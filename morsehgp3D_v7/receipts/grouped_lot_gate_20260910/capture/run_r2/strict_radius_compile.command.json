@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-isystem",
+    "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-O2",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r2/strict_radius.d",
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r2/strict_radius/morsehgp3D_v7/tests/full_ball_tower_gate.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r2/strict_radius.bin"
+  ],
+  "closed": true,
+  "ended_epoch": 1789071971.1696837,
+  "exit_code": 0,
+  "expected_code": 0,
+  "name": "strict_radius_compile",
+  "pid": 611298,
+  "started_epoch": 1789071959.0953422,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

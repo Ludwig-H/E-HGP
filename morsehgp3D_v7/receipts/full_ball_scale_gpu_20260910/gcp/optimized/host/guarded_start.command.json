@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/home/codespace/.local/state/ehgp/optimized-v7-20260910.Xqje4g82k2/full_host/start_and_verify.sh",
+    "--yes",
+    "--guest-shutdown-minutes",
+    "30",
+    "--handoff-file",
+    "/home/codespace/.local/state/ehgp/optimized-v7-20260910.Xqje4g82k2/full_host/handoff.json",
+    "--lifecycle-state-file",
+    "/home/codespace/.local/state/ehgp/optimized-v7-20260910.Xqje4g82k2/full_host/lifecycle.txt",
+    "--guard-mark-dir",
+    "/home/codespace/.local/state/ehgp/optimized-v7-20260910.Xqje4g82k2/full_host/guardmarks"
+  ],
+  "ended_epoch": 1789072986.8007708,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "guarded_start",
+  "pid": 683172,
+  "started_epoch": 1789072878.0785968,
+  "stderr_sha256": "39086d05c171a2c04aa4ee0709181a6eecfe350e978512c0a565a9cbca7561b5",
+  "stdout_sha256": "e32cb64a485c94cbdfc42b929a9ff51ce18b3610c0348153b39a60702116bffb",
+  "timeout_seconds": null
+}

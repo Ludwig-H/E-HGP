@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/tmp/ehgp-full-v7-73766fa52dcfc59b.M5DKWfCPIl/output/device_gate",
+    "--selftest"
+  ],
+  "cwd": "/tmp/ehgp-full-v7-73766fa52dcfc59b.M5DKWfCPIl/output",
+  "elapsed_seconds": 0.6646624279999997,
+  "ended_utc": "2026-09-10T20:43:50.373137+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 1855,
+  "session_work_deadline_epoch": 1789074462,
+  "started_utc": "2026-09-10T20:43:49.708440+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e2fe3901547079a7b1ec9886b9cc8df64becc5782eeda07480a801fdf2e245e1"
+}

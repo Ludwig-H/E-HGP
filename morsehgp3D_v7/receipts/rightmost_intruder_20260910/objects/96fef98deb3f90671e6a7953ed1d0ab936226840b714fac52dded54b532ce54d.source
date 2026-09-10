@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_rightmost_intruder_20260910/baseline_probe_o2.bin",
+    "--n=1000",
+    "--s=8",
+    "--kmax=10",
+    "--threads=1"
+  ],
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "elapsed_seconds": 13.014027469998837,
+  "stdout_sha256": "1cd29b28f5253a571d4a2de189ac24132a061fbb77424cba279b88e5b1f0cee8",
+  "stderr_sha256": "0550b60e85fe3fcd9a5168a10ddc233e59443ee46dd859c67e2b36c992b4260d",
+  "sanitizers": false
+}

@@ -1,0 +1,1 @@
+{"CUDA_executed": false, "GCP_used": false, "accepted_complete_summaries": 10, "checks": 389, "malformed_wires_rejected": 310, "matched_pairs": 5, "pure_rejections": 22, "status": "passed", "subprocess_invoked": false}

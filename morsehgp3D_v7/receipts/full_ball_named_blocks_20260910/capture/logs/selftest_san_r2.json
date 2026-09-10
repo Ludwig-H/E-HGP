@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_named_blocks_gate_20260910_r1/observer_san_r2",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "seconds": 1.370807382001658,
+  "stdout_sha256": "ed95148f0e07df503f6fe5df483071fe2f9eee4143681904848f0c19cf730c0e",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment_overrides": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  }
+}

@@ -1,0 +1,1 @@
+{"schema":"mhgp7-named-block-observer-selftest-v1","status":"passed","cases":2,"matched_blocks":4,"observer_rejections":8,"strict_root_checks":68,"grouped_lots":17,"physical_outputs_equal":true,"raw_anchor_mutant_killed":true,"raw_anchor_mutant_reason":"named.pre_root_not_live","real_50000_executed":false,"benchmark":false}

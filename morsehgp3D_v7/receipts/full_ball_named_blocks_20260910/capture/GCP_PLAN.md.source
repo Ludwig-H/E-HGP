@@ -1,0 +1,26 @@
+# Guarded G4 execution plan — not executed
+
+This adapter is prepared for a **separate validation** command within a guarded SPOT session. No VM was inventoried, created, started, stopped or modified by this subtask. No cloud cost or GPU result is claimed.
+
+## Minimal integration
+
+Reuse `full_probe_session_v7.py` / `v7_g4_session.py` as lifecycle authority, unchanged where possible. Use a dedicated validation worker that imports the existing pinned Worker/metadata/guard helpers rather than duplicating start/stop logic. Its worker body compiles/runs only the device selftest and this named gate. Do not add it silently to a timed benchmark stage.
+
+Archive a dedicated source tree: current product dependencies plus the **explicit observer overlay**, `observer.hpp`, `observer_gate.cpp`, `expectations.json` and the bounded oracle fixture helper. Put test support under a declared `morsehgp3D_v7/bench/session_support/named_blocks/` directory and preserve the include tree with `-I source_root`. The controller's existing manifest validator still requires the legacy probe filename; include its unchanged snapshot for validation, but do not compile/run it. The new worker must explicitly permit the additional `tests/full_ball_tower_gate.cpp` dependency and the named expectation JSON. Do not weaken the general path checker or allow arbitrary source paths.
+
+The nominal benchmark archive must remain distinct: its FULL header must contain **no observer namespace/hook or runtime-mutant reference**. Pin the overlay diff, nominal header hash, final overlay hash, whole compiled project closure, worker and guard scripts, compiler/toolkit versions, binaries, expectation JSON and input digest. A future rebase of the overlay must locate the two whole-lot boundaries and the single BallKey-hit normalization by exact unique contexts; a mismatch stops preparation for review.
+
+## In-guest order and capture
+
+1. Verify both existing cut-offs before compilation/benchmark: GCE `SPOT`, `instanceTerminationAction=STOP`, bounded `maxRunDuration`, guest shutdown at or before that deadline, exact project/zone/name and `project=e-hgp` label. No NVCC installation, reboot, unguarded start or bootstrap that invalidates the guest shutdown.
+2. Require the existing NVCC/device tools. Build strict C++20, `-O3 -Wall -Wextra -Wpedantic -Werror`, and CUDA `-arch=sm_120` using ROOT's qualified strict-host adapter where NVCC-generated host code requires it. Do not suppress strict warnings on authored sources. Use the same cold census route as the nominal GPU probe.
+3. Run `census_route_device_gate --selftest` first; require0 and its declared non-vacuity counters. Build the observer validation binary separately with `MHGP7_NAMED_BLOCK_CUDA=1`. Run `--selftest`, `--describe` and compare descriptions against the archived expectation JSON. These commands must pass before the expensive50k command.
+4. Run exactly one `--pinned-50000 --threads=48`. Candidate generation, sorting and FULL remain CPU; census can use CUDA. The adapter reuses one census for the causal mutant and nominal named checks, avoiding a second candidate/generation pass and a multi-gigabyte census export. This is not an end-to-end GPU implementation or latency measurement.
+5. Capture separate stdout/stderr, command argv, exit codes, wall-clock interval, hashes and environment for each command. Preserve the stage lines, four named rows, exact mutant reason and all failures. A killed process, deadline/preemption, missing final JSON, code nonzero, input mismatch, missing key or absent anchor is incomplete/failed validation, never a partial pass. Keep observer results outside performance CSVs/digest comparators.
+6. Retrieve and hash the useful artifacts immediately, then use `stop_and_verify.sh --yes` on the exact same project/zone/name. Require `TERMINATED`; a missing certificate blocks handoff. Other labelled VMs are report-only. A worker/session exception follows the controller's same targeted closure path.
+
+## Budget and scheduling
+
+Do not create a second VM solely for this gate if the authorized current G4 session has a genuinely sufficient remaining work window. Conversely, do not extend a session or start heavy validation merely to fit it in: compare the latest nominal50k/cache measurements with the verified remaining guest deadline, leaving time for capture and stop. The choice of a new session duration belongs to ROOT using those measurements; this packet does not assume that the old 30-minute ceiling or any particular wall-time will suffice.
+
+The session deadline and double cut-off are cost controls, not algorithmic caps. Stop when the useful result is acquired; if a run is demonstrably stalled, terminate its exact command and close the session. No arbitrary per-facet or cloud-size work ceiling is introduced. Use only SPOT under the user's standing authorization. No price quote is supplied or inferred from an old rate.

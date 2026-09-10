@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_full_residence_20260910_r2/probe_reserve_frozen"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "elapsed_seconds": 17.601140500002657,
+  "stdout_sha256": "c9e3cbc5f04d777738aa6dcc75e2ae96aea872b0a6ffde0b2a5c3df8d7eb3c3b",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

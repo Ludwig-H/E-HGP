@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/usr/bin/time",
+    "-v",
+    "/workspaces/E-HGP/build/v7_optimized_g4_20260910/local_r1/full_ball_probe",
+    "--n=400",
+    "--s=8",
+    "--kmax=10",
+    "--threads=1"
+  ],
+  "closed": true,
+  "ended_ns": 1789072705174157019,
+  "exit_code": 0,
+  "name": "n400_s8",
+  "pid": 651244,
+  "started_ns": 1789072700936551867,
+  "stderr_sha256": "3aabf4c5025140793e636e23703511377891015e41028632644254aaeb1af623",
+  "stdout_sha256": "31762db63c733ff2b97da7d6f02c87e4accef3f607813ef9f3ebb8cc791b9bb8"
+}

@@ -1,0 +1,1 @@
+witness_front_gate=passed checks=431010 cases=1728 rows=88560 requests=311968 rejections=15 singleton_reuses=1 backend=cpu_only

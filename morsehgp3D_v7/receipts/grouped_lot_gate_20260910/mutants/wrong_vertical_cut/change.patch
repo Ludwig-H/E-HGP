@@ -1,0 +1,11 @@
+--- a/morsehgp3D_v7/src/forest/full_ball_tower.hpp
++++ b/morsehgp3D_v7/src/forest/full_ball_tower.hpp
+@@ -627,7 +627,7 @@
+   const auto& upper = tower.orders[k - 1];
+   if (root >= upper.lower_nodes.size() || full_coverage_root_at(upper.forest, root, cut, closed) != root)
+     return kFullCoverageAbsent;
+-  return full_coverage_root_at(tower.orders[k - 2].forest, upper.lower_nodes[root], cut, closed);
++  return full_coverage_root_at(tower.orders[k - 2].forest, upper.lower_nodes[root], ExactLevel{U192{}, 1}, true);
+ }
+ 
+ }  // namespace mhgp7

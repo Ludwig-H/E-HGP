@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "lscpu"
+  ],
+  "cwd": "/tmp/ehgp-full-v7-73766fa52dcfc59b.M5DKWfCPIl/output",
+  "elapsed_seconds": 0.00831011100000012,
+  "ended_utc": "2026-09-10T20:43:38.265974+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 1813,
+  "session_work_deadline_epoch": 1789074462,
+  "started_utc": "2026-09-10T20:43:38.257637+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "2efda043bcd879a936a13bdaddc2667f9e4e6dc97ad64164c1ed5e1a54a6cf71"
+}

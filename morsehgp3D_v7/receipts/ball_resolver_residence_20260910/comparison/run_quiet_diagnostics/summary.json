@@ -1,0 +1,31 @@
+{
+  "1000": {
+    "baseline": {
+      "tower_median_s": 8.346267874,
+      "total_median_s": 15.131566571,
+      "resolver_meb_calls": 1174515,
+      "resolver_supports": 97376638,
+      "max_rss_kib": 230424,
+      "cache_bytes": 0,
+      "cache_hits": 0
+    },
+    "plain": {
+      "tower_median_s": 6.852590501,
+      "total_median_s": 13.903241469,
+      "resolver_meb_calls": 783299,
+      "resolver_supports": 68700123,
+      "max_rss_kib": 226768,
+      "cache_bytes": 786432,
+      "cache_hits": 380051
+    },
+    "seed": {
+      "tower_median_s": 5.740769273,
+      "total_median_s": 13.088232286,
+      "resolver_meb_calls": 583337,
+      "resolver_supports": 52168577,
+      "max_rss_kib": 226980,
+      "cache_bytes": 786432,
+      "cache_hits": 580186
+    }
+  }
+}

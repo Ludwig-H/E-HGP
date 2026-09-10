@@ -1,0 +1,112 @@
+"""Record bounded private O2/SAN gates and optional paired n1000 probes."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import shlex
+import subprocess
+import sys
+import time
+
+BASE = Path(__file__).resolve().parent
+ROOT = BASE.parents[1]
+FLAGS = ["g++", "-std=c++20", "-pthread", "-Wall", "-Wextra", "-Wpedantic", "-Werror", "-isystem", str(ROOT / "build/v7_boost_gate/extracted/usr/include")]
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def command(name, argv, expected=0, san=False):
+    logs = BASE / "logs"
+    logs.mkdir(exist_ok=True)
+    if (logs / (name + ".json")).exists():
+        raise RuntimeError("refuse overwriting command")
+    print(name, flush=True)
+    env = dict(os.environ)
+    if san:
+        env.update(ASAN_OPTIONS="detect_leaks=1:halt_on_error=1", UBSAN_OPTIONS="halt_on_error=1:print_stacktrace=1")
+    start = time.monotonic()
+    p = subprocess.run(list(map(str, argv)), cwd=ROOT, env=env, capture_output=True, check=False)
+    for suffix, data in (("stdout", p.stdout), ("stderr", p.stderr)):
+        (logs / (name + "." + suffix)).write_bytes(data)
+    row = {"argv":list(map(str, argv)), "exit_code":p.returncode, "expected_exit_code":expected,
+           "elapsed_seconds":time.monotonic()-start, "stdout_sha256":sha(logs / (name + ".stdout")),
+           "stderr_sha256":sha(logs / (name + ".stderr")), "sanitizers":san}
+    (logs / (name + ".json")).write_text(json.dumps(row, indent=2) + "\n")
+    if p.returncode != expected:
+        raise RuntimeError(name + ": unexpected code " + str(p.returncode))
+
+
+def build(kind, mode, entry):
+    name = kind + "_" + entry + "_" + mode
+    tree = BASE / kind
+    source = BASE / "choice_gate.cpp" if entry == "choice" else tree / "morsehgp3D_v7" / ("tests/full_ball_tower_gate.cpp" if entry == "tower" else "bench/full_ball_tower_probe.cpp")
+    binary = BASE / (name + ".bin")
+    flags = ["-O1", "-g", "-fsanitize=address,undefined", "-fno-omit-frame-pointer", "-fno-pie", "-no-pie"] if mode == "san" else ["-O2"]
+    dep = BASE / (name + ".d")
+    all_pins = json.loads((BASE / "variants_before.json").read_text())[kind]
+    before = {file:sha(tree / file) for file in all_pins}
+    if before != all_pins:
+        raise RuntimeError("variant changed before compile")
+    command(name + "_compile", [*FLAGS, *flags, "-MMD", "-MF", dep, source, "-o", binary])
+    consumed = {}
+    for spelling in shlex.split(dep.read_text().replace("\\\n", " ").split(":", 1)[1]):
+        path = (ROOT / spelling).resolve()
+        consumed[str(path.relative_to(BASE))] = sha(path)
+    (BASE / (name + "_compiled_sources.json")).write_text(json.dumps(consumed, indent=2) + "\n")
+    if entry != "probe":
+        command(name + "_selftest", [binary, "--selftest"], san=mode == "san")
+        command(name + "_argument", [binary, "--unknown"], 2, mode == "san")
+    after = {file:sha(tree / file) for file in all_pins}
+    if before != after:
+        raise RuntimeError("variant source drift")
+    (BASE / (name + "_sources_after.json")).write_text(json.dumps(after, indent=2) + "\n")
+    (BASE / (name + "_binary.sha256")).write_text(sha(binary) + "\n")
+
+
+def choice_mutants():
+    adapters = (BASE / "intruder_adapters.hpp").read_text()
+    marker = "struct RightmostIntruder {"
+    start, end = adapters.index(marker), adapters.index("struct ExhaustiveLastIntruder {")
+    target = adapters[start:end]
+    variants = {
+        "ascending_range": ("for (i32 u = range.last; u >= range.first; --u)", "for (i32 u = range.first; u <= range.last; ++u)"),
+        "left_first": ("stack.push_back(ix.nodes[node].left); stack.push_back(ix.nodes[node].right);", "stack.push_back(ix.nodes[node].right); stack.push_back(ix.nodes[node].left);"),
+    }
+    for name, (old, new) in variants.items():
+        if target.count(old) != 1:
+            raise RuntimeError("nonunique choice mutant")
+        tree = BASE / "choice_mutants" / name
+        tree.mkdir(parents=True, exist_ok=False)
+        source = tree / "choice_gate.cpp"
+        source.write_bytes((BASE / "choice_gate.cpp").read_bytes())
+        (tree / "intruder_adapters.hpp").write_text(adapters[:start] + target.replace(old, new) + adapters[end:])
+        binary = BASE / ("choice_mutant_" + name + ".bin")
+        label = "choice_mutant_" + name
+        dep = BASE / (label + ".d")
+        command(label + "_compile", [*FLAGS, "-O2", "-iquote", BASE, "-MMD", "-MF", dep, source, "-o", binary])
+        consumed = {}
+        for spelling in shlex.split(dep.read_text().replace("\\\n", " ").split(":", 1)[1]):
+            path = (ROOT / spelling).resolve()
+            consumed[str(path.relative_to(BASE))] = sha(path)
+        (BASE / (label + "_compiled_sources.json")).write_text(json.dumps(consumed, indent=2) + "\n")
+        command(label + "_selftest", [binary, "--selftest"], 1)
+        reason = (BASE / "logs" / (label + "_selftest.stderr")).read_text()
+        if not reason.startswith("FAIL [") or not reason.endswith(" choice.rightmost_equals_rational_max_rank\n"):
+            raise RuntimeError("wrong choice mutant reason")
+        (BASE / (label + "_binary.sha256")).write_text(sha(binary) + "\n")
+
+
+if sys.argv[1:] == ["compiler"]:
+    command("compiler", ["g++", "--version"])
+elif len(sys.argv) == 5 and sys.argv[1] == "build":
+    build(*sys.argv[2:])
+elif sys.argv[1:] == ["measure"]:
+    for repeat, order in enumerate((("baseline", "rightmost"), ("rightmost", "baseline"), ("baseline", "rightmost")), 1):
+        for kind in order:
+            command(kind + "_n1000_r" + str(repeat), [BASE / (kind + "_probe_o2.bin"), "--n=1000", "--s=8", "--kmax=10", "--threads=1"])
+elif sys.argv[1:] == ["choice_mutants"]:
+    choice_mutants()
+else:
+    raise SystemExit("usage: record.py compiler | build baseline|rightmost o2|san choice|tower|probe | measure")

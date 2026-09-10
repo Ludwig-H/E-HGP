@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r2/drop_inert_grouped.bin",
+    "--selftest"
+  ],
+  "closed": true,
+  "ended_epoch": 1789071934.476019,
+  "exit_code": 1,
+  "expected_code": 1,
+  "name": "drop_inert_grouped_run",
+  "pid": 610093,
+  "started_epoch": 1789071934.0335672,
+  "stderr_sha256": "5de4c7daf74c43993b6c4d3931685270ea5add6e9572ffa1ec1921ac51e999ae",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

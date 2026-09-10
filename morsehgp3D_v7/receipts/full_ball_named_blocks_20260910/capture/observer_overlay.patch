@@ -1,0 +1,22 @@
+--- nominal/morsehgp3D_v7/src/forest/full_ball_tower.hpp
++++ test_overlay/morsehgp3D_v7/src/forest/full_ball_tower.hpp
+@@ -275,7 +275,9 @@
+         blocks.reserve(end - begin);
+         const u64 prior_count = current.levels.size();
+         for (size_t j = begin; j < end; ++j) blocks.push_back(prepare_block(program[j], level, prior_count));
++        ::named_block_gate::before(current_k, blocks, balls, current);
+         close_lot(blocks, level, draft, lower_cursor, lower_anchors);
++        ::named_block_gate::after(current_k, blocks, balls, anchors, current);
+         begin = end;
+       }
+       u64 live = 0;
+@@ -523,7 +525,8 @@
+         require(same_exact_level(balls[*found].level, local.level), "full_ball_anchor_level");
+         if (anchors[*found] != absent) {
+           add(st.anchor_hits); st.max_chain_steps = std::max(st.max_chain_steps, length);
+-          const u64 resolved = root(anchors[*found], prior_count);
++          const u64 resolved = ::named_block_gate::raw_anchor_mutant ? anchors[*found]
++              : root(anchors[*found], prior_count);
+           resolver_cache.store(initial_key, resolved);
+           return resolved;  // hit BEFORE spatial query
+         }

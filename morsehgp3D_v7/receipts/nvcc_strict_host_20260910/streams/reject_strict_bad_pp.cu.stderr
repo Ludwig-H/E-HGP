@@ -1,0 +1,4 @@
+/workspaces/E-HGP/build/v7_nvcc_active_20260910/run_r1/packet/source/build/v7_nvcc_pedantic_20260910/strict_bad_pp.cu:1:32: error: ISO C++ does not permit named variadic macros [-Werror=variadic-macros]
+    1 | #define MHGP7_BAD_VARIADIC(args...) args
+      |                                ^~~
+cc1plus: all warnings being treated as errors

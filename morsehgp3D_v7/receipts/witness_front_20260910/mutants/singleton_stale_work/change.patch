@@ -1,0 +1,11 @@
+--- a/morsehgp3D_v7/src/pipeline/witness_front.hpp
++++ b/morsehgp3D_v7/src/pipeline/witness_front.hpp
+@@ -58,7 +58,7 @@
+     throw std::invalid_argument("witness_front_options");
+   if (!ix.valid || !run.matches_index(ix))
+     throw std::invalid_argument("witness_front_index_binding");
+-  if (ix.nodes.empty()) { *work = {}; return; }
++  if (ix.nodes.empty()) return;
+   struct Task { WspdRect r; u8 mask; };
+   struct Decision { u8 mask = 0; bool terminal = false; size_t corner_slot = 0; };
+   GenerateStats delta;

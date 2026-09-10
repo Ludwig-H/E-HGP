@@ -1,0 +1,11 @@
+--- a/morsehgp3D_v7/src/forest/full_ball_tower.hpp
++++ b/morsehgp3D_v7/src/forest/full_ball_tower.hpp
+@@ -587,7 +587,7 @@
+         target = new_node(level, action.parents, draft, lower, birth_image);
+       }
+       for (size_t b : group) targets[b] = target;
+-      if (action.parents.size() != 1 || !action.contributions.empty()) batch.actions.push_back(std::move(action));
++      if (action.parents.size() != 1) batch.actions.push_back(std::move(action));
+       else add(st.inert_blocks, group.size());
+     }
+     if (!batch.actions.empty()) draft.batches.push_back(std::move(batch));

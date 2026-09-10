@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/usr/bin/time",
+    "--version"
+  ],
+  "cwd": "/tmp/ehgp-full-v7-73766fa52dcfc59b.M5DKWfCPIl/output",
+  "exit_code": null,
+  "group_closed": false,
+  "per_command_watchdog": null,
+  "pid": null,
+  "session_work_deadline_epoch": 1789074462,
+  "started_utc": "2026-09-10T20:43:38.239824+00:00"
+}

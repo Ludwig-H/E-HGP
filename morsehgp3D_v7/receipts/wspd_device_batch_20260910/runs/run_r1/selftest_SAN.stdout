@@ -1,0 +1,2 @@
+backend=stub-hote sm=0.0 public_status=not_claimed
+checks=74313 failures=0 rows=73935 positive=14925,6867,5903 corners=55663 cores_zero=46984 cores_positive=100886 weighted_rows=1617 s8_s10_s12=178,185,192 rejected=37 semantic_differences=0

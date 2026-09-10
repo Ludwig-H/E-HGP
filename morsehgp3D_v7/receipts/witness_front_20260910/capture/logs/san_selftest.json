@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_witness_front_qualification_20260910/gate_san",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "elapsed_seconds": 7.60859104300107,
+  "stdout_sha256": "f8b3cc47d3731f30ceee35a66a4e917c7d458b751c1108d56ad932d93381a1e9",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment_overrides": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  }
+}

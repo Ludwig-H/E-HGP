@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_rightmost_intruder_20260910/baseline_tower_o2.bin",
+    "--selftest"
+  ],
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "elapsed_seconds": 0.6040369469992584,
+  "stdout_sha256": "3a017058eba3f8d07d4bc5e3ed41a35f0489aa4d3a007c619138d5668d7d6fc8",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "sanitizers": false
+}

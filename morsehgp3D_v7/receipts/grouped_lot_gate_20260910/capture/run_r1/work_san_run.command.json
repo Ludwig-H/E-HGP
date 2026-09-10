@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/work_san",
+    "--selftest"
+  ],
+  "closed": true,
+  "ended_epoch": 1789071801.0359824,
+  "exit_code": 0,
+  "expected_code": 0,
+  "name": "work_san_run",
+  "pid": 575993,
+  "started_epoch": 1789071793.8197749,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "ce55c70bd0e6d2471d5c8a36704b718c9bed052712256aa2c67ddc6faed23505"
+}

@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_full_residence_20260910_r2/probe_phase_frozen"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "elapsed_seconds": 12.156664903999626,
+  "stdout_sha256": "c0878553fa151e985fb66aaa73ee45e62722194fc6eb8b4c332aa98f052a1877",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/front_o2",
+    "--unknown"
+  ],
+  "expected_code": 2,
+  "name": "front_argument",
+  "started_epoch": 1789071833.1026208
+}

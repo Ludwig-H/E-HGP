@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_rightmost_intruder_20260910/choice_mutant_left_first.bin",
+    "--selftest"
+  ],
+  "exit_code": 1,
+  "expected_exit_code": 1,
+  "elapsed_seconds": 0.006964423999306746,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "ab862cfd7f1f6e95af533745ded6fa63f8538f63be5bf3a55c77ab21ef0e9f20",
+  "sanitizers": false
+}

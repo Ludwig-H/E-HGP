@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+"""GCC phase adapter for NVCC 12.9 generated host translation units.
+
+Original-source preprocessing is forwarded unchanged. Only the generated
+*.cudafe1.cpp is fully preprocessed with pedantic preprocessing warnings off;
+the resulting .ii is then compiled with all original strict diagnostics.
+No source token or line marker is deleted, and CUDA registration #includes run.
+This adapter is intentionally bound to /usr/bin/g++ on the qualified Linux host.
+"""
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+
+
+def main() -> int:
+    args = sys.argv[1:]
+    compiler = "/usr/bin/g++"
+    candidates = [i for i, arg in enumerate(args) if arg.endswith(".cudafe1.cpp")]
+    if not candidates:
+        return subprocess.run([compiler, *args], check=False).returncode
+    if len(candidates) != 1 or "-c" not in args or "-E" in args or args.count("-o") != 1:
+        print("strict_host: refused unknown NVCC generated-host phase", file=sys.stderr)
+        return 2
+    source_index = candidates[0]
+    if not Path(args[source_index]).is_file():
+        return 2
+    output_index = args.index("-o") + 1
+    if output_index >= len(args) or ("-x" in args and args.index("-x") + 1 >= len(args)):
+        return 2
+    with tempfile.TemporaryDirectory(prefix="mhgp7-nvcc-host-") as directory:
+        preprocessed = str(Path(directory) / "generated_host.ii")
+        preprocess = list(args)
+        preprocess[preprocess.index("-c")] = "-E"
+        preprocess[output_index] = preprocessed
+        # This phase reads already-generated GCC linemarkers. The original .cu
+        # preprocessing and final C++ compilation retain -Wpedantic -Werror.
+        preprocess += ["-Wno-pedantic"]
+        result = subprocess.run([compiler, *preprocess], check=False)
+        if result.returncode:
+            return result.returncode
+        compile_args = list(args)
+        compile_args[source_index] = preprocessed
+        if "-x" in compile_args:
+            compile_args[compile_args.index("-x") + 1] = "c++-cpp-output"
+        else:
+            compile_args += ["-x", "c++-cpp-output"]
+        return subprocess.run([compiler, *compile_args], check=False).returncode
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

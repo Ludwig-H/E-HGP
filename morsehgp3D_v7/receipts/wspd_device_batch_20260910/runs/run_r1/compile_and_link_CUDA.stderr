@@ -1,0 +1,28 @@
+In function ‘int mhgp7::box_vs_ball(const AxisBox&, const CoreBall&)’,
+    inlined from ‘mhgp7::FusedCounts mhgp7::count_universal_witnesses(const CloudIndex&, NodeRef, NodeRef, const u64*, u8, bool)’ at /workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r1/source/morsehgp3D_v7/src/spindle/witness_count.hpp:97:29:
+/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r1/source/morsehgp3D_v7/src/spindle/spindle.hpp:163:11: error: ‘balls[1].mhgp7::CoreBall::center4[0]’ may be used uninitialized [-Werror=maybe-uninitialized]
+  163 |     const i64 hi4 = 4 * box.hi[i] - cb.center4[i];
+      |           ^~~
+/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r1/source/morsehgp3D_v7/src/spindle/witness_count.hpp: In function ‘mhgp7::FusedCounts mhgp7::count_universal_witnesses(const CloudIndex&, NodeRef, NodeRef, const u64*, u8, bool)’:
+/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r1/source/morsehgp3D_v7/src/spindle/witness_count.hpp:60:10: note: ‘balls[1].mhgp7::CoreBall::center4[0]’ was declared here
+   60 |   CoreBall balls[3];
+      |          ^~~~~
+In function ‘int mhgp7::box_vs_ball(const AxisBox&, const CoreBall&)’,
+    inlined from ‘mhgp7::FusedCounts mhgp7::count_universal_witnesses(const CloudIndex&, NodeRef, NodeRef, const u64*, u8, bool)’ at /workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r1/source/morsehgp3D_v7/src/spindle/witness_count.hpp:97:29:
+/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r1/source/morsehgp3D_v7/src/spindle/spindle.hpp:163:11: error: ‘balls[1].mhgp7::CoreBall::center4[1]’ may be used uninitialized [-Werror=maybe-uninitialized]
+  163 |     const i64 hi4 = 4 * box.hi[i] - cb.center4[i];
+      |           ^~~
+/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r1/source/morsehgp3D_v7/src/spindle/witness_count.hpp: In function ‘mhgp7::FusedCounts mhgp7::count_universal_witnesses(const CloudIndex&, NodeRef, NodeRef, const u64*, u8, bool)’:
+/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r1/source/morsehgp3D_v7/src/spindle/witness_count.hpp:60:10: note: ‘balls[1].mhgp7::CoreBall::center4[1]’ was declared here
+   60 |   CoreBall balls[3];
+      |          ^~~~~
+In function ‘int mhgp7::box_vs_ball(const AxisBox&, const CoreBall&)’,
+    inlined from ‘mhgp7::FusedCounts mhgp7::count_universal_witnesses(const CloudIndex&, NodeRef, NodeRef, const u64*, u8, bool)’ at /workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r1/source/morsehgp3D_v7/src/spindle/witness_count.hpp:97:29:
+/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r1/source/morsehgp3D_v7/src/spindle/spindle.hpp:163:11: error: ‘balls[1].mhgp7::CoreBall::center4[2]’ may be used uninitialized [-Werror=maybe-uninitialized]
+  163 |     const i64 hi4 = 4 * box.hi[i] - cb.center4[i];
+      |           ^~~
+/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r1/source/morsehgp3D_v7/src/spindle/witness_count.hpp: In function ‘mhgp7::FusedCounts mhgp7::count_universal_witnesses(const CloudIndex&, NodeRef, NodeRef, const u64*, u8, bool)’:
+/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r1/source/morsehgp3D_v7/src/spindle/witness_count.hpp:60:10: note: ‘balls[1].mhgp7::CoreBall::center4[2]’ was declared here
+   60 |   CoreBall balls[3];
+      |          ^~~~~
+cc1plus: all warnings being treated as errors

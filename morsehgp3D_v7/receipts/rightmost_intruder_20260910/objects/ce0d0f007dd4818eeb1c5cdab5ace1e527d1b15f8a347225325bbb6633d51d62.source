@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_rightmost_intruder_20260910/choice_mutant_ascending_range.bin",
+    "--selftest"
+  ],
+  "exit_code": 1,
+  "expected_exit_code": 1,
+  "elapsed_seconds": 0.0028329929991741665,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "d0564baeb28e4867f92d0b4f41952175a6a9870b5a5f1fdd8a8d7bbdadafb430",
+  "sanitizers": false
+}

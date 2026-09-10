@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "/usr/local/cuda/bin/nvcc",
+    "-O3",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-arch=sm_120",
+    "-fmad=false",
+    "--expt-relaxed-constexpr",
+    "-Xcompiler=-Wall,-Wextra,-Wpedantic,-Werror,-pthread",
+    "-ccbin",
+    "/usr/bin/g++",
+    "-MMD",
+    "-MF",
+    "/tmp/ehgp-full-v7-52ab19a40eaf813f.YekO2GROHV/output/device_gate.d",
+    "/tmp/ehgp-full-v7-52ab19a40eaf813f.YekO2GROHV/source/morsehgp3D_v7/tests/census_route_device_gate.cu",
+    "-o",
+    "/tmp/ehgp-full-v7-52ab19a40eaf813f.YekO2GROHV/output/device_gate"
+  ],
+  "cwd": "/tmp/ehgp-full-v7-52ab19a40eaf813f.YekO2GROHV/output",
+  "elapsed_seconds": 11.431577107999999,
+  "ended_utc": "2026-09-10T20:12:59.876335+00:00",
+  "exit_code": 1,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 1841,
+  "session_work_deadline_epoch": 1789072625,
+  "started_utc": "2026-09-10T20:12:48.444741+00:00",
+  "stderr_sha256": "81dae11ffd3125187696ba49bdf2a34d48c68def2bdcc5d363db5c3e1a8a4f13",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

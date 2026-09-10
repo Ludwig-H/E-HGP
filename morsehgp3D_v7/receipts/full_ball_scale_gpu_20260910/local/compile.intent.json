@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "g++",
+    "-std=c++20",
+    "-O3",
+    "-DNDEBUG",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_optimized_g4_20260910/local_r1/compile.d",
+    "/workspaces/E-HGP/build/v7_optimized_g4_20260910/local_r1/snapshot/morsehgp3D_v7/bench/full_ball_tower_probe.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_optimized_g4_20260910/local_r1/full_ball_probe"
+  ],
+  "name": "compile",
+  "started_ns": 1789072680304750141
+}

@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/front_o2",
+    "--selftest"
+  ],
+  "closed": true,
+  "ended_epoch": 1789071807.712002,
+  "exit_code": 0,
+  "expected_code": 0,
+  "name": "front_o2_run",
+  "pid": 576814,
+  "started_epoch": 1789071806.7011175,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "d0aef188a546ca8a24a3d01c073c248964df778cd215c361bc17eb61d27b4cd8"
+}

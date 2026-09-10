@@ -1,0 +1,9 @@
+{
+  "originals": {
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/plateau_model.py": "8afb5663c1fa0384d5ae392294cc03853676a89fcb18f858cd7d764ed9b1b93a",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/ball_anchor_model.py": "8f13f02d6b2c36c79708f6bdb8482c3d01ec81c4164b2bb60422993861e0ded4",
+    "morsehgp3D_v7/audits/meb_rational_oracle_20260905.py": "ad6c0d6c041ff788180a400f6ba2ad2b1546f8607e8f2c91fefca9133a8e7f2b"
+  },
+  "private_model_sha256": "7d54563bc6b93b5f3b26c3fb67cde94a5550376147ac871c657afe8cb4b6f805",
+  "mechanical_change": "private Model bound 7 -> 10 only; main is never called"
+}

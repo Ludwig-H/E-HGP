@@ -1,0 +1,20 @@
+--- a/morsehgp3D_v7/src/forest/full_ball_tower.hpp
++++ b/morsehgp3D_v7/src/forest/full_ball_tower.hpp
+@@ -487,7 +487,7 @@
+       if (hi < 0) {
+         add(st.interior_ranges);
+         const auto range = ix.range_of(node);
+-        for (i32 u = range.first; u <= range.last; ++u) if (!member(u)) return u;
++        for (i32 u = range.last; u >= range.first; --u) if (!member(u)) return u;
+       } else if (is_leaf(node)) {
+         const i32 u = leaf_index(node);
+         if (!member(u)) {
+@@ -495,7 +495,7 @@
+           if (key.power(ix.upos[u]) < 0) return u;
+         }
+       } else {
+-        stack.push_back(ix.nodes[node].right); stack.push_back(ix.nodes[node].left);
++        stack.push_back(ix.nodes[node].left); stack.push_back(ix.nodes[node].right);
+       }
+     }
+     return -1;

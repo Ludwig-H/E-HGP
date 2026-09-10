@@ -1,0 +1,11 @@
+{
+  "CUDA_executed": false,
+  "GCP_used": false,
+  "binaries": {
+    "mhgp7_census_route_device_gate": "60ddbb37d2946f3ed87096c7f2d04ee23380f1ace564641dc30ffecdf57bf41b",
+    "mhgp7_full_ball_tower_cuda_probe": "e31e9ed8df7fd392f9f25eb18e15dd4411ec4d59ca5733f65d21fafa8c1f5c65"
+  },
+  "fresh_targets_on_local_redist": true,
+  "sources_stable": true,
+  "status": "passed"
+}

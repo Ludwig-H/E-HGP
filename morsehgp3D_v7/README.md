@@ -19,28 +19,35 @@ contrats de performance ne sont pas encore livrés.**
 
 Le [nouveau raccord FULL](docs/TOUR_FULL_PAR_BOULES.md) produit les forêts
 datées et leurs cartes verticales à partir de census exacts complets fournis,
-y compris les plateaux non réguliers. O2/SAN : 130 734 contrôles,
-100 ordres et 35 462 comparaisons verticales contre Gram/Gamma indépendant.
+y compris les plateaux non réguliers. O2/SAN : 170 320 contrôles,
+112 ordres et 45 948 comparaisons verticales contre Gram/Gamma indépendant.
 Cela ne certifie ni toute la génération WSPD ni un contrat de performance.
 
-Trois optimisations mono-thread sont qualifiées : validation directe des
+Les optimisations mono-thread qualifiées incluent la validation directe des
 supports réguliers, lots unitaires sans DSU et normalisation temporelle
 des images inférieures. La troisième supprime un reparcours quadratique
 des chaînes historiques sans modifier l'histoire livrée. La nouvelle
-sonde conserve simultanément toute la tour et ses verticales.
+sonde conserve simultanément toute la tour et ses verticales. S'ajoutent
+le [cache exact évictif, ses semis fermés et la réduction de résidence](docs/OPTIMISATIONS_CACHE_ET_GPU_20260910.md) :
+sur le cas apparié n1000, 1 174 515 → 583 337 MEB, sans changer le payload.
 
-Le [triplet local clos](docs/RESULTATS_TOUR_BOULES_20260910.md) termine
-à 215,169 s / 417,627 s / 965,053 s pour 8k/16k/32k, s=8, un thread.
+Le [triplet local courant](docs/RESULTATS_TOUR_CACHE_G4_20260910.md) termine
+à 235,724 s / 354,144 s / 736,819 s pour 8k/16k/32k, s=8, un thread.
 Les sorties ont 3,98 M / 8,31 M / 17,17 M nœuds. Ce sont des diagnostics
-non répétés, pas des contrats ni un gain apparié contre l'ancienne sonde.
+non répétés sur hôte partagé, pas des contrats ni un gain temporel apparié.
+À 8k, s=8/10/12 donne le même payload ; le temps perturbé ne choisit pas s.
 
 La route CUDA réutilisable est raccordée à une sonde hybride, mais elle
-n'accélère que prefilter/census. Ses tests locaux sont des **simulations
-hôte**, pas des résultats GPU. Le démarrage G4 SPOT du 10 septembre est
-refusé par le quota global GPU occupé par une autre charge de travail ;
-la cible E-HGP est certifiée `TERMINATED`. Aucun benchmark distant lancé.
+n'accélère que prefilter/census. La vraie gate SM12.0 passe sur G4 et les
+[paires 50k complètes](docs/RESULTATS_TOUR_CACHE_G4_20260910.md) coïncident :
+418,873 / 418,921 s CPU/hybride pour K1..10 ; 33,853 / 33,569 s pour K1..5.
+Les deux sessions SPOT de cette étape, dont un premier échec NVCC, sont
+closes et la cible exacte E-HGP est certifiée `TERMINATED`.
 Les [refus historiques 50k du 6 septembre](docs/RESULTATS_G4_FULL_20260906.md)
 restent distincts, sans réétiquetage. Contrats 1 s/100 ms non acquis.
+La séparation statique des résolutions géométriques est désormais
+[prouvée sous census complet par l'auditeur](audits/receipts_raccord_ancres_20260910/suite_cache_20260910/NOTE_PHASE_STATIQUE_MEB.md) ;
+son backend CPU/GPU par lots n'est pas encore implémenté.
 
 L'[audit indépendant du journal](audits/receipts_coverage_cpp_20260910/README.md)
 a exposé un angle mort du juge, pas un défaut nominal : le tableau des
@@ -121,10 +128,11 @@ non intégré et sans nouveau temps de grand nuage.
 Le [raccord multi-CPU](docs/PARALLELISME_FULL_20260906.md) est appliqué
 à l'ancienne sonde régulière ; ses micros passent et les mesures 8k terminent en
 132,962 / 98,195 / 74,577 / 69,853 s externes à 1/2/4/8 threads,
-mêmes dix forêts. FULL et la boucle K restent séquentiels. Après le premier
-refus 50k CPU48 décrit plus haut, la suite doit traiter la régularité et
-le coût FULL avant une campagne massive ou GPU, sans convertir les reçus F
-ou les seules primitives device en résultats de tour FULL.
+mêmes dix forêts. FULL et la boucle K restent séquentiels. Ces mesures du
+6 septembre sont historiques ; la tour par boules traite maintenant les
+extra-shells 50k observées. Son coût FULL reste dominant et interdit une
+promotion massive, sans convertir les reçus F ou primitives device en
+contrats de tour.
 L'[admission mémoire du probe](receipts/full_census_payload_20260906/README.md)
 ne réserve plus une seconde BallData absente du census nominal. Contrôles
 arithmétiques O2/SAN, micros et deux nouveaux CTests passent ; il s'agit
@@ -153,7 +161,8 @@ ctest --test-dir build/v7_fresh --output-on-failure -L '^gate$'
 
 Les tests `scale8000`, `scale16000` et `scale32000` sont des campagnes
 séparées plus longues. Les résultats des portes ciblées FULL ne
-réattribuent pas la suite F complète au nouveau delta.
+réattribuent pas la suite F complète au nouveau delta. Le présent lot
+conserve un rejeu stable de vingt CTests ciblés CPU et les gates O2/SAN.
 
 ## Entrée réelle et CLI historique
 
@@ -183,5 +192,5 @@ La lecture intégrale des parties I et II du manuscrit et le port v6 sont
 [déclarés et épinglés](docs/LECTURE_ET_CONTRATS.md). Ce chantier ne modifie pas la v6 ;
 aucun de ses résultats n'est hérité. Les preuves détaillées et essais
 négatifs restent dans `receipts/` ; les builds et brouillons vont dans
-`build/`, pas dans les entrées actives. La tentative G4 de ce delta n'a
-exécuté aucun benchmark ; l'arrêt de la cible E-HGP est certifié.
+`build/`, pas dans les entrées actives. Les benchmarks G4 de ce delta sont
+clos ; les deux arrêts ciblés E-HGP sont certifiés dans le reçu courant.

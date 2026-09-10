@@ -1,0 +1,11 @@
+# NVCC strict : compilation et lien seulement
+
+Ce paquet qualifie les **octets actifs épinglés** du helper, du gate census et du probe FULL hybride sous NVCC 12.9.86/GCC 13.3.0, sm_120. Aucun device CUDA exécuté, aucun résultat GPU, aucun contrat FULL 50k acquis ici. GCP non utilisé par cet agent.
+
+Les 17 commandes du reçu réussissent avec leurs codes attendus : vraies VLA et macro variadique GNU rejetées ; phase générée inconnue et paramètres tronqués refusés ; includes/macros correctement développés ; fixture CUDA minimale, gate census et probe FULL compilés **et liés**. Les options host `-Wall -Wextra -Wpedantic -Werror` restent actives sur le code original et la compilation finale. Seul le prétraitement intermédiaire du `.cudafe1.cpp` vendor neutralise son diagnostic de linemarkers ; le stub est entièrement développé, jamais simplement déclaré prétraité. Le seul exécutable lancé est une minuscule fixture **hôte** d'include/defines.
+
+Lire avec `python3 verify.py` puis `python3 -O verify.py` depuis ce dossier. Le lecteur vérifie le manifeste, les pins avant/après, les fichiers de source, les sorties brutes et les commandes requises ; il n'exécute aucun binaire. Les binaires ELF ne sont pas distribués : leurs hashes sont conservés dans le reçu. Les sources/dépendances projet sont présentes une seule fois dans `source/`. La metadata NVIDIA décrit le toolkit utilisé, mais aucune archive toolkit, bibliothèque système ou donnée secrète n'est embarquée. Les commandes historiques conservent leurs chemins absolus d'origine.
+
+Pins : helper `994d9e6970797594efa2d333275594ef2085cdd166b345b0000135e94e395fb7`, probe `306e5a9e2a424f73f6d01122e4a81aa5beaffd0140642888d34218d7b5bda275`, digest `04b69e840d083d239af374a67d368393f033f94946dda5a9850c4440593d7979`, tour `910f45baea1750b11d2b34f40c893c9d1a34f950705cdb127ffa226de60f7b2e`, couverture `7608e70ec0bf7df7ed726ae2388a39e800ab2db35043b4ba42c619ceef13bac0`.
+
+`provenance/private_manifest.json` conserve le scellement exact du paquet privé avant ajout de ce README : SHA `c7d9b98302829af1810a476c2a52e189d77fa1934fe53048a7591f77e9bb1390`. Le nouveau manifeste public recouvre aussi ce document et cette provenance ; aucun reçu brut n'a été modifié. La primitive WSPD privée est absente de ces sources actives et possède son paquet séparé.

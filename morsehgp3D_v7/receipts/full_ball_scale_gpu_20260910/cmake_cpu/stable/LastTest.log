@@ -1,0 +1,373 @@
+Start testing: Sep 10 20:55 UTC
+----------------------------------------------------------
+3/445 Testing: mhgp7_witness_front
+3/445 Test: mhgp7_witness_front
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1/mhgp7_witness_front_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1
+"mhgp7_witness_front" start time: Sep 10 20:55 UTC
+Output:
+----------------------------------------------------------
+witness_front_gate=passed checks=431010 cases=1728 rows=88560 requests=311968 rejections=15 singleton_reuses=1 backend=cpu_only
+
+<end of output>
+Test time =   0.91 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_witness_front" end time: Sep 10 20:55 UTC
+"mhgp7_witness_front" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/445 Testing: mhgp7_witness_front_bad_argument
+4/445 Test: mhgp7_witness_front_bad_argument
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1/mhgp7_witness_front_gate" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1
+"mhgp7_witness_front_bad_argument" start time: Sep 10 20:55 UTC
+Output:
+----------------------------------------------------------
+
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_witness_front_bad_argument" end time: Sep 10 20:55 UTC
+"mhgp7_witness_front_bad_argument" time elapsed: 00:00:00
+----------------------------------------------------------
+
+33/445 Testing: mhgp7_facet_resolver_cache
+33/445 Test: mhgp7_facet_resolver_cache
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1/mhgp7_facet_resolver_cache_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1
+"mhgp7_facet_resolver_cache" start time: Sep 10 20:55 UTC
+Output:
+----------------------------------------------------------
+{"status":"passed","clouds":28,"cache_hits":556,"seeds":352,"released_slots":2752,"entry_bytes":48}
+
+<end of output>
+Test time =   0.49 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_facet_resolver_cache" end time: Sep 10 20:56 UTC
+"mhgp7_facet_resolver_cache" time elapsed: 00:00:00
+----------------------------------------------------------
+
+34/445 Testing: mhgp7_facet_resolver_cache_bad_argument
+34/445 Test: mhgp7_facet_resolver_cache_bad_argument
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1/mhgp7_facet_resolver_cache_gate" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1
+"mhgp7_facet_resolver_cache_bad_argument" start time: Sep 10 20:56 UTC
+Output:
+----------------------------------------------------------
+
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_facet_resolver_cache_bad_argument" end time: Sep 10 20:56 UTC
+"mhgp7_facet_resolver_cache_bad_argument" time elapsed: 00:00:00
+----------------------------------------------------------
+
+35/445 Testing: mhgp7_full_gabriel_digest
+35/445 Test: mhgp7_full_gabriel_digest
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1/mhgp7_full_gabriel_digest_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1
+"mhgp7_full_gabriel_digest" start time: Sep 10 20:56 UTC
+Output:
+----------------------------------------------------------
+full_gabriel_digest authority=bench_serializer_only oracle=Boost_cpp_int divisions=672 reductions=672 rejections=6 checks=2695 failures=0 floor=1
+
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_gabriel_digest" end time: Sep 10 20:56 UTC
+"mhgp7_full_gabriel_digest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+36/445 Testing: mhgp7_full_gabriel_digest_bad_argument
+36/445 Test: mhgp7_full_gabriel_digest_bad_argument
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1/mhgp7_full_gabriel_digest_gate" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1
+"mhgp7_full_gabriel_digest_bad_argument" start time: Sep 10 20:56 UTC
+Output:
+----------------------------------------------------------
+
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_gabriel_digest_bad_argument" end time: Sep 10 20:56 UTC
+"mhgp7_full_gabriel_digest_bad_argument" time elapsed: 00:00:00
+----------------------------------------------------------
+
+43/445 Testing: mhgp7_local_plateau
+43/445 Test: mhgp7_local_plateau
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1/mhgp7_local_plateau_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1
+"mhgp7_local_plateau" start time: Sep 10 20:56 UTC
+Output:
+----------------------------------------------------------
+{"schema":"mhgp7-local-plateau-v1","status":"passed","public_status":"not_claimed","tables":18,"ranks":96,"components":96,"representatives":96,"inert":14,"local_births":26,"supports_q2_q3_q4":[20,14,4],"large_p":5000,"external_global_parent_counts":[2,1],"real_tables":4,"real_ranks":40,"complete_support_sets":18,"diameter_hubs":17,"dsu_ranks":68,"u2_exclusions":1}
+
+<end of output>
+Test time =   0.07 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_local_plateau" end time: Sep 10 20:56 UTC
+"mhgp7_local_plateau" time elapsed: 00:00:00
+----------------------------------------------------------
+
+44/445 Testing: mhgp7_local_plateau_bad_argument
+44/445 Test: mhgp7_local_plateau_bad_argument
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1/mhgp7_local_plateau_gate" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1
+"mhgp7_local_plateau_bad_argument" start time: Sep 10 20:56 UTC
+Output:
+----------------------------------------------------------
+
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_local_plateau_bad_argument" end time: Sep 10 20:56 UTC
+"mhgp7_local_plateau_bad_argument" time elapsed: 00:00:00
+----------------------------------------------------------
+
+45/445 Testing: mhgp7_full_coverage_certificate
+45/445 Test: mhgp7_full_coverage_certificate
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1/mhgp7_full_coverage_certificate_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1
+"mhgp7_full_coverage_certificate" start time: Sep 10 20:56 UTC
+Output:
+----------------------------------------------------------
+full_coverage_certificate checks=823 rejects=30 replay_cuts=30 gamma_cuts=40 allocation_rejects=20 authority=structural_only
+
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_coverage_certificate" end time: Sep 10 20:56 UTC
+"mhgp7_full_coverage_certificate" time elapsed: 00:00:00
+----------------------------------------------------------
+
+46/445 Testing: mhgp7_full_coverage_certificate_bad_argument
+46/445 Test: mhgp7_full_coverage_certificate_bad_argument
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1/mhgp7_full_coverage_certificate_gate" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1
+"mhgp7_full_coverage_certificate_bad_argument" start time: Sep 10 20:56 UTC
+Output:
+----------------------------------------------------------
+
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_coverage_certificate_bad_argument" end time: Sep 10 20:56 UTC
+"mhgp7_full_coverage_certificate_bad_argument" time elapsed: 00:00:00
+----------------------------------------------------------
+
+47/445 Testing: mhgp7_census_route_stub
+47/445 Test: mhgp7_census_route_stub
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1/mhgp7_census_route_stub_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1
+"mhgp7_census_route_stub" start time: Sep 10 20:56 UTC
+Output:
+----------------------------------------------------------
+backend=stub-hote device=stub-hote sm=0.0
+census_route_gate=passed backend=stub-hote checks=16627 compared=4116 extra_shells=3 q2=846 q3=2085 q4=1185 rejections=17 failures=0
+
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_census_route_stub" end time: Sep 10 20:56 UTC
+"mhgp7_census_route_stub" time elapsed: 00:00:00
+----------------------------------------------------------
+
+48/445 Testing: mhgp7_census_route_stub_bad_argument
+48/445 Test: mhgp7_census_route_stub_bad_argument
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1/mhgp7_census_route_stub_gate" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1
+"mhgp7_census_route_stub_bad_argument" start time: Sep 10 20:56 UTC
+Output:
+----------------------------------------------------------
+
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_census_route_stub_bad_argument" end time: Sep 10 20:56 UTC
+"mhgp7_census_route_stub_bad_argument" time elapsed: 00:00:00
+----------------------------------------------------------
+
+49/445 Testing: mhgp7_anchor_meb
+49/445 Test: mhgp7_anchor_meb
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1/mhgp7_anchor_meb_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1
+"mhgp7_anchor_meb" start time: Sep 10 20:56 UTC
+Output:
+----------------------------------------------------------
+{"status":"pass","checks":11752,"comparisons":605,"permutations":300,"extra_shells":197,"accepted_supports":[82,393,110,20],"scope":"exact_local_meb_only","gcp_used":false}
+
+<end of output>
+Test time =   0.37 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_anchor_meb" end time: Sep 10 20:56 UTC
+"mhgp7_anchor_meb" time elapsed: 00:00:00
+----------------------------------------------------------
+
+50/445 Testing: mhgp7_anchor_meb_bad_argument
+50/445 Test: mhgp7_anchor_meb_bad_argument
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1/mhgp7_anchor_meb_gate" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1
+"mhgp7_anchor_meb_bad_argument" start time: Sep 10 20:56 UTC
+Output:
+----------------------------------------------------------
+
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_anchor_meb_bad_argument" end time: Sep 10 20:56 UTC
+"mhgp7_anchor_meb_bad_argument" time elapsed: 00:00:00
+----------------------------------------------------------
+
+51/445 Testing: mhgp7_full_ball_tower
+51/445 Test: mhgp7_full_ball_tower
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1/mhgp7_full_ball_tower_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1
+"mhgp7_full_ball_tower" start time: Sep 10 20:56 UTC
+Output:
+----------------------------------------------------------
+{"status":"passed","authority":"bounded_independent_Gram_Gamma_not_WSPD_completeness","checks":170320,"clouds":28,"orders":112,"cuts":2508,"facets":20054,"vertical_checks":45948,"births":504,"merges":224,"continuation_snapshots":1036,"growth_snapshots":8,"overlap_cuts":484,"duplicate_cover_cuts":0,"regular_blocks":666,"extra_blocks":160,"anchor_hits":74,"representatives":992,"intruder_queries":12,"same_radius_steps":2,"rejections":8}
+
+<end of output>
+Test time =   0.58 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_ball_tower" end time: Sep 10 20:56 UTC
+"mhgp7_full_ball_tower" time elapsed: 00:00:00
+----------------------------------------------------------
+
+52/445 Testing: mhgp7_full_ball_tower_bad_argument
+52/445 Test: mhgp7_full_ball_tower_bad_argument
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1/mhgp7_full_ball_tower_gate" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1
+"mhgp7_full_ball_tower_bad_argument" start time: Sep 10 20:56 UTC
+Output:
+----------------------------------------------------------
+usage: mhgp7_full_ball_tower_gate --selftest
+
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_ball_tower_bad_argument" end time: Sep 10 20:56 UTC
+"mhgp7_full_ball_tower_bad_argument" time elapsed: 00:00:00
+----------------------------------------------------------
+
+53/445 Testing: mhgp7_full_ball_work
+53/445 Test: mhgp7_full_ball_work
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1/mhgp7_full_ball_work_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1
+"mhgp7_full_ball_work" start time: Sep 10 20:56 UTC
+Output:
+----------------------------------------------------------
+{"merges":256,"nodes":513,"baseline_edges":32896,"activated_edges":512,"find_steps":1022,"path_writes":512}
+{"merges":512,"nodes":1025,"baseline_edges":131328,"activated_edges":1024,"find_steps":2046,"path_writes":1024}
+{"merges":1024,"nodes":2049,"baseline_edges":524800,"activated_edges":2048,"find_steps":4094,"path_writes":2048}
+{"status":"passed","clouds":28,"declared_support_checks":352,"extra_MEB_calls":50,"extra_MEB_supports":56,"singleton_lots":306,"grouped_lots":176,"lot_dsu_slots":520,"gcp_used":false}
+
+<end of output>
+Test time =   0.54 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_ball_work" end time: Sep 10 20:56 UTC
+"mhgp7_full_ball_work" time elapsed: 00:00:00
+----------------------------------------------------------
+
+54/445 Testing: mhgp7_full_ball_work_bad_argument
+54/445 Test: mhgp7_full_ball_work_bad_argument
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1/mhgp7_full_ball_work_gate" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1
+"mhgp7_full_ball_work_bad_argument" start time: Sep 10 20:56 UTC
+Output:
+----------------------------------------------------------
+
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_ball_work_bad_argument" end time: Sep 10 20:56 UTC
+"mhgp7_full_ball_work_bad_argument" time elapsed: 00:00:00
+----------------------------------------------------------
+
+55/445 Testing: mhgp7_full_ball_tower_probe_smoke
+55/445 Test: mhgp7_full_ball_tower_probe_smoke
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1/mhgp7_full_ball_tower_probe" "-DARGS=--n=8 --s=8 --kmax=10 --threads=1" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1
+"mhgp7_full_ball_tower_probe_smoke" start time: Sep 10 20:56 UTC
+Output:
+----------------------------------------------------------
+stage_start=index
+stage_complete=index seconds=0.000010309
+stage_start=generate
+stage_complete=generate seconds=0.000175808
+stage_start=sort_rle
+stage_complete=sort_rle seconds=0.000006131
+stage_start=prefilter
+stage_complete=prefilter seconds=0.000055343
+stage_start=census
+stage_complete=census seconds=0.000026229
+stage_start=full_ball_tower
+stage_complete=full_ball_tower seconds=0.000221684
+stage_start=payload_digest
+stage_complete=payload_digest seconds=0.000063719
+{"schema":"mhgp7-full-ball-tower-probe-v1","status":"completed_relative","public_status":"not_claimed","backend":"cpu_reference","contract_qualified":false,"n":8,"s":8,"kmax":8,"threads":1,"seed":3,"coord":65536,"orders":8,"raw":71,"unique":71,"balls":71,"nodes":123,"parent_refs":115,"contributions":79,"vertical_refs":108,"extra_records":0,"anchor_blocks":142,"representatives":198,"anchor_hits":17,"intruder_queries":2,"same_radius_steps":0,"validation_meb_calls":0,"resolver_meb_calls":19,"input_digest":"3c95479be68aeb3af8d367b56f6a78e4fa07a0c193ee8bd33d1dece00b31e94d","payload_digest":"78c56099c2f876cfb5e3829c6e911689042bb70135cfd68f672609a5777c2656","declared_support_checks":71,"singleton_lots":142,"grouped_lots":0,"lot_dsu_slots":0,"lower_edges_indexed":115,"lower_nodes_activated":122,"lower_edges_activated":115,"lower_queries":209,"lower_find_steps":526,"lower_path_writes":132,"index_s":0.000010309,"generate_s":0.000175808,"sort_s":0.000006131,"prefilter_s":0.000055343,"census_s":0.000026229,"tower_s":0.000221684,"digest_s":0.000063719,"total_s":0.000666573,"resolver_cache_accounting":"exact_direct_mapped_seeded_facet_tokens_16n_per_order_v1","residence_accounting":"release_dead_construction_before_population_copy_v1","resolver_cache_queries":172,"resolver_cache_hits":155,"resolver_cache_stores":88,"resolver_cache_evictions":2,"resolver_cache_seed_stores":71,"resolver_cache_slots":128,"resolver_cache_reset_slots":896,"resolver_cache_bytes":6144,"resolver_cache_released_slots":128,"resolver_supports_tested":200}
+
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_ball_tower_probe_smoke" end time: Sep 10 20:56 UTC
+"mhgp7_full_ball_tower_probe_smoke" time elapsed: 00:00:00
+----------------------------------------------------------
+
+56/445 Testing: mhgp7_full_ball_tower_probe_bad_argument
+56/445 Test: mhgp7_full_ball_tower_probe_bad_argument
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1/mhgp7_full_ball_tower_probe" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1
+"mhgp7_full_ball_tower_probe_bad_argument" start time: Sep 10 20:56 UTC
+Output:
+----------------------------------------------------------
+
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_ball_tower_probe_bad_argument" end time: Sep 10 20:56 UTC
+"mhgp7_full_ball_tower_probe_bad_argument" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Sep 10 20:56 UTC
+
+anchor_meb =   0.39 sec*proc
+
+facet_resolver_cache =   0.50 sec*proc
+
+full_ball_tower =   1.18 sec*proc
+
+full_coverage_certificate =   0.03 sec*proc
+
+full_gabriel_digest =   0.03 sec*proc
+
+gate =   3.13 sec*proc
+
+local_plateau =   0.08 sec*proc
+
+oracle =   2.07 sec*proc
+
+stub =   0.06 sec*proc
+
+witness_front =   0.92 sec*proc
+

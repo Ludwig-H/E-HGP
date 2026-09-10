@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/work_o2",
+    "--unknown"
+  ],
+  "closed": true,
+  "ended_epoch": 1789071801.0503678,
+  "exit_code": 2,
+  "expected_code": 2,
+  "name": "work_argument",
+  "pid": 576558,
+  "started_epoch": 1789071801.0477245,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

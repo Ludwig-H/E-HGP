@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_witness_front_qualification_20260910/gate_generation_reserved",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": 1,
+  "expected_exit_code": 1,
+  "elapsed_seconds": 1.3729105359998357,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "67635c974a9fd3a683c3e76d25269e4208734d564e89372e3602b79382a3bf33",
+  "environment_overrides": {}
+}

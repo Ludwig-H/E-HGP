@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-O2",
+    "-I",
+    "/workspaces/E-HGP/build/v7_full_residence_20260910_r2/reserve",
+    "/workspaces/E-HGP/build/v7_full_residence_20260910_r2/reserve/build/v7_full_residence_20260910_r2/probe.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_full_residence_20260910_r2/probe_reserve_frozen"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "elapsed_seconds": 12.581525156998396,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

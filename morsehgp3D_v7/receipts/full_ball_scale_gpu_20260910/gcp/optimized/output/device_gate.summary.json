@@ -1,0 +1,12 @@
+{
+  "backend": "CUDA",
+  "checks": 16627,
+  "compared": 4116,
+  "extra_shells": 3,
+  "q2": 846,
+  "q3": 2085,
+  "q4": 1185,
+  "rejections": 17,
+  "sm": "12.0",
+  "status": "passed"
+}

@@ -1,0 +1,8 @@
+{
+  "estimator": "max_120s_3x_observed_s8_four_processes_plus_30s_v1",
+  "reason": "closing_window_reserve",
+  "remaining_work_seconds": 502.52575269330237,
+  "required_estimate_seconds": 2752.482571905,
+  "s": 10,
+  "status": "not_attempted"
+}

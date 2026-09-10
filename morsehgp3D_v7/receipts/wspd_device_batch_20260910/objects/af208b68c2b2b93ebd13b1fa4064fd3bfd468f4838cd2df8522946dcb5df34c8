@@ -1,0 +1,311 @@
+// Private synchronous WSPD witness route. CPU prepares CoreBall per request.
+// Owns one immutable host wire and its device copy, not a borrowed CloudIndex.
+// No generation/front/ledger mutation; full output is published only at success.
+#pragma once
+
+#include <algorithm>
+#include <bit>
+#include <chrono>
+#include <limits>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
+#if defined(__CUDACC__) && !defined(MHGP7_FAKE_DEVICE)
+#include <cuda_runtime.h>
+#endif
+#include "../spindle/witness_batch.hpp"
+#include "morsehgp3D_v7/src/gpu/wire.hpp"
+#include "witness_kernels.cuh"
+
+namespace mhgp7::gpu {
+
+static_assert(static_cast<u64>(WitnessBatchStatus::kUnwritten) == witness_device::kUnwritten &&
+              static_cast<u64>(WitnessBatchStatus::kOk) == witness_device::kOk &&
+              static_cast<u64>(WitnessBatchStatus::kInvalidRequest) == witness_device::kInvalid &&
+              static_cast<u64>(WitnessBatchStatus::kStackOverflow) == witness_device::kStack &&
+              static_cast<u64>(WitnessBatchStatus::kCounterOverflow) == witness_device::kCounter);
+
+struct WitnessRouteCosts {
+  double index_prepare_ms = 0, core_prepare_ms = 0, allocation_ms = 0;
+  double h2d_ms = 0, kernel_ms = 0, d2h_ms = 0, validate_ms = 0, release_ms = 0;
+  u64 h2d_index_bytes = 0, h2d_request_bytes = 0, h2d_sentinel_bytes = 0, d2h_bytes = 0;
+  u64 allocated_bytes = 0, freed_bytes = 0, allocations = 0, resident_bytes = 0, peak_bytes = 0;
+  u64 failed_free_bytes = 0, failed_frees = 0, host_index_bytes = 0;
+  u64 rows_prepared = 0, lots_launched = 0, lots_validated = 0;
+};
+
+namespace witness_route_detail {
+
+struct Timer {
+  double& elapsed;
+  std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+  ~Timer() { elapsed += std::chrono::duration<double, std::milli>(
+      std::chrono::steady_clock::now() - start).count(); }
+};
+inline void require(bool condition, const char* reason) {
+  if (!condition) throw std::runtime_error(reason);
+}
+inline void checked(cudaError_t status, const char* operation) {
+  if (status != cudaSuccess) throw std::runtime_error(std::string(operation) + " : " + cudaGetErrorString(status));
+}
+struct Buffer {
+  void* pointer = nullptr;
+  size_t bytes = 0;
+  Buffer() = default;
+  Buffer(const Buffer&) = delete;
+  Buffer& operator=(const Buffer&) = delete;
+  ~Buffer() { if (pointer != nullptr) (void)cudaFree(pointer); }
+  template<class T> T* as() { return static_cast<T*>(pointer); }
+  void allocate(size_t n, WitnessRouteCosts& costs) {
+    if (!n) return;
+    Timer timer{costs.allocation_ms};
+    checked(cudaMalloc(&pointer, n), "witness_cuda_allocate");
+    bytes = n; ++costs.allocations; costs.allocated_bytes += n; costs.resident_bytes += n;
+    costs.peak_bytes = std::max(costs.peak_bytes, costs.resident_bytes);
+  }
+  void release(WitnessRouteCosts& costs) noexcept {
+    if (pointer == nullptr) return;
+    Timer timer{costs.release_ms};
+    if (cudaFree(pointer) == cudaSuccess) costs.freed_bytes += bytes;
+    else { ++costs.failed_frees; costs.failed_free_bytes += bytes; }
+    costs.resident_bytes -= bytes; pointer = nullptr; bytes = 0;
+  }
+};
+inline void transfer(void* out, const void* in, size_t bytes, cudaMemcpyKind kind,
+                     double& milliseconds, u64& physical_bytes) {
+  if (!bytes) return;
+  Timer timer{milliseconds};
+  checked(cudaMemcpy(out, in, bytes, kind), "witness_cuda_transfer");
+  physical_bytes += bytes;
+}
+inline u32 word32(const std::vector<u8>& bytes, size_t slot) {
+  u32 value = 0;
+  for (unsigned i = 0; i < 4; ++i) value |= u32(bytes[slot * 4 + i]) << (8 * i);
+  return value;
+}
+inline u16 word16(const std::vector<u8>& bytes, size_t slot) {
+  return u16(u16(bytes[slot * 2]) | (u16(bytes[slot * 2 + 1]) << 8));
+}
+inline bool valid_node(const GpuCloudIndexWire& wire, NodeRef node) {
+  return node < 0 ? u64(-i64(node) - 1) < wire.n_upos : u64(node) < wire.n_nodes;
+}
+inline NodeRange range(const GpuCloudIndexWire& wire, NodeRef node) {
+  return node < 0 ? NodeRange{i32(-i64(node) - 1), i32(-i64(node) - 1)}
+                  : NodeRange{i32(word32(wire.node_first, size_t(node))),
+                              i32(word32(wire.node_last, size_t(node)))};
+}
+inline AxisBox box(const GpuCloudIndexWire& wire, NodeRef node) {
+  AxisBox result{};
+  for (unsigned axis = 0; axis < 3; ++axis) {
+    result.lo[axis] = node < 0 ? word16(wire.upos, size_t(-i64(node) - 1) * 3 + axis)
+                              : word16(wire.node_box, size_t(node) * 6 + axis);
+    result.hi[axis] = node < 0 ? result.lo[axis] : word16(wire.node_box, size_t(node) * 6 + 3 + axis);
+  }
+  return result;
+}
+
+inline void validate_index(const CloudIndex& ix, const GpuCloudIndexWire& wire) {
+  require(ix.valid && wire.error.empty(), "witness_index_invalid");
+  require(wire.n_nodes + u64{1} == wire.n_upos && wire.n_upos <= u64(INT32_MAX), "witness_index_shape");
+  require(wire.node_left.size() == size_t(wire.n_nodes) * 4 &&
+          wire.node_right.size() == size_t(wire.n_nodes) * 4 &&
+          wire.node_first.size() == size_t(wire.n_nodes) * 4 &&
+          wire.node_last.size() == size_t(wire.n_nodes) * 4 &&
+          wire.node_box.size() == size_t(wire.n_nodes) * 12 &&
+          wire.upos.size() == size_t(wire.n_upos) * 6 &&
+          wire.wsum.size() == (size_t(wire.n_upos) + 1) * 4, "witness_index_wire_shape");
+  require(word32(wire.wsum, 0) == 0, "witness_prefix_origin");
+  for (u32 u = 0; u < wire.n_upos; ++u)
+    require(word32(wire.wsum, size_t(u) + 1) > word32(wire.wsum, u), "witness_prefix_monotone");
+  const auto valid_range = [&](NodeRange r) { return r.first >= 0 && r.last >= r.first && u64(r.last) < wire.n_upos; };
+  require(valid_node(wire, wire.root), "witness_root_invalid");
+  const auto root = range(wire, wire.root);
+  require(root.first == 0 && u64(root.last) + 1 == wire.n_upos, "witness_root_range");
+  for (u32 node = 0; node < wire.n_nodes; ++node) {
+    const auto current = range(wire, NodeRef(node));
+    const NodeRef l = i32(word32(wire.node_left, node)), r = i32(word32(wire.node_right, node));
+    require(valid_node(wire, l) && valid_node(wire, r) && valid_range(current), "witness_child_invalid");
+    const auto lr = range(wire, l), rr = range(wire, r);
+    require(valid_range(lr) && valid_range(rr) && current.first == lr.first &&
+            i64(lr.last) + 1 == rr.first && current.last == rr.last, "witness_child_partition");
+    const auto current_box = box(wire, NodeRef(node)), lb = box(wire, l), rb = box(wire, r);
+    for (unsigned axis = 0; axis < 3; ++axis)
+      require(current_box.lo[axis] == std::min(lb.lo[axis], rb.lo[axis]) &&
+              current_box.hi[axis] == std::max(lb.hi[axis], rb.hi[axis]), "witness_child_box");
+  }
+}
+
+struct State {
+  GpuCloudIndexWire wire;
+  Buffer left, right, first, last, boxes, positions, prefix, input, output;
+  std::vector<u64> host_input, host_output;
+  size_t capacity = 0;
+  void release(WitnessRouteCosts& costs) noexcept {
+    left.release(costs); right.release(costs); first.release(costs); last.release(costs);
+    boxes.release(costs); positions.release(costs); prefix.release(costs);
+    input.release(costs); output.release(costs);
+    costs.host_index_bytes = 0;
+  }
+};
+
+}  // namespace witness_route_detail
+
+class WitnessRouteContext {
+ public:
+  WitnessRouteContext() = default;
+  WitnessRouteContext(const WitnessRouteContext&) = delete;
+  WitnessRouteContext& operator=(const WitnessRouteContext&) = delete;
+  const WitnessRouteCosts& costs() const { return costs_; }
+  bool ready() const { return state_ != nullptr; }
+  std::string index_digest() const { return ready() ? state_->wire.host_wire_digest : ""; }
+  std::string close() {
+    const u64 before = costs_.failed_frees;
+    if (state_) { state_->release(costs_); state_.reset(); }
+    return costs_.failed_frees == before ? "" : "witness_cuda_free_failed";
+  }
+#ifdef MHGP7_TESTING
+  void test_fault(u32 flags, u64 request_id) { fault_flags_ = flags; fault_id_ = request_id; }
+  void test_fail_allocation(u64 ordinal) { allocation_failure_ = ordinal; }
+#endif
+  std::string prepare(const CloudIndex& ix, size_t capacity) {
+    using namespace witness_route_detail;
+    if (const auto error = close(); !error.empty()) return error;
+    try {
+      require(std::endian::native == std::endian::little, "witness_host_endianness");
+      require(capacity > 0 && capacity <= std::numeric_limits<u32>::max() &&
+              capacity <= std::numeric_limits<size_t>::max() / (witness_device::kInputWords * 8),
+              "witness_batch_capacity");
+      state_ = std::make_unique<State>();
+      auto& state = *state_;
+      {
+        Timer timer{costs_.index_prepare_ms};
+        state.wire = build_index_wire(ix);
+        validate_index(ix, state.wire);
+      }
+      state.capacity = capacity;
+      u64 ordinal = 0;
+      const auto allocate = [&](Buffer& buffer, size_t bytes) {
+        if (!bytes) return;
+        ++ordinal;
+#ifdef MHGP7_TESTING
+        require(ordinal != allocation_failure_, "witness_test_allocation_failure");
+#endif
+        buffer.allocate(bytes, costs_);
+      };
+      const auto upload = [&](Buffer& buffer, const std::vector<u8>& bytes) {
+        allocate(buffer, bytes.size());
+        transfer(buffer.pointer, bytes.data(), bytes.size(), cudaMemcpyHostToDevice,
+                 costs_.h2d_ms, costs_.h2d_index_bytes);
+        costs_.host_index_bytes += bytes.size();
+      };
+      upload(state.left, state.wire.node_left); upload(state.right, state.wire.node_right);
+      upload(state.first, state.wire.node_first); upload(state.last, state.wire.node_last);
+      upload(state.boxes, state.wire.node_box); upload(state.positions, state.wire.upos);
+      upload(state.prefix, state.wire.wsum);
+      allocate(state.input, capacity * witness_device::kInputWords * sizeof(u64));
+      allocate(state.output, capacity * witness_device::kOutputWords * sizeof(u64));
+      state.host_input.resize(capacity * witness_device::kInputWords);
+      state.host_output.resize(capacity * witness_device::kOutputWords);
+      return "";
+    } catch (const std::exception& error) { (void)close(); return error.what(); }
+  }
+
+  std::string run(std::span<const WitnessBatchRequest> requests, const u64 h[3], u64 generation,
+                  std::vector<WitnessBatchResult>* output) {
+    using namespace witness_route_detail;
+    if (output != nullptr) output->clear();
+    try {
+      require(state_ != nullptr && output != nullptr && h != nullptr, "witness_context_or_output");
+      auto& state = *state_;
+      require(generation != ~u64{0} && (!has_generation_ || generation > generation_),
+              "witness_generation_replay");
+      generation_ = generation; has_generation_ = true;
+      std::vector<WitnessBatchResult> pending;
+      pending.reserve(requests.size());
+      for (size_t base = 0; base < requests.size(); base += state.capacity) {
+        const u32 n = u32(std::min(state.capacity, requests.size() - base));
+        {
+          Timer timer{costs_.core_prepare_ms};
+          for (size_t i = 0; i < n; ++i) {
+            const auto& request = requests[base + i];
+            require((request.mask & ~u8{7}) == 0 && request.request_id != ~u64{0} &&
+                    (base + i == 0 || requests[base + i - 1].request_id < request.request_id),
+                    "witness_request_identity");
+            require(valid_node(state.wire, request.a) && valid_node(state.wire, request.b), "witness_request_node");
+            const auto ra = range(state.wire, request.a), rb = range(state.wire, request.b);
+            require(ra.last < rb.first || rb.last < ra.first, "witness_request_overlap");
+            const auto a = box(state.wire, request.a), b = box(state.wire, request.b);
+            CoreBall cores[2]{};
+            if (request.mask & 2) cores[0] = core_ball(Lane::kQ3, a, b);
+            if (request.mask & 4) cores[1] = core_ball(Lane::kQ4, a, b);
+            const auto& common = (request.mask & 2) ? cores[0] : cores[1];
+            u64* row = state.host_input.data() + i * witness_device::kInputWords;
+            row[0] = request.request_id; row[1] = generation;
+            row[2] = u64(u32(request.a)) | (u64(u32(request.b)) << 32);
+            row[3] = request.mask | (u64(request.corners) << 8);
+            for (unsigned axis = 0; axis < 3; ++axis) row[4 + axis] = u64(common.center4[axis]);
+            row[7] = u64(cores[0].radius4); row[8] = u64(cores[1].radius4);
+            ++costs_.rows_prepared;
+          }
+        }
+        std::fill(state.host_output.begin(), state.host_output.end(), ~u64{0});
+        for (size_t i = 0; i < n; ++i) state.host_output[i * witness_device::kOutputWords + 7] = witness_device::kUnwritten;
+        transfer(state.input.pointer, state.host_input.data(), size_t(n) * witness_device::kInputWords * 8,
+                 cudaMemcpyHostToDevice, costs_.h2d_ms, costs_.h2d_request_bytes);
+        transfer(state.output.pointer, state.host_output.data(), size_t(n) * witness_device::kOutputWords * 8,
+                 cudaMemcpyHostToDevice, costs_.h2d_ms, costs_.h2d_sentinel_bytes);
+        {
+          Timer timer{costs_.kernel_ms};
+          u32 flags = 0; u64 id = 0;
+#ifdef MHGP7_TESTING
+          flags = fault_flags_; id = fault_id_;
+#endif
+          ++costs_.lots_launched;
+          const u32 blocks = u32((u64(n) + 127) / 128);
+          MHGP7_LAUNCH(witness_device::count, blocks, 128,
+              state.left.as<i32>(), state.right.as<i32>(), state.first.as<i32>(), state.last.as<i32>(),
+              state.boxes.as<u16>(), state.positions.as<u16>(), state.prefix.as<u32>(), state.wire.root,
+              state.input.as<u64>(), n, h[0], h[1], h[2], state.output.as<u64>(), flags, id);
+          checked(cudaGetLastError(), "witness_cuda_launch");
+          checked(cudaDeviceSynchronize(), "witness_cuda_synchronize");
+        }
+        transfer(state.host_output.data(), state.output.pointer, size_t(n) * witness_device::kOutputWords * 8,
+                 cudaMemcpyDeviceToHost, costs_.d2h_ms, costs_.d2h_bytes);
+        {
+          Timer timer{costs_.validate_ms};
+          for (size_t i = 0; i < n; ++i) {
+            const u64* row = state.host_output.data() + i * witness_device::kOutputWords;
+            WitnessBatchResult result;
+            result.request_id = row[0]; result.generation = row[1];
+            require(row[7] <= witness_device::kCounter, "witness_unknown_status");
+            result.status = static_cast<WitnessBatchStatus>(row[7]);
+            for (unsigned lane = 0; lane < 3; ++lane) result.counts.c[lane] = row[2 + lane];
+            result.counts.nodes_visited = row[5]; result.counts.corner_evals = row[6];
+            pending.push_back(result);
+          }
+          validate_witness_batch(requests.subspan(base, n), h, generation,
+                                 std::span<const WitnessBatchResult>(pending).subspan(base, n));
+          ++costs_.lots_validated;
+        }
+      }
+      output->swap(pending);
+      return "";
+    } catch (const std::exception& error) { (void)close(); return error.what(); }
+  }
+
+ private:
+  WitnessRouteCosts costs_;
+  std::unique_ptr<witness_route_detail::State> state_;
+  // Lifetime identity, not index identity: explicit re-prepare is not a replay
+  // escape. A new context object is required to begin a new generation domain.
+  bool has_generation_ = false;
+  u64 generation_ = 0;
+#ifdef MHGP7_TESTING
+  u32 fault_flags_ = 0;
+  u64 fault_id_ = 0, allocation_failure_ = 0;
+#endif
+};
+
+}  // namespace mhgp7::gpu

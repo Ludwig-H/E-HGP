@@ -1,0 +1,253 @@
+// Private differential gate, not a qualification of generator/FULL/GPU speed.
+#ifndef MHGP7_TESTING
+#define MHGP7_TESTING 1
+#endif
+#include <cstdio>
+#include <cstring>
+#include <limits>
+#include "morsehgp3D_v7/src/cloud/families.hpp"
+#include "morsehgp3D_v7/src/wspd/wavefront.hpp"
+#include "../src/gpu/witness_route.cuh"
+
+namespace {
+using namespace mhgp7;
+using gpu::WitnessRouteContext;
+u64 checks = 0, failures = 0, compared = 0, rejected = 0;
+u64 positive[3]{}, masks[8]{}, corner_visits = 0, zero_core = 0, nonzero_core = 0;
+u64 weighted_rows = 0, separated_rows[3]{}, semantic_differences = 0;
+u32 semantic_mutant = 0;
+void expect(bool value, const char* reason) {
+  ++checks;
+  if (!value) { ++failures; if (failures <= 12) std::printf("failure=%s\n", reason); }
+}
+bool same(const FusedCounts& a, const FusedCounts& b) {
+  return a.c[0] == b.c[0] && a.c[1] == b.c[1] && a.c[2] == b.c[2] &&
+      a.nodes_visited == b.nodes_visited && a.corner_evals == b.corner_evals;
+}
+std::vector<InputPoint> points(std::initializer_list<P3> positions) {
+  std::vector<InputPoint> out;
+  for (const auto& p : positions) out.push_back(InputPoint{PointId(700 + out.size() * 3), p});
+  return out;
+}
+std::vector<WitnessBatchRequest> requests_for(const CloudIndex& ix) {
+  std::vector<NodeRef> nodes;
+  for (size_t i = 0; i < ix.nodes.size(); ++i) nodes.push_back(NodeRef(i));
+  for (int i = 0; i < ix.unique_count(); ++i) nodes.push_back(leaf_ref(i));
+  std::vector<WitnessBatchRequest> requests;
+  for (size_t i = 0; i < nodes.size(); ++i) for (size_t j = i + 1; j < nodes.size(); ++j) {
+    const auto a = ix.range_of(nodes[i]), b = ix.range_of(nodes[j]);
+    if (!(a.last < b.first || b.last < a.first)) continue;
+    for (u8 mask = 0; mask < 8; ++mask) for (bool corners : {false, true})
+      requests.push_back({nodes[i], nodes[j], mask, corners, u64(requests.size())});
+  }
+  return requests;
+}
+void check_released(const WitnessRouteContext& context) {
+  const auto& costs = context.costs();
+  expect(!context.ready() && costs.resident_bytes == 0 && costs.host_index_bytes == 0 &&
+         costs.allocated_bytes == costs.freed_bytes && costs.failed_frees == 0, "released");
+}
+void compare(const CloudIndex& ix, std::span<const WitnessBatchRequest> requests, const u64 h[3],
+             const std::vector<WitnessBatchResult>& actual) {
+  expect(actual.size() == requests.size(), "output_size");
+  if (actual.size() != requests.size()) return;
+  for (size_t i = 0; i < requests.size(); ++i) {
+    const auto& r = requests[i];
+    const auto reference = count_universal_witnesses(ix, r.a, r.b, h, r.mask, r.corners);
+    if (semantic_mutant && !same(reference, actual[i].counts)) ++semantic_differences;
+    expect(same(reference, actual[i].counts), "scalar_counts_and_DFS_counters");
+    ++compared; ++masks[r.mask];
+    for (unsigned lane = 0; lane < 3; ++lane) positive[lane] += reference.c[lane] > 0;
+    corner_visits += reference.corner_evals;
+    weighted_rows += ix.has_duplicate_positions() && (reference.c[0] || reference.c[1] || reference.c[2]);
+    for (const auto q : {Lane::kQ3, Lane::kQ4}) {
+      if (core_ball(q, ix.box_of(r.a), ix.box_of(r.b)).radius4 > 0) ++nonzero_core;
+      else ++zero_core;
+    }
+  }
+}
+void exercise(const CloudIndex& ix) {
+  const auto requests = requests_for(ix);
+  expect(ix.valid && requests.size() >= 16, "fixture_nonempty");
+  const u64 thresholds[][3] = {{0, 0, 0}, {1, 2, 3}, {11, 9, 10}, {~u64{0}, ~u64{0}, ~u64{0}}};
+  for (size_t capacity : {size_t{17}, size_t{128}}) {
+    WitnessRouteContext context;
+    expect(context.prepare(ix, capacity).empty(), "prepare");
+    if (!context.ready()) return;
+    const u64 index_bytes = 38 * ix.upos.size() - 24;
+    expect(context.costs().h2d_index_bytes == index_bytes && context.costs().host_index_bytes == index_bytes,
+           "index_transfer_bytes");
+    expect(context.costs().resident_bytes == index_bytes + capacity * 136, "resident_budget");
+    expect(context.index_digest() == gpu::build_index_wire(ix).host_wire_digest, "index_digest");
+    if (semantic_mutant) context.test_fault(semantic_mutant, ~u64{0});
+    u64 generation = 1;
+    for (const auto& h : thresholds) {
+      std::vector<WitnessBatchResult> actual(3);
+      const auto error = context.run(requests, h, generation++, &actual);
+      expect(error.empty(), "run");
+      if (!error.empty()) { std::printf("route_error=%s\n", error.c_str()); return; }
+      compare(ix, requests, h, actual);
+      const u64 rows = context.costs().rows_prepared;
+      expect(context.costs().h2d_request_bytes == 72 * rows && context.costs().h2d_sentinel_bytes == 64 * rows &&
+             context.costs().d2h_bytes == 64 * rows, "physical_transfer_bytes");
+      actual.resize(2);
+      const auto before = context.costs().lots_launched;
+      expect(context.run({}, h, generation++, &actual).empty() && actual.empty() && context.ready() &&
+             context.costs().lots_launched == before, "empty_after_full");
+    }
+    expect(context.close().empty(), "close"); check_released(context);
+  }
+  // The primitive has no s parameter: feed actual WSPD terminal rectangles
+  // from each requested separation, and compare only this batched operation.
+  for (unsigned si = 0; si < 3; ++si) {
+    std::vector<WitnessBatchRequest> separated;
+    const i64 s = 8 + 2 * si;
+    const auto stats = wspd_wavefront(ix, s, 1, [&](const WspdRect& r) {
+      separated.push_back({r.a, r.b, 7, true, u64(separated.size())});
+    });
+    WitnessRouteContext context;
+    expect(context.prepare(ix, 1).empty(), "wspd_prepare");
+    const u64 h[3] = {9, 8, 7};
+    std::vector<WitnessBatchResult> out;
+    if (semantic_mutant) context.test_fault(semantic_mutant, ~u64{0});
+    expect(context.run(separated, h, 5, &out).empty(), "wspd_run");
+    compare(ix, separated, h, out);
+    separated_rows[si] += separated.size();
+    expect(stats.rectangles == separated.size(), "wspd_request_association");
+    expect(context.close().empty(), "wspd_close"); check_released(context);
+  }
+}
+void rejection_gate(const CloudIndex& ix) {
+  const u64 h[3] = {100, 100, 100};
+  auto requests = requests_for(ix);
+  requests.resize(36);
+  for (u32 flag : {gpu::witness_device::kSkipWrite, gpu::witness_device::kWrongId,
+                   gpu::witness_device::kWrongGeneration}) {
+    WitnessRouteContext context;
+    expect(context.prepare(ix, 17).empty(), "fault_prepare");
+    context.test_fault(flag, 17);
+    std::vector<WitnessBatchResult> out(2);
+    expect(!context.run(requests, h, 9, &out).empty() && out.empty(), "association_transactional");
+    expect(context.costs().lots_validated == 1 && context.costs().lots_launched == 2, "private_prefix_not_published");
+    ++rejected; check_released(context);
+  }
+  for (unsigned error = 0; error < 8; ++error) {
+    WitnessRouteContext context;
+    expect(context.prepare(ix, 17).empty(), "invalid_prepare");
+    auto bad = requests;
+    if (error == 0) bad[17].mask = 8;
+    if (error == 1) bad[17].a = INT32_MIN;
+    if (error == 2) bad[17].b = bad[17].a;
+    if (error == 3) bad[17].request_id = bad[16].request_id;
+    if (error == 4) bad[17].request_id = ~u64{0};
+    std::vector<WitnessBatchResult> out(2);
+    const auto message = context.run(bad, error == 5 ? nullptr : h, error == 6 ? ~u64{0} : 3,
+                                     error == 7 ? nullptr : &out);
+    expect(!message.empty() && (error == 7 || out.empty()), "invalid_request_transactional");
+    if (error < 5) expect(context.costs().lots_validated == 1, "late_invalid_prefix");
+    ++rejected; check_released(context);
+  }
+  for (u64 repeated : {u64{0}, u64{12}}) {
+    WitnessRouteContext context;
+    expect(context.prepare(ix, 17).empty(), "generation_prepare");
+    std::vector<WitnessBatchResult> out;
+    expect(context.run(requests, h, 10, &out).empty(), "generation_first");
+    expect(context.run({}, h, 12, &out).empty(), "generation_empty_consumes");
+    out.resize(1);
+    expect(!context.run(requests, h, repeated, &out).empty() && out.empty(), "generation_replay");
+    ++rejected; check_released(context);
+    expect(context.prepare(ix, 17).empty(), "reprepare_generation_context");
+    expect(!context.run({}, h, 12, &out).empty(), "reprepare_does_not_reset_generation");
+    ++rejected; check_released(context);
+  }
+  for (u64 ordinal = 1; ordinal <= 9; ++ordinal) {
+    WitnessRouteContext context;
+    context.test_fail_allocation(ordinal);
+    expect(!context.prepare(ix, 17).empty(), "injected_allocation_failure");
+    ++rejected; check_released(context);
+  }
+  for (unsigned malformed = 0; malformed < 9; ++malformed) {
+    auto bad = ix;
+    if (malformed == 0) bad.valid = false;
+    if (malformed == 1) bad.wsum[0] = 1;
+    if (malformed == 2) bad.wsum[1] = bad.wsum[0];
+    if (malformed == 3) bad.wsum.back() = u64{1} << 32;
+    if (malformed == 4) bad.nodes[0].left = INT32_MIN;
+    if (malformed == 5) bad.nodes[0].right = bad.nodes[0].left;
+    if (malformed == 6) bad.nodes[0].first = 1;
+    if (malformed == 7) ++bad.nodes[0].thi[0];
+    if (malformed == 8) bad.wsum.pop_back();
+    WitnessRouteContext context;
+    expect(!context.prepare(bad, 17).empty(), "invalid_index");
+    ++rejected; check_released(context);
+  }
+  {
+    WitnessRouteContext context;
+    expect(!context.prepare(build_cloud_index(std::vector<InputPoint>{}), 17).empty(), "empty_index_rejected");
+    ++rejected; check_released(context);
+    std::vector<WitnessBatchResult> out(2);
+    expect(!context.run({}, h, 1, &out).empty() && out.empty(), "unprepared_clears_output");
+    ++rejected; check_released(context);
+    expect(context.prepare(build_cloud_index(points({{7, 8, 9}})), 1).empty(), "singleton_prepare");
+    expect(context.costs().h2d_index_bytes == 14 && context.costs().allocations == 4, "singleton_index_wire");
+    expect(context.run({}, h, 2, &out).empty() && out.empty(), "singleton_empty");
+    expect(context.close().empty(), "singleton_close"); check_released(context);
+  }
+  {
+    WitnessRouteContext context;
+    expect(!context.prepare(ix, 0).empty(), "zero_capacity"); ++rejected; check_released(context);
+    auto mutable_index = ix;
+    expect(context.prepare(mutable_index, 17).empty(), "snapshot_prepare");
+    mutable_index.upos[0].x = 65535;
+    mutable_index.wsum.clear(); mutable_index.nodes.clear(); mutable_index.valid = false;
+    std::vector<WitnessBatchResult> out;
+    expect(context.run(requests, h, 7, &out).empty(), "immutable_snapshot");
+    compare(ix, requests, h, out);
+    // A new front can restart request IDs, but never its context generation.
+    expect(context.run(requests, h, 8, &out).empty(), "new_front_fresh_generation");
+    expect(context.close().empty(), "snapshot_close"); check_released(context);
+  }
+  {
+    WitnessRouteContext context;
+    expect(context.prepare(ix, 17).empty(), "stack_prepare");
+    context.test_fault(gpu::witness_device::kShallow, ~u64{0});
+    std::vector<WitnessBatchResult> out(2);
+    const auto all = requests_for(ix);
+    expect(!context.run(all, h, 3, &out).empty() && out.empty(), "bounded_stack_failure");
+    ++rejected; check_released(context);
+  }
+}
+}  // namespace
+
+int main(int argc, char** argv) {
+  if (argc != 2) return 2;
+  if (std::strcmp(argv[1], "--mutant=no-mask") == 0) semantic_mutant = gpu::witness_device::kNoMask;
+  else if (std::strcmp(argv[1], "--mutant=reverse-push") == 0) semantic_mutant = gpu::witness_device::kReversePush;
+  else if (std::strcmp(argv[1], "--selftest") != 0) return 2;
+  cudaDeviceProp properties{};
+  if (cudaGetDeviceProperties(&properties, 0) != cudaSuccess) return 2;
+  std::printf("backend=%s sm=%d.%d public_status=not_claimed\n", properties.name, properties.major, properties.minor);
+  const auto line = build_cloud_index(points({{0, 50, 50}, {100, 50, 50}, {48, 50, 50}, {49, 50, 50},
+                                             {50, 50, 50}, {51, 50, 50}, {52, 50, 50}, {50, 50, 50}}));
+  exercise(line);
+  exercise(build_cloud_index(points({{0, 0, 0}, {20, 0, 0}, {0, 20, 0}, {20, 20, 0}, {10, 10, 0},
+                                     {9, 11, 0}, {11, 9, 0}, {5, 8, 0}, {10, 15, 0}})));
+  exercise(build_cloud_index(points({{0, 0, 0}, {65535, 65535, 65535}, {65535, 0, 0}, {0, 65535, 0},
+                                     {0, 0, 65535}, {32767, 32768, 32769}, {1, 2, 3}, {65534, 65533, 65532}})));
+  exercise(build_cloud_index(make_family_input(CloudFamily::kUniform, 17, 300, 1729)));
+  if (!semantic_mutant) rejection_gate(line);
+  expect(compared >= 10000 && corner_visits > 0 && zero_core > 0 && nonzero_core > 0 && weighted_rows > 0,
+         "nonvacuity_global");
+  for (unsigned i = 0; i < 8; ++i) expect(masks[i] > 0, "nonvacuity_mask");
+  for (unsigned i = 0; i < 3; ++i) expect(positive[i] > 0 && separated_rows[i] > 0, "nonvacuity_lane_and_s");
+  if (semantic_mutant) expect(semantic_differences > 0, "causal_mutant_differences");
+  else expect(rejected >= 30, "nonvacuity_rejections");
+  std::printf("checks=%llu failures=%llu rows=%llu positive=%llu,%llu,%llu corners=%llu cores_zero=%llu cores_positive=%llu "
+              "weighted_rows=%llu s8_s10_s12=%llu,%llu,%llu rejected=%llu semantic_differences=%llu\n",
+      (unsigned long long)checks, (unsigned long long)failures, (unsigned long long)compared,
+      (unsigned long long)positive[0], (unsigned long long)positive[1], (unsigned long long)positive[2],
+      (unsigned long long)corner_visits, (unsigned long long)zero_core, (unsigned long long)nonzero_core,
+      (unsigned long long)weighted_rows, (unsigned long long)separated_rows[0], (unsigned long long)separated_rows[1],
+      (unsigned long long)separated_rows[2], (unsigned long long)rejected, (unsigned long long)semantic_differences);
+  return failures ? 1 : 0;
+}

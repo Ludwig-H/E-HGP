@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_rightmost_intruder_20260910/baseline_choice_san.bin",
+    "--selftest"
+  ],
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "elapsed_seconds": 14.034063741000864,
+  "stdout_sha256": "57e6e16354e6564f9a5136d2fdd39bc42c40646e60c11364b09f145fb247626d",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "sanitizers": true
+}

@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_witness_front_qualification_20260910/gate_o2",
+    "--unknown"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": 2,
+  "expected_exit_code": 2,
+  "elapsed_seconds": 0.0026317830015614163,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment_overrides": {}
+}

@@ -1,0 +1,45 @@
+{
+  "status": "passed",
+  "commands": [
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r3_vertical/baseline/morsehgp3D_v7/tests/full_ball_tower_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r3_vertical/wrong_vertical_cut.bin"
+      ],
+      "exit_code": 0,
+      "expected": 0,
+      "started_epoch": 1789072492.4689114,
+      "ended_epoch": 1789072504.748123,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r3_vertical/wrong_vertical_cut.bin",
+        "--selftest"
+      ],
+      "exit_code": 1,
+      "expected": 1,
+      "started_epoch": 1789072504.7483363,
+      "ended_epoch": 1789072504.75062,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "12f601c9d30f5f646f2a5e744efb295c7253a1ab70bda628ec3709fa22060256"
+    }
+  ],
+  "mutant_header_sha256": "d643015406b7c9262df20cea0d476ec0ed8050ee76f0db274b066bfb05d3665d",
+  "binary_sha256": "7fffaef0ea9c8b7cdd81ca2e797dc1775133e5aa60ade251b0c7911ef5f66ed6",
+  "frozen_source_inventory": "ad8b38060293aa98dbfdd75b83bbb57aee22d229759663b3bb85608b04a36f45",
+  "live_sources_consumed": false,
+  "GCP_used": false
+}

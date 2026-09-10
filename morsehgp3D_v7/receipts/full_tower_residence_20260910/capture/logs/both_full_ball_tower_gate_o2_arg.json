@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_full_residence_20260910_r2/both_full_ball_tower_gate_o2",
+    "unexpected"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": 2,
+  "expected_exit_code": 2,
+  "elapsed_seconds": 0.002484725999238435,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "4b9eeadc562c94288f788d79631dcc662f5b8c306e7232ccdc083094698a2e85"
+}

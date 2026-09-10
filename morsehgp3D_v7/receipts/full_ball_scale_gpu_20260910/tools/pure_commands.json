@@ -1,0 +1,44 @@
+[
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "gcp-migration/selftest_full_ball_worker_v7.py"
+    ],
+    "started_ns": 1789074691144768508,
+    "ended_ns": 1789074691288445062,
+    "exit_code": 0
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "gcp-migration/selftest_full_ball_worker_v7.py"
+    ],
+    "started_ns": 1789074691288455101,
+    "ended_ns": 1789074691425258843,
+    "exit_code": 0
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "gcp-migration/selftest_inspect_full_ball_session_v7.py"
+    ],
+    "started_ns": 1789074691425266858,
+    "ended_ns": 1789074691549372629,
+    "exit_code": 0
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "gcp-migration/selftest_inspect_full_ball_session_v7.py"
+    ],
+    "started_ns": 1789074691549378690,
+    "ended_ns": 1789074691668468039,
+    "exit_code": 0
+  }
+]

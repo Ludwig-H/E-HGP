@@ -1,0 +1,60 @@
+{
+  "400": {
+    "baseline": {
+      "tower_median_s": 2.720482877,
+      "total_median_s": 4.701534639,
+      "resolver_meb_calls": 392135,
+      "resolver_supports": 31719733,
+      "max_rss_kib": 80896,
+      "cache_bytes": 0,
+      "cache_hits": 0
+    },
+    "plain": {
+      "tower_median_s": 2.125157996,
+      "total_median_s": 4.135648949,
+      "resolver_meb_calls": 251687,
+      "resolver_supports": 21519754,
+      "max_rss_kib": 81588,
+      "cache_bytes": 393216,
+      "cache_hits": 136796
+    },
+    "seed": {
+      "tower_median_s": 1.621743067,
+      "total_median_s": 3.623533579,
+      "resolver_meb_calls": 180260,
+      "resolver_supports": 15708447,
+      "max_rss_kib": 81540,
+      "cache_bytes": 393216,
+      "cache_hits": 208261
+    }
+  },
+  "1000": {
+    "baseline": {
+      "tower_median_s": 8.37102102,
+      "total_median_s": 15.291214928,
+      "resolver_meb_calls": 1174515,
+      "resolver_supports": 97376638,
+      "max_rss_kib": 230272,
+      "cache_bytes": 0,
+      "cache_hits": 0
+    },
+    "plain": {
+      "tower_median_s": 6.434721052,
+      "total_median_s": 13.349393085,
+      "resolver_meb_calls": 783299,
+      "resolver_supports": 68700123,
+      "max_rss_kib": 226880,
+      "cache_bytes": 786432,
+      "cache_hits": 380051
+    },
+    "seed": {
+      "tower_median_s": 5.296305513,
+      "total_median_s": 12.231948179,
+      "resolver_meb_calls": 583337,
+      "resolver_supports": 52168577,
+      "max_rss_kib": 226752,
+      "cache_bytes": 786432,
+      "cache_hits": 580186
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_rightmost_intruder_20260910/rightmost_probe_o2.bin",
+    "--n=1000",
+    "--s=8",
+    "--kmax=10",
+    "--threads=1"
+  ],
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "elapsed_seconds": 12.963360989000648,
+  "stdout_sha256": "2c5e1082d88551b3dba512e5a6619983f7de9aedfb2353ad1fd568688a13ff66",
+  "stderr_sha256": "23a00420997a1c94ee9cadca9ea4bfbf888ae9184a613bb544d280ebf70ef643",
+  "sanitizers": false
+}

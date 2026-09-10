@@ -1,0 +1,11 @@
+--- a/morsehgp3D_v7/src/forest/full_ball_tower.hpp
++++ b/morsehgp3D_v7/src/forest/full_ball_tower.hpp
+@@ -539,7 +539,7 @@
+         draft.batches.push_back(std::move(batch));
+       } else add(st.inert_blocks);
+       require(anchors[block.ball] == absent && target != absent, "full_ball_anchor_duplicate");
+-      anchors[block.ball] = target;  // All representatives and the whole lot are closed.
++      if (block.roots.size() != 1 || block.contribution || block.interior) anchors[block.ball] = target;
+       return;
+     }
+     add(st.grouped_lots);

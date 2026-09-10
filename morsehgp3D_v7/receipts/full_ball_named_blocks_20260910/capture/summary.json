@@ -1,0 +1,7 @@
+{
+  "status": "NOT_EXECUTED_50K",
+  "small_observer_tests": "passed_O2_ASAN_UBSAN",
+  "expectation_mutants_rejected": 6,
+  "GCP_used": false,
+  "public_status": "not_claimed"
+}

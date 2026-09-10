@@ -1,0 +1,450 @@
+{
+  "backend": "stub-hote",
+  "binaries": {
+    "CUDA_compile_only": {
+      "path": "witness_CUDA_compile_only",
+      "sha256": "4790e937b944797a775136c30495d5dab881045c9edc500c38ee1fb3a6ae337b",
+      "sha256_after": "4790e937b944797a775136c30495d5dab881045c9edc500c38ee1fb3a6ae337b"
+    },
+    "O2": {
+      "path": "witness_O2",
+      "sha256": "c26cc37ca6b3a85b1c77c1a50bede7dd074151f2a07171471ec75acfca4f9d54",
+      "sha256_after": "c26cc37ca6b3a85b1c77c1a50bede7dd074151f2a07171471ec75acfca4f9d54"
+    },
+    "SAN": {
+      "path": "witness_SAN",
+      "sha256": "d17f4e8684893692ebc60c06b9f768d32e6f4afbe61952a7e5252ef6ecd78ac8",
+      "sha256_after": "d17f4e8684893692ebc60c06b9f768d32e6f4afbe61952a7e5252ef6ecd78ac8"
+    }
+  },
+  "commands": [
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "expected": 0,
+      "name": "head",
+      "returncode": 0,
+      "stderr": {
+        "bytes": 0,
+        "path": "head.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 41,
+        "path": "head.stdout",
+        "sha256": "8c8a93d2c3991eead58c36e0ada56a40dde5c5a514d42446ace2b8a04bd189a2"
+      },
+      "wall_s": 0.006516610999824479
+    },
+    {
+      "command": [
+        "git",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=no"
+      ],
+      "expected": 0,
+      "name": "worktree",
+      "returncode": 0,
+      "stderr": {
+        "bytes": 0,
+        "path": "worktree.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 676,
+        "path": "worktree.stdout",
+        "sha256": "377e8b37b1de28fe3e9ea4497b4ec6aeaa479a7057d0efb18fac532f8e90c170"
+      },
+      "wall_s": 0.03326944700165768
+    },
+    {
+      "command": [
+        "g++",
+        "--version"
+      ],
+      "expected": 0,
+      "name": "compiler",
+      "returncode": 0,
+      "stderr": {
+        "bytes": 0,
+        "path": "compiler.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 246,
+        "path": "compiler.stdout",
+        "sha256": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8"
+      },
+      "wall_s": 0.0037099820001458284
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/build/v7_nvcc_pedantic_20260910/toolkit/bin/nvcc",
+        "--version"
+      ],
+      "expected": 0,
+      "name": "nvcc",
+      "returncode": 0,
+      "stderr": {
+        "bytes": 0,
+        "path": "nvcc.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 208,
+        "path": "nvcc.stdout",
+        "sha256": "77d7ef23109cd2437a8b9cf5efbc4e89996b816276077edb86143ee04f6d5269"
+      },
+      "wall_s": 0.003325984998809872
+    },
+    {
+      "command": [
+        "g++",
+        "-std=c++20",
+        "-I/workspaces/E-HGP",
+        "-I/workspaces/E-HGP/morsehgp3D_v7/src/spindle",
+        "-MM",
+        "-MT",
+        "witness_gate",
+        "/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/tests/witness_route_stub_gate.cpp"
+      ],
+      "expected": 0,
+      "name": "dependencies",
+      "returncode": 0,
+      "stderr": {
+        "bytes": 0,
+        "path": "dependencies.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 1560,
+        "path": "dependencies.stdout",
+        "sha256": "2c66f61cd3d4a1d0784fd0b5f5425772bc42cb37f5446da56134f2d6dd6ef0fb"
+      },
+      "wall_s": 0.1918540299993765
+    },
+    {
+      "command": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-I/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r2/source",
+        "-I/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r2/source/morsehgp3D_v7/src/spindle",
+        "-O2",
+        "/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r2/source/build/v7_wspd_device_20260910_r2/tests/witness_route_stub_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r2/witness_O2"
+      ],
+      "expected": 0,
+      "name": "compile_O2",
+      "returncode": 0,
+      "stderr": {
+        "bytes": 0,
+        "path": "compile_O2.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 0,
+        "path": "compile_O2.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "wall_s": 7.439208828000119
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r2/witness_O2",
+        "--selftest"
+      ],
+      "expected": 0,
+      "name": "selftest_O2",
+      "returncode": 0,
+      "stderr": {
+        "bytes": 0,
+        "path": "selftest_O2.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 241,
+        "path": "selftest_O2.stdout",
+        "sha256": "4544a958a60c408c421134e7f430feb15d544d9f8f780ea36db4b03533e1f0b8"
+      },
+      "wall_s": 0.15106375600225874
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r2/witness_O2",
+        "--unknown"
+      ],
+      "expected": 2,
+      "name": "unknown_O2",
+      "returncode": 2,
+      "stderr": {
+        "bytes": 0,
+        "path": "unknown_O2.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 0,
+        "path": "unknown_O2.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "wall_s": 0.005177238999749534
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r2/witness_O2",
+        "--mutant=no-mask"
+      ],
+      "expected": 1,
+      "name": "mutant_O2_no-mask",
+      "returncode": 1,
+      "stderr": {
+        "bytes": 0,
+        "path": "mutant_O2_no-mask.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 714,
+        "path": "mutant_O2_no-mask.stdout",
+        "sha256": "bd07f5de5f0a1285a67cb95f2ab1eeabcd669e6740ea722d8948886ebecbc66a"
+      },
+      "wall_s": 0.1681468480019248
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r2/witness_O2",
+        "--mutant=reverse-push"
+      ],
+      "expected": 1,
+      "name": "mutant_O2_reverse-push",
+      "returncode": 1,
+      "stderr": {
+        "bytes": 0,
+        "path": "mutant_O2_reverse-push.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 714,
+        "path": "mutant_O2_reverse-push.stdout",
+        "sha256": "37d7e4df1e2e6a8b1c88c738951a3cc92c7ad67c01c799fc325645b837eb30c3"
+      },
+      "wall_s": 0.16241274999993038
+    },
+    {
+      "command": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-I/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r2/source",
+        "-I/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r2/source/morsehgp3D_v7/src/spindle",
+        "-O1",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+        "/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r2/source/build/v7_wspd_device_20260910_r2/tests/witness_route_stub_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r2/witness_SAN"
+      ],
+      "expected": 0,
+      "name": "compile_SAN",
+      "returncode": 0,
+      "stderr": {
+        "bytes": 0,
+        "path": "compile_SAN.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 0,
+        "path": "compile_SAN.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "wall_s": 21.373887567002384
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r2/witness_SAN",
+        "--selftest"
+      ],
+      "expected": 0,
+      "name": "selftest_SAN",
+      "returncode": 0,
+      "stderr": {
+        "bytes": 0,
+        "path": "selftest_SAN.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 241,
+        "path": "selftest_SAN.stdout",
+        "sha256": "4544a958a60c408c421134e7f430feb15d544d9f8f780ea36db4b03533e1f0b8"
+      },
+      "wall_s": 2.023089840000466
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r2/witness_SAN",
+        "--unknown"
+      ],
+      "expected": 2,
+      "name": "unknown_SAN",
+      "returncode": 2,
+      "stderr": {
+        "bytes": 0,
+        "path": "unknown_SAN.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 0,
+        "path": "unknown_SAN.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "wall_s": 0.03683810299844481
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r2/witness_SAN",
+        "--mutant=no-mask"
+      ],
+      "expected": 1,
+      "name": "mutant_SAN_no-mask",
+      "returncode": 1,
+      "stderr": {
+        "bytes": 0,
+        "path": "mutant_SAN_no-mask.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 714,
+        "path": "mutant_SAN_no-mask.stdout",
+        "sha256": "bd07f5de5f0a1285a67cb95f2ab1eeabcd669e6740ea722d8948886ebecbc66a"
+      },
+      "wall_s": 1.8304077370012237
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r2/witness_SAN",
+        "--mutant=reverse-push"
+      ],
+      "expected": 1,
+      "name": "mutant_SAN_reverse-push",
+      "returncode": 1,
+      "stderr": {
+        "bytes": 0,
+        "path": "mutant_SAN_reverse-push.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 714,
+        "path": "mutant_SAN_reverse-push.stdout",
+        "sha256": "37d7e4df1e2e6a8b1c88c738951a3cc92c7ad67c01c799fc325645b837eb30c3"
+      },
+      "wall_s": 1.8608824429975357
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/build/v7_nvcc_pedantic_20260910/toolkit/bin/nvcc",
+        "-O3",
+        "-DNDEBUG",
+        "-std=c++20",
+        "-arch=sm_120",
+        "-fmad=false",
+        "--expt-relaxed-constexpr",
+        "-Xcompiler=-Wall,-Wextra,-Wpedantic,-Werror,-pthread",
+        "-ccbin",
+        "/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r2/source/build/v7_nvcc_pedantic_20260910/strict_host.py",
+        "-L/workspaces/E-HGP/build/v7_nvcc_pedantic_20260910/toolkit/lib",
+        "-I/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r2/source",
+        "-I/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r2/source/morsehgp3D_v7/src/spindle",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r2/CUDA.d",
+        "/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r2/source/build/v7_wspd_device_20260910_r2/tests/witness_route_gate.cu",
+        "-o",
+        "/workspaces/E-HGP/build/v7_wspd_device_20260910_r2/run_r2/witness_CUDA_compile_only"
+      ],
+      "expected": 0,
+      "name": "compile_and_link_CUDA",
+      "returncode": 0,
+      "stderr": {
+        "bytes": 0,
+        "path": "compile_and_link_CUDA.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 0,
+        "path": "compile_and_link_CUDA.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "wall_s": 27.41380521099927
+    }
+  ],
+  "compiler_sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+  "device_executed": false,
+  "nvcc_sha256": "df9974db233a0b7a6c6d59c0e5d74e011566104098bcb3553495ff1b95bdeaf6",
+  "public_status": "not_claimed",
+  "snapshot_stable": true,
+  "sources_after": {
+    "build/v7_nvcc_pedantic_20260910/strict_host.py": "4f4bed3f67587cf5ac2b1be521f97862c5d4c60abffacf4ed86ddc7a585648d1",
+    "build/v7_wspd_device_20260910_r2/record.py": "06456dccabbe6eacc56f67c4d14c0013a3cf436f25d03dceefdd406a75a37068",
+    "build/v7_wspd_device_20260910_r2/src/gpu/witness_kernels.cuh": "1e42848c47fdee2cfde043f35343e92eb67fada0d45b8d441cf1760cde3347b4",
+    "build/v7_wspd_device_20260910_r2/src/gpu/witness_route.cuh": "af208b68c2b2b93ebd13b1fa4064fd3bfd468f4838cd2df8522946dcb5df34c8",
+    "build/v7_wspd_device_20260910_r2/src/spindle/witness_batch.hpp": "66f31ead8b358dbbb09274b1a0e4fbfcc4777604827527f5c0b2220c1602cd52",
+    "build/v7_wspd_device_20260910_r2/src/spindle/witness_count.hpp": "baa83b05909014b20b01092ab2b7c4e485f0f71e7e7098408dd45ea4ae0d3655",
+    "build/v7_wspd_device_20260910_r2/tests/witness_route_gate.cu": "c9c010b2315095201e5487785864ed9fcb2ca4b82dfd576e00efb2f010f78b26",
+    "build/v7_wspd_device_20260910_r2/tests/witness_route_stub_gate.cpp": "2c2a14ffa4ae422e276f9385d5c2a94c600de478557b621b14ee68c40205e36f",
+    "morsehgp3D_v7/src/cloud/families.hpp": "bff4ff92368c3ced40b0367b426d4aff2e56371896b03603b72089ef5944ed11",
+    "morsehgp3D_v7/src/core/device.hpp": "1f7150b21138c4450e2cc23c6253a82e80c770e2a9f3b4c08c708ed889fc1d37",
+    "morsehgp3D_v7/src/core/inline_stack.hpp": "59bdc34eab997583e8221469fdc5e2b9109dfc516cc54356397eebb1bb8aeb42",
+    "morsehgp3D_v7/src/core/intmath.hpp": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54",
+    "morsehgp3D_v7/src/core/morton.hpp": "67e9f2bc5d388f995977aac3d2191800f5d7065b4db3e2506717c8e85590406e",
+    "morsehgp3D_v7/src/core/mutants.hpp": "870266d181c67b2dbc6b43740d12bff92c990eafbadb8691c22c0d91b858b0b5",
+    "morsehgp3D_v7/src/core/sha256.hpp": "b675835e9bd05a0ca1fb63dfeaa6fa99d3521b761c35c50b1b51f0aac259798d",
+    "morsehgp3D_v7/src/core/types.hpp": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
+    "morsehgp3D_v7/src/core/wide.hpp": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85",
+    "morsehgp3D_v7/src/gpu/census_kernels.cuh": "90c13d514edd3ec375dcbd0457ead049cd1c1ae00db58b059dce6e37834ef947",
+    "morsehgp3D_v7/src/gpu/wire.hpp": "1ab6a35d4e685d7a15513ef3f082bfd07a872da9fa78bdbfea6c0b52f100c5d1",
+    "morsehgp3D_v7/src/lanes/keys.hpp": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0",
+    "morsehgp3D_v7/src/spindle/spindle.hpp": "f64af67ff1b6aa7a70f10e410bd53841600b44722b7d035fe86b51c25b808577",
+    "morsehgp3D_v7/src/tree/cloud_index.hpp": "8c5acf166ce378b0271e15850c54ca1740a8f6cb899d34a60c832a533504ad95",
+    "morsehgp3D_v7/src/wspd/wavefront.hpp": "481a0d05da0631c71d74b52d90ea84233ad9c7624221a3783f322554fdb32063",
+    "morsehgp3D_v7/tests/cuda_stub.hpp": "3b2fcff9bb6ca4cf10ffb54cf0655ec232844f9e7bcfe27b36ce984972eab473"
+  },
+  "sources_before": {
+    "build/v7_nvcc_pedantic_20260910/strict_host.py": "4f4bed3f67587cf5ac2b1be521f97862c5d4c60abffacf4ed86ddc7a585648d1",
+    "build/v7_wspd_device_20260910_r2/record.py": "06456dccabbe6eacc56f67c4d14c0013a3cf436f25d03dceefdd406a75a37068",
+    "build/v7_wspd_device_20260910_r2/src/gpu/witness_kernels.cuh": "1e42848c47fdee2cfde043f35343e92eb67fada0d45b8d441cf1760cde3347b4",
+    "build/v7_wspd_device_20260910_r2/src/gpu/witness_route.cuh": "af208b68c2b2b93ebd13b1fa4064fd3bfd468f4838cd2df8522946dcb5df34c8",
+    "build/v7_wspd_device_20260910_r2/src/spindle/witness_batch.hpp": "66f31ead8b358dbbb09274b1a0e4fbfcc4777604827527f5c0b2220c1602cd52",
+    "build/v7_wspd_device_20260910_r2/src/spindle/witness_count.hpp": "baa83b05909014b20b01092ab2b7c4e485f0f71e7e7098408dd45ea4ae0d3655",
+    "build/v7_wspd_device_20260910_r2/tests/witness_route_gate.cu": "c9c010b2315095201e5487785864ed9fcb2ca4b82dfd576e00efb2f010f78b26",
+    "build/v7_wspd_device_20260910_r2/tests/witness_route_stub_gate.cpp": "2c2a14ffa4ae422e276f9385d5c2a94c600de478557b621b14ee68c40205e36f",
+    "morsehgp3D_v7/src/cloud/families.hpp": "bff4ff92368c3ced40b0367b426d4aff2e56371896b03603b72089ef5944ed11",
+    "morsehgp3D_v7/src/core/device.hpp": "1f7150b21138c4450e2cc23c6253a82e80c770e2a9f3b4c08c708ed889fc1d37",
+    "morsehgp3D_v7/src/core/inline_stack.hpp": "59bdc34eab997583e8221469fdc5e2b9109dfc516cc54356397eebb1bb8aeb42",
+    "morsehgp3D_v7/src/core/intmath.hpp": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54",
+    "morsehgp3D_v7/src/core/morton.hpp": "67e9f2bc5d388f995977aac3d2191800f5d7065b4db3e2506717c8e85590406e",
+    "morsehgp3D_v7/src/core/mutants.hpp": "870266d181c67b2dbc6b43740d12bff92c990eafbadb8691c22c0d91b858b0b5",
+    "morsehgp3D_v7/src/core/sha256.hpp": "b675835e9bd05a0ca1fb63dfeaa6fa99d3521b761c35c50b1b51f0aac259798d",
+    "morsehgp3D_v7/src/core/types.hpp": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
+    "morsehgp3D_v7/src/core/wide.hpp": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85",
+    "morsehgp3D_v7/src/gpu/census_kernels.cuh": "90c13d514edd3ec375dcbd0457ead049cd1c1ae00db58b059dce6e37834ef947",
+    "morsehgp3D_v7/src/gpu/wire.hpp": "1ab6a35d4e685d7a15513ef3f082bfd07a872da9fa78bdbfea6c0b52f100c5d1",
+    "morsehgp3D_v7/src/lanes/keys.hpp": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0",
+    "morsehgp3D_v7/src/spindle/spindle.hpp": "f64af67ff1b6aa7a70f10e410bd53841600b44722b7d035fe86b51c25b808577",
+    "morsehgp3D_v7/src/tree/cloud_index.hpp": "8c5acf166ce378b0271e15850c54ca1740a8f6cb899d34a60c832a533504ad95",
+    "morsehgp3D_v7/src/wspd/wavefront.hpp": "481a0d05da0631c71d74b52d90ea84233ad9c7624221a3783f322554fdb32063",
+    "morsehgp3D_v7/tests/cuda_stub.hpp": "3b2fcff9bb6ca4cf10ffb54cf0655ec232844f9e7bcfe27b36ce984972eab473"
+  },
+  "sources_stable": true,
+  "status": "completed"
+}

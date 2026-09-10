@@ -1,0 +1,37 @@
+=================================================================
+==683383==ERROR: AddressSanitizer: alloc-dealloc-mismatch (operator new vs free) on 0x502000000230
+    #0 0x79f64c52b4d8 in free ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:52
+    #1 0x40507f in cache_allocation_fault::release(void*) /workspaces/E-HGP/build/v7_combined_resolver_20260910/combined/tests/facet_resolver_cache_gate.cpp:16
+    #2 0x51838c in operator delete(void*, unsigned long) /workspaces/E-HGP/build/v7_combined_resolver_20260910/combined/tests/facet_resolver_cache_gate.cpp:22
+    #3 0x51838c in void std::__detail::__return_temporary_buffer<unsigned int>(unsigned int*, unsigned long) /usr/include/c++/13/bits/stl_tempbuf.h:77
+    #4 0x51838c in std::_Temporary_buffer<__gnu_cxx::__normal_iterator<unsigned int*, std::vector<unsigned int, std::allocator<unsigned int> > >, unsigned int>::~_Temporary_buffer() /usr/include/c++/13/bits/stl_tempbuf.h:186
+    #5 0x5bda94 in void std::__stable_sort<__gnu_cxx::__normal_iterator<unsigned int*, std::vector<unsigned int, std::allocator<unsigned int> > >, __gnu_cxx::__ops::_Iter_comp_iter<mhgp7::full_ball_detail::Builder::validate_catalogue()::{lambda(unsigned int, unsigned int)#2}> >(__gnu_cxx::__normal_iterator<unsigned int*, std::vector<unsigned int, std::allocator<unsigned int> > >, __gnu_cxx::__normal_iterator<unsigned int*, std::vector<unsigned int, std::allocator<unsigned int> > >, __gnu_cxx::__ops::_Iter_comp_iter<mhgp7::full_ball_detail::Builder::validate_catalogue()::{lambda(unsigned int, unsigned int)#2}>) /usr/include/c++/13/bits/stl_algo.h:5052
+    #6 0x5bda94 in void std::stable_sort<__gnu_cxx::__normal_iterator<unsigned int*, std::vector<unsigned int, std::allocator<unsigned int> > >, mhgp7::full_ball_detail::Builder::validate_catalogue()::{lambda(unsigned int, unsigned int)#2}>(__gnu_cxx::__normal_iterator<unsigned int*, std::vector<unsigned int, std::allocator<unsigned int> > >, __gnu_cxx::__normal_iterator<unsigned int*, std::vector<unsigned int, std::allocator<unsigned int> > >, mhgp7::full_ball_detail::Builder::validate_catalogue()::{lambda(unsigned int, unsigned int)#2}) /usr/include/c++/13/bits/stl_algo.h:5119
+    #7 0x5bda94 in mhgp7::full_ball_detail::Builder::validate_catalogue() /workspaces/E-HGP/build/v7_combined_resolver_20260910/combined/tests/../src/forest/full_ball_tower.hpp:450
+    #8 0x5ea1d7 in mhgp7::full_ball_detail::Builder::run() /workspaces/E-HGP/build/v7_combined_resolver_20260910/combined/tests/../src/forest/full_ball_tower.hpp:245
+    #9 0x5f45d1 in mhgp7::build_full_ball_tower(mhgp7::CloudIndex const&, std::span<mhgp7::BallData const, 18446744073709551615ul>, unsigned int) /workspaces/E-HGP/build/v7_combined_resolver_20260910/combined/tests/../src/forest/full_ball_tower.hpp:726
+    #10 0x434b21 in check_builder_work /workspaces/E-HGP/build/v7_combined_resolver_20260910/combined/tests/facet_resolver_cache_gate.cpp:83
+    #11 0x437353 in main /workspaces/E-HGP/build/v7_combined_resolver_20260910/combined/tests/facet_resolver_cache_gate.cpp:118
+    #12 0x79f64b89a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #13 0x79f64b89a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #14 0x404e94 in _start (/workspaces/E-HGP/build/v7_combined_resolver_20260910/run_san/facet_resolver_cache_gate+0x404e94) (BuildId: b6d6cb22769b4fedb4874b3abbef6085098e4016)
+
+0x502000000230 is located 0 bytes inside of 4-byte region [0x502000000230,0x502000000234)
+allocated by thread T0 here:
+    #0 0x79f64c52d840 in operator new(unsigned long, std::nothrow_t const&) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:101
+    #1 0x52e735 in std::pair<unsigned int*, long> std::get_temporary_buffer<unsigned int>(long) /usr/include/c++/13/bits/stl_tempbuf.h:113
+    #2 0x5bd8ca in std::_Temporary_buffer<__gnu_cxx::__normal_iterator<unsigned int*, std::vector<unsigned int, std::allocator<unsigned int> > >, unsigned int>::_Temporary_buffer(__gnu_cxx::__normal_iterator<unsigned int*, std::vector<unsigned int, std::allocator<unsigned int> > >, long) /usr/include/c++/13/bits/stl_tempbuf.h:268
+    #3 0x5bd8ca in void std::__stable_sort<__gnu_cxx::__normal_iterator<unsigned int*, std::vector<unsigned int, std::allocator<unsigned int> > >, __gnu_cxx::__ops::_Iter_comp_iter<mhgp7::full_ball_detail::Builder::validate_catalogue()::{lambda(unsigned int, unsigned int)#2}> >(__gnu_cxx::__normal_iterator<unsigned int*, std::vector<unsigned int, std::allocator<unsigned int> > >, __gnu_cxx::__normal_iterator<unsigned int*, std::vector<unsigned int, std::allocator<unsigned int> > >, __gnu_cxx::__ops::_Iter_comp_iter<mhgp7::full_ball_detail::Builder::validate_catalogue()::{lambda(unsigned int, unsigned int)#2}>) /usr/include/c++/13/bits/stl_algo.h:5038
+    #4 0x5bd8ca in void std::stable_sort<__gnu_cxx::__normal_iterator<unsigned int*, std::vector<unsigned int, std::allocator<unsigned int> > >, mhgp7::full_ball_detail::Builder::validate_catalogue()::{lambda(unsigned int, unsigned int)#2}>(__gnu_cxx::__normal_iterator<unsigned int*, std::vector<unsigned int, std::allocator<unsigned int> > >, __gnu_cxx::__normal_iterator<unsigned int*, std::vector<unsigned int, std::allocator<unsigned int> > >, mhgp7::full_ball_detail::Builder::validate_catalogue()::{lambda(unsigned int, unsigned int)#2}) /usr/include/c++/13/bits/stl_algo.h:5119
+    #5 0x5bd8ca in mhgp7::full_ball_detail::Builder::validate_catalogue() /workspaces/E-HGP/build/v7_combined_resolver_20260910/combined/tests/../src/forest/full_ball_tower.hpp:450
+    #6 0x5ea1d7 in mhgp7::full_ball_detail::Builder::run() /workspaces/E-HGP/build/v7_combined_resolver_20260910/combined/tests/../src/forest/full_ball_tower.hpp:245
+    #7 0x5f45d1 in mhgp7::build_full_ball_tower(mhgp7::CloudIndex const&, std::span<mhgp7::BallData const, 18446744073709551615ul>, unsigned int) /workspaces/E-HGP/build/v7_combined_resolver_20260910/combined/tests/../src/forest/full_ball_tower.hpp:726
+    #8 0x434b21 in check_builder_work /workspaces/E-HGP/build/v7_combined_resolver_20260910/combined/tests/facet_resolver_cache_gate.cpp:83
+    #9 0x437353 in main /workspaces/E-HGP/build/v7_combined_resolver_20260910/combined/tests/facet_resolver_cache_gate.cpp:118
+    #10 0x79f64b89a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #11 0x79f64b89a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #12 0x404e94 in _start (/workspaces/E-HGP/build/v7_combined_resolver_20260910/run_san/facet_resolver_cache_gate+0x404e94) (BuildId: b6d6cb22769b4fedb4874b3abbef6085098e4016)
+
+SUMMARY: AddressSanitizer: alloc-dealloc-mismatch ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:52 in free
+==683383==HINT: if you don't care about these errors you may set ASAN_OPTIONS=alloc_dealloc_mismatch=0
+==683383==ABORTING

@@ -1,0 +1,217 @@
+// Private v7 witness primitive. One thread per rectangle; no pair expansion.
+// CPU CoreBall preparation, exact integer predicates, scalar DFS ordering.
+#pragma once
+
+#include "morsehgp3D_v7/src/gpu/census_kernels.cuh"
+
+namespace mhgp7::gpu::witness_device {
+
+// Explicit u64-word wire, never memcpy of an ABI struct.
+// Input: id, generation, packed(a,b), mask|corners<<8, center4[3], radius4[2].
+// Output: id, generation, c[3], nodes_visited, corner_evals, status.
+inline constexpr size_t kInputWords = 9, kOutputWords = 8;
+inline constexpr u64 kUnwritten = 0, kOk = 1, kInvalid = 2, kStack = 3, kCounter = 4;
+inline constexpr u32 kSkipWrite = 1, kWrongId = 2, kWrongGeneration = 4,
+                     kNoMask = 8, kShallow = 16, kReversePush = 32;
+
+struct Box { i64 lo[3], hi[3]; };
+struct Range { i32 first, last; };
+struct Entry { i32 node; u8 open; };
+
+MHGP7_DEV Box box_at(i32 node, const u16* boxes, const u16* positions) {
+  Box box{};
+  const size_t offset = node < 0 ? size_t(-i64(node) - 1) * 3 : size_t(node) * 6;
+  for (int axis = 0; axis < 3; ++axis) {
+    box.lo[axis] = node < 0 ? positions[offset + axis] : boxes[offset + axis];
+    box.hi[axis] = node < 0 ? box.lo[axis] : boxes[offset + 3 + axis];
+  }
+  return box;
+}
+
+MHGP7_DEV Range range_at(i32 node, const i32* first, const i32* last) {
+  return node < 0 ? Range{i32(-i64(node) - 1), i32(-i64(node) - 1)}
+                  : Range{first[size_t(node)], last[size_t(node)]};
+}
+
+MHGP7_DEV i64 hmin(const Box& a, const Box& b, const Box& z) {
+  i64 total = 0;
+  for (int axis = 0; axis < 3; ++axis) {
+    i64 best = INT64_MAX;
+    for (int ai = 0; ai < 2; ++ai)
+      for (int bi = 0; bi < 2; ++bi)
+        for (int zi = 0; zi < 2; ++zi) {
+          const i64 av = ai ? a.hi[axis] : a.lo[axis];
+          const i64 bv = bi ? b.hi[axis] : b.lo[axis];
+          const i64 zv = zi ? z.hi[axis] : z.lo[axis];
+          const i64 value = zv * (av + bv) - av * bv - zv * zv;
+          if (value < best) best = value;
+        }
+    total += best;
+  }
+  return total;
+}
+
+MHGP7_DEV i64 hmax4(const Box& a, const Box& b, const Box& z) {
+  i64 total = 0;
+  for (int axis = 0; axis < 3; ++axis) {
+    i64 best = INT64_MAX;
+    for (int ai = 0; ai < 2; ++ai)
+      for (int bi = 0; bi < 2; ++bi) {
+        const i64 av = ai ? a.hi[axis] : a.lo[axis];
+        const i64 bv = bi ? b.hi[axis] : b.lo[axis];
+        const i64 sum = av + bv;
+        const i64 y = dev_clamp(sum, 2 * z.lo[axis], 2 * z.hi[axis]);
+        const i64 value = (bv - av) * (bv - av) - (y - sum) * (y - sum);
+        if (value < best) best = value;
+      }
+    total += best;
+  }
+  return total;
+}
+
+MHGP7_DEV int ball_side(const Box& box, const i64 center[3], i64 radius) {
+  i128 far2 = 0, near2 = 0;
+  for (int axis = 0; axis < 3; ++axis) {
+    const i64 lo = 4 * box.lo[axis] - center[axis];
+    const i64 hi = 4 * box.hi[axis] - center[axis];
+    const i64 alo = lo < 0 ? -lo : lo, ahi = hi < 0 ? -hi : hi;
+    const i64 far = alo > ahi ? alo : ahi;
+    const i64 near = lo > 0 ? lo : (hi < 0 ? -hi : 0);
+    far2 += i128(far) * far;
+    near2 += i128(near) * near;
+  }
+  const i128 r2 = i128(radius) * radius;
+  return far2 < r2 ? 1 : (near2 >= r2 ? -1 : 0);
+}
+
+MHGP7_DEV bool corner(const Box& box, int bits, i64 out[3]) {
+  for (int axis = 0; axis < 3; ++axis) {
+    if ((bits & (1 << axis)) && box.lo[axis] == box.hi[axis]) return false;
+    out[axis] = (bits & (1 << axis)) ? box.hi[axis] : box.lo[axis];
+  }
+  return true;
+}
+
+MHGP7_DEV bool corners34(const Box& a, const Box& b, const u16* z,
+                         bool* all3, bool* all4, u64* evaluations) {
+  i64 av[3]{}, bv[3]{};
+  for (int ai = 0; ai < 8 && (*all3 || *all4); ++ai) {
+    if (!corner(a, ai, av)) continue;
+    for (int bi = 0; bi < 8 && (*all3 || *all4); ++bi) {
+      if (!corner(b, bi, bv)) continue;
+      if (*evaluations == ~u64{0}) return false;
+      ++*evaluations;
+      i64 w[3], d[3], h = 0;
+      for (int axis = 0; axis < 3; ++axis) {
+        w[axis] = i64(z[axis]) - av[axis];
+        d[axis] = bv[axis] - av[axis];
+        h += d[axis] * w[axis] - w[axis] * w[axis];
+      }
+      if (h <= 0) { *all3 = *all4 = false; return true; }
+      const i64 cross[3] = {d[1] * w[2] - d[2] * w[1],
+                            d[2] * w[0] - d[0] * w[2],
+                            d[0] * w[1] - d[1] * w[0]};
+      i128 xi = 0;
+      for (int axis = 0; axis < 3; ++axis) xi += i128(cross[axis]) * cross[axis];
+      const i128 h2 = i128(h) * h;
+      if (3 * h2 <= xi) *all3 = false;
+      if (2 * h2 <= xi) *all4 = false;
+    }
+  }
+  return true;
+}
+
+MHGP7_DEV u64 overlap(Range r, Range excluded, const u32* prefix) {
+  const i32 lo = r.first > excluded.first ? r.first : excluded.first;
+  const i32 hi = r.last < excluded.last ? r.last : excluded.last;
+  return lo > hi ? 0 : u64(prefix[size_t(hi) + 1]) - prefix[size_t(lo)];
+}
+
+MHGP7_DEV u64 credit(Range r, Range a, Range b, const u32* prefix) {
+  return u64(prefix[size_t(r.last) + 1]) - prefix[size_t(r.first)]
+         - overlap(r, a, prefix) - overlap(r, b, prefix);
+}
+
+MHGP7_DEV bool within(i32 position, Range range) {
+  return position >= range.first && position <= range.last;
+}
+
+__global__ void count(const i32* left, const i32* right, const i32* first, const i32* last,
+                      const u16* boxes, const u16* positions, const u32* prefix, i32 root,
+                      const u64* input, u32 rows, u64 h0, u64 h1, u64 h2, u64* output,
+                      u32 mutant, u64 mutant_request_id) {
+  const u32 gid = blockIdx.x * blockDim.x + threadIdx.x;
+  if (gid >= rows) return;
+  const u64* row = input + size_t(gid) * kInputWords;
+  const u32 faults = (row[0] == mutant_request_id || mutant_request_id == ~u64{0}) ? mutant : 0;
+  if (faults & kSkipWrite) return;
+  const i32 a = i32(u32(row[2])), b = i32(u32(row[2] >> 32));
+  const Box abox = box_at(a, boxes, positions), bbox = box_at(b, boxes, positions);
+  const Range arange = range_at(a, first, last), brange = range_at(b, first, last);
+  const i64 center[3] = {i64(row[4]), i64(row[5]), i64(row[6])};
+  const i64 radii[3] = {0, i64(row[7]), i64(row[8])};
+  const u64 h[3] = {h0, h1, h2};
+  const bool with_corners = (row[3] & 256) != 0;
+  u8 effective = u8(row[3]);
+  if (!with_corners) {
+    if (radii[1] == 0) effective &= u8(~2);
+    if (radii[2] == 0) effective &= u8(~4);
+  }
+  u64 counts[3] = {0, 0, 0}, visits = 0, evaluations = 0, status = kOk;
+  Entry stack[kDfsStackCap];
+  int size = 0;
+  stack[size++] = Entry{root, effective};
+  const int cap = (faults & kShallow) ? 1 : kDfsStackCap;
+  while (size > 0) {
+    u8 still = 0;
+    for (int lane = 0; lane < 3; ++lane)
+      if ((effective & (1 << lane)) && counts[lane] < h[lane]) still |= u8(1 << lane);
+    if (!still) break;
+    Entry entry = stack[--size];
+    entry.open &= still;
+    if (!entry.open) continue;
+    if (visits == ~u64{0}) { status = kCounter; break; }
+    ++visits;
+    const Box box = box_at(entry.node, boxes, positions);
+    if (hmax4(abox, bbox, box) <= 0) continue;
+    const Range range = range_at(entry.node, first, last);
+    if ((entry.open & 1) && hmin(abox, bbox, box) > 0) {
+      counts[0] += credit(range, arange, brange, prefix);
+      if (!(faults & kNoMask)) entry.open &= u8(~1);
+    }
+    for (int lane = 1; lane < 3; ++lane) {
+      if (!(entry.open & (1 << lane)) || radii[lane] == 0) continue;
+      const int side = ball_side(box, center, radii[lane]);
+      if (side > 0) {
+        counts[lane] += credit(range, arange, brange, prefix);
+        if (!(faults & kNoMask)) entry.open &= u8(~(1 << lane));
+      } else if (side < 0 && !with_corners) {
+        entry.open &= u8(~(1 << lane));
+      }
+    }
+    if (!entry.open) continue;
+    if (entry.node < 0) {
+      const i32 u = i32(-i64(entry.node) - 1);
+      if (within(u, arange) || within(u, brange) || !(entry.open & 6) || !with_corners) continue;
+      bool all3 = (entry.open & 2) != 0, all4 = (entry.open & 4) != 0;
+      if (!corners34(abox, bbox, positions + size_t(u) * 3, &all3, &all4, &evaluations)) {
+        status = kCounter; break;
+      }
+      const u64 weight = u64(prefix[size_t(u) + 1]) - prefix[size_t(u)];
+      if (all3 && (entry.open & 2)) counts[1] += weight;
+      if (all4 && (entry.open & 4)) counts[2] += weight;
+      continue;
+    }
+    if (size + 2 > cap) { status = kStack; break; }
+    const i32 l = left[size_t(entry.node)], r = right[size_t(entry.node)];
+    stack[size++] = Entry{(faults & kReversePush) ? r : l, entry.open};
+    stack[size++] = Entry{(faults & kReversePush) ? l : r, entry.open};
+  }
+  u64* out = output + size_t(gid) * kOutputWords;
+  out[0] = row[0] + ((faults & kWrongId) ? 1 : 0);
+  out[1] = row[1] - ((faults & kWrongGeneration) ? 1 : 0);
+  for (int lane = 0; lane < 3; ++lane) out[2 + lane] = counts[lane] < h[lane] ? counts[lane] : h[lane];
+  out[5] = visits; out[6] = evaluations; out[7] = status;
+}
+
+}  // namespace mhgp7::gpu::witness_device

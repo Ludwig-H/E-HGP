@@ -1,0 +1,42 @@
+# Named 50k blocks — private observer gate preparation
+
+Prepared 10 September 2026. **No 50k run and no GCP execution in this packet.** This is a validation adapter, never a benchmark or a certificate of global WSPD completeness. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
+
+The gate answers item5.2 of the second auditor's `receipts_raccord_ancres_20260910/README.md` using the independent `GLOBAL_PARENTS.md` expectations. Sources and mathematical receipts are pinned in `source_before.json` and `authority_pins.json` and copied privately. The nominal FULL header is `910f45baea1750b11d2b34f40c893c9d1a34f950705cdb127ffa226de60f7b2e` (seeded cache + residence); the journal is `7608e70ec0bf7df7ed726ae2388a39e800ab2db35043b4ba42c619ceef13bac0`. No active source or Git/index was changed.
+
+## Exact targets, not catalogue indices
+
+`expectations.json` binds the input to uniform n=50,000, seed3, coord65,536 and FULLv1 input digest `3f7c6dd47bcba4222e511c94f90aaeeeb80198b0d5ac8a6721e4ff55feedab3f`. The run uses s=8 and the whole tower K1..10. Capture labels are explanatory only; lookup is by **(K, primitive BallKey)**. Census I/U are compared as external PointIds, independent of catalogue index or Morton order.
+
+| Historical label | K | Expected distinct pre-lot roots | Contribution | Closed anchor |
+| ---: | ---: | ---: | --- | --- |
+| 174406 | 5 | 1 | empty | required |
+| 254569 | 2 | 2 | empty | required |
+| 996863 | 6 | 2 | empty | required |
+| 1251653 | 10 | 1 (locally connected inert block) | empty | required |
+
+This verifies three named global parent cardinalities plus one inert K10 anchor. The first three counts are the auditor's bridge/isolation certificates. The fourth count follows its connected local quotient. The counts are **not** the arities of final public nodes: other balls in the exact same level can join the atomic group. No S1 completeness, whole-tower geometric oracle or latency contract follows from this gate.
+
+## Test-only observer, no nominal API change
+
+Only the private overlay header differs from the nominal snapshot. It inserts one observer call after all blocks of an exact level have resolved, immediately before `close_lot`, and one after `close_lot` has installed all anchors. Callback arguments are const views of the current blocks, balls, history and anchors. No references to these buffers escape; the four matching observations copy only IDs and flags. An inactive observer returns immediately.
+
+Before the lot, matching roots must be sorted, distinct, prior, alive, and born strictly below the exact level. The level and complete named census must match the pinned expectation, including empty interior. After the lot, every block's anchor must already be installed; the matching anchor must be live and not from a future level. The final reader checks each captured root at the open cut and each anchor at the closed cut. Each named (K,key) must be seen exactly once in each phase. Missing blocks, absent anchors, changed parent counts or contributions fail closed.
+
+The overlay also contains a runtime-selectable **causal test mutant** at the BallKey hit: use `anchors[*found]` in place of `root(anchors[*found], prior_count)`. The cache-hit path is unchanged. The mutant is enabled only by the test executable's scoped state, never by the nominal engine. A scope destructor resets both observer and mutant after any exception. Its accepted kill is the exact observer rejection `named.pre_root_not_live`; resource failure or unrelated refusal is inconclusive, never a successful mutant kill.
+
+## Local bounded qualification
+
+Only two tiny oracle-built catalogues are constructed: square and doubled ABCZ (4/8 points). Four named observations exercise the same key at distinct K, an empty contribution, a birth contribution and two independent growth blocks in one exact-level lot. The existing independent Gram/Gamma catalogue helper is used only on those small fixtures. An inactive-observer build and the observed build must have identical physical node/CSR/parent/successor/contribution/population/vertical digests and unchanged resolver counters.
+
+Eight observation corruptions are rejected: missing pre-observation, wrong root cardinality, wrong contribution and absent anchor, on both fixtures. The raw-anchor mutant is killed on E5, independently of the future 50k execution. Expected selftest:2 cases,4 matched blocks,8 observer rejections,68 strict-root checks,17 grouped lots, physical outputs identical. This does **not** say the real four blocks have been recovered yet.
+
+The strict O2 and ASan/UBSan builds run `--selftest`, `--describe` and an invalid-argument case. `--describe` returns only the four static expectations; it does not generate the 50k input. The verifier compares that output exactly to `expectations.json` and to the historical census/auditor receipts. `prepare.py` deliberately has no command capable of running50k or GCP.
+
+## Later validation invocation (not executed here)
+
+`observer_o2 --pinned-50000 --threads=48` is the explicit CPU path. The CUDA-census variant is compiled with `MHGP7_NAMED_BLOCK_CUDA=1`; FULL itself remains CPU. Both generate the pinned input and exact census once, release candidate/survivor buffers, run the stale-anchor mutant on that same catalogue, then run and validate the nominal tower. The mutant is expected to stop early at its first stale pre-lot root; the exact reason is retained. Both runs share only the immutable input/index/census, not histories or output state. Only a complete nominal tower followed by all four matching checks prints a passed result.
+
+The JSON uses its own schema `mhgp7-full-named-blocks-gate-v1` and explicitly declares `benchmark=false`, `contract_qualified=false`, `global_catalogue_completeness_verified=false`, `final_node_arities_verified=false`. It reports actual pre-lot root IDs, catalogue indices for diagnostics, before/after counts, anchors and contribution flags. Do not feed this output into the ordinary performance probe pair comparator.
+
+See `GCP_PLAN.md` for guarded-session integration. GCP non utilisé.

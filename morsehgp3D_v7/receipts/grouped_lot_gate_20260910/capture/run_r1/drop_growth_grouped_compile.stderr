@@ -1,0 +1,2 @@
+/usr/bin/ld: cannot open output file /workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/drop_growth_grouped: Is a directory
+collect2: error: ld returned 1 exit status

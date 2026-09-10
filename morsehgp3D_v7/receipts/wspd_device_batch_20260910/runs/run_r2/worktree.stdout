@@ -1,0 +1,15 @@
+ M audits/COORDINATION_MORSEHGP3D_V7.md
+ M gcp-migration/full_ball_worker_v7.py
+ M gcp-migration/selftest_full_ball_worker_v7.py
+ M morsehgp3D_v6/src/gpu/lot_ring.hpp
+ M morsehgp3D_v6/src/parallel/sort.hpp
+ M morsehgp3D_v6/src/pipeline/census.hpp
+ M morsehgp3D_v6/src/pipeline/expand.hpp
+ M morsehgp3D_v7/CMakeLists.txt
+ M morsehgp3D_v7/audits/COORDINATION_AUDITEURS.md
+ M morsehgp3D_v7/bench/full_ball_tower_probe.cpp
+ M morsehgp3D_v7/bench/full_gabriel_semantic_digest.hpp
+ M morsehgp3D_v7/src/forest/full_ball_tower.hpp
+ M morsehgp3D_v7/src/forest/full_coverage_certificate.hpp
+ M morsehgp3D_v7/tests/full_ball_tower_gate.cpp
+ M morsehgp3D_v7/tests/full_ball_work_gate.cpp

@@ -1,0 +1,1 @@
+{"status":"passed","clouds":30,"queries":72840,"positive":25734,"empty":47106,"different_first_last":10922,"right_fewer_nodes_than_exhaustive":21080,"right_fewer_power_than_exhaustive":0,"first_nodes":466040,"right_nodes":465424,"exhaustive_last_nodes":568984,"GCP_used":false}

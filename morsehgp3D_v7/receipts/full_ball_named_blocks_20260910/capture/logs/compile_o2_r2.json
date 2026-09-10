@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-isystem",
+    "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-O2",
+    "-I",
+    "/workspaces/E-HGP/build/v7_named_blocks_gate_20260910_r1/overlay",
+    "/workspaces/E-HGP/build/v7_named_blocks_gate_20260910_r1/overlay/build/v7_named_blocks_gate_20260910_r1/observer_gate.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_named_blocks_gate_20260910_r1/observer_o2_r2"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "seconds": 30.016799154000182,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment_overrides": {}
+}

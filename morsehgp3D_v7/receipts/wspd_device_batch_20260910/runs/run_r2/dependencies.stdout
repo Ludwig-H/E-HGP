@@ -1,0 +1,23 @@
+witness_gate: \
+ /workspaces/E-HGP/build/v7_wspd_device_20260910_r2/tests/witness_route_stub_gate.cpp \
+ /workspaces/E-HGP/morsehgp3D_v7/tests/cuda_stub.hpp \
+ /workspaces/E-HGP/build/v7_wspd_device_20260910_r2/tests/witness_route_gate.cu \
+ /workspaces/E-HGP/morsehgp3D_v7/src/cloud/families.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/src/cloud/../core/intmath.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/src/cloud/../core/device.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/src/cloud/../core/types.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/src/cloud/../core/mutants.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/src/wspd/wavefront.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/src/wspd/../core/wide.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/src/wspd/../tree/cloud_index.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/src/wspd/../tree/../core/morton.hpp \
+ /workspaces/E-HGP/build/v7_wspd_device_20260910_r2/tests/../src/gpu/witness_route.cuh \
+ /workspaces/E-HGP/build/v7_wspd_device_20260910_r2/tests/../src/gpu/../spindle/witness_batch.hpp \
+ /workspaces/E-HGP/build/v7_wspd_device_20260910_r2/tests/../src/gpu/../spindle/witness_count.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/src/spindle/spindle.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/src/spindle/../core/inline_stack.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/src/gpu/wire.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/src/gpu/../core/sha256.hpp \
+ /workspaces/E-HGP/morsehgp3D_v7/src/gpu/../lanes/keys.hpp \
+ /workspaces/E-HGP/build/v7_wspd_device_20260910_r2/tests/../src/gpu/witness_kernels.cuh \
+ /workspaces/E-HGP/morsehgp3D_v7/src/gpu/census_kernels.cuh

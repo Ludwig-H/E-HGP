@@ -1,0 +1,7 @@
+{
+  "GCP_used": false,
+  "GPU_simulated_only": true,
+  "build_kind": "stable_recheck_of_fresh_private_release",
+  "sources_stable": true,
+  "status": "passed"
+}

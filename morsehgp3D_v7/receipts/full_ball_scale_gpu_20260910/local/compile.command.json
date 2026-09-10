@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "g++",
+    "-std=c++20",
+    "-O3",
+    "-DNDEBUG",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_optimized_g4_20260910/local_r1/compile.d",
+    "/workspaces/E-HGP/build/v7_optimized_g4_20260910/local_r1/snapshot/morsehgp3D_v7/bench/full_ball_tower_probe.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_optimized_g4_20260910/local_r1/full_ball_probe"
+  ],
+  "closed": true,
+  "ended_ns": 1789072700934908781,
+  "exit_code": 0,
+  "name": "compile",
+  "pid": 649696,
+  "started_ns": 1789072680304750141,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

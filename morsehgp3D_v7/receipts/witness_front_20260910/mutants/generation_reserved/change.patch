@@ -1,0 +1,11 @@
+--- a/morsehgp3D_v7/src/pipeline/witness_front.hpp
++++ b/morsehgp3D_v7/src/pipeline/witness_front.hpp
+@@ -91,7 +91,7 @@
+   const auto query = [&](std::span<const WitnessBatchRequest> input,
+                          std::vector<WitnessBatchResult>* result) {
+     if (input.empty()) { result->clear(); return; }
+-    if (generation >= ~u64{0} - 1) throw std::overflow_error("witness_front_generation");
++    if (generation == ~u64{0}) throw std::overflow_error("witness_front_generation");
+     ++generation;
+     result->clear();
+     const size_t workers = run(input, h, generation, result);

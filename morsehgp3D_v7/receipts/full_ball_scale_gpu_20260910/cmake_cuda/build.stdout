@@ -1,0 +1,49 @@
+Change Dir: '/workspaces/E-HGP/build/v7_cuda_cmake_20260910'
+
+Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile -j1 mhgp7_census_route_device_gate mhgp7_full_ball_tower_cuda_probe
+/usr/bin/cmake -S/workspaces/E-HGP/morsehgp3D_v7 -B/workspaces/E-HGP/build/v7_cuda_cmake_20260910 --check-build-system CMakeFiles/Makefile.cmake 0
+/usr/bin/gmake  -f CMakeFiles/Makefile2 mhgp7_census_route_device_gate
+gmake[1]: Entering directory '/workspaces/E-HGP/build/v7_cuda_cmake_20260910'
+/usr/bin/cmake -S/workspaces/E-HGP/morsehgp3D_v7 -B/workspaces/E-HGP/build/v7_cuda_cmake_20260910 --check-build-system CMakeFiles/Makefile.cmake 0
+/usr/bin/cmake -E cmake_progress_start /workspaces/E-HGP/build/v7_cuda_cmake_20260910/CMakeFiles 2
+/usr/bin/gmake  -f CMakeFiles/Makefile2 CMakeFiles/mhgp7_census_route_device_gate.dir/all
+gmake[2]: Entering directory '/workspaces/E-HGP/build/v7_cuda_cmake_20260910'
+/usr/bin/gmake  -f CMakeFiles/mhgp7_census_route_device_gate.dir/build.make CMakeFiles/mhgp7_census_route_device_gate.dir/depend
+gmake[3]: Entering directory '/workspaces/E-HGP/build/v7_cuda_cmake_20260910'
+cd /workspaces/E-HGP/build/v7_cuda_cmake_20260910 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /workspaces/E-HGP/morsehgp3D_v7 /workspaces/E-HGP/morsehgp3D_v7 /workspaces/E-HGP/build/v7_cuda_cmake_20260910 /workspaces/E-HGP/build/v7_cuda_cmake_20260910 /workspaces/E-HGP/build/v7_cuda_cmake_20260910/CMakeFiles/mhgp7_census_route_device_gate.dir/DependInfo.cmake "--color="
+gmake[3]: Leaving directory '/workspaces/E-HGP/build/v7_cuda_cmake_20260910'
+/usr/bin/gmake  -f CMakeFiles/mhgp7_census_route_device_gate.dir/build.make CMakeFiles/mhgp7_census_route_device_gate.dir/build
+gmake[3]: Entering directory '/workspaces/E-HGP/build/v7_cuda_cmake_20260910'
+[ 50%] Building CUDA object CMakeFiles/mhgp7_census_route_device_gate.dir/tests/census_route_device_gate.cu.o
+/workspaces/E-HGP/build/v7_nvcc_pedantic_20260910/toolkit/bin/nvcc -forward-unknown-to-host-compiler -ccbin=/workspaces/E-HGP/build/v7_cuda_cmake_20260910/nvcc_strict_host.py -DMHGP7_TESTING=1  -L/workspaces/E-HGP/build/v7_nvcc_pedantic_20260910/toolkit/lib -O3 -DNDEBUG -std=c++20 "--generate-code=arch=compute_120,code=[compute_120,sm_120]" -fmad=false --expt-relaxed-constexpr -Xcompiler=-Wall,-Wextra,-Wpedantic,-Werror -MD -MT CMakeFiles/mhgp7_census_route_device_gate.dir/tests/census_route_device_gate.cu.o -MF CMakeFiles/mhgp7_census_route_device_gate.dir/tests/census_route_device_gate.cu.o.d -x cu -c /workspaces/E-HGP/morsehgp3D_v7/tests/census_route_device_gate.cu -o CMakeFiles/mhgp7_census_route_device_gate.dir/tests/census_route_device_gate.cu.o
+[100%] Linking CUDA executable mhgp7_census_route_device_gate
+/usr/bin/cmake -E cmake_link_script CMakeFiles/mhgp7_census_route_device_gate.dir/link.txt --verbose=1
+/workspaces/E-HGP/build/v7_cuda_cmake_20260910/nvcc_strict_host.py @CMakeFiles/mhgp7_census_route_device_gate.dir/objects1.rsp -o mhgp7_census_route_device_gate @CMakeFiles/mhgp7_census_route_device_gate.dir/linkLibs.rsp -L"/workspaces/E-HGP/build/v7_nvcc_pedantic_20260910/toolkit/lib" -L"/workspaces/E-HGP/build/v7_nvcc_pedantic_20260910/toolkit/lib64/stubs" -L"/workspaces/E-HGP/build/v7_nvcc_pedantic_20260910/toolkit/lib64"
+gmake[3]: Leaving directory '/workspaces/E-HGP/build/v7_cuda_cmake_20260910'
+[100%] Built target mhgp7_census_route_device_gate
+gmake[2]: Leaving directory '/workspaces/E-HGP/build/v7_cuda_cmake_20260910'
+/usr/bin/cmake -E cmake_progress_start /workspaces/E-HGP/build/v7_cuda_cmake_20260910/CMakeFiles 0
+gmake[1]: Leaving directory '/workspaces/E-HGP/build/v7_cuda_cmake_20260910'
+/usr/bin/gmake  -f CMakeFiles/Makefile2 mhgp7_full_ball_tower_cuda_probe
+gmake[1]: Entering directory '/workspaces/E-HGP/build/v7_cuda_cmake_20260910'
+/usr/bin/cmake -S/workspaces/E-HGP/morsehgp3D_v7 -B/workspaces/E-HGP/build/v7_cuda_cmake_20260910 --check-build-system CMakeFiles/Makefile.cmake 0
+/usr/bin/cmake -E cmake_progress_start /workspaces/E-HGP/build/v7_cuda_cmake_20260910/CMakeFiles 1
+/usr/bin/gmake  -f CMakeFiles/Makefile2 CMakeFiles/mhgp7_full_ball_tower_cuda_probe.dir/all
+gmake[2]: Entering directory '/workspaces/E-HGP/build/v7_cuda_cmake_20260910'
+/usr/bin/gmake  -f CMakeFiles/mhgp7_full_ball_tower_cuda_probe.dir/build.make CMakeFiles/mhgp7_full_ball_tower_cuda_probe.dir/depend
+gmake[3]: Entering directory '/workspaces/E-HGP/build/v7_cuda_cmake_20260910'
+cd /workspaces/E-HGP/build/v7_cuda_cmake_20260910 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /workspaces/E-HGP/morsehgp3D_v7 /workspaces/E-HGP/morsehgp3D_v7 /workspaces/E-HGP/build/v7_cuda_cmake_20260910 /workspaces/E-HGP/build/v7_cuda_cmake_20260910 /workspaces/E-HGP/build/v7_cuda_cmake_20260910/CMakeFiles/mhgp7_full_ball_tower_cuda_probe.dir/DependInfo.cmake "--color="
+gmake[3]: Leaving directory '/workspaces/E-HGP/build/v7_cuda_cmake_20260910'
+/usr/bin/gmake  -f CMakeFiles/mhgp7_full_ball_tower_cuda_probe.dir/build.make CMakeFiles/mhgp7_full_ball_tower_cuda_probe.dir/build
+gmake[3]: Entering directory '/workspaces/E-HGP/build/v7_cuda_cmake_20260910'
+[  0%] Building CUDA object CMakeFiles/mhgp7_full_ball_tower_cuda_probe.dir/bench/full_ball_tower_probe.cu.o
+/workspaces/E-HGP/build/v7_nvcc_pedantic_20260910/toolkit/bin/nvcc -forward-unknown-to-host-compiler -ccbin=/workspaces/E-HGP/build/v7_cuda_cmake_20260910/nvcc_strict_host.py   -L/workspaces/E-HGP/build/v7_nvcc_pedantic_20260910/toolkit/lib -O3 -DNDEBUG -std=c++20 "--generate-code=arch=compute_120,code=[compute_120,sm_120]" -fmad=false --expt-relaxed-constexpr -Xcompiler=-Wall,-Wextra,-Wpedantic,-Werror -MD -MT CMakeFiles/mhgp7_full_ball_tower_cuda_probe.dir/bench/full_ball_tower_probe.cu.o -MF CMakeFiles/mhgp7_full_ball_tower_cuda_probe.dir/bench/full_ball_tower_probe.cu.o.d -x cu -c /workspaces/E-HGP/morsehgp3D_v7/bench/full_ball_tower_probe.cu -o CMakeFiles/mhgp7_full_ball_tower_cuda_probe.dir/bench/full_ball_tower_probe.cu.o
+[100%] Linking CUDA executable mhgp7_full_ball_tower_cuda_probe
+/usr/bin/cmake -E cmake_link_script CMakeFiles/mhgp7_full_ball_tower_cuda_probe.dir/link.txt --verbose=1
+/workspaces/E-HGP/build/v7_cuda_cmake_20260910/nvcc_strict_host.py @CMakeFiles/mhgp7_full_ball_tower_cuda_probe.dir/objects1.rsp -o mhgp7_full_ball_tower_cuda_probe @CMakeFiles/mhgp7_full_ball_tower_cuda_probe.dir/linkLibs.rsp -L"/workspaces/E-HGP/build/v7_nvcc_pedantic_20260910/toolkit/lib" -L"/workspaces/E-HGP/build/v7_nvcc_pedantic_20260910/toolkit/lib64/stubs" -L"/workspaces/E-HGP/build/v7_nvcc_pedantic_20260910/toolkit/lib64"
+gmake[3]: Leaving directory '/workspaces/E-HGP/build/v7_cuda_cmake_20260910'
+[100%] Built target mhgp7_full_ball_tower_cuda_probe
+gmake[2]: Leaving directory '/workspaces/E-HGP/build/v7_cuda_cmake_20260910'
+/usr/bin/cmake -E cmake_progress_start /workspaces/E-HGP/build/v7_cuda_cmake_20260910/CMakeFiles 0
+gmake[1]: Leaving directory '/workspaces/E-HGP/build/v7_cuda_cmake_20260910'
+

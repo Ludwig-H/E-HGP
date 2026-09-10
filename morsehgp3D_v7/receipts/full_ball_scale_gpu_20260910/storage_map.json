@@ -1,0 +1,7 @@
+{
+  "gcp/compile_failed/output/compile_gate.stderr": {
+    "raw_bytes": 2270120,
+    "raw_sha256": "81dae11ffd3125187696ba49bdf2a34d48c68def2bdcc5d363db5c3e1a8a4f13",
+    "stored": "gcp/compile_failed/output/compile_gate.stderr.gz"
+  }
+}

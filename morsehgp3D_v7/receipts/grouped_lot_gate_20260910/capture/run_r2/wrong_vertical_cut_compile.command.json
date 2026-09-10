@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-isystem",
+    "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-O2",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r2/wrong_vertical_cut.d",
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r2/wrong_vertical_cut/morsehgp3D_v7/tests/full_ball_tower_gate.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r2/wrong_vertical_cut.bin"
+  ],
+  "closed": true,
+  "ended_epoch": 1789071976.2325628,
+  "exit_code": 1,
+  "expected_code": 0,
+  "name": "wrong_vertical_cut_compile",
+  "pid": 611911,
+  "started_epoch": 1789071971.4136877,
+  "stderr_sha256": "8905ac379f7cf6e5d6c8bc2e4a986a97e854f35f79be502724fc3fd6da76c8e9",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

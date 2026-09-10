@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_witness_front_qualification_20260910/gate_index_binding",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": 1,
+  "expected_exit_code": 1,
+  "elapsed_seconds": 1.0480556010006694,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "259dcc00873654ae983c6a7f18f84a137ea5b57763c0a11d8d7dd92e6e6aa72d",
+  "environment_overrides": {}
+}

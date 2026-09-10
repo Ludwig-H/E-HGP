@@ -1,0 +1,117 @@
+#!/usr/bin/env python3
+"""Pinned, local-only witness primitive gate. Never execute a CUDA binary."""
+from pathlib import Path
+import argparse
+import hashlib
+import json
+import os
+import shlex
+import shutil
+import subprocess
+import time
+
+
+def sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output", required=True)
+    args = parser.parse_args()
+    root = Path(__file__).resolve().parent
+    repo = root.parents[1]
+    output = Path(args.output).resolve()
+    output.mkdir(parents=True, exist_ok=False)
+    snapshot = output / "source"
+    snapshot.mkdir()
+    records = []
+    source_before = {}
+    binaries = {}
+    receipt = {"status": "running", "backend": "stub-hote", "device_executed": False,
+               "public_status": "not_claimed", "commands": records, "binaries": binaries}
+
+    def save() -> None:
+        (output / "receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
+
+    def run(name: str, command: list[str], expected: int = 0, env: dict | None = None) -> int:
+        start = time.monotonic()
+        with (output / (name + ".stdout")).open("xb") as stdout, (output / (name + ".stderr")).open("xb") as stderr:
+            completed = subprocess.run(command, stdout=stdout, stderr=stderr, check=False, env=env, cwd=repo)
+        row = dict(name=name, command=command, expected=expected, returncode=completed.returncode,
+                   wall_s=time.monotonic() - start)
+        for stream in ("stdout", "stderr"):
+            path = output / (name + "." + stream)
+            row[stream] = dict(path=path.name, bytes=path.stat().st_size, sha256=sha(path))
+        records.append(row)
+        save()
+        print(name, completed.returncode, f'{row["wall_s"]:.3f}s', "expected", expected, flush=True)
+        if completed.returncode != expected:
+            raise RuntimeError(f"{name}: exit {completed.returncode}, expected {expected}")
+        return completed.returncode
+
+    try:
+        run("head", ["git", "rev-parse", "HEAD"])
+        run("worktree", ["git", "status", "--porcelain=v1", "--untracked-files=no"])
+        run("compiler", ["g++", "--version"])
+        nvcc = repo / "build/v7_nvcc_pedantic_20260910/toolkit/bin/nvcc"
+        helper = repo / "build/v7_nvcc_pedantic_20260910/strict_host.py"
+        run("nvcc", [str(nvcc), "--version"])
+        source = root / "tests/witness_route_stub_gate.cpp"
+        includes = ["-I" + str(repo), "-I" + str(repo / "morsehgp3D_v7/src/spindle")]
+        run("dependencies", ["g++", "-std=c++20", *includes, "-MM", "-MT", "witness_gate", str(source)])
+        dependency_text = (output / "dependencies.stdout").read_text().replace("\\\n", " ")
+        dependencies = shlex.split(dependency_text.split(":", 1)[1])
+        paths = {Path(value).resolve() for value in dependencies}
+        paths.update({Path(__file__).resolve(), helper})
+        for path in sorted(paths):
+            relative = path.relative_to(repo)
+            source_before[str(relative)] = sha(path)
+            target = snapshot / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(path, target)
+            if sha(target) != source_before[str(relative)]:
+                raise RuntimeError("snapshot mismatch")
+        receipt["sources_before"] = source_before
+        receipt["compiler_sha256"] = sha(Path(shutil.which("g++")).resolve())
+        receipt["nvcc_sha256"] = sha(nvcc)
+        save()
+        private = snapshot / root.relative_to(repo)
+        common = ["-std=c++20", "-Wall", "-Wextra", "-Wpedantic", "-Werror",
+                  "-I" + str(snapshot), "-I" + str(snapshot / "morsehgp3D_v7/src/spindle")]
+        for mode, flags in (("O2", ["-O2"]), ("SAN", ["-O1", "-g", "-fsanitize=address,undefined", "-fno-omit-frame-pointer"])):
+            binary = output / ("witness_" + mode)
+            run("compile_" + mode, ["g++", *common, *flags, str(private / "tests/witness_route_stub_gate.cpp"), "-o", str(binary)])
+            binaries[mode] = dict(path=binary.name, sha256=sha(binary))
+            env = dict(os.environ)
+            env.update(ASAN_OPTIONS="detect_leaks=1:halt_on_error=1", UBSAN_OPTIONS="halt_on_error=1")
+            run("selftest_" + mode, [str(binary), "--selftest"], env=env)
+            run("unknown_" + mode, [str(binary), "--unknown"], 2, env=env)
+            for mutant in ("no-mask", "reverse-push"):
+                run("mutant_" + mode + "_" + mutant, [str(binary), "--mutant=" + mutant], 1, env=env)
+        cuda_binary = output / "witness_CUDA_compile_only"
+        frozen_helper = snapshot / helper.relative_to(repo)
+        run("compile_and_link_CUDA", [str(nvcc), "-O3", "-DNDEBUG", "-std=c++20", "-arch=sm_120", "-fmad=false",
+            "--expt-relaxed-constexpr", "-Xcompiler=-Wall,-Wextra,-Wpedantic,-Werror,-pthread", "-ccbin", str(frozen_helper),
+            "-L" + str(nvcc.parents[1] / "lib"), "-I" + str(snapshot),
+            "-I" + str(snapshot / "morsehgp3D_v7/src/spindle"), "-MMD", "-MF", str(output / "CUDA.d"),
+            str(private / "tests/witness_route_gate.cu"), "-o", str(cuda_binary)])
+        binaries["CUDA_compile_only"] = dict(path=cuda_binary.name, sha256=sha(cuda_binary))
+        receipt["status"] = "completed"
+    except BaseException as error:
+        receipt.update(status="failed", error=type(error).__name__ + ": " + str(error))
+    finally:
+        source_after = {path: sha(repo / path) for path in source_before}
+        receipt["sources_after"] = source_after
+        receipt["sources_stable"] = source_before == source_after
+        receipt["snapshot_stable"] = all(sha(snapshot / path) == digest for path, digest in source_before.items())
+        for item in binaries.values():
+            item["sha256_after"] = sha(output / item["path"])
+        if not receipt["sources_stable"] or not receipt["snapshot_stable"]:
+            receipt.update(status="failed", source_error="source changed")
+        save()
+    return 0 if receipt["status"] == "completed" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

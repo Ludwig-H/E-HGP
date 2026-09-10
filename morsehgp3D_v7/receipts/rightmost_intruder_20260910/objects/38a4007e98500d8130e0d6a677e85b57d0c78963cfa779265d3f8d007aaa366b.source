@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "g++",
+    "-std=c++20",
+    "-pthread",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-isystem",
+    "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-O2",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_rightmost_intruder_20260910/rightmost_probe_o2.d",
+    "/workspaces/E-HGP/build/v7_rightmost_intruder_20260910/rightmost/morsehgp3D_v7/bench/full_ball_tower_probe.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_rightmost_intruder_20260910/rightmost_probe_o2.bin"
+  ],
+  "exit_code": 0,
+  "expected_exit_code": 0,
+  "elapsed_seconds": 14.713109129999793,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "sanitizers": false
+}

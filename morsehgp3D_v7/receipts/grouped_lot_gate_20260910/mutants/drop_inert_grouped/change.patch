@@ -1,0 +1,10 @@
+--- a/morsehgp3D_v7/src/forest/full_ball_tower.hpp
++++ b/morsehgp3D_v7/src/forest/full_ball_tower.hpp
+@@ -594,6 +594,7 @@
+     // Publish anchors only AFTER the complete atomic group has been staged.
+     // Failure anywhere invalidates the whole result, not just this lot.
+     for (size_t b = 0; b < blocks.size(); ++b) {
++      if (blocks[b].roots.size() == 1 && !blocks[b].contribution && !blocks[b].interior) continue;
+       require(anchors[blocks[b].ball] == absent && targets[b] != absent, "full_ball_anchor_duplicate");
+       anchors[blocks[b].ball] = targets[b];
+     }

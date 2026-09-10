@@ -12,34 +12,46 @@ et cartes verticales. Les dix forêts et leurs images adjacentes sont retenues.
 Autorité relative aux census complets et exacts fournis ; aucune promotion
 automatique de la génération WSPD, des reçus F ou de l'archive industrielle.
 
-Qualification géométrique O2/SAN : 24 variantes, 100 ordres, 2 136 coupes,
-35 462 images verticales, 130 734 contrôles et quatre mutants causaux.
+Qualification géométrique O2/SAN courante : 28 nuages, 112 ordres, 2 508 coupes,
+45 948 images verticales, 170 320 contrôles. Six mutants du delta cache sont
+tués, dont croissance et ancre inerte dans le chemin groupé exposé par l'auditeur.
 La fixture n8 exerce réellement une descente à rayon égal. MEB séparée :
 605 cas, dont 197 extra-shells. Les optimisations validées portent sur les
 supports réguliers déclarés, les lots unitaires et le normaliseur temporel
 inférieur. Le peigne expose le coût quadratique écarté, sans réécrire les
-successeurs historiques. Les brouillons et les résolutions MEB restent coûteux.
+successeurs historiques. Le [cache exact et ses semis fermés](docs/OPTIMISATIONS_CACHE_ET_GPU_20260910.md)
+réduisent les MEB appariées de 1 174 515 à 583 337 à n1000. Le journal réserve
+ses arènes exactes et les états morts sont libérés avant la banque finale.
+Les brouillons globaux et les résolutions restantes restent coûteux.
 
 L'[auditeur du journal](audits/receipts_coverage_cpp_20260910/README.md)
 a démontré que parent→0 échappait au juge antérieur. La gate renforcée
 compare directement parents, successeurs, niveaux et contributions :
-837 contrôles O2/SAN, 40 coupes Gamma, 34 pannes d'allocation ; le mutant
-est rejeté par `arena.parent_value`. Une vraie multifusion à quatre parents
-du carré K2 est permanente. Le header nominal du journal n'a pas changé.
+823 contrôles O2/SAN avec les réservations, 40 coupes Gamma et 20 pannes
+d'allocation contre 34 auparavant ; le mutant est rejeté par `arena.parent_value`.
+Une vraie multifusion à quatre parents du carré K2 est permanente. Le schéma
+v2 ne change pas. L'injecteur du test cache inclut désormais `new(nothrow)` ;
+son premier échec ASan est conservé sans modification des captures.
 
 La nouvelle sonde hybride conserve le constructeur FULL sur CPU et place
 seulement prefilter/census sur CUDA. Le contexte inclut les transferts froids
-et traite les erreurs sans publier de préfixe. Stub hôte : 16 627 contrôles,
-4 116 boules et 17 rejets ; aucun résultat NVCC/device encore obtenu.
+et traite les erreurs sans publier de préfixe. La gate passe dans le stub
+hôte ET sur le vrai G4 SM12.0 : 16 627 contrôles, 4 116 boules et 17 rejets.
+La compilation NVCC stricte est qualifiée avec son adaptateur de phases.
 
-Tentative G4 du 10 septembre : refus `GPUS_ALL_REGIONS`, limite 1,
-occupée par `cracksam-frangigraph-g4-spot-ew8c` en `europe-west8-c`
-(autre charge de travail, non modifiée). La cible exacte E-HGP
+Les [mesures courantes](docs/RESULTATS_TOUR_CACHE_G4_20260910.md) terminent
+les tours 50k à s8 : CPU/hybride 418,873 / 418,921 s K1..10 et
+33,853 / 33,569 s K1..5, avec signatures identiques. Elles conservent
+27 273 218 / 4 209 792 nœuds et leurs verticales. FULL reste mono-thread
+et prend environ 390 / 27 s ; les kernels census seuls ne font pas le contrat.
+Les essais s10/12 G4 ne sont pas lancés faute de temps de clôture restant.
+
+Deux générations SPOT sont closes dans le reçu courant : échec initial NVCC,
+puis session optimisée réussie. La cible exacte
 `devpod-gpu-exploration/us-central1-b/ehgp-v7-4fa0e0789a7d5bb06b787d35`
-est vérifiée `TERMINATED`. Le contrôleur a conservé son refus de clôture
-sans génération nouvelle ; la vérification ciblée ultérieure confirme
-l'arrêt et l'absence de nouveau `lastStartTimestamp`. Aucun worker distant
-n'a commencé. Ne pas relancer dans une autre zone : le quota est global.
+est certifiée `TERMINATED` pour chacune. GCE STOP/3600 s et arrêt invité
+30 minutes vérifiés ; aucune autre VM modifiée. L'ancien refus de quota
+est historique et ne décrit plus l'issue de cette nouvelle campagne.
 
 Les [deux processus G4 historiques K10/K5](docs/RESULTATS_G4_FULL_20260906.md)
 restent des refus (21,372 s / 5,646 s), pas des mesures de la nouvelle tour.
@@ -87,27 +99,36 @@ de mesurer séparément croissance des sorties et temps sur 8k/16k/32k.
 
 Entrée : [TOUR_FULL_PAR_BOULES.md](docs/TOUR_FULL_PAR_BOULES.md).
 `anchor_meb.hpp` et `full_ball_tower.hpp` forment le nouveau constructeur ;
-`full_coverage_certificate.hpp` reste le journal partagé, inchangé.
+`full_coverage_certificate.hpp` reste le journal partagé, à réservations exactes.
 Les sondes CPU et CUDA-census sont dans `bench/full_ball_tower_probe.*`.
 Leurs sorties sont relatives, sans archive industrielle ni claim produit.
 
-Construire dans un répertoire neuf ; les quatorze CTests ciblés concernent
-MEB, tour, travail temporel, journal, quotient local et simulation de route.
+Construire dans un répertoire neuf ; vingt CTests ciblés passent sur sources
+stables : MEB, tour, cache, travail temporel, journal, quotient, front WSPD
+et simulation de route. O2/SAN et vrai device restent des autorités distinctes.
 Le worker `gcp-migration/full_ball_worker_v7.py` réutilise le contrôleur
 SPOT gardé et le support CPU épinglé. Il vérifie d'abord le vrai device
 SM120, puis compare CPU/hybride sur n8 et sur 50k K10/K5, avec s8 puis
 s10/s12 selon le temps observé et la fenêtre de fermeture. Aucune installation
 CUDA, aucun reboot, aucune mutation d'une autre VM n'est autorisé par ce worker.
-Le quota global doit être libéré avant cette reprise.
 
-Le [triplet retenu 8k/16k/32k](docs/RESULTATS_TOUR_BOULES_20260910.md)
-est clos : 215,169 s / 417,627 s / 965,053 s, dix ordres et verticales,
-s=8 et un thread ; 17 166 975 nœuds à 32k, pic 10 559 316 KiB.
-Ordre de travail restant : réduire résolutions et résidence,
-qualifier la route sur G4, puis porter
-les témoins universels WSPD par lots. À 8k, la sonde compte déjà 3 976 472
-nœuds sur dix ordres : coût des sorties et coûts intermédiaires doivent
-être rapportés ensemble. Aucun temps de composant ne satisfait le contrat.
+Le [triplet retenu courant](docs/RESULTATS_TOUR_CACHE_G4_20260910.md)
+est clos : 235,724 s / 354,144 s / 736,819 s, dix ordres et verticales,
+s=8 et un thread ; 17 166 975 nœuds à 32k, pic 9 108 756 KiB.
+Les temps sont perturbés par l'hôte partagé : pas de gain apparié revendiqué.
+À 8k, s8/10/12 donne exactement le même payload ; aucun optimum s n'est acquis.
+
+Prochaines coutures, distinctes du moteur mesuré :
+
+- [Résolutions géométriques statiques](receipts/static_anchor_graph_20260910/README.md) : preuve conditionnelle favorable, oracle fini et sept mutants ; dédoublonner les clés initiales par ordre avant un backend CPU/GPU par lots. Garder activations, lots simultanés, contributions datées et verticales historiques.
+- [Parcours droit des intrus](receipts/rightmost_intruder_20260910/README.md) : prototype de deux lignes non intégré ; 28 nuages O2/SAN et 72 840 requêtes contre un juge de choix. À n1000 : −18,7 % de visites et −3,07 % de MEB, pas de gain contractuel.
+- [Journal incrémental](docs/PLAN_JOURNAL_INCREMENTAL.md) : conception transactionnelle à arènes plates, pas encore implémentée ; coût amorti en taille de sortie, gain net de pic à mesurer.
+- [Front WSPD optionnel](receipts/witness_front_20260910/README.md) : 431 010 contrôles O2/SAN, liaison explicite à l'index et générations vérifiées. Le batch device reste privé et non exécuté sur GPU ; le générateur nominal reste scalaire.
+
+Les [quatre blocs nommés](receipts/full_ball_named_blocks_20260910/README.md)
+restent **NOT_EXECUTED_50K**. Leur observateur passe de petits tests mais
+les digests des nouvelles paires ne lèvent pas ce verrou. Aucun temps de
+composant ni extrapolation 8k/16k/32k ne qualifie 1 s ou le massif.
 
 Les [notes de la sonde régulière au 6 septembre](docs/HISTORIQUE_SONDE_REGULIERE_20260906.md)
 conservent les variantes eager/lazy, quotas retirés, MEB filtrées, mesures
@@ -123,8 +144,8 @@ anciens reçus restent conservés, sans copies d'ELF dans la livraison.
 - [Primitives et autorités mathématiques](docs/QUALIFICATION_S1_PRIMITIVES.md), [MEB à double budget](docs/RESULTATS_MEB_DOUBLE_BUDGET_20260905.md) et [coût local défavorable](docs/RESULTATS_COUT_MEB_20260905.md) : qualification locale, pas accélération de tour intégrée.
 - [G4 historique](docs/RESULTATS_G4_20260904.md) et [arrêt certifié historique](receipts/gcp_handoff_20260905.json) : aucune qualification FULL ou nouvelle mesure massive héritée.
 
-Tentative G4 refusée avant démarrage ; cible E-HGP vérifiée arrêtée,
-autre VM non modifiée. Les CTests locaux, la CI et les sessions G4 sont
+Deux sessions G4 closes, cible E-HGP certifiée arrêtée ; aucune autre VM
+modifiée. Les CTests locaux, la CI et les sessions G4 sont
 trois autorités distinctes. Aucun
 succès CI d'un ancien commit n'est attribué automatiquement au nouveau.
 Le registre officiel reste inchangé. Avant publication : contrôle des

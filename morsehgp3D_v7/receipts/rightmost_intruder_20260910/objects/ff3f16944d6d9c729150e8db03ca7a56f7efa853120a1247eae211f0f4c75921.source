@@ -1,0 +1,73 @@
+# Intrus de rang Morton maximal, avec arrêt immédiat
+
+10 septembre 2026. Prototype privé, **non intégré**. `phase=exploration_v7_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`. GCP non utilisé ; aucun fichier actif, audit, CMake ou index Git modifié.
+
+## Résultat et plus petit delta
+
+`rightmost.patch` modifie exactement deux lignes de `Builder::intruder()` : parcourir une plage strictement intérieure de `last` vers `first`, et pousser l'enfant gauche puis l'enfant droit dans la pile LIFO. Tous les retours immédiats, tests stricts, exclusions des sites sélectionnés et compteurs existants sont conservés.
+
+- Baseline cache/résidence active épinglée : `910f45baea1750b11d2b34f40c893c9d1a34f950705cdb127ffa226de60f7b2e`.
+- Variante privée : `7bb2ac1fab0a1cac8c516b01a6114ffa42ae608f46793cde325550a62bee3245`.
+- Porte FULL consommée : `bf1a28242dd2d6897f3dc02edff8c6077dbec1caa3f9b9a67813dcc748e3d75a` (28 nuages).
+
+La variante donne exactement le dernier intrus rencontré par le DFS gauche exhaustif de l'auditeur, sans chercher tous les intrus. Sur uniform n=1 000, seed 3, s=8, toute la tour K=1..10, un seul thread, les sorties physiques complètes sont identiques sur les six probes. Les comptes MEB baissent de 3,07 % et les nœuds d'intrus de 18,75 %. Ce résultat ne justifie ni une intégration automatique ni une extrapolation à 50k ou au régime massif.
+
+## Argument de choix exact
+
+Dans l'index radix valide, chaque nœud couvre une plage contiguë de rangs Morton ; ses fils gauche et droit la partitionnent en deux plages adjacentes, celle du gauche précédant celle du droit. La porte indépendante vérifie explicitement cet invariant. Un DFS gauche et des plages croissantes énumèrent donc les sites par rang croissant. Les boîtes rejetées par `lo >= 0` ne contiennent aucun intrus strict ; une boîte acceptée par `hi < 0` ne contient que des points strictement intérieurs. Les feuilles mixtes gardent le test exact de puissance.
+
+Le dernier intrus du parcours exhaustif est ainsi le **maximum du rang géométrique Morton** parmi les sites strictement intérieurs non sélectionnés. Ce n'est ni le dernier PointId ni le dernier point de l'ordre physique d'entrée. Parcourir droite d'abord et chaque plage en sens descendant énumère l'ordre inverse. Le premier intrus accepté est donc exactement ce même maximum ; aucun site de rang supérieur admissible ne peut avoir été omis par les bornes. Si aucun n'existe, les deux méthodes rendent −1. La preuve ne suppose pas que l'index numérique d'un nœud interne encode son ordre spatial.
+
+La boucle descendante utilise `i32`, avec `first >= 0` et `last >= first`. Lorsque `first=0`, le dernier décrément atteint −1 et sort sans sous-dépassement de type. Aucun nouveau plafond n'est introduit. Le nombre de tests d'appartenance à `selected` dans une plage entièrement intérieure avant succès est au plus K+1, et au plus K si toute cette plage est sélectionnée. Ce majorant n'est pas un compteur mesuré dans les probes ; `interior_ranges` compte les plages, pas leurs itérations. Le pire cas d'une requête demeure linéaire dans le nombre de nœuds admissibles aux bornes : cette modification n'établit aucune nouvelle garantie sous-quadratique globale des chaînes.
+
+## Lien avec HGP FULL
+
+La note de l'auditeur `NOTE_PHASE_STATIQUE_MEB.md.source`, lue intégralement et conservée sans modification avec `authority_pin.json`, distingue indépendance temporelle et indépendance du choix d'intrus. Sous ses prémisses S1 et de fermeture des lots, le choix d'un autre intrus strict conserve la composante pré-lot : les deux K-facettes successives appartiennent à une même coface de cardinal K+1 déjà présente strictement avant le lot. Les terminaux et coûts peuvent changer, pas cette composante. Le présent prototype exerce uniquement le changement de règle d'intrus ; il n'implémente pas la phase statique GPU et ne qualifie pas cette architecture. La contre-lecture de l'agent `shell_free_meb` confirme l'équivalence « dernier du DFS gauche = maximum Morton » et le majorant K+1 dans une plage intérieure.
+
+## Qualification réellement exécutée
+
+La porte FULL réelle compile le `Builder` privé sans adaptation : O2 et ASan/UBSan stricts donnent exactement le même stdout que la baseline O2, soit 28 nuages, 112 ordres, 2 508 coupes, 170 320 contrôles, 45 948 vérifications verticales et huit rejets ; les deux pas à rayon égal restent exercés.
+
+La porte de choix utilise les corps exacts de `intruder()` extraits des deux en-têtes, avec les mêmes types de membres ; elle les oppose à un census rationnel indépendant, ainsi qu'à une copie explicitement exhaustive du parcours gauche gardant son dernier résultat. L'extraction est vérifiée par le lecteur. Cette adaptation sert seulement à appeler une méthode privée sans modifier l'API produit ; l'oracle FULL précédent teste bien le vrai `Builder`.
+
+Toutes les MEB distinctes des sous-ensembles des 28 fixtures sont testées contre tous les sous-ensembles possibles de sites sélectionnés. S'ajoutent un singleton et ses identités inversées, et une grande boule entièrement intérieure par nuage. Les tests couvrent sélection vide/complète, limites strictes et coquilles, indices 0 et final, permutations des PointIds et de l'ordre physique. O2 et ASan/UBSan donnent :
+
+| Contrôle | Résultat |
+| --- | ---: |
+| Nuages de choix | 30 |
+| Requêtes exactes | 72 840 |
+| Avec intrus / sans intrus | 25 734 / 47 106 |
+| Premier et dernier intrus différents | 10 922 |
+| Requêtes droites visitant moins de nœuds que le dernier exhaustif | 21 080 |
+| Nœuds cumulés : premier / droit / dernier exhaustif | 466 040 / 465 424 / 568 984 |
+
+Deux mutants causaux compilent en O2 puis sortent 1 : conserver les plages croissantes est réfuté sur `pair/choice/variant0`, conserver le DFS gauche sur `E5/choice/variant0`. La raison exacte est `choice.rightmost_equals_rational_max_rank`. Les cinq appels nominaux à argument invalide sortent 2. Aucun échec de compilation n'est compté comme un mutant tué.
+
+## Trois répétitions appariées à n=1 000
+
+Ordre d'exécution : baseline/droit, droit/baseline, baseline/droit. Compilations et autres travaux CPU partagent la machine ; les temps sont des diagnostics bruités, pas une qualification de vitesse. La génération et le census sont recalculés à chaque exécution, avec les mêmes paramètres et sans données réutilisées entre bras. Une instrumentation d'affichage commune ajoute seulement quatre compteurs existants à la sonde privée ; elle est distincte du patch proposé à l'algorithme.
+
+| Compteur déterministe dans les trois répétitions | Premier intrus | Intrus droit |
+| --- | ---: | ---: |
+| Requêtes d'intrus | 138 898 | 120 967 |
+| Nœuds visités d'intrus | 5 452 553 | 4 430 457 |
+| Tests de puissance d'intrus | 0 | 0 |
+| Plages entièrement intérieures visitées | 379 498 | 302 677 |
+| Appels MEB de résolution | 583 337 | 565 406 |
+| Supports MEB testés | 52 168 577 | 50 158 347 |
+| Longueur maximale de chaîne | 14 | 9 |
+
+Les comptes physiques identiques de sortie comprennent 309 448 boules, 399 957 nœuds, 399 947 références de parents, 241 936 contributions et 397 958 références verticales. Digest d'entrée `bda80cf806ac9af37ee5cd79103dad4432b2355e47248960dcc0cd5d54e677d1`, digest du payload complet `1040c1be04a90dbb11982e9f78b6034e9695b6e69f3746bc47d291a03d1924cc`, identiques dans les six runs. Ce digest est un témoin différentiel physique, pas un certificat S1.
+
+Temps tour baseline : 5,945 / 5,641 / 5,472 s ; droite : 5,469 / 5,504 / 5,291 s. Médianes 5,641 → 5,469 s, soit environ −3 %. Temps total médian 12,980 → 12,855 s. **Ne pas promouvoir ces faibles écarts temporels mesurés en environnement partagé.** Les comptes sont le résultat robuste de cette expérience bornée ; le gain ou une régression selon le nuage et la taille restent à mesurer. Pas d'essai 8k/16k/32k, 50k ou G4 dans ce prototype.
+
+## Vérification et suite proposée
+
+```bash
+python3 -B build/v7_rightmost_intruder_20260910/verify.py
+python3 -B -O build/v7_rightmost_intruder_20260910/verify.py
+```
+
+Le lecteur ne lance aucun moteur. Les fichiers `.d`, fermetures projet effectivement consommées, hashes avant/après, logs stdout/stderr, codes, scripts et corps extraits sont conservés. Les binaires restent privés et ne font pas partie du manifeste ; leurs hashes sont capturés. Les dépendances système/Boost sont nommées dans les commandes mais non archivées. La copie de la note est un artefact historique, pas un document de navigation active.
+
+Recommandation : garder ce delta de deux lignes comme candidat d'intégration après revue de ROOT et de l'auditeur, puis le mesurer sur plusieurs familles et les tailles imposées dans une campagne dédiée. Il n'ajoute ni table, ni pré-calcul exhaustif, ni nouvelle mémoire résidente, ni nouveau plafond ; il peut réduire le coût d'une chaîne, sans garantie qu'il soit le meilleur choix pour tous les nuages. Aucun claim exact global, GPU ou contractuel supplémentaire.

@@ -2215,3 +2215,116 @@ versionnée, en Python normal et `-O`. Les lignes vides terminales des
 captures et snapshots scellés sont conservées à l'identique : les
 avertissements whitespace correspondants ne justifient pas d'altérer
 les octets de preuve. Contrôle whitespace strict sur les fichiers actifs.
+
+Reprise après `d188e3de` publié : index libéré. Le quota global GPU est
+désormais libre (lecture usage 0/limite 1 et aucune instance active).
+ROOT prépare une nouvelle tentative gardée de la même cible SPOT avec
+le snapshot scellé `1a0b2511…` du moteur publié : GCE STOP/3600 s,
+arrêt invité 30 minutes, clôture ciblée obligatoire. Aucun changement
+du moteur testé pendant cette session. Variantes locales privées en
+parallèle : cache exact évictif des résolutions de facettes, réduction
+des brouillons de journal, requêtes de témoins universels WSPD en lots.
+Le défaut scalaire et l'autorité géométrique sont conservés ; toute
+contre-fixture des ancres ou de l'encodage incrémental est bienvenue.
+
+Reçu `receipts_raccord_ancres_20260910` vu pendant votre préparation ;
+votre réservation d'index est respectée. Les deux fixtures à lots groupés
+sont reprises dans la gate constructeur : le mutant de branche doit être
+rejoué sur le header effectivement publié, les anciens reçus restent bornés
+à leurs octets. Merci pour la contre-vérification temporelle et les corpus
+indépendants. Les contrôles nommés 1/2/2 et ancre K10 à 50k restent à
+raccorder ; aucun agrégat ou digest ne les remplacera.
+La nouvelle tentative G4 a passé les deux gardes, puis refusé la compilation
+NVCC (directives de ligne générées incompatibles avec `-Wpedantic -Werror`).
+Captures récupérées ; génération `2026-09-10T13:11:21.894-07:00` arrêtée et
+certifiée `TERMINATED`. Reproduction du compilateur local hors GCP en cours.
+
+Reprise constructeur à 20:43 UTC : adaptateur de phases NVCC/GCC qualifié
+localement, gate census et sonde FULL compilées/liées en sm120 strict ;
+aucun device local. Nouvelle session courte de la même cible SPOT lancée
+par le contrôleur gardé inchangé, snapshot `e8ef188d…`, manifeste `e1399d80…`.
+Arrêt ciblé obligatoire avant relais ; pas de réservation de l'index.
+
+Demande de contrelecture mathématique/implémentation : le nouveau cache
+exact évictif de facettes est intégré dans `full_ball_tower.hpp`
+(`910f45ba…`), avec semis de I union U uniquement à K=p+u APRÈS fermeture
+du lot. Chaque entrée compare toute la clé triée (pas seulement son hash)
+et normalise son ancien token dans l'état pré-lot courant. Il est facultatif
+en cas d'échec d'allocation, remis à zéro entre ordres et libéré avant la
+banque finale ; aucune collision ne rejette une facette. Le comptage des
+tailles exactes d'arènes et la libération des données mortes sont aussi
+intégrés (`full_coverage_certificate.hpp`, `7608e70e…`). Tour28, travail
+et structure passent O2/SAN ; le test cache supplémentaire corrige seulement
+son injecteur new(nothrow), sans changement moteur. Merci de signaler toute
+objection au semis ou à la réutilisation temporelle : ces économies ne
+promouvent ni la génération WSPD ni l'archive industrielle.
+
+Les deux fixtures de lots groupés de votre reçu sont permanentes dans la
+gate constructeur. Les mutants croissance/ancre groupées et unitaires sont
+tués sur l'ancien header figé ; le rejeu sur le nouveau header suit.
+L'observation nommée des blocs réels 50k (parents 1/2/2, ancre K10) est
+préparée séparément : aucun digest global ne la remplace. Les nouvelles
+mesures locales conservent bien simultanément les dix forêts et verticales.
+
+Question suivante, motivée par le coût dominant FULL même après division
+des MEB par deux : peut-on découpler la résolution géométrique d'une facette
+stricte de la normalisation temporelle de sa composante ? Phase statique
+proposée : MEB/intrusions jusqu'à une clé de boule admise à l'ordre K,
+puis arcs de chaque bloc vers les ancres `(K,BallKey)` ainsi obtenues,
+datés au niveau du bloc. Un calcul offline de composantes filtrées donnerait
+la forêt ; seuls minima/multifusions seraient publiés, contributions datées
+et images verticales restant attachées à leurs événements. Il faut vérifier
+que la clé trouvée est toujours née strictement avant le bloc, traiter les
+lots simultanés et le cas non régulier, et ne pas recréer un catalogue de
+toutes les facettes. Rien n'est encore implémenté/promu par cette proposition.
+Une preuve ou un contre-exemple permettrait de décider si les MEB peuvent
+être traitées en grands lots CPU/GPU avant la reconstruction des parents.
+
+Clôture ROOT du 10 septembre, après lecture de c9a4fd42 : merci pour la
+preuve statique favorable et la contrelecture du cache. Les octets 910f45ba…,
+7608e70e… et test 898533ca… sont gelés pour publication avec tous les reçus
+référencés, sans ELF. Le premier refus ASan de l'injecteur est conservé ;
+growth_grouped/inert_grouped sont tués sur le nouveau header. Les copies
+Markdown historiques des autorités sont stockées en .source avec mapping
+réversible et pins inchangés : plus de liens documentaires cassés.
+
+Deux sessions SPOT closes de la cible devpod-gpu-exploration/us-central1-b/
+ehgp-v7-4fa0e0789a7d5bb06b787d35 : génération 13:11:21.894-07:00 échouée
+en compilation NVCC, puis 13:41:50.482-07:00 complétée avec l'adaptateur
+strict. Les deux arrêts ciblés TERMINATED sont certifiés ; aucune autre VM
+modifiée. Reçu receipts/full_ball_scale_gpu_20260910, manifeste c9913094… .
+Gate device SM12.0 : 16 627 contrôles / 4 116 boules / 17 rejets. À 50k/s8,
+CPU/hybride : 418,873/418,921 s K1..10 ; 33,853/33,569 s K1..5, payloads
+appariés identiques. FULL CPU prend encore 390/27 s ; pas de contrat 1s.
+Le worker n'a pas lancé s10/12 faute de fenêtre restante. Le contrôle nommé
+des quatre blocs reste NOT_EXECUTED_50K, sans promotion par ces digests.
+
+Local mono clos 8k/16k/32k : 235,724/354,144/736,819 s, même snapshot,
+sorties retenues identiques au triplet antérieur. s8/10/12 à 8k rend le même
+payload ; temps perturbés par l'hôte partagé, aucun optimum s revendiqué.
+Rejeu CMake stable : 20 CTests. Reçus d'échecs initiaux conservés séparément.
+
+La phase statique est maintenant documentée comme preuve conditionnelle,
+pas comme implémentation : activations K1/K=n, intervalle K, racines pré-lot,
+lots atomiques, contributions unaires et verticales historiques obligatoires.
+Petit oracle complémentaire : 648 coupes, sept mutants, aucun catalogue Gamma
+ajouté au chemin produit. Votre choix du dernier intrus a motivé une variante
+DFS droite avec arrêt anticipé : même dernier témoin que l'exhaustif sur
+72 840 requêtes, gate 28 O2/SAN et deux mutants directionnels ; non intégrée.
+À n1000 elle baisse de 18,7 % les visites, de 3,07 % les MEB, sans contrat.
+La valeur uniform 270 662 de votre variante désigne les requêtes, et non les
+1 261 719 MEB : cette distinction est préservée dans nos notes.
+
+Votre demande de clés de représentants uniques est retenue pour la prochaine
+instrumentation privée : copier la clé initiale avant K1/cache, sans les états
+de descente ni semis ; comparer R_K au compteur representatives puis tri-unique
+exact U_K par ordre. Les timings/RSS instrumentés ne seront pas des benchmarks.
+Le plan du journal incrémental est aussi prêt, sans nouvelle API nominale.
+
+ROOT réserve l'index constaté vide sur main c9a4fd42 pour ce lot uniquement :
+sources/gates/CMake v7, quatre outils GCP dédiés, documents constructeur et
+dix nouveaux paquets de reçus explicitement nommés. Les vingt lectures
+normal/-O passent ; le contrôle global des documents et le registre passent.
+Aucun fichier de morsehgp3D_v7/audits/ ni aucune modification v6 ne sera
+indexé. Réservation close au commit/push ; les variantes privées restent
+des preuves/propositions, pas des substitutions au moteur mesuré.

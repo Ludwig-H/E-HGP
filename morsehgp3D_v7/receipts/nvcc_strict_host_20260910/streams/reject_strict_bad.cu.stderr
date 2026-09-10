@@ -1,0 +1,5 @@
+/workspaces/E-HGP/build/v7_nvcc_active_20260910/run_r1/packet/source/build/v7_nvcc_pedantic_20260910/strict_bad.cu: In function ‘int mhgp7_bad_host(int)’:
+/workspaces/E-HGP/build/v7_nvcc_active_20260910/run_r1/packet/source/build/v7_nvcc_pedantic_20260910/strict_bad.cu:4:5: error: ISO C++ forbids variable length array ‘variable_length’ [-Werror=vla]
+    4 |   int variable_length[n];
+      |     ^~~~~~~~~~~~~~~
+cc1plus: all warnings being treated as errors

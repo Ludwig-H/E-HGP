@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/tower_san",
+    "--selftest"
+  ],
+  "expected_code": 0,
+  "name": "tower_san_run",
+  "started_epoch": 1789071736.4820864
+}

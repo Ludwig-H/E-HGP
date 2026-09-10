@@ -1,0 +1,267 @@
+{
+  "schema": "resolver-cache-private-summary-v1",
+  "gcp_used": false,
+  "gates": {
+    "baseline_o2": {
+      "receipt_sha256": "6fc95944e49d80006f70c6aaf3edf391efe5a9c894c30ab3c60259449fdb2b83",
+      "oracle": {
+        "status": "passed",
+        "authority": "bounded_independent_Gram_Gamma_not_WSPD_completeness",
+        "checks": 170320,
+        "clouds": 28,
+        "orders": 112,
+        "cuts": 2508,
+        "facets": 20054,
+        "vertical_checks": 45948,
+        "births": 504,
+        "merges": 224,
+        "continuation_snapshots": 1036,
+        "growth_snapshots": 8,
+        "overlap_cuts": 484,
+        "duplicate_cover_cuts": 0,
+        "regular_blocks": 666,
+        "extra_blocks": 160,
+        "anchor_hits": 630,
+        "representatives": 992,
+        "intruder_queries": 12,
+        "same_radius_steps": 2,
+        "rejections": 8
+      },
+      "work_stdout_sha256": "ce55c70bd0e6d2471d5c8a36704b718c9bed052712256aa2c67ddc6faed23505"
+    },
+    "plain_o2": {
+      "receipt_sha256": "0b4089f4a24dc66af7d8e7767cb202a34fda51fe248f0a6e1477eeb46167594d",
+      "oracle": {
+        "status": "passed",
+        "authority": "bounded_independent_Gram_Gamma_not_WSPD_completeness",
+        "checks": 170320,
+        "clouds": 28,
+        "orders": 112,
+        "cuts": 2508,
+        "facets": 20054,
+        "vertical_checks": 45948,
+        "births": 504,
+        "merges": 224,
+        "continuation_snapshots": 1036,
+        "growth_snapshots": 8,
+        "overlap_cuts": 484,
+        "duplicate_cover_cuts": 0,
+        "regular_blocks": 666,
+        "extra_blocks": 160,
+        "anchor_hits": 398,
+        "representatives": 992,
+        "intruder_queries": 12,
+        "same_radius_steps": 2,
+        "rejections": 8
+      },
+      "work_stdout_sha256": "ce55c70bd0e6d2471d5c8a36704b718c9bed052712256aa2c67ddc6faed23505"
+    },
+    "seed_o2": {
+      "receipt_sha256": "79001c66a046643d3648165054e868ecf42472ec204ccfa8d0dcbb3c327fa7c0",
+      "oracle": {
+        "status": "passed",
+        "authority": "bounded_independent_Gram_Gamma_not_WSPD_completeness",
+        "checks": 170320,
+        "clouds": 28,
+        "orders": 112,
+        "cuts": 2508,
+        "facets": 20054,
+        "vertical_checks": 45948,
+        "births": 504,
+        "merges": 224,
+        "continuation_snapshots": 1036,
+        "growth_snapshots": 8,
+        "overlap_cuts": 484,
+        "duplicate_cover_cuts": 0,
+        "regular_blocks": 666,
+        "extra_blocks": 160,
+        "anchor_hits": 74,
+        "representatives": 992,
+        "intruder_queries": 12,
+        "same_radius_steps": 2,
+        "rejections": 8
+      },
+      "work_stdout_sha256": "ce55c70bd0e6d2471d5c8a36704b718c9bed052712256aa2c67ddc6faed23505"
+    },
+    "plain_san": {
+      "receipt_sha256": "94b949dc8fe20fbf142390b3a18d097898d81ae08caa5e317da81c01e6bada6d",
+      "oracle": {
+        "status": "passed",
+        "authority": "bounded_independent_Gram_Gamma_not_WSPD_completeness",
+        "checks": 170320,
+        "clouds": 28,
+        "orders": 112,
+        "cuts": 2508,
+        "facets": 20054,
+        "vertical_checks": 45948,
+        "births": 504,
+        "merges": 224,
+        "continuation_snapshots": 1036,
+        "growth_snapshots": 8,
+        "overlap_cuts": 484,
+        "duplicate_cover_cuts": 0,
+        "regular_blocks": 666,
+        "extra_blocks": 160,
+        "anchor_hits": 398,
+        "representatives": 992,
+        "intruder_queries": 12,
+        "same_radius_steps": 2,
+        "rejections": 8
+      },
+      "work_stdout_sha256": "ce55c70bd0e6d2471d5c8a36704b718c9bed052712256aa2c67ddc6faed23505"
+    },
+    "seed_san": {
+      "receipt_sha256": "3317b4fcceac49ce82ea6b718d378e078fefa4533454215e42144ada5724a559",
+      "oracle": {
+        "status": "passed",
+        "authority": "bounded_independent_Gram_Gamma_not_WSPD_completeness",
+        "checks": 170320,
+        "clouds": 28,
+        "orders": 112,
+        "cuts": 2508,
+        "facets": 20054,
+        "vertical_checks": 45948,
+        "births": 504,
+        "merges": 224,
+        "continuation_snapshots": 1036,
+        "growth_snapshots": 8,
+        "overlap_cuts": 484,
+        "duplicate_cover_cuts": 0,
+        "regular_blocks": 666,
+        "extra_blocks": 160,
+        "anchor_hits": 74,
+        "representatives": 992,
+        "intruder_queries": 12,
+        "same_radius_steps": 2,
+        "rejections": 8
+      },
+      "work_stdout_sha256": "ce55c70bd0e6d2471d5c8a36704b718c9bed052712256aa2c67ddc6faed23505"
+    }
+  },
+  "mutants": {
+    "identity": {
+      "receipt_sha256": "b9177bedd666c4e73b4af3e08857e9570cbeffd700359663e0e13afb460a2090",
+      "antidrift_rechecked": true,
+      "returncode": 1,
+      "stderr": "collision_never_returns_other_key_token\n"
+    },
+    "normalization": {
+      "receipt_sha256": "6c2ddbfeebb1d3574ee6fd81b82fe81bc92371a5b9afc3d794cab458dfd1026f",
+      "antidrift_rechecked": true,
+      "returncode": 1,
+      "stderr": "product refusal [E5/variant0]: full_ball_final_component_count\nFAIL [E5/variant0] producer.complete_relative_orders\n"
+    },
+    "order": {
+      "receipt_sha256": "e63a4b1708faa14fbec8c0f6214d894abc160acbc516ceb3ba4450d60a9a4e82",
+      "antidrift_rechecked": true,
+      "returncode": 0,
+      "stderr": "",
+      "interpretation": "Survives: full sorted zero-padded distinct nonnegative keys already encode K>=2. Per-order reset bounds residence and namespace, not an independently necessary semantic condition for this exact layout."
+    }
+  },
+  "src/forest/full_ball_tower.hpp": {
+    "baseline_sha256": "0b72b4e9cb3858f7026d6b5d2b55f8a7b191903fc37aa24c140dfb8b557657e8",
+    "candidate_sha256": "70f53814edd6ee5c44715e9f5d5f97908241aa50e9f7e39b2dc42dd6a0d5c8f2",
+    "patch_sha256": "fd020331a4c5d1ef98a9f1cf9922cc858726217c33cfa05acb1fc3355758894d"
+  },
+  "bench/full_ball_tower_probe.cpp": {
+    "baseline_sha256": "c4f5c399bad251bd3bfbf4429fbb45df2851a44b554a03b7baea836ee174a44d",
+    "candidate_sha256": "c4f5c399bad251bd3bfbf4429fbb45df2851a44b554a03b7baea836ee174a44d",
+    "patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "diagnostics": {
+    "400": {
+      "baseline": {
+        "tower_median_s": 2.720482877,
+        "total_median_s": 4.701534639,
+        "resolver_meb_calls": 392135,
+        "resolver_supports": 31719733,
+        "max_rss_kib": 80896,
+        "cache_bytes": 0,
+        "cache_hits": 0
+      },
+      "plain": {
+        "tower_median_s": 2.125157996,
+        "total_median_s": 4.135648949,
+        "resolver_meb_calls": 251687,
+        "resolver_supports": 21519754,
+        "max_rss_kib": 81588,
+        "cache_bytes": 393216,
+        "cache_hits": 136796
+      },
+      "seed": {
+        "tower_median_s": 1.621743067,
+        "total_median_s": 3.623533579,
+        "resolver_meb_calls": 180260,
+        "resolver_supports": 15708447,
+        "max_rss_kib": 81540,
+        "cache_bytes": 393216,
+        "cache_hits": 208261
+      }
+    },
+    "1000": {
+      "baseline": {
+        "tower_median_s": 8.37102102,
+        "total_median_s": 15.291214928,
+        "resolver_meb_calls": 1174515,
+        "resolver_supports": 97376638,
+        "max_rss_kib": 230272,
+        "cache_bytes": 0,
+        "cache_hits": 0
+      },
+      "plain": {
+        "tower_median_s": 6.434721052,
+        "total_median_s": 13.349393085,
+        "resolver_meb_calls": 783299,
+        "resolver_supports": 68700123,
+        "max_rss_kib": 226880,
+        "cache_bytes": 786432,
+        "cache_hits": 380051
+      },
+      "seed": {
+        "tower_median_s": 5.296305513,
+        "total_median_s": 12.231948179,
+        "resolver_meb_calls": 583337,
+        "resolver_supports": 52168577,
+        "max_rss_kib": 226752,
+        "cache_bytes": 786432,
+        "cache_hits": 580186
+      }
+    }
+  },
+  "diagnostics_receipt_sha256": "feb5b535f35749b1a6e2638d98d764a8b1f73facb12ae31da823c60c7e0766bb",
+  "physical_counter_relations": "passed: nonvacuous saving, exact calls/dispositions/stores/resets/bytes",
+  "supplemental_triplet": {
+    "1000": {
+      "baseline": {
+        "tower_median_s": 8.346267874,
+        "total_median_s": 15.131566571,
+        "resolver_meb_calls": 1174515,
+        "resolver_supports": 97376638,
+        "max_rss_kib": 230424,
+        "cache_bytes": 0,
+        "cache_hits": 0
+      },
+      "plain": {
+        "tower_median_s": 6.852590501,
+        "total_median_s": 13.903241469,
+        "resolver_meb_calls": 783299,
+        "resolver_supports": 68700123,
+        "max_rss_kib": 226768,
+        "cache_bytes": 786432,
+        "cache_hits": 380051
+      },
+      "seed": {
+        "tower_median_s": 5.740769273,
+        "total_median_s": 13.088232286,
+        "resolver_meb_calls": 583337,
+        "resolver_supports": 52168577,
+        "max_rss_kib": 226980,
+        "cache_bytes": 786432,
+        "cache_hits": 580186
+      }
+    }
+  },
+  "supplemental_triplet_receipt_sha256": "653c5e535a32f44e4b6906ec543049912519715b50239e98f031e99d4be6b650",
+  "supplemental_triplet_isolation": "not_claimed: no compiler before; one compiler at final context snapshot"
+}

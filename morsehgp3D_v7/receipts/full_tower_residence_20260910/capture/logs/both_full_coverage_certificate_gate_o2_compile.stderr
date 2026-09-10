@@ -1,0 +1,5 @@
+In file included from /workspaces/E-HGP/build/v7_full_residence_20260910_r2/both/morsehgp3D_v7/tests/full_coverage_certificate_gate.cpp:11:
+/workspaces/E-HGP/build/v7_full_residence_20260910_r2/both/morsehgp3D_v7/tests/../oracle/local_plateau_oracle.hpp:6:10: fatal error: boost/multiprecision/cpp_int.hpp: No such file or directory
+    6 | #include <boost/multiprecision/cpp_int.hpp>
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+compilation terminated.

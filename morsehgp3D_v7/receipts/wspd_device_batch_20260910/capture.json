@@ -1,0 +1,21 @@
+{
+  "GCP": "not_used_by_this_agent",
+  "device_executed": false,
+  "runs": {
+    "run_r1": {
+      "binary_sha256_at_capture": {
+        "O2": "52db6335829f02e21e049621386c3d1600012217d8a3821ddb6ee6cf5248d372",
+        "SAN": "5b6a123270c491a99c9a1921abd0d7029fa37123e5d1aab919000149b9491838"
+      },
+      "receipt_sha256": "6e38091de3e990bc370a5601e0349360705f6cd252ad5e4d7eb433e0be6769ae"
+    },
+    "run_r2": {
+      "binary_sha256_at_capture": {
+        "CUDA_compile_only": "4790e937b944797a775136c30495d5dab881045c9edc500c38ee1fb3a6ae337b",
+        "O2": "c26cc37ca6b3a85b1c77c1a50bede7dd074151f2a07171471ec75acfca4f9d54",
+        "SAN": "d17f4e8684893692ebc60c06b9f768d32e6f4afbe61952a7e5252ef6ecd78ac8"
+      },
+      "receipt_sha256": "5dbbdc628c3cb5fda2cc9adea94b4b3a814b78be2c28199658e8ac2888ff2b1e"
+    }
+  }
+}

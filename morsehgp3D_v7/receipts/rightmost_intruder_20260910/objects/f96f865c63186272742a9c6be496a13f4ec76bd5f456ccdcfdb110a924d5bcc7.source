@@ -1,0 +1,30 @@
+"""Seal only completed private experiment artifacts, without ELF binaries."""
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+import sys
+
+BASE = Path(__file__).resolve().parent
+ROOT = BASE.parents[1]
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+pins = json.loads((BASE / "source_before.json").read_text())
+if {name:sha(ROOT / name) for name in pins} != pins:
+    raise RuntimeError("active source drift")
+if (BASE / "manifest.json").exists():
+    raise RuntimeError("refuse overwrite sealed manifest")
+proc = subprocess.run([sys.executable, "-B", str(BASE / "verify.py")], capture_output=True, check=False)
+(BASE / "verify_before_seal.stdout").write_bytes(proc.stdout)
+(BASE / "verify_before_seal.stderr").write_bytes(proc.stderr)
+if proc.returncode != 0:
+    raise RuntimeError("verification not complete")
+(BASE / "summary.json").write_bytes(proc.stdout)
+(BASE / "source_after.json").write_text(json.dumps(pins, indent=2) + "\n")
+manifest = {str(path.relative_to(BASE)):sha(path) for path in sorted(BASE.rglob("*")) if path.is_file() and path.suffix != ".bin"}
+(BASE / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+print(json.dumps({"files":len(manifest)+1,"manifest_sha256":sha(BASE / "manifest.json")}))

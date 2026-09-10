@@ -6,6 +6,10 @@ non encore qualifiée n'est pas, à elle seule, une fausse piste.
 
 | Idée écartée ou corrigée | Pourquoi ; décision retenue |
 | --- | --- |
+| Mémoriser seulement le hash d'une facette ou son ancienne racine | Une collision n'identifie pas une facette ; une racine historique peut déjà avoir fusionné. Comparer la clé complète et normaliser chaque hit au pré-lot courant. [Cache qualifié](OPTIMISATIONS_CACHE_ET_GPU_20260910.md) |
+| Déduire une baisse de pic RSS de la réduction des arènes finales | À n800, −23,1 % de sortie ne donne que −3,0 % du pic demandé ; les brouillons dominent encore. La paire n1000 combinée ne baisse pas le RSS. [Résidence](../receipts/full_tower_residence_20260910/README.md) |
+| Supprimer globalement `-Wpedantic` pour compiler CUDA | L'échec vient des directives générées par NVCC. Séparer ce prétraitement vendor et conserver les diagnostics de source/finale ; les vraies extensions restent rejetées. [Qualification](../receipts/nvcc_strict_host_20260910/README.md) |
+| Accepter un batch de témoins parce que ses IDs et compteurs sont bien formés | Un autre index peut avoir exactement les mêmes plages de NodeRef. Lier le fournisseur à l'index du front avant tout appel ; la forme des résultats n'est pas une preuve géométrique. [Front optionnel](OPTIMISATIONS_CACHE_ET_GPU_20260910.md) |
 | Reparcourir une chaîne inférieure entière pour chaque image verticale | Coût quadratique sur le peigne ; le normaliseur temporel active chaque arête une fois, dans une DSU de travail séparée de l'histoire. [Raccord](TOUR_FULL_PAR_BOULES.md) |
 | Déduire la correction du tableau des parents des seuls lecteurs de couverture | Ces lecteurs utilisent les successeurs : parent→0 leur échappait. Comparer directement toutes les arènes à l'entrée ; le mutant est maintenant rejeté. [Audit](../audits/receipts_coverage_cpp_20260910/README.md) |
 | Espérer atteindre 1s par le seul port prefilter/census | Le reçu historique 50k paie déjà plus de 15s de génération et tri CPU48 avant FULL. Porter ensuite les requêtes universelles WSPD par blocs ; ne pas appeler un census de boule fixe un témoin de rectangle. [Raccord et suite](TOUR_FULL_PAR_BOULES.md) |
@@ -49,6 +53,11 @@ non encore qualifiée n'est pas, à elle seule, une fausse piste.
 | Relâcher seulement la garde de rayon strict du resolver F | Ses MEB et requêtes d'intrus refusent aussi les coquilles supplémentaires. Il faut une entrée MEB à coquille libre, à cardinal K, avec terminal par ancre de boule ; jamais récupérer une sortie F déclarée échouée. [Couture prévue](CONTRAT_COUVERTURES_DATEES.md#prochain-raccord) |
 
 ## Règle d'entretien du dossier actif
+
+Le 10 septembre, deux distinctions supplémentaires sont conservées :
+
+- Le « dernier intrus » obtenu par balayage exhaustif peut raccourcir la descente mais augmente potentiellement le coût d'une requête. Une DFS droite anticipée retrouve exactement ce même témoin sans terminer le scan ; son [prototype](../receipts/rightmost_intruder_20260910/README.md) reste séparé du moteur mesuré.
+- Les 189 ms de kernels census à 50k ne sont pas une tour à 189 ms : préparation/reconstruction et FULL CPU portent le total à environ 419 s. Les [mesures closes](RESULTATS_TOUR_CACHE_G4_20260910.md) interdisent de qualifier 1 s par ce chrono de composant.
 
 README et PASSATION décrivent le présent et renvoient aux preuves ; leurs
 longues chronologies redondantes ont été retirées. Les anciennes versions

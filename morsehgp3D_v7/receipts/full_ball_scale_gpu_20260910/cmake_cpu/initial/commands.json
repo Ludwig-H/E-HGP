@@ -1,0 +1,78 @@
+[
+  {
+    "argv": [
+      "cmake",
+      "-S",
+      "morsehgp3D_v7",
+      "-B",
+      "/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1",
+      "-DCMAKE_BUILD_TYPE=Release",
+      "-DMHGP7_DIGEST_BOOST_INCLUDE_DIR=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include"
+    ],
+    "ended_ns": 1789072834683739465,
+    "exit_code": 0,
+    "name": "configure",
+    "started_ns": 1789072833320938010
+  },
+  {
+    "argv": [
+      "cmake",
+      "--build",
+      "/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1",
+      "--parallel",
+      "2",
+      "--target",
+      "mhgp7_anchor_meb_gate",
+      "mhgp7_full_ball_tower_gate",
+      "mhgp7_full_ball_work_gate",
+      "mhgp7_full_ball_tower_probe",
+      "mhgp7_full_coverage_certificate_gate",
+      "mhgp7_local_plateau_gate",
+      "mhgp7_census_route_stub_gate",
+      "mhgp7_full_gabriel_digest_gate",
+      "mhgp7_facet_resolver_cache_gate",
+      "mhgp7_witness_front_gate"
+    ],
+    "ended_ns": 1789072987771888417,
+    "exit_code": 0,
+    "name": "build",
+    "started_ns": 1789072834683769411
+  },
+  {
+    "argv": [
+      "ctest",
+      "--test-dir",
+      "/workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1",
+      "--output-on-failure",
+      "-R",
+      "^mhgp7_(anchor_meb|full_ball_tower|full_ball_work|census_route_stub|local_plateau|full_coverage_certificate|facet_resolver_cache|witness_front|full_gabriel_digest)"
+    ],
+    "ended_ns": 1789072994298038626,
+    "exit_code": 0,
+    "name": "ctest",
+    "started_ns": 1789072987771916449
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "gcp-migration/selftest_full_ball_worker_v7.py"
+    ],
+    "ended_ns": 1789072994475258321,
+    "exit_code": 0,
+    "name": "worker_normal",
+    "started_ns": 1789072994298323367
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "gcp-migration/selftest_full_ball_worker_v7.py"
+    ],
+    "ended_ns": 1789072994627257029,
+    "exit_code": 0,
+    "name": "worker_optimized",
+    "started_ns": 1789072994475494762
+  }
+]

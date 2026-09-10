@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+"""Portable integrity and closed-observation checks, never execute binaries/GCP."""
+import gzip
+import hashlib
+import io
+import json
+import math
+from pathlib import Path, PurePosixPath
+import re
+import tarfile
+
+ROOT = Path(__file__).resolve().parent
+def need(ok,reason):
+    if not ok: raise ValueError(reason)
+def unique(pairs):
+    out={}
+    for k,v in pairs:
+        need(k not in out,'duplicate JSON field');out[k]=v
+    return out
+def parse(raw): return json.loads(raw,object_pairs_hook=unique)
+def sha(raw): return hashlib.sha256(raw).hexdigest()
+def safe(name):
+    p=PurePosixPath(name)
+    return bool(name) and str(p)==name and not p.is_absolute() and '..' not in p.parts and '\\' not in name
+manifest=parse((ROOT/'manifest.json').read_text())
+actual={}
+for p in ROOT.rglob('*'):
+    need(not p.is_symlink(),'symlink')
+    if p.is_file() and p!=ROOT/'manifest.json':
+        raw=p.read_bytes()
+        need(not raw.startswith((b'\x7fELF', b'-----BEGIN OPENSSH PRIVATE KEY-----')),'ELF/private key')
+        actual[p.relative_to(ROOT).as_posix()]=sha(raw)
+need(all(safe(k) and re.fullmatch('[0-9a-f]{64}',v) for k,v in manifest.items()),'manifest domain')
+need(actual==manifest,'manifest differs')
+storage=parse((ROOT/'storage_map.json').read_text())
+def raw(name):
+    need(safe(name),'unsafe read')
+    if name in storage:
+        row=storage[name];need(safe(row['stored']),'unsafe storage')
+        data=gzip.decompress((ROOT/row['stored']).read_bytes())
+        need(len(data)==row['raw_bytes'] and sha(data)==row['raw_sha256'],'lossless storage')
+        return data
+    return (ROOT/name).read_bytes()
+def read(name):return parse(raw(name))
+def snapshot(archive_path,manifest_path):
+    observed={}
+    with tarfile.open(fileobj=io.BytesIO(raw(archive_path)),mode='r:gz') as archive:
+        for entry in archive:
+            need(entry.isfile() and safe(entry.name) and entry.name.startswith('morsehgp3D_v7/') and
+                 entry.name not in observed,'source archive domain')
+            data=archive.extractfile(entry).read();need(not data.startswith(b'\x7fELF'),'archive ELF')
+            observed[entry.name]=sha(data)
+    need(observed==read(manifest_path),'source archive differs')
+    return observed
+optimized=snapshot('snapshot/snapshot.tar.gz','snapshot/source_manifest.json')
+local=read('local/receipt.json')
+need(local['status']=='completed' and local['sources_stable'] and local['GCP_used'] is False,'local closure')
+need(read('local/sources_before.json')==optimized==read('local/sources_after.json'),'local frozen inputs')
+expected_names=['compiler','compile','n400_s8','n8000_s8','n16000_s8','n32000_s8','n8000_s10','n8000_s12']
+need([r['name'] for r in local['commands']]==expected_names,'local command inventory')
+for c in local['commands']:
+    need(c['closed'] is True and c['exit_code']==0 and c['ended_ns']>=c['started_ns'],'unclosed local command')
+    for stream in ('stdout','stderr'):
+        need(sha(raw('local/'+c['name']+'.'+stream))==c[stream+'_sha256'],'local stream pin')
+def valid_row(row,n,k,s,threads,backend):
+    need(row['schema']=='mhgp7-full-ball-tower-probe-v1' and row['status']=='completed_relative' and
+         row['public_status']=='not_claimed' and row['contract_qualified'] is False and row['backend']==backend,'authority')
+    for field,value in dict(n=n,kmax=k,s=s,orders=k,threads=threads,seed=3,coord=65536).items():
+        need(type(row[field]) is int and row[field]==value,'requested configuration')
+    need(row['raw']>=row['unique']>=row['balls']>0 and row['nodes']>=n and row['contributions']>=n,'nonvacuity')
+    fields=['index_s','generate_s','sort_s','prefilter_s','census_s','tower_s','digest_s','total_s']
+    need(all(type(row[f]) in (int,float) and math.isfinite(row[f]) and row[f]>=0 for f in fields) and
+         sum(row[f] for f in fields[:-1])<=row['total_s']+0.000001,'stage/total time')
+    need(all(re.fullmatch('[0-9a-f]{64}',row[f]) for f in ('input_digest','payload_digest')),'digest format')
+    need(row['resolver_meb_calls']==row['anchor_hits']+row['intruder_queries'],'actual MEB accounting')
+    need(row['resolver_cache_slots']==row['resolver_cache_released_slots'],'cache released')
+    if row['resolver_cache_slots']:
+        need(row['resolver_cache_queries']==row['resolver_cache_hits']+row['anchor_hits'],'cache disposition')
+    return {f:row[f] for f in ('n','kmax','s','total_s','tower_s','nodes')}
+local_rows=[]
+for n,s in ((400,8),(8000,8),(16000,8),(32000,8),(8000,10),(8000,12)):
+    row=read(f'local/n{n}_s{s}.stdout');local_rows.append(valid_row(row,n,10,s,1,'cpu_reference'))
+for s in (10,12):
+    need(read(f'local/n8000_s{s}.stdout')['payload_digest']==read('local/n8000_s8.stdout')['payload_digest'],'s invariant payload')
+
+target=dict(project='devpod-gpu-exploration',zone='us-central1-b',instance='ehgp-v7-4fa0e0789a7d5bb06b787d35')
+for label,status in (('compile_failed','worker_failed'),('optimized','completed')):
+    prefix='gcp/'+label
+    host=read(prefix+'/host/receipt.json')
+    need(host['status']==status and host['target']==target and host['targeted_shutdown_certified'] is True and
+         host['capture_received'] is True,'targeted cloud closure')
+    handoff=read(prefix+'/host/handoff.json')
+    need(handoff['last_start_timestamp']==host['generation'] and all(handoff[k]==v for k,v in target.items()),'generation binding')
+    need(b'TERMINATED' in raw(prefix+'/host/guarded_stop.stdout'),'target stop output')
+    snap=snapshot(prefix+'/host/snapshot.tar.gz',prefix+'/host/source_manifest.json')
+    need(sha(raw(prefix+'/host/snapshot.tar.gz'))==host['snapshot_sha256'] and
+         sha(raw(prefix+'/host/source_manifest.json'))==host['manifest_sha256'] and
+         sha(raw(prefix+'/host/worker.py'))==host['worker_sha256'],'host input pins')
+    worker=read(prefix+'/output/receipt.json')
+    need(worker['sources_stable'] is True and read(prefix+'/output/sources_before.json')==snap==
+         read(prefix+'/output/sources_after.json'),'guest source drift')
+    need(worker['public_status']=='not_claimed' and worker['contract_qualified'] is False,'guest authority')
+    need(sha(raw('tools/full_probe_session_v7.py'))==host['controller_sha256'],'unchanged controller')
+    if label=='compile_failed':
+        need(worker['status']=='failed' and 'strict compile: gate' in worker['error'],'preserved NVCC failure')
+        need(b'style of line directive is a GCC extension' in raw(prefix+'/output/compile_gate.stderr'),'original compiler error')
+        need(not any(c['name']=='device_gate' for c in worker['commands']),'no device after compile failure')
+    else:
+        need(snap==optimized and worker['status']=='completed' and worker['device_gate']['backend']=='CUDA' and
+             worker['device_gate']['sm']=='12.0' and worker['device_gate']['compared']==4116 and
+             worker['device_gate']['checks']==16627 and worker['device_gate']['rejections']==17,'real device gate')
+        need(worker['smoke']['matched'] is True and len(worker['s8'])==2 and
+             all(p['matched'] and p['cpu_signature']==p['gpu_signature'] for p in worker['s8']),'whole tower CPU/GPU pairs')
+        need([p['plan']['s'] for p in worker['additional_s']]==[10,12] and
+             all(p['plan']['status']=='not_attempted' and p['pairs']==[] for p in worker['additional_s']),'unrun cloud s values')
+gpu_rows=[]
+for k in (10,5):
+    for kind,backend in (('cpu','cpu_reference'),('gpu','cuda_census_cpu_full')):
+        summary=read(f'gcp/optimized/output/{kind}_n50000_k{k}_s8.summary.json')
+        need(summary['reported_complete'] is True and summary['command_exit_code']==0,'reported complete cloud process')
+        row=summary['row'];gpu_rows.append(dict(backend=backend,**valid_row(row,50000,k,8,48,backend)))
+        need(summary['process_wall_seconds']+0.05>=row['total_s'],'process includes pipeline')
+for name in ('cmake_cpu/stable','cmake_cuda'):
+    need(read(name+'/receipt.json')['status']=='passed' and read(name+'/sources_before.json')==
+         read(name+'/sources_after.json') and all(c['exit_code']==0 for c in read(name+'/commands.json')),'CMake closure')
+need(b'100% tests passed, 0 tests failed out of 20' in raw('cmake_cpu/stable/ctest.stdout'),'20 CPU CTests')
+initial=read('cmake_cpu/initial/receipt.json')
+need(initial['status']=='failed' and initial['sources_stable'] is False,'preserved initial source drift')
+for name,pin in read('checks_sources.json').items():
+    need(sha(raw('checks_sources/'+name))==pin==read('cmake_cpu/stable/sources_before.json')[name],'checked CMake source')
+need(read('cmake_cuda/receipt.json')['CUDA_executed'] is False,'CMake is compile-only locally')
+need(all(c['exit_code']==0 for c in read('tools/pure_commands.json')),'pure tool gates')
+print(json.dumps(dict(status='passed',files=len(manifest),local=local_rows,cloud=gpu_rows,
+                     CTests=20,targeted_shutdowns_certified=2,contract_qualified=False),sort_keys=True))

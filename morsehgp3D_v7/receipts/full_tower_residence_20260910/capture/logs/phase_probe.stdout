@@ -1,0 +1,36 @@
+sizeof ExactLevel=48 FullNode=64 FullDatedContribution=80 Population=48 Ref=16 Action=48 Batch=80 Draft=48 History=48 Block=40 Header=16
+stage=validated K=0 requested_live=4565300 requested_peak=5756003 new_calls=39 interval_seconds=0.000000181
+stage=draft_staged K=1 requested_live=6865148 requested_peak=6887748 new_calls=18973 interval_seconds=0.001455115
+stage=draft_staged K=2 requested_live=8517443 requested_peak=10812947 new_calls=88604 interval_seconds=0.012767399
+stage=draft_staged K=3 requested_live=11882774 requested_peak=14806538 new_calls=243122 interval_seconds=0.035127707
+stage=draft_staged K=4 requested_live=15443571 requested_peak=18778403 new_calls=471780 interval_seconds=0.073014231
+stage=draft_staged K=5 requested_live=21356549 requested_peak=25016593 new_calls=816583 interval_seconds=0.143267782
+stage=draft_staged K=6 requested_live=28589476 requested_peak=32476196 new_calls=1264725 interval_seconds=0.268146113
+stage=draft_staged K=7 requested_live=43280442 requested_peak=49051362 new_calls=1851235 interval_seconds=0.509525289
+stage=draft_staged K=8 requested_live=53858591 requested_peak=60539487 new_calls=2596981 interval_seconds=0.917459254
+stage=draft_staged K=9 requested_live=72038249 requested_peak=82105025 new_calls=3519267 interval_seconds=1.625747548
+stage=draft_staged K=10 requested_live=95049340 requested_peak=105186724 new_calls=4618116 interval_seconds=2.740472422
+stage=before_bank K=0 requested_live=93030664 requested_peak=105186724 new_calls=4618116 interval_seconds=0.000005110
+stage=bank_cloned K=0 requested_live=107702972 requested_peak=107702972 new_calls=4983560 interval_seconds=0.081015669
+stage=population_builder_freed K=0 requested_live=88104496 requested_peak=107702972 new_calls=4983560 interval_seconds=0.027388027
+stage=order_encoded K=1 requested_live=88351696 requested_peak=107702972 new_calls=4983620 interval_seconds=0.016818498
+stage=order_draft_freed K=1 requested_live=88156688 requested_peak=107702972 new_calls=4983620 interval_seconds=0.000072435
+stage=order_encoded K=2 requested_live=89139728 requested_peak=107702972 new_calls=4983689 interval_seconds=0.000340034
+stage=order_draft_freed K=2 requested_live=88168456 requested_peak=107702972 new_calls=4983689 interval_seconds=0.000218698
+stage=order_encoded K=3 requested_live=90134536 requested_peak=107702972 new_calls=4983763 interval_seconds=0.000614777
+stage=order_draft_freed K=3 requested_live=88201144 requested_peak=107702972 new_calls=4983763 interval_seconds=0.000494263
+stage=order_encoded K=4 requested_live=90822584 requested_peak=107702972 new_calls=4983838 interval_seconds=0.001174982
+stage=order_draft_freed K=4 requested_live=88502952 requested_peak=107702972 new_calls=4983838 interval_seconds=0.000892184
+stage=order_encoded K=5 requested_live=92435112 requested_peak=107702972 new_calls=4983917 interval_seconds=0.001438824
+stage=order_draft_freed K=5 requested_live=88339552 requested_peak=107702972 new_calls=4983917 interval_seconds=0.001037496
+stage=order_encoded K=6 requested_live=93582432 requested_peak=107702972 new_calls=4983997 interval_seconds=0.001955949
+stage=order_draft_freed K=6 requested_live=88947192 requested_peak=107702972 new_calls=4983997 interval_seconds=0.001415151
+stage=order_encoded K=7 requested_live=96811512 requested_peak=107702972 new_calls=4984081 interval_seconds=0.004836413
+stage=order_draft_freed K=7 requested_live=88950120 requested_peak=107702972 new_calls=4984081 interval_seconds=0.001934619
+stage=order_encoded K=8 requested_live=96814440 requested_peak=107702972 new_calls=4984165 interval_seconds=0.002978317
+stage=order_draft_freed K=8 requested_live=88290120 requested_peak=107702972 new_calls=4984165 interval_seconds=0.002476240
+stage=order_encoded K=9 requested_live=98775880 requested_peak=107702972 new_calls=4984250 interval_seconds=0.004662248
+stage=order_draft_freed K=9 requested_live=89512272 requested_peak=107702972 new_calls=4984250 interval_seconds=0.003050331
+stage=order_encoded K=10 requested_live=105240912 requested_peak=108452176 new_calls=4984339 interval_seconds=0.006824342
+stage=order_draft_freed K=10 requested_live=89957664 requested_peak=108452176 new_calls=4984339 interval_seconds=0.003989463
+n=800 balls=238123 nodes=308430 parents=308420 contributions=186495 populations=186495 new_calls=4984339 requested_total=428722888 requested_peak=108452176 retained=75097940 arene_capacity=60424192 tower_seconds=6.891288231 physical_digest=b40e7046f50fdada377b7790f88fa8c5d1efe2ec200a49abfccbbb602a1b3b6e

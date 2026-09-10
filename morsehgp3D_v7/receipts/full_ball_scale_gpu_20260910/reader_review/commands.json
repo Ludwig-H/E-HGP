@@ -1,0 +1,23 @@
+[
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_ball_scale_gpu_20260910/verify.py"
+    ],
+    "exit_code": 1,
+    "started_ns": 1789074779945584730,
+    "ended_ns": 1789074780070882490
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/full_ball_scale_gpu_20260910/verify.py"
+    ],
+    "exit_code": 1,
+    "started_ns": 1789074780070922514,
+    "ended_ns": 1789074780186511646
+  }
+]

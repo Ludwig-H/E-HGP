@@ -1,0 +1,65 @@
+"""Pin active cache engine and create bounded private test variants."""
+import difflib
+import hashlib
+import json
+from pathlib import Path
+import shutil
+
+BASE = Path(__file__).resolve().parent
+ROOT = BASE.parents[1]
+HEADER = Path("morsehgp3D_v7/src/forest/full_ball_tower.hpp")
+PIN = "910f45baea1750b11d2b34f40c893c9d1a34f950705cdb127ffa226de60f7b2e"
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+if sha(ROOT / HEADER) != PIN:
+    raise RuntimeError("active cache source changed")
+files = [path for path in (ROOT / "morsehgp3D_v7/src").rglob("*") if path.is_file() and path.suffix in (".hpp", ".cuh")]
+files += [ROOT / "morsehgp3D_v7" / name for name in ("tests/full_ball_tower_gate.cpp", "oracle/local_plateau_oracle.hpp", "bench/full_ball_tower_probe.cpp", "bench/full_gabriel_semantic_digest.hpp")]
+pins = {str(path.relative_to(ROOT)):sha(path) for path in files}
+for kind in ("baseline", "rightmost"):
+    tree = BASE / kind
+    tree.mkdir(exist_ok=False)
+    for name in pins:
+        target = tree / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / name, target)
+if {name:sha(ROOT / name) for name in pins} != pins:
+    raise RuntimeError("active source drift during freeze")
+(BASE / "source_before.json").write_text(json.dumps(pins, indent=2) + "\n")
+text = (BASE / "baseline" / HEADER).read_text()
+changed = text.replace("for (i32 u = range.first; u <= range.last; ++u) if (!member(u)) return u;", "for (i32 u = range.last; u >= range.first; --u) if (!member(u)) return u;")
+changed = changed.replace("stack.push_back(ix.nodes[node].right); stack.push_back(ix.nodes[node].left);", "stack.push_back(ix.nodes[node].left); stack.push_back(ix.nodes[node].right);")
+if text.count("for (i32 u = range.first; u <= range.last; ++u) if (!member(u)) return u;") != 1 or text.count("stack.push_back(ix.nodes[node].right); stack.push_back(ix.nodes[node].left);") != 1:
+    raise RuntimeError("intruder sites not unique")
+(BASE / "rightmost" / HEADER).write_text(changed)
+(BASE / "rightmost.patch").write_text("".join(difflib.unified_diff(text.splitlines(keepends=True), changed.splitlines(keepends=True), fromfile="a/" + str(HEADER), tofile="b/" + str(HEADER))))
+# The choice oracle tests the exact extracted method body, with identical
+# member types. The independent FULL gate also compiles the real Builder.
+def method(source):
+    return source[source.index("  i32 intruder("):source.index("  u64 resolve(")]
+original, reversed_body = method(text), method(changed)
+last = original.replace("    stack.clear();", "    i32 last = -1;\n    stack.clear();")
+last = last.replace("if (!member(u)) return u;", "if (!member(u)) last = u;").replace("if (key.power(ix.upos[u]) < 0) return u;", "if (key.power(ix.upos[u]) < 0) last = u;").replace("    return -1;", "    return last;")
+adapters = "#pragma once\nnamespace mhgp7::full_ball_detail {\n"
+for label, body in (("FirstIntruder", original), ("RightmostIntruder", reversed_body), ("ExhaustiveLastIntruder", last)):
+    adapters += "struct " + label + " {\n  const CloudIndex& ix;\n  FullBallStats st;\n  std::vector<NodeRef> stack;\n" + body + "};\n"
+adapters += "}\n"
+(BASE / "intruder_adapters.hpp").write_text(adapters)
+(BASE / "method_pins.json").write_text(json.dumps({name:hashlib.sha256(body.encode()).hexdigest() for name, body in (("first", original), ("rightmost", reversed_body), ("exhaustive_last", last))}, indent=2) + "\n")
+for kind in ("baseline", "rightmost"):
+    path = BASE / kind / "morsehgp3D_v7/bench/full_ball_tower_probe.cpp"
+    source = path.read_text()
+    site = '    std::printf("}\\n");'
+    extra = '    std::printf(",\\\"intruder_nodes\\\":%llu,\\\"intruder_power_tests\\\":%llu,\\\"interior_ranges\\\":%llu,\\\"max_chain_steps\\\":%llu",\n        static_cast<unsigned long long>(st.intruder_nodes), static_cast<unsigned long long>(st.intruder_power_tests),\n        static_cast<unsigned long long>(st.interior_ranges), static_cast<unsigned long long>(st.max_chain_steps));\n'
+    if source.count(site) != 1:
+        raise RuntimeError("probe instrumentation site")
+    path.write_text(source.replace(site, extra + site))
+(BASE / "variants_before.json").write_text(json.dumps({kind:{name:sha(BASE / kind / name) for name in pins} for kind in ("baseline", "rightmost")}, indent=2) + "\n")
+authority = ROOT / "morsehgp3D_v7/audits/receipts_raccord_ancres_20260910/suite_cache_20260910/NOTE_PHASE_STATIQUE_MEB.md"
+shutil.copyfile(authority, BASE / "NOTE_PHASE_STATIQUE_MEB.md.source")
+(BASE / "authority_pin.json").write_text(json.dumps({str(authority.relative_to(ROOT)):sha(authority)}, indent=2) + "\n")
+print(json.dumps({"baseline":PIN,"rightmost":sha(BASE / "rightmost" / HEADER),"files":len(pins)}))

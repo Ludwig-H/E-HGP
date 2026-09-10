@@ -1,0 +1,276 @@
+# Graphe statique d’ancres : réduction conditionnelle, contre-fixtures et coût des intrus
+
+10 septembre 2026. Travail privé du constructeur, sans modification du moteur,
+des fichiers des auditeurs, de l’index Git ni de GCP. Cadre :
+`phase=exploration_v7_hors_registre`, `backend=cpu_reference`,
+`profile=quantized_u16_input_only`,
+`mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
+
+## Conclusion
+
+Oui : sous le census exact complet déjà exigé, la résolution d’un représentant
+strict peut produire une **ancre géométrique statique** avant tout calendrier.
+Les étoiles pondérées ainsi obtenues reconstruisent les composantes filtrées
+et les événements FULL, sans catalogue global des facettes. Cette réduction
+ne permet pas de supprimer les dates, la normalisation des ancres, les
+contributions unaires ni la fermeture atomique des niveaux égaux. Elle ne
+prouve aucun gain de temps, aucune borne sous-quadratique en n, ni un moteur
+de merge-tree GPU parallèle déjà qualifié.
+
+La preuve géométrique est celle de la
+[note du second auditeur](../../morsehgp3D_v7/audits/receipts_raccord_ancres_20260910/suite_cache_20260910/NOTE_PHASE_STATIQUE_MEB.md),
+avec les prémisses de [BALL_ANCHORS](../../morsehgp3D_v7/audits/receipts_plateaux_full_20260906/BALL_ANCHORS.md)
+et [GLOBAL_PARENTS](../../morsehgp3D_v7/audits/receipts_plateaux_full_20260906/GLOBAL_PARENTS.md).
+La présente note ajoute la formulation en graphe décoré, un oracle fini et
+l’analyse précise du parcours « dernier intrus ». Elle ne duplique pas une
+qualification C++ ni celle du producteur WSPD.
+
+## 1. Ce qui devient statique
+
+Écrire $\beta_B$ pour le rayon carré exact de B, $p=|I_B|$, $u=|U_B|$ et
+$m=p+q_{\min}$. Le catalogue commun C retient $m\leq\min(K_{\max}+1,n)$.
+Une clé est admise à K si et seulement si elle appartient à C et vérifie :
+
+$$p+q_{\min}-1\leq K\leq p+u.$$
+
+Pour un représentant strict F d’un bloc B, la descente MEB/support/intrus
+produit un terminal $t_K(F)\in C$ admis à K. Elle ne consulte ni racines,
+ni `prior_count`, ni ancres déjà installées. Tous ses niveaux sont au plus
+$\beta_{\mathrm{MEB}(F)}<\beta_B$ ; le lot de chaque clé admise rencontrée
+est donc déjà fermé lors d’une résolution nominale de F. Le prédicat
+statique d’admission coïncide avec le hit d’ancre nominal.
+
+À rayon égal, la clé reste identique et la coquille sélectionnée perd un
+point. Ces étapes sont internes à une chaîne géométrique : **aucun arc
+émis ne joint deux blocs de même niveau**. En absence d’intrus, le terminal
+faible contient I et un support positif, donc $m\leq K\leq p+u$ ; il est
+conservé et admis. Un terminal faible sans clé admise est un défaut de
+catalogue, jamais une naissance inventée.
+
+Pour une règle géométrique fixée, le terminal est indépendant du calendrier.
+Pour deux règles d’intrus différentes, les clés terminales peuvent différer,
+mais chaque échange est une incidence élémentaire de niveau strictement
+antérieur à B. Les deux terminaux ont donc la même composante **pré-lot**.
+Le `q_min` global, et non l’arité d’un support arbitrairement choisi, définit
+la fenêtre. La seule présence d’une clé globale ne suffit pas à l’admettre.
+
+## 2. Le graphe suffisant et les décorations indispensables
+
+À ordre K fixé, créer un sommet $v_{K,B}$ par boule programmée, avec date
+d’activation $\beta_B$. Pour K=1, ajouter explicitement les sommets des
+points, de date zéro : ils ne sont pas produits par une MEB K≥2.
+Chaque composante stricte locale de B fournit un représentant F et une arête
+non orientée entre $v_{K,B}$ et $v_{K,t_K(F)}$, active à $\beta_B$.
+Conserver également la contribution locale datée $D_{K,B}$ calculée par le
+quotient de coquille, et l’identité stable de B.
+
+L’orientation B vers son terminal est un DAG de dépendances. L’objet H0 est
+celui du **graphe non orienté filtré**, pas celui de la simple atteignabilité
+orientée. Le poids d’une arête est implicite dans son bloc source : on peut
+stocker un BallId terminal, pas recopier un `ExactLevel` pour chaque arête.
+
+À un niveau r, quotienter d’abord le graphe par ses composantes à $r^-$.
+Les nouveaux sommets/étoiles sont ensuite regroupés simultanément par ces
+anciens sommets quotients. Pour un groupe ayant d anciennes composantes :
+
+- d=0 : naissance ; deux étoiles sans parents distinctes ne se regroupent pas.
+- d=1 : continuation, éventuellement croissance de couverture, sans nœud
+  topologique public supplémentaire.
+- d≥2 : une vraie multifusion atomique de ces d parents.
+
+Induction sur les niveaux : les composantes anciennes sont les mêmes que
+celles du raccord ; chaque terminal se normalise vers son vrai parent
+pré-lot ; les mêmes étoiles joignent donc exactement les mêmes anciennes
+composantes. Le quotient simultané donne les mêmes nouvelles composantes,
+naissances et arités. Les unions de contributions D, datées à la fermeture
+du lot, donnent les mêmes couvertures. Cela justifie un calcul offline
+équivalent, mais pas encore une implémentation parallèle particulière.
+
+Il faut conserver l’activation des sommets isolés, notamment le terminal
+K=n. Un graphe de seules arêtes, ou des sommets réputés présents à zéro,
+perd ces naissances. Il faut aussi normaliser les **composantes**, pas compter
+les BallKeys terminales distinctes. Supprimer un portail unaire est permis
+dans la topologie de sortie seulement si son alias d’ancre et sa contribution
+datée restent attachés à la composante persistante. Le
+[contrat des couvertures datées](../../morsehgp3D_v7/docs/CONTRAT_COUVERTURES_DATEES.md)
+reste inchangé.
+
+Un MST/MSF du graphe pondéré conserve les composantes à chaque seuil, à
+condition de garder les activations des sommets et toutes les décorations.
+L’argument est l’échange d’une arête dépassant le seuil contre une arête
+du chemin original traversant la même coupe. Cette observation ne livre
+ni le MST gratuitement ni une compression des contributions D ; aucune
+construction MST n’est implémentée ici.
+
+## 3. Verticale et cache
+
+Les graphes horizontaux des différents K peuvent être préparés indépendamment.
+Pour une naissance supérieure B à K≥2, son image est la composante de
+$(K-1,B)$ à la coupe **fermée** $\beta_B$. Pour une fusion supérieure, les
+images de ses parents, normalisées dans l’ordre inférieur à la coupe fermée
+de fusion, coïncident. Les contributions unaires n’imposent pas de nouvelle
+identité verticale. Un post-traitement vertical peut utiliser le merge-tree
+inférieur daté et le BallId de chaque naissance ; la racine finale seule
+est insuffisante, tout comme la coupe ouverte.
+
+Le cache actif du header `910f45ba…` conserve des **jetons temporels**, qu’un
+hit normalise dans l’état pré-lot. Il ne peut pas être repris tel quel dans
+la phase géométrique. Un cache statique aurait pour valeur un BallId admis
+(ou une clé exacte), sous clé `(K, facette triée)` vérifiée intégralement.
+La consommation temporelle ferait ensuite `root(anchor[BallId])` au bon lot.
+Ne jamais réinterpréter le jeton nominal comme une clé ou une racine finale.
+
+Le semis statique $F=I_B\cup U_B$, quand $|F|=K$, est licite : MEB(F)=B et
+B est admise, sans dépendre de l’activation courante. Il peut être préparé
+avant le calendrier. Un cache facultatif évictif O(n) demeure une option,
+jamais une condition de validité. Une capacité O(n) n’est pas synonyme de
+faible résidence : la table nominale de 48 octets/entrée, arrondie à la
+puissance de deux au-dessus de 16n, représente 12 Gio pour dix millions
+de points et 24 Gio pour trente millions.
+
+La preuve ne compare pas le nombre de MEB du nominal avec celui d’une
+phase statique : les deux politiques de mémoïsation et leurs semis peuvent
+éviter des premières MEB différentes. Sans mémo et avec même règle, les
+chaînes sont les mêmes ; avec mémo, il faut mesurer séparément hits,
+terminaux, MEB et travail exact. Le modèle fini ci-dessous ne simule pas
+la table directe C++ : il vérifie l’équivalence des ancres normalisées.
+
+## 4. Contre-fixtures exécutables
+
+[graph_oracle.py](graph_oracle.py) contient sept nuages de 2 à 8 points,
+Kmax de 2 à 6. Les mêmes graphes sont préparés avant tout état temporel,
+en ordre normal et inversé. Une garde exécutable interdit l’appel de Gamma
+pendant cette préparation. Ensuite seulement, l’oracle Gamma exhaustif
+et le raccord rationnel dynamique jugent les sorties.
+
+| Piège réfuté | Fixture permanente privée |
+| --- | --- |
+| Oublier l’activation d’un sommet isolé | Deux points distants de 2 : K2 naît à rayon carré 1, pas à 0. |
+| Compter des clés comme parents | Triangle (0,0), (4,0), (1,3) : à 9/2, deux ancres de points ont déjà le même parent global. |
+| Fermer une série de fusions binaires au même niveau | Carré de côté 2 : une seule multifusion K1 à quatre parents au niveau 1. |
+| Utiliser une image verticale ouverte | Le carré naît à K3 au niveau 2 ; sa même-boule inférieure n’est disponible qu’à la coupe fermée. |
+| Supprimer le payload unaire | ABCZ : K3 naît sur ABC au niveau 16, puis ajoute Z au niveau 25 sans nouveau nœud public. Le supprimer perd Z. |
+| Admettre toute clé présente, sans fenêtre K | Huit points : cercle de niveau 4225 avec p=3 et q_min=3, présent pour Kmax6 mais non admis à K4. |
+| Consulter un calendrier partiel dans la géométrie | Préparation des blocs inversée : la visibilité temporaire des ancres ne peut pas remplacer C. |
+
+La fixture à huit points est une véritable demande de représentant strict :
+F=(0,1,2,3) est consommée par une boule de niveau `70058125/11236`.
+Sa descente contient réellement un échange à rayon égal ; la clé de niveau
+4225 est présente mais non admise à K4. Les politiques premier/dernier site
+changent les terminaux de deux blocs. Les partitions, couvertures, arités
+et images verticales restent identiques après normalisation. Le choix
+premier/dernier de cet oracle porte sur ses identifiants finis, pas sur
+les rangs Morton du C++.
+
+Résultat nominal, par politique : 648 coupes d’ordres ouvertes/fermées,
+5 943 comparaisons facette/coupe, 203 raccords pré-lot, 5 047 contrôles
+verticaux par facette, 78 ancres verticales de naissance ; 112 naissances,
+55 multifusions, 3 croissances et 16 événements inertes. L’autre politique
+produit la même empreinte pour chaque nuage. Sept mutants physiques sont
+refusés avec code 1 ; le nominal termine avec code 0, sous Python normal
+et `-O`. Les lecteurs/recorders normaux et `-O` ont chacun capturé les
+16 commandes fermées (32 exécutions en tout).
+
+Les helpers rationnels sont des copies épinglées de l’auditeur dans
+[geometry/](geometry/), sans import d’un helper produit. Seule la borne
+finie de leur entrée a été mécaniquement élargie de 7 à 10 ; les cas
+exécutés restent à huit points au plus. Ils énumèrent toutes les facettes
+pour l’oracle géométrique : ce n’est **pas** une architecture produit.
+`geometry_table_reads` compte des lectures de MEB précalculées, pas les
+appels MEB ni les supports testés du moteur C++.
+
+Sources du modèle : [source_pins.json](source_pins.json). Commandes et sorties :
+[runs_normal/commands.json](runs_normal/commands.json),
+[runs_optimized/commands.json](runs_optimized/commands.json).
+Les premiers `oracle.stdout.json`/`oracle.optimized.stdout.json` sont une
+capture exploratoire antérieure à l’ajout des sept mutants ; les captures
+finales autoritaires sont celles des deux répertoires `runs_*`.
+
+Lecture sans réexécution : `python3 -B build/v7_static_anchor_graph_20260910/verify.py`
+puis la même commande avec `-O`. Le lecteur vérifie le manifeste des sources
+privées et sorties finales, les 32 commandes, les sept raisons exactes de
+rejet et l’identité des quatre sorties nominales. Les résultats exploratoires
+antérieurs mentionnés ci-dessus ne portent pas cette autorité finale.
+
+## 5. Dernier intrus : une invariance, pas encore une économie physique
+
+Le [diff de l’auditeur](../../morsehgp3D_v7/audits/receipts_raccord_ancres_20260910/suite_cache_20260910/mutant_intruder_last/mutant_intruder_last.diff)
+remplace les retours anticipés par `last=u`, conserve une DFS gauche d’abord
+et parcourt chaque plage intérieure en ordre croissant. Il peut donc
+balayer tout l’arbre et toutes les plages même lorsqu’un intrus a déjà été
+trouvé. Le brut de [comparaison](../../morsehgp3D_v7/audits/receipts_raccord_ancres_20260910/suite_cache_20260910/mutant_intruder_last/comparaison_empreintes.txt)
+donne, sur n=2 000, Kmax10, s8, deux threads :
+
+| Famille | Requêtes premier → dernier | MEB resolver premier → dernier |
+| --- | ---: | ---: |
+| uniform | 311 864 → 270 662 | 1 302 921 → 1 261 719 |
+| scanline_overlap_multiecho | 107 717 → 28 870 | 124 254 → 45 407 |
+| scanline_single_pass | 0 → 0 | 955 → 955 |
+
+**270 662 n’est pas le nombre de MEB uniform : c’est celui des requêtes
+d’intrus.** Les empreintes de payload sont identiques. Ces sorties ne
+publient pas les visites de nœuds, tests de puissance ni candidats de plage ;
+on ne peut donc pas conclure que la baisse de requêtes est une baisse du
+travail spatial. Le témoin porte sur un overlay ancien, pas sur le cache
+et la résidence actuellement actifs.
+
+Le `CloudIndex` actif construit des enfants gauche/droite correspondant
+à deux intervalles Morton contigus ordonnés. Le dernier intrus de cette
+DFS est exactement le **plus grand rang Morton admissible**. Une DFS
+droite d’abord, plages descendantes et retour au premier intrus admissible
+rend le même point, par induction sur les deux intervalles enfants. Pour
+un même BallKey et une même sélection, elle reproduit donc le choix du
+mutant sans son balayage exhaustif volontaire. Le membre de l’équipe
+`ball_tower_gate` qualifie séparément ce petit prototype privé ; aucun
+header actif n’est modifié par la présente tâche.
+
+Crédits exacts par bloc de recherche, réutilisant les bornes existantes :
+
+- `lo>=0` exclut tout le sous-arbre de la recherche d’intrus strict.
+- `hi<0` certifie toute la plage intérieure. Descendre depuis `last`
+  nécessite au plus K+1 tests d’appartenance avant succès, ou au plus K
+  si la plage entière est sélectionnée ; aucun test de puissance ponctuel
+  supplémentaire n’est nécessaire dans cette plage.
+- Une boîte mixte doit encore être subdivisée. Le premier succès permet
+  d’arrêter ; une réponse « aucun intrus » doit toujours épuiser la recherche
+  exacte nécessaire. Aucune borne uniforme de coût logarithmique ne découle
+  de cette règle.
+
+Autre piste, non implémentée : une entrée de cache géométrique par BallKey
+peut mémoriser jusqu’à K+1 points intérieurs certifiés. K+1 témoins distincts
+garantissent un point hors de toute sélection de cardinal K. Moins de
+témoins sans candidat disponible ne prouve rien : reprendre la recherche,
+sauf certificat explicite que la liste intérieure est complète. Une table
+évictive bornée en fonction de n peut maîtriser sa résidence ; ce n’est ni
+un plafond de validité ni une preuve que ce cache paierait.
+
+Les mesures à demander au prototype apparié sont : requêtes, succès/absences,
+MEB et supports exacts, visites de nœuds, exclusions `lo>=0`, plages
+`hi<0`, tests d’appartenance dans ces plages, tests de puissance, longueur
+totale/max des chaînes, étapes à rayon égal, capacité des piles/caches,
+temps du resolver et temps de bout en bout. Séparer une baisse de longueur
+de descente d’une baisse du coût par requête. Sur GPU, inclure transferts,
+files de chaînes actives et synchronisations ; aucun temps GPU n’est
+rapporté ici.
+
+## 6. Limites de volume et prochaine frontière de preuve
+
+Le graphe occupe O(A+R) références, A étant le nombre d’ancres programmées
+et R le nombre de représentants. En régime régulier, une boule contribue
+au plus deux ancres et quatre représentants dans la tour ; un plateau
+peut coûter davantage via son quotient de coquille. Cela ne donne pas
+A=O(n), ni R=O(n), ni une longueur de descente sous-quadratique.
+
+La [borne de sortie FULL](../../morsehgp3D_v7/docs/CROISSANCE_ET_BORNE_DE_SORTIE.md)
+interdit une promesse générale sous-quadratique en n pour une sortie
+explicite indépendante de sa taille, à précision croissante. Elle ne
+constitue pas une asymptotique infinie dans l’univers u16 fixé. La bonne
+séparation reste volume de sortie, travail intermédiaire et coût de
+matérialisation. Le graphe évite Gamma mais ne fait pas disparaître une
+sortie quadratique.
+
+Une future qualification produit devrait comparer tour28, corpus complet
+de l’auditeur, couvertures datées, parents pré-lot et verticale, sur les
+mêmes octets statiques/temporaux, puis seulement mesurer 8k/16k/32k et G4.
+Cette note n’établit aucun contrat 50k/1 s, aucune exactitude industrielle
+globale, aucune nouvelle implémentation GPU. GCP non utilisé.

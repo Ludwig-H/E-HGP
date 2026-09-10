@@ -1,0 +1,166 @@
+{
+  "GCP_used": false,
+  "binary_sha256": "cf50a841ceb6102e93dfacb734860d63d3d3a6e9bdce04e44a1be210c550b964",
+  "commands": [
+    {
+      "argv": [
+        "g++",
+        "--version"
+      ],
+      "closed": true,
+      "ended_ns": 1789072680304314569,
+      "exit_code": 0,
+      "name": "compiler",
+      "pid": 649695,
+      "started_ns": 1789072680301187184,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8"
+    },
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-O3",
+        "-DNDEBUG",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_optimized_g4_20260910/local_r1/compile.d",
+        "/workspaces/E-HGP/build/v7_optimized_g4_20260910/local_r1/snapshot/morsehgp3D_v7/bench/full_ball_tower_probe.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_optimized_g4_20260910/local_r1/full_ball_probe"
+      ],
+      "closed": true,
+      "ended_ns": 1789072700934908781,
+      "exit_code": 0,
+      "name": "compile",
+      "pid": 649696,
+      "started_ns": 1789072680304750141,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/workspaces/E-HGP/build/v7_optimized_g4_20260910/local_r1/full_ball_probe",
+        "--n=400",
+        "--s=8",
+        "--kmax=10",
+        "--threads=1"
+      ],
+      "closed": true,
+      "ended_ns": 1789072705174157019,
+      "exit_code": 0,
+      "name": "n400_s8",
+      "pid": 651244,
+      "started_ns": 1789072700936551867,
+      "stderr_sha256": "3aabf4c5025140793e636e23703511377891015e41028632644254aaeb1af623",
+      "stdout_sha256": "31762db63c733ff2b97da7d6f02c87e4accef3f607813ef9f3ebb8cc791b9bb8"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/workspaces/E-HGP/build/v7_optimized_g4_20260910/local_r1/full_ball_probe",
+        "--n=8000",
+        "--s=8",
+        "--kmax=10",
+        "--threads=1"
+      ],
+      "closed": true,
+      "ended_ns": 1789072941558008641,
+      "exit_code": 0,
+      "name": "n8000_s8",
+      "pid": 651585,
+      "started_ns": 1789072705175946026,
+      "stderr_sha256": "a1f9c5cb6ae8d14efe756d88133b4f293f4fa9cd0b464388729a6f2ff04e5d5f",
+      "stdout_sha256": "6351d49a5638211f63487010a0dc8f636f2abc9d16eb3f539386b4706b3a346b"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/workspaces/E-HGP/build/v7_optimized_g4_20260910/local_r1/full_ball_probe",
+        "--n=16000",
+        "--s=8",
+        "--kmax=10",
+        "--threads=1"
+      ],
+      "closed": true,
+      "ended_ns": 1789073296300754171,
+      "exit_code": 0,
+      "name": "n16000_s8",
+      "pid": 687572,
+      "started_ns": 1789072941563668237,
+      "stderr_sha256": "e27b5ad475da2211770e1c7d55deefbb494b53b49355bdb7536ca3eddb3231a9",
+      "stdout_sha256": "f8cae0982d7cfe2867f7dac0f1a75407e99e79ef61d4d2c9b82390b384604b76"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/workspaces/E-HGP/build/v7_optimized_g4_20260910/local_r1/full_ball_probe",
+        "--n=32000",
+        "--s=8",
+        "--kmax=10",
+        "--threads=1"
+      ],
+      "closed": true,
+      "ended_ns": 1789074034458852783,
+      "exit_code": 0,
+      "name": "n32000_s8",
+      "pid": 718712,
+      "started_ns": 1789073296302121703,
+      "stderr_sha256": "e97a914e700dcb0a8f944ef085f5a3452692909c647d6171b6b0cc370b033c59",
+      "stdout_sha256": "f043f9095b7703a2b11ff2b79c7a4148c029e29dd6f03fdff850c73fd5f477e1"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/workspaces/E-HGP/build/v7_optimized_g4_20260910/local_r1/full_ball_probe",
+        "--n=8000",
+        "--s=10",
+        "--kmax=10",
+        "--threads=1"
+      ],
+      "closed": true,
+      "ended_ns": 1789074183959727106,
+      "exit_code": 0,
+      "name": "n8000_s10",
+      "pid": 833945,
+      "started_ns": 1789074034460210306,
+      "stderr_sha256": "2b225aff42d04e5bea55fd68d1985bde4e403bd398f4ecb10570a1814b2e3977",
+      "stdout_sha256": "57a0d1036a9418545de537a68b7d00d3e2594c28c15546f0d3fd9bf0711de71b"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/workspaces/E-HGP/build/v7_optimized_g4_20260910/local_r1/full_ball_probe",
+        "--n=8000",
+        "--s=12",
+        "--kmax=10",
+        "--threads=1"
+      ],
+      "closed": true,
+      "ended_ns": 1789074341409754112,
+      "exit_code": 0,
+      "name": "n8000_s12",
+      "pid": 841165,
+      "started_ns": 1789074183961089358,
+      "stderr_sha256": "04c6aa6f400f4da53847bfe620a4ed6b8c5c4c167683554b755d83077b8a812d",
+      "stdout_sha256": "0244fbf18d9e732cd35adeceeba5e11de22f73a49680f48ec3c3ecbb738ffb72"
+    }
+  ],
+  "performance_scope": "local_single_diagnostic_shared_host",
+  "public_status": "not_claimed",
+  "source_snapshot_retained": true,
+  "sources_stable": true,
+  "status": "completed"
+}

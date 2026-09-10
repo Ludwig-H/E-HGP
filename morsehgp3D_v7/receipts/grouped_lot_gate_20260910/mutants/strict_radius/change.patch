@@ -1,0 +1,11 @@
+--- a/morsehgp3D_v7/src/forest/full_ball_tower.hpp
++++ b/morsehgp3D_v7/src/forest/full_ball_tower.hpp
+@@ -437,7 +437,7 @@
+       std::sort(sites.begin(), sites.end());
+       auto next = meb(sites, st.resolve_work);
+       const int cmp = compare_exact_level(next.level, local.level);
+-      require(cmp <= 0, "full_ball_radius_increased");
++      require(cmp < 0, "full_ball_radius_increased");
+       if (cmp == 0) {
+         require(next.key == local.key && next.selected_shell_count + 1 == local.selected_shell_count,
+                 "full_ball_equal_radius_shell_not_decreased");

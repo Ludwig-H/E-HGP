@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "g++",
+    "--version"
+  ],
+  "expected_code": 0,
+  "name": "compiler",
+  "started_epoch": 1789071688.8806195
+}

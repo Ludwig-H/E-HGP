@@ -1,0 +1,214 @@
+[
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v7_static_anchor_graph_20260910/graph_oracle.py"
+    ],
+    "returncode": 0,
+    "name": "normal_nominal",
+    "stdout_sha256": "61aebcd7e8e2150704e5ed74cf49ff7beef362181fd9fcc0ec8a44fb916a36cf",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v7_static_anchor_graph_20260910/graph_oracle.py",
+      "--mutant",
+      "drop_vertex_activation"
+    ],
+    "returncode": 1,
+    "name": "normal_drop_vertex_activation",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "cd1fac9da44183dde64aafb416ebcb65a2a493eab6851990df3347159b0c0fda"
+  },
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v7_static_anchor_graph_20260910/graph_oracle.py",
+      "--mutant",
+      "drop_unary_contribution"
+    ],
+    "returncode": 1,
+    "name": "normal_drop_unary_contribution",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "6b144436aa2235477bb7ea624f9e627c0d4d8d54958fa43edebe1bf8f71ab08d"
+  },
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v7_static_anchor_graph_20260910/graph_oracle.py",
+      "--mutant",
+      "count_keys_not_roots"
+    ],
+    "returncode": 1,
+    "name": "normal_count_keys_not_roots",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "6158a15919b839b0a31499714ce87105997a566bdcae20670207e8e0fb6ed82e"
+  },
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v7_static_anchor_graph_20260910/graph_oracle.py",
+      "--mutant",
+      "binary_same_level"
+    ],
+    "returncode": 1,
+    "name": "normal_binary_same_level",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "6158a15919b839b0a31499714ce87105997a566bdcae20670207e8e0fb6ed82e"
+  },
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v7_static_anchor_graph_20260910/graph_oracle.py",
+      "--mutant",
+      "vertical_open"
+    ],
+    "returncode": 1,
+    "name": "normal_vertical_open",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e34323540d0e27b0303dc4f6dfbeb7288fe09244b1d0bbeff6cabb01c459463c"
+  },
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v7_static_anchor_graph_20260910/graph_oracle.py",
+      "--mutant",
+      "admit_global_key_without_K"
+    ],
+    "returncode": 1,
+    "name": "normal_admit_global_key_without_K",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "4404f10c4281c5c748c778a3b07705c8327553d17145c21f9204d08b1183ec82"
+  },
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v7_static_anchor_graph_20260910/graph_oracle.py",
+      "--mutant",
+      "consult_partial_calendar"
+    ],
+    "returncode": 1,
+    "name": "normal_consult_partial_calendar",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "87009b07350fc8a6a8d0d81ab3cdcdafb5d3e832035950cfe7713570ab947bb8"
+  },
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v7_static_anchor_graph_20260910/graph_oracle.py"
+    ],
+    "returncode": 0,
+    "name": "opt_nominal",
+    "stdout_sha256": "61aebcd7e8e2150704e5ed74cf49ff7beef362181fd9fcc0ec8a44fb916a36cf",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v7_static_anchor_graph_20260910/graph_oracle.py",
+      "--mutant",
+      "drop_vertex_activation"
+    ],
+    "returncode": 1,
+    "name": "opt_drop_vertex_activation",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "cd1fac9da44183dde64aafb416ebcb65a2a493eab6851990df3347159b0c0fda"
+  },
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v7_static_anchor_graph_20260910/graph_oracle.py",
+      "--mutant",
+      "drop_unary_contribution"
+    ],
+    "returncode": 1,
+    "name": "opt_drop_unary_contribution",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "6b144436aa2235477bb7ea624f9e627c0d4d8d54958fa43edebe1bf8f71ab08d"
+  },
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v7_static_anchor_graph_20260910/graph_oracle.py",
+      "--mutant",
+      "count_keys_not_roots"
+    ],
+    "returncode": 1,
+    "name": "opt_count_keys_not_roots",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "6158a15919b839b0a31499714ce87105997a566bdcae20670207e8e0fb6ed82e"
+  },
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v7_static_anchor_graph_20260910/graph_oracle.py",
+      "--mutant",
+      "binary_same_level"
+    ],
+    "returncode": 1,
+    "name": "opt_binary_same_level",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "6158a15919b839b0a31499714ce87105997a566bdcae20670207e8e0fb6ed82e"
+  },
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v7_static_anchor_graph_20260910/graph_oracle.py",
+      "--mutant",
+      "vertical_open"
+    ],
+    "returncode": 1,
+    "name": "opt_vertical_open",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e34323540d0e27b0303dc4f6dfbeb7288fe09244b1d0bbeff6cabb01c459463c"
+  },
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v7_static_anchor_graph_20260910/graph_oracle.py",
+      "--mutant",
+      "admit_global_key_without_K"
+    ],
+    "returncode": 1,
+    "name": "opt_admit_global_key_without_K",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "4404f10c4281c5c748c778a3b07705c8327553d17145c21f9204d08b1183ec82"
+  },
+  {
+    "command": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v7_static_anchor_graph_20260910/graph_oracle.py",
+      "--mutant",
+      "consult_partial_calendar"
+    ],
+    "returncode": 1,
+    "name": "opt_consult_partial_calendar",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "87009b07350fc8a6a8d0d81ab3cdcdafb5d3e832035950cfe7713570ab947bb8"
+  }
+]

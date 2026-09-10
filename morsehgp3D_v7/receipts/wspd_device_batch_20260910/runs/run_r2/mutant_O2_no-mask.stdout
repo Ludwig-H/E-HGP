@@ -1,0 +1,14 @@
+backend=stub-hote sm=0.0 public_status=not_claimed
+failure=scalar_counts_and_DFS_counters
+failure=scalar_counts_and_DFS_counters
+failure=scalar_counts_and_DFS_counters
+failure=scalar_counts_and_DFS_counters
+failure=scalar_counts_and_DFS_counters
+failure=scalar_counts_and_DFS_counters
+failure=scalar_counts_and_DFS_counters
+failure=scalar_counts_and_DFS_counters
+failure=scalar_counts_and_DFS_counters
+failure=scalar_counts_and_DFS_counters
+failure=scalar_counts_and_DFS_counters
+failure=scalar_counts_and_DFS_counters
+checks=74164 failures=6456 rows=73899 positive=14925,6867,5903 corners=55663 cores_zero=46976 cores_positive=100822 weighted_rows=1617 s8_s10_s12=178,185,192 rejected=0 semantic_differences=6456

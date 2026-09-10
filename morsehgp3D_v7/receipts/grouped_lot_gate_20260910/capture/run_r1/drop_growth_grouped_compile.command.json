@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-isystem",
+    "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-O2",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/drop_growth_grouped.d",
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/drop_growth_grouped/morsehgp3D_v7/tests/full_ball_tower_gate.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/drop_growth_grouped"
+  ],
+  "closed": true,
+  "ended_epoch": 1789071846.3774161,
+  "exit_code": 1,
+  "expected_code": 0,
+  "name": "drop_growth_grouped_compile",
+  "pid": 604857,
+  "started_epoch": 1789071833.126111,
+  "stderr_sha256": "a1b1ec86410f3bc4f4fddb8a8753c55e9cb164ac3147a52aa7ba8d9a1c904e4e",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_named_blocks_gate_20260910_r1/observer_o2",
+    "--not-a-mode"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": 2,
+  "expected_exit_code": 2,
+  "seconds": 0.002183767002861714,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment_overrides": {}
+}

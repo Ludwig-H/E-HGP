@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "/usr/bin/g++",
+    "-O3",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-MMD",
+    "-MF",
+    "/tmp/ehgp-full-v7-73766fa52dcfc59b.M5DKWfCPIl/output/full_probe.d",
+    "/tmp/ehgp-full-v7-73766fa52dcfc59b.M5DKWfCPIl/source/morsehgp3D_v7/bench/full_ball_tower_probe.cpp",
+    "-o",
+    "/tmp/ehgp-full-v7-73766fa52dcfc59b.M5DKWfCPIl/output/full_probe"
+  ],
+  "cwd": "/tmp/ehgp-full-v7-73766fa52dcfc59b.M5DKWfCPIl/output",
+  "elapsed_seconds": 8.076362895000003,
+  "ended_utc": "2026-09-10T20:43:58.450284+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 1861,
+  "session_work_deadline_epoch": 1789074462,
+  "started_utc": "2026-09-10T20:43:50.373896+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

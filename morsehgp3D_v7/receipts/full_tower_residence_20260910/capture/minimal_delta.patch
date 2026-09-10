@@ -1,0 +1,51 @@
+--- a/morsehgp3D_v7/src/forest/full_ball_tower.hpp
++++ b/morsehgp3D_v7/src/forest/full_ball_tower.hpp
+@@ -203,6 +203,19 @@
+       lower_history = std::move(current);
+       lower_anchors = std::move(anchors);
+     }
++    // Private residence experiment: these construction indices and histories
++    // are dead after the last order; no published object references them.
++    lower_history = {};
++    decltype(lower_anchors)().swap(lower_anchors);
++    decltype(identity)().swap(identity);
++    decltype(by_key)().swap(by_key);
++    decltype(programs)().swap(programs);
++    decltype(extra)().swap(extra);
++    decltype(population_ids)().swap(population_ids);
++    decltype(anchors)().swap(anchors);
++    decltype(compressed)().swap(compressed);
++    current = {};
++    decltype(stack)().swap(stack);
+     auto bank = build_full_coverage_populations(domain, populations);
+     require(bank.status == FullCertificateStatus::kOk, "full_ball_population_bank",
+         bank.status == FullCertificateStatus::kResourceExhausted ? FullBallStatus::kResourceExhausted
+--- a/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp
++++ b/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp
+@@ -165,6 +165,26 @@
+     FullCoverageBuildResult result;
+     auto& out = result.value;
+     std::vector<u8> live;
++    // Private residence experiment: exact structural sizes only. No action,
++    // identity, population reference or validation order is changed.
++    size_t node_count = 0, parent_count = 0, contribution_count = 0;
++    const auto count = [](size_t& total, size_t amount) {
++      if (amount > std::numeric_limits<size_t>::max() - total)
++        throw std::length_error("coverage arena size overflow");
++      total += amount;
++    };
++    for (const auto& batch : batches) for (const auto& action : batch.actions) {
++      if (action.parents.size() != 1) {
++        count(node_count, 1);
++        count(parent_count, action.parents.size());
++      }
++      count(contribution_count, action.contributions.size());
++    }
++    out.nodes_.reserve(node_count);
++    out.parents_.reserve(parent_count);
++    out.successors_.reserve(node_count);
++    out.contributions_.reserve(contribution_count);
++    live.reserve(node_count);
+     for (size_t b = 0; b < batches.size(); ++b) {
+       const auto& batch = batches[b];
+       if (batch.level.den <= 0) return invalid("coverage_invalid_level");

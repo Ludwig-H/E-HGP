@@ -1,0 +1,382 @@
+{
+  "CUDA_executed": false,
+  "GCP_used": false,
+  "commands": [
+    {
+      "argv": [
+        "g++",
+        "--version"
+      ],
+      "closed": true,
+      "ended_epoch": 1789071688.8836224,
+      "exit_code": 0,
+      "expected_code": 0,
+      "name": "compiler",
+      "pid": 572324,
+      "started_epoch": 1789071688.8806195,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8"
+    },
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O2",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/tower_o2.d",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/baseline/morsehgp3D_v7/tests/full_ball_tower_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/tower_o2"
+      ],
+      "closed": true,
+      "ended_epoch": 1789071701.2219608,
+      "exit_code": 0,
+      "expected_code": 0,
+      "name": "tower_o2_compile",
+      "pid": 572325,
+      "started_epoch": 1789071688.8840382,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/tower_o2",
+        "--selftest"
+      ],
+      "closed": true,
+      "ended_epoch": 1789071701.799671,
+      "exit_code": 0,
+      "expected_code": 0,
+      "name": "tower_o2_run",
+      "pid": 572613,
+      "started_epoch": 1789071701.2229779,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "d9d1f0fbe9c0878517126dcc0e6f5a46c3905e03f29b8f3394a15ab85b967e3b"
+    },
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O1",
+        "-g",
+        "-fno-omit-frame-pointer",
+        "-fsanitize=address,undefined",
+        "-no-pie",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/tower_san.d",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/baseline/morsehgp3D_v7/tests/full_ball_tower_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/tower_san"
+      ],
+      "closed": true,
+      "ended_epoch": 1789071736.4643505,
+      "exit_code": 0,
+      "expected_code": 0,
+      "name": "tower_san_compile",
+      "pid": 572621,
+      "started_epoch": 1789071701.8007457,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/tower_san",
+        "--selftest"
+      ],
+      "closed": true,
+      "ended_epoch": 1789071743.7164555,
+      "exit_code": 0,
+      "expected_code": 0,
+      "name": "tower_san_run",
+      "pid": 573817,
+      "started_epoch": 1789071736.4820864,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "d9d1f0fbe9c0878517126dcc0e6f5a46c3905e03f29b8f3394a15ab85b967e3b"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/tower_o2",
+        "--unknown"
+      ],
+      "closed": true,
+      "ended_epoch": 1789071743.7356834,
+      "exit_code": 2,
+      "expected_code": 2,
+      "name": "tower_argument",
+      "pid": 574269,
+      "started_epoch": 1789071743.733054,
+      "stderr_sha256": "4b9eeadc562c94288f788d79631dcc662f5b8c306e7232ccdc083094698a2e85",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O2",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/work_o2.d",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/baseline/morsehgp3D_v7/tests/full_ball_work_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/work_o2"
+      ],
+      "closed": true,
+      "ended_epoch": 1789071757.1484559,
+      "exit_code": 0,
+      "expected_code": 0,
+      "name": "work_o2_compile",
+      "pid": 574270,
+      "started_epoch": 1789071743.736126,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/work_o2",
+        "--selftest"
+      ],
+      "closed": true,
+      "ended_epoch": 1789071757.7844446,
+      "exit_code": 0,
+      "expected_code": 0,
+      "name": "work_o2_run",
+      "pid": 575069,
+      "started_epoch": 1789071757.1493168,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "ce55c70bd0e6d2471d5c8a36704b718c9bed052712256aa2c67ddc6faed23505"
+    },
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O1",
+        "-g",
+        "-fno-omit-frame-pointer",
+        "-fsanitize=address,undefined",
+        "-no-pie",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/work_san.d",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/baseline/morsehgp3D_v7/tests/full_ball_work_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/work_san"
+      ],
+      "closed": true,
+      "ended_epoch": 1789071793.8005128,
+      "exit_code": 0,
+      "expected_code": 0,
+      "name": "work_san_compile",
+      "pid": 575071,
+      "started_epoch": 1789071757.7853005,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/work_san",
+        "--selftest"
+      ],
+      "closed": true,
+      "ended_epoch": 1789071801.0359824,
+      "exit_code": 0,
+      "expected_code": 0,
+      "name": "work_san_run",
+      "pid": 575993,
+      "started_epoch": 1789071793.8197749,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "ce55c70bd0e6d2471d5c8a36704b718c9bed052712256aa2c67ddc6faed23505"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/work_o2",
+        "--unknown"
+      ],
+      "closed": true,
+      "ended_epoch": 1789071801.0503678,
+      "exit_code": 2,
+      "expected_code": 2,
+      "name": "work_argument",
+      "pid": 576558,
+      "started_epoch": 1789071801.0477245,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O2",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/front_o2.d",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/baseline/morsehgp3D_v7/tests/witness_front_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/front_o2"
+      ],
+      "closed": true,
+      "ended_epoch": 1789071806.7004213,
+      "exit_code": 0,
+      "expected_code": 0,
+      "name": "front_o2_compile",
+      "pid": 576559,
+      "started_epoch": 1789071801.0507836,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/front_o2",
+        "--selftest"
+      ],
+      "closed": true,
+      "ended_epoch": 1789071807.712002,
+      "exit_code": 0,
+      "expected_code": 0,
+      "name": "front_o2_run",
+      "pid": 576814,
+      "started_epoch": 1789071806.7011175,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "d0aef188a546ca8a24a3d01c073c248964df778cd215c361bc17eb61d27b4cd8"
+    },
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O1",
+        "-g",
+        "-fno-omit-frame-pointer",
+        "-fsanitize=address,undefined",
+        "-no-pie",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/front_san.d",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/baseline/morsehgp3D_v7/tests/witness_front_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/front_san"
+      ],
+      "closed": true,
+      "ended_epoch": 1789071824.7654827,
+      "exit_code": 0,
+      "expected_code": 0,
+      "name": "front_san_compile",
+      "pid": 590232,
+      "started_epoch": 1789071807.7127347,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/front_san",
+        "--selftest"
+      ],
+      "closed": true,
+      "ended_epoch": 1789071833.0978968,
+      "exit_code": 0,
+      "expected_code": 0,
+      "name": "front_san_run",
+      "pid": 591089,
+      "started_epoch": 1789071824.7702417,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "d0aef188a546ca8a24a3d01c073c248964df778cd215c361bc17eb61d27b4cd8"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/front_o2",
+        "--unknown"
+      ],
+      "closed": true,
+      "ended_epoch": 1789071833.105127,
+      "exit_code": 2,
+      "expected_code": 2,
+      "name": "front_argument",
+      "pid": 604856,
+      "started_epoch": 1789071833.1026208,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O2",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/drop_growth_grouped.d",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/drop_growth_grouped/morsehgp3D_v7/tests/full_ball_tower_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/drop_growth_grouped"
+      ],
+      "closed": true,
+      "ended_epoch": 1789071846.3774161,
+      "exit_code": 1,
+      "expected_code": 0,
+      "name": "drop_growth_grouped_compile",
+      "pid": 604857,
+      "started_epoch": 1789071833.126111,
+      "stderr_sha256": "a1b1ec86410f3bc4f4fddb8a8753c55e9cb164ac3147a52aa7ba8d9a1c904e4e",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "error": "RuntimeError: drop_growth_grouped_compile unexpected code",
+  "mutants": {},
+  "nominal": {
+    "front_o2": "9829acc33ce37c9f28da140193421224d0511146a5bea28309105969784770fe",
+    "front_san": "dd9346700c3ec93d7ac179032a07e4f28cf8454d40f756404ee653d10448a626",
+    "tower_o2": "d31a2610a7a4b597498b282374f6a0a9e1e4155f7962f70021258986dd4f3097",
+    "tower_san": "ad9a268caada409144837b8d646cba3f02e18cac4752a3cee764435c60abc884",
+    "work_o2": "e9938a8efdd2276928a60fcc4cf4e1fe850cfecc2ff41c07620705e2f81acbaa",
+    "work_san": "def9714f24df438b34e5ede1fe1b80ab16e8970768fc16a6caa63b72ffcfdaa2"
+  },
+  "status": "failed"
+}

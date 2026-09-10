@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/usr/bin/time",
+    "-v",
+    "/workspaces/E-HGP/build/v7_optimized_g4_20260910/local_r1/full_ball_probe",
+    "--n=8000",
+    "--s=10",
+    "--kmax=10",
+    "--threads=1"
+  ],
+  "name": "n8000_s10",
+  "started_ns": 1789074034460210306
+}

@@ -100,9 +100,16 @@ interdit une promesse FULL explicite sous-quadratique universelle en n.
 Les brouillons de journaux sont encore retenus avant encodage : leur
 résidence et les allocations par représentant restent des coûts à réduire.
 
+Le [delta cache/résidence](OPTIMISATIONS_CACHE_ET_GPU_20260910.md) mémorise
+les résolutions par clé entière, normalise tout token à la coupe pré-lot et
+sème I union U seulement après fermeture à K=p+u. Collisions et allocation
+impossible n'élident aucun travail requis. Il libère aussi les états morts
+avant la banque finale et réserve les arènes exactes du journal v2.
+Cela ne supprime pas encore les brouillons globaux du journal.
+
 ## Qualification et instrument
 
-Le [paquet de preuves locales](../receipts/ball_tower_20260910/README.md)
+Le [paquet initial de preuves locales](../receipts/ball_tower_20260910/README.md)
 conserve les sources dédupliquées, commandes, échecs et limites de provenance.
 La gate indépendante Gram/Gamma juge 24 variantes, 100 ordres, 2 136
 coupes ouvertes/fermées et 35 462 images verticales : 130 734 contrôles
@@ -112,6 +119,14 @@ descente strictement en rayon. Le normaliseur temporel conserve ces
 résultats et rejette aussi l'activation anticipée de toutes les fusions.
 La MEB libre a sa qualification séparée : 605 cas dont 197 extra-shells,
 300 permutations, trois mutants. Aucune de ces gates n'est le chemin produit.
+
+Le [paquet courant](../receipts/ball_resolver_residence_20260910/README.md)
+porte le moteur avec cache : 28 nuages, 112 ordres, 2 508 coupes,
+45 948 verticales et 170 320 contrôles O2/SAN. Six mutants causaux sont
+tués, notamment croissance et ancre inerte dans le chemin des lots groupés.
+Le défaut `new(nothrow)` de l'injecteur ASan est corrigé dans le test,
+avec conservation de son échec antérieur. Vingt CTests CPU passent sur
+sources stables dans le [reçu d'échelle](../receipts/full_ball_scale_gpu_20260910/README.md).
 
 `bench/full_ball_tower_probe.cpp` mesure entrée, index, génération WSPD,
 tri/RLE, prefilter, census, tour retenue et empreinte du payload. Elle garde
@@ -125,13 +140,17 @@ pour prefilter/census. Le contexte froid, ses allocations, transferts et
 libérations sont inclus dans le temps. WSPD, tri et constructeur FULL
 restent CPU. La taille du lot device borne une résidence, pas le nombre
 de points ni le nombre total de candidats.
-La gate de cette route passe 16 627 contrôles dans le stub hôte ; **NVCC
-et device G4 ne sont pas encore qualifiés**. Le premier démarrage G4 du
-10 septembre a été refusé par le quota global GPU déjà occupé, et la cible
-E-HGP a été contrôlée `TERMINATED`. Aucun résultat GPU n'en découle.
+La gate de cette route passe 16 627 contrôles dans le stub hôte et sur le
+vrai device G4 SM12.0, dont 4 116 boules et 17 rejets. Le build strict NVCC
+utilise l'adaptateur de phases qualifié séparément. Les [tours 50k](RESULTATS_TOUR_CACHE_G4_20260910.md)
+coïncident CPU/hybride : environ 419 s K1..10 et 33,6 s K1..5. Les deux
+générations SPOT utilisées sont arrêtées et certifiées `TERMINATED`.
 
 Les contrats 50k/1s, 100ms et plusieurs dizaines de millions de points
-ne sont pas acquis. Le prochain port GPU utile vise les requêtes de témoins
+ne sont pas acquis. Le coût FULL dominant motive d'abord la
+[séparation statique prouvée sous census complet](../audits/receipts_raccord_ancres_20260910/suite_cache_20260910/NOTE_PHASE_STATIQUE_MEB.md)
+des MEB et du calcul temporel des parents ; cette variante n'est pas encore
+le moteur produit. Un autre port GPU utile vise les requêtes de témoins
 universels par rectangle WSPD, dont le reçu historique 50k compte près de
 cinq milliards de visites d'index. Un kernel de census dans une boule fixe
 ne remplace pas ce prédicat universel sur A×B ; son port doit conserver

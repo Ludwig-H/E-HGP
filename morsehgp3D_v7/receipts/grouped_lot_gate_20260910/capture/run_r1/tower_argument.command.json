@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/tower_o2",
+    "--unknown"
+  ],
+  "closed": true,
+  "ended_epoch": 1789071743.7356834,
+  "exit_code": 2,
+  "expected_code": 2,
+  "name": "tower_argument",
+  "pid": 574269,
+  "started_epoch": 1789071743.733054,
+  "stderr_sha256": "4b9eeadc562c94288f788d79631dcc662f5b8c306e7232ccdc083094698a2e85",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

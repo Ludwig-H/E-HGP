@@ -1,0 +1,178 @@
+--- a/morsehgp3D_v7/src/forest/full_ball_tower.hpp
++++ b/morsehgp3D_v7/src/forest/full_ball_tower.hpp
+@@ -20,6 +20,11 @@
+     "direct_unitary_lots_and_grouped_dsu_slots_v1";
+ inline constexpr const char* kFullBallLowerAccounting =
+     "monotone_lower_edge_activation_ranked_union_find_v1";
++inline constexpr const char* kFullBallResolverCacheAccounting =
++    "exact_direct_mapped_facet_tokens_16n_per_order_v1";
++#ifndef MHGP7_PRIVATE_RESOLVER_SEED
++#define MHGP7_PRIVATE_RESOLVER_SEED 0
++#endif
+ enum class FullBallStatus { kCompleteRelative, kInvalidInput, kResourceExhausted, kInvariantViolated };
+ struct FullBallStats {
+   u64 records = 0, extra_records = 0, anchor_blocks = 0, regular_blocks = 0, extra_blocks = 0;
+@@ -30,6 +35,9 @@
+   u64 declared_support_checks = 0, singleton_lots = 0, grouped_lots = 0, lot_dsu_slots = 0;
+   u64 lower_edges_indexed = 0, lower_nodes_activated = 0, lower_edges_activated = 0;
+   u64 lower_queries = 0, lower_find_steps = 0, lower_path_writes = 0;
++  u64 resolver_cache_queries = 0, resolver_cache_hits = 0, resolver_cache_stores = 0;
++  u64 resolver_cache_evictions = 0, resolver_cache_seed_stores = 0;
++  u64 resolver_cache_slots = 0, resolver_cache_reset_slots = 0, resolver_cache_bytes = 0;
+   AnchorMebWork validation_work, resolve_work;
+ };
+ struct FullBallOrder {
+@@ -156,18 +164,87 @@
+   bool interior = false;
+ };
+ 
++struct ResolverCacheEntry {
++  std::array<i32, kFacetMaxK> sites{};
++  u64 token = absent;
++};
++
++// Optional exact memo, never an authority or a source of geometric rejection.
++// Per-order reset binds every retained token to the current component namespace.
++// Collision replacement is constant work and cannot alter a successful answer.
++class ResolverCache {
++ public:
++  using Key = std::array<i32, kFacetMaxK>;
++  explicit ResolverCache(FullBallStats& stats) : st(stats) {}
++  void configure(size_t n) {
++    if (n > std::numeric_limits<size_t>::max() / 16) return;
++    const size_t target = n * 16;
++    size_t count = 1;
++    while (count < target) {
++      if (count > std::numeric_limits<size_t>::max() / 2) return;
++      count *= 2;
++    }
++    if (count > entries.max_size()) return;
++    try { entries.resize(count); }
++    catch (const std::bad_alloc&) { std::vector<ResolverCacheEntry>().swap(entries); return; }
++    catch (const std::length_error&) { std::vector<ResolverCacheEntry>().swap(entries); return; }
++    st.resolver_cache_slots = entries.size();
++    st.resolver_cache_bytes = entries.size() * sizeof(ResolverCacheEntry);
++  }
++  void reset() {
++    add(st.resolver_cache_reset_slots, entries.size());
++    for (auto& entry : entries) entry.token = absent;
++  }
++  static Key key(std::span<const i32> sites) {
++    Key value{};
++    std::copy(sites.begin(), sites.end(), value.begin());
++    return value;
++  }
++  u64 lookup(const Key& key) {
++    if (entries.empty()) return absent;
++    add(st.resolver_cache_queries);
++    const auto& entry = entries[slot(key)];
++    if (entry.token == absent || entry.sites != key) return absent;
++    add(st.resolver_cache_hits);
++    return entry.token;
++  }
++  void store(const Key& key, u64 token, bool seed = false) {
++    if (entries.empty()) return;
++    auto& entry = entries[slot(key)];
++    if (entry.token != absent && entry.sites != key) add(st.resolver_cache_evictions);
++    add(st.resolver_cache_stores);
++    if (seed) add(st.resolver_cache_seed_stores);
++    entry.sites = key; entry.token = token;
++  }
++ private:
++  FullBallStats& st;
++  std::vector<ResolverCacheEntry> entries;
++  size_t slot(const Key& key) const {
++    u64 hash = 0x9e3779b97f4a7c15ull;
++    for (i32 site : key) {
++      hash ^= static_cast<u32>(site) + 0x9e3779b97f4a7c15ull + (hash << 6) + (hash >> 2);
++    }
++    hash ^= hash >> 30; hash *= 0xbf58476d1ce4e5b9ull;
++    hash ^= hash >> 27; hash *= 0x94d049bb133111ebull;
++    hash ^= hash >> 31;
++    return static_cast<size_t>(hash) & (entries.size() - 1);
++  }
++};
++
+ class Builder {
+  public:
+   Builder(const CloudIndex& index, std::span<const BallData> census, unsigned max_k, FullBallStats& stats)
+-      : ix(index), balls(census), requested(max_k), st(stats) {}
++      : ix(index), balls(census), requested(max_k), st(stats), resolver_cache(stats) {}
+ 
+   std::vector<FullBallOrder> run() {
+     validate_catalogue();
++    if (kmax > 1) resolver_cache.configure(ix.upos.size());
+     std::vector<Draft> drafts;
+     History lower_history;
+     std::vector<u64> lower_anchors;
+     for (unsigned k = 1; k <= kmax; ++k) {
+       current_k = k;
++      if (k > 1) resolver_cache.reset();
+       anchors.assign(balls.size(), absent);
+       current = {}; compressed.clear();
+       MonotoneHistory lower_cursor(lower_history, st);
+@@ -229,6 +306,7 @@
+   std::span<const BallData> balls;
+   unsigned requested, kmax = 0, current_k = 0;
+   FullBallStats& st;
++  ResolverCache resolver_cache;
+   std::vector<PointId> domain;
+   std::vector<std::pair<PointId,i32>> identity;
+   std::vector<BallId> by_key;
+@@ -412,6 +490,9 @@
+       const PointId id = ix.point_id(sites.front());
+       return root(std::lower_bound(domain.begin(), domain.end(), id) - domain.begin(), prior_count);
+     }
++    const auto initial_key = ResolverCache::key(sites);
++    const u64 cached = resolver_cache.lookup(initial_key);
++    if (cached != absent) return root(cached, prior_count);
+     auto local = meb(sites, st.resolve_work);
+     u64 length = 0;
+     for (;;) {
+@@ -423,7 +504,9 @@
+         require(same_exact_level(balls[*found].level, local.level), "full_ball_anchor_level");
+         if (anchors[*found] != absent) {
+           add(st.anchor_hits); st.max_chain_steps = std::max(st.max_chain_steps, length);
+-          return root(anchors[*found], prior_count);  // hit BEFORE spatial query
++          const u64 resolved = root(anchors[*found], prior_count);
++          resolver_cache.store(initial_key, resolved);
++          return resolved;  // hit BEFORE spatial query
+         }
+         const auto& ball = balls[*found];
+         const unsigned lo = ball.n_interior + ball.arity - 1;
+@@ -444,6 +527,19 @@
+         add(st.same_radius_steps);
+       } else add(st.descending_steps);
+       add(length); local = next;
++    }
++  }
++
++  void seed_closed_anchor(BallId ball, u64 target) {
++    if constexpr (MHGP7_PRIVATE_RESOLVER_SEED != 0) {
++      const auto& b = balls[ball];
++      if (current_k < 2 || current_k != static_cast<unsigned>(b.n_interior) + b.n_shell) return;
++      ResolverCache::Key key{};
++      size_t n = 0;
++      for (i32 site : b.interior()) key[n++] = site;
++      for (i32 site : b.shell()) key[n++] = site;
++      std::sort(key.begin(), key.begin() + n);
++      resolver_cache.store(key, target, true);
+     }
+   }
+ 
+@@ -540,6 +636,7 @@
+       } else add(st.inert_blocks);
+       require(anchors[block.ball] == absent && target != absent, "full_ball_anchor_duplicate");
+       anchors[block.ball] = target;  // All representatives and the whole lot are closed.
++      seed_closed_anchor(block.ball, target);
+       return;
+     }
+     add(st.grouped_lots);
+@@ -596,6 +693,7 @@
+     for (size_t b = 0; b < blocks.size(); ++b) {
+       require(anchors[blocks[b].ball] == absent && targets[b] != absent, "full_ball_anchor_duplicate");
+       anchors[blocks[b].ball] = targets[b];
++      seed_closed_anchor(blocks[b].ball, targets[b]);
+     }
+   }
+ };

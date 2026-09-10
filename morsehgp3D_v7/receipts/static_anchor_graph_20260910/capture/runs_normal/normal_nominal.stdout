@@ -1,0 +1,325 @@
+{
+  "fixtures": [
+    {
+      "changed_target_blocks": 0,
+      "checks": {
+        "birth_events": 3,
+        "facet_cut_checks": 7,
+        "merge_events": 1,
+        "order_cuts": 8,
+        "prelot_target_checks": 2,
+        "vertical_birth_anchor_checks": 1,
+        "vertical_facet_checks": 1
+      },
+      "digest": "13b0a64f73afd538aa9ffc1505fdaf7ed85d522b8b8f4b21136de18ebb6f0767",
+      "first_work": {
+        "arcs": 2,
+        "geometry_table_reads": 2,
+        "representatives": 2,
+        "vertices": 4
+      },
+      "kmax": 2,
+      "last_checks": {
+        "birth_events": 3,
+        "facet_cut_checks": 7,
+        "merge_events": 1,
+        "order_cuts": 8,
+        "prelot_target_checks": 2,
+        "vertical_birth_anchor_checks": 1,
+        "vertical_facet_checks": 1
+      },
+      "last_work": {
+        "arcs": 2,
+        "geometry_table_reads": 2,
+        "representatives": 2,
+        "vertices": 4
+      },
+      "n": 2,
+      "name": "pair_terminal",
+      "named_checks": {
+        "omitted_vertex_activation_killed": true
+      }
+    },
+    {
+      "changed_target_blocks": 0,
+      "checks": {
+        "birth_events": 7,
+        "facet_cut_checks": 43,
+        "inert_events": 1,
+        "merge_events": 3,
+        "order_cuts": 30,
+        "prelot_target_checks": 9,
+        "vertical_birth_anchor_checks": 4,
+        "vertical_facet_checks": 16
+      },
+      "digest": "f5e9382d19748c27786c90b1176ef578c887e6280c3daabe4a37f7c5ccd87733",
+      "first_work": {
+        "arcs": 9,
+        "geometry_table_reads": 9,
+        "representatives": 9,
+        "vertices": 11
+      },
+      "kmax": 3,
+      "last_checks": {
+        "birth_events": 7,
+        "facet_cut_checks": 43,
+        "inert_events": 1,
+        "merge_events": 3,
+        "order_cuts": 30,
+        "prelot_target_checks": 9,
+        "vertical_birth_anchor_checks": 4,
+        "vertical_facet_checks": 16
+      },
+      "last_work": {
+        "arcs": 9,
+        "geometry_table_reads": 9,
+        "representatives": 9,
+        "vertices": 11
+      },
+      "n": 3,
+      "name": "triangle_reused_root",
+      "named_checks": {
+        "distinct_keys_are_not_parent_count": [
+          "9/2"
+        ]
+      }
+    },
+    {
+      "changed_target_blocks": 0,
+      "checks": {
+        "birth_events": 10,
+        "facet_cut_checks": 39,
+        "inert_events": 1,
+        "merge_events": 2,
+        "order_cuts": 24,
+        "prelot_target_checks": 13,
+        "vertical_birth_anchor_checks": 6,
+        "vertical_facet_checks": 19
+      },
+      "digest": "745d6335ea0d6ad89481fd9d3158393b25facaea1ffa86518d5c19d89361d3b8",
+      "first_work": {
+        "arcs": 13,
+        "geometry_table_reads": 13,
+        "representatives": 13,
+        "vertices": 16
+      },
+      "kmax": 4,
+      "last_checks": {
+        "birth_events": 10,
+        "facet_cut_checks": 39,
+        "inert_events": 1,
+        "merge_events": 2,
+        "order_cuts": 24,
+        "prelot_target_checks": 13,
+        "vertical_birth_anchor_checks": 6,
+        "vertical_facet_checks": 19
+      },
+      "last_work": {
+        "arcs": 13,
+        "geometry_table_reads": 13,
+        "representatives": 13,
+        "vertices": 16
+      },
+      "n": 4,
+      "name": "square",
+      "named_checks": {
+        "simultaneous_arity": 4,
+        "vertical_open_cut_killed": true
+      }
+    },
+    {
+      "changed_target_blocks": 0,
+      "checks": {
+        "birth_events": 10,
+        "facet_cut_checks": 71,
+        "growth_events": 1,
+        "inert_events": 1,
+        "merge_events": 4,
+        "order_cuts": 40,
+        "prelot_target_checks": 15,
+        "vertical_birth_anchor_checks": 6,
+        "vertical_facet_checks": 35
+      },
+      "digest": "4096797f7bd143f0bb342bcde74f81a0bb824b3295bd3de1a813415710093699",
+      "first_work": {
+        "arcs": 15,
+        "geometry_table_reads": 15,
+        "representatives": 15,
+        "vertices": 18
+      },
+      "kmax": 4,
+      "last_checks": {
+        "birth_events": 10,
+        "facet_cut_checks": 71,
+        "growth_events": 1,
+        "inert_events": 1,
+        "merge_events": 4,
+        "order_cuts": 40,
+        "prelot_target_checks": 15,
+        "vertical_birth_anchor_checks": 6,
+        "vertical_facet_checks": 35
+      },
+      "last_work": {
+        "arcs": 15,
+        "geometry_table_reads": 15,
+        "representatives": 15,
+        "vertices": 18
+      },
+      "n": 4,
+      "name": "ABCZ_growth",
+      "named_checks": {
+        "delete_unary_payload_killed": true
+      }
+    },
+    {
+      "changed_target_blocks": 0,
+      "checks": {
+        "birth_events": 23,
+        "facet_cut_checks": 1250,
+        "growth_events": 2,
+        "inert_events": 4,
+        "merge_events": 13,
+        "order_cuts": 90,
+        "prelot_target_checks": 51,
+        "vertical_birth_anchor_checks": 15,
+        "vertical_facet_checks": 1018
+      },
+      "digest": "96bf31282d4664fb259d6262b76eb06924b0f19ca9641ba52b8921c5aa4732b7",
+      "first_work": {
+        "arcs": 51,
+        "geometry_table_reads": 51,
+        "representatives": 51,
+        "vertices": 49
+      },
+      "kmax": 3,
+      "last_checks": {
+        "birth_events": 23,
+        "facet_cut_checks": 1250,
+        "growth_events": 2,
+        "inert_events": 4,
+        "merge_events": 13,
+        "order_cuts": 90,
+        "prelot_target_checks": 51,
+        "vertical_birth_anchor_checks": 15,
+        "vertical_facet_checks": 1018
+      },
+      "last_work": {
+        "arcs": 51,
+        "geometry_table_reads": 51,
+        "representatives": 51,
+        "vertices": 49
+      },
+      "n": 8,
+      "name": "ABCZ_doubled",
+      "named_checks": {}
+    },
+    {
+      "changed_target_blocks": 2,
+      "checks": {
+        "birth_events": 43,
+        "facet_cut_checks": 4378,
+        "inert_events": 8,
+        "merge_events": 27,
+        "order_cuts": 396,
+        "prelot_target_checks": 87,
+        "vertical_birth_anchor_checks": 35,
+        "vertical_facet_checks": 3858
+      },
+      "digest": "95bcf0e14566b953f1e1eeb4020ea826956cbc022d85e9e949ff80a3a2a251fe",
+      "first_work": {
+        "arcs": 87,
+        "equal_radius_steps": 1,
+        "geometry_table_reads": 92,
+        "present_but_order_inadmissible": 5,
+        "representatives": 87,
+        "strict_radius_steps": 4,
+        "vertices": 83
+      },
+      "kmax": 6,
+      "last_checks": {
+        "birth_events": 43,
+        "facet_cut_checks": 4378,
+        "inert_events": 8,
+        "merge_events": 27,
+        "order_cuts": 396,
+        "prelot_target_checks": 87,
+        "vertical_birth_anchor_checks": 35,
+        "vertical_facet_checks": 3858
+      },
+      "last_work": {
+        "arcs": 87,
+        "equal_radius_steps": 1,
+        "geometry_table_reads": 90,
+        "present_but_order_inadmissible": 3,
+        "representatives": 87,
+        "strict_radius_steps": 2,
+        "vertices": 83
+      },
+      "n": 8,
+      "name": "equal_radius_admitted_window",
+      "named_checks": {
+        "consumer_levels": [
+          "70058125/11236"
+        ],
+        "equal_radius_steps": 1,
+        "present_but_inadmissible_killed": true
+      }
+    },
+    {
+      "changed_target_blocks": 0,
+      "checks": {
+        "birth_events": 16,
+        "facet_cut_checks": 155,
+        "inert_events": 1,
+        "merge_events": 5,
+        "order_cuts": 60,
+        "prelot_target_checks": 26,
+        "vertical_birth_anchor_checks": 11,
+        "vertical_facet_checks": 100
+      },
+      "digest": "35e4b155f5afb96b1fd30de9c19e56148c3b6df01f110bc43598495adee38f36",
+      "first_work": {
+        "arcs": 26,
+        "geometry_table_reads": 26,
+        "representatives": 26,
+        "vertices": 30
+      },
+      "kmax": 5,
+      "last_checks": {
+        "birth_events": 16,
+        "facet_cut_checks": 155,
+        "inert_events": 1,
+        "merge_events": 5,
+        "order_cuts": 60,
+        "prelot_target_checks": 26,
+        "vertical_birth_anchor_checks": 11,
+        "vertical_facet_checks": 100
+      },
+      "last_work": {
+        "arcs": 26,
+        "geometry_table_reads": 26,
+        "representatives": 26,
+        "vertices": 30
+      },
+      "n": 5,
+      "name": "tetra_interior",
+      "named_checks": {}
+    }
+  ],
+  "production_Gamma_queries": 0,
+  "public_status": "not_claimed",
+  "schema": "mhgp7-private-static-anchor-graph-oracle-v1",
+  "status": "passed_relative_bounded",
+  "totals": {
+    "birth_events": 112,
+    "changed_target_blocks": 2,
+    "facet_cut_checks": 5943,
+    "growth_events": 3,
+    "inert_events": 16,
+    "merge_events": 55,
+    "order_cuts": 648,
+    "prelot_target_checks": 203,
+    "vertical_birth_anchor_checks": 78,
+    "vertical_facet_checks": 5047
+  }
+}

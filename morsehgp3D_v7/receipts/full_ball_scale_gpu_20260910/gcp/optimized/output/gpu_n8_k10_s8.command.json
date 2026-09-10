@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "/usr/bin/time",
+    "-v",
+    "/tmp/ehgp-full-v7-73766fa52dcfc59b.M5DKWfCPIl/output/full_probe_gpu",
+    "--n=8",
+    "--s=8",
+    "--kmax=10",
+    "--threads=48"
+  ],
+  "cwd": "/tmp/ehgp-full-v7-73766fa52dcfc59b.M5DKWfCPIl/output",
+  "elapsed_seconds": 0.26390336500000444,
+  "ended_utc": "2026-09-10T20:44:11.973473+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 2031,
+  "session_work_deadline_epoch": 1789074462,
+  "started_utc": "2026-09-10T20:44:11.709537+00:00",
+  "stderr_sha256": "e27de2d593207c3229808f6509347e3afc04516096e2b7d4699a2fe806d7c766",
+  "stdout_sha256": "1614ef9dca9c42b3c4dd31a2d28ed05fb358be6fbcf2c9086eac9254d07d794d"
+}

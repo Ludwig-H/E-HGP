@@ -1,0 +1,104 @@
+#!/usr/bin/env python3
+"""Read-only verification of the private rightmost-intruder experiment."""
+import hashlib
+import json
+from pathlib import Path
+import posixpath
+import shlex
+import statistics
+
+BASE = Path(__file__).resolve().parent
+HEADER = "morsehgp3D_v7/src/forest/full_ball_tower.hpp"
+KINDS = ("baseline", "rightmost")
+PAIRED = ("n", "s", "kmax", "threads", "seed", "coord", "orders", "raw", "unique", "balls", "nodes", "parent_refs", "contributions", "vertical_refs", "extra_records", "anchor_blocks", "representatives", "input_digest", "payload_digest", "declared_support_checks", "singleton_lots", "grouped_lots", "lot_dsu_slots")
+WORK = ("intruder_queries", "intruder_nodes", "intruder_power_tests", "interior_ranges", "resolver_meb_calls", "resolver_supports_tested", "max_chain_steps")
+
+
+def need(value, reason):
+    if not value:
+        raise SystemExit("rightmost_intruder_receipt: " + reason)
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def read(path):
+    return json.loads(path.read_text())
+
+
+if (BASE / "manifest.json").exists():
+    for name, digest in read(BASE / "manifest.json").items():
+        relative = Path(name)
+        need(not relative.is_absolute() and ".." not in relative.parts, "manifest path")
+        need(sha(BASE / relative) == digest, "manifest pin " + name)
+source = read(BASE / "source_before.json")
+need(source[HEADER] == "910f45baea1750b11d2b34f40c893c9d1a34f950705cdb127ffa226de60f7b2e", "active baseline pin")
+original = (BASE / "baseline" / HEADER).read_text()
+changed = original.replace("for (i32 u = range.first; u <= range.last; ++u) if (!member(u)) return u;", "for (i32 u = range.last; u >= range.first; --u) if (!member(u)) return u;")
+changed = changed.replace("stack.push_back(ix.nodes[node].right); stack.push_back(ix.nodes[node].left);", "stack.push_back(ix.nodes[node].left); stack.push_back(ix.nodes[node].right);")
+need((BASE / "rightmost" / HEADER).read_text() == changed, "exact two-line intruder delta")
+need(sha(BASE / "rightmost" / HEADER) == "7bb2ac1fab0a1cac8c516b01a6114ffa42ae608f46793cde325550a62bee3245", "private variant pin")
+variants = read(BASE / "variants_before.json")
+for kind in KINDS:
+    need({name:sha(BASE / kind / name) for name in variants[kind]} == variants[kind], "frozen variant source " + kind)
+    expected_changes = {"morsehgp3D_v7/bench/full_ball_tower_probe.cpp"} | ({HEADER} if kind == "rightmost" else set())
+    need({name for name in source if source[name] != variants[kind][name]} == expected_changes, "only declared private instrumentation and algorithm changes")
+adapters = (BASE / "intruder_adapters.hpp").read_text()
+for label, text in (("FirstIntruder", original), ("RightmostIntruder", changed)):
+    body = text[text.index("  i32 intruder("):text.index("  u64 resolve(")]
+    start = adapters.index("  i32 intruder(", adapters.index("struct " + label + " {"))
+    need(adapters[start:start+len(body)] == body, "exact extracted method under choice oracle")
+for path in BASE.glob("*_compiled_sources.json"):
+    consumed = read(path)
+    for name, digest in consumed.items():
+        need(sha(BASE / name) == digest, "actual compiled source pin")
+    dep = path.with_name(path.name.removesuffix("_compiled_sources.json") + ".d")
+    names = set()
+    for spelling in shlex.split(dep.read_text().replace("\\\n", " ").split(":", 1)[1]):
+        normalized = posixpath.normpath(spelling)
+        prefix = "/workspaces/E-HGP/build/v7_rightmost_intruder_20260910/"
+        need(normalized.startswith(prefix), "compiler dependency outside private experiment")
+        names.add(normalized[len(prefix):])
+    need(names == set(consumed), "observed compiler dependency inventory")
+for path in BASE.glob("*_sources_after.json"):
+    kind = path.name.split("_", 1)[0]
+    need(read(path) == variants[kind], "source unchanged through compilation/run")
+for path in sorted((BASE / "logs").glob("*.json")):
+    row = read(path)
+    need(row["exit_code"] == row["expected_exit_code"], "command code " + path.stem)
+    for suffix in ("stdout", "stderr"):
+        need(sha(path.with_suffix("." + suffix)) == row[suffix + "_sha256"], "captured output pin")
+    if path.stem.endswith("_compile"):
+        need(all(flag in row["argv"] for flag in ("-std=c++20", "-pthread", "-Wall", "-Wextra", "-Wpedantic", "-Werror", "-MMD")), "strict compiled gate")
+        need(not path.with_suffix(".stderr").read_bytes(), "compile diagnostics")
+for name in ("baseline_tower_o2", "rightmost_tower_o2", "rightmost_tower_san", "baseline_choice_o2", "baseline_choice_san"):
+    need(read(BASE / "logs" / (name + "_selftest.json"))["exit_code"] == 0, "nominal gate code")
+    need(read(BASE / "logs" / (name + "_argument.json"))["exit_code"] == 2, "invalid argument code")
+    need(not (BASE / "logs" / (name + "_selftest.stderr")).read_bytes(), "nominal gate diagnostics")
+tower = (BASE / "logs/rightmost_tower_o2_selftest.stdout").read_bytes()
+need(tower == (BASE / "logs/rightmost_tower_san_selftest.stdout").read_bytes() == (BASE / "logs/baseline_tower_o2_selftest.stdout").read_bytes(), "FULL gate paired output")
+tower_row = json.loads(tower)
+need(tower_row["clouds"] == 28 and tower_row["checks"] == 170320 and tower_row["vertical_checks"] == 45948 and tower_row["same_radius_steps"] > 0, "FULL nonvacuity")
+choice = read(BASE / "logs/baseline_choice_o2_selftest.stdout")
+need(choice == read(BASE / "logs/baseline_choice_san_selftest.stdout"), "choice O2/SAN identity")
+need(choice["clouds"] == 30 and choice["queries"] == 72840 and choice["different_first_last"] == 10922 and choice["right_fewer_nodes_than_exhaustive"] == 21080, "choice nonvacuity")
+for name in ("ascending_range", "left_first"):
+    label = "choice_mutant_" + name
+    need(read(BASE / "logs" / (label + "_compile.json"))["exit_code"] == 0, "mutant compiled")
+    need(read(BASE / "logs" / (label + "_selftest.json"))["exit_code"] == 1, "mutant runtime rejected")
+    reason = (BASE / "logs" / (label + "_selftest.stderr")).read_text()
+    need(reason.startswith("FAIL [") and reason.endswith(" choice.rightmost_equals_rational_max_rank\n"), "causal direction mutant")
+rows = {kind:[read(BASE / "logs" / (kind + "_n1000_r" + str(repeat) + ".stdout")) for repeat in (1, 2, 3)] for kind in KINDS}
+reference = rows["baseline"][0]
+for kind in KINDS:
+    for row in rows[kind]:
+        need(row["status"] == "completed_relative" and row["contract_qualified"] is False and row["backend"] == "cpu_reference", "bounded CPU diagnostic status")
+        need(all(row[field] == reference[field] for field in PAIRED), "paired input and whole payload")
+        need(all(row[field] == rows[kind][0][field] for field in WORK), "repeatable physical work counts")
+    need([rows[kind][0][key] for key in ("n", "s", "kmax", "threads")] == [1000, 8, 10, 1], "probe scope")
+summary = {"status":"private_qualified_not_integrated", "GCP_used":False, "gate_clouds":28, "choice_queries":choice["queries"], "causal_mutants":2,
+           "work":{kind:{field:rows[kind][0][field] for field in WORK} for kind in KINDS},
+           "shared_environment_seconds":{kind:{field:{"samples":[row[field] for row in rows[kind]], "median":statistics.median(row[field] for row in rows[kind])} for field in ("tower_s", "total_s")} for kind in KINDS},
+           "input_digest":reference["input_digest"], "payload_digest":reference["payload_digest"]}
+print(json.dumps(summary, indent=2, sort_keys=True))

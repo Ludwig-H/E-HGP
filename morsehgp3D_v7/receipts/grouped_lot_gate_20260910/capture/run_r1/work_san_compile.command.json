@@ -1,0 +1,33 @@
+{
+  "argv": [
+    "g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-isystem",
+    "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-O1",
+    "-g",
+    "-fno-omit-frame-pointer",
+    "-fsanitize=address,undefined",
+    "-no-pie",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/work_san.d",
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/baseline/morsehgp3D_v7/tests/full_ball_work_gate.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r1/work_san"
+  ],
+  "closed": true,
+  "ended_epoch": 1789071793.8005128,
+  "exit_code": 0,
+  "expected_code": 0,
+  "name": "work_san_compile",
+  "pid": 575071,
+  "started_epoch": 1789071757.7853005,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

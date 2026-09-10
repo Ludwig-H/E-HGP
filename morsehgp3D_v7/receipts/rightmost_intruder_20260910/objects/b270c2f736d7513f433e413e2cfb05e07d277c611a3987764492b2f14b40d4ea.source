@@ -1,0 +1,97 @@
+// Test-only exact method extraction plus independent rational point census.
+#define main full_ball_gate_archived_main
+#include "baseline/morsehgp3D_v7/tests/full_ball_tower_gate.cpp"
+#undef main
+#include "intruder_adapters.hpp"
+
+namespace {
+u64 queries = 0, positive = 0, empty = 0, alternatives = 0;
+u64 fewer_nodes = 0, fewer_power = 0, all_inside = 0;
+u64 first_nodes = 0, right_nodes = 0, last_nodes = 0;
+
+void query(const CloudIndex& ix, const oracle::Ball& ball, const BallKey& ball_key,
+           u32 selected_mask) {
+  std::vector<i32> selected;
+  i32 expected_first = -1, expected_last = -1;
+  for (i32 u = 0; u < ix.unique_count(); ++u) {
+    if (selected_mask & (u32{1} << u)) selected.push_back(u);
+    else if (distance2(ix.upos[u], ball) < ball.radius2) {
+      if (expected_first < 0) expected_first = u;
+      expected_last = u;
+    }
+  }
+  full_ball_detail::FirstIntruder first{ix, {}, {}};
+  full_ball_detail::RightmostIntruder right{ix, {}, {}};
+  full_ball_detail::ExhaustiveLastIntruder exhaustive{ix, {}, {}};
+  const i32 a = first.intruder(ball_key, selected);
+  const i32 b = right.intruder(ball_key, selected);
+  const i32 c = exhaustive.intruder(ball_key, selected);
+  need(a == expected_first, "choice.original_first_equals_rational_min_rank");
+  need(b == expected_last, "choice.rightmost_equals_rational_max_rank");
+  need(c == expected_last && b == c, "choice.same_as_exhaustive_last_left_DFS");
+  need(first.st.intruder_queries == 1 && right.st.intruder_queries == 1 && exhaustive.st.intruder_queries == 1,
+      "choice.one_physical_query");
+  need(right.st.intruder_nodes <= exhaustive.st.intruder_nodes &&
+      right.st.intruder_power_tests <= exhaustive.st.intruder_power_tests,
+      "choice.early_exit_never_more_work_than_exhaustive_last");
+  fewer_nodes += right.st.intruder_nodes < exhaustive.st.intruder_nodes;
+  fewer_power += right.st.intruder_power_tests < exhaustive.st.intruder_power_tests;
+  alternatives += a != b;
+  positive += b >= 0; empty += b < 0; ++queries;
+  first_nodes += first.st.intruder_nodes;
+  right_nodes += right.st.intruder_nodes;
+  last_nodes += exhaustive.st.intruder_nodes;
+}
+
+void choices() {
+  auto corpus = fixtures();
+  corpus.push_back({"singleton", {{42,42,42}}, 1});
+  for (const auto& fixture : corpus) for (unsigned variant = 0; variant < 2; ++variant) {
+    context = std::string(fixture.name) + "/choice/variant" + std::to_string(variant);
+    const auto ix = build_cloud_index(input(fixture, variant));
+    need(ix.valid && !ix.has_duplicate_positions(), "choice.valid_distinct_cloud");
+    for (const auto& node : ix.nodes) {
+      const auto left = ix.range_of(node.left), right = ix.range_of(node.right);
+      need(left.first == node.first && left.last + 1 == right.first && right.last == node.last,
+          "choice.left_right_ordered_contiguous_partition");
+    }
+    const oracle::Model model(ix.upos);
+    const u32 domain = (u32{1} << ix.upos.size()) - 1;
+    std::map<BallKey, oracle::Ball> balls;
+    for (u32 mask = 1; mask <= domain; ++mask) {
+      const auto ball = model.meb(mask);
+      balls.emplace(key(ball), ball);
+    }
+    // Strict full-root boxes and descending compressed ranges are exercised
+    // for all possible selected subsets, including none and all sites.
+    const oracle::Ball enclosing{{Rat(32768), Rat(32768), Rat(32768)}, Rat(4000000000ull)};
+    balls.emplace(key(enclosing), enclosing);
+    ++all_inside;
+    for (const auto& [ball_key, ball] : balls)
+      for (u32 selected = 0; selected <= domain; ++selected) query(ix, ball, ball_key, selected);
+    ++clouds;
+  }
+  need(clouds == 30 && queries > 10000 && positive > 100 && empty > 100 && alternatives > 100 &&
+      fewer_nodes > 100 && all_inside == 30, "choice.nonvacuity");
+}
+}
+
+int main(int argc, char** argv) {
+  if (argc != 2 || std::string_view(argv[1]) != "--selftest") return 2;
+  try {
+    choices();
+    std::printf("{\"status\":\"passed\",\"clouds\":%llu,\"queries\":%llu,\"positive\":%llu,\"empty\":%llu,"
+        "\"different_first_last\":%llu,\"right_fewer_nodes_than_exhaustive\":%llu,\"right_fewer_power_than_exhaustive\":%llu,"
+        "\"first_nodes\":%llu,\"right_nodes\":%llu,\"exhaustive_last_nodes\":%llu,\"GCP_used\":false}\n",
+        static_cast<unsigned long long>(clouds), static_cast<unsigned long long>(queries),
+        static_cast<unsigned long long>(positive), static_cast<unsigned long long>(empty),
+        static_cast<unsigned long long>(alternatives), static_cast<unsigned long long>(fewer_nodes),
+        static_cast<unsigned long long>(fewer_power), static_cast<unsigned long long>(first_nodes),
+        static_cast<unsigned long long>(right_nodes), static_cast<unsigned long long>(last_nodes));
+    return 0;
+  } catch (const Failure& failure) {
+    std::fprintf(stderr, "FAIL [%s] %s\n", context.c_str(), failure.why); return 1;
+  } catch (const std::exception& error) {
+    std::fprintf(stderr, "EXCEPTION [%s] %s\n", context.c_str(), error.what()); return 1;
+  }
+}

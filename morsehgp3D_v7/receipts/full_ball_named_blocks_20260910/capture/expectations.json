@@ -1,0 +1,43 @@
+{
+  "schema": "mhgp7-named-block-expectations-v1",
+  "input": {
+    "family": "uniform", "n": 50000, "seed": 3, "coord": 65536,
+    "digest_kind": "sha256_FULLv1_labelled_u16_input",
+    "digest": "3f7c6dd47bcba4222e511c94f90aaeeeb80198b0d5ac8a6721e4ff55feedab3f",
+    "s": 8, "kmax": 10, "smax": 11
+  },
+  "blocks": [
+    {
+      "capture_label": 174406, "k": 5,
+      "ball_key": {"a": "1", "b": ["-117436", "-63637", "-105474"], "c": "7237823525"},
+      "level_num": 14352441, "level_den": 4, "expected_roots": 1,
+      "expected_contribution_mask": 0, "expected_contribution_interior": false,
+      "interior": [12055, 27569, 46679], "shell": [36860, 42779, 46707]
+    },
+    {
+      "capture_label": 254569, "k": 2,
+      "ball_key": {"a": "1", "b": ["-111935", "-55901", "-93422"], "c": "6094057006"},
+      "level_num": 2904043, "level_den": 2, "expected_roots": 2,
+      "expected_contribution_mask": 0, "expected_contribution_interior": false,
+      "interior": [], "shell": [4912, 32276, 34292]
+    },
+    {
+      "capture_label": 996863, "k": 6,
+      "ball_key": {"a": "1", "b": ["-60899", "-109188", "-104077"], "c": "6612344594"},
+      "level_num": 6675549, "level_den": 2, "expected_roots": 2,
+      "expected_contribution_mask": 0, "expected_contribution_interior": false,
+      "interior": [23184, 23681, 34559, 42468], "shell": [25389, 40661, 43571]
+    },
+    {
+      "capture_label": 1251653, "k": 10,
+      "ball_key": {"a": "1", "b": ["-43377", "-128636", "-55885"], "c": "5381668141"},
+      "level_num": 12622643, "level_den": 2, "expected_roots": 1,
+      "expected_contribution_mask": 0, "expected_contribution_interior": false,
+      "interior": [8622, 9003, 13287, 14710, 16188, 49148, 49421, 49620, 49945],
+      "shell": [27084, 44066, 48544]
+    }
+  ],
+  "scope": "three_named_pre_lot_global_parent_cardinalities_plus_one_K10_inert_anchor; not_S1_completeness_or_final_node_arity",
+  "benchmark": false,
+  "public_status": "not_claimed"
+}

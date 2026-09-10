@@ -1,0 +1,12 @@
+[100%] Built target mhgp7_anchor_meb_gate
+[100%] Built target mhgp7_full_ball_tower_gate
+[100%] Built target mhgp7_full_ball_work_gate
+[100%] Built target mhgp7_full_ball_tower_probe
+[100%] Built target mhgp7_full_coverage_certificate_gate
+[100%] Built target mhgp7_local_plateau_gate
+[100%] Built target mhgp7_census_route_stub_gate
+[100%] Built target mhgp7_full_gabriel_digest_gate
+[100%] Built target mhgp7_facet_resolver_cache_gate
+[ 50%] Building CXX object CMakeFiles/mhgp7_witness_front_gate.dir/tests/witness_front_gate.cpp.o
+[100%] Linking CXX executable mhgp7_witness_front_gate
+[100%] Built target mhgp7_witness_front_gate

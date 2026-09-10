@@ -1,0 +1,37 @@
+[
+  {
+    "argv": [
+      "cmake",
+      "-S",
+      "/workspaces/E-HGP/morsehgp3D_v7",
+      "-B",
+      "/workspaces/E-HGP/build/v7_cuda_cmake_20260910",
+      "-DCMAKE_BUILD_TYPE=Release",
+      "-DMHGP7_ENABLE_CUDA=ON",
+      "-DCMAKE_CUDA_COMPILER=/workspaces/E-HGP/build/v7_nvcc_pedantic_20260910/toolkit/bin/nvcc",
+      "-DCMAKE_CUDA_FLAGS=-L/workspaces/E-HGP/build/v7_nvcc_pedantic_20260910/toolkit/lib",
+      "-DMHGP7_DIGEST_BOOST_INCLUDE_DIR=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include"
+    ],
+    "ended_ns": 1789073903164434535,
+    "exit_code": 0,
+    "name": "configure",
+    "started_ns": 1789073902964720938
+  },
+  {
+    "argv": [
+      "cmake",
+      "--build",
+      "/workspaces/E-HGP/build/v7_cuda_cmake_20260910",
+      "--parallel",
+      "1",
+      "--verbose",
+      "--target",
+      "mhgp7_census_route_device_gate",
+      "mhgp7_full_ball_tower_cuda_probe"
+    ],
+    "ended_ns": 1789073958213260246,
+    "exit_code": 0,
+    "name": "build",
+    "started_ns": 1789073903164463419
+  }
+]

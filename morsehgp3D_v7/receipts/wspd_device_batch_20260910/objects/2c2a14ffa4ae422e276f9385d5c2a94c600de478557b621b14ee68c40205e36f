@@ -1,0 +1,3 @@
+#define MHGP7_FAKE_DEVICE 1
+#include "morsehgp3D_v7/tests/cuda_stub.hpp"
+#include "witness_route_gate.cu"

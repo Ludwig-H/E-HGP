@@ -1,0 +1,67 @@
+{
+  "GCP_used": false,
+  "causal_mutants": 2,
+  "choice_queries": 72840,
+  "gate_clouds": 28,
+  "input_digest": "bda80cf806ac9af37ee5cd79103dad4432b2355e47248960dcc0cd5d54e677d1",
+  "payload_digest": "1040c1be04a90dbb11982e9f78b6034e9695b6e69f3746bc47d291a03d1924cc",
+  "shared_environment_seconds": {
+    "baseline": {
+      "total_s": {
+        "median": 12.979714279,
+        "samples": [
+          13.47416137,
+          12.979714279,
+          12.640249323
+        ]
+      },
+      "tower_s": {
+        "median": 5.640863427,
+        "samples": [
+          5.944889423,
+          5.640863427,
+          5.472312202
+        ]
+      }
+    },
+    "rightmost": {
+      "total_s": {
+        "median": 12.854880819,
+        "samples": [
+          12.930801,
+          12.854880819,
+          12.467388922
+        ]
+      },
+      "tower_s": {
+        "median": 5.469089798,
+        "samples": [
+          5.469089798,
+          5.503620932,
+          5.290889253
+        ]
+      }
+    }
+  },
+  "status": "private_qualified_not_integrated",
+  "work": {
+    "baseline": {
+      "interior_ranges": 379498,
+      "intruder_nodes": 5452553,
+      "intruder_power_tests": 0,
+      "intruder_queries": 138898,
+      "max_chain_steps": 14,
+      "resolver_meb_calls": 583337,
+      "resolver_supports_tested": 52168577
+    },
+    "rightmost": {
+      "interior_ranges": 302677,
+      "intruder_nodes": 4430457,
+      "intruder_power_tests": 0,
+      "intruder_queries": 120967,
+      "max_chain_steps": 9,
+      "resolver_meb_calls": 565406,
+      "resolver_supports_tested": 50158347
+    }
+  }
+}

@@ -1,0 +1,58 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1
+Test project /workspaces/E-HGP/build/v7_optimized_checks_20260910/cmake_r1
+      Start  3: mhgp7_witness_front
+ 1/20 Test  #3: mhgp7_witness_front ............................   Passed    0.91 sec
+      Start  4: mhgp7_witness_front_bad_argument
+ 2/20 Test  #4: mhgp7_witness_front_bad_argument ...............   Passed    0.01 sec
+      Start 33: mhgp7_facet_resolver_cache
+ 3/20 Test #33: mhgp7_facet_resolver_cache .....................   Passed    0.49 sec
+      Start 34: mhgp7_facet_resolver_cache_bad_argument
+ 4/20 Test #34: mhgp7_facet_resolver_cache_bad_argument ........   Passed    0.01 sec
+      Start 35: mhgp7_full_gabriel_digest
+ 5/20 Test #35: mhgp7_full_gabriel_digest ......................   Passed    0.02 sec
+      Start 36: mhgp7_full_gabriel_digest_bad_argument
+ 6/20 Test #36: mhgp7_full_gabriel_digest_bad_argument .........   Passed    0.01 sec
+      Start 43: mhgp7_local_plateau
+ 7/20 Test #43: mhgp7_local_plateau ............................   Passed    0.07 sec
+      Start 44: mhgp7_local_plateau_bad_argument
+ 8/20 Test #44: mhgp7_local_plateau_bad_argument ...............   Passed    0.01 sec
+      Start 45: mhgp7_full_coverage_certificate
+ 9/20 Test #45: mhgp7_full_coverage_certificate ................   Passed    0.02 sec
+      Start 46: mhgp7_full_coverage_certificate_bad_argument
+10/20 Test #46: mhgp7_full_coverage_certificate_bad_argument ...   Passed    0.01 sec
+      Start 47: mhgp7_census_route_stub
+11/20 Test #47: mhgp7_census_route_stub ........................   Passed    0.04 sec
+      Start 48: mhgp7_census_route_stub_bad_argument
+12/20 Test #48: mhgp7_census_route_stub_bad_argument ...........   Passed    0.02 sec
+      Start 49: mhgp7_anchor_meb
+13/20 Test #49: mhgp7_anchor_meb ...............................   Passed    0.37 sec
+      Start 50: mhgp7_anchor_meb_bad_argument
+14/20 Test #50: mhgp7_anchor_meb_bad_argument ..................   Passed    0.01 sec
+      Start 51: mhgp7_full_ball_tower
+15/20 Test #51: mhgp7_full_ball_tower ..........................   Passed    0.58 sec
+      Start 52: mhgp7_full_ball_tower_bad_argument
+16/20 Test #52: mhgp7_full_ball_tower_bad_argument .............   Passed    0.01 sec
+      Start 53: mhgp7_full_ball_work
+17/20 Test #53: mhgp7_full_ball_work ...........................   Passed    0.54 sec
+      Start 54: mhgp7_full_ball_work_bad_argument
+18/20 Test #54: mhgp7_full_ball_work_bad_argument ..............   Passed    0.01 sec
+      Start 55: mhgp7_full_ball_tower_probe_smoke
+19/20 Test #55: mhgp7_full_ball_tower_probe_smoke ..............   Passed    0.01 sec
+      Start 56: mhgp7_full_ball_tower_probe_bad_argument
+20/20 Test #56: mhgp7_full_ball_tower_probe_bad_argument .......   Passed    0.01 sec
+
+100% tests passed, 0 tests failed out of 20
+
+Label Time Summary:
+anchor_meb                   =   0.39 sec*proc (2 tests)
+facet_resolver_cache         =   0.50 sec*proc (2 tests)
+full_ball_tower              =   1.18 sec*proc (6 tests)
+full_coverage_certificate    =   0.03 sec*proc (2 tests)
+full_gabriel_digest          =   0.03 sec*proc (2 tests)
+gate                         =   3.13 sec*proc (18 tests)
+local_plateau                =   0.08 sec*proc (2 tests)
+oracle                       =   2.07 sec*proc (6 tests)
+stub                         =   0.06 sec*proc (2 tests)
+witness_front                =   0.92 sec*proc (2 tests)
+
+Total Test time (real) =   3.21 sec

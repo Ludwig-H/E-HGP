@@ -1,0 +1,94 @@
+#pragma once
+namespace mhgp7::full_ball_detail {
+struct FirstIntruder {
+  const CloudIndex& ix;
+  FullBallStats st;
+  std::vector<NodeRef> stack;
+  i32 intruder(const BallKey& key, std::span<const i32> selected) {
+    add(st.intruder_queries);
+    const auto member = [&](i32 u) { return std::binary_search(selected.begin(), selected.end(), u); };
+    const census_detail::AxisBounds bounds(key);
+    stack.clear(); stack.push_back(ix.root());
+    while (!stack.empty()) {
+      const auto node = stack.back(); stack.pop_back(); add(st.intruder_nodes);
+      i128 lo, hi; bounds.bounds(ix.box_of(node), &lo, &hi);
+      if (lo >= 0) continue;
+      if (hi < 0) {
+        add(st.interior_ranges);
+        const auto range = ix.range_of(node);
+        for (i32 u = range.first; u <= range.last; ++u) if (!member(u)) return u;
+      } else if (is_leaf(node)) {
+        const i32 u = leaf_index(node);
+        if (!member(u)) {
+          add(st.intruder_power_tests);
+          if (key.power(ix.upos[u]) < 0) return u;
+        }
+      } else {
+        stack.push_back(ix.nodes[node].right); stack.push_back(ix.nodes[node].left);
+      }
+    }
+    return -1;
+  }
+};
+struct RightmostIntruder {
+  const CloudIndex& ix;
+  FullBallStats st;
+  std::vector<NodeRef> stack;
+  i32 intruder(const BallKey& key, std::span<const i32> selected) {
+    add(st.intruder_queries);
+    const auto member = [&](i32 u) { return std::binary_search(selected.begin(), selected.end(), u); };
+    const census_detail::AxisBounds bounds(key);
+    stack.clear(); stack.push_back(ix.root());
+    while (!stack.empty()) {
+      const auto node = stack.back(); stack.pop_back(); add(st.intruder_nodes);
+      i128 lo, hi; bounds.bounds(ix.box_of(node), &lo, &hi);
+      if (lo >= 0) continue;
+      if (hi < 0) {
+        add(st.interior_ranges);
+        const auto range = ix.range_of(node);
+        for (i32 u = range.last; u >= range.first; --u) if (!member(u)) return u;
+      } else if (is_leaf(node)) {
+        const i32 u = leaf_index(node);
+        if (!member(u)) {
+          add(st.intruder_power_tests);
+          if (key.power(ix.upos[u]) < 0) return u;
+        }
+      } else {
+        stack.push_back(ix.nodes[node].left); stack.push_back(ix.nodes[node].right);
+      }
+    }
+    return -1;
+  }
+};
+struct ExhaustiveLastIntruder {
+  const CloudIndex& ix;
+  FullBallStats st;
+  std::vector<NodeRef> stack;
+  i32 intruder(const BallKey& key, std::span<const i32> selected) {
+    add(st.intruder_queries);
+    const auto member = [&](i32 u) { return std::binary_search(selected.begin(), selected.end(), u); };
+    const census_detail::AxisBounds bounds(key);
+    i32 last = -1;
+    stack.clear(); stack.push_back(ix.root());
+    while (!stack.empty()) {
+      const auto node = stack.back(); stack.pop_back(); add(st.intruder_nodes);
+      i128 lo, hi; bounds.bounds(ix.box_of(node), &lo, &hi);
+      if (lo >= 0) continue;
+      if (hi < 0) {
+        add(st.interior_ranges);
+        const auto range = ix.range_of(node);
+        for (i32 u = range.first; u <= range.last; ++u) if (!member(u)) last = u;
+      } else if (is_leaf(node)) {
+        const i32 u = leaf_index(node);
+        if (!member(u)) {
+          add(st.intruder_power_tests);
+          if (key.power(ix.upos[u]) < 0) last = u;
+        }
+      } else {
+        stack.push_back(ix.nodes[node].right); stack.push_back(ix.nodes[node].left);
+      }
+    }
+    return last;
+  }
+};
+}

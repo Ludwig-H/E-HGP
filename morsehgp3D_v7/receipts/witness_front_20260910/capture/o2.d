@@ -1,0 +1,31 @@
+/workspaces/E-HGP/build/v7_witness_front_qualification_20260910/gate_o2: \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/witness_front_gate.cpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/cloud/families.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/cloud/../core/intmath.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/cloud/../core/device.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/cloud/../core/types.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/cloud/../core/mutants.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/witness_front.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/generate.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/../lanes/cell_grid.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/../lanes/edge_cover.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/../lanes/../tree/cloud_index.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/../lanes/../tree/../core/morton.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/../lanes/sector_kill.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/../lanes/../spindle/spindle.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/../core/caps.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/../lanes/chord_kill.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/../lanes/q2.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/../lanes/keys.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/../lanes/level.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/../lanes/../core/wide.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/../lanes/q3.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/../lanes/q4.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/../parallel/pool.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/../spindle/witness_count.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/../spindle/../core/inline_stack.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/../wspd/wavefront.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/candidates.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/../parallel/sort.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/float_filter.hpp \
+ /workspaces/E-HGP/build/v7_witness_front_qualification_20260910/snapshot/morsehgp3D_v7/tests/../src/pipeline/../spindle/witness_batch.hpp

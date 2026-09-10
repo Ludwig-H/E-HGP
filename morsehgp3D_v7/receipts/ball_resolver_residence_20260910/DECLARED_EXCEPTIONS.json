@@ -1,0 +1,18 @@
+[
+  {
+    "receipt": "combined/run_san/receipt.json",
+    "command": "facet_resolver_cache_gate_selftest",
+    "expected": 0,
+    "actual": 1,
+    "stderr_contains": "alloc-dealloc-mismatch",
+    "reason": "Historical new test allocator omitted nothrow overloads; repaired test is independently green."
+  },
+  {
+    "receipt": "comparison/run_final_mutant_order/receipt.json",
+    "command": "selftest",
+    "expected": 1,
+    "actual": 0,
+    "stderr_contains": "",
+    "reason": "Negative exploration: complete sorted padded keys already encode cardinality; reset is not independently necessary."
+  }
+]

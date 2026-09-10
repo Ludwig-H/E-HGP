@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "/usr/local/cuda/bin/nvcc",
+    "-O3",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-arch=sm_120",
+    "-fmad=false",
+    "--expt-relaxed-constexpr",
+    "-Xcompiler=-Wall,-Wextra,-Wpedantic,-Werror,-pthread",
+    "-ccbin",
+    "/tmp/ehgp-full-v7-73766fa52dcfc59b.M5DKWfCPIl/output/nvcc_strict_host.py",
+    "-DMHGP7_FULL_BALL_CUDA=1",
+    "-x",
+    "cu",
+    "-MMD",
+    "-MF",
+    "/tmp/ehgp-full-v7-73766fa52dcfc59b.M5DKWfCPIl/output/full_probe_gpu.d",
+    "/tmp/ehgp-full-v7-73766fa52dcfc59b.M5DKWfCPIl/source/morsehgp3D_v7/bench/full_ball_tower_probe.cpp",
+    "-o",
+    "/tmp/ehgp-full-v7-73766fa52dcfc59b.M5DKWfCPIl/output/full_probe_gpu"
+  ],
+  "cwd": "/tmp/ehgp-full-v7-73766fa52dcfc59b.M5DKWfCPIl/output",
+  "exit_code": null,
+  "group_closed": false,
+  "per_command_watchdog": null,
+  "pid": null,
+  "session_work_deadline_epoch": 1789074462,
+  "started_utc": "2026-09-10T20:43:58.454829+00:00"
+}

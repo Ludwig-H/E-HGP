@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-isystem",
+    "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-O2",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r2/drop_growth_singleton.d",
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r2/drop_growth_singleton/morsehgp3D_v7/tests/full_ball_tower_gate.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r2/drop_growth_singleton.bin"
+  ],
+  "expected_code": 0,
+  "name": "drop_growth_singleton_compile",
+  "started_epoch": 1789071934.4956594
+}

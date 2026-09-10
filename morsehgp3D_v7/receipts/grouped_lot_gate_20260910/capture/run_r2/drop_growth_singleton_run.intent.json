@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_grouped_front_20260910/run_r2/drop_growth_singleton.bin",
+    "--selftest"
+  ],
+  "expected_code": 1,
+  "name": "drop_growth_singleton_run",
+  "started_epoch": 1789071946.987286
+}
