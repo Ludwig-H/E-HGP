@@ -1,0 +1,33 @@
+--- /tmp/claude-1000/-workspaces-E-HGP/6300a9ba-5bd7-42ea-91b3-d2c07c163916/scratchpad/overlay_wip4/src/forest/full_ball_tower.hpp	2026-09-10 20:37:01.719868997 +0000
++++ /tmp/claude-1000/-workspaces-E-HGP/6300a9ba-5bd7-42ea-91b3-d2c07c163916/scratchpad/overlay_intruder_last/src/forest/full_ball_tower.hpp	2026-09-10 20:56:57.803822718 +0000
+@@ -479,6 +479,8 @@
+     add(st.intruder_queries);
+     const auto member = [&](i32 u) { return std::binary_search(selected.begin(), selected.end(), u); };
+     const census_detail::AxisBounds bounds(key);
++    // MUTANT D'INVARIANCE (auditeur) : intrus = le DERNIER trouve au lieu du premier.
++    i32 last = -1;
+     stack.clear(); stack.push_back(ix.root());
+     while (!stack.empty()) {
+       const auto node = stack.back(); stack.pop_back(); add(st.intruder_nodes);
+@@ -487,18 +489,18 @@
+       if (hi < 0) {
+         add(st.interior_ranges);
+         const auto range = ix.range_of(node);
+-        for (i32 u = range.first; u <= range.last; ++u) if (!member(u)) return u;
++        for (i32 u = range.first; u <= range.last; ++u) if (!member(u)) last = u;
+       } else if (is_leaf(node)) {
+         const i32 u = leaf_index(node);
+         if (!member(u)) {
+           add(st.intruder_power_tests);
+-          if (key.power(ix.upos[u]) < 0) return u;
++          if (key.power(ix.upos[u]) < 0) last = u;
+         }
+       } else {
+         stack.push_back(ix.nodes[node].right); stack.push_back(ix.nodes[node].left);
+       }
+     }
+-    return -1;
++    return last;
+   }
+   u64 resolve(std::vector<i32> sites, const ExactLevel& before, u64 prior_count) {
+     add(st.representatives);

@@ -31,6 +31,8 @@ Ces notes portent des arguments encore cités par le dossier principal ; elles n
 
 ## Fraîcheur et entretien
 
+Les sondes et juges datés du 4 au 6 septembre restent à la racine : 39 d’entre eux dérivent leurs chemins de `__file__` et tous sont épinglés par des reçus scellés, un déplacement casserait des preuves. Toute nouvelle sonde vit dans le paquet de reçu qui la consomme ; aucun fichier épars nouveau à la racine. Les répertoires de travail locaux `.work*` sont ignorés par Git et supprimés une fois leur paquet publié.
+
 ```bash
 python3 -B -O morsehgp3D_v7/audits/verify_current.py
 ```

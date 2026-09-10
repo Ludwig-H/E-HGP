@@ -2,3 +2,5 @@
 __pycache__/
 !receipts_20260904/**/*.log
 !receipts_raccord_ancres_20260910/**/*.log
+!receipts_full_lazy_20260905/constructor_review/*/build_artifacts/CMakeCache.txt
+!receipts_full_lazy_20260905/constructor_review/*/build_artifacts/compile_commands.json

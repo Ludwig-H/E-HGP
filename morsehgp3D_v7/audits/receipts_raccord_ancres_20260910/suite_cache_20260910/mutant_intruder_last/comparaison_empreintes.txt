@@ -1,0 +1,3 @@
+uniform digest_identical | intruder_queries 311864 270662 | same_radius 0 0 | resolver_meb 1302921 1261719
+scanline_overlap_multiecho digest_identical | intruder_queries 107717 28870 | same_radius 9 2 | resolver_meb 124254 45407
+scanline_single_pass digest_identical | intruder_queries 0 0 | same_radius 0 0 | resolver_meb 955 955

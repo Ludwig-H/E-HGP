@@ -20,8 +20,10 @@ une autorité (allocation impossible ⇒ cache désactivé). Le jeton mémorisé
 normalisé par `root()` à la lecture : les fusions ultérieures sont suivies. La
 garde `full_ball_representative_not_strict` est sautée sur hit, sans perte : une
 facette résolue à un lot antérieur a une MEB strictement inférieure à tout lot
-ultérieur. **Lecture favorable.** Remarque de résidence : 768 octets par point
-(48 × 16n), soit 7,7 Gio à dix millions de points ; la désactivation sur
+ultérieur. **Lecture favorable.** Remarque de résidence : 48 octets par entrée et
+2^⌈log₂ 16n⌉ entrées, soit 268 435 456 entrées et **12 884 901 888 octets (12,0 Gio)** à dix
+millions de points (chiffre corrigé par l'auditeur historique : ma première
+estimation de 7,7 Go omettait l'arrondi à la puissance de deux) ; la désactivation sur
 `bad_alloc` est correcte mais silencieuse, un budget déclaré serait préférable.
 
 ## 2. Portes du constructeur rejouées (`portes/`)
@@ -85,3 +87,19 @@ fixtures à lots groupés (`grouped.fixture_not_singleton_only`), le rejeu des q
 mutants sur le header commité et les contrôles nommés des blocs réels 50k restent
 dus. Pour ce delta : porte du cache corrigée pour ASan, budget de résidence du
 cache déclaré, et un reçu ancré aux octets réellement commités.
+
+## 6. Note prospective : adaptateur `nvcc_strict_host.py` (hors périmètre déclaré)
+
+Le constructeur prépare un adaptateur de phase hôte pour NVCC (`bench/nvcc_strict_host.py`,
+option CMake `MHGP7_NVCC_STRICT_GCC_HOST`, lié à `/usr/bin/g++`) après l'échec
+NVCC de la tentative G4 (`-Wpedantic -Werror` sur les directives de ligne
+générées). Lecture : seule l'unité `*.cudafe1.cpp` générée est prétraitée avec
+`-Wno-pedantic`, puis le `.ii` obtenu est compilé avec tous les drapeaux
+d'origine ; toute autre phase est refusée (code 2). Deux obligations pour son
+reçu, sans lesquelles « aucun diagnostic source perdu » resterait une
+déclaration : un mutant qui introduit une violation pédante dans une source
+`.cu` réelle (par exemple des jetons après `#endif`) et qui doit encore être
+refusé à travers l'adaptateur ; et une porte qui prouve le refus des phases
+inconnues (deux sources générées, absence de `-c`, présence de `-E`). Aucun
+résultat device n'en découle ; la compilation NVCC elle-même n'a pas été
+rejouée ici.
