@@ -1,6 +1,6 @@
 {
   "schema": "mhgp7-current-audit-validation-v2",
-  "updated_utc": "2026-09-10T21:08:07.115601+00:00",
+  "updated_utc": "2026-09-10T21:13:05.406556+00:00",
   "phase": "exploration_v7_hors_registre",
   "backend": "cpu_reference",
   "profile": "quantized_u16_input_only",
@@ -21,7 +21,7 @@
     "audits/CERTIFICAT_HORIZONTAL_COURANT.md": "e76714730f4ce24f4451a8d9bab0c365d29b25e9d18008d3675d2ea9f036c611",
     "audits/CONTRAT_MASSES_VOTE_COURANT.md": "2ed2a8eebef68fbb12b2a23fc18067d36a343b0a206c1330c2ca823ee26f2b72",
     "audits/CONTRAT_VERTICAL_COURANT.md": "09b2f2a8d0b59a540e4eba865b2f7754225e1583ca97d42cbc43b4dc0e4868c9",
-    "audits/DIALOGUE_COURANT.md": "b319569120289aef985543f7231be007a1f35d9b945dbe88000655785e55057f",
+    "audits/DIALOGUE_COURANT.md": "07238d76231b9e3b78c6a679318abf2a467d439b67af5329bce972693b062a31",
     "audits/DOMAINE_CPU_COURANT.md": "18258334cfc7d74f3a262ea1dab798ff621245b079bfd5cbe8b48c987404cd33",
     "audits/ENTRETIEN.json": "1944c73e9e24656a0977e2bae96cd57131af3500c1ff57dc19d922ac6f5c1fa6",
     "audits/ETAT_COURANT.md": "302505bbabe69d6554a9061535ab761bf01e2187e21753718b114b7de9dd791e",
