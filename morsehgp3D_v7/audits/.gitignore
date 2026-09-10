@@ -1,3 +1,4 @@
 .work*/
 __pycache__/
 !receipts_20260904/**/*.log
+!receipts_raccord_ancres_20260910/**/*.log

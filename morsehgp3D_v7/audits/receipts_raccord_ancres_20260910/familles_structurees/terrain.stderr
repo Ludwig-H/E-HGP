@@ -1,0 +1,16 @@
+stage_start=index
+stage_complete=index seconds=0.000756421
+stage_start=generate
+stage_complete=generate seconds=1.006810289
+stage_start=sort_rle
+stage_complete=sort_rle seconds=0.021093153
+stage_start=prefilter
+stage_complete=prefilter seconds=0.166007135
+stage_start=census
+stage_complete=census seconds=0.128703539
+stage_start=full_ball_tower
+stage_complete=full_ball_tower seconds=1.640068897
+stage_start=payload_digest
+stage_complete=payload_digest seconds=0.072253819
+fam=terrain elapsed=3.05 s maxrss=108800 KiB
+rc=0

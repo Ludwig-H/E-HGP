@@ -1,0 +1,527 @@
+{
+ "GCP_used": false,
+ "artifacts": {
+  "bin/tower_bridge": "ed78b5ed2f9a7480c32b0a5e3e06c38f5bd161e5e36d74beb25b4178494b25b0",
+  "corpus_cocircular_normal.json": "59a6e87da38ae738b2903bc2e7f52eebf9614df4694ab676a0cc5206b081504e",
+  "corpus_cocircular_optimized.json": "59a6e87da38ae738b2903bc2e7f52eebf9614df4694ab676a0cc5206b081504e",
+  "corpus_ext_normal.json": "51dcead4cf621b87129e260e20c9c65d038753c3d171836f901818ccb0d86925",
+  "corpus_ext_optimized.json": "51dcead4cf621b87129e260e20c9c65d038753c3d171836f901818ccb0d86925",
+  "corpus_normal.json": "bd2b9c26f9b38b200881684d60a8965cf67a2baa1cecd62d0a9691cc7b3782fb",
+  "corpus_optimized.json": "bd2b9c26f9b38b200881684d60a8965cf67a2baa1cecd62d0a9691cc7b3782fb",
+  "distributions_corpus_cocircular_normal.json": "ab386f0f51df0258e287782b04dfdf6a44d7350ebcde4b331f47bdca8701f772",
+  "distributions_corpus_ext_normal.json": "fb1e57fb09d749a7af808f1b1f32dced1a24430e749e38d943212163bc3c743d",
+  "distributions_corpus_normal.json": "b534df7f3950d34d430aafd1377a9ccd4003f86f906354df6d92e0d860cab03a",
+  "mutants/drop_extra_ball.json": "1e0bdfbbd3d7bef08a16e3fe68e254d862f267dbae3a54cbe421e93408f174bd",
+  "mutants/drop_extra_ball_redundant_merge.json": "cef36f4336362a83983c8c07113c45fa551b76c06d70d9a03952f77fa3525810",
+  "mutants/drop_extra_ball_silent_analysis.json": "f6e59c9630b7173cd454dfc009ebd452943e7c6b993d62550cec661f383a97dd",
+  "mutants/ref_open_as_closed.json": "9319e3ecc79b3956025d5e8cbb181bec61f421e7f6415f446c1d4eb4b8d81b49",
+  "mutants/wrong_arity.json": "413f0e9172ab4158157f3eaf1efd1f2832453cb28e6cd64504c0f3d0adf55f18"
+ },
+ "backend": "cpu_reference",
+ "campaigns": {
+  "cocircular": {
+   "cloud_sizes": {
+    "10": 38,
+    "11": 33,
+    "12": 37,
+    "5": 35,
+    "6": 42,
+    "7": 39,
+    "8": 39,
+    "9": 37
+   },
+   "divergence_count": 0,
+   "exit_code_from_status": 0,
+   "family": "cocircular",
+   "file": "corpus_cocircular_normal.json",
+   "fixtures": false,
+   "normal_equals_optimized_bytes": true,
+   "optimized_file": "corpus_cocircular_optimized.json",
+   "product_stats_note": "sums over clouds; max_chain_steps is a SUM of per-cloud maxima",
+   "product_stats_sums": {
+    "anchor_blocks": 20145,
+    "anchor_hits": 18613,
+    "births": 10845,
+    "contributions": 10866,
+    "descending_steps": 483,
+    "extra_blocks": 2756,
+    "extra_records": 1053,
+    "inert_blocks": 3187,
+    "intruder_queries": 483,
+    "key_lookups": 19096,
+    "max_chain_steps": 235,
+    "merges": 6587,
+    "records": 10690,
+    "regular_blocks": 17389,
+    "representatives": 25012,
+    "same_radius_steps": 0
+   },
+   "refusal_reasons": {},
+   "seed": 20260912,
+   "status": "passed",
+   "time_normal": {
+    "exit_logged": null,
+    "real": "0m16.988s"
+   },
+   "time_optimized": {
+    "exit_logged": null,
+    "real": "0m16.973s"
+   },
+   "totals": {
+    "ambiguous_cuts": 0,
+    "ambiguous_roots": 0,
+    "candidate_balls": 13896,
+    "catalogue_balls": 10690,
+    "clouds": 300,
+    "cuts_compared": 73976,
+    "divergences": 0,
+    "equal_level_lot_balls": 10000,
+    "equal_level_lots": 3548,
+    "excluded_outside_window": 3206,
+    "extra_shell_balls": 1053,
+    "facets_activated": 101540,
+    "images_compared": 100459,
+    "k1_images_null": 33720,
+    "merges": 100363,
+    "mutated_clouds": 0,
+    "orders": 1177,
+    "product_refusals": 0,
+    "roots_compared": 134179,
+    "unions": 148008,
+    "vertical_checks": 408034
+   }
+  },
+  "extended": {
+   "cloud_sizes": {
+    "10": 240,
+    "11": 266,
+    "12": 246,
+    "5": 263,
+    "6": 219,
+    "7": 241,
+    "8": 270,
+    "9": 255
+   },
+   "divergence_count": 0,
+   "exit_code_from_status": 0,
+   "family": "random",
+   "file": "corpus_ext_normal.json",
+   "fixtures": false,
+   "normal_equals_optimized_bytes": true,
+   "optimized_file": "corpus_ext_optimized.json",
+   "product_stats_note": "sums over clouds; max_chain_steps is a SUM of per-cloud maxima",
+   "product_stats_sums": {
+    "anchor_blocks": 166983,
+    "anchor_hits": 166249,
+    "births": 79006,
+    "contributions": 79344,
+    "descending_steps": 1119,
+    "extra_blocks": 56015,
+    "extra_records": 22050,
+    "inert_blocks": 36153,
+    "intruder_queries": 1119,
+    "key_lookups": 167368,
+    "max_chain_steps": 495,
+    "merges": 44260,
+    "records": 84016,
+    "regular_blocks": 110968,
+    "representatives": 217512,
+    "same_radius_steps": 0
+   },
+   "refusal_reasons": {},
+   "seed": 20260911,
+   "status": "passed",
+   "time_normal": {
+    "exit_logged": null,
+    "real": "2m30.235s"
+   },
+   "time_optimized": {
+    "exit_logged": null,
+    "real": "2m16.385s"
+   },
+   "totals": {
+    "ambiguous_cuts": 0,
+    "ambiguous_roots": 0,
+    "candidate_balls": 124305,
+    "catalogue_balls": 84016,
+    "clouds": 2000,
+    "cuts_compared": 633958,
+    "divergences": 0,
+    "equal_level_lot_balls": 100855,
+    "equal_level_lots": 32805,
+    "excluded_outside_window": 40289,
+    "extra_shell_balls": 22050,
+    "facets_activated": 655595,
+    "images_compared": 811601,
+    "k1_images_null": 247796,
+    "merges": 647822,
+    "mutated_clouds": 0,
+    "orders": 7773,
+    "product_refusals": 0,
+    "roots_compared": 1059397,
+    "unions": 974190,
+    "vertical_checks": 2583549
+   }
+  },
+  "main": {
+   "cloud_sizes": {
+    "10": 25,
+    "11": 17,
+    "12": 29,
+    "4": 2,
+    "5": 24,
+    "6": 25,
+    "7": 23,
+    "8": 35,
+    "9": 27
+   },
+   "divergence_count": 0,
+   "exit_code_from_status": 0,
+   "family": "random",
+   "file": "corpus_normal.json",
+   "fixtures": true,
+   "normal_equals_optimized_bytes": true,
+   "optimized_file": "corpus_optimized.json",
+   "product_stats_note": "sums over clouds; max_chain_steps is a SUM of per-cloud maxima",
+   "product_stats_sums": {
+    "anchor_blocks": 17249,
+    "anchor_hits": 17358,
+    "births": 8235,
+    "contributions": 8270,
+    "descending_steps": 94,
+    "extra_blocks": 5363,
+    "extra_records": 2120,
+    "inert_blocks": 3772,
+    "intruder_queries": 95,
+    "key_lookups": 17453,
+    "max_chain_steps": 50,
+    "merges": 4709,
+    "records": 8741,
+    "regular_blocks": 11886,
+    "representatives": 22653,
+    "same_radius_steps": 1
+   },
+   "refusal_reasons": {},
+   "seed": 20260910,
+   "status": "passed",
+   "time_normal": {
+    "exit_logged": null,
+    "real": "0m14.497s"
+   },
+   "time_optimized": {
+    "exit_logged": null,
+    "real": "0m16.626s"
+   },
+   "totals": {
+    "ambiguous_cuts": 0,
+    "ambiguous_roots": 0,
+    "candidate_balls": 12873,
+    "catalogue_balls": 8741,
+    "clouds": 207,
+    "cuts_compared": 69694,
+    "divergences": 0,
+    "equal_level_lot_balls": 9756,
+    "equal_level_lots": 3303,
+    "excluded_outside_window": 4132,
+    "extra_shell_balls": 2120,
+    "facets_activated": 68789,
+    "images_compared": 93038,
+    "k1_images_null": 26713,
+    "merges": 67994,
+    "mutated_clouds": 0,
+    "orders": 795,
+    "product_refusals": 0,
+    "roots_compared": 119751,
+    "unions": 100904,
+    "vertical_checks": 276212
+   }
+  }
+ },
+ "commands": [
+  "cd corpus_aleatoire && g++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Werror -I ../../overlay_wip_130402 tower_bridge.cpp -o bin/tower_bridge",
+  "python3 -B tower_corpus.py --bridge bin/tower_bridge --clouds 200 --seed 20260910 > corpus_normal.json",
+  "python3 -B -O tower_corpus.py --bridge bin/tower_bridge --clouds 200 --seed 20260910 > corpus_optimized.json",
+  "python3 -B tower_corpus.py --bridge bin/tower_bridge --clouds 2000 --seed 20260911 --no-fixtures > corpus_ext_normal.json",
+  "python3 -B -O tower_corpus.py --bridge bin/tower_bridge --clouds 2000 --seed 20260911 --no-fixtures > corpus_ext_optimized.json",
+  "python3 -B tower_corpus.py --bridge bin/tower_bridge --clouds 300 --seed 20260912 --no-fixtures --family cocircular > corpus_cocircular_normal.json",
+  "python3 -B -O tower_corpus.py --bridge bin/tower_bridge --clouds 300 --seed 20260912 --no-fixtures --family cocircular > corpus_cocircular_optimized.json",
+  "python3 -B tower_corpus.py --bridge bin/tower_bridge --clouds 200 --seed 20260910 --mutant drop_extra_ball > mutants/drop_extra_ball.json",
+  "python3 -B tower_corpus.py --bridge bin/tower_bridge --clouds 200 --seed 20260910 --mutant wrong_arity > mutants/wrong_arity.json",
+  "python3 -B tower_corpus.py --bridge bin/tower_bridge --clouds 200 --seed 20260910 --mutant ref_open_as_closed > mutants/ref_open_as_closed.json",
+  "python3 -B silent_mutant_analysis.py mutants/drop_extra_ball.json > mutants/drop_extra_ball_silent_analysis.json",
+  "python3 -B redundant_merge_check.py mutants/drop_extra_ball_silent_analysis.json > mutants/drop_extra_ball_redundant_merge.json",
+  "python3 -B shell_distribution.py <campaign>.json > distributions_<campaign>.json",
+  "python3 -B make_review.py > review.json"
+ ],
+ "date": "2026-09-10",
+ "distributions": {
+  "corpus_cocircular_normal": {
+   "arity_qmin": {
+    "2": 8233,
+    "3": 2396,
+    "4": 61
+   },
+   "equal_level_lot_sizes": {
+    "10": 5,
+    "11": 1,
+    "12": 9,
+    "2": 2189,
+    "3": 651,
+    "4": 343,
+    "5": 145,
+    "6": 99,
+    "7": 48,
+    "8": 49,
+    "9": 9
+   },
+   "extra_shell_gap_u_minus_qmin": {
+    "0": 9637,
+    "1": 805,
+    "10": 6,
+    "2": 58,
+    "3": 40,
+    "4": 26,
+    "5": 42,
+    "6": 27,
+    "7": 22,
+    "8": 14,
+    "9": 13
+   },
+   "file": "corpus_cocircular_normal.json",
+   "interior_p": {
+    "0": 4143,
+    "1": 3184,
+    "2": 1922,
+    "3": 982,
+    "4": 389,
+    "5": 70
+   },
+   "shell_size_u": {
+    "10": 14,
+    "11": 13,
+    "12": 6,
+    "2": 7201,
+    "3": 3166,
+    "4": 126,
+    "5": 47,
+    "6": 26,
+    "7": 42,
+    "8": 27,
+    "9": 22
+   }
+  },
+  "corpus_ext_normal": {
+   "arity_qmin": {
+    "2": 57299,
+    "3": 23424,
+    "4": 3293
+   },
+   "equal_level_lot_sizes": {
+    "10": 148,
+    "11": 79,
+    "12": 43,
+    "13": 26,
+    "14": 15,
+    "15": 5,
+    "16": 4,
+    "2": 17168,
+    "3": 7337,
+    "4": 3556,
+    "5": 1953,
+    "6": 1177,
+    "7": 674,
+    "8": 393,
+    "9": 227
+   },
+   "extra_shell_gap_u_minus_qmin": {
+    "0": 61966,
+    "1": 17073,
+    "2": 4004,
+    "3": 797,
+    "4": 149,
+    "5": 21,
+    "6": 5,
+    "7": 1
+   },
+   "file": "corpus_ext_normal.json",
+   "interior_p": {
+    "0": 37602,
+    "1": 23191,
+    "2": 13784,
+    "3": 6668,
+    "4": 2394,
+    "5": 377
+   },
+   "shell_size_u": {
+    "2": 36036,
+    "3": 39208,
+    "4": 7540,
+    "5": 1032,
+    "6": 171,
+    "7": 23,
+    "8": 5,
+    "9": 1
+   }
+  },
+  "corpus_normal": {
+   "arity_qmin": {
+    "2": 5788,
+    "3": 2555,
+    "4": 398
+   },
+   "equal_level_lot_sizes": {
+    "10": 9,
+    "11": 3,
+    "12": 4,
+    "13": 1,
+    "2": 1796,
+    "3": 728,
+    "4": 382,
+    "5": 173,
+    "6": 97,
+    "7": 68,
+    "8": 33,
+    "9": 9
+   },
+   "extra_shell_gap_u_minus_qmin": {
+    "0": 6621,
+    "1": 1667,
+    "2": 359,
+    "3": 76,
+    "4": 14,
+    "5": 4
+   },
+   "file": "corpus_normal.json",
+   "interior_p": {
+    "0": 3911,
+    "1": 2363,
+    "2": 1401,
+    "3": 777,
+    "4": 261,
+    "5": 28
+   },
+   "shell_size_u": {
+    "2": 3759,
+    "3": 4081,
+    "4": 773,
+    "5": 104,
+    "6": 19,
+    "7": 5
+   }
+  }
+ },
+ "environment": {
+  "gxx": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "python": "3.12.1"
+ },
+ "mode": "audit_independant_math_and_architecture",
+ "mutants": {
+  "drop_extra_ball": {
+   "clouds_with_divergence": 12,
+   "divergence_count": 128,
+   "exit_code_from_status": 1,
+   "file": "mutants/drop_extra_ball.json",
+   "mutated_clouds": 199,
+   "mutated_clouds_silent": 39,
+   "product_refusals": 148,
+   "refusal_reasons": {
+    "full_ball_final_component_count": 23,
+    "full_ball_missing_weak_terminal": 125
+   },
+   "status": "divergent",
+   "time": {
+    "exit_logged": null,
+    "real": "0m13.908s"
+   }
+  },
+  "drop_extra_ball_redundant_merge": {
+   "all_explained": true
+  },
+  "drop_extra_ball_silent_analysis": {
+   "explained": 38,
+   "inert_at_all_scheduled_ranks": 27,
+   "silent_clouds": 39
+  },
+  "ref_open_as_closed": {
+   "clouds_with_divergence": 207,
+   "divergence_count": 8458,
+   "exit_code_from_status": 1,
+   "file": "mutants/ref_open_as_closed.json",
+   "mutated_clouds": 0,
+   "mutated_clouds_silent": 0,
+   "product_refusals": 0,
+   "refusal_reasons": {},
+   "status": "divergent",
+   "time": {
+    "exit_logged": null,
+    "real": "0m15.634s"
+   }
+  },
+  "wrong_arity": {
+   "clouds_with_divergence": 0,
+   "divergence_count": 0,
+   "exit_code_from_status": 1,
+   "file": "mutants/wrong_arity.json",
+   "mutated_clouds": 199,
+   "mutated_clouds_silent": 0,
+   "product_refusals": 199,
+   "refusal_reasons": {
+    "full_ball_census_geometry": 189,
+    "full_ball_census_shape": 10
+   },
+   "status": "divergent",
+   "time": {
+    "exit_logged": null,
+    "real": "0m20.895s"
+   }
+  }
+ },
+ "not_exercised": [
+  "couvertures dupliquees a une meme coupe (ambiguous_cuts=0 sur toutes les campagnes) : aucune ambiguite declaree, donc toutes les images verticales ont ete jugees",
+  "same_radius_steps>0 seulement sur la fixture actual_equal_radius_descent (1 pas) ; jamais sur un nuage aleatoire",
+  "n<=12, coordonnees dans un cube 0..7 ou sur le cercle x^2+y^2=25 : aucune conclusion d'echelle, de cout ou de completude WSPD"
+ ],
+ "overlay": "/tmp/claude-1000/-workspaces-E-HGP/6300a9ba-5bd7-42ea-91b3-d2c07c163916/scratchpad/overlay_wip_130402",
+ "overlay_matches_snapshot_sha256sums": true,
+ "own_sources": {
+  "make_review.py": "cd17b35adae8e9794a4699e5bbc39a402cde0d6087940324c64a6e348e3c9b94",
+  "redundant_merge_check.py": "7f68d9f00d5e5fac7ee15d98a477f90d041139ad227e6f579ea6a9dfb8a165f3",
+  "shell_distribution.py": "765915900345d96d44f980bc8536f03b57e688e8c1a2352fc93e10120e58752a",
+  "silent_mutant_analysis.py": "8f01fbf40ec39a6e4b88ec1e7667852b9368989a4f1778140ae2dcc1ed7a928a",
+  "tower_bridge.cpp": "c0a1c759c2cae0214cfa7159e29de786e6bd8fe331c49cf3f31271bf2e7df8fb",
+  "tower_corpus.py": "5083f3d868654593e9d49e0cded6c52291fbc2f533e84614568ab908e956a585"
+ },
+ "phase": "exploration_v7_hors_registre",
+ "profile": "quantized_u16_input_only",
+ "public_status": "not_claimed",
+ "repo_head": "514038ed1290330528184b2d19b3111c0877a66a",
+ "repo_writes": false,
+ "sources_read": {
+  "audits": {
+   "NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md": "ac50b500d7c982f08160e513721a3ec9496bc0204a86153a384dffaa145a89f0",
+   "meb_rational_oracle_20260905.py": "ad6c0d6c041ff788180a400f6ba2ad2b1546f8607e8f2c91fefca9133a8e7f2b",
+   "receipts_plateaux_full_20260906/BALL_ANCHORS.md": "6b03342058b7ee758b00b7dc45563767eeee2b0115b40855eeac2f1dd8e197e2",
+   "receipts_plateaux_full_20260906/LOCAL_DIAGNOSTICS.md": "999c9a1051db71ff8befd0f95872d8f6d070c32a32282372202a7fd3aa35323a",
+   "receipts_plateaux_full_20260906/README.md": "b40372dd9ce18c921840d4b985eff6ad3e5c898fbb6a083066351c2b6cc57049",
+   "receipts_plateaux_full_20260906/ball_anchor_model.py": "8f13f02d6b2c36c79708f6bdb8482c3d01ec81c4164b2bb60422993861e0ded4",
+   "receipts_plateaux_full_20260906/plateau_model.py": "8afb5663c1fa0384d5ae392294cc03853676a89fcb18f858cd7d764ed9b1b93a"
+  },
+  "overlay": {
+   "bench/full_ball_tower_probe.cpp": "68ff890e31d291e138a08f954566d9bf8227a230f5b272032ef885cb6e873fc3",
+   "oracle/local_plateau_oracle.hpp": "7a002853749784bb14a8db178fbfe637244bd3019a08ae1daf92fd20aeae670d",
+   "src/core/types.hpp": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
+   "src/forest/anchor_meb.hpp": "386072c8a02bbb836d0070a10e1421418a36d3f4024ade63b4c9014c5536f786",
+   "src/forest/full_ball_tower.hpp": "4929a5420d7401c7b69ab4de004ed3b99c9fceb0eee9b4eb8bc86881af55718c",
+   "src/forest/full_certificate.hpp": "463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2",
+   "src/forest/full_coverage_certificate.hpp": "e8e65b211ec01964f35f1eb60587096a9b1e144d2c4634d2cad0c2f50ae5e883",
+   "src/forest/local_plateau.hpp": "df56fbf33ea3088218174f88a646c65702d97a0366ec848887f1846ae7666f2e",
+   "src/lanes/keys.hpp": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0",
+   "src/lanes/level.hpp": "acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c",
+   "src/pipeline/expand.hpp": "7cafb0341344fbc7d1584001e4685e2e5bf0122fe3b7e37277f5468d5c5e1cf0",
+   "src/tree/cloud_index.hpp": "8c5acf166ce378b0271e15850c54ca1740a8f6cb899d34a60c832a533504ad95",
+   "tests/full_ball_tower_gate.cpp": "7ed1ecbaa311eb496bc9c9538af154b3ad7f3bdeb339a8343d0fa53e40e73bea",
+   "tests/full_ball_tower_gate_v2.cpp": "d2a08edbbe9f1e8b25d1e50031dd2601da4ba7254b0117e764291e33ee04b9ca"
+  }
+ },
+ "title": "Corpus differentiel de nuages entiers aleatoires : juge rationnel vs build_full_ball_tower (WIP raccord ancres)"
+}

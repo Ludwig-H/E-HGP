@@ -1,0 +1,2 @@
+product refusal [actual_equal_radius_descent/variant0]: mutant_strict_descent_only
+FAIL [actual_equal_radius_descent/variant0] producer.complete_relative_orders

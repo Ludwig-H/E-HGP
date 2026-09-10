@@ -1,0 +1,8 @@
+drop_continuation code=1
+future_contribution code=1
+final_root code=1
+parents_zero code=1
+open_as_closed code=1
+birth_size_lax code=1
+continuation_new_node code=1
+dedup_across_roots code=1

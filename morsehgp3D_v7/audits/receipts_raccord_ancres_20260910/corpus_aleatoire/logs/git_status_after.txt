@@ -1,0 +1,33 @@
+ M audits/COORDINATION_MORSEHGP3D_V7.md
+ M morsehgp3D_v6/src/gpu/lot_ring.hpp
+ M morsehgp3D_v6/src/parallel/sort.hpp
+ M morsehgp3D_v6/src/pipeline/census.hpp
+ M morsehgp3D_v6/src/pipeline/expand.hpp
+ M morsehgp3D_v7/CMakeLists.txt
+ M morsehgp3D_v7/PASSATION.md
+ M morsehgp3D_v7/README.md
+ M morsehgp3D_v7/docs/CONTRAT_COUVERTURES_DATEES.md
+ M morsehgp3D_v7/docs/ELIMINATION_BLOCS_WSPD.md
+ M morsehgp3D_v7/docs/FAUSSES_PISTES.md
+ M morsehgp3D_v7/docs/LECTURE_ET_CONTRATS.md
+ M morsehgp3D_v7/docs/PLATEAUX_FULL_ET_ANCRES.md
+ M morsehgp3D_v7/tests/full_coverage_certificate_gate.cpp
+?? gcp-migration/full_ball_worker_v7.py
+?? gcp-migration/selftest_full_ball_worker_v7.py
+?? morsehgp3D_v6/src/gpu/route_c6.hpp
+?? morsehgp3D_v6/tests/perm_sort_gate.cpp
+?? morsehgp3D_v6/tests/route_c6_gate.cpp
+?? morsehgp3D_v7/bench/full_ball_tower_probe.cpp
+?? morsehgp3D_v7/bench/full_ball_tower_probe.cu
+?? morsehgp3D_v7/docs/HISTORIQUE_SONDE_REGULIERE_20260906.md
+?? morsehgp3D_v7/docs/TOUR_FULL_PAR_BOULES.md
+?? morsehgp3D_v7/receipts/ball_tower_20260910/
+?? morsehgp3D_v7/receipts/coverage_parent_array_20260910/
+?? morsehgp3D_v7/src/forest/anchor_meb.hpp
+?? morsehgp3D_v7/src/forest/full_ball_tower.hpp
+?? morsehgp3D_v7/src/gpu/census_route.cuh
+?? morsehgp3D_v7/tests/anchor_meb_gate.cpp
+?? morsehgp3D_v7/tests/census_route_device_gate.cu
+?? morsehgp3D_v7/tests/census_route_stub_gate.cpp
+?? morsehgp3D_v7/tests/full_ball_tower_gate.cpp
+?? morsehgp3D_v7/tests/full_ball_work_gate.cpp

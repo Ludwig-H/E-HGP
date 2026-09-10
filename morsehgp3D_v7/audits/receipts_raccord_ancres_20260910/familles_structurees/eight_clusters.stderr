@@ -1,0 +1,16 @@
+stage_start=index
+stage_complete=index seconds=0.000783121
+stage_start=generate
+stage_complete=generate seconds=8.077225551
+stage_start=sort_rle
+stage_complete=sort_rle seconds=0.160853701
+stage_start=prefilter
+stage_complete=prefilter seconds=1.180755357
+stage_start=census
+stage_complete=census seconds=0.881053084
+stage_start=full_ball_tower
+stage_complete=full_ball_tower seconds=16.691689759
+stage_start=payload_digest
+stage_complete=payload_digest seconds=0.350652554
+fam=eight_clusters elapsed=27.41 s maxrss=411196 KiB
+rc=0

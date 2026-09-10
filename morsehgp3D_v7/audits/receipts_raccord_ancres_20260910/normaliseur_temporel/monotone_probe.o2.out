@@ -1,0 +1,2 @@
+{"first_history_stats":{"lower_edges_indexed":709,"lower_nodes_activated":710,"lower_edges_activated":709,"lower_queries":69320,"lower_find_steps":82480,"lower_path_writes":2165}}
+{"status":"passed","histories":40,"nodes":46163,"queries":11891006,"equal_level_fusions":5092,"max_chain_depth":1283,"refused_nonmonotone":40}

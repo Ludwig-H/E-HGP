@@ -1,0 +1,10 @@
+--- /tmp/claude-1000/-workspaces-E-HGP/6300a9ba-5bd7-42ea-91b3-d2c07c163916/scratchpad/overlay_wip_3/src/forest/full_ball_tower.hpp	2026-09-10 13:29:16.461862051 +0000
++++ /tmp/claude-1000/-workspaces-E-HGP/6300a9ba-5bd7-42ea-91b3-d2c07c163916/scratchpad/overlay_mut_drop_inert_anchor_grouped/src/forest/full_ball_tower.hpp	2026-09-10 20:08:59.535934085 +0000
+@@ -594,6 +594,7 @@
+     // Publish anchors only AFTER the complete atomic group has been staged.
+     // Failure anywhere invalidates the whole result, not just this lot.
+     for (size_t b = 0; b < blocks.size(); ++b) {
++      if (blocks[b].roots.size() == 1 && !blocks[b].contribution && !blocks[b].interior) continue;  // MUTANT groupe : ancre inerte omise
+       require(anchors[blocks[b].ball] == absent && targets[b] != absent, "full_ball_anchor_duplicate");
+       anchors[blocks[b].ball] = targets[b];
+     }

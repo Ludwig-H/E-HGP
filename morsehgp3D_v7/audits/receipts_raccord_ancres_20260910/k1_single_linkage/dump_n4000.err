@@ -1,0 +1,5 @@
+n=4000 dump elapsed=0.42 s
+dump rc=0
+n=4000 compare elapsed=34.43 s
+compare rc=0
+normal==opt

@@ -1,0 +1,1 @@
+{"balls": 14745, "distinct_levels": 7986979, "equal_level_lots": 11003, "extra_in_tower": 0, "extra_records": 0, "missing_in_tower": 0, "multifusions_arity_ge3": 0, "n": 4000, "pairs": 7998000, "reference_events": 3999, "status": "passed", "tower_events": 3999}
