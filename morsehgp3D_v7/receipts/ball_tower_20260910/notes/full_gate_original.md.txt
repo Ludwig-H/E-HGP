@@ -1,0 +1,91 @@
+# Gate indépendante du raccord FULL par boules
+
+10 septembre 2026. Propriétaire : sous-agent `ball_tower_gate`, code actif
+limité à `morsehgp3D_v7/tests/full_ball_tower_gate.cpp`. Aucun fichier de
+production, CMake, audit ou index Git n'a été modifié par ce sous-agent.
+GCP non utilisé.
+
+## Portée
+
+Douze nuages de deux à huit sites, chacun en identités denses puis en
+identités externes clairsemées avec ordre physique et catalogue inversés :
+paire, E5, carré, ABCZ, ABCZXY, boule inerte à cinq sites, coquille7 avec
+Kmax5, supports3/4, tétraèdre u16, cercle avec intérieurs et vrai échange
+de resolver à rayon égal. Cent ordres, jusqu'au terminal K=n lorsque
+le Kmax de la fixture le demande.
+
+L'oracle Gram rationnel indépendant énumère ses sous-ensembles ; le juge
+forme les BallKey par LCM/GCD indépendants, recense tous les sites par
+distance rationnelle, calcule le q_min de tous les supports positifs
+indépendants et applique seulement la fenêtre p+q_min<=min(Kmax+1,n).
+La génération WSPD et les prédicats géométriques produit ne construisent
+pas ces entrées de test. Cette exhaustivité est STRICTEMENT bornée au juge.
+
+À chaque niveau MEB de tous les sous-ensembles, coupe ouverte puis fermée,
+comparaison des multisets de couvertures (pas d'union entre composantes),
+puis bijection des identités par histoire : racine pré-lot unique conservée,
+ou naissance, ou nœud portant exactement les parents de l'oracle. Toutes
+les sous-facettes K-1 de toutes les facettes d'une composante sont comparées
+à l'image verticale à la même coupe. Des composantes se recouvrent dans
+420 coupes ; aucun exemple à deux couvertures identiques n'a été trouvé
+dans ce corpus, bien que le comparateur conserve leurs multiplicités.
+
+Huit rejets couvrent les ordres invalides, domaine vide/dupliqué, clé répétée,
+dénominateur nul, niveau contradictoire et un catalogue auquel il manque
+une ancre faible effectivement demandée. Ils ne prouvent pas que toute
+incomplétude d'un catalogue fourni soit détectable.
+
+## Captures
+
+`run_r1/` conserve le premier binaire O2 de développement (pas de capture
+portable des commandes). `run_r2/` contient les sources, les seize commandes
+et sorties du premier passage scellé : 22 variantes/92 ordres ; O2/SAN,
+fuites actives, trois mutants. Le recorder de cette version est préservé
+dans `run_r2/record.py`, après ce premier passage et sans réécriture des
+sources capturées.
+
+`run_r3/` est la qualification finale demandée à `record.py`, sur un snapshot
+isolé des 26 dépendances projet découvertes avant compilation. Elle ajoute
+la douzième fixture et le quatrième mutant de descente strictement en rayon.
+Son statut fait autorité uniquement lorsque `run_r3/result.json` existe
+avec `status=passed` ; ne pas déduire une fin réussie de ce document.
+Les compilateurs et headers Boost sont ceux de l'environnement de capture,
+avec commande et chemin Boost conservés ; les dépendances système ne sont
+pas recopiées ni déclarées vendues par cette capture.
+
+Fin constatée : `run_r3/result.json` porte `status=passed`. Les dix-huit
+commandes rendent les codes attendus. O2 et ASan/UBSan avec détection de
+fuites active donnent les mêmes 130 734 contrôles : 2 136 coupes,
+15 048 facettes, 35 462 comparaisons verticales, 408 naissances, 174 fusions,
+quatre croissances datées et deux échanges réellement à rayon égal. Les
+quatre mutants sont tous rejetés causalement après compilation réussie.
+
+## Fixture d'échange réellement égal
+
+Les quatre premières positions sont (35,100,0), (139,48,0), (152,139,0),
+(48,139,0). Elles ont la même MEB, cercle de centre (100,100,0), rayon 65,
+et deux supports positifs triangulaires. Trois intrus (100,36,0), (101,37,0),
+(99,37,0) donnent p+q_min=6>smax5 : cette boule est hors catalogue. Le site
+(100,200,0) permet une demande d'un bloc ultérieur. La tour K1..4 exerce
+un échange égal par variante, puis ferme toutes ses forêts. Les coupes et
+la verticale de cette tour sont jugées comme celles des autres nuages.
+
+Recherche bornée de la fixture : huit positions extérieures essayées avec
+le quadrilatère avant rotation (aucun échange égal), puis rotation
+180 degrés pour modifier le premier sommet Morton du support ; le premier
+essai réussit. `search.cpp`, `search` et `search_rotated` sont des artefacts
+de recherche privés, pas des éléments du produit ou d'une preuve portable.
+Une erreur initiale de chemin d'inclusion dans ce script privé a été corrigée
+avant compilation ; aucun résultat de ce script erroné n'est revendiqué.
+
+## Mutants
+
+Sur des copies privées du header ROOT, pas via une macro de test : omettre
+les contributions de continuation ; supprimer les ancres inertes ; lire
+l'image verticale au niveau final inférieur ; imposer une décroissance
+strictement en rayon. Chaque mutant doit compiler normalement puis rendre
+code 1 avec un diagnostic de gate, et jamais seulement échouer au build.
+La gate normale rend 0 avec `--selftest`, 2 avec `--unknown`.
+
+Ni certificat de complétude WSPD, ni export/registre, ni contrat 50k/GPU
+ou preuve de performance ne résulte de cette gate bornée.

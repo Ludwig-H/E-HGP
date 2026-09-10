@@ -1,11 +1,14 @@
 # Fausses pistes et décisions écartées
 
-6 septembre 2026. `public_status=not_claimed`. Cette note garde les raisons
+10 septembre 2026. `public_status=not_claimed`. Cette note garde les raisons
 des abandons et corrections sans encombrer les entrées actives. Une piste
 non encore qualifiée n'est pas, à elle seule, une fausse piste.
 
 | Idée écartée ou corrigée | Pourquoi ; décision retenue |
 | --- | --- |
+| Reparcourir une chaîne inférieure entière pour chaque image verticale | Coût quadratique sur le peigne ; le normaliseur temporel active chaque arête une fois, dans une DSU de travail séparée de l'histoire. [Raccord](TOUR_FULL_PAR_BOULES.md) |
+| Déduire la correction du tableau des parents des seuls lecteurs de couverture | Ces lecteurs utilisent les successeurs : parent→0 leur échappait. Comparer directement toutes les arènes à l'entrée ; le mutant est maintenant rejeté. [Audit](../audits/receipts_coverage_cpp_20260910/README.md) |
+| Espérer atteindre 1s par le seul port prefilter/census | Le reçu historique 50k paie déjà plus de 15s de génération et tri CPU48 avant FULL. Porter ensuite les requêtes universelles WSPD par blocs ; ne pas appeler un census de boule fixe un témoin de rectangle. [Raccord et suite](TOUR_FULL_PAR_BOULES.md) |
 | Publier tous les niveaux Gamma pour reconstruire FULL | Sous régularité, minima Gabriel, vraies multifusions et parents suffisent. Les portails restent nécessaires au calcul, pas à la sortie. [Preuve](AUDIT_NIVEAUX_GABRIEL_20260905.md) |
 | Garder seulement les minima avec les adjacences géométriques héritées | Quatre points réguliers suffisent à perdre une multifusion, même avec toutes les intersections entre régions témoins des minima. Transférer les bons chemins/parents vers les minima, pas supprimer leurs ponts. [Preuve et fixture](SQUELETTE_MINIMA_GABRIEL.md) |
 | Remplacer partout le raccourci J=1 par la descente de facettes | La nouvelle descente est correcte mais peut demander deux MEB là où J=1 en demande une. Garder la possibilité d'un hybride, sans supposer que plus petit cardinal signifie moins de travail. [Différentiel rationnel](SQUELETTE_MINIMA_GABRIEL.md) |

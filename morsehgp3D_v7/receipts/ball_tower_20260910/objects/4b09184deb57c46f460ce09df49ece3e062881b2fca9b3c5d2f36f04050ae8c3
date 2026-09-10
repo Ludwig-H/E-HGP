@@ -1,0 +1,5 @@
+#!/usr/bin/env python3
+from pathlib import Path
+import shutil
+BASE = Path('/workspaces/E-HGP/build/v7_ball_tower_mono_20260910')
+shutil.copytree(BASE / 'extended', BASE / 'monotone', symlinks=True)

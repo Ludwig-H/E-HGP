@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "g++",
+    "-std=c++20",
+    "-O3",
+    "-DNDEBUG",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-MM",
+    "/workspaces/E-HGP/morsehgp3D_v7/bench/full_ball_tower_probe.cpp"
+  ],
+  "closed": true,
+  "ended_ns": 1789046871648566589,
+  "exit_code": 0,
+  "name": "dependencies",
+  "pid": 253377,
+  "started_ns": 1789046871511365907
+}

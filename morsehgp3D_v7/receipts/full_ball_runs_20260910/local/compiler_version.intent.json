@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "g++",
+    "--version"
+  ],
+  "name": "compiler_version",
+  "started_ns": 1789046871508142053
+}

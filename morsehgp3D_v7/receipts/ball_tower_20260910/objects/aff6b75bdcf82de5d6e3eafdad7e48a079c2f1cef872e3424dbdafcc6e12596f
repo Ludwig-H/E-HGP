@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+"""Direct paired geometry gates and new physical-work gate, no timings claim."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import time
+
+ROOT = Path('/workspaces/E-HGP')
+BASE = ROOT / 'build/v7_ball_tower_mono_20260910'
+BOOST = ROOT / 'build/v7_boost_gate/extracted/usr/include'
+MODE = sys.argv[1]
+RUN = BASE / ('run_' + MODE)
+RUN.mkdir(exist_ok=False)
+manifest = {'schema': 'full-ball-mono-direct-v1', 'commands': [], 'sources': {}}
+sources = [BASE / 'baseline/src/forest/full_ball_tower.hpp',
+           BASE / 'candidate/src/forest/full_ball_tower.hpp',
+           BASE / 'baseline/tests/full_ball_tower_gate.cpp',
+           BASE / 'candidate/tests/full_ball_tower_gate.cpp',
+           BASE / 'candidate/tests/mono_counters_gate.cpp', Path(__file__)]
+for source in sources:
+    manifest['sources'][str(source.relative_to(BASE))] = hashlib.sha256(source.read_bytes()).hexdigest()
+
+
+def run(name: str, argv: list[str], expected: int, env: dict | None = None) -> None:
+    started = time.time_ns()
+    with (RUN / (name + '.stdout')).open('wb') as stdout, (RUN / (name + '.stderr')).open('wb') as stderr:
+        result = subprocess.run(argv, cwd=ROOT, stdout=stdout, stderr=stderr, env=env, check=False)
+    row = {'name': name, 'argv': argv, 'returncode': result.returncode, 'expected': expected,
+           'start_ns': started, 'end_ns': time.time_ns()}
+    for stream in ['stdout', 'stderr']:
+        row[stream + '_sha256'] = hashlib.sha256((RUN / (name + '.' + stream)).read_bytes()).hexdigest()
+    manifest['commands'].append(row)
+    (RUN / 'receipt.json').write_text(json.dumps(manifest, indent=2) + '\n')
+    print(name, result.returncode, flush=True)
+    if result.returncode != expected:
+        print((RUN / (name + '.stderr')).read_text(), flush=True)
+        raise RuntimeError(name)
+
+
+common = ['g++', '-std=c++20', '-Wall', '-Wextra', '-Wpedantic', '-Werror', '-isystem', str(BOOST)]
+env = os.environ.copy()
+if MODE in ['o2', 'san']:
+    flags = ['-O2'] if MODE == 'o2' else ['-O1', '-g', '-fsanitize=address,undefined', '-fno-omit-frame-pointer']
+    if MODE == 'san':
+        env['ASAN_OPTIONS'] = 'detect_leaks=1:halt_on_error=1'
+        env['UBSAN_OPTIONS'] = 'halt_on_error=1:print_stacktrace=1'
+        manifest['sanitizer_env'] = {key: env[key] for key in ['ASAN_OPTIONS', 'UBSAN_OPTIONS']}
+    for kind in ['baseline', 'candidate', 'counters']:
+        source = BASE / kind / 'tests/full_ball_tower_gate.cpp' if kind != 'counters' else BASE / 'candidate/tests/mono_counters_gate.cpp'
+        executable = RUN / ('mhgp7_' + kind + '_gate')
+        run(kind + '_compile', common + flags + ['-MMD', '-MF', str(RUN / (kind + '.d')), str(source), '-o', str(executable)], 0)
+        run(kind + '_selftest', [str(executable), '--selftest'], 0, env)
+        run(kind + '_bad_argument', [str(executable), '--unknown'], 2, env)
+    if (RUN / 'baseline_selftest.stdout').read_bytes() != (RUN / 'candidate_selftest.stdout').read_bytes():
+        raise RuntimeError('baseline/candidate oracle output differs')
+    manifest['oracle_stdout_identical'] = True
+    (RUN / 'receipt.json').write_text(json.dumps(manifest, indent=2) + '\n')
+elif MODE == 'mutant':
+    private = BASE / 'mutant'
+    shutil.copytree(BASE / 'candidate', private, symlinks=True)
+    header = private / 'src/forest/full_ball_tower.hpp'
+    source = header.read_text()
+    before = 'if (blocks.size() == 1) {'
+    if source.count(before) != 1:
+        raise RuntimeError('mutation site count')
+    header.write_text(source.replace(before, 'if (blocks.size() == 1 && false) {'))
+    for kind, gate, expected in [('oracle', 'full_ball_tower_gate.cpp', 0), ('counters', 'mono_counters_gate.cpp', 1)]:
+        executable = RUN / ('mhgp7_mutant_' + kind)
+        run(kind + '_compile', common + ['-O2', str(private / 'tests' / gate), '-o', str(executable)], 0)
+        run(kind + '_selftest', [str(executable), '--selftest'], expected)
+else:
+    raise ValueError(MODE)

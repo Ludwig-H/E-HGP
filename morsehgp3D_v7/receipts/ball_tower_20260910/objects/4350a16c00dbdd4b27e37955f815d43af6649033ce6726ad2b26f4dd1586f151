@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+import difflib
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import time
+
+ROOT = Path('/workspaces/E-HGP')
+BASE = ROOT / 'build/v7_ball_tower_mono_20260910'
+MODE = sys.argv[1]
+RUN = BASE / ('run_monotone_' + MODE)
+RUN.mkdir(exist_ok=False)
+SOURCE = BASE / 'monotone'
+manifest = {'schema': 'full-ball-monotone-lower-v1', 'commands': [], 'sources': {}}
+for source in [SOURCE / 'src/forest/full_ball_tower.hpp', SOURCE / 'tests/full_ball_tower_gate.cpp',
+               SOURCE / 'tests/monotone_history_gate.cpp', Path(__file__)]:
+    manifest['sources'][str(source.relative_to(BASE))] = hashlib.sha256(source.read_bytes()).hexdigest()
+    shutil.copy2(source, RUN / source.name)
+
+
+def run(name, argv, expected, env=None):
+    started = time.time_ns()
+    with (RUN / (name + '.stdout')).open('wb') as out, (RUN / (name + '.stderr')).open('wb') as err:
+        result = subprocess.run(argv, cwd=ROOT, stdout=out, stderr=err, env=env, check=False)
+    command = {'name': name, 'argv': argv, 'returncode': result.returncode, 'expected': expected,
+               'start_ns': started, 'end_ns': time.time_ns()}
+    for stream in ['stdout', 'stderr']:
+        command[stream + '_sha256'] = hashlib.sha256((RUN / (name + '.' + stream)).read_bytes()).hexdigest()
+    manifest['commands'].append(command)
+    (RUN / 'receipt.json').write_text(json.dumps(manifest, indent=2) + '\n')
+    print(name, result.returncode, flush=True)
+    if result.returncode != expected:
+        print((RUN / (name + '.stderr')).read_text(), flush=True)
+        raise RuntimeError(name)
+
+
+common = ['g++', '-std=c++20', '-Wall', '-Wextra', '-Wpedantic', '-Werror', '-isystem',
+          str(ROOT / 'build/v7_boost_gate/extracted/usr/include')]
+if MODE in ['o2', 'san']:
+    flags = ['-O2'] if MODE == 'o2' else ['-O1', '-g', '-fsanitize=address,undefined', '-fno-omit-frame-pointer']
+    env = os.environ.copy()
+    if MODE == 'san':
+        env['ASAN_OPTIONS'] = 'detect_leaks=1:halt_on_error=1'
+        env['UBSAN_OPTIONS'] = 'halt_on_error=1:print_stacktrace=1'
+        manifest['sanitizer_env'] = {key: env[key] for key in ['ASAN_OPTIONS', 'UBSAN_OPTIONS']}
+    for kind, gate in [('comb', 'monotone_history_gate.cpp'), ('oracle', 'full_ball_tower_gate.cpp')]:
+        executable = RUN / ('mhgp7_' + kind)
+        run(kind + '_compile', common + flags + ['-MMD', '-MF', str(RUN / (kind + '.d')),
+            str(SOURCE / 'tests' / gate), '-o', str(executable)], 0)
+        run(kind + '_selftest', [str(executable), '--selftest'], 0, env)
+        run(kind + '_bad_argument', [str(executable), '--unknown'], 2, env)
+    if (RUN / 'oracle_selftest.stdout').read_bytes() != (BASE / 'run_extended/o2_selftest.stdout').read_bytes():
+        raise RuntimeError('monotone oracle output differs from predecessor')
+    manifest['oracle_output_identical_to_predecessor'] = True
+    (RUN / 'receipt.json').write_text(json.dumps(manifest, indent=2) + '\n')
+elif MODE == 'mutant':
+    SOURCE = BASE / 'monotone_future_mutant'
+    shutil.copytree(BASE / 'monotone', SOURCE, symlinks=True)
+    header = SOURCE / 'src/forest/full_ball_tower.hpp'
+    original = header.read_text()
+    before = 'full_coverage_detail::admitted(source.levels[cursor], cut, closed)'
+    if original.count(before) != 1:
+        raise RuntimeError('mutation count')
+    header.write_text(original.replace(before, 'true'))
+    for kind, gate in [('comb', 'monotone_history_gate.cpp'), ('oracle', 'full_ball_tower_gate.cpp')]:
+        executable = RUN / ('mhgp7_' + kind)
+        run(kind + '_compile', common + ['-O2', str(SOURCE / 'tests' / gate), '-o', str(executable)], 0)
+        run(kind + '_selftest', [str(executable), '--selftest'], 1)
+else:
+    raise ValueError(MODE)
+header = SOURCE / 'src/forest/full_ball_tower.hpp'
+if MODE != 'mutant':
+    delta = ''.join(difflib.unified_diff((BASE / 'candidate/src/forest/full_ball_tower.hpp').read_text().splitlines(keepends=True),
+        header.read_text().splitlines(keepends=True), fromfile='a/morsehgp3D_v7/src/forest/full_ball_tower.hpp',
+        tofile='b/morsehgp3D_v7/src/forest/full_ball_tower.hpp'))
+    (BASE / 'monotone.patch').write_text(delta)

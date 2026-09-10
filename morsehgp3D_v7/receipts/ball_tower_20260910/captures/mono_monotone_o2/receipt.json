@@ -1,0 +1,116 @@
+{
+  "schema": "full-ball-monotone-lower-v1",
+  "commands": [
+    {
+      "name": "comb_compile",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O2",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_monotone_o2/comb.d",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/monotone/tests/monotone_history_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_monotone_o2/mhgp7_comb"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789046563377765630,
+      "end_ns": 1789046566767684860,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "comb_selftest",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_monotone_o2/mhgp7_comb",
+        "--selftest"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789046566768215229,
+      "end_ns": 1789046566807143689,
+      "stdout_sha256": "7aa93a6b416681006c5faea23e91c78a29631586de5fd4974501c7ca19f96a7a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "comb_bad_argument",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_monotone_o2/mhgp7_comb",
+        "--unknown"
+      ],
+      "returncode": 2,
+      "expected": 2,
+      "start_ns": 1789046566807603668,
+      "end_ns": 1789046566809818127,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "oracle_compile",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O2",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_monotone_o2/oracle.d",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/monotone/tests/full_ball_tower_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_monotone_o2/mhgp7_oracle"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789046566810284267,
+      "end_ns": 1789046580211392388,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "oracle_selftest",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_monotone_o2/mhgp7_oracle",
+        "--selftest"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789046580211931444,
+      "end_ns": 1789046580572004393,
+      "stdout_sha256": "5f9ba02050c0b1ae097ceb0699b8a062f8b5cf666635b34c0fb0ca827efbd714",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "oracle_bad_argument",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_monotone_o2/mhgp7_oracle",
+        "--unknown"
+      ],
+      "returncode": 2,
+      "expected": 2,
+      "start_ns": 1789046580572542888,
+      "end_ns": 1789046580575152098,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "4b9eeadc562c94288f788d79631dcc662f5b8c306e7232ccdc083094698a2e85"
+    }
+  ],
+  "sources": {
+    "monotone/src/forest/full_ball_tower.hpp": "0b72b4e9cb3858f7026d6b5d2b55f8a7b191903fc37aa24c140dfb8b557657e8",
+    "monotone/tests/full_ball_tower_gate.cpp": "d2a08edbbe9f1e8b25d1e50031dd2601da4ba7254b0117e764291e33ee04b9ca",
+    "monotone/tests/monotone_history_gate.cpp": "09c294b370d0749d45b726bb469b3424bcecbb09fc13ad7c3fda8c12ab5147f4",
+    "record_monotone.py": "4350a16c00dbdd4b27e37955f815d43af6649033ce6726ad2b26f4dd1586f151"
+  },
+  "oracle_output_identical_to_predecessor": true
+}

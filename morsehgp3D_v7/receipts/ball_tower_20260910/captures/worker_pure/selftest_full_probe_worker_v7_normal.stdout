@@ -1,0 +1,1 @@
+{"GCP_used": false, "failed_partial_wrongK_rejected": 9, "full_summaries": 3, "invalid_wire_rejected": 33, "list_only_bootstrap_plans": 2, "pure_guard_positive": 1, "rejected_guard_mutants": 7, "status": "passed", "subprocess_invoked": false}

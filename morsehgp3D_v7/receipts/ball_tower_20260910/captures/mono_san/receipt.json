@@ -1,0 +1,183 @@
+{
+  "schema": "full-ball-mono-direct-v1",
+  "commands": [
+    {
+      "name": "baseline_compile",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O1",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_san/baseline.d",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/baseline/tests/full_ball_tower_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_san/mhgp7_baseline_gate"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789046010019486732,
+      "end_ns": 1789046048480514959,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "baseline_selftest",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_san/mhgp7_baseline_gate",
+        "--selftest"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789046048481225665,
+      "end_ns": 1789046050230157397,
+      "stdout_sha256": "9ee496b6ede9f0b295023f65728375971ec0a86939283cd65e2d35d15d28e9b0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "baseline_bad_argument",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_san/mhgp7_baseline_gate",
+        "--unknown"
+      ],
+      "returncode": 2,
+      "expected": 2,
+      "start_ns": 1789046050230833759,
+      "end_ns": 1789046050247739169,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "4b9eeadc562c94288f788d79631dcc662f5b8c306e7232ccdc083094698a2e85"
+    },
+    {
+      "name": "candidate_compile",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O1",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_san/candidate.d",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/candidate/tests/full_ball_tower_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_san/mhgp7_candidate_gate"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789046050248523031,
+      "end_ns": 1789046086680008044,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "candidate_selftest",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_san/mhgp7_candidate_gate",
+        "--selftest"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789046086680537782,
+      "end_ns": 1789046088376432815,
+      "stdout_sha256": "9ee496b6ede9f0b295023f65728375971ec0a86939283cd65e2d35d15d28e9b0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "candidate_bad_argument",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_san/mhgp7_candidate_gate",
+        "--unknown"
+      ],
+      "returncode": 2,
+      "expected": 2,
+      "start_ns": 1789046088377137219,
+      "end_ns": 1789046088393772875,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "4b9eeadc562c94288f788d79631dcc662f5b8c306e7232ccdc083094698a2e85"
+    },
+    {
+      "name": "counters_compile",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O1",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_san/counters.d",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/candidate/tests/mono_counters_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_san/mhgp7_counters_gate"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789046088394502948,
+      "end_ns": 1789046125610966047,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "counters_selftest",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_san/mhgp7_counters_gate",
+        "--selftest"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789046125611662106,
+      "end_ns": 1789046127035462225,
+      "stdout_sha256": "7b1a1d24dd23f9070e28bf1bfd7ea7f07a0a605396ca508da381549c5dd1efd6",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "counters_bad_argument",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_san/mhgp7_counters_gate",
+        "--unknown"
+      ],
+      "returncode": 2,
+      "expected": 2,
+      "start_ns": 1789046127036231791,
+      "end_ns": 1789046127053277312,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "sources": {
+    "baseline/src/forest/full_ball_tower.hpp": "4929a5420d7401c7b69ab4de004ed3b99c9fceb0eee9b4eb8bc86881af55718c",
+    "candidate/src/forest/full_ball_tower.hpp": "01d6dc1666d5e41b04c081f6b205504d3fbe6ab213c50da33fd3ab20f91036a2",
+    "baseline/tests/full_ball_tower_gate.cpp": "7ed1ecbaa311eb496bc9c9538af154b3ad7f3bdeb339a8343d0fa53e40e73bea",
+    "candidate/tests/full_ball_tower_gate.cpp": "7ed1ecbaa311eb496bc9c9538af154b3ad7f3bdeb339a8343d0fa53e40e73bea",
+    "candidate/tests/mono_counters_gate.cpp": "cb70fe97c532c80ce77bd1e0f2227dd7f60fe9af8f27546d1b11dc66c5cfd628",
+    "record.py": "aff6b75bdcf82de5d6e3eafdad7e48a079c2f1cef872e3424dbdafcc6e12596f"
+  },
+  "sanitizer_env": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "oracle_stdout_identical": true
+}

@@ -162,3 +162,10 @@ Une archive atomique de sortie ne résout pas la reprise du calcul.
 
 Les résultats CPU, CUDA et les extrapolations doivent rester séparés.
 `public_status=not_claimed` demeure tant que les portes requises manquent.
+
+Depuis le 10 septembre, le [raccord par boules](TOUR_FULL_PAR_BOULES.md)
+conserve les forêts datées et leurs cartes verticales, y compris les
+plateaux sur les oracles bornés. Il ne change pas les fondements lus
+ci-dessus, le profil pondéré, l'autorité des reçus F ni les contrats
+de performance. Les anciennes sondes horizontales gardent leurs mesures
+propres ; le nouvel instrument doit être mesuré avec toute sa tour retenue.

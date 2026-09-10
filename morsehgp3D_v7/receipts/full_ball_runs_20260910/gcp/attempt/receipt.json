@@ -1,0 +1,64 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "os-login",
+        "ssh-keys",
+        "add",
+        "--project=devpod-gpu-exploration",
+        "--key-file=/home/codespace/.local/state/ehgp/ball-v7-20260910.bMRbbRsMjg/session_key.pub",
+        "--ttl=70m",
+        "--format=json",
+        "--quiet"
+      ],
+      "ended_epoch": 1789047021.6719124,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "oslogin_add",
+      "pid": 261600,
+      "started_epoch": 1789047019.9409158,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "b88f27300cd05287b9d18ed2d1c72f39f3f6fe5638c0abfef548f13481ce8c9f",
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "/home/codespace/.local/state/ehgp/ball-v7-20260910.bMRbbRsMjg/full_host/start_and_verify.sh",
+        "--yes",
+        "--guest-shutdown-minutes",
+        "30",
+        "--handoff-file",
+        "/home/codespace/.local/state/ehgp/ball-v7-20260910.bMRbbRsMjg/full_host/handoff.json",
+        "--lifecycle-state-file",
+        "/home/codespace/.local/state/ehgp/ball-v7-20260910.bMRbbRsMjg/full_host/lifecycle.txt",
+        "--guard-mark-dir",
+        "/home/codespace/.local/state/ehgp/ball-v7-20260910.bMRbbRsMjg/full_host/guardmarks"
+      ],
+      "ended_epoch": 1789047050.7388616,
+      "exit_code": 1,
+      "group_closed": true,
+      "name": "guarded_start",
+      "pid": 261651,
+      "started_epoch": 1789047021.6724231,
+      "stderr_sha256": "5bc23dacf19ba77de34c317b9b7deeab42842e70b4653cadc7a0fbe83f7fb5ef",
+      "stdout_sha256": "22011340e3131b1a4857ee0f637da5ae7210a2234630d6161e8fd08a55540c37",
+      "timeout_seconds": null
+    }
+  ],
+  "controller_sha256": "177b25a0d72150dc331661fdf8da1ccde77ea17fb694d9c6af5b0929755160d8",
+  "error": "ValueError: start may have happened but generation is unknown",
+  "manifest_sha256": "6ef49898dbce7a0f6599ff4625bf8b196fa70bcc67a9f289b164de3f19df27c7",
+  "public_status": "not_claimed",
+  "shutdown_error": "ValueError: start may have happened but generation is unknown",
+  "snapshot_sha256": "1a0b2511cdd0378e25d7dd7e778c698abbdcb9bcba1f0cd86330d762a07cba84",
+  "status": "shutdown_uncertified",
+  "target": {
+    "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-b"
+  },
+  "targeted_shutdown_certified": false,
+  "worker_sha256": "6dd46af8863976e52194efb16aa1b16fdfaea11cf6aa605a16c5ecc78610729a"
+}

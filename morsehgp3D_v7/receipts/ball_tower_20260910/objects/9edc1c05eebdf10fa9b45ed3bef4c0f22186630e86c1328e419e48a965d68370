@@ -1,0 +1,122 @@
+"""Capture a fresh, isolated product/gate snapshot and causal mutant runs."""
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+from pathlib import Path
+import shlex
+import shutil
+import subprocess
+import time
+
+ROOT = Path(__file__).resolve().parents[2]
+OUT = ROOT / "build/v7_ball_tower_gate_20260910/run_r3"
+TEST = Path("morsehgp3D_v7/tests/full_ball_tower_gate.cpp")
+HEADER = Path("morsehgp3D_v7/src/forest/full_ball_tower.hpp")
+BOOST = ROOT / "build/v7_boost_gate/extracted/usr/include"
+FLAGS = ["-std=c++20", "-Wall", "-Wextra", "-Wpedantic", "-Werror", "-pthread",
+         "-isystem", str(BOOST)]
+
+
+def sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main() -> None:
+    OUT.mkdir(parents=True, exist_ok=False)
+    records: list[dict] = []
+    source_hashes: dict[str, str] = {}
+
+    def run(name: str, command: list[str], cwd: Path = ROOT,
+            env: dict[str, str] | None = None, expected: int = 0) -> dict:
+        print(name, flush=True)
+        start = time.time_ns()
+        completed = subprocess.run(command, cwd=cwd, env=env,
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+        stdout, stderr = OUT / f"{name}.stdout", OUT / f"{name}.stderr"
+        stdout.write_bytes(completed.stdout)
+        stderr.write_bytes(completed.stderr)
+        row = dict(name=name, argv=command, cwd=str(cwd),
+                   environment_overrides={key: env[key] for key in ["ASAN_OPTIONS", "UBSAN_OPTIONS"]}
+                   if env else {}, started_ns=start, finished_ns=time.time_ns(),
+                   returncode=completed.returncode, expected_returncode=expected,
+                   stdout_sha256=sha(stdout), stderr_sha256=sha(stderr))
+        records.append(row)
+        (OUT / "commands.json").write_text(json.dumps(records, indent=2) + "\n")
+        if completed.returncode != expected:
+            print(completed.stderr.decode(errors="replace"), flush=True)
+            raise RuntimeError(f"{name}: code {completed.returncode}, expected {expected}")
+        return row
+
+    run("head", ["git", "rev-parse", "HEAD"])
+    run("worktree", ["git", "status", "--short"])
+    run("compiler", ["g++", "--version"])
+    run("dependencies", ["g++", *FLAGS, "-MM", str(TEST)])
+    text = (OUT / "dependencies.stdout").read_text().replace("\\\n", " ")
+    dependencies = shlex.split(text.split(":", 1)[1])
+    snapshot = OUT / "snapshot"
+    for spelling in dependencies:
+        original = (ROOT / spelling).resolve()
+        relative = original.relative_to(ROOT)
+        destination = snapshot / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(original, destination)
+        source_hashes[str(relative)] = sha(original)
+    (OUT / "sources.json").write_text(json.dumps(source_hashes, indent=2, sort_keys=True) + "\n")
+    run("compile_o2", ["g++", *FLAGS, "-O2", str(TEST), "-o", str(OUT / "gate_o2")], snapshot)
+    run("selftest_o2", [str(OUT / "gate_o2"), "--selftest"])
+    run("argument_o2", [str(OUT / "gate_o2"), "--unknown"], expected=2)
+    run("compile_san", ["g++", *FLAGS, "-O1", "-g", "-fno-omit-frame-pointer",
+                         "-fsanitize=address,undefined", "-fno-pie", "-no-pie", str(TEST),
+                         "-o", str(OUT / "gate_san")], snapshot)
+    environment = os.environ.copy()
+    environment.update(ASAN_OPTIONS="detect_leaks=1:halt_on_error=1",
+                       UBSAN_OPTIONS="halt_on_error=1:print_stacktrace=1")
+    run("selftest_san", [str(OUT / "gate_san"), "--selftest"], env=environment)
+    run("argument_san", [str(OUT / "gate_san"), "--unknown"], env=environment, expected=2)
+    if (OUT / "selftest_o2.stdout").read_bytes() != (OUT / "selftest_san.stdout").read_bytes():
+        raise RuntimeError("O2/SAN output disagreement")
+    mutants = {
+        "drop_growth": (
+            "if (action.parents.size() != 1 || !action.contributions.empty()) batch.actions.push_back(std::move(action));",
+            "if (action.parents.size() != 1) batch.actions.push_back(std::move(action));"),
+        "drop_inert_anchor": (
+            "anchors[blocks[b].ball] = targets[b];",
+            "if (blocks[b].roots.size() == 1 && blocks[b].contribution == 0 && !blocks[b].interior) continue;\n"
+            "      anchors[blocks[b].ball] = targets[b];"),
+        "wrong_vertical_cut": (
+            "return full_coverage_root_at(tower.orders[k - 2].forest, upper.lower_nodes[root], cut, closed);",
+            "return full_coverage_root_at(tower.orders[k - 2].forest, upper.lower_nodes[root],\n"
+            "      tower.orders[k - 2].forest.nodes().back().level, true);"),
+        "strict_radius_only": (
+            "require(cmp <= 0, \"full_ball_radius_increased\");",
+            "require(cmp < 0, \"full_ball_radius_increased\");"),
+    }
+    mutant_results = {}
+    for name, (old, new) in mutants.items():
+        private = OUT / "mutants" / name
+        shutil.copytree(snapshot, private)
+        path = private / HEADER
+        original = path.read_text()
+        if original.count(old) != 1:
+            raise RuntimeError(f"{name}: mutation is not unique")
+        path.write_text(original.replace(old, new))
+        binary = OUT / f"gate_mutant_{name}"
+        run(f"compile_mutant_{name}", ["g++", *FLAGS, "-O2", str(TEST), "-o", str(binary)], private)
+        run(f"selftest_mutant_{name}", [str(binary), "--selftest"], expected=1)
+        diagnostic = (OUT / f"selftest_mutant_{name}.stderr").read_text()
+        if "FAIL [" not in diagnostic:
+            raise RuntimeError(f"{name}: not a causal gate failure")
+        mutant_results[name] = dict(header_sha256=sha(path), binary_sha256=sha(binary),
+                                    diagnostic=diagnostic.strip())
+    result = dict(status="passed", authority="bounded_independent_Gram_Gamma_not_WSPD_completeness",
+                  source_hashes=source_hashes, recorder_sha256=sha(Path(__file__)),
+                  o2_binary_sha256=sha(OUT / "gate_o2"), san_binary_sha256=sha(OUT / "gate_san"),
+                  mutants=mutant_results, commands=len(records), GCP_used=False)
+    (OUT / "result.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+    print(json.dumps(result), flush=True)
+
+
+if __name__ == "__main__":
+    main()

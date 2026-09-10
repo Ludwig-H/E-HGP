@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "g++",
+    "--version"
+  ],
+  "closed": true,
+  "ended_ns": 1789046871511032935,
+  "exit_code": 0,
+  "name": "compiler_version",
+  "pid": 253376,
+  "started_ns": 1789046871508142053
+}

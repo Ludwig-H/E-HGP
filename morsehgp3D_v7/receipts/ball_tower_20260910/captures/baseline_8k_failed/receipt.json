@@ -1,0 +1,9 @@
+{
+  "all_processes_closed": true,
+  "binary_sha256": "e74283b69587a573303cb63d31ec51dcd6c175a925de968ecd9eb090a0b133e6",
+  "commands": 8,
+  "error": "RuntimeError: unexpected exit: n8000",
+  "gcp_used": false,
+  "public_status": "not_claimed",
+  "status": "failed"
+}

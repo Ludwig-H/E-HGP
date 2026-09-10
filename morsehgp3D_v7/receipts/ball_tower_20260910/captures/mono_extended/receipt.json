@@ -1,0 +1,178 @@
+{
+  "schema": "full-ball-mono-direct-v1",
+  "commands": [
+    {
+      "name": "o2_compile",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O2",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_extended/o2.d",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/extended/tests/full_ball_tower_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_extended/mhgp7_o2_gate"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789046142413093855,
+      "end_ns": 1789046155471140698,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "o2_selftest",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_extended/mhgp7_o2_gate",
+        "--selftest"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789046155471622036,
+      "end_ns": 1789046155819698344,
+      "stdout_sha256": "5f9ba02050c0b1ae097ceb0699b8a062f8b5cf666635b34c0fb0ca827efbd714",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "o2_bad_argument",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_extended/mhgp7_o2_gate",
+        "--unknown"
+      ],
+      "returncode": 2,
+      "expected": 2,
+      "start_ns": 1789046155820282754,
+      "end_ns": 1789046155822664758,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "4b9eeadc562c94288f788d79631dcc662f5b8c306e7232ccdc083094698a2e85"
+    },
+    {
+      "name": "san_compile",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O1",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_extended/san.d",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/extended/tests/full_ball_tower_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_extended/mhgp7_san_gate"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789046155823162507,
+      "end_ns": 1789046193687643543,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "san_selftest",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_extended/mhgp7_san_gate",
+        "--selftest"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789046193689317355,
+      "end_ns": 1789046199372457474,
+      "stdout_sha256": "5f9ba02050c0b1ae097ceb0699b8a062f8b5cf666635b34c0fb0ca827efbd714",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "san_bad_argument",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_extended/mhgp7_san_gate",
+        "--unknown"
+      ],
+      "returncode": 2,
+      "expected": 2,
+      "start_ns": 1789046199373303623,
+      "end_ns": 1789046199390212169,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "4b9eeadc562c94288f788d79631dcc662f5b8c306e7232ccdc083094698a2e85"
+    },
+    {
+      "name": "counter_o2_compile",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O2",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_extended/counter_o2.d",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/candidate/tests/mono_counters_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_extended/mhgp7_counter_o2_gate"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789046199391117498,
+      "end_ns": 1789046212993132105,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "counter_o2_selftest",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_extended/mhgp7_counter_o2_gate",
+        "--selftest"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789046212993835959,
+      "end_ns": 1789046213110170802,
+      "stdout_sha256": "7b1a1d24dd23f9070e28bf1bfd7ea7f07a0a605396ca508da381549c5dd1efd6",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "counter_o2_bad_argument",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_extended/mhgp7_counter_o2_gate",
+        "--unknown"
+      ],
+      "returncode": 2,
+      "expected": 2,
+      "start_ns": 1789046213110921883,
+      "end_ns": 1789046213113196787,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "sources": {
+    "baseline/src/forest/full_ball_tower.hpp": "4929a5420d7401c7b69ab4de004ed3b99c9fceb0eee9b4eb8bc86881af55718c",
+    "candidate/src/forest/full_ball_tower.hpp": "01d6dc1666d5e41b04c081f6b205504d3fbe6ab213c50da33fd3ab20f91036a2",
+    "baseline/tests/full_ball_tower_gate.cpp": "7ed1ecbaa311eb496bc9c9538af154b3ad7f3bdeb339a8343d0fa53e40e73bea",
+    "candidate/tests/full_ball_tower_gate.cpp": "7ed1ecbaa311eb496bc9c9538af154b3ad7f3bdeb339a8343d0fa53e40e73bea",
+    "candidate/tests/mono_counters_gate.cpp": "cb70fe97c532c80ce77bd1e0f2227dd7f60fe9af8f27546d1b11dc66c5cfd628",
+    "record.py": "e5fb4fa05486fb716cc9b37bb601e71c624855da346300216befd4775b5aa5b6"
+  },
+  "extended_gate_sha256": "d2a08edbbe9f1e8b25d1e50031dd2601da4ba7254b0117e764291e33ee04b9ca",
+  "sanitizer_env": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "extended_o2_san_stdout_identical": true
+}

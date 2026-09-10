@@ -11,30 +11,41 @@ public_status=not_claimed
 ```
 
 Objectif : HGP FULL exact et industriel, sans mosaïque de Delaunay d'ordre
-supérieur ni catalogue Gamma exhaustif. **Le moteur FULL intégré et les
+supérieur ni catalogue Gamma exhaustif. **Le raccord FULL par boules est
+implémenté et qualifié sur oracles bornés ; l'archive industrielle et les
 contrats de performance ne sont pas encore livrés.**
 
 ## État courant
 
-Le [premier essai 50k G4 SPOT CPU48](docs/RESULTATS_G4_FULL_20260906.md)
-est clos : K10 et K5 refusent sur des coquilles non régulières avant tout
-ordre FULL, après 21,372 s et 5,646 s. Ce ne sont pas des temps de tour.
-Captures récupérées, même VM confirmée `TERMINATED`. Les
-[quatre coquilles ont maintenant été extraites et vérifiées localement](docs/PLATEAUX_FULL_ET_ANCRES.md)
-contre les 50 000 points. Le raccord prouvé par l'auditeur repose sur
-des quotients locaux et des ancres de boule fermées ; il exige aussi des
-gains de couverture datés hors régularité. FULL ne traite pas encore ces
-plateaux : aucun contrat ni résultat GPU acquis.
-Le [quotient local C++](receipts/local_plateau_20260906/README.md) est
-implémenté et qualifié séparément : tables de coquille partagées,
-intérieurs factorisés et contributions de couverture compactes.
-Il n'est pas encore raccordé au producteur FULL.
-Le raccourci diamétral et le contrôle complet des supports sont désormais
-[qualifiés](receipts/local_plateau_diameter_20260906/README.md).
-Le [journal de couvertures datées](docs/CONTRAT_COUVERTURES_DATEES.md)
-est implémenté séparément : populations partagées entre ordres,
-continuations sans nœud et racines aux coupes historiques. Il reste
-d'autorité structurelle ; le raccord aux ancres et au producteur est suivant.
+Le [nouveau raccord FULL](docs/TOUR_FULL_PAR_BOULES.md) produit les forêts
+datées et leurs cartes verticales à partir de census exacts complets fournis,
+y compris les plateaux non réguliers. O2/SAN : 130 734 contrôles,
+100 ordres et 35 462 comparaisons verticales contre Gram/Gamma indépendant.
+Cela ne certifie ni toute la génération WSPD ni un contrat de performance.
+
+Trois optimisations mono-thread sont qualifiées : validation directe des
+supports réguliers, lots unitaires sans DSU et normalisation temporelle
+des images inférieures. La troisième supprime un reparcours quadratique
+des chaînes historiques sans modifier l'histoire livrée. La nouvelle
+sonde conserve simultanément toute la tour et ses verticales.
+
+Le [triplet local clos](docs/RESULTATS_TOUR_BOULES_20260910.md) termine
+à 215,169 s / 417,627 s / 965,053 s pour 8k/16k/32k, s=8, un thread.
+Les sorties ont 3,98 M / 8,31 M / 17,17 M nœuds. Ce sont des diagnostics
+non répétés, pas des contrats ni un gain apparié contre l'ancienne sonde.
+
+La route CUDA réutilisable est raccordée à une sonde hybride, mais elle
+n'accélère que prefilter/census. Ses tests locaux sont des **simulations
+hôte**, pas des résultats GPU. Le démarrage G4 SPOT du 10 septembre est
+refusé par le quota global GPU occupé par une autre charge de travail ;
+la cible E-HGP est certifiée `TERMINATED`. Aucun benchmark distant lancé.
+Les [refus historiques 50k du 6 septembre](docs/RESULTATS_G4_FULL_20260906.md)
+restent distincts, sans réétiquetage. Contrats 1 s/100 ms non acquis.
+
+L'[audit indépendant du journal](audits/receipts_coverage_cpp_20260910/README.md)
+a exposé un angle mort du juge, pas un défaut nominal : le tableau des
+parents est désormais vérifié directement, avec une fusion à quatre
+parents et le mutant parent→0. Le journal reste d'autorité structurelle.
 
 Sous régularité, conserver les minima Gabriel de cardinal K et les vraies
 multifusions induites par les cofaces Gabriel de cardinal K+1, avec leurs
@@ -53,16 +64,16 @@ précise la simplification : les minima suffisent avec des connexions
 transférant les chemins omis, **pas** avec les seules adjacences induites.
 La descente à cardinal K constant fournit une autre méthode correcte pour
 retrouver les parents ; le raccourci J=1 actuel peut toutefois être moins
-coûteux. Le choix hybride et le partage des ancres horizontales/verticales
-restent à qualifier dans le produit. Le catalogue géométrique est déjà
+coûteux. Le choix hybride reste à évaluer ; le nouveau raccord partage
+ses ancres horizontales/verticales entre ordres adjacents. Le catalogue géométrique est déjà
 partagé entre ordres ; cette étude ne revendique pas un facteur K gagné.
 
-La [sonde v5](docs/CONTRAT_SONDE_FULL_MEB.md) retire les quotas arbitraires
+La [sonde historique au format v5](docs/CONTRAT_SONDE_FULL_MEB.md) retire les quotas arbitraires
 d'opérations FULL et les listes fermées de tailles d'entrée/cache. Elle
 conserve les limites de représentation, les admissions mémoire et le
 suivi des exécutions ; `P=unlimited` est explicite. Sa compilation fraîche
 et six nouveaux CTests passent ; la micro partielle et son défaut de
-format first-C restent déclarés dans la [passation](PASSATION.md).
+format first-C restent déclarés dans les [notes historiques](docs/HISTORIQUE_SONDE_REGULIERE_20260906.md).
 Le premier triplet direct 8k/16k/32k est clos. Aucun reçu n'est réétiqueté.
 La [borne de sortie](docs/CROISSANCE_ET_BORNE_DE_SORTIE.md) interdit de
 promettre une sortie FULL explicite sous-quadratique pour tout nuage 3D.
@@ -71,13 +82,14 @@ promettre une sortie FULL explicite sous-quadratique pour tout nuage 3D.
 | --- | --- |
 | [Certificat FULL et lecteur](docs/CONTRAT_CERTIFICAT_FULL.md) | Validation structurelle transactionnelle ; aucune certification géométrique |
 | [Journal de couvertures datées v2](docs/CONTRAT_COUVERTURES_DATEES.md) | Format distinct pour les plateaux ; couvertures initiales et contributions datées ; ni producteur ni archive FULL |
-| [Quotient local de plateau](docs/PLATEAUX_FULL_ET_ANCRES.md#composant-local-implémenté-et-qualifié) | 18 tables / 96 rangs rationnels, 40 rangs réels et contributions potentielles ; pas de parents globaux ni de raccord FULL |
+| [Quotient local de plateau](docs/PLATEAUX_FULL_ET_ANCRES.md#composant-local-implémenté-et-qualifié) | Qualification locale conservée ; consommé par le nouveau raccord, pas par l'ancienne sonde régulière |
+| [Tour par boules et verticale](docs/TOUR_FULL_PAR_BOULES.md) | Parents, plateaux, journal v2 et cartes adjacentes ; autorité relative aux census complets exacts fournis |
 | [Producteur horizontal FULL](docs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md) | Parents calculés, minima isolés et K=n conservés ; succès relatif à des catalogues complets, exacts et réguliers fournis |
 | [Cache FULL facultatif](docs/CONTRAT_CACHE_FULL_PARESSEUX.md) | API lazy distincte, capacité nulle permise, dispatcher J=1 ; minima et ancres restent obligatoires |
 | [Lots unitaires](docs/CONTRAT_LOT_UNITAIRE_FULL.md) | Tableau de quatre racines au lieu de la DSU locale ; mêmes demandes, compteurs, parents et ancres |
 | [Normalisation v2](docs/CONTRAT_NORMALISATION_FULL.md) | Dernière paire de compression supprimée ; mêmes forêts, calendrier d'accès et admissions explicitement versionnés |
 | [Proposeur MEB filtré dans FULL](docs/CONTRAT_MEB_FULL.md) | Opt-in C++ P, désactivé par défaut ; budget partagé par ordre, F inchangé et coûts physiques p/A séparés ; qualification propre au raccord |
-| CLI et archive | Route historique F séparée ; ni export FULL ni verticale FULL intégrée |
+| CLI et archive | Route historique F séparée ; sonde de tour retenue avec verticale, sans archive industrielle FULL |
 
 Les qualifications antérieures restent attribuées à leurs sources :
 
@@ -107,7 +119,7 @@ ralentissement q4 à 32k. Le [prototype rejet angulaire/saturation](receipts/wsp
 passe 432 comparaisons O2/SAN et son mutant ciblé ; il reste privé,
 non intégré et sans nouveau temps de grand nuage.
 Le [raccord multi-CPU](docs/PARALLELISME_FULL_20260906.md) est appliqué
-à la sonde ; ses micros passent et les mesures 8k terminent en
+à l'ancienne sonde régulière ; ses micros passent et les mesures 8k terminent en
 132,962 / 98,195 / 74,577 / 69,853 s externes à 1/2/4/8 threads,
 mêmes dix forêts. FULL et la boucle K restent séquentiels. Après le premier
 refus 50k CPU48 décrit plus haut, la suite doit traiter la régularité et
@@ -168,7 +180,8 @@ Cette archive atomique n'est pas un checkpoint de reprise du moteur.
 - [Dialogue de l'auditeur](audits/DIALOGUE_COURANT.md) : avis indépendants ; ce dossier lui appartient.
 
 La lecture intégrale des parties I et II du manuscrit et le port v6 sont
-[déclarés et épinglés](docs/LECTURE_ET_CONTRATS.md). La v6 reste intacte ;
+[déclarés et épinglés](docs/LECTURE_ET_CONTRATS.md). Ce chantier ne modifie pas la v6 ;
 aucun de ses résultats n'est hérité. Les preuves détaillées et essais
 négatifs restent dans `receipts/` ; les builds et brouillons vont dans
-`build/`, pas dans les entrées actives. GCP non utilisé pour ce delta.
+`build/`, pas dans les entrées actives. La tentative G4 de ce delta n'a
+exécuté aucun benchmark ; l'arrêt de la cible E-HGP est certifié.

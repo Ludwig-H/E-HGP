@@ -1,0 +1,16 @@
+ M audits/COORDINATION_MORSEHGP3D_V7.md
+ M morsehgp3D_v6/src/gpu/lot_ring.hpp
+ M morsehgp3D_v6/src/parallel/sort.hpp
+ M morsehgp3D_v6/src/pipeline/census.hpp
+ M morsehgp3D_v6/src/pipeline/expand.hpp
+ M morsehgp3D_v7/CMakeLists.txt
+?? morsehgp3D_v6/src/gpu/route_c6.hpp
+?? morsehgp3D_v6/tests/perm_sort_gate.cpp
+?? morsehgp3D_v6/tests/route_c6_gate.cpp
+?? morsehgp3D_v7/audits/COORDINATION_AUDITEURS.md
+?? morsehgp3D_v7/audits/receipts_coverage_cpp_20260910/
+?? morsehgp3D_v7/bench/full_ball_tower_probe.cpp
+?? morsehgp3D_v7/src/forest/anchor_meb.hpp
+?? morsehgp3D_v7/src/forest/full_ball_tower.hpp
+?? morsehgp3D_v7/tests/anchor_meb_gate.cpp
+?? morsehgp3D_v7/tests/full_ball_tower_gate.cpp

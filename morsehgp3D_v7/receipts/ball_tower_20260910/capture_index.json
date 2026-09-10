@@ -1,0 +1,36 @@
+{
+  "CUDA_executed": false,
+  "GCP_used": false,
+  "excluded": [
+    "active monotone_r1 performance capture",
+    "CUDA host raw results without a proper recorder",
+    "ELF executables and all system/Boost headers",
+    "GCP session evidence and coverage-parent packet published separately"
+  ],
+  "groups": {
+    "baseline_8k_failed": "build/v7_ball_probe_20260910/baseline_r1",
+    "full_gate_r3": "build/v7_ball_tower_gate_20260910/run_r3",
+    "meb_mutants": "build/v7_anchor_meb_20260910/run_mutants",
+    "meb_o2": "build/v7_anchor_meb_20260910/run_o2",
+    "meb_san": "build/v7_anchor_meb_20260910/run_san",
+    "mono_extended": "build/v7_ball_tower_mono_20260910/run_extended",
+    "mono_monotone_mutant": "build/v7_ball_tower_mono_20260910/run_monotone_mutant",
+    "mono_monotone_o2": "build/v7_ball_tower_mono_20260910/run_monotone_o2",
+    "mono_monotone_san": "build/v7_ball_tower_mono_20260910/run_monotone_san",
+    "mono_mutant": "build/v7_ball_tower_mono_20260910/run_mutant",
+    "mono_o2": "build/v7_ball_tower_mono_20260910/run_o2",
+    "mono_san": "build/v7_ball_tower_mono_20260910/run_san",
+    "work_o2": "build/v7_ball_work_gate_20260910/run_o2",
+    "work_san": "build/v7_ball_work_gate_20260910/run_san",
+    "worker_pure": "build/v7_ball_tower_gate_20260910/worker_checks_r1"
+  },
+  "known_unavailable_source_pin": {
+    "field": "sources",
+    "group": "mono_o2",
+    "name": "candidate/tests/mono_counters_gate.cpp",
+    "reason": "signedness fix after initial pin, before compilation; not an immutable-source validation",
+    "sha256": "bddcd449ff4e013ba681184afb8d7597b178762b9d7da40670d25976e22f5a2b"
+  },
+  "public_status": "not_claimed",
+  "schema": "v7-ball-local-publication-v1"
+}

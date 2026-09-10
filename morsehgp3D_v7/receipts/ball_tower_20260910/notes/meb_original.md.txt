@@ -1,0 +1,73 @@
+# MEB locale à coquille libre — 10 septembre 2026
+
+Sous-tâche bornée du raccord FULL : `phase=exploration_v7_hors_registre`,
+`backend=cpu_reference`, `profile=quantized_u16_input_only`,
+`mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
+GCP non utilisé ; aucun Git, CMake ou fichier d'audit modifié.
+
+## Entrée et portée
+
+`mhgp7::anchor_meb(std::span<const P3>, AnchorMebWork&) noexcept` reçoit
+1 à 10 positions u16 distinctes. Le résultat retourne clé de boule primitive,
+niveau exact, cardinal du support positif choisi, positions de ce support dans
+le span et nombre de sites sélectionnés sur la frontière. Le singleton est
+représentable avec une boule de rayon zéro, sans imposer son usage au resolver.
+
+Les supports q2, q3 puis q4 sont essayés dans l'ordre lexicographique des
+slots. Les prédicats entiers existants des lanes sont réemployés ; seules les
+formes acceptées sont matérialisées. Un support positif dont la boule contient
+tous les sites certifie la MEB, donc le premier suffit. La frontière peut
+contenir des sites supplémentaires. Le q choisi n'est jamais réinterprété
+comme q_min de la coquille globale du catalogue.
+
+Le composant n'inclut ni `silent_incidence.hpp` ni `meb_proposal.hpp`.
+Il ne modifie ni leur domaine régulier, ni leur autorité, ni leurs compteurs.
+Son calendrier neuf est `anchor_meb_real_lexicographic_supports_and_powers_v1`.
+Les charges réelles sont prospectives : appels, supports tentés par cardinal,
+tests de puissance et matérialisations. Aucun quota n'est ajouté ; seul
+l'overflow u64 est un refus. Le travail payé persiste après refus. Aucune
+allocation, aucun cache de nuage, aucune liste Gamma n'est construit.
+
+Le coût local est au plus 375 supports et 3 750 tests de puissance pour dix
+sites, espace constant. Cette borne locale ne borne ni la longueur de la
+descente, ni le nombre global de résolutions. Aucun gain de tour ou contrat
+de performance n'est revendiqué.
+
+## Qualification propre
+
+`record.py` conserve commandes exactes, heures, stdout, stderr, statuts,
+hashes de sources et ELF. Chaque mode crée un répertoire neuf sans écrasement.
+
+- `run_o2/` : compilation C++20 `-O2 -Wall -Wextra -Wpedantic -Werror`,
+  selftest code 0 et argument inconnu code 2.
+- `run_san/` : compilation `-O1 -g -fsanitize=address,undefined`, pointeur de
+  frame conservé, détection des fuites active ; mêmes codes et sortie.
+- `run_mutants/` : trois copies privées mécaniques du seul nouveau header,
+  compilées avec la gate nominale. Chacune refuse code 1 : confondre coquille
+  et support, accepter un extérieur, refuser une coquille supplémentaire.
+
+La gate effectue 11 752 contrôles, 605 comparaisons MEB, 300 permutations et
+197 cas à frontière supplémentaire. Les supports acceptés q1/q2/q3/q4 sont
+82/393/110/20. Le juge rationnel Gram indépendant évalue tous les supports
+positifs jusqu'à quatre sites, puis choisit la plus petite boule contenante.
+Il calcule séparément les coûts physiques attendus du calendrier du produit.
+
+Les sous-ensembles des fixtures incluent carré, ABCZ, coquille à sept points,
+supports alternatifs et tétraèdre aux extrêmes u16. Soixante nuages générés
+fixent les tailles 1..10, avec et sans permutation ; aucun cardinal supérieur
+n'est qualifié. Une fixture explicite conserve le rayon après remplacement
+d'un support par un intrus, diminue exactement la coquille sélectionnée,
+puis diminue strictement le rayon au remplacement suivant. Non-mutation de
+l'entrée, distinction des arités q2/q3 d'une même boule, rejets de domaine,
+sorties vides et limites exactes des compteurs sont contrôlés séparément.
+
+Il s'agit de géométrie locale seulement. Le resolver, les intrus globaux,
+les ancres et leurs dates, les parents FULL et la complétude du catalogue
+restent à qualifier par le constructeur de ROOT.
+
+Sources testées :
+
+- `src/forest/anchor_meb.hpp` :
+  `386072c8a02bbb836d0070a10e1421418a36d3f4024ade63b4c9014c5536f786`.
+- `tests/anchor_meb_gate.cpp` :
+  `5e3ee812ebd707a9afb65ff408fc8a3a4f9b506f3c972d15a37e32f4029b753a`.

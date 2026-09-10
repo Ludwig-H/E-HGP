@@ -1,0 +1,116 @@
+# Deux optimisations mono privées — 10 septembre 2026
+
+Cadre : `phase=exploration_v7_hors_registre`, `backend=cpu_reference`,
+`profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
+`public_status=not_claimed`. Aucun header actif, CMake, audit ou état Git modifié.
+GCP non utilisé. Les temps de compilation/exécution capturés ne sont pas des
+mesures de performance isolées : d'autres agents et audits travaillaient.
+
+## Sources et application
+
+La baseline `4929a5420d7401c7b69ab4de004ed3b99c9fceb0eee9b4eb8bc86881af55718c`
+est copiée dans `baseline/src/forest/full_ball_tower.hpp`. Toutes les variantes
+utilisent les mêmes dépendances produit via des liens locaux. Les copies des
+gates sont gelées ; leur changement concurrent dans le worktree ne modifie pas
+ces captures.
+
+- Premier delta : `candidate/src/forest/full_ball_tower.hpp`, SHA
+  `01d6dc1666d5e41b04c081f6b205504d3fbe6ab213c50da33fd3ab20f91036a2`.
+  Patch physique `candidate.patch`, résumé `summary.json`.
+- Deuxième delta : `monotone/src/forest/full_ball_tower.hpp`, SHA
+  `0b72b4e9cb3858f7026d6b5d2b55f8a7b191903fc37aa24c140dfb8b557657e8`.
+  `monotone.patch` s'applique après le premier ; `combined.patch` décrit le
+  delta complet contre la baseline. Résumé `monotone_summary.json`.
+
+## 1. Support déclaré et lot unitaire
+
+Les puissances de tous les points du census étant déjà contrôlées, un support
+régulier positif qui reproduit exactement clé et niveau certifie la boule.
+La validation utilise directement les formes exactes q2/q3/q4, sans chercher
+à nouveau la MEB parmi leurs sous-supports. `declared_support_checks` compte
+ce travail nouveau ; `validation_work` ne conserve que les vrais appels MEB
+pour les coquilles supplémentaires. Aucun compteur F n'est réinterprété.
+
+Un lot d'une seule boule ferme directement naissance, continuation ou fusion,
+calcule la même image verticale puis publie son ancre. Il n'alloue aucune DSU,
+liste d'owners, liste de groupes ou tableau de cibles. Les représentants, les
+identités de nœuds, les contributions et leurs dates restent inchangés.
+Les nouveaux compteurs sont `singleton_lots`, `grouped_lots`, `lot_dsu_slots`.
+
+Sur les 22 variantes de la première gate : 212 contrôles de support directs,
+32 MEB extra-shells ; 210 lots unitaires sans DSU, 102 lots groupés et 320
+slots de DSU. Un mutant désactive seulement ce raccourci : l'oracle demeure
+vert (code 0), mais le juge de travail physique le tue (code 1).
+
+## 2. Normalisation inférieure monotone
+
+L'ancien `History::root_at` recommençait la traversée des successeurs à chaque
+naissance ou parent supérieur. Le worktree conserve cette histoire immuable
+pour les coupes historiques ; la variante ajoute une vue de travail distincte.
+
+Une indexation linéaire des liens entrants (`heads/links`) permet de parcourir
+les nœuds inférieurs par date une seule fois. Une fusion est activée seulement
+lorsque son niveau est admis à la coupe demandée. La DSU utilise union par rang
+et compression ; un tableau `owner` distinct conserve le vrai token de la
+composante, indépendamment du représentant technique de la DSU. Les requêtes
+du constructeur avancent chronologiquement ; un recul de date ou de côté à
+date égale est explicitement refusé par cette vue de travail seulement.
+
+Invariant : après activation du préfixe admis, chaque classe DSU contient
+exactement les tokens reliés par des fusions admises et son owner est le plus
+récent nœud de cette composante. Les seuls liens entrants d'un nœud sont ses
+parents préexistants ; leur union établit l'invariant à l'activation suivante.
+Les fusions futures ne sont pas activées, même si toute l'histoire inférieure
+a déjà été construite. L'histoire de sortie n'est jamais compressée.
+
+Pour N nœuds inférieurs, E liens et Q requêtes, l'index coûte O(N+E), puis
+l'activation et les recherches coûtent O((N+E+Q) α(N)). Il n'y a aucun scan N
+par lot. La vue ajoute quatre tableaux u64 et un tableau u8, soit environ
+33N octets de payload, plus métadonnées fixes et allocations du standard.
+Cette borne ne dit rien du nombre global de nœuds ou de la génération WSPD.
+
+Compteurs : `lower_edges_indexed`, `lower_nodes_activated`,
+`lower_edges_activated`, `lower_queries`, `lower_find_steps`,
+`lower_path_writes`. Les activations et écritures sont prospectivement
+chargées ; les pas find comptent les arêtes traversées dans les deux passes.
+
+Une hiérarchie en peigne, avec deux parents par fusion et des niveaux
+croissants, expose exactement le surcoût supprimé :
+
+| Fusions | Liens parcourus sans cache | Activations nouvelles | Pas find nouveaux |
+| --- | --- | --- | --- |
+| 256 | 32 896 | 512 | 1 022 |
+| 512 | 131 328 | 1 024 | 2 046 |
+| 1 024 | 524 800 | 2 048 | 4 094 |
+
+Le compte quadratique est celui d'un miroir littéral de la traversée, contrôlé
+contre `History::root_at` à chaque coupe. Le nouveau compte est physique.
+La gate vérifie aussi l'immuabilité des historiques, les lectures publiques
+ouvertes anciennes après construction entière et les refus de recul de la vue.
+Un mutant activant toutes les fusions futures est tué par ce peigne et par
+la gate géométrique/verticale complète.
+
+## Qualification et portée
+
+`run_o2/` et `run_san/` conservent la première gate à 22 variantes. Les sorties
+baseline/candidate y sont identiques. `run_extended/` qualifie le premier delta
+sur la gate finale `d2a08edbbe9f1e8b25d1e50031dd2601da4ba7254b0117e764291e33ee04b9ca`.
+`run_monotone_o2/` et `run_monotone_san/` qualifient ensuite le delta combiné
+sur cette même gate et sur le peigne.
+
+La gate finale donne, pour les deux deltas, O2 et ASan/UBSan/LSan identiques :
+130 734 contrôles, 24 variantes, 100 ordres, 2 136 coupes, 35 462 contrôles
+verticaux, deux vraies descentes à rayon égal et huit refus. Aucun quota de
+travail n'est ajouté. Les allocations de toute la tour et la génération des
+candidats restent d'autres postes à optimiser ; ces preuves ne satisfont pas
+le contrat de temps 50k.
+
+Les scripts conservent commandes, statuts, stdout, stderr et pins. Détail de
+provenance : pendant la première capture O2, une correction de signedness du
+juge privé de compteurs a précédé sa compilation mais suivi le pin initial.
+Cette exécution de compteurs n'est donc pas utilisée comme qualification à
+source initiale immuable ; elle a été répétée, sources stables, dans
+`run_extended/counter_o2_*`, en plus de SAN. Les deux premiers modes du recorder
+ont ensuite été étendus pour la gate finale ; leur ancienne source a été
+reconstituée et contrôlée contre son SHA initial, sans prétendre l'avoir copiée
+avant exécution. Les captures brutes originales ne sont pas réécrites.

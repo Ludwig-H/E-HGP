@@ -1,0 +1,162 @@
+{
+  "binary_sha256": "33c3ca26ec40ad5a60455b42cb29d9c4e4d4c6f84f2db020efcfe0238c4c6f90",
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "closed": true,
+      "ended_ns": 1789046871444405130,
+      "exit_code": 0,
+      "name": "git_head",
+      "pid": 253354,
+      "started_ns": 1789046871441256406
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain=v1"
+      ],
+      "closed": true,
+      "ended_ns": 1789046871507875064,
+      "exit_code": 0,
+      "name": "git_status",
+      "pid": 253355,
+      "started_ns": 1789046871444608570
+    },
+    {
+      "argv": [
+        "g++",
+        "--version"
+      ],
+      "closed": true,
+      "ended_ns": 1789046871511032935,
+      "exit_code": 0,
+      "name": "compiler_version",
+      "pid": 253376,
+      "started_ns": 1789046871508142053
+    },
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-O3",
+        "-DNDEBUG",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-MM",
+        "/workspaces/E-HGP/morsehgp3D_v7/bench/full_ball_tower_probe.cpp"
+      ],
+      "closed": true,
+      "ended_ns": 1789046871648566589,
+      "exit_code": 0,
+      "name": "dependencies",
+      "pid": 253377,
+      "started_ns": 1789046871511365907
+    },
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-O3",
+        "-DNDEBUG",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_ball_probe_20260910/monotone_r1/compile.d",
+        "/workspaces/E-HGP/morsehgp3D_v7/bench/full_ball_tower_probe.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_ball_probe_20260910/monotone_r1/full_ball_probe"
+      ],
+      "closed": true,
+      "ended_ns": 1789046888622034294,
+      "exit_code": 0,
+      "name": "compile",
+      "pid": 253379,
+      "started_ns": 1789046871667827443
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/workspaces/E-HGP/build/v7_ball_probe_20260910/monotone_r1/full_ball_probe",
+        "--n=400",
+        "--s=8",
+        "--kmax=10",
+        "--threads=1"
+      ],
+      "closed": true,
+      "ended_ns": 1789046893266255825,
+      "exit_code": 0,
+      "name": "n400",
+      "pid": 253814,
+      "started_ns": 1789046888623397408
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/workspaces/E-HGP/build/v7_ball_probe_20260910/monotone_r1/full_ball_probe",
+        "--n=8000",
+        "--s=8",
+        "--kmax=10",
+        "--threads=1"
+      ],
+      "closed": true,
+      "ended_ns": 1789047108730582276,
+      "exit_code": 0,
+      "name": "n8000",
+      "pid": 253956,
+      "started_ns": 1789046893267417493
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/workspaces/E-HGP/build/v7_ball_probe_20260910/monotone_r1/full_ball_probe",
+        "--n=16000",
+        "--s=8",
+        "--kmax=10",
+        "--threads=1"
+      ],
+      "closed": true,
+      "ended_ns": 1789047527000539357,
+      "exit_code": 0,
+      "name": "n16000",
+      "pid": 264989,
+      "started_ns": 1789047108731497975
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/workspaces/E-HGP/build/v7_ball_probe_20260910/monotone_r1/full_ball_probe",
+        "--n=32000",
+        "--s=8",
+        "--kmax=10",
+        "--threads=1"
+      ],
+      "closed": true,
+      "ended_ns": 1789048493290613293,
+      "exit_code": 0,
+      "name": "n32000",
+      "pid": 277412,
+      "started_ns": 1789047527001304735
+    }
+  ],
+  "gcp_used": false,
+  "performance_scope": "local_diagnostic_no_claim_of_exclusive_host",
+  "public_status": "not_claimed",
+  "sources_stable": true,
+  "status": "completed"
+}

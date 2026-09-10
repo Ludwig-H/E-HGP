@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+"""Freeze the baseline and make private include trees for a bounded delta."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+
+ROOT = Path('/workspaces/E-HGP')
+BASE = ROOT / 'build/v7_ball_tower_mono_20260910'
+PROJECT = ROOT / 'morsehgp3D_v7'
+snapshot = {}
+for variant in ['baseline', 'candidate']:
+    destination = BASE / variant
+    (destination / 'src/forest').mkdir(parents=True, exist_ok=False)
+    (destination / 'tests').mkdir()
+    for directory in (PROJECT / 'src').iterdir():
+        if directory.name != 'forest':
+            (destination / 'src' / directory.name).symlink_to(directory, target_is_directory=directory.is_dir())
+    for header in (PROJECT / 'src/forest').iterdir():
+        target = destination / 'src/forest' / header.name
+        if header.name == 'full_ball_tower.hpp':
+            shutil.copy2(header, target)
+        else:
+            target.symlink_to(header, target_is_directory=header.is_dir())
+    (destination / 'oracle').symlink_to(PROJECT / 'oracle', target_is_directory=True)
+    gate = PROJECT / 'tests/full_ball_tower_gate.cpp'
+    shutil.copy2(gate, destination / 'tests/full_ball_tower_gate.cpp')
+    for source in [PROJECT / 'src/forest/full_ball_tower.hpp', gate]:
+        snapshot[str(source.relative_to(ROOT))] = hashlib.sha256(source.read_bytes()).hexdigest()
+(BASE / 'baseline_sources.json').write_text(json.dumps(snapshot, indent=2) + '\n')
+print(json.dumps(snapshot, indent=2))

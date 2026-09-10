@@ -1,0 +1,4 @@
+{"merges":256,"nodes":513,"baseline_edges":32896,"activated_edges":512,"find_steps":1022,"path_writes":512}
+{"merges":512,"nodes":1025,"baseline_edges":131328,"activated_edges":1024,"find_steps":2046,"path_writes":1024}
+{"merges":1024,"nodes":2049,"baseline_edges":524800,"activated_edges":2048,"find_steps":4094,"path_writes":2048}
+{"status":"passed","clouds":24,"declared_support_checks":270,"extra_MEB_calls":36,"extra_MEB_supports":42,"singleton_lots":290,"grouped_lots":120,"lot_dsu_slots":356,"gcp_used":false}

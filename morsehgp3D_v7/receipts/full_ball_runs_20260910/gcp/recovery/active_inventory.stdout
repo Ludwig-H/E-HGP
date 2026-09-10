@@ -1,0 +1,22 @@
+[
+  {
+    "guestAccelerators": [
+      {
+        "acceleratorCount": 1,
+        "acceleratorType": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west8-c/acceleratorTypes/nvidia-rtx-pro-6000"
+      }
+    ],
+    "labels": {
+      "managed-by": "manual-script",
+      "project": "generalized-frangi",
+      "workload": "cracksam-frangi"
+    },
+    "machineType": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west8-c/machineTypes/g4-standard-48",
+    "name": "cracksam-frangigraph-g4-spot-ew8c",
+    "scheduling": {
+      "provisioningModel": "SPOT"
+    },
+    "status": "RUNNING",
+    "zone": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west8-c"
+  }
+]

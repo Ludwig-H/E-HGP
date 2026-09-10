@@ -224,3 +224,44 @@ Les [mesures du triplet](RESULTATS_MONO_FULL_SANS_QUOTAS_20260906.md)
 motivent ces travaux : à 32k, le front WSPD paie 151,786 s et les corps
 des rectangles 132,697 s. Aucun gain de ces nouvelles pistes n'est déjà
 inclus dans ces chiffres. Aucun usage GCP.
+
+## Couture GPU proposée le 10 septembre
+
+La [nouvelle sonde de tour](TOUR_FULL_PAR_BOULES.md) peut déporter
+prefilter/census, mais pas le front WSPD. Le reçu **historique** CPU48
+50k/s8/K10 paie 7,639s au front et 4,621s dans les rectangles ; il compte
+4 946 403 888 visites de témoins WSPD, 1 293 436 130 évaluations de coins,
+1 536 766 250 tests de cœur q4 et 276 996 927 complétions. Ne pas attribuer
+ces milliards de visites aux histogrammes h_a/h_b sans mesure séparée.
+
+Le premier port envisagé est un batch de requêtes universelles
+`(Aref, Bref, lane_mask, with_corners)`, pas un transfert de toutes les
+paires A×B ou un appel CUDA par rectangle. Le contrôle de vague, la
+scission, l'ordre stable et le grand-livre u128 restent d'abord CPU.
+Le device retourne trois comptes écrêtés, statuts d'écriture, visites
+et coins. La porte compare les listes de rectangles/masques/cœurs et
+l'ownership des paires, pas seulement la masse totale.
+
+Les cœurs peuvent être préparés CPU au premier jalon ; le noyau reprend
+strictement exclusions parentales A∪B, crédit unique par lane et nœud,
+seuils stricts, masques actifs et passage coûteux aux coins uniquement
+pour les terminaux q3/q4 encore ouverts. Un census dans une boule fixe
+n'est pas ce prédicat universel. Garder deux phases évite la fausse piste
+du passage aux coins systématique déjà mesurée ci-dessus.
+
+La résidence ajoutée est O(B) pour un lot de B requêtes et O(n) pour
+l'index device, sans matrice rectangle×visites. Les vecteurs de vagues
+et de terminaux CPU subsistent ; leur conversion en flux repris reste
+un chantier distinct. Le GPU seul ne diminue pas l'exposant du travail.
+
+Deuxième unité possible : un histogramme saturé par extrémité fixée,
+jamais les matrices A² ou B². Préserver le need global, les exclusions
+et les unités positions/multiplicités ; le rejet négatif doit accompagner
+les crédits positifs. Pour q4, conserver ensuite le seed et son cover
+avec le sweep exact, plutôt que rescanner le cover pour chaque completion.
+
+Ce plan n'est ni implémenté ni qualifié sur GPU. La tentative G4 du
+10 septembre n'a lancé aucun worker : quota global occupé par une autre
+charge de travail ; cible E-HGP contrôlée TERMINATED. Après disponibilité,
+qualifier les kernels et les queues de lots, puis les régimes 8k/16k/32k
+et s8/10/12 en séparant visites, sorties, mémoire et temps de tour.

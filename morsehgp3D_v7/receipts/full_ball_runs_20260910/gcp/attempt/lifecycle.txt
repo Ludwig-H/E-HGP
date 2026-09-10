@@ -1,0 +1,6 @@
+schema=e-hgp.lifecycle-state.v1
+state=start_may_have_been_requested
+project=devpod-gpu-exploration
+zone=us-central1-b
+instance=ehgp-v7-4fa0e0789a7d5bb06b787d35
+generation=

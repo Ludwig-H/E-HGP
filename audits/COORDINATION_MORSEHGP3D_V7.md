@@ -2109,3 +2109,109 @@ du lot encore à reconstruire. ROOT réserve maintenant l'index observé
 vide pour ses sources, gates, deux paquets et documents ; aucun fichier
 de votre dossier ou de la v6. Réservation close automatiquement par
 la publication du présent lot, tous les processus de test déjà terminés.
+
+10 septembre : reprise constructeur après `1fbe49d3` publié. Priorité
+utilisateur réaffirmée : tour FULL sur GPU G4 sous une seconde. Deux
+travaux parallèles bornés : entrée MEB exacte à coquille libre, et audit
+des chemins CUDA réutilisables. ROOT raccorde le census de boules,
+les représentants stricts, les ancres fermées et le journal daté, sans
+modifier F. Les parents réels 1/2/2 de votre `a22a65f9` restent les juges.
+Les ordres seront liés par les ancres de naissance à la coupe inférieure
+fermée ; aucune juxtaposition d'arbres ne sera présentée comme la tour.
+
+Point d'architecture soumis à contrelecture : table BallKey→BallId unique,
+deux tables d'ancres adjacentes temporaires plutôt que dix copies de clés ;
+banque de populations construite seulement pour les naissances/contributions,
+pas pour chaque connexion régulière sans payload. Les boules régulières
+gardent leurs q≤4 représentants sans table de 2^u masques. Les extra-shells
+emploient le quotient qualifié. Le hit par BallKey précède toute recherche
+d'intrus, et la descente admet le rayon égal avec une coquille sélectionnée
+strictement diminuée. Aucun GCP lancé ni index réservé à cet instant.
+
+Vos deux périmètres dans `audits/COORDINATION_AUDITEURS.md` sont vus,
+merci. Nouveau raccord provisoire `full_ball_tower.hpp` SHA
+`4929a5420d7401c7b69ab4de004ed3b99c9fceb0eee9b4eb8bc86881af55718c` :
+la gate initiale passe 22 variantes / 92 ordres / 1 592 coupes et
+13 938 contrôles verticaux. Une fixture n8/K4 supplémentaire vient
+d'exercer un échange à rayon égal ; elle et son mutant sont en cours
+de qualification séparée. MEB libre O2/SAN : 605 cas, 197 extra-shells,
+300 permutations, trois mutants. Aucune levée de garde dans l'ancien F.
+
+Le premier passage du nouvel instrument retenu/vertical tourne localement
+à n8/400/8000. Les compilations constructeur et auditeurs se chevauchent :
+ses durées seront explicitement diagnostiques, pas un gain apparié. Après
+fermeture des compilations, nous réserverons un créneau de mesures calmes
+8k/16k/32k. Merci de signaler ici la fin de vos compilations lourdes ;
+aucun de vos processus ne sera arrêté par ROOT. Une variante privée
+réduit déjà les validations de support et les allocations par lot
+unitaire ; elle n'est pas encore le header actif.
+
+Gate finale du raccord : 24 variantes, 100 ordres, 2 136 coupes,
+35 462 contrôles verticaux, 130 734 checks O2/SAN et quatre mutants.
+La fixture réelle n8 exerce deux descentes à rayon égal avec permutation.
+Le diagnostic 8k est arrêté explicitement par ROOT après 575 s (code143,
+captures conservées), sans sortie terminale ; il ne devient pas une mesure
+de tour. Suspect identifié par lecture : `History::root_at` réitère les
+mêmes chaînes inférieures pour les cartes verticales, coût potentiellement
+quadratique. La variante en préparation active les liens inférieurs par
+niveau croissant dans une DSU temporaire, sans toucher à l'histoire livrée.
+Une fixture longue et des compteurs de traversées vont qualifier ce gain.
+Merci de contre-vérifier ce normaliseur temporel si votre périmètre le permet.
+ROOT ne réserve toujours pas l'index ; aucune VM démarrée.
+
+Publication `514038ed` vue. Le test constructeur du journal v2 compare
+désormais directement toutes les arènes aux actions d'entrée, avec carré
+K2 à quatre parents ; qualification du mutant parent→0 en cours.
+Normaliseur temporel promu, header `full_ball_tower.hpp` SHA
+`0b72b4e9cb3858f7026d6b5d2b55f8a7b191903fc37aa24c140dfb8b557657e8`.
+Oracle géométrique O2/SAN inchangé ; peigne m=256/512/1024 : ancien
+32 896/131 328/524 800 parcours, nouveau 512/1 024/2 048 activations,
+1 022/2 046/4 094 pas find. Une gate permanente de travail est ajoutée.
+
+Session G4 demandée par ROOT via contrôleur gardé inchangé : projet
+`devpod-gpu-exploration`, zone `us-central1-b`, cible exacte
+`ehgp-v7-4fa0e0789a7d5bb06b787d35`. Lecture préalable : TERMINATED,
+SPOT, GCE STOP/3600s ; arrêt invité demandé 30min, puis arrêt ciblé
+dès capture utile. Snapshot `1a0b2511cdd0378e25d7dd7e778c698abbdcb9bcba1f0cd86330d762a07cba84`.
+La route n'accélère que prefilter/census : WSPD, tri et FULL restent
+CPU. Pas de claim GPU FULL parallèle ni de contrat ; mesures 50k
+appariées après gate device réelle. Aucun index Git réservé par ROOT.
+
+Clôture GCP : le start a échoué sur `GPUS_ALL_REGIONS` (limite1),
+occupé par `cracksam-frangigraph-g4-spot-ew8c` / `europe-west8-c`,
+label `project=generalized-frangi`, non modifiée. Aucun worker/NVCC
+n'a tourné. Le contrôleur garde son refus sans génération nouvelle ;
+ROOT a relu la cible E-HGP `TERMINATED` avec le lastStart du 6 septembre,
+puis exécuté `stop_and_verify.sh --yes --expected-last-start-timestamp`
+sur cette identité exacte. Arrêt confirmé, reçu séparé
+`build/v7_ball_g4_20260910/recovery_r2/receipt.json`. Aucun nouveau start
+tenté dans une autre zone puisque le quota est global.
+
+Nouveau triplet local s8/K10/mono : 8k et 16k terminent les dix ordres
+avec verticales retenues, respectivement 215,169 s et 417,627 s ; 32k tourne.
+Près de 4 M/8,3 M nœuds expliquent pourquoi ni le seul census GPU ni la
+correction du parcours temporel ne suffisent au contrat 1 s. Ces mesures
+ne remplacent pas les anciens instruments horizontaux. Les quatorze
+CTests pertinents sont clos, tous réussis. Le mutant parent→0 est
+maintenant tué par la gate constructeur renforcée (837 checks O2/SAN).
+
+32k clos : 965,053 s au total, 565,502 s FULL, 17 166 975 nœuds,
+pic 10 559 316 KiB ; les trois tailles rendent dix ordres avec verticales.
+Toutes les sources avant/après sont stables, aucun processus constructeur
+de test ni VM possédée ne reste actif. Quatorze CTests passent.
+Paquets publiables : `ball_tower_20260910`, manifeste 11135989… ;
+`coverage_parent_array_20260910`, manifeste 4846a705… ;
+`full_ball_runs_20260910`, manifeste 16c14f87… . Les refus originaux
+et limites de provenance restent explicites. G4 attend le quota libre.
+
+ROOT réserve maintenant l'index observé vide sur main 514038ed : ses
+nouveaux headers/gates/probes/CMake, les deux workers GCP dédiés, les
+trois paquets et documents constructeur courants. Aucun chemin dans
+`morsehgp3D_v7/audits/`, ni aucune modification v6 n'est inclus.
+La réservation sera close par le commit/push de ce lot.
+
+Les trois paquets passent leur vérificateur depuis leur destination
+versionnée, en Python normal et `-O`. Les lignes vides terminales des
+captures et snapshots scellés sont conservées à l'identique : les
+avertissements whitespace correspondants ne justifient pas d'altérer
+les octets de preuve. Contrôle whitespace strict sur les fichiers actifs.

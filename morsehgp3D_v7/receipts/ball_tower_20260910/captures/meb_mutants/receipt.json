@@ -1,0 +1,118 @@
+{
+  "schema": "anchor-meb-direct-qualification-v1",
+  "commands": [
+    {
+      "name": "shell_is_support_compile",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O2",
+        "/workspaces/E-HGP/build/v7_anchor_meb_20260910/run_mutants/shell_is_support/tests/anchor_meb_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_anchor_meb_20260910/run_mutants/shell_is_support/gate"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789045041739940097,
+      "end_ns": 1789045047413706382,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "shell_is_support_selftest",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_anchor_meb_20260910/run_mutants/shell_is_support/gate",
+        "--selftest"
+      ],
+      "returncode": 1,
+      "expected": 1,
+      "start_ns": 1789045047414212476,
+      "end_ns": 1789045047416708012,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "f20c60973793aa472875133fee436bd3ab508ca9e60b499260603743a693b0de"
+    },
+    {
+      "name": "accept_outside_compile",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O2",
+        "/workspaces/E-HGP/build/v7_anchor_meb_20260910/run_mutants/accept_outside/tests/anchor_meb_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_anchor_meb_20260910/run_mutants/accept_outside/gate"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789045047418346690,
+      "end_ns": 1789045053001144880,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "accept_outside_selftest",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_anchor_meb_20260910/run_mutants/accept_outside/gate",
+        "--selftest"
+      ],
+      "returncode": 1,
+      "expected": 1,
+      "start_ns": 1789045053001672555,
+      "end_ns": 1789045053004100154,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "0e5fc039be85012691582352b9190dff4b20dae528465a9243c9af398fa1f10d"
+    },
+    {
+      "name": "reject_extra_shell_compile",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O2",
+        "/workspaces/E-HGP/build/v7_anchor_meb_20260910/run_mutants/reject_extra_shell/tests/anchor_meb_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_anchor_meb_20260910/run_mutants/reject_extra_shell/gate"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789045053005464028,
+      "end_ns": 1789045058571719318,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reject_extra_shell_selftest",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_anchor_meb_20260910/run_mutants/reject_extra_shell/gate",
+        "--selftest"
+      ],
+      "returncode": 1,
+      "expected": 1,
+      "start_ns": 1789045058572315009,
+      "end_ns": 1789045058574829671,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "aa21005192bcfb5d7879e605feeb4c03f145d9b718a955f5fd7f45d5f7481dae"
+    }
+  ],
+  "sources": {
+    "morsehgp3D_v7/src/forest/anchor_meb.hpp": "386072c8a02bbb836d0070a10e1421418a36d3f4024ade63b4c9014c5536f786",
+    "morsehgp3D_v7/tests/anchor_meb_gate.cpp": "5e3ee812ebd707a9afb65ff408fc8a3a4f9b506f3c972d15a37e32f4029b753a",
+    "build/v7_anchor_meb_20260910/record.py": "fb6af9a928b8b7c79cd8056b78ed2b6da8d0be9d0f9b3898780b43b48e9b337a"
+  }
+}

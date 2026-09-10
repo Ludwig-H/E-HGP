@@ -1,0 +1,37 @@
+stage_start=index
+stage_complete=index seconds=0.002387805
+stage_start=generate
+stage_complete=generate seconds=59.199729780
+stage_start=sort_rle
+stage_complete=sort_rle seconds=2.091978827
+stage_start=prefilter
+stage_complete=prefilter seconds=20.260397384
+stage_start=census
+stage_complete=census seconds=12.080359096
+stage_start=full_ball_tower
+stage_complete=full_ball_tower seconds=119.635793015
+stage_start=payload_digest
+stage_complete=payload_digest seconds=1.841992569
+	Command being timed: "/workspaces/E-HGP/build/v7_ball_probe_20260910/monotone_r1/full_ball_probe --n=8000 --s=8 --kmax=10 --threads=1"
+	User time (seconds): 202.22
+	System time (seconds): 3.38
+	Percent of CPU this job got: 95%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 3:35.45
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 2329780
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 1180135
+	Voluntary context switches: 1
+	Involuntary context switches: 10945
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 48
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

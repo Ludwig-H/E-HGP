@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "git",
+    "rev-parse",
+    "HEAD"
+  ],
+  "closed": true,
+  "ended_ns": 1789046871444405130,
+  "exit_code": 0,
+  "name": "git_head",
+  "pid": 253354,
+  "started_ns": 1789046871441256406
+}

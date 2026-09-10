@@ -1,0 +1,67 @@
+{
+  "CUDA_executed": false,
+  "GCP_used": false,
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "/workspaces/E-HGP/build/v7_ball_tower_gate_20260910/worker_checks_r1/sources/gcp-migration/selftest_full_ball_worker_v7.py"
+      ],
+      "exit_code": 0,
+      "finished_ns": 1789046738654277182,
+      "name": "selftest_full_ball_worker_v7_normal",
+      "started_ns": 1789046738521420895,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "61ea97a66fd897717a0edfaef5fdbe08581f921abc9eb3a7bff3be69958ef990"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v7_ball_tower_gate_20260910/worker_checks_r1/sources/gcp-migration/selftest_full_ball_worker_v7.py"
+      ],
+      "exit_code": 0,
+      "finished_ns": 1789046738787911961,
+      "name": "selftest_full_ball_worker_v7_optimized",
+      "started_ns": 1789046738654337735,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "61ea97a66fd897717a0edfaef5fdbe08581f921abc9eb3a7bff3be69958ef990"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "/workspaces/E-HGP/build/v7_ball_tower_gate_20260910/worker_checks_r1/sources/gcp-migration/selftest_full_probe_worker_v7.py"
+      ],
+      "exit_code": 0,
+      "finished_ns": 1789046738885189760,
+      "name": "selftest_full_probe_worker_v7_normal",
+      "started_ns": 1789046738787981972,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "4dfb8d7b87ed2e3d61d6c0f769acae03c5e6ebbf6c6414edb8bc9d9fcd5f4bdc"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v7_ball_tower_gate_20260910/worker_checks_r1/sources/gcp-migration/selftest_full_probe_worker_v7.py"
+      ],
+      "exit_code": 0,
+      "finished_ns": 1789046738983587711,
+      "name": "selftest_full_probe_worker_v7_optimized",
+      "started_ns": 1789046738885251785,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "4dfb8d7b87ed2e3d61d6c0f769acae03c5e6ebbf6c6414edb8bc9d9fcd5f4bdc"
+    }
+  ],
+  "sources": {
+    "full_ball_worker_v7.py": "6dd46af8863976e52194efb16aa1b16fdfaea11cf6aa605a16c5ecc78610729a",
+    "full_probe_worker_v7.py": "da967163bdb7247bc6aad4df0c294cda1071076a0127cd5bd9f59bc0e4788439",
+    "selftest_full_ball_worker_v7.py": "da07122bce58fc29e4d400102533f370e8261f5e84076767529461fd5dd147e2",
+    "selftest_full_probe_worker_v7.py": "54ffac16413813b87f38a8d3d658d27860c9712901f4612a5a0eb114e48cad48"
+  },
+  "status": "passed"
+}

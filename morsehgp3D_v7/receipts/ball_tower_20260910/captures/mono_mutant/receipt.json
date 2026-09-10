@@ -1,0 +1,85 @@
+{
+  "schema": "full-ball-mono-direct-v1",
+  "commands": [
+    {
+      "name": "oracle_compile",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O2",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/mutant/tests/full_ball_tower_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_mutant/mhgp7_mutant_oracle"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789046040434853725,
+      "end_ns": 1789046054915741202,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "oracle_selftest",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_mutant/mhgp7_mutant_oracle",
+        "--selftest"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789046054916366699,
+      "end_ns": 1789046055079215602,
+      "stdout_sha256": "9ee496b6ede9f0b295023f65728375971ec0a86939283cd65e2d35d15d28e9b0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "counters_compile",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O2",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/mutant/tests/mono_counters_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_mutant/mhgp7_mutant_counters"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789046055079843593,
+      "end_ns": 1789046068545251102,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "counters_selftest",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_ball_tower_mono_20260910/run_mutant/mhgp7_mutant_counters",
+        "--selftest"
+      ],
+      "returncode": 1,
+      "expected": 1,
+      "start_ns": 1789046068545773426,
+      "end_ns": 1789046068547997145,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "cc05e43a305b0d3f1b3352fa568e9bf53225ab3dc1ee842cd6d7dfc0805e4694"
+    }
+  ],
+  "sources": {
+    "baseline/src/forest/full_ball_tower.hpp": "4929a5420d7401c7b69ab4de004ed3b99c9fceb0eee9b4eb8bc86881af55718c",
+    "candidate/src/forest/full_ball_tower.hpp": "01d6dc1666d5e41b04c081f6b205504d3fbe6ab213c50da33fd3ab20f91036a2",
+    "baseline/tests/full_ball_tower_gate.cpp": "7ed1ecbaa311eb496bc9c9538af154b3ad7f3bdeb339a8343d0fa53e40e73bea",
+    "candidate/tests/full_ball_tower_gate.cpp": "7ed1ecbaa311eb496bc9c9538af154b3ad7f3bdeb339a8343d0fa53e40e73bea",
+    "candidate/tests/mono_counters_gate.cpp": "cb70fe97c532c80ce77bd1e0f2227dd7f60fe9af8f27546d1b11dc66c5cfd628",
+    "record.py": "aff6b75bdcf82de5d6e3eafdad7e48a079c2f1cef872e3424dbdafcc6e12596f"
+  }
+}

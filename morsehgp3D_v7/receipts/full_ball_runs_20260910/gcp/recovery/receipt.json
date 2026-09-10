@@ -1,0 +1,84 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "instances",
+        "describe",
+        "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-b",
+        "--format=json(name,status,lastStartTimestamp,lastStopTimestamp,labels,machineType,scheduling)"
+      ],
+      "ended_epoch": 1789047529.701233,
+      "exit_code": 0,
+      "name": "describe_before",
+      "started_epoch": 1789047527.9372616,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "f6547b2addaea07d3ff31fba319b9b8cc89c6b0e2f34060be4d42a5a9ba9309d"
+    },
+    {
+      "argv": [
+        "./gcp-migration/stop_and_verify.sh",
+        "--yes",
+        "--expected-last-start-timestamp",
+        "2026-09-06T06:19:11.593-07:00"
+      ],
+      "ended_epoch": 1789047540.8450484,
+      "exit_code": 0,
+      "name": "guarded_stop",
+      "started_epoch": 1789047529.7013166,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "542c8f8747cc337aa2489b769bbe0b1fa2dfa5de04511953ffe0b7d385f16688"
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "instances",
+        "describe",
+        "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-b",
+        "--format=json(name,status,lastStartTimestamp,lastStopTimestamp,labels,machineType,scheduling)"
+      ],
+      "ended_epoch": 1789047542.735457,
+      "exit_code": 0,
+      "name": "describe_after",
+      "started_epoch": 1789047540.8450775,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "f6547b2addaea07d3ff31fba319b9b8cc89c6b0e2f34060be4d42a5a9ba9309d"
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "instances",
+        "list",
+        "--project=devpod-gpu-exploration",
+        "--filter=status!=TERMINATED",
+        "--format=json(name,zone,status,labels,machineType,guestAccelerators,scheduling.provisioningModel)"
+      ],
+      "ended_epoch": 1789047544.2944186,
+      "exit_code": 0,
+      "name": "active_inventory",
+      "started_epoch": 1789047542.7355385,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a57ba3561644fb6c6659b898e6eb33e463043c527b2ffa6a42e6a10959d43b36"
+    }
+  ],
+  "controller_original_preserved": true,
+  "controller_original_status": "shutdown_uncertified",
+  "generation": "2026-09-06T06:19:11.593-07:00",
+  "gpu_benchmark_executed": false,
+  "no_new_generation_observed": true,
+  "other_instances_modified": false,
+  "status": "refused_start_target_shutdown_certified",
+  "target": {
+    "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-b"
+  },
+  "targeted_shutdown_certified": true
+}

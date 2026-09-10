@@ -1,0 +1,73 @@
+#include <cstdio>
+#include <string_view>
+#include "../src/forest/full_ball_tower.hpp"
+
+namespace {
+using namespace mhgp7;
+void need(bool ok, const char* reason) { if (!ok) throw reason; }
+ExactLevel level(u64 value) { return {{value, 0, 0}, 1}; }
+full_ball_detail::History comb(u64 merges) {
+  full_ball_detail::History history;
+  history.levels.assign(2 * merges + 1, level(0));
+  history.next.assign(history.levels.size(), kFullCoverageAbsent);
+  for (u64 j = 1; j <= merges; ++j) {
+    const u64 target = merges + j;
+    history.levels[target] = level(j);
+    history.next[j] = target;
+    history.next[j == 1 ? 0 : target - 1] = target;
+  }
+  return history;
+}
+void run(u64 merges) {
+  const auto history = comb(merges);
+  const auto before = history;
+  FullBallStats stats;
+  full_ball_detail::MonotoneHistory cursor(history, stats);
+  need(cursor.root_at(0, level(0), true) == 0, "birth_initial_cut");
+  u64 baseline_edges = 0;
+  for (u64 cut = 1; cut <= merges; ++cut) {
+    u64 expected = 0;
+    while (history.next[expected] != kFullCoverageAbsent &&
+        full_coverage_detail::admitted(history.levels[history.next[expected]], level(cut), true)) {
+      ++baseline_edges; expected = history.next[expected];
+    }
+    need(expected == merges + cut, "baseline_comb_identity");
+    need(history.root_at(0, level(cut), true) == expected, "baseline_mirror_exact");
+    need(cursor.root_at(0, level(cut), true) == expected, "monotone_current_cut_not_future");
+  }
+  need(baseline_edges == merges * (merges + 1) / 2, "quadratic_baseline_edge_count");
+  need(stats.lower_nodes_activated == 2 * merges + 1 && stats.lower_edges_indexed == 2 * merges &&
+      stats.lower_edges_activated == 2 * merges && stats.lower_queries == merges + 1,
+      "each_node_and_edge_activated_once");
+  need(stats.lower_find_steps <= 20 * merges && stats.lower_path_writes <= 4 * merges,
+      "linear_physical_work_on_comb");
+  need(history.levels == before.levels && history.next == before.next, "immutable_public_history");
+  for (u64 cut = 1; cut <= merges; ++cut)
+    need(history.root_at(0, level(cut), false) == (cut == 1 ? 0 : merges + cut - 1),
+        "public_history_past_open_cut_preserved");
+  bool caught = false;
+  try { (void)cursor.root_at(0, level(0), true); }
+  catch (const full_ball_detail::Failure&) { caught = true; }
+  need(caught, "working_cursor_rejects_time_reversal");
+  FullBallStats fresh;
+  full_ball_detail::MonotoneHistory boundary(history, fresh);
+  need(boundary.root_at(0, level(1), false) == 0, "working_open_cut_excludes_fusion");
+  need(boundary.root_at(0, level(1), true) == merges + 1, "working_closed_cut_includes_fusion");
+  caught = false;
+  try { (void)boundary.root_at(0, level(1), false); }
+  catch (const full_ball_detail::Failure&) { caught = true; }
+  need(caught, "working_cursor_rejects_same_time_side_reversal");
+  std::printf("{\"merges\":%llu,\"nodes\":%llu,\"baseline_edges\":%llu,\"activated_edges\":%llu,"
+      "\"find_steps\":%llu,\"path_writes\":%llu}\n", static_cast<unsigned long long>(merges),
+      static_cast<unsigned long long>(history.levels.size()), static_cast<unsigned long long>(baseline_edges),
+      static_cast<unsigned long long>(stats.lower_edges_activated), static_cast<unsigned long long>(stats.lower_find_steps),
+      static_cast<unsigned long long>(stats.lower_path_writes));
+}
+}
+int main(int argc, char** argv) {
+  if (argc != 2 || std::string_view(argv[1]) != "--selftest") return 2;
+  try { for (u64 merges : {256, 512, 1024}) run(merges); return 0; }
+  catch (const char* reason) { std::fprintf(stderr, "%s\n", reason); return 1; }
+  catch (const full_ball_detail::Failure& error) { std::fprintf(stderr, "%s\n", error.reason); return 1; }
+  catch (const std::exception& error) { std::fprintf(stderr, "%s\n", error.what()); return 1; }
+}

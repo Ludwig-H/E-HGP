@@ -1,11 +1,11 @@
 # Plateaux FULL : coquilles locales et ancres de boule
 
-6 septembre 2026. `phase=exploration_v7_hors_registre`,
+10 septembre 2026. `phase=exploration_v7_hors_registre`,
 `backend=cpu_reference`, `profile=quantized_u16_input_only`,
 `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
-**Le refus réel à 50k est expliqué géométriquement, pas encore levé dans
-FULL.** L'extension ne réclame ni tous les niveaux Gamma ni un catalogue
+**Le nouveau raccord FULL traite les plateaux sur les oracles bornés ;
+son exécution 50k reste à qualifier.** L'extension ne réclame ni tous les niveaux Gamma ni un catalogue
 de leurs facettes. Elle change le certificat, les terminaux du resolver
 et la fermeture des lots. Les preuves indépendantes sont les
 [contrats de plateau](../audits/receipts_plateaux_full_20260906/README.md)
@@ -19,7 +19,7 @@ régularité, deux phénomènes imposent un supplément : une naissance peut
 couvrir plus de K points ; une composante existante peut gagner un point
 sans fusionner. La fixture ABCZ de l'auditeur montre ce second cas à K3.
 
-Le futur certificat doit donc versionner les couvertures initiales, les
+Le certificat étendu doit donc versionner les couvertures initiales, les
 parents pré-lot et les gains de couverture datés, y compris lors d'une
 continuation à un parent. Celle-ci ne devient pas une nouvelle naissance
 ou une multifusion artificielle. Les identités persistent indépendamment
@@ -200,17 +200,17 @@ couverture éventuellement supérieure à K, continuation sans nouveau nœud,
 contribution datée et racines historiques aux coupes. Son autorité est
 structurelle, sans certification du census ni des parents fournis.
 
-Ce composant n'est encore appelé ni par `full_gabriel.hpp` ni par la
-sonde FULL : **aucun gain de temps de tour ni levée du refus 50k n'est
-attribué à cette implémentation locale.**
+Ce composant est consommé par le [nouveau raccord](TOUR_FULL_PAR_BOULES.md),
+pas par `full_gabriel.hpp` ni l'ancienne sonde régulière. **Aucun gain
+de temps de tour ni réussite 50k n'est attribué à sa seule qualification locale.**
 
 ## Ce qui reste à raccorder et à mesurer
 
 Le quotient local ne décide ni parents globaux, ni lots, ni verticale.
-Le journal étendu est disponible, sans raccord au constructeur. La
-suppression du refus ne sera correcte qu'après
-ce raccord et sa qualification sur coupes ouvertes/fermées, continuations,
-naissances de plateau, racines répétées et ancres silencieuses.
+Le nouveau constructeur raccorde ces objets et passe les coupes
+ouvertes/fermées, continuations, naissances, recouvrements, ancres
+inertes et verticales de 100 ordres jugés par Gram/Gamma. Il reste à
+requalifier la chaîne WSPD entière et les quatre plateaux réels à 50k.
 Le traitement régulier doit conserver son chemin économique ; aucune
 table de 4 096 masques n'est à construire systématiquement pour les
 millions de boules régulières.

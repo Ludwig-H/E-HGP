@@ -1,0 +1,13 @@
+Starting instance(s) ehgp-v7-4fa0e0789a7d5bb06b787d35...
+...............................failed.
+ERROR: (gcloud.compute.instances.start)  - Quota 'GPUS_ALL_REGIONS' exceeded.  Limit: 1.0 globally.
+	metric name = compute.googleapis.com/gpus_all_regions
+	limit name = GPUS-ALL-REGIONS-per-project
+	limit = 1.0
+	dimensions = global: global
+Try your request in another zone, or view documentation on how to increase quotas: https://cloud.google.com/compute/quotas.
+
+[ERREUR] La commande de démarrage GCP a échoué ou dépassé 180 s.
+[URGENCE] Démarrage non certifié de ehgp-v7-4fa0e0789a7d5bb06b787d35 et génération lastStartTimestamp inconnue; aucun arrêt automatique non versionné n’est autorisé.
+[URGENCE] Projet=devpod-gpu-exploration zone=us-central1-b instance=ehgp-v7-4fa0e0789a7d5bb06b787d35; dernier état certifié avant mutation=TERMINATED.
+Commande de contrôle : gcloud compute instances describe ehgp-v7-4fa0e0789a7d5bb06b787d35 --project=devpod-gpu-exploration --zone=us-central1-b --format=value\(status\,lastStartTimestamp\)

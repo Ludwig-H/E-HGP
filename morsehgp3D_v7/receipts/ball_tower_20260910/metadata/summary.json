@@ -1,0 +1,48 @@
+{
+  "status": "passed",
+  "scope": "bounded_private_delta_not_performance_contract",
+  "baseline_sha256": "4929a5420d7401c7b69ab4de004ed3b99c9fceb0eee9b4eb8bc86881af55718c",
+  "candidate_sha256": "01d6dc1666d5e41b04c081f6b205504d3fbe6ab213c50da33fd3ab20f91036a2",
+  "patch_sha256": "5cd634dc2e850aad307fcdee67e4e74ab4e319502606de6f626d377a4820ec2a",
+  "receipts": {
+    "o2": "6c3f18c623e6131d2dd9aa2eb79f23be41f9499cc6bac96882bbd15023b02d78",
+    "san": "7edc873a7ba43b414aa399078429ab157c1108dc898c94f67c34e70ec61a15c0",
+    "mutant": "426e1f7f11c8138e8913ab407fd4330d5eb932613dfa2218491f2f282a3ae6f6",
+    "extended": "d784f878adfba2d1294baab6bb0ca9da5e60b2c6f6574cb11403464a944a360a"
+  },
+  "final_oracle": {
+    "status": "passed",
+    "authority": "bounded_independent_Gram_Gamma_not_WSPD_completeness",
+    "checks": 130734,
+    "clouds": 24,
+    "orders": 100,
+    "cuts": 2136,
+    "facets": 15048,
+    "vertical_checks": 35462,
+    "births": 408,
+    "merges": 174,
+    "continuation_snapshots": 860,
+    "growth_snapshots": 4,
+    "overlap_cuts": 420,
+    "duplicate_cover_cuts": 0,
+    "regular_blocks": 524,
+    "extra_blocks": 122,
+    "anchor_hits": 476,
+    "representatives": 758,
+    "intruder_queries": 12,
+    "same_radius_steps": 2,
+    "rejections": 8
+  },
+  "physical_work": {
+    "status": "passed",
+    "clouds": 22,
+    "declared_support_checks": 212,
+    "extra_MEB_calls": 32,
+    "extra_MEB_supports": 32,
+    "singleton_lots": 210,
+    "grouped_lots": 102,
+    "lot_dsu_slots": 320,
+    "gcp_used": false
+  },
+  "gcp_used": false
+}

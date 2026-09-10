@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "git",
+    "status",
+    "--porcelain=v1"
+  ],
+  "name": "git_status",
+  "started_ns": 1789046871444608570
+}

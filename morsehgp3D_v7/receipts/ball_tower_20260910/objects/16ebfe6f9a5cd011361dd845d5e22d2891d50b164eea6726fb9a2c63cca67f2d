@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+"""Export the physical delta and verify the bounded local captures."""
+import difflib
+import hashlib
+import json
+from pathlib import Path
+
+BASE = Path('/workspaces/E-HGP/build/v7_ball_tower_mono_20260910')
+baseline = BASE / 'baseline/src/forest/full_ball_tower.hpp'
+candidate = BASE / 'candidate/src/forest/full_ball_tower.hpp'
+patch = ''.join(difflib.unified_diff(baseline.read_text().splitlines(keepends=True),
+    candidate.read_text().splitlines(keepends=True),
+    fromfile='a/morsehgp3D_v7/src/forest/full_ball_tower.hpp',
+    tofile='b/morsehgp3D_v7/src/forest/full_ball_tower.hpp'))
+(BASE / 'candidate.patch').write_text(patch)
+receipts = {}
+for mode in ['o2', 'san', 'mutant', 'extended']:
+    run = BASE / ('run_' + mode)
+    receipt = json.loads((run / 'receipt.json').read_text())
+    if any(command['returncode'] != command['expected'] for command in receipt['commands']):
+        raise RuntimeError('unexpected command status: ' + mode)
+    receipts[mode] = hashlib.sha256((run / 'receipt.json').read_bytes()).hexdigest()
+    for command in receipt['commands']:
+        for stream in ['stdout', 'stderr']:
+            digest = hashlib.sha256((run / (command['name'] + '.' + stream)).read_bytes()).hexdigest()
+            if digest != command[stream + '_sha256']:
+                raise RuntimeError('changed raw stream')
+for mode in ['o2', 'san']:
+    run = BASE / ('run_' + mode)
+    if (run / 'baseline_selftest.stdout').read_bytes() != (run / 'candidate_selftest.stdout').read_bytes():
+        raise RuntimeError('old corpus differential mismatch')
+extended = BASE / 'run_extended'
+if (extended / 'o2_selftest.stdout').read_bytes() != (extended / 'san_selftest.stdout').read_bytes():
+    raise RuntimeError('final corpus sanitizer mismatch')
+if (BASE / 'run_mutant/oracle_selftest.stdout').read_bytes() != (BASE / 'run_o2/baseline_selftest.stdout').read_bytes():
+    raise RuntimeError('unitary performance mutant changed geometry')
+if (BASE / 'run_mutant/counters_selftest.stderr').read_text().strip() != 'mono.physical_unitary_work':
+    raise RuntimeError('wrong causal mutant failure')
+# Recover the exact initially pinned recorder after its later mode extension.
+# This is content reconstruction checked by SHA, not a claim of prior capture.
+recorder = (BASE / 'record.py').read_text()
+begin = recorder.index("elif MODE == 'extended':")
+end = recorder.index('\nelse:\n    raise ValueError(MODE)', begin)
+old_recorder = recorder[:begin] + recorder[end + 1:]
+old_hash = hashlib.sha256(old_recorder.encode()).hexdigest()
+for mode in ['o2', 'san', 'mutant']:
+    run = BASE / ('run_' + mode)
+    receipt = json.loads((run / 'receipt.json').read_text())
+    if receipt['sources']['record.py'] != old_hash:
+        raise RuntimeError('reconstructed recorder does not match pin')
+    (run / 'record_at_start_reconstructed.py').write_text(old_recorder)
+summary = {'status': 'passed', 'scope': 'bounded_private_delta_not_performance_contract',
+    'baseline_sha256': hashlib.sha256(baseline.read_bytes()).hexdigest(),
+    'candidate_sha256': hashlib.sha256(candidate.read_bytes()).hexdigest(),
+    'patch_sha256': hashlib.sha256((BASE / 'candidate.patch').read_bytes()).hexdigest(),
+    'receipts': receipts,
+    'final_oracle': json.loads((extended / 'o2_selftest.stdout').read_text()),
+    'physical_work': json.loads((extended / 'counter_o2_selftest.stdout').read_text()),
+    'gcp_used': False}
+(BASE / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
+print(json.dumps(summary, indent=2))

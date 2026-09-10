@@ -1,0 +1,143 @@
+[
+  {
+    "argv": [
+      "git",
+      "rev-parse",
+      "HEAD"
+    ],
+    "closed": true,
+    "ended_ns": 1789045684289280545,
+    "exit_code": 0,
+    "expected": 0,
+    "name": "git_head",
+    "pid": 166488,
+    "started_ns": 1789045684286138723
+  },
+  {
+    "argv": [
+      "git",
+      "status",
+      "--porcelain=v1"
+    ],
+    "closed": true,
+    "ended_ns": 1789045684356166192,
+    "exit_code": 0,
+    "expected": 0,
+    "name": "git_status",
+    "pid": 166489,
+    "started_ns": 1789045684289521685
+  },
+  {
+    "argv": [
+      "g++",
+      "--version"
+    ],
+    "closed": true,
+    "ended_ns": 1789045684359320677,
+    "exit_code": 0,
+    "expected": 0,
+    "name": "compiler",
+    "pid": 166510,
+    "started_ns": 1789045684356537194
+  },
+  {
+    "argv": [
+      "g++",
+      "-std=c++20",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-MM",
+      "/workspaces/E-HGP/morsehgp3D_v7/bench/full_ball_tower_probe.cpp"
+    ],
+    "closed": true,
+    "ended_ns": 1789045684494375055,
+    "exit_code": 0,
+    "expected": 0,
+    "name": "dependencies",
+    "pid": 166511,
+    "started_ns": 1789045684359651515
+  },
+  {
+    "argv": [
+      "g++",
+      "-std=c++20",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_ball_probe_20260910/baseline_r1/compiled.d",
+      "/workspaces/E-HGP/morsehgp3D_v7/bench/full_ball_tower_probe.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_ball_probe_20260910/baseline_r1/full_ball_probe"
+    ],
+    "closed": true,
+    "ended_ns": 1789045699698988021,
+    "exit_code": 0,
+    "expected": 0,
+    "name": "compile",
+    "pid": 166519,
+    "started_ns": 1789045684513650507
+  },
+  {
+    "argv": [
+      "/usr/bin/time",
+      "-v",
+      "/workspaces/E-HGP/build/v7_ball_probe_20260910/baseline_r1/full_ball_probe",
+      "--n=8",
+      "--s=8",
+      "--kmax=10",
+      "--threads=1"
+    ],
+    "closed": true,
+    "ended_ns": 1789045699710589892,
+    "exit_code": 0,
+    "expected": 0,
+    "name": "n8",
+    "pid": 166942,
+    "started_ns": 1789045699700346576
+  },
+  {
+    "argv": [
+      "/usr/bin/time",
+      "-v",
+      "/workspaces/E-HGP/build/v7_ball_probe_20260910/baseline_r1/full_ball_probe",
+      "--n=400",
+      "--s=8",
+      "--kmax=10",
+      "--threads=1"
+    ],
+    "closed": true,
+    "ended_ns": 1789045705791953920,
+    "exit_code": 0,
+    "expected": 0,
+    "name": "n400",
+    "pid": 166945,
+    "started_ns": 1789045699711227411
+  },
+  {
+    "argv": [
+      "/usr/bin/time",
+      "-v",
+      "/workspaces/E-HGP/build/v7_ball_probe_20260910/baseline_r1/full_ball_probe",
+      "--n=8000",
+      "--s=8",
+      "--kmax=10",
+      "--threads=1"
+    ],
+    "closed": true,
+    "ended_ns": 1789046281226220175,
+    "exit_code": 143,
+    "expected": 0,
+    "name": "n8000",
+    "pid": 167302,
+    "started_ns": 1789045705792596759
+  }
+]

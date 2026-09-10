@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "git",
+    "status",
+    "--porcelain=v1"
+  ],
+  "closed": true,
+  "ended_ns": 1789046871507875064,
+  "exit_code": 0,
+  "name": "git_status",
+  "pid": 253355,
+  "started_ns": 1789046871444608570
+}

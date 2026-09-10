@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "git",
+    "rev-parse",
+    "HEAD"
+  ],
+  "name": "git_head",
+  "started_ns": 1789046871441256406
+}

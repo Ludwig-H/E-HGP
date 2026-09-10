@@ -1,0 +1,77 @@
+#!/usr/bin/env python3
+"""Bounded local qualification with raw streams and return codes retained."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import time
+
+ROOT = Path('/workspaces/E-HGP')
+BASE = ROOT / 'build/v7_anchor_meb_20260910'
+RUN = BASE / ('run_' + sys.argv[1])
+RUN.mkdir(exist_ok=False)
+HEADER = ROOT / 'morsehgp3D_v7/src/forest/anchor_meb.hpp'
+GATE = ROOT / 'morsehgp3D_v7/tests/anchor_meb_gate.cpp'
+BOOST = ROOT / 'build/v7_boost_gate/extracted/usr/include'
+manifest = {'schema': 'anchor-meb-direct-qualification-v1', 'commands': [], 'sources': {}}
+for source in [HEADER, GATE, Path(__file__)]:
+    manifest['sources'][str(source.relative_to(ROOT))] = hashlib.sha256(source.read_bytes()).hexdigest()
+    shutil.copy2(source, RUN / source.name)
+
+
+def run(name: str, argv: list[str], expected: int, env: dict | None = None) -> None:
+    started = time.time_ns()
+    with (RUN / (name + '.stdout')).open('wb') as stdout, (RUN / (name + '.stderr')).open('wb') as stderr:
+        result = subprocess.run(argv, cwd=ROOT, stdout=stdout, stderr=stderr, env=env, check=False)
+    row = {'name': name, 'argv': argv, 'returncode': result.returncode, 'expected': expected,
+           'start_ns': started, 'end_ns': time.time_ns()}
+    for stream in ['stdout', 'stderr']:
+        row[stream + '_sha256'] = hashlib.sha256((RUN / (name + '.' + stream)).read_bytes()).hexdigest()
+    manifest['commands'].append(row)
+    (RUN / 'receipt.json').write_text(json.dumps(manifest, indent=2) + '\n')
+    print(name, result.returncode, flush=True)
+    if result.returncode != expected:
+        print((RUN / (name + '.stderr')).read_text(), flush=True)
+        raise RuntimeError(name)
+
+
+common = ['g++', '-std=c++20', '-Wall', '-Wextra', '-Wpedantic', '-Werror', '-isystem', str(BOOST)]
+mode = sys.argv[1]
+if mode in ['o2', 'san']:
+    flags = ['-O2'] if mode == 'o2' else ['-O1', '-g', '-fsanitize=address,undefined', '-fno-omit-frame-pointer']
+    executable = RUN / 'mhgp7_anchor_meb_gate'
+    run('compile', common + flags + ['-MMD', '-MF', str(RUN / 'dependencies.d'), str(GATE), '-o', str(executable)], 0)
+    manifest['elf_sha256'] = hashlib.sha256(executable.read_bytes()).hexdigest()
+    env = os.environ.copy()
+    if mode == 'san':
+        env['ASAN_OPTIONS'] = 'detect_leaks=1:halt_on_error=1'
+        env['UBSAN_OPTIONS'] = 'halt_on_error=1:print_stacktrace=1'
+        manifest['sanitizer_env'] = {key: env[key] for key in ['ASAN_OPTIONS', 'UBSAN_OPTIONS']}
+    run('selftest', [str(executable), '--selftest'], 0, env)
+    run('bad_argument', [str(executable), '--unknown'], 2, env)
+elif mode == 'mutants':
+    alterations = {
+        'shell_is_support': ('result.selected_shell_count = shell;', 'result.selected_shell_count = q;'),
+        'accept_outside': ('if (power > 0) return false;', 'if (power > 0) continue;'),
+        'reject_extra_shell': ('if (!anchor_meb_detail::charge(work.materializations)) {',
+                               'if (shell != q) return false;\n    if (!anchor_meb_detail::charge(work.materializations)) {'),
+    }
+    for name, (before, after) in alterations.items():
+        private = RUN / name
+        (private / 'src/forest').mkdir(parents=True)
+        (private / 'tests').mkdir()
+        (private / 'src/lanes').symlink_to(ROOT / 'morsehgp3D_v7/src/lanes', target_is_directory=True)
+        (private / 'oracle').symlink_to(ROOT / 'morsehgp3D_v7/oracle', target_is_directory=True)
+        original = HEADER.read_text()
+        if original.count(before) != 1:
+            raise RuntimeError('mutation site count')
+        (private / 'src/forest/anchor_meb.hpp').write_text(original.replace(before, after))
+        shutil.copy2(GATE, private / 'tests/anchor_meb_gate.cpp')
+        executable = private / 'gate'
+        run(name + '_compile', common + ['-O2', str(private / 'tests/anchor_meb_gate.cpp'), '-o', str(executable)], 0)
+        run(name + '_selftest', [str(executable), '--selftest'], 1)
+else:
+    raise ValueError(mode)

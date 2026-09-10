@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/usr/bin/time",
+    "-v",
+    "/workspaces/E-HGP/build/v7_ball_probe_20260910/monotone_r1/full_ball_probe",
+    "--n=8000",
+    "--s=8",
+    "--kmax=10",
+    "--threads=1"
+  ],
+  "closed": true,
+  "ended_ns": 1789047108730582276,
+  "exit_code": 0,
+  "name": "n8000",
+  "pid": 253956,
+  "started_ns": 1789046893267417493
+}

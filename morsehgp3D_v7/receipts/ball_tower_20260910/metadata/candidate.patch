@@ -1,0 +1,113 @@
+--- a/morsehgp3D_v7/src/forest/full_ball_tower.hpp
++++ b/morsehgp3D_v7/src/forest/full_ball_tower.hpp
+@@ -14,6 +14,10 @@
+ 
+ inline constexpr const char* kFullBallAuthority =
+     "full_tower_relative_to_supplied_complete_exact_ball_censuses";
++inline constexpr const char* kFullBallValidationAccounting =
++    "declared_regular_support_plus_extra_anchor_meb_v1";
++inline constexpr const char* kFullBallLotAccounting =
++    "direct_unitary_lots_and_grouped_dsu_slots_v1";
+ enum class FullBallStatus { kCompleteRelative, kInvalidInput, kResourceExhausted, kInvariantViolated };
+ struct FullBallStats {
+   u64 records = 0, extra_records = 0, anchor_blocks = 0, regular_blocks = 0, extra_blocks = 0;
+@@ -21,6 +25,7 @@
+   u64 intruder_queries = 0, intruder_nodes = 0, intruder_power_tests = 0, interior_ranges = 0;
+   u64 same_radius_steps = 0, descending_steps = 0, max_chain_steps = 0;
+   u64 births = 0, merges = 0, contributions = 0, inert_blocks = 0;
++  u64 declared_support_checks = 0, singleton_lots = 0, grouped_lots = 0, lot_dsu_slots = 0;
+   AnchorMebWork validation_work, resolve_work;
+ };
+ struct FullBallOrder {
+@@ -161,6 +166,32 @@
+         result.status == AnchorMebStatus::kCounterOverflow ? FullBallStatus::kResourceExhausted
+                                                          : FullBallStatus::kInvariantViolated);
+     return result;
++  }
++
++  void validate_declared_support(const BallData& ball, const std::array<i32, 4>& support) {
++    // The caller has already validated indices, primitive-domain bounds and
++    // every interior/shell power. A positive declared support reproducing the
++    // ball certifies it directly, without enumerating any of its sub-supports.
++    std::array<P3, 4> positions{};
++    for (size_t j = 0; j < ball.arity; ++j) positions[j] = ix.upos[support[j]];
++    add(st.declared_support_checks);
++    anchor_meb_detail::Candidate candidate;
++    require(anchor_meb_detail::form(std::span<const P3>(positions.data(), ball.arity),
++        {0, 1, 2, 3}, ball.arity, candidate), "full_ball_census_geometry", FullBallStatus::kInvalidInput);
++    BallKey key;
++    ExactLevel level;
++    if (ball.arity == 2) {
++      key = q2_ball_key(candidate.a, candidate.b);
++      level = promote_level(q2_exact_level(p3_norm2(p3_sub(candidate.a, candidate.b))));
++    } else if (ball.arity == 3) {
++      key = q3_ball_key(candidate.three);
++      level = promote_level(q3_exact_level(candidate.a, candidate.b, positions[2]));
++    } else {
++      key = ball_key_reduce(q4_ball_form(candidate.four));
++      level = q4_level_raw(candidate.four);
++    }
++    require(key == ball.key && same_exact_level(level, ball.level),
++        "full_ball_census_geometry", FullBallStatus::kInvalidInput);
+   }
+ 
+   void validate_catalogue() {
+@@ -222,9 +253,12 @@
+         require(at == q, "full_ball_minimum_support");
+         extra.emplace(static_cast<BallId>(j), std::move(table)); add(st.extra_records);
+       }
+-      const auto witness = meb(std::span<const i32>(support.data(), q), st.validation_work);
+-      require(witness.support_size == q && witness.key == ball.key &&
+-          same_exact_level(witness.level, ball.level), "full_ball_census_geometry", invalid);
++      if (ball.n_shell == ball.arity) validate_declared_support(ball, support);
++      else {
++        const auto witness = meb(std::span<const i32>(support.data(), q), st.validation_work);
++        require(witness.support_size == q && witness.key == ball.key &&
++            same_exact_level(witness.level, ball.level), "full_ball_census_geometry", invalid);
++      }
+       require(ball.n_interior + q <= std::min<u64>(kmax + 1, ix.input_count),
+               "full_ball_outside_rank_window", invalid);
+       qmins[j] = static_cast<u8>(q);
+@@ -394,6 +428,42 @@
+   }
+   void close_lot(const std::vector<Block>& blocks, const ExactLevel& level, Draft& draft,
+       const History& lower, const std::vector<u64>& lower_anchors) {
++    if (blocks.size() == 1) {
++      add(st.singleton_lots);
++      const auto& block = blocks.front();
++      FullCoverageAction action;
++      action.parents = block.roots;  // Already sorted and unique in prepare_block.
++      if (block.contribution || block.interior) {
++        action.contributions.push_back({population(block.ball), block.contribution, block.interior});
++        add(st.contributions);
++      }
++      u64 target;
++      if (action.parents.size() == 1) target = action.parents.front();
++      else {
++        u64 birth_image = absent;
++        if (action.parents.empty()) {
++          require(action.contributions.size() == 1, "full_ball_distinct_births");
++          if (current_k > 1) {
++            require(block.ball < lower_anchors.size() && lower_anchors[block.ball] != absent,
++                "full_ball_vertical_birth_anchor");
++            birth_image = lower.root_at(lower_anchors[block.ball], level, true);
++          }
++        }
++        target = new_node(level, action.parents, draft, lower, birth_image);
++      }
++      if (action.parents.size() != 1 || !action.contributions.empty()) {
++        FullCoverageBatch batch{level, {}};
++        batch.actions.push_back(std::move(action));
++        draft.batches.push_back(std::move(batch));
++      } else add(st.inert_blocks);
++      require(anchors[block.ball] == absent && target != absent, "full_ball_anchor_duplicate");
++      anchors[block.ball] = target;  // All representatives and the whole lot are closed.
++      return;
++    }
++    add(st.grouped_lots);
++    // Prospectively account the actual DSU initialization; unitary lots never
++    // reach this path and create no DSU, owner groups or target array.
++    add(st.lot_dsu_slots, blocks.size());
+     std::vector<size_t> dsu(blocks.size()); std::iota(dsu.begin(), dsu.end(), size_t{0});
+     const auto find = [&](size_t a) { while (dsu[a] != a) { dsu[a] = dsu[dsu[a]]; a = dsu[a]; } return a; };
+     std::vector<std::pair<u64,size_t>> owners;

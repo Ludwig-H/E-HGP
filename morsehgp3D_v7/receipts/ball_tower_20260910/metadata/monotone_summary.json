@@ -1,0 +1,63 @@
+{
+  "status": "passed",
+  "scope": "private_two_step_cpu_delta_not_performance_contract",
+  "baseline_sha256": "4929a5420d7401c7b69ab4de004ed3b99c9fceb0eee9b4eb8bc86881af55718c",
+  "candidate_sha256": "0b72b4e9cb3858f7026d6b5d2b55f8a7b191903fc37aa24c140dfb8b557657e8",
+  "combined_patch_sha256": "40978efc97a97066f00e852614e6e8f5b2613c8847c3b13b3434d28d0f3912c3",
+  "gate_sha256": "d2a08edbbe9f1e8b25d1e50031dd2601da4ba7254b0117e764291e33ee04b9ca",
+  "receipts": {
+    "o2": "3a4253af7c2dc5883304f3dc139c9553fbcdab3b542ad58dee0000e5ad72f097",
+    "san": "aa4b9336ba6eecd75d7e53747fface1e9c46329a853262d44443f64e06b6be0e",
+    "mutant": "e2a82b4740986298ed6cf4e374767e35b9d8814c1328f403038acd6efcb7704d"
+  },
+  "oracle": {
+    "status": "passed",
+    "authority": "bounded_independent_Gram_Gamma_not_WSPD_completeness",
+    "checks": 130734,
+    "clouds": 24,
+    "orders": 100,
+    "cuts": 2136,
+    "facets": 15048,
+    "vertical_checks": 35462,
+    "births": 408,
+    "merges": 174,
+    "continuation_snapshots": 860,
+    "growth_snapshots": 4,
+    "overlap_cuts": 420,
+    "duplicate_cover_cuts": 0,
+    "regular_blocks": 524,
+    "extra_blocks": 122,
+    "anchor_hits": 476,
+    "representatives": 758,
+    "intruder_queries": 12,
+    "same_radius_steps": 2,
+    "rejections": 8
+  },
+  "comb": [
+    {
+      "merges": 256,
+      "nodes": 513,
+      "baseline_edges": 32896,
+      "activated_edges": 512,
+      "find_steps": 1022,
+      "path_writes": 512
+    },
+    {
+      "merges": 512,
+      "nodes": 1025,
+      "baseline_edges": 131328,
+      "activated_edges": 1024,
+      "find_steps": 2046,
+      "path_writes": 1024
+    },
+    {
+      "merges": 1024,
+      "nodes": 2049,
+      "baseline_edges": 524800,
+      "activated_edges": 2048,
+      "find_steps": 4094,
+      "path_writes": 2048
+    }
+  ],
+  "gcp_used": false
+}

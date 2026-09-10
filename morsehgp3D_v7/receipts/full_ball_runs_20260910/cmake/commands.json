@@ -1,0 +1,60 @@
+[
+  {
+    "argv": [
+      "cmake",
+      "--build",
+      "/workspaces/E-HGP/build/v7_ball_cmake_20260910",
+      "--parallel",
+      "2",
+      "--target",
+      "mhgp7_anchor_meb_gate",
+      "mhgp7_full_ball_tower_gate",
+      "mhgp7_full_ball_work_gate",
+      "mhgp7_full_ball_tower_probe",
+      "mhgp7_full_coverage_certificate_gate",
+      "mhgp7_local_plateau_gate",
+      "mhgp7_census_route_stub_gate"
+    ],
+    "end_ns": 1789047826793105325,
+    "exit_code": 0,
+    "name": "build",
+    "start_ns": 1789047826079052308
+  },
+  {
+    "argv": [
+      "ctest",
+      "--test-dir",
+      "/workspaces/E-HGP/build/v7_ball_cmake_20260910",
+      "--output-on-failure",
+      "-R",
+      "^mhgp7_(anchor_meb|full_ball_tower|full_ball_work|census_route_stub|local_plateau|full_coverage_certificate)"
+    ],
+    "end_ns": 1789047828244220675,
+    "exit_code": 0,
+    "name": "ctest",
+    "start_ns": 1789047826793108631
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "gcp-migration/selftest_full_ball_worker_v7.py"
+    ],
+    "end_ns": 1789047828372404705,
+    "exit_code": 0,
+    "name": "worker_normal",
+    "start_ns": 1789047828244225735
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "gcp-migration/selftest_full_ball_worker_v7.py"
+    ],
+    "end_ns": 1789047828498112930,
+    "exit_code": 0,
+    "name": "worker_optimized",
+    "start_ns": 1789047828372407180
+  }
+]

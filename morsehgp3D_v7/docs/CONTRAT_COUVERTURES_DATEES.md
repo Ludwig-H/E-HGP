@@ -1,6 +1,6 @@
 # Journal FULL à couvertures datées
 
-6 septembre 2026. `phase=exploration_v7_hors_registre`,
+10 septembre 2026. `phase=exploration_v7_hors_registre`,
 `backend=cpu_reference`, `profile=quantized_u16_input_only`,
 `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
@@ -9,7 +9,9 @@ la topologie et les couvertures d'une hiérarchie déjà calculée. Son
 schéma `full_dated_coverage_forest_v2` est **distinct** du certificat
 régulier `full_minima_merge_forest_v1`. Ce n'est ni le constructeur
 géométrique FULL, ni une archive, ni la qualification du catalogue amont.
-La sonde ne l'appelle pas encore et conserve son refus des plateaux.
+Le [nouveau raccord par boules](TOUR_FULL_PAR_BOULES.md) le consomme,
+avec les cartes verticales. L'ancienne sonde régulière conserve son
+format v1 et son refus des plateaux ; ses reçus ne sont pas réétiquetés.
 
 ## Objet encodé
 
@@ -120,7 +122,7 @@ ce format ; l'association à une géométrie certifiée reste au constructeur.
 Les poids du manuscrit et les datations de toutes les facettes ne sont
 pas reconstructibles depuis ce seul journal.
 
-## Prochain raccord
+## Raccord distinct du journal
 
 Consommer le census partagé, résoudre un représentant par composante
 stricte dans l'état pré-lot, assembler les parents globaux, fermer le lot
@@ -132,5 +134,10 @@ leur support. Il faut une entrée exacte **à coquille libre**, pas réutiliser
 le résultat d'un appel déclaré échoué. La descente garde K sites et peut
 conserver le rayon si le nombre de sites sélectionnés sur la coquille
 baisse strictement. Le hit d'ancre précède la recherche d'un intrus strict.
-Ces étapes restent à implémenter et qualifier ; ni la garde générale
-50k, ni l'autorité F ne changent avec ce journal. GCP non utilisé.
+Ces étapes sont désormais implémentées dans le nouveau raccord et
+qualifiées sur 100 ordres Gram/Gamma. Ni la garde de l'ancienne sonde,
+ni l'autorité F ne changent avec ce journal. Sa qualification initiale
+710 contrôles reste épinglée ; après l'audit du tableau des parents,
+la [gate renforcée](../receipts/coverage_parent_array_20260910/README.md)
+passe 837 contrôles O2/SAN et rejette parent→0.
+Cette correction du juge ne change pas le header structurel nominal.

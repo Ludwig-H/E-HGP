@@ -1,0 +1,26 @@
+{
+  "controller": {
+    "path": "/workspaces/E-HGP/gcp-migration/full_probe_session_v7.py",
+    "sha256": "177b25a0d72150dc331661fdf8da1ccde77ea17fb694d9c6af5b0929755160d8"
+  },
+  "manifest": {
+    "path": "/workspaces/E-HGP/build/v7_ball_g4_20260910/input_r1/source_manifest.json",
+    "sha256": "6ef49898dbce7a0f6599ff4625bf8b196fa70bcc67a9f289b164de3f19df27c7"
+  },
+  "snapshot": {
+    "path": "/workspaces/E-HGP/build/v7_ball_g4_20260910/input_r1/snapshot.tar.gz",
+    "sha256": "1a0b2511cdd0378e25d7dd7e778c698abbdcb9bcba1f0cd86330d762a07cba84"
+  },
+  "start": {
+    "path": "/workspaces/E-HGP/gcp-migration/start_and_verify.sh",
+    "sha256": "73d76c674c71d997a803587a0b20186f668e7aa44f62d4c8b516e22e13469bc0"
+  },
+  "stop": {
+    "path": "/workspaces/E-HGP/gcp-migration/stop_and_verify.sh",
+    "sha256": "ddcad77aa995ebb334fd3f341f7bb81ac94f749593fec98f885fb1c4b7956f3c"
+  },
+  "worker": {
+    "path": "/workspaces/E-HGP/gcp-migration/full_ball_worker_v7.py",
+    "sha256": "6dd46af8863976e52194efb16aa1b16fdfaea11cf6aa605a16c5ecc78610729a"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "schema": "anchor-meb-direct-qualification-v1",
+  "commands": [
+    {
+      "name": "compile",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O2",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_anchor_meb_20260910/run_o2/dependencies.d",
+        "/workspaces/E-HGP/morsehgp3D_v7/tests/anchor_meb_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_anchor_meb_20260910/run_o2/mhgp7_anchor_meb_gate"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789045016066265585,
+      "end_ns": 1789045024482119126,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "selftest",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_anchor_meb_20260910/run_o2/mhgp7_anchor_meb_gate",
+        "--selftest"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "start_ns": 1789045024483049822,
+      "end_ns": 1789045024923634630,
+      "stdout_sha256": "a08d13238e7c9eb6719591a0d73cc8cd9524f2ced3091251590d5c42cdbfc4d0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "bad_argument",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_anchor_meb_20260910/run_o2/mhgp7_anchor_meb_gate",
+        "--unknown"
+      ],
+      "returncode": 2,
+      "expected": 2,
+      "start_ns": 1789045024924314368,
+      "end_ns": 1789045024926627083,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "sources": {
+    "morsehgp3D_v7/src/forest/anchor_meb.hpp": "386072c8a02bbb836d0070a10e1421418a36d3f4024ade63b4c9014c5536f786",
+    "morsehgp3D_v7/tests/anchor_meb_gate.cpp": "5e3ee812ebd707a9afb65ff408fc8a3a4f9b506f3c972d15a37e32f4029b753a",
+    "build/v7_anchor_meb_20260910/record.py": "fb6af9a928b8b7c79cd8056b78ed2b6da8d0be9d0f9b3898780b43b48e9b337a"
+  },
+  "elf_sha256": "c364d18c715cdd7ea7e484208da2f0314d05b120b354675b75bd18dfcb831853"
+}
