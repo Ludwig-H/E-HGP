@@ -1,0 +1,9 @@
+7a8
+> #include <new>
+19a21,26
+> // AUDITEUR : les variantes nothrow sont necessaires, std::stable_sort du
+> // produit obtient son tampon temporaire par new(nothrow) et le rend par delete.
+> void* operator new(size_t n, const std::nothrow_t&) noexcept { try { return cache_allocation_fault::allocate(n); } catch (...) { return nullptr; } }
+> void* operator new[](size_t n, const std::nothrow_t&) noexcept { try { return cache_allocation_fault::allocate(n); } catch (...) { return nullptr; } }
+> void operator delete(void* p, const std::nothrow_t&) noexcept { cache_allocation_fault::release(p); }
+> void operator delete[](void* p, const std::nothrow_t&) noexcept { cache_allocation_fault::release(p); }

@@ -1,0 +1,5 @@
+uniform 400 digest_identical | nodes 136448 136448 | extra 0 0 | cache hits n/a | tower_s 3.36 3.0
+uniform 2000 digest_identical | nodes 872148 872148 | extra 0 0 | cache hits n/a | tower_s 35.47 27.95
+scanline_overlap_multiecho 2000 digest_identical | nodes 58012 58012 | extra 3726 3726 | cache hits n/a | tower_s 0.56 0.84
+scanline_single_pass 2000 digest_identical | nodes 31725 31725 | extra 76 76 | cache hits n/a | tower_s 0.08 0.09
+terrain 2000 digest_identical | nodes 189317 189317 | extra 0 0 | cache hits n/a | tower_s 1.64 2.2

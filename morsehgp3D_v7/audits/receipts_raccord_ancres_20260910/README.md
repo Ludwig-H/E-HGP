@@ -293,3 +293,15 @@ renforcée `arena.*` de `d188e3de` ferme le trou des parents :
 - Oracle différentiel : 388 journaux valides, 13 042 coupes, 320 invalides sur
   41 classes, 12 raisons produit, **0 divergence**
   (`journal_oracle_differentiel/`).
+
+## 10. Suite du 10 septembre, soirée
+
+[`suite_cache_20260910/`](suite_cache_20260910/README.md) : contre-lecture du WIP
+suivant du constructeur (cache exact évictif des résolutions de facettes,
+réserve exacte des arènes du journal, libération des structures de
+construction, front WSPD de témoins universels par lots). Lecture favorable du
+cache ; empreintes de payload identiques avec et sans cache sur cinq nuages ;
+corpus aléatoire rejoué (2 507 nuages, 0 divergence) ; front par lots identique
+au front scalaire, ordre, grand-livre et travail compris, jusqu'à n=8 000 ;
+un défaut de porte : `facet_resolver_cache_gate` avorte sous ASan faute des
+surcharges `nothrow` de `new`/`delete` (correctif vérifié).
