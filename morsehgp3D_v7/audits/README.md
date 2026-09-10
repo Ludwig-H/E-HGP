@@ -1,9 +1,10 @@
 # Audit indépendant v7
 
-Lire l’[état courant](ETAT_COURANT.md), puis le [dialogue actif](DIALOGUE_COURANT.md). Les contrats, décisions d’architecture et résultats déjà repris par le développeur sont dans le [dossier principal](../PASSATION.md) et les [fausses pistes](../docs/FAUSSES_PISTES.md). Ce dossier garde leur contrôle indépendant et les preuves qui lui sont propres.
+Lire l’[état courant](ETAT_COURANT.md), puis le [dialogue actif](DIALOGUE_COURANT.md). La [coordination entre auditeurs](COORDINATION_AUDITEURS.md) répartit les écritures. Les décisions reprises par le développeur sont dans le [dossier principal](../PASSATION.md) et les [fausses pistes](../docs/FAUSSES_PISTES.md) ; ce dossier conserve leurs preuves indépendantes.
 
 | Sujet courant | Qualification indépendante |
 | --- | --- |
+| Journal daté v2 et parents exportés | [184 cas O2/SAN, 2 976 coupes et mutant du tableau de parents](receipts_coverage_cpp_20260910/README.md) ; raccord géométrique FULL encore distinct |
 | Modèle FULL et taille de sortie | [Décision et domaine](NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md), [borne à K fixé et témoins u16](receipts_probe_meb_review_20260906/full_output_growth.md) |
 | Priorité 50k : plateaux non réguliers | [Trois cas globaux décidés](receipts_plateaux_full_20260906/GLOBAL_PARENTS.md), [C++ local publié](../receipts/local_plateau_20260906/README.md), [preuves et ancres](receipts_plateaux_full_20260906/README.md) ; raccord FULL à qualifier |
 | Vraie hiérarchie K-NN et tour sur les minima | [Descente et prototype K1..4](receipts_gabriel_vertices_20260906/README.md), [ancres partagées et choix de retrait](receipts_shared_anchors_20260906/README.md) |

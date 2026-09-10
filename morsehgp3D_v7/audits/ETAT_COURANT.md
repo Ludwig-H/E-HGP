@@ -1,8 +1,8 @@
 # État courant de l’audit v7
 
-Les [parents globaux des trois blocs 50k](receipts_plateaux_full_20260906/GLOBAL_PARENTS.md) sont décidés par certificats exacts : 174406 est déjà connecté avant K5 ; 254569 à K2 et 996863 à K6 relient chacun deux parents distincts. Un pont extérieur et deux preuves d’isolement suffisent, sans reconstruire le catalogue. L’arité totale des lots égaux, le raccord FULL et l’export restent à qualifier.
+Le [journal daté v2](receipts_coverage_cpp_20260910/README.md), publié par 1fbe49d3, passe la qualification indépendante **O2 et ASan/UBSan** : 184 cas, 2 976 coupes, 23 104 requêtes de racine et autant de lectures. Le juge détecte 124 tableaux de parents corrompus que les 710 contrôles constructeur ne détectent pas. Aucun défaut nominal n’est établi ; le test principal doit comparer directement ces parents et leurs offsets. L’échec initial LeakSanitizer sous ptrace est conservé séparément de la reprise réussie.
 
-Le [quotient C++ local](../receipts/local_plateau_20260906/README.md), publié par 7debdbab, conserve sa qualification constructeur et sa contrelecture indépendante statique favorable. Les [census et contributions](receipts_plateaux_full_20260906/LOCAL_DIAGNOSTICS.md), puis les [seuils partagés et le raccourci q2](receipts_plateaux_full_20260906/COVERAGE_THRESHOLDS.md), ont leurs preuves distinctes. Les changements C++ ultérieurs en préparation ne sont pas qualifiés par ces lectures.
+Les [parents réels 50k](receipts_plateaux_full_20260906/GLOBAL_PARENTS.md), maintenant repris par le constructeur, restent 1/2/2 pour les trois blocs concernés. Le [raccourci local q2](../receipts/local_plateau_diameter_20260906/README.md) a sa qualification constructeur distincte. Le journal structurel ne qualifie ni le calcul de ces parents, ni la MEB à coquille libre, ni le raccord FULL et l’export.
 
 Le raccord FULL du proposeur MEB filtré publié par 20b28b1d dispose de la **qualification indépendante O2 et ASan/UBSan** : 2 784 sorties et 214 704 coupes par build, avec budgets, Work persistant et ordres n=14/K9/K10. L’export industriel et les contrats de performance restent ouverts.
 
@@ -22,6 +22,7 @@ La lecture intégrale des parties I et II du manuscrit, PDF 35–134, reste acqu
 
 | Autorité | Résultat conservé |
 | --- | --- |
+| Journal v2, `1fbe49d3` | [Arènes complètes, multifusions, lots mixtes et coupes larges](receipts_coverage_cpp_20260910/README.md) ; qualification de composant, pas nouvelle variante moteur |
 | O, raccord FULL `20b28b1d` | [116 ordres, budgets, K9/K10 et deux mutants](receipts_full_meb_20260906/README.md) ; builds indépendants, captures constructeur 30+30 contre-vérifiées |
 | N, filtre privé publié par `62e5cd76` | [Captures R2, frontières MAX et ordre admissible](receipts_filtered_review_20260906/README.md) ; qualification locale historique distincte |
 | M, publication et captures `5633bc5a` | [29 comparaisons / 204 ordres, rejeu s8 et diagnostic du refus MEB](receipts_followup_20260906/README.md) ; lectures seules, aucune nouvelle qualification C++ ou de performance |
@@ -34,6 +35,6 @@ La lecture intégrale des parties I et II du manuscrit, PDF 35–134, reste acqu
 
 Le [manifeste](validation_current.json) conserve O sur le publié `20b28b1d`, ainsi que D–N. Les écarts ultérieurs des documents, tests et du générateur sont affichés par le contrôle de fraîcheur, sans requalification implicite. Les headers FULL/MEB qualifiés sont inchangés. La réutilisation terminale q2 possède ses captures constructeur, contre-lues sans nouvelle exécution ; elle reste hors de O. Les sondes sans quotas et multi-CPU ne sont pas qualifiées par O. Le juge se rejoue sur les captures sans moteur.
 
-Le [dialogue actif](DIALOGUE_COURANT.md) porte les trois verdicts globaux réels et leur emploi comme fixtures de raccord. Les autres questions sans incidence immédiate restent [regroupées](QUESTIONS_SECONDAIRES.md).
+Le [dialogue actif](DIALOGUE_COURANT.md) porte la clôture du journal et le contrôle manquant des parents exportés. Les autres questions sans incidence immédiate restent [regroupées](QUESTIONS_SECONDAIRES.md).
 
 Les reçus bruts et échecs restent conservés ; les anciennes synthèses sont accessibles par le [registre d’entretien](ENTRETIEN.json). GCP non utilisé.

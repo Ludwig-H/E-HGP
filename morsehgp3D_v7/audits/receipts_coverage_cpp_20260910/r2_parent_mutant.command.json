@@ -1,0 +1,19 @@
+{
+  "args": [
+    "taskset",
+    "-c",
+    "1",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_coverage_cpp_20260910/.work_build/parent_mutant"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "environment": {},
+  "exit_code": 0,
+  "expected_exit": 0,
+  "finished_unix": 1789045705.9047477,
+  "name": "r2_parent_mutant",
+  "started_unix": 1789045705.8583658,
+  "status": "completed",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_sha256": "a3440c1b5b8762f92e5236435ee80bca603254ae9990324e0ab71ea3d19a214b",
+  "stdout_sha256": "ebfd03a0654f0f064193babb0140ddd4c1c6a76dcc454153548227a8df01313b"
+}

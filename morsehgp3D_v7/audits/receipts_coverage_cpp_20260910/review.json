@@ -1,0 +1,37 @@
+{
+  "GCP_used": false,
+  "authority": "bounded_structural_journal_qualification",
+  "bank_scope": "Canonical populations are consistent across K; bridge creates one bank per case. It verifies pointer sharing with that bank and deep ownership after caller buffer poisoning, not simultaneous multi-order bank residency.",
+  "constructor_followup": "Compare the exact parent arena and node CSR offsets/counts against input actions; check parent/successor inversion. Add the square at K2 with one four-parent merge. No nominal product defect was demonstrated.",
+  "date": "2026-09-10",
+  "engine_executed": false,
+  "executed_mutant": "Replace every stored parent by zero while preserving successors. The existing constructor gate passes all 710 checks. The independent judge detects 124 corrupted parent arrays, while every reader output remains identical.",
+  "first_failure": {
+    "attempt": "r1_san",
+    "exit_code": 1,
+    "reason": "LeakSanitizer fatal error under sandbox ptrace; capture retained; no sanitizer success assigned to this attempt."
+  },
+  "historical_variants_D_to_O_unchanged": true,
+  "math_reference": "Thesis Parts I/II already read; independent rational Gamma model and proved dated-contribution semantics reused with immutable pins.",
+  "nominal_header_sha256": "e8e65b211ec01964f35f1eb60587096a9b1e144d2c4634d2cad0c2f50ae5e883",
+  "nominal_result": "184 cases pass O2 and ASan/UBSan, byte-identical output; full coverage journal arenas and all old-cut queries compared.",
+  "not_qualified": [
+    "Nonregular geometric FULL producer",
+    "Free-shell MEB and anchor resolver",
+    "Exported industrial archive",
+    "Catalogue completeness",
+    "Vertical maps or manuscript weights",
+    "Performance targets"
+  ],
+  "public_status": "not_claimed",
+  "retry": {
+    "attempt": "r2",
+    "detect_leaks": 1,
+    "permission": "Explicit sandbox escalation approved for the same CPU test.",
+    "result": "all three executions closed with exit 0",
+    "source_or_binary_change": false
+  },
+  "schema": "mhgp7-independent-dated-coverage-cpp-review-v1",
+  "source_commit": "1fbe49d3107874a923541f8c42b1530dfd04361a",
+  "system_dependencies": "Compiler identity recorded; system/Boost headers were not frozen before compilation and are not copied. Project dependency closures are recorded before compilation and verified afterward."
+}

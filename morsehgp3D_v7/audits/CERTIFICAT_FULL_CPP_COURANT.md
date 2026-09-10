@@ -1,5 +1,7 @@
 # Certificat FULL C++ : qualification structurelle
 
+Le [journal daté v2](receipts_coverage_cpp_20260910/README.md) a désormais sa qualification indépendante O2/SAN et son contrôle direct des parents. Il conserve les contributions de continuation ; la présente note concerne le certificat régulier **v1**, dont les preuves restent distinctes.
+
 Le composant `full_certificate.hpp`, publié dans `f4c0734c`, est qualifié sur les forêts déjà décidées de son corpus. Son autorité reste `structural_only` ; `public_status=not_claimed`.
 
 Le [contrat constructeur](../docs/CONTRAT_CERTIFICAT_FULL.md) décrit arènes, identités, lots et budgets. Les [preuves indépendantes](receipts_full_cpp_20260905/README.md) conservent la lecture du code et les exécutions :

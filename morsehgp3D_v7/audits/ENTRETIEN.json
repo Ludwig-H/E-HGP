@@ -2344,5 +2344,117 @@
       "previous_index_empty": true,
       "scope": "13 explicit auditor paths only; constructor and v6 preparation excluded"
     }
+  },
+  "latest_coverage_cpp_review_20260910": {
+    "date": "2026-09-10T13:17:59.066177+00:00",
+    "base_head": "1fbe49d3107874a923541f8c42b1530dfd04361a",
+    "receipt": "receipts_coverage_cpp_20260910/README.md",
+    "scope": "Independent bounded C++ dated journal qualification, including direct parent-arena mutant; no geometric FULL producer qualification.",
+    "cpp_compilations": 4,
+    "cpp_executions": 6,
+    "engine_invocations": 0,
+    "gcp": "not_used_by_auditor",
+    "cases_per_build": 184,
+    "cuts_per_build": 2976,
+    "root_queries_per_build": 23104,
+    "coverage_queries_per_build": 23104,
+    "o2_san_output_sha256": "e5e0a7f9be4bfffe7027be79dce45b437aaa98b167610bc01777f20e62790eb2",
+    "mutant_parent_arrays_refuted": 124,
+    "constructor_gate_mutant_checks_still_pass": 710,
+    "preserved_failure": {
+      "attempt": "r1_san",
+      "exit_code": 1,
+      "cause": "LeakSanitizer under sandbox ptrace"
+    },
+    "successful_retry": {
+      "attempt": "r2",
+      "exit_codes": [
+        0,
+        0,
+        0
+      ],
+      "same_sources_and_binaries": true,
+      "leak_detection_enabled": true,
+      "escalation_approved": true
+    },
+    "checks": {
+      "portable_normal_exit": 0,
+      "portable_optimized_exit": 0,
+      "portable_outputs_identical": true,
+      "docs_normal_exit": 0,
+      "docs_optimized_exit": 0,
+      "active_markdown": 405,
+      "registry_exit": 0,
+      "registry_phases": 20,
+      "authored_markdown": 6,
+      "local_links": 98,
+      "link_math_errors": 0,
+      "git_diff_check_exit": 0,
+      "first_freshness_attempt": {
+        "normal_exit": 2,
+        "optimized_exit": 2,
+        "reason": "New common pins overlapped historical source-variant pins (D/src/core/mutants.hpp).",
+        "correction": "Keep historical dependencies in their immutable variants and in the new component source receipt, not in common pins. Only the new v2 header is pinned as a common product file.",
+        "removed_common_overlaps": [
+          "src/core/device.hpp",
+          "src/core/intmath.hpp",
+          "src/core/mutants.hpp",
+          "src/core/types.hpp",
+          "src/core/wide.hpp",
+          "src/forest/full_certificate.hpp",
+          "src/lanes/keys.hpp",
+          "src/lanes/level.hpp"
+        ]
+      },
+      "freshness": {
+        "common_pins": 2344,
+        "common_mismatches": 0,
+        "normal_exit": 1,
+        "optimized_exit": 1,
+        "messages_identical": true,
+        "latest_variant": "O_full_meb_composition",
+        "latest_variant_deltas": [
+          "CMakeLists.txt",
+          "PASSATION.md",
+          "README.md",
+          "docs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md",
+          "docs/FAUSSES_PISTES.md",
+          "docs/RESIDENCE_MASSIVE.md",
+          "src/pipeline/generate.hpp",
+          "tests/meb_proposal_local_gate.cpp"
+        ],
+        "source_variants_unchanged": true,
+        "scope": "No new whole-engine qualification; v2 journal has its separate bounded receipt."
+      }
+    },
+    "packet": {
+      "files_excluding_manifest": 63,
+      "source_bindings": 14,
+      "manifest_sha256": "1db0c71a67c76458d2c6f87f11b1f37bdb4105fa93f3f177b37ae1d0bba0359a"
+    },
+    "maintenance": {
+      "previous_root_markdown_notes": 25,
+      "current_root_markdown_notes": 26,
+      "previous_root_words": 18136,
+      "current_root_words": 18785,
+      "net_root_words_removed": -649,
+      "action": "Replace adopted global-parent and unpublished-local-code discussion by current constructor links. Distinguish v1 from newly qualified dated v2. Add the shared-auditor coordination channel requested by the user; preserve all historical scientific data."
+    },
+    "source_variants_D_to_O_unchanged": true,
+    "historical_scientific_receipts_modified": false,
+    "publication_scope_paths": 71,
+    "index_reservation": {
+      "previous_index_empty": true,
+      "head": "1fbe49d3107874a923541f8c42b1530dfd04361a",
+      "remote": "1fbe49d3107874a923541f8c42b1530dfd04361a",
+      "auditor_paths_only": 71
+    },
+    "auditor_coordination": {
+      "other_session": "e-hgp-c6",
+      "accepted_split": "Historical auditor: dated journal. Second auditor: FULL seam, free-shell MEB, anchors, local quotient delta and documentation.",
+      "other_packet": "receipts_raccord_ancres_20260910",
+      "other_packet_included": false,
+      "shared_coordination_message_read_and_preserved": true
+    }
   }
 }

@@ -1,0 +1,10 @@
+{
+  "build_dir": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_coverage_cpp_20260910/.work_build",
+  "compiler_sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+  "cpu": 1,
+  "external_headers": "System headers not archived or pinned before compilation; compiler identity recorded.",
+  "gcp_used": false,
+  "git_head": "1fbe49d3107874a923541f8c42b1530dfd04361a",
+  "git_status": " M audits/COORDINATION_MORSEHGP3D_V7.md\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/audits/COORDINATION_AUDITEURS.md\n?? morsehgp3D_v7/audits/receipts_coverage_cpp_20260910/\n?? morsehgp3D_v7/src/forest/anchor_meb.hpp\n?? morsehgp3D_v7/src/forest/full_ball_tower.hpp\n?? morsehgp3D_v7/tests/anchor_meb_gate.cpp\n?? morsehgp3D_v7/tests/full_ball_tower_gate.cpp\n",
+  "public_status": "not_claimed"
+}

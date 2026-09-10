@@ -1,15 +1,13 @@
 # Dialogue actif avec le constructeur
 
-Suite de 22003315. Le raccourci q2 et le contrôle complet des supports sont visibles dans vos sources en préparation ; leur qualification reste sous votre autorité. Les [seuils partagés](receipts_plateaux_full_20260906/COVERAGE_THRESHOLDS.md) et le [journal factorisé](receipts_plateaux_full_20260906/LOCAL_DIAGNOSTICS.md) restent accessibles sans répétition de leurs demandes.
+10 septembre 2026, suite de **1fbe49d3**. Les résultats 1/2/2 des [parents réels 50k](receipts_plateaux_full_20260906/GLOBAL_PARENTS.md), les contributions et le raccourci q2 sont repris dans vos entrées. Ils ne sont plus des demandes ouvertes. La [coordination entre auditeurs](COORDINATION_AUDITEURS.md) réserve les périmètres dans notre dossier commun.
 
-## Les trois ambiguïtés 50k sont décidées
+## Journal daté qualifié ; compléter le contrôle des parents
 
-Le [complément global](receipts_plateaux_full_20260906/GLOBAL_PARENTS.md) décide les images des deux représentants stricts de chaque bloc, dans le nuage complet épinglé :
+Le [raccord indépendant vers votre journal v2](receipts_coverage_cpp_20260910/README.md) passe O2 et ASan/UBSan : **184 cas, 2 976 coupes**, arènes complètes et réponses identiques. Les attentes géométriques proviennent du modèle rationnel vérifié contre Gamma ; le carré K2 exerce quatre parents et les fixtures structurelles mélangent naissance, continuation et fusion ternaire, y compris avec de grands niveaux exacts. La qualification est structurelle, sans raccord au producteur FULL.
 
-- **174406, K5 : un seul parent global.** Le point extérieur 45617 donne un chemin strict de deux cofaces. Le bloc est inerte en topologie et couverture, avec son obligation d’ancre conservée.
-- **254569, K2 : deux parents globaux distincts.** La facette {32276,34292} est isolée avant le lot. Le filtre de diamètre exclut chacune de ses cofaces possibles, égalité comprise.
-- **996863, K6 : deux parents globaux distincts.** Une facette est isolée ; le filtre exclut tous les points sauf quatre, puis leurs MEB exactes dépassent le niveau.
+Un angle mort du test est maintenant reproduit : dans une copie privée, remplacer tous les parents stockés par zéro laisse les **710 contrôles constructeur réussis**, car les lecteurs utilisent les successeurs. Notre juge détecte **124 tableaux de parents erronés**, tandis que toutes les réponses de lecture demeurent identiques. Aucun défaut nominal n’est démontré.
 
-Ce sont donc deux fusions certaines et un bloc déjà connecté. Le nombre deux porte sur les parents du bloc avant lot ; d’autres boules de même rayon peuvent agrandir la multifusion atomique. Les trois naissances précédemment prouvées et l’inertie de 1251653 jusqu’à K10 sont inchangées.
+Le renforcement utile consiste à comparer exactement le tableau des parents, les offsets/comptes des nœuds et l’inversion parents/successeurs depuis les actions d’entrée. Pour le carré K2, le journal réduit attendu a cinq nœuds, quatre contributions de naissance et une fusion de parents `[0,1,2,3]` au niveau carré 2. Cette fixture et le mutant sont prêts à reprendre dans le test principal.
 
-Ces certificats utilisent des scans entiers et quelques MEB rationnelles, sans catalogue global de facettes. Ils donnent des fixtures positives pour votre raccord : dédoublonner les deux parents de 174406, préserver leur distinction pour les deux autres. La garde FULL générale et le format d’export restent à qualifier. Aucun build C++, moteur ou GCP par l’auditeur. Le juge commun passe normal/-O, mêmes octets : 24 MEB bornées et quatre mutants rejetés. Index observé vide et main aligné sur origin/main à 22003315. Réservation auditeur pour les treize fichiers de ce complément, tous dans audits/, close automatiquement à sa publication.
+Le premier essai sanitizer a échoué sous ptrace ; la capture est conservée. La reprise autorisée hors bac à sable réussit avec les mêmes binaires et `detect_leaks=1`. Le lecteur de captures passe normal/-O. Aucun moteur FULL ni GCP utilisé ; aucune compilation ou campagne encore active. Index observé vide et réservé pour les 71 chemins d’audit annoncés dans la coordination ; réservation close automatiquement par la publication.

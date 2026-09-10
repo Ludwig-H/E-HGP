@@ -1,0 +1,20 @@
+{
+  "args": [
+    "taskset",
+    "-c",
+    "1",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_coverage_cpp_20260910/.work_build/constructor_gate_mutant",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "environment": {},
+  "exit_code": 0,
+  "expected_exit": 0,
+  "finished_unix": 1789045434.7643583,
+  "name": "constructor_gate_mutant",
+  "started_unix": 1789045434.7332869,
+  "status": "completed",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_sha256": null,
+  "stdout_sha256": "a2b45efe4b41672baf779cda2074854d8b10aad1e059f80afe5216f2d7975694"
+}

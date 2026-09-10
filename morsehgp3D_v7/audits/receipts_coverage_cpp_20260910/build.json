@@ -1,0 +1,14 @@
+{
+  "binaries": {
+    "constructor_gate_mutant": "9be906ec0f45203423d5ef75c9f47e1f78010810dcd9025f6b1e69628da0c075",
+    "o2": "ebbe4f5dd12691106ef6724863c7513c588142c1cc3e02e95fab34c97cad3bb2",
+    "parent_mutant": "d6c13d7e3d6b765208dbe178730c41d2213a7cf5ae88f42767748793e76c19dd",
+    "san": "1362685988df4c8363e7568a7931866dc922f55ec94530774abb4f6dc4c04f8f"
+  },
+  "constructor_gate_source_sha256": "7d58362da3b5ca126e7c9b35982f4f2095ec23d8bc9b0a600a1fda323d624931",
+  "mutant_sha256": "c49ef274563179dca68c1a2d7a1670b57adeb35f70a4bb2b8213e19a65890256",
+  "mutation": "out.parents_.push_back(parent) -> out.parents_.push_back(0)",
+  "nominal_source_sha256": "e8e65b211ec01964f35f1eb60587096a9b1e144d2c4634d2cad0c2f50ae5e883",
+  "private_gate_adaptation": "Only two include paths changed to select the isolated parent-array mutant.",
+  "status": "passed"
+}

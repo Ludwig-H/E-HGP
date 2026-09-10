@@ -1,0 +1,355 @@
+{
+  "cases": 184,
+  "constructor_gate_passes_same_mutant": true,
+  "corpus": {
+    "counters": {
+      "active_facets": 2588,
+      "anchor_hits": 2588,
+      "anchor_lookups": 2698,
+      "anchor_misses": 110,
+      "census_after_anchor_miss": 110,
+      "cpp_cases": 184,
+      "cpp_coverage_queries": 23104,
+      "cpp_queries": 2976,
+      "cpp_root_queries": 23104,
+      "descent_steps": 110,
+      "exact_MEB_requests": 2698,
+      "geometric_cases": 180,
+      "geometry_clouds": 10,
+      "geometry_orders": 45,
+      "live_component_coverages": 779,
+      "order_cuts": 718,
+      "requests": 2588,
+      "strict_radius_exchanges": 110,
+      "structural_cases": 4
+    },
+    "geometric_cuts": "historical read_cut after independent Gram/Gamma verify",
+    "level_encodings": [
+      "reduced_fraction",
+      "same_fraction_times_two"
+    ],
+    "population_bank": "same canonical BallKey populations across orders; the transport builds a bank instance per case",
+    "runs": {
+      "arity_mix": {
+        "kmax": 4,
+        "n": 4,
+        "partition_digest": "811c75c4a4cbff56f018f79525bc935ea32110821dbf76f1308df76d94570cc9",
+        "population_rows": 10,
+        "production": {
+          "anchor_hits": 15,
+          "anchor_lookups": 15,
+          "anchors": 18,
+          "birth_nodes": 10,
+          "continuation_blocks": 2,
+          "continuation_gap_contributions": 1,
+          "exact_MEB_requests": 15,
+          "local_classes": 15,
+          "merge_nodes": 4,
+          "requests": 15,
+          "scheduled_blocks": 18
+        },
+        "verification": {
+          "active_facets": 71,
+          "anchor_hits": 71,
+          "anchor_lookups": 71,
+          "exact_MEB_requests": 71,
+          "live_component_coverages": 38,
+          "order_cuts": 40,
+          "requests": 71
+        }
+      },
+      "arity_window_tetra_Kmax2": {
+        "kmax": 2,
+        "n": 5,
+        "partition_digest": "57aa1665fa310a8bd8b885a9f139e2afa9d1a31e7478572572a0b67affddc809",
+        "population_rows": 18,
+        "production": {
+          "anchor_hits": 32,
+          "anchor_lookups": 32,
+          "anchors": 28,
+          "balls_outside_rank_window": 1,
+          "birth_nodes": 11,
+          "continuation_blocks": 2,
+          "exact_MEB_requests": 32,
+          "local_classes": 32,
+          "merge_nodes": 4,
+          "requests": 32,
+          "scheduled_blocks": 28
+        },
+        "verification": {
+          "active_facets": 97,
+          "anchor_hits": 97,
+          "anchor_lookups": 97,
+          "exact_MEB_requests": 97,
+          "live_component_coverages": 36,
+          "order_cuts": 20,
+          "requests": 97
+        }
+      },
+      "coverage_growth": {
+        "kmax": 4,
+        "n": 4,
+        "partition_digest": "c5cd790e7d8fefde51e4132813d6562f3abe1a337d11a39f5f82649f4d03d08f",
+        "population_rows": 10,
+        "production": {
+          "anchor_hits": 15,
+          "anchor_lookups": 15,
+          "anchors": 18,
+          "birth_nodes": 10,
+          "continuation_blocks": 2,
+          "continuation_gap_contributions": 1,
+          "exact_MEB_requests": 15,
+          "local_classes": 15,
+          "merge_nodes": 4,
+          "requests": 15,
+          "scheduled_blocks": 18
+        },
+        "verification": {
+          "active_facets": 71,
+          "anchor_hits": 71,
+          "anchor_lookups": 71,
+          "exact_MEB_requests": 71,
+          "live_component_coverages": 38,
+          "order_cuts": 40,
+          "requests": 71
+        }
+      },
+      "external_bridge": {
+        "kmax": 4,
+        "n": 4,
+        "partition_digest": "2868cb648aae7c56ffe79fc975425870aaa0586547eddbdc04e1d7f2bdca5726",
+        "population_rows": 11,
+        "production": {
+          "anchor_hits": 16,
+          "anchor_lookups": 16,
+          "anchors": 19,
+          "birth_nodes": 11,
+          "continuation_blocks": 2,
+          "exact_MEB_requests": 16,
+          "local_classes": 16,
+          "merge_nodes": 4,
+          "requests": 16,
+          "scheduled_blocks": 19
+        },
+        "verification": {
+          "active_facets": 95,
+          "anchor_hits": 95,
+          "anchor_lookups": 95,
+          "exact_MEB_requests": 95,
+          "live_component_coverages": 46,
+          "order_cuts": 48,
+          "requests": 95
+        }
+      },
+      "outside_removes_growth": {
+        "kmax": 6,
+        "n": 6,
+        "partition_digest": "3bc1c847f796f7cafdffa0141576b92af628428ef83bbaaa5bb3af1986d2bcbd",
+        "population_rows": 25,
+        "production": {
+          "anchor_hits": 46,
+          "anchor_lookups": 48,
+          "anchor_misses": 2,
+          "anchors": 47,
+          "birth_nodes": 25,
+          "census_after_anchor_miss": 2,
+          "continuation_blocks": 6,
+          "continuation_gap_contributions": 1,
+          "descent_steps": 2,
+          "exact_MEB_requests": 48,
+          "local_classes": 46,
+          "merge_nodes": 15,
+          "requests": 46,
+          "scheduled_blocks": 47,
+          "strict_radius_exchanges": 2
+        },
+        "verification": {
+          "active_facets": 885,
+          "anchor_hits": 885,
+          "anchor_lookups": 949,
+          "anchor_misses": 64,
+          "census_after_anchor_miss": 64,
+          "descent_steps": 64,
+          "exact_MEB_requests": 949,
+          "live_component_coverages": 226,
+          "order_cuts": 216,
+          "requests": 885,
+          "strict_radius_exchanges": 64
+        }
+      },
+      "portal_equal": {
+        "kmax": 6,
+        "n": 6,
+        "partition_digest": "1777234c2c39994f601f5f379965d53eee86c7a542b5e1ff3bccbb028bbb55f9",
+        "population_rows": 22,
+        "production": {
+          "anchor_hits": 43,
+          "anchor_lookups": 43,
+          "anchors": 46,
+          "birth_nodes": 23,
+          "continuation_blocks": 6,
+          "exact_MEB_requests": 43,
+          "local_classes": 43,
+          "merge_nodes": 8,
+          "requests": 43,
+          "scheduled_blocks": 46
+        },
+        "verification": {
+          "active_facets": 341,
+          "anchor_hits": 341,
+          "anchor_lookups": 343,
+          "anchor_misses": 2,
+          "census_after_anchor_miss": 2,
+          "descent_steps": 2,
+          "exact_MEB_requests": 343,
+          "live_component_coverages": 98,
+          "order_cuts": 96,
+          "requests": 341,
+          "strict_radius_exchanges": 2
+        }
+      },
+      "right_triangle": {
+        "kmax": 3,
+        "n": 3,
+        "partition_digest": "89658d3508c7bb089cf5e9b8602fcbe1847055bcc3c749a36cfe0074a0c68848",
+        "population_rows": 6,
+        "production": {
+          "anchor_hits": 7,
+          "anchor_lookups": 7,
+          "anchors": 10,
+          "birth_nodes": 6,
+          "continuation_blocks": 1,
+          "exact_MEB_requests": 7,
+          "local_classes": 7,
+          "merge_nodes": 2,
+          "requests": 7,
+          "scheduled_blocks": 10
+        },
+        "verification": {
+          "active_facets": 23,
+          "anchor_hits": 23,
+          "anchor_lookups": 23,
+          "exact_MEB_requests": 23,
+          "live_component_coverages": 15,
+          "order_cuts": 18,
+          "requests": 23
+        }
+      },
+      "square": {
+        "kmax": 4,
+        "n": 4,
+        "partition_digest": "89d3fe8a6e5562d77cb1e2410613441ba576edc1554bd2b4151dbf44f424ce1b",
+        "population_rows": 9,
+        "production": {
+          "anchor_hits": 13,
+          "anchor_lookups": 13,
+          "anchors": 16,
+          "birth_nodes": 10,
+          "continuation_blocks": 1,
+          "exact_MEB_requests": 13,
+          "local_classes": 13,
+          "merge_nodes": 2,
+          "requests": 13,
+          "scheduled_blocks": 16
+        },
+        "verification": {
+          "active_facets": 39,
+          "anchor_hits": 39,
+          "anchor_lookups": 39,
+          "exact_MEB_requests": 39,
+          "live_component_coverages": 22,
+          "order_cuts": 24,
+          "requests": 39
+        }
+      },
+      "window_shell7": {
+        "kmax": 7,
+        "n": 7,
+        "partition_digest": "759b0674395547ea5ac4e1c1b3ef990ad043b12b71a21504516cb2832a372b82",
+        "population_rows": 26,
+        "production": {
+          "anchor_hits": 45,
+          "anchor_lookups": 46,
+          "anchor_misses": 1,
+          "anchors": 50,
+          "birth_nodes": 28,
+          "census_after_anchor_miss": 1,
+          "continuation_blocks": 3,
+          "descent_steps": 1,
+          "exact_MEB_requests": 46,
+          "local_classes": 45,
+          "merge_nodes": 13,
+          "requests": 45,
+          "scheduled_blocks": 50,
+          "strict_radius_exchanges": 1
+        },
+        "verification": {
+          "active_facets": 487,
+          "anchor_hits": 487,
+          "anchor_lookups": 509,
+          "anchor_misses": 22,
+          "census_after_anchor_miss": 22,
+          "descent_steps": 22,
+          "exact_MEB_requests": 509,
+          "live_component_coverages": 131,
+          "order_cuts": 126,
+          "requests": 487,
+          "strict_radius_exchanges": 22
+        }
+      },
+      "window_shell7_Kmax5": {
+        "kmax": 5,
+        "n": 7,
+        "partition_digest": "a6f386742254cd1704e20b9daa225bf86a3cc864559b3d6b98bc0cbd6948f02a",
+        "population_rows": 26,
+        "production": {
+          "anchor_hits": 45,
+          "anchor_lookups": 46,
+          "anchor_misses": 1,
+          "anchors": 48,
+          "birth_nodes": 26,
+          "census_after_anchor_miss": 1,
+          "continuation_blocks": 3,
+          "descent_steps": 1,
+          "exact_MEB_requests": 46,
+          "local_classes": 45,
+          "merge_nodes": 13,
+          "requests": 45,
+          "scheduled_blocks": 48,
+          "strict_radius_exchanges": 1
+        },
+        "verification": {
+          "active_facets": 479,
+          "anchor_hits": 479,
+          "anchor_lookups": 501,
+          "anchor_misses": 22,
+          "census_after_anchor_miss": 22,
+          "descent_steps": 22,
+          "exact_MEB_requests": 501,
+          "live_component_coverages": 129,
+          "order_cuts": 90,
+          "requests": 479,
+          "strict_radius_exchanges": 22
+        }
+      }
+    },
+    "structural_cuts": "separate forward point-set and ancestor-set replay",
+    "wide_fixture": "(2^180+i)/(2^120-1), also numerator and denominator times two"
+  },
+  "engine_executed": false,
+  "gcp_used": false,
+  "global_producer_qualified": false,
+  "mutant_failures": 124,
+  "mutant_fields": [
+    "parents"
+  ],
+  "nominal_and_sanitized_identical": true,
+  "output_sha256": "e5e0a7f9be4bfffe7027be79dce45b437aaa98b167610bc01777f20e62790eb2",
+  "public_status": "not_claimed",
+  "source_sha256": {
+    "bridge.cpp": "b38034d1c33afa0488d345db517a4ec206542191df8358facf2484cf768202f6",
+    "corpus.py": "07d92efb36136ceb440c49e775778479312b97a9f99c35a81b1748ae31e91e8c",
+    "runner.py": "53c7d831f63e18bd9bba902a5b98a7d047ec2eba9ff9aad7222d17f805bbf10d"
+  },
+  "status": "passed"
+}

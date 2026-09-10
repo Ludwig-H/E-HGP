@@ -1,0 +1,625 @@
+{
+  "cases": 184,
+  "failures": [
+    {
+      "case": 0,
+      "field": "parents",
+      "name": "arity_mix/K1/gap/factor1"
+    },
+    {
+      "case": 1,
+      "field": "parents",
+      "name": "arity_mix/K1/gap/factor2"
+    },
+    {
+      "case": 2,
+      "field": "parents",
+      "name": "arity_mix/K1/whole/factor1"
+    },
+    {
+      "case": 3,
+      "field": "parents",
+      "name": "arity_mix/K1/whole/factor2"
+    },
+    {
+      "case": 4,
+      "field": "parents",
+      "name": "arity_mix/K2/gap/factor1"
+    },
+    {
+      "case": 5,
+      "field": "parents",
+      "name": "arity_mix/K2/gap/factor2"
+    },
+    {
+      "case": 6,
+      "field": "parents",
+      "name": "arity_mix/K2/whole/factor1"
+    },
+    {
+      "case": 7,
+      "field": "parents",
+      "name": "arity_mix/K2/whole/factor2"
+    },
+    {
+      "case": 16,
+      "field": "parents",
+      "name": "arity_window_tetra_Kmax2/K1/gap/factor1"
+    },
+    {
+      "case": 17,
+      "field": "parents",
+      "name": "arity_window_tetra_Kmax2/K1/gap/factor2"
+    },
+    {
+      "case": 18,
+      "field": "parents",
+      "name": "arity_window_tetra_Kmax2/K1/whole/factor1"
+    },
+    {
+      "case": 19,
+      "field": "parents",
+      "name": "arity_window_tetra_Kmax2/K1/whole/factor2"
+    },
+    {
+      "case": 20,
+      "field": "parents",
+      "name": "arity_window_tetra_Kmax2/K2/gap/factor1"
+    },
+    {
+      "case": 21,
+      "field": "parents",
+      "name": "arity_window_tetra_Kmax2/K2/gap/factor2"
+    },
+    {
+      "case": 22,
+      "field": "parents",
+      "name": "arity_window_tetra_Kmax2/K2/whole/factor1"
+    },
+    {
+      "case": 23,
+      "field": "parents",
+      "name": "arity_window_tetra_Kmax2/K2/whole/factor2"
+    },
+    {
+      "case": 24,
+      "field": "parents",
+      "name": "coverage_growth/K1/gap/factor1"
+    },
+    {
+      "case": 25,
+      "field": "parents",
+      "name": "coverage_growth/K1/gap/factor2"
+    },
+    {
+      "case": 26,
+      "field": "parents",
+      "name": "coverage_growth/K1/whole/factor1"
+    },
+    {
+      "case": 27,
+      "field": "parents",
+      "name": "coverage_growth/K1/whole/factor2"
+    },
+    {
+      "case": 28,
+      "field": "parents",
+      "name": "coverage_growth/K2/gap/factor1"
+    },
+    {
+      "case": 29,
+      "field": "parents",
+      "name": "coverage_growth/K2/gap/factor2"
+    },
+    {
+      "case": 30,
+      "field": "parents",
+      "name": "coverage_growth/K2/whole/factor1"
+    },
+    {
+      "case": 31,
+      "field": "parents",
+      "name": "coverage_growth/K2/whole/factor2"
+    },
+    {
+      "case": 40,
+      "field": "parents",
+      "name": "external_bridge/K1/gap/factor1"
+    },
+    {
+      "case": 41,
+      "field": "parents",
+      "name": "external_bridge/K1/gap/factor2"
+    },
+    {
+      "case": 42,
+      "field": "parents",
+      "name": "external_bridge/K1/whole/factor1"
+    },
+    {
+      "case": 43,
+      "field": "parents",
+      "name": "external_bridge/K1/whole/factor2"
+    },
+    {
+      "case": 44,
+      "field": "parents",
+      "name": "external_bridge/K2/gap/factor1"
+    },
+    {
+      "case": 45,
+      "field": "parents",
+      "name": "external_bridge/K2/gap/factor2"
+    },
+    {
+      "case": 46,
+      "field": "parents",
+      "name": "external_bridge/K2/whole/factor1"
+    },
+    {
+      "case": 47,
+      "field": "parents",
+      "name": "external_bridge/K2/whole/factor2"
+    },
+    {
+      "case": 48,
+      "field": "parents",
+      "name": "external_bridge/K3/gap/factor1"
+    },
+    {
+      "case": 49,
+      "field": "parents",
+      "name": "external_bridge/K3/gap/factor2"
+    },
+    {
+      "case": 50,
+      "field": "parents",
+      "name": "external_bridge/K3/whole/factor1"
+    },
+    {
+      "case": 51,
+      "field": "parents",
+      "name": "external_bridge/K3/whole/factor2"
+    },
+    {
+      "case": 56,
+      "field": "parents",
+      "name": "outside_removes_growth/K1/gap/factor1"
+    },
+    {
+      "case": 57,
+      "field": "parents",
+      "name": "outside_removes_growth/K1/gap/factor2"
+    },
+    {
+      "case": 58,
+      "field": "parents",
+      "name": "outside_removes_growth/K1/whole/factor1"
+    },
+    {
+      "case": 59,
+      "field": "parents",
+      "name": "outside_removes_growth/K1/whole/factor2"
+    },
+    {
+      "case": 60,
+      "field": "parents",
+      "name": "outside_removes_growth/K2/gap/factor1"
+    },
+    {
+      "case": 61,
+      "field": "parents",
+      "name": "outside_removes_growth/K2/gap/factor2"
+    },
+    {
+      "case": 62,
+      "field": "parents",
+      "name": "outside_removes_growth/K2/whole/factor1"
+    },
+    {
+      "case": 63,
+      "field": "parents",
+      "name": "outside_removes_growth/K2/whole/factor2"
+    },
+    {
+      "case": 64,
+      "field": "parents",
+      "name": "outside_removes_growth/K3/gap/factor1"
+    },
+    {
+      "case": 65,
+      "field": "parents",
+      "name": "outside_removes_growth/K3/gap/factor2"
+    },
+    {
+      "case": 66,
+      "field": "parents",
+      "name": "outside_removes_growth/K3/whole/factor1"
+    },
+    {
+      "case": 67,
+      "field": "parents",
+      "name": "outside_removes_growth/K3/whole/factor2"
+    },
+    {
+      "case": 68,
+      "field": "parents",
+      "name": "outside_removes_growth/K4/gap/factor1"
+    },
+    {
+      "case": 69,
+      "field": "parents",
+      "name": "outside_removes_growth/K4/gap/factor2"
+    },
+    {
+      "case": 70,
+      "field": "parents",
+      "name": "outside_removes_growth/K4/whole/factor1"
+    },
+    {
+      "case": 71,
+      "field": "parents",
+      "name": "outside_removes_growth/K4/whole/factor2"
+    },
+    {
+      "case": 72,
+      "field": "parents",
+      "name": "outside_removes_growth/K5/gap/factor1"
+    },
+    {
+      "case": 73,
+      "field": "parents",
+      "name": "outside_removes_growth/K5/gap/factor2"
+    },
+    {
+      "case": 74,
+      "field": "parents",
+      "name": "outside_removes_growth/K5/whole/factor1"
+    },
+    {
+      "case": 75,
+      "field": "parents",
+      "name": "outside_removes_growth/K5/whole/factor2"
+    },
+    {
+      "case": 80,
+      "field": "parents",
+      "name": "portal_equal/K1/gap/factor1"
+    },
+    {
+      "case": 81,
+      "field": "parents",
+      "name": "portal_equal/K1/gap/factor2"
+    },
+    {
+      "case": 82,
+      "field": "parents",
+      "name": "portal_equal/K1/whole/factor1"
+    },
+    {
+      "case": 83,
+      "field": "parents",
+      "name": "portal_equal/K1/whole/factor2"
+    },
+    {
+      "case": 84,
+      "field": "parents",
+      "name": "portal_equal/K2/gap/factor1"
+    },
+    {
+      "case": 85,
+      "field": "parents",
+      "name": "portal_equal/K2/gap/factor2"
+    },
+    {
+      "case": 86,
+      "field": "parents",
+      "name": "portal_equal/K2/whole/factor1"
+    },
+    {
+      "case": 87,
+      "field": "parents",
+      "name": "portal_equal/K2/whole/factor2"
+    },
+    {
+      "case": 88,
+      "field": "parents",
+      "name": "portal_equal/K3/gap/factor1"
+    },
+    {
+      "case": 89,
+      "field": "parents",
+      "name": "portal_equal/K3/gap/factor2"
+    },
+    {
+      "case": 90,
+      "field": "parents",
+      "name": "portal_equal/K3/whole/factor1"
+    },
+    {
+      "case": 91,
+      "field": "parents",
+      "name": "portal_equal/K3/whole/factor2"
+    },
+    {
+      "case": 92,
+      "field": "parents",
+      "name": "portal_equal/K4/gap/factor1"
+    },
+    {
+      "case": 93,
+      "field": "parents",
+      "name": "portal_equal/K4/gap/factor2"
+    },
+    {
+      "case": 94,
+      "field": "parents",
+      "name": "portal_equal/K4/whole/factor1"
+    },
+    {
+      "case": 95,
+      "field": "parents",
+      "name": "portal_equal/K4/whole/factor2"
+    },
+    {
+      "case": 104,
+      "field": "parents",
+      "name": "right_triangle/K1/gap/factor1"
+    },
+    {
+      "case": 105,
+      "field": "parents",
+      "name": "right_triangle/K1/gap/factor2"
+    },
+    {
+      "case": 106,
+      "field": "parents",
+      "name": "right_triangle/K1/whole/factor1"
+    },
+    {
+      "case": 107,
+      "field": "parents",
+      "name": "right_triangle/K1/whole/factor2"
+    },
+    {
+      "case": 108,
+      "field": "parents",
+      "name": "right_triangle/K2/gap/factor1"
+    },
+    {
+      "case": 109,
+      "field": "parents",
+      "name": "right_triangle/K2/gap/factor2"
+    },
+    {
+      "case": 110,
+      "field": "parents",
+      "name": "right_triangle/K2/whole/factor1"
+    },
+    {
+      "case": 111,
+      "field": "parents",
+      "name": "right_triangle/K2/whole/factor2"
+    },
+    {
+      "case": 116,
+      "field": "parents",
+      "name": "square/K1/gap/factor1"
+    },
+    {
+      "case": 117,
+      "field": "parents",
+      "name": "square/K1/gap/factor2"
+    },
+    {
+      "case": 118,
+      "field": "parents",
+      "name": "square/K1/whole/factor1"
+    },
+    {
+      "case": 119,
+      "field": "parents",
+      "name": "square/K1/whole/factor2"
+    },
+    {
+      "case": 120,
+      "field": "parents",
+      "name": "square/K2/gap/factor1"
+    },
+    {
+      "case": 121,
+      "field": "parents",
+      "name": "square/K2/gap/factor2"
+    },
+    {
+      "case": 122,
+      "field": "parents",
+      "name": "square/K2/whole/factor1"
+    },
+    {
+      "case": 123,
+      "field": "parents",
+      "name": "square/K2/whole/factor2"
+    },
+    {
+      "case": 132,
+      "field": "parents",
+      "name": "window_shell7/K1/gap/factor1"
+    },
+    {
+      "case": 133,
+      "field": "parents",
+      "name": "window_shell7/K1/gap/factor2"
+    },
+    {
+      "case": 134,
+      "field": "parents",
+      "name": "window_shell7/K1/whole/factor1"
+    },
+    {
+      "case": 135,
+      "field": "parents",
+      "name": "window_shell7/K1/whole/factor2"
+    },
+    {
+      "case": 136,
+      "field": "parents",
+      "name": "window_shell7/K2/gap/factor1"
+    },
+    {
+      "case": 137,
+      "field": "parents",
+      "name": "window_shell7/K2/gap/factor2"
+    },
+    {
+      "case": 138,
+      "field": "parents",
+      "name": "window_shell7/K2/whole/factor1"
+    },
+    {
+      "case": 139,
+      "field": "parents",
+      "name": "window_shell7/K2/whole/factor2"
+    },
+    {
+      "case": 140,
+      "field": "parents",
+      "name": "window_shell7/K3/gap/factor1"
+    },
+    {
+      "case": 141,
+      "field": "parents",
+      "name": "window_shell7/K3/gap/factor2"
+    },
+    {
+      "case": 142,
+      "field": "parents",
+      "name": "window_shell7/K3/whole/factor1"
+    },
+    {
+      "case": 143,
+      "field": "parents",
+      "name": "window_shell7/K3/whole/factor2"
+    },
+    {
+      "case": 144,
+      "field": "parents",
+      "name": "window_shell7/K4/gap/factor1"
+    },
+    {
+      "case": 145,
+      "field": "parents",
+      "name": "window_shell7/K4/gap/factor2"
+    },
+    {
+      "case": 146,
+      "field": "parents",
+      "name": "window_shell7/K4/whole/factor1"
+    },
+    {
+      "case": 147,
+      "field": "parents",
+      "name": "window_shell7/K4/whole/factor2"
+    },
+    {
+      "case": 160,
+      "field": "parents",
+      "name": "window_shell7_Kmax5/K1/gap/factor1"
+    },
+    {
+      "case": 161,
+      "field": "parents",
+      "name": "window_shell7_Kmax5/K1/gap/factor2"
+    },
+    {
+      "case": 162,
+      "field": "parents",
+      "name": "window_shell7_Kmax5/K1/whole/factor1"
+    },
+    {
+      "case": 163,
+      "field": "parents",
+      "name": "window_shell7_Kmax5/K1/whole/factor2"
+    },
+    {
+      "case": 164,
+      "field": "parents",
+      "name": "window_shell7_Kmax5/K2/gap/factor1"
+    },
+    {
+      "case": 165,
+      "field": "parents",
+      "name": "window_shell7_Kmax5/K2/gap/factor2"
+    },
+    {
+      "case": 166,
+      "field": "parents",
+      "name": "window_shell7_Kmax5/K2/whole/factor1"
+    },
+    {
+      "case": 167,
+      "field": "parents",
+      "name": "window_shell7_Kmax5/K2/whole/factor2"
+    },
+    {
+      "case": 168,
+      "field": "parents",
+      "name": "window_shell7_Kmax5/K3/gap/factor1"
+    },
+    {
+      "case": 169,
+      "field": "parents",
+      "name": "window_shell7_Kmax5/K3/gap/factor2"
+    },
+    {
+      "case": 170,
+      "field": "parents",
+      "name": "window_shell7_Kmax5/K3/whole/factor1"
+    },
+    {
+      "case": 171,
+      "field": "parents",
+      "name": "window_shell7_Kmax5/K3/whole/factor2"
+    },
+    {
+      "case": 172,
+      "field": "parents",
+      "name": "window_shell7_Kmax5/K4/gap/factor1"
+    },
+    {
+      "case": 173,
+      "field": "parents",
+      "name": "window_shell7_Kmax5/K4/gap/factor2"
+    },
+    {
+      "case": 174,
+      "field": "parents",
+      "name": "window_shell7_Kmax5/K4/whole/factor1"
+    },
+    {
+      "case": 175,
+      "field": "parents",
+      "name": "window_shell7_Kmax5/K4/whole/factor2"
+    },
+    {
+      "case": 180,
+      "field": "parents",
+      "name": "structural_mixed/small/factor1"
+    },
+    {
+      "case": 181,
+      "field": "parents",
+      "name": "structural_mixed/small/factor2"
+    },
+    {
+      "case": 182,
+      "field": "parents",
+      "name": "structural_mixed/wide/factor1"
+    },
+    {
+      "case": 183,
+      "field": "parents",
+      "name": "structural_mixed/wide/factor2"
+    }
+  ]
+}

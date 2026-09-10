@@ -1,0 +1,33 @@
+{
+  "args": [
+    "taskset",
+    "-c",
+    "1",
+    "/usr/bin/g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-O1",
+    "-g",
+    "-fno-omit-frame-pointer",
+    "-fsanitize=address,undefined",
+    "-I",
+    "/workspaces/E-HGP/morsehgp3D_v7/src",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_coverage_cpp_20260910/bridge.cpp",
+    "-o",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_coverage_cpp_20260910/.work_build/san"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "environment": {},
+  "exit_code": 0,
+  "expected_exit": 0,
+  "finished_unix": 1789045403.3984919,
+  "name": "compile_san",
+  "started_unix": 1789045368.2434704,
+  "status": "completed",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_sha256": null,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
