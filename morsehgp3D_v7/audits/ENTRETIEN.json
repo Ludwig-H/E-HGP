@@ -3061,5 +3061,71 @@
     },
     "source_variants_D_to_Q_unchanged": true,
     "gcp_used": false
+  },
+  "latest_batch_work_20260911": {
+    "date_utc": "2026-09-11T12:38:57.220538+00:00",
+    "reviewed_base_commit": "b8336ad3",
+    "publication_base_commit": "8484cd496e3c249d2be7600ddcc821a479981314",
+    "packet": "receipts_batch_work_20260911",
+    "packet_manifest_sha256": "a0ba377fd7dd9d274e12e56b102d2fd8062603a4416373ec3b4f6f419c0a1b41",
+    "scope": "Independent accounting-boundary qualification of the private adapter, using injected Context results and unchanged adapter bodies on one frozen dependency tree. No geometry, complete Builder, device or performance execution.",
+    "original_adapter_sha256": "143bcbfe489ca2950b5ff48be64025dab1dbd5cbf959c4fc0053bb9bbf370bb8",
+    "fixed_adapter_sha256": "993786f352421eab8f183eb0675fe210e408dc5b3045b55af66a245a40f278ff",
+    "checks": {
+      "reader_normal_and_optimized_exit": 0,
+      "compilation_successes": 4,
+      "original_expected_failure_exit_codes": [
+        1,
+        1
+      ],
+      "fixed_success_exit_codes": [
+        0,
+        0
+      ],
+      "modes": [
+        "O2",
+        "ASan/UBSan"
+      ],
+      "leak_detection": true,
+      "original_source_headers": 75,
+      "source_bytes_stable": true,
+      "published_readers_normal_and_optimized": 2,
+      "documentation_normal_and_optimized_exit": 0,
+      "documentation_files": 477,
+      "implementation_status_exit": 0,
+      "implementation_phases": 20
+    },
+    "maintenance": {
+      "action": "Close the already corrected private-adapter request, link the second auditor permanent-CTest request and cost reading, condense the active graph discussion. Preserve all historical packets and expected failures. Remove our generated .work and .work_boundary directories; frozen source archive and captures retained.",
+      "entries": [
+        {
+          "path": "COORDINATION_AUDITEURS.md",
+          "previous_sha256": "7a35345baa3dfc9bd333bd4550641814034c659de62e831798eb1d5f66ef30ab",
+          "previous_words": 297,
+          "words": 351
+        },
+        {
+          "path": "DIALOGUE_COURANT.md",
+          "previous_sha256": "501c9680cc4abf345ea8cb9d43b38a55974bc97a9e010985fc7e6b0ab563647e",
+          "previous_words": 415,
+          "words": 431
+        },
+        {
+          "path": "ETAT_COURANT.md",
+          "previous_sha256": "6b8bf313bb7002aff9c4c0c796dac2713efbd9e1d3b9e0acf8597442addccf0d",
+          "previous_words": 634,
+          "words": 668
+        },
+        {
+          "path": "README.md",
+          "previous_sha256": "1158e9ee899ac67ab03b9d532d5b6c7d3e5774a8fd7c79bcd4683cf837c55931",
+          "previous_words": 738,
+          "words": 759
+        }
+      ]
+    },
+    "source_variants_D_to_Q_unchanged": true,
+    "new_engine_variant": false,
+    "gcp_used": false
   }
 }

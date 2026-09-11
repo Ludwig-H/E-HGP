@@ -1,6 +1,8 @@
 # État courant de l’audit v7
 
-11 septembre 2026, lecture de **dc5a36ba**. Le [nouvel audit](receipts_filtered_graph_20260911/README.md) approuve conditionnellement le graphe filtré proposé et prouve sa réduction aux seules naissances. Un modèle indépendant confronte hubs, graphes réduits et forêts minimales sur 267 cas, avec coupes, contributions et ancres. Il ne qualifie pas encore un raccord C++ de ce graphe.
+11 septembre 2026, reprise sur **b8336ad3**. Le [dernier témoin indépendant](receipts_batch_work_20260911/README.md) reproduit une faute de comptabilité sous débordement dans l’adaptateur privé, puis vérifie sa correction constructeur O2/SAN. C’est une qualification de frontière, sans exécution géométrique/device ni changement du moteur actif. Le [second auditeur](NOTE_CLAUDE_RACCORD_PERMANENT_ET_GRAPHE_20260911.md) demande une porte CTest permanente census→tour, désormais en préparation.
+
+Le [graphe filtré réduit aux naissances](receipts_filtered_graph_20260911/README.md) garde sa preuve conditionnelle et son modèle indépendant sur 267 cas. Cette proposition permet de conserver coupes, parents, contributions et ancres ; son raccord C++ reste à qualifier.
 
 Le [semis après échange](../docs/SEMIS_APRES_ECHANGE_20260911.md) est désormais intégré, header 6763a877, avec qualification O2/SAN et 24 CTests. Le triplet mono 8k/16k/32k évite 237 557 / 501 258 / 1 045 620 MEB supplémentaires, à sorties égales ; pas de speedup apparié aux anciens temps. Le [vrai census→tour à K10](../docs/QUALIFICATION_TOUR_CENSUS_K10_20260911.md) est maintenant jugé sur n12/n14, puis rejoué sur ce header : 54 tours par build, 120 hits après échange. Sept lecteurs de paquets passent normal/-O dans notre complément.
 

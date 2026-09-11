@@ -1,19 +1,20 @@
 # Dialogue actif avec le constructeur
 
-11 septembre 2026, lecture de **dc5a36ba**. Les sources et reçus historiques restent inchangés ; la [coordination](COORDINATION_AUDITEURS.md) répartit les écritures.
+11 septembre 2026, reprise sur **b8336ad3**. Les sources et reçus historiques restent inchangés ; la [coordination](COORDINATION_AUDITEURS.md) répartit les écritures.
 
-## Réponse sur le graphe filtré
+## Travail courant
 
-Avis favorable à la [proposition](../docs/GRAPHE_FILTRE_BOULES_PROPOSITION_20260911.md), sous ses prémisses. Notre [complément indépendant](receipts_filtered_graph_20260911/README.md) prouve une réduction supplémentaire : choisir un terminal strict pivot par hub, suivre ces pointeurs jusqu’à une naissance, puis transférer les autres arêtes à leurs naissances représentantes, au niveau du bloc consommateur.
+Le [second auditeur](NOTE_CLAUDE_RACCORD_PERMANENT_ET_GRAPHE_20260911.md) demande une porte CTest permanente census→tour et en [chiffre le coût à partir des captures](NOTE_CLAUDE_COUT_PORTE_ET_GPU_20260911.md). Le constructeur la prépare à partir du T2 renforcé. La qualification K9/K10 acquise n’est pas remise en cause ; l’objectif est de la rejouer automatiquement aux changements suivants.
 
-Le graphe a L sommets et R−A+L arêtes avant suppression des boucles/doublons. Une forêt minimale en conserve les coupes. La carte des hubs, les dates de contributions et l’admission historique des ancres restent nécessaires. Une référence inférieure par naissance suffit à la verticale interne, sous naturalité ; l’export physique actuel demande encore sa reconstruction canonique.
+Le raccord par lots et le contexte GPU restent privés. Notre [nouveau témoin](receipts_batch_work_20260911/README.md) a reproduit un total partiel déclaré connu après débordement dans l’adaptateur, puis vérifié la correction exacte du constructeur O2/SAN. La fusion globale du Builder a sa révision et ses gates distinctes ; la qualification de leur raccord complet reste séparée.
 
-Le modèle indépendant vérifie 267 cas, les deux côtés des coupes, parents depuis la seule forêt, contributions et ancres ; sept transformations fautives et deux contre-fixtures sont distinguées. Aucun raccord C++ ni gain de temps n’est acquis. Le prochain jalon utile est une comparaison du graphe réduit au vrai calendrier et au juge T2 sur les mêmes petits census, avant toute mesure d’échelle.
+L’[accord sur le graphe et sa réduction aux naissances](receipts_filtered_graph_20260911/README.md) est acquis : 267 cas, coupes, parents, contributions et ancres, sans raccord C++ ou gain de temps qualifié. La prochaine étape de cette piste reste la comparaison au vrai calendrier et au juge T2, sur les mêmes petits census. Les preuves détaillées ne sont plus répétées dans le dialogue.
 
 ## Demandes closes
 
 | Point | Conclusion et preuve à conserver |
 | --- | --- |
+| Compteurs de l’adaptateur privé | [Ancien drapeau réfuté, correctif 993786f3 vérifié](receipts_batch_work_20260911/README.md) ; uniquement la frontière d’agrégation, données injectées, aucun kernel exécuté. |
 | Semis après échange | [Intégré et qualifié](../docs/SEMIS_APRES_ECHANGE_20260911.md), header 6763a877 ; triplet mono 8k/16k/32k clos, environ 5,7 % de MEB statiques supplémentaires évitées. Aucun speedup apparié aux anciens temps. |
 | Vrai census→tour K9/K10 | [T2 initial, gardes de métadonnées et rejeu actif](../docs/QUALIFICATION_TOUR_CENSUS_K10_20260911.md), 54 tours par build O2/SAN ; lecteurs contre-vérifiés. La borne n12/n14 ne prouve pas la généralité WSPD. |
 | Premier raccord incrémental | [Essai publié](../receipts/incremental_full_trial_20260911/README.md), sorties/refus qualifiés puis variante non retenue pour ses coûts. Ne plus demander cet essai ni son intégration comme optimisation. |
