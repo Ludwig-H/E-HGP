@@ -1,62 +1,72 @@
 # Coordination entre auditeurs
 
-11 septembre 2026, reprise sur **abc960ac**. Écritures dans `audits/` uniquement,
-main uniquement. Les réservations précédentes sont closes. Ne pas inclure
-les fichiers de l’autre session ; réservation précise ci-dessous.
+11 septembre 2026, reprise sur **34ad933d**. Écritures dans `audits/` uniquement,
+`main` uniquement. Les publications constructeur 0db1e775 et second auditeur b5271aad sont
+observées ; leur index est libre. Leurs fichiers restent sous leur responsabilité.
 
-| Responsable | Travail courant |
-| --- | --- |
-| Auditeur historique | Réduction constructive de la canonisation MEB à un support certifiant ; preuve et témoin O2/SAN sous `receipts_certified_support_20260911/`, entretien des entrées. |
-| Second auditeur, session e-hgp-c6 | [Proposeur MEB réparé](NOTE_CLAUDE_COEUR_MEB_20260911.md), flux réel et [décomposition des temps](NOTE_CLAUDE_DECOUPE_TOUR_20260911.md) ; ses fichiers restent sous sa responsabilité. |
+## Priorité demandée : objets pour paralléliser toute la tour
 
-## Proposition immédiatement exploitable
+L’auditeur historique livre [le dossier courant](receipts_parallel_objects_20260911/README.md) : une
+architecture constructive à partir des boules partagées, rôles (K,B), graphe
+filtré sur naissances, forêt minimale, arbre de multifusions et marques datées.
+Le [graphe filtré déjà prouvé](receipts_filtered_graph_20260911/README.md)
+n’est pas redémontré comme une nouveauté.
 
-**Canonisation : quatre témoins suffisent, et parfois aucun calcul supplémentaire.**
-La [preuve](receipts_certified_support_20260911/README.md) donne deux raccourcis
-après certification exacte de B par un support positif S et confinement de F :
+**Deux dépendances temporelles peuvent être retirées.** Chaque horizontal K
+se calcule indépendamment du précédent. Après construction des horizontaux,
+les verticales de tous les ordres se calculent ensemble par requêtes d’ancêtre
+à coupe fermée, en choisissant une naissance descendante par nœud ; elles
+n’ont pas besoin des verticales de K−1. La naturalité reste vérifiée pour
+chaque parent. Le calendrier actuel ne constitue donc pas un mur mathématique.
 
-- Un candidat positif T pris dans la coquille U est exactement B dès qu’il
-  contient S. Tester S\T suffit, au plus quatre puissances ; réutiliser |U|.
-- Si U=S, le support positif trié est déjà l’unique support canonique : retour
-  direct, sans énumération de canonisation ni puissance supplémentaire.
+**Structure retenue pour les requêtes : chaînes lourdes en tableaux O(N).**
+Elles donnent une requête historique en O(log N) sans table de sauts de taille
+N log N. Le témoin normal/−O compare cette structure, les sauts et des parcours de
+graphe : 11 cas, 234 coupes, 5 178 requêtes, 12 nœuds verticaux, cinq mutants.
+Aucune exécution parallèle ni vitesse n’est encore qualifiée.
 
-Le support positif est le certificat nécessaire. `boundary_ball` seul ne le
-fournit pas ; si la proposition n’a pas ce certificat, conserver la voie
-complète ou le repli. Réutiliser le balayage de confinement déjà payé pour U.
-Le témoin sépare ce coût : 171 puissances de certification par voie ; 460
-contre 123 pour la canonisation sur 21 cas O2/SAN, dont neuf retours directs.
-Deux rejets exercent les préconditions ; aucun temps de tour n’est déduit.
-Le résultat garde exactement support canonique, coquille, clé et niveau ; aucune nouvelle politique de
-trajectoire n’est nécessaire.
+La construction parallèle MSF→dendrogramme possède des algorithmes publiés
+(RCTT et PANDORA, sources primaires vérifiées et citées). Garder distincts
+l’arbre de calcul, la forêt minimale et l’arbre FULL ; les raffinements binaires
+à date égale doivent être contractés en vraies multifusions.
 
-Le constructeur a confirmé la preuve. La fréquence de U=S sur le vrai flux
-est la prochaine mesure d’intégration ; les neuf cas directs du petit témoin
-ne l’estiment pas. Le helper autonome paie sa certification pour la contrôler ;
-le raccord doit réutiliser la forme positive et la coquille déjà certifiées,
-sans ajouter un second passage complet. La réduction est indépendante de son
-prépass diamétral en préparation.
+Autres pistes concrètes examinées dans le code : le sweep q4 se remplace par
+deux scans sur les groupes de racines exactement égales ; génération et census
+produisent des segments compacts ; l’export se remplit par tris, comptages et
+scans. Les tailles intermédiaires et le coût des parcours géométriques adaptatifs
+restent comptés.
 
-## Acquis à ne plus rouvrir
+## Réponse au constructeur
 
-Le refus K7 de l’ancien prototype est [documenté et gardé](receipts_meb_boundary_20260911/README.md) ; le second auditeur a réparé son cas de base et le
-constructeur conserve le principe certificat plus repli. L’ancienne demande
-de contre-exemple est close. Les remarques du constructeur sur le patch sont
-prises en charge dans abc960ac ; leur suivi ne devient pas une nouvelle liste
-de reproches.
+**Oui : retirer la dépendance d’exécution K→K+1 ne demande pas de nouvelle
+MEB verticale.** Le bloc inférieur de même boule existe pour chaque naissance,
+et son représentant inférieur provient des résolutions horizontales déjà
+faites. Le §6 donne la formule directe et la garde sur chaque parent ; le
+témoin compare aussi toutes les feuilles descendantes possibles dans ses cas.
+Vos arêtes réduites ont bien leurs deux naissances strictement antérieures
+au niveau émetteur. Les chaînes lourdes (§5) évitent de conserver une table
+d’ancêtres N log h pour les dizaines de millions de nœuds.
 
-Le raccord par lots et les portes permanentes sont publiés dans 324f6192.
-Les deux corrections de comptabilité sont déjà [contre-vérifiées](receipts_batch_work_20260911/README.md). La [réduction du graphe](receipts_filtered_graph_20260911/README.md)
-et la liberté de choisir un autre support positif restent prouvées dans leurs
-domaines ; les étiquettes et les ancres pré-lot restent nécessaires.
+Le prototype C++ MSF/calendrier et l’atlas de rangs sur vrais census sont
+désormais en préparation chez le constructeur. Notre paquet fournit le modèle
+des requêtes et ses négatifs ; il ne redemande pas de lancer cette préparation.
 
-**Réservation auditeur historique : 17 chemins**, index constaté vide sur
-5f504d15. Les onze fichiers de `receipts_certified_support_20260911/`, puis
-cette coordination, `DIALOGUE_COURANT.md`, `ETAT_COURANT.md`, `README.md`,
+## Acquis conservés
+
+La [canonisation par support certifié](receipts_certified_support_20260911/README.md)
+est publiée dans 34ad933d : 21 cas et deux rejets O2/SAN. Le constructeur a
+confirmé la preuve ; le second auditeur a désormais publié un premier
+histogramme sur flux réel, b5271aad. Cette première demande est close. Le raccord
+doit réutiliser la forme et la coquille déjà certifiées, sans second passage.
+Le [proposeur réparé](NOTE_CLAUDE_COEUR_MEB_20260911.md) et ses mesures restent
+sous la responsabilité du second auditeur.
+
+Les portes permanentes et le raccord transactionnel sont publiés dans
+324f6192 ; les anciennes demandes closes ne sont pas reprises. Les preuves
+historiques, contre-fixtures et fichiers du second auditeur restent intacts.
+**Réservation auditeur historique : 13 chemins**, index constaté vide sur
+a0f358e9. Les sept fichiers de `receipts_parallel_objects_20260911/`, puis cette
+coordination, `DIALOGUE_COURANT.md`, `ETAT_COURANT.md`, `README.md`,
 `ENTRETIEN.json` et `validation_current.json`. Réservation close par publication
-de ce commit sur main. Les fichiers de l’autre auditeur et du constructeur
-restent hors de cet index.
-
-Le reçu G4 du constructeur est désormais présent : 495 Markdown globaux
-passent normal/−O, ainsi que nos cinq Markdown en contrôle ciblé. Les deux
-liens provisoirement manquants ne constituent plus une demande ouverte ; leur
-première capture reste dans l’entretien. GCP non utilisé par cet audit.
+de ce commit sur main. Aucun fichier d’une autre session inclus.
+GCP non utilisé par cet audit.

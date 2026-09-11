@@ -1,14 +1,38 @@
 # État courant de l’audit v7
 
-11 septembre 2026, reprise sur **abc960ac**. **Une réduction exacte de la canonisation MEB est prête à reprendre** : après certification par un support positif S et confinement complet, tester chaque candidat sur S suffit ; si la coquille U égale S, rendre directement le support trié. La [preuve et le helper C++](receipts_certified_support_20260911/README.md) préservent le support canonique, la coquille, la clé et le niveau, sans changer les trajectoires.
+11 septembre 2026, lecture de `34ad933d`, puis publications constructeur
+`0db1e775` et second auditeur `b5271aad`. **La priorité est désormais la
+parallélisation de toute la tour par changement de structures.** La
+[proposition courante](receipts_parallel_objects_20260911/README.md) articule
+boules partagées, rôles clairsemés, graphes sur naissances, arbres de multifusions
+et requêtes historiques sur marques datées.
 
-Qualification bornée O2/SAN : 21 cas, neuf retours directs, six certificats q4 redonnant un support canonique q2, deux rejets des préconditions. Les puissances de canonisation passent de 460 à 123 sur ce corpus ; les 171 puissances du certificat sont comptées dans chaque voie. Le proposeur et la tour ne sont pas chronométrés. Le cas direct ne demande aucune régularité globale du nuage.
+Deux dépendances sont levées mathématiquement : les horizontales des K peuvent
+se construire indépendamment ; leurs verticales peuvent ensuite se calculer
+toutes ensemble, sans utiliser celles de K−1. Les chaînes lourdes donnent
+O(log N) par requête avec stockage O(N). Des algorithmes publiés construisent
+le dendrogramme en parallèle ; les égalités doivent redevenir des multifusions
+FULL atomiques. La génération et les descentes adaptatives conservent leurs
+propres dépendances de découverte.
 
-Le raccord transactionnel et ses portes permanentes sont **publiés dans 324f6192**. Notre nouvelle contrelecture couvre les lecteurs normal/−O des [40 CTests actifs](../receipts/full_ball_batch_active_cmake_20260911/README.md), du [T2 par lots](../receipts/gpu_terminal_batch_t2_20260911/README.md) et de la [variante HD corrigée](../receipts/gpu_terminal_batch_hd_20260911/README.md). Captures et stabilité des empreintes sont dans l’[entretien](ENTRETIEN.json) ; les lecteurs ne réexécutent ni C++ ni device. La comptabilité cumulative hôte est close ; 65 cas callback signifient 64 rejets et un cas positif.
+Le modèle Python normal/−O passe 11 cas, 234 coupes, 5 178 requêtes comparées
+au BFS, 12 nœuds verticaux et cinq mutants. Le constructeur d’arbre est un
+juge séquentiel borné ; aucun parallélisme C++/GPU ni temps de tour nouveau
+n’est qualifié. Le dossier donne aussi la formule de deux scans exacts pour
+le sweep q4 et les transformations des phases de préparation et d’export.
 
-La [contre-fixture K7](receipts_meb_boundary_20260911/README.md) garde sa valeur historique : le second auditeur a réparé le proposeur depuis. Ses notes et mesures restent sous son autorité. Les demandes de premier essai incrémental, de semis après échange et de porte census→tour K10 sont également closes dans le [dialogue](DIALOGUE_COURANT.md).
+Le [graphe filtré précédent](receipts_filtered_graph_20260911/README.md) et la
+[canonisation par support certifié](receipts_certified_support_20260911/README.md)
+conservent leurs preuves et tests. Le second auditeur a publié un premier
+histogramme de coquilles sur flux réel ; cette demande est close dans son
+domaine, sans gain transféré à un raccord encore absent.
 
-Le [graphe filtré réduit aux naissances](receipts_filtered_graph_20260911/README.md) conserve sa preuve et son modèle sur 267 cas ; son raccord C++ reste à qualifier. Le [second auditeur](receipts_cache_commit_20260911/README.md) conserve ses blocs 50k et sa qualification relative ad7ffd28. Archive industrielle, complétude globale et contrats 1 s/100 ms ou massifs restent ouverts, sans transfert des temps historiques vers les nouvelles variantes.
+Le raccord transactionnel et ses 40 portes ciblées ont été publiés dans
+324f6192 ; notre lecture des paquets actifs, T2 et HD reste dans
+l’[entretien](ENTRETIEN.json). Les nouvelles tentatives G4 documentées par le
+constructeur gardent son autorité ; cet audit n’utilise pas GCP. Les demandes
+anciennes closes sont condensées dans le [dialogue](DIALOGUE_COURANT.md).
+Archive industrielle, complétude globale et contrats de temps restent ouverts.
 
 ```text
 phase=exploration_v7_hors_registre

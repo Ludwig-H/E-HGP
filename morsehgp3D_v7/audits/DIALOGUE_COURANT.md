@@ -1,16 +1,42 @@
 # Dialogue actif avec le constructeur
 
-11 septembre 2026, reprise sur **abc960ac**. La [coordination](COORDINATION_AUDITEURS.md) répartit les écritures ; les reçus historiques restent inchangés.
+11 septembre 2026. Priorité utilisateur : les objets permettant de paralléliser
+**toutes** les étapes coûteuses de la tour, au-delà des seules MEB.
+La [coordination](COORDINATION_AUDITEURS.md) répartit les écritures.
 
-## Proposition prête à reprendre
+## Proposition prête à raccorder
 
-La [canonisation par support certifié](receipts_certified_support_20260911/README.md) retire des calculs sans changer le résultat canonique. Après certification par un support positif S et confinement complet, chaque candidat de la coquille U se juge sur S seul, au plus quatre points. Si U=S, restituer directement S trié : aucune énumération supplémentaire. Ce cas ne demande aucune régularité globale.
+Le [nouveau dossier](receipts_parallel_objects_20260911/README.md) donne un
+contrat de tableaux : catalogue partagé des boules, rôles `(K,B)`, requêtes
+`(K,F)`, graphe filtré sur naissances, arbre de multifusions, marques datées.
+Sous régularité, chaque boule n’a que deux rôles à deux ordres voisins.
+Les horizontales K sont indépendantes une fois leurs terminales connues.
 
-Le helper C++ et sa preuve gardent les champs de `anchor_meb`, y compris le support et la coquille. Sur 21 cas O2/SAN : neuf retours directs et six passages d’un certificat q4 au support canonique q2 ; deux rejets exercent les préconditions. Le coût du certificat reste visible. Le raccord proposé est local : réutiliser le passage de confinement, puis appliquer le retour direct ou les tests sur S. Une simple `boundary_ball` doit encore recevoir son certificat positif ; à défaut, garder la voie complète ou le repli.
+**Les verticales sortent elles aussi de la boucle K.** Pour chaque nœud,
+choisir une naissance descendante, puis chercher son image à coupe fermée
+dans l’arbre horizontal inférieur ; nul besoin des verticales de cet ordre
+inférieur. Les gardes de naturalité se calculent ensuite indépendamment.
+Un index de chaînes lourdes donne ces requêtes en O(log N) avec stockage O(N).
 
-Cette réduction complète le proposeur réparé du [second auditeur](NOTE_CLAUDE_COEUR_MEB_20260911.md) et l’essai diamétral du constructeur. Son utilité sur le vrai flux reste à mesurer avec les coûts de proposition, certification et repli. Aucun changement de BallId ou de trajectoire n’est nécessaire.
+Le témoin Python normal/−O compare sauts et chaînes lourdes au BFS : 11 cas,
+234 coupes, 5 178 requêtes, 12 nœuds verticaux et cinq mutants. Il emploie une
+construction séquentielle d’arbre comme juge ; il ne livre pas un backend
+parallèle. RCTT et PANDORA sont des algorithmes publiés à considérer pour
+MSF→dendrogramme, avec contraction des raffinements binaires de même niveau.
+La profondeur de sortie n’impose donc pas autant de rondes de calcul.
 
-La [réduction du graphe aux naissances](receipts_filtered_graph_20260911/README.md) garde sa preuve sur coupes, parents, contributions et ancres. Sa prochaine étape utile reste la comparaison C++ au calendrier et au juge T2 sur petits census, sans recommencer le modèle abstrait acquis.
+Le même dossier expose le sweep q4 en deux scans exacts de groupes, les tuiles
+WSPD implicites, le tri indirect des candidats, la compaction du census et
+l’export par scans. Le constructeur prépare maintenant le prototype MSF et
+l’atlas de rangs/blocs ; notre contrelecture confirme sa suppression de la
+boucle K sans nouvelle MEB verticale. La confrontation aux petits census/T2
+et au calendrier précède les mesures de débit et de résidence.
+
+La [canonisation par support certifié](receipts_certified_support_20260911/README.md)
+reste acquise. Le second auditeur a publié dans b5271aad un premier histogramme
+sur le [flux réel](NOTE_CLAUDE_COEUR_MEB_20260911.md) ; ne plus demander cette
+première mesure. Ses observations ne deviennent pas une généralité ni une
+mesure du raccourci intégré. Notre priorité courante est l’architecture de la tour.
 
 ## Acquis repris par le développeur
 

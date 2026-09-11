@@ -1,0 +1,37 @@
+{
+  "source_commit": "34ad933d6e12c72f415bb86efad995a4dc044d98",
+  "historical_source_pins": {
+    "morsehgp3D_v7/src/forest/full_ball_tower.hpp": "83f1c78e0656f08cd42522e4cd36d153ce283a6082246a36fe5225b3790c6366",
+    "morsehgp3D_v7/src/forest/full_coverage_certificate.hpp": "7608e70ec0bf7df7ed726ae2388a39e800ab2db35043b4ba42c619ceef13bac0",
+    "morsehgp3D_v7/src/pipeline/generate.hpp": "345129a775d430a40e151d3b1adb5cd9efeaf77a6ffb6713bd081c74d40bdd9c",
+    "morsehgp3D_v7/src/pipeline/expand.hpp": "7cafb0341344fbc7d1584001e4685e2e5bf0122fe3b7e37277f5468d5c5e1cf0",
+    "morsehgp3D_v7/src/parallel/sort.hpp": "ceb89f8ba42fbc3f44351f4dcbf5e347e7d66a4c85bce08f346e66a9b11f20bd",
+    "morsehgp3D_v7/audits/receipts_filtered_graph_20260911/graph_model.py": "e9a363a93d6709d09973705d9c6f25a6fdfadd9459c04109589312f1367245a5",
+    "morsehgp3D_v7/audits/receipts_filtered_graph_20260911/README.md": "180943436fb0a1e38b9a19bd8baf8d5e350d76cb3f901d457f57e8874be0eb3e"
+  },
+  "model_dependency": {
+    "path": "../receipts_filtered_graph_20260911/graph_model.py",
+    "sha256": "e9a363a93d6709d09973705d9c6f25a6fdfadd9459c04109589312f1367245a5"
+  },
+  "primary_references": [
+    {
+      "url": "https://arxiv.org/html/2404.19019v1",
+      "title": "Optimal Parallel Algorithms for Dendrogram Computation and Single-Linkage Clustering",
+      "sections": [
+        "2.3",
+        "4.2"
+      ],
+      "consulted": "2026-09-11"
+    },
+    {
+      "url": "https://arxiv.org/html/2401.06089v1",
+      "title": "PANDORA: A Parallel Dendrogram Construction Algorithm for Single Linkage Clustering on GPU",
+      "sections": [
+        "3",
+        "5"
+      ],
+      "consulted": "2026-09-11"
+    }
+  ],
+  "scope": "Source reading and independent Python model only; no implementation or execution of parallel MSF, RCTT, PANDORA, GPU or active HGP product."
+}

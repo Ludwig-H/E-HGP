@@ -3709,5 +3709,179 @@
     },
     "new_engine_variant": false,
     "gcp_used": false
+  },
+  "latest_parallel_objects_20260911": {
+    "date_utc": "2026-09-11T14:32:21.076022+00:00",
+    "source_head_at_start": "34ad933d",
+    "source_head_at_publication_preparation": "a0f358e91e3e6ef11255b26cd1b68892cb7143c1",
+    "objective": "Objects and structures for massive parallelization of all costly K-NN tower stages, preserving FULL identities and marked histories.",
+    "constructive_results": [
+      "Independent horizontal construction for every K once geometric terminal results are available",
+      "Vertical maps at all K from weighted-ancestor queries without new vertical MEB or dependence on lower vertical maps",
+      "Heavy-chain historical index uses linear storage and logarithmic queries for arbitrary multifusions",
+      "Dated hub marks can attach to immutable historical nodes, allowing phi release after required joins",
+      "Regular catalogue has at most two adjacent roles per ball and at most four representative occurrences per ball",
+      "Strict q4 chord depths equal exclusive entry-prefix plus exit-suffix over exact equal-root groups",
+      "Published RCTT/PANDORA distinguish computational contraction trees from potentially deep output dendrograms; equal geometric ranks must return atomic multifusions"
+    ],
+    "packet": {
+      "path": "receipts_parallel_objects_20260911",
+      "pins": {
+        "README.md": "702d97c4f5e75e0c70c59c707b7da64131bd3e09ed8ee15d8b9e34e5574a6cb1",
+        "SHA256SUMS": "520418cfead4753917f4f1c938cd013574e09a537b479ac89e80580ef90d1cca",
+        "commands.json": "c8b85be56f70c8a891e0e6365fcecd3d40a5afcd739769bb41fc4c784d49be51",
+        "context_pins.json": "07c1d61ab014a9c99827da70c0b6119f6b31ebffab4fc139def5bd7c59b01630",
+        "parallel_model.py": "08c3478771fb987e32fa18f7ad102e754d2d95c46bae533db7a3747f2372908d",
+        "result.json": "15b0aa0e5a482a49ddd0517a0ddbb4f20bf8134b9198f2c35fc52aa5b8c1d864",
+        "verify.py": "24afc377cbd351b559d0d100f8f0523af04d2c087c9645235d59889078db03a5"
+      },
+      "result": {
+        "cases": 11,
+        "constructor": "sequential_sorted_dsu_test_oracle",
+        "cut_checks": 234,
+        "dated_occurrence_checks": 10126,
+        "gcp_used": false,
+        "geometry_source": "bounded_collinear_fixture_dates_not_product_census",
+        "heavy_binary_steps": 10736,
+        "heavy_chain_construction": "sequential_model_not_parallel_product",
+        "heavy_layout": "linear_logical_integer_storage_not_measured_bytes",
+        "heavy_layout_integer_entries": 288,
+        "heavy_light_steps": 2384,
+        "heavy_queries": 5178,
+        "inactive_leaf_queries": 169,
+        "jump_construction": "synchronous_double_buffer_model",
+        "jump_entries": 548,
+        "leaf_queries": 5178,
+        "maximum_jump_rounds": 7,
+        "maximum_tested_depth": 34,
+        "mutants_rejected": [
+          "replace_open_cut_with_closed",
+          "replace_dated_image_with_final_root",
+          "lose_unary_contribution_date",
+          "leave_equal_date_binary_nodes_uncontracted",
+          "use_lower_leaf_outside_upper_descendants"
+        ],
+        "overlap_keeps_two_components": true,
+        "parallel_threads_executed": false,
+        "performance_claim": false,
+        "product_executed": false,
+        "public_status": "not_claimed",
+        "simultaneous_three_parent_fusion": true,
+        "status": "passed_parallel_object_model",
+        "vertical_equal_level_merges": 9,
+        "vertical_leaf_witnesses": 16,
+        "vertical_nodes": 12,
+        "vertical_nonfinal_images": 2,
+        "verticals_consume": "completed_horizontal_forests_only"
+      },
+      "scope": "Independent Python model and source review. No product execution, parallel MSF implementation, RCTT/PANDORA execution, actual parallel threads, measured speed or memory bytes."
+    },
+    "checks": [
+      {
+        "name": "packet_normal",
+        "command": "python3 -B morsehgp3D_v7/audits/receipts_parallel_objects_20260911/verify.py",
+        "exit_code": 0,
+        "output": "{\"cases\": 11, \"cut_checks\": 234, \"gcp_used\": false, \"historical_sources\": 7, \"independent_queries\": 5178, \"mutants\": 5, \"parallel_threads_executed\": false, \"product_executed\": false, \"public_status\": \"not_claimed\", \"status\": \"passed_parallel_objects_receipt\", \"vertical_nodes\": 12}\n"
+      },
+      {
+        "name": "packet_optimized",
+        "command": "python3 -B -O morsehgp3D_v7/audits/receipts_parallel_objects_20260911/verify.py",
+        "exit_code": 0,
+        "output": "{\"cases\": 11, \"cut_checks\": 234, \"gcp_used\": false, \"historical_sources\": 7, \"independent_queries\": 5178, \"mutants\": 5, \"parallel_threads_executed\": false, \"product_executed\": false, \"public_status\": \"not_claimed\", \"status\": \"passed_parallel_objects_receipt\", \"vertical_nodes\": 12}\n"
+      },
+      {
+        "name": "docs_normal",
+        "command": "python3 -B tools/check_docs.py",
+        "exit_code": 0,
+        "output": "Validated 496 active Markdown files.\n"
+      },
+      {
+        "name": "docs_optimized",
+        "command": "python3 -B -O tools/check_docs.py",
+        "exit_code": 0,
+        "output": "Validated 496 active Markdown files.\n"
+      },
+      {
+        "name": "registry",
+        "command": "python3 -B tools/check_implementation_status.py",
+        "exit_code": 0,
+        "output": "Validated 20 implementation phases and their gates.\n"
+      },
+      {
+        "name": "own_markdown",
+        "command": "python3 -B - <<'PY'\nfrom pathlib import Path\nimport importlib.util,json\nspec=importlib.util.spec_from_file_location('doccheck','tools/check_docs.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)\np=Path('morsehgp3D_v7/audits').resolve();files=[p/n for n in ['COORDINATION_AUDITEURS.md','DIALOGUE_COURANT.md','ETAT_COURANT.md','README.md','receipts_parallel_objects_20260911/README.md']];errors=[e for f in files for e in m.validate(f)]\nprint(json.dumps({'files':len(files),'errors':errors}))\nraise SystemExit(bool(errors))\nPY",
+        "exit_code": 0,
+        "output": "{\"files\": 5, \"errors\": []}\n"
+      }
+    ],
+    "own_markdown_final_errors": [],
+    "coordination": {
+      "constructor_response": "Confirmed that K-to-K+1 execution dependence can be removed without new vertical MEB; existing horizontal geometry supplies lower birth reference and naturality is checked per parent.",
+      "constructor_work_in_progress": "Private C++ MSF/calendar and exact-rank role atlas on real census announced; not included or prematurely qualified.",
+      "other_auditor_histogram": "b5271aad publishes first shell/support histogram; first frequency request closed in its measured scope, no shortcut runtime inherited.",
+      "other_auditor_calendar_reframing": "a0f358e9 retracts an intrinsic sequential calendar wall; findings here describe alternate structures, not a speed claim."
+    },
+    "maintenance": {
+      "entries": [
+        {
+          "path": "COORDINATION_AUDITEURS.md",
+          "previous_sha256": "b407def9e60e6b17d1206bfbcb9acea1d1d5f97092abbfc025343bb52214d79e",
+          "previous_words": 542,
+          "words": 588
+        },
+        {
+          "path": "DIALOGUE_COURANT.md",
+          "previous_sha256": "bb373ff3ec1272287290bc4c9245ec7ec1f568301ca423662c5c8d2f2d3c10cc",
+          "previous_words": 433,
+          "words": 520
+        },
+        {
+          "path": "ETAT_COURANT.md",
+          "previous_sha256": "161070d2e92276dcb7cc6079716b6a04bb5953467dd8403ed54762034006bc48",
+          "previous_words": 707,
+          "words": 694
+        },
+        {
+          "path": "README.md",
+          "previous_sha256": "e8b83e7c5e002c758a0b884b8b40210bcb07f51b50107f07b9021d40dc1ab769",
+          "previous_words": 791,
+          "words": 828
+        }
+      ],
+      "current_priority_rewritten_not_appended": true,
+      "historical_packets_unchanged": true,
+      "source_variants_D_to_Q_unchanged": true,
+      "other_session_files_untouched": true,
+      "new_scattered_root_probe_files": false,
+      "new_engine_variant": false
+    },
+    "gcp_used": false,
+    "whole_source_freshness": {
+      "common_pins_valid": 2817,
+      "scope": "Historical D-Q variants remain unchanged; code 1 is no complete current engine match, not a failure of the bounded new model.",
+      "commands": [
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "morsehgp3D_v7/audits/verify_current.py"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "Audit à actualiser : aucune variante complète ne correspond.\nvariante=D\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/core/mutants.hpp\nsrc/forest/silent_incidence.hpp\nsrc/pipeline/generate.hpp\nsrc/spindle/witness_count.hpp\ntests/meb_lazy_gate.cpp\nvariante=E_qualified\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/pipeline/generate.hpp\nsrc/spindle/witness_count.hpp\nvariante=F_qualified\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/pipeline/generate.hpp\nvariante=G_full_structural\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/pipeline/generate.hpp\nvariante=H_full_relative\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/COMPARE_MONO.md\nbench/full_gabriel_probe.cpp\ndocs/CONTRAT_CERTIFICAT_FULL.md\ndocs/CONTRAT_PERFORMANCE.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\nvariante=I_full_mono_published\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/COMPARE_MONO.md\nbench/full_gabriel_probe.cpp\ndocs/CONTRAT_CERTIFICAT_FULL.md\ndocs/CONTRAT_PERFORMANCE.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/RESIDENCE_MASSIVE.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\nvariante=J_full_lazy\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/COMPARE_MONO.md\nbench/full_gabriel_cache_policy_audit.py\nbench/full_gabriel_lazy_probe.cpp\nbench/full_gabriel_lazy_probe_audit.py\nbench/full_gabriel_probe.cpp\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_CACHE_FULL_PARESSEUX.md\ndocs/CONTRAT_CERTIFICAT_FULL.md\ndocs/CONTRAT_DIGEST_FULL.md\ndocs/CONTRAT_PERFORMANCE.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/RESIDENCE_MASSIVE.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\nvariante=K_full_singleton\nCMakeLists.txt\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_CACHE_FULL_PARESSEUX.md\ndocs/CONTRAT_LOT_UNITAIRE_FULL.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=L_full_successor_v2\nCMakeLists.txt\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_NORMALISATION_FULL.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=M_successor_publication_review\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=N_filtered_publication_review\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/FAUSSES_PISTES.md\ndocs/RESIDENCE_MASSIVE.md\ndocs/RESULTATS_MEB_FILTREE_20260906.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=O_full_meb_composition\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/FAUSSES_PISTES.md\ndocs/RESIDENCE_MASSIVE.md\nsrc/pipeline/generate.hpp\ntests/meb_proposal_local_gate.cpp\nvariante=P_raccord_ancres_counter_reading\nCMakeLists.txt\nREADME.md\nPASSATION.md\ndocs/TOUR_FULL_PAR_BOULES.md\ndocs/FAUSSES_PISTES.md\nsrc/forest/full_ball_tower.hpp\nsrc/forest/full_coverage_certificate.hpp\ntests/full_ball_tower_gate.cpp\ntests/full_ball_work_gate.cpp\nbench/full_ball_tower_probe.cpp\nvariante=Q_cache_commit_replay_named_blocks\nCMakeLists.txt\nREADME.md\nPASSATION.md\ndocs/TOUR_FULL_PAR_BOULES.md\ndocs/FAUSSES_PISTES.md\ndocs/OPTIMISATIONS_CACHE_ET_GPU_20260910.md\ndocs/PLAN_JOURNAL_INCREMENTAL.md\nsrc/forest/full_ball_tower.hpp\ntests/full_ball_tower_gate.cpp\nbench/full_ball_tower_probe.cpp\n"
+        },
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "-O",
+            "morsehgp3D_v7/audits/verify_current.py"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "Audit à actualiser : aucune variante complète ne correspond.\nvariante=D\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/core/mutants.hpp\nsrc/forest/silent_incidence.hpp\nsrc/pipeline/generate.hpp\nsrc/spindle/witness_count.hpp\ntests/meb_lazy_gate.cpp\nvariante=E_qualified\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/pipeline/generate.hpp\nsrc/spindle/witness_count.hpp\nvariante=F_qualified\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/pipeline/generate.hpp\nvariante=G_full_structural\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/pipeline/generate.hpp\nvariante=H_full_relative\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/COMPARE_MONO.md\nbench/full_gabriel_probe.cpp\ndocs/CONTRAT_CERTIFICAT_FULL.md\ndocs/CONTRAT_PERFORMANCE.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\nvariante=I_full_mono_published\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/COMPARE_MONO.md\nbench/full_gabriel_probe.cpp\ndocs/CONTRAT_CERTIFICAT_FULL.md\ndocs/CONTRAT_PERFORMANCE.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/RESIDENCE_MASSIVE.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\nvariante=J_full_lazy\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/COMPARE_MONO.md\nbench/full_gabriel_cache_policy_audit.py\nbench/full_gabriel_lazy_probe.cpp\nbench/full_gabriel_lazy_probe_audit.py\nbench/full_gabriel_probe.cpp\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_CACHE_FULL_PARESSEUX.md\ndocs/CONTRAT_CERTIFICAT_FULL.md\ndocs/CONTRAT_DIGEST_FULL.md\ndocs/CONTRAT_PERFORMANCE.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/RESIDENCE_MASSIVE.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\nvariante=K_full_singleton\nCMakeLists.txt\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_CACHE_FULL_PARESSEUX.md\ndocs/CONTRAT_LOT_UNITAIRE_FULL.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=L_full_successor_v2\nCMakeLists.txt\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_NORMALISATION_FULL.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=M_successor_publication_review\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=N_filtered_publication_review\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/FAUSSES_PISTES.md\ndocs/RESIDENCE_MASSIVE.md\ndocs/RESULTATS_MEB_FILTREE_20260906.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=O_full_meb_composition\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/FAUSSES_PISTES.md\ndocs/RESIDENCE_MASSIVE.md\nsrc/pipeline/generate.hpp\ntests/meb_proposal_local_gate.cpp\nvariante=P_raccord_ancres_counter_reading\nCMakeLists.txt\nREADME.md\nPASSATION.md\ndocs/TOUR_FULL_PAR_BOULES.md\ndocs/FAUSSES_PISTES.md\nsrc/forest/full_ball_tower.hpp\nsrc/forest/full_coverage_certificate.hpp\ntests/full_ball_tower_gate.cpp\ntests/full_ball_work_gate.cpp\nbench/full_ball_tower_probe.cpp\nvariante=Q_cache_commit_replay_named_blocks\nCMakeLists.txt\nREADME.md\nPASSATION.md\ndocs/TOUR_FULL_PAR_BOULES.md\ndocs/FAUSSES_PISTES.md\ndocs/OPTIMISATIONS_CACHE_ET_GPU_20260910.md\ndocs/PLAN_JOURNAL_INCREMENTAL.md\nsrc/forest/full_ball_tower.hpp\ntests/full_ball_tower_gate.cpp\nbench/full_ball_tower_probe.cpp\n"
+        }
+      ]
+    }
   }
 }

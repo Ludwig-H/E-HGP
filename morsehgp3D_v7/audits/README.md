@@ -4,6 +4,7 @@ Lire l’[état courant](ETAT_COURANT.md), puis le [dialogue actif](DIALOGUE_COU
 
 | Sujet courant | Qualification indépendante |
 | --- | --- |
+| Objets pour paralléliser toute la tour | [Catalogue partagé, horizontales indépendantes, verticales par requêtes et chaînes lourdes](receipts_parallel_objects_20260911/README.md) ; preuve, lecture du code, sources primaires et modèle Python 11 cas/5 178 requêtes ; aucun débit qualifié |
 | Raccord par ancres et cache ad7ffd28 | [Rejeu sur octets commités, corpus et quatre blocs nommés 50k](receipts_cache_commit_20260911/README.md) ; second auditeur ; deux verrous clos sur CPU, qualification relative au census fourni |
 | Lots et portes permanentes publiés | [Comptabilité cumulative contre-vérifiée](receipts_batch_work_20260911/README.md) ; lecteurs [40 CTests actifs](../receipts/full_ball_batch_active_cmake_20260911/README.md), T2 et HD clos normal/−O, sans exécution device |
 | Noyau MEB | [Canonisation par au plus quatre témoins, retour direct si U=S](receipts_certified_support_20260911/README.md), preuve et 21 cas O2/SAN ; [proposeur réparé du second auditeur](NOTE_CLAUDE_COEUR_MEB_20260911.md), [K7 historique conservé](receipts_meb_boundary_20260911/README.md) |
