@@ -186,7 +186,27 @@ du moteur actuel.
 
 ## 4ter. Le piège concret : renuméroter passe le digest et échoue les portes
 
-Ceci est le point actionnable de cette note, et il ne figure nulle part ailleurs.
+Ceci est le point actionnable de cette note, mais **je dois d'abord corriger une
+revendication de nouveauté qui était fausse**. J'avais écrit qu'il ne figure
+nulle part ailleurs. Vérification faite après coup, c'est inexact, et les deux
+textes concernés étaient déjà publiés quand j'ai écrit cette note.
+
+La [proposition de graphe filtré](../docs/GRAPHE_FILTRE_BOULES_PROPOSITION_20260911.md)
+énonce que l'équivalence mathématique des forêts n'impose pas les mêmes numéros
+de nœuds, et qu'un export physiquement identique exige une convention
+déterministe supplémentaire incluant « l'ordre des premières références de
+populations/contributions », une implémentation parallèle devant reproduire
+cette convention ou déclarer une autre canonisation comparée par bijection
+explicite. Le [document sur les objets parallèles](../docs/OBJETS_PARALLELES_TOUR_20260911.md)
+prescrit de son côté, pour l'export, de « réduire la première occurrence
+canonique pour numéroter ». La contrainte et son remède étaient donc connus et
+écrits avant moi.
+
+**Ce qui reste de mon apport est plus étroit, et je le formule tel quel** : le
+mécanisme exact dans le moteur, **quelles portes précises l'imposent**, et
+surtout le fait que `payload_digest` y soit aveugle, ce qui rend tout témoin
+différentiel fondé sur ce digest incapable de détecter une renumérotation. C'est
+précisément l'erreur que j'ai commise et que cinq analyses ont commise avec moi.
 
 Un calendrier à ordres découplés **renumérote les populations**. La table
 `population_ids` est initialisée une seule fois avant la boucle, jamais
