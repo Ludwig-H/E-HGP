@@ -1,0 +1,26 @@
+[
+  {
+    "patch": "patches/src_gpu_anchor_meb_selection_private.cuh.patch",
+    "prior": "src/gpu/anchor_meb_selection_private.cuh",
+    "sha256": "9fff621078aa9506211552afd0fc53bc9617e26f461d01d273a4cdd0148e526f",
+    "source": "src/gpu/anchor_meb_selection_private.cuh"
+  },
+  {
+    "patch": "patches/src_gpu_anchor_meb_key.cuh.patch",
+    "prior": null,
+    "sha256": "cc3507ef4fdd3142dd3a3b35c559f3eeefebbd0944f556c73e7b27b13d5d137b",
+    "source": "src/gpu/anchor_meb_key.cuh"
+  },
+  {
+    "patch": "patches/src_gpu_anchor_meb_key_route.cuh.patch",
+    "prior": "src/gpu/anchor_meb_route.cuh",
+    "sha256": "72665f4fbdb0f44103cf238a667e44bda76f6005ed3d05f81564b66e04c54e54",
+    "source": "src/gpu/anchor_meb_key_route.cuh"
+  },
+  {
+    "patch": "patches/tests_anchor_meb_key_route_gate.cu.patch",
+    "prior": "tests/anchor_meb_route_device_gate.cu",
+    "sha256": "cc4218aa29d7f3378e55ae41d17a783c0c6ec9b03ad5d9e93053841d6cf0241f",
+    "source": "tests/anchor_meb_key_route_gate.cu"
+  }
+]

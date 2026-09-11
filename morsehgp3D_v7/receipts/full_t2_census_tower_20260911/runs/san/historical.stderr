@@ -1,0 +1,14 @@
+start=historical/pair
+start=historical/E5
+start=historical/square
+start=historical/growth_ABCZ
+start=historical/growth_redundant
+start=historical/inert_ball
+start=historical/shell7_window
+start=historical/support3
+start=historical/support4
+start=historical/u16_tetra
+start=historical/portal_equal
+start=historical/actual_equal_radius_descent
+start=historical/growth_ABCZ_doubled_lot
+start=historical/inert_ball_doubled_lot

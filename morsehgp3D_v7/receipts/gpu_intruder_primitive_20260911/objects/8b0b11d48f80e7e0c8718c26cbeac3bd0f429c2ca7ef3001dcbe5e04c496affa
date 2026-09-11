@@ -1,0 +1,61 @@
+#pragma once
+#include <fstream>
+#include <limits>
+#include <stdexcept>
+#include <string>
+#include <vector>
+#include "portable.hpp"
+namespace mhgp7::gpu_intruder_private {
+struct Fixtures {
+  std::vector<i32> left,right,first,last;
+  std::vector<u16> boxes,positions;
+  std::vector<u64> cases,expected;
+};
+template<class T> inline void write_values(std::ostream& stream, const std::vector<T>& values) {
+  stream << values.size() << '\n';
+  for (T value : values) stream << (u64)(i64)value << '\n';
+}
+inline void write_fixtures(const Fixtures& f, std::ostream& stream) {
+  stream << "MHGP7_INTRUDER_V1\n";
+  write_values(stream,f.left); write_values(stream,f.right); write_values(stream,f.first); write_values(stream,f.last);
+  write_values(stream,f.boxes); write_values(stream,f.positions); write_values(stream,f.cases); write_values(stream,f.expected);
+}
+template<class T> inline void read_values(std::istream& stream, std::vector<T>* values) {
+  u64 size=0;
+  if (!(stream>>size) || size>values->max_size()) throw std::runtime_error("vectors.size");
+  values->resize((size_t)size);
+  for (T& value : *values) {
+    u64 word=0;
+    if (!(stream>>word)) throw std::runtime_error("vectors.word");
+    if constexpr (std::is_same_v<T,u16>) {
+      if (word>65535) throw std::runtime_error("vectors.u16");
+    } else if constexpr (std::is_same_v<T,i32>) {
+      const i64 signed_word=(i64)word;
+      if (signed_word<std::numeric_limits<i32>::min() || signed_word>std::numeric_limits<i32>::max())
+        throw std::runtime_error("vectors.i32");
+    }
+    value=(T)word;
+  }
+}
+inline Fixtures read_fixtures(std::istream& stream) {
+  Fixtures f;
+  std::string version;
+  if (!(stream>>version) || version!="MHGP7_INTRUDER_V1") throw std::runtime_error("vectors.version");
+  read_values(stream,&f.left); read_values(stream,&f.right); read_values(stream,&f.first); read_values(stream,&f.last);
+  read_values(stream,&f.boxes); read_values(stream,&f.positions); read_values(stream,&f.cases); read_values(stream,&f.expected);
+  if (stream>>version) throw std::runtime_error("vectors.trailing");
+  if (f.left.size()!=f.right.size() || f.left.size()!=f.first.size() || f.left.size()!=f.last.size() ||
+      f.boxes.size()!=6*f.left.size() || f.positions.size()%3 || f.cases.size()%kCaseWords ||
+      f.expected.size()!=f.cases.size()/kCaseWords*kResultWords) throw std::runtime_error("vectors.layout");
+  for (size_t offset=0; offset<f.cases.size(); offset+=kCaseWords) {
+    const auto* w=f.cases.data()+offset;
+    if (w[0]>f.left.size() || w[2]>f.left.size()-w[0] || w[1]>f.positions.size()/3 ||
+        w[3]>f.positions.size()/3-w[1] || w[2]>0x7fffffffu || w[3]>0x7fffffffu || w[7]>0xffffffffu)
+      throw std::runtime_error("vectors.case_bounds");
+    for (int i : {4,18,19,20,21,22,23,24,25,26,27})
+      if ((i64)w[i]<std::numeric_limits<i32>::min() || (i64)w[i]>std::numeric_limits<i32>::max())
+        throw std::runtime_error("vectors.case_i32");
+  }
+  return f;
+}
+}

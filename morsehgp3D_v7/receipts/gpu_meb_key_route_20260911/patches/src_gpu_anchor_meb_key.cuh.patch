@@ -1,0 +1,90 @@
+--- upstream/src/gpu/anchor_meb_key.cuh
++++ source/morsehgp3D_v7/src/gpu/anchor_meb_key.cuh
+@@ -0,0 +1,87 @@
++#pragma once
++
++#include "anchor_meb_selection_private.cuh"
++
++namespace mhgp7::gpu_meb_key_private {
++namespace selection = gpu_meb_private;
++
++// Common terminal handoff: a,bx,by,bz,c, each low/high two's-complement.
++// No native i128 object crosses a host/device boundary.
++struct PrimitiveKeyWords { u64 words[10]{}; };
++static_assert(sizeof(PrimitiveKeyWords) == 80 && alignof(PrimitiveKeyWords) == 8);
++MHGP7_HD inline u128 load_u128(const u64* words) { return (static_cast<u128>(words[1]) << 64) | words[0]; }
++MHGP7_HD inline i128 load_i128(const u64* words) { return static_cast<i128>(load_u128(words)); }
++MHGP7_HD inline void store_i128(u64* words, i128 value) {
++  const auto raw = static_cast<u128>(value);
++  words[0] = static_cast<u64>(raw); words[1] = static_cast<u64>(raw >> 64);
++}
++MHGP7_HD inline PrimitiveKeyWords encode_key(const BallKey& key) {
++  PrimitiveKeyWords output;
++  store_i128(output.words, key.a);
++  for (u8 axis = 0; axis < 3; ++axis) store_i128(output.words + 2 + 2 * axis, key.b[axis]);
++  store_i128(output.words + 8, key.c); return output;
++}
++// Decode only: no GCD, coefficient formation, level or geometry decision.
++MHGP7_HD inline BallKey decode_key(const PrimitiveKeyWords& key) {
++  return {load_i128(key.words), {load_i128(key.words + 2), load_i128(key.words + 4),
++      load_i128(key.words + 6)}, load_i128(key.words + 8)};
++}
++enum class KeyStatus : u64 { kOk = 0, kSelectionRefused = 1, kInvalidSupport = 2, kInvalidForm = 3, kUnwritten = 0xee };
++struct SelectedBall {
++  selection::Selection selected;
++  PrimitiveKeyWords key;
++  KeyStatus key_status = KeyStatus::kSelectionRefused;
++  u64 key_materializations = 0;
++};
++// Private causal injections. 2/3/4 change a,b,c; 6 preserves the sphere but
++// destroys primitiveness. No mutation is enabled in the nominal helper.
++enum class KeyMutation : u32 { kNone = 0, kOmitKey = 1, kFlipA = 2, kFlipBHigh = 3,
++    kFlipC = 4, kDropSingletonCenter = 5, kScaleBy2 = 6 };
++
++MHGP7_HD inline SelectedBall select_meb_key(const P3* positions, u64 position_count,
++    const selection::Request& request, u32 selection_flags = 0, KeyMutation mutation = KeyMutation::kNone) {
++  SelectedBall output;
++  output.selected = selection::select_one(positions, position_count, request, selection_flags);
++  if (output.selected.status != selection::Status::kOk) return output;
++  const auto q = output.selected.q;
++  if (q < 1 || q > 4 || q > request.count) { output.key_status = KeyStatus::kInvalidSupport; return output; }
++  P3 support[4]{};
++  for (u8 i = 0; i < q; ++i) {
++    const auto slot = output.selected.slots[i];
++    if (slot >= request.count || (i && output.selected.slots[i - 1] >= slot)) {
++      output.key_status = KeyStatus::kInvalidSupport; return output;
++    }
++    // select_one has already validated all selected indices and the profile.
++    support[i] = positions[request.sites[slot]];
++  }
++  BallKey key{};
++  if (q == 1) key = q2_ball_key(support[0], support[0]);
++  else if (q == 2) key = q2_ball_key(support[0], support[1]);
++  else {
++    const BallForm form = q == 3 ? q3_ball_form(q3_form(support[0], support[1], support[2])) :
++        q4_ball_form(q4_form(support[0], support[1], support[2], support[3]));
++    if (form.a <= 0) { output.key_status = KeyStatus::kInvalidForm; return output; }
++    key = ball_key_reduce(form);  // existing exact reducer/PGCD128, now HD
++  }
++  if (key.a <= 0) { output.key_status = KeyStatus::kInvalidForm; return output; }
++  output.key_materializations = 1; output.key_status = KeyStatus::kOk;
++  if (mutation != KeyMutation::kOmitKey) output.key = encode_key(key);
++  if (mutation == KeyMutation::kFlipA) {
++    output.key.words[0] ^= 2;
++    if ((output.key.words[0] | output.key.words[1]) == 0) output.key.words[0] = 1;
++  }
++  if (mutation == KeyMutation::kFlipBHigh) output.key.words[3] ^= 1;
++  if (mutation == KeyMutation::kFlipC) output.key.words[8] ^= 1;
++  if (mutation == KeyMutation::kDropSingletonCenter && q == 1) {
++    for (u8 i = 2; i < 10; ++i) output.key.words[i] = 0;
++  }
++  if (mutation == KeyMutation::kScaleBy2) {
++    for (u8 coefficient = 0; coefficient < 5; ++coefficient) {
++      u64* words = output.key.words + 2 * coefficient;
++      const u128 doubled = load_u128(words) << 1;
++      words[0] = static_cast<u64>(doubled); words[1] = static_cast<u64>(doubled >> 64);
++    }
++  }
++  return output;
++}
++}  // namespace mhgp7::gpu_meb_key_private

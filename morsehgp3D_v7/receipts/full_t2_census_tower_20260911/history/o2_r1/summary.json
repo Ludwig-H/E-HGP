@@ -1,0 +1,23 @@
+{
+  "status": "failed",
+  "stable_sources": true,
+  "commands": [
+    {
+      "name": "compile",
+      "exit": 0,
+      "elapsed_s": 19.313822537000306
+    },
+    {
+      "name": "historical",
+      "exit": 0,
+      "elapsed_s": 0.35586967000017466
+    },
+    {
+      "name": "line12",
+      "exit": 1,
+      "elapsed_s": 0.03270795600110432
+    }
+  ],
+  "binary_sha256": "17088940c16e1d5af1e7962bb01dcb36eeaaa5444398e484de95857d7c3f7ad4",
+  "scope": "private_bounded_real_census_FULL_K1_K10_not_universal_completeness"
+}

@@ -1,0 +1,21 @@
+#pragma once
+#include "intruder.cuh"
+namespace mhgp7::gpu_intruder_private {
+inline constexpr u32 kCaseWords=28, kResultWords=12;
+// Offsets/counts/request and results cross the boundary only as u64 words.
+MHGP7_HD inline Result evaluate_case(const u64* words, const i32* left, const i32* right,
+    const i32* first, const i32* last, const u16* boxes, const u16* positions) {
+  IndexView view{left+words[0],right+words[0],first+words[0],last+words[0],boxes+6*words[0],positions+3*words[1],
+      words[5],(u32)words[2],(u32)words[3],(i32)(i64)words[4]};
+  Request request{};
+  request.snapshot=words[6]; request.selected_count=(u32)words[7];
+  for (int i=0; i<10; ++i) { request.key_words[i]=words[8+i]; request.selected[i]=(i32)(i64)words[18+i]; }
+  return find_intruder(view,request);
+}
+MHGP7_HD inline void encode_result(const Result& result, u64* words) {
+  words[0]=(u64)result.status; words[1]=(u64)(i64)result.intruder;
+  words[2]=result.queries; words[3]=result.nodes; words[4]=result.interior_ranges; words[5]=result.power_tests;
+  for (int i=0; i<3; ++i) words[6+i]=result.integer_min[i];
+  words[9]=result.stack_peak; words[10]=result.axis_divisions; words[11]=0;
+}
+}

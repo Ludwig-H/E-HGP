@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+"""Create-only compact private package, only after every capture is closed."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+
+HERE = Path(__file__).resolve().parent.parent
+CAPTURES = ("o2_r1", "san_root_r1", "o2_r2", "san_root_r2", "host_r1", "nvcc_r1", "mutants_r1", "host_san_root_r1")
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def main():
+    for name in CAPTURES:
+        receipt = json.loads((HERE / name / "receipt.json").read_bytes())
+        required = "failed" if name == "san_root_r1" else "passed"
+        if receipt["status"] != required:
+            raise ValueError(name + ": capture not closed as expected")
+    package = HERE / "package"
+    package.mkdir(exist_ok=False)
+    (package / "objects").mkdir()
+    files = {}
+
+    def include(name, value):
+        digest = sha(value)
+        if value.startswith(b"\x7fELF"):
+            raise ValueError("ELF refused: " + name)
+        files[name] = dict(sha256=digest, bytes=len(value))
+        target = package / "objects" / digest
+        if not target.exists():
+            target.write_bytes(value)
+
+    for source in sorted((HERE / "source").rglob("*")):
+        if source.is_file():
+            include("current/" + str(source.relative_to(HERE)), source.read_bytes())
+    for source in sorted(HERE.iterdir()):
+        if source.is_file() and source.suffix in (".cuh", ".hpp", ".cpp", ".cu", ".py", ".json", ".md"):
+            include("current/" + source.name, source.read_bytes())
+    pins = {}
+    for capture in CAPTURES:
+        for source in sorted((HERE / capture).rglob("*")):
+            if not source.is_file():
+                continue
+            name = str(source.relative_to(HERE / capture))
+            data = source.read_bytes()
+            if data.startswith(b"\x7fELF"):
+                pins[capture + "/" + name] = sha(data)
+                continue
+            include("captures/" + capture + "/" + name, data)
+    include("post_capture_binary_pins.json", (json.dumps(dict(
+        authority="post_capture_read_only_hashes_not_new_execution", files=pins), indent=2, sort_keys=True) + "\n").encode())
+    for name in ("reader.py", "publish.py", "README.md"):
+        value = (HERE / "package_tools" / name).read_bytes()
+        include("package_tools/" + name, value)
+        if name != "publish.py":
+            shutil.copy2(HERE / "package_tools" / name, package / name)
+    manifest = dict(schema="mhgp7_intruder_private_v1", captures=list(CAPTURES), files=files,
+        claims=dict(device_executed=False, GCP_used=False, public_status="not_claimed", full_terminal=False,
+                    performance_contract=False, profile="quantized_u16_input_only"))
+    (package / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+    (package / "manifest.sha256").write_text(sha((package / "manifest.json").read_bytes()) + "  manifest.json\n")
+    for optimized in (False, True):
+        command = ["python3", "-B", *(["-O"] if optimized else []), str(package / "reader.py"), str(package), "--selftest"]
+        result = subprocess.run(command, capture_output=True)
+        suffix = "optimized" if optimized else "normal"
+        (package / ("reader_" + suffix + ".stdout")).write_bytes(result.stdout)
+        (package / ("reader_" + suffix + ".stderr")).write_bytes(result.stderr)
+        if result.returncode:
+            raise ValueError("reader failed: " + suffix + ": " + result.stderr.decode())
+        print(result.stdout.decode().strip())
+
+
+if __name__ == "__main__":
+    main()

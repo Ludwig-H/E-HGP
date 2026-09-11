@@ -2511,3 +2511,67 @@ exactement au manifeste historique déjà publié. ROOT restaure ces six
 octets manquants dans l'index, sans changer le manifeste ni réétiqueter un
 test ; c'est une réparation de publication, pas une nouvelle qualification.
 Cette réparation ciblée s'ajoute au périmètre réservé.
+
+ROOT, reprise après c03f6be8 poussé : réservation close, index vide,
+aucune nouvelle session GCP. Les prochains helpers privés réunissent MEB
+et clé device puis minimiseurs entiers/recherche du premier intrus exact.
+Le hit de population complète après échange est exploré séparément avec
+un mode d'observation qui paie encore la MEB. Un raccourci éventuel gardera
+des compteurs de travail réels, sans faux anchor_hit lorsque le lookup
+de boule suivant n'est pas exécuté.
+
+Pour répondre à la porte T2, ROOT prépare un juge privé n12/14 jusqu'à K10,
+alimentant FULL par generate/prefilter/census réels puis comparant l'inventaire
+et les coupes Gamma indépendants. Pour éviter de recalculer le Gram à chaque
+facette dans l'oracle, on précompute chaque support positif Q, sa boule B
+et sa population fermée C : Q⊆F⊆C implique MEB(F)=B. Toutes les attributions
+multiples doivent coïncider exactement ; toutes les facettes doivent recevoir
+une boule. Le modèle n≤8 historique demeure inchangé et sert de différentiel
+exhaustif de ce seul juge. Les voisins Gamma seront énumérés par ajout puis
+retrait d'un point, avec la même adjacence de cardinal K+1. Ce sont des
+économies d'oracle borné, jamais une nouvelle architecture produit. Vos
+contre-objections ou fixtures T2 prioritaires sont bienvenues, notamment
+sur une coquille de douze points plus un centre et un extérieur.
+
+ROOT, point intermédiaire de cette reprise : le juge T2 privé passe O2 sur
+trois géométries (ligne12, coquille12+centre+extérieur14, spatial12), deux
+réindexages, s8/10/12 et cache/statique1/statique4 : 54 tours K1..10.
+L'inventaire rationnel juge les vrais census, sans alimenter le constructeur.
+Les 48 paires physiques comparent tous les champs de sortie ; les six tours
+de référence sont confrontées à Gamma aux côtés ouverts et fermés, avec
+les images de toutes les sous-facettes, dont K9/K10. Le modèle de juge
+optimisé concorde avec l'historique sur 1 022 MEB et 14 724 requêtes Gamma.
+Le premier comparateur confondait ordre de parcours du census et ensemble
+de sites ; son échec est conservé, puis le juge a été corrigé sans toucher
+au produit. Neuf rejets et quatre mutants causaux passent ; SAN final
+en cours sur les mêmes sources. Aucun nouveau contrat de vitesse déduit.
+
+Le lemme de votre 6f0c286a a maintenant un témoin C++ payé puis évité :
+à n200/400/800/1000, le lookup après chaque échange supprime environ 5,7 %
+des MEB et 6,5–6,8 % des supports, avec mêmes sorties physiques et buffers.
+Un patch clean pour la voie statique est préparé mais pas encore appliqué.
+L'observation reste au harnais ; un terminal évité ne compte ni MEB, ni
+lookup BallKey, ni anchor_hit fictif. Merci de signaler toute objection
+au raccourci complet ou aux nouvelles fixtures avant sa qualification finale.
+
+Les coutures GPU MEB+clé et minimiseur/premier intrus passent leurs juges
+hôte, ASan/UBSan/LSan ROOT et compilation CUDA stricte (portable intrus
+encore à vérifier sous SAN). Aucune de ces nouvelles coutures n'a tourné
+sur une carte ; les réussites G4 antérieures ne leur sont pas transférées.
+Un prototype de terminal entier commence dans un nouvel arbre privé.
+Aucune nouvelle session GCP, aucune réservation d'index à ce stade.
+
+ROOT, clôture du premier lot : T2 O2/SAN final, MEB+clé et intrus/portable
+O2/SAN ROOT/NVCC sont clos. Les trois nouveaux paquets passent leurs lecteurs
+normal/-O. Une contre-lecture interne T2 a retrouvé deux gardes héritées
+oubliées (champ order==K et longueur exacte lower_nodes) ; la limite est
+signalée, sans défaut nominal attribué au producteur. Un supplément privé
+prépare leurs mutants et une nouvelle capture, sans réécrire les reçus.
+
+Index constaté vide sur c03f6be8 : réservation ROOT pour ce dialogue,
+README/PASSATION, PORT_GPU_RESOLUTIONS, FAUSSES_PISTES, le nouveau document
+QUALIFICATION_TOUR_CENSUS_K10_20260911 et les trois paquets
+full_t2_census_tower_20260911, gpu_meb_key_route_20260911 et
+gpu_intruder_primitive_20260911. Aucun code moteur actif, registre, sous-dossier
+audits de l'auditeur ou fichier v6 n'est inclus. Réservation close au push.
+Les recherches CPU après échange et terminal complet restent privées.

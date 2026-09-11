@@ -1,0 +1,7 @@
+{
+  "name": "mutant-adjacency",
+  "exit": 1,
+  "expected_exit": 1,
+  "causal_diagnostic_matched": true,
+  "elapsed_s": 0.002045900000666734
+}

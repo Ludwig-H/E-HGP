@@ -1,0 +1,214 @@
+--- upstream/tests/anchor_meb_route_device_gate.cu
++++ source/morsehgp3D_v7/tests/anchor_meb_key_route_gate.cu
+@@ -7,12 +7,14 @@
+ #include <thread>
+ #include <vector>
+ 
+-#include "../src/gpu/anchor_meb_route.cuh"
++#define MHGP7_MEB_KEY_FORBID_LEGACY_HOST_MATERIALIZE 1
++#include "../src/gpu/anchor_meb_key_route.cuh"
+ 
+ namespace {
+ using namespace mhgp7;
+-namespace route = gpu_meb_route_private;
++namespace route = gpu_meb_key_route_private;
+ namespace primitive = gpu_meb_private;
++namespace key_helper = gpu_meb_key_private;
+ struct Case {
+   u32 count;
+   P3 points[10];
+@@ -24,6 +26,7 @@
+ };
+ static_assert(std::size(fixtures) == 605);
+ u64 checks = 0, compared = 0, rejections = 0, causal_flags = 0, extra_shells = 0, arities[5]{};
++u64 key_mutations = 0, key_words_compared = 0, key_words_high_nonzero = 0;
+ struct Failure { const char* reason; };
+ void need(bool value, const char* reason) { ++checks; if (!value) throw Failure{reason}; }
+ void words(i128 value, u64* target) {
+@@ -40,10 +43,19 @@
+   std::array<u64, 5> result{level.num[0], level.num[1], level.num[2], 0, 0};
+   words(level.den, result.data() + 3); return result;
+ }
+-bool identical(const AnchorMebResult& a, const AnchorMebResult& b) {
+-  return a.status == b.status && a.key == b.key && a.level == b.level &&
+-      a.support_slots == b.support_slots && a.support_size == b.support_size &&
+-      a.selected_shell_count == b.selected_shell_count;
++bool same_words(const key_helper::PrimitiveKeyWords& a, const key_helper::PrimitiveKeyWords& b) {
++  for (u8 i = 0; i < 10; ++i) if (a.words[i] != b.words[i]) return false;
++  return true;
++}
++bool identical(const route::AcceptedMebKey& a, const route::AcceptedMebKey& b) {
++  return same_words(a.key, b.key) && a.support_slots == b.support_slots &&
++      a.support_size == b.support_size && a.selected_shell_count == b.selected_shell_count;
++}
++bool matches_cpu(const route::AcceptedMebKey& observed, const AnchorMebResult& cpu) {
++  const auto words = key_words(cpu.key);
++  for (u8 i = 0; i < 10; ++i) if (observed.key.words[i] != words[i]) return false;
++  return observed.support_size == cpu.support_size && observed.support_slots == cpu.support_slots &&
++      observed.selected_shell_count == cpu.selected_shell_count;
+ }
+ CloudIndex make_index() {
+   std::vector<P3> unique;
+@@ -76,13 +88,21 @@
+       "cleanup.all_owned_bytes");
+ }
+ void check_expected(const Case& expected, const AnchorMebResult& cpu, const AnchorMebWork& paid,
+-    const AnchorMebResult& observed, const route::WireSelection& raw) {
++    const route::AcceptedMebKey& observed, const route::WireSelection& raw) {
+   need(cpu.status == AnchorMebStatus::kOk, "cpu.nominal_success");
+-  need(identical(cpu, observed), "device.physical_geometry_vs_cpu");
+-  const auto key = key_words(cpu.key), observed_key = key_words(observed.key);
+-  const auto level = level_words(cpu.level), observed_level = level_words(observed.level);
+-  for (u8 i = 0; i < 10; ++i) need(key[i] == expected.key_words[i] && observed_key[i] == expected.key_words[i], "gram.key");
+-  for (u8 i = 0; i < 5; ++i) need(level[i] == expected.level_words[i] && observed_level[i] == expected.level_words[i], "gram.level");
++  need(matches_cpu(observed, cpu), "device.physical_key_selection_vs_cpu");
++  const auto key = key_words(cpu.key);
++  const auto level = level_words(cpu.level);
++  for (u8 i = 0; i < 10; ++i) {
++    need(key[i] == expected.key_words[i] && observed.key.words[i] == expected.key_words[i] &&
++        raw.key_words[i] == expected.key_words[i], "gram.device_primitive_key_word");
++    ++key_words_compared;
++    if ((i % 2) == 1 && raw.key_words[i] != 0) ++key_words_high_nonzero;
++  }
++  // Level is checked only on the independent CPU reference. It is absent,
++  // not fabricated as zero, from the new device-key result.
++  for (u8 i = 0; i < 5; ++i) need(level[i] == expected.level_words[i], "gram.cpu_reference_level_only");
++  need(raw.key_status == 0 && raw.key_materializations == 1, "device.key_materialized_once");
+   need(cpu.support_size == expected.q && raw.q == expected.q, "gram.support_size");
+   need(cpu.selected_shell_count == expected.shell && raw.shell == expected.shell, "gram.shell");
+   for (u8 i = 0; i < 4; ++i)
+@@ -124,7 +144,7 @@
+   need(full.work.allocations == 2 && full.work.launches == 1 && full.work.synchronizations == 1, "full.phases");
+   need(full.work.h2d_bytes == 605 * (sizeof(route::WireRequest) + sizeof(route::WireSelection)) &&
+       full.work.d2h_bytes == 605 * sizeof(route::WireSelection), "full.bytes");
+-  u64 powers = 0, validation_powers = 0, supports[5]{};
++  u64 powers = 0, supports[5]{};
+   for (u32 i = 0; i < std::size(fixtures); ++i) {
+     const auto& fixture = fixtures[i];
+     AnchorMebWork work;
+@@ -132,12 +152,12 @@
+     check_expected(fixture, cpu, work, full.values[i], full.observed[i]);
+     need(full.observed[i].ordinal == requests[i].ordinal && full.observed[i].snapshot == snapshot.serial(), "transport.row_binding");
+     powers += fixture.powers;
+-    validation_powers += fixture.count == 1 ? 0 : fixture.count;
+     for (u8 q = 0; q < 5; ++q) supports[q] += fixture.supports[q];
+   }
+   need(full.work.observed_complete && full.work.reported_selection_calls == 605 &&
+-      full.work.reported_selection_powers == powers && full.work.host_materializations == 605 &&
+-      full.work.host_validation_powers == validation_powers, "work.host_device_separated");
++      full.work.reported_selection_powers == powers && full.work.host_materializations == 0 &&
++      full.work.host_validation_powers == 0 && full.work.reported_key_materializations == 605,
++      "work.no_host_materialization_or_geometry_revalidation");
+   for (u8 q = 0; q < 5; ++q) need(full.work.reported_supports[q] == supports[q], "work.support_totals");
+   for (size_t count : {size_t{1}, size_t{127}, size_t{128}, size_t{129}, size_t{7}}) {
+     const auto batch = context.run(snapshot, std::span<const primitive::Request>(requests.data(), count));
+@@ -214,24 +234,26 @@
+     need(refused, "initialization.failure_cleanup"); ++rejections;
+   }
+   for (u32 flag : {route::kOmitLast, route::kBadLastShell, route::kWrongBatch, route::kWrongSnapshot,
+-       route::kBadLastInput, route::kBadReserved, route::kBadSlot, route::kBadStatus, route::kBadCounter}) {
++       route::kBadLastInput, route::kBadReserved, route::kBadSlot, route::kBadStatus, route::kBadCounter,
++       route::kBadKeyStatus, route::kBadKeyCounter, route::key_mutation_flag(key_helper::KeyMutation::kOmitKey)}) {
+     route::Context failing(snapshot);
+     const auto result = failing.run(snapshot, pair, route::Fault::kNone, flag);
+     rejected(result, "device.final_output_no_prefix");
+     need(result.work.observed_complete && result.observed.size() == 2 && failing.poisoned(), "device.failure_diagnostic_only");
+     cleanup(failing);
+   }
+-  // Positivity/inclusion/shell/first-support flags are causally detected. A
+-  // later positive support remains a valid MEB: runtime is NOT a prefix proof.
++  // Positivity/inclusion/shell/first-support flags are causally detected by
++  // the judge. Nominal runtime acceptance is metadata-only, not geometry proof.
+   for (u32 flag : {primitive::kSkipContainment, primitive::kShellIsSupport, primitive::kDiscardFirst}) {
+     route::Context altered(snapshot);
+     const auto result = altered.run(snapshot, pair, route::Fault::kNone, flag);
+-    const bool changed = !result.passed || result.values[0].support_slots != std::array<u8, 4>{0,2,0,0};
++    AnchorMebWork work; const auto expected = anchor_meb(square, work);
++    const bool changed = !result.passed || !matches_cpu(result.values[0], expected) ||
++        result.observed[0].powers != work.power_tests || result.observed[0].supports[2] != work.supports_by_size[2];
+     need(changed, "causal.support_containment_shell"); ++causal_flags;
+     if (flag == primitive::kDiscardFirst) {
+       need(result.passed && result.values[0].support_slots == std::array<u8, 4>{1,3,0,0}, "later.support_accepted_as_meb");
+-      AnchorMebWork work; const auto expected = anchor_meb(square, work);
+-      need(result.values[0].key == expected.key && result.values[0].level == expected.level &&
++      need(same_words(result.values[0].key, key_helper::encode_key(expected.key)) &&
+           result.observed[0].powers > work.power_tests, "later.support_not_prefix_certificate");
+     }
+     cleanup(altered);
+@@ -241,6 +263,40 @@
+     bool different = !result.passed;
+     for (size_t i = 0; i < result.values.size(); ++i) different = different || !identical(result.values[i], full.values[i]);
+     need(different, "causal.positive_support"); ++causal_flags; cleanup(altered); }
++
++  // Each arity is challenged on all coefficient classes, including high
++  // words. Scaling keeps the sphere but not its primitive canonical key.
++  for (u32 q = 1; q <= 4; ++q) {
++    size_t chosen = std::size(fixtures);
++    for (size_t i = 0; i < std::size(fixtures); ++i)
++      if (fixtures[i].q == q && (q != 1 || fixtures[i].points[0] != P3{})) { chosen = i; break; }
++    need(chosen < std::size(fixtures), "key_mutant.arity_fixture");
++    for (auto mutation : {key_helper::KeyMutation::kFlipA, key_helper::KeyMutation::kFlipBHigh,
++                         key_helper::KeyMutation::kFlipC, key_helper::KeyMutation::kScaleBy2}) {
++      route::Context altered(snapshot);
++      const auto result = altered.run(snapshot, std::span<const primitive::Request>(&requests[chosen], 1),
++          route::Fault::kNone, route::key_mutation_flag(mutation));
++      need(result.passed && !same_words(result.values[0].key, full.values[chosen].key), "key_mutant.word_detected");
++      need(result.work.host_materializations == 0 && result.work.host_validation_powers == 0 &&
++          result.work.reported_key_materializations == 1, "key_mutant.no_hidden_cpu_fallback");
++      for (u8 word = 0; word < 4; ++word)
++        need(result.values[0].support_slots[word] == full.values[chosen].support_slots[word], "key_mutant.selection_unchanged");
++      need(result.observed[0].powers == full.observed[chosen].powers, "key_mutant.selection_work_unchanged");
++      if (mutation == key_helper::KeyMutation::kScaleBy2) {
++        const auto scaled = key_helper::decode_key(result.values[0].key);
++        const auto nominal = key_helper::decode_key(full.values[chosen].key);
++        need(scaled.a == 2 * nominal.a && scaled.c == 2 * nominal.c, "key_mutant.nonprimitive_same_sphere");
++      }
++      ++key_mutations; cleanup(altered);
++    }
++    if (q == 1) {
++      route::Context altered(snapshot);
++      const auto result = altered.run(snapshot, std::span<const primitive::Request>(&requests[chosen], 1),
++          route::Fault::kNone, route::key_mutation_flag(key_helper::KeyMutation::kDropSingletonCenter));
++      need(result.passed && !same_words(result.values[0].key, full.values[chosen].key), "key_mutant.singleton_center_detected");
++      ++key_mutations; cleanup(altered);
++    }
++  }
+ 
+   // A release error stays UNCERTIFIED even after the context has no owned
+   // pointer left; no cudaDeviceReset, no assumed recovery of cudaFree.
+@@ -257,6 +313,8 @@
+   need(compared == 605 && extra_shells == 197 && arities[1] == 82 && arities[2] == 393 &&
+       arities[3] == 110 && arities[4] == 20 && causal_flags == 4 && rejections >= 20 && checks >= 6 * compared,
+       "nonvacuity");
++  need(key_words_compared == 6050 && key_words_high_nonzero > 100 && key_mutations == 17,
++      "key_materialization.nonvacuity");
+   // Device names returned by CUDA are escaped so stdout remains one JSON line.
+   std::string escaped;
+   for (unsigned char c : device_name) {
+@@ -274,10 +332,12 @@
+   std::printf("{\"status\":\"passed\",\"backend\":\"%s\",\"sm\":\"%d.%d\",\"checks\":%llu,"
+       "\"compared\":%llu,\"q1\":%llu,\"q2\":%llu,\"q3\":%llu,\"q4\":%llu,\"extra_shells\":%llu,"
+       "\"rejections\":%llu,\"causal_flags\":%llu,\"failures\":0,\"device_name\":\"%s\",\"device_executed\":%s,"
+-      "\"scope\":\"local_meb_batch_only\",\"gcp_used\":false,\"abi_version\":1,\"request_bytes\":72,\"selection_bytes\":112,"
++      "\"scope\":\"local_meb_device_key_only\",\"gcp_used\":false,\"abi_version\":2,\"request_bytes\":72,\"selection_bytes\":208,"
+       "\"positions\":%zu,\"resident_h2d_bytes\":%llu,\"batch_h2d_bytes\":%llu,\"batch_d2h_bytes\":%llu,"
+       "\"batch_launches\":%llu,\"host_validation_powers\":%llu,\"host_materializations\":%llu,"
+-      "\"reported_selection_powers\":%llu}\n", backend, major, minor,
++      "\"reported_selection_powers\":%llu,\"backend_key_materializations\":%llu,"
++      "\"key_words_compared\":%llu,\"key_high_words_nonzero\":%llu,\"key_mutations\":%llu,"
++      "\"legacy_host_materialize_deleted\":true,\"device_level_available\":false}\n", backend, major, minor,
+       static_cast<unsigned long long>(checks), static_cast<unsigned long long>(compared),
+       static_cast<unsigned long long>(arities[1]), static_cast<unsigned long long>(arities[2]),
+       static_cast<unsigned long long>(arities[3]), static_cast<unsigned long long>(arities[4]),
+@@ -286,7 +346,10 @@
+       static_cast<unsigned long long>(initialization.h2d_bytes), static_cast<unsigned long long>(full.work.h2d_bytes),
+       static_cast<unsigned long long>(full.work.d2h_bytes), static_cast<unsigned long long>(full.work.launches),
+       static_cast<unsigned long long>(full.work.host_validation_powers), static_cast<unsigned long long>(full.work.host_materializations),
+-      static_cast<unsigned long long>(full.work.reported_selection_powers));
++      static_cast<unsigned long long>(full.work.reported_selection_powers),
++      static_cast<unsigned long long>(full.work.reported_key_materializations),
++      static_cast<unsigned long long>(key_words_compared), static_cast<unsigned long long>(key_words_high_nonzero),
++      static_cast<unsigned long long>(key_mutations));
+ }
+ }  // namespace
+ 

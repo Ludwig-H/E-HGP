@@ -1,0 +1,20 @@
+{
+  "nvcc_r1/device_gate": {
+    "executed": false,
+    "published": false,
+    "sha256": "a4a1b74a0f9c21254722847c0c8db00347a0bfe83de791089ba1733dd553d36c",
+    "size": 1623208
+  },
+  "san_root_r1/stub_gate": {
+    "executed": true,
+    "published": false,
+    "sha256": "3071196763bc0ca16764e616994eb9c00f13aa01ac2a42952048c32340ac0350",
+    "size": 4462848
+  },
+  "stub_r1/stub_gate": {
+    "executed": true,
+    "published": false,
+    "sha256": "ac78b483c3dbce48a26898773b9951226a741b0ac2f8baab7bc81aa83f47562e",
+    "size": 369976
+  }
+}

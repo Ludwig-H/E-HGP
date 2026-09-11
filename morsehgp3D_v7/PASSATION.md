@@ -84,8 +84,13 @@ l'entrée 50k, depuis les octets du moteur du 10 septembre. Ce verrou est
 clos sur CPU, sans certifier l'arité finale, la complétude du catalogue,
 ni la nouvelle voie statique. Contrats 1 s/100 ms et plusieurs dizaines
 de millions de points non atteints. Le jugement du raccord réel
-génération/census→tour à K9/K10 par un oracle rationnel indépendant reste
-une porte de qualification distincte des comparaisons de payloads.
+génération/census→tour à K9/K10 dispose maintenant d'une
+[nouvelle qualification bornée sur c03f6be8](docs/QUALIFICATION_TOUR_CENSUS_K10_20260911.md) :
+trois géométries n12/n14, deux réindexages, s8/10/12 et cache/statique1/4,
+54 tours K1..10 par build O2/SAN. Les inventaires exacts sont jugés avant
+13 000 coupes Gamma et 8 103 948 vérifications verticales, avec neuf rejets
+et quatre mutants. Les 48 paires physiques supplémentaires complètent ces
+six tours de référence, sans promouvoir la complétude universelle WSPD.
 
 Nouvelle session du 11 septembre : [deux primitives CUDA](docs/RESULTATS_PRIMITIVES_GPU_20260911.md)
 passent sur la vraie G4 SM12.0, après O2/SAN hôte et compilation stricte.
@@ -95,6 +100,18 @@ sont réfutés sur carte. Aucun résolveur complet ou assemblage FULL GPU
 livré par ces gates, aucun nouveau benchmark 50k. La génération SPOT
 `2026-09-11T01:20:08.309-07:00` de la même cible est maintenant certifiée
 `TERMINATED` ; aucune autre VM active détectée à la clôture.
+
+Depuis cette session, deux raccords supplémentaires sont clos localement :
+[MEB + clé primitive](receipts/gpu_meb_key_route_20260911/README.md),
+22 245 contrôles, 605 cas, 47 rejets, zéro matérialisation ou puissance hôte
+sur le chemin nominal ; [premier intrus exact](receipts/gpu_intruder_primitive_20260911/README.md),
+6 861 contrôles, 596 requêtes, O2 et SAN ROOT, six mutants causaux.
+La gate autonome de ce dernier compare 14 688 mots pour 612 cas ; pile
+Morton 49 effectivement exercée et générations de propriétaires distinctes.
+Les deux vrais kernels compilent et se lient sous NVCC strict, mais aucune
+nouvelle exécution device n'a eu lieu. GCP non utilisé pour cette reprise.
+Le terminal entier commence dans un arbre privé : ces helpers ne sont pas
+encore raccordés au constructeur actif.
 
 Le [raccord FULL privé du journal incrémental](receipts/incremental_full_trial_20260911/README.md)
 passe les comparaisons physiques O2/SAN dans quatre modes et les refus

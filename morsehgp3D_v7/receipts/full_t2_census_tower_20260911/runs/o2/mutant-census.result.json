@@ -1,0 +1,7 @@
+{
+  "name": "mutant-census",
+  "exit": 1,
+  "expected_exit": 1,
+  "causal_diagnostic_matched": true,
+  "elapsed_s": 0.03385939700092422
+}

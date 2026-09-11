@@ -1,0 +1,217 @@
+--- upstream/src/gpu/anchor_meb_route.cuh
++++ source/morsehgp3D_v7/src/gpu/anchor_meb_key_route.cuh
+@@ -14,11 +14,12 @@
+ #include <type_traits>
+ #include <vector>
+ 
+-#include "anchor_meb_selection_private.cuh"
++#include "anchor_meb_key.cuh"
+ #include "../tree/cloud_index.hpp"
+ 
+-namespace mhgp7::gpu_meb_route_private {
++namespace mhgp7::gpu_meb_key_route_private {
+ namespace primitive = gpu_meb_private;
++namespace key_helper = gpu_meb_key_private;
+ 
+ // Explicit 64-bit little-endian process ABI, not a portable archive format.
+ struct alignas(8) WireRequest {
+@@ -32,20 +33,28 @@
+   u32 ordinal = 0, status = 0xee, q = 0, shell = 0;
+   u32 slots[4]{};
+   u64 calls = 0, supports[5]{}, powers = 0, reserved = 0;
++  u64 key_words[10]{}, key_materializations = 0;
++  u64 key_status = static_cast<u64>(key_helper::KeyStatus::kUnwritten);
+ };
+ static_assert(sizeof(void*) == 8 && std::endian::native == std::endian::little);
+ static_assert(std::is_trivially_copyable_v<WireRequest> && std::is_standard_layout_v<WireRequest>);
+ static_assert(std::is_trivially_copyable_v<WireSelection> && std::is_standard_layout_v<WireSelection>);
+ static_assert(sizeof(WireRequest) == 72 && alignof(WireRequest) == 8 && offsetof(WireRequest, sites) == 24);
+-static_assert(sizeof(WireSelection) == 112 && alignof(WireSelection) == 8 &&
++static_assert(sizeof(WireSelection) == 208 && alignof(WireSelection) == 8 &&
+     offsetof(WireSelection, slots) == 32 && offsetof(WireSelection, calls) == 48 &&
+     offsetof(WireSelection, supports) == 56 && offsetof(WireSelection, powers) == 96);
++static_assert(offsetof(WireSelection, key_words) == 112 && offsetof(WireSelection, key_materializations) == 192 &&
++    offsetof(WireSelection, key_status) == 200);
+ static_assert(sizeof(P3) == 24 && alignof(P3) == 8 && offsetof(P3, y) == 8 && offsetof(P3, z) == 16);
+ 
+-inline constexpr u32 kAbiVersion = 1;
++inline constexpr u32 kAbiVersion = 2;
+ inline constexpr u32 kOmitLast = 0x100, kBadLastShell = 0x200, kWrongBatch = 0x400,
+     kWrongSnapshot = 0x800, kBadLastInput = 0x1000, kBadReserved = 0x2000,
+     kBadSlot = 0x4000, kBadStatus = 0x8000, kBadCounter = 0x10000;
++inline constexpr u32 kBadKeyStatus = 0x800000, kBadKeyCounter = 0x1000000;
++inline constexpr u32 key_mutation_flag(key_helper::KeyMutation mutation) {
++  return static_cast<u32>(mutation) << 17;
++}
+ 
+ MHGP7_HD inline void process_one(const P3* positions, u64 position_count,
+     const WireRequest* input, u32 count, WireSelection* output, u64 snapshot, u64 batch,
+@@ -61,11 +70,16 @@
+     primitive::Request local;
+     local.ordinal = request.ordinal; local.count = static_cast<u8>(request.count);
+     for (u8 i = 0; i < 10; ++i) local.sites[i] = request.sites[i];
+-    const auto result = primitive::select_one(positions, position_count, local, flags & 31);
++    const auto ball = key_helper::select_meb_key(positions, position_count, local, flags & 31,
++        static_cast<key_helper::KeyMutation>((flags >> 17) & 7));
++    const auto& result = ball.selected;
+     selected.status = static_cast<u32>(result.status); selected.q = result.q; selected.shell = result.shell;
+     for (u8 i = 0; i < 4; ++i) selected.slots[i] = result.slots[i];
+     selected.calls = result.calls; selected.powers = result.powers;
+     for (u8 q = 0; q < 5; ++q) selected.supports[q] = result.supports[q];
++    for (u8 word = 0; word < 10; ++word) selected.key_words[word] = ball.key.words[word];
++    selected.key_materializations = ball.key_materializations;
++    selected.key_status = static_cast<u64>(ball.key_status);
+   }
+   if (gid + 1 == count) {
+     if (flags & kBadLastShell) selected.shell = 11;
+@@ -75,15 +89,18 @@
+     if (flags & kBadSlot) selected.slots[0] = 300;
+     if (flags & kBadStatus) selected.status = 300;
+     if (flags & kBadCounter) selected.calls = 0;
++    if (flags & kBadKeyStatus) selected.key_status = 100;
++    if (flags & kBadKeyCounter) selected.key_materializations = 0;
+   }
+   output[gid] = selected;
+ }
+ 
+-inline constexpr std::array<u64, 12> host_abi{
++inline constexpr std::array<u64, 16> host_abi{
+     kAbiVersion, sizeof(P3), alignof(P3), sizeof(WireRequest), alignof(WireRequest),
+     offsetof(WireRequest, sites), sizeof(WireSelection), alignof(WireSelection),
+     offsetof(WireSelection, slots), offsetof(WireSelection, calls),
+-    offsetof(WireSelection, supports), offsetof(WireSelection, powers)};
++    offsetof(WireSelection, supports), offsetof(WireSelection, powers), offsetof(WireSelection, key_words),
++    offsetof(WireSelection, key_materializations), offsetof(WireSelection, key_status), sizeof(key_helper::PrimitiveKeyWords)};
+ #if defined(__CUDACC__)
+ __global__ void route_kernel(const P3* positions, u64 position_count, const WireRequest* input,
+     u32 count, WireSelection* output, u64 snapshot, u64 batch, u32 flags) {
+@@ -91,11 +108,12 @@
+   process_one(positions, position_count, input, count, output, snapshot, batch, gid, flags);
+ }
+ __global__ void abi_kernel(u64* result) {
+-  const u64 values[12]{kAbiVersion, sizeof(P3), alignof(P3), sizeof(WireRequest), alignof(WireRequest),
++  const u64 values[16]{kAbiVersion, sizeof(P3), alignof(P3), sizeof(WireRequest), alignof(WireRequest),
+       offsetof(WireRequest, sites), sizeof(WireSelection), alignof(WireSelection),
+       offsetof(WireSelection, slots), offsetof(WireSelection, calls),
+-      offsetof(WireSelection, supports), offsetof(WireSelection, powers)};
+-  for (u8 i = 0; i < 12; ++i) result[i] = values[i];
++      offsetof(WireSelection, supports), offsetof(WireSelection, powers), offsetof(WireSelection, key_words),
++      offsetof(WireSelection, key_materializations), offsetof(WireSelection, key_status), sizeof(key_helper::PrimitiveKeyWords)};
++  for (u8 i = 0; i < 16; ++i) result[i] = values[i];
+ }
+ #endif
+ 
+@@ -105,6 +123,7 @@
+   u64 allocations = 0, h2d_bytes = 0, d2h_bytes = 0, launches = 0, synchronizations = 0;
+   u64 host_validation_powers = 0, host_materializations = 0;
+   u64 reported_selection_calls = 0, reported_selection_powers = 0, reported_supports[5]{};
++  u64 reported_key_materializations = 0;
+   bool observed_complete = false;
+ };
+ 
+@@ -237,7 +256,7 @@
+   void validate_abi() {
+     void* storage = allocate(sizeof(host_abi));
+     try {
+-      std::array<u64, 12> observed{};
++      std::array<u64, 16> observed{};
+ #if defined(__CUDACC__)
+       abi_kernel<<<1, 1>>>(static_cast<u64*>(storage));
+       check(cudaGetLastError()); ++work.launches;
+@@ -259,10 +278,41 @@
+   void mark_closed() { closed_ = true; }
+ };
+ 
++struct AcceptedMebKey {
++  key_helper::PrimitiveKeyWords key;
++  u8 support_size = 0, selected_shell_count = 0;
++  std::array<u8, 4> support_slots{};
++};
++
++// Metadata-only acceptance. No power, form, GCD or key materialization on the
++// host path. Geometry/key exactness is the qualified producer's obligation.
++inline bool accept_metadata(const primitive::Request& request, const WireSelection& raw) {
++  if (raw.calls != 1 || raw.supports[0] || raw.q < 1 || raw.q > 4 || raw.q > request.count ||
++      raw.shell < raw.q || raw.shell > request.count || (request.count == 1) != (raw.q == 1) ||
++      raw.key_status != static_cast<u64>(key_helper::KeyStatus::kOk) || raw.key_materializations != 1 ||
++      ((raw.key_words[0] | raw.key_words[1]) == 0) || (raw.key_words[1] >> 63)) return false;
++  for (u8 i = 0; i < 4; ++i) {
++    if (i < raw.q) {
++      if (raw.slots[i] >= request.count || (i && raw.slots[i - 1] >= raw.slots[i])) return false;
++    } else if (raw.slots[i]) return false;
++  }
++  u64 rank = 0, attempts = 0;
++  for (u32 i = 0; i < raw.q; ++i) {
++    const u32 begin = i == 0 ? 0 : raw.slots[i - 1] + 1;
++    for (u32 v = begin; v < raw.slots[i]; ++v)
++      rank += primitive::choose(request.count - v - 1, raw.q - i - 1);
++  }
++  for (u32 q = 1; q <= 4; ++q) {
++    const u64 expected = q == raw.q ? rank + 1 : (q >= 2 && q < raw.q ? primitive::choose(request.count, q) : 0);
++    if (raw.supports[q] != expected) return false;
++    attempts += expected;
++  }
++  return raw.q == 1 ? raw.powers == 0 : raw.powers >= request.count && raw.powers <= attempts * request.count;
++}
+ struct BatchResult {
+   bool passed = false;
+   const char* reason = "not_run";
+-  std::vector<AnchorMebResult> values;  // published only if the entire lot passes
++  std::vector<AcceptedMebKey> values;  // no ExactLevel, no host-generated key
+   std::vector<WireSelection> observed; // diagnostics, never geometry authority
+   Phases work;
+ };
+@@ -359,7 +409,7 @@
+       backend_.bind_thread_device(); grow(input.size());
+       std::vector<WireRequest> wire(input.size());
+       std::vector<WireSelection> observed(input.size());
+-      std::vector<AnchorMebResult> values;
++      std::vector<AcceptedMebKey> values;
+       values.reserve(input.size());
+       for (size_t i = 0; i < input.size(); ++i) {
+         wire[i].snapshot = snapshot_.serial(); wire[i].batch = batch;
+@@ -383,6 +433,7 @@
+       for (const auto& raw : result.observed) {
+         add(backend_.work.reported_selection_calls, raw.calls);
+         add(backend_.work.reported_selection_powers, raw.powers);
++        add(backend_.work.reported_key_materializations, raw.key_materializations);
+         for (u8 q = 0; q < 5; ++q) add(backend_.work.reported_supports[q], raw.supports[q]);
+       }
+       for (size_t i = 0; i < input.size(); ++i) {
+@@ -390,23 +441,15 @@
+         if (raw.snapshot != snapshot_.serial() || raw.batch != batch || raw.ordinal != input[i].ordinal ||
+             raw.status != static_cast<u32>(primitive::Status::kOk) || raw.q > 4 || raw.shell > 10 || raw.reserved)
+           throw Error{"invalid_device_output"};
+-        primitive::Selection selected;
+-        selected.ordinal = raw.ordinal; selected.status = static_cast<primitive::Status>(raw.status);
+-        selected.q = static_cast<u8>(raw.q); selected.shell = static_cast<u8>(raw.shell);
+-        for (u8 slot = 0; slot < 4; ++slot) {
+-          if (raw.slots[slot] > 9) throw Error{"invalid_device_slot"};
+-          selected.slots[slot] = static_cast<u8>(raw.slots[slot]);
+-        }
+-        selected.calls = raw.calls; selected.powers = raw.powers;
+-        for (u8 q = 0; q < 5; ++q) selected.supports[q] = raw.supports[q];
+-        const auto materialized = primitive::materialize(snapshot.index().upos.data(), snapshot.index().upos.size(), input[i], selected);
+-        backend_.work.host_validation_powers += materialized.host_validation_power_tests;
+-        if (materialized.value.status != AnchorMebStatus::kOk) throw Error{"materialization_refused"};
+-        ++backend_.work.host_materializations;
+-        values.push_back(materialized.value);
++        if (!accept_metadata(input[i], raw)) throw Error{"metadata_refused"};
++        AcceptedMebKey accepted;
++        accepted.support_size = static_cast<u8>(raw.q); accepted.selected_shell_count = static_cast<u8>(raw.shell);
++        for (u8 slot = 0; slot < 4; ++slot) accepted.support_slots[slot] = static_cast<u8>(raw.slots[slot]);
++        for (u8 word = 0; word < 10; ++word) accepted.key.words[word] = raw.key_words[word];
++        values.push_back(accepted);
+       }
+       backend_.injection(Fault::kHostPublish);
+-      result.values = std::move(values); result.passed = true; result.reason = "whole_batch_materialized";
++      result.values = std::move(values); result.passed = true; result.reason = "whole_batch_device_key_accepted";
+     } catch (const Error& error) { poisoned_ = true; result.reason = error.reason; }
+       catch (const std::bad_alloc&) { poisoned_ = true; result.reason = "host_allocation_failed"; }
+     result.work = backend_.work;
+@@ -414,4 +457,4 @@
+   }
+ };
+ 
+-}  // namespace mhgp7::gpu_meb_route_private
++}  // namespace mhgp7::gpu_meb_key_route_private

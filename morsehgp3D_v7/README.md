@@ -23,6 +23,14 @@ y compris les plateaux non réguliers. O2/SAN : 170 320 contrôles,
 112 ordres et 45 948 comparaisons verticales contre Gram/Gamma indépendant.
 Cela ne certifie ni toute la génération WSPD ni un contrat de performance.
 
+La [porte du vrai raccord census → FULL à K10](docs/QUALIFICATION_TOUR_CENSUS_K10_20260911.md)
+passe désormais sur les sources c03f6be8 : trois géométries n12/n14,
+deux réindexages, s8/10/12 et cache/statique1/statique4, soit 54 tours par
+build O2/SAN. Inventaires rationnels, 13 000 coupes et 8 103 948 vérifications
+verticales ; neuf rejets et quatre mutants causaux. Le constructeur est
+alimenté par les vrais census, jamais par le catalogue du juge. C'est une
+qualification bornée supplémentaire, pas une preuve universelle WSPD.
+
 Les optimisations mono-thread qualifiées incluent la validation directe des
 supports réguliers, lots unitaires sans DSU et normalisation temporelle
 des images inférieures. La troisième supprime un reparcours quadratique
@@ -72,6 +80,14 @@ du 11 septembre passe maintenant sur la vraie G4 SM12.0 : 605 MEB,
 325 752 mots comparés. O2/SAN hôte précèdent cette exécution. La session
 SPOT est close, arrêt ciblé `TERMINATED` certifié. Ces primitives restent
 des prototypes séparés : ni résolveur complet ni tour FULL GPU intégrés.
+
+Deux coutures supplémentaires sont maintenant qualifiées **localement** :
+[MEB suivie de sa clé primitive](receipts/gpu_meb_key_route_20260911/README.md)
+sans rematérialisation hôte (605 cas), puis
+[minimiseurs entiers et premier intrus strict](receipts/gpu_intruder_primitive_20260911/README.md)
+(596 requêtes, 612 cas de transport). O2, SAN ROOT et compilation/lien CUDA
+stricts passent. Aucune de ces nouvelles coutures n'a encore été exécutée
+sur carte ; les succès G4 antérieurs ne leur sont pas transférés.
 
 Le [premier raccord privé du journal incrémental](receipts/incremental_full_trial_20260911/README.md)
 préserve les sorties physiques O2/SAN dans quatre modes, mais augmente

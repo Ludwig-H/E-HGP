@@ -1,0 +1,267 @@
+#include <array>
+#include <cstdio>
+#include <iostream>
+#include <numeric>
+#include <boost/multiprecision/cpp_int.hpp>
+#include "owner.hpp"
+#include "cpu_reference.hpp"
+#include "fixture_io.hpp"
+
+namespace {
+using namespace mhgp7;
+using namespace mhgp7::gpu_intruder_private;
+using Big=boost::multiprecision::cpp_int;
+u64 checks=0, queries=0, found=0, missing=0, shells=0, range_hits=0, excluded=0;
+u64 rejects=0, owner_rejects=0, high_coefficients=0, nontrivial_rounding=0, axis_cases=0, box_cases=0;
+u32 maximum_stack=0;
+Fixtures fixtures;
+void need(bool condition, const char* reason) { ++checks; if (!condition) throw std::runtime_error(reason); }
+Big big(i128 value) { return (Big((u64)((u128)value>>64))<<64)+(u64)value-(value<0 ? Big(1)<<128 : Big(0)); }
+Big axis(const BallKey& key, int i, i64 t) { return big(key.a)*t*t+big(key.b[i])*t; }
+Big power(const BallKey& key, const P3& p) { return big(key.c)+axis(key,0,p.x)+axis(key,1,p.y)+axis(key,2,p.z); }
+u64 next() { static u64 state=0x618474753cf912aeull; state^=state<<13; state^=state>>7; state^=state<<17; return state; }
+u32 oracle_min(const BallKey& key, int i, u32 low=0, u32 high=65535) {
+  // Independent decision: compare Big polynomial values at two neighbours,
+  // rather than reuse the remainder threshold of the implementation.
+  Big q=-big(key.b[i])/(2*big(key.a));
+  if (-big(key.b[i])%(2*big(key.a))<0) --q;
+  Big q1=q+1;
+  if (q<low) q=low;
+  if (q>high) q=high;
+  if (q1<low) q1=low;
+  if (q1>high) q1=high;
+  const auto v0=q.convert_to<u32>(), v1=q1.convert_to<u32>();
+  return axis(key,i,v1)<axis(key,i,v0) ? v1 : v0;
+}
+Request make_request(const BallKey& key, u64 snapshot, std::vector<i32> selected={}) {
+  Request request{}; request.snapshot=snapshot; request.selected_count=(u32)selected.size();
+  const i128 values[5]{key.a,key.b[0],key.b[1],key.b[2],key.c};
+  for (int i=0; i<5; ++i) gpu_ball_key_private::wire_store(request.key_words+2*i,(u128)values[i]);
+  for (size_t i=0; i<selected.size(); ++i) request.selected[i]=selected[i];
+  return request;
+}
+u32 cpu_peak(const CloudIndex& ix, const BallKey& key, std::span<const i32> selected) {
+  census_detail::AxisBounds bounds(key);
+  std::vector<NodeRef> stack{ix.root()}; u32 peak=1;
+  while (!stack.empty()) {
+    auto node=stack.back(); stack.pop_back();
+    i128 low,high; bounds.bounds(ix.box_of(node),&low,&high);
+    if (low>=0) continue;
+    if (high<0) {
+      auto range=ix.range_of(node);
+      for (i32 i=range.first; i<=range.last; ++i) if (!std::binary_search(selected.begin(),selected.end(),i)) return peak;
+    } else if (!is_leaf(node)) {
+      stack.push_back(ix.nodes[(size_t)node].right); stack.push_back(ix.nodes[(size_t)node].left);
+      peak=std::max(peak,(u32)stack.size());
+    }
+  }
+  return peak;
+}
+void export_case(const IndexView& view, const Request& request, const Result& expected) {
+  const u64 node_offset=fixtures.left.size(), point_offset=fixtures.positions.size()/3;
+  for (u32 i=0; i<view.nodes; ++i) {
+    fixtures.left.push_back(view.left[i]); fixtures.right.push_back(view.right[i]);
+    fixtures.first.push_back(view.first[i]); fixtures.last.push_back(view.last[i]);
+    for (int j=0; j<6; ++j) fixtures.boxes.push_back(view.box6[6ull*i+j]);
+  }
+  for (u64 i=0; i<3ull*view.positions; ++i) fixtures.positions.push_back(view.positions3[i]);
+  const auto offset=fixtures.cases.size(); fixtures.cases.resize(offset+kCaseWords);
+  auto* words=fixtures.cases.data()+offset;
+  words[0]=node_offset; words[1]=point_offset; words[2]=view.nodes; words[3]=view.positions;
+  words[4]=(u64)(i64)view.root; words[5]=view.snapshot; words[6]=request.snapshot; words[7]=request.selected_count;
+  for (int i=0; i<10; ++i) { words[8+i]=request.key_words[i]; words[18+i]=(u64)(i64)request.selected[i]; }
+  const auto result_offset=fixtures.expected.size(); fixtures.expected.resize(result_offset+kResultWords);
+  encode_result(expected,fixtures.expected.data()+result_offset);
+}
+void query(const CloudIndex& ix, const BallKey& key, const std::vector<i32>& selected={}) {
+  ++queries;
+  IndexOwner owner(ix,queries+100);
+  const auto view=owner.view(); const auto request=make_request(key,view.snapshot,selected);
+  const auto actual=find_intruder(view,request);
+  need(actual.status==Status::ok,"query.admission");
+  i32 expected_index=-1;
+  for (size_t i=0; i<ix.upos.size(); ++i) {
+    const auto value=power(key,ix.upos[i]);
+    if (value==0) ++shells;
+    if (std::find(selected.begin(),selected.end(),(i32)i)!=selected.end()) { if (value<0) ++excluded; continue; }
+    if (value<0 && expected_index<0) expected_index=(i32)i;
+  }
+  need(actual.intruder==expected_index,"query.first_geometry_index_boost");
+  if (expected_index>=0) ++found; else ++missing;
+  CpuStats work; std::vector<NodeRef> scratch;
+  const auto cpu=CpuReference{ix}.intruder_work(key,selected,work,scratch);
+  need(cpu==expected_index,"cpu.first_geometry_index_boost");
+  need(actual.queries==work.intruder_queries && actual.nodes==work.intruder_nodes &&
+       actual.interior_ranges==work.interior_ranges && actual.power_tests==work.intruder_power_tests,"query.cpu_counters");
+  need(actual.power_tests==0,"query.exact_leaf_bounds");
+  Result expected{}; expected.status=Status::ok; expected.intruder=expected_index;
+  expected.queries=work.intruder_queries; expected.nodes=work.intruder_nodes;
+  expected.interior_ranges=work.interior_ranges; expected.power_tests=work.intruder_power_tests;
+  expected.stack_peak=cpu_peak(ix,key,selected); expected.axis_divisions=3;
+  for (int i=0; i<3; ++i) {
+    expected.integer_min[i]=oracle_min(key,i);
+    need(actual.integer_min[i]==expected.integer_min[i],"axis.independent_minimizer");
+  }
+  need(actual.stack_peak==expected.stack_peak && actual.axis_divisions==3,"query.auxiliary_counters");
+  maximum_stack=std::max(maximum_stack,actual.stack_peak);
+  if (actual.interior_ranges) ++range_hits;
+  if (uabs128(key.b[0])>>64 || (u128)key.a>>64) ++high_coefficients;
+  export_case(view,request,expected);
+}
+CloudIndex cloud(std::vector<P3> points) {
+  // Input order and non-dense PointId intentionally do not identify geometry ranks.
+  std::vector<InputPoint> input;
+  for (size_t i=0; i<points.size(); ++i) input.push_back({(u32)(4000000000ull-97*i),points[points.size()-1-i]});
+  auto ix=build_cloud_index(input); need(ix.valid,"fixture.valid"); return ix;
+}
+void axes_and_boxes() {
+  for (i128 a=1; a<=5; ++a) for (i128 b=-25; b<=9; ++b) {
+    BallKey key{a,{b,b+1,b-1},-7};
+    u32 minima[3]{},divisions=0;
+    need(make_minimizers(key,minima,&divisions),"axis.admission");
+    ++axis_cases;
+    for (int i=0; i<3; ++i) {
+      u32 brute=0;
+      for (u32 t=1; t<=16; ++t) if (axis(key,i,t)<axis(key,i,brute)) brute=t;
+      need(minima[i]==brute,"axis.brute_integer_minimum");
+      const Big floor=-big(key.b[i])/(2*big(a));
+      if (floor>=0 && floor<=65535 && minima[i]!=floor.convert_to<u32>()) ++nontrivial_rounding;
+    }
+    for (u16 x=0; x<4; ++x) {
+      const u16 low[3]{x,1,0}, high[3]{(u16)(x+3),4,3};
+      i128 mn=0,mx=0; box_bounds(key,minima,low,high,&mn,&mx);
+      Big minimum=power(key,{low[0],low[1],low[2]}), maximum=minimum;
+      for (i64 xx=low[0]; xx<=high[0]; ++xx) for (i64 y=low[1]; y<=high[1]; ++y) for (i64 z=low[2]; z<=high[2]; ++z) {
+        const Big p=power(key,{xx,y,z}); if (p<minimum) minimum=p; if (p>maximum) maximum=p;
+      }
+      need(big(mn)==minimum && big(mx)==maximum,"box.brute_grid_bounds"); ++box_cases;
+    }
+  }
+}
+void fixtures_named() {
+  const auto line=cloud({{0,0,0},{1,0,0},{2,0,0},{3,0,0},{4,0,0},{5,0,0},{6,0,0},{7,0,0}});
+  query(line,{1,{-8,0,0},7});  // shell x=1,7; several interior ranks.
+  query(line,{1,{-8,0,0},7},{2,3});
+  query(line,{1,{-8,0,0},-100});  // full root, exclusion in range order.
+  query(line,{1,{-8,0,0},-100},{0,1,2,3,4,5,6,7});
+  query(line,{1,{-7,0,0},12});  // equal neighbours choose lower.
+  query(line,{2,{-7,0,0},5});   // upper neighbour strictly closer.
+  query(line,{1,{0,0,0},0});   // zero radius, origin shell.
+  query(cloud({{0,0,0}}),{1,{0,0,0},0});
+  query(cloud({{0,0,0}}),{1,{0,0,0},-1});
+  query(cloud({{65535,65535,65535}}),{1,{-131070,-131070,-131070},3*(i128)65535*65535});
+  query(line,{1,{-((i128)1<<80),((i128)1<<79),0},0});
+  query(line,{1,{((i128)1<<80),-((i128)1<<79),0},0});
+  query(line,{((i128)1<<67),{-((i128)1<<86),((i128)1<<85),0},-((i128)1<<104)});
+  const std::vector<P3> extreme{{0,0,0},{65535,65535,65535},{65535,0,0},{0,65535,0},{0,0,65535},{1,1,1}};
+  const auto ix=cloud(extreme);
+  for (u32 q=2; q<=4; ++q) {
+    gpu_ball_key_private::SupportRequest request{}; request.arity=q;
+    for (u32 i=0; i<q; ++i) request.points[i]=extreme[i];
+    const auto reduction=gpu_ball_key_private::support_key(request);
+    need(reduction.status==gpu_ball_key_private::Status::ok,"support.key_admitted");
+    query(ix,reduction.key);
+  }
+  for (bool mirrored : {false,true}) {
+    const u64 mask=mirrored ? (1ull<<48)-1 : 0;
+    std::vector<P3> comb;
+    for (int bit=-1; bit<48; ++bit) {
+      const u64 code=(bit<0 ? 0 : 1ull<<bit)^mask;
+      comb.push_back({(i64)morton_axis16(code,0),(i64)morton_axis16(code,1),(i64)morton_axis16(code,2)});
+    }
+    // Every ancestor box mixes negative and positive values while the origin
+    // is found last down the left comb: the qualified maximum is 49 pending refs.
+    const auto ci=cloud(comb);
+    query(ci,{1,{0,0,0},-1});
+    query(ci,{1,{-65535,-65535,-65535},0});
+  }
+}
+void random_queries() {
+  for (int scene=0; scene<48; ++scene) {
+    std::vector<P3> points;
+    const u64 extent=scene%3==0 ? 65536 : 32;
+    while (points.size()<24) {
+      const P3 p{(i64)(next()%extent),(i64)(next()%extent),(i64)(next()%extent)};
+      if (std::find(points.begin(),points.end(),p)==points.end()) points.push_back(p);
+    }
+    auto ix=cloud(points);
+    if (ix.has_duplicate_positions()) continue;
+    for (int trial=0; trial<12; ++trial) {
+      const i64 a=1+(i64)(next()%7), x=(i64)(next()%(extent+20))-10,
+          y=(i64)(next()%(extent+20))-10, z=(i64)(next()%(extent+20))-10;
+      const i64 radius=(i64)(next()%(extent+1));
+      BallKey key{a,{-2*a*x-(i64)(next()%a),-2*a*y,-2*a*z},(i128)a*(x*x+y*y+z*z-radius*radius)};
+      std::vector<i32> selected;
+      for (i32 i=0; i<(i32)ix.upos.size() && selected.size()<10; ++i) if (next()%3==0) selected.push_back(i);
+      query(ix,key,selected);
+    }
+  }
+}
+void rejections() {
+  const auto ix=cloud({{0,0,0},{1,0,0},{2,2,2},{3,3,3}});
+  IndexOwner owner(ix,55); const auto view=owner.view();
+  auto rejected=[&](const Request& request, Status status) {
+    const auto actual=find_intruder(view,request);
+    need(actual.status==status && actual.intruder==-1 && actual.queries==0,"reject.query");
+    Result expected; expected.status=status;
+    export_case(view,request,expected); ++rejects;
+  };
+  auto request=make_request({1,{0,0,0},-1},55);
+  auto bad=request; bad.snapshot=54; rejected(bad,Status::invalid_request);
+  bad=request; bad.selected_count=11; rejected(bad,Status::invalid_request);
+  bad=request; bad.selected_count=2; bad.selected[0]=1; bad.selected[1]=0; rejected(bad,Status::invalid_request);
+  bad=request; bad.selected_count=2; bad.selected[0]=1; bad.selected[1]=1; rejected(bad,Status::invalid_request);
+  bad=request; bad.selected_count=1; bad.selected[0]=-1; rejected(bad,Status::invalid_request);
+  bad=request; bad.selected_count=1; bad.selected[0]=4; rejected(bad,Status::invalid_request);
+  for (const BallKey& key : std::vector<BallKey>{{0,{0,0,0},0},{-1,{0,0,0},0},{(i128)1<<68,{0,0,0},0},
+      {1,{(i128)1<<87,0,0},0},{1,{-((i128)1<<87),0,0},0},{1,{0,0,0},(i128)1<<105},
+      {1,{0,0,0},-((i128)1<<126)-((i128)1<<126)}})
+    rejected(make_request(key,55),Status::invalid_key);
+  auto bad_view=view; bad_view.snapshot=0;
+  need(find_intruder(bad_view,request).status==Status::invalid_view,"reject.view_snapshot"); ++rejects;
+  bad_view=view; bad_view.nodes=99;
+  need(find_intruder(bad_view,request).status==Status::invalid_view,"reject.view_count"); ++rejects;
+  bad_view=view; bad_view.positions3=nullptr;
+  need(find_intruder(bad_view,request).status==Status::invalid_view,"reject.view_pointer"); ++rejects;
+  auto owner_reject=[&](CloudIndex candidate) {
+    bool threw=false;
+    try { IndexOwner invalid(candidate,99); } catch (const std::invalid_argument&) { threw=true; }
+    need(threw,"reject.owner_structure"); ++owner_rejects;
+  };
+  owner_reject(build_cloud_index(std::vector<P3>{}));
+  owner_reject(cloud({{0,0,0},{0,0,0}}));
+  auto broken=ix; std::swap(broken.nodes[0].left,broken.nodes[0].right); owner_reject(broken);
+  broken=ix; broken.nodes[0].left=0; owner_reject(broken);
+  broken=ix; broken.nodes[0].left=-2147483647; owner_reject(broken);
+  broken=ix; broken.nodes[0].last=2147483647; owner_reject(broken);
+  broken=ix; broken.nodes[0].tlo[0]=1; owner_reject(broken);
+  broken=ix; broken.keys[0]=broken.keys[1]; owner_reject(broken);
+  broken=ix; broken.upos[0].x=65536; owner_reject(broken);
+  broken=ix; broken.nodes[0].right=broken.nodes[0].left; owner_reject(broken);
+  // A geometrically stale index cannot reuse its old key/range certificate.
+  broken=ix; std::swap(broken.upos[0],broken.upos[1]); owner_reject(broken);
+}
+}
+int main(int argc, char** argv) {
+  const bool export_mode=argc==2 && std::string(argv[1])=="--export";
+  if (argc!=1 && !export_mode) return 2;
+  try {
+    axes_and_boxes(); fixtures_named(); random_queries(); rejections();
+    need(queries>=590 && found>200 && missing>100 && shells>10 && range_hits>200 && excluded>100 &&
+        high_coefficients>=3 && nontrivial_rounding>80 && axis_cases==175 && box_cases==700 &&
+        rejects>=16 && owner_rejects>=11 && maximum_stack==49,"nonvacuity");
+    if (export_mode) write_fixtures(fixtures,std::cout);
+    std::cerr << "{\"status\":\"passed\",\"checks\":" << checks << ",\"queries\":" << queries
+        << ",\"found\":" << found << ",\"missing\":" << missing << ",\"shell_points\":" << shells
+        << ",\"range_hits\":" << range_hits << ",\"excluded_interior\":" << excluded
+        << ",\"high_coefficients\":" << high_coefficients << ",\"nontrivial_rounding\":" << nontrivial_rounding
+        << ",\"axis_cases\":" << axis_cases << ",\"box_cases\":" << box_cases << ",\"rejects\":" << rejects
+        << ",\"owner_rejects\":" << owner_rejects << ",\"maximum_stack\":" << maximum_stack
+        << ",\"exported_cases\":" << fixtures.cases.size()/kCaseWords << "}\n";
+    return 0;
+  } catch (const std::exception& error) {
+    std::cerr << "FAIL " << error.what() << " checks=" << checks << " queries=" << queries
+        << " found=" << found << " missing=" << missing << " shells=" << shells << " peak=" << maximum_stack << '\n';
+    return 1;
+  }
+}

@@ -1,0 +1,1 @@
+{"status":"passed","checks":6861,"queries":596,"found":372,"missing":224,"shell_points":34,"range_hits":394,"excluded_interior":1083,"high_coefficients":3,"nontrivial_rounding":94,"axis_cases":175,"box_cases":700,"rejects":19,"owner_rejects":13,"maximum_stack":49,"exported_cases":612}

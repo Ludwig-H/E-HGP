@@ -1,0 +1,48 @@
+#!/usr/bin/env python3
+"""Create-only private provenance capture; no active source mutation."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+
+HERE = Path(__file__).resolve().parent
+REPO = HERE.parents[1]
+source = HERE / "source"
+source.mkdir(exist_ok=False)
+origins = {}
+for path in sorted((REPO / "morsehgp3D_v7/src").rglob("*")):
+    if not path.is_file():
+        continue
+    name = path.relative_to(REPO)
+    target = source / name
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(path, target)
+    origins[str(target.relative_to(HERE))] = dict(origin=str(name), sha256=hashlib.sha256(path.read_bytes()).hexdigest())
+qualified = REPO / "build/v7_gpu_ball_key_20260911"
+for name in ("ball_key_device.cuh", "wire.cuh", "nvcc_strict_host.py",
+             "source/morsehgp3D_v7/src/core/intmath.hpp", "source/morsehgp3D_v7/src/lanes/keys.hpp"):
+    path = qualified / name
+    target = HERE / name
+    shutil.copy2(path, target)
+    origins[name] = dict(origin=str(path.relative_to(REPO)), sha256=hashlib.sha256(path.read_bytes()).hexdigest())
+text = (source / "morsehgp3D_v7/src/forest/full_ball_tower.hpp").read_text()
+first = text.index("  i32 intruder_work(")
+last = text.index("\n  i32 intruder(", first)
+body = text[first:last]
+if "scratch.push_back(ix.nodes[node].right); scratch.push_back(ix.nodes[node].left);" not in body:
+    raise ValueError("reference ordering changed")
+adapter = """#pragma once
+#include <span>
+#include \"source/morsehgp3D_v7/src/pipeline/census.hpp\"
+namespace mhgp7::gpu_intruder_private {
+struct CpuStats { u64 intruder_queries=0, intruder_nodes=0, interior_ranges=0, intruder_power_tests=0; };
+struct CpuReference {
+  const CloudIndex& ix;
+  using FullBallStats=CpuStats;
+  static void add(u64& value) { ++value; }
+""" + body + "\n};\n}\n"
+(HERE / "cpu_reference.hpp").write_text(adapter)
+origins["cpu_reference.hpp"] = dict(origin="verbatim intruder_work method from pinned full_ball_tower.hpp, only enclosing class/stats supplied", sha256=hashlib.sha256(adapter.encode()).hexdigest())
+(HERE / "baseline.json").write_text(json.dumps(dict(commit=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO).decode().strip(), files=origins), indent=2, sort_keys=True) + "\n")
+print("private source capture", len(origins))

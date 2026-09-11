@@ -1,0 +1,1 @@
+{"captures": 8, "checked_portable_words": 14688, "cpp_mutants": 6, "device_executed": false, "exported_cases": 612, "logical_files": 751, "manifest_sha256": "f124d56120fef6e6674d58f2adf0f24321531f2d50810321cc6bf1312401ec34", "queries": 596, "reader_only_faults_rejected": 6, "status": "passed"}

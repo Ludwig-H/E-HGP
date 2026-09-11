@@ -6,6 +6,14 @@
 Plan de port mis à jour après une première exécution de primitives sur G4.
 Le résolveur complet et son raccord à la tour GPU restent à implémenter.
 
+Après la session G4, la [couture MEB + clé](../receipts/gpu_meb_key_route_20260911/README.md)
+est qualifiée O2/SAN ROOT et NVCC strict : le backend forme désormais la
+clé primitive, sans matérialisation ni revalidation de puissance sur CPU.
+Elle ne rend pas encore de niveau. Le [helper du premier intrus](../receipts/gpu_intruder_primitive_20260911/README.md)
+est également clos localement : minimiseurs entiers, exclusions, parcours,
+propriétaire d'index hôte et gate portable. Aucun de ces nouveaux raccords
+n'a tourné sur device ; leurs prédécesseurs G4 gardent leurs preuves séparées.
+
 La [voie statique CPU](RESOLUTION_STATIQUE_CPU_20260911.md) sépare désormais
 les résolutions géométriques des composantes temporelles. La première
 réduction de travail est qualifiée ; le GPU doit ensuite traiter les clés
@@ -68,10 +76,10 @@ de cette interface locale.
 
 | Travail nécessaire | Réutilisation et obligation distincte |
 | --- | --- |
-| Clé de boule primitive | PGCD/réduction et division pleine largeur maintenant qualifiés séparément sur G4, 13 573 cas ; les joindre à la sélection MEB dans le futur résolveur |
+| Clé de boule primitive | Raccord MEB + clé maintenant qualifié localement sur 605 cas, 6 050 mots, sans matérialisation hôte ; exécution device de ce raccord encore à faire |
 | Recherche de catalogue | Comparer la clé entière, contrôler l'intervalle de K et l'antériorité stricte ; ni hash seul ni présence globale sans admission |
-| Recherche de l'intrus | Reprendre exclusions des sites sélectionnés et ordre gauche d'abord/ranges croissants du resolver ; le census device existant visite droite d'abord |
-| Élagage de l'index | Produire les minimiseurs entiers pour chaque nouvelle boule ; ceux du census courant arrivent déjà calculés par l'hôte |
+| Recherche de l'intrus | Helper local qualifié contre Boost et le parcours CPU sur 596 requêtes ; même premier indice et mêmes compteurs, six mutants causaux |
+| Élagage de l'index | Minimiseurs entiers produits dans le helper HD ; 175 cas d'axes et 700 boîtes exhaustives ; ceux du census historique restent calculés par l'hôte |
 | Descente | Conserver la décroissance exacte, y compris à rayon égal par baisse de coquille sélectionnée ; aucun plafond d'itérations transformé en terminal |
 | Remise au calendrier | Rendre une BallId, puis normaliser son ancre fermée à la coupe pré-lot CPU ; ne transmettre aucun jeton union-find historique aux workers |
 
@@ -79,6 +87,18 @@ Le lookup et la MEB ne doivent pas consulter les ancres courantes. L'auditeur
 a [justifié cette indépendance sous census exact complet](../audits/receipts_raccord_ancres_20260910/suite_cache_20260910/NOTE_PHASE_STATIQUE_MEB.md).
 Les lots simultanés, naissances sans représentant, contributions unaires et
 verticales historiques gardent leur calendrier nominal.
+
+Le [plan détaillé du terminal suivant](../receipts/gpu_meb_key_route_20260911/PLAN_TERMINAL.md)
+réunit ces helpers sans aller-retour hôte par étape. Les niveaux internes
+peuvent rester bruts : q2 distance carrée/4, q3/q4 depuis leurs formes,
+comparaison sémantique U320. Inutile de canoniser chaque niveau ; ne pas
+le reconstruire naïvement depuis BallKey, dont `4A²` peut dépasser le
+dénominateur i128 admis. K1 garde son chemin vers les feuilles sur CPU ;
+le premier terminal géométrique cible K2..10 et rend une BallId, pas un
+token DSU. Le propriétaire final devra lier index **et** catalogue à une
+génération commune. Les premières gates FULL puis le
+[juge T2](QUALIFICATION_TOUR_CENSUS_K10_20260911.md) seront rejoués sur ce
+raccord ; aucun résultat de leurs sources antérieures n'est hérité.
 
 ## Résidence et mesures
 

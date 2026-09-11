@@ -1,0 +1,9 @@
+/workspaces/E-HGP/build/v7_gpu_intruder_20260911/san_root_r1/source_snapshot/gate.cpp: In function ‘void {anonymous}::rejections()’:
+/workspaces/E-HGP/build/v7_gpu_intruder_20260911/san_root_r1/source_snapshot/gate.cpp:213:19: error: loop variable ‘fresh’ creates a copy from type ‘const mhgp7::gpu_intruder_private::IndexView’ [-Werror=range-loop-construct]
+  213 |   for (const auto fresh : {same_owner.view(),other_owner.view()}) {
+      |                   ^~~~~
+/workspaces/E-HGP/build/v7_gpu_intruder_20260911/san_root_r1/source_snapshot/gate.cpp:213:19: note: use reference type to prevent copying
+  213 |   for (const auto fresh : {same_owner.view(),other_owner.view()}) {
+      |                   ^~~~~
+      |                   &
+cc1plus: all warnings being treated as errors

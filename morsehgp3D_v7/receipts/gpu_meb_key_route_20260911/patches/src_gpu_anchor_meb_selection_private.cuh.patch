@@ -1,0 +1,19 @@
+--- upstream/src/gpu/anchor_meb_selection_private.cuh
++++ source/morsehgp3D_v7/src/gpu/anchor_meb_selection_private.cuh
+@@ -160,6 +160,9 @@
+ // enumeration: materialization checks only the support selected by the kernel.
+ // A later positive support can certify the same MEB. Rank bounds do not prove
+ // that an unobserved enumeration prefix was executed or rejected correctly.
++#if defined(MHGP7_MEB_KEY_FORBID_LEGACY_HOST_MATERIALIZE)
++inline Materialized materialize(const P3*, u64, const Request&, const Selection&) = delete;
++#else
+ inline Materialized materialize(const P3* positions, u64 position_count,
+     const Request& request, const Selection& selected) {
+   Materialized out;
+@@ -242,5 +245,6 @@
+   out.value = result;
+   return out;
+ }
++#endif
+ 
+ }  // namespace mhgp7::gpu_meb_private

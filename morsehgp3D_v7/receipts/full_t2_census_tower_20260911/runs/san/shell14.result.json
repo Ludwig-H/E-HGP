@@ -1,0 +1,7 @@
+{
+  "name": "shell14",
+  "exit": 0,
+  "expected_exit": 0,
+  "causal_diagnostic_matched": true,
+  "elapsed_s": 10.147789415999796
+}

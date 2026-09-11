@@ -1,0 +1,17 @@
+{
+  "authority": "post_capture_read_only_hashes_not_new_execution",
+  "files": {
+    "host_r1/device_gate": "3311214e9fa10fd623c19f8127b62547729d31c96aa1d56cacd78bc0186092d4",
+    "host_san_root_r1/device_gate": "483e65855a2765a03aa8dc9ce10e43dda83efa6aa47cdd66f0f6eb3cc503cf64",
+    "mutants_r1/mutant1": "2bfef3c59b91eeef986e01d3c16c739808f2765c05943857b006e478323f954b",
+    "mutants_r1/mutant2": "3b744f89a2c4d5ce24b1b22f4a8c56a040c52155fefda674437b4b66210dc41d",
+    "mutants_r1/mutant3": "783a8a08137a4f597da073edde8b8652d90e035ba05d2aa3d4be4ff0ebcf2257",
+    "mutants_r1/mutant4": "316ef8473fc882875b1fd40a9dc7b9c24738611927d50c0c0711a169d05df032",
+    "mutants_r1/mutant5": "73a6a8a14fa60890eaa495f09c0ed5e3ce17abf1f4fc4f2665862b85d4c9d610",
+    "mutants_r1/mutant6": "cc008ccf9f5ac1aaf53ac607ba33ac781fa4057bd40af387110e22c9afd4fd87",
+    "nvcc_r1/device_gate": "29f7b41dd27f32caf3b03a445f0b59e29dc64cdf121468e2479d1964b1e45ab6",
+    "o2_r1/gate": "cc58be26ec6cbcff50263ed790ddf81f23931e5c0d4efbc1d9c75ec07baed70a",
+    "o2_r2/gate": "746a2c2017c67354111b3c1b52f6fc32c09e85d78409f9ddfb52a03c6d6ef47a",
+    "san_root_r2/gate": "55610713800f6372a2617432532ab53a293bc2deda45c95ffb7a9d176ecd55b3"
+  }
+}

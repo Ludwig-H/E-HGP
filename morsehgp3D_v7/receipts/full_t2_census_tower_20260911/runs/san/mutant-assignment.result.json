@@ -1,0 +1,7 @@
+{
+  "name": "mutant-assignment",
+  "exit": 1,
+  "expected_exit": 1,
+  "causal_diagnostic_matched": true,
+  "elapsed_s": 0.02142123200064816
+}

@@ -1,0 +1,1 @@
+FAIL query.first_geometry_index_boost checks=1412 queries=2 found=1 missing=0 shells=4 peak=3
