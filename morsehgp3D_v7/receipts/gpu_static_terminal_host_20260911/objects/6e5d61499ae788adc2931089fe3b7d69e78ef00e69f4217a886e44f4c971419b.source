@@ -1,0 +1,72 @@
+#!/usr/bin/env python3
+"""Create one private composed source tree; leave all consumed snapshots alone."""
+import hashlib
+import io
+import json
+from pathlib import Path
+import subprocess
+import tarfile
+
+ROOT = Path(__file__).resolve().parent
+REPO = ROOT.parents[1]
+MEB = REPO / "build/v7_gpu_meb_key_20260911"
+INTRUDER = REPO / "build/v7_gpu_intruder_20260911"
+COMMIT = "c03f6be8488453486b112811071827a96303ec86"
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def write(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("xb") as stream:
+        stream.write(data)
+
+
+def main():
+    source = ROOT / "source"
+    source.mkdir(exist_ok=False)
+    payload = (MEB / "manifest.json").read_bytes()
+    if sha(payload) != "2e26fa2d592f3455a8fddfd7aa3e9a98370d24bf537c22fe07d20eb9500414a9":
+        raise RuntimeError("MEB closure drift")
+    manifest = json.loads(payload)
+    pins = {"base_commit": COMMIT, "meb_closure_sha256": sha(payload), "sources": {}, "intruder": {}}
+    for name, entry in manifest["files"].items():
+        if not name.startswith("source/"):
+            continue
+        data = (MEB / name).read_bytes()
+        if sha(data) != entry["sha256"]:
+            raise RuntimeError("MEB source drift")
+        write(ROOT / name, data)
+        pins["sources"][name] = sha(data)
+    archive_bytes = subprocess.run(["git", "archive", COMMIT, "morsehgp3D_v7/oracle",
+        "morsehgp3D_v7/tests/full_ball_tower_gate.cpp"], cwd=REPO, check=True, capture_output=True).stdout
+    with tarfile.open(fileobj=io.BytesIO(archive_bytes)) as archive:
+        for member in archive.getmembers():
+            if not member.isfile():
+                continue
+            if Path(member.name).is_absolute() or ".." in Path(member.name).parts:
+                raise RuntimeError("unsafe archive")
+            data = archive.extractfile(member).read()
+            write(source / member.name, data)
+            pins["sources"]["source/" + member.name] = sha(data)
+    for name in ("intruder.cuh", "owner.hpp", "wire.cuh", "ball_key_device.cuh", "cpu_reference.hpp", "PROOF.md"):
+        data = (INTRUDER / name).read_bytes()
+        if name == "intruder.cuh" and sha(data) != "165fd5964c9ea2394ca29747b236713d74528db4fd4149429f9080dd423cc75a":
+            raise RuntimeError("intruder helper pin changed")
+        write(ROOT / name, data)
+        write(ROOT / "upstream_intruder" / name, data)
+        pins["intruder"][name] = sha(data)
+    data = (MEB / "nvcc_strict_host.py").read_bytes()
+    write(ROOT / "nvcc_strict_host.py", data)
+    (ROOT / "nvcc_strict_host.py").chmod(0o700)
+    for name in ("src/forest/full_ball_tower.hpp", "tests/full_ball_tower_gate.cpp"):
+        write(ROOT / "originals" / name, (source / "morsehgp3D_v7" / name).read_bytes())
+    write(ROOT / "baseline_pins.json", (json.dumps(pins, indent=2, sort_keys=True) + "\n").encode())
+    print(json.dumps({"source_files": len(pins["sources"]), "intruder_files": len(pins["intruder"]),
+                      "base_commit": COMMIT, "compiled": False}))
+
+
+if __name__ == "__main__":
+    main()

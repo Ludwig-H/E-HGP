@@ -1,0 +1,1148 @@
+{
+  "backtraceGraph" : 
+  {
+    "commands" : 
+    [
+      "add_test",
+      "mhgp7_gate"
+    ],
+    "files" : 
+    [
+      "/workspaces/E-HGP/morsehgp3D_v7/CMakeLists.txt"
+    ],
+    "nodes" : 
+    [
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 61,
+        "parent" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 1
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 63,
+        "parent" : 3
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 4
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 153,
+        "parent" : 6
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 7
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 155,
+        "parent" : 9
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 10
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 159,
+        "parent" : 12
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 13
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 161,
+        "parent" : 15
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 16
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 188,
+        "parent" : 18
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 19
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 190,
+        "parent" : 21
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 22
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 196,
+        "parent" : 24
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 25
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 198,
+        "parent" : 27
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 28
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 203,
+        "parent" : 30
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 31
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 204,
+        "parent" : 33
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 34
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 206,
+        "parent" : 36
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 37
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 208,
+        "parent" : 39
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 40
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 212,
+        "parent" : 42
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 43
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 214,
+        "parent" : 45
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 46
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 216,
+        "parent" : 48
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 49
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 218,
+        "parent" : 51
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 52
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 222,
+        "parent" : 54
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 55
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 224,
+        "parent" : 57
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 58
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 227,
+        "parent" : 60
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 61
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 229,
+        "parent" : 63
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 64
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 231,
+        "parent" : 66
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 67
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 234,
+        "parent" : 69
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 70
+      }
+    ]
+  },
+  "kind" : "ctestInfo",
+  "tests" : 
+  [
+    {
+      "backtrace" : 2,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_witness_front_gate",
+        "-DARGS=--selftest",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_witness_front",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate",
+            "witness_front"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 5,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_witness_front_gate",
+        "-DARGS=--unknown",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_witness_front_bad_argument",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate",
+            "witness_front"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 8,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_facet_resolver_cache_gate",
+        "-DARGS=--selftest",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_facet_resolver_cache",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "facet_resolver_cache",
+            "gate",
+            "oracle"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 11,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_facet_resolver_cache_gate",
+        "-DARGS=--unknown",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_facet_resolver_cache_bad_argument",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "facet_resolver_cache",
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 14,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_full_gabriel_digest_gate",
+        "-DARGS=--selftest",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_gabriel_digest",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_gabriel_digest",
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 17,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_full_gabriel_digest_gate",
+        "-DARGS=--unknown",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_gabriel_digest_bad_argument",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_gabriel_digest",
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 20,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_local_plateau_gate",
+        "-DARGS=--selftest",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_local_plateau",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate",
+            "local_plateau",
+            "oracle"
+          ]
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 23,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_local_plateau_gate",
+        "-DARGS=--unknown",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_local_plateau_bad_argument",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "gate",
+            "local_plateau"
+          ]
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 26,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_full_coverage_certificate_gate",
+        "-DARGS=--selftest",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_coverage_certificate",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_coverage_certificate",
+            "gate",
+            "oracle"
+          ]
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 29,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_full_coverage_certificate_gate",
+        "-DARGS=--unknown",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_coverage_certificate_bad_argument",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_coverage_certificate",
+            "gate"
+          ]
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 32,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_census_route_stub_gate",
+        "-DARGS=--selftest",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_census_route_stub",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "stub"
+          ]
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 35,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_census_route_stub_gate",
+        "-DARGS=--unknown",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_census_route_stub_bad_argument",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "stub"
+          ]
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 38,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_anchor_meb_gate",
+        "-DARGS=--selftest",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_anchor_meb",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "anchor_meb",
+            "gate",
+            "oracle"
+          ]
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 41,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_anchor_meb_gate",
+        "-DARGS=--unknown",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_anchor_meb_bad_argument",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "anchor_meb",
+            "gate"
+          ]
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 44,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_full_ball_tower_gate",
+        "-DARGS=--selftest",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_ball_tower",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_ball_tower",
+            "gate",
+            "oracle"
+          ]
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 47,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_full_ball_tower_gate",
+        "-DARGS=--unknown",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_ball_tower_bad_argument",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_ball_tower",
+            "gate"
+          ]
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 50,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_full_ball_tower_gate",
+        "-DARGS=--static-1",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_ball_static_cpu1",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_ball_static",
+            "full_ball_tower",
+            "gate",
+            "oracle"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 53,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_full_ball_tower_gate",
+        "-DARGS=--static-4",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_ball_static_cpu4",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_ball_static",
+            "full_ball_tower",
+            "gate",
+            "oracle"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 56,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_full_ball_work_gate",
+        "-DARGS=--selftest",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_ball_work",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_ball_tower",
+            "gate",
+            "oracle"
+          ]
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 59,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_full_ball_work_gate",
+        "-DARGS=--unknown",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_ball_work_bad_argument",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_ball_tower",
+            "gate"
+          ]
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 62,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_full_ball_tower_probe",
+        "-DARGS=--n=8 --s=8 --kmax=10 --threads=1",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_ball_tower_probe_smoke",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_ball_tower",
+            "gate"
+          ]
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 65,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_full_ball_tower_probe",
+        "-DARGS=--unknown",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_ball_tower_probe_bad_argument",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_ball_tower",
+            "gate"
+          ]
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 68,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_full_ball_tower_probe",
+        "-DARGS=--n=8 --s=8 --kmax=10 --threads=1 --static-threads=2",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_ball_static_probe_smoke",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_ball_static",
+            "full_ball_tower",
+            "gate"
+          ]
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 71,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_full_ball_tower_probe",
+        "-DARGS=--n=8 --s=8 --kmax=10 --threads=1 --static-threads=-1",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_ball_static_probe_bad_threads",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_ball_static",
+            "full_ball_tower",
+            "gate"
+          ]
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build"
+        }
+      ]
+    }
+  ],
+  "version" : 
+  {
+    "major" : 1,
+    "minor" : 0
+  }
+}

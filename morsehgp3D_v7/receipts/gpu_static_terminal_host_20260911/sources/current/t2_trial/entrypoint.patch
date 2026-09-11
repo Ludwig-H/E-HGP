@@ -1,0 +1,11 @@
+--- t2_gate.original.cpp
++++ t2_gate.cpp
+@@ -193,7 +193,7 @@
+ }
+ }  // namespace
+ 
+-int main(int argc, char** argv) {
++int terminal_t2_reference_main(int argc, char** argv) {
+   try {
+     if (argc != 2) return 2;
+     std::string_view mode(argv[1]);

@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+"""Freeze the qualified clean O2 probe; no engine execution or compilation."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+
+BASE=Path(__file__).resolve().parent
+ROOT=BASE.parents[1]
+ORIGIN=ROOT/'build/v7_post_exchange_seed_20260911'
+REFERENCE=ROOT/'morsehgp3D_v7/receipts/static_resolution_scale_20260911'
+HEADER='morsehgp3D_v7/src/forest/full_ball_tower.hpp'
+HEADER_SHA='6763a877f43d79a45532bce4426feca645b6ee97f18c9a4ee1fea4c47cd408a5'
+BINARY_SHA='45e043036ba866284aaa1f475923a39512826ab62318defe2178ca60239e6b4e'
+REFERENCE_SHA='2485cafaf912c9138cb618199f7fd59cd3670bcc2365be05295d4e3eca54d5e9'
+
+
+def need(ok,why):
+    if not ok:raise RuntimeError(why)
+
+
+def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def save(path,value):
+    with path.open('x') as stream:
+        json.dump(value,stream,indent=2,sort_keys=True);stream.write('\n')
+
+
+def pins(path):return {p.relative_to(path).as_posix():sha(p) for p in sorted(path.rglob('*')) if p.is_file()}
+
+
+def main():
+    for run in ('clean_o2_r1','clean_san_root_r1'):
+        receipt=json.loads((ORIGIN/run/'receipt.json').read_text())
+        need(receipt['status']=='passed' and receipt['sources_stable'] and receipt['commands']==14,'clean_qualification')
+        need(sha(ORIGIN/run/'source/product'/HEADER)==HEADER_SHA,'qualified_clean_header')
+    original=ORIGIN/'clean_o2_r1'
+    need(sha(original/'probe')==BINARY_SHA,'qualified_probe_binary')
+    binaries=json.loads((original/'binaries.json').read_text())
+    need(binaries['probe']==dict(before=BINARY_SHA,after=BINARY_SHA),'O2_binary_closure')
+    before=json.loads((original/'sources_before.json').read_text())
+    need(before==json.loads((original/'sources_after.json').read_text())==pins(original/'source'),'O2_source_closure')
+    need(sha(REFERENCE/'MANIFEST.json')==REFERENCE_SHA,'static_reference_pin')
+    manifest=json.loads((REFERENCE/'MANIFEST.json').read_text())
+    out=BASE/'input'
+    out.mkdir(exist_ok=False)
+    shutil.copytree(original/'source/product',out/'source')
+    shutil.copyfile(original/'probe',out/'probe')
+    (out/'probe').chmod(0o755)
+    selected=['commands.json','receipt.json','binaries.json','sources_before.json','sources_after.json','probe.d']
+    for name in selected:
+        shutil.copyfile(original/name,out/('O2_'+name))
+    shutil.copyfile(ORIGIN/'clean_san_root_r1/receipt.json',out/'SAN_receipt.json')
+    shutil.copyfile(REFERENCE/'MANIFEST.json',out/'reference_manifest.json')
+    for n in (8000,16000,32000):
+        name=f'n{n}_s8_static4/stdout'
+        comparison=f'n{n}_s8_static4/comparison.json'
+        for logical in (name,comparison):
+            need(sha(REFERENCE/logical)==manifest['files'][logical],'exact_reference_capture')
+        shutil.copyfile(REFERENCE/name,out/f'reference_{n}.stdout')
+        shutil.copyfile(REFERENCE/comparison,out/f'reference_{n}_comparison.json')
+    save(out/'source_pins.json',pins(out/'source'))
+    save(out/'pins.json',dict(header_sha256=HEADER_SHA,binary_sha256=BINARY_SHA,
+        reference_manifest_sha256=REFERENCE_SHA,origin=str(original),source_scope='product',
+        compiler_optimization='O2_DNDEBUG',new_engine_execution=False,GCP_used=False))
+    shutil.copyfile(Path(__file__),out/'prepare_input.py.source')
+    need(sha(out/'probe')==BINARY_SHA and sha(out/'source'/HEADER)==HEADER_SHA,'copied_input_exact')
+    save(out/'MANIFEST.json',pins(out))
+    print(json.dumps(dict(status='input_frozen_no_execution',binary_sha256=BINARY_SHA,
+         source_header_sha256=HEADER_SHA,manifest_sha256=sha(out/'MANIFEST.json'))))
+
+
+if __name__=='__main__':main()

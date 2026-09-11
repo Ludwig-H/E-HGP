@@ -1,0 +1,10 @@
+{
+  "GCP_used": false,
+  "baseline_retained": false,
+  "error": null,
+  "exit_code": 0,
+  "public_status": "not_claimed",
+  "sources_and_binary_stable": true,
+  "standalone_process": true,
+  "status": "completed"
+}

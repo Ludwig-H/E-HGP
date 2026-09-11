@@ -1,0 +1,8 @@
+{
+  "gate_sha256": "13f06875da99ae8413b0e64115964979bc5afe9f0c6f7224a7cd4efe773883dc",
+  "gate_source": "/workspaces/E-HGP/build/v7_t2_metadata_20260911/source/t2_gate.cpp",
+  "inherited_results": false,
+  "oracle_sha256": "57b615240896f4631434421fa2360d8e5b87db41b0cfc74a28afa0bd0727939c",
+  "oracle_source": "/workspaces/E-HGP/build/v7_t2_census_tower_20260911/t2_oracle.hpp",
+  "product_headers_imported_from_T2": false
+}

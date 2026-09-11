@@ -57,8 +57,14 @@ insuffisant. Micro mono : environ −5,7 % de MEB et −6,5 à −6,8 % de suppo
 supplémentaires ; pas de gain chronométrique qualifié. Le [build actif](receipts/post_exchange_active_cmake_20260911/README.md)
 passe ses 24 CTests, et le [T2 propre](receipts/full_t2_post_exchange_20260911/README.md)
 ses 54 tours O2/SAN avec 120 hits/228 recherches, sans reprise des chiffres
-historiques ci-dessus. Le nouveau triplet mono est en cours, un processus
-par taille, sans compilation concurrente du chantier.
+historiques ci-dessus. Le [nouveau triplet mono](receipts/post_exchange_scale_20260911/README.md)
+est clos, un processus par taille sans compilation concurrente du chantier :
+3 947 627 / 8 278 207 / 17 199 233 MEB payées et
+237 557 / 501 258 / 1 045 620 évitées à 8k/16k/32k. Les 35 champs/digests
+et R/U/S par K coïncident. Totaux 141,366 / 318,968 / 694,459 s ; FULL
+58,977 / 134,329 / 292,341 s ; pic RSS 8,687 Gio à 32k. Pas de speedup
+historique ou de gain RSS revendiqué, ni de qualification s10/s12 ou 50k
+sur ce nouveau header.
 
 L'[auditeur du journal](audits/receipts_coverage_cpp_20260910/README.md)
 a démontré que parent→0 échappait au juge antérieur. La gate renforcée
@@ -124,8 +130,21 @@ La gate autonome de ce dernier compare 14 688 mots pour 612 cas ; pile
 Morton 49 effectivement exercée et générations de propriétaires distinctes.
 Les deux vrais kernels compilent et se lient sous NVCC strict, mais aucune
 nouvelle exécution device n'a eu lieu. GCP non utilisé pour cette reprise.
-Le terminal entier commence dans un arbre privé : ces helpers ne sont pas
-encore raccordés au constructeur actif.
+Le [terminal entier composé](receipts/gpu_static_terminal_host_20260911/README.md)
+est maintenant clos en stub O2/SAN : cœur FULL, T2 54 tours et rejets, sur
+la baseline c03 sans le nouveau raccourci après échange. La collision réelle
+entre deux compteurs de propriétaires est corrigée par réemploi du token de
+l'index possédé ; le même juge croisé réfute l'ancien owner et refuse la vue
+mixte avant MEB dans le nouveau. Les sources et échecs antérieurs sont
+conservés. Pas d'exécution device dans ce paquet ni de raccord au constructeur
+actif ; ses gates paient aussi les références et ne sont pas des benchmarks.
+Le [paquet CUDA séparé](receipts/gpu_static_terminal_cuda_20260911/README.md)
+ferme export exact, O2/SAN ROOT et compilation/lien NVCC stricts, sans aucune
+exécution device. Il compare 949 facettes et 1 428 traces sur K2..8 seulement,
+avec douze rejets et huit corruptions de transport réfutées. La prochaine
+qualification doit ajouter K9/K10 sur le transport/kernel et choisir
+explicitement sa source cible avant G4 ; les six preuves hôte c03 ne
+qualifient pas silencieusement le nouveau header actif après échange.
 
 Le [raccord FULL privé du journal incrémental](receipts/incremental_full_trial_20260911/README.md)
 passe les comparaisons physiques O2/SAN dans quatre modes et les refus
@@ -202,6 +221,7 @@ Prochaines coutures et prototypes séparés :
 - [Parcours droit des intrus](receipts/rightmost_intruder_20260910/README.md) : prototype de deux lignes non intégré ; 28 nuages O2/SAN et 72 840 requêtes contre un juge de choix. À n1000 : −18,7 % de visites et −3,07 % de MEB, pas de gain contractuel.
 - [Journal incrémental](docs/PLAN_JOURNAL_INCREMENTAL.md) : raccord privé FULL O2/SAN correct dans quatre modes, non intégré après micro défavorable sur allocations/rétention finale ; vues plates et suppression des copies restent à évaluer.
 - [Primitives de résolutions GPU](docs/RESULTATS_PRIMITIVES_GPU_20260911.md) : MEB par lots et clé/PGCD/division passent sur G4 après O2/SAN ; sources privées, ni terminal ni raccord de tour GPU. Le premier prototype et ses échecs restent conservés séparément.
+- [Graphe filtré des boules](docs/GRAPHE_FILTRE_BOULES_PROPOSITION_20260911.md) : proposition pour paralléliser ensuite les fusions, sous terminales exactes et quotient local corrects. L'induction conserve les parents ; les contributions datées et les verticales ne découlent pas d'un graphe nu. Aucun code ou gain mesuré, relecture indépendante demandée.
 - [Front WSPD optionnel](receipts/witness_front_20260910/README.md) : 431 010 contrôles O2/SAN, liaison explicite à l'index et générations vérifiées. Le batch device reste privé et non exécuté sur GPU ; le générateur nominal reste scalaire.
 
 Le premier reçu des [quatre blocs nommés](receipts/full_ball_named_blocks_20260910/README.md)

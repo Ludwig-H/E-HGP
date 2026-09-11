@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+"""Synthetic comparison-parser tests only; never run any engine or recorder."""
+import copy
+import json
+from pathlib import Path
+import record
+
+ROOT=Path(__file__).resolve().parents[2]
+reference=json.loads((ROOT/'morsehgp3D_v7/receipts/static_resolution_scale_20260911/n8000_s8_static4/stdout').read_text())
+nominal=copy.deepcopy(reference)
+nominal['static_threads']=1
+nominal['resolver_cache_accounting']='static_exact_sort_unique_complete_population_seeds_after_exchange_v2'
+for row in nominal['static_orders']:
+    row.update(post_seed_queries=0,post_seed_hits=0,post_seed_terminals=0)
+nominal['static_orders'][1].update(post_seed_queries=nominal['intruder_queries'],post_seed_hits=1,post_seed_terminals=1)
+nominal['resolver_meb_calls']-=1
+nominal['anchor_hits']-=1
+nominal['resolver_supports_tested']-=1
+
+
+def main():
+    result=record.compare(nominal,reference,8000)
+    if result['H']!=1 or result['old_MEB']-result['new_MEB']!=1:
+        raise RuntimeError('synthetic_positive')
+    mutations=[('digest',lambda v:v.update(payload_digest='a'*64)),
+        ('R',lambda v:v['static_orders'][3].update(requests=v['static_orders'][3]['requests']+1)),
+        ('H_T',lambda v:v['static_orders'][1].update(post_seed_terminals=0)),
+        ('Q',lambda v:v['static_orders'][1].update(post_seed_queries=2)),
+        ('fake_anchor_hit',lambda v:v.update(anchor_hits=v['anchor_hits']+1)),
+        ('MEB_not_removed',lambda v:v.update(resolver_meb_calls=v['resolver_meb_calls']+1)),
+        ('float_H',lambda v:v['static_orders'][1].update(post_seed_hits=1.0)),
+        ('boolean_threads',lambda v:v.update(threads=True)),
+        ('wrong_tag',lambda v:v.update(resolver_cache_accounting='old'))]
+    rejected=[]
+    for name,mutate in mutations:
+        changed=copy.deepcopy(nominal);mutate(changed)
+        try:record.compare(changed,reference,8000)
+        except RuntimeError as exc:rejected.append(dict(name=name,reason=str(exc)))
+        else:raise RuntimeError('synthetic_mutation_survived:'+name)
+    print(json.dumps(dict(status='passed_synthetic_parser_only',positive=1,rejected=rejected,
+        engine_executed=False,compiler_executed=False,GCP_used=False,scale_qualified=False)))
+
+
+if __name__=='__main__':main()

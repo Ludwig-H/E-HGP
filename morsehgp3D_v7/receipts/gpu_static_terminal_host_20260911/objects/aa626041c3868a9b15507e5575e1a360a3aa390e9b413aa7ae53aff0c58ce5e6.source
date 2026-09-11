@@ -1,0 +1,2 @@
+{"status":"passed","oracle_mebs":1022,"oracle_components":14724}
+{"status":"passed","scope":"new_T2_terminal_host_stub_capture","paired_terminals":0,"paired_trace_rows":0,"paired_key_words":0,"paired_raw_levels":0,"q2_trace_rows":0,"q3_trace_rows":0,"q4_trace_rows":0,"extra_shell_trace_rows":0,"strict_steps":0,"same_radius_steps":0,"zero_trace_capacity_checks":0,"device_executed":false,"gcp_used":false}

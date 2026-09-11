@@ -1,0 +1,144 @@
+#define MHGP7_MEB_KEY_FORBID_LEGACY_HOST_MATERIALIZE 1
+#include "../terminal_owner.hpp"
+#include <cstdio>
+#include <string_view>
+
+namespace {
+using namespace mhgp7;
+namespace terminal = gpu_terminal_private;
+u64 checks = 0, refusals = 0, comparator_checks = 0;
+void need(bool condition, const char* reason) {
+  ++checks;
+  if (!condition) throw std::runtime_error(reason);
+}
+void refuse(const terminal::Result& result, terminal::Status expected, const char* reason = "guard.refusal_empty_target") {
+  need(result.status == expected && result.target == terminal::kAbsentBall, reason);
+  ++refusals;
+}
+void run() {
+  const auto index = build_cloud_index(std::vector<P3>{{0,0,0},{1,1,1},{2,2,2},{3,3,3},{4,4,4}});
+  std::vector<BallData> balls;
+  for (i32 a = 0; a < 5; ++a) for (i32 b = a + 1; b < 5; ++b) {
+    BallData ball;
+    ball.key = q2_ball_key(index.upos[a], index.upos[b]);
+    ball.level = promote_level(q2_exact_level(p3_norm2(p3_sub(index.upos[a], index.upos[b]))));
+    ball.arity = 2;
+    for (i32 i = 0; i < 5; ++i) {
+      const auto power = ball.key.power(index.upos[i]);
+      if (power < 0) ball.interior_ids[ball.n_interior++] = i;
+      else if (power == 0) ball.shell_ids[ball.n_shell++] = i;
+    }
+    balls.push_back(ball);
+  }
+  terminal::HostOwner owner(index, balls), foreign(index, balls);
+  const auto view = owner.view();
+  terminal::Request request;
+  request.snapshot = view.index.snapshot; request.ordinal = (u64{1} << 40) + 1; request.k = 2;
+  request.selected[0] = 0; request.selected[1] = 4;
+  request.before = terminal::encode_level(ExactLevel{{100,0,0},1});
+  terminal::TraceRow rows[3];
+  terminal::TraceBuffer trace{rows,3,0,false};
+  const auto nominal = terminal::resolve(view, request, &trace);
+  need(nominal.status == terminal::Status::kOk && nominal.target == 8 && nominal.ordinal == request.ordinal &&
+      nominal.work.calls == 3 && nominal.work.key_lookups == 3 && nominal.work.anchor_hits == 1 &&
+      nominal.work.intruder_queries == 2 && nominal.work.descending_steps == 2 && trace.written == 3 && !trace.overflow,
+      "guard.present_but_wrong_window_descends_twice");
+  need(rows[0].intruder == 1 && rows[1].intruder == 2 && rows[2].terminal == 8,
+      "guard.first_Morton_intruder_and_first_support_replacement");
+  terminal::TraceRow first;
+  terminal::TraceBuffer short_trace{&first,1,0,false};
+  const auto short_result = terminal::resolve(view, request, &short_trace);
+  need(short_result.status == terminal::Status::kOk && short_result.target == 8 &&
+      short_result.work.calls == 3 && short_result.work.intruder_queries == 2 && short_trace.written == 3 && short_trace.overflow,
+      "guard.trace_limit_not_search_limit");
+
+  for (u32 mutation = 0; mutation < 10; ++mutation) {
+    auto bad = view;
+    switch (mutation) {
+      case 0: bad.index.snapshot = 0; break;
+      case 1: bad.catalog.snapshot = foreign.view().catalog.snapshot; break;
+      case 2: bad.index.positions = 0; break;
+      case 3: ++bad.index.nodes; break;
+      case 4: bad.index.positions3 = nullptr; break;
+      case 5: bad.index.root = -1; break;
+      case 6: bad.index.left = nullptr; break;
+      case 7: bad.catalog.entries = nullptr; break;
+      case 8: bad.catalog.by_key = nullptr; break;
+      case 9: bad.index.positions = 0x80000000u; break;
+    }
+    const auto result = terminal::resolve(bad, request);
+    refuse(result, terminal::Status::kInvalidView);
+    need(result.work.calls == 0, "guard.invalid_view_prework");
+  }
+  for (u32 mutation = 0; mutation < 10; ++mutation) {
+    auto bad = request;
+    switch (mutation) {
+      case 0: bad.snapshot = foreign.view().index.snapshot; break;
+      case 1: bad.k = 0; break;
+      case 2: bad.k = 1; break;
+      case 3: bad.k = 11; break;
+      case 4: bad.selected[0] = -1; break;
+      case 5: bad.selected[1] = 5; break;
+      case 6: bad.selected[1] = bad.selected[0]; break;
+      case 7: std::swap(bad.selected[0],bad.selected[1]); break;
+      case 8: bad.before = {}; break;
+      case 9: bad.before.words[4] = u64{1} << 63; break;
+    }
+    const auto result = terminal::resolve(view, bad);
+    refuse(result, terminal::Status::kInvalidRequest);
+    need(result.work.calls == 0 && result.ordinal == bad.ordinal, "guard.invalid_request_prework_ordinal");
+  }
+  terminal::TraceBuffer missing_trace{nullptr,1,0,false};
+  refuse(terminal::resolve(view, request, &missing_trace), terminal::Status::kInvalidRequest);
+  auto equality = request; equality.before = rows[0].level;
+  const auto equality_result = terminal::resolve(view, equality);
+  refuse(equality_result, terminal::Status::kNotStrict, "guard.equal_cut_must_be_refused");
+  need(equality_result.work.calls == 1 && equality_result.work.key_lookups == 0, "guard.strict_before_paid_work");
+  auto none = view; none.catalog.count = 0; none.catalog.entries = nullptr; none.catalog.by_key = nullptr;
+  const auto missing = terminal::resolve(none, request);
+  refuse(missing, terminal::Status::kMissingWeakTerminal);
+  need(missing.work.calls == 4 && missing.work.key_lookups == 4 && missing.work.intruder_queries == 4 &&
+      missing.work.descending_steps == 3, "guard.missing_terminal_retains_paid_chain");
+  std::vector<terminal::BallId> bad_order(view.catalog.count, terminal::kAbsentBall);
+  auto bad_lookup = view; bad_lookup.catalog.by_key = bad_order.data();
+  refuse(terminal::resolve(bad_lookup, request), terminal::Status::kInvalidView);
+  for (u32 mutation = 0; mutation < 7; ++mutation) {
+    std::vector<terminal::CatalogEntry> entries(view.catalog.entries, view.catalog.entries + view.catalog.count);
+    auto& selected = entries[3];  // exact initial MEB of geometric sites 0,4
+    switch (mutation) {
+      case 0: selected.arity = 0; break;
+      case 1: selected.arity = 5; break;
+      case 2: selected.shell = 1; break;
+      case 3: selected.shell = 13; break;
+      case 4: selected.interior = 10; break;
+      case 5: selected.reserved = 1; break;
+      case 6: selected.level.words[3] = selected.level.words[4] = 0; break;
+    }
+    auto bad = view; bad.catalog.entries = entries.data();
+    refuse(terminal::resolve(bad, request), mutation == 6 ? terminal::Status::kCatalogLevelMismatch : terminal::Status::kInvalidView);
+  }
+  const i128 large = (i128{1} << 90);
+  std::vector<BallKey> keys{{1,{0,0,0},0},{1,{-1,0,0},0},{1,{1,0,0},0},{1,{-large,0,0},0},
+      {1,{large,0,0},0},{1,{0,-large,0},0},{1,{0,0,-large},0},{1,{0,0,0},-large},{2,{-1,0,0},0}};
+  for (const auto& a : keys) for (const auto& b : keys) {
+    const auto comparison = terminal::compare_keys(terminal::meb_key::encode_key(a), terminal::meb_key::encode_key(b));
+    need((comparison < 0) == (a < b) && (comparison == 0) == (a == b), "guard.signed_key_order");
+    ++comparator_checks;
+  }
+  u64 counter = ~u64{0};
+  need(!terminal::add(counter) && counter == ~u64{0}, "guard.counter_refuses_wrap");
+  need(refusals == 31 && comparator_checks == 81, "guard.nonvacuity");
+}
+}  // namespace
+
+int main(int argc, char** argv) {
+  if (argc != 2 || std::string_view(argv[1]) != "--selftest") return 2;
+  try {
+    run();
+    std::printf("{\"status\":\"passed\",\"checks\":%llu,\"rejections\":%llu,\"signed_key_comparisons\":%llu,"
+        "\"strict_descents\":2,\"trace_capacity_one_complete_result\":true,\"device_executed\":false,\"gcp_used\":false}\n",
+        static_cast<unsigned long long>(checks), static_cast<unsigned long long>(refusals),
+        static_cast<unsigned long long>(comparator_checks));
+    return 0;
+  } catch (const std::exception& error) { std::fprintf(stderr, "FAIL %s\n", error.what()); return 1; }
+}

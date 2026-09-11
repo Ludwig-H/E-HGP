@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+"""Copy only T2 judge/oracle, never its private mutated product headers."""
+import difflib
+import hashlib
+import json
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+REPO = ROOT.parents[2]
+
+
+def write(path, data):
+    with path.open("xb") as stream:
+        stream.write(data)
+
+
+def main():
+    gate_path = REPO / "build/v7_t2_metadata_20260911/source/t2_gate.cpp"
+    gate = gate_path.read_bytes()
+    gate_pin = hashlib.sha256(gate).hexdigest()
+    if gate_pin != "13f06875da99ae8413b0e64115964979bc5afe9f0c6f7224a7cd4efe773883dc":
+        raise RuntimeError("T2 strengthened judge pin changed")
+    original = gate.decode()
+    if original.count("int main(int argc, char** argv) {") != 1:
+        raise RuntimeError("T2 main signature changed")
+    adapted = original.replace("int main(int argc, char** argv) {", "int terminal_t2_reference_main(int argc, char** argv) {")
+    oracle_path = REPO / "build/v7_t2_census_tower_20260911/t2_oracle.hpp"
+    oracle = oracle_path.read_bytes()
+    write(ROOT / "t2_gate.original.cpp", gate)
+    write(ROOT / "t2_gate.cpp", adapted.encode())
+    write(ROOT / "t2_oracle.hpp", oracle)
+    patch = "".join(difflib.unified_diff(original.splitlines(keepends=True), adapted.splitlines(keepends=True),
+        fromfile="t2_gate.original.cpp", tofile="t2_gate.cpp"))
+    write(ROOT / "entrypoint.patch", patch.encode())
+    pins = {"gate_source": str(gate_path), "gate_sha256": gate_pin,
+        "oracle_source": str(oracle_path), "oracle_sha256": hashlib.sha256(oracle).hexdigest(),
+        "product_headers_imported_from_T2": False, "inherited_results": False}
+    write(ROOT / "pins.json", (json.dumps(pins, indent=2, sort_keys=True) + "\n").encode())
+    print(json.dumps(pins, sort_keys=True))
+
+
+if __name__ == "__main__":
+    main()

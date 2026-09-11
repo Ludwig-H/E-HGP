@@ -1,0 +1,34 @@
+# Triplet semis après échange — préparé, non lancé
+
+Un processus neuf par taille : 8 000, puis 16 000, puis 32 000. Uniformes u16,
+graine 3, WSPD s8, tour K1..10, amont1 et statique1. Aucune référence vivante
+dans le moteur. Comparaison hors moteur avec les 35 champs de sortie et digest
+du triplet statique4 publié, les R/U/S exacts par K, puis Q/H/T et le travail
+réel : M nouveau+H=M ancien, anchor_hits nouveau+H=U−S, Q=intruder_queries.
+
+`prepare_active_input.py` fige le nouveau probe CMake Release actif après sa
+qualification 24 CTests et sa comparaison de travail n200, source 6763a877… ;
+il ne compile ni n'exécute. Son ELF provient du reçu actif fermé, pas du probe
+O2 privé. Les références historiques sont copiées avec leur manifeste.
+`prepare_input.py` conserve le projet initial de binding O2, qui n'a pas été
+exécuté et n'est plus accepté par le recorder ; aucune origine n'est réétiquetée.
+
+`record.py 8000` puis `16000` et `32000` attendent un signal ROOT dans
+`exclusive_session.json` précisant `authorized=true`, `sizes=[8000,16000,32000]`,
+`source_header_sha256` et `binary_sha256` complets. Ce fichier est un verrou de
+coordination avant lancement, pas une limite algorithmique. Aucun grand calcul
+n'est lancé pendant la préparation. Un verrou local interdit deux de ces runs
+simultanés ; ROOT coordonne les autres tâches CPU de l'hôte.
+
+Le recorder conserve commandes, sources/ELF avant et après, stdout/stderr bruts,
+état hôte et progression CPU/RSS toutes les 30 secondes. Aucun délai maximal
+algorithmique ; un `stop_request.json` dans le répertoire du run arrête seulement
+son groupe de processus possédé, conserve l'échec et ne rend aucun résultat
+partiel réussi. Ce mécanisme permet à l'opérateur d'arrêter un calcul sans
+progrès utile, sans imposer de plafond de cardinal au moteur.
+
+Les temps historiques statique4 provenaient d'un hôte partagé. On ne déduira
+donc aucun speedup de leur rapport avec les nouvelles latences mono-thread.
+Le nouveau triplet mesurera le travail, la résidence et ses doublages ; il ne
+constitue ni une preuve universelle sous-quadratique ni un contrat 50k/1s.
+GCP non utilisé.

@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+"""Read-only closure and independent re-derivation of the complete triplet."""
+import hashlib
+import importlib.util
+import json
+import math
+from pathlib import Path
+import re
+import sys
+
+BASE=Path(__file__).resolve().parent
+RECORD_SHA='5c4e31fd05cf034899ac535d00ea4f2938d3b858ebb647cc743bd660012902e0'
+INPUT_SHA='7ce9df73726bcfdb946949b94a36ac32fe7b97f80e8ba35894b8f8487535ff74'
+HEADER_SHA='6763a877f43d79a45532bce4426feca645b6ee97f18c9a4ee1fea4c47cd408a5'
+BINARY_SHA='ade5dbdd7b35fb1f66a8e9f7ea6f33c315458b1ce12897396686ce7782cd9512'
+REFERENCE_SHA='2485cafaf912c9138cb618199f7fd59cd3670bcc2365be05295d4e3eca54d5e9'
+
+
+def need(ok,why):
+    if not ok:raise RuntimeError(why)
+
+
+def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def obj(path):return json.loads(path.read_text())
+
+
+def main():
+    need(len(sys.argv)==1,'complete_triplet_no_arguments')
+    need(sha(BASE/'record.py')==RECORD_SHA,'pinned_read_only_comparison_module')
+    spec=importlib.util.spec_from_file_location('pinned_scale_comparison',BASE/'record.py')
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    # Importing definitions never calls record.main(); no compiler/engine starts.
+    input_dir=BASE/'input'
+    need(sha(input_dir/'MANIFEST.json')==INPUT_SHA,'exact_qualified_input_manifest')
+    manifest=obj(input_dir/'MANIFEST.json')
+    for name,pin in manifest.items():
+        relative=Path(name)
+        need(not relative.is_absolute() and '..' not in relative.parts,'relative_input_path')
+        need(sha(input_dir/relative)==pin,'closed_input_file')
+    need(sha(input_dir/'probe')==BINARY_SHA and
+         sha(input_dir/'source/morsehgp3D_v7/src/forest/full_ball_tower.hpp')==HEADER_SHA,'qualified_active_source_ELF')
+    need(sha(input_dir/'reference_manifest.json')==REFERENCE_SHA,'historical_reference_manifest')
+    references=obj(input_dir/'reference_manifest.json')['files']
+    source=obj(input_dir/'source_pins.json')
+    prior_end=0;rows=[]
+    for n in (8000,16000,32000):
+        run=BASE/f'n{n}_s8_static1'
+        receipt=obj(run/'receipt.json')
+        need(receipt['status']=='completed' and receipt['exit_code']==0 and receipt['sources_and_binary_stable'] and
+             receipt['standalone_process'] and not receipt['baseline_retained'] and not receipt['GCP_used'],
+             'run_closed_success')
+        need(obj(run/'sources_before.json')==obj(run/'sources_after.json')==source,'run_source_identity')
+        need(obj(run/'binary_before.json')==obj(run/'binary_after.json')==dict(sha256=BINARY_SHA),'run_binary_identity')
+        need(obj(run/'input_manifest_pin.json')['sha256']==INPUT_SHA and sha(run/'record.py.source')==RECORD_SHA,
+             'run_exact_inputs_and_script')
+        command=obj(run/'command.json')
+        need(command['exit_code']==0 and prior_end<=command['started_ns']<=command['ended_ns'],'sequential_process_intervals')
+        prior_end=command['ended_ns']
+        need(command['argv']==['/usr/bin/time','-v',str(input_dir/'probe'),f'--n={n}',
+             '--s=8','--kmax=10','--threads=1','--static-threads=1'],'exact_standalone_command')
+        for stream in ('stdout','stderr'):
+            need(sha(run/stream)==command[stream+'_sha256'],'raw_output_hash')
+        need(sha(run/'reference.stdout')==references[f'n{n}_s8_static4/stdout'],'reference_bound_to_old_publication')
+        a,b=obj(run/'stdout'),obj(run/'reference.stdout')
+        derived=module.compare(a,b,n)
+        need(derived==obj(run/'comparison.json'),'all_science_recomputed')
+        stderr=(run/'stderr').read_text()
+        peak=re.search(r'Maximum resident set size \(kbytes\): (\d+)',stderr)
+        need(peak is not None and int(peak.group(1))>0,'maximum_RSS_recorded')
+        need('\tExit status: 0' in stderr and '\tSwaps: 0' in stderr,'process_success_no_swap')
+        need(all('stage_complete='+stage+' seconds=' in stderr for stage in
+             ('index','generate','sort_rle','prefilter','census','full_ball_tower','payload_digest')),'all_pipeline_stages_closed')
+        progress=sorted(run.glob('progress_*.json'))
+        need(len(progress)>1,'progress_observations_preserved')
+        previous=0
+        for item in progress:
+            current=obj(item);need(current['time_ns']>=previous,'progress_time_order');previous=current['time_ns']
+        row=dict(derived,max_RSS_KiB=int(peak.group(1)),max_RSS_GiB=int(peak.group(1))/(1<<20),
+                 nodes=a['nodes'],retained_capacity_bytes=a['static_sampled_retained_capacity_peak_bytes'])
+        rows.append(row)
+    doublings=[]
+    for a,b in zip(rows,rows[1:]):
+        keys=('R','U','S','Q','H','new_MEB','new_supports','nodes','retained_capacity_bytes','max_RSS_KiB','total_s','tower_s')
+        ratios={key:b[key]/a[key] for key in keys}
+        doublings.append(dict(n_from=a['n'],n_to=b['n'],ratios=ratios,
+                             MEB_log2_ratio=math.log2(ratios['new_MEB']),
+                             support_log2_ratio=math.log2(ratios['new_supports'])))
+    print(json.dumps(dict(status='verified_closed_post_exchange_mono_triplet',runs=3,rows=rows,doublings=doublings,
+         input_manifest_sha256=INPUT_SHA,source_header_sha256=HEADER_SHA,binary_sha256=BINARY_SHA,
+         source_regime='uniform_u16_seed3_s8_K1_to_10_upstream1_static1',
+         GCP_used=False,engine_executed_here=False,compiler_executed_here=False,public_status='not_claimed',
+         historical_speedup_claimed=False,universal_subquadratic_claimed=False,latency_contract_qualified=False)))
+
+
+if __name__=='__main__':main()

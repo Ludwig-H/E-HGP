@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+"""Create-only final private triplet packet; no ELF/vendor or new experiment."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+
+BASE=Path(__file__).resolve().parent
+ROOT=BASE.parents[1]
+SOURCE=ROOT/'build/v7_post_exchange_scale_20260911'
+FORMATS=ROOT/'build/v7_postseed_active_publish_20260911/readback_r1'
+TARGET=ROOT/'build/v7_post_exchange_scale_packet_20260911'
+
+
+def sha(data):return hashlib.sha256(data).hexdigest()
+
+
+def write(path,data):
+    path.parent.mkdir(parents=True,exist_ok=True)
+    with path.open('xb') as stream:stream.write(data)
+
+
+def main():
+    for n in (8000,16000,32000):
+        receipt=json.loads((SOURCE/f'n{n}_s8_static1/receipt.json').read_text())
+        if receipt['status']!='completed' or not receipt['sources_and_binary_stable']:
+            raise RuntimeError('scale_not_closed')
+    if json.loads((SOURCE/'readback_r1/receipt.json').read_text())['status']!='passed':
+        raise RuntimeError('readback_not_closed')
+    originals={}
+    for directory,prefix in [(SOURCE,''),(FORMATS,'format_checks/')]:
+        for path in sorted(directory.rglob('*')):
+            if path.is_symlink():raise RuntimeError('no_source_symlink')
+            if path.is_file() and '__pycache__' not in path.parts:
+                logical=prefix+path.relative_to(directory).as_posix()
+                originals[logical]=path
+    data={name:path.read_bytes() for name,path in originals.items()}
+    omitted={name:dict(sha256=sha(value),size=len(value),reason='ELF_not_distributed') for name,value in data.items()
+             if value.startswith(b'\x7fELF')}
+    TARGET.mkdir(exist_ok=False)
+    mapping={};stored={}
+    comparison=data['record.py'];write(TARGET/'record_comparison.py.source',comparison)
+    stored[sha(comparison)]='record_comparison.py.source'
+    for logical,value in sorted(data.items()):
+        if logical in omitted:continue
+        value.decode('utf-8')
+        if any(p in ('vendor','boost','third_party') for p in Path(logical).parts):raise RuntimeError('unexpected_vendor')
+        pin=sha(value)
+        if pin not in stored:
+            stored[pin]='objects/'+pin+'.source';write(TARGET/stored[pin],value)
+        mapping[logical]=dict(sha256=pin,size=len(value),storage=stored[pin])
+    for name,value in [('storage_map.json',mapping),('omitted_ELF.json',omitted)]:
+        write(TARGET/name,(json.dumps(value,indent=2,sort_keys=True)+'\n').encode())
+    for name in ('README.md','verify.py','extract.py'):
+        shutil.copyfile(BASE/name,TARGET/name)
+    shutil.copyfile(Path(__file__),TARGET/'prepare.py.source')
+    for name,path in originals.items():
+        if path.read_bytes()!=data[name]:raise RuntimeError('source_changed_during_copy:'+name)
+    files={p.relative_to(TARGET).as_posix():sha(p.read_bytes()) for p in sorted(TARGET.rglob('*')) if p.is_file()}
+    write(TARGET/'MANIFEST.json',(json.dumps(dict(files=files,logical_files=len(mapping),unique_contents=len(stored),
+        ELF_included=False,vendor_included=False,GCP_used=False,public_status='not_claimed'),indent=2,sort_keys=True)+'\n').encode())
+    print(json.dumps(dict(status='created',logical_files=len(mapping),unique_contents=len(stored),
+        bytes=sum((TARGET/name).stat().st_size for name in files),manifest_sha256=sha((TARGET/'MANIFEST.json').read_bytes()))))
+
+
+if __name__=='__main__':main()

@@ -1,0 +1,11 @@
+{
+  "GCP_used": false,
+  "binary_sha256": "ade5dbdd7b35fb1f66a8e9f7ea6f33c315458b1ce12897396686ce7782cd9512",
+  "compiler_optimization": "CMake_Release_O3_DNDEBUG",
+  "header_sha256": "6763a877f43d79a45532bce4426feca645b6ee97f18c9a4ee1fea4c47cd408a5",
+  "new_engine_execution": false,
+  "origin": "/workspaces/E-HGP/build/v7_postseed_active_20260911/capture_r1",
+  "qualification_kind": "active_CMake_24",
+  "qualification_receipt_sha256": "d2e7634e8d99eff6a51a6f6222057a535912a4d32d8c82b961cc9775c8a770f5",
+  "reference_manifest_sha256": "2485cafaf912c9138cb618199f7fd59cd3670bcc2365be05295d4e3eca54d5e9"
+}

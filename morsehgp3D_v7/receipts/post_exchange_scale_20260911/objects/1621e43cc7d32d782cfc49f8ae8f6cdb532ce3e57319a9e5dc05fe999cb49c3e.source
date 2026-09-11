@@ -1,0 +1,73 @@
+{
+  "status": "passed",
+  "before": {
+    "/workspaces/E-HGP/morsehgp3D_v7/receipts/post_exchange_active_cmake_20260911/verify.py": "fc370df4b17e1c5cd648ed9e49531e375b65b71eca206a1d90c501f23753e425",
+    "/workspaces/E-HGP/morsehgp3D_v7/receipts/post_exchange_active_cmake_20260911/MANIFEST.json": "a59f2b0b103c7b9db31ac2149f404fe540eafd41a94c1cbd605df0e79ffcc404",
+    "/workspaces/E-HGP/build/v7_post_exchange_scale_20260911/record.py": "5c4e31fd05cf034899ac535d00ea4f2938d3b858ebb647cc743bd660012902e0",
+    "/workspaces/E-HGP/build/v7_post_exchange_scale_20260911/selftest_comparison.py": "f818c39dd91e73a37ac61184a8b9e0292d4f852a350b327175b8fcd54598414e"
+  },
+  "after": {
+    "/workspaces/E-HGP/morsehgp3D_v7/receipts/post_exchange_active_cmake_20260911/verify.py": "fc370df4b17e1c5cd648ed9e49531e375b65b71eca206a1d90c501f23753e425",
+    "/workspaces/E-HGP/morsehgp3D_v7/receipts/post_exchange_active_cmake_20260911/MANIFEST.json": "a59f2b0b103c7b9db31ac2149f404fe540eafd41a94c1cbd605df0e79ffcc404",
+    "/workspaces/E-HGP/build/v7_post_exchange_scale_20260911/record.py": "5c4e31fd05cf034899ac535d00ea4f2938d3b858ebb647cc743bd660012902e0",
+    "/workspaces/E-HGP/build/v7_post_exchange_scale_20260911/selftest_comparison.py": "f818c39dd91e73a37ac61184a8b9e0292d4f852a350b327175b8fcd54598414e"
+  },
+  "commands": [
+    {
+      "name": "packet_normal",
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/post_exchange_active_cmake_20260911/verify.py"
+      ],
+      "exit_code": 0,
+      "started_ns": 1789121231489337907,
+      "ended_ns": 1789121231658960157,
+      "stdout_sha256": "4cb54e1ef06d013b3bf92528bce63c931e2cb58cc12b1ce6c9804c9eeee0221f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "packet_optimized",
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/post_exchange_active_cmake_20260911/verify.py"
+      ],
+      "exit_code": 0,
+      "started_ns": 1789121231659068157,
+      "ended_ns": 1789121231830115655,
+      "stdout_sha256": "4cb54e1ef06d013b3bf92528bce63c931e2cb58cc12b1ce6c9804c9eeee0221f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "parser_normal",
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v7_post_exchange_scale_20260911/selftest_comparison.py"
+      ],
+      "exit_code": 0,
+      "started_ns": 1789121231830227651,
+      "ended_ns": 1789121231883989689,
+      "stdout_sha256": "98167506ca5484ebb7c1bf4fec9ff8f8a0773a7e74c632295ebbe080e729830a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "parser_optimized",
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v7_post_exchange_scale_20260911/selftest_comparison.py"
+      ],
+      "exit_code": 0,
+      "started_ns": 1789121231884095126,
+      "ended_ns": 1789121231937557629,
+      "stdout_sha256": "98167506ca5484ebb7c1bf4fec9ff8f8a0773a7e74c632295ebbe080e729830a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "engine_executed": false,
+  "GCP_used": false
+}

@@ -1,0 +1,16 @@
+{
+  "affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "cgroup_cpu_max": "max 100000\n",
+  "loadavg": "1.30 1.39 1.27 2/891 79\n",
+  "meminfo": "MemTotal:       32866528 kB\nMemFree:         9122348 kB\nMemAvailable:   27490912 kB\nBuffers:          544380 kB\nCached:         16629704 kB\nSwapCached:            0 kB\nActive:          2869276 kB\nInactive:       18602872 kB\nActive(anon):    1961876 kB\nInactive(anon):  2412564 kB\nActive(file):     907400 kB\nInactive(file): 16190308 kB\nUnevictable:       31128 kB\nMlocked:           28056 kB\nSwapTotal:             0 kB\nSwapFree:              0 kB\nZswap:                 0 kB\nZswapped:              0 kB\nDirty:              2480 kB\nWriteback:             0 kB\nAnonPages:       4329324 kB\nMapped:           983280 kB\nShmem:             67244 kB\nKReclaimable:    1763548 kB\nSlab:            2005264 kB\nSReclaimable:    1763548 kB\nSUnreclaim:       241716 kB\nKernelStack:       14280 kB\nPageTables:        54972 kB\nSecPageTables:         0 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:    16433264 kB\nCommitted_AS:    9355304 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:       51008 kB\nVmallocChunk:          0 kB\nPercpu:             5344 kB\nHardwareCorrupted:     0 kB\nAnonHugePages:         0 kB\nShmemHugePages:        0 kB\nShmemPmdMapped:        0 kB\nFileHugePages:         0 kB\nFilePmdMapped:         0 kB\nUnaccepted:            0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:      268224 kB\nDirectMap2M:    10217472 kB\nDirectMap1G:    25165824 kB\n",
+  "time_ns": 1789121787188102819
+}

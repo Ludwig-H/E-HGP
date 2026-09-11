@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build",
+    "--output-on-failure",
+    "--parallel",
+    "1",
+    "--output-junit",
+    "/workspaces/E-HGP/build/v7_postseed_active_20260911/capture_r1/ctest.junit.xml",
+    "-R",
+    "^mhgp7_(anchor_meb|full_ball_tower|full_ball_work|full_ball_static|census_route_stub|local_plateau|full_coverage_certificate|facet_resolver_cache|witness_front|full_gabriel_digest)"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "expected_exit": 0
+}

@@ -1,0 +1,30 @@
+--- build/v7_gpu_static_terminal_20260911/terminal_owner.hpp
++++ build/v7_gpu_static_terminal_ownerfix_20260911/terminal_owner.hpp
+@@ -28,22 +28,23 @@
+     for (size_t i = 1; i < by_key_.size(); ++i)
+       if (compare_keys(entries_[by_key_[i - 1]].key, entries_[by_key_[i]].key) == 0)
+         throw std::invalid_argument("terminal.duplicate_ball_key");
+-    snapshot_ = spatial::owner_detail::acquire_snapshot(next_snapshot_);
++    // The newly constructed, privately owned IndexOwner already has a unique
++    // generation in the SAME domain as every compatible spatial::IndexView.
++    // A separate HostOwner counter would collide with standalone IndexOwners.
++    snapshot_ = index_.view().snapshot;
+   }
+   HostOwner(const HostOwner&) = delete;
+   HostOwner& operator=(const HostOwner&) = delete;
+   HostOwner(HostOwner&&) = delete;
+   HostOwner& operator=(HostOwner&&) = delete;
+   View view() const {
+-    auto index = index_.view();
+-    index.snapshot = snapshot_;  // NEW common owner identity, never two borrowed tokens.
++    const auto index = index_.view();
+     return {index, {entries_.data(), by_key_.data(), snapshot_, static_cast<u32>(entries_.size())}};
+   }
+  private:
+   spatial::IndexOwner index_;
+   std::vector<CatalogEntry> entries_;
+   std::vector<BallId> by_key_;
+-  inline static std::atomic<u64> next_snapshot_{1};
+   u64 snapshot_ = 0;
+ };
+ }  // namespace mhgp7::gpu_terminal_private

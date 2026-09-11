@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+"""Capture final read-only triplet verification in normal and optimized Python."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import time
+
+BASE=Path(__file__).resolve().parent
+
+
+def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main():
+    out=BASE/'readback_r1';out.mkdir(exist_ok=False)
+    for name in ('record.py','verify_results.py','record_readback.py'):
+        shutil.copyfile(BASE/name,out/(name+'.source'))
+    rows=[];results=[]
+    for optimized in (False,True):
+        name='optimized' if optimized else 'normal'
+        argv=[sys.executable,'-B']+(['-O'] if optimized else [])+[str(BASE/'verify_results.py')]
+        start=time.time_ns()
+        result=subprocess.run(argv,stdin=subprocess.DEVNULL,capture_output=True,check=False)
+        for suffix,value in [('stdout',result.stdout),('stderr',result.stderr)]:
+            with (out/(name+'.'+suffix)).open('xb') as stream:stream.write(value)
+        rows.append(dict(name=name,argv=argv,exit_code=result.returncode,started_ns=start,ended_ns=time.time_ns(),
+            stdout_sha256=sha(out/(name+'.stdout')),stderr_sha256=sha(out/(name+'.stderr'))))
+        if result.returncode==0:results.append(json.loads(result.stdout))
+    passed=len(results)==2 and results[0]==results[1] and all(r['exit_code']==0 for r in rows)
+    with (out/'receipt.json').open('x') as stream:
+        json.dump(dict(status='passed' if passed else 'failed',commands=rows,engine_executed=False,GCP_used=False),stream,indent=2)
+        stream.write('\n')
+    print(json.dumps(dict(status='passed' if passed else 'failed',commands=len(rows),
+        doublings=results[0]['doublings'] if results else [])))
+    if not passed:raise RuntimeError('readback_failed')
+
+
+if __name__=='__main__':main()

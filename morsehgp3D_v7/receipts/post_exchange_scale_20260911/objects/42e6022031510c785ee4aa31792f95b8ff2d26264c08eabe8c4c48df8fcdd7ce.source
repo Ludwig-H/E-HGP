@@ -1,0 +1,20 @@
+{
+  "processes": [
+    {
+      "pid": 80,
+      "rss_pages": 320,
+      "state": "S",
+      "stime_ticks": 0,
+      "utime_ticks": 0
+    },
+    {
+      "pid": 81,
+      "rss_pages": 44155,
+      "state": "R",
+      "stime_ticks": 17,
+      "utime_ticks": 5982
+    }
+  ],
+  "stderr_bytes": 80,
+  "time_ns": 1789121847206071620
+}

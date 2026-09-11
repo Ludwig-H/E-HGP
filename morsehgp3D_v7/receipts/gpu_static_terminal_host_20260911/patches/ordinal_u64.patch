@@ -1,0 +1,33 @@
+--- build/v7_gpu_static_terminal_20260911/o2_r1/source_snapshot/terminal.cuh
++++ build/v7_gpu_static_terminal_20260911/terminal.cuh
+@@ -42,8 +42,8 @@
+ };
+ struct View { spatial::IndexView index; CatalogView catalog; };
+ struct Request {
+-  u64 snapshot = 0;
+-  u32 ordinal = 0, k = 0;
++  u64 snapshot = 0, ordinal = 0;
++  u32 k = 0;
+   i32 selected[10]{};
+   LevelWords before;
+ };
+@@ -80,7 +80,7 @@
+ };
+ struct Result {
+   Status status = Status::kInvalidRequest;
+-  u32 ordinal = 0;
++  u64 ordinal = 0;
+   BallId target = kAbsentBall;
+   Work work;
+ };
+@@ -122,7 +122,9 @@
+ MHGP7_HD inline bool meb(const View& view, const i32* sites, u32 k, Local& local, Result& result) {
+   P3 positions[10]{};
+   meb_selection::Request request;
+-  request.ordinal = result.ordinal; request.count = static_cast<u8>(k);
++  // The legacy primitive's ordinal is local to this ONE call. Global
++  // terminal occurrence identity is u64 and remains in Request/Result.
++  request.ordinal = 0; request.count = static_cast<u8>(k);
+   for (u32 i = 0; i < k; ++i) {
+     const u16* point = view.index.positions3 + 3ull * static_cast<u32>(sites[i]);
+     positions[i] = {point[0], point[1], point[2]}; request.sites[i] = static_cast<i32>(i);

@@ -1,0 +1,61 @@
+--- build/v7_gpu_static_terminal_20260911/guards_trial/gate.cpp
++++ build/v7_gpu_static_terminal_ownerfix_20260911/guards_trial/gate.cpp
+@@ -14,6 +14,38 @@
+ void refuse(const terminal::Result& result, terminal::Status expected, const char* reason = "guard.refusal_empty_target") {
+   need(result.status == expected && result.target == terminal::kAbsentBall, reason);
+   ++refusals;
++}
++// Separate CLI mode, hence a fresh process: no dependence on owners created by
++// another fixture. The historical r2 owner publishes its independent token 1
++// while its owned spatial index has token 2, colliding with foreign_index.
++void run_owner_cross() {
++  const auto a = build_cloud_index(std::vector<P3>{{10,10,10},{12,12,12}});
++  const auto b = build_cloud_index(std::vector<P3>{{0,0,0},{2,2,2}});
++  terminal::spatial::IndexOwner foreign_index(a);
++  BallData ball;
++  ball.key = q2_ball_key(b.upos[0], b.upos[1]);
++  ball.level = promote_level(q2_exact_level(p3_norm2(p3_sub(b.upos[0], b.upos[1]))));
++  ball.arity = 2; ball.n_shell = 2; ball.shell_ids[0] = 0; ball.shell_ids[1] = 1;
++  terminal::HostOwner owner(b, std::span<const BallData>(&ball, 1));
++  const auto view = owner.view();
++  terminal::Request request;
++  request.snapshot = view.index.snapshot; request.ordinal = (u64{1} << 40) + 7;
++  request.k = 2; request.selected[0] = 0; request.selected[1] = 1;
++  request.before = terminal::encode_level(ExactLevel{{100,0,0},1});
++  const auto nominal = terminal::resolve(view, request);
++  need(nominal.status == terminal::Status::kOk && nominal.target == 0 &&
++      nominal.work.calls == 1, "guard.cross_owner_nominal");
++  auto mixed = view;
++  mixed.index = foreign_index.view();
++  // Check the actual API refusal before inspecting token inequality: the old
++  // implementation reaches geometric work instead of rejecting this mix.
++  const auto result = terminal::resolve(mixed, request);
++  refuse(result, terminal::Status::kInvalidView, "guard.cross_owner_must_refuse_foreign_index");
++  need(result.work.calls == 0 && result.ordinal == request.ordinal,
++      "guard.cross_owner_refusal_prework");
++  need(mixed.index.snapshot != mixed.catalog.snapshot,
++      "guard.cross_owner_identity_is_distinct");
++  need(!terminal::valid_view(mixed), "guard.cross_owner_invalid_view");
+ }
+ void run() {
+   const auto index = build_cloud_index(std::vector<P3>{{0,0,0},{1,1,1},{2,2,2},{3,3,3},{4,4,4}});
+@@ -132,8 +164,18 @@
+ }  // namespace
+ 
+ int main(int argc, char** argv) {
+-  if (argc != 2 || std::string_view(argv[1]) != "--selftest") return 2;
++  if (argc != 2) return 2;
++  const auto mode = std::string_view(argv[1]);
++  if (mode != "--selftest" && mode != "--owner-cross") return 2;
+   try {
++    if (mode == "--owner-cross") {
++      run_owner_cross();
++      std::printf("{\"status\":\"passed\",\"mode\":\"owner-cross\",\"checks\":%llu,"
++          "\"rejections\":%llu,\"foreign_owner_refused_before_work\":true,"
++          "\"fresh_process\":true,\"device_executed\":false,\"gcp_used\":false}\n",
++          static_cast<unsigned long long>(checks), static_cast<unsigned long long>(refusals));
++      return 0;
++    }
+     run();
+     std::printf("{\"status\":\"passed\",\"checks\":%llu,\"rejections\":%llu,\"signed_key_comparisons\":%llu,"
+         "\"strict_descents\":2,\"trace_capacity_one_complete_result\":true,\"device_executed\":false,\"gcp_used\":false}\n",

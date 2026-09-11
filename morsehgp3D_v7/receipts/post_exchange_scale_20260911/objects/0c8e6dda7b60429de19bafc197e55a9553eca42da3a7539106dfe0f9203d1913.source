@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+"""Bind the new qualified active Release build, never execute a scale test."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import prepare_input
+
+BASE=Path(__file__).resolve().parent
+ROOT=BASE.parents[1]
+CAPTURE=ROOT/'build/v7_postseed_active_20260911/capture_r1'
+BUILD=ROOT/'build/v7_postseed_active_20260911/cmake_build'
+HEADER='morsehgp3D_v7/src/forest/full_ball_tower.hpp'
+HEADER_SHA=prepare_input.HEADER_SHA
+REFERENCE=prepare_input.REFERENCE
+REFERENCE_SHA=prepare_input.REFERENCE_SHA
+need,sha,save,pins=prepare_input.need,prepare_input.sha,prepare_input.save,prepare_input.pins
+
+
+def main():
+    receipt=json.loads((CAPTURE/'receipt.json').read_text())
+    need(receipt['status']=='passed' and receipt['sources_and_dependencies_stable'] and
+         receipt['selected_CTests']==24 and receipt['cuda_enabled'] is False,'active_CMake_qualification')
+    before=json.loads((CAPTURE/'sources_before.json').read_text())
+    need(before==json.loads((CAPTURE/'sources_after.json').read_text())==pins(CAPTURE/'source'),'active_source_closure')
+    need(sha(CAPTURE/'source'/HEADER)==HEADER_SHA,'active_source_clean_pin')
+    binary_pin=receipt['binary_sha256']['mhgp7_full_ball_tower_probe']
+    need(sha(BUILD/'mhgp7_full_ball_tower_probe')==binary_pin,'active_binary_closure')
+    need(json.loads((CAPTURE/'binaries_before.json').read_text())==json.loads((CAPTURE/'binaries_after.json').read_text()),
+         'active_binaries_stable')
+    source_probe=json.loads((CAPTURE/'probe_200_static1.stdout').read_text())
+    need(source_probe['resolver_meb_calls']==48618 and sum(r['post_seed_hits'] for r in source_probe['static_orders'])==2945,
+         'active_probe_smoke_nonvacuity')
+    need(sha(REFERENCE/'MANIFEST.json')==REFERENCE_SHA,'reference_manifest_pin')
+    ref_manifest=json.loads((REFERENCE/'MANIFEST.json').read_text())
+    out=BASE/'input';out.mkdir(exist_ok=False)
+    shutil.copytree(CAPTURE/'source',out/'source')
+    shutil.copyfile(BUILD/'mhgp7_full_ball_tower_probe',out/'probe');(out/'probe').chmod(0o755)
+    qualification=out/'qualification';qualification.mkdir()
+    for path in sorted(CAPTURE.iterdir()):
+        if path.is_file():shutil.copyfile(path,qualification/path.name)
+    shutil.copyfile(REFERENCE/'MANIFEST.json',out/'reference_manifest.json')
+    for n in (8000,16000,32000):
+        for suffix,destination in [('stdout',f'reference_{n}.stdout'),('comparison.json',f'reference_{n}_comparison.json')]:
+            logical=f'n{n}_s8_static4/'+suffix
+            need(sha(REFERENCE/logical)==ref_manifest['files'][logical],'reference_capture_pin')
+            shutil.copyfile(REFERENCE/logical,out/destination)
+    save(out/'source_pins.json',before)
+    save(out/'pins.json',dict(header_sha256=HEADER_SHA,binary_sha256=binary_pin,qualification_kind='active_CMake_24',
+        reference_manifest_sha256=REFERENCE_SHA,qualification_receipt_sha256=sha(CAPTURE/'receipt.json'),
+        compiler_optimization='CMake_Release_O3_DNDEBUG',origin=str(CAPTURE),new_engine_execution=False,GCP_used=False))
+    shutil.copyfile(Path(__file__),out/'prepare_active_input.py.source')
+    shutil.copyfile(BASE/'prepare_input.py',out/'prepare_input.py.source')
+    need(sha(out/'probe')==binary_pin and pins(out/'source')==before,'frozen_active_input_exact')
+    save(out/'MANIFEST.json',pins(out))
+    print(json.dumps(dict(status='active_input_frozen_no_execution',binary_sha256=binary_pin,
+         source_header_sha256=HEADER_SHA,manifest_sha256=sha(out/'MANIFEST.json'))))
+
+
+if __name__=='__main__':main()

@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "/usr/bin/c++",
+    "-M",
+    "-O3",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "/workspaces/E-HGP/morsehgp3D_v7/bench/full_ball_tower_probe.cpp"
+  ],
+  "ended_ns": 1789120794850529077,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "dependencies_mhgp7_full_ball_tower_probe",
+  "started_ns": 1789120794721556743,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "5a3eb72e955249e5a87ed3a6d284edc2d24a26a1b1913288399552f90e8441a1"
+}

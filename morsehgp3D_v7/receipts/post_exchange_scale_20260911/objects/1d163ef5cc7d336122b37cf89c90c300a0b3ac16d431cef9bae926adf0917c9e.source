@@ -1,0 +1,67 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build
+Test project /workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build
+      Start  3: mhgp7_witness_front
+ 1/24 Test  #3: mhgp7_witness_front ............................   Passed    0.81 sec
+      Start  4: mhgp7_witness_front_bad_argument
+ 2/24 Test  #4: mhgp7_witness_front_bad_argument ...............   Passed    0.02 sec
+      Start 33: mhgp7_facet_resolver_cache
+ 3/24 Test #33: mhgp7_facet_resolver_cache .....................   Passed    0.48 sec
+      Start 34: mhgp7_facet_resolver_cache_bad_argument
+ 4/24 Test #34: mhgp7_facet_resolver_cache_bad_argument ........   Passed    0.01 sec
+      Start 35: mhgp7_full_gabriel_digest
+ 5/24 Test #35: mhgp7_full_gabriel_digest ......................   Passed    0.02 sec
+      Start 36: mhgp7_full_gabriel_digest_bad_argument
+ 6/24 Test #36: mhgp7_full_gabriel_digest_bad_argument .........   Passed    0.01 sec
+      Start 43: mhgp7_local_plateau
+ 7/24 Test #43: mhgp7_local_plateau ............................   Passed    0.06 sec
+      Start 44: mhgp7_local_plateau_bad_argument
+ 8/24 Test #44: mhgp7_local_plateau_bad_argument ...............   Passed    0.01 sec
+      Start 45: mhgp7_full_coverage_certificate
+ 9/24 Test #45: mhgp7_full_coverage_certificate ................   Passed    0.02 sec
+      Start 46: mhgp7_full_coverage_certificate_bad_argument
+10/24 Test #46: mhgp7_full_coverage_certificate_bad_argument ...   Passed    0.01 sec
+      Start 47: mhgp7_census_route_stub
+11/24 Test #47: mhgp7_census_route_stub ........................   Passed    0.04 sec
+      Start 48: mhgp7_census_route_stub_bad_argument
+12/24 Test #48: mhgp7_census_route_stub_bad_argument ...........   Passed    0.01 sec
+      Start 49: mhgp7_anchor_meb
+13/24 Test #49: mhgp7_anchor_meb ...............................   Passed    0.37 sec
+      Start 50: mhgp7_anchor_meb_bad_argument
+14/24 Test #50: mhgp7_anchor_meb_bad_argument ..................   Passed    0.01 sec
+      Start 51: mhgp7_full_ball_tower
+15/24 Test #51: mhgp7_full_ball_tower ..........................   Passed    0.52 sec
+      Start 52: mhgp7_full_ball_tower_bad_argument
+16/24 Test #52: mhgp7_full_ball_tower_bad_argument .............   Passed    0.01 sec
+      Start 53: mhgp7_full_ball_static_cpu1
+17/24 Test #53: mhgp7_full_ball_static_cpu1 ....................   Passed    0.84 sec
+      Start 54: mhgp7_full_ball_static_cpu4
+18/24 Test #54: mhgp7_full_ball_static_cpu4 ....................   Passed    0.87 sec
+      Start 55: mhgp7_full_ball_work
+19/24 Test #55: mhgp7_full_ball_work ...........................   Passed    0.47 sec
+      Start 56: mhgp7_full_ball_work_bad_argument
+20/24 Test #56: mhgp7_full_ball_work_bad_argument ..............   Passed    0.01 sec
+      Start 57: mhgp7_full_ball_tower_probe_smoke
+21/24 Test #57: mhgp7_full_ball_tower_probe_smoke ..............   Passed    0.01 sec
+      Start 58: mhgp7_full_ball_tower_probe_bad_argument
+22/24 Test #58: mhgp7_full_ball_tower_probe_bad_argument .......   Passed    0.01 sec
+      Start 59: mhgp7_full_ball_static_probe_smoke
+23/24 Test #59: mhgp7_full_ball_static_probe_smoke .............   Passed    0.02 sec
+      Start 60: mhgp7_full_ball_static_probe_bad_threads
+24/24 Test #60: mhgp7_full_ball_static_probe_bad_threads .......   Passed    0.01 sec
+
+100% tests passed, 0 tests failed out of 24
+
+Label Time Summary:
+anchor_meb                   =   0.39 sec*proc (2 tests)
+facet_resolver_cache         =   0.50 sec*proc (2 tests)
+full_ball_static             =   1.74 sec*proc (4 tests)
+full_ball_tower              =   2.79 sec*proc (10 tests)
+full_coverage_certificate    =   0.03 sec*proc (2 tests)
+full_gabriel_digest          =   0.03 sec*proc (2 tests)
+gate                         =   4.63 sec*proc (22 tests)
+local_plateau                =   0.08 sec*proc (2 tests)
+oracle                       =   3.64 sec*proc (8 tests)
+stub                         =   0.06 sec*proc (2 tests)
+witness_front                =   0.82 sec*proc (2 tests)
+
+Total Test time (real) =   4.71 sec

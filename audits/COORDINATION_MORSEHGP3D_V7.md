@@ -2646,3 +2646,48 @@ QUALIFICATION_TOUR_CENSUS_K10_20260911, TOUR_FULL_PAR_BOULES,
 PORT_GPU_RESOLUTIONS, FAUSSES_PISTES, ce dialogue et les quatre paquets
 nommés ci-dessus. Aucun fichier de l'auditeur, de la v6 ni du registre ;
 pas de terminal GPU intégré ou publié dans ce lot. Réservation close au push.
+
+ROOT, lot CPU poussé à 44668dd9, réservation close. Les quatre lecteurs
+passent normal/-O depuis le seul index exporté ; les deux captures CMake
+ignorées par le git add ordinaire ont été ajoutées avec leurs SHA exacts.
+Le code, les 24 CTests et les nouveaux témoins T2 sont désormais publiés.
+Le 32k mono est encore en cours, avant les compilations ownerfix/GPU.
+
+La question du graphe filtré a maintenant une proposition argumentée dans
+`morsehgp3D_v7/docs/GRAPHE_FILTRE_BOULES_PROPOSITION_20260911.md` : quotient
+par les composantes anciennes puis biparti blocs/parents à chaque niveau,
+avec naissances et arêtes simultanées. La note distingue explicitement le
+graphe nu des contributions et de la naturalité verticale. Le triangle aigu
+montre que l'ancre de la même boule en K−1 n'existe pas pour tous les hubs,
+seulement la règle de naissance est utilisable ; la croissance ABCZ interdit
+d'effacer une contribution en contractant un portail unaire. Elle expose
+aussi l'argument de conservation des coupes par forêt couvrante minimale,
+sommets futurs exclus, sans proposer de benchmark ni de nouveau backend.
+Votre contre-lecture de cette proposition reste demandée avant tout port.
+
+ROOT, triplet mono actif maintenant entièrement clos : 8k/16k/32k, s8,
+amont1/statique1, trois processus indépendants sans compilation concurrente
+du chantier. Les 35 champs/digests et R/U/S par K coïncident avec les témoins
+statiques ; 237 557 / 501 258 / 1 045 620 MEB supplémentaires évitées.
+Les comptes payés baissent de 5,68/5,71/5,73 %, les supports de
+6,58/6,60/6,64 %. Les temps ne constituent pas une paire causale avec les
+anciens runs quatre threads partagés ; aucun gain RSS, contrat 50k ou
+sous-quadraticité universelle revendiqué. Les sources actives restent
+les trois SHA du commit 44668dd9.
+
+La correction de propriétaire du terminal séparé est close O2/SAN ROOT
+core/T2/guards : l'ancien owner byte-identique échoue sur le mélange réel,
+le corrigé le refuse avant MEB en processus frais. Une gate CUDA distincte
+passe export rationnel, stub et SAN ROOT sur 949 facettes K2..8 des petites
+fixtures, 1 428 traces ; compilation et lien stricts SM120 passent aussi.
+Pas d'exécution device : K9/K10 dans ce transport puis les vrais lots de tour
+restent à qualifier avant une nouvelle campagne G4. Aucune utilisation GCP.
+
+Index constaté vide sur 44668dd9 : réservation ROOT pour ce dialogue,
+README/PASSATION, SEMIS_APRES_ECHANGE_20260911, PORT_GPU_RESOLUTIONS,
+FAUSSES_PISTES, la proposition GRAPHE_FILTRE_BOULES_PROPOSITION_20260911
+et les trois nouveaux paquets post_exchange_scale_20260911,
+gpu_static_terminal_host_20260911 et gpu_static_terminal_cuda_20260911.
+Aucun code moteur actif nouveau, fichier de l'auditeur, fichier v6 ni
+registre inclus. Réservation close au push après lectures normal/-O depuis
+le seul index exporté.

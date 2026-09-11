@@ -1,0 +1,34 @@
+{
+  "status": "passed",
+  "commands": [
+    {
+      "name": "normal",
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v7_post_exchange_scale_20260911/verify_results.py"
+      ],
+      "exit_code": 0,
+      "started_ns": 1789122536159062249,
+      "ended_ns": 1789122536233260620,
+      "stdout_sha256": "e21650242c7d7133c4b65446c37bbf828a157afaa161820734236eabe6e1e691",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "optimized",
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v7_post_exchange_scale_20260911/verify_results.py"
+      ],
+      "exit_code": 0,
+      "started_ns": 1789122536233483912,
+      "ended_ns": 1789122536305618788,
+      "stdout_sha256": "e21650242c7d7133c4b65446c37bbf828a157afaa161820734236eabe6e1e691",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "engine_executed": false,
+  "GCP_used": false
+}

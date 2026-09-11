@@ -1,0 +1,117 @@
+--- build/v7_gpu_static_terminal_20260911/originals/src/forest/full_ball_tower.hpp
++++ build/v7_gpu_static_terminal_ownerfix_20260911/source/morsehgp3D_v7/src/forest/full_ball_tower.hpp
+@@ -10,6 +10,9 @@
+ #include "local_plateau.hpp"
+ #include "../pipeline/expand.hpp"
+ #include "../parallel/pool.hpp"
++#if defined(MHGP7_PRIVATE_TERMINAL_STUB)
++#include "../../../../terminal_bridge.hpp"
++#endif
+ 
+ namespace mhgp7 {
+ 
+@@ -251,6 +254,10 @@
+   std::vector<FullBallOrder> run() {
+     validate_catalogue();
+     require(geometry_threads >= 0, "full_ball_static_threads", FullBallStatus::kInvalidInput);
++#if defined(MHGP7_PRIVATE_TERMINAL_STUB)
++    if (geometry_threads && kmax > 1)
++      terminal_owner = std::make_unique<gpu_terminal_private::HostOwner>(ix, balls);
++#endif
+     if (kmax > 1 && !geometry_threads) resolver_cache.configure(ix.upos.size());
+     std::vector<Draft> drafts;
+     History lower_history;
+@@ -351,6 +358,9 @@
+   std::vector<u64> population_ids, anchors, compressed;
+   History current;
+   std::vector<NodeRef> stack;
++#if defined(MHGP7_PRIVATE_TERMINAL_STUB)
++  std::unique_ptr<gpu_terminal_private::HostOwner> terminal_owner;
++#endif
+ 
+   AnchorMebResult meb(std::span<const i32> sites, AnchorMebWork& work) const {
+     std::array<P3, kFacetMaxK> positions{};
+@@ -522,10 +532,22 @@
+   }
+ 
+   // Geometry-only: immutable index/catalogue and rank, never anchors or DSU.
++#if defined(MHGP7_PRIVATE_TERMINAL_STUB)
++  BallId static_terminal_cpu(ResolverCache::Key key, const ExactLevel& before,
++      FullBallStats& work, std::vector<NodeRef>& scratch,
++      std::vector<gpu_terminal_private::TraceRow>* trace) const {
++#else
+   BallId static_terminal(ResolverCache::Key key, const ExactLevel& before,
+       FullBallStats& work, std::vector<NodeRef>& scratch) const {
++#endif
+     std::span<i32> sites(key.data(), current_k);
++#if defined(MHGP7_PRIVATE_TERMINAL_STUB)
++    auto paid_before = work.resolve_work;
++#endif
+     auto local = meb(sites, work.resolve_work);
++#if defined(MHGP7_PRIVATE_TERMINAL_STUB)
++    auto local_paid = gpu_terminal_private::delta(work.resolve_work, paid_before);
++#endif
+     u64 length = 0;
+     for (;;) {
+       require(compare_exact_level(local.level, before) < 0, "full_ball_static_not_strict");
+@@ -538,6 +560,9 @@
+         const unsigned lo = b.n_interior + b.arity - 1;
+         if (current_k >= lo && current_k <= b.n_interior + b.n_shell) {
+           add(work.anchor_hits); work.max_chain_steps = std::max(work.max_chain_steps, length);
++#if defined(MHGP7_PRIVATE_TERMINAL_STUB)
++          gpu_terminal_private::note_cpu(trace, sites, local, local_paid, -1, *found);
++#endif
+           return *found;
+         }
+       }
+@@ -545,9 +570,18 @@
+       require(z >= 0, "full_ball_static_missing_weak_terminal");
+       require(local.support_size > 0 && local.support_slots[0] < sites.size(),
+               "full_ball_static_missing_support");
++#if defined(MHGP7_PRIVATE_TERMINAL_STUB)
++      gpu_terminal_private::note_cpu(trace, sites, local, local_paid, z, gpu_terminal_private::kAbsentBall);
++#endif
+       sites[local.support_slots[0]] = z;
+       std::sort(sites.begin(), sites.end());
++#if defined(MHGP7_PRIVATE_TERMINAL_STUB)
++      paid_before = work.resolve_work;
++#endif
+       auto next = meb(sites, work.resolve_work);
++#if defined(MHGP7_PRIVATE_TERMINAL_STUB)
++      local_paid = gpu_terminal_private::delta(work.resolve_work, paid_before);
++#endif
+       const int cmp = compare_exact_level(next.level, local.level);
+       require(cmp <= 0, "full_ball_static_radius_increased");
+       if (cmp == 0) {
+@@ -558,6 +592,31 @@
+       add(length); local = next;
+     }
+   }
++
++#if defined(MHGP7_PRIVATE_TERMINAL_STUB)
++  BallId static_terminal(ResolverCache::Key key, const ExactLevel& before,
++      FullBallStats& work, std::vector<NodeRef>& scratch) const {
++    require(static_cast<bool>(terminal_owner), "full_ball_terminal_owner_missing");
++    const auto result = gpu_terminal_private::paired<FullBallStats>(*terminal_owner,
++        std::span<const i32>(key.data(), current_k), before,
++        [&](FullBallStats& reference_work, std::vector<NodeRef>&,
++            std::vector<gpu_terminal_private::TraceRow>* trace) {
++          return static_terminal_cpu(key, before, reference_work, scratch, trace);
++        });
++    require(result.status == gpu_terminal_private::Status::kOk, "full_ball_terminal_differential");
++    const auto& w = result.work;
++    add(work.resolve_work.calls, w.calls);
++    add(work.resolve_work.power_tests, w.powers);
++    add(work.resolve_work.materializations, w.materializations);
++    for (u8 q = 0; q < 5; ++q) add(work.resolve_work.supports_by_size[q], w.supports[q]);
++    add(work.key_lookups, w.key_lookups); add(work.anchor_hits, w.anchor_hits);
++    add(work.intruder_queries, w.intruder_queries); add(work.intruder_nodes, w.intruder_nodes);
++    add(work.intruder_power_tests, w.intruder_power_tests); add(work.interior_ranges, w.interior_ranges);
++    add(work.same_radius_steps, w.same_radius_steps); add(work.descending_steps, w.descending_steps);
++    work.max_chain_steps = std::max(work.max_chain_steps, w.max_chain_steps);
++    return result.target;
++  }
++#endif
+ 
+   void merge_static_work(const FullBallStats& w) {
+     for (const auto field : {&FullBallStats::anchor_hits, &FullBallStats::key_lookups,

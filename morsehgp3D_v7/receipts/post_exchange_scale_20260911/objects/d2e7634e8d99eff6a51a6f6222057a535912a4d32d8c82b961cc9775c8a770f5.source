@@ -1,0 +1,31 @@
+{
+  "GCP_used": false,
+  "active_source_pins": {
+    "bench/full_ball_tower_probe.cpp": "e96f8d36a523c6cfb64848ae5ee86933fef2279050691e6b4f774a430a0f2f46",
+    "src/forest/full_ball_tower.hpp": "6763a877f43d79a45532bce4426feca645b6ee97f18c9a4ee1fea4c47cd408a5",
+    "tests/full_ball_tower_gate.cpp": "c4f39462487610e32fd5b23210c268a4f7300490aff511252a3cf859afe9cb88"
+  },
+  "binary_sha256": {
+    "mhgp7_anchor_meb_gate": "08063cd442501f2ee7ed56d3bf3216b3d0db3cffd798b76bf3f9bfebd3612433",
+    "mhgp7_census_route_stub_gate": "ad3018233f6f67eba93768fb67dcf20a6e7cca8421f6ae1d4cceba90a1d72a25",
+    "mhgp7_facet_resolver_cache_gate": "3b611b2293f0fcaf4576efa8e97f27da49bc0e3ceef4e24dd7199ca88c974e0a",
+    "mhgp7_full_ball_tower_gate": "f2b893f64cf226a8edb6a2e5f561f657a9bd564fba0e0382949e45a843722d99",
+    "mhgp7_full_ball_tower_probe": "ade5dbdd7b35fb1f66a8e9f7ea6f33c315458b1ce12897396686ce7782cd9512",
+    "mhgp7_full_ball_work_gate": "5ca38761a97f92635620b8d06979acd10f6837ee50b36dae15b93c9bcbdf4e63",
+    "mhgp7_full_coverage_certificate_gate": "a6499c71e1682f95e204294ac210d47b1ffe8e71b2925056260cd2e2aa68aeae",
+    "mhgp7_full_gabriel_digest_gate": "1be5909f6a33516e1ad79d6874df9a47b61cd7386995a589e8136277a19e3b0d",
+    "mhgp7_local_plateau_gate": "c7df566cb69734b9dac0d49b778aca1a56d602934fb1b830ec2e3a674829f605",
+    "mhgp7_witness_front_gate": "2613b391140da35d5d1b10534880fc9716fb6d2eddea571766b8b3c36273c6b0"
+  },
+  "build_parallelism": 1,
+  "commands": 21,
+  "cuda_enabled": false,
+  "error": null,
+  "probe_latency_claimed": false,
+  "public_status": "not_claimed",
+  "selected_CTests": 24,
+  "sources": 173,
+  "sources_and_dependencies_stable": true,
+  "status": "passed",
+  "used_dependencies": 1048
+}

@@ -1,0 +1,171 @@
+#!/usr/bin/env python3
+"""One standalone scale run after ROOT's signal; no baseline held or new build."""
+import fcntl
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import signal
+import subprocess
+import sys
+import time
+
+BASE=Path(__file__).resolve().parent
+INPUT=BASE/'input'
+HEADER_SHA='6763a877f43d79a45532bce4426feca645b6ee97f18c9a4ee1fea4c47cd408a5'
+REFERENCE_SHA='2485cafaf912c9138cb618199f7fd59cd3670bcc2365be05295d4e3eca54d5e9'
+FIELDS=('anchor_blocks','backend','balls','contract_qualified','contributions','coord',
+        'declared_support_checks','extra_records','grouped_lots','input_digest','kmax','lot_dsu_slots',
+        'lower_edges_activated','lower_edges_indexed','lower_find_steps','lower_nodes_activated',
+        'lower_path_writes','lower_queries','n','nodes','orders','parent_refs','payload_digest','public_status',
+        'raw','representatives','residence_accounting','s','schema','seed','singleton_lots','status','threads',
+        'unique','vertical_refs')
+
+
+def need(ok,why):
+    if not ok:raise RuntimeError(why)
+
+
+def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def save(path,value):
+    with path.open('x') as stream:
+        json.dump(value,stream,indent=2,sort_keys=True);stream.write('\n')
+
+
+def pins(path):return {p.relative_to(path).as_posix():sha(p) for p in sorted(path.rglob('*')) if p.is_file()}
+
+
+def host():
+    return dict(time_ns=time.time_ns(),affinity=sorted(os.sched_getaffinity(0)),
+         loadavg=Path('/proc/loadavg').read_text(),meminfo=Path('/proc/meminfo').read_text(),
+         cgroup_cpu_max=Path('/sys/fs/cgroup/cpu.max').read_text())
+
+
+def progress(pid):
+    rows=[];pending=[pid]
+    while pending:
+        current=pending.pop()
+        try:
+            raw=Path(f'/proc/{current}/stat').read_text();fields=raw[raw.rfind(')')+2:].split()
+            rows.append(dict(pid=current,state=fields[0],utime_ticks=int(fields[11]),stime_ticks=int(fields[12]),
+                             rss_pages=int(fields[21])))
+            pending.extend(int(p) for p in Path(f'/proc/{current}/task/{current}/children').read_text().split())
+        except (FileNotFoundError,ProcessLookupError):pass
+    return rows
+
+
+def compare(actual,reference,n):
+    need(len(FIELDS)==35 and all(type(actual.get(k)) is type(reference[k]) and actual.get(k)==reference[k]
+         for k in FIELDS),'35_output_fields_and_digests')
+    for key in ('static_threads','anchor_hits','intruder_queries','same_radius_steps','validation_meb_calls',
+                'resolver_meb_calls','resolver_supports_tested'):
+        need(type(actual[key]) is int and actual[key]>=0,'work_counter_integer_domain')
+    need((actual['n'],actual['s'],actual['kmax'],actual['threads'],actual['static_threads'],actual['seed'],actual['coord'])
+         ==(n,8,10,1,1,3,65536),'exact_configuration')
+    need(actual['orders']==10 and actual['status']=='completed_relative' and actual['contract_qualified'] is False and
+         actual['public_status']=='not_claimed' and actual['backend']=='cpu_reference','limited_authority')
+    need(actual['resolver_cache_accounting']=='static_exact_sort_unique_complete_population_seeds_after_exchange_v2',
+         'post_exchange_accounting_version')
+    rows,old=actual['static_orders'],reference['static_orders']
+    need(len(rows)==len(old)==10 and [r['K'] for r in rows]==list(range(1,11)),'entire_tower')
+    for a,b in zip(rows,old):
+        need(all(type(a[k]) is int and a[k]==b[k] for k in ('K','requests','unique','seeded_unique')),
+             'per_K_R_U_S_identity')
+        q,h,t=(a[k] for k in ('post_seed_queries','post_seed_hits','post_seed_terminals'))
+        need(all(type(v)is int and v>=0 for v in (q,h,t)),'post_counter_integer_domain')
+        need(t==h and h<=min(q,a['unique']-a['seeded_unique']),'per_K_post_work_bound')
+    need(all(rows[0][k]==0 for k in rows[0] if k!='K'),'K1_unchanged')
+    q,h,t=(sum(r[k] for r in rows) for k in ('post_seed_queries','post_seed_hits','post_seed_terminals'))
+    u,s=(sum(r[k] for r in rows) for k in ('unique','seeded_unique'))
+    need(q>h>0 and h==t and h<=u-s,'nonvacuous_lookup_hit_terminal')
+    need(actual['intruder_queries']==reference['intruder_queries']==q,'every_paid_exchange_lookup')
+    need(actual['same_radius_steps']==reference['same_radius_steps']<=q,'same_radius_trajectory')
+    need(actual['validation_meb_calls']==reference['validation_meb_calls'],'same_validation_work')
+    need(actual['resolver_meb_calls']==actual['anchor_hits']+actual['intruder_queries'],'paid_MEB_identity')
+    need(actual['anchor_hits']+h==reference['anchor_hits']==u-s,'real_terminal_partition')
+    need(actual['resolver_meb_calls']+h==reference['resolver_meb_calls'],'exact_H_MEB_removed')
+    supports_saved=reference['resolver_supports_tested']-actual['resolver_supports_tested']
+    need(supports_saved>=h,'at_least_one_support_removed_per_terminal_MEB')
+    return dict(status='passed',n=n,fields_compared=list(FIELDS),R=sum(r['requests'] for r in rows),U=u,S=s,
+        Q=q,H=h,T=t,old_MEB=reference['resolver_meb_calls'],new_MEB=actual['resolver_meb_calls'],
+        old_supports=reference['resolver_supports_tested'],new_supports=actual['resolver_supports_tested'],
+        supports_saved=supports_saved,payload_digest=actual['payload_digest'],input_digest=actual['input_digest'],
+        total_s=actual['total_s'],tower_s=actual['tower_s'],historical_reference_static_threads=4,
+        actual_static_threads=1,reference_host_shared=True,speedup_against_reference_claimed=False,
+        baseline_retained_in_engine=False,contract_qualified=False)
+
+
+def main():
+    need(len(sys.argv)==2 and sys.argv[1] in ('8000','16000','32000'),'one_fixture_size_not_algorithmic_ceiling')
+    n=int(sys.argv[1])
+    binding=json.loads((INPUT/'pins.json').read_text())
+    binary_pin=binding['binary_sha256']
+    need(binding['header_sha256']==HEADER_SHA and binding['qualification_kind']=='active_CMake_24' and
+         len(binary_pin)==64 and all(c in '0123456789abcdef' for c in binary_pin),'active_qualified_binding')
+    guard=BASE/'exclusive_session.json'
+    # Written by ROOT after coordinating this specific CPU slot, not by this recorder.
+    authorization=json.loads(guard.read_text())
+    need(authorization.get('authorized') is True and authorization.get('sizes')==[8000,16000,32000]
+         and authorization.get('source_header_sha256')==HEADER_SHA and authorization.get('binary_sha256')==binary_pin,
+         'ROOT_exclusive_session_signal')
+    if n!=8000:
+        prior=json.loads((BASE/f'n{n//2}_s8_static1/receipt.json').read_text())
+        need(prior['status']=='completed','previous_size_closed_before_next')
+    with (BASE/'scale.lock').open('a+') as lock:
+        fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+        input_manifest=json.loads((INPUT/'MANIFEST.json').read_text())
+        need(all(sha(INPUT/name)==pin for name,pin in input_manifest.items()),'closed_input_inventory')
+        before=pins(INPUT/'source')
+        need(before==json.loads((INPUT/'source_pins.json').read_text()) and sha(INPUT/'probe')==binary_pin,'input_pins')
+        need(sha(INPUT/'reference_manifest.json')==REFERENCE_SHA,'reference_manifest')
+        out=BASE/f'n{n}_s8_static1';out.mkdir(exist_ok=False)
+        shutil.copyfile(Path(__file__),out/'record.py.source')
+        shutil.copyfile(guard,out/'exclusive_session.json')
+        shutil.copyfile(INPUT/f'reference_{n}.stdout',out/'reference.stdout')
+        save(out/'sources_before.json',before);save(out/'host_before.json',host())
+        save(out/'binary_before.json',dict(sha256=sha(INPUT/'probe')))
+        save(out/'input_manifest_pin.json',dict(sha256=sha(INPUT/'MANIFEST.json')))
+        argv=['/usr/bin/time','-v',str(INPUT/'probe'),f'--n={n}','--s=8','--kmax=10','--threads=1','--static-threads=1']
+        started=time.time_ns();proc=None;code=None;status,error='failed',None
+        save(out/'intent.json',dict(argv=argv,started_ns=started,algorithmic_timeout=None,
+             standalone_process=True,baseline_retained=False,exclusive_session_requested=True,GCP_used=False))
+        with (out/'stdout').open('xb') as so,(out/'stderr').open('xb') as se:
+            try:
+                proc=subprocess.Popen(argv,stdin=subprocess.DEVNULL,stdout=so,stderr=se,start_new_session=True)
+                save(out/'owned_process.json',dict(process_group=proc.pid))
+                next_at=0;sample=0
+                while proc.poll() is None:
+                    if (out/'stop_request.json').exists():raise RuntimeError('explicit_operator_stop_request')
+                    if time.monotonic()>=next_at:
+                        save(out/f'progress_{sample:04d}.json',dict(time_ns=time.time_ns(),processes=progress(proc.pid),
+                             stderr_bytes=(out/'stderr').stat().st_size))
+                        sample+=1;next_at=time.monotonic()+30
+                    time.sleep(1)
+                code=proc.returncode
+                need(code==0,'probe_exit')
+                result=compare(json.loads((out/'stdout').read_text()),json.loads((out/'reference.stdout').read_text()),n)
+                save(out/'comparison.json',result);status='completed'
+                print(json.dumps(result),flush=True)
+            except BaseException as exc:error=type(exc).__name__+': '+str(exc)
+            finally:
+                if proc is not None and proc.poll() is None:
+                    os.killpg(proc.pid,signal.SIGTERM)
+                    try:proc.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        os.killpg(proc.pid,signal.SIGKILL);proc.wait()
+                    code=proc.returncode
+                save(out/'command.json',dict(argv=argv,started_ns=started,ended_ns=time.time_ns(),exit_code=code,
+                     stdout_sha256=sha(out/'stdout'),stderr_sha256=sha(out/'stderr')))
+                after=pins(INPUT/'source');save(out/'sources_after.json',after)
+                save(out/'binary_after.json',dict(sha256=sha(INPUT/'probe')));save(out/'host_after.json',host())
+                stable=before==after and sha(INPUT/'probe')==binary_pin
+                if not stable:status,error='failed','source_or_binary_changed'
+                save(out/'receipt.json',dict(status=status,error=error,exit_code=code,sources_and_binary_stable=stable,
+                     standalone_process=True,baseline_retained=False,GCP_used=False,public_status='not_claimed'))
+        need(status=='completed',str(error))
+
+
+if __name__=='__main__':main()

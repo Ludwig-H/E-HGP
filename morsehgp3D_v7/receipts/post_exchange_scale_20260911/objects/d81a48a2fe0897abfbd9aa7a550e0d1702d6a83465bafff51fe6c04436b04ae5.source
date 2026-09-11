@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/usr/bin/c++",
+    "-M",
+    "-DMHGP7_TESTING=1",
+    "-O3",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "/workspaces/E-HGP/morsehgp3D_v7/tests/census_route_stub_gate.cpp"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "expected_exit": 0
+}

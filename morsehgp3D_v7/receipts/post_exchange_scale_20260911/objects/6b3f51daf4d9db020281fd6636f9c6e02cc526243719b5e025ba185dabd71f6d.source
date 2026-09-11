@@ -1,0 +1,9 @@
+{
+  "authorized": true,
+  "sizes": [8000, 16000, 32000],
+  "source_header_sha256": "6763a877f43d79a45532bce4426feca645b6ee97f18c9a4ee1fea4c47cd408a5",
+  "binary_sha256": "ade5dbdd7b35fb1f66a8e9f7ea6f33c315458b1ce12897396686ce7782cd9512",
+  "coordination": "ROOT qualifications closed; all three child agents instructed not to compile or run other experiments during this triplet; unrelated host activity remains outside this scope",
+  "public_status": "not_claimed",
+  "GCP_used": false
+}

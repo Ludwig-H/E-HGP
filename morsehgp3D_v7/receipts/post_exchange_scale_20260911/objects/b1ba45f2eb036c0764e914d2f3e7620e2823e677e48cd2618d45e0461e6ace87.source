@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/usr/bin/time",
+    "-v",
+    "/workspaces/E-HGP/build/v7_post_exchange_scale_20260911/input/probe",
+    "--n=32000",
+    "--s=8",
+    "--kmax=10",
+    "--threads=1",
+    "--static-threads=1"
+  ],
+  "ended_ns": 1789122483382026309,
+  "exit_code": 0,
+  "started_ns": 1789121787189291936,
+  "stderr_sha256": "10760d718a1691daf067bbe76ca045a57902b5255952ccadef0811323ccee357",
+  "stdout_sha256": "9b029479e4e0355b2e6b04f4efe9310471cf4fabe4619a798485e2596eb8542e"
+}

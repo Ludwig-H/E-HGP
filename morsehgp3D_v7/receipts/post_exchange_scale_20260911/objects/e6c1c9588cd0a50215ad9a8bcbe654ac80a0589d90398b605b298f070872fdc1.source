@@ -1,0 +1,18 @@
+{
+  "GCP_used": false,
+  "algorithmic_timeout": null,
+  "argv": [
+    "/usr/bin/time",
+    "-v",
+    "/workspaces/E-HGP/build/v7_post_exchange_scale_20260911/input/probe",
+    "--n=16000",
+    "--s=8",
+    "--kmax=10",
+    "--threads=1",
+    "--static-threads=1"
+  ],
+  "baseline_retained": false,
+  "exclusive_session_requested": true,
+  "standalone_process": true,
+  "started_ns": 1789121429943108743
+}

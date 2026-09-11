@@ -66,8 +66,13 @@ résultat historique 8k/50k n'est transféré à ce nouveau header.
 Sa [reconstruction CMake CPU](receipts/post_exchange_active_cmake_20260911/README.md)
 passe les 24 CTests pertinents. Le [nouveau T2](receipts/full_t2_post_exchange_20260911/README.md)
 recalcule les 54 tours O2/SAN sur ces sources, avec 120 hits effectivement
-exercés et des comptes identiques à un/quatre threads. Le nouveau triplet
-mono 8k/16k/32k est en cours, dans des processus indépendants.
+exercés et des comptes identiques à un/quatre threads. Le [nouveau triplet
+mono 8k/16k/32k](receipts/post_exchange_scale_20260911/README.md) est clos :
+237 557 / 501 258 / 1 045 620 MEB supplémentaires évitées, soit
+−5,68/5,71/5,73 %, mêmes 35 champs/digests et R/U/S par K. Totaux mono
+141,366 / 318,968 / 694,459 s, dont FULL 58,977 / 134,329 / 292,341 s ;
+8,687 Gio de pic RSS à 32k. Ce sont des observations sur l'uniforme s8,
+pas un speedup apparié aux anciens temps ni une qualification 50k.
 
 Le [triplet nominal du 10 septembre](docs/RESULTATS_TOUR_CACHE_G4_20260910.md) termine
 à 235,724 s / 354,144 s / 736,819 s pour 8k/16k/32k, s=8, un thread.
@@ -102,6 +107,19 @@ sans rematérialisation hôte (605 cas), puis
 (596 requêtes, 612 cas de transport). O2, SAN ROOT et compilation/lien CUDA
 stricts passent. Aucune de ces nouvelles coutures n'a encore été exécutée
 sur carte ; les succès G4 antérieurs ne leur sont pas transférés.
+
+Le [terminal géométrique composé](receipts/gpu_static_terminal_host_20260911/README.md)
+passe désormais ses raccords FULL/T2 et rejets en stub O2/SAN, avec une
+correction d'identité index/catalogue et la réfutation causale de l'ancien
+propriétaire. Il garde MEB, lookup, intrus et descente dans le même helper,
+sans quota de recherche. Ces sources séparées utilisent la référence c03,
+pas le nouveau raccourci actif ; aucune exécution device ni vitesse de tour
+n'est déduite de ces gates hôte.
+Son [transport CUDA autonome](receipts/gpu_static_terminal_cuda_20260911/README.md)
+passe aussi O2/SAN et compilation/lien NVCC stricts SM120 : 949 facettes
+K2..8, 1 428 traces, douze rejets et huit corruptions de transport réfutées.
+Le kernel compilé n'a pas été exécuté ; K9/K10 sur ce transport et les vrais
+lots de la tour restent à qualifier avant une nouvelle campagne G4.
 
 Le [premier raccord privé du journal incrémental](receipts/incremental_full_trial_20260911/README.md)
 préserve les sorties physiques O2/SAN dans quatre modes, mais augmente

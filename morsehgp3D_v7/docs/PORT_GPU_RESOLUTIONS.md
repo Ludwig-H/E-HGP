@@ -4,7 +4,8 @@
 `backend=cpu_reference`, `profile=quantized_u16_input_only`,
 `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 Plan de port mis à jour après une première exécution de primitives sur G4.
-Le résolveur complet et son raccord à la tour GPU restent à implémenter.
+Le terminal complet dispose maintenant d'un prototype qualifié sur hôte ;
+son exécution device et son raccord à la tour GPU restent à qualifier.
 
 Après la session G4, la [couture MEB + clé](../receipts/gpu_meb_key_route_20260911/README.md)
 est qualifiée O2/SAN ROOT et NVCC strict : le backend forme désormais la
@@ -14,15 +15,36 @@ est également clos localement : minimiseurs entiers, exclusions, parcours,
 propriétaire d'index hôte et gate portable. Aucun de ces nouveaux raccords
 n'a tourné sur device ; leurs prédécesseurs G4 gardent leurs preuves séparées.
 
-Le terminal entier est maintenant assemblé dans un arbre privé, sur la
-baseline `33e7d05e…` sans le nouveau raccourci CPU après échange. Il passe
-ses premiers raccords FULL et T2 en stub O2/SAN, mais une contre-lecture a
+Le [terminal entier composé](../receipts/gpu_static_terminal_host_20260911/README.md)
+est qualifié en stub O2/SAN dans un arbre séparé, sur la baseline
+`33e7d05e…` sans le nouveau raccourci CPU après échange. Une contre-lecture a
 trouvé une collision entre les compteurs de génération de deux types de
 propriétaires : une vue mêlant l'index d'un nuage et le catalogue d'un autre
-pouvait porter des tokens égaux. Une révision séparée réutilise le token du
-nouvel index possédé et prépare sa fixture croisée. Les captures initiales
-restent conservées avec ce manque ; ni ownership général, ni CUDA, ni device
-ne sont qualifiés pour ce terminal. Il n'est pas intégré au moteur actif.
+pouvait porter des tokens égaux. La révision réutilise le token du nouvel
+index possédé. Sa fixture croisée refuse maintenant ce mélange avant toute
+MEB, O2 et SAN ; le même juge réfute l'ancien owner byte-identique.
+
+Les six nouvelles captures core/T2/guards sont closes : le raccord FULL
+compare physiquement les sorties ; T2 exerce 54 tours K1..10, dont les cas
+coquille14 et spatial12 exécutent réellement le terminal. Les traces
+retrouvent aussi les pas à rayon égal et le premier support choisi. La
+capacité nulle de trace n'arrête pas la descente. Les succès initiaux restent
+conservés avec leur manque d'identité ; les nouvelles vues restent des
+emprunts à durée de vie bornée par leur propriétaire, sans protection contre
+des pointeurs/tokens forgés. Ni device ni performance ne sont qualifiés
+par ce paquet hôte. Le terminal n'est pas intégré au moteur actif.
+
+Le [transport CUDA autonome](../receipts/gpu_static_terminal_cuda_20260911/README.md)
+ferme ensuite export, stub O2/SAN ROOT et compilation/lien NVCC SM120 stricts.
+Ses 949 facettes K2..8 produisent 1 428 traces vérifiées contre la référence
+et Gram ; les replays à capacité de trace nulle restent complets. Douze
+requêtes invalides et huit corruptions de transport sont réfutées. Les
+48 descripteurs ABI vérifient le layout, pas la géométrie ; les niveaux sont
+comparés rationnellement. Ce paquet n'exécute aucun device, ne qualifie
+pas K9/K10 sur le transport et n'est pas un wrapper FULL transactionnel.
+Compléter ce domaine, raccorder les vrais lots sur la source cible choisie,
+puis exécuter sur G4 restent des jalons distincts, sans gain de vitesse
+présumé depuis ces tests locaux.
 
 La [voie statique CPU](RESOLUTION_STATIQUE_CPU_20260911.md) sépare désormais
 les résolutions géométriques des composantes temporelles. La première
@@ -97,6 +119,13 @@ Le lookup et la MEB ne doivent pas consulter les ancres courantes. L'auditeur
 a [justifié cette indépendance sous census exact complet](../audits/receipts_raccord_ancres_20260910/suite_cache_20260910/NOTE_PHASE_STATIQUE_MEB.md).
 Les lots simultanés, naissances sans représentant, contributions unaires et
 verticales historiques gardent leur calendrier nominal.
+
+Une [proposition distincte de graphe filtré](GRAPHE_FILTRE_BOULES_PROPOSITION_20260911.md)
+étudie ensuite la parallélisation du calendrier lui-même, une fois les
+terminales géométriques connues. L'argument compare ses composantes au
+biparti blocs/parents du constructeur ; dates de sommets, contributions,
+plateaux et verticales restent indispensables. Ce n'est pas une implémentation
+ni une optimisation mesurée ; la question est transmise à l'auditeur.
 
 Le [plan détaillé du terminal suivant](../receipts/gpu_meb_key_route_20260911/PLAN_TERMINAL.md)
 réunit ces helpers sans aller-retour hôte par étape. Les niveaux internes

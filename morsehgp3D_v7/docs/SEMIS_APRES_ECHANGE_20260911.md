@@ -101,7 +101,37 @@ statique un/quatre threads. Les hits proviennent de spatial12 ; la coquille14
 exerce les recherches qui doivent manquer, et la ligne12 seulement les semis
 initiaux. Les quatre mutants T2 ne remplacent pas les trois mutations propres
 au raccourci, conservées dans son paquet.
-Le triplet mono-thread 8k/16k/32k est préparé séparément sans transférer les
-captures du moteur précédent. Aucun temps 50k nouveau, aucun terminal GPU actif :
+## Triplet mono-thread actif : 8k, 16k, 32k
+
+Le [nouveau triplet](../receipts/post_exchange_scale_20260911/README.md) est
+clos sur le binaire Release actif : trois processus indépendants, uniforme
+u16 graine 3, s8, toute la tour K1..10 et ses verticales retenues, un thread
+amont et un statique. Aucun autre compilateur ou benchmark du chantier
+pendant ce créneau ; les charges extérieures de l'hôte ne sont pas contrôlées.
+
+| n | MEB après | MEB évitées | Supports testés après | Total pipeline (s) | FULL seul (s) | Pic RSS (Gio) |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 8 000 | 3 947 627 | 237 557 | 340 615 272 | 141,366 | 58,977 | 2,039 |
+| 16 000 | 8 278 207 | 501 258 | 717 184 296 | 318,968 | 134,329 | 4,223 |
+| 32 000 | 17 199 233 | 1 045 620 | 1 494 426 349 | 694,459 | 292,341 | 8,687 |
+
+La réduction supplémentaire du travail est de 5,68/5,71/5,73 % pour les MEB
+et 6,58/6,60/6,64 % pour les supports. Les 35 champs et digests de sortie,
+ainsi que R/U/S par K, coïncident avec les captures statiques antérieures.
+À ces tailles, ce n'est pas une comparaison physique de chaque objet de
+sortie : les qualifications bornées ci-dessus fournissent ce contrôle séparé.
+Les comptes Q/H/T vérifient le travail réellement supprimé, sans faux hit.
+
+En doublant n, le nombre de MEB est multiplié par 2,097 puis 2,078 ; les
+supports par 2,106 puis 2,084. Ces exposants locaux proches de 1,05–1,07
+ne concernent que cette famille uniforme. Le pic RSS mesure le processus
+entier et ne démontre pas un gain mémoire. Les durées sont une observation
+par taille, sans répétitions : les références anciennes utilisaient quatre
+threads statiques sur hôte partagé, donc aucune accélération chronométrique
+causale n'est déduite de leur comparaison avec ces nouveaux temps.
+
+s10/s12 n'ont pas été remesurés à ces tailles sur ce nouveau header ; leur
+comparaison antérieure reste attribuée à ses sources. Aucun temps 50k
+nouveau, aucun terminal GPU actif :
 les contrats de toute la tour sous 1 s, puis 100 ms, et le régime de plusieurs
 dizaines de millions de points ne sont pas acquis. GCP non utilisé ici.

@@ -1,0 +1,62 @@
+[
+  {
+    "command": "/usr/bin/c++  -isystem /workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_anchor_meb_gate.dir/tests/anchor_meb_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/anchor_meb_gate.cpp",
+    "directory": "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build",
+    "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/anchor_meb_gate.cpp",
+    "output": "CMakeFiles/mhgp7_anchor_meb_gate.dir/tests/anchor_meb_gate.cpp.o"
+  },
+  {
+    "command": "/usr/bin/c++  -isystem /workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_full_ball_tower_gate.dir/tests/full_ball_tower_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/full_ball_tower_gate.cpp",
+    "directory": "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build",
+    "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/full_ball_tower_gate.cpp",
+    "output": "CMakeFiles/mhgp7_full_ball_tower_gate.dir/tests/full_ball_tower_gate.cpp.o"
+  },
+  {
+    "command": "/usr/bin/c++  -isystem /workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_full_ball_work_gate.dir/tests/full_ball_work_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/full_ball_work_gate.cpp",
+    "directory": "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build",
+    "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/full_ball_work_gate.cpp",
+    "output": "CMakeFiles/mhgp7_full_ball_work_gate.dir/tests/full_ball_work_gate.cpp.o"
+  },
+  {
+    "command": "/usr/bin/c++   -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_full_ball_tower_probe.dir/bench/full_ball_tower_probe.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/bench/full_ball_tower_probe.cpp",
+    "directory": "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build",
+    "file": "/workspaces/E-HGP/morsehgp3D_v7/bench/full_ball_tower_probe.cpp",
+    "output": "CMakeFiles/mhgp7_full_ball_tower_probe.dir/bench/full_ball_tower_probe.cpp.o"
+  },
+  {
+    "command": "/usr/bin/c++  -isystem /workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_full_coverage_certificate_gate.dir/tests/full_coverage_certificate_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/full_coverage_certificate_gate.cpp",
+    "directory": "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build",
+    "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/full_coverage_certificate_gate.cpp",
+    "output": "CMakeFiles/mhgp7_full_coverage_certificate_gate.dir/tests/full_coverage_certificate_gate.cpp.o"
+  },
+  {
+    "command": "/usr/bin/c++  -isystem /workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_local_plateau_gate.dir/tests/local_plateau_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/local_plateau_gate.cpp",
+    "directory": "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build",
+    "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/local_plateau_gate.cpp",
+    "output": "CMakeFiles/mhgp7_local_plateau_gate.dir/tests/local_plateau_gate.cpp.o"
+  },
+  {
+    "command": "/usr/bin/c++ -DMHGP7_TESTING=1  -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_census_route_stub_gate.dir/tests/census_route_stub_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/census_route_stub_gate.cpp",
+    "directory": "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build",
+    "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/census_route_stub_gate.cpp",
+    "output": "CMakeFiles/mhgp7_census_route_stub_gate.dir/tests/census_route_stub_gate.cpp.o"
+  },
+  {
+    "command": "/usr/bin/c++  -isystem /workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_full_gabriel_digest_gate.dir/tests/full_gabriel_digest_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_digest_gate.cpp",
+    "directory": "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build",
+    "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_digest_gate.cpp",
+    "output": "CMakeFiles/mhgp7_full_gabriel_digest_gate.dir/tests/full_gabriel_digest_gate.cpp.o"
+  },
+  {
+    "command": "/usr/bin/c++  -isystem /workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_facet_resolver_cache_gate.dir/tests/facet_resolver_cache_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/facet_resolver_cache_gate.cpp",
+    "directory": "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build",
+    "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/facet_resolver_cache_gate.cpp",
+    "output": "CMakeFiles/mhgp7_facet_resolver_cache_gate.dir/tests/facet_resolver_cache_gate.cpp.o"
+  },
+  {
+    "command": "/usr/bin/c++   -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/mhgp7_witness_front_gate.dir/tests/witness_front_gate.cpp.o -c /workspaces/E-HGP/morsehgp3D_v7/tests/witness_front_gate.cpp",
+    "directory": "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build",
+    "file": "/workspaces/E-HGP/morsehgp3D_v7/tests/witness_front_gate.cpp",
+    "output": "CMakeFiles/mhgp7_witness_front_gate.dir/tests/witness_front_gate.cpp.o"
+  }
+]
