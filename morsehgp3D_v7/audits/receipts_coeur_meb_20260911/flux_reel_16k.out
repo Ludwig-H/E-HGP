@@ -1,0 +1,5 @@
+=== (3) exactitude a une seconde echelle, n=16000 ===
+base: "payload_digest":"8eb94f8ff9dedc144012116651806b3966ed05624b5d6f72815689b3398f4e45" "tower_s":139.149873998 
+var: "payload_digest":"8eb94f8ff9dedc144012116651806b3966ed05624b5d6f72815689b3398f4e45" "tower_s":107.030832527 
+
+[exited with code 0]

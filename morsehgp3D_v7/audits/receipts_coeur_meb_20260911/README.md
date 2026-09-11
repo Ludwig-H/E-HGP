@@ -55,3 +55,14 @@ Il exécute trois épreuves : la contre-fixture K7 de
 points sur tous les masques de taille 2 à 10, et 200 000 tirages. Il rend 1 si
 une seule divergence apparaît, et compte les déclenchements du repli de sécurité.
 Mesuré : 0 divergence et 0 repli sur les trois épreuves, 4,12x en temps.
+
+## Exactitude à deux échelles
+
+| n | `payload_digest` | `tower_s` base | `tower_s` patché | gain |
+| ---: | --- | ---: | ---: | ---: |
+| 8 000 | identique | 61,23 s | 45,13 s | 1,357x |
+| 16 000 | identique | 139,15 s | 107,03 s | 1,300x |
+
+Sorties brutes : `flux_reel.out` et `flux_reel_16k.out`. Le lecteur `verify.py`
+exige, pour chaque échelle, deux digests identiques et un `tower_s` strictement
+décroissant. Le gain recule avec la taille parce que la part géométrique recule.

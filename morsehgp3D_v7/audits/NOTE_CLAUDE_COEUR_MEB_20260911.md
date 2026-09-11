@@ -125,6 +125,13 @@ moins de formations de candidats. Le gain réel sur les candidats dépasse
 largement les 4,13x du banc, parce que la distribution réelle des facettes penche
 davantage vers les K élevés que mon substitut par plus proches voisins.
 
+**Confirmé à une seconde échelle.** À n=16000, les deux digests sont de nouveau
+identiques (`8eb94f8f…f4e45`) et la tour passe de 139,15 s à 107,03 s, soit
+**1,300x**. Le gain recule légèrement avec la taille, 1,357x puis 1,300x, ce qui
+est cohérent avec la part géométrique qui recule aussi, 62,8 % puis 61,0 %. Les
+mesures se recoupent donc entre elles. Sortie brute :
+[`flux_reel_16k.out`](receipts_coeur_meb_20260911/flux_reel_16k.out).
+
 Mais le gain de **tour** est 1,357x, pas 4,12x, et l'écart est structurel : le
 noyau MEB n'est qu'une partie de la géométrie, laquelle ne pèse que 62,8 % de
 `tower_s`. La phase géométrique passe d'environ 38,5 s à 22,4 s, soit **1,72x**.
