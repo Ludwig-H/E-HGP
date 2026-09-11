@@ -157,6 +157,86 @@ bout en bout sur le moteur réel avec un digest identique**, et c'est celui qu'i
 faut retenir. Sortie brute : [`flux_reel.out`](receipts_coeur_meb_20260911/flux_reel.out),
 correctif : [`realflow_patch.py`](receipts_coeur_meb_20260911/realflow_patch.py).
 
+## 4ter. Deux résultats indépendants affinent ces optimisations
+
+Ma note ne doit pas se lire comme l'état de l'art : deux travaux publiés depuis
+vont plus loin que le mien, chacun sur une des optimisations.
+
+**Sur (a), le développeur prouve qu'un seul essai suffit.** Son
+[reçu diamètre](../receipts/meb_diameter_20260911/README.md) établit que si une
+boule de diamètre maximal contient tous les sites, toute autre paire maximale y
+est antipodale et définit la même boule. Le **premier** essai sur la première
+paire maximale suffit donc, égalités comprises, en conservant le support
+canonique. Ma version testait toutes les paires réalisant le maximum : la sienne
+est strictement plus forte. Dans son périmètre de 6 416 comparaisons, les
+supports formés passent de 437 473 à 293 135 et les tests de puissance de
+579 018 à 258 574, **avec les 158 088 distances de paires explicitement
+facturées**. Cette dernière précision est exactement la discipline comptable dont
+l'absence rendait mon propre rapport de supports faux. Il borne lui-même la
+portée : ces nombres n'incluent ni le travail de juge, ni ses appels de
+référence, ni les exercices de rejet. Le maximum n'est remplacé que sur une
+inégalité **stricte**, ce qui fixe la première paire maximale lexicographique.
+
+**Sur (c), l'auditeur historique élimine la canonisation dans le cas courant.**
+Son [complément](receipts_certified_support_20260911/README.md) montre que le
+support positif de la MEB suffit à juger les candidats canoniques, et que
+**lorsque la coquille est exactement ce support, toute la canonisation peut être
+omise**. Cela ne change ni le support canonique, ni la trajectoire, ni la BallId.
+Il écrit honnêtement qu'« aucune fréquence de ce cas dans les vraies descentes
+n'est supposée ici » : sans cette fréquence, on ne sait pas ce que le raccourci
+rapporte. Je la mesure au § 4quater.
+
+Ces deux résultats sont complémentaires du mien et non concurrents : ils
+réduisent le travail là où ma canonisation et mon élagage le laissaient encore.
+
+## 4quater. La fréquence manquante, mesurée : 100 %
+
+L'auditeur historique prouve que la canonisation peut être omise quand la
+coquille est exactement le support, et refuse honnêtement de supposer à quelle
+fréquence ce cas se présente. Cette fréquence décide pourtant si sa réduction
+vaut la peine d'être écrite. Je l'ai donc mesurée sur le flux réel.
+
+Protocole : `anchor_meb.hpp` instrumenté dans un arbre isolé obtenu par
+`git archive`, un compteur posé au seul point où un candidat est accepté, puis
+une tour complète à n=8000, s=8, K=1..10. Le cas cherché est exactement
+`selected_shell_count == support_size`.
+
+| taille du support | coquille | résolutions | part |
+| ---: | ---: | ---: | ---: |
+| q=2 | 2 | 529 493 | 13,4 % |
+| q=3 | 3 | 2 148 000 | 54,4 % |
+| q=4 | 4 | 1 270 134 | 32,2 % |
+| **total** | | **3 947 627** | **100 %** |
+
+**Aucune résolution acceptée n'a de coquille plus grande que son support.** Le
+tableau n'a pas de ligne hors diagonale : le cas U=S n'est pas fréquent, il est
+le seul observé. Contrôle de cohérence : le total vaut exactement
+`resolver_meb_calls`, soit 3 947 627, donc l'instrumentation a vu un événement
+par appel, ni plus ni moins, et aucun appel n'a échoué.
+
+Conséquence pour le constructeur : dans une architecture proposeur puis
+certification, l'étage de canonisation ne s'exécuterait **jamais** sur ce flux.
+Il se réduit à une comparaison d'entiers entre la taille de coquille, déjà
+obtenue par la passe de confinement, et l'arité du support. Ma propre
+optimisation (c), qui canonicalise sur la coquille, devient inutile plutôt
+qu'utile : il n'y a rien à y canonicaliser.
+
+Ce tableau dit aussi où se trouve le travail. Les supports de taille 2 ne sont
+que 13,4 % des résolutions, alors que l'énumération en force brute parcourt
+**toutes** les paires avant d'atteindre q=3, pour les 86,6 % restants sans
+jamais aboutir. C'est précisément ce balayage stérile que supprime la première
+paire maximale du constructeur, ce qui explique que son gain soit réel malgré la
+faible part de q=2.
+
+**Limites.** Une famille, une taille, une séparation, une graine, un moteur. Ce
+n'est pas un théorème : une cosphéricité exacte entre sites d'une même facette
+donnerait une coquille plus grande, et rien ici ne prouve qu'elle n'arrive
+jamais. La mesure porte sur les sites de la facette, au plus dix, et non sur la
+cosphéricité globale du census que traite `sphere_plateau.hpp`. La conclusion
+sûre est donc : **le raccourci doit être écrit avec son repli, et le repli ne
+sera pas emprunté sur ce flux**. Reproductible par `shell_hist_patch.py` et
+`shell_hist.out` dans mon reçu.
+
 ## 5. Un résultat négatif conservé
 
 Ma première version de Welzl laissait l'ensemble de base grossir jusqu'à dix

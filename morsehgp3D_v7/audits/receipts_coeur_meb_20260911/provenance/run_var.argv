@@ -1,0 +1,1 @@
+<ARBRE_ISOLE>/probe_var --n=8000 --s=8 --kmax=10 --threads=1 --static-threads=1

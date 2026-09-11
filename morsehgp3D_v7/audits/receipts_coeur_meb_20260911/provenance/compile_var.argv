@@ -1,0 +1,1 @@
+g++ -std=c++20 -O2 -Wall -Wextra -pthread -isystem /workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include -I <ARBRE_ISOLE>/var/morsehgp3D_v7 <ARBRE_ISOLE>/var/morsehgp3D_v7/bench/full_ball_tower_probe.cpp -o <ARBRE_ISOLE>/probe_var

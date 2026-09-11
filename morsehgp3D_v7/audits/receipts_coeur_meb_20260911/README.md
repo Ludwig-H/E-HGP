@@ -101,3 +101,59 @@ grep -c anchor_meb_brute "$PIN/morsehgp3D_v7/src/forest/anchor_meb.hpp"
 Le dernier contrôle doit rendre un compte strictement positif. Je suis moi-même
 tombé dans ce piège : une mesure entière a été rendue nulle parce que la garde
 avait refusé de patcher et que je ne l'avais pas vérifié avant de chronométrer.
+
+## Provenance complète des deux bras
+
+Le constructeur a relevé que `flux_reel.out` ne conservait que des extraits
+filtrés, sans commandes exactes, sans sources épinglées ni sorties complètes.
+C'est exact sur mes octets : quinze lignes de `grep`. Le dossier `provenance/`
+répare ce défaut et conserve, pour chacun des deux bras :
+
+| pièce | contenu |
+| --- | --- |
+| `provenance.txt` | le commit exact dont les deux arbres sont extraits |
+| `compiler.txt` | la version de `g++` réellement utilisée |
+| `sources.sha256` | SHA-256 des trois sources compilées, bras par bras |
+| `compile_*.argv` | la ligne de compilation complète, sans abréviation |
+| `compile_*.stdout/stderr` | la sortie intégrale de la compilation |
+| `run_*.argv` | la ligne d'exécution complète de la sonde |
+| `run_*.stdout/stderr` | la sortie **intégrale** de la sonde, non filtrée |
+| `patch.stdout` | le rapport du patch et son compte de marqueurs |
+
+Le lecteur `verify.py` ne se contente pas de relire ces fichiers : il compare
+les empreintes des sources entre les deux bras et **échoue si le noyau MEB y est
+identique**. C'est la garde qui manquait le jour où j'ai mesuré la référence
+contre elle-même pendant plusieurs minutes, sans m'en apercevoir, parce que ma
+propre garde avait refusé d'appliquer le patch. Il vérifie symétriquement que
+`full_ball_tower.hpp` et la sonde sont **inchangés** entre les bras : seul le
+noyau doit différer, sans quoi la comparaison porterait sur deux moteurs.
+
+Limites déclarées, dans le même esprit que le reçu diamètre du constructeur :
+les en-têtes système et Boost ne sont pas épinglés, les binaires ne sont pas
+distribués, et une seule exécution par bras est conservée. Ce paquet atteste la
+provenance des mesures, pas une fermeture hermétique d'outillage.
+
+### Le lecteur sait échouer
+
+Un verdict incapable d'échouer ne certifie rien ; c'était le premier des défauts
+relevés par le constructeur sur ce reçu. Les trois gardes du paquet de
+provenance sont donc vérifiées par mutation, chacune sur une copie jetable :
+
+| mutant | altération | diagnostic rendu | code |
+| --- | --- | --- | ---: |
+| A | le bras variante reçoit l'empreinte de noyau du bras de référence | `MESURE A VIDE : le noyau est identique dans les deux bras, le patch n'a donc pas ete applique` | 1 |
+| B | un `payload_digest` est modifié d'un caractère | `les payload_digest des deux bras different` | 1 |
+| C | l'empreinte de la tour diverge entre les bras | `src/forest/full_ball_tower.hpp devait rester identique entre les bras` | 1 |
+
+Le mutant A est la reproduction dirigée de l'incident qui m'a fait mesurer la
+référence contre elle-même. Le mutant C interdit la faute symétrique : comparer
+deux moteurs en croyant comparer deux noyaux.
+
+### Les deux mesures portent sur les mêmes octets
+
+`provenance/sources.sha256` donne au bras de référence le noyau `386072c8…` et
+la tour `83f1c78e…`. Ce sont exactement les deux épingles que le constructeur
+cite dans son [reçu diamètre](../../receipts/meb_diameter_20260911/README.md),
+« le MEB nominal épinglé `386072c8` » et « le Builder privé épinglé `83f1c78e` ».
+Nos deux campagnes partent donc du même état, et leurs chiffres se comparent
+sans requalification.

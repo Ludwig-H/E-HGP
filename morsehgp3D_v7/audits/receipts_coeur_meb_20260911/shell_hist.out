@@ -1,0 +1,8 @@
+MHGP7_SHELL_HIST_BEGIN
+q=2 shell=2 count=529493
+q=3 shell=3 count=2148000
+q=4 shell=4 count=1270134
+total_accepte=3947627 coquille_egale_support=3947627
+MHGP7_SHELL_HIST_END
+"resolver_meb_calls":3947627
+commande : probe --n=8000 --s=8 --kmax=10 --threads=1 --static-threads=1
