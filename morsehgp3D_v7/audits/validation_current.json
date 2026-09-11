@@ -1,6 +1,6 @@
 {
   "schema": "mhgp7-current-audit-validation-v2",
-  "updated_utc": "2026-09-11T08:15:35.710576+00:00",
+  "updated_utc": "2026-09-11T08:18:17.213437+00:00",
   "phase": "exploration_v7_hors_registre",
   "backend": "cpu_reference",
   "profile": "quantized_u16_input_only",
@@ -12607,6 +12607,39 @@
         "oracle/local_plateau_oracle.hpp": "7a002853749784bb14a8db178fbfe637244bd3019a08ae1daf92fd20aeae670d"
       },
       "evidence": "audits/receipts_raccord_ancres_20260910/README.md"
+    },
+    {
+      "id": "Q_cache_commit_replay_named_blocks",
+      "source_authority": "Published ad7ffd28: resolver cache and seeded closed anchors (full_ball_tower.hpp 910f45ba), exact journal reservations (full_coverage_certificate.hpp 7608e70e), corrected cache gate injector (898533ca), batched witness front (witness_front.hpp fb6f1bcc), constructor documents and receipts of 10 September. Read first as uncommitted WIP on 10 September, then found byte-identical in the commit for the three announced hashes. Historical variants D-P preserved untouched.",
+      "qualification_scope": "Second auditor replay on the committed bytes, NOT a reception of the tower: the four constructor gates pass O2 and ASan/UBSan with identical stdout; the two grouped-lot mutants are killed on the committed header by growth_ABCZ_doubled_lot; payload fingerprints per family, the 2507-cloud random corpus against the rational Gamma judge and the scalar-vs-batched witness front differential are byte-identical to the 10 September receipt; the full CTest suite passes; the constructor's named 50k block observer (binary bit-identical to the constructor capture ae992d15) was executed on local CPU with threads=8: the four blocks 174406/K5, 254569/K2, 996863/K6, 1251653/K10 match the pinned expectations and the raw-anchor mutant is killed on the same census. Relative to supplied complete exact censuses; no timing claim, no GPU, no public promotion. Superseded at HEAD by ce842a3f (full_ball_tower.hpp 910f45ba->33e7d05e); this variant records the ad7ffd28 qualification and is intentionally stale once the engine changed.",
+      "pinned_sources": {
+        "CMakeLists.txt": "25d6fe078d26467353e3ad6f185e1108d3ae26de2fff2dec01d18b24e6e3942b",
+        "README.md": "c02def6e6adaf7a97009beee4bd5d2c1ca3c234456250f3d78eac4241837bb20",
+        "PASSATION.md": "bea5b54480674de70d0a614aab5660904e97ed8ded306db37cbc529b1f48a90e",
+        "docs/TOUR_FULL_PAR_BOULES.md": "943dafb9b09653cae8d34bf24e974ce3fd5dad64d530444a9cc7c838eecbe5ca",
+        "docs/FAUSSES_PISTES.md": "ea72bae78645a06f2032f21c2fa9960ae35254cf446b780a0ff10af6f1d8b3b3",
+        "docs/OPTIMISATIONS_CACHE_ET_GPU_20260910.md": "2a1c0ea8b5a07f950ac0244e484770571a0f48f3030fd8132b9815cd64d11a72",
+        "docs/RESULTATS_TOUR_CACHE_G4_20260910.md": "119c15ca1daaa75a1d80fef1e9fe22579db5d915919e0105faadbf537c06837f",
+        "docs/PLAN_JOURNAL_INCREMENTAL.md": "4e4e76252a12d41a20925bdfa686615735dd105cbd564a7b911e8b111a4013ec",
+        "src/forest/full_ball_tower.hpp": "910f45baea1750b11d2b34f40c893c9d1a34f950705cdb127ffa226de60f7b2e",
+        "src/forest/full_coverage_certificate.hpp": "7608e70ec0bf7df7ed726ae2388a39e800ab2db35043b4ba42c619ceef13bac0",
+        "src/forest/anchor_meb.hpp": "386072c8a02bbb836d0070a10e1421418a36d3f4024ade63b4c9014c5536f786",
+        "src/pipeline/witness_front.hpp": "fb6f1bcca0a6dee13d9c786250bdd26e4c388b8d6e7caac615f7a33972937b81",
+        "src/spindle/witness_batch.hpp": "66f31ead8b358dbbb09274b1a0e4fbfcc4777604827527f5c0b2220c1602cd52",
+        "tests/facet_resolver_cache_gate.cpp": "898533cacf20b5d3444cd63250bba8f7727f709c3e5ee6b97ad7a68d71e42a64",
+        "tests/full_ball_tower_gate.cpp": "bf1a28242dd2d6897f3dc02edff8c6077dbec1caa3f9b9a67813dcc748e3d75a",
+        "tests/full_ball_work_gate.cpp": "25d5cf9a193db2eefe432f21bf823941402d82975c53f92660a9f984fb57498c",
+        "tests/witness_front_gate.cpp": "f283bca024d593abc47305c5c40f32af1be47d89ff09d84da9225b7e48f1c4a7",
+        "bench/full_ball_tower_probe.cpp": "306e5a9e2a424f73f6d01122e4a81aa5beaffd0140642888d34218d7b5bda275",
+        "bench/full_gabriel_semantic_digest.hpp": "04b69e840d083d239af374a67d368393f033f94946dda5a9850c4440593d7979",
+        "oracle/local_plateau_oracle.hpp": "7a002853749784bb14a8db178fbfe637244bd3019a08ae1daf92fd20aeae670d",
+        "receipts/full_ball_named_blocks_20260910/capture/observer.hpp": "56bca49db8b4e76efa5083036b6009c23383d9b09678bd61c52dbce7f472173d",
+        "receipts/full_ball_named_blocks_20260910/capture/observer_gate.cpp": "de262c2ac2da36aa7268eabdada40950ecc914a0915d436f6d705941b7744630",
+        "receipts/full_ball_named_blocks_20260910/capture/observer_overlay.patch": "ffcbf614d4784e691254ae2776a74e91513c33f8370278f48b1f05aed15eae46",
+        "receipts/full_ball_named_blocks_20260910/capture/expectations.json": "088e37a320dcad5ffafb2f881ec6e80112e0034bc9f47de829edcf2b69be4151",
+        "receipts/ball_resolver_residence_20260910/README.md": "74ff111dc1619b6738ef015d112b7b31912a1888b11e0cb577d9d88ec11b19d4"
+      },
+      "evidence": "audits/receipts_cache_commit_20260911/README.md"
     }
   ],
   "freshness_note": "Code 0 confirms common pins and one WHOLE source variant; scope printed. No per-file mixing, no tests rerun, no promotion.",
@@ -12796,5 +12829,19 @@
     "new_engine_variant": false,
     "new_cpp_qualification": false,
     "scope": "Old-cut stability lemma and historical net storage calculation; grouped-lot request closed by published constructor receipt. Current journal guards retain their own source qualification; named 50k observations still pending in published receipts."
+  },
+  "cache_commit_followup": {
+    "receipt": "audits/receipts_cache_commit_20260911/README.md",
+    "auditor": "second_auditor_session_e-hgp-c6",
+    "publication_reviewed": "ad7ffd28b35e153a20bd8cf42534d1cd29160bcd",
+    "superseded_at_head_by": "ce842a3f",
+    "scope": "Replay on pinned ad7ffd28 bytes (git archive export, isolated from the concurrently-mutating shared worktree) of the four gates, per-family payload fingerprints, grouped-lot mutants, the 2507-cloud random corpus and the batched witness front, plus local-CPU execution of the constructor's named 50k block observer (binary bit-identical to the constructor capture). Both P1 locks of the ball-anchor raccord closed on ad7ffd28; 11-surface adversarial contre-lecture with 0 surviving P1 and 19 P2 (chief: ball-tower oracle-judged only at n<=8,K<=8). The HEAD engine ce842a3f is not reviewed here.",
+    "p1_survivors_in_contre_lecture": 0,
+    "p2_findings": 19,
+    "named_50k_blocks": "EXECUTED_LOCAL_CPU_PASSED",
+    "both_p1_locks": "closed_on_ad7ffd28",
+    "source_variants_D_to_P_unchanged": true,
+    "new_engine_variant": false,
+    "gcp": "not_used"
   }
 }
