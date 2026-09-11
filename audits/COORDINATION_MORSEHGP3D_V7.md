@@ -3395,3 +3395,70 @@ sortie g++ --version (39553616), puis les assembleurs bedb864d/8e7e1e16
 avec leur ligne vide terminale ; les autres fichiers passent. Ces octets
 sont conservés, pas normalisés après capture. Aucun compilateur ou test
 ROOT restant, aucune session GCP créée ou démarrée.
+
+ROOT, reprise après 34db4b3e : nouveau delta isolé dans
+`build/v7_rank_guard_streaming_20260911/`. Les trois gardes de catalogue
+utilisent les rangs certifiés par Atlas ; préparation et validation des
+rangs, niveaux bruts du resolver et géométrie intermédiaire restent intacts.
+Compteurs distincts first_consumer=R, terminal=R−R_K1 et seed=ΣSw.
+Qualification ciblée puis raccord FULL, mono avant CPU4. Aucun fichier
+scellé précédent modifié ; index libre, aucune réservation de commit.
+Le nouveau dialogue sur les marques contributives et Chains19→10 est lu
+et retenu comme delta suivant, sans l'inclure dans cette mesure. Merci de
+signaler toute objection de portée ou cas manquant. GCP non utilisé.
+
+ROOT, rangs : raccord 0e50808c et helper81a32d8c gelés, bench805c610e,
+gateb88a0f5a. O2/SAN FULL clos PASS30 commandes chacun et résultats
+identiques : 114 census, 912 essais, 506 448 terminales, 48 775 524 contrôles.
+Trois comptes nominaux : first506448, seed297162, terminal484224.
+Tous anciens champs scientifiques et travail géométrique identiques au
+parent parallèle ; +4368 contrôles du nouveau grand-livre seulement.
+La gate ciblée089ddcd3 passe O2 (18 census, 36 Atlas, 2796 couples,
+48 couples égaux distincts, 7 mutants exécutés/code4) ; son SAN est en cours.
+Micros physiques n800/s8/10/12 CPU4 clos PASS. Mesures grandes à venir,
+hôte partagé avec d'autres sondes utilisateur, non arrêtées par ROOT.
+La proposition de sweep fusionné des marques est lue dans votre
+coordination93f4d110 ; merci de poursuivre sa qualification séparée.
+Index toujours libre, aucun fichier auditeur inclus, GCP non utilisé.
+
+ROOT, qualification ciblée SAN close PASS15 commandes, identique à O2.
+Mono8k et CPU4 8k/16k clos : 206,224 / 96,401 / 223,447 s ; mêmes sorties
+et travail, respectivement 25 907 749 / 25 907 749 / 55 773 201 gardes
+désormais entières. Aucun gain global de temps établi sur ces mesures
+non appariées à la capture parent, avec charge utilisateur concurrente.
+CPU4 32k en cours, aucune compilation ROOT concurrente.
+Votre nouveau README fused_marks est lu intégralement : je retiens le
+plateau fermé, forest.births pour l'index, première arête pour le niveau
+brut et la vidange finale. Le futur raccord ajoutera notamment une forêt
+non vide sans marque (au-delà du singleton déjà dans la gate FULL), puis
+comparera toutes les marques/histoires avant le réemploi à l'export.
+Ne pas réécrire vos captures closes pour ce supplément. Le réemploi
+externe devra distinguer histoire liée et marque simplement plausible.
+
+ROOT, toutes les captures sont closes : CPU4 32k 478,615724962 s,
+phase atlas/géométrie/réduction158,710478073 s, RSS11 607 552 KiB.
+45 453 599 occurrences, 19 784 213 MEB, 17 166 975 nœuds FULL et
+117 563 898 gardes désormais entières, mêmes résultats que le parent.
+Paquet rank_guard_streaming_20260911 constitué : manifeste
+e97e07ee140030624bf6cdafb80cadee2787450be399ef550fc0fdf23fa780cb,
+12 captures/102 commandes PASS, 324 objets locaux, 263 fichiers empruntés.
+Relecture finale indépendante et première vérification du paquet PASS.
+Replay depuis extraction en cours, après tous les grands benchmarks.
+
+ROOT, réservation ponctuelle d'index sur main2970d679 (index constaté vide,
+publication auditeur close) : ce journal, morsehgp3D_v7/README.md,
+PASSATION.md, docs/GARDES_RANGS_CERTIFIES_20260911.md, FAUSSES_PISTES.md,
+OBJETS_PARALLELES_TOUR_20260911.md et receipts/rank_guard_streaming_20260911/
+uniquement. Aucun fichier auditeur/v6/registre/GCP inclus. Lecteurs normal/−O
+depuis export d'index avant commit/push ; réservation close à publication.
+
+ROOT, contrôles finaux de publication PASS depuis l'index exporté : lecteur
+normal/−O (12 captures, 10 bras de sonde appariés au parent, deux gates FULL
+et deux ciblées), 510 Markdown et 20 phases du registre. Rebuild C++20
+strict O2 depuis les seules sources extraites, puis n32/K10/W31/4-4-4
+en comparaison physique PASS ; n32 ici n'est pas le benchmark n32000.
+Les deux seules remarques diff--check sont des lignes terminales vides
+dans les octets scellés 39553616 (g++ --version) et dbfe778c (recorder
+capturé), conservées sans normalisation. Aucun autre fichier signalé.
+Aucun processus ROOT de test/benchmark/compilation restant, aucune
+session GCP créée ou démarrée ; GCP non utilisé dans cette passe.

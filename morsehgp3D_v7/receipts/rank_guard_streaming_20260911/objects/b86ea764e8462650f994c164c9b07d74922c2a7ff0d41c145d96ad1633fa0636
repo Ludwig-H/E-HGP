@@ -1,0 +1,372 @@
+[
+  {
+    "argv": [
+      "/usr/bin/x86_64-linux-gnu-g++-13",
+      "--version"
+    ],
+    "cwd": "/workspaces/E-HGP/build",
+    "elapsed_seconds_observation_only": 0.0018281829998159083,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "compiler",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "39553616934606f58b27c04bed0cdbbe5b00c92c831a9aaadebd7ceda61d1334",
+      "size": 266
+    }
+  },
+  {
+    "argv": [
+      "/usr/bin/x86_64-linux-gnu-g++-13",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-O1",
+      "-g",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-fno-pie",
+      "-no-pie",
+      "-I",
+      "/workspaces/E-HGP/build/v7_atlas_graph_20260911",
+      "-MM",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/local_dependencies.d",
+      "-MT",
+      "mhgp7_focused_rank_guards",
+      "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/rank_guards_gate.cpp"
+    ],
+    "cwd": "/workspaces/E-HGP/build",
+    "elapsed_seconds_observation_only": 0.35469549800018285,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "local_dependencies",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    }
+  },
+  {
+    "argv": [
+      "/usr/bin/x86_64-linux-gnu-g++-13",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-O1",
+      "-g",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-fno-pie",
+      "-no-pie",
+      "-I",
+      "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/source_snapshot/v7_atlas_graph_20260911",
+      "-M",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/dependencies_before.d",
+      "-MT",
+      "mhgp7_focused_rank_guards",
+      "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/source_snapshot/v7_rank_guard_streaming_20260911/rank_guards_gate.cpp"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.3673263919999954,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "dependencies_before",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    }
+  },
+  {
+    "argv": [
+      "/usr/bin/x86_64-linux-gnu-g++-13",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-O1",
+      "-g",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-fno-pie",
+      "-no-pie",
+      "-I",
+      "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/source_snapshot/v7_atlas_graph_20260911",
+      "-MD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/compile.d",
+      "-MT",
+      "mhgp7_focused_rank_guards",
+      "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/source_snapshot/v7_rank_guard_streaming_20260911/rank_guards_gate.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/rank-gate"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 34.70958897500077,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "compile",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/rank-gate",
+      "--selftest"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.23426709300019866,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "selftest",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "49b4e719633f48926e12715a2805d64de16baefab0cac149a47c66a0e5bf2c67",
+      "size": 439
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/rank-gate",
+      "--mutant-seed-equality"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.01727237100021739,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-seed-equality",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "857aae37162a3fc68bf81580021ec6a624c99bc200f2eb398de2c5b144a47f1f",
+      "size": 88
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/rank-gate",
+      "--mutant-terminal-equality"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.01745020500038663,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-terminal-equality",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "e55fbb71a0fba11e047e4d6ae8f44d6c2bb241d63d7c245ff7ebd8e531e734c0",
+      "size": 92
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/rank-gate",
+      "--mutant-consumer-order"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.01736863399946742,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-consumer-order",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "a79f31f13ef2b093274f4fd67b05d230d3d4883e576f5c284e9c5d23e3751d76",
+      "size": 91
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/rank-gate",
+      "--mutant-consumer-strict"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.01747222799986048,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-consumer-strict",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "098b543fe063ba152b81bc46d8cc0885c5dd024ce3a12aad5a3c818ef9505e03",
+      "size": 93
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/rank-gate",
+      "--mutant-terminal-domain"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.017370235999806027,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-terminal-domain",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "64e256a1b1d7f090d78b614bfb3fe9ee00dad44270d9e7b42f28fdb50f36385d",
+      "size": 92
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/rank-gate",
+      "--mutant-terminal-admission"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.01773700000012468,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-terminal-admission",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "be58beb5afc486d2d22e495b9c83ec928e8695b92f805073ab8b0a3322c74ffc",
+      "size": 95
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/rank-gate",
+      "--mutant-K1-domain"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.01563489100044535,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-K1-domain",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "b6868c398b811177c6ea494d0a26688f45680cd0cc8b5c4fe22791c5335f69e7",
+      "size": 92
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/rank-gate",
+      "--unknown"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.013010241000301903,
+    "exit_code": 2,
+    "expected_exit": 2,
+    "name": "unknown",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/rank-gate"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.01289420400007657,
+    "exit_code": 2,
+    "expected_exit": 2,
+    "name": "missing",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    }
+  },
+  {
+    "argv": [
+      "/usr/bin/x86_64-linux-gnu-g++-13",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-O1",
+      "-g",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-fno-pie",
+      "-no-pie",
+      "-I",
+      "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/source_snapshot/v7_atlas_graph_20260911",
+      "-M",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/dependencies_after.d",
+      "-MT",
+      "mhgp7_focused_rank_guards",
+      "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/source_snapshot/v7_rank_guard_streaming_20260911/rank_guards_gate.cpp"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.35236480999992636,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "dependencies_after",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    }
+  }
+]

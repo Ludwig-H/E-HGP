@@ -1,0 +1,244 @@
+#!/usr/bin/env python3
+"""Create-only focused rank-guard capture; no FULL benchmark or cloud operation."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import shlex
+import shutil
+import subprocess
+import time
+
+BASE = Path(__file__).resolve().parent
+BOOST = BASE.parent / "v7_boost_gate/extracted/usr/include"
+TREES = {"v7_rank_guard_streaming_20260911", "v7_birth_streaming_20260911",
+         "v7_ordered_streaming_20260911", "v7_streaming_graph_20260911",
+         "v7_atlas_graph_20260911", "v7_graph_full_20260911", "v7_composable_msf_20260911"}
+TARGET = "mhgp7_focused_rank_guards"
+SOURCE_NAME = "rank_guards_gate.cpp"
+SCOPE = "focused_certified_rank_guards"
+SAN_ENV = {"ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+           "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"}
+FIXTURES = ("selftest",)
+CAUSES = {"mutant-seed-equality": "rank_gate.seed_strict",
+          "mutant-terminal-equality": "rank_gate.terminal_strict",
+          "mutant-consumer-order": "rank_gate.consumer_order",
+          "mutant-consumer-strict": "rank_gate.consumer_plateau",
+          "mutant-terminal-domain": "rank_gate.terminal_domain",
+          "mutant-terminal-admission": "rank_gate.terminal_admission",
+          "mutant-K1-domain": "rank_gate.K1_point_domain"}
+
+
+def need(value, reason):
+    if not value:
+        raise ValueError(reason)
+
+
+def pin(path):
+    data = Path(path).read_bytes()
+    return {"sha256": hashlib.sha256(data).hexdigest(), "size": len(data)}
+
+
+def save(path, value):
+    with path.open("x") as stream:
+        json.dump(value, stream, indent=2, sort_keys=True)
+        stream.write("\n")
+
+
+def dependencies(path):
+    target, colon, body = path.read_text().replace("\\\n", " ").partition(":")
+    need(colon and target.strip() == TARGET, "dependency target")
+    result = sorted({str(Path(name).resolve(strict=True)) for name in shlex.split(body)})
+    need(result, "nonempty dependency closure")
+    return result
+
+
+def local_name(path):
+    path = Path(path)
+    need(path.is_file() and not path.is_symlink(), "plain local source")
+    name = path.relative_to(BASE.parent)
+    need(name.parts[0] in TREES and path.suffix in (".cpp", ".hpp", ".cuh", ".cu", ".py"),
+         "source outside declared trees")
+    return name.as_posix()
+
+
+def tree_pins(snapshot):
+    result = {}
+    for path in snapshot.rglob("*"):
+        need(not path.is_symlink(), "snapshot symlink")
+        if path.is_file():
+            result[path.relative_to(snapshot).as_posix()] = pin(path)
+    return result
+
+
+def dependency_pins(paths, snapshot):
+    result = {}
+    for name in paths:
+        path = Path(name)
+        if path.is_relative_to(snapshot):
+            kind = "source_snapshot"
+        elif path.is_relative_to(BOOST.resolve()):
+            kind = "boost_system_header"
+        else:
+            need(path.is_relative_to(Path("/usr")) or path.is_relative_to(Path("/lib").resolve()),
+                 "dependency outside snapshot/toolchain/Boost")
+            kind = "system_header"
+        result[name] = {"kind": kind, **pin(path)}
+    return result
+
+
+def check_gate(name, stdout, stderr):
+    need(not stderr, "focused diagnostic")
+    if name in ("unknown", "missing"):
+        need(not stdout, "silent focused CLI refusal")
+        return None
+    need(stdout.endswith(b"\n") and len(stdout.splitlines()) == 1, "single focused JSON")
+    row = json.loads(stdout)
+    if name in CAUSES:
+        need(type(row) is dict and set(row) == {"status", "cause", "checks", "fault_hits"} and
+             row["status"] == "causal_rejection" and row["cause"] == CAUSES[name] and
+             type(row["checks"]) is int and row["checks"] == 2 and
+             type(row["fault_hits"]) is int and row["fault_hits"] > 0,
+             "focused causal identity and executed mutation")
+        return row
+    counters = set("censuses atlas_variants checks ball_pairs equal_distinct_pairs accepted rejected "
+                   "point_checks binding_rejections scaled_bindings counter_refusals first_successes "
+                   "seed_successes terminal_successes fault_hits".split())
+    need(name == "selftest" and type(row) is dict and
+         set(row) == counters | {"status", "scope", "public_status", "rational_reference"},
+         "focused result fields")
+    need(all(type(row[key]) is int and row[key] >= 0 for key in counters), "focused integer counters")
+    need(row["status"] == "passed" and row["scope"] == SCOPE and row["public_status"] == "not_claimed" and
+         row["rational_reference"] == "boost_cpp_int_cross_products", "focused result scope")
+    need(row["censuses"] == 18 and row["atlas_variants"] == 36 and row["point_checks"] == 132 and
+         row["counter_refusals"] == 36 and row["fault_hits"] == 0 and row["checks"] >= row["ball_pairs"] > 100 and
+         row["accepted"] > 100 and row["rejected"] > 100 and
+         all(row[key] > 0 for key in ("equal_distinct_pairs", "binding_rejections", "scaled_bindings",
+                                     "first_successes", "seed_successes", "terminal_successes")),
+         "focused fixture nonvacuity")
+    return row
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--out", required=True)
+    parser.add_argument("--san", action="store_true")
+    args = parser.parse_args()
+    need(args.out.isidentifier(), "fresh child identifier")
+    out = BASE / args.out
+    out.mkdir(exist_ok=False)
+    snapshot, binary = out / "source_snapshot", out / "rank-gate"
+    commands, results = [], {}
+    before, copied, tools_before, deps_before = {}, {}, {}, {}
+    binary_before, error, status = None, None, "failed"
+    environment = dict(os.environ, LC_ALL="C")
+    if args.san:
+        environment.update(SAN_ENV)
+
+    def run(name, argv, cwd, expected=0, diagnostic=False):
+        row = {"name": name, "argv": [str(value) for value in argv], "cwd": str(cwd),
+               "expected_exit": expected, "exit_code": None}
+        commands.append(row)
+        save(out / (name + ".launch.json"), row)
+        start = time.monotonic()
+        try:
+            with (out / (name + ".stdout")).open("xb") as stdout:
+                with (out / (name + ".stderr")).open("xb") as stderr:
+                    row["exit_code"] = subprocess.run(row["argv"], cwd=cwd, env=environment,
+                                                      stdout=stdout, stderr=stderr, check=False).returncode
+        finally:
+            row["elapsed_seconds_observation_only"] = time.monotonic() - start
+            for channel in ("stdout", "stderr"):
+                path = out / (name + "." + channel)
+                if path.exists():
+                    row[channel] = pin(path)
+            save(out / (name + ".command.json"), row)
+            print(json.dumps({"command": name, "exit_code": row["exit_code"]}), flush=True)
+        need(row["exit_code"] == expected, "unexpected process exit: " + name)
+        stdout, stderr = (out / (name + ".stdout")).read_bytes(), (out / (name + ".stderr")).read_bytes()
+        if diagnostic:
+            need(not stderr and (bool(stdout) if name == "compiler" else not stdout),
+                 "compiler/dependency diagnostic: " + name)
+        return stdout, stderr
+
+    try:
+        executable = shutil.which("g++")
+        need(executable is not None, "existing g++ required, no installation")
+        need((BOOST / "boost/multiprecision/cpp_int.hpp").is_file(), "existing Boost required")
+        compiler = Path(executable).resolve(strict=True)
+        tools_before = {str(compiler): pin(compiler)}
+        flags = [compiler, "-std=c++20", "-Wall", "-Wextra", "-Wpedantic", "-Werror", "-pthread", "-isystem", BOOST]
+        flags += (["-O1", "-g", "-fsanitize=address,undefined", "-fno-omit-frame-pointer", "-fno-pie", "-no-pie"]
+                  if args.san else ["-O2"])
+        run("compiler", [compiler, "--version"], BASE.parent, diagnostic=True)
+        run("local_dependencies", [*flags, "-I", BASE.parent / "v7_atlas_graph_20260911", "-MM", "-MF",
+                                  out / "local_dependencies.d", "-MT", TARGET, BASE / SOURCE_NAME], BASE.parent, diagnostic=True)
+        before = {local_name(path): pin(path) for path in dependencies(out / "local_dependencies.d")}
+        before[local_name(Path(__file__).resolve())] = pin(__file__)
+        for name in before:
+            target = snapshot / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(BASE.parent / name, target)
+        copied = tree_pins(snapshot)
+        need(before == copied, "source copy mismatch")
+        flags += ["-I", snapshot / "v7_atlas_graph_20260911"]
+        tu = snapshot / "v7_rank_guard_streaming_20260911" / SOURCE_NAME
+        run("dependencies_before", [*flags, "-M", "-MF", out / "dependencies_before.d", "-MT", TARGET, tu],
+            snapshot, diagnostic=True)
+        deps_before = dependency_pins(dependencies(out / "dependencies_before.d"), snapshot)
+        for name, value in (("sources_before", before), ("sources_copied_before", copied),
+                            ("compiler_before", tools_before), ("dependencies_before", deps_before)):
+            save(out / (name + ".json"), value)
+        need(before == tree_pins(snapshot) == {name: pin(BASE.parent / name) for name in before}, "pre-run source closure")
+        need(tools_before == {name: pin(name) for name in tools_before} and
+             deps_before == dependency_pins(list(deps_before), snapshot), "pre-run tool/header closure")
+        used = {Path(name).relative_to(snapshot).as_posix() for name in deps_before if Path(name).is_relative_to(snapshot)}
+        need(used == set(before) - {"v7_rank_guard_streaming_20260911/record_rank.py"}, "minimal consumed closure")
+        run("compile", [*flags, "-MD", "-MF", out / "compile.d", "-MT", TARGET, tu, "-o", binary], snapshot, diagnostic=True)
+        need(dependencies(out / "compile.d") == list(deps_before), "compile dependency selection")
+        binary_before = pin(binary)
+        save(out / "binary_before.json", binary_before)
+        for name in (*FIXTURES, *CAUSES, "unknown", "missing"):
+            argv = [binary] + ([] if name == "missing" else ["--" + name])
+            stdout, stderr = run(name, argv, snapshot, 4 if name in CAUSES else 2 if name in ("unknown", "missing") else 0)
+            results[name] = check_gate(name, stdout, stderr)
+        run("dependencies_after", [*flags, "-M", "-MF", out / "dependencies_after.d", "-MT", TARGET, tu],
+            snapshot, diagnostic=True)
+        need(dependencies(out / "dependencies_after.d") == list(deps_before), "post-run dependency selection")
+        status = "passed"
+    except BaseException as exc:
+        error = type(exc).__name__ + ": " + str(exc)
+    finally:
+        closure = {}
+        try:
+            after = {name: pin(BASE.parent / name) for name in before}
+            copied_after = tree_pins(snapshot)
+            tools_after = {name: pin(name) for name in tools_before}
+            deps_after = dependency_pins(list(deps_before), snapshot)
+            binary_after = pin(binary) if binary.is_file() else None
+            for name, value in (("sources_after", after), ("sources_copied_after", copied_after),
+                                ("compiler_after", tools_after), ("dependencies_after", deps_after), ("binary_after", binary_after)):
+                save(out / (name + ".json"), value)
+            closure = {"sources": bool(before) and before == after == copied == copied_after,
+                       "compiler": bool(tools_before) and tools_before == tools_after,
+                       "dependencies": bool(deps_before) and deps_before == deps_after,
+                       "binary": binary_before is not None and binary_before == binary_after}
+            need(all(closure.values()), "source/compiler/header/ELF closure")
+        except BaseException as exc:
+            status = "failed"
+            error = (error + "; " if error else "") + "closure: " + type(exc).__name__ + ": " + str(exc)
+        save(out / "commands.json", commands)
+        save(out / "results.json", results)
+        save(out / "receipt.json", {"status": status, "error": error, "kind": "rank-gate", "scope": SCOPE,
+             "geometry_qualified": False, "closure": closure, "commands": len(commands), "source_build_receipt": None,
+             "sanitizer": args.san, "sanitizer_environment": SAN_ENV if args.san else {}, "locale": "C",
+             "public_status": "not_claimed", "performance_claim": False, "benchmark_executed": False,
+             "device_executed": False, "gcp_used": False,
+             "system_scope": "compiler binary/version and preprocessor headers, not complete linker/runtime sysroot"})
+    print(json.dumps({"status": status, "error": error, "out": str(out)}), flush=True)
+    return 0 if status == "passed" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

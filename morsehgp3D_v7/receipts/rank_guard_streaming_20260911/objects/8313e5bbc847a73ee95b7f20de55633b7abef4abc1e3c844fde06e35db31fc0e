@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/qualification_o2_r1/gate",
+    "--mutant-drop-edge"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/qualification_o2_r1/source_snapshot",
+  "elapsed_seconds_observation_only": 0.0024169369999071932,
+  "exit_code": 4,
+  "expected_exit": 4,
+  "name": "mutant-drop-edge",
+  "stderr": {
+    "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+    "size": 18
+  },
+  "stdout": {
+    "sha256": "128a0b25ce41c9f436eaa38c1807c6fbdabd98416b956373bec4c4156e7a9068",
+    "size": 125
+  }
+}

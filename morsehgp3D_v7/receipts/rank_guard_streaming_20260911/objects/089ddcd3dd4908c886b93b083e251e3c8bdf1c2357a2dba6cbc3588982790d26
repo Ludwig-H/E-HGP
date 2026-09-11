@@ -1,0 +1,298 @@
+// Focused private guard judge. Real small census supplies the tested Atlas;
+// Boost fractions judge level comparisons independently of the rank fields.
+// This is not a new census-completeness oracle, FULL run or timing benchmark.
+#define MHGP7_RANK_GUARDS_TESTING
+#include "rank_guards.hpp"
+#include "../v7_atlas_graph_20260911/source/morsehgp3D_v7/src/pipeline/generate.hpp"
+#include <boost/multiprecision/cpp_int.hpp>
+#include <cstdio>
+#include <string_view>
+
+namespace {
+using namespace mhgp7;
+namespace rg = rank_guards_private;
+using boost::multiprecision::cpp_int;
+struct Failure { const char* cause; };
+void need(bool value, const char* cause) { if (!value) throw Failure{cause}; }
+struct Counts {
+  u64 checks = 0, censuses = 0, atlas_variants = 0, ball_pairs = 0, equal_distinct_pairs = 0;
+  u64 accepted = 0, rejected = 0, point_checks = 0, binding_rejections = 0, scaled_bindings = 0;
+  u64 counter_refusals = 0, first_successes = 0, seed_successes = 0, terminal_successes = 0;
+} counts;
+
+cpp_int numerator(const ExactLevel& value) {
+  cpp_int result = 0;
+  for (size_t j = 3; j != 0; --j) { result <<= 64; result += value.num[j - 1]; }
+  return result;
+}
+cpp_int denominator(const ExactLevel& value) {
+  need(value.den > 0, "rank_gate.positive_denominator");
+  const u128 raw = static_cast<u128>(value.den);
+  return (cpp_int(static_cast<u64>(raw >> 64)) << 64) + static_cast<u64>(raw);
+}
+int rational_compare(const ExactLevel& a, const ExactLevel& b) {
+  const cpp_int left = numerator(a) * denominator(b), right = numerator(b) * denominator(a);
+  return (left > right) - (left < right);
+}
+template<class Function> void observe(Function&& function, bool expected, const char* cause) {
+  bool accepted = true;
+  try { function(); } catch (const std::invalid_argument&) { accepted = false; }
+  ++counts.checks;
+  need(accepted == expected, cause);
+  if (accepted) ++counts.accepted; else ++counts.rejected;
+}
+template<class Function> void reject_reason(Function&& function, const char* expected) {
+  bool caught = false;
+  try { function(); } catch (const std::invalid_argument& error) {
+    need(std::string_view(error.what()) == expected, "rank_gate.exact_rejection_cause");
+    caught = true;
+  }
+  ++counts.checks; ++counts.rejected;
+  need(caught, "rank_gate.rejection_missing");
+}
+
+std::vector<BallData> census(const CloudIndex& index, unsigned kmax, int separation) {
+  GenerateOptions options; options.s = separation;
+  options.smax = std::min<u64>(kmax + 1, index.input_count); options.threads = 1;
+  std::vector<BallCandidate> candidates;
+  GenerateStats generated;
+  generate_candidates(index, options, &candidates, &generated);
+  need(generated.cap_refus == kCapRefusNone && !generated.invariant_jneg, "rank_gate.generation");
+  for (size_t lane = 0; lane < 3; ++lane)
+    need(generated.ledger_emitted_mass[lane] + generated.ledger_killed_mass[lane] == expected_pair_mass(index),
+         "rank_gate.pair_ledger");
+  rle_candidates(&candidates, 1);
+  std::vector<Survivor> survivors;
+  ExpandStats work;
+  prefilter_balls(index, candidates, options.smax, 1, &survivors, &work);
+  std::vector<BallData> balls;
+  need(census_balls(index, candidates, survivors, options.smax, kBallShellMax, 1, &balls, &work) ==
+       PipelineStatus::kCompleteRegular, "rank_gate.census");
+  ++counts.censuses;
+  return balls;
+}
+template<class Function> void with_census(const std::vector<P3>& points, unsigned variant, int separation,
+                                         Function&& function) {
+  std::vector<InputPoint> input;
+  for (size_t j = 0; j < points.size(); ++j)
+    input.push_back({variant ? static_cast<PointId>(4294967295u - 100003u * j) : static_cast<PointId>(j), points[j]});
+  if (variant) std::reverse(input.begin(), input.end());
+  const auto index = build_cloud_index(input);
+  need(index.valid && !index.has_duplicate_positions(), "rank_gate.index");
+  const unsigned kmax = static_cast<unsigned>(points.size());
+  auto balls = census(index, kmax, separation);
+  const auto atlas = rg::Atlas::build(index, balls, kmax);
+  function(index, balls, atlas);
+}
+
+void judge(const rg::Atlas& atlas) {
+  ++counts.atlas_variants;
+  rg::Work work, expected;
+  for (u32 leader = 0; leader < atlas.balls.size(); ++leader) {
+    for (u32 consumer = 0; consumer < atlas.balls.size(); ++consumer) {
+      const int direct = rational_compare(atlas.balls[leader].level, atlas.balls[consumer].level);
+      const int ranked = (atlas.slots[leader].rank > atlas.slots[consumer].rank) -
+                         (atlas.slots[leader].rank < atlas.slots[consumer].rank);
+      ++counts.ball_pairs; ++counts.checks;
+      need(direct == ranked, "rank_gate.rational_rank_sign");
+      counts.equal_distinct_pairs += direct == 0 && leader != consumer;
+      observe([&] { rg::first_consumer(atlas, leader, consumer, work); }, direct <= 0,
+              "rank_gate.consumer_order");
+      expected.first_consumer_rank_checks += direct <= 0;
+    }
+  }
+  for (unsigned k = 2; k <= atlas.kmax; ++k) for (u32 consumer : atlas.program(k)) {
+    for (u32 target = 0; target < atlas.balls.size(); ++target) {
+      const auto& ball = atlas.balls[target];
+      // Admission is derived independently from BallData, not atlas.block_id.
+      const bool admitted = k >= static_cast<unsigned>(ball.n_interior) + ball.arity - 1 &&
+                            k <= static_cast<unsigned>(ball.n_interior) + ball.n_shell;
+      const bool strict = rational_compare(ball.level, atlas.balls[consumer].level) < 0;
+      observe([&] { rg::terminal_admission(atlas, k, consumer, target, work); }, admitted && strict,
+              "rank_gate.terminal_admission");
+      expected.terminal_rank_checks += admitted && strict;
+      if (k == static_cast<unsigned>(ball.n_interior) + ball.n_shell) {
+        observe([&] { rg::initial_seed(atlas, k, consumer, target, work); }, strict, "rank_gate.seed_strict");
+        expected.initial_seed_rank_checks += strict;
+      }
+    }
+    reject_reason([&] { rg::terminal_admission(atlas, k, consumer, std::numeric_limits<u32>::max(), work); },
+                  "streaming.terminal_admission_strict");
+    reject_reason([&] { rg::initial_seed(atlas, k, consumer, std::numeric_limits<u32>::max(), work); },
+                  "streaming.seed_not_strict");
+  }
+  for (u32 point = 0; point < atlas.index->input_count; ++point) {
+    // Invalid consumer sentinel is intentionally unused by the K1 point guard.
+    observe([&] { rg::terminal_admission(atlas, 1, std::numeric_limits<u32>::max(), point, work); },
+            true, "rank_gate.K1_point_domain");
+    ++counts.point_checks;
+  }
+  reject_reason([&] { rg::terminal_admission(atlas, 1, 0, static_cast<u32>(atlas.index->input_count), work); },
+                "streaming.K1_terminal");
+  reject_reason([&] { rg::first_consumer(atlas, std::numeric_limits<u32>::max(), 0, work); },
+                "rank_guard.consumer_domain");
+  reject_reason([&] { rg::terminal_admission(atlas, 0, 0, 0, work); }, "rank_guard.K");
+  reject_reason([&] { rg::initial_seed(atlas, 1, 0, 0, work); }, "rank_guard.seed_K");
+  need(work.first_consumer_rank_checks == expected.first_consumer_rank_checks &&
+       work.initial_seed_rank_checks == expected.initial_seed_rank_checks &&
+       work.terminal_rank_checks == expected.terminal_rank_checks, "rank_gate.successful_check_accounting");
+  counts.first_successes += work.first_consumer_rank_checks;
+  counts.seed_successes += work.initial_seed_rank_checks;
+  counts.terminal_successes += work.terminal_rank_checks;
+  if (!atlas.balls.empty()) {
+    work.first_consumer_rank_checks = std::numeric_limits<u64>::max();
+    bool caught = false;
+    try { rg::first_consumer(atlas, 0, 0, work); } catch (const std::overflow_error& error) {
+      need(std::string_view(error.what()) == "rank_guard.counter_overflow", "rank_gate.counter_cause");
+      caught = true;
+    }
+    need(caught && work.first_consumer_rank_checks == std::numeric_limits<u64>::max(), "rank_gate.counter_no_wrap");
+    ++counts.counter_refusals; ++counts.checks;
+  }
+}
+
+void scale_level(ExactLevel& level) {
+  need(level.num[2] < (u64{1} << 63) && level.den > 0 &&
+       level.den <= std::numeric_limits<i128>::max() / 2, "rank_gate.scaling_domain");
+  u64 carry = 0;
+  for (auto& word : level.num) { const u64 next = word >> 63; word = (word << 1) | carry; carry = next; }
+  level.den *= 2;
+}
+void full_case(const std::vector<P3>& points, unsigned variant, int separation) {
+  with_census(points, variant, separation, [&](const CloudIndex& index, const auto& balls, const rg::Atlas& atlas) {
+    judge(atlas);
+    auto scaled = balls;
+    for (size_t j = 0; j < scaled.size(); j += 2) scale_level(scaled[j].level);
+    const auto equivalent = rg::Atlas::build(index, scaled, atlas.kmax);
+    need(atlas.program_balls == equivalent.program_balls && atlas.level_balls == equivalent.level_balls,
+         "rank_gate.equivalent_raw_program");
+    for (size_t j = 0; j < balls.size(); ++j) {
+      need(rational_compare(balls[j].level, scaled[j].level) == 0 && atlas.slots[j].rank == equivalent.slots[j].rank,
+           "rank_gate.equivalent_raw_binding");
+      ++counts.scaled_bindings; ++counts.checks;
+    }
+    judge(equivalent);
+    if (atlas.level_balls.size() >= 2) {
+      auto bad = atlas;
+      const u32 first = atlas.level_balls[0], second = atlas.level_balls[1];
+      bad.slots[first].rank = atlas.slots[second].rank;
+      reject_reason([&] { bad.validate_shape(); }, "atlas.rank_date");
+      ++counts.binding_rejections;
+      bad = atlas;
+      std::swap(bad.level_balls[0], bad.level_balls[1]);
+      reject_reason([&] { bad.validate_shape(); }, "atlas.rank_order");
+      ++counts.binding_rejections;
+    }
+  });
+}
+
+struct Mutation { std::string_view cli; rg::Fault fault; const char* cause; };
+constexpr Mutation mutations[] = {
+  {"--mutant-seed-equality", rg::Fault::kSeedNonStrict, "rank_gate.seed_strict"},
+  {"--mutant-terminal-equality", rg::Fault::kTerminalNonStrict, "rank_gate.terminal_strict"},
+  {"--mutant-consumer-order", rg::Fault::kReverseConsumer, "rank_gate.consumer_order"},
+  {"--mutant-consumer-strict", rg::Fault::kConsumerStrict, "rank_gate.consumer_plateau"},
+  {"--mutant-terminal-domain", rg::Fault::kAcceptInvalidTerminalDomain, "rank_gate.terminal_domain"},
+  {"--mutant-terminal-admission", rg::Fault::kSkipTerminalAdmission, "rank_gate.terminal_admission"},
+  {"--mutant-K1-domain", rg::Fault::kTreatPointAsBall, "rank_gate.K1_point_domain"}
+};
+void mutate(const Mutation& mutation) {
+  const bool point_case = mutation.fault == rg::Fault::kTreatPointAsBall;
+  const std::vector<P3> points = point_case ? std::vector<P3>{{0,0,0},{2,0,0}} :
+                                           std::vector<P3>{{0,0,0},{2,0,0},{10,0,0},{12,0,0}};
+  with_census(points, 0, 8, [&](const CloudIndex&, const auto&, const rg::Atlas& atlas) {
+    rg::Work work;
+    const auto exercise = [&](auto&& call, bool expected) {
+      rg::fault = rg::Fault::kNone;
+      observe(call, expected, "rank_gate.nominal_before_mutant");
+      rg::fault = mutation.fault;
+      observe(call, expected, mutation.cause);
+      need(false, "rank_gate.mutant_survived");
+    };
+    if (point_case) {
+      need(atlas.balls.size() == 1 && atlas.index->input_count == 2, "rank_gate.point_mutant_nonvacuity");
+      exercise([&] { rg::terminal_admission(atlas, 1, 0, 1, work); }, true);
+      return;
+    }
+    const auto program = atlas.program(2);
+    need(!program.empty(), "rank_gate.mutant_program");
+    const u32 a = program.front();
+    if (mutation.fault == rg::Fault::kConsumerStrict) {
+      exercise([&] { rg::first_consumer(atlas, a, a, work); }, true); return;
+    }
+    if (mutation.fault == rg::Fault::kTerminalNonStrict) {
+      exercise([&] { rg::terminal_admission(atlas, 2, a, a, work); }, false); return;
+    }
+    if (mutation.fault == rg::Fault::kAcceptInvalidTerminalDomain) {
+      exercise([&] { rg::terminal_admission(atlas, 2, a, std::numeric_limits<u32>::max(), work); }, false); return;
+    }
+    if (mutation.fault == rg::Fault::kSeedNonStrict) {
+      for (u32 target : program) if (atlas.balls[target].n_interior + atlas.balls[target].n_shell == 2) {
+        exercise([&] { rg::initial_seed(atlas, 2, target, target, work); }, false); return;
+      }
+    }
+    if (mutation.fault == rg::Fault::kReverseConsumer) {
+      for (u32 b : program) if (rational_compare(atlas.balls[b].level, atlas.balls[a].level) > 0) {
+        exercise([&] { rg::first_consumer(atlas, b, a, work); }, false); return;
+      }
+    }
+    if (mutation.fault == rg::Fault::kSkipTerminalAdmission) {
+      for (unsigned k = 2; k <= atlas.kmax; ++k) for (u32 consumer : atlas.program(k))
+        for (u32 target = 0; target < atlas.balls.size(); ++target) {
+          const auto& ball = atlas.balls[target];
+          const bool admitted = k >= static_cast<unsigned>(ball.n_interior) + ball.arity - 1 &&
+                                k <= static_cast<unsigned>(ball.n_interior) + ball.n_shell;
+          if (!admitted && rational_compare(ball.level, atlas.balls[consumer].level) < 0) {
+            exercise([&] { rg::terminal_admission(atlas, k, consumer, target, work); }, false); return;
+          }
+        }
+    }
+    need(false, "rank_gate.mutant_nonvacuity");
+  });
+}
+}  // namespace
+
+int main(int argc, char** argv) {
+  if (argc != 2) return 2;
+  const std::string_view mode(argv[1]);
+  const Mutation* mutation = nullptr;
+  for (const auto& row : mutations) if (mode == row.cli) mutation = &row;
+  if (mode != "--selftest" && mutation == nullptr) return 2;
+  try {
+    if (mutation) mutate(*mutation);
+    else {
+      const std::vector<std::vector<P3>> fixtures = {
+        {{0,0,0},{2,0,0}}, {{0,0,0},{2,0,0},{10,0,0},{12,0,0}},
+        {{7,42,83},{91,12,64},{33,88,9},{54,20,71},{18,61,39}}
+      };
+      for (const auto& points : fixtures) for (unsigned variant : {0, 1}) for (int s : {8, 10, 12})
+        full_case(points, variant, s);
+      need(counts.censuses == 18 && counts.atlas_variants == 36 && counts.ball_pairs > 100 &&
+           counts.equal_distinct_pairs > 0 && counts.accepted > 100 && counts.rejected > 100 &&
+           counts.point_checks == 132 && counts.binding_rejections > 0 && counts.scaled_bindings > 0 &&
+           counts.first_successes > 0 && counts.seed_successes > 0 && counts.terminal_successes > 0 &&
+           counts.counter_refusals == 36 && rg::fault_hits == 0, "rank_gate.nonvacuity");
+      std::printf("{\"status\":\"passed\",\"scope\":\"focused_certified_rank_guards\",\"public_status\":\"not_claimed\","
+          "\"rational_reference\":\"boost_cpp_int_cross_products\",\"censuses\":%llu,\"atlas_variants\":%llu,"
+          "\"checks\":%llu,\"ball_pairs\":%llu,\"equal_distinct_pairs\":%llu,\"accepted\":%llu,\"rejected\":%llu,"
+          "\"point_checks\":%llu,\"binding_rejections\":%llu,\"scaled_bindings\":%llu,\"counter_refusals\":%llu,"
+          "\"first_successes\":%llu,\"seed_successes\":%llu,\"terminal_successes\":%llu,\"fault_hits\":0}\n",
+          static_cast<unsigned long long>(counts.censuses), static_cast<unsigned long long>(counts.atlas_variants),
+          static_cast<unsigned long long>(counts.checks), static_cast<unsigned long long>(counts.ball_pairs),
+          static_cast<unsigned long long>(counts.equal_distinct_pairs), static_cast<unsigned long long>(counts.accepted),
+          static_cast<unsigned long long>(counts.rejected), static_cast<unsigned long long>(counts.point_checks),
+          static_cast<unsigned long long>(counts.binding_rejections), static_cast<unsigned long long>(counts.scaled_bindings),
+          static_cast<unsigned long long>(counts.counter_refusals), static_cast<unsigned long long>(counts.first_successes),
+          static_cast<unsigned long long>(counts.seed_successes), static_cast<unsigned long long>(counts.terminal_successes));
+      return 0;
+    }
+  } catch (const Failure& failure) {
+    if (mutation && std::string_view(failure.cause) == mutation->cause && rg::fault_hits > 0) {
+      std::printf("{\"status\":\"causal_rejection\",\"cause\":\"%s\",\"checks\":%llu,\"fault_hits\":%llu}\n",
+          failure.cause, static_cast<unsigned long long>(counts.checks), static_cast<unsigned long long>(rg::fault_hits));
+      return 4;
+    }
+    std::fprintf(stderr, "FAIL %s\n", failure.cause);
+  } catch (const std::exception& error) { std::fprintf(stderr, "EXCEPTION %s\n", error.what()); }
+  return 1;
+}

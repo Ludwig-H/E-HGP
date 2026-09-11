@@ -17,51 +17,46 @@ contrats de performance ne sont pas encore livrés.**
 
 ## État courant
 
-Priorité courante : [objets pour paralléliser toute la tour](docs/OBJETS_PARALLELES_TOUR_20260911.md).
-Catalogue partagé, blocs clairsemés (K,B), graphes datés sur les naissances,
-puis contributions et verticales par requêtes sur arbres immuables :
-l'auditeur confirme que les horizontales K n'ont pas à s'attendre et que
-les verticales ne demandent pas de nouvelles MEB. Après les premières briques
-atlas/calendrier, le [raccord privé complet](receipts/atlas_graph_full_20260911/README.md)
-joint maintenant vrais census, graphes, contributions et verticales. Deux
-routes de réduction par lots sont confrontées à la même tour : directement
-sur les naissances, ou sur les blocs puis projetées vers les naissances.
-Le [producteur réellement fenêtré](docs/RESOLUTIONS_PAR_FENETRES_20260911.md)
-retire maintenant les tableaux globaux de terminales et les graphes complets.
-O2/SAN : 114 census, 456 essais de fenêtres et 253 224 terminales comparées
-par build ; mêmes forêts, contributions et verticales. Catalogue, masques
-compacts et sortie restent présents ; les répétitions géométriques sont
-comptées, pas masquées. Le moteur actif reste inchangé ; extraction et
-reconstruction ne sont pas encore massivement parallèles.
-La première paire mono n8000 était défavorable : 188,638 → 250,408 s et
-aucune baisse du RSS. Le [correctif ordonné](receipts/ordered_streaming_20260911/README.md)
-est maintenant qualifié O2/SAN : une seule visite par arête sur les hubs,
-sans leurs retris ni recompactions. À n8000, le travail passe de 48,39 à
-10,46 millions de visites, pour 207,867 s jusqu'à FULL ; même tour et MEB,
-RSS pratiquement inchangé. Ce résultat ne suffit pas à promouvoir la voie
-mono devant la référence matérialisée. La [contraction immédiate sur les
-naissances](docs/CONTRACTION_NAISSANCES_ET_WORKERS_20260911.md), proposée avec
-l'auditeur, est maintenant qualifiée O2/SAN séparément : suppression du
-DSU sur hubs, du certificat intermédiaire et de la compaction native finale.
-φ garde les identités des naissances, jamais leurs racines courantes.
-Le raccord géométrique à équipe persistante passe aussi O2/SAN, workers1/4 :
-114 census, 912 essais et 506 448 terminales comparées par build, avec
-refus après vraie géométrie parallèle et fermeture des threads vérifiée.
-Le réducteur, les préparations et la reconstruction restent séquentiels ;
-le moteur actif n'est pas encore remplacé et aucun gain massif n'est acquis.
-Le [triplet du raccord CPU4](receipts/parallel_birth_streaming_20260911/README.md)
-est clos : 92,963 / 215,381 / 489,601 s à 8k/16k/32k, mêmes sorties et
-travail géométrique que les témoins correspondants. À 8k, la paire qui
-change seulement les workers géométriques fait 187,214 → 164,703 s ;
-le reste du gain CPU4 vient de l'amont déjà parallèle. Les grands runs
-sont successifs sur hôte partagé, pas une statistique de speedup universel.
-La mémoire reste élevée, 11 608 968 KiB à 32k. Aucun contrat 50k acquis.
-Le triplet ordonné historique 8k/16k/32k est clos : 207,867 / 595,244 / 1 076,969 s
-pour toute la tour, avec charge extérieure documentée. Le travail augmente
-d'environ 2,1 par doublement sur uniforme/s8 ; cela ne prouve pas une borne
-tous régimes. Le pic atteint 11,07 Gio à 32k, pour 17,17 millions de nœuds.
+Priorité courante : [paralléliser les objets de toute la tour](docs/OBJETS_PARALLELES_TOUR_20260911.md).
+Les boules sont partagées entre ordres ; un atlas clairsemé décrit leurs
+rôles, puis des graphes datés sur les naissances donnent les horizontales.
+Les contributions et verticales sont reconstruites sur leurs histoires
+immuables, sans nouvelle MEB verticale.
+
+Le [raccord CPU privé](docs/CONTRACTION_NAISSANCES_ET_WORKERS_20260911.md)
+traite des fenêtres de facettes complètes et distribue leur géométrie à
+une équipe persistante. Il ne garde ni tableau global des terminales,
+ni graphe complet, ni DSU sur les hubs. φ conserve l'identité stable des
+naissances ; une seule DSU native consomme les résultats dans l'ordre source.
+Catalogue, masques, histoires et sortie FULL restent présents. La
+reconstruction et plusieurs préparations sont encore séquentielles ;
+le moteur actif n'est pas remplacé par ce prototype.
+
+Le [delta de gardes par rangs](docs/GARDES_RANGS_CERTIFIES_20260911.md)
+passe maintenant O2/SAN : 114 census, 912 essais et 506 448 terminales
+comparées par build, mêmes forêts, contributions, verticales et travail
+géométrique que le parent. Trois comparaisons répétées utilisent les rangs
+certifiés, sans retirer les validations exactes du catalogue ni les gardes
+des MEB intermédiaires. Les tests ciblés passent également avec fractions
+équivalentes, plateaux, domaines K1 et sept mutations. Ses propres mesures
+CPU4 donnent 96,401 / 223,447 / 478,616 s pour toute la tour 8k/16k/32k ;
+mono8k 206,224 s. Même sortie et MEB, 25,9 / 55,8 / 117,6 millions de
+gardes désormais entières, sans gain de latence reproductible établi.
+
+Le [triplet parent CPU4](receipts/parallel_birth_streaming_20260911/README.md)
+donne 92,963 / 215,381 / 489,601 s à 8k/16k/32k ; à 8k, changer seulement
+la géométrie de un à quatre workers donne 187,214 → 164,703 s.
+Le travail croît d'environ 2,1 par doublement sur uniforme/s8, pas selon
+une borne tous régimes. Le RSS atteint 11 608 968 KiB à 32k.
 Les comparaisons s8/10/12 à n800 préservent la tour, sans optimum temps déduit.
-Cette décomposition vise aussi WSPD, census et export, pas seulement les MEB.
+Les [premières voies défavorables](docs/FAUSSES_PISTES.md) et leurs
+reçus restent conservés, sans rallonger l'état courant.
+
+Prochains raccords : préparation partagée du catalogue, réemploi des
+marques historiques, index de chaînes adjacents réutilisés, reconstruction
+et export parallèles, puis backend GPU. Aucun contrat 50k sous 1 s/100 ms
+ni dizaines de millions de points sur G4 n'est acquis par ces résultats CPU.
+GCP non utilisé pour ce delta.
 
 Jalon précédent : [sonde complète par lots, gate census→FULL et réduction MEB](docs/QUALIFICATION_BATCH_ET_MEB_20260911.md).
 Le raccord privé passe 372 536 contrôles O2/SAN et compile avec la sonde

@@ -1,0 +1,1 @@
+{"status":"causal_rejection","cause":"parallel_stream_gate.worker_after_geometry","workers_after_geometry":4,"callbacks_active_after":0,"threads_active_after":0,"captured_exceptions":1,"fresh_producer_verified":true}

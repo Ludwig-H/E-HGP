@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_o2_r1/rank-gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_o2_r1/source_snapshot",
+  "elapsed_seconds_observation_only": 0.0130735899992942,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "selftest",
+  "stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  "stdout": {
+    "sha256": "49b4e719633f48926e12715a2805d64de16baefab0cac149a47c66a0e5bf2c67",
+    "size": 439
+  }
+}

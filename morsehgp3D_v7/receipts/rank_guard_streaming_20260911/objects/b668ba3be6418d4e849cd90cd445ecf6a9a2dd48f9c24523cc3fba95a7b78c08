@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_o2_r1/rank-gate",
+    "--mutant-consumer-order"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_o2_r1/source_snapshot",
+  "elapsed_seconds_observation_only": 0.0022684220002702205,
+  "exit_code": 4,
+  "expected_exit": 4,
+  "name": "mutant-consumer-order",
+  "stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  "stdout": {
+    "sha256": "a79f31f13ef2b093274f4fd67b05d230d3d4883e576f5c284e9c5d23e3751d76",
+    "size": 91
+  }
+}

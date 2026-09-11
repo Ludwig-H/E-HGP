@@ -1,0 +1,599 @@
+// Bounded judges retain the old global tape solely as an independent witness.
+// It is never passed to the streaming producer or used to fill its results.
+#include "../v7_streaming_graph_20260911/reference_gate.hpp"
+#define MHGP7_BIRTH_STREAM_TESTING
+#define MHGP7_WINDOW_WORKERS_TESTING
+#include "streaming_graph.hpp"
+#include "../v7_ordered_streaming_20260911/streaming_graph.hpp"
+#include <barrier>
+
+namespace streaming_gate {
+using namespace mhgp7;
+namespace ag = atlas_graph_private;
+namespace sg = rank_guard_streaming_graph_private;
+namespace gf = graph_full_private;
+namespace fc = filtered_calendar_private;
+using graph_gate::compare_towers;
+u64 cases = 0, trials = 0, observed = 0, windowed_mebs = 0, reference_mebs = 0;
+u64 atomic_levels = 0, callback_aborts = 0;
+u64 birth_occurrences = 0, dense_dsu_initializations = 0, pivot_assignments = 0, nonpivot_attempts = 0;
+u64 dense_loop_occurrences = 0, native_edge_comparisons = 0, split_hub_windows = 0;
+u64 window_certificate_checks = 0;
+u64 parallel_trials = 0, parallel_tasks = 0;
+rank_guards_private::Work rank_guard_work;
+bool parallel_geometry_observed = false;
+namespace cm = composable_msf_private;
+constexpr std::array<size_t, 4> widths{1, 7, 31, 4096};
+struct WidthWork {
+  u64 orders = 0, occurrences = 0, geometry_occurrences = 0, windows = 0;
+  u64 unique = 0, initial_hits = 0, starts = 0, queries = 0, hits = 0, terminals = 0, mebs = 0;
+  u64 multi_window_orders = 0, partial_window_orders = 0, deduplicated_orders = 0, postseed_orders = 0;
+  u64 peak_window_items = 0, peak_window_capacity_bytes = 0;
+};
+std::array<WidthWork, widths.size()> width_work{};
+u64 work_identity_orders = 0;
+struct Observation {
+  const ag::Extraction& reference;
+  std::vector<u8> seen;
+  unsigned last_k = 0;
+  u64 next_ordinal = 0;
+  bool corrupt = false, abort = false;
+  u64 accepted = 0;
+  static void accept(void* opaque, const ag::Occurrence& occurrence) {
+    auto& self = *static_cast<Observation*>(opaque);
+    if (self.abort && self.accepted == 3) {
+      need(self.last_k == 1 && self.next_ordinal == 3, "stream_gate.observer_abort_prefix");
+      ++callback_aborts;
+      throw std::runtime_error("stream_gate.observer_abort_after_three");
+    }
+    auto actual = occurrence;
+    if (self.corrupt) ++actual.target;
+    const auto& a = self.reference.atlas;
+    need(actual.k >= 1 && actual.k <= a.kmax && actual.source_ball < a.balls.size(), "stream_gate.observation_domain");
+    need(actual.slot < self.seen.size() && self.seen[actual.slot]++ == 0, "stream_gate.observation_unique");
+    need(actual.target == self.reference.targets[actual.slot], "stream_gate.direct_terminal");
+    const u64 cell = a.cell(actual.source_ball, actual.k);
+    need(actual.source_block == *a.block_id(actual.source_ball, actual.k) &&
+         actual.slot == a.rep_offsets[cell] + actual.local && actual.slot < a.rep_offsets[cell + 1],
+         "stream_gate.occurrence_identity");
+    if (actual.k != self.last_k) {
+      need(actual.k > self.last_k, "stream_gate.observer_order");
+      self.last_k = actual.k; self.next_ordinal = 0;
+    }
+    need(actual.ordinal == self.next_ordinal++, "stream_gate.observer_ordinal");
+    ++observed; ++self.accepted;
+  }
+};
+
+std::vector<gf::History> reconstruct(const std::vector<fc::Certificate<u32>>& certificates) {
+  std::vector<gf::History> histories;
+  for (const auto& certificate : certificates) histories.push_back(fc::reconstruct(certificate, std::less<u32>{}));
+  return histories;
+}
+
+void compare_ordered(const sg::Streaming& trial,
+                     const ordered_streaming_graph_private::Streaming& ordered) {
+  need(trial.extraction.phi == ordered.extraction.phi, "birth_stream_gate.ordered_phi");
+  need(trial.certificates.size() == ordered.certificates.size(), "birth_stream_gate.ordered_domain");
+  for (size_t k = 0; k < trial.certificates.size(); ++k) {
+    auto a = trial.certificates[k].edges;
+    auto b = ordered.certificates[k].edges;
+    const auto by_id = [](const auto& x, const auto& y) { return x.id < y.id; };
+    std::sort(a.begin(), a.end(), by_id); std::sort(b.begin(), b.end(), by_id);
+    need(a.size() == b.size(), "birth_stream_gate.ordered_edge_count");
+    for (size_t j = 0; j < a.size(); ++j) {
+      need(a[j].id == b[j].id && a[j].a == b[j].a && a[j].b == b[j].b && a[j].date == b[j].date,
+           "birth_stream_gate.ordered_edge_identity");
+      ++native_edge_comparisons;
+    }
+    const auto& x = trial.stats.orders[k + 1]; const auto& y = ordered.stats.orders[k + 1];
+    need(x.occurrences == y.occurrences && x.windows == y.windows && x.window_unique == y.window_unique &&
+         x.initial_seed_hits == y.initial_seed_hits && x.seed_rows == y.seed_rows, "birth_stream_gate.same_geometry_groups");
+    const auto& u = x.geometry_work; const auto& v = y.geometry_work;
+    need(u.resolve_work.calls == v.resolve_work.calls && u.resolve_work.power_tests == v.resolve_work.power_tests &&
+         u.resolve_work.materializations == v.resolve_work.materializations &&
+         u.resolve_work.supports_by_size == v.resolve_work.supports_by_size &&
+         u.static_post_seed_queries == v.static_post_seed_queries && u.static_post_seed_hits == v.static_post_seed_hits &&
+         u.static_post_seed_terminals == v.static_post_seed_terminals, "birth_stream_gate.same_geometry_work");
+    for (const auto field : {&FullBallStats::anchor_hits, &FullBallStats::key_lookups,
+        &FullBallStats::intruder_queries, &FullBallStats::intruder_nodes, &FullBallStats::intruder_power_tests,
+        &FullBallStats::interior_ranges, &FullBallStats::same_radius_steps, &FullBallStats::descending_steps,
+        &FullBallStats::max_chain_steps}) need(u.*field == v.*field, "birth_stream_gate.same_geometry_detail");
+  }
+}
+
+void metadata(const sg::Streaming& trial, const ag::Extraction& reference) {
+  const auto& e = trial.extraction;
+  need(e.targets.empty() && e.targets.capacity() == 0, "stream_gate.no_terminal_tape");
+  need(e.atlas.index == reference.atlas.index && e.atlas.balls.data() == reference.atlas.balls.data() &&
+       e.atlas.balls.size() == reference.atlas.balls.size(), "stream_gate.borrowed_census");
+  need(e.atlas.rep_masks == reference.atlas.rep_masks && e.atlas.rep_offsets == reference.atlas.rep_offsets &&
+       e.atlas.program_balls == reference.atlas.program_balls, "stream_gate.shared_atlas_program");
+  need(e.phi == reference.phi, "stream_gate.ordinal_zero_pivots");
+  need(e.orders.size() == reference.orders.size() && trial.certificates.size() == reference.orders.size(),
+       "stream_gate.order_count");
+  for (size_t k = 0; k < e.orders.size(); ++k) {
+    const auto& a = e.orders[k]; const auto& b = reference.orders[k];
+    need(a.k == b.k && a.graph.edges.empty() && a.graph.edges.capacity() == 0, "stream_gate.no_global_graph");
+    need(a.graph.births.size() == b.graph.births.size() && a.graph.marks.size() == b.graph.marks.size(),
+         "stream_gate.metadata_domain");
+    for (size_t j = 0; j < a.graph.births.size(); ++j)
+      need(a.graph.births[j].id == b.graph.births[j].id && a.graph.births[j].date == b.graph.births[j].date,
+           "stream_gate.native_births");
+    for (size_t j = 0; j < a.graph.marks.size(); ++j)
+      need(a.graph.marks[j].id == b.graph.marks[j].id && a.graph.marks[j].representative == b.graph.marks[j].representative &&
+           a.graph.marks[j].admission == b.graph.marks[j].admission, "stream_gate.dated_marks");
+    fc::verify_certificate(b.graph, trial.certificates[k], std::less<u32>{});
+  }
+}
+
+template<class T> u64 reserved_bytes(size_t count) {
+  // Characterize reserve on this runtime, not a universal std::vector growth rule.
+  std::vector<T> probe; probe.reserve(count);
+  return probe.capacity() * sizeof(T);
+}
+
+void work_and_residence(const sg::Streaming& trial, const ag::Extraction& reference, size_t width) {
+  const auto& e = trial.extraction;
+  const auto position = std::find(widths.begin(), widths.end(), width);
+  need(position != widths.end() && trial.stats.window_width == width, "stream_gate.width_identity");
+  auto& total = width_work[static_cast<size_t>(position - widths.begin())];
+  u64 expected_peak_items = 0, expected_peak_capacity = 0, all_occurrences = 0, expected_tasks = 0, expected_batches = 0;
+  FullBallStats sum;
+  for (unsigned k = 1; k <= e.atlas.kmax; ++k) {
+    const auto& s = trial.stats.orders[k];
+    const auto& w = s.geometry_work;
+    const auto& hub = trial.stats.hub_work[k];
+    const auto& native = trial.stats.native_work[k];
+    const auto& birth = trial.stats.birth_work[k];
+    u64 occurrences = 0, pivots = 0;
+    for (u32 b : e.atlas.program(k)) {
+      const u64 cell = e.atlas.cell(b, k);
+      const u64 count = e.atlas.rep_offsets[cell + 1] - e.atlas.rep_offsets[cell];
+      cm::add(occurrences, count); cm::add(pivots, count != 0);
+    }
+    const u64 expected_windows = occurrences / width + (occurrences % width != 0);
+    cm::add(expected_batches, expected_windows);
+    need(s.occurrences == occurrences && s.pivots == pivots, "stream_gate.occurrence_work");
+    const auto& ranks = trial.stats.rank_guard_work[k];
+    need(ranks.first_consumer_rank_checks == occurrences &&
+         ranks.terminal_rank_checks == (k >= 2 ? occurrences : 0) &&
+         ranks.initial_seed_rank_checks == s.initial_seed_hits, "rank_stream_gate.guard_work");
+    cm::add(rank_guard_work.first_consumer_rank_checks, ranks.first_consumer_rank_checks);
+    cm::add(rank_guard_work.terminal_rank_checks, ranks.terminal_rank_checks);
+    cm::add(rank_guard_work.initial_seed_rank_checks, ranks.initial_seed_rank_checks);
+    need(s.windows == expected_windows && birth.windows == expected_windows,
+         "stream_gate.window_work");
+    need(s.window_unique <= occurrences && s.initial_seed_hits <= s.window_unique,
+         "stream_gate.window_unique_bounds");
+    if (width == 1) need(s.window_unique == occurrences, "stream_gate.unit_window_unique");
+    need(s.seed_rows == reference.stats.seed_rows[k], "stream_gate.global_seed_domain");
+    const u64 native_vertices = e.orders[k - 1].graph.births.size();
+    need(birth.dsu_initializations == 1 && birth.native_vertices == native_vertices &&
+         birth.occurrences == occurrences && birth.pivot_assignments == pivots &&
+         birth.nonpivot_occurrences == occurrences - pivots && birth.dsu_attempts == occurrences - pivots,
+         "birth_stream_gate.single_pass");
+    need(birth.order_date_comparisons == (occurrences == 0 ? 0 : occurrences - 1) &&
+         birth.order_identity_comparisons == occurrences && birth.dense_terminal_reads == occurrences &&
+         birth.dense_source_reads == occurrences - pivots && birth.native_date_comparisons == 2 * occurrences - pivots &&
+         birth.phi_conversions == e.atlas.program(k).size() &&
+         birth.dsu_logical_bytes == 2 * sizeof(size_t) * native_vertices &&
+         birth.dsu_capacity_bytes >= birth.dsu_logical_bytes, "birth_stream_gate.dense_work");
+    for (const auto& legacy : {hub, native})
+      for (auto field : {&cm::Work::domain_vertices, &cm::Work::domain_sort_items, &cm::Work::domain_sort_comparisons,
+          &cm::Work::compact_calls, &cm::Work::input_edges, &cm::Work::output_edges, &cm::Work::sort_calls,
+          &cm::Work::sort_items, &cm::Work::identity_sort_comparisons, &cm::Work::sort_date_comparisons,
+          &cm::Work::endpoint_queries, &cm::Work::endpoint_comparisons, &cm::Work::validation_date_comparisons,
+          &cm::Work::touched_vertices, &cm::Work::peak_touched_vertices, &cm::Work::dsu_attempts, &cm::Work::dsu_unions,
+          &cm::Work::windows, &cm::Work::nonempty_windows, &cm::Work::source_edges, &cm::Work::merges,
+          &cm::Work::peak_retained_edges, &cm::Work::peak_call_edge_slots, &cm::Work::peak_merge_input_edges})
+        need(legacy.*field == 0, "birth_stream_gate.no_legacy_reducer");
+    using OldOrdered = ordered_msf_private::Stats;
+    for (auto field : {&OldOrdered::dsu_initializations, &OldOrdered::initialized_vertices,
+        &OldOrdered::order_date_comparisons, &OldOrdered::order_identity_comparisons, &OldOrdered::validated_edges,
+        &OldOrdered::finish_calls, &OldOrdered::peak_input_edges, &OldOrdered::peak_certificate_edges,
+        &OldOrdered::dsu_logical_bytes, &OldOrdered::dsu_capacity_bytes, &OldOrdered::peak_certificate_capacity_bytes})
+      need(trial.stats.ordered_work[k].*field == 0, "birth_stream_gate.no_legacy_reducer");
+    need(s.retained_pivots == 0 && s.projected_loops == 0 && s.projected_edges == 0 && s.hub_certificate_edges == 0 &&
+         trial.stats.ordered_work[k].dsu_initializations == 0, "birth_stream_gate.no_hub_projection");
+    need(birth.dsu_unions == birth.certificate_edges && birth.certificate_edges == s.native_certificate_edges &&
+         s.native_certificate_edges == trial.certificates[k - 1].edges.size() && birth.dense_self_loops <= birth.dsu_attempts,
+         "birth_stream_gate.certificate_work");
+    cm::add(birth_occurrences, birth.occurrences); cm::add(dense_dsu_initializations, birth.dsu_initializations);
+    cm::add(pivot_assignments, pivots); cm::add(nonpivot_attempts, birth.dsu_attempts);
+    cm::add(dense_loop_occurrences, birth.dense_self_loops);
+    u64 cursor = 0;
+    for (u32 b : e.atlas.program(k)) {
+      const auto cell = e.atlas.cell(b, k);
+      const auto count = e.atlas.rep_offsets[cell + 1] - e.atlas.rep_offsets[cell];
+      for (u64 local = 1; local < count; ++local) cm::add(split_hub_windows, (cursor + local) % width == 0);
+      cursor += count;
+    }
+    const size_t reserve = std::min<u64>(width, occurrences);
+    expected_peak_items = std::max<u64>(expected_peak_items, reserve);
+    const u64 capacity = reserved_bytes<sg::detail::Request>(reserve) + reserved_bytes<size_t>(reserve) +
+        reserved_bytes<u32>(reserve) + reserved_bytes<size_t>(reserve == 0 ? 0 : reserve + 1) +
+        reserved_bytes<size_t>(reserve);
+    expected_peak_capacity = std::max(expected_peak_capacity, capacity);
+    cm::add(all_occurrences, occurrences); cm::add(total.orders);
+    cm::add(total.occurrences, occurrences); cm::add(total.windows, expected_windows);
+    cm::add(total.multi_window_orders, expected_windows > 1);
+    cm::add(total.partial_window_orders, occurrences % width != 0);
+    if (k >= 2) {
+      const u64 starts = s.window_unique - s.initial_seed_hits;
+      cm::add(expected_tasks, starts);
+      const u64 q = w.static_post_seed_queries[k], h = w.static_post_seed_hits[k];
+      const u64 t = w.static_post_seed_terminals[k], m = w.resolve_work.calls;
+      need(h <= q && h <= starts && h == t, "stream_gate.postseed_work");
+      need(m == cm::sum(starts, q - h) && w.key_lookups == m &&
+           cm::sum(w.anchor_hits, h) == starts && w.intruder_queries == q &&
+           cm::sum(w.descending_steps, w.same_radius_steps) == q, "stream_gate.meb_work_identity");
+      need(e.work.static_requests[k] == occurrences && e.work.static_unique[k] == 0 && e.work.static_seeded[k] == 0,
+           "stream_gate.window_not_global_counts");
+      need(reference.work.static_unique[k] <= s.window_unique && reference.work.static_seeded[k] <= s.initial_seed_hits,
+           "stream_gate.global_dedup_lower_bound");
+      cm::add(total.geometry_occurrences, occurrences); cm::add(total.unique, s.window_unique);
+      cm::add(total.initial_hits, s.initial_seed_hits); cm::add(total.starts, starts);
+      cm::add(total.queries, q); cm::add(total.hits, h); cm::add(total.terminals, t); cm::add(total.mebs, m);
+      cm::add(total.deduplicated_orders, s.window_unique < occurrences); cm::add(total.postseed_orders, h != 0);
+      ++work_identity_orders;
+    } else need(w.resolve_work.calls == 0 && s.initial_seed_hits == 0, "stream_gate.K1_geometry_separate");
+    for (size_t j = 0; j < sum.static_post_seed_queries.size(); ++j) {
+      if (j != k) need(w.static_post_seed_queries[j] == 0 && w.static_post_seed_hits[j] == 0 &&
+                       w.static_post_seed_terminals[j] == 0, "stream_gate.work_order_identity");
+      cm::add(sum.static_post_seed_queries[j], w.static_post_seed_queries[j]);
+      cm::add(sum.static_post_seed_hits[j], w.static_post_seed_hits[j]);
+      cm::add(sum.static_post_seed_terminals[j], w.static_post_seed_terminals[j]);
+    }
+    for (const auto field : {&FullBallStats::anchor_hits, &FullBallStats::key_lookups,
+        &FullBallStats::intruder_queries, &FullBallStats::intruder_nodes, &FullBallStats::intruder_power_tests,
+        &FullBallStats::interior_ranges, &FullBallStats::same_radius_steps, &FullBallStats::descending_steps})
+      cm::add(sum.*field, w.*field);
+    sum.max_chain_steps = std::max(sum.max_chain_steps, w.max_chain_steps);
+    cm::add(sum.resolve_work.calls, w.resolve_work.calls);
+    cm::add(sum.resolve_work.power_tests, w.resolve_work.power_tests);
+    cm::add(sum.resolve_work.materializations, w.resolve_work.materializations);
+    for (size_t q = 0; q < sum.resolve_work.supports_by_size.size(); ++q)
+      cm::add(sum.resolve_work.supports_by_size[q], w.resolve_work.supports_by_size[q]);
+  }
+  need(all_occurrences == reference.targets.size() && all_occurrences == e.stats.representatives,
+       "stream_gate.total_occurrence_work");
+  need(trial.stats.peak_hub_domain_logical_bytes == 0 && trial.stats.peak_hub_domain_capacity_bytes == 0 &&
+       trial.stats.peak_hub_certificate_logical_bytes == 0 && trial.stats.peak_hub_certificate_capacity_bytes == 0,
+       "birth_stream_gate.no_hub_storage");
+  need(sum.static_post_seed_queries == e.work.static_post_seed_queries && sum.static_post_seed_hits == e.work.static_post_seed_hits &&
+       sum.static_post_seed_terminals == e.work.static_post_seed_terminals, "stream_gate.aggregate_postseed_work");
+  for (const auto field : {&FullBallStats::anchor_hits, &FullBallStats::key_lookups,
+      &FullBallStats::intruder_queries, &FullBallStats::intruder_nodes, &FullBallStats::intruder_power_tests,
+      &FullBallStats::interior_ranges, &FullBallStats::same_radius_steps, &FullBallStats::descending_steps, &FullBallStats::max_chain_steps})
+    need(sum.*field == e.work.*field, "stream_gate.aggregate_geometry_work");
+  need(sum.resolve_work.calls == e.work.resolve_work.calls && sum.resolve_work.power_tests == e.work.resolve_work.power_tests &&
+       sum.resolve_work.materializations == e.work.resolve_work.materializations &&
+       sum.resolve_work.supports_by_size == e.work.resolve_work.supports_by_size, "stream_gate.aggregate_meb_work");
+  const u64 stride = sizeof(sg::detail::Request) + sizeof(size_t) + sizeof(u32);
+  need(trial.stats.peak_window_items == expected_peak_items &&
+       trial.stats.peak_window_logical_bytes >= expected_peak_items * stride &&
+       trial.stats.peak_window_logical_bytes <= expected_peak_capacity &&
+       trial.stats.peak_window_capacity_bytes == expected_peak_capacity, "stream_gate.named_window_residence");
+  const auto worker_count = trial.stats.requested_geometry_workers;
+  need((worker_count == 1 || worker_count == 4) &&
+       trial.stats.created_geometry_threads == (worker_count == 1 ? 0 : worker_count) &&
+       trial.stats.geometry_batches == expected_batches && trial.stats.geometry_tasks == expected_tasks &&
+       trial.stats.geometry_tasks_per_worker.size() == worker_count, "parallel_stream_gate.team_and_tasks");
+  u64 paid = 0, useful = 0;
+  for (u64 count : trial.stats.geometry_tasks_per_worker) { cm::add(paid, count); cm::add(useful, count != 0); }
+  need(paid == expected_tasks, "parallel_stream_gate.worker_tasks");
+  need(trial.stats.worker_state_capacity_bytes == reserved_bytes<sg::detail::WorkerState>(worker_count),
+       "parallel_stream_gate.worker_state_residence");
+  if (worker_count > 1) {
+    ++parallel_trials; cm::add(parallel_tasks, paid);
+    parallel_geometry_observed = parallel_geometry_observed || useful > 1;
+  }
+  // These named-vector samples do NOT observe hidden/freed transients, MSF
+  // capacities, simultaneous RSS, or the intruder DFS's intermediate size.
+  total.peak_window_items = std::max(total.peak_window_items, trial.stats.peak_window_items);
+  total.peak_window_capacity_bytes = std::max(total.peak_window_capacity_bytes, trial.stats.peak_window_capacity_bytes);
+}
+
+void work_nonvacuity() {
+  u64 deduplicated = 0, postseed = 0, multiple = 0, partial = 0, total_mebs = 0, total_occurrences = 0;
+  for (size_t j = 0; j < widths.size(); ++j) {
+    const auto& w = width_work[j];
+    need(w.orders > 0 && w.occurrences == width_work[0].occurrences &&
+         w.geometry_occurrences == width_work[0].geometry_occurrences, "stream_gate.width_work_domain");
+    need(w.hits == w.terminals && w.queries >= w.hits && w.starts == w.unique - w.initial_hits &&
+         w.mebs == cm::sum(w.starts, w.queries - w.hits), "stream_gate.width_work_identity");
+    if (widths[j] == 1) need(w.unique == w.geometry_occurrences && w.deduplicated_orders == 0,
+                           "stream_gate.unit_window_nonvacuity");
+    cm::add(deduplicated, w.deduplicated_orders); cm::add(postseed, w.postseed_orders);
+    cm::add(multiple, w.multi_window_orders); cm::add(partial, w.partial_window_orders);
+    cm::add(total_mebs, w.mebs); cm::add(total_occurrences, w.occurrences);
+  }
+  need(work_identity_orders > 0 && deduplicated > 0 && postseed > 0 && multiple > 0 && partial > 0,
+       "stream_gate.window_work_nonvacuity");
+  need(total_mebs == windowed_mebs && total_mebs > 0 && total_occurrences == observed,
+       "stream_gate.observed_work_totals");
+  need(birth_occurrences == observed && dense_dsu_initializations > 0 && pivot_assignments > 0 &&
+       pivot_assignments + nonpivot_attempts == observed && dense_loop_occurrences > 0 &&
+       native_edge_comparisons > 0 && window_certificate_checks > 0 && split_hub_windows > 0,
+       "birth_stream_gate.nonvacuity");
+  need(parallel_geometry_observed && parallel_trials * 2 == trials && parallel_tasks > 0,
+       "parallel_stream_gate.nonvacuity");
+  // Non-nested widths need not have monotone Uw or M. Width4096 boundary
+  // coverage is reported from multi_window_orders, never assumed here.
+}
+
+void print_width_work() {
+  std::printf(",\"guard_backend\":\"certified_catalogue_ranks\",\"rank_guard_work\":{"
+      "\"first_consumer_rank_checks\":%llu,\"initial_seed_rank_checks\":%llu,\"terminal_rank_checks\":%llu}",
+      static_cast<unsigned long long>(rank_guard_work.first_consumer_rank_checks),
+      static_cast<unsigned long long>(rank_guard_work.initial_seed_rank_checks),
+      static_cast<unsigned long long>(rank_guard_work.terminal_rank_checks));
+  std::printf(",\"reducer\":\"parallel_geometry_dense_birth_one_dsu\",\"birth_occurrences\":%llu,\"dense_dsu_initializations\":%llu,"
+      "\"pivot_assignments\":%llu,\"nonpivot_attempts\":%llu,\"dense_loop_occurrences\":%llu,"
+      "\"native_edge_comparisons\":%llu,\"split_hub_windows\":%llu,\"window_certificate_checks\":%llu",
+      static_cast<unsigned long long>(birth_occurrences), static_cast<unsigned long long>(dense_dsu_initializations),
+      static_cast<unsigned long long>(pivot_assignments), static_cast<unsigned long long>(nonpivot_attempts),
+      static_cast<unsigned long long>(dense_loop_occurrences), static_cast<unsigned long long>(native_edge_comparisons),
+      static_cast<unsigned long long>(split_hub_windows), static_cast<unsigned long long>(window_certificate_checks));
+  std::printf(",\"geometry_workers\":[1,4],\"parallel_trials\":%llu,\"parallel_tasks\":%llu,\"parallel_geometry_observed\":true",
+      static_cast<unsigned long long>(parallel_trials), static_cast<unsigned long long>(parallel_tasks));
+  std::printf(",\"work_identity_orders\":%llu,\"memory_scope\":\"five_named_window_vectors_not_rss\",\"window_work\":[",
+      static_cast<unsigned long long>(work_identity_orders));
+  for (size_t j = 0; j < widths.size(); ++j) {
+    const auto& w = width_work[j];
+    std::printf("%s{\"width\":%zu,\"orders\":%llu,\"R_all\":%llu,\"R_ge2\":%llu,\"windows\":%llu,"
+        "\"Uw_ge2\":%llu,\"Sw_ge2\":%llu,\"G\":%llu,\"Q\":%llu,\"H\":%llu,\"T\":%llu,\"M\":%llu,"
+        "\"multi_window_orders\":%llu,\"partial_window_orders\":%llu,\"deduplicated_orders\":%llu,\"postseed_orders\":%llu,"
+        "\"peak_window_items\":%llu,\"peak_window_capacity_bytes\":%llu}", j ? "," : "", widths[j],
+        static_cast<unsigned long long>(w.orders), static_cast<unsigned long long>(w.occurrences),
+        static_cast<unsigned long long>(w.geometry_occurrences), static_cast<unsigned long long>(w.windows),
+        static_cast<unsigned long long>(w.unique), static_cast<unsigned long long>(w.initial_hits),
+        static_cast<unsigned long long>(w.starts), static_cast<unsigned long long>(w.queries),
+        static_cast<unsigned long long>(w.hits), static_cast<unsigned long long>(w.terminals), static_cast<unsigned long long>(w.mebs),
+        static_cast<unsigned long long>(w.multi_window_orders), static_cast<unsigned long long>(w.partial_window_orders),
+        static_cast<unsigned long long>(w.deduplicated_orders), static_cast<unsigned long long>(w.postseed_orders),
+        static_cast<unsigned long long>(w.peak_window_items), static_cast<unsigned long long>(w.peak_window_capacity_bytes));
+  }
+  std::printf("]}\n");
+}
+
+void one_case(const Fixture& fixture, unsigned variant, int s, bool oracle, std::string_view fault = {}) {
+  context = std::string(fixture.name) + "/v" + std::to_string(variant) + "/s" + std::to_string(s);
+  std::fprintf(stderr, "start=%s\n", context.c_str());
+  const auto input = graph_gate::make_input(fixture, variant);
+  const auto index = build_cloud_index(input);
+  auto balls = graph_gate::real_census(index, fixture.kmax, s);
+  if (variant) {
+    std::reverse(balls.begin(), balls.end());
+    for (auto& b : balls) {
+      std::reverse(b.shell_ids, b.shell_ids + b.n_shell);
+      std::reverse(b.interior_ids, b.interior_ids + b.n_interior);
+    }
+  }
+  const auto original = build_full_ball_tower(index, balls, fixture.kmax, 1);
+  need(original.status == FullBallStatus::kCompleteRelative, "stream_gate.reference_complete");
+  const auto reference = ag::extract(index, balls, fixture.kmax);
+  std::vector<fc::Certificate<u32>> certificates;
+  for (const auto& order : reference.orders) certificates.push_back(fc::spanning_certificate(order.graph, std::less<u32>{}));
+  const auto full = gf::build(reference, reconstruct(certificates), 1);
+  compare_towers(original, full.tower, reference);
+  if (oracle) graph_gate::judge(full.tower, input);
+  std::vector<fc::Certificate<u32>> first_window_certificates;
+  for (size_t width : widths) for (size_t workers : {size_t{1}, size_t{4}}) {
+    Observation observer{reference, std::vector<u8>(reference.targets.size(), 0)};
+    observer.corrupt = fault == "--mutant-terminal";
+    observer.abort = fault == "--reject-observer";
+    sg::Fault injected = sg::Fault::kNone;
+    if (fault == "--mutant-root-pivot") injected = sg::Fault::kRootPivot;
+    if (fault == "--mutant-forget-pivot") injected = sg::Fault::kForgetPivot;
+    if (fault == "--mutant-early-conversion") injected = sg::Fault::kEarlyConversion;
+    auto streamed = sg::build(index, balls, fixture.kmax, fault == "--reject-zero-window" ? 0 : width,
+                             {&observer, fault == "--reject-observer-pair" ? nullptr : Observation::accept},
+                             fault == "--reject-zero-workers" ? 0 : workers, injected);
+    need(std::all_of(observer.seen.begin(), observer.seen.end(), [](u8 count) { return count == 1; }),
+         "stream_gate.observation_complete");
+    if (fault == "--mutant-pivot") {
+      need(!streamed.extraction.phi.empty(), "stream_gate.pivot_mutant_nonvacuity");
+      streamed.extraction.phi.front() = ag::absent;
+    } else if (fault == "--mutant-edge-date") {
+      need(!streamed.certificates[0].edges.empty(), "stream_gate.edge_mutant_nonvacuity");
+      streamed.certificates[0].edges[0].date = 0;
+    } else if (fault == "--mutant-drop-edge") {
+      need(!streamed.certificates[0].edges.empty(), "stream_gate.drop_mutant_nonvacuity");
+      streamed.certificates[0].edges.pop_back();
+    } else if (fault == "--mutant-mark-date") {
+      need(!streamed.certificates[0].marks.empty(), "stream_gate.mark_mutant_nonvacuity");
+      streamed.certificates[0].marks[0].admission = 0;
+    } else if (fault == "--mutant-drop-birth") {
+      need(streamed.certificates.back().edges.empty() && !streamed.certificates.back().births.empty(),
+           "stream_gate.birth_mutant_nonvacuity");
+      streamed.certificates.back().births.clear(); streamed.certificates.back().marks.clear();
+    } else if (fault == "--mutant-work") {
+      need(streamed.extraction.atlas.kmax >= 2, "stream_gate.work_mutant_nonvacuity");
+      ++streamed.stats.orders[2].geometry_work.resolve_work.calls;
+    } else if (fault == "--mutant-window-work") {
+      need(streamed.stats.orders[1].occurrences > 0, "stream_gate.window_mutant_nonvacuity");
+      ++streamed.stats.orders[1].windows;
+    } else if (fault == "--mutant-birth-work") {
+      ++streamed.stats.birth_work[1].dsu_attempts;
+    } else if (fault == "--mutant-legacy-work") {
+      ++streamed.stats.native_work[1].input_edges;
+    } else if (fault == "--mutant-worker-work") {
+      ++streamed.stats.geometry_tasks;
+    } else if (fault == "--mutant-rank-work") {
+      ++streamed.stats.rank_guard_work[1].terminal_rank_checks;
+    }
+    metadata(streamed, reference);
+    work_and_residence(streamed, reference, width);
+    const auto ordered = ordered_streaming_graph_private::build(index, balls, fixture.kmax, width);
+    compare_ordered(streamed, ordered);
+    if (width == widths.front() && workers == 1) first_window_certificates = streamed.certificates;
+    else for (size_t k = 0; k < streamed.certificates.size(); ++k) {
+      const auto& a = first_window_certificates[k].edges;
+      const auto& b = streamed.certificates[k].edges;
+      need(a.size() == b.size(), "ordered_stream_gate.window_certificate_size");
+      for (size_t i = 0; i < a.size(); ++i) {
+        need(a[i].id == b[i].id && a[i].a == b[i].a && a[i].b == b[i].b && a[i].date == b[i].date,
+             "ordered_stream_gate.window_certificate_identity");
+        ++window_certificate_checks;
+      }
+    }
+    const auto histories = reconstruct(streamed.certificates);
+    const auto candidate = gf::build(streamed.extraction, histories, 1);
+    compare_towers(original, candidate.tower, reference);
+    same_payload(full.tower, candidate.tower);
+    const auto parallel_queries = gf::build(streamed.extraction, histories, 4);
+    same_payload(candidate.tower, parallel_queries.tower);
+    // Shared ownership is required, in addition to equal bank row contents.
+    for (const auto& order : candidate.tower.orders)
+      need(order.forest.populations().get() == candidate.tower.orders[0].forest.populations().get(), "stream_gate.shared_bank");
+    if (oracle && width == 7) graph_gate::judge(candidate.tower, input);
+    windowed_mebs += streamed.extraction.work.resolve_work.calls;
+    reference_mebs += reference.work.resolve_work.calls;
+    for (const auto& history : histories) for (const auto& node : history.nodes) atomic_levels += node.parent_count >= 3;
+    ++trials;
+  }
+  ++cases;
+  std::fprintf(stderr, "complete=%s\n", context.c_str());
+}
+
+std::string_view cause_for(std::string_view mode) {
+  if (mode == "--mutant-terminal") return "stream_gate.direct_terminal";
+  if (mode == "--mutant-pivot") return "stream_gate.ordinal_zero_pivots";
+  if (mode == "--mutant-edge-date") return "filtered.edge_not_strictly_after_birth";
+  if (mode == "--mutant-drop-edge") return "filtered.cut_connectivity";
+  if (mode == "--mutant-mark-date") return "filtered.mark_identity";
+  if (mode == "--mutant-drop-birth") return "filtered.certificate_domain";
+  if (mode == "--mutant-work") return "stream_gate.meb_work_identity";
+  if (mode == "--mutant-window-work") return "stream_gate.window_work";
+  if (mode == "--mutant-birth-work") return "birth_stream_gate.single_pass";
+  if (mode == "--mutant-legacy-work") return "birth_stream_gate.no_legacy_reducer";
+  if (mode == "--mutant-root-pivot") return "stream_gate.ordinal_zero_pivots";
+  if (mode == "--mutant-forget-pivot") return "birth_stream.source_label";
+  if (mode == "--mutant-early-conversion") return "birth_stream.source_label";
+  if (mode == "--mutant-worker-work") return "parallel_stream_gate.team_and_tasks";
+  if (mode == "--mutant-rank-work") return "rank_stream_gate.guard_work";
+  if (mode == "--reject-zero-workers") return "parallel_stream.geometry_workers";
+  if (mode == "--reject-zero-window") return "streaming.window_width";
+  if (mode == "--reject-observer") return "stream_gate.observer_abort_after_three";
+  if (mode == "--reject-observer-pair") return "streaming.observer_pair";
+  return {};
+}
+bool causal_hit(std::string_view mode) {
+  const bool injected = mode == "--mutant-root-pivot" || mode == "--mutant-forget-pivot" ||
+      mode == "--mutant-early-conversion";
+  return !injected || sg::fault_hits > 0;
+}
+
+// A real unresolved K>=2 batch, not the earlier K1 observer refusal.
+// Each of four workers pays geometry before the test-only callback barrier;
+// worker zero then throws. The callback never supplies an algorithm value.
+int reject_parallel_worker() {
+  struct Probe {
+    std::barrier<> ready{4};
+    std::array<std::atomic<bool>, 4> seen{};
+    std::atomic<u64> entered{0}, active{0}, completed{0};
+    static void after(void* opaque, unsigned k, size_t tasks, size_t worker) {
+      auto& self = *static_cast<Probe*>(opaque);
+      if (k < 2 || tasks < 4 || self.seen[worker].exchange(true)) return;
+      self.entered.fetch_add(1);
+      self.active.fetch_add(1);
+      struct Leave { std::atomic<u64>& active; ~Leave() { active.fetch_sub(1); } } leave{self.active};
+      self.ready.arrive_and_wait();
+      self.completed.fetch_add(1);
+      if (worker == 0) throw std::runtime_error("parallel_stream_gate.worker_after_geometry");
+    }
+  } probe;
+  context = "parallel_worker_uniform32";
+  Fixture uniform{"uniform32", {}, 10};
+  for (const auto& p : make_family_input(CloudFamily::kUniform, 32, 65536, 3)) uniform.points.push_back(p.position);
+  const auto input = graph_gate::make_input(uniform, 0);
+  const auto index = build_cloud_index(input);
+  const auto balls = graph_gate::real_census(index, 10, 8);
+  bool caught = false;
+  try {
+    (void)sg::build(index, balls, 10, 4096, {}, 4, sg::Fault::kNone, {&probe, Probe::after});
+  } catch (const std::runtime_error& error) {
+    need(std::string_view(error.what()) == "parallel_stream_gate.worker_after_geometry", "parallel_stream_gate.worker_cause");
+    caught = true;
+  }
+  need(caught && probe.entered == 4 && probe.completed == 4 && probe.active == 0 &&
+       window_workers_private::testing::launch_active == 0 &&
+       window_workers_private::testing::exceptions_captured == 1,
+       "parallel_stream_gate.worker_quiescence");
+  // A fresh complete producer still agrees after the failed producer's
+  // destruction; no reuse of a partially published Streaming is possible.
+  const auto resumed = sg::build(index, balls, 10, 4096, {}, 4);
+  const auto ordered = ordered_streaming_graph_private::build(index, balls, 10, 4096);
+  compare_ordered(resumed, ordered);
+  need(resumed.stats.geometry_tasks > 4 && window_workers_private::testing::launch_active == 0,
+       "parallel_stream_gate.worker_recovery_nonvacuity");
+  std::printf("{\"status\":\"causal_rejection\",\"cause\":\"parallel_stream_gate.worker_after_geometry\","
+      "\"workers_after_geometry\":4,\"callbacks_active_after\":0,\"threads_active_after\":0,"
+      "\"captured_exceptions\":1,\"fresh_producer_verified\":true}\n");
+  return 4;
+}
+}  // namespace streaming_gate
+
+int main(int argc, char** argv) {
+  if (argc != 2) return 2;
+  const std::string_view mode(argv[1]);
+  const auto expected = streaming_gate::cause_for(mode);
+  try {
+    using namespace streaming_gate;
+    if (mode == "--reject-parallel-worker") return reject_parallel_worker();
+    if (mode == "--selftest") {
+      auto corpus = fixtures();
+      corpus.push_back({"singleton", {{3,7,11}}, 1});
+      corpus.push_back({"line4", {{0,0,0},{2,0,0},{10,0,0},{12,0,0}}, 4});
+      for (const auto& fixture : corpus) for (unsigned v : {0, 1}) for (int s : {8, 10, 12}) one_case(fixture, v, s, s == 8);
+      need(cases == 96 && trials == 768 && atomic_levels > 0 && observed > 1000 && graph_gate::oracle_verticals > 10000,
+           "stream_gate.selftest_nonvacuity");
+    } else if (mode == "--high") {
+      const Fixture spatial{"spatial12", {{7,42,83},{91,12,64},{33,88,9},{54,20,71},{18,61,39},{76,53,95},
+          {42,7,24},{62,94,47},{3,29,58},{85,73,15},{29,36,97},{58,65,3}}, 10};
+      const Fixture shell{"shell14", {{15,10,10},{5,10,10},{10,15,10},{10,5,10},{10,10,15},{10,10,5},
+          {13,14,10},{13,6,10},{7,14,10},{7,6,10},{10,13,14},{10,7,6},{10,10,10},{20,25,30}}, 10};
+      for (const auto& fixture : {spatial, shell}) for (unsigned v : {0, 1}) for (int s : {8, 10, 12}) one_case(fixture, v, s, s == 8);
+      need(cases == 12 && trials == 96 && graph_gate::oracle_verticals > 100000, "stream_gate.high_nonvacuity");
+    } else if (mode == "--uniform32") {
+      Fixture uniform{"uniform32", {}, 10};
+      for (const auto& p : make_family_input(CloudFamily::kUniform, 32, 65536, 3)) uniform.points.push_back(p.position);
+      for (unsigned v : {0, 1}) for (int s : {8, 10, 12}) one_case(uniform, v, s, false);
+      need(cases == 6 && trials == 48 && observed > 100000, "stream_gate.uniform_nonvacuity");
+    } else if (!expected.empty()) {
+      one_case({"line4", {{0,0,0},{2,0,0},{10,0,0},{12,0,0}}, 4}, 0, 8, false, mode);
+      need(false, "stream_gate.mutant_survived");
+    } else return 2;
+    work_nonvacuity();
+    std::printf("{\"status\":\"passed\",\"public_status\":\"not_claimed\",\"cases\":%llu,\"stream_trials\":%llu,"
+        "\"observed_terminals\":%llu,\"checks\":%llu,\"paired_nodes\":%llu,\"paired_contributions\":%llu,"
+        "\"oracle_cuts\":%llu,\"oracle_verticals\":%llu,\"stream_mebs\":%llu,\"reference_mebs_repeated\":%llu,"
+        "\"multifusion_observations\":%llu,\"widths\":[1,7,31,4096],\"workers_queries\":[1,4],\"gcp_used\":false",
+        static_cast<unsigned long long>(cases), static_cast<unsigned long long>(trials), static_cast<unsigned long long>(observed),
+        static_cast<unsigned long long>(checks), static_cast<unsigned long long>(graph_gate::paired_nodes),
+        static_cast<unsigned long long>(graph_gate::paired_contributions), static_cast<unsigned long long>(graph_gate::oracle_cuts),
+        static_cast<unsigned long long>(graph_gate::oracle_verticals), static_cast<unsigned long long>(windowed_mebs),
+        static_cast<unsigned long long>(reference_mebs), static_cast<unsigned long long>(atomic_levels));
+    print_width_work();
+    return 0;
+  } catch (const Failure& error) {
+    if (!expected.empty() && expected == error.why && streaming_gate::causal_hit(mode)) {
+      std::printf("{\"status\":\"causal_rejection\",\"cause\":\"%s\",\"observed_terminals\":%llu,\"callback_aborts\":%llu,\"fault_hits\":%llu}\n",
+          error.why, static_cast<unsigned long long>(streaming_gate::observed),
+          static_cast<unsigned long long>(streaming_gate::callback_aborts),
+          static_cast<unsigned long long>(mhgp7::rank_guard_streaming_graph_private::fault_hits)); return 4;
+    }
+    std::fprintf(stderr, "FAIL [%s] %s\n", context.c_str(), error.why);
+  } catch (const std::exception& error) {
+    if (!expected.empty() && expected == error.what() && streaming_gate::causal_hit(mode)) {
+      std::printf("{\"status\":\"causal_rejection\",\"cause\":\"%s\",\"observed_terminals\":%llu,\"callback_aborts\":%llu,\"fault_hits\":%llu}\n",
+          error.what(), static_cast<unsigned long long>(streaming_gate::observed),
+          static_cast<unsigned long long>(streaming_gate::callback_aborts),
+          static_cast<unsigned long long>(mhgp7::rank_guard_streaming_graph_private::fault_hits)); return 4;
+    }
+    std::fprintf(stderr, "EXCEPTION [%s] %s\n", context.c_str(), error.what());
+  } catch (const full_ball_detail::Failure& error) { std::fprintf(stderr, "GEOMETRY [%s] %s\n", context.c_str(), error.reason); }
+  return 1;
+}

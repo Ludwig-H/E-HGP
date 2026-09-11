@@ -1,0 +1,67 @@
+{
+  "missing": null,
+  "mutant-K1-domain": {
+    "cause": "rank_gate.K1_point_domain",
+    "checks": 2,
+    "fault_hits": 1,
+    "status": "causal_rejection"
+  },
+  "mutant-consumer-order": {
+    "cause": "rank_gate.consumer_order",
+    "checks": 2,
+    "fault_hits": 1,
+    "status": "causal_rejection"
+  },
+  "mutant-consumer-strict": {
+    "cause": "rank_gate.consumer_plateau",
+    "checks": 2,
+    "fault_hits": 1,
+    "status": "causal_rejection"
+  },
+  "mutant-seed-equality": {
+    "cause": "rank_gate.seed_strict",
+    "checks": 2,
+    "fault_hits": 1,
+    "status": "causal_rejection"
+  },
+  "mutant-terminal-admission": {
+    "cause": "rank_gate.terminal_admission",
+    "checks": 2,
+    "fault_hits": 1,
+    "status": "causal_rejection"
+  },
+  "mutant-terminal-domain": {
+    "cause": "rank_gate.terminal_domain",
+    "checks": 2,
+    "fault_hits": 1,
+    "status": "causal_rejection"
+  },
+  "mutant-terminal-equality": {
+    "cause": "rank_gate.terminal_strict",
+    "checks": 2,
+    "fault_hits": 1,
+    "status": "causal_rejection"
+  },
+  "selftest": {
+    "accepted": 3660,
+    "atlas_variants": 36,
+    "ball_pairs": 2796,
+    "binding_rejections": 24,
+    "censuses": 18,
+    "checks": 12882,
+    "counter_refusals": 36,
+    "equal_distinct_pairs": 48,
+    "fault_hits": 0,
+    "first_successes": 1548,
+    "point_checks": 132,
+    "public_status": "not_claimed",
+    "rational_reference": "boost_cpp_int_cross_products",
+    "rejected": 6264,
+    "scaled_bindings": 126,
+    "scope": "focused_certified_rank_guards",
+    "seed_successes": 912,
+    "status": "passed",
+    "terminal_successes": 1068
+  },
+  "unknown": null
+}

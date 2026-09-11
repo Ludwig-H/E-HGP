@@ -6,60 +6,47 @@
 Chantier sur `main` uniquement. Cette entrée décrit le travail courant ;
 les récits des anciens jalons sont retirés, leurs preuves restent liées.
 
-Priorité après `f2bea998` et l'audit `383f8f98` : [objets parallèles de toute la tour](docs/OBJETS_PARALLELES_TOUR_20260911.md).
-L'auditeur confirme l'indépendance des horizontales K et le calcul offline
-des verticales sans nouvelle MEB. Catalogue unique, atlas des blocs,
-graphe daté sur naissances, multifusions et marques séparées remplaceraient
-les dépendances temporelles du calendrier actuel. Le [raccord privé complet](receipts/atlas_graph_full_20260911/README.md)
-relie désormais les premières briques atlas/calendrier : extraction depuis
-vrais census, histoires FULL, contributions datées et verticales offline.
-La composition des MSF par fenêtres est exercée avant et après projection
-sur les naissances. Les certificats internes peuvent différer, pas la tour.
-Aucun remplacement actif ni temps extrapolé. Le [delta réellement fenêtré](docs/RESOLUTIONS_PAR_FENETRES_20260911.md)
-produit et consomme désormais les terminales sans garder targets[R] ni le
-graphe complet. O2/SAN : 114 census, 456 essais, 253 224 terminales comparées
-par build ; huit mutations et trois refus causaux. Les compteurs distinguent
-uniques globaux et locaux cumulés, travail répété et capacités nommées.
-Le [delta ordonné](receipts/ordered_streaming_20260911/README.md) exploite
-maintenant l'ordre d'émission pour éviter les recompactions des hubs.
-O2/SAN clos : 114 census, 456 essais, 253 224 terminales, 82 368 pivots
-retenus et 54 612 comparaisons du certificat entre fenêtres par build.
-La compaction native finale est encore exécutée dans ce témoin historique.
-Le [nouveau delta dense](docs/CONTRACTION_NAISSANCES_ET_WORKERS_20260911.md)
-est qualifié O2/SAN séparément : un DSU sur les seules naissances,
-sans certificat hubs ni compaction native finale. Les identités restent
-stables malgré les unions ; conversion dense→BlockId après tout K.
-Sa géométrie a ensuite été raccordée à une équipe CPU persistante :
-O2/SAN, 114 census, 912 essais, 506 448 terminales et 48 771 156 contrôles
-par build. Le refus après géométrie parallèle vérifie la quiescence et
-la destruction de l'équipe. Aucun résultat TSan : démarrage refusé par
-l'environnement, capture conservée. Le moteur actif n'est pas remplacé,
-la reconstruction reste séquentielle, aucun débit massif n'est annoncé.
-Les [mesures propres du raccord parallèle](receipts/parallel_birth_streaming_20260911/README.md)
-ferment maintenant 8k/16k/32k à 4/4/4 : 92,963 / 215,381 / 489,601 s,
-avec 4 359 540 / 9 364 101 / 19 784 213 MEB, mêmes sorties que les
-témoins correspondants. À 8k, changer seulement la géométrie de un à
-quatre workers donne 187,214 → 164,703 s. Les 16 000 et 32 000 de ce
-jalon sont multi-CPU, pas un nouveau triplet dense mono. Prochaine étape :
-partage de préparation, gardes entières après rangs certifiés, puis
-parallélisation de la reconstruction/export et raccord GPU. Aucun nouveau
-chrono 50k ou contrat 1 s/100 ms ; GCP non utilisé.
-La paire n8000/s8/K1..10 donne le même digest et les mêmes compteurs FULL,
-mais 188,638 → 250,408 s, MEB +10,4 %, RSS +1,4 %. La pile traite
-48,4 millions d'arêtes pour 10,5 millions d'arêtes source. Pas de promotion
-mono depuis cette première mesure. Le correctif donne 207,867 s à 8k,
-10 456 312 visites de hubs (une par arête), mêmes 4 359 540 MEB et digest
-dense, RSS 2 769 680 KiB. La référence fraîche donne 213,064 s ; les
-écarts de sous-phases interdisent d'en déduire un speedup stable de 2,4 %.
-Le triplet ordonné 8k/16k/32k est clos : 207,867 / 595,244 / 1 076,969 s,
-RSS 2 769 680 / 5 663 636 / 11 604 252 KiB. Les temps sont sur hôte
-partagé, avec forte charge extérieure documentée à 16k. Les occurrences
-croissent par facteurs 2,099 puis 2,071, les MEB par 2,148 puis 2,113 :
-observation sur uniforme/s8 seulement, pas une preuve tous régimes.
-À n800, s8/10/12 donnent même digest dense et mêmes comptes géométriques ;
-leur comparaison à grande taille reste ouverte. Aucun transfert de ces
-qualifications historiques au nouveau réducteur dense et aucun contrat 50k acquis.
-GCP non utilisé pour ce nouveau jalon architectural.
+Priorité : [objets parallèles de toute la tour](docs/OBJETS_PARALLELES_TOUR_20260911.md).
+Le [raccord privé complet](receipts/atlas_graph_full_20260911/README.md)
+relie vrais census, atlas, graphes datés, histoires FULL, contributions et
+verticales offline. La [voie dense à workers persistants](docs/CONTRACTION_NAISSANCES_ET_WORKERS_20260911.md)
+supprime targets[R], graphe global, DSU/certificat des hubs et compaction
+native finale. φ porte des labels de naissance stables, pas des racines DSU.
+Une fenêtre géométrique est dispersée avant consommation dans l'ordre source.
+Les références historiques restent scellées, sans remplacement actif.
+
+Dernier delta : [trois gardes sur rangs certifiés](docs/GARDES_RANGS_CERTIFIES_20260911.md).
+O2/SAN FULL clos : 114 census, 912 essais, 506 448 terminales comparées et
+48 775 524 contrôles par build. Mêmes champs scientifiques et travail
+géométrique que le parent ; +4 368 contrôles du nouveau grand-livre.
+Gardes first=506448, seed=297162, terminal=484224. Tests ciblés O2/SAN :
+18 census, 36 Atlas, 2 796 couples, 12 882 contrôles et sept mutants,
+avec causes/code4 et exécution de la faute vérifiés. Sources dans les reçus,
+pas dans le moteur actif ; géométrie et validation initiale restent exactes.
+Mesures propres : mono8k 206,224 s ; CPU4 8k/16k/32k en 96,401 /
+223,447 / 478,616 s, même sortie/MEB que les parents. 25,9 / 55,8 /
+117,6 millions de gardes désormais entières ; pas de gain temporel
+reproductible établi sur ces captures non appariées et hôte partagé.
+
+Le [triplet CPU4 parent](receipts/parallel_birth_streaming_20260911/README.md)
+est clos à 92,963 / 215,381 / 489,601 s pour 8k/16k/32k,
+avec 4 359 540 / 9 364 101 / 19 784 213 MEB. Histoires et export coûtent
+encore 50,145 / 91,704 s à 32k. L'observation de croissance uniforme/s8
+ne démontre pas de borne sous-quadratique universelle. Les anciennes voies
+fenêtrées défavorables sont expliquées dans [FAUSSES_PISTES](docs/FAUSSES_PISTES.md)
+et leurs résultats restent accessibles dans les paquets historiques.
+
+Suite convenue avec l'auditeur : réemploi des marques contributives et
+partage des index précédent/courant (19→10 préparations pour K1..10).
+Garder dates d'admission, ordre source, validation des histoires et coupes
+propres aux verticales. Son [prototype de premier sweep](audits/receipts_fused_marks_20260911/README.md)
+est maintenant qualifié séparément sur 30 essais structurels, sans raccord
+géométrique ni mesure de tour ; ces résultats ne sont pas ceux du delta
+de rangs. Partage du catalogue,
+reconstruction/export massivement parallèles et backend GPU restent ouverts.
+Aucun nouveau chrono 50k, contrat 1 s/100 ms ou qualification massive G4.
+GCP non utilisé. Les fichiers auditeur/v6 et les captures scellées ne sont
+pas modifiés ; publication sur main uniquement.
 
 Complément précédent après `324f6192` : [lots complets, MEB et tentatives G4](docs/QUALIFICATION_BATCH_ET_MEB_20260911.md).
 Sonde et gate privées compilées/liées NVCC strict ; la gate O2/SAN compare

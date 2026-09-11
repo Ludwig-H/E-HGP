@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/qualification_san_r1/gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/qualification_san_r1/source_snapshot",
+  "elapsed_seconds_observation_only": 8.339901944999838,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "selftest",
+  "stderr": {
+    "sha256": "f9e1c68d001709739171c9139af98c5bbc793dc683a12fd02de1201775143746",
+    "size": 5132
+  },
+  "stdout": {
+    "sha256": "0ae2c1a33e111a7e4c725bbb5d96463face6bff8e0805e7147d530ee96742e98",
+    "size": 2147
+  }
+}

@@ -59,6 +59,13 @@ aucun niveau distinct et ne départage aucun plateau géométrique.** Garder
 historique. Le tri exact commun existe déjà dans Builder ; le delta est son
 exposition comme atlas et son utilisation par toutes les phases.
 
+Le [raccord de trois gardes par rangs](GARDES_RANGS_CERTIFIES_20260911.md)
+est maintenant qualifié O2/SAN sur la voie CPU fenêtrée : semis initial,
+ordre des consommateurs et terminale strictement antérieure. Il réutilise
+les rangs déjà certifiés, sans retirer leur validation exacte ni changer
+les comparaisons des MEB intermédiaires. K1 conserve le domaine des points.
+Ce changement ne partage pas encore la préparation répétée du catalogue.
+
 Dans cette fenêtre, chaque représentant strict comprend **tout I(B)** et
 un masque de U(B). Conserver une fois les masques, offsets et contribution
 du quotient évite les deux appels actuels à `visit_block`. Déclarer l'ordre
@@ -318,20 +325,22 @@ réellement raccordé, avec travail et résidence de toutes les phases.
 
 ## 8. Préparations partagées : doublons identifiés, retrait non implémenté
 
-La sonde ordonnée conserve entièrement `Builder::validate_catalogue`, puis
+Les sondes ordonnée et dense conservent entièrement `Builder::validate_catalogue`, puis
 en détruit les temporaires avant de préparer l'atlas. Ce parcours trie
 trois fois les clés de boules : validateur, atlas et index de la géométrie.
 Il trie deux fois les niveaux exacts et recrée les programmes par K.
 Le prochain partage envisageable est un catalogue immuable préparé et
 validé, avec ses permutations réutilisées par les consommateurs. Ce n'est
 ni une option pour ignorer la validation d'une entrée extérieure, ni une
-preuve de complétude du producteur. La question est transmise à l'auditeur.
+preuve de complétude du producteur. L'auditeur a accepté ce partage sous
+liaison au même propriétaire immuable ; son raccord reste à implémenter.
 
 Après vérification des niveaux distincts et de chaque correspondance
-boule→rang, les vérifications d'ordre pourraient aussi comparer les rangs
-entiers, avec départage par clé, plutôt que répéter les comparaisons exactes.
-Ces deux deltas restent à prouver et qualifier séparément ; aucun de leurs
-gains possibles n'est soustrait des chronométrages publiés.
+boule→rang, trois gardes de fenêtre comparent maintenant les rangs entiers,
+avec leur [qualification propre](GARDES_RANGS_CERTIFIES_20260911.md).
+Le comparateur d'ordre du programme dans l'Atlas reste exact dans ce delta.
+Ni préparation partagée ni gain possible non mesuré ne sont soustraits des
+chronométrages publiés.
 
 Pour le raccord géométrique parallèle, l'unité indépendante reste le groupe
 de facettes entières identiques dans une fenêtre, après les hits du semis
@@ -350,3 +359,43 @@ sans affaiblir l'identité des données ni leur durée de vie. Un même contexte
 mutable ne peut pas être appelé concurremment sans emplacements indépendants.
 Ce raccord n'est pas encore implémenté ; les transferts réels comprennent
 aussi les statuts, la provenance et le travail, pas seulement le BallId utile.
+
+## 9. Histoires : calculer puis réutiliser leurs marques
+
+La suite convenue dans le [dialogue de l'auditeur](../audits/DIALOGUE_COURANT.md)
+distingue trois raccords. D'abord, résoudre les marques dans le premier
+DSU, après fermeture complète de chaque plateau, pour éviter leur second
+DSU/rejeu. Ensuite, consommer ces réponses pour les contributions. Enfin,
+conserver les index de chaînes précédent/courant au lieu de reconstruire
+l'index inférieur : 19→10 préparations pour K1..10. Les gains de temps de
+ces raccords ne sont pas acquis par les mesures de gardes de rang.
+
+Le [prototype de l'auditeur](../audits/receipts_fused_marks_20260911/README.md),
+publié dans 2970d679, qualifie le premier de ces deltas O2/SAN sur 30 essais
+structurels et 6 828 comparaisons BFS. Il ne remplace pas le raccord aux
+vrais census et ne fournit aucun chrono de tour. Ses captures sont conservées
+séparément de celles du constructeur.
+
+La réutilisation demande une liaison explicite : MarkId=BlockId,
+représentant=φ, admission=rang(B), et segment égal à la composante fermée
+à cette admission. Les trois premières identités ne certifient pas la
+quatrième. Une marque visant une autre composante vivante peut passer
+les validateurs de parents/successeurs et produire une contribution
+structurellement admissible mais fausse. Les histoires fraîches doivent
+donc être construites et liées dans un propriétaire immuable explicite ;
+des histoires extérieures gardent leur vérification indépendante, sans
+option implicite pour faire confiance aux marques.
+
+Émettre les contributions dans `atlas.program(K)`, à la date d'admission
+de B, pas à la naissance du segment ; ne pas parcourir simplement les
+marques triées par identifiant. Garder les singletons K1 à part, les marques
+silencieuses et les coupes propres aux verticales. Les index adjacents
+restent vivants jusqu'à leur dernière consultation, sur des histoires
+immuables à adresses stables ; chaque histoire reste validée.
+
+La qualification du prochain raccord comparera tous les champs physiques
+des histoires/marques avant leur réemploi, y compris une forêt non vide
+sans marque et les naissances tardives. Le réemploi ajoutera une marque
+forgée vers une autre composante vivante et un mélange de propriétaires.
+Compter séparément marques réutilisées, HLD effectivement exécutées,
+recherches de marque, préparations d'index et résidence des deux index.

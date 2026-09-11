@@ -1,0 +1,105 @@
+#pragma once
+
+// Private CPU guards. PRECONDITION: this very Atlas completed validate_shape,
+// and its index, census and all rank/admission metadata remain immutable and
+// alive. This borrowed helper neither establishes completeness nor certifies
+// ownership; callers must not substitute an unrelated or mutated Atlas.
+#include "../v7_atlas_graph_20260911/rank_atlas.hpp"
+
+namespace mhgp7::rank_guards_private {
+using Atlas = rank_atlas_private::Atlas;
+using BallId = rank_atlas_private::BallId;
+struct Work {
+  u64 first_consumer_rank_checks = 0;
+  u64 initial_seed_rank_checks = 0;
+  u64 terminal_rank_checks = 0;
+};
+
+#ifdef MHGP7_RANK_GUARDS_TESTING
+// Actual private guard mutations, never enabled in the nominal producer.
+enum class Fault { kNone, kSeedNonStrict, kTerminalNonStrict, kReverseConsumer, kConsumerStrict,
+  kAcceptInvalidTerminalDomain, kSkipTerminalAdmission, kTreatPointAsBall };
+inline thread_local Fault fault = Fault::kNone;
+inline thread_local u64 fault_hits = 0;
+#endif
+
+inline void require(bool value, const char* reason) {
+  if (!value) throw std::invalid_argument(reason);
+}
+inline void paid(u64& count) {
+  if (count == std::numeric_limits<u64>::max())
+    throw std::overflow_error("rank_guard.counter_overflow");
+  ++count;
+}
+
+inline void first_consumer(const Atlas& atlas, BallId leader, BallId consumer, Work& work) {
+  require(leader < atlas.balls.size() && consumer < atlas.balls.size(), "rank_guard.consumer_domain");
+  bool ordered = atlas.slots[leader].rank <= atlas.slots[consumer].rank;
+#ifdef MHGP7_RANK_GUARDS_TESTING
+  if (fault == Fault::kReverseConsumer) {
+    ordered = atlas.slots[leader].rank >= atlas.slots[consumer].rank;
+    ++fault_hits;
+  }
+  if (fault == Fault::kConsumerStrict) {
+    ordered = atlas.slots[leader].rank < atlas.slots[consumer].rank;
+    ++fault_hits;
+  }
+#endif
+  require(ordered, "streaming.first_consumer");
+  paid(work.first_consumer_rank_checks);
+}
+
+inline void initial_seed(const Atlas& atlas, unsigned k, BallId leader, BallId target, Work& work) {
+  require(k >= 2 && k <= atlas.kmax, "rank_guard.seed_K");
+  require(leader < atlas.balls.size(), "rank_guard.consumer_domain");
+  // Initial seeds were built from the complete I union U in program(k).
+  // Check the inexpensive domain/admission again before accessing its rank.
+  require(target < atlas.balls.size() && atlas.block_id(target, k).has_value(), "streaming.seed_not_strict");
+  bool strict = atlas.slots[target].rank < atlas.slots[leader].rank;
+#ifdef MHGP7_RANK_GUARDS_TESTING
+  if (fault == Fault::kSeedNonStrict) {
+    strict = atlas.slots[target].rank <= atlas.slots[leader].rank;
+    ++fault_hits;
+  }
+#endif
+  require(strict, "streaming.seed_not_strict");
+  paid(work.initial_seed_rank_checks);
+}
+
+inline void terminal_admission(const Atlas& atlas, unsigned k, BallId consumer, u32 target, Work& work) {
+  require(k >= 1 && k <= atlas.kmax, "rank_guard.K");
+  if (k == 1) {
+    // target is a GEOMETRY POINT INDEX, not a BallId. consumer is not needed
+    // for this point-domain guard. No slot[target] access or rank work here.
+    bool in_domain = target < atlas.index->input_count;
+#ifdef MHGP7_RANK_GUARDS_TESTING
+    if (fault == Fault::kTreatPointAsBall) { in_domain = target < atlas.balls.size(); ++fault_hits; }
+#endif
+    require(in_domain, "streaming.K1_terminal");
+    return;
+  }
+  require(consumer < atlas.balls.size(), "rank_guard.consumer_domain");
+#ifdef MHGP7_RANK_GUARDS_TESTING
+  if (fault == Fault::kAcceptInvalidTerminalDomain && target >= atlas.balls.size()) {
+    // Deliberately accept an invalid ID, without making the mutant itself UB.
+    ++fault_hits;
+    return;
+  }
+#endif
+  require(target < atlas.balls.size(), "streaming.terminal_admission_strict");
+  bool admitted = atlas.block_id(target, k).has_value();
+#ifdef MHGP7_RANK_GUARDS_TESTING
+  if (fault == Fault::kSkipTerminalAdmission) { admitted = true; ++fault_hits; }
+#endif
+  require(admitted, "streaming.terminal_admission_strict");
+  bool strict = atlas.slots[target].rank < atlas.slots[consumer].rank;
+#ifdef MHGP7_RANK_GUARDS_TESTING
+  if (fault == Fault::kTerminalNonStrict) {
+    strict = atlas.slots[target].rank <= atlas.slots[consumer].rank;
+    ++fault_hits;
+  }
+#endif
+  require(strict, "streaming.terminal_admission_strict");
+  paid(work.terminal_rank_checks);
+}
+}  // namespace mhgp7::rank_guards_private

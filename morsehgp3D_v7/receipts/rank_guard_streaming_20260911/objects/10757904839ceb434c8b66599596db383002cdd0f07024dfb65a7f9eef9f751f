@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/rank-gate",
+    "--mutant-terminal-domain"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_rank_guard_streaming_20260911/focused_san_r1/source_snapshot",
+  "exit_code": null,
+  "expected_exit": 4,
+  "name": "mutant-terminal-domain"
+}

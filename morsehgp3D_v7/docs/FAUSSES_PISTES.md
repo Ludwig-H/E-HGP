@@ -94,6 +94,15 @@ un label dense en BlockId avant la fin de K mélange deux espaces d'indices.
 Le parallélisme géométrique ne permet pas davantage de consommer les
 résultats dans leur ordre d'arrivée. Le scatter les remet dans l'ordre source.
 
+Le [delta de rangs certifiés](GARDES_RANGS_CERTIFIES_20260911.md) ne permet
+pas de supprimer la certification initiale des rangs, ni les gardes des MEB
+intermédiaires : toutes les boules visitées par la descente ne sont pas des
+entrées du catalogue. Comparer uniquement le terminal au seuil peut
+accepter une facette dont la MEB initiale dépassait ce seuil. À K1, utiliser
+la terminale comme BallId confond deux domaines. Enfin, remplacer une
+inégalité stricte par une égalité admise n'est pas une optimisation : les
+plateaux doivent conserver leurs vraies règles d'admission.
+
 Le 11 septembre, la [décomposition en objets parallèles](OBJETS_PARALLELES_TOUR_20260911.md)
 écarte aussi ces raccourcis d'architecture :
 

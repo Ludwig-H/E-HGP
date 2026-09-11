@@ -1,0 +1,27 @@
+{
+  "benchmark_executed": false,
+  "closure": {
+    "binary": true,
+    "compiler": true,
+    "dependencies": true,
+    "sources": true
+  },
+  "commands": 15,
+  "device_executed": false,
+  "error": null,
+  "gcp_used": false,
+  "geometry_qualified": false,
+  "kind": "rank-gate",
+  "locale": "C",
+  "performance_claim": false,
+  "public_status": "not_claimed",
+  "sanitizer": true,
+  "sanitizer_environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "scope": "focused_certified_rank_guards",
+  "source_build_receipt": null,
+  "status": "passed",
+  "system_scope": "compiler binary/version and preprocessor headers, not complete linker/runtime sysroot"
+}
