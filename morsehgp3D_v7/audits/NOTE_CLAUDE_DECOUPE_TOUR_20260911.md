@@ -99,7 +99,7 @@ le point structurel, après ces leviers **90 % du temps restant est le calendrie
 et l'épilogue**, tous deux séquentiels. Le goulot se déplace complètement.
 
 Point notable : ce total vaut 102, 98 ou 104 secondes selon que le noyau MEB
-gagne 1,357x, 4,12x ou 1,33x, parce que la géométrie finit parallélisée de toute
+gagne 1,36x, 4,12x ou 1,33x, parce que la géométrie finit parallélisée de toute
 façon. **La conclusion stratégique ne dépend donc pas du sort de mon prototype**,
 et elle a survécu à sa réfutation, à sa réparation et à sa mesure réelle.
 
@@ -143,23 +143,86 @@ géométrie. Cela n'est pas contesté. Mais écrire « séquentiel par construct
 puis « le vrai mur », c'est transformer une observation sur le code en nécessité
 mathématique. Ma mesure n'autorise pas ce pas, et je le retire.
 
-**Ce que sa thèse vaut, chiffré.** Si le calendrier quitte la part irréductible,
-seul l'épilogue y reste.
+**Ce que sa thèse vaut, chiffré : environ 11x, et non 20x.** J'avais écrit 20,0x
+et 18,9x. C'est faux, et la faute est un glissement de ma part sur le mot
+« calendrier ».
 
-| n | plafond, géométrie et prologue | plafond si le calendrier tombe aussi |
-| ---: | ---: | ---: |
-| 8 000 | 4,58x | **20,0x** |
-| 16 000 | 4,26x | **18,9x** |
+Dans mon § 1, « calendrier » désigne une grandeur **chronométrée** : la boucle
+des lots, 16,8 % à 8 000. Cette boucle est séquentielle **à l'intérieur d'un
+ordre** : la résolution d'une boule lit des ancres publiées par des lots
+antérieurs du **même** K, et la racine exigée doit être strictement antérieure au
+lot. La thèse de l'auditeur historique porte uniquement sur la frontière
+K−1 → K. Elle ne touche aucun de ces points. En écrivant 20,0x = 1/épilogue,
+j'ai fait sortir le calendrier **en entier** de la part irréductible, c'est-à-dire
+que je lui ai appliqué une conséquence que sa thèse ne peut pas livrer.
 
-L'écart n'est pas marginal, il change la nature du problème. On passe d'un
-facteur quatre à un facteur vingt, et le contrat 50k cesse d'être fermé par le
-plafond. C'est la raison pour laquelle cette thèse mérite une démonstration
-avant d'être crue, et la raison pour laquelle je ne maintiens plus ma formule.
+Ce que la thèse livre réellement, c'est un découpage en **dix tâches**, une par
+ordre, l'intérieur de chaque ordre restant la chaîne de lots. Le plafond est
+alors somme/max sur dix tâches inégales, et les ordres sont très inégaux.
 
-Deux réserves que je conserve. L'épilogue, 5,0 % puis 5,3 %, deviendrait alors
-le facteur limitant, et personne ne l'a étudié. Et un plafond n'est pas un gain :
-il suppose une efficacité de parallélisation que nul n'a mesurée ici. Le § 3
-reste donc une allocation sous l'hypothèse du moteur actuel.
+| mesure | 8 000 | 16 000 |
+| --- | ---: | ---: |
+| part de l'ordre le plus lourd | 24,4 % | — |
+| plafond inter-ordres sur le calendrier | 3,7x | 3,8x |
+| **plafond réel sous la thèse entièrement accordée** | **11,4x** | **11,2x** |
+
+Deux routes indépendantes y mènent. Par chronométrage des dix calendriers :
+l'ordre le plus cher vaut 26,8 % du calendrier total. Par la distribution des
+requêtes statiques, monotone croissante en K, où l'ordre 10 pèse 24,4 % :
+1/(0,168 × 0,244 + 0,050) = 11,0x.
+
+**Et 11x reste optimiste.** Dix ordres découplés doivent construire dix banques
+de populations, puis les canoniser en la banque unique que le dépôt exige. Ce
+travail atterrit dans l'épilogue, c'est-à-dire dans la part même qui fixe le
+plafond. Voir le § 4ter.
+
+Ma découpe, elle, a été reproduite indépendamment : 16,0 / 62,7 / 16,2 / 4,4 % à
+8 000 contre mes 15,4 / 62,8 / 16,8 / 5,0. Ce qui est réfuté est ma conséquence,
+pas ma mesure.
+
+Un plafond n'est toujours pas un gain : il suppose une efficacité de
+parallélisation que nul n'a mesurée. Le § 3 reste une allocation sous l'hypothèse
+du moteur actuel.
+
+## 4ter. Le piège concret : renuméroter passe le digest et échoue les portes
+
+Ceci est le point actionnable de cette note, et il ne figure nulle part ailleurs.
+
+Un calendrier à ordres découplés **renumérote les populations**. La table
+`population_ids` est initialisée une seule fois avant la boucle, jamais
+réinitialisée, et mémoïsée : l'indice d'une boule est celui que lui donne le
+**premier ordre qui la rencontre**. Changer l'ordre de parcours change les
+indices, sans changer aucun contenu.
+
+Cette renumérotation est **invisible à `payload_digest`**, qui déréférence chaque
+population en `PointId` au lieu de hacher l'indice, et qui se déclare lui-même,
+dans son commentaire, « not a canonical geometric oracle ». J'avais conclu de là
+que le couplage était sans effet sur l'objet. **C'était faux**, et je le retire :
+j'ai jugé la conformité avec l'instrument que j'avais sous la main, pas avec le
+critère que le dépôt s'impose.
+
+Le dépôt, lui, voit la renumérotation, en trois endroits :
+
+| contrôle | ce qu'il compare |
+| --- | --- |
+| `paired.bank_rows` | les lignes de la banque **positionnellement**, indice par indice |
+| `paired.exact_contribution` | `u.ref.population == v.ref.population`, l'indice **brut** |
+| `bank.shared_across_orders` | l'**identité de pointeur** de la banque entre deux ordres |
+
+Les deux premiers vivent dans la porte de la tour, sous plancher anti-vacuité
+`paired_payload_checks > 100`, et sont câblés sur deux CTests. Le troisième vit
+dans la porte du certificat de couverture.
+
+**Conséquence pour le raccord.** Un calendrier à ordres découplés passera
+`payload_digest` et échouera ces trois contrôles. Il faut donc prévoir, dès la
+conception, soit une numérotation des populations indépendante de l'ordre de
+découverte, soit une passe de canonisation de la banque. Cette passe est du
+travail supplémentaire, et il tombe dans l'épilogue.
+
+**Un angle mort de test, au passage.** Le chemin des lots **groupés** porte le
+second site d'ancre de naissance, et il est quasi inexercé : 474 lots groupés
+pour 5 510 027 blocs d'ancrage à 8 000, et un seul à n=2000. Ni plancher de
+couverture, ni mutant causal ne le gardent aujourd'hui.
 
 ## 5. Sur le contrat lui-même
 
