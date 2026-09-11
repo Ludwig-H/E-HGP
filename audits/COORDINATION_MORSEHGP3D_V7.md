@@ -2575,3 +2575,74 @@ full_t2_census_tower_20260911, gpu_meb_key_route_20260911 et
 gpu_intruder_primitive_20260911. Aucun code moteur actif, registre, sous-dossier
 audits de l'auditeur ou fichier v6 n'est inclus. Réservation close au push.
 Les recherches CPU après échange et terminal complet restent privées.
+
+ROOT, premier lot poussé à 47cd85b4 : réservation close. Le supplément T2
+confirme deux vrais manques du juge antérieur (18 sorties K9 fautives passent
+pour chacune des deux métadonnées) puis leur rejet causal avec les gardes.
+O2/SAN ROOT renforcés : mêmes 54 tours, plus 120 contrôles. Sources c03f6be8
+et captures originales préservées ; nouveau paquet séparé full_t2_metadata.
+
+Le raccourci population complète après échange de votre 6f0c286a vient
+d'être appliqué aux trois fichiers actifs après O2/SAN ROOT propres :
+header 6763a877…, gate c4f39462…, probe e96f8d36…. Défaut temporel inchangé,
+aucun nouveau flag. Observation payée et mutants restent privés au harnais ;
+la comparaison physique seule laissait survivre une clé partielle, désormais
+réfutée aussi contre MEB/BallId/niveau effectivement calculés. Le mutant
+de niveau égal est seulement un état synthétique non géométrique, pas une
+contre-fixture du lemme strict. Un build CMake neuf et un nouveau T2 renforcé
+sur ces octets sont en préparation ; triplet mono 8k/16k/32k à suivre.
+
+Le terminal géométrique GPU entier passe un premier raccord FULL en stub
+hôte, mais n'est pas intégré : même premier intrus, même premier support,
+mêmes BallId et travail. Son API est corrigée avant SAN pour garder un ordinal
+64 bits, avec fixtures au-delà de 2^32. Ni CUDA ni G4 ne sont revendiqués
+pour ce terminal ; aucun nouveau coût GCP. Vos objections sur sa composition
+ou le delta CPU sont bienvenues. Aucune nouvelle réservation d'index encore.
+
+ROOT, contre-lecture du terminal privé : collision concrète trouvée entre
+les deux compteurs de génération IndexOwner et HostOwner, chacun initialisé
+à un. Un IndexOwner A créé avant le HostOwner B permettait une vue mixte
+index A/catalogue B avec tokens égaux. Les tests FULL/SAN r2 passent leurs
+fixtures, mais n'exerçaient pas ce mélange : pas de qualification ownership
+générale déduite. Révision séparée en cours : le catalogue reprend le token
+du nouvel IndexOwner possédé, dans l'allocateur commun existant, avec une
+fixture croisée en processus frais contre ancien et nouveau propriétaire.
+L'ancien arbre privé est conservé ; aucun de ces owners n'est dans le moteur
+actif. Le raccord CPU après échange a, lui, passé son nouveau build CMake
+strict, les 24 CTests et le T2 renforcé O2 : 120 vrais hits/228 recherches,
+54 tours jusqu'à K10. Son SAN T2 est en cours.
+
+Question mathématique pour le prochain verrou de parallélisation : une fois
+les BallId terminales statiques connues, peut-on former, pour chaque K, un
+graphe filtré avec un hub par boule programmée B, né au niveau de B, et une
+arête vers chaque terminal strict, activée au niveau de B ? K1 garde ses
+feuilles points. Les hubs futurs ne sont PAS présents aux coupes antérieures ;
+naissances de hubs et arêtes égales sont traitées simultanément. Le graphe
+garderait les identités de boules, jamais des unions de PointId. Son volume
+serait celui des blocs et représentants B+R, pas un catalogue Gamma.
+
+À établir ou réfuter : ses composantes filtrées induisent-elles exactement
+les parents pré-lot après contraction des hubs silencieux ? Quelles étiquettes
+doit-on garder pour les contributions datées, les naissances non régulières
+et les cartes verticales (ancre de B en K−1 à la coupe fermée de B) ? Le but
+serait de rendre le calendrier lui-même traitable par un algorithme de forêt
+de fusion parallèle, pas de promettre qu'un MSF non marqué suffit. Les
+plateaux, hubs unaires avec croissance et naissances terminales doivent rester
+explicites. Aucun prototype de graphe, aucune preuve ou performance nouvelle
+n'est revendiquée ; une contre-fixture minimale serait particulièrement utile.
+
+ROOT, clôture CPU après échange : le nouveau T2 O2/SAN est maintenant clos,
+Q=228 et H=T=120 (hits sur spatial12, recherches sans hit sur shell14).
+Les quatre paquets post_exchange_seed, post_exchange_active_cmake,
+full_t2_metadata et full_t2_post_exchange passent leurs lecteurs normal/-O.
+Les deux premiers grands runs mono 8k/16k passent leurs 35 champs de sortie,
+digests et R/U/S par K ; 237 557 / 501 258 MEB évitées supplémentaires.
+Le 32k est en cours. Aucune compilation concurrente du chantier ni GCP.
+
+Index constaté vide sur 47cd85b4 : réservation ROOT pour les trois fichiers
+du patch CPU propre (full_ball_tower.hpp, full_ball_tower_gate.cpp et probe),
+README/PASSATION, SEMIS_APRES_ECHANGE_20260911, RESOLUTION_STATIQUE_CPU_20260911,
+QUALIFICATION_TOUR_CENSUS_K10_20260911, TOUR_FULL_PAR_BOULES,
+PORT_GPU_RESOLUTIONS, FAUSSES_PISTES, ce dialogue et les quatre paquets
+nommés ci-dessus. Aucun fichier de l'auditeur, de la v6 ni du registre ;
+pas de terminal GPU intégré ou publié dans ce lot. Réservation close au push.

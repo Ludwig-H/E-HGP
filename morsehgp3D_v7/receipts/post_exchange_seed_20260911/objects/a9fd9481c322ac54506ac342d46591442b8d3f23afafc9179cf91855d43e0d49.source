@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/causal_r3/omit_terminal_exchange/gate",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/causal_r3/fixtures.txt",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/causal_r3/expected.txt",
+    "1"
+  ],
+  "ended_ns": 1789119817837149230,
+  "exit_code": 1,
+  "expected_exit": 1,
+  "name": "omit_terminal_exchange_run",
+  "started_ns": 1789119817832526041,
+  "stderr_sha256": "0a7c4df1a9276a125f089223d87e5c4894e92c3055c0b4dccb47a37814bb9f9f",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

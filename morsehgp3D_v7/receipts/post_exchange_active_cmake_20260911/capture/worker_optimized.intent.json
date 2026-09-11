@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "python3",
+    "-B",
+    "-O",
+    "gcp-migration/selftest_full_ball_worker_v7.py"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "expected_exit": 0
+}

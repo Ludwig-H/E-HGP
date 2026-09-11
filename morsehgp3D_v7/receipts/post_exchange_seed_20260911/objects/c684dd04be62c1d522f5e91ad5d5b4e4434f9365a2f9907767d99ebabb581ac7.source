@@ -1,0 +1,2 @@
+static_threads=1 paired_payload_checks=5704 deduplicated=337 seeded_unique=492
+post_seed_queries=20 post_seed_hits=4 post_seed_terminals=4

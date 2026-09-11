@@ -1,0 +1,23 @@
+{
+  "GCP_used": false,
+  "Kmax": 10,
+  "contract_qualified": false,
+  "error": null,
+  "modes": [
+    0,
+    1,
+    2
+  ],
+  "public_status": "not_claimed",
+  "s": 8,
+  "sizes": [
+    200,
+    400,
+    800,
+    1000
+  ],
+  "sources_stable": true,
+  "static_threads": 1,
+  "status": "passed",
+  "upstream_threads": 1
+}

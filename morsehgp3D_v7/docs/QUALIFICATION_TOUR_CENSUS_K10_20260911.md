@@ -80,10 +80,14 @@ Une modification du résolveur ou un futur raccord GPU demande sa propre
 capture ; les signatures présentes ne lui seront pas transférées.
 La contre-lecture de publication a identifié deux gardes héritées non reprises
 dans le nouveau juge : égalité du champ `forest.order()` à K et taille exacte
-de `lower_nodes`. Les coupes/parents/images sont bien jugés, mais une faute
-commune de ces seules métadonnées pourrait échapper aux paires physiques.
-Ce n'est pas un défaut nominal démontré. Un supplément séparé prépare leurs
-contrôles et mutants, sans réécrire les captures fermées du présent reçu.
+de `lower_nodes`. Le [supplément séparé](../receipts/full_t2_metadata_20260911/README.md)
+confirme causalement cet angle mort : l'ancien juge passe malgré 18 sorties
+K9 réellement corrompues pour chacune des deux fautes. Le nouveau juge les
+refuse avec le diagnostic attendu, puis passe les trois géométries nominales
+O2/SAN ROOT : mêmes résultats, avec 120 contrôles de métadonnées ajoutés,
+soit 12 315 725 contrôles par build. Ces fautes injectées ne démontrent pas
+un défaut nominal du producteur. Les captures originales restent inchangées ;
+ce supplément porte encore sur les sources c03f6be8, pas sur un futur moteur.
 Les prémisses d'entrée u16 et de positions distinctes restent déclarées.
 Le cas terminal K=n des petites fixtures, les poids du manuscrit et l'archive
 industrielle gardent leurs contrats séparés. Aucun résultat F n'est promu FULL.
@@ -92,3 +96,17 @@ Ce sont des tests de conformité, pas les tests de croissance 8k/16k/32k ni
 un benchmark 50k. Les contrats de toute la tour sous 1 s puis 100 ms et le
 régime de plusieurs dizaines de millions de points restent non acquis.
 GCP non utilisé pour ce reçu.
+
+## Requalification du raccourci CPU après échange
+
+Le [nouveau reçu sur le header actif 6763a877](../receipts/full_t2_post_exchange_20260911/README.md)
+rejoue l'oracle historique, les trois géométries et les quatre mutants T2
+en O2 puis SAN ROOT. Il inclut les deux gardes de métadonnées renforcées.
+Les 54 tours, 13 000 coupes et 8 103 948 vérifications verticales sont
+recalculées, pas héritées. Le travail statique un/quatre threads est aussi
+comparé, avec 228 recherches après échange et 120 hits exacts, tous issus
+de spatial12 ; shell14 compte douze recherches sans hit, line12 aucune.
+La [qualification CMake propre](../receipts/post_exchange_active_cmake_20260911/README.md)
+reconstruit séparément le probe actif et passe les 24 CTests pertinents.
+Les trois reçus T2 — initial c03, supplément de métadonnées c03 et nouveau
+producteur CPU — gardent chacun leurs sources et leur autorité.

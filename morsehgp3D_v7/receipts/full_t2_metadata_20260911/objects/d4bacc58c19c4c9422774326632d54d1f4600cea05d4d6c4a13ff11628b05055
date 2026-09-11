@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_t2_metadata_20260911/causal_r1/legacy_order",
+    "--line12"
+  ],
+  "expected_exit": 0,
+  "causal_diagnostic": null,
+  "mutation_marker": "T2_METADATA_MUTANT published_order=8 expected_order=9"
+}

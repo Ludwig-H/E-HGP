@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/causal_r3/partial_key/gate",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/causal_r3/fixtures.txt",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/causal_r3/expected.txt",
+    "observe"
+  ],
+  "ended_ns": 1789119807631005798,
+  "exit_code": 1,
+  "expected_exit": 1,
+  "name": "partial_key_run",
+  "started_ns": 1789119807626452583,
+  "stderr_sha256": "03c0339af321666d466ac5da290e6999daf91984873df6e65355468a59de3f7d",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

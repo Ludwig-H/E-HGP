@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+"""ROOT-only invocation: qualify the frozen shortcut header with leak detection."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import time
+
+BASE=Path(__file__).resolve().parent
+ROOT=BASE.parents[1]
+FROZEN=BASE/'o2_shortcut_r1'
+PIN='a73b89bfc8b03d38c546d30ee578610e4bb1d26911e252bf19399b8384af4ba6'
+
+
+def need(ok,why):
+    if not ok: raise RuntimeError(why)
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def save(path,value):
+    with path.open('x') as stream:
+        json.dump(value,stream,indent=2,sort_keys=True);stream.write('\n')
+
+
+def pins(path):
+    return {p.relative_to(path).as_posix():sha(p) for p in sorted(path.rglob('*')) if p.is_file()}
+
+
+def main():
+    need(len(sys.argv)==2 and sys.argv[1].isidentifier(),'fresh_output_identifier')
+    out=BASE/sys.argv[1];out.mkdir(exist_ok=False)
+    need(sha(FROZEN/'source/candidate/morsehgp3D_v7/src/forest/full_ball_tower.hpp')==PIN,'frozen_header')
+    shutil.copytree(FROZEN/'source',out/'source')
+    shutil.copyfile(Path(__file__),out/'record_san.py.source')
+    before=pins(out/'source');save(out/'sources_before.json',before)
+    commands=[];status,error='failed',None
+    env=dict(os.environ,ASAN_OPTIONS='detect_leaks=1:halt_on_error=1',
+             UBSAN_OPTIONS='halt_on_error=1:print_stacktrace=1')
+    def run(name,argv,expected=0):
+        start=time.time_ns()
+        with (out/(name+'.stdout')).open('xb') as so,(out/(name+'.stderr')).open('xb') as se:
+            result=subprocess.run(argv,stdin=subprocess.DEVNULL,stdout=so,stderr=se,env=env,check=False)
+        row=dict(name=name,argv=argv,exit_code=result.returncode,expected_exit=expected,
+                 started_ns=start,ended_ns=time.time_ns(),stdout_sha256=sha(out/(name+'.stdout')),
+                 stderr_sha256=sha(out/(name+'.stderr')),
+                 sanitizer_environment={key:env[key] for key in ('ASAN_OPTIONS','UBSAN_OPTIONS')})
+        commands.append(row);save(out/(name+'.command.json'),row)
+        print(name,result.returncode,flush=True)
+        need(result.returncode==expected,'unexpected_exit:'+name)
+    try:
+        source=out/'source/candidate/morsehgp3D_v7';binary=out/'candidate'
+        run('compile_candidate',['g++','-O1','-g','-fsanitize=address,undefined','-fno-omit-frame-pointer',
+            '-std=c++20','-Wall','-Wextra','-Wpedantic','-Werror','-pthread','-isystem',
+            str(ROOT/'build/v7_boost_gate/extracted/usr/include'),
+            '-DMHGP7_FULL_HEADER="'+str(source/'src/forest/full_ball_tower.hpp')+'"',
+            '-DMHGP7_GATE_SOURCE="'+str(source/'tests/full_ball_tower_gate.cpp')+'"',
+            '-DMHGP7_PRIVATE_POST_EXCHANGE_SEED=1','-MMD','-MF',str(out/'candidate.d'),
+            str(out/'source/qualification.cpp'),'-o',str(binary)])
+        binary_before=sha(binary)
+        for observation in (0,1,2):
+            for mode in ('static1','static4','cache','no_cache'):
+                name='candidate_'+mode+'_observe'+str(observation)
+                run(name,[str(binary),mode,str(out/(name+'.physical')),str(observation)])
+                for suffix in ('physical','stdout','stderr'):
+                    need((out/(name+'.'+suffix)).read_bytes()==(FROZEN/(name+'.'+suffix)).read_bytes(),
+                         'SAN_O2_exact_identity:'+name+':'+suffix)
+        run('candidate_bad_arguments',[str(binary)],2)
+        need(sha(binary)==binary_before,'binary_changed');save(out/'binary.json',dict(before=binary_before,after=sha(binary)))
+        status='passed'
+    except BaseException as exc:
+        error=type(exc).__name__+': '+str(exc)
+    finally:
+        after=pins(out/'source');save(out/'sources_after.json',after)
+        if before!=after:status,error='failed','source_changed'
+        save(out/'commands.json',commands)
+        save(out/'receipt.json',dict(status=status,error=error,sources_stable=before==after,SAN=True,
+             source_header_sha256=PIN,compared_to='o2_shortcut_r1',GCP_used=False,public_status='not_claimed'))
+        print(json.dumps(dict(status=status,error=error,out=str(out))),flush=True)
+    need(status=='passed',str(error))
+
+
+if __name__=='__main__':main()

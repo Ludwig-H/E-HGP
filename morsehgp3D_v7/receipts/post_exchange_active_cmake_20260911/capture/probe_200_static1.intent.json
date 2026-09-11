@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build/mhgp7_full_ball_tower_probe",
+    "--n=200",
+    "--s=8",
+    "--kmax=10",
+    "--threads=1",
+    "--static-threads=1"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "expected_exit": 0
+}

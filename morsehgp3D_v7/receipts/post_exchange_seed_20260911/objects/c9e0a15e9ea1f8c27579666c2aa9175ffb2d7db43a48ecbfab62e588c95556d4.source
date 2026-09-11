@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/probe",
+    "--n=200",
+    "--s=8",
+    "--kmax=10",
+    "--threads=1",
+    "--static-threads=0"
+  ],
+  "ended_ns": 1789119932227935732,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "probe_static0",
+  "sanitizer_environment": {},
+  "started_ns": 1789119930893612492,
+  "stderr_sha256": "c6912464fb8eab3d03916205626103fe9913a04f08a75d8c2e10f9980295c51f",
+  "stdout_sha256": "ba9774920feb0c89e94189cb0c1e8768880a53f0f775495a954dd6b60f189168"
+}

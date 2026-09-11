@@ -1,0 +1,11 @@
+# Nouvelle T2 du résolveur CPU post-échange
+
+Préparation seulement, aucune compilation au moment de l'écriture. Cette source indépendante du supplément metadata capture les fichiers actifs `full_ball_tower.hpp` 6763a877…, `full_ball_tower_gate.cpp` c4f39462… et `full_ball_tower_probe.cpp` e96f8d36…. Le probe est épinglé mais n'est pas consommé par le TU T2 : aucune qualification de ce probe n'est inférée. Aucun header privé porteur de mutant metadata n'est importé.
+
+Le juge conserve les deux gardes supplémentaires d'ordre et de longueur verticale, le vrai générateur/prefilter/census, l'inventaire rationnel et les coupes Gamma. Il rejoue les trois géométries et toutes les combinaisons : deux ordres/identifiants d'entrée, s8/10/12, cache/statique1/statique4. La cible est une nouvelle capture O2 puis SAN ROOT, pas une reprise des résultats c03.
+
+Les tentatives Q, hits exacts H et terminaux T post-échange sont journalisés par K et par tour, avec R/U et les seeds initiales séparées. La branche cache doit payer zéro travail statique. Les branches statiques vérifient H=T≤Q, H≤U−seeds, Q=descentes strictes+égales, anchor_hits+T=U−seeds et MEB_calls=anchor_hits+intruder_queries. Elles ne possèdent pas de cache de tokens temporels. À entrée et s identiques, les compteurs statique1/statique4 doivent être exactement égaux, sans confondre les allocations propres aux nombres de workers.
+
+Une absence de hit dans une géométrie ne sera pas cachée. Le recorder exige globalement au moins un hit sur les trois géométries pour qualifier causalement cette nouvelle voie ; un manque de non-vacuité est un résultat distinct, pas un défaut géométrique attribué au producteur. Les sorties physiques restent confrontées aux six références cache directement jugées, avec 48 comparaisons appariées. Tous les volumes sont de travail, jamais un chronométrage contractuel.
+
+Le régime reste u16 / positions distinctes, `public_status=not_claimed`. Aucun GCP, GPU ou contrat 50k/multi-millions. Sources actives, audits et reçus fermés restent intacts.

@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "g++",
+    "-O2",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-isystem",
+    "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-DMHGP7_FULL_HEADER=\"/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_shortcut_r1/source/candidate/morsehgp3D_v7/src/forest/full_ball_tower.hpp\"",
+    "-DMHGP7_GATE_SOURCE=\"/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_shortcut_r1/source/candidate/morsehgp3D_v7/tests/full_ball_tower_gate.cpp\"",
+    "-DMHGP7_PRIVATE_POST_EXCHANGE_SEED=1",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_shortcut_r1/candidate.d",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_shortcut_r1/source/qualification.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_shortcut_r1/candidate"
+  ],
+  "ended_ns": 1789117816495629926,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "compile_candidate",
+  "started_ns": 1789117801793658716,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

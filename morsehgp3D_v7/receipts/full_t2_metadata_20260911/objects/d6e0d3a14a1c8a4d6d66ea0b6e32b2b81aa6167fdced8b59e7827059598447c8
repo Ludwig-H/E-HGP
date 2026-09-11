@@ -1,0 +1,22 @@
+start=line12/variant0
+T2_METADATA_MUTANT published_order=8 expected_order=9
+T2_METADATA_MUTANT published_order=8 expected_order=9
+T2_METADATA_MUTANT published_order=8 expected_order=9
+T2_METADATA_MUTANT published_order=8 expected_order=9
+T2_METADATA_MUTANT published_order=8 expected_order=9
+T2_METADATA_MUTANT published_order=8 expected_order=9
+T2_METADATA_MUTANT published_order=8 expected_order=9
+T2_METADATA_MUTANT published_order=8 expected_order=9
+T2_METADATA_MUTANT published_order=8 expected_order=9
+complete=line12/variant0 gram=793 assignments=4095
+start=line12/variant1
+T2_METADATA_MUTANT published_order=8 expected_order=9
+T2_METADATA_MUTANT published_order=8 expected_order=9
+T2_METADATA_MUTANT published_order=8 expected_order=9
+T2_METADATA_MUTANT published_order=8 expected_order=9
+T2_METADATA_MUTANT published_order=8 expected_order=9
+T2_METADATA_MUTANT published_order=8 expected_order=9
+T2_METADATA_MUTANT published_order=8 expected_order=9
+T2_METADATA_MUTANT published_order=8 expected_order=9
+T2_METADATA_MUTANT published_order=8 expected_order=9
+complete=line12/variant1 gram=793 assignments=4095

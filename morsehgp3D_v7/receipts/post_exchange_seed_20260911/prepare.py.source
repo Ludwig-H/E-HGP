@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+"""Create-only private archive; the final SAN must be closed before copying."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+SOURCE = ROOT/'build/v7_post_exchange_seed_20260911'
+TARGET = ROOT/'build/v7_post_exchange_evidence_20260911_r2'
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def write(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open('xb') as stream:
+        stream.write(data)
+
+
+def main():
+    san=json.loads((SOURCE/'clean_san_root_r1/receipt.json').read_text())
+    if san['status']!='passed' or not san['sources_stable'] or san['commands']!=14:
+        raise RuntimeError('clean_SAN_not_closed_PASS')
+    entries={}
+    omitted={}
+    for path in sorted(SOURCE.rglob('*')):
+        if path.is_symlink():
+            raise RuntimeError('source_symlink')
+        if not path.is_file() or '__pycache__' in path.parts:
+            continue
+        logical=path.relative_to(SOURCE).as_posix()
+        data=path.read_bytes()
+        if data.startswith(b'\x7fELF'):
+            omitted[logical]=dict(sha256=sha(data),size=len(data),reason='ELF_not_distributed')
+            continue
+        data.decode('utf-8')
+        if any(p in ('vendor','third_party','boost') for p in Path(logical).parts):
+            raise RuntimeError('unexpected_vendor_tree')
+        entries[logical]=data
+    for name in ('README.md','seed_fixture.py'):
+        path=ROOT/'morsehgp3D_v7/audits/receipts_static_followup_20260911'/name
+        entries['math_reference/'+name]=path.read_bytes()
+    TARGET.mkdir(exist_ok=False)
+    mapping={}
+    stored={}
+    for logical,data in sorted(entries.items()):
+        pin=sha(data)
+        destination='objects/'+pin+'.source'
+        if pin not in stored:
+            write(TARGET/destination,data)
+            stored[pin]=destination
+        mapping[logical]=dict(sha256=pin,size=len(data),storage=destination)
+    for name,value in [('storage_map.json',mapping),('omitted_binaries.json',omitted)]:
+        write(TARGET/name,(json.dumps(value,indent=2,sort_keys=True)+'\n').encode())
+    for name in ('README.md','verify.py','extract.py'):
+        shutil.copyfile(HERE/name,TARGET/name)
+    shutil.copyfile(Path(__file__),TARGET/'prepare.py.source')
+    # Read all sources once more: no retrospective replacement of a capture.
+    for logical,data in entries.items():
+        if logical.startswith('math_reference/'):
+            path=ROOT/'morsehgp3D_v7/audits/receipts_static_followup_20260911'/logical.split('/',1)[1]
+        else:
+            path=SOURCE/logical
+        if path.read_bytes()!=data:
+            raise RuntimeError('source_changed_during_copy:'+logical)
+    files={p.relative_to(TARGET).as_posix():sha(p.read_bytes())
+           for p in sorted(TARGET.rglob('*')) if p.is_file()}
+    manifest=dict(files=files,logical_files=len(mapping),unique_contents=len(stored),
+        GCP_used=False,ELF_included=False,vendor_included=False,public_status='not_claimed',
+        integration_decision='private_proposal_not_applied_by_this_subtask')
+    write(TARGET/'MANIFEST.json',(json.dumps(manifest,indent=2,sort_keys=True)+'\n').encode())
+    print(json.dumps(dict(status='created',logical_files=len(mapping),unique_contents=len(stored),
+        physical_bytes=sum((TARGET/n).stat().st_size for n in files),
+        manifest_sha256=sha((TARGET/'MANIFEST.json').read_bytes()))))
+
+
+if __name__=='__main__':
+    main()

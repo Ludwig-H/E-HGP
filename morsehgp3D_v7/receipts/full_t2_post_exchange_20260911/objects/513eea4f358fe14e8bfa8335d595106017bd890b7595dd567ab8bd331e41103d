@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_t2_post_exchange_20260911/san_root_r1/gate",
+    "--historical"
+  ],
+  "expected_exit": 0,
+  "causal_diagnostic": null
+}

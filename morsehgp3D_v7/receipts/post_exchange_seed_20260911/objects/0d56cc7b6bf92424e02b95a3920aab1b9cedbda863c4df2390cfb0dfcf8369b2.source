@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_shortcut_r1/baseline",
+    "cache",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_shortcut_r1/baseline_cache_observe0.physical",
+    "0"
+  ],
+  "expected_exit": 0
+}

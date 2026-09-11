@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+"""Add a declared deterministic small rational corpus after one surviving mutant."""
+import json
+from pathlib import Path
+import random
+import shutil
+import prepare_causal
+
+HERE = Path(__file__).resolve().parent
+OUT = HERE / 'causal_fixtures_r2'
+OUT.mkdir(exist_ok=False)
+rng = random.Random(2026091103)
+extra = []
+for case in range(8):
+    points = []
+    while len(points) < 6:
+        point = tuple(rng.randrange(101) for _ in range(3))
+        if point not in points:
+            points.append(point)
+    extra.append((f'partial_key_random6_{case}', points, 6))
+with (OUT / 'additional_inputs.json').open('x') as stream:
+    json.dump(dict(seed=2026091103, fixtures=extra, reason='causal_r1_partial_key_survived'), stream, indent=2)
+    stream.write('\n')
+for name in ('prepare_causal.py', 'prepare_causal_extra.py'):
+    shutil.copyfile(HERE / name, OUT / (name + '.source'))
+prepare_causal.HERE = OUT
+prepare_causal.run(extra)

@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build",
+    "--show-only=json-v1",
+    "-R",
+    "^mhgp7_(anchor_meb|full_ball_tower|full_ball_work|full_ball_static|census_route_stub|local_plateau|full_coverage_certificate|facet_resolver_cache|witness_front|full_gabriel_digest)"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "expected_exit": 0
+}

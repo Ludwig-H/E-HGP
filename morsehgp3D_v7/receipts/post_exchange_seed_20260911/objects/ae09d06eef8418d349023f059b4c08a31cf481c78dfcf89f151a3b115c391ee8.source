@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/product_gate",
+    "--selftest"
+  ],
+  "ended_ns": 1789119914281404443,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "product_nominal",
+  "sanitizer_environment": {},
+  "started_ns": 1789119913763870285,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "3a017058eba3f8d07d4bc5e3ed41a35f0489aa4d3a007c619138d5668d7d6fc8"
+}

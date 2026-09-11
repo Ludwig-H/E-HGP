@@ -1,0 +1,6 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_shortcut_r1/baseline"
+  ],
+  "expected_exit": 2
+}

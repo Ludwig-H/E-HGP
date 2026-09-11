@@ -1,0 +1,112 @@
+#!/usr/bin/env python3
+"""Capture the paired 200/400/800/1000 mono-CPU micro; no cloud."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import time
+
+BASE = Path(__file__).resolve().parent
+SOURCE = BASE / 'o2_shortcut_r1/source/candidate'
+HEADER = 'morsehgp3D_v7/src/forest/full_ball_tower.hpp'
+PIN = 'a73b89bfc8b03d38c546d30ee578610e4bb1d26911e252bf19399b8384af4ba6'
+
+
+def need(ok, why):
+    if not ok:
+        raise RuntimeError(why)
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def pins(path):
+    return {p.relative_to(path).as_posix(): sha(p) for p in sorted(path.rglob('*')) if p.is_file()}
+
+
+def save(path, value):
+    with path.open('x') as stream:
+        json.dump(value, stream, indent=2, sort_keys=True)
+        stream.write('\n')
+
+
+def main():
+    need(len(sys.argv) == 2 and sys.argv[1].isidentifier(), 'fresh output identifier')
+    need(sha(SOURCE / HEADER) == PIN, 'frozen_qualified_header')
+    out = BASE / sys.argv[1]
+    out.mkdir(exist_ok=False)
+    shutil.copytree(SOURCE / 'morsehgp3D_v7/src', out / 'source/morsehgp3D_v7/src')
+    shutil.copyfile(BASE / 'micro.cpp', out / 'source/micro.cpp')
+    shutil.copyfile(Path(__file__), out / 'record_micro.py.source')
+    before = pins(out / 'source')
+    save(out / 'sources_before.json', before)
+    commands, comparisons = [], []
+    status, error = 'failed', None
+    def run(name, argv):
+        save(out / (name + '.intent.json'), dict(argv=argv))
+        start = time.time_ns()
+        with (out / (name + '.stdout')).open('xb') as so, (out / (name + '.stderr')).open('xb') as se:
+            result = subprocess.run(argv, stdin=subprocess.DEVNULL, stdout=so, stderr=se, env=dict(os.environ), check=False)
+        row = dict(name=name, argv=argv, exit_code=result.returncode, started_ns=start, ended_ns=time.time_ns(),
+                   stdout_sha256=sha(out / (name + '.stdout')), stderr_sha256=sha(out / (name + '.stderr')))
+        commands.append(row)
+        save(out / (name + '.command.json'), row)
+        print(name, result.returncode, flush=True)
+        need(result.returncode == 0, 'command_failed:' + name)
+    try:
+        binary = out / 'micro'
+        run('compile', ['g++', '-O2', '-DNDEBUG', '-std=c++20', '-Wall', '-Wextra', '-Wpedantic', '-Werror',
+             '-pthread', '-I', str(out / 'source'), '-MMD', '-MF', str(out / 'micro.d'),
+             str(out / 'source/micro.cpp'), '-o', str(binary)])
+        digest = sha(binary)
+        run('micro', ['/usr/bin/time', '-v', str(binary)])
+        need(sha(binary) == digest, 'binary_changed')
+        save(out / 'binary.json', dict(before=digest, after=sha(binary)))
+        output = (out / 'micro.stdout').read_text().splitlines()
+        summary = json.loads(output[-1])
+        need(summary['status'] == 'passed_paired_mono_micro', 'CXX_physical_gate')
+        rows = [dict(item.split('=', 1) for item in line.split()) for line in output[:-1]]
+        need([(int(r['n']), int(r['mode'])) for r in rows] == [(n,m) for n in (200,400,800,1000) for m in (0,1,2)],
+             'four_sizes_three_modes')
+        for j in range(0,len(rows),3):
+            base, obs, opt = rows[j:j+3]
+            stable = ('n','balls','nodes','parents','contributions','populations','R','U','S','D','same_radius',
+                      'retained_buffers','input_digest','physical_digest')
+            need(all(base[k] == obs[k] == opt[k] for k in stable), 'matched_micro_fields')
+            h = int(obs['H'])
+            need(h == int(opt['H']) == int(obs['verified']) == int(opt['terminals']) and
+                 int(obs['queries']) == int(opt['queries']) == int(base['D']) and
+                 h <= min(int(base['D']),int(base['U'])-int(base['S'])), 'H_bounds_and_trajectory')
+            for work, saved in [('M','observed_calls'),('supports','observed_supports'),
+                                ('powers','observed_powers'),('materializations','observed_materializations')]:
+                need(base[work] == obs[work] and int(base[work]) == int(opt[work])+int(obs[saved]), 'paid_work_removed')
+            comparisons.append(dict(n=int(base['n']), baseline=base, observation=obs, shortcut=opt,
+                H=h, H_over_D=h/int(base['D']), H_over_M=h/int(base['M']),
+                support_fraction_removed=int(obs['observed_supports'])/int(base['supports']),
+                observation_extra_seconds=float(obs['tower_seconds'])-float(base['tower_seconds']),
+                shortcut_minus_baseline_seconds=float(opt['tower_seconds'])-float(base['tower_seconds']),
+                physical_fields_compared_in_CXX=True, shared_host=True, repeated=False, speedup_claim=False,
+                timing_caveat='fixed 0/1/2 order; baseline retained for physical comparison; observation includes verification, not pure lookup timing'))
+        save(out / 'comparison.json', comparisons)
+        status = 'passed'
+    except BaseException as exc:
+        error = type(exc).__name__ + ': ' + str(exc)
+    finally:
+        after = pins(out / 'source')
+        save(out / 'sources_after.json', after)
+        if before != after:
+            status, error = 'failed', 'source_changed'
+        save(out / 'commands.json', commands)
+        save(out / 'receipt.json', dict(status=status,error=error,sources_stable=before==after,GCP_used=False,
+             public_status='not_claimed',contract_qualified=False,sizes=[200,400,800,1000],modes=[0,1,2],
+             upstream_threads=1,static_threads=1,s=8,Kmax=10))
+        print(json.dumps(dict(status=status,error=error,out=str(out))),flush=True)
+    need(status=='passed',str(error))
+
+
+if __name__ == '__main__':
+    main()

@@ -24,8 +24,8 @@ réduisent les MEB appariées de 1 174 515 à 583 337 à n1000. Le journal rése
 ses arènes exactes et les états morts sont libérés avant la banque finale.
 Les brouillons globaux et les résolutions restantes restent coûteux.
 
-Nouveau delta intégré : [voie statique CPU optionnelle](docs/RESOLUTION_STATIQUE_CPU_20260911.md),
-header `33e7d05e…`. Tri-unique des représentants stricts, semis géométriques,
+Premier delta statique : [voie CPU optionnelle](docs/RESOLUTION_STATIQUE_CPU_20260911.md),
+header historique `33e7d05e…`. Tri-unique des représentants stricts, semis géométriques,
 une BallId par clé puis restitution des occurrences au calendrier nominal.
 Le défaut reste le cache temporel ; `--static-threads=1` ou `4` sélectionne
 la nouvelle voie, indépendamment des threads amont. O2/SAN : 30 nuages,
@@ -45,6 +45,20 @@ pas de gain chronométrique revendiqué ; capacités statiques retenues
 La [comparaison statique s8/10/12](receipts/static_s_factors_20260911/README.md)
 est close à 8k : mêmes dix forêts et neuf lignes de résolutions par K,
 mêmes MEB/supports, seuls les candidats amont et les temps varient.
+
+Le header actif est maintenant `6763a877…` : [semis après échange](docs/SEMIS_APRES_ECHANGE_20260911.md),
+dans la même option statique, défaut temporel inchangé. Une recherche exacte
+dans la table complète existante évite la dernière MEB lorsqu'elle trouve
+la nouvelle facette entière. O2/SAN propres passent, 34 nuages/150 ordres,
+87 230 verticales et 5 704 comparaisons physiques dans chaque mode statique.
+Le [paquet du delta](receipts/post_exchange_seed_20260911/README.md) conserve
+106 commandes, trois mutations réfutées et deux premières tentatives de juge
+insuffisant. Micro mono : environ −5,7 % de MEB et −6,5 à −6,8 % de supports
+supplémentaires ; pas de gain chronométrique qualifié. Le [build actif](receipts/post_exchange_active_cmake_20260911/README.md)
+passe ses 24 CTests, et le [T2 propre](receipts/full_t2_post_exchange_20260911/README.md)
+ses 54 tours O2/SAN avec 120 hits/228 recherches, sans reprise des chiffres
+historiques ci-dessus. Le nouveau triplet mono est en cours, un processus
+par taille, sans compilation concurrente du chantier.
 
 L'[auditeur du journal](audits/receipts_coverage_cpp_20260910/README.md)
 a démontré que parent→0 échappait au juge antérieur. La gate renforcée

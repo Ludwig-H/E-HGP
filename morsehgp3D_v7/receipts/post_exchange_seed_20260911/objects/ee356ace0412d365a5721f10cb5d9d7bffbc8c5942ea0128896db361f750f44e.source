@@ -1,0 +1,126 @@
+#!/usr/bin/env python3
+"""Generate finite rational census/Gamma fixtures; copy frozen private sources."""
+from fractions import Fraction
+from itertools import combinations
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import sys
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+SOURCE = HERE / 'o2_shortcut_r1/source/candidate'
+ORACLE = ROOT / 'morsehgp3D_v7/receipts/static_anchor_graph_20260910/capture'
+
+def need(ok, reason):
+    if not ok:
+        raise ValueError(reason)
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+def run(extra_fixtures=()):
+    need(sha(SOURCE / 'morsehgp3D_v7/src/forest/full_ball_tower.hpp') ==
+         'a73b89bfc8b03d38c546d30ee578610e4bb1d26911e252bf19399b8384af4ba6', 'frozen_shortcut_r1')
+    copied = HERE / 'causal_source'
+    shutil.copytree(SOURCE / 'morsehgp3D_v7/src', copied / 'morsehgp3D_v7/src')
+    geom = HERE / 'causal_geometry'
+    geom.mkdir()
+    for name in ('plateau_model.py',):
+        shutil.copy2(ORACLE / 'geometry' / name, geom / name)
+    shutil.copy2(ORACLE / 'meb_rational_oracle_20260905.py', HERE / 'meb_rational_oracle_20260905.py')
+    sys.path.insert(0, str(geom))
+    from plateau_model import Model
+    fixtures = [
+        ('E5', [(0,0,7),(0,9,6),(1,4,0),(0,0,1),(4,1,2)], 5),
+        ('window', [(35,100,0),(139,48,0),(152,139,0),(48,139,0),
+                    (100,36,0),(101,37,0),(99,37,0),(100,200,0)], 6),
+        ('growth_double', [(1,8,0),(5,10,0),(9,8,0),(5,0,0),
+                           (201,8,0),(205,10,0),(209,8,0),(205,0,0)], 3),
+        ('square', [(0,0,0),(2,0,0),(2,2,0),(0,2,0)], 4),
+        ('pair', [(0,0,0),(2,0,0)], 2),
+        ('inert', [(2,2,2),(2,0,0),(0,2,0),(0,0,2),(0,0,0),
+                    (100,100,100),(102,102,102)], 3),
+        ('post_seed_ABEZW', [(0,3,0),(8,3,0),(4,2,0),(6,0,0),(4,23,0)], 5),
+        ('post_seed_square_partial', [(0,0,0),(10,0,0),(0,10,0),(10,10,0),
+                    (4,4,0),(4,6,0),(6,4,0),(6,6,0)], 8),
+    ]
+    fixtures.extend(extra_fixtures)
+    data = [str(len(fixtures))]
+    expected = []
+    metrics = []
+    def bits(component):
+        return sum(1 << x for x in set(x for f in component for x in f))
+    def frac(value):
+        need(0 <= value.numerator < 2**64 and 0 < value.denominator < 2**127, 'fixture_level_bound')
+        return f'{value.numerator} {value.denominator}'
+    for name, points, kmax in fixtures:
+        model = Model(points)
+        levels = sorted(set(model.level.values()))
+        catalogue = [(key, ball) for key, ball in sorted(model.balls.items())
+            if ball['radius'] > 0 and len(ball['interior']) + min(map(len, ball['bases'])) <= min(kmax+1, len(points))]
+        data.append(f'{name} {len(points)} {kmax} {len(catalogue)} {len(levels)}')
+        data.extend(' '.join(map(str, p)) for p in points)
+        for key, ball in catalogue:
+            q = min(map(len, ball['bases']))
+            row = [*map(str, key), frac(ball['radius']), str(q), str(len(ball['interior'])), str(len(ball['shell']))]
+            row += [str(x) for x in sorted(ball['interior'])] + [str(x) for x in sorted(ball['shell'])]
+            data.append(' '.join(row))
+        data.extend(frac(r) for r in levels)
+        if name == 'window':
+            key = model.key[(0,1,2,3)]
+            b = model.balls[key]
+            need(b['radius'] == Fraction(4225) and key in dict(catalogue) and
+                 len(b['interior']) + min(map(len, b['bases'])) - 1 > 4, 'present_but_K4_inadmissible')
+        previous = [{} for _ in range(kmax)]
+        nodes = [[] for _ in range(kmax)]
+        for ci, radius in enumerate(levels):
+            snapshots = []
+            for k in range(1, kmax+1):
+                before = model.gamma(k, radius, False)
+                need(set(before) == set(previous[k-1]), 'gamma_monotone_previous_cut')
+                after = {}
+                for component in model.gamma(k, radius, True):
+                    parents = sorted(previous[k-1][old] for old in before if old <= component)
+                    if len(parents) == 1:
+                        signature = parents[0]
+                    elif not parents:
+                        signature = f'b{ci}:{bits(component)}'
+                        nodes[k-1].append(signature)
+                    else:
+                        signature = f'm{ci}(' + ','.join(parents) + ')'
+                        nodes[k-1].append(signature)
+                    after[component] = signature
+                snapshots.append((previous[k-1], after))
+            for closed in (False, True):
+                states = [s[int(closed)] for s in snapshots]
+                for k, state in enumerate(states, 1):
+                    for component, signature in state.items():
+                        lower = '-'
+                        if k > 1:
+                            images = {s for lower_component, s in states[k-2].items()
+                                      if any(tuple(face) in lower_component for facet in component
+                                             for face in combinations(facet, k-1))}
+                            need(len(images) == 1, 'unique_gamma_vertical_image')
+                            lower = next(iter(images))
+                        for variant in range(2):
+                            expected.append(f'C {name} {variant} {k} {ci} {int(closed)} {signature} {bits(component)} {lower}')
+            previous = [s[1] for s in snapshots]
+        for k, signatures in enumerate(nodes, 1):
+            need(len(signatures) == len(set(signatures)), 'unambiguous_birth_parent_signatures')
+            for signature in signatures:
+                for variant in range(2):
+                    expected.append(f'N {name} {variant} {k} {signature}')
+        metrics.append(dict(name=name, n=len(points), kmax=kmax, census=len(catalogue), cuts=len(levels),
+                            nodes=sum(map(len, nodes))))
+    (HERE / 'fixtures.txt').write_text('\n'.join(data) + '\n')
+    (HERE / 'expected.txt').write_text('\n'.join(sorted(expected)) + '\n')
+    (HERE / 'fixture_metrics.json').write_text(json.dumps(metrics, indent=2) + '\n')
+    source_pins = {p.relative_to(copied).as_posix(): sha(p) for p in sorted(copied.rglob('*')) if p.is_file()}
+    (HERE / 'source_pins.json').write_text(json.dumps(source_pins, indent=2, sort_keys=True) + '\n')
+    print(json.dumps(dict(status='prepared', fixtures=len(fixtures), expected_rows=len(expected),
+                          source_files=len(source_pins))))
+
+if __name__ == '__main__':
+    run()

@@ -1,0 +1,124 @@
+#!/usr/bin/env python3
+"""Own qualification of the clean three-file proposal, never active writes."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import time
+
+BASE=Path(__file__).resolve().parent
+ROOT=BASE.parents[1]
+PIN='6763a877f43d79a45532bce4426feca645b6ee97f18c9a4ee1fea4c47cd408a5'
+HEADER='morsehgp3D_v7/src/forest/full_ball_tower.hpp'
+
+
+def need(ok,why):
+    if not ok:raise RuntimeError(why)
+
+
+def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def save(path,value):
+    with path.open('x') as stream:
+        json.dump(value,stream,indent=2,sort_keys=True);stream.write('\n')
+
+
+def pins(path):return {p.relative_to(path).as_posix():sha(p) for p in sorted(path.rglob('*')) if p.is_file()}
+
+
+def main():
+    need(len(sys.argv) in (2,3) and sys.argv[1].isidentifier() and
+         (len(sys.argv)==2 or sys.argv[2]=='--san'),'fresh_output [--san_ROOT_only]')
+    san=len(sys.argv)==3
+    need(sha(BASE/'clean'/HEADER)==PIN,'clean_header_pin')
+    out=BASE/sys.argv[1];out.mkdir(exist_ok=False)
+    for kind in ('product','harness'):shutil.copytree(BASE/'clean',out/'source'/kind)
+    overlay=out/'source/harness'/HEADER
+    old='if (kmax > 1 && !geometry_threads) resolver_cache.configure(ix.upos.size());'
+    new='if (kmax > 1 && !geometry_threads && post_seed_test::cache_enabled) resolver_cache.configure(ix.upos.size());'
+    text=overlay.read_text();need(text.count(old)==1,'one_cache_test_hook');overlay.write_text(text.replace(old,new))
+    # The same historical gate/call sequence as a73 lets us compare every field
+    # directly. The proposed production gate is ALSO compiled and run below.
+    shutil.copyfile(BASE/'o2_shortcut_r1/source/candidate/morsehgp3D_v7/tests/full_ball_tower_gate.cpp',
+                    out/'source/harness/morsehgp3D_v7/tests/full_ball_tower_gate.cpp')
+    shutil.copyfile(BASE/'clean_qualification.cpp',out/'source/qualification.cpp')
+    shutil.copyfile(Path(__file__),out/'record_clean.py.source')
+    before=pins(out/'source');save(out/'sources_before.json',before)
+    commands=[];status,error='failed',None
+    env=dict(os.environ)
+    if san:env.update(ASAN_OPTIONS='detect_leaks=1:halt_on_error=1',UBSAN_OPTIONS='halt_on_error=1:print_stacktrace=1')
+    def run(name,argv,expected=0):
+        start=time.time_ns()
+        with (out/(name+'.stdout')).open('xb') as so,(out/(name+'.stderr')).open('xb') as se:
+            result=subprocess.run(argv,stdin=subprocess.DEVNULL,stdout=so,stderr=se,env=env,check=False)
+        row=dict(name=name,argv=argv,exit_code=result.returncode,expected_exit=expected,
+                 started_ns=start,ended_ns=time.time_ns(),stdout_sha256=sha(out/(name+'.stdout')),
+                 stderr_sha256=sha(out/(name+'.stderr')),
+                 sanitizer_environment={k:env[k] for k in ('ASAN_OPTIONS','UBSAN_OPTIONS')} if san else {})
+        commands.append(row);save(out/(name+'.command.json'),row);print(name,result.returncode,flush=True)
+        need(result.returncode==expected,'unexpected_exit:'+name)
+    binaries={}
+    try:
+        flags=['-O1','-g','-fsanitize=address,undefined','-fno-omit-frame-pointer'] if san else ['-O2','-DNDEBUG']
+        common=['g++',*flags,'-std=c++20','-Wall','-Wextra','-Wpedantic','-Werror','-pthread',
+                '-isystem',str(ROOT/'build/v7_boost_gate/extracted/usr/include')]
+        harness=out/'source/harness/morsehgp3D_v7';product=out/'source/product/morsehgp3D_v7'
+        run('compile_harness',[*common,'-DMHGP7_FULL_HEADER="'+str(harness/'src/forest/full_ball_tower.hpp')+'"',
+            '-DMHGP7_GATE_SOURCE="'+str(harness/'tests/full_ball_tower_gate.cpp')+'"','-MMD','-MF',str(out/'harness.d'),
+            str(out/'source/qualification.cpp'),'-o',str(out/'harness')])
+        binaries['harness']=sha(out/'harness')
+        for mode in ('cache','no_cache','static1','static4'):
+            run(mode,[str(out/'harness'),mode,str(out/(mode+'.physical')),'0'])
+            prior=BASE/'o2_shortcut_r1'/('candidate_'+mode+'_observe2.physical')
+            def semantic(path):
+                return [line for line in path.read_text().splitlines() if not line.startswith(
+                    ('S post_seed_','S static_peak_worker_bytes ','S static_peak_retained_bytes '))]
+            need(semantic(prior)==semantic(out/(mode+'.physical')),'clean_a73_physical_and_work_identity:'+mode)
+        run('harness_bad_arguments',[str(out/'harness')],2)
+        run('compile_product_gate',[*common,'-MMD','-MF',str(out/'product_gate.d'),
+             str(product/'tests/full_ball_tower_gate.cpp'),'-o',str(out/'product_gate')])
+        binaries['product_gate']=sha(out/'product_gate')
+        for name,arg in [('product_nominal','--selftest'),('product_static1','--static-1'),('product_static4','--static-4')]:
+            run(name,[str(out/'product_gate'),arg])
+        run('product_bad_argument',[str(out/'product_gate'),'--unknown'],2)
+        run('compile_probe',[*common,'-MMD','-MF',str(out/'probe.d'),str(product/'bench/full_ball_tower_probe.cpp'),
+             '-o',str(out/'probe')])
+        binaries['probe']=sha(out/'probe')
+        summaries=[]
+        for threads in (0,1):
+            name='probe_static'+str(threads)
+            run(name,[str(out/'probe'),'--n=200','--s=8','--kmax=10','--threads=1','--static-threads='+str(threads)])
+            row=json.loads((out/(name+'.stdout')).read_text());summaries.append(row)
+            need(row['status']=='completed_relative' and row['orders']==10 and row['contract_qualified'] is False,
+                 'clean_probe_complete')
+            need([r['K'] for r in row['static_orders']]==list(range(1,11)),'clean_probe_whole_tower')
+            q,h,t=(sum(r[k] for r in row['static_orders']) for k in ('post_seed_queries','post_seed_hits','post_seed_terminals'))
+            need(h==t and h<=q,'clean_probe_post_work')
+            if threads:
+                need(h==2945 and q==17419 and row['resolver_meb_calls']==48618,'clean_probe_micro_crosscheck')
+                need(row['resolver_cache_accounting']=='static_exact_sort_unique_complete_population_seeds_after_exchange_v2',
+                     'clean_probe_versioned_accounting')
+            else:need(q==h==t==0,'nominal_post_seed_inert')
+        for key in ('input_digest','payload_digest','balls','nodes','parent_refs','contributions','vertical_refs'):
+            need(summaries[0][key]==summaries[1][key],'clean_probe_same_payload:'+key)
+        save(out/'probe_comparison.json',dict(status='passed',nominal=summaries[0],static1=summaries[1],contract_qualified=False))
+        for name,pin in binaries.items():need(sha(out/name)==pin,'binary_changed:'+name)
+        save(out/'binaries.json',{name:dict(before=pin,after=sha(out/name)) for name,pin in binaries.items()})
+        status='passed'
+    except BaseException as exc:error=type(exc).__name__+': '+str(exc)
+    finally:
+        after=pins(out/'source');save(out/'sources_after.json',after)
+        if before!=after:status,error='failed','source_changed'
+        save(out/'commands.json',commands)
+        save(out/'receipt.json',dict(status=status,error=error,source_header_sha256=PIN,sources_stable=before==after,
+             SAN=san,commands=len(commands),production_applied=False,GCP_used=False,public_status='not_claimed',
+             peak_worker_capacity_not_equal_to_instrumented_a73=True))
+        print(json.dumps(dict(status=status,error=error,out=str(out))),flush=True)
+    need(status=='passed',str(error))
+
+
+if __name__=='__main__':main()

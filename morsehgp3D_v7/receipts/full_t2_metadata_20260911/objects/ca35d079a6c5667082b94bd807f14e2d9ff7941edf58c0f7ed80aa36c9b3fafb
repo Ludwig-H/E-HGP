@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_t2_metadata_20260911/san_root_r1/gate",
+    "--spatial12"
+  ],
+  "expected_exit": 0,
+  "causal_diagnostic": null,
+  "mutation_marker": null
+}

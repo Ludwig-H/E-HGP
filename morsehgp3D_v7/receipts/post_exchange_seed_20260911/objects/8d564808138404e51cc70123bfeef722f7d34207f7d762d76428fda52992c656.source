@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/causal_r3/nominal/gate",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/causal_r3/fixtures.txt",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/causal_r3/expected.txt",
+    "0"
+  ],
+  "ended_ns": 1789119797151771661,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "nominal_0",
+  "started_ns": 1789119797128914605,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "7834d8d06ea9f92c1d3a3a46cce8e4cf980d8eb33738e0198d193de822b70c1e"
+}

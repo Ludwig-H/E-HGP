@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "g++",
+    "-O2",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-isystem",
+    "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-DMHGP7_FULL_HEADER=\"/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_shortcut_r1/source/baseline/morsehgp3D_v7/src/forest/full_ball_tower.hpp\"",
+    "-DMHGP7_GATE_SOURCE=\"/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_shortcut_r1/source/baseline/morsehgp3D_v7/tests/full_ball_tower_gate.cpp\"",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_shortcut_r1/baseline.d",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_shortcut_r1/source/qualification.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_shortcut_r1/baseline"
+  ],
+  "expected_exit": 0
+}

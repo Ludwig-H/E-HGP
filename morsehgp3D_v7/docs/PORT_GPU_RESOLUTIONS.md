@@ -14,6 +14,16 @@ est également clos localement : minimiseurs entiers, exclusions, parcours,
 propriétaire d'index hôte et gate portable. Aucun de ces nouveaux raccords
 n'a tourné sur device ; leurs prédécesseurs G4 gardent leurs preuves séparées.
 
+Le terminal entier est maintenant assemblé dans un arbre privé, sur la
+baseline `33e7d05e…` sans le nouveau raccourci CPU après échange. Il passe
+ses premiers raccords FULL et T2 en stub O2/SAN, mais une contre-lecture a
+trouvé une collision entre les compteurs de génération de deux types de
+propriétaires : une vue mêlant l'index d'un nuage et le catalogue d'un autre
+pouvait porter des tokens égaux. Une révision séparée réutilise le token du
+nouvel index possédé et prépare sa fixture croisée. Les captures initiales
+restent conservées avec ce manque ; ni ownership général, ni CUDA, ni device
+ne sont qualifiés pour ce terminal. Il n'est pas intégré au moteur actif.
+
 La [voie statique CPU](RESOLUTION_STATIQUE_CPU_20260911.md) sépare désormais
 les résolutions géométriques des composantes temporelles. La première
 réduction de travail est qualifiée ; le GPU doit ensuite traiter les clés

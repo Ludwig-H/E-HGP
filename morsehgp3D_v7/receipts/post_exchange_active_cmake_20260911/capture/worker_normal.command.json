@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "python3",
+    "-B",
+    "gcp-migration/selftest_full_ball_worker_v7.py"
+  ],
+  "ended_ns": 1789120915176984136,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "worker_normal",
+  "started_ns": 1789120915057213594,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "630be61c687049f9dedfe4d09762545e8de9d55a7649cf32fe91b436714e4f5e"
+}

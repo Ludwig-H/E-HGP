@@ -1,0 +1,73 @@
+--- closed/t2_gate.cpp
++++ private/t2_gate.cpp
+@@ -129,6 +129,13 @@
+ 
+ void check_large_cuts(const FullBallTowerResult& tower, const std::vector<InputPoint>& in,
+     const oracle::Model& model) {
++  // Once per order, before any geometric cuts. Physical paired towers must
++  // then retain these exact metadata, not merely agree on a wrong reference.
++  for (unsigned k = 1; k <= 10; ++k) {
++    const auto& order = tower.orders[k - 1];
++    need(order.forest.order() == k, "T2.metadata.order_identity");
++    need(order.lower_nodes.size() == order.forest.nodes().size(), "T2.metadata.vertical_node_indexed");
++  }
+   const u32 domain = (u32{1} << in.size()) - 1;
+   std::set<Rat> levels{Rat(0)};
+   for (u32 mask = 1; mask <= domain; ++mask) levels.insert(model.meb(mask).radius2);
+--- closed/source/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp
++++ private/source/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp
+@@ -1,6 +1,10 @@
+ // Dated FULL coverage journal, structural authority ONLY. This is not the
+ // regular minima certificate v1, a geometric producer, or a completeness proof.
+ #pragma once
++
++#if defined(MHGP7_T2_METADATA_MUTANT) && MHGP7_T2_METADATA_MUTANT == 1
++#include <cstdio>
++#endif
+ 
+ #include <memory>
+ 
+@@ -252,7 +256,14 @@
+           out.contributions_.push_back({batch.level, segment, ref});
+       }
+     }
+-    out.order_ = order; out.populations_ = std::move(bank);
++#if defined(MHGP7_T2_METADATA_MUTANT) && MHGP7_T2_METADATA_MUTANT == 1
++    // PRIVATE source mutant: corrupt only the published K9 order metadata.
++    out.order_ = order == 9 ? 8 : order;
++    if (order == 9) std::fprintf(stderr, "T2_METADATA_MUTANT published_order=8 expected_order=9\n");
++#else
++    out.order_ = order;
++#endif
++    out.populations_ = std::move(bank);
+     result.status = FullCertificateStatus::kOk; result.reason = "structural_only";
+     return result;
+   } catch (const std::bad_alloc&) {
+--- closed/source/morsehgp3D_v7/src/forest/full_ball_tower.hpp
++++ private/source/morsehgp3D_v7/src/forest/full_ball_tower.hpp
+@@ -1,6 +1,10 @@
+ // FULL horizontal forests and vertical birth maps from supplied COMPLETE EXACT
+ // ball censuses. No claim of WSPD completeness, archive authority, or speed.
+ #pragma once
++
++#if defined(MHGP7_T2_METADATA_MUTANT) && MHGP7_T2_METADATA_MUTANT == 2
++#include <cstdio>
++#endif
+ 
+ #include <numeric>
+ #include <unordered_map>
+@@ -328,6 +332,14 @@
+                                                                    : FullBallStatus::kInvariantViolated);
+       require(forest.value.nodes().size() == drafts[k - 1].lower_nodes.size(), "full_ball_node_encoding");
+       result.push_back({std::move(forest.value), std::move(drafts[k - 1].lower_nodes)});
++#if defined(MHGP7_T2_METADATA_MUTANT) && MHGP7_T2_METADATA_MUTANT == 2
++      // PRIVATE source mutant: add a surplus output entry after normal encoding.
++      // No cast, private-memory overwrite, or mutation of the forest geometry.
++      if (k == 9) {
++        result.back().lower_nodes.push_back(kFullCoverageAbsent);
++        std::fprintf(stderr, "T2_METADATA_MUTANT surplus_vertical_entry=1 order=9\n");
++      }
++#endif
+       std::vector<FullCoverageBatch>().swap(drafts[k - 1].batches);
+     }
+     return result;

@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+"""Freeze and qualify disabled, paid observation and post-exchange shortcut."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import time
+
+BASE = Path(__file__).resolve().parent
+ROOT = BASE.parents[1]
+
+
+def need(ok, why):
+    if not ok:
+        raise RuntimeError(why)
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def save(path, value):
+    with path.open('x') as stream:
+        json.dump(value, stream, indent=2, sort_keys=True)
+        stream.write('\n')
+
+
+def pins(path):
+    return {p.relative_to(path).as_posix(): sha(p) for p in sorted(path.rglob('*')) if p.is_file()}
+
+
+def main():
+    need(len(sys.argv) == 2 and sys.argv[1].isidentifier(), 'fresh output identifier')
+    out = BASE / sys.argv[1]
+    out.mkdir(exist_ok=False)
+    before = {}
+    rows = []
+    status, error = 'failed', None
+    def run(name, argv, expected=0):
+        save(out / (name + '.intent.json'), dict(argv=argv, expected_exit=expected))
+        start = time.time_ns()
+        with (out / (name + '.stdout')).open('xb') as stdout, (out / (name + '.stderr')).open('xb') as stderr:
+            process = subprocess.run(argv, stdin=subprocess.DEVNULL, stdout=stdout, stderr=stderr,
+                                     cwd=ROOT, env=dict(os.environ), check=False)
+        row = dict(name=name, argv=argv, exit_code=process.returncode, expected_exit=expected,
+                   started_ns=start, ended_ns=time.time_ns(), stdout_sha256=sha(out / (name + '.stdout')),
+                   stderr_sha256=sha(out / (name + '.stderr')))
+        save(out / (name + '.command.json'), row)
+        rows.append(row)
+        print(name, process.returncode, flush=True)
+        need(process.returncode == expected, 'unexpected_exit:' + name)
+    try:
+        for kind in ('baseline', 'candidate'):
+            shutil.copytree(BASE / kind, out / 'source' / kind)
+        shutil.copyfile(BASE / 'qualification.cpp', out / 'source/qualification.cpp')
+        shutil.copyfile(Path(__file__), out / 'record_shortcut.py.source')
+        before = pins(out / 'source')
+        save(out / 'sources_before.json', before)
+        for kind in ('candidate', 'baseline'):
+            source = out / 'source' / kind / 'morsehgp3D_v7'
+            argv = ['g++', '-O2', '-DNDEBUG', '-std=c++20', '-Wall', '-Wextra', '-Wpedantic', '-Werror',
+                    '-pthread', '-isystem', str(ROOT / 'build/v7_boost_gate/extracted/usr/include'),
+                    '-DMHGP7_FULL_HEADER="' + str(source / 'src/forest/full_ball_tower.hpp') + '"',
+                    '-DMHGP7_GATE_SOURCE="' + str(source / 'tests/full_ball_tower_gate.cpp') + '"']
+            if kind == 'candidate':
+                argv += ['-DMHGP7_PRIVATE_POST_EXCHANGE_SEED=1']
+            argv += ['-MMD', '-MF', str(out / (kind + '.d')), str(out / 'source/qualification.cpp'), '-o', str(out / kind)]
+            run('compile_' + kind, argv)
+            save(out / (kind + '.binary.json'), dict(sha256=sha(out / kind)))
+            for observation in ([0, 1, 2] if kind == 'candidate' else [0]):
+                for mode in ('static1', 'static4', 'cache', 'no_cache'):
+                    tag = kind + '_' + mode + '_observe' + str(observation)
+                    run(tag, [str(out / kind), mode, str(out / (tag + '.physical')), str(observation)])
+            run(kind + '_bad_arguments', [str(out / kind)], 2)
+        def filtered(path, baseline=False):
+            return [line for line in path.read_text().splitlines() if not line.startswith('S post_seed_')
+                    and (not baseline or not line.startswith(('S static_peak_worker_bytes ', 'S static_peak_retained_bytes ')))]
+        for mode in ('static1', 'static4', 'cache', 'no_cache'):
+            baseline = out / ('baseline_' + mode + '_observe0.physical')
+            disabled = out / ('candidate_' + mode + '_observe0.physical')
+            observed = out / ('candidate_' + mode + '_observe1.physical')
+            need(filtered(baseline, True) == filtered(disabled, True), 'baseline_physical_delta:' + mode)
+            need(filtered(disabled) == filtered(observed), 'observation_changed_existing_field:' + mode)
+            shortcut = out / ('candidate_' + mode + '_observe2.physical')
+            def calls(path):
+                parsed = []
+                for block in path.read_text().split('BEGIN')[1:]:
+                    lines = block.splitlines()
+                    stats = {line.split()[1]: list(map(int, line.split()[2:])) for line in lines if line.startswith('S ')}
+                    parsed.append((stats, [line for line in lines if not line.startswith('S ')]))
+                return parsed
+            obs, opt = calls(observed), calls(shortcut)
+            need(len(obs) == len(opt), 'same_number_of_builder_calls')
+            hits = 0
+            for (a, obj_a), (b, obj_b) in zip(obs, opt):
+                need(obj_a == obj_b, 'whole_physical_output_identity:' + mode)
+                ha, hb = a['post_seed_hits'], b['post_seed_hits']
+                need(ha == hb and a['post_seed_queries'] == b['post_seed_queries'], 'same_lookup_trajectory')
+                h = sum(ha[1:]); hits += h
+                need(a['post_seed_verified'] == ha and b['post_seed_terminal'] == ha and
+                     not any(a['post_seed_terminal'][1:]) and not any(b['post_seed_verified'][1:]), 'H_verified_then_avoided')
+                need(a['post_seed_observed_work'][0] == h and not b['post_seed_observed_work'][0], 'one_saved_MEB_per_hit')
+                for name in a:
+                    if name.startswith('post_seed_'):
+                        continue
+                    if name in ('anchor_hits', 'key_lookups'):
+                        need(a[name][0] == b[name][0] + h, 'paid_terminal_work:' + name)
+                    elif name == 'resolve_work':
+                        aw, bw, paid = a[name], b[name], a['post_seed_observed_work']
+                        need(aw[1] == bw[1] == paid[1] == 5, 'support_counter_shape')
+                        need(all(aw[i] == bw[i] + paid[i] for i in range(len(aw)) if i != 1),
+                             'exact_paid_MEB_work_removed')
+                    else:
+                        need(a[name] == b[name], 'unchanged_work:' + name)
+            if mode.startswith('static'):
+                need(hits >= 4, 'post_exchange_hit_floor')
+        status = 'passed'
+    except BaseException as exc:
+        error = type(exc).__name__ + ': ' + str(exc)
+    finally:
+        after = pins(out / 'source')
+        save(out / 'sources_after.json', after)
+        if before != after:
+            status, error = 'failed', 'source_changed'
+        save(out / 'commands.json', rows)
+        save(out / 'receipt.json', dict(status=status, error=error, sources_stable=before == after,
+             commands=len(rows), GCP_used=False, public_status='not_claimed', phase='post_exchange_shortcut_paired'))
+        print(json.dumps(dict(status=status, error=error, out=str(out))), flush=True)
+    need(status == 'passed', str(error))
+
+
+if __name__ == '__main__':
+    main()

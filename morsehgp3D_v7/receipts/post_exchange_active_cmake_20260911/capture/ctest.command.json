@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v7_postseed_active_20260911/cmake_build",
+    "--output-on-failure",
+    "--parallel",
+    "1",
+    "--output-junit",
+    "/workspaces/E-HGP/build/v7_postseed_active_20260911/capture_r1/ctest.junit.xml",
+    "-R",
+    "^mhgp7_(anchor_meb|full_ball_tower|full_ball_work|full_ball_static|census_route_stub|local_plateau|full_coverage_certificate|facet_resolver_cache|witness_front|full_gabriel_digest)"
+  ],
+  "ended_ns": 1789120915056492823,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "ctest",
+  "started_ns": 1789120910327252924,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "1d163ef5cc7d336122b37cf89c90c300a0b3ac16d431cef9bae926adf0917c9e"
+}

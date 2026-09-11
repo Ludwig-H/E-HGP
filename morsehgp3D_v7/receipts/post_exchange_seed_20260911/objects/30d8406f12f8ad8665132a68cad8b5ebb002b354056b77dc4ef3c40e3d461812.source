@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_shortcut_r1/candidate",
+    "static4",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_shortcut_r1/candidate_static4_observe0.physical",
+    "0"
+  ],
+  "ended_ns": 1789117818548609875,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "candidate_static4_observe0",
+  "started_ns": 1789117817527432739,
+  "stderr_sha256": "d78f7936e61482441b24d671d47ba47bc1cffd3f1558de1882b37caa46974167",
+  "stdout_sha256": "5a38ce8b6891d10cd50c5be5ed901a03d7ed6802df05d2896f821e6311c5efd4"
+}

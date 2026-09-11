@@ -1,0 +1,117 @@
+#!/usr/bin/env python3
+"""Compile finite C++ causal mutations and a separately labelled faulty-state guard."""
+import difflib
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import time
+
+BASE = Path(__file__).resolve().parent
+HEADER = 'morsehgp3D_v7/src/forest/full_ball_tower.hpp'
+
+
+def need(ok, why):
+    if not ok:
+        raise RuntimeError(why)
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def save(path, value):
+    with path.open('x') as stream:
+        json.dump(value, stream, indent=2, sort_keys=True)
+        stream.write('\n')
+
+
+def pins(path):
+    return {p.relative_to(path).as_posix(): sha(p) for p in sorted(path.rglob('*')) if p.is_file()}
+
+
+def replace(source, old, new):
+    need(source.count(old) == 1, 'one_injection_site')
+    return source.replace(old, new)
+
+
+def main():
+    need(len(sys.argv) in (2,3) and sys.argv[1].isidentifier() and
+         (len(sys.argv)==2 or sys.argv[2].isidentifier()), 'fresh output identifier [fixture directory]')
+    out = BASE / sys.argv[1]
+    out.mkdir(exist_ok=False)
+    fixture_source = BASE / sys.argv[2] if len(sys.argv)==3 else BASE
+    for name in ('causal.cpp', 'fixtures.txt', 'expected.txt', 'record_causal.py'):
+        shutil.copyfile((fixture_source if name in ('fixtures.txt','expected.txt') else BASE) / name, out / name)
+    commands = []
+    def run(name, argv, expected=0):
+        start = time.time_ns()
+        with (out / (name + '.stdout')).open('xb') as so, (out / (name + '.stderr')).open('xb') as se:
+            result = subprocess.run(argv, stdin=subprocess.DEVNULL, stdout=so, stderr=se, check=False)
+        row = dict(name=name, argv=argv, expected_exit=expected, exit_code=result.returncode,
+                   started_ns=start, ended_ns=time.time_ns(), stdout_sha256=sha(out/(name+'.stdout')),
+                   stderr_sha256=sha(out/(name+'.stderr')))
+        commands.append(row)
+        save(out/(name+'.command.json'), row)
+        print(name,result.returncode,flush=True)
+        need(result.returncode == expected,'unexpected_exit:'+name)
+    status,error='failed',None
+    started=[]
+    try:
+        original=(BASE/'causal_source'/HEADER).read_text()
+        old='require(compare_exact_level(b.level, local.level) < 0 && compare_exact_level(b.level, before) < 0,'
+        injected=('const auto& checked_previous_level = post_seed_test::force_equal_level ? b.level : local.level;\n'
+                  '          require(compare_exact_level(b.level, checked_previous_level) < 0 && compare_exact_level(b.level, before) < 0,')
+        common=replace(original,old,injected)
+        variants=[('nominal',common,'1'),
+                  ('partial_key',replace(replace(common,
+                    '[](const StaticSeed& a, const ResolverCache::Key& value) { return a.key < value; });',
+                    '[](const StaticSeed& a, const ResolverCache::Key& value) { return a.key[0] < value[0]; });'),
+                    'if (seed != seeds.end() && seed->key == key) {','if (seed != seeds.end() && seed->key[0] == key[0]) {'),'observe'),
+                  ('omit_terminal_exchange',replace(common,'add(work.descending_steps); add(length);',
+                    'add(length); // MUTANT: terminal exchange work is not counted.'),'1'),
+                  ('accept_equal_fault',replace(common,
+                    'compare_exact_level(b.level, checked_previous_level) < 0 &&',
+                    'compare_exact_level(b.level, checked_previous_level) <= 0 &&'),'equal_fault')]
+        for name,text,mode in variants:
+            directory=out/name
+            shutil.copytree(BASE/'causal_source',directory/'source')
+            (directory/'source'/HEADER).write_text(text)
+            (directory/'delta.patch').write_text(''.join(difflib.unified_diff(original.splitlines(True),text.splitlines(True),
+                                                                            fromfile=HEADER,tofile=HEADER)))
+            before=pins(directory/'source');save(directory/'sources_before.json',before);started.append(name)
+            binary=directory/'gate'
+            run(name+'_compile',['g++','-O2','-DNDEBUG','-std=c++20','-Wall','-Wextra','-Wpedantic','-Werror','-pthread',
+                '-I',str(directory/'source'),'-MMD','-MF',str(directory/'gate.d'),str(out/'causal.cpp'),'-o',str(binary)])
+            save(directory/'binary.json',dict(sha256=sha(binary)))
+            if name=='nominal':
+                for mode in ('0','1','4','observe','equal_fault'):
+                    run('nominal_'+mode,[str(binary),str(out/'fixtures.txt'),str(out/'expected.txt'),mode])
+            else:
+                run(name+'_run',[str(binary),str(out/'fixtures.txt'),str(out/'expected.txt'),mode],1)
+                need(not (out/(name+'_run.stdout')).read_bytes(),'no_mutant_success_output')
+            after=pins(directory/'source');save(directory/'sources_after.json',after)
+            need(before==after,'source_changed:'+name)
+        need((out/'omit_terminal_exchange_run.stderr').read_text().strip()=='post_seed_exchange_accounting',
+             'exchange_counter_causal_reason')
+        need('full_ball_post_seed_observation_mismatch' in (out/'partial_key_run.stderr').read_text(),
+             'partial_seed_is_not_the_actual_MEB_terminal')
+        need((out/'accept_equal_fault_run.stderr').read_text().strip()=='controlled_equal_level_fault_was_not_rejected',
+             'separate_fault_state_causal_reason')
+        status='passed'
+    except BaseException as exc:
+        error=type(exc).__name__+': '+str(exc)
+    finally:
+        save(out/'commands.json',commands)
+        save(out/'receipt.json',dict(status=status,error=error,started_variants=started,mutants=3,
+             finite_Gamma_corpus=True,equal_radius_guard_test_only_state=True,
+             partial_key_judged_by_paid_MEB_BallId_key_level=True,
+             valid_complete_population_equal_radius_witness_claimed=False,GCP_used=False,public_status='not_claimed'))
+        print(json.dumps(dict(status=status,error=error)),flush=True)
+    need(status=='passed',str(error))
+
+
+if __name__=='__main__':
+    main()

@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/product_gate",
+    "--unknown"
+  ],
+  "ended_ns": 1789120153582252110,
+  "exit_code": 2,
+  "expected_exit": 2,
+  "name": "product_bad_argument",
+  "sanitizer_environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "started_ns": 1789120153563207013,
+  "stderr_sha256": "4b9eeadc562c94288f788d79631dcc662f5b8c306e7232ccdc083094698a2e85",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

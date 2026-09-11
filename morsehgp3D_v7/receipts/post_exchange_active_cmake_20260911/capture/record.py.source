@@ -1,0 +1,147 @@
+#!/usr/bin/env python3
+"""Fresh sequential active CMake qualification; no active source writes or CUDA."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shlex
+import shutil
+import subprocess
+import time
+
+BASE=Path(__file__).resolve().parent
+ROOT=BASE.parents[1]
+OUT=BASE/'capture_r1'
+BUILD=BASE/'cmake_build'
+ACTIVE=ROOT/'morsehgp3D_v7'
+BOOST=ROOT/'build/v7_boost_gate/extracted/usr/include'
+TARGETS=['mhgp7_anchor_meb_gate','mhgp7_full_ball_tower_gate','mhgp7_full_ball_work_gate',
+         'mhgp7_full_ball_tower_probe','mhgp7_full_coverage_certificate_gate','mhgp7_local_plateau_gate',
+         'mhgp7_census_route_stub_gate','mhgp7_full_gabriel_digest_gate','mhgp7_facet_resolver_cache_gate',
+         'mhgp7_witness_front_gate']
+PATTERN='^mhgp7_(anchor_meb|full_ball_tower|full_ball_work|full_ball_static|census_route_stub|local_plateau|full_coverage_certificate|facet_resolver_cache|witness_front|full_gabriel_digest)'
+PINS={'src/forest/full_ball_tower.hpp':'6763a877f43d79a45532bce4426feca645b6ee97f18c9a4ee1fea4c47cd408a5',
+      'tests/full_ball_tower_gate.cpp':'c4f39462487610e32fd5b23210c268a4f7300490aff511252a3cf859afe9cb88',
+      'bench/full_ball_tower_probe.cpp':'e96f8d36a523c6cfb64848ae5ee86933fef2279050691e6b4f774a430a0f2f46'}
+
+
+def need(ok,why):
+    if not ok:raise RuntimeError(why)
+
+
+def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def save(path,value):
+    with path.open('x') as stream:
+        json.dump(value,stream,indent=2,sort_keys=True);stream.write('\n')
+
+
+def inventory():
+    files=[]
+    for prefix in ('src','oracle','tests','bench','cli','cmake'):
+        files.extend(p for p in sorted((ACTIVE/prefix).rglob('*')) if p.is_file() and '__pycache__' not in p.parts)
+    files.append(ACTIVE/'CMakeLists.txt')
+    for name in ('selftest_full_ball_worker_v7.py','full_ball_worker_v7.py','full_probe_worker_v7.py','full_probe_session_v7.py'):
+        files.append(ROOT/'gcp-migration'/name)
+    return {p.relative_to(ROOT).as_posix():sha(p) for p in files}
+
+
+def main():
+    need(not BUILD.exists(),'fresh_CMake_build')
+    for name,pin in PINS.items():need(sha(ACTIVE/name)==pin,'active_matches_clean:'+name)
+    OUT.mkdir(exist_ok=False)
+    before=inventory();save(OUT/'sources_before.json',before)
+    for name in before:
+        destination=OUT/'source'/name;destination.parent.mkdir(parents=True,exist_ok=True)
+        shutil.copyfile(ROOT/name,destination)
+    shutil.copyfile(Path(__file__),OUT/'record.py.source')
+    save(OUT/'host_before.json',dict(time_ns=time.time_ns(),affinity=sorted(os.sched_getaffinity(0)),
+        loadavg=Path('/proc/loadavg').read_text(),cpu_max=Path('/sys/fs/cgroup/cpu.max').read_text()))
+    commands=[];dependencies={};status,error='failed',None;binaries={}
+    def run(name,argv):
+        save(OUT/(name+'.intent.json'),dict(argv=argv,cwd=str(ROOT),expected_exit=0))
+        started=time.time_ns()
+        with (OUT/(name+'.stdout')).open('xb') as so,(OUT/(name+'.stderr')).open('xb') as se:
+            result=subprocess.run(argv,cwd=ROOT,stdin=subprocess.DEVNULL,stdout=so,stderr=se,check=False)
+        row=dict(name=name,argv=argv,exit_code=result.returncode,expected_exit=0,started_ns=started,ended_ns=time.time_ns(),
+             stdout_sha256=sha(OUT/(name+'.stdout')),stderr_sha256=sha(OUT/(name+'.stderr')))
+        commands.append(row);save(OUT/(name+'.command.json'),row);print(name,result.returncode,flush=True)
+        need(result.returncode==0,'command_failed:'+name)
+    try:
+        for name,argv in [('compiler_version',['g++','--version']),('cmake_version',['cmake','--version']),
+                          ('ctest_version',['ctest','--version']),('compiler_frontend',['g++','-print-prog-name=cc1plus'])]:
+            run(name,argv)
+        tools={name:dict(path=str(Path(shutil.which(name)).resolve()),sha256=sha(Path(shutil.which(name)).resolve()))
+               for name in ('g++','cmake','ctest')}
+        frontend=Path((OUT/'compiler_frontend.stdout').read_text().strip()).resolve()
+        tools['cc1plus']=dict(path=str(frontend),sha256=sha(frontend));save(OUT/'toolchain_before.json',tools)
+        run('configure',['cmake','-S',str(ACTIVE),'-B',str(BUILD),'-DCMAKE_BUILD_TYPE=Release',
+              '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON','-DMHGP7_ENABLE_CUDA=OFF',
+              '-DMHGP7_DIGEST_BOOST_INCLUDE_DIR='+str(BOOST)])
+        compile_rows=json.loads((BUILD/'compile_commands.json').read_text())
+        selected=[]
+        for target in TARGETS:
+            found=[r for r in compile_rows if 'CMakeFiles/'+target+'.dir/' in r['command']]
+            need(len(found)==1,'one_TU_per_target:'+target)
+            selected.extend(found)
+            argv=shlex.split(found[0]['command'])
+            oi=argv.index('-o');del argv[oi:oi+2]
+            argv.remove('-c');argv.insert(1,'-M')
+            name='dependencies_'+target
+            run(name,argv)
+            output=(OUT/(name+'.stdout')).read_text().replace('\\\n',' ')
+            for value in shlex.split(output.split(':',1)[1]):
+                path=Path(value)
+                if not path.is_absolute():path=ROOT/path
+                path=path.resolve();need(path.is_file(),'dependency_exists')
+                dependencies[str(path)]=sha(path)
+        save(OUT/'selected_compile_commands.json',selected)
+        save(OUT/'dependencies_before.json',dependencies)
+        run('build',['cmake','--build',str(BUILD),'--parallel','1','--target',*TARGETS])
+        binaries={name:sha(BUILD/name) for name in TARGETS};save(OUT/'binaries_before.json',binaries)
+        run('ctest_list',['ctest','--test-dir',str(BUILD),'--show-only=json-v1','-R',PATTERN])
+        tests=json.loads((OUT/'ctest_list.stdout').read_text())['tests']
+        need(len(tests)==24,'same_24_CTests_selected')
+        expected=re.findall(r'Test\s+#\d+:\s+(mhgp7_\w+)',
+            (ROOT/'build/v7_static_resolver_20260911/cmake_capture_r1/ctest.stdout').read_text())
+        need(set(t['name'] for t in tests)==set(expected) and len(expected)==24,'historical_test_name_set')
+        save(OUT/'selected_tests.json',[t['name'] for t in tests])
+        run('ctest',['ctest','--test-dir',str(BUILD),'--output-on-failure','--parallel','1',
+                    '--output-junit',str(OUT/'ctest.junit.xml'),'-R',PATTERN])
+        need('100% tests passed, 0 tests failed out of 24' in (OUT/'ctest.stdout').read_text(),'all_24_reported')
+        for name,flags in [('worker_normal',[]),('worker_optimized',['-O'])]:
+            run(name,['python3','-B',*flags,'gcp-migration/selftest_full_ball_worker_v7.py'])
+        run('probe_200_static1',[str(BUILD/'mhgp7_full_ball_tower_probe'),'--n=200','--s=8','--kmax=10',
+             '--threads=1','--static-threads=1'])
+        actual=json.loads((OUT/'probe_200_static1.stdout').read_text())
+        original=ROOT/'build/v7_post_exchange_seed_20260911/clean_o2_r1/probe_static1.stdout'
+        reference=json.loads(original.read_text());shutil.copyfile(original,OUT/'probe_O2_reference.stdout')
+        timing={'index_s','generate_s','sort_s','prefilter_s','census_s','tower_s','digest_s','total_s'}
+        need({k:v for k,v in actual.items() if k not in timing}=={k:v for k,v in reference.items() if k not in timing},
+             'active_Release_vs_clean_O2_all_non_time_fields')
+        need(actual['resolver_meb_calls']==48618 and sum(r['post_seed_hits'] for r in actual['static_orders'])==2945,
+             'active_probe_hit_floor')
+        shutil.copyfile(BUILD/'CMakeCache.txt',OUT/'CMakeCache.txt.source')
+        shutil.copyfile(BUILD/'compile_commands.json',OUT/'compile_commands.json')
+        shutil.copyfile(BUILD/'CTestTestfile.cmake',OUT/'CTestTestfile.cmake.source')
+        shutil.copyfile(BUILD/'Testing/Temporary/LastTest.log',OUT/'LastTest.log')
+        status='passed'
+    except BaseException as exc:error=type(exc).__name__+': '+str(exc)
+    finally:
+        after=inventory();save(OUT/'sources_after.json',after)
+        dependency_after={name:sha(Path(name)) for name in dependencies};save(OUT/'dependencies_after.json',dependency_after)
+        binary_after={name:sha(BUILD/name) for name in binaries};save(OUT/'binaries_after.json',binary_after)
+        stable=before==after and dependencies==dependency_after and binaries==binary_after
+        if not stable:status,error='failed','source_dependency_or_binary_changed'
+        save(OUT/'commands.json',commands)
+        save(OUT/'receipt.json',dict(status=status,error=error,sources_and_dependencies_stable=stable,
+            sources=len(before),used_dependencies=len(dependencies),binary_sha256=binary_after,commands=len(commands),
+            selected_CTests=24,build_parallelism=1,cuda_enabled=False,GCP_used=False,
+            public_status='not_claimed',active_source_pins=PINS,probe_latency_claimed=False))
+        print(json.dumps(dict(status=status,error=error,commands=len(commands))),flush=True)
+    need(status=='passed',str(error))
+
+
+if __name__=='__main__':main()

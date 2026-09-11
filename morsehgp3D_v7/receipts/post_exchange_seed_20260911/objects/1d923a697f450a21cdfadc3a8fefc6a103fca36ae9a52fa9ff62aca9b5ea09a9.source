@@ -1,0 +1,10 @@
+{
+  "GCP_used": false,
+  "SAN": true,
+  "compared_to": "o2_shortcut_r1",
+  "error": null,
+  "public_status": "not_claimed",
+  "source_header_sha256": "a73b89bfc8b03d38c546d30ee578610e4bb1d26911e252bf19399b8384af4ba6",
+  "sources_stable": true,
+  "status": "passed"
+}

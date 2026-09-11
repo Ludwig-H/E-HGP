@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+"""Create-only private supplement; never rewrite the earlier T2 receipt."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+
+HERE = Path(__file__).resolve().parent.parent
+REPO = HERE.parents[1]
+BASE = REPO / "morsehgp3D_v7/receipts/full_t2_census_tower_20260911"
+CAPTURES = ("causal_r1", "o2_r1", "san_root_r1")
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def main():
+    for name in CAPTURES:
+        if json.loads((HERE / name / "receipt.json").read_bytes())["status"] != "passed":
+            raise ValueError(name + ": not closed PASS")
+    package = HERE / "package"; package.mkdir(exist_ok=False); (package / "objects").mkdir()
+    files = {}
+
+    def add(name, data):
+        if data.startswith(b"\x7fELF"):
+            return
+        pin = sha(data); files[name] = dict(sha256=pin, bytes=len(data))
+        target = package / "objects" / pin
+        if not target.exists():
+            target.write_bytes(data)
+
+    for path in sorted((HERE / "source").rglob("*")):
+        if path.is_file():
+            add("current/" + str(path.relative_to(HERE)), path.read_bytes())
+    for path in sorted(HERE.iterdir()):
+        if path.is_file() and path.suffix in (".py", ".json", ".md"):
+            add("current/" + path.name, path.read_bytes())
+    for capture in CAPTURES:
+        for path in sorted((HERE / capture).rglob("*")):
+            if path.is_file():
+                add("captures/" + capture + "/" + str(path.relative_to(HERE / capture)), path.read_bytes())
+    for name in ("manifest.json", "source/t2_gate.cpp", "source/t2_oracle.hpp",
+                 "source/source/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp",
+                 "source/source/morsehgp3D_v7/src/forest/full_ball_tower.hpp",
+                 "runs/o2/line12.stdout", "runs/o2/shell14.stdout", "runs/o2/spatial12.stdout"):
+        add("closed/" + name, (BASE / name).read_bytes())
+    for name in ("reader.py", "publish.py", "README.md"):
+        add("package_tools/" + name, (HERE / "package_tools" / name).read_bytes())
+        if name != "publish.py":
+            shutil.copy2(HERE / "package_tools" / name, package / name)
+    manifest = dict(schema="mhgp7_t2_metadata_supplement_v1", files=files,
+        closed_receipt_sha256=sha((BASE / "manifest.json").read_bytes()),
+        scope=dict(public_status="not_claimed", GCP_used=False, device_executed=False,
+                   performance_contract=False, legacy_fault_runs_are_positive_miss_witnesses=True))
+    (package / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+    (package / "manifest.sha256").write_text(sha((package / "manifest.json").read_bytes()) + "  manifest.json\n")
+    for optimized in (False, True):
+        command = ["python3", "-B", *(["-O"] if optimized else []), str(package / "reader.py"), str(package), "--selftest"]
+        process = subprocess.run(command, capture_output=True)
+        name = "optimized" if optimized else "normal"
+        (package / ("reader_" + name + ".stdout")).write_bytes(process.stdout)
+        (package / ("reader_" + name + ".stderr")).write_bytes(process.stderr)
+        if process.returncode:
+            raise ValueError(process.stderr.decode())
+        print(process.stdout.decode().strip())
+
+
+if __name__ == "__main__":
+    main()

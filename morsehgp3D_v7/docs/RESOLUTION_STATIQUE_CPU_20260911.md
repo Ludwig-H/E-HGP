@@ -6,6 +6,11 @@
 Le défaut reste le resolver temporel avec cache. Cette voie ne certifie ni
 la complétude WSPD, ni une archive industrielle, ni un contrat de performance.
 
+Le delta initial décrit ci-dessous est épinglé au header `33e7d05e…`.
+Son [complément après échange](SEMIS_APRES_ECHANGE_20260911.md) porte le
+header actif `6763a877…` : mêmes semis complets, consultés aussi après chaque
+échange. Les résultats historiques ne lui sont pas réattribués.
+
 ## Ce qui est maintenant implémenté
 
 `build_full_ball_tower(index, balls, kmax, static_threads)` sélectionne la
@@ -46,7 +51,7 @@ pas intégré dans ce delta, pour séparer leurs effets.
 ## Exactitude et travail réellement exécuté
 
 Le [paquet de qualification CPU](../receipts/static_resolution_cpu_20260911/README.md)
-épingle le header intégré `33e7d05e…`, exactement celui du prototype qualifié.
+épingle le header initial `33e7d05e…`, exactement celui du prototype qualifié.
 O2 et ASan/UBSan avec détection des fuites : 30 nuages, 124 ordres,
 3 324 coupes et 75 136 vérifications verticales dans chaque voie statique.
 S'ajoutent 4 498 contrôles physiques appariés des nœuds, tableaux de parents
@@ -67,9 +72,11 @@ Le [complément après admission](../receipts/static_worker_failure_20260911/REA
 injecte une vraie panne d'allocation de la pile d'un worker après sa première
 MEB. O2 vérifie deux pannes, la sortie vide, les jointures, le travail payé
 et la réutilisation ensuite ; le mutant omettant la réduction des stats est
-réfuté. **Son SAN n'est pas qualifié** : LSan/ptrace a refusé l'exécution,
-et le rejeu hors sandbox n'a pas reçu d'autorisation exploitable. Il reste
-distinct des gates O2/SAN favorables du constructeur décrites ci-dessus.
+réfuté. Sa première capture SAN reste un refus LSan/ptrace inchangé.
+Le [nouveau rejeu indépendant](../audits/receipts_static_followup_20260911/README.md)
+exécute depuis le même binaire SAN, fuites activées : les deux pannes,
+jointures et réutilisation passent. Ce résultat distinct ne qualifie ni
+le nouveau header après échange ni l'absence générale de races.
 
 Le premier contrôle ASan sous sandbox a échoué à cause de ptrace ; le même
 binaire a été rejoué hors sandbox, sans désactiver LeakSanitizer. Une erreur
@@ -122,7 +129,7 @@ conserve les trois tours K1..10, s8, un thread amont et quatre statiques.
 Les 35 champs de calendrier/sortie comparés au moteur nominal du 10 septembre
 coïncident à chaque taille, dont les payloads et toutes les verticales.
 Les compteurs physiques proviennent de la même sonde privée figée que les
-micros ; son header est identique au raccord actif, ses métadonnées restent
+micros ; son header est identique au raccord initial `33e7d05e…`, ses métadonnées restent
 distinctes de la sonde active. La référence nominale n'est pas rechronométrée.
 
 | n | MEB nominales | MEB statiques | Réduction des MEB | Réduction des supports | Capacités statiques retenues (octets) |

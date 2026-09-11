@@ -1,0 +1,176 @@
+// Private mono-CPU paired micro. Census is generated once; FULL outputs are
+// compared field by field. Wall times on a shared host are not speed claims.
+#include <chrono>
+#include <cstdio>
+#include <stdexcept>
+namespace post_seed_test { bool cache_enabled = true; }
+#include "morsehgp3D_v7/src/forest/full_ball_tower.hpp"
+#include "morsehgp3D_v7/src/pipeline/generate.hpp"
+#include "morsehgp3D_v7/src/cloud/families.hpp"
+#include "morsehgp3D_v7/src/core/sha256.hpp"
+
+namespace {
+using namespace mhgp7;
+using Clock = std::chrono::steady_clock;
+void need(bool ok, const char* why) { if (!ok) throw std::runtime_error(why); }
+u64 sum(const auto& values) { return std::accumulate(values.begin(), values.end(), u64{0}); }
+bool same_work(const AnchorMebWork& a, const AnchorMebWork& b) {
+  return a.calls == b.calls && a.supports_by_size == b.supports_by_size &&
+      a.power_tests == b.power_tests && a.materializations == b.materializations;
+}
+void same_physical(const FullBallTowerResult& a, const FullBallTowerResult& b) {
+  need(a.status == FullBallStatus::kCompleteRelative && b.status == a.status &&
+       a.orders.size() == b.orders.size(), "micro.complete_tower_shape");
+  const auto pa = a.orders.front().forest.populations(), pb = b.orders.front().forest.populations();
+  need(pa && pb && pa->domain() == pb->domain() && pa->rows().size() == pb->rows().size(), "micro.population_bank");
+  for (size_t j = 0; j < pa->rows().size(); ++j)
+    need(pa->rows()[j].interior == pb->rows()[j].interior && pa->rows()[j].shell == pb->rows()[j].shell,
+         "micro.population_row");
+  for (size_t k = 0; k < a.orders.size(); ++k) {
+    const auto& x = a.orders[k].forest; const auto& y = b.orders[k].forest;
+    need(x.order() == y.order() && x.nodes().size() == y.nodes().size() && x.parents() == y.parents() &&
+         x.successors() == y.successors() && a.orders[k].lower_nodes == b.orders[k].lower_nodes &&
+         x.contributions().size() == y.contributions().size(), "micro.forest_vectors");
+    for (size_t j = 0; j < x.nodes().size(); ++j) {
+      const auto& u = x.nodes()[j]; const auto& v = y.nodes()[j];
+      need(same_exact_level(u.level, v.level) && u.first == v.first && u.parent_count == v.parent_count,
+           "micro.node_physical_fields");
+    }
+    for (size_t j = 0; j < x.contributions().size(); ++j) {
+      const auto& u = x.contributions()[j]; const auto& v = y.contributions()[j];
+      need(same_exact_level(u.level, v.level) && u.segment == v.segment &&
+           u.ref.population == v.ref.population && u.ref.shell_mask == v.ref.shell_mask &&
+           u.ref.include_interior == v.ref.include_interior, "micro.contribution_physical_fields");
+    }
+  }
+}
+void stable_work(const FullBallStats& a, const FullBallStats& b, const FullBallStats& observation, int mode) {
+  const u64 h = mode == 2 ? sum(observation.post_seed_hits) : 0;
+  need(a.anchor_hits == b.anchor_hits + h && a.key_lookups == b.key_lookups + h,
+       "micro.terminal_paid_work_removed");
+#define SAME(name) need(a.name == b.name, "micro.unchanged_" #name)
+  SAME(records); SAME(extra_records); SAME(anchor_blocks); SAME(regular_blocks); SAME(extra_blocks);
+  SAME(representatives); SAME(intruder_queries); SAME(intruder_nodes); SAME(intruder_power_tests); SAME(interior_ranges);
+  SAME(same_radius_steps); SAME(descending_steps); SAME(max_chain_steps);
+  SAME(births); SAME(merges); SAME(contributions); SAME(inert_blocks); SAME(declared_support_checks);
+  SAME(singleton_lots); SAME(grouped_lots); SAME(lot_dsu_slots); SAME(lower_edges_indexed); SAME(lower_nodes_activated);
+  SAME(lower_edges_activated); SAME(lower_queries); SAME(lower_find_steps); SAME(lower_path_writes);
+  SAME(resolver_cache_queries); SAME(resolver_cache_hits); SAME(resolver_cache_stores); SAME(resolver_cache_evictions);
+  SAME(resolver_cache_seed_stores); SAME(resolver_cache_slots); SAME(resolver_cache_reset_slots); SAME(resolver_cache_bytes);
+  SAME(resolver_cache_released_slots); SAME(static_requests); SAME(static_unique); SAME(static_seeded);
+  SAME(static_workers_created); SAME(static_peak_request_bytes); SAME(static_peak_target_bytes); SAME(static_lanes_used);
+  SAME(static_peak_retained_bytes); SAME(static_peak_seed_bytes); SAME(static_peak_group_bytes); SAME(static_peak_worker_bytes);
+#undef SAME
+  need(same_work(a.validation_work, b.validation_work), "micro.validation_work_unchanged");
+  const AnchorMebWork removed = mode == 2 ? observation.post_seed_observed_work : AnchorMebWork{};
+  need(a.resolve_work.calls == b.resolve_work.calls + removed.calls && removed.calls == h &&
+       a.resolve_work.power_tests == b.resolve_work.power_tests + removed.power_tests &&
+       a.resolve_work.materializations == b.resolve_work.materializations + removed.materializations,
+       "micro.exact_MEB_work_saved");
+  for (size_t q = 0; q < removed.supports_by_size.size(); ++q)
+    need(a.resolve_work.supports_by_size[q] == b.resolve_work.supports_by_size[q] + removed.supports_by_size[q],
+         "micro.exact_support_work_saved");
+  const auto queries = sum(b.post_seed_queries), hits = sum(b.post_seed_hits), terminals = sum(b.post_seed_terminal);
+  need(b.resolve_work.calls == b.anchor_hits + b.intruder_queries &&
+       b.anchor_hits + terminals == sum(b.static_unique) - sum(b.static_seeded), "micro.work_identities");
+  if (mode) {
+    need(queries == b.descending_steps + b.same_radius_steps &&
+         hits <= std::min(queries, sum(b.static_unique) - sum(b.static_seeded)), "micro.H_bounds");
+    need(b.post_seed_hits == observation.post_seed_hits && b.post_seed_queries == observation.post_seed_queries,
+         "micro.same_hit_trajectory");
+    if (mode == 1) need(sum(b.post_seed_verified) == hits && !terminals, "micro.observation_verified");
+    else need(terminals == hits && !sum(b.post_seed_verified), "micro.shortcut_terminal");
+  }
+}
+void level(Sha256& h, const ExactLevel& l) {
+  for (u64 n : l.num) h.u64le(n);
+  h.u64le(static_cast<u64>(static_cast<u128>(l.den)));
+  h.u64le(static_cast<u64>(static_cast<u128>(l.den) >> 64));
+}
+std::string physical_digest(const FullBallTowerResult& tower) {
+  Sha256 h; h.tag("mhgp7-post-exchange-physical-v1");
+  const auto values = [&](const auto& v) { h.u64le(v.size()); for (auto x : v) h.u64le(x); };
+  h.u64le(tower.orders.size());
+  for (const auto& o : tower.orders) {
+    const auto& f = o.forest; h.u64le(f.order()); h.u64le(f.nodes().size());
+    for (const auto& node : f.nodes()) { level(h,node.level); h.u64le(node.first); h.u64le(node.parent_count); }
+    values(f.parents()); values(f.successors()); values(o.lower_nodes);
+    h.u64le(f.contributions().size());
+    for (const auto& c : f.contributions()) {
+      level(h,c.level); h.u64le(c.segment); h.u64le(c.ref.population); h.u64le(c.ref.shell_mask); h.u64le(c.ref.include_interior);
+    }
+  }
+  const auto bank = tower.orders.front().forest.populations(); values(bank->domain()); h.u64le(bank->rows().size());
+  for (const auto& row : bank->rows()) { values(row.interior); values(row.shell); }
+  return h.hex();
+}
+void report(int n, int mode, double seconds, size_t balls, const FullBallTowerResult& tower, const std::string& input) {
+  const auto& s = tower.stats;
+  u64 nodes = 0, parents = 0, contributions = 0;
+  for (const auto& order : tower.orders) {
+    nodes += order.forest.nodes().size(); parents += order.forest.parents().size(); contributions += order.forest.contributions().size();
+  }
+  std::printf("n=%d mode=%d balls=%zu nodes=%llu parents=%llu contributions=%llu populations=%zu "
+      "R=%llu U=%llu S=%llu D=%llu same_radius=%llu H=%llu queries=%llu verified=%llu terminals=%llu "
+      "M=%llu supports=%llu powers=%llu materializations=%llu observed_calls=%llu observed_supports=%llu "
+      "observed_powers=%llu observed_materializations=%llu retained_buffers=%llu tower_seconds=%.9f input_digest=%s physical_digest=%s\n",
+      n, mode, balls, static_cast<unsigned long long>(nodes), static_cast<unsigned long long>(parents),
+      static_cast<unsigned long long>(contributions), tower.orders.front().forest.populations()->rows().size(),
+      static_cast<unsigned long long>(sum(s.static_requests)), static_cast<unsigned long long>(sum(s.static_unique)),
+      static_cast<unsigned long long>(sum(s.static_seeded)), static_cast<unsigned long long>(s.descending_steps+s.same_radius_steps),
+      static_cast<unsigned long long>(s.same_radius_steps), static_cast<unsigned long long>(sum(s.post_seed_hits)),
+      static_cast<unsigned long long>(sum(s.post_seed_queries)), static_cast<unsigned long long>(sum(s.post_seed_verified)),
+      static_cast<unsigned long long>(sum(s.post_seed_terminal)), static_cast<unsigned long long>(s.resolve_work.calls),
+      static_cast<unsigned long long>(sum(s.resolve_work.supports_by_size)), static_cast<unsigned long long>(s.resolve_work.power_tests),
+      static_cast<unsigned long long>(s.resolve_work.materializations), static_cast<unsigned long long>(s.post_seed_observed_work.calls),
+      static_cast<unsigned long long>(sum(s.post_seed_observed_work.supports_by_size)),
+      static_cast<unsigned long long>(s.post_seed_observed_work.power_tests),
+      static_cast<unsigned long long>(s.post_seed_observed_work.materializations),
+      static_cast<unsigned long long>(s.static_peak_retained_bytes), seconds, input.c_str(), physical_digest(tower).c_str());
+  std::fflush(stdout);
+}
+}
+
+int main(int argc, char**) {
+  if (argc != 1) return 2;
+  try {
+    for (int n : {200,400,800,1000}) {
+      std::fprintf(stderr,"n=%d stage=census_start\n",n); std::fflush(stderr);
+      const auto in = make_family_input(CloudFamily::kUniform,n,65536,3);
+      const auto ix = build_cloud_index(in);
+      need(ix.valid && !ix.has_duplicate_positions(), "micro.valid_u16_cloud");
+      Sha256 ih; ih.u64le(in.size());
+      for (const auto& p : in) { ih.u64le(p.id); ih.u64le(p.position.x); ih.u64le(p.position.y); ih.u64le(p.position.z); }
+      const auto input_hash = ih.hex();
+      std::vector<BallCandidate> candidates; GenerateOptions opt; opt.s=8; opt.smax=11; opt.threads=1;
+      GenerateStats gen; generate_candidates(ix,opt,&candidates,&gen);
+      need(gen.cap_refus == kCapRefusNone && !gen.invariant_jneg,"micro.generate_refusal");
+      const auto mass = expected_pair_mass(ix);
+      for (size_t q=0;q<3;++q) need(gen.ledger_emitted_mass[q]+gen.ledger_killed_mass[q] == mass,"micro.WSPD_mass");
+      rle_candidates(&candidates,1); std::vector<Survivor> survivors; std::vector<BallData> balls; ExpandStats census;
+      prefilter_balls(ix,candidates,11,1,&survivors,&census);
+      need(census_balls(ix,candidates,survivors,11,kBallShellMax,1,&balls,&census) == PipelineStatus::kCompleteRegular,
+           "micro.census_refusal");
+      std::vector<BallCandidate>().swap(candidates); std::vector<Survivor>().swap(survivors);
+      std::fprintf(stderr,"n=%d stage=census_complete balls=%zu\n",n,balls.size()); std::fflush(stderr);
+      const auto start = Clock::now();
+      const auto baseline = build_full_ball_tower(ix,balls,10,1,0);
+      const double seconds = std::chrono::duration<double>(Clock::now()-start).count();
+      need(baseline.status == FullBallStatus::kCompleteRelative,"micro.baseline_status");
+      report(n,0,seconds,balls.size(),baseline,input_hash);
+      FullBallStats observation;
+      for (int mode : {1,2}) {
+        const auto begin = Clock::now();
+        const auto variant = build_full_ball_tower(ix,balls,10,1,mode);
+        const double elapsed = std::chrono::duration<double>(Clock::now()-begin).count();
+        if (mode==1) observation=variant.stats;
+        same_physical(baseline,variant); stable_work(baseline.stats,variant.stats,observation,mode);
+        report(n,mode,elapsed,balls.size(),variant,input_hash);
+      }
+    }
+    std::puts("{\"status\":\"passed_paired_mono_micro\",\"sizes\":[200,400,800,1000],\"modes\":[0,1,2],"
+              "\"threads\":1,\"static_threads\":1,\"s\":8,\"Kmax\":10,\"seed\":3,\"coord\":65536,"
+              "\"physical_comparison\":\"all_serialized_fields_not_only_digest\",\"contract_qualified\":false,\"GCP_used\":false}");
+    return 0;
+  } catch (const std::exception& error) { std::fprintf(stderr,"FAIL %s\n",error.what()); return 1; }
+}

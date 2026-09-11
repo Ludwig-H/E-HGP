@@ -115,6 +115,10 @@ ancres temporelles ne sont lues qu'après fermeture du lot de naissance de
 la cible, strictement avant le lot consommateur. Ni les
 blocs sans représentant ni les verticales ne sont supprimés. Le défaut
 conserve le cache temporel ; les deux voies ne cumulent pas leurs tables.
+Le [complément après échange](SEMIS_APRES_ECHANGE_20260911.md) réutilise
+maintenant la table complète existante après chaque remplacement : un hit
+exact évite la MEB terminale suivante. Aucun support partiel ne fait semis,
+et le travail évité est compté séparément des semis initiaux.
 
 ## Qualification et instrument
 
@@ -137,12 +141,17 @@ Le défaut `new(nothrow)` de l'injecteur ASan est corrigé dans le test,
 avec conservation de son échec antérieur. Vingt CTests CPU passent sur
 sources stables dans le [reçu d'échelle](../receipts/full_ball_scale_gpu_20260910/README.md).
 
-Le nouveau raccord statique est qualifié séparément : 30 nuages, 124 ordres,
+Le premier raccord statique `33e7d05e…` est qualifié séparément : 30 nuages, 124 ordres,
 3 324 coupes, 75 136 verticales et 4 498 contrôles physiques appariés O2/SAN.
 La gate nominale intégrée garde ses 28 nuages. Six mutants statiques sont
 réfutés et 24 CTests ciblés passent sur les nouvelles sources figées.
 Le lien CUDA de la sonde hybride est aussi rejoué localement, sans device ;
 ce contrôle ne transforme pas la résolution CPU en backend GPU.
+Le header courant `6763a877…` a ses propres O2/SAN : 34 nuages, 150 ordres,
+87 230 verticales et 5 704 comparaisons physiques statiques. Ses 24 CTests
+CPU passent dans un build neuf ; le [raccord réel T2](QUALIFICATION_TOUR_CENSUS_K10_20260911.md)
+est également rejoué jusqu'à K10. Aucun nouveau lien CUDA de ce header
+actif n'est déduit des compilations de prototypes ou de son prédécesseur.
 
 `bench/full_ball_tower_probe.cpp` mesure entrée, index, génération WSPD,
 tri/RLE, prefilter, census, tour retenue et empreinte du payload. Elle garde

@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/probe",
+    "--n=200",
+    "--s=8",
+    "--kmax=10",
+    "--threads=1",
+    "--static-threads=0"
+  ],
+  "ended_ns": 1789120208318257175,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "probe_static0",
+  "sanitizer_environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "started_ns": 1789120200425179415,
+  "stderr_sha256": "68c68b5b2a451fc5005bb738a2f7770b7de08fe40698058a289c914c0f5a54bd",
+  "stdout_sha256": "2b6a390856e46584f4057f4c4219d70a1f6a6a8c3f8c947edc4cc238de5bd26c"
+}

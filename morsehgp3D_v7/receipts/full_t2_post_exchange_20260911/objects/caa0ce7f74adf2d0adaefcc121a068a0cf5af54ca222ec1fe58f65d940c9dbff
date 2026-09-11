@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+"""Create-only portable evidence for fresh post-exchange CPU T2 captures."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+
+HERE = Path(__file__).resolve().parent.parent
+CAPTURES = ("o2_r1", "san_root_r1")
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def main():
+    for name in CAPTURES:
+        if json.loads((HERE / name / "receipt.json").read_bytes())["status"] != "passed":
+            raise ValueError(name + ": capture not closed PASS")
+    packet = HERE / "package"
+    packet.mkdir(exist_ok=False)
+    (packet / "objects").mkdir()
+    files = {}
+
+    def add(name, data):
+        if data.startswith(b"\x7fELF"):
+            return
+        pin = sha(data)
+        files[name] = dict(sha256=pin, bytes=len(data))
+        target = packet / "objects" / pin
+        if not target.exists():
+            target.write_bytes(data)
+
+    for path in sorted((HERE / "source").rglob("*")):
+        if path.is_file():
+            add("current/" + str(path.relative_to(HERE)), path.read_bytes())
+    for path in sorted(HERE.iterdir()):
+        if path.is_file() and path.suffix in (".py", ".md", ".json"):
+            add("current/" + path.name, path.read_bytes())
+    for capture in CAPTURES:
+        for path in sorted((HERE / capture).rglob("*")):
+            if path.is_file():
+                add("captures/" + capture + "/" + str(path.relative_to(HERE / capture)), path.read_bytes())
+    for name in ("reader.py", "publish.py", "README.md"):
+        add("package_tools/" + name, (HERE / "package_tools" / name).read_bytes())
+        if name != "publish.py":
+            shutil.copy2(HERE / "package_tools" / name, packet / name)
+    manifest = dict(schema="mhgp7_t2_post_exchange_cpu_v1", files=files,
+        scope=dict(public_status="not_claimed", GCP_used=False, device_executed=False,
+                   performance_contract=False, inherited_results=False, probe_compiled=False))
+    raw = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode()
+    (packet / "manifest.json").write_bytes(raw)
+    (packet / "manifest.sha256").write_text(sha(raw) + "  manifest.json\n")
+    for optimized in (False, True):
+        command = ["python3", "-B", *(["-O"] if optimized else []), str(packet / "reader.py"), str(packet), "--selftest"]
+        result = subprocess.run(command, capture_output=True)
+        tag = "optimized" if optimized else "normal"
+        (packet / ("reader_" + tag + ".stdout")).write_bytes(result.stdout)
+        (packet / ("reader_" + tag + ".stderr")).write_bytes(result.stderr)
+        if result.returncode:
+            raise ValueError(result.stderr.decode())
+        print(result.stdout.decode().strip())
+
+
+if __name__ == "__main__":
+    main()

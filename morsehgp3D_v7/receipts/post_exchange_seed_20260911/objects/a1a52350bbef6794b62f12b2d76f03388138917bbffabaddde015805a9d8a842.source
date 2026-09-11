@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/usr/bin/time",
+    "-v",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/micro_r1/micro"
+  ],
+  "ended_ns": 1789118412700151545,
+  "exit_code": 0,
+  "name": "micro",
+  "started_ns": 1789118365025097250,
+  "stderr_sha256": "885621f44f58b2c8cf4df925a6d8a372172524cba30295beab8f196ab7184f9c",
+  "stdout_sha256": "9fc44b288dc1ff2293fa7ad35a810ccae221be7875d846d1371fd6e9d896cd27"
+}

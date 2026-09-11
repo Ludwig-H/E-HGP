@@ -1,0 +1,9 @@
+{
+  "GCP_used": false,
+  "commands": 16,
+  "error": null,
+  "phase": "observation_pays_all_MEB",
+  "public_status": "not_claimed",
+  "sources_stable": true,
+  "status": "passed"
+}

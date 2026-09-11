@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "/usr/bin/c++",
+    "-M",
+    "-DMHGP7_TESTING=1",
+    "-O3",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "/workspaces/E-HGP/morsehgp3D_v7/tests/census_route_stub_gate.cpp"
+  ],
+  "ended_ns": 1789120795880702414,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "dependencies_mhgp7_census_route_stub_gate",
+  "started_ns": 1789120795753063121,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "3c6c3b219ef60bb5da621416c44f3d5290ec2bd29688125804da14a5b38298f8"
+}

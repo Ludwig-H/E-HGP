@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/san_root_r1/candidate",
+    "static1",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/san_root_r1/candidate_static1_observe2.physical",
+    "2"
+  ],
+  "ended_ns": 1789119331029409869,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "candidate_static1_observe2",
+  "sanitizer_environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "started_ns": 1789119318579404075,
+  "stderr_sha256": "f8777581e0dc5ede60143d3a72fe7b927fd34bbf682b2cd5155997e746d99584",
+  "stdout_sha256": "d3abecbdd3367a96d4ef95ddd18ba73f65ef3457d7fa202a79e56b3d3ca9a8b4"
+}

@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "g++",
+    "-O2",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-I",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/causal_r1/nominal/source",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/causal_r1/nominal/gate.d",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/causal_r1/causal.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/causal_r1/nominal/gate"
+  ],
+  "ended_ns": 1789119606835857570,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "nominal_compile",
+  "started_ns": 1789119596712990593,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

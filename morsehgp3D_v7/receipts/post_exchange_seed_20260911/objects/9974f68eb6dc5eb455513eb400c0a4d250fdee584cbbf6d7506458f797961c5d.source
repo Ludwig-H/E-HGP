@@ -1,0 +1,308 @@
+[
+  {
+    "argv": [
+      "g++",
+      "-O1",
+      "-g",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-DMHGP7_FULL_HEADER=\"/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/source/harness/morsehgp3D_v7/src/forest/full_ball_tower.hpp\"",
+      "-DMHGP7_GATE_SOURCE=\"/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/source/harness/morsehgp3D_v7/tests/full_ball_tower_gate.cpp\"",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/harness.d",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/source/qualification.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/harness"
+    ],
+    "ended_ns": 1789120038546667290,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "compile_harness",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789119996489025851,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/harness",
+      "cache",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/cache.physical",
+      "0"
+    ],
+    "ended_ns": 1789120049012869620,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "cache",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789120038602931956,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "3d47ed6ca765625845168d881c7c5c344658c70564395fd5436c5bf16e8c0fa7"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/harness",
+      "no_cache",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/no_cache.physical",
+      "0"
+    ],
+    "ended_ns": 1789120059151588058,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "no_cache",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789120049013605613,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "cdf3b6e11c998bbf1010f3223cfe0ff79adde44b756edc0eb04a291fe020e3a5"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/harness",
+      "static1",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/static1.physical",
+      "0"
+    ],
+    "ended_ns": 1789120071463733878,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "static1",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789120059152367426,
+    "stderr_sha256": "f8777581e0dc5ede60143d3a72fe7b927fd34bbf682b2cd5155997e746d99584",
+    "stdout_sha256": "d3abecbdd3367a96d4ef95ddd18ba73f65ef3457d7fa202a79e56b3d3ca9a8b4"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/harness",
+      "static4",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/static4.physical",
+      "0"
+    ],
+    "ended_ns": 1789120084395791791,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "static4",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789120071464592244,
+    "stderr_sha256": "d78f7936e61482441b24d671d47ba47bc1cffd3f1558de1882b37caa46974167",
+    "stdout_sha256": "d3abecbdd3367a96d4ef95ddd18ba73f65ef3457d7fa202a79e56b3d3ca9a8b4"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/harness"
+    ],
+    "ended_ns": 1789120084415619801,
+    "exit_code": 2,
+    "expected_exit": 2,
+    "name": "harness_bad_arguments",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789120084396592561,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "argv": [
+      "g++",
+      "-O1",
+      "-g",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/product_gate.d",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/source/product/morsehgp3D_v7/tests/full_ball_tower_gate.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/product_gate"
+    ],
+    "ended_ns": 1789120126537945371,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "compile_product_gate",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789120084416262957,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/product_gate",
+      "--selftest"
+    ],
+    "ended_ns": 1789120132811632186,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "product_nominal",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789120126573276635,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "3a017058eba3f8d07d4bc5e3ed41a35f0489aa4d3a007c619138d5668d7d6fc8"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/product_gate",
+      "--static-1"
+    ],
+    "ended_ns": 1789120143028729547,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "product_static1",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789120132812272036,
+    "stderr_sha256": "c684dd04be62c1d522f5e91ad5d5b4e4434f9365a2f9907767d99ebabb581ac7",
+    "stdout_sha256": "55c2ce9db598d31bd086553ff8d6cac1564da8a02bb1334d894731e87512a63d"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/product_gate",
+      "--static-4"
+    ],
+    "ended_ns": 1789120153562576457,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "product_static4",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789120143029401045,
+    "stderr_sha256": "7bab9570b8fd962497dcccab6b11aa96391b4953d8a5d88ce3489cd7a52adf34",
+    "stdout_sha256": "55c2ce9db598d31bd086553ff8d6cac1564da8a02bb1334d894731e87512a63d"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/product_gate",
+      "--unknown"
+    ],
+    "ended_ns": 1789120153582252110,
+    "exit_code": 2,
+    "expected_exit": 2,
+    "name": "product_bad_argument",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789120153563207013,
+    "stderr_sha256": "4b9eeadc562c94288f788d79631dcc662f5b8c306e7232ccdc083094698a2e85",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "argv": [
+      "g++",
+      "-O1",
+      "-g",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/probe.d",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/source/product/morsehgp3D_v7/bench/full_ball_tower_probe.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/probe"
+    ],
+    "ended_ns": 1789120200375336590,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "compile_probe",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789120153582860444,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/probe",
+      "--n=200",
+      "--s=8",
+      "--kmax=10",
+      "--threads=1",
+      "--static-threads=0"
+    ],
+    "ended_ns": 1789120208318257175,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "probe_static0",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789120200425179415,
+    "stderr_sha256": "68c68b5b2a451fc5005bb738a2f7770b7de08fe40698058a289c914c0f5a54bd",
+    "stdout_sha256": "2b6a390856e46584f4057f4c4219d70a1f6a6a8c3f8c947edc4cc238de5bd26c"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/probe",
+      "--n=200",
+      "--s=8",
+      "--kmax=10",
+      "--threads=1",
+      "--static-threads=1"
+    ],
+    "ended_ns": 1789120215537549103,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "probe_static1",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789120208319270721,
+    "stderr_sha256": "b3a4e5e3babfe4365b0c8163d0f4f63cd097d282d8d09e1e41e58c63a3fbcc88",
+    "stdout_sha256": "73d25bc969d68c38e8cf8fc06f977bfcc55d21b4029bf1a54aff9bd532b3361e"
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "GCP_used": false,
+  "SAN": true,
+  "commands": 14,
+  "compared_to": "clean_o2_r1",
+  "error": null,
+  "probe_latency_claimed": false,
+  "production_applied": false,
+  "public_status": "not_claimed",
+  "source_header_sha256": "6763a877f43d79a45532bce4426feca645b6ee97f18c9a4ee1fea4c47cd408a5",
+  "sources_stable": true,
+  "status": "passed"
+}

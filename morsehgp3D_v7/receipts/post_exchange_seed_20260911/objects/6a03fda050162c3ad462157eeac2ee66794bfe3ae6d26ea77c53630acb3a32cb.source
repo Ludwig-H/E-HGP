@@ -1,0 +1,9 @@
+{
+  "GCP_used": false,
+  "commands": 20,
+  "error": null,
+  "phase": "post_exchange_shortcut_paired",
+  "public_status": "not_claimed",
+  "sources_stable": true,
+  "status": "passed"
+}

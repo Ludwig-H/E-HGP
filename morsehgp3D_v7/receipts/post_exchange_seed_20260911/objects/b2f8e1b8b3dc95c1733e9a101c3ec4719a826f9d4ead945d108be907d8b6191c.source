@@ -1,0 +1,17 @@
+{
+  "GCP_used": false,
+  "equal_radius_guard_test_only_state": true,
+  "error": null,
+  "finite_Gamma_corpus": true,
+  "mutants": 3,
+  "partial_key_judged_by_paid_MEB_BallId_key_level": true,
+  "public_status": "not_claimed",
+  "started_variants": [
+    "nominal",
+    "partial_key",
+    "omit_terminal_exchange",
+    "accept_equal_fault"
+  ],
+  "status": "passed",
+  "valid_complete_population_equal_radius_witness_claimed": false
+}

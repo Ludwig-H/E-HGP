@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_t2_post_exchange_20260911/o2_r1/gate",
+    "--mutant-assignment"
+  ],
+  "expected_exit": 1,
+  "causal_diagnostic": "T2 unassigned subset"
+}

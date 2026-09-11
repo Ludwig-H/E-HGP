@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-O2",
+    "-DMHGP7_T2_METADATA_MUTANT=2",
+    "-isystem",
+    "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_t2_metadata_20260911/causal_r1/checked_vertical.d",
+    "/workspaces/E-HGP/build/v7_t2_metadata_20260911/causal_r1/source_snapshot/source/t2_gate.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_t2_metadata_20260911/causal_r1/checked_vertical"
+  ],
+  "expected_exit": 0,
+  "causal_diagnostic": null,
+  "mutation_marker": null
+}

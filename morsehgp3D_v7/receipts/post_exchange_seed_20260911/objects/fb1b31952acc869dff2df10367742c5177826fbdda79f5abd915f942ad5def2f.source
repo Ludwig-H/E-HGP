@@ -1,0 +1,14 @@
+{
+  "GCP_used": false,
+  "equal_radius_guard_test_only_state": true,
+  "error": "RuntimeError: unexpected_exit:partial_key_run",
+  "finite_Gamma_corpus": true,
+  "mutants": 3,
+  "public_status": "not_claimed",
+  "started_variants": [
+    "nominal",
+    "partial_key"
+  ],
+  "status": "failed",
+  "valid_complete_population_equal_radius_witness_claimed": false
+}

@@ -55,6 +55,20 @@ La [comparaison statique s8/10/12](receipts/static_s_factors_20260911/README.md)
 est aussi close à 8k : mêmes tours et travail MEB, quelques candidats amont
 en moins à s10/s12 ; aucun optimum de temps déduit de la charge variable.
 
+Le [complément après échange](docs/SEMIS_APRES_ECHANGE_20260911.md) est
+maintenant intégré à cette option : header `6763a877…`. Retrouver exactement
+une population complète évite la dernière MEB d'une descente, sans changer
+son terminal ni les parents. O2/SAN propres au patch : 34 nuages, 150 ordres,
+87 230 vérifications verticales ; trois mutants ciblés réfutés, avec les
+deux essais de juge insuffisant conservés. La micro mono n200 à n1000
+économise environ 5,7 % de MEB supplémentaires ; aucun gain de temps ni
+résultat historique 8k/50k n'est transféré à ce nouveau header.
+Sa [reconstruction CMake CPU](receipts/post_exchange_active_cmake_20260911/README.md)
+passe les 24 CTests pertinents. Le [nouveau T2](receipts/full_t2_post_exchange_20260911/README.md)
+recalcule les 54 tours O2/SAN sur ces sources, avec 120 hits effectivement
+exercés et des comptes identiques à un/quatre threads. Le nouveau triplet
+mono 8k/16k/32k est en cours, dans des processus indépendants.
+
 Le [triplet nominal du 10 septembre](docs/RESULTATS_TOUR_CACHE_G4_20260910.md) termine
 à 235,724 s / 354,144 s / 736,819 s pour 8k/16k/32k, s=8, un thread.
 Les sorties ont 3,98 M / 8,31 M / 17,17 M nœuds. Ce sont des diagnostics

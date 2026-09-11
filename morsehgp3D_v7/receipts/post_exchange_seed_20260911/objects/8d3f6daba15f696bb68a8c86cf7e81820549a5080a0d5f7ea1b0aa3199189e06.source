@@ -1,0 +1,66 @@
+[
+  {
+    "name": "E5",
+    "n": 5,
+    "kmax": 5,
+    "census": 17,
+    "cuts": 17,
+    "nodes": 32
+  },
+  {
+    "name": "window",
+    "n": 8,
+    "kmax": 6,
+    "census": 37,
+    "cuts": 33,
+    "nodes": 70
+  },
+  {
+    "name": "growth_double",
+    "n": 8,
+    "kmax": 3,
+    "census": 22,
+    "cuts": 15,
+    "nodes": 36
+  },
+  {
+    "name": "square",
+    "n": 4,
+    "kmax": 4,
+    "census": 5,
+    "cuts": 3,
+    "nodes": 12
+  },
+  {
+    "name": "pair",
+    "n": 2,
+    "kmax": 2,
+    "census": 1,
+    "cuts": 2,
+    "nodes": 4
+  },
+  {
+    "name": "inert",
+    "n": 7,
+    "kmax": 3,
+    "census": 26,
+    "cuts": 14,
+    "nodes": 37
+  },
+  {
+    "name": "post_seed_ABEZW",
+    "n": 5,
+    "kmax": 5,
+    "census": 12,
+    "cuts": 11,
+    "nodes": 27
+  },
+  {
+    "name": "post_seed_square_partial",
+    "n": 8,
+    "kmax": 8,
+    "census": 34,
+    "cuts": 10,
+    "nodes": 53
+  }
+]

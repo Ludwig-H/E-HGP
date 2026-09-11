@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/harness",
+    "static1",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/static1.physical",
+    "0"
+  ],
+  "ended_ns": 1789120071463733878,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "static1",
+  "sanitizer_environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "started_ns": 1789120059152367426,
+  "stderr_sha256": "f8777581e0dc5ede60143d3a72fe7b927fd34bbf682b2cd5155997e746d99584",
+  "stdout_sha256": "d3abecbdd3367a96d4ef95ddd18ba73f65ef3457d7fa202a79e56b3d3ca9a8b4"
+}

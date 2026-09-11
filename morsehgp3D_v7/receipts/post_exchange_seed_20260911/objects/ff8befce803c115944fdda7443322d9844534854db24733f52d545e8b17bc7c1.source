@@ -1,0 +1,171 @@
+# Semis complets après échange : état privé et proposition d'intégration
+
+Base de la qualification : `33e7d05e…`. Aucun Git, audit ou GCP utilisé/modifié
+par cette sous-tâche. Les snapshots et résultats de chaque étape restent distincts.
+Après fermeture du SAN propre, ROOT a appliqué exactement le patch clean aux
+trois fichiers actifs ; leur qualification CMake active est encore séparée.
+
+## Preuve et comptage
+
+La preuve consommée est celle de
+`morsehgp3D_v7/audits/receipts_static_followup_20260911/README.md`.
+Après le retrait du premier site du support et l'ajout du premier intrus strict,
+la clé triée entière de la facette est cherchée dans la table locale des semis.
+Une entrée représente exactement I union U, au même K, dans le même index.
+Son support positif force sa MEB. Le rayon décroît strictement : en cas d'égalité,
+unicité de la MEB identifierait l'ancienne boule au semis, dont la population
+complète devrait alors contenir le site retiré. Contradiction.
+
+La trajectoire originale calculerait donc la MEB du semis puis terminerait au
+tour suivant sur la même BallId. Les choix antérieurs de supports, d'intrus,
+de consommateurs, de populations et d'ancres restent inchangés.
+
+Sur les exécutions réussies, avec U clés uniques, S semis initiaux, D échanges,
+H hits après échange, Q lookups et T terminaux raccourcis : Q=D, H=T et
+H <= min(D,U-S). Le raccourci retire exactement H MEB et H lookups de boule.
+Il ne compte pas les H anchor_hits évités. Ainsi M=anchor_hits+intruder_queries
+et anchor_hits+T=U-S. Le dernier échange et la longueur restent payés.
+Les trois nouveaux compteurs Q/H/T sont séparés par K et fusionnés par worker.
+Ces identités ne sont pas promises sur un préfixe interrompu ou en erreur.
+
+Ni nouvelle table ni cache global : la table triée existante est passée en
+lecture seule au helper. Le surcoût est un lookup de clé entière par échange,
+et trois petits tableaux de compteurs par worker. Pas de consultation d'ancres
+ou de DSU dans la phase géométrique. La résidence reste celle de la phase
+statique existante O(A+R+n+workers*depth), sans garantie universelle de coût
+sous-quadratique sur tous les nuages ou de sortie FULL succincte.
+
+## Étapes exécutées
+
+`o2_observation_r1/` : 16 commandes O2 fermées, mode observation seulement.
+Chaque hit paie encore la MEB et vérifie BallId, clé et niveau. H=4 pour 20
+échanges dans chacun des modes statiques 1/4 du corpus étendu. Les quatre modes
+cache/no_cache/static1/static4 gardent leurs sorties physiques et anciens
+compteurs ; seule la taille du Worker instrumenté diffère entre headers.
+
+`o2_shortcut_r1/` : 20 commandes O2 fermées, modes privé 0/1/2. H=4 ; retrait
+exact du travail MEB observé sur les hits (appels, supports par taille,
+puissances et matérialisations), de H lookups et de H anchor_hits. Populations,
+nœuds, parents, successors, contributions et verticales sont comparés champ par
+champ ; l'oracle Gram/Gamma borné reste indépendant. La fixture ABEZW à cinq
+points exerce H>0 sous les deux réindexages. Le carré à quatre intérieurs
+conserve le rayon après échange, mais sa population8 n'est pas une clé K4 :
+lookup manqué, sans raccourci d'égalité.
+
+Header expérimental qualifié O2 :
+`a73b89bfc8b03d38c546d30ee578610e4bb1d26911e252bf19399b8384af4ba6`.
+Il possède encore l'API d'observation et un crochet de harnais pour désactiver
+le cache. Il n'est pas une source prête à copier dans le produit.
+
+## Micro mono-thread
+
+`micro_r1/` est fermé PASS sur uniformes u16, seed3, s8, toute la tour K1..10,
+un thread amont et un thread statique. Le census est partagé entre les trois
+modes ; les sorties sont comparées directement champ par champ en C++, et non
+seulement par leur digest.
+
+| n | D = lookups ajoutés | H = MEB évitées | MEB avant | MEB après | Supports retirés |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 200 | 17 419 | 2 945 | 51 563 | 48 618 | 282 985 |
+| 400 | 43 638 | 7 551 | 132 750 | 125 199 | 723 253 |
+| 800 | 106 276 | 17 933 | 314 605 | 296 672 | 1 749 123 |
+| 1 000 | 135 371 | 23 205 | 406 134 | 382 929 | 2 300 411 |
+
+Environ 5,7 % des MEB et 6,5–6,8 % des supports sont supprimés. Les hits valent
+16,9–17,3 % des lookups ajoutés, soit environ 5,8–5,9 lookups par hit. Même
+résidence de buffers entre les trois modes du même header ; zéro pas à rayon
+égal sur ces quatre uniformes. Cette stabilité est un intérêt de travail,
+pas une preuve de gain de latence industriel.
+
+À n1000 les temps FULL 0/1/2 sont 4,930 / 5,109 / 4,868 s. Ils ne sont pas
+promus : ordre fixe 0/1/2, une répétition, hôte partagé et baseline conservée
+pour comparaison physique. L'observation ajoute aussi ses vérifications exactes ;
+sa différence de temps n'est pas un chronométrage pur du lookup. Le RSS du
+processus inclut census et plusieurs tours vivantes, pas une résidence produit.
+
+## Mutants causaux et SAN a73 fermés
+
+`record_causal.py` prépare trois mutations C++ : clé partielle, omission du
+dernier échange dans le travail, admission d'une égalité dans un état fautif
+contrôlé. Le dernier cas est expressément test-only et non géométrique : le
+lemme interdit un vrai semis entier de même rayon sur une entrée valide.
+Affaiblir isolément `<` en `<=` n'offre donc pas de contre-fixture valide.
+Le premier corpus de huit census rationnels indépendants et 3 246
+signatures/coupes laisse survivre la mutation « premier site seulement ».
+Ce résultat négatif est conservé dans `causal_r1/` ; il ne constitue aucune
+qualification de cette mutation. Le corpus suivant ajoute huit nuages de six
+points déterministes (graine 2026091103), soit 16 census et 9 660 lignes
+attendues. `causal_r2/` conserve un second résultat négatif : les signatures
+Gamma restent identiques, malgré 12 hits dans le mutant contre 8 dans le
+nominal. Une mauvaise boule peut rejoindre la même racine temporelle ;
+l'égalité Gamma ne certifie pas l'égalité des terminaux géométriques.
+
+`causal_r3/` est fermé PASS, 12 commandes et quatre variantes compilées. Le
+nominal passe les bras 0/1/4, observation payée et état égalité fautif rejeté.
+Le corpus comprend 168 ordres, 7 196 coupes, 6 040 images verticales et 9 660
+lignes attendues. Trois mutations sont réfutées :
+
+- clé tronquée au premier site : l'observation payant réellement la MEB
+  rejette dès E5, `full_ball_post_seed_observation_mismatch` ; elle compare
+  BallId, clé et niveau, pas seulement la racine de composante ;
+- omission du dernier échange : `post_seed_exchange_accounting` ;
+- admission `<=` : `controlled_equal_level_fault_was_not_rejected` dans
+  l'état fautif non géométrique expressément injecté. Ce n'est toujours pas
+  un contre-exemple géométrique au lemme de décroissance stricte.
+
+Les fixtures et leur oracle restent des juges bornés. Les essais survivants
+ne sont ni effacés ni transformés rétrospectivement en réussites.
+
+`san_root_r1/` a été exécuté par ROOT et est fermé PASS : 14 commandes,
+snapshot O2 a73 exact, ASan/UBSan avec détection des fuites. Les 12 bras
+conservent exactement stdout, stderr et sortie physique de leur équivalent O2.
+Aucune exécution SAN n'a été lancée par cette sous-tâche.
+
+## Proposition clean — O2 et SAN propres fermés
+
+`clean/` prépare trois changements seulement :
+
+- header : raccourci automatique dans la voie statique déjà optionnelle,
+  défaut `static_threads=0` et cache nominal inchangés ; aucune API de mode
+  observation, aucun crochet de test, trois compteurs Q/H/T par K ;
+- probe : tag comptable statique v2 et trois champs additifs dans `static_orders`,
+  sans nouvelle CLI ni nouveau quota ;
+- gate : fixtures permanentes cinq points/carré8, deux réindexages, invariants de
+  travail et plancher H>0 ; le nominal reste sur ses fixtures historiques.
+
+`gcp-migration/full_ball_worker_v7.py` sélectionne toujours le chemin nominal
+sans `--static-threads` ; sa signature lit des champs connus et ignore les
+champs additifs. Il n'est pas modifié. S'il doit qualifier la voie statique un
+jour, ses parseurs devront vérifier les nouveaux compteurs et le tag v2 plutôt
+que déduire une qualification de leur seule présence. Les lecteurs historiques
+consomment leurs snapshots fermés et ne sont jamais réétiquetés.
+
+`clean_o2_r1/` est fermé PASS : 14 commandes, trois compilations distinctes.
+Le harnais des quatre modes reprend le même ordre de 78 appels que la
+qualification a73 ; il compare physiquement tous les champs et le travail
+ancien au mode raccourci a73, à l'exception des tableaux d'instrumentation
+remplacés et des deux capacités dépendant de la taille du Worker. Le cache
+nominal reste identique. La gate produit clean est compilée séparément,
+sans le crochet cache du harnais : les deux bras statiques passent 34 nuages,
+150 ordres, 87 230 contrôles verticaux, 5 704 comparaisons physiques appariées,
+Q=20 et H=T=4. Le nominal historique et les arguments invalides passent aussi.
+
+Le probe clean est compilé indépendamment : à n200, s8, toute la tour K1..10,
+nominal et statique1 ont le même input/payload et les mêmes volumes de sortie.
+Le statique retrouve Q=17 419, H=T=2 945 et M=48 618, exactement le travail du
+micro a73. Ses champs additifs et son tag comptable v2 sont vérifiés. Ces deux
+invocations servent à contrôler le travail et le format, pas la latence.
+
+Header clean : `6763a877f43d79a45532bce4426feca645b6ee97f18c9a4ee1fea4c47cd408a5`.
+Patch trois fichiers gelé dans `integration_proposal_r1/integration.patch` :
+`70453fb670019b97f1eb8d11f406625f412580bb97d11810523065a641d88535`.
+
+`record_clean_san.py clean_san_root_r1` a été exécuté par ROOT et ne copie aucune
+source active : il repart de `clean_o2_r1/source`, vérifie sa fermeture,
+rejoue les 14 commandes avec ASan/UBSan et détection des fuites, puis compare
+les physiques/flux exacts et tous les champs des probes hors les huit temps.
+Ce SAN clean est fermé PASS, exit 0, 14 commandes : le SAN a73 ne lui est pas
+transféré. ROOT a ensuite appliqué le patch exact ; ce paquet n'hérite d'aucun
+résultat CMake actif non encore effectué. Aucun 8k+ n'a été lancé ; le triplet exige un feu vert ROOT
+et une estimation réaliste du budget CPU. Aucun contrat 50k/1s ou 100ms ni
+plusieurs dizaines de millions sur G4 n'est revendiqué par cette étape.

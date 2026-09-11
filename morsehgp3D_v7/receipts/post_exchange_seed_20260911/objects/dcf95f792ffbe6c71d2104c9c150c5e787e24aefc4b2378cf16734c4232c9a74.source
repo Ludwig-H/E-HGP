@@ -1,0 +1,123 @@
+#!/usr/bin/env python3
+"""ROOT-only SAN replay from a closed clean O2 source, without live source copies."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+import time
+
+BASE = Path(__file__).resolve().parent
+REFERENCE = BASE / 'clean_o2_r1'
+HEADER = 'product/morsehgp3D_v7/src/forest/full_ball_tower.hpp'
+PIN = '6763a877f43d79a45532bce4426feca645b6ee97f18c9a4ee1fea4c47cd408a5'
+TIMES = {'index_s','generate_s','sort_s','prefilter_s','census_s','tower_s','digest_s','total_s'}
+
+
+def need(ok, why):
+    if not ok:
+        raise RuntimeError(why)
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def save(path, value):
+    with path.open('x') as stream:
+        json.dump(value, stream, indent=2, sort_keys=True)
+        stream.write('\n')
+
+
+def pins(path):
+    return {p.relative_to(path).as_posix():sha(p) for p in sorted(path.rglob('*')) if p.is_file()}
+
+
+def main():
+    need(len(sys.argv)==2 and sys.argv[1].isidentifier(), 'fresh_output_ROOT_only')
+    reference = json.loads((REFERENCE/'receipt.json').read_text())
+    need(reference['status']=='passed' and reference['SAN'] is False and reference['sources_stable'], 'closed_O2')
+    before = json.loads((REFERENCE/'sources_before.json').read_text())
+    need(before==json.loads((REFERENCE/'sources_after.json').read_text())==pins(REFERENCE/'source'), 'O2_source_still_closed')
+    need(sha(REFERENCE/'source'/HEADER)==PIN, 'clean_header_pin')
+    original_commands = json.loads((REFERENCE/'commands.json').read_text())
+    need(len(original_commands)==14, 'O2_command_floor')
+    out = BASE/sys.argv[1]
+    out.mkdir(exist_ok=False)
+    shutil.copytree(REFERENCE/'source', out/'source')
+    shutil.copyfile(Path(__file__), out/'record_clean_san.py.source')
+    save(out/'sources_before.json', before)
+    save(out/'O2_reference.json', dict(receipt_sha256=sha(REFERENCE/'receipt.json'),
+         commands_sha256=sha(REFERENCE/'commands.json'), source_header_sha256=PIN))
+    env = dict(os.environ, ASAN_OPTIONS='detect_leaks=1:halt_on_error=1',
+               UBSAN_OPTIONS='halt_on_error=1:print_stacktrace=1')
+    commands=[]
+    binaries={}
+    status,error='failed',None
+    try:
+        for old in original_commands:
+            name = old['name']
+            compiling = name.startswith('compile_')
+            argv=[]
+            for arg in old['argv']:
+                if compiling and arg=='-O2':
+                    argv.extend(['-O1','-g','-fsanitize=address,undefined','-fno-omit-frame-pointer'])
+                elif compiling and arg=='-DNDEBUG':
+                    continue
+                else:
+                    argv.append(arg.replace(str(REFERENCE),str(out)))
+            start=time.time_ns()
+            with (out/(name+'.stdout')).open('xb') as so, (out/(name+'.stderr')).open('xb') as se:
+                result=subprocess.run(argv,stdin=subprocess.DEVNULL,stdout=so,stderr=se,env=env,check=False)
+            row=dict(name=name,argv=argv,exit_code=result.returncode,expected_exit=old['expected_exit'],
+                     started_ns=start,ended_ns=time.time_ns(),stdout_sha256=sha(out/(name+'.stdout')),
+                     stderr_sha256=sha(out/(name+'.stderr')),
+                     sanitizer_environment={k:env[k] for k in ('ASAN_OPTIONS','UBSAN_OPTIONS')})
+            commands.append(row)
+            save(out/(name+'.command.json'),row)
+            print(name,result.returncode,flush=True)
+            need(result.returncode==old['expected_exit'],'unexpected_exit:'+name)
+            if compiling:
+                binary=Path(argv[argv.index('-o')+1])
+                binaries[binary.name]=sha(binary)
+                save(out/(binary.name+'.binary_before.json'),dict(sha256=sha(binary)))
+                continue
+            if name in ('probe_static0','probe_static1'):
+                actual=json.loads((out/(name+'.stdout')).read_text())
+                expected=json.loads((REFERENCE/(name+'.stdout')).read_text())
+                need(all(k in actual and k in expected for k in TIMES),'probe_time_schema')
+                need({k:v for k,v in actual.items() if k not in TIMES}==
+                     {k:v for k,v in expected.items() if k not in TIMES},'all_probe_non_time_fields:'+name)
+                normalize=lambda p:re.sub(r'seconds=[0-9]+\.[0-9]+','seconds=TIME',p.read_text())
+                need(normalize(out/(name+'.stderr'))==normalize(REFERENCE/(name+'.stderr')),'probe_stages:'+name)
+            else:
+                for suffix in ('.stdout','.stderr'):
+                    need((out/(name+suffix)).read_bytes()==(REFERENCE/(name+suffix)).read_bytes(),
+                         'O2_SAN_exact_stream:'+name+suffix)
+            physical=REFERENCE/(name+'.physical')
+            if physical.exists():
+                need((out/physical.name).read_bytes()==physical.read_bytes(),'O2_SAN_exact_physical:'+name)
+        for name,pin in binaries.items():
+            need(sha(out/name)==pin,'binary_changed:'+name)
+        save(out/'binaries.json',{name:dict(before=pin,after=sha(out/name)) for name,pin in binaries.items()})
+        status='passed'
+    except BaseException as exc:
+        error=type(exc).__name__+': '+str(exc)
+    finally:
+        after=pins(out/'source')
+        save(out/'sources_after.json',after)
+        if before!=after:
+            status,error='failed','source_changed'
+        save(out/'commands.json',commands)
+        save(out/'receipt.json',dict(status=status,error=error,SAN=True,sources_stable=before==after,
+             commands=len(commands),compared_to=REFERENCE.name,source_header_sha256=PIN,
+             probe_latency_claimed=False,production_applied=False,GCP_used=False,public_status='not_claimed'))
+        print(json.dumps(dict(status=status,error=error,out=str(out))),flush=True)
+    need(status=='passed',str(error))
+
+
+if __name__=='__main__':
+    main()

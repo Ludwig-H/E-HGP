@@ -1,0 +1,36 @@
+#!/usr/bin/env python3
+"""Create-only exact patch proposal; never applies it or invokes Git."""
+import difflib
+import hashlib
+import json
+from pathlib import Path
+import sys
+
+BASE=Path(__file__).resolve().parent
+ROOT=BASE.parents[1]
+FILES=('morsehgp3D_v7/src/forest/full_ball_tower.hpp',
+       'morsehgp3D_v7/bench/full_ball_tower_probe.cpp',
+       'morsehgp3D_v7/tests/full_ball_tower_gate.cpp')
+
+
+def sha(data):return hashlib.sha256(data).hexdigest()
+
+
+def save(path,data):
+    with path.open('xb') as stream:stream.write(data)
+
+
+if len(sys.argv)!=2 or not sys.argv[1].isidentifier():raise SystemExit('fresh output name')
+out=BASE/sys.argv[1];out.mkdir(exist_ok=False)
+original={name:(ROOT/name).read_bytes() for name in FILES}
+candidate={name:(BASE/'clean'/name).read_bytes() for name in FILES}
+if sha(original[FILES[0]])!='33e7d05effce908532d21255e5e0efc4f8c7370d8a05a17dd761142d81bd4209':
+    raise RuntimeError('active header differs from proposal base')
+patch=''.join(''.join(difflib.unified_diff(original[name].decode().splitlines(True),
+                   candidate[name].decode().splitlines(True),fromfile='a/'+name,tofile='b/'+name)) for name in FILES)
+save(out/'integration.patch',patch.encode())
+save(out/'pins.json',(json.dumps(dict(before={name:sha(raw) for name,raw in original.items()},
+                                    after={name:sha(raw) for name,raw in candidate.items()},
+                                    patch_sha256=sha(patch.encode()),applied=False,qualified=False),indent=2,sort_keys=True)+'\n').encode())
+if any((ROOT/name).read_bytes()!=raw for name,raw in original.items()):raise RuntimeError('active source changed during freeze')
+print(json.dumps(dict(status='proposal_frozen_not_applied',out=str(out),patch_sha256=sha(patch.encode()))))

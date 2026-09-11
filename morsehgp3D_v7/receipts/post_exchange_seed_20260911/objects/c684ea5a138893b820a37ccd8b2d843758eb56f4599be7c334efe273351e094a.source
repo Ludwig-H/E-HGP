@@ -1,0 +1,18 @@
+--- morsehgp3D_v7/src/forest/full_ball_tower.hpp
++++ morsehgp3D_v7/src/forest/full_ball_tower.hpp
+@@ -564,12 +564,13 @@
+           const auto& b = balls[seed_ball];
+           require(current_k == static_cast<unsigned>(b.n_interior) + b.n_shell,
+                   "full_ball_post_seed_whole_population");
+-          require(compare_exact_level(b.level, local.level) < 0 && compare_exact_level(b.level, before) < 0,
++          const auto& checked_previous_level = post_seed_test::force_equal_level ? b.level : local.level;
++          require(compare_exact_level(b.level, checked_previous_level) < 0 && compare_exact_level(b.level, before) < 0,
+                   "full_ball_post_seed_not_strict");
+           add(work.post_seed_hits[current_k]);
+           if (post_seed_mode == 2) {
+             add(work.post_seed_terminal[current_k]);
+-            add(work.descending_steps); add(length);
++            add(length); // MUTANT: terminal exchange work is not counted.
+             work.max_chain_steps = std::max(work.max_chain_steps, length);
+             return seed_ball;  // No MEB, BallKey lookup or nominal anchor hit is paid.
+           }

@@ -1,0 +1,267 @@
+[
+  {
+    "argv": [
+      "g++",
+      "-O2",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-DMHGP7_FULL_HEADER=\"/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/source/candidate/morsehgp3D_v7/src/forest/full_ball_tower.hpp\"",
+      "-DMHGP7_GATE_SOURCE=\"/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/source/candidate/morsehgp3D_v7/tests/full_ball_tower_gate.cpp\"",
+      "-DMHGP7_PRIVATE_POST_EXCHANGE_SEED=1",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/candidate.d",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/source/qualification.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/candidate"
+    ],
+    "ended_ns": 1789117480903944514,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "compile_candidate",
+    "started_ns": 1789117466569898527,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/candidate",
+      "static1",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/candidate_static1_observe1.physical",
+      "1"
+    ],
+    "ended_ns": 1789117481768783707,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "candidate_static1_observe1",
+    "started_ns": 1789117480905331064,
+    "stderr_sha256": "f8777581e0dc5ede60143d3a72fe7b927fd34bbf682b2cd5155997e746d99584",
+    "stdout_sha256": "06e1851ace216e603e667673e78104d97fedbe1607b328a991b465e2315fc271"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/candidate",
+      "static4",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/candidate_static4_observe1.physical",
+      "1"
+    ],
+    "ended_ns": 1789117482645551864,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "candidate_static4_observe1",
+    "started_ns": 1789117481769406452,
+    "stderr_sha256": "d78f7936e61482441b24d671d47ba47bc1cffd3f1558de1882b37caa46974167",
+    "stdout_sha256": "06e1851ace216e603e667673e78104d97fedbe1607b328a991b465e2315fc271"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/candidate",
+      "cache",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/candidate_cache_observe1.physical",
+      "1"
+    ],
+    "ended_ns": 1789117483327654553,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "candidate_cache_observe1",
+    "started_ns": 1789117482646162281,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "3d47ed6ca765625845168d881c7c5c344658c70564395fd5436c5bf16e8c0fa7"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/candidate",
+      "no_cache",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/candidate_no_cache_observe1.physical",
+      "1"
+    ],
+    "ended_ns": 1789117484018874137,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "candidate_no_cache_observe1",
+    "started_ns": 1789117483328307593,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "cdf3b6e11c998bbf1010f3223cfe0ff79adde44b756edc0eb04a291fe020e3a5"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/candidate",
+      "static1",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/candidate_static1_observe0.physical",
+      "0"
+    ],
+    "ended_ns": 1789117484889945961,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "candidate_static1_observe0",
+    "started_ns": 1789117484019495020,
+    "stderr_sha256": "f8777581e0dc5ede60143d3a72fe7b927fd34bbf682b2cd5155997e746d99584",
+    "stdout_sha256": "5a38ce8b6891d10cd50c5be5ed901a03d7ed6802df05d2896f821e6311c5efd4"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/candidate",
+      "static4",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/candidate_static4_observe0.physical",
+      "0"
+    ],
+    "ended_ns": 1789117485795199370,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "candidate_static4_observe0",
+    "started_ns": 1789117484890536038,
+    "stderr_sha256": "d78f7936e61482441b24d671d47ba47bc1cffd3f1558de1882b37caa46974167",
+    "stdout_sha256": "5a38ce8b6891d10cd50c5be5ed901a03d7ed6802df05d2896f821e6311c5efd4"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/candidate",
+      "cache",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/candidate_cache_observe0.physical",
+      "0"
+    ],
+    "ended_ns": 1789117486541106207,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "candidate_cache_observe0",
+    "started_ns": 1789117485795813883,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "3d47ed6ca765625845168d881c7c5c344658c70564395fd5436c5bf16e8c0fa7"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/candidate",
+      "no_cache",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/candidate_no_cache_observe0.physical",
+      "0"
+    ],
+    "ended_ns": 1789117487277173726,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "candidate_no_cache_observe0",
+    "started_ns": 1789117486541650175,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "cdf3b6e11c998bbf1010f3223cfe0ff79adde44b756edc0eb04a291fe020e3a5"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/candidate"
+    ],
+    "ended_ns": 1789117487280398427,
+    "exit_code": 2,
+    "expected_exit": 2,
+    "name": "candidate_bad_arguments",
+    "started_ns": 1789117487277875879,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "argv": [
+      "g++",
+      "-O2",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-DMHGP7_FULL_HEADER=\"/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/source/baseline/morsehgp3D_v7/src/forest/full_ball_tower.hpp\"",
+      "-DMHGP7_GATE_SOURCE=\"/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/source/baseline/morsehgp3D_v7/tests/full_ball_tower_gate.cpp\"",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/baseline.d",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/source/qualification.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/baseline"
+    ],
+    "ended_ns": 1789117502143356937,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "compile_baseline",
+    "started_ns": 1789117487280943066,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/baseline",
+      "static1",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/baseline_static1_observe0.physical",
+      "0"
+    ],
+    "ended_ns": 1789117502998160790,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "baseline_static1_observe0",
+    "started_ns": 1789117502144777637,
+    "stderr_sha256": "f8777581e0dc5ede60143d3a72fe7b927fd34bbf682b2cd5155997e746d99584",
+    "stdout_sha256": "5a38ce8b6891d10cd50c5be5ed901a03d7ed6802df05d2896f821e6311c5efd4"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/baseline",
+      "static4",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/baseline_static4_observe0.physical",
+      "0"
+    ],
+    "ended_ns": 1789117503897052628,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "baseline_static4_observe0",
+    "started_ns": 1789117502998807371,
+    "stderr_sha256": "d78f7936e61482441b24d671d47ba47bc1cffd3f1558de1882b37caa46974167",
+    "stdout_sha256": "5a38ce8b6891d10cd50c5be5ed901a03d7ed6802df05d2896f821e6311c5efd4"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/baseline",
+      "cache",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/baseline_cache_observe0.physical",
+      "0"
+    ],
+    "ended_ns": 1789117504585631088,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "baseline_cache_observe0",
+    "started_ns": 1789117503897683205,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "3d47ed6ca765625845168d881c7c5c344658c70564395fd5436c5bf16e8c0fa7"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/baseline",
+      "no_cache",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/baseline_no_cache_observe0.physical",
+      "0"
+    ],
+    "ended_ns": 1789117505274031584,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "baseline_no_cache_observe0",
+    "started_ns": 1789117504586316216,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "cdf3b6e11c998bbf1010f3223cfe0ff79adde44b756edc0eb04a291fe020e3a5"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/baseline"
+    ],
+    "ended_ns": 1789117505276983750,
+    "exit_code": 2,
+    "expected_exit": 2,
+    "name": "baseline_bad_arguments",
+    "started_ns": 1789117505274593929,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/causal_r3/accept_equal_fault/gate",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/causal_r3/fixtures.txt",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/causal_r3/expected.txt",
+    "equal_fault"
+  ],
+  "ended_ns": 1789119828038340659,
+  "exit_code": 1,
+  "expected_exit": 1,
+  "name": "accept_equal_fault_run",
+  "started_ns": 1789119828015112387,
+  "stderr_sha256": "962e846ddee3ed812dfb35c54aee9d2cfa0076d80716803a2f0b0ab5f26f8647",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

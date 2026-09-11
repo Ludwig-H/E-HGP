@@ -1,0 +1,53 @@
+{
+  "line12": {
+    "catalogue_rows": 390,
+    "census_runs": 6,
+    "checks": 525045,
+    "clouds": 2,
+    "cuts": 720,
+    "high_order_facets": 2392,
+    "high_order_verticals": 22024,
+    "orders": 180,
+    "physical_tower_pairs": 16,
+    "q3_rows": 0,
+    "q4_rows": 0,
+    "scope": "bounded_real_census_FULL_K1_K10",
+    "shell12_rows": 0,
+    "status": "passed",
+    "vertical_checks": 352752
+  },
+  "shell14": {
+    "catalogue_rows": 1242,
+    "census_runs": 6,
+    "checks": 6326788,
+    "clouds": 2,
+    "cuts": 2080,
+    "high_order_facets": 91638,
+    "high_order_verticals": 851740,
+    "orders": 180,
+    "physical_tower_pairs": 16,
+    "q3_rows": 702,
+    "q4_rows": 36,
+    "scope": "bounded_real_census_FULL_K1_K10",
+    "shell12_rows": 6,
+    "status": "passed",
+    "vertical_checks": 4658780
+  },
+  "spatial12": {
+    "catalogue_rows": 1512,
+    "census_runs": 6,
+    "checks": 5463772,
+    "clouds": 2,
+    "cuts": 10200,
+    "high_order_facets": 7540,
+    "high_order_verticals": 69020,
+    "orders": 180,
+    "physical_tower_pairs": 16,
+    "q3_rows": 738,
+    "q4_rows": 378,
+    "scope": "bounded_real_census_FULL_K1_K10",
+    "shell12_rows": 0,
+    "status": "passed",
+    "vertical_checks": 3092416
+  }
+}

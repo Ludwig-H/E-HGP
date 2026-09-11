@@ -1,0 +1,259 @@
+--- a/morsehgp3D_v7/src/forest/full_ball_tower.hpp
++++ b/morsehgp3D_v7/src/forest/full_ball_tower.hpp
+@@ -23,6 +23,8 @@
+     "monotone_lower_edge_activation_ranked_union_find_v1";
+ inline constexpr const char* kFullBallResolverCacheAccounting =
+     "exact_direct_mapped_seeded_facet_tokens_16n_per_order_v1";
++inline constexpr const char* kFullBallStaticResolverAccounting =
++    "static_exact_sort_unique_complete_population_seeds_after_exchange_v2";
+ inline constexpr const char* kFullBallResidenceAccounting =
+     "release_dead_construction_before_population_copy_v1";
+ enum class FullBallStatus { kCompleteRelative, kInvalidInput, kResourceExhausted, kInvariantViolated };
+@@ -41,6 +43,9 @@
+   u64 resolver_cache_slots = 0, resolver_cache_reset_slots = 0, resolver_cache_bytes = 0;
+   u64 resolver_cache_released_slots = 0;
+   std::array<u64, kFacetMaxK + 1> static_requests{}, static_unique{}, static_seeded{};
++  // Actual post-exchange lookup attempts, exact hits and returned terminals.
++  // Initial seeds stay in static_seeded; shortcut terminals pay no anchor hit.
++  std::array<u64, kFacetMaxK + 1> static_post_seed_queries{}, static_post_seed_hits{}, static_post_seed_terminals{};
+   u64 static_workers_created = 0, static_peak_request_bytes = 0, static_peak_target_bytes = 0;
+   u64 static_lanes_used = 0, static_peak_retained_bytes = 0;
+   u64 static_peak_seed_bytes = 0, static_peak_group_bytes = 0, static_peak_worker_bytes = 0;
+@@ -340,6 +345,7 @@
+   FullBallStats& st;
+   ResolverCache resolver_cache;
+   int geometry_threads = 0;
++  struct StaticSeed { ResolverCache::Key key; BallId ball; };
+   std::vector<BallId> static_targets;
+   size_t static_cursor = 0;
+   std::vector<PointId> domain;
+@@ -523,7 +529,7 @@
+ 
+   // Geometry-only: immutable index/catalogue and rank, never anchors or DSU.
+   BallId static_terminal(ResolverCache::Key key, const ExactLevel& before,
+-      FullBallStats& work, std::vector<NodeRef>& scratch) const {
++      FullBallStats& work, std::vector<NodeRef>& scratch, std::span<const StaticSeed> seeds) const {
+     std::span<i32> sites(key.data(), current_k);
+     auto local = meb(sites, work.resolve_work);
+     u64 length = 0;
+@@ -547,6 +553,25 @@
+               "full_ball_static_missing_support");
+       sites[local.support_slots[0]] = z;
+       std::sort(sites.begin(), sites.end());
++      add(work.static_post_seed_queries[current_k]);
++      const auto seed = std::lower_bound(seeds.begin(), seeds.end(), key,
++          [](const StaticSeed& a, const ResolverCache::Key& value) { return a.key < value; });
++      if (seed != seeds.end() && seed->key == key) {
++        const auto& b = balls[seed->ball];
++        // Whole I union U, in this Builder's index and K. A surviving support
++        // or partial shell is NOT a seed: it can preserve the previous radius.
++        require(current_k == static_cast<unsigned>(b.n_interior) + b.n_shell,
++                "full_ball_post_seed_whole_population");
++        require(compare_exact_level(b.level, local.level) < 0 && compare_exact_level(b.level, before) < 0,
++                "full_ball_post_seed_not_strict");
++        add(work.static_post_seed_hits[current_k]);
++        add(work.descending_steps); add(length);
++        work.max_chain_steps = std::max(work.max_chain_steps, length);
++        add(work.static_post_seed_terminals[current_k]);
++        // Exact full-population MEB is this ball; the original next iteration
++        // would terminate here. Do not charge its MEB/lookup/anchor hit.
++        return seed->ball;
++      }
+       auto next = meb(sites, work.resolve_work);
+       const int cmp = compare_exact_level(next.level, local.level);
+       require(cmp <= 0, "full_ball_static_radius_increased");
+@@ -560,6 +585,11 @@
+   }
+ 
+   void merge_static_work(const FullBallStats& w) {
++    for (size_t k = 0; k < st.static_post_seed_queries.size(); ++k) {
++      add(st.static_post_seed_queries[k], w.static_post_seed_queries[k]);
++      add(st.static_post_seed_hits[k], w.static_post_seed_hits[k]);
++      add(st.static_post_seed_terminals[k], w.static_post_seed_terminals[k]);
++    }
+     for (const auto field : {&FullBallStats::anchor_hits, &FullBallStats::key_lookups,
+         &FullBallStats::intruder_queries, &FullBallStats::intruder_nodes,
+         &FullBallStats::intruder_power_tests, &FullBallStats::interior_ranges,
+@@ -574,9 +604,8 @@
+ 
+   void prepare_static_order() {
+     struct Request { ResolverCache::Key key; BallId consumer; size_t ordinal; };
+-    struct Seed { ResolverCache::Key key; BallId ball; };
+     std::vector<Request> requests;
+-    std::vector<Seed> seeds;
++    std::vector<StaticSeed> seeds;
+     for (BallId id : programs[current_k]) {
+       u16 contribution = 0; bool interior = false;
+       visit_block(id, contribution, interior, [&](std::vector<i32> sites) {
+@@ -602,7 +631,7 @@
+       if (a.key != b.key) return a.key < b.key;
+       return a.ordinal < b.ordinal;  // earliest consumer first in each class
+     });
+-    std::sort(seeds.begin(), seeds.end(), [](const Seed& a, const Seed& b) { return a.key < b.key; });
++    std::sort(seeds.begin(), seeds.end(), [](const StaticSeed& a, const StaticSeed& b) { return a.key < b.key; });
+     for (size_t j = 1; j < seeds.size(); ++j)
+       require(seeds[j - 1].key != seeds[j].key, "full_ball_static_duplicate_seed");
+     std::vector<size_t> groups;
+@@ -619,7 +648,7 @@
+     const auto account = [&] {
+       u64 worker_bytes = workers.capacity() * sizeof(Worker);
+       for (const auto& w : workers) add(worker_bytes, w.scratch.capacity() * sizeof(NodeRef));
+-      const u64 seed_bytes = seeds.capacity() * sizeof(Seed);
++      const u64 seed_bytes = seeds.capacity() * sizeof(StaticSeed);
+       const u64 group_bytes = groups.capacity() * sizeof(size_t);
+       st.static_peak_seed_bytes = std::max(st.static_peak_seed_bytes, seed_bytes);
+       st.static_peak_group_bytes = std::max(st.static_peak_group_bytes, group_bytes);
+@@ -640,13 +669,13 @@
+         const auto& first = requests[groups[group]];
+         const auto& before = balls[first.consumer].level;
+         const auto seed = std::lower_bound(seeds.begin(), seeds.end(), first.key,
+-            [](const Seed& a, const ResolverCache::Key& key) { return a.key < key; });
++            [](const StaticSeed& a, const ResolverCache::Key& key) { return a.key < key; });
+         BallId target;
+         if (seed != seeds.end() && seed->key == first.key) {
+           target = seed->ball;
+           require(compare_exact_level(balls[target].level, before) < 0, "full_ball_static_seed_not_strict");
+           add(w.seeded);
+-        } else target = static_terminal(first.key, before, w.work, w.scratch);
++        } else target = static_terminal(first.key, before, w.work, w.scratch, seeds);
+         for (size_t r = groups[group]; r < groups[group + 1]; ++r) {
+           const auto& request = requests[r];
+           require(compare_exact_level(before, balls[request.consumer].level) <= 0,
+--- a/morsehgp3D_v7/bench/full_ball_tower_probe.cpp
++++ b/morsehgp3D_v7/bench/full_ball_tower_probe.cpp
+@@ -170,7 +170,7 @@
+         "\"resolver_cache_slots\":%llu,\"resolver_cache_reset_slots\":%llu,"
+         "\"resolver_cache_bytes\":%llu,\"resolver_cache_released_slots\":%llu,"
+         "\"resolver_supports_tested\":%llu",
+-        opt.static_threads ? "static_exact_sort_unique_seeded_ball_ids_v1" : kFullBallResolverCacheAccounting,
++        opt.static_threads ? kFullBallStaticResolverAccounting : kFullBallResolverCacheAccounting,
+         kFullBallResidenceAccounting,
+         static_cast<unsigned long long>(st.resolver_cache_queries), static_cast<unsigned long long>(st.resolver_cache_hits),
+         static_cast<unsigned long long>(st.resolver_cache_stores), static_cast<unsigned long long>(st.resolver_cache_evictions),
+@@ -193,10 +193,14 @@
+         static_cast<unsigned long long>(st.static_peak_worker_bytes),
+         static_cast<unsigned long long>(st.static_peak_retained_bytes));
+     for (unsigned k = 1; k <= kmax; ++k)
+-      std::printf("%s{\"K\":%u,\"requests\":%llu,\"unique\":%llu,\"seeded_unique\":%llu}",
++      std::printf("%s{\"K\":%u,\"requests\":%llu,\"unique\":%llu,\"seeded_unique\":%llu,"
++          "\"post_seed_queries\":%llu,\"post_seed_hits\":%llu,\"post_seed_terminals\":%llu}",
+           k == 1 ? "" : ",", k, static_cast<unsigned long long>(st.static_requests[k]),
+           static_cast<unsigned long long>(st.static_unique[k]),
+-          static_cast<unsigned long long>(st.static_seeded[k]));
++          static_cast<unsigned long long>(st.static_seeded[k]),
++          static_cast<unsigned long long>(st.static_post_seed_queries[k]),
++          static_cast<unsigned long long>(st.static_post_seed_hits[k]),
++          static_cast<unsigned long long>(st.static_post_seed_terminals[k]));
+     std::printf("]");
+ #ifdef MHGP7_FULL_BALL_CUDA
+     const auto& c = device_costs;
+--- a/morsehgp3D_v7/tests/full_ball_tower_gate.cpp
++++ b/morsehgp3D_v7/tests/full_ball_tower_gate.cpp
+@@ -29,6 +29,7 @@
+ std::string context;
+ int static_threads = 0;
+ u64 paired_payload_checks = 0, deduplicated = 0, seeded_unique = 0;
++u64 post_seed_queries = 0, post_seed_hits = 0, post_seed_terminals = 0;
+ u64 checks = 0, clouds = 0, orders = 0, cuts = 0, facets = 0, vertical = 0;
+ u64 births = 0, merges = 0, continuations = 0, growth = 0, rejections = 0;
+ u64 overlap_cuts = 0, duplicate_cover_cuts = 0, regular = 0, extra = 0;
+@@ -324,6 +325,36 @@
+   const auto ix = build_cloud_index(in);
+   auto balls = catalogue(points, ix, model, fixture.kmax);
+   if (variant) std::reverse(balls.begin(), balls.end());
++  if (std::string_view(fixture.name) == "post_seed_square_partial") {
++    const auto circle = q2_ball_key(fixture.points[0], fixture.points[3]);
++    const auto found = std::find_if(balls.begin(), balls.end(), [&](const BallData& b) { return b.key == circle; });
++    need(found != balls.end() && found->n_interior == 4 && found->n_shell == 4,
++         "post_seed.square_whole_population_eight");
++    const std::array<P3,4> original{fixture.points[0],fixture.points[1],fixture.points[2],fixture.points[3]};
++    const std::array<P3,4> next{fixture.points[1],fixture.points[2],fixture.points[3],fixture.points[4]};
++    AnchorMebWork work;
++    const auto a = anchor_meb(original, work), b = anchor_meb(next, work);
++    need(a.status == AnchorMebStatus::kOk && b.status == AnchorMebStatus::kOk && a.key == circle &&
++         b.key == circle && same_exact_level(a.level,b.level) && a.selected_shell_count == 4 &&
++         b.selected_shell_count == 3, "post_seed.square_equal_radius_is_not_a_hit");
++    std::array<i32,4> selected{};
++    for (size_t j = 0; j < next.size(); ++j) {
++      const auto at = std::find(ix.upos.begin(),ix.upos.end(),next[j]);
++      need(at != ix.upos.end(), "post_seed.square_index_remap");
++      selected[j] = static_cast<i32>(at-ix.upos.begin());
++    }
++    std::sort(selected.begin(),selected.end());
++    const auto key = full_ball_detail::ResolverCache::key(selected);
++    for (const auto& seed : balls) {
++      if (static_cast<unsigned>(seed.n_interior)+seed.n_shell != selected.size()) continue;
++      full_ball_detail::ResolverCache::Key entire{};
++      size_t n = 0;
++      for (i32 site : seed.interior()) entire[n++] = site;
++      for (i32 site : seed.shell()) entire[n++] = site;
++      std::sort(entire.begin(),entire.begin()+n);
++      need(entire != key, "post_seed.square_partial_population_misses_lookup");
++    }
++  }
+   auto result = build_full_ball_tower(ix, balls, fixture.kmax, static_threads);
+   if (static_threads) {
+     const auto baseline = build_full_ball_tower(ix, balls, fixture.kmax);
+@@ -335,10 +366,24 @@
+            result.stats.static_seeded[k] <= result.stats.static_unique[k], "static.work_partition");
+       deduplicated += result.stats.static_requests[k] - result.stats.static_unique[k];
+       seeded_unique += result.stats.static_seeded[k];
++      need(result.stats.static_post_seed_hits[k] == result.stats.static_post_seed_terminals[k] &&
++           result.stats.static_post_seed_hits[k] <= result.stats.static_post_seed_queries[k] &&
++           result.stats.static_post_seed_hits[k] <= result.stats.static_unique[k] - result.stats.static_seeded[k],
++           "static.post_seed_per_order_bounds");
++      post_seed_queries += result.stats.static_post_seed_queries[k];
++      post_seed_hits += result.stats.static_post_seed_hits[k];
++      post_seed_terminals += result.stats.static_post_seed_terminals[k];
+     }
+     need(result.stats.resolve_work.calls == result.stats.anchor_hits + result.stats.intruder_queries,
+          "static.actual_meb_accounting");
+     need(result.stats.resolver_cache_slots == 0, "static.no_temporal_token_cache");
++    const auto sum = [](const auto& values) { return std::accumulate(values.begin(), values.end(), u64{0}); };
++    need(sum(result.stats.static_post_seed_queries) == result.stats.descending_steps + result.stats.same_radius_steps,
++         "static.every_exchange_lookup_is_paid");
++    need(result.stats.anchor_hits + sum(result.stats.static_post_seed_terminals) ==
++         sum(result.stats.static_unique) - sum(result.stats.static_seeded), "static.actual_terminal_partition");
++    if (std::string_view(fixture.name) == "post_seed_ABEZW")
++      need(sum(result.stats.static_post_seed_hits) > 0, "post_seed.five_point_nonvacuity");
+   }
+   if (result.status != FullBallStatus::kCompleteRelative)
+     std::fprintf(stderr, "product refusal [%s]: %s\n", context.c_str(), result.reason);
+@@ -456,13 +501,18 @@
+   try {
+     auto cases = fixtures();
+     // Extra static-admission test; keep the nominal shared fixture set stable.
+-    if (static_threads) cases.push_back({"present_but_wrong_rank",
+-        {{35,100,0},{139,48,0},{152,139,0},{48,139,0},
+-         {100,36,0},{101,37,0},{99,37,0},{100,200,0}}, 6});
++    if (static_threads) {
++      cases.push_back({"present_but_wrong_rank",
++          {{35,100,0},{139,48,0},{152,139,0},{48,139,0},
++           {100,36,0},{101,37,0},{99,37,0},{100,200,0}}, 6});
++      cases.push_back({"post_seed_ABEZW", {{0,3,0},{8,3,0},{4,2,0},{6,0,0},{4,23,0}}, 5});
++      cases.push_back({"post_seed_square_partial", {{0,0,0},{10,0,0},{0,10,0},{10,10,0},
++           {4,4,0},{4,6,0},{6,4,0},{6,6,0}}, 8});
++    }
+     for (const auto& fixture : cases) for (unsigned variant = 0; variant < 2; ++variant)
+       check_fixture(fixture, variant);
+     rejection_fixtures();
+-    need(clouds == (static_threads ? 30u : 28u) && orders >= (static_threads ? 124u : 112u) &&
++    need(clouds == (static_threads ? 34u : 28u) && orders >= (static_threads ? 150u : 112u) &&
+         cuts >= 500 && facets >= 1000 && vertical >= 1000,
+         "nonvacuity.oracle_tower_and_vertical");
+     need(births > 50 && merges > 10 && growth > 0 && overlap_cuts > 0 &&
+@@ -471,9 +521,14 @@
+     if (static_threads) {
+       need(paired_payload_checks > 100 && deduplicated > 0 && seeded_unique > 0,
+            "nonvacuity.static_dedup_seed_and_exact_payload");
++      need(post_seed_hits >= 4 && post_seed_queries >= post_seed_hits && post_seed_terminals == post_seed_hits,
++           "nonvacuity.post_exchange_complete_population_hits");
+       std::fprintf(stderr, "static_threads=%d paired_payload_checks=%llu deduplicated=%llu seeded_unique=%llu\n",
+           static_threads, static_cast<unsigned long long>(paired_payload_checks),
+           static_cast<unsigned long long>(deduplicated), static_cast<unsigned long long>(seeded_unique));
++      std::fprintf(stderr, "post_seed_queries=%llu post_seed_hits=%llu post_seed_terminals=%llu\n",
++          static_cast<unsigned long long>(post_seed_queries), static_cast<unsigned long long>(post_seed_hits),
++          static_cast<unsigned long long>(post_seed_terminals));
+     }
+     std::printf("{\"status\":\"passed\",\"authority\":\"bounded_independent_Gram_Gamma_not_WSPD_completeness\","
+         "\"checks\":%llu,\"clouds\":%llu,\"orders\":%llu,\"cuts\":%llu,\"facets\":%llu,"

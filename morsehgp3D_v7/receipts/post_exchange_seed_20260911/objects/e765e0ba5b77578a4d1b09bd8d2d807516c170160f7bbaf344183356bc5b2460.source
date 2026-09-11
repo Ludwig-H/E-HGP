@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/o2_observation_r1/baseline"
+  ],
+  "ended_ns": 1789117505276983750,
+  "exit_code": 2,
+  "expected_exit": 2,
+  "name": "baseline_bad_arguments",
+  "started_ns": 1789117505274593929,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

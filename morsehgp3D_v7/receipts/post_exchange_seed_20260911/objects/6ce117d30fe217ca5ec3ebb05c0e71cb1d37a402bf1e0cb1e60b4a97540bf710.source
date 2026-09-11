@@ -1,0 +1,260 @@
+[
+  {
+    "argv": [
+      "g++",
+      "-O2",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-DMHGP7_FULL_HEADER=\"/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/source/harness/morsehgp3D_v7/src/forest/full_ball_tower.hpp\"",
+      "-DMHGP7_GATE_SOURCE=\"/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/source/harness/morsehgp3D_v7/tests/full_ball_tower_gate.cpp\"",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/harness.d",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/source/qualification.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/harness"
+    ],
+    "ended_ns": 1789119895368787591,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "compile_harness",
+    "sanitizer_environment": {},
+    "started_ns": 1789119880728948015,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/harness",
+      "cache",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/cache.physical",
+      "0"
+    ],
+    "ended_ns": 1789119896181856456,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "cache",
+    "sanitizer_environment": {},
+    "started_ns": 1789119895369971340,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "3d47ed6ca765625845168d881c7c5c344658c70564395fd5436c5bf16e8c0fa7"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/harness",
+      "no_cache",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/no_cache.physical",
+      "0"
+    ],
+    "ended_ns": 1789119897053020847,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "no_cache",
+    "sanitizer_environment": {},
+    "started_ns": 1789119896184826558,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "cdf3b6e11c998bbf1010f3223cfe0ff79adde44b756edc0eb04a291fe020e3a5"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/harness",
+      "static1",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/static1.physical",
+      "0"
+    ],
+    "ended_ns": 1789119898071605591,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "static1",
+    "sanitizer_environment": {},
+    "started_ns": 1789119897055251501,
+    "stderr_sha256": "f8777581e0dc5ede60143d3a72fe7b927fd34bbf682b2cd5155997e746d99584",
+    "stdout_sha256": "d3abecbdd3367a96d4ef95ddd18ba73f65ef3457d7fa202a79e56b3d3ca9a8b4"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/harness",
+      "static4",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/static4.physical",
+      "0"
+    ],
+    "ended_ns": 1789119899092639078,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "static4",
+    "sanitizer_environment": {},
+    "started_ns": 1789119898076162131,
+    "stderr_sha256": "d78f7936e61482441b24d671d47ba47bc1cffd3f1558de1882b37caa46974167",
+    "stdout_sha256": "d3abecbdd3367a96d4ef95ddd18ba73f65ef3457d7fa202a79e56b3d3ca9a8b4"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/harness"
+    ],
+    "ended_ns": 1789119899098821414,
+    "exit_code": 2,
+    "expected_exit": 2,
+    "name": "harness_bad_arguments",
+    "sanitizer_environment": {},
+    "started_ns": 1789119899096524000,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "argv": [
+      "g++",
+      "-O2",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/product_gate.d",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/source/product/morsehgp3D_v7/tests/full_ball_tower_gate.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/product_gate"
+    ],
+    "ended_ns": 1789119913762832253,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "compile_product_gate",
+    "sanitizer_environment": {},
+    "started_ns": 1789119899099104865,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/product_gate",
+      "--selftest"
+    ],
+    "ended_ns": 1789119914281404443,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "product_nominal",
+    "sanitizer_environment": {},
+    "started_ns": 1789119913763870285,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "3a017058eba3f8d07d4bc5e3ed41a35f0489aa4d3a007c619138d5668d7d6fc8"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/product_gate",
+      "--static-1"
+    ],
+    "ended_ns": 1789119915199795702,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "product_static1",
+    "sanitizer_environment": {},
+    "started_ns": 1789119914281875953,
+    "stderr_sha256": "c684dd04be62c1d522f5e91ad5d5b4e4434f9365a2f9907767d99ebabb581ac7",
+    "stdout_sha256": "55c2ce9db598d31bd086553ff8d6cac1564da8a02bb1334d894731e87512a63d"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/product_gate",
+      "--static-4"
+    ],
+    "ended_ns": 1789119916133822753,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "product_static4",
+    "sanitizer_environment": {},
+    "started_ns": 1789119915200320121,
+    "stderr_sha256": "7bab9570b8fd962497dcccab6b11aa96391b4953d8a5d88ce3489cd7a52adf34",
+    "stdout_sha256": "55c2ce9db598d31bd086553ff8d6cac1564da8a02bb1334d894731e87512a63d"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/product_gate",
+      "--unknown"
+    ],
+    "ended_ns": 1789119916136564161,
+    "exit_code": 2,
+    "expected_exit": 2,
+    "name": "product_bad_argument",
+    "sanitizer_environment": {},
+    "started_ns": 1789119916134268705,
+    "stderr_sha256": "4b9eeadc562c94288f788d79631dcc662f5b8c306e7232ccdc083094698a2e85",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "argv": [
+      "g++",
+      "-O2",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/probe.d",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/source/product/morsehgp3D_v7/bench/full_ball_tower_probe.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/probe"
+    ],
+    "ended_ns": 1789119930892706166,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "compile_probe",
+    "sanitizer_environment": {},
+    "started_ns": 1789119916136994030,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/probe",
+      "--n=200",
+      "--s=8",
+      "--kmax=10",
+      "--threads=1",
+      "--static-threads=0"
+    ],
+    "ended_ns": 1789119932227935732,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "probe_static0",
+    "sanitizer_environment": {},
+    "started_ns": 1789119930893612492,
+    "stderr_sha256": "c6912464fb8eab3d03916205626103fe9913a04f08a75d8c2e10f9980295c51f",
+    "stdout_sha256": "ba9774920feb0c89e94189cb0c1e8768880a53f0f775495a954dd6b60f189168"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_o2_r1/probe",
+      "--n=200",
+      "--s=8",
+      "--kmax=10",
+      "--threads=1",
+      "--static-threads=1"
+    ],
+    "ended_ns": 1789119933442213962,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "probe_static1",
+    "sanitizer_environment": {},
+    "started_ns": 1789119932228623043,
+    "stderr_sha256": "843d7b91659a9e7e3d93c2c5aa65c8f95713a10c56589f89854d01c652dc8788",
+    "stdout_sha256": "112010179a0539661bfa06636cd605ecf6b2b7d2b3646f1717d40668e71bb20c"
+  }
+]

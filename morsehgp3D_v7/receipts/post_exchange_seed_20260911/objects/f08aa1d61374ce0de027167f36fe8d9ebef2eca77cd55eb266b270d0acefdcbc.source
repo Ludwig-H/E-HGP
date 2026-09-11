@@ -1,0 +1,34 @@
+{
+  "argv": [
+    "g++",
+    "-O1",
+    "-g",
+    "-fsanitize=address,undefined",
+    "-fno-omit-frame-pointer",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-isystem",
+    "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-MMD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/product_gate.d",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/source/product/morsehgp3D_v7/tests/full_ball_tower_gate.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_post_exchange_seed_20260911/clean_san_root_r1/product_gate"
+  ],
+  "ended_ns": 1789120126537945371,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "compile_product_gate",
+  "sanitizer_environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "started_ns": 1789120084416262957,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

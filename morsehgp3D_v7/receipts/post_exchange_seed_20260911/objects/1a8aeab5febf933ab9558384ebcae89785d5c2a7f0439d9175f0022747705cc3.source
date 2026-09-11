@@ -1,0 +1,36 @@
+# Hit de population complète après échange — prototype privé
+
+Base active épinglée : `full_ball_tower.hpp` SHA
+`33e7d05effce908532d21255e5e0efc4f8c7370d8a05a17dd761142d81bd4209`.
+La preuve consommée est `audits/receipts_static_followup_20260911/README.md`.
+Ni source active, ni audit, ni Git, ni GCP ne sont modifiés.
+
+API privée : dernier argument `post_exchange_seed_mode=0` ; 0 désactivé,
+1 observation payant la MEB et vérifiant la même BallId/niveau, 2 raccourci.
+La table triée de populations complètes par K et index est réutilisée en
+lecture seule. Le lookup intervient après remplacement et tri, avant la MEB.
+Il ne se fonde jamais sur un support, une partie de la population ou une
+égalité de hash. Le hit impose un rayon strictement inférieur au rayon courant
+et au consommateur. Le replay temporel reste inchangé.
+
+Sur succès statique, avec U départs uniques, S semis initiaux, D échanges,
+H hits post-échange : H <= min(D,U-S), M_observé=M_nominal et
+M_raccourci=M_nominal-H. Le raccourci ne paie ni MEB ni lookup de boule ni
+anchor_hit du dernier tour évité. Il compte le dernier échange et la longueur,
+et un terminal post-échange distinct. Ainsi M=anchor_hits+intruder_queries et
+anchor_hits+terminaux_post-échange=U-S. Les semis initiaux restent séparés.
+
+Observer et shortcut exposent leurs nouveaux compteurs séparément. La taille
+des statistiques et donc des Worker instrumentés peut changer : ne pas la
+confondre avec un gain de résidence. L'observation mesure aussi le travail MEB
+réellement payé sur les hits pour expliquer les économies par taille de support.
+
+Qualification : sorties physiques (populations, niveaux, nœuds, parents,
+successors, contributions, verticales), oracle Gram/Gamma borné, cache/no_cache,
+static1/static4, permutations, terminal et rejets. Ajouter les cinq points
+ABEZW et le carré à quatre intérieurs de la preuve. Les mutants visent clé
+partielle, rayon non strict et comptage manquant ; aucun mutant lecteur ne
+devient une qualification C++.
+
+Compilation O2 séquentielle sur créneau ROOT. SAN seulement par ROOT sur
+sources gelées. Micro 200/400/800/1000 autorisée après succès, aucun 8k+.

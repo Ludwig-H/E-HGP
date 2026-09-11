@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "/usr/bin/c++",
+    "-M",
+    "-O3",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "/workspaces/E-HGP/morsehgp3D_v7/tests/witness_front_gate.cpp"
+  ],
+  "ended_ns": 1789120796918189012,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "dependencies_mhgp7_witness_front_gate",
+  "started_ns": 1789120796824193997,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "df0a845d62e106bb1d4f2437df07025168b122bffac536bd7cfb4ec1687e9d44"
+}
