@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_parallel_birth_streaming_20260911/qualification_o2_r1/gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_parallel_birth_streaming_20260911/qualification_o2_r1/source_snapshot",
+  "elapsed_seconds_observation_only": 0.9150868430001537,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "selftest",
+  "stderr": {
+    "sha256": "f9e1c68d001709739171c9139af98c5bbc793dc683a12fd02de1201775143746",
+    "size": 5132
+  },
+  "stdout": {
+    "sha256": "4fc45c3862dbe97020d2be5a213f520d914f0820737e509c49ee06e2fa2061a5",
+    "size": 1986
+  }
+}

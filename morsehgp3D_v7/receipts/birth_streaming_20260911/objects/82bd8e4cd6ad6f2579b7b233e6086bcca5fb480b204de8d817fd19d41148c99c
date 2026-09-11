@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_birth_streaming_20260911/qualification_san_r1/gate",
+    "--reject-observer-pair"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_birth_streaming_20260911/qualification_san_r1/source_snapshot",
+  "exit_code": null,
+  "expected_exit": 4,
+  "name": "reject-observer-pair"
+}

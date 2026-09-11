@@ -1,0 +1,14 @@
+{
+  "checks": 2500,
+  "empty_batches": 8,
+  "gcp_used": false,
+  "geometry_qualified": false,
+  "partial_launches": 3,
+  "positive_batches": 23,
+  "rejections": 10,
+  "reuse_after_failure": 5,
+  "scope": "persistent_cpu_window_pool_only",
+  "status": "passed",
+  "task_throws": 4,
+  "useful_parallel_workers": 6
+}

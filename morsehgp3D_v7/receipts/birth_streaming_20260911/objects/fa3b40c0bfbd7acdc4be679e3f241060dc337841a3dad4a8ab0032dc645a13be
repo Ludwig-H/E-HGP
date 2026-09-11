@@ -1,0 +1,36 @@
+{
+  "argv": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-O1",
+    "-g",
+    "-fsanitize=thread",
+    "-fno-omit-frame-pointer",
+    "-fPIE",
+    "-pie",
+    "-M",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_birth_streaming_20260911/workers_tsan_root_r1/dependencies_before.d",
+    "-MT",
+    "window_workers_gate",
+    "/workspaces/E-HGP/build/v7_birth_streaming_20260911/workers_tsan_root_r1/source_snapshot/v7_birth_streaming_20260911/window_workers_gate.cpp"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_birth_streaming_20260911/workers_tsan_root_r1/source_snapshot",
+  "elapsed_seconds_observation_only": 0.06703855899968403,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "dependencies_before",
+  "stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  "stdout": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  }
+}

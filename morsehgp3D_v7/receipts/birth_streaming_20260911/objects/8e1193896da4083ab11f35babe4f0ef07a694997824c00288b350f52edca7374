@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-O1",
+    "-g",
+    "-fsanitize=address,undefined",
+    "-fno-omit-frame-pointer",
+    "-fno-pie",
+    "-no-pie",
+    "-MD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_birth_streaming_20260911/workers_san_root_r1/compile.d",
+    "-MT",
+    "window_workers_gate",
+    "/workspaces/E-HGP/build/v7_birth_streaming_20260911/workers_san_root_r1/source_snapshot/v7_birth_streaming_20260911/window_workers_gate.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_birth_streaming_20260911/workers_san_root_r1/window_workers_gate"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_birth_streaming_20260911/workers_san_root_r1/source_snapshot",
+  "exit_code": null,
+  "expected_exit": 0,
+  "name": "compile"
+}

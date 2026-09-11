@@ -1,0 +1,19 @@
+{
+  "closure": {
+    "binary": true,
+    "compiler": true,
+    "dependencies": true,
+    "sources": true
+  },
+  "commands": 7,
+  "error": null,
+  "gcp_used": false,
+  "geometry_qualified": false,
+  "locale": "C",
+  "mode": "o2",
+  "sanitizer": false,
+  "sanitizer_environment": {},
+  "scope": "persistent_cpu_window_pool_only",
+  "status": "passed",
+  "system_scope": "compiler binary/version and consumed headers, not hermetic linker/runtime"
+}

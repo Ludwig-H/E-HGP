@@ -83,7 +83,16 @@ par arête au lieu de 4,63 en moyenne dans le reçu précédent. La mesure
 complète devient 207,867 s, sans baisse notable de RSS ; le travail MEB
 répété reste inchangé. Ce correctif ne suffit donc pas non plus à faire
 du stockage fenêtré une optimisation globale acquise. La contraction directe
-sur les naissances est préparée séparément, sans résultat anticipé.
+sur les naissances est désormais qualifiée séparément en O2/SAN ; elle
+supprime la structure hubs et la compaction finale, sans gain temporel
+universel déduit de cette suppression. [Nouveau jalon](CONTRACTION_NAISSANCES_ET_WORKERS_20260911.md).
+
+Trois erreurs de cette contraction sont maintenant des mutants permanents
+dans son paquet : stocker une racine DSU dans φ perd l'identité historique ;
+oublier le pivot à une frontière de fenêtre casse la suite du même hub ; convertir
+un label dense en BlockId avant la fin de K mélange deux espaces d'indices.
+Le parallélisme géométrique ne permet pas davantage de consommer les
+résultats dans leur ordre d'arrivée. Le scatter les remet dans l'ordre source.
 
 Le 11 septembre, la [décomposition en objets parallèles](OBJETS_PARALLELES_TOUR_20260911.md)
 écarte aussi ces raccourcis d'architecture :

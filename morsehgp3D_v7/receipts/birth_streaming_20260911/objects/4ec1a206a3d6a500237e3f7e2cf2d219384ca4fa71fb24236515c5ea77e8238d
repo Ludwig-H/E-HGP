@@ -1,0 +1,278 @@
+// Private v7 CPU prototype; not integrated or qualified by inclusion alone.
+#pragma once
+
+#include <algorithm>
+#include <atomic>
+#include <condition_variable>
+#include <cstddef>
+#include <exception>
+#include <functional>
+#include <limits>
+#include <mutex>
+#include <stdexcept>
+#include <system_error>
+#include <thread>
+#include <vector>
+
+namespace mhgp7::window_workers_private {
+
+#if defined(MHGP7_WINDOW_WORKERS_TESTING)
+namespace testing {
+// Change/reset only while no pool is alive. The constructor reads this on
+// its calling thread. These hooks are absent from the ordinary header path.
+inline thread_local std::size_t launch_fail_after =
+    std::numeric_limits<std::size_t>::max();
+inline std::atomic<std::size_t> launch_started{0};
+inline std::atomic<std::size_t> launch_active{0};
+inline std::atomic<std::size_t> launch_admitted{0};
+inline std::atomic<std::size_t> task_entries{0};
+inline std::atomic<std::size_t> exceptions_captured{0};
+struct Access;
+}  // namespace testing
+#endif
+
+struct Stats {
+  std::size_t workers = 0;
+  std::size_t initial_threads = 0;  // Actual OS threads constructed, once.
+  std::size_t batches = 0;  // Cumulative admitted runs, including empty/failed.
+  std::size_t task_count = 0;  // Requested size of the last admitted run.
+  // Last run only; invocation attempts, including a callback which throws.
+  // Cancellation may leave some tasks unattempted. No cumulative task sum.
+  std::vector<std::size_t> tasks_per_worker;
+};
+
+// Synchronous windows, one borrowed Fn(index, worker) shared by the team.
+// Fn and its referenced storage must outlive run(); each worker is the sole
+// user of its scratch[worker]. Other shared callback mutations need the
+// caller's synchronization. The pool does not roll back callback writes.
+//
+// Concurrent/recursive run() is rejected BEFORE admission. stats() and
+// destruction require a live, idle pool and no concurrent accessor/run.
+// A throwing run waits for ALL workers' quiescence, then rethrows the first
+// exception CAPTURED under the mutex (not necessarily the lowest task index).
+// Pending tasks stop cooperatively; already entered callbacks finish.
+// Threads persist after both success and failure; destruction joins them.
+class WindowWorkers {
+ public:
+  explicit WindowWorkers(std::size_t workers)
+      : workers_(checked_workers(workers)) {
+    stats_.workers = workers_;
+    stats_.tasks_per_worker.resize(workers_);
+    if (workers_ == 1) return;
+    threads_.reserve(workers_);
+    try {
+      for (std::size_t worker = 0; worker < workers_; ++worker) {
+#if defined(MHGP7_WINDOW_WORKERS_TESTING)
+        if (worker == testing::launch_fail_after)
+          throw std::system_error(std::make_error_code(
+              std::errc::resource_unavailable_try_again));
+#endif
+        threads_.emplace_back([this, worker] { worker_entry(worker); });
+        ++stats_.initial_threads;
+      }
+    } catch (...) {
+      // No batch can exist before successful construction. In particular,
+      // partially created teams are never admitted to a task/barrier.
+      admission_.store(2, std::memory_order_release);
+      admission_.notify_all();
+      join_threads();
+      throw;
+    }
+    admission_.store(1, std::memory_order_release);
+    admission_.notify_all();
+  }
+
+  WindowWorkers(const WindowWorkers&) = delete;
+  WindowWorkers& operator=(const WindowWorkers&) = delete;
+  WindowWorkers(WindowWorkers&&) = delete;
+  WindowWorkers& operator=(WindowWorkers&&) = delete;
+
+  ~WindowWorkers() {
+    {
+      std::lock_guard<std::mutex> lock(mutex_);
+      stopping_ = true;
+    }
+    ready_.notify_all();
+    join_threads();
+  }
+
+  const Stats& stats() const noexcept { return stats_; }
+
+  template <typename Fn>
+  void run(std::size_t task_count, Fn&& fn) {
+    if (running_.test_and_set(std::memory_order_acquire))
+      throw std::logic_error("window_workers.concurrent_or_recursive_run");
+    struct Release {
+      std::atomic_flag& flag;
+      ~Release() { flag.clear(std::memory_order_release); }
+    } release{running_};
+    if (stats_.batches == std::numeric_limits<std::size_t>::max())
+      throw std::overflow_error("window_workers.batch_counter_overflow");
+    ++stats_.batches;
+    stats_.task_count = task_count;
+    std::fill(stats_.tasks_per_worker.begin(),
+              stats_.tasks_per_worker.end(), std::size_t{0});
+    if (task_count == 0) return;
+    if (workers_ == 1) {
+      for (std::size_t index = 0; index < task_count; ++index) {
+        ++stats_.tasks_per_worker[0];
+#if defined(MHGP7_WINDOW_WORKERS_TESTING)
+        testing::task_entries.fetch_add(1, std::memory_order_relaxed);
+#endif
+        std::invoke(fn, index, std::size_t{0});
+      }
+      return;
+    }
+
+    // Stack-only erasure: no copying of Fn, no per-run std::function heap.
+    auto call = [&fn](std::size_t index, std::size_t worker) {
+      std::invoke(fn, index, worker);
+    };
+    std::unique_lock<std::mutex> lock(mutex_);
+    object_ = &call;
+    invoke_ = [](void* object, std::size_t index, std::size_t worker) {
+      (*static_cast<decltype(call)*>(object))(index, worker);
+    };
+    task_count_ = task_count;
+    // ceil(task_count / (8 * workers)), without forming 8 * workers.
+    // This is scheduling granularity, never a bound on accepted tasks.
+    chunk_size_ = ceil_div(ceil_div(task_count, workers_), 8);
+    chunks_ = ceil_div(task_count, chunk_size_);
+    next_chunk_.store(0, std::memory_order_relaxed);
+    cancelled_.store(false, std::memory_order_relaxed);
+    first_exception_ = nullptr;
+    remaining_ = workers_;
+    generation_ = stats_.batches;
+    ready_.notify_all();
+    done_.wait(lock, [this] { return remaining_ == 0; });
+    object_ = nullptr;
+    invoke_ = nullptr;
+    const auto failure = first_exception_;
+    first_exception_ = nullptr;
+    lock.unlock();
+    if (failure) std::rethrow_exception(failure);
+  }
+
+ private:
+  static std::size_t checked_workers(std::size_t workers) {
+    if (workers == 0) throw std::invalid_argument("window_workers.zero_workers");
+    if (workers > std::vector<std::thread>().max_size() ||
+        workers > std::vector<std::size_t>().max_size())
+      throw std::length_error("window_workers.worker_representation");
+    return workers;
+  }
+
+  static std::size_t ceil_div(std::size_t value, std::size_t divisor) {
+    return value / divisor + (value % divisor != 0 ? 1 : 0);
+  }
+
+  // Saturating claim cursor, unlike an unchecked fetch_add which could
+  // wrap for a representable task_count near SIZE_MAX and repeat work.
+  bool claim(std::size_t& chunk) {
+    chunk = next_chunk_.load(std::memory_order_relaxed);
+    for (;;) {
+      if (chunk >= chunks_) return false;
+      if (next_chunk_.compare_exchange_weak(
+              chunk, chunk + 1, std::memory_order_relaxed))
+        return true;
+    }
+  }
+
+  std::size_t execute(std::size_t worker, void* object,
+                      void (*invoke)(void*, std::size_t, std::size_t)) noexcept {
+    // Register-local count; one publication per worker/window avoids a
+    // shared cache line bouncing between adjacent statistics on every task.
+    std::size_t attempts = 0;
+    try {
+      std::size_t chunk = 0;
+      while (!cancelled_.load(std::memory_order_relaxed) && claim(chunk)) {
+        const std::size_t begin = chunk * chunk_size_;
+        const std::size_t end = begin + std::min(chunk_size_, task_count_ - begin);
+        for (std::size_t index = begin; index < end; ++index) {
+          if (cancelled_.load(std::memory_order_relaxed)) return attempts;
+          ++attempts;
+#if defined(MHGP7_WINDOW_WORKERS_TESTING)
+          testing::task_entries.fetch_add(1, std::memory_order_relaxed);
+#endif
+          invoke(object, index, worker);
+        }
+      }
+    } catch (...) {
+      std::lock_guard<std::mutex> lock(mutex_);
+      if (!first_exception_) first_exception_ = std::current_exception();
+      cancelled_.store(true, std::memory_order_relaxed);
+#if defined(MHGP7_WINDOW_WORKERS_TESTING)
+      testing::exceptions_captured.fetch_add(1, std::memory_order_release);
+      testing::exceptions_captured.notify_all();
+#endif
+    }
+    return attempts;
+  }
+
+  void worker_entry(std::size_t worker) {
+#if defined(MHGP7_WINDOW_WORKERS_TESTING)
+    testing::launch_started.fetch_add(1, std::memory_order_relaxed);
+    testing::launch_active.fetch_add(1, std::memory_order_relaxed);
+    struct Active {
+      ~Active() { testing::launch_active.fetch_sub(1, std::memory_order_relaxed); }
+    } active;
+#endif
+    admission_.wait(0, std::memory_order_acquire);
+    if (admission_.load(std::memory_order_acquire) != 1) return;
+#if defined(MHGP7_WINDOW_WORKERS_TESTING)
+    testing::launch_admitted.fetch_add(1, std::memory_order_relaxed);
+#endif
+    std::size_t seen = 0;
+    std::unique_lock<std::mutex> lock(mutex_);
+    for (;;) {
+      ready_.wait(lock, [this, seen] { return stopping_ || generation_ != seen; });
+      if (stopping_) return;
+      seen = generation_;
+      void* const object = object_;
+      auto* const invoke = invoke_;
+      lock.unlock();
+      stats_.tasks_per_worker[worker] = execute(worker, object, invoke);
+      lock.lock();
+      --remaining_;
+      if (remaining_ == 0) done_.notify_one();
+    }
+  }
+
+  void join_threads() noexcept {
+    for (auto& thread : threads_)
+      if (thread.joinable()) thread.join();
+  }
+
+#if defined(MHGP7_WINDOW_WORKERS_TESTING)
+  friend struct testing::Access;
+#endif
+  const std::size_t workers_;
+  Stats stats_;
+  std::vector<std::thread> threads_;
+  std::atomic<unsigned> admission_{0};
+  std::atomic_flag running_ = ATOMIC_FLAG_INIT;
+  std::mutex mutex_;
+  std::condition_variable ready_, done_;
+  bool stopping_ = false;
+  std::size_t generation_ = 0, remaining_ = 0;
+  std::size_t task_count_ = 0, chunk_size_ = 1, chunks_ = 0;
+  std::atomic<std::size_t> next_chunk_{0};
+  std::atomic<bool> cancelled_{false};
+  std::exception_ptr first_exception_;
+  void* object_ = nullptr;
+  void (*invoke_)(void*, std::size_t, std::size_t) = nullptr;
+};
+
+#if defined(MHGP7_WINDOW_WORKERS_TESTING)
+namespace testing {
+struct Access {
+  // Fault fixture only: never call concurrently or reduce an already-used
+  // generation. The overflow fixture uses a fresh pool and rejects admission.
+  static void set_batches(WindowWorkers& pool, std::size_t batches) {
+    pool.stats_.batches = batches;
+  }
+};
+}  // namespace testing
+#endif
+
+}  // namespace mhgp7::window_workers_private

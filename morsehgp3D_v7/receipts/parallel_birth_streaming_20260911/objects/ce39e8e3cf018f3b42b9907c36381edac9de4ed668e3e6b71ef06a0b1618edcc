@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_parallel_birth_streaming_20260911/qualification_o2_r1/gate",
+    "--mutant-birth-work"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_parallel_birth_streaming_20260911/qualification_o2_r1/source_snapshot",
+  "elapsed_seconds_observation_only": 0.00243338100017354,
+  "exit_code": 4,
+  "expected_exit": 4,
+  "name": "mutant-birth-work",
+  "stderr": {
+    "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+    "size": 18
+  },
+  "stdout": {
+    "sha256": "beb0d0d0f9ce81d383769ada929a4292e1393f198138c38fcb8589a08cda860b",
+    "size": 129
+  }
+}

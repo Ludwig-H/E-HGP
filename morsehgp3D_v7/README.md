@@ -39,10 +39,24 @@ est maintenant qualifié O2/SAN : une seule visite par arête sur les hubs,
 sans leurs retris ni recompactions. À n8000, le travail passe de 48,39 à
 10,46 millions de visites, pour 207,867 s jusqu'à FULL ; même tour et MEB,
 RSS pratiquement inchangé. Ce résultat ne suffit pas à promouvoir la voie
-mono devant la référence matérialisée. La contraction immédiate sur les
-naissances, proposée avec l'auditeur, est le delta suivant : brouillon
-distinct, non compilé et non crédité de ces tests.
-Le triplet mono 8k/16k/32k est clos : 207,867 / 595,244 / 1 076,969 s
+mono devant la référence matérialisée. La [contraction immédiate sur les
+naissances](docs/CONTRACTION_NAISSANCES_ET_WORKERS_20260911.md), proposée avec
+l'auditeur, est maintenant qualifiée O2/SAN séparément : suppression du
+DSU sur hubs, du certificat intermédiaire et de la compaction native finale.
+φ garde les identités des naissances, jamais leurs racines courantes.
+Le raccord géométrique à équipe persistante passe aussi O2/SAN, workers1/4 :
+114 census, 912 essais et 506 448 terminales comparées par build, avec
+refus après vraie géométrie parallèle et fermeture des threads vérifiée.
+Le réducteur, les préparations et la reconstruction restent séquentiels ;
+le moteur actif n'est pas encore remplacé et aucun gain massif n'est acquis.
+Le [triplet du raccord CPU4](receipts/parallel_birth_streaming_20260911/README.md)
+est clos : 92,963 / 215,381 / 489,601 s à 8k/16k/32k, mêmes sorties et
+travail géométrique que les témoins correspondants. À 8k, la paire qui
+change seulement les workers géométriques fait 187,214 → 164,703 s ;
+le reste du gain CPU4 vient de l'amont déjà parallèle. Les grands runs
+sont successifs sur hôte partagé, pas une statistique de speedup universel.
+La mémoire reste élevée, 11 608 968 KiB à 32k. Aucun contrat 50k acquis.
+Le triplet ordonné historique 8k/16k/32k est clos : 207,867 / 595,244 / 1 076,969 s
 pour toute la tour, avec charge extérieure documentée. Le travail augmente
 d'environ 2,1 par doublement sur uniforme/s8 ; cela ne prouve pas une borne
 tous régimes. Le pic atteint 11,07 Gio à 32k, pour 17,17 millions de nœuds.

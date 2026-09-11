@@ -24,11 +24,26 @@ Le [delta ordonné](receipts/ordered_streaming_20260911/README.md) exploite
 maintenant l'ordre d'émission pour éviter les recompactions des hubs.
 O2/SAN clos : 114 census, 456 essais, 253 224 terminales, 82 368 pivots
 retenus et 54 612 comparaisons du certificat entre fenêtres par build.
-La compaction native finale est encore exécutée ; aucun de ses retris
-n'est annoncé supprimé. Prochain delta : contracter les pivots au fil
-sur les seules identités de naissance, puis distribuer la géométrie et
-la reconstruction. Le brouillon dense séparé n'est pas encore compilé.
-Les consultations seules sont CPU1/4 ; pas de débit massif annoncé.
+La compaction native finale est encore exécutée dans ce témoin historique.
+Le [nouveau delta dense](docs/CONTRACTION_NAISSANCES_ET_WORKERS_20260911.md)
+est qualifié O2/SAN séparément : un DSU sur les seules naissances,
+sans certificat hubs ni compaction native finale. Les identités restent
+stables malgré les unions ; conversion dense→BlockId après tout K.
+Sa géométrie a ensuite été raccordée à une équipe CPU persistante :
+O2/SAN, 114 census, 912 essais, 506 448 terminales et 48 771 156 contrôles
+par build. Le refus après géométrie parallèle vérifie la quiescence et
+la destruction de l'équipe. Aucun résultat TSan : démarrage refusé par
+l'environnement, capture conservée. Le moteur actif n'est pas remplacé,
+la reconstruction reste séquentielle, aucun débit massif n'est annoncé.
+Les [mesures propres du raccord parallèle](receipts/parallel_birth_streaming_20260911/README.md)
+ferment maintenant 8k/16k/32k à 4/4/4 : 92,963 / 215,381 / 489,601 s,
+avec 4 359 540 / 9 364 101 / 19 784 213 MEB, mêmes sorties que les
+témoins correspondants. À 8k, changer seulement la géométrie de un à
+quatre workers donne 187,214 → 164,703 s. Les 16 000 et 32 000 de ce
+jalon sont multi-CPU, pas un nouveau triplet dense mono. Prochaine étape :
+partage de préparation, gardes entières après rangs certifiés, puis
+parallélisation de la reconstruction/export et raccord GPU. Aucun nouveau
+chrono 50k ou contrat 1 s/100 ms ; GCP non utilisé.
 La paire n8000/s8/K1..10 donne le même digest et les mêmes compteurs FULL,
 mais 188,638 → 250,408 s, MEB +10,4 %, RSS +1,4 %. La pile traite
 48,4 millions d'arêtes pour 10,5 millions d'arêtes source. Pas de promotion
@@ -43,7 +58,7 @@ croissent par facteurs 2,099 puis 2,071, les MEB par 2,148 puis 2,113 :
 observation sur uniforme/s8 seulement, pas une preuve tous régimes.
 À n800, s8/10/12 donnent même digest dense et mêmes comptes géométriques ;
 leur comparaison à grande taille reste ouverte. Aucun transfert de ces
-qualifications au futur réducteur dense et aucun contrat 50k acquis.
+qualifications historiques au nouveau réducteur dense et aucun contrat 50k acquis.
 GCP non utilisé pour ce nouveau jalon architectural.
 
 Complément précédent après `324f6192` : [lots complets, MEB et tentatives G4](docs/QUALIFICATION_BATCH_ET_MEB_20260911.md).

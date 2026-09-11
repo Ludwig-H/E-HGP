@@ -134,12 +134,15 @@ preuve sous-quadratique tous régimes ni extrapolation de latence depuis
 ces mesures sur hôte partagé. Les comparaisons n800/s8/10/12 donnent
 le même digest dense, les mêmes comptes par K et le même travail géométrique.
 
-L'auditeur propose ensuite de contracter les pivots **pendant** leur
-consommation. Le DSU ne porterait plus que les naissances, dont les
-identités doivent rester stables même après union. Cela retirerait les
-hubs du DSU, les recherches binaires d'extrémités, leur certificat et la
-projection/compaction finale. Le brouillon C++ est conservé séparément,
-explicitement non compilé. La conversion des indices denses en identités
-natives doit attendre la fin de K ; elle ne change ni les marques datées
-ni les ancres verticales. Qualifier ce delta avant son propre triplet
-d'échelle et les benchmarks multi-CPU/GPU, sans hériter des mesures ci-dessus.
+La [contraction proposée avec l'auditeur](CONTRACTION_NAISSANCES_ET_WORKERS_20260911.md)
+est maintenant qualifiée séparément : les pivots sont contractés **pendant**
+leur consommation et le DSU ne porte plus que les naissances. Les identités
+restent stables après union ; leur conversion en BlockId attend la fin de K.
+Les hubs, recherches binaires d'extrémités, certificat intermédiaire et
+projection/compaction finale disparaissent de ce nouveau chemin, pas des
+témoins historiques ci-dessus. O2/SAN et mono8k sont clos : même sortie,
+186,354 s et 2 752 852 KiB, sans gain statistique ou RSS majeur revendiqué.
+Le raccord suivant distribue les groupes géométriques à des workers CPU
+persistants, puis restitue l'ordre source. Il est qualifié O2/SAN, mais
+préparation et reconstruction restent séquentielles. Le moteur actif et
+les contrats GPU ne sont pas promus par ces qualifications privées.

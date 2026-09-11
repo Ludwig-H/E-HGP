@@ -90,7 +90,8 @@ certificats. Ses pivots sont tous retenus et la projection est forestière.
 La spécialisation proposée ensuite avec l'auditeur peut contracter chaque
 pivot dès sa consommation : φ porte un indice dense de naissance stable,
 pas une racine DSU. Un DSU sur les seules naissances suffit alors aux autres
-occurrences. Le brouillon C++ de cette spécialisation n'est pas compilé.
+occurrences. Cette [spécialisation est maintenant qualifiée O2/SAN](CONTRACTION_NAISSANCES_ET_WORKERS_20260911.md),
+sur une nouvelle source distincte du brouillon historique non compilé.
 Cela ne supprime pas l'obligation de remettre les résultats géométriques
 dans l'ordre source avant leur consommation. Les fenêtres indépendantes
 arrivant hors ordre gardent le contrat distinct de composition ; ce raccourci
@@ -214,8 +215,11 @@ supprime maintenant la conservation globale des terminales et des arêtes :
 une fenêtre géométrique alimente directement les certificats sur hubs,
 puis φ et leur projection. Il conserve les masques u16[R] et compte les
 résolutions répétées entre fenêtres. O2/SAN compare les terminales et la
-tour entière, pas seulement les certificats abstraits. Ce producteur reste
-mono-thread et ne constitue pas une accélération acquise.
+tour entière, pas seulement les certificats abstraits. Sa première version
+reste mono-thread. Le nouveau raccord dense distribue maintenant les
+groupes géométriques entre workers persistants, puis disperse et consomme
+dans l'ordre source ; préparations, union-find et reconstruction ne sont
+pas encore massivement parallèles. Aucun gain massif n'est acquis.
 
 | Brique | Qualification locale | Ce qui n'est pas encore livré |
 | --- | --- | --- |

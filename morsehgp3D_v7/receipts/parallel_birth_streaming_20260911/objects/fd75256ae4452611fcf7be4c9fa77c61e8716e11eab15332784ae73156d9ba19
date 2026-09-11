@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_parallel_birth_streaming_20260911/qualification_o2_r1/gate",
+    "--high"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_parallel_birth_streaming_20260911/qualification_o2_r1/source_snapshot",
+  "exit_code": null,
+  "expected_exit": 0,
+  "name": "high"
+}

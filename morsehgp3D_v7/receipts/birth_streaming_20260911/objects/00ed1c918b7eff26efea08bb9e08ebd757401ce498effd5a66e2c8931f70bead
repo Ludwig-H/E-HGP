@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_birth_streaming_20260911/qualification_o2_r1/gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_birth_streaming_20260911/qualification_o2_r1/source_snapshot",
+  "elapsed_seconds_observation_only": 0.45079853800007186,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "selftest",
+  "stderr": {
+    "sha256": "f9e1c68d001709739171c9139af98c5bbc793dc683a12fd02de1201775143746",
+    "size": 5132
+  },
+  "stdout": {
+    "sha256": "cf2580c5f98446da46a96769fe7e18aa3105c97beda2d4a762cac2138bdc4bce",
+    "size": 1847
+  }
+}

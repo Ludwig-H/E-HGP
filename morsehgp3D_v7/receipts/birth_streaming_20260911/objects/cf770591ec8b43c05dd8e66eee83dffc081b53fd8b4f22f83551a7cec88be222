@@ -1,0 +1,200 @@
+#!/usr/bin/env python3
+"""Create-only O2/SAN/TSAN capture of the private persistent CPU window pool.
+
+No installation, geometry qualification, benchmark, or cloud operation.
+SAN and TSAN are distinct captures; an incompatible sanitizer host is a
+preserved failure, never an implicit pass or a reason to disable checks.
+"""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import shlex
+import shutil
+import subprocess
+import time
+
+BASE = Path(__file__).resolve().parent
+TREE = "v7_birth_streaming_20260911"
+FILES = tuple(TREE + "/" + name for name in (
+    "window_workers.hpp", "window_workers_gate.cpp", "record_workers.py"))
+SAN = {"ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+       "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"}
+TSAN = {"TSAN_OPTIONS": "halt_on_error=1:exitcode=66"}
+SCOPE = "persistent_cpu_window_pool_only"
+
+
+def need(value, reason):
+    if not value:
+        raise ValueError(reason)
+
+
+def pin(path):
+    data = Path(path).read_bytes()
+    return {"sha256": hashlib.sha256(data).hexdigest(), "size": len(data)}
+
+
+def save(path, value):
+    with path.open("x") as stream:
+        json.dump(value, stream, indent=2, sort_keys=True)
+        stream.write("\n")
+
+
+def deps(path):
+    target, colon, body = path.read_text().replace("\\\n", " ").partition(":")
+    need(colon and target.strip() == "window_workers_gate", "dependency target")
+    return sorted({str(Path(name).resolve(strict=True)) for name in shlex.split(body)})
+
+
+def check_result(result):
+    fixed = {"status": "passed", "scope": SCOPE, "rejections": 10,
+             "partial_launches": 3, "positive_batches": 23, "empty_batches": 8,
+             "useful_parallel_workers": 6, "task_throws": 4,
+             "reuse_after_failure": 5, "geometry_qualified": False, "gcp_used": False}
+    need(type(result) is dict and set(result) == set(fixed) | {"checks"},
+         "result fields")
+    for key, expected in fixed.items():
+        need(type(result[key]) is type(expected) and result[key] == expected,
+             "result: " + key)
+    need(type(result["checks"]) is int and result["checks"] >= 2400,
+         "result nonvacuity")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--out", required=True)
+    sanitizer = parser.add_mutually_exclusive_group()
+    sanitizer.add_argument("--san", action="store_true")
+    sanitizer.add_argument("--tsan", action="store_true")
+    args = parser.parse_args()
+    need(args.out.isidentifier(), "fresh output child identifier")
+    out = BASE / args.out
+    out.mkdir(exist_ok=False)
+    source = out / "source_snapshot"
+    source.mkdir()
+    commands, before, headers, compiler_pin = [], {}, {}, {}
+    binary_before, result, error, status = None, None, None, "failed"
+    binary = out / "window_workers_gate"
+    mode = "asan_ubsan_lsan" if args.san else "tsan" if args.tsan else "o2"
+    sanitizer_environment = SAN if args.san else TSAN if args.tsan else {}
+    env = dict(os.environ, LC_ALL="C")
+    # Do not inherit a disabling/suppressing sanitizer configuration from
+    # another job. Capture the exact selected options below.
+    for key in ("ASAN_OPTIONS", "UBSAN_OPTIONS", "LSAN_OPTIONS", "TSAN_OPTIONS"):
+        env.pop(key, None)
+    env.update(sanitizer_environment)
+
+    def run(name, argv, expected=0):
+        row = {"name": name, "argv": [str(value) for value in argv],
+               "cwd": str(source), "expected_exit": expected, "exit_code": None}
+        commands.append(row)
+        save(out / (name + ".launch.json"), row)
+        start = time.monotonic()
+        try:
+            with (out / (name + ".stdout")).open("xb") as stdout:
+                with (out / (name + ".stderr")).open("xb") as stderr:
+                    row["exit_code"] = subprocess.run(
+                        row["argv"], cwd=source, env=env, stdout=stdout,
+                        stderr=stderr, check=False).returncode
+        finally:
+            row["elapsed_seconds_observation_only"] = time.monotonic() - start
+            for channel in ("stdout", "stderr"):
+                path = out / (name + "." + channel)
+                if path.exists():
+                    row[channel] = pin(path)
+            save(out / (name + ".command.json"), row)
+            print(json.dumps({"command": name, "exit_code": row["exit_code"]}),
+                  flush=True)
+        need(row["exit_code"] == expected, "exit: " + name)
+        stdout = (out / (name + ".stdout")).read_bytes()
+        stderr = (out / (name + ".stderr")).read_bytes()
+        need(not stderr, "diagnostic: " + name)
+        need((bool(stdout) if name in ("compiler", "selftest") else not stdout),
+             "stdout: " + name)
+        return stdout
+
+    try:
+        before = {name: pin(BASE.parent / name) for name in FILES}
+        save(out / "sources_before.json", before)
+        for name in FILES:
+            target = source / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(BASE.parent / name, target)
+        copied_before = {name: pin(source / name) for name in FILES}
+        save(out / "sources_copied_before.json", copied_before)
+        need(before == copied_before, "snapshot copy")
+        compiler_name = shutil.which("g++")
+        need(compiler_name, "existing g++ required")
+        compiler = Path(compiler_name).resolve(strict=True)
+        compiler_pin = {str(compiler): pin(compiler)}
+        save(out / "compiler_before.json", compiler_pin)
+        run("compiler", [compiler, "--version"])
+        flags = [compiler, "-std=c++20", "-Wall", "-Wextra", "-Wpedantic",
+                 "-Werror", "-pthread"]
+        if args.san:
+            flags += ["-O1", "-g", "-fsanitize=address,undefined",
+                      "-fno-omit-frame-pointer", "-fno-pie", "-no-pie"]
+        elif args.tsan:
+            flags += ["-O1", "-g", "-fsanitize=thread", "-fno-omit-frame-pointer",
+                      "-fPIE", "-pie"]
+        else:
+            flags += ["-O2"]
+        tu = source / TREE / "window_workers_gate.cpp"
+        run("dependencies_before", [*flags, "-M", "-MF", out / "dependencies_before.d",
+                                    "-MT", "window_workers_gate", tu])
+        headers = {name: pin(name) for name in deps(out / "dependencies_before.d")}
+        save(out / "dependencies_before.json", headers)
+        run("compile", [*flags, "-MD", "-MF", out / "compile.d", "-MT",
+                        "window_workers_gate", tu, "-o", binary])
+        need(deps(out / "compile.d") == list(headers), "compile dependencies")
+        binary_before = pin(binary)
+        save(out / "binary_before.json", binary_before)
+        stdout = run("selftest", [binary, "--selftest"])
+        need(len(stdout.splitlines()) == 1, "single result JSON")
+        result = json.loads(stdout)
+        check_result(result)
+        run("unknown", [binary, "--unknown"], 2)
+        run("missing", [binary], 2)
+        run("dependencies_after", [*flags, "-M", "-MF", out / "dependencies_after.d",
+                                   "-MT", "window_workers_gate", tu])
+        need(deps(out / "dependencies_after.d") == list(headers), "post dependencies")
+        status = "passed"
+    except BaseException as exc:
+        error = type(exc).__name__ + ": " + str(exc)
+    finally:
+        closure = {}
+        try:
+            after = {name: pin(BASE.parent / name) for name in before}
+            copied = {name: pin(source / name) for name in before}
+            headers_after = {name: pin(name) for name in headers}
+            compiler_after = {name: pin(name) for name in compiler_pin}
+            binary_after = pin(binary) if binary.is_file() else None
+            for name, value in (("sources_after", after), ("sources_copied_after", copied),
+                                ("dependencies_after", headers_after),
+                                ("compiler_after", compiler_after), ("binary_after", binary_after)):
+                save(out / (name + ".json"), value)
+            closure = {
+                "sources": bool(before) and before == after == copied,
+                "dependencies": bool(headers) and headers == headers_after,
+                "compiler": bool(compiler_pin) and compiler_pin == compiler_after,
+                "binary": binary_before is not None and binary_before == binary_after}
+            need(all(closure.values()), "closure")
+        except BaseException as exc:
+            status = "failed"
+            error = (error + "; " if error else "") + "closure: " + str(exc)
+        save(out / "commands.json", commands)
+        save(out / "result.json", result)
+        save(out / "receipt.json", {
+            "status": status, "error": error, "closure": closure,
+            "commands": len(commands), "mode": mode,
+            "sanitizer": args.san or args.tsan,
+            "sanitizer_environment": sanitizer_environment, "locale": "C",
+            "scope": SCOPE, "geometry_qualified": False, "gcp_used": False,
+            "system_scope": "compiler binary/version and consumed headers, not hermetic linker/runtime"})
+    print(json.dumps({"status": status, "error": error}), flush=True)
+    return 0 if status == "passed" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

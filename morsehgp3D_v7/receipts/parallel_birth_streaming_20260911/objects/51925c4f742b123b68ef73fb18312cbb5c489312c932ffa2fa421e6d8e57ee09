@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "/usr/bin/time",
+    "-v",
+    "-o",
+    "/workspaces/E-HGP/build/v7_parallel_birth_streaming_20260911/micro_n800_s8_cpu4_compare_r1/rss.txt",
+    "/workspaces/E-HGP/build/v7_parallel_birth_streaming_20260911/bench_build_o2_r1/bench",
+    "--n=800",
+    "--s=8",
+    "--kmax=10",
+    "--window=65536",
+    "--mode=compare",
+    "--geometry-threads=4",
+    "--threads=4",
+    "--history-threads=4"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_parallel_birth_streaming_20260911/bench_build_o2_r1/source_snapshot",
+  "elapsed_seconds_observation_only": 9.80794247599988,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "bench",
+  "stderr": {
+    "sha256": "b723eebce57181cf02bf1b708224b429e47c88220226b31458032782f77c7ca7",
+    "size": 1858
+  },
+  "stdout": {
+    "sha256": "ee1c4fddb8fbef6fa880e39f70f1c68cd6ba94591118848f0c273d3b723a3131",
+    "size": 33310
+  }
+}

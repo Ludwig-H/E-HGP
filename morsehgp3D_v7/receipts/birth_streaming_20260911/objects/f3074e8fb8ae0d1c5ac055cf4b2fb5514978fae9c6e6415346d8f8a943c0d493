@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_birth_streaming_20260911/qualification_o2_r1/gate",
+    "--high"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_birth_streaming_20260911/qualification_o2_r1/source_snapshot",
+  "elapsed_seconds_observation_only": 5.4607447540001885,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "high",
+  "stderr": {
+    "sha256": "bb4b86b140dce94ef7c171e7598855749203e6ef5d7d2d3ba3a9c80ccda973b8",
+    "size": 556
+  },
+  "stdout": {
+    "sha256": "fdddbd9a1e98b7cd1ae148bbf295244db8f68f00935d7c798457b6fd9e0d1a6c",
+    "size": 1881
+  }
+}

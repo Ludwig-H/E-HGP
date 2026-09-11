@@ -1,0 +1,1 @@
+{"status":"passed","scope":"persistent_cpu_window_pool_only","checks":2500,"rejections":10,"partial_launches":3,"positive_batches":23,"empty_batches":8,"useful_parallel_workers":6,"task_throws":4,"reuse_after_failure":5,"geometry_qualified":false,"gcp_used":false}

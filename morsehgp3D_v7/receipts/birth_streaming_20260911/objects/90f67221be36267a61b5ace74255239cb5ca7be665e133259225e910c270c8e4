@@ -1,0 +1,22 @@
+{
+  "closure": {
+    "binary": true,
+    "compiler": true,
+    "dependencies": true,
+    "sources": true
+  },
+  "commands": 7,
+  "error": null,
+  "gcp_used": false,
+  "geometry_qualified": false,
+  "locale": "C",
+  "mode": "asan_ubsan_lsan",
+  "sanitizer": true,
+  "sanitizer_environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "scope": "persistent_cpu_window_pool_only",
+  "status": "passed",
+  "system_scope": "compiler binary/version and consumed headers, not hermetic linker/runtime"
+}

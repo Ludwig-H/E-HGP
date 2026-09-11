@@ -1,0 +1,22 @@
+{
+  "benchmark_executed": false,
+  "closure": {
+    "binary": true,
+    "compiler": true,
+    "dependencies": true,
+    "sources": true
+  },
+  "commands": 26,
+  "device_executed": false,
+  "error": null,
+  "gcp_used": false,
+  "kind": "gate",
+  "locale": "C",
+  "performance_claim": false,
+  "public_status": "not_claimed",
+  "sanitizer": false,
+  "sanitizer_environment": {},
+  "source_build_receipt": null,
+  "status": "passed",
+  "system_scope": "compiler binary/version and preprocessor headers, not complete linker/runtime sysroot"
+}

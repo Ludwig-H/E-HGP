@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "--version"
+  ],
+  "cwd": "/workspaces/E-HGP/build",
+  "elapsed_seconds_observation_only": 0.0017587699999239703,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "compiler",
+  "stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  "stdout": {
+    "sha256": "39553616934606f58b27c04bed0cdbbe5b00c92c831a9aaadebd7ceda61d1334",
+    "size": 266
+  }
+}

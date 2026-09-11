@@ -1,0 +1,308 @@
+// Private CPU scheduling gate: no geometry, timing, FULL or GPU claim.
+#define MHGP7_WINDOW_WORKERS_TESTING 1
+#include "window_workers.hpp"
+
+#include <array>
+#include <cstdint>
+#include <iostream>
+#include <latch>
+#include <memory>
+#include <numeric>
+#include <string>
+#include <string_view>
+
+namespace ww = mhgp7::window_workers_private;
+
+namespace {
+struct Counts {
+  std::size_t checks = 0, rejections = 0, partial_launches = 0;
+  std::size_t positive_batches = 0, empty_batches = 0;
+  std::size_t useful_parallel_workers = 0, task_throws = 0;
+  std::size_t reuse_after_failure = 0;
+} counts;
+
+void need(bool value, std::string_view cause) {
+  ++counts.checks;
+  if (!value) throw std::runtime_error(std::string(cause));
+}
+
+template <typename Error, typename Fn>
+void reject(Fn&& fn, std::string_view message) {
+  bool caught = false;
+  try {
+    fn();
+  } catch (const Error& error) {
+    caught = std::string_view(error.what()) == message;
+  }
+  need(caught, "window_gate.expected_rejection");
+  ++counts.rejections;
+}
+
+void reset_hooks() {
+  need(ww::testing::launch_active.load() == 0, "window_gate.no_live_thread");
+  ww::testing::launch_started.store(0);
+  ww::testing::launch_admitted.store(0);
+  ww::testing::task_entries.store(0);
+  ww::testing::exceptions_captured.store(0);
+  ww::testing::launch_fail_after = std::numeric_limits<std::size_t>::max();
+}
+
+std::size_t attempted(const ww::WindowWorkers& pool) {
+  return std::accumulate(pool.stats().tasks_per_worker.begin(),
+                         pool.stats().tasks_per_worker.end(), std::size_t{0});
+}
+
+void basic(std::size_t workers) {
+  reset_hooks();
+  {
+    ww::WindowWorkers pool(workers);
+    const auto initial = workers == 1 ? 0 : workers;
+    need(pool.stats().initial_threads == initial, "window_gate.initial_threads");
+    need(pool.stats().batches == 0, "window_gate.initial_batches");
+    std::vector<std::thread::id> identities(workers);
+    std::vector<std::size_t> scratch(workers);
+    const std::array<std::size_t, 6> sizes{0, 1, 257, 17, 0, 509};
+    std::size_t batch = 0;
+    for (const auto n : sizes) {
+      std::vector<std::atomic<unsigned>> visits(n);
+      std::atomic<bool> bad_worker{false};
+      const auto caller = std::this_thread::get_id();
+      pool.run(n, [&](std::size_t index, std::size_t worker) {
+        if (worker >= workers || index >= n) {
+          bad_worker.store(true);
+          return;
+        }
+        const auto id = std::this_thread::get_id();
+        if (identities[worker] != std::thread::id{} && identities[worker] != id)
+          bad_worker.store(true);
+        identities[worker] = id;
+        if ((workers == 1) != (id == caller)) bad_worker.store(true);
+        ++scratch[worker];
+        visits[index].fetch_add(1);
+      });
+      ++batch;
+      need(!bad_worker.load(), "window_gate.worker_identity");
+      need(pool.stats().batches == batch && pool.stats().task_count == n,
+           "window_gate.batch_metadata");
+      need(attempted(pool) == n, "window_gate.last_attempts");
+      need(pool.stats().initial_threads == initial, "window_gate.persistent_creation");
+      for (const auto& hit : visits) need(hit.load() == 1, "window_gate.once_only");
+      if (n == 0) ++counts.empty_batches;
+      ++counts.positive_batches;
+    }
+    need(std::accumulate(scratch.begin(), scratch.end(), std::size_t{0}) == 784,
+         "window_gate.scratch_per_worker");
+    // No all-workers-used requirement for the small windows above. This
+    // fixture deliberately gives >= 8 tasks/worker, hence chunk_size == 1.
+    // Each worker waits only on its first task; all team members must enter.
+    if (workers > 1) {
+      std::latch all_entered(static_cast<std::ptrdiff_t>(workers));
+      std::vector<unsigned char> first(workers, 0);
+      pool.run(workers * 8, [&](std::size_t, std::size_t worker) {
+        if (first[worker] == 0) {
+          first[worker] = 1;
+          all_entered.arrive_and_wait();
+        }
+        if (identities[worker] != std::thread::id{} &&
+            identities[worker] != std::this_thread::get_id())
+          throw std::runtime_error("window_gate.team_recreated");
+        identities[worker] = std::this_thread::get_id();
+      });
+      for (std::size_t a = 0; a < workers; ++a) {
+        need(first[a] == 1 && pool.stats().tasks_per_worker[a] > 0,
+             "window_gate.useful_worker");
+        for (std::size_t b = 0; b < a; ++b)
+          need(identities[a] != identities[b], "window_gate.distinct_threads");
+      }
+      counts.useful_parallel_workers += workers;
+      ++counts.positive_batches;
+    }
+    // Temporary, move-only callback; no std::function copy requirement.
+    std::atomic<std::size_t> move_only_sum{0};
+    pool.run(9, [owned = std::make_unique<std::size_t>(3), &move_only_sum](
+                    std::size_t index, std::size_t) {
+      move_only_sum.fetch_add(index + *owned);
+    });
+    need(move_only_sum.load() == 63, "window_gate.move_only_callable");
+    ++counts.positive_batches;
+  }
+  need(ww::testing::launch_active.load() == 0, "window_gate.destructor_join");
+  need(ww::testing::launch_started.load() == (workers == 1 ? 0 : workers),
+       "window_gate.no_relaunch");
+}
+
+void launch_failures() {
+  for (const std::size_t prefix : {std::size_t{0}, std::size_t{1}, std::size_t{3}}) {
+    reset_hooks();
+    ww::testing::launch_fail_after = prefix;
+    bool caught = false;
+    try {
+      ww::WindowWorkers pool(4);
+    } catch (const std::system_error& error) {
+      caught = error.code() == std::errc::resource_unavailable_try_again;
+    }
+    ww::testing::launch_fail_after = std::numeric_limits<std::size_t>::max();
+    need(caught, "window_gate.partial_launch_cause");
+    need(ww::testing::launch_started.load() == prefix, "window_gate.partial_started");
+    need(ww::testing::launch_active.load() == 0, "window_gate.partial_joined");
+    need(ww::testing::launch_admitted.load() == 0 &&
+             ww::testing::task_entries.load() == 0,
+         "window_gate.partial_no_admission");
+    ++counts.partial_launches;
+    ++counts.rejections;
+  }
+}
+
+void recursion_and_reuse(std::size_t workers) {
+  reset_hooks();
+  ww::WindowWorkers pool(workers);
+  std::atomic<std::size_t> nested_calls{0};
+  reject<std::logic_error>([&] {
+    pool.run(1, [&](std::size_t, std::size_t) {
+      pool.run(1, [&](std::size_t, std::size_t) { nested_calls.fetch_add(1); });
+    });
+  }, "window_workers.concurrent_or_recursive_run");
+  need(nested_calls.load() == 0 && pool.stats().batches == 1 && attempted(pool) == 1,
+       "window_gate.recursion_before_admission");
+  ++counts.task_throws;
+  pool.run(0, [&](std::size_t, std::size_t) { nested_calls.fetch_add(1); });
+  need(attempted(pool) == 0 && nested_calls.load() == 0, "window_gate.empty_after_throw");
+  ++counts.empty_batches;
+  pool.run(19, [&](std::size_t, std::size_t) { nested_calls.fetch_add(1); });
+  need(nested_calls.load() == 19 && attempted(pool) == 19 && pool.stats().batches == 3,
+       "window_gate.reuse_after_throw");
+  ++counts.reuse_after_failure;
+}
+
+void concurrent_rejection() {
+  reset_hooks();
+  ww::WindowWorkers pool(2);
+  std::latch entered(1), release(1);
+  std::exception_ptr caller_error;
+  std::atomic<std::size_t> rejected_calls{0};
+  std::thread caller([&] {
+    try {
+      pool.run(1, [&](std::size_t, std::size_t) {
+        entered.count_down();
+        release.wait();
+      });
+    } catch (...) { caller_error = std::current_exception(); }
+  });
+  entered.wait();
+  bool caught = false;
+  try {
+    pool.run(1, [&](std::size_t, std::size_t) { rejected_calls.fetch_add(1); });
+  } catch (const std::logic_error& error) {
+    caught = std::string_view(error.what()) == "window_workers.concurrent_or_recursive_run";
+  } catch (...) {
+    release.count_down();
+    caller.join();
+    throw;
+  }
+  release.count_down();
+  caller.join();
+  need(caught && !caller_error && rejected_calls.load() == 0,
+       "window_gate.concurrent_rejection");
+  need(pool.stats().batches == 1 && attempted(pool) == 1,
+       "window_gate.concurrent_no_admission");
+  ++counts.rejections;
+  pool.run(3, [&](std::size_t, std::size_t) { rejected_calls.fetch_add(1); });
+  need(rejected_calls.load() == 3, "window_gate.reuse_after_concurrent");
+  ++counts.reuse_after_failure;
+}
+
+void ordered_exceptions() {
+  reset_hooks();
+  ww::WindowWorkers pool(4);
+  std::latch entered(4);
+  std::array<bool, 4> first{};
+  std::atomic<std::size_t> active{0}, completed{0};
+  reject<std::runtime_error>([&] {
+    pool.run(32, [&](std::size_t, std::size_t worker) {
+      active.fetch_add(1);
+      struct Finish {
+        std::atomic<std::size_t>& active;
+        std::atomic<std::size_t>& completed;
+        ~Finish() { completed.fetch_add(1); active.fetch_sub(1); }
+      } finish{active, completed};
+      if (first[worker]) return;
+      first[worker] = true;
+      entered.arrive_and_wait();
+      if (worker == 0) throw std::runtime_error("window_gate.first_exception");
+      if (worker == 1) {
+        // This callback was already entered before cancellation. Order its
+        // second throw AFTER the first has actually been captured.
+        ww::testing::exceptions_captured.wait(0, std::memory_order_acquire);
+        throw std::runtime_error("window_gate.second_exception");
+      }
+    });
+  }, "window_gate.first_exception");
+  need(ww::testing::exceptions_captured.load() == 2, "window_gate.two_exceptions");
+  need(active.load() == 0 && completed.load() == attempted(pool) && attempted(pool) >= 4,
+       "window_gate.quiescent_before_rethrow");
+  counts.task_throws += 2;
+  std::atomic<std::size_t> calls{0};
+  pool.run(41, [&](std::size_t, std::size_t) { calls.fetch_add(1); });
+  need(calls.load() == 41 && attempted(pool) == 41, "window_gate.reuse_first_exception");
+  ++counts.reuse_after_failure;
+}
+
+void representation_guards() {
+  reject<std::invalid_argument>([] { ww::WindowWorkers pool(0); },
+                                "window_workers.zero_workers");
+  reject<std::length_error>([] {
+    ww::WindowWorkers pool(std::numeric_limits<std::size_t>::max());
+  }, "window_workers.worker_representation");
+  reset_hooks();
+  ww::WindowWorkers pool(2);
+  ww::testing::Access::set_batches(pool, std::numeric_limits<std::size_t>::max());
+  std::atomic<std::size_t> calls{0};
+  reject<std::overflow_error>([&] {
+    pool.run(1, [&](std::size_t, std::size_t) { calls.fetch_add(1); });
+  }, "window_workers.batch_counter_overflow");
+  need(calls.load() == 0 && attempted(pool) == 0 && pool.stats().task_count == 0,
+       "window_gate.counter_overflow_before_admission");
+  // No generation has ever been admitted in this deliberately modified pool.
+  ww::testing::Access::set_batches(pool, 0);
+  pool.run(1, [&](std::size_t, std::size_t) { calls.fetch_add(1); });
+  need(calls.load() == 1, "window_gate.reuse_after_overflow");
+  ++counts.reuse_after_failure;
+}
+
+void selftest() {
+  representation_guards();
+  launch_failures();
+  basic(1);
+  basic(2);
+  basic(4);
+  recursion_and_reuse(1);
+  recursion_and_reuse(4);
+  concurrent_rejection();
+  ordered_exceptions();
+  need(ww::testing::launch_active.load() == 0, "window_gate.all_threads_closed");
+  need(counts.checks >= 2400 && counts.rejections == 10 && counts.partial_launches == 3 &&
+           counts.useful_parallel_workers == 6 && counts.task_throws == 4 &&
+           counts.reuse_after_failure == 5 && counts.empty_batches == 8,
+       "window_gate.nonvacuity");
+  std::cout << "{\"status\":\"passed\",\"scope\":\"persistent_cpu_window_pool_only\","
+            << "\"checks\":" << counts.checks << ",\"rejections\":" << counts.rejections
+            << ",\"partial_launches\":" << counts.partial_launches
+            << ",\"positive_batches\":" << counts.positive_batches
+            << ",\"empty_batches\":" << counts.empty_batches
+            << ",\"useful_parallel_workers\":" << counts.useful_parallel_workers
+            << ",\"task_throws\":" << counts.task_throws
+            << ",\"reuse_after_failure\":" << counts.reuse_after_failure
+            << ",\"geometry_qualified\":false,\"gcp_used\":false}\n";
+}
+}  // namespace
+
+int main(int argc, char** argv) {
+  if (argc != 2 || std::string_view(argv[1]) != "--selftest") return 2;
+  try {
+    selftest();
+    return 0;
+  } catch (const std::exception& error) {
+    std::cerr << "cause=" << error.what() << '\n';
+    return 1;
+  }
+}

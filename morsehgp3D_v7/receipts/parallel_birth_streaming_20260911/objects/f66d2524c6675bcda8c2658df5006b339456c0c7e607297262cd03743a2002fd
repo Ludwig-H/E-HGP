@@ -1,0 +1,40 @@
+{
+  "argv": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-isystem",
+    "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-O1",
+    "-g",
+    "-fsanitize=address,undefined",
+    "-fno-omit-frame-pointer",
+    "-fno-pie",
+    "-no-pie",
+    "-I",
+    "/workspaces/E-HGP/build/v7_parallel_birth_streaming_20260911/qualification_san_r1/source_snapshot/v7_atlas_graph_20260911",
+    "-M",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_parallel_birth_streaming_20260911/qualification_san_r1/dependencies_after.d",
+    "-MT",
+    "mhgp7_parallel_birth_streaming",
+    "/workspaces/E-HGP/build/v7_parallel_birth_streaming_20260911/qualification_san_r1/source_snapshot/v7_parallel_birth_streaming_20260911/gate.cpp"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_parallel_birth_streaming_20260911/qualification_san_r1/source_snapshot",
+  "elapsed_seconds_observation_only": 0.40737620199979574,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "dependencies_after",
+  "stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  "stdout": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  }
+}

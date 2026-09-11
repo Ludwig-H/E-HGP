@@ -1,0 +1,28 @@
+phase_start=synthetic_input
+phase_complete=synthetic_input seconds=0.004065043
+phase_start=input_digest
+phase_complete=input_digest seconds=0.000827979
+phase_start=index
+phase_complete=index seconds=0.006975882
+phase_start=generate
+phase_complete=generate seconds=44.006030381
+phase_start=sort_rle
+phase_complete=sort_rle seconds=1.884149622
+phase_start=prefilter
+phase_complete=prefilter seconds=9.805796381
+phase_start=census
+phase_complete=census seconds=7.246980690
+phase_start=release_upstream
+phase_complete=release_upstream seconds=0.080652752
+phase_start=common_validate_catalogue
+phase_complete=common_validate_catalogue seconds=20.167244539
+phase_start=streaming_atlas_parallel_geometry_dense_birth
+phase_complete=streaming_atlas_parallel_geometry_dense_birth seconds=75.133142286
+phase_start=streaming_histories
+phase_complete=streaming_histories seconds=19.558561393
+phase_start=streaming_export
+phase_complete=streaming_export seconds=37.380203281
+phase_start=streaming_release_metadata
+phase_complete=streaming_release_metadata seconds=0.102636764
+phase_start=streaming_digest
+phase_complete=streaming_digest seconds=2.199125780

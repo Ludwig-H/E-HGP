@@ -3297,3 +3297,101 @@ modifie pas les 15 captures historiques du paquet. `diff --check` ne
 signale que la ligne vide finale de la sortie brute g++ --version, objet
 39553616… : conservée octet pour octet sous son hash, contrôle des autres
 fichiers PASS. Aucun test ou compilateur ROOT restant, GCP non utilisé.
+
+ROOT, reprise après ac3e8b9f, main/index libre. Cadre inchangé
+exploration_v7_hors_registre / cpu_reference / quantized_u16_input_only /
+audit_independant_math_and_architecture / not_claimed. Nous portons le draft
+de contraction directe dans build/v7_birth_streaming_20260911, sans modifier
+les sources scellées ni le moteur actif. La gate comparera toutes les
+terminales, φ/marques, l'ensemble exact des arêtes au réducteur ordonné,
+FULL/T2 et trois mutations causales : φ=find, oubli entre fenêtres,
+conversion dense→BlockId avant fin de K. Compteurs DSU[L], P et R−P propres.
+En parallèle, préparation d'une équipe CPU persistante pour les groupes
+géométriques, à qualifier séparément avant raccord. Aucun GCP prévu tant
+que cette voie hôte n'est pas fermée ; pas de transfert des anciens temps.
+
+ROOT, réponse courante COORDINATION_AUDITEURS relue : accord pour retourner
+les métadonnées préparées du validateur, sans sa future arène FULL, et pour
+comparer les rangs après certification de chaque liaison BallId→rang.
+La distinction ordre des bits contribution/représentant/ShellTable est
+conservée. Le retrait des doublons de préparation sera un delta séparé ;
+le premier reçu dense garde intégralement la validation commune mesurée.
+Le pool CPU n'expose ni φ ni le DSU aux workers ; le Context GPU actuel
+ne sera pas partagé concurremment. Nous ne traitons pas span<const> comme
+preuve suffisante d'immuabilité d'un propriétaire extérieur.
+
+ROOT, qualification dense locale fermée O2/SAN, nouvelle source 87eb210e :
+114 census, 456 essais de fenêtres et 253 224 terminales par build ; φ,
+arêtes natives datées, FULL/T2 et travail géométrique confrontés directement
+aux voies précédentes. Trois fautes sources réellement exercées : racine
+courante au lieu d'identité, pivot oublié, conversion précoce. Les deux
+captures sont create-only ; correction du lecteur bench ensuite, sans
+modifier le C++ ni réécrire ces témoins. Mesures encore à venir.
+
+ROOT, le pool persistant passe sa gate autonome O2 et ASan/UBSan/LSan :
+10 refus, trois créations partielles, réutilisations et quiescence exercées.
+TSan échoue avant le test sur « unexpected memory mapping », code66 ;
+capture conservée, aucune certification de race par TSan. Le raccord de
+géométrie fenêtrée passe déjà O2, workers1/4, sans partager φ/DSU. Un refus
+spécifique attend quatre workers ayant chacun payé une résolution K>=2,
+puis injecte une exception : quiescence et fermeture des threads vérifiées,
+nouveau producteur confronté aux certificats ordonnés. Ce n'est ni un compte
+exhaustif du travail avant erreur, ni une réutilisation d'objet échoué.
+SAN de ce raccord en cours. Votre publication e3903b2a est bien distinguée
+des sources candidates ; préparation partagée/semis GPU non intégrés ici.
+
+ROOT, SAN parallèle désormais clos et égal à O2 : 114 census, 912 essais,
+506 448 terminales et 48 771 156 contrôles par build ; 456 essais à quatre
+workers avec 52 524 tâches géométriques payées. Réserve conservée : cela
+ne prouve pas leur simultanéité nominale, et le refus à barrière compte
+quatre workers ayant payé au moins une tâche, pas exactement quatre tâches.
+Votre extension des comparaisons de rang au scatter/semis est retenue comme
+prochain delta séparé des sources figées : 2R−R_K1 comparaisons rationnelles
+évitables, pas de gain MEB. Les niveaux de la MEB initiale et des descentes
+restent exacts hors catalogue. Pour le runner sans timeout : les captures
+en cours sont surveillées et aucun blocage observé ; nous ne changeons pas
+leurs scripts scellés. Un délai d'essai serait un échec du test, jamais
+une borne d'itération du producteur. Mono8000 en cours, puis mesures workers.
+
+ROOT, paquet mono maintenant constitué, lecteur normal/−O PASS :
+`receipts/birth_streaming_20260911`, manifeste e613ff0f558c6f5f10589f92d219d2acce616e5eca4a67bc63ff15cab47c1510.
+Treize captures / 82 commandes, 12 PASS + TSan initial refusé ; snapshots
+923c5823 et36e97047 du recorder distingués. Mono8k clos : 186,354254893 s,
+2 752 852 KiB, mêmes digest/MEB/nœuds que le témoin ordonné parent ;
+P=3 113 381 unions retirées, R−P=7 342 931 unions natives, L=2 404 646.
+Début de génération concurrent à fin SAN parallèle, pas de gain statistique
+revendiqué. Paquet non encore commité, index libre, paire workers1/4 en cours.
+
+ROOT, toutes les nouvelles captures sont fermées. Paquet parallèle construit,
+lecteur PASS, manifeste 759fcc21ef945803efa54c82f48b1368ec15dc95f715ad2131f140cb280688e0.
+Quinze captures réussies / 75 commandes. Paire géométrie1/4 à 8k, autres
+contrôles1 : 187,214349752→164,702915024 s ; phase atlas/géométrie/réduction
+58,649085565→34,976048990 s, mêmes comptes complets. Triplet4/4/4 :
+92,963380155 / 215,380860626 / 489,601175356 s, RSS 2 874 428 /
+5 803 964 / 11 608 968 KiB. Dix champs FULL/digest/travail géométrique
+comparés aux témoins ordonnés respectifs, tous égaux. Les histoires et
+l'export restent coûteux : 50,145306644 / 91,704433127 s à32k.
+Les petits s8/10/12 n800 CPU4 concordent, sans optimum temps déduit.
+Replay extrait du pool O2 PASS sept commandes ; replay de sonde parallèle
+à effectuer depuis extraction. Aucun benchmark original encore actif.
+
+ROOT, réservation de publication sur main, index constaté vide sur19049adf :
+ce journal, README/PASSATION, docs/FAUSSES_PISTES,
+OBJETS_PARALLELES_TOUR_20260911, RESOLUTIONS_PAR_FENETRES_20260911,
+CONTRACTION_NAISSANCES_ET_WORKERS_20260911, et les deux dossiers de reçus
+birth_streaming_20260911/parallel_birth_streaming_20260911 uniquement.
+Aucun fichier d'auditeur, v6, registre, GCP ou src actif dans cette réservation.
+Lectures depuis l'index exporté et replay avant commit/push ; réservation
+close à publication. GCP non utilisé dans cette passe.
+
+ROOT, contrôles de publication fermés : les deux lecteurs normal/−O passent
+depuis l'index exporté (13/15 captures, 281/274 objets locaux). 508 Markdown
+et 20 phases validés. Replay de sonde depuis les seules sources extraites :
+build C++20 strict O2 PASS, puis comparaison n32/K10/W31/4-4-4 PASS ; ce
+n32 est un contrôle de reproduction, pas le benchmark n32000. Les reçus
+historiques des paquets ne sont pas modifiés par ces replays. `diff --check`
+ne signale que les quatre fins de fichiers sous hash : deux copies de la
+sortie g++ --version (39553616), puis les assembleurs bedb864d/8e7e1e16
+avec leur ligne vide terminale ; les autres fichiers passent. Ces octets
+sont conservés, pas normalisés après capture. Aucun compilateur ou test
+ROOT restant, aucune session GCP créée ou démarrée.

@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "/usr/bin/time",
+    "-v",
+    "-o",
+    "/workspaces/E-HGP/build/v7_parallel_birth_streaming_20260911/micro_n800_s10_cpu4_compare_r1/rss.txt",
+    "/workspaces/E-HGP/build/v7_parallel_birth_streaming_20260911/bench_build_o2_r1/bench",
+    "--n=800",
+    "--s=10",
+    "--kmax=10",
+    "--window=65536",
+    "--mode=compare",
+    "--geometry-threads=4",
+    "--threads=4",
+    "--history-threads=4"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_parallel_birth_streaming_20260911/bench_build_o2_r1/source_snapshot",
+  "exit_code": null,
+  "expected_exit": 0,
+  "name": "bench"
+}

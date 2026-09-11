@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "--version"
+  ],
+  "cwd": "/workspaces/E-HGP/build",
+  "exit_code": null,
+  "expected_exit": 0,
+  "name": "compiler"
+}

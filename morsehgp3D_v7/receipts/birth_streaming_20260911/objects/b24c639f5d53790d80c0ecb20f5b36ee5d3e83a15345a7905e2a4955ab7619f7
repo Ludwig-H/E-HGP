@@ -1,0 +1,44 @@
+phase_start=synthetic_input
+phase_complete=synthetic_input seconds=0.000067941
+phase_start=input_digest
+phase_complete=input_digest seconds=0.000020620
+phase_start=index
+phase_complete=index seconds=0.000106769
+phase_start=generate
+phase_complete=generate seconds=0.465596016
+phase_start=sort_rle
+phase_complete=sort_rle seconds=0.008563648
+phase_start=prefilter
+phase_complete=prefilter seconds=0.109828707
+phase_start=census
+phase_complete=census seconds=0.085186820
+phase_start=release_upstream
+phase_complete=release_upstream seconds=0.000455126
+phase_start=common_validate_catalogue
+phase_complete=common_validate_catalogue seconds=0.044372565
+phase_start=reference_extract
+phase_complete=reference_extract seconds=0.452097386
+phase_start=reference_release_targets
+phase_complete=reference_release_targets seconds=0.000000440
+phase_start=reference_certificates
+phase_complete=reference_certificates seconds=0.041321168
+phase_start=reference_histories
+phase_complete=reference_histories seconds=0.052948301
+phase_start=reference_export
+phase_complete=reference_export seconds=0.105917713
+phase_start=reference_release_metadata
+phase_complete=reference_release_metadata seconds=0.000015804
+phase_start=streaming_atlas_geometry_dense_birth
+phase_complete=streaming_atlas_geometry_dense_birth seconds=0.442264199
+phase_start=streaming_histories
+phase_complete=streaming_histories seconds=0.056520041
+phase_start=streaming_export
+phase_complete=streaming_export seconds=0.108035496
+phase_start=streaming_release_metadata
+phase_complete=streaming_release_metadata seconds=0.000022083
+phase_start=reference_digest
+phase_complete=reference_digest seconds=0.018414726
+phase_start=streaming_digest
+phase_complete=streaming_digest seconds=0.014614932
+phase_start=direct_physical_compare
+phase_complete=direct_physical_compare seconds=0.000877272

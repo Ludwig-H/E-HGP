@@ -1,0 +1,21 @@
+{
+  "closure": {
+    "binary": true,
+    "compiler": true,
+    "dependencies": true,
+    "sources": true
+  },
+  "commands": 4,
+  "error": "ValueError: exit: selftest",
+  "gcp_used": false,
+  "geometry_qualified": false,
+  "locale": "C",
+  "mode": "tsan",
+  "sanitizer": true,
+  "sanitizer_environment": {
+    "TSAN_OPTIONS": "halt_on_error=1:exitcode=66"
+  },
+  "scope": "persistent_cpu_window_pool_only",
+  "status": "failed",
+  "system_scope": "compiler binary/version and consumed headers, not hermetic linker/runtime"
+}

@@ -1,0 +1,407 @@
+#!/usr/bin/env python3
+"""Local, create-only DENSE-BIRTH streaming qualification/build and explicit single bench run.
+
+Adapted from ../v7_graph_full_20260911/record_tower.py. No historical failure
+is invented; earlier uncaptured smoke commands are outside these receipts.
+"""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shlex
+import shutil
+import subprocess
+import time
+
+BASE = Path(__file__).resolve().parent
+BOOST = BASE.parent / "v7_boost_gate/extracted/usr/include"
+TREES = {"v7_birth_streaming_20260911", "v7_ordered_streaming_20260911", "v7_streaming_graph_20260911", "v7_atlas_graph_20260911",
+         "v7_graph_full_20260911", "v7_composable_msf_20260911"}
+TARGET = "mhgp7_birth_streaming"
+SAN_ENV = {"ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+           "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"}
+CAUSES = dict(zip(
+    ("mutant-terminal", "mutant-pivot", "mutant-edge-date", "mutant-drop-edge", "mutant-mark-date",
+     "mutant-drop-birth", "mutant-work", "mutant-window-work", "reject-zero-window", "reject-observer", "reject-observer-pair",
+     "mutant-birth-work", "mutant-legacy-work", "mutant-root-pivot", "mutant-forget-pivot", "mutant-early-conversion"),
+    ("stream_gate.direct_terminal", "stream_gate.ordinal_zero_pivots", "filtered.edge_not_strictly_after_birth",
+     "filtered.cut_connectivity", "filtered.mark_identity", "filtered.certificate_domain", "stream_gate.meb_work_identity",
+     "stream_gate.window_work", "streaming.window_width", "stream_gate.observer_abort_after_three", "streaming.observer_pair",
+     "birth_stream_gate.single_pass", "birth_stream_gate.no_legacy_reducer", "stream_gate.ordinal_zero_pivots",
+     "birth_stream.source_label", "birth_stream.source_label")))
+FIXTURES = {"selftest": ("pair E5 square growth_ABCZ growth_redundant inert_ball shell7_window support3 support4 "
+                         "u16_tetra portal_equal actual_equal_radius_descent growth_ABCZ_doubled_lot "
+                         "inert_ball_doubled_lot singleton line4").split(),
+            "high": ["spatial12", "shell14"], "uniform32": ["uniform32"]}
+
+
+def need(value, reason):
+    if not value:
+        raise ValueError(reason)
+
+
+def pin(path):
+    data = Path(path).read_bytes()
+    return {"sha256": hashlib.sha256(data).hexdigest(), "size": len(data)}
+
+
+def save(path, value):
+    with path.open("x") as stream:
+        json.dump(value, stream, indent=2, sort_keys=True); stream.write("\n")
+
+
+def read(path):
+    return json.loads(path.read_text())
+
+
+def dependencies(path):
+    target, colon, body = path.read_text().replace("\\\n", " ").partition(":")
+    need(colon and target.strip() == TARGET, "dependency target")
+    result = sorted({str(Path(name).resolve(strict=True)) for name in shlex.split(body)})
+    need(result, "empty dependency closure")
+    return result
+
+
+def local_name(path):
+    path = Path(path)
+    need(path.is_file() and not path.is_symlink(), "plain local source: " + str(path))
+    name = path.relative_to(BASE.parent)
+    need(name.parts[0] in TREES and path.suffix in (".cpp", ".hpp", ".cuh", ".cu", ".py"), "source outside six trees")
+    return name.as_posix()
+
+
+def tree_pins(snapshot):
+    result = {}
+    for path in snapshot.rglob("*"):
+        need(not path.is_symlink(), "snapshot symlink")
+        if path.is_file():
+            result[path.relative_to(snapshot).as_posix()] = pin(path)
+    return result
+
+
+def dependency_pins(paths, snapshot):
+    rows = {}
+    for name in paths:
+        path = Path(name)
+        if path.is_relative_to(snapshot):
+            kind = "source_snapshot"
+        elif path.is_relative_to(BOOST.resolve()):
+            kind = "boost_system_header"
+        else:
+            need(path.is_relative_to(Path("/usr")) or path.is_relative_to(Path("/lib").resolve()),
+                 "dependency outside snapshot/toolchain/Boost: " + name)
+            kind = "system_header"
+        rows[name] = {"kind": kind, **pin(path)}
+    return rows
+
+
+def one_json(stdout):
+    need(stdout.endswith(b"\n") and len(stdout.splitlines()) == 1, "one JSON line")
+    return json.loads(stdout)
+
+
+def check_gate(name, stdout, stderr):
+    if name in ("unknown", "missing"):
+        need(not stdout and not stderr, "silent CLI refusal"); return None
+    row = one_json(stdout)
+    if name in CAUSES:
+        need(set(row) == {"status", "cause", "observed_terminals", "callback_aborts", "fault_hits"} and
+             row["status"] == "causal_rejection" and row["cause"] == CAUSES[name], "exact causal JSON")
+        need(type(row["observed_terminals"]) is int and row["observed_terminals"] >= 0 and
+             type(row["callback_aborts"]) is int and type(row["fault_hits"]) is int and
+             row["fault_hits"] >= 0, "causal integer counters")
+        injected = name in ("mutant-root-pivot", "mutant-forget-pivot", "mutant-early-conversion")
+        need(row["fault_hits"] > 0 if injected else row["fault_hits"] == 0, "causal executed source fault")
+        observed = row["observed_terminals"]
+        if name == "reject-observer":
+            need(observed == 3 and row["callback_aborts"] == 1, "three accepted callbacks before abort")
+        else:
+            need(row["callback_aborts"] == 0, "no callback abort on other faults")
+            need(observed == 0 if name in ("mutant-terminal", "reject-zero-window", "reject-observer-pair")
+                 else observed > 0, "causal observation nonvacuity")
+        need(stderr == b"start=line4/v0/s8\n", "single uncompleted causal case")
+        return row
+    counters = set("cases stream_trials observed_terminals checks paired_nodes paired_contributions oracle_cuts oracle_verticals "
+                   "stream_mebs reference_mebs_repeated multifusion_observations work_identity_orders "
+                   "birth_occurrences dense_dsu_initializations pivot_assignments nonpivot_attempts "
+                   "dense_loop_occurrences native_edge_comparisons split_hub_windows window_certificate_checks".split())
+    need(set(row) == counters | {"status", "public_status", "widths", "workers_queries", "gcp_used", "memory_scope", "window_work", "reducer"},
+         "exact gate fields")
+    need(all(type(row[key]) is int and row[key] >= 0 for key in counters), "gate nonnegative integer counts")
+    need(row["status"] == "passed" and row["public_status"] == "not_claimed" and row["gcp_used"] is False and
+         row["widths"] == [1, 7, 31, 4096] and row["workers_queries"] == [1, 4] and
+         row["memory_scope"] == "three_named_window_vectors_not_rss", "gate scope")
+    need(row["reducer"] == "dense_birth_one_dsu" and row["birth_occurrences"] == row["observed_terminals"] and
+         row["dense_dsu_initializations"] > 0 and row["pivot_assignments"] > 0 and
+         row["pivot_assignments"] + row["nonpivot_attempts"] == row["observed_terminals"] and
+         0 < row["dense_loop_occurrences"] <= row["nonpivot_attempts"] and
+         row["native_edge_comparisons"] > 0 and row["split_hub_windows"] > 0 and
+         row["window_certificate_checks"] > 0, "dense reducer work and pivot/window nonvacuity")
+    tags = [f"{case}/v{v}/s{s}" for case in FIXTURES[name] for v in (0, 1) for s in (8, 10, 12)]
+    need(stderr.decode().splitlines() == [line for tag in tags for line in ("start=" + tag, "complete=" + tag)],
+         "exact executed case matrix and paired progress")
+    need(row["cases"] == len(tags) and row["stream_trials"] == 4 * len(tags) and
+         row["checks"] > row["paired_nodes"] > 1000 and row["paired_contributions"] > 0 and
+         row["observed_terminals"] > 1000 and row["stream_mebs"] > 0 and row["reference_mebs_repeated"] > 0,
+         "gate payload/work nonvacuity")
+    if name == "uniform32":
+        need(row["oracle_cuts"] == row["oracle_verticals"] == 0 and row["observed_terminals"] > 100000,
+             "n32 differential only")
+    else:
+        need(row["oracle_cuts"] > 0 and row["oracle_verticals"] > (100000 if name == "high" else 10000), "bounded oracle coverage")
+    if name == "selftest":
+        need(row["multifusion_observations"] > 0, "atomic multifusion nonvacuity")
+    fields = set("width orders R_all R_ge2 windows Uw_ge2 Sw_ge2 G Q H T M multi_window_orders partial_window_orders "
+                 "deduplicated_orders postseed_orders peak_window_items peak_window_capacity_bytes".split())
+    work = row["window_work"]
+    need(type(work) is list and len(work) == 4, "four width counters")
+    for width, w in zip(row["widths"], work):
+        need(set(w) == fields and all(type(v) is int and v >= 0 for v in w.values()), "exact window integers")
+        need(w["width"] == width and w["orders"] > 0 and w["R_all"] >= w["R_ge2"] >= w["Uw_ge2"] >= w["Sw_ge2"] and
+             w["R_all"] == work[0]["R_all"] and w["R_ge2"] == work[0]["R_ge2"], "window domains")
+        need(w["G"] == w["Uw_ge2"] - w["Sw_ge2"] and w["H"] == w["T"] <= min(w["G"], w["Q"]) and
+             w["M"] == w["G"] + w["Q"] - w["H"], "paid geometry identities")
+        need(0 < w["peak_window_items"] <= width and w["peak_window_capacity_bytes"] > 0, "named window residence")
+        if width == 1:
+            need(w["Uw_ge2"] == w["R_ge2"] and w["deduplicated_orders"] == 0, "unit-width exact counts")
+    need(sum(w["M"] for w in work) == row["stream_mebs"] and sum(w["R_all"] for w in work) == row["observed_terminals"] and
+         row["work_identity_orders"] > 0, "summed geometry and observer coverage")
+    need(sum(w["orders"] for w in work) == row["dense_dsu_initializations"] and
+         len({w["orders"] for w in work}) == 1, "one dense DSU per executed K per width")
+    for key in ("multi_window_orders", "partial_window_orders", "deduplicated_orders", "postseed_orders"):
+        need(sum(w[key] for w in work) > 0, "window path nonvacuity: " + key)
+    return row
+
+
+def check_bench(stdout, stderr, argv, expected):
+    if expected == 2:
+        need(not stdout and not stderr, "silent bench CLI refusal"); return None
+    row = one_json(stdout)
+    options = dict(arg[2:].split("=", 1) for arg in argv)
+    need(row["status"] == "passed" and row["scope"] == "private_real_census_graph_FULL_probe" and
+         row["backend"] == "cpu_reference" and row["public_status"] == "not_claimed" and
+         row["geometric_oracle_executed"] is False and row["sampled_memory_not_additive_peak"] is True, "bench scope")
+    for flag, key in (("n", "n"), ("s", "s"), ("kmax", "requested_K"), ("window", "window")):
+        need(row[key] == int(options[flag]), "bench argument/output binding: " + flag)
+    need(row["mode"] == options["mode"] and row["generation_threads"] == int(options.get("threads", 1)) and
+         row["history_query_threads"] == int(options.get("history-threads", 1)) and row["geometry_threads"] == 1,
+         "bench route and threads")
+    active = None
+    for line in stderr.decode().splitlines():
+        start = re.fullmatch(r"phase_start=([a-z_]+)", line)
+        complete = re.fullmatch(r"phase_complete=([a-z_]+) seconds=([0-9]+\.[0-9]{9})", line)
+        if start:
+            need(active is None, "overlapping bench phase"); active = start[1]
+        else:
+            need(complete is not None and active == complete[1], "bench progress/diagnostic"); active = None
+    need(active is None and stderr, "complete bench phase trace")
+    routes = [name for name in ("reference", "streaming") if name in row]
+    need(routes == ({"reference": ["reference"], "streaming": ["streaming"], "compare": ["reference", "streaming"]}[row["mode"]]),
+         "exact benchmark arms")
+    need(row["physical_comparison_executed"] is (row["mode"] == "compare"), "comparison provenance")
+    for name in routes:
+        route = row[name]
+        need(route["full_status"] == "complete_relative" and re.fullmatch("[0-9a-f]{64}", route["payload_digest"]) and
+             route["orders"] == row["effective_K"] and route["nodes"] == route["vertical_refs"] > 0, "FULL shape/digest")
+        need(route["reducer"] == ("dense_birth_one_dsu" if name == "streaming" else "materialized_reference"),
+             "exact reducer identity")
+        if name != "streaming":
+            continue
+        need([order["K"] for order in route["per_order"]] == list(range(1, route["orders"] + 1)), "dense K domain")
+        layout = route["birth_layout"]
+        need(set(layout) == {"dsu_index_bytes", "certificate_edge_bytes", "window_request_bytes",
+                             "window_sort_index_bytes", "window_target_bytes"} and
+             all(type(v) is int and v > 0 for v in layout.values()), "explicit positive native layout")
+        totals = {name: 0 for name in ("occurrences", "native_vertices", "certificate_edges", "phi_conversions")}
+        for order in route["per_order"]:
+            for old, count in (("hub_msf_work", 24), ("native_msf_work", 24), ("ordered_work", 11)):
+                need(len(order[old]) == count and all(type(v) is int and v == 0 for v in order[old].values()),
+                     "no legacy reducer work")
+            work = order["birth_work"]
+            fields = set("native_vertices dsu_initializations occurrences windows pivot_assignments nonpivot_occurrences "
+                         "order_date_comparisons order_identity_comparisons dense_terminal_reads dense_source_reads "
+                         "native_date_comparisons dsu_attempts dsu_unions dense_self_loops certificate_edges phi_conversions "
+                         "dsu_logical_bytes dsu_capacity_bytes peak_certificate_logical_bytes peak_certificate_capacity_bytes".split())
+            need(set(work) == fields and all(type(v) is int and v >= 0 for v in work.values()), "exact dense work fields")
+            r, p, l = order["occurrences"], order["pivots"], work["native_vertices"]
+            need(type(r) is int and type(p) is int and 0 <= p <= r and work["occurrences"] == r and
+                 work["pivot_assignments"] == p and work["nonpivot_occurrences"] == work["dsu_attempts"] == r - p and
+                 work["order_identity_comparisons"] == work["dense_terminal_reads"] == r and
+                 work["order_date_comparisons"] == max(0, r - 1) and work["dense_source_reads"] == r - p and
+                 work["native_date_comparisons"] == 2 * r - p, "single dense pass R/P/R-P")
+            need(work["dsu_initializations"] == 1 and
+                 work["phi_conversions"] + (row["n"] if order["K"] == 1 else 0) == p + l and
+                 work["windows"] == order["windows"] == (r + row["window"] - 1) // row["window"], "dense domain and windows")
+            edges = work["certificate_edges"]
+            need(edges == work["dsu_unions"] == order["native_certificate_edges"] <= work["dsu_attempts"] and
+                 work["dense_self_loops"] <= work["dsu_attempts"] - edges and edges <= max(0, l - 1),
+                 "dense forest and attempts")
+            need(work["dsu_logical_bytes"] == 2 * layout["dsu_index_bytes"] * l <= work["dsu_capacity_bytes"] and
+                 work["peak_certificate_logical_bytes"] == layout["certificate_edge_bytes"] * edges <=
+                 work["peak_certificate_capacity_bytes"], "dense named allocation accounting")
+            need(all(order[name] == 0 for name in ("retained_pivots", "projected_loops", "projected_edges", "hub_certificate_edges")),
+                 "no pivot certificate or projection")
+            if order["K"] >= 2:
+                starts = order["unique"] - order["initial_seed_hits"]
+                q, h, t = order["Q"], order["H"], order["T"]
+                need(0 <= h == t <= min(q, starts) and order["geometry_work"]["meb"]["calls"] == starts + q - h,
+                     "paid geometric work")
+            for key in totals:
+                totals[key] += work[key]
+        need(totals["occurrences"] == route["occurrences"] and totals["native_vertices"] == route["native_births"] and
+             totals["certificate_edges"] == route["retained_certificate_edges"] and totals["phi_conversions"] == route["marks"],
+             "dense tower work totals")
+        memory = route["sampled_capacities_not_RSS"]
+        need(all(memory[name] == 0 for name in ("peak_hub_domain_logical_bytes", "peak_hub_domain_capacity_bytes",
+                                              "peak_hub_certificate_logical_bytes", "peak_hub_certificate_capacity_bytes")),
+             "no hub storage")
+    if len(routes) == 2:
+        need(row["reference"]["payload_digest"] == row["streaming"]["payload_digest"], "paired physical payload digest")
+    return row
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--out", required=True)
+    parser.add_argument("--kind", choices=("gate", "bench", "bench-run"), required=True)
+    parser.add_argument("--san", action="store_true")
+    parser.add_argument("--build", help="closed --kind bench output child, for bench-run only")
+    parser.add_argument("--expect-exit", type=int, choices=(0, 2), default=0)
+    parser.add_argument("arguments", nargs=argparse.REMAINDER)
+    args = parser.parse_args()
+    need(args.out.isidentifier() and (args.build is None or args.build.isidentifier()), "fresh child identifier")
+    extra = args.arguments[1:] if args.arguments[:1] == ["--"] else args.arguments
+    need((args.kind == "bench-run") == (args.build is not None), "bench-run requires --build only")
+    need(args.kind == "bench-run" or (not extra and args.expect_exit == 0), "build has no bench execution arguments")
+    need(not args.san or args.kind == "gate", "SAN reserved for bounded gate")
+    out = BASE / args.out; out.mkdir(exist_ok=False)
+    commands, results, closure = [], {}, {}
+    before, copied, tool_before, deps_before = {}, {}, {}, {}
+    binary_before, source_receipt = None, None
+    snapshot = out / "source_snapshot"
+    binary = out / args.kind
+    environment = dict(os.environ, LC_ALL="C")
+    if args.san:
+        environment.update(SAN_ENV)
+    status, error = "failed", None
+
+    def run(name, argv, cwd, expected=0, diagnostic=False):
+        row = {"name": name, "argv": [str(v) for v in argv], "cwd": str(cwd), "expected_exit": expected, "exit_code": None}
+        commands.append(row); save(out / (name + ".launch.json"), row)
+        started = time.monotonic()
+        try:
+            with (out / (name + ".stdout")).open("xb") as so, (out / (name + ".stderr")).open("xb") as se:
+                row["exit_code"] = subprocess.run(row["argv"], cwd=cwd, env=environment, stdout=so, stderr=se, check=False).returncode
+        finally:
+            row["elapsed_seconds_observation_only"] = time.monotonic() - started
+            for channel in ("stdout", "stderr"):
+                path = out / (name + "." + channel)
+                if path.exists(): row[channel] = pin(path)
+            save(out / (name + ".command.json"), row)
+            print(json.dumps({"command": name, "exit_code": row["exit_code"]}), flush=True)
+        need(row["exit_code"] == expected, "unexpected process exit: " + name)
+        stdout, stderr = (out / (name + ".stdout")).read_bytes(), (out / (name + ".stderr")).read_bytes()
+        if diagnostic:
+            need(not stderr and (bool(stdout) if name == "compiler" else not stdout), "compiler/dependency diagnostic: " + name)
+        return stdout, stderr
+
+    try:
+        if args.kind == "bench-run":
+            build = BASE / args.build
+            parent = read(build / "receipt.json")
+            need(parent["status"] == "passed" and parent["kind"] == "bench" and all(parent["closure"].values()), "closed benchmark build required")
+            source_receipt = {"path": str(build / "receipt.json"), **pin(build / "receipt.json")}
+            snapshot, binary = build / "source_snapshot", build / "bench"
+            before, copied = read(build / "sources_before.json"), read(build / "sources_copied_before.json")
+            deps_before, tool_before = read(build / "dependencies_before.json"), read(build / "compiler_before.json")
+            binary_before = read(build / "binary_before.json")
+        else:
+            executable = shutil.which("g++")
+            need(executable is not None, "existing g++ required, no installation")
+            compiler = Path(executable).resolve(strict=True)
+            tool_before = {str(compiler): pin(compiler)}
+            flags = [compiler, "-std=c++20", "-Wall", "-Wextra", "-Wpedantic", "-Werror", "-pthread", "-isystem", BOOST]
+            flags += (["-O1", "-g", "-fsanitize=address,undefined", "-fno-omit-frame-pointer", "-fno-pie", "-no-pie"]
+                      if args.san else ["-O2"])
+            if args.kind == "gate": need((BOOST / "boost/multiprecision/cpp_int.hpp").is_file(), "existing Boost required")
+            run("compiler", [compiler, "--version"], BASE.parent, diagnostic=True)
+            run("local_dependencies", [*flags, "-I", BASE.parent / "v7_atlas_graph_20260911", "-MM", "-MF",
+                out / "local_dependencies.d", "-MT", TARGET, BASE / (args.kind + ".cpp")], BASE.parent, diagnostic=True)
+            before = {local_name(path): pin(path) for path in dependencies(out / "local_dependencies.d")}
+            before[local_name(Path(__file__).resolve())] = pin(__file__)
+            for name in before:
+                target = snapshot / name; target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(BASE.parent / name, target)
+            copied = tree_pins(snapshot)
+            need(before == copied, "source copy mismatch")
+            flags += ["-I", snapshot / "v7_atlas_graph_20260911"]
+            tu = snapshot / "v7_birth_streaming_20260911" / (args.kind + ".cpp")
+            run("dependencies_before", [*flags, "-M", "-MF", out / "dependencies_before.d", "-MT", TARGET, tu], snapshot, diagnostic=True)
+            deps_before = dependency_pins(dependencies(out / "dependencies_before.d"), snapshot)
+        for name, value in (("sources_before", before), ("sources_copied_before", copied),
+                            ("compiler_before", tool_before), ("dependencies_before", deps_before)):
+            save(out / (name + ".json"), value)
+        need(before == copied == tree_pins(snapshot), "pre-run source closure")
+        need(before == {name: pin(BASE.parent / name) for name in before}, "original sources changed")
+        need(tool_before == {name: pin(name) for name in tool_before} and
+             deps_before == dependency_pins(list(deps_before), snapshot), "pre-run tool/header closure")
+        if args.kind != "bench-run":
+            local_used = {Path(name).relative_to(snapshot).as_posix() for name in deps_before if Path(name).is_relative_to(snapshot)}
+            need(local_used == set(before) - {"v7_birth_streaming_20260911/record.py"}, "minimal local closure consumed")
+            run("compile", [*flags, "-MD", "-MF", out / "compile.d", "-MT", TARGET, tu, "-o", binary], snapshot, diagnostic=True)
+            need(dependencies(out / "compile.d") == list(deps_before), "compile dependency selection changed")
+            binary_before = pin(binary)
+        need(binary_before == pin(binary), "pre-run ELF closure"); save(out / "binary_before.json", binary_before)
+        if args.kind == "gate":
+            for name in (*FIXTURES, *CAUSES, "unknown", "missing"):
+                argv = [binary] + ([] if name == "missing" else ["--" + name])
+                stdout, stderr = run(name, argv, snapshot, 4 if name in CAUSES else 2 if name in ("unknown", "missing") else 0)
+                results[name] = check_gate(name, stdout, stderr)
+        elif args.kind == "bench-run":
+            timer = Path("/usr/bin/time").resolve(strict=True)
+            save(out / "timer_before.json", pin(timer))
+            stdout, stderr = run("bench", [timer, "-v", "-o", out / "rss.txt", binary, *extra], snapshot, args.expect_exit)
+            results["bench"] = check_bench(stdout, stderr, extra, args.expect_exit)
+            rss = (out / "rss.txt").read_text()
+            match = re.search(r"Maximum resident set size \(kbytes\): ([0-9]+)", rss)
+            need(match is not None, "external process RSS capture")
+            results["max_rss_kib"] = int(match[1]); save(out / "rss_pin.json", pin(out / "rss.txt"))
+            need(pin(timer) == read(out / "timer_before.json"), "timer changed")
+        if args.kind != "bench-run":
+            run("dependencies_after", [*flags, "-M", "-MF", out / "dependencies_after.d", "-MT", TARGET, tu], snapshot, diagnostic=True)
+            need(dependencies(out / "dependencies_after.d") == list(deps_before), "post-run dependency selection changed")
+        status = "passed"
+    except BaseException as exc:
+        error = type(exc).__name__ + ": " + str(exc)
+    finally:
+        try:
+            after = {name: pin(BASE.parent / name) for name in before}
+            copied_after = tree_pins(snapshot)
+            tools_after = {name: pin(name) for name in tool_before}
+            deps_after = dependency_pins(list(deps_before), snapshot)
+            binary_after = pin(binary) if binary.is_file() else None
+            for name, value in (("sources_after", after), ("sources_copied_after", copied_after), ("compiler_after", tools_after),
+                                ("dependencies_after", deps_after), ("binary_after", binary_after)):
+                save(out / (name + ".json"), value)
+            closure = {"sources": bool(before) and before == after == copied == copied_after,
+                       "compiler": bool(tool_before) and tool_before == tools_after,
+                       "dependencies": bool(deps_before) and deps_before == deps_after,
+                       "binary": binary_before is not None and binary_before == binary_after}
+            need(all(closure.values()), "source/compiler/header/ELF closure")
+        except BaseException as exc:
+            status = "failed"; error = (error + "; " if error else "") + "closure: " + type(exc).__name__ + ": " + str(exc)
+        save(out / "commands.json", commands); save(out / "results.json", results)
+        save(out / "receipt.json", {"status": status, "error": error, "kind": args.kind, "closure": closure,
+             "commands": len(commands), "source_build_receipt": source_receipt, "sanitizer": args.san,
+             "sanitizer_environment": SAN_ENV if args.san else {}, "locale": "C", "public_status": "not_claimed",
+             "system_scope": "compiler binary/version and preprocessor headers, not complete linker/runtime sysroot",
+             "performance_claim": False, "benchmark_executed": args.kind == "bench-run" and bool(results.get("bench")),
+             "device_executed": False, "gcp_used": False})
+    print(json.dumps({"status": status, "error": error, "out": str(out)}), flush=True)
+    return 0 if status == "passed" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

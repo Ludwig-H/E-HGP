@@ -1,0 +1,26 @@
+{
+  "benchmark_executed": false,
+  "closure": {
+    "binary": true,
+    "compiler": true,
+    "dependencies": true,
+    "sources": true
+  },
+  "commands": 1,
+  "device_executed": false,
+  "error": null,
+  "gcp_used": false,
+  "kind": "bench-run",
+  "locale": "C",
+  "performance_claim": false,
+  "public_status": "not_claimed",
+  "sanitizer": false,
+  "sanitizer_environment": {},
+  "source_build_receipt": {
+    "path": "/workspaces/E-HGP/build/v7_parallel_birth_streaming_20260911/bench_build_o2_r1/receipt.json",
+    "sha256": "78e3a724b7ce71ee8b68cb4bc5f5b98726cd3b57086805facab16cb7ea344d85",
+    "size": 539
+  },
+  "status": "passed",
+  "system_scope": "compiler binary/version and preprocessor headers, not complete linker/runtime sysroot"
+}
