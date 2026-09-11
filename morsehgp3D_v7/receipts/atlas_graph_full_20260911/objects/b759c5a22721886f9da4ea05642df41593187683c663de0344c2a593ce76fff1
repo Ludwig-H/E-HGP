@@ -1,0 +1,48 @@
+{
+  "status": "passed",
+  "scope": "adapter_pair_singleton_smoke",
+  "capture_kind": "exec_tool_results_combined_output_not_separate_stdout_stderr",
+  "commands": [
+    {
+      "argv": ["g++", "-std=c++20", "-O2", "-Wall", "-Wextra", "-Wpedantic", "-Werror", "-pthread", "-MMD", "-MF", "build/v7_graph_full_20260911/smoke_o2_r1.d", "build/v7_graph_full_20260911/smoke.cpp", "-o", "build/v7_graph_full_20260911/smoke_o2_r1"],
+      "first_tool_chunk": "822d6e",
+      "completion_tool_chunk": "b15a55",
+      "exit_code": 0,
+      "combined_output": ""
+    },
+    {
+      "argv": ["build/v7_graph_full_20260911/smoke_o2_r1", "--selftest"],
+      "tool_chunk": "50dc6d",
+      "exit_code": 0,
+      "combined_output": "{\"status\":\"passed\",\"scope\":\"adapter_pair_singleton_smoke\",\"checks\":30,\"towers\":4,\"workers\":[1,4],\"geometry_qualified\":false,\"gcp_used\":false}\n"
+    },
+    {
+      "argv": ["build/v7_graph_full_20260911/smoke_o2_r1", "--unknown"],
+      "tool_chunk": "4fdafa",
+      "exit_code": 2,
+      "combined_output": ""
+    },
+    {
+      "argv": ["build/v7_graph_full_20260911/smoke_o2_r1"],
+      "tool_chunk": "8347f7",
+      "exit_code": 2,
+      "combined_output": ""
+    }
+  ],
+  "source_pins": {
+    "graph_full.hpp": "bad5051fca4d78345841b4171dfb8a438c0f5a752452f784f4c9c196966a3f2d",
+    "smoke.cpp": "5c695804ce3560d9787a62c28cc68c961eb3d096e0245c4c9f41002b2abe546b",
+    "../v7_atlas_graph_20260911/atlas_graph.hpp": "bb2b84d990a99289c2cc08198cedf44ec7c3013901a32af7ee7ecbcfaec6a7c0",
+    "../v7_atlas_graph_20260911/rank_atlas.hpp": "9fc118a208eac74472a0e8e5490e094953afced19495102a1ae06409b591d621",
+    "../v7_atlas_graph_20260911/filtered_calendar.hpp": "1cf438cbac839c8f502de0c8daebbf89296a3884d2d40ba50715b5aaca161fa2",
+    "../v7_atlas_graph_20260911/historical_chains.hpp": "686c2137a905e4f77c15a1d7f497541e6f8d87b9217f5c9c726cf4951be573c3"
+  },
+  "pin_capture_note": "Helper/smoke pins observed during compilation and unchanged after execution. This small smoke did not freeze a separate source tree; the later ROOT integration qualification is separate.",
+  "binary_sha256": "fb821f2aa1fab77e4fa4bb54cff0e8dc0bc6155eb4991240c7199225c17283f6",
+  "dependency_file": "smoke_o2_r1.d",
+  "dependency_file_sha256": "d029fc48978f6f31b562055c9ecd28fe5bfe4cb74878620fe6478b44cc7e8534",
+  "sanitizer": false,
+  "geometry_qualified": false,
+  "performance_claim": false,
+  "gcp_used": false
+}

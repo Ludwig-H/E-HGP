@@ -1,0 +1,196 @@
+// Private end-to-end extraction, NOT a product terminal backend.
+#pragma once
+#include "rank_atlas.hpp"
+#include "filtered_calendar.hpp"
+#include "source/morsehgp3D_v7/tests/full_ball_batch_geometry.hpp"
+
+namespace mhgp7::atlas_graph_private {
+namespace ra = rank_atlas_private;
+namespace fc = filtered_calendar_private;
+using BlockId = u64;
+inline constexpr BlockId absent = std::numeric_limits<BlockId>::max();
+inline void require(bool condition, const char* why) {
+  if (!condition) throw std::invalid_argument(why);
+}
+struct Order {
+  unsigned k = 0;
+  fc::Graph<u32> graph;  // Ranks, NOT raw ExactLevel representations.
+};
+struct Stats {
+  u64 representatives = 0, native_ball_births = 0, point_births = 0, marks = 0;
+  u64 candidate_reduced_edges = 0, loops_removed = 0, retained_edges = 0;
+  u64 peak_request_capacity_bytes = 0, peak_slot_map_capacity_bytes = 0;
+  std::array<u64, 11> seed_rows{};
+};
+struct DecodedBlock { unsigned k; bool point; u32 ball_or_point; };
+struct Occurrence {
+  unsigned k;
+  u32 source_ball;
+  BlockId source_block;
+  u64 local, ordinal, slot;
+  u32 target;  // K1: GeometryIndex. K>=2: BallId. Never a DSU root.
+};
+struct Extraction {
+  ra::Atlas atlas;  // Keeps the same borrowed CloudIndex/BallData lifetime.
+  std::vector<BlockId> phi;  // A, indexed by atlas.cell(B,K); native block IDs.
+  std::vector<u32> targets;  // R, indexed by atlas.rep_offsets; exact terminal IDs.
+  std::vector<Order> orders;  // K-1, size atlas.kmax; includes implicit K1 points.
+  FullBallStats work;  // Paid geometry work; static R/U/S/Q/H/T for K>=2.
+  Stats stats;
+
+  DecodedBlock decode(BlockId id) const {
+    const u64 n = atlas.index->input_count;
+    if (id < n) return {1, true, static_cast<u32>(id)};
+    const u64 cell = id - n;
+    require(cell < atlas.contributions.size(), "atlas_graph.block_id");
+    const auto next = std::upper_bound(atlas.slots.begin(), atlas.slots.end(), cell,
+        [](u64 value, const ra::BallSlot& row) { return value < row.base; });
+    require(next != atlas.slots.begin(), "atlas_graph.block_base");
+    const auto row = std::prev(next);
+    const unsigned k = static_cast<unsigned>(cell - row->base + row->lo);
+    require(k <= row->hi, "atlas_graph.block_rank");
+    return {k, false, static_cast<u32>(row - atlas.slots.begin())};
+  }
+  template<class Emit> void occurrences(unsigned k, Emit&& emit) const {
+    u64 ordinal = 0;
+    for (u32 b : atlas.program(k)) {
+      const u64 c = atlas.cell(b, k), first = atlas.rep_offsets[c];
+      for (u64 slot = first; slot < atlas.rep_offsets[c + 1]; ++slot)
+        emit(Occurrence{k, b, *atlas.block_id(b, k), slot - first, ordinal++, slot, targets.at(slot)});
+    }
+  }
+  BlockId terminal_block(const Occurrence& occurrence) const {
+    if (occurrence.k == 1) {
+      require(occurrence.target < atlas.index->input_count, "atlas_graph.point_terminal");
+      return occurrence.target;
+    }
+    const auto id = atlas.block_id(occurrence.target, occurrence.k);
+    require(id.has_value(), "atlas_graph.terminal_admission");
+    return *id;
+  }
+};
+
+// Validated exact census is a precondition (same as Atlas). Geometry is the
+// test-only scalar reference copied byte-for-byte from tests/, not a newly
+// qualified product implementation. No Builder is constructed/called here.
+// Return-by-value publishes only complete extraction. Failure throws and
+// publishes nothing; paid work is NOT claimed recoverable after an exception.
+inline Extraction extract(const CloudIndex& index, std::span<const BallData> balls, unsigned requested) {
+  Extraction out{ra::Atlas::build(index, balls, requested), {}, {}, {}, {}, {}};
+  out.phi.assign(out.atlas.contributions.size(), absent);
+  out.targets.assign(out.atlas.rep_masks.size(), std::numeric_limits<u32>::max());
+  out.orders.resize(out.atlas.kmax);
+  std::vector<u32> by_key(balls.size());
+  std::iota(by_key.begin(), by_key.end(), u32{0});
+  std::sort(by_key.begin(), by_key.end(), [&](u32 a, u32 b) { return balls[a].key < balls[b].key; });
+  for (unsigned k = 1; k <= out.atlas.kmax; ++k) {
+    auto& order = out.orders[k - 1]; order.k = k;
+    std::vector<FullBallBatchRequest> requests;
+    std::vector<u64> ordinal_slots;
+    std::vector<FullBallBatchSeed> seeds;
+    u64 ordinal = 0;
+    for (u32 b : out.atlas.program(k)) {
+      const u64 cell = out.atlas.cell(b, k);
+      for (u64 slot = out.atlas.rep_offsets[cell]; slot < out.atlas.rep_offsets[cell + 1]; ++slot) {
+        const auto sites = out.atlas.expand(b, out.atlas.rep_masks[slot]);
+        require(sites.size() == k && std::adjacent_find(sites.begin(), sites.end()) == sites.end(),
+            "atlas_graph.representative_cardinality");
+        if (k == 1) out.targets[slot] = static_cast<u32>(sites[0]);
+        else {
+          requests.push_back({full_ball_detail::ResolverCache::key(sites), b, ordinal});
+          ordinal_slots.push_back(slot);
+        }
+        ++ordinal; ++out.stats.representatives;
+      }
+      if (k >= 2 && k == static_cast<unsigned>(balls[b].n_interior) + balls[b].n_shell) {
+        FullBallFacetKey key{}; size_t n = 0;
+        for (i32 site : balls[b].interior()) key[n++] = site;
+        for (i32 site : balls[b].shell()) key[n++] = site;
+        std::sort(key.begin(), key.begin() + n); seeds.push_back({key, b});
+      }
+    }
+    out.stats.seed_rows[k] = seeds.size();
+    if (k >= 2) {
+      out.work.static_requests[k] = requests.size();
+      out.stats.peak_request_capacity_bytes = std::max<u64>(out.stats.peak_request_capacity_bytes,
+          requests.capacity() * sizeof(FullBallBatchRequest));
+      out.stats.peak_slot_map_capacity_bytes = std::max<u64>(out.stats.peak_slot_map_capacity_bytes,
+          ordinal_slots.capacity() * sizeof(u64));
+      std::sort(requests.begin(), requests.end(), [](const auto& a, const auto& b) {
+        return a.key != b.key ? a.key < b.key : a.ordinal < b.ordinal;
+      });
+      std::sort(seeds.begin(), seeds.end(), [](const auto& a, const auto& b) { return a.key < b.key; });
+      for (size_t j = 1; j < seeds.size(); ++j)
+        require(seeds[j - 1].key != seeds[j].key, "atlas_graph.duplicate_seed");
+      batch_test::Geometry geometry{index, balls, by_key, k};
+      std::vector<NodeRef> scratch;
+      for (size_t first = 0; first < requests.size();) {
+        size_t last = first + 1;
+        while (last < requests.size() && requests[last].key == requests[first].key) ++last;
+        ++out.work.static_unique[k];
+        const auto& source = requests[first];
+        const auto& before = balls[source.consumer].level;
+        const auto seed = std::lower_bound(seeds.begin(), seeds.end(), source.key,
+            [](const FullBallBatchSeed& row, const FullBallFacetKey& key) { return row.key < key; });
+        u32 target;
+        if (seed != seeds.end() && seed->key == source.key) {
+          target = seed->ball;
+          require(compare_exact_level(balls[target].level, before) < 0, "atlas_graph.initial_seed_not_strict");
+          ++out.work.static_seeded[k];
+        } else target = geometry.static_terminal(source.key, before, out.work, scratch, seeds);
+        require(target < balls.size() && out.atlas.block_id(target, k).has_value(), "atlas_graph.terminal_rank");
+        for (size_t r = first; r < last; ++r) {
+          const auto& request = requests[r];
+          require(compare_exact_level(before, balls[request.consumer].level) <= 0,
+              "atlas_graph.earliest_consumer");
+          require(compare_exact_level(balls[target].level, balls[request.consumer].level) < 0,
+              "atlas_graph.terminal_strict");
+          out.targets[ordinal_slots[request.ordinal]] = target;
+        }
+        first = last;
+      }
+    }
+    // Rank-ordered DAG projection only. No connectivity/DSU/temporal anchors.
+    // Independent K work could run in parallel with independent temporaries.
+    if (k == 1) for (u32 point = 0; point < index.input_count; ++point) {
+      order.graph.births.push_back({point, 0}); ++out.stats.point_births;
+    }
+    u64 occurrence_ordinal = 0;
+    for (u32 b : out.atlas.program(k)) {
+      const u64 cell = out.atlas.cell(b, k), first = out.atlas.rep_offsets[cell], last = out.atlas.rep_offsets[cell + 1];
+      const BlockId block = *out.atlas.block_id(b, k);
+      const u32 rank = out.atlas.slots[b].rank;
+      const auto target_native = [&](u64 slot) -> BlockId {
+        const u32 t = out.targets[slot];
+        if (k == 1) { require(t < index.input_count, "atlas_graph.K1_domain"); return t; }
+        require(t < balls.size() && out.atlas.slots[t].rank < rank && out.atlas.block_id(t, k).has_value(),
+            "atlas_graph.target_earlier_rank");
+        const BlockId native = out.phi[out.atlas.cell(t, k)];
+        require(native != absent, "atlas_graph.phi_predecessor");
+        return native;
+      };
+      if (first == last) {
+        out.phi[cell] = block;
+        order.graph.births.push_back({block, rank}); ++out.stats.native_ball_births;
+      } else out.phi[cell] = target_native(first);  // Ordinal zero, never sorted-target order.
+      order.graph.marks.push_back({block, out.phi[cell], rank}); ++out.stats.marks;
+      for (u64 slot = first; slot < last; ++slot, ++occurrence_ordinal) {
+        if (slot == first) continue;  // Pivot is contracted, not emitted as a loop.
+        ++out.stats.candidate_reduced_edges;
+        const BlockId endpoint = target_native(slot);
+        if (endpoint == out.phi[cell]) { ++out.stats.loops_removed; continue; }
+        // Edge identity is original per-K occurrence ordinal, not sorted index.
+        order.graph.edges.push_back({occurrence_ordinal, out.phi[cell], endpoint, rank});
+        ++out.stats.retained_edges;
+      }
+    }
+    require(occurrence_ordinal == ordinal, "atlas_graph.occurrence_consumption");
+  }
+  require(out.stats.marks == out.phi.size() && out.stats.representatives == out.targets.size() &&
+      out.stats.retained_edges + out.stats.loops_removed == out.stats.candidate_reduced_edges &&
+      out.stats.native_ball_births <= out.phi.size() && out.stats.candidate_reduced_edges ==
+          out.stats.representatives - (out.phi.size() - out.stats.native_ball_births),
+      "atlas_graph.count_identities");
+  return out;
+}
+}  // namespace mhgp7::atlas_graph_private

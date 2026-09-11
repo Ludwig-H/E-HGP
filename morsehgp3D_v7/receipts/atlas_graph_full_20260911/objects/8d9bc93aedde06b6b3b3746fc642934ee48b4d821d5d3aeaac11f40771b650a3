@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_san_root_r1/tower_gate",
+    "--mutant-parent"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_san_root_r1/source_snapshot",
+  "elapsed_seconds_observation_only": 0.05577964599797269,
+  "exit_code": 4,
+  "expected_exit": 4,
+  "name": "mutant-parent",
+  "stderr": {
+    "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+    "size": 18
+  },
+  "stdout": {
+    "sha256": "45dc04a53560c5cf458d9c99f73c3682ab4a0144456d140488041cac1fbdf832",
+    "size": 75
+  }
+}

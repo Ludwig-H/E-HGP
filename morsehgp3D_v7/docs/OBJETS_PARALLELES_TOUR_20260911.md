@@ -212,10 +212,82 @@ Il exerce les extras, K9/K10, ABCZ, n=1 et K=n ; 66 paires de niveaux égaux
 ont des fractions brutes différentes. Masques et contributions faux mais
 bien formés sont refusés sémantiquement par le différentiel.
 
-Les graphes abstraits et les vrais census sont encore deux portes séparées.
-Leur succès n'est donc **pas** le succès du chemin census→atlas→graphe→FULL.
+À ce premier jalon, graphes abstraits et vrais census étaient deux portes
+séparées. Leur succès ne constituait donc **pas** celui du chemin complet.
 La numérotation déterministe du prototype de graphe n'est pas présentée
 comme l'encodage physique du Builder. Le premier échec de compilation du
 harnais de consultations est conservé, avec sa correction signée/non signée.
 Les reçus n'incluent aucun exécutable ni résultat GCP. Aucune nouvelle mesure
 8k/16k/32k ou 50k n'est attribuée à ces prototypes.
+
+## 7. Raccord complet et certificats composables
+
+Le raccord privé suivant joint désormais ces objets : vrai census WSPD,
+atlas partagé, résolutions géométriques, pivots, graphe daté, histoire FULL,
+contributions et verticales. Il n'utilise ni le catalogue de l'oracle comme
+entrée ni les ensembles de points comme identités de composantes. La
+qualification et ses sources sont dans le [paquet du raccord](../receipts/atlas_graph_full_20260911/README.md).
+Le constructeur actif reste inchangé ; cette référence rend testable son
+remplacement par des primitives parallèles.
+
+O2 et ASan/UBSan/LSan donnent les mêmes résultats : 114 census positifs,
+546 graphes d'ordres, 29 784 coupes et 15 594 832 vérifications verticales
+par l'oracle indépendant sur les petites géométries. Le cas n32 est un
+différentiel explicite avec Builder, sans oracle exhaustif à cette taille.
+Chaque capture compare 237 840 nœuds et 150 240 contributions entre chemins,
+et réfute sept corruptions ciblées avec leur cause attendue. Les largeurs de
+fenêtres sont 1, 7 et 31, sans rapport avec K ni avec s WSPD=8/10/12.
+
+Le [nouvel audit de composition](../audits/receipts_composable_msf_20260911/README.md)
+permet de remplacer chaque lot d'arêtes par sa forêt minimale, puis de réduire
+ces certificats entre eux. Une arête éliminée possède un chemin de remplacement
+dont toutes les dates sont au plus la sienne. Toutes les coupes sont conservées,
+même si un lot léger arrive tard. Les plateaux sont reconstruits **après**
+composition : leurs fusions locales ne se concatènent pas.
+
+Deux routes sont exercées sur les mêmes vrais census :
+
+- Réduire des fenêtres du graphe déjà projeté sur les naissances. Avec une
+  même clé totale d'arêtes, le certificat final est identique au MSF direct.
+- Réduire d'abord les arêtes entre blocs d'origine, puis projeter les arêtes
+  retenues via les pivots. Conserver leur date originale et retirer les
+  boucles. Le certificat interne peut changer ; les histoires FULL, leurs
+  contributions et leurs verticales doivent rester identiques.
+
+Le second chemin permet conceptuellement de consommer les résolutions par
+fenêtres, sans attendre tous les pivots pour commencer à comprimer les
+arêtes. Dans le témoin actuel, **seules les fenêtres d'arêtes sont bornées** :
+l'extraction possède encore toutes les terminales R et le graphe de contrôle.
+Il ne faut donc pas annoncer la disparition effective de ces allocations.
+La prochaine modification utile est de raccorder directement le producteur
+de terminales à ce consommateur, puis de libérer les clés de chaque fenêtre.
+
+Le helper MSF emprunte les naissances et ne renvoie que des arêtes. Son DSU
+ne porte que sur les extrémités réellement présentes dans le lot, pas sur
+tout le catalogue. La pile binaire garde un certificat par niveau de réduction.
+Avec N sommets, M arêtes et J fenêtres, ses certificats prennent
+O(min(M,N(1+log(max(1,J))))) arêtes, plus la fenêtre et les temporaires :
+**pas une borne O(N) sur toute la RAM**. Catalogue, atlas, pivots, populations
+et sortie restent à compter. Les lots forestiers ne se compriment pas.
+
+La comparaison FULL utilise une bijection explicite par descendants de
+naissances (K,B), puis vérifie dates rationnelles, parents, successeurs,
+contributions datées avec masques et images inférieures. La banque partagée
+et le représentant brut choisi pour un rang peuvent différer du Builder ;
+on ne prétend pas conserver ses octets historiques. Dans la nouvelle
+convention, CPU1/4 et les deux routes de certificats doivent en revanche
+donner les mêmes octets. Des changements d'identités cohérents structurellement
+ne deviennent pas pour autant géométriquement corrects.
+
+L'adaptateur suppose ses histoires issues de certificats vérifiés contre
+le graphe initial. Son contrôle structurel ne suffit pas à lier une histoire
+arbitraire à ce graphe ; les marques externes et leurs dates restent séparées
+des arêtes éliminées. Les contributions sont consultées à leur admission,
+les verticales à la date du nœud supérieur, jamais à la racine finale.
+
+Restent séquentiels dans cette référence : les résolutions géométriques,
+le calcul des pivots, les MSF, la reconstruction et la construction des
+index historiques. Seules les consultations historiques sont distribuées
+sur CPU1/4. Aucun débit GPU, gain de latence ou contrat 50k ne découle de ce
+raccord ; les prochains benchmarks 8k/16k/32k doivent porter sur un moteur
+réellement raccordé, avec travail et résidence de toutes les phases.

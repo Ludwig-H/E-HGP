@@ -6,14 +6,19 @@
 Chantier sur `main` uniquement. Cette entrée décrit le travail courant ;
 les récits des anciens jalons sont retirés, leurs preuves restent liées.
 
-Priorité après `a97ee819` : [objets parallèles de toute la tour](docs/OBJETS_PARALLELES_TOUR_20260911.md).
+Priorité après `f2bea998` et l'audit `383f8f98` : [objets parallèles de toute la tour](docs/OBJETS_PARALLELES_TOUR_20260911.md).
 L'auditeur confirme l'indépendance des horizontales K et le calcul offline
 des verticales sans nouvelle MEB. Catalogue unique, atlas des blocs,
 graphe daté sur naissances, multifusions et marques séparées remplaceraient
-les dépendances temporelles du calendrier actuel. Les briques privées passent
-O2/SAN : atlas sur 30 562 blocs de vrais census, calendrier sur 264 graphes
-abstraits, 307 500 consultations CPU1/2/4. Le raccord de ces portes séparées
-reste à faire ; aucun remplacement actif ni temps extrapolé.
+les dépendances temporelles du calendrier actuel. Le [raccord privé complet](receipts/atlas_graph_full_20260911/README.md)
+relie désormais les premières briques atlas/calendrier : extraction depuis
+vrais census, histoires FULL, contributions datées et verticales offline.
+La composition des MSF par fenêtres est exercée avant et après projection
+sur les naissances. Les certificats internes peuvent différer, pas la tour.
+Aucun remplacement actif ni temps extrapolé. Prochain delta : produire et
+consommer les terminales par fenêtres sans garder targets[R], puis distribuer
+les réductions et la reconstruction ; mesurer le travail répété et la RAM,
+pas seulement la compression des arêtes. Les consultations seules sont CPU1/4.
 GCP non utilisé pour ce nouveau jalon architectural.
 
 Complément précédent après `324f6192` : [lots complets, MEB et tentatives G4](docs/QUALIFICATION_BATCH_ET_MEB_20260911.md).

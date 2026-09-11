@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_san_root_r1/tower_gate",
+    "--mutant-growth-date"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_san_root_r1/source_snapshot",
+  "elapsed_seconds_observation_only": 0.05403831799776526,
+  "exit_code": 4,
+  "expected_exit": 4,
+  "name": "mutant-growth-date",
+  "stderr": {
+    "sha256": "cb299db387d1e4193963a8b0e74be9e065139f3b9499ece07fdeacf52197083c",
+    "size": 24
+  },
+  "stdout": {
+    "sha256": "11ca51caff87b321ad87daffcab886ce29f7ee020ba4cbd4ad3f7a11eb331f5d",
+    "size": 77
+  }
+}

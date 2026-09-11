@@ -1,0 +1,300 @@
+#!/usr/bin/env python3
+"""Freeze three private trees and qualify the composed FULL gate. Local only.
+
+The first historical ROOT compilation without Boost was reported exit 1
+(boost/multiprecision/cpp_int.hpp missing). Its TU was not frozen; this recorder
+does not reconstruct or relabel that attempt as one of its captured runs.
+"""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shlex
+import shutil
+import subprocess
+import time
+
+BASE = Path(__file__).resolve().parent
+BOOST = Path("/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include")
+SAN_ENV = {"ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+           "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"}
+CAUSAL = {
+    "mutant-growth-date": "graph_gate.single_birth_contribution",
+    "mutant-vertical": "graph_gate.vertical_identity",
+    "mutant-parent": "graph_gate.duplicate_native_parent",
+    "mutant-node-date": "graph_gate.parent_time",
+    "reject-descendant": "graph_full.descendant_leaf",
+    "mutant-mask": "graph_gate.dated_contributions",
+    "mutant-native-anchor": "graph_gate.native_history_bijection",
+}
+POSITIVE = {"selftest": 96, "high": 12, "uniform32": 6}
+COUNTERS = ("checks", "census_runs", "runs", "graph_orders", "graph_edges", "tree_edges",
+            "paired_nodes", "paired_contributions", "paired_verticals", "oracle_cuts", "oracle_verticals",
+            "requests", "unique", "initial_seeds", "post_seeds", "mebs", "descents", "equal_steps",
+            "composed_orders", "composed_windows", "composed_retained_edge_peak", "composed_touched_vertex_peak",
+            "hub_orders", "hub_windows", "hub_source_edges", "hub_tree_edges", "hub_projected_edges",
+            "hub_retained_edge_peak", "hub_touched_vertex_peak", "hub_different_certificates")
+
+
+def need(condition, reason):
+    if not condition:
+        raise ValueError(reason)
+
+
+def pin(path):
+    data = path.read_bytes()
+    return {"sha256": hashlib.sha256(data).hexdigest(), "size": len(data)}
+
+
+def save(path, value):
+    with path.open("x") as stream:
+        json.dump(value, stream, indent=2, sort_keys=True)
+        stream.write("\n")
+
+
+def sources():
+    files = [BASE / name for name in ("graph_full.hpp", "tower_gate.cpp", "record_tower.py")]
+    atlas = BASE.parent / "v7_atlas_graph_20260911"
+    files.extend(atlas / name for name in ("atlas_graph.hpp", "rank_atlas.hpp", "filtered_calendar.hpp", "historical_chains.hpp"))
+    files.extend(path for path in (atlas / "source").rglob("*") if path.is_file())
+    files.append(BASE.parent / "v7_composable_msf_20260911" / "composable_msf.hpp")
+    result = {}
+    for path in sorted(files):
+        need(path.is_file() and not path.is_symlink() and path.suffix in (".hpp", ".cpp", ".cu", ".cuh", ".py"),
+             "plain source file required: " + str(path))
+        result[path.relative_to(BASE.parent).as_posix()] = pin(path)
+    return result
+
+
+def snapshot_pins(snapshot):
+    result = {}
+    for path in snapshot.rglob("*"):
+        need(not path.is_symlink(), "no source snapshot symlink")
+        if path.is_file():
+            result[path.relative_to(snapshot).as_posix()] = pin(path)
+    return result
+
+
+def dependencies(path):
+    # GCC make dependency format, including escaped spaces and continuations.
+    target, colon, body = path.read_text().replace("\\\n", " ").partition(":")
+    need(colon and target.strip() == "mhgp7_graph_full_tower", "dependency target")
+    result = sorted({str(Path(name).resolve(strict=True)) for name in shlex.split(body)})
+    need(result, "empty dependency closure")
+    return result
+
+
+def dependency_pins(paths, snapshot):
+    rows = {}
+    for name in paths:
+        path = Path(name)
+        if path.is_relative_to(snapshot):
+            kind = "source_snapshot"
+        elif path.is_relative_to(BOOST.resolve()):
+            kind = "boost_system_header"
+        else:
+            need(path.is_relative_to(Path("/usr")) or path.is_relative_to(Path("/lib").resolve()),
+                 "dependency outside snapshot/toolchain/Boost: " + name)
+            kind = "system_header"
+        rows[name] = {"kind": kind, **pin(path)}
+    need(any(row["kind"] == "boost_system_header" and name.endswith("/boost/multiprecision/cpp_int.hpp")
+             for name, row in rows.items()), "real cpp_int dependency required")
+    return rows
+
+
+def parse_progress(payload, expected_runs, causal=False):
+    lines = payload.decode("utf-8").splitlines()
+    active, completed, started = None, 0, 0
+    for line in lines:
+        start = re.fullmatch(r"start=([A-Za-z0-9_]+/v[01]/s(?:8|10|12))", line)
+        complete = re.fullmatch(r"complete=([A-Za-z0-9_]+/v[01]/s(?:8|10|12)) nodes=([1-9][0-9]*)", line)
+        if start:
+            need(active is None, "overlapping progress cases")
+            active = start[1]; started += 1
+        elif complete:
+            need(active == complete[1], "completion without matching start")
+            active = None; completed += 1
+        else:
+            raise ValueError("unexpected stderr/compiler/sanitizer diagnostic: " + line)
+    need(started == expected_runs, "progress start nonvacuity")
+    if causal:
+        need(started == 1 and completed == 0 and active is not None, "causal progress shape")
+    else:
+        need(active is None and completed == expected_runs, "unfinished progress")
+
+
+def check_result(name, stdout, stderr):
+    if name in ("unknown", "missing"):
+        need(not stdout and not stderr, "CLI rejection must be silent")
+        return None
+    text = stdout.decode("utf-8")
+    need(len(text.splitlines()) == 1 and text.endswith("\n"), "one complete JSON line")
+    result = json.loads(text)
+    if name in CAUSAL:
+        need(result == {"status": "causal_rejection", "cause": CAUSAL[name]}, "exact causal rejection: " + name)
+        parse_progress(stderr, 1, True)
+        return result
+    need(name in POSITIVE, "known nominal mode")
+    need(set(result) == set(COUNTERS) | {"status", "scope", "public_status", "workers", "graph_construction_parallel", "gcp_used"},
+         "exact nominal JSON fields")
+    for key in COUNTERS:
+        need(type(result[key]) is int and result[key] >= 0, "nonnegative integer counter: " + key)
+    need(result["status"] == "passed" and result["scope"] == "bounded_real_census_atlas_graph_FULL" and
+         result["public_status"] == "not_claimed" and result["workers"] == [1, 4] and
+         result["graph_construction_parallel"] is False and result["gcp_used"] is False, "nominal scope")
+    need(result["runs"] == result["census_runs"] == POSITIVE[name], "real census/run count")
+    need(result["paired_nodes"] > 1000 and result["paired_verticals"] == result["paired_nodes"] and
+         result["paired_contributions"] > 0 and result["checks"] > result["paired_nodes"], "payload nonvacuity")
+    need(result["graph_edges"] >= result["tree_edges"] > 0 and
+         result["composed_orders"] == 3 * result["graph_orders"] > 0 and
+         result["composed_windows"] > 0 and result["composed_retained_edge_peak"] > 0 and
+         result["composed_touched_vertex_peak"] > 0, "three composed certificate widths nonvacuity")
+    need(result["hub_orders"] == result["composed_orders"] and result["hub_windows"] > 0 and
+         result["hub_source_edges"] >= result["hub_tree_edges"] >= result["hub_projected_edges"] > 0 and
+         result["hub_projected_edges"] >= 3 * result["tree_edges"] and
+         result["hub_retained_edge_peak"] > 0 and result["hub_touched_vertex_peak"] > 0 and
+         result["hub_different_certificates"] <= result["hub_orders"], "hub route, preserved weighted projections")
+    need(result["requests"] >= result["unique"] >= result["initial_seeds"] and result["mebs"] > 0,
+         "terminal geometry nonvacuity")
+    if name == "selftest":
+        need(result["oracle_cuts"] > 1000 and result["oracle_verticals"] > 10000 and
+             result["descents"] > 0 and result["equal_steps"] > 0, "small exact oracle/descending/equal paths")
+    elif name == "high":
+        need(result["graph_orders"] == 120 and result["oracle_cuts"] > 0 and result["oracle_verticals"] > 100000,
+             "K10 exact high-order oracle")
+    else:
+        need(result["graph_orders"] == 60 and result["paired_nodes"] > 10000 and
+             result["oracle_cuts"] == result["oracle_verticals"] == 0, "n32 differential, no exhaustive oracle")
+    parse_progress(stderr, POSITIVE[name])
+    return result
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--out", required=True)
+    parser.add_argument("--san", action="store_true")
+    args = parser.parse_args()
+    need(args.out.isidentifier(), "out must be a fresh child identifier")
+    out = BASE / args.out
+    out.mkdir(exist_ok=False)
+    snapshot = out / "source_snapshot"
+    commands, results = [], {}
+    before, copied_before, deps_before, tool_before = {}, {}, {}, {}
+    status, error = "failed", None
+    environment = dict(os.environ)
+    if args.san:
+        environment.update(SAN_ENV)
+    binary = out / "tower_gate"
+    binary_before = None
+
+    def run(name, argv, expected=0):
+        row = {"name": name, "argv": [str(value) for value in argv], "cwd": str(snapshot),
+               "expected_exit": expected, "exit_code": None}
+        commands.append(row)
+        save(out / (name + ".launch.json"), row)
+        started = time.monotonic()
+        try:
+            with (out / (name + ".stdout")).open("xb") as so, (out / (name + ".stderr")).open("xb") as se:
+                process = subprocess.run(row["argv"], cwd=snapshot, env=environment, stdout=so, stderr=se, check=False)
+            row["exit_code"] = process.returncode
+        finally:
+            row["elapsed_seconds_observation_only"] = time.monotonic() - started
+            for channel in ("stdout", "stderr"):
+                path = out / (name + "." + channel)
+                if path.exists():
+                    row[channel] = pin(path)
+            save(out / (name + ".command.json"), row)
+            print(json.dumps({"command": name, "exit_code": row["exit_code"]}), flush=True)
+        need(row["exit_code"] == expected, "unexpected process exit: " + name)
+        stdout, stderr = (out / (name + ".stdout")).read_bytes(), (out / (name + ".stderr")).read_bytes()
+        if name in ("compiler", "dependencies_before", "compile", "dependencies_after"):
+            need(not stderr and (name == "compiler" or not stdout), "compiler/dependency diagnostic: " + name)
+            if name == "compiler":
+                need(bool(stdout), "missing compiler version")
+        else:
+            results[name] = check_result(name, stdout, stderr)
+
+    try:
+        save(out / "historical_prior_compile_note.json", {
+            "status": "reported_historical_failure_not_replayed",
+            "source": "ROOT task message, not independently captured compiler streams",
+            "exit_code_reported": 1, "reason_reported": "boost/multiprecision/cpp_int.hpp missing",
+            "initial_TU_frozen": False, "attributed_to_this_snapshot": False,
+            "note": "The initial command omitted the local Boost -isystem path. No old TU/streams are invented here."})
+        before = sources()
+        save(out / "sources_before.json", before)
+        for name in before:
+            target = snapshot / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(BASE.parent / name, target)
+        copied_before = snapshot_pins(snapshot)
+        save(out / "sources_copied_before.json", copied_before)
+        need(before == copied_before, "source copy mismatch")
+        compiler_path = shutil.which("g++")
+        need(compiler_path is not None, "g++ must already exist")
+        compiler = Path(compiler_path).resolve(strict=True)
+        tool_before = {str(compiler): pin(compiler)}
+        save(out / "compiler_before.json", tool_before)
+        need((BOOST / "boost/multiprecision/cpp_int.hpp").is_file(), "existing local Boost required, no installation")
+        run("compiler", [compiler, "--version"])
+        flags = [compiler, "-std=c++20", "-Wall", "-Wextra", "-Wpedantic", "-Werror", "-pthread",
+                 "-isystem", BOOST, "-I", snapshot / "v7_atlas_graph_20260911"]
+        flags += (["-O1", "-g", "-fsanitize=address,undefined", "-fno-omit-frame-pointer", "-fno-pie", "-no-pie"]
+                  if args.san else ["-O2"])
+        tu = snapshot / "v7_graph_full_20260911/tower_gate.cpp"
+        run("dependencies_before", [*flags, "-M", "-MF", out / "dependencies_before.d", "-MT", "mhgp7_graph_full_tower", tu])
+        dependency_paths = dependencies(out / "dependencies_before.d")
+        deps_before = dependency_pins(dependency_paths, snapshot)
+        save(out / "dependencies_before.json", deps_before)
+        run("compile", [*flags, "-MD", "-MF", out / "compile.d", "-MT", "mhgp7_graph_full_tower", tu, "-o", binary])
+        need(dependencies(out / "compile.d") == dependency_paths, "compile consumed different dependencies")
+        binary_before = pin(binary)
+        save(out / "binary_before.json", binary_before)
+        for name in POSITIVE:
+            run(name, [binary, "--" + name])
+        for name in CAUSAL:
+            run(name, [binary, "--" + name], 4)
+        run("unknown", [binary, "--unknown"], 2)
+        run("missing", [binary], 2)
+        run("dependencies_after", [*flags, "-M", "-MF", out / "dependencies_after.d", "-MT", "mhgp7_graph_full_tower", tu])
+        need(dependencies(out / "dependencies_after.d") == dependency_paths, "dependency selection changed")
+        need(len(commands) == 16 and set(results) == set(POSITIVE) | set(CAUSAL) | {"unknown", "missing"},
+             "complete command/mode closure")
+        status = "passed"
+    except BaseException as exc:
+        error = type(exc).__name__ + ": " + str(exc)
+    finally:
+        closure = {}
+        try:
+            after = sources()
+            copied_after = snapshot_pins(snapshot)
+            tools_after = {name: pin(Path(name)) for name in tool_before}
+            deps_after = dependency_pins(list(deps_before), snapshot) if deps_before else {}
+            binary_after = pin(binary) if binary.is_file() else None
+            for name, value in (("sources_after", after), ("sources_copied_after", copied_after),
+                                ("compiler_after", tools_after), ("dependencies_after", deps_after),
+                                ("binary_after", binary_after)):
+                save(out / (name + ".json"), value)
+            closure = {"sources": bool(before) and before == after == copied_before == copied_after,
+                       "compiler": bool(tool_before) and tool_before == tools_after,
+                       "dependencies": bool(deps_before) and deps_before == deps_after,
+                       "binary": binary_before is not None and binary_before == binary_after}
+            need(all(closure.values()), "source/compiler/header/binary closure")
+        except BaseException as exc:
+            status = "failed"
+            error = (error + "; " if error else "") + "closure: " + type(exc).__name__ + ": " + str(exc)
+        save(out / "commands.json", commands)
+        save(out / "results.json", results)
+        save(out / "receipt.json", {"status": status, "error": error, "closure": closure,
+             "commands": len(commands), "sanitizer": args.san, "sanitizer_environment": SAN_ENV if args.san else {},
+             "scope": "bounded_real_census_atlas_graph_composed_MSF_FULL", "public_status": "not_claimed",
+             "system_scope": "compiler binary/version and preprocessor headers, not a complete linker/runtime sysroot",
+             "performance_claim": False, "device_executed": False, "gcp_used": False})
+    print(json.dumps({"status": status, "error": error, "out": str(out)}), flush=True)
+    return 0 if status == "passed" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

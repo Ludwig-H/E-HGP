@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+"""Fresh local O2/SAN capture. No publication or compiled-code reuse."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+
+HERE = Path(__file__).resolve().parent
+CALENDAR = HERE.parent / 'v7_filtered_calendar_20260911' / 'filtered_calendar.hpp'
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def save(path, value):
+    with path.open('x') as stream:
+        json.dump(value, stream, indent=2, sort_keys=True)
+        stream.write('\n')
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--out', required=True)
+    parser.add_argument('--san', action='store_true')
+    args = parser.parse_args()
+    if not args.out.isidentifier():
+        raise ValueError('fresh capture identifier required')
+    out = HERE / args.out
+    out.mkdir()
+    sources = {name: HERE / name for name in ('composable_msf.hpp', 'gate.cpp', 'README.md', 'record.py')}
+    sources['filtered_calendar.hpp'] = CALENDAR
+    before = {name: sha(path) for name, path in sources.items()}
+    for name, path in sources.items():
+        shutil.copyfile(path, out / name)
+    save(out / 'source_before.json', before)
+    flags = ['g++', '-std=c++20', '-Wall', '-Wextra', '-Wpedantic', '-Werror']
+    flags += ['-O1', '-g', '-fsanitize=address,undefined', '-fno-omit-frame-pointer'] if args.san else ['-O2']
+    environment = dict(os.environ)
+    sanitizer = dict(ASAN_OPTIONS='detect_leaks=1:halt_on_error=1', UBSAN_OPTIONS='halt_on_error=1:print_stacktrace=1') if args.san else {}
+    environment.update(sanitizer)
+    binary = out / 'gate'
+    commands, status, error = [], 'failed', None
+    try:
+        runs = [('compile', [*flags, '-MMD', '-MF', str(out / 'gate.d'), str(out / 'gate.cpp'), '-o', str(binary)], 0),
+                ('selftest', [str(binary), '--selftest'], 0), ('unknown', [str(binary), '--unknown'], 2),
+                ('missing', [str(binary)], 2)]
+        for name, argv, expected in runs:
+            with (out / (name + '.stdout')).open('xb') as so, (out / (name + '.stderr')).open('xb') as se:
+                run = subprocess.run(argv, stdout=so, stderr=se, env=environment, check=False)
+            row = dict(name=name, argv=argv, exit_code=run.returncode, expected_exit=expected,
+                       stdout_sha256=sha(out / (name + '.stdout')), stderr_sha256=sha(out / (name + '.stderr')))
+            commands.append(row)
+            save(out / (name + '.command.json'), row)
+            print(name, run.returncode, flush=True)
+            if run.returncode != expected or (out / (name + '.stderr')).read_bytes():
+                raise ValueError('process or diagnostics: ' + name)
+            if name == 'selftest':
+                result = json.loads((out / 'selftest.stdout').read_text())
+                if result.get('status') != 'passed' or result.get('variants') != 56 or result.get('mutant_refutations') != 4:
+                    raise ValueError('non-vacuity result')
+            elif (out / (name + '.stdout')).read_bytes():
+                raise ValueError('unexpected payload: ' + name)
+        status = 'passed'
+    except BaseException as exc:
+        error = type(exc).__name__ + ': ' + str(exc)
+    finally:
+        after = {name: sha(path) for name, path in sources.items()}
+        copied = {name: sha(out / name) for name in sources}
+        stable = before == after == copied
+        if not stable:
+            status, error = 'failed', 'source instability'
+        save(out / 'source_after.json', after)
+        save(out / 'receipt.json', dict(status=status, error=error, source_stable=stable, commands=commands,
+             sanitizer=args.san, sanitizer_environment=sanitizer,
+             binary_sha256=sha(binary) if binary.is_file() else None,
+             dependency_sha256=sha(out / 'gate.d') if (out / 'gate.d').is_file() else None,
+             compiler_and_system_headers_pinned=False, GCP_used=False, geometry_qualified=False))
+    print(json.dumps(dict(status=status, error=error, out=str(out))))
+    if status != 'passed':
+        raise SystemExit(1)
+
+
+if __name__ == '__main__':
+    main()

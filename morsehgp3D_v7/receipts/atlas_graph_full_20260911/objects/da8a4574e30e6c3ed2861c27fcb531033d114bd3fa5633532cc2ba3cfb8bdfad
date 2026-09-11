@@ -1,0 +1,225 @@
+#include "composable_msf.hpp"
+#include <cstdio>
+#include <functional>
+#include <map>
+#include <set>
+#include <string>
+
+namespace f = mhgp7::filtered_calendar_private;
+namespace c = mhgp7::composable_msf_private;
+using Id = f::Id;
+using Date = std::uint64_t;
+using Graph = f::Graph<Date>;
+using Edge = f::Edge<Date>;
+using Partition = std::vector<std::vector<Id>>;
+using Domain = c::BorrowedDomain<Date, std::less<Date>>;
+Id checks = 0, variants = 0, cut_pairs = 0, rejected = 0, mutant_refutations = 0;
+Id marks_checked = 0, ternary_checked = 0, projection_checked = 0;
+c::Work work;
+void need(bool ok, const char* why) {
+  ++checks;
+  if (!ok) throw std::runtime_error(why);
+}
+template<class Fn> void reject(Fn&& fn, const char* why) {
+  try { fn(); }
+  catch (const std::invalid_argument& error) {
+    need(std::string(error.what()) == why, "gate.reject_cause"); ++rejected; return;
+  }
+  throw std::runtime_error("gate.reject_missing");
+}
+bool active(Date date, Date cut, bool closed) { return closed ? date <= cut : date < cut; }
+Partition bfs(const Graph& g, std::span<const Edge> edges, Date cut, bool closed) {
+  std::map<Id, std::vector<Id>> adjacent;
+  for (const auto& b : g.births) if (active(b.date, cut, closed)) adjacent[b.id];
+  for (const auto& e : edges) if (active(e.date, cut, closed)) {
+    need(adjacent.contains(e.a) && adjacent.contains(e.b), "gate.bfs_unborn_endpoint");
+    adjacent[e.a].push_back(e.b); adjacent[e.b].push_back(e.a);
+  }
+  std::set<Id> seen;
+  Partition out;
+  for (const auto& [first, unused] : adjacent) {
+    (void)unused;
+    if (!seen.insert(first).second) continue;
+    std::vector<Id> pending{first}, component;
+    while (!pending.empty()) {
+      const Id v = pending.back(); pending.pop_back(); component.push_back(v);
+      for (Id next : adjacent.at(v)) if (seen.insert(next).second) pending.push_back(next);
+    }
+    std::sort(component.begin(), component.end()); out.push_back(std::move(component));
+  }
+  std::sort(out.begin(), out.end()); return out;
+}
+bool edge_equal(const Edge& a, const Edge& b) {
+  return a.id == b.id && a.a == b.a && a.b == b.b && a.date == b.date;
+}
+bool same_edges(const std::vector<Edge>& a, const std::vector<Edge>& b) {
+  return a.size() == b.size() && std::equal(a.begin(), a.end(), b.begin(), edge_equal);
+}
+std::set<Date> cuts(const Graph& g) {
+  std::set<Date> dates{0};
+  for (const auto& b : g.births) dates.insert(b.date);
+  for (const auto& e : g.edges) dates.insert(e.date);
+  for (const auto& m : g.marks) dates.insert(m.admission);
+  dates.insert(*dates.rbegin() + 1);
+  return dates;
+}
+void compare_cuts(const Graph& g, const std::vector<Edge>& edges) {
+  for (Date cut : cuts(g)) for (bool closed : {false, true}) {
+    need(bfs(g, g.edges, cut, closed) == bfs(g, edges, cut, closed), "gate.filtered_partition");
+    ++cut_pairs;
+  }
+}
+void qualify(const Graph& g, bool strict, bool ternary = false) {
+  Domain domain(g.births, std::less<Date>{}, work);
+  const auto reference = c::compact_msf(domain, std::span<const Edge>(g.edges), work);
+  compare_cuts(g, reference.edges);
+  for (std::size_t width : {std::size_t{1}, std::size_t{2}, std::size_t{3}, std::max<std::size_t>(1, g.edges.size())}) {
+    for (bool reverse : {false, true}) {
+      auto input = g.edges;
+      if (reverse) std::reverse(input.begin(), input.end());
+      c::BinaryPile<Date, std::less<Date>> pile(domain, work);
+      pile.push({});
+      for (std::size_t first = 0; first < input.size(); first += width)
+        pile.push(std::span<const Edge>(input).subspan(first, std::min(width, input.size() - first)));
+      pile.push({});
+      auto result = pile.finish();
+      need(same_edges(reference.edges, result.edges), "gate.stable_edge_identity");
+      compare_cuts(g, result.edges); ++variants;
+      reject([&] { pile.push({}); }, "composable.closed_or_failed");
+      if (strict) {
+        f::Certificate<Date> cert{g.births, result.edges, g.marks};
+        f::verify_certificate(g, cert, std::less<Date>{});
+        const auto history = f::reconstruct(cert, std::less<Date>{});
+        if (ternary) {
+          need(history.nodes.size() == 4 && history.nodes.back().parent_count == 3,
+              "gate.single_ternary_plateau"); ++ternary_checked;
+        }
+        for (const auto& mark : g.marks) for (Date cut : cuts(g)) for (bool closed : {false, true}) {
+          const Id segment = f::mark_component(history, mark.id, cut, closed, std::less<Date>{});
+          if (!active(mark.admission, cut, closed)) need(segment == f::absent, "gate.mark_early");
+          else need(segment == f::vertex_component(history, mark.representative, cut, closed, std::less<Date>{}),
+                    "gate.mark_wrong_segment");
+          ++marks_checked;
+        }
+      }
+    }
+  }
+}
+void projection() {
+  const Graph hubs{{{0, 0}, {1, 0}, {2, 4}, {3, 9}, {Id{1} << 40, 20}},
+                   {{0, 2, 0, 4}, {1, 3, 1, 9}, {2, 3, 2, 9}}, {}};
+  qualify(hubs, false);
+  reject([&] { (void)f::normalized(hubs, std::less<Date>{}); }, "filtered.edge_not_strictly_after_birth");
+  Domain domain(hubs.births, std::less<Date>{}, work);
+  c::BinaryPile<Date, std::less<Date>> pile(domain, work);
+  for (const auto& edge : hubs.edges) pile.push(std::span<const Edge>(&edge, 1));
+  auto certificate = pile.finish();
+  const std::map<Id, Id> phi{{0, 0}, {1, 1}, {2, 0}, {3, 1}, {Id{1} << 40, Id{1} << 40}};
+  Graph reduced{{{0, 0}, {1, 0}, {Id{1} << 40, 20}}, {}, {{2, 0, 4}, {3, 1, 9}}};
+  for (auto edge : certificate.edges) {
+    edge.a = phi.at(edge.a); edge.b = phi.at(edge.b);
+    if (edge.a != edge.b) reduced.edges.push_back(edge);
+  }
+  need(reduced.edges.size() == 1 && reduced.edges[0].date == 9, "gate.projection_keeps_path_maximum");
+  qualify(reduced, true); ++projection_checked;
+  auto bad = reduced.edges; bad[0].date = 4;
+  need(bfs(reduced, reduced.edges, 4, true) != bfs(reduced, bad, 4, true), "gate.projection_antidate_mutant");
+  ++mutant_refutations;
+}
+void guards() {
+  c::Work w;
+  const std::vector<f::Birth<Date>> duplicates{{0, 0}, {0, 1}}, reserved{{f::absent, 0}};
+  reject([&] { Domain bad(duplicates, std::less<Date>{}, w); }, "composable.domain_identity");
+  reject([&] { Domain bad(reserved, std::less<Date>{}, w); }, "composable.domain_identity");
+  const std::vector<f::Birth<Date>> vertices{{1, 4}, {0, 0}};
+  Domain domain(vertices, std::less<Date>{}, w);
+  const std::vector<Edge> unknown{{0, 0, 2, 4}}, early{{0, 0, 1, 3}}, duplicate{{0, 0, 1, 4}, {0, 0, 1, 4}};
+  reject([&] { (void)c::compact_msf(domain, std::span<const Edge>(unknown), w); }, "composable.unknown_endpoint");
+  reject([&] { (void)c::compact_msf(domain, std::span<const Edge>(early), w); }, "composable.edge_before_endpoint");
+  reject([&] { (void)c::compact_msf(domain, std::span<const Edge>(duplicate), w); }, "composable.edge_identity");
+  c::BinaryPile<Date, std::less<Date>> failed(domain, w);
+  reject([&] { failed.push(early); }, "composable.edge_before_endpoint");
+  reject([&] { (void)failed.finish(); }, "composable.closed_or_failed");
+  Id counter = std::numeric_limits<Id>::max();
+  reject([&] { c::add(counter); }, "composable.counter_overflow");
+  need(counter == std::numeric_limits<Id>::max(), "gate.counter_not_wrapped");
+
+  // One initialization of the identity map for many isolates; the sole DSU
+  // touches exactly TWO vertices, not the complete domain.
+  std::vector<f::Birth<Date>> isolated;
+  for (Id i = 0; i != 1000; ++i) isolated.push_back({i, 0});
+  c::Work touch;
+  Domain large(isolated, std::less<Date>{}, touch);
+  const std::vector<Edge> one{{0, 0, 999, 1}};
+  const auto result = c::compact_msf(large, std::span<const Edge>(one), touch);
+  need(result.edges.size() == 1 && touch.domain_vertices == 1000 && touch.touched_vertices == 2 &&
+      touch.peak_touched_vertices == 2 && touch.dsu_attempts == 1 && touch.dsu_unions == 1 &&
+      touch.sort_calls == 3 && touch.sort_items == 4 && touch.peak_call_edge_slots == 3,
+      "gate.touched_dsu_nonvacuity");
+}
+void mutants() {
+  const Graph late{{{0, 0}, {1, 0}, {2, 0}}, {{0, 0, 1, 10}, {1, 1, 2, 10}, {2, 0, 2, 1}}, {}};
+  const std::vector<Edge> omitted(late.edges.begin(), late.edges.begin() + 2);
+  need(bfs(late, late.edges, 1, true) != bfs(late, omitted, 1, true), "gate.late_edge_mutant");
+  ++mutant_refutations;
+  Graph isolated{{{0, 0}, {1, 9}}, {}, {}};
+  auto lost = isolated; lost.births.pop_back();
+  need(bfs(isolated, {}, 9, true) != bfs(lost, {}, 9, true), "gate.isolated_mutant");
+  ++mutant_refutations;
+  auto early = isolated; early.births[1].date = 0;
+  need(bfs(isolated, {}, 4, true) != bfs(early, {}, 4, true), "gate.future_birth_mutant");
+  ++mutant_refutations;
+}
+struct Rational { Id num, den; };
+struct RationalLess {
+  bool operator()(const Rational& a, const Rational& b) const {
+    __extension__ using Wide = unsigned __int128;
+    return static_cast<Wide>(a.num) * b.den < static_cast<Wide>(b.num) * a.den;
+  }
+};
+void rational_smoke() {
+  const std::vector<f::Birth<Rational>> births{{Id{1} << 40, {0, 1}}, {7, {0, 1}}, {9, {0, 1}}};
+  const std::vector<f::Edge<Rational>> edges{{9, 7, 9, {1, 2}}, {8, 9, Id{1} << 40, {2, 4}},
+                                           {7, 7, Id{1} << 40, {3, 6}}};
+  c::BorrowedDomain<Rational, RationalLess> domain(births, RationalLess{}, work);
+  c::BinaryPile<Rational, RationalLess> pile(domain, work);
+  for (const auto& edge : edges) pile.push(std::span<const f::Edge<Rational>>(&edge, 1));
+  const auto result = pile.finish();
+  // All weights equal exactly; endpoint order keeps 7--9 and 7--large.
+  need(result.edges.size() == 2 && result.edges[0].id == 9 && result.edges[1].id == 7 &&
+      result.edges[1].date.num == 3 && result.edges[1].date.den == 6, "gate.exact_rational_representation");
+}
+int main(int argc, char** argv) {
+  if (argc != 2 || std::string(argv[1]) != "--selftest") return 2;
+  try {
+    qualify({}, true);
+    qualify({{{0, 0}, {1, 9}}, {}, {{7, 0, 4}}}, true);
+    qualify({{{0, 0}, {1, 0}, {2, 0}}, {{0, 0, 1, 10}, {1, 1, 2, 10}, {2, 0, 2, 1}}, {}}, true);
+    qualify({{{0, 0}, {1, 0}, {2, 0}}, {{0, 0, 1, 4}, {1, 1, 2, 4}, {2, 0, 2, 4}}, {}}, true, true);
+    qualify({{{5, 0}, {1, 0}, {3, 0}, {8, 0}}, {{0, 5, 1, 4}, {1, 3, 8, 4}, {2, 5, 5, 1},
+        {3, 5, 1, 8}, {4, 5, 3, 9}}, {{11, 1, 4}, {12, 8, 8}}}, true);
+    projection(); guards(); mutants(); rational_smoke();
+    need(variants == 56 && ternary_checked == 8 && projection_checked == 1 && marks_checked > 0 &&
+        mutant_refutations == 4 && rejected >= 60 && work.merges > 0 && work.nonempty_windows > 0 &&
+        work.sort_calls == 3 * work.compact_calls && work.dsu_attempts == work.input_edges &&
+        work.dsu_unions == work.output_edges, "gate.nonvacuity_and_work_identities");
+    std::printf("{\"status\":\"passed\",\"checks\":%llu,\"variants\":%llu,\"cut_pairs\":%llu,\"rejects\":%llu,"
+        "\"mutant_refutations\":%llu,\"marks_checked\":%llu,\"ternary_checked\":%llu,\"projection_checked\":%llu,"
+        "\"compact_calls\":%llu,\"source_edges\":%llu,\"input_edges_all_compactions\":%llu,\"output_edges_all_compactions\":%llu,"
+        "\"windows\":%llu,\"nonempty_windows\":%llu,\"merges\":%llu,\"sort_calls\":%llu,\"sort_items\":%llu,"
+        "\"domain_vertices\":%llu,\"touched_vertices\":%llu,\"peak_touched_vertices\":%llu,"
+        "\"peak_retained_edges\":%llu,\"peak_call_edge_slots\":%llu,\"peak_merge_input_edges\":%llu,"
+        "\"geometry_qualified\":false,\"GPU_executed\":false,\"RSS_measured\":false}\n",
+        static_cast<unsigned long long>(checks), static_cast<unsigned long long>(variants), static_cast<unsigned long long>(cut_pairs),
+        static_cast<unsigned long long>(rejected), static_cast<unsigned long long>(mutant_refutations), static_cast<unsigned long long>(marks_checked),
+        static_cast<unsigned long long>(ternary_checked), static_cast<unsigned long long>(projection_checked),
+        static_cast<unsigned long long>(work.compact_calls), static_cast<unsigned long long>(work.source_edges),
+        static_cast<unsigned long long>(work.input_edges), static_cast<unsigned long long>(work.output_edges),
+        static_cast<unsigned long long>(work.windows), static_cast<unsigned long long>(work.nonempty_windows), static_cast<unsigned long long>(work.merges),
+        static_cast<unsigned long long>(work.sort_calls), static_cast<unsigned long long>(work.sort_items),
+        static_cast<unsigned long long>(work.domain_vertices), static_cast<unsigned long long>(work.touched_vertices),
+        static_cast<unsigned long long>(work.peak_touched_vertices), static_cast<unsigned long long>(work.peak_retained_edges),
+        static_cast<unsigned long long>(work.peak_call_edge_slots), static_cast<unsigned long long>(work.peak_merge_input_edges));
+    return 0;
+  } catch (const std::exception& error) { std::fprintf(stderr, "%s\n", error.what()); return 1; }
+}

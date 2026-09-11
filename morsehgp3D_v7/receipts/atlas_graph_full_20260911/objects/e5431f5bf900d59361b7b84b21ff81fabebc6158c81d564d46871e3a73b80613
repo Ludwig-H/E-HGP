@@ -1,0 +1,9 @@
+{
+  "commands": 11,
+  "device_executed": false,
+  "gcp_used": false,
+  "san": false,
+  "scope": "bounded real-census atlas/terminal/pivot/graph differential; no FULL export or new geometry authority",
+  "source_stable": true,
+  "status": "passed"
+}

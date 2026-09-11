@@ -1,0 +1,9 @@
+{
+  "attributed_to_this_snapshot": false,
+  "exit_code_reported": 1,
+  "initial_TU_frozen": false,
+  "note": "The initial command omitted the local Boost -isystem path. No old TU/streams are invented here.",
+  "reason_reported": "boost/multiprecision/cpp_int.hpp missing",
+  "source": "ROOT task message, not independently captured compiler streams",
+  "status": "reported_historical_failure_not_replayed"
+}

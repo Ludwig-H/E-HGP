@@ -1,0 +1,193 @@
+#pragma once
+
+// Private sequential certificate reducer. Include path must select the SAME
+// filtered_calendar.hpp as its consumer; the strict calendar is not changed.
+#include "filtered_calendar.hpp"
+#include <optional>
+#include <span>
+
+namespace mhgp7::composable_msf_private {
+namespace fc = filtered_calendar_private;
+using Id = fc::Id;
+inline void require(bool ok, const char* reason) {
+  if (!ok) throw std::invalid_argument(reason);
+}
+inline void add(Id& value, Id increment = 1) {
+  require(increment <= std::numeric_limits<Id>::max() - value, "composable.counter_overflow");
+  value += increment;
+}
+inline Id sum(Id a, Id b) { add(a, b); return a; }
+struct Work {
+  Id domain_vertices = 0, domain_sort_items = 0, domain_sort_comparisons = 0;
+  Id compact_calls = 0, input_edges = 0, output_edges = 0;
+  Id sort_calls = 0, sort_items = 0, identity_sort_comparisons = 0, sort_date_comparisons = 0;
+  Id endpoint_queries = 0, endpoint_comparisons = 0, validation_date_comparisons = 0;
+  Id touched_vertices = 0, peak_touched_vertices = 0, dsu_attempts = 0, dsu_unions = 0;
+  Id windows = 0, nonempty_windows = 0, source_edges = 0, merges = 0;
+  // Logical sizes, NOT capacities/RSS. Retained = simultaneous certificate
+  // arrays, including carry/new output. Call = caller input + sorted copy +
+  // output of ONE compaction. The two peaks must not be added as a measured RSS.
+  Id peak_retained_edges = 0, peak_call_edge_slots = 0, peak_merge_input_edges = 0;
+};
+
+// Lifetime and immutability are caller premises, not an opaque owner/token.
+// Vertices may be unordered. One identity permutation is prepared ONCE; no
+// all-domain DSU, birth copy, or metadata copy is made for a window.
+template<class Date, class Less> class BorrowedDomain {
+ public:
+  BorrowedDomain(std::span<const fc::Birth<Date>> vertices, Less less, Work& work)
+      : vertices_(vertices), less_(std::move(less)), order_(vertices.size()) {
+    add(work.domain_vertices, vertices.size());
+    add(work.domain_sort_items, vertices.size());
+    std::iota(order_.begin(), order_.end(), 0);
+    std::sort(order_.begin(), order_.end(), [&](auto a, auto b) {
+      add(work.domain_sort_comparisons); return vertices_[a].id < vertices_[b].id;
+    });
+    for (std::size_t j = 0; j < order_.size(); ++j)
+      require(vertices_[order_[j]].id != fc::absent &&
+          (!j || vertices_[order_[j - 1]].id != vertices_[order_[j]].id),
+          "composable.domain_identity");
+  }
+  BorrowedDomain(const BorrowedDomain&) = delete;
+  BorrowedDomain& operator=(const BorrowedDomain&) = delete;
+  const Less& less() const { return less_; }
+  std::span<const fc::Birth<Date>> vertices() const { return vertices_; }
+  const fc::Birth<Date>& lookup(Id id, Work& work) const {
+    add(work.endpoint_queries);
+    const auto found = std::lower_bound(order_.begin(), order_.end(), id, [&](auto at, Id key) {
+      add(work.endpoint_comparisons); return vertices_[at].id < key;
+    });
+    require(found != order_.end() && vertices_[*found].id == id, "composable.unknown_endpoint");
+    return vertices_[*found];
+  }
+ private:
+  std::span<const fc::Birth<Date>> vertices_;
+  Less less_;
+  std::vector<std::size_t> order_;
+};
+
+template<class Date> struct EdgeCertificate { std::vector<fc::Edge<Date>> edges; };
+
+// Caller guarantees global edge identity/ordinal ownership across windows.
+// Local/reduction duplicates that coexist are rejected; this is deliberately
+// NOT an O(R) global seen-ID table disguised as a streaming implementation.
+template<class Date, class Less> EdgeCertificate<Date> compact_msf(
+    const BorrowedDomain<Date, Less>& domain, std::span<const fc::Edge<Date>> input, Work& work) {
+  add(work.compact_calls); add(work.input_edges, input.size());
+  std::vector<fc::Edge<Date>> edges(input.begin(), input.end());
+  std::vector<Id> touched;
+  require(edges.size() <= touched.max_size() / 2, "composable.endpoint_representation");
+  touched.reserve(2 * edges.size());
+  add(work.sort_calls); add(work.sort_items, edges.size());
+  std::sort(edges.begin(), edges.end(), [&](const auto& a, const auto& b) {
+    add(work.identity_sort_comparisons); return a.id < b.id;
+  });
+  for (std::size_t j = 0; j < edges.size(); ++j) {
+    const auto& edge = edges[j];
+    require(edge.id != fc::absent && (!j || edges[j - 1].id != edge.id), "composable.edge_identity");
+    const auto& a = domain.lookup(edge.a, work);
+    const auto& b = domain.lookup(edge.b, work);
+    // General dated graph/hub condition. Strict reduced-birth validation is
+    // deliberately still supplied by filtered_calendar after projection.
+    add(work.validation_date_comparisons);
+    require(!domain.less()(edge.date, a.date), "composable.edge_before_endpoint");
+    add(work.validation_date_comparisons);
+    require(!domain.less()(edge.date, b.date), "composable.edge_before_endpoint");
+    touched.push_back(edge.a); touched.push_back(edge.b);
+  }
+  add(work.sort_calls); add(work.sort_items, touched.size());
+  std::sort(touched.begin(), touched.end(), [&](Id a, Id b) {
+    add(work.identity_sort_comparisons); return a < b;
+  });
+  touched.erase(std::unique(touched.begin(), touched.end()), touched.end());
+  add(work.touched_vertices, touched.size());
+  work.peak_touched_vertices = std::max<Id>(work.peak_touched_vertices, touched.size());
+  add(work.sort_calls); add(work.sort_items, edges.size());
+  fc::sort_edges(edges, [&](const Date& a, const Date& b) {
+    add(work.sort_date_comparisons); return domain.less()(a, b);
+  });
+  fc::Dsu dsu(touched.size());
+  EdgeCertificate<Date> out;
+  out.edges.reserve(std::min(edges.size(), touched.empty() ? 0 : touched.size() - 1));
+  for (const auto& edge : edges) {
+    const auto locate = [&](Id id) {
+      return static_cast<std::size_t>(std::lower_bound(touched.begin(), touched.end(), id) - touched.begin());
+    };
+    add(work.dsu_attempts);
+    if (dsu.unite(locate(edge.a), locate(edge.b))) { out.edges.push_back(edge); add(work.dsu_unions); }
+  }
+  add(work.output_edges, out.edges.size());
+  work.peak_call_edge_slots = std::max(work.peak_call_edge_slots,
+      sum(sum(input.size(), edges.size()), out.edges.size()));
+  return out;
+}
+
+// Binary carry stack: no all-local-certificates queue. Reductions are sequential
+// references. Out-of-order windows are legal under the same stable edge IDs.
+// Any failed operation poisons this instance; no partial certificate is returned.
+template<class Date, class Less> class BinaryPile {
+ public:
+  BinaryPile(const BorrowedDomain<Date, Less>& domain, Work& work) : domain_(domain), work_(work) {}
+  BinaryPile(const BinaryPile&) = delete;
+  BinaryPile& operator=(const BinaryPile&) = delete;
+  void push(std::span<const fc::Edge<Date>> input) {
+    check_live();
+    try {
+      add(work_.windows); add(work_.source_edges, input.size());
+      if (input.empty()) return;
+      add(work_.nonempty_windows);
+      auto carry = compact_msf(domain_, input, work_);
+      std::size_t level = 0;
+      observe(carry.edges.size());
+      for (;;) {
+        if (level == bins_.size()) bins_.emplace_back();
+        if (!bins_[level]) {
+          add(retained_, carry.edges.size()); bins_[level] = std::move(carry); observe(0); break;
+        }
+        auto next = merge(*bins_[level], carry);
+        observe(sum(carry.edges.size(), next.edges.size()));
+        retained_ -= bins_[level]->edges.size(); bins_[level].reset();
+        carry = std::move(next); ++level;
+      }
+    } catch (...) { failed_ = true; throw; }
+  }
+  EdgeCertificate<Date> finish() {
+    check_live();
+    try {
+      EdgeCertificate<Date> carry;
+      for (auto& bin : bins_) if (bin) {
+        if (carry.edges.empty()) {
+          retained_ -= bin->edges.size(); carry = std::move(*bin); bin.reset();
+        } else {
+          auto next = merge(*bin, carry);
+          observe(sum(carry.edges.size(), next.edges.size()));
+          retained_ -= bin->edges.size(); bin.reset(); carry = std::move(next);
+        }
+        observe(carry.edges.size());
+      }
+      finished_ = true;
+      return carry;
+    } catch (...) { failed_ = true; throw; }
+  }
+ private:
+  void check_live() const { require(!failed_ && !finished_, "composable.closed_or_failed"); }
+  void observe(Id other) {
+    work_.peak_retained_edges = std::max(work_.peak_retained_edges, sum(retained_, other));
+  }
+  EdgeCertificate<Date> merge(const EdgeCertificate<Date>& left, const EdgeCertificate<Date>& right) {
+    add(work_.merges);
+    std::vector<fc::Edge<Date>> input;
+    require(right.edges.size() <= input.max_size() - left.edges.size(), "composable.merge_representation");
+    input.reserve(left.edges.size() + right.edges.size());
+    input.insert(input.end(), left.edges.begin(), left.edges.end());
+    input.insert(input.end(), right.edges.begin(), right.edges.end());
+    work_.peak_merge_input_edges = std::max<Id>(work_.peak_merge_input_edges, input.size());
+    return compact_msf(domain_, std::span<const fc::Edge<Date>>(input), work_);
+  }
+  const BorrowedDomain<Date, Less>& domain_;
+  Work& work_;
+  std::vector<std::optional<EdgeCertificate<Date>>> bins_;
+  Id retained_ = 0;
+  bool finished_ = false, failed_ = false;
+};
+}  // namespace mhgp7::composable_msf_private

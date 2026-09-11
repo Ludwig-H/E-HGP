@@ -1,0 +1,42 @@
+{
+  "argv": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-isystem",
+    "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-I",
+    "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_san_root_r1/source_snapshot/v7_atlas_graph_20260911",
+    "-O1",
+    "-g",
+    "-fsanitize=address,undefined",
+    "-fno-omit-frame-pointer",
+    "-fno-pie",
+    "-no-pie",
+    "-MD",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_san_root_r1/compile.d",
+    "-MT",
+    "mhgp7_graph_full_tower",
+    "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_san_root_r1/source_snapshot/v7_graph_full_20260911/tower_gate.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_san_root_r1/tower_gate"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_san_root_r1/source_snapshot",
+  "elapsed_seconds_observation_only": 82.32685696499539,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "compile",
+  "stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  "stdout": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  }
+}

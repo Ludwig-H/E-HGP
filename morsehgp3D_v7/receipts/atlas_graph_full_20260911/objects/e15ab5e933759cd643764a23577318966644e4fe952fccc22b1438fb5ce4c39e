@@ -1,0 +1,62 @@
+# Certificats MSF composables : prototype privé séquentiel
+
+11 septembre 2026. `phase=exploration_v7_hors_registre`,
+`backend=cpu_reference`, `profile=quantized_u16_input_only`,
+`mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
+Aucun moteur actif, auditeur, Git ou GCP modifié. Ce helper structurel n'est
+pas un producteur géométrique. Aucun débit, RSS ou résultat GPU annoncé.
+
+`BorrowedDomain<Date,Less>` emprunte les Birth originales, non nécessairement
+triées ; une permutation d'identités est préparée une fois. L'appelant garantit
+validité des dates/comparateur, lifetime et immutabilité du domaine. Aucun
+token de propriétaire opaque ni protection contre une mutation concurrente
+n'est prétendu. Les identités sont u64, UINT64_MAX réservé.
+
+`compact_msf(domain, span<Edge<Date>>, work)` retourne seulement `edges`.
+La condition générale est date(arête) >= dates(extrémités), donc les hubs
+sont admis. Chaque appel trie seulement les arêtes/IDs touchés et initialise
+le DSU sur les seules extrémités présentes. Il ne copie ni domaine, ni marques,
+ni populations. Le tri exact réutilise `filtered_calendar::sort_edges` et son
+ordre total date, extrémités canoniques, ordinal stable. Les ordinals doivent
+appartenir globalement à des occurrences uniques ; le contrôle des doublons
+locaux ne remplace pas l'ownership du producteur entre fenêtres.
+
+`BinaryPile(domain, work).push(window)` réduit immédiatement chaque fenêtre ;
+`finish()` compose les certificats restants. Les arêtes légères tardives sont
+admises, aucune ancienne coupe FULL n'est publiée en avance. Un échec empoisonne
+la pile ; elle ne publie pas de certificat partiel. Les compteurs sont ceux du
+travail effectué jusqu'au refus, pas un protocole industriel work_known.
+
+Les naissances isolées et toutes les marques/populations/références inférieures
+restent dans les métadonnées immuables externes. Après projection des hubs via
+des pivots certifiés, conserver les dates originales, supprimer les boucles,
+puis utiliser le validateur STRICT et `reconstruct` de filtered_calendar.
+Le helper strict n'est ni modifié ni applicable directement aux hubs.
+
+La couture prévue pour le raccord ROOT est
+`Extraction.orders[K-1].graph` (Graph<u32> de l'atlas privé). Construire un domaine
+empruntant `graph.births`, pousser des spans de `graph.edges`, puis remettre
+`graph.births`, les arêtes finales et `graph.marks` dans Certificate<u32> avant
+vérification/reconstruction. Ce témoin réutilise encore un graphe extrait
+matérialisé ; il ne qualifie pas la génération géométrique en flux.
+
+Avec N sommets, M arêtes et J fenêtres, permutation d'IDs O(N), stockage des
+certificats de pile O(min(M,N(1+log(max(1,J))))), plus une fenêtre et les
+temporaires. Chaque compactage de m arêtes utilise O(m) scratch et au plus
+min(N,2m) sommets de DSU ; tris O(m log m), recherches dans le domaine O(m log N).
+Les fusions peuvent retraiter les arêtes survivantes : pas de travail linéaire
+ni de sous-quadraticité universelle annoncés.
+
+Les métriques sont des tailles logiques distinctes : `peak_retained_edges`
+compte les tableaux de certificats simultanés (pile, carry et nouveau résultat),
+`peak_call_edge_slots` compte entrée empruntée + copie triée + sortie d'UN appel,
+`peak_merge_input_edges` la concaténation d'UNE fusion ; pas leur somme comme
+RSS. Elles excluent capacités, allocateur, permutations, tris, DSU, catalogue
+et payload. Les tris, entrées traitées et sommets touchés sont comptés séparément.
+
+Gate : BFS indépendant aux dates, coupes ouvertes/fermées ; arête légère
+tardive, plateau ternaire, naissances isolées/futures, marques datées, dates
+de hubs égales aux arêtes, projection maximale 9 et mutant antidaté 4. Un domaine
+de 1000 sommets avec une arête atteste un DSU à 2 sommets. Smoke rationnel exact,
+préservation des représentations et identités >2^32. Les résultats de la preuve
+auditeur ne sont pas hérités ; ce dossier reçoit ses propres captures.

@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/tower_gate",
+    "--high"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot",
+  "elapsed_seconds_observation_only": 5.646950393005682,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "high",
+  "stderr": {
+    "sha256": "233e75b529131066ec77eb25ea47693da9aed55c57956033685c91d1ee3a4289",
+    "size": 664
+  },
+  "stdout": {
+    "sha256": "4597fce598c71e476108aceea8a0608a6904178ccafe2e68ac9416af5d6f5a0d",
+    "size": 815
+  }
+}

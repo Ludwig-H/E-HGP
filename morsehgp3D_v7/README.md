@@ -21,10 +21,14 @@ Priorité courante : [objets pour paralléliser toute la tour](docs/OBJETS_PARAL
 Catalogue partagé, blocs clairsemés (K,B), graphes datés sur les naissances,
 puis contributions et verticales par requêtes sur arbres immuables :
 l'auditeur confirme que les horizontales K n'ont pas à s'attendre et que
-les verticales ne demandent pas de nouvelles MEB. Les références C++ privées
-passent O2/SAN : atlas sur 13 vrais census, calendrier sur 264 graphes,
-307 500 consultations CPU1/2/4. Ces portes sont encore séparées ; le chemin
-census→graphe→FULL n'est pas raccordé et le moteur actif reste inchangé.
+les verticales ne demandent pas de nouvelles MEB. Après les premières briques
+atlas/calendrier, le [raccord privé complet](receipts/atlas_graph_full_20260911/README.md)
+joint maintenant vrais census, graphes, contributions et verticales. Deux
+routes de réduction par lots sont confrontées à la même tour : directement
+sur les naissances, ou sur les blocs puis projetées vers les naissances.
+Le moteur actif reste inchangé ; extraction géométrique et reconstruction
+ne sont pas encore massivement parallèles. Les fenêtres d'arêtes ne retirent
+pas encore les tableaux globaux de terminales de cette référence.
 Cette décomposition vise aussi WSPD, census et export, pas seulement les MEB.
 
 Jalon précédent : [sonde complète par lots, gate census→FULL et réduction MEB](docs/QUALIFICATION_BATCH_ET_MEB_20260911.md).

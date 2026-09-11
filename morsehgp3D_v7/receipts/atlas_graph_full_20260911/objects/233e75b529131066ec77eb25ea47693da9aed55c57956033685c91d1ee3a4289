@@ -1,0 +1,24 @@
+start=spatial12/v0/s8
+complete=spatial12/v0/s8 nodes=23
+start=spatial12/v0/s10
+complete=spatial12/v0/s10 nodes=23
+start=spatial12/v0/s12
+complete=spatial12/v0/s12 nodes=23
+start=spatial12/v1/s8
+complete=spatial12/v1/s8 nodes=23
+start=spatial12/v1/s10
+complete=spatial12/v1/s10 nodes=23
+start=spatial12/v1/s12
+complete=spatial12/v1/s12 nodes=23
+start=shell14/v0/s8
+complete=shell14/v0/s8 nodes=21
+start=shell14/v0/s10
+complete=shell14/v0/s10 nodes=21
+start=shell14/v0/s12
+complete=shell14/v0/s12 nodes=21
+start=shell14/v1/s8
+complete=shell14/v1/s8 nodes=21
+start=shell14/v1/s10
+complete=shell14/v1/s10 nodes=21
+start=shell14/v1/s12
+complete=shell14/v1/s12 nodes=21

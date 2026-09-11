@@ -1,0 +1,19 @@
+{
+  "closure": {
+    "binary": true,
+    "compiler": true,
+    "dependencies": true,
+    "sources": true
+  },
+  "commands": 16,
+  "device_executed": false,
+  "error": null,
+  "gcp_used": false,
+  "performance_claim": false,
+  "public_status": "not_claimed",
+  "sanitizer": false,
+  "sanitizer_environment": {},
+  "scope": "bounded_real_census_atlas_graph_composed_MSF_FULL",
+  "status": "passed",
+  "system_scope": "compiler binary/version and preprocessor headers, not a complete linker/runtime sysroot"
+}

@@ -7,6 +7,16 @@ Plan de port mis à jour après une première exécution de primitives sur G4.
 Le terminal complet dispose maintenant d'un prototype qualifié sur hôte ;
 son exécution device et son raccord à la tour GPU restent à qualifier.
 
+Le [raccord atlas→graphes→FULL](OBJETS_PARALLELES_TOUR_20260911.md#7-raccord-complet-et-certificats-composables)
+passe maintenant sur hôte O2/SAN avec vrais census, contributions et verticales.
+Il utilise la géométrie scalaire de référence et ne branche pas implicitement
+le terminal CUDA. Les certificats d'arêtes peuvent se composer par fenêtres,
+y compris avant projection des blocs vers les naissances. Le raccord suivant
+doit consommer directement les sorties des lots géométriques et libérer leurs
+clés, puis qualifier la construction parallèle des MSF/histoires. La première
+référence garde encore targets[R] et les graphes ; aucune baisse de RAM ou
+mesure GPU ne lui est attribuée.
+
 La [couture par lots résidents](PARALLELISATION_PAR_LOTS_20260911.md) est
 maintenant intégrée au Builder côté API CPU. Le prototype sépare index,
 catalogue et semis résidents des buffers de requêtes réutilisés ; il conserve
@@ -64,8 +74,11 @@ présumé depuis ces tests locaux.
 
 La [voie statique CPU](RESOLUTION_STATIQUE_CPU_20260911.md) sépare désormais
 les résolutions géométriques des composantes temporelles. La première
-réduction de travail est qualifiée ; le GPU doit ensuite traiter les clés
-uniques non semées, sans recevoir toutes les occurrences répétées.
+réduction de travail est qualifiée ; le chemin GPU prévu traite les clés
+uniques non semées. Dans une variante par fenêtres, la déduplication peut
+être locale et le cache inter-fenêtres borné : c'est exact sous les mêmes
+certificats, mais une même facette peut refaire sa MEB. Compter ce travail
+répété avant de préférer cette résidence à la mutualisation globale.
 Les [tours G4 du 10 septembre](RESULTATS_TOUR_CACHE_G4_20260910.md) ne faisaient
 que prefilter/census sur device : leur coût FULL restait CPU.
 

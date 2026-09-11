@@ -1,0 +1,119 @@
+# Raccord privé atlas → terminales → pivots → graphes
+
+Exploration CPU, `public_status=not_claimed`. Aucune source active modifiée,
+aucun GCP/GPU, aucune intégration industrielle ni borne temporelle revendiquée.
+
+## API gelée avant qualification
+
+`atlas_graph.hpp`, namespace `mhgp7::atlas_graph_private` :
+
+```cpp
+Extraction extract(const CloudIndex&, std::span<const BallData>, unsigned requested);
+// Extraction : atlas, phi[A], targets[R], orders[K-1], work, stats.
+// orders[K-1] : unsigned k ; filtered_calendar_private::Graph<u32> graph.
+// decode(BlockId) : { k, point, ball_or_point }.
+// occurrences(k, emit) : { k, source_ball, source_block, local, ordinal, slot, target }.
+```
+
+Un seul arbre de types `source/morsehgp3D_v7/src`, identique à celui du paquet
+atlas fermé sauf la déclaration friend de test déjà présente. Le helper
+`rank_atlas.hpp` est copié sans changer ses octets. Les deux headers du
+calendrier/HLD sont présents au même root pour que les autres raccords ne
+définissent pas les mêmes types depuis deux copies différentes.
+
+L'entrée doit être un vrai index immuable et un census complet exact accepté
+par le contrat FULL ; Atlas ne prouve pas la complétude. `Extraction` possède
+ses vecteurs mais emprunte l'index et les boules : identité, contenus et durée
+de vie doivent rester inchangés. `extract` rend par valeur seulement un objet
+achevé ; une exception ne publie rien. Le travail payé lors d'une exception
+n'est pas récupéré par cette API expérimentale, ni présenté comme zéro exact.
+
+## Géométrie et identités
+
+L'autorité terminale initiale est EXPLICITEMENT test-only :
+`tests/full_ball_batch_geometry.hpp` de SHA
+`194f1b2b62dba6b847858d81217574d8fdc47d9d71c7b72c8c2caa0085d3a438`, copie
+mécanique déjà qualifiée du scalaire géométrique. Ce n'est pas un nouveau
+backend produit. Aucune instance Builder, ancre temporelle ou DSU n'est lue
+par `extract`. Le tri par rang nécessaire à φ est un parcours de dépendances
+strictes, pas une reconstruction des composantes ni un calendrier de fusions.
+
+Par K, développement temporaire des clés complètes, tri exact unique stable
+par le premier ordinal du parcours Atlas, résolution une fois par unique non
+semé puis scatter vers `targets[rep_slot]`. Les semis sont exactement I∪U au
+seul K=p+u ; les semis initiaux et après échange restent distincts. La cible
+BallId et son admission sont contrôlées avant toute projection en natif.
+Les compteurs payés R/U/S/Q/H/T et MEB/intrusions correspondent au scalaire
+statique ; K1 contourne la MEB et garde R/U/S statiques à zéro comme lui.
+Les représentants K1 sont comptés séparément dans `stats.representatives`.
+
+Les points K1 ont IDs 0..n−1 (GeometryIndex), rang zéro. Une boule native
+sans représentants a son BlockId `n+base[B]+K-lo[B]` et sa date propre. Pour
+les autres blocs, φ suit EXCLUSIVEMENT la terminale de l'ordinal local zéro.
+Le graphe conserve les arêtes vers les autres φ à la date du consommateur.
+Les loops sont comptés puis omis ; les parallèles sont conservées, destinées
+au certificat MSF séparé. L'identité d'arête est l'ordinal original par K.
+
+Chaque bloc, y compris natif ou inerte, conserve une marque dont `id` est
+son BlockId, `representative=phi[cell]`, `admission=slots[B].rank`. La date
+d'admission ne doit jamais devenir la date antérieure de son natif.
+Les dates u32 du graphe sont les rangs rationnels de l'atlas, pas des niveaux
+bruts de sortie ni des flottants. Le niveau brut et le masque de contribution
+restent accessibles via la boule/cellule : aucune réaffectation de population.
+
+## Couture histoires / contributions / verticales
+
+Pour la reconstruction séparée : `orders[K-1].graph` a les types exacts de
+`filtered_calendar.hpp`. `historical_chains.hpp` est disponible au même root.
+Chaque contribution est `atlas.contributions[atlas.cell(B,K)]`, avec son
+niveau `atlas.raw_level(B)` et sa marque `*atlas.block_id(B,K)` ; le masque
+de contribution est en ordre PointId, pas l'ordre du masque représentant.
+Son segment est à rechercher à l'admission fermée, jamais à la racine finale.
+
+Une naissance supérieure B permet d'identifier son bloc inférieur par
+`atlas.block_id(B,K-1)` ; les consultations et la naturalité de TOUS les
+parents restent le travail du raccord vertical séparé. Les IDs internes ne
+sont pas les IDs de populations ou nœuds physiques exportés. Pour décoder
+un natif de boule, `decode` fait une recherche des préfixes en O(log C).
+
+## Qualification bornée
+
+La gate obtient de vrais census via génération/prefilter/census CPU. Elle
+compare toutes les terminales NON NORMALISÉES et le travail payé au vrai
+`Builder::prepare_static_order` via la seule ligne friend de la copie privée
+83f1 (aucun autre corps changé). K1 compare au vrai `visit_block`. Les φ,
+arêtes, naissances et marques sont ensuite confrontés à une construction
+attendue depuis ces terminales de référence. La garde structurelle du graphe
+ne remplace jamais cette comparaison directe.
+
+Corpus : n32/K10/s8,10,12 et permutations des entrées/census/listes I/U ;
+square8, ABEZW avec semis après échange, ABCZ, line3, terminal n2 et singleton.
+Six fautes d'état : mauvaise cible, mauvais scatter, mauvais choix d'ordinal
+pivot, arête retardée, marque antidatée, naissance ponctuelle omise. Retarder
+l'arête et antidater une marque jusqu'à son natif passent la forme mais
+doivent échouer au différentiel des dates. Le mutant pivot porte sur le
+contrat de déterminisme ordinal0, pas sur l'affirmation que tout autre
+arbre de pivots serait mathématiquement impossible.
+
+Cette gate n'est pas un nouveau juge Gamma ni un export FULL. Les juges
+bornés T2 et l'export histoire/contributions/verticales sont des coutures
+distinctes confiées aux autres agents. Pas de duplication d'oracle exhaustif.
+
+## Coût et reproduction
+
+Cette première preuve assume la rétention de tous `targets[R]`, `phi[A]`,
+graphes et marques. Le développement des demandes est fenêtré par K, mais
+ce n'est PAS un moteur à résidence massive fenêtrée. Stockage total
+O(C+A+R+n+K), temporaire O(R_K+C) plus quotient local. Aucun catalogue Gamma
+global, aucune copie K fois BallData. A et R peuvent être quadratiques en n.
+Les compteurs de capacité ne sont pas une mesure de pic RSS/VRAM.
+
+```bash
+python3 -B build/v7_atlas_graph_20260911/record.py --out o2_r1
+# ROOT uniquement, après lecture et signal, nouvelles destinations :
+python3 -B build/v7_atlas_graph_20260911/record.py --out san_root_r1 --san
+```
+
+Le recorder conserve les commandes, codes, flags stricts, stdout/stderr et
+pins source avant/après. Un compilateur maximum pour cet agent ; pas de
+nouveau lancement SAN autonome. Aucun packaging avant gel de l'API.

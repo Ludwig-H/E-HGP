@@ -1,0 +1,290 @@
+#include <cstdio>
+#include <string_view>
+#include "atlas_graph.hpp"
+#include "source/morsehgp3D_v7/src/cloud/families.hpp"
+#include "source/morsehgp3D_v7/src/pipeline/generate.hpp"
+
+namespace mhgp7::full_ball_detail {
+struct RankAtlasReference {
+  // Only source instrumentation is the existing one-line friend. The real
+  // prepare_static_order pays actual work and returns unnormalized BallIds.
+  static std::vector<std::vector<u32>> capture(const CloudIndex& ix, std::span<const BallData> balls,
+      unsigned requested, FullBallStats& work) {
+    Builder builder(ix, balls, requested, work, 1);
+    builder.validate_catalogue();
+    std::vector<std::vector<u32>> targets(builder.kmax);
+    for (unsigned k = 1; k <= builder.kmax; ++k) {
+      builder.current_k = k;
+      if (k >= 2) {
+        builder.prepare_static_order(); targets[k - 1] = builder.static_targets;
+      } else for (u32 b : builder.programs[k]) {
+        u16 contribution = 0; bool interior = false;
+        builder.visit_block(b, contribution, interior, [&](std::vector<i32> sites) {
+          require(sites.size() == 1, "gate.reference_K1_size");
+          targets[0].push_back(static_cast<u32>(sites[0]));
+        });
+      }
+    }
+    return targets;
+  }
+};
+}
+namespace gate {
+using namespace mhgp7;
+namespace ag = atlas_graph_private;
+namespace fc = filtered_calendar_private;
+struct Totals {
+  u64 checks = 0, fixtures = 0, balls = 0, cells = 0, representatives = 0;
+  u64 point_births = 0, native_births = 0, marks = 0, edges = 0, loops = 0, candidate_edges = 0;
+  u64 q3 = 0, q4 = 0, extras = 0, decoded = 0;
+  std::array<u64, 11> direct{}, R{}, U{}, S{}, Q{}, H{}, T{};
+  u64 meb_calls = 0, anchor_hits = 0, intruder_queries = 0, descending = 0, same_radius = 0;
+} total;
+void need(bool value, const char* why) {
+  ++total.checks;
+  if (!value) throw std::runtime_error(why);
+}
+void work_equal(const FullBallStats& actual, const FullBallStats& expected) {
+  for (auto member : {&FullBallStats::key_lookups, &FullBallStats::anchor_hits, &FullBallStats::intruder_queries,
+       &FullBallStats::intruder_nodes, &FullBallStats::intruder_power_tests, &FullBallStats::interior_ranges,
+       &FullBallStats::same_radius_steps, &FullBallStats::descending_steps, &FullBallStats::max_chain_steps})
+    need(actual.*member == expected.*member, "gate.paid_descent_work");
+  need(actual.resolve_work.calls == expected.resolve_work.calls &&
+       actual.resolve_work.power_tests == expected.resolve_work.power_tests &&
+       actual.resolve_work.materializations == expected.resolve_work.materializations &&
+       actual.resolve_work.supports_by_size == expected.resolve_work.supports_by_size, "gate.paid_MEB_work");
+  need(actual.static_requests == expected.static_requests && actual.static_unique == expected.static_unique &&
+       actual.static_seeded == expected.static_seeded && actual.static_post_seed_queries == expected.static_post_seed_queries &&
+       actual.static_post_seed_hits == expected.static_post_seed_hits &&
+       actual.static_post_seed_terminals == expected.static_post_seed_terminals, "gate.RUSQHT");
+}
+void compare(const ag::Extraction& out, const std::vector<std::vector<u32>>& reference, const FullBallStats& work) {
+  const auto& a = out.atlas;
+  need(out.orders.size() == a.kmax && reference.size() == a.kmax, "gate.order_count");
+  std::vector<u64> expected_phi(a.contributions.size(), ag::absent);
+  for (unsigned k = 1; k <= a.kmax; ++k) {
+    const auto& graph = out.orders[k - 1].graph;
+    need(out.orders[k - 1].k == k, "gate.order_K");
+    u64 at = 0;
+    out.occurrences(k, [&](const ag::Occurrence& occurrence) {
+      need(occurrence.ordinal == at && at < reference[k - 1].size() && occurrence.target == reference[k - 1][at],
+          "gate.direct_terminal");
+      const auto source = out.decode(occurrence.source_block);
+      need(!source.point && source.k == k && source.ball_or_point == occurrence.source_ball,
+          "gate.source_identity");
+      const auto target = out.decode(out.terminal_block(occurrence));
+      need(target.k == k && target.point == (k == 1) && target.ball_or_point == occurrence.target,
+          "gate.target_identity");
+      ++at;
+    });
+    need(at == reference[k - 1].size(), "gate.all_occurrences");
+    std::vector<fc::Birth<u32>> births;
+    std::vector<fc::Edge<u32>> edges;
+    std::vector<fc::Mark<u32>> marks;
+    if (k == 1) for (u32 p = 0; p < a.index->input_count; ++p) births.push_back({p, 0});
+    at = 0;
+    for (u32 b : a.program(k)) {
+      const u64 cell = a.cell(b, k), reps = a.masks(b, k).size(), block = *a.block_id(b, k);
+      const u32 rank = a.slots[b].rank;
+      const auto native = [&](u64 ordinal) {
+        const u32 t = reference[k - 1].at(ordinal);
+        if (k == 1) return static_cast<u64>(t);
+        need(a.block_id(t, k).has_value() && a.slots[t].rank < rank, "gate.reference_terminal_strict");
+        const u64 value = expected_phi[a.cell(t, k)];
+        need(value != ag::absent, "gate.reference_phi_predecessor");
+        return value;
+      };
+      if (!reps) {
+        expected_phi[cell] = block; births.push_back({block, rank});
+      } else expected_phi[cell] = native(at);
+      need(out.phi[cell] == expected_phi[cell], "gate.pivot_ordinal_zero");
+      marks.push_back({block, expected_phi[cell], rank});
+      for (u64 r = 1; r < reps; ++r) {
+        const u64 t = native(at + r);
+        if (t != expected_phi[cell]) edges.push_back({at + r, expected_phi[cell], t, rank});
+      }
+      at += reps;
+    }
+    need(births.size() == graph.births.size(), "gate.native_births");
+    for (size_t j = 0; j < births.size(); ++j)
+      need(births[j].id == graph.births[j].id && births[j].date == graph.births[j].date, "gate.native_identity_date");
+    need(edges.size() == graph.edges.size(), "gate.edge_count");
+    for (size_t j = 0; j < edges.size(); ++j)
+      need(edges[j].id == graph.edges[j].id && edges[j].a == graph.edges[j].a &&
+          edges[j].b == graph.edges[j].b && edges[j].date == graph.edges[j].date, "gate.edge_identity_date");
+    need(marks.size() == graph.marks.size(), "gate.mark_count");
+    for (size_t j = 0; j < marks.size(); ++j)
+      need(marks[j].id == graph.marks[j].id && marks[j].representative == graph.marks[j].representative &&
+          marks[j].admission == graph.marks[j].admission, "gate.mark_identity_admission");
+    // Structural graph guard, not another authority for target geometry.
+    static_cast<void>(fc::normalized(graph, std::less<u32>{}));
+  }
+  work_equal(out.work, work);
+}
+void mutate(ag::Extraction& out, std::string_view mode) {
+  bool changed = false;
+  if (mode == "--target") {
+    out.occurrences(2, [&](const ag::Occurrence& o) {
+      if (!changed) { out.targets[o.slot] = static_cast<u32>((o.target + 1ull) % out.atlas.balls.size()); changed = true; }
+    });
+  } else if (mode == "--slot") {
+    std::optional<ag::Occurrence> first;
+    out.occurrences(2, [&](const ag::Occurrence& o) {
+      if (!first) first = o;
+      else if (!changed && first->target != o.target) { std::swap(out.targets[first->slot], out.targets[o.slot]); changed = true; }
+    });
+  } else if (mode == "--pivot") {
+    for (unsigned k = 1; k <= out.atlas.kmax && !changed; ++k) out.occurrences(k, [&](const ag::Occurrence& o) {
+      if (changed || !o.local) return;
+      const u64 other = k == 1 ? o.target : out.phi[out.atlas.cell(o.target, k)];
+      auto& pivot = out.phi[out.atlas.cell(o.source_ball, k)];
+      if (other != pivot) { pivot = other; changed = true; }
+    });
+  } else if (mode == "--edge-date") {
+    for (auto& order : out.orders) if (!changed && !order.graph.edges.empty()) {
+      ++order.graph.edges.front().date; changed = true;
+      static_cast<void>(fc::normalized(order.graph, std::less<u32>{}));
+    }
+  } else if (mode == "--mark-date") {
+    for (auto& order : out.orders) for (auto& mark : order.graph.marks) if (!changed) {
+      const auto found = std::find_if(order.graph.births.begin(), order.graph.births.end(),
+          [&](const auto& birth) { return birth.id == mark.representative; });
+      need(found != order.graph.births.end(), "gate.mutation_native_exists");
+      if (found->date < mark.admission) { mark.admission = found->date; changed = true; }
+    }
+    for (const auto& order : out.orders) static_cast<void>(fc::normalized(order.graph, std::less<u32>{}));
+  } else if (mode == "--omit-birth") {
+    need(!out.orders.front().graph.births.empty(), "gate.point_birth_nonempty");
+    out.orders.front().graph.births.erase(out.orders.front().graph.births.begin()); changed = true;
+  }
+  need(changed, "gate.mutation_nonvacuous");
+}
+std::vector<InputPoint> points(std::initializer_list<P3> values) {
+  std::vector<InputPoint> result; PointId id = 1009;
+  for (P3 p : values) { result.push_back({id, p}); id += 37; }
+  return result;
+}
+void fixture(const char* name, std::vector<InputPoint> input, unsigned requested, int s,
+    bool permutation, std::string_view mode) {
+  std::fprintf(stderr, "fixture_start=%s n=%zu K=%u s=%d permuted=%d\n", name, input.size(), requested, s, permutation);
+  const auto index = build_cloud_index(input);
+  need(index.valid && !index.has_duplicate_positions(), "gate.index");
+  const auto smax = std::min<u64>(requested + 1, index.input_count);
+  GenerateOptions options; options.s = s; options.smax = smax; options.threads = 1;
+  GenerateStats generated; std::vector<BallCandidate> candidates;
+  generate_candidates(index, options, &candidates, &generated);
+  need(generated.cap_refus == kCapRefusNone && !generated.invariant_jneg, "gate.generation");
+  const u128 mass = expected_pair_mass(index);
+  for (size_t q = 0; q < 3; ++q)
+    need(generated.ledger_emitted_mass[q] + generated.ledger_killed_mass[q] == mass, "gate.pair_ledger");
+  rle_candidates(&candidates, 1);
+  need(candidates_capacity_ok(candidates.size()), "gate.candidate_representation");
+  ExpandStats census; std::vector<Survivor> survivors;
+  prefilter_balls(index, candidates, smax, 1, &survivors, &census);
+  std::vector<BallData> balls;
+  need(census_balls(index, candidates, survivors, smax, kBallShellMax, 1, &balls, &census) ==
+      PipelineStatus::kCompleteRegular, "gate.real_census");
+  if (permutation) {
+    std::reverse(balls.begin(), balls.end());
+    for (auto& b : balls) { std::reverse(b.interior_ids, b.interior_ids + b.n_interior); std::reverse(b.shell_ids, b.shell_ids + b.n_shell); }
+  }
+  FullBallStats reference_work;
+  const auto reference = full_ball_detail::RankAtlasReference::capture(index, balls, requested, reference_work);
+  auto out = ag::extract(index, balls, requested);
+  compare(out, reference, reference_work);
+  if (mode != "--selftest") {
+    mutate(out, mode);
+    try { compare(out, reference, reference_work); }
+    catch (const std::exception& error) {
+      const std::string_view required = mode == "--target" || mode == "--slot" ? "gate.direct_terminal" :
+          mode == "--pivot" ? "gate.pivot_ordinal_zero" : mode == "--edge-date" ? "gate.edge_identity_date" :
+          mode == "--mark-date" ? "gate.mark_identity_admission" : "gate.native_births";
+      need(error.what() == required, "gate.exact_mutation_cause");
+      std::printf("{\"status\":\"causal_rejection\",\"fault\":\"%.*s\",\"cause\":\"%s\",\"checks\":%llu}\n",
+          static_cast<int>(mode.size()), mode.data(), error.what(), static_cast<unsigned long long>(total.checks));
+      return;
+    }
+    throw std::runtime_error("gate.mutation_survived");
+  }
+  ++total.fixtures; total.balls += balls.size(); total.cells += out.phi.size();
+  for (const auto& b : balls) { total.q3 += b.arity == 3; total.q4 += b.arity == 4; total.extras += b.n_shell > b.arity; }
+  for (unsigned k = 1; k <= out.atlas.kmax; ++k) {
+    out.occurrences(k, [&](const ag::Occurrence&) { ++total.direct[k]; });
+    total.R[k] += out.work.static_requests[k]; total.U[k] += out.work.static_unique[k]; total.S[k] += out.work.static_seeded[k];
+    total.Q[k] += out.work.static_post_seed_queries[k]; total.H[k] += out.work.static_post_seed_hits[k];
+    total.T[k] += out.work.static_post_seed_terminals[k];
+    for (u32 b : out.atlas.program(k)) {
+      const auto d = out.decode(*out.atlas.block_id(b, k));
+      need(!d.point && d.ball_or_point == b && d.k == k, "gate.decode_block_roundtrip"); ++total.decoded;
+    }
+  }
+  total.representatives += out.stats.representatives; total.point_births += out.stats.point_births;
+  total.native_births += out.stats.native_ball_births; total.marks += out.stats.marks;
+  total.edges += out.stats.retained_edges; total.loops += out.stats.loops_removed;
+  total.candidate_edges += out.stats.candidate_reduced_edges;
+  total.meb_calls += out.work.resolve_work.calls; total.anchor_hits += out.work.anchor_hits;
+  total.intruder_queries += out.work.intruder_queries; total.descending += out.work.descending_steps;
+  total.same_radius += out.work.same_radius_steps;
+  std::fprintf(stderr, "fixture_complete=%s C=%zu A=%zu R=%zu native=%llu edges=%llu loops=%llu\n", name, balls.size(),
+      out.phi.size(), out.targets.size(), static_cast<unsigned long long>(out.stats.native_ball_births),
+      static_cast<unsigned long long>(out.stats.retained_edges), static_cast<unsigned long long>(out.stats.loops_removed));
+}
+}
+int main(int argc, char** argv) {
+  if (argc != 2) return 2;
+  const std::string_view mode(argv[1]);
+  if (mode != "--selftest" && mode != "--target" && mode != "--slot" && mode != "--pivot" &&
+      mode != "--edge-date" && mode != "--mark-date" && mode != "--omit-birth") return 2;
+  try {
+    using namespace gate;
+    auto uniform = make_family_input(CloudFamily::kUniform, 32, 65536, 3);
+    if (mode != "--selftest") { fixture("causal_uniform32", uniform, 10, 8, false, mode); return 4; }
+    for (int s : {8, 10, 12}) {
+      fixture("uniform32", uniform, 10, s, false, mode);
+      auto reverse = uniform; std::reverse(reverse.begin(), reverse.end());
+      fixture("uniform32_permuted", reverse, 10, s, true, mode);
+    }
+    fixture("extra_square8", points({{0,0,0},{10,0,0},{0,10,0},{10,10,0},
+        {4,4,0},{5,4,0},{4,5,0},{5,5,0}}), 8, 8, true, mode);
+    fixture("ABEZW", points({{0,3,0},{8,3,0},{4,2,0},{6,0,0},{4,23,0}}), 5, 8, false, mode);
+    fixture("ABCZ", points({{1,8,0},{5,10,0},{9,8,0},{5,0,0}}), 4, 8, true, mode);
+    fixture("line3", points({{0,0,0},{2,0,0},{4,0,0}}), 3, 8, true, mode);
+    fixture("terminal_pair", points({{0,0,0},{2,0,0}}), 2, 8, false, mode);
+    fixture("terminal_singleton", points({{0,0,0}}), 1, 8, false, mode);
+    const u64 H = std::accumulate(total.H.begin(), total.H.end(), u64{0});
+    const u64 S = std::accumulate(total.S.begin(), total.S.end(), u64{0});
+    need(total.fixtures == 12 && total.q3 > 0 && total.q4 > 0 && total.extras > 0 &&
+        total.direct[9] > 0 && total.direct[10] > 0 && H > 0 && S > 0 && total.descending > 0 && total.loops > 0 &&
+        total.native_births > 0 && total.edges > 0 && total.marks == total.cells && total.decoded == total.cells,
+        "gate.nonvacuity");
+    need(total.meb_calls == total.anchor_hits + total.intruder_queries &&
+        total.candidate_edges == total.edges + total.loops &&
+        total.candidate_edges == total.representatives - (total.cells - total.native_births), "gate.work_identities");
+    std::printf("{\"status\":\"passed\",\"scope\":\"bounded_real_census_atlas_terminal_pivot_graph_extraction\","
+        "\"terminal_authority\":\"test_only_Geometry_differential_actual_Builder_static\",\"device_executed\":false,"
+        "\"public_status\":\"not_claimed\",\"checks\":%llu,\"fixtures\":%llu,\"balls\":%llu,\"cells\":%llu,"
+        "\"representatives\":%llu,\"point_births\":%llu,\"native_ball_births\":%llu,\"marks\":%llu,"
+        "\"candidate_reduced_edges\":%llu,\"loops_removed\":%llu,\"retained_edges\":%llu,"
+        "\"q3\":%llu,\"q4\":%llu,\"extras\":%llu,\"meb_calls\":%llu,\"anchor_hits\":%llu,"
+        "\"intruder_queries\":%llu,\"descending_steps\":%llu,\"same_radius_steps\":%llu,\"per_k\":[",
+        static_cast<unsigned long long>(total.checks), static_cast<unsigned long long>(total.fixtures),
+        static_cast<unsigned long long>(total.balls), static_cast<unsigned long long>(total.cells),
+        static_cast<unsigned long long>(total.representatives), static_cast<unsigned long long>(total.point_births),
+        static_cast<unsigned long long>(total.native_births), static_cast<unsigned long long>(total.marks),
+        static_cast<unsigned long long>(total.candidate_edges), static_cast<unsigned long long>(total.loops),
+        static_cast<unsigned long long>(total.edges), static_cast<unsigned long long>(total.q3),
+        static_cast<unsigned long long>(total.q4), static_cast<unsigned long long>(total.extras),
+        static_cast<unsigned long long>(total.meb_calls), static_cast<unsigned long long>(total.anchor_hits),
+        static_cast<unsigned long long>(total.intruder_queries), static_cast<unsigned long long>(total.descending),
+        static_cast<unsigned long long>(total.same_radius));
+    for (unsigned k = 1; k <= 10; ++k) std::printf("%s{\"K\":%u,\"direct\":%llu,\"R\":%llu,\"U\":%llu,"
+        "\"S\":%llu,\"Q\":%llu,\"H\":%llu,\"T\":%llu}", k == 1 ? "" : ",", k,
+        static_cast<unsigned long long>(total.direct[k]), static_cast<unsigned long long>(total.R[k]),
+        static_cast<unsigned long long>(total.U[k]), static_cast<unsigned long long>(total.S[k]),
+        static_cast<unsigned long long>(total.Q[k]), static_cast<unsigned long long>(total.H[k]),
+        static_cast<unsigned long long>(total.T[k]));
+    std::printf("]}\n"); return 0;
+  } catch (const mhgp7::full_ball_detail::Failure& error) { std::fprintf(stderr, "reference_failure=%s\n", error.reason); }
+    catch (const std::exception& error) { std::fprintf(stderr, "error=%s\n", error.what()); }
+  return 1;
+}

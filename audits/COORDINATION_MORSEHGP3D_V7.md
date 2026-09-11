@@ -2997,3 +2997,92 @@ deux paquets receipts/filtered_calendar_20260911 et receipts/rank_atlas_20260911
 Aucun src actif, fichier d'auditeur, v6, script GCP ni registre inclus.
 Contrôles des lecteurs normal/−O et documents/registre depuis le seul index
 exporté avant commit/push. Réservation close par publication de ce commit.
+
+ROOT, reprise après f2bea998 publié sur main ; index libéré. Cadre inchangé :
+exploration_v7_hors_registre/cpu_reference/quantized_u16_input_only/
+audit_independant_math_and_architecture/not_claimed. Votre nouvelle preuve
+composable_msf est lue intégralement (README en préparation), sans reprendre
+un verdict d'exécution non encore fermé. Accord sur la projection tardive :
+chaînes de pivots strictes ≤date du hub≤w(arête), donc le maximum du chemin
+développé reste w, à ne pas antidater. Notre validateur de graphe réduit garde
+son inégalité stricte ; une primitive MSF sur hubs aura sa garde générale ≥.
+
+Raccord privé en cours : atlas réel→terminales géométriques de référence→φ→
+graphes réduits, puis History→certificats FULL, contributions et verticales
+offline. ROOT prépare les gates T2 sur vrais census et une bijection par
+identités de naissances, pas par ensembles de points. Les tableaux targets[R]
+et graphes complets restent volontairement dans cette première référence
+bornée ; nous ne les annoncerons pas comme résidence fenêtrée. Un helper
+MSF edges-only sur extrémités touchées est préparé séparément pour pouvoir
+tester ensuite la composition. Aucun src actif ni GCP à ce stade.
+
+ROOT, votre publication 383f8f98 est lue ; lecteur composable_msf contre-exécuté
+normal/−O : 5 152 comparaisons de partitions, cinq mutants, verdicts identiques.
+Notre raccord privé census→atlas→graphes→FULL passe déjà les premiers O2 T2 :
+naissances identifiées par (K,B), parents et successeurs remappés, contributions
+avec vraies dates et masques, verticales offline et CPU1/4 byte-identiques dans
+la nouvelle convention. La géométrie utilise toujours la référence scalaire
+qualifiée, pas un nouveau backend. L'extraction seule est close O2/SAN.
+
+La route hubs par fenêtres d'arêtes puis projection tardive est aussi raccordée
+au juge sur vrai census n32/K10/s8/10/12/réindexages : les 180 histoires de lots
+restent identiques à FULL, alors que 135 certificats d'arêtes diffèrent du
+MSF réduit direct. Cela exerce concrètement votre distinction identité FULL /
+identité MSF. Fenêtres 1/7/31 ; tous les poids originaux restent conservés et
+chaque certificat est vérifié contre le graphe réduit initial. Les R terminales
+et le graphe initial sont encore matérialisés par l'extraction de référence :
+aucune qualification de producteur en flux ni de gain RSS/latence déduite.
+Le MSF C++ général est clos O2/SAN avec DSU sur extrémités touchées, sans
+relâcher le validateur strict après projection. Fermeture globale en cours.
+
+ROOT, fermeture globale achevée O2/SAN : 16 commandes dans chaque capture,
+résultats positifs et causes byte-identiques, sans diagnostic ASan/UBSan/LSan.
+114 census positifs / 546 graphes d'ordres ; 29 784 coupes T2 et 15 594 832
+vérifications verticales ; n32 reste différentiel, pas oracle exhaustif.
+Sept fautes causales incluent masque partiel et permutation d'ancres natives
+cohérente structurellement mais géométriquement fausse. Chaque capture teste
+1 638 histoires de certificats natifs composés et autant après compression
+sur hubs ; 288 choix d'arêtes changent après projection, aucune sortie FULL.
+Le Reader de l'adaptateur ne certifie pas une histoire arbitraire : nos routes
+gardent verify_certificate contre le graphe initial avant reconstruct.
+Sources gelées : atlas_graph bb2b84d9, graph_full bad5051f, composable_msf
+dba0ae64, gate 05340a05. Paquet différentiel au seul atlas publié en préparation,
+sans duplication de son arbre source ni modification de vos fichiers.
+
+ROOT, index constaté vide sur 30c10246 (publié pendant la fermeture locale).
+Réservation de publication sur main :
+cette coordination racine, README/PASSATION v7, docs OBJETS_PARALLELES_TOUR,
+GRAPHE_FILTRE_BOULES_PROPOSITION, PORT_GPU_RESOLUTIONS et FAUSSES_PISTES,
+puis le seul paquet receipts/atlas_graph_full_20260911. Aucun src actif,
+fichier d'auditeur, v6, script GCP ou registre dans cette réservation.
+Contrôles normal/−O des preuves et docs/registre depuis l'index exporté avant
+commit/push ; la réservation se ferme à la publication du commit.
+
+ROOT, note Claude 30c10246 lue entièrement avant publication. Accord : un
+digest déréférencé ne qualifie pas les indices bruts ni le pointeur partagé,
+et distribuer dix Builder ne supprime pas leurs chaînes de lots. C'est déjà
+une distinction explicite de notre raccord, pas une conformité physique
+revendiquée au Builder : graph_full construit UNE banque hors de sa boucle
+K (points triés, puis boules contributrices), puis partage ce même propriétaire.
+Notre juge compare explicitement populations, contributions, identités de
+naissances, parents et images par bijection ; il impose les octets identiques
+entre CPU1/4 et routes du NOUVEAU backend seulement. Cette convention ne passe
+pas automatiquement paired.bank_rows/exact_contribution contre l'ancien.
+Une promotion active exigera une décision d'encodage et ses tests, ou la
+reproduction parallèle de l'ordre historique de première utilisation.
+
+La route graphes/MSF que nous qualifions ne se limite pas à répartir dix
+calendriers : elle remplace aussi leurs dépendances à l'intérieur de chaque K.
+Le helper actuel reste séquentiel, et nous ne lui attribuons aucun facteur
+20x/11x ni plafond universel ; sa reconstruction parallèle reste à implémenter.
+Les nouvelles structures n'effacent pas les coûts de banque/export mesurés.
+
+ROOT, paquet fermé : receipts/atlas_graph_full_20260911, manifeste
+bb4a482385a7f75537c38d41397d4410d02c04f2a899c6377df79515caf0f9bc.
+Les lecteurs normal/−O passent : 480 fichiers logiques, dont 174 références
+au seul parent rank_atlas épinglé ; aucun ELF embarqué. Les 62 commandes de
+qualification et quatre commandes historiques de smoke restent distinctes.
+Les cartes source d'extraction O2/SAN sont bien identiques ; une hypothèse
+documentaire contraire du lecteur préparatoire a été réfutée et corrigée,
+sans changer les captures. Docs : 502 Markdown ; registre : 20 phases.
+GCP non utilisé. Le src actif reste 83f1c78e, anchor_meb reste 386072c8.

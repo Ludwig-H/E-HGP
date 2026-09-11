@@ -1,0 +1,301 @@
+#pragma once
+
+// Private adapter only. The extraction and the histories must be certified
+// against the SAME immutable exact census. This is not new geometry, nor a
+// verification that arbitrary histories are the histories of the input graph.
+#include "../v7_atlas_graph_20260911/atlas_graph.hpp"
+#include "../v7_atlas_graph_20260911/historical_chains.hpp"
+#include <functional>
+
+namespace mhgp7::graph_full_private {
+namespace fc = filtered_calendar_private;
+using Id = fc::Id;
+using Rank = u32;
+using History = fc::History<Rank>;
+using Chains = fc::HistoricalChains<Rank, std::less<Rank>>;
+
+inline void require(bool value, const char* why) {
+  if (!value) throw std::invalid_argument(why);
+}
+
+struct Work {
+  u64 contribution_queries = 0, lower_queries = 0, naturality_queries = 0;
+  u64 light_steps = 0, binary_steps = 0;
+};
+struct Export {
+  FullBallTowerResult tower;
+  // All vectors are order K-1. Mappings refer to the supplied History IDs.
+  std::vector<std::vector<Id>> history_to_full, descendant_native;
+  Work work;
+};
+
+namespace detail {
+struct Fragment {
+  Rank rank;
+  Id target;
+  bool node, contribution;
+  FullCoverageRef ref;
+};
+
+inline const fc::VertexAnchor<Rank>& birth(const History& history, Id native) {
+  return history.births[fc::index_of(history.births, native)];
+}
+
+inline void count_work(Work& work, std::span<const fc::HistoricalAnswer> answers) {
+  for (const auto& answer : answers) {
+    full_ball_detail::add(work.light_steps, answer.work.light_steps);
+    full_ball_detail::add(work.binary_steps, answer.work.binary_steps);
+  }
+}
+
+// Validate the explicit native-anchor table independently of least_birth.
+// It is not enough for a forged least_birth to name some final-root leaf.
+inline std::vector<Id> native_descendants(const History& history) {
+  std::vector<Id> native(history.nodes.size(), fc::absent);
+  Id previous = 0;
+  bool first = true;
+  for (const auto& anchor : history.births) {
+    require(anchor.id != fc::absent && (first || previous < anchor.id), "graph_full.birth_ids");
+    previous = anchor.id; first = false;
+    require(anchor.segment < history.nodes.size(), "graph_full.birth_segment");
+    const auto& node = history.nodes[anchor.segment];
+    require(node.parent_count == 0 && native[anchor.segment] == fc::absent &&
+        anchor.admission == node.date, "graph_full.birth_anchor");
+    native[anchor.segment] = anchor.id;
+  }
+  for (Id i = 0; i < history.nodes.size(); ++i) {
+    const auto& node = history.nodes[i];
+    if (node.parent_count) {
+      Id chosen = fc::absent;
+      for (Id j = 0; j < node.parent_count; ++j) {
+        const auto parent = history.parents[node.first + j];
+        require(parent < i && native[parent] != fc::absent, "graph_full.descendant_parent");
+        chosen = std::min(chosen, native[parent]);
+      }
+      native[i] = chosen;
+    }
+    require(native[i] != fc::absent && node.least_birth == native[i], "graph_full.descendant_leaf");
+  }
+  return native;
+}
+}  // namespace detail
+
+// Exporting returns a whole tower by value or throws; no partial order is
+// published. workers controls only independent historical HLD queries.
+inline Export build(const atlas_graph_private::Extraction& extraction,
+                    std::span<const History> histories, std::size_t workers = 1) {
+  const auto& atlas = extraction.atlas;
+  require(workers > 0, "graph_full.workers");
+  atlas.validate_shape();
+  require(extraction.orders.size() == atlas.kmax && histories.size() == atlas.kmax &&
+      extraction.phi.size() == atlas.contributions.size(), "graph_full.order_shape");
+  const auto& index = *atlas.index;
+  const Id n = index.upos.size();
+  require(n == index.input_count && n > 0, "graph_full.point_domain");
+  // A stable shared bank: point rows by PointId, then contributing BallIds.
+  // It intentionally need not reproduce the Builder's first-use row numbers.
+  std::vector<std::pair<PointId, Id>> point_order;
+  point_order.reserve(n);
+  for (Id i = 0; i < n; ++i) point_order.emplace_back(index.point_id(static_cast<i32>(i)), i);
+  std::sort(point_order.begin(), point_order.end());
+  std::vector<PointId> domain;
+  std::vector<FullCoveragePopulation> populations;
+  std::vector<Id> point_population(n), ball_population(atlas.balls.size(), fc::absent);
+  domain.reserve(n); populations.reserve(n);
+  for (const auto& [point, geometry] : point_order) {
+    require(domain.empty() || domain.back() < point, "graph_full.point_identity");
+    point_population[geometry] = populations.size();
+    domain.push_back(point); populations.push_back({{}, {point}});
+  }
+  for (u32 b = 0; b < atlas.balls.size(); ++b) {
+    bool used = false;
+    for (unsigned k = atlas.slots[b].lo; k <= atlas.slots[b].hi; ++k) {
+      const auto ref = atlas.contributions[atlas.cell(b, k)];
+      used = used || ref.shell != 0 || ref.interior;
+    }
+    if (!used) continue;
+    FullCoveragePopulation population;
+    for (i32 site : atlas.balls[b].interior()) population.interior.push_back(index.point_id(site));
+    for (i32 site : atlas.balls[b].shell()) population.shell.push_back(index.point_id(site));
+    std::sort(population.interior.begin(), population.interior.end());
+    std::sort(population.shell.begin(), population.shell.end());
+    ball_population[b] = populations.size(); populations.push_back(std::move(population));
+  }
+  const auto bank = build_full_coverage_populations(domain, populations);
+  require(bank.status == FullCertificateStatus::kOk, "graph_full.population_bank");
+  std::vector<FullCoveragePopulation>().swap(populations);
+
+  Export out;
+  out.history_to_full.resize(atlas.kmax); out.descendant_native.resize(atlas.kmax);
+  out.tower.orders.reserve(atlas.kmax);
+  const auto raw_level = [&](Rank rank) {
+    require(rank <= atlas.level_balls.size(), "graph_full.rank_domain");
+    return rank == 0 ? ExactLevel{{0, 0, 0}, 1} : atlas.raw_level(atlas.level_balls[rank - 1]);
+  };
+  for (unsigned k = 1; k <= atlas.kmax; ++k) {
+    const auto& history = histories[k - 1];
+    require(extraction.orders[k - 1].k == k && !history.nodes.empty() && history.roots.size() == 1,
+            "graph_full.complete_order");
+    const Chains chains(history, std::less<Rank>{});  // validates parent/successor structure
+    auto& descendants = out.descendant_native[k - 1];
+    descendants = detail::native_descendants(history);
+    const auto& graph_births = extraction.orders[k - 1].graph.births;
+    require(graph_births.size() == history.births.size(), "graph_full.birth_domain");
+    for (const auto& vertex : graph_births)
+      require(detail::birth(history, vertex.id).admission == vertex.date, "graph_full.birth_date");
+    for (const auto& anchor : history.births) {
+      if (k == 1) {
+        require(anchor.id < n && anchor.admission == 0, "graph_full.k1_native");
+      } else {
+        const auto cell = extraction.decode(anchor.id);
+        require(!cell.point && cell.k == k && atlas.masks(cell.ball_or_point, k).empty() &&
+            anchor.admission == atlas.slots[cell.ball_or_point].rank &&
+            extraction.phi[anchor.id - n] == anchor.id, "graph_full.native_birth");
+      }
+    }
+    if (k == 1) require(history.births.size() == n, "graph_full.k1_birth_count");
+
+    // Renumber only for the journal's K1 PointId convention; all parent
+    // relationships and native identities are transported explicitly.
+    auto& mapping = out.history_to_full[k - 1];
+    mapping.assign(history.nodes.size(), fc::absent);
+    std::vector<Id> order(history.nodes.size());
+    std::iota(order.begin(), order.end(), Id{0});
+    std::sort(order.begin(), order.end(), [&](Id a, Id b) {
+      if (history.nodes[a].date != history.nodes[b].date)
+        return history.nodes[a].date < history.nodes[b].date;
+      if (k == 1 && history.nodes[a].date == 0)
+        return point_population[descendants[a]] < point_population[descendants[b]];
+      return a < b;
+    });
+    for (Id i = 0; i < order.size(); ++i) mapping[order[i]] = i;
+
+    std::vector<detail::Fragment> fragments;
+    fragments.reserve(history.nodes.size());
+    for (Id i = 0; i < history.nodes.size(); ++i)
+      fragments.push_back({history.nodes[i].date, i, true, false, {}});
+    if (k == 1)
+      for (const auto& anchor : history.births)
+        fragments.push_back({0, anchor.segment, false, true, {point_population[anchor.id], 1, false}});
+
+    std::vector<fc::HistoricalRequest<Rank>> requests;
+    std::vector<u32> contribution_balls;
+    for (u32 b : atlas.program(k)) {
+      const auto c = atlas.cell(b, k);
+      const auto& native = detail::birth(history, extraction.phi[c]);
+      require(native.admission <= atlas.slots[b].rank, "graph_full.block_admission");
+      const auto ref = atlas.contributions[c];
+      if (ref.shell == 0 && !ref.interior) continue;
+      require(ball_population[b] != fc::absent, "graph_full.population_reference");
+      requests.push_back({native.segment, atlas.slots[b].rank, atlas.slots[b].rank, true});
+      contribution_balls.push_back(b);
+    }
+    const auto contribution_answers = chains.batch(requests, workers);
+    full_ball_detail::add(out.work.contribution_queries, requests.size());
+    detail::count_work(out.work, contribution_answers);
+    for (size_t i = 0; i < contribution_answers.size(); ++i) {
+      const u32 b = contribution_balls[i];
+      const auto ref = atlas.contributions[atlas.cell(b, k)];
+      require(contribution_answers[i].segment != fc::absent, "graph_full.contribution_not_admitted");
+      fragments.push_back({atlas.slots[b].rank, contribution_answers[i].segment, false, true,
+                           {ball_population[b], ref.shell, ref.interior}});
+    }
+
+    // Independent node-local choice of a descendant birth. For that birth B,
+    // use the lower native representative of the SAME B, never a final root.
+    std::vector<Id> lower_images(history.nodes.size(), fc::absent);
+    if (k > 1) {
+      const auto& lower = histories[k - 2];
+      const Chains lower_chains(lower, std::less<Rank>{});
+      requests.clear();
+      requests.reserve(history.nodes.size());
+      for (Id i = 0; i < history.nodes.size(); ++i) {
+        const Id native_id = descendants[i];
+        const auto birth_cell = extraction.decode(native_id);
+        require(!birth_cell.point && birth_cell.k == k, "graph_full.lower_birth_identity");
+        const auto lower_block = atlas.block_id(birth_cell.ball_or_point, k - 1);
+        require(lower_block.has_value(), "graph_full.lower_same_ball_absent");
+        const Id lower_native = extraction.phi[*lower_block - n];
+        const auto& anchor = detail::birth(lower, lower_native);
+        const Rank admission = atlas.slots[birth_cell.ball_or_point].rank;
+        require(admission == detail::birth(history, native_id).admission &&
+            admission <= history.nodes[i].date, "graph_full.lower_birth_admission");
+        requests.push_back({anchor.segment, admission, history.nodes[i].date, true});
+      }
+      const auto answers = lower_chains.batch(requests, workers);
+      full_ball_detail::add(out.work.lower_queries, requests.size());
+      detail::count_work(out.work, answers);
+      for (size_t i = 0; i < answers.size(); ++i) {
+        require(answers[i].segment != fc::absent, "graph_full.lower_not_admitted");
+        lower_images[i] = answers[i].segment;
+      }
+      requests.clear();
+      std::vector<Id> consumers;
+      consumers.reserve(history.parents.size()); requests.reserve(history.parents.size());
+      for (Id i = 0; i < history.nodes.size(); ++i) {
+        const auto& node = history.nodes[i];
+        for (Id j = 0; j < node.parent_count; ++j) {
+          const Id parent = history.parents[node.first + j];
+          requests.push_back({lower_images[parent], history.nodes[parent].date, node.date, true});
+          consumers.push_back(i);
+        }
+      }
+      const auto naturality = lower_chains.batch(requests, workers);
+      full_ball_detail::add(out.work.naturality_queries, requests.size());
+      detail::count_work(out.work, naturality);
+      for (size_t i = 0; i < naturality.size(); ++i)
+        require(naturality[i].segment == lower_images[consumers[i]], "graph_full.vertical_naturality");
+    }
+
+    std::stable_sort(fragments.begin(), fragments.end(), [&](const auto& a, const auto& b) {
+      return a.rank < b.rank || (a.rank == b.rank && mapping[a.target] < mapping[b.target]);
+    });
+    full_ball_detail::Draft draft;
+    for (size_t at = 0; at < fragments.size();) {
+      const Rank rank = fragments[at].rank;
+      FullCoverageBatch batch{raw_level(rank), {}};
+      while (at < fragments.size() && fragments[at].rank == rank) {
+        const Id target = fragments[at].target;
+        FullCoverageAction action;
+        unsigned creation = 0;
+        do {
+          const auto& fragment = fragments[at++];
+          creation += fragment.node;
+          if (fragment.contribution) action.contributions.push_back(fragment.ref);
+        } while (at < fragments.size() && fragments[at].rank == rank && fragments[at].target == target);
+        require(creation <= 1, "graph_full.duplicate_creation");
+        const auto& node = history.nodes[target];
+        if (creation) {
+          require(node.date == rank, "graph_full.creation_date");
+          for (Id j = 0; j < node.parent_count; ++j) action.parents.push_back(mapping[history.parents[node.first + j]]);
+          std::sort(action.parents.begin(), action.parents.end());
+        } else {
+          require(node.date < rank && !action.contributions.empty(), "graph_full.continuation_date");
+          action.parents.push_back(mapping[target]);
+        }
+        batch.actions.push_back(std::move(action));
+      }
+      draft.batches.push_back(std::move(batch));
+    }
+    draft.lower_nodes.resize(history.nodes.size(), fc::absent);
+    if (k > 1)
+      for (Id i = 0; i < history.nodes.size(); ++i)
+        draft.lower_nodes[mapping[i]] = out.history_to_full[k - 2][lower_images[i]];
+    auto encoded = build_full_coverage_certificate(k, bank.value, draft.batches);
+    require(encoded.status == FullCertificateStatus::kOk, "graph_full.structural_encoding");
+    require(encoded.value.nodes().size() == history.nodes.size(), "graph_full.node_encoding_count");
+    for (Id i = 0; i < history.nodes.size(); ++i) {
+      const auto& node = encoded.value.nodes()[mapping[i]];
+      require(same_exact_level(node.level, raw_level(history.nodes[i].date)) &&
+          node.parent_count == history.nodes[i].parent_count, "graph_full.node_encoding");
+      if (node.parent_count) full_ball_detail::add(out.tower.stats.merges);
+      else full_ball_detail::add(out.tower.stats.births);
+    }
+    full_ball_detail::add(out.tower.stats.contributions, encoded.value.contributions().size());
+    out.tower.orders.push_back({std::move(encoded.value), std::move(draft.lower_nodes)});
+  }
+  out.tower.status = FullBallStatus::kCompleteRelative;
+  out.tower.reason = "graph_full_relative_to_supplied_atlas_and_histories";
+  return out;
+}
+}  // namespace mhgp7::graph_full_private

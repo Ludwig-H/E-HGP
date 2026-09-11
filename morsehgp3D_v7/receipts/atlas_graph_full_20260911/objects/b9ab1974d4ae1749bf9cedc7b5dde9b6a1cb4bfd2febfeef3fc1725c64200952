@@ -1,0 +1,64 @@
+# Adaptateur privé graphe filtré vers journal FULL
+
+`graph_full.hpp` consomme l'`Extraction` du prototype voisin
+`v7_atlas_graph_20260911` et un `span` des histoires filtrées de rangs u32,
+indexées K−1. Il réutilise son unique arbre de sources et les helpers
+calendrier/HLD figés. Aucune copie ni modification du moteur actif.
+
+API : `mhgp7::graph_full_private::build(extraction, histories, workers=1)`.
+Le résultat `Export` porte `tower` (`FullBallTowerResult`),
+`history_to_full[K−1]`, `descendant_native[K−1]` et les compteurs HLD propres
+à l'adaptation. Tout est retourné par valeur ou une exception est levée ;
+aucun ordre partiel n'est publié. Les sources d'entrée sont empruntées,
+immuables et doivent rester vivantes pendant l'appel.
+
+Prémisse : atlas et histoires reconstruits/certifiés à partir du même census
+exact admis. Les vérifications ici sont structurelles et de transport ; elles
+ne démontrent pas qu'une histoire arbitrairement forgée décrit ce graphe,
+ni la validité ou la complétude géométrique de l'extraction.
+
+## Conservation
+
+- Les composantes sont identifiées par leurs naissances natives, jamais par
+  l'égalité des ensembles de points de leur couverture.
+- Le masque de contribution est déjà ordonné par PointId dans l'atlas. Une
+  banque commune contient les singletons et chaque population de boule utile
+  une seule fois, dans l'ordre BallId, pas dans l'ordre de premier usage du
+  Builder. Les références numériques de banque peuvent donc différer.
+- Chaque contribution est rattachée au segment après fermeture de sa vraie
+  date grâce à une requête HLD depuis le natif φ du bloc. Une continuation
+  avec croissance reste un événement daté sans créer de nœud topologique.
+- Chaque nœud choisit une feuille descendante de son propre sous-arbre. Pour
+  la boule B de cette naissance, l'ancre inférieure est le natif φ du bloc
+  de la même boule à K−1. La requête est fermée à la date du nœud supérieur ;
+  l'admission reste celle de B. Il ne faut pas choisir une feuille de la
+  racine finale à la place de ce descendant local.
+- Toutes les images de parents sont indépendamment normalisées à la coupe
+  fermée de la multifusion et doivent égaler l'image du nouveau nœud.
+- `history_to_full` transporte les IDs et impose seulement la convention
+  PointId des feuilles K1 du validateur existant. Les dates sont ramenées à
+  un représentant exact du rang : comparer leurs valeurs rationnelles, pas
+  leurs octets. Les autres numéros de nœuds peuvent différer du Builder.
+
+L'encodeur FULL existant valide ensuite les lots atomiques et les masques.
+Le champ `tower.stats` ne porte que les trois comptes structurels calculés
+ici : naissances, fusions et contributions. Ses autres champs restent nuls,
+ce ne sont pas les comptes de travail de l'extraction/Builder. `Export.work`
+compte séparément les consultations de transport ; aucun coût GPU caché.
+
+## Portée et coût
+
+La construction du journal reste séquentielle. Les requêtes contributions,
+verticales et naturalité sont des lots CPU indépendants, sans parcours
+d'ancêtres par contribution. Le tri porte sur les nœuds et contributions ;
+la mémoire temporaire est linéaire en atlas/histoires/sorties et requêtes,
+hors coût de leur producteur. Les copies `Draft`/banque privilégient ici le
+raccord vérifiable, pas une architecture de résidence GPU finale. Aucun
+plafond de nuage, de temps ou de descente n'est ajouté.
+
+La smoke O2 `smoke_o2_r1.json` passe : singleton et paire à PointIds inversés,
+CPU 1/4, quatre tours et trente contrôles ; refus CLI unknown/missing = 2.
+Son retour d'outil combiné, les pins et le fichier de dépendances sont
+conservés. Cette smoke n'a pas gelé une nouvelle copie complète des sources.
+La gate réelle et T2 est préparée par ROOT séparément : aucun de ses résultats
+n'est anticipé ni hérité. Aucun gain de vitesse revendiqué. GCP non utilisé.

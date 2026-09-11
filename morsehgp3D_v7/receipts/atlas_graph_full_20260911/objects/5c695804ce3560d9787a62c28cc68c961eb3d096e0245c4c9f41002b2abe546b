@@ -1,0 +1,73 @@
+#include "graph_full.hpp"
+#include <iostream>
+#include <string>
+
+using namespace mhgp7;
+namespace gf = graph_full_private;
+namespace ag = atlas_graph_private;
+namespace fc = filtered_calendar_private;
+
+static void need(bool value, const char* reason) {
+  if (!value) throw std::runtime_error(reason);
+}
+
+int main(int argc, char** argv) {
+  if (argc != 2 || std::string(argv[1]) != "--selftest") return 2;
+  try {
+    u64 checks = 0, towers = 0;
+    const auto run = [&](std::vector<InputPoint> points, std::vector<BallData> balls) {
+      const auto index = build_cloud_index(points);
+      need(index.valid, "index");
+      // Construct the one pair census in geometric-index order, independently
+      // of the deliberately reverse PointIds in the input.
+      if (points.size() == 2) {
+        BallData ball;
+        ball.key = q2_ball_key(index.upos[0], index.upos[1]);
+        ball.level = promote_level(q2_exact_level(p3_norm2(p3_sub(index.upos[0], index.upos[1]))));
+        ball.arity = 2; ball.n_shell = 2; ball.n_interior = 0;
+        ball.shell_ids[0] = 0; ball.shell_ids[1] = 1;
+        balls.push_back(ball);
+      }
+      const auto extraction = ag::extract(index, balls, 10);
+      std::vector<gf::History> histories;
+      for (const auto& order : extraction.orders) {
+        const auto certificate = fc::spanning_certificate(order.graph, std::less<u32>{});
+        fc::verify_certificate(order.graph, certificate, std::less<u32>{});
+        histories.push_back(fc::reconstruct(certificate, std::less<u32>{}));
+      }
+      const auto scalar = build_full_ball_tower(index, balls, 10, 1);
+      need(scalar.status == FullBallStatus::kCompleteRelative, "baseline");
+      for (size_t workers : {size_t{1}, size_t{4}}) {
+        const auto exported = gf::build(extraction, histories, workers);
+        need(exported.tower.status == FullBallStatus::kCompleteRelative &&
+             exported.tower.orders.size() == points.size(), "export status");
+        ++checks; ++towers;
+        for (size_t k = 0; k < scalar.orders.size(); ++k) {
+          const auto& a = scalar.orders[k].forest;
+          const auto& b = exported.tower.orders[k].forest;
+          need(a.nodes().size() == b.nodes().size() && a.parents() == b.parents() &&
+               a.successors() == b.successors() && scalar.orders[k].lower_nodes == exported.tower.orders[k].lower_nodes,
+               "pair/singleton physical structure");
+          ++checks;
+          for (u64 i = 0; i < a.nodes().size(); ++i) {
+            need(same_exact_level(a.nodes()[i].level, b.nodes()[i].level), "level"); ++checks;
+            const auto cut = a.nodes().back().level;
+            const auto ra = full_coverage_root_at(a, i, cut, true);
+            const auto rb = full_coverage_root_at(b, i, cut, true);
+            need(full_coverage_at(a, ra, cut, true).values == full_coverage_at(b, rb, cut, true).values,
+                 "coverage"); ++checks;
+          }
+        }
+      }
+    };
+    run({{9, {0, 0, 0}}}, {});
+    run({{9, {0, 0, 0}}, {3, {4, 0, 0}}}, {});
+    need(towers == 4 && checks == 30, "nonvacuity");
+    std::cout << "{\"status\":\"passed\",\"scope\":\"adapter_pair_singleton_smoke\",\"checks\":" << checks
+              << ",\"towers\":" << towers << ",\"workers\":[1,4],\"geometry_qualified\":false,\"gcp_used\":false}\n";
+    return 0;
+  } catch (const std::exception& error) {
+    std::cerr << error.what() << '\n';
+    return 1;
+  }
+}

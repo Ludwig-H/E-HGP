@@ -1,0 +1,68 @@
+{
+  "GCP_used": false,
+  "binary_sha256": "15630fe316377f3140e9956e7c93402a8af451d6d8018a65d378663233a1e7d3",
+  "commands": [
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-O2",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_composable_msf_20260911/o2_r1/gate.d",
+        "/workspaces/E-HGP/build/v7_composable_msf_20260911/o2_r1/gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_composable_msf_20260911/o2_r1/gate"
+      ],
+      "exit_code": 0,
+      "expected_exit": 0,
+      "name": "compile",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_composable_msf_20260911/o2_r1/gate",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "expected_exit": 0,
+      "name": "selftest",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "9a8c1fb0d62e61ce5b3fb67bc75a7c1a3268ba7f7e63bb5d1662c43edefb127c"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_composable_msf_20260911/o2_r1/gate",
+        "--unknown"
+      ],
+      "exit_code": 2,
+      "expected_exit": 2,
+      "name": "unknown",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_composable_msf_20260911/o2_r1/gate"
+      ],
+      "exit_code": 2,
+      "expected_exit": 2,
+      "name": "missing",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "compiler_and_system_headers_pinned": false,
+  "dependency_sha256": "cf07b6dd9979f343e147b72e5bd67d157af70a46dd3b4fdfb2d986c6a45d1f3d",
+  "error": null,
+  "geometry_qualified": false,
+  "sanitizer": false,
+  "sanitizer_environment": {},
+  "source_stable": true,
+  "status": "passed"
+}

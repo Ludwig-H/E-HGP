@@ -1,0 +1,12 @@
+start=uniform32/v0/s8
+complete=uniform32/v0/s8 nodes=63
+start=uniform32/v0/s10
+complete=uniform32/v0/s10 nodes=63
+start=uniform32/v0/s12
+complete=uniform32/v0/s12 nodes=63
+start=uniform32/v1/s8
+complete=uniform32/v1/s8 nodes=63
+start=uniform32/v1/s10
+complete=uniform32/v1/s10 nodes=63
+start=uniform32/v1/s12
+complete=uniform32/v1/s12 nodes=63

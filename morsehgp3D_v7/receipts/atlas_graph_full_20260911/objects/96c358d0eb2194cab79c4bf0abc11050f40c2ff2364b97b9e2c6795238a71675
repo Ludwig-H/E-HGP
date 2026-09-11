@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/tower_gate",
+    "--mutant-node-date"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot",
+  "elapsed_seconds_observation_only": 0.005584787999396212,
+  "exit_code": 4,
+  "expected_exit": 4,
+  "name": "mutant-node-date",
+  "stderr": {
+    "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+    "size": 18
+  },
+  "stdout": {
+    "sha256": "a37a6a30d6ad589d3185292a202ca9f98291c13e5512f4d4393572d237cebd11",
+    "size": 63
+  }
+}

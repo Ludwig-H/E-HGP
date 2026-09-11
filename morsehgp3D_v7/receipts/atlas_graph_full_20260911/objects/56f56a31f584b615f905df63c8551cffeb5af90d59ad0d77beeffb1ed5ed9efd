@@ -1,0 +1,355 @@
+[
+  {
+    "argv": [
+      "/usr/bin/x86_64-linux-gnu-g++-13",
+      "--version"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.001897720001579728,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "compiler",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "39553616934606f58b27c04bed0cdbbe5b00c92c831a9aaadebd7ceda61d1334",
+      "size": 266
+    }
+  },
+  {
+    "argv": [
+      "/usr/bin/x86_64-linux-gnu-g++-13",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-I",
+      "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot/v7_atlas_graph_20260911",
+      "-O2",
+      "-M",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/dependencies_before.d",
+      "-MT",
+      "mhgp7_graph_full_tower",
+      "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot/v7_graph_full_20260911/tower_gate.cpp"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.3755406079944805,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "dependencies_before",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    }
+  },
+  {
+    "argv": [
+      "/usr/bin/x86_64-linux-gnu-g++-13",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-I",
+      "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot/v7_atlas_graph_20260911",
+      "-O2",
+      "-MD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/compile.d",
+      "-MT",
+      "mhgp7_graph_full_tower",
+      "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot/v7_graph_full_20260911/tower_gate.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/tower_gate"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 26.14348791899829,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "compile",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/tower_gate",
+      "--selftest"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.5981705750018591,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "selftest",
+    "stderr": {
+      "sha256": "57f68a042e858f0668a5021aa75fd5edadc86ab15f6f9ecfe685fe77b8b3815e",
+      "size": 5930
+    },
+    "stdout": {
+      "sha256": "c370a290b8844bc733a49594ce4e97262a2542b1613a6d22da72b5eb3eb895a5",
+      "size": 804
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/tower_gate",
+      "--high"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 5.646950393005682,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "high",
+    "stderr": {
+      "sha256": "233e75b529131066ec77eb25ea47693da9aed55c57956033685c91d1ee3a4289",
+      "size": 664
+    },
+    "stdout": {
+      "sha256": "4597fce598c71e476108aceea8a0608a6904178ccafe2e68ac9416af5d6f5a0d",
+      "size": 815
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/tower_gate",
+      "--uniform32"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 2.8796497610019287,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "uniform32",
+    "stderr": {
+      "sha256": "2a36fa363958d4b986b36110e252cc0ec478a424a3f1be7cc38073e49cbd6f1d",
+      "size": 344
+    },
+    "stdout": {
+      "sha256": "8830f3c03ec6824edd3ed86df78597291008e8e4e25034cb88cc7c866fa0acfd",
+      "size": 819
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/tower_gate",
+      "--mutant-growth-date"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.005492620999575593,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-growth-date",
+    "stderr": {
+      "sha256": "cb299db387d1e4193963a8b0e74be9e065139f3b9499ece07fdeacf52197083c",
+      "size": 24
+    },
+    "stdout": {
+      "sha256": "11ca51caff87b321ad87daffcab886ce29f7ee020ba4cbd4ad3f7a11eb331f5d",
+      "size": 77
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/tower_gate",
+      "--mutant-vertical"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.0057553509977879,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-vertical",
+    "stderr": {
+      "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+      "size": 18
+    },
+    "stdout": {
+      "sha256": "52110d012d483e29a22be9f411629734dbf4b241085d99b19af45fcdb0c51d93",
+      "size": 69
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/tower_gate",
+      "--mutant-parent"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.005594892994849943,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-parent",
+    "stderr": {
+      "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+      "size": 18
+    },
+    "stdout": {
+      "sha256": "45dc04a53560c5cf458d9c99f73c3682ab4a0144456d140488041cac1fbdf832",
+      "size": 75
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/tower_gate",
+      "--mutant-node-date"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.005584787999396212,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-node-date",
+    "stderr": {
+      "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+      "size": 18
+    },
+    "stdout": {
+      "sha256": "a37a6a30d6ad589d3185292a202ca9f98291c13e5512f4d4393572d237cebd11",
+      "size": 63
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/tower_gate",
+      "--reject-descendant"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.006011727004079148,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "reject-descendant",
+    "stderr": {
+      "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+      "size": 18
+    },
+    "stdout": {
+      "sha256": "af76fc6ed06be72caca38faf14508b9862aaee0ed3fe8d7e850014a522df8dde",
+      "size": 67
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/tower_gate",
+      "--mutant-mask"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.006581408997590188,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-mask",
+    "stderr": {
+      "sha256": "fd77976bb1e3576ff65ba5530b7f5b09f3b3f6a0d1f399a854dff06f19d695f9",
+      "size": 24
+    },
+    "stdout": {
+      "sha256": "b419ed469b66a2d716749aa0979ffde111c765e99908abce7bb4a335f5463b53",
+      "size": 71
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/tower_gate",
+      "--mutant-native-anchor"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.0022554059978574514,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-native-anchor",
+    "stderr": {
+      "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+      "size": 18
+    },
+    "stdout": {
+      "sha256": "98b8c9ec7294d5dd1954e3ebbe4f79fac7ac587df183300e8ab974bee0df9068",
+      "size": 76
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/tower_gate",
+      "--unknown"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.0018343250048928894,
+    "exit_code": 2,
+    "expected_exit": 2,
+    "name": "unknown",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/tower_gate"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.001753324999299366,
+    "exit_code": 2,
+    "expected_exit": 2,
+    "name": "missing",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    }
+  },
+  {
+    "argv": [
+      "/usr/bin/x86_64-linux-gnu-g++-13",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-I",
+      "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot/v7_atlas_graph_20260911",
+      "-O2",
+      "-M",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/dependencies_after.d",
+      "-MT",
+      "mhgp7_graph_full_tower",
+      "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot/v7_graph_full_20260911/tower_gate.cpp"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 0.39498962400102755,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "dependencies_after",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    }
+  }
+]

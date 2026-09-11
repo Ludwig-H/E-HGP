@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_san_root_r1/tower_gate",
+    "--unknown"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_san_root_r1/source_snapshot",
+  "exit_code": null,
+  "expected_exit": 2,
+  "name": "unknown"
+}

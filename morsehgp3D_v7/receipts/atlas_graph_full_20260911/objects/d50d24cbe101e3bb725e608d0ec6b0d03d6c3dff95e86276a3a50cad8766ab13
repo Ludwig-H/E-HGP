@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/tower_gate",
+    "--mutant-mask"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_graph_full_20260911/tower_o2_r1/source_snapshot",
+  "exit_code": null,
+  "expected_exit": 4,
+  "name": "mutant-mask"
+}
