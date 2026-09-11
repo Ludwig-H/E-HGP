@@ -1,0 +1,1 @@
+{"family":"scanline_overlap_multiecho","n":8000,"s":8,"lot":1000,"threads":4,"rows":89893,"rows_batched":89893,"ordered_equal":1,"first_diff":89893,"ledger_equal":1,"work_equal":1,"batches":596,"requests":391932,"corner_requests":117201,"peak_batch":1000,"witness_nodes":19347957,"cap_refus":0}

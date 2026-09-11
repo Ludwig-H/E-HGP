@@ -1,0 +1,24 @@
+{
+  "schema": "mhgp7-audit-record-v1",
+  "name": "pinned_50000_threads8_o2_r2",
+  "argv": [
+    "/workspaces/E-HGP/build/v7-audit-20260911/named_blocks/observer_o2",
+    "--pinned-50000",
+    "--threads=8"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "start_utc": "2026-09-11T07:30:06Z",
+  "end_utc": "2026-09-11T07:46:34Z",
+  "wall_seconds": 988.597,
+  "returncode": 0,
+  "expected_returncode": 0,
+  "signal": null,
+  "conforming": true,
+  "child_maxrss_kib": 14453640,
+  "child_user_seconds": 1934.862,
+  "child_system_seconds": 31.242,
+  "stdout_sha256": "65bfa4238cf552c90e55fedc2929a63117a335c5b70e5e61c78b2e27247eb477",
+  "stderr_sha256": "451c74b51f9ac11bc3e853861d1dc83f0c4e9e8248370093d4954c4e58fd51c3",
+  "environment_overrides": {},
+  "gcp_used": false
+}

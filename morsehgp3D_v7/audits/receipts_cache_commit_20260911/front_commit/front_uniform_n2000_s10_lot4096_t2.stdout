@@ -1,0 +1,1 @@
+{"family":"uniform","n":2000,"s":10,"lot":4096,"threads":2,"rows":168908,"rows_batched":168908,"ordered_equal":1,"first_diff":168908,"ledger_equal":1,"work_equal":1,"batches":501,"requests":1243829,"corner_requests":267582,"peak_batch":4096,"witness_nodes":104400351,"cap_refus":0}

@@ -1,0 +1,28 @@
+{
+  "schema": "mhgp7-audit-record-v1",
+  "name": "commit_scanline_single_pass_n2000",
+  "argv": [
+    "/workspaces/E-HGP/build/ad7ffd28_replay/gates/probe_family_o2",
+    "--n=2000",
+    "--s=8",
+    "--kmax=10",
+    "--threads=2"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "start_utc": "2026-09-11T08:02:37Z",
+  "end_utc": "2026-09-11T08:02:37Z",
+  "wall_seconds": 0.191,
+  "returncode": 0,
+  "expected_returncode": 0,
+  "signal": null,
+  "conforming": true,
+  "child_maxrss_kib": 19976,
+  "child_user_seconds": 0.269,
+  "child_system_seconds": 0.02,
+  "stdout_sha256": "bb845ff0a7ddf715a075b0157b7f0cd1c8a95324621e69c0083792c4124404f7",
+  "stderr_sha256": "8a64a2cc396c6ee8c62c6a6b38794535bd62e758bf8328f2810e3eb2cefff392",
+  "environment_overrides": {
+    "MHGP7_AUDIT_FAMILY": "scanline_single_pass"
+  },
+  "gcp_used": false
+}

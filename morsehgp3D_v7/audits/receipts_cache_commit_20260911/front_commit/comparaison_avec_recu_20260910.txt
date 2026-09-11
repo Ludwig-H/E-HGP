@@ -1,0 +1,9 @@
+front_uniform_n2000_s8_lot4096_t1 == ligne du reçu du 10 sept.
+front_uniform_n2000_s8_lot100000_t4 == ligne du reçu du 10 sept.
+front_uniform_n2000_s10_lot4096_t2 == ligne du reçu du 10 sept.
+front_uniform_n2000_s12_lot4096_t2 == ligne du reçu du 10 sept.
+front_scanline_overlap_multiecho_n2000_s8_lot4096_t2 == ligne du reçu du 10 sept.
+front_eight_clusters_n2000_s8_lot4096_t2 == ligne du reçu du 10 sept.
+front_terrain_n2000_s8_lot4096_t2 == ligne du reçu du 10 sept.
+front_uniform_n8000_s8_lot65536_t4 == ligne du reçu du 10 sept.
+front_scanline_overlap_multiecho_n8000_s8_lot1000_t4 == ligne du reçu du 10 sept.

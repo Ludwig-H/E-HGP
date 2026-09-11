@@ -1,0 +1,59 @@
+== portes O2 / ASan-UBSan (arbre pinné ad7ffd28)
+compile_facet_resolver_cache_gate_o2: rc=0 attendu=0 12.870s maxrss_kib=702608
+facet_resolver_cache_gate_o2_selftest: rc=0 attendu=0 0.478s maxrss_kib=16896
+facet_resolver_cache_gate_o2_bad_argument: rc=2 attendu=2 0.002s maxrss_kib=16768
+compile_facet_resolver_cache_gate_san: rc=0 attendu=0 36.406s maxrss_kib=1147104
+facet_resolver_cache_gate_san_selftest: rc=0 attendu=0 5.946s maxrss_kib=28728
+compile_full_ball_tower_gate_o2: rc=0 attendu=0 12.706s maxrss_kib=698148
+full_ball_tower_gate_o2_selftest: rc=0 attendu=0 0.585s maxrss_kib=16896
+full_ball_tower_gate_o2_bad_argument: rc=2 attendu=2 0.002s maxrss_kib=16768
+compile_full_ball_tower_gate_san: rc=0 attendu=0 36.514s maxrss_kib=1145704
+full_ball_tower_gate_san_selftest: rc=0 attendu=0 6.166s maxrss_kib=45688
+compile_full_ball_work_gate_o2: rc=0 attendu=0 13.195s maxrss_kib=708088
+full_ball_work_gate_o2_selftest: rc=0 attendu=0 0.555s maxrss_kib=16768
+full_ball_work_gate_o2_bad_argument: rc=2 attendu=2 0.002s maxrss_kib=16896
+compile_full_ball_work_gate_san: rc=0 attendu=0 37.160s maxrss_kib=1158544
+full_ball_work_gate_san_selftest: rc=0 attendu=0 5.995s maxrss_kib=30148
+compile_witness_front_gate_o2: rc=0 attendu=0 5.200s maxrss_kib=334728
+witness_front_gate_o2_selftest: rc=0 attendu=0 0.789s maxrss_kib=16768
+witness_front_gate_o2_bad_argument: rc=2 attendu=2 0.002s maxrss_kib=16896
+compile_witness_front_gate_san: rc=0 attendu=0 15.832s maxrss_kib=519388
+witness_front_gate_san_selftest: rc=0 attendu=0 6.087s maxrss_kib=181028
+== empreintes par famille (arbre pinné)
+compile_probe_family_o2: rc=0 attendu=0 14.172s maxrss_kib=575988
+commit_uniform_n400: rc=0 attendu=0 2.887s maxrss_kib=78768
+commit_uniform_n2000: rc=0 attendu=0 24.869s maxrss_kib=510316
+commit_scanline_overlap_multiecho_n2000: rc=0 attendu=0 1.466s maxrss_kib=34472
+commit_scanline_single_pass_n2000: rc=0 attendu=0 0.191s maxrss_kib=19976
+commit_terrain_n2000: rc=0 attendu=0 2.444s maxrss_kib=111088
+== mutants groupés (copies du pinné)
+mutate_nominal: rc=0 attendu=0 0.030s maxrss_kib=17024
+compile_nominal_o2: rc=0 attendu=0 12.774s maxrss_kib=697716
+nominal_selftest: rc=0 attendu=0 0.523s maxrss_kib=16768
+mutate_growth_grouped: rc=0 attendu=0 0.030s maxrss_kib=16896
+compile_growth_grouped_o2: rc=0 attendu=0 12.564s maxrss_kib=697652
+growth_grouped_selftest: rc=1 attendu=1 0.402s maxrss_kib=16896
+mutate_inert_grouped: rc=0 attendu=0 0.030s maxrss_kib=16896
+compile_inert_grouped_o2: rc=0 attendu=0 12.714s maxrss_kib=697816
+inert_grouped_selftest: rc=1 attendu=1 0.406s maxrss_kib=16768
+== corpus aléatoire (pont pinné)
+compile_tower_bridge_o2: rc=0 attendu=0 8.408s maxrss_kib=430280
+principal_normal: rc=0 attendu=0 12.876s maxrss_kib=28540
+principal_optimized: rc=0 attendu=0 12.832s maxrss_kib=28528
+cocircular_normal: rc=0 attendu=0 14.737s maxrss_kib=22796
+extended_normal: rc=0 attendu=0 120.418s maxrss_kib=37600
+mutant_drop_extra_ball: rc=1 attendu=1 10.784s maxrss_kib=22980
+== front par lots (probe pinné)
+compile_witness_front_scale_probe_o2: rc=0 attendu=0 4.999s maxrss_kib=335500
+front_uniform_n2000_s8_lot4096_t1: rc=0 attendu=0 13.157s maxrss_kib=27724
+front_uniform_n2000_s8_lot100000_t4: rc=0 attendu=0 3.945s maxrss_kib=45652
+front_uniform_n2000_s10_lot4096_t2: rc=0 attendu=0 7.359s maxrss_kib=29100
+front_uniform_n2000_s12_lot4096_t2: rc=0 attendu=0 7.969s maxrss_kib=31876
+front_scanline_overlap_multiecho_n2000_s8_lot4096_t2: rc=0 attendu=0 0.332s maxrss_kib=16768
+front_eight_clusters_n2000_s8_lot4096_t2: rc=0 attendu=0 3.952s maxrss_kib=26128
+front_terrain_n2000_s8_lot4096_t2: rc=0 attendu=0 1.152s maxrss_kib=16896
+front_uniform_n8000_s8_lot65536_t4: rc=0 attendu=0 24.540s maxrss_kib=126936
+front_scanline_overlap_multiecho_n8000_s8_lot1000_t4: rc=0 attendu=0 1.032s maxrss_kib=18748
+== empreintes des sources pinnées ad7ffd28 consultées
+rejeu pinné terminé
+pin_replay rc=0

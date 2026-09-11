@@ -1,0 +1,23 @@
+{
+  "schema": "mhgp7-audit-record-v1",
+  "name": "witness_front_gate_o2_bad_argument",
+  "argv": [
+    "/workspaces/E-HGP/build/ad7ffd28_replay/gates/witness_front_gate_o2",
+    "--unknown"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "start_utc": "2026-09-11T08:01:31Z",
+  "end_utc": "2026-09-11T08:01:31Z",
+  "wall_seconds": 0.002,
+  "returncode": 2,
+  "expected_returncode": 2,
+  "signal": null,
+  "conforming": true,
+  "child_maxrss_kib": 16896,
+  "child_user_seconds": 0.0,
+  "child_system_seconds": 0.002,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment_overrides": {},
+  "gcp_used": false
+}

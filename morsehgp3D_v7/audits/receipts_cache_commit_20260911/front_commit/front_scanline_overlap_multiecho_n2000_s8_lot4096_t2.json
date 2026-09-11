@@ -1,0 +1,27 @@
+{
+  "schema": "mhgp7-audit-record-v1",
+  "name": "front_scanline_overlap_multiecho_n2000_s8_lot4096_t2",
+  "argv": [
+    "/workspaces/E-HGP/build/ad7ffd28_replay/gates/witness_front_scale_probe_o2",
+    "2000",
+    "8",
+    "4096",
+    "2",
+    "scanline_overlap_multiecho"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "start_utc": "2026-09-11T08:06:57Z",
+  "end_utc": "2026-09-11T08:06:58Z",
+  "wall_seconds": 0.332,
+  "returncode": 0,
+  "expected_returncode": 0,
+  "signal": null,
+  "conforming": true,
+  "child_maxrss_kib": 16768,
+  "child_user_seconds": 0.615,
+  "child_system_seconds": 0.008,
+  "stdout_sha256": "8f9e98c9b2d324ede5033701131fb341026cdb2417a8ea427657143797b1d63d",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment_overrides": {},
+  "gcp_used": false
+}

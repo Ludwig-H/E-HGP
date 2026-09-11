@@ -1,0 +1,6 @@
+principal_normal : status=passed, divergence_count=0, refusals=0, totals==reçu_10sept (oui) -> OK
+cocircular_normal : status=passed, divergence_count=0, refusals=0, totals==reçu_10sept (oui) -> OK
+extended_normal : status=passed, divergence_count=0, refusals=0, totals==reçu_10sept (oui) -> OK
+principal : -B == -B -O (oui)
+mutant drop_extra_ball : status=divergent, divergences=128, refus=148 -> tué
+note : product_stats_totals diffèrent du reçu du 10 sept. (header pré-cache 4929a542) uniquement sur les compteurs de travail du cache (anchor_hits, intruder_queries, descending_steps) ; l'objet jugé (bloc totals) est identique -> le cache ne change pas l'objet.

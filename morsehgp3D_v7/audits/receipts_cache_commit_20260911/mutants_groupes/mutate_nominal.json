@@ -1,0 +1,26 @@
+{
+  "schema": "mhgp7-audit-record-v1",
+  "name": "mutate_nominal",
+  "argv": [
+    "python3",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_cache_commit_20260911/mutants_groupes_mutate.py",
+    "nominal",
+    "/workspaces/E-HGP/build/ad7ffd28_replay/mutants/nominal/src/forest/full_ball_tower.hpp"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "start_utc": "2026-09-11T08:02:40Z",
+  "end_utc": "2026-09-11T08:02:40Z",
+  "wall_seconds": 0.03,
+  "returncode": 0,
+  "expected_returncode": 0,
+  "signal": null,
+  "conforming": true,
+  "child_maxrss_kib": 17024,
+  "child_user_seconds": 0.021,
+  "child_system_seconds": 0.008,
+  "stdout_sha256": "21efa1c67390565238b52a798e07744996bcf9ac474f369beba4f9c05bd88c40",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment_overrides": {},
+  "gcp_used": false
+}

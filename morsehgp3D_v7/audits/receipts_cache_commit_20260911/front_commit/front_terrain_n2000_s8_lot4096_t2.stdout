@@ -1,0 +1,1 @@
+{"family":"terrain","n":2000,"s":8,"lot":4096,"threads":2,"rows":47261,"rows_batched":47261,"ordered_equal":1,"first_diff":47261,"ledger_equal":1,"work_equal":1,"batches":136,"requests":278516,"corner_requests":71273,"peak_batch":4096,"witness_nodes":14358805,"cap_refus":0}

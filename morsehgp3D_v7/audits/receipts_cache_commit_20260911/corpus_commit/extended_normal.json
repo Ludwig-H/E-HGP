@@ -1,0 +1,31 @@
+{
+  "schema": "mhgp7-audit-record-v1",
+  "name": "extended_normal",
+  "argv": [
+    "python3",
+    "-B",
+    "tower_corpus.py",
+    "--bridge",
+    "/workspaces/E-HGP/build/ad7ffd28_replay/gates/tower_bridge",
+    "--clouds",
+    "2000",
+    "--seed",
+    "20260911",
+    "--no-fixtures"
+  ],
+  "cwd": "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_raccord_ancres_20260910/corpus_aleatoire",
+  "start_utc": "2026-09-11T08:04:08Z",
+  "end_utc": "2026-09-11T08:06:09Z",
+  "wall_seconds": 120.418,
+  "returncode": 0,
+  "expected_returncode": 0,
+  "signal": null,
+  "conforming": true,
+  "child_maxrss_kib": 37600,
+  "child_user_seconds": 117.813,
+  "child_system_seconds": 3.361,
+  "stdout_sha256": "e94de3c82a36cb8c5a9c87dafb8c2377a3aaf387ed9359409f973c33fd7ac827",
+  "stderr_sha256": "f8b41394a6c0333407566549f55301a3d46031ce94578e0fffcb4c0a2f53ed70",
+  "environment_overrides": {},
+  "gcp_used": false
+}

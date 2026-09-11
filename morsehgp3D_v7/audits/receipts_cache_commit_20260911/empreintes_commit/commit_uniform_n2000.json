@@ -1,0 +1,28 @@
+{
+  "schema": "mhgp7-audit-record-v1",
+  "name": "commit_uniform_n2000",
+  "argv": [
+    "/workspaces/E-HGP/build/ad7ffd28_replay/gates/probe_family_o2",
+    "--n=2000",
+    "--s=8",
+    "--kmax=10",
+    "--threads=2"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "start_utc": "2026-09-11T08:02:10Z",
+  "end_utc": "2026-09-11T08:02:35Z",
+  "wall_seconds": 24.869,
+  "returncode": 0,
+  "expected_returncode": 0,
+  "signal": null,
+  "conforming": true,
+  "child_maxrss_kib": 510316,
+  "child_user_seconds": 33.098,
+  "child_system_seconds": 0.634,
+  "stdout_sha256": "670840f95cedb1c62edc422746485db77afb3d401a365dc8ce6247ef0f38e120",
+  "stderr_sha256": "da6698997797c11695de0846ca910e66500c36984759f58c27848525a5395f4e",
+  "environment_overrides": {
+    "MHGP7_AUDIT_FAMILY": "uniform"
+  },
+  "gcp_used": false
+}

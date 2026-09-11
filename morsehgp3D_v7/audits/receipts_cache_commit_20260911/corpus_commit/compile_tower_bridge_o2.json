@@ -1,0 +1,33 @@
+{
+  "schema": "mhgp7-audit-record-v1",
+  "name": "compile_tower_bridge_o2",
+  "argv": [
+    "g++",
+    "-std=c++20",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-I",
+    "/workspaces/E-HGP/build/ad7ffd28_v7_pin/morsehgp3D_v7",
+    "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_cache_commit_20260911/../receipts_raccord_ancres_20260910/corpus_aleatoire/tower_bridge.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/ad7ffd28_replay/gates/tower_bridge"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "start_utc": "2026-09-11T08:03:19Z",
+  "end_utc": "2026-09-11T08:03:28Z",
+  "wall_seconds": 8.408,
+  "returncode": 0,
+  "expected_returncode": 0,
+  "signal": null,
+  "conforming": true,
+  "child_maxrss_kib": 430280,
+  "child_user_seconds": 7.983,
+  "child_system_seconds": 0.422,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment_overrides": {},
+  "gcp_used": false
+}

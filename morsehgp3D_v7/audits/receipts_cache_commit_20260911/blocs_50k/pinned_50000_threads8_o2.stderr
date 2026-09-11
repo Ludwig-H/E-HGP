@@ -1,0 +1,5 @@
+validation_stage=input
+validation_stage=generate_s8
+validation_stage=census
+validation_stage=raw_anchor_mutant_same_census
+validation_stage=nominal_named_blocks

@@ -1,0 +1,1 @@
+{"family":"eight_clusters","n":2000,"s":8,"lot":4096,"threads":2,"rows":121977,"rows_batched":121977,"ordered_equal":1,"first_diff":121977,"ledger_equal":1,"work_equal":1,"batches":226,"requests":591660,"corner_requests":181699,"peak_batch":4096,"witness_nodes":46115396,"cap_refus":0}

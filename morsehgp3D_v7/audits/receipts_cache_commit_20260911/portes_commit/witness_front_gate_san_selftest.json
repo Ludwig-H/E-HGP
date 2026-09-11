@@ -1,0 +1,26 @@
+{
+  "schema": "mhgp7-audit-record-v1",
+  "name": "witness_front_gate_san_selftest",
+  "argv": [
+    "/workspaces/E-HGP/build/ad7ffd28_replay/gates/witness_front_gate_san",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "start_utc": "2026-09-11T08:01:47Z",
+  "end_utc": "2026-09-11T08:01:53Z",
+  "wall_seconds": 6.087,
+  "returncode": 0,
+  "expected_returncode": 0,
+  "signal": null,
+  "conforming": true,
+  "child_maxrss_kib": 181028,
+  "child_user_seconds": 4.628,
+  "child_system_seconds": 6.506,
+  "stdout_sha256": "f8b3cc47d3731f30ceee35a66a4e917c7d458b751c1108d56ad932d93381a1e9",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment_overrides": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "gcp_used": false
+}

@@ -1,0 +1,26 @@
+{
+  "schema": "mhgp7-audit-record-v1",
+  "name": "facet_resolver_cache_gate_san_selftest",
+  "argv": [
+    "/workspaces/E-HGP/build/ad7ffd28_replay/gates/facet_resolver_cache_gate_san",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "start_utc": "2026-09-11T07:59:26Z",
+  "end_utc": "2026-09-11T07:59:32Z",
+  "wall_seconds": 5.946,
+  "returncode": 0,
+  "expected_returncode": 0,
+  "signal": null,
+  "conforming": true,
+  "child_maxrss_kib": 28728,
+  "child_user_seconds": 5.912,
+  "child_system_seconds": 0.031,
+  "stdout_sha256": "090b0a51e8a25ae0ec8fa8b5fa54c32af85662c86ee68dc13cae67b409682937",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment_overrides": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "gcp_used": false
+}

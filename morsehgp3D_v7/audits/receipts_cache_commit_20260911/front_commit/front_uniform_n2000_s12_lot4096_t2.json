@@ -1,0 +1,27 @@
+{
+  "schema": "mhgp7-audit-record-v1",
+  "name": "front_uniform_n2000_s12_lot4096_t2",
+  "argv": [
+    "/workspaces/E-HGP/build/ad7ffd28_replay/gates/witness_front_scale_probe_o2",
+    "2000",
+    "12",
+    "4096",
+    "2",
+    "uniform"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "start_utc": "2026-09-11T08:06:49Z",
+  "end_utc": "2026-09-11T08:06:57Z",
+  "wall_seconds": 7.969,
+  "returncode": 0,
+  "expected_returncode": 0,
+  "signal": null,
+  "conforming": true,
+  "child_maxrss_kib": 31876,
+  "child_user_seconds": 15.205,
+  "child_system_seconds": 0.117,
+  "stdout_sha256": "815ca1b39f30fb9cbcaa480d2059b9eca5f899def91edcbba2cc1551ab606617",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment_overrides": {},
+  "gcp_used": false
+}

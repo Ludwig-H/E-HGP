@@ -1,0 +1,4 @@
+facet_resolver_cache_gate stdout O2 == stdout ASan/UBSan
+full_ball_tower_gate stdout O2 == stdout ASan/UBSan
+full_ball_work_gate stdout O2 == stdout ASan/UBSan
+witness_front_gate stdout O2 == stdout ASan/UBSan

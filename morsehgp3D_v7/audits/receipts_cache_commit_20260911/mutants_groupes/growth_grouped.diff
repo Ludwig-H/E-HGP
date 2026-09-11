@@ -1,0 +1,11 @@
+--- /workspaces/E-HGP/build/ad7ffd28_v7_pin/morsehgp3D_v7/src/forest/full_ball_tower.hpp	2026-09-10 21:27:07.000000000 +0000
++++ /workspaces/E-HGP/build/ad7ffd28_replay/mutants/growth_grouped/src/forest/full_ball_tower.hpp	2026-09-11 08:02:53.536356855 +0000
+@@ -704,7 +704,7 @@
+         target = new_node(level, action.parents, draft, lower, birth_image);
+       }
+       for (size_t b : group) targets[b] = target;
+-      if (action.parents.size() != 1 || !action.contributions.empty()) batch.actions.push_back(std::move(action));
++      if (action.parents.size() != 1) batch.actions.push_back(std::move(action));  // MUTANT groupe : croissance omise
+       else add(st.inert_blocks, group.size());
+     }
+     if (!batch.actions.empty()) draft.batches.push_back(std::move(batch));

@@ -1,0 +1,23 @@
+{
+  "schema": "mhgp7-audit-record-v1",
+  "name": "growth_grouped_selftest",
+  "argv": [
+    "/workspaces/E-HGP/build/ad7ffd28_replay/gates/growth_grouped_gate_o2",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "start_utc": "2026-09-11T08:03:06Z",
+  "end_utc": "2026-09-11T08:03:06Z",
+  "wall_seconds": 0.402,
+  "returncode": 1,
+  "expected_returncode": 1,
+  "signal": null,
+  "conforming": true,
+  "child_maxrss_kib": 16896,
+  "child_user_seconds": 0.398,
+  "child_system_seconds": 0.003,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "4b085315a07cf811408098da8fee9369aaeef31bac07a1a95048cb1541d2c0cd",
+  "environment_overrides": {},
+  "gcp_used": false
+}

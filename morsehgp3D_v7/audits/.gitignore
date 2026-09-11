@@ -4,3 +4,4 @@ __pycache__/
 !receipts_raccord_ancres_20260910/**/*.log
 !receipts_full_lazy_20260905/constructor_review/*/build_artifacts/CMakeCache.txt
 !receipts_full_lazy_20260905/constructor_review/*/build_artifacts/compile_commands.json
+!receipts_cache_commit_20260911/**/*.log

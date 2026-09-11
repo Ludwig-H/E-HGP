@@ -1,0 +1,23 @@
+{
+  "schema": "mhgp7-audit-record-v1",
+  "name": "full_ball_tower_gate_o2_bad_argument",
+  "argv": [
+    "/workspaces/E-HGP/build/ad7ffd28_replay/gates/full_ball_tower_gate_o2",
+    "--unknown"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "start_utc": "2026-09-11T07:59:45Z",
+  "end_utc": "2026-09-11T07:59:45Z",
+  "wall_seconds": 0.002,
+  "returncode": 2,
+  "expected_returncode": 2,
+  "signal": null,
+  "conforming": true,
+  "child_maxrss_kib": 16768,
+  "child_user_seconds": 0.001,
+  "child_system_seconds": 0.001,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "4b9eeadc562c94288f788d79631dcc662f5b8c306e7232ccdc083094698a2e85",
+  "environment_overrides": {},
+  "gcp_used": false
+}

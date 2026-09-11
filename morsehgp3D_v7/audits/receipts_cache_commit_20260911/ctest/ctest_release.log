@@ -1,0 +1,930 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v7-audit-20260911
+Test project /workspaces/E-HGP/build/v7-audit-20260911
+        Start   1: mhgp7_wspd_terminal_reuse
+        Start   2: mhgp7_wspd_terminal_reuse_bad_argument
+        Start   3: mhgp7_witness_front
+        Start   4: mhgp7_witness_front_bad_argument
+  1/445 Test   #2: mhgp7_wspd_terminal_reuse_bad_argument ..................   Passed    0.03 sec
+        Start   5: mhgp7_full_certificate
+  2/445 Test   #1: mhgp7_wspd_terminal_reuse ...............................   Passed    0.05 sec
+        Start   6: mhgp7_full_certificate_rejects
+  3/445 Test   #4: mhgp7_witness_front_bad_argument ........................   Passed    0.04 sec
+        Start   7: mhgp7_full_gabriel
+  4/445 Test   #5: mhgp7_full_certificate ..................................   Passed    0.04 sec
+        Start   8: mhgp7_full_gabriel_rejects
+  5/445 Test   #6: mhgp7_full_certificate_rejects ..........................   Passed    0.04 sec
+        Start   9: mhgp7_full_gabriel_bad_argument
+  6/445 Test   #9: mhgp7_full_gabriel_bad_argument .........................   Passed    0.03 sec
+        Start  10: mhgp7_full_gabriel_allocation
+  7/445 Test  #10: mhgp7_full_gabriel_allocation ...........................   Passed    0.02 sec
+        Start  11: mhgp7_full_gabriel_allocation_bad_argument
+  8/445 Test  #11: mhgp7_full_gabriel_allocation_bad_argument ..............   Passed    0.03 sec
+        Start  12: mhgp7_full_gabriel_lazy
+  9/445 Test   #7: mhgp7_full_gabriel ......................................   Passed    0.16 sec
+        Start  13: mhgp7_full_gabriel_lazy_rejects
+ 10/445 Test   #8: mhgp7_full_gabriel_rejects ..............................   Passed    0.22 sec
+        Start  14: mhgp7_full_gabriel_lazy_bad_argument
+ 11/445 Test  #14: mhgp7_full_gabriel_lazy_bad_argument ....................   Passed    0.02 sec
+        Start  15: mhgp7_full_gabriel_lazy_allocation
+ 12/445 Test  #15: mhgp7_full_gabriel_lazy_allocation ......................   Passed    0.04 sec
+        Start  16: mhgp7_full_gabriel_lazy_allocation_bad_argument
+ 13/445 Test  #16: mhgp7_full_gabriel_lazy_allocation_bad_argument .........   Passed    0.05 sec
+        Start  17: mhgp7_full_gabriel_singleton
+ 14/445 Test  #12: mhgp7_full_gabriel_lazy .................................   Passed    0.35 sec
+        Start  18: mhgp7_full_gabriel_singleton_rejects
+ 15/445 Test  #17: mhgp7_full_gabriel_singleton ............................   Passed    0.39 sec
+        Start  19: mhgp7_full_gabriel_singleton_bad_argument
+ 16/445 Test  #13: mhgp7_full_gabriel_lazy_rejects .........................   Passed    0.60 sec
+        Start  20: mhgp7_full_gabriel_successor
+ 17/445 Test  #19: mhgp7_full_gabriel_singleton_bad_argument ...............   Passed    0.03 sec
+        Start  21: mhgp7_full_gabriel_successor_rejects
+ 18/445 Test  #18: mhgp7_full_gabriel_singleton_rejects ....................   Passed    0.39 sec
+        Start  22: mhgp7_full_gabriel_successor_bad_argument
+ 19/445 Test  #22: mhgp7_full_gabriel_successor_bad_argument ...............   Passed    0.02 sec
+        Start  23: mhgp7_meb_proposal_local_selftest
+ 20/445 Test  #23: mhgp7_meb_proposal_local_selftest .......................   Passed    0.04 sec
+        Start  24: mhgp7_full_gabriel_meb_selftest
+ 21/445 Test  #21: mhgp7_full_gabriel_successor_rejects ....................   Passed    0.55 sec
+        Start  25: mhgp7_meb_proposal_local_rejects
+ 22/445 Test  #25: mhgp7_meb_proposal_local_rejects ........................   Passed    0.04 sec
+        Start  26: mhgp7_full_gabriel_meb_rejects
+ 23/445 Test  #20: mhgp7_full_gabriel_successor ............................   Passed    0.71 sec
+        Start  27: mhgp7_meb_proposal_local_bad_argument
+ 24/445 Test  #27: mhgp7_meb_proposal_local_bad_argument ...................   Passed    0.04 sec
+        Start  28: mhgp7_full_gabriel_meb_bad_argument
+ 25/445 Test  #28: mhgp7_full_gabriel_meb_bad_argument .....................   Passed    0.04 sec
+        Start  29: mhgp7_full_gabriel_meb_allocation_low
+ 26/445 Test  #29: mhgp7_full_gabriel_meb_allocation_low ...................   Passed    0.03 sec
+        Start  30: mhgp7_full_gabriel_meb_lazy_allocation_low
+ 27/445 Test  #30: mhgp7_full_gabriel_meb_lazy_allocation_low ..............   Passed    0.04 sec
+        Start  31: mhgp7_full_gabriel_meb_allocation_large
+ 28/445 Test  #31: mhgp7_full_gabriel_meb_allocation_large .................   Passed    0.04 sec
+        Start  32: mhgp7_full_gabriel_meb_lazy_allocation_large
+ 29/445 Test  #32: mhgp7_full_gabriel_meb_lazy_allocation_large ............   Passed    0.05 sec
+        Start  33: mhgp7_facet_resolver_cache
+ 30/445 Test  #33: mhgp7_facet_resolver_cache ..............................   Passed    1.33 sec
+        Start  34: mhgp7_facet_resolver_cache_bad_argument
+ 31/445 Test  #34: mhgp7_facet_resolver_cache_bad_argument .................   Passed    0.02 sec
+        Start  35: mhgp7_full_gabriel_digest
+ 32/445 Test  #35: mhgp7_full_gabriel_digest ...............................   Passed    0.03 sec
+        Start  36: mhgp7_full_gabriel_digest_bad_argument
+ 33/445 Test  #36: mhgp7_full_gabriel_digest_bad_argument ..................   Passed    0.02 sec
+        Start  37: mhgp7_full_gabriel_probe_limits
+ 34/445 Test  #37: mhgp7_full_gabriel_probe_limits .........................   Passed    0.03 sec
+        Start  38: mhgp7_full_gabriel_probe_limits_bad_argument
+ 35/445 Test  #38: mhgp7_full_gabriel_probe_limits_bad_argument ............   Passed    0.02 sec
+        Start  39: mhgp7_full_gabriel_census_payload
+ 36/445 Test  #39: mhgp7_full_gabriel_census_payload .......................   Passed    0.03 sec
+        Start  40: mhgp7_full_gabriel_census_payload_bad_argument
+ 37/445 Test  #40: mhgp7_full_gabriel_census_payload_bad_argument ..........   Passed    0.04 sec
+        Start  41: mhgp7_full_extra_shell_diagnostic
+ 38/445 Test  #41: mhgp7_full_extra_shell_diagnostic .......................   Passed    0.04 sec
+        Start  42: mhgp7_full_extra_shell_diagnostic_bad_argument
+ 39/445 Test  #42: mhgp7_full_extra_shell_diagnostic_bad_argument ..........   Passed    0.05 sec
+        Start  43: mhgp7_local_plateau
+ 40/445 Test  #43: mhgp7_local_plateau .....................................   Passed    0.21 sec
+        Start  44: mhgp7_local_plateau_bad_argument
+ 41/445 Test  #44: mhgp7_local_plateau_bad_argument ........................   Passed    0.02 sec
+        Start  45: mhgp7_full_coverage_certificate
+ 42/445 Test  #45: mhgp7_full_coverage_certificate .........................   Passed    0.03 sec
+        Start  46: mhgp7_full_coverage_certificate_bad_argument
+ 43/445 Test  #46: mhgp7_full_coverage_certificate_bad_argument ............   Passed    0.02 sec
+        Start  47: mhgp7_census_route_stub
+ 44/445 Test  #47: mhgp7_census_route_stub .................................   Passed    0.12 sec
+        Start  48: mhgp7_census_route_stub_bad_argument
+ 45/445 Test  #48: mhgp7_census_route_stub_bad_argument ....................   Passed    0.04 sec
+        Start  49: mhgp7_anchor_meb
+ 46/445 Test  #24: mhgp7_full_gabriel_meb_selftest .........................   Passed    4.01 sec
+        Start  50: mhgp7_anchor_meb_bad_argument
+ 47/445 Test  #50: mhgp7_anchor_meb_bad_argument ...........................   Passed    0.04 sec
+        Start  51: mhgp7_full_ball_tower
+ 48/445 Test  #49: mhgp7_anchor_meb ........................................   Passed    1.22 sec
+        Start  52: mhgp7_full_ball_tower_bad_argument
+ 49/445 Test  #52: mhgp7_full_ball_tower_bad_argument ......................   Passed    0.03 sec
+        Start  53: mhgp7_full_ball_work
+ 50/445 Test  #26: mhgp7_full_gabriel_meb_rejects ..........................   Passed    4.63 sec
+        Start  54: mhgp7_full_ball_work_bad_argument
+ 51/445 Test  #54: mhgp7_full_ball_work_bad_argument .......................   Passed    0.04 sec
+        Start  55: mhgp7_full_ball_tower_probe_smoke
+ 52/445 Test  #55: mhgp7_full_ball_tower_probe_smoke .......................   Passed    0.04 sec
+        Start  56: mhgp7_full_ball_tower_probe_bad_argument
+ 53/445 Test  #56: mhgp7_full_ball_tower_probe_bad_argument ................   Passed    0.03 sec
+        Start  57: mhgp7_full_minima_quotient_normal_selftest
+ 54/445 Test  #53: mhgp7_full_ball_work ....................................   Passed    1.32 sec
+        Start  58: mhgp7_full_minima_quotient_normal_unknown
+ 55/445 Test  #58: mhgp7_full_minima_quotient_normal_unknown ...............   Passed    0.07 sec
+        Start  59: mhgp7_full_minima_quotient_optimized_selftest
+ 56/445 Test  #51: mhgp7_full_ball_tower ...................................   Passed    1.53 sec
+        Start  60: mhgp7_full_minima_quotient_optimized_unknown
+ 57/445 Test  #60: mhgp7_full_minima_quotient_optimized_unknown ............   Passed    0.14 sec
+        Start  61: mhgp7_arith_selftest
+ 58/445 Test  #61: mhgp7_arith_selftest ....................................   Passed    0.04 sec
+        Start  62: mhgp7_sha256_selftest
+ 59/445 Test  #62: mhgp7_sha256_selftest ...................................   Passed    0.08 sec
+        Start  63: mhgp7_families_fixture
+ 60/445 Test  #63: mhgp7_families_fixture ..................................   Passed    0.06 sec
+        Start  64: mhgp7_families_mutant_overshoot
+ 61/445 Test  #64: mhgp7_families_mutant_overshoot .........................   Passed    0.04 sec
+        Start  65: mhgp7_tree_selftest
+ 62/445 Test  #65: mhgp7_tree_selftest .....................................   Passed    0.07 sec
+        Start  66: mhgp7_wspd_ledger
+ 63/445 Test  #66: mhgp7_wspd_ledger .......................................   Passed    0.08 sec
+        Start  67: mhgp7_wspd_ownership
+ 64/445 Test  #59: mhgp7_full_minima_quotient_optimized_selftest ...........   Passed    0.58 sec
+        Start  68: mhgp7_wspd_mutant_cap
+ 65/445 Test  #57: mhgp7_full_minima_quotient_normal_selftest ..............   Passed    0.93 sec
+        Start  69: mhgp7_wspd_mutant_split
+ 66/445 Test  #68: mhgp7_wspd_mutant_cap ...................................   Passed    0.61 sec
+        Start  70: mhgp7_contrat_echec
+ 67/445 Test  #67: mhgp7_wspd_ownership ....................................   Passed    1.39 sec
+        Start  71: mhgp7_contrat_echec_census
+ 68/445 Test  #69: mhgp7_wspd_mutant_split .................................   Passed    2.08 sec
+        Start  72: mhgp7_contrat_echec_fold_k2
+ 69/445 Test   #3: mhgp7_witness_front .....................................   Passed    9.21 sec
+        Start  73: mhgp7_contrat_echec_fuite_sum_parents
+ 70/445 Test  #70: mhgp7_contrat_echec .....................................   Passed    4.58 sec
+        Start  74: mhgp7_bad_alloc_temoin
+ 71/445 Test  #74: mhgp7_bad_alloc_temoin ..................................   Passed    3.31 sec
+        Start  75: mhgp7_bad_alloc_etage_provision
+ 72/445 Test  #75: mhgp7_bad_alloc_etage_provision .........................   Passed    0.04 sec
+        Start  76: mhgp7_bad_alloc_etage_census
+ 73/445 Test  #71: mhgp7_contrat_echec_census ..............................   Passed    8.91 sec
+        Start  77: mhgp7_bad_alloc_etage_fold
+ 74/445 Test  #72: mhgp7_contrat_echec_fold_k2 .............................   Passed   11.21 sec
+        Start  78: mhgp7_e6_grille_objet
+ 75/445 Test  #73: mhgp7_contrat_echec_fuite_sum_parents ...................   Passed   11.46 sec
+        Start  79: mhgp7_fused_descent
+ 76/445 Test  #76: mhgp7_bad_alloc_etage_census ............................   Passed    5.81 sec
+        Start  80: mhgp7_sweep_oracle
+ 77/445 Test  #80: mhgp7_sweep_oracle ......................................   Passed    0.88 sec
+        Start  81: mhgp7_caps_refus
+ 78/445 Test  #77: mhgp7_bad_alloc_etage_fold ..............................   Passed    7.53 sec
+        Start  82: mhgp7_caps_mutant_emission
+ 79/445 Test  #79: mhgp7_fused_descent .....................................   Passed   10.98 sec
+        Start  83: mhgp7_caps_mutant_late_wave
+ 80/445 Test  #82: mhgp7_caps_mutant_emission ..............................   Passed   36.58 sec
+        Start  84: mhgp7_caps_mutant_prefusion
+ 81/445 Test  #83: mhgp7_caps_mutant_late_wave .............................   Passed   37.23 sec
+        Start  85: mhgp7_executor_pool
+ 82/445 Test  #85: mhgp7_executor_pool .....................................   Passed    0.44 sec
+        Start  86: mhgp7_executor_pool_mutant_serial
+ 83/445 Test  #86: mhgp7_executor_pool_mutant_serial .......................   Passed    0.05 sec
+        Start  87: mhgp7_executor_pool_mutant_drop_exception
+ 84/445 Test  #87: mhgp7_executor_pool_mutant_drop_exception ...............   Passed    0.06 sec
+        Start  88: mhgp7_executor_pool_mutant_worker_resume
+ 85/445 Test  #88: mhgp7_executor_pool_mutant_worker_resume ................   Passed    0.05 sec
+        Start  89: mhgp7_executor_pool_mutant_activate_late
+ 86/445 Test  #89: mhgp7_executor_pool_mutant_activate_late ................   Passed    0.07 sec
+        Start  90: mhgp7_wire
+ 87/445 Test  #90: mhgp7_wire ..............................................   Passed    0.05 sec
+        Start  91: mhgp7_wire_mutant_drop_node
+ 88/445 Test  #91: mhgp7_wire_mutant_drop_node .............................   Passed    0.06 sec
+        Start  92: mhgp7_wire_mutant_t1
+ 89/445 Test  #92: mhgp7_wire_mutant_t1 ....................................   Passed    0.04 sec
+        Start  93: mhgp7_census_device_stub
+ 90/445 Test  #93: mhgp7_census_device_stub ................................   Passed   12.95 sec
+        Start  94: mhgp7_census_stub_mutant_range_le
+ 91/445 Test  #94: mhgp7_census_stub_mutant_range_le .......................   Passed    9.83 sec
+        Start  95: mhgp7_census_stub_mutant_stack
+ 92/445 Test  #95: mhgp7_census_stub_mutant_stack ..........................   Passed   10.59 sec
+        Start  96: mhgp7_census_stub_mutant_swap_push
+ 93/445 Test  #96: mhgp7_census_stub_mutant_swap_push ......................   Passed   10.55 sec
+        Start  97: mhgp7_census_stub_mutant_nonstrict
+ 94/445 Test  #84: mhgp7_caps_mutant_prefusion .............................   Passed   52.73 sec
+        Start  98: mhgp7_census_stub_mutant_skip_write
+ 95/445 Test  #98: mhgp7_census_stub_mutant_skip_write .....................   Passed   10.11 sec
+        Start  99: mhgp7_census_stub_mutant_nshell
+ 96/445 Test  #97: mhgp7_census_stub_mutant_nonstrict ......................   Passed   10.65 sec
+        Start 100: mhgp7_census_stub_mutant_skip_count
+ 97/445 Test  #81: mhgp7_caps_refus ........................................   Passed  110.36 sec
+        Start 101: mhgp7_pilot_stub
+ 98/445 Test #100: mhgp7_census_stub_mutant_skip_count .....................   Passed    9.54 sec
+        Start 102: mhgp7_pilote_stub_refus_n
+ 99/445 Test #102: mhgp7_pilote_stub_refus_n ...............................   Passed    0.02 sec
+        Start 103: mhgp7_pilote_stub_parite_200
+100/445 Test  #99: mhgp7_census_stub_mutant_nshell .........................   Passed    9.85 sec
+        Start 104: mhgp7_pilote_stub_lot17
+101/445 Test #103: mhgp7_pilote_stub_parite_200 ............................   Passed   14.64 sec
+        Start 105: mhgp7_pilote_stub_mutant_base
+102/445 Test #104: mhgp7_pilote_stub_lot17 .................................   Passed   15.26 sec
+        Start 106: mhgp7_pilote_juge_contre_fixtures
+103/445 Test #106: mhgp7_pilote_juge_contre_fixtures .......................   Passed    0.20 sec
+        Start 107: mhgp7_pilote_stub_juge
+104/445 Test #105: mhgp7_pilote_stub_mutant_base ...........................   Passed    2.99 sec
+        Start 108: mhgp7_pilote_stub_juge_ordre_inverse
+105/445 Test #107: mhgp7_pilote_stub_juge ..................................   Passed   16.98 sec
+        Start 109: mhgp7_pilot_stub_mutant_stack
+106/445 Test #108: mhgp7_pilote_stub_juge_ordre_inverse ....................   Passed   17.75 sec
+        Start 110: mhgp7_pilot_stub_mutant_nonstrict
+107/445 Test #109: mhgp7_pilot_stub_mutant_stack ...........................   Passed    8.23 sec
+        Start 111: mhgp7_pilot_stub_mutant_skip_write
+108/445 Test #110: mhgp7_pilot_stub_mutant_nonstrict .......................   Passed    7.99 sec
+        Start 112: mhgp7_pilot_stub_mutant_nshell
+109/445 Test #111: mhgp7_pilot_stub_mutant_skip_write ......................   Passed    8.25 sec
+        Start 113: mhgp7_pilot_stub_mutant_skip_count
+110/445 Test #112: mhgp7_pilot_stub_mutant_nshell ..........................   Passed    7.73 sec
+        Start 114: mhgp7_device_witness_stub
+111/445 Test #114: mhgp7_device_witness_stub ...............................   Passed    0.19 sec
+        Start 115: mhgp7_device_witness_stub_mutant_carry
+112/445 Test #115: mhgp7_device_witness_stub_mutant_carry ..................   Passed    0.33 sec
+        Start 116: mhgp7_device_witness_stub_mutant_skip_write
+113/445 Test #116: mhgp7_device_witness_stub_mutant_skip_write .............   Passed    0.20 sec
+        Start 117: mhgp7_device_witness_stub_mutant_skip_native
+114/445 Test #117: mhgp7_device_witness_stub_mutant_skip_native ............   Passed    0.51 sec
+        Start 118: mhgp7_device_witness_stub_contre_double
+115/445 Test #118: mhgp7_device_witness_stub_contre_double .................   Passed    0.35 sec
+        Start 119: mhgp7_sweep_mutant_depth
+116/445 Test #119: mhgp7_sweep_mutant_depth ................................   Passed    0.87 sec
+        Start 120: mhgp7_fused_mutant_mask
+117/445 Test #113: mhgp7_pilot_stub_mutant_skip_count ......................   Passed    6.73 sec
+        Start 121: mhgp7_conformity_uniform_400
+118/445 Test #121: mhgp7_conformity_uniform_400 ............................   Passed    3.91 sec
+        Start 122: mhgp7_conformity_terrain_400
+119/445 Test #122: mhgp7_conformity_terrain_400 ............................   Passed    0.93 sec
+        Start 123: mhgp7_conformity_eight_clusters_400
+120/445 Test #123: mhgp7_conformity_eight_clusters_400 .....................   Passed    2.70 sec
+        Start 124: mhgp7_conformity_scanline_single_pass_400
+121/445 Test #124: mhgp7_conformity_scanline_single_pass_400 ...............   Passed    0.98 sec
+        Start 125: mhgp7_conformity_collinear_seven_600
+122/445 Test #125: mhgp7_conformity_collinear_seven_600 ....................   Passed    0.23 sec
+        Start 126: mhgp7_conformity_two_lines_200
+123/445 Test #126: mhgp7_conformity_two_lines_200 ..........................   Passed    0.95 sec
+        Start 127: mhgp7_conformity_uniform_2000
+124/445 Test #120: mhgp7_fused_mutant_mask .................................   Passed   16.69 sec
+        Start 128: mhgp7_conformity_terrain_2000
+125/445 Test #128: mhgp7_conformity_terrain_2000 ...........................   Passed    5.76 sec
+        Start 129: mhgp7_sweep_mutant_exit
+126/445 Test #129: mhgp7_sweep_mutant_exit .................................   Passed    2.43 sec
+        Start 130: mhgp7_conformity_mutant_rle
+127/445 Test #130: mhgp7_conformity_mutant_rle .............................   Passed    8.61 sec
+        Start 131: mhgp7_cli_refus_s7
+128/445 Test #131: mhgp7_cli_refus_s7 ......................................   Passed    0.05 sec
+        Start 132: mhgp7_cli_refus_s_suffix
+129/445 Test #132: mhgp7_cli_refus_s_suffix ................................   Passed    0.05 sec
+        Start 133: mhgp7_cli_refus_n_suffix
+130/445 Test #133: mhgp7_cli_refus_n_suffix ................................   Passed    0.05 sec
+        Start 134: mhgp7_cli_ok_s8
+131/445 Test #134: mhgp7_cli_ok_s8 .........................................   Passed    2.65 sec
+        Start 135: mhgp7_cli_budget_signature
+132/445 Test #135: mhgp7_cli_budget_signature ..............................   Passed    3.38 sec
+        Start 136: mhgp7_conformity_uniform_8000
+133/445 Test #127: mhgp7_conformity_uniform_2000 ...........................   Passed   28.40 sec
+        Start 137: mhgp7_conformity_uniform_16000
+134/445 Test #101: mhgp7_pilot_stub ........................................   Passed  171.41 sec
+        Start 138: mhgp7_conformity_uniform_32000
+135/445 Test #136: mhgp7_conformity_uniform_8000 ...........................   Passed  131.09 sec
+        Start 139: mhgp7_conformity_terrain_8000
+136/445 Test #139: mhgp7_conformity_terrain_8000 ...........................   Passed   31.74 sec
+        Start 140: mhgp7_conformity_terrain_16000
+137/445 Test #140: mhgp7_conformity_terrain_16000 ..........................   Passed   74.97 sec
+        Start 141: mhgp7_conformity_terrain_32000
+138/445 Test #137: mhgp7_conformity_uniform_16000 ..........................   Passed  294.54 sec
+        Start 142: mhgp7_conformity_eight_clusters_8000
+139/445 Test  #78: mhgp7_e6_grille_objet ...................................***Timeout 600.12 sec
+
+        Start 143: mhgp7_conformity_eight_clusters_16000
+140/445 Test #142: mhgp7_conformity_eight_clusters_8000 ....................   Passed  141.12 sec
+        Start 144: mhgp7_conformity_eight_clusters_32000
+141/445 Test #141: mhgp7_conformity_terrain_32000 ..........................   Passed  227.02 sec
+        Start 145: mhgp7_conformity_scanline_single_pass_8000
+142/445 Test #145: mhgp7_conformity_scanline_single_pass_8000 ..............   Passed   28.78 sec
+        Start 146: mhgp7_conformity_scanline_single_pass_16000
+143/445 Test #146: mhgp7_conformity_scanline_single_pass_16000 .............   Passed   76.42 sec
+        Start 147: mhgp7_conformity_scanline_single_pass_32000
+144/445 Test #138: mhgp7_conformity_uniform_32000 ..........................   Passed  626.87 sec
+        Start 148: mhgp7_conformity_scanline_overlap_multiecho_8000
+145/445 Test #148: mhgp7_conformity_scanline_overlap_multiecho_8000 ........   Passed   49.66 sec
+        Start 149: mhgp7_conformity_scanline_overlap_multiecho_16000
+146/445 Test #143: mhgp7_conformity_eight_clusters_16000 ...................   Passed  366.87 sec
+        Start 150: mhgp7_conformity_scanline_overlap_multiecho_32000
+147/445 Test #147: mhgp7_conformity_scanline_single_pass_32000 .............   Passed  199.27 sec
+        Start 151: mhgp7_prefix_uniform_400
+148/445 Test #151: mhgp7_prefix_uniform_400 ................................   Passed    1.53 sec
+        Start 152: mhgp7_prefix_terrain_400
+149/445 Test #152: mhgp7_prefix_terrain_400 ................................   Passed    0.67 sec
+        Start 153: mhgp7_prefix_eight_clusters_400
+150/445 Test #153: mhgp7_prefix_eight_clusters_400 .........................   Passed    1.21 sec
+        Start 154: mhgp7_prefix_scanline_single_pass_400
+151/445 Test #154: mhgp7_prefix_scanline_single_pass_400 ...................   Passed    0.54 sec
+        Start 155: mhgp7_prefix_collinear_seven_600
+152/445 Test #155: mhgp7_prefix_collinear_seven_600 ........................   Passed    0.19 sec
+        Start 156: mhgp7_prefix_two_lines_200
+153/445 Test #156: mhgp7_prefix_two_lines_200 ..............................   Passed    1.38 sec
+        Start 157: mhgp7_prefix_uniform_2000
+154/445 Test #157: mhgp7_prefix_uniform_2000 ...............................   Passed    9.18 sec
+        Start 158: mhgp7_prefix_terrain_2000
+155/445 Test #158: mhgp7_prefix_terrain_2000 ...............................   Passed    2.04 sec
+        Start 159: mhgp7_prefix_uniform_8000
+156/445 Test #159: mhgp7_prefix_uniform_8000 ...............................   Passed   29.64 sec
+        Start 160: mhgp7_prefix_uniform_16000
+157/445 Test #160: mhgp7_prefix_uniform_16000 ..............................   Passed   64.48 sec
+        Start 161: mhgp7_prefix_uniform_32000
+158/445 Test #149: mhgp7_conformity_scanline_overlap_multiecho_16000 .......   Passed  135.87 sec
+        Start 162: mhgp7_prefix_terrain_8000
+159/445 Test #162: mhgp7_prefix_terrain_8000 ...............................   Passed    8.71 sec
+        Start 163: mhgp7_prefix_terrain_16000
+160/445 Test #163: mhgp7_prefix_terrain_16000 ..............................   Passed   25.49 sec
+        Start 164: mhgp7_prefix_terrain_32000
+161/445 Test #164: mhgp7_prefix_terrain_32000 ..............................   Passed   73.80 sec
+        Start 165: mhgp7_prefix_eight_clusters_8000
+162/445 Test #165: mhgp7_prefix_eight_clusters_8000 ........................   Passed   31.88 sec
+        Start 166: mhgp7_prefix_eight_clusters_16000
+163/445 Test #161: mhgp7_prefix_uniform_32000 ..............................   Passed  150.39 sec
+        Start 167: mhgp7_prefix_eight_clusters_32000
+164/445 Test #150: mhgp7_conformity_scanline_overlap_multiecho_32000 .......   Passed  326.98 sec
+        Start 168: mhgp7_prefix_scanline_single_pass_8000
+165/445 Test #168: mhgp7_prefix_scanline_single_pass_8000 ..................   Passed    8.63 sec
+        Start 169: mhgp7_prefix_scanline_single_pass_16000
+166/445 Test #166: mhgp7_prefix_eight_clusters_16000 .......................   Passed   83.97 sec
+        Start 170: mhgp7_prefix_scanline_single_pass_32000
+167/445 Test #169: mhgp7_prefix_scanline_single_pass_16000 .................   Passed   18.73 sec
+        Start 171: mhgp7_prefix_scanline_overlap_multiecho_8000
+168/445 Test #171: mhgp7_prefix_scanline_overlap_multiecho_8000 ............   Passed   11.53 sec
+        Start 172: mhgp7_prefix_scanline_overlap_multiecho_16000
+169/445 Test #172: mhgp7_prefix_scanline_overlap_multiecho_16000 ...........   Passed   36.94 sec
+        Start 173: mhgp7_prefix_scanline_overlap_multiecho_32000
+170/445 Test #170: mhgp7_prefix_scanline_single_pass_32000 .................   Passed   61.10 sec
+        Start 174: mhgp7_prefix_temoin_evenements
+171/445 Test #174: mhgp7_prefix_temoin_evenements ..........................   Passed    6.20 sec
+        Start 175: mhgp7_prefix_mutant_event_order
+172/445 Test #175: mhgp7_prefix_mutant_event_order .........................   Passed    6.79 sec
+        Start 176: mhgp7_prefix_contre_event_order_sans_temoin
+173/445 Test #176: mhgp7_prefix_contre_event_order_sans_temoin .............   Passed    1.14 sec
+        Start 177: mhgp7_prefix_mutant_batch_levels
+174/445 Test #177: mhgp7_prefix_mutant_batch_levels ........................   Passed    1.35 sec
+        Start 178: mhgp7_prefix_mutant_depth_smax6
+175/445 Test #178: mhgp7_prefix_mutant_depth_smax6 .........................   Passed    0.85 sec
+        Start 179: mhgp7_prefix_refus_smax11
+176/445 Test #179: mhgp7_prefix_refus_smax11 ...............................   Passed    0.06 sec
+        Start 180: mhgp7_prefix_refus_sans_reference
+177/445 Test #180: mhgp7_prefix_refus_sans_reference .......................   Passed    0.06 sec
+        Start 181: mhgp7_prefix_refus_reference_courte
+178/445 Test #181: mhgp7_prefix_refus_reference_courte .....................   Passed    1.37 sec
+        Start 182: mhgp7_prefix_plancher_cable
+179/445 Test #182: mhgp7_prefix_plancher_cable .............................   Passed    1.36 sec
+        Start 183: mhgp7_residence_jalons
+180/445 Test #173: mhgp7_prefix_scanline_overlap_multiecho_32000 ...........   Passed   61.16 sec
+        Start 184: mhgp7_residence_mutant_hwm_instantane
+181/445 Test #183: mhgp7_residence_jalons ..................................   Passed   32.94 sec
+        Start 185: mhgp7_residence_mutant_jalon_manquant
+182/445 Test #167: mhgp7_prefix_eight_clusters_32000 .......................   Passed  196.85 sec
+        Start 186: mhgp7_residence_mutant_tranches_gardees
+183/445 Test #184: mhgp7_residence_mutant_hwm_instantane ...................   Passed   27.58 sec
+        Start 187: mhgp7_residence_plafond_cable
+184/445 Test #186: mhgp7_residence_mutant_tranches_gardees .................   Passed   28.98 sec
+        Start 188: mhgp7_residence_plancher_cable
+185/445 Test #185: mhgp7_residence_mutant_jalon_manquant ...................   Passed   32.02 sec
+        Start 189: mhgp7_residence_refus_smax
+186/445 Test #189: mhgp7_residence_refus_smax ..............................   Passed    0.06 sec
+        Start 190: mhgp7_residence_jalons_prefixe
+187/445 Test #190: mhgp7_residence_jalons_prefixe ..........................   Passed    8.31 sec
+        Start 191: mhgp7_linked_arcs_u16
+188/445 Test #191: mhgp7_linked_arcs_u16 ...................................   Passed    1.57 sec
+        Start 192: mhgp7_linked_arcs_oracle_i64
+189/445 Test #192: mhgp7_linked_arcs_oracle_i64 ............................   Passed    0.63 sec
+        Start 193: mhgp7_cell_grid_oracle
+190/445 Test #187: mhgp7_residence_plafond_cable ...........................   Passed   25.36 sec
+        Start 194: mhgp7_cell_grid_oracle_mutant_ns
+191/445 Test #188: mhgp7_residence_plancher_cable ..........................   Passed   23.99 sec
+        Start 195: mhgp7_cell_grid_oracle_mutant_eps
+192/445 Test #144: mhgp7_conformity_eight_clusters_32000 ...................   Passed  860.42 sec
+        Start 196: mhgp7_cell_grid_oracle_mutant_h1
+193/445 Test #193: mhgp7_cell_grid_oracle ..................................   Passed   35.66 sec
+        Start 197: mhgp7_sweep_frontieres
+194/445 Test #197: mhgp7_sweep_frontieres ..................................   Passed    0.10 sec
+        Start 198: mhgp7_sweep_frontieres_mutant_depth
+195/445 Test #198: mhgp7_sweep_frontieres_mutant_depth .....................   Passed    0.02 sec
+        Start 199: mhgp7_sweep_frontieres_mutant_exit
+196/445 Test #199: mhgp7_sweep_frontieres_mutant_exit ......................   Passed    0.02 sec
+        Start 200: mhgp7_cover_coef4
+197/445 Test #200: mhgp7_cover_coef4 .......................................   Passed    0.06 sec
+        Start 201: mhgp7_cover_coef3_mutant
+198/445 Test #201: mhgp7_cover_coef3_mutant ................................   Passed    0.02 sec
+        Start 202: mhgp7_postprefilter_uniform_400
+199/445 Test #202: mhgp7_postprefilter_uniform_400 .........................   Passed    2.05 sec
+        Start 203: mhgp7_mutant_wspd-drop-rect
+200/445 Test #203: mhgp7_mutant_wspd-drop-rect .............................   Passed    0.78 sec
+        Start 204: mhgp7_mutant_census-nonstrict
+201/445 Test #204: mhgp7_mutant_census-nonstrict ...........................   Passed    0.99 sec
+        Start 205: mhgp7_mutant_genfilter-nonstrict
+202/445 Test #194: mhgp7_cell_grid_oracle_mutant_ns ........................   Passed   32.95 sec
+        Start 206: mhgp7_mutant_depth-threshold-minus-one
+203/445 Test #205: mhgp7_mutant_genfilter-nonstrict ........................   Passed    1.35 sec
+        Start 207: mhgp7_mutant_range-add-max-le-zero
+204/445 Test #207: mhgp7_mutant_range-add-max-le-zero ......................   Passed    1.14 sec
+        Start 208: mhgp7_mutant_skip-full-census
+205/445 Test #206: mhgp7_mutant_depth-threshold-minus-one ..................   Passed    1.59 sec
+        Start 209: mhgp7_mutant_binary-ties
+206/445 Test #208: mhgp7_mutant_skip-full-census ...........................   Passed    1.28 sec
+        Start 210: mhgp7_mutant_repr-ties
+207/445 Test #209: mhgp7_mutant_binary-ties ................................   Passed    1.37 sec
+        Start 211: mhgp7_mutant_attach-prebatch
+208/445 Test #195: mhgp7_cell_grid_oracle_mutant_eps .......................   Passed   33.77 sec
+        Start 212: mhgp7_mutant_drop-nonmerge
+209/445 Test #210: mhgp7_mutant_repr-ties ..................................   Passed    1.76 sec
+        Start 213: mhgp7_mutant_dense-pointid
+210/445 Test #211: mhgp7_mutant_attach-prebatch ............................   Passed    1.59 sec
+        Start 214: mhgp7_mutant_canonical-is-uf-root
+211/445 Test #214: mhgp7_mutant_canonical-is-uf-root .......................   Passed    1.56 sec
+        Start 215: mhgp7_mutant_q3-level-4g
+212/445 Test #212: mhgp7_mutant_drop-nonmerge ..............................   Passed    2.12 sec
+        Start 216: mhgp7_mutant_q4-center-parity
+213/445 Test #213: mhgp7_mutant_dense-pointid ..............................   Passed    2.06 sec
+        Start 217: mhgp7_mutant_q4-eq-sign
+214/445 Test #215: mhgp7_mutant_q3-level-4g ................................   Passed    1.43 sec
+        Start 218: mhgp7_mutant_q4-i64-drop-factor
+215/445 Test #216: mhgp7_mutant_q4-center-parity ...........................   Passed    1.68 sec
+        Start 219: mhgp7_mutant_q4-i64-pair-min
+216/445 Test #217: mhgp7_mutant_q4-eq-sign .................................   Passed    1.69 sec
+        Start 220: mhgp7_mutant_witness-no-lane-mask
+217/445 Test #218: mhgp7_mutant_q4-i64-drop-factor .........................   Passed    1.49 sec
+        Start 221: mhgp7_mutant_par-drop-shard
+218/445 Test #219: mhgp7_mutant_q4-i64-pair-min ............................   Passed    1.61 sec
+        Start 222: mhgp7_mutant_par-drop-ball-chunk
+219/445 Test #220: mhgp7_mutant_witness-no-lane-mask .......................   Passed    2.02 sec
+        Start 223: mhgp7_mutant_fold-inject-a-failure-k2
+220/445 Test #221: mhgp7_mutant_par-drop-shard .............................   Passed    1.64 sec
+        Start 224: mhgp7_mutant_ablation-mat-sans-copie
+221/445 Test #223: mhgp7_mutant_fold-inject-a-failure-k2 ...................   Passed    1.33 sec
+        Start 225: mhgp7_mutant_ablation-mat-sans-tris
+222/445 Test #222: mhgp7_mutant_par-drop-ball-chunk ........................   Passed    1.91 sec
+        Start 226: mhgp7_mutant_ablation-post-cle-factice
+223/445 Test #224: mhgp7_mutant_ablation-mat-sans-copie ....................   Passed    2.07 sec
+        Start 227: mhgp7_juge_refus_narrowing
+224/445 Test #227: mhgp7_juge_refus_narrowing ..............................   Passed    0.03 sec
+        Start 228: mhgp7_juge_refus_reference_tronquee
+225/445 Test #225: mhgp7_mutant_ablation-mat-sans-tris .....................   Passed    1.94 sec
+        Start 229: mhgp7_juge_refus_k_en_trop
+226/445 Test #226: mhgp7_mutant_ablation-post-cle-factice ..................   Passed    1.92 sec
+        Start 230: mhgp7_juge_refus_k11
+227/445 Test #229: mhgp7_juge_refus_k_en_trop ..............................   Passed    0.04 sec
+        Start 231: mhgp7_cover_refus_mutant_hors_cible
+228/445 Test #231: mhgp7_cover_refus_mutant_hors_cible .....................   Passed    0.04 sec
+        Start 232: mhgp7_sweep_refus_inject_vide
+229/445 Test #232: mhgp7_sweep_refus_inject_vide ...........................   Passed    0.02 sec
+        Start 233: mhgp7_fused_mutant_droprect
+230/445 Test #228: mhgp7_juge_refus_reference_tronquee .....................   Passed    2.01 sec
+        Start 234: mhgp7_pentes_validateur
+231/445 Test #230: mhgp7_juge_refus_k11 ....................................   Passed    2.09 sec
+        Start 235: mhgp7_campagne_provenance
+232/445 Test #235: mhgp7_campagne_provenance ...............................   Passed    1.00 sec
+        Start 236: mhgp7_agregateur_intergraines
+233/445 Test #234: mhgp7_pentes_validateur .................................   Passed    2.73 sec
+        Start 237: mhgp7_wire_pack
+234/445 Test #236: mhgp7_agregateur_intergraines ...........................   Passed    1.22 sec
+        Start 238: mhgp7_wire_pack_mutant_stride
+235/445 Test #233: mhgp7_fused_mutant_droprect .............................   Passed    5.76 sec
+        Start 239: mhgp7_wire_pack_mutant_slack
+236/445 Test #238: mhgp7_wire_pack_mutant_stride ...........................   Passed    2.38 sec
+        Start 240: mhgp7_wire_pack_contre_double
+237/445 Test #237: mhgp7_wire_pack .........................................   Passed    2.79 sec
+        Start 241: mhgp7_wire_pack_refus_arg
+238/445 Test #241: mhgp7_wire_pack_refus_arg ...............................   Passed    0.06 sec
+        Start 242: mhgp7_wire_pack_plancher
+239/445 Test #239: mhgp7_wire_pack_mutant_slack ............................   Passed    3.03 sec
+        Start 243: mhgp7_lot_ring
+240/445 Test #243: mhgp7_lot_ring ..........................................   Passed    0.05 sec
+        Start 244: mhgp7_lot_ring_plancher
+241/445 Test #244: mhgp7_lot_ring_plancher .................................   Passed    0.04 sec
+        Start 245: mhgp7_lot_ring_refus_arg
+242/445 Test #245: mhgp7_lot_ring_refus_arg ................................   Passed    0.03 sec
+        Start 246: mhgp7_lot_ring_refus_mutant
+243/445 Test #246: mhgp7_lot_ring_refus_mutant .............................   Passed    0.02 sec
+        Start 247: mhgp7_lot_ring_mutant_reuse
+244/445 Test #247: mhgp7_lot_ring_mutant_reuse .............................   Passed    0.03 sec
+        Start 248: mhgp7_lot_ring_mutant_merge
+245/445 Test #240: mhgp7_wire_pack_contre_double ...........................   Passed    2.38 sec
+        Start 249: mhgp7_lot_ring_mutant_epoch
+246/445 Test #248: mhgp7_lot_ring_mutant_merge .............................   Passed    0.04 sec
+        Start 250: mhgp7_lot_ring_mutant_prefixe
+247/445 Test #249: mhgp7_lot_ring_mutant_epoch .............................   Passed    0.03 sec
+        Start 251: mhgp7_lot_ring_mutant_rebuild_tot
+248/445 Test #250: mhgp7_lot_ring_mutant_prefixe ...........................   Passed    0.03 sec
+        Start 252: mhgp7_fold_cap_evenements
+249/445 Test #251: mhgp7_lot_ring_mutant_rebuild_tot .......................   Passed    0.04 sec
+        Start 253: mhgp7_fold_cap_incidences
+250/445 Test #242: mhgp7_wire_pack_plancher ................................   Passed    2.99 sec
+        Start 254: mhgp7_fold_cap_mutant_evenements
+251/445 Test #196: mhgp7_cell_grid_oracle_mutant_h1 ........................   Passed   38.75 sec
+        Start 255: mhgp7_fold_cap_mutant_incidences
+252/445 Test #254: mhgp7_fold_cap_mutant_evenements ........................   Passed    5.33 sec
+        Start 256: mhgp7_fold_cap_plancher
+253/445 Test #253: mhgp7_fold_cap_incidences ...............................   Passed    7.42 sec
+        Start 257: mhgp7_fold_cap_refus_arg
+254/445 Test #257: mhgp7_fold_cap_refus_arg ................................   Passed    0.05 sec
+        Start 258: mhgp7_profile_refuse_inject
+255/445 Test #252: mhgp7_fold_cap_evenements ...............................   Passed    7.51 sec
+        Start 259: mhgp7_profile_sonde_refuse_inconnu
+256/445 Test #258: mhgp7_profile_refuse_inject .............................   Passed    0.11 sec
+        Start 260: mhgp7_profile_sonde_refuse_inject_vide
+257/445 Test #259: mhgp7_profile_sonde_refuse_inconnu ......................   Passed    0.10 sec
+        Start 261: mhgp7_profile_sonde_refuse_inject_virgule
+258/445 Test #260: mhgp7_profile_sonde_refuse_inject_vide ..................   Passed    0.04 sec
+        Start 262: mhgp7_profile_sonde_refuse_mutant_production
+259/445 Test #261: mhgp7_profile_sonde_refuse_inject_virgule ...............   Passed    0.06 sec
+        Start 263: mhgp7_profil_identite
+260/445 Test #262: mhgp7_profile_sonde_refuse_mutant_production ............   Passed    0.02 sec
+        Start 264: mhgp7_profil_contre_fixture
+261/445 Test #264: mhgp7_profil_contre_fixture .............................   Passed    0.09 sec
+        Start 265: mhgp7_plan_keycsr_gate
+262/445 Test #255: mhgp7_fold_cap_mutant_incidences ........................   Passed    5.53 sec
+        Start 266: mhgp7_sonde_ablation_gate
+263/445 Test #265: mhgp7_plan_keycsr_gate ..................................   Passed    1.21 sec
+        Start 267: mhgp7_profil_contrat_echec
+264/445 Test #256: mhgp7_fold_cap_plancher .................................   Passed    2.76 sec
+        Start 268: mhgp7_profil_contrat_echec_k2
+265/445 Test #268: mhgp7_profil_contrat_echec_k2 ...........................   Passed    2.06 sec
+        Start 269: mhgp7_fold_csr_fixtures
+266/445 Test #269: mhgp7_fold_csr_fixtures .................................   Passed    0.59 sec
+        Start 270: mhgp7_fold_csr_offsets
+267/445 Test #270: mhgp7_fold_csr_offsets ..................................   Passed    0.03 sec
+        Start 271: mhgp7_fold_csr_overflow
+268/445 Test #267: mhgp7_profil_contrat_echec ..............................   Passed    3.01 sec
+        Start 272: mhgp7_fold_csr_copie
+269/445 Test #271: mhgp7_fold_csr_overflow .................................   Passed    1.98 sec
+        Start 273: mhgp7_fold_csr_pipeline
+270/445 Test #272: mhgp7_fold_csr_copie ....................................   Passed    3.81 sec
+        Start 274: mhgp7_fold_csr_pipeline_uniform_8000
+271/445 Test #263: mhgp7_profil_identite ...................................   Passed   25.74 sec
+        Start 275: mhgp7_fold_csr_refus_inject_vide
+272/445 Test #275: mhgp7_fold_csr_refus_inject_vide ........................   Passed    0.02 sec
+        Start 276: mhgp7_fold_csr_refus_mutant_inconnu
+273/445 Test #276: mhgp7_fold_csr_refus_mutant_inconnu .....................   Passed    0.02 sec
+        Start 277: mhgp7_fold_csr_refus_mutant_hors_cible
+274/445 Test #277: mhgp7_fold_csr_refus_mutant_hors_cible ..................   Passed    0.02 sec
+        Start 278: mhgp7_fold_csr_refus_pipeline_sans_inject
+275/445 Test #278: mhgp7_fold_csr_refus_pipeline_sans_inject ...............   Passed    0.02 sec
+        Start 279: mhgp7_fold_csr_mutant_csr-order-by-output
+276/445 Test #279: mhgp7_fold_csr_mutant_csr-order-by-output ...............   Passed    0.11 sec
+        Start 280: mhgp7_fold_csr_mutant_csr-keep-continuation
+277/445 Test #280: mhgp7_fold_csr_mutant_csr-keep-continuation .............   Passed    0.13 sec
+        Start 281: mhgp7_fold_csr_mutant_csr-stale-level
+278/445 Test #281: mhgp7_fold_csr_mutant_csr-stale-level ...................   Passed    0.12 sec
+        Start 282: mhgp7_fold_csr_mutant_csr-stale-output
+279/445 Test #282: mhgp7_fold_csr_mutant_csr-stale-output ..................   Passed    0.14 sec
+        Start 283: mhgp7_fold_csr_mutant_csr-unsorted-born
+280/445 Test #283: mhgp7_fold_csr_mutant_csr-unsorted-born .................   Passed    0.09 sec
+        Start 284: mhgp7_fold_csr_mutant_csr-unsorted-parents
+281/445 Test #284: mhgp7_fold_csr_mutant_csr-unsorted-parents ..............   Passed    0.12 sec
+        Start 285: mhgp7_fold_csr_mutant_csr-drop-delta
+282/445 Test #285: mhgp7_fold_csr_mutant_csr-drop-delta ....................   Passed    0.12 sec
+        Start 286: mhgp7_fold_csr_mutant_csr-dup-delta
+283/445 Test #286: mhgp7_fold_csr_mutant_csr-dup-delta .....................   Passed    0.08 sec
+        Start 287: mhgp7_fold_csr_mutant_csr-shift-offset
+284/445 Test #287: mhgp7_fold_csr_mutant_csr-shift-offset ..................   Passed    0.12 sec
+        Start 288: mhgp7_fold_csr_mutant_csr-offset-hole
+285/445 Test #288: mhgp7_fold_csr_mutant_csr-offset-hole ...................   Passed    0.12 sec
+        Start 289: mhgp7_fold_csr_mutant_csr-offset-overlap
+286/445 Test #289: mhgp7_fold_csr_mutant_csr-offset-overlap ................   Passed    0.12 sec
+        Start 290: mhgp7_fold_csr_mutant_csr-offset-end
+287/445 Test #290: mhgp7_fold_csr_mutant_csr-offset-end ....................   Passed    0.10 sec
+        Start 291: mhgp7_fold_csr_mutant_csr-offset-domain
+288/445 Test #291: mhgp7_fold_csr_mutant_csr-offset-domain .................   Passed    0.09 sec
+        Start 292: mhgp7_fold_csr_refus_csr-offset-hole
+289/445 Test #292: mhgp7_fold_csr_refus_csr-offset-hole ....................   Passed    1.36 sec
+        Start 293: mhgp7_fold_csr_refus_csr-offset-overlap
+290/445 Test #293: mhgp7_fold_csr_refus_csr-offset-overlap .................   Passed    1.41 sec
+        Start 294: mhgp7_fold_csr_refus_csr-offset-end
+291/445 Test #294: mhgp7_fold_csr_refus_csr-offset-end .....................   Passed    1.39 sec
+        Start 295: mhgp7_fold_csr_refus_csr-offset-domain
+292/445 Test #295: mhgp7_fold_csr_refus_csr-offset-domain ..................   Passed    1.28 sec
+        Start 296: mhgp7_fold_csr_mutant_csr-guard-skip
+293/445 Test #296: mhgp7_fold_csr_mutant_csr-guard-skip ....................   Passed    0.02 sec
+        Start 297: mhgp7_fold_csr_mutant_csr-inject-bad-alloc
+294/445 Test #297: mhgp7_fold_csr_mutant_csr-inject-bad-alloc ..............   Passed    1.36 sec
+        Start 298: mhgp7_conformity_csr_uniform_400
+295/445 Test #298: mhgp7_conformity_csr_uniform_400 ........................   Passed    1.96 sec
+        Start 299: mhgp7_conformity_csr_terrain_400
+296/445 Test #299: mhgp7_conformity_csr_terrain_400 ........................   Passed    0.67 sec
+        Start 300: mhgp7_conformity_csr_eight_clusters_400
+297/445 Test #300: mhgp7_conformity_csr_eight_clusters_400 .................   Passed    1.90 sec
+        Start 301: mhgp7_conformity_csr_scanline_single_pass_400
+298/445 Test #301: mhgp7_conformity_csr_scanline_single_pass_400 ...........   Passed    0.69 sec
+        Start 302: mhgp7_conformity_csr_collinear_seven_600
+299/445 Test #302: mhgp7_conformity_csr_collinear_seven_600 ................   Passed    0.14 sec
+        Start 303: mhgp7_conformity_csr_two_lines_200
+300/445 Test #303: mhgp7_conformity_csr_two_lines_200 ......................   Passed    0.56 sec
+        Start 304: mhgp7_conformity_csr_uniform_2000
+301/445 Test #304: mhgp7_conformity_csr_uniform_2000 .......................   Passed   16.74 sec
+        Start 305: mhgp7_conformity_csr_terrain_2000
+302/445 Test #305: mhgp7_conformity_csr_terrain_2000 .......................   Passed    3.08 sec
+        Start 306: mhgp7_conformity_csr_uniform_8000
+303/445 Test #266: mhgp7_sonde_ablation_gate ...............................   Passed   98.55 sec
+        Start 307: mhgp7_conformity_csr_uniform_16000
+304/445 Test #306: mhgp7_conformity_csr_uniform_8000 .......................   Passed   71.86 sec
+        Start 308: mhgp7_conformity_csr_uniform_32000
+305/445 Test #307: mhgp7_conformity_csr_uniform_16000 ......................   Passed  189.98 sec
+        Start 309: mhgp7_conformity_csr_terrain_8000
+306/445 Test #309: mhgp7_conformity_csr_terrain_8000 .......................   Passed   19.43 sec
+        Start 310: mhgp7_conformity_csr_terrain_16000
+307/445 Test #310: mhgp7_conformity_csr_terrain_16000 ......................   Passed   55.62 sec
+        Start 311: mhgp7_conformity_csr_terrain_32000
+308/445 Test #311: mhgp7_conformity_csr_terrain_32000 ......................   Passed  163.39 sec
+        Start 312: mhgp7_conformity_csr_eight_clusters_8000
+309/445 Test #308: mhgp7_conformity_csr_uniform_32000 ......................   Passed  423.56 sec
+        Start 313: mhgp7_conformity_csr_eight_clusters_16000
+310/445 Test #312: mhgp7_conformity_csr_eight_clusters_8000 ................   Passed   88.34 sec
+        Start 314: mhgp7_conformity_csr_eight_clusters_32000
+311/445 Test #313: mhgp7_conformity_csr_eight_clusters_16000 ...............   Passed  241.42 sec
+        Start 315: mhgp7_conformity_csr_scanline_single_pass_8000
+312/445 Test #315: mhgp7_conformity_csr_scanline_single_pass_8000 ..........   Passed   18.45 sec
+        Start 316: mhgp7_conformity_csr_scanline_single_pass_16000
+313/445 Test #316: mhgp7_conformity_csr_scanline_single_pass_16000 .........   Passed   48.39 sec
+        Start 317: mhgp7_conformity_csr_scanline_single_pass_32000
+314/445 Test #317: mhgp7_conformity_csr_scanline_single_pass_32000 .........   Passed  144.86 sec
+        Start 318: mhgp7_conformity_csr_scanline_overlap_multiecho_8000
+315/445 Test #318: mhgp7_conformity_csr_scanline_overlap_multiecho_8000 ....   Passed   31.35 sec
+        Start 319: mhgp7_conformity_csr_scanline_overlap_multiecho_16000
+316/445 Test #319: mhgp7_conformity_csr_scanline_overlap_multiecho_16000 ...   Passed   69.19 sec
+        Start 320: mhgp7_conformity_csr_scanline_overlap_multiecho_32000
+317/445 Test #273: mhgp7_fold_csr_pipeline .................................   Passed  1147.72 sec
+        Start 321: mhgp7_conformity_refus_layout_inconnu
+318/445 Test #321: mhgp7_conformity_refus_layout_inconnu ...................   Passed    0.04 sec
+        Start 322: mhgp7_mutant_csr_csr-order-by-output
+319/445 Test #322: mhgp7_mutant_csr_csr-order-by-output ....................   Passed    2.36 sec
+        Start 323: mhgp7_mutant_csr_csr-keep-continuation
+320/445 Test #323: mhgp7_mutant_csr_csr-keep-continuation ..................   Passed    2.54 sec
+        Start 324: mhgp7_mutant_csr_csr-stale-level
+321/445 Test #324: mhgp7_mutant_csr_csr-stale-level ........................   Passed    2.62 sec
+        Start 325: mhgp7_mutant_csr_csr-stale-output
+322/445 Test #325: mhgp7_mutant_csr_csr-stale-output .......................   Passed    2.37 sec
+        Start 326: mhgp7_mutant_csr_csr-unsorted-born
+323/445 Test #326: mhgp7_mutant_csr_csr-unsorted-born ......................   Passed    2.32 sec
+        Start 327: mhgp7_mutant_csr_csr-unsorted-parents
+324/445 Test #327: mhgp7_mutant_csr_csr-unsorted-parents ...................   Passed    2.43 sec
+        Start 328: mhgp7_mutant_csr_csr-drop-delta
+325/445 Test #328: mhgp7_mutant_csr_csr-drop-delta .........................   Passed    2.36 sec
+        Start 329: mhgp7_mutant_csr_csr-dup-delta
+326/445 Test #329: mhgp7_mutant_csr_csr-dup-delta ..........................   Passed    2.45 sec
+        Start 330: mhgp7_mutant_csr_csr-shift-offset
+327/445 Test #330: mhgp7_mutant_csr_csr-shift-offset .......................   Passed    2.47 sec
+        Start 331: mhgp7_mutant_csr_ablation-mat-sans-copie
+328/445 Test #331: mhgp7_mutant_csr_ablation-mat-sans-copie ................   Passed    2.54 sec
+        Start 332: mhgp7_mutant_csr_ablation-mat-sans-tris
+329/445 Test #332: mhgp7_mutant_csr_ablation-mat-sans-tris .................   Passed    2.17 sec
+        Start 333: mhgp7_mutant_csr_ablation-post-cle-factice
+330/445 Test #333: mhgp7_mutant_csr_ablation-post-cle-factice ..............   Passed    2.06 sec
+        Start 334: mhgp7_mutant_csr_binary-ties
+331/445 Test #334: mhgp7_mutant_csr_binary-ties ............................   Passed    2.24 sec
+        Start 335: mhgp7_mutant_csr_repr-ties
+332/445 Test #335: mhgp7_mutant_csr_repr-ties ..............................   Passed    2.89 sec
+        Start 336: mhgp7_mutant_csr_attach-prebatch
+333/445 Test #314: mhgp7_conformity_csr_eight_clusters_32000 ...............   Passed  573.00 sec
+        Start 337: mhgp7_mutant_csr_drop-nonmerge
+334/445 Test #336: mhgp7_mutant_csr_attach-prebatch ........................   Passed    2.71 sec
+        Start 338: mhgp7_mutant_csr_canonical-is-uf-root
+335/445 Test #337: mhgp7_mutant_csr_drop-nonmerge ..........................   Passed    2.72 sec
+        Start 339: mhgp7_cli_layout_classic_signature
+336/445 Test #338: mhgp7_mutant_csr_canonical-is-uf-root ...................   Passed    1.95 sec
+        Start 340: mhgp7_cli_layout_csr_signature
+337/445 Test #339: mhgp7_cli_layout_classic_signature ......................   Passed    1.68 sec
+        Start 341: mhgp7_cli_refus_layout_inconnu
+338/445 Test #341: mhgp7_cli_refus_layout_inconnu ..........................   Passed    0.03 sec
+        Start 342: mhgp7_cli_refus_layout_vide
+339/445 Test #342: mhgp7_cli_refus_layout_vide .............................   Passed    0.04 sec
+        Start 343: mhgp7_perm_residence
+340/445 Test #340: mhgp7_cli_layout_csr_signature ..........................   Passed    1.54 sec
+        Start 344: mhgp7_perm_residence_perm-apply-scatter
+341/445 Test #344: mhgp7_perm_residence_perm-apply-scatter .................   Passed    0.24 sec
+        Start 345: mhgp7_perm_residence_perm-apply-partial
+342/445 Test #343: mhgp7_perm_residence ....................................   Passed    0.53 sec
+        Start 346: mhgp7_perm_residence_perm-tie-desc
+343/445 Test #345: mhgp7_perm_residence_perm-apply-partial .................   Passed    0.30 sec
+        Start 347: mhgp7_perm_sort
+344/445 Test #346: mhgp7_perm_residence_perm-tie-desc ......................   Passed    0.28 sec
+        Start 348: mhgp7_perm_sort_plancher
+345/445 Test #347: mhgp7_perm_sort .........................................   Passed    7.90 sec
+        Start 349: mhgp7_perm_sort_refus_arg
+346/445 Test #349: mhgp7_perm_sort_refus_arg ...............................   Passed    0.03 sec
+        Start 350: mhgp7_perm_sort_mutant_perm-apply-scatter
+347/445 Test #348: mhgp7_perm_sort_plancher ................................   Passed    9.07 sec
+        Start 351: mhgp7_perm_sort_mutant_perm-apply-partial
+348/445 Test #351: mhgp7_perm_sort_mutant_perm-apply-partial ...............   Passed    8.84 sec
+        Start 352: mhgp7_perm_sort_mutant_perm-tie-desc
+349/445 Test #350: mhgp7_perm_sort_mutant_perm-apply-scatter ...............   Passed   10.16 sec
+        Start 353: mhgp7_perm_sort_mutant_census-stack-per-ball
+350/445 Test #352: mhgp7_perm_sort_mutant_perm-tie-desc ....................   Passed    1.47 sec
+        Start 354: mhgp7_perm_sort_mutant_parallel-sort-unstable
+351/445 Test #354: mhgp7_perm_sort_mutant_parallel-sort-unstable ...........   Passed    1.02 sec
+        Start 355: mhgp7_route_c6_stub
+352/445 Test #353: mhgp7_perm_sort_mutant_census-stack-per-ball ............   Passed    6.42 sec
+        Start 356: mhgp7_route_c6_stub_plancher
+353/445 Test #320: mhgp7_conformity_csr_scanline_overlap_multiecho_32000 ...   Passed  148.10 sec
+        Start 357: mhgp7_route_c6_stub_refus_arg
+354/445 Test #357: mhgp7_route_c6_stub_refus_arg ...........................   Passed    0.03 sec
+        Start 358: mhgp7_route_c6_stub_mutant_gpu-lot-base-reset
+355/445 Test #358: mhgp7_route_c6_stub_mutant_gpu-lot-base-reset ...........   Passed    2.40 sec
+        Start 359: mhgp7_route_c6_stub_mutant_c6-wrong-epoch
+356/445 Test #359: mhgp7_route_c6_stub_mutant_c6-wrong-epoch ...............   Passed    2.23 sec
+        Start 360: mhgp7_route_c6_stub_mutant_c6-reuse-before-lease
+357/445 Test #360: mhgp7_route_c6_stub_mutant_c6-reuse-before-lease ........   Passed    9.59 sec
+        Start 361: mhgp7_route_c6_stub_mutant_c6-publish-prefix
+358/445 Test #361: mhgp7_route_c6_stub_mutant_c6-publish-prefix ............   Passed    8.94 sec
+        Start 362: mhgp7_route_c6_stub_mutant_gpu-stack-shallow
+359/445 Test #362: mhgp7_route_c6_stub_mutant_gpu-stack-shallow ............   Passed    2.13 sec
+        Start 363: mhgp7_route_c6_stub_mutant_gpu-census-nonstrict
+360/445 Test #363: mhgp7_route_c6_stub_mutant_gpu-census-nonstrict .........   Passed    2.47 sec
+        Start 364: mhgp7_route_c6_stub_mutant_gpu-skip-ball-write
+361/445 Test #364: mhgp7_route_c6_stub_mutant_gpu-skip-ball-write ..........   Passed    7.23 sec
+        Start 365: mhgp7_route_c6_stub_mutant_gpu-nshell-overdomain
+362/445 Test #365: mhgp7_route_c6_stub_mutant_gpu-nshell-overdomain ........   Passed    2.38 sec
+        Start 366: mhgp7_route_c6_stub_mutant_gpu-skip-count-write
+363/445 Test #366: mhgp7_route_c6_stub_mutant_gpu-skip-count-write .........   Passed    1.87 sec
+        Start 367: mhgp7_thread_failure
+364/445 Test #367: mhgp7_thread_failure ....................................   Passed    0.10 sec
+        Start 368: mhgp7_thread_failure_mutant_admission
+365/445 Test #368: mhgp7_thread_failure_mutant_admission ...................   Passed    0.03 sec
+        Start 369: mhgp7_thread_failure_refus_arg
+366/445 Test #369: mhgp7_thread_failure_refus_arg ..........................   Passed    0.02 sec
+        Start 370: mhgp7_census_direct
+367/445 Test #370: mhgp7_census_direct .....................................   Passed    0.22 sec
+        Start 371: mhgp7_census_direct_offset
+368/445 Test #371: mhgp7_census_direct_offset ..............................   Passed    0.14 sec
+        Start 372: mhgp7_census_direct_transaction
+369/445 Test #372: mhgp7_census_direct_transaction .........................   Passed    0.12 sec
+        Start 373: mhgp7_census_direct_residence
+370/445 Test #373: mhgp7_census_direct_residence ...........................   Passed    0.17 sec
+        Start 374: mhgp7_silent_incidence
+371/445 Test #374: mhgp7_silent_incidence ..................................   Passed    0.91 sec
+        Start 375: mhgp7_silent_incidence_mutant
+372/445 Test #375: mhgp7_silent_incidence_mutant ...........................   Passed    0.02 sec
+        Start 376: mhgp7_reduced_latent_parent_mutant
+373/445 Test #376: mhgp7_reduced_latent_parent_mutant ......................   Passed    0.02 sec
+        Start 377: mhgp7_reduced_drop_materialization_mutant
+374/445 Test #377: mhgp7_reduced_drop_materialization_mutant ...............   Passed    0.03 sec
+        Start 378: mhgp7_silent_drop_nonmerge_mutant
+375/445 Test #378: mhgp7_silent_drop_nonmerge_mutant .......................   Passed    0.02 sec
+        Start 379: mhgp7_silent_csr_stale_level_mutant
+376/445 Test #379: mhgp7_silent_csr_stale_level_mutant .....................   Passed    0.02 sec
+        Start 380: mhgp7_archive
+377/445 Test #380: mhgp7_archive ...........................................   Passed    0.21 sec
+        Start 381: mhgp7_archive_optimized
+378/445 Test #381: mhgp7_archive_optimized .................................   Passed    0.26 sec
+        Start 382: mhgp7_compare_campaign
+379/445 Test #382: mhgp7_compare_campaign ..................................   Passed    8.97 sec
+        Start 383: mhgp7_compare_campaign_optimized
+380/445 Test #383: mhgp7_compare_campaign_optimized ........................   Passed    8.72 sec
+        Start 384: mhgp7_archive_api
+381/445 Test #384: mhgp7_archive_api .......................................   Passed    0.06 sec
+        Start 385: mhgp7_archive_cleanup
+382/445 Test #385: mhgp7_archive_cleanup ...................................   Passed    0.11 sec
+        Start 386: mhgp7_incidence_campaign
+383/445 Test #386: mhgp7_incidence_campaign ................................   Passed    4.72 sec
+        Start 387: mhgp7_incidence_campaign_optimized
+384/445 Test #387: mhgp7_incidence_campaign_optimized ......................   Passed    2.31 sec
+        Start 388: mhgp7_expect_line
+385/445 Test #388: mhgp7_expect_line .......................................   Passed    0.75 sec
+        Start 389: mhgp7_mono_inline
+386/445 Test #389: mhgp7_mono_inline .......................................   Passed    0.24 sec
+        Start 390: mhgp7_mono_inline_late_a
+387/445 Test #390: mhgp7_mono_inline_late_a ................................   Passed    0.06 sec
+        Start 391: mhgp7_mono_inline_late_b
+388/445 Test #391: mhgp7_mono_inline_late_b ................................   Passed    0.05 sec
+        Start 392: mhgp7_mono_inline_early_alloc
+389/445 Test #392: mhgp7_mono_inline_early_alloc ...........................   Passed    0.03 sec
+        Start 393: mhgp7_axis_bounds
+390/445 Test #393: mhgp7_axis_bounds .......................................   Passed    0.10 sec
+        Start 394: mhgp7_axis_bounds_axis-argmin-floor-only
+391/445 Test #394: mhgp7_axis_bounds_axis-argmin-floor-only ................   Passed    0.02 sec
+        Start 395: mhgp7_axis_bounds_axis-argmin-ceil-always
+392/445 Test #395: mhgp7_axis_bounds_axis-argmin-ceil-always ...............   Passed    0.02 sec
+        Start 396: mhgp7_axis_bounds_axis-argmin-no-clip
+393/445 Test #396: mhgp7_axis_bounds_axis-argmin-no-clip ...................   Passed    0.03 sec
+        Start 397: mhgp7_axis_bounds_axis-argmin-narrow-coefficient
+394/445 Test #397: mhgp7_axis_bounds_axis-argmin-narrow-coefficient ........   Passed    0.03 sec
+        Start 398: mhgp7_axis_bounds_axis-argmin-max-min
+395/445 Test #398: mhgp7_axis_bounds_axis-argmin-max-min ...................   Passed    0.02 sec
+        Start 399: mhgp7_arithmetic_integer
+396/445 Test #399: mhgp7_arithmetic_integer ................................   Passed    0.04 sec
+        Start 400: mhgp7_arithmetic_integer_u320
+397/445 Test #400: mhgp7_arithmetic_integer_u320 ...........................   Passed    0.04 sec
+        Start 401: mhgp7_arithmetic_integer_oracle
+398/445 Test #401: mhgp7_arithmetic_integer_oracle .........................   Passed    0.04 sec
+        Start 402: mhgp7_arithmetic_u320_word4
+399/445 Test #402: mhgp7_arithmetic_u320_word4 .............................   Passed    0.06 sec
+        Start 403: mhgp7_arithmetic_integer_oracle_carry
+400/445 Test #403: mhgp7_arithmetic_integer_oracle_carry ...................   Passed    0.02 sec
+        Start 404: mhgp7_arithmetic_integer_bad_case
+401/445 Test #404: mhgp7_arithmetic_integer_bad_case .......................   Passed    0.02 sec
+        Start 405: mhgp7_arithmetic_integer_bad_mutant
+402/445 Test #405: mhgp7_arithmetic_integer_bad_mutant .....................   Passed    0.06 sec
+        Start 406: mhgp7_arithmetic_integer_case_mismatch
+403/445 Test #406: mhgp7_arithmetic_integer_case_mismatch ..................   Passed    0.06 sec
+        Start 407: mhgp7_arithmetic_lanes
+404/445 Test #407: mhgp7_arithmetic_lanes ..................................   Passed    0.05 sec
+        Start 408: mhgp7_arithmetic_lanes_q4_level
+405/445 Test #408: mhgp7_arithmetic_lanes_q4_level .........................   Passed    0.04 sec
+        Start 409: mhgp7_arithmetic_lanes_oracle
+406/445 Test #409: mhgp7_arithmetic_lanes_oracle ...........................   Passed    0.03 sec
+        Start 410: mhgp7_arithmetic_lanes_oracle_overflow
+407/445 Test #410: mhgp7_arithmetic_lanes_oracle_overflow ..................   Passed    0.04 sec
+        Start 411: mhgp7_arithmetic_q3_factor
+408/445 Test #411: mhgp7_arithmetic_q3_factor ..............................   Passed    0.04 sec
+        Start 412: mhgp7_arithmetic_q4_parity
+409/445 Test #412: mhgp7_arithmetic_q4_parity ..............................   Passed    0.03 sec
+        Start 413: mhgp7_arithmetic_q4_face_boundary
+410/445 Test #413: mhgp7_arithmetic_q4_face_boundary .......................   Passed    0.03 sec
+        Start 414: mhgp7_arithmetic_q4_u192_word2
+411/445 Test #414: mhgp7_arithmetic_q4_u192_word2 ..........................   Passed    0.02 sec
+        Start 415: mhgp7_arithmetic_lanes_oracle_carry
+412/445 Test #415: mhgp7_arithmetic_lanes_oracle_carry .....................   Passed    0.03 sec
+        Start 416: mhgp7_arithmetic_lanes_bad_case
+413/445 Test #416: mhgp7_arithmetic_lanes_bad_case .........................   Passed    0.03 sec
+        Start 417: mhgp7_arithmetic_lanes_bad_inject
+414/445 Test #417: mhgp7_arithmetic_lanes_bad_inject .......................   Passed    0.04 sec
+        Start 418: mhgp7_arithmetic_lanes_duplicate_case
+415/445 Test #418: mhgp7_arithmetic_lanes_duplicate_case ...................   Passed    0.04 sec
+        Start 419: mhgp7_arithmetic_lanes_duplicate_inject
+416/445 Test #419: mhgp7_arithmetic_lanes_duplicate_inject .................   Passed    0.02 sec
+        Start 420: mhgp7_arithmetic_lanes_empty_inject
+417/445 Test #420: mhgp7_arithmetic_lanes_empty_inject .....................   Passed    0.02 sec
+        Start 421: mhgp7_arithmetic_lanes_u192_case_mismatch
+418/445 Test #421: mhgp7_arithmetic_lanes_u192_case_mismatch ...............   Passed    0.02 sec
+        Start 422: mhgp7_arithmetic_lanes_oracle_case_mismatch
+419/445 Test #422: mhgp7_arithmetic_lanes_oracle_case_mismatch .............   Passed    0.02 sec
+        Start 423: mhgp7_meb_lazy
+420/445 Test #423: mhgp7_meb_lazy ..........................................   Passed    0.23 sec
+        Start 424: mhgp7_meb_lazy_q2_reject_shell
+421/445 Test #424: mhgp7_meb_lazy_q2_reject_shell ..........................   Passed    0.03 sec
+        Start 425: mhgp7_meb_lazy_q3_reject_shell
+422/445 Test #425: mhgp7_meb_lazy_q3_reject_shell ..........................   Passed    0.02 sec
+        Start 426: mhgp7_meb_lazy_q4_reject_shell
+423/445 Test #426: mhgp7_meb_lazy_q4_reject_shell ..........................   Passed    0.03 sec
+        Start 427: mhgp7_meb_lazy_eager_materialization
+424/445 Test #427: mhgp7_meb_lazy_eager_materialization ....................   Passed    0.54 sec
+        Start 428: mhgp7_meb_lazy_unknown_mutant
+425/445 Test #428: mhgp7_meb_lazy_unknown_mutant ...........................   Passed    0.04 sec
+        Start 429: mhgp7_meb_lazy_empty_mutant
+426/445 Test #429: mhgp7_meb_lazy_empty_mutant .............................   Passed    0.03 sec
+        Start 430: mhgp7_meb_lazy_duplicate_mutant
+427/445 Test #430: mhgp7_meb_lazy_duplicate_mutant .........................   Passed    0.04 sec
+        Start 431: mhgp7_witness_stack
+428/445 Test #431: mhgp7_witness_stack .....................................   Passed    0.23 sec
+        Start 432: mhgp7_witness_stack_helper
+429/445 Test #432: mhgp7_witness_stack_helper ..............................   Passed    0.03 sec
+        Start 433: mhgp7_witness_stack_witness
+430/445 Test #433: mhgp7_witness_stack_witness .............................   Passed    0.22 sec
+        Start 434: mhgp7_witness_stack_lane_mask
+431/445 Test #434: mhgp7_witness_stack_lane_mask ...........................   Passed    0.02 sec
+        Start 435: mhgp7_witness_stack_lane_mask_mutant
+432/445 Test #435: mhgp7_witness_stack_lane_mask_mutant ....................   Passed    0.03 sec
+        Start 436: mhgp7_witness_stack_unknown_case
+433/445 Test #436: mhgp7_witness_stack_unknown_case ........................   Passed    0.03 sec
+        Start 437: mhgp7_witness_stack_empty_case
+434/445 Test #437: mhgp7_witness_stack_empty_case ..........................   Passed    0.02 sec
+        Start 438: mhgp7_witness_stack_duplicate_case
+435/445 Test #438: mhgp7_witness_stack_duplicate_case ......................   Passed    0.04 sec
+        Start 439: mhgp7_witness_stack_unknown_argument
+436/445 Test #439: mhgp7_witness_stack_unknown_argument ....................   Passed    0.04 sec
+        Start 440: mhgp7_witness_stack_unknown_mutant
+437/445 Test #440: mhgp7_witness_stack_unknown_mutant ......................   Passed    0.04 sec
+        Start 441: mhgp7_witness_stack_empty_mutant
+438/445 Test #441: mhgp7_witness_stack_empty_mutant ........................   Passed    0.06 sec
+        Start 442: mhgp7_witness_stack_duplicate_mutant
+439/445 Test #442: mhgp7_witness_stack_duplicate_mutant ....................   Passed    0.09 sec
+        Start 443: mhgp7_witness_stack_mutant_case_mismatch
+440/445 Test #443: mhgp7_witness_stack_mutant_case_mismatch ................   Passed    0.03 sec
+        Start 444: mhgp7_witness_stack_semantic
+441/445 Test #444: mhgp7_witness_stack_semantic ............................   Passed    0.22 sec
+        Start 445: mhgp7_witness_stack_semantic_lane_mask_mutant
+442/445 Test #445: mhgp7_witness_stack_semantic_lane_mask_mutant ...........   Passed    0.03 sec
+443/445 Test #355: mhgp7_route_c6_stub .....................................   Passed  144.94 sec
+444/445 Test #356: mhgp7_route_c6_stub_plancher ............................   Passed  144.20 sec
+445/445 Test #274: mhgp7_fold_csr_pipeline_uniform_8000 ....................   Passed  2447.26 sec
+
+99% tests passed, 1 tests failed out of 445
+
+Label Time Summary:
+anchor_meb                     =   1.26 sec*proc (2 tests)
+facet_resolver_cache           =   1.36 sec*proc (2 tests)
+full_ball_tower                =   2.99 sec*proc (6 tests)
+full_census_payload            =   0.07 sec*proc (2 tests)
+full_certificate               =   0.07 sec*proc (2 tests)
+full_coverage_certificate      =   0.05 sec*proc (2 tests)
+full_extra_shell_diagnostic    =   0.09 sec*proc (2 tests)
+full_gabriel                   =   0.46 sec*proc (5 tests)
+full_gabriel_digest            =   0.05 sec*proc (2 tests)
+full_gabriel_lazy              =   1.06 sec*proc (5 tests)
+full_gabriel_meb               =   8.84 sec*proc (7 tests)
+full_gabriel_singleton         =   0.82 sec*proc (3 tests)
+full_gabriel_successor         =   1.28 sec*proc (3 tests)
+full_minima_quotient           =   1.71 sec*proc (4 tests)
+full_probe_limits              =   0.05 sec*proc (2 tests)
+gate                           = 3605.74 sec*proc (397 tests)
+local_plateau                  =   0.24 sec*proc (2 tests)
+meb_proposal                   =   0.11 sec*proc (3 tests)
+oracle                         =  57.50 sec*proc (23 tests)
+residence                      = 179.24 sec*proc (8 tests)
+scale16000                     = 1782.88 sec*proc (15 tests)
+scale32000                     = 4236.77 sec*proc (15 tests)
+scale8000                      = 3149.49 sec*proc (16 tests)
+stub                           =   0.16 sec*proc (2 tests)
+witness_front                  =   9.25 sec*proc (2 tests)
+wspd_terminal_reuse            =   0.08 sec*proc (2 tests)
+
+Total Test time (real) = 4022.78 sec
+
+The following tests FAILED:
+	 78 - mhgp7_e6_grille_objet (Timeout)
+Errors while running CTest
+ctest rc=8

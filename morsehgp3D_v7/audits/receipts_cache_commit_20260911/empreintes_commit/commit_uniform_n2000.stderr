@@ -1,0 +1,14 @@
+stage_start=index
+stage_complete=index seconds=0.000861200
+stage_start=generate
+stage_complete=generate seconds=6.758176916
+stage_start=sort_rle
+stage_complete=sort_rle seconds=0.186700214
+stage_start=prefilter
+stage_complete=prefilter seconds=1.365132785
+stage_start=census
+stage_complete=census seconds=1.045999366
+stage_start=full_ball_tower
+stage_complete=full_ball_tower seconds=14.933094436
+stage_start=payload_digest
+stage_complete=payload_digest seconds=0.480430931

@@ -1,0 +1,653 @@
+{
+  "schema": "mhgp7-contre-lecture-ad7ffd28-v1",
+  "publication_reviewed": "ad7ffd28",
+  "auditor_commit_seen": "175acdd5",
+  "gcp_used": false,
+  "public_status": "not_claimed",
+  "method": "11 lanes de lecture, 3 réfutateurs à lentilles distinctes par constat P1/P2 (>=2/3 pour maintenir), critique de complétude",
+  "p1_survivors": 0,
+  "survivors": [
+    {
+      "lane": "plan_journal",
+      "severity": "P2",
+      "kind": "documentation",
+      "title": "Le choix recommandé abandonne les réservations exactes sans obligation de compaction : gain de résidence non établi, régression possible",
+      "claim": "Le plan compare brouillons et arènes en octets logiques « hors capacités » (L188-197) et fait de la compaction finale une option (« éventuellement une seule compaction », L176-177 ; « shrink_to_fit ne garantit pas », L178), alors que le constructeur v2 actuel garantit une capacité exactement égale à la taille pour les quatre arènes (passe de comptage L171-188). Avec croissance géométrique et scellement « par déplacement » (L109), la surcapacité résiduelle peut atteindre ~F (jusqu'à ~2,2 Go logiques à 32k, review.json final_arena_logical_bytes=2 203 835 040) contre un écart logique net de 0,29 Go (audit 175acdd5, tableau L89-93) : le pic et la résidence publiée peuvent être supérieurs à ceux de la voie actuelle. Le plan le signale seulement comme « surcapacités ... s'ajoutent » (L192) sans en faire une obligation du delta ni une porte.",
+      "evidence": "morsehgp3D_v7/docs/PLAN_JOURNAL_INCREMENTAL.md:109,175-180,188-197 ; morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:171-188 (reserve exact), :112-116 (move conserve la capacité) ; morsehgp3D_v7/audits/receipts_incremental_review_20260911/README.md:89-98 ; review.json runs[2].final_arena_logical_bytes",
+      "files": [
+        "morsehgp3D_v7/docs/PLAN_JOURNAL_INCREMENTAL.md",
+        "morsehgp3D_v7/src/forest/full_coverage_certificate.hpp",
+        "morsehgp3D_v7/audits/receipts_incremental_review_20260911/README.md"
+      ],
+      "proposed_lock": "Rendre obligatoire dans le delta une compaction à taille exacte des quatre arènes avant scellement (une copie par ordre, transitoire comptée) ou une borne prouvée de surcapacité ; ajouter à la porte 5 le rapport capacité/taille des arènes publiées et le pic RSS apparié façade/assembleur à n=8000/16000/32000, toute surcapacité > 0 après scellement étant un refus de la porte.",
+      "votes": [
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "lane": "plan_journal",
+      "severity": "P2",
+      "kind": "test_vacuity",
+      "title": "Porte de régression manquante : digests de payload épinglés à 8k/16k/32k non exigés de l'assembleur",
+      "claim": "Les portes 1-5 du plan n'imposent nulle part que l'assembleur incrémental reproduise les digests physiques déjà épinglés aux tailles d'intérêt (cdd77e30…, 8eb94f8f…, ef797782…), identiques de la lignée d188e3de à ad7ffd28 (s=8/10/12 à 8k). La porte 4 limite l'égalité de payload au corpus Gram/Gamma de 28 nuages (petites tailles) ; la porte 5 à 8k/16k/32k ne mesure que des coûts. Une divergence structurelle n'apparaissant qu'à l'échelle (ordre des groupes sur plateaux, lots groupés rares : 474/3 046/20 095) passerait les portes proposées.",
+      "evidence": "morsehgp3D_v7/docs/PLAN_JOURNAL_INCREMENTAL.md:207-233 ; morsehgp3D_v7/receipts/full_ball_runs_20260910/local/n8000.stdout (payload_digest cdd77e30…), n16000 (8eb94f8f…), n32000 (ef797782…) ; morsehgp3D_v7/receipts/full_ball_scale_gpu_20260910/local/n8000_s8.stdout, n8000_s10.stdout, n8000_s12.stdout, n16000_s8.stdout, n32000_s8.stdout (mêmes digests) ; CMakeLists.txt:864-869 (label scale8000 existant)",
+      "files": [
+        "morsehgp3D_v7/docs/PLAN_JOURNAL_INCREMENTAL.md",
+        "morsehgp3D_v7/receipts/full_ball_runs_20260910/local/n8000.stdout",
+        "morsehgp3D_v7/receipts/full_ball_scale_gpu_20260910/local/n32000_s8.stdout"
+      ],
+      "proposed_lock": "Ajouter aux portes de raccord une porte labellisée scale8000/scale16000/scale32000 exigeant payload_digest, vertical_refs, nodes, parent_refs, contributions, singleton_lots, grouped_lots, lot_dsu_slots identiques aux valeurs épinglées (seed 3, s=8, kmax=10) pour la voie assembleur, en plus de l'égalité façade/assembleur sur le corpus 28 nuages.",
+      "votes": [
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "lane": "static_note",
+      "severity": "P2",
+      "kind": "test_vacuity",
+      "title": "Le mutant « admettre toute clé présente sans fenêtre K » ne teste pas une divergence d'objet : la fenêtre basse est une économie, pas une condition de l'objet",
+      "claim": "La NOTE (§ 1 « La seule présence d'une clé globale ne suffit pas à l'admettre » ; § 4 tableau, ligne « Admettre toute clé présente, sans fenêtre K ») présente la fenêtre p+q_min−1 ≤ K comme un piège réfuté par l'oracle. Or le mutant `admit_global_key_without_K` n'est tué que par des contrôles de cohérence interne (terminal non créé comme sommet), jamais par une partition, couverture, arité ou verticale différente. En supprimant la borne basse de façon cohérente (clé admise ET sommet créé), l'objet est identique sur les sept fixtures.",
+      "evidence": "graph_oracle.py:36 (`admitted`), :46-47 (mutant dans `target` seulement), :78 (`if not admitted: continue` non muté), :100 (`every_arc_endpoint_is_admitted`), :136 (`active_facet_has_active_static_terminal`). Captures : runs_normal/normal_admit_global_key_without_K.stderr = `active_facet_has_active_static_terminal`. Rejeu scratch fixture par fixture : le mutant meurt sur `ABCZ_doubled` (verify), et sur la fixture huit points par `every_arc_endpoint_is_admitted` (build). Sonde scratch `probe_consistent2.py` (admission `k <= p+u` avec sommets créés, juge Gamma + covers + événements) : `object_identical=True` sur les 7 fixtures, 65 sommets supplémentaires sur la fixture huit points, 5 rencontres `present_but_order_inadmissible` en nominal. Cohérent avec BALL_ANCHORS.md § 2 (blocs sous la fenêtre inertes) et local_plateau.hpp:109 (`inert_sufficient`).",
+      "files": [
+        "morsehgp3D_v7/receipts/static_anchor_graph_20260910/NOTE.md",
+        "morsehgp3D_v7/receipts/static_anchor_graph_20260910/capture/graph_oracle.py",
+        "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/BALL_ANCHORS.md"
+      ],
+      "proposed_lock": "Reformuler § 1 et la ligne du tableau : l'invariant réel est « le prédicat d'admission statique doit être identique au prédicat d'installation d'ancre temporel (`programs[K]`) », la borne basse étant une économie (blocs inertes). Ajouter dans l'oracle un contrôle nommé qui exécute la variante cohérente sans borne basse et exige `object_identical` (témoin d'inertie), et un mutant qui décale la fenêtre d'un seul côté (statique ≠ temporel) tué par la faute d'ancre absente, pas par un contrôle structurel.",
+      "votes": [
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "lane": "static_note",
+      "severity": "P2",
+      "kind": "documentation",
+      "title": "Chemin de hit du cache : l'assertion ℓ_t < r (obligation 3 du second auditeur) n'est pas exécutée et le lemme de stricte antériorité des semis n'est écrit nulle part",
+      "claim": "NOTE_PHASE_STATIQUE_MEB.md exige « assertion ℓ_t < r et refus explicite […] jamais un repli » (obligation 3). Dans le header épinglé 910f45ba, un hit du `ResolverCache` retourne avant tout calcul de MEB et avant `full_ball_representative_not_strict` ; aucun niveau n'est stocké dans l'entrée, donc aucune vérification n'est possible sur ce chemin. La sûreté repose sur deux lemmes non écrits : (i) une facette stockée après hit a été validée stricte à un lot antérieur ou égal ; (ii) un semis S_B = I_B∪U_B consommé par B' vérifie β_B < β_{B'} car S_B ⊊ S_{B'} ⊆ B' et β_B = β_{B'} forceraient B = B' par unicité de la MEB. Le README de l'auditeur (§ 1) ne couvre que le cas (i) ; la NOTE constructeur § 3 est muette. Un semis corrompu (mauvais BallId/token) serait accepté silencieusement.",
+      "evidence": "full_ball_tower.hpp@910f45ba (= HEAD 175acdd5 et ad7ffd28) :512-514 (lookup puis `return root(cached, prior_count)`), :518 (`full_ball_representative_not_strict` seulement après le miss), :552-564 (`seed_closed_anchor`, aucun niveau stocké), :168-171 (`ResolverCacheEntry` = sites + token). NOTE_PHASE_STATIQUE_MEB.md § « Obligations », point 3. suite_cache_20260910/README.md § 1 (« garde sautée sur hit, sans perte : une facette résolue à un lot antérieur… »).",
+      "files": [
+        "morsehgp3D_v7/src/forest/full_ball_tower.hpp",
+        "morsehgp3D_v7/audits/receipts_raccord_ancres_20260910/suite_cache_20260910/NOTE_PHASE_STATIQUE_MEB.md",
+        "morsehgp3D_v7/receipts/static_anchor_graph_20260910/NOTE.md"
+      ],
+      "proposed_lock": "Graver les deux lemmes (hit stocké, semis) dans la NOTE constructeur § 3 ou dans une NOTE_CLAUDE ; pour toute phase statique à venir, stocker la BallId/le niveau du terminal avec le jeton et exécuter `compare_exact_level(level, before) < 0` au hit, avec un mutant « semis à niveau non strict » refusé par code 3 (pas un repli).",
+      "votes": [
+        {
+          "refuted": true,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "lane": "static_note",
+      "severity": "P2",
+      "kind": "test_vacuity",
+      "title": "La descente d'intrus et l'indépendance de politique (B) ne sont exercées que par une seule fixture",
+      "claim": "Sur sept fixtures, six n'exécutent aucune étape de chaîne : `geometry_table_reads == representatives` (chaque représentant a directement une MEB admise). Seule `equal_radius_admitted_window` produit `strict_radius_steps` (4 en premier intrus, 2 en dernier) et `equal_radius_steps` (1). Les « 648 coupes / 203 raccords pré-lot » sont donc majoritairement des cas sans descente ; l'énoncé (B) (terminaux différents, même racine pré-lot) n'est témoigné que par 2 blocs d'une fixture, et aucune chaîne ne traverse deux clés présentes-inadmissibles ni deux étapes à rayon égal.",
+      "evidence": "runs_normal/normal_nominal.stdout : `first_work` de pair_terminal (2/2), triangle (9/9), square (13/13), ABCZ_growth (15/15), ABCZ_doubled (51/51), tetra_interior (26/26) ; equal_radius_admitted_window : reads 92 / representatives 87, strict_radius_steps 4, equal_radius_steps 1, present_but_order_inadmissible 5 ; `changed_target_blocks` total = 2. NOTE.md § 4 (« 648 coupes… », « changent les terminaux de deux blocs »).",
+      "files": [
+        "morsehgp3D_v7/receipts/static_anchor_graph_20260910/capture/graph_oracle.py",
+        "morsehgp3D_v7/receipts/static_anchor_graph_20260910/NOTE.md"
+      ],
+      "proposed_lock": "Ajouter au moins deux fixtures à chaînes longues (p ≥ 2 intérieurs forçant ≥ 3 échanges, dont ≥ 2 à rayon égal) et une où les deux politiques d'intrus aboutissent à des terminaux de blocs différents participant à une multifusion d ≥ 2 ; publier par fixture les compteurs `strict_radius_steps`/`equal_radius_steps` avec un plancher `--min-*` non nul dans le lecteur.",
+      "votes": [
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": true,
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "lane": "rightmost",
+      "severity": "P2",
+      "kind": "test_vacuity",
+      "title": "Branche « feuille mixte » avec test de puissance inatteignable : le rapport la présente comme un cas vivant de la preuve et de la conservation des « tests stricts »",
+      "claim": "Dans `intruder()` (et ses trois copies d'adaptateur), la branche `else if (is_leaf(node))` avec `key.power(...) < 0` ne peut jamais s'exécuter : `AxisBounds::bounds` est exacte sur une boîte ponctuelle (`axis_min` clippe l'argmin dans `[lo,hi]` = `{p}`, `axis_max` = max des deux extrémités égales), donc pour une feuille `mn == mx == power(p)` et la feuille tombe toujours dans `lo >= 0` (élaguée) ou `hi < 0` (plage). Le rapport écrit « Les feuilles mixtes gardent le test exact de puissance » (report.md.source:17) et « Tous les retours immédiats, tests stricts … sont conservés » (report.md.source:7) comme si ce cas participait à la preuve et à la qualification ; toutes les captures montrent `intruder_power_tests = 0` (6 runs n1000, porte FULL) et `right_fewer_power_than_exhaustive = 0` (72 840 requêtes), et la non-vacuité de la porte de choix (choice_gate.cpp:74-75) n'exige rien sur ce compteur. Ce n'est pas une faute de correction (code mort inoffensif), mais l'énoncé de couverture est vide et la preuve cite un cas qui n'existe pas.",
+      "evidence": "morsehgp3D_v7/src/pipeline/census.hpp:85-101 (`axis_min` clippé, `axis_max` = max(val(lo),val(hi)), bornes exactes sur un point) ; morsehgp3D_v7/src/tree/cloud_index.hpp:89-94 (`box_of` d'une feuille = boîte dégénérée `lo==hi`) ; morsehgp3D_v7/src/forest/full_ball_tower.hpp:491-496 à ad7ffd28 (branche feuille) ; objets 57e6e163… (`right_fewer_power_than_exhaustive:0`), 14859927…/2c5e1082… (`intruder_power_tests:0`), 3a017058… (porte FULL) ; sonde scratch indépendante (36 000 requêtes, n≤3000 avec doublons) : `power_tests=0/0/0`.",
+      "files": [
+        "morsehgp3D_v7/receipts/rightmost_intruder_20260910/report.md.source",
+        "morsehgp3D_v7/receipts/rightmost_intruder_20260910/objects/b270c2f736d7513f433e413e2cfb05e07d277c611a3987764492b2f14b40d4ea.source",
+        "morsehgp3D_v7/src/pipeline/census.hpp",
+        "morsehgp3D_v7/src/forest/full_ball_tower.hpp"
+      ],
+      "proposed_lock": "Soit documenter la branche comme inatteignable par exactitude des bornes (commentaire dans `intruder()` + une porte qui exige `intruder_power_tests == 0` comme invariant des bornes exactes, ou une fixture qui assert `mn == mx` sur toute feuille), soit la retirer ; corriger report.md.source:7,17 pour ne plus présenter ce cas comme exercé, et ne pas compter « tests stricts conservés » comme couverture.",
+      "votes": [
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "lane": "rightmost",
+      "severity": "P2",
+      "kind": "receipt_consistency",
+      "title": "La porte FULL à 28 nuages n'exerce `intruder()` que 12 fois : elle est citée en tête de la « qualification réellement exécutée » sans ce chiffre",
+      "claim": "README.md:7 place la porte FULL (170 320 contrôles, 45 948 verticales) en première preuve de qualification de la variante. Or le stdout de cette porte donne `intruder_queries:12` sur les 28 nuages, et rien ne dit combien de ces 12 requêtes ont un intrus maximal différent de l'intrus minimal ; la porte exige seulement `intruder_queries > 0` (full_ball_tower_gate.cpp:365). L'invariance de l'objet sous la nouvelle règle repose en réalité sur (a) le théorème (B) de la note de l'auditeur et (b) un seul nuage différentiel (uniform n=1000, seed 3) à digest identique. Les 170 320 contrôles ne mesurent pas la règle d'intrus ; le lecteur du README ne peut pas le voir.",
+      "evidence": "morsehgp3D_v7/receipts/rightmost_intruder_20260910/README.md:7 ; objets 3a017058… (`\"intruder_queries\":12,\"same_radius_steps\":2`) ; bf1a2824… (full_ball_tower_gate.cpp:365) ; 9f461729… § (B) ; logs n1000 (un seul nuage, une seule famille).",
+      "files": [
+        "morsehgp3D_v7/receipts/rightmost_intruder_20260910/README.md",
+        "morsehgp3D_v7/receipts/rightmost_intruder_20260910/objects/bf1a28242dd2d6897f3dc02edff8c6077dbec1caa3f9b9a67813dcc748e3d75a.source"
+      ],
+      "proposed_lock": "Écrire dans le README que la porte FULL n'exerce que 12 requêtes d'intrus et que l'invariance de l'objet est portée par (B) + un digest différentiel sur une famille ; avant toute intégration, exiger un compteur `intruder_alternatives` (requêtes où min ≠ max) > 0 sur la porte FULL ou une fixture gravée où la chaîne diffère entre les deux règles, et des digests appariés sur les cinq familles aux tailles 8000/16000/32000.",
+      "votes": [
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "lane": "docs_claims",
+      "severity": "P2",
+      "kind": "documentation",
+      "title": "« Six mutants du delta cache » : deux des six mutants portent sur le chemin des lots groupés préexistant, pas sur le delta cache",
+      "claim": "PASSATION.md:16-17 écrit « Six mutants du delta cache sont tués, dont croissance et ancre inerte dans le chemin groupé ». Les mutants `growth_grouped` et `inert_grouped` mutent des lignes déjà présentes dans l'en-tête de base pré-cache (0b72b4e9…) et sont tués par la gate tour grâce à la fixture `growth_ABCZ_doubled_lot` ajoutée au test dans ad7ffd28 ; seuls `identity`, `normalization`, `seed`, `release` mutent des lignes introduites par le cache. Le reçu (README.md:60) dit correctement « six mutants sur les headers normalisés » ; TOUR_FULL_PAR_BOULES.md:125-126 et OPTIMISATIONS:41-43 sont également corrects. La formulation de la passation attribue au delta cache deux réfutateurs qui qualifient un autre chemin.",
+      "evidence": "receipts/ball_resolver_residence_20260910/combined/run_mutant_growth_grouped/mutant.py (specs : sites `if (action.parents.size() != 1 || !action.contributions.empty())` et `require(anchors[blocks[b].ball]`, gate `full_ball_tower_gate`) ; `grep -c` de ces deux sites = 1 dans combined/baseline/src/forest/full_ball_tower.hpp (en-tête pré-cache) ; `git show ad7ffd28 -- morsehgp3D_v7/tests/full_ball_tower_gate.cpp` ajoute `growth_ABCZ_doubled_lot` / `inert_ball_doubled_lot` (absents de d188e3de) ; audits/DIALOGUE_COURANT.md:23 décrit ce verrou comme « vacuité des lots groupés ».",
+      "files": [
+        "morsehgp3D_v7/PASSATION.md",
+        "morsehgp3D_v7/receipts/ball_resolver_residence_20260910/README.md",
+        "morsehgp3D_v7/receipts/ball_resolver_residence_20260910/combined/run_mutant_growth_grouped/mutant.py",
+        "morsehgp3D_v7/receipts/ball_resolver_residence_20260910/combined/baseline/src/forest/full_ball_tower.hpp"
+      ],
+      "proposed_lock": "Reformuler PASSATION.md:16-17 : « quatre mutants du delta cache (identité, normalisation, semis, libération) et deux mutants du chemin des lots groupés préexistant (croissance, ancre inerte), tous tués sur l'en-tête 910f45ba avec la fixture doublée ajoutée dans ad7ffd28 ».",
+      "votes": [
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "lane": "nvcc",
+      "severity": "P2",
+      "kind": "test_vacuity",
+      "title": "Refus des phases inconnues : une seule commande conflate deux conditions, « deux sources générées » et « -o multiple » jamais exercés",
+      "claim": "L'obligation (ii) n'est couverte que partiellement : la disjonction de nvcc_strict_host.py:22 (`len(candidates) != 1 or \"-c\" not in args or \"-E\" in args or args.count(\"-o\") != 1`) n'est atteinte que par `reject_unknown_phase`, dont l'argv (record.py:104) contient à la fois `-E` et l'absence de `-c` ; on ne sait pas laquelle des deux clauses a déclenché le code 2. Les clauses « deux .cudafe1.cpp » et « -o ≠ 1 » ne sont exercées par aucune des 17 commandes, pas plus que le refus « fichier absent » (ligne 26–27). `reject_truncated_output` et `reject_truncated_language` sortent par la ligne 29, pas par la 22.",
+      "evidence": "morsehgp3D_v7/bench/nvcc_strict_host.py:19-29 ; receipt.json commandes reject_unknown_phase / reject_truncated_output / reject_truncated_language (argv identiques à record.py:104-106) ; verify.py:40-42 (plancher de non-vacuité sans commande à deux sources ni sans-`-c`-seul) ; streams/reject_unknown_phase.stderr = message de la ligne 23 (une seule fois).",
+      "files": [
+        "morsehgp3D_v7/bench/nvcc_strict_host.py",
+        "morsehgp3D_v7/receipts/nvcc_strict_host_20260910/source/build/v7_nvcc_active_20260910/record.py",
+        "morsehgp3D_v7/receipts/nvcc_strict_host_20260910/verify.py",
+        "morsehgp3D_v7/receipts/nvcc_strict_host_20260910/receipt.json"
+      ],
+      "proposed_lock": "Ajouter au reçu quatre commandes attendues à 2, chacune n'activant qu'une clause : (a) deux `*.cudafe1.cpp` avec `-c`/`-o` ; (b) `-c` absent sans `-E` (par ex. `-S`) ; (c) `-E` présent avec `-c` ; (d) deux `-o`. Inscrire ces noms dans le plancher de verify.py:40 et exiger un stderr non vide pour chacune.",
+      "votes": [
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "lane": "nvcc",
+      "severity": "P2",
+      "kind": "receipt_consistency",
+      "title": "Le stade de production de chaque diagnostic est inféré, pas capturé par le reçu",
+      "claim": "Le README (ligne 5) affirme que `-Wall -Wextra -Wpedantic -Werror` restent actifs « sur le code original et la compilation finale ». Le reçu ne contient ni `nvcc --dryrun`/`-v`, ni `--keep` du `.cudafe1.cpp` réel, ni marqueur de phase de l'adaptateur : le stade se déduit seulement de la nature du diagnostic (VLA = diagnostic sémantique de cc1plus, donc compilation finale du `.ii` avec linemarker `strict_bad.cu:4:5` ; macro variadique nommée = diagnostic de directive libcpp, donc premier `g++ -E` de la source auteur) et des durées (2,09 s avec compilation device vs 0,30 s). L'inférence est cohérente mais non réfutable par les octets du paquet.",
+      "evidence": "receipt.json : reject_strict_bad.cu wall_s=2.0897, reject_strict_bad_pp.cu wall_s=0.3026 ; streams/reject_strict_bad.cu.stderr (« [-Werror=vla] », position strict_bad.cu:4:5 via linemarker) ; streams/reject_strict_bad_pp.cu.stderr (« ISO C++ does not permit named variadic macros [-Werror=variadic-macros] », strict_bad_pp.cu:1:32) ; README.md:5 ; record.py:95-96 (aucune option `--dryrun`, `-v` ou `--keep`).",
+      "files": [
+        "morsehgp3D_v7/receipts/nvcc_strict_host_20260910/README.md",
+        "morsehgp3D_v7/receipts/nvcc_strict_host_20260910/receipt.json",
+        "morsehgp3D_v7/receipts/nvcc_strict_host_20260910/source/build/v7_nvcc_active_20260910/record.py"
+      ],
+      "proposed_lock": "Ajouter au reçu la capture `nvcc --dryrun` des deux fixtures de refus (séquence gcc -E / cudafe++ / gcc -c avec l'adaptateur en `-ccbin`) et une exécution `--keep --keep-dir` de strict_bad.cu dont le `strict_bad.cudafe1.cpp` est archivé ; verify.py contrôle que ses seules lignes `#include` visent `*.cudafe1.stub.c` (les en-têtes auteur y sont déjà développés) et que le linemarker `# 4 \"…strict_bad.cu\"` précède la VLA.",
+      "votes": [
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "lane": "nvcc",
+      "severity": "P2",
+      "kind": "test_vacuity",
+      "title": "Obligation (i) : aucun mutant d'une source .cu du projet, seulement deux fixtures synthétiques",
+      "claim": "Les refus pédants du reçu portent sur strict_bad.cu (7 lignes, kernel + VLA hôte) et strict_bad_pp.cu (2 lignes, macro variadique GNU), pas sur un mutant de `tests/census_route_device_gate.cu` ou de `bench/full_ball_tower_probe.cpp` traversant les 46 en-têtes réels. Les classes « jetons après #endif » et « ## en début de macro » ne sont pas exercées. Par lecture de libcpp elles ne dépendent pas de `-Wpedantic` (`-Wendif-labels` est actif par défaut, `##` en bout d'expansion est une erreur dure) et tombent donc au premier `g++ -E` transmis inchangé ; mais le reçu ne le montre pas, et le seul chemin `#include` d'un `.cudafe1.cpp` démontré (fixture.cudafe1.cpp:2 → strict_include.hpp) est prétraité SOUS `-Wno-pedantic`, ce qui ne fixe pas la frontière par une fixture négative.",
+      "evidence": "source/build/v7_nvcc_pedantic_20260910/strict_bad.cu:4 ; strict_bad_pp.cu:1 ; fixture.cudafe1.cpp:2 (include auteur-like prétraité par la ligne 38-39 de l'adaptateur avec `-Wno-pedantic`) ; record.py:95-96 (seules deux fixtures de refus) ; README.md:5 (« vraies VLA et macro variadique GNU rejetées »).",
+      "files": [
+        "morsehgp3D_v7/receipts/nvcc_strict_host_20260910/source/build/v7_nvcc_pedantic_20260910/strict_bad.cu",
+        "morsehgp3D_v7/receipts/nvcc_strict_host_20260910/source/build/v7_nvcc_pedantic_20260910/strict_bad_pp.cu",
+        "morsehgp3D_v7/receipts/nvcc_strict_host_20260910/source/build/v7_nvcc_pedantic_20260910/fixture.cudafe1.cpp",
+        "morsehgp3D_v7/receipts/nvcc_strict_host_20260910/source/build/v7_nvcc_active_20260910/record.py"
+      ],
+      "proposed_lock": "Ajouter trois mutants générés depuis la copie épinglée de census_route_device_gate.cu (VLA dans une fonction hôte ; `#endif MHGP7_TESTING` avec jeton ; `#define M(x) ## x`) compilés via nvcc + adaptateur, attendus à 1, avec vérification que le stderr localise le mutant dans le `.cu` ; et une fixture négative documentant la frontière : un en-tête à macro variadique inclus depuis un `.cudafe1.cpp` synthétique est accepté (code 0) — inscrit comme limite vendor explicite, jamais comme garantie.",
+      "votes": [
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "lane": "witness_front",
+      "severity": "P2",
+      "kind": "test_vacuity",
+      "title": "`WitnessFrontWork` non remis à zéro sur échec par exception, contrat « par appel » prouvé seulement sur le chemin singleton",
+      "claim": "Le reçu affirme que `WitnessFrontWork` est « par appel » et qu'un échec tardif « ne publie ni sortie ni statistiques partielles ». Dans le code, `out->clear()` est exécuté dès l'entrée (witness_front.hpp:56), avant les gardes d'options (l.57) et de liaison (l.59), tandis que `*work` n'est écrit qu'à la fin (l.183), au refus de cap (l.76) ou sur index vide (l.61) : après une exception (options, liaison, forme/association, génération), l'appelant conserve un `work` périmé de l'appel précédent alors que son `out` a été vidé. La porte ne peut pas le voir : `st` est semé (`stats.rect_visited_fused = 123`, gate l.142) pour prouver l'absence de publication partielle, mais `work` est toujours frais (gate l.143, 152, 168), donc « intact » et « remis à zéro » sont indistinguables. Ce n'est pas une faute de calcul (aucun résultat n'est publié), c'est une obligation de contrat non exercée.",
+      "evidence": "morsehgp3D_v7/src/pipeline/witness_front.hpp:56-61,72-77,183 ; morsehgp3D_v7/tests/witness_front_gate.cpp:142-149,152,163,168-173 ; morsehgp3D_v7/receipts/witness_front_20260910/README.md:11 (« `WitnessFrontWork` est par appel » ; « ne publie ni sortie ni statistiques partielles »).",
+      "files": [
+        "morsehgp3D_v7/src/pipeline/witness_front.hpp",
+        "morsehgp3D_v7/tests/witness_front_gate.cpp",
+        "morsehgp3D_v7/receipts/witness_front_20260910/README.md"
+      ],
+      "proposed_lock": "Soit remettre `*work = {}` à l'entrée (au même endroit que `out->clear()`), soit graver dans l'en-tête que `work` n'est lisible qu'après retour normal ou refus de cap. Dans les deux cas, semer `work` avec des valeurs non nulles avant chaque cas d'échec de la porte (fautes 0–7, modes 2–5, liaison) et exiger explicitement l'état attendu, comme le fait déjà `stats.rect_visited_fused = 123`.",
+      "votes": [
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "lane": "wspd_device",
+      "severity": "P2",
+      "kind": "documentation",
+      "title": "Le document d'optimisations attribue les trois seuils à chaque requête ; ils sont par appel run()",
+      "claim": "docs/OPTIMISATIONS_CACHE_ET_GPU_20260910.md:74-75 affirme « chaque requête porte un rectangle, ses lanes, les trois seuils et le choix des coins ». Dans la primitive, une requête ne porte que a, b, mask, corners, request_id ; les seuils h[3] sont un argument de `run()` partagé par toutes les lignes du lot et passés au kernel comme h0/h1/h2 uniques. Le README et l'IMPLEMENTATION_NOTE du reçu décrivent correctement la requête ; seul le document de synthèse est inexact. Sans conséquence sur les décisions calculées.",
+      "evidence": "receipt object witness_batch.hpp:13-18 (WitnessBatchRequest{a,b,mask,corners,request_id}, SHA 66f31ead…, identique à morsehgp3D_v7/src/spindle/witness_batch.hpp à ad7ffd28) ; witness_route.cuh:215 `run(span<const WitnessBatchRequest>, const u64 h[3], u64 generation, …)` ; witness_kernels.cuh:141 `u64 h0, u64 h1, u64 h2` ; witness_route.cuh:270 passe h[0],h[1],h[2] pour tout le lot ; IMPLEMENTATION_NOTE.md § « Interface » : « Une requête contient deux NodeRef …, un masque q2/q3/q4, l'activation des coins et un request_id ».",
+      "files": [
+        "morsehgp3D_v7/docs/OPTIMISATIONS_CACHE_ET_GPU_20260910.md",
+        "morsehgp3D_v7/src/spindle/witness_batch.hpp",
+        "morsehgp3D_v7/receipts/wspd_device_batch_20260910/IMPLEMENTATION_NOTE.md"
+      ],
+      "proposed_lock": "Corriger la phrase en « chaque requête porte un rectangle, ses lanes et le choix des coins ; les trois seuils sont fixés par appel de lot ». Si un futur raccord a besoin de seuils par requête (h_q varie par s_max), l'API doit être étendue explicitement et re-jugée.",
+      "votes": [
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "lane": "gcp_tools",
+      "severity": "P2",
+      "kind": "documentation",
+      "title": "Les deux nouveaux selftests GCP (worker boules, inspecteur) ne sont câblés ni en CI ni dans le README",
+      "claim": "`selftest_full_ball_worker_v7.py` et `selftest_inspect_full_ball_session_v7.py` sont les seuls contrôles qui vérifient les épingles `SUPPORT_SHA256` et `STRICT_HOST_SHA256` (full_ball_worker_v7.py:26,31 ; selftest_full_ball_worker_v7.py:56-57) et la forme argv attendue par l'inspecteur ; ils ne sont exécutés ni par `.github/workflows/morsehgp3d-v7.yml` (étape « Test session safety without cloud access », lignes 65-78, qui liste selftest_session_v7 / create_v7 / private_cmake / cpu_towers) ni documentés dans `gcp-migration/README_FULL_V7.md` (lignes 48-55, qui ne cite que selftest_full_probe_worker/session). Une dérive de `gcp-migration/full_probe_worker_v7.py` ou de `morsehgp3D_v7/bench/nvcc_strict_host.py` ne serait vue qu'au refus `source_map` sur la VM payante (fail-closed mais tardif). Le reçu n'atteste qu'une exécution manuelle (receipts/full_ball_scale_gpu_20260910/tools/pure_commands.json).",
+      "evidence": ".github/workflows/morsehgp3d-v7.yml:65-78 ; gcp-migration/README_FULL_V7.md:48-55 ; gcp-migration/full_ball_worker_v7.py:26,31,76-77 ; gcp-migration/selftest_full_ball_worker_v7.py:56-57 ; morsehgp3D_v7/receipts/full_ball_scale_gpu_20260910/tools/pure_commands.json (4 exécutions manuelles, exit 0). Exécution locale : `python3 -B` des deux selftests = exit 0 (checks=389/rejects=22 ; checks=9/rejects=67).",
+      "files": [
+        ".github/workflows/morsehgp3d-v7.yml",
+        "gcp-migration/README_FULL_V7.md",
+        "gcp-migration/selftest_full_ball_worker_v7.py",
+        "gcp-migration/selftest_inspect_full_ball_session_v7.py"
+      ],
+      "proposed_lock": "Ajouter à l'étape « Test session safety without cloud access » les quatre commandes `python3 -B [-O] gcp-migration/selftest_full_ball_worker_v7.py` et `python3 -B [-O] gcp-migration/selftest_inspect_full_ball_session_v7.py`, et les lister dans README_FULL_V7.md avec une phrase décrivant le worker boules et l'inspecteur lecture seule.",
+      "votes": [
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "lane": "static_prototype",
+      "severity": "P2",
+      "kind": "test_vacuity",
+      "title": "Contrôles « terminal strictement antérieur » (statique, cible, semis) jamais exercés : un mutant relâchant les trois `<` en `<=` survit avec sortie identique",
+      "claim": "Les trois require de chronologie stricte de la voie statique (full_ball_static_not_strict l.531, moitié niveau de full_ball_static_target_not_strict l.681-682, full_ball_static_seed_not_strict l.647) ne sont jamais déclenchés par un census valide (théorème MEB(F) < r) et aucun mutant du reçu ne les rend causaux. Reproduit dans mon scratch : mutant B (les trois comparaisons passées à `<= 0`) passe le driver du reçu en modes 1 et 4 avec exactement la sortie nominale (checks 20135, rows 2524, requests 354, unique 219, seeded 176, mebs 51). De plus le reçu attribue la mort de scatter_holes à `full_ball_static_target_not_strict`, alors que c'est la moitié domaine `target < balls.size()` (cible non écrite = BallId max) qui tue, pas la comparaison de niveau. La garde effectivement portante est `anchors[target] != absent` (l.683) : un terminal de même niveau est dans le même lot, donc sans ancre jusqu'à close_lot.",
+      "evidence": "morsehgp3D_v7/src/forest/full_ball_tower.hpp:531,647,681-683 ; receipts/static_resolver_mutants_20260911/README.md tableau « Oublier les occurrences répétées → full_ball_static_target_not_strict » et capture/mutations/scatter_holes.diff ; scratch wf/static_prototype/run.log lignes « run mutB mode 1/4 rc=0 » (compilation -O1, driver et fixtures du reçu, header 33e7d05e…).",
+      "files": [
+        "morsehgp3D_v7/src/forest/full_ball_tower.hpp",
+        "morsehgp3D_v7/receipts/static_resolver_mutants_20260911/README.md",
+        "morsehgp3D_v7/receipts/static_resolver_mutants_20260911/capture/mutations/scatter_holes.diff"
+      ],
+      "proposed_lock": "(1) Scinder la raison l.681-682 en `full_ball_static_target_domain` (cible non écrite) et `full_ball_static_target_not_strict` (niveau) et corriger le tableau du reçu. (2) Ajouter un mutant causal « semis d'une boule postérieure » : semer aussi les blocs à K = p+u−1 avec la clé I ∪ U privée du dernier site (MEB(F) ≠ B ; B est son propre consommateur) et exiger le refus nommé `full_ball_static_seed_not_strict` — c'est le seul chemin où la comparaison de niveau est portante, puisque le semis court-circuite la géométrie et précède les ancres. (3) Ajouter un mutant d'émetteur (visit_block émettant I ∪ U comme représentant d'un bloc régulier à K = p+u) et exiger un refus nommé dans les deux routes (`full_ball_representative_not_strict` / `full_ball_static_not_strict`), avec la fixture huit sites Kmax6 et la fixture neuf sites de l'auditeur. (4) Documenter la défense en couches (niveau → ancre présente → root prior) au lieu de présenter le contrôle strict comme la garde.",
+      "votes": [
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "lane": "static_prototype",
+      "severity": "P2",
+      "kind": "test_vacuity",
+      "title": "« Clé présente mais inadmissible à K4 » : aucune observation nommée ; le mutant d'admission meurt sur E5 avant la fixture window",
+      "claim": "Aucun compteur n'enregistre l'événement « clé trouvée dans by_key, niveau conforme, K hors [p+q_min−1, p+u] → poursuite par intrus » ni dans la route nominale (l.694-703) ni dans la route statique (l.533-542). La gate ne vérifie sur window/present_but_wrong_rank que same_radius_steps > 0 et intruder_queries > 0 (gate l.411-413, fixture Kmax4 seulement). Le reçu reconnaît que admit_global_key est réfuté sur E5, première fixture, et que « son arrêt n'est pas une observation du bloc 4225 ». La phrase de coordination « La variante huit points Kmax6 exerce une clé présente mais inadmissible à K4 » est donc une lecture de la géométrie, pas une observation du moteur.",
+      "evidence": "morsehgp3D_v7/src/forest/full_ball_tower.hpp:533-542,694-703 ; morsehgp3D_v7/tests/full_ball_tower_gate.cpp:411-413,459-461 ; receipts/static_resolver_mutants_20260911/README.md § Résultats (« Le mutant d'admission est déjà réfuté sur E5 ») ; capture/rejections/admit_global_key.stderr = tower_status:E5:….",
+      "files": [
+        "morsehgp3D_v7/src/forest/full_ball_tower.hpp",
+        "morsehgp3D_v7/tests/full_ball_tower_gate.cpp",
+        "morsehgp3D_v7/receipts/static_resolver_mutants_20260911/README.md"
+      ],
+      "proposed_lock": "Ajouter un compteur `inadmissible_key_continuations` incrémenté aux deux endroits (clé trouvée, niveau égal, K hors fenêtre) et exiger > 0 sur present_but_wrong_rank à K=4 dans les deux routes ; exécuter le mutant admit_global_key fixture par fixture (ou window seule) pour obtenir le refus nommé sur le bloc 4225 ; sans cela la fixture n'établit pas que la fenêtre K est portante.",
+      "votes": [
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "lane": "static_prototype",
+      "severity": "P2",
+      "kind": "implementation",
+      "title": "Dédoublonnage : mutant « comparateur sur préfixe / hash seul » absent du reçu ; un préfixe K−1 est tué mais par un invariant structurel, pas par le juge de payload",
+      "claim": "Le reçu ne contient pas le mutant « dédoublonner par hash ou clé partielle » listé par la contrelecture (review/CONCEPTION.md § 5 et addendum). Reproduit dans mon scratch : mutant A (tri l.601-604 et regroupement l.610 sur la clé privée de son dernier site) est refusé en modes 1 et 4 avec `tower_status:E5:full_ball_final_component_count`. C'est un invariant global de fin d'ordre qui tue, pas la comparaison de payload ; sur un nuage plus grand deux facettes fusionnées à tort peuvent recevoir une cible valide, antérieure et ancrée (toutes les gardes structurelles passent) et ne différer que par les parents : seul le juge de payload (nœuds, parents, contributions, verticales, banque) le verrait. Un mutant « hash 64 bits seul » serait vacuant sur ces fixtures (aucune collision), il ne remplace pas le mutant de préfixe.",
+      "evidence": "morsehgp3D_v7/src/forest/full_ball_tower.hpp:601-610 ; receipts/static_resolver_mutants_20260911/capture/mutations/ (six diffs, aucun sur le comparateur) ; review/CONCEPTION.md addendum « remplacer le comparator de clé par un hash seul » ; scratch wf/static_prototype/run.log « run mutA mode 1 rc=1 tower_status:E5:full_ball_final_component_count ».",
+      "files": [
+        "morsehgp3D_v7/src/forest/full_ball_tower.hpp",
+        "morsehgp3D_v7/receipts/static_resolver_mutants_20260911/review/CONCEPTION.md",
+        "morsehgp3D_v7/receipts/static_resolver_mutants_20260911/capture/commands.json"
+      ],
+      "proposed_lock": "Graver le mutant « clé sur préfixe K−1 » (pas seulement « hash seul ») dans le reçu et la gate ; exiger que le juge soit l'identité de payload appariée (same_payload de la gate : nodes/parents/successors/lower_nodes/bank/contributions) et non un invariant structurel ; exiger que le comparateur compare les K indices géométriques triés, (entrée, K) fixés par la reconstruction des requests à chaque ordre (l.576-611), et que la même clé ne soit jamais partagée entre ordres.",
+      "votes": [
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "lane": "static_prototype",
+      "severity": "P2",
+      "kind": "math",
+      "title": "Indépendance (B) non témoignée par la gate appariée : les deux routes utilisent la même règle « premier intrus »",
+      "claim": "L'obligation 1 de NOTE_PHASE_STATIQUE_MEB.md exige l'égalité de l'objet « avec au moins une règle d'intrus différente de celle du resolver (témoin de (B)) ». La voie statique appelle intruder_work avec la même DFS gauche que le nominal (l.494-520) ; le doc constructeur le dit (« le prototype droit du 10 septembre n'est pas intégré »). L'identité nominal/statique observée est donc un témoin de (A) seulement ; elle ne teste pas que le regroupement par clé puis normalisation pré-lot est insensible au terminal choisi, ce qui est précisément la propriété qui rend la phase statique licite par lots/GPU.",
+      "evidence": "morsehgp3D_v7/audits/receipts_raccord_ancres_20260910/suite_cache_20260910/NOTE_PHASE_STATIQUE_MEB.md § Obligations pour une implémentation, point 1 ; morsehgp3D_v7/docs/RESOLUTION_STATIQUE_CPU_20260911.md:38-41 ; full_ball_tower.hpp:494-520,545.",
+      "files": [
+        "morsehgp3D_v7/audits/receipts_raccord_ancres_20260910/suite_cache_20260910/NOTE_PHASE_STATIQUE_MEB.md",
+        "morsehgp3D_v7/src/forest/full_ball_tower.hpp",
+        "morsehgp3D_v7/docs/RESOLUTION_STATIQUE_CPU_20260911.md"
+      ],
+      "proposed_lock": "Avant toute promotion au-delà de l'opt-in : voie statique avec une seconde règle d'intrus (DFS droite / dernier rang Morton admissible) → même payload apparié sur les 30 fixtures, sur la fixture neuf sites et sur le corpus aléatoire de 2 507 nuages de l'auditeur ; publier séparément les compteurs (intruder_queries, MEB, same_radius_steps) qui doivent différer. Les compteurs de travail n'entrent dans aucune empreinte.",
+      "votes": [
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "lane": "static_prototype",
+      "severity": "P2",
+      "kind": "implementation",
+      "title": "Résidence de la voie statique : O(R_K) par ordre (56 o/occurrence + 4 o/cible), pas O(U_K) ; « jamais un cache 16n par fil » n'est pas un gain mémoire",
+      "claim": "prepare_static_order matérialise toutes les occurrences R_K (Request = clé 40 o + BallId 4 + ordinal 8 = 56 o, capacité géométrique jusqu'à 2×) puis static_targets (4 o × R_K, retenu jusqu'à la fin de l'ordre), plus seeds (44 o × S_K) et groups (8 o × U_K). Le pic retenu est donc proportionnel à R_K, non à U_K, et R_K n'est borné en n par aucun théorème. Le doc constructeur mesure déjà 19 577 344 o retenus à n1000 contre 786 432 o pour le cache nominal 16n×48 ; à 8k le diagnostic donne 10 396 562 occurrences hors K1, donc des pics par ordre de plusieurs dizaines de Mo contre 6,3 Mo de cache. Aucune mesure aux tailles d'intérêt 8k/16k/32k n'est versionnée. Une affirmation « mémoire O(U_K) par ordre » serait fausse pour ce prototype.",
+      "evidence": "full_ball_tower.hpp:576-587 (Request), 598-600, 614-616 (static_targets), 617-635 (account : capacités échantillonnées) ; docs/RESOLUTION_STATIQUE_CPU_20260911.md tableau n400/n1000 et « Le cache nominal demande seulement 786 432 octets à n1000 : le travail économisé a donc un coût de résidence supplémentaire » ; ResolverCache::configure l.190-205 (2^⌈log2 16n⌉ × 48 o).",
+      "files": [
+        "morsehgp3D_v7/src/forest/full_ball_tower.hpp",
+        "morsehgp3D_v7/docs/RESOLUTION_STATIQUE_CPU_20260911.md"
+      ],
+      "proposed_lock": "Publier par ordre K, à 8k/16k/32k : R_K, U_K, S_K, octets retenus (requests+targets+seeds+groups+piles) et capacité maximale des vecteurs, face à 2^⌈log2 16n⌉×48 o du nominal ; interdire toute lecture de « pas de cache 16n par thread » comme économie de résidence ; si une variante O(U_K) est visée, exiger qu'elle ne retienne que U_K clés et R_K cibles 4 o, et mesurer avant de l'annoncer.",
+      "votes": [
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        },
+        {
+          "refuted": false,
+          "confidence": "high"
+        }
+      ]
+    }
+  ],
+  "refuted": [
+    {
+      "lane": "named_blocks",
+      "title": "L'hypothèse « un seul site de hit BallKey » du mutant raw_anchor ne tient plus sur le header non commité (second site dans la route statique)",
+      "severity": "P2"
+    },
+    {
+      "lane": "static_prototype",
+      "title": "Coordination « moteur actif inchangé / sources gelées » contredite par le worktree : le header actif non commité est le prototype r2",
+      "severity": "P2"
+    },
+    {
+      "lane": "static_prototype",
+      "title": "Le doc constructeur affirme des runs ASan/UBSan et des mesures n400/n1000 sans reçu versionné ; le reçu publié déclare explicitement ne porter aucun SAN",
+      "severity": "P2"
+    }
+  ],
+  "p3": [
+    {
+      "lane": "plan_journal",
+      "title": "Numéros de lignes du header épinglé inexacts (lookup L513, non L508 ; L656 ; L675-722)"
+    },
+    {
+      "lane": "plan_journal",
+      "title": "review.json publie birth_nodes et published_continuations comme des mesures alors qu'ils sont dérivés d'une hypothèse"
+    },
+    {
+      "lane": "static_note",
+      "title": "Le tableau « piège réfuté → fixture permanente » ne correspond pas aux sites de mort des mutants capturés"
+    },
+    {
+      "lane": "static_note",
+      "title": "Hypothèses implicites de la NOTE constructeur non listées : positions distinctes, K ≤ K_max, même égalité de niveau exact pour les lots, et mécanisme réel des sommets K=1 dans l'oracle"
+    },
+    {
+      "lane": "g4_results",
+      "title": "SPOT/STOP « vérifiés avant travail » : preuve indirecte (code de sortie + marque), sortie du démarrage non embarquée"
+    },
+    {
+      "lane": "g4_results",
+      "title": "Non-exécution s10/12 : la règle réellement appliquée (3× observé + 30 s) n'est pas énoncée"
+    },
+    {
+      "lane": "docs_claims",
+      "title": "Le document présente le reset inter-ordres comme conception sans dire que son mutant survit (exception déclarée du reçu)"
+    },
+    {
+      "lane": "docs_claims",
+      "title": "« Vingt CTests » = sous-ensemble ciblé par regex, dont dix refus d'argument ; le CMakeLists actif en déclare plus de 300"
+    },
+    {
+      "lane": "docs_claims",
+      "title": "« Capacité de sortie » désigne deux métriques différentes à n800 et à n1000"
+    },
+    {
+      "lane": "nvcc",
+      "title": "Refus silencieux (lignes 26-29) et branche « sans -x » jamais exercée"
+    },
+    {
+      "lane": "witness_front",
+      "title": "Aucun plancher de non-vacuité sur les requêtes de coins ni sur les cœurs q3/q4 dans la porte"
+    },
+    {
+      "lane": "witness_front",
+      "title": "Au refus de capacité, le contenu de `GenerateStats` et de `WitnessFrontWork` diverge du front scalaire et n'est pas vérifié"
+    },
+    {
+      "lane": "wspd_device",
+      "title": "« Seul ajout privé CoreBall balls[3]{} » : la copie privée diffère aussi par une ligne vide finale supprimée"
+    },
+    {
+      "lane": "wspd_device",
+      "title": "La substitution du scalaire privé repose sur l'ordre de résolution des includes entre guillemets, non sur un include explicite"
+    },
+    {
+      "lane": "gcp_tools",
+      "title": "Les reçus d'inspection ne sont vérifiés par aucun lecteur et citent un fichier non publié"
+    },
+    {
+      "lane": "gcp_tools",
+      "title": "La porte du programme distant de lecture n'exerce qu'un des trois préfixes de ligne"
+    },
+    {
+      "lane": "gcp_tools",
+      "title": "L'inspecteur ne compare l'expiration SSH enregistrée qu'à la génération, pas à l'instant présent"
+    },
+    {
+      "lane": "named_blocks",
+      "title": "expected_roots=1 du bloc K10 1251653 est structurel (un seul représentant), pas une vérification de parent global"
+    },
+    {
+      "lane": "named_blocks",
+      "title": "Le mutant raw_anchor à 50k est tué par la première ancre périmée du tour entier, pas par le contrôle nommé"
+    },
+    {
+      "lane": "named_blocks",
+      "title": "Le README ne dit ni ce que gouverne `--threads` ni la liste complète de ce que la gate ne vérifie pas"
+    },
+    {
+      "lane": "static_prototype",
+      "title": "R_K/U_K : K1 exclu des compteurs statiques alors que la définition du plan l'inclut ; sémantique d'anchor_hits différente entre routes"
+    },
+    {
+      "lane": "static_prototype",
+      "title": "Mode `--expect-launch-failure` non enregistré et sans injection ; chaîne de comptabilité statique en littéral dans la sonde"
+    }
+  ],
+  "completeness_critic": "GCP non utilisé. Lecture seule ; rien écrit hors du scratch.\n\n**Ce qui manque encore pour clore la contre-lecture (par valeur décroissante)**\n\n1. **Question mathématique/oracle ouverte — la tour par boules n'a jamais été jugée par un oracle au-delà de 8 points, ni à K9/K10, ni sur un census issu du pipeline.** `morsehgp3D_v7/oracle/local_plateau_oracle.hpp:27-29` refuse `points.size() > 8` ; la gate alimente la tour avec le catalogue dérivé de l'oracle (`tests/full_ball_tower_gate.cpp:293` `catalogue(points, ix, model, kmax)`), jamais avec `generate→prefilter→census`. Les « 170 320 contrôles / 28 nuages » sont donc tous ≤ 8 points, K ≤ 8, coquille ≤ 8 (garde `kBallShellMax=12` et banque ≤ 16 jamais approchées). Le seul oracle K9/K10 à n=14 (`audits/receipts_full_meb_20260906/README.md`, tableau « Extension K9/K10 ») juge `full_gabriel.hpp`, pas `full_ball_tower.hpp`. À exécuter : oracle rationnel T2 (n = 12–14, Gamma exhaustif) sur la tour par boules **alimentée par le census pipeline**, avec plateaux cosphériques ≥ 5 points. Tant que ce raccord n'est pas jugé, « exact relativement au census fourni » ne dit rien du census réellement fourni à 8k–50k.\n\n2. **Modalité non exécutée — les quatre blocs nommés 50k.** `audits/receipts_cache_commit_20260911/blocs_50k/pinned_50000_threads8_o2.json` (NON COMMITÉ) : `returncode -15`, 2 086 s, stdout vide (sha e3b0c442…), `conforming:false` ; `guard_rerun_50k.log` attend encore. Le verrou P1 n° 2 du second auditeur (`audits/receipts_raccord_ancres_20260910/README.md` § 5.2) et la demande active n° 1 de `DIALOGUE_COURANT.md` restent ouverts ; l'issue de l'observateur en cours n'est pas encore un résultat.\n\n3. **Porte de régression absente à l'échelle et famille unique.** Aucune cible CTest `mhgp7_full_ball_*` à label `scale*` : les seules conformités 8k/16k/32k (`CMakeLists.txt@ad7ffd28:440-447, 905-911`) jugent le pipeline réduit contre `conformite_v5`, pas le payload FULL (cdd77e30/8eb94f8f/ef797782 ne vivent que dans des reçus). De plus toutes les sondes FULL ≥ 8k des reçus sont `--family=uniform` (92 occurrences ; les `eight_clusters`/`terrain` trouvés sont des conformités réduites) : toute conclusion coût/résidence/sélectivité de la tour repose sur une famille.\n\n4. **Verrous § 5.3–5.8 du second auditeur toujours « non vérifiés par réfutateurs »** (`receipts_raccord_ancres_20260910/README.md` § 5) : couplage Kmax census ↔ tour (refus `full_ball_outside_rank_window` vs omission autorisée) ; identités `N_A = Σ_B(...)` et `resolver_meb_calls = anchor_hits + intruder_queries` non assertées dans le code (vérifié conforme à la main sur `suite_cache_20260910/mesure_cache_8k/n8000_cache.stdout` : 4 780 219 + 1 447 046 = 6 227 265) ; fixtures des seuils (cercle plan vs octaèdre u=6, coquille asymétrique h_S=3) non gravées ; aucune porte threads=1 vs 8 ni permutation physique à PointId constants sur le payload FULL.\n\n5. **Lemme à écrire et assertion à poser sur le chemin de hit du cache** (constat static_note) : stricte antériorité des semis S_B ⊊ S_B′ ⇒ β_B < β_B′, et niveau non stocké dans `ResolverCacheEntry` (48 o) donc `ℓ_t < r` invérifiable au hit. Même famille : hypothèse « positions distinctes » implicite — `full_ball_tower.hpp@ad7ffd28:379` refuse `has_duplicate_positions()` alors que le profil u16 les admet bucketisées ; le statut rendu (unsupported_degeneracy ?) et sa documentation n'ont été lus par aucune lane.\n\n6. **Sources non commitées non lues par aucune lane** : `receipts/incremental_journal_prototype_20260911/`, `receipts/initial_representatives_20260911/`, `receipts/static_resolver_mutants_20260911/`, `audits/receipts_incremental_prefix_20260911/`, `docs/PORT_GPU_RESOLUTIONS.md`, et les modifications non commitées de `PASSATION.md`, `README.md`, `docs/{CONTRAT_PERFORMANCE,FAUSSES_PISTES,OPTIMISATIONS_CACHE_ET_GPU_20260910,PLAN_JOURNAL_INCREMENTAL,RESIDENCE_MASSIVE,TOUR_FULL_PAR_BOULES}.md` (`git status`). La lane docs_claims a jugé les versions ad7ffd28 ; les affirmations du worktree (p. ex. « aucun backend MEB par lots n'est intégré ») sont déjà périmées par le header 33e7d05e non commité.\n\n7. **Provenance non rejouée dans le reçu statique** : `receipts/static_resolution_cpu_20260911/README.md` ne cite ni oracle ni origine d'`expected.txt` (grep `expected|oracle|rationnel` vide) ; captures n400/n1000 et SAN sous `build/`, non versionnées. Tout ce chantier statique est pré-publication : header, gate, probe et CMake non commités.\n\n8. **Vacuités probables à graver ou à retirer** (déjà constatées, restent sans porte) : `intruder_power_tests` structurellement 0 ; « clé présente inadmissible » jamais observée ; `kFullCoverageArenaAccounting` jamais émis ; `kStack`/`kCounter` du kernel témoin inatteignables ; obligation `ℓ_t < r` des trois `<` statiques non causale (mutant `<=` survivant) ; `WitnessFrontWork` périmé après exception non distinguable.\n\n9. **Reçus nvcc/G4 non réfutables par leurs octets** : aucun `nvcc --dryrun`/`--keep` ni mutant d'une source `.cu` du projet ; sorties `describe` brutes absentes des reçus TERMINATED (README:21-22, choix documenté). Faible valeur tant que l'adaptateur n'est pas invoqué par un contrat."
+}

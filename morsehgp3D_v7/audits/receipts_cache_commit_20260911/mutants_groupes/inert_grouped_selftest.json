@@ -1,0 +1,23 @@
+{
+  "schema": "mhgp7-audit-record-v1",
+  "name": "inert_grouped_selftest",
+  "argv": [
+    "/workspaces/E-HGP/build/ad7ffd28_replay/gates/inert_grouped_gate_o2",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "start_utc": "2026-09-11T08:03:19Z",
+  "end_utc": "2026-09-11T08:03:19Z",
+  "wall_seconds": 0.406,
+  "returncode": 1,
+  "expected_returncode": 1,
+  "signal": null,
+  "conforming": true,
+  "child_maxrss_kib": 16768,
+  "child_user_seconds": 0.402,
+  "child_system_seconds": 0.004,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "5de4c7daf74c43993b6c4d3931685270ea5add6e9572ffa1ec1921ac51e999ae",
+  "environment_overrides": {},
+  "gcp_used": false
+}

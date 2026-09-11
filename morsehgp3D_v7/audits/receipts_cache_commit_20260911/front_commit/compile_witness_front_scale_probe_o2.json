@@ -1,0 +1,32 @@
+{
+  "schema": "mhgp7-audit-record-v1",
+  "name": "compile_witness_front_scale_probe_o2",
+  "argv": [
+    "g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-O2",
+    "/workspaces/E-HGP/build/ad7ffd28_v7_pin/morsehgp3D_v7/bench/witness_front_scale_probe.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/ad7ffd28_replay/gates/witness_front_scale_probe_o2"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "start_utc": "2026-09-11T08:06:20Z",
+  "end_utc": "2026-09-11T08:06:25Z",
+  "wall_seconds": 4.999,
+  "returncode": 0,
+  "expected_returncode": 0,
+  "signal": null,
+  "conforming": true,
+  "child_maxrss_kib": 335500,
+  "child_user_seconds": 4.671,
+  "child_system_seconds": 0.327,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment_overrides": {},
+  "gcp_used": false
+}

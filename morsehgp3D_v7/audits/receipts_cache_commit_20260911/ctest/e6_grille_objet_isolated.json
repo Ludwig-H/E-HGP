@@ -1,0 +1,23 @@
+{
+  "schema": "mhgp7-audit-record-v1",
+  "name": "e6_grille_objet_isolated",
+  "argv": [
+    "build/v7-audit-20260911/mhgp7_selftest",
+    "--e6-equal"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "start_utc": "2026-09-11T07:49:01Z",
+  "end_utc": "2026-09-11T07:51:12Z",
+  "wall_seconds": 130.969,
+  "returncode": 0,
+  "expected_returncode": 0,
+  "signal": null,
+  "conforming": true,
+  "child_maxrss_kib": 512684,
+  "child_user_seconds": 253.321,
+  "child_system_seconds": 4.207,
+  "stdout_sha256": "ad7fc3363202d56488aa40b3a5dab4e02ba5cea6897ae834ff2fa3a70fef1653",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment_overrides": {},
+  "gcp_used": false
+}

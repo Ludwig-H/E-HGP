@@ -1,0 +1,27 @@
+{
+  "schema": "mhgp7-audit-record-v1",
+  "name": "front_terrain_n2000_s8_lot4096_t2",
+  "argv": [
+    "/workspaces/E-HGP/build/ad7ffd28_replay/gates/witness_front_scale_probe_o2",
+    "2000",
+    "8",
+    "4096",
+    "2",
+    "terrain"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "start_utc": "2026-09-11T08:07:02Z",
+  "end_utc": "2026-09-11T08:07:03Z",
+  "wall_seconds": 1.152,
+  "returncode": 0,
+  "expected_returncode": 0,
+  "signal": null,
+  "conforming": true,
+  "child_maxrss_kib": 16896,
+  "child_user_seconds": 2.171,
+  "child_system_seconds": 0.034,
+  "stdout_sha256": "06575642e9831f7440226e6bb1c5882d4ccdb94d17bd0cf2457424e46e1806e4",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment_overrides": {},
+  "gcp_used": false
+}
