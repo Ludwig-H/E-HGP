@@ -260,7 +260,13 @@ et les unités positions/multiplicités ; le rejet négatif doit accompagner
 les crédits positifs. Pour q4, conserver ensuite le seed et son cover
 avec le sweep exact, plutôt que rescanner le cover pour chaque completion.
 
-Ce plan n'est ni implémenté ni qualifié sur GPU. La tentative G4 du
+Ce plan n'est pas qualifié sur GPU. La [couture CPU optionnelle](../receipts/witness_front_20260910/README.md)
+est depuis implémentée et qualifiée sur 431 010 contrôles O2/SAN ; elle
+n'est pas appelée par le générateur nominal. Le batch device demeure privé
+et non exécuté sur carte. Le [plan de vagues plates](OBJETS_PARALLELES_TOUR_20260911.md#4-les-étapes-amont-restent-dans-le-contrat)
+propose maintenant décisions indépendantes, préfixes et sorties à offsets
+disjoints ; ce changement de planification reste à raccorder et mesurer.
+La tentative G4 du
 10 septembre n'a lancé aucun worker : quota global occupé par une autre
 charge de travail ; cible E-HGP contrôlée TERMINATED. Après disponibilité,
 qualifier les kernels et les queues de lots, puis les régimes 8k/16k/32k

@@ -17,7 +17,17 @@ contrats de performance ne sont pas encore livrés.**
 
 ## État courant
 
-Dernier jalon : [sonde complète par lots, gate census→FULL et réduction MEB](docs/QUALIFICATION_BATCH_ET_MEB_20260911.md).
+Priorité courante : [objets pour paralléliser toute la tour](docs/OBJETS_PARALLELES_TOUR_20260911.md).
+Catalogue partagé, blocs clairsemés (K,B), graphes datés sur les naissances,
+puis contributions et verticales par requêtes sur arbres immuables :
+l'auditeur confirme que les horizontales K n'ont pas à s'attendre et que
+les verticales ne demandent pas de nouvelles MEB. Les références C++ privées
+passent O2/SAN : atlas sur 13 vrais census, calendrier sur 264 graphes,
+307 500 consultations CPU1/2/4. Ces portes sont encore séparées ; le chemin
+census→graphe→FULL n'est pas raccordé et le moteur actif reste inchangé.
+Cette décomposition vise aussi WSPD, census et export, pas seulement les MEB.
+
+Jalon précédent : [sonde complète par lots, gate census→FULL et réduction MEB](docs/QUALIFICATION_BATCH_ET_MEB_20260911.md).
 Le raccord privé passe 372 536 contrôles O2/SAN et compile avec la sonde
 entière sous NVCC strict. La variante q2 indépendante préserve les résultats
 sur 6 416 MEB, avec moins de supports/puissances et ses distances nouvelles

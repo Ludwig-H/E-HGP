@@ -143,7 +143,12 @@ biparti blocs/parents du constructeur ; dates de sommets, contributions,
 plateaux et verticales restent indispensables. L'auditeur a confirmé cette
 équivalence conditionnelle et montré la réduction supplémentaire aux seules
 naissances ; la table de correspondances datées reste nécessaire. Ce n'est
-pas encore une implémentation ni une optimisation mesurée.
+pas encore un raccord productif ni une optimisation mesurée. La
+[décomposition de toute la tour](OBJETS_PARALLELES_TOUR_20260911.md) précise
+désormais atlas partagé, graphes de naissances et consultations historiques
+en tableaux linéaires. Les horizontales sont indépendantes ; les verticales
+se calculent ensuite sans nouvelle MEB, sans dépendre des verticales de K−1.
+Les premières références C++ privées ne constituent pas un backend MSF GPU.
 
 Le [plan détaillé du terminal suivant](../receipts/gpu_meb_key_route_20260911/PLAN_TERMINAL.md)
 réunit ces helpers sans aller-retour hôte par étape. Les niveaux internes

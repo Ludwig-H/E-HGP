@@ -1,6 +1,6 @@
 # Graphe filtré des boules : proposition pour paralléliser les fusions
 
-11 septembre 2026. Proposition d'architecture argumentée, relue indépendamment à `90ee69ee` : accord conditionnel et réduction supplémentaire aux naissances. Aucun raccord C++/GPU ni claim de performance. Cadre : phase=exploration_v7_hors_registre, backend=cpu_reference, profile=quantized_u16_input_only, mode=audit_independant_math_and_architecture, public_status=not_claimed.
+11 septembre 2026. Proposition d'architecture argumentée, relue indépendamment à `90ee69ee` : accord conditionnel et réduction supplémentaire aux naissances. Aucun raccord productif/GPU ni claim de performance. Les [objets parallèles et premiers prototypes C++ privés](OBJETS_PARALLELES_TOUR_20260911.md) prolongent maintenant cette proposition, sans lui attribuer une qualification géométrique. Cadre : phase=exploration_v7_hors_registre, backend=cpu_reference, profile=quantized_u16_input_only, mode=audit_independant_math_and_architecture, public_status=not_claimed.
 
 ## 1. Objet et prémisses
 

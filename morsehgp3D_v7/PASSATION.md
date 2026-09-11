@@ -6,7 +6,17 @@
 Chantier sur `main` uniquement. Cette entrée décrit le travail courant ;
 les récits des anciens jalons sont retirés, leurs preuves restent liées.
 
-Dernier complément après `324f6192` : [lots complets, MEB et tentatives G4](docs/QUALIFICATION_BATCH_ET_MEB_20260911.md).
+Priorité après `a97ee819` : [objets parallèles de toute la tour](docs/OBJETS_PARALLELES_TOUR_20260911.md).
+L'auditeur confirme l'indépendance des horizontales K et le calcul offline
+des verticales sans nouvelle MEB. Catalogue unique, atlas des blocs,
+graphe daté sur naissances, multifusions et marques séparées remplaceraient
+les dépendances temporelles du calendrier actuel. Les briques privées passent
+O2/SAN : atlas sur 30 562 blocs de vrais census, calendrier sur 264 graphes
+abstraits, 307 500 consultations CPU1/2/4. Le raccord de ces portes séparées
+reste à faire ; aucun remplacement actif ni temps extrapolé.
+GCP non utilisé pour ce nouveau jalon architectural.
+
+Complément précédent après `324f6192` : [lots complets, MEB et tentatives G4](docs/QUALIFICATION_BATCH_ET_MEB_20260911.md).
 Sonde et gate privées compilées/liées NVCC strict ; la gate O2/SAN compare
 10 326 terminales directes et vingt paires physiques. La réduction q2 est
 qualifiée séparément sur 6 416 MEB, non intégrée et sans benchmark de vitesse.
@@ -251,7 +261,7 @@ Prochaines coutures et prototypes séparés :
 - [Parcours droit des intrus](receipts/rightmost_intruder_20260910/README.md) : prototype de deux lignes non intégré ; 28 nuages O2/SAN et 72 840 requêtes contre un juge de choix. À n1000 : −18,7 % de visites et −3,07 % de MEB, pas de gain contractuel.
 - [Journal incrémental](docs/PLAN_JOURNAL_INCREMENTAL.md) : raccord privé FULL O2/SAN correct dans quatre modes, non intégré après micro défavorable sur allocations/rétention finale ; vues plates et suppression des copies restent à évaluer.
 - [Primitives de résolutions GPU](docs/RESULTATS_PRIMITIVES_GPU_20260911.md) : MEB par lots et clé/PGCD/division passent sur G4 après O2/SAN ; sources privées, ni terminal ni raccord de tour GPU. Le premier prototype et ses échecs restent conservés séparément.
-- [Graphe filtré des boules](docs/GRAPHE_FILTRE_BOULES_PROPOSITION_20260911.md) : accord conditionnel de l'auditeur et réduction aux naissances avant forêt couvrante minimale. Contributions, dates d'admission et verticales restent nécessaires ; la table des pivots n'est pas gratuite. Aucun raccord C++/GPU ni gain mesuré.
+- [Graphe filtré des boules](docs/GRAPHE_FILTRE_BOULES_PROPOSITION_20260911.md) : accord conditionnel de l'auditeur et réduction aux naissances avant forêt couvrante minimale. La [décomposition en objets parallèles](docs/OBJETS_PARALLELES_TOUR_20260911.md) retire aussi la boucle d'exécution des ordres ; contributions, dates d'admission et verticales restent nécessaires. Premières références C++ privées, pas de raccord actif/GPU ni gain mesuré.
 - [Front WSPD optionnel](receipts/witness_front_20260910/README.md) : 431 010 contrôles O2/SAN, liaison explicite à l'index et générations vérifiées. Le batch device reste privé et non exécuté sur GPU ; le générateur nominal reste scalaire.
 
 Le premier reçu des [quatre blocs nommés](receipts/full_ball_named_blocks_20260910/README.md)

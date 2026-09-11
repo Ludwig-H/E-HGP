@@ -1,0 +1,7 @@
+--- base_full_ball_tower.hpp.source
++++ source/morsehgp3D_v7/src/forest/full_ball_tower.hpp
+@@ -290,3 +290,4 @@
+ class Builder {
++  friend struct RankAtlasReference;  // Private gate access only; no changed algorithm.
+  public:
+   Builder(const CloudIndex& index, std::span<const BallData> census, unsigned max_k, FullBallStats& stats,

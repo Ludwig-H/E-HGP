@@ -1,0 +1,181 @@
+[
+  {
+    "argv": [
+      "/usr/bin/x86_64-linux-gnu-g++-13",
+      "--version"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_atlas_20260911",
+    "elapsed_s": 0.001986711999052204,
+    "environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "expected": 0,
+    "name": "compiler",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "/usr/bin/x86_64-linux-gnu-g++-13",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-O1",
+      "-g",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_rank_atlas_20260911/san_root_r1/gate.d",
+      "/workspaces/E-HGP/build/v7_rank_atlas_20260911/atlas_gate.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_rank_atlas_20260911/san_root_r1/atlas_gate"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_atlas_20260911",
+    "elapsed_s": 38.78331884900035,
+    "environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "expected": 0,
+    "name": "compile",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_rank_atlas_20260911/san_root_r1/atlas_gate",
+      "--selftest"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_atlas_20260911",
+    "elapsed_s": 3.1399262830018415,
+    "environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "expected": 0,
+    "name": "selftest",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_rank_atlas_20260911/san_root_r1/atlas_gate",
+      "--date"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_atlas_20260911",
+    "elapsed_s": 0.23329136699976516,
+    "environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "expected": 4,
+    "name": "date",
+    "returncode": 4
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_rank_atlas_20260911/san_root_r1/atlas_gate",
+      "--offset"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_atlas_20260911",
+    "elapsed_s": 0.21633468399886624,
+    "environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "expected": 4,
+    "name": "offset",
+    "returncode": 4
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_rank_atlas_20260911/san_root_r1/atlas_gate",
+      "--mask"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_atlas_20260911",
+    "elapsed_s": 0.22727691099862568,
+    "environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "expected": 4,
+    "name": "mask",
+    "returncode": 4
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_rank_atlas_20260911/san_root_r1/atlas_gate",
+      "--contribution"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_atlas_20260911",
+    "elapsed_s": 0.22092329099905328,
+    "environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "expected": 4,
+    "name": "contribution",
+    "returncode": 4
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_rank_atlas_20260911/san_root_r1/atlas_gate",
+      "--admission"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_atlas_20260911",
+    "elapsed_s": 0.22648241099886945,
+    "environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "expected": 4,
+    "name": "admission",
+    "returncode": 4
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_rank_atlas_20260911/san_root_r1/atlas_gate",
+      "--permutation"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_atlas_20260911",
+    "elapsed_s": 0.22631606399954762,
+    "environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "expected": 4,
+    "name": "permutation",
+    "returncode": 4
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_rank_atlas_20260911/san_root_r1/atlas_gate",
+      "--unknown"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_atlas_20260911",
+    "elapsed_s": 0.01687307999964105,
+    "environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "expected": 2,
+    "name": "unknown",
+    "returncode": 2
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_rank_atlas_20260911/san_root_r1/atlas_gate"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_rank_atlas_20260911",
+    "elapsed_s": 0.01651484700050787,
+    "environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "expected": 2,
+    "name": "missing",
+    "returncode": 2
+  }
+]

@@ -1,0 +1,96 @@
+# Atlas privé des rangs et blocs FULL
+
+Exploration CPU uniquement, `public_status=not_claimed`. Pas de GCP, GPU,
+calendrier reconstruit, terminal géométrique, verticales ou résultat industriel.
+
+La référence est `src/forest/full_ball_tower.hpp` actif de SHA-256
+`83f1c78e0656f08cd42522e4cd36d153ce283a6082246a36fe5225b3790c6366`.
+La copie privée `source/morsehgp3D_v7/src/` est inchangée sauf UNE déclaration
+`friend struct RankAtlasReference` dans Builder. Aucun corps n'est changé.
+Le friend appelle son vrai `validate_catalogue`, son calendrier d'admission
+`programs` et son vrai `visit_block`, sans exécuter le résolveur ni la forêt.
+Les pins avant/après du recorder portent tous ces fichiers. Pas de Boost.
+
+## Objet et préconditions
+
+Un seul `span<const BallData>` et une référence d'index immuables, empruntés
+avec leur identité et leur durée de vie. Il faut un vrai index sans doublons
+de positions et un census complet exact accepté par le contrat FULL, avec
+clés uniques, classification I/U et `arity=q_min` certifiées en amont. Les
+contrôles de forme ne certifient ni ces propriétés ni la complétude WSPD.
+
+Pour chaque boule B : `lo=p+arity-1`, `hi=min(kmax,p+u)`, préfixe `base` et
+rang exact commun. Une cellule est `(K,B)`, d'identifiant interne
+`n+base[B]+K-lo[B]`. Les IDs `0..n-1` réservent les naissances ponctuelles K1
+en ordre d'indice géométrique, au rang zéro ; ce ne sont PAS les IDs exportés
+de population ou de nœud. Les K effectifs sont tronqués à n comme le Builder.
+Le singleton a un catalogue vide, mais n'est pas un nuage vide accepté.
+
+Les rangs utilisent l'égalité et l'ordre RATIONNELS des niveaux positifs.
+Le tri de chaque K conserve exactement l'ordre `(niveau exact, BallKey)`
+du Builder. Les niveaux bruts restent empruntés par boule : un rang global
+ne remplace jamais le numérateur/dénominateur brut du premier B d'un lot K.
+Cette distinction est nécessaire pour les q4 non réduits et la sortie
+physique. L'atlas ne numérote pas les populations, dont l'ordre de première
+utilisation dépend encore du calendrier des groupes.
+
+Chaque contribution et chaque représentant sont produits une seule fois
+par cellule. Les coquilles régulières utilisent l'identité analytique du
+Builder ; chaque coquille extra prépare une `ShellTable` une seule fois et
+appelle `rank(K)` une fois par K admis. La table/le quotient temporaire est
+libéré avant la boule suivante. Aucun catalogue Gamma global n'est construit.
+
+Dans tous les rangs programmés K>p : le représentant contient tout I(B).
+Il suffit donc de conserver un masque de coquille u16, avec offsets par
+cellule. Ce masque est traduit dans l'ordre ORIGINAL de `BallData.shell_ids`.
+En revanche, le masque de contribution reste dans l'ordre PointId trié du
+contrat de population. Confondre ces deux ordres est une faute sémantique.
+La clef complète triée n'est développée que temporairement dans la gate.
+
+## Mémoire et travail
+
+C boules, A cellules réellement admises, R représentants : stockage
+persistant O(C+A+R+K), zéro copie de BallData, aucun tableau K fois C de
+census, aucun tableau permanent de clefs de facettes de 40 octets. Pour une
+coquille régulière, l'intervalle a au plus deux K ; les extras peuvent être
+plus larges. Le tri ajoute O(C), le validateur de forme O(A), et le quotient
+local un temporaire de taille O(2^u), u<=12 dans le profil EXISTANT.
+R n'est pas universellement sous-quadratique ; aucune telle garantie ni
+gain RAM/RSS industriel n'est déduit. Les octets logiques et de capacité
+sont ceux des vecteurs persistants seulement : pas le peak processus, pas
+le census emprunté, pas le quotient ni le snapshot de référence de la gate.
+
+## Qualification et limites
+
+La gate génère de vrais census CPU n32 K1..10 avec s=8/10/12, puis compare
+admission, ordre par K, contributions, nombre/identité/ordre des représentants
+au vrai parcours Builder. Elle ajoute permutations de points/census/listes
+I/U, square8 avec extras et intérieurs, ABCZ, line3, terminal n=2 et n=1.
+Des niveaux bruts de square8 sont doublés numérateur ET dénominateur :
+l'égalité rationnelle doit rester une seule date malgré des octets distincts.
+Le contrôle pair-à-pair de rangs est quadratique SEULEMENT dans cette gate
+bornée ; ce n'est pas le helper produit proposé.
+
+Six mutations d'état ciblées : date, offsets, masque à cardinalité conservée,
+contribution, admission, permutation. Le masque faux et la contribution
+fausse passent les contrôles de forme mais doivent être réfutés par le
+différentiel sémantique. Ce ne sont pas six mutants de géométrie compilés.
+Sorties attendues 0 selftest, 4 faute détectée avec cause exacte, 2 CLI invalide.
+
+L'atlas n'a encore ni sorties de terminaux, ni unique/scatter, ni graphe, ni
+contributions datées affectées à un segment, ni traitement des verticales.
+Il ne remplace pas une qualification physique complète de forêts FULL.
+La propriété « naissance => bloc inférieur de même B admis » est testée,
+pas la reconstruction d'une image verticale ni sa naturalité.
+
+Exécution depuis la racine (chaque destination doit être nouvelle) :
+
+```bash
+python3 -B build/v7_rank_atlas_20260911/record.py --out o2_r1
+# SAN uniquement après lecture/autorisation ROOT, même source figée :
+python3 -B build/v7_rank_atlas_20260911/record.py --out san_root_r1 --san
+```
+
+Le recorder capture compilateur/flags, commandes, stdout/stderr, code exact,
+pins sources avant/après et binaire local non destiné à publication. Aucun
+nouveau framework de reçus, aucune dépendance vendor copiée.

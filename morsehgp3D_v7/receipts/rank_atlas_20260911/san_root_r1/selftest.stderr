@@ -1,0 +1,26 @@
+fixture_start=uniform32 n=32 K=10 s=8 scramble=0 scale=0
+fixture_complete=uniform32 C=2701 A=5049 R=8694 births=2348 logical_bytes=152296 capacity_bytes=173256
+fixture_start=uniform32_permuted n=32 K=10 s=8 scramble=1 scale=0
+fixture_complete=uniform32_permuted C=2701 A=5049 R=8694 births=2348 logical_bytes=152296 capacity_bytes=173256
+fixture_start=uniform32 n=32 K=10 s=10 scramble=0 scale=0
+fixture_complete=uniform32 C=2701 A=5049 R=8694 births=2348 logical_bytes=152296 capacity_bytes=173256
+fixture_start=uniform32_permuted n=32 K=10 s=10 scramble=1 scale=0
+fixture_complete=uniform32_permuted C=2701 A=5049 R=8694 births=2348 logical_bytes=152296 capacity_bytes=173256
+fixture_start=uniform32 n=32 K=10 s=12 scramble=0 scale=0
+fixture_complete=uniform32 C=2701 A=5049 R=8694 births=2348 logical_bytes=152296 capacity_bytes=173256
+fixture_start=uniform32_permuted n=32 K=10 s=12 scramble=1 scale=0
+fixture_complete=uniform32_permuted C=2701 A=5049 R=8694 births=2348 logical_bytes=152296 capacity_bytes=173256
+fixture_start=extra_square8 n=8 K=8 s=8 scramble=1 scale=1
+fixture_complete=extra_square8 C=36 A=82 R=94 births=38 logical_bytes=2224 capacity_bytes=2296
+fixture_start=extra_square8 n=8 K=8 s=10 scramble=1 scale=1
+fixture_complete=extra_square8 C=36 A=82 R=94 births=38 logical_bytes=2224 capacity_bytes=2296
+fixture_start=extra_square8 n=8 K=8 s=12 scramble=1 scale=1
+fixture_complete=extra_square8 C=36 A=82 R=94 births=38 logical_bytes=2224 capacity_bytes=2296
+fixture_start=ABCZ n=4 K=4 s=8 scramble=1 scale=0
+fixture_complete=ABCZ C=6 A=14 R=15 births=6 logical_bytes=422 capacity_bytes=424
+fixture_start=line3 n=3 K=3 s=8 scramble=1 scale=0
+fixture_complete=line3 C=3 A=6 R=6 births=3 logical_bytes=212 capacity_bytes=216
+fixture_start=terminal_pair n=2 K=2 s=8 scramble=0 scale=0
+fixture_complete=terminal_pair C=1 A=2 R=2 births=1 logical_bytes=96 capacity_bytes=96
+fixture_start=terminal_singleton n=1 K=1 s=8 scramble=0 scale=0
+fixture_complete=terminal_singleton C=0 A=0 R=0 births=0 logical_bytes=32 capacity_bytes=32

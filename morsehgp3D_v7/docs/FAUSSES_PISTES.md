@@ -69,6 +69,21 @@ non encore qualifiée n'est pas, à elle seule, une fausse piste.
 
 ## Règle d'entretien du dossier actif
 
+Le 11 septembre, la [décomposition en objets parallèles](OBJETS_PARALLELES_TOUR_20260911.md)
+écarte aussi ces raccourcis d'architecture :
+
+- Copier dix fois le constructeur et son catalogue : les boules sont communes
+  et, sous régularité, n'ont que deux rôles voisins ; le parallélisme utile
+  se trouve surtout à l'intérieur des ordres.
+- Prendre le calendrier séquentiel actuel pour un obstacle mathématique :
+  le graphe daté permet des horizontales indépendantes, puis des verticales
+  historiques offline. Le coût actuel reste mesuré, pas universel.
+- Garder seulement une forêt sur les points ou oublier les dates des marques :
+  on perd les identités d'ordre supérieur ou on anticipe les contributions.
+- Conserver une table de sauts N log N par défaut pour les requêtes massives :
+  les chaînes lourdes suffisent en mémoire linéaire. Leur construction reste
+  un coût séparé ; le premier prototype ne la parallélise pas encore.
+
 Le 10 septembre, deux distinctions supplémentaires sont conservées :
 
 - Le « dernier intrus » obtenu par balayage exhaustif peut raccourcir la descente mais augmente potentiellement le coût d'une requête. Une DFS droite anticipée retrouve exactement ce même témoin sans terminer le scan ; son [prototype](../receipts/rightmost_intruder_20260910/README.md) reste séparé du moteur mesuré.

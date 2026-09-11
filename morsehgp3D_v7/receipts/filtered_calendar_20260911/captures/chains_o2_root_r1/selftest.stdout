@@ -1,0 +1,1 @@
+{"status":"passed","checks":922537,"queries":307500,"inactive":76902,"light_steps":159780,"binary_steps":665319,"rejected":9,"cases":5,"workers":[1,2,4],"maximum_nodes":8191,"logical_index_bytes_total":245928,"construction_parallel":false,"batch_parallel":true,"geometry_tested":false,"gcp_used":false,"public_status":"not_claimed"}

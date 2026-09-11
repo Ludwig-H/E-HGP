@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_filtered_calendar_20260911/o2_r2/gate",
+    "--selftest"
+  ],
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "selftest",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "620dc0a660b9295b6e1a832717cecae2621d0bf3c19feb9073ab29ed996a1f74"
+}

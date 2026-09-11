@@ -1,0 +1,63 @@
+{
+  "GCP_used": false,
+  "binary_sha256": "e8037602a1fe4a572963cd988ecc1f4c79ac29061a194791705ac049184118e3",
+  "commands": [
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-O2",
+        "/workspaces/E-HGP/build/v7_filtered_calendar_20260911/o2_r2/gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_filtered_calendar_20260911/o2_r2/gate"
+      ],
+      "exit_code": 0,
+      "expected_exit": 0,
+      "name": "compile",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_filtered_calendar_20260911/o2_r2/gate",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "expected_exit": 0,
+      "name": "selftest",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "620dc0a660b9295b6e1a832717cecae2621d0bf3c19feb9073ab29ed996a1f74"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_filtered_calendar_20260911/o2_r2/gate",
+        "--unknown"
+      ],
+      "exit_code": 2,
+      "expected_exit": 2,
+      "name": "unknown",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_filtered_calendar_20260911/o2_r2/gate"
+      ],
+      "exit_code": 2,
+      "expected_exit": 2,
+      "name": "missing",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "error": null,
+  "geometry_qualified": false,
+  "sanitizer": false,
+  "sanitizer_environment": {},
+  "source_stable": true,
+  "status": "passed"
+}

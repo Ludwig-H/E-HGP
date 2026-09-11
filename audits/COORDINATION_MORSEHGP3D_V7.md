@@ -2923,3 +2923,77 @@ terminal_batch_worker, terminal_batch_g4, terminal_batch_tool_discovery.
 Aucun src actif C++, fichier de vos audits, v6 ou registre inclus. Relecture
 des cinq paquets et autotests Python normal/−O depuis le seul index exporté,
 puis commit/push main. Cette réservation finit après publication.
+
+ROOT, nouvelle demande utilisateur après b5271aad : priorité aux OBJETS et
+structures permettant de paralléliser toutes les étapes coûteuses, pas au
+seul cœur MEB. Le commit0db1e775 est publié, l'index ROOT est libre. Cadre
+inchangé : exploration_v7_hors_registre/cpu_reference/quantized_u16_input_only/
+audit_independant_math_and_architecture/not_claimed. GCP non utilisé à cette
+reprise ; pas de nouveau redémarrage pour étudier les structures.
+
+Votre réduction aux naissances semble désormais le pivot architectural :
+catalogue géométrique commun + atlas des blocs (K,B), rangs de niveaux exacts
+communs, géométrie multi-K indépendante, φ par pointeurs strictement
+décroissants, arêtes sur naissances datées du bloc émetteur, puis MSF et
+reconstruction atomique. Les marques d'admission et contributions restent
+hors graphe, les verticales se calculent après TOUTES les histoires
+horizontales depuis une référence inférieure par naissance. Je ne reprends
+ni un hub nu comme feuille ni la racine finale comme ancre historique.
+
+Question de contrelecture ciblée : confirmez-vous que l'on peut supprimer
+la dépendance d'exécution K→K+1 de Builder::run sans nouvelle MEB verticale ?
+Après production indépendante de chaque forêt, choisir pour chaque nœud une
+feuille descendante, lire son ancre inférieure au niveau de création du
+nœud fermé, puis vérifier en parallèle toutes les images de parents. Les
+arêtes du graphe RÉDUIT satisfont bien date(extrémité)<date(arête), puisque
+leurs deux extrémités remontent à des terminaux stricts ; cela écarte les
+feuilles de durée nulle qu'un graphe général autoriserait.
+
+Un prototype C++ de MSF/calendrier abstrait, puis un atlas de rangs et blocs
+sur vrais census, sont en préparation privée ; aucun remplacement actif.
+Recherche primaire utile consultée aujourd'hui : PANDORA arXiv2401.06089v1
+et ParSLD/RCTT arXiv2404.19019v2. Leurs dendrogrammes binaires sur MST ne
+portent ni nos naissances datées ni nos contributions/verticales. Les
+égalités doivent être contractées en multifusions ; leurs temps ne sont
+pas des estimations HGP. Je privilégie la contraction d'arbres à un simple
+Union-Find asynchrone qui reste profond sur un peigne.
+
+ROOT, publications a0f358e9/a97ee819 lues. Votre lecteur et votre modèle
+parallel_objects sont contre-exécutés normal/−O : 11 cas, 234 coupes,
+5 178 requêtes et 12 nœuds verticaux, résultats identiques. Accord sur les
+chaînes lourdes ; je les porte en prototype C++ à stockage linéaire avec
+requêtes effectivement distribuées sur CPU1/2/4. Son constructeur demeure
+séquentiel et le graphe abstrait, sans prétendre au raccord census→FULL.
+Première gate O2 : 307 500 requêtes, 922 537 contrôles, neuf rejets, peigne
+de 8 191 nœuds. SAN en cours. L'atlas compact est confronté séparément aux
+vrais census via une instrumentation de lecture du Builder inchangé.
+La nouvelle note OBJETS_PARALLELES_TOUR_20260911 explicite aussi les plans
+amont, les copies évitées et les limites de travail/résidence. Index libre
+pendant cette préparation ; aucun de vos fichiers n'est modifié par ROOT.
+
+ROOT, trois briques privées closes O2/SAN (ASan/UBSan/LSan actifs) :
+atlas : 13 vrais census, 30 562 blocs/52 469 représentants comparés au vrai
+visit_block via un unique friend de lecture, six mutations causales ;
+calendrier : 264 graphes/6 570 coupes/474 524 contrôles ; consultations HLD :
+307 500 requêtes CPU1/2/4, 922 537 contrôles, huit refus plus un mutant
+sémantique d'admission. Aucun calendrier parallèle/MSF GPU ni extraction
+du graphe depuis ces census n'est encore qualifié. Les deux portes restent
+séparées. Le helper d'atlas emprunte le census, garde masques u16 et niveaux
+bruts ; son juge pair-à-pair borné n'est pas son architecture.
+
+Paquet calendrier prêt : receipts/filtered_calendar_20260911,
+manifeste397c3172374ebeaa997fb0ded12d3ad54cbd289e6fb34ee25226dfd73fe4190c,
+lecteur contre-exécuté normal/−O. Paquet atlas en conditionnement final.
+Le constructeur actif reste83f1c78e ; aucun src actif ni registre modifié.
+Le prochain raccord utile émettra les terminaux et marques depuis cet atlas,
+puis comparera graphes/histoires, contributions et verticales à Builder/T2.
+GCP non utilisé. Votre dossier et les changements v6 restent hors index ROOT.
+
+ROOT, index constaté vide sur a97ee819. Réservation pour publication cohérente
+sur main : cette coordination racine, README/PASSATION v7, les docs
+OBJETS_PARALLELES_TOUR_20260911, ELIMINATION_BLOCS_WSPD, FAUSSES_PISTES,
+GRAPHE_FILTRE_BOULES_PROPOSITION_20260911 et PORT_GPU_RESOLUTIONS, plus les
+deux paquets receipts/filtered_calendar_20260911 et receipts/rank_atlas_20260911.
+Aucun src actif, fichier d'auditeur, v6, script GCP ni registre inclus.
+Contrôles des lecteurs normal/−O et documents/registre depuis le seul index
+exporté avant commit/push. Réservation close par publication de ce commit.

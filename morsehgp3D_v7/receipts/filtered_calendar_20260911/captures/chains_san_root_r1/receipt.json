@@ -1,0 +1,76 @@
+{
+  "binary_sha256": "a83f0c1f35c70b4cae0fa0a5ab882a22b0feae5a80f8b964481f9f8c9d9f41eb",
+  "commands": [
+    {
+      "argv": [
+        "g++",
+        "--version"
+      ],
+      "exit_code": 0,
+      "name": "compiler",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8"
+    },
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-O1",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+        "-fno-pie",
+        "-no-pie",
+        "/workspaces/E-HGP/build/v7_filtered_calendar_20260911/chains_san_root_r1/historical_chains_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_filtered_calendar_20260911/chains_san_root_r1/gate"
+      ],
+      "exit_code": 0,
+      "name": "compile",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v7_filtered_calendar_20260911/chains_san_root_r1/gate"
+      ],
+      "exit_code": 0,
+      "name": "selftest",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "6c013db524b0cd44c7ac0c398363b1137f9df0cc74bdff943093b01c57c2fac4"
+    }
+  ],
+  "error": null,
+  "gcp_used": false,
+  "geometry_qualified": false,
+  "sanitizer": true,
+  "sanitizer_environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "source_stable": true,
+  "sources_after": {
+    "filtered_calendar.hpp": "1cf438cbac839c8f502de0c8daebbf89296a3884d2d40ba50715b5aaca161fa2",
+    "historical_chains.hpp": "686c2137a905e4f77c15a1d7f497541e6f8d87b9217f5c9c726cf4951be573c3",
+    "historical_chains_gate.cpp": "f405cda33256a456446010c5779b1381e18635c1989d3af86a5333104a928ea3",
+    "record_chains.py": "1021050b256fdafda9ca68974911d76df111b75f2c9eb97cc41c1aa121241931"
+  },
+  "sources_before": {
+    "filtered_calendar.hpp": "1cf438cbac839c8f502de0c8daebbf89296a3884d2d40ba50715b5aaca161fa2",
+    "historical_chains.hpp": "686c2137a905e4f77c15a1d7f497541e6f8d87b9217f5c9c726cf4951be573c3",
+    "historical_chains_gate.cpp": "f405cda33256a456446010c5779b1381e18635c1989d3af86a5333104a928ea3",
+    "record_chains.py": "1021050b256fdafda9ca68974911d76df111b75f2c9eb97cc41c1aa121241931"
+  },
+  "sources_copied": {
+    "filtered_calendar.hpp": "1cf438cbac839c8f502de0c8daebbf89296a3884d2d40ba50715b5aaca161fa2",
+    "historical_chains.hpp": "686c2137a905e4f77c15a1d7f497541e6f8d87b9217f5c9c726cf4951be573c3",
+    "historical_chains_gate.cpp": "f405cda33256a456446010c5779b1381e18635c1989d3af86a5333104a928ea3",
+    "record_chains.py": "1021050b256fdafda9ca68974911d76df111b75f2c9eb97cc41c1aa121241931"
+  },
+  "status": "passed"
+}

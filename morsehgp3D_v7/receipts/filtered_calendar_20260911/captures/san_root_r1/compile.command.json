@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-O1",
+    "-g",
+    "-fsanitize=address,undefined",
+    "-fno-omit-frame-pointer",
+    "/workspaces/E-HGP/build/v7_filtered_calendar_20260911/san_root_r1/gate.cpp",
+    "-o",
+    "/workspaces/E-HGP/build/v7_filtered_calendar_20260911/san_root_r1/gate"
+  ],
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "compile",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
