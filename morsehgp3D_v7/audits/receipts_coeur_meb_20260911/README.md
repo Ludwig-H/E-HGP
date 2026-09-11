@@ -39,3 +39,19 @@ facettes réelles, **pas** le flux exact du résolveur. Le banc mesure le noyau 
 isolé, pas la tour : la part de ce noyau dans `tower_s` n'est pas instrumentée.
 Aucun contrat 50k, 1 s ou 100 ms n'en découle. Le prototype n'a ni mutants, ni
 gardes de dépassement, ni portes O2/SAN : ce n'est pas du code produit.
+
+## Welzl réparé, après la réfutation K7
+
+`welzl2.cpp` porte la réparation : le cas de base construit la boule passant
+**par** `R` avec `q3_form` et `q4_form`, en ne gardant que `g > 0` et `det > 0`
+et en retirant les filtres de minimalité de `form()`. Même compilation, puis :
+
+```bash
+./welzl2
+```
+
+Il exécute trois épreuves : la contre-fixture K7 de
+`receipts_meb_boundary_20260911`, le balayage exhaustif de sa famille de dix
+points sur tous les masques de taille 2 à 10, et 200 000 tirages. Il rend 1 si
+une seule divergence apparaît, et compte les déclenchements du repli de sécurité.
+Mesuré : 0 divergence et 0 repli sur les trois épreuves, 4,12x en temps.

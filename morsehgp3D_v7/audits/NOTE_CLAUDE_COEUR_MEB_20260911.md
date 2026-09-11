@@ -1,4 +1,4 @@
-# Coeur MEB : profil mesuré, trois optimisations exactes, et 2,9x vérifié
+# Coeur MEB : profil mesuré, et le gain qui survit à une réfutation
 
 11 septembre 2026, second auditeur (session e-hgp-c6), sur `99b4d3b1`.
 `phase=exploration_v7_hors_registre`, `backend=cpu_reference`,
@@ -71,7 +71,8 @@ rien changer au résultat.
 Pur réordonnancement. La plupart des candidats sont rejetés, et ils le sont en
 deux tests au lieu de K.
 
-**c. Calculer la MEB d'abord, puis canonicaliser sur la coquille.** Le théorème :
+**c. Calculer la MEB d'abord, puis canonicaliser sur la coquille.** *Le théorème
+ci-dessous reste vrai, mais ma réalisation par Welzl est réfutée, cf. § 9.* Le théorème :
 tout candidat accepté définit une boule contenant tous les sites avec son support
 au bord ; une telle boule **est** la MEB, qui est unique. Donc les points du
 support canonique sont tous sur la sphère de la MEB, c'est-à-dire dans la
@@ -79,32 +80,30 @@ coquille. Il suffit d'énumérer les sous-ensembles de la **coquille**, dans le
 même ordre. Comme `extra_records` vaut 4 sur 21,5 M boules à 50k, la coquille est
 presque toujours de taille 2, 3 ou 4 : la canonicalisation est quasi gratuite.
 
-## 4. Résultat mesuré
+## 4. Résultat mesuré, après réfutation puis réparation
 
-Aiguillage : force brute avec (a) et (b) pour K<7, Welzl borné plus
-canonicalisation (c) pour K≥7. **Jamais pire que l'existant, à aucun K.**
+Ma première voie Welzl est réfutée (§ 9). Elle a ensuite été **réparée**, et la
+réparation est mesurée ici. Deux étages sont distingués.
 
-| K | candidats actuel → hybride | puissances actuel → hybride |
-| ---: | ---: | ---: |
-| 3 | 3,2 → 1,4 | 8,1 → 4,2 |
-| 6 | 30,2 → 16,6 | 55,8 → 19,6 |
-| 10 | 200,1 → 30,9 | 272,3 → 112,1 |
+Étage 1, les deux optimisations prouvées exactes (a) et (b) seules, sans aucun
+Welzl. Étage 2, en ajoutant le Welzl réparé et la canonicalisation (c).
 
-Gains moyens à K uniforme : 3,94x sur les candidats, 1,94x sur les puissances.
-Pondérés par la distribution réelle des K : **4,53x** sur les candidats et
-**1,99x** sur les puissances à 8k, 4,54x et 1,99x à 32k. En pondérant par les
-clés uniques, qui sont ce qui atteint réellement la MEB après dédoublonnage,
-plutôt que par les requêtes brutes : 4,59x et 2,00x.
-
-Temps mural, trois exécutions consécutives, machine se calmant :
-
-| exécution | référence | hybride | rapport |
+| grandeur | référence | (a)+(b) seules | (a)+(b)+Welzl réparé |
 | --- | ---: | ---: | ---: |
-| 1 | 0,183 s | 0,062 s | 2,95x |
-| 2 | 0,175 s | 0,058 s | 3,01x |
-| 3 | 0,168 s | 0,058 s | 2,89x |
+| candidats par appel | 58,0 | 41,1 | **14,1** |
+| tests de puissance par appel | 88,4 | 29,5 | 33,6 |
+| temps mural, machine calme | 0,902 s | 0,680 s | **0,219 s** |
+| gain en temps | — | 1,33x | **4,12x** |
 
-Soit environ **2,9x sur le noyau MEB**, à sortie identique.
+Vérification, identique pour les deux étages : 196 898 appels aléatoires, les
+1 013 cas du balayage exhaustif de la famille de contre-fixtures de l'auditeur
+historique, et sa contre-fixture K7 nominale. Comparaison champ par champ,
+**zéro divergence**. Pour l'étage 2, le repli de sécurité vers la force brute
+**ne se déclenche jamais**, sur aucun des 198 000 cas.
+
+Noter que l'étage 2 fait *plus* de tests de puissance que l'étage 1, 33,6 contre
+29,5, tout en étant trois fois plus rapide : il élimine surtout des formations de
+candidats, plus coûteuses qu'un test de puissance.
 
 ## 5. Un résultat négatif conservé
 
@@ -160,4 +159,48 @@ distribution de n=200. Les valeurs correctes sont 4,53x et 1,99x à 8k. L'erreur
 était donc **conservatrice** : la distribution réelle penche davantage vers les
 ordres élevés, où l'hybride gagne le plus. Les mesures du banc, les compteurs par
 K et le 2,9x mural ne sont pas touchés : ils ne dépendent d'aucune distribution.
+
+## 9. Erratum 2 : la voie Welzl est réfutée
+
+L'auditeur historique a construit une contre-fixture à sept sites,
+`(2,3,2) (2,0,0) (0,2,2) (1,0,0) (2,2,0) (3,0,1) (0,2,3)`, sur laquelle mon
+hybride rend `kInvariantViolated` avec la raison `canon_fail` là où `anchor_meb`
+rend un support canonique `{0,1,5,6}`. **Je l'ai reproduite moi-même** : ma
+proposition Welzl rend une boule dont le site 6 a une puissance de `+176`, donc
+hors de la boule. Voir [leur reçu](receipts_meb_boundary_20260911/README.md).
+
+La cause est exactement celle qu'ils identifient, et l'erreur est mienne. Mon
+`welzl_rec` borne bien `R` à quatre sites, mais son cas de base calcule la **MEB
+de `R`**, ce qui peut laisser des points de `R` strictement à l'intérieur. La
+récursion de Welzl exige une boule passant **par** `R`, tous ses points sur la
+frontière. Le théorème « quatre points suffisent à définir la MEB » ne justifie
+pas cette substitution.
+
+Deux atténuations, ni l'une ni l'autre n'excusant le défaut. Le mode de
+défaillance est un **refus d'entrée valide**, pas un faux succès géométrique,
+parce que la canonicalisation revérifie le confinement et refuse. Et leur premier
+échec apparaît au 307 985e essai : mes 39 364 tirages ne pouvaient pas le
+trouver, ce qui est une leçon sur la taille d'échantillon exigée par ce genre de
+prédicat.
+
+Ce qui tombe : la voie K≥7, donc les 2,9x muraux et les 4,5x pondérés.
+Ce qui tient : les optimisations (a) et (b), prouvées exactes et indépendantes de
+Welzl, ainsi que le théorème de canonicalisation (c) lui-même. Le gain survivant
+est mesuré au § 4.
+
+**La réparation est faite et mesurée.** Le cas de base construit désormais la
+boule passant par `R` via `q3_form` et `q4_form` appelés directement, en ne
+gardant que les gardes de non-dégénérescence `g > 0` et `det > 0`, et en retirant
+les filtres de minimalité de `form()`, acuité pour q3 et centre intérieur pour
+q4. Ces filtres décident si un support est un support de MEB valide ; ils n'ont
+rien à faire dans une construction de boule frontière. C'était exactement mon
+erreur.
+
+Résultat : la contre-fixture K7 passe, le repli ne se déclenche sur aucun des
+198 000 cas, et le gain passe à 4,12x (§ 4). La réfutation de l'auditeur
+historique a donc produit un résultat meilleur que ma proposition initiale, et le
+mérite lui en revient. Source : [`welzl2.cpp`](receipts_coeur_meb_20260911/welzl2.cpp).
+
+Zéro repli sur 198 000 cas est une évidence empirique forte, pas une preuve.
+Une intégration produit demanderait le repli gardé de l'auditeur comme filet.
 
