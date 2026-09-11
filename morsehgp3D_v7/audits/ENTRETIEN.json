@@ -4373,5 +4373,243 @@
         }
       ]
     }
+  },
+  "latest_birth_stream_20260911": {
+    "date_utc": "2026-09-11T17:07:05.088640+00:00",
+    "source_head_at_start": "069bb6a2ace426c3b43f15a22be2ae2b9dd2f5ee",
+    "source_head_at_preparation": "7ccd9d6eddddbe84aa753c545a4a1c1cdb7cdc25",
+    "objective": "Contract pivots during chronological terminal consumption, then run Kruskal directly on native births while preserving immutable phi identities.",
+    "constructive_results": [
+      "Each edge has its source hub birth date; strict predecessor terminals make phi available at local0.",
+      "Online pivot contraction makes exactly the nonpivot decisions of ordered hub Kruskal, with unchanged occurrence IDs and weights.",
+      "Dense local birth indices remove endpoint binary searches; native IDs are restored at the graph_full boundary.",
+      "R-A+L union tests and L-C retained edges require no hub DSU, intermediate hub certificate or final projection/MSF.",
+      "Native phi must never become a DSU representative; the causal witness changes native identity while preserving all threshold components.",
+      "Birth dates, marks, geometrical terminal buffers and observation of all occurrences remain explicit.",
+      "Monotone mono specialization and arbitrary distributed certificate composition remain different contracts."
+    ],
+    "packet": {
+      "path": "receipts_birth_stream_20260911",
+      "pins": {
+        "README.md": "174e25981a6254e45048834a6146797a2f2fccf50c6dbdb86d3cf10ac8d2616b",
+        "SHA256SUMS": "a7631507d034aebee2c5f04aee4e72e1966a61d9fe6135603fce9f11606df361",
+        "commands.json": "f5859e9314c1f9e2a1549aa5fec9813115b493c919292056d652a6c979b2305c",
+        "context_pins.json": "bbaf447f8d9d872f9daae86a9eced482b3b192588d9686ee8544a81baf866fab",
+        "model.py": "216f3329f0dc2bb16cbabd722dedd2db6a3b52f3ff6b30aa7daa7631ca950b88",
+        "result.json": "09d64eca363453e06535f86f36a3b8f20a71011fc35c3bda235c96c80480181b",
+        "verify.py": "0b57d088c78bfdce432656e83dfd6ecb2db9b21df2b557260e52f6d976f50589"
+      },
+      "model_source_sha256": "216f3329f0dc2bb16cbabd722dedd2db6a3b52f3ff6b30aa7daa7631ca950b88",
+      "result_summary": {
+        "status": "passed_bounded_sequential_birth_stream_model",
+        "corpus_cases": 14,
+        "window_runs": 42,
+        "window_widths": [
+          1,
+          7,
+          31
+        ],
+        "partition_comparisons": 3276,
+        "causal_rejections": 9,
+        "cost_totals_once_per_case": {
+          "A": 165,
+          "C": 27,
+          "L": 61,
+          "R": 251,
+          "nonpivot_tests": 147,
+          "pivots": 104,
+          "retained": 34
+        },
+        "memory_scope": "native DSU has L entries and phi has A entries; Python object memory and materialized fixtures not qualified",
+        "native_allocation": "lazy at explicit zero-degree birth headers; future birth entries are not preallocated in this model",
+        "diagnostic_storage": "input, offline reference and every tested nonpivot edge remain materialized; no executed streaming residence qualification"
+      },
+      "modes": [
+        "Python normal",
+        "Python -O"
+      ],
+      "commands_per_mode": 3,
+      "scope": "Independent synthetic graph correctness witness only; births allocated lazily at chronological headers, full candidate edges retained for diagnostics. No C++, geometric producer, real terminal integration, measured memory or performance qualification."
+    },
+    "checks": [
+      {
+        "name": "packet_normal",
+        "command": "python3 -B morsehgp3D_v7/audits/receipts_birth_stream_20260911/verify.py",
+        "exit_code": 0,
+        "output": "{\"cases\": 14, \"causal_rejections\": 9, \"cuts_compared\": 3276, \"gcp_used\": false, \"historical_context_pins\": 10, \"n8000_direct_attempts\": \"7342931_derived_not_executed\", \"performance_claim\": false, \"product_executed\": false, \"public_status\": \"not_claimed\", \"status\": \"passed_birth_stream_receipt\", \"window_runs\": 42}\n"
+      },
+      {
+        "name": "packet_optimized",
+        "command": "python3 -B -O morsehgp3D_v7/audits/receipts_birth_stream_20260911/verify.py",
+        "exit_code": 0,
+        "output": "{\"cases\": 14, \"causal_rejections\": 9, \"cuts_compared\": 3276, \"gcp_used\": false, \"historical_context_pins\": 10, \"n8000_direct_attempts\": \"7342931_derived_not_executed\", \"performance_claim\": false, \"product_executed\": false, \"public_status\": \"not_claimed\", \"status\": \"passed_birth_stream_receipt\", \"window_runs\": 42}\n"
+      },
+      {
+        "name": "docs_normal",
+        "command": "python3 -B tools/check_docs.py",
+        "exit_code": 0,
+        "output": "Validated 504 active Markdown files.\n"
+      },
+      {
+        "name": "docs_optimized",
+        "command": "python3 -B -O tools/check_docs.py",
+        "exit_code": 0,
+        "output": "Validated 504 active Markdown files.\n"
+      },
+      {
+        "name": "registry",
+        "command": "python3 -B tools/check_implementation_status.py",
+        "exit_code": 0,
+        "output": "Validated 20 implementation phases and their gates.\n"
+      },
+      {
+        "name": "own_markdown",
+        "command": "python3 -B - <<'PY'\nfrom pathlib import Path\nimport importlib.util,json\nspec=importlib.util.spec_from_file_location('doccheck','tools/check_docs.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)\np=Path('morsehgp3D_v7/audits').resolve();files=[p/n for n in ['COORDINATION_AUDITEURS.md','DIALOGUE_COURANT.md','ETAT_COURANT.md','README.md','receipts_birth_stream_20260911/README.md']];errors=[e for f in files for e in m.validate(f)]\nprint(json.dumps({'files':len(files),'errors':errors}));raise SystemExit(bool(errors))\nPY",
+        "exit_code": 0,
+        "output": "{\"files\": 5, \"errors\": []}\n"
+      }
+    ],
+    "constructor_review": {
+      "reader_agent": "/root/prototype_review",
+      "published_commit": "069bb6a2ace426c3b43f15a22be2ae2b9dd2f5ee",
+      "packet": "morsehgp3D_v7/receipts/streaming_graph_20260911",
+      "manifest_sha256": "348810e5501edad16b7ef3fa1a846be82248bce526fc8e3b5a1a8e5dd9c859a4",
+      "reader_commands": [
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "morsehgp3D_v7/receipts/streaming_graph_20260911/verify.py"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "-O",
+            "morsehgp3D_v7/receipts/streaming_graph_20260911/verify.py"
+          ],
+          "exit_code": 0
+        }
+      ],
+      "reader_result_summary": {
+        "logical_files": 548,
+        "borrowed_files": 185,
+        "local_objects": 189,
+        "closed_captures": 8,
+        "gate_captures": 2,
+        "performance_contract_claim": false
+      },
+      "closed_findings": [
+        "True streaming no longer materializes targets[R], requests[R_K] or the full graph.",
+        "Window-local dedup correctly charges MEB work; global uniqueness is deliberately not measured.",
+        "The n8000 negative mono result and process RSS are honestly reported; no extension of the costly BinaryPile variant before reducer correction."
+      ],
+      "source_pins": {
+        "streaming_graph.hpp": "6f341cffc655925aacebde4b7a21d0801086ce57913df6235bba5b6a46ff1697",
+        "ordered_msf.hpp": "852627a512454f7572a1779211e64f91ad998c21e9477158905f71cb2c9e8920"
+      },
+      "scope": "Read-only sources and captured results. No new constructor C++ compilation or benchmark by this audit.",
+      "new_wip_at_close": "Constructor acknowledges direct-phi proof and prepares a separate draft. Ordered hub variant has later private O2/SAN captures and n8000 probe in progress; none is inherited here.",
+      "counter_derivation": {
+        "A": 5518027,
+        "L": 2404646,
+        "R": 10456312,
+        "C": 10,
+        "pivots": 3113381,
+        "direct_union_attempts_derived_not_measured": 7342931,
+        "old_hub_union_attempts_observed": 48390815,
+        "old_native_union_attempts_observed": 3910849,
+        "retained_edges": 2404636
+      }
+    },
+    "counterreading": {
+      "math_agent": "/root/streaming_msf_math",
+      "code_agent": "/root/prototype_review",
+      "math_result": "Agrees after making edge date equal source birth explicit; prefix contraction and cuts hold for strict terminals including nonregular plateaux.",
+      "api_result": "Stable dense birth vector; normalized sorts copies; retain BallId in geometry/caches/observer, emit native IDs and all O(A) marks.",
+      "packet_result": "Final code/model/reader/captures read: no serious defect; reader normal/-O PASS,14 cases42 runs3276 comparisons9 causal rejections10 historical pins. phi=find changes phi[4]1->0 and candidate endpoints while preserving all18 open/closed partitions; lazy native allocation and diagnostic R-edge storage declared."
+    },
+    "maintenance": {
+      "entries": [
+        {
+          "path": "COORDINATION_AUDITEURS.md",
+          "previous_sha256": "f1d5f1cb2646749c91226c2bb27bf71e6e8b6528782c99371e31891d0057108f",
+          "previous_words": 546,
+          "words": 580
+        },
+        {
+          "path": "DIALOGUE_COURANT.md",
+          "previous_sha256": "9104e0d8855ffbe19b05c8b16d80efcbd21cbe26d028e472912751f2ca502220",
+          "previous_words": 555,
+          "words": 566
+        },
+        {
+          "path": "ETAT_COURANT.md",
+          "previous_sha256": "f42903ccc1d1510721a1bd4cf46b26e9c66a10c4c702fde21a8270cb5d5a7d1c",
+          "previous_words": 674,
+          "words": 656
+        },
+        {
+          "path": "README.md",
+          "previous_sha256": "57efc16929372be3134a1e187ef2903bed363c401fe81c8702c86b7ba2143db2",
+          "previous_words": 914,
+          "words": 948
+        }
+      ],
+      "active_notes_rewritten_not_appended": true,
+      "historical_packets_unchanged": true,
+      "source_variants_D_to_Q_unchanged": true,
+      "other_session_files_untouched": true,
+      "new_scattered_root_probe_files": false,
+      "temporary_directory_created": false,
+      "new_engine_variant": false,
+      "final_markdown_validation": {
+        "files": 5,
+        "errors": [],
+        "initial_invocation_path_error_corrected": "validate() requires resolved absolute paths; corrected before any staging."
+      }
+    },
+    "gcp_used": false,
+    "whole_source_freshness": {
+      "common_pins_valid": 2839,
+      "source_variants_D_to_Q_unchanged": true,
+      "scope": "All common pins pass; unchanged historical source variants do not fully match current engine. This code1 is separate from the passing bounded birth-stream model.",
+      "commands": [
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "morsehgp3D_v7/audits/verify_current.py"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr_first_line": "Audit à actualiser : aucune variante complète ne correspond.",
+          "stderr_sha256": "6b7321b69dcf56cd8795142cd9c8692b62968d6e321388a490eaf538868d0c4e",
+          "stderr_lines": 149
+        },
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "-O",
+            "morsehgp3D_v7/audits/verify_current.py"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr_first_line": "Audit à actualiser : aucune variante complète ne correspond.",
+          "stderr_sha256": "6b7321b69dcf56cd8795142cd9c8692b62968d6e321388a490eaf538868d0c4e",
+          "stderr_lines": 149
+        }
+      ]
+    },
+    "coordination": {
+      "constructor_has_read_and_agrees": true,
+      "source": "audits/COORDINATION_MORSEHGP3D_V7.md read only",
+      "index_reservation_files": 13,
+      "index_reservation_base": "7ccd9d6e",
+      "constructor_current_ordered_hub_experiments_not_inherited": true
+    }
   }
 }

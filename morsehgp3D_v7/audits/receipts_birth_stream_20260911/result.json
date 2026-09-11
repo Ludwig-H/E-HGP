@@ -1,0 +1,1962 @@
+{
+  "cases": [
+    {
+      "cut_values": 9,
+      "hubs": 6,
+      "interpretation": "K1-like explicit point births; synthetic incidence",
+      "name": "k1_explicit_points",
+      "native_births": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ]
+      ],
+      "partition_comparisons": 162,
+      "phi": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          5,
+          0
+        ]
+      ],
+      "records": 12,
+      "retained_edge_ids": [
+        1,
+        3
+      ],
+      "runs": [
+        {
+          "A": 6,
+          "C": 1,
+          "L": 3,
+          "R": 6,
+          "boundaries_after_pivot": 3,
+          "boundaries_inside_hub": 6,
+          "max_window_records": 1,
+          "native_dsu_vertices": 3,
+          "nonpivot_tests": 3,
+          "phi_entries": 6,
+          "pivots": 3,
+          "retained": 2,
+          "window_width": 1,
+          "windows": 12
+        },
+        {
+          "A": 6,
+          "C": 1,
+          "L": 3,
+          "R": 6,
+          "boundaries_after_pivot": 0,
+          "boundaries_inside_hub": 1,
+          "max_window_records": 7,
+          "native_dsu_vertices": 3,
+          "nonpivot_tests": 3,
+          "phi_entries": 6,
+          "pivots": 3,
+          "retained": 2,
+          "window_width": 7,
+          "windows": 2
+        },
+        {
+          "A": 6,
+          "C": 1,
+          "L": 3,
+          "R": 6,
+          "boundaries_after_pivot": 0,
+          "boundaries_inside_hub": 0,
+          "max_window_records": 12,
+          "native_dsu_vertices": 3,
+          "nonpivot_tests": 3,
+          "phi_entries": 6,
+          "pivots": 3,
+          "retained": 2,
+          "window_width": 31,
+          "windows": 1
+        }
+      ]
+    },
+    {
+      "cut_values": 9,
+      "hubs": 10,
+      "interpretation": "equal-date sources, no same-date terminal",
+      "name": "plateau_disjoint_and_duplicate_terminals",
+      "native_births": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          20,
+          8
+        ]
+      ],
+      "partition_comparisons": 162,
+      "phi": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          11,
+          1
+        ],
+        [
+          12,
+          3
+        ],
+        [
+          13,
+          0
+        ],
+        [
+          20,
+          20
+        ]
+      ],
+      "records": 20,
+      "retained_edge_ids": [
+        1,
+        3,
+        5
+      ],
+      "runs": [
+        {
+          "A": 10,
+          "C": 3,
+          "L": 6,
+          "R": 10,
+          "boundaries_after_pivot": 4,
+          "boundaries_inside_hub": 10,
+          "max_window_records": 1,
+          "native_dsu_vertices": 6,
+          "nonpivot_tests": 6,
+          "phi_entries": 10,
+          "pivots": 4,
+          "retained": 3,
+          "window_width": 1,
+          "windows": 20
+        },
+        {
+          "A": 10,
+          "C": 3,
+          "L": 6,
+          "R": 10,
+          "boundaries_after_pivot": 1,
+          "boundaries_inside_hub": 1,
+          "max_window_records": 7,
+          "native_dsu_vertices": 6,
+          "nonpivot_tests": 6,
+          "phi_entries": 10,
+          "pivots": 4,
+          "retained": 3,
+          "window_width": 7,
+          "windows": 3
+        },
+        {
+          "A": 10,
+          "C": 3,
+          "L": 6,
+          "R": 10,
+          "boundaries_after_pivot": 0,
+          "boundaries_inside_hub": 0,
+          "max_window_records": 20,
+          "native_dsu_vertices": 6,
+          "nonpivot_tests": 6,
+          "phi_entries": 10,
+          "pivots": 4,
+          "retained": 3,
+          "window_width": 31,
+          "windows": 1
+        }
+      ]
+    },
+    {
+      "cut_values": 13,
+      "hubs": 6,
+      "interpretation": "degree-one pivots and a future isolated birth",
+      "name": "strict_silent_chain_and_future_birth",
+      "native_births": [
+        [
+          0,
+          0
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          5,
+          10
+        ]
+      ],
+      "partition_comparisons": 234,
+      "phi": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          5,
+          5
+        ]
+      ],
+      "records": 10,
+      "retained_edge_ids": [
+        3
+      ],
+      "runs": [
+        {
+          "A": 6,
+          "C": 2,
+          "L": 3,
+          "R": 4,
+          "boundaries_after_pivot": 1,
+          "boundaries_inside_hub": 4,
+          "max_window_records": 1,
+          "native_dsu_vertices": 3,
+          "nonpivot_tests": 1,
+          "phi_entries": 6,
+          "pivots": 3,
+          "retained": 1,
+          "window_width": 1,
+          "windows": 10
+        },
+        {
+          "A": 6,
+          "C": 2,
+          "L": 3,
+          "R": 4,
+          "boundaries_after_pivot": 0,
+          "boundaries_inside_hub": 1,
+          "max_window_records": 7,
+          "native_dsu_vertices": 3,
+          "nonpivot_tests": 1,
+          "phi_entries": 6,
+          "pivots": 3,
+          "retained": 1,
+          "window_width": 7,
+          "windows": 2
+        },
+        {
+          "A": 6,
+          "C": 2,
+          "L": 3,
+          "R": 4,
+          "boundaries_after_pivot": 0,
+          "boundaries_inside_hub": 0,
+          "max_window_records": 10,
+          "native_dsu_vertices": 3,
+          "nonpivot_tests": 1,
+          "phi_entries": 6,
+          "pivots": 3,
+          "retained": 1,
+          "window_width": 31,
+          "windows": 1
+        }
+      ]
+    },
+    {
+      "cut_values": 9,
+      "hubs": 6,
+      "interpretation": "wrong native identity can retain every threshold component",
+      "name": "find_is_not_native_phi",
+      "native_births": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ]
+      ],
+      "partition_comparisons": 162,
+      "phi": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          5,
+          1
+        ]
+      ],
+      "records": 12,
+      "retained_edge_ids": [
+        1,
+        3
+      ],
+      "runs": [
+        {
+          "A": 6,
+          "C": 1,
+          "L": 3,
+          "R": 6,
+          "boundaries_after_pivot": 3,
+          "boundaries_inside_hub": 6,
+          "max_window_records": 1,
+          "native_dsu_vertices": 3,
+          "nonpivot_tests": 3,
+          "phi_entries": 6,
+          "pivots": 3,
+          "retained": 2,
+          "window_width": 1,
+          "windows": 12
+        },
+        {
+          "A": 6,
+          "C": 1,
+          "L": 3,
+          "R": 6,
+          "boundaries_after_pivot": 0,
+          "boundaries_inside_hub": 1,
+          "max_window_records": 7,
+          "native_dsu_vertices": 3,
+          "nonpivot_tests": 3,
+          "phi_entries": 6,
+          "pivots": 3,
+          "retained": 2,
+          "window_width": 7,
+          "windows": 2
+        },
+        {
+          "A": 6,
+          "C": 1,
+          "L": 3,
+          "R": 6,
+          "boundaries_after_pivot": 0,
+          "boundaries_inside_hub": 0,
+          "max_window_records": 12,
+          "native_dsu_vertices": 3,
+          "nonpivot_tests": 3,
+          "phi_entries": 6,
+          "pivots": 3,
+          "retained": 2,
+          "window_width": 31,
+          "windows": 1
+        }
+      ]
+    },
+    {
+      "cut_values": 3,
+      "hubs": 1,
+      "interpretation": "terminal order represented by one explicit full-population birth",
+      "name": "terminal_k_equals_n",
+      "native_births": [
+        [
+          40,
+          7
+        ]
+      ],
+      "partition_comparisons": 54,
+      "phi": [
+        [
+          40,
+          40
+        ]
+      ],
+      "records": 1,
+      "retained_edge_ids": [],
+      "runs": [
+        {
+          "A": 1,
+          "C": 1,
+          "L": 1,
+          "R": 0,
+          "boundaries_after_pivot": 0,
+          "boundaries_inside_hub": 0,
+          "max_window_records": 1,
+          "native_dsu_vertices": 1,
+          "nonpivot_tests": 0,
+          "phi_entries": 1,
+          "pivots": 0,
+          "retained": 0,
+          "window_width": 1,
+          "windows": 1
+        },
+        {
+          "A": 1,
+          "C": 1,
+          "L": 1,
+          "R": 0,
+          "boundaries_after_pivot": 0,
+          "boundaries_inside_hub": 0,
+          "max_window_records": 1,
+          "native_dsu_vertices": 1,
+          "nonpivot_tests": 0,
+          "phi_entries": 1,
+          "pivots": 0,
+          "retained": 0,
+          "window_width": 7,
+          "windows": 1
+        },
+        {
+          "A": 1,
+          "C": 1,
+          "L": 1,
+          "R": 0,
+          "boundaries_after_pivot": 0,
+          "boundaries_inside_hub": 0,
+          "max_window_records": 1,
+          "native_dsu_vertices": 1,
+          "nonpivot_tests": 0,
+          "phi_entries": 1,
+          "pivots": 0,
+          "retained": 0,
+          "window_width": 31,
+          "windows": 1
+        }
+      ]
+    },
+    {
+      "cut_values": 3,
+      "hubs": 1,
+      "interpretation": "single point, no occurrence and no artificial edge",
+      "name": "k1_singleton",
+      "native_births": [
+        [
+          90,
+          0
+        ]
+      ],
+      "partition_comparisons": 54,
+      "phi": [
+        [
+          90,
+          90
+        ]
+      ],
+      "records": 1,
+      "retained_edge_ids": [],
+      "runs": [
+        {
+          "A": 1,
+          "C": 1,
+          "L": 1,
+          "R": 0,
+          "boundaries_after_pivot": 0,
+          "boundaries_inside_hub": 0,
+          "max_window_records": 1,
+          "native_dsu_vertices": 1,
+          "nonpivot_tests": 0,
+          "phi_entries": 1,
+          "pivots": 0,
+          "retained": 0,
+          "window_width": 1,
+          "windows": 1
+        },
+        {
+          "A": 1,
+          "C": 1,
+          "L": 1,
+          "R": 0,
+          "boundaries_after_pivot": 0,
+          "boundaries_inside_hub": 0,
+          "max_window_records": 1,
+          "native_dsu_vertices": 1,
+          "nonpivot_tests": 0,
+          "phi_entries": 1,
+          "pivots": 0,
+          "retained": 0,
+          "window_width": 7,
+          "windows": 1
+        },
+        {
+          "A": 1,
+          "C": 1,
+          "L": 1,
+          "R": 0,
+          "boundaries_after_pivot": 0,
+          "boundaries_inside_hub": 0,
+          "max_window_records": 1,
+          "native_dsu_vertices": 1,
+          "nonpivot_tests": 0,
+          "phi_entries": 1,
+          "pivots": 0,
+          "retained": 0,
+          "window_width": 31,
+          "windows": 1
+        }
+      ]
+    },
+    {
+      "cut_values": 17,
+      "hubs": 16,
+      "interpretation": "fixed bounded chronological recipe",
+      "name": "fixed_chronology_0",
+      "native_births": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          32,
+          9
+        ]
+      ],
+      "partition_comparisons": 306,
+      "phi": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          20,
+          1
+        ],
+        [
+          21,
+          1
+        ],
+        [
+          22,
+          1
+        ],
+        [
+          23,
+          2
+        ],
+        [
+          24,
+          0
+        ],
+        [
+          25,
+          1
+        ],
+        [
+          26,
+          1
+        ],
+        [
+          27,
+          1
+        ],
+        [
+          28,
+          2
+        ],
+        [
+          29,
+          1
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          31,
+          2
+        ],
+        [
+          32,
+          32
+        ]
+      ],
+      "records": 48,
+      "retained_edge_ids": [
+        1,
+        6
+      ],
+      "runs": [
+        {
+          "A": 16,
+          "C": 2,
+          "L": 4,
+          "R": 32,
+          "boundaries_after_pivot": 10,
+          "boundaries_inside_hub": 32,
+          "max_window_records": 1,
+          "native_dsu_vertices": 4,
+          "nonpivot_tests": 20,
+          "phi_entries": 16,
+          "pivots": 12,
+          "retained": 2,
+          "window_width": 1,
+          "windows": 48
+        },
+        {
+          "A": 16,
+          "C": 2,
+          "L": 4,
+          "R": 32,
+          "boundaries_after_pivot": 1,
+          "boundaries_inside_hub": 3,
+          "max_window_records": 7,
+          "native_dsu_vertices": 4,
+          "nonpivot_tests": 20,
+          "phi_entries": 16,
+          "pivots": 12,
+          "retained": 2,
+          "window_width": 7,
+          "windows": 7
+        },
+        {
+          "A": 16,
+          "C": 2,
+          "L": 4,
+          "R": 32,
+          "boundaries_after_pivot": 0,
+          "boundaries_inside_hub": 0,
+          "max_window_records": 31,
+          "native_dsu_vertices": 4,
+          "nonpivot_tests": 20,
+          "phi_entries": 16,
+          "pivots": 12,
+          "retained": 2,
+          "window_width": 31,
+          "windows": 2
+        }
+      ]
+    },
+    {
+      "cut_values": 17,
+      "hubs": 17,
+      "interpretation": "fixed bounded chronological recipe",
+      "name": "fixed_chronology_1",
+      "native_births": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          23,
+          2
+        ],
+        [
+          32,
+          9
+        ]
+      ],
+      "partition_comparisons": 306,
+      "phi": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          20,
+          0
+        ],
+        [
+          21,
+          3
+        ],
+        [
+          22,
+          3
+        ],
+        [
+          23,
+          23
+        ],
+        [
+          24,
+          3
+        ],
+        [
+          25,
+          1
+        ],
+        [
+          26,
+          1
+        ],
+        [
+          27,
+          2
+        ],
+        [
+          28,
+          0
+        ],
+        [
+          29,
+          3
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          32,
+          32
+        ]
+      ],
+      "records": 48,
+      "retained_edge_ids": [
+        1,
+        4,
+        13,
+        24
+      ],
+      "runs": [
+        {
+          "A": 17,
+          "C": 2,
+          "L": 6,
+          "R": 31,
+          "boundaries_after_pivot": 9,
+          "boundaries_inside_hub": 31,
+          "max_window_records": 1,
+          "native_dsu_vertices": 6,
+          "nonpivot_tests": 20,
+          "phi_entries": 17,
+          "pivots": 11,
+          "retained": 4,
+          "window_width": 1,
+          "windows": 48
+        },
+        {
+          "A": 17,
+          "C": 2,
+          "L": 6,
+          "R": 31,
+          "boundaries_after_pivot": 1,
+          "boundaries_inside_hub": 4,
+          "max_window_records": 7,
+          "native_dsu_vertices": 6,
+          "nonpivot_tests": 20,
+          "phi_entries": 17,
+          "pivots": 11,
+          "retained": 4,
+          "window_width": 7,
+          "windows": 7
+        },
+        {
+          "A": 17,
+          "C": 2,
+          "L": 6,
+          "R": 31,
+          "boundaries_after_pivot": 0,
+          "boundaries_inside_hub": 0,
+          "max_window_records": 31,
+          "native_dsu_vertices": 6,
+          "nonpivot_tests": 20,
+          "phi_entries": 17,
+          "pivots": 11,
+          "retained": 4,
+          "window_width": 31,
+          "windows": 2
+        }
+      ]
+    },
+    {
+      "cut_values": 17,
+      "hubs": 18,
+      "interpretation": "fixed bounded chronological recipe",
+      "name": "fixed_chronology_2",
+      "native_births": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          27,
+          4
+        ],
+        [
+          32,
+          9
+        ]
+      ],
+      "partition_comparisons": 306,
+      "phi": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          20,
+          4
+        ],
+        [
+          21,
+          2
+        ],
+        [
+          22,
+          2
+        ],
+        [
+          23,
+          4
+        ],
+        [
+          24,
+          4
+        ],
+        [
+          25,
+          4
+        ],
+        [
+          26,
+          4
+        ],
+        [
+          27,
+          27
+        ],
+        [
+          28,
+          4
+        ],
+        [
+          29,
+          1
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          31,
+          2
+        ],
+        [
+          32,
+          32
+        ]
+      ],
+      "records": 42,
+      "retained_edge_ids": [
+        1,
+        2,
+        7,
+        17
+      ],
+      "runs": [
+        {
+          "A": 18,
+          "C": 3,
+          "L": 7,
+          "R": 24,
+          "boundaries_after_pivot": 7,
+          "boundaries_inside_hub": 24,
+          "max_window_records": 1,
+          "native_dsu_vertices": 7,
+          "nonpivot_tests": 13,
+          "phi_entries": 18,
+          "pivots": 11,
+          "retained": 4,
+          "window_width": 1,
+          "windows": 42
+        },
+        {
+          "A": 18,
+          "C": 3,
+          "L": 7,
+          "R": 24,
+          "boundaries_after_pivot": 1,
+          "boundaries_inside_hub": 3,
+          "max_window_records": 7,
+          "native_dsu_vertices": 7,
+          "nonpivot_tests": 13,
+          "phi_entries": 18,
+          "pivots": 11,
+          "retained": 4,
+          "window_width": 7,
+          "windows": 6
+        },
+        {
+          "A": 18,
+          "C": 3,
+          "L": 7,
+          "R": 24,
+          "boundaries_after_pivot": 1,
+          "boundaries_inside_hub": 1,
+          "max_window_records": 31,
+          "native_dsu_vertices": 7,
+          "nonpivot_tests": 13,
+          "phi_entries": 18,
+          "pivots": 11,
+          "retained": 4,
+          "window_width": 31,
+          "windows": 2
+        }
+      ]
+    },
+    {
+      "cut_values": 17,
+      "hubs": 16,
+      "interpretation": "fixed bounded chronological recipe",
+      "name": "fixed_chronology_3",
+      "native_births": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          32,
+          9
+        ]
+      ],
+      "partition_comparisons": 306,
+      "phi": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          20,
+          1
+        ],
+        [
+          21,
+          1
+        ],
+        [
+          22,
+          2
+        ],
+        [
+          23,
+          0
+        ],
+        [
+          24,
+          1
+        ],
+        [
+          25,
+          0
+        ],
+        [
+          26,
+          1
+        ],
+        [
+          27,
+          1
+        ],
+        [
+          28,
+          2
+        ],
+        [
+          29,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          31,
+          1
+        ],
+        [
+          32,
+          32
+        ]
+      ],
+      "records": 44,
+      "retained_edge_ids": [
+        2,
+        6
+      ],
+      "runs": [
+        {
+          "A": 16,
+          "C": 2,
+          "L": 4,
+          "R": 28,
+          "boundaries_after_pivot": 9,
+          "boundaries_inside_hub": 28,
+          "max_window_records": 1,
+          "native_dsu_vertices": 4,
+          "nonpivot_tests": 16,
+          "phi_entries": 16,
+          "pivots": 12,
+          "retained": 2,
+          "window_width": 1,
+          "windows": 44
+        },
+        {
+          "A": 16,
+          "C": 2,
+          "L": 4,
+          "R": 28,
+          "boundaries_after_pivot": 3,
+          "boundaries_inside_hub": 6,
+          "max_window_records": 7,
+          "native_dsu_vertices": 4,
+          "nonpivot_tests": 16,
+          "phi_entries": 16,
+          "pivots": 12,
+          "retained": 2,
+          "window_width": 7,
+          "windows": 7
+        },
+        {
+          "A": 16,
+          "C": 2,
+          "L": 4,
+          "R": 28,
+          "boundaries_after_pivot": 0,
+          "boundaries_inside_hub": 0,
+          "max_window_records": 31,
+          "native_dsu_vertices": 4,
+          "nonpivot_tests": 16,
+          "phi_entries": 16,
+          "pivots": 12,
+          "retained": 2,
+          "window_width": 31,
+          "windows": 2
+        }
+      ]
+    },
+    {
+      "cut_values": 17,
+      "hubs": 17,
+      "interpretation": "fixed bounded chronological recipe",
+      "name": "fixed_chronology_4",
+      "native_births": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          23,
+          2
+        ],
+        [
+          32,
+          9
+        ]
+      ],
+      "partition_comparisons": 306,
+      "phi": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          20,
+          3
+        ],
+        [
+          21,
+          2
+        ],
+        [
+          22,
+          0
+        ],
+        [
+          23,
+          23
+        ],
+        [
+          24,
+          1
+        ],
+        [
+          25,
+          3
+        ],
+        [
+          26,
+          2
+        ],
+        [
+          27,
+          2
+        ],
+        [
+          28,
+          3
+        ],
+        [
+          29,
+          0
+        ],
+        [
+          30,
+          3
+        ],
+        [
+          31,
+          23
+        ],
+        [
+          32,
+          32
+        ]
+      ],
+      "records": 45,
+      "retained_edge_ids": [
+        1,
+        3,
+        6,
+        19
+      ],
+      "runs": [
+        {
+          "A": 17,
+          "C": 2,
+          "L": 6,
+          "R": 28,
+          "boundaries_after_pivot": 9,
+          "boundaries_inside_hub": 28,
+          "max_window_records": 1,
+          "native_dsu_vertices": 6,
+          "nonpivot_tests": 17,
+          "phi_entries": 17,
+          "pivots": 11,
+          "retained": 4,
+          "window_width": 1,
+          "windows": 45
+        },
+        {
+          "A": 17,
+          "C": 2,
+          "L": 6,
+          "R": 28,
+          "boundaries_after_pivot": 0,
+          "boundaries_inside_hub": 2,
+          "max_window_records": 7,
+          "native_dsu_vertices": 6,
+          "nonpivot_tests": 17,
+          "phi_entries": 17,
+          "pivots": 11,
+          "retained": 4,
+          "window_width": 7,
+          "windows": 7
+        },
+        {
+          "A": 17,
+          "C": 2,
+          "L": 6,
+          "R": 28,
+          "boundaries_after_pivot": 0,
+          "boundaries_inside_hub": 0,
+          "max_window_records": 31,
+          "native_dsu_vertices": 6,
+          "nonpivot_tests": 17,
+          "phi_entries": 17,
+          "pivots": 11,
+          "retained": 4,
+          "window_width": 31,
+          "windows": 2
+        }
+      ]
+    },
+    {
+      "cut_values": 17,
+      "hubs": 18,
+      "interpretation": "fixed bounded chronological recipe",
+      "name": "fixed_chronology_5",
+      "native_births": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          27,
+          4
+        ],
+        [
+          32,
+          9
+        ]
+      ],
+      "partition_comparisons": 306,
+      "phi": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          20,
+          2
+        ],
+        [
+          21,
+          0
+        ],
+        [
+          22,
+          2
+        ],
+        [
+          23,
+          1
+        ],
+        [
+          24,
+          1
+        ],
+        [
+          25,
+          2
+        ],
+        [
+          26,
+          0
+        ],
+        [
+          27,
+          27
+        ],
+        [
+          28,
+          1
+        ],
+        [
+          29,
+          4
+        ],
+        [
+          30,
+          2
+        ],
+        [
+          31,
+          2
+        ],
+        [
+          32,
+          32
+        ]
+      ],
+      "records": 47,
+      "retained_edge_ids": [
+        1,
+        4,
+        5,
+        8
+      ],
+      "runs": [
+        {
+          "A": 18,
+          "C": 3,
+          "L": 7,
+          "R": 29,
+          "boundaries_after_pivot": 8,
+          "boundaries_inside_hub": 29,
+          "max_window_records": 1,
+          "native_dsu_vertices": 7,
+          "nonpivot_tests": 18,
+          "phi_entries": 18,
+          "pivots": 11,
+          "retained": 4,
+          "window_width": 1,
+          "windows": 47
+        },
+        {
+          "A": 18,
+          "C": 3,
+          "L": 7,
+          "R": 29,
+          "boundaries_after_pivot": 2,
+          "boundaries_inside_hub": 4,
+          "max_window_records": 7,
+          "native_dsu_vertices": 7,
+          "nonpivot_tests": 18,
+          "phi_entries": 18,
+          "pivots": 11,
+          "retained": 4,
+          "window_width": 7,
+          "windows": 7
+        },
+        {
+          "A": 18,
+          "C": 3,
+          "L": 7,
+          "R": 29,
+          "boundaries_after_pivot": 0,
+          "boundaries_inside_hub": 1,
+          "max_window_records": 31,
+          "native_dsu_vertices": 7,
+          "nonpivot_tests": 18,
+          "phi_entries": 18,
+          "pivots": 11,
+          "retained": 4,
+          "window_width": 31,
+          "windows": 2
+        }
+      ]
+    },
+    {
+      "cut_values": 17,
+      "hubs": 16,
+      "interpretation": "fixed bounded chronological recipe",
+      "name": "fixed_chronology_6",
+      "native_births": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          32,
+          9
+        ]
+      ],
+      "partition_comparisons": 306,
+      "phi": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          20,
+          1
+        ],
+        [
+          21,
+          1
+        ],
+        [
+          22,
+          0
+        ],
+        [
+          23,
+          1
+        ],
+        [
+          24,
+          1
+        ],
+        [
+          25,
+          2
+        ],
+        [
+          26,
+          1
+        ],
+        [
+          27,
+          1
+        ],
+        [
+          28,
+          2
+        ],
+        [
+          29,
+          0
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          32,
+          32
+        ]
+      ],
+      "records": 44,
+      "retained_edge_ids": [
+        1,
+        9
+      ],
+      "runs": [
+        {
+          "A": 16,
+          "C": 2,
+          "L": 4,
+          "R": 28,
+          "boundaries_after_pivot": 8,
+          "boundaries_inside_hub": 28,
+          "max_window_records": 1,
+          "native_dsu_vertices": 4,
+          "nonpivot_tests": 16,
+          "phi_entries": 16,
+          "pivots": 12,
+          "retained": 2,
+          "window_width": 1,
+          "windows": 44
+        },
+        {
+          "A": 16,
+          "C": 2,
+          "L": 4,
+          "R": 28,
+          "boundaries_after_pivot": 3,
+          "boundaries_inside_hub": 6,
+          "max_window_records": 7,
+          "native_dsu_vertices": 4,
+          "nonpivot_tests": 16,
+          "phi_entries": 16,
+          "pivots": 12,
+          "retained": 2,
+          "window_width": 7,
+          "windows": 7
+        },
+        {
+          "A": 16,
+          "C": 2,
+          "L": 4,
+          "R": 28,
+          "boundaries_after_pivot": 0,
+          "boundaries_inside_hub": 0,
+          "max_window_records": 31,
+          "native_dsu_vertices": 4,
+          "nonpivot_tests": 16,
+          "phi_entries": 16,
+          "pivots": 12,
+          "retained": 2,
+          "window_width": 31,
+          "windows": 2
+        }
+      ]
+    },
+    {
+      "cut_values": 17,
+      "hubs": 17,
+      "interpretation": "fixed bounded chronological recipe",
+      "name": "fixed_chronology_7",
+      "native_births": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          23,
+          2
+        ],
+        [
+          32,
+          9
+        ]
+      ],
+      "partition_comparisons": 306,
+      "phi": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          20,
+          2
+        ],
+        [
+          21,
+          1
+        ],
+        [
+          22,
+          3
+        ],
+        [
+          23,
+          23
+        ],
+        [
+          24,
+          2
+        ],
+        [
+          25,
+          23
+        ],
+        [
+          26,
+          1
+        ],
+        [
+          27,
+          2
+        ],
+        [
+          28,
+          3
+        ],
+        [
+          29,
+          23
+        ],
+        [
+          30,
+          23
+        ],
+        [
+          31,
+          1
+        ],
+        [
+          32,
+          32
+        ]
+      ],
+      "records": 42,
+      "retained_edge_ids": [
+        2,
+        4,
+        9,
+        10
+      ],
+      "runs": [
+        {
+          "A": 17,
+          "C": 2,
+          "L": 6,
+          "R": 25,
+          "boundaries_after_pivot": 8,
+          "boundaries_inside_hub": 25,
+          "max_window_records": 1,
+          "native_dsu_vertices": 6,
+          "nonpivot_tests": 14,
+          "phi_entries": 17,
+          "pivots": 11,
+          "retained": 4,
+          "window_width": 1,
+          "windows": 42
+        },
+        {
+          "A": 17,
+          "C": 2,
+          "L": 6,
+          "R": 25,
+          "boundaries_after_pivot": 0,
+          "boundaries_inside_hub": 5,
+          "max_window_records": 7,
+          "native_dsu_vertices": 6,
+          "nonpivot_tests": 14,
+          "phi_entries": 17,
+          "pivots": 11,
+          "retained": 4,
+          "window_width": 7,
+          "windows": 6
+        },
+        {
+          "A": 17,
+          "C": 2,
+          "L": 6,
+          "R": 25,
+          "boundaries_after_pivot": 0,
+          "boundaries_inside_hub": 0,
+          "max_window_records": 31,
+          "native_dsu_vertices": 6,
+          "nonpivot_tests": 14,
+          "phi_entries": 17,
+          "pivots": 11,
+          "retained": 4,
+          "window_width": 31,
+          "windows": 2
+        }
+      ]
+    }
+  ],
+  "causal_rejections": 9,
+  "corpus_cases": 14,
+  "cost_symbols": {
+    "A": "all source hubs including explicit K1 point births",
+    "C": "final native components",
+    "L": "native births, including future and isolated births",
+    "R": "terminal occurrences"
+  },
+  "cost_totals_once_per_case": {
+    "A": 165,
+    "C": 27,
+    "L": 61,
+    "R": 251,
+    "nonpivot_tests": 147,
+    "pivots": 104,
+    "retained": 34
+  },
+  "diagnostic_storage": "input, offline reference and every tested nonpivot edge remain materialized; no executed streaming residence qualification",
+  "memory_scope": "native DSU has L entries and phi has A entries; Python object memory and materialized fixtures not qualified",
+  "native_allocation": "lazy at explicit zero-degree birth headers; future birth entries are not preallocated in this model",
+  "native_identity": "immutable phi; DSU find never replaces the native birth identity",
+  "not_claimed": [
+    "geometric census",
+    "product OrderedReducer",
+    "parallel execution",
+    "speedup",
+    "RAM in bytes"
+  ],
+  "occurrence_date": "exactly the source hub birth date; every terminal birth is strictly earlier",
+  "partition_comparisons": 3276,
+  "partition_counter_scope": "three independent BFS comparisons per cut side and window run; mutants excluded",
+  "rejections": [
+    {
+      "cause": "local_occurrence_before_pivot_or_out_of_order",
+      "name": "local_one_before_pivot",
+      "scope": "stream_guard"
+    },
+    {
+      "cause": "terminal_not_previously_admitted",
+      "name": "future_terminal",
+      "scope": "stream_guard"
+    },
+    {
+      "cause": "terminal_not_strictly_earlier",
+      "name": "same_date_terminal",
+      "scope": "stream_guard"
+    },
+    {
+      "cause": "occurrence_ordinal_regression",
+      "name": "occurrence_ordinal_regression",
+      "scope": "stream_guard"
+    },
+    {
+      "cause": "occurrence_source_mismatch",
+      "name": "occurrence_after_source_birth",
+      "scope": "stream_guard"
+    },
+    {
+      "cause": "source_date_key_regression",
+      "name": "source_date_regression",
+      "scope": "stream_guard"
+    },
+    {
+      "cause": "native_phi_identity_mismatch",
+      "equal_open_closed_partitions": 18,
+      "expected_native": 1,
+      "hub": 4,
+      "name": "replace_native_phi_by_find",
+      "scope": "identity_gate_despite_equal_partitions",
+      "wrong_native": 0
+    },
+    {
+      "cause": "birth_filtration_mismatch",
+      "name": "omit_future_isolated_birth",
+      "scope": "independent_BFS",
+      "witness": {
+        "actual": [
+          [
+            0,
+            3
+          ]
+        ],
+        "closed": true,
+        "cut": "10",
+        "expected": [
+          [
+            0,
+            3
+          ],
+          [
+            5
+          ]
+        ]
+      }
+    },
+    {
+      "cause": "birth_filtration_mismatch",
+      "name": "discard_future_birth_date",
+      "scope": "independent_BFS",
+      "witness": {
+        "actual": [
+          [
+            0
+          ],
+          [
+            5
+          ]
+        ],
+        "closed": true,
+        "cut": "0",
+        "expected": [
+          [
+            0
+          ]
+        ]
+      }
+    }
+  ],
+  "status": "passed_bounded_sequential_birth_stream_model",
+  "total_order": "date, original source key, local occurrence; globally stable occurrence ordinal",
+  "window_runs": 42,
+  "window_widths": [
+    1,
+    7,
+    31
+  ]
+}

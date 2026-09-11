@@ -1,0 +1,54 @@
+{
+  "source_commit": "069bb6a2ace426c3b43f15a22be2ae2b9dd2f5ee",
+  "historical_source_pins": {
+    "morsehgp3D_v7/receipts/streaming_graph_20260911/MANIFEST.json": "348810e5501edad16b7ef3fa1a846be82248bce526fc8e3b5a1a8e5dd9c859a4",
+    "morsehgp3D_v7/receipts/atlas_graph_full_20260911/MANIFEST.json": "bb4a482385a7f75537c38d41397d4410d02c04f2a899c6377df79515caf0f9bc",
+    "morsehgp3D_v7/receipts/rank_atlas_20260911/manifest.json": "341c8c228a9d008084010db7b010adac77beefba123fa8a59d1d7c9023652013",
+    "morsehgp3D_v7/docs/RESOLUTIONS_PAR_FENETRES_20260911.md": "e94b1634ced62b879ab4b88dc729c23b409ef563ed5178c34ceb04757a38d0d8",
+    "morsehgp3D_v7/audits/receipts_composable_msf_20260911/README.md": "3f3f0343a1f86c0206f9e50f9625e9e02ef35bf6dc0b240be0c1f79c1cfcc22d",
+    "morsehgp3D_v7/audits/receipts_filtered_graph_20260911/README.md": "180943436fb0a1e38b9a19bd8baf8d5e350d76cb3f901d457f57e8874be0eb3e",
+    "morsehgp3D_v7/receipts/streaming_graph_20260911/objects/6f341cffc655925aacebde4b7a21d0801086ce57913df6235bba5b6a46ff1697": "6f341cffc655925aacebde4b7a21d0801086ce57913df6235bba5b6a46ff1697",
+    "morsehgp3D_v7/receipts/streaming_graph_20260911/objects/852627a512454f7572a1779211e64f91ad998c21e9477158905f71cb2c9e8920": "852627a512454f7572a1779211e64f91ad998c21e9477158905f71cb2c9e8920",
+    "morsehgp3D_v7/receipts/streaming_graph_20260911/objects/d8c2c9d731af837ed82e3694ea47c227c7eef140d98cd13e154d4c601dc0115b": "d8c2c9d731af837ed82e3694ea47c227c7eef140d98cd13e154d4c601dc0115b",
+    "morsehgp3D_v7/receipts/streaming_graph_20260911/objects/2419ab22128505c2c7dcab58bd89f11362aa4f000627d65a7274e1c751f21ab7": "2419ab22128505c2c7dcab58bd89f11362aa4f000627d65a7274e1c751f21ab7"
+  },
+  "streaming_packet": "morsehgp3D_v7/receipts/streaming_graph_20260911",
+  "logical_context_objects": {
+    "build/v7_streaming_graph_20260911/streaming_graph.hpp": {
+      "path": "objects/6f341cffc655925aacebde4b7a21d0801086ce57913df6235bba5b6a46ff1697",
+      "provider": "object",
+      "sha256": "6f341cffc655925aacebde4b7a21d0801086ce57913df6235bba5b6a46ff1697",
+      "size": 17280
+    },
+    "build/v7_streaming_graph_20260911/ordered_msf.hpp": {
+      "path": "objects/852627a512454f7572a1779211e64f91ad998c21e9477158905f71cb2c9e8920",
+      "provider": "object",
+      "sha256": "852627a512454f7572a1779211e64f91ad998c21e9477158905f71cb2c9e8920",
+      "size": 4946
+    },
+    "build/v7_streaming_graph_20260911/bench_n8000_streaming/results.json": {
+      "path": "objects/d8c2c9d731af837ed82e3694ea47c227c7eef140d98cd13e154d4c601dc0115b",
+      "provider": "object",
+      "sha256": "d8c2c9d731af837ed82e3694ea47c227c7eef140d98cd13e154d4c601dc0115b",
+      "size": 36369
+    },
+    "build/v7_streaming_graph_20260911/bench_n8000_reference/results.json": {
+      "path": "objects/2419ab22128505c2c7dcab58bd89f11362aa4f000627d65a7274e1c751f21ab7",
+      "provider": "object",
+      "sha256": "2419ab22128505c2c7dcab58bd89f11362aa4f000627d65a7274e1c751f21ab7",
+      "size": 6964
+    }
+  },
+  "n8000_counter_derivation": {
+    "A": 5518027,
+    "L": 2404646,
+    "R": 10456312,
+    "C": 10,
+    "pivots": 3113381,
+    "direct_union_attempts_derived_not_measured": 7342931,
+    "old_hub_union_attempts_observed": 48390815,
+    "old_native_union_attempts_observed": 3910849,
+    "retained_edges": 2404636
+  },
+  "scope": "Conditional proof plus independent synthetic Python graphs only. Constructor packet read separately; no direct reducer C++, geometry, FULL, parallel or runtime execution."
+}

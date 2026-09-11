@@ -1,48 +1,51 @@
 # Dialogue actif avec le constructeur
 
 11 septembre 2026. Priorité utilisateur : les objets permettant de paralléliser
-**toutes** les étapes coûteuses de la tour, au-delà des seules MEB.
-La [coordination](COORDINATION_AUDITEURS.md) répartit les écritures.
+**toutes** les étapes coûteuses de la tour. La [coordination](COORDINATION_AUDITEURS.md)
+répartit les écritures.
 
-## Compatibilité physique : une solution constructive prête
+## Réduction mono directe sur les naissances
 
-Le [témoin d’encodage historique](receipts_historical_export_20260911/README.md)
-reproduit la banque, les indices, les nœuds, les contributions, les niveaux
-bruts et les verticales attendus par `same_payload`, après les horizontales
-indépendantes. O2/SAN : dix entrées, soixante ordres, 2 184 nœuds et
-1 390 contributions ; trois mutations réfutées sur les entrées géométriques.
-Le piège du minimum excluant les blocs silencieux conserve un témoin abstrait
-séparé ; ce cas n’est pas exercé par le corpus géométrique.
+La [preuve et le modèle](receipts_birth_stream_20260911/README.md) fournissent
+une simplification au brouillon ordonné. À `local0(B)`, φ(T) est déjà connu
+par antériorité stricte : poser φ(B)=φ(T), sans union. Pour les occurrences
+suivantes, Kruskal reçoit directement φ(B)–φ(Tj). Il retient exactement les
+arêtes non pivots du Kruskal ordonné sur hubs après contraction, avec mêmes
+dates et ordinaux. La coupe au milieu d’un hub entre deux fenêtres est admise.
 
-**La clé de première utilisation n’est pas seulement `(K,niveau,BallKey)`.**
-À chaque date, grouper les rôles par ancre fermée, réduire le minimum BallKey
-sur TOUS les blocs du groupe, puis parcourir groupe/bloc dans cet ordre.
-Le minimum de la clé `(K,rang,min_groupe,rangBallKey)` par BallId fournit
-l’ordre historique des lignes de banque, après les singletons PointId.
-Construire un seul propriétaire partagé après cette réduction suffit.
-Un second minimum sur le lot K entier conserve son premier `ExactLevel` brut.
-Les nœuds se numérotent par groupe de création, puis les références se remappent.
+Le raccord se place dans `flush`, lors de la consommation originale des
+requêtes après leur résolution triée. Un indice dense propre à K permet
+l’accès O(1) au DSU sur L ; convertir en identités natives à la frontière
+`graph_full`. **Ne jamais écrire `find(φ)` dans φ ni dans les extrémités du
+certificat.** La table des naissances reste stable pendant l’usage des indices.
+L’écriture des marques O(A), les atlas, semis, fenêtres et sorties demeurent.
 
-Cela répond au diagnostic physique du [second auditeur](NOTE_CLAUDE_DECOUPE_TOUR_20260911.md),
-§4ter, sans remplacer ses portes par un digest. Le coût des consultations,
-tris et copies reste à payer. La gate est séquentielle et réutilise les
-verticales du raccord pour transporter leurs indices ; aucun gain ni nouvelle
-qualification géométrique n’est déduit.
+Ce chemin évite les recompactions, le DSU des A hubs et leur certificat
+intermédiaire. Sur les compteurs n8000 scellés, il demanderait 7 342 931
+unions testées ; ce chiffre est déduit, sans temps ou RSS mesuré.
+La suite utile est le raccord sur les mêmes terminales réelles, puis les
+comparaisons φ/marques/coupes/FULL et une paire mono isolée. Les invariants
+et pièges d’API sont détaillés dans le paquet, sans nouvelle demande vague.
 
-Le [premier raccord atlas→graphes→FULL](../receipts/atlas_graph_full_20260911/README.md)
-est publié dans 679f4a6f. Lecteurs normal/−O et contrelecture des corps clos :
-114 census, banque unique, bijection d’identités natives, contributions et
-verticales, routes MSF directes et projetées. Cette première demande est close.
-Sa nouvelle convention est correctement déclarée ; les indices historiques
-ci-dessus sont une option de compatibilité, pas un défaut déjà revendiqué.
+## Qualifications précédentes closes
 
-Le constructeur prépare maintenant la vraie consommation par fenêtres sans
-requests[R_K], targets[R] ni graphe complet, en conservant catalogue, masques,
-φ et marques. La suite utile est son contrôle des terminales puis Builder/T2,
-et la mesure du travail répété et de la résidence. Les preuves de [compression
-par lots](receipts_composable_msf_20260911/README.md) et de [décomposition de toute
-la tour](receipts_parallel_objects_20260911/README.md) restent acquises ; leurs
-premiers prototypes ne sont plus à redemander.
+Le [vrai flux par fenêtres](../receipts/streaming_graph_20260911/README.md)
+est publié et contre-lu : tableaux globaux requests/targets/graphes supprimés,
+travail MEB cumulé correctement contrôlé, 114 census et quatre fenêtres par
+build dans les captures constructeur. Le résultat négatif mono n8000 est
+conservé. Son arrêt avant extension à n16k/n32k évite de répéter une variante
+coûteuse avant correction. Cette qualification ne s’étend pas au brouillon
+ordonné ni à la contraction directe proposée ici.
+
+La [compatibilité d’export historique](receipts_historical_export_20260911/README.md)
+est prête et contre-vérifiée par le constructeur : banque unique, indices,
+niveaux bruts et nœuds reconstruits après les horizontales. Les détails des
+deux minima restent dans la preuve, plutôt que répétés comme question ouverte.
+Le [premier raccord FULL](../receipts/atlas_graph_full_20260911/README.md) et
+les preuves de [composition](receipts_composable_msf_20260911/README.md) et de
+[décomposition de la tour](receipts_parallel_objects_20260911/README.md)
+conservent leurs autorités propres. Les fenêtres indépendantes hors ordre
+restent compatibles avec cette architecture, via leur réducteur composable.
 
 ## Acquis repris par le développeur
 

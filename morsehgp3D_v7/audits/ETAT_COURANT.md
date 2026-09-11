@@ -1,39 +1,36 @@
 # État courant de l’audit v7
 
-11 septembre 2026, reprise après 30c10246 et publication constructeur
-**679f4a6f**. La priorité reste la parallélisation de toute la tour et la
-maîtrise des objets intermédiaires.
+11 septembre 2026, après publication constructeur **069bb6a2**. La priorité
+reste la parallélisation de toute la tour et la maîtrise des intermédiaires.
 
-**Nouvel acquis : l’encodage physique historique peut être reconstruit après
-les horizontales indépendantes.** La [preuve et sa gate C++](receipts_historical_export_20260911/README.md)
-retrouvent les premiers usages des populations et l’ordre des nœuds depuis
-les groupes à coupe fermée. Les blocs silencieux participent aux minima ;
-les représentants rationnels bruts sont choisis par lot K. Une banque unique
-est partagée entre les ordres ; parents, contributions et verticales sont
-remappés vers les anciens indices.
+**Nouvelle simplification prouvée : contracter les pivots pendant la
+consommation des terminales et appliquer Kruskal directement aux naissances.**
+La [preuve et son modèle indépendant](receipts_birth_stream_20260911/README.md)
+exploitent l’ordre du flux réel et l’antériorité stricte des terminales.
+φ reste une identité native stable ; le DSU travaille sur les seules L
+naissances. Le certificat intermédiaire sur A hubs, sa projection et sa
+compaction disparaissent. Atlas, φ, fenêtres, marques et sortie restent à payer.
 
-O2 et ASan/UBSan/LSan concordent : dix entrées, soixante ordres, 2 184 nœuds,
-1 390 contributions, 2 056 références verticales comparés au Builder.
-Huit entrées utilisent le census sans recodage, deux changent seulement une
-représentation rationnelle équivalente, admise par le vrai Builder.
-Trois mutations sont réfutées sur ces entrées ; le minimum silencieux reste
-un témoin abstrait séparé. La gate n’est pas une implantation parallèle et
-emprunte les verticales du raccord avant transport des indices.
+Sur les compteurs publiés n8000, le travail du nouveau réducteur se déduit à
+7 342 931 tentatives d’union, contre 48 390 815 dans la pile actuelle et
+3 910 849 dans sa compaction native. **Cette déduction n’est pas un nouveau
+benchmark.** Le raccord C++, le RSS et le temps de cette spécialisation restent
+à qualifier. Les lots parallèles hors ordre gardent leur contrat distinct.
 
-Le [raccord constructeur atlas→graphes→FULL](../receipts/atlas_graph_full_20260911/README.md)
-a reçu une contrelecture favorable : lecteurs normal/−O, sources, banque
-partagée, bijection de naissances natives, contributions et verticales.
-Ses 114 census et certificats composables qualifient un raccord privé borné,
-avec une convention numérique déclarée différente du Builder. Le premier
-raccord est clos ; la consommation réellement fenêtrée est en préparation.
+Le [producteur réellement fenêtré](../receipts/streaming_graph_20260911/README.md)
+a reçu une contrelecture favorable, lecteurs normal/−O compris. Sa première
+qualification bornée est close ; son résultat mono n8000 reste négatif :
+188,638 s référence contre 250,408 s flux, index jusqu’à FULL retenu, avec un
+RSS légèrement supérieur. Corriger le réducteur avant de prolonger cette
+variante à n16k/n32k est la bonne suite. Aucune promotion de performance.
 
-Les preuves de [composition MSF](receipts_composable_msf_20260911/README.md),
-de [décomposition parallèle](receipts_parallel_objects_20260911/README.md),
-de [réduction aux naissances](receipts_filtered_graph_20260911/README.md) et
-la [canonisation par support certifié](receipts_certified_support_20260911/README.md)
-restent conservées. L’[entretien](ENTRETIEN.json) épingle ces autorités distinctes.
-Archive industrielle, complétude globale et contrats de temps restent ouverts.
-GCP non utilisé par cet audit.
+Les acquis précédents restent consultables dans leurs preuves :
+[export physique historique](receipts_historical_export_20260911/README.md),
+[raccord FULL constructeur](../receipts/atlas_graph_full_20260911/README.md),
+[composition MSF](receipts_composable_msf_20260911/README.md),
+[décomposition parallèle](receipts_parallel_objects_20260911/README.md) et
+[support certifié](receipts_certified_support_20260911/README.md).
+Les demandes déjà closes ne sont plus développées ici.
 
 ```text
 phase=exploration_v7_hors_registre
