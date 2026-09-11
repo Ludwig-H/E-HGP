@@ -3883,5 +3883,252 @@
         }
       ]
     }
+  },
+  "latest_composable_msf_20260911": {
+    "date_utc": "2026-09-11T15:00:56.601863+00:00",
+    "source_head_at_start": "a97ee81998250458ad971232f57b0d3b07b956c8",
+    "source_head_at_publication_preparation": "f2bea9986ab26149ad8935974310cc9ae571bab8",
+    "objective": "Bound intermediate edge and expanded-query residence while exposing independent parallel MSF tasks for the true K-NN tower.",
+    "constructive_results": [
+      "Local MSFs and recursively composed certificates preserve every open/closed cut with original vertex births.",
+      "One representative pass can compress the hub graph before phi is known, then project the retained certificate to births.",
+      "Alternative two-pass route resolves A-L pivots first and R-A+L remaining occurrences second, compressing directly on L births.",
+      "Global expanded-key deduplication is optional for exactness; bounded windows/cache may repeat MEB work and must retain cumulative accounting.",
+      "Canonical MSF identities are batch-independent on a fixed graph under a common stable total key; endpoint projection may change these IDs without changing FULL.",
+      "Fold, binary stack and balanced reduction have different residence/work tradeoffs; logical edge buffers are not RSS."
+    ],
+    "packet": {
+      "path": "receipts_composable_msf_20260911",
+      "pins": {
+        "README.md": "3f3f0343a1f86c0206f9e50f9625e9e02ef35bf6dc0b240be0c1f79c1cfcc22d",
+        "SHA256SUMS": "33326661575954d30314d0465742a9507a3317f7ad87e07efe1f3280f8f50881",
+        "commands.json": "adf1cc44d7e1e94a4b7aaba86c62361e547164808c85ebaecbb261d347d044a0",
+        "context_pins.json": "97c1e3e1f6df9b317258d679eb06b73e82b2b32674048071b478e284d930d1df",
+        "msf_model.py": "68eeffc1b732911f99e2cea502b6101afd4224b26344d66bc972e47e436ad1bd",
+        "result.json": "029db62c03931dcd02cd2cf1c612711991cdf7cd853f2f5f8b3f99a23794617e",
+        "verify.py": "1e8651703ebbfb5981c9d2ae052987897f61f72386b34ba49ae67690aff99b17"
+      },
+      "result_summary": {
+        "claim": "all threshold partitions, births and global multifusions preserved; exact canonical MSF edge identities under a stable global tie order on unchanged endpoints, on this corpus",
+        "composition_runs": 198,
+        "corpus_cases": 10,
+        "dates": "exact integer weights and Fraction cuts; open and closed",
+        "memory_counter": "logical algorithm buffers: local raw batch, retained certificate arrays, merge concatenation and output slots; excludes fixture storage, Python sort scratch, DSU, interpreter aliases and object overhead",
+        "mutants_rejected": 5,
+        "not_claimed": [
+          "parallel backend",
+          "product integration",
+          "runtime speedup",
+          "RAM bound in bytes",
+          "identical certificates across endpoint projection"
+        ],
+        "partition_comparisons": 4720,
+        "partition_counter_scope": "local certificate unions and final composed certificates against the original BFS; preliminary reference and mutant checks excluded",
+        "projection_cases_count": 3,
+        "projection_partition_comparisons": 198,
+        "projection_source_partition_comparisons": 66,
+        "reference_partition_comparisons": 168,
+        "status": "passed_bounded_sequential_model",
+        "strategy_totals": {
+          "balanced": {
+            "local_input_edges_sum": 210,
+            "local_output_edges_sum": 166,
+            "max_resident_edge_slots": 15,
+            "merge_input_edges_sum": 380,
+            "merge_output_edges_sum": 334,
+            "runs": 66
+          },
+          "binary_flush": {
+            "local_input_edges_sum": 210,
+            "local_output_edges_sum": 166,
+            "max_resident_edge_slots": 15,
+            "merge_input_edges_sum": 380,
+            "merge_output_edges_sum": 334,
+            "runs": 66
+          },
+          "fold": {
+            "local_input_edges_sum": 210,
+            "local_output_edges_sum": 166,
+            "max_resident_edge_slots": 15,
+            "merge_input_edges_sum": 408,
+            "merge_output_edges_sum": 362,
+            "runs": 66
+          }
+        }
+      },
+      "partition_comparisons_total": 5152,
+      "scope": "Sequential Python model only; 10 composition and 3 projection fixtures, 198 compositions; no product execution, actual threads, C++ rebuild, speed/RSS claim or geometry qualification."
+    },
+    "checks": [
+      {
+        "name": "packet_normal",
+        "command": "python3 -B morsehgp3D_v7/audits/receipts_composable_msf_20260911/verify.py",
+        "exit_code": 0,
+        "output": "{\"composition_cases\": 10, \"compositions\": 198, \"gcp_used\": false, \"historical_sources\": 7, \"mutants\": 5, \"parallel_threads_executed\": false, \"partition_comparisons_total\": 5152, \"performance_claim\": false, \"product_executed\": false, \"projection_cases\": 3, \"public_status\": \"not_claimed\", \"status\": \"passed_composable_msf_receipt\"}\n"
+      },
+      {
+        "name": "packet_optimized",
+        "command": "python3 -B -O morsehgp3D_v7/audits/receipts_composable_msf_20260911/verify.py",
+        "exit_code": 0,
+        "output": "{\"composition_cases\": 10, \"compositions\": 198, \"gcp_used\": false, \"historical_sources\": 7, \"mutants\": 5, \"parallel_threads_executed\": false, \"partition_comparisons_total\": 5152, \"performance_claim\": false, \"product_executed\": false, \"projection_cases\": 3, \"public_status\": \"not_claimed\", \"status\": \"passed_composable_msf_receipt\"}\n"
+      },
+      {
+        "name": "docs_normal",
+        "command": "python3 -B tools/check_docs.py",
+        "exit_code": 0,
+        "output": "Validated 501 active Markdown files.\n"
+      },
+      {
+        "name": "docs_optimized",
+        "command": "python3 -B -O tools/check_docs.py",
+        "exit_code": 0,
+        "output": "Validated 501 active Markdown files.\n"
+      },
+      {
+        "name": "registry",
+        "command": "python3 -B tools/check_implementation_status.py",
+        "exit_code": 0,
+        "output": "Validated 20 implementation phases and their gates.\n"
+      },
+      {
+        "name": "own_markdown",
+        "command": "python3 -B - <<'PY'\nfrom pathlib import Path\nimport importlib.util,json\nspec=importlib.util.spec_from_file_location('doccheck','tools/check_docs.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)\np=Path('morsehgp3D_v7/audits').resolve();files=[p/n for n in ['COORDINATION_AUDITEURS.md','DIALOGUE_COURANT.md','ETAT_COURANT.md','README.md','receipts_composable_msf_20260911/README.md']];errors=[e for f in files for e in m.validate(f)]\nprint(json.dumps({'files':len(files),'errors':errors}))\nraise SystemExit(bool(errors))\nPY",
+        "exit_code": 0,
+        "output": "{\"files\": 5, \"errors\": []}\n"
+      }
+    ],
+    "constructor_review": {
+      "reader_agent": "/root/prototype_review",
+      "authority": "Counter-execution of published receipt readers and source reading; not independent recompilation.",
+      "commands": [
+        {
+          "argv": [
+            "python3",
+            "morsehgp3D_v7/receipts/filtered_calendar_20260911/verify.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"status\": \"passed\", \"captures\": 5, \"commands\": 18, \"logical_files\": 90, \"physical_files\": 37, \"ELF_omitted\": 5, \"calendar_checks_current\": 474524, \"historical_checks\": 922537, \"historical_queries\": 307500, \"historical_api_refusals\": 8, \"historical_semantic_mutants\": 1, \"geometry_qualified\": false, \"performance_claim\": false, \"GCP_used\": false, \"manifest_sha256\": \"397c3172374ebeaa997fb0ded12d3ad54cbd289e6fb34ee25226dfd73fe4190c\"}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "python3",
+            "-O",
+            "morsehgp3D_v7/receipts/filtered_calendar_20260911/verify.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"status\": \"passed\", \"captures\": 5, \"commands\": 18, \"logical_files\": 90, \"physical_files\": 37, \"ELF_omitted\": 5, \"calendar_checks_current\": 474524, \"historical_checks\": 922537, \"historical_queries\": 307500, \"historical_api_refusals\": 8, \"historical_semantic_mutants\": 1, \"geometry_qualified\": false, \"performance_claim\": false, \"GCP_used\": false, \"manifest_sha256\": \"397c3172374ebeaa997fb0ded12d3ad54cbd289e6fb34ee25226dfd73fe4190c\"}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "python3",
+            "morsehgp3D_v7/receipts/rank_atlas_20260911/verify.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"commands\": 22, \"files\": 123, \"gcp_used\": false, \"scope\": \"bounded atlas differential, not geometry or FULL forests\", \"state_faults_per_mode\": 6, \"status\": \"passed\"}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "python3",
+            "-O",
+            "morsehgp3D_v7/receipts/rank_atlas_20260911/verify.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"commands\": 22, \"files\": 123, \"gcp_used\": false, \"scope\": \"bounded atlas differential, not geometry or FULL forests\", \"state_faults_per_mode\": 6, \"status\": \"passed\"}\n",
+          "stderr": ""
+        }
+      ],
+      "pins": {
+        "morsehgp3D_v7/receipts/filtered_calendar_20260911/MANIFEST.json": "397c3172374ebeaa997fb0ded12d3ad54cbd289e6fb34ee25226dfd73fe4190c",
+        "morsehgp3D_v7/receipts/rank_atlas_20260911/manifest.json": "341c8c228a9d008084010db7b010adac77beefba123fa8a59d1d7c9023652013",
+        "morsehgp3D_v7/receipts/filtered_calendar_20260911/sources/historical_chains.hpp": "686c2137a905e4f77c15a1d7f497541e6f8d87b9217f5c9c726cf4951be573c3",
+        "morsehgp3D_v7/receipts/filtered_calendar_20260911/sources/historical_chains_gate.cpp": "f405cda33256a456446010c5779b1381e18635c1989d3af86a5333104a928ea3",
+        "morsehgp3D_v7/receipts/filtered_calendar_20260911/sources/filtered_calendar.hpp": "1cf438cbac839c8f502de0c8daebbf89296a3884d2d40ba50715b5aaca161fa2",
+        "morsehgp3D_v7/receipts/rank_atlas_20260911/rank_atlas.hpp": "9fc118a208eac74472a0e8e5490e094953afced19495102a1ae06409b591d621",
+        "morsehgp3D_v7/receipts/rank_atlas_20260911/atlas_gate.cpp": "8e28078bff2f24d9c000c8dc244367047cff225fb143dea94475739debbedb12"
+      },
+      "positive_findings": [
+        "HLD admission guard, heavy-chain light jumps and single binary search match the proved query; result slots are disjoint and all threads joined before return/rethrow.",
+        "Published O2/SAN HLD source hashes and stdout agree; 307500 CPU1/2/4 queries, 8 API refusals plus one admission mutant.",
+        "Atlas requires immutable authentic index and complete exact admitted census; six state faults do not certify geometry.",
+        "Original BallData-order representative masks and PointId-order contribution masks are explicitly translated; raw rational levels retained."
+      ],
+      "closed_requests": [
+        "first C++ MSF/calendar and HLD prototype gates",
+        "first compact rank/role atlas compared with real visit_block"
+      ],
+      "remaining_bridge": "Atlas resolutions and streamed graph certificates to FULL, dated contributions, anchors, verticals and canonical export against Builder/T2.",
+      "work_in_progress_at_close": "Constructor acknowledged late projection; bounded real-census bridge to FULL and touched-endpoint MSF helper preparing. First reference explicitly retains full targets[R]/graphs; no windowed residence claim."
+    },
+    "math_counterreading": {
+      "agent": "/root/streaming_msf_math",
+      "result": "Agrees with dated projection proof, R occurrence count and edge-buffer bounds; no correction required.",
+      "new_execution": false
+    },
+    "maintenance": {
+      "entries": [
+        {
+          "path": "COORDINATION_AUDITEURS.md",
+          "previous_sha256": "f8f35f3139b66403d35a58dc0148e8b5406795526f7c913801227020637eae51",
+          "previous_words": 588,
+          "words": 564
+        },
+        {
+          "path": "DIALOGUE_COURANT.md",
+          "previous_sha256": "cb1bf4447ef1e7d6c3131cd1d8a978cdc85035061dc9e1e4af294fab9a4f89d0",
+          "previous_words": 520,
+          "words": 563
+        },
+        {
+          "path": "ETAT_COURANT.md",
+          "previous_sha256": "76c98741d2b4e147852ceeca8e0fbd89a616aa693e68eaf6060366abdea46e83",
+          "previous_words": 694,
+          "words": 683
+        },
+        {
+          "path": "README.md",
+          "previous_sha256": "84ad937a22c2a2086a6816a75c08e6271b508f616549d2a14b6e252289e78b6c",
+          "previous_words": 828,
+          "words": 867
+        }
+      ],
+      "current_priority_rewritten_not_appended": true,
+      "historical_packets_unchanged": true,
+      "source_variants_D_to_Q_unchanged": true,
+      "other_session_files_untouched": true,
+      "new_scattered_root_probe_files": false,
+      "new_engine_variant": false
+    },
+    "gcp_used": false,
+    "whole_source_freshness": {
+      "common_pins_valid": 2824,
+      "historical_source_variants_unchanged": true,
+      "scope": "Code 1 retains visibility of historical D-Q source variants: no complete current-engine match. All common pins pass; no global engine claim added.",
+      "commands": [
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "morsehgp3D_v7/audits/verify_current.py"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "Audit à actualiser : aucune variante complète ne correspond.\nvariante=D\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/core/mutants.hpp\nsrc/forest/silent_incidence.hpp\nsrc/pipeline/generate.hpp\nsrc/spindle/witness_count.hpp\ntests/meb_lazy_gate.cpp\nvariante=E_qualified\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/pipeline/generate.hpp\nsrc/spindle/witness_count.hpp\nvariante=F_qualified\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/pipeline/generate.hpp\nvariante=G_full_structural\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/pipeline/generate.hpp\nvariante=H_full_relative\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/COMPARE_MONO.md\nbench/full_gabriel_probe.cpp\ndocs/CONTRAT_CERTIFICAT_FULL.md\ndocs/CONTRAT_PERFORMANCE.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\nvariante=I_full_mono_published\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/COMPARE_MONO.md\nbench/full_gabriel_probe.cpp\ndocs/CONTRAT_CERTIFICAT_FULL.md\ndocs/CONTRAT_PERFORMANCE.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/RESIDENCE_MASSIVE.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\nvariante=J_full_lazy\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/COMPARE_MONO.md\nbench/full_gabriel_cache_policy_audit.py\nbench/full_gabriel_lazy_probe.cpp\nbench/full_gabriel_lazy_probe_audit.py\nbench/full_gabriel_probe.cpp\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_CACHE_FULL_PARESSEUX.md\ndocs/CONTRAT_CERTIFICAT_FULL.md\ndocs/CONTRAT_DIGEST_FULL.md\ndocs/CONTRAT_PERFORMANCE.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/RESIDENCE_MASSIVE.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\nvariante=K_full_singleton\nCMakeLists.txt\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_CACHE_FULL_PARESSEUX.md\ndocs/CONTRAT_LOT_UNITAIRE_FULL.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=L_full_successor_v2\nCMakeLists.txt\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_NORMALISATION_FULL.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=M_successor_publication_review\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=N_filtered_publication_review\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/FAUSSES_PISTES.md\ndocs/RESIDENCE_MASSIVE.md\ndocs/RESULTATS_MEB_FILTREE_20260906.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=O_full_meb_composition\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/FAUSSES_PISTES.md\ndocs/RESIDENCE_MASSIVE.md\nsrc/pipeline/generate.hpp\ntests/meb_proposal_local_gate.cpp\nvariante=P_raccord_ancres_counter_reading\nCMakeLists.txt\nREADME.md\nPASSATION.md\ndocs/TOUR_FULL_PAR_BOULES.md\ndocs/FAUSSES_PISTES.md\nsrc/forest/full_ball_tower.hpp\nsrc/forest/full_coverage_certificate.hpp\ntests/full_ball_tower_gate.cpp\ntests/full_ball_work_gate.cpp\nbench/full_ball_tower_probe.cpp\nvariante=Q_cache_commit_replay_named_blocks\nCMakeLists.txt\nREADME.md\nPASSATION.md\ndocs/TOUR_FULL_PAR_BOULES.md\ndocs/FAUSSES_PISTES.md\ndocs/OPTIMISATIONS_CACHE_ET_GPU_20260910.md\ndocs/PLAN_JOURNAL_INCREMENTAL.md\nsrc/forest/full_ball_tower.hpp\ntests/full_ball_tower_gate.cpp\nbench/full_ball_tower_probe.cpp\n"
+        },
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "-O",
+            "morsehgp3D_v7/audits/verify_current.py"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "Audit à actualiser : aucune variante complète ne correspond.\nvariante=D\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/core/mutants.hpp\nsrc/forest/silent_incidence.hpp\nsrc/pipeline/generate.hpp\nsrc/spindle/witness_count.hpp\ntests/meb_lazy_gate.cpp\nvariante=E_qualified\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/pipeline/generate.hpp\nsrc/spindle/witness_count.hpp\nvariante=F_qualified\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/pipeline/generate.hpp\nvariante=G_full_structural\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/pipeline/generate.hpp\nvariante=H_full_relative\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/COMPARE_MONO.md\nbench/full_gabriel_probe.cpp\ndocs/CONTRAT_CERTIFICAT_FULL.md\ndocs/CONTRAT_PERFORMANCE.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\nvariante=I_full_mono_published\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/COMPARE_MONO.md\nbench/full_gabriel_probe.cpp\ndocs/CONTRAT_CERTIFICAT_FULL.md\ndocs/CONTRAT_PERFORMANCE.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/RESIDENCE_MASSIVE.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\nvariante=J_full_lazy\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/COMPARE_MONO.md\nbench/full_gabriel_cache_policy_audit.py\nbench/full_gabriel_lazy_probe.cpp\nbench/full_gabriel_lazy_probe_audit.py\nbench/full_gabriel_probe.cpp\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_CACHE_FULL_PARESSEUX.md\ndocs/CONTRAT_CERTIFICAT_FULL.md\ndocs/CONTRAT_DIGEST_FULL.md\ndocs/CONTRAT_PERFORMANCE.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/RESIDENCE_MASSIVE.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\nvariante=K_full_singleton\nCMakeLists.txt\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_CACHE_FULL_PARESSEUX.md\ndocs/CONTRAT_LOT_UNITAIRE_FULL.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=L_full_successor_v2\nCMakeLists.txt\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_NORMALISATION_FULL.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=M_successor_publication_review\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=N_filtered_publication_review\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/FAUSSES_PISTES.md\ndocs/RESIDENCE_MASSIVE.md\ndocs/RESULTATS_MEB_FILTREE_20260906.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=O_full_meb_composition\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/FAUSSES_PISTES.md\ndocs/RESIDENCE_MASSIVE.md\nsrc/pipeline/generate.hpp\ntests/meb_proposal_local_gate.cpp\nvariante=P_raccord_ancres_counter_reading\nCMakeLists.txt\nREADME.md\nPASSATION.md\ndocs/TOUR_FULL_PAR_BOULES.md\ndocs/FAUSSES_PISTES.md\nsrc/forest/full_ball_tower.hpp\nsrc/forest/full_coverage_certificate.hpp\ntests/full_ball_tower_gate.cpp\ntests/full_ball_work_gate.cpp\nbench/full_ball_tower_probe.cpp\nvariante=Q_cache_commit_replay_named_blocks\nCMakeLists.txt\nREADME.md\nPASSATION.md\ndocs/TOUR_FULL_PAR_BOULES.md\ndocs/FAUSSES_PISTES.md\ndocs/OPTIMISATIONS_CACHE_ET_GPU_20260910.md\ndocs/PLAN_JOURNAL_INCREMENTAL.md\nsrc/forest/full_ball_tower.hpp\ntests/full_ball_tower_gate.cpp\nbench/full_ball_tower_probe.cpp\n"
+        }
+      ]
+    }
   }
 }

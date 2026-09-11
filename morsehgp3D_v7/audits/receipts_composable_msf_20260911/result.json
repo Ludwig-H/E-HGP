@@ -1,0 +1,3487 @@
+{
+  "cases": [
+    {
+      "cut_values": 9,
+      "global_events": [
+        [
+          1,
+          [
+            [
+              "a"
+            ],
+            [
+              "c"
+            ]
+          ]
+        ],
+        [
+          8,
+          [
+            [
+              "a",
+              "c"
+            ],
+            [
+              "b"
+            ]
+          ]
+        ]
+      ],
+      "input_edges": 3,
+      "name": "unordered_weighted_cycle",
+      "partition_comparisons": 432,
+      "variants": [
+        {
+          "batch_width": 1,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 4,
+          "merge_input_edges": 8,
+          "merge_output_edges": 7,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 1,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 4,
+          "merge_input_edges": 8,
+          "merge_output_edges": 7,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 1,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 4,
+          "merge_input_edges": 8,
+          "merge_output_edges": 7,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 1,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 4,
+          "merge_input_edges": 8,
+          "merge_output_edges": 7,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 1,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 4,
+          "merge_input_edges": 8,
+          "merge_output_edges": 7,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 1,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 4,
+          "merge_input_edges": 8,
+          "merge_output_edges": 7,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 2,
+          "local_calls": 4,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 3,
+          "merge_input_edges": 6,
+          "merge_output_edges": 5,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 2,
+          "local_calls": 4,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 3,
+          "merge_input_edges": 7,
+          "merge_output_edges": 6,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 2,
+          "local_calls": 4,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 3,
+          "merge_input_edges": 6,
+          "merge_output_edges": 5,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 2,
+          "local_calls": 4,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 3,
+          "merge_input_edges": 6,
+          "merge_output_edges": 5,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 2,
+          "local_calls": 4,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 3,
+          "merge_input_edges": 6,
+          "merge_output_edges": 5,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 2,
+          "local_calls": 4,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 3,
+          "merge_input_edges": 6,
+          "merge_output_edges": 5,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 3,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 6,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 3,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 6,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 3,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 6,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 3,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 6,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 3,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 6,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 3,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 6,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": true,
+          "strategy": "binary_flush"
+        }
+      ],
+      "vertices": 3
+    },
+    {
+      "cut_values": 5,
+      "global_events": [
+        [
+          4,
+          [
+            [
+              "a"
+            ],
+            [
+              "b"
+            ],
+            [
+              "c"
+            ]
+          ]
+        ]
+      ],
+      "input_edges": 3,
+      "name": "split_ternary_plateau",
+      "partition_comparisons": 240,
+      "variants": [
+        {
+          "batch_width": 1,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 4,
+          "merge_input_edges": 8,
+          "merge_output_edges": 7,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 1,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 4,
+          "merge_input_edges": 8,
+          "merge_output_edges": 7,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 1,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 4,
+          "merge_input_edges": 8,
+          "merge_output_edges": 7,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 1,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 4,
+          "merge_input_edges": 8,
+          "merge_output_edges": 7,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 1,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 4,
+          "merge_input_edges": 8,
+          "merge_output_edges": 7,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 1,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 4,
+          "merge_input_edges": 8,
+          "merge_output_edges": 7,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 2,
+          "local_calls": 4,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 3,
+          "merge_input_edges": 6,
+          "merge_output_edges": 5,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 2,
+          "local_calls": 4,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 3,
+          "merge_input_edges": 7,
+          "merge_output_edges": 6,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 2,
+          "local_calls": 4,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 3,
+          "merge_input_edges": 6,
+          "merge_output_edges": 5,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 2,
+          "local_calls": 4,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 3,
+          "merge_input_edges": 6,
+          "merge_output_edges": 5,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 2,
+          "local_calls": 4,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 3,
+          "merge_input_edges": 6,
+          "merge_output_edges": 5,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 2,
+          "local_calls": 4,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 3,
+          "merge_input_edges": 6,
+          "merge_output_edges": 5,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 3,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 6,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 3,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 6,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 3,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 6,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 3,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 6,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 3,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 6,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 3,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 6,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": true,
+          "strategy": "binary_flush"
+        }
+      ],
+      "vertices": 3
+    },
+    {
+      "cut_values": 7,
+      "global_events": [
+        [
+          4,
+          [
+            [
+              "a"
+            ],
+            [
+              "b"
+            ]
+          ]
+        ],
+        [
+          4,
+          [
+            [
+              "c"
+            ],
+            [
+              "d"
+            ],
+            [
+              "e"
+            ]
+          ]
+        ],
+        [
+          8,
+          [
+            [
+              "a",
+              "b"
+            ],
+            [
+              "c",
+              "d",
+              "e"
+            ]
+          ]
+        ]
+      ],
+      "input_edges": 4,
+      "name": "disjoint_same_date",
+      "partition_comparisons": 448,
+      "variants": [
+        {
+          "batch_width": 1,
+          "batches": 6,
+          "final_edges": 4,
+          "local_calls": 6,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 5,
+          "merge_input_edges": 11,
+          "merge_output_edges": 11,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 1,
+          "batches": 6,
+          "final_edges": 4,
+          "local_calls": 6,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 5,
+          "merge_input_edges": 14,
+          "merge_output_edges": 14,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 1,
+          "batches": 6,
+          "final_edges": 4,
+          "local_calls": 6,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 5,
+          "merge_input_edges": 11,
+          "merge_output_edges": 11,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 1,
+          "batches": 6,
+          "final_edges": 4,
+          "local_calls": 6,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 5,
+          "merge_input_edges": 11,
+          "merge_output_edges": 11,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 1,
+          "batches": 6,
+          "final_edges": 4,
+          "local_calls": 6,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 5,
+          "merge_input_edges": 14,
+          "merge_output_edges": 14,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 1,
+          "batches": 6,
+          "final_edges": 4,
+          "local_calls": 6,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 5,
+          "merge_input_edges": 11,
+          "merge_output_edges": 11,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 4,
+          "local_calls": 4,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 3,
+          "merge_input_edges": 8,
+          "merge_output_edges": 8,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 4,
+          "local_calls": 4,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 3,
+          "merge_input_edges": 10,
+          "merge_output_edges": 10,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 4,
+          "local_calls": 4,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 3,
+          "merge_input_edges": 8,
+          "merge_output_edges": 8,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 4,
+          "local_calls": 4,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 3,
+          "merge_input_edges": 8,
+          "merge_output_edges": 8,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 4,
+          "local_calls": 4,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 3,
+          "merge_input_edges": 10,
+          "merge_output_edges": 10,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 4,
+          "local_calls": 4,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 3,
+          "merge_input_edges": 8,
+          "merge_output_edges": 8,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 3,
+          "batches": 4,
+          "final_edges": 4,
+          "local_calls": 4,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 3,
+          "merge_input_edges": 8,
+          "merge_output_edges": 8,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 3,
+          "batches": 4,
+          "final_edges": 4,
+          "local_calls": 4,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 3,
+          "merge_input_edges": 11,
+          "merge_output_edges": 11,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 3,
+          "batches": 4,
+          "final_edges": 4,
+          "local_calls": 4,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 3,
+          "merge_input_edges": 8,
+          "merge_output_edges": 8,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 3,
+          "batches": 4,
+          "final_edges": 4,
+          "local_calls": 4,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 3,
+          "merge_input_edges": 8,
+          "merge_output_edges": 8,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 3,
+          "batches": 4,
+          "final_edges": 4,
+          "local_calls": 4,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 3,
+          "merge_input_edges": 9,
+          "merge_output_edges": 9,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 3,
+          "batches": 4,
+          "final_edges": 4,
+          "local_calls": 4,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 3,
+          "merge_input_edges": 8,
+          "merge_output_edges": 8,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 4,
+          "batches": 3,
+          "final_edges": 4,
+          "local_calls": 3,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 2,
+          "merge_input_edges": 8,
+          "merge_output_edges": 8,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 4,
+          "batches": 3,
+          "final_edges": 4,
+          "local_calls": 3,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 2,
+          "merge_input_edges": 8,
+          "merge_output_edges": 8,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 4,
+          "batches": 3,
+          "final_edges": 4,
+          "local_calls": 3,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 2,
+          "merge_input_edges": 8,
+          "merge_output_edges": 8,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 4,
+          "batches": 3,
+          "final_edges": 4,
+          "local_calls": 3,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 2,
+          "merge_input_edges": 8,
+          "merge_output_edges": 8,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 4,
+          "batches": 3,
+          "final_edges": 4,
+          "local_calls": 3,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 2,
+          "merge_input_edges": 8,
+          "merge_output_edges": 8,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 4,
+          "batches": 3,
+          "final_edges": 4,
+          "local_calls": 3,
+          "local_input_edges": 4,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 12,
+          "merge_calls": 2,
+          "merge_input_edges": 8,
+          "merge_output_edges": 8,
+          "reverse": true,
+          "strategy": "binary_flush"
+        }
+      ],
+      "vertices": 5
+    },
+    {
+      "cut_values": 9,
+      "global_events": [
+        [
+          3,
+          [
+            [
+              "a"
+            ],
+            [
+              "b"
+            ]
+          ]
+        ]
+      ],
+      "input_edges": 1,
+      "name": "isolated_and_future",
+      "partition_comparisons": 432,
+      "variants": [
+        {
+          "batch_width": 1,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 1,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 1,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 1,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 1,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 1,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 2,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 2,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 2,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 2,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 2,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 2,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": true,
+          "strategy": "binary_flush"
+        }
+      ],
+      "vertices": 3
+    },
+    {
+      "cut_values": 13,
+      "global_events": [
+        [
+          2,
+          [
+            [
+              "a"
+            ],
+            [
+              "b"
+            ]
+          ]
+        ],
+        [
+          3,
+          [
+            [
+              "a",
+              "b"
+            ],
+            [
+              "c"
+            ]
+          ]
+        ]
+      ],
+      "input_edges": 8,
+      "name": "parallel_edges_and_loops",
+      "partition_comparisons": 832,
+      "variants": [
+        {
+          "batch_width": 1,
+          "batches": 10,
+          "final_edges": 2,
+          "local_calls": 10,
+          "local_input_edges": 8,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 10,
+          "merge_calls": 9,
+          "merge_input_edges": 16,
+          "merge_output_edges": 12,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 1,
+          "batches": 10,
+          "final_edges": 2,
+          "local_calls": 10,
+          "local_input_edges": 8,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 9,
+          "merge_input_edges": 17,
+          "merge_output_edges": 13,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 1,
+          "batches": 10,
+          "final_edges": 2,
+          "local_calls": 10,
+          "local_input_edges": 8,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 9,
+          "merge_calls": 9,
+          "merge_input_edges": 16,
+          "merge_output_edges": 12,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 1,
+          "batches": 10,
+          "final_edges": 2,
+          "local_calls": 10,
+          "local_input_edges": 8,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 10,
+          "merge_calls": 9,
+          "merge_input_edges": 16,
+          "merge_output_edges": 12,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 1,
+          "batches": 10,
+          "final_edges": 2,
+          "local_calls": 10,
+          "local_input_edges": 8,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 9,
+          "merge_input_edges": 19,
+          "merge_output_edges": 15,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 1,
+          "batches": 10,
+          "final_edges": 2,
+          "local_calls": 10,
+          "local_input_edges": 8,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 9,
+          "merge_calls": 9,
+          "merge_input_edges": 16,
+          "merge_output_edges": 12,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 2,
+          "batches": 6,
+          "final_edges": 2,
+          "local_calls": 6,
+          "local_input_edges": 8,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 9,
+          "merge_calls": 5,
+          "merge_input_edges": 10,
+          "merge_output_edges": 8,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 2,
+          "batches": 6,
+          "final_edges": 2,
+          "local_calls": 6,
+          "local_input_edges": 8,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 5,
+          "merge_input_edges": 10,
+          "merge_output_edges": 8,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 2,
+          "batches": 6,
+          "final_edges": 2,
+          "local_calls": 6,
+          "local_input_edges": 8,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 5,
+          "merge_input_edges": 10,
+          "merge_output_edges": 8,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 2,
+          "batches": 6,
+          "final_edges": 2,
+          "local_calls": 6,
+          "local_input_edges": 8,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 9,
+          "merge_calls": 5,
+          "merge_input_edges": 10,
+          "merge_output_edges": 8,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 2,
+          "batches": 6,
+          "final_edges": 2,
+          "local_calls": 6,
+          "local_input_edges": 8,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 5,
+          "merge_input_edges": 11,
+          "merge_output_edges": 9,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 2,
+          "batches": 6,
+          "final_edges": 2,
+          "local_calls": 6,
+          "local_input_edges": 8,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 5,
+          "merge_input_edges": 10,
+          "merge_output_edges": 8,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 3,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 8,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 9,
+          "merge_calls": 4,
+          "merge_input_edges": 9,
+          "merge_output_edges": 7,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 3,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 8,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 4,
+          "merge_input_edges": 9,
+          "merge_output_edges": 7,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 3,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 8,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 9,
+          "merge_calls": 4,
+          "merge_input_edges": 9,
+          "merge_output_edges": 7,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 3,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 8,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 9,
+          "merge_calls": 4,
+          "merge_input_edges": 9,
+          "merge_output_edges": 7,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 3,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 8,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 4,
+          "merge_input_edges": 9,
+          "merge_output_edges": 7,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 3,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 8,
+          "local_output_edges": 4,
+          "max_resident_edge_slots": 9,
+          "merge_calls": 4,
+          "merge_input_edges": 9,
+          "merge_output_edges": 7,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 8,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 8,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 10,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 8,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 8,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 10,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 8,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 8,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 10,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 8,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 8,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 10,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 8,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 8,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 10,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 8,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 8,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 10,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": true,
+          "strategy": "binary_flush"
+        }
+      ],
+      "vertices": 3
+    },
+    {
+      "cut_values": 7,
+      "global_events": [
+        [
+          1,
+          [
+            [
+              "a"
+            ],
+            [
+              "c"
+            ]
+          ]
+        ],
+        [
+          10,
+          [
+            [
+              "a",
+              "c"
+            ],
+            [
+              "b"
+            ]
+          ]
+        ]
+      ],
+      "input_edges": 3,
+      "name": "late_lighter_edge",
+      "partition_comparisons": 336,
+      "variants": [
+        {
+          "batch_width": 1,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 4,
+          "merge_input_edges": 8,
+          "merge_output_edges": 7,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 1,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 4,
+          "merge_input_edges": 8,
+          "merge_output_edges": 7,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 1,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 4,
+          "merge_input_edges": 8,
+          "merge_output_edges": 7,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 1,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 4,
+          "merge_input_edges": 8,
+          "merge_output_edges": 7,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 1,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 4,
+          "merge_input_edges": 8,
+          "merge_output_edges": 7,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 1,
+          "batches": 5,
+          "final_edges": 2,
+          "local_calls": 5,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 4,
+          "merge_input_edges": 8,
+          "merge_output_edges": 7,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 2,
+          "local_calls": 4,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 3,
+          "merge_input_edges": 6,
+          "merge_output_edges": 5,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 2,
+          "local_calls": 4,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 3,
+          "merge_input_edges": 7,
+          "merge_output_edges": 6,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 2,
+          "local_calls": 4,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 3,
+          "merge_input_edges": 6,
+          "merge_output_edges": 5,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 2,
+          "local_calls": 4,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 3,
+          "merge_input_edges": 6,
+          "merge_output_edges": 5,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 2,
+          "local_calls": 4,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 3,
+          "merge_input_edges": 6,
+          "merge_output_edges": 5,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 2,
+          "batches": 4,
+          "final_edges": 2,
+          "local_calls": 4,
+          "local_input_edges": 3,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 8,
+          "merge_calls": 3,
+          "merge_input_edges": 6,
+          "merge_output_edges": 5,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 3,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 6,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 3,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 6,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 3,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 6,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 3,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 6,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 3,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 6,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 2,
+          "local_calls": 3,
+          "local_input_edges": 3,
+          "local_output_edges": 2,
+          "max_resident_edge_slots": 6,
+          "merge_calls": 2,
+          "merge_input_edges": 4,
+          "merge_output_edges": 4,
+          "reverse": true,
+          "strategy": "binary_flush"
+        }
+      ],
+      "vertices": 3
+    },
+    {
+      "cut_values": 23,
+      "global_events": [
+        [
+          2,
+          [
+            [
+              "a"
+            ],
+            [
+              "b"
+            ]
+          ]
+        ],
+        [
+          4,
+          [
+            [
+              "a",
+              "b"
+            ],
+            [
+              "d"
+            ]
+          ]
+        ],
+        [
+          6,
+          [
+            [
+              "a",
+              "b",
+              "d"
+            ],
+            [
+              "c"
+            ]
+          ]
+        ]
+      ],
+      "input_edges": 6,
+      "name": "strictly_dated_birth_graph",
+      "partition_comparisons": 1472,
+      "variants": [
+        {
+          "batch_width": 1,
+          "batches": 8,
+          "final_edges": 3,
+          "local_calls": 8,
+          "local_input_edges": 6,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 15,
+          "merge_calls": 7,
+          "merge_input_edges": 18,
+          "merge_output_edges": 15,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 1,
+          "batches": 8,
+          "final_edges": 3,
+          "local_calls": 8,
+          "local_input_edges": 6,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 11,
+          "merge_calls": 7,
+          "merge_input_edges": 21,
+          "merge_output_edges": 18,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 1,
+          "batches": 8,
+          "final_edges": 3,
+          "local_calls": 8,
+          "local_input_edges": 6,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 15,
+          "merge_calls": 7,
+          "merge_input_edges": 18,
+          "merge_output_edges": 15,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 1,
+          "batches": 8,
+          "final_edges": 3,
+          "local_calls": 8,
+          "local_input_edges": 6,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 15,
+          "merge_calls": 7,
+          "merge_input_edges": 18,
+          "merge_output_edges": 15,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 1,
+          "batches": 8,
+          "final_edges": 3,
+          "local_calls": 8,
+          "local_input_edges": 6,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 11,
+          "merge_calls": 7,
+          "merge_input_edges": 21,
+          "merge_output_edges": 18,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 1,
+          "batches": 8,
+          "final_edges": 3,
+          "local_calls": 8,
+          "local_input_edges": 6,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 15,
+          "merge_calls": 7,
+          "merge_input_edges": 18,
+          "merge_output_edges": 15,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 2,
+          "batches": 5,
+          "final_edges": 3,
+          "local_calls": 5,
+          "local_input_edges": 6,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 13,
+          "merge_calls": 4,
+          "merge_input_edges": 14,
+          "merge_output_edges": 11,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 2,
+          "batches": 5,
+          "final_edges": 3,
+          "local_calls": 5,
+          "local_input_edges": 6,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 13,
+          "merge_calls": 4,
+          "merge_input_edges": 14,
+          "merge_output_edges": 11,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 2,
+          "batches": 5,
+          "final_edges": 3,
+          "local_calls": 5,
+          "local_input_edges": 6,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 13,
+          "merge_calls": 4,
+          "merge_input_edges": 14,
+          "merge_output_edges": 11,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 2,
+          "batches": 5,
+          "final_edges": 3,
+          "local_calls": 5,
+          "local_input_edges": 6,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 13,
+          "merge_calls": 4,
+          "merge_input_edges": 14,
+          "merge_output_edges": 11,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 2,
+          "batches": 5,
+          "final_edges": 3,
+          "local_calls": 5,
+          "local_input_edges": 6,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 13,
+          "merge_calls": 4,
+          "merge_input_edges": 14,
+          "merge_output_edges": 11,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 2,
+          "batches": 5,
+          "final_edges": 3,
+          "local_calls": 5,
+          "local_input_edges": 6,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 13,
+          "merge_calls": 4,
+          "merge_input_edges": 14,
+          "merge_output_edges": 11,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 3,
+          "batches": 4,
+          "final_edges": 3,
+          "local_calls": 4,
+          "local_input_edges": 6,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 15,
+          "merge_calls": 3,
+          "merge_input_edges": 12,
+          "merge_output_edges": 9,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 3,
+          "batches": 4,
+          "final_edges": 3,
+          "local_calls": 4,
+          "local_input_edges": 6,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 15,
+          "merge_calls": 3,
+          "merge_input_edges": 12,
+          "merge_output_edges": 9,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 3,
+          "batches": 4,
+          "final_edges": 3,
+          "local_calls": 4,
+          "local_input_edges": 6,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 15,
+          "merge_calls": 3,
+          "merge_input_edges": 12,
+          "merge_output_edges": 9,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 3,
+          "batches": 4,
+          "final_edges": 3,
+          "local_calls": 4,
+          "local_input_edges": 6,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 15,
+          "merge_calls": 3,
+          "merge_input_edges": 12,
+          "merge_output_edges": 9,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 3,
+          "batches": 4,
+          "final_edges": 3,
+          "local_calls": 4,
+          "local_input_edges": 6,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 15,
+          "merge_calls": 3,
+          "merge_input_edges": 12,
+          "merge_output_edges": 9,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 3,
+          "batches": 4,
+          "final_edges": 3,
+          "local_calls": 4,
+          "local_input_edges": 6,
+          "local_output_edges": 6,
+          "max_resident_edge_slots": 15,
+          "merge_calls": 3,
+          "merge_input_edges": 12,
+          "merge_output_edges": 9,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 6,
+          "batches": 3,
+          "final_edges": 3,
+          "local_calls": 3,
+          "local_input_edges": 6,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 9,
+          "merge_calls": 2,
+          "merge_input_edges": 6,
+          "merge_output_edges": 6,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 6,
+          "batches": 3,
+          "final_edges": 3,
+          "local_calls": 3,
+          "local_input_edges": 6,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 9,
+          "merge_calls": 2,
+          "merge_input_edges": 6,
+          "merge_output_edges": 6,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 6,
+          "batches": 3,
+          "final_edges": 3,
+          "local_calls": 3,
+          "local_input_edges": 6,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 9,
+          "merge_calls": 2,
+          "merge_input_edges": 6,
+          "merge_output_edges": 6,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 6,
+          "batches": 3,
+          "final_edges": 3,
+          "local_calls": 3,
+          "local_input_edges": 6,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 9,
+          "merge_calls": 2,
+          "merge_input_edges": 6,
+          "merge_output_edges": 6,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 6,
+          "batches": 3,
+          "final_edges": 3,
+          "local_calls": 3,
+          "local_input_edges": 6,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 9,
+          "merge_calls": 2,
+          "merge_input_edges": 6,
+          "merge_output_edges": 6,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 6,
+          "batches": 3,
+          "final_edges": 3,
+          "local_calls": 3,
+          "local_input_edges": 6,
+          "local_output_edges": 3,
+          "max_resident_edge_slots": 9,
+          "merge_calls": 2,
+          "merge_input_edges": 6,
+          "merge_output_edges": 6,
+          "reverse": true,
+          "strategy": "binary_flush"
+        }
+      ],
+      "vertices": 5
+    },
+    {
+      "cut_values": 5,
+      "global_events": [
+        [
+          4,
+          [
+            [
+              "a"
+            ],
+            [
+              "b"
+            ]
+          ]
+        ]
+      ],
+      "input_edges": 1,
+      "name": "edge_at_endpoint_birth",
+      "partition_comparisons": 240,
+      "variants": [
+        {
+          "batch_width": 1,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 1,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 1,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 1,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 1,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 1,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 2,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 2,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 2,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 2,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 2,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 2,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 3,
+          "batches": 3,
+          "final_edges": 1,
+          "local_calls": 3,
+          "local_input_edges": 1,
+          "local_output_edges": 1,
+          "max_resident_edge_slots": 3,
+          "merge_calls": 2,
+          "merge_input_edges": 2,
+          "merge_output_edges": 2,
+          "reverse": true,
+          "strategy": "binary_flush"
+        }
+      ],
+      "vertices": 3
+    },
+    {
+      "cut_values": 5,
+      "global_events": [],
+      "input_edges": 0,
+      "name": "isolated_only",
+      "partition_comparisons": 240,
+      "variants": [
+        {
+          "batch_width": 1,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 1,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 1,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 1,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 1,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 1,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 2,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 2,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 2,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 2,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 2,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 2,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 3,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 3,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 3,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 3,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 3,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 3,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": true,
+          "strategy": "binary_flush"
+        }
+      ],
+      "vertices": 2
+    },
+    {
+      "cut_values": 1,
+      "global_events": [],
+      "input_edges": 0,
+      "name": "empty_graph",
+      "partition_comparisons": 48,
+      "variants": [
+        {
+          "batch_width": 1,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 1,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 1,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 1,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 1,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 1,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 2,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 2,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 2,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 2,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 2,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 2,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": true,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 3,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": false,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 3,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": false,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 3,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": false,
+          "strategy": "binary_flush"
+        },
+        {
+          "batch_width": 3,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": true,
+          "strategy": "balanced"
+        },
+        {
+          "batch_width": 3,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": true,
+          "strategy": "fold"
+        },
+        {
+          "batch_width": 3,
+          "batches": 2,
+          "final_edges": 0,
+          "local_calls": 2,
+          "local_input_edges": 0,
+          "local_output_edges": 0,
+          "max_resident_edge_slots": 0,
+          "merge_calls": 1,
+          "merge_input_edges": 0,
+          "merge_output_edges": 0,
+          "reverse": true,
+          "strategy": "binary_flush"
+        }
+      ],
+      "vertices": 0
+    }
+  ],
+  "claim": "all threshold partitions, births and global multifusions preserved; exact canonical MSF edge identities under a stable global tie order on unchanged endpoints, on this corpus",
+  "composition_runs": 198,
+  "corpus_cases": 10,
+  "dates": "exact integer weights and Fraction cuts; open and closed",
+  "memory_counter": "logical algorithm buffers: local raw batch, retained certificate arrays, merge concatenation and output slots; excludes fixture storage, Python sort scratch, DSU, interpreter aliases and object overhead",
+  "mutants": [
+    {
+      "name": "arbitrary_local_maximal_forest",
+      "witness": {
+        "actual": [
+          [
+            "a"
+          ],
+          [
+            "b"
+          ],
+          [
+            "c"
+          ]
+        ],
+        "closed": true,
+        "cut": "1",
+        "expected": [
+          [
+            "a",
+            "c"
+          ],
+          [
+            "b"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "discard_isolated_vertices",
+      "witness": {
+        "actual": [
+          [
+            "a",
+            "b"
+          ]
+        ],
+        "closed": true,
+        "cut": "9",
+        "expected": [
+          [
+            "a",
+            "b"
+          ],
+          [
+            "z"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "backdate_certificate_weights",
+      "witness": {
+        "actual": [
+          [
+            "a",
+            "b",
+            "c"
+          ]
+        ],
+        "closed": true,
+        "cut": "0",
+        "expected": [
+          [
+            "a"
+          ],
+          [
+            "b"
+          ],
+          [
+            "c"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "publish_local_fusions_as_global",
+      "witness": {
+        "actual": [
+          [
+            4,
+            [
+              [
+                "a"
+              ],
+              [
+                "b"
+              ]
+            ]
+          ],
+          [
+            4,
+            [
+              [
+                "a"
+              ],
+              [
+                "c"
+              ]
+            ]
+          ],
+          [
+            4,
+            [
+              [
+                "b"
+              ],
+              [
+                "c"
+              ]
+            ]
+          ]
+        ],
+        "expected": [
+          [
+            4,
+            [
+              [
+                "a"
+              ],
+              [
+                "b"
+              ],
+              [
+                "c"
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "name": "discard_late_lighter_edge",
+      "witness": {
+        "actual": [
+          [
+            "a"
+          ],
+          [
+            "b"
+          ],
+          [
+            "c"
+          ]
+        ],
+        "closed": true,
+        "cut": "1",
+        "expected": [
+          [
+            "a",
+            "c"
+          ],
+          [
+            "b"
+          ]
+        ]
+      }
+    }
+  ],
+  "mutants_rejected": 5,
+  "not_claimed": [
+    "parallel backend",
+    "product integration",
+    "runtime speedup",
+    "RAM bound in bytes",
+    "identical certificates across endpoint projection"
+  ],
+  "partition_comparisons": 4720,
+  "partition_counter_scope": "local certificate unions and final composed certificates against the original BFS; preliminary reference and mutant checks excluded",
+  "projection_cases": [
+    {
+      "birth_vertices_after": 3,
+      "final_certificate_edges": 2,
+      "full_projection_certificate_ids": [
+        "e3",
+        "e0"
+      ],
+      "global_events": [
+        [
+          1,
+          [
+            [
+              "0"
+            ],
+            [
+              "1"
+            ],
+            [
+              "2"
+            ]
+          ]
+        ]
+      ],
+      "input_edges": 5,
+      "name": "projection_changes_canonical_certificate",
+      "pivots": {
+        "3": "2",
+        "4": "0"
+      },
+      "preserved_births": [
+        [
+          "0",
+          0
+        ],
+        [
+          "1",
+          0
+        ],
+        [
+          "2",
+          0
+        ]
+      ],
+      "projected_source_edges_including_loops": 4,
+      "projection_partition_comparisons": 30,
+      "same_canonical_certificate": false,
+      "source_certificate_edges": 4,
+      "source_certificate_ids": [
+        "e0",
+        "e1",
+        "e2",
+        "e4"
+      ],
+      "source_partition_comparisons": 10,
+      "sparse_projection_certificate_ids": [
+        "e0",
+        "e2"
+      ],
+      "terminal_mapping": {
+        "0": "0",
+        "1": "1",
+        "2": "2",
+        "3": "2",
+        "4": "0"
+      },
+      "vertices_before": 5
+    },
+    {
+      "birth_vertices_after": 3,
+      "final_certificate_edges": 1,
+      "full_projection_certificate_ids": [
+        "e3"
+      ],
+      "global_events": [
+        [
+          7,
+          [
+            [
+              "a"
+            ],
+            [
+              "b"
+            ]
+          ]
+        ]
+      ],
+      "input_edges": 6,
+      "name": "strict_pivot_chain_and_future_isolated_birth",
+      "pivots": {
+        "h1": "a",
+        "h2": "h1",
+        "h3": "b"
+      },
+      "preserved_births": [
+        [
+          "a",
+          0
+        ],
+        [
+          "b",
+          2
+        ],
+        [
+          "z",
+          9
+        ]
+      ],
+      "projected_source_edges_including_loops": 4,
+      "projection_partition_comparisons": 114,
+      "same_canonical_certificate": true,
+      "source_certificate_edges": 4,
+      "source_certificate_ids": [
+        "e0",
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "source_partition_comparisons": 38,
+      "sparse_projection_certificate_ids": [
+        "e3"
+      ],
+      "terminal_mapping": {
+        "a": "a",
+        "b": "b",
+        "h1": "a",
+        "h2": "a",
+        "h3": "b",
+        "z": "z"
+      },
+      "vertices_before": 6
+    },
+    {
+      "birth_vertices_after": 5,
+      "final_certificate_edges": 2,
+      "full_projection_certificate_ids": [
+        "e1",
+        "e3"
+      ],
+      "global_events": [
+        [
+          4,
+          [
+            [
+              "a"
+            ],
+            [
+              "b"
+            ]
+          ]
+        ],
+        [
+          4,
+          [
+            [
+              "c"
+            ],
+            [
+              "d"
+            ]
+          ]
+        ]
+      ],
+      "input_edges": 7,
+      "name": "projection_disjoint_plateau_with_duplicates",
+      "pivots": {
+        "h1": "a",
+        "h2": "c"
+      },
+      "preserved_births": [
+        [
+          "a",
+          0
+        ],
+        [
+          "b",
+          0
+        ],
+        [
+          "c",
+          0
+        ],
+        [
+          "d",
+          0
+        ],
+        [
+          "z",
+          6
+        ]
+      ],
+      "projected_source_edges_including_loops": 4,
+      "projection_partition_comparisons": 54,
+      "same_canonical_certificate": false,
+      "source_certificate_edges": 4,
+      "source_certificate_ids": [
+        "e0",
+        "e2",
+        "e4",
+        "e5"
+      ],
+      "source_partition_comparisons": 18,
+      "sparse_projection_certificate_ids": [
+        "e4",
+        "e5"
+      ],
+      "terminal_mapping": {
+        "a": "a",
+        "b": "b",
+        "c": "c",
+        "d": "d",
+        "h1": "a",
+        "h2": "c",
+        "z": "z"
+      },
+      "vertices_before": 7
+    }
+  ],
+  "projection_cases_count": 3,
+  "projection_partition_comparisons": 198,
+  "projection_source_partition_comparisons": 66,
+  "reference_partition_comparisons": 168,
+  "status": "passed_bounded_sequential_model",
+  "strategy_totals": {
+    "balanced": {
+      "local_input_edges_sum": 210,
+      "local_output_edges_sum": 166,
+      "max_resident_edge_slots": 15,
+      "merge_input_edges_sum": 380,
+      "merge_output_edges_sum": 334,
+      "runs": 66
+    },
+    "binary_flush": {
+      "local_input_edges_sum": 210,
+      "local_output_edges_sum": 166,
+      "max_resident_edge_slots": 15,
+      "merge_input_edges_sum": 380,
+      "merge_output_edges_sum": 334,
+      "runs": 66
+    },
+    "fold": {
+      "local_input_edges_sum": 210,
+      "local_output_edges_sum": 166,
+      "max_resident_edge_slots": 15,
+      "merge_input_edges_sum": 408,
+      "merge_output_edges_sum": 362,
+      "runs": 66
+    }
+  }
+}

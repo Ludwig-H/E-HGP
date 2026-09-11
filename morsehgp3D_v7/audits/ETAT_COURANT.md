@@ -1,38 +1,38 @@
 # État courant de l’audit v7
 
-11 septembre 2026, lecture de `34ad933d`, puis publications constructeur
-`0db1e775` et second auditeur `b5271aad`. **La priorité est désormais la
-parallélisation de toute la tour par changement de structures.** La
-[proposition courante](receipts_parallel_objects_20260911/README.md) articule
-boules partagées, rôles clairsemés, graphes sur naissances, arbres de multifusions
-et requêtes historiques sur marques datées.
+11 septembre 2026, reprise de a97ee819 et contrelecture de la publication
+constructeur **f2bea998**. La priorité reste la parallélisation de toute la
+tour, avec maîtrise de ses structures intermédiaires.
 
-Deux dépendances sont levées mathématiquement : les horizontales des K peuvent
-se construire indépendamment ; leurs verticales peuvent ensuite se calculer
-toutes ensemble, sans utiliser celles de K−1. Les chaînes lourdes donnent
-O(log N) par requête avec stockage O(N). Des algorithmes publiés construisent
-le dendrogramme en parallèle ; les égalités doivent redevenir des multifusions
-FULL atomiques. La génération et les descentes adaptatives conservent leurs
-propres dépendances de découverte.
+**Nouvel acquis : les MSF par fenêtres forment des certificats composables de
+toutes les coupes.** La [preuve et le modèle](receipts_composable_msf_20260911/README.md)
+permettent de comprimer les arêtes entre hubs en une passe, puis de projeter
+le certificat vers les naissances. La variante en deux passes réduit d’abord
+les hubs par φ. Les fenêtres libèrent clés développées et résultats terminaux
+après consommation ; catalogue, métadonnées et sortie restent à compter.
+Le calendrier de réduction détermine le compromis travail/résidence.
 
-Le modèle Python normal/−O passe 11 cas, 234 coupes, 5 178 requêtes comparées
-au BFS, 12 nœuds verticaux et cinq mutants. Le constructeur d’arbre est un
-juge séquentiel borné ; aucun parallélisme C++/GPU ni temps de tour nouveau
-n’est qualifié. Le dossier donne aussi la formule de deux scans exacts pour
-le sweep q4 et les transformations des phases de préparation et d’export.
+Dix graphes de composition et trois de projection passent normal/−O :
+198 compositions, 5 152 comparaisons, cinq mutants. Les identités des
+certificats peuvent varier après projection, avec des histoires FULL égales.
+Le témoin est un modèle séquentiel borné, sans exécution parallèle ni mesure.
 
-Le [graphe filtré précédent](receipts_filtered_graph_20260911/README.md) et la
-[canonisation par support certifié](receipts_certified_support_20260911/README.md)
-conservent leurs preuves et tests. Le second auditeur a publié un premier
-histogramme de coquilles sur flux réel ; cette demande est close dans son
-domaine, sans gain transféré à un raccord encore absent.
+Les prototypes constructeur [calendrier/HLD](../receipts/filtered_calendar_20260911/README.md)
+et [atlas](../receipts/rank_atlas_20260911/README.md) sont désormais publiés ;
+leurs lecteurs passent normal/−O. Captures O2/SAN : calendrier 264 graphes,
+6 570 coupes ; HLD 307 500 requêtes réparties sur CPU1/2/4 ; atlas 13 vrais
+census, 30 562 blocs et 52 469 représentants. La contrelecture des corps HLD
+et de la traduction des masques d’atlas est favorable dans leur domaine.
+Les dates brutes et les admissions restent préservées. Aucun raccord complet
+census→graphe→FULL ni débit de tour n’est qualifié par ces briques.
 
-Le raccord transactionnel et ses 40 portes ciblées ont été publiés dans
-324f6192 ; notre lecture des paquets actifs, T2 et HD reste dans
-l’[entretien](ENTRETIEN.json). Les nouvelles tentatives G4 documentées par le
-constructeur gardent son autorité ; cet audit n’utilise pas GCP. Les demandes
-anciennes closes sont condensées dans le [dialogue](DIALOGUE_COURANT.md).
-Archive industrielle, complétude globale et contrats de temps restent ouverts.
+La [décomposition parallèle](receipts_parallel_objects_20260911/README.md),
+la [réduction aux naissances](receipts_filtered_graph_20260911/README.md) et
+la [canonisation par support certifié](receipts_certified_support_20260911/README.md)
+conservent leurs preuves. Les anciennes demandes maintenant satisfaites sont
+condensées dans le [dialogue](DIALOGUE_COURANT.md), leurs preuves dans
+l’[entretien](ENTRETIEN.json). Archive industrielle, complétude globale et
+contrats de temps restent ouverts. GCP non utilisé par cet audit.
 
 ```text
 phase=exploration_v7_hors_registre

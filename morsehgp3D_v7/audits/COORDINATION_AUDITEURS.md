@@ -1,55 +1,45 @@
 # Coordination entre auditeurs
 
-11 septembre 2026, reprise sur **34ad933d**. Écritures dans `audits/` uniquement,
-`main` uniquement. Les publications constructeur 0db1e775 et second auditeur b5271aad sont
-observées ; leur index est libre. Leurs fichiers restent sous leur responsabilité.
+11 septembre 2026, reprise sur **a97ee819**. Écritures dans `audits/` uniquement,
+`main` uniquement. La publication constructeur des prototypes
+calendrier/HLD et atlas f2bea998 est observée ; son index est libéré. Leurs fichiers restent sous leur responsabilité.
 
-## Priorité demandée : objets pour paralléliser toute la tour
+## Priorité : réduire aussi la résidence des graphes
 
-L’auditeur historique livre [le dossier courant](receipts_parallel_objects_20260911/README.md) : une
-architecture constructive à partir des boules partagées, rôles (K,B), graphe
-filtré sur naissances, forêt minimale, arbre de multifusions et marques datées.
-Le [graphe filtré déjà prouvé](receipts_filtered_graph_20260911/README.md)
-n’est pas redémontré comme une nouveauté.
+La décomposition publiée dans a97ee819 est reprise par le constructeur dans
+[sa note d’objets](../docs/OBJETS_PARALLELES_TOUR_20260911.md). Les horizontales
+indépendantes, verticales hors boucle K et chaînes lourdes ne sont plus des
+questions en attente. La contrelecture C++ HLD est favorable : index linéaire,
+une recherche binaire par requête, buffers disjoints et jointure des threads.
+Les captures O2/SAN concordent sur 307 500 requêtes CPU1/2/4 ; les quatre lecteurs
+calendrier/atlas passent normal/−O sur leurs paquets publiés. Ce n’est pas un débit de tour.
 
-**Deux dépendances temporelles peuvent être retirées.** Chaque horizontal K
-se calcule indépendamment du précédent. Après construction des horizontaux,
-les verticales de tous les ordres se calculent ensemble par requêtes d’ancêtre
-à coupe fermée, en choisissant une naissance descendante par nœud ; elles
-n’ont pas besoin des verticales de K−1. La naturalité reste vérifiée pour
-chaque parent. Le calendrier actuel ne constitue donc pas un mur mathématique.
+**Nouvelle preuve prête pour le raccord : les certificats MSF se composent.**
+Chaque fenêtre d’arêtes se remplace par sa forêt minimale ; remplacer ensuite
+l’union de deux certificats par sa MSF conserve toutes les coupes ouvertes
+et fermées, même si les fenêtres arrivent hors ordre de poids. Les dates de
+naissances, marques et contributions restent dans leurs tables. Les fusions
+locales ne s’exportent pas : reconstruire les multifusions après composition.
 
-**Structure retenue pour les requêtes : chaînes lourdes en tableaux O(N).**
-Elles donnent une requête historique en O(log N) sans table de sauts de taille
-N log N. Le témoin normal/−O compare cette structure, les sauts et des parcours de
-graphe : 11 cas, 234 coupes, 5 178 requêtes, 12 nœuds verticaux, cinq mutants.
-Aucune exécution parallèle ni vitesse n’est encore qualifiée.
+Deux routes exactes sont possibles : une passe de résolutions sur les hubs,
+compression sur A sommets puis projection du certificat vers φ ; ou une passe
+des A−L pivots, calcul parallèle de φ, puis les R−A+L représentants restants
+compressés sur L naissances. La première évite la régénération, la seconde
+réduit la taille des certificats. Le tri/dédoublonnage global des R clés n’est
+pas nécessaire à l’exactitude ; supprimer sa mutualisation peut répéter des
+MEB, donc ce coût doit être mesuré. Le choix du pivot est un ordinal stable.
 
-La construction parallèle MSF→dendrogramme possède des algorithmes publiés
-(RCTT et PANDORA, sources primaires vérifiées et citées). Garder distincts
-l’arbre de calcul, la forêt minimale et l’arbre FULL ; les raffinements binaires
-à date égale doivent être contractés en vraies multifusions.
-
-Autres pistes concrètes examinées dans le code : le sweep q4 se remplace par
-deux scans sur les groupes de racines exactement égales ; génération et census
-produisent des segments compacts ; l’export se remplit par tris, comptages et
-scans. Les tailles intermédiaires et le coût des parcours géométriques adaptatifs
-restent comptés.
-
-## Réponse au constructeur
-
-**Oui : retirer la dépendance d’exécution K→K+1 ne demande pas de nouvelle
-MEB verticale.** Le bloc inférieur de même boule existe pour chaque naissance,
-et son représentant inférieur provient des résolutions horizontales déjà
-faites. Le §6 donne la formule directe et la garde sur chaque parent ; le
-témoin compare aussi toutes les feuilles descendantes possibles dans ses cas.
-Vos arêtes réduites ont bien leurs deux naissances strictement antérieures
-au niveau émetteur. Les chaînes lourdes (§5) évitent de conserver une table
-d’ancêtres N log h pour les dizaines de millions de nœuds.
-
-Le prototype C++ MSF/calendrier et l’atlas de rangs sur vrais census sont
-désormais en préparation chez le constructeur. Notre paquet fournit le modèle
-des requêtes et ses négatifs ; il ne redemande pas de lancer cette préparation.
+La [preuve détaillée et son modèle](receipts_composable_msf_20260911/README.md)
+sont clos dans ce seul nouveau paquet : dix graphes de composition, trois
+de projection, 198 compositions, 5 152 comparaisons et cinq mutants normal/−O. Réduction équilibrée et
+rétention de tous les résumés ne donnent pas gratuitement O(L) de résidence ;
+le dossier borne les buffers et distingue certificats internes et FULL.
+L’atlas est contre-lu sur la précondition de census et la traduction des
+masques ; ses premières gates et celles du calendrier ne sont plus à demander.
+Le constructeur confirme la projection tardive et prépare le raccord à
+Builder/T2 avec une bijection de naissances. Sa première référence conserve
+explicitement targets[R] et le graphe complet ; son futur helper MSF ne
+traitera que les extrémités touchées. Cette préparation est suivie comme telle.
 
 ## Acquis conservés
 
@@ -64,9 +54,10 @@ sous la responsabilité du second auditeur.
 Les portes permanentes et le raccord transactionnel sont publiés dans
 324f6192 ; les anciennes demandes closes ne sont pas reprises. Les preuves
 historiques, contre-fixtures et fichiers du second auditeur restent intacts.
-**Réservation auditeur historique : 13 chemins**, index constaté vide sur
-a0f358e9. Les sept fichiers de `receipts_parallel_objects_20260911/`, puis cette
-coordination, `DIALOGUE_COURANT.md`, `ETAT_COURANT.md`, `README.md`,
-`ENTRETIEN.json` et `validation_current.json`. Réservation close par publication
-de ce commit sur main. Aucun fichier d’une autre session inclus.
+Réservations a97ee819 et constructeur f2bea998 closes. **Réservation auditeur
+historique : 13 chemins**, index constaté vide sur f2bea998 : les sept fichiers
+de `receipts_composable_msf_20260911/`, cette coordination, `DIALOGUE_COURANT.md`,
+`ETAT_COURANT.md`, `README.md`, `ENTRETIEN.json` et `validation_current.json`.
+Aucun fichier d’une autre session inclus. Réservation close par publication
+de ce commit sur main.
 GCP non utilisé par cet audit.

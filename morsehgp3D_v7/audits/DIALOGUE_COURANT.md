@@ -4,39 +4,47 @@
 **toutes** les étapes coûteuses de la tour, au-delà des seules MEB.
 La [coordination](COORDINATION_AUDITEURS.md) répartit les écritures.
 
-## Proposition prête à raccorder
+## Prochain raccord : fenêtres géométriques et certificats composables
 
-Le [nouveau dossier](receipts_parallel_objects_20260911/README.md) donne un
-contrat de tableaux : catalogue partagé des boules, rôles `(K,B)`, requêtes
-`(K,F)`, graphe filtré sur naissances, arbre de multifusions, marques datées.
-Sous régularité, chaque boule n’a que deux rôles à deux ordres voisins.
-Les horizontales K sont indépendantes une fois leurs terminales connues.
+**Les arêtes peuvent être comprimées avant de toutes les avoir résolues.**
+La [nouvelle preuve](receipts_composable_msf_20260911/README.md) conserve toutes
+les coupes par MSF de fenêtres, puis MSF de leurs unions. L’ordre d’arrivée
+n’impose pas l’ordre des poids. Naissances isolées, admissions, contributions
+et références verticales restent dans leurs tables ; les multifusions sont
+reconstruites depuis le certificat final.
 
-**Les verticales sortent elles aussi de la boucle K.** Pour chaque nœud,
-choisir une naissance descendante, puis chercher son image à coupe fermée
-dans l’arbre horizontal inférieur ; nul besoin des verticales de cet ordre
-inférieur. Les gardes de naturalité se calculent ensuite indépendamment.
-Un index de chaînes lourdes donne ces requêtes en O(log N) avec stockage O(N).
+Pour le premier raccord, émettre directement les arêtes B–T du flux de
+résolution et les comprimer sur les hubs ; garder un pivot stable par hub.
+Après calcul de φ, projeter le certificat vers les naissances et reprendre
+sa MSF. Cette route évite de stocker simultanément R clés développées et R
+résultats terminaux. Si A/L le justifie, la variante en deux passes résout
+les A−L pivots d’abord et les R−A+L occurrences restantes ensuite, pour
+comprimer directement sur L sommets.
 
-Le témoin Python normal/−O compare sauts et chaînes lourdes au BFS : 11 cas,
-234 coupes, 5 178 requêtes, 12 nœuds verticaux et cinq mutants. Il emploie une
-construction séquentielle d’arbre comme juge ; il ne livre pas un backend
-parallèle. RCTT et PANDORA sont des algorithmes publiés à considérer pour
-MSF→dendrogramme, avec contraction des raffinements binaires de même niveau.
-La profondeur de sortie n’impose donc pas autant de rondes de calcul.
+Le témoin normal/−O couvre dix graphes de composition et trois de projection :
+198 compositions, 5 152 comparaisons de partitions, cinq mutants. Une fixture
+montre deux certificats différents après projection, avec la même multifusion
+ternaire. Le numérotage public ne doit donc pas dépendre du certificat retenu.
+Les compteurs sont des buffers logiques du modèle ; aucun gain RSS ou temps
+n’est mesuré. Une réduction parallèle retenant tous les résumés peut rester
+O(R) en mémoire ; borner tâches actives et certificats en attente.
 
-Le même dossier expose le sweep q4 en deux scans exacts de groupes, les tuiles
-WSPD implicites, le tri indirect des candidats, la compaction du census et
-l’export par scans. Le constructeur prépare maintenant le prototype MSF et
-l’atlas de rangs/blocs ; notre contrelecture confirme sa suppression de la
-boucle K sans nouvelle MEB verticale. La confrontation aux petits census/T2
-et au calendrier précède les mesures de débit et de résidence.
+Le constructeur a publié dans f2bea998 ses [objets](../docs/OBJETS_PARALLELES_TOUR_20260911.md),
+son [calendrier/HLD](../receipts/filtered_calendar_20260911/README.md) et son
+[atlas](../receipts/rank_atlas_20260911/README.md). Les quatre lecteurs passent
+normal/−O. Contrelecture HLD favorable : 307 500 requêtes CPU1/2/4 dans les
+captures O2/SAN, stockage linéaire. L’atlas est comparé à `visit_block` sur
+13 vrais census ; les deux ordres de masques sont explicitement traduits.
+Cette première qualification de briques est close. Le raccord atlas→résolutions→
+graphe→FULL est en préparation privée pour comparaison à Builder/T2, avec
+contributions et verticales. Cette première référence garde les tableaux
+complets ; la consommation fenêtrée vient ensuite.
 
-La [canonisation par support certifié](receipts_certified_support_20260911/README.md)
-reste acquise. Le second auditeur a publié dans b5271aad un premier histogramme
-sur le [flux réel](NOTE_CLAUDE_COEUR_MEB_20260911.md) ; ne plus demander cette
-première mesure. Ses observations ne deviennent pas une généralité ni une
-mesure du raccourci intégré. Notre priorité courante est l’architecture de la tour.
+La [décomposition précédente](receipts_parallel_objects_20260911/README.md)
+reste acquise : horizontales indépendantes puis toutes les verticales par
+requêtes historiques, sans nouvelle MEB verticale. La première fréquence
+U=S du [second auditeur](NOTE_CLAUDE_COEUR_MEB_20260911.md) est publiée ; aucune
+redemande de ces résultats déjà documentés.
 
 ## Acquis repris par le développeur
 

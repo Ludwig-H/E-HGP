@@ -1,6 +1,6 @@
 {
   "schema": "mhgp7-current-audit-validation-v2",
-  "updated_utc": "2026-09-11T14:32:21.076022+00:00",
+  "updated_utc": "2026-09-11T15:00:56.601863+00:00",
   "phase": "exploration_v7_hors_registre",
   "backend": "cpu_reference",
   "profile": "quantized_u16_input_only",
@@ -21,10 +21,10 @@
     "audits/CERTIFICAT_HORIZONTAL_COURANT.md": "e76714730f4ce24f4451a8d9bab0c365d29b25e9d18008d3675d2ea9f036c611",
     "audits/CONTRAT_MASSES_VOTE_COURANT.md": "2ed2a8eebef68fbb12b2a23fc18067d36a343b0a206c1330c2ca823ee26f2b72",
     "audits/CONTRAT_VERTICAL_COURANT.md": "09b2f2a8d0b59a540e4eba865b2f7754225e1583ca97d42cbc43b4dc0e4868c9",
-    "audits/DIALOGUE_COURANT.md": "cb1bf4447ef1e7d6c3131cd1d8a978cdc85035061dc9e1e4af294fab9a4f89d0",
+    "audits/DIALOGUE_COURANT.md": "1842c4185b2aabc397d1e71ea0b14c15330b5fc9b2245157eb0ace33aa9f237f",
     "audits/DOMAINE_CPU_COURANT.md": "18258334cfc7d74f3a262ea1dab798ff621245b079bfd5cbe8b48c987404cd33",
-    "audits/ENTRETIEN.json": "c7726a472ef8bea05719e05e259ded3b99d33f9d2ecffad34128192f10702730",
-    "audits/ETAT_COURANT.md": "76c98741d2b4e147852ceeca8e0fbd89a616aa693e68eaf6060366abdea46e83",
+    "audits/ENTRETIEN.json": "041ea9c4839281a12a1e63ff483e756cf752f330c2739e7ccdcca9d2249bac8d",
+    "audits/ETAT_COURANT.md": "35ab3deaaa222c06b229c0ea4d67e8f037481d8647aa906e18097b15c29c7ba7",
     "audits/FILTRES_FLOTTANTS_COURANTS.md": "7ba3d325a007b12e45baaa5d7d6ee00abb2cb978a1006af9bc7e9a8a3bc2af03",
     "audits/FRONT_ET_TEMOINS_COURANT.md": "3fb7202d0d56720ac8325d46473eb86d329669b27dff8a51fd9ead8afb4dde08",
     "audits/MEB_DOUBLE_BUDGET_COURANT.md": "134b91b9cbdda6c23255807474e1f2010ac872fc54636b975bd3f6cea3e1187c",
@@ -33,7 +33,7 @@
     "audits/PREUVE_CHORD_SECTOR_COURANTE.md": "2e4d1494957c8f5849234ada2e86edfd0dbcb4a2945e5a9fbfeb778b1ed432e7",
     "audits/PRODUCTEUR_FULL_GABRIEL_COURANT.md": "5a3e80d338c6c18f346224d811997e08e40b55876e12d3e9e8f837b8ef963910",
     "audits/QUESTIONS_SECONDAIRES.md": "d41daf7b69827114c19991984ba5bb4652886b4197350b2809e748caba68c9d8",
-    "audits/README.md": "84ad937a22c2a2086a6816a75c08e6271b508f616549d2a14b6e252289e78b6c",
+    "audits/README.md": "2810884a2b16682a92a45ff92ec987e8ea8335ff61b58c83515e38f722c20f0d",
     "audits/S1_COURANT.md": "e4c79bc1cb57df636c226765c7a7be616998ff7248b86f93e61976e77fa173eb",
     "audits/archive_cleanup_probe.cpp": "f94bc8032d4a55f4afccf43a56497866f803eb3e42f2d96b05dc9420b964a63d",
     "audits/cell_compiled_bridge.cpp": "0a8045ec5b9691cb1db627fedaeca60042bf76714f4eca62db48264a8d6842fb",
@@ -2275,7 +2275,7 @@
     "audits/receipts_plateaux_full_20260906/real_parent_certificates_normal.json": "7cc7e28d44f09bf1a29874b8892599d7814811f339bee3b1d62459ba41920444",
     "audits/receipts_plateaux_full_20260906/real_parent_certificates_optimized.json": "7cc7e28d44f09bf1a29874b8892599d7814811f339bee3b1d62459ba41920444",
     "audits/receipts_plateaux_full_20260906/global_parent_review.json": "28da3f09d5ece7724db2fd5756acc2f5ea2f5cf660c0e89013bb9de630546f94",
-    "audits/COORDINATION_AUDITEURS.md": "f8f35f3139b66403d35a58dc0148e8b5406795526f7c913801227020637eae51",
+    "audits/COORDINATION_AUDITEURS.md": "5d6cc65cb0dfe27b44059652f8707b310c283128507061db55641e3c0ca4f1e6",
     "audits/receipts_coverage_cpp_20260910/README.md": "42987980fc3f62a308764c4ef2b6b5517069952775d5bf1cd8cc7e5068cacf21",
     "audits/receipts_coverage_cpp_20260910/SHA256SUMS": "1db0c71a67c76458d2c6f87f11b1f37bdb4105fa93f3f177b37ae1d0bba0359a",
     "audits/receipts_coverage_cpp_20260910/bridge.cpp": "b38034d1c33afa0488d345db517a4ec206542191df8358facf2484cf768202f6",
@@ -2824,7 +2824,14 @@
     "audits/receipts_parallel_objects_20260911/result.json": "15b0aa0e5a482a49ddd0517a0ddbb4f20bf8134b9198f2c35fc52aa5b8c1d864",
     "audits/receipts_parallel_objects_20260911/README.md": "702d97c4f5e75e0c70c59c707b7da64131bd3e09ed8ee15d8b9e34e5574a6cb1",
     "audits/receipts_parallel_objects_20260911/commands.json": "c8b85be56f70c8a891e0e6365fcecd3d40a5afcd739769bb41fc4c784d49be51",
-    "audits/receipts_parallel_objects_20260911/SHA256SUMS": "520418cfead4753917f4f1c938cd013574e09a537b479ac89e80580ef90d1cca"
+    "audits/receipts_parallel_objects_20260911/SHA256SUMS": "520418cfead4753917f4f1c938cd013574e09a537b479ac89e80580ef90d1cca",
+    "audits/receipts_composable_msf_20260911/msf_model.py": "68eeffc1b732911f99e2cea502b6101afd4224b26344d66bc972e47e436ad1bd",
+    "audits/receipts_composable_msf_20260911/verify.py": "1e8651703ebbfb5981c9d2ae052987897f61f72386b34ba49ae67690aff99b17",
+    "audits/receipts_composable_msf_20260911/context_pins.json": "97c1e3e1f6df9b317258d679eb06b73e82b2b32674048071b478e284d930d1df",
+    "audits/receipts_composable_msf_20260911/result.json": "029db62c03931dcd02cd2cf1c612711991cdf7cd853f2f5f8b3f99a23794617e",
+    "audits/receipts_composable_msf_20260911/README.md": "3f3f0343a1f86c0206f9e50f9625e9e02ef35bf6dc0b240be0c1f79c1cfcc22d",
+    "audits/receipts_composable_msf_20260911/commands.json": "adf1cc44d7e1e94a4b7aaba86c62361e547164808c85ebaecbb261d347d044a0",
+    "audits/receipts_composable_msf_20260911/SHA256SUMS": "33326661575954d30314d0465742a9507a3317f7ad87e07efe1f3280f8f50881"
   },
   "source_variants": [
     {
@@ -12943,5 +12950,10 @@
     "source_head_at_review": "a0f358e91e3e6ef11255b26cd1b68892cb7143c1",
     "packet": "audits/receipts_parallel_objects_20260911/README.md",
     "scope": "Architecture, proofs and independent 11-case Python model; source variants unchanged; no parallel runtime or throughput qualified."
+  },
+  "composable_msf_followup": {
+    "source_head_at_review": "f2bea9986ab26149ad8935974310cc9ae571bab8",
+    "packet": "audits/receipts_composable_msf_20260911/README.md",
+    "scope": "Composable certificate and late-projection proofs; independent 13-fixture Python model, 198 compositions, 5152 partition comparisons, 5 mutants. Constructor published atlas/calendar/HLD readers counter-executed normal/-O; no new engine variant, product integration or performance claim."
   }
 }
