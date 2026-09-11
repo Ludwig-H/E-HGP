@@ -1,33 +1,33 @@
 # État courant de l’audit v7
 
-11 septembre 2026, après **34db4b3e**. Priorité : les opérations encore
-coûteuses de toute la tour, après le premier raccord de géométrie parallèle.
+11 septembre 2026, après **93f4d110**. Priorité : les opérations encore
+coûteuses de toute la tour.
 
-**Deux suites constructives dans l’export : réutiliser les marques fermées
-et préparer chaque index historique une seule fois.** Le [dialogue courant](DIALOGUE_COURANT.md)
-établit l’équivalence des réponses et les conditions de liaison, de dates
-et d’ordre physique. Sur le témoin 32k, 10 348 964 consultations HLD
-contributives peuvent devenir des lectures de marques déjà calculées ;
-les 34 205 965 consultations inférieures/de naturalité restent distinctes.
-Pour K1..10, les préparations de chaînes passent de 19 à 10 avec deux
-index adjacents vivants. Ces propositions n’ont pas encore de gain mesuré.
+**Suite constructive qualifiée : résoudre les marques dans le premier
+parcours des fusions.** Le [prototype d’audit](receipts_fused_marks_20260911/README.md)
+retire le second union-find, active_segment et le rejeu des parents, en
+conservant plateaux atomiques, identifiants et dates brutes. O2 et
+ASan/UBSan/LSan passent : 30 essais structurels, 6 828 comparaisons BFS,
+deux mutants et cinq entrées invalides. Les vrais census et la performance
+de cette variante restent à raccorder ; aucun gain de temps n’est revendiqué.
+
+Le développeur a accepté le réemploi des marques contributives et des index
+historiques adjacents. Le [dialogue courant](DIALOGUE_COURANT.md) garde les
+liaisons, dates, coupes et ordres physiques à préserver. Sur le témoin 32k,
+10 348 964 consultations contributives sont remplaçables ; les verticales
+restent à leur coupe propre. Chains19→10 conserve au plus deux index vivants.
+La lecture du nouveau raccord par rangs est favorable ; ses captures
+constructeur restent distinctes de notre qualification des histoires.
 
 Les [reçus dense/pool](../receipts/birth_streaming_20260911/README.md)
-et [géométrie parallèle](../receipts/parallel_birth_streaming_20260911/README.md)
-sont publiés et contre-vérifiés normal/−O. Les O2/SAN sont attribués à leurs
-sources propres, déjà relues ; TSan demeure un refus préalable code66.
-Le triplet CPU4/4/4 mesure 92,963 / 215,381 / 489,601 s à 8k/16k/32k,
-avec mêmes digests et comptes que les témoins ordonnés. Ce sont des mesures
-sur hôte partagé, sans qualification de speedup universel ni du contrat 50k.
-
-Les anciennes demandes de première gate dense, du pool et de triplet sont
-closes. Les [métadonnées préparées, semis et rangs](receipts_prepared_catalogue_20260911/README.md)
-ont été acceptés comme deltas séparés ; les recommandations répétées sont
-condensées. L’[export historique](receipts_historical_export_20260911/README.md)
-peut lui aussi consommer les marques déjà fermées, silencieuses comprises,
-avant ses minima et permutations. Les preuves de
+et [CPU parallèle](../receipts/parallel_birth_streaming_20260911/README.md)
+restent contre-vérifiés sur leurs sources. Le triplet CPU4/4/4 mesure
+92,963 / 215,381 / 489,601 s à 8k/16k/32k sur hôte partagé, sans contrat
+50k acquis. Les premières portes ne sont plus demandées ; les recommandations
+reprises sont condensées. Les preuves de
+[préparation](receipts_prepared_catalogue_20260911/README.md),
 [contraction](receipts_birth_stream_20260911/README.md),
-[composition](receipts_composable_msf_20260911/README.md) et d’
+[export](receipts_historical_export_20260911/README.md) et d’
 [objets parallèles](receipts_parallel_objects_20260911/README.md) sont conservées.
 
 ```text

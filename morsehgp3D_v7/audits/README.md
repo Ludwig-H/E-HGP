@@ -4,7 +4,8 @@ Lire l’[état courant](ETAT_COURANT.md), puis le [dialogue actif](DIALOGUE_COU
 
 | Sujet courant | Qualification indépendante |
 | --- | --- |
-| Réemploi des histoires préparées | [Marques déjà fermées et index adjacents partagés](DIALOGUE_COURANT.md) ; 10 348 964 requêtes contributives évitables sur le témoin 32k, 19→10 préparations de chaînes ; dates/ordre physique conservés, pas de gain mesuré |
+| Marques pendant la construction des histoires | [Un seul DSU, marques après fermeture atomique](receipts_fused_marks_20260911/README.md) ; preuve et prototype O2/SAN, 30 essais/6 828 BFS, deux mutants et cinq gardes ; identité physique préservée, raccord géométrique et temps ouverts |
+| Réemploi des histoires préparées | [Marques déjà fermées et index adjacents partagés](DIALOGUE_COURANT.md) ; 10 348 964 requêtes contributives évitables sur le témoin 32k, 19→10 préparations de chaînes ; deltas acceptés, dates/ordre physique conservés, pas de gain mesuré |
 | Raccord dense et workers CPU | [Dense/pool](../receipts/birth_streaming_20260911/README.md) et [géométrie parallèle](../receipts/parallel_birth_streaming_20260911/README.md) publiés, lecteurs normal/−O contre-vérifiés ; O2/SAN distincts, TSan failed conservé, triplet CPU4 clos |
 | Préparation commune et workers | [Métadonnées validées partagées, rangs exacts, liaison des semis et seuils de cache](receipts_prepared_catalogue_20260911/README.md) ; preuves et petit modèle exact ; principes acceptés comme delta séparé, sans gain mesuré |
 | Réducteur mono du vrai flux | [Contraction φ en ligne et Kruskal sur les seules naissances](receipts_birth_stream_20260911/README.md) ; preuve et modèle indépendant ; raccord C++ dense désormais publié et contre-vérifié, sans mesure propre à notre audit |

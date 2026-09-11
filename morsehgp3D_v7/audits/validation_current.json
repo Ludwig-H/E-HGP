@@ -1,6 +1,6 @@
 {
   "schema": "mhgp7-current-audit-validation-v2",
-  "updated_utc": "2026-09-11T19:50:16.175555+00:00",
+  "updated_utc": "2026-09-11T20:20:07.129551+00:00",
   "phase": "exploration_v7_hors_registre",
   "backend": "cpu_reference",
   "profile": "quantized_u16_input_only",
@@ -21,10 +21,10 @@
     "audits/CERTIFICAT_HORIZONTAL_COURANT.md": "e76714730f4ce24f4451a8d9bab0c365d29b25e9d18008d3675d2ea9f036c611",
     "audits/CONTRAT_MASSES_VOTE_COURANT.md": "2ed2a8eebef68fbb12b2a23fc18067d36a343b0a206c1330c2ca823ee26f2b72",
     "audits/CONTRAT_VERTICAL_COURANT.md": "09b2f2a8d0b59a540e4eba865b2f7754225e1583ca97d42cbc43b4dc0e4868c9",
-    "audits/DIALOGUE_COURANT.md": "85da54e8d5e45e7c6ba4792eba800da783281e707b9a49dc3d1ac5d7b2d2d78b",
+    "audits/DIALOGUE_COURANT.md": "aec50486f089841b8cedbd55efe072602bf736961a6b25f3d4d834e3efce72af",
     "audits/DOMAINE_CPU_COURANT.md": "18258334cfc7d74f3a262ea1dab798ff621245b079bfd5cbe8b48c987404cd33",
-    "audits/ENTRETIEN.json": "c8e66df7ac8110599d35f33f1212105c0980d9801fc9edb8fbd42fa51cf2ff3b",
-    "audits/ETAT_COURANT.md": "8726a31daee7d14e8457db953c50935421049b0d5cab4be521c56539029fa796",
+    "audits/ENTRETIEN.json": "3ffb2dc83ec5c2e0d3fd29b28200cdeb6d710dc8860e70ab4db073dd0b8018f9",
+    "audits/ETAT_COURANT.md": "9d5de7e5b5e6633caf216d8dd3a961a659fbd086a1da86d49bc169587089f167",
     "audits/FILTRES_FLOTTANTS_COURANTS.md": "7ba3d325a007b12e45baaa5d7d6ee00abb2cb978a1006af9bc7e9a8a3bc2af03",
     "audits/FRONT_ET_TEMOINS_COURANT.md": "3fb7202d0d56720ac8325d46473eb86d329669b27dff8a51fd9ead8afb4dde08",
     "audits/MEB_DOUBLE_BUDGET_COURANT.md": "134b91b9cbdda6c23255807474e1f2010ac872fc54636b975bd3f6cea3e1187c",
@@ -33,7 +33,7 @@
     "audits/PREUVE_CHORD_SECTOR_COURANTE.md": "2e4d1494957c8f5849234ada2e86edfd0dbcb4a2945e5a9fbfeb778b1ed432e7",
     "audits/PRODUCTEUR_FULL_GABRIEL_COURANT.md": "5a3e80d338c6c18f346224d811997e08e40b55876e12d3e9e8f837b8ef963910",
     "audits/QUESTIONS_SECONDAIRES.md": "d41daf7b69827114c19991984ba5bb4652886b4197350b2809e748caba68c9d8",
-    "audits/README.md": "9f230cfbe6e2485a6e2f2a83ba2959eb5a0b3c5fd1c45cf986e071523db0e26a",
+    "audits/README.md": "aa0ff44715b45c5f61fc3916c452dc4eb614a153fcd71808310ddde27ae0f648",
     "audits/S1_COURANT.md": "e4c79bc1cb57df636c226765c7a7be616998ff7248b86f93e61976e77fa173eb",
     "audits/archive_cleanup_probe.cpp": "f94bc8032d4a55f4afccf43a56497866f803eb3e42f2d96b05dc9420b964a63d",
     "audits/cell_compiled_bridge.cpp": "0a8045ec5b9691cb1db627fedaeca60042bf76714f4eca62db48264a8d6842fb",
@@ -2275,7 +2275,7 @@
     "audits/receipts_plateaux_full_20260906/real_parent_certificates_normal.json": "7cc7e28d44f09bf1a29874b8892599d7814811f339bee3b1d62459ba41920444",
     "audits/receipts_plateaux_full_20260906/real_parent_certificates_optimized.json": "7cc7e28d44f09bf1a29874b8892599d7814811f339bee3b1d62459ba41920444",
     "audits/receipts_plateaux_full_20260906/global_parent_review.json": "28da3f09d5ece7724db2fd5756acc2f5ea2f5cf660c0e89013bb9de630546f94",
-    "audits/COORDINATION_AUDITEURS.md": "5620aa394f622241d1f63faaa270676b9ad30c4c5959039598b8a3bd55fd6368",
+    "audits/COORDINATION_AUDITEURS.md": "bdf76c3dea51e928cbf1e82ea31ec7ab189cba56baf8da1bd788d65309628239",
     "audits/receipts_coverage_cpp_20260910/README.md": "42987980fc3f62a308764c4ef2b6b5517069952775d5bf1cd8cc7e5068cacf21",
     "audits/receipts_coverage_cpp_20260910/SHA256SUMS": "1db0c71a67c76458d2c6f87f11b1f37bdb4105fa93f3f177b37ae1d0bba0359a",
     "audits/receipts_coverage_cpp_20260910/bridge.cpp": "b38034d1c33afa0488d345db517a4ec206542191df8358facf2484cf768202f6",
@@ -2868,7 +2868,17 @@
     "receipts/birth_streaming_20260911/verify.py": "b9ce20aed172e6ff1a31da739b9a2c982aef501c8c6c304b169f61018e7aed65",
     "receipts/parallel_birth_streaming_20260911/MANIFEST.json": "759fcc21ef945803efa54c82f48b1368ec15dc95f715ad2131f140cb280688e0",
     "receipts/parallel_birth_streaming_20260911/README.md": "fbdfbc1fd1119aedf746ef2e886c350b3e8fb26def7950bac4b2a310b8aaca4f",
-    "receipts/parallel_birth_streaming_20260911/verify.py": "9d96e9c5b2afb107f3d3fafcbd4724f9303499a91f7356299b950af87480f87f"
+    "receipts/parallel_birth_streaming_20260911/verify.py": "9d96e9c5b2afb107f3d3fafcbd4724f9303499a91f7356299b950af87480f87f",
+    "audits/receipts_fused_marks_20260911/README.md": "d17361b1c06c061b3b77e82d647a6a9f5f53ef60e7a9dc8f4452991b4f18378d",
+    "audits/receipts_fused_marks_20260911/SHA256SUMS": "1f08751ee35b2440cffbaf4c256e6da8733fecc6c271c20e2230e643a2e60b82",
+    "audits/receipts_fused_marks_20260911/context_pins.json": "fb4046c5322a883f2dfba9b2f7da485fbe69cb7432c147bc93cbe00163c2ff36",
+    "audits/receipts_fused_marks_20260911/fused_marks.hpp": "043654808f0571689f18857c0738b57b36e85ecc784d7272fa552b7f2282b388",
+    "audits/receipts_fused_marks_20260911/gate.cpp": "c171da9adc38c507cead2e884d34b67a28e40293bab1f7998054f59d75cce4dd",
+    "audits/receipts_fused_marks_20260911/o2.json": "48c1e85826bab349ba58f7cffc19f6a6da3690285b6995c0ba8f4892dd740dba",
+    "audits/receipts_fused_marks_20260911/record.py": "7c7d2717496383301d43b55089042c998b8fabdd3ea7713a88ed731c8468d098",
+    "audits/receipts_fused_marks_20260911/result.json": "23d2eba02eb333ad8999a2f32293f5a7fd808a77fec7ee94db933edeb65d5c6e",
+    "audits/receipts_fused_marks_20260911/san.json": "c1b48e27156048fb0d931ca188ce0652478de00d2d3d1b458d3ff127cc5fc5bf",
+    "audits/receipts_fused_marks_20260911/verify.py": "25c76bd620ea955389b550b00b2d7b866ba2e19aff3be49209de42f0d30fdd15"
   },
   "source_variants": [
     {
@@ -13022,6 +13032,15 @@
     "scope": "Conditional reuse of closed history marks and adjacent HLD indexes; static query counts, published dense/pool/parallel capture readers normal/-O pass. No new C++ execution, engine variant or measured speedup.",
     "source_variants_D_to_Q_unchanged": true,
     "new_cpp_qualification": false,
+    "new_engine_variant": false
+  },
+  "fused_marks_followup": {
+    "source_head_at_review": "93f4d1109737d7f293ef18734c6d1b15ca323823",
+    "packet": "audits/receipts_fused_marks_20260911/README.md",
+    "scope": "Fused closed-mark resolution in first structural DSU; strict O2 and ASan/UBSan/LSan synthetic qualification,30 trials6828 graph-cut comparisons,two physical mutants and five input refusals. No geometric census, new engine variant or measured speedup.",
+    "source_variants_D_to_Q_unchanged": true,
+    "new_cpp_qualification": true,
+    "new_cpp_scope": "bounded audit structural prototype",
     "new_engine_variant": false
   }
 }

@@ -1,0 +1,139 @@
+{
+  "context": {
+    "status": "passed",
+    "failure": null,
+    "sanitizers": false,
+    "source_pins": {
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/atlas_graph_full_20260911/objects/1cf438cbac839c8f502de0c8daebbf89296a3884d2d40ba50715b5aaca161fa2": "1cf438cbac839c8f502de0c8daebbf89296a3884d2d40ba50715b5aaca161fa2",
+      "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_fused_marks_20260911/fused_marks.hpp": "043654808f0571689f18857c0738b57b36e85ecc784d7272fa552b7f2282b388",
+      "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_fused_marks_20260911/gate.cpp": "c171da9adc38c507cead2e884d34b67a28e40293bab1f7998054f59d75cce4dd",
+      "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_fused_marks_20260911/record.py": "7c7d2717496383301d43b55089042c998b8fabdd3ea7713a88ed731c8468d098"
+    },
+    "compiler_before": {
+      "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+      "bytes": 1027128,
+      "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769"
+    },
+    "compiler_after": {
+      "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+      "bytes": 1027128,
+      "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769"
+    },
+    "executable_after_compile": {
+      "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_fused_marks_20260911/o2_r2/gate",
+      "bytes": 135088,
+      "sha256": "64e2914c0618a69eab8f1b0c106dbe0fa735e80bfe5bb509bb90680f984237d7"
+    },
+    "executable_after_tests": {
+      "path": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_fused_marks_20260911/o2_r2/gate",
+      "bytes": 135088,
+      "sha256": "64e2914c0618a69eab8f1b0c106dbe0fa735e80bfe5bb509bb90680f984237d7"
+    },
+    "environment": {
+      "TMPDIR": "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_fused_marks_20260911/tmp"
+    },
+    "scope": "bounded synthetic fixtures; pinned sources/compiler/ELF, system headers and libraries are not hermetically pinned; no timing claim"
+  },
+  "commands": [
+    {
+      "label": "compiler",
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "--version"
+      ],
+      "expected_exit": 0,
+      "exit": 0,
+      "timeout_seconds": 10,
+      "timed_out": false,
+      "execution_error": null,
+      "stdout_sha256": "39553616934606f58b27c04bed0cdbbe5b00c92c831a9aaadebd7ceda61d1334",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "compile",
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-O2",
+        "-DMHGP7_AUDIT_CALENDAR_HEADER=\"/workspaces/E-HGP/morsehgp3D_v7/receipts/atlas_graph_full_20260911/objects/1cf438cbac839c8f502de0c8daebbf89296a3884d2d40ba50715b5aaca161fa2\"",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_fused_marks_20260911/gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_fused_marks_20260911/o2_r2/gate"
+      ],
+      "expected_exit": 0,
+      "exit": 0,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "execution_error": null,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "selftest",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_fused_marks_20260911/o2_r2/gate",
+        "--selftest"
+      ],
+      "expected_exit": 0,
+      "exit": 0,
+      "timeout_seconds": 30,
+      "timed_out": false,
+      "execution_error": null,
+      "stdout_sha256": "af6e09ff6a11e182ae8fb21b83cadc1e9c6bbb090c12dfa63a7b4cdfd92a7c9c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "missing",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_fused_marks_20260911/o2_r2/gate"
+      ],
+      "expected_exit": 2,
+      "exit": 2,
+      "timeout_seconds": 10,
+      "timed_out": false,
+      "execution_error": null,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "unknown",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/.work_fused_marks_20260911/o2_r2/gate",
+        "--unknown"
+      ],
+      "expected_exit": 2,
+      "exit": 2,
+      "timeout_seconds": 10,
+      "timed_out": false,
+      "execution_error": null,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "outputs": {
+    "compiler": {
+      "stdout": "x86_64-linux-gnu-g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+      "stderr": ""
+    },
+    "compile": {
+      "stdout": "",
+      "stderr": ""
+    },
+    "selftest": {
+      "stdout": "{\"status\":\"passed_bounded_fused_marks_model\",\"runs\":30,\"nodes\":184,\"marks\":186,\"BFS_mark_cut_comparisons\":6828,\"first_sweep_union_attempts\":70,\"removed_replay_union_attempts\":124,\"mark_find_queries\":186,\"event_dates\":156,\"removed_logical_workspace_bytes_sum\":2928,\"raw_equivalent_date_runs\":2,\"physical_mutants_rejected\":2,\"shared_input_guards_rejected\":5,\"scope\":\"synthetic exact-preorder dates; no 3D census or timing claim\",\"workspace_scope\":\"removed Dsu parent/size and active_segment, logical sizes not RSS; other temporaries remain\"}\n",
+      "stderr": ""
+    },
+    "missing": {
+      "stdout": "",
+      "stderr": ""
+    },
+    "unknown": {
+      "stdout": "",
+      "stderr": ""
+    }
+  }
+}

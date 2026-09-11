@@ -1,47 +1,63 @@
 # Coordination entre auditeurs
 
-11 septembre 2026, après **34db4b3e**. Écritures dans le seul
-`morsehgp3D_v7/audits/`, sur `main`. Réservation précédente close par
-19049adf. Réservation d’index pour cette publication : les six fichiers
-`COORDINATION_AUDITEURS.md`, `DIALOGUE_COURANT.md`, `ETAT_COURANT.md`,
-`README.md`, `ENTRETIEN.json` et `validation_current.json` uniquement.
-Aucun fichier d’une autre session inclus ; réservation close à publication.
+11 septembre 2026, après **93f4d110**. Écritures dans le seul
+`morsehgp3D_v7/audits/`, sur `main`. Réservations précédentes closes. Réservation ponctuelle des 16 fichiers
+ci-dessous pour cette publication, close automatiquement à son commit.
+Aucun autre fichier n’est réservé.
 
-## Reçus dense et workers désormais contre-vérifiés
+## Marques dans le premier sweep : prototype qualifié séparément
 
-Les lecteurs [dense/pool](../receipts/birth_streaming_20260911/README.md)
-et [géométrie parallèle](../receipts/parallel_birth_streaming_20260911/README.md)
-passent normal/−O, sur les octets publiés dans 34db4b3e. Sources déjà
-contre-lues inchangées : dense 87eb210e, pool 4ec1a206, parallèle f400de79.
-Les qualifications O2/SAN sont maintenant attribuées à leurs captures propres ;
-TSan reste un échec préalable code66. Les premiers raccords et triplets sont
-clos à cette portée, sans nouvelle exécution C++ par notre audit.
+Le [paquet](receipts_fused_marks_20260911/README.md) ferme O2 et ASan/UBSan/LSan :
+30 essais synthétiques, mêmes champs physiques que le calendrier scellé,
+6 828 comparaisons BFS, deux mutants et cinq gardes d’entrée. Compilateur,
+ELF et sources sont liés ; les lecteurs normal/−O passent. Aucun benchmark
+ou producteur géométrique n’est exécuté par cette qualification.
 
-## Suite utile : consommer les réponses historiques déjà calculées
+À chaque date : naissances admissibles, **plateau entier**, puis marques
+fermées, dans le premier DSU. Le second DSU, active_segment et le rejeu final
+disparaissent. Conserver la recherche dans forest.births normalisé, le
+représentant brut de la première arête, toutes les marques silencieuses et
+la vidange des naissances restantes. Le coût de chaque marque et ses tris
+reste payé. Les sorties alimentent le réemploi contributif déjà accepté.
 
-`reconstruct` fournit déjà dans `history.marks` la composante fermée de
-chaque rôle à son admission. `graph_full::build` ignore cette table et
-repose les questions contributives en HLD. Le [dialogue courant](DIALOGUE_COURANT.md)
-établit la liaison nécessaire : histoire immuable authentifiée, MarkId,
-φ et admission. À 32k, **10 348 964** consultations peuvent devenir des
-réemplois de marques ; les requêtes verticales à d’autres dates restent.
+## Rangs : lecture favorable, aucun nouveau verrou signalé
 
-Garder la boucle `atlas.program(K)` pour l’ordre physique des contributions :
-les marques sont triées par MarkId, pas par ordre du programme. Garder aussi
-leur admission, distincte de la naissance du segment. Les marques silencieuses
-fournissent les minima de groupe/lot de notre preuve d’export historique ;
-elles ne sont pas à filtrer avant cette consommation.
+Sources streaming **0e50808c** et helper **81a32d8c** : bornes avant slots,
+admission, stricteté et leader du groupe conformes à la preuve. Les niveaux
+exacts du resolver restent inchangés. K1 appelle first_consumer et garde son
+contrôle d’indice de point ; la branche K1 du helper terminal relève de ses
+tests directs. La gate ciblée lue ajoute comparaison Boost indépendante,
+fractions équivalentes, liaisons de rang invalides et sept mutants réels.
+Les captures du constructeur restent sous sa qualification séparée.
 
-Deuxième doublon : Chains(K) est reconstruit comme lower_chains au K suivant.
-Garder précédent/courant ramène **19 préparations à 10** pour K1..10, avec
-au plus deux index simultanés. Conserver la validation de chaque histoire et
-la durée de vie de leurs propriétaires. Aucun gain de temps n’est déduit.
+## Acquis et entretien
 
-## Décisions conservées sans répétition
+Le développeur a accepté les marques contributives liées, Chains19→10,
+la préparation commune, les semis liés et les gardes de rang comme deltas
+séparés. Le [dialogue](DIALOGUE_COURANT.md) garde leurs conditions utiles,
+sans répéter les demandes de premières gates déjà closes dans
+[34db4b3e](../receipts/parallel_birth_streaming_20260911/README.md).
+Les preuves antérieures, échecs et fichiers du second auditeur restent intacts.
+L’[entretien](ENTRETIEN.json) trace les notes condensées et les nouveaux reçus.
+GCP non utilisé.
 
-La préparation commune, les semis liés et les gardes par rangs ont été
-acceptés comme deltas séparés. Le timeout du runner reste un correctif futur,
-sans réécriture des captures scellées. Les [preuves précédentes](README.md)
-et fichiers du second auditeur sont intacts ; les notes courantes remplacent
-les anciens messages « en préparation ». Commandes et empreintes dans
-l’[entretien](ENTRETIEN.json). GCP non utilisé.
+## Périmètre exact de cette publication
+
+```text
+morsehgp3D_v7/audits/COORDINATION_AUDITEURS.md
+morsehgp3D_v7/audits/DIALOGUE_COURANT.md
+morsehgp3D_v7/audits/ETAT_COURANT.md
+morsehgp3D_v7/audits/README.md
+morsehgp3D_v7/audits/ENTRETIEN.json
+morsehgp3D_v7/audits/validation_current.json
+morsehgp3D_v7/audits/receipts_fused_marks_20260911/README.md
+morsehgp3D_v7/audits/receipts_fused_marks_20260911/SHA256SUMS
+morsehgp3D_v7/audits/receipts_fused_marks_20260911/context_pins.json
+morsehgp3D_v7/audits/receipts_fused_marks_20260911/fused_marks.hpp
+morsehgp3D_v7/audits/receipts_fused_marks_20260911/gate.cpp
+morsehgp3D_v7/audits/receipts_fused_marks_20260911/o2.json
+morsehgp3D_v7/audits/receipts_fused_marks_20260911/record.py
+morsehgp3D_v7/audits/receipts_fused_marks_20260911/result.json
+morsehgp3D_v7/audits/receipts_fused_marks_20260911/san.json
+morsehgp3D_v7/audits/receipts_fused_marks_20260911/verify.py
+```

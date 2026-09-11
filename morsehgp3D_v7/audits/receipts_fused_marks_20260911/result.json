@@ -1,0 +1,17 @@
+{
+  "status": "passed_bounded_fused_marks_model",
+  "runs": 30,
+  "nodes": 184,
+  "marks": 186,
+  "BFS_mark_cut_comparisons": 6828,
+  "first_sweep_union_attempts": 70,
+  "removed_replay_union_attempts": 124,
+  "mark_find_queries": 186,
+  "event_dates": 156,
+  "removed_logical_workspace_bytes_sum": 2928,
+  "raw_equivalent_date_runs": 2,
+  "physical_mutants_rejected": 2,
+  "shared_input_guards_rejected": 5,
+  "scope": "synthetic exact-preorder dates; no 3D census or timing claim",
+  "workspace_scope": "removed Dsu parent/size and active_segment, logical sizes not RSS; other temporaries remain"
+}

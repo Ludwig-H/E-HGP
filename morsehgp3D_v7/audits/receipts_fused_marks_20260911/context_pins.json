@@ -1,0 +1,13 @@
+{
+  "source_head_at_start": "93f4d1109737d7f293ef18734c6d1b15ca323823",
+  "reference_object": "morsehgp3D_v7/receipts/atlas_graph_full_20260911/objects/1cf438cbac839c8f502de0c8daebbf89296a3884d2d40ba50715b5aaca161fa2",
+  "reference_sha256": "1cf438cbac839c8f502de0c8daebbf89296a3884d2d40ba50715b5aaca161fa2",
+  "scope": "Structural synthetic exact-preorder prototype, against the original pinned calendar and graph BFS; no geometric census or performance qualification.",
+  "captured_modes": [
+    "o2_r2",
+    "san_r2"
+  ],
+  "preliminary_smoke": "o2_r1/san_r1 succeeded before recorder hardening; unpromoted, unchanged C++ and same stdout. Only r2 is this qualification. No failed C++ run occurred.",
+  "system_scope": "Source hashes and compiler/ELF closure, not a hermetic standard-header, linker or runtime closure.",
+  "gcp_used": false
+}

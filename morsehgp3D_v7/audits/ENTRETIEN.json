@@ -5486,5 +5486,217 @@
       "constructor_reservation_closed_in_34db4b3e": true,
       "source": "audits/COORDINATION_MORSEHGP3D_V7.md read only"
     }
+  },
+  "latest_fused_marks_qualification_20260911": {
+    "source_head_at_review": "93f4d1109737d7f293ef18734c6d1b15ca323823",
+    "date_utc": "2026-09-11T20:18:31.027763+00:00",
+    "objective": "Resolve closed marks inside the existing birth/edge sweep; remove the second DSU and node/parent replay while preserving every physical history and mark field.",
+    "invariant": "After all births and the entire edge plateau at date t, segment[dsu.find(native_id)] is its closed component history node. Additional mark finds only compress paths, leaving all union decisions and emission order unchanged.",
+    "integration_conditions": [
+      "Use normalized forest.births for ID lookup, not out.births in emission order.",
+      "At equivalent mark/edge dates use the first edge raw date for fusion nodes.",
+      "Retain each mark admission, silent roles and source contribution order at export.",
+      "Drain all remaining births; marks never create nodes or unions."
+    ],
+    "qualification": {
+      "packet": "audits/receipts_fused_marks_20260911/README.md",
+      "pins": {
+        "audits/receipts_fused_marks_20260911/README.md": "d17361b1c06c061b3b77e82d647a6a9f5f53ef60e7a9dc8f4452991b4f18378d",
+        "audits/receipts_fused_marks_20260911/SHA256SUMS": "1f08751ee35b2440cffbaf4c256e6da8733fecc6c271c20e2230e643a2e60b82",
+        "audits/receipts_fused_marks_20260911/context_pins.json": "fb4046c5322a883f2dfba9b2f7da485fbe69cb7432c147bc93cbe00163c2ff36",
+        "audits/receipts_fused_marks_20260911/fused_marks.hpp": "043654808f0571689f18857c0738b57b36e85ecc784d7272fa552b7f2282b388",
+        "audits/receipts_fused_marks_20260911/gate.cpp": "c171da9adc38c507cead2e884d34b67a28e40293bab1f7998054f59d75cce4dd",
+        "audits/receipts_fused_marks_20260911/o2.json": "48c1e85826bab349ba58f7cffc19f6a6da3690285b6995c0ba8f4892dd740dba",
+        "audits/receipts_fused_marks_20260911/record.py": "7c7d2717496383301d43b55089042c998b8fabdd3ea7713a88ed731c8468d098",
+        "audits/receipts_fused_marks_20260911/result.json": "23d2eba02eb333ad8999a2f32293f5a7fd808a77fec7ee94db933edeb65d5c6e",
+        "audits/receipts_fused_marks_20260911/san.json": "c1b48e27156048fb0d931ca188ce0652478de00d2d3d1b458d3ff127cc5fc5bf",
+        "audits/receipts_fused_marks_20260911/verify.py": "25c76bd620ea955389b550b00b2d7b866ba2e19aff3be49209de42f0d30fdd15"
+      },
+      "result": {
+        "status": "passed_bounded_fused_marks_model",
+        "runs": 30,
+        "nodes": 184,
+        "marks": 186,
+        "BFS_mark_cut_comparisons": 6828,
+        "first_sweep_union_attempts": 70,
+        "removed_replay_union_attempts": 124,
+        "mark_find_queries": 186,
+        "event_dates": 156,
+        "removed_logical_workspace_bytes_sum": 2928,
+        "raw_equivalent_date_runs": 2,
+        "physical_mutants_rejected": 2,
+        "shared_input_guards_rejected": 5,
+        "scope": "synthetic exact-preorder dates; no 3D census or timing claim",
+        "workspace_scope": "removed Dsu parent/size and active_segment, logical sizes not RSS; other temporaries remain"
+      },
+      "commands_per_build": 5,
+      "builds": [
+        "C++20 strict O2",
+        "C++20 strict ASan/UBSan/LSan"
+      ],
+      "reader_checks": [
+        {
+          "command": "python3 -B morsehgp3D_v7/audits/receipts_fused_marks_20260911/verify.py",
+          "exit_code": 0,
+          "output": "{\"BFS_mark_cut_comparisons\": 6828, \"commands_per_build\": 5, \"event_dates\": 156, \"first_sweep_union_attempts\": 70, \"gcp_used\": false, \"mark_find_queries\": 186, \"marks\": 186, \"nodes\": 184, \"performance_claim\": false, \"physical_mutants_rejected\": 2, \"product_executed\": false, \"raw_equivalent_date_runs\": 2, \"removed_logical_workspace_bytes_sum\": 2928, \"removed_replay_union_attempts\": 124, \"runs\": 30, \"shared_input_guards_rejected\": 5, \"status\": \"passed_fused_marks_receipt\"}\n"
+        },
+        {
+          "command": "python3 -B -O morsehgp3D_v7/audits/receipts_fused_marks_20260911/verify.py",
+          "exit_code": 0,
+          "output": "{\"BFS_mark_cut_comparisons\": 6828, \"commands_per_build\": 5, \"event_dates\": 156, \"first_sweep_union_attempts\": 70, \"gcp_used\": false, \"mark_find_queries\": 186, \"marks\": 186, \"nodes\": 184, \"performance_claim\": false, \"physical_mutants_rejected\": 2, \"product_executed\": false, \"raw_equivalent_date_runs\": 2, \"removed_logical_workspace_bytes_sum\": 2928, \"removed_replay_union_attempts\": 124, \"runs\": 30, \"shared_input_guards_rejected\": 5, \"status\": \"passed_fused_marks_receipt\"}\n"
+        }
+      ],
+      "authority": "Synthetic structural fixtures against the pinned original calendar and graph traversal. Shared exact cut predicate; no 3D realization or dedicated nonempty wholly unmarked fixture. Source/compiler/ELF closure, not hermetic system headers/link/runtime.",
+      "preliminary_runs": "r1 succeeded before recorder hardening, unpromoted; only r2 captures published, no failed C++ run.",
+      "live_precleanup_closure": [
+        {
+          "mode": "o2",
+          "source_pins_verified": 4,
+          "compiler_before_after_verified_live": true,
+          "elf_before_after_verified_live": true
+        },
+        {
+          "mode": "san",
+          "source_pins_verified": 4,
+          "compiler_before_after_verified_live": true,
+          "elf_before_after_verified_live": true
+        }
+      ]
+    },
+    "counterreading": {
+      "implementation_and_capture": "composable_msf_model",
+      "proof_source_and_final_packet": "parallel_seam_review: favorable independent read-only review, both readers pass; no additional compile.",
+      "current_notes": "parallel_seam_review: no relevant issue after wording correction for seven targeted rank mutants."
+    },
+    "constructor_rank_review": {
+      "pins": {
+        "build/v7_rank_guard_streaming_20260911/streaming_graph.hpp": "0e50808ce6e0de0f27443577f5c68156375d0358e1bd989dbb06e8ac4bb9f710",
+        "build/v7_rank_guard_streaming_20260911/rank_guards.hpp": "81a32d8ca8baecd84ad7ef7e25b05d7ec698366e8911f613f55d188fab1cbe4d",
+        "build/v7_rank_guard_streaming_20260911/rank_guards_gate.cpp": "089ddcd3dd4908c886b93b083e251e3c8bdf1c2357a2dba6cbc3588982790d26"
+      },
+      "verdict": "Favorable static review: certified rank ordering, bounds/admission and original resolver levels preserved; seven physical focused mutants and shared counter overflow read. K1 scatter keeps direct point guard, terminal-helper K1 is a direct-test branch.",
+      "runtime_authority": "Constructor announces FULL O2/SAN and focused O2; these are not new runtime qualifications executed by this auditor."
+    },
+    "maintenance": {
+      "entries": [
+        {
+          "path": "COORDINATION_AUDITEURS.md",
+          "previous_sha256": "5620aa394f622241d1f63faaa270676b9ad30c4c5959039598b8a3bd55fd6368",
+          "previous_words": 350,
+          "words": 337
+        },
+        {
+          "path": "DIALOGUE_COURANT.md",
+          "previous_sha256": "85da54e8d5e45e7c6ba4792eba800da783281e707b9a49dc3d1ac5d7b2d2d78b",
+          "previous_words": 974,
+          "words": 833
+        },
+        {
+          "path": "ETAT_COURANT.md",
+          "previous_sha256": "8726a31daee7d14e8457db953c50935421049b0d5cab4be521c56539029fa796",
+          "previous_words": 644,
+          "words": 624
+        },
+        {
+          "path": "README.md",
+          "previous_sha256": "9f230cfbe6e2485a6e2f2a83ba2959eb5a0b3c5fd1c45cf986e071523db0e26a",
+          "previous_words": 1054,
+          "words": 1095
+        }
+      ],
+      "active_notes_rewritten_not_appended": true,
+      "closed_first_qualification_requests_condensed": true,
+      "historical_packets_unchanged": true,
+      "source_variants_D_to_Q_unchanged": true,
+      "other_session_files_untouched": true,
+      "new_scattered_root_probe_files": false,
+      "temporary_directory": "audits/.work_fused_marks_20260911",
+      "temporary_cleanup": "completed: only own .work_fused_marks_20260911 removed after r2 source/compiler/ELF live hash checks; complete final source and raw capture packet retained; no failed C++ run discarded"
+    },
+    "new_cpp_execution": true,
+    "new_cpp_scope": "audit structural prototype only",
+    "new_engine_variant": false,
+    "performance_claim": false,
+    "gcp_used": false,
+    "checks": [
+      {
+        "name": "docs_normal",
+        "command": "python3 -B tools/check_docs.py",
+        "exit_code": 0,
+        "output": "Validated 510 active Markdown files.\n"
+      },
+      {
+        "name": "docs_optimized",
+        "command": "python3 -B -O tools/check_docs.py",
+        "exit_code": 0,
+        "output": "Validated 510 active Markdown files.\n"
+      },
+      {
+        "name": "registry",
+        "command": "python3 -B tools/check_implementation_status.py",
+        "exit_code": 0,
+        "output": "Validated 20 implementation phases and their gates.\n"
+      },
+      {
+        "name": "own_markdown",
+        "command": "python3 -B - <<'PY'\nfrom pathlib import Path\nimport importlib.util,json\nspec=importlib.util.spec_from_file_location('doccheck','tools/check_docs.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)\np=Path('morsehgp3D_v7/audits').resolve();files=[p/n for n in ['COORDINATION_AUDITEURS.md','DIALOGUE_COURANT.md','ETAT_COURANT.md','README.md','receipts_fused_marks_20260911/README.md']];errors=[e for f in files for e in m.validate(f)]\nprint(json.dumps({'files':len(files),'errors':errors}));raise SystemExit(bool(errors))\nPY",
+        "exit_code": 0,
+        "output": "{\"files\": 5, \"errors\": []}\n"
+      }
+    ],
+    "whole_source_freshness": {
+      "common_pins_valid": 2871,
+      "source_variants_D_to_Q_unchanged": true,
+      "scope": "All common pins pass; no historical engine variant fully matches current sources. No new engine qualification.",
+      "commands": [
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "morsehgp3D_v7/audits/verify_current.py"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr_first_line": "Audit à actualiser : aucune variante complète ne correspond.",
+          "stderr_sha256": "6b7321b69dcf56cd8795142cd9c8692b62968d6e321388a490eaf538868d0c4e",
+          "stderr_lines": 149
+        },
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "-O",
+            "morsehgp3D_v7/audits/verify_current.py"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr_first_line": "Audit à actualiser : aucune variante complète ne correspond.",
+          "stderr_sha256": "6b7321b69dcf56cd8795142cd9c8692b62968d6e321388a490eaf538868d0c4e",
+          "stderr_lines": 149
+        }
+      ]
+    },
+    "coordination": {
+      "index_observed_empty_on": "93f4d1109737d7f293ef18734c6d1b15ca323823",
+      "reserved_paths": [
+        "morsehgp3D_v7/audits/COORDINATION_AUDITEURS.md",
+        "morsehgp3D_v7/audits/DIALOGUE_COURANT.md",
+        "morsehgp3D_v7/audits/ETAT_COURANT.md",
+        "morsehgp3D_v7/audits/README.md",
+        "morsehgp3D_v7/audits/ENTRETIEN.json",
+        "morsehgp3D_v7/audits/validation_current.json",
+        "morsehgp3D_v7/audits/receipts_fused_marks_20260911/README.md",
+        "morsehgp3D_v7/audits/receipts_fused_marks_20260911/SHA256SUMS",
+        "morsehgp3D_v7/audits/receipts_fused_marks_20260911/context_pins.json",
+        "morsehgp3D_v7/audits/receipts_fused_marks_20260911/fused_marks.hpp",
+        "morsehgp3D_v7/audits/receipts_fused_marks_20260911/gate.cpp",
+        "morsehgp3D_v7/audits/receipts_fused_marks_20260911/o2.json",
+        "morsehgp3D_v7/audits/receipts_fused_marks_20260911/record.py",
+        "morsehgp3D_v7/audits/receipts_fused_marks_20260911/result.json",
+        "morsehgp3D_v7/audits/receipts_fused_marks_20260911/san.json",
+        "morsehgp3D_v7/audits/receipts_fused_marks_20260911/verify.py"
+      ],
+      "release": "reservation closes automatically with publication commit; no foreign staged paths allowed"
+    }
   }
 }
