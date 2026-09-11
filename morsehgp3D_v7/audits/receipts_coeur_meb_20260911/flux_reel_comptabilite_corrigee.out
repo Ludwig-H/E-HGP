@@ -1,0 +1,10 @@
+patche : /tmp/tmp.KWZsH4FQTU/var/morsehgp3D_v7/src/forest/anchor_meb.hpp
+marqueurs du patch: 8
+compile base rc=0
+compile var rc=0
+=== comptabilite CORRIGEE et borne a dix facettes, n=8000 ===
+base: "resolver_meb_calls":3947627 "payload_digest":"cdd77e308f765d643ce6707ba0f613f94b4cf560124c0079ee8bfa58ca0c329b" "tower_s":62.171377344 "resolver_supports_tested":340615272 
+var: "resolver_meb_calls":3947627 "payload_digest":"cdd77e308f765d643ce6707ba0f613f94b4cf560124c0079ee8bfa58ca0c329b" "tower_s":45.634416589 "resolver_supports_tested":104791833 
+EXPORT=/tmp/tmp.KWZsH4FQTU
+
+[exited with code 0]

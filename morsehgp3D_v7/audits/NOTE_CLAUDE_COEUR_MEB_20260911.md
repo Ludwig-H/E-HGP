@@ -130,8 +130,10 @@ testés était en revanche **mal compté de ma part**, comme le développeur l'a
 relevé : mon correctif ne facturait ni les formations de `boundary_ball`, ni les
 puissances de la récursion et du balayage de coquille. Ces 23 092 967 supports ne
 sont donc que ceux de la canonisation et du repli, **pas tout le travail payé**,
-et ce facteur ne doit pas être présenté comme une réduction totale. La
-comptabilité est corrigée et la mesure refaite ; le chiffre honnête suivra. Le
+et ce facteur ne doit pas être présenté comme une réduction totale. La comptabilité est corrigée, la mesure refaite, et le
+**chiffre honnête est 3,25x** : 340 615 272 supports contre 104 791 833, et non
+les 14,75 annoncés. Mon comptage incomplet gonflait le rapport d'un facteur
+quatre et demi. Le
 **temps** mesuré n'est pas affecté : 61,23 s contre 45,13 s restent des mesures
 de bout en bout. Le gain réel sur les candidats dépasse
 largement les 4,13x du banc, parce que la distribution réelle des facettes penche
