@@ -1,0 +1,20 @@
+{
+  "schema": "mhgp7-static-followup-context-v1",
+  "constructor_commit": "ce842a3f",
+  "files": {
+    "receipts/initial_representatives_20260911/logical_manifest.json": "6f2c2c448a7de9d2d5f5af9f689e551fb78e4bf4bdb18c1b2b99cfcd9bdcb8fe",
+    "receipts/initial_representatives_20260911/verify.py": "c85d9048a38dc2fc19f6e97bc7bfeecaa3492343f86c25493b6a5785157cfcaf",
+    "receipts/static_resolution_scale_20260911/MANIFEST.json": "2485cafaf912c9138cb618199f7fd59cd3670bcc2365be05295d4e3eca54d5e9",
+    "receipts/static_resolution_scale_20260911/verify.py": "11bfef21d45efa14f59a7310cbc4c8684eae31eed97c3a705473d02325563ab7",
+    "receipts/static_s_factors_20260911/manifest.json": "3d1c4203cf72a338abc3b8960a24492fca854355552dc55ab44fefd22e57f791",
+    "receipts/static_s_factors_20260911/verify.py": "37bbae9c60f09d8e9d7085318ec4d82d94c00300ea05a91aca04cfd6c0ad6c75",
+    "receipts/static_resolution_cpu_20260911/logical_manifest.json": "219793e318aad0ff3eed0732c68998a43f4f60be6c57c9a449c6f8412154a876",
+    "receipts/static_resolution_cpu_20260911/verify.py": "d2703d93eee4f0c21c8556616f4f1e58d8c00bc248be11bfb17e725319495da8",
+    "receipts/static_worker_failure_20260911/MANIFEST.json": "3afcd1f8b24aa5689f3ef633cf181aa422be4a8267b6a88a089741eead7b9f8a",
+    "receipts/static_worker_failure_20260911/verify.py": "35eebe04ccac8103c010cb78a93d18a06b937f9c819819dba72838d828ee32d9",
+    "receipts/incremental_journal_prototype_20260911/manifest.json": "650321433a32720cf09e7b42fa1ebc190a9d008cd9f933fcf04797cb5298f66a",
+    "receipts/incremental_journal_prototype_20260911/verify.py": "2a8a1f2530b2e27ef715e6668259460c2b817e28fb45011f64834e98cb2aa569",
+    "receipts/static_resolver_mutants_20260911/MANIFEST.json": "b297992d887b3deb105bed3096f7772ab6ae99f511046f5e73f1ff17bb625d0f",
+    "receipts/static_resolver_mutants_20260911/verify.py": "a27ad6aa56e7f36212a8de8c66f1e00e3de8b9a43888cff3d6cab45b44bce70e"
+  }
+}

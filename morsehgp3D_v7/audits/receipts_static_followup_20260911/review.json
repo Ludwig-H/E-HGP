@@ -1,0 +1,180 @@
+{
+  "status": "passed_static_followup",
+  "constructor_commit": "ce842a3f",
+  "constructor_readers": {
+    "receipts/initial_representatives_20260911/verify.py": "passed",
+    "receipts/static_resolution_scale_20260911/verify.py": "verified_portable_static_resolution_scale",
+    "receipts/static_s_factors_20260911/verify.py": "verified_static_s_factors_closed",
+    "receipts/static_resolution_cpu_20260911/verify.py": "passed",
+    "receipts/static_worker_failure_20260911/verify.py": "verified_O2_post_admission_failure_with_unqualified_SAN",
+    "receipts/incremental_journal_prototype_20260911/verify.py": "passed",
+    "receipts/static_resolver_mutants_20260911/verify.py": "verified_portable_static_resolver_mutants"
+  },
+  "worker_SAN": [
+    {
+      "status": "passed_post_admission_failure",
+      "checks": 601,
+      "failed_runs": 2,
+      "retained_MEB_calls": 2
+    },
+    {
+      "status": "passed",
+      "checks": 20736,
+      "rows": 2524,
+      "orders": 46,
+      "cuts": 1544,
+      "vertical": 1506,
+      "requests": 354,
+      "unique": 219,
+      "seeded": 176,
+      "mebs": 51
+    }
+  ],
+  "saved_work": [
+    {
+      "n": 8000,
+      "unique": 5176885,
+      "seeded_initial": 2396646,
+      "descents": 1404945,
+      "initial_saved": 1999980,
+      "descents_saved": 42101,
+      "MEB_calls": 4185184
+    },
+    {
+      "n": 16000,
+      "unique": 10862732,
+      "seeded_initial": 5010402,
+      "descents": 2927135,
+      "initial_saved": 4380172,
+      "descents_saved": 93143,
+      "MEB_calls": 8779465
+    },
+    {
+      "n": 32000,
+      "unique": 22503000,
+      "seeded_initial": 10348964,
+      "descents": 6090817,
+      "initial_saved": 9267110,
+      "descents_saved": 199546,
+      "MEB_calls": 18244853
+    }
+  ],
+  "seed_exchange_witnesses": {
+    "status": "passed_exact_seed_exchange_witnesses",
+    "input_points": {
+      "A": [
+        0,
+        3,
+        0
+      ],
+      "B": [
+        8,
+        3,
+        0
+      ],
+      "Z": [
+        4,
+        2,
+        0
+      ],
+      "W": [
+        6,
+        0,
+        0
+      ],
+      "E": [
+        4,
+        23,
+        0
+      ]
+    },
+    "K": 2,
+    "consumer": "ABE",
+    "consumer_squared_radius": "2704/25",
+    "branches": [
+      {
+        "intruder": "Z",
+        "removed": "A",
+        "terminal_sites": [
+          "B",
+          "Z"
+        ],
+        "squared_radius": "17/4",
+        "algebraic_MEB_calls_current": 2,
+        "algebraic_MEB_calls_with_lookup": 1
+      },
+      {
+        "intruder": "W",
+        "removed": "A",
+        "terminal_sites": [
+          "B",
+          "W"
+        ],
+        "squared_radius": "13/4",
+        "algebraic_MEB_calls_current": 2,
+        "algebraic_MEB_calls_with_lookup": 1
+      }
+    ],
+    "equal_radius_counterfixture": {
+      "input_points": {
+        "A": [
+          0,
+          0,
+          0
+        ],
+        "B": [
+          10,
+          0,
+          0
+        ],
+        "C": [
+          0,
+          10,
+          0
+        ],
+        "D": [
+          10,
+          10,
+          0
+        ],
+        "Z": [
+          4,
+          4,
+          0
+        ],
+        "P": [
+          4,
+          6,
+          0
+        ],
+        "Q": [
+          6,
+          4,
+          0
+        ],
+        "R": [
+          6,
+          6,
+          0
+        ]
+      },
+      "K": 4,
+      "squared_radius": "50",
+      "selected_sites": [
+        "B",
+        "C",
+        "D",
+        "Z"
+      ],
+      "whole_population": 8,
+      "seed_hit": false
+    },
+    "engine_executed": false,
+    "timing_claim": false,
+    "public_status": "not_claimed"
+  },
+  "seed_shortcut_implemented": false,
+  "seed_hit_count_measured": false,
+  "public_status": "not_claimed",
+  "gcp_used": false
+}

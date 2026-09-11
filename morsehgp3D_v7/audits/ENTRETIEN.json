@@ -2911,5 +2911,91 @@
     "other_auditor_packet_excluded": "receipts_cache_commit_20260911",
     "gcp_used": false,
     "independent_final_read": "Fixture tables, wide cuts, CSR and poisoned suffixes reviewed; wording narrowed to observed successor transitions and receipt reader now checks compiler/sanitizer options."
+  },
+  "latest_static_followup_20260911": {
+    "date_utc": "2026-09-11T08:08:00.219293+00:00",
+    "base_commit": "ce842a3f1c0d55786250b1deba85e7bd92c8807a",
+    "scope": "Seven constructor receipt packages checked; same historical worker SAN binary replayed successfully. Exact seed-exchange and surviving-support conditions, no shortcut implementation or speedup claim.",
+    "packet": "receipts_static_followup_20260911",
+    "packet_manifest_sha256": "6e137057c78e0afd69248afb450b76db9efed072dd55c36e1c98dba7a0099e44",
+    "checks": {
+      "readers_normal_and_optimized_exit": 0,
+      "constructor_readers": 7,
+      "SAN_worker_binary_sha256": "70379dd9dfeb3d7643debca660eb2239ecc9f1d7206222bfee27258113ce20cf",
+      "SAN_exit": 0,
+      "SAN_failures_exercised": 2,
+      "SAN_paid_MEB_floor": 2,
+      "nominal_reuse_Gamma_rows": 2524,
+      "nominal_reuse_vertical": 1506,
+      "exact_seed_branches": 2,
+      "equal_radius_counterfixture": true,
+      "documentation_files": 443,
+      "documentation_exit": 0,
+      "implementation_phases": 20,
+      "implementation_status_exit": 0,
+      "documentation_optimized_exit": 0,
+      "common_pins": 2753,
+      "common_pins_mismatches_before_concurrent_gitignore_edit": 0,
+      "global_variant_normal_and_optimized_exit": 1,
+      "global_variant_reason": "No complete historical source variant matches ce842a3f; variants D–P unchanged.",
+      "concurrent_gitignore_edit_excluded": true
+    },
+    "maintenance": {
+      "action": "Close R/U, admitted-worker and now published named-50k requests; distinguish journal prototype from future FULL integration. Link adopted cache detail and the second auditor published packet. Historical receipts unchanged.",
+      "entries": [
+        {
+          "path": "CERTIFICAT_FULL_CPP_COURANT.md",
+          "previous_sha256": "47c0d50d16cdfe3404989795168c2c5cce5f939380853f6504c606529b9fadcc",
+          "previous_words": 280,
+          "words": 285
+        },
+        {
+          "path": "COORDINATION_AUDITEURS.md",
+          "previous_sha256": "95c27960bb1ee931cdb500c59e8f5f7c4edec9b365d04a5f0128852d5d5c5351",
+          "previous_words": 291,
+          "words": 352
+        },
+        {
+          "path": "DIALOGUE_COURANT.md",
+          "previous_sha256": "80f12bbf34f2466f3a2b58e9f315fb240a49a38b4064afbfb8ec610816d684f0",
+          "previous_words": 678,
+          "words": 524
+        },
+        {
+          "path": "ETAT_COURANT.md",
+          "previous_sha256": "34f000b13fc53df380a147a43c29c2e907b8f587ea9781fdb5a8ee4483060cdc",
+          "previous_words": 704,
+          "words": 720
+        },
+        {
+          "path": "MONO_FULL_COURANT.md",
+          "previous_sha256": "5da93dbf921d496537068dc838e71e042da86b30e8874f406b959799581f7832",
+          "previous_words": 709,
+          "words": 737
+        },
+        {
+          "path": "README.md",
+          "previous_sha256": "4b3681508f646a5683f74c7465dc651eca610d00fef7465e42c77b3f62cdd159",
+          "previous_words": 677,
+          "words": 714
+        }
+      ]
+    },
+    "source_variants_D_to_P_unchanged": true,
+    "other_auditor_packet_excluded": "receipts_cache_commit_20260911",
+    "gcp_used": false,
+    "publication_base_commit": "223a3897e1e8841ee59d520813867e90059a9819",
+    "concurrent_publication": {
+      "commit": "223a3897",
+      "packet": "receipts_cache_commit_20260911",
+      "reviewed_engine": "ad7ffd28",
+      "normal_and_optimized_reader_exit": 0,
+      "records": 58,
+      "artefacts_pinned": 196,
+      "named_50k_blocks_checked": 4,
+      "scope": "Second auditor closes grouped-lot and named pre-lot 50k requests on pinned ad7ffd28; no transfer to ce842a3f, no completeness, final arity or time claim. Historical interruption preserved.",
+      "common_gitignore_pin": "Advance to bytes already committed by the second auditor, without staging that file.",
+      "global_source_variants": "unchanged"
+    }
   }
 }
