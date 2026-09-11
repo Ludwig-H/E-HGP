@@ -1,0 +1,21 @@
+#!/usr/bin/env python3
+import hashlib,json,os,subprocess,time
+from pathlib import Path
+p=Path(__file__).resolve().parent
+pins={x.name:hashlib.sha256(x.read_bytes()).hexdigest() for x in [p/'guard.cpp',p/'guarded_run.hpp',p/'meb_hybrid.cpp']}
+rows=[]
+for mode,flags in [('O2',['-O2']),('SAN',['-O1','-g','-fsanitize=address,undefined','-fno-omit-frame-pointer'])]:
+    env=os.environ.copy()
+    extra={'ASAN_OPTIONS':'detect_leaks=1:halt_on_error=1','UBSAN_OPTIONS':'halt_on_error=1:print_stacktrace=1'} if mode=='SAN' else {}
+    env.update(extra)
+    commands=[('compile',['g++','-std=c++20',*flags,'-Wall','-Wextra','-Wpedantic','-Werror','-I',str(p/'source/morsehgp3D_v7'),str(p/'guard.cpp'),'-o',str(p/('guard_'+mode))]),('run',[str(p/('guard_'+mode))])]
+    for action,argv in commands:
+        started=time.monotonic();r=subprocess.run(argv,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env,timeout=60)
+        stem=mode+'_'+action
+        (p/(stem+'.stdout')).write_bytes(r.stdout);(p/(stem+'.stderr')).write_bytes(r.stderr)
+        rows.append(dict(name=stem,argv=argv,exit_code=r.returncode,seconds=time.monotonic()-started,sanitizer_environment=extra))
+        (p/'commands.json').write_text(json.dumps(rows,indent=2)+'\n')
+        if r.returncode or r.stderr: raise RuntimeError(stem+':'+str(r.returncode)+':'+r.stderr.decode())
+if pins!={x.name:hashlib.sha256(x.read_bytes()).hexdigest() for x in [p/'guard.cpp',p/'guarded_run.hpp',p/'meb_hybrid.cpp']}:raise RuntimeError('source_changed')
+(p/'final_sources.json').write_text(json.dumps(pins,indent=2)+'\n')
+print(json.dumps(dict(status='passed_guarded_boundary',commands=len(rows),sources_stable=True,device_executed=False,GCP_used=False)))

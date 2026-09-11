@@ -5,7 +5,8 @@ Lire l’[état courant](ETAT_COURANT.md), puis le [dialogue actif](DIALOGUE_COU
 | Sujet courant | Qualification indépendante |
 | --- | --- |
 | Raccord par ancres et cache ad7ffd28 | [Rejeu sur octets commités, corpus et quatre blocs nommés 50k](receipts_cache_commit_20260911/README.md) ; second auditeur ; deux verrous clos sur CPU, qualification relative au census fourni |
-| Comptage du nouveau lot privé | [Débordement reproduit et correction vérifiée O2/SAN](receipts_batch_work_20260911/README.md) ; frontière de l’adaptateur, sans qualification géométrique/device |
+| Comptabilité des lots privés | [Débordement reproduit et correction vérifiée](receipts_batch_work_20260911/README.md) ; consommation cumulative hôte 83f1/993786f3 désormais contre-vérifiée, sans exécution device |
+| Noyau MEB | [Piste du second auditeur](NOTE_CLAUDE_COEUR_MEB_20260911.md) ; [refus valide sur K7 et repli vérifié O2/SAN](receipts_meb_boundary_20260911/README.md), aucun nouveau temps de tour |
 | Graphe filtré et vraies hiérarchies | [Réduction aux naissances, forêts minimales, contributions et verticales](receipts_filtered_graph_20260911/README.md) ; preuve et modèle borné, sans nouveau raccord produit |
 | Phase statique CPU | [SAN et preuves des raccourcis](receipts_static_followup_20260911/README.md) ; semis après échange désormais intégré et mesuré, support survivant encore non mesuré |
 | Gardes du journal réservé, publié | [Dix cas valides, neuf rejets, six lectures, neuf mutants et pannes d’allocation](receipts_journal_guards_20260910/README.md) ; preuves indépendantes conservées du prototype incrémental |

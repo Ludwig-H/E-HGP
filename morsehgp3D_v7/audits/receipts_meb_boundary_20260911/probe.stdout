@@ -1,0 +1,3 @@
+DIVERGENCE kind=2 iteration=7984 checked=307985 reference=0 anchor_meb_exact_local hybrid=3 canon_fail
+{4,6,4},{4,0,0},{0,4,4},{2,0,0},{4,4,0},{6,0,2},{0,4,6},{4,4,2},{4,4,6},{2,4,2},
+welzl_ok=1 powers=0,-512,0,0,-3072,0,5632,-6656,0,-6144,

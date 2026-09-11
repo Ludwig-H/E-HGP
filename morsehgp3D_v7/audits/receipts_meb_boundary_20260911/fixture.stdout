@@ -1,0 +1,4 @@
+FAIL n=7 mask=127 reference=0:anchor_meb_exact_local hybrid=3:canon_fail
+{2,3,2},{2,0,0},{0,2,2},{1,0,0},{2,2,0},{3,0,1},{0,2,3},
+reference support=4 slots=0,1,5,6 shell=4
+welzl_ok=1 powers=0,-16,0,0,-96,0,176,

@@ -1,0 +1,3 @@
+PASS original_rejection reference_ok hybrid_canon_fail outside_power=176
+PASS fallback=1 all_fields_equal=1 proposal_candidates=167 proposal_powers=415 fallback_calls=1 fallback_powers=71
+PASS fallback=0 all_fields_equal=1 proposal_candidates=12 proposal_powers=71 fallback_calls=0 fallback_powers=0

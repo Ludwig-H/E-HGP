@@ -3127,5 +3127,278 @@
     "source_variants_D_to_Q_unchanged": true,
     "new_engine_variant": false,
     "gcp_used": false
+  },
+  "latest_batch_followup_and_meb_boundary_20260911": {
+    "date_utc": "2026-09-11T13:11:50.179299+00:00",
+    "reviewed_base": "99b4d3b1",
+    "prototype_publication": "d2ed4d48",
+    "latest_prose_read": "49b793be",
+    "publication_base_commit": "49b793be5527bcba4ba247f95a764be567ce792c",
+    "scope": "Four read-only constructor package reviews, bounded independent K7 MEB failure and guarded fallback qualification, and application of existing support-choice proof. No whole-engine, GPU or performance qualification.",
+    "constructor_package_reviews": [
+      {
+        "packet": "morsehgp3D_v7/receipts/static_batch_seam_20260911",
+        "publication_status_at_read": "uncommitted_constructor_candidate",
+        "root_pins": {
+          "MANIFEST.json": "284bda5a2f5f4307733b3e941a937df509a16f92eb323262540a5ed23ea3d1bf",
+          "README.md": "eb1fc892e97d1695d75a92943a8e9e701e2c310ffcaa306ee1d9e684879ef531",
+          "storage_map.json": "58d2b087f42344c7c2fab9627ec2970b96d4cd7faddf1634b032d2832259c4c7",
+          "verify.py": "759bd508b240d9a66399a476953521d8beac12011612ca8d26d11c6d80f7b28c"
+        },
+        "physical_files": 236,
+        "closure_digest_sha256": "c85f41516b69de4241e2af197c6f78d9767d2d5a37ae21cc8f5f050d58b2e6bb",
+        "all_physical_bytes_stable": true,
+        "commands": [
+          {
+            "argv": [
+              "python3",
+              "-B",
+              "morsehgp3D_v7/receipts/static_batch_seam_20260911/verify.py"
+            ],
+            "exit_code": 0,
+            "stdout": "{\"status\": \"passed\", \"capture\": \"o2_r1\", \"commands\": 11, \"SAN\": false, \"direct_terminals\": [118, 118], \"rejections\": {\"status\": \"passed_batch_rejections\", \"cases\": 55, \"prefix_cases\": 26, \"known_paid\": 40}, \"large_scale_or_GPU_claimed\": false}\n{\"status\": \"passed\", \"capture\": \"o2_r2\", \"commands\": 11, \"SAN\": false, \"direct_terminals\": [118, 118], \"rejections\": {\"status\": \"passed_batch_rejections\", \"cases\": 65, \"prefix_cases\": 32, \"known_paid\": 44}, \"large_scale_or_GPU_claimed\": false}\n{\"status\": \"passed\", \"capture\": \"san_root_r1\", \"commands\": 11, \"SAN\": true, \"direct_terminals\": [118, 118], \"rejections\": {\"status\": \"passed_batch_rejections\", \"cases\": 65, \"prefix_cases\": 32, \"known_paid\": 44}, \"large_scale_or_GPU_claimed\": false}\n{\"status\": \"passed_portable\", \"captures\": 3, \"engine_commands\": 33, \"logical_files\": 765, \"objects\": 232, \"no_ELF\": true, \"no_vendor\": true, \"device_executed\": false, \"GCP_used\": false, \"private_prototype\": true, \"public_status\": \"not_claimed\"}\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "python3",
+              "-B",
+              "-O",
+              "morsehgp3D_v7/receipts/static_batch_seam_20260911/verify.py"
+            ],
+            "exit_code": 0,
+            "stdout": "{\"status\": \"passed\", \"capture\": \"o2_r1\", \"commands\": 11, \"SAN\": false, \"direct_terminals\": [118, 118], \"rejections\": {\"status\": \"passed_batch_rejections\", \"cases\": 55, \"prefix_cases\": 26, \"known_paid\": 40}, \"large_scale_or_GPU_claimed\": false}\n{\"status\": \"passed\", \"capture\": \"o2_r2\", \"commands\": 11, \"SAN\": false, \"direct_terminals\": [118, 118], \"rejections\": {\"status\": \"passed_batch_rejections\", \"cases\": 65, \"prefix_cases\": 32, \"known_paid\": 44}, \"large_scale_or_GPU_claimed\": false}\n{\"status\": \"passed\", \"capture\": \"san_root_r1\", \"commands\": 11, \"SAN\": true, \"direct_terminals\": [118, 118], \"rejections\": {\"status\": \"passed_batch_rejections\", \"cases\": 65, \"prefix_cases\": 32, \"known_paid\": 44}, \"large_scale_or_GPU_claimed\": false}\n{\"status\": \"passed_portable\", \"captures\": 3, \"engine_commands\": 33, \"logical_files\": 765, \"objects\": 232, \"no_ELF\": true, \"no_vendor\": true, \"device_executed\": false, \"GCP_used\": false, \"private_prototype\": true, \"public_status\": \"not_claimed\"}\n",
+            "stderr": ""
+          }
+        ]
+      },
+      {
+        "packet": "morsehgp3D_v7/receipts/gpu_terminal_batch_host_20260911",
+        "publication_status_at_read": "uncommitted_constructor_candidate",
+        "root_pins": {
+          "README.md": "5e5911bd1e45bae375d0367c6b737a5e92385b985710eeb32b1dc83e28a41d9c",
+          "capture_manifest.json": "410e8e7fb5c59d9a9afdf418443360e1713a2d8b16248ff292e7330a8661926d",
+          "manifest.json": "2c7df2e04132e306cd0a063efa93007548a0bc01736f818b5f447b8af1e0a4dd",
+          "storage_map.json": "f9ad1672d3a06467e13bfe3ee372269cdd68256b95ea76e6bfe8186095253a04",
+          "verify.py": "10b0c0112b896fd5c27056a516d9cc285695d40136022d972e9498679eb20f7e"
+        },
+        "physical_files": 192,
+        "closure_digest_sha256": "fd2ee173b369da27a6d26a8ab851e05e18880bd6eb6efd41e2d81de6358181a8",
+        "all_physical_bytes_stable": true,
+        "commands": [
+          {
+            "argv": [
+              "python3",
+              "-B",
+              "morsehgp3D_v7/receipts/gpu_terminal_batch_host_20260911/verify.py"
+            ],
+            "exit_code": 0,
+            "stdout": "{\"ELF_pins_only\": 6, \"captures\": 7, \"commands\": 30, \"cumulative_checks_each\": 28044, \"cumulative_forests_each\": 64, \"device_executed\": false, \"direct_terminals_each\": 176, \"gcp_used\": false, \"geometry_executed_by_reader\": false, \"historical_failures\": 2, \"isolated_traffic_checks\": 27691, \"logical_files\": 827, \"physical_files\": 192, \"status\": \"passed\", \"synthetic_aggregate_rejections_each\": 1, \"transaction_rejections_each\": 41}\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "python3",
+              "-B",
+              "-O",
+              "morsehgp3D_v7/receipts/gpu_terminal_batch_host_20260911/verify.py"
+            ],
+            "exit_code": 0,
+            "stdout": "{\"ELF_pins_only\": 6, \"captures\": 7, \"commands\": 30, \"cumulative_checks_each\": 28044, \"cumulative_forests_each\": 64, \"device_executed\": false, \"direct_terminals_each\": 176, \"gcp_used\": false, \"geometry_executed_by_reader\": false, \"historical_failures\": 2, \"isolated_traffic_checks\": 27691, \"logical_files\": 827, \"physical_files\": 192, \"status\": \"passed\", \"synthetic_aggregate_rejections_each\": 1, \"transaction_rejections_each\": 41}\n",
+            "stderr": ""
+          }
+        ]
+      },
+      {
+        "packet": "morsehgp3D_v7/receipts/gpu_static_terminal_k10_20260911",
+        "publication_status_at_read": "uncommitted_constructor_candidate",
+        "root_pins": {
+          "MODES.md": "c2d343f11efcb8e08b20a9e5a5d5b627ed55d697707f65640c2d441bf8ce38d9",
+          "README.md": "aee55f6d4f22a9349d2e9a3a30e938ed295abd545a5b86966173c17d15e4f1b0",
+          "capture_manifest.json": "254c12d143aaef692fdfb88fc304358d605d8329926946065575e359caa7b218",
+          "manifest.json": "98d63f3acc64d9291c830894e7d73c0eda4ae0921ddc1eb8e4c0b657aefc5bde",
+          "storage_map.json": "200d7c3092f7647a1a918ceedbc5f52c1000d590aefe1d013a671e69a29f4cbe",
+          "verify.py": "de12d428b2818317022bf9feea2ff190dcb30866496e85bf58bc8083cf56ce92"
+        },
+        "physical_files": 175,
+        "closure_digest_sha256": "1fc17ce38f51f2d895de3a38c132c91d5c3b5a02361bb79c57e37c01b8078bdc",
+        "all_physical_bytes_stable": true,
+        "commands": [
+          {
+            "argv": [
+              "python3",
+              "-B",
+              "morsehgp3D_v7/receipts/gpu_static_terminal_k10_20260911/verify.py"
+            ],
+            "exit_code": 0,
+            "stdout": "{\"ELF_pins_only\": 4, \"K10_requests\": 160, \"K9_requests\": 468, \"captures\": 5, \"commands\": 22, \"compared\": 1577, \"device_executed\": false, \"geometry_executed_by_reader\": false, \"historical_failures\": 1, \"host_qualifications\": 6, \"logical_files\": 627, \"physical_files\": 175, \"scope\": \"private_terminal_CUDA_gate_local_compile_only_K2_K10_c03\", \"status\": \"passed\", \"trace_rows\": 2763}\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "python3",
+              "-B",
+              "-O",
+              "morsehgp3D_v7/receipts/gpu_static_terminal_k10_20260911/verify.py"
+            ],
+            "exit_code": 0,
+            "stdout": "{\"ELF_pins_only\": 4, \"K10_requests\": 160, \"K9_requests\": 468, \"captures\": 5, \"commands\": 22, \"compared\": 1577, \"device_executed\": false, \"geometry_executed_by_reader\": false, \"historical_failures\": 1, \"host_qualifications\": 6, \"logical_files\": 627, \"physical_files\": 175, \"scope\": \"private_terminal_CUDA_gate_local_compile_only_K2_K10_c03\", \"status\": \"passed\", \"trace_rows\": 2763}\n",
+            "stderr": ""
+          }
+        ]
+      },
+      {
+        "packet": "morsehgp3D_v7/receipts/census_tower_permanent_20260911",
+        "publication_status_at_read": "uncommitted_constructor_candidate",
+        "root_pins": {
+          "README.md": "f9556624e194a52d7e8223273544dc729fd37e7b4837e429bce245a8a412b812",
+          "capture_manifest.json": "e1add97b9583c9be82eaa3a2904d270203a4ab1452a8b5d71f6bc9d2d15534fd",
+          "manifest.json": "f26e11a64ac44c6cc8f617b7e3b670b86fe75427a3aad5370705e8a98114f953",
+          "storage_map.json": "6b1a51a40eff6b17d13a0024ff47f1d6bf761541528de036b3dbca128ab813f0",
+          "verify.py": "655e0103ec36b99d01e6f5823557a204d1c9d167567198497862f0813f2c4077"
+        },
+        "physical_files": 248,
+        "closure_digest_sha256": "0a191fe5dc34a5f59e5511f6da25cb71df1b42937821ff1b35b3ac9b8d614076",
+        "all_physical_bytes_stable": true,
+        "commands": [
+          {
+            "argv": [
+              "python3",
+              "-B",
+              "morsehgp3D_v7/receipts/census_tower_permanent_20260911/verify.py"
+            ],
+            "exit_code": 0,
+            "stdout": "{\"CTests_each\": 11, \"ELF_pins_only\": 2, \"callback_supplied\": false, \"captures\": 2, \"causal_mutants_each\": 4, \"census_runs_each\": 18, \"commands\": 10, \"cuts_each\": 13000, \"device_executed\": false, \"gcp_used\": false, \"geometry_executed_by_reader\": false, \"incidental_bytecode_pins\": 14, \"logical_files\": 625, \"orders_each\": 540, \"physical_files\": 248, \"physical_pairs_each\": 48, \"real_checks_each\": 12315725, \"real_towers_each\": 54, \"status\": \"passed\", \"vertical_checks_each\": 8103948}\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "python3",
+              "-B",
+              "-O",
+              "morsehgp3D_v7/receipts/census_tower_permanent_20260911/verify.py"
+            ],
+            "exit_code": 0,
+            "stdout": "{\"CTests_each\": 11, \"ELF_pins_only\": 2, \"callback_supplied\": false, \"captures\": 2, \"causal_mutants_each\": 4, \"census_runs_each\": 18, \"commands\": 10, \"cuts_each\": 13000, \"device_executed\": false, \"gcp_used\": false, \"geometry_executed_by_reader\": false, \"incidental_bytecode_pins\": 14, \"logical_files\": 625, \"orders_each\": 540, \"physical_files\": 248, \"physical_pairs_each\": 48, \"real_checks_each\": 12315725, \"real_towers_each\": 54, \"status\": \"passed\", \"vertical_checks_each\": 8103948}\n",
+            "stderr": ""
+          }
+        ]
+      }
+    ],
+    "new_boundary_packet": "receipts_meb_boundary_20260911",
+    "packet_manifest_sha256": "2458ae21dac8cfcc0058da92a1de09a1a2f3e56490694ccd27b0f536863af38b",
+    "qualification": {
+      "original_valid_input_rejected": true,
+      "minimum_hybrid_order_fixture": 7,
+      "coordinates_max": 3,
+      "original_exploratory_exit_codes": [
+        1,
+        1
+      ],
+      "guarded_O2_SAN_exit_codes": [
+        0,
+        0
+      ],
+      "root_replay_O2_SAN_exit_codes": [
+        0,
+        0
+      ],
+      "rational_certificate_verified": true,
+      "archived_source_files": 57,
+      "replay_stable_headers": 56,
+      "proof_reader_normal_and_optimized_exit": 0,
+      "scope": "Two final fixtures: K7 failure with fallback and collinear positive control without fallback. Original frozen proposal retained, no correction of the other auditor source."
+    },
+    "maintenance": {
+      "entries": [
+        {
+          "path": "COORDINATION_AUDITEURS.md",
+          "previous_sha256": "afefeee893d32d920015cff4670ea8d884031489f53b672ceb3323216933e284",
+          "previous_words": 351,
+          "words": 675
+        },
+        {
+          "path": "DIALOGUE_COURANT.md",
+          "previous_sha256": "93317f29ee88c3871c3a7f9f03ef49ac8a9892628f78bea13dbcce31581be1ea",
+          "previous_words": 431,
+          "words": 551
+        },
+        {
+          "path": "ETAT_COURANT.md",
+          "previous_sha256": "7c1bb25a49d3b7cf3bf00b6f07ef59897194343751f0c76f760ceca3a2247509",
+          "previous_words": 668,
+          "words": 748
+        },
+        {
+          "path": "README.md",
+          "previous_sha256": "3ce6091c1fdc2d52c17863cb8c575f9ff00ebd75da1ebaecd6ecba7e2c2433ec",
+          "previous_words": 759,
+          "words": 783
+        }
+      ],
+      "closed_requests": [
+        "cumulative consumption of Builder83f1 and adapter993786f3 in the HOST_STUB package",
+        "first private CMake/CTest census-to-tower trial",
+        "log(1+h) formula correction"
+      ],
+      "still_open": "Publication and independent review of the newly announced active raccord and its separate callback/CUDA qualifications. Constructor reports 40/40 active targeted CTests; this audit retains its earlier pinned private eleven-test reading without inheriting later results.",
+      "historical_packets_unchanged": true,
+      "source_variants_D_to_Q_unchanged": true,
+      "generated_scratch_removed": true
+    },
+    "checks": {
+      "changed_audit_markdown_files": 5,
+      "changed_audit_markdown_errors": [],
+      "global_documentation": [
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "tools/check_docs.py"
+          ],
+          "exit_code": 0,
+          "stdout": "Validated 487 active Markdown files.\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "-O",
+            "tools/check_docs.py"
+          ],
+          "exit_code": 0,
+          "stdout": "Validated 487 active Markdown files.\n",
+          "stderr": ""
+        }
+      ],
+      "global_documentation_scope": "Final normal/-O checks pass on 487 active Markdown files after the constructor changed only physical presentation of the two historical Markdown source copies. No file outside audits was modified by this auditor.",
+      "implementation_status": {
+        "exit_code": 0,
+        "stdout": "Validated 20 implementation phases and their gates.\n",
+        "stderr": ""
+      },
+      "earlier_global_documentation_failures": {
+        "normal_and_optimized_initial_exit_codes": [
+          1,
+          1
+        ],
+        "initial_missing_links": 2,
+        "later_normal_exit_code": 1,
+        "later_missing_links": 4,
+        "packets": [
+          "census_tower_permanent_20260911",
+          "full_ball_batch_permanent_20260911"
+        ],
+        "historical_relative_source": "sources/current/morsehgp3D_v7/bench/COMPARE_MONO.md",
+        "missing_targets": [
+          "../docs/CONTRAT_SONDE_FULL_MEB.md",
+          "../docs/RESULTATS_MONO_FULL_LAZY_20260905.md"
+        ],
+        "final_correction": "Constructor re-presented historical files as .md.source with logical bytes and previous manifests retained; final two checks above pass."
+      }
+    },
+    "new_engine_variant": false,
+    "gcp_used": false
   }
 }
