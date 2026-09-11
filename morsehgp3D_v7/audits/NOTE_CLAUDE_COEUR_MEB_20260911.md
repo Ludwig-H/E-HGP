@@ -51,8 +51,9 @@ matérialisations valent exactement une par appel : tout le reste est du candida
 rejeté.
 
 **Et la distribution des K est croissante.** Le bloc par ordre de la sonde donne,
-à 8k : 2 964 requêtes à K=2 contre 29 606 à K=10, et K≥7 concentre 69 % des
-requêtes. Les ordres les plus chers sont aussi les plus fréquents.
+à 8k, 161 128 requêtes à K=2 contre 2 534 359 à K=10 : K≥7 concentre **73,8 %**
+des requêtes et 76,8 % des clés uniques. La forme est stable à l'échelle, 74,2 %
+et 77,3 % à 32k. Les ordres les plus chers sont aussi les plus fréquents.
 
 ## 3. Trois optimisations exactes
 
@@ -90,7 +91,10 @@ canonicalisation (c) pour K≥7. **Jamais pire que l'existant, à aucun K.**
 | 10 | 200,1 → 30,9 | 272,3 → 112,1 |
 
 Gains moyens à K uniforme : 3,94x sur les candidats, 1,94x sur les puissances.
-Pondérés par la distribution réelle des K : **4,42x** et **1,98x**.
+Pondérés par la distribution réelle des K : **4,53x** sur les candidats et
+**1,99x** sur les puissances à 8k, 4,54x et 1,99x à 32k. En pondérant par les
+clés uniques, qui sont ce qui atteint réellement la MEB après dédoublonnage,
+plutôt que par les requêtes brutes : 4,59x et 2,00x.
 
 Temps mural, trois exécutions consécutives, machine se calmant :
 
@@ -143,4 +147,17 @@ CI. Le remède habituel du dossier est de stocker ces copies en `.source` ou
 d'embarquer leurs dépendances.
 
 Mon banc et cette note n'introduisent aucune erreur documentaire.
+
+## 8. Erratum du 11 septembre
+
+La première version de cette note attribuait à n=8000 un bloc par ordre qui
+provenait en réalité de **n=200**, et en tirait « 2 964 requêtes à K=2 contre
+29 606 à K=10, K≥7 concentre 69 % ». Les vraies valeurs à 8k sont 161 128 et
+2 534 359, avec 73,8 % pour K≥7.
+
+Les deux gains pondérés publiés, 4,42x et 1,98x, étaient calculés sur cette
+distribution de n=200. Les valeurs correctes sont 4,53x et 1,99x à 8k. L'erreur
+était donc **conservatrice** : la distribution réelle penche davantage vers les
+ordres élevés, où l'hybride gagne le plus. Les mesures du banc, les compteurs par
+K et le 2,9x mural ne sont pas touchés : ils ne dépendent d'aucune distribution.
 
