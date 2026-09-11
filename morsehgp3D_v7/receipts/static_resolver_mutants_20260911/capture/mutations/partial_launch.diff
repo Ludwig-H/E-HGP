@@ -1,0 +1,11 @@
+--- morsehgp3D_v7/src/parallel/pool.hpp
++++ morsehgp3D_v7/src/parallel/pool.hpp
+@@ -78,7 +78,7 @@
+       });
+     }
+   } catch (...) {
+-    admission.store(MHGP7_MUTANT("parallel-admit-partial-launch") ? 1u : 2u);
++    admission.store(1u);
+     admission.notify_all();
+     throw;
+   }

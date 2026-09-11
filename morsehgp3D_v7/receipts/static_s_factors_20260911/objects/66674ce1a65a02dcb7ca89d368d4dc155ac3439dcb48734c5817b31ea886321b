@@ -1,0 +1,137 @@
+[
+  {
+    "name": "compile",
+    "argv": [
+      "g++",
+      "-O3",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/micro_r1/probe.d",
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/probe_source/morsehgp3D_v7/bench/full_ball_tower_probe.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/micro_r1/probe"
+    ],
+    "started_ns": 1789108349475582379,
+    "ended_ns": 1789108450856821422,
+    "exit_code": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "n400_static0",
+    "argv": [
+      "/usr/bin/time",
+      "-v",
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/micro_r1/probe",
+      "--n=400",
+      "--s=8",
+      "--kmax=10",
+      "--threads=1",
+      "--static-threads=0"
+    ],
+    "started_ns": 1789108450859411571,
+    "ended_ns": 1789108472733893612,
+    "exit_code": 0,
+    "stdout_sha256": "493f0affe33c42ae5f1dd9f6035fa0278e2963059885dc5389734856193cc14d",
+    "stderr_sha256": "1b45f9a83165def8f0c9e170a1fff7313b3662135c6d0f28c74ee3ac0ab38722"
+  },
+  {
+    "name": "n400_static1",
+    "argv": [
+      "/usr/bin/time",
+      "-v",
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/micro_r1/probe",
+      "--n=400",
+      "--s=8",
+      "--kmax=10",
+      "--threads=1",
+      "--static-threads=1"
+    ],
+    "started_ns": 1789108472736893329,
+    "ended_ns": 1789108487719886883,
+    "exit_code": 0,
+    "stdout_sha256": "6e404240d24938fbf42de574d00170efd0f6d6d29c540c30f1b60da59dac32f5",
+    "stderr_sha256": "ff030a2be52614a0ddc1b26031d8d7795329e341f1898fb753e4065e970cd8aa"
+  },
+  {
+    "name": "n400_static4",
+    "argv": [
+      "/usr/bin/time",
+      "-v",
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/micro_r1/probe",
+      "--n=400",
+      "--s=8",
+      "--kmax=10",
+      "--threads=1",
+      "--static-threads=4"
+    ],
+    "started_ns": 1789108487721168908,
+    "ended_ns": 1789108505308586751,
+    "exit_code": 0,
+    "stdout_sha256": "d60e7813a09f89efb1ef25aa1ad53e82c10ef367f2485bfd69e446f2f116999b",
+    "stderr_sha256": "735aaa03072e0afef53ef311ccf500d32a0a3f9ead6c32675c8fbab7885c7222"
+  },
+  {
+    "name": "n1000_static0",
+    "argv": [
+      "/usr/bin/time",
+      "-v",
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/micro_r1/probe",
+      "--n=1000",
+      "--s=8",
+      "--kmax=10",
+      "--threads=1",
+      "--static-threads=0"
+    ],
+    "started_ns": 1789108505309980011,
+    "ended_ns": 1789108573490915270,
+    "exit_code": 0,
+    "stdout_sha256": "8d5a1f8ad383b90e169e5e379a2e5ba74ca75c2af6f589edad0cabea2a0a2d72",
+    "stderr_sha256": "c3592e53a8fbdbeccb2a61c71027164dd8732e61aefbcc2a839c3030f815885b"
+  },
+  {
+    "name": "n1000_static1",
+    "argv": [
+      "/usr/bin/time",
+      "-v",
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/micro_r1/probe",
+      "--n=1000",
+      "--s=8",
+      "--kmax=10",
+      "--threads=1",
+      "--static-threads=1"
+    ],
+    "started_ns": 1789108573492185968,
+    "ended_ns": 1789108642463406875,
+    "exit_code": 0,
+    "stdout_sha256": "b04b2c7d3aa462d06e1c3124e3056b2e10378f4e0cac22c3631b15cc73447007",
+    "stderr_sha256": "943f624234f7c9cf3dfa2a63d2d3dcea4f1c6a8c6358cf5cadadd446e4b6a47a"
+  },
+  {
+    "name": "n1000_static4",
+    "argv": [
+      "/usr/bin/time",
+      "-v",
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/micro_r1/probe",
+      "--n=1000",
+      "--s=8",
+      "--kmax=10",
+      "--threads=1",
+      "--static-threads=4"
+    ],
+    "started_ns": 1789108642471719285,
+    "ended_ns": 1789108693971886920,
+    "exit_code": 0,
+    "stdout_sha256": "8882cee47f1dbd0b9c7f2f1c00952d008bed44c41295cf6a9135ed1a6669e5ed",
+    "stderr_sha256": "c6308510ffc772d3de013fa993e0a67b9232ee105e749a40751e5b89dcb05fcb"
+  }
+]

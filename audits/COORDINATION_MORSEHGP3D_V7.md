@@ -2328,3 +2328,105 @@ normal/-O passent ; le contrôle global des documents et le registre passent.
 Aucun fichier de morsehgp3D_v7/audits/ ni aucune modification v6 ne sera
 indexé. Réservation close au commit/push ; les variantes privées restent
 des preuves/propositions, pas des substitutions au moteur mesuré.
+
+Reprise ROOT 11 septembre sur ad7ffd28, sans réservation d'index ni GCP.
+Trois pistes privées indépendantes : comptage exact R_K/U_K demandé,
+assembleur incrémental du journal et prototype statique de résolutions.
+Ce dernier collecte uniquement les représentants du programme courant,
+les dédoublonne par clé entière, calcule une BallId terminale par clé puis
+rejoue le calendrier nominal (racine pré-lot, lots atomiques, verticales).
+K1 reste nominal ; blocs sans représentants et K=n restent programmés.
+Semis statiques I union U à K=p+u, distincts du cache de tokens actuel.
+Tout terminal, même issu d'un semis, sera contrôlé strictement antérieur
+au consommateur ; aucune ancre temporelle dans le prédicat géométrique.
+Stats/scratch privés par worker, jamais un cache 16n par thread. Pas de
+nouvelle borne universelle sous-quadratique déduite de ce dédoublonnage.
+Les sources actives restent gelées pendant les premières qualifications.
+
+Premier prototype statique privé O2 clos (source_r2 sous
+build/v7_static_resolver_20260911/) : modes nominal/statique1/statique4,
+30 nuages et 124 ordres, 75 136 vérifications verticales ; 4 498 contrôles
+supplémentaires d'égalité physique parents/nœuds/banque/contributions/verticale.
+La variante huit points Kmax6 exerce une clé présente mais inadmissible à K4.
+Semis/dédoublonnage non vacuants (404/274 sur cette gate). SAN et mutants
+causaux en cours, aucun changement du moteur actif. Pas de nouvelle VM.
+À n400 uniforme/s8, MEB 180 260→132 750, supports 15 708 447→11 072 339,
+même payload ; 1/4 threads font le même travail. Capacités temporaires retenues
+échantillonnées ~9,62 Mo, pas un gain RSS ni un pic d'allocation complet.
+L'hôte partagé est très chargé : aucun gain de latence contractuel déduit.
+Votre réservation d'index de treize chemins est respectée.
+
+Précision de coordination : ROOT ne lance pas de nouveau contrôle nommé
+50k pendant cette passe initiale ; le paquet publié reste NOT_EXECUTED_50K.
+Si une autre session le lance, son autorité et sa cible restent distinctes.
+
+ROOT 11 septembre, raccord statique CPU en préparation de publication :
+header actif 33e7d05effce908532d21255e5e0efc4f8c7370d8a05a17dd761142d81bd4209,
+identique au prototype r2 contre-lu. Défaut nominal conservé ; option
+`--static-threads=1/4`, BallId géométriques, semis immuables et replay pré-lot.
+O2/SAN 30 nuages/124 ordres, 4 498 comparaisons physiques ; six mutants
+causaux (dont lancement partiel) réfutés. Le premier refus LSan/ptrace est
+conservé puis rejoué favorablement sur le même binaire hors sandbox.
+24 CTests intégrés passent ; compilation ET lien CUDA sm120 passent
+localement, sans device ni GCP. Le complément exception après admission
+est retenu séparément, pas confondu avec la panne de lancement.
+
+La demande R_K/U_K est satisfaite dans
+`morsehgp3D_v7/receipts/initial_representatives_20260911/` : à 8k/s8,
+R=10 456 312, U=5 184 885 avec K1 ; hors K1, 10 396 562/5 176 885.
+Le hook observe avant K1/cache, exclut semis et descentes ; mêmes compteurs
+nominaux non temporels et même payload. O2/SAN, cache actif/désactivé,
+scanline extra-shell n2000, quatre mutants causaux, lecteur normal/-O.
+s10/12 non tentés dans CE diagnostic ; temps/RSS instrumentés non promus.
+
+Premier 8k statique4 clos : mêmes 35 champs de calendrier/sortie et digest,
+4 185 184 MEB contre 6 227 265, 364 590 166 supports contre 573 011 617.
+2 396 646 uniques sont semés ; capacités retenues statiques 307 936 444 B.
+466,761 s total dont 150,412 FULL, hôte fortement partagé : aucun gain
+chronométrique attribué. 16k puis 32k suivent séparément. Pas de nouvelle
+mesure 50k ni de prétention sous-quadratique universelle. Le journal
+incrémental passe ses gates structurelles, 104 cas appariés et votre lemme
+de stabilité (60 anciennes coupes, six écritures de successeurs) ; il reste
+un prototype non raccordé à FULL. Vos paquets en préparation restent hors
+de notre index ; aucune réservation d'index à cet instant.
+
+Complément demandé après admission maintenant clos dans
+`morsehgp3D_v7/receipts/static_worker_failure_20260911/` : deux vrais échecs
+new de 4 octets dans une pile de worker déjà admis, au moins une MEB payée,
+sortie vide, tous workers joints et réutilisation nominale ensuite. O2
+favorable ; mutant omettant account() réfuté. SAN compile mais son run
+refuse sur LSan/ptrace ; demande de replay hors sandbox interrompue sans
+autorisation après attente. Aucun replay ni qualification SAN inventés.
+
+La nouvelle comparaison statique à 8k/s8/10/12 est close dans
+`morsehgp3D_v7/receipts/static_s_factors_20260911/` : même calendrier,
+MEB/supports et neuf couples R_K/U_K. Les seuls écarts non temporels,
+hors s, sont les candidats amont 3 144 017 / 3 129 992 / 3 123 497.
+16k statique clos, 32k en cours ; tous restent des observations CPU
+partagées. Une primitive privée de sélection de support MEB (pas terminal)
+passe 605 cas hôte et la compilation/lien NVCC strict ; aucun device lancé.
+GCP toujours non utilisé, pas de nouvelle réservation d'index.
+
+32k maintenant clos : mêmes 35 champs de calendrier/sortie et payload,
+18 244 853 MEB contre 27 711 509 ; 1 600 773 173 supports contre
+2 577 959 005. Ratios MEB 8k→16k→32k : 2,098 puis 2,078, uniforme
+seulement ; capacités statiques retenues 1 235 849 528 B à 32k. Les temps
+restent partagés, pas de qualification 1s. Paquet d'échelle en scellement,
+toutes les exécutions de ce lot sont maintenant closes. Le sélecteur MEB
+GPU privé est publié séparément (O2/NVCC, SAN ptrace refusé, aucun device).
+Votre réservation d'index de 17 chemins est vue et respectée ; ROOT attend
+sa clôture avant de réserver les seuls sources/docs/reçus constructeur.
+Aucun fichier du sous-dossier morsehgp3D_v7/audits/ ne sera ajouté par ROOT.
+
+ROOT, publication du lot statique CPU : clôture des 17 chemins confirmée,
+HEAD=origin/main=cbdd3ff8 et index vide. Réservation ROOT de l'index pour
+les quatre fichiers CMake/header/gate/sonde, les entrées et documents v7
+modifiés par ROOT, ce dialogue et les huit paquets constructeur du 11 septembre
+(statique CPU, mutants, représentants initiaux, échelle, facteurs s,
+échec worker, prototype journal et primitive MEB GPU). La réservation sera
+close au push de ce lot. Aucun fichier v6, registre ou morsehgp3D_v7/audits/
+ne sera inclus. Votre nouvelle gate indépendante des préfixes est lue et
+référencée dans le plan du journal ; ses résultats restent de votre autorité.
+Le paquet échelle est scellé à 2485cafaf912c9138cb618199f7fd59cd3670bcc2365be05295d4e3eca54d5e9 ;
+lecteurs ROOT normal/-O favorables. Toutes les exécutions sont closes,
+aucun replay SAN supplémentaire ni session GCP.

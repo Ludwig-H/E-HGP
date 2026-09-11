@@ -1,0 +1,182 @@
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <sstream>
+#include <string>
+#include "morsehgp3D_v7/src/forest/full_ball_tower.hpp"
+
+namespace {
+using namespace mhgp7;
+struct Failure { std::string why; };
+u64 checks = 0;
+void need(bool good, const std::string& why) { ++checks; if (!good) throw Failure{why}; }
+i128 integer(std::istream& in) {
+  std::string s; in >> s;
+  need(!s.empty(), "fixture_integer_missing");
+  bool neg = s[0] == '-'; u128 n = 0;
+  for (size_t j = neg ? 1 : 0; j < s.size(); ++j) {
+    need(s[j] >= '0' && s[j] <= '9' && n < (u128{1} << 120), "fixture_integer_domain");
+    n = n * 10 + static_cast<unsigned>(s[j] - '0');
+  }
+  need(n < (u128{1} << 127), "fixture_integer_bound");
+  return neg ? -static_cast<i128>(n) : static_cast<i128>(n);
+}
+ExactLevel level(std::istream& in) {
+  const i128 n = integer(in), d = integer(in);
+  need(n >= 0 && static_cast<u128>(n) <= std::numeric_limits<u64>::max() && d > 0,
+       "fixture_rational_bound");
+  return {{static_cast<u64>(n), 0, 0}, d};
+}
+u64 mask(const FullCoverageCertificate& f, FullNodeId node, const ExactLevel& cut,
+    bool closed, const std::map<PointId, unsigned>& labels) {
+  auto row = full_coverage_at(f, node, cut, closed);
+  need(row.status == FullCertificateStatus::kOk, "coverage_read");
+  u64 bits = 0;
+  for (PointId id : row.values) {
+    need(labels.contains(id), "coverage_identity_domain");
+    bits |= u64{1} << labels.at(id);
+  }
+  return bits;
+}
+std::string join(std::vector<std::string> values) {
+  std::sort(values.begin(), values.end());
+  std::string out;
+  for (const auto& value : values) { if (!out.empty()) out += ','; out += value; }
+  return out;
+}
+}
+
+int main(int argc, char** argv) {
+  if (argc != 4) return 2;
+  try {
+    const std::string mode = argv[3];
+    const bool launch = mode == "launch";
+    need(mode == "0" || mode == "1" || mode == "4" || launch, "mode");
+    const int threads = launch ? 4 : mode[0] - '0';
+    std::ifstream data(argv[1]), expected_file(argv[2]);
+    need(data.good() && expected_file.good(), "fixture_files");
+    std::vector<std::string> expected, actual;
+    for (std::string line; std::getline(expected_file, line);) if (!line.empty()) expected.push_back(line);
+    unsigned count = 0; data >> count; need(count >= 5, "cloud_floor");
+    u64 requests = 0, unique = 0, seeded = 0, mebs = 0, orders = 0, cuts = 0, vertical = 0;
+    for (unsigned fi = 0; fi < count; ++fi) {
+      std::string name; unsigned n = 0, kmax = 0, nb = 0, nc = 0;
+      data >> name >> n >> kmax >> nb >> nc;
+      need(n >= 2 && n <= 8 && kmax <= n && nb && nc, "fixture_shape");
+      std::vector<P3> points(n);
+      for (auto& p : points) data >> p.x >> p.y >> p.z;
+      std::vector<BallData> original(nb);
+      for (auto& b : original) {
+        b.key.a = integer(data); for (auto& a : b.key.b) a = integer(data); b.key.c = integer(data);
+        b.level = level(data);
+        unsigned arity = 0, ni = 0, ns = 0; data >> arity >> ni >> ns;
+        need(ni <= kBallInteriorMax && ns <= kBallShellMax, "census_size");
+        b.arity = static_cast<u8>(arity); b.n_interior = static_cast<u8>(ni); b.n_shell = static_cast<u8>(ns);
+        for (unsigned j = 0; j < ni; ++j) data >> b.interior_ids[j];
+        for (unsigned j = 0; j < ns; ++j) data >> b.shell_ids[j];
+      }
+      std::vector<ExactLevel> levels(nc); for (auto& r : levels) r = level(data);
+      need(data.good(), "fixture_not_truncated");
+      for (unsigned variant = 0; variant < 2; ++variant) {
+        std::vector<InputPoint> input;
+        std::map<PointId, unsigned> labels;
+        for (unsigned j = 0; j < n; ++j) {
+          PointId id = variant ? 1001u + 37u * (n - j) : j;
+          input.push_back({id, points[j]}); labels[id] = j;
+        }
+        if (variant) std::reverse(input.begin(), input.end());
+        auto ix = build_cloud_index(input);
+        auto balls = original;
+        for (auto& b : balls) for (auto sites : {std::span<i32>(b.interior_ids, b.n_interior),
+                                                std::span<i32>(b.shell_ids, b.n_shell)}) {
+          for (auto& site : sites) {
+            need(site >= 0 && static_cast<unsigned>(site) < n, "fixture_site");
+            auto pos = std::find(ix.upos.begin(), ix.upos.end(), points[site]);
+            need(pos != ix.upos.end(), "morton_remap");
+            site = static_cast<i32>(pos - ix.upos.begin());
+          }
+          std::sort(sites.begin(), sites.end());
+        }
+#ifdef MHGP7_TESTING
+        if (launch) parallel_detail::launch_fail_after = 1;
+#endif
+        auto tower = build_full_ball_tower(ix, balls, kmax, threads);
+        if (launch) {
+#ifdef MHGP7_TESTING
+          need(tower.status == FullBallStatus::kResourceExhausted && tower.orders.empty(), "launch_failure_transaction");
+          need(tower.stats.resolve_work.calls == 0, "partial_launch_admitted_geometry");
+          need(parallel_detail::launch_active.load() == 0, "launch_workers_joined");
+          std::cout << "{\"status\":\"passed_launch_guard\",\"checks\":" << checks << "}\n";
+          return 0;
+#else
+          throw Failure{"launch_instrumentation_required"};
+#endif
+        }
+        need(tower.status == FullBallStatus::kCompleteRelative,
+             "tower_status:" + name + ":" + tower.reason);
+        need(tower.orders.size() == kmax, "all_orders");
+        std::vector<std::vector<std::string>> sig(kmax);
+        for (unsigned k = 1; k <= kmax; ++k) {
+          ++orders;
+          requests += tower.stats.static_requests[k]; unique += tower.stats.static_unique[k];
+          seeded += tower.stats.static_seeded[k];
+          const auto& f = tower.orders[k - 1].forest;
+          for (size_t node = 0; node < f.nodes().size(); ++node) {
+            const auto& r = f.nodes()[node];
+            auto at = std::find_if(levels.begin(), levels.end(), [&](const ExactLevel& v) {
+              return same_exact_level(v, r.level);
+            });
+            need(at != levels.end(), "node_exact_level");
+            std::string s;
+            if (!r.parent_count) s = "b" + std::to_string(at - levels.begin()) + ":" +
+                std::to_string(mask(f, node, r.level, true, labels));
+            else {
+              std::vector<std::string> parents;
+              for (u64 j = 0; j < r.parent_count; ++j) {
+                const auto p = f.parents().at(r.first + j);
+                need(p < node, "prior_parent"); parents.push_back(sig[k - 1].at(p));
+              }
+              s = "m" + std::to_string(at - levels.begin()) + "(" + join(parents) + ")";
+            }
+            sig[k - 1].push_back(s);
+            actual.push_back("N " + name + " " + std::to_string(variant) + " " + std::to_string(k) + " " + s);
+          }
+        }
+        mebs += tower.stats.resolve_work.calls;
+        for (unsigned cut = 0; cut < levels.size(); ++cut) for (bool closed : {false, true})
+          for (unsigned k = 1; k <= kmax; ++k) {
+            ++cuts;
+            const auto& f = tower.orders[k - 1].forest;
+            for (size_t node = 0; node < f.nodes().size(); ++node) {
+              if (full_coverage_root_at(f, node, levels[cut], closed) != node) continue;
+              std::string lower = "-";
+              if (k > 1) {
+                auto image = full_ball_vertical_root_at(tower, k, node, levels[cut], closed);
+                need(image < sig[k - 2].size(), "vertical_live_image");
+                lower = sig[k - 2][image]; ++vertical;
+              }
+              actual.push_back("C " + name + " " + std::to_string(variant) + " " + std::to_string(k) +
+                  " " + std::to_string(cut) + " " + std::to_string(closed) + " " + sig[k - 1][node] +
+                  " " + std::to_string(mask(f, node, levels[cut], closed, labels)) + " " + lower);
+            }
+          }
+      }
+    }
+    std::sort(actual.begin(), actual.end()); std::sort(expected.begin(), expected.end());
+    if (actual != expected) {
+      const auto mismatch = std::mismatch(actual.begin(), actual.end(), expected.begin(), expected.end());
+      std::cerr << "gamma_signature_mismatch actual=" <<
+          (mismatch.first == actual.end() ? "END" : *mismatch.first) << " expected=" <<
+          (mismatch.second == expected.end() ? "END" : *mismatch.second) << '\n';
+      return 1;
+    }
+    need(actual.size() > 1000 && vertical > 100 && orders >= 40, "semantic_floors");
+    if (threads) need(requests > unique && unique > seeded && seeded > 0 && mebs > 0, "physical_floors");
+    std::cout << "{\"status\":\"passed\",\"checks\":" << checks << ",\"rows\":" << actual.size()
+        << ",\"orders\":" << orders << ",\"cuts\":" << cuts << ",\"vertical\":" << vertical
+        << ",\"requests\":" << requests << ",\"unique\":" << unique << ",\"seeded\":" << seeded
+        << ",\"mebs\":" << mebs << "}\n";
+    return 0;
+  } catch (const Failure& error) { std::cerr << error.why << '\n'; return 1; }
+  catch (const std::exception& error) { std::cerr << error.what() << '\n'; return 1; }
+}

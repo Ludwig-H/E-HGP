@@ -1,0 +1,18 @@
+{
+  "status": "passed",
+  "error": null,
+  "source_header_sha256": "33e7d05effce908532d21255e5e0efc4f8c7370d8a05a17dd761142d81bd4209",
+  "mutants": 6,
+  "public_status": "not_claimed",
+  "authority": "bounded_rational_Gamma_signatures",
+  "source_sets_started": [
+    "nominal",
+    "admit_global_key",
+    "consult_anchors",
+    "scatter_sorted_index",
+    "scatter_holes",
+    "unnormalized_anchor",
+    "partial_launch"
+  ],
+  "GCP_used": false
+}

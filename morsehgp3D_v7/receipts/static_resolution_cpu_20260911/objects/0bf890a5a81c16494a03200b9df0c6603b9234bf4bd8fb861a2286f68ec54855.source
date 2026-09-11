@@ -1,0 +1,531 @@
+// Permanent F judge, ported from the privately qualified gate SHA256
+// 24272725d0f1a6474292bbf26959b1c15227745ec4afcd85cf4b64ce37fb856a.
+// The product header is exercised directly, including its real lane-mask mutant.
+// The semantic target deliberately has no global allocation replacement; its
+// zeros in allocation counters are not allocation or failure-injection evidence.
+#include <algorithm>
+#include <array>
+#include <cstdio>
+#include <cstdlib>
+#include <limits>
+#include <new>
+#include <string_view>
+#include <type_traits>
+#include <utility>
+#include <vector>
+
+#include "../src/spindle/witness_count.hpp"
+#include "reference/witness_count_e.hpp"
+
+#if !defined(MHGP7_TESTING)
+#error This gate requires the real product mutant under MHGP7_TESTING
+#endif
+
+#if defined(MHGP7_WITNESS_STACK_NO_ALLOC_OBSERVER)
+inline constexpr bool kObserveAllocations = false;
+#else
+inline constexpr bool kObserveAllocations = true;
+#endif
+
+namespace allocation_probe {
+enum class Mode { kOff, kCount, kFail };
+thread_local Mode mode = Mode::kOff;
+thread_local std::size_t calls = 0;
+
+#if !defined(MHGP7_WITNESS_STACK_NO_ALLOC_OBSERVER)
+// GNU/Clang noinline separates malloc/free implementations from call sites;
+// the recipe must declare the actual compiler. Only ordinary replaceable
+// new/new[] are observed, not aligned allocation, malloc, mmap or all heaps.
+[[gnu::noinline]] void* allocate(std::size_t bytes) {
+  if (mode != Mode::kOff) ++calls;
+  if (mode == Mode::kFail) throw std::bad_alloc();
+  if (void* p = std::malloc(bytes ? bytes : 1)) return p;
+  throw std::bad_alloc();
+}
+[[gnu::noinline]] void release(void* p) noexcept { std::free(p); }
+#endif
+
+class Scope {
+ public:
+  explicit Scope(Mode selected) : old_(mode) { calls = 0; mode = selected; }
+  ~Scope() { mode = old_; }
+  Scope(const Scope&) = delete;
+  Scope& operator=(const Scope&) = delete;
+  std::size_t observed() const noexcept { return calls; }
+ private:
+  Mode old_;
+};
+}  // namespace allocation_probe
+
+#if !defined(MHGP7_WITNESS_STACK_NO_ALLOC_OBSERVER)
+void* operator new(std::size_t bytes) { return allocation_probe::allocate(bytes); }
+void* operator new[](std::size_t bytes) { return allocation_probe::allocate(bytes); }
+void operator delete(void* p) noexcept { allocation_probe::release(p); }
+void operator delete[](void* p) noexcept { allocation_probe::release(p); }
+void operator delete(void* p, std::size_t) noexcept { allocation_probe::release(p); }
+void operator delete[](void* p, std::size_t) noexcept { allocation_probe::release(p); }
+#endif
+
+using namespace mhgp7;
+namespace {
+struct Failure { const char* reason; };
+void check(bool condition, const char* reason) { if (!condition) throw Failure{reason}; }
+
+struct Entry { NodeRef z; u8 open; };
+static_assert(std::is_trivial_v<Entry> && std::is_standard_layout_v<Entry>);
+static_assert(alignof(Entry) <= alignof(std::max_align_t));
+using Stack = InlineStack<Entry, 64>;
+Entry entry(std::size_t i) { return {static_cast<NodeRef>(-1 - static_cast<i32>(i)), static_cast<u8>(i % 8)}; }
+bool same_entry(const Entry& a, const Entry& b) { return a.z == b.z && a.open == b.open; }
+
+struct Totals {
+  u64 helper_checks = 0, helper_spill_allocations = 0, helper_allocation_failures = 0;
+  u64 clouds = 0, permutations = 0, queries = 0, guarded_queries = 0;
+  u64 reference_allocations = 0, candidate_allocations = 0, corner_evals = 0, nodes_visited = 0;
+  u64 positive[3] = {0, 0, 0};
+  u64 max_height = 0, max_frontier = 0, topology_checks = 0, internal_anchor_pairs = 0;
+  u64 permutation_comparisons = 0, duplicate_position_clouds = 0;
+  u64 lane_mask_fixtures = 0, lane_mask_nominal = 0, lane_mask_product = 0;
+} totals;
+
+void helper_gate() {
+  check(kObserveAllocations, "helper.requires_allocation_observer");
+  // Positive control: this is an explicit function call, not a claim that
+  // every possible C++ allocation expression must remain unelided.
+  bool control_failed = false;
+  std::size_t control_calls = 0;
+  {
+    allocation_probe::Scope scope(allocation_probe::Mode::kFail);
+    try { void* p = ::operator new(8); ::operator delete(p); }
+    catch (const std::bad_alloc&) { control_failed = true; }
+    control_calls = scope.observed();
+  }
+  check(control_failed && control_calls == 1, "helper.allocation_interceptor_control");
+  ++totals.helper_checks;
+
+  std::size_t inline_calls = 0;
+  {
+    allocation_probe::Scope scope(allocation_probe::Mode::kFail);
+    Stack stack;
+    check(stack.empty() && stack.size() == 0, "helper.initial_empty");
+    for (std::size_t i = 0; i < 64; ++i) {
+      stack.push_back(entry(i));
+      const Stack& view = stack;
+      check(view.size() == i + 1 && same_entry(view.back(), entry(i)), "helper.inline_push_const_back");
+    }
+    for (std::size_t n = 64; n > 0; --n) {
+      check(stack.size() == n && same_entry(stack.back(), entry(n - 1)), "helper.inline_lifo");
+      stack.pop_back();
+    }
+    check(stack.empty(), "helper.inline_drained");
+    stack.clear();
+    inline_calls = scope.observed();
+  }
+  check(inline_calls == 0, "helper.inline_allocated");
+  ++totals.helper_checks;
+
+  Stack stack;
+  for (std::size_t i = 0; i < 64; ++i) stack.push_back(entry(i));
+  bool rejected = false;
+  std::size_t failed_calls = 0;
+  {
+    allocation_probe::Scope scope(allocation_probe::Mode::kFail);
+    try { stack.push_back(entry(64)); }
+    catch (const std::bad_alloc&) { rejected = true; }
+    failed_calls = scope.observed();
+  }
+  check(rejected && failed_calls == 1 && stack.size() == 64 && same_entry(stack.back(), entry(63)),
+        "helper.first_overflow_failure_strong_state");
+  ++totals.helper_allocation_failures;
+  ++totals.helper_checks;
+
+  std::size_t spill_calls = 0;
+  {
+    allocation_probe::Scope scope(allocation_probe::Mode::kCount);
+    for (std::size_t i = 64; i < 256; ++i) stack.push_back(entry(i));
+    spill_calls = scope.observed();
+  }
+  check(spill_calls > 0, "helper.overflow_positive_allocation_control");
+  totals.helper_spill_allocations += spill_calls;
+  for (std::size_t n = 256; n > 0; --n) {
+    check(stack.size() == n && same_entry(stack.back(), entry(n - 1)), "helper.spill_lifo");
+    stack.pop_back();
+  }
+  check(stack.empty(), "helper.spill_drained");
+  ++totals.helper_checks;
+
+  // Clear after overflow retains any vector capacity, but reuses inline
+  // entries first. The no-allocation assertion only covers this scope.
+  for (std::size_t i = 0; i < 160; ++i) stack.push_back(entry(i));
+  {
+    allocation_probe::Scope scope(allocation_probe::Mode::kFail);
+    stack.clear();
+    check(stack.empty() && stack.size() == 0, "helper.clear_after_overflow");
+    for (std::size_t i = 0; i < 64; ++i) stack.push_back(entry(i));
+    check(scope.observed() == 0 && same_entry(stack.back(), entry(63)), "helper.clear_inline_reuse");
+  }
+  for (std::size_t n = 64; n > 0; --n) {
+    check(same_entry(stack.back(), entry(n - 1)), "helper.clear_reuse_lifo");
+    stack.pop_back();
+  }
+  ++totals.helper_checks;
+
+  // Aliasing back() is exercised when entering overflow and when its vector
+  // grows. No assumptions are made about the vector's growth factor.
+  Stack alias;
+  for (std::size_t i = 0; i < 64; ++i) alias.push_back(entry(7));
+  for (std::size_t i = 64; i < 256; ++i) alias.push_back(alias.back());
+  while (!alias.empty()) {
+    check(same_entry(alias.back(), entry(7)), "helper.aliasing_push_lifo");
+    alias.pop_back();
+  }
+  ++totals.helper_checks;
+
+  Stack boundary;
+  for (std::size_t i = 0; i < 65; ++i) boundary.push_back(entry(i));
+  boundary.pop_back(); // Remove the last overflow entry, keep its capacity.
+  check(boundary.size() == 64 && same_entry(boundary.back(), entry(63)), "helper.last_overflow_pop");
+  boundary.push_back(entry(64));
+  check(boundary.size() == 65 && same_entry(boundary.back(), entry(64)), "helper.push_after_last_overflow_pop");
+  for (std::size_t n = 65; n > 0; --n) {
+    check(same_entry(boundary.back(), entry(n - 1)), "helper.boundary_reuse_lifo");
+    boundary.pop_back();
+  }
+  ++totals.helper_checks;
+
+  // Find the next actual vector growth under a throwing allocator without
+  // reading its capacity or assuming a vendor-specific growth factor.
+  Stack existing;
+  for (std::size_t i = 0; i < 65; ++i) existing.push_back(entry(i));
+  std::size_t accepted = 65;
+  rejected = false;
+  while (accepted < 4096 && !rejected) {
+    std::size_t calls = 0;
+    {
+      allocation_probe::Scope scope(allocation_probe::Mode::kFail);
+      try { existing.push_back(entry(accepted)); }
+      catch (const std::bad_alloc&) { rejected = true; }
+      calls = scope.observed();
+    }
+    check(calls == (rejected ? 1u : 0u), "helper.existing_overflow_interceptor");
+    if (!rejected) ++accepted;
+  }
+  check(rejected && existing.size() == accepted && same_entry(existing.back(), entry(accepted - 1)),
+        "helper.existing_overflow_failure_strong_state");
+  for (std::size_t n = accepted; n > 0; --n) {
+    check(same_entry(existing.back(), entry(n - 1)), "helper.failure_preserved_entire_lifo");
+    existing.pop_back();
+  }
+  ++totals.helper_allocation_failures;
+  ++totals.helper_checks;
+  check(totals.helper_checks == 8 && totals.helper_allocation_failures == 2 &&
+        totals.helper_spill_allocations > 0, "helper.nonvacuity");
+}
+
+P3 decode_key(u64 key) {
+  i64 c[3] = {0, 0, 0};
+  for (int bit = 0; bit < 48; ++bit)
+    if ((key >> bit) & 1) c[bit % 3] += i64{1} << (bit / 3);
+  return {c[0], c[1], c[2]};
+}
+
+std::vector<std::vector<InputPoint>> scenes() {
+  std::vector<std::vector<P3>> points;
+  points.push_back({{0, 0, 0}, {65535, 65535, 65535}});
+  std::vector<P3> line;
+  for (i64 x = 0; x <= 600; x += 100) line.push_back({x, 100, 100});
+  points.push_back(std::move(line));
+  std::vector<P3> cube;
+  for (i64 x : {0, 32767, 65535}) for (i64 y : {0, 32767, 65535}) for (i64 z : {0, 32767, 65535})
+    cube.push_back({x, y, z}); // All six faces and one interior point.
+  check(cube.size() == 27, "fixture.six_faces_cardinality");
+  points.push_back(std::move(cube));
+  points.push_back({{0, 0, 0}, {0, 4, 0}, {100, 0, 0}, {100, 4, 0},
+                    {50, 2, 0}, {50, 20, 0}, {50, 30, 0}, {18, 1, 1}, {80, 3, 2}});
+  std::vector<P3> scattered;
+  u64 state = 0x7769746e65737346ULL;
+  const auto next = [&]() { state = state * 6364136223846793005ULL + 1442695040888963407ULL; return state; };
+  for (int i = 0; i < 48; ++i)
+    scattered.push_back({static_cast<i64>((next() >> 32) & 65535),
+                         static_cast<i64>((next() >> 32) & 65535), static_cast<i64>((next() >> 32) & 65535)});
+  points.push_back(std::move(scattered));
+  const u64 all = (u64{1} << 48) - 1;
+  for (bool mirrored : {false, true}) {
+    std::vector<P3> comb{decode_key(mirrored ? all : 0)};
+    for (int bit = 0; bit < 48; ++bit) comb.push_back(decode_key((u64{1} << bit) ^ (mirrored ? all : 0)));
+    points.push_back(std::move(comb));
+  }
+  points.push_back({{0, 0, 0}, {0, 0, 0}, {100, 0, 0}, {100, 0, 0},
+                    {50, 0, 0}, {50, 0, 0}, {50, 0, 0}, {50, 20, 0}, {50, 30, 0}});
+  check(points.size() == 8, "fixture.scene_cardinality");
+  std::vector<std::vector<InputPoint>> result;
+  for (const auto& cloud : points) {
+    std::vector<InputPoint> input;
+    for (std::size_t i = 0; i < cloud.size(); ++i)
+      input.push_back({static_cast<PointId>(4000000000ULL - 97 * i), cloud[i]});
+    result.push_back(std::move(input));
+  }
+  return result;
+}
+
+bool same_index(const CloudIndex& a, const CloudIndex& b) {
+  if (a.keys != b.keys || a.upos != b.upos || a.bucket_start != b.bucket_start || a.bucket_ids != b.bucket_ids ||
+      a.wsum != b.wsum || a.nodes.size() != b.nodes.size() || a.input_count != b.input_count || a.valid != b.valid)
+    return false;
+  for (std::size_t i = 0; i < a.nodes.size(); ++i) {
+    const auto& x = a.nodes[i]; const auto& y = b.nodes[i];
+    if (x.left != y.left || x.right != y.right || x.first != y.first || x.last != y.last || x.parent != y.parent)
+      return false;
+    for (int k = 0; k < 3; ++k)
+      if (x.clo[k] != y.clo[k] || x.chi[k] != y.chi[k] || x.tlo[k] != y.tlo[k] || x.thi[k] != y.thi[k]) return false;
+  }
+  return true;
+}
+
+void topology_gate(const CloudIndex& ix) {
+  struct Pending { NodeRef z; u64 depth; };
+  std::vector<Pending> pending{{ix.root(), 0}};
+  std::vector<NodeRef> expected;
+  u64 height = 0, peak = 1;
+  while (!pending.empty()) {
+    const Pending p = pending.back(); pending.pop_back();
+    expected.push_back(p.z);
+    height = std::max(height, p.depth);
+    if (!is_leaf(p.z)) {
+      pending.push_back({ix.nodes[static_cast<std::size_t>(p.z)].left, p.depth + 1});
+      pending.push_back({ix.nodes[static_cast<std::size_t>(p.z)].right, p.depth + 1});
+      peak = std::max<u64>(peak, pending.size());
+    }
+  }
+  check(expected.size() == 2 * ix.keys.size() - 1 && height <= 48 && peak <= height + 1,
+        "topology.reference_frontier_height");
+  std::vector<NodeRef> actual;
+  actual.reserve(expected.size()); // Outside the allocation observation.
+  u64 observed_peak = 1;
+  {
+    allocation_probe::Scope scope(allocation_probe::Mode::kFail);
+    InlineStack<NodeRef, 64> stack;
+    stack.push_back(ix.root());
+    while (!stack.empty()) {
+      const NodeRef z = stack.back(); stack.pop_back(); actual.push_back(z);
+      if (!is_leaf(z)) {
+        stack.push_back(ix.nodes[static_cast<std::size_t>(z)].left);
+        stack.push_back(ix.nodes[static_cast<std::size_t>(z)].right);
+        observed_peak = std::max<u64>(observed_peak, stack.size());
+      }
+    }
+    if constexpr (kObserveAllocations) check(scope.observed() == 0, "topology.inline_allocated");
+  }
+  check(actual == expected && observed_peak == peak, "topology.dfs_order_frontier");
+  totals.max_height = std::max(totals.max_height, height);
+  totals.max_frontier = std::max(totals.max_frontier, peak);
+  ++totals.topology_checks;
+}
+
+using Pair = std::pair<NodeRef, NodeRef>;
+std::vector<Pair> query_pairs(const CloudIndex& ix) {
+  std::vector<NodeRef> refs;
+  for (std::size_t i = 0; i < ix.nodes.size(); ++i) refs.push_back(static_cast<NodeRef>(i));
+  for (i32 u = 0; u < ix.unique_count(); ++u) refs.push_back(leaf_ref(u));
+  const auto disjoint = [&](NodeRef a, NodeRef b) {
+    const auto ra = ix.range_of(a), rb = ix.range_of(b);
+    return ra.last < rb.first || rb.last < ra.first;
+  };
+  std::vector<Pair> all;
+  for (std::size_t a = 0; a < refs.size(); ++a) for (std::size_t b = a + 1; b < refs.size(); ++b)
+    if (disjoint(refs[a], refs[b])) all.emplace_back(refs[a], refs[b]);
+  check(!all.empty(), "fixture.disjoint_pair_nonvacuity");
+  std::vector<Pair> selected;
+  const auto add = [&](Pair p) {
+    if (selected.size() >= 12 || !disjoint(p.first, p.second)) return;
+    if (std::find(selected.begin(), selected.end(), p) == selected.end() &&
+        std::find(selected.begin(), selected.end(), Pair{p.second, p.first}) == selected.end()) selected.push_back(p);
+  };
+  add({leaf_ref(0), leaf_ref(ix.unique_count() - 1)});
+  add({leaf_ref(ix.unique_count() / 3), leaf_ref((2 * ix.unique_count()) / 3)});
+  for (std::size_t i = 0; i < 12; ++i) add(all[(i * all.size()) / 12]);
+  for (const auto& p : all) add(p);
+  for (const auto& p : selected) totals.internal_anchor_pairs += !is_leaf(p.first) || !is_leaf(p.second);
+  return selected;
+}
+
+template<class A, class B>
+bool same_counts(const A& a, const B& b) {
+  return a.c[0] == b.c[0] && a.c[1] == b.c[1] && a.c[2] == b.c[2] &&
+      a.nodes_visited == b.nodes_visited && a.corner_evals == b.corner_evals;
+}
+
+FusedCounts query_gate(const CloudIndex& ix, NodeRef a, NodeRef b, const std::array<u64, 3>& thresholds,
+                      u8 mask, bool corners) {
+  witness_stack_reference::FusedCounts reference;
+  FusedCounts candidate, guarded;
+  std::size_t reference_calls = 0, candidate_calls = 0, guarded_calls = 0;
+  {
+    // E is compared in a successful allocation regime. Removing its heap
+    // need deliberately changes when bad_alloc can occur; no same-failure-
+    // calendar claim is made. Only F is required to complete with new denied.
+    allocation_probe::Scope scope(allocation_probe::Mode::kCount);
+    reference = witness_stack_reference::count_universal_witnesses(ix, a, b, thresholds.data(), mask, corners);
+    reference_calls = scope.observed();
+  }
+  {
+    allocation_probe::Scope scope(allocation_probe::Mode::kCount);
+    candidate = count_universal_witnesses(ix, a, b, thresholds.data(), mask, corners);
+    candidate_calls = scope.observed();
+  }
+  check(same_counts(reference, candidate), "witness.count_nodes_corners_differential");
+  if constexpr (kObserveAllocations) {
+    allocation_probe::Scope scope(allocation_probe::Mode::kFail);
+    guarded = count_universal_witnesses(ix, a, b, thresholds.data(), mask, corners);
+    guarded_calls = scope.observed();
+    check(same_counts(reference, guarded), "witness.guarded_count_nodes_corners_differential");
+    check(reference_calls > 0 && candidate_calls == 0 && guarded_calls == 0, "witness.allocation_control");
+    ++totals.guarded_queries;
+  }
+  for (int lane = 0; lane < 3; ++lane) {
+    check(reference.c[lane] <= thresholds[static_cast<std::size_t>(lane)], "witness.threshold_clipping");
+    if (!(mask & (1u << lane))) check(reference.c[lane] == 0, "witness.masked_lane_zero");
+    totals.positive[lane] += reference.c[lane] > 0;
+  }
+  ++totals.queries;
+  totals.reference_allocations += reference_calls; totals.candidate_allocations += candidate_calls;
+  totals.nodes_visited += reference.nodes_visited; totals.corner_evals += reference.corner_evals;
+  return candidate;
+}
+
+void witness_gate() {
+  const u64 maximum = std::numeric_limits<u64>::max();
+  const std::array<std::array<u64, 3>, 6> thresholds{{{0, 0, 0}, {0, 1, 9}, {1, 1, 1},
+                                                   {2, 4, 8}, {8, 2, 4}, {maximum, maximum, maximum}}};
+  for (const auto& original : scenes()) {
+    const CloudIndex baseline = build_cloud_index(original);
+    check(baseline.valid && baseline.unique_count() >= 2, "fixture.valid_index");
+    std::vector<FusedCounts> expected;
+    for (int permutation = 0; permutation < 3; ++permutation) {
+      auto input = original;
+      if (permutation == 1) std::reverse(input.begin(), input.end());
+      if (permutation == 2) std::rotate(input.begin(), input.begin() + static_cast<std::ptrdiff_t>(input.size() / 3), input.end());
+      const CloudIndex ix = build_cloud_index(input);
+      check(same_index(ix, baseline), "fixture.permutation_index_identity");
+      ++totals.clouds; totals.permutations += permutation != 0;
+      totals.duplicate_position_clouds += ix.has_duplicate_positions();
+      topology_gate(ix);
+      const auto pairs = query_pairs(ix);
+      if (permutation == 0) expected.reserve(pairs.size() * 2 * 8 * thresholds.size() * 2);
+      std::size_t ordinal = 0;
+      for (const auto& pair : pairs) for (bool swapped : {false, true})
+        for (u8 mask = 0; mask < 8; ++mask) for (const auto& h : thresholds) for (bool corners : {false, true}) {
+          const FusedCounts result = query_gate(ix, swapped ? pair.second : pair.first,
+                                               swapped ? pair.first : pair.second, h, mask, corners);
+          if (permutation == 0) expected.push_back(result);
+          else {
+            check(ordinal < expected.size() && same_counts(result, expected[ordinal]), "witness.permutation_counts");
+            ++totals.permutation_comparisons;
+          }
+          ++ordinal;
+        }
+      check(ordinal == expected.size() && same_index(ix, baseline), "witness.index_unchanged");
+    }
+  }
+  check(totals.clouds == 24 && totals.permutations == 16 && totals.topology_checks == 24,
+        "witness.fixture_inventory");
+  check(totals.queries >= 20000 &&
+        totals.guarded_queries == (kObserveAllocations ? totals.queries : 0) &&
+        totals.permutation_comparisons * 3 == totals.queries * 2, "witness.query_nonvacuity");
+  check(totals.max_height == 48 && totals.max_frontier == 49 && totals.internal_anchor_pairs > 0 &&
+        totals.duplicate_position_clouds == 3, "witness.topology_nonvacuity");
+  check(totals.positive[0] > 0 && totals.positive[1] > 0 && totals.positive[2] > 0 &&
+        totals.corner_evals > 0 && totals.nodes_visited > 0, "witness.geometric_nonvacuity");
+  if constexpr (kObserveAllocations)
+    check(totals.reference_allocations > 0 && totals.candidate_allocations == 0, "witness.allocation_nonvacuity");
+}
+
+
+void lane_mask_gate(bool injected) {
+  const std::vector<InputPoint> input{{0, {0, 0, 0}}, {1, {4, 0, 0}}, {2, {5, 0, 0}},
+                                      {3, {6, 0, 0}}, {4, {10, 0, 0}}};
+  const CloudIndex ix = build_cloud_index(input);
+  check(ix.valid && ix.unique_count() == 5 && ix.input_count == 5, "lane_mask.fixture_cardinality");
+  i32 ua = -1, ub = -1;
+  for (i32 u = 0; u < ix.unique_count(); ++u) {
+    if (ix.upos[static_cast<std::size_t>(u)] == P3{0, 0, 0}) ua = u;
+    if (ix.upos[static_cast<std::size_t>(u)] == P3{10, 0, 0}) ub = u;
+  }
+  check(ua >= 0 && ub >= 0 && ua != ub, "lane_mask.fixture_anchors");
+  const u64 h[3] = {10, 10, 10};
+  const auto nominal = witness_stack_reference::count_universal_witnesses(ix, leaf_ref(ua), leaf_ref(ub), h, 1, false);
+  const auto product = count_universal_witnesses(ix, leaf_ref(ua), leaf_ref(ub), h, 1, false);
+  check(nominal.c[0] == 3 && nominal.c[1] == 0 && nominal.c[2] == 0 &&
+        nominal.nodes_visited > 0 && nominal.corner_evals == 0, "lane_mask.reference_literal_three");
+  check(product.c[1] == 0 && product.c[2] == 0 && product.corner_evals == 0,
+        "lane_mask.other_fields_preserved");
+  check(injected ? (product.c[0] == 8 && product.nodes_visited > nominal.nodes_visited)
+                 : same_counts(nominal, product), "lane_mask.expected_causal_difference");
+  ++totals.lane_mask_fixtures;
+  totals.lane_mask_nominal = nominal.c[0];
+  totals.lane_mask_product = product.c[0];
+  check(totals.lane_mask_fixtures == 1, "lane_mask.nonvacuity");
+}
+
+void report(const char* status, const char* reason, std::string_view selected, std::string_view mutant) {
+  std::printf("witness_stack_gate=%s case=%.*s reason=%s mutant=%.*s public_status=not_claimed\n",
+              status, static_cast<int>(selected.size()), selected.data(), reason,
+              static_cast<int>(mutant.size()), mutant.data());
+  std::printf("allocation_observer=%s sizeof_entry=%zu sizeof_array64=%zu sizeof_vector=%zu sizeof_stack=%zu alignof_entry=%zu alignof_stack=%zu\n",
+    kObserveAllocations ? "enabled" : "disabled", sizeof(Entry), sizeof(std::array<Entry, 64>),
+    sizeof(std::vector<Entry>), sizeof(Stack), alignof(Entry), alignof(Stack));
+  std::printf("lane_mask_fixtures=%llu lane_mask_nominal=%llu lane_mask_product=%llu\n",
+    static_cast<unsigned long long>(totals.lane_mask_fixtures),
+    static_cast<unsigned long long>(totals.lane_mask_nominal),
+    static_cast<unsigned long long>(totals.lane_mask_product));
+  std::printf("helper_checks=%llu overflow_allocations=%llu allocation_failures=%llu\n",
+    static_cast<unsigned long long>(totals.helper_checks), static_cast<unsigned long long>(totals.helper_spill_allocations),
+    static_cast<unsigned long long>(totals.helper_allocation_failures));
+  std::printf("clouds=%llu permutations=%llu queries=%llu guarded_queries=%llu permutation_comparisons=%llu topology_checks=%llu max_height=%llu max_topological_frontier=%llu internal_anchor_pairs=%llu duplicate_clouds=%llu\n",
+    static_cast<unsigned long long>(totals.clouds), static_cast<unsigned long long>(totals.permutations),
+    static_cast<unsigned long long>(totals.queries), static_cast<unsigned long long>(totals.guarded_queries),
+    static_cast<unsigned long long>(totals.permutation_comparisons), static_cast<unsigned long long>(totals.topology_checks),
+    static_cast<unsigned long long>(totals.max_height), static_cast<unsigned long long>(totals.max_frontier),
+    static_cast<unsigned long long>(totals.internal_anchor_pairs), static_cast<unsigned long long>(totals.duplicate_position_clouds));
+  std::printf("positive_q2=%llu positive_q3=%llu positive_q4=%llu nodes=%llu corners=%llu reference_new_calls=%llu candidate_new_calls=%llu\n",
+    static_cast<unsigned long long>(totals.positive[0]), static_cast<unsigned long long>(totals.positive[1]),
+    static_cast<unsigned long long>(totals.positive[2]), static_cast<unsigned long long>(totals.nodes_visited),
+    static_cast<unsigned long long>(totals.corner_evals), static_cast<unsigned long long>(totals.reference_allocations),
+    static_cast<unsigned long long>(totals.candidate_allocations));
+}
+}  // namespace
+
+int main(int argc, char** argv) {
+  std::string_view selected = "all", mutant = "none";
+  bool have_case = false, have_mutant = false;
+  for (int i = 1; i < argc; ++i) {
+    const std::string_view arg = argv[i];
+    if (arg.starts_with("--case=") && !have_case) {
+      selected = arg.substr(7); have_case = true;
+    } else if (arg.starts_with("--mutant=") && !have_mutant) {
+      mutant = arg.substr(9); have_mutant = true;
+    } else return 2;
+  }
+  if (selected != "all" && selected != "helper" && selected != "witness" && selected != "lane-mask") return 2;
+  if (have_mutant && (mutant != "witness-no-lane-mask" || selected != "lane-mask")) return 2;
+  if (!kObserveAllocations && (selected == "all" || selected == "helper")) return 2;
+  try {
+    // Freeze the test registry before any product call or observed query.
+    // No witness warm-up is hidden outside an allocation observation.
+    (void)mutant_registry();
+    if (have_mutant && !mutants_enable(mutant)) return 2;
+    if (selected == "all" || selected == "helper") helper_gate();
+    if (selected == "all" || selected == "lane-mask") lane_mask_gate(have_mutant);
+    if (selected == "all" || selected == "witness") witness_gate();
+    if (have_mutant) {
+      report("mutant_killed", "witness.lane_mask_double_credit", selected, mutant); return 4;
+    }
+    report("passed", "none", selected, mutant); return 0;
+  } catch (const Failure& failure) {
+    report("failed", failure.reason, selected, mutant); return 1;
+  } catch (const std::bad_alloc&) {
+    report("failed", "unexpected_bad_alloc", selected, mutant); return 1;
+  } catch (...) {
+    report("failed", "unexpected_exception", selected, mutant); return 1;
+  }
+}

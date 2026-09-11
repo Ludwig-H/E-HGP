@@ -1,0 +1,84 @@
+{
+  "GCP_used": false,
+  "doubling_physical_ratios": [
+    {
+      "n0": 8000,
+      "n1": 16000,
+      "ratios": {
+        "mebs": 2.09774886838906,
+        "nodes": 2.0898924976713027,
+        "peak_RSS_KiB": 2.0711830793552792,
+        "requests": 2.0994519149695834,
+        "seeds": 2.090589098264825,
+        "static_capacity": 2.003831933579125,
+        "supports": 2.1060735631580365,
+        "unique": 2.098314333812708
+      }
+    },
+    {
+      "n0": 16000,
+      "n1": 32000,
+      "ratios": {
+        "mebs": 2.0781281091729396,
+        "nodes": 2.06572211514754,
+        "peak_RSS_KiB": 2.0571137188729915,
+        "requests": 2.0712250496882727,
+        "seeds": 2.065495742656976,
+        "static_capacity": 2.002825962014795,
+        "supports": 2.0847371734389353,
+        "unique": 2.071578310134136
+      }
+    }
+  ],
+  "public_status": "not_claimed",
+  "results": [
+    {
+      "fields_compared": 35,
+      "mebs": 4185184,
+      "n": 8000,
+      "nodes": 3976472,
+      "payload_digest": "cdd77e308f765d643ce6707ba0f613f94b4cf560124c0079ee8bfa58ca0c329b",
+      "peak_RSS_KiB": 2137980,
+      "requests": 10396562,
+      "seeds": 2396646,
+      "static_capacity": 307936444,
+      "supports": 364590166,
+      "total_s": 466.761054724,
+      "tower_s": 150.41232426,
+      "unique": 5176885
+    },
+    {
+      "fields_compared": 35,
+      "mebs": 8779465,
+      "n": 16000,
+      "nodes": 8310399,
+      "payload_digest": "8eb94f8ff9dedc144012116651806b3966ed05624b5d6f72815689b3398f4e45",
+      "peak_RSS_KiB": 4428148,
+      "requests": 21827082,
+      "seeds": 5010402,
+      "static_capacity": 617052880,
+      "supports": 767853710,
+      "total_s": 686.048711954,
+      "tower_s": 123.976270631,
+      "unique": 10862732
+    },
+    {
+      "fields_compared": 35,
+      "mebs": 18244853,
+      "n": 32000,
+      "nodes": 17166975,
+      "payload_digest": "ef79778208293a4b6941e8b632e569d38b732d15556309426fe6d5f33b32d8c4",
+      "peak_RSS_KiB": 9109204,
+      "requests": 45208799,
+      "seeds": 10348964,
+      "static_capacity": 1235849528,
+      "supports": 1600773173,
+      "total_s": 802.278327661,
+      "tower_s": 217.109716203,
+      "unique": 22503000
+    }
+  ],
+  "shared_host": true,
+  "status": "verified_closed_local_static_scale",
+  "timing_speedup_claim": false
+}

@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+"""Correct only the package reader, retaining every original capture byte."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+
+
+def main() -> None:
+    here = Path(__file__).resolve().parent
+    root = here.parents[2]
+    target = root / "morsehgp3D_v7/receipts/static_resolution_cpu_20260911"
+    manifest = json.loads((target / "logical_manifest.json").read_text())
+    if "reader_review/manifest_initial.json" in manifest["files"]:
+        raise RuntimeError("already resealed")
+    updates = {"README.md": (here / "README.md").read_bytes(),
+               "packaging/verify.py": (here / "verify.py").read_bytes(),
+               "packaging/reseal_reader.py": Path(__file__).read_bytes(),
+               "packaging/record_reader_failure.py": (here / "record_reader_failure.py").read_bytes()}
+    for path in sorted((here / "reader_review").iterdir()):
+        if path.is_file():
+            updates["reader_review/" + path.name] = path.read_bytes()
+    for name, data in updates.items():
+        digest = hashlib.sha256(data).hexdigest()
+        manifest["files"][name] = digest
+        obj = target / "objects" / (digest + ".source")
+        if not obj.exists():
+            obj.write_bytes(data)
+    encoded = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode()
+    (target / "logical_manifest.json").write_bytes(encoded)
+    shutil.copyfile(here / "verify.py", target / "verify.py")
+    shutil.copyfile(here / "README.md", target / "README.md")
+    for flags in [[], ["-O"]]:
+        subprocess.run(["python3", "-B", *flags, str(target / "verify.py")], check=True)
+    print(json.dumps({"status": "sealed", "files": len(manifest["files"]),
+                      "manifest_sha256": hashlib.sha256(encoded).hexdigest()}))
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,18 @@
+{
+  "ELF_included": false,
+  "GCP_used": false,
+  "commands": 18,
+  "default_route_not_changed": true,
+  "historical_markdown_storage": "README.md mapped byte-identically to capture/README.md.source",
+  "logical_capture_files": 544,
+  "original_root_header": "build/v7_static_resolver_20260911/source_r2/morsehgp3D_v7/src/forest/full_ball_tower.hpp",
+  "physical_mutants": 6,
+  "preserved_bytes": true,
+  "private_manifest_sha256": "47bad2042100d4545faa1f5bcd57bf77482cc126266d2ef6b612a69a9f16c15e",
+  "private_prototype_cpu": true,
+  "prototype_header_sha256": "33e7d05effce908532d21255e5e0efc4f8c7370d8a05a17dd761142d81bd4209",
+  "review_files": {
+    "review/CONCEPTION.md": "0cab6779e70f55046621b582b481741124e610185071b29efcb62002e1ab7df0",
+    "review/INITIAL.md": "ede92f77fd153822bf2ac939331563db2e7363e413b7ce0047788d2ff5c9868e"
+  }
+}

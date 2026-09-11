@@ -1,0 +1,10 @@
+--- full_ball_tower.hpp
++++ full_ball_tower.hpp
+@@ -661,7 +661,6 @@
+       if (lanes > 1) add(st.static_workers_created, lanes);  // one lane uses the caller
+     }
+     catch (...) {
+-      account();
+       throw;
+     }
+     account();

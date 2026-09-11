@@ -1,0 +1,40 @@
+--- original/source/morsehgp3D_v7/tests/anchor_meb_gate.cpp
++++ private/source/morsehgp3D_v7/tests/anchor_meb_gate.cpp
+@@ -7,6 +7,7 @@
+ #include <vector>
+ 
+ #include "../src/forest/anchor_meb.hpp"
++#include "../../../meb_selection.cuh"
+ #include "../oracle/local_plateau_oracle.hpp"
+ 
+ #ifdef MHGP7_TESTING
+@@ -98,7 +99,28 @@
+   AnchorMebWork expected = cumulative;
+   u32 selected = 0;
+   const auto truth = judge(points, expected, selected);
+-  const auto got = anchor_meb(points, cumulative);
++  const auto paid_before = cumulative;
++  const auto cpu = anchor_meb(points, cumulative);
++  gpu_meb_private::Request request;
++  request.ordinal = static_cast<u32>(comparisons);
++  request.count = static_cast<u8>(points.size());
++  for (u8 i = 0; i < request.count; ++i) request.sites[i] = i;
++  gpu_meb_private::Selection selection;
++  gpu_meb_private::select_stub(points.data(), points.size(), &request, 1, &selection);
++  const auto materialized = gpu_meb_private::materialize(points.data(), points.size(), request, selection);
++  const auto& got = materialized.value;
++  need(got.status == cpu.status && got.key == cpu.key && got.level == cpu.level &&
++      got.support_size == cpu.support_size && got.support_slots == cpu.support_slots &&
++      got.selected_shell_count == cpu.selected_shell_count, "stub.physical_cpu_match");
++  need(materialized.selection_work.calls == cumulative.calls - paid_before.calls &&
++      materialized.selection_work.power_tests == cumulative.power_tests - paid_before.power_tests &&
++      materialized.selection_work.materializations == cumulative.materializations - paid_before.materializations,
++      "stub.exact_paid_work");
++  for (size_t q = 0; q < 5; ++q)
++    need(materialized.selection_work.supports_by_size[q] ==
++        cumulative.supports_by_size[q] - paid_before.supports_by_size[q], "stub.support_work");
++  need(materialized.host_validation_power_tests == (points.size() == 1 ? 0 : points.size()),
++      "stub.extra_host_validation_is_explicit");
+   need(points == before, "input.modified");
+   need(got.status == AnchorMebStatus::kOk, "meb.expected_success");
+   need(got.key.a > 0 && got.level.den > 0, "meb.invalid_geometry");

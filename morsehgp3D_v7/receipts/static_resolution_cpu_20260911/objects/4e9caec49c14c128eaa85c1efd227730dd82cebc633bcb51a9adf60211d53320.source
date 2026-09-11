@@ -1,0 +1,40 @@
+[
+  {
+    "name": "configure",
+    "argv": [
+      "cmake",
+      "-S",
+      "morsehgp3D_v7",
+      "-B",
+      "/workspaces/E-HGP/build/v7_static_cuda_cmake_20260911",
+      "-DCMAKE_BUILD_TYPE=Release",
+      "-DMHGP7_ENABLE_CUDA=ON",
+      "-DCMAKE_CUDA_COMPILER=/workspaces/E-HGP/build/v7_nvcc_pedantic_20260910/toolkit/bin/nvcc",
+      "-DCMAKE_CUDA_FLAGS=-L/workspaces/E-HGP/build/v7_nvcc_pedantic_20260910/toolkit/lib",
+      "-DMHGP7_DIGEST_BOOST_INCLUDE_DIR=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include"
+    ],
+    "exit_code": 0,
+    "started_ns": 1789110042037084673,
+    "ended_ns": 1789110067158401609,
+    "stdout_sha256": "bc96d7ec655ac24e1ad9a9132c9aec19c5cbcb6c0041b6e4d5c72ae0cc3ae233",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "build",
+    "argv": [
+      "cmake",
+      "--build",
+      "/workspaces/E-HGP/build/v7_static_cuda_cmake_20260911",
+      "--parallel",
+      "1",
+      "--verbose",
+      "--target",
+      "mhgp7_full_ball_tower_cuda_probe"
+    ],
+    "exit_code": 0,
+    "started_ns": 1789110067159013298,
+    "ended_ns": 1789110177317308059,
+    "stdout_sha256": "3ab659902ecb1d7831a7aae3f883b2ec24c24e3502396dfc9883a5425f07043a",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

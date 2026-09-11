@@ -1,0 +1,67 @@
+[
+  {
+    "name": "nominal",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/san_r2/gate",
+      "--selftest"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "started_ns": 1789108878125237219,
+    "ended_ns": 1789108961342366246,
+    "stdout_sha256": "cab6b63f8be174011f2b64186419fa467bf00641e4284d54ecff33768555a8d5",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "static1",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/san_r2/gate",
+      "--static-1"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "started_ns": 1789108961342959687,
+    "ended_ns": 1789109030273917113,
+    "stdout_sha256": "ab7ce73fbbad56c7f3a91b9ff31cdd62f2597b768a2362b47651b6df366d7e69",
+    "stderr_sha256": "f8777581e0dc5ede60143d3a72fe7b927fd34bbf682b2cd5155997e746d99584"
+  },
+  {
+    "name": "static4",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/san_r2/gate",
+      "--static-4"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "started_ns": 1789109030274819103,
+    "ended_ns": 1789109091786542927,
+    "stdout_sha256": "ab7ce73fbbad56c7f3a91b9ff31cdd62f2597b768a2362b47651b6df366d7e69",
+    "stderr_sha256": "d78f7936e61482441b24d671d47ba47bc1cffd3f1558de1882b37caa46974167"
+  },
+  {
+    "name": "bad_argument",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/san_r2/gate",
+      "--unknown"
+    ],
+    "exit_code": 2,
+    "expected_exit_code": 2,
+    "started_ns": 1789109091787182848,
+    "ended_ns": 1789109091914840338,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "4b9eeadc562c94288f788d79631dcc662f5b8c306e7232ccdc083094698a2e85"
+  },
+  {
+    "name": "nominal_launch_guard",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/san_r2/gate",
+      "--expect-launch-failure"
+    ],
+    "exit_code": 1,
+    "expected_exit_code": 1,
+    "started_ns": 1789109091915854104,
+    "ended_ns": 1789109092558476805,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

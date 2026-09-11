@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+"""Create portable snapshot of closed O2 and failed SAN, without ELF."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+
+HERE = Path(__file__).resolve().parent
+DEST = HERE.parents[1] / 'morsehgp3D_v7/receipts/static_worker_failure_20260911'
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+def main():
+    if DEST.exists():
+        raise ValueError('destination_exists')
+    if json.loads((HERE/'o2/receipt.json').read_text())['status'] != 'passed' or (HERE/'san_replay').exists():
+        raise ValueError('closed_O2_no_SAN_replay_required')
+    rows = {}
+    for directory in ('o2', 'san'):
+        for p in sorted((HERE/directory).rglob('*')):
+            if p.is_file() and p.name not in ('gate', 'mutant_gate'):
+                rows[p.relative_to(HERE).as_posix()] = p.read_bytes()
+    for name in ('driver.cpp', 'record.py', 'verify.py', 'replay_sanitizers.py'):
+        rows[name] = (HERE/name).read_bytes()
+    rows['original_header.hpp.source'] = (HERE.parent/'v7_static_mutants_20260911/source/morsehgp3D_v7/src/forest/full_ball_tower.hpp').read_bytes()
+    preferred = {
+        'driver.cpp': 'capture/driver.cpp',
+        'original_header.hpp.source': 'capture/original_header.hpp.source',
+        'o2/fixture_driver.cpp': 'capture/fixture_driver.cpp',
+        'o2/test_only_hook.diff': 'capture/test_only_hook.diff',
+        'o2/drop_paid_work.diff': 'capture/drop_paid_work.diff',
+        'o2/commands.json': 'capture/o2_commands.json',
+        'san/commands.json': 'capture/san_commands.json',
+        'o2/post_admission_and_reuse.stdout': 'capture/O2.stdout.jsonl',
+        'o2/drop_paid_work.stderr': 'capture/mutant.stderr',
+        'san/post_admission_and_reuse.stderr': 'capture/SAN_failed.stderr',
+        'record.py': 'capture/record.py.source',
+        'verify.py': 'capture/verify_private.py.source',
+        'replay_sanitizers.py': 'capture/replay_sanitizers_NOT_EXECUTED.py.source',
+    }
+    DEST.mkdir(parents=True); stored = {}; mapping = {}
+    for name in [*preferred, *(n for n in rows if n not in preferred)]:
+        data = rows[name]; digest = sha(data)
+        if data.startswith(b'\x7fELF'):
+            raise ValueError('ELF_in_capture')
+        if digest not in stored:
+            target = preferred.get(name, 'objects/' + digest)
+            (DEST/target).parent.mkdir(parents=True, exist_ok=True)
+            (DEST/target).write_bytes(data); stored[digest] = target
+        mapping[name] = dict(physical=stored[digest], sha256=digest)
+    (DEST/'storage_map.json').write_text(json.dumps(mapping, indent=2, sort_keys=True) + '\n')
+    shutil.copyfile(HERE/'public_README.md', DEST/'README.md')
+    shutil.copyfile(HERE/'public_verify.py', DEST/'verify.py')
+    shutil.copyfile(Path(__file__), DEST/'capture/publish.py.source')
+    files = {p.relative_to(DEST).as_posix(): sha(p.read_bytes()) for p in sorted(DEST.rglob('*')) if p.is_file()}
+    (DEST/'MANIFEST.json').write_text(json.dumps(dict(files=files, public_status='not_claimed'), indent=2, sort_keys=True) + '\n')
+    print(json.dumps(dict(status='published', logical_files=len(rows), distinct_captures=len(stored),
+        manifest_sha256=sha((DEST/'MANIFEST.json').read_bytes()))))
+
+if __name__ == '__main__':
+    main()

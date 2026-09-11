@@ -1,0 +1,105 @@
+#!/usr/bin/env python3
+"""Capture strict light driver builds and physical private mutations, serially."""
+import difflib
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import time
+
+HERE = Path(__file__).resolve().parent
+
+def need(ok, why):
+    if not ok:
+        raise ValueError(why)
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+def pins(path):
+    return {p.relative_to(path).as_posix(): sha(p) for p in sorted(path.rglob('*')) if p.is_file()}
+
+def main():
+    need(len(sys.argv) == 2, 'one_new_capture_name')
+    out = HERE / sys.argv[1]
+    out.mkdir(exist_ok=False)
+    shutil.copy2(HERE / 'driver.cpp', out / 'driver.cpp')
+    shutil.copy2(HERE / 'fixtures.txt', out / 'fixtures.txt')
+    shutil.copy2(HERE / 'expected.txt', out / 'expected.txt')
+    shutil.copy2(Path(__file__), out / 'record.py.source')
+    commands = []
+    def run(name, argv, expected=0):
+        start = time.time_ns()
+        with (out / f'{name}.stdout').open('wb') as stdout, (out / f'{name}.stderr').open('wb') as stderr:
+            proc = subprocess.run(argv, stdout=stdout, stderr=stderr, env=dict(os.environ))
+        row = dict(name=name, argv=argv, started_ns=start, ended_ns=time.time_ns(),
+                   exit_code=proc.returncode, expected_exit_code=expected)
+        for stream in ('stdout', 'stderr'):
+            row[stream + '_sha256'] = sha(out / f'{name}.{stream}')
+        commands.append(row)
+        (out / 'commands.json').write_text(json.dumps(commands, indent=2) + '\n')
+        print(name, proc.returncode, flush=True)
+        need(proc.returncode == expected, f'unexpected_exit:{name}')
+    header = 'morsehgp3D_v7/src/forest/full_ball_tower.hpp'
+    pool = 'morsehgp3D_v7/src/parallel/pool.hpp'
+    mutations = [
+        ('admit_global_key', header,
+         'if (current_k >= lo && current_k <= b.n_interior + b.n_shell) {',
+         'if (current_k >= lo || current_k <= b.n_interior + b.n_shell) {', '4'),
+        ('consult_anchors', header,
+         'if (current_k >= lo && current_k <= b.n_interior + b.n_shell) {',
+         'if (current_k >= lo && current_k <= b.n_interior + b.n_shell && anchors[*found] != absent) {', '4'),
+        ('scatter_sorted_index', header,
+         'static_targets[request.ordinal] = target;', 'static_targets[r] = target;', '4'),
+        ('scatter_holes', header,
+         'r < groups[group + 1]; ++r)', 'r < std::min(groups[group + 1], groups[group] + 1); ++r)', '4'),
+        ('unnormalized_anchor', header,
+         'return root(anchors[target], prior_count);', 'return anchors[target];', '4'),
+        ('partial_launch', pool,
+         'admission.store(MHGP7_MUTANT("parallel-admit-partial-launch") ? 1u : 2u);',
+         'admission.store(1u);', 'launch'),
+    ]
+    status = 'failed'; error = None; source_sets = {}
+    try:
+        run('compiler', ['g++', '--version'])
+        for name, path, old, new, mode in [('nominal', '', '', '', '4')] + mutations:
+            source = out / name / 'source'
+            shutil.copytree(HERE / 'source', source)
+            if path:
+                changed = source / path
+                original = changed.read_text()
+                need(original.count(old) == 1, f'unique_mutation_site:{name}')
+                changed.write_text(original.replace(old, new))
+                diff = ''.join(difflib.unified_diff(original.splitlines(True),
+                    changed.read_text().splitlines(True), fromfile=path, tofile=path))
+                (out / name / 'mutation.diff').write_text(diff)
+            before = pins(source); source_sets[name] = before
+            (out / name / 'sources_before.json').write_text(json.dumps(before, indent=2, sort_keys=True) + '\n')
+            binary = out / name / 'gate'
+            run(name + '_compile', ['g++', '-O1', '-std=c++20', '-Wall', '-Wextra', '-Wpedantic', '-Werror',
+                '-pthread', '-DMHGP7_TESTING', '-I', str(source), '-MMD', '-MF', str(out / name / 'gate.d'),
+                str(out / 'driver.cpp'), '-o', str(binary)])
+            (out / name / 'binary.sha256').write_text(sha(binary) + '\n')
+            if name == 'nominal':
+                for route in ('0', '1', '4', 'launch'):
+                    run('nominal_' + route, [str(binary), str(out / 'fixtures.txt'), str(out / 'expected.txt'), route])
+            else:
+                run(name + '_run', [str(binary), str(out / 'fixtures.txt'), str(out / 'expected.txt'), mode], 1)
+            after = pins(source)
+            (out / name / 'sources_after.json').write_text(json.dumps(after, indent=2, sort_keys=True) + '\n')
+            need(after == before, f'source_stability:{name}')
+        status = 'passed'
+    except Exception as exc:
+        error = str(exc)
+    finally:
+        (out / 'receipt.json').write_text(json.dumps(dict(status=status, error=error,
+            source_header_sha256=sha(HERE / 'source' / header), mutants=len(mutations),
+            public_status='not_claimed', authority='bounded_rational_Gamma_signatures',
+            source_sets_started=list(source_sets), GCP_used=False), indent=2) + '\n')
+    need(status == 'passed', error)
+
+if __name__ == '__main__':
+    main()

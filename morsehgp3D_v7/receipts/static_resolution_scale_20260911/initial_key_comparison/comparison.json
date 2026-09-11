@@ -1,0 +1,80 @@
+{
+  "authority": "read_only_per_order_counter_comparison_not_new_geometric_oracle",
+  "input_digest": "b73744755477b18a5853084851075bb4e3e468ae7d1353c98d0991576a099639",
+  "payload_digest": "cdd77e308f765d643ce6707ba0f613f94b4cf560124c0079ee8bfa58ca0c329b",
+  "orders": [
+    {
+      "K": 2,
+      "R_observed": 161128,
+      "R_static": 161128,
+      "U_observed": 46136,
+      "U_static": 46136,
+      "static_seeded_unique": 29875
+    },
+    {
+      "K": 3,
+      "R_observed": 308189,
+      "R_static": 308189,
+      "U_observed": 114555,
+      "U_static": 114555,
+      "static_seeded_unique": 63353
+    },
+    {
+      "K": 4,
+      "R_observed": 500741,
+      "R_static": 500741,
+      "U_observed": 211968,
+      "U_static": 211968,
+      "static_seeded_unique": 108117
+    },
+    {
+      "K": 5,
+      "R_observed": 739105,
+      "R_static": 739105,
+      "U_observed": 337252,
+      "U_static": 337252,
+      "static_seeded_unique": 164195
+    },
+    {
+      "K": 6,
+      "R_observed": 1018342,
+      "R_static": 1018342,
+      "U_observed": 488952,
+      "U_static": 488952,
+      "static_seeded_unique": 231663
+    },
+    {
+      "K": 7,
+      "R_observed": 1338921,
+      "R_static": 1338921,
+      "U_observed": 666230,
+      "U_static": 666230,
+      "static_seeded_unique": 308825
+    },
+    {
+      "K": 8,
+      "R_observed": 1697911,
+      "R_static": 1697911,
+      "U_observed": 868194,
+      "U_static": 868194,
+      "static_seeded_unique": 396424
+    },
+    {
+      "K": 9,
+      "R_observed": 2097866,
+      "R_static": 2097866,
+      "U_observed": 1096161,
+      "U_static": 1096161,
+      "static_seeded_unique": 493388
+    },
+    {
+      "K": 10,
+      "R_observed": 2534359,
+      "R_static": 2534359,
+      "U_observed": 1347437,
+      "U_static": 1347437,
+      "static_seeded_unique": 600806
+    }
+  ],
+  "observed_packet_manifest_sha256": "6f2c2c448a7de9d2d5f5af9f689e551fb78e4bf4bdb18c1b2b99cfcd9bdcb8fe"
+}

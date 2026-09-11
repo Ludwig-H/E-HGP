@@ -1,0 +1,319 @@
+#include <array>
+#include <cstdio>
+#include <cstdlib>
+#include <new>
+#include <string_view>
+#include <type_traits>
+
+#include "variant/morsehgp3D_v7/src/forest/full_coverage_incremental.hpp"
+
+namespace allocation_fault {
+bool count = false;
+size_t calls = 0, requested = 0;
+long remaining = -1;
+[[gnu::noinline]] void* allocate(size_t bytes) {
+  if (count) { ++calls; requested += bytes; }
+  if (remaining == 0) throw std::bad_alloc();
+  if (remaining > 0) --remaining;
+  if (void* p = std::malloc(bytes ? bytes : 1)) return p;
+  throw std::bad_alloc();
+}
+[[gnu::noinline]] void release(void* p) noexcept { std::free(p); }
+}
+void* operator new(size_t n) { return allocation_fault::allocate(n); }
+void* operator new[](size_t n) { return allocation_fault::allocate(n); }
+void operator delete(void* p) noexcept { allocation_fault::release(p); }
+void operator delete[](void* p) noexcept { allocation_fault::release(p); }
+void operator delete(void* p, size_t) noexcept { allocation_fault::release(p); }
+void operator delete[](void* p, size_t) noexcept { allocation_fault::release(p); }
+void* operator new(size_t n, const std::nothrow_t&) noexcept {
+  try { return allocation_fault::allocate(n); } catch (...) { return nullptr; }
+}
+void* operator new[](size_t n, const std::nothrow_t&) noexcept {
+  try { return allocation_fault::allocate(n); } catch (...) { return nullptr; }
+}
+void operator delete(void* p, const std::nothrow_t&) noexcept { allocation_fault::release(p); }
+void operator delete[](void* p, const std::nothrow_t&) noexcept { allocation_fault::release(p); }
+
+namespace {
+using namespace mhgp7;
+using namespace mhgp7::full_coverage_detail;
+using Batches = std::vector<FullCoverageBatch>;
+template <class T>
+concept AcceptsForeignBank = requires(T& owner, std::shared_ptr<const FullCoveragePopulations> bank) {
+  owner.seal(bank);
+};
+struct Failure { const char* reason; };
+size_t checks = 0, rejects = 0, physical_nodes = 0, physical_parents = 0;
+size_t physical_contributions = 0, fault_rejects = 0, growth_allocations = 0;
+size_t incremental_allocations = 0, incremental_requested = 0;
+void need(bool condition, const char* reason) { ++checks; if (!condition) throw Failure{reason}; }
+ExactLevel level(u64 value) { return {{value, 0, 0}, 1}; }
+bool empty(const CoverageTowerBuildResult& result) {
+  return !result.populations && result.orders.empty();
+}
+void reject(const CoverageTowerBuildResult& result, const char* reason) {
+  need(result.status == FullCertificateStatus::kInvalidInput &&
+      std::string_view(result.reason) == reason && empty(result), reason);
+  ++rejects;
+}
+void same(const FullCoverageCertificate& a, const FullCoverageCertificate& b) {
+  need(a.order() == b.order() && a.nodes().size() == b.nodes().size(), "physical.nodes.size");
+  need(a.parents() == b.parents(), "physical.parents");
+  need(a.successors() == b.successors(), "physical.successors");
+  need(a.contributions().size() == b.contributions().size(), "physical.contributions.size");
+  need(a.populations()->domain() == b.populations()->domain(), "physical.domain");
+  need(a.populations()->rows().size() == b.populations()->rows().size(), "physical.rows.size");
+  for (size_t i = 0; i < a.populations()->rows().size(); ++i) {
+    need(a.populations()->rows()[i].interior == b.populations()->rows()[i].interior &&
+        a.populations()->rows()[i].shell == b.populations()->rows()[i].shell, "physical.rows");
+  }
+  for (size_t i = 0; i < a.nodes().size(); ++i) {
+    const auto& x = a.nodes()[i]; const auto& y = b.nodes()[i];
+    need(x.level == y.level && x.first == y.first && x.parent_count == y.parent_count,
+        "physical.node.fields");
+    ++physical_nodes;
+  }
+  physical_parents += a.parents().size();
+  for (size_t i = 0; i < a.contributions().size(); ++i) {
+    const auto& x = a.contributions()[i]; const auto& y = b.contributions()[i];
+    need(x.level == y.level && x.segment == y.segment &&
+        x.ref.population == y.ref.population && x.ref.shell_mask == y.ref.shell_mask &&
+        x.ref.include_interior == y.ref.include_interior, "physical.contribution.fields");
+    ++physical_contributions;
+  }
+}
+
+struct Fixture {
+  std::vector<PointId> domain{0, 1, 2, 3, 4, 5, 6, 7};
+  std::vector<FullCoveragePopulation> rows{{{}, {0, 1, 2}}, {{}, {3, 4, 5}},
+                                          {{6}, {7}}, {{}, {0}}};
+  Batches k2{{level(1), {{{}, {{0, 7, false}}}, {{}, {{1, 7, false}}}}},
+             {level(2), {{{0}, {{2, 1, false}}}}},
+             {level(3), {{{0, 1}, {}}}},
+             {level(4), {{{2}, {{3, 1, false}}}}}};
+  Batches k3{{level(1), {{{}, {{0, 7, false}}}, {{}, {{0, 7, false}}}}},
+             {level(2), {{{0, 1}, {{2, 1, true}}}}}};
+};
+
+// All fixture storage is prepared before fault injection. No harness allocation
+// occurs between starting the owner and receiving the globally sealed result.
+CoverageTowerBuildResult construct(const Fixture& fixture, bool views = false) {
+  CoverageTowerAssembler owner(fixture.domain);
+  for (const auto& row : fixture.rows) {
+    const auto appended = owner.append_population(row);
+    if (appended.status != FullCertificateStatus::kOk) return owner.seal();
+  }
+  for (const auto order : {2U, 3U}) {
+    const auto started = owner.begin_order(order);
+    if (started.status != FullCertificateStatus::kOk) return owner.seal();
+    const auto& batches = order == 2 ? fixture.k2 : fixture.k3;
+    for (const auto& batch : batches) {
+      CoverageAppendResult appended;
+      if (views) {
+        std::array<CoverageActionView, 2> scratch{};
+        for (size_t i = 0; i < batch.actions.size(); ++i)
+          scratch[i] = {batch.actions[i].parents, batch.actions[i].contributions};
+        appended = owner.append_batch(started.token, batch.level,
+            std::span<const CoverageActionView>(scratch.data(), batch.actions.size()));
+      } else appended = owner.append_batch(started.token, batch);
+      if (appended.status != FullCertificateStatus::kOk) return owner.seal();
+    }
+    if (owner.end_order(started.token).status != FullCertificateStatus::kOk) return owner.seal();
+  }
+  return owner.seal();
+}
+
+void paired_and_ownership() {
+  Fixture fixture;
+  const auto bank = build_full_coverage_populations(fixture.domain, fixture.rows);
+  need(bank.status == FullCertificateStatus::kOk, "baseline.bank");
+  auto first = build_full_coverage_certificate(2, bank.value, fixture.k2);
+  auto second = build_full_coverage_certificate(3, bank.value, fixture.k3);
+  need(first.status == FullCertificateStatus::kOk && second.status == FullCertificateStatus::kOk,
+      "baseline.build");
+  for (bool views : {false, true}) {
+    auto built = construct(fixture, views);
+    need(built.status == FullCertificateStatus::kOk && built.orders.size() == 2, "incremental.build");
+    need(built.orders[0].populations() == built.populations &&
+        built.orders[1].populations() == built.populations, "owner.actual.bank.sharing");
+    same(first.value, built.orders[0]); same(second.value, built.orders[1]);
+    FullCoverageCertificate moved(std::move(built.orders[0]));
+    need(!built.orders[0].populations() && built.orders[0].order() == 0 &&
+        built.orders[0].nodes().empty(), "move.source.empty");
+    same(first.value, moved);
+  }
+  auto built = construct(fixture, true);
+  fixture.rows.clear(); fixture.k2.clear(); fixture.k3.clear(); fixture.domain.assign(256, 99);
+  same(first.value, built.orders[0]); same(second.value, built.orders[1]);
+  const auto covered = full_coverage_at(built.orders[0], 2, level(4), true);
+  need(covered.status == FullCertificateStatus::kOk &&
+      covered.values == std::vector<PointId>({0, 1, 2, 3, 4, 5, 7}), "poisoned.input.coverage");
+
+  Fixture shared;
+  CoverageTowerAssembler owner(shared.domain), foreign(shared.domain);
+  for (const auto& row : shared.rows) {
+    need(owner.append_population(row).status == FullCertificateStatus::kOk, "owner.row");
+    need(foreign.append_population(row).status == FullCertificateStatus::kOk, "foreign.row");
+  }
+  const auto mine = owner.begin_order(2); const auto other = foreign.begin_order(2);
+  need(mine.status == FullCertificateStatus::kOk && other.status == FullCertificateStatus::kOk,
+      "owners.begun");
+  need(owner.append_batch(mine.token, shared.k2.front()).status == FullCertificateStatus::kOk,
+      "owner.valid.prefix");
+  need(owner.append_batch(other.token, shared.k2.back()).status == FullCertificateStatus::kInvalidInput,
+      "owner.foreign.token");
+  reject(owner.seal(), "coverage_wrong_owner");
+  need(owner.append_batch(mine.token, shared.k2[1]).status == FullCertificateStatus::kInvalidInput,
+      "owner.failed.resume");
+  reject(owner.seal(), "coverage_wrong_owner");
+  // Poisoning one owner must not invalidate the distinct owner's identity.
+  need(foreign.append_batch(other.token, shared.k2.front()).status == FullCertificateStatus::kOk,
+      "foreign.unchanged");
+  auto sealed = foreign.seal();
+  need(sealed.status == FullCertificateStatus::kOk, "foreign.sealed");
+  reject(foreign.seal(), "coverage_tower_closed");
+  need(sealed.orders[0].populations() == sealed.populations, "repeat.seal.no.mutation");
+}
+
+void late_rejections() {
+  Fixture fixture;
+  const std::array<const char*, 5> reasons{
+      "coverage_parent_not_unique_prebatch_root", "coverage_parent_not_unique_prebatch_root",
+      "coverage_parent_not_unique_prebatch_root", "coverage_empty_batch", "coverage_nonincreasing_batch"};
+  for (size_t variant = 0; variant < reasons.size(); ++variant) {
+    auto bad = fixture;
+    if (variant == 0) bad.k2.back().actions[0].parents = {0, 1};
+    if (variant == 1) {
+      // A continuation followed by another action using that same pre-lot root.
+      bad.k2.back().actions.push_back({{2}, {{3, 1, false}}});
+    }
+    if (variant == 2) {
+      bad.k2.back().actions = {{{}, {{0, 7, false}}}, {{2, 3}, {}}};
+    }
+    if (variant == 3) bad.k2.back().actions.clear();
+    if (variant == 4) bad.k2.back().level = level(3);
+    const auto refused = construct(bad);
+    reject(refused, reasons[variant]);
+  }
+  // A last-order rejection must not publish the previously finished order.
+  fixture.k3.back().actions[0].parents = {1, 0};
+  reject(construct(fixture), "coverage_parent_not_unique_prebatch_root");
+  fixture = Fixture{};
+  fixture.rows.push_back({{}, {8}});  // unreferenced but invalid at bank freeze
+  reject(construct(fixture), "coverage_invalid_population");
+  fixture.rows.back() = {{}, std::vector<PointId>(17, 0)};
+  reject(construct(fixture), "coverage_invalid_population");
+  fixture.k2.back().actions[0].contributions = {{4, 1, false}};
+  reject(construct(fixture), "coverage_invalid_population");
+  fixture = Fixture{};
+  fixture.domain[2] = 0;
+  reject(construct(fixture), "coverage_invalid_population");
+
+  CoverageTowerAssembler owner(std::vector<PointId>{0, 1, 2});
+  const auto token = owner.begin_order(2);
+  reject(owner.seal(), "coverage_invalid_domain");
+  need(owner.append_population({{}, {0, 1}}).status == FullCertificateStatus::kInvalidInput,
+      "empty.order.cannot.resume");
+  need(owner.end_order(token.token).status == FullCertificateStatus::kInvalidInput,
+      "empty.order.cannot.close");
+}
+
+void reallocation_and_growth() {
+  const std::vector<PointId> domain{0, 1, 2, 3};
+  const FullCoveragePopulation first{{}, {0, 1}}, later{{}, {2, 3}};
+  CoverageTowerAssembler owner(domain);
+  need(owner.append_population(first).population == 0, "reallocation.first.row");
+  const auto started = owner.begin_order(2);
+  const FullCoverageRef initial{0, 3, false};
+  const CoverageActionView birth{{}, std::span(&initial, 1)};
+  const auto born = owner.append_batch(started.token, level(1), std::span(&birth, 1));
+  need(born.status == FullCertificateStatus::kOk && born.first_new_node == 0 &&
+      born.new_node_count == 1, "append.ids.birth");
+  // 257 appends force multiple row-vector reallocations in the tested STL;
+  // each caller-owned row is copied and then immediately poisoned below.
+  for (u64 id = 1; id <= 257; ++id) {
+    auto mutable_row = later;
+    need(owner.append_population(mutable_row).population == id, "reallocation.row.id");
+    mutable_row.shell.assign(99, 99);
+  }
+  const FullNodeId parent = 0;
+  const FullCoverageRef growth{257, 3, false};
+  const CoverageActionView continuation{std::span(&parent, 1), std::span(&growth, 1)};
+  const auto continued = owner.append_batch(started.token, level(2), std::span(&continuation, 1));
+  need(continued.status == FullCertificateStatus::kOk && continued.first_new_node == 1 &&
+      continued.new_node_count == 0, "append.ids.continuation");
+  auto done = owner.seal();
+  need(done.status == FullCertificateStatus::kOk && done.populations->rows().size() == 258,
+      "reallocation.sealed");
+  const auto coverage = full_coverage_at(done.orders[0], 0, level(2), true);
+  need(coverage.status == FullCertificateStatus::kOk && coverage.values == domain,
+      "reallocation.fresh.row.view");
+
+  CoverageTowerAssembler many(domain);
+  need(many.append_population(first).status == FullCertificateStatus::kOk, "growth.row");
+  const auto order = many.begin_order(2);
+  allocation_fault::count = true; allocation_fault::calls = 0;
+  for (u64 i = 0; i < 1024; ++i) {
+    const auto appended = many.append_batch(order.token, level(i + 1), std::span(&birth, 1));
+    if (appended.status != FullCertificateStatus::kOk || appended.first_new_node != i ||
+        appended.new_node_count != 1) throw Failure{"growth.nominal"};
+  }
+  allocation_fault::count = false; growth_allocations = allocation_fault::calls;
+  // Four independently growing arenas: nodes, successors, contributions, live.
+  // This bound rejects reserve(size+1) per batch on the 1024-birth fixture;
+  // it is an observed STL regression gate, not a universal allocator theorem.
+  need(growth_allocations > 0 && growth_allocations <= 48, "growth.not.linear.allocations");
+  auto grown = many.seal();
+  need(grown.status == FullCertificateStatus::kOk && grown.orders[0].nodes().size() == 1024,
+      "growth.output");
+}
+
+void allocation_rejections() {
+  const Fixture fixture;
+  allocation_fault::count = true; allocation_fault::calls = 0; allocation_fault::requested = 0;
+  auto nominal = construct(fixture, true);
+  allocation_fault::count = false;
+  incremental_allocations = allocation_fault::calls;
+  incremental_requested = allocation_fault::requested;
+  need(nominal.status == FullCertificateStatus::kOk && incremental_allocations > 20,
+      "allocation.nonvacuity");
+  for (size_t ordinal = 0; ordinal < incremental_allocations; ++ordinal) {
+    allocation_fault::remaining = static_cast<long>(ordinal);
+    auto refused = construct(fixture, true);
+    allocation_fault::remaining = -1;
+    need(refused.status == FullCertificateStatus::kResourceExhausted &&
+        std::string_view(refused.reason) == "coverage_allocation_failed" && empty(refused),
+        "allocation.global.transaction");
+    ++fault_rejects;
+  }
+  need(fault_rejects == incremental_allocations, "allocation.all.ordinals");
+}
+
+int run() {
+  static_assert(!std::is_copy_constructible_v<CoverageTowerAssembler>);
+  static_assert(!std::is_move_constructible_v<CoverageTowerAssembler>);
+  static_assert(!AcceptsForeignBank<CoverageTowerAssembler>);
+  paired_and_ownership(); late_rejections(); reallocation_and_growth(); allocation_rejections();
+  need(physical_nodes == 24 && physical_parents == 16 && physical_contributions == 29 &&
+      rejects >= 14, "gate.nonvacuity");
+  std::printf("{\"status\":\"passed\",\"checks\":%zu,\"rejections\":%zu,"
+      "\"physical_nodes\":%zu,\"physical_parents\":%zu,\"physical_contributions\":%zu,"
+      "\"allocation_calls\":%zu,\"allocation_requested_bytes\":%zu,"
+      "\"allocation_rejections\":%zu,\"growth_1024_batch_allocations\":%zu}\n",
+      checks, rejects, physical_nodes, physical_parents, physical_contributions,
+      incremental_allocations, incremental_requested, fault_rejects, growth_allocations);
+  return 0;
+}
+}
+int main(int argc, char**) {
+  if (argc != 1) { std::fputs("FAIL invalid_arguments\n", stderr); return 2; }
+  try { return run(); }
+  catch (const Failure& failure) {
+    allocation_fault::remaining = -1; allocation_fault::count = false;
+    std::fprintf(stderr, "FAIL %s\n", failure.reason); return 1;
+  } catch (...) {
+    allocation_fault::remaining = -1; allocation_fault::count = false;
+    std::fputs("FAIL unexpected_exception\n", stderr); return 1;
+  }
+}

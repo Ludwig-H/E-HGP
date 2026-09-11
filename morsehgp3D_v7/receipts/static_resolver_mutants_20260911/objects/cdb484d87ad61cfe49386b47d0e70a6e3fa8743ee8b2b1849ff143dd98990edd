@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+"""Seal source/raw captures after the process has completed; exclude only ELFs."""
+import hashlib
+import json
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+if (HERE / 'MANIFEST.json').exists():
+    raise ValueError('manifest_exists')
+receipt = json.loads((HERE / 'run_r1/receipt.json').read_text())
+if receipt['status'] != 'passed':
+    raise ValueError('unfinished_or_failed_run')
+files = {}
+for path in sorted(HERE.rglob('*')):
+    if path.is_file() and path.name != 'gate' and '__pycache__' not in path.parts:
+        files[path.relative_to(HERE).as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()
+(HERE / 'MANIFEST.json').write_text(json.dumps(dict(files=files, excludes=['gate ELF files'],
+    public_status='not_claimed'), indent=2, sort_keys=True) + '\n')
+print(json.dumps(dict(status='sealed', files=len(files))))

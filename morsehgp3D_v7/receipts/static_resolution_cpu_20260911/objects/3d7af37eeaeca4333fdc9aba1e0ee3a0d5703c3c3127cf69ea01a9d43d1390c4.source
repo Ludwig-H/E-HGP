@@ -1,0 +1,72 @@
+#!/usr/bin/env python3
+"""Closed paired probes, private source, no statistical claim on shared host."""
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+import time
+
+here = Path(__file__).resolve().parent
+source = here / 'probe_source'
+out = here / 'micro_r1'
+out.mkdir(exist_ok=False)
+def pins():
+    return {p.relative_to(source).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in sorted(source.rglob('*')) if p.is_file()}
+before = pins()
+(out / 'sources_before.json').write_text(json.dumps(before, indent=2, sort_keys=True) + '\n')
+commands = []
+def run(name, argv):
+    start = time.time_ns()
+    with (out / (name + '.stdout')).open('wb') as stdout, (out / (name + '.stderr')).open('wb') as stderr:
+        proc = subprocess.run(argv, stdout=stdout, stderr=stderr)
+    row = dict(name=name, argv=argv, started_ns=start, ended_ns=time.time_ns(), exit_code=proc.returncode)
+    for stream in ('stdout', 'stderr'):
+        row[stream + '_sha256'] = hashlib.sha256((out / (name + '.' + stream)).read_bytes()).hexdigest()
+    commands.append(row)
+    (out / 'commands.json').write_text(json.dumps(commands, indent=2) + '\n')
+    print(name, proc.returncode, flush=True)
+    if proc.returncode: raise RuntimeError('nonzero: ' + name)
+
+status = 'failed'
+error = None
+paired = []
+try:
+    binary = out / 'probe'
+    run('compile', ['g++', '-O3', '-DNDEBUG', '-std=c++20', '-Wall', '-Wextra', '-Wpedantic', '-Werror',
+        '-pthread', '-isystem', '/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include', '-MMD', '-MF',
+        str(out / 'probe.d'), str(source / 'morsehgp3D_v7/bench/full_ball_tower_probe.cpp'), '-o', str(binary)])
+    (out / 'binary.sha256').write_text(hashlib.sha256(binary.read_bytes()).hexdigest() + '\n')
+    for n in (400, 1000):
+        rows = []
+        for threads in (0, 1, 4):
+            name = f'n{n}_static{threads}'
+            (out / (name + '.host.json')).write_text(json.dumps({p: Path(p).read_text() for p in
+                 ('/proc/loadavg', '/proc/meminfo', '/sys/fs/cgroup/cpu.max')}, indent=2) + '\n')
+            run(name, ['/usr/bin/time', '-v', str(binary), f'--n={n}', '--s=8', '--kmax=10', '--threads=1',
+                       f'--static-threads={threads}'])
+            row = json.loads((out / (name + '.stdout')).read_text())
+            if row['status'] != 'completed_relative' or row['orders'] != 10 or row['contract_qualified'] is not False:
+                raise ValueError('authority/completeness')
+            if row['resolver_meb_calls'] != row['anchor_hits'] + row['intruder_queries']:
+                raise ValueError('MEB accounting')
+            if threads and not all(r['seeded_unique'] <= r['unique'] <= r['requests'] for r in row['static_orders']):
+                raise ValueError('static work accounting')
+            rows.append(row)
+        fields = ('input_digest', 'payload_digest', 'nodes', 'parent_refs', 'vertical_refs', 'contributions',
+                  'anchor_blocks', 'representatives', 'raw', 'unique', 'balls', 'extra_records')
+        if any(any(row[f] != rows[0][f] for f in fields) for row in rows[1:]):
+            raise ValueError('paired payload/configuration divergence')
+        for f in ('resolver_meb_calls', 'resolver_supports_tested', 'intruder_queries', 'static_orders'):
+            if rows[1][f] != rows[2][f]: raise ValueError('worker invariant physical work: ' + f)
+        paired.append(dict(n=n, matched=True))
+    status = 'passed'
+except Exception as exc:
+    error = str(exc)
+finally:
+    after = pins()
+    (out / 'sources_after.json').write_text(json.dumps(after, indent=2, sort_keys=True) + '\n')
+    if before != after: status = 'failed'
+    (out / 'receipt.json').write_text(json.dumps(dict(status=status, error=error, sources_stable=before == after,
+         public_status='not_claimed', GCP_used=False, paired=paired, shared_host=True), indent=2) + '\n')
+if status != 'passed': raise SystemExit(1)

@@ -1,0 +1,96 @@
+{
+  "all_common_field_differences": {
+    "census_s": {
+      "current": 7.768278321,
+      "s8": 19.293611428
+    },
+    "digest_s": {
+      "current": 2.461301691,
+      "s8": 5.908781534
+    },
+    "generate_s": {
+      "current": 62.930554993,
+      "s8": 257.464719886
+    },
+    "index_s": {
+      "current": 0.002286608,
+      "s8": 0.006938119
+    },
+    "prefilter_s": {
+      "current": 10.376777926,
+      "s8": 26.290823476
+    },
+    "raw": {
+      "current": 3129992,
+      "s8": 3144017
+    },
+    "s": {
+      "current": 10,
+      "s8": 8
+    },
+    "sort_s": {
+      "current": 2.126883152,
+      "s8": 7.243313027
+    },
+    "total_s": {
+      "current": 136.374812996,
+      "s8": 466.761054724
+    },
+    "tower_s": {
+      "current": 50.651636046,
+      "s8": 150.41232426
+    },
+    "unique": {
+      "current": 3129992,
+      "s8": 3144017
+    }
+  },
+  "compared_fields": [
+    "schema",
+    "status",
+    "public_status",
+    "backend",
+    "contract_qualified",
+    "n",
+    "kmax",
+    "threads",
+    "seed",
+    "coord",
+    "orders",
+    "input_digest",
+    "payload_digest",
+    "static_threads",
+    "private_static_prototype",
+    "resolver_cache_accounting",
+    "residence_accounting",
+    "nodes",
+    "parent_refs",
+    "contributions",
+    "vertical_refs",
+    "anchor_blocks",
+    "representatives",
+    "singleton_lots",
+    "grouped_lots",
+    "lot_dsu_slots",
+    "lower_edges_indexed",
+    "lower_nodes_activated",
+    "lower_edges_activated",
+    "lower_queries",
+    "lower_find_steps",
+    "lower_path_writes"
+  ],
+  "contract_qualified": false,
+  "fields_only_current": [],
+  "fields_only_reference": [],
+  "output_calendar_matched": true,
+  "s": 10,
+  "shared_host": true,
+  "static_orders_matched": true,
+  "static_totals": {
+    "requests": 10396562,
+    "seeded_unique": 2396646,
+    "unique": 5176885
+  },
+  "timing_optimum_claim": false,
+  "upstream_invariance_assumed": false
+}

@@ -1,4 +1,4 @@
-# État de livraison v7 — 10 septembre 2026
+# État de livraison v7 — 11 septembre 2026
 
 `phase=exploration_v7_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
@@ -24,6 +24,28 @@ réduisent les MEB appariées de 1 174 515 à 583 337 à n1000. Le journal rése
 ses arènes exactes et les états morts sont libérés avant la banque finale.
 Les brouillons globaux et les résolutions restantes restent coûteux.
 
+Nouveau delta intégré : [voie statique CPU optionnelle](docs/RESOLUTION_STATIQUE_CPU_20260911.md),
+header `33e7d05e…`. Tri-unique des représentants stricts, semis géométriques,
+une BallId par clé puis restitution des occurrences au calendrier nominal.
+Le défaut reste le cache temporel ; `--static-threads=1` ou `4` sélectionne
+la nouvelle voie, indépendamment des threads amont. O2/SAN : 30 nuages,
+124 ordres, 75 136 comparaisons verticales et 4 498 contrôles physiques
+appariés, six mutants réfutés. À 8k/s8, un thread amont et quatre statiques,
+même payload, 6 227 265 → 4 185 184 MEB
+et 573 011 617 → 364 590 166 supports ; capacités temporaires retenues
+307 936 444 octets. Ni ces capacités ni les temps sur hôte chargé ne prouvent
+un gain RSS ou de latence contractuel. Le GPU de cette phase reste à porter.
+Le [triplet statique](receipts/static_resolution_scale_20260911/README.md) est
+clos : mêmes 35 champs de calendrier/sortie et payloads à 8k/16k/32k ;
+MEB 4 185 184 / 8 779 465 / 18 244 853, soit −32,8/33,8/34,2 % contre
+les comptes nominaux publiés. Exposants locaux du travail MEB 1,069 puis
+1,055, uniforme seulement. Totaux partagés 466,761 / 686,049 / 802,278 s,
+pas de gain chronométrique revendiqué ; capacités statiques retenues
+1 235 849 528 octets à 32k, pas un gain RSS.
+La [comparaison statique s8/10/12](receipts/static_s_factors_20260911/README.md)
+est close à 8k : mêmes dix forêts et neuf lignes de résolutions par K,
+mêmes MEB/supports, seuls les candidats amont et les temps varient.
+
 L'[auditeur du journal](audits/receipts_coverage_cpp_20260910/README.md)
 a démontré que parent→0 échappait au juge antérieur. La gate renforcée
 compare directement parents, successeurs, niveaux et contributions :
@@ -42,8 +64,9 @@ La compilation NVCC stricte est qualifiée avec son adaptateur de phases.
 Les [mesures courantes](docs/RESULTATS_TOUR_CACHE_G4_20260910.md) terminent
 les tours 50k à s8 : CPU/hybride 418,873 / 418,921 s K1..10 et
 33,853 / 33,569 s K1..5, avec signatures identiques. Elles conservent
-27 273 218 / 4 209 792 nœuds et leurs verticales. FULL reste mono-thread
-et prend environ 390 / 27 s ; les kernels census seuls ne font pas le contrat.
+27 273 218 / 4 209 792 nœuds et leurs verticales. Dans ces captures du
+10 septembre, FULL restait mono-thread et prenait environ 390 / 27 s ;
+les kernels census seuls ne font pas le contrat.
 Les essais s10/12 G4 ne sont pas lancés faute de temps de clôture restant.
 
 Deux générations SPOT sont closes dans le reçu courant : échec initial NVCC,
@@ -103,7 +126,7 @@ Entrée : [TOUR_FULL_PAR_BOULES.md](docs/TOUR_FULL_PAR_BOULES.md).
 Les sondes CPU et CUDA-census sont dans `bench/full_ball_tower_probe.*`.
 Leurs sorties sont relatives, sans archive industrielle ni claim produit.
 
-Construire dans un répertoire neuf ; vingt CTests ciblés passent sur sources
+Construire dans un répertoire neuf ; 24 CTests ciblés passent sur sources
 stables : MEB, tour, cache, travail temporel, journal, quotient, front WSPD
 et simulation de route. O2/SAN et vrai device restent des autorités distinctes.
 Le worker `gcp-migration/full_ball_worker_v7.py` réutilise le contrôleur
@@ -111,18 +134,23 @@ SPOT gardé et le support CPU épinglé. Il vérifie d'abord le vrai device
 SM120, puis compare CPU/hybride sur n8 et sur 50k K10/K5, avec s8 puis
 s10/s12 selon le temps observé et la fenêtre de fermeture. Aucune installation
 CUDA, aucun reboot, aucune mutation d'une autre VM n'est autorisé par ce worker.
+Ce worker conserve encore le défaut `static_threads=0` : il ne transmet pas
+l'option statique de la sonde. Une prochaine campagne statique G4 devra
+raccorder explicitement cette configuration à ses validations et selftests,
+pas supposer que le nouveau header active automatiquement le parallélisme.
 
-Le [triplet retenu courant](docs/RESULTATS_TOUR_CACHE_G4_20260910.md)
+Le [triplet nominal retenu du 10 septembre](docs/RESULTATS_TOUR_CACHE_G4_20260910.md)
 est clos : 235,724 s / 354,144 s / 736,819 s, dix ordres et verticales,
 s=8 et un thread ; 17 166 975 nœuds à 32k, pic 9 108 756 KiB.
 Les temps sont perturbés par l'hôte partagé : pas de gain apparié revendiqué.
 À 8k, s8/10/12 donne exactement le même payload ; aucun optimum s n'est acquis.
 
-Prochaines coutures, distinctes du moteur mesuré :
+Prochaines coutures et prototypes séparés :
 
-- [Résolutions géométriques statiques](receipts/static_anchor_graph_20260910/README.md) : preuve conditionnelle favorable, oracle fini et sept mutants ; dédoublonner les clés initiales par ordre avant un backend CPU/GPU par lots. Garder activations, lots simultanés, contributions datées et verticales historiques.
+- [Résolutions géométriques statiques](docs/RESOLUTION_STATIQUE_CPU_20260911.md) : option CPU intégrée, triplet 8k/16k/32k et s8/10/12 à 8k clos ; suivre maintenant le [port GPU des résolutions](docs/PORT_GPU_RESOLUTIONS.md). Les [clés initiales mesurées](receipts/initial_representatives_20260911/README.md) à 8k ont 50,4 % de doublons ; ce ratio ne vaut pas gain de vitesse, le cache nominal en exploite déjà une partie.
 - [Parcours droit des intrus](receipts/rightmost_intruder_20260910/README.md) : prototype de deux lignes non intégré ; 28 nuages O2/SAN et 72 840 requêtes contre un juge de choix. À n1000 : −18,7 % de visites et −3,07 % de MEB, pas de gain contractuel.
-- [Journal incrémental](docs/PLAN_JOURNAL_INCREMENTAL.md) : conception transactionnelle à arènes plates, pas encore implémentée ; coût amorti en taille de sortie, gain net de pic à mesurer.
+- [Journal incrémental](docs/PLAN_JOURNAL_INCREMENTAL.md) : prototype transactionnel qualifié séparément, pas encore raccordé au producteur FULL ; stabilité de préfixes et refus global vérifiés, gain net de pic et de temps non mesuré.
+- [Sélection MEB destinée au GPU](receipts/gpu_meb_selection_prototype_20260911/README.md) : prototype privé O2, 605 cas et 253 contrôles de transport ; vrai kernel compilé/lié en SM120 mais jamais exécuté. SAN refusé par LSan/ptrace, aucun replay. Ni terminal ni raccord de tour GPU livré par cette primitive.
 - [Front WSPD optionnel](receipts/witness_front_20260910/README.md) : 431 010 contrôles O2/SAN, liaison explicite à l'index et générations vérifiées. Le batch device reste privé et non exécuté sur GPU ; le générateur nominal reste scalaire.
 
 Les [quatre blocs nommés](receipts/full_ball_named_blocks_20260910/README.md)
@@ -144,8 +172,9 @@ anciens reçus restent conservés, sans copies d'ELF dans la livraison.
 - [Primitives et autorités mathématiques](docs/QUALIFICATION_S1_PRIMITIVES.md), [MEB à double budget](docs/RESULTATS_MEB_DOUBLE_BUDGET_20260905.md) et [coût local défavorable](docs/RESULTATS_COUT_MEB_20260905.md) : qualification locale, pas accélération de tour intégrée.
 - [G4 historique](docs/RESULTATS_G4_20260904.md) et [arrêt certifié historique](receipts/gcp_handoff_20260905.json) : aucune qualification FULL ou nouvelle mesure massive héritée.
 
-Deux sessions G4 closes, cible E-HGP certifiée arrêtée ; aucune autre VM
-modifiée. Les CTests locaux, la CI et les sessions G4 sont
+GCP non utilisé pour le delta du 11 septembre. Les deux sessions G4 du
+10 septembre sont closes et leur cible E-HGP est certifiée arrêtée.
+Les CTests locaux, la CI et les sessions G4 sont
 trois autorités distinctes. Aucun
 succès CI d'un ancien commit n'est attribué automatiquement au nouveau.
 Le registre officiel reste inchangé. Avant publication : contrôle des

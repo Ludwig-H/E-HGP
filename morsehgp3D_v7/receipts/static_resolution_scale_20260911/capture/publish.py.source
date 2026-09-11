@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+"""Create a new portable triplet receipt from closed, byte-identical evidence."""
+from __future__ import annotations
+
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+DEST = ROOT / 'morsehgp3D_v7/receipts/static_resolution_scale_20260911'
+KEYS = ROOT / 'build/v7_initial_static_key_comparison_20260911'
+KEY_SHA = '9167657c29c3ffb36292f2b830475d537d47072831740e5bb0b7bb937caa2c77'
+REFS = ROOT / 'morsehgp3D_v7/receipts/full_ball_scale_gpu_20260910/manifest.json'
+REF_SHA = 'c9913094b6479a61a0395be2dc0f09ef2d25672f170e19d3c6e01c584ba08b2c'
+
+
+def need(ok: bool, reason: str) -> None:
+    if not ok:
+        raise ValueError(reason)
+
+
+def sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def write_json(path: Path, value) -> None:
+    path.write_text(json.dumps(value, indent=2, sort_keys=True) + '\n')
+
+
+def main() -> None:
+    need(not DEST.exists(), 'new_destination_required')
+    need(sha(KEYS / 'manifest.json') == KEY_SHA and sha(REFS) == REF_SHA, 'prior_manifest_pins')
+    closed = subprocess.run([sys.executable, '-B', str(HERE / 'verify.py'), '8000', '16000', '32000'],
+                            text=True, capture_output=True, check=False)
+    need(closed.returncode == 0 and not closed.stderr.strip(), 'triplet_reader:' + closed.stderr)
+    result = json.loads(closed.stdout)
+    original = {p.relative_to(HERE).as_posix(): p for p in sorted((HERE / 'source').rglob('*')) if p.is_file()}
+    for n in (8000, 16000, 32000):
+        for path in sorted((HERE / f'n{n}_s8_static4').rglob('*')):
+            if path.is_file():
+                original[path.relative_to(HERE).as_posix()] = path
+    for name in ('README.md', 'verify.py', 'record.py', 'original_compile.d',
+                 'original_micro_commands.json', 'original_micro_receipt.json'):
+        original[name] = HERE / name
+    inventory = {name: sha(path) for name, path in original.items()}
+    need(all(not p.read_bytes().startswith(b'\x7fELF') for p in original.values()), 'no_original_ELF')
+    mapping = {name: name for name in original}
+    mapping.update({'README.md': 'capture/README.md.source', 'verify.py': 'verify_scale.py',
+                    'record.py': 'capture/record.py.source'})
+    DEST.mkdir(parents=True)
+    for name, path in original.items():
+        target = DEST / mapping[name]
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(path, target)
+        need(sha(target) == inventory[name], 'copy_identity:' + name)
+    write_json(DEST / 'capture/original_inventory.json', inventory)
+    write_json(DEST / 'source_map.json', mapping)
+    write_json(DEST / 'results.json', result)
+    key_manifest = json.loads((KEYS / 'manifest.json').read_text())
+    (DEST / 'initial_key_comparison').mkdir()
+    for name in [*key_manifest['files'], 'manifest.json']:
+        path = KEYS / name
+        need(name == 'manifest.json' or sha(path) == key_manifest['files'][name], 'key_original:' + name)
+        shutil.copyfile(path, DEST / 'initial_key_comparison' / name)
+    shutil.copyfile(REFS, DEST / 'capture/reference_manifest.json')
+    shutil.copyfile(HERE / 'public_README.md', DEST / 'README.md')
+    shutil.copyfile(HERE / 'public_verify.py', DEST / 'verify.py')
+    shutil.copyfile(Path(__file__), DEST / 'capture/publish.py.source')
+    write_json(DEST / 'source_pins.json', dict(
+        binary_sha256='f71f31190f5d50ac70f8332f969c6baa50549536bd08836702e6ba01ae7fcdce',
+        header_sha256='33e7d05effce908532d21255e5e0efc4f8c7370d8a05a17dd761142d81bd4209',
+        reference_manifest_sha256=REF_SHA, key_comparison_manifest_sha256=KEY_SHA,
+        runs=3, shared_host=True, timing_speedup_claim=False, ELF_included=False, GCP_used=False,
+        original_files_preserved=len(original), snapshot_copied_once=True,
+        historical_markdown_storage='README.md -> capture/README.md.source, bytes preserved',
+        independent_key_comparison_storage='initial_key_comparison/, complete unchanged packet'))
+    need(all(sha(path) == inventory[name] for name, path in original.items()), 'original_unchanged_after_copy')
+    files = {p.relative_to(DEST).as_posix(): sha(p) for p in sorted(DEST.rglob('*')) if p.is_file()}
+    write_json(DEST / 'MANIFEST.json', dict(files=files, public_status='not_claimed'))
+    print(json.dumps(dict(status='published', runs=3, original_files=len(original), public_files=len(files),
+        manifest_sha256=sha(DEST / 'MANIFEST.json'), bytes=sum(p.stat().st_size for p in DEST.rglob('*') if p.is_file()))))
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+"""Replay the exact already-built sanitizer gate outside ptrace, without rebuild."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import tempfile
+import time
+
+here = Path(__file__).resolve().parent
+prior = here / 'san_r2'
+binary = prior / 'gate'
+expected_binary = (prior / 'binary.sha256').read_text().strip()
+def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
+def pins():
+    source = here / 'source_r2'
+    return {p.relative_to(source).as_posix(): sha(p) for p in sorted(source.rglob('*')) if p.is_file()}
+expected = json.loads((prior / 'sources_before.json').read_text())
+if sha(binary) != expected_binary or pins() != expected:
+    raise SystemExit('source/binary drift before sanitizer replay')
+out = Path(tempfile.mkdtemp(prefix='san_replay_', dir=here))
+print('capture', str(out), flush=True)
+(out / 'sources_before.json').write_text(json.dumps(expected, indent=2, sort_keys=True) + '\n')
+commands = []
+status = 'failed'
+error = None
+try:
+    env = dict(os.environ, ASAN_OPTIONS='detect_leaks=1:halt_on_error=1',
+               UBSAN_OPTIONS='halt_on_error=1:print_stacktrace=1')
+    for name, arg, code in (('nominal','--selftest',0), ('static1','--static-1',0),
+                            ('static4','--static-4',0), ('bad_argument','--unknown',2),
+                            ('nominal_launch_guard','--expect-launch-failure',1)):
+        start = time.time_ns()
+        argv = [str(binary), arg]
+        with (out / (name + '.stdout')).open('wb') as stdout, (out / (name + '.stderr')).open('wb') as stderr:
+            proc = subprocess.run(argv, stdout=stdout, stderr=stderr, env=env)
+        row = dict(name=name, argv=argv, exit_code=proc.returncode, expected_exit_code=code,
+                   started_ns=start, ended_ns=time.time_ns())
+        for stream in ('stdout', 'stderr'): row[stream+'_sha256'] = sha(out/(name+'.'+stream))
+        commands.append(row)
+        (out / 'commands.json').write_text(json.dumps(commands, indent=2) + '\n')
+        print(name, proc.returncode, flush=True)
+        if proc.returncode != code: raise RuntimeError('unexpected exit: ' + name)
+    status = 'passed'
+except Exception as exc:
+    error = str(exc)
+finally:
+    after = pins()
+    stable = after == expected and sha(binary) == expected_binary
+    if not stable: status = 'failed'
+    (out / 'sources_after.json').write_text(json.dumps(after, indent=2, sort_keys=True) + '\n')
+    (out / 'receipt.json').write_text(json.dumps(dict(status=status, error=error,
+        source_binary_stable=stable, binary_sha256=expected_binary, public_status='not_claimed',
+        GCP_used=False, ASAN_OPTIONS=env['ASAN_OPTIONS'], UBSAN_OPTIONS=env['UBSAN_OPTIONS']), indent=2) + '\n')
+if status != 'passed': raise SystemExit(1)

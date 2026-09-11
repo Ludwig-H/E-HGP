@@ -1,0 +1,132 @@
+// PRIVATE observer only. Copies initial sorted keys; never changes product state.
+#pragma once
+#include <algorithm>
+#include <array>
+#include <chrono>
+#include <cstdio>
+#include <cstdlib>
+#include <span>
+#include <stdexcept>
+#include <string>
+#include <vector>
+#include "../core/sha256.hpp"
+
+namespace mhgp7::unique_representative_detail {
+using Key = std::array<i32, 10>;
+using Clock = std::chrono::steady_clock;
+inline void need(bool ok, const char* reason) {
+  if (!ok) throw std::runtime_error(reason);
+}
+inline bool cache_enabled() { return std::getenv("MHGP7_PRIVATE_NO_CACHE") == nullptr; }
+struct Row {
+  unsigned k = 0;
+  u64 occurrences = 0, unique = 0, calls = 0, hits = 0, seeds = 0, queries = 0;
+  u64 logical_bytes = 0, capacity_bytes = 0, pairwise_checks = 0;
+  std::string unique_digest;
+  double sort_s = 0;
+};
+class Collector {
+ public:
+  std::vector<Row> rows;
+  u64 completed = 0, completed_rows = 0, duplicate_rows = 0, distinct_rows = 0, zero_rows = 0;
+  u64 pairwise_checks = 0;
+  Sha256 transcript;
+  std::string index_digest;
+  template<class Index> void start(const Index& ix) {
+    rows.clear(); keys.clear();
+    Sha256 h; h.tag("mhgp7-private-geometry-index-v1"); h.u64le(ix.upos.size());
+    for (size_t j = 0; j < ix.upos.size(); ++j) {
+      h.u64le(ix.point_id(static_cast<i32>(j)));
+      h.u64le(ix.upos[j].x); h.u64le(ix.upos[j].y); h.u64le(ix.upos[j].z);
+    }
+    index_digest = h.hex();
+  }
+  template<class Stats> void begin(unsigned k, const Stats& st) {
+    need(keys.empty(), "observer.previous_keys_not_released");
+    order = k; before_r = st.representatives; before_m = st.resolve_work.calls;
+    before_h = st.resolver_cache_hits; before_s = st.resolver_cache_seed_stores;
+    before_q = st.resolver_cache_queries;
+  }
+  void record(std::span<const i32> sites) {
+    need(sites.size() == order && order >= 1 && order <= 10, "observer.key_cardinality");
+    need(std::is_sorted(sites.begin(), sites.end()) &&
+        std::adjacent_find(sites.begin(), sites.end()) == sites.end(), "observer.key_order");
+    Key key{}; std::copy(sites.begin(), sites.end(), key.begin()); keys.push_back(key);
+  }
+  template<class Stats> void end(const Stats& st) {
+    Row row; row.k = order; row.occurrences = keys.size();
+    need(row.occurrences == st.representatives - before_r, "observer.occurrence_delta");
+    row.calls = st.resolve_work.calls - before_m; row.hits = st.resolver_cache_hits - before_h;
+    row.seeds = st.resolver_cache_seed_stores - before_s;
+    row.queries = st.resolver_cache_queries - before_q;
+    row.logical_bytes = keys.size() * sizeof(Key); row.capacity_bytes = keys.capacity() * sizeof(Key);
+    // Bounded independent equality-by-pairs oracle, never the scale counter.
+    u64 pairwise_unique = 0;
+    if (keys.size() <= 4096) {
+      for (size_t i = 0; i < keys.size(); ++i) {
+        bool first = true;
+        for (size_t j = 0; j < i; ++j) {
+          ++row.pairwise_checks;
+          bool equal = true;
+          for (unsigned site = 0; site < order; ++site)
+            if (keys[i][site] != keys[j][site]) equal = false;
+          if (equal) { first = false; break; }
+        }
+        pairwise_unique += first;
+      }
+    }
+    const auto begin = Clock::now();
+    std::sort(keys.begin(), keys.end());
+    const auto end = std::unique(keys.begin(), keys.end());
+    row.unique = static_cast<u64>(end - keys.begin());
+#ifdef MHGP7_PRIVATE_HASH_ONLY_MUTANT
+    row.unique = keys.empty() ? 0 : 1;  // Every key has the same deliberate hash.
+#endif
+    row.sort_s = std::chrono::duration<double>(Clock::now() - begin).count();
+    need(row.unique <= row.occurrences, "observer.unique_bound");
+    if (keys.size() <= 4096) need(pairwise_unique == row.unique, "observer.pairwise_unique");
+    Sha256 h; h.tag("mhgp7-private-unique-initial-representatives-v1");
+    h.tag(index_digest.c_str()); h.u64le(order); h.u64le(row.unique);
+    for (auto it = keys.begin(); it != end; ++it)
+      for (unsigned j = 0; j < order; ++j) h.u64le(static_cast<u32>((*it)[j]));
+    row.unique_digest = h.hex();
+    if (std::any_of(keys.begin(), end, [](const auto& key) { return key[0] == 0; })) ++zero_rows;
+    pairwise_checks += row.pairwise_checks;
+    rows.push_back(std::move(row)); std::vector<Key>().swap(keys);
+  }
+  template<class Stats> void finish(const Stats& st) {
+    u64 total = 0;
+    for (const auto& row : rows) {
+      total += row.occurrences; ++completed_rows;
+      duplicate_rows += row.unique < row.occurrences; distinct_rows += row.unique > 1;
+      transcript.u64le(row.k); transcript.u64le(row.occurrences); transcript.u64le(row.unique);
+      transcript.tag(row.unique_digest.c_str());
+    }
+    need(total == st.representatives, "observer.complete_occurrence_sum"); ++completed;
+  }
+  void print() const {
+    std::printf(",\"observer\":{\"kind\":\"exact_initial_keys_sort_unique_v1\","
+        "\"instrumented_not_benchmark\":true,\"cache_enabled\":%s,\"index_digest\":\"%s\",\"rows\":[",
+        cache_enabled() ? "true" : "false", index_digest.c_str());
+    for (size_t j = 0; j < rows.size(); ++j) {
+      const auto& r = rows[j];
+      std::printf("%s{\"k\":%u,\"representative_occurrences\":%llu,\"unique_representative_keys\":%llu,"
+          "\"duplicate_occurrences\":%llu,\"resolver_meb_calls\":%llu,\"cache_hits\":%llu,"
+          "\"cache_seed_stores\":%llu,\"cache_queries\":%llu,\"key_logical_bytes\":%llu,"
+          "\"key_capacity_bytes\":%llu,\"pairwise_checks\":%llu,\"unique_digest\":\"%s\",\"sort_s\":%.9f}",
+          j ? "," : "", r.k, static_cast<unsigned long long>(r.occurrences),
+          static_cast<unsigned long long>(r.unique), static_cast<unsigned long long>(r.occurrences - r.unique),
+          static_cast<unsigned long long>(r.calls), static_cast<unsigned long long>(r.hits),
+          static_cast<unsigned long long>(r.seeds), static_cast<unsigned long long>(r.queries),
+          static_cast<unsigned long long>(r.logical_bytes), static_cast<unsigned long long>(r.capacity_bytes),
+          static_cast<unsigned long long>(r.pairwise_checks), r.unique_digest.c_str(), r.sort_s);
+    }
+    std::printf("]}");
+  }
+ private:
+  unsigned order = 0;
+  u64 before_r = 0, before_m = 0, before_h = 0, before_s = 0, before_q = 0;
+  std::vector<Key> keys;
+};
+inline Collector collector;
+}  // namespace mhgp7::unique_representative_detail

@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/usr/bin/time",
+    "-v",
+    "/workspaces/E-HGP/build/v7_static_resolver_20260911/micro_r1/probe",
+    "--n=8000",
+    "--s=10",
+    "--kmax=10",
+    "--threads=1",
+    "--static-threads=4"
+  ],
+  "ended_ns": 1789111454142196503,
+  "exit_code": 0,
+  "started_ns": 1789111316078036357,
+  "stderr_sha256": "b90ee33cbc55ebf48925de8e8f89a8f51b2a9f5e9e28653893a544412767b44c",
+  "stdout_sha256": "a185188361c43d62d534aa9aab17e5a73d383210073967e5480f7d0d51868ba8"
+}

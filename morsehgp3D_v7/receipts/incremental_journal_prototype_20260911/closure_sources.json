@@ -1,0 +1,761 @@
+{
+  "schema": "mhgp7_recorded_source_closure_v1",
+  "files": {
+    "o2_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_kernels.cuh": {
+      "sha256": "90c13d514edd3ec375dcbd0457ead049cd1c1ae00db58b059dce6e37834ef947",
+      "bytes": 12124,
+      "capture_receipt": "o2_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_kernels.cuh"
+    },
+    "o2_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_route.cuh": {
+      "sha256": "eb496ff125852f9b2a7bd169abb9c12650bc8f9802b6f6e13ad526739978c609",
+      "bytes": 18373,
+      "capture_receipt": "o2_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_route.cuh"
+    },
+    "o2_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/device_witness.cu": {
+      "sha256": "5c5d46077427a1a269da4577f571f95ba8602d15cfe7f17acfd2b97ad2f43153",
+      "bytes": 19136,
+      "capture_receipt": "o2_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/device_witness.cu"
+    },
+    "o2_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_device_gate.cu": {
+      "sha256": "696f72eede4c838dd24ffd78cfa716f087898c3fa24d154795072240a8059c61",
+      "bytes": 14349,
+      "capture_receipt": "o2_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_device_gate.cu"
+    },
+    "o2_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_route_device_gate.cu": {
+      "sha256": "05cc4f8bbc3cfcb63cab602b35a8dc07a7d26f5bf8a30ade62e827118971b22a",
+      "bytes": 10826,
+      "capture_receipt": "o2_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_route_device_gate.cu"
+    },
+    "o2_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt": {
+      "sha256": "f8b37b2f64fa2caf2d698cb10aaa81f4184db96ef6016224a90ac0f6ea0d3bc0",
+      "bytes": 598,
+      "capture_receipt": "o2_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt"
+    },
+    "o2_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt": {
+      "sha256": "80ee3dc52623bd8393dc2f2a3027fd3f796d4460395483611659d1db6d2546a4",
+      "bytes": 1376,
+      "capture_receipt": "o2_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt"
+    },
+    "o2_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt": {
+      "sha256": "61a2545302691fa5f8ecfd0327efce56146ae8d25efa0dc842d054e749bf6bc7",
+      "bytes": 1190,
+      "capture_receipt": "o2_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt"
+    },
+    "o2_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt": {
+      "sha256": "55c6c206b027e3fc6a3b548cb1801e24fac6a5442fe9835822e70b9303003d69",
+      "bytes": 160,
+      "capture_receipt": "o2_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt"
+    },
+    "o2_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_kernels.cuh": {
+      "sha256": "90c13d514edd3ec375dcbd0457ead049cd1c1ae00db58b059dce6e37834ef947",
+      "bytes": 12124,
+      "capture_receipt": "o2_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_kernels.cuh"
+    },
+    "o2_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_route.cuh": {
+      "sha256": "eb496ff125852f9b2a7bd169abb9c12650bc8f9802b6f6e13ad526739978c609",
+      "bytes": 18373,
+      "capture_receipt": "o2_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_route.cuh"
+    },
+    "o2_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/device_witness.cu": {
+      "sha256": "5c5d46077427a1a269da4577f571f95ba8602d15cfe7f17acfd2b97ad2f43153",
+      "bytes": 19136,
+      "capture_receipt": "o2_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/device_witness.cu"
+    },
+    "o2_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_device_gate.cu": {
+      "sha256": "696f72eede4c838dd24ffd78cfa716f087898c3fa24d154795072240a8059c61",
+      "bytes": 14349,
+      "capture_receipt": "o2_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_device_gate.cu"
+    },
+    "o2_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_route_device_gate.cu": {
+      "sha256": "05cc4f8bbc3cfcb63cab602b35a8dc07a7d26f5bf8a30ade62e827118971b22a",
+      "bytes": 10826,
+      "capture_receipt": "o2_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_route_device_gate.cu"
+    },
+    "o2_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt": {
+      "sha256": "f8b37b2f64fa2caf2d698cb10aaa81f4184db96ef6016224a90ac0f6ea0d3bc0",
+      "bytes": 598,
+      "capture_receipt": "o2_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt"
+    },
+    "o2_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt": {
+      "sha256": "80ee3dc52623bd8393dc2f2a3027fd3f796d4460395483611659d1db6d2546a4",
+      "bytes": 1376,
+      "capture_receipt": "o2_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt"
+    },
+    "o2_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt": {
+      "sha256": "61a2545302691fa5f8ecfd0327efce56146ae8d25efa0dc842d054e749bf6bc7",
+      "bytes": 1190,
+      "capture_receipt": "o2_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt"
+    },
+    "o2_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt": {
+      "sha256": "55c6c206b027e3fc6a3b548cb1801e24fac6a5442fe9835822e70b9303003d69",
+      "bytes": 160,
+      "capture_receipt": "o2_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt"
+    },
+    "o2_r3/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_kernels.cuh": {
+      "sha256": "90c13d514edd3ec375dcbd0457ead049cd1c1ae00db58b059dce6e37834ef947",
+      "bytes": 12124,
+      "capture_receipt": "o2_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_kernels.cuh"
+    },
+    "o2_r3/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_route.cuh": {
+      "sha256": "eb496ff125852f9b2a7bd169abb9c12650bc8f9802b6f6e13ad526739978c609",
+      "bytes": 18373,
+      "capture_receipt": "o2_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_route.cuh"
+    },
+    "o2_r3/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/device_witness.cu": {
+      "sha256": "5c5d46077427a1a269da4577f571f95ba8602d15cfe7f17acfd2b97ad2f43153",
+      "bytes": 19136,
+      "capture_receipt": "o2_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/device_witness.cu"
+    },
+    "o2_r3/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_device_gate.cu": {
+      "sha256": "696f72eede4c838dd24ffd78cfa716f087898c3fa24d154795072240a8059c61",
+      "bytes": 14349,
+      "capture_receipt": "o2_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_device_gate.cu"
+    },
+    "o2_r3/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_route_device_gate.cu": {
+      "sha256": "05cc4f8bbc3cfcb63cab602b35a8dc07a7d26f5bf8a30ade62e827118971b22a",
+      "bytes": 10826,
+      "capture_receipt": "o2_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_route_device_gate.cu"
+    },
+    "o2_r3/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt": {
+      "sha256": "f8b37b2f64fa2caf2d698cb10aaa81f4184db96ef6016224a90ac0f6ea0d3bc0",
+      "bytes": 598,
+      "capture_receipt": "o2_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt"
+    },
+    "o2_r3/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt": {
+      "sha256": "80ee3dc52623bd8393dc2f2a3027fd3f796d4460395483611659d1db6d2546a4",
+      "bytes": 1376,
+      "capture_receipt": "o2_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt"
+    },
+    "o2_r3/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt": {
+      "sha256": "61a2545302691fa5f8ecfd0327efce56146ae8d25efa0dc842d054e749bf6bc7",
+      "bytes": 1190,
+      "capture_receipt": "o2_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt"
+    },
+    "o2_r3/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt": {
+      "sha256": "55c6c206b027e3fc6a3b548cb1801e24fac6a5442fe9835822e70b9303003d69",
+      "bytes": 160,
+      "capture_receipt": "o2_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt"
+    },
+    "o2_r3/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_kernels.cuh": {
+      "sha256": "90c13d514edd3ec375dcbd0457ead049cd1c1ae00db58b059dce6e37834ef947",
+      "bytes": 12124,
+      "capture_receipt": "o2_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_kernels.cuh"
+    },
+    "o2_r3/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_route.cuh": {
+      "sha256": "eb496ff125852f9b2a7bd169abb9c12650bc8f9802b6f6e13ad526739978c609",
+      "bytes": 18373,
+      "capture_receipt": "o2_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_route.cuh"
+    },
+    "o2_r3/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/device_witness.cu": {
+      "sha256": "5c5d46077427a1a269da4577f571f95ba8602d15cfe7f17acfd2b97ad2f43153",
+      "bytes": 19136,
+      "capture_receipt": "o2_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/device_witness.cu"
+    },
+    "o2_r3/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_device_gate.cu": {
+      "sha256": "696f72eede4c838dd24ffd78cfa716f087898c3fa24d154795072240a8059c61",
+      "bytes": 14349,
+      "capture_receipt": "o2_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_device_gate.cu"
+    },
+    "o2_r3/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_route_device_gate.cu": {
+      "sha256": "05cc4f8bbc3cfcb63cab602b35a8dc07a7d26f5bf8a30ade62e827118971b22a",
+      "bytes": 10826,
+      "capture_receipt": "o2_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_route_device_gate.cu"
+    },
+    "o2_r3/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt": {
+      "sha256": "f8b37b2f64fa2caf2d698cb10aaa81f4184db96ef6016224a90ac0f6ea0d3bc0",
+      "bytes": 598,
+      "capture_receipt": "o2_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt"
+    },
+    "o2_r3/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt": {
+      "sha256": "80ee3dc52623bd8393dc2f2a3027fd3f796d4460395483611659d1db6d2546a4",
+      "bytes": 1376,
+      "capture_receipt": "o2_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt"
+    },
+    "o2_r3/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt": {
+      "sha256": "61a2545302691fa5f8ecfd0327efce56146ae8d25efa0dc842d054e749bf6bc7",
+      "bytes": 1190,
+      "capture_receipt": "o2_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt"
+    },
+    "o2_r3/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt": {
+      "sha256": "55c6c206b027e3fc6a3b548cb1801e24fac6a5442fe9835822e70b9303003d69",
+      "bytes": 160,
+      "capture_receipt": "o2_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt"
+    },
+    "san_r1/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_kernels.cuh": {
+      "sha256": "90c13d514edd3ec375dcbd0457ead049cd1c1ae00db58b059dce6e37834ef947",
+      "bytes": 12124,
+      "capture_receipt": "san_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_kernels.cuh"
+    },
+    "san_r1/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_route.cuh": {
+      "sha256": "eb496ff125852f9b2a7bd169abb9c12650bc8f9802b6f6e13ad526739978c609",
+      "bytes": 18373,
+      "capture_receipt": "san_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_route.cuh"
+    },
+    "san_r1/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/device_witness.cu": {
+      "sha256": "5c5d46077427a1a269da4577f571f95ba8602d15cfe7f17acfd2b97ad2f43153",
+      "bytes": 19136,
+      "capture_receipt": "san_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/device_witness.cu"
+    },
+    "san_r1/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_device_gate.cu": {
+      "sha256": "696f72eede4c838dd24ffd78cfa716f087898c3fa24d154795072240a8059c61",
+      "bytes": 14349,
+      "capture_receipt": "san_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_device_gate.cu"
+    },
+    "san_r1/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_route_device_gate.cu": {
+      "sha256": "05cc4f8bbc3cfcb63cab602b35a8dc07a7d26f5bf8a30ade62e827118971b22a",
+      "bytes": 10826,
+      "capture_receipt": "san_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_route_device_gate.cu"
+    },
+    "san_r1/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt": {
+      "sha256": "f8b37b2f64fa2caf2d698cb10aaa81f4184db96ef6016224a90ac0f6ea0d3bc0",
+      "bytes": 598,
+      "capture_receipt": "san_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt"
+    },
+    "san_r1/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt": {
+      "sha256": "80ee3dc52623bd8393dc2f2a3027fd3f796d4460395483611659d1db6d2546a4",
+      "bytes": 1376,
+      "capture_receipt": "san_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt"
+    },
+    "san_r1/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt": {
+      "sha256": "61a2545302691fa5f8ecfd0327efce56146ae8d25efa0dc842d054e749bf6bc7",
+      "bytes": 1190,
+      "capture_receipt": "san_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt"
+    },
+    "san_r1/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt": {
+      "sha256": "55c6c206b027e3fc6a3b548cb1801e24fac6a5442fe9835822e70b9303003d69",
+      "bytes": 160,
+      "capture_receipt": "san_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt"
+    },
+    "san_r1/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_kernels.cuh": {
+      "sha256": "90c13d514edd3ec375dcbd0457ead049cd1c1ae00db58b059dce6e37834ef947",
+      "bytes": 12124,
+      "capture_receipt": "san_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_kernels.cuh"
+    },
+    "san_r1/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_route.cuh": {
+      "sha256": "eb496ff125852f9b2a7bd169abb9c12650bc8f9802b6f6e13ad526739978c609",
+      "bytes": 18373,
+      "capture_receipt": "san_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_route.cuh"
+    },
+    "san_r1/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/device_witness.cu": {
+      "sha256": "5c5d46077427a1a269da4577f571f95ba8602d15cfe7f17acfd2b97ad2f43153",
+      "bytes": 19136,
+      "capture_receipt": "san_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/device_witness.cu"
+    },
+    "san_r1/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_device_gate.cu": {
+      "sha256": "696f72eede4c838dd24ffd78cfa716f087898c3fa24d154795072240a8059c61",
+      "bytes": 14349,
+      "capture_receipt": "san_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_device_gate.cu"
+    },
+    "san_r1/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_route_device_gate.cu": {
+      "sha256": "05cc4f8bbc3cfcb63cab602b35a8dc07a7d26f5bf8a30ade62e827118971b22a",
+      "bytes": 10826,
+      "capture_receipt": "san_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_route_device_gate.cu"
+    },
+    "san_r1/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt": {
+      "sha256": "f8b37b2f64fa2caf2d698cb10aaa81f4184db96ef6016224a90ac0f6ea0d3bc0",
+      "bytes": 598,
+      "capture_receipt": "san_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt"
+    },
+    "san_r1/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt": {
+      "sha256": "80ee3dc52623bd8393dc2f2a3027fd3f796d4460395483611659d1db6d2546a4",
+      "bytes": 1376,
+      "capture_receipt": "san_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt"
+    },
+    "san_r1/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt": {
+      "sha256": "61a2545302691fa5f8ecfd0327efce56146ae8d25efa0dc842d054e749bf6bc7",
+      "bytes": 1190,
+      "capture_receipt": "san_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt"
+    },
+    "san_r1/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt": {
+      "sha256": "55c6c206b027e3fc6a3b548cb1801e24fac6a5442fe9835822e70b9303003d69",
+      "bytes": 160,
+      "capture_receipt": "san_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt"
+    },
+    "san_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_kernels.cuh": {
+      "sha256": "90c13d514edd3ec375dcbd0457ead049cd1c1ae00db58b059dce6e37834ef947",
+      "bytes": 12124,
+      "capture_receipt": "san_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_kernels.cuh"
+    },
+    "san_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_route.cuh": {
+      "sha256": "eb496ff125852f9b2a7bd169abb9c12650bc8f9802b6f6e13ad526739978c609",
+      "bytes": 18373,
+      "capture_receipt": "san_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_route.cuh"
+    },
+    "san_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/device_witness.cu": {
+      "sha256": "5c5d46077427a1a269da4577f571f95ba8602d15cfe7f17acfd2b97ad2f43153",
+      "bytes": 19136,
+      "capture_receipt": "san_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/device_witness.cu"
+    },
+    "san_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_device_gate.cu": {
+      "sha256": "696f72eede4c838dd24ffd78cfa716f087898c3fa24d154795072240a8059c61",
+      "bytes": 14349,
+      "capture_receipt": "san_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_device_gate.cu"
+    },
+    "san_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_route_device_gate.cu": {
+      "sha256": "05cc4f8bbc3cfcb63cab602b35a8dc07a7d26f5bf8a30ade62e827118971b22a",
+      "bytes": 10826,
+      "capture_receipt": "san_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_route_device_gate.cu"
+    },
+    "san_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt": {
+      "sha256": "f8b37b2f64fa2caf2d698cb10aaa81f4184db96ef6016224a90ac0f6ea0d3bc0",
+      "bytes": 598,
+      "capture_receipt": "san_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt"
+    },
+    "san_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt": {
+      "sha256": "80ee3dc52623bd8393dc2f2a3027fd3f796d4460395483611659d1db6d2546a4",
+      "bytes": 1376,
+      "capture_receipt": "san_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt"
+    },
+    "san_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt": {
+      "sha256": "61a2545302691fa5f8ecfd0327efce56146ae8d25efa0dc842d054e749bf6bc7",
+      "bytes": 1190,
+      "capture_receipt": "san_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt"
+    },
+    "san_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt": {
+      "sha256": "55c6c206b027e3fc6a3b548cb1801e24fac6a5442fe9835822e70b9303003d69",
+      "bytes": 160,
+      "capture_receipt": "san_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt"
+    },
+    "san_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_kernels.cuh": {
+      "sha256": "90c13d514edd3ec375dcbd0457ead049cd1c1ae00db58b059dce6e37834ef947",
+      "bytes": 12124,
+      "capture_receipt": "san_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_kernels.cuh"
+    },
+    "san_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_route.cuh": {
+      "sha256": "eb496ff125852f9b2a7bd169abb9c12650bc8f9802b6f6e13ad526739978c609",
+      "bytes": 18373,
+      "capture_receipt": "san_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_route.cuh"
+    },
+    "san_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/device_witness.cu": {
+      "sha256": "5c5d46077427a1a269da4577f571f95ba8602d15cfe7f17acfd2b97ad2f43153",
+      "bytes": 19136,
+      "capture_receipt": "san_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/device_witness.cu"
+    },
+    "san_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_device_gate.cu": {
+      "sha256": "696f72eede4c838dd24ffd78cfa716f087898c3fa24d154795072240a8059c61",
+      "bytes": 14349,
+      "capture_receipt": "san_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_device_gate.cu"
+    },
+    "san_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_route_device_gate.cu": {
+      "sha256": "05cc4f8bbc3cfcb63cab602b35a8dc07a7d26f5bf8a30ade62e827118971b22a",
+      "bytes": 10826,
+      "capture_receipt": "san_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_route_device_gate.cu"
+    },
+    "san_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt": {
+      "sha256": "f8b37b2f64fa2caf2d698cb10aaa81f4184db96ef6016224a90ac0f6ea0d3bc0",
+      "bytes": 598,
+      "capture_receipt": "san_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt"
+    },
+    "san_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt": {
+      "sha256": "80ee3dc52623bd8393dc2f2a3027fd3f796d4460395483611659d1db6d2546a4",
+      "bytes": 1376,
+      "capture_receipt": "san_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt"
+    },
+    "san_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt": {
+      "sha256": "61a2545302691fa5f8ecfd0327efce56146ae8d25efa0dc842d054e749bf6bc7",
+      "bytes": 1190,
+      "capture_receipt": "san_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt"
+    },
+    "san_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt": {
+      "sha256": "55c6c206b027e3fc6a3b548cb1801e24fac6a5442fe9835822e70b9303003d69",
+      "bytes": 160,
+      "capture_receipt": "san_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt"
+    },
+    "additional_r1/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_kernels.cuh": {
+      "sha256": "90c13d514edd3ec375dcbd0457ead049cd1c1ae00db58b059dce6e37834ef947",
+      "bytes": 12124,
+      "capture_receipt": "additional_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_kernels.cuh"
+    },
+    "additional_r1/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_route.cuh": {
+      "sha256": "eb496ff125852f9b2a7bd169abb9c12650bc8f9802b6f6e13ad526739978c609",
+      "bytes": 18373,
+      "capture_receipt": "additional_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_route.cuh"
+    },
+    "additional_r1/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/device_witness.cu": {
+      "sha256": "5c5d46077427a1a269da4577f571f95ba8602d15cfe7f17acfd2b97ad2f43153",
+      "bytes": 19136,
+      "capture_receipt": "additional_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/device_witness.cu"
+    },
+    "additional_r1/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_device_gate.cu": {
+      "sha256": "696f72eede4c838dd24ffd78cfa716f087898c3fa24d154795072240a8059c61",
+      "bytes": 14349,
+      "capture_receipt": "additional_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_device_gate.cu"
+    },
+    "additional_r1/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_route_device_gate.cu": {
+      "sha256": "05cc4f8bbc3cfcb63cab602b35a8dc07a7d26f5bf8a30ade62e827118971b22a",
+      "bytes": 10826,
+      "capture_receipt": "additional_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_route_device_gate.cu"
+    },
+    "additional_r1/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt": {
+      "sha256": "f8b37b2f64fa2caf2d698cb10aaa81f4184db96ef6016224a90ac0f6ea0d3bc0",
+      "bytes": 598,
+      "capture_receipt": "additional_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt"
+    },
+    "additional_r1/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt": {
+      "sha256": "80ee3dc52623bd8393dc2f2a3027fd3f796d4460395483611659d1db6d2546a4",
+      "bytes": 1376,
+      "capture_receipt": "additional_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt"
+    },
+    "additional_r1/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt": {
+      "sha256": "61a2545302691fa5f8ecfd0327efce56146ae8d25efa0dc842d054e749bf6bc7",
+      "bytes": 1190,
+      "capture_receipt": "additional_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt"
+    },
+    "additional_r1/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt": {
+      "sha256": "55c6c206b027e3fc6a3b548cb1801e24fac6a5442fe9835822e70b9303003d69",
+      "bytes": 160,
+      "capture_receipt": "additional_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt"
+    },
+    "additional_r1/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_kernels.cuh": {
+      "sha256": "90c13d514edd3ec375dcbd0457ead049cd1c1ae00db58b059dce6e37834ef947",
+      "bytes": 12124,
+      "capture_receipt": "additional_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_kernels.cuh"
+    },
+    "additional_r1/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_route.cuh": {
+      "sha256": "eb496ff125852f9b2a7bd169abb9c12650bc8f9802b6f6e13ad526739978c609",
+      "bytes": 18373,
+      "capture_receipt": "additional_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_route.cuh"
+    },
+    "additional_r1/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/device_witness.cu": {
+      "sha256": "5c5d46077427a1a269da4577f571f95ba8602d15cfe7f17acfd2b97ad2f43153",
+      "bytes": 19136,
+      "capture_receipt": "additional_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/device_witness.cu"
+    },
+    "additional_r1/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_device_gate.cu": {
+      "sha256": "696f72eede4c838dd24ffd78cfa716f087898c3fa24d154795072240a8059c61",
+      "bytes": 14349,
+      "capture_receipt": "additional_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_device_gate.cu"
+    },
+    "additional_r1/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_route_device_gate.cu": {
+      "sha256": "05cc4f8bbc3cfcb63cab602b35a8dc07a7d26f5bf8a30ade62e827118971b22a",
+      "bytes": 10826,
+      "capture_receipt": "additional_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_route_device_gate.cu"
+    },
+    "additional_r1/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt": {
+      "sha256": "f8b37b2f64fa2caf2d698cb10aaa81f4184db96ef6016224a90ac0f6ea0d3bc0",
+      "bytes": 598,
+      "capture_receipt": "additional_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt"
+    },
+    "additional_r1/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt": {
+      "sha256": "80ee3dc52623bd8393dc2f2a3027fd3f796d4460395483611659d1db6d2546a4",
+      "bytes": 1376,
+      "capture_receipt": "additional_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt"
+    },
+    "additional_r1/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt": {
+      "sha256": "61a2545302691fa5f8ecfd0327efce56146ae8d25efa0dc842d054e749bf6bc7",
+      "bytes": 1190,
+      "capture_receipt": "additional_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt"
+    },
+    "additional_r1/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt": {
+      "sha256": "55c6c206b027e3fc6a3b548cb1801e24fac6a5442fe9835822e70b9303003d69",
+      "bytes": 160,
+      "capture_receipt": "additional_r1/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt"
+    },
+    "additional_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_kernels.cuh": {
+      "sha256": "90c13d514edd3ec375dcbd0457ead049cd1c1ae00db58b059dce6e37834ef947",
+      "bytes": 12124,
+      "capture_receipt": "additional_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_kernels.cuh"
+    },
+    "additional_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_route.cuh": {
+      "sha256": "eb496ff125852f9b2a7bd169abb9c12650bc8f9802b6f6e13ad526739978c609",
+      "bytes": 18373,
+      "capture_receipt": "additional_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_route.cuh"
+    },
+    "additional_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/device_witness.cu": {
+      "sha256": "5c5d46077427a1a269da4577f571f95ba8602d15cfe7f17acfd2b97ad2f43153",
+      "bytes": 19136,
+      "capture_receipt": "additional_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/device_witness.cu"
+    },
+    "additional_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_device_gate.cu": {
+      "sha256": "696f72eede4c838dd24ffd78cfa716f087898c3fa24d154795072240a8059c61",
+      "bytes": 14349,
+      "capture_receipt": "additional_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_device_gate.cu"
+    },
+    "additional_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_route_device_gate.cu": {
+      "sha256": "05cc4f8bbc3cfcb63cab602b35a8dc07a7d26f5bf8a30ade62e827118971b22a",
+      "bytes": 10826,
+      "capture_receipt": "additional_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_route_device_gate.cu"
+    },
+    "additional_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt": {
+      "sha256": "f8b37b2f64fa2caf2d698cb10aaa81f4184db96ef6016224a90ac0f6ea0d3bc0",
+      "bytes": 598,
+      "capture_receipt": "additional_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt"
+    },
+    "additional_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt": {
+      "sha256": "80ee3dc52623bd8393dc2f2a3027fd3f796d4460395483611659d1db6d2546a4",
+      "bytes": 1376,
+      "capture_receipt": "additional_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt"
+    },
+    "additional_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt": {
+      "sha256": "61a2545302691fa5f8ecfd0327efce56146ae8d25efa0dc842d054e749bf6bc7",
+      "bytes": 1190,
+      "capture_receipt": "additional_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt"
+    },
+    "additional_r2/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt": {
+      "sha256": "55c6c206b027e3fc6a3b548cb1801e24fac6a5442fe9835822e70b9303003d69",
+      "bytes": 160,
+      "capture_receipt": "additional_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt"
+    },
+    "additional_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_kernels.cuh": {
+      "sha256": "90c13d514edd3ec375dcbd0457ead049cd1c1ae00db58b059dce6e37834ef947",
+      "bytes": 12124,
+      "capture_receipt": "additional_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_kernels.cuh"
+    },
+    "additional_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_route.cuh": {
+      "sha256": "eb496ff125852f9b2a7bd169abb9c12650bc8f9802b6f6e13ad526739978c609",
+      "bytes": 18373,
+      "capture_receipt": "additional_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_route.cuh"
+    },
+    "additional_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/device_witness.cu": {
+      "sha256": "5c5d46077427a1a269da4577f571f95ba8602d15cfe7f17acfd2b97ad2f43153",
+      "bytes": 19136,
+      "capture_receipt": "additional_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/device_witness.cu"
+    },
+    "additional_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_device_gate.cu": {
+      "sha256": "696f72eede4c838dd24ffd78cfa716f087898c3fa24d154795072240a8059c61",
+      "bytes": 14349,
+      "capture_receipt": "additional_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_device_gate.cu"
+    },
+    "additional_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_route_device_gate.cu": {
+      "sha256": "05cc4f8bbc3cfcb63cab602b35a8dc07a7d26f5bf8a30ade62e827118971b22a",
+      "bytes": 10826,
+      "capture_receipt": "additional_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_route_device_gate.cu"
+    },
+    "additional_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt": {
+      "sha256": "f8b37b2f64fa2caf2d698cb10aaa81f4184db96ef6016224a90ac0f6ea0d3bc0",
+      "bytes": 598,
+      "capture_receipt": "additional_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt"
+    },
+    "additional_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt": {
+      "sha256": "80ee3dc52623bd8393dc2f2a3027fd3f796d4460395483611659d1db6d2546a4",
+      "bytes": 1376,
+      "capture_receipt": "additional_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt"
+    },
+    "additional_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt": {
+      "sha256": "61a2545302691fa5f8ecfd0327efce56146ae8d25efa0dc842d054e749bf6bc7",
+      "bytes": 1190,
+      "capture_receipt": "additional_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt"
+    },
+    "additional_r2/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt": {
+      "sha256": "55c6c206b027e3fc6a3b548cb1801e24fac6a5442fe9835822e70b9303003d69",
+      "bytes": 160,
+      "capture_receipt": "additional_r2/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt"
+    },
+    "additional_r3/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_kernels.cuh": {
+      "sha256": "90c13d514edd3ec375dcbd0457ead049cd1c1ae00db58b059dce6e37834ef947",
+      "bytes": 12124,
+      "capture_receipt": "additional_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_kernels.cuh"
+    },
+    "additional_r3/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_route.cuh": {
+      "sha256": "eb496ff125852f9b2a7bd169abb9c12650bc8f9802b6f6e13ad526739978c609",
+      "bytes": 18373,
+      "capture_receipt": "additional_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_route.cuh"
+    },
+    "additional_r3/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/device_witness.cu": {
+      "sha256": "5c5d46077427a1a269da4577f571f95ba8602d15cfe7f17acfd2b97ad2f43153",
+      "bytes": 19136,
+      "capture_receipt": "additional_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/device_witness.cu"
+    },
+    "additional_r3/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_device_gate.cu": {
+      "sha256": "696f72eede4c838dd24ffd78cfa716f087898c3fa24d154795072240a8059c61",
+      "bytes": 14349,
+      "capture_receipt": "additional_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_device_gate.cu"
+    },
+    "additional_r3/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_route_device_gate.cu": {
+      "sha256": "05cc4f8bbc3cfcb63cab602b35a8dc07a7d26f5bf8a30ade62e827118971b22a",
+      "bytes": 10826,
+      "capture_receipt": "additional_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/census_route_device_gate.cu"
+    },
+    "additional_r3/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt": {
+      "sha256": "f8b37b2f64fa2caf2d698cb10aaa81f4184db96ef6016224a90ac0f6ea0d3bc0",
+      "bytes": 598,
+      "capture_receipt": "additional_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt"
+    },
+    "additional_r3/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt": {
+      "sha256": "80ee3dc52623bd8393dc2f2a3027fd3f796d4460395483611659d1db6d2546a4",
+      "bytes": 1376,
+      "capture_receipt": "additional_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt"
+    },
+    "additional_r3/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt": {
+      "sha256": "61a2545302691fa5f8ecfd0327efce56146ae8d25efa0dc842d054e749bf6bc7",
+      "bytes": 1190,
+      "capture_receipt": "additional_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt"
+    },
+    "additional_r3/source_snapshot/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt": {
+      "sha256": "55c6c206b027e3fc6a3b548cb1801e24fac6a5442fe9835822e70b9303003d69",
+      "bytes": 160,
+      "capture_receipt": "additional_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt"
+    },
+    "additional_r3/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_kernels.cuh": {
+      "sha256": "90c13d514edd3ec375dcbd0457ead049cd1c1ae00db58b059dce6e37834ef947",
+      "bytes": 12124,
+      "capture_receipt": "additional_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_kernels.cuh"
+    },
+    "additional_r3/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_route.cuh": {
+      "sha256": "eb496ff125852f9b2a7bd169abb9c12650bc8f9802b6f6e13ad526739978c609",
+      "bytes": 18373,
+      "capture_receipt": "additional_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/census_route.cuh"
+    },
+    "additional_r3/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/device_witness.cu": {
+      "sha256": "5c5d46077427a1a269da4577f571f95ba8602d15cfe7f17acfd2b97ad2f43153",
+      "bytes": 19136,
+      "capture_receipt": "additional_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/gpu/device_witness.cu"
+    },
+    "additional_r3/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_device_gate.cu": {
+      "sha256": "696f72eede4c838dd24ffd78cfa716f087898c3fa24d154795072240a8059c61",
+      "bytes": 14349,
+      "capture_receipt": "additional_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_device_gate.cu"
+    },
+    "additional_r3/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_route_device_gate.cu": {
+      "sha256": "05cc4f8bbc3cfcb63cab602b35a8dc07a7d26f5bf8a30ade62e827118971b22a",
+      "bytes": 10826,
+      "capture_receipt": "additional_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/census_route_device_gate.cu"
+    },
+    "additional_r3/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt": {
+      "sha256": "f8b37b2f64fa2caf2d698cb10aaa81f4184db96ef6016224a90ac0f6ea0d3bc0",
+      "bytes": 598,
+      "capture_receipt": "additional_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_2_k10_en_trop.txt"
+    },
+    "additional_r3/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt": {
+      "sha256": "80ee3dc52623bd8393dc2f2a3027fd3f796d4460395483611659d1db6d2546a4",
+      "bytes": 1376,
+      "capture_receipt": "additional_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_cinq_ordres.txt"
+    },
+    "additional_r3/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt": {
+      "sha256": "61a2545302691fa5f8ecfd0327efce56146ae8d25efa0dc842d054e749bf6bc7",
+      "bytes": 1190,
+      "capture_receipt": "additional_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_k11_en_trop.txt"
+    },
+    "additional_r3/source_snapshot/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt": {
+      "sha256": "55c6c206b027e3fc6a3b548cb1801e24fac6a5442fe9835822e70b9303003d69",
+      "bytes": 160,
+      "capture_receipt": "additional_r3/receipt.json",
+      "source_path": "build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/tests/refs/uniform_400_tronque_k1_absent.txt"
+    }
+  }
+}

@@ -1,0 +1,100 @@
+[
+  {
+    "processes": [
+      {
+        "pid": 80,
+        "rss_pages": 160,
+        "state": "R",
+        "stime_ticks": 0,
+        "utime_ticks": 0
+      }
+    ],
+    "stage": "starting",
+    "stderr_bytes": 0,
+    "time_ns": 1789111316079328878
+  },
+  {
+    "processes": [
+      {
+        "pid": 80,
+        "rss_pages": 320,
+        "state": "S",
+        "stime_ticks": 0,
+        "utime_ticks": 0
+      },
+      {
+        "pid": 81,
+        "rss_pages": 14239,
+        "state": "R",
+        "stime_ticks": 7,
+        "utime_ticks": 2991
+      }
+    ],
+    "stage": "stage_start=generate",
+    "stderr_bytes": 80,
+    "time_ns": 1789111346087271623
+  },
+  {
+    "processes": [
+      {
+        "pid": 80,
+        "rss_pages": 320,
+        "state": "S",
+        "stime_ticks": 0,
+        "utime_ticks": 0
+      },
+      {
+        "pid": 81,
+        "rss_pages": 120669,
+        "state": "R",
+        "stime_ticks": 69,
+        "utime_ticks": 5928
+      }
+    ],
+    "stage": "stage_start=generate",
+    "stderr_bytes": 80,
+    "time_ns": 1789111376095273836
+  },
+  {
+    "processes": [
+      {
+        "pid": 80,
+        "rss_pages": 320,
+        "state": "S",
+        "stime_ticks": 0,
+        "utime_ticks": 0
+      },
+      {
+        "pid": 81,
+        "rss_pages": 180828,
+        "state": "R",
+        "stime_ticks": 152,
+        "utime_ticks": 8843
+      }
+    ],
+    "stage": "stage_start=full_ball_tower",
+    "stderr_bytes": 347,
+    "time_ns": 1789111406103522802
+  },
+  {
+    "processes": [
+      {
+        "pid": 80,
+        "rss_pages": 320,
+        "state": "S",
+        "stime_ticks": 0,
+        "utime_ticks": 0
+      },
+      {
+        "pid": 81,
+        "rss_pages": 457272,
+        "state": "S",
+        "stime_ticks": 288,
+        "utime_ticks": 14152
+      }
+    ],
+    "stage": "stage_start=full_ball_tower",
+    "stderr_bytes": 347,
+    "time_ns": 1789111436118044271
+  }
+]

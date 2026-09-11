@@ -1,0 +1,48 @@
+{
+  "captured_ns": 1789111830799932206,
+  "commands": [
+    {
+      "argv": [
+        "g++",
+        "--version"
+      ],
+      "ended_ns": 1789111830803008817,
+      "exit_code": 0,
+      "name": "compiler",
+      "started_ns": 1789111830800107276,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8"
+    },
+    {
+      "argv": [
+        "uname",
+        "-a"
+      ],
+      "ended_ns": 1789111830805190949,
+      "exit_code": 0,
+      "name": "kernel",
+      "started_ns": 1789111830803124399,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "88f3550fba0ac84e8b5a3fd03552202247df72a629dff5219576ba6c2394f44d"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "--version"
+      ],
+      "ended_ns": 1789111830806387737,
+      "exit_code": 0,
+      "name": "time",
+      "started_ns": 1789111830805300462,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a3b64288a651d40a18a243c43c871f7ae2886baa58b7e3c64a1061bfd651245f"
+    }
+  ],
+  "current_boost_key_headers_match_historical_package": true,
+  "dependency_vendor_payload_included": false,
+  "no_retroactive_compile_environment_stability_claim": true,
+  "original_CPU_packet_manifest_sha256": "219793e318aad0ff3eed0732c68998a43f4f60be6c57c9a449c6f8412154a876",
+  "original_compile_source": "/workspaces/E-HGP/build/v7_static_resolver_20260911/micro_r1",
+  "role": "post_run_reproduction_observation",
+  "status": "passed"
+}

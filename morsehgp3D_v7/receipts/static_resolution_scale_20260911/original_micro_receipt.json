@@ -1,0 +1,18 @@
+{
+  "status": "passed",
+  "error": null,
+  "sources_stable": true,
+  "public_status": "not_claimed",
+  "GCP_used": false,
+  "paired": [
+    {
+      "n": 400,
+      "matched": true
+    },
+    {
+      "n": 1000,
+      "matched": true
+    }
+  ],
+  "shared_host": true
+}

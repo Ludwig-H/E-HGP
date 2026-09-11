@@ -1,0 +1,11 @@
+--- morsehgp3D_v7/src/forest/full_ball_tower.hpp
++++ morsehgp3D_v7/src/forest/full_ball_tower.hpp
+@@ -651,7 +651,7 @@
+           const auto& request = requests[r];
+           require(compare_exact_level(before, balls[request.consumer].level) <= 0,
+                   "full_ball_static_request_chronology");
+-          static_targets[request.ordinal] = target;
++          static_targets[r] = target;
+         }
+       }
+     };

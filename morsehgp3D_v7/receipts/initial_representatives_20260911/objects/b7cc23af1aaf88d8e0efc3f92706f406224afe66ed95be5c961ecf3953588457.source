@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+"""Create-only derived report after all primary measurements finish."""
+import hashlib
+import json
+from pathlib import Path
+import summarize
+
+HERE = Path(__file__).resolve().parent
+
+
+def main():
+    rows = summarize.main()
+    required = {"observed_n400", "observed_n400_nocache", "observed_uniform_n8000_s8", "observed_scanline_overlap_multiecho_n2000_s8"}
+    if not required <= {row["run"] for row in rows}:
+        raise RuntimeError("primary measurements not complete")
+    pins = {str(p.relative_to(HERE)): hashlib.sha256(p.read_bytes()).hexdigest() for p in
+            [HERE / "observed/morsehgp3D_v7/src/forest/full_ball_tower.hpp",
+             HERE / "observed/morsehgp3D_v7/src/forest/unique_observer.hpp",
+             HERE / "observed/morsehgp3D_v7/bench/full_ball_tower_probe.cpp",
+             HERE / "observed/morsehgp3D_v7/tests/unique_representative_gate.cpp"]}
+    report = {"status": "completed_primary_diagnostic", "public_status": "not_claimed",
+              "instrumented_not_benchmark": True, "source_pins": pins, "measurements": rows,
+              "not_attempted": [{"n": 8000, "s": s, "family": "uniform", "reason": "deferred_by_ROOT_after_observed_shared_host_load_not_algorithmic_ceiling"} for s in [10, 12]]}
+    with (HERE / "diagnostic_summary.json").open("x") as out:
+        out.write(json.dumps(report, indent=2) + "\n")
+
+
+if __name__ == "__main__":
+    main()

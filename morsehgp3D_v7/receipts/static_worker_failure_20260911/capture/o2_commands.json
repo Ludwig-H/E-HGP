@@ -1,0 +1,90 @@
+[
+  {
+    "name": "compile",
+    "argv": [
+      "g++",
+      "-O2",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-DMHGP7_TESTING",
+      "-I",
+      "/workspaces/E-HGP/build/v7_static_worker_failure_20260911/o2/source",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_static_worker_failure_20260911/o2/gate.d",
+      "/workspaces/E-HGP/build/v7_static_worker_failure_20260911/o2/driver.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_static_worker_failure_20260911/o2/gate"
+    ],
+    "started_ns": 1789110593845621866,
+    "ended_ns": 1789110614865976053,
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "sanitizer": false,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "post_admission_and_reuse",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_worker_failure_20260911/o2/gate",
+      "/workspaces/E-HGP/build/v7_static_worker_failure_20260911/o2/fixtures.txt",
+      "/workspaces/E-HGP/build/v7_static_worker_failure_20260911/o2/expected.txt"
+    ],
+    "started_ns": 1789110614869790991,
+    "ended_ns": 1789110614967206103,
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "sanitizer": false,
+    "stdout_sha256": "3229893a7eba017edb44985a1510553f339b72c31aad8ee4037dbe97ce046129",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "mutant_compile",
+    "argv": [
+      "g++",
+      "-O2",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-DMHGP7_TESTING",
+      "-I",
+      "/workspaces/E-HGP/build/v7_static_worker_failure_20260911/o2/mutant_source",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_static_worker_failure_20260911/o2/mutant_gate.d",
+      "/workspaces/E-HGP/build/v7_static_worker_failure_20260911/o2/driver.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_static_worker_failure_20260911/o2/mutant_gate"
+    ],
+    "started_ns": 1789110615037659740,
+    "ended_ns": 1789110636173148997,
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "sanitizer": false,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "drop_paid_work",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_worker_failure_20260911/o2/mutant_gate",
+      "/workspaces/E-HGP/build/v7_static_worker_failure_20260911/o2/fixtures.txt",
+      "/workspaces/E-HGP/build/v7_static_worker_failure_20260911/o2/expected.txt"
+    ],
+    "started_ns": 1789110636175087037,
+    "ended_ns": 1789110636186498141,
+    "exit_code": 1,
+    "expected_exit_code": 1,
+    "sanitizer": false,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "044ca1489db367f371e2c1d6e283f9e0842087c7b6b62d3b0fa64c52c2e9d7a6"
+  }
+]

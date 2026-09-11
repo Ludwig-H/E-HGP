@@ -1,0 +1,24 @@
+// PRIVATE wrapper: retains the existing independent Gram/Gamma judge.
+#define main published_gate_main
+#include "full_ball_tower_gate.cpp"
+#undef main
+
+int main(int argc, char** argv) {
+  const int result = published_gate_main(argc, argv);
+  if (result != 0) return result;
+  auto& c = mhgp7::unique_representative_detail::collector;
+  try {
+    mhgp7::unique_representative_detail::need(c.completed == 28 && c.completed_rows == 112 &&
+        c.duplicate_rows > 0 && c.distinct_rows > 0 && c.zero_rows > 0 && c.pairwise_checks > 100,
+        "observer.nonvacuity");
+    std::printf("{\"observer_gate\":\"passed\",\"completed\":%llu,\"rows\":%llu,\"duplicate_rows\":%llu,"
+        "\"distinct_rows\":%llu,\"zero_rows\":%llu,\"pairwise_checks\":%llu,\"transcript_digest\":\"%s\"}\n",
+        static_cast<unsigned long long>(c.completed), static_cast<unsigned long long>(c.completed_rows),
+        static_cast<unsigned long long>(c.duplicate_rows), static_cast<unsigned long long>(c.distinct_rows),
+        static_cast<unsigned long long>(c.zero_rows), static_cast<unsigned long long>(c.pairwise_checks),
+        c.transcript.hex().c_str());
+  } catch (const std::exception& e) {
+    std::fprintf(stderr, "observer gate failed: %s\n", e.what()); return 1;
+  }
+  return 0;
+}

@@ -1,0 +1,18 @@
+{
+  "GCP_used": false,
+  "algorithmic_timeout": null,
+  "argv": [
+    "/usr/bin/time",
+    "-v",
+    "/workspaces/E-HGP/build/v7_static_resolver_20260911/micro_r1/probe",
+    "--n=8000",
+    "--s=12",
+    "--kmax=10",
+    "--threads=1",
+    "--static-threads=4"
+  ],
+  "owned_process_group": 80,
+  "reference_stdout_sha256": "37106c249dc6fd4b49ad3cb8d9c6d907d211d317d5aa12bdb7a96627ce9c1dc0",
+  "shared_host": true,
+  "started_ns": 1789111480045277853
+}

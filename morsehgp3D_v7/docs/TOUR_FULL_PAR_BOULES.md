@@ -1,6 +1,6 @@
 # Tour FULL par ancres de boule
 
-10 septembre 2026. `phase=exploration_v7_hors_registre`,
+11 septembre 2026. `phase=exploration_v7_hors_registre`,
 `backend=cpu_reference`, `profile=quantized_u16_input_only`,
 `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
@@ -107,6 +107,15 @@ impossible n'élident aucun travail requis. Il libère aussi les états morts
 avant la banque finale et réserve les arènes exactes du journal v2.
 Cela ne supprime pas encore les brouillons globaux du journal.
 
+La [voie statique du 11 septembre](RESOLUTION_STATIQUE_CPU_20260911.md)
+est intégrée en option CPU : tri-unique des représentants stricts par K,
+résolution vers des BallId admissibles, puis restitution des occurrences
+au calendrier nominal. Les semis sont géométriques et immuables ; les
+ancres temporelles ne sont lues qu'après fermeture du lot de naissance de
+la cible, strictement avant le lot consommateur. Ni les
+blocs sans représentant ni les verticales ne sont supprimés. Le défaut
+conserve le cache temporel ; les deux voies ne cumulent pas leurs tables.
+
 ## Qualification et instrument
 
 Le [paquet initial de preuves locales](../receipts/ball_tower_20260910/README.md)
@@ -127,6 +136,13 @@ tués, notamment croissance et ancre inerte dans le chemin des lots groupés.
 Le défaut `new(nothrow)` de l'injecteur ASan est corrigé dans le test,
 avec conservation de son échec antérieur. Vingt CTests CPU passent sur
 sources stables dans le [reçu d'échelle](../receipts/full_ball_scale_gpu_20260910/README.md).
+
+Le nouveau raccord statique est qualifié séparément : 30 nuages, 124 ordres,
+3 324 coupes, 75 136 verticales et 4 498 contrôles physiques appariés O2/SAN.
+La gate nominale intégrée garde ses 28 nuages. Six mutants statiques sont
+réfutés et 24 CTests ciblés passent sur les nouvelles sources figées.
+Le lien CUDA de la sonde hybride est aussi rejoué localement, sans device ;
+ce contrôle ne transforme pas la résolution CPU en backend GPU.
 
 `bench/full_ball_tower_probe.cpp` mesure entrée, index, génération WSPD,
 tri/RLE, prefilter, census, tour retenue et empreinte du payload. Elle garde
@@ -149,8 +165,8 @@ générations SPOT utilisées sont arrêtées et certifiées `TERMINATED`.
 Les contrats 50k/1s, 100ms et plusieurs dizaines de millions de points
 ne sont pas acquis. Le coût FULL dominant motive d'abord la
 [séparation statique prouvée sous census complet](../audits/receipts_raccord_ancres_20260910/suite_cache_20260910/NOTE_PHASE_STATIQUE_MEB.md)
-des MEB et du calcul temporel des parents ; cette variante n'est pas encore
-le moteur produit. Un autre port GPU utile vise les requêtes de témoins
+des MEB et du calcul temporel des parents ; son option CPU est maintenant
+disponible, son backend GPU reste à porter. Un autre port GPU utile vise les requêtes de témoins
 universels par rectangle WSPD, dont le reçu historique 50k compte près de
 cinq milliards de visites d'index. Un kernel de census dans une boule fixe
 ne remplace pas ce prédicat universel sur A×B ; son port doit conserver

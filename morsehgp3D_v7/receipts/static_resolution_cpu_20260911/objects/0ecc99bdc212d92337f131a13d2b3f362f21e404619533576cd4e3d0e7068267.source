@@ -1,0 +1,6 @@
+/workspaces/E-HGP/build/v7_static_resolver_20260911/source/morsehgp3D_v7/tests/full_ball_tower_gate.cpp: In lambda function:
+/workspaces/E-HGP/build/v7_static_resolver_20260911/source/morsehgp3D_v7/tests/full_ball_tower_gate.cpp:293:18: error: comparison between two arrays is deprecated in C++20 [-Werror=array-compare]
+  293 |     return x.num == y.num && x.den == y.den;
+      |            ~~~~~~^~~~~~~~
+/workspaces/E-HGP/build/v7_static_resolver_20260911/source/morsehgp3D_v7/tests/full_ball_tower_gate.cpp:293:18: note: use unary ‘+’ which decays operands to pointers or ‘&(x.mhgp7::ExactLevel::num)[0] == &(y.mhgp7::ExactLevel::num)[0]’ to compare the addresses
+cc1plus: all warnings being treated as errors

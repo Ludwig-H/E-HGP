@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+"""Derived summary only; never edits captured commands or streams."""
+from pathlib import Path
+import json
+import re
+from typing import Any
+
+HERE = Path(__file__).resolve().parent
+
+
+def main() -> list[dict[str, Any]]:
+    rows = []
+    for directory in sorted((HERE / "runs").glob("observed_*")):
+        receipt = directory / "receipt.json"
+        if not receipt.exists():
+            continue
+        command = json.loads(receipt.read_text())
+        if command["exit_code"] != 0:
+            continue
+        candidates = [json.loads(line) for line in (directory / "stdout").read_text().splitlines() if line.startswith("{")]
+        if len(candidates) != 1 or "observer" not in candidates[0]:
+            continue
+        data = candidates[0]
+        raw = (directory / "stderr").read_text()
+        rss = re.search(r"Maximum resident set size \(kbytes\): (\d+)", raw)
+        summary = {k: data[k] for k in ["n", "s", "family", "kmax", "representatives", "resolver_meb_calls", "extra_records", "same_radius_steps", "nodes", "payload_digest", "total_s", "tower_s"]}
+        summary["run"] = directory.name
+        summary["unique_representatives"] = sum(r["unique_representative_keys"] for r in data["observer"]["rows"])
+        summary["duplicate_occurrences"] = summary["representatives"] - summary["unique_representatives"]
+        summary["duplicate_fraction"] = summary["duplicate_occurrences"] / summary["representatives"]
+        summary["peak_key_capacity_bytes"] = max(r["key_capacity_bytes"] for r in data["observer"]["rows"])
+        summary["peak_rss_kib"] = int(rss.group(1)) if rss else None
+        summary["instrumented_not_benchmark"] = True
+        summary["rows"] = data["observer"]["rows"]
+        rows.append(summary)
+        print(json.dumps({k: v for k, v in summary.items() if k != "rows"}), flush=True)
+    return rows
+
+
+if __name__ == "__main__":
+    main()

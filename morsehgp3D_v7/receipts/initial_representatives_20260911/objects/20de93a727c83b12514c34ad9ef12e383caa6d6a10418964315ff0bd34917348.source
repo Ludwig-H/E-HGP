@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+"""Preserve scripts used for capture before nonsemantic typing cleanup."""
+from pathlib import Path
+import hashlib
+import json
+
+
+def main() -> None:
+    here = Path(__file__).resolve().parent
+    destination = here / "script_history"
+    destination.mkdir()
+    pins: dict[str, str] = {}
+    for source in sorted(here.glob("*.py")):
+        data = source.read_bytes()
+        digest = hashlib.sha256(data).hexdigest()
+        (destination / (source.name + ".source")).write_bytes(data)
+        pins[source.name] = digest
+    (destination / "pins.json").write_text(json.dumps(pins, indent=2) + "\n")
+
+
+if __name__ == "__main__":
+    main()

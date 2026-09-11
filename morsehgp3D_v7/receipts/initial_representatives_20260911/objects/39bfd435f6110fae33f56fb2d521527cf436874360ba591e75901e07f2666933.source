@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+"""Re-run the same SAN binary, after a preserved sandbox LSan failure only."""
+from pathlib import Path
+import json
+import run
+
+HERE = Path(__file__).resolve().parent
+
+
+def main():
+    first = HERE / "runs/observed_gate_san"
+    prior = json.loads((first / "receipt.json").read_text())
+    stderr = (first / "stderr").read_text()
+    if prior["exit_code"] == 0 or "LeakSanitizer" not in stderr or "ptrace" not in stderr:
+        raise RuntimeError("This replay requires the captured LSan/ptrace failure")
+    env = {"ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1", "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"}
+    run.execute("observed_gate_san_r2", [str(HERE / "bin/observed_gate_san"), "--selftest"], env)
+    run.execute("observed_gate_san_nocache_r2", [str(HERE / "bin/observed_gate_san"), "--selftest"], {**env, "MHGP7_PRIVATE_NO_CACHE": "1"})
+
+
+if __name__ == "__main__":
+    main()

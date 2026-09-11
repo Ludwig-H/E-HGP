@@ -9,14 +9,20 @@ Une fois le jalon d'une seconde validé, **la cible suivante est 100 ms**
 pour le même périmètre de tour déclaré, sans relâcher l'exactitude.
 Ce document ne rapporte aucun objectif atteint.
 
-Dernière observation, le 6 septembre : [G4 SPOT CPU48 à 50k](RESULTATS_G4_FULL_20260906.md).
-K10 et le véritable repli K5 refusent avant toute hiérarchie, pour
-coquilles non régulières, en 21,372 s et 5,646 s. Aucune qualification
-de la seconde ni de 100 ms ; les dizaines de millions et le GPU FULL
-restent non mesurés. La session ciblée est close et ses preuves récupérées.
-Le [diagnostic local suivant](PLATEAUX_FULL_ET_ANCRES.md) vérifie les quatre
-coquilles contre toute l'entrée, sans nouvelle VM. Son temps de refus
-n'est pas un temps de tour ni un gain de performance.
+Dernières tours 50k complètes, le 10 septembre : [G4 SPOT CPU/hybride](RESULTATS_TOUR_CACHE_G4_20260910.md),
+418,873 / 418,921 s pour K1..10 et 33,853 / 33,569 s pour K1..5.
+La route hybride n'accélère que prefilter/census ; FULL reste CPU dans ces
+captures. Aucun contrat 1 s/100 ms ou plusieurs dizaines de millions acquis.
+Les deux générations de VM utilisées sont closes, arrêts ciblés certifiés.
+Les [refus du 6 septembre](RESULTATS_G4_FULL_20260906.md) restent historiques ;
+leurs 21,372 / 5,646 s ne sont pas des temps de tour. Le nouvel observateur
+des quatre blocs nommés 50k reste un contrôle distinct des digests globaux.
+
+Le 11 septembre, la [résolution statique CPU](RESOLUTION_STATIQUE_CPU_20260911.md)
+est intégrée en option, avec MEB/supports réduits sur des cas appariés.
+Ses tests locaux et sa compilation CUDA ne réattribuent pas les temps 50k
+précédents et ne qualifient pas un backend de résolutions GPU. GCP non utilisé
+pour cette étape ; le chemin nominal reste sélectionné par défaut.
 
 Le statut demeure `public_status=not_claimed`, profil d'entrée u16.
 La cible de 100 ms du plan transverse est ainsi conservée comme jalon
@@ -40,11 +46,13 @@ K+1 et parents certifiés. Leurs unions descendantes restituent les couvertures,
 isolés inclus. Le [lecteur structurel livré](CONTRAT_CERTIFICAT_FULL.md)
 `src/forest/full_certificate.hpp` n'est pas, à lui seul, un constructeur
 complet ni une porte de performance.
-Le [producteur FULL horizontal](CONTRAT_PRODUCTEUR_FULL_GABRIEL.md)
-calcule ensuite les parents relativement aux catalogues Gabriel fournis.
-Même une exécution des ordres 1..K de ce composant ne qualifie pas la tour
-intégrée : la verticale, l'autorité terminale, le profil pondéré déclaré
-et la publication ne sont pas encore raccordés.
+Le [producteur FULL horizontal historique](CONTRAT_PRODUCTEUR_FULL_GABRIEL.md)
+calcule les parents relativement aux catalogues Gabriel fournis. Ses mesures
+par ordre n'incluaient pas une tour conservée. Le [raccord par boules actuel](TOUR_FULL_PAR_BOULES.md)
+retient maintenant forêts datées, terminal K=n et verticales adjacentes,
+y compris les plateaux ; son autorité reste relative au census exact complet.
+L'archive industrielle et le supplément pondéré restent des obligations
+distinctes, non certifiées par une mesure de cette sonde.
 Le produit F et ses mesures réduites ou `verified_events_only` conservent
 leur portée historique ; aucune de ces mesures ne qualifie ce nouveau payload.
 
@@ -72,8 +80,9 @@ pas une qualification mono-thread.
 
 ## Ordre d'optimisation
 
-Pour le chantier mono courant, la [sonde v5](CONTRAT_SONDE_FULL_MEB.md)
-retire les quotas arbitraires d'opérations. Les garde-fous temps/RAM et
+La [sonde historique v5](CONTRAT_SONDE_FULL_MEB.md) a retiré les quotas
+arbitraires d'opérations ; la sonde de tour par boules conserve cette absence
+de plafond de travail. Les admissions RAM et limites
 de représentation restent distincts ; augmenter l'admission ne constitue
 pas une accélération. Les triplets 8k/16k/32k doivent comparer des runs
 complets de même profil, ainsi que le volume des minima et le travail

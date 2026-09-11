@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "error": null,
+  "mode": "o2",
+  "public_status": "not_claimed",
+  "GCP_used": false,
+  "test_only_hook": true,
+  "header_original_sha256": "33e7d05effce908532d21255e5e0efc4f8c7370d8a05a17dd761142d81bd4209"
+}

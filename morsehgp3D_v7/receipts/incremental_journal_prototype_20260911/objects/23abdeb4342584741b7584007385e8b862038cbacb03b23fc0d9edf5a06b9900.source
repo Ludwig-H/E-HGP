@@ -1,0 +1,661 @@
+In file included from /workspaces/E-HGP/build/v7_incremental_journal_20260911/paired_baseline_gate.cpp:6:
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:13:18: error: ‘FullNodeId’ does not name a type
+   13 | inline constexpr FullNodeId kFullCoverageAbsent = std::numeric_limits<FullNodeId>::max();
+      |                  ^~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:18:15: error: ‘PointId’ was not declared in this scope; did you mean ‘mhgp7::PointId’?
+   18 |   std::vector<PointId> interior, shell;
+      |               ^~~~~~~
+      |               mhgp7::PointId
+In file included from /workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/../lanes/../core/intmath.hpp:9,
+                 from /workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/../lanes/keys.hpp:24,
+                 from /workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/full_certificate.hpp:14,
+                 from /workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:7,
+                 from /workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/full_coverage_incremental.hpp:4,
+                 from /workspaces/E-HGP/build/v7_incremental_journal_20260911/paired_baseline_gate.cpp:4:
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/../lanes/../core/types.hpp:30:7: note: ‘mhgp7::PointId’ declared here
+   30 | using PointId = u32;
+      |       ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:18:22: error: template argument 1 is invalid
+   18 |   std::vector<PointId> interior, shell;
+      |                      ^
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:18:22: error: template argument 2 is invalid
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:18:8: error: ‘<expression error>’ in namespace ‘std’ does not name a type
+   18 |   std::vector<PointId> interior, shell;
+      |        ^~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:22:3: error: ‘FullCertificateStatus’ does not name a type
+   22 |   FullCertificateStatus status = FullCertificateStatus::kInvalidInput;
+      |   ^~~~~~~~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:27:21: error: ISO C++ forbids declaration of ‘type name’ with no type [-fpermissive]
+   27 |     std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |                     ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:27:28: error: template argument 1 is invalid
+   27 |     std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |                            ^
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:27:21: error: ISO C++ forbids declaration of ‘type name’ with no type [-fpermissive]
+   27 |     std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |                     ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:27:28: error: template argument 1 is invalid
+   27 |     std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |                            ^
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:27:21: error: ISO C++ forbids declaration of ‘type name’ with no type [-fpermissive]
+   27 |     std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |                     ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:27:28: error: template argument 1 is invalid
+   27 |     std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |                            ^
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:27:21: error: ISO C++ forbids declaration of ‘type name’ with no type [-fpermissive]
+   27 |     std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |                     ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:27:28: error: template argument 1 is invalid
+   27 |     std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |                            ^
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:27:5: error: invalid template-id
+   27 |     std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |     ^~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:27:21: error: ISO C++ forbids declaration of ‘type name’ with no type [-fpermissive]
+   27 |     std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |                     ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:27:29: error: missing template arguments before ‘,’ token
+   27 |     std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |                             ^
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:27:70: error: expected primary-expression before ‘)’ token
+   27 |     std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |                                                                      ^
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:36:21: error: ‘PointId’ was not declared in this scope; did you mean ‘mhgp7::PointId’?
+   36 |   const std::vector<PointId>& domain() const { return domain_; }
+      |                     ^~~~~~~
+      |                     mhgp7::PointId
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/../lanes/../core/types.hpp:30:7: note: ‘mhgp7::PointId’ declared here
+   30 | using PointId = u32;
+      |       ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:36:28: error: template argument 1 is invalid
+   36 |   const std::vector<PointId>& domain() const { return domain_; }
+      |                            ^
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:36:28: error: template argument 2 is invalid
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:36:14: error: ‘<expression error>’ in namespace ‘std’ does not name a type
+   36 |   const std::vector<PointId>& domain() const { return domain_; }
+      |              ^~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:40:23: error: ISO C++ forbids declaration of ‘type name’ with no type [-fpermissive]
+   40 |       std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |                       ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:40:30: error: template argument 1 is invalid
+   40 |       std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |                              ^
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:40:23: error: ISO C++ forbids declaration of ‘type name’ with no type [-fpermissive]
+   40 |       std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |                       ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:40:30: error: template argument 1 is invalid
+   40 |       std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |                              ^
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:40:23: error: ISO C++ forbids declaration of ‘type name’ with no type [-fpermissive]
+   40 |       std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |                       ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:40:30: error: template argument 1 is invalid
+   40 |       std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |                              ^
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:40:23: error: ISO C++ forbids declaration of ‘type name’ with no type [-fpermissive]
+   40 |       std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |                       ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:40:30: error: template argument 1 is invalid
+   40 |       std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |                              ^
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:40:7: error: invalid template-id
+   40 |       std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |       ^~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:40:23: error: ISO C++ forbids declaration of ‘type name’ with no type [-fpermissive]
+   40 |       std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |                       ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:40:17: error: expected primary-expression before ‘const’
+   40 |       std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |                 ^~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:40:17: error: expected ‘>’ before ‘const’
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:40:7: error: missing template argument list after ‘std::span’; template placeholder not permitted in parameter
+   40 |       std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |       ^~~
+      |          <>
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:40:7: note: or use ‘auto’ for an abbreviated function template
+In file included from /workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/full_certificate.hpp:9:
+/usr/include/c++/13/span:56:11: note: ‘template<class _Type, long unsigned int _Extent> class std::span’ declared here
+   56 |     class span;
+      |           ^~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:40:72: error: ‘mhgp7_baseline::FullCoveragePopulationResult mhgp7_baseline::build_full_coverage_populations(...)’ redeclared as different kind of entity
+   40 |       std::span<const PointId>, std::span<const FullCoveragePopulation>);
+      |                                                                        ^
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:26:30: note: previous declaration ‘mhgp7_baseline::FullCoveragePopulationResult mhgp7_baseline::build_full_coverage_populations’
+   26 | FullCoveragePopulationResult build_full_coverage_populations(
+      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:41:15: error: ‘PointId’ was not declared in this scope; did you mean ‘mhgp7::PointId’?
+   41 |   std::vector<PointId> domain_;
+      |               ^~~~~~~
+      |               mhgp7::PointId
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/../lanes/../core/types.hpp:30:7: note: ‘mhgp7::PointId’ declared here
+   30 | using PointId = u32;
+      |       ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:41:22: error: template argument 1 is invalid
+   41 |   std::vector<PointId> domain_;
+      |                      ^
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:41:22: error: template argument 2 is invalid
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:41:8: error: ‘<expression error>’ in namespace ‘std’ does not name a type
+   41 |   std::vector<PointId> domain_;
+      |        ^~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:46:21: error: ISO C++ forbids declaration of ‘type name’ with no type [-fpermissive]
+   46 |     std::span<const PointId> domain, std::span<const FullCoveragePopulation> rows) {
+      |                     ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:46:28: error: template argument 1 is invalid
+   46 |     std::span<const PointId> domain, std::span<const FullCoveragePopulation> rows) {
+      |                            ^
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:46:21: error: ISO C++ forbids declaration of ‘type name’ with no type [-fpermissive]
+   46 |     std::span<const PointId> domain, std::span<const FullCoveragePopulation> rows) {
+      |                     ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:46:28: error: template argument 1 is invalid
+   46 |     std::span<const PointId> domain, std::span<const FullCoveragePopulation> rows) {
+      |                            ^
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:46:21: error: ISO C++ forbids declaration of ‘type name’ with no type [-fpermissive]
+   46 |     std::span<const PointId> domain, std::span<const FullCoveragePopulation> rows) {
+      |                     ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:46:28: error: template argument 1 is invalid
+   46 |     std::span<const PointId> domain, std::span<const FullCoveragePopulation> rows) {
+      |                            ^
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:46:21: error: ISO C++ forbids declaration of ‘type name’ with no type [-fpermissive]
+   46 |     std::span<const PointId> domain, std::span<const FullCoveragePopulation> rows) {
+      |                     ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:46:28: error: template argument 1 is invalid
+   46 |     std::span<const PointId> domain, std::span<const FullCoveragePopulation> rows) {
+      |                            ^
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:46:5: error: invalid template-id
+   46 |     std::span<const PointId> domain, std::span<const FullCoveragePopulation> rows) {
+      |     ^~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:46:21: error: ISO C++ forbids declaration of ‘type name’ with no type [-fpermissive]
+   46 |     std::span<const PointId> domain, std::span<const FullCoveragePopulation> rows) {
+      |                     ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:45:37: error: redefinition of ‘mhgp7_baseline::FullCoveragePopulationResult mhgp7_baseline::build_full_coverage_populations’
+   45 | inline FullCoveragePopulationResult build_full_coverage_populations(
+      |                                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:26:30: note: ‘mhgp7_baseline::FullCoveragePopulationResult mhgp7_baseline::build_full_coverage_populations’ previously declared here
+   26 | FullCoveragePopulationResult build_full_coverage_populations(
+      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:46:30: error: missing template arguments before ‘domain’
+   46 |     std::span<const PointId> domain, std::span<const FullCoveragePopulation> rows) {
+      |                              ^~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:46:78: error: expected primary-expression before ‘rows’
+   46 |     std::span<const PointId> domain, std::span<const FullCoveragePopulation> rows) {
+      |                                                                              ^~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:84:3: error: ‘u64’ does not name a type
+   84 |   u64 population = 0;
+      |   ^~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:85:3: error: ‘u16’ does not name a type
+   85 |   u16 shell_mask = 0;
+      |   ^~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:90:15: error: ‘FullNodeId’ was not declared in this scope; did you mean ‘mhgp7::FullNodeId’?
+   90 |   std::vector<FullNodeId> parents;
+      |               ^~~~~~~~~~
+      |               mhgp7::FullNodeId
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/full_certificate.hpp:19:7: note: ‘mhgp7::FullNodeId’ declared here
+   19 | using FullNodeId = u64;
+      |       ^~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:90:25: error: template argument 1 is invalid
+   90 |   std::vector<FullNodeId> parents;
+      |                         ^
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:90:25: error: template argument 2 is invalid
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:90:8: error: ‘<expression error>’ in namespace ‘std’ does not name a type
+   90 |   std::vector<FullNodeId> parents;
+      |        ^~~~~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:94:3: error: ‘ExactLevel’ does not name a type
+   94 |   ExactLevel level{{0, 0, 0}, 1};
+      |   ^~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:94:33: error: extra ‘;’ [-Werror=pedantic]
+   94 |   ExactLevel level{{0, 0, 0}, 1};
+      |                                 ^
+      |                                 -
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:98:3: error: ‘ExactLevel’ does not name a type
+   98 |   ExactLevel level;
+      |   ^~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:99:3: error: ‘FullNodeId’ does not name a type
+   99 |   FullNodeId segment;
+      |   ^~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:134:15: error: ‘FullNode’ was not declared in this scope; did you mean ‘mhgp7::FullNode’?
+  134 |   std::vector<FullNode> nodes_;  // first is always a CSR offset, including births.
+      |               ^~~~~~~~
+      |               mhgp7::FullNode
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/full_certificate.hpp:37:8: note: ‘mhgp7::FullNode’ declared here
+   37 | struct FullNode {
+      |        ^~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:134:23: error: template argument 1 is invalid
+  134 |   std::vector<FullNode> nodes_;  // first is always a CSR offset, including births.
+      |                       ^
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:134:23: error: template argument 2 is invalid
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:134:8: error: ‘<expression error>’ in namespace ‘std’ does not name a type
+  134 |   std::vector<FullNode> nodes_;  // first is always a CSR offset, including births.
+      |        ^~~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:135:15: error: ‘FullNodeId’ was not declared in this scope; did you mean ‘mhgp7::FullNodeId’?
+  135 |   std::vector<FullNodeId> parents_, successors_;
+      |               ^~~~~~~~~~
+      |               mhgp7::FullNodeId
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/full_certificate.hpp:19:7: note: ‘mhgp7::FullNodeId’ declared here
+   19 | using FullNodeId = u64;
+      |       ^~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:135:25: error: template argument 1 is invalid
+  135 |   std::vector<FullNodeId> parents_, successors_;
+      |                         ^
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:135:25: error: template argument 2 is invalid
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:135:8: error: ‘<expression error>’ in namespace ‘std’ does not name a type
+  135 |   std::vector<FullNodeId> parents_, successors_;
+      |        ^~~~~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp: In member function ‘const auto& mhgp7_baseline::FullCoverageCertificate::nodes() const’:
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:119:38: error: ‘nodes_’ was not declared in this scope; did you mean ‘nodes’?
+  119 |   const auto& nodes() const { return nodes_; }
+      |                                      ^~~~~~
+      |                                      nodes
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp: In member function ‘const auto& mhgp7_baseline::FullCoverageCertificate::parents() const’:
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:120:40: error: ‘parents_’ was not declared in this scope; did you mean ‘parents’?
+  120 |   const auto& parents() const { return parents_; }
+      |                                        ^~~~~~~~
+      |                                        parents
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp: In member function ‘const auto& mhgp7_baseline::FullCoverageCertificate::successors() const’:
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:121:43: error: ‘successors_’ was not declared in this scope; did you mean ‘successors’?
+  121 |   const auto& successors() const { return successors_; }
+      |                                           ^~~~~~~~~~~
+      |                                           successors
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp: In member function ‘void mhgp7_baseline::FullCoverageCertificate::swap(mhgp7_baseline::FullCoverageCertificate&)’:
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:129:5: error: ‘nodes_’ was not declared in this scope; did you mean ‘nodes’?
+  129 |     nodes_.swap(other.nodes_); parents_.swap(other.parents_);
+      |     ^~~~~~
+      |     nodes
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:129:23: error: ‘class mhgp7_baseline::FullCoverageCertificate’ has no member named ‘nodes_’; did you mean ‘nodes’?
+  129 |     nodes_.swap(other.nodes_); parents_.swap(other.parents_);
+      |                       ^~~~~~
+      |                       nodes
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:129:32: error: ‘parents_’ was not declared in this scope; did you mean ‘parents’?
+  129 |     nodes_.swap(other.nodes_); parents_.swap(other.parents_);
+      |                                ^~~~~~~~
+      |                                parents
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:129:52: error: ‘class mhgp7_baseline::FullCoverageCertificate’ has no member named ‘parents_’; did you mean ‘parents’?
+  129 |     nodes_.swap(other.nodes_); parents_.swap(other.parents_);
+      |                                                    ^~~~~~~~
+      |                                                    parents
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:130:5: error: ‘successors_’ was not declared in this scope; did you mean ‘successors’?
+  130 |     successors_.swap(other.successors_); contributions_.swap(other.contributions_);
+      |     ^~~~~~~~~~~
+      |     successors
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:130:28: error: ‘class mhgp7_baseline::FullCoverageCertificate’ has no member named ‘successors_’; did you mean ‘successors’?
+  130 |     successors_.swap(other.successors_); contributions_.swap(other.contributions_);
+      |                            ^~~~~~~~~~~
+      |                            successors
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp: At global scope:
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:139:3: error: ‘FullCertificateStatus’ does not name a type
+  139 |   FullCertificateStatus status = FullCertificateStatus::kInvalidInput;
+      |   ^~~~~~~~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:145:8: error: ‘u16’ does not name a type
+  145 | inline u16 all_shell(const FullCoveragePopulation& row) {
+      |        ^~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:148:28: error: ‘ExactLevel’ does not name a type
+  148 | inline bool admitted(const ExactLevel& level, const ExactLevel& cut, bool closed) {
+      |                            ^~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:148:53: error: ‘ExactLevel’ does not name a type
+  148 | inline bool admitted(const ExactLevel& level, const ExactLevel& cut, bool closed) {
+      |                                                     ^~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp: In function ‘bool mhgp7_baseline::full_coverage_detail::admitted(const int&, const int&, bool)’:
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:149:19: error: ‘compare_exact_level’ was not declared in this scope; did you mean ‘mhgp7::compare_exact_level’?
+  149 |   const int cmp = compare_exact_level(level, cut);
+      |                   ^~~~~~~~~~~~~~~~~~~
+      |                   mhgp7::compare_exact_level
+In file included from /workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/full_certificate.hpp:15:
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/../lanes/level.hpp:51:21: note: ‘mhgp7::compare_exact_level’ declared here
+   51 | MHGP7_HD inline int compare_exact_level(const ExactLevel& x, const ExactLevel& y) {
+      |                     ^~~~~~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp: In function ‘mhgp7_baseline::FullCoverageBuildResult mhgp7_baseline::build_full_coverage_certificate(unsigned int, std::shared_ptr<const FullCoveragePopulations>, std::span<const FullCoverageBatch>)’:
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:163:28: error: ‘kFacetMaxK’ was not declared in this scope; did you mean ‘mhgp7::kFacetMaxK’?
+  163 |   if (order < 1 || order > kFacetMaxK || !bank || bank->rows().empty() ||
+      |                            ^~~~~~~~~~
+      |                            mhgp7::kFacetMaxK
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/../lanes/keys.hpp:114:22: note: ‘mhgp7::kFacetMaxK’ declared here
+  114 | inline constexpr int kFacetMaxK = 10;
+      |                      ^~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:164:13: error: ‘using std::__shared_ptr_access<const mhgp7_baseline::FullCoveragePopulations, __gnu_cxx::_S_atomic, false, false>::element_type = const class mhgp7_baseline::FullCoveragePopulations’ {aka ‘const class mhgp7_baseline::FullCoveragePopulations’} has no member named ‘domain’
+  164 |       bank->domain().size() < order || batches.empty()) return invalid("coverage_invalid_domain");
+      |             ^~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:168:17: error: ‘u8’ was not declared in this scope; did you mean ‘mhgp7::u8’?
+  168 |     std::vector<u8> live;
+      |                 ^~
+      |                 mhgp7::u8
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/../lanes/../core/types.hpp:20:7: note: ‘mhgp7::u8’ declared here
+   20 | using u8 = std::uint8_t;
+      |       ^~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:168:19: error: template argument 1 is invalid
+  168 |     std::vector<u8> live;
+      |                   ^
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:168:19: error: template argument 2 is invalid
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:178:18: error: ‘const struct mhgp7_baseline::FullCoverageAction’ has no member named ‘parents’
+  178 |       if (action.parents.size() != 1) {
+      |                  ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:180:36: error: ‘const struct mhgp7_baseline::FullCoverageAction’ has no member named ‘parents’
+  180 |         count(parent_count, action.parents.size());
+      |                                    ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:184:9: error: ‘class mhgp7_baseline::FullCoverageCertificate’ has no member named ‘nodes_’; did you mean ‘nodes’?
+  184 |     out.nodes_.reserve(node_count);
+      |         ^~~~~~
+      |         nodes
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:185:9: error: ‘class mhgp7_baseline::FullCoverageCertificate’ has no member named ‘parents_’; did you mean ‘parents’?
+  185 |     out.parents_.reserve(parent_count);
+      |         ^~~~~~~~
+      |         parents
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:186:9: error: ‘class mhgp7_baseline::FullCoverageCertificate’ has no member named ‘successors_’; did you mean ‘successors’?
+  186 |     out.successors_.reserve(node_count);
+      |         ^~~~~~~~~~~
+      |         successors
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:188:10: error: request for member ‘reserve’ in ‘live’, which is of non-class type ‘int’
+  188 |     live.reserve(node_count);
+      |          ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:191:17: error: ‘const struct mhgp7_baseline::FullCoverageBatch’ has no member named ‘level’
+  191 |       if (batch.level.den <= 0) return invalid("coverage_invalid_level");
+      |                 ^~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:192:51: error: ‘using std::span<const mhgp7_baseline::FullCoverageBatch>::element_type = const struct mhgp7_baseline::FullCoverageBatch’ {aka ‘const struct mhgp7_baseline::FullCoverageBatch’} has no member named ‘level’
+  192 |       if (b && compare_exact_level(batches[b - 1].level, batch.level) >= 0)
+      |                                                   ^~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:192:64: error: ‘const struct mhgp7_baseline::FullCoverageBatch’ has no member named ‘level’
+  192 |       if (b && compare_exact_level(batches[b - 1].level, batch.level) >= 0)
+      |                                                                ^~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:192:16: error: ‘compare_exact_level’ was not declared in this scope; did you mean ‘mhgp7::compare_exact_level’?
+  192 |       if (b && compare_exact_level(batches[b - 1].level, batch.level) >= 0)
+      |                ^~~~~~~~~~~~~~~~~~~
+      |                mhgp7::compare_exact_level
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/../lanes/level.hpp:51:21: note: ‘mhgp7::compare_exact_level’ declared here
+   51 | MHGP7_HD inline int compare_exact_level(const ExactLevel& x, const ExactLevel& y) {
+      |                     ^~~~~~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:195:24: error: ‘full_certificate_detail’ has not been declared
+  195 |       if (order > 1 && full_certificate_detail::zero(batch.level))
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:195:60: error: ‘const struct mhgp7_baseline::FullCoverageBatch’ has no member named ‘level’
+  195 |       if (order > 1 && full_certificate_detail::zero(batch.level))
+      |                                                            ^~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:197:37: error: ‘full_certificate_detail’ has not been declared
+  197 |       if (order == 1 && b == 0 && (!full_certificate_detail::zero(batch.level) ||
+      |                                     ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:197:73: error: ‘const struct mhgp7_baseline::FullCoverageBatch’ has no member named ‘level’
+  197 |       if (order == 1 && b == 0 && (!full_certificate_detail::zero(batch.level) ||
+      |                                                                         ^~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:198:41: error: ‘using std::__shared_ptr_access<const mhgp7_baseline::FullCoveragePopulations, __gnu_cxx::_S_atomic, false, false>::element_type = const class mhgp7_baseline::FullCoveragePopulations’ {aka ‘const class mhgp7_baseline::FullCoveragePopulations’} has no member named ‘domain’
+  198 |           batch.actions.size() != bank->domain().size())) return invalid("coverage_k1_roots");
+      |                                         ^~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:199:38: error: ‘class mhgp7_baseline::FullCoverageCertificate’ has no member named ‘nodes_’; did you mean ‘nodes’?
+  199 |       const size_t prior_count = out.nodes_.size();
+      |                                      ^~~~~~
+      |                                      nodes
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:204:39: error: ‘const struct mhgp7_baseline::FullCoverageAction’ has no member named ‘parents’
+  204 |         for (size_t j = 0; j < action.parents.size(); ++j) {
+      |                                       ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:205:38: error: ‘const struct mhgp7_baseline::FullCoverageAction’ has no member named ‘parents’
+  205 |           const auto parent = action.parents[j];
+      |                                      ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:206:28: error: ‘const struct mhgp7_baseline::FullCoverageAction’ has no member named ‘parents’
+  206 |           if ((j && action.parents[j - 1] >= parent) || parent >= prior_count || !live[parent])
+      |                            ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:210:20: error: ‘const struct mhgp7_baseline::FullCoverageAction’ has no member named ‘parents’
+  210 |         if (action.parents.size() == 1 && action.contributions.empty())
+      |                    ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:213:19: error: ‘const struct mhgp7_baseline::FullCoverageRef’ has no member named ‘population’
+  213 |           if (ref.population >= bank->rows().size()) return invalid("coverage_population_reference");
+      |                   ^~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:214:46: error: ‘const struct mhgp7_baseline::FullCoverageRef’ has no member named ‘population’
+  214 |           const auto& row = bank->rows()[ref.population];
+      |                                              ^~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:215:20: error: ‘const struct mhgp7_baseline::FullCoverageRef’ has no member named ‘shell_mask’
+  215 |           if ((ref.shell_mask & ~full_coverage_detail::all_shell(row)) ||
+      |                    ^~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:215:56: error: ‘all_shell’ is not a member of ‘mhgp7_baseline::full_coverage_detail’; did you mean ‘mhgp7::full_coverage_detail::all_shell’?
+  215 |           if ((ref.shell_mask & ~full_coverage_detail::all_shell(row)) ||
+      |                                                        ^~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:147:12: note: ‘mhgp7::full_coverage_detail::all_shell’ declared here
+  147 | inline u16 all_shell(const FullCoveragePopulation& row) {
+      |            ^~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:217:45: error: ‘const struct mhgp7_baseline::FullCoverageRef’ has no member named ‘shell_mask’
+  217 |               (!ref.include_interior && ref.shell_mask == 0)) return invalid("coverage_empty_or_invalid_mask");
+      |                                             ^~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:219:20: error: ‘const struct mhgp7_baseline::FullCoverageAction’ has no member named ‘parents’
+  219 |         if (action.parents.empty()) {
+      |                    ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:222:46: error: ‘const struct mhgp7_baseline::FullCoverageRef’ has no member named ‘population’
+  222 |           const auto& row = bank->rows()[ref.population];
+      |                                              ^~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:224:19: error: ‘const struct mhgp7_baseline::FullCoverageRef’ has no member named ‘shell_mask’
+  224 |               ref.shell_mask != full_coverage_detail::all_shell(row) ||
+      |                   ^~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:224:55: error: ‘all_shell’ is not a member of ‘mhgp7_baseline::full_coverage_detail’; did you mean ‘mhgp7::full_coverage_detail::all_shell’?
+  224 |               ref.shell_mask != full_coverage_detail::all_shell(row) ||
+      |                                                       ^~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:147:12: note: ‘mhgp7::full_coverage_detail::all_shell’ declared here
+  147 | inline u16 all_shell(const FullCoveragePopulation& row) {
+      |            ^~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:230:29: error: ‘using std::__shared_ptr_access<const mhgp7_baseline::FullCoveragePopulations, __gnu_cxx::_S_atomic, false, false>::element_type = const class mhgp7_baseline::FullCoveragePopulations’ {aka ‘const class mhgp7_baseline::FullCoveragePopulations’} has no member named ‘domain’
+  230 |             if (id != bank->domain()[a]) return invalid("coverage_k1_roots");
+      |                             ^~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:235:9: error: ‘FullNodeId’ was not declared in this scope; did you mean ‘mhgp7::FullNodeId’?
+  235 |         FullNodeId segment;
+      |         ^~~~~~~~~~
+      |         mhgp7::FullNodeId
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/full_certificate.hpp:19:7: note: ‘mhgp7::FullNodeId’ declared here
+   19 | using FullNodeId = u64;
+      |       ^~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:236:20: error: ‘const struct mhgp7_baseline::FullCoverageAction’ has no member named ‘parents’
+  236 |         if (action.parents.size() == 1) {
+      |                    ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:237:11: error: ‘segment’ was not declared in this scope
+  237 |           segment = action.parents.front();
+      |           ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:237:28: error: ‘const struct mhgp7_baseline::FullCoverageAction’ has no member named ‘parents’
+  237 |           segment = action.parents.front();
+      |                            ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:240:19: error: ‘class mhgp7_baseline::FullCoverageCertificate’ has no member named ‘nodes_’; did you mean ‘nodes’?
+  240 |           if (out.nodes_.size() == kFullCoverageAbsent)
+      |                   ^~~~~~
+      |                   nodes
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:240:36: error: ‘kFullCoverageAbsent’ was not declared in this scope; did you mean ‘mhgp7::kFullCoverageAbsent’?
+  240 |           if (out.nodes_.size() == kFullCoverageAbsent)
+      |                                    ^~~~~~~~~~~~~~~~~~~
+      |                                    mhgp7::kFullCoverageAbsent
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:13:29: note: ‘mhgp7::kFullCoverageAbsent’ declared here
+   13 | inline constexpr FullNodeId kFullCoverageAbsent = std::numeric_limits<FullNodeId>::max();
+      |                             ^~~~~~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:242:11: error: ‘segment’ was not declared in this scope
+  242 |           segment = out.nodes_.size();
+      |           ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:242:25: error: ‘class mhgp7_baseline::FullCoverageCertificate’ has no member named ‘nodes_’; did you mean ‘nodes’?
+  242 |           segment = out.nodes_.size();
+      |                         ^~~~~~
+      |                         nodes
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:243:15: error: ‘class mhgp7_baseline::FullCoverageCertificate’ has no member named ‘nodes_’; did you mean ‘nodes’?
+  243 |           out.nodes_.push_back({batch.level, static_cast<u64>(out.parents_.size()),
+      |               ^~~~~~
+      |               nodes
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:243:39: error: ‘const struct mhgp7_baseline::FullCoverageBatch’ has no member named ‘level’
+  243 |           out.nodes_.push_back({batch.level, static_cast<u64>(out.parents_.size()),
+      |                                       ^~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:243:58: error: ‘u64’ does not name a type
+  243 |           out.nodes_.push_back({batch.level, static_cast<u64>(out.parents_.size()),
+      |                                                          ^~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:243:67: error: ‘class mhgp7_baseline::FullCoverageCertificate’ has no member named ‘parents_’; did you mean ‘parents’?
+  243 |           out.nodes_.push_back({batch.level, static_cast<u64>(out.parents_.size()),
+      |                                                                   ^~~~~~~~
+      |                                                                   parents
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:244:45: error: ‘u64’ does not name a type
+  244 |                                 static_cast<u64>(action.parents.size())});
+      |                                             ^~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:244:57: error: ‘const struct mhgp7_baseline::FullCoverageAction’ has no member named ‘parents’
+  244 |                                 static_cast<u64>(action.parents.size())});
+      |                                                         ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:245:15: error: ‘class mhgp7_baseline::FullCoverageCertificate’ has no member named ‘successors_’; did you mean ‘successors’?
+  245 |           out.successors_.push_back(kFullCoverageAbsent); live.push_back(1);
+      |               ^~~~~~~~~~~
+      |               successors
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:245:37: error: ‘kFullCoverageAbsent’ was not declared in this scope; did you mean ‘mhgp7::kFullCoverageAbsent’?
+  245 |           out.successors_.push_back(kFullCoverageAbsent); live.push_back(1);
+      |                                     ^~~~~~~~~~~~~~~~~~~
+      |                                     mhgp7::kFullCoverageAbsent
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:13:29: note: ‘mhgp7::kFullCoverageAbsent’ declared here
+   13 | inline constexpr FullNodeId kFullCoverageAbsent = std::numeric_limits<FullNodeId>::max();
+      |                             ^~~~~~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:245:64: error: request for member ‘push_back’ in ‘live’, which is of non-class type ‘int’
+  245 |           out.successors_.push_back(kFullCoverageAbsent); live.push_back(1);
+      |                                                                ^~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:246:37: error: ‘const struct mhgp7_baseline::FullCoverageAction’ has no member named ‘parents’
+  246 |           for (auto parent : action.parents) {
+      |                                     ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:247:17: error: ‘class mhgp7_baseline::FullCoverageCertificate’ has no member named ‘parents_’; did you mean ‘parents’?
+  247 |             out.parents_.push_back(parent);
+      |                 ^~~~~~~~
+      |                 parents
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:248:17: error: ‘class mhgp7_baseline::FullCoverageCertificate’ has no member named ‘successors_’; did you mean ‘successors’?
+  248 |             out.successors_[parent] = segment;
+      |                 ^~~~~~~~~~~
+      |                 successors
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:252:47: error: ‘const struct mhgp7_baseline::FullCoverageBatch’ has no member named ‘level’
+  252 |           out.contributions_.push_back({batch.level, segment, ref});
+      |                                               ^~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:252:54: error: ‘segment’ was not declared in this scope
+  252 |           out.contributions_.push_back({batch.level, segment, ref});
+      |                                                      ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:252:39: error: no matching function for call to ‘std::vector<mhgp7_baseline::FullDatedContribution>::push_back(<brace-enclosed initializer list>)’
+  252 |           out.contributions_.push_back({batch.level, segment, ref});
+      |           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from /usr/include/c++/13/vector:66,
+                 from /workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/full_certificate.hpp:12:
+/usr/include/c++/13/bits/stl_vector.h:1281:7: note: candidate: ‘constexpr void std::vector<_Tp, _Alloc>::push_back(const value_type&) [with _Tp = mhgp7_baseline::FullDatedContribution; _Alloc = std::allocator<mhgp7_baseline::FullDatedContribution>; value_type = mhgp7_baseline::FullDatedContribution]’
+ 1281 |       push_back(const value_type& __x)
+      |       ^~~~~~~~~
+/usr/include/c++/13/bits/stl_vector.h:1281:35: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘const std::vector<mhgp7_baseline::FullDatedContribution>::value_type&’ {aka ‘const mhgp7_baseline::FullDatedContribution&’}
+ 1281 |       push_back(const value_type& __x)
+      |                 ~~~~~~~~~~~~~~~~~~^~~
+/usr/include/c++/13/bits/stl_vector.h:1298:7: note: candidate: ‘constexpr void std::vector<_Tp, _Alloc>::push_back(value_type&&) [with _Tp = mhgp7_baseline::FullDatedContribution; _Alloc = std::allocator<mhgp7_baseline::FullDatedContribution>; value_type = mhgp7_baseline::FullDatedContribution]’
+ 1298 |       push_back(value_type&& __x)
+      |       ^~~~~~~~~
+/usr/include/c++/13/bits/stl_vector.h:1298:30: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<mhgp7_baseline::FullDatedContribution>::value_type&&’ {aka ‘mhgp7_baseline::FullDatedContribution&&’}
+ 1298 |       push_back(value_type&& __x)
+      |                 ~~~~~~~~~~~~~^~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:256:12: error: ‘struct mhgp7_baseline::FullCoverageBuildResult’ has no member named ‘status’
+  256 |     result.status = FullCertificateStatus::kOk; result.reason = "structural_only";
+      |            ^~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:256:21: error: ‘FullCertificateStatus’ has not been declared
+  256 |     result.status = FullCertificateStatus::kOk; result.reason = "structural_only";
+      |                     ^~~~~~~~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:260:12: error: ‘struct mhgp7_baseline::FullCoverageBuildResult’ has no member named ‘status’
+  260 |     result.status = FullCertificateStatus::kResourceExhausted; return result;
+      |            ^~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:260:21: error: ‘FullCertificateStatus’ has not been declared
+  260 |     result.status = FullCertificateStatus::kResourceExhausted; return result;
+      |                     ^~~~~~~~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:263:12: error: ‘struct mhgp7_baseline::FullCoverageBuildResult’ has no member named ‘status’
+  263 |     result.status = FullCertificateStatus::kResourceExhausted; return result;
+      |            ^~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:263:21: error: ‘FullCertificateStatus’ has not been declared
+  263 |     result.status = FullCertificateStatus::kResourceExhausted; return result;
+      |                     ^~~~~~~~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp: At global scope:
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:268:8: error: ‘FullNodeId’ does not name a type
+  268 | inline FullNodeId full_coverage_root_at(const FullCoverageCertificate& forest,
+      |        ^~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:284:23: error: ‘PointId’ was not declared in this scope; did you mean ‘mhgp7::PointId’?
+  284 | inline FullReadResult<PointId> full_coverage_at(const FullCoverageCertificate& forest,
+      |                       ^~~~~~~
+      |                       mhgp7::PointId
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/../lanes/../core/types.hpp:30:7: note: ‘mhgp7::PointId’ declared here
+   30 | using PointId = u32;
+      |       ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:284:23: error: ‘PointId’ was not declared in this scope; did you mean ‘mhgp7::PointId’?
+  284 | inline FullReadResult<PointId> full_coverage_at(const FullCoverageCertificate& forest,
+      |                       ^~~~~~~
+      |                       mhgp7::PointId
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/../lanes/../core/types.hpp:30:7: note: ‘mhgp7::PointId’ declared here
+   30 | using PointId = u32;
+      |       ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:284:23: error: ‘PointId’ was not declared in this scope; did you mean ‘mhgp7::PointId’?
+  284 | inline FullReadResult<PointId> full_coverage_at(const FullCoverageCertificate& forest,
+      |                       ^~~~~~~
+      |                       mhgp7::PointId
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/../lanes/../core/types.hpp:30:7: note: ‘mhgp7::PointId’ declared here
+   30 | using PointId = u32;
+      |       ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:284:23: error: ‘PointId’ was not declared in this scope; did you mean ‘mhgp7::PointId’?
+  284 | inline FullReadResult<PointId> full_coverage_at(const FullCoverageCertificate& forest,
+      |                       ^~~~~~~
+      |                       mhgp7::PointId
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/../lanes/../core/types.hpp:30:7: note: ‘mhgp7::PointId’ declared here
+   30 | using PointId = u32;
+      |       ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:284:23: error: ‘PointId’ was not declared in this scope; did you mean ‘mhgp7::PointId’?
+  284 | inline FullReadResult<PointId> full_coverage_at(const FullCoverageCertificate& forest,
+      |                       ^~~~~~~
+      |                       mhgp7::PointId
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/../lanes/../core/types.hpp:30:7: note: ‘mhgp7::PointId’ declared here
+   30 | using PointId = u32;
+      |       ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:284:23: error: ‘PointId’ was not declared in this scope; did you mean ‘mhgp7::PointId’?
+  284 | inline FullReadResult<PointId> full_coverage_at(const FullCoverageCertificate& forest,
+      |                       ^~~~~~~
+      |                       mhgp7::PointId
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/../lanes/../core/types.hpp:30:7: note: ‘mhgp7::PointId’ declared here
+   30 | using PointId = u32;
+      |       ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:284:23: error: ‘PointId’ was not declared in this scope; did you mean ‘mhgp7::PointId’?
+  284 | inline FullReadResult<PointId> full_coverage_at(const FullCoverageCertificate& forest,
+      |                       ^~~~~~~
+      |                       mhgp7::PointId
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/../lanes/../core/types.hpp:30:7: note: ‘mhgp7::PointId’ declared here
+   30 | using PointId = u32;
+      |       ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:284:23: error: ‘PointId’ was not declared in this scope; did you mean ‘mhgp7::PointId’?
+  284 | inline FullReadResult<PointId> full_coverage_at(const FullCoverageCertificate& forest,
+      |                       ^~~~~~~
+      |                       mhgp7::PointId
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/variant/morsehgp3D_v7/src/forest/../lanes/../core/types.hpp:30:7: note: ‘mhgp7::PointId’ declared here
+   30 | using PointId = u32;
+      |       ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:284:8: error: ‘FullReadResult’ does not name a type
+  284 | inline FullReadResult<PointId> full_coverage_at(const FullCoverageCertificate& forest,
+      |        ^~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/paired_baseline_gate.cpp: In function ‘void {anonymous}::paired(unsigned int, const std::vector<unsigned int, std::allocator<unsigned int> >&, const std::vector<mhgp7::FullCoveragePopulation>&, const std::vector<mhgp7::FullCoverageBatch>&)’:
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/paired_baseline_gate.cpp:22:51: error: no matching function for call to ‘std::vector<mhgp7_baseline::FullCoveragePopulation>::push_back(<brace-enclosed initializer list>)’
+   22 |   for (const auto& row : rows) base_rows.push_back({row.interior, row.shell});
+      |                                ~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/include/c++/13/bits/stl_vector.h:1281:7: note: candidate: ‘constexpr void std::vector<_Tp, _Alloc>::push_back(const value_type&) [with _Tp = mhgp7_baseline::FullCoveragePopulation; _Alloc = std::allocator<mhgp7_baseline::FullCoveragePopulation>; value_type = mhgp7_baseline::FullCoveragePopulation]’
+ 1281 |       push_back(const value_type& __x)
+      |       ^~~~~~~~~
+/usr/include/c++/13/bits/stl_vector.h:1281:35: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘const std::vector<mhgp7_baseline::FullCoveragePopulation>::value_type&’ {aka ‘const mhgp7_baseline::FullCoveragePopulation&’}
+ 1281 |       push_back(const value_type& __x)
+      |                 ~~~~~~~~~~~~~~~~~~^~~
+/usr/include/c++/13/bits/stl_vector.h:1298:7: note: candidate: ‘constexpr void std::vector<_Tp, _Alloc>::push_back(value_type&&) [with _Tp = mhgp7_baseline::FullCoveragePopulation; _Alloc = std::allocator<mhgp7_baseline::FullCoveragePopulation>; value_type = mhgp7_baseline::FullCoveragePopulation]’
+ 1298 |       push_back(value_type&& __x)
+      |       ^~~~~~~~~
+/usr/include/c++/13/bits/stl_vector.h:1298:30: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<mhgp7_baseline::FullCoveragePopulation>::value_type&&’ {aka ‘mhgp7_baseline::FullCoveragePopulation&&’}
+ 1298 |       push_back(value_type&& __x)
+      |                 ~~~~~~~~~~~~~^~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/paired_baseline_gate.cpp:25:48: error: ‘struct mhgp7_baseline::FullCoverageBatch’ has no member named ‘level’
+   25 |     baseline::FullCoverageBatch copied; copied.level.num = batch.level.num; copied.level.den = batch.level.den;
+      |                                                ^~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/paired_baseline_gate.cpp:25:84: error: ‘struct mhgp7_baseline::FullCoverageBatch’ has no member named ‘level’
+   25 |     baseline::FullCoverageBatch copied; copied.level.num = batch.level.num; copied.level.den = batch.level.den;
+      |                                                                                    ^~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/paired_baseline_gate.cpp:27:65: error: ‘struct mhgp7_baseline::FullCoverageAction’ has no member named ‘parents’
+   27 |       baseline::FullCoverageAction copied_action; copied_action.parents = action.parents;
+      |                                                                 ^~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/paired_baseline_gate.cpp:29:46: error: no matching function for call to ‘std::vector<mhgp7_baseline::FullCoverageRef>::push_back(<brace-enclosed initializer list>)’
+   29 |         copied_action.contributions.push_back({ref.population, ref.shell_mask, ref.include_interior});
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/include/c++/13/bits/stl_vector.h:1281:7: note: candidate: ‘constexpr void std::vector<_Tp, _Alloc>::push_back(const value_type&) [with _Tp = mhgp7_baseline::FullCoverageRef; _Alloc = std::allocator<mhgp7_baseline::FullCoverageRef>; value_type = mhgp7_baseline::FullCoverageRef]’
+ 1281 |       push_back(const value_type& __x)
+      |       ^~~~~~~~~
+/usr/include/c++/13/bits/stl_vector.h:1281:35: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘const std::vector<mhgp7_baseline::FullCoverageRef>::value_type&’ {aka ‘const mhgp7_baseline::FullCoverageRef&’}
+ 1281 |       push_back(const value_type& __x)
+      |                 ~~~~~~~~~~~~~~~~~~^~~
+/usr/include/c++/13/bits/stl_vector.h:1298:7: note: candidate: ‘constexpr void std::vector<_Tp, _Alloc>::push_back(value_type&&) [with _Tp = mhgp7_baseline::FullCoverageRef; _Alloc = std::allocator<mhgp7_baseline::FullCoverageRef>; value_type = mhgp7_baseline::FullCoverageRef]’
+ 1298 |       push_back(value_type&& __x)
+      |       ^~~~~~~~~
+/usr/include/c++/13/bits/stl_vector.h:1298:30: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<mhgp7_baseline::FullCoverageRef>::value_type&&’ {aka ‘mhgp7_baseline::FullCoverageRef&&’}
+ 1298 |       push_back(value_type&& __x)
+      |                 ~~~~~~~~~~~~~^~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/paired_baseline_gate.cpp:34:56: error: no match for call to ‘(mhgp7_baseline::FullCoveragePopulationResult) (const std::vector<unsigned int, std::allocator<unsigned int> >&, std::vector<mhgp7_baseline::FullCoveragePopulation>&)’
+   34 |   auto bank = baseline::build_full_coverage_populations(domain, base_rows);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/paired_baseline_gate.cpp:36:37: error: ‘{anonymous}::baseline::FullCertificateStatus’ has not been declared
+   36 |   need(expected.status == baseline::FullCertificateStatus::kOk, "original.baseline.success");
+      |                                     ^~~~~~~~~~~~~~~~~~~~~
+cc1plus: all warnings being treated as errors

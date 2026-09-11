@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "error": null,
+  "sources_stable": true,
+  "public_status": "not_claimed",
+  "GCP_used": false,
+  "binary_sha256": {
+    "mhgp7_anchor_meb_gate": "08063cd442501f2ee7ed56d3bf3216b3d0db3cffd798b76bf3f9bfebd3612433",
+    "mhgp7_full_ball_tower_gate": "834bd76067f2a624b2b4d64e306e1e5fab1c8471c0db84054343f472874368de",
+    "mhgp7_full_ball_work_gate": "4e3930ce4cc9204478e11810e74796c66cc950c8a5c436ec7514a6fb821ac4fc",
+    "mhgp7_full_ball_tower_probe": "b42d073f549b0af02ccbc139d89a3f87b020f1fc5ad931668aa2a509dfeef039",
+    "mhgp7_full_coverage_certificate_gate": "a6499c71e1682f95e204294ac210d47b1ffe8e71b2925056260cd2e2aa68aeae",
+    "mhgp7_local_plateau_gate": "c7df566cb69734b9dac0d49b778aca1a56d602934fb1b830ec2e3a674829f605",
+    "mhgp7_census_route_stub_gate": "ad3018233f6f67eba93768fb67dcf20a6e7cca8421f6ae1d4cceba90a1d72a25",
+    "mhgp7_full_gabriel_digest_gate": "1be5909f6a33516e1ad79d6874df9a47b61cd7386995a589e8136277a19e3b0d",
+    "mhgp7_facet_resolver_cache_gate": "4c7c8b2611878f89f9bd72f87dfb73f17d390e698776909fd6e1604b4b0b57af",
+    "mhgp7_witness_front_gate": "2613b391140da35d5d1b10534880fc9716fb6d2eddea571766b8b3c36273c6b0"
+  }
+}

@@ -1,0 +1,11 @@
+--- morsehgp3D_v7/src/forest/full_ball_tower.hpp
++++ morsehgp3D_v7/src/forest/full_ball_tower.hpp
+@@ -647,7 +647,7 @@
+           require(compare_exact_level(balls[target].level, before) < 0, "full_ball_static_seed_not_strict");
+           add(w.seeded);
+         } else target = static_terminal(first.key, before, w.work, w.scratch);
+-        for (size_t r = groups[group]; r < groups[group + 1]; ++r) {
++        for (size_t r = groups[group]; r < std::min(groups[group + 1], groups[group] + 1); ++r) {
+           const auto& request = requests[r];
+           require(compare_exact_level(before, balls[request.consumer].level) <= 0,
+                   "full_ball_static_request_chronology");

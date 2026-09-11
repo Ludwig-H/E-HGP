@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "error": null,
+  "sources_stable": true,
+  "public_status": "not_claimed",
+  "GCP_used": false,
+  "device_executed": false,
+  "binary_sha256": "bc20994627f3baeed47a43d94366acb4e82a2c5fae50e649000b0eca12b46638"
+}

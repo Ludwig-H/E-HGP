@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+"""Close metadata after a preserved wrong manifest-filename lookup."""
+from __future__ import annotations
+
+import json
+import shutil
+import subprocess
+import time
+
+from collect_metadata import HERE, ROOT, sha
+
+
+def main() -> None:
+    out = HERE / "reproduction"
+    if (out / "receipt.json").exists():
+        raise ValueError("metadata_already_closed")
+    shutil.copy2(HERE / "collect_metadata.py", out / "collect_metadata_failed_r1.py")
+    failure = dict(status="failed", exit_code=1, scope="post_run_metadata_only",
+                   authority="operator_transcription_of_exec_result",
+                   tool_chunk="1fb37e", scientific_capture_affected=False,
+                   error="FileNotFoundError: static_resolution_cpu_20260911/manifest.json; actual filename is logical_manifest.json",
+                   original_script_sha256=sha(HERE / "collect_metadata.py"),
+                   original_partial_files=["original_micro_sources_before.json",
+                      "original_micro_sources_after.json", "original_micro_compile.stdout",
+                      "original_micro_compile.stderr", "boost_package.json"])
+    (out / "first_attempt.json").write_text(json.dumps(failure, indent=2) + "\n")
+    metadata = dict(captured_ns=time.time_ns(), role="post_run_reproduction_observation",
+                    no_retroactive_compile_environment_stability_claim=True,
+                    current_boost_key_headers_match_historical_package=True,
+                    dependency_vendor_payload_included=False,
+                    original_compile_source=str(ROOT / "build/v7_static_resolver_20260911/micro_r1"),
+                    original_CPU_packet_manifest_sha256=sha(ROOT /
+                      "morsehgp3D_v7/receipts/static_resolution_cpu_20260911/logical_manifest.json"))
+    commands = []
+    for name, argv in (("compiler", ["g++", "--version"]),
+                       ("kernel", ["uname", "-a"]),
+                       ("time", ["/usr/bin/time", "--version"])):
+        started = time.time_ns()
+        with (out / (name + ".stdout")).open("wb") as stdout, (out / (name + ".stderr")).open("wb") as stderr:
+            result = subprocess.run(argv, stdout=stdout, stderr=stderr)
+        commands.append(dict(name=name, argv=argv, started_ns=started, ended_ns=time.time_ns(),
+                             exit_code=result.returncode, stdout_sha256=sha(out / (name + ".stdout")),
+                             stderr_sha256=sha(out / (name + ".stderr"))))
+    metadata["commands"] = commands
+    metadata["status"] = "passed" if all(row["exit_code"] == 0 for row in commands) else "failed"
+    (out / "receipt.json").write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n")
+    if metadata["status"] != "passed":
+        raise SystemExit(1)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,83 @@
+#!/usr/bin/env python3
+"""Create-only private overlay of pinned published sources, no active edit."""
+from pathlib import Path
+import difflib
+import hashlib
+import json
+import subprocess
+
+ROOT = Path(__file__).resolve().parents[2]
+HERE = Path(__file__).resolve().parent
+REV = "ad7ffd28b35e153a20bd8cf42534d1cd29160bcd"
+
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def replace_once(text, old, new):
+    if text.count(old) != 1:
+        raise RuntimeError(f"overlay anchor count {text.count(old)}: {old[:70]}")
+    return text.replace(old, new)
+
+
+def main():
+    baseline = HERE / "baseline"
+    overlay = HERE / "observed"
+    baseline.mkdir()
+    overlay.mkdir()
+    paths = subprocess.check_output([
+        "git", "ls-tree", "-r", "--name-only", REV, "morsehgp3D_v7/src", "morsehgp3D_v7/oracle"
+    ], cwd=ROOT, text=True).splitlines()
+    paths += ["morsehgp3D_v7/bench/full_ball_tower_probe.cpp",
+              "morsehgp3D_v7/bench/full_gabriel_semantic_digest.hpp",
+              "morsehgp3D_v7/tests/full_ball_tower_gate.cpp"]
+    pins = {}
+    for path in paths:
+        data = subprocess.check_output(["git", "show", f"{REV}:{path}"], cwd=ROOT)
+        pins[path] = digest(data)
+        for directory in [baseline, overlay]:
+            target = directory / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(data)
+    (HERE / "published_source_manifest.json").write_text(json.dumps({"revision": REV, "files": pins}, indent=2) + "\n")
+    header = overlay / "morsehgp3D_v7/src/forest/full_ball_tower.hpp"
+    original = header.read_text()
+    code = replace_once(original, '#include <numeric>', '#include "unique_observer.hpp"\n#include <numeric>')
+    code = replace_once(code, '    validate_catalogue();', '    unique_representative_detail::collector.start(ix);\n    validate_catalogue();')
+    code = replace_once(code, '    if (kmax > 1) resolver_cache.configure(ix.upos.size());',
+                        '    if (kmax > 1 && unique_representative_detail::cache_enabled()) resolver_cache.configure(ix.upos.size());')
+    code = replace_once(code, '      current_k = k;', '      current_k = k;\n      unique_representative_detail::collector.begin(k, st);')
+    code = replace_once(code, '      lower_anchors = std::move(anchors);',
+                        '      lower_anchors = std::move(anchors);\n      unique_representative_detail::collector.end(st);')
+    code = replace_once(code, '    return result;\n  }\n\n private:',
+                        '    unique_representative_detail::collector.finish(st);\n    return result;\n  }\n\n private:')
+    code = replace_once(code, '            "full_ball_representative_cardinality");',
+                        '            "full_ball_representative_cardinality");\n    unique_representative_detail::collector.record(sites);')
+    header.write_text(code)
+    (header.parent / "unique_observer.hpp").write_bytes((HERE / "observer.hpp").read_bytes())
+    probe = overlay / "morsehgp3D_v7/bench/full_ball_tower_probe.cpp"
+    original_probe = probe.read_text()
+    code = replace_once(original_probe,
+                        '    auto input = make_family_input(CloudFamily::kUniform, static_cast<int>(opt.n), 65536, 3);',
+                        '    CloudFamily family = CloudFamily::kUniform;\n'
+                        '    if (const char* selected = std::getenv("MHGP7_PRIVATE_FAMILY"))\n'
+                        '      full_ball_detail::require(parse_cloud_family(selected, &family), "observer.family");\n'
+                        '    auto input = make_family_input(family, static_cast<int>(opt.n), 65536, 3);')
+    code = replace_once(code, '    std::printf("}\\n");',
+                        '    std::printf(",\\"family\\":\\"%s\\"", cloud_family_name(family));\n'
+                        '    unique_representative_detail::collector.print();\n    std::printf("}\\n");')
+    probe.write_text(code)
+    gate = overlay / "morsehgp3D_v7/tests/unique_representative_gate.cpp"
+    gate.write_bytes((HERE / "gate.cpp").read_bytes())
+    patches = []
+    for path, before in [(header, original), (probe, original_probe)]:
+        rel = path.relative_to(overlay)
+        patches += difflib.unified_diff(before.splitlines(True), path.read_text().splitlines(True),
+                                        fromfile=f"baseline/{rel}", tofile=f"observed/{rel}")
+    (HERE / "instrumentation.patch").write_text("".join(patches))
+    print(json.dumps({"status": "prepared", "published_files": len(paths), "header_original": pins["morsehgp3D_v7/src/forest/full_ball_tower.hpp"], "header_overlay": digest(header.read_bytes())}))
+
+
+if __name__ == "__main__":
+    main()

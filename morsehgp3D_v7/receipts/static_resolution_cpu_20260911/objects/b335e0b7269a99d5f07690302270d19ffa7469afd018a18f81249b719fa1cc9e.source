@@ -1,0 +1,58 @@
+[
+  {
+    "name": "compiler",
+    "argv": [
+      "g++",
+      "--version"
+    ],
+    "started_ns": 1789108348020994008,
+    "ended_ns": 1789108348046029140,
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout_sha256": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "compile",
+    "argv": [
+      "g++",
+      "-O1",
+      "-g",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/san_r2/gate.d",
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/source_r2/morsehgp3D_v7/tests/full_ball_tower_gate.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/san_r2/gate"
+    ],
+    "started_ns": 1789108348046902047,
+    "ended_ns": 1789108611306991983,
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "nominal",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/san_r2/gate",
+      "--selftest"
+    ],
+    "started_ns": 1789108611477846503,
+    "ended_ns": 1789108667182385693,
+    "exit_code": 1,
+    "expected_exit_code": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "5bd8e461b1a037df8842326d83ad4bdf02d9eed8ed517ee92fc9cad0c259df82"
+  }
+]

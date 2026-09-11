@@ -1,0 +1,11 @@
+--- morsehgp3D_v7/src/forest/full_ball_tower.hpp
++++ morsehgp3D_v7/src/forest/full_ball_tower.hpp
+@@ -536,7 +536,7 @@
+         const auto& b = balls[*found];
+         require(same_exact_level(b.level, local.level), "full_ball_static_anchor_level");
+         const unsigned lo = b.n_interior + b.arity - 1;
+-        if (current_k >= lo && current_k <= b.n_interior + b.n_shell) {
++        if (current_k >= lo && current_k <= b.n_interior + b.n_shell && anchors[*found] != absent) {
+           add(work.anchor_hits); work.max_chain_steps = std::max(work.max_chain_steps, length);
+           return *found;
+         }

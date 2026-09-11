@@ -1,0 +1,85 @@
+#!/usr/bin/env python3
+"""Read-only verifier, effective under python -O; does not compile or use GCP."""
+import hashlib
+import json
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+
+
+def need(condition, reason):
+    if not condition:
+        raise ValueError(reason)
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def read(name):
+    return json.loads((ROOT / name).read_text())
+
+
+def check_capture(name, expected_status="passed"):
+    directory = ROOT / name
+    receipt = read(name + "/receipt.json")
+    need(receipt["status"] == expected_status and receipt["gcp_used"] is False, name + ".status")
+    need(receipt["sources_stable"] and receipt["sources_before"] == receipt["sources_after"], name + ".stable")
+    for path, digest in receipt["sources_before"].items():
+        frozen = directory / "source_snapshot" / path
+        need(frozen.is_file() and sha(frozen) == digest, name + ".source." + path)
+    for command in receipt["commands"]:
+        label = command["name"]
+        need(sha(directory / (label + ".stdout")) == command["stdout_sha256"], label + ".stdout")
+        need(sha(directory / (label + ".stderr")) == command["stderr_sha256"], label + ".stderr")
+        if expected_status == "passed":
+            need(command["exit_code"] == command["expected_exit_code"], label + ".exit")
+    return receipt
+
+
+def main():
+    manifest = read("manifest.json")
+    need(manifest["schema"] == "private_incremental_journal_v1" and not manifest["gcp_used"], "manifest.schema")
+    for name, expected in manifest["files"].items():
+        path = ROOT / name
+        need(path.is_file() and path.stat().st_size == expected["bytes"] and
+             sha(path) == expected["sha256"], "manifest." + name)
+    for name in ("o2_r2", "o2_r3", "san_r2", "additional_r3"):
+        check_capture(name)
+    for name in ("san_r1", "additional_r1", "additional_r2"):
+        check_capture(name, "failed")
+    first = read("o2_r1/receipt.json")
+    need(first["status"] == "failed" and first["commands"][-1]["exit_code"] == 2, "first.runner.failure")
+    need("LeakSanitizer does not work under ptrace" in
+         (ROOT / "san_r1/run_baseline_facade.stderr").read_text(), "san.ptrace.failure.retained")
+    for suffix in ("facade", "audit"):
+        outputs = [(ROOT / f"{capture}/run_{flavor}_{suffix}.stdout").read_bytes()
+                   for capture in ("o2_r2", "san_r2") for flavor in ("baseline", "variant")]
+        need(all(data == outputs[0] for data in outputs), suffix + ".baseline.variant.o2.san.equal")
+    incremental = read("o2_r3/run_incremental.stdout")
+    need(incremental == read("san_r2/run_incremental.stdout"), "incremental.o2.san.equal")
+    need(incremental["checks"] == 491 and incremental["rejections"] == 14 and
+         incremental["allocation_calls"] == incremental["allocation_rejections"] == 49 and
+         incremental["growth_1024_batch_allocations"] == 44, "incremental.nonvacuity")
+    paired = read("additional_r3/run_paired_o2.stdout")
+    need(paired == read("additional_r3/run_paired_san.stdout"), "paired.o2.san.equal")
+    need(paired["cases"] == 104 and paired["stability_cuts"] == 60 and
+         paired["successor_transitions"] == 6, "paired.nonvacuity")
+    mutants = read("additional_r3_mutants/receipt.json")
+    need(mutants["status"] == "passed" and len(mutants["mutations"]) == 4, "mutants.closed")
+    for command in mutants["commands"]:
+        name = command["name"]
+        need(command["exit_code"] == command["expected_exit_code"], "mutant." + name)
+        for stream in ("stdout", "stderr"):
+            need(sha(ROOT / "additional_r3_mutants" / (name + "." + stream)) ==
+                 command[stream + "_sha256"], "mutant.stream." + name)
+        if command["expected_causal_failure"]:
+            need((ROOT / "additional_r3_mutants" / (name + ".stderr")).read_text() ==
+                 "FAIL " + command["expected_causal_failure"] + "\n", "mutant.causal." + name)
+    print(json.dumps({"status": "passed", "manifest_files": len(manifest["files"]),
+                      "incremental": incremental, "paired": paired, "mutants": 4,
+                      "gcp_used": False}, sort_keys=True))
+
+
+if __name__ == "__main__":
+    main()

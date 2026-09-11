@@ -1,0 +1,202 @@
+{
+  "status": "passed",
+  "mutations": {
+    "restore_continuation_early": {
+      "file": "full_coverage_certificate.hpp",
+      "before": "          live_[parent] = 0;",
+      "after": "          live_[parent] = action.parents.size() == 1 ? 1 : 0;",
+      "failure": "coverage_parent_not_unique_prebatch_root"
+    },
+    "ignore_owner_identity": {
+      "file": "full_coverage_incremental.hpp",
+      "before": "if (!token.owner_ || token.owner_ != owner_ || token.slot_ >= states_.size())",
+      "after": "if (!token.owner_ || token.slot_ >= states_.size())",
+      "failure": "owner.foreign.token"
+    },
+    "reserve_every_batch": {
+      "file": "full_coverage_certificate.hpp",
+      "before": "      const size_t prior_count = out_.nodes_.size();",
+      "after": "      const size_t prior_count = out_.nodes_.size();\n      out_.nodes_.reserve(prior_count + actions.size());\n      out_.successors_.reserve(prior_count + actions.size());\n      live_.reserve(prior_count + actions.size());",
+      "failure": "growth.not.linear.allocations"
+    },
+    "write_parent_zero": {
+      "file": "full_coverage_certificate.hpp",
+      "before": "            out_.parents_.push_back(parent);",
+      "after": "            out_.parents_.push_back(0);",
+      "failure": "physical.parents.explicit"
+    }
+  },
+  "commands": [
+    {
+      "name": "compile_restore_continuation_early",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_incremental_journal_20260911/additional_r3_mutants/restore_continuation_early/gate.d",
+        "/workspaces/E-HGP/build/v7_incremental_journal_20260911/additional_r3_mutants/restore_continuation_early/incremental_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_incremental_journal_20260911/additional_r3_mutants/restore_continuation_early/gate"
+      ],
+      "started_unix": 1789109560.1400244,
+      "elapsed_seconds": 15.913224697113037,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "expected_causal_failure": null,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "run_restore_continuation_early",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_incremental_journal_20260911/additional_r3_mutants/restore_continuation_early/gate"
+      ],
+      "started_unix": 1789109576.0536623,
+      "elapsed_seconds": 0.010027170181274414,
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "expected_causal_failure": "coverage_parent_not_unique_prebatch_root",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "8e7e369acbe2b1a1a1989957fa8f612041ddf8853a0e92fe35305432e6168bd9"
+    },
+    {
+      "name": "compile_ignore_owner_identity",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_incremental_journal_20260911/additional_r3_mutants/ignore_owner_identity/gate.d",
+        "/workspaces/E-HGP/build/v7_incremental_journal_20260911/additional_r3_mutants/ignore_owner_identity/incremental_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_incremental_journal_20260911/additional_r3_mutants/ignore_owner_identity/gate"
+      ],
+      "started_unix": 1789109576.1846845,
+      "elapsed_seconds": 18.92948865890503,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "expected_causal_failure": null,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "run_ignore_owner_identity",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_incremental_journal_20260911/additional_r3_mutants/ignore_owner_identity/gate"
+      ],
+      "started_unix": 1789109595.114809,
+      "elapsed_seconds": 0.0063762664794921875,
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "expected_causal_failure": "owner.foreign.token",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "3f1808d0b0ac26c4700827598ffacc8a9be8460c7440539058a3a775e3f3f31a"
+    },
+    {
+      "name": "compile_reserve_every_batch",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_incremental_journal_20260911/additional_r3_mutants/reserve_every_batch/gate.d",
+        "/workspaces/E-HGP/build/v7_incremental_journal_20260911/additional_r3_mutants/reserve_every_batch/incremental_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_incremental_journal_20260911/additional_r3_mutants/reserve_every_batch/gate"
+      ],
+      "started_unix": 1789109595.231162,
+      "elapsed_seconds": 14.36415696144104,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "expected_causal_failure": null,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "run_reserve_every_batch",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_incremental_journal_20260911/additional_r3_mutants/reserve_every_batch/gate"
+      ],
+      "started_unix": 1789109609.5962543,
+      "elapsed_seconds": 0.010620832443237305,
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "expected_causal_failure": "growth.not.linear.allocations",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "1ef1806ad51b75e06baa8fefd1829da5c27f7af41764aa625b6b99aa1f4bdd49"
+    },
+    {
+      "name": "compile_write_parent_zero",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-MMD",
+        "-MF",
+        "/workspaces/E-HGP/build/v7_incremental_journal_20260911/additional_r3_mutants/write_parent_zero/gate.d",
+        "/workspaces/E-HGP/build/v7_incremental_journal_20260911/additional_r3_mutants/write_parent_zero/incremental_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v7_incremental_journal_20260911/additional_r3_mutants/write_parent_zero/gate"
+      ],
+      "started_unix": 1789109609.7241676,
+      "elapsed_seconds": 14.141175031661987,
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "expected_causal_failure": null,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "run_write_parent_zero",
+      "argv": [
+        "/workspaces/E-HGP/build/v7_incremental_journal_20260911/additional_r3_mutants/write_parent_zero/gate"
+      ],
+      "started_unix": 1789109623.8661568,
+      "elapsed_seconds": 0.0037872791290283203,
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "expected_causal_failure": "physical.parents.explicit",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "3b92cee514f722f1dde73ac97d0f51d87ecbd23637c0e4da58bf6d6694ee1003"
+    }
+  ],
+  "gcp_used": false,
+  "mutated_sources": {
+    "restore_continuation_early": {
+      "header_sha256": "4060726106ecca74a5a3b7daa93bcdc3d7a3a2c09306fc0d76479c30d7acf9ad",
+      "gate_sha256": "366b4a7604a3c5675d6224d6f98f514ddf468fb68c364a6a54794c3d588ac556"
+    },
+    "ignore_owner_identity": {
+      "header_sha256": "47b117c4912da772db63b82f3b5bffb542aef4fdd1b4f6c44930521086480cc9",
+      "gate_sha256": "366b4a7604a3c5675d6224d6f98f514ddf468fb68c364a6a54794c3d588ac556"
+    },
+    "reserve_every_batch": {
+      "header_sha256": "3089be602a951530760a14d16f446a71c502409f0b3e25d274f1b43daf490607",
+      "gate_sha256": "366b4a7604a3c5675d6224d6f98f514ddf468fb68c364a6a54794c3d588ac556"
+    },
+    "write_parent_zero": {
+      "header_sha256": "21bba8be54d86b2f7cf3fc71d5df5379ea0be813f6fc91d17de062023d6501f8",
+      "gate_sha256": "366b4a7604a3c5675d6224d6f98f514ddf468fb68c364a6a54794c3d588ac556"
+    }
+  }
+}

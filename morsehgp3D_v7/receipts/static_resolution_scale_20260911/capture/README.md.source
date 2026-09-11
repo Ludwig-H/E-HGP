@@ -1,0 +1,110 @@
+# Échelle locale de la phase statique — triplet fermé
+
+11 septembre 2026. Mesures privées demandées par ROOT ; aucune compilation,
+modification de moteur, d'auditeur, de Git ou d'état GCP dans cette campagne.
+Cadre : `phase=exploration_v7_hors_registre`, `backend=cpu_reference`,
+`profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
+`public_status=not_claimed`. Les trois sous-dossiers ont leurs propres reçus
+de fin, exit 0, sources et binaire stables avant/après.
+
+Configuration demandée : uniform, seed 3, coordonnées u16 dans [0,65535],
+toute la tour K1..10, WSPD s8 et un thread de pipeline, phase statique à quatre
+workers demandés. Tailles successives : 8 000, puis 16 000, puis 32 000.
+Les champs de configuration sont contrôlés dans chaque sortie.
+
+## Résultats fermés
+
+Les lecteurs du triplet normal/`-O` passent : à chaque taille, les 35 champs
+communs hors travail géométrique/cache/temps correspondent exactement à la
+référence historique, notamment le payload et le calendrier des dix ordres.
+
+| n | Total observé (s) | FULL observé (s) | MEB statiques / référence | Supports statiques / référence | RSS KiB |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 8 000 | 466,761055 | 150,412324 | 4 185 184 / 6 227 265 | 364 590 166 / 573 011 617 | 2 137 980 |
+| 16 000 | 686,048712 | 123,976271 | 8 779 465 / 13 252 780 | 767 853 710 / 1 227 441 406 | 4 428 148 |
+| 32 000 | 802,278328 | 217,109716 | 18 244 853 / 27 711 509 | 1 600 773 173 / 2 577 959 005 | 9 109 204 |
+
+Le plan 8k contient 10 396 562 demandes, 5 176 885 facettes uniques et
+2 396 646 hits de semis. Le maximum échantillonné des capacités retenues est
+307 936 444 octets. Le RSS de référence était 2 136 656 KiB : cette observation
+ne montre pas de gain RSS. WSPD inchangé prend 257,464720 s dans cette passe,
+avec une charge initiale de 28,18 sur huit CPU accessibles : les temps ne sont
+pas des accélérations appariées. Les diminutions de travail MEB/supports sont
+des comparaisons physiques exactes sur le même input, pas des speedups.
+
+16k a été lancé après transmission du résultat 8k à ROOT. ROOT a lancé et
+surveillé le cas 32k avec le même recorder après fermeture de 16k. Ces trois
+calculs d'échelle ne se chevauchent pas ; l'hôte reste partagé avec d'autres
+travaux et les campagnes s10/s12 de l'agent indépendant.
+
+| n | Demandes | Uniques | Semis | Capacité retenue échantillonnée (octets) |
+| --- | ---: | ---: | ---: | ---: |
+| 8 000 | 10 396 562 | 5 176 885 | 2 396 646 | 307 936 444 |
+| 16 000 | 21 827 082 | 10 862 732 | 5 010 402 | 617 052 880 |
+| 32 000 | 45 208 799 | 22 503 000 | 10 348 964 | 1 235 849 528 |
+
+Ratios physiques 8k→16k / 16k→32k : MEB 2,09775 / 2,07813 ; supports
+2,10607 / 2,08474 ; demandes 2,09945 / 2,07123 ; capacités retenues
+2,00383 / 2,00283. Ce sont des observations, pas des bornes asymptotiques.
+
+Le reçu indépendant `build/v7_initial_static_key_comparison_20260911/`
+(manifeste `9167657c29c3ffb36292f2b830475d537d47072831740e5bb0b7bb937caa2c77`)
+compare les neuf couples R_K/U_K à 8k et est joint brut au paquet portable.
+Il ne compare pas un flux intégral des clés statiques, non exporté.
+
+Le binaire réutilisé est celui du microbenchmark ROOT déjà fermé :
+`build/v7_static_resolver_20260911/micro_r1/probe`, SHA-256
+`f71f31190f5d50ac70f8332f969c6baa50549536bd08836702e6ba01ae7fcdce`.
+Le snapshot `probe_source` a été copié dans `source/`, et la provenance de
+compilation est conservée séparément. Chaque run vérifie sources et binaire
+avant/après ; aucune nouvelle compilation ne se superpose à ces mesures.
+
+## Comparaison et autorité
+
+La référence historique vient des sorties locales n8k/n16k/n32k, s8,
+`receipts/full_ball_scale_gpu_20260910/local/`. Chaque sortie de référence est
+copiée sans changement, avec son SHA et celui du manifeste public d'origine.
+Comparer ces jours et charges distincts **ne donne pas un speedup chronométrique**.
+Le poste est explicitement partagé ; load average, affinité et mémoire sont
+capturés avant/après et les temps bruts sont conservés sans correction inventée.
+
+Le checker compare tous les champs communs du schéma hors temps, cache et
+travail géométrique du resolver. Il conserve notamment l'identité de l'entrée,
+du payload, des tailles de forêts, des références de parents/verticale, des
+contributions et des compteurs de calendrier. La liste exacte de ces champs
+est publiée dans chaque `comparison.json`, jamais implicite. Les compteurs de
+travail statique sont jugés séparément : R, uniques, seeds, MEB effectivement
+payées, supports exacts et capacités retenues.
+
+La capacité retenue échantillonnée n'est ni le pic d'allocation transitoire
+ni le RSS ; `/usr/bin/time -v` conserve séparément le pic RSS mesuré. Les ratios
+de doublement sont des observations sur cette famille uniform, pas une borne
+sous-quadratique pour tous les nuages ni une garantie sur les dizaines de
+millions. Le digest apparié ne certifie pas la complétude du producteur WSPD.
+
+## Exécution et suivi
+
+`record.py SIZE` exécute un seul cas dans un nouveau dossier create-only. Le
+premier résultat 8k doit être transmis à ROOT avant lancement de 16k/32k. Les
+étapes du probe, le temps CPU et la mémoire du groupe de processus possédé sont
+observés toutes les trente secondes. Il n'y a pas de limite algorithmique de
+temps ou de n ajoutée au moteur.
+
+Le recorder 8k est conservé tel qu'exécuté dans son `record.py.source`. Pour
+les cas suivants, le recorder ajoute seulement une fermeture ciblée de son
+groupe de processus en cas d'exception ou de demande d'arrêt explicite ; aucun
+timeout automatique n'est appliqué au calcul. Cette différence de contrôle
+des processus ne modifie ni le binaire, ni les sources du probe, ni les
+arguments, ni les mesures de travail et sorties comparées.
+
+Lecture d'un ou plusieurs cas **fermés**, sans exécuter le moteur :
+
+```bash
+python3 -B build/v7_static_scale_20260911/verify.py 8000
+python3 -B -O build/v7_static_scale_20260911/verify.py 8000 16000 32000
+```
+
+Une taille absente ou encore ouverte est refusée par le lecteur. Les temps
+complets sont des observations de toute la tour retenue et de son digest, pas
+des temps d'un seul composant ; aucun contrat 50k/1 s ou GPU n'est acquis ici.
+GCP non utilisé.

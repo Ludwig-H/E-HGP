@@ -1,0 +1,74 @@
+--- baseline/morsehgp3D_v7/src/forest/full_ball_tower.hpp
++++ observed/morsehgp3D_v7/src/forest/full_ball_tower.hpp
+@@ -2,6 +2,7 @@
+ // ball censuses. No claim of WSPD completeness, archive authority, or speed.
+ #pragma once
+ 
++#include "unique_observer.hpp"
+ #include <numeric>
+ #include <unordered_map>
+ 
+@@ -242,13 +243,15 @@
+       : ix(index), balls(census), requested(max_k), st(stats), resolver_cache(stats) {}
+ 
+   std::vector<FullBallOrder> run() {
++    unique_representative_detail::collector.start(ix);
+     validate_catalogue();
+-    if (kmax > 1) resolver_cache.configure(ix.upos.size());
++    if (kmax > 1 && unique_representative_detail::cache_enabled()) resolver_cache.configure(ix.upos.size());
+     std::vector<Draft> drafts;
+     History lower_history;
+     std::vector<u64> lower_anchors;
+     for (unsigned k = 1; k <= kmax; ++k) {
+       current_k = k;
++      unique_representative_detail::collector.begin(k, st);
+       if (k > 1) resolver_cache.reset();
+       anchors.assign(balls.size(), absent);
+       current = {}; compressed.clear();
+@@ -284,6 +287,7 @@
+       drafts.push_back(std::move(draft));
+       lower_history = std::move(current);
+       lower_anchors = std::move(anchors);
++      unique_representative_detail::collector.end(st);
+     }
+     // Construction indices and histories are dead after the last order; no
+     // published object borrows them. Release before copying the immutable bank.
+@@ -317,6 +321,7 @@
+       result.push_back({std::move(forest.value), std::move(drafts[k - 1].lower_nodes)});
+       std::vector<FullCoverageBatch>().swap(drafts[k - 1].batches);
+     }
++    unique_representative_detail::collector.finish(st);
+     return result;
+   }
+ 
+@@ -505,6 +510,7 @@
+     std::sort(sites.begin(), sites.end());
+     require(sites.size() == current_k && std::adjacent_find(sites.begin(), sites.end()) == sites.end(),
+             "full_ball_representative_cardinality");
++    unique_representative_detail::collector.record(sites);
+     if (current_k == 1) {
+       const PointId id = ix.point_id(sites.front());
+       return root(std::lower_bound(domain.begin(), domain.end(), id) - domain.begin(), prior_count);
+--- baseline/morsehgp3D_v7/bench/full_ball_tower_probe.cpp
++++ observed/morsehgp3D_v7/bench/full_ball_tower_probe.cpp
+@@ -76,7 +76,10 @@
+   if (!options(argc, argv, opt)) return 2;
+   const auto start = Clock::now();
+   try {
+-    auto input = make_family_input(CloudFamily::kUniform, static_cast<int>(opt.n), 65536, 3);
++    CloudFamily family = CloudFamily::kUniform;
++    if (const char* selected = std::getenv("MHGP7_PRIVATE_FAMILY"))
++      full_ball_detail::require(parse_cloud_family(selected, &family), "observer.family");
++    auto input = make_family_input(family, static_cast<int>(opt.n), 65536, 3);
+     full_ball_detail::require(input.size() == static_cast<size_t>(opt.n), "probe_incomplete_input");
+     const auto input_digest = full_probe_digest::input(input);
+     CloudIndex ix;
+@@ -187,6 +190,8 @@
+         static_cast<unsigned long long>(c.h2d_index_bytes), static_cast<unsigned long long>(c.h2d_ball_bytes),
+         static_cast<unsigned long long>(c.h2d_sentinel_bytes), static_cast<unsigned long long>(c.d2h_bytes));
+ #endif
++    std::printf(",\"family\":\"%s\"", cloud_family_name(family));
++    unique_representative_detail::collector.print();
+     std::printf("}\n");
+     return std::fflush(stdout) == 0 ? 0 : 2;
+   } catch (const full_ball_detail::Failure& error) {

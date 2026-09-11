@@ -1,0 +1,16 @@
+--- original/source/morsehgp3D_v7/src/lanes/q4.hpp
++++ private/source/morsehgp3D_v7/src/lanes/q4.hpp
+@@ -78,7 +78,7 @@
+ }
+ 
+ // Precondition : det > 0.
+-inline bool q4_center_strictly_inside(const Q4Form& f, const P3& a, const P3& b, const P3& x, const P3& y) {
++MHGP7_HD inline bool q4_center_strictly_inside(const Q4Form& f, const P3& a, const P3& b, const P3& x, const P3& y) {
+   const bool parity = MHGP7_MUTANT("q4-center-parity");
+   const i64 ux = b.x - a.x, uy = b.y - a.y, uz = b.z - a.z;
+   const i64 px = x.x - a.x, py = x.y - a.y, pz = x.z - a.z;
+@@ -165,4 +165,3 @@
+ };
+ 
+ }  // namespace mhgp7
+-

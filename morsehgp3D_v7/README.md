@@ -31,7 +31,23 @@ sonde conserve simultanément toute la tour et ses verticales. S'ajoutent
 le [cache exact évictif, ses semis fermés et la réduction de résidence](docs/OPTIMISATIONS_CACHE_ET_GPU_20260910.md) :
 sur le cas apparié n1000, 1 174 515 → 583 337 MEB, sans changer le payload.
 
-Le [triplet local courant](docs/RESULTATS_TOUR_CACHE_G4_20260910.md) termine
+Depuis le 11 septembre, la [résolution statique dédoublonnée](docs/RESOLUTION_STATIQUE_CPU_20260911.md)
+est intégrée **en option CPU** (`--static-threads=1` ou `4`, zéro par défaut).
+Elle résout les clés uniques vers des boules, puis rejoue les mêmes ancres
+pré-lot ; aucune composante temporelle n'est consultée par les workers.
+À 8k/s8, un thread amont et quatre pour la géométrie statique, même tour
+complète, MEB −32,8 % et supports testés −36,4 %,
+avec environ 308 Mo de capacités de buffers temporaires retenus.
+Le [triplet statique 8k/16k/32k](receipts/static_resolution_scale_20260911/README.md)
+est clos : MEB −32,8/33,8/34,2 %, mêmes tours et verticales ; croissance
+du nombre de MEB proche de n puissance 1,05–1,07 sur l'uniforme seulement.
+O2/SAN et 24 CTests passent ; six mutants ciblés sont réfutés. Ce n'est pas encore
+un backend de résolutions GPU ni une accélération chronométrique qualifiée.
+La [comparaison statique s8/10/12](receipts/static_s_factors_20260911/README.md)
+est aussi close à 8k : mêmes tours et travail MEB, quelques candidats amont
+en moins à s10/s12 ; aucun optimum de temps déduit de la charge variable.
+
+Le [triplet nominal du 10 septembre](docs/RESULTATS_TOUR_CACHE_G4_20260910.md) termine
 à 235,724 s / 354,144 s / 736,819 s pour 8k/16k/32k, s=8, un thread.
 Les sorties ont 3,98 M / 8,31 M / 17,17 M nœuds. Ce sont des diagnostics
 non répétés sur hôte partagé, pas des contrats ni un gain temporel apparié.
@@ -47,7 +63,11 @@ Les [refus historiques 50k du 6 septembre](docs/RESULTATS_G4_FULL_20260906.md)
 restent distincts, sans réétiquetage. Contrats 1 s/100 ms non acquis.
 La séparation statique des résolutions géométriques est désormais
 [prouvée sous census complet par l'auditeur](audits/receipts_raccord_ancres_20260910/suite_cache_20260910/NOTE_PHASE_STATIQUE_MEB.md) ;
-son backend CPU/GPU par lots n'est pas encore implémenté.
+son backend CPU par lots est maintenant optionnel ; son backend GPU reste
+à implémenter. Les mesures 50k ci-dessus portent sur le moteur du 10 septembre,
+pas sur cette nouvelle option. GCP non utilisé pour l'étape du 11 septembre.
+Le [prototype de sélection MEB pour GPU](docs/PORT_GPU_RESOLUTIONS.md) passe
+ses juges O2 et la compilation/lien CUDA, sans exécution device ni raccord FULL.
 
 L'[audit indépendant du journal](audits/receipts_coverage_cpp_20260910/README.md)
 a exposé un angle mort du juge, pas un défaut nominal : le tableau des
@@ -96,6 +116,7 @@ promettre une sortie FULL explicite sous-quadratique pour tout nuage 3D.
 | [Lots unitaires](docs/CONTRAT_LOT_UNITAIRE_FULL.md) | Tableau de quatre racines au lieu de la DSU locale ; mêmes demandes, compteurs, parents et ancres |
 | [Normalisation v2](docs/CONTRAT_NORMALISATION_FULL.md) | Dernière paire de compression supprimée ; mêmes forêts, calendrier d'accès et admissions explicitement versionnés |
 | [Proposeur MEB filtré dans FULL](docs/CONTRAT_MEB_FULL.md) | Opt-in C++ P, désactivé par défaut ; budget partagé par ordre, F inchangé et coûts physiques p/A séparés ; qualification propre au raccord |
+| [Résolution statique CPU](docs/RESOLUTION_STATIQUE_CPU_20260911.md) | Option 1/multi-CPU, dédoublonnage exact et semis de BallId ; calendrier nominal conservé, GPU non porté |
 | CLI et archive | Route historique F séparée ; sonde de tour retenue avec verticale, sans archive industrielle FULL |
 
 Les qualifications antérieures restent attribuées à leurs sources :
@@ -162,7 +183,7 @@ ctest --test-dir build/v7_fresh --output-on-failure -L '^gate$'
 Les tests `scale8000`, `scale16000` et `scale32000` sont des campagnes
 séparées plus longues. Les résultats des portes ciblées FULL ne
 réattribuent pas la suite F complète au nouveau delta. Le présent lot
-conserve un rejeu stable de vingt CTests ciblés CPU et les gates O2/SAN.
+conserve un rejeu stable de 24 CTests ciblés CPU et les gates O2/SAN.
 
 ## Entrée réelle et CLI historique
 
@@ -192,5 +213,6 @@ La lecture intégrale des parties I et II du manuscrit et le port v6 sont
 [déclarés et épinglés](docs/LECTURE_ET_CONTRATS.md). Ce chantier ne modifie pas la v6 ;
 aucun de ses résultats n'est hérité. Les preuves détaillées et essais
 négatifs restent dans `receipts/` ; les builds et brouillons vont dans
-`build/`, pas dans les entrées actives. Les benchmarks G4 de ce delta sont
-clos ; les deux arrêts ciblés E-HGP sont certifiés dans le reçu courant.
+`build/`, pas dans les entrées actives. Les benchmarks G4 du 10 septembre sont
+clos ; leurs deux arrêts ciblés E-HGP sont certifiés dans leur reçu.
+Le delta statique CPU du 11 septembre n'utilise pas GCP.

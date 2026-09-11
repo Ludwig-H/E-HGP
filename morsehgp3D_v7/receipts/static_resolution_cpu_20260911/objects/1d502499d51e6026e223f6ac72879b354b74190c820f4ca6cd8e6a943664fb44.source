@@ -1,0 +1,25 @@
+#!/usr/bin/env python3
+"""Create a private source snapshot, never overwrite the published engine."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+
+root = Path('/workspaces/E-HGP')
+here = Path(__file__).resolve().parent
+out = here / 'source'
+out.mkdir(exist_ok=False)
+names = subprocess.check_output(['git', 'ls-files', 'morsehgp3D_v7/src',
+    'morsehgp3D_v7/oracle', 'morsehgp3D_v7/tests/full_ball_tower_gate.cpp',
+    'morsehgp3D_v7/bench/full_ball_tower_probe.cpp',
+    'morsehgp3D_v7/bench/full_gabriel_semantic_digest.hpp'], cwd=root).decode().splitlines()
+pins = {}
+for name in names:
+    path = root / name
+    target = out / name
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(path, target)
+    pins[name] = hashlib.sha256(path.read_bytes()).hexdigest()
+(here / 'source_baseline.json').write_text(json.dumps(pins, indent=2, sort_keys=True) + '\n')
+print('private snapshot', len(pins))

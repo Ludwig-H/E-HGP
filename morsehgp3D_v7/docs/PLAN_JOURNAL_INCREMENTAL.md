@@ -1,12 +1,36 @@
-# Plan de journal FULL incrémental — conception non implémentée
+# Plan de journal FULL incrémental — prototype hors producteur
 
-10 septembre 2026. Document de conception seulement : **aucun assembleur
-incrémental livré ou qualifié par cette note**. Publication d'une analyse
-privée, sans modification du moteur, compilation ni benchmark nouveau.
+Conception du 10 septembre, mise à jour le 11 septembre 2026.
+Un prototype d'assembleur est désormais qualifié séparément ; **il n'est pas
+encore raccordé au producteur FULL**. Les signatures et pins de l'analyse
+initiale ci-dessous restent historiques, pas des octets réattribués.
 GCP non utilisé pour ce travail. Cadre :
 `phase=exploration_v7_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
+
+## Qualification du prototype au 11 septembre
+
+Le [paquet du prototype](../receipts/incremental_journal_prototype_20260911/README.md)
+conserve un validateur whole-lot commun à la façade actuelle et à l'assembleur,
+une banque liée à son propriétaire et un refus global définitif. O2/SAN :
+491 contrôles nouveaux, 14 rejets, 49/49 pannes d'allocation. Le différentiel
+direct ajoute 104 cas et 17 436 contrôles : 2 991 nœuds, 2 480 parents et
+4 595 contributions physiquement identiques. Quatre mutants sont réfutés.
+Les premiers refus de compilation du montage de juge et les refus LSan/ptrace
+sont conservés séparément de leurs replays favorables.
+
+Le [lemme de l'auditeur](../audits/receipts_incremental_review_20260911/README.md)
+est exercé sur 60 anciennes coupes et six écritures de successeurs.
+Les nœuds, parents et contributions prolongent leurs préfixes ; un ancien
+successeur peut passer une fois de la sentinelle à sa fusion future.
+Les coupes plus anciennes et la coupe ouverte du nouveau lot sont préservées.
+La [gate indépendante publiée à cbdd3ff8](../audits/receipts_incremental_prefix_20260911/README.md)
+ajoute 13 905 contrôles O2/SAN, 20 préfixes, 260 paires de coupes historiques,
+16 suffixes invalides et trois mutants réfutés sur son propre snapshot.
+Cela ne certifie ni l'ordre complet K1..10 ni les verticales : l'API prototype
+assemble une collection de journaux structurels, pas une tour géométrique.
+Les étapes de raccord FULL et les mesures de temps/RSS ci-dessous restent à faire.
 
 ## Choix recommandé
 
@@ -64,7 +88,7 @@ Il ne faut garder aucun descripteur de lot/action après son append réussi.
 
 ## API interne minimale et couture
 
-Esquisse de signature, **non implémentée** :
+Esquisse de signature historique ; l'API exacte du prototype est dans son paquet :
 
 ```cpp
 struct CoverageActionView {
@@ -232,10 +256,10 @@ universelle en n ne découle de O(N+P+C).
    mono sur les régimes contractuels et s8/10/12. Une baisse des allocations
    n'est pas un gain temporel établi. G4 50k ensuite si ce delta le justifie.
 
-Pas de prototype joint : une classe d'append isolée sans les mêmes gardes et
-le lien banque/tour donnerait un doublon trompeur. Le prochain code utile
-est la factorisation du validateur avec sa gate appariée, puis le raccord
-`close_lot` privé, pas une reconstitution de l'oracle.
+Le prototype joint factorise maintenant le validateur et passe sa gate
+appariée. Le prochain code utile est le raccord `close_lot` privé avec ses
+oracles et verticales, pas une reconstitution de l'oracle ni une promotion
+du seul assembleur structurel en producteur FULL.
 
 ## Diagnostic proposé : représentants initiaux uniques par ordre
 
@@ -243,7 +267,12 @@ Le [dialogue de l'auditeur](../audits/DIALOGUE_COURANT.md) demande, à côté de
 `representatives` et `resolver_meb_calls`, le nombre exact de clés de
 représentants uniques par ordre. Sa
 [note d'échelle](../audits/receipts_raccord_ancres_20260910/suite_cache_20260910/NOTE_REFLEXION_ECHELLE.md)
-motive le dédoublonnage statique. **Instrumentation proposée, non exécutée ici.**
+motive le dédoublonnage statique. Le [diagnostic du 11 septembre](../receipts/initial_representatives_20260911/README.md)
+est maintenant exécuté sur n400, 8k/s8 et scanline n2000 : nominaux O2/SAN
+réussis et quatre mutants réfutés, sans intégrer de hook dans le moteur.
+À 8k, R=10 456 312
+et U=5 184 885 ; K1 compris, descente/semis exclus. s10/12 ne sont pas
+tentés dans ce diagnostic. Le protocole ci-dessous reste sa définition.
 Elle est distincte du plan de journal ; elle mesure un autre levier.
 
 Définition : R_K est le nombre d'entrées dans `resolve` à l'ordre K et U_K

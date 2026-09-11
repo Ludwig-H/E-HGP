@@ -1,0 +1,1 @@
+{"status":"passed","checks":491,"rejections":14,"physical_nodes":24,"physical_parents":16,"physical_contributions":29,"allocation_calls":49,"allocation_requested_bytes":3854,"allocation_rejections":49,"growth_1024_batch_allocations":44}

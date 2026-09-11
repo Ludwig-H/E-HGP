@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v7/receipts/incremental_journal_prototype_20260911/verify.py", line 87, in <module>
+    main()
+  File "/workspaces/E-HGP/morsehgp3D_v7/receipts/incremental_journal_prototype_20260911/verify.py", line 76, in main
+    need(done.returncode == 0, "original reader failed: " + done.stderr.decode(errors="replace"))
+  File "/workspaces/E-HGP/morsehgp3D_v7/receipts/incremental_journal_prototype_20260911/verify.py", line 15, in need
+    raise ValueError(reason)
+ValueError: original reader failed: Traceback (most recent call last):
+  File "/tmp/mhgp7_incremental_receipt_3mqjxkvn/verify.py", line 85, in <module>
+    main()
+  File "/tmp/mhgp7_incremental_receipt_3mqjxkvn/verify.py", line 48, in main
+    check_capture(name)
+  File "/tmp/mhgp7_incremental_receipt_3mqjxkvn/verify.py", line 30, in check_capture
+    need(frozen.is_file() and sha(frozen) == digest, name + ".source." + path)
+  File "/tmp/mhgp7_incremental_receipt_3mqjxkvn/verify.py", line 12, in need
+    raise ValueError(reason)
+ValueError: o2_r2.source.build/v7_incremental_journal_20260911/baseline/morsehgp3D_v7/src/gpu/census_kernels.cuh
+

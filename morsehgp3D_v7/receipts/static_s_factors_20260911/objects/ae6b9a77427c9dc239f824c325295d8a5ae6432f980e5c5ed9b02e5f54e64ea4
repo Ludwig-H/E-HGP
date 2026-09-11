@@ -1,0 +1,128 @@
+[
+  {
+    "processes": [
+      {
+        "pid": 80,
+        "rss_pages": 320,
+        "state": "S",
+        "stime_ticks": 0,
+        "utime_ticks": 0
+      },
+      {
+        "pid": 81,
+        "rss_pages": 0,
+        "state": "R",
+        "stime_ticks": 0,
+        "utime_ticks": 0
+      }
+    ],
+    "stage": "starting",
+    "stderr_bytes": 0,
+    "time_ns": 1789111480048690814
+  },
+  {
+    "processes": [
+      {
+        "pid": 80,
+        "rss_pages": 320,
+        "state": "S",
+        "stime_ticks": 0,
+        "utime_ticks": 0
+      },
+      {
+        "pid": 81,
+        "rss_pages": 13363,
+        "state": "R",
+        "stime_ticks": 6,
+        "utime_ticks": 2666
+      }
+    ],
+    "stage": "stage_start=generate",
+    "stderr_bytes": 80,
+    "time_ns": 1789111510081625961
+  },
+  {
+    "processes": [
+      {
+        "pid": 80,
+        "rss_pages": 320,
+        "state": "S",
+        "stime_ticks": 0,
+        "utime_ticks": 0
+      },
+      {
+        "pid": 81,
+        "rss_pages": 63152,
+        "state": "R",
+        "stime_ticks": 43,
+        "utime_ticks": 5138
+      }
+    ],
+    "stage": "stage_start=generate",
+    "stderr_bytes": 80,
+    "time_ns": 1789111540105024450
+  },
+  {
+    "processes": [
+      {
+        "pid": 80,
+        "rss_pages": 320,
+        "state": "S",
+        "stime_ticks": 0,
+        "utime_ticks": 0
+      },
+      {
+        "pid": 81,
+        "rss_pages": 120351,
+        "state": "R",
+        "stime_ticks": 120,
+        "utime_ticks": 7854
+      }
+    ],
+    "stage": "stage_start=sort_rle",
+    "stderr_bytes": 146,
+    "time_ns": 1789111570130869113
+  },
+  {
+    "processes": [
+      {
+        "pid": 80,
+        "rss_pages": 320,
+        "state": "S",
+        "stime_ticks": 0,
+        "utime_ticks": 0
+      },
+      {
+        "pid": 81,
+        "rss_pages": 180789,
+        "state": "R",
+        "stime_ticks": 173,
+        "utime_ticks": 10583
+      }
+    ],
+    "stage": "stage_start=full_ball_tower",
+    "stderr_bytes": 347,
+    "time_ns": 1789111600150193129
+  },
+  {
+    "processes": [
+      {
+        "pid": 80,
+        "rss_pages": 320,
+        "state": "S",
+        "stime_ticks": 0,
+        "utime_ticks": 0
+      },
+      {
+        "pid": 81,
+        "rss_pages": 457265,
+        "state": "R",
+        "stime_ticks": 321,
+        "utime_ticks": 14790
+      }
+    ],
+    "stage": "stage_start=full_ball_tower",
+    "stderr_bytes": 347,
+    "time_ns": 1789111630169375364
+  }
+]

@@ -1,0 +1,30 @@
+[ 50%] Building CXX object CMakeFiles/mhgp7_anchor_meb_gate.dir/tests/anchor_meb_gate.cpp.o
+[100%] Linking CXX executable mhgp7_anchor_meb_gate
+[100%] Built target mhgp7_anchor_meb_gate
+[ 50%] Building CXX object CMakeFiles/mhgp7_full_ball_tower_gate.dir/tests/full_ball_tower_gate.cpp.o
+[100%] Linking CXX executable mhgp7_full_ball_tower_gate
+[100%] Built target mhgp7_full_ball_tower_gate
+[ 50%] Building CXX object CMakeFiles/mhgp7_full_ball_work_gate.dir/tests/full_ball_work_gate.cpp.o
+[100%] Linking CXX executable mhgp7_full_ball_work_gate
+[100%] Built target mhgp7_full_ball_work_gate
+[100%] Building CXX object CMakeFiles/mhgp7_full_ball_tower_probe.dir/bench/full_ball_tower_probe.cpp.o
+[100%] Linking CXX executable mhgp7_full_ball_tower_probe
+[100%] Built target mhgp7_full_ball_tower_probe
+[  0%] Building CXX object CMakeFiles/mhgp7_full_coverage_certificate_gate.dir/tests/full_coverage_certificate_gate.cpp.o
+[100%] Linking CXX executable mhgp7_full_coverage_certificate_gate
+[100%] Built target mhgp7_full_coverage_certificate_gate
+[ 50%] Building CXX object CMakeFiles/mhgp7_local_plateau_gate.dir/tests/local_plateau_gate.cpp.o
+[100%] Linking CXX executable mhgp7_local_plateau_gate
+[100%] Built target mhgp7_local_plateau_gate
+[  0%] Building CXX object CMakeFiles/mhgp7_census_route_stub_gate.dir/tests/census_route_stub_gate.cpp.o
+[100%] Linking CXX executable mhgp7_census_route_stub_gate
+[100%] Built target mhgp7_census_route_stub_gate
+[ 50%] Building CXX object CMakeFiles/mhgp7_full_gabriel_digest_gate.dir/tests/full_gabriel_digest_gate.cpp.o
+[100%] Linking CXX executable mhgp7_full_gabriel_digest_gate
+[100%] Built target mhgp7_full_gabriel_digest_gate
+[ 50%] Building CXX object CMakeFiles/mhgp7_facet_resolver_cache_gate.dir/tests/facet_resolver_cache_gate.cpp.o
+[100%] Linking CXX executable mhgp7_facet_resolver_cache_gate
+[100%] Built target mhgp7_facet_resolver_cache_gate
+[ 50%] Building CXX object CMakeFiles/mhgp7_witness_front_gate.dir/tests/witness_front_gate.cpp.o
+[100%] Linking CXX executable mhgp7_witness_front_gate
+[100%] Built target mhgp7_witness_front_gate

@@ -1,0 +1,88 @@
+[
+  {
+    "name": "configure",
+    "argv": [
+      "cmake",
+      "-S",
+      "morsehgp3D_v7",
+      "-B",
+      "/workspaces/E-HGP/build/v7_static_cpu_cmake_20260911",
+      "-DCMAKE_BUILD_TYPE=Release",
+      "-DMHGP7_DIGEST_BOOST_INCLUDE_DIR=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include"
+    ],
+    "exit_code": 0,
+    "started_ns": 1789109490700046611,
+    "ended_ns": 1789109492695778627,
+    "stdout_sha256": "115e0f4f58455859009f74404a57ce69d0d13c91086cf7293ac1bb652bdfc63d",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "build",
+    "argv": [
+      "cmake",
+      "--build",
+      "/workspaces/E-HGP/build/v7_static_cpu_cmake_20260911",
+      "--parallel",
+      "2",
+      "--target",
+      "mhgp7_anchor_meb_gate",
+      "mhgp7_full_ball_tower_gate",
+      "mhgp7_full_ball_work_gate",
+      "mhgp7_full_ball_tower_probe",
+      "mhgp7_full_coverage_certificate_gate",
+      "mhgp7_local_plateau_gate",
+      "mhgp7_census_route_stub_gate",
+      "mhgp7_full_gabriel_digest_gate",
+      "mhgp7_facet_resolver_cache_gate",
+      "mhgp7_witness_front_gate"
+    ],
+    "exit_code": 0,
+    "started_ns": 1789109492696417376,
+    "ended_ns": 1789109945183619888,
+    "stdout_sha256": "c731c0415172f0fc71b8afcf4fae757b43e480897cd836c98c672993a5e4b13b",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "ctest",
+    "argv": [
+      "ctest",
+      "--test-dir",
+      "/workspaces/E-HGP/build/v7_static_cpu_cmake_20260911",
+      "--output-on-failure",
+      "-R",
+      "^mhgp7_(anchor_meb|full_ball_tower|full_ball_work|full_ball_static|census_route_stub|local_plateau|full_coverage_certificate|facet_resolver_cache|witness_front|full_gabriel_digest)"
+    ],
+    "exit_code": 0,
+    "started_ns": 1789109945184293699,
+    "ended_ns": 1789109976567896340,
+    "stdout_sha256": "5ca6cba59109950dfba3651faf56564e266826029dc17d329306a89b4cfdf8e1",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "worker_normal",
+    "argv": [
+      "python3",
+      "-B",
+      "gcp-migration/selftest_full_ball_worker_v7.py"
+    ],
+    "exit_code": 0,
+    "started_ns": 1789109976568568339,
+    "ended_ns": 1789109976801969515,
+    "stdout_sha256": "630be61c687049f9dedfe4d09762545e8de9d55a7649cf32fe91b436714e4f5e",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "worker_optimized",
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "gcp-migration/selftest_full_ball_worker_v7.py"
+    ],
+    "exit_code": 0,
+    "started_ns": 1789109976803343756,
+    "ended_ns": 1789109977539118354,
+    "stdout_sha256": "630be61c687049f9dedfe4d09762545e8de9d55a7649cf32fe91b436714e4f5e",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

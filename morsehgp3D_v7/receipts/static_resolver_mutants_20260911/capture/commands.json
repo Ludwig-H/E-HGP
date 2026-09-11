@@ -1,0 +1,361 @@
+[
+  {
+    "name": "compiler",
+    "argv": [
+      "g++",
+      "--version"
+    ],
+    "started_ns": 1789108703475691297,
+    "ended_ns": 1789108703524890901,
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout_sha256": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "nominal_compile",
+    "argv": [
+      "g++",
+      "-O1",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-DMHGP7_TESTING",
+      "-I",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/nominal/source",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/nominal/gate.d",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/driver.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/nominal/gate"
+    ],
+    "started_ns": 1789108703709022649,
+    "ended_ns": 1789108740423916641,
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "nominal_0",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/nominal/gate",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/fixtures.txt",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/expected.txt",
+      "0"
+    ],
+    "started_ns": 1789108740425219737,
+    "ended_ns": 1789108740450966611,
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout_sha256": "9b8ef4dea0948f132b4e1573d28ee2b14eaa15432b45210804be0a144be4edcb",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "nominal_1",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/nominal/gate",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/fixtures.txt",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/expected.txt",
+      "1"
+    ],
+    "started_ns": 1789108740452085694,
+    "ended_ns": 1789108740493443392,
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout_sha256": "5199538dbd339f04fede8d2a8e347975f62681d05e1c45f1b2ee8a5ed3db7c39",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "nominal_4",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/nominal/gate",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/fixtures.txt",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/expected.txt",
+      "4"
+    ],
+    "started_ns": 1789108740494481895,
+    "ended_ns": 1789108740708411305,
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout_sha256": "5199538dbd339f04fede8d2a8e347975f62681d05e1c45f1b2ee8a5ed3db7c39",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "nominal_launch",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/nominal/gate",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/fixtures.txt",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/expected.txt",
+      "launch"
+    ],
+    "started_ns": 1789108740709353254,
+    "ended_ns": 1789108740732852849,
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout_sha256": "945af192cb4b50e3385dacc87260f2808ca19a17c1809dbfd3cecc8e266bda1a",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "admit_global_key_compile",
+    "argv": [
+      "g++",
+      "-O1",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-DMHGP7_TESTING",
+      "-I",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/admit_global_key/source",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/admit_global_key/gate.d",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/driver.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/admit_global_key/gate"
+    ],
+    "started_ns": 1789108740909927932,
+    "ended_ns": 1789108782543863978,
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "admit_global_key_run",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/admit_global_key/gate",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/fixtures.txt",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/expected.txt",
+      "4"
+    ],
+    "started_ns": 1789108782545222626,
+    "ended_ns": 1789108782569519997,
+    "exit_code": 1,
+    "expected_exit_code": 1,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "ba23ae3c631fe9e0badea4327b64b70da1a76e455a3fa131f0a322f2a68df460"
+  },
+  {
+    "name": "consult_anchors_compile",
+    "argv": [
+      "g++",
+      "-O1",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-DMHGP7_TESTING",
+      "-I",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/consult_anchors/source",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/consult_anchors/gate.d",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/driver.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/consult_anchors/gate"
+    ],
+    "started_ns": 1789108782778854444,
+    "ended_ns": 1789108827165905874,
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "consult_anchors_run",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/consult_anchors/gate",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/fixtures.txt",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/expected.txt",
+      "4"
+    ],
+    "started_ns": 1789108827167110804,
+    "ended_ns": 1789108827186459772,
+    "exit_code": 1,
+    "expected_exit_code": 1,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "09dcc47589039cfa9217815bbc2f20372071a15be2146b0e73786c16b11b8b96"
+  },
+  {
+    "name": "scatter_sorted_index_compile",
+    "argv": [
+      "g++",
+      "-O1",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-DMHGP7_TESTING",
+      "-I",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/scatter_sorted_index/source",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/scatter_sorted_index/gate.d",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/driver.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/scatter_sorted_index/gate"
+    ],
+    "started_ns": 1789108827308948953,
+    "ended_ns": 1789108866192909272,
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "scatter_sorted_index_run",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/scatter_sorted_index/gate",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/fixtures.txt",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/expected.txt",
+      "4"
+    ],
+    "started_ns": 1789108866194332056,
+    "ended_ns": 1789108866228837914,
+    "exit_code": 1,
+    "expected_exit_code": 1,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "45fcac58a7881dd9bb214aa42851d094c21308b5edd7abf4e1d00933c2eb5761"
+  },
+  {
+    "name": "scatter_holes_compile",
+    "argv": [
+      "g++",
+      "-O1",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-DMHGP7_TESTING",
+      "-I",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/scatter_holes/source",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/scatter_holes/gate.d",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/driver.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/scatter_holes/gate"
+    ],
+    "started_ns": 1789108866384988438,
+    "ended_ns": 1789108904591258364,
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "scatter_holes_run",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/scatter_holes/gate",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/fixtures.txt",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/expected.txt",
+      "4"
+    ],
+    "started_ns": 1789108904593528206,
+    "ended_ns": 1789108904614971426,
+    "exit_code": 1,
+    "expected_exit_code": 1,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e1da0b98dd16fe7170f5a419ab28113931ab7724345b806167ce0fef8ce3c7e7"
+  },
+  {
+    "name": "unnormalized_anchor_compile",
+    "argv": [
+      "g++",
+      "-O1",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-DMHGP7_TESTING",
+      "-I",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/unnormalized_anchor/source",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/unnormalized_anchor/gate.d",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/driver.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/unnormalized_anchor/gate"
+    ],
+    "started_ns": 1789108904789892413,
+    "ended_ns": 1789108954938189768,
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "unnormalized_anchor_run",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/unnormalized_anchor/gate",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/fixtures.txt",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/expected.txt",
+      "4"
+    ],
+    "started_ns": 1789108954939803646,
+    "ended_ns": 1789108954955580678,
+    "exit_code": 1,
+    "expected_exit_code": 1,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "45fcac58a7881dd9bb214aa42851d094c21308b5edd7abf4e1d00933c2eb5761"
+  },
+  {
+    "name": "partial_launch_compile",
+    "argv": [
+      "g++",
+      "-O1",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-DMHGP7_TESTING",
+      "-I",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/partial_launch/source",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/partial_launch/gate.d",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/driver.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/partial_launch/gate"
+    ],
+    "started_ns": 1789108955187148669,
+    "ended_ns": 1789108997953449814,
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "partial_launch_run",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/partial_launch/gate",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/fixtures.txt",
+      "/workspaces/E-HGP/build/v7_static_mutants_20260911/run_r1/expected.txt",
+      "launch"
+    ],
+    "started_ns": 1789108997957901218,
+    "ended_ns": 1789108997985560293,
+    "exit_code": 1,
+    "expected_exit_code": 1,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e658820b513632ad3fb6763e9b395b9b8b4cc3703d01531422a18be0e8185d43"
+  }
+]

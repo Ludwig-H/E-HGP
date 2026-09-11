@@ -1,0 +1,9 @@
+{
+  "authority": "post_capture_reproduction_pins_not_before_after_stability",
+  "reference_revision": "ad7ffd28b35e153a20bd8cf42534d1cd29160bcd",
+  "files": {
+    "gcp-migration/selftest_full_ball_worker_v7.py": "b1606a6532341ce29804ae41249d09a8a56da648f3d750510a5450ce10295768",
+    "gcp-migration/full_ball_worker_v7.py": "80b94a5a211c959f0dfa61340f72e2805d69178ea42393a0658b3150b10a2556",
+    "gcp-migration/full_probe_worker_v7.py": "da967163bdb7247bc6aad4df0c294cda1071076a0127cd5bd9f59bc0e4788439"
+  }
+}

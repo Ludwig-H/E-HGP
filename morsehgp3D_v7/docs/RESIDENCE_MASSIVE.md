@@ -1,5 +1,31 @@
 # Tour massive : résidence du code C et première frontière externe
 
+## Actualisation du 11 septembre : tour retenue et option statique CPU
+
+L'analyse C ci-dessous conserve son périmètre historique. Le moteur actuel
+est la [tour par boules](TOUR_FULL_PAR_BOULES.md), qui garde simultanément
+les dix forêts et leurs verticales. Les [mesures du 10 septembre](RESULTATS_TOUR_CACHE_G4_20260910.md)
+comptent 17 166 975 nœuds à 32k et 27 273 218 à 50k/K10 ; ce ne sont pas
+des ordres détruits successivement. Elles ne qualifient pas le massif.
+
+La [nouvelle option statique CPU](RESOLUTION_STATIQUE_CPU_20260911.md)
+réduit les MEB par tri-unique des représentants stricts, au prix d'un buffer
+d'occurrences par ordre : à 8k/s8, un thread amont et quatre statiques,
+307 936 444 octets de capacités temporaires
+retenues échantillonnées. Le cache de jetons nominal n'est pas répliqué dans
+les workers ni utilisé par cette option. Ce compte n'est ni le pic transitoire
+des réallocations ni un gain RSS. Sa dépendance à R_K, nombre de représentants,
+interdit de présenter ce layout comme déjà qualifié pour des dizaines de millions.
+
+Le [journal incrémental](PLAN_JOURNAL_INCREMENTAL.md) est qualifié en prototype
+structurel, non raccordé à FULL. Il pourrait retirer les brouillons retenus,
+mais les arènes finales résident alors plus tôt : compter leur coût net.
+La banque, le census et les identités des sorties restent obligatoires dans
+l'API actuelle. Ni un batch GPU ni le traitement ordre par ordre ne constituent
+à eux seuls une exécution externe. GCP non utilisé le 11 septembre.
+
+## Analyse historique du snapshot C
+
 4 septembre 2026. Port documentaire revérifié depuis l'analyse locale de la
 v7 C : **aucune compilation, aucun benchmark, aucun changement du code
 produit, GCP non utilisé**. Cadre :

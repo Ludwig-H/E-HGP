@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+"""Record actual normal/-O reader and reader-only fault checks."""
+from __future__ import annotations
+
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+import time
+
+HERE = Path(__file__).resolve().parent
+
+
+def sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main() -> None:
+    out = HERE / "reader_checks"
+    out.mkdir(exist_ok=False)
+    commands = []
+    for name, optimized, script in (
+        ("normal", False, "verify.py"),
+        ("optimized", True, "verify.py"),
+        ("faults_normal", False, "reader_cases.py"),
+        ("faults_optimized", True, "reader_cases.py"),
+    ):
+        argv = ["python3", "-B"] + (["-O"] if optimized else []) + [str(HERE / script)]
+        started = time.time_ns()
+        with (out / (name + ".stdout")).open("wb") as stdout, (out / (name + ".stderr")).open("wb") as stderr:
+            proc = subprocess.run(argv, stdout=stdout, stderr=stderr)
+        row = dict(name=name, argv=argv, started_ns=started, ended_ns=time.time_ns(),
+                   exit_code=proc.returncode, stdout_sha256=sha(out / (name + ".stdout")),
+                   stderr_sha256=sha(out / (name + ".stderr")))
+        commands.append(row)
+        print(json.dumps(row), flush=True)
+    status = "passed" if all(row["exit_code"] == 0 for row in commands) else "failed"
+    (out / "receipt.json").write_text(json.dumps(dict(status=status, commands=commands,
+                                      Cpp_producer_mutants=False), indent=2) + "\n")
+    if status != "passed":
+        raise SystemExit(1)
+
+
+if __name__ == "__main__":
+    main()

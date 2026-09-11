@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+"""Record actually preprocessed transitive dependencies, including Boost/system."""
+import hashlib
+import json
+from pathlib import Path
+import shlex
+import subprocess
+import run
+
+HERE = Path(__file__).resolve().parent
+
+
+def main() -> None:
+    for name, argv in [("compiler_version", ["g++", "--version"]),
+                       ("uname", ["uname", "-a"]), ("cpu", ["lscpu"])]:
+        run.execute(name, argv)
+    rows = []
+    for kind, source in [("gate", "observed/morsehgp3D_v7/tests/unique_representative_gate.cpp"),
+                         ("probe", "observed/morsehgp3D_v7/bench/full_ball_tower_probe.cpp")]:
+        name = f"dependencies_{kind}"
+        argv = ["g++", "-std=c++20", "-pthread", "-isystem",
+                str(HERE.parent / "v7_boost_gate/extracted/usr/include"), "-M", source]
+        run.execute(name, argv)
+        raw = (HERE / "runs" / name / "stdout").read_text().replace("\\\n", "")
+        files = {}
+        for token in shlex.split(raw.split(":", 1)[1]):
+            path = Path(token)
+            if not path.is_absolute():
+                path = HERE / path
+            path = path.resolve()
+            files[str(path)] = hashlib.sha256(path.read_bytes()).hexdigest()
+        rows.append({"kind": kind, "dependency_sha256": files})
+    (HERE / "dependency_pins.json").write_text(json.dumps(rows, indent=2) + "\n")
+
+
+if __name__ == "__main__":
+    main()

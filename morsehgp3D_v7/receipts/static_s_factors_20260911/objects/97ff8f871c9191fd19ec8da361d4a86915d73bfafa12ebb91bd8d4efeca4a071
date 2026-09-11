@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+"""Copy original compile evidence and observe current reproduction dependencies."""
+from __future__ import annotations
+
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+import time
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+
+
+def sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main() -> None:
+    out = HERE / "reproduction"
+    out.mkdir(exist_ok=False)
+    original = ROOT / "build/v7_static_resolver_20260911/micro_r1"
+    for name in ("sources_before.json", "sources_after.json", "compile.stdout", "compile.stderr"):
+        shutil.copy2(original / name, out / ("original_micro_" + name))
+    boost = ROOT / "build/v7_boost_gate"
+    package = json.loads((boost / "receipts/package.json").read_text())
+    headers = boost / "extracted/usr/include/boost"
+    if sha(headers / "version.hpp") != package["version_header_sha256"]:
+        raise ValueError("boost_version_header_changed")
+    if sha(headers / "multiprecision/cpp_int.hpp") != package["cpp_int_header_sha256"]:
+        raise ValueError("boost_cpp_int_header_changed")
+    shutil.copy2(boost / "receipts/package.json", out / "boost_package.json")
+    metadata = dict(captured_ns=time.time_ns(), role="post_run_reproduction_observation",
+                    no_retroactive_compile_environment_stability_claim=True,
+                    current_boost_key_headers_match_historical_package=True,
+                    dependency_vendor_payload_included=False, original_compile_source=str(original),
+                    original_CPU_packet_manifest_sha256=sha(ROOT /
+                      "morsehgp3D_v7/receipts/static_resolution_cpu_20260911/manifest.json"))
+    commands = []
+    for name, argv in (("compiler", ["g++", "--version"]),
+                       ("kernel", ["uname", "-a"]),
+                       ("time", ["/usr/bin/time", "--version"])):
+        started = time.time_ns()
+        with (out / (name + ".stdout")).open("wb") as stdout, (out / (name + ".stderr")).open("wb") as stderr:
+            result = subprocess.run(argv, stdout=stdout, stderr=stderr)
+        commands.append(dict(name=name, argv=argv, started_ns=started, ended_ns=time.time_ns(),
+                             exit_code=result.returncode, stdout_sha256=sha(out / (name + ".stdout")),
+                             stderr_sha256=sha(out / (name + ".stderr"))))
+    metadata["commands"] = commands
+    metadata["status"] = "passed" if all(row["exit_code"] == 0 for row in commands) else "failed"
+    (out / "receipt.json").write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n")
+    if metadata["status"] != "passed":
+        raise SystemExit(1)
+
+
+if __name__ == "__main__":
+    main()

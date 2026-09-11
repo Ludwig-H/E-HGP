@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+"""Create-only portable package from CLOSED ROOT static-resolution captures."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+from typing import Any
+
+HERE = Path(__file__).resolve().parent
+BASE = HERE.parent
+ROOT = BASE.parents[1]
+TARGET = ROOT / "morsehgp3D_v7/receipts/static_resolution_cpu_20260911"
+CAPTURES = ["o2_r1", "o2_r2", "san_r2", "san_replay_z21y3h9h", "micro_r1", "cmake_capture_r1", "cuda_capture_r1"]
+
+
+def digest(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def main() -> None:
+    selected: dict[str, bytes] = {}
+    for name in CAPTURES:
+        status = BASE / name / "receipt.json"
+        if not status.exists():
+            raise RuntimeError("capture not closed: " + name)
+        receipt = json.loads(status.read_text())
+        expected = "failed" if name in ("o2_r1", "san_r2") else "passed"
+        if receipt["status"] != expected:
+            raise RuntimeError("coordinate with ROOT before sealing unexpected status: " + name)
+        for path in sorted((BASE / name).rglob("*")):
+            if path.is_file():
+                data = path.read_bytes()
+                if data.startswith(b"\x7fELF"):
+                    continue
+                selected[str(path.relative_to(BASE))] = data
+    for tree in ("source", "source_r2", "probe_source"):
+        for path in sorted((BASE / tree).rglob("*")):
+            if path.is_file():
+                selected[str(path.relative_to(BASE))] = path.read_bytes()
+    for path in sorted(BASE.glob("*.py")):
+        selected[path.name] = path.read_bytes()
+    selected["source_baseline.json"] = (BASE / "source_baseline.json").read_bytes()
+    for name, path in {
+        "LastTest.log": ROOT / "build/v7_static_cpu_cmake_20260911/Testing/Temporary/LastTest.log",
+        "CTestTestfile.cmake": ROOT / "build/v7_static_cpu_cmake_20260911/CTestTestfile.cmake",
+        "CMakeCache.cpu.txt": ROOT / "build/v7_static_cpu_cmake_20260911/CMakeCache.txt",
+        "CMakeCache.cuda.txt": ROOT / "build/v7_static_cuda_cmake_20260911/CMakeCache.txt",
+    }.items():
+        selected["integrated_build/" + name] = path.read_bytes()
+    helper_pins: dict[str, str] = {}
+    for name in ("gcp-migration/selftest_full_ball_worker_v7.py", "gcp-migration/full_ball_worker_v7.py", "gcp-migration/full_probe_worker_v7.py"):
+        published = subprocess.check_output(["git", "show", "ad7ffd28:" + name], cwd=ROOT)
+        if published != (ROOT / name).read_bytes():
+            raise RuntimeError("post-capture helper differs from published source: " + name)
+        selected["supplemental_helpers/" + name] = published
+        helper_pins[name] = digest(published)
+    selected["supplemental_helpers/pins.json"] = (json.dumps({
+        "authority": "post_capture_reproduction_pins_not_before_after_stability",
+        "reference_revision": "ad7ffd28b35e153a20bd8cf42534d1cd29160bcd", "files": helper_pins,
+    }, indent=2) + "\n").encode()
+    summary: dict[str, Any] = {"public_status": "not_claimed", "shared_host": True, "measurements": []}
+    for n in (400, 1000):
+        for threads in (0, 1, 4):
+            data = json.loads(selected[f"micro_r1/n{n}_static{threads}.stdout"])
+            summary["measurements"].append({key: data[key] for key in (
+                "n", "static_threads", "input_digest", "payload_digest", "resolver_meb_calls", "resolver_supports_tested",
+                "tower_s", "total_s", "static_sampled_retained_capacity_peak_bytes", "static_orders")})
+    selected["summary.json"] = (json.dumps(summary, indent=2) + "\n").encode()
+    for path in sorted(HERE.glob("*.py")):
+        selected["packaging/" + path.name] = path.read_bytes()
+    selected["README.md"] = (HERE / "README.md").read_bytes()
+    # No target directory exists before every capture has closed successfully.
+    TARGET.mkdir()
+    objects = TARGET / "objects"
+    objects.mkdir()
+    files: dict[str, str] = {}
+    for name, data in sorted(selected.items()):
+        if data.startswith(b"\x7fELF"):
+            raise RuntimeError("ELF unexpectedly selected: " + name)
+        sha = digest(data)
+        files[name] = sha
+        target = objects / (sha + ".source")
+        if not target.exists():
+            target.write_bytes(data)
+    encoded = (json.dumps({"schema": "mhgp7-static-resolution-cpu-receipt-v1", "files": files}, indent=2, sort_keys=True) + "\n").encode()
+    (TARGET / "logical_manifest.json").write_bytes(encoded)
+    shutil.copyfile(HERE / "verify.py", TARGET / "verify.py")
+    shutil.copyfile(HERE / "README.md", TARGET / "README.md")
+    for mode in [[], ["-O"]]:
+        subprocess.run(["python3", "-B", *mode, str(TARGET / "verify.py")], check=True)
+    print(json.dumps({"status": "sealed", "logical_files": len(files), "objects": len(list(objects.iterdir())),
+                      "manifest_sha256": digest(encoded), "path": str(TARGET)}))
+
+
+if __name__ == "__main__":
+    main()

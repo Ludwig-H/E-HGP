@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "error": null,
+  "source_binary_stable": true,
+  "binary_sha256": "bde2790bdf63b2e9e5aebd772f8d904caa09464a008078302dfdf72d8a2e1e2a",
+  "public_status": "not_claimed",
+  "GCP_used": false,
+  "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+  "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+}

@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+"""Preserve the too-strict CTest-spacing reader before its correction."""
+import json
+from pathlib import Path
+import subprocess
+import time
+
+
+def main() -> None:
+    here = Path(__file__).resolve().parent
+    root = here.parents[2]
+    target = root / "morsehgp3D_v7/receipts/static_resolution_cpu_20260911"
+    history = here / "reader_review"
+    history.mkdir()
+    for source, name in [(target / "verify.py", "verify_initial.py.source"),
+                         (target / "logical_manifest.json", "manifest_initial.json")]:
+        (history / name).write_bytes(source.read_bytes())
+    commands = []
+    for name, flags in [("normal", []), ("optimized", ["-O"])]:
+        argv = ["python3", "-B", *flags, str(target / "verify.py")]
+        tick = time.time_ns()
+        with (history / (name + ".stdout")).open("wb") as out, (history / (name + ".stderr")).open("wb") as err:
+            result = subprocess.run(argv, stdout=out, stderr=err, check=False)
+        commands.append({"argv": argv, "started_ns": tick, "ended_ns": time.time_ns(), "exit_code": result.returncode})
+        if result.returncode != 1 or "24 actual CTests" not in (history / (name + ".stderr")).read_text():
+            raise RuntimeError("unexpected original-reader outcome")
+    (history / "commands.json").write_text(json.dumps(commands, indent=2) + "\n")
+
+
+if __name__ == "__main__":
+    main()

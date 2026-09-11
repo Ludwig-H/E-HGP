@@ -1,0 +1,171 @@
+# Prototype privé de journal incrémental
+
+11 septembre 2026. Snapshot source `ad7ffd28b35e153a20bd8cf42534d1cd29160bcd`.
+Travail sous `build/` uniquement, sans mutation des sources actives, des audits,
+de Git ou de GCP. Cadre `phase=exploration_v7_hors_registre`,
+`backend=cpu_reference`, `profile=quantized_u16_input_only`,
+`mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
+
+**État : prototype structurel privé qualifié O2/SAN, non raccordé au constructeur FULL.**
+Les qualifications achevées et les échecs conservés sont distingués
+ci-dessous ; aucune mesure du contrat 50k, aucun gain de temps/RSS et aucune
+certification géométrique ne découlent de ce travail.
+
+## Delta
+
+`variant/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp` factorise le
+validateur/encodeur des lots en `full_coverage_detail::CoverageJournalState`.
+La façade `build_full_coverage_certificate` garde son API, son précomptage, les
+cinq réservations exactes et le schéma v2. Elle consomme ce même noyau de garde,
+et non un juge réimplémenté parallèlement. Le baseline intégral est conservé
+sous `baseline/morsehgp3D_v7/` ; ses deux headers actifs ne sont pas modifiés.
+
+`variant/morsehgp3D_v7/src/forest/full_coverage_incremental.hpp` ajoute le
+propriétaire interne append-only et les appels :
+
+- `append_population` copie une ligne, sans exposer d'alias mutable ; l'ordre
+  d'append détermine les identifiants de population.
+- `begin_order` produit un jeton opaque attaché à un propriétaire précis.
+- `append_batch` emprunte synchroniquement un lot owning existant ou des vues
+  parents/contributions. Il ne conserve aucun descripteur ni span d'entrée.
+- `end_order` ferme le journal et libère son tableau `live`.
+- `seal()` valide la banque complète, réserve une fois le vector des résultats,
+  puis publie tous les journaux par mouvements sans allocation supplémentaire.
+
+Le nom privé `CoverageTowerAssembler` désigne seulement le propriétaire destiné
+au futur raccord de tour. **Son résultat est une collection de journaux
+structurels**, pas un certificat de tour HGP : `begin_order` accepte encore
+des K dans un ordre arbitraire, répétés ou non consécutifs. Il ne valide aucune
+carte verticale. Ces contrôles restent au futur constructeur de tour ; aucune
+garde artificielle nouvelle n'est ajoutée ici.
+
+## Invariants de transaction et de propriété
+
+Tous les parents sont contrôlés/consommés sur le même `prior_count` pré-lot.
+Aucune continuation n'est restaurée avant la fin de cette première passe.
+Toute erreur invalide définitivement le propriétaire, y compris une erreur
+après la fermeture d'un premier journal : aucun préfixe ni banque n'est rendu.
+Un appel ultérieur ne peut reprendre ce propriétaire. Un scellement répété
+rend un nouveau résultat vide sans modifier la sortie déjà publiée.
+
+Le propriétaire n'est ni copiable ni déplaçable. Son identité est une petite
+allocation conservée par les jetons ; un jeton survivant ne peut donc pas être
+confondu avec un nouveau propriétaire réutilisant la même adresse d'objet.
+Les jetons n'exposent pas les journaux. Aucune surcharge `seal(bank)` n'existe :
+la banque scellée provient uniquement des lignes et du domaine de ce propriétaire.
+
+À chaque append de lot, les spans de domaine/lignes sont reconstruits à partir
+des vectors owning actuels. Avant tout `all_shell`, la largeur de la coquille
+consultée est contrôlée <=16. Le gel final emploie le validateur public de la
+banque, y compris pour une ligne jamais référencée. La première variante garde
+la copie vers la banque immuable ; l'adoption par mouvement n'est pas intégrée.
+
+## Coût et portée
+
+La façade actuelle continue d'annoncer `exact_structural_sizes_reserved_v1`.
+La nouvelle voie possède son étiquette distincte
+`amortized_vector_growth_v1` : les arènes croissent via `push_back`, jamais par
+`reserve(size+delta)` à chaque lot. Tout raccord doit adapter l'accounting du
+probe à cette voie ; réutiliser silencieusement l'étiquette ancienne serait faux.
+
+La complexité de l'encodeur reste amortie en O(N+P+C), pour les nœuds N,
+références de parents P et contributions C réellement produits ; elle ne borne
+pas ces tailles par une fonction sous-quadratique universelle du nuage.
+La banque, les scratchs géométriques et la production des actions restent des
+coûts séparés. Sans raccord, ce prototype ne retire pas encore les `Draft.batches`
+du moteur : il démontre seulement l'API/transaction qui permettra de le faire.
+
+## Captures
+
+`record.py` travaille en répertoires create-only et fige les sources avant/après.
+Les commandes, sorties et codes sont conservés dans chaque `receipt.json`.
+Les captures r2 et suivantes possèdent également une copie de toutes les
+sources épinglées ; les ELF sont seulement des artefacts locaux de travail.
+
+| Capture | Résultat et portée |
+| --- | --- |
+| `o2_r1` | Échec du runner : `--selftest` manquait pour la gate historique, sortie 2 ; aucune erreur du header. Runner et gate originaux conservés sous `review_original/`. |
+| `o2_r2` | PASS : baseline/variante produisent les mêmes sorties pour la gate historique et celle de l'auditeur ; nouvelle gate PASS. |
+| `o2_r3` | PASS : seule la gate incrémentale renforcée est recompilée ; attentes explicites du tableau des parents et token étranger sur une action autrement valide. |
+| `san_r1` | Échec de LeakSanitizer sous ptrace après compilation baseline ; ne constitue pas un rejet du code nominal. |
+| `san_r2` | PASS : rejeu ASan/UBSan hors bac à sable autorisé, `detect_leaks=1` ; sorties exactement identiques à O2 pour le baseline et la variante. |
+| `additional_r1` | Échec de montage du juge direct : les headers prédécesseurs identiques sont dédupliqués par GCC avec `#pragma once`, d'où des types absents du second namespace. |
+| `additional_r2` | Échec de compilation du juge : affectation/comparaison de tableaux C prise à tort pour une opération sur `std::array`. Corrigé dans le juge uniquement. |
+| `additional_r3` | PASS : 104 comparaisons directes et métamorphiques O2/SAN, puis quatre mutants causaux O2. |
+
+Les erreurs du juge n'ont pas modifié les deux headers du prototype, identiques
+dans les qualifications O2 et SAN closes. Le juge direct importe explicitement
+les primitives prédécesseures inchangées avant d'inclure le journal baseline
+sous un namespace renommé ; ce journal conserve tous ses octets ad7ffd28.
+
+La gate historique baseline/variante passe 823 contrôles, 30 refus, 30 coupes
+de rejeu, 40 coupes Gamma et 20 pannes d'allocation. Les fixtures de l'auditeur
+passent 42 contrôles : 10 cas valides, 9 rejets précis, 6 lectures et les 5/5
+allocations injectées. Les sorties sont identiques entre les deux sources.
+
+La gate incrémentale finale O2 passe 491 contrôles et 14 rejets : préfixe valide
+puis suffixe erroné, parent créé dans le lot, parent partagé après continuation,
+ordre précédent terminé puis ordre suivant invalide, reprise après échec,
+scellement répété, jeton étranger, banque malformée même non référencée,
+réallocation des populations, buffers d'entrée empoisonnés et partage réel de
+banque entre deux journaux. L'absence de `seal(bank)` est vérifiée à la compilation.
+
+Elle compare les champs physiques de 24 nœuds, 16 références de parents et
+29 contributions, et injecte toutes les 49 allocations de sa construction
+mixte, initialisation et scellement inclus. Les demandes cumulées de cette
+micro-fixture sont 3 854 octets ; ce n'est ni le RSS ni une économie. La fixture
+de 1 024 lots de naissance observe 44 allocations des quatre arènes non vides,
+et exige au plus 48 dans ce STL : porte de régression contre la réservation à
+chaque lot, pas théorème de complexité basé sur une mesure.
+
+La comparaison directe au header baseline non factorisé
+(`paired_baseline_gate.cpp`) passe **17 436 contrôles O2 et SAN** : 100 journaux
+structurels déterministes K=1..10 et quatre préfixes de la fixture
+`structural_mixed` de l'auditeur. Les 2 991 nœuds, 2 480 références de parents,
+4 595 contributions et toutes les lignes/indices/dates sont égaux physiquement,
+champ par champ. Les capacités et octets de padding sont exclus de cette
+égalité de contenu. Aucun de ces journaux synthétiques n'est promu en résultat
+géométrique de nuage ; les domaines comptent au plus 16 points.
+
+La gate métamorphique réemploie la fixture `structural_case(false, 1)` de
+`audits/receipts_coverage_cpp_20260910/corpus.py`, conformément à la contrelecture
+`audits/receipts_incremental_review_20260911/README.md`. Elle compare des
+constructions distinctes et complètement scellées de chaque préfixe valide :
+aucune API de publication d'un état pending n'est ajoutée. Les 60 anciennes
+coupes, ouvertes/fermées sous le dernier niveau et ouvertes au dernier niveau,
+gardent leurs racines/couvertures. Nodes, parents et contributions gardent leur
+préfixe ; **successors n'est pas append-only** : ses six écritures observées
+sont exactement ABSENT vers la nouvelle multifusion qui consomme le parent.
+Les successeurs déjà renseignés ne changent pas. Le contenu de chaque préfixe
+augmenté est aussi confronté directement au journal baseline, fermé compris.
+
+`record_mutants.py` compile et réfute quatre variantes indépendantes avec leur
+code 1 et diagnostic causal exact : restauration des continuations trop tôt,
+oubli de l'identité du propriétaire, `reserve` à chaque lot et parent écrit 0.
+Une erreur de compilation n'est jamais comptée comme mutant tué.
+
+`delta.patch` est le patch cohérent **non appliqué** des deux headers ;
+`manifest.json` et `verify.py` lient les sources, captures closes et erreurs
+préservées. Le lecteur n'exécute ni compilateur ni moteur et reste effectif
+sous Python `-O`.
+
+```bash
+python3 -B build/v7_incremental_journal_20260911/verify.py
+python3 -B -O build/v7_incremental_journal_20260911/verify.py
+```
+
+## Limites avant promotion
+
+Raccorder ensuite, toujours en privé, `close_lot` et la création paresseuse des
+populations au propriétaire ; conserver les ancres/semis après fermeture
+complète du lot. Le premier raccord pourra emprunter un `FullCoverageBatch`
+temporaire, avant de remplacer ses petites allocations par des scratchs plats.
+Repasser alors les 28 nuages Gram/Gamma, les deux plateaux groupés, les cartes
+verticales et les identités physiques de toute la tour. Seulement après cette
+couture, mesurer n200/400/800 appariés : allocations, volume demandé, pic par
+phase, capacités et temps. Une réduction des allocations ou de la rétention des
+brouillons ne promet pas un gain de RSS, puisque les arènes finales résident
+plus tôt et gardent leurs surcapacités.
+
+La priorité donnée ici est le prototype cohérent et falsifiable ; aucun appel
+à GCP, aucun run n800 du producteur et aucun changement de statut public.

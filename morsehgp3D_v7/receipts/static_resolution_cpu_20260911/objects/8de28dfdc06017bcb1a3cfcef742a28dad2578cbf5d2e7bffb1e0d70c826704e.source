@@ -1,0 +1,85 @@
+# Résolutions statiques CPU — reçus fermés du 11 septembre 2026
+
+`phase=exploration_v7_hors_registre`, `backend=cpu_reference`,
+`profile=quantized_u16_input_only`,
+`mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
+Autorité relative aux census complets exacts fournis ; ni complétude WSPD,
+ni archive industrielle, ni contrat de temps. GCP et device non utilisés.
+
+Le header qualifié est
+`33e7d05effce908532d21255e5e0efc4f8c7370d8a05a17dd761142d81bd4209`.
+Il est commun aux gates corrigées, micros et captures intégrées. Les
+sondes privées et intégrées ne sont pas confondues : leurs octets distincts
+sont conservés avec leurs propres fermetures source.
+
+## Captures et échecs conservés
+
+- `o2_r1` : échec de compilation du juge initial (`array-compare`), aucune
+  qualification de son header initial. Source `source/` conservée.
+- `o2_r2` : sept commandes fermées, compile strict puis gates nominale,
+  statique 1/4, rejet d'argument code2 et contrôle négatif de lancement code1.
+- `san_r2` : compilation réussie, exécution refusée par LeakSanitizer sous
+  ptrace. Le code1 n'est pas compté comme une gate réussie.
+- `san_replay_z21y3h9h` : même binaire et mêmes sources, cinq commandes
+  réussies selon leurs codes attendus, détection des fuites toujours activée.
+- `micro_r1` : six tours K1..10 appariées, n400/n1000, options 0/1/4.
+- `cmake_capture_r1` : configuration, compilation intégrée et 24 CTests
+  réussis ; selftests purs du worker normaux et Python `-O` identiques.
+- `cuda_capture_r1` : compilation **et édition de liens** de la sonde hybride
+  sur cible SM120 via l'adaptateur strict ; aucun binaire CUDA exécuté.
+
+Le contrôle `nominal_launch_guard` est le **contrôle négatif sans injection** :
+il attend à tort un échec de lancement sur le nominal, donc doit rendre code1.
+Il n'est ni une panne réelle du pool nominal ni un mutant tué. Les mutations
+indépendantes appartiennent à leur reçu séparé, pas à ce paquet.
+
+La gate privée compte 30 nuages, 124 ordres, 3324 coupes et 75 136
+comparaisons verticales. Son mode nominal fait 250 204 contrôles ; les modes
+statiques font 254 857 contrôles et 4498 contrôles physiques appariés, avec
+274 répétitions supprimées et 404 uniques résolus par semis. O2/SAN et 1/4
+threads concordent. **La gate nominale intégrée reste à 28 nuages**, 112
+ordres et 170 320 contrôles ; les modes statiques intégrés passent les 30
+nuages. Les journaux CTest bruts permettent de vérifier cette distinction.
+
+## Travail mesuré, pas de gain de latence qualifié
+
+Uniforme, seed3, coord65536, s8, un thread amont, tour K1..10 et verticales
+retenues. Un seul passage par configuration sur hôte partagé. Les payloads
+et le calendrier concordent pour 0/1/4 ; le travail géométrique statique est
+identique pour 1 et 4. Les durées/RSS brutes restent disponibles, sans
+statistique ni extrapolation vers les contrats 50k/G4.
+
+| n | MEB nominales | MEB statiques | Supports nominaux | Supports statiques | Capacité statique retenue échantillonnée, 1 thread |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 400 | 180 260 | 132 750 | 15 708 447 | 11 072 339 | 9 621 256 octets |
+| 1000 | 583 337 | 406 134 | 52 168 577 | 34 607 823 | 19 577 344 octets |
+
+Ces capacités ne sont ni le pic de réallocation, ni le RSS, ni un gain net
+de mémoire ; le cache nominal n'est pas répliqué dans la voie statique.
+Les tableaux `static_orders` excluent le travail K1 : leurs zéros à K1 ne
+signifient pas absence de représentants K1. Le quotient requêtes/uniques
+n'est pas un facteur de vitesse, puisque les semis/cache évitent déjà du
+travail et que les descentes peuvent demander plusieurs MEB.
+
+## Vérification et provenance
+
+Exécuter `python3 -B verify.py` et `python3 -B -O verify.py`. Le lecteur ne
+compile rien, ne lance aucun ELF et n'accède pas au réseau. Il vérifie
+sources avant/après, commandes et codes exacts, hashes des flux, non-vacuité,
+paires, compteurs, 24 CTests et compilation CUDA seule. Aucun `assert` ne
+porte une porte. Les objets `.source` sont dédupliqués par SHA256 ; les
+noms et octets logiques restent intégralement disponibles dans le manifeste.
+Aucun ELF ni en-tête vendor n'est distribué.
+
+Les scripts originaux de capture sont conservés sans modification. Les
+deux selftests worker ont réellement été exécutés, mais le manifeste
+original CMake ne couvrait pas leurs scripts `gcp-migration/` : leurs pins
+complémentaires sont donc explicitement **post-capture**, contrôlés égaux
+au contenu publié `ad7ffd28`. Ils servent à la reproduction, sans inventer
+une stabilité avant/après qui n'a pas été enregistrée. Les sources v7,
+elles, disposent bien des fermetures avant/après de chaque capture.
+
+Les fichiers CMake générés et `LastTest.log` sont copiés après fermeture de
+la capture, sans relancer de test. Les dépendances système/Boost/CUDA restent
+externes ; leurs chemins et options sont ceux des commandes originales.
+La publication de ce reçu n'exécute ni CPU géométrique, ni GPU, ni GCP.

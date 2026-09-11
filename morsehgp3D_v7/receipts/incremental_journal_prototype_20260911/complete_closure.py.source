@@ -1,0 +1,91 @@
+#!/usr/bin/env python3
+"""Retain initial reader failure and add only receipt-pinned missing sources."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+
+REPO = Path(__file__).resolve().parents[2]
+SOURCE = REPO / "build/v7_incremental_journal_20260911"
+TARGET = REPO / "morsehgp3D_v7/receipts/incremental_journal_prototype_20260911"
+REVIEW = Path(__file__).resolve().parent / "reader_r1"
+
+
+def need(condition, reason):
+    if not condition:
+        raise ValueError(reason)
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def main():
+    need(not (TARGET / "reader_review").exists() and not (TARGET / "closure_sources.json").exists(),
+         "refuse repeated closure completion")
+    initial_bytes = (REVIEW / "manifest_initial.json").read_bytes()
+    need(initial_bytes == (TARGET / "manifest.json").read_bytes(), "initial manifest changed")
+    initial = json.loads(initial_bytes)
+    for name, expected in initial["files"].items():
+        if name not in {"README.md", "verify.py"}:
+            data = (TARGET / name).read_bytes()
+            need(len(data) == expected["bytes"] and sha(data) == expected["sha256"], "initial file changed: " + name)
+    shutil.copytree(REVIEW, TARGET / "reader_review")
+    shutil.copy2(Path(__file__).resolve().parent / "capture_reader_failure.py",
+                 TARGET / "reader_review/capture_reader_failure.py.source")
+    shutil.copy2(TARGET / "storage_map.json", TARGET / "reader_review/storage_map_initial.json")
+    current_readme = (TARGET / "README.md").read_text()
+    start = current_readme.index("Il omettait les extensions")
+    end = current_readme.index("Le paquet stocke chaque contenu", start)
+    initial_readme = (current_readme[:start] + current_readme[end:]).encode()
+    need(sha(initial_readme) == initial["files"]["README.md"]["sha256"], "reconstructed initial README pin")
+    (TARGET / "reader_review/README_initial.md.source").write_bytes(initial_readme)
+
+    original = json.loads((SOURCE / "manifest.json").read_text())
+    mapping = json.loads((TARGET / "storage_map.json").read_text())
+    storage_for_hash = {entry["sha256"]: entry["storage"] for entry in mapping["files"].values()}
+    extras = {}
+    for name in ("o2_r2", "o2_r3", "san_r1", "san_r2", "additional_r1", "additional_r2", "additional_r3"):
+        receipt_name = name + "/receipt.json"
+        receipt = json.loads((SOURCE / receipt_name).read_text())
+        need(receipt["sources_stable"] and receipt["sources_before"] == receipt["sources_after"], "source stability")
+        for path, digest in receipt["sources_before"].items():
+            logical = name + "/source_snapshot/" + path
+            if logical in original["files"]:
+                continue
+            data = (SOURCE / logical).read_bytes()
+            need(sha(data) == digest and not data.startswith(b"\x7fELF"), "closure source pin: " + logical)
+            if digest not in storage_for_hash:
+                storage_for_hash[digest] = "objects/" + digest + ".source"
+                destination = TARGET / storage_for_hash[digest]
+                with destination.open("xb") as output:
+                    output.write(data)
+            extras[logical] = {"sha256": digest, "bytes": len(data),
+                               "capture_receipt": receipt_name, "source_path": path}
+            mapping["files"][logical] = {"sha256": digest, "bytes": len(data),
+                                          "storage": storage_for_hash[digest]}
+    need(len(extras) == 126 and len({entry["sha256"] for entry in extras.values()}) == 9,
+         "closure nonvacuity")
+    (TARGET / "closure_sources.json").write_text(json.dumps({
+        "schema": "mhgp7_recorded_source_closure_v1", "files": extras}, indent=2) + "\n")
+    (TARGET / "storage_map.json").write_text(json.dumps(mapping, indent=2) + "\n")
+    shutil.copy2(Path(__file__), TARGET / "complete_closure.py.source")
+    files = {}
+    for path in sorted(TARGET.rglob("*")):
+        if path.is_file() and path != TARGET / "manifest.json":
+            data = path.read_bytes()
+            files[path.relative_to(TARGET).as_posix()] = {"sha256": sha(data), "bytes": len(data)}
+    final = {**initial, "files": files, "logical_files": len(mapping["files"]),
+        "unique_stored_contents": len(storage_for_hash),
+        "stored_bytes_excluding_manifest": sum(row["bytes"] for row in files.values()),
+        "supplemented_receipt_pinned_sources": len(extras),
+        "initial_portable_manifest_sha256": sha(initial_bytes)}
+    data = (json.dumps(final, indent=2) + "\n").encode()
+    (TARGET / "manifest.json").write_bytes(data)
+    print(json.dumps({"manifest_sha256": sha(data), "physical_files": len(files) + 1,
+        "logical_files": len(mapping["files"]), "unique_stored_contents": len(storage_for_hash),
+        "stored_bytes": len(data) + final["stored_bytes_excluding_manifest"]}))
+
+
+if __name__ == "__main__":
+    main()

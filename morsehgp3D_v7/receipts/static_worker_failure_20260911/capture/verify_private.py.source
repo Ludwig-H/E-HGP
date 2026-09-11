@@ -1,0 +1,69 @@
+#!/usr/bin/env python3
+"""Read closed worker-failure captures; guards survive python -O."""
+import hashlib
+import json
+from pathlib import Path
+import sys
+
+HERE = Path(__file__).resolve().parent
+
+def need(ok, why):
+    if not ok:
+        raise ValueError(why)
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+def main():
+    modes = sys.argv[1:] or ['o2', 'san']
+    need(modes and len(set(modes)) == len(modes) and all(m in ('o2', 'san') for m in modes), 'build_modes')
+    summary = []
+    for mode in modes:
+        run = HERE / mode
+        receipt = json.loads((run / 'receipt.json').read_text())
+        need(receipt['status'] == 'passed' and receipt['test_only_hook'] and not receipt['GCP_used'], 'receipt_status')
+        need(receipt['header_original_sha256'] == '33e7d05effce908532d21255e5e0efc4f8c7370d8a05a17dd761142d81bd4209',
+             'original_header_identity')
+        before = json.loads((run / 'sources_before.json').read_text())
+        after = json.loads((run / 'sources_after.json').read_text())
+        need(before == after, 'sources_stable')
+        for name, digest in before.items():
+            need(sha(run / 'source' / name) == digest, 'current_frozen_source')
+        commands = json.loads((run / 'commands.json').read_text())
+        rows = {r['name']: r for r in commands}
+        need(len(rows) == len(commands) == (4 if mode == 'o2' else 2), 'command_count')
+        for row in commands:
+            need(row['exit_code'] == row['expected_exit_code'] and row['ended_ns'] >= row['started_ns'], 'closed_command')
+            for stream in ('stdout', 'stderr'):
+                need(sha(run / (row['name'] + '.' + stream)) == row[stream + '_sha256'], 'stream_pin')
+        need(rows['compile']['exit_code'] == 0 and '-Werror' in rows['compile']['argv'], 'strict_compile')
+        output = [json.loads(line) for line in (run / 'post_admission_and_reuse.stdout').read_text().splitlines()]
+        need(len(output) == 2 and output[0]['status'] == 'passed_post_admission_failure' and
+             output[0]['failed_runs'] == 2 and output[0]['retained_MEB_calls'] >= 2, 'real_worker_faults_paid')
+        need(output[1]['status'] == 'passed' and output[1]['rows'] == 2524 and output[1]['vertical'] == 1506 and
+             output[1]['requests'] == 354 and output[1]['unique'] == 219 and output[1]['seeded'] == 176,
+             'nominal_reuse_full_Gamma')
+        need(not (run / 'post_admission_and_reuse.stderr').read_text().strip(), 'nominal_clean_stderr')
+        if mode == 'san':
+            need('-fsanitize=address,undefined' in rows['compile']['argv'], 'sanitizers_enabled')
+        else:
+            need(rows['mutant_compile']['exit_code'] == 0 and rows['drop_paid_work']['exit_code'] == 1,
+                 'mutant_compiled_then_killed')
+            need((run / 'drop_paid_work.stderr').read_text().strip() == 'paid_worker_work_retained_after_failure',
+                 'exact_causal_mutant_reason')
+            mb = json.loads((run / 'mutant_before.json').read_text())
+            ma = json.loads((run / 'mutant_after.json').read_text())
+            need(mb == ma, 'mutant_stable')
+            for name, digest in mb.items():
+                need(sha(run / 'mutant_source' / name) == digest, 'current_mutant_pin')
+        for name in ('binary.sha256',) + (('mutant_binary.sha256',) if mode == 'o2' else ()):
+            executable = run / ('mutant_gate' if name.startswith('mutant') else 'gate')
+            if executable.exists():
+                need(sha(executable) == (run / name).read_text().strip(), 'binary_pin')
+        summary.append(dict(mode=mode, commands=len(commands), failed_runs=2,
+            retained_MEB_calls=output[0]['retained_MEB_calls'], nominal_Gamma_rows=2524))
+    print(json.dumps(dict(status='verified_post_admission_worker_failure', results=summary,
+        public_status='not_claimed', GCP_used=False)))
+
+if __name__ == '__main__':
+    main()

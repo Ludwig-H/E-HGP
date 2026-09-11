@@ -1,0 +1,221 @@
+#!/usr/bin/env python3
+"""One closed WSPD-factor run; frozen private binary, no operation ceiling."""
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import signal
+import subprocess
+import sys
+import time
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+ORIGINAL = ROOT / "build/v7_static_resolver_20260911"
+SOURCE = ORIGINAL / "probe_source"
+BINARY = ORIGINAL / "micro_r1/probe"
+BINARY_SHA = "f71f31190f5d50ac70f8332f969c6baa50549536bd08836702e6ba01ae7fcdce"
+HEADER_SHA = "33e7d05effce908532d21255e5e0efc4f8c7370d8a05a17dd761142d81bd4209"
+REFERENCE = ROOT / "build/v7_static_scale_20260911/n8000_s8_static4"
+CALENDAR_FIELDS = (
+    "nodes", "parent_refs", "contributions", "vertical_refs", "anchor_blocks",
+    "representatives", "singleton_lots", "grouped_lots", "lot_dsu_slots",
+    "lower_edges_indexed", "lower_nodes_activated", "lower_edges_activated",
+    "lower_queries", "lower_find_steps", "lower_path_writes",
+)
+MATCH_FIELDS = (
+    "schema", "status", "public_status", "backend", "contract_qualified", "n",
+    "kmax", "threads", "seed", "coord", "orders", "input_digest", "payload_digest",
+    "static_threads", "private_static_prototype", "resolver_cache_accounting",
+    "residence_accounting",
+) + CALENDAR_FIELDS
+
+
+def need(condition: bool, reason: str) -> None:
+    if not condition:
+        raise ValueError(reason)
+
+
+def sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def pins(path: Path) -> dict[str, str]:
+    return {p.relative_to(path).as_posix(): sha(p)
+            for p in sorted(path.rglob("*")) if p.is_file()}
+
+
+def write_json(path: Path, obj: object) -> None:
+    path.write_text(json.dumps(obj, indent=2, sort_keys=True) + "\n")
+
+
+def host() -> dict[str, object]:
+    values = {p: Path(p).read_text() for p in
+              ("/proc/loadavg", "/proc/meminfo", "/sys/fs/cgroup/cpu.max")}
+    values["affinity"] = sorted(os.sched_getaffinity(0))
+    values["time_ns"] = time.time_ns()
+    return values
+
+
+def progress(pid: int) -> list[dict[str, object]]:
+    result = []
+    pending = [pid]
+    while pending:
+        current = pending.pop()
+        try:
+            stat = Path(f"/proc/{current}/stat").read_text()
+            fields = stat[stat.rfind(")") + 2:].split()
+            result.append(dict(pid=current, state=fields[0], utime_ticks=int(fields[11]),
+                               stime_ticks=int(fields[12]), rss_pages=int(fields[21])))
+            pending.extend(int(p) for p in
+                           Path(f"/proc/{current}/task/{current}/children").read_text().split())
+        except (FileNotFoundError, ProcessLookupError):
+            pass
+    return result
+
+
+def compare(actual: dict, reference: dict, factor: int) -> dict:
+    need(actual["status"] == "completed_relative" and actual["orders"] == 10
+         and actual["contract_qualified"] is False
+         and actual["public_status"] == "not_claimed", "bounded_authority_ten_orders")
+    need(actual["s"] == factor and actual["n"] == 8000 and actual["threads"] == 1
+         and actual["static_threads"] == 4, "exact_configuration")
+    need(all(actual[name] == reference[name] for name in MATCH_FIELDS),
+         "output_calendar_or_input_divergence")
+    rows = actual["static_orders"]
+    need([r["K"] for r in rows] == list(range(1, 11)), "static_order_domain")
+    need(all(0 <= r["seeded_unique"] <= r["unique"] <= r["requests"] for r in rows),
+         "static_order_counts")
+    totals = {name: sum(r[name] for r in rows)
+              for name in ("requests", "unique", "seeded_unique")}
+    need(totals["requests"] > totals["unique"] > totals["seeded_unique"] > 0,
+         "nonvacuous_dedup_and_seed_route")
+    need(actual["anchor_hits"] == totals["unique"] - totals["seeded_unique"],
+         "static_initial_MEB_identity")
+    need(actual["resolver_meb_calls"] == actual["anchor_hits"] + actual["intruder_queries"],
+         "static_total_MEB_identity")
+    common = sorted(set(actual) & set(reference))
+    differences = {name: {"s8": reference[name], "current": actual[name]}
+                   for name in common if actual[name] != reference[name]}
+    return dict(s=factor, compared_fields=list(MATCH_FIELDS), output_calendar_matched=True,
+                static_orders_matched=actual["static_orders"] == reference["static_orders"],
+                static_totals=totals, all_common_field_differences=differences,
+                fields_only_current=sorted(set(actual) - set(reference)),
+                fields_only_reference=sorted(set(reference) - set(actual)),
+                upstream_invariance_assumed=False, shared_host=True,
+                timing_optimum_claim=False, contract_qualified=False)
+
+
+def main() -> None:
+    need(len(sys.argv) == 2 and sys.argv[1] in ("10", "12"), "factor_argument")
+    factor = int(sys.argv[1])
+    need(sha(BINARY) == BINARY_SHA
+         and (ORIGINAL / "micro_r1/binary.sha256").read_text().strip() == BINARY_SHA,
+         "closed_binary_pin")
+    need(json.loads((ORIGINAL / "micro_r1/receipt.json").read_text())["status"] == "passed",
+         "closed_original_micro")
+    before = pins(SOURCE)
+    need(before["morsehgp3D_v7/src/forest/full_ball_tower.hpp"] == HEADER_SHA,
+         "qualified_header")
+    frozen = HERE / "source"
+    if not frozen.exists():
+        shutil.copytree(SOURCE, frozen)
+        for name in ("commands.json", "receipt.json", "probe.d", "binary.sha256"):
+            shutil.copy2(ORIGINAL / "micro_r1" / name, HERE / ("original_micro_" + name))
+        for name in ("micro.py", "prepare.py"):
+            shutil.copy2(ORIGINAL / name, HERE / ("original_" + name))
+    need(pins(frozen) == before, "frozen_source_matches_original")
+    baseline = HERE / "reference_s8"
+    if not baseline.exists():
+        reference_receipt = json.loads((REFERENCE / "receipt.json").read_text())
+        need(reference_receipt["status"] == "completed"
+             and reference_receipt["sources_and_binary_stable"], "closed_s8_reference")
+        shutil.copytree(REFERENCE, baseline)
+        write_json(HERE / "reference_copy.json", dict(path=str(REFERENCE),
+                   copied_after_closure=True, original_pins=pins(REFERENCE)))
+    need(pins(baseline) == json.loads((HERE / "reference_copy.json").read_text())["original_pins"],
+         "closed_s8_copy_stable")
+    out = HERE / f"n8000_s{factor}_static4"
+    out.mkdir(exist_ok=False)
+    shutil.copy2(Path(__file__), out / "record.py.source")
+    write_json(out / "sources_before.json", before)
+    (out / "binary_before.sha256").write_text(sha(BINARY) + "\n")
+    write_json(out / "host_before.json", host())
+    argv = ["/usr/bin/time", "-v", str(BINARY), "--n=8000", f"--s={factor}",
+            "--kmax=10", "--threads=1", "--static-threads=4"]
+    started = time.time_ns()
+    intent = dict(argv=argv, started_ns=started, shared_host=True, GCP_used=False,
+                  algorithmic_timeout=None, reference_stdout_sha256=sha(baseline / "stdout"))
+    write_json(out / "intent.json", intent)
+    status = "failed"
+    error = None
+    code = None
+    proc = None
+    observations = []
+    try:
+        with (out / "stdout").open("wb") as stdout, (out / "stderr").open("wb") as stderr:
+            proc = subprocess.Popen(argv, stdout=stdout, stderr=stderr, start_new_session=True)
+            intent["owned_process_group"] = proc.pid
+            write_json(out / "intent.json", intent)
+            next_observation = 0.0
+            while proc.poll() is None:
+                if (out / "stop_request.json").exists():
+                    raise RuntimeError("explicit_operator_stop_request")
+                now = time.monotonic()
+                if now >= next_observation:
+                    stage_lines = [line for line in (out / "stderr").read_text().splitlines()
+                                   if line.startswith("stage_")]
+                    row = dict(time_ns=time.time_ns(), processes=progress(proc.pid),
+                               stage=stage_lines[-1] if stage_lines else "starting",
+                               stderr_bytes=(out / "stderr").stat().st_size)
+                    observations.append(row)
+                    write_json(out / "progress.json", observations)
+                    print(json.dumps(dict(s=factor, progress=row)), flush=True)
+                    next_observation = now + 30
+                time.sleep(1)
+            code = proc.returncode
+        write_json(out / "command.json", dict(argv=argv, started_ns=started,
+                   ended_ns=time.time_ns(), exit_code=code,
+                   stdout_sha256=sha(out / "stdout"), stderr_sha256=sha(out / "stderr")))
+        need(code == 0, "probe_nonzero_exit")
+        actual = json.loads((out / "stdout").read_text())
+        reference = json.loads((baseline / "stdout").read_text())
+        comparison = compare(actual, reference, factor)
+        write_json(out / "comparison.json", comparison)
+        print(json.dumps(dict(s=factor, status="completed", comparison=comparison)), flush=True)
+        status = "completed"
+    except BaseException as exc:
+        error = str(exc)
+    finally:
+        if proc is not None and proc.poll() is None:
+            # Terminate only the exact process group owned by this invocation.
+            os.killpg(proc.pid, signal.SIGTERM)
+            try:
+                proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                os.killpg(proc.pid, signal.SIGKILL)
+                proc.wait()
+            code = proc.returncode
+        if not (out / "command.json").exists():
+            write_json(out / "command.json", dict(argv=argv, started_ns=started,
+                       ended_ns=time.time_ns(), exit_code=code,
+                       stdout_sha256=sha(out / "stdout"), stderr_sha256=sha(out / "stderr")))
+        after = pins(SOURCE)
+        write_json(out / "sources_after.json", after)
+        (out / "binary_after.sha256").write_text(sha(BINARY) + "\n")
+        write_json(out / "host_after.json", host())
+        stable = before == after == pins(frozen) and sha(BINARY) == BINARY_SHA
+        if not stable:
+            status = "failed"
+            error = "source_or_binary_changed"
+        write_json(out / "receipt.json", dict(status=status, error=error,
+                   sources_and_binary_stable=stable, exit_code=code,
+                   public_status="not_claimed", GCP_used=False, shared_host=True))
+    need(status == "completed", error or "incomplete")
+
+
+if __name__ == "__main__":
+    main()

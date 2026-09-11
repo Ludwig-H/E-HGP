@@ -1,0 +1,29 @@
+{
+  "status": "failed_missing_closure_sources",
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/incremental_journal_prototype_20260911/verify.py"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "34caa85617c21e467237f084d7aabda4260790d1c7231cb1d3b4579e3f131baa",
+      "name": "normal"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v7/receipts/incremental_journal_prototype_20260911/verify.py"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "546811870c306b862cf18e3db52b943afc3da808035cd6412ba735f8e3bc7bc3",
+      "name": "optimized"
+    }
+  ],
+  "initial_manifest_sha256": "5689033a580ed623c930aec46262b20ad5abd8795f68cb4640115e52fc558b96"
+}

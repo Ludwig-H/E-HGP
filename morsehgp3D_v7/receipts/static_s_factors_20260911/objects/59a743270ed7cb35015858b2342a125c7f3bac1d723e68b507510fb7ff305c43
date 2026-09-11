@@ -1,0 +1,145 @@
+#!/usr/bin/env python3
+"""One closed local scale probe per invocation; no compiler, timeout or cloud."""
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import time
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+ORIGINAL = ROOT / 'build/v7_static_resolver_20260911'
+BINARY = ORIGINAL / 'micro_r1/probe'
+BINARY_SHA = 'f71f31190f5d50ac70f8332f969c6baa50549536bd08836702e6ba01ae7fcdce'
+REFERENCE = ROOT / 'morsehgp3D_v7/receipts/full_ball_scale_gpu_20260910'
+
+def need(ok: bool, reason: str) -> None:
+    if not ok:
+        raise ValueError(reason)
+
+def sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+def pins(path: Path) -> dict[str, str]:
+    return {p.relative_to(path).as_posix(): sha(p) for p in sorted(path.rglob('*')) if p.is_file()}
+
+def host() -> dict[str, object]:
+    values = {p: Path(p).read_text() for p in ('/proc/loadavg', '/proc/meminfo', '/sys/fs/cgroup/cpu.max')}
+    values['affinity'] = sorted(os.sched_getaffinity(0))
+    values['time_ns'] = time.time_ns()
+    return values
+
+def progress(pid: int) -> list[dict[str, object]]:
+    result = []
+    pending = [pid]
+    while pending:
+        current = pending.pop()
+        try:
+            stat = Path(f'/proc/{current}/stat').read_text()
+            fields = stat[stat.rfind(')')+2:].split()
+            result.append(dict(pid=current, state=fields[0], utime_ticks=int(fields[11]),
+                stime_ticks=int(fields[12]), rss_pages=int(fields[21])))
+            child = Path(f'/proc/{current}/task/{current}/children').read_text().split()
+            pending.extend(int(p) for p in child)
+        except (FileNotFoundError, ProcessLookupError):
+            pass
+    return result
+
+def main() -> None:
+    need(len(sys.argv) == 2 and sys.argv[1] in ('8000', '16000', '32000'), 'scale_fixture_argument')
+    n = int(sys.argv[1])
+    need(sha(BINARY) == BINARY_SHA and (ORIGINAL / 'micro_r1/binary.sha256').read_text().strip() == BINARY_SHA,
+         'closed_binary_pin')
+    need(json.loads((ORIGINAL / 'micro_r1/receipt.json').read_text())['status'] == 'passed', 'closed_micro_origin')
+    out = HERE / f'n{n}_s8_static4'
+    out.mkdir(exist_ok=False)
+    source = ORIGINAL / 'probe_source'
+    before = pins(source)
+    frozen = HERE / 'source'
+    if not frozen.exists():
+        shutil.copytree(source, frozen)
+        shutil.copy2(ORIGINAL / 'micro_r1/probe.d', HERE / 'original_compile.d')
+        shutil.copy2(ORIGINAL / 'micro_r1/commands.json', HERE / 'original_micro_commands.json')
+        shutil.copy2(ORIGINAL / 'micro_r1/receipt.json', HERE / 'original_micro_receipt.json')
+    need(pins(frozen) == before, 'frozen_source_matches_original')
+    shutil.copy2(Path(__file__), out / 'record.py.source')
+    (out / 'sources_before.json').write_text(json.dumps(before, indent=2, sort_keys=True) + '\n')
+    (out / 'binary_before.sha256').write_text(sha(BINARY) + '\n')
+    (out / 'host_before.json').write_text(json.dumps(host(), indent=2) + '\n')
+    baseline_file = REFERENCE / f'local/n{n}_s8.stdout'
+    shutil.copy2(baseline_file, out / 'reference.stdout')
+    (out / 'reference.json').write_text(json.dumps(dict(path=str(baseline_file), sha256=sha(baseline_file),
+        packet_manifest_sha256=sha(REFERENCE / 'manifest.json')), indent=2) + '\n')
+    argv = ['/usr/bin/time', '-v', str(BINARY), f'--n={n}', '--s=8', '--kmax=10', '--threads=1', '--static-threads=4']
+    started = time.time_ns()
+    intent = dict(argv=argv, started_ns=started, shared_host=True, GCP_used=False, algorithmic_timeout=None)
+    (out / 'intent.json').write_text(json.dumps(intent, indent=2) + '\n')
+    status = 'failed'; error = None; code = None; observations = []
+    try:
+        with (out / 'stdout').open('wb') as stdout, (out / 'stderr').open('wb') as stderr:
+            proc = subprocess.Popen(argv, stdout=stdout, stderr=stderr, start_new_session=True)
+            intent['owned_process_group'] = proc.pid
+            (out / 'intent.json').write_text(json.dumps(intent, indent=2) + '\n')
+            next_observation = 0.0
+            while proc.poll() is None:
+                now = time.monotonic()
+                if now >= next_observation:
+                    observations.append(dict(time_ns=time.time_ns(), processes=progress(proc.pid),
+                        stderr_bytes=(out / 'stderr').stat().st_size))
+                    (out / 'progress.json').write_text(json.dumps(observations, indent=2) + '\n')
+                    next_observation = now + 30
+                time.sleep(1)
+            code = proc.returncode
+        ended = time.time_ns()
+        (out / 'command.json').write_text(json.dumps(dict(argv=argv, started_ns=started, ended_ns=ended,
+            exit_code=code, stdout_sha256=sha(out / 'stdout'), stderr_sha256=sha(out / 'stderr')), indent=2) + '\n')
+        need(code == 0, 'probe_nonzero_exit')
+        actual = json.loads((out / 'stdout').read_text())
+        reference = json.loads((out / 'reference.stdout').read_text())
+        need(actual['status'] == 'completed_relative' and actual['contract_qualified'] is False and
+             actual['public_status'] == 'not_claimed' and actual['orders'] == 10, 'authority_and_ten_orders')
+        excluded = {'anchor_hits', 'intruder_queries', 'same_radius_steps', 'validation_meb_calls',
+                    'resolver_meb_calls', 'resolver_supports_tested'}
+        fields = sorted(k for k in reference if not (k.endswith('_s') or k.startswith('resolver_cache_') or k in excluded))
+        need(all(k in actual and actual[k] == reference[k] for k in fields), 'nonwork_reference_divergence')
+        need(actual['resolver_meb_calls'] == actual['anchor_hits'] + actual['intruder_queries'], 'physical_MEB_identity')
+        need(actual['static_threads'] == 4 and actual['threads'] == 1 and actual['s'] == 8 and actual['n'] == n,
+             'configuration_exact')
+        rows = actual['static_orders']
+        need(len(rows) == 10 and [r['K'] for r in rows] == list(range(1,11)), 'static_all_orders')
+        need(all(0 <= r['seeded_unique'] <= r['unique'] <= r['requests'] for r in rows), 'static_count_order')
+        requests = sum(r['requests'] for r in rows); unique = sum(r['unique'] for r in rows)
+        seeded = sum(r['seeded_unique'] for r in rows)
+        need(requests > unique > seeded > 0 and actual['resolver_meb_calls'] > 0, 'nonvacuous_static_route')
+        summary = dict(n=n, fields_compared=fields, all_nonwork_fields_matched=True,
+            input_digest=actual['input_digest'], payload_digest=actual['payload_digest'], requests=requests,
+            unique_facets=unique, seeded_unique=seeded, nodes=actual['nodes'],
+            total_s=actual['total_s'], tower_s=actual['tower_s'],
+            meb_calls=actual['resolver_meb_calls'], reference_meb_calls=reference['resolver_meb_calls'],
+            exact_supports=actual['resolver_supports_tested'], reference_exact_supports=reference['resolver_supports_tested'],
+            sampled_retained_capacity=actual['static_sampled_retained_capacity_peak_bytes'],
+            shared_host=True, timing_speedup_claim=False, contract_qualified=False)
+        (out / 'comparison.json').write_text(json.dumps(summary, indent=2) + '\n')
+        print(json.dumps(summary), flush=True)
+        status = 'completed'
+    except Exception as exc:
+        error = str(exc)
+    finally:
+        after = pins(source)
+        (out / 'sources_after.json').write_text(json.dumps(after, indent=2, sort_keys=True) + '\n')
+        (out / 'binary_after.sha256').write_text(sha(BINARY) + '\n')
+        (out / 'host_after.json').write_text(json.dumps(host(), indent=2) + '\n')
+        stable = before == after == pins(frozen) and sha(BINARY) == BINARY_SHA
+        if not stable:
+            status = 'failed'; error = 'source_or_binary_changed'
+        (out / 'receipt.json').write_text(json.dumps(dict(status=status, error=error, sources_and_binary_stable=stable,
+            exit_code=code, public_status='not_claimed', GCP_used=False, shared_host=True), indent=2) + '\n')
+    need(status == 'completed', error or 'incomplete')
+
+if __name__ == '__main__':
+    main()

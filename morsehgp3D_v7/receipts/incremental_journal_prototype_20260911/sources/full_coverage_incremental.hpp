@@ -1,0 +1,189 @@
+// PRIVATE prototype. Not connected to full_ball_tower or a public producer.
+#pragma once
+
+#include "full_coverage_certificate.hpp"
+
+namespace mhgp7::full_coverage_detail {
+
+inline constexpr const char* kIncrementalCoverageArenaAccounting =
+    "amortized_vector_growth_v1";
+
+class CoverageTowerAssembler;
+struct CoverageOwnerIdentity {};
+class CoverageOrderToken {
+ public:
+  CoverageOrderToken() = default;
+ private:
+  friend class CoverageTowerAssembler;
+  // A token keeps the identity allocation alive, avoiding stale-token/address
+  // reuse. It never borrows population rows or grants access to mutable state.
+  std::shared_ptr<const CoverageOwnerIdentity> owner_;
+  size_t slot_ = 0;
+};
+struct CoverageOrderResult {
+  FullCertificateStatus status = FullCertificateStatus::kInvalidInput;
+  const char* reason = "coverage_invalid_input";
+  CoverageOrderToken token;
+};
+struct CoveragePopulationAppendResult {
+  FullCertificateStatus status = FullCertificateStatus::kInvalidInput;
+  const char* reason = "coverage_invalid_input";
+  u64 population = kFullCoverageAbsent;
+};
+struct CoverageTowerBuildResult {
+  FullCertificateStatus status = FullCertificateStatus::kInvalidInput;
+  const char* reason = "coverage_invalid_input";
+  std::shared_ptr<const FullCoveragePopulations> populations;
+  std::vector<FullCoverageCertificate> orders;
+};
+
+// A unique append-only population owner. No mutable row alias is exposed,
+// including across reallocations. All orders seal together on this exact bank;
+// there is deliberately no API accepting a replacement bank or sealing token.
+class CoverageTowerAssembler {
+ public:
+  explicit CoverageTowerAssembler(std::span<const PointId> domain) noexcept {
+    try {
+      owner_ = std::make_shared<CoverageOwnerIdentity>();
+      domain_.assign(domain.begin(), domain.end());
+    } catch (const std::bad_alloc&) {
+      fail("coverage_allocation_failed", FullCertificateStatus::kResourceExhausted);
+    } catch (const std::length_error&) {
+      fail("coverage_size_overflow", FullCertificateStatus::kResourceExhausted);
+    }
+  }
+  CoverageTowerAssembler(const CoverageTowerAssembler&) = delete;
+  CoverageTowerAssembler& operator=(const CoverageTowerAssembler&) = delete;
+  CoverageTowerAssembler(CoverageTowerAssembler&&) = delete;
+  CoverageTowerAssembler& operator=(CoverageTowerAssembler&&) = delete;
+
+  CoveragePopulationAppendResult append_population(const FullCoveragePopulation& row) {
+    if (!open()) return {status_, reason_};
+    try {
+      if (rows_.size() == kFullCoverageAbsent)
+        return population_failure("coverage_size_overflow", FullCertificateStatus::kResourceExhausted);
+      const auto id = static_cast<u64>(rows_.size());
+      rows_.push_back(row);
+      return {FullCertificateStatus::kOk, "structural_only", id};
+    } catch (const std::bad_alloc&) {
+      return population_failure("coverage_allocation_failed", FullCertificateStatus::kResourceExhausted);
+    } catch (const std::length_error&) {
+      return population_failure("coverage_size_overflow", FullCertificateStatus::kResourceExhausted);
+    }
+  }
+
+  CoverageOrderResult begin_order(unsigned order) {
+    if (!open()) return {status_, reason_, {}};
+    if (order < 1 || order > kFacetMaxK || domain_.size() < order) {
+      fail("coverage_invalid_domain"); return {status_, reason_, {}};
+    }
+    try {
+      const auto slot = states_.size();
+      states_.emplace_back(order);
+      CoverageOrderToken token; token.owner_ = owner_; token.slot_ = slot;
+      return {FullCertificateStatus::kOk, "structural_only", std::move(token)};
+    } catch (const std::bad_alloc&) {
+      fail("coverage_allocation_failed", FullCertificateStatus::kResourceExhausted);
+    } catch (const std::length_error&) {
+      fail("coverage_size_overflow", FullCertificateStatus::kResourceExhausted);
+    }
+    return {status_, reason_, {}};
+  }
+
+  CoverageAppendResult append_batch(const CoverageOrderToken& token,
+      const ExactLevel& level, std::span<const CoverageActionView> actions) {
+    return append<CoverageActionView>(token, level, actions);
+  }
+  CoverageAppendResult append_batch(const CoverageOrderToken& token,
+      const FullCoverageBatch& batch) {
+    return append<FullCoverageAction>(token, batch.level, batch.actions);
+  }
+  CoverageAppendResult end_order(const CoverageOrderToken& token) {
+    if (!valid(token)) return {status_, reason_};
+    const auto result = states_[token.slot_].close();
+    if (result.status != FullCertificateStatus::kOk) fail(result.reason, result.status);
+    return result;
+  }
+
+  CoverageTowerBuildResult seal() {
+    const auto rejected = [this]() {
+      CoverageTowerBuildResult result; result.status = status_; result.reason = reason_;
+      return result;
+    };
+    if (!open()) return rejected();
+    if (states_.empty()) { fail("coverage_invalid_domain"); return rejected(); }
+    for (auto& state : states_) {
+      if (!state.closed_) {
+        const auto closed = state.close();
+        if (closed.status != FullCertificateStatus::kOk) {
+          fail(closed.reason, closed.status); return rejected();
+        }
+      }
+    }
+    // Full validation includes EVERY row, even rows never referenced by a lot.
+    // build_full_coverage_populations copies to immutable storage; adoption by
+    // move and immutable-bank allocation reduction are deliberately separate.
+    auto bank = build_full_coverage_populations(domain_, rows_);
+    if (bank.status != FullCertificateStatus::kOk) {
+      fail(bank.reason, bank.status); return rejected();
+    }
+    try {
+      CoverageTowerBuildResult result;
+      // One final reserve, not reserve(size+delta) at each lot. Subsequent
+      // publication uses noexcept moves only and cannot leak an earlier order.
+      result.orders.reserve(states_.size());
+      for (auto& state : states_) result.orders.push_back(state.publish(bank.value));
+      result.populations = std::move(bank.value);
+      result.status = FullCertificateStatus::kOk; result.reason = "structural_only";
+      sealed_ = true;
+      std::vector<FullCoveragePopulation>().swap(rows_);
+      std::vector<PointId>().swap(domain_);
+      std::vector<CoverageJournalState>().swap(states_);
+      return result;
+    } catch (const std::bad_alloc&) {
+      fail("coverage_allocation_failed", FullCertificateStatus::kResourceExhausted);
+    } catch (const std::length_error&) {
+      fail("coverage_size_overflow", FullCertificateStatus::kResourceExhausted);
+    }
+    return rejected();
+  }
+
+ private:
+  bool open() {
+    if (status_ != FullCertificateStatus::kOk) return false;
+    if (sealed_) { fail("coverage_tower_closed"); return false; }
+    return true;
+  }
+  bool valid(const CoverageOrderToken& token) {
+    if (!open()) return false;
+    if (!token.owner_ || token.owner_ != owner_ || token.slot_ >= states_.size()) {
+      fail("coverage_wrong_owner"); return false;
+    }
+    return true;
+  }
+  void fail(const char* reason,
+      FullCertificateStatus status = FullCertificateStatus::kInvalidInput) {
+    status_ = status; reason_ = reason;
+  }
+  CoveragePopulationAppendResult population_failure(const char* reason, FullCertificateStatus status) {
+    fail(reason, status); return {status_, reason_};
+  }
+  template <class Action>
+  CoverageAppendResult append(const CoverageOrderToken& token, const ExactLevel& level,
+      std::span<const Action> actions) {
+    if (!valid(token)) return {status_, reason_};
+    // Fresh spans on each call, never retained after an append or reallocation.
+    const auto result = states_[token.slot_].append<Action>(level, actions, domain_, rows_);
+    if (result.status != FullCertificateStatus::kOk) fail(result.reason, result.status);
+    return result;
+  }
+  std::shared_ptr<const CoverageOwnerIdentity> owner_;
+  std::vector<PointId> domain_;
+  std::vector<FullCoveragePopulation> rows_;
+  std::vector<CoverageJournalState> states_;
+  FullCertificateStatus status_ = FullCertificateStatus::kOk;
+  const char* reason_ = "structural_only";
+  bool sealed_ = false;
+};
+
+}  // namespace mhgp7::full_coverage_detail

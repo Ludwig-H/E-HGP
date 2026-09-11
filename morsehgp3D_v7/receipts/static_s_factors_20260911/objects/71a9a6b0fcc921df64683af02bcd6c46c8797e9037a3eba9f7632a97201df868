@@ -1,0 +1,17 @@
+{
+  "status": "failed",
+  "exit_code": 1,
+  "scope": "post_run_metadata_only",
+  "authority": "operator_transcription_of_exec_result",
+  "tool_chunk": "1fb37e",
+  "scientific_capture_affected": false,
+  "error": "FileNotFoundError: static_resolution_cpu_20260911/manifest.json; actual filename is logical_manifest.json",
+  "original_script_sha256": "97ff8f871c9191fd19ec8da361d4a86915d73bfafa12ebb91bd8d4efeca4a071",
+  "original_partial_files": [
+    "original_micro_sources_before.json",
+    "original_micro_sources_after.json",
+    "original_micro_compile.stdout",
+    "original_micro_compile.stderr",
+    "boost_package.json"
+  ]
+}

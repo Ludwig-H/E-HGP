@@ -1,0 +1,13 @@
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/paired_baseline_gate.cpp: In function ‘void {anonymous}::paired(unsigned int, const std::vector<unsigned int, std::allocator<unsigned int> >&, const std::vector<mhgp7::FullCoveragePopulation>&, const std::vector<mhgp7::FullCoverageBatch>&)’:
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/paired_baseline_gate.cpp:29:58: error: invalid array assignment
+   29 |     baseline::FullCoverageBatch copied; copied.level.num = batch.level.num; copied.level.den = batch.level.den;
+      |                                         ~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/paired_baseline_gate.cpp:68:22: error: comparison between two arrays is deprecated in C++20 [-Werror=array-compare]
+   68 |     need(x.level.num == y.level.num && x.level.den == y.level.den &&
+      |          ~~~~~~~~~~~~^~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/paired_baseline_gate.cpp:68:22: note: use unary ‘+’ which decays operands to pointers or ‘&(x.mhgp7::FullNode::level.mhgp7::ExactLevel::num)[0] == &(y.mhgp7::FullNode::level.mhgp7::ExactLevel::num)[0]’ to compare the addresses
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/paired_baseline_gate.cpp:75:22: error: comparison between two arrays is deprecated in C++20 [-Werror=array-compare]
+   75 |     need(x.level.num == y.level.num && x.level.den == y.level.den && x.segment == y.segment &&
+      |          ~~~~~~~~~~~~^~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_incremental_journal_20260911/paired_baseline_gate.cpp:75:22: note: use unary ‘+’ which decays operands to pointers or ‘&(x.mhgp7_baseline::FullDatedContribution::level.mhgp7::ExactLevel::num)[0] == &(y.mhgp7::FullDatedContribution::level.mhgp7::ExactLevel::num)[0]’ to compare the addresses
+cc1plus: all warnings being treated as errors

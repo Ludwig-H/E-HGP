@@ -1,0 +1,60 @@
+{
+  "status": "passed",
+  "commands": [
+    {
+      "name": "normal",
+      "argv": [
+        "python3",
+        "-B",
+        "/workspaces/E-HGP/build/v7_static_s_factors_20260911/verify.py"
+      ],
+      "started_ns": 1789111830864716887,
+      "ended_ns": 1789111830931660799,
+      "exit_code": 0,
+      "stdout_sha256": "78555c507226e5e587cb1fd6c5e2a033cb97815ddd6c8fc8a1aa3d2b205af84e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "optimized",
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v7_static_s_factors_20260911/verify.py"
+      ],
+      "started_ns": 1789111830932039782,
+      "ended_ns": 1789111831019977658,
+      "exit_code": 0,
+      "stdout_sha256": "78555c507226e5e587cb1fd6c5e2a033cb97815ddd6c8fc8a1aa3d2b205af84e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "faults_normal",
+      "argv": [
+        "python3",
+        "-B",
+        "/workspaces/E-HGP/build/v7_static_s_factors_20260911/reader_cases.py"
+      ],
+      "started_ns": 1789111831020260478,
+      "ended_ns": 1789111831369246562,
+      "exit_code": 0,
+      "stdout_sha256": "fe444ac36b400c095689646fafa22b0aeb672c3e83331f28f57f370d0a99490c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "faults_optimized",
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v7_static_s_factors_20260911/reader_cases.py"
+      ],
+      "started_ns": 1789111831369535121,
+      "ended_ns": 1789111831701558211,
+      "exit_code": 0,
+      "stdout_sha256": "fe444ac36b400c095689646fafa22b0aeb672c3e83331f28f57f370d0a99490c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "Cpp_producer_mutants": false
+}

@@ -1,0 +1,92 @@
+#!/usr/bin/env python3
+"""Create-only, lossless content deduplication of the sealed private packet."""
+import hashlib
+import json
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[2]
+SOURCE = REPO / "build/v7_incremental_journal_20260911"
+TARGET = REPO / "morsehgp3D_v7/receipts/incremental_journal_prototype_20260911"
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def need(condition, reason):
+    if not condition:
+        raise ValueError(reason)
+
+
+def write_new(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("xb") as output:
+        output.write(data)
+
+
+def main():
+    need({p.name for p in TARGET.iterdir()} == {"README.md", "verify.py"},
+         "publication target is not the fresh README/reader skeleton")
+    original_bytes = (SOURCE / "manifest.json").read_bytes()
+    original = json.loads(original_bytes)
+    need(original["schema"] == "private_incremental_journal_v1" and
+         original["gcp_used"] is False, "private manifest schema")
+    selected = dict(original["files"])
+    selected["manifest.json"] = {"sha256": sha(original_bytes), "bytes": len(original_bytes)}
+    preferred = {
+        "manifest.json": "capture_manifest.json",
+        "README.md": "README_original.md.source",
+        "verify.py": "reader_original.py.source",
+        "delta.patch": "delta.patch",
+        "variant/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp": "sources/full_coverage_certificate.hpp",
+        "variant/morsehgp3D_v7/src/forest/full_coverage_incremental.hpp": "sources/full_coverage_incremental.hpp",
+        "baseline/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp": "sources/baseline_full_coverage_certificate.hpp.source",
+        "incremental_gate.cpp": "sources/incremental_gate.cpp",
+        "paired_baseline_gate.cpp": "sources/paired_baseline_gate.cpp",
+        "record.py": "sources/record.py.source",
+        "record_additional.py": "sources/record_additional.py.source",
+        "record_mutants.py": "sources/record_mutants.py.source",
+    }
+    for capture in ("o2_r1", "o2_r2", "o2_r3", "san_r1", "san_r2",
+                    "additional_r1", "additional_r2", "additional_r3", "additional_r3_mutants"):
+        preferred[capture + "/receipt.json"] = "captures/" + capture + ".json"
+    storage_for_hash = {}
+    mapping = {}
+    for name in [*preferred, *(name for name in sorted(selected) if name not in preferred)]:
+        need(name in selected, "unknown preferred source: " + name)
+        path = SOURCE / name
+        need(path.is_file() and not path.is_symlink(), "missing/symlink source: " + name)
+        data = path.read_bytes()
+        expected = selected[name]
+        digest = sha(data)
+        need(len(data) == expected["bytes"] and digest == expected["sha256"],
+             "private source changed: " + name)
+        need(not data.startswith(b"\x7fELF"), "ELF prohibited: " + name)
+        if digest not in storage_for_hash:
+            storage = preferred.get(name, "objects/" + digest + ".source")
+            storage_for_hash[digest] = storage
+            write_new(TARGET / storage, data)
+        mapping[name] = {"storage": storage_for_hash[digest], **expected}
+    write_new(TARGET / "storage_map.json", (json.dumps({
+        "schema": "mhgp7_logical_to_dedup_source_v1", "files": mapping}, indent=2) + "\n").encode())
+    write_new(TARGET / "publish.py.source", Path(__file__).read_bytes())
+    files = {}
+    for path in sorted(TARGET.rglob("*")):
+        if path.is_file():
+            data = path.read_bytes()
+            files[path.relative_to(TARGET).as_posix()] = {"sha256": sha(data), "bytes": len(data)}
+    manifest = {"schema": "mhgp7_portable_incremental_journal_v1",
+        "source_commit": original["source_commit"], "public_status": "not_claimed", "gcp_used": False,
+        "authority": "private_structural_journals_not_connected_to_full",
+        "original_manifest_sha256": sha(original_bytes), "files": files,
+        "logical_files": len(mapping), "unique_stored_contents": len(storage_for_hash),
+        "stored_bytes_excluding_manifest": sum(entry["bytes"] for entry in files.values())}
+    output = (json.dumps(manifest, indent=2) + "\n").encode()
+    write_new(TARGET / "manifest.json", output)
+    print(json.dumps({"manifest_sha256": sha(output), "logical_files": len(mapping),
+                      "unique_stored_contents": len(storage_for_hash), "physical_files": len(files) + 1,
+                      "stored_bytes": len(output) + manifest["stored_bytes_excluding_manifest"]}))
+
+
+if __name__ == "__main__":
+    main()

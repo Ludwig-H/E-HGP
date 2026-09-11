@@ -1,0 +1,444 @@
+{
+  "public_status": "not_claimed",
+  "shared_host": true,
+  "measurements": [
+    {
+      "n": 400,
+      "static_threads": 0,
+      "input_digest": "0d496e1b4f7056f36b112c2b3e305c4bcea5c85061fbfcf24afd478c4202684d",
+      "payload_digest": "62d03d3ad15aa90b33112eca981645d4aaa4426d4348335d1339eb9245f98bad",
+      "resolver_meb_calls": 180260,
+      "resolver_supports_tested": 15708447,
+      "tower_s": 10.187581473,
+      "total_s": 21.745391551,
+      "static_sampled_retained_capacity_peak_bytes": 0,
+      "static_orders": [
+        {
+          "K": 1,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        },
+        {
+          "K": 2,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        },
+        {
+          "K": 3,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        },
+        {
+          "K": 4,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        },
+        {
+          "K": 5,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        },
+        {
+          "K": 6,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        },
+        {
+          "K": 7,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        },
+        {
+          "K": 8,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        },
+        {
+          "K": 9,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        },
+        {
+          "K": 10,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        }
+      ]
+    },
+    {
+      "n": 400,
+      "static_threads": 1,
+      "input_digest": "0d496e1b4f7056f36b112c2b3e305c4bcea5c85061fbfcf24afd478c4202684d",
+      "payload_digest": "62d03d3ad15aa90b33112eca981645d4aaa4426d4348335d1339eb9245f98bad",
+      "resolver_meb_calls": 132750,
+      "resolver_supports_tested": 11072339,
+      "tower_s": 5.795464421,
+      "total_s": 14.83868159,
+      "static_sampled_retained_capacity_peak_bytes": 9621256,
+      "static_orders": [
+        {
+          "K": 1,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        },
+        {
+          "K": 2,
+          "requests": 6508,
+          "unique": 1958,
+          "seeded_unique": 1332
+        },
+        {
+          "K": 3,
+          "requests": 11898,
+          "unique": 4587,
+          "seeded_unique": 2565
+        },
+        {
+          "K": 4,
+          "requests": 18563,
+          "unique": 8036,
+          "seeded_unique": 4203
+        },
+        {
+          "K": 5,
+          "requests": 26498,
+          "unique": 12251,
+          "seeded_unique": 6133
+        },
+        {
+          "K": 6,
+          "requests": 35385,
+          "unique": 17059,
+          "seeded_unique": 8380
+        },
+        {
+          "K": 7,
+          "requests": 44985,
+          "unique": 22420,
+          "seeded_unique": 10800
+        },
+        {
+          "K": 8,
+          "requests": 55323,
+          "unique": 28368,
+          "seeded_unique": 13409
+        },
+        {
+          "K": 9,
+          "requests": 66331,
+          "unique": 34724,
+          "seeded_unique": 16175
+        },
+        {
+          "K": 10,
+          "requests": 78572,
+          "unique": 41826,
+          "seeded_unique": 19120
+        }
+      ]
+    },
+    {
+      "n": 400,
+      "static_threads": 4,
+      "input_digest": "0d496e1b4f7056f36b112c2b3e305c4bcea5c85061fbfcf24afd478c4202684d",
+      "payload_digest": "62d03d3ad15aa90b33112eca981645d4aaa4426d4348335d1339eb9245f98bad",
+      "resolver_meb_calls": 132750,
+      "resolver_supports_tested": 11072339,
+      "tower_s": 5.921097667,
+      "total_s": 17.422178516,
+      "static_sampled_retained_capacity_peak_bytes": 9623824,
+      "static_orders": [
+        {
+          "K": 1,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        },
+        {
+          "K": 2,
+          "requests": 6508,
+          "unique": 1958,
+          "seeded_unique": 1332
+        },
+        {
+          "K": 3,
+          "requests": 11898,
+          "unique": 4587,
+          "seeded_unique": 2565
+        },
+        {
+          "K": 4,
+          "requests": 18563,
+          "unique": 8036,
+          "seeded_unique": 4203
+        },
+        {
+          "K": 5,
+          "requests": 26498,
+          "unique": 12251,
+          "seeded_unique": 6133
+        },
+        {
+          "K": 6,
+          "requests": 35385,
+          "unique": 17059,
+          "seeded_unique": 8380
+        },
+        {
+          "K": 7,
+          "requests": 44985,
+          "unique": 22420,
+          "seeded_unique": 10800
+        },
+        {
+          "K": 8,
+          "requests": 55323,
+          "unique": 28368,
+          "seeded_unique": 13409
+        },
+        {
+          "K": 9,
+          "requests": 66331,
+          "unique": 34724,
+          "seeded_unique": 16175
+        },
+        {
+          "K": 10,
+          "requests": 78572,
+          "unique": 41826,
+          "seeded_unique": 19120
+        }
+      ]
+    },
+    {
+      "n": 1000,
+      "static_threads": 0,
+      "input_digest": "bda80cf806ac9af37ee5cd79103dad4432b2355e47248960dcc0cd5d54e677d1",
+      "payload_digest": "1040c1be04a90dbb11982e9f78b6034e9695b6e69f3746bc47d291a03d1924cc",
+      "resolver_meb_calls": 583337,
+      "resolver_supports_tested": 52168577,
+      "tower_s": 30.708471917,
+      "total_s": 67.869574218,
+      "static_sampled_retained_capacity_peak_bytes": 0,
+      "static_orders": [
+        {
+          "K": 1,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        },
+        {
+          "K": 2,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        },
+        {
+          "K": 3,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        },
+        {
+          "K": 4,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        },
+        {
+          "K": 5,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        },
+        {
+          "K": 6,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        },
+        {
+          "K": 7,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        },
+        {
+          "K": 8,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        },
+        {
+          "K": 9,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        },
+        {
+          "K": 10,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        }
+      ]
+    },
+    {
+      "n": 1000,
+      "static_threads": 1,
+      "input_digest": "bda80cf806ac9af37ee5cd79103dad4432b2355e47248960dcc0cd5d54e677d1",
+      "payload_digest": "1040c1be04a90dbb11982e9f78b6034e9695b6e69f3746bc47d291a03d1924cc",
+      "resolver_meb_calls": 406134,
+      "resolver_supports_tested": 34607823,
+      "tower_s": 26.080433584,
+      "total_s": 68.757262805,
+      "static_sampled_retained_capacity_peak_bytes": 19577344,
+      "static_orders": [
+        {
+          "K": 1,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        },
+        {
+          "K": 2,
+          "requests": 18005,
+          "unique": 5289,
+          "seeded_unique": 3494
+        },
+        {
+          "K": 3,
+          "requests": 33492,
+          "unique": 12614,
+          "seeded_unique": 7095
+        },
+        {
+          "K": 4,
+          "requests": 53012,
+          "unique": 22572,
+          "seeded_unique": 11789
+        },
+        {
+          "K": 5,
+          "requests": 76251,
+          "unique": 34887,
+          "seeded_unique": 17433
+        },
+        {
+          "K": 6,
+          "requests": 102996,
+          "unique": 49521,
+          "seeded_unique": 23996
+        },
+        {
+          "K": 7,
+          "requests": 132655,
+          "unique": 66448,
+          "seeded_unique": 31373
+        },
+        {
+          "K": 8,
+          "requests": 165409,
+          "unique": 85199,
+          "seeded_unique": 39408
+        },
+        {
+          "K": 9,
+          "requests": 201739,
+          "unique": 106150,
+          "seeded_unique": 48299
+        },
+        {
+          "K": 10,
+          "requests": 241066,
+          "unique": 129019,
+          "seeded_unique": 58049
+        }
+      ]
+    },
+    {
+      "n": 1000,
+      "static_threads": 4,
+      "input_digest": "bda80cf806ac9af37ee5cd79103dad4432b2355e47248960dcc0cd5d54e677d1",
+      "payload_digest": "1040c1be04a90dbb11982e9f78b6034e9695b6e69f3746bc47d291a03d1924cc",
+      "resolver_meb_calls": 406134,
+      "resolver_supports_tested": 34607823,
+      "tower_s": 17.139776812,
+      "total_s": 51.339738729,
+      "static_sampled_retained_capacity_peak_bytes": 19579912,
+      "static_orders": [
+        {
+          "K": 1,
+          "requests": 0,
+          "unique": 0,
+          "seeded_unique": 0
+        },
+        {
+          "K": 2,
+          "requests": 18005,
+          "unique": 5289,
+          "seeded_unique": 3494
+        },
+        {
+          "K": 3,
+          "requests": 33492,
+          "unique": 12614,
+          "seeded_unique": 7095
+        },
+        {
+          "K": 4,
+          "requests": 53012,
+          "unique": 22572,
+          "seeded_unique": 11789
+        },
+        {
+          "K": 5,
+          "requests": 76251,
+          "unique": 34887,
+          "seeded_unique": 17433
+        },
+        {
+          "K": 6,
+          "requests": 102996,
+          "unique": 49521,
+          "seeded_unique": 23996
+        },
+        {
+          "K": 7,
+          "requests": 132655,
+          "unique": 66448,
+          "seeded_unique": 31373
+        },
+        {
+          "K": 8,
+          "requests": 165409,
+          "unique": 85199,
+          "seeded_unique": 39408
+        },
+        {
+          "K": 9,
+          "requests": 201739,
+          "unique": 106150,
+          "seeded_unique": 48299
+        },
+        {
+          "K": 10,
+          "requests": 241066,
+          "unique": 129019,
+          "seeded_unique": 58049
+        }
+      ]
+    }
+  ]
+}

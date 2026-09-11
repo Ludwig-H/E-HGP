@@ -1,0 +1,5 @@
+In file included from baseline/morsehgp3D_v7/tests/full_ball_tower_gate.cpp:14:
+baseline/morsehgp3D_v7/tests/../oracle/local_plateau_oracle.hpp:6:10: fatal error: boost/multiprecision/cpp_int.hpp: No such file or directory
+    6 | #include <boost/multiprecision/cpp_int.hpp>
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+compilation terminated.

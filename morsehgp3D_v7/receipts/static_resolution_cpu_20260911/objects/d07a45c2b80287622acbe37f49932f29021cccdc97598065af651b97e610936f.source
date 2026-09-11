@@ -1,0 +1,23 @@
+[
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/static_resolution_cpu_20260911/verify.py"
+    ],
+    "started_ns": 1789110595471356150,
+    "ended_ns": 1789110595838379537,
+    "exit_code": 1
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/morsehgp3D_v7/receipts/static_resolution_cpu_20260911/verify.py"
+    ],
+    "started_ns": 1789110595838605303,
+    "ended_ns": 1789110595987708106,
+    "exit_code": 1
+  }
+]

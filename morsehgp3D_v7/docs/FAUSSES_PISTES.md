@@ -1,12 +1,15 @@
 # Fausses pistes et décisions écartées
 
-10 septembre 2026. `public_status=not_claimed`. Cette note garde les raisons
+11 septembre 2026. `public_status=not_claimed`. Cette note garde les raisons
 des abandons et corrections sans encombrer les entrées actives. Une piste
 non encore qualifiée n'est pas, à elle seule, une fausse piste.
 
 | Idée écartée ou corrigée | Pourquoi ; décision retenue |
 | --- | --- |
 | Mémoriser seulement le hash d'une facette ou son ancienne racine | Une collision n'identifie pas une facette ; une racine historique peut déjà avoir fusionné. Comparer la clé complète et normaliser chaque hit au pré-lot courant. [Cache qualifié](OPTIMISATIONS_CACHE_ET_GPU_20260910.md) |
+| Utiliser toute clé du census comme ancre statique à tous les ordres | La présence globale ne garantit pas l'admission à K. Vérifier l'intervalle de rang et la naissance strictement antérieure, puis lire l'ancre fermée et sa racine pré-lot. [Voie statique](RESOLUTION_STATIQUE_CPU_20260911.md) |
+| Assimiler 50 % de doublons de représentants à un facteur deux de vitesse | À 8k, le cache/semis nominal évite déjà une partie des MEB initiales et 1,45 M de MEB proviennent des descentes. Le gain statique mesuré est de 32,8 % de MEB, pas 50 %. [Diagnostic](../receipts/initial_representatives_20260911/README.md) |
+| Présenter le tri-unique statique comme un gain de mémoire | À 8k, il ajoute environ 308 Mo de capacités temporaires retenues ; ces échantillons ne sont ni les réallocations transitoires ni le RSS. C'est actuellement un compromis travail/résidence. [Mesures](RESOLUTION_STATIQUE_CPU_20260911.md) |
 | Déduire une baisse de pic RSS de la réduction des arènes finales | À n800, −23,1 % de sortie ne donne que −3,0 % du pic demandé ; les brouillons dominent encore. La paire n1000 combinée ne baisse pas le RSS. [Résidence](../receipts/full_tower_residence_20260910/README.md) |
 | Supprimer globalement `-Wpedantic` pour compiler CUDA | L'échec vient des directives générées par NVCC. Séparer ce prétraitement vendor et conserver les diagnostics de source/finale ; les vraies extensions restent rejetées. [Qualification](../receipts/nvcc_strict_host_20260910/README.md) |
 | Accepter un batch de témoins parce que ses IDs et compteurs sont bien formés | Un autre index peut avoir exactement les mêmes plages de NodeRef. Lier le fournisseur à l'index du front avant tout appel ; la forme des résultats n'est pas une preuve géométrique. [Front optionnel](OPTIMISATIONS_CACHE_ET_GPU_20260910.md) |

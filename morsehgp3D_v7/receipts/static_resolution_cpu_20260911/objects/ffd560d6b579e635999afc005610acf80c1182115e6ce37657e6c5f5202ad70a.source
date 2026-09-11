@@ -1,0 +1,107 @@
+[
+  {
+    "name": "compiler",
+    "argv": [
+      "g++",
+      "--version"
+    ],
+    "started_ns": 1789108114664118154,
+    "ended_ns": 1789108114674857230,
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout_sha256": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "compile",
+    "argv": [
+      "g++",
+      "-O2",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/o2_r2/gate.d",
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/source_r2/morsehgp3D_v7/tests/full_ball_tower_gate.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/o2_r2/gate"
+    ],
+    "started_ns": 1789108114675493255,
+    "ended_ns": 1789108203686904501,
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "nominal",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/o2_r2/gate",
+      "--selftest"
+    ],
+    "started_ns": 1789108203693864792,
+    "ended_ns": 1789108208579241921,
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout_sha256": "cab6b63f8be174011f2b64186419fa467bf00641e4284d54ecff33768555a8d5",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "static1",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/o2_r2/gate",
+      "--static-1"
+    ],
+    "started_ns": 1789108208580023752,
+    "ended_ns": 1789108215163455062,
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout_sha256": "ab7ce73fbbad56c7f3a91b9ff31cdd62f2597b768a2362b47651b6df366d7e69",
+    "stderr_sha256": "f8777581e0dc5ede60143d3a72fe7b927fd34bbf682b2cd5155997e746d99584"
+  },
+  {
+    "name": "static4",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/o2_r2/gate",
+      "--static-4"
+    ],
+    "started_ns": 1789108215164229803,
+    "ended_ns": 1789108221521224129,
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout_sha256": "ab7ce73fbbad56c7f3a91b9ff31cdd62f2597b768a2362b47651b6df366d7e69",
+    "stderr_sha256": "d78f7936e61482441b24d671d47ba47bc1cffd3f1558de1882b37caa46974167"
+  },
+  {
+    "name": "bad_argument",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/o2_r2/gate",
+      "--unknown"
+    ],
+    "started_ns": 1789108221522338064,
+    "ended_ns": 1789108221533353029,
+    "exit_code": 2,
+    "expected_exit_code": 2,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "4b9eeadc562c94288f788d79631dcc662f5b8c306e7232ccdc083094698a2e85"
+  },
+  {
+    "name": "nominal_launch_guard",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_resolver_20260911/o2_r2/gate",
+      "--expect-launch-failure"
+    ],
+    "started_ns": 1789108221534338594,
+    "ended_ns": 1789108221577463618,
+    "exit_code": 1,
+    "expected_exit_code": 1,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

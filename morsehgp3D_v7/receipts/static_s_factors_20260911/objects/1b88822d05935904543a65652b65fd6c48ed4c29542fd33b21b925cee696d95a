@@ -1,0 +1,22 @@
+{
+  "copied_after_closure": true,
+  "original_pins": {
+    "binary_after.sha256": "38c01a5e5aa379300ba902e7b0d27d6d3564a3276cb03accee776139e00105e5",
+    "binary_before.sha256": "38c01a5e5aa379300ba902e7b0d27d6d3564a3276cb03accee776139e00105e5",
+    "command.json": "ad0975ef78d83eb7d3163c4c33917205d0aa406ade61ec6c9fdd3cd303f15321",
+    "comparison.json": "71fab7f5f208cef12acd15ec11c11ed442ed1ce1b0090d6e590f0378af454a97",
+    "host_after.json": "d2031345696a61227a9843924e42b14bea2758134d719b6ec251371facd5d91e",
+    "host_before.json": "309bed74a6c7240e5bddb5a6acb2a9728088e79117226dd0aa9093d0a33754ca",
+    "intent.json": "ee76702991dd6f86857cb1d2a656c4f563e51411e52c8f2b3a0606674ef8e94e",
+    "progress.json": "f00151913204b548a19a29a08a0864ee199680988ebf0d282055e5e41ecbac05",
+    "receipt.json": "a0b42a09bb87a8188a30bdcfadb57743530848f5540312f2e2228cf95d20d0e6",
+    "record.py.source": "59a743270ed7cb35015858b2342a125c7f3bac1d723e68b507510fb7ff305c43",
+    "reference.json": "b8aea9f4238eb3ecaf97244c321c8c4cbbc46729f4b5336cbd58b36de7d01da7",
+    "reference.stdout": "6351d49a5638211f63487010a0dc8f636f2abc9d16eb3f539386b4706b3a346b",
+    "sources_after.json": "1499727f3caca17cd8bdfa0cd5377a5797da89845bc6ba265aadf61a7a825c27",
+    "sources_before.json": "1499727f3caca17cd8bdfa0cd5377a5797da89845bc6ba265aadf61a7a825c27",
+    "stderr": "7a84b2aa58655018fe52f201394096cb7be143d798b821bde51572e19e90e352",
+    "stdout": "37106c249dc6fd4b49ad3cb8d9c6d907d211d317d5aa12bdb7a96627ce9c1dc0"
+  },
+  "path": "/workspaces/E-HGP/build/v7_static_scale_20260911/n8000_s8_static4"
+}

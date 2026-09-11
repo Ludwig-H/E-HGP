@@ -1,0 +1,106 @@
+#!/usr/bin/env python3
+"""Verify portable dedup storage, then replay only the pinned text reader."""
+import hashlib
+import json
+from pathlib import Path, PurePosixPath
+import subprocess
+import sys
+import tempfile
+
+ROOT = Path(__file__).resolve().parent
+
+
+def need(condition, reason):
+    if not condition:
+        raise ValueError(reason)
+
+
+def safe_relative(name):
+    need(isinstance(name, str), "non-string path")
+    path = PurePosixPath(name)
+    need(not path.is_absolute() and name == path.as_posix() and
+         all(part not in {"", ".", ".."} for part in path.parts), "unsafe path: " + name)
+    return Path(*path.parts)
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def main():
+    manifest = json.loads((ROOT / "manifest.json").read_text())
+    need(manifest["schema"] == "mhgp7_portable_incremental_journal_v1" and
+         manifest["public_status"] == "not_claimed" and manifest["gcp_used"] is False,
+         "manifest authority")
+    for name, expected in manifest["files"].items():
+        path = ROOT / safe_relative(name)
+        need(path.is_file() and not path.is_symlink(), "missing or linked file: " + name)
+        data = path.read_bytes()
+        need(len(data) == expected["bytes"] and sha(data) == expected["sha256"],
+             "portable file mismatch: " + name)
+    original_bytes = (ROOT / "capture_manifest.json").read_bytes()
+    need(sha(original_bytes) == manifest["original_manifest_sha256"], "original manifest pin")
+    original = json.loads(original_bytes)
+    mapping = json.loads((ROOT / "storage_map.json").read_text())
+    need(mapping["schema"] == "mhgp7_logical_to_dedup_source_v1", "storage schema")
+    entries = mapping["files"]
+    closure = json.loads((ROOT / "closure_sources.json").read_text())
+    need(closure["schema"] == "mhgp7_recorded_source_closure_v1", "source closure schema")
+    need(not (set(original["files"]) & set(closure["files"])), "closure overlaps original manifest")
+    need(set(entries) == set(original["files"]) | set(closure["files"]) | {"manifest.json"},
+         "logical manifest coverage")
+    content_cache = {}
+    for name, entry in entries.items():
+        safe_relative(name)
+        storage = entry["storage"]
+        safe_relative(storage)
+        need(storage in manifest["files"], "unsealed storage: " + storage)
+        if name == "manifest.json":
+            expected = {"bytes": len(original_bytes), "sha256": sha(original_bytes)}
+        elif name in original["files"]:
+            expected = original["files"][name]
+        else:
+            expected = closure["files"][name]
+        need(entry["bytes"] == expected["bytes"] and entry["sha256"] == expected["sha256"],
+             "logical source mismatch: " + name)
+        if storage not in content_cache:
+            content_cache[storage] = (ROOT / storage).read_bytes()
+        need(len(content_cache[storage]) == entry["bytes"] and
+             sha(content_cache[storage]) == entry["sha256"], "storage content mismatch: " + name)
+    # These extra files were already pinned by original before/after receipts;
+    # do not rewrite their historical manifest, which omitted .cu/.cuh/.txt.
+    for name, entry in closure["files"].items():
+        receipt_name = entry["capture_receipt"]
+        need(receipt_name in original["files"], "unsealed closure provenance")
+        receipt = json.loads(content_cache[entries[receipt_name]["storage"]])
+        source_path = entry["source_path"]
+        need(receipt["sources_before"][source_path] == entry["sha256"] ==
+             receipt["sources_after"][source_path], "closure before/after pin")
+        need(name == str(PurePosixPath(receipt_name).parent / "source_snapshot" / source_path),
+             "closure snapshot path")
+    # A complete temporary reconstruction preserves the immutable original
+    # reader and all its paths. No compiler, saved executable or worker is run.
+    with tempfile.TemporaryDirectory(prefix="mhgp7_incremental_receipt_") as directory:
+        capture = Path(directory)
+        for name, entry in entries.items():
+            target = capture / safe_relative(name)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(content_cache[entry["storage"]])
+        argv = [sys.executable, "-B"]
+        if sys.flags.optimize:
+            argv.append("-O")
+        argv.append(str(capture / "verify.py"))
+        done = subprocess.run(argv, cwd=capture, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                              check=False)
+        need(done.returncode == 0, "original reader failed: " + done.stderr.decode(errors="replace"))
+        observed = json.loads(done.stdout)
+        need(observed["status"] == "passed" and observed["gcp_used"] is False,
+             "original reader authority")
+    print(json.dumps({"status": "passed", "logical_files": len(entries),
+                      "physical_files": len(manifest["files"]),
+                      "unique_stored_contents": len(content_cache),
+                      "original_reader": observed, "gcp_used": False}, sort_keys=True))
+
+
+if __name__ == "__main__":
+    main()

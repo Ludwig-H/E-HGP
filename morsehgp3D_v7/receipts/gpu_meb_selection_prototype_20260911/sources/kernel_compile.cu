@@ -1,0 +1,12 @@
+#include "meb_selection.cuh"
+
+// This function forces a real device kernel to be instantiated and linked.
+// The executable deliberately never invokes it and claims no device result.
+void mhgp7_private_launch_meb(const mhgp7::P3* positions, mhgp7::u64 count,
+    const mhgp7::gpu_meb_private::Request* requests, mhgp7::u32 requests_count,
+    mhgp7::gpu_meb_private::Selection* output) {
+  if (requests_count == 0) return;
+  const auto blocks = static_cast<unsigned>((static_cast<mhgp7::u64>(requests_count) + 127) / 128);
+  mhgp7::gpu_meb_private::select_kernel<<<blocks, 128>>>(positions, count, requests, requests_count, output, 0);
+}
+int main() { return 2; }

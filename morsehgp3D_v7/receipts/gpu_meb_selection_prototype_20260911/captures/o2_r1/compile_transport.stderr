@@ -1,0 +1,10 @@
+/workspaces/E-HGP/build/v7_static_gpu_meb_20260911/transport_gate.cpp:125:2: error: expected ‘}’ at end of input
+  125 | }
+      |  ^
+/workspaces/E-HGP/build/v7_static_gpu_meb_20260911/transport_gate.cpp:8:11: note: to match this ‘{’
+    8 | namespace {
+      |           ^
+/workspaces/E-HGP/build/v7_static_gpu_meb_20260911/transport_gate.cpp:121:5: error: ‘int {anonymous}::main(int, char**)’ defined but not used [-Werror=unused-function]
+  121 | int main(int argc, char**) {
+      |     ^~~~
+cc1plus: all warnings being treated as errors

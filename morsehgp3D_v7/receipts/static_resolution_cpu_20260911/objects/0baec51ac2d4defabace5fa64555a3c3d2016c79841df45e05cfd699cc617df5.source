@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+"""Compile/link the integrated hybrid probe without starting a device or GCP."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+import time
+
+root = Path('/workspaces/E-HGP')
+here = Path(__file__).resolve().parent
+out = here / 'cuda_capture_r1'
+build = root / 'build/v7_static_cuda_cmake_20260911'
+out.mkdir(exist_ok=False)
+if build.exists():
+    raise SystemExit('fresh build required')
+names = []
+for prefix in ('src', 'oracle', 'tests', 'bench', 'cli', 'cmake'):
+    for path in sorted((root/'morsehgp3D_v7'/prefix).rglob('*')):
+        if path.is_file() and path.suffix in ('.hpp', '.cpp', '.cu', '.cuh', '.py', '.cmake'):
+            names.append(path.relative_to(root).as_posix())
+names.append('morsehgp3D_v7/CMakeLists.txt')
+def pins():
+    return {name: hashlib.sha256((root/name).read_bytes()).hexdigest() for name in names}
+before = pins()
+(out/'sources_before.json').write_text(json.dumps(before, indent=2, sort_keys=True)+'\n')
+for name in names:
+    target = out/'source'/name
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(root/name, target)
+shutil.copyfile(__file__, out/'cuda_check.py')
+commands = []
+status = 'failed'
+error = None
+target_name = 'mhgp7_full_ball_tower_cuda_probe'
+def run(name, argv):
+    start = time.time_ns()
+    with (out/(name+'.stdout')).open('wb') as stdout, (out/(name+'.stderr')).open('wb') as stderr:
+        proc = subprocess.run(argv, cwd=root, stdout=stdout, stderr=stderr)
+    row = dict(name=name, argv=argv, exit_code=proc.returncode, started_ns=start, ended_ns=time.time_ns())
+    for stream in ('stdout', 'stderr'):
+        row[stream+'_sha256'] = hashlib.sha256((out/(name+'.'+stream)).read_bytes()).hexdigest()
+    commands.append(row)
+    (out/'commands.json').write_text(json.dumps(commands, indent=2)+'\n')
+    print(name, proc.returncode, flush=True)
+    if proc.returncode:
+        raise RuntimeError(name)
+try:
+    run('configure', ['cmake', '-S', 'morsehgp3D_v7', '-B', str(build), '-DCMAKE_BUILD_TYPE=Release',
+        '-DMHGP7_ENABLE_CUDA=ON',
+        '-DCMAKE_CUDA_COMPILER=/workspaces/E-HGP/build/v7_nvcc_pedantic_20260910/toolkit/bin/nvcc',
+        '-DCMAKE_CUDA_FLAGS=-L/workspaces/E-HGP/build/v7_nvcc_pedantic_20260910/toolkit/lib',
+        '-DMHGP7_DIGEST_BOOST_INCLUDE_DIR=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include'])
+    run('build', ['cmake', '--build', str(build), '--parallel', '1', '--verbose', '--target', target_name])
+    status = 'passed'
+except Exception as exc:
+    error = str(exc)
+finally:
+    after = pins()
+    (out/'sources_after.json').write_text(json.dumps(after, indent=2, sort_keys=True)+'\n')
+    if before != after:
+        status = 'failed'
+    binary = build/target_name
+    (out/'receipt.json').write_text(json.dumps(dict(status=status, error=error, sources_stable=before==after,
+        public_status='not_claimed', GCP_used=False, device_executed=False,
+        binary_sha256=hashlib.sha256(binary.read_bytes()).hexdigest() if binary.is_file() else None), indent=2)+'\n')
+if status != 'passed':
+    raise SystemExit(1)

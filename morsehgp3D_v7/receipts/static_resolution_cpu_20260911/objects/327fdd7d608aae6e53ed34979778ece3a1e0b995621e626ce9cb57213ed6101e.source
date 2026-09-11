@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+"""Record this private statically resolved tower; runs are never claims."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import time
+
+here = Path(__file__).resolve().parent
+san = '--san' in sys.argv[1:]
+out = here / ('san_r2' if san else 'o2_r2')
+out.mkdir(exist_ok=False)
+source = here / 'source_r2'
+def pins():
+    return {p.relative_to(source).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in sorted(source.rglob('*')) if p.is_file()}
+before = pins()
+(out / 'sources_before.json').write_text(json.dumps(before, indent=2, sort_keys=True) + '\n')
+commands = []
+def run(name, argv, expected=0):
+    start = time.time_ns()
+    env = dict(os.environ)
+    if san:
+        env['ASAN_OPTIONS'] = 'detect_leaks=1:halt_on_error=1'
+        env['UBSAN_OPTIONS'] = 'halt_on_error=1:print_stacktrace=1'
+    with (out / (name + '.stdout')).open('wb') as stdout, (out / (name + '.stderr')).open('wb') as stderr:
+        proc = subprocess.run(argv, stdout=stdout, stderr=stderr, env=env)
+    row = dict(name=name, argv=argv, started_ns=start, ended_ns=time.time_ns(), exit_code=proc.returncode,
+               expected_exit_code=expected)
+    for stream in ('stdout', 'stderr'):
+        row[stream + '_sha256'] = hashlib.sha256((out / (name + '.' + stream)).read_bytes()).hexdigest()
+    commands.append(row)
+    (out / 'commands.json').write_text(json.dumps(commands, indent=2) + '\n')
+    print(name, proc.returncode, flush=True)
+    if proc.returncode != expected: raise RuntimeError('unexpected exit: ' + name)
+
+status = 'failed'
+error = None
+try:
+    run('compiler', ['g++', '--version'])
+    flags = ['-O1', '-g', '-fsanitize=address,undefined', '-fno-omit-frame-pointer'] if san else ['-O2']
+    binary = out / 'gate'
+    run('compile', ['g++', *flags, '-std=c++20', '-Wall', '-Wextra', '-Wpedantic', '-Werror', '-pthread',
+        '-isystem', '/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include', '-MMD', '-MF', str(out / 'gate.d'),
+        str(source / 'morsehgp3D_v7/tests/full_ball_tower_gate.cpp'), '-o', str(binary)])
+    (out / 'binary.sha256').write_text(hashlib.sha256(binary.read_bytes()).hexdigest() + '\n')
+    for name, arg in [('nominal', '--selftest'), ('static1', '--static-1'), ('static4', '--static-4')]:
+        run(name, [str(binary), arg])
+    run('bad_argument', [str(binary), '--unknown'], 2)
+    run('nominal_launch_guard', [str(binary), '--expect-launch-failure'], 1)
+    status = 'passed'
+except Exception as exc:
+    error = str(exc)
+finally:
+    after = pins()
+    (out / 'sources_after.json').write_text(json.dumps(after, indent=2, sort_keys=True) + '\n')
+    stable = before == after
+    if not stable: status = 'failed'
+    receipt = dict(status=status, error=error, sources_stable=stable, public_status='not_claimed',
+                   private_prototype=True, GCP_used=False, sanitizer=san)
+    (out / 'receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')
+if status != 'passed': raise SystemExit(1)

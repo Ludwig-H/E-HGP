@@ -1,0 +1,15 @@
+{
+  "ELF_included": false,
+  "GCP_used": false,
+  "binary_sha256": "f71f31190f5d50ac70f8332f969c6baa50549536bd08836702e6ba01ae7fcdce",
+  "header_sha256": "33e7d05effce908532d21255e5e0efc4f8c7370d8a05a17dd761142d81bd4209",
+  "historical_markdown_storage": "README.md -> capture/README.md.source, bytes preserved",
+  "independent_key_comparison_storage": "initial_key_comparison/, complete unchanged packet",
+  "key_comparison_manifest_sha256": "9167657c29c3ffb36292f2b830475d537d47072831740e5bb0b7bb937caa2c77",
+  "original_files_preserved": 117,
+  "reference_manifest_sha256": "c9913094b6479a61a0395be2dc0f09ef2d25672f170e19d3c6e01c584ba08b2c",
+  "runs": 3,
+  "shared_host": true,
+  "snapshot_copied_once": true,
+  "timing_speedup_claim": false
+}

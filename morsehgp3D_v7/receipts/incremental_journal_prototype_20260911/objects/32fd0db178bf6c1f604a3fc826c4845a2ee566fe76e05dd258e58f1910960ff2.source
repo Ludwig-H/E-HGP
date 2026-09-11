@@ -1,0 +1,8 @@
+compile_restore_continuation_early 0
+run_restore_continuation_early 1
+compile_ignore_owner_identity 0
+run_ignore_owner_identity 1
+compile_reserve_every_batch 0
+run_reserve_every_batch 1
+compile_write_parent_zero 0
+run_write_parent_zero 1

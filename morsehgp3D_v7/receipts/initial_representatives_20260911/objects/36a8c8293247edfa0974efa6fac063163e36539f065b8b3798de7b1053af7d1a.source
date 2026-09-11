@@ -1,0 +1,37 @@
+stage_start=index
+stage_complete=index seconds=0.004998797
+stage_start=generate
+stage_complete=generate seconds=414.760883259
+stage_start=sort_rle
+stage_complete=sort_rle seconds=13.470095873
+stage_start=prefilter
+stage_complete=prefilter seconds=79.814163682
+stage_start=census
+stage_complete=census seconds=61.217426251
+stage_start=full_ball_tower
+stage_complete=full_ball_tower seconds=448.641948718
+stage_start=payload_digest
+stage_complete=payload_digest seconds=3.312381973
+	Command being timed: "/workspaces/E-HGP/build/v7_unique_representatives_20260911/bin/observed_probe --n=8000 --s=8 --kmax=10 --threads=1"
+	User time (seconds): 261.22
+	System time (seconds): 5.15
+	Percent of CPU this job got: 26%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 17:02.21
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 2139852
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 1326495
+	Voluntary context switches: 28
+	Involuntary context switches: 125307
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 56
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

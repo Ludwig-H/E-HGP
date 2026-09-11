@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+"""Private causal mutants and sanitizer gates. Does not mutate active source."""
+from pathlib import Path
+import argparse
+import json
+import shutil
+import subprocess
+import run
+
+HERE = Path(__file__).resolve().parent
+BOOST = HERE.parent / "v7_boost_gate/extracted/usr/include"
+
+
+def replace_once(text, old, new):
+    if text.count(old) != 1:
+        raise RuntimeError(f"mutation anchor {text.count(old)}: {old[:50]}")
+    return text.replace(old, new)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--without-san", action="store_true")
+    args = parser.parse_args()
+    common = ["g++", "-std=c++20", "-Wall", "-Wextra", "-Wpedantic", "-Werror", "-pthread", "-isystem", str(BOOST)]
+    src = "observed/morsehgp3D_v7/tests/unique_representative_gate.cpp"
+    if not args.without_san:
+        run.execute("compile_observed_gate_san", common + ["-O1", "-g", "-fsanitize=address,undefined", "-fno-omit-frame-pointer", "-fno-pie", "-no-pie", src, "-o", str(HERE / "bin/observed_gate_san")])
+        env = {"ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1", "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"}
+        run.execute("observed_gate_san", [str(HERE / "bin/observed_gate_san"), "--selftest"], env)
+        run.execute("observed_gate_san_nocache", [str(HERE / "bin/observed_gate_san"), "--selftest"], {**env, "MHGP7_PRIVATE_NO_CACHE": "1"})
+    mutants = ["after_cache", "count_seeds", "count_descent", "hash_only"]
+    for mutant in mutants:
+        dst = HERE / "mutants" / mutant
+        shutil.copytree(HERE / "observed", dst)
+        header = dst / "morsehgp3D_v7/src/forest/full_ball_tower.hpp"
+        text = header.read_text()
+        record = "    unique_representative_detail::collector.record(sites);\n"
+        if mutant == "after_cache":
+            text = replace_once(text, record, "")
+            text = replace_once(text, '    if (current_k == 1) {\n      const PointId id',
+                                '    if (current_k == 1) {\n' + record + '      const PointId id')
+            text = replace_once(text, "    if (cached != absent) return root(cached, prior_count);\n",
+                                "    if (cached != absent) return root(cached, prior_count);\n" + record)
+        elif mutant == "count_seeds":
+            text = replace_once(text, "    resolver_cache.store(key, target, true);",
+                                "    unique_representative_detail::collector.record(std::span<const i32>(key.data(), n));\n    resolver_cache.store(key, target, true);")
+        elif mutant == "count_descent":
+            text = replace_once(text, "      auto next = meb(sites, st.resolve_work);",
+                                "  " + record + "      auto next = meb(sites, st.resolve_work);")
+        header.write_text(text)
+        binary = HERE / "bin" / f"mutant_{mutant}"
+        flags = ["-DMHGP7_PRIVATE_HASH_ONLY_MUTANT"] if mutant == "hash_only" else []
+        run.execute(f"compile_mutant_{mutant}", common + ["-O2"] + flags + [str(dst / "morsehgp3D_v7/tests/unique_representative_gate.cpp"), "-o", str(binary)])
+        try:
+            run.execute(f"mutant_{mutant}", [str(binary), "--selftest"])
+        except SystemExit as e:
+            if e.code != 1:
+                raise
+        else:
+            raise RuntimeError(f"mutant survived: {mutant}")
+    print(json.dumps({"status": "qualified", "mutants_rejected": len(mutants)}))
+
+
+if __name__ == "__main__":
+    main()

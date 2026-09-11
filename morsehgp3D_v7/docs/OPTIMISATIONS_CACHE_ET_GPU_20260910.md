@@ -5,6 +5,10 @@
 `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 Cette étape ne livre ni archive industrielle ni contrat 50k/1s.
 
+Mise à jour du 11 septembre : le moteur et les mesures décrits ci-dessous
+restent ceux du 10 septembre. La nouvelle [voie statique CPU optionnelle](RESOLUTION_STATIQUE_CPU_20260911.md)
+est qualifiée séparément ; elle ne réattribue pas ces chronométrages.
+
 ## Changements intégrés au constructeur FULL
 
 Le [cache exact de facettes](../receipts/ball_resolver_residence_20260910/README.md)
@@ -108,15 +112,17 @@ facettes vers une clé admise à l'ordre K, puis lire sa racine à la coupe
 pré-lot. Toute cible est née strictement avant le bloc consommateur.
 Les activations, lots simultanés, contributions datées et verticales fermées
 restent obligatoires. Le [petit oracle indépendant](../receipts/static_anchor_graph_20260910/README.md)
-juge 648 coupes et tue sept mutants ; aucun backend MEB par lots n'est intégré.
-Mesurer d'abord les clés de représentants uniques par ordre quantifiera le
-dédoublonnage possible, indépendamment des hits du cache et du choix d'intrus.
+juge 648 coupes et tue sept mutants. Au 11 septembre, le backend CPU statique
+est intégré en option et le [diagnostic des représentants](../receipts/initial_representatives_20260911/README.md)
+est clos à 8k/s8 ; le backend GPU n'est pas encore porté. Le dédoublonnage
+initial ne prédit pas seul les MEB économisées : semis et cache évitent déjà
+des appels, alors que les descentes ajoutent des clés transitoires.
 
 Le [parcours droit anticipé](../receipts/rightmost_intruder_20260910/README.md)
 calcule le même dernier intrus que le balayage exhaustif proposé par l'auditeur,
 sans devoir finir ce balayage. Le prototype privé passe les gates et réduit
 les visites de 18,7 % sur n1000 ; il reste non intégré et sans contrat de temps.
 Le [journal incrémental](PLAN_JOURNAL_INCREMENTAL.md) est une autre conception
-préparée : supprimer les brouillons globaux sans changer le format v2 ni
+désormais prototypée hors producteur : supprimer les brouillons globaux sans changer le format v2 ni
 publier un préfixe en échec. Ses arènes finales résident plus tôt ; ni une
 économie d'en-têtes ni une baisse des allocations ne prouvent un gain RSS.

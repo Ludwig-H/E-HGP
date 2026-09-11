@@ -1,0 +1,25 @@
+#!/usr/bin/env python3
+"""Import an immutable historical output only for non-timing equality checks."""
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+REV = "ad7ffd28b35e153a20bd8cf42534d1cd29160bcd"
+
+
+def main() -> None:
+    path = "morsehgp3D_v7/receipts/full_ball_scale_gpu_20260910/local/n8000_s8.stdout"
+    data = subprocess.check_output(["git", "show", f"{REV}:{path}"], cwd=ROOT)
+    target = HERE / "historical_reference"
+    target.mkdir()
+    (target / "uniform_n8000_s8.stdout").write_bytes(data)
+    (target / "pin.json").write_text(json.dumps({"revision": REV, "path": path,
+        "sha256": hashlib.sha256(data).hexdigest(), "authority": "historical_same_source_non_timing_comparison_only",
+        "not_a_new_measurement": True}, indent=2) + "\n")
+
+
+if __name__ == "__main__":
+    main()

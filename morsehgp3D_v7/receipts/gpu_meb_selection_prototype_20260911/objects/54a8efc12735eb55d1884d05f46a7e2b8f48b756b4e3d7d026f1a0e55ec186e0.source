@@ -1,0 +1,125 @@
+#include <array>
+#include <cstdio>
+#include <string_view>
+#include <type_traits>
+
+#include "meb_selection.cuh"
+
+namespace {
+using namespace mhgp7;
+using namespace mhgp7::gpu_meb_private;
+struct Failure { const char* reason; };
+size_t checks = 0, rejects = 0, flags_detected = 0;
+void need(bool value, const char* reason) { ++checks; if (!value) throw Failure{reason}; }
+Request request(u8 count, u32 ordinal = 123) {
+  Request result; result.count = count; result.ordinal = ordinal;
+  for (u8 i = 0; i < count && i < kFacetMaxK; ++i) result.sites[i] = i;
+  return result;
+}
+bool empty(const AnchorMebResult& value) {
+  return value.status != AnchorMebStatus::kOk && value.key == BallKey{} &&
+      value.level == ExactLevel{} && value.support_size == 0 && value.selected_shell_count == 0 &&
+      value.support_slots == std::array<u8, 4>{};
+}
+template <size_t N>
+void reject_output(const std::array<P3, N>& positions, const Request& req, const Selection& out) {
+  const auto result = materialize(positions.data(), N, req, out);
+  need(empty(result.value), "invalid.output.empty"); ++rejects;
+}
+int run() {
+  static_assert(std::is_trivially_copyable_v<Request> && std::is_standard_layout_v<Request>);
+  static_assert(std::is_trivially_copyable_v<Selection> && std::is_standard_layout_v<Selection>);
+  const std::array<P3, 4> square{{{0, 0, 0}, {4, 0, 0}, {4, 4, 0}, {0, 4, 0}}};
+  const auto req = request(4);
+  Selection good;
+  select_stub(square.data(), square.size(), &req, 1, &good);
+  need(good.status == Status::kOk && good.q == 2 && good.shell == 4 &&
+      good.slots[0] == 0 && good.slots[1] == 2, "square.first.support_and_extra_shell");
+  need(materialize(square.data(), square.size(), req, good).value.status == AnchorMebStatus::kOk,
+      "square.materialized");
+  for (unsigned mutation = 0; mutation < 16; ++mutation) {
+    auto broken = good;
+    switch (mutation) {
+      case 0: broken.status = Status::kUnwritten; break;
+      case 1: broken.status = static_cast<Status>(77); break;
+      case 2: ++broken.ordinal; break;
+      case 3: broken.q = 0; break;
+      case 4: broken.q = 5; break;
+      case 5: broken.shell = 1; break;
+      case 6: broken.shell = 5; break;
+      case 7: broken.slots[0] = 4; break;
+      case 8: broken.slots[1] = broken.slots[0]; break;
+      case 9: std::swap(broken.slots[0], broken.slots[1]); break;
+      case 10: broken.slots[3] = 1; break;
+      case 11: broken.calls = 0; break;
+      case 12: broken.supports[0] = 1; break;
+      case 13: ++broken.supports[2]; break;
+      case 14: broken.powers = 0; break;
+      case 15: broken.powers = ~u64{0}; break;
+    }
+    reject_output(square, req, broken);
+  }
+  for (unsigned mutation = 0; mutation < 8; ++mutation) {
+    auto input = req;
+    auto positions = square;
+    switch (mutation) {
+      case 0: input.count = 0; break;
+      case 1: input.count = 11; break;
+      case 2: input.sites[0] = -1; break;
+      case 3: input.sites[0] = 4; break;
+      case 4: input.sites[1] = input.sites[0]; break;
+      case 5: positions[1] = positions[0]; break;
+      case 6: positions[0].x = -1; break;
+      case 7: positions[0].z = 65536; break;
+    }
+    const auto output = select_one(positions.data(), positions.size(), input);
+    need(output.status == Status::kInvalidInput && output.calls == 1 && output.q == 0 && output.shell == 0,
+        "invalid.input.status");
+    reject_output(positions, input, output);
+    reject_output(positions, input, good);
+  }
+  const auto missing_positions = select_one(nullptr, square.size(), req);
+  need(missing_positions.status == Status::kInvalidInput, "null.positions");
+  need(empty(materialize(nullptr, square.size(), req, missing_positions).value), "null.empty");
+  ++rejects;
+
+  for (u32 flag : {kSkipContainment, kDiscardFirst, kShellIsSupport, kSkipWrite}) {
+    Selection selected;
+    select_stub(square.data(), square.size(), &req, 1, &selected, flag);
+    const auto value = materialize(square.data(), square.size(), req, selected);
+    const bool difference = value.value.status != AnchorMebStatus::kOk ||
+        value.value.support_slots != std::array<u8, 4>{0, 2, 0, 0} ||
+        selected.powers != good.powers || selected.supports[2] != good.supports[2];
+    need(difference, "causal.flag.detected"); ++flags_detected;
+  }
+  // Direct non-vacuous positivity checks: right triangle, acute triangle,
+  // coplanar tetrahedron, outside-centre tetrahedron, regular tetrahedron.
+  const std::array<P3, 4> right{{{0, 0, 0}, {4, 0, 0}, {2, 2, 0}, {0, 0, 2}}};
+  const std::array<P3, 4> acute{{{0, 0, 0}, {2, 2, 0}, {2, 0, 2}, {0, 2, 2}}};
+  const std::array<P3, 4> outside{{{0, 0, 0}, {2, 0, 0}, {0, 2, 0}, {0, 0, 2}}};
+  const u8 triangle[4]{0, 1, 2, 0}, tetrahedron[4]{0, 1, 2, 3};
+  Candidate candidate;
+  need(!form(right.data(), triangle, 3, candidate), "support.right.not.strict");
+  need(form(acute.data(), triangle, 3, candidate), "support.acute.positive");
+  need(!form(square.data(), tetrahedron, 4, candidate), "support.coplanar");
+  need(!form(outside.data(), tetrahedron, 4, candidate), "support.centre.outside");
+  need(form(acute.data(), tetrahedron, 4, candidate), "support.regular.positive");
+
+  const std::array<Request, 3> requests{{request(4, 7), request(3, 9), request(1, 11)}};
+  std::array<Selection, 5> outputs;
+  select_stub(acute.data(), acute.size(), requests.data(), requests.size(), outputs.data());
+  for (u32 i = 0; i < requests.size(); ++i)
+    need(outputs[i].ordinal == requests[i].ordinal && outputs[i].status == Status::kOk,
+        "batch.request.binding");
+  need(outputs[3].status == Status::kUnwritten && outputs[4].status == Status::kUnwritten,
+      "batch.overlaunch.bounds");
+  need(rejects == 33 && flags_detected == 4, "transport.nonvacuity");
+  std::printf("{\"status\":\"passed\",\"checks\":%zu,\"rejections\":%zu,"
+      "\"causal_flags\":%zu,\"device_executed\":false}\n", checks, rejects, flags_detected);
+  return 0;
+}
+int main(int argc, char**) {
+  if (argc != 1) return 2;
+  try { return run(); }
+  catch (const Failure& failure) { std::fprintf(stderr, "FAIL %s\n", failure.reason); return 1; }
+}

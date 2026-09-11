@@ -1,0 +1,9 @@
+{
+  "GCP_used": false,
+  "error": null,
+  "exit_code": 0,
+  "public_status": "not_claimed",
+  "shared_host": true,
+  "sources_and_binary_stable": true,
+  "status": "completed"
+}

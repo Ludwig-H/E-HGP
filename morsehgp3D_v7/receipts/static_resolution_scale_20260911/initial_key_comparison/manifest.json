@@ -1,0 +1,17 @@
+{
+  "files": {
+    "README.md": "21ed5a8574aa42ffe2f842004af3a7565150579dcd9a29999d0fe239be430013",
+    "capture.py": "fd182639f682321e2be01d6d63c60779ef6e9fe73ccc4c91b80009019e4f6e32",
+    "comparison.json": "7196a4928dd45ab10600834ac2822c52ae3b76250497234b70d9e8e455879a9a",
+    "observed.receipt.json": "f94cd042519acee5919212c039894667b1bfe3f7964c41f5bac3b56cd04d95dc",
+    "observed.stdout": "d74954718b4c217a162d3cb3b0c07733a7e78559dd1a0cc9fd9eaf34f48ba83c",
+    "static.binary_after.sha256": "38c01a5e5aa379300ba902e7b0d27d6d3564a3276cb03accee776139e00105e5",
+    "static.binary_before.sha256": "38c01a5e5aa379300ba902e7b0d27d6d3564a3276cb03accee776139e00105e5",
+    "static.command.json": "ad0975ef78d83eb7d3163c4c33917205d0aa406ade61ec6c9fdd3cd303f15321",
+    "static.receipt.json": "a0b42a09bb87a8188a30bdcfadb57743530848f5540312f2e2228cf95d20d0e6",
+    "static.sources_after.json": "1499727f3caca17cd8bdfa0cd5377a5797da89845bc6ba265aadf61a7a825c27",
+    "static.sources_before.json": "1499727f3caca17cd8bdfa0cd5377a5797da89845bc6ba265aadf61a7a825c27",
+    "static.stdout": "37106c249dc6fd4b49ad3cb8d9c6d907d211d317d5aa12bdb7a96627ce9c1dc0",
+    "verify.py": "bbb044bd56d87fcdf11fa9ed0920a4a76bd87df3d9427ef0f216c3024d636ca9"
+  }
+}

@@ -1,0 +1,170 @@
+#!/usr/bin/env python3
+"""Read-only verifier for sealed static-resolution CPU captures; no execution."""
+import hashlib
+import json
+from pathlib import Path
+import re
+import sys
+from typing import Any
+
+HEADER = "33e7d05effce908532d21255e5e0efc4f8c7370d8a05a17dd761142d81bd4209"
+CAPTURES = {
+    "o2_r1": ("failed", "source", ["compiler", "compile"]),
+    "o2_r2": ("passed", "source_r2", ["compiler", "compile", "nominal", "static1", "static4", "bad_argument", "nominal_launch_guard"]),
+    "san_r2": ("failed", "source_r2", ["compiler", "compile", "nominal"]),
+    "san_replay_z21y3h9h": ("passed", "source_r2", ["nominal", "static1", "static4", "bad_argument", "nominal_launch_guard"]),
+    "micro_r1": ("passed", "probe_source", ["compile"] + [f"n{n}_static{t}" for n in (400, 1000) for t in (0, 1, 4)]),
+    "cmake_capture_r1": ("passed", "cmake_capture_r1/source", ["configure", "build", "ctest", "worker_normal", "worker_optimized"]),
+    "cuda_capture_r1": ("passed", "cuda_capture_r1/source", ["configure", "build"]),
+}
+
+
+def need(ok: bool, reason: str) -> None:
+    if not ok:
+        raise RuntimeError(reason)
+
+
+def main() -> None:
+    root = Path(__file__).resolve().parent
+    manifest = json.loads((root / "logical_manifest.json").read_text())
+
+    def raw(name: str) -> bytes:
+        return (root / "objects" / (manifest["files"][name] + ".source")).read_bytes()
+
+    def js(name: str) -> Any:
+        return json.loads(raw(name))
+
+    def txt(name: str) -> str:
+        return raw(name).decode()
+
+    for name, digest in manifest["files"].items():
+        data = raw(name)
+        need(not data.startswith(b"\x7fELF"), "ELF forbidden")
+        need(hashlib.sha256(data).hexdigest() == digest, "content hash: " + name)
+    need(raw("packaging/verify.py") == Path(__file__).read_bytes(), "outer reader matches sealed reader")
+    need(raw("README.md") == (root / "README.md").read_bytes(), "outer README matches sealed README")
+    count = 0
+    for capture, (status, source, names) in CAPTURES.items():
+        receipt = js(capture + "/receipt.json")
+        need(receipt["status"] == status and receipt["public_status"] == "not_claimed" and receipt["GCP_used"] is False,
+             "capture status/authority: " + capture)
+        need(receipt.get("sources_stable", receipt.get("source_binary_stable")) is True, "source stability")
+        before = js(capture + "/sources_before.json")
+        need(before == js(capture + "/sources_after.json"), "before/after pins")
+        for path, digest in before.items():
+            need(manifest["files"][source + "/" + path] == digest, "source pin: " + capture + "/" + path)
+        if capture != "o2_r1":
+            need(before["morsehgp3D_v7/src/forest/full_ball_tower.hpp"] == HEADER, "qualified header")
+        commands = js(capture + "/commands.json")
+        need([r["name"] for r in commands] == names, "complete command sequence: " + capture)
+        count += len(commands)
+        for command in commands:
+            name = command["name"]
+            code = 2 if name == "bad_argument" else 1 if name == "nominal_launch_guard" else 0
+            if (capture, name) in [("o2_r1", "compile"), ("san_r2", "nominal")]:
+                code = 1
+                need(command["expected_exit_code"] == 0, "preserved unexpected failure")
+            need(command["exit_code"] == code, "command exit: " + capture + "/" + name)
+            need(command["ended_ns"] >= command["started_ns"], "command chronology")
+            for stream in ("stdout", "stderr"):
+                need(hashlib.sha256(raw(f"{capture}/{name}.{stream}")).hexdigest() == command[stream + "_sha256"], "stream hash")
+            if name == "compile":
+                need(all(flag in command["argv"] for flag in ("-std=c++20", "-Wall", "-Wextra", "-Wpedantic", "-Werror")), "strict compile flags")
+    need("array-compare" in txt("o2_r1/compile.stderr"), "initial judge compile failure")
+    need("LeakSanitizer" in txt("san_r2/nominal.stderr") and "ptrace" in txt("san_r2/nominal.stderr"), "sandbox sanitizer failure")
+    replay = js("san_replay_z21y3h9h/receipt.json")
+    need(replay["binary_sha256"] == txt("san_r2/binary.sha256").strip(), "same sanitizer binary")
+    need(replay["ASAN_OPTIONS"] == "detect_leaks=1:halt_on_error=1" and
+         replay["UBSAN_OPTIONS"] == "halt_on_error=1:print_stacktrace=1", "sanitizer policy unchanged")
+    for mode in ("nominal", "static1", "static4"):
+        a = js(f"o2_r2/{mode}.stdout")
+        need(a == js(f"san_replay_z21y3h9h/{mode}.stdout"), "O2/SAN gate equality")
+        need(a["status"] == "passed" and a["clouds"] == 30 and a["orders"] == 124 and a["cuts"] == 3324 and
+             a["vertical_checks"] == 75136 and a["growth_snapshots"] > 0 and a["extra_blocks"] > 0 and
+             a["same_radius_steps"] > 0, "private gate nonvacuity")
+        need(a["checks"] == (250204 if mode == "nominal" else 254857), "private gate check count")
+        if mode != "nominal":
+            for capture in ("o2_r2", "san_replay_z21y3h9h"):
+                line = txt(f"{capture}/{mode}.stderr")
+                need("paired_payload_checks=4498 deduplicated=274 seeded_unique=404" in line, "physical pair/nonvacuity")
+    need(js("o2_r2/static1.stdout") == js("o2_r2/static4.stdout"), "static thread count gate invariance")
+    semantic_fields = ("input_digest", "payload_digest", "nodes", "parent_refs", "vertical_refs", "contributions",
+                       "anchor_blocks", "representatives", "raw", "unique", "balls", "extra_records",
+                       "declared_support_checks", "singleton_lots", "grouped_lots", "lot_dsu_slots",
+                       "lower_edges_indexed", "lower_nodes_activated", "lower_edges_activated", "lower_queries",
+                       "lower_find_steps", "lower_path_writes")
+    expected = {400: (180260, 132750, 15708447, 11072339, 9621256),
+                1000: (583337, 406134, 52168577, 34607823, 19577344)}
+    for n in (400, 1000):
+        rows = [js(f"micro_r1/n{n}_static{threads}.stdout") for threads in (0, 1, 4)]
+        for row, threads in zip(rows, (0, 1, 4)):
+            need(row["status"] == "completed_relative" and row["public_status"] == "not_claimed" and
+                 row["contract_qualified"] is False and row["private_static_prototype"] is True, "micro authority")
+            need(row["n"] == n and row["s"] == 8 and row["kmax"] == row["orders"] == 10 and
+                 row["seed"] == 3 and row["coord"] == 65536 and row["threads"] == 1 and row["static_threads"] == threads,
+                 "micro configuration")
+            need(row["resolver_meb_calls"] == row["anchor_hits"] + row["intruder_queries"], "MEB accounting")
+            need(all(row[key] == rows[0][key] for key in semantic_fields), "full retained payload/schedule equality")
+            orders = row["static_orders"]
+            need([r["K"] for r in orders] == list(range(1, 11)), "all order counters")
+            need(orders[0] == {"K": 1, "requests": 0, "unique": 0, "seeded_unique": 0}, "K1 omitted only from static phase")
+            if threads:
+                need(all(0 <= r["seeded_unique"] <= r["unique"] <= r["requests"] for r in orders), "S<=U<=R")
+                need(sum(r["unique"] - r["seeded_unique"] for r in orders) == row["anchor_hits"], "seeded exact unique work")
+                need(sum(r["requests"] - r["unique"] for r in orders) > 0, "deduplication nonvacuity")
+                need(row["resolver_cache_bytes"] == row["resolver_cache_queries"] == row["resolver_cache_hits"] == 0, "no token cache replication")
+                need(row["static_lanes_used"] == (9 if threads == 1 else 36) and
+                     row["static_worker_threads_created_in_completed_pools"] == (0 if threads == 1 else 36), "completed worker pools")
+            else:
+                need(all(r["requests"] == r["unique"] == r["seeded_unique"] == 0 for r in orders), "nominal no static work")
+        need(all(rows[1][key] == rows[2][key] for key in ("resolver_meb_calls", "resolver_supports_tested", "intruder_queries", "static_orders")), "one/four thread physical work")
+        got = (rows[0]["resolver_meb_calls"], rows[1]["resolver_meb_calls"], rows[0]["resolver_supports_tested"],
+               rows[1]["resolver_supports_tested"], rows[1]["static_sampled_retained_capacity_peak_bytes"])
+        need(got == expected[n], "measured work/residence constants")
+    ctest = txt("cmake_capture_r1/ctest.stdout")
+    need("100% tests passed, 0 tests failed out of 24" in ctest and len(re.findall(r"\d+/24\s+Test\s+#", ctest)) == 24,
+         "24 actual CTests")
+    last = txt("integrated_build/LastTest.log")
+    need(last.count("Test Passed.") == 24, "24 raw CTest results")
+    block = last.split("Testing: mhgp7_full_ball_tower\n", 1)[1].split("Test Passed.", 1)[0]
+    need('"clouds":28' in block and '"checks":170320' in block and '"orders":112' in block,
+         "integrated nominal remains 28 fixtures")
+    for mode in ("cpu1", "cpu4"):
+        block = last.split("Testing: mhgp7_full_ball_static_" + mode + "\n", 1)[1].split("Test Passed.", 1)[0]
+        need('"clouds":30' in block and '"checks":254857' in block and "paired_payload_checks=4498" in block,
+             "integrated static 30 fixtures")
+    a = js("cmake_capture_r1/worker_normal.stdout")
+    need(a == js("cmake_capture_r1/worker_optimized.stdout") and a["status"] == "passed" and a["checks"] == 389 and
+         a["pure_rejections"] == 22 and a["CUDA_executed"] is False and a["GCP_used"] is False and
+         a["subprocess_invoked"] is False, "pure worker selftests only")
+    cuda = js("cuda_capture_r1/receipt.json")
+    need(cuda["device_executed"] is False and len(cuda["binary_sha256"]) == 64, "CUDA compile/link only")
+    build_command = js("cuda_capture_r1/commands.json")[1]
+    need(build_command["argv"][-1] == "mhgp7_full_ball_tower_cuda_probe", "CUDA target")
+    log = txt("cuda_capture_r1/build.stdout")
+    need("Built target mhgp7_full_ball_tower_cuda_probe" in log and "compute_120" in log and
+         "nvcc_strict_host.py" in log, "strict SM120 compile/link evidence")
+    supplemental = js("supplemental_helpers/pins.json")
+    need(supplemental["authority"] == "post_capture_reproduction_pins_not_before_after_stability", "supplemental scope")
+    for path, digest in supplemental["files"].items():
+        need(manifest["files"]["supplemental_helpers/" + path] == digest, "supplemental helper pin")
+    initial = js("reader_review/manifest_initial.json")
+    for name, digest in initial["files"].items():
+        if name not in ("README.md", "packaging/verify.py"):
+            need(manifest["files"][name] == digest, "reader correction must not alter scientific capture")
+    need(hashlib.sha256(raw("reader_review/verify_initial.py.source")).hexdigest() == initial["files"]["packaging/verify.py"],
+         "preserved original reader")
+    for name in ("normal", "optimized"):
+        need("24 actual CTests" in txt(f"reader_review/{name}.stderr"), "preserved spacing-parser refusal")
+    need([r["exit_code"] for r in js("reader_review/commands.json")] == [1, 1], "initial reader command exits")
+    print(json.dumps({"status": "passed", "commands": count, "private_clouds": 30, "integrated_nominal_clouds": 28,
+                      "paired_micro_towers": 6, "ctests": 24, "device_executed": False, "GCP_used": False,
+                      "public_status": "not_claimed"}))
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as error:
+        print(f"VERIFY FAILED: {error}", file=sys.stderr)
+        raise SystemExit(1)

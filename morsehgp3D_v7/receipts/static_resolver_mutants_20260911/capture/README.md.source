@@ -1,0 +1,121 @@
+# Phase statique : six mutants physiques, oracle rationnel léger
+
+11 septembre 2026. Qualification privée demandée par ROOT à
+`static_resolver_review`, sans modification du moteur actif, des sources ROOT,
+des fichiers d'auditeur, de l'index Git ni de GCP. Cadre :
+`phase=exploration_v7_hors_registre`, `backend=cpu_reference`,
+`profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
+`public_status=not_claimed`.
+
+## Résultat
+
+**Nominal passé et six mutants compilés puis réfutés**, sur le header privé
+ROOT `source_r2`, SHA-256
+`33e7d05effce908532d21255e5e0efc4f8c7370d8a05a17dd761142d81bd4209`.
+Le paquet contient 18 commandes fermées : version du compilateur, sept
+compilations strictes, trois routes nominales, une injection de lancement
+nominale et six exécutions de mutants. Tous les sources avant/après sont stables.
+Aucun échec de compilation ne compte comme mutant tué.
+
+Le driver léger C++20 ne dépend pas de Boost. Il est construit avec `-O1`,
+`-Wall -Wextra -Wpedantic -Werror -pthread -DMHGP7_TESTING`. Ce dernier define
+rend accessible l'injection de panne du pool ; aucun mutant du registre n'est
+activé dans le nominal. Les mutations sont des changements physiques séparés
+de source, un fichier touché par mutant, chacun accompagné de son diff et de
+son empreinte. Ce paquet ne porte aucune exécution ASan/UBSan ; celles de ROOT
+sont des reçus distincts, à ne pas lui attribuer.
+
+## Jugement indépendant et non-vacuité
+
+`prepare.py` copie sans changement le modèle rationnel fini `plateau_model.py`
+et son helper de géométrie depuis le reçu public `static_anchor_graph_20260910`.
+Il construit les census exacts et Gamma par énumération sur six nuages de 2 à
+8 points : E5, fenêtre d'admission à huit points/Kmax6, croissance ABCZ doublée,
+carré, paire terminale et portail inerte. Cette énumération est un **oracle
+borné**, pas le chemin produit ni une proposition de catalogue Gamma global.
+
+Les réponses attendues ne viennent pas d'un moteur C++ nominal. Les partitions
+Gamma à chaque coupe donnent naissances, vraies multifusions et parents ; les
+croissances unaires conservent leur identité. Une signature récursive encode
+date exacte, couverture de naissance et signatures des parents. L'unicité des
+signatures de nœuds est vérifiée dans chaque fixture ; il ne s'agit pas d'une
+preuve générale que la couverture seule identifie une composante. Les coupes
+ajoutent couvertures datées et image verticale Gamma. Les comparaisons utilisent
+des chaînes entières, pas des hashes susceptibles de collision.
+
+Le driver remappe explicitement les indices rationnels vers les indices Morton
+de chaque `CloudIndex`. Deux variantes d'entrée changent à la fois ordre des
+points et PointIds ; les sorties sont remappées vers les labels de l'oracle.
+Les niveaux produits sont comparés exactement aux rationnels des coupes, sans
+flottant ni conversion tronquée de leur représentation 192 bits.
+
+| Route | Ordres | Coupes d'ordres | Contrôles verticaux | Lignes exactes |
+| --- | ---: | ---: | ---: | ---: |
+| Nominale, `static_threads=0` | 46 | 1 544 | 1 506 | 2 524 |
+| Statique, 1 lane | 46 | 1 544 | 1 506 | 2 524 |
+| Statique, 4 lanes demandées | 46 | 1 544 | 1 506 | 2 524 |
+
+Les deux routes statiques paient chacune 354 demandes, 219 facettes uniques,
+176 hits de semis et 51 MEB ; le nominal paie 59 MEB. Le driver impose des
+planchers stricts pour les demandes répétées, les seeds et les MEB restantes.
+Ces comptes sur des petites fixtures ne sont pas un gain chronométrique ni un
+contrat de passage à l'échelle. Les compteurs généraux de contrôles incluent
+aussi le parsing et les vérifications de domaine ; les nombres sémantiques
+distincts sont ceux du tableau.
+
+La fixture `window` vérifie explicitement dans le générateur que le cercle de
+niveau 4225 est présent dans le census Kmax6 mais inadmissible à K4. Elle est
+jugée dans chaque nominal. Le mutant d'admission est déjà réfuté sur E5, première
+fixture ; **son exécution interrompue n'est pas une observation du bloc 4225**.
+
+## Mutants physiques et raisons exactes
+
+| Mutation | Compilation | Exécution | Première raison |
+| --- | ---: | ---: | --- |
+| Admission globale : `&&` devient `||` dans la fenêtre K | 0 | 1 | `tower_status:E5:full_ball_static_closed_anchor_missing` |
+| Consulter les ancres non encore installées pendant la géométrie | 0 | 1 | `tower_status:E5:full_ball_static_missing_weak_terminal` |
+| Scatter selon l'index trié au lieu de l'ordinal initial | 0 | 1 | `tower_status:E5:full_ball_final_component_count` |
+| Ne remplir que la première occurrence de chaque groupe | 0 | 1 | `tower_status:E5:full_ball_static_target_not_strict` |
+| Utiliser le jeton d'ancre sans normalisation pré-lot | 0 | 1 | `tower_status:E5:full_ball_final_component_count` |
+| Admettre le travail après lancement partiel du pool | 0 | 1 | `partial_launch_admitted_geometry` |
+
+Le dernier test injecte l'échec de création du deuxième thread. Dans le nominal,
+le résultat est `resource_exhausted`, sans ordre publié, sans MEB de résolution
+payée et sans worker encore actif. Le mutant joint bien ses threads, mais a
+admis à tort de la géométrie avant d'avoir créé tous les workers ; le compteur
+MEB non nul le réfute. Le test ne se contente donc pas de vérifier que la
+fonction finit par renvoyer un échec. L'injection est limitée au premier ordre
+statique de E5 et n'est pas une campagne exhaustive de pannes d'allocation.
+
+## Sources, captures et lecture
+
+- `source/` : 57 fichiers privés figés avant mutations, header ROOT inchangé.
+- `geometry/plateau_model.py` : SHA-256 `7d54563bc6b93b5f3b26c3fb67cde94a5550376147ac871c657afe8cb4b6f805`.
+- `meb_rational_oracle_20260905.py` : SHA-256 `ad6c0d6c041ff788180a400f6ba2ad2b1546f8607e8f2c91fefca9133a8e7f2b`.
+- `fixtures.txt` : SHA-256 `168404ea7b0e7a0136a8af3ef1e289fb7a3dd7c403670c4ffc8a88846c63f69b`.
+- `expected.txt` : SHA-256 `578a38d8d52c610bc5fed0a834ab06a46aee351e43927e0c92eb101738f5f432`.
+- `run_r1/` : commandes, sorties, sept sources réellement compilées, depfiles,
+  empreintes des exécutables et reçus de stabilité.
+
+Après fermeture de toutes les commandes, `freeze.py` scelle les sources et
+captures dans `MANIFEST.json`. Les seuls ELF exclus sont les fichiers `gate` ;
+leurs empreintes demeurent enregistrées et le lecteur les contrôle quand ils
+sont présents. Aucun toolkit ou archive de dépendance n'est nécessaire.
+
+Lecture sans réexécution ni réseau :
+
+```bash
+python3 -B build/v7_static_mutants_20260911/verify.py
+python3 -B -O build/v7_static_mutants_20260911/verify.py
+```
+
+Le lecteur vérifie manifestes, codes de sortie, raisons exactes, empreintes,
+stabilité des sources, unique fichier muté et planchers. Il reste effectif sous
+`-O`. `prepare.py` et `record.py` sont des générateurs create-only : ne pas les
+relancer dans les mêmes dossiers. Il n'y a pas de run initial échoué dans cette
+qualification ; les sept compilations et leurs exécutions attendues ont réussi
+dès `run_r1`.
+
+Ce résultat est conditionnel aux census exacts complets fournis. Il ne qualifie
+ni WSPD, ni l'archive, ni le GPU, ni la production FULL de grands nuages. Aucun
+contrat 50k/1 s, 100 ms ou dizaines de millions n'est acquis par ce paquet.

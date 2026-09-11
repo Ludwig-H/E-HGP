@@ -1,0 +1,9 @@
+{
+  "boost_version": 108300,
+  "bytes": 10745362,
+  "cpp_int_header_sha256": "2677f6c5f854060c483f08500f2d7ddb16e4d3f5e64562e414fdd1ebb4226aa4",
+  "package": "libboost1.83-dev",
+  "sha256": "519ecf2c64308527e15b6582955681d192a832250baa4bc424967aaf7d02d68f",
+  "version": "1.83.0-2.1ubuntu3.2",
+  "version_header_sha256": "a547ee7eddf1b96695027922345b471feba8bcba79a8572399d282247c02e4ab"
+}

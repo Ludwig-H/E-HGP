@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+"""Publish immutable compact objects after both local factors have closed."""
+from __future__ import annotations
+
+import hashlib
+import json
+from pathlib import Path
+import shutil
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+TARGET = ROOT / "morsehgp3D_v7/receipts/static_s_factors_20260911"
+
+
+def main() -> None:
+    for factor in (10, 12):
+        row = json.loads((HERE / f"n8000_s{factor}_static4/receipt.json").read_text())
+        if row["status"] != "completed" or not row["sources_and_binary_stable"]:
+            raise ValueError("capture_not_closed")
+    if TARGET.exists():
+        raise ValueError("publication_target_already_exists")
+    TARGET.mkdir()
+    objects = TARGET / "objects"
+    objects.mkdir()
+    entries = []
+    for path in sorted(HERE.rglob("*")):
+        if not path.is_file() or "__pycache__" in path.parts:
+            continue
+        relative = path.relative_to(HERE).as_posix()
+        data = path.read_bytes()
+        if data.startswith(b"\x7fELF"):
+            raise ValueError("ELF_forbidden:" + relative)
+        sha = hashlib.sha256(data).hexdigest()
+        destination = objects / sha
+        if not destination.exists():
+            destination.write_bytes(data)
+        entries.append(dict(path=relative, sha256=sha, bytes=len(data), object="objects/" + sha))
+    manifest = dict(schema="mhgp7-static-s-factors-capture-v1", public_status="not_claimed",
+                    GCP_used=False, shared_host=True, timing_optimum_claim=False,
+                    files=entries)
+    (TARGET / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+    for name in ("README.md", "verify.py", "reader_cases.py"):
+        shutil.copy2(HERE / name, TARGET / name)
+    print(json.dumps(dict(path=str(TARGET), files=len(entries),
+                          objects=len(list(objects.iterdir())),
+                          manifest_sha256=hashlib.sha256((TARGET / "manifest.json").read_bytes()).hexdigest())))
+
+
+if __name__ == "__main__":
+    main()

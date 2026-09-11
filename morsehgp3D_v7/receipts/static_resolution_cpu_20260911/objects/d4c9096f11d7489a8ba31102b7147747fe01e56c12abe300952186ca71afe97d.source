@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+"""Fresh CMake qualification of the integrated opt-in route, sources pinned."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+import time
+
+root = Path('/workspaces/E-HGP')
+here = Path(__file__).resolve().parent
+out = here / 'cmake_capture_r1'
+out.mkdir(exist_ok=False)
+build = root / 'build/v7_static_cpu_cmake_20260911'
+if build.exists(): raise SystemExit('build must be fresh')
+names = []
+for prefix in ('src', 'oracle', 'tests', 'bench', 'cli'):
+    for p in sorted((root/'morsehgp3D_v7'/prefix).rglob('*')):
+        if p.is_file() and p.suffix in ('.hpp', '.cpp', '.cu', '.cuh', '.py', '.cmake'):
+            names.append(p.relative_to(root).as_posix())
+names.append('morsehgp3D_v7/CMakeLists.txt')
+def pins(): return {name: hashlib.sha256((root/name).read_bytes()).hexdigest() for name in names}
+before = pins()
+(out/'sources_before.json').write_text(json.dumps(before, indent=2, sort_keys=True)+'\n')
+for name in names:
+    target=out/'source'/name
+    target.parent.mkdir(parents=True,exist_ok=True)
+    shutil.copyfile(root/name,target)
+shutil.copyfile(__file__,out/'cmake_check.py')
+commands=[]
+status='failed'
+error=None
+def run(name,argv):
+    start=time.time_ns()
+    with (out/(name+'.stdout')).open('wb') as stdout, (out/(name+'.stderr')).open('wb') as stderr:
+        proc=subprocess.run(argv,cwd=root,stdout=stdout,stderr=stderr)
+    row=dict(name=name,argv=argv,exit_code=proc.returncode,started_ns=start,ended_ns=time.time_ns())
+    for stream in ('stdout','stderr'):
+        row[stream+'_sha256']=hashlib.sha256((out/(name+'.'+stream)).read_bytes()).hexdigest()
+    commands.append(row)
+    (out/'commands.json').write_text(json.dumps(commands,indent=2)+'\n')
+    print(name,proc.returncode,flush=True)
+    if proc.returncode: raise RuntimeError(name)
+try:
+    run('configure',['cmake','-S','morsehgp3D_v7','-B',str(build),'-DCMAKE_BUILD_TYPE=Release',
+        '-DMHGP7_DIGEST_BOOST_INCLUDE_DIR=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include'])
+    targets=['mhgp7_anchor_meb_gate','mhgp7_full_ball_tower_gate','mhgp7_full_ball_work_gate',
+             'mhgp7_full_ball_tower_probe','mhgp7_full_coverage_certificate_gate','mhgp7_local_plateau_gate',
+             'mhgp7_census_route_stub_gate','mhgp7_full_gabriel_digest_gate',
+             'mhgp7_facet_resolver_cache_gate','mhgp7_witness_front_gate']
+    run('build',['cmake','--build',str(build),'--parallel','2','--target',*targets])
+    pattern='^mhgp7_(anchor_meb|full_ball_tower|full_ball_work|full_ball_static|census_route_stub|local_plateau|full_coverage_certificate|facet_resolver_cache|witness_front|full_gabriel_digest)'
+    run('ctest',['ctest','--test-dir',str(build),'--output-on-failure','-R',pattern])
+    run('worker_normal',['python3','-B','gcp-migration/selftest_full_ball_worker_v7.py'])
+    run('worker_optimized',['python3','-B','-O','gcp-migration/selftest_full_ball_worker_v7.py'])
+    status='passed'
+except Exception as exc:
+    error=str(exc)
+finally:
+    after=pins()
+    (out/'sources_after.json').write_text(json.dumps(after,indent=2,sort_keys=True)+'\n')
+    if before!=after: status='failed'
+    binaries={t:hashlib.sha256((build/t).read_bytes()).hexdigest() for t in targets if (build/t).is_file()}
+    (out/'receipt.json').write_text(json.dumps(dict(status=status,error=error,sources_stable=before==after,
+        public_status='not_claimed',GCP_used=False,binary_sha256=binaries),indent=2)+'\n')
+if status!='passed': raise SystemExit(1)

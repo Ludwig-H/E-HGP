@@ -1,0 +1,11 @@
+--- full_ball_tower.hpp
++++ full_ball_tower.hpp
+@@ -496,7 +496,7 @@
+     add(work.intruder_queries);
+     const auto member = [&](i32 u) { return std::binary_search(selected.begin(), selected.end(), u); };
+     const census_detail::AxisBounds bounds(key);
+-    scratch.clear(); scratch.push_back(ix.root());
++    scratch.clear(); ::scratch_fault::arm(work.resolve_work.calls, scratch.capacity()); scratch.push_back(ix.root());
+     while (!scratch.empty()) {
+       const auto node = scratch.back(); scratch.pop_back(); add(work.intruder_nodes);
+       i128 lo, hi; bounds.bounds(ix.box_of(node), &lo, &hi);

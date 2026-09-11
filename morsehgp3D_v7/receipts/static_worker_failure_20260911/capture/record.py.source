@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+"""After-admission scratch allocation fault; separate bounded private capture."""
+import difflib
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import time
+
+HERE = Path(__file__).resolve().parent
+ORIGIN = HERE.parent / 'v7_static_mutants_20260911'
+
+def need(ok, why):
+    if not ok:
+        raise ValueError(why)
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+def pins(path):
+    return {p.relative_to(path).as_posix(): sha(p) for p in sorted(path.rglob('*')) if p.is_file()}
+
+def main():
+    need(len(sys.argv) == 2 and sys.argv[1] in ('o2', 'san'), 'one_build_mode')
+    mode = sys.argv[1]; out = HERE / mode; out.mkdir(exist_ok=False)
+    commands = []
+    def run(name, argv, expected=0):
+        env = dict(os.environ)
+        if mode == 'san':
+            env['ASAN_OPTIONS'] = 'detect_leaks=1:halt_on_error=1'
+            env['UBSAN_OPTIONS'] = 'halt_on_error=1:print_stacktrace=1'
+        start = time.time_ns()
+        with (out / (name + '.stdout')).open('wb') as stdout, (out / (name + '.stderr')).open('wb') as stderr:
+            result = subprocess.run(argv, stdout=stdout, stderr=stderr, env=env)
+        row = dict(name=name, argv=argv, started_ns=start, ended_ns=time.time_ns(), exit_code=result.returncode,
+                   expected_exit_code=expected, sanitizer=mode == 'san')
+        for stream in ('stdout', 'stderr'):
+            row[stream + '_sha256'] = sha(out / (name + '.' + stream))
+        commands.append(row)
+        (out / 'commands.json').write_text(json.dumps(commands, indent=2) + '\n')
+        print(name, result.returncode, flush=True)
+        need(result.returncode == expected, 'unexpected_exit:' + name)
+    status = 'failed'; error = None
+    try:
+        source = out / 'source'; shutil.copytree(ORIGIN / 'source', source)
+        header = source / 'morsehgp3D_v7/src/forest/full_ball_tower.hpp'
+        original = header.read_text()
+        need(sha(header) == '33e7d05effce908532d21255e5e0efc4f8c7370d8a05a17dd761142d81bd4209', 'header_r2')
+        needle = 'scratch.clear(); scratch.push_back(ix.root());'
+        need(original.count(needle) == 1, 'one_scratch_allocation_site')
+        modified = original.replace(needle,
+            'scratch.clear(); ::scratch_fault::arm(work.resolve_work.calls, scratch.capacity()); scratch.push_back(ix.root());')
+        header.write_text(modified)
+        (out / 'test_only_hook.diff').write_text(''.join(difflib.unified_diff(original.splitlines(True),
+            modified.splitlines(True), fromfile='full_ball_tower.hpp', tofile='full_ball_tower.hpp')))
+        shutil.copy2(HERE / 'driver.cpp', out / 'driver.cpp')
+        shutil.copy2(ORIGIN / 'driver.cpp', out / 'fixture_driver.cpp')
+        for name in ('fixtures.txt', 'expected.txt'):
+            shutil.copy2(ORIGIN / name, out / name)
+        shutil.copy2(Path(__file__), out / 'record.py.source')
+        before = pins(source)
+        (out / 'sources_before.json').write_text(json.dumps(before, indent=2, sort_keys=True) + '\n')
+        flags = ['-O2'] if mode == 'o2' else ['-O1', '-g', '-fsanitize=address,undefined', '-fno-omit-frame-pointer']
+        binary = out / 'gate'
+        argv = ['g++', *flags, '-std=c++20', '-Wall', '-Wextra', '-Wpedantic', '-Werror', '-pthread',
+                '-DMHGP7_TESTING', '-I', str(source), '-MMD', '-MF', str(out / 'gate.d'),
+                str(out / 'driver.cpp'), '-o', str(binary)]
+        run('compile', argv)
+        (out / 'binary.sha256').write_text(sha(binary) + '\n')
+        run('post_admission_and_reuse', [str(binary), str(out / 'fixtures.txt'), str(out / 'expected.txt')])
+        after = pins(source)
+        (out / 'sources_after.json').write_text(json.dumps(after, indent=2, sort_keys=True) + '\n')
+        need(before == after, 'source_stability')
+        if mode == 'o2':
+            mutant = out / 'mutant_source'; shutil.copytree(source, mutant)
+            changed = mutant / 'morsehgp3D_v7/src/forest/full_ball_tower.hpp'
+            text = changed.read_text()
+            old = 'catch (...) {\n      account();\n      throw;\n    }'
+            need(text.count(old) == 1, 'one_failure_work_account_site')
+            new = text.replace(old, 'catch (...) {\n      throw;\n    }')
+            changed.write_text(new)
+            (out / 'drop_paid_work.diff').write_text(''.join(difflib.unified_diff(text.splitlines(True),
+                new.splitlines(True), fromfile='full_ball_tower.hpp', tofile='full_ball_tower.hpp')))
+            mutant_before = pins(mutant)
+            (out / 'mutant_before.json').write_text(json.dumps(mutant_before, indent=2, sort_keys=True) + '\n')
+            mutant_binary = out / 'mutant_gate'
+            mutant_argv = argv.copy()
+            mutant_argv[mutant_argv.index(str(source))] = str(mutant)
+            mutant_argv[mutant_argv.index(str(out / 'gate.d'))] = str(out / 'mutant_gate.d')
+            mutant_argv[-1] = str(mutant_binary)
+            run('mutant_compile', mutant_argv)
+            (out / 'mutant_binary.sha256').write_text(sha(mutant_binary) + '\n')
+            run('drop_paid_work', [str(mutant_binary), str(out / 'fixtures.txt'), str(out / 'expected.txt')], 1)
+            (out / 'mutant_after.json').write_text(json.dumps(pins(mutant), indent=2, sort_keys=True) + '\n')
+            need(mutant_before == pins(mutant), 'mutant_stability')
+        status = 'passed'
+    except Exception as exc:
+        error = str(exc)
+    finally:
+        (out / 'receipt.json').write_text(json.dumps(dict(status=status, error=error, mode=mode,
+            public_status='not_claimed', GCP_used=False, test_only_hook=True,
+            header_original_sha256='33e7d05effce908532d21255e5e0efc4f8c7370d8a05a17dd761142d81bd4209'), indent=2) + '\n')
+    need(status == 'passed', error)
+
+if __name__ == '__main__':
+    main()
