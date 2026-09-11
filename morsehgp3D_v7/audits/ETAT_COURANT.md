@@ -1,35 +1,34 @@
 # État courant de l’audit v7
 
-11 septembre 2026, après **e3903b2a**. Priorité : paralléliser toute la tour
-et maîtriser les intermédiaires.
+11 septembre 2026, après **34db4b3e**. Priorité : les opérations encore
+coûteuses de toute la tour, après le premier raccord de géométrie parallèle.
 
-**Suite constructive : étendre les rangs certifiés aux gardes du scatter.**
-Le [dialogue courant](DIALOGUE_COURANT.md) donne les trois substitutions
-exactes, avec les mêmes contrôles de domaine et d’admission. Sur le témoin
-ordonné 32k, cela concerne 90 662 398 comparaisons de scatter et 26 901 500
-de semis initiaux. Ce comptage logique est reproductible ; aucun gain de
-temps ni retrait de MEB n’est revendiqué. Les gardes des boules dynamiques
-restent exactes, distinctes des rangs du catalogue.
+**Deux suites constructives dans l’export : réutiliser les marques fermées
+et préparer chaque index historique une seule fois.** Le [dialogue courant](DIALOGUE_COURANT.md)
+établit l’équivalence des réponses et les conditions de liaison, de dates
+et d’ordre physique. Sur le témoin 32k, 10 348 964 consultations HLD
+contributives peuvent devenir des lectures de marques déjà calculées ;
+les 34 205 965 consultations inférieures/de naturalité restent distinctes.
+Pour K1..10, les préparations de chaînes passent de 19 à 10 avec deux
+index adjacents vivants. Ces propositions n’ont pas encore de gain mesuré.
 
-La lecture du pool CPU persistant et du raccord parallèle est favorable :
-une fenêtre, scratch privé, barrière avant scatter et consommation ordonnée
-de φ/DSU. Le tri, la préparation et la réduction restent séquentiels. Le
-runner des fixtures concurrentes doit encore borner ses commandes par un
-timeout. La capture dense privée O2 **87eb210e** a été contre-vérifiée en
-lecture : 26 commandes, 114 census, 456 essais et trois fautes réellement
-injectées. Le constructeur prépare la publication O2/SAN et du pool ; ces
-qualifications restent distinctes de notre lecture et du moteur actif.
+Les [reçus dense/pool](../receipts/birth_streaming_20260911/README.md)
+et [géométrie parallèle](../receipts/parallel_birth_streaming_20260911/README.md)
+sont publiés et contre-vérifiés normal/−O. Les O2/SAN sont attribués à leurs
+sources propres, déjà relues ; TSan demeure un refus préalable code66.
+Le triplet CPU4/4/4 mesure 92,963 / 215,381 / 489,601 s à 8k/16k/32k,
+avec mêmes digests et comptes que les témoins ordonnés. Ce sont des mesures
+sur hôte partagé, sans qualification de speedup universel ni du contrat 50k.
 
-Le [partage de préparation et les semis liés](receipts_prepared_catalogue_20260911/README.md)
-sont acceptés par le développeur comme delta suivant. Le détail de leur
-preuve, les conventions de masques et la contre-fixture de seuil restent
-dans le paquet ; les recommandations déjà reprises ont été condensées.
-Le [réducteur ordonné](../receipts/ordered_streaming_20260911/README.md),
-la [contraction](receipts_birth_stream_20260911/README.md),
-l’[export](receipts_historical_export_20260911/README.md), la
-[composition MSF](receipts_composable_msf_20260911/README.md) et les
-[objets parallèles](receipts_parallel_objects_20260911/README.md)
-conservent leurs preuves et leurs limites, sans redemander les premières portes.
+Les anciennes demandes de première gate dense, du pool et de triplet sont
+closes. Les [métadonnées préparées, semis et rangs](receipts_prepared_catalogue_20260911/README.md)
+ont été acceptés comme deltas séparés ; les recommandations répétées sont
+condensées. L’[export historique](receipts_historical_export_20260911/README.md)
+peut lui aussi consommer les marques déjà fermées, silencieuses comprises,
+avant ses minima et permutations. Les preuves de
+[contraction](receipts_birth_stream_20260911/README.md),
+[composition](receipts_composable_msf_20260911/README.md) et d’
+[objets parallèles](receipts_parallel_objects_20260911/README.md) sont conservées.
 
 ```text
 phase=exploration_v7_hors_registre

@@ -5178,5 +5178,313 @@
       "reservation_base": "e3903b2ac757f5d1b9c6c091f22794ba62a12bdd",
       "constructor_SAN_parallel_announced_separately_not_reverified": true
     }
+  },
+  "latest_historical_reuse_review_20260911": {
+    "source_head_at_start": "19049adfa3659e8c601f31d03eeec15bc4c18920",
+    "source_head_at_review": "34db4b3ef4f51b495d3dfac42638e4866ea8e71b",
+    "objective": "Reuse certified closed-admission marks and prepared adjacent historical indexes; close first dense/pool/parallel qualification requests using published constructor receipts.",
+    "derivation": {
+      "command": "python3 -B - <<'PY'\nimport hashlib,json,subprocess\nfrom pathlib import Path\nroot=Path.cwd();base=root/'morsehgp3D_v7/receipts/parallel_birth_streaming_20260911';sha=lambda b:hashlib.sha256(b).hexdigest();head=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()\ndef resolve(directory,name):\n m=json.loads((directory/'MANIFEST.json').read_text());r=m['files'][name]\n if r['provider']=='parent':\n  parent=(directory/m['parent']['directory']).resolve()\n  if sha((parent/m['parent']['manifest']).read_bytes())!=m['parent']['sha256']:raise SystemExit('parent mismatch')\n  path,raw=resolve(parent,r['path'])\n else:path=directory/r['path'];raw=path.read_bytes()\n if sha(raw)!=r['sha256'] or len(raw)!=r['size']:raise SystemExit('object mismatch '+name)\n if subprocess.check_output(['git','show',head+':'+str(path.relative_to(root))])!=raw:raise SystemExit('uncommitted reference')\n return path,raw\nsources=[]\nfor name in ['build/v7_graph_full_20260911/graph_full.hpp','build/v7_atlas_graph_20260911/filtered_calendar.hpp','build/v7_atlas_graph_20260911/historical_chains.hpp']:\n path,raw=resolve(base,name);sources.append({'logical':name,'object':str(path.relative_to(root)),'sha256':sha(raw),'size':len(raw)})\nrows=[]\nfor n in [8000,16000,32000]:\n name=f'build/v7_parallel_birth_streaming_20260911/n{n}_cpu4_r1/results.json';path,raw=resolve(base,name);d=json.loads(raw);b=d['bench'];s=b['streaming'];w=s['history_work'];C=w['contribution_queries'];m=s['orders']\n if b['status']!='passed' or b['n']!=n or b['s']!=8 or b['requested_K']!=10 or b['window']!=65536:raise SystemExit('scope mismatch')\n if C+n!=s['contributions'] or m!=10 or s['marks']<C:raise SystemExit('count identity differs')\n rows.append({'n':n,'object':str(path.relative_to(root)),'sha256':sha(raw),'histories_s':s['history_s'],'export_s':s['export_s'],'contribution_hld_queries_replaceable':C,'lower_and_naturality_queries_retained':w['lower_queries']+w['naturality_queries'],'all_role_marks':s['marks'],'chains_constructions_before_derived':2*m-1,'chains_constructions_after_proposed':m})\nif [r['contribution_hld_queries_replaceable']for r in rows]!=[2396646,5010402,10348964]:raise SystemExit('expected query counts differ')\nprint(json.dumps({'status':'passed_sealed_source_and_counter_derivation','source_commit':head,'manifest_sha256':sha((base/'MANIFEST.json').read_bytes()),'sources':sources,'rows':rows,'scope':'Static equivalence and logical counts only. No new C++ execution, speedup, or output memory reduction measured.'},sort_keys=True))\nPY",
+      "exit_code": 0,
+      "output": "{\"manifest_sha256\": \"759fcc21ef945803efa54c82f48b1368ec15dc95f715ad2131f140cb280688e0\", \"rows\": [{\"all_role_marks\": 5510027, \"chains_constructions_after_proposed\": 10, \"chains_constructions_before_derived\": 19, \"contribution_hld_queries_replaceable\": 2396646, \"export_s\": 15.50084369, \"histories_s\": 7.717746988, \"lower_and_naturality_queries_retained\": 7920937, \"n\": 8000, \"object\": \"morsehgp3D_v7/receipts/parallel_birth_streaming_20260911/objects/3d3c34fd3d4cfe300d22545c046a36cea72ca941ad50d7d2e67d1e566d8df426\", \"sha256\": \"3d3c34fd3d4cfe300d22545c046a36cea72ca941ad50d7d2e67d1e566d8df426\"}, {\"all_role_marks\": 11537118, \"chains_constructions_after_proposed\": 10, \"chains_constructions_before_derived\": 19, \"contribution_hld_queries_replaceable\": 5010402, \"export_s\": 37.380203281, \"histories_s\": 19.558561393, \"lower_and_naturality_queries_retained\": 16556793, \"n\": 16000, \"object\": \"morsehgp3D_v7/receipts/parallel_birth_streaming_20260911/objects/e8746d5a246af313c09394b7f8cdc2d0906f64d13076461baee3692395d3f0a5\", \"sha256\": \"e8746d5a246af313c09394b7f8cdc2d0906f64d13076461baee3692395d3f0a5\"}, {\"all_role_marks\": 23851396, \"chains_constructions_after_proposed\": 10, \"chains_constructions_before_derived\": 19, \"contribution_hld_queries_replaceable\": 10348964, \"export_s\": 91.704433127, \"histories_s\": 50.145306644, \"lower_and_naturality_queries_retained\": 34205965, \"n\": 32000, \"object\": \"morsehgp3D_v7/receipts/parallel_birth_streaming_20260911/objects/93925b9962a73febbe4882867a5348462ed77bdd8be9c37bc442fd9f90b259a5\", \"sha256\": \"93925b9962a73febbe4882867a5348462ed77bdd8be9c37bc442fd9f90b259a5\"}], \"scope\": \"Static equivalence and logical counts only. No new C++ execution, speedup, or output memory reduction measured.\", \"source_commit\": \"34db4b3ef4f51b495d3dfac42638e4866ea8e71b\", \"sources\": [{\"logical\": \"build/v7_graph_full_20260911/graph_full.hpp\", \"object\": \"morsehgp3D_v7/receipts/atlas_graph_full_20260911/objects/bad5051fca4d78345841b4171dfb8a438c0f5a752452f784f4c9c196966a3f2d\", \"sha256\": \"bad5051fca4d78345841b4171dfb8a438c0f5a752452f784f4c9c196966a3f2d\", \"size\": 14986}, {\"logical\": \"build/v7_atlas_graph_20260911/filtered_calendar.hpp\", \"object\": \"morsehgp3D_v7/receipts/atlas_graph_full_20260911/objects/1cf438cbac839c8f502de0c8daebbf89296a3884d2d40ba50715b5aaca161fa2\", \"sha256\": \"1cf438cbac839c8f502de0c8daebbf89296a3884d2d40ba50715b5aaca161fa2\", \"size\": 14223}, {\"logical\": \"build/v7_atlas_graph_20260911/historical_chains.hpp\", \"object\": \"morsehgp3D_v7/receipts/atlas_graph_full_20260911/objects/686c2137a905e4f77c15a1d7f497541e6f8d87b9217f5c9c726cf4951be573c3\", \"sha256\": \"686c2137a905e4f77c15a1d7f497541e6f8d87b9217f5c9c726cf4951be573c3\", \"size\": 5799}], \"status\": \"passed_sealed_source_and_counter_derivation\"}\n",
+      "result": {
+        "manifest_sha256": "759fcc21ef945803efa54c82f48b1368ec15dc95f715ad2131f140cb280688e0",
+        "rows": [
+          {
+            "all_role_marks": 5510027,
+            "chains_constructions_after_proposed": 10,
+            "chains_constructions_before_derived": 19,
+            "contribution_hld_queries_replaceable": 2396646,
+            "export_s": 15.50084369,
+            "histories_s": 7.717746988,
+            "lower_and_naturality_queries_retained": 7920937,
+            "n": 8000,
+            "object": "morsehgp3D_v7/receipts/parallel_birth_streaming_20260911/objects/3d3c34fd3d4cfe300d22545c046a36cea72ca941ad50d7d2e67d1e566d8df426",
+            "sha256": "3d3c34fd3d4cfe300d22545c046a36cea72ca941ad50d7d2e67d1e566d8df426"
+          },
+          {
+            "all_role_marks": 11537118,
+            "chains_constructions_after_proposed": 10,
+            "chains_constructions_before_derived": 19,
+            "contribution_hld_queries_replaceable": 5010402,
+            "export_s": 37.380203281,
+            "histories_s": 19.558561393,
+            "lower_and_naturality_queries_retained": 16556793,
+            "n": 16000,
+            "object": "morsehgp3D_v7/receipts/parallel_birth_streaming_20260911/objects/e8746d5a246af313c09394b7f8cdc2d0906f64d13076461baee3692395d3f0a5",
+            "sha256": "e8746d5a246af313c09394b7f8cdc2d0906f64d13076461baee3692395d3f0a5"
+          },
+          {
+            "all_role_marks": 23851396,
+            "chains_constructions_after_proposed": 10,
+            "chains_constructions_before_derived": 19,
+            "contribution_hld_queries_replaceable": 10348964,
+            "export_s": 91.704433127,
+            "histories_s": 50.145306644,
+            "lower_and_naturality_queries_retained": 34205965,
+            "n": 32000,
+            "object": "morsehgp3D_v7/receipts/parallel_birth_streaming_20260911/objects/93925b9962a73febbe4882867a5348462ed77bdd8be9c37bc442fd9f90b259a5",
+            "sha256": "93925b9962a73febbe4882867a5348462ed77bdd8be9c37bc442fd9f90b259a5"
+          }
+        ],
+        "scope": "Static equivalence and logical counts only. No new C++ execution, speedup, or output memory reduction measured.",
+        "source_commit": "34db4b3ef4f51b495d3dfac42638e4866ea8e71b",
+        "sources": [
+          {
+            "logical": "build/v7_graph_full_20260911/graph_full.hpp",
+            "object": "morsehgp3D_v7/receipts/atlas_graph_full_20260911/objects/bad5051fca4d78345841b4171dfb8a438c0f5a752452f784f4c9c196966a3f2d",
+            "sha256": "bad5051fca4d78345841b4171dfb8a438c0f5a752452f784f4c9c196966a3f2d",
+            "size": 14986
+          },
+          {
+            "logical": "build/v7_atlas_graph_20260911/filtered_calendar.hpp",
+            "object": "morsehgp3D_v7/receipts/atlas_graph_full_20260911/objects/1cf438cbac839c8f502de0c8daebbf89296a3884d2d40ba50715b5aaca161fa2",
+            "sha256": "1cf438cbac839c8f502de0c8daebbf89296a3884d2d40ba50715b5aaca161fa2",
+            "size": 14223
+          },
+          {
+            "logical": "build/v7_atlas_graph_20260911/historical_chains.hpp",
+            "object": "morsehgp3D_v7/receipts/atlas_graph_full_20260911/objects/686c2137a905e4f77c15a1d7f497541e6f8d87b9217f5c9c726cf4951be573c3",
+            "sha256": "686c2137a905e4f77c15a1d7f497541e6f8d87b9217f5c9c726cf4951be573c3",
+            "size": 5799
+          }
+        ],
+        "status": "passed_sealed_source_and_counter_derivation"
+      }
+    },
+    "constructor_review": {
+      "reviewer": "/root/worker_pool_review",
+      "modes": [
+        "Python normal",
+        "Python -O"
+      ],
+      "all_four_reader_exit_codes": 0,
+      "outputs_identical_per_pair": true,
+      "packets": [
+        {
+          "directory": "birth_streaming_20260911",
+          "manifest_sha256": "e613ff0f558c6f5f10589f92d219d2acce616e5eca4a67bc63ff15cab47c1510",
+          "reader_sha256": "b9ce20aed172e6ff1a31da739b9a2c982aef501c8c6c304b169f61018e7aed65",
+          "logical_files": 759,
+          "borrowed_files": 195,
+          "local_objects": 281,
+          "captures": 13,
+          "passed_captures": 12,
+          "failed_captures": 1,
+          "commands": 82
+        },
+        {
+          "directory": "parallel_birth_streaming_20260911",
+          "manifest_sha256": "759fcc21ef945803efa54c82f48b1368ec15dc95f715ad2131f140cb280688e0",
+          "reader_sha256": "9d96e9c5b2afb107f3d3fafcbd4724f9303499a91f7356299b950af87480f87f",
+          "logical_files": 756,
+          "borrowed_files": 199,
+          "local_objects": 274,
+          "captures": 15,
+          "passed_captures": 15,
+          "failed_captures": 0,
+          "commands": 75
+        }
+      ],
+      "commands": [
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "morsehgp3D_v7/receipts/birth_streaming_20260911/verify.py"
+          ],
+          "exit_code": 0,
+          "observer": "/root/worker_pool_review"
+        },
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "-O",
+            "morsehgp3D_v7/receipts/birth_streaming_20260911/verify.py"
+          ],
+          "exit_code": 0,
+          "observer": "/root/worker_pool_review"
+        },
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "morsehgp3D_v7/receipts/parallel_birth_streaming_20260911/verify.py"
+          ],
+          "exit_code": 0,
+          "observer": "/root/worker_pool_review"
+        },
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "-O",
+            "morsehgp3D_v7/receipts/parallel_birth_streaming_20260911/verify.py"
+          ],
+          "exit_code": 0,
+          "observer": "/root/worker_pool_review"
+        }
+      ],
+      "dense_each_build": {
+        "census_cases": 114,
+        "stream_trials": 456,
+        "observed_terminals": 253224,
+        "checks": 30619873,
+        "oracle_cuts": 29784,
+        "oracle_verticals": 15594832,
+        "causes": 16
+      },
+      "pool_each_build": {
+        "checks": 2500,
+        "refusals": 10,
+        "partial_starts": 3,
+        "reuses_after_refusal": 5
+      },
+      "parallel_each_build": {
+        "census_cases": 114,
+        "stream_trials": 912,
+        "observed_terminals": 506448,
+        "checks": 48771156,
+        "parallel_trials": 456,
+        "paid_geometry_tasks": 52524,
+        "causes": 19
+      },
+      "tsan": {
+        "status": "failed_before_test",
+        "exit_code": 66,
+        "reason": "unexpected memory mapping",
+        "race_qualification": false
+      },
+      "scope": "Read-only source/capture readers. Dense, autonomous pool and geometry workers retain separate O2/SAN authorities; no new C++ execution or timing by auditor. Shared-host timings are not a universal speedup or50k latency contract."
+    },
+    "constructive_results": [
+      "reconstruct already computes the closed-admission segment for every mark; gf::build asks contribution_answers the identical question.",
+      "Binding needs authentic immutable history ownership plus matching MarkId, representative phi and admission. Those field checks alone do not prove a supplied mark's segment is the true closed component.",
+      "Retain activation admission, not segment birth date, and preserve atlas.program(K) insertion order; history.marks sorted by MarkId is a different order.",
+      "Reuse all marks, including silent roles, for the u_B needed by the sealed historical export proof; retain group/lot minima, first-use order and all permutations.",
+      "A future parallel history constructor which has not produced marks must still compute them before this reuse.",
+      "Keep previous/current Chains:2m-1 constructions become m, at most two adjacent indexes live, unchanged structural validation and stable History addresses.",
+      "Lower and naturality queries keep their own cuts; a closed lower birth anchor is not a constant image for every upper node sharing that birth.",
+      "Measure real HLD queries and mark reuse/binding separately. Existing aggregated light/binary counts cannot quantify the removed work or runtime.",
+      "Historical first gates/triplets are closed; accepted prepared metadata, bound seed and integer scatter deltas are condensed, immutable evidence preserved."
+    ],
+    "counterreading": {
+      "reviewer": "/root/parallel_seam_review",
+      "agreement": "Both equivalences and three query counts independently confirmed; important physical insertion-order constraint added before publication.",
+      "cpp_executed": false
+    },
+    "checks": [
+      {
+        "name": "docs_normal",
+        "command": "python3 -B tools/check_docs.py",
+        "exit_code": 0,
+        "output": "Validated 508 active Markdown files.\n"
+      },
+      {
+        "name": "docs_optimized",
+        "command": "python3 -B -O tools/check_docs.py",
+        "exit_code": 0,
+        "output": "Validated 508 active Markdown files.\n"
+      },
+      {
+        "name": "registry",
+        "command": "python3 -B tools/check_implementation_status.py",
+        "exit_code": 0,
+        "output": "Validated 20 implementation phases and their gates.\n"
+      },
+      {
+        "name": "own_markdown",
+        "command": "python3 -B - <<'PY'\nfrom pathlib import Path\nimport importlib.util,json\nspec=importlib.util.spec_from_file_location('doccheck','tools/check_docs.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)\np=Path('morsehgp3D_v7/audits').resolve();files=[p/n for n in ['COORDINATION_AUDITEURS.md','DIALOGUE_COURANT.md','ETAT_COURANT.md','README.md']];errors=[e for f in files for e in m.validate(f)]\nprint(json.dumps({'files':len(files),'errors':errors}));raise SystemExit(bool(errors))\nPY",
+        "exit_code": 0,
+        "output": "{\"files\": 4, \"errors\": []}\n"
+      }
+    ],
+    "new_packet": false,
+    "new_cpp_execution": false,
+    "new_engine_variant": false,
+    "performance_claim": false,
+    "gcp_used": false,
+    "date_utc": "2026-09-11T19:50:16.175555+00:00",
+    "maintenance": {
+      "entries": [
+        {
+          "path": "COORDINATION_AUDITEURS.md",
+          "previous_sha256": "d6a577059abf5e3c5db21f1e91ea16eeb411a0cca7c1f93ce65db9e4fcf1c225",
+          "previous_words": 387,
+          "words": 350
+        },
+        {
+          "path": "DIALOGUE_COURANT.md",
+          "previous_sha256": "a13f83bfdfe6816e1f1ee59f448a5e1c42f64edd2efb9f8d43d6807c00855bc7",
+          "previous_words": 798,
+          "words": 974
+        },
+        {
+          "path": "ETAT_COURANT.md",
+          "previous_sha256": "85d0a48c905dfdb049ce118edbc8fb16586d2032bb0d539167a8f80bbc25a007",
+          "previous_words": 657,
+          "words": 644
+        },
+        {
+          "path": "README.md",
+          "previous_sha256": "e9181a79771db4ffea1ef6d4b26e423aa69afdda0f33f829b5751a757239e1a7",
+          "previous_words": 1031,
+          "words": 1054
+        }
+      ],
+      "active_notes_rewritten_not_appended": true,
+      "closed_first_qualification_requests_condensed": true,
+      "historical_packets_unchanged": true,
+      "source_variants_D_to_Q_unchanged": true,
+      "other_session_files_untouched": true,
+      "new_scattered_root_probe_files": false,
+      "temporary_directory_created": false
+    },
+    "whole_source_freshness": {
+      "common_pins_valid": 2861,
+      "source_variants_D_to_Q_unchanged": true,
+      "scope": "All common pins pass; no historical engine variant fully matches current sources. No new engine qualification.",
+      "commands": [
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "morsehgp3D_v7/audits/verify_current.py"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr_first_line": "Audit à actualiser : aucune variante complète ne correspond.",
+          "stderr_sha256": "6b7321b69dcf56cd8795142cd9c8692b62968d6e321388a490eaf538868d0c4e",
+          "stderr_lines": 149
+        },
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "-O",
+            "morsehgp3D_v7/audits/verify_current.py"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr_first_line": "Audit à actualiser : aucune variante complète ne correspond.",
+          "stderr_sha256": "6b7321b69dcf56cd8795142cd9c8692b62968d6e321388a490eaf538868d0c4e",
+          "stderr_lines": 149
+        }
+      ]
+    },
+    "coordination": {
+      "reservation_files": [
+        "COORDINATION_AUDITEURS.md",
+        "DIALOGUE_COURANT.md",
+        "ETAT_COURANT.md",
+        "README.md",
+        "ENTRETIEN.json",
+        "validation_current.json"
+      ],
+      "reservation_base": "34db4b3ef4f51b495d3dfac42638e4866ea8e71b",
+      "constructor_reservation_closed_in_34db4b3e": true,
+      "source": "audits/COORDINATION_MORSEHGP3D_V7.md read only"
+    }
   }
 }
