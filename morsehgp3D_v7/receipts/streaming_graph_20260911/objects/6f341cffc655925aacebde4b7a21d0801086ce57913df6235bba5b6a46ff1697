@@ -1,0 +1,295 @@
+#pragma once
+
+// Private mono-thread streaming seam. One shared tree of core/graph types.
+#include "../v7_atlas_graph_20260911/atlas_graph.hpp"
+#include "../v7_composable_msf_20260911/composable_msf.hpp"
+
+namespace mhgp7::streaming_graph_private {
+namespace ag = atlas_graph_private;
+namespace fc = filtered_calendar_private;
+namespace cm = composable_msf_private;
+using BlockId = u64;
+inline void require(bool value, const char* reason) {
+  if (!value) throw std::invalid_argument(reason);
+}
+struct Observer {
+  void* context = nullptr;
+  void (*terminal)(void*, const ag::Occurrence&) = nullptr;
+};
+struct OrderStats {
+  u64 occurrences = 0, windows = 0, window_unique = 0, initial_seed_hits = 0;
+  u64 seed_rows = 0, pivots = 0;
+  u64 hub_certificate_edges = 0, projected_edges = 0, projected_loops = 0, native_certificate_edges = 0;
+  FullBallStats geometry_work;  // Actual paid local work; Uglobal/Sglobal stay unmeasured.
+};
+struct Stats {
+  size_t window_width = 0;
+  std::array<OrderStats, 11> orders{};  // Indexed by K, not K-1.
+  std::array<cm::Work, 11> hub_work{}, native_work{};
+  u64 peak_window_items = 0, peak_window_logical_bytes = 0, peak_window_capacity_bytes = 0;
+  u64 peak_seed_logical_bytes = 0, peak_seed_capacity_bytes = 0;
+  u64 peak_hub_domain_logical_bytes = 0, peak_hub_domain_capacity_bytes = 0;
+  u64 by_key_logical_bytes = 0, by_key_capacity_bytes = 0;
+  u64 peak_intruder_scratch_logical_bytes = 0, peak_intruder_scratch_capacity_bytes = 0;
+  u64 peak_hub_certificate_logical_bytes = 0, peak_hub_certificate_capacity_bytes = 0;
+  u64 peak_native_certificate_logical_bytes = 0, peak_native_certificate_capacity_bytes = 0;
+  u64 output_metadata_logical_bytes = 0, output_metadata_capacity_bytes = 0;
+  u64 output_certificates_logical_bytes = 0, output_certificates_capacity_bytes = 0;
+};
+struct Streaming {
+  // Not substitutable for ag::extract: this is metadata only for gf::build.
+  // extraction.occurrences() is NOT valid without its targets[R] tape.
+  static constexpr bool has_terminal_tape = false;
+  ag::Extraction extraction;
+  std::vector<fc::Certificate<u32>> certificates;  // K-1.
+  Stats stats;
+};
+namespace detail {
+struct Request {
+  FullBallFacetKey key;
+  u64 ordinal;
+  u32 consumer, local;
+};
+template<class T> u64 logical(const std::vector<T>& rows) {
+  require(rows.size() <= std::numeric_limits<u64>::max() / sizeof(T), "streaming.bytes_overflow");
+  return rows.size() * sizeof(T);
+}
+template<class T> u64 capacity(const std::vector<T>& rows) {
+  require(rows.capacity() <= std::numeric_limits<u64>::max() / sizeof(T), "streaming.bytes_overflow");
+  return rows.capacity() * sizeof(T);
+}
+inline void output_memory(Streaming& out) {
+  const auto& extraction = out.extraction;
+  auto& stats = out.stats;
+  stats.output_metadata_logical_bytes = cm::sum(extraction.atlas.logical_bytes(), logical(extraction.phi));
+  stats.output_metadata_capacity_bytes = cm::sum(extraction.atlas.capacity_bytes(), capacity(extraction.phi));
+  cm::add(stats.output_metadata_logical_bytes, logical(extraction.orders));
+  cm::add(stats.output_metadata_capacity_bytes, capacity(extraction.orders));
+  for (const auto& order : extraction.orders) {
+    cm::add(stats.output_metadata_logical_bytes, cm::sum(logical(order.graph.births), logical(order.graph.marks)));
+    cm::add(stats.output_metadata_capacity_bytes, cm::sum(capacity(order.graph.births), capacity(order.graph.marks)));
+    require(order.graph.edges.empty() && order.graph.edges.capacity() == 0, "streaming.no_materialized_graph");
+  }
+  stats.output_certificates_logical_bytes = logical(out.certificates);
+  stats.output_certificates_capacity_bytes = capacity(out.certificates);
+  for (const auto& certificate : out.certificates) {
+    cm::add(stats.output_certificates_logical_bytes, cm::sum(cm::sum(logical(certificate.births),
+        logical(certificate.edges)), logical(certificate.marks)));
+    cm::add(stats.output_certificates_capacity_bytes, cm::sum(cm::sum(capacity(certificate.births),
+        capacity(certificate.edges)), capacity(certificate.marks)));
+  }
+  require(extraction.targets.empty() && extraction.targets.capacity() == 0, "streaming.no_terminal_tape");
+}
+}  // namespace detail
+
+// Premises: authentic immutable index and COMPLETE EXACT validated census, as
+// for Atlas. The terminal backend remains the qualified TEST-ONLY Geometry.
+// Observer is diagnostic and cannot provide values to the algorithm. It may
+// see a prefix before an exception; no Streaming result is then published and
+// no recoverable paid-work count is claimed. Both observer members or neither.
+inline Streaming build(const CloudIndex& index, std::span<const BallData> balls,
+    unsigned requested, size_t window_width, Observer observer = {}) {
+  require(window_width > 0, "streaming.window_width");
+  require((observer.context == nullptr) == (observer.terminal == nullptr), "streaming.observer_pair");
+  Streaming out{ag::Extraction{rank_atlas_private::Atlas::build(index, balls, requested), {}, {}, {}, {}, {}}, {}, {}};
+  out.stats.window_width = window_width;
+  auto& extraction = out.extraction;
+  const auto& atlas = extraction.atlas;
+  extraction.phi.assign(atlas.contributions.size(), ag::absent);
+  extraction.orders.resize(atlas.kmax);
+  out.certificates.reserve(atlas.kmax);
+  std::vector<u32> by_key(balls.size());
+  std::iota(by_key.begin(), by_key.end(), u32{0});
+  std::sort(by_key.begin(), by_key.end(), [&](u32 a, u32 b) { return balls[a].key < balls[b].key; });
+  out.stats.by_key_logical_bytes = detail::logical(by_key);
+  out.stats.by_key_capacity_bytes = detail::capacity(by_key);
+
+  for (unsigned k = 1; k <= atlas.kmax; ++k) {
+    auto& order = extraction.orders[k - 1]; order.k = k;
+    auto& stats = out.stats.orders[k];
+    std::vector<fc::Birth<u32>> hubs;
+    std::vector<FullBallBatchSeed> seeds;
+    const auto program = atlas.program(k);
+    const auto point_count = k == 1 ? index.input_count : 0;
+    const auto hub_count = cm::sum(program.size(), point_count);
+    require(hub_count <= hubs.max_size(), "streaming.domain_representation");
+    hubs.reserve(static_cast<size_t>(hub_count));
+    if (k == 1) for (u32 point = 0; point < index.input_count; ++point) {
+      hubs.push_back({point, 0}); order.graph.births.push_back({point, 0});
+      cm::add(extraction.stats.point_births);
+    }
+    u64 planned_occurrences = 0, seed_count = 0;
+    for (u32 b : program) {
+      const u64 cell = atlas.cell(b, k), first = atlas.rep_offsets[cell], last = atlas.rep_offsets[cell + 1];
+      const u64 block = *atlas.block_id(b, k);
+      hubs.push_back({block, atlas.slots[b].rank});
+      cm::add(planned_occurrences, last - first);
+      if (first == last) {
+        // Native even if isolated forever. It never generates a terminal.
+        extraction.phi[cell] = block;
+        order.graph.births.push_back({block, atlas.slots[b].rank});
+        cm::add(extraction.stats.native_ball_births);
+      }
+      if (k >= 2 && k == static_cast<unsigned>(balls[b].n_interior) + balls[b].n_shell) cm::add(seed_count);
+    }
+    require(seed_count <= seeds.max_size(), "streaming.seed_representation");
+    seeds.reserve(static_cast<size_t>(seed_count));
+    for (u32 b : program) if (k >= 2 && k == static_cast<unsigned>(balls[b].n_interior) + balls[b].n_shell) {
+      FullBallFacetKey key{}; size_t count = 0;
+      for (i32 site : balls[b].interior()) key[count++] = site;
+      for (i32 site : balls[b].shell()) key[count++] = site;
+      std::sort(key.begin(), key.begin() + count); seeds.push_back({key, b});
+    }
+    std::sort(seeds.begin(), seeds.end(), [](const auto& a, const auto& b) { return a.key < b.key; });
+    for (size_t j = 1; j < seeds.size(); ++j) require(seeds[j - 1].key != seeds[j].key, "streaming.duplicate_seed");
+    stats.seed_rows = seeds.size(); extraction.stats.seed_rows[k] = seeds.size();
+    out.stats.peak_seed_logical_bytes = std::max(out.stats.peak_seed_logical_bytes, detail::logical(seeds));
+    out.stats.peak_seed_capacity_bytes = std::max(out.stats.peak_seed_capacity_bytes, detail::capacity(seeds));
+    out.stats.peak_hub_domain_logical_bytes = std::max(out.stats.peak_hub_domain_logical_bytes, detail::logical(hubs));
+    out.stats.peak_hub_domain_capacity_bytes = std::max(out.stats.peak_hub_domain_capacity_bytes, detail::capacity(hubs));
+
+    cm::BorrowedDomain<u32, std::less<u32>> hub_domain(hubs, {}, out.stats.hub_work[k]);
+    cm::BinaryPile<u32, std::less<u32>> pile(hub_domain, out.stats.hub_work[k]);
+    batch_test::Geometry geometry{index, balls, by_key, k};
+    std::vector<NodeRef> scratch;
+    std::vector<detail::Request> requests;
+    std::vector<size_t> sorted;
+    std::vector<u32> targets;
+    std::vector<fc::Edge<u32>> edges;
+    require(planned_occurrences <= atlas.rep_masks.size(), "streaming.occurrence_representation");
+    const size_t reserve = std::min(window_width, static_cast<size_t>(planned_occurrences));
+    requests.reserve(reserve); sorted.reserve(reserve); targets.reserve(reserve); edges.reserve(reserve);
+    const auto observe_window_memory = [&] {
+      out.stats.peak_window_items = std::max<u64>(out.stats.peak_window_items, requests.size());
+      const u64 logical = cm::sum(cm::sum(detail::logical(requests), detail::logical(sorted)),
+          cm::sum(detail::logical(targets), detail::logical(edges)));
+      const u64 capacity = cm::sum(cm::sum(detail::capacity(requests), detail::capacity(sorted)),
+          cm::sum(detail::capacity(targets), detail::capacity(edges)));
+      out.stats.peak_window_logical_bytes = std::max(out.stats.peak_window_logical_bytes, logical);
+      out.stats.peak_window_capacity_bytes = std::max(out.stats.peak_window_capacity_bytes, capacity);
+    };
+    const auto flush = [&] {
+      if (requests.empty()) return;
+      require(requests.size() <= window_width, "streaming.window_size");
+      cm::add(stats.windows);
+      sorted.resize(requests.size()); std::iota(sorted.begin(), sorted.end(), size_t{0});
+      std::sort(sorted.begin(), sorted.end(), [&](size_t a, size_t b) {
+        const auto& x = requests[a]; const auto& y = requests[b];
+        return x.key != y.key ? x.key < y.key : x.ordinal < y.ordinal;
+      });
+      targets.assign(requests.size(), std::numeric_limits<u32>::max());
+      for (size_t first = 0; first < sorted.size();) {
+        size_t last = first + 1;
+        const auto& source = requests[sorted[first]];
+        while (last < sorted.size() && requests[sorted[last]].key == source.key) ++last;
+        cm::add(stats.window_unique);
+        const auto& before = balls[source.consumer].level;
+        u32 target;
+        if (k == 1) {
+          require(source.key[0] >= 0 && static_cast<u64>(source.key[0]) < index.input_count, "streaming.K1_terminal");
+          target = static_cast<u32>(source.key[0]);
+        } else {
+          const auto seed = std::lower_bound(seeds.begin(), seeds.end(), source.key,
+              [](const FullBallBatchSeed& row, const FullBallFacetKey& key) { return row.key < key; });
+          if (seed != seeds.end() && seed->key == source.key) {
+            target = seed->ball;
+            require(compare_exact_level(balls[target].level, before) < 0, "streaming.seed_not_strict");
+            cm::add(stats.initial_seed_hits);
+          } else target = geometry.static_terminal(source.key, before, stats.geometry_work, scratch, seeds);
+        }
+        out.stats.peak_intruder_scratch_logical_bytes = std::max(out.stats.peak_intruder_scratch_logical_bytes, detail::logical(scratch));
+        out.stats.peak_intruder_scratch_capacity_bytes = std::max(out.stats.peak_intruder_scratch_capacity_bytes, detail::capacity(scratch));
+        for (size_t j = first; j < last; ++j) {
+          const size_t at = sorted[j]; const auto& request = requests[at];
+          require(compare_exact_level(before, balls[request.consumer].level) <= 0, "streaming.first_consumer");
+          if (k >= 2) require(target < balls.size() && atlas.block_id(target, k).has_value() &&
+              compare_exact_level(balls[target].level, balls[request.consumer].level) < 0,
+              "streaming.terminal_admission_strict");
+          targets[at] = target;
+        }
+        first = last;
+      }
+      edges.clear();
+      for (size_t j = 0; j < requests.size(); ++j) {
+        const auto& request = requests[j]; const u32 target = targets[j];
+        const u64 cell = atlas.cell(request.consumer, k), block = *atlas.block_id(request.consumer, k);
+        const u64 target_block = k == 1 ? static_cast<u64>(target) : *atlas.block_id(target, k);
+        if (request.local == 0) {
+          require(extraction.phi[cell] == ag::absent, "streaming.pivot_unique");
+          extraction.phi[cell] = target_block; cm::add(stats.pivots);
+        }
+        edges.push_back({request.ordinal, block, target_block, atlas.slots[request.consumer].rank});
+        if (observer.terminal) {
+          const u64 slot = atlas.rep_offsets[cell] + request.local;
+          const ag::Occurrence occurrence{k, request.consumer, block, request.local, request.ordinal, slot, target};
+          observer.terminal(observer.context, occurrence);
+        }
+      }
+      observe_window_memory();
+      pile.push(edges);
+      requests.clear(); sorted.clear(); targets.clear(); edges.clear();
+    };
+
+    u64 ordinal = 0;
+    for (u32 b : program) {
+      const u64 cell = atlas.cell(b, k), first = atlas.rep_offsets[cell], last = atlas.rep_offsets[cell + 1];
+      for (u64 slot = first; slot < last; ++slot) {
+        const auto sites = atlas.expand(b, atlas.rep_masks[slot]);
+        require(sites.size() == k && std::adjacent_find(sites.begin(), sites.end()) == sites.end(),
+            "streaming.facet_cardinality");
+        require(slot - first <= std::numeric_limits<u32>::max(), "streaming.local_ordinal_representation");
+        requests.push_back({full_ball_detail::ResolverCache::key(sites), ordinal, b, static_cast<u32>(slot - first)});
+        cm::add(ordinal);
+        if (requests.size() == window_width) flush();
+      }
+    }
+    flush();
+    stats.occurrences = ordinal; cm::add(extraction.stats.representatives, ordinal);
+    require(ordinal == planned_occurrences, "streaming.all_occurrences");
+    if (k >= 2) extraction.work.static_requests[k] = ordinal;
+    batch_test::Merger{extraction.work}.merge_static_work(stats.geometry_work);
+    // Uglobal and Sglobal are not measured. Their old fields intentionally
+    // remain zero; ΣUw and paid initial hits live in Stats::orders[K].
+    for (u32 b : program) {
+      const u64 cell = atlas.cell(b, k), block = *atlas.block_id(b, k);
+      const bool native = atlas.rep_offsets[cell] == atlas.rep_offsets[cell + 1];
+      const u64 pivot = extraction.phi[cell];
+      require(pivot != ag::absent, "streaming.pivot_missing");
+      if (native) require(pivot == block, "streaming.native_identity");
+      else if (k == 1) require(pivot < index.input_count, "streaming.point_pivot");
+      else {
+        require(pivot >= index.input_count && pivot - index.input_count < extraction.phi.size(), "streaming.pivot_block");
+        const u64 resolved = extraction.phi[pivot - index.input_count];
+        require(resolved != ag::absent, "streaming.phi_predecessor");
+        extraction.phi[cell] = resolved;
+      }
+      order.graph.marks.push_back({block, extraction.phi[cell], atlas.slots[b].rank});
+      cm::add(extraction.stats.marks);
+    }
+
+    auto certificate = pile.finish();
+    stats.hub_certificate_edges = certificate.edges.size();
+    out.stats.peak_hub_certificate_logical_bytes = std::max(out.stats.peak_hub_certificate_logical_bytes, detail::logical(certificate.edges));
+    out.stats.peak_hub_certificate_capacity_bytes = std::max(out.stats.peak_hub_certificate_capacity_bytes, detail::capacity(certificate.edges));
+    // In-place projection of a sparse hub certificate, never the R-edge graph.
+    size_t write = 0;
+    for (const auto& edge : certificate.edges) {
+      const auto native = [&](u64 hub) { return hub < index.input_count ? hub : extraction.phi.at(hub - index.input_count); };
+      const u64 a = native(edge.a), b = native(edge.b);
+      if (a == b) { cm::add(stats.projected_loops); continue; }
+      certificate.edges[write++] = {edge.id, a, b, edge.date};  // Original consumer weight preserved.
+    }
+    certificate.edges.resize(write); stats.projected_edges = write;
+    cm::BorrowedDomain<u32, std::less<u32>> native_domain(order.graph.births, {}, out.stats.native_work[k]);
+    auto compact = cm::compact_msf(native_domain, std::span<const fc::Edge<u32>>(certificate.edges), out.stats.native_work[k]);
+    stats.native_certificate_edges = compact.edges.size();
+    out.stats.peak_native_certificate_logical_bytes = std::max(out.stats.peak_native_certificate_logical_bytes, detail::logical(compact.edges));
+    out.stats.peak_native_certificate_capacity_bytes = std::max(out.stats.peak_native_certificate_capacity_bytes, detail::capacity(compact.edges));
+    out.certificates.push_back({order.graph.births, std::move(compact.edges), order.graph.marks});
+    require(out.stats.hub_work[k].source_edges == ordinal && out.stats.hub_work[k].windows == stats.windows,
+        "streaming.hub_window_accounting");
+  }
+  detail::output_memory(out);
+  return out;
+}
+}  // namespace mhgp7::streaming_graph_private

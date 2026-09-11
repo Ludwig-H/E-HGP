@@ -1,0 +1,144 @@
+# Fenêtres de représentants : terminales, semis et résidence
+
+11 septembre 2026. Analyse privée en lecture des sources qualifiées, pas un
+résultat d'exécution de `streaming_graph.hpp` en cours de préparation.
+`phase=exploration_v7_hors_registre`, `backend=cpu_reference`,
+`profile=quantized_u16_input_only`,
+`mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
+Aucune compilation ni utilisation GCP ; aucun fichier produit/auditeur modifié.
+
+## 1. Pourquoi la terminale ne dépend pas de la fenêtre
+
+Fixer K, le même index géométrique, le même catalogue exact complet et la même
+facette entière F triée en GeometryIndex. Garder toute l'exclusion F, pas
+seulement le support de sa MEB. `Geometry::static_terminal` lit `before` aux
+lignes 61 et 89 uniquement dans des gardes ; il ne l'utilise pour choisir ni
+support, ni premier intrus, ni candidat du catalogue.
+
+Si la MEB initiale de F est strictement antérieure à chaque consommateur,
+toutes les MEB suivantes le restent puisque leurs niveaux ne croissent pas.
+Le premier support canonique, l'intrus gauche/range croissant, le remplacement
+du premier slot et le tri géométrique suivant sont alors identiques. Par
+induction, les requêtes identiques ont la même trace et la même BallId terminale,
+indépendamment du découpage et de l'ordre de traitement des fenêtres.
+
+Cela n'autorise pas à permuter les sites à l'intérieur d'une clé : trier par
+PointId au lieu de GeometryIndex peut changer le support canonique et la
+descente. Les indices sont attachés à ce même index immutable ; une permutation
+du catalogue peut changer les BallId numériques et demande une bijection exacte.
+
+Au raccord, sélectionner le consommateur le plus ancien de chaque groupe
+intra-fenêtre, puis vérifier la stricte antériorité pour CHAQUE occurrence avant
+publication de sa terminale. Le choix d'un consommateur tardif n'est pas un
+certificat de la validité des autres. L'ordinal doit être celui de l'émission
+canonique, jamais celui de la fin d'exécution asynchrone.
+
+## 2. Les semis sont géométriques, pas temporels
+
+Préparer une fois par K les clés complètes triées I(B)∪U(B) de cardinal K, depuis
+tout le programme admis. Une telle population possède pour MEB la boule B,
+grâce à son support positif. Un hit initial remplace donc exactement une MEB
+suivie de son lookup ; il exige toujours niveau(B) < niveau(consommateur).
+
+Après échange, le hit remplace la MEB suivante et son arrêt immédiat. Il exige
+les DEUX inégalités strictes du helper : niveau(B) < niveau(MEB précédente) et
+niveau(B) < niveau(consommateur). Une coquille partielle ou un support survivant
+n'est pas un semis : les pas à rayon égal doivent rester possibles et vérifiés.
+
+La présence de tous les semis du catalogue ne fait pas apparaître les hubs
+futurs dans la forêt ; seules les gardes de niveau autorisent le résultat.
+Limiter les semis à ceux rencontrés dans des fenêtres antérieures change le
+travail et son ordre, même si le repli géométrique complet garde la terminale.
+Filtrer le catalogue lui-même par fenêtre changerait au contraire les arrêts.
+
+## 3. Flux et certificat
+
+Conserver sur chaque occurrence `(K, source_block, local, ordinal, facette)`.
+Après dédup local, restituer la terminale à toutes les occurrences en ordre
+d'émission et émettre leurs arêtes originales hub→terminal. Le pivot d'un hub
+non natif est sa seule occurrence `local==0`, même si ce hub chevauche plusieurs
+fenêtres. Ne pas choisir la première clé triée ni la première réponse arrivée.
+Les hubs sans représentant sont les naissances ; ajouter séparément les points K1.
+
+Le domaine des hubs, leurs dates et la pile MSF sont préparés une fois par K.
+La table φ de taille A peut contenir les pivots provisoires, puis être convertie
+en place dans l'ordre des rangs croissants après réception de toutes les
+terminales K. Chaque pivot non natif doit viser un bloc strictement plus ancien.
+Une valeur manquante ne doit pas devenir implicitement le point zéro.
+
+Projeter TOUTES les arêtes du certificat hub, conserver leurs dates et identités,
+supprimer les boucles, puis compacter sur les seules naissances. La date w d'une
+arête domine chaque chaîne de pivots de ses extrémités ; le maximum du chemin
+développé vaut donc w. Le témoin a,b à0 ; h→a à4 ; H→b à9 ; H–h à9 doit donner
+a–b à9, jamais4. Marques d'admission, contributions et références inférieures
+restent hors des certificats d'arêtes. Les histoires locales ne sont pas publiées.
+
+## 4. Comparer au tri-unique global sans confondre les compteurs
+
+Pour un K fixé, noter R les occurrences, U le nombre global de clés distinctes,
+Uw la somme des nombres de clés distinctes des fenêtres, Sw leurs hits initiaux
+sur les semis et G les appels effectifs à `static_terminal`. Sans cache global :
+
+$$U\leq U_w\leq R,\qquad G=U_w-S_w.$$
+
+Avec Q requêtes de semis après échange, H hits, T arrêts par ce raccourci et M
+MEB effectivement évaluées, les appels complets du helper respectent :
+
+$$H=T,\qquad M=G+Q-H,\qquad G=\mathrm{anchor\_hits}+H,\qquad Q=\mathrm{descending\_steps}+\mathrm{same\_radius\_steps}.$$
+
+Ces identités sont par K≥2 et pour une exécution nominale complète ; les
+singletons K1, les validations et le travail du juge sont séparés. Le coût
+géométrique supplémentaire dépend du nombre de répétitions de chaque facette
+ET de sa longueur de descente, pas seulement du quotient Uw/U. Ne pas appeler
+Uw « U global » dans `static_unique` ni Sw « semis globalement distincts » sans
+un nouveau tag explicite. Le U exact du comparateur matérialisé est diagnostic,
+pas une table globale à réintroduire dans le chemin mémoire bornée.
+
+La fenêtre retire la nécessité des clés 56R et des targets 4R simultanées.
+Elle ne retire pas les masques de l'atlas (2R), ses offsets, les populations,
+les A cellules/φ, les S semis complets, les sorties FULL ni la pile de certificats.
+Préparer `Atlas`, `validate_shape`, `by_key`, semis et `BorrowedDomain` une seule
+fois ; les reconstruire dans chaque flush réintroduirait J(A+R) ou JC log C.
+Le domaine construit une permutation d'IDs une fois, puis le DSU ne touche que
+les extrémités des arêtes réellement soumises à chaque compactage.
+
+Mesurer séparément : R/Udiagnostic/Uw/Sw/G par K ; Q/H/T, MEB/supports/power,
+intrus/visites ; comptes d'initialisations et tailles des tris globaux ; nombre
+de flushes, sorts/items et arêtes retraitées par MSF ; pics de capacités des
+fenêtres/seeds/φ/atlas/certificats et pic total réellement simultané. Les pics
+logiques du helper MSF ne sont ni leur somme en RSS ni une prévision de débit.
+Petites fenêtres : résidence réduite mais dédup moins efficace et plus de
+réductions. Grande fenêtre : meilleure mutualisation possible mais résidence
+accrue. Aucun optimum ni speedup ne découle de la seule preuve.
+
+## 5. Mutants ciblés proposés, non exécutés ici
+
+- Dédup par support MEB au lieu de F entière : mêmes supports mais exclusions
+  différentes ; le contrôle BallId direct doit voir la divergence ou le rejet.
+- Retour d'une terminale valide seulement pour le consommateur tardif : vérifier
+  l'absence de publication pour l'autre occurrence strictement invalide.
+- Mauvaise table de semis : faux couple clé/BallId de même cardinal K ; hit
+  initial trop tardif ; semis partiel après échange à niveau égal. Comparer
+  terminales ET compteurs, pas seulement la topologie de sortie.
+- Semis rendus dépendants de la fenêtre : terminales éventuellement inchangées,
+  mais identités de travail attendues selon les clés répétées/seeds réfutent le
+  claim de même politique. Exercer `actual_equal_radius_descent` et un vrai hit H.
+- Hub partagé entre fenêtres : remplacer pivot local0 par premier retour,
+  perdre/rejouer une occurrence, omettre un pivot ou une naissance isolée. La
+  séquence d'observation directe doit contrôler les ordinals sans stocker R en
+  produit ; le juge borné peut conserver toutes les attentes pour comparaison.
+- Antidater la projection 9→4, supprimer une marque silencieuse, inverser les
+  bits d'une contribution partielle sous permutation des PointId ; comparer les
+  coupes ouvertes/fermées, identités natives, contributions et verticales.
+- Déplacer les initialisations globales dans flush : atlas/by_key préparés une
+  fois pour le catalogue, domaine/seeds une fois par ordre concerné, jamais
+  une fois par fenêtre ; grand domaine avec peu d'extrémités pour vérifier la
+  non-vacuité du DSU touché.
+
+Sources lues : `atlas_graph.hpp` bb2b84d990a99289c2cc08198cedf44ec7c3013901a32af7ee7ecbcfaec6a7c0 ;
+`rank_atlas.hpp` 9fc118a208eac74472a0e8e5490e094953afced19495102a1ae06409b591d621 ;
+`full_ball_batch_geometry.hpp` 194f1b2b62dba6b847858d81217574d8fdc47d9d71c7b72c8c2caa0085d3a438 ;
+`composable_msf.hpp` dba0ae644a6aa5911519e2a4130180d9bfa371253134f065d61808bec91e065a.
+Fondement conditionnel : preuve auditeur `receipts_composable_msf_20260911`,
+preuves de fenêtre/quotient/terminales du programme FULL, non une nouvelle
+qualification du manuscrit ou d'un régime de coordonnées supplémentaire.

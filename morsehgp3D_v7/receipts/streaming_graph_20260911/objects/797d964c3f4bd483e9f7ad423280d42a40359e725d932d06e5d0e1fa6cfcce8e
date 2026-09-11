@@ -1,0 +1,31 @@
+# Décision de raccord — flux de terminales
+
+Le raccord expérimental conserve le catalogue exact partagé, l'atlas et ses
+masques compacts. Il retire les demandes développées d'un ordre entier, le
+tableau global des terminales et les graphes complets. Les quatre buffers
+de résolution ont une résidence choisie W ; aucun nombre maximal de pas
+géométriques n'est introduit.
+
+Une fenêtre calcule ses terminales indépendamment des précédentes. Elle
+conserve seulement le pivot d'ordinal local zéro de chaque bloc et un
+certificat MSF daté. Les certificats sont composables ; après résolution
+des pivots, leur projection conserve les dates d'origine. Les naissances,
+les marques d'admission et les contributions ne sont pas jetées avec les
+arêtes éliminées. La tour et ses verticales se reconstruisent ensuite.
+
+La sortie FULL explicite, les masques et les certificats restent des coûts
+réels. Réduire W augmente potentiellement les résolutions répétées et les
+compactions ; W n'est ni K, ni le facteur s de séparation WSPD. Le benchmark
+doit comparer ces coûts à entrée, catalogue et convention d'export identiques.
+
+L'auditeur a également fourni une reconstruction de l'encodage historique :
+minimum BallKey par groupe fermé pour ordonner groupes et premières
+utilisations, minimum distinct par lot K pour les fractions brutes. Tous les
+blocs participent, silencieux compris. Cette passe d'export ne demande pas
+de rejouer le calendrier géométrique. Elle n'est pas intégrée ici : la voie
+mesurée conserve la convention du raccord graph_full qualifié.
+
+Le producteur de ce jalon reste mono-thread. Les résolutions de facettes,
+les compactions et la reconstruction des histoires ne deviennent pas GPU
+par le seul fait d'être indépendantes. Leur distribution, les jointures
+globales et l'export doivent encore être implémentés et mesurés.

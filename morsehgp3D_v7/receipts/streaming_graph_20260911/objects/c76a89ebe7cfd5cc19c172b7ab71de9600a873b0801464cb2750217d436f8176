@@ -1,0 +1,50 @@
+# Réducteur privé pour flux déjà ordonné
+
+`ordered_msf.hpp` expose `mhgp7::ordered_msf_private::OrderedReducer<Date, Less>` :
+constructeur `(const cm::BorrowedDomain<Date, Less>&, cm::Work&)`, `push(span<Edge>)`,
+`finish()->cm::EdgeCertificate<Date>` et `stats() const`. Aucun raccord au moteur
+figé, aucune compilation ou qualification n'est revendiquée ici.
+
+Le domaine et son tableau contigu de naissances sont empruntés, immuables et
+vivants pendant tout le réducteur. Une DSU de taille |V| est initialisée une fois.
+Le lookup qualifié rend une référence dans ce même tableau ; son offset par
+soustraction d'adresses fournit l'indice DSU, sans nouvelle table d'identités.
+Les sommets isolés et futurs restent dans le domaine, sans être reliés avant
+leurs naissances : chaque arête contrôle `birth(endpoint) <= date(edge)`.
+L'égalité est autorisée pour les hubs ; la validation stricte du graphe réduit
+reste postérieure à la projection, comme dans la route composée.
+
+Les dates doivent être non décroissantes sous le comparateur exact et les IDs
+strictement croissants sur TOUT le flux, y compris entre fenêtres et autour
+des fenêtres vides. Pas de conversion des dates, pas de table globale seen[R].
+Ces deux conditions sont contrôlées ; les causes sont `ordered.edge_order` et
+`ordered.edge_identity`. Le tie-break est l'ordre d'arrivée/ordinal, pas le tri
+secondaire des endpoints de `compact_msf`. Les certificats peuvent donc différer
+en arêtes à date égale : il faut qualifier les coupes et la reconstruction,
+pas réclamer l'identité des arêtes avec la pile binaire.
+
+Kruskal traite chaque arête une fois et ne conserve que les unions. Un rejet
+signifie qu'un chemin déjà retenu relie les deux bouts avec des dates <= à celle
+de l'arête. Après consommation de tous les plateaux, cette propriété est celle
+du certificat de filtration ; elle ne fait pas d'un préfixe AU MILIEU d'un
+plateau une coupe temporelle complète. Elle ne remplace ni le juge indépendant
+ni une preuve de géométrie. Les fenêtres désordonnées restent du ressort de
+la voie composée ; aucun gain de parallélisation massive n'est affirmé ici.
+
+Toute exception pendant `push` ou `finish` empoisonne l'objet. Aucun certificat
+partiel n'est retourné et `finish` n'est autorisé qu'une fois, même pour un
+domaine vide. Les compteurs connus peuvent décrire un préfixe payé, jamais un
+résultat valide après erreur. Les compteurs `cm::Work` enregistrent les fenêtres,
+arêtes proposées/examinées, lookups, validations, unions et sortie réels.
+`compact_calls`, `merges`, compteurs de tris/vertices touchés et pics temporaires
+de compaction NE sont PAS incrémentés artificiellement. Le tri initial du
+`BorrowedDomain`, s'il figure dans ce même Work, reste naturellement compté.
+
+Les statistiques propres distinguent initialisation DSU, validations d'ordre et
+tailles/capacités des vecteurs possédés. Le certificat croît seulement lors
+d'une union, sans réserve obligatoire de |V|−1 arêtes. Ses capacités observées
+ne mesurent pas les anciens/nouveaux buffers simultanés lors d'une réallocation.
+La résidence est DSU O(|V|), certificat O(|V|), dernier `(id,date)` O(1), plus
+le domaine/permutation emprunté et la fenêtre détenue par l'appelant. Aucun
+tableau proportionnel à tout R, aucun pic RSS revendiqué, aucun plafond de n
+ou d'itération ajouté. Qualification et mesures nouvelles requises.

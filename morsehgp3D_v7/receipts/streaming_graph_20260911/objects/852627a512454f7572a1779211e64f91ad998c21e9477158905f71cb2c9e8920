@@ -1,0 +1,109 @@
+#pragma once
+
+// Private monotone-input Kruskal reducer; not a replacement for arbitrary
+// out-of-order/composed windows. Resolve filtered_calendar.hpp from the SAME
+// atlas tree as the consumer, exactly as for the qualified BinaryPile.
+#include "../v7_composable_msf_20260911/composable_msf.hpp"
+
+namespace mhgp7::ordered_msf_private {
+namespace cm = composable_msf_private;
+namespace fc = filtered_calendar_private;
+using Id = fc::Id;
+
+struct Stats {
+  Id dsu_initializations = 0, initialized_vertices = 0;
+  Id order_date_comparisons = 0, order_identity_comparisons = 0;
+  Id validated_edges = 0, finish_calls = 0;
+  Id peak_input_edges = 0, peak_certificate_edges = 0;
+  // Named owned vectors only, not allocator transients or total process RSS.
+  Id dsu_logical_bytes = 0, dsu_capacity_bytes = 0;
+  Id peak_certificate_capacity_bytes = 0;
+};
+
+template<class T> Id bytes(std::size_t count) {
+  cm::require(count <= std::numeric_limits<Id>::max() / sizeof(T), "ordered.bytes_overflow");
+  return static_cast<Id>(count) * sizeof(T);
+}
+
+// Domain, its contiguous birth span and comparator must remain immutable and
+// alive. Date/Less obey the same exact total-preorder premise as the calendar.
+// All edges in all pushes must have nondecreasing dates and STRICTLY increasing
+// IDs; equal dates are legal, as is endpoint birth == edge date for a hub.
+// Empty pushes do not reset the previous edge. No O(R) seen-ID table exists.
+template<class Date, class Less> class OrderedReducer {
+ public:
+  OrderedReducer(const cm::BorrowedDomain<Date, Less>& domain, cm::Work& work)
+      : domain_(domain), work_(work), dsu_(domain.vertices().size()) {
+    stats_.dsu_initializations = 1;
+    stats_.initialized_vertices = domain.vertices().size();
+    stats_.dsu_logical_bytes = cm::sum(bytes<std::size_t>(dsu_.parent.size()), bytes<std::size_t>(dsu_.size.size()));
+    stats_.dsu_capacity_bytes = cm::sum(bytes<std::size_t>(dsu_.parent.capacity()), bytes<std::size_t>(dsu_.size.capacity()));
+  }
+  OrderedReducer(const OrderedReducer&) = delete;
+  OrderedReducer& operator=(const OrderedReducer&) = delete;
+
+  const Stats& stats() const { return stats_; }
+
+  void push(std::span<const fc::Edge<Date>> input) {
+    check_live();
+    try {
+      cm::add(work_.windows); cm::add(work_.source_edges, input.size());
+      stats_.peak_input_edges = std::max<Id>(stats_.peak_input_edges, input.size());
+      if (input.empty()) return;
+      cm::add(work_.nonempty_windows);
+      for (const auto& edge : input) {
+        cm::add(work_.input_edges);
+        cm::require(edge.id != fc::absent, "ordered.edge_identity");
+        if (previous_) {
+          cm::add(stats_.order_identity_comparisons);
+          cm::require(previous_->first < edge.id, "ordered.edge_identity");
+          cm::add(stats_.order_date_comparisons);
+          cm::require(!domain_.less()(edge.date, previous_->second), "ordered.edge_order");
+        }
+        const auto& a = domain_.lookup(edge.a, work_);
+        const auto& b = domain_.lookup(edge.b, work_);
+        cm::add(work_.validation_date_comparisons);
+        cm::require(!domain_.less()(edge.date, a.date), "ordered.edge_before_endpoint");
+        cm::add(work_.validation_date_comparisons);
+        cm::require(!domain_.less()(edge.date, b.date), "ordered.edge_before_endpoint");
+        cm::add(stats_.validated_edges);
+        previous_.emplace(edge.id, edge.date);
+        // lookup returns an element of this exact contiguous borrowed span.
+        // Pointer subtraction therefore gives its DSU position, not its ID.
+        const auto* first = domain_.vertices().data();
+        const auto ia = static_cast<std::size_t>(&a - first);
+        const auto ib = static_cast<std::size_t>(&b - first);
+        cm::add(work_.dsu_attempts);
+        if (dsu_.unite(ia, ib)) {
+          cm::add(work_.dsu_unions);
+          out_.edges.push_back(edge);
+          stats_.peak_certificate_edges = std::max<Id>(stats_.peak_certificate_edges, out_.edges.size());
+          stats_.peak_certificate_capacity_bytes = std::max(stats_.peak_certificate_capacity_bytes,
+              bytes<fc::Edge<Date>>(out_.edges.capacity()));
+          work_.peak_retained_edges = std::max<Id>(work_.peak_retained_edges, out_.edges.size());
+        }
+      }
+    } catch (...) { failed_ = true; throw; }
+  }
+
+  cm::EdgeCertificate<Date> finish() {
+    check_live();
+    try {
+      cm::add(stats_.finish_calls);
+      cm::add(work_.output_edges, out_.edges.size());
+      finished_ = true;
+      return std::move(out_);
+    } catch (...) { failed_ = true; throw; }
+  }
+
+ private:
+  void check_live() const { cm::require(!failed_ && !finished_, "ordered.closed_or_failed"); }
+  const cm::BorrowedDomain<Date, Less>& domain_;
+  cm::Work& work_;
+  fc::Dsu dsu_;
+  cm::EdgeCertificate<Date> out_;
+  std::optional<std::pair<Id, Date>> previous_;
+  Stats stats_;
+  bool finished_ = false, failed_ = false;
+};
+}  // namespace mhgp7::ordered_msf_private

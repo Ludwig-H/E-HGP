@@ -1,0 +1,472 @@
+// Bounded real-census -> atlas -> graph -> FULL gate. No exhaustive producer.
+#include <tuple>
+#include "../v7_atlas_graph_20260911/source/morsehgp3D_v7/tests/census_tower_oracle.hpp"
+#define main mhgp7_graph_gate_inherited_reference_main
+#define local_plateau_oracle census_tower_oracle
+#include "../v7_atlas_graph_20260911/source/morsehgp3D_v7/tests/full_ball_tower_gate.cpp"
+#undef local_plateau_oracle
+#undef main
+#include "../v7_graph_full_20260911/graph_full.hpp"
+#include "../v7_composable_msf_20260911/composable_msf.hpp"
+#include "../v7_atlas_graph_20260911/source/morsehgp3D_v7/src/pipeline/generate.hpp"
+#include "../v7_atlas_graph_20260911/source/morsehgp3D_v7/src/cloud/families.hpp"
+
+namespace graph_gate {
+namespace ag = mhgp7::atlas_graph_private;
+namespace gf = mhgp7::graph_full_private;
+namespace fc = mhgp7::filtered_calendar_private;
+namespace cm = mhgp7::composable_msf_private;
+using PopulationKey = std::pair<std::vector<PointId>, std::vector<PointId>>;
+using Label = std::vector<u64>;  // Native (K,B) IDs, NEVER point coverage IDs.
+using Mapping = std::vector<std::vector<FullNodeId>>;
+u64 runs = 0, graph_orders = 0, graph_edges = 0, tree_edges = 0;
+u64 paired_nodes = 0, paired_contributions = 0, paired_verticals = 0;
+u64 exact_censuses = 0, oracle_cuts = 0, oracle_verticals = 0, mutations = 0;
+u64 extraction_requests = 0, extraction_unique = 0, extraction_initial_seeds = 0;
+u64 extraction_post_seeds = 0, extraction_mebs = 0, extraction_descents = 0, extraction_equal_steps = 0;
+u64 composed_orders = 0, composed_windows = 0, composed_retained_peak = 0, composed_touched_peak = 0;
+u64 hub_orders = 0, hub_windows = 0, hub_source_edges = 0, hub_tree_edges = 0, hub_projected_edges = 0;
+u64 hub_retained_peak = 0, hub_touched_peak = 0, hub_different_certificates = 0;
+
+std::vector<InputPoint> make_input(const Fixture& fixture, unsigned variant) {
+  std::vector<InputPoint> out;
+  for (size_t j = 0; j < fixture.points.size(); ++j)
+    out.push_back({variant ? static_cast<PointId>(4294967295u - 100003u * j) : static_cast<PointId>(j), fixture.points[j]});
+  if (variant) std::reverse(out.begin(), out.end());
+  return out;
+}
+std::vector<BallData> real_census(const CloudIndex& index, unsigned kmax, int s) {
+  const u64 smax = std::min<u64>(kmax + 1, index.input_count);
+  GenerateOptions options; options.s = s; options.smax = smax; options.threads = 1;
+  GenerateStats generated;
+  std::vector<BallCandidate> candidates;
+  generate_candidates(index, options, &candidates, &generated);
+  need(generated.cap_refus == kCapRefusNone && !generated.invariant_jneg, "graph_gate.generation");
+  for (size_t lane = 0; lane < 3; ++lane)
+    need(generated.ledger_emitted_mass[lane] + generated.ledger_killed_mass[lane] == expected_pair_mass(index),
+         "graph_gate.pair_ledger");
+  rle_candidates(&candidates, 1);
+  ExpandStats stats;
+  std::vector<Survivor> survivors;
+  prefilter_balls(index, candidates, smax, 1, &survivors, &stats);
+  std::vector<BallData> balls;
+  need(census_balls(index, candidates, survivors, smax, kBallShellMax, 1, &balls, &stats) ==
+       PipelineStatus::kCompleteRegular, "graph_gate.real_census");
+  ++exact_censuses;
+  return balls;
+}
+
+PopulationKey population_key(const FullCoveragePopulation& row) { return {row.interior, row.shell}; }
+std::map<PopulationKey, u32> population_balls(const ag::Extraction& extraction) {
+  std::map<PopulationKey, u32> out;
+  for (u32 b = 0; b < extraction.atlas.balls.size(); ++b) {
+    PopulationKey key;
+    for (i32 p : extraction.atlas.balls[b].interior()) key.first.push_back(extraction.atlas.index->point_id(p));
+    for (i32 p : extraction.atlas.balls[b].shell()) key.second.push_back(extraction.atlas.index->point_id(p));
+    std::sort(key.first.begin(), key.first.end()); std::sort(key.second.begin(), key.second.end());
+    need(out.emplace(std::move(key), b).second, "graph_gate.census_population_identity");
+  }
+  return out;
+}
+
+// Recover a native identity from its exact census population, not from its
+// projected point coverage. All internal labels consist of these native IDs.
+std::vector<Label> native_labels(const FullCoverageCertificate& forest, const ag::Extraction& extraction,
+                                const std::map<PopulationKey, u32>& balls) {
+  std::vector<Label> out;
+  std::set<u64> distinct_births;
+  for (FullNodeId n = 0; n < forest.nodes().size(); ++n) {
+    const auto& node = forest.nodes()[n];
+    Label label;
+    if (!node.parent_count) {
+      const FullDatedContribution* birth = nullptr;
+      for (const auto& c : forest.contributions())
+        if (c.segment == n && same_exact_level(c.level, node.level)) {
+          need(birth == nullptr, "graph_gate.single_birth_contribution"); birth = &c;
+        }
+      need(birth != nullptr && birth->ref.population < forest.populations()->rows().size(), "graph_gate.birth_population");
+      const auto& row = forest.populations()->rows()[birth->ref.population];
+      u64 native = 0;
+      if (forest.order() == 1) {
+        need(row.interior.empty() && row.shell.size() == 1 && rational(node.level) == Rat(0), "graph_gate.point_birth");
+        bool found = false;
+        for (size_t p = 0; p < extraction.atlas.index->upos.size(); ++p)
+          if (extraction.atlas.index->point_id(static_cast<i32>(p)) == row.shell[0]) { native = p; found = true; }
+        need(found, "graph_gate.point_identity");
+      } else {
+        const auto at = balls.find(population_key(row));
+        need(at != balls.end(), "graph_gate.birth_census_identity");
+        const auto block = extraction.atlas.block_id(at->second, forest.order());
+        need(block.has_value() && extraction.atlas.masks(at->second, forest.order()).empty() &&
+            same_exact_level(extraction.atlas.raw_level(at->second), node.level), "graph_gate.native_birth_role");
+        native = *block;
+      }
+      need(distinct_births.insert(native).second, "graph_gate.repeated_native_birth");
+      label.push_back(native);
+    } else {
+      need(node.parent_count >= 2 && node.first <= forest.parents().size() &&
+           node.parent_count <= forest.parents().size() - node.first, "graph_gate.parent_interval");
+      for (u64 j = 0; j < node.parent_count; ++j) {
+        const auto parent = forest.parents()[node.first + j];
+        need(parent < n && compare_exact_level(forest.nodes()[parent].level, node.level) < 0, "graph_gate.parent_time");
+        label.insert(label.end(), out[parent].begin(), out[parent].end());
+      }
+      std::sort(label.begin(), label.end());
+      need(std::adjacent_find(label.begin(), label.end()) == label.end(), "graph_gate.duplicate_native_parent");
+    }
+    out.push_back(std::move(label));
+  }
+  return out;
+}
+Mapping compare_towers(const FullBallTowerResult& reference, const FullBallTowerResult& trial,
+                       const ag::Extraction& extraction) {
+  need(reference.status == FullBallStatus::kCompleteRelative && trial.status == reference.status &&
+       reference.orders.size() == extraction.atlas.kmax && trial.orders.size() == reference.orders.size(),
+       "graph_gate.complete_tower");
+  const auto balls = population_balls(extraction);
+  Mapping map(trial.orders.size());
+  for (size_t k = 0; k < trial.orders.size(); ++k) {
+    const auto& a = reference.orders[k].forest; const auto& b = trial.orders[k].forest;
+    need(a.order() == k + 1 && b.order() == k + 1 && a.nodes().size() == b.nodes().size(), "graph_gate.node_domain");
+    need(a.populations()->domain() == b.populations()->domain(), "graph_gate.point_domain");
+    const auto la = native_labels(a, extraction, balls), lb = native_labels(b, extraction, balls);
+    std::map<Label, FullNodeId> ids;
+    for (FullNodeId n = 0; n < la.size(); ++n) need(ids.emplace(la[n], n).second, "graph_gate.unique_history_identity");
+    std::set<FullNodeId> used;
+    for (const auto& label : lb) {
+      const auto found = ids.find(label);
+      need(found != ids.end() && used.insert(found->second).second, "graph_gate.native_history_bijection");
+      map[k].push_back(found->second);
+    }
+    need(used.size() == la.size(), "graph_gate.full_bijection");
+    for (FullNodeId n = 0; n < b.nodes().size(); ++n) {
+      const auto expected = map[k][n];
+      need(same_exact_level(a.nodes()[expected].level, b.nodes()[n].level), "graph_gate.node_level");
+      auto observed = parents(b, n);
+      for (auto& p : observed) p = map[k][p];
+      std::sort(observed.begin(), observed.end());
+      need(observed == parents(a, expected), "graph_gate.parent_identity");
+      const auto successor = b.successors()[n];
+      need((successor == kFullCoverageAbsent ? successor : map[k].at(successor)) == a.successors()[expected],
+           "graph_gate.successor_identity");
+      ++paired_nodes;
+    }
+    using Contribution = std::tuple<Rat, FullNodeId, PopulationKey, u16, bool>;
+    const auto contributions = [&](const FullCoverageCertificate& f, bool remap) {
+      std::vector<Contribution> rows;
+      for (const auto& c : f.contributions()) {
+        need(c.ref.population < f.populations()->rows().size(), "graph_gate.contribution_population");
+        rows.emplace_back(rational(c.level), remap ? map[k].at(c.segment) : c.segment,
+            population_key(f.populations()->rows()[c.ref.population]), c.ref.shell_mask, c.ref.include_interior);
+      }
+      std::sort(rows.begin(), rows.end()); return rows;
+    };
+    need(contributions(a, false) == contributions(b, true), "graph_gate.dated_contributions");
+    paired_contributions += b.contributions().size();
+  }
+  for (size_t k = 0; k < trial.orders.size(); ++k) {
+    const auto& a = reference.orders[k]; const auto& b = trial.orders[k];
+    need(a.lower_nodes.size() == a.forest.nodes().size() && b.lower_nodes.size() == b.forest.nodes().size(),
+         "graph_gate.vertical_shape");
+    for (FullNodeId n = 0; n < b.lower_nodes.size(); ++n) {
+      auto image = b.lower_nodes[n];
+      if (image != kFullCoverageAbsent) {
+        need(k > 0 && image < map[k-1].size(), "graph_gate.vertical_domain"); image = map[k-1][image];
+      }
+      need(image == a.lower_nodes[map[k][n]], "graph_gate.vertical_identity"); ++paired_verticals;
+    }
+  }
+  return map;
+}
+
+// One-pass hub certificate reference. Only the edge window is bounded here;
+// the upstream extraction still owns all R resolved targets and native edges.
+// The borrowed birth domain and phi remain O(A), separately from certificates.
+gf::History hub_history(const ag::Extraction& extraction, const ag::Order& order, size_t width) {
+  std::vector<fc::Birth<u32>> births;
+  if (order.k == 1) births = order.graph.births;
+  for (u32 b : extraction.atlas.program(order.k))
+    births.push_back({*extraction.atlas.block_id(b, order.k), extraction.atlas.slots[b].rank});
+  cm::Work work;
+  const cm::BorrowedDomain<u32, std::less<u32>> domain(births, {}, work);
+  cm::BinaryPile<u32, std::less<u32>> pile(domain, work);
+  std::vector<fc::Edge<u32>> window; window.reserve(width);
+  extraction.occurrences(order.k, [&](const ag::Occurrence& occurrence) {
+    window.push_back({occurrence.ordinal, occurrence.source_block, extraction.terminal_block(occurrence),
+                      extraction.atlas.slots[occurrence.source_ball].rank});
+    if (window.size() == width) { pile.push(window); window.clear(); }
+  });
+  if (!window.empty()) pile.push(window);
+  auto hubs = pile.finish();
+  hub_source_edges += work.source_edges; hub_tree_edges += hubs.edges.size(); hub_windows += work.windows;
+  hub_retained_peak = std::max(hub_retained_peak, work.peak_retained_edges);
+  hub_touched_peak = std::max(hub_touched_peak, work.peak_touched_vertices);
+  const u64 n = extraction.atlas.index->input_count;
+  const auto native = [&](u64 block) { return block < n ? block : extraction.phi.at(block - n); };
+  std::vector<fc::Edge<u32>> projected;
+  for (const auto& edge : hubs.edges) {
+    const auto a = native(edge.a), b = native(edge.b);
+    if (a != b) projected.push_back({edge.id, a, b, edge.date});  // Keep ORIGINAL weight.
+  }
+  hub_projected_edges += projected.size();
+  cm::Work final_work;
+  const cm::BorrowedDomain<u32, std::less<u32>> native_domain(order.graph.births, {}, final_work);
+  auto reduced = cm::compact_msf(native_domain, std::span<const fc::Edge<u32>>(projected), final_work);
+  fc::Certificate<u32> certificate{order.graph.births, std::move(reduced.edges), order.graph.marks};
+  fc::verify_certificate(order.graph, certificate, std::less<u32>{});
+  const auto direct = fc::spanning_certificate(order.graph, std::less<u32>{});
+  need(direct.edges.size() == certificate.edges.size(), "graph_gate.hub_msf_size");
+  bool different = false;
+  for (size_t j = 0; j < direct.edges.size(); ++j)
+    different = different || direct.edges[j].id != certificate.edges[j].id;
+  hub_different_certificates += different; ++hub_orders;
+  return fc::reconstruct(certificate, std::less<u32>{});
+}
+
+void judge(const FullBallTowerResult& tower, const std::vector<InputPoint>& in) {
+  std::vector<P3> points; for (const auto& p : in) points.push_back(p.position);
+  const mhgp7::census_tower_oracle::Model model(points);
+  const auto kmax = tower.orders.size();
+  const u32 domain = (u32{1} << in.size()) - 1;
+  std::set<Rat> levels{Rat(0)};
+  for (u32 mask = 1; mask <= domain; ++mask) levels.insert(model.meb(mask).radius2);
+  levels.insert(*levels.rbegin() + Rat(1));
+  std::vector<Snapshot> previous(kmax), current(kmax);
+  for (const auto& cut : levels) for (bool closed : {false, true}) {
+    for (size_t k = 0; k < kmax; ++k) {
+      current[k] = check_cut(tower.orders[k].forest, model.components(static_cast<unsigned>(k + 1), cut, closed, domain),
+                             previous[k], in, cut, closed);
+      ++oracle_cuts;
+      if (closed) previous[k] = current[k];
+      for (const auto& [facet, root] : current[k]) {
+        const auto image = full_ball_vertical_root_at(tower, static_cast<unsigned>(k + 1), root, level(cut), closed);
+        if (!k) need(image == kFullCoverageAbsent, "graph_gate.T2_K1_absent");
+        else for (u32 bits = facet; bits; bits &= bits - 1) {
+          const auto found = current[k-1].find(facet & ~(u32{1} << std::countr_zero(bits)));
+          need(found != current[k-1].end() && image == found->second, "graph_gate.T2_vertical_subfacets");
+          ++oracle_verticals;
+        }
+      }
+    }
+  }
+}
+
+void run_case(const Fixture& fixture, unsigned variant, int s, bool use_oracle, std::string_view fault = {}) {
+  context = std::string(fixture.name) + "/v" + std::to_string(variant) + "/s" + std::to_string(s);
+  std::fprintf(stderr, "start=%s\n", context.c_str()); std::fflush(stderr);
+  const auto in = make_input(fixture, variant);
+  const auto index = build_cloud_index(in);
+  auto balls = real_census(index, fixture.kmax, s);
+  if (variant) {
+    std::reverse(balls.begin(), balls.end());
+    for (auto& b : balls) { std::reverse(b.shell_ids, b.shell_ids + b.n_shell); std::reverse(b.interior_ids, b.interior_ids + b.n_interior); }
+  }
+  auto reference = build_full_ball_tower(index, balls, fixture.kmax, 1);
+  need(reference.status == FullBallStatus::kCompleteRelative, "graph_gate.reference_complete");
+  // The reference validates the supplied census; the oracle NEVER supplies it.
+  const auto extraction = ag::extract(index, balls, fixture.kmax);
+  std::vector<gf::History> histories;
+  for (const auto& order : extraction.orders) {
+    const auto certificate = fc::spanning_certificate(order.graph, std::less<u32>{});
+    fc::verify_certificate(order.graph, certificate, std::less<u32>{});
+    histories.push_back(fc::reconstruct(certificate, std::less<u32>{}));
+    graph_edges += order.graph.edges.size(); tree_edges += certificate.edges.size(); ++graph_orders;
+  }
+  auto first = gf::build(extraction, histories, 1);
+  compare_towers(reference, first.tower, extraction);
+  if (use_oracle) { judge(reference, in); judge(first.tower, in); }
+  auto four = gf::build(extraction, histories, 4);
+  compare_towers(reference, four.tower, extraction);
+  same_payload(first.tower, four.tower);  // Within the NEW convention, exact bytes must be stable.
+  // These are alternate certificates of the REAL extracted graph. The input
+  // remains materialized here: this gate does not certify a streaming producer.
+  for (size_t width : {size_t{1}, size_t{7}, size_t{31}}) {
+    std::vector<gf::History> composed;
+    for (const auto& order : extraction.orders) {
+      cm::Work work;
+      const cm::BorrowedDomain<u32, std::less<u32>> domain(order.graph.births, {}, work);
+      cm::BinaryPile<u32, std::less<u32>> pile(domain, work);
+      const auto edges = std::span<const fc::Edge<u32>>(order.graph.edges);
+      const size_t count = (edges.size() + width - 1) / width;
+      for (size_t j = 0; j < count; ++j) {
+        const size_t at = (variant ? count - 1 - j : j) * width;
+        pile.push(edges.subspan(at, std::min(width, edges.size() - at)));
+      }
+      auto compact = pile.finish();
+      auto direct = fc::spanning_certificate(order.graph, std::less<u32>{});
+      need(direct.edges.size() == compact.edges.size(), "graph_gate.composed_edge_count");
+      for (size_t j = 0; j < compact.edges.size(); ++j) {
+        const auto& a = direct.edges[j]; const auto& b = compact.edges[j];
+        need(a.id == b.id && a.a == b.a && a.b == b.b && a.date == b.date,
+             "graph_gate.composed_total_key");
+      }
+      direct.edges = std::move(compact.edges);
+      fc::verify_certificate(order.graph, direct, std::less<u32>{});
+      composed.push_back(fc::reconstruct(direct, std::less<u32>{}));
+      ++composed_orders; composed_windows += work.windows;
+      composed_retained_peak = std::max(composed_retained_peak, work.peak_retained_edges);
+      composed_touched_peak = std::max(composed_touched_peak, work.peak_touched_vertices);
+    }
+    const auto compact_full = gf::build(extraction, composed, 4);
+    compare_towers(reference, compact_full.tower, extraction);
+    same_payload(first.tower, compact_full.tower);
+    std::vector<gf::History> hub_histories;
+    for (const auto& order : extraction.orders) hub_histories.push_back(hub_history(extraction, order, width));
+    const auto hub_full = gf::build(extraction, hub_histories, 4);
+    compare_towers(reference, hub_full.tower, extraction);
+    same_payload(first.tower, hub_full.tower);  // Histories, not chosen edge IDs.
+  }
+  for (unsigned k = 2; k <= fixture.kmax; ++k) {
+    extraction_requests += extraction.work.static_requests[k]; extraction_unique += extraction.work.static_unique[k];
+    extraction_initial_seeds += extraction.work.static_seeded[k]; extraction_post_seeds += extraction.work.static_post_seed_hits[k];
+  }
+  extraction_mebs += extraction.work.resolve_work.calls;
+  extraction_descents += extraction.work.descending_steps; extraction_equal_steps += extraction.work.same_radius_steps;
+  ++runs;
+  if (!fault.empty()) {
+    if (fault == "--mutant-growth-date") {
+      bool changed = false;
+      for (auto& order : first.tower.orders) {
+        auto& rows = const_cast<std::vector<FullDatedContribution>&>(order.forest.contributions());
+        for (auto& c : rows) if (compare_exact_level(c.level, order.forest.nodes()[c.segment].level) > 0) {
+          c.level = order.forest.nodes()[c.segment].level; changed = true; break;
+        }
+        if (changed) break;
+      }
+      need(changed, "graph_gate.mutant_growth_nonvacuity");
+    } else if (fault == "--mutant-mask") {
+      bool changed = false;
+      for (auto& order : first.tower.orders) {
+        auto& rows = const_cast<std::vector<FullDatedContribution>&>(order.forest.contributions());
+        for (auto& c : rows) if (std::popcount(c.ref.shell_mask) >= 2) {
+          c.ref.shell_mask &= static_cast<u16>(c.ref.shell_mask - 1); changed = true; break;
+        }
+        if (changed) break;
+      }
+      need(changed, "graph_gate.mutant_mask_nonvacuity");
+    } else if (fault == "--mutant-native-anchor") {
+      need(histories.size() == 1 && histories[0].births.size() == 4, "graph_gate.mutant_anchor_nonvacuity");
+      auto& h = histories[0];
+      std::swap(h.births[0].segment, h.births[2].segment);
+      for (const auto& birth : h.births) h.nodes[birth.segment].least_birth = birth.id;
+      for (auto& node : h.nodes) if (node.parent_count) {
+        node.least_birth = fc::absent;
+        for (u64 j = 0; j < node.parent_count; ++j)
+          node.least_birth = std::min(node.least_birth, h.nodes[h.parents[node.first + j]].least_birth);
+      }
+      // Deliberately bypass the certificate provenance gate. This mutation is
+      // structurally coherent; only the independent native-identity judge may
+      // qualify its semantics. build alone does not make that claim.
+      first = gf::build(extraction, histories, 4);
+    } else if (fault == "--mutant-vertical") {
+      bool changed = false;
+      for (size_t k = 1; k < first.tower.orders.size() && !changed; ++k) {
+        const auto& lower = first.tower.orders[k-1].forest;
+        for (auto& node : first.tower.orders[k].lower_nodes) if (lower.successors()[node] != kFullCoverageAbsent) {
+          while (lower.successors()[node] != kFullCoverageAbsent) node = lower.successors()[node];
+          changed = true; break;
+        }
+      }
+      need(changed, "graph_gate.mutant_vertical_nonvacuity");
+    } else if (fault == "--mutant-parent") {
+      auto& rows = const_cast<std::vector<FullNodeId>&>(first.tower.orders[0].forest.parents());
+      need(rows.size() >= 2, "graph_gate.mutant_parent_nonvacuity"); rows[1] = rows[0];
+    } else if (fault == "--mutant-node-date") {
+      auto& nodes = const_cast<std::vector<FullNode>&>(first.tower.orders[0].forest.nodes());
+      bool changed = false;
+      for (auto& node : nodes) if (node.parent_count && compare_exact_level(node.level, nodes.back().level) < 0) {
+        node.level = nodes.back().level; changed = true; break;
+      }
+      need(changed, "graph_gate.mutant_date_nonvacuity");
+    } else if (fault == "--reject-descendant") {
+      bool changed = false;
+      for (auto& h : histories) if (h.births.size() >= 2) {
+        h.nodes[h.births[0].segment].least_birth = h.births[1].id; changed = true; break;
+      }
+      need(changed, "graph_gate.mutant_descendant_nonvacuity");
+      try { (void)gf::build(extraction, histories, 4); }
+      catch (const std::invalid_argument& e) {
+        need(std::string_view(e.what()) == "graph_full.descendant_leaf", "graph_gate.descendant_cause");
+        ++mutations; std::puts("{\"status\":\"causal_rejection\",\"cause\":\"graph_full.descendant_leaf\"}"); return;
+      }
+      need(false, "graph_gate.descendant_mutant_survived");
+    }
+    try { compare_towers(reference, first.tower, extraction); }
+    catch (const Failure& e) {
+      const std::string_view cause(e.why);
+      const bool expected = fault == "--mutant-growth-date" ? (cause == "graph_gate.single_birth_contribution" || cause == "graph_gate.dated_contributions") :
+          fault == "--mutant-mask" ? cause == "graph_gate.dated_contributions" :
+          fault == "--mutant-native-anchor" ? cause == "graph_gate.native_history_bijection" :
+          fault == "--mutant-vertical" ? cause == "graph_gate.vertical_identity" :
+          fault == "--mutant-parent" ? cause == "graph_gate.duplicate_native_parent" : cause == "graph_gate.parent_time";
+      need(expected, "graph_gate.exact_mutant_cause"); ++mutations;
+      std::printf("{\"status\":\"causal_rejection\",\"cause\":\"%s\"}\n", e.why); return;
+    }
+    need(false, "graph_gate.mutant_survived");
+  }
+  std::fprintf(stderr, "complete=%s nodes=%zu\n", context.c_str(), first.tower.orders[0].forest.nodes().size());
+}
+}  // namespace graph_gate
+
+int mhgp7_stream_previous_gate_main(int argc, char** argv) {
+  if (argc != 2) return 2;
+  const std::string_view mode(argv[1]);
+  try {
+    using namespace graph_gate;
+    if (mode == "--selftest") {
+      auto corpus = fixtures();
+      corpus.push_back({"singleton", {{3,7,11}}, 1});
+      corpus.push_back({"line4", {{0,0,0},{2,0,0},{10,0,0},{12,0,0}}, 4});
+      for (const auto& fixture : corpus) for (unsigned v : {0, 1}) for (int s : {8, 10, 12})
+        run_case(fixture, v, s, s == 8);
+      need(runs == 96 && oracle_cuts > 1000 && oracle_verticals > 10000 && paired_nodes > 1000 &&
+           extraction_descents > 0 && extraction_equal_steps > 0, "graph_gate.nonvacuity");
+    } else if (mode == "--high") {
+      const Fixture spatial{"spatial12", {{7,42,83},{91,12,64},{33,88,9},{54,20,71},{18,61,39},{76,53,95},
+          {42,7,24},{62,94,47},{3,29,58},{85,73,15},{29,36,97},{58,65,3}}, 10};
+      const Fixture shell{"shell14", {{15,10,10},{5,10,10},{10,15,10},{10,5,10},{10,10,15},{10,10,5},
+          {13,14,10},{13,6,10},{7,14,10},{7,6,10},{10,13,14},{10,7,6},{10,10,10},{20,25,30}}, 10};
+      for (const auto& fixture : {spatial, shell}) for (unsigned v : {0, 1}) for (int s : {8, 10, 12})
+        run_case(fixture, v, s, s == 8);
+      need(runs == 12 && graph_orders == 120 && oracle_verticals > 100000, "graph_gate.high_nonvacuity");
+    } else if (mode == "--uniform32") {
+      Fixture uniform{"uniform32", {}, 10};
+      for (const auto& point : make_family_input(CloudFamily::kUniform, 32, 65536, 3)) uniform.points.push_back(point.position);
+      for (unsigned v : {0, 1}) for (int s : {8, 10, 12}) run_case(uniform, v, s, false);
+      need(runs == 6 && graph_orders == 60 && paired_nodes > 10000, "graph_gate.uniform_nonvacuity");
+    } else if (mode == "--mutant-growth-date") {
+      run_case({"growth_ABCZ", {{1,8,0},{5,10,0},{9,8,0},{5,0,0}}, 4}, 0, 8, false, mode); return 4;
+    } else if (mode == "--mutant-mask") {
+      run_case({"growth_ABCZ", {{1,8,0},{5,10,0},{9,8,0},{5,0,0}}, 4}, 1, 8, false, mode); return 4;
+    } else if (mode == "--mutant-native-anchor") {
+      run_case({"line4", {{0,0,0},{2,0,0},{10,0,0},{12,0,0}}, 1}, 0, 8, false, mode); return 4;
+    } else if (mode == "--mutant-vertical" || mode == "--mutant-parent" || mode == "--mutant-node-date" || mode == "--reject-descendant") {
+      run_case({"line4", {{0,0,0},{2,0,0},{10,0,0},{12,0,0}}, 4}, 0, 8, false, mode); return 4;
+    } else return 2;
+    std::printf("{\"status\":\"passed\",\"scope\":\"bounded_real_census_atlas_graph_FULL\",\"public_status\":\"not_claimed\","
+        "\"checks\":%llu,\"census_runs\":%llu,\"runs\":%llu,\"graph_orders\":%llu,\"graph_edges\":%llu,\"tree_edges\":%llu,"
+        "\"paired_nodes\":%llu,\"paired_contributions\":%llu,\"paired_verticals\":%llu,\"oracle_cuts\":%llu,\"oracle_verticals\":%llu,"
+        "\"requests\":%llu,\"unique\":%llu,\"initial_seeds\":%llu,\"post_seeds\":%llu,\"mebs\":%llu,\"descents\":%llu,"
+        "\"equal_steps\":%llu,\"composed_orders\":%llu,\"composed_windows\":%llu,\"composed_retained_edge_peak\":%llu,"
+        "\"composed_touched_vertex_peak\":%llu,\"hub_orders\":%llu,\"hub_windows\":%llu,\"hub_source_edges\":%llu,"
+        "\"hub_tree_edges\":%llu,\"hub_projected_edges\":%llu,\"hub_retained_edge_peak\":%llu,"
+        "\"hub_touched_vertex_peak\":%llu,\"hub_different_certificates\":%llu,"
+        "\"workers\":[1,4],\"graph_construction_parallel\":false,\"gcp_used\":false}\n",
+        static_cast<unsigned long long>(checks), static_cast<unsigned long long>(exact_censuses), static_cast<unsigned long long>(runs),
+        static_cast<unsigned long long>(graph_orders), static_cast<unsigned long long>(graph_edges), static_cast<unsigned long long>(tree_edges),
+        static_cast<unsigned long long>(paired_nodes), static_cast<unsigned long long>(paired_contributions), static_cast<unsigned long long>(paired_verticals),
+        static_cast<unsigned long long>(oracle_cuts), static_cast<unsigned long long>(oracle_verticals), static_cast<unsigned long long>(extraction_requests),
+        static_cast<unsigned long long>(extraction_unique), static_cast<unsigned long long>(extraction_initial_seeds), static_cast<unsigned long long>(extraction_post_seeds),
+        static_cast<unsigned long long>(extraction_mebs), static_cast<unsigned long long>(extraction_descents), static_cast<unsigned long long>(extraction_equal_steps),
+        static_cast<unsigned long long>(composed_orders), static_cast<unsigned long long>(composed_windows),
+        static_cast<unsigned long long>(composed_retained_peak), static_cast<unsigned long long>(composed_touched_peak),
+        static_cast<unsigned long long>(hub_orders), static_cast<unsigned long long>(hub_windows),
+        static_cast<unsigned long long>(hub_source_edges), static_cast<unsigned long long>(hub_tree_edges),
+        static_cast<unsigned long long>(hub_projected_edges), static_cast<unsigned long long>(hub_retained_peak),
+        static_cast<unsigned long long>(hub_touched_peak), static_cast<unsigned long long>(hub_different_certificates));
+    return 0;
+  } catch (const Failure& e) { std::fprintf(stderr, "FAIL [%s] %s\n", context.c_str(), e.why); }
+    catch (const full_ball_detail::Failure& e) { std::fprintf(stderr, "GEOMETRY [%s] %s\n", context.c_str(), e.reason); }
+    catch (const std::exception& e) { std::fprintf(stderr, "EXCEPTION [%s] %s\n", context.c_str(), e.what()); }
+  return 1;
+}

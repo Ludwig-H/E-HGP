@@ -1,0 +1,145 @@
+# Réducteur mono sur le flux déjà ordonné
+
+11 septembre 2026. Proposition privée, sans compilation ni mesure nouvelle.
+`phase=exploration_v7_hors_registre`, `backend=cpu_reference`,
+`profile=quantized_u16_input_only`,
+`mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
+Les preuves ci-dessous concernent le graphe admis ; elles ne certifient pas à
+nouveau la géométrie du census. GCP non utilisé.
+
+## Conclusion et conditions
+
+Oui : pour la voie mono, un DSU persistant par K peut consommer les arêtes en
+ordre d'émission et garder une arête exactement quand elle unit deux racines.
+Il conserve au plus N−C arêtes, où N compte les hubs de cet ordre et les points
+K1, et C ses composantes finales, isolés compris. Ni les contributions, ni le
+choix du pivot, ni φ, ni les dates de projection ne doivent changer.
+
+La source `streaming_graph.hpp` 6f341cff émet chaque fenêtre en ordre original,
+après sa résolution et son dédoublonnage géométrique. L'atlas 9fc118a2 vérifie
+que `program(K)` est trié par niveau exact puis BallKey ; ses rangs conservent
+les égalités. Ainsi les arêtes `(ordinal, B, terminal, rang(B))` ont des dates
+non décroissantes et des ordinaux strictement croissants, y compris entre
+fenêtres. Le tri temporaire des clés de facettes ne doit pas devenir cet ordre
+de consommation. Des fenêtres reçues arbitrairement restent du ressort de la
+voie composable ; les passer à ce réducteur sans remise en ordre serait faux.
+
+Conserver l'état entre `push` : dernière date, dernier ordinal, DSU et certificat.
+Vérifier les identités, la monotonie, les deux extrémités et leur date de
+naissance. Pour les hubs, la garde est bien w≥β(u),β(v), pas une garde stricte :
+le hub consommateur naît à la date de ses arêtes. Un défaut empoisonne le
+réducteur ; ne pas publier son préfixe comme certificat complet.
+
+## Pourquoi toutes les coupes sont préservées
+
+Par induction sur le préfixe consommé, le DSU décrit exactement la connexité
+des arêtes déjà retenues. Une arête rejetée e ferme un cycle : ses extrémités
+sont déjà jointes par un chemin d'arêtes retenues. Comme les dates du flux ne
+diminuent pas, chaque arête de ce chemin a une date au plus w(e). Ce chemin
+reste présent jusqu'à la fin, puisque le réducteur n'enlève aucune arête retenue.
+
+À une coupe fermée t, toute arête active du graphe est donc remplaçable dans
+le certificat par un chemin de dates ≤w(e)≤t. Tous les sommets intermédiaires
+sont également nés, par la garde w≥β sur chaque arête du chemin. À une coupe
+ouverte, w(e)<t implique de même que toutes les arêtes et tous les sommets du
+chemin sont actifs. Réciproquement, le certificat ne contient que des arêtes
+du graphe : aucune connexion nouvelle n'apparaît. Les partitions de chaque
+coupe, des deux côtés, sont identiques.
+
+Les sommets sans arête restent dans le domaine avec leur date. Initialiser
+leur case DSU en avance n'autorise pas à compter un sommet futur comme une
+composante visible. La preuve ne permet pas de publier les unions binaires
+internes : toutes les arêtes d'un même niveau constituent toujours un plateau
+atomique pour la reconstruction FULL.
+
+## Départages : mêmes coupes, pas nécessairement mêmes arêtes
+
+`filtered_calendar.hpp` 1cf438cb trie par `(date, minmax(extrémités), id)`.
+Le flux mono est trié par `(date, ordinal)` ; ces clés totales diffèrent.
+Un triangle abstrait a,b,c, né à zéro, dont bc,ac,ab arrivent dans cet ordre à
+la date 1, garde bc/ac en émission ; un départage par extrémités a<b<c garde
+ab/ac. Les deux certificats donnent la même fusion ternaire à 1.
+
+Il faut donc comparer au certificat composable par toutes les coupes et les
+identités natives, pas exiger les mêmes arêtes internes. Le vérificateur
+`verify_certificate` est justement indépendant du départage. L'histoire
+reconstruite groupe les dates égales et ordonne ses groupes par naissance
+minimale ; maintenir cette convention et la bijection native dans l'export.
+Sur un même flux mono, en revanche, changer seulement les frontières des
+fenêtres ne change pas l'ordre des unions ni le certificat retenu.
+
+## Pivots : une propriété supplémentaire de ce flux précis
+
+Chaque hub non natif B possède une première occurrence fixée `local==0`.
+Avant celle-ci, aucune arête ne touche B : B n'a encore rien émis, et une arête
+entrante ne peut venir que d'un consommateur strictement plus tardif, puisque
+sa terminale est strictement antérieure. Les autres hubs du même niveau ne
+peuvent donc pas déjà atteindre B. Sa première arête B→pivot(B) unit forcément
+deux composantes et est retenue, même si son terminal appartient à une grosse
+composante plus ancienne. C'est aussi vrai à K1, avec un point pour terminal.
+
+Le certificat mono contient ainsi toute la forêt des pivots. Ces pivots vont
+vers des dates strictement décroissantes ; leur racine est exactement φ(B).
+Chaque fibre de φ est un sous-arbre connexe du certificat. Projeter ce
+certificat en conservant les dates et les IDs revient à contracter ces
+sous-arbres. Après suppression des boucles, le résultat reste une forêt :
+un cycle projeté se développerait, avec les chemins de pivots dans les fibres,
+en un cycle du certificat initial.
+
+La projection reste un certificat de toutes les coupes : projeter le chemin
+de remplacement de toute arête omise donne un chemin de dates non augmentées
+entre ses naissances. Chaque naissance φ(B) est antérieure au hub B. Les
+arêtes non bouclées sont les arêtes originales du graphe réduit, mêmes dates
+et mêmes identités ; les occurrences pivots donnent des boucles. Cette
+projection n'autorise jamais à antidater une arête au niveau de son pivot.
+
+Ainsi la seconde compaction native est mathématiquement redondante pour ce
+flux spécifique conservant tous les pivots. Ce n'est pas une propriété du
+certificat composable arbitraire, qui peut omettre un pivot. Pour le premier
+delta, garder le raccord et ses vérifications inchangés ; qualifier séparément
+l'acceptation de tous les pivots et l'acyclicité projetée avant de supprimer
+la seconde compaction. Les marques, contributions datées et ancres verticales
+restent identiques : cette preuve ne permet d'en supprimer aucune.
+
+## Coûts, rejets et prochain delta borné
+
+Le réducteur ordonné évite les tris d'arêtes et les recompressions des
+certificats par fenêtre ; il initialise son DSU une seule fois. Il paie R
+tentatives d'union et garde N−C arêtes. La recherche d'extrémité dans le
+`BorrowedDomain` actuel reste binaire : préparation O(N log N), puis O(log N)
+par extrémité. L'union par taille donne une profondeur au plus logarithmique,
+la compression de chemins ne l'augmente pas ; une borne élémentaire totale
+O(N log N + R log N) suffit donc ici. Ne pas annoncer O(R) en temps avec ce
+remappage, ni transférer cette borne à la géométrie ou à toute la tour.
+
+La résidence du réducteur est O(N) : domaine/permutation, parent/size DSU et
+certificat. Ajouter les buffers de fenêtre O(W), l'atlas et ses masques O(R),
+φ, semis, populations et sortie FULL. Mesurer les capacités réelles de ces
+objets, pas seulement N−C ni une somme de pics logiques. Cette proposition
+ne démontre aucun speedup, aucun contrat 50k et aucune sous-quadraticité
+universelle en n.
+
+Gates ciblées pour une nouvelle qualification :
+
+- Même flux aux frontières 1/7/31/4096 : certificat ordonné identique entre
+  fenêtres ; comparaison de toutes les coupes au graphe original et FULL au
+  Builder/T2, sans imposer les arêtes du départage par extrémités.
+- Égalité w=β du hub admise ; sommet futur et isolé correctement filtrés ;
+  étoile ternaire de même niveau reconstruite atomiquement.
+- Arête légère tardive : ab à9, ac à9, puis bc à1. Sans refus d'ordre, bc
+  serait supprimée et la coupe1 serait fausse. Tester le défaut à cheval sur
+  deux fenêtres et après une fenêtre vide, avec état empoisonné ensuite.
+- Ordinal dupliqué, extrémité absente, arête avant sa naissance et réutilisation
+  après `finish` : rejets causaux. L'ordinal64 ne doit ni tronquer ni reboucler.
+- Pour l'éventuelle suppression de la seconde compaction : tous les pivots
+  retenus, nombre de boucles égal au nombre de hubs non natifs, forêt projetée
+  et mêmes coupes. Permuter les arêtes égales avant `local0` retire cette
+  garantie particulière, même si cela garde la connexité filtrée générale.
+
+Sources locales relues : `streaming_graph.hpp` 6f341cff,
+`rank_atlas.hpp` 9fc118a2, `filtered_calendar.hpp` 1cf438cb,
+`composable_msf.hpp` dba0ae64 et la preuve indépendante
+`audits/receipts_composable_msf_20260911/README.md`, sections 1–4.
+Les qualifications antérieures conservent leur portée propre ; aucun résultat
+exécuté n'est hérité par cette proposition. Aucun fichier actif/auditeur/Git
+modifié.

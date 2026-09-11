@@ -1,0 +1,141 @@
+# Flux privé occurrences → MSF hubs → certificat natif
+
+Exploration mono-thread CPU, `public_status=not_claimed`. Pas de modification
+des helpers importés. Ce document décrit l'API et sa portée ; les captures
+O2/SAN et les mesures séparées qualifient leurs propres sources épinglées.
+Le helper reste distinct du moteur actif. GCP non utilisé.
+
+## API et portée du résultat
+
+```cpp
+namespace mhgp7::streaming_graph_private {
+Streaming build(const CloudIndex& index, std::span<const BallData> balls,
+                unsigned requested, size_t window_width, Observer observer = {});
+// Streaming { ag::Extraction extraction; vector<fc::Certificate<u32>> certificates; Stats stats; }
+// Streaming::has_terminal_tape == false
+// Observer { void* context; void (*terminal)(void*, const ag::Occurrence&); }
+}
+```
+
+`Streaming` est un type DISTINCT : `extraction` n'est que la partie
+métadonnées compatible avec `graph_full_private::build`. Ce n'est PAS un
+substitut de `ag::extract` : `extraction.targets` et tous `graph.edges` sont
+vides, de capacité nulle ; appeler `extraction.occurrences()` n'est pas une
+opération disponible dans ce contrat. Le callback facultatif est l'unique
+export des terminales par occurrence. Les certificats sont indexés K−1,
+les statistiques locales `stats.orders[K]` et `hub_work/native_work[K]` par K.
+
+L'index et le census sont empruntés et doivent rester immuables/vivants.
+Le census complet exact et sa validité géométrique sont des PRÉCONDITIONS.
+La résolution utilise le helper test-only `Geometry` déjà qualifié, pas un
+nouveau backend produit. Aucun calendrier d'ancres ni DSU temporel FULL n'est
+lu pour produire les arêtes. Les DSU utilisés sont ceux des compactions MSF.
+
+## Un seul passage de résolution par fenêtres
+
+L'Atlas, sa validation de forme et le tri global `by_key[C]` sont préparés
+une fois. Pour chaque K, les métadonnées de hubs/natifs et TOUS les semis
+complets I∪U admissibles à K=p+u sont préparés avant les fenêtres. Le domaine
+emprunté MSF et sa permutation d'identités sont construits une fois par K,
+jamais dans `flush()` ; les fenêtres ne font aucun scan O(A) du domaine.
+
+Les demandes sont parcourues dans l'ordre du programme de l'Atlas et des
+représentants locaux. Au plus W demandes à clé entière triée GeometryIndex
+sont retenues. Un tri D'INDICES conserve leur ordre original pour le scatter
+et l'observation. Les facettes égales dans la fenêtre sont résolues une fois
+au premier consommateur, puis chaque consommateur vérifie séparément
+l'admission au même K et l'antériorité stricte de la terminale. Aucun semis
+partiel/support seul, aucun tri de facette par PointId.
+
+Les tableaux d'une fenêtre sont `requests`, indices triés, `targets` et
+arêtes hubs ; leurs tailles sont ≤W. Si W dépasse la taille de l'ordre, une
+fenêtre contient naturellement cet ordre entier : aucune allocation d'une
+campagne par ordre n'est imposée indépendamment de W. Les capacités réellement
+observées sont rapportées, pas supposées égales aux tailles.
+
+Pour chaque hub non natif, seul le terminal de l'ordinal local zéro est
+conservé dans `phi[cell]` à titre de pivot provisoire. Après toutes les
+résolutions K, ce même tableau est converti in-place en natifs, dans l'ordre
+exact des rangs. Les terminales sont strictement antérieures ; leur φ est
+déjà résolue. Pas de second tableau de pivots ni de `targets[R]` global.
+Les natifs sans représentants restent présents, même isolés. K1 conserve
+les points au rang zéro et leurs indices géométriques ; aucune MEB K1.
+
+Les arêtes hub-consommateur → hub-terminale sont immédiatement réduites dans
+la pile binaire MSF qualifiée. À la fin de K, seul son certificat sparse est
+projeté in-place par φ, avec les dates ORIGINALES des consommateurs. Les
+loops de projection sont comptées puis retirées. Une dernière compaction
+MSF sur les naissances natives produit le certificat de sortie. Ni graphe
+hubs complet ni graphe natif complet n'est construit.
+
+Les marques gardent leurs admissions propres et les contributions restent
+celles de l'Atlas. Histoires, contributions datées et verticales sont ensuite
+reconstruites par le raccord FULL séparé ; une racine finale ne remplace
+jamais une consultation à l'admission fermée.
+
+## Compteurs réels, sans fausse égalité de travail
+
+`stats.orders[K]` contient `occurrences`, `windows`, `window_unique`,
+`initial_seed_hits`, `seed_rows`, `pivots`, les tailles des certificats hubs/
+projeté/natif, et `geometry_work` (`FullBallStats`) du travail réellement payé
+pour cet ordre. Les répétitions entre fenêtres sont repayées : la somme
+des uniques de fenêtres peut dépasser le nombre d'uniques global.
+
+Par conséquent `extraction.work.static_unique` et `static_seeded` restent
+à ZÉRO, signifiant ici **non mesurés globalement**, pas absence d'uniques ou
+de semis. Les nouveaux compteurs `window_unique/initial_seed_hits` doivent
+être lus à leur place. `static_requests` garde le nombre d'occurrences pour
+K≥2 ; Q/H/T et les comptes MEB/intrusions/descendes sont les sommes réellement
+payées. Les MEB économisées par les semis après échange ne deviennent pas
+de fausses `anchor_hits`.
+
+Sur succès K≥2 : si G=Uw−Sw, alors `anchor_hits+H=G`, `H=T`,
+`MEB=G+Q−H`, et `Q=intruder_queries=descending_steps+same_radius_steps`.
+Ces identités sont testées indépendamment par la gate ; elles ne donnent
+pas une égalité des coûts avec la déduplication globale matérialisée.
+
+## Mémoire : gain ciblé, pas R totalement disparu
+
+L'Atlas qualifié possède TOUJOURS ses masques u16 de représentants R et ses
+offsets. Ce jalon élimine les terminales u32[R], les demandes développées
+de tout un ordre indépendamment de W, et les graphes d'arêtes complets ;
+il n'est pas une suppression de toutes les structures proportionnelles à R.
+
+Restent O(C) pour `by_key`, O(A) pour φ et les métadonnées, les semis de K,
+le domaine de hubs de K et sa permutation, O(W) demandes/targets/arêtes,
+et les certificats de la pile binaire. Cette pile peut retenir plusieurs
+certificats à la fois ; ses pics logiques sont dans `hub_work[K]`, pas dans
+un prétendu pic O(W). La projection retient un certificat O(A_K+n_K), pas R_K.
+Les certificats retournés possèdent leurs copies de naissances/marques,
+distinctes des métadonnées d'`extraction` ; elles sont comptabilisées séparément.
+
+Les pics `peak_window_*`, `peak_seed_*`, `peak_hub_domain_*` et certificats
+portent les vecteurs visibles précis. Le domaine mesuré est le tableau de
+naissances, pas la capacité privée de sa permutation. Les capacités internes
+de la pile/DSU ne sont pas exposées par le helper qualifié : son `cm::Work`
+rapporte des tailles logiques, sans prétendre les transformer en capacité.
+`peak_intruder_scratch_logical_bytes` est échantillonné APRÈS les terminales
+(peut manquer un pic transitoire de taille) ; sa capacité persistante est
+observée après chaque terminale. `output_metadata_*` et
+`output_certificates_*` sont des octets de buffers possédés, pas la taille du
+census/index emprunté, des temporaires MEB fixes ou du processus.
+
+Ne pas additionner les maxima de phases disjointes pour prétendre mesurer
+un pic RSS/VRAM. Aucune borne universelle sous-quadratique en n, aucun
+contrat 50k/1s ou dizaines de millions de points n'est acquis ici.
+
+## Échecs et observation
+
+W=0 est refusé par `streaming.window_width`. Les deux champs de l'observer
+doivent être présents ensemble ou absents ensemble (`streaming.observer_pair`).
+Le callback reçoit une occurrence const, dans l'ordre original ; il ne
+fournit aucune valeur au calcul et aucune référence n'est retenue après retour.
+Sa propre exception se propage. Une observation peut donc avoir vu un
+préfixe, mais aucune valeur `Streaming` partielle n'est publiée. Le travail
+payé sur exception n'est pas récupéré par cette API expérimentale et n'est
+jamais annoncé égal à zéro.
+
+Les seuls autres contrôles de tailles sont ceux de représentation/allocation
+des types déjà utilisés. Aucun plafond de boucle, de descente ou de nombre
+d'occurrences n'est ajouté. Une qualification O2/SAN et une nouvelle campagne
+appariée doivent précéder toute intégration au code actif.

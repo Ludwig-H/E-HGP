@@ -15,10 +15,20 @@ relie désormais les premières briques atlas/calendrier : extraction depuis
 vrais census, histoires FULL, contributions datées et verticales offline.
 La composition des MSF par fenêtres est exercée avant et après projection
 sur les naissances. Les certificats internes peuvent différer, pas la tour.
-Aucun remplacement actif ni temps extrapolé. Prochain delta : produire et
-consommer les terminales par fenêtres sans garder targets[R], puis distribuer
-les réductions et la reconstruction ; mesurer le travail répété et la RAM,
-pas seulement la compression des arêtes. Les consultations seules sont CPU1/4.
+Aucun remplacement actif ni temps extrapolé. Le [delta réellement fenêtré](docs/RESOLUTIONS_PAR_FENETRES_20260911.md)
+produit et consomme désormais les terminales sans garder targets[R] ni le
+graphe complet. O2/SAN : 114 census, 456 essais, 253 224 terminales comparées
+par build ; huit mutations et trois refus causaux. Les compteurs distinguent
+uniques globaux et locaux cumulés, travail répété et capacités nommées.
+Prochain delta : exploiter l'ordre d'émission pour éviter les recompactions
+mono inutiles, puis distribuer les réductions et la reconstruction.
+Les consultations seules sont CPU1/4 ; pas de débit massif annoncé.
+La paire n8000/s8/K1..10 donne le même digest et les mêmes compteurs FULL,
+mais 188,638 → 250,408 s, MEB +10,4 %, RSS +1,4 %. La pile traite
+48,4 millions d'arêtes pour 10,5 millions d'arêtes source. Pas de promotion
+mono ; le nouveau triplet 8k/16k/32k et s10/s12 à grande taille attendent
+le réducteur corrigé. Le brouillon ordonné et sa preuve sont conservés,
+non compilés et non crédités des tests du flux composé.
 GCP non utilisé pour ce nouveau jalon architectural.
 
 Complément précédent après `324f6192` : [lots complets, MEB et tentatives G4](docs/QUALIFICATION_BATCH_ET_MEB_20260911.md).

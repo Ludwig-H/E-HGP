@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_streaming_graph_20260911/qualification_o2/gate",
+    "--uniform32"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_streaming_graph_20260911/qualification_o2/source_snapshot",
+  "exit_code": null,
+  "expected_exit": 0,
+  "name": "uniform32"
+}

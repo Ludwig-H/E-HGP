@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-isystem",
+    "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-O2",
+    "-I",
+    "/workspaces/E-HGP/build/v7_atlas_graph_20260911",
+    "-MM",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_streaming_graph_20260911/bench_build_r1/local_dependencies.d",
+    "-MT",
+    "mhgp7_streaming",
+    "/workspaces/E-HGP/build/v7_streaming_graph_20260911/bench.cpp"
+  ],
+  "cwd": "/workspaces/E-HGP/build",
+  "exit_code": null,
+  "expected_exit": 0,
+  "name": "local_dependencies"
+}

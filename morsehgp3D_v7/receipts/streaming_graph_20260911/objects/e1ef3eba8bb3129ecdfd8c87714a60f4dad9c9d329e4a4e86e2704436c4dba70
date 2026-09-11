@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/usr/bin/time",
+    "-v",
+    "-o",
+    "/workspaces/E-HGP/build/v7_streaming_graph_20260911/bench_n200_compare/rss.txt",
+    "/workspaces/E-HGP/build/v7_streaming_graph_20260911/bench_build_r1/bench",
+    "--n=200",
+    "--s=8",
+    "--kmax=10",
+    "--window=4096",
+    "--mode=compare"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_streaming_graph_20260911/bench_build_r1/source_snapshot",
+  "exit_code": null,
+  "expected_exit": 0,
+  "name": "bench"
+}

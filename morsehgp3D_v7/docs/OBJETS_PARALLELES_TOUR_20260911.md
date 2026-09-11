@@ -197,6 +197,14 @@ rajouter de travail quadratique inutile aux objets effectivement requis.
 Les trois helpers privés passent C++20 strict en O2 et sous ASan/UBSan/LSan.
 Le moteur actif `83f1c78e…` n'est pas remplacé.
 
+Le [raccord de résolution en flux](RESOLUTIONS_PAR_FENETRES_20260911.md)
+supprime maintenant la conservation globale des terminales et des arêtes :
+une fenêtre géométrique alimente directement les certificats sur hubs,
+puis φ et leur projection. Il conserve les masques u16[R] et compte les
+résolutions répétées entre fenêtres. O2/SAN compare les terminales et la
+tour entière, pas seulement les certificats abstraits. Ce producteur reste
+mono-thread et ne constitue pas une accélération acquise.
+
 | Brique | Qualification locale | Ce qui n'est pas encore livré |
 | --- | --- | --- |
 | [Atlas partagé](../receipts/rank_atlas_20260911/README.md) | 13 vrais census, n≤32, s8/10/12, K jusqu'à 10 ; 30 562 blocs et 52 469 représentants identiques au parcours du Builder ; six mutations d'état réfutées. | Résolution des représentants, extraction du graphe et nouvelle forêt FULL. |

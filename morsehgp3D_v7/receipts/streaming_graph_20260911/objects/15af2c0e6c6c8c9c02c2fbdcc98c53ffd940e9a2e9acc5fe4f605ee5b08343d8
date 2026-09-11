@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_streaming_graph_20260911/qualification_san/gate",
+    "--mutant-edge-date"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_streaming_graph_20260911/qualification_san/source_snapshot",
+  "exit_code": null,
+  "expected_exit": 4,
+  "name": "mutant-edge-date"
+}

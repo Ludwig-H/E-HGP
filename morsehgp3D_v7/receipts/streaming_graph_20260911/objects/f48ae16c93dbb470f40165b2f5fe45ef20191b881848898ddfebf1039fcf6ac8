@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_streaming_graph_20260911/qualification_san/gate",
+    "--reject-zero-window"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_streaming_graph_20260911/qualification_san/source_snapshot",
+  "elapsed_seconds_observation_only": 0.029050271994492505,
+  "exit_code": 4,
+  "expected_exit": 4,
+  "name": "reject-zero-window",
+  "stderr": {
+    "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+    "size": 18
+  },
+  "stdout": {
+    "sha256": "4ea27533f58f86ca3597c2523e855a7c3ddd36b855394efe19bd408f4ddc173b",
+    "size": 106
+  }
+}

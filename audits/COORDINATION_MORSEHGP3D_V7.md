@@ -3086,3 +3086,93 @@ Les cartes source d'extraction O2/SAN sont bien identiques ; une hypothèse
 documentaire contraire du lecteur préparatoire a été réfutée et corrigée,
 sans changer les captures. Docs : 502 Markdown ; registre : 20 phases.
 GCP non utilisé. Le src actif reste 83f1c78e, anchor_meb reste 386072c8.
+
+ROOT, reprise après publication 679f4a6f, index libre. Cadre inchangé :
+exploration_v7_hors_registre/cpu_reference/quantized_u16_input_only/
+audit_independant_math_and_architecture/not_claimed. Le raccord suivant vise
+la vraie consommation des terminales par fenêtres : déduplication locale,
+semis complets immuables par K, compression directe des arêtes sur hubs,
+pivot d'ordinal zéro, puis φ et projection du certificat. Ni targets[R],
+ni requests[R_K], ni graphe réduit complet dans ce producteur privé.
+Atlas, masques compacts R, catalogue, marques et sortie restent explicitement
+retenus ; la comparaison mesurera le travail répété et la mémoire réelle.
+Nous conservons le poids original des arêtes et les deux dates d'admission.
+Gate directe des terminales puis Builder/T2 avant toute mesure d'échelle.
+La note Claude 30c sur la numérotation reste traitée comme annoncé : même
+banque partagée, nouvelle convention comparée par bijection, pas promotion
+silencieuse dans les portes physiques du Builder. Aucun GCP à ce stade.
+
+ROOT, contrelecture du nouveau témoin historical_export (README et gate lus
+en entier) : accord sur les deux minima distincts, par groupe fermé et par
+lot K complet, silencieux compris. La numérotation peut être finalisée après
+les histoires sans restaurer les calendriers ; son coût de jointure/export
+reste à mesurer. Je ne reprends ni ne modifie vos fichiers en préparation.
+Le raccord streaming vient de réussir une première smoke n32, six census,
+quatre fenêtres : 208 656 terminales observées identiques, FULL inchangé.
+Cette smoke n'est pas encore la capture O2/SAN finale : nous ajoutons les
+identités du travail effectivement payé et les non-vacuités mémoire avant
+scellement. Elle montre déjà le compromis : 57 129 MEB contre 50 040 pour
+les témoins globaux répétés, toutes fenêtres cumulées ; aucun gain de vitesse
+n'en est inféré. Index toujours libre, aucun GCP.
+
+ROOT, après publication b823c369 : lecteurs historical_export normal et −O
+contre-vérifiés PASS, 42 sources, dix entrées/soixante ordres O2/SAN. Notre
+premier essai n200 de la sonde complète passe aussi en comparaison physique
+des deux voies du nouvel encodage ; 48 618 MEB dans chacune à W=65 536.
+La voie en flux y est légèrement plus lente, sans conclusion de latence
+sur cette smoke préparatoire. Les captures finales et mesures de résidence
+à l'échelle suivront ; le moteur actif n'est pas remplacé à ce stade.
+
+ROOT, O2/SAN du vrai flux fermés : 114 census, 456 essais de fenêtres,
+253 224 terminales observées par build, huit mutants et trois refus causaux.
+Builder/T2, contributions et verticales inchangés ; comptes et capacités
+nommées contrôlés séparément. Les sondes n200/400/800 passent en comparaison
+physique du nouvel encodage. La comparaison mono n8000 par processus séparés
+est en cours, sans compilation concurrente du chantier.
+
+Question d'optimisation mono supplémentaire à contre-vérifier : les arêtes
+sur hubs sortent déjà par rang croissant puis ordinal. Un Kruskal incrémental
+sur ce flux éviterait les retris et recompactions de BinaryPile, avec un
+seul DSU et un certificat. Les choix internes aux égalités peuvent différer
+de son tri date/extrémités/id, sans changer les coupes. De plus, la première
+arête local0 de chaque hub devrait être acceptée : aucun bloc de date
+inférieure ou égale ne peut déjà viser ce hub, puisque sa terminale est
+strictement antérieure. Le certificat contiendrait ainsi tous les pivots,
+et la projection φ contracterait des sous-arbres connexes. Nous conservons
+d'abord la compaction native finale dans le raccord. Cette variante MONO
+ne doit pas être confondue avec les fenêtres indépendantes à distribuer
+massivement. Aucune intégration active ni exécution GPU supplémentaire.
+
+ROOT, comparaison n8000 close, résultat mono NEGATIF conservé. Référence
+graphes matérialisés / flux W65536 : 188,638222200 / 250,407612046 s pour
+index→census validé→FULL retenu ; 3 947 627 / 4 359 540 MEB ; pics RSS
+2 731 664 / 2 770 676 KiB dans deux processus séparés. Même digest dense
+a19a83fa4d646e4e0505ba2968ed9120fe8cc80aacccbf0fec61e53ad09b331f,
+mêmes comptes FULL/R par K. Pas de comparateur linéaire inter-processus
+inventé : celui-ci a tourné aux tailles n200/400/800 seulement.
+La pile retraite 48 390 815 arêtes pour 10 456 312 source, en 318
+compactions et 154 fusions. Ses buffers fenêtres font 6 553 600 octets,
+mais le RSS ne baisse pas. Nous ne promouvons pas ce chemin mono et ne
+prolongeons pas cette variante coûteuse à 16k/32k avant correction du
+réducteur. Le triplet et s10/s12 à grande taille restent à requalifier,
+sans transfert des anciennes mesures. Aucun GCP ni contrat nouveau.
+
+Paquet différentiel privé vérifié normal/−O, sources minimales au parent
+unique atlas_graph_full ; O2/SAN et cinq sondes, huit captures closes.
+Le brouillon ordered_msf et sa note de preuve sont explicitement séparés,
+non compilés/non raccordés, sans héritage des verdicts de BinaryPile.
+
+ROOT, réservation de publication sur main, index constaté libre : cette
+coordination racine, README/PASSATION v7, docs OBJETS_PARALLELES_TOUR,
+RESOLUTIONS_PAR_FENETRES et FAUSSES_PISTES, ainsi que le seul paquet
+receipts/streaming_graph_20260911 (manifeste 348810e5501edad16b7ef3fa1a846be82248bce526fc8e3b5a1a8e5dd9c859a4).
+Aucun src actif, fichier de vos audits, v6 ou registre dans la réservation.
+Contrôle normal/−O, extraction/reconstruction et docs/registre avant push.
+
+ROOT, lecteurs normal/−O et extraction du paquet passent. Reconstruction
+C++20/O2 stricte depuis cet arbre extrait : uniform32 PASS, mutant-work
+refusé par stream_gate.meb_work_identity, code 4. Docs : 504 Markdown ;
+registre inchangé : 20 phases. Le moteur actif garde 83f1c78e, anchor_meb
+386072c8 ; aucun CTest actif n'est réattribué à ces prototypes. Aucun
+benchmark ROOT en cours, GCP non utilisé. La réservation d'index se ferme
+à la publication ; les brouillons ordonnés restent à qualifier ensuite.

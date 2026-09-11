@@ -26,9 +26,16 @@ atlas/calendrier, le [raccord privé complet](receipts/atlas_graph_full_20260911
 joint maintenant vrais census, graphes, contributions et verticales. Deux
 routes de réduction par lots sont confrontées à la même tour : directement
 sur les naissances, ou sur les blocs puis projetées vers les naissances.
-Le moteur actif reste inchangé ; extraction géométrique et reconstruction
-ne sont pas encore massivement parallèles. Les fenêtres d'arêtes ne retirent
-pas encore les tableaux globaux de terminales de cette référence.
+Le [producteur réellement fenêtré](docs/RESOLUTIONS_PAR_FENETRES_20260911.md)
+retire maintenant les tableaux globaux de terminales et les graphes complets.
+O2/SAN : 114 census, 456 essais de fenêtres et 253 224 terminales comparées
+par build ; mêmes forêts, contributions et verticales. Catalogue, masques
+compacts et sortie restent présents ; les répétitions géométriques sont
+comptées, pas masquées. Le moteur actif reste inchangé ; extraction et
+reconstruction ne sont pas encore massivement parallèles.
+La première paire mono n8000 est défavorable : 188,638 → 250,408 s et
+aucune baisse du RSS. Le prochain correctif vise les recompactions de
+certificats ; ce flux n'est pas activé comme optimisation du moteur.
 Cette décomposition vise aussi WSPD, census et export, pas seulement les MEB.
 
 Jalon précédent : [sonde complète par lots, gate census→FULL et réduction MEB](docs/QUALIFICATION_BATCH_ET_MEB_20260911.md).
