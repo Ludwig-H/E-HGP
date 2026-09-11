@@ -42,6 +42,31 @@ paraît parallélisable ; l'épilogue construit la banque immuable.
 | 8 000 | 2,69x | 4,58x |
 | 16 000 | 2,56x | 4,26x |
 
+### Et le plafond empire quand on optimise le mono-thread
+
+Mesure refaite avec les mêmes chronomètres, mais **sur la variante MEB réparée**,
+à n=8000. J'avais annoncé cette dégradation avant de la mesurer ; elle est
+confirmée.
+
+| phase | moteur d'origine | après noyau MEB |
+| --- | ---: | ---: |
+| géométrie | 40,15 s (62,8 %) | 22,72 s (**49,5 %**) |
+| calendrier | 10,77 s (16,8 %) | 10,26 s (22,3 %) |
+| prologue | 9,84 s (15,4 %) | 9,70 s (21,1 %) |
+| épilogue | 3,21 s (5,0 %) | 3,25 s (7,1 %) |
+| `tower_s` | 63,97 s | 45,92 s |
+| plafond, géométrie seule | 2,69x | **1,98x** |
+| plafond, géométrie + prologue | 4,58x | **3,40x** |
+
+Le calendrier et le prologue sont inchangés en valeur absolue, ce qui vérifie que
+l'instrumentation mesure bien la bonne chose : je n'ai touché qu'au noyau
+géométrique, qui passe de 40,15 à 22,72 s, soit 1,77x.
+
+**Conséquence contre-intuitive à retenir.** Optimiser proprement le mono-thread
+rend le parallélisme **moins** rentable, puisque la part parallélisable rétrécit.
+Les deux leviers ne s'additionnent pas, ils se disputent le même gisement. Il ne
+faut donc pas promettre le produit de leurs facteurs.
+
 **Le plafond baisse quand n monte.** En doublant n, la géométrie croît d'un
 facteur 2,134 et le calendrier d'un facteur 2,367, soit des exposants locaux de
 1,094 et 1,243. Le calendrier croît donc plus vite que la part parallélisable,
@@ -133,12 +158,13 @@ en notant que le facteur 2,9 annoncé ne qualifie ni la réparation ni la tour.
 C'est exact ; le chiffre de remplacement, 1,33x pour ce qui survit, est au § 4 de
 ma note MEB.
 
-La porte permanente census→tour que je demandais est **en cours et non commitée**
-au moment où j'écris : `CMakeLists.txt` est modifié, `tests/census_tower_gate.cpp`
-et `tests/census_tower_oracle.hpp` sont non suivis, et le `CMakeLists` commité
-n'en contient aucune trace. Sa forme est la bonne : elle réutilise l'include
-Boost que la porte de tour reçoit déjà, donc aucune dépendance nouvelle, elle
-couvre `historical`, `line12`, `shell14`, `spatial12` et `rejects`, et elle porte
-des mutants causaux qui vérifient la ligne de diagnostic exacte, pas seulement
-un code non nul. Je mesurerai son coût réel une fois publiée, pour le confronter
-à mon estimation de trois secondes et demie.
+La porte permanente census→tour est **livrée** par `324f6192` et vérifiée ligne
+à ligne : elle alimente `build_full_ball_tower` avec le `balls` du vrai census
+jusqu'à K=10, l'oracle rationnel servant de juge et jamais de source, avec quatre
+mutants causaux contrôlant la ligne de diagnostic exacte.
+
+**Coût mesuré, comme promis** : `ctest -R '^mhgp7_census_tower'` sur les onze
+tests rend **3,50 s** au total. J'avais estimé environ 3,4 s à partir des
+captures du reçu, donc l'estimation tombe à 3 % près. L'objection de coût
+n'existait pas : cette porte est parmi les moins chères d'une suite qui porte
+des tests individuels à 145 s et 423 s.
