@@ -17,7 +17,9 @@ performance plutôt que l'outillage de test.
 [la sonde](../bench/full_ball_tower_probe.cpp) chronomètre `full_ball_tower`
 d'un seul tenant. Or ce bloc agrège deux travaux de nature opposée :
 
-- la **géométrie**, résolution de chaque représentant vers sa boule terminale,
+- la **géométrie**, tout `prepare_static_order`, c'est-à-dire la
+  résolution des représentants vers leur boule terminale **mais aussi** les tris,
+  le dédoublonnage, les semis et la restitution, donc pas une part MEB pure,
   démontrée séparable du calendrier, donc parallélisable ;
 - le **calendrier**, fermeture des lots par niveau, union-find sur les racines
   pré-lot, installation des ancres et émission de 27,3 M nœuds, séquentiel.
@@ -88,7 +90,10 @@ réparation est mesurée ici. Deux étages sont distingués.
 Étage 1, les deux optimisations prouvées exactes (a) et (b) seules, sans aucun
 Welzl. Étage 2, en ajoutant le Welzl réparé et la canonicalisation (c).
 
-| grandeur | référence | (a)+(b) seules | (a)+(b)+Welzl réparé |
+Le gain de la troisième colonne appartient au **chemin réparé appliqué à tous les
+K**, et non au dispositif hybride réfuté, qui n'existe plus.
+
+| grandeur | référence | (a)+(b) seules | (a)+(b)+Welzl réparé, tous K |
 | --- | ---: | ---: | ---: |
 | candidats par appel | 58,0 | 41,1 | **14,1** |
 | tests de puissance par appel | 88,4 | 29,5 | 33,6 |
@@ -120,8 +125,15 @@ nominal change.
 | supports testés | 340 615 272 | **23 092 967** |
 | `tower_s` | 61,23 s | **45,13 s** |
 
-**L'objet est inchangé bit à bit** et la tour gagne **1,357x**, avec 14,75 fois
-moins de formations de candidats. Le gain réel sur les candidats dépasse
+**L'objet est inchangé bit à bit** et la tour gagne **1,357x**, . Le rapport de **14,75** sur les supports
+testés était en revanche **mal compté de ma part**, comme le développeur l'a
+relevé : mon correctif ne facturait ni les formations de `boundary_ball`, ni les
+puissances de la récursion et du balayage de coquille. Ces 23 092 967 supports ne
+sont donc que ceux de la canonisation et du repli, **pas tout le travail payé**,
+et ce facteur ne doit pas être présenté comme une réduction totale. La
+comptabilité est corrigée et la mesure refaite ; le chiffre honnête suivra. Le
+**temps** mesuré n'est pas affecté : 61,23 s contre 45,13 s restent des mesures
+de bout en bout. Le gain réel sur les candidats dépasse
 largement les 4,13x du banc, parce que la distribution réelle des facettes penche
 davantage vers les K élevés que mon substitut par plus proches voisins.
 

@@ -29,7 +29,8 @@ RENAMED = "inline AnchorMebResult anchor_meb_brute(std::span<const P3> sites, An
 INJECT = r'''
 namespace anchor_meb_detail {
 struct Bag { u8 v[12]; u8 n = 0; };
-inline bool boundary_ball(std::span<const P3> s, const Bag& R, Candidate& out) noexcept {
+inline bool boundary_ball(std::span<const P3> s, const Bag& R, Candidate& out, AnchorMebWork& w) noexcept {
+  if (R.n >= 2 && !charge(w.supports_by_size[R.n < 4 ? R.n : 4])) return false;
   if (R.n == 0) return false;
   if (R.n <= 2) { const u8 i0=R.v[0], i1=R.v[R.n-1];
     out.q=2; out.slots={i0,i1,0,0}; out.a=s[i0]; out.b=s[i1]; return true; }
@@ -38,21 +39,24 @@ inline bool boundary_ball(std::span<const P3> s, const Bag& R, Candidate& out) n
   out.q=4; out.slots={R.v[0],R.v[1],R.v[2],R.v[3]}; out.a=s[R.v[0]]; out.b=s[R.v[1]];
   out.four=q4_form(s[R.v[0]],s[R.v[1]],s[R.v[2]],s[R.v[3]]); return out.four.det>0;
 }
-inline bool welzl_repaired(std::span<const P3> s, const u8* P, u8 pn, Bag& R, Candidate& out) noexcept {
-  if (pn == 0 || R.n == 4) return boundary_ball(s, R, out);
+inline bool welzl_repaired(std::span<const P3> s, const u8* P, u8 pn, Bag& R, Candidate& out, AnchorMebWork& w) noexcept {
+  if (pn == 0 || R.n == 4) return boundary_ball(s, R, out, w);
   const u8 p = P[pn-1];
-  bool ok = welzl_repaired(s, P, (u8)(pn-1), R, out);
-  if (ok && out.power(s[p]) <= 0) return true;
+  bool ok = welzl_repaired(s, P, (u8)(pn-1), R, out, w);
+  if (ok) { if (!charge(w.power_tests)) return false;
+            if (out.power(s[p]) <= 0) return true; }
   R.v[R.n++] = p;
-  ok = welzl_repaired(s, P, (u8)(pn-1), R, out);
+  ok = welzl_repaired(s, P, (u8)(pn-1), R, out, w);
   --R.n;
   return ok;
 }
 }  // namespace anchor_meb_detail
 
 inline AnchorMebResult anchor_meb(std::span<const P3> sites, AnchorMebWork& work) noexcept {
+  // Valider la taille AVANT toute conversion : un grand span tronquerait son
+  // cardinal. Borne a dix facettes, conformement au contrat actif.
+  if (sites.size() < 2 || sites.size() > 10) return anchor_meb_brute(sites, work);
   const u8 n = static_cast<u8>(sites.size());
-  if (n < 2 || n > 12) return anchor_meb_brute(sites, work);
   for (u8 i = 0; i < n; ++i) {
     if (!p3_in_profile(sites[i])) return anchor_meb_brute(sites, work);
     for (u8 j = 0; j < i; ++j) if (sites[i] == sites[j]) return anchor_meb_brute(sites, work);
@@ -60,9 +64,10 @@ inline AnchorMebResult anchor_meb(std::span<const P3> sites, AnchorMebWork& work
   using namespace anchor_meb_detail;
   u8 P[12]; for (u8 i = 0; i < n; ++i) P[i] = static_cast<u8>(n - 1 - i);
   Bag R{}; Candidate meb;
-  if (!welzl_repaired(sites, P, n, R, meb)) return anchor_meb_brute(sites, work);
+  if (!welzl_repaired(sites, P, n, R, meb, work)) return anchor_meb_brute(sites, work);
   u8 shell[12]; u8 sn = 0;
-  for (u8 i = 0; i < n; ++i) { const i128 pw = meb.power(sites[i]);
+  for (u8 i = 0; i < n; ++i) { if (!charge(work.power_tests)) return anchor_meb_brute(sites, work);
+    const i128 pw = meb.power(sites[i]);
     if (pw > 0) return anchor_meb_brute(sites, work);
     if (pw == 0) shell[sn++] = i; }
   AnchorMebResult r;
@@ -96,9 +101,12 @@ def main() -> int:
         print("usage: realflow_patch.py <copie isolee>/src/forest/anchor_meb.hpp", file=sys.stderr)
         return 2
     target = Path(sys.argv[1])
-    if "morsehgp3D_v7/audits" in str(target.resolve()):
-        print("refus : ne jamais patcher le depot, seulement une copie isolee", file=sys.stderr)
-        return 2
+    resolved = target.resolve()
+    for parent in [resolved, *resolved.parents]:
+        if (parent / ".git").exists():
+            print(f"refus : {parent} est un arbre versionne ; patcher une copie isolee",
+                  file=sys.stderr)
+            return 2
     try:
         text = target.read_text(encoding="utf-8")
     except OSError as error:

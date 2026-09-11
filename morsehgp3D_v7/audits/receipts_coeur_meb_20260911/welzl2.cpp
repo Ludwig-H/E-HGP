@@ -57,12 +57,14 @@ static AnchorMebResult run2(std::span<const P3> s, Counters& c, bool& guarded) {
   guarded=true; return brute_q2(s,c);
 }
 int main(){
+  bool k7_ok=false; unsigned bad_ex=0;
   // Epreuve 1 : la contre-fixture K7 exacte
   {
     std::vector<P3> f{{2,3,2},{2,0,0},{0,2,2},{1,0,0},{2,2,0},{3,0,1},{0,2,3}};
     AnchorMebWork w; Counters c; bool g=false;
     auto a=anchor_meb(std::span<const P3>(f),w); auto b=run2(std::span<const P3>(f),c,g);
-    printf("epreuve K7 : %s  repli=%s\n", same(a,b)?"IDENTIQUE":"DIVERGENT", g?"oui":"non");
+    k7_ok = same(a,b);
+    printf("epreuve K7 : %s  repli=%s\n", k7_ok?"IDENTIQUE":"DIVERGENT", g?"oui":"non");
   }
   // Epreuve 2 : leur balayage exhaustif
   {
@@ -74,6 +76,7 @@ int main(){
       AnchorMebWork w; Counters c; bool g=false;
       auto a=anchor_meb(std::span<const P3>(s),w); auto b=run2(std::span<const P3>(s),c,g);
       ++cases; if(!same(a,b))++bad; if(g)++gu; }
+    bad_ex = bad;
     printf("epreuve exhaustive : %u cas, %u divergences, %u replis\n",cases,bad,gu);
   }
   // Epreuve 3 : 200k tirages + chronometrage
@@ -102,4 +105,7 @@ int main(){
   printf("candidats  ref=%.1f  welzl2=%.1f  gain=%.2fx\n",(double)rc/cases,(double)vc/cases,(double)rc/vc);
   printf("puissances ref=%.1f  welzl2=%.1f  gain=%.2fx\n",(double)rp/cases,(double)vp/cases,(double)rp/vp);
   printf("TEMPS ref=%.3fs welzl2=%.3fs speedup=%.2fx\n",tref,tvar,tref/tvar);
-  return bad?1:0; }
+  const bool all_ok = k7_ok && bad_ex==0 && bad==0;
+  printf("VERDICT %s (K7=%s exhaustif=%u divergences aleatoires=%llu)\n",
+         all_ok?"PASS":"FAIL", k7_ok?"ok":"DIVERGENT", bad_ex, bad);
+  return all_ok?0:1; }

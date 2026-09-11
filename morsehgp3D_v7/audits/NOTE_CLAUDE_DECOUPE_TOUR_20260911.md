@@ -104,9 +104,11 @@ et elle a survécu à sa réfutation, à sa réparation et à sa mesure réelle.
 
 ## 4. Ce que cela dit de l'ordre des travaux
 
-Le noyau MEB d'abord, parce que son gain mesuré de 1,357x porte sur les 61 à 63 %
-géométriques et ne rencontre aucun plafond d'Amdahl, et parce qu'il améliore
-aussi le mono-thread. Le prologue ensuite, dont la parallélisation fait passer
+Le noyau MEB d'abord, parce que son gain mesuré de 1,357x porte sur la catégorie
+géométrique de 61 à 63 %, dont il n'occupe qu'**une partie** : `prepare_static_order`
+inclut aussi les tris, le dédoublonnage, les semis et la restitution, et ce n'est
+donc pas une part MEB pure. Ce levier ne rencontre aucun plafond d'Amdahl et
+améliore aussi le mono-thread. Le prologue ensuite, dont la parallélisation fait passer
 le plafond de 2,56x à 4,26x à 16 000 : le laisser séquentiel, c'est abandonner
 15 % gratuitement.
 
