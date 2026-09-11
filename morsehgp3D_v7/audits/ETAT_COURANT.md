@@ -1,36 +1,40 @@
 # État courant de l’audit v7
 
-11 septembre 2026, après publication constructeur **069bb6a2**. La priorité
+11 septembre 2026, après publication constructeur **ac3e8b9f**. La priorité
 reste la parallélisation de toute la tour et la maîtrise des intermédiaires.
 
-**Nouvelle simplification prouvée : contracter les pivots pendant la
-consommation des terminales et appliquer Kruskal directement aux naissances.**
-La [preuve et son modèle indépendant](receipts_birth_stream_20260911/README.md)
-exploitent l’ordre du flux réel et l’antériorité stricte des terminales.
-φ reste une identité native stable ; le DSU travaille sur les seules L
-naissances. Le certificat intermédiaire sur A hubs, sa projection et sa
-compaction disparaissent. Atlas, φ, fenêtres, marques et sortie restent à payer.
+**Suite constructive : partager la préparation validée et lier les semis
+une fois aux workers.** L’[audit de préparation](receipts_prepared_catalogue_20260911/README.md)
+identifie les tris, programmes et ShellTable aujourd’hui détruits puis
+reconstruits. Les comparaisons des programmes peuvent utiliser des rangs
+entiers après certification de chaque liaison exacte. Les contrôles locaux
+et l’autorité distincte de complétude restent conservés.
 
-Sur les compteurs publiés n8000, le travail du nouveau réducteur se déduit à
-7 342 931 tentatives d’union, contre 48 390 815 dans la pile actuelle et
-3 910 849 dans sa compaction native. **Cette déduction n’est pas un nouveau
-benchmark.** Le raccord C++, le RSS et le temps de cette spécialisation restent
-à qualifier. Les lots parallèles hors ordre gardent leur contrat distinct.
+La liaison exacte des semis passe de Σ J_K·S_K à Σ S_K≤B comparaisons,
+plus les contrôles des vues liées. Le Context actuel est non réentrant :
+plan immuable partagé et états privés des workers doivent être séparés.
+Une contre-fixture exacte à quatre points fixe aussi la condition de réemploi
+d’une terminale mémorisée sous un autre seuil. Le modèle qualifie ces arguments
+bornés ; il n’exécute ni le propriétaire préparé ni le pool parallèle.
 
-Le [producteur réellement fenêtré](../receipts/streaming_graph_20260911/README.md)
-a reçu une contrelecture favorable, lecteurs normal/−O compris. Sa première
-qualification bornée est close ; son résultat mono n8000 reste négatif :
-188,638 s référence contre 250,408 s flux, index jusqu’à FULL retenu, avec un
-RSS légèrement supérieur. Corriger le réducteur avant de prolonger cette
-variante à n16k/n32k est la bonne suite. Aucune promotion de performance.
+Le [raccord ordonné constructeur](../receipts/ordered_streaming_20260911/README.md)
+est contre-lu, lecteurs normal/−O PASS. Son triplet 8k/16k/32k est clos :
+une visite par occurrence et aucun retri des arêtes de hubs. Le RSS ne baisse
+pas sensiblement ; les temps sous charge n’établissent pas un speedup universel.
+Les anciennes demandes de correction ordonnée et de premier triplet sont closes.
 
-Les acquis précédents restent consultables dans leurs preuves :
-[export physique historique](receipts_historical_export_20260911/README.md),
-[raccord FULL constructeur](../receipts/atlas_graph_full_20260911/README.md),
-[composition MSF](receipts_composable_msf_20260911/README.md),
-[décomposition parallèle](receipts_parallel_objects_20260911/README.md) et
-[support certifié](receipts_certified_support_20260911/README.md).
-Les demandes déjà closes ne sont plus développées ici.
+La [contraction directe](receipts_birth_stream_20260911/README.md), publiée
+03198682 et contre-exécutée par le constructeur, conserve sa preuve et son
+modèle indépendant. Le draft dense b2a472db est favorable en lecture ; son
+raccord C++ fait l’objet d’une qualification distincte en préparation. Le
+développeur a accepté le partage des métadonnées comme delta séparé, avec
+validation commune conservée dans le premier reçu dense.
+
+Les acquis d’[export historique](receipts_historical_export_20260911/README.md),
+de [composition MSF](receipts_composable_msf_20260911/README.md),
+d’[objets parallèles](receipts_parallel_objects_20260911/README.md) et de
+[support certifié](receipts_certified_support_20260911/README.md) restent dans
+leurs preuves, sans répéter les demandes satisfaites.
 
 ```text
 phase=exploration_v7_hors_registre

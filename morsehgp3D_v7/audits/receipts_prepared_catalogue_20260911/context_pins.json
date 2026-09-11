@@ -1,0 +1,44 @@
+{
+  "source_commit": "ac3e8b9f6f9e61facf186887485c8519a1ea6019",
+  "historical_source_pins": {
+    "morsehgp3D_v7/src/forest/full_ball_tower.hpp": "83f1c78e0656f08cd42522e4cd36d153ce283a6082246a36fe5225b3790c6366",
+    "morsehgp3D_v7/tests/full_ball_batch_geometry.hpp": "194f1b2b62dba6b847858d81217574d8fdc47d9d71c7b72c8c2caa0085d3a438",
+    "morsehgp3D_v7/src/forest/local_plateau.hpp": "df56fbf33ea3088218174f88a646c65702d97a0366ec848887f1846ae7666f2e",
+    "morsehgp3D_v7/receipts/rank_atlas_20260911/rank_atlas.hpp": "9fc118a208eac74472a0e8e5490e094953afced19495102a1ae06409b591d621",
+    "morsehgp3D_v7/receipts/ordered_streaming_20260911/MANIFEST.json": "75a09eab39ebeb3852c2cc888c1a5c06b7df8bc83f35f3a0f8c4a07bb68de06e",
+    "morsehgp3D_v7/receipts/ordered_streaming_20260911/README.md": "7a553e56a439e10a0e4311ba766105d508e4f1001d9e2a784cfbf3902af76949",
+    "morsehgp3D_v7/audits/receipts_birth_stream_20260911/README.md": "174e25981a6254e45048834a6146797a2f2fccf50c6dbdb86d3cf10ac8d2616b",
+    "morsehgp3D_v7/receipts/gpu_terminal_batch_t2_20260911/sources/current/prototype/batch_adapter.hpp": "993786f352421eab8f183eb0675fe210e408dc5b3045b55af66a245a40f278ff",
+    "morsehgp3D_v7/receipts/gpu_terminal_batch_t2_20260911/sources/current/prototype/batch_route.cuh": "a62bd1d5ab4bf80eaac5eff34db115ad7b6682222774d68c843cb0ccc20fc45f",
+    "morsehgp3D_v7/receipts/gpu_terminal_batch_t2_20260911/sources/current/prototype/seed_owner.hpp": "f2ac463bce6eeaae59046d5a4198c6f4455a48b5ab5e6fad20ccbc456bb10485",
+    "morsehgp3D_v7/receipts/gpu_terminal_batch_t2_20260911/sources/current/prototype/terminal_owner.hpp": "be3c422c8ff7a09650c7a91d175eebfef21585ca160150fb40bae83dcdd13a60",
+    "morsehgp3D_v7/receipts/gpu_terminal_batch_t2_20260911/sources/current/prototype/terminal.cuh": "d73de05f81354b9c658d22ee040ac490f52625b8c8bdb523939aa9b5fd8e0860",
+    "morsehgp3D_v7/receipts/gpu_terminal_batch_t2_20260911/sources/current/prototype/owner.hpp": "ce94d8ee9a93fad16319487979ff31daf31236544e6539b5942a754591f13fda",
+    "morsehgp3D_v7/receipts/gpu_terminal_batch_t2_20260911/sources/current/prototype/intruder.cuh": "165fd5964c9ea2394ca29747b236713d74528db4fd4149429f9080dd423cc75a",
+    "morsehgp3D_v7/receipts/ordered_streaming_20260911/objects/fb9f0c0c255e319277ccd464215ce179169cc4382f981815c91829a04b7efe5c": "fb9f0c0c255e319277ccd464215ce179169cc4382f981815c91829a04b7efe5c",
+    "morsehgp3D_v7/receipts/ordered_streaming_20260911/objects/b2a472dbcc4f5f82e14b66146b99ff1d873d58a79ec889240500c9e62f056853": "b2a472dbcc4f5f82e14b66146b99ff1d873d58a79ec889240500c9e62f056853",
+    "morsehgp3D_v7/receipts/ordered_streaming_20260911/objects/f702e9dded8eab9e3e597b4c5eb2d9b9c80367c912ca8528b31f6f159b578adc": "f702e9dded8eab9e3e597b4c5eb2d9b9c80367c912ca8528b31f6f159b578adc"
+  },
+  "ordered_packet": "morsehgp3D_v7/receipts/ordered_streaming_20260911",
+  "logical_context_objects": {
+    "build/v7_ordered_streaming_20260911/streaming_graph.hpp": {
+      "path": "objects/fb9f0c0c255e319277ccd464215ce179169cc4382f981815c91829a04b7efe5c",
+      "provider": "object",
+      "sha256": "fb9f0c0c255e319277ccd464215ce179169cc4382f981815c91829a04b7efe5c",
+      "size": 18523
+    },
+    "build/v7_ordered_streaming_20260911/birth_streaming_graph.hpp": {
+      "path": "objects/b2a472dbcc4f5f82e14b66146b99ff1d873d58a79ec889240500c9e62f056853",
+      "provider": "object",
+      "sha256": "b2a472dbcc4f5f82e14b66146b99ff1d873d58a79ec889240500c9e62f056853",
+      "size": 21062
+    },
+    "build/v7_ordered_streaming_20260911/bench.cpp": {
+      "path": "objects/f702e9dded8eab9e3e597b4c5eb2d9b9c80367c912ca8528b31f6f159b578adc",
+      "provider": "object",
+      "sha256": "f702e9dded8eab9e3e597b4c5eb2d9b9c80367c912ca8528b31f6f159b578adc",
+      "size": 34101
+    }
+  },
+  "scope": "Read-only constructor sources/captures; exact rank proof and independent 1D cache threshold counterfixture. No prepared owner, pool, dense reducer or device execution."
+}

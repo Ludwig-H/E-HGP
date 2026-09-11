@@ -4,48 +4,61 @@
 **toutes** les étapes coûteuses de la tour. La [coordination](COORDINATION_AUDITEURS.md)
 répartit les écritures.
 
-## Réduction mono directe sur les naissances
+## Partager les objets déjà validés
 
-La [preuve et le modèle](receipts_birth_stream_20260911/README.md) fournissent
-une simplification au brouillon ordonné. À `local0(B)`, φ(T) est déjà connu
-par antériorité stricte : poser φ(B)=φ(T), sans union. Pour les occurrences
-suivantes, Kruskal reçoit directement φ(B)–φ(Tj). Il retient exactement les
-arêtes non pivots du Kruskal ordonné sur hubs après contraction, avec mêmes
-dates et ordinaux. La coupe au milieu d’un hub entre deux fenêtres est admise.
+Le [nouvel audit](receipts_prepared_catalogue_20260911/README.md) répond aux
+questions de préparation et de liaison. Le premier delta sûr retourne les
+métadonnées du validateur, aujourd’hui détruites avant Atlas : ordre par clé,
+ordre exact stable, programmes et ShellTable extras. Une fabrique commune
+peut garder tous les contrôles existants et servir ses vues à Builder,
+Atlas et Geometry. Elle ne doit pas retenir un Builder complet pour cela.
 
-Le raccord se place dans `flush`, lors de la consommation originale des
-requêtes après leur résolution triée. Un indice dense propre à K permet
-l’accès O(1) au DSU sur L ; convertir en identités natives à la frontière
-`graph_full`. **Ne jamais écrire `find(φ)` dans φ ni dans les extrémités du
-certificat.** La table des naissances reste stable pendant l’usage des indices.
-L’écriture des marques O(A), les atlas, semis, fenêtres et sorties demeurent.
+Les rangs entiers remplacent les comparaisons rationnelles répétées des
+programmes après vérification des représentants stricts et de chaque liaison
+BallId→rang→niveau. Préserver égalités, ordre des clés, couverture des cellules,
+fractions brutes et permutation des masques PointId/BallData. Le partage
+ne transforme pas la validation locale en preuve de complétude productrice.
+Le constructeur a lu et accepté ce delta ; il le séparera de son premier
+raccord dense pour conserver un différentiel clair.
 
-Ce chemin évite les recompactions, le DSU des A hubs et leur certificat
-intermédiaire. Sur les compteurs n8000 scellés, il demanderait 7 342 931
-unions testées ; ce chiffre est déduit, sans temps ou RSS mesuré.
-La suite utile est le raccord sur les mêmes terminales réelles, puis les
-comparaisons φ/marques/coupes/FULL et une paire mono isolée. Les invariants
-et pièges d’API sont détaillés dans le paquet, sans nouvelle demande vague.
+## Semis partagés, état privé par worker
+
+Une liaison exhaustive une fois par owner/génération/K peut produire un
+objet opaque consommé par toutes les fenêtres, avec stockage vivant et
+fermé aux mutations. Puisque chaque boule fournit un semis complet au seul
+ordre |I|+|U|, Σ S_K≤B pour la tour. L’adapter actuel paie au contraire
+Σ J_K·S_K comparaisons de liaison. Construction, tri et transferts restent
+à compter ; il ne s’agit pas d’un gain de temps déjà mesuré.
+
+Le Context actuel porte des buffers, un compteur batch et un état d’échec
+mutables. Le pool partage seulement les objets immuables, avec espaces de
+travail distincts et couverture explicite des résultats. Borner ensemble
+fenêtres en vol et résultats terminés en attente évite une accumulation
+si une ancienne fenêtre tarde. Le constructeur confirme que ses workers
+ne recevront ni φ ni le DSU et ne partageront pas ce Context concurremment.
+
+Pour un mémo de terminales, garder aussi le seuil sous lequel la requête
+était certifiée. Réemploi direct sous un seuil supérieur ou égal ; en dessous,
+**miss et repli**, pas rejet automatique. Le seul niveau de la terminale ne
+suffit pas : la MEB initiale peut être plus haute. Le paquet conserve un
+témoin exact à quatre points, et un seuil intermédiaire valide qui nécessite
+le repli. Ce témoin d’API ne prétend pas être une occurrence FULL authentique.
 
 ## Qualifications précédentes closes
 
-Le [vrai flux par fenêtres](../receipts/streaming_graph_20260911/README.md)
-est publié et contre-lu : tableaux globaux requests/targets/graphes supprimés,
-travail MEB cumulé correctement contrôlé, 114 census et quatre fenêtres par
-build dans les captures constructeur. Le résultat négatif mono n8000 est
-conservé. Son arrêt avant extension à n16k/n32k évite de répéter une variante
-coûteuse avant correction. Cette qualification ne s’étend pas au brouillon
-ordonné ni à la contraction directe proposée ici.
+Le [réducteur ordonné](../receipts/ordered_streaming_20260911/README.md) et son
+triplet 8k/16k/32k sont publiés et contre-lus, lecteurs normal/−O PASS.
+Une visite par R et zéro retri de hubs sont établis ; le compact natif reste
+exécuté. Les temps sous charge et le RSS sont correctement bornés. Le refus
+LSan initial est conservé séparément ; aucune mesure n’est réattribuée.
 
-La [compatibilité d’export historique](receipts_historical_export_20260911/README.md)
-est prête et contre-vérifiée par le constructeur : banque unique, indices,
-niveaux bruts et nœuds reconstruits après les horizontales. Les détails des
-deux minima restent dans la preuve, plutôt que répétés comme question ouverte.
-Le [premier raccord FULL](../receipts/atlas_graph_full_20260911/README.md) et
-les preuves de [composition](receipts_composable_msf_20260911/README.md) et de
+La [preuve de contraction directe](receipts_birth_stream_20260911/README.md)
+a été contre-exécutée par le développeur. Son draft C++ dense est favorable
+en lecture ; son premier raccord et son pool CPU sont en préparation.
+Les preuves d’[export historique](receipts_historical_export_20260911/README.md),
+de [composition](receipts_composable_msf_20260911/README.md) et de
 [décomposition de la tour](receipts_parallel_objects_20260911/README.md)
-conservent leurs autorités propres. Les fenêtres indépendantes hors ordre
-restent compatibles avec cette architecture, via leur réducteur composable.
+restent acquises à leur portée, sans redemander leurs premières gates.
 
 ## Acquis repris par le développeur
 

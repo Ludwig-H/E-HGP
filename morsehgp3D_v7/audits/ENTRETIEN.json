@@ -4611,5 +4611,316 @@
       "index_reservation_base": "7ccd9d6e",
       "constructor_current_ordered_hub_experiments_not_inherited": true
     }
+  },
+  "latest_prepared_catalogue_20260911": {
+    "date_utc": "2026-09-11T18:57:59.376160+00:00",
+    "source_head_at_start": "ac3e8b9f6f9e61facf186887485c8519a1ea6019",
+    "source_head_at_publication_preparation": "ac3e8b9f6f9e61facf186887485c8519a1ea6019",
+    "objective": "Share validated catalogue preparation and bind immutable full-population seeds once per owner/order while preserving request-specific exact guards and private worker state.",
+    "constructive_results": [
+      "Builder validation constructs by_key, exact stable order, programs and extra ShellTable; the probe destroys these before Atlas repeats the work and Geometry receives another by_key.",
+      "A prepared owner can expose these derived views without removing existing local geometric checks or retaining the whole Builder output state.",
+      "Exact representative ordering plus every BallId-to-level binding proves integer rank comparisons equivalent; program admission, uniqueness, coverage and raw representatives remain explicit.",
+      "ShellTable and Atlas use distinct mask conventions; preserve the PointId-to-original-shell permutation.",
+      "A nonforgeable bound seed-order object replaces exhaustive per-window rebinding only on truly immutable live ownership.",
+      "Each ball contributes a full-population seed only at K=|I|+|U|; total seed rows over K2..Kmax are at most B, while build/sort/upload remain separately paid.",
+      "Context is not reentrant; shared readonly geometry/seed plans require private mutable worker/backend state and bounded inflight-plus-completed windows.",
+      "A cached terminal level alone cannot certify a smaller consumer threshold. Store the previously certified threshold and use fallback below it, or bind an exact initial-MEB certificate.",
+      "The four-point exact API witness rejects before2 despite terminal level1; before9/2 is a positive fallback case below the cached threshold5."
+    ],
+    "packet": {
+      "path": "receipts_prepared_catalogue_20260911",
+      "pins": {
+        "README.md": "b0dd9a64a98949abd9f55c13278a06eb2f8540515aa02ba5c6153d7ff666faa2",
+        "SHA256SUMS": "d9e21821af51dd85d27327fe61637b7018f9729312619cd7fbf4d02a410d91a4",
+        "commands.json": "50a41f2740001286173e559945880e4eab5cdbe2f732a568a765375503083a0e",
+        "context_pins.json": "55c82fa65a0eda04174769ac5c961dc22fe7d066fd2c27487964bc75f25bd132",
+        "model.py": "44942facb8ecf65e35adf08fc96391172d4b8ab66070db2408b1d71d1d550f6e",
+        "result.json": "e5ccaca0c15628b4396743343b4a912621de7b9aac761388eeb875b332a114c1",
+        "verify.py": "047b39827c7562eecfa010294087464e9ee5af84d26bdc12319aff1f77b8b3c8"
+      },
+      "result": {
+        "cache_before": {
+          "K": 2,
+          "exchange": {
+            "inserted_strict_intruder": 2,
+            "removed_first_support": 0
+          },
+          "fallback_before_squared": "9/2",
+          "fallback_direct_reuse_allowed": false,
+          "fallback_fresh_accepted": true,
+          "independent_power_classifications": 8,
+          "initial_center": "2",
+          "initial_interior": [
+            2,
+            3
+          ],
+          "initial_pair": [
+            0,
+            4
+          ],
+          "initial_radius_squared": "4",
+          "initial_shell": [
+            0,
+            4
+          ],
+          "initial_window": [
+            3,
+            4
+          ],
+          "mutant_terminal_only_accepted": true,
+          "new_before_squared": "2",
+          "new_fresh_accepted": false,
+          "old_before_squared": "5",
+          "old_fresh_accepted": true,
+          "safe_bounds_tested": [
+            "5",
+            "11/2",
+            "6",
+            "10"
+          ],
+          "scope": "arbitrary exact 1D query; not an authenticated FULL occurrence or producer execution",
+          "source_u16": [
+            0,
+            2,
+            3,
+            4
+          ],
+          "stored_before_guard_rejected": true,
+          "terminal_center": "3",
+          "terminal_interior": [
+            3
+          ],
+          "terminal_pair": [
+            2,
+            4
+          ],
+          "terminal_radius_squared": "1",
+          "terminal_shell": [
+            2,
+            4
+          ],
+          "terminal_window": [
+            2,
+            3
+          ]
+        },
+        "causal_mutants": 5,
+        "not_claimed": [
+          "geometric catalogue validation",
+          "prepared owner implementation",
+          "authentic FULL request",
+          "product execution",
+          "performance"
+        ],
+        "rank_binding": {
+          "catalogue_variants": 6,
+          "causal_rejections": [
+            {
+              "cause": "rank_unbound_to_exact_level",
+              "mutant": "unbound_integer_rank"
+            },
+            {
+              "cause": "representatives_not_strictly_increasing",
+              "mutant": "nonincreasing_representatives"
+            },
+            {
+              "cause": "program_not_ordered",
+              "mutant": "equal_level_key_inversion"
+            },
+            {
+              "cause": "program_not_permutation",
+              "mutant": "duplicate_with_omission"
+            }
+          ],
+          "equivalent_raw_representation_accepted": true,
+          "pair_sign_comparisons": 84,
+          "program_comparisons": 18
+        },
+        "status": "passed_bounded_exact_model"
+      },
+      "model_source_sha256": "44942facb8ecf65e35adf08fc96391172d4b8ab66070db2408b1d71d1d550f6e",
+      "modes": [
+        "Python normal",
+        "Python -O"
+      ],
+      "commands_per_mode": 3,
+      "scope": "Independent rational rank and 1D geometric threshold model. No prepared owner, C++ producer, authentic FULL cache occurrence, worker pool, geometry completeness or performance qualified."
+    },
+    "checks": [
+      {
+        "name": "packet_normal",
+        "command": "python3 -B morsehgp3D_v7/audits/receipts_prepared_catalogue_20260911/verify.py",
+        "exit_code": 0,
+        "output": "{\"cache_counterfixture_points\": 4, \"causal_mutants\": 5, \"gcp_used\": false, \"historical_context_pins\": 17, \"pair_sign_comparisons\": 84, \"performance_claim\": false, \"product_executed\": false, \"programs_compared\": 18, \"public_status\": \"not_claimed\", \"rank_variants\": 6, \"status\": \"passed_prepared_catalogue_receipt\", \"valid_lower_threshold_requires_fallback\": true}\n"
+      },
+      {
+        "name": "packet_optimized",
+        "command": "python3 -B -O morsehgp3D_v7/audits/receipts_prepared_catalogue_20260911/verify.py",
+        "exit_code": 0,
+        "output": "{\"cache_counterfixture_points\": 4, \"causal_mutants\": 5, \"gcp_used\": false, \"historical_context_pins\": 17, \"pair_sign_comparisons\": 84, \"performance_claim\": false, \"product_executed\": false, \"programs_compared\": 18, \"public_status\": \"not_claimed\", \"rank_variants\": 6, \"status\": \"passed_prepared_catalogue_receipt\", \"valid_lower_threshold_requires_fallback\": true}\n"
+      },
+      {
+        "name": "docs_normal",
+        "command": "python3 -B tools/check_docs.py",
+        "exit_code": 0,
+        "output": "Validated 505 active Markdown files.\n"
+      },
+      {
+        "name": "docs_optimized",
+        "command": "python3 -B -O tools/check_docs.py",
+        "exit_code": 0,
+        "output": "Validated 505 active Markdown files.\n"
+      },
+      {
+        "name": "registry",
+        "command": "python3 -B tools/check_implementation_status.py",
+        "exit_code": 0,
+        "output": "Validated 20 implementation phases and their gates.\n"
+      },
+      {
+        "name": "own_markdown",
+        "command": "python3 -B - <<'PY'\nfrom pathlib import Path\nimport importlib.util,json\nspec=importlib.util.spec_from_file_location('doccheck','tools/check_docs.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)\np=Path('morsehgp3D_v7/audits').resolve();files=[p/n for n in ['COORDINATION_AUDITEURS.md','DIALOGUE_COURANT.md','ETAT_COURANT.md','README.md','receipts_prepared_catalogue_20260911/README.md']];errors=[e for f in files for e in m.validate(f)]\nprint(json.dumps({'files':len(files),'errors':errors}));raise SystemExit(bool(errors))\nPY",
+        "exit_code": 0,
+        "output": "{\"files\": 5, \"errors\": []}\n"
+      }
+    ],
+    "constructor_review": {
+      "published_commit": "ac3e8b9f6f9e61facf186887485c8519a1ea6019",
+      "packet": "morsehgp3D_v7/receipts/ordered_streaming_20260911",
+      "manifest_sha256": "75a09eab39ebeb3852c2cc888c1a5c06b7df8bc83f35f3a0f8c4a07bb68de06e",
+      "reader_commands": [
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "morsehgp3D_v7/receipts/ordered_streaming_20260911/verify.py"
+          ],
+          "exit_code": 0,
+          "status": "passed"
+        },
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "-O",
+            "morsehgp3D_v7/receipts/ordered_streaming_20260911/verify.py"
+          ],
+          "exit_code": 0,
+          "status": "passed"
+        }
+      ],
+      "reader_result_summary": {
+        "logical_files": 779,
+        "borrowed_files": 201,
+        "local_objects": 286,
+        "runs": 15,
+        "passed_captures": 14,
+        "failed_captures_preserved": [
+          "build/v7_ordered_streaming_20260911/primitive_san_r1"
+        ],
+        "gate_captures": 2,
+        "performance_contract_claim": false
+      },
+      "closed_findings": [
+        "Ordered reducer qualification and first8k16k32k triplet are closed on published captures.",
+        "Hub edges are processed once, no hub edge re-sorts; final native compaction is still paid.",
+        "Parallel load, process RSS scope and absence of geometry oracle at16k32k are stated.",
+        "Dense draft b2a472db is favorable in source reading: immutable phi, conversion after whole K, all callbacks retained; explicitly excluded from executed capture closures."
+      ],
+      "source_pins": {
+        "streaming_graph.hpp": "fb9f0c0c255e319277ccd464215ce179169cc4382f981815c91829a04b7efe5c",
+        "birth_streaming_graph.hpp": "b2a472dbcc4f5f82e14b66146b99ff1d873d58a79ec889240500c9e62f056853",
+        "bench.cpp": "f702e9dded8eab9e3e597b4c5eb2d9b9c80367c912ca8528b31f6f159b578adc"
+      },
+      "scope": "Read-only verification and source review, no new C++ compilation or benchmark by this audit.",
+      "new_wip_at_close": "Constructor accepted prepared metadata as separate delta; dense route and persistent CPU pool being prepared with unchanged common validation in first dense receipt. No later result inherited."
+    },
+    "counterreading": {
+      "metadata_api": "/root/prototype_review agrees on exact obligations, rank equivalence and mask ordering; raw representative wording corrected before sealing.",
+      "seeds_and_cache": "/root/streaming_msf_math agrees on one-time binding, total seed bound, Context nonreentrance and exact four-point counterfixture.",
+      "final_packet": "/root/prepared_packet_review independently ran model and reader normal/-O, matching outputs; no serious defect or scope excess found."
+    },
+    "coordination": {
+      "source": "audits/COORDINATION_MORSEHGP3D_V7.md read only",
+      "constructor_agrees_with_prepared_plan": true,
+      "constructor_workers_exclude_phi_and_dsu": true,
+      "constructor_does_not_share_mutable_GPU_Context": true,
+      "reservation_files": 13,
+      "reservation_base": "ac3e8b9f"
+    },
+    "maintenance": {
+      "entries": [
+        {
+          "path": "COORDINATION_AUDITEURS.md",
+          "previous_sha256": "053464b4865eb7659b70d13ad42eed60b758871c360b9ac4869f37743799fda4",
+          "previous_words": 580,
+          "words": 702
+        },
+        {
+          "path": "DIALOGUE_COURANT.md",
+          "previous_sha256": "d47c3fbbe73f055939da5d175ba1b90df7c0729bd3e13b4b0a4f504107de4216",
+          "previous_words": 566,
+          "words": 683
+        },
+        {
+          "path": "ETAT_COURANT.md",
+          "previous_sha256": "6ce8fc0574d423aba26d4ba48d080de4d725350458cbf6e9efb6075d2fcb51bc",
+          "previous_words": 656,
+          "words": 689
+        },
+        {
+          "path": "README.md",
+          "previous_sha256": "c4a584017712bfb126d34bdeefdb833e9c703abcc597bcfc5b3e78e4047d00a3",
+          "previous_words": 948,
+          "words": 982
+        }
+      ],
+      "active_notes_rewritten_not_appended": true,
+      "closed_ordered_and_triplet_requests_condensed": true,
+      "historical_packets_unchanged": true,
+      "source_variants_D_to_Q_unchanged": true,
+      "other_session_files_untouched": true,
+      "new_scattered_root_probe_files": false,
+      "temporary_directory_created": false,
+      "new_engine_variant": false,
+      "final_own_markdown_validation": {
+        "files": 5,
+        "errors": []
+      }
+    },
+    "gcp_used": false,
+    "whole_source_freshness": {
+      "common_pins_valid": 2846,
+      "source_variants_D_to_Q_unchanged": true,
+      "scope": "All common pins pass; historical engine variants D-Q do not fully match current engine. This code1 is separate from the passing prepared-catalogue proof/model receipt.",
+      "commands": [
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "morsehgp3D_v7/audits/verify_current.py"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr_first_line": "Audit à actualiser : aucune variante complète ne correspond.",
+          "stderr_sha256": "6b7321b69dcf56cd8795142cd9c8692b62968d6e321388a490eaf538868d0c4e",
+          "stderr_lines": 149
+        },
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "-O",
+            "morsehgp3D_v7/audits/verify_current.py"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr_first_line": "Audit à actualiser : aucune variante complète ne correspond.",
+          "stderr_sha256": "6b7321b69dcf56cd8795142cd9c8692b62968d6e321388a490eaf538868d0c4e",
+          "stderr_lines": 149
+        }
+      ]
+    }
   }
 }

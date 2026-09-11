@@ -1,0 +1,100 @@
+{
+  "cache_before": {
+    "K": 2,
+    "exchange": {
+      "inserted_strict_intruder": 2,
+      "removed_first_support": 0
+    },
+    "fallback_before_squared": "9/2",
+    "fallback_direct_reuse_allowed": false,
+    "fallback_fresh_accepted": true,
+    "independent_power_classifications": 8,
+    "initial_center": "2",
+    "initial_interior": [
+      2,
+      3
+    ],
+    "initial_pair": [
+      0,
+      4
+    ],
+    "initial_radius_squared": "4",
+    "initial_shell": [
+      0,
+      4
+    ],
+    "initial_window": [
+      3,
+      4
+    ],
+    "mutant_terminal_only_accepted": true,
+    "new_before_squared": "2",
+    "new_fresh_accepted": false,
+    "old_before_squared": "5",
+    "old_fresh_accepted": true,
+    "safe_bounds_tested": [
+      "5",
+      "11/2",
+      "6",
+      "10"
+    ],
+    "scope": "arbitrary exact 1D query; not an authenticated FULL occurrence or producer execution",
+    "source_u16": [
+      0,
+      2,
+      3,
+      4
+    ],
+    "stored_before_guard_rejected": true,
+    "terminal_center": "3",
+    "terminal_interior": [
+      3
+    ],
+    "terminal_pair": [
+      2,
+      4
+    ],
+    "terminal_radius_squared": "1",
+    "terminal_shell": [
+      2,
+      4
+    ],
+    "terminal_window": [
+      2,
+      3
+    ]
+  },
+  "causal_mutants": 5,
+  "not_claimed": [
+    "geometric catalogue validation",
+    "prepared owner implementation",
+    "authentic FULL request",
+    "product execution",
+    "performance"
+  ],
+  "rank_binding": {
+    "catalogue_variants": 6,
+    "causal_rejections": [
+      {
+        "cause": "rank_unbound_to_exact_level",
+        "mutant": "unbound_integer_rank"
+      },
+      {
+        "cause": "representatives_not_strictly_increasing",
+        "mutant": "nonincreasing_representatives"
+      },
+      {
+        "cause": "program_not_ordered",
+        "mutant": "equal_level_key_inversion"
+      },
+      {
+        "cause": "program_not_permutation",
+        "mutant": "duplicate_with_omission"
+      }
+    ],
+    "equivalent_raw_representation_accepted": true,
+    "pair_sign_comparisons": 84,
+    "program_comparisons": 18
+  },
+  "status": "passed_bounded_exact_model"
+}

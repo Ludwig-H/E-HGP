@@ -1,0 +1,90 @@
+{
+  "source_hashes_before": {
+    "morsehgp3D_v7/audits/receipts_prepared_catalogue_20260911/model.py": "44942facb8ecf65e35adf08fc96391172d4b8ab66070db2408b1d71d1d550f6e"
+  },
+  "python_before": {
+    "path": "/usr/local/python/3.12.1/bin/python3.12",
+    "sha256": "0d9afd17e565411cbff3f942ccd0ba7cd2c0a9a623cf00448034b2e50f0220f9",
+    "version": "Python 3.12.1"
+  },
+  "started_utc": "2026-09-11T18:54:49.459949+00:00",
+  "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v7/audits/receipts_prepared_catalogue_20260911/model.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"cache_before\": {\n    \"K\": 2,\n    \"exchange\": {\n      \"inserted_strict_intruder\": 2,\n      \"removed_first_support\": 0\n    },\n    \"fallback_before_squared\": \"9/2\",\n    \"fallback_direct_reuse_allowed\": false,\n    \"fallback_fresh_accepted\": true,\n    \"independent_power_classifications\": 8,\n    \"initial_center\": \"2\",\n    \"initial_interior\": [\n      2,\n      3\n    ],\n    \"initial_pair\": [\n      0,\n      4\n    ],\n    \"initial_radius_squared\": \"4\",\n    \"initial_shell\": [\n      0,\n      4\n    ],\n    \"initial_window\": [\n      3,\n      4\n    ],\n    \"mutant_terminal_only_accepted\": true,\n    \"new_before_squared\": \"2\",\n    \"new_fresh_accepted\": false,\n    \"old_before_squared\": \"5\",\n    \"old_fresh_accepted\": true,\n    \"safe_bounds_tested\": [\n      \"5\",\n      \"11/2\",\n      \"6\",\n      \"10\"\n    ],\n    \"scope\": \"arbitrary exact 1D query; not an authenticated FULL occurrence or producer execution\",\n    \"source_u16\": [\n      0,\n      2,\n      3,\n      4\n    ],\n    \"stored_before_guard_rejected\": true,\n    \"terminal_center\": \"3\",\n    \"terminal_interior\": [\n      3\n    ],\n    \"terminal_pair\": [\n      2,\n      4\n    ],\n    \"terminal_radius_squared\": \"1\",\n    \"terminal_shell\": [\n      2,\n      4\n    ],\n    \"terminal_window\": [\n      2,\n      3\n    ]\n  },\n  \"causal_mutants\": 5,\n  \"not_claimed\": [\n    \"geometric catalogue validation\",\n    \"prepared owner implementation\",\n    \"authentic FULL request\",\n    \"product execution\",\n    \"performance\"\n  ],\n  \"rank_binding\": {\n    \"catalogue_variants\": 6,\n    \"causal_rejections\": [\n      {\n        \"cause\": \"rank_unbound_to_exact_level\",\n        \"mutant\": \"unbound_integer_rank\"\n      },\n      {\n        \"cause\": \"representatives_not_strictly_increasing\",\n        \"mutant\": \"nonincreasing_representatives\"\n      },\n      {\n        \"cause\": \"program_not_ordered\",\n        \"mutant\": \"equal_level_key_inversion\"\n      },\n      {\n        \"cause\": \"program_not_permutation\",\n        \"mutant\": \"duplicate_with_omission\"\n      }\n    ],\n    \"equivalent_raw_representation_accepted\": true,\n    \"pair_sign_comparisons\": 84,\n    \"program_comparisons\": 18\n  },\n  \"status\": \"passed_bounded_exact_model\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v7/audits/receipts_prepared_catalogue_20260911/model.py"
+      ],
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v7/audits/receipts_prepared_catalogue_20260911/model.py",
+        "--unknown"
+      ],
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/receipts_prepared_catalogue_20260911/model.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"cache_before\": {\n    \"K\": 2,\n    \"exchange\": {\n      \"inserted_strict_intruder\": 2,\n      \"removed_first_support\": 0\n    },\n    \"fallback_before_squared\": \"9/2\",\n    \"fallback_direct_reuse_allowed\": false,\n    \"fallback_fresh_accepted\": true,\n    \"independent_power_classifications\": 8,\n    \"initial_center\": \"2\",\n    \"initial_interior\": [\n      2,\n      3\n    ],\n    \"initial_pair\": [\n      0,\n      4\n    ],\n    \"initial_radius_squared\": \"4\",\n    \"initial_shell\": [\n      0,\n      4\n    ],\n    \"initial_window\": [\n      3,\n      4\n    ],\n    \"mutant_terminal_only_accepted\": true,\n    \"new_before_squared\": \"2\",\n    \"new_fresh_accepted\": false,\n    \"old_before_squared\": \"5\",\n    \"old_fresh_accepted\": true,\n    \"safe_bounds_tested\": [\n      \"5\",\n      \"11/2\",\n      \"6\",\n      \"10\"\n    ],\n    \"scope\": \"arbitrary exact 1D query; not an authenticated FULL occurrence or producer execution\",\n    \"source_u16\": [\n      0,\n      2,\n      3,\n      4\n    ],\n    \"stored_before_guard_rejected\": true,\n    \"terminal_center\": \"3\",\n    \"terminal_interior\": [\n      3\n    ],\n    \"terminal_pair\": [\n      2,\n      4\n    ],\n    \"terminal_radius_squared\": \"1\",\n    \"terminal_shell\": [\n      2,\n      4\n    ],\n    \"terminal_window\": [\n      2,\n      3\n    ]\n  },\n  \"causal_mutants\": 5,\n  \"not_claimed\": [\n    \"geometric catalogue validation\",\n    \"prepared owner implementation\",\n    \"authentic FULL request\",\n    \"product execution\",\n    \"performance\"\n  ],\n  \"rank_binding\": {\n    \"catalogue_variants\": 6,\n    \"causal_rejections\": [\n      {\n        \"cause\": \"rank_unbound_to_exact_level\",\n        \"mutant\": \"unbound_integer_rank\"\n      },\n      {\n        \"cause\": \"representatives_not_strictly_increasing\",\n        \"mutant\": \"nonincreasing_representatives\"\n      },\n      {\n        \"cause\": \"program_not_ordered\",\n        \"mutant\": \"equal_level_key_inversion\"\n      },\n      {\n        \"cause\": \"program_not_permutation\",\n        \"mutant\": \"duplicate_with_omission\"\n      }\n    ],\n    \"equivalent_raw_representation_accepted\": true,\n    \"pair_sign_comparisons\": 84,\n    \"program_comparisons\": 18\n  },\n  \"status\": \"passed_bounded_exact_model\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/receipts_prepared_catalogue_20260911/model.py"
+      ],
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v7/audits/receipts_prepared_catalogue_20260911/model.py",
+        "--unknown"
+      ],
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "source_hashes_after": {
+    "morsehgp3D_v7/audits/receipts_prepared_catalogue_20260911/model.py": "44942facb8ecf65e35adf08fc96391172d4b8ab66070db2408b1d71d1d550f6e"
+  },
+  "python_after": {
+    "path": "/usr/local/python/3.12.1/bin/python3.12",
+    "sha256": "0d9afd17e565411cbff3f942ccd0ba7cd2c0a9a623cf00448034b2e50f0220f9",
+    "version": "Python 3.12.1"
+  },
+  "finished_utc": "2026-09-11T18:54:50.088764+00:00"
+}
