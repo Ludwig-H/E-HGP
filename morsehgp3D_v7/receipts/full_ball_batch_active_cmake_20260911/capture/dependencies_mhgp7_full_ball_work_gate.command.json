@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/usr/bin/c++",
+    "-M",
+    "-isystem",
+    "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-O3",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "/workspaces/E-HGP/morsehgp3D_v7/tests/full_ball_work_gate.cpp"
+  ],
+  "ended_ns": 1789131745749358886,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "dependencies_mhgp7_full_ball_work_gate",
+  "started_ns": 1789131745334967364,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "882f3cd829480e6cee6ca15092758fc1d075de9c632bc7c15c8d5073ce882935"
+}

@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "ctest",
+    "--version"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "expected_exit": 0
+}

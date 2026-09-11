@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v7_batch_active_20260911/cmake_build",
+    "--parallel",
+    "1",
+    "--target",
+    "mhgp7_anchor_meb_gate",
+    "mhgp7_full_ball_tower_gate",
+    "mhgp7_full_ball_work_gate",
+    "mhgp7_full_ball_tower_probe",
+    "mhgp7_full_coverage_certificate_gate",
+    "mhgp7_local_plateau_gate",
+    "mhgp7_census_route_stub_gate",
+    "mhgp7_full_gabriel_digest_gate",
+    "mhgp7_facet_resolver_cache_gate",
+    "mhgp7_witness_front_gate",
+    "mhgp7_census_tower_gate",
+    "mhgp7_full_ball_batch_gate"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "expected_exit": 0
+}

@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+"""Mechanical private extraction of the immutable 6763 scalar geometry only."""
+import hashlib
+from pathlib import Path
+
+base = Path(__file__).resolve().parent
+source = base.parents[1] / 'morsehgp3D_v7/src/forest/full_ball_tower.hpp'
+raw = source.read_bytes()
+if hashlib.sha256(raw).hexdigest() != '6763a877f43d79a45532bce4426feca645b6ee97f18c9a4ee1fea4c47cd408a5':
+    raise RuntimeError('source_pin')
+text = raw.decode()
+
+
+def section(begin, end):
+    if text.count(begin) != 1 or text.count(end) != 1:
+        raise RuntimeError('unique_extraction_markers')
+    return text[text.index(begin):text.index(end)]
+
+
+parts = [section('  AnchorMebResult meb(', '  void validate_declared_support('),
+         section('  i32 intruder_work(', '  i32 intruder(const BallKey&'),
+         section('  // Geometry-only:', '  void merge_static_work(')]
+merge = section('  void merge_static_work(', '  void prepare_static_order()')
+prefix = '''// Test-only scalar geometry reference, mechanically extracted from header6763.
+// No Builder, anchors, temporal history or DSU reference is accessible here.
+#pragma once
+#include MHGP7_FULL_HEADER
+namespace batch_cpu {
+using namespace mhgp7;
+using full_ball_detail::add;
+using full_ball_detail::require;
+using BallId = u32;
+using ResolverCache = full_ball_detail::ResolverCache;
+using StaticSeed = FullBallBatchSeed;
+struct Geometry {
+  const CloudIndex& ix;
+  std::span<const BallData> balls;
+  std::span<const BallId> by_key;
+  unsigned current_k;
+'''
+suffix = '''};
+struct Merger {
+  FullBallStats& st;
+'''
+target = base / 'cpu_geometry.hpp'
+with target.open('x') as stream:
+    stream.write(prefix + ''.join(parts) + suffix + merge + '};\n}  // namespace batch_cpu\n')

@@ -1,0 +1,161 @@
+#pragma once
+#include <mutex>
+#include <atomic>
+#include "full_ball_batch_geometry.hpp"
+
+namespace mhgp7::batch_test {
+struct Trace {
+  unsigned k;
+  FullBallFacetKey key;
+  u32 consumer;
+  u64 ordinal;
+  u32 ball;
+};
+struct Owner {
+  const CloudIndex* index;
+  const BallData* data;
+  size_t size;
+  int threads;
+  u64 batches = 0, requests = 0, checked_terminals = 0;
+  std::string_view fault;
+  unsigned fault_k = 0;
+  u64 joined_workers = 0, workers_started = 0;
+  std::atomic<unsigned> active{0};
+  u64 paid_calls = 0;
+  // Independent test replay is diagnostic work, excluded from result.work.
+  u64 reference_calls = 0;
+
+  Owner(const CloudIndex& ix, std::span<const BallData> balls, int workers)
+      : index(&ix), data(balls.data()), size(balls.size()), threads(workers) {}
+
+  static void dispatch(void* opaque, const FullBallGeometryView& geometry,
+      const FullBallBatchView& batch, FullBallBatchResult& result) {
+    auto& owner = *static_cast<Owner*>(opaque);
+    ++owner.batches;
+    if (owner.index != &geometry.index || owner.data != geometry.balls.data() ||
+        owner.size != geometry.balls.size()) {
+      result.status = FullBallStatus::kInvalidInput;
+      result.reason = "batch_cpu_owner_mismatch";
+      result.work_known = true;
+      return;
+    }
+    owner.requests += batch.requests.size();
+    Geometry scalar{geometry.index, geometry.balls, geometry.by_key, batch.k};
+    // The public callback is the observation point. No hook in Builder and no
+    // rewritten product header is needed to obtain direct terminal expectations.
+    std::vector<Trace> expected;
+    expected.reserve(batch.requests.size());
+    FullBallStats reference_work;
+    std::vector<NodeRef> reference_scratch;
+    for (const auto& request : batch.requests) {
+      const auto target = scalar.static_terminal(request.key, geometry.balls[request.consumer].level,
+          reference_work, reference_scratch, batch.seeds);
+      expected.push_back({batch.k, request.key, request.consumer, request.ordinal, target});
+    }
+    add(owner.reference_calls, reference_work.resolve_work.calls);
+    struct Worker { FullBallStats work; std::vector<NodeRef> scratch; u64 completed = 0; };
+    std::vector<Worker> workers(planned_workers(batch.requests.size(), owner.threads));
+    std::vector<FullBallBatchTarget> pending(batch.requests.size());
+    const auto finalize_work = [&] {
+      FullBallStats complete_work;
+      u64 retained = workers.capacity() * sizeof(Worker);
+      if (owner.fault == "work_merge_overflow" && batch.k == owner.fault_k)
+        complete_work.resolve_work.calls = std::numeric_limits<u64>::max();
+      for (const auto& worker : workers) {
+        Merger{complete_work}.merge_static_work(worker.work);
+        add(retained, worker.scratch.capacity() * sizeof(NodeRef));
+      }
+      result.work = complete_work;
+      result.retained_bytes = retained;
+      result.work_known = true;
+    };
+    try {
+      parallel_ranges(batch.requests.size(), owner.threads, [&](size_t begin, size_t end, size_t lane) {
+        struct Admission {
+          std::atomic<unsigned>& count;
+          explicit Admission(std::atomic<unsigned>& n) : count(n) { ++count; }
+          ~Admission() { --count; }
+        } admission(owner.active);
+        auto& worker = workers[lane];
+        for (size_t j = begin; j < end; ++j) {
+          const auto& request = batch.requests[j];
+          const auto target = scalar.static_terminal(request.key, geometry.balls[request.consumer].level,
+              worker.work, worker.scratch, batch.seeds);
+          pending[j] = {target, request.ordinal};
+          ++worker.completed;
+          if (owner.fault == "worker_after_paid" && batch.k == owner.fault_k)
+            throw std::bad_alloc();  // private injection AFTER work in an admitted lane
+        }
+      });
+      finalize_work();
+      add(owner.paid_calls, result.work.resolve_work.calls);
+      if (owner.fault == "wrong_admissible" && batch.k == owner.fault_k) {
+        bool changed = false;
+        for (size_t j = 0; j < pending.size() && !changed; ++j)
+          for (size_t b = 0; b < geometry.balls.size() && !changed; ++b) {
+            const auto& ball = geometry.balls[b];
+            if (b != pending[j].ball && batch.k >= static_cast<unsigned>(ball.n_interior) + ball.arity - 1 &&
+                batch.k <= ball.n_interior + ball.n_shell && compare_exact_level(ball.level,
+                    geometry.balls[batch.requests[j].consumer].level) < 0) {
+              pending[j].ball = static_cast<u32>(b); changed = true;
+            }
+          }
+        require(changed, "batch_cpu_wrong_terminal_fixture");
+      }
+      {
+        for (size_t j = 0; j < batch.requests.size(); ++j) {
+          const auto& request = batch.requests[j];
+          const auto found = std::find_if(expected.begin(), expected.end(), [&](const Trace& row) {
+            return row.k == batch.k && row.key == request.key;
+          });
+          require(found != expected.end() && found->consumer == request.consumer &&
+              found->ordinal == request.ordinal && found->ball == pending[j].ball,
+              "batch_cpu_actual_terminal_mismatch");
+          ++owner.checked_terminals;
+        }
+      }
+      result.targets = std::move(pending);
+      result.status = FullBallStatus::kCompleteRelative;
+      result.reason = "batch_cpu_complete";
+    } catch (const full_ball_detail::Failure& error) {
+      if (!result.work_known) finalize_work();
+      result.targets.clear(); result.status = error.status; result.reason = error.reason;
+    } catch (const std::bad_alloc&) {
+      if (!result.work_known) finalize_work();
+      result.targets.clear(); result.status = FullBallStatus::kResourceExhausted;
+      result.reason = "batch_cpu_worker_allocation";
+    }
+    // The pool guarantees return/throw only after joining all admitted workers.
+    for (const auto& worker : workers) if (worker.completed) ++owner.joined_workers;
+    if (batch.k != owner.fault_k) return;
+    if (owner.fault == "throw_unknown") {
+      result.work_known = false;
+      throw std::runtime_error("injected_backend_exception");
+    }
+    if (owner.fault == "failure_unknown") {
+      result.targets.clear(); result.work_known = false; result.status = FullBallStatus::kResourceExhausted;
+      result.reason = "batch_cpu_unknown_device_work";
+    } else if (owner.fault == "partial_failure") {
+      result.status = FullBallStatus::kResourceExhausted; result.reason = "batch_cpu_partial";
+    } else if (owner.fault == "short_targets" && !result.targets.empty()) result.targets.pop_back();
+    else if (owner.fault == "ordinal" && !result.targets.empty()) ++result.targets.front().ordinal;
+    else if (owner.fault == "out_of_domain" && !result.targets.empty())
+      result.targets.front().ball = std::numeric_limits<u32>::max();
+    else if (owner.fault == "not_strict" && !result.targets.empty())
+      result.targets.front().ball = batch.requests.front().consumer;
+    else if (owner.fault == "omit_q") ++result.work.static_post_seed_queries[batch.k];
+    else if (owner.fault == "other_k") ++result.work.static_post_seed_queries[0];
+    else if (owner.fault == "success_unknown") result.work_known = false;
+    else if (owner.fault == "capacity_overflow") result.retained_bytes = std::numeric_limits<u64>::max();
+    else if (owner.fault == "core_work_merge_overflow") result.work.resolve_work.calls = std::numeric_limits<u64>::max();
+    else if (owner.fault == "wrong_admission" && !result.targets.empty()) {
+      auto candidate = std::find_if(geometry.balls.begin(), geometry.balls.end(), [&](const BallData& ball) {
+        return batch.k < static_cast<unsigned>(ball.n_interior) + ball.arity - 1 || batch.k > ball.n_interior + ball.n_shell;
+      });
+      require(candidate != geometry.balls.end(), "batch_cpu_admission_fault_fixture");
+      result.targets.front().ball = static_cast<u32>(candidate - geometry.balls.begin());
+    }
+  }
+  FullBallBatchResolver resolver() { return {this, dispatch}; }
+};
+}  // namespace mhgp7::batch_test

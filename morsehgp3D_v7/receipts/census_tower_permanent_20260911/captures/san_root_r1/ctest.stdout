@@ -1,0 +1,35 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v7_census_tower_permanent_20260911/san_root_r1/cmake_build
+Test project /workspaces/E-HGP/build/v7_census_tower_permanent_20260911/san_root_r1/cmake_build
+      Start 55: mhgp7_census_tower_historical
+ 1/11 Test #55: mhgp7_census_tower_historical ..........   Passed    9.19 sec
+      Start 56: mhgp7_census_tower_line12
+ 2/11 Test #56: mhgp7_census_tower_line12 ..............   Passed    4.19 sec
+      Start 57: mhgp7_census_tower_shell14
+ 3/11 Test #57: mhgp7_census_tower_shell14 .............   Passed   37.71 sec
+      Start 58: mhgp7_census_tower_spatial12
+ 4/11 Test #58: mhgp7_census_tower_spatial12 ...........   Passed   47.57 sec
+      Start 59: mhgp7_census_tower_rejects
+ 5/11 Test #59: mhgp7_census_tower_rejects .............   Passed    0.11 sec
+      Start 60: mhgp7_census_tower_bad_argument
+ 6/11 Test #60: mhgp7_census_tower_bad_argument ........   Passed    0.09 sec
+      Start 61: mhgp7_census_tower_missing_argument
+ 7/11 Test #61: mhgp7_census_tower_missing_argument ....   Passed    0.11 sec
+      Start 62: mhgp7_census_tower_mutant_assignment
+ 8/11 Test #62: mhgp7_census_tower_mutant_assignment ...   Passed    0.13 sec
+      Start 63: mhgp7_census_tower_mutant_open
+ 9/11 Test #63: mhgp7_census_tower_mutant_open .........   Passed    0.12 sec
+      Start 64: mhgp7_census_tower_mutant_adjacency
+10/11 Test #64: mhgp7_census_tower_mutant_adjacency ....   Passed    0.11 sec
+      Start 65: mhgp7_census_tower_mutant_census
+11/11 Test #65: mhgp7_census_tower_mutant_census .......   Passed    0.96 sec
+
+100% tests passed, 0 tests failed out of 11
+
+Label Time Summary:
+census_tower       = 100.29 sec*proc (11 tests)
+full_ball_tower    =  98.77 sec*proc (5 tests)
+gate               = 100.29 sec*proc (11 tests)
+mutant             =   1.32 sec*proc (4 tests)
+oracle             = 100.09 sec*proc (9 tests)
+
+Total Test time (real) = 100.33 sec

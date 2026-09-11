@@ -1,0 +1,235 @@
+[
+  {
+    "argv": [
+      "g++",
+      "-O1",
+      "-g",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-DMHGP7_FULL_HEADER=\"/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/source/morsehgp3D_v7/src/forest/full_ball_tower.hpp\"",
+      "-DMHGP7_GATE_SOURCE=\"/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/source/morsehgp3D_v7/tests/full_ball_tower_gate.cpp\"",
+      "-M",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/all.d",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/qualification.cpp"
+    ],
+    "ended_ns": 1789129617155472750,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "dependencies",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789129615133090607,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "argv": [
+      "g++",
+      "-O1",
+      "-g",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-DMHGP7_FULL_HEADER=\"/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/source/morsehgp3D_v7/src/forest/full_ball_tower.hpp\"",
+      "-DMHGP7_GATE_SOURCE=\"/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/source/morsehgp3D_v7/tests/full_ball_tower_gate.cpp\"",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/qualification.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/gate"
+    ],
+    "ended_ns": 1789129724254974139,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "compile",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789129617910340546,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/gate",
+      "cache",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/cache_batch0.physical",
+      "0"
+    ],
+    "ended_ns": 1789129739136882083,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "cache_batch0",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789129724291472717,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "74761a13ca676e037fa66dfb3bc590cdda8bebfce85dfb49e957a157c8fb6d86"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/gate",
+      "no_cache",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/no_cache_batch0.physical",
+      "0"
+    ],
+    "ended_ns": 1789129758024226120,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "no_cache_batch0",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789129739137403949,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "d853404c2d5c84800e2320f23b9fe34843f66de8b049954ec1a28d17b9bf5368"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/gate",
+      "static1",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/static1_batch0.physical",
+      "0"
+    ],
+    "ended_ns": 1789129783747923005,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "static1_batch0",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789129758025165035,
+    "stderr_sha256": "c684dd04be62c1d522f5e91ad5d5b4e4434f9365a2f9907767d99ebabb581ac7",
+    "stdout_sha256": "f49e3967ef708a1630d2918d7f59071c2fec584bfdbbcc6d046240f345a5f193"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/gate",
+      "static4",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/static4_batch0.physical",
+      "0"
+    ],
+    "ended_ns": 1789129802862088697,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "static4_batch0",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789129783748423669,
+    "stderr_sha256": "7bab9570b8fd962497dcccab6b11aa96391b4953d8a5d88ce3489cd7a52adf34",
+    "stdout_sha256": "f49e3967ef708a1630d2918d7f59071c2fec584bfdbbcc6d046240f345a5f193"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/gate",
+      "cache",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/cache_batch1.physical",
+      "1"
+    ],
+    "ended_ns": 1789129818022609005,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "cache_batch1",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789129802862667627,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "74761a13ca676e037fa66dfb3bc590cdda8bebfce85dfb49e957a157c8fb6d86"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/gate",
+      "static1",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/static1_batch1.physical",
+      "1"
+    ],
+    "ended_ns": 1789129845637700450,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "static1_batch1",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789129818023254735,
+    "stderr_sha256": "c684dd04be62c1d522f5e91ad5d5b4e4434f9365a2f9907767d99ebabb581ac7",
+    "stdout_sha256": "0a7593859c3bc980f4e9097aa5f4ed2c08ac41148cc696cc04b2d89ba6804a68"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/gate",
+      "static4",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/static4_batch1.physical",
+      "1"
+    ],
+    "ended_ns": 1789129874182827386,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "static4_batch1",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789129845641430883,
+    "stderr_sha256": "7bab9570b8fd962497dcccab6b11aa96391b4953d8a5d88ce3489cd7a52adf34",
+    "stdout_sha256": "0a7593859c3bc980f4e9097aa5f4ed2c08ac41148cc696cc04b2d89ba6804a68"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/gate",
+      "--rejects"
+    ],
+    "ended_ns": 1789129874300479695,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "rejections",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789129874183423151,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "c63f1d5c35ff8a785d634519c0b71309008b48d8da96c8956f951c72c08e422d"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/gate"
+    ],
+    "ended_ns": 1789129874339191762,
+    "exit_code": 2,
+    "expected_exit": 2,
+    "name": "bad_arguments",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "started_ns": 1789129874301867267,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

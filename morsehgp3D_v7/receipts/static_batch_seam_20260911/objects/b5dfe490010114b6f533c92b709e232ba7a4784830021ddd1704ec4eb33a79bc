@@ -1,0 +1,93 @@
+#!/usr/bin/env python3
+"""Read-only gate. Checks are explicit and remain enabled with python -O."""
+import hashlib
+import json
+from pathlib import Path
+import sys
+
+
+def need(ok, why):
+    if not ok:
+        raise RuntimeError(why)
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def read(path):
+    return json.loads(path.read_text())
+
+
+def main():
+    need(len(sys.argv) == 2, 'capture_directory_required')
+    out = Path(sys.argv[1]).resolve()
+    receipt = read(out/'receipt.json')
+    need(receipt['status'] == 'passed' and receipt['error'] is None and receipt['sources_stable'] is True and
+         receipt['public_status'] == 'not_claimed' and receipt['GCP_used'] is False and
+         receipt['active_source_modified'] is False and receipt['component_or_tower_timing_claimed'] is False,
+         'closed_scope')
+    for prefix, directory in [('sources', out/'source'), ('harness', out)]:
+        before, after = read(out/(prefix+'_before.json')), read(out/(prefix+'_after.json'))
+        need(before == after, prefix+'_stable')
+        for path, pin in before.items():
+            need(sha(directory/path) == pin, prefix+'_current_pin:'+path)
+    before, after = read(out/'dependencies_before.json'), read(out/'dependencies_after.json')
+    need(before == after and len(before) > 500, 'dependency_closure')
+    # System/vendor octets are attested before/after the run, not distributed by
+    # this reader. Its own proof does not claim a hermetic native toolchain.
+    commands = read(out/'commands.json')
+    names = ['dependencies', 'compile', 'cache_batch0', 'no_cache_batch0', 'static1_batch0',
+             'static4_batch0', 'cache_batch1', 'static1_batch1', 'static4_batch1', 'rejections', 'bad_arguments']
+    need([c['name'] for c in commands] == names and receipt['commands'] == len(names), 'commands_exact')
+    for row in commands:
+        need(row == read(out/(row['name']+'.command.json')), 'command_copy')
+        need(type(row['exit_code']) is int and row['exit_code'] == row['expected_exit'] ==
+             (2 if row['name'] == 'bad_arguments' else 0), 'command_exit')
+        for stream in ('stdout', 'stderr'):
+            need(sha(out/(row['name']+'.'+stream)) == row[stream+'_sha256'], 'command_output_pin')
+        if receipt['SAN']:
+            need(row['sanitizer_environment'] == {
+                'ASAN_OPTIONS': 'detect_leaks=1:halt_on_error=1',
+                'UBSAN_OPTIONS': 'halt_on_error=1:print_stacktrace=1'}, 'san_environment')
+        else:
+            need(row['sanitizer_environment'] == {}, 'no_san_claim')
+    comparison = read(out/'comparison.json')
+    ignored = ('S static_workers_created ', 'S static_lanes_used ', 'S static_peak_worker_bytes ',
+               'S static_peak_retained_bytes ')
+    need(comparison['status'] == 'passed' and comparison['geometric_BallId_directly_compared'] is True and
+         tuple(comparison['ignored_execution_capacity_fields']) == ignored, 'comparison_scope')
+    expected_pairs = [('cache_batch0', 'cache_batch1'), ('static1_batch0', 'static1_batch1'),
+                      ('static4_batch0', 'static4_batch1')]
+    need([(r['reference'], r['candidate']) for r in comparison['comparisons']] == expected_pairs,
+         'physical_pairs_exact')
+    for left, right in expected_pairs:
+        def rows(name):
+            return [line for line in (out/(name+'.physical')).read_text().splitlines()
+                    if not line.startswith(ignored)]
+        need(rows(left) == rows(right), 'all_physical_and_paid_work_fields:'+left)
+    terminals = []
+    for mode in ('static1_batch1', 'static4_batch1'):
+        rows = [json.loads(line) for line in (out/(mode+'.stdout')).read_text().splitlines()]
+        need(len(rows) == 3 and rows[0]['status'] == 'passed' and rows[0]['clouds'] == 34 and
+             rows[0]['orders'] == 150 and rows[0]['vertical_checks'] == 87230, 'bounded_Gram_Gamma_floors')
+        need(rows[1]['status'] == 'physical_recorded' and rows[1]['complete'] == 77 and
+             rows[1]['rejected'] == 9 and rows[1]['post_seed_hits'] == 6 and rows[1]['post_seed_queries'] == 22,
+             'physical_floors')
+        need(rows[2] == {'batch_calls': 56, 'batch_requests': 118, 'direct_terminals': 118},
+             'actual_terminal_identity_floor')
+        terminals.append(rows[2]['direct_terminals'])
+    rejects = read(out/'rejections.stdout')
+    # r1 predates the additional synthetic accumulation-overflow guard; both
+    # are preserved without promoting the old capture to the larger gate.
+    need(rejects in [dict(status='passed_batch_rejections', cases=55, prefix_cases=26, known_paid=40),
+                    dict(status='passed_batch_rejections', cases=59, prefix_cases=28, known_paid=40),
+                    dict(status='passed_batch_rejections', cases=65, prefix_cases=32, known_paid=44)],
+         'rejection_nonvacuity')
+    need((out/'rejections.stderr').read_bytes() == b'', 'rejection_diagnostics')
+    print(json.dumps(dict(status='passed', capture=out.name, commands=len(commands), SAN=receipt['SAN'],
+        direct_terminals=terminals, rejections=rejects, large_scale_or_GPU_claimed=False)))
+
+
+if __name__ == '__main__':
+    main()

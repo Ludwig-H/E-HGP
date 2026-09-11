@@ -1,0 +1,276 @@
+{
+  "backtraceGraph" : 
+  {
+    "commands" : 
+    [
+      "add_test",
+      "mhgp7_gate"
+    ],
+    "files" : 
+    [
+      "/workspaces/E-HGP/build/v7_batch_permanent_20260911/san_root_r1/source_snapshot/morsehgp3D_v7/CMakeLists.txt"
+    ],
+    "nodes" : 
+    [
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 224,
+        "parent" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 1
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 224,
+        "parent" : 3
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 4
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 227,
+        "parent" : 6
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 7
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 229,
+        "parent" : 9
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 10
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 231,
+        "parent" : 12
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 13
+      }
+    ]
+  },
+  "kind" : "ctestInfo",
+  "tests" : 
+  [
+    {
+      "backtrace" : 2,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_batch_permanent_20260911/san_root_r1/cmake_build/mhgp7_full_ball_batch_gate",
+        "-DARGS=--selftest-1",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/build/v7_batch_permanent_20260911/san_root_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_ball_batch_cpu1",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_ball_batch",
+            "full_ball_tower",
+            "gate",
+            "oracle"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_batch_permanent_20260911/san_root_r1/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 5,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_batch_permanent_20260911/san_root_r1/cmake_build/mhgp7_full_ball_batch_gate",
+        "-DARGS=--selftest-4",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/build/v7_batch_permanent_20260911/san_root_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_ball_batch_cpu4",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_ball_batch",
+            "full_ball_tower",
+            "gate",
+            "oracle"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_batch_permanent_20260911/san_root_r1/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 8,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_batch_permanent_20260911/san_root_r1/cmake_build/mhgp7_full_ball_batch_gate",
+        "-DARGS=--rejects",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/build/v7_batch_permanent_20260911/san_root_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_ball_batch_rejects",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_ball_batch",
+            "gate",
+            "oracle"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_batch_permanent_20260911/san_root_r1/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 11,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_batch_permanent_20260911/san_root_r1/cmake_build/mhgp7_full_ball_batch_gate",
+        "-DARGS=--unknown",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/build/v7_batch_permanent_20260911/san_root_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_ball_batch_bad_argument",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_ball_batch",
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_batch_permanent_20260911/san_root_r1/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 14,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_batch_permanent_20260911/san_root_r1/cmake_build/mhgp7_full_ball_batch_gate",
+        "-DARGS=",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/build/v7_batch_permanent_20260911/san_root_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_full_ball_batch_missing_argument",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "full_ball_batch",
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_batch_permanent_20260911/san_root_r1/cmake_build"
+        }
+      ]
+    }
+  ],
+  "version" : 
+  {
+    "major" : 1,
+    "minor" : 0
+  }
+}

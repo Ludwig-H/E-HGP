@@ -1,0 +1,963 @@
+// FULL horizontal forests and vertical birth maps from supplied COMPLETE EXACT
+// ball censuses. No claim of WSPD completeness, archive authority, or speed.
+#pragma once
+
+#include <numeric>
+#include <unordered_map>
+
+#include "anchor_meb.hpp"
+#include "full_coverage_certificate.hpp"
+#include "local_plateau.hpp"
+#include "../pipeline/expand.hpp"
+#include "../parallel/pool.hpp"
+
+namespace mhgp7 {
+
+inline constexpr const char* kFullBallAuthority =
+    "full_tower_relative_to_supplied_complete_exact_ball_censuses";
+inline constexpr const char* kFullBallValidationAccounting =
+    "declared_regular_support_plus_extra_anchor_meb_v1";
+inline constexpr const char* kFullBallLotAccounting =
+    "direct_unitary_lots_and_grouped_dsu_slots_v1";
+inline constexpr const char* kFullBallLowerAccounting =
+    "monotone_lower_edge_activation_ranked_union_find_v1";
+inline constexpr const char* kFullBallResolverCacheAccounting =
+    "exact_direct_mapped_seeded_facet_tokens_16n_per_order_v1";
+inline constexpr const char* kFullBallStaticResolverAccounting =
+    "static_exact_sort_unique_complete_population_seeds_after_exchange_v2";
+inline constexpr const char* kFullBallResidenceAccounting =
+    "release_dead_construction_before_population_copy_v1";
+enum class FullBallStatus { kCompleteRelative, kInvalidInput, kResourceExhausted, kInvariantViolated };
+struct FullBallStats {
+  u64 records = 0, extra_records = 0, anchor_blocks = 0, regular_blocks = 0, extra_blocks = 0;
+  u64 representatives = 0, anchor_hits = 0, key_lookups = 0;
+  u64 intruder_queries = 0, intruder_nodes = 0, intruder_power_tests = 0, interior_ranges = 0;
+  u64 same_radius_steps = 0, descending_steps = 0, max_chain_steps = 0;
+  u64 births = 0, merges = 0, contributions = 0, inert_blocks = 0;
+  u64 declared_support_checks = 0, singleton_lots = 0, grouped_lots = 0, lot_dsu_slots = 0;
+  u64 lower_edges_indexed = 0, lower_nodes_activated = 0, lower_edges_activated = 0;
+  u64 lower_queries = 0, lower_find_steps = 0, lower_path_writes = 0;
+  u64 resolver_cache_queries = 0, resolver_cache_hits = 0, resolver_cache_stores = 0;
+  u64 resolver_cache_evictions = 0, resolver_cache_seed_stores = 0;
+  // Allocated capacity, retained for accounting after release (not live bytes).
+  u64 resolver_cache_slots = 0, resolver_cache_reset_slots = 0, resolver_cache_bytes = 0;
+  u64 resolver_cache_released_slots = 0;
+  std::array<u64, kFacetMaxK + 1> static_requests{}, static_unique{}, static_seeded{};
+  // Actual post-exchange lookup attempts, exact hits and returned terminals.
+  // Initial seeds stay in static_seeded; shortcut terminals pay no anchor hit.
+  std::array<u64, kFacetMaxK + 1> static_post_seed_queries{}, static_post_seed_hits{}, static_post_seed_terminals{};
+  u64 static_workers_created = 0, static_peak_request_bytes = 0, static_peak_target_bytes = 0;
+  u64 static_lanes_used = 0, static_peak_retained_bytes = 0;
+  u64 static_peak_seed_bytes = 0, static_peak_group_bytes = 0, static_peak_worker_bytes = 0;
+  AnchorMebWork validation_work, resolve_work;
+};
+struct FullBallOrder {
+  FullCoverageCertificate forest;
+  // Image at the node's closed creation level. Queries normalize in the lower
+  // history at their OWN cut. All entries are absent at K1.
+  std::vector<FullNodeId> lower_nodes;
+};
+struct FullBallTowerResult {
+  FullBallStatus status = FullBallStatus::kInvalidInput;
+  const char* reason = "full_ball_uninitialized";
+  FullBallStats stats;
+  std::vector<FullBallOrder> orders;  // index K-1, no partial orders on failure
+};
+
+namespace full_ball_detail {
+using BallId = u32;
+constexpr u64 absent = kFullCoverageAbsent;
+struct Failure { FullBallStatus status; const char* reason; };
+inline void require(bool ok, const char* reason, FullBallStatus status = FullBallStatus::kInvariantViolated) {
+  if (!ok) throw Failure{status, reason};
+}
+inline void add(u64& count, u64 amount = 1) {
+  require(amount <= std::numeric_limits<u64>::max() - count, "full_ball_counter_overflow",
+          FullBallStatus::kResourceExhausted);
+  count += amount;
+}
+struct History {
+  std::vector<ExactLevel> levels;
+  std::vector<u64> next;
+  u64 root_at(u64 token, const ExactLevel& cut, bool closed) const {
+    require(token < levels.size() && full_coverage_detail::admitted(levels[token], cut, closed),
+            "full_ball_anchor_not_born");
+    while (next[token] != absent && full_coverage_detail::admitted(levels[next[token]], cut, closed))
+      token = next[token];
+    return token;
+  }
+};
+// Working view for chronologically increasing LOWER closed cuts. Component
+// labels are separate from DSU representatives, so union by rank is permitted.
+// The immutable source history still answers arbitrary historical export cuts.
+class MonotoneHistory {
+ public:
+  MonotoneHistory(const History& history, FullBallStats& stats) : source(history), st(stats),
+      heads(history.levels.size(), absent), links(history.levels.size(), absent),
+      parent(history.levels.size()), owner(history.levels.size()), rank(history.levels.size(), 0) {
+    const size_t n = source.levels.size();
+    require(source.next.size() == n, "full_ball_lower_history_shape");
+    std::iota(parent.begin(), parent.end(), u64{0});
+    std::iota(owner.begin(), owner.end(), u64{0});
+    for (size_t node = 0; node < n; ++node) {
+      require(source.levels[node].den > 0 && (!node ||
+          compare_exact_level(source.levels[node - 1], source.levels[node]) <= 0),
+          "full_ball_lower_history_chronology");
+      const u64 next = source.next[node];
+      if (next == absent) continue;
+      require(next > node && next < n && compare_exact_level(source.levels[node], source.levels[next]) < 0,
+          "full_ball_lower_history_edge");
+      add(st.lower_edges_indexed);
+      links[node] = heads[next]; heads[next] = node;
+    }
+  }
+
+  u64 root_at(u64 token, const ExactLevel& cut, bool closed) {
+    add(st.lower_queries);
+    require(cut.den > 0, "full_ball_lower_cut_domain");
+    if (has_cut) {
+      const int cmp = compare_exact_level(cut, previous_cut);
+      require(cmp > 0 || (cmp == 0 && (closed || !previous_closed)), "full_ball_lower_cut_not_monotone");
+    }
+    has_cut = true; previous_cut = cut; previous_closed = closed;
+    while (cursor < source.levels.size() &&
+        full_coverage_detail::admitted(source.levels[cursor], cut, closed)) {
+      add(st.lower_nodes_activated);
+      u64 representative = cursor;
+      for (u64 child = heads[cursor]; child != absent; child = links[child]) {
+        add(st.lower_edges_activated);
+        const u64 a = find(representative), b = find(child);
+        require(a != b, "full_ball_lower_duplicate_component");
+        representative = unite(a, b);
+      }
+      owner[representative] = cursor;
+      ++cursor;
+    }
+    require(token < cursor, "full_ball_lower_anchor_not_born");
+    return owner[find(token)];
+  }
+
+ private:
+  const History& source;
+  FullBallStats& st;
+  std::vector<u64> heads, links, parent, owner;
+  std::vector<u8> rank;
+  size_t cursor = 0;
+  ExactLevel previous_cut{};
+  bool has_cut = false, previous_closed = false;
+
+  u64 find(u64 token) {
+    u64 root = token;
+    while (parent[root] != root) { add(st.lower_find_steps); root = parent[root]; }
+    while (parent[token] != token) {
+      add(st.lower_find_steps);
+      const u64 next = parent[token];
+      if (next != root) { add(st.lower_path_writes); parent[token] = root; }
+      token = next;
+    }
+    return root;
+  }
+  u64 unite(u64 a, u64 b) {
+    if (rank[a] < rank[b] || (rank[a] == rank[b] && a > b)) std::swap(a, b);
+    add(st.lower_path_writes); parent[b] = a;
+    if (rank[a] == rank[b]) ++rank[a];  // rank <= log2(node count) <= 64
+    return a;
+  }
+};
+struct Draft {
+  std::vector<FullCoverageBatch> batches;
+  std::vector<u64> lower_nodes;
+};
+struct Block {
+  BallId ball;
+  std::vector<u64> roots;
+  u16 contribution = 0;
+  bool interior = false;
+};
+
+struct ResolverCacheEntry {
+  std::array<i32, kFacetMaxK> sites{};
+  u64 token = absent;
+};
+
+// Optional exact memo, never an authority or a source of geometric rejection.
+// Capacity is the next power of two >= 16*n, without a fixed cloud/work ceiling.
+// Per-order reset bounds residence; collisions only evict, never alias keys.
+class ResolverCache {
+ public:
+  using Key = std::array<i32, kFacetMaxK>;
+  explicit ResolverCache(FullBallStats& stats) : st(stats) {}
+  void configure(size_t n) {
+    if (n > std::numeric_limits<size_t>::max() / 16) return;
+    const size_t target = n * 16;
+    size_t count = 1;
+    while (count < target) {
+      if (count > std::numeric_limits<size_t>::max() / 2) return;
+      count *= 2;
+    }
+    if (count > entries.max_size()) return;
+    try { entries.resize(count); }
+    catch (const std::bad_alloc&) { std::vector<ResolverCacheEntry>().swap(entries); return; }
+    catch (const std::length_error&) { std::vector<ResolverCacheEntry>().swap(entries); return; }
+    st.resolver_cache_slots = entries.size();
+    st.resolver_cache_bytes = entries.size() * sizeof(ResolverCacheEntry);
+  }
+  void reset() {
+    add(st.resolver_cache_reset_slots, entries.size());
+    for (auto& entry : entries) entry.token = absent;
+  }
+  void release() {
+    add(st.resolver_cache_released_slots, entries.size());
+    std::vector<ResolverCacheEntry>().swap(entries);
+  }
+  // The internal caller supplies a sorted, distinct facet of size <= kFacetMaxK.
+  static Key key(std::span<const i32> sites) {
+    Key value{};
+    std::copy(sites.begin(), sites.end(), value.begin());
+    return value;
+  }
+  u64 lookup(const Key& key) {
+    if (entries.empty()) return absent;
+    add(st.resolver_cache_queries);
+    const auto& entry = entries[slot(key)];
+    if (entry.token == absent || entry.sites != key) return absent;
+    add(st.resolver_cache_hits);
+    return entry.token;
+  }
+  void store(const Key& key, u64 token, bool seed = false) {
+    if (entries.empty()) return;
+    auto& entry = entries[slot(key)];
+    if (entry.token != absent && entry.sites != key) add(st.resolver_cache_evictions);
+    add(st.resolver_cache_stores);
+    if (seed) add(st.resolver_cache_seed_stores);
+    entry.sites = key; entry.token = token;
+  }
+ private:
+  FullBallStats& st;
+  std::vector<ResolverCacheEntry> entries;
+  size_t slot(const Key& key) const {
+    u64 hash = 0x9e3779b97f4a7c15ull;
+    for (i32 site : key)
+      hash ^= static_cast<u32>(site) + 0x9e3779b97f4a7c15ull + (hash << 6) + (hash >> 2);
+    hash ^= hash >> 30; hash *= 0xbf58476d1ce4e5b9ull;
+    hash ^= hash >> 27; hash *= 0x94d049bb133111ebull;
+    hash ^= hash >> 31;
+    return static_cast<size_t>(hash) & (entries.size() - 1);
+  }
+};
+
+class Builder {
+ public:
+  Builder(const CloudIndex& index, std::span<const BallData> census, unsigned max_k, FullBallStats& stats,
+      int static_threads = 0)
+      : ix(index), balls(census), requested(max_k), st(stats), resolver_cache(stats),
+        geometry_threads(static_threads) {}
+
+  std::vector<FullBallOrder> run() {
+    validate_catalogue();
+    require(geometry_threads >= 0, "full_ball_static_threads", FullBallStatus::kInvalidInput);
+    if (kmax > 1 && !geometry_threads) resolver_cache.configure(ix.upos.size());
+    std::vector<Draft> drafts;
+    History lower_history;
+    std::vector<u64> lower_anchors;
+    for (unsigned k = 1; k <= kmax; ++k) {
+      current_k = k;
+      if (k > 1) resolver_cache.reset();
+      anchors.assign(balls.size(), absent);
+      current = {}; compressed.clear();
+      if (geometry_threads && k > 1) prepare_static_order();
+      MonotoneHistory lower_cursor(lower_history, st);
+      Draft draft;
+      if (k == 1) {
+        FullCoverageBatch initial;
+        for (PointId id : domain) {
+          const u64 population = populations.size();
+          populations.push_back({{}, {id}});
+          initial.actions.push_back({{}, {{population, 1, false}}});
+          add(st.contributions);
+          new_node(initial.level, {}, draft, lower_cursor, absent);
+        }
+        draft.batches.push_back(std::move(initial));
+      }
+      const auto& program = programs[k];
+      for (size_t begin = 0; begin < program.size();) {
+        size_t end = begin + 1;
+        const auto& level = balls[program[begin]].level;
+        while (end < program.size() && same_exact_level(level, balls[program[end]].level)) ++end;
+        // No anchor of this lot is installed until EVERY representative resolves.
+        std::vector<Block> blocks;
+        blocks.reserve(end - begin);
+        const u64 prior_count = current.levels.size();
+        for (size_t j = begin; j < end; ++j) blocks.push_back(prepare_block(program[j], level, prior_count));
+        close_lot(blocks, level, draft, lower_cursor, lower_anchors);
+        begin = end;
+      }
+      if (geometry_threads && k > 1) {
+        require(static_cursor == static_targets.size(), "full_ball_static_unconsumed_targets");
+        std::vector<BallId>().swap(static_targets);
+      }
+      u64 live = 0;
+      for (u64 next : current.next) if (next == absent) ++live;
+      require(live == 1, "full_ball_final_component_count");
+      drafts.push_back(std::move(draft));
+      lower_history = std::move(current);
+      lower_anchors = std::move(anchors);
+    }
+    // Construction indices and histories are dead after the last order; no
+    // published object borrows them. Release before copying the immutable bank.
+    resolver_cache.release();
+    lower_history = {};
+    decltype(lower_anchors)().swap(lower_anchors);
+    decltype(identity)().swap(identity);
+    decltype(by_key)().swap(by_key);
+    decltype(programs)().swap(programs);
+    decltype(extra)().swap(extra);
+    decltype(population_ids)().swap(population_ids);
+    decltype(anchors)().swap(anchors);
+    decltype(compressed)().swap(compressed);
+    current = {};
+    decltype(stack)().swap(stack);
+    auto bank = build_full_coverage_populations(domain, populations);
+    require(bank.status == FullCertificateStatus::kOk, "full_ball_population_bank",
+        bank.status == FullCertificateStatus::kResourceExhausted ? FullBallStatus::kResourceExhausted
+                                                               : FullBallStatus::kInvariantViolated);
+    // No further population is created: release construction rows before
+    // encoding all forests. The immutable bank is shared across the tower.
+    std::vector<FullCoveragePopulation>().swap(populations);
+    std::vector<FullBallOrder> result;
+    result.reserve(kmax);
+    for (unsigned k = 1; k <= kmax; ++k) {
+      auto forest = build_full_coverage_certificate(k, bank.value, drafts[k - 1].batches);
+      require(forest.status == FullCertificateStatus::kOk, "full_ball_structural_certificate",
+          forest.status == FullCertificateStatus::kResourceExhausted ? FullBallStatus::kResourceExhausted
+                                                                   : FullBallStatus::kInvariantViolated);
+      require(forest.value.nodes().size() == drafts[k - 1].lower_nodes.size(), "full_ball_node_encoding");
+      result.push_back({std::move(forest.value), std::move(drafts[k - 1].lower_nodes)});
+      std::vector<FullCoverageBatch>().swap(drafts[k - 1].batches);
+    }
+    return result;
+  }
+
+ private:
+  const CloudIndex& ix;
+  std::span<const BallData> balls;
+  unsigned requested, kmax = 0, current_k = 0;
+  FullBallStats& st;
+  ResolverCache resolver_cache;
+  int geometry_threads = 0;
+  struct StaticSeed { ResolverCache::Key key; BallId ball; };
+  std::vector<BallId> static_targets;
+  size_t static_cursor = 0;
+  std::vector<PointId> domain;
+  std::vector<std::pair<PointId,i32>> identity;
+  std::vector<BallId> by_key;
+  std::vector<std::vector<BallId>> programs;
+  std::unordered_map<BallId, local_plateau::ShellTable> extra;
+  std::vector<FullCoveragePopulation> populations;
+  std::vector<u64> population_ids, anchors, compressed;
+  History current;
+  std::vector<NodeRef> stack;
+
+  AnchorMebResult meb(std::span<const i32> sites, AnchorMebWork& work) const {
+    std::array<P3, kFacetMaxK> positions{};
+    require(!sites.empty() && sites.size() <= positions.size(), "full_ball_meb_cardinality");
+    for (size_t j = 0; j < sites.size(); ++j) positions[j] = ix.upos[sites[j]];
+    auto result = anchor_meb(std::span<const P3>(positions.data(), sites.size()), work);
+    require(result.status == AnchorMebStatus::kOk, "full_ball_meb_failure",
+        result.status == AnchorMebStatus::kCounterOverflow ? FullBallStatus::kResourceExhausted
+                                                         : FullBallStatus::kInvariantViolated);
+    return result;
+  }
+
+  void validate_declared_support(const BallData& ball, const std::array<i32, 4>& support) {
+    // The caller has already validated indices, primitive-domain bounds and
+    // every interior/shell power. A positive declared support reproducing the
+    // ball certifies it directly, without enumerating any of its sub-supports.
+    std::array<P3, 4> positions{};
+    for (size_t j = 0; j < ball.arity; ++j) positions[j] = ix.upos[support[j]];
+    add(st.declared_support_checks);
+    anchor_meb_detail::Candidate candidate;
+    require(anchor_meb_detail::form(std::span<const P3>(positions.data(), ball.arity),
+        {0, 1, 2, 3}, ball.arity, candidate), "full_ball_census_geometry", FullBallStatus::kInvalidInput);
+    BallKey key;
+    ExactLevel level;
+    if (ball.arity == 2) {
+      key = q2_ball_key(candidate.a, candidate.b);
+      level = promote_level(q2_exact_level(p3_norm2(p3_sub(candidate.a, candidate.b))));
+    } else if (ball.arity == 3) {
+      key = q3_ball_key(candidate.three);
+      level = promote_level(q3_exact_level(candidate.a, candidate.b, positions[2]));
+    } else {
+      key = ball_key_reduce(q4_ball_form(candidate.four));
+      level = q4_level_raw(candidate.four);
+    }
+    require(key == ball.key && same_exact_level(level, ball.level),
+        "full_ball_census_geometry", FullBallStatus::kInvalidInput);
+  }
+
+  void validate_catalogue() {
+    constexpr auto invalid = FullBallStatus::kInvalidInput;
+    require(requested > 0 && requested <= kFacetMaxK && ix.valid && !ix.upos.empty() &&
+        !ix.has_duplicate_positions() && ix.input_count <= static_cast<u64>(std::numeric_limits<i32>::max()) &&
+        balls.size() <= std::numeric_limits<BallId>::max(), "full_ball_input_domain", invalid);
+    // As for existing spatial consumers, ix must be an authentic immutable
+    // build_cloud_index result. No arbitrary hand-edited tree is certified.
+    kmax = static_cast<unsigned>(std::min<u64>(requested, ix.input_count));
+    for (size_t j = 0; j < ix.upos.size(); ++j) {
+      require(p3_in_profile(ix.upos[j]), "full_ball_u16_domain", invalid);
+      identity.emplace_back(ix.point_id(static_cast<i32>(j)), static_cast<i32>(j));
+    }
+    std::sort(identity.begin(), identity.end());
+    for (const auto& row : identity) domain.push_back(row.first);
+    require(std::adjacent_find(domain.begin(), domain.end()) == domain.end(), "full_ball_duplicate_id", invalid);
+    by_key.resize(balls.size()); std::iota(by_key.begin(), by_key.end(), BallId{0});
+    std::sort(by_key.begin(), by_key.end(), [&](BallId a, BallId b) { return balls[a].key < balls[b].key; });
+    for (size_t j = 1; j < by_key.size(); ++j)
+      require(!(balls[by_key[j]].key == balls[by_key[j - 1]].key), "full_ball_duplicate_key", invalid);
+    std::vector<u8> qmins(balls.size());
+    std::vector<size_t> counts(kmax + 1, 0);
+    for (size_t j = 0; j < balls.size(); ++j) {
+      const auto& ball = balls[j];
+      require(ball.arity >= 2 && ball.arity <= 4 && ball.n_shell >= ball.arity &&
+          ball.n_shell <= kBallShellMax && ball.n_interior <= kBallInteriorMax &&
+          ball.level.den > 0, "full_ball_census_shape", invalid);
+      std::array<i32, kBallInteriorMax + kBallShellMax> selected{};
+      size_t n = 0;
+      for (const auto sites : {ball.interior(), ball.shell()}) for (i32 site : sites) {
+        require(site >= 0 && static_cast<size_t>(site) < ix.upos.size(), "full_ball_geometry_index", invalid);
+        selected[n++] = site;
+      }
+      std::sort(selected.begin(), selected.begin() + n);
+      require(std::adjacent_find(selected.begin(), selected.begin() + n) == selected.begin() + n,
+              "full_ball_repeated_census_site", invalid);
+      // Bound BEFORE any power/axis arithmetic, including malformed callers.
+      require(ball.key.a > 0 && ball.key.a < (i128{1} << 68) &&
+          uabs128(ball.key.c) < (u128{1} << 105), "full_ball_key_domain", invalid);
+      for (i128 b : ball.key.b) require(uabs128(b) < (u128{1} << 87), "full_ball_key_domain", invalid);
+      for (i32 site : ball.interior()) require(ball.key.power(ix.upos[site]) < 0, "full_ball_census_power", invalid);
+      for (i32 site : ball.shell()) require(ball.key.power(ix.upos[site]) == 0, "full_ball_census_power", invalid);
+      std::array<i32,4> support{};
+      unsigned q = ball.arity;
+      if (ball.n_shell == ball.arity) {
+        std::copy(ball.shell().begin(), ball.shell().end(), support.begin());
+      } else {
+        local_plateau::LocalCensus local{ball.key, {}, {}};
+        for (i32 site : ball.interior()) local.interior.push_back({ix.point_id(site), ix.upos[site]});
+        for (i32 site : ball.shell()) local.shell.push_back({ix.point_id(site), ix.upos[site]});
+        auto table = local_plateau::ShellTable::prepare(std::move(local));
+        q = table.q_min();
+        require(q == ball.arity, "full_ball_minimum_arity", invalid);
+        const auto mask = table.minimal_supports().front();
+        unsigned at = 0;
+        for (size_t bit = 0; bit < table.census().shell.size(); ++bit)
+          if (mask & (u16{1} << bit)) support[at++] = geometry_id(table.census().shell[bit].id);
+        require(at == q, "full_ball_minimum_support");
+        extra.emplace(static_cast<BallId>(j), std::move(table)); add(st.extra_records);
+      }
+      if (ball.n_shell == ball.arity) validate_declared_support(ball, support);
+      else {
+        const auto witness = meb(std::span<const i32>(support.data(), q), st.validation_work);
+        require(witness.support_size == q && witness.key == ball.key &&
+            same_exact_level(witness.level, ball.level), "full_ball_census_geometry", invalid);
+      }
+      require(ball.n_interior + q <= std::min<u64>(kmax + 1, ix.input_count),
+              "full_ball_outside_rank_window", invalid);
+      qmins[j] = static_cast<u8>(q);
+      const unsigned lo = ball.n_interior + q - 1;
+      const unsigned hi = std::min<unsigned>(kmax, ball.n_interior + ball.n_shell);
+      for (unsigned k = lo; k <= hi; ++k) ++counts[k];
+      add(st.records);
+    }
+    auto by_level = by_key;
+    std::stable_sort(by_level.begin(), by_level.end(), [&](BallId a, BallId b) {
+      return compare_exact_level(balls[a].level, balls[b].level) < 0;
+    });
+    programs.resize(kmax + 1);
+    for (unsigned k = 1; k <= kmax; ++k) programs[k].reserve(counts[k]);
+    for (BallId b : by_level) {
+      const unsigned lo = balls[b].n_interior + qmins[b] - 1;
+      const unsigned hi = std::min<unsigned>(kmax, balls[b].n_interior + balls[b].n_shell);
+      for (unsigned k = lo; k <= hi; ++k) programs[k].push_back(b);
+    }
+    population_ids.assign(balls.size(), absent);
+  }
+
+  i32 geometry_id(PointId id) const {
+    const auto found = std::lower_bound(identity.begin(), identity.end(), std::pair<PointId,i32>{id, -1});
+    require(found != identity.end() && found->first == id, "full_ball_unknown_identity");
+    return found->second;
+  }
+  u64 root(u64 token, u64 prior_count) {
+    require(token < prior_count, "full_ball_anchor_not_prior");
+    u64 r = token;
+    while (compressed[r] != r) r = compressed[r];
+    while (compressed[token] != token) {
+      const auto next = compressed[token]; compressed[token] = r; token = next;
+    }
+    require(r < prior_count && current.next[r] == absent, "full_ball_root_not_prior");
+    return r;
+  }
+  i32 intruder_work(const BallKey& key, std::span<const i32> selected,
+      FullBallStats& work, std::vector<NodeRef>& scratch) const {
+    add(work.intruder_queries);
+    const auto member = [&](i32 u) { return std::binary_search(selected.begin(), selected.end(), u); };
+    const census_detail::AxisBounds bounds(key);
+    scratch.clear(); scratch.push_back(ix.root());
+    while (!scratch.empty()) {
+      const auto node = scratch.back(); scratch.pop_back(); add(work.intruder_nodes);
+      i128 lo, hi; bounds.bounds(ix.box_of(node), &lo, &hi);
+      if (lo >= 0) continue;
+      if (hi < 0) {
+        add(work.interior_ranges);
+        const auto range = ix.range_of(node);
+        for (i32 u = range.first; u <= range.last; ++u) if (!member(u)) return u;
+      } else if (is_leaf(node)) {
+        const i32 u = leaf_index(node);
+        if (!member(u)) {
+          add(work.intruder_power_tests);
+          if (key.power(ix.upos[u]) < 0) return u;
+        }
+      } else {
+        scratch.push_back(ix.nodes[node].right); scratch.push_back(ix.nodes[node].left);
+      }
+    }
+    return -1;
+  }
+  i32 intruder(const BallKey& key, std::span<const i32> selected) {
+    return intruder_work(key, selected, st, stack);
+  }
+
+  // Geometry-only: immutable index/catalogue and rank, never anchors or DSU.
+  BallId static_terminal(ResolverCache::Key key, const ExactLevel& before,
+      FullBallStats& work, std::vector<NodeRef>& scratch, std::span<const StaticSeed> seeds) const {
+    std::span<i32> sites(key.data(), current_k);
+    auto local = meb(sites, work.resolve_work);
+    u64 length = 0;
+    for (;;) {
+      require(compare_exact_level(local.level, before) < 0, "full_ball_static_not_strict");
+      add(work.key_lookups);
+      const auto found = std::lower_bound(by_key.begin(), by_key.end(), local.key,
+          [&](BallId id, const BallKey& value) { return balls[id].key < value; });
+      if (found != by_key.end() && balls[*found].key == local.key) {
+        const auto& b = balls[*found];
+        require(same_exact_level(b.level, local.level), "full_ball_static_anchor_level");
+        const unsigned lo = b.n_interior + b.arity - 1;
+        if (current_k >= lo && current_k <= b.n_interior + b.n_shell) {
+          add(work.anchor_hits); work.max_chain_steps = std::max(work.max_chain_steps, length);
+          return *found;
+        }
+      }
+      const i32 z = intruder_work(local.key, sites, work, scratch);
+      require(z >= 0, "full_ball_static_missing_weak_terminal");
+      require(local.support_size > 0 && local.support_slots[0] < sites.size(),
+              "full_ball_static_missing_support");
+      sites[local.support_slots[0]] = z;
+      std::sort(sites.begin(), sites.end());
+      add(work.static_post_seed_queries[current_k]);
+      const auto seed = std::lower_bound(seeds.begin(), seeds.end(), key,
+          [](const StaticSeed& a, const ResolverCache::Key& value) { return a.key < value; });
+      if (seed != seeds.end() && seed->key == key) {
+        const auto& b = balls[seed->ball];
+        // Whole I union U, in this Builder's index and K. A surviving support
+        // or partial shell is NOT a seed: it can preserve the previous radius.
+        require(current_k == static_cast<unsigned>(b.n_interior) + b.n_shell,
+                "full_ball_post_seed_whole_population");
+        require(compare_exact_level(b.level, local.level) < 0 && compare_exact_level(b.level, before) < 0,
+                "full_ball_post_seed_not_strict");
+        add(work.static_post_seed_hits[current_k]);
+        add(work.descending_steps); add(length);
+        work.max_chain_steps = std::max(work.max_chain_steps, length);
+        add(work.static_post_seed_terminals[current_k]);
+        // Exact full-population MEB is this ball; the original next iteration
+        // would terminate here. Do not charge its MEB/lookup/anchor hit.
+        return seed->ball;
+      }
+      auto next = meb(sites, work.resolve_work);
+      const int cmp = compare_exact_level(next.level, local.level);
+      require(cmp <= 0, "full_ball_static_radius_increased");
+      if (cmp == 0) {
+        require(next.key == local.key && next.selected_shell_count + 1 == local.selected_shell_count,
+                "full_ball_static_equal_radius_shell_not_decreased");
+        add(work.same_radius_steps);
+      } else add(work.descending_steps);
+      add(length); local = next;
+    }
+  }
+
+  void merge_static_work(const FullBallStats& w) {
+    for (size_t k = 0; k < st.static_post_seed_queries.size(); ++k) {
+      add(st.static_post_seed_queries[k], w.static_post_seed_queries[k]);
+      add(st.static_post_seed_hits[k], w.static_post_seed_hits[k]);
+      add(st.static_post_seed_terminals[k], w.static_post_seed_terminals[k]);
+    }
+    for (const auto field : {&FullBallStats::anchor_hits, &FullBallStats::key_lookups,
+        &FullBallStats::intruder_queries, &FullBallStats::intruder_nodes,
+        &FullBallStats::intruder_power_tests, &FullBallStats::interior_ranges,
+        &FullBallStats::same_radius_steps, &FullBallStats::descending_steps}) add(st.*field, w.*field);
+    st.max_chain_steps = std::max(st.max_chain_steps, w.max_chain_steps);
+    add(st.resolve_work.calls, w.resolve_work.calls);
+    add(st.resolve_work.power_tests, w.resolve_work.power_tests);
+    add(st.resolve_work.materializations, w.resolve_work.materializations);
+    for (size_t q = 0; q < st.resolve_work.supports_by_size.size(); ++q)
+      add(st.resolve_work.supports_by_size[q], w.resolve_work.supports_by_size[q]);
+  }
+
+  void prepare_static_order() {
+    struct Request { ResolverCache::Key key; BallId consumer; size_t ordinal; };
+    std::vector<Request> requests;
+    std::vector<StaticSeed> seeds;
+    for (BallId id : programs[current_k]) {
+      u16 contribution = 0; bool interior = false;
+      visit_block(id, contribution, interior, [&](std::vector<i32> sites) {
+        std::sort(sites.begin(), sites.end());
+        require(sites.size() == current_k && std::adjacent_find(sites.begin(), sites.end()) == sites.end(),
+                "full_ball_static_representative_cardinality");
+        requests.push_back({ResolverCache::key(sites), id, requests.size()});
+      });
+      const auto& b = balls[id];
+      if (current_k == static_cast<unsigned>(b.n_interior) + b.n_shell) {
+        ResolverCache::Key key{};
+        size_t n = 0;
+        for (i32 site : b.interior()) key[n++] = site;
+        for (i32 site : b.shell()) key[n++] = site;
+        std::sort(key.begin(), key.begin() + n);
+        seeds.push_back({key, id});
+      }
+    }
+    st.static_requests[current_k] = requests.size();
+    st.static_peak_request_bytes = std::max<u64>(st.static_peak_request_bytes,
+        requests.capacity() * sizeof(Request));
+    std::sort(requests.begin(), requests.end(), [](const Request& a, const Request& b) {
+      if (a.key != b.key) return a.key < b.key;
+      return a.ordinal < b.ordinal;  // earliest consumer first in each class
+    });
+    std::sort(seeds.begin(), seeds.end(), [](const StaticSeed& a, const StaticSeed& b) { return a.key < b.key; });
+    for (size_t j = 1; j < seeds.size(); ++j)
+      require(seeds[j - 1].key != seeds[j].key, "full_ball_static_duplicate_seed");
+    std::vector<size_t> groups;
+    for (size_t j = 0; j < requests.size(); ++j)
+      if (!j || requests[j].key != requests[j - 1].key) groups.push_back(j);
+    st.static_unique[current_k] = groups.size();
+    groups.push_back(requests.size());
+    static_cursor = 0;
+    static_targets.assign(requests.size(), std::numeric_limits<BallId>::max());
+    st.static_peak_target_bytes = std::max<u64>(st.static_peak_target_bytes,
+        static_targets.capacity() * sizeof(BallId));
+    struct Worker { FullBallStats work; std::vector<NodeRef> scratch; u64 seeded = 0; };
+    std::vector<Worker> workers(planned_workers(groups.size() - 1, geometry_threads));
+    const auto account = [&] {
+      u64 worker_bytes = workers.capacity() * sizeof(Worker);
+      for (const auto& w : workers) add(worker_bytes, w.scratch.capacity() * sizeof(NodeRef));
+      const u64 seed_bytes = seeds.capacity() * sizeof(StaticSeed);
+      const u64 group_bytes = groups.capacity() * sizeof(size_t);
+      st.static_peak_seed_bytes = std::max(st.static_peak_seed_bytes, seed_bytes);
+      st.static_peak_group_bytes = std::max(st.static_peak_group_bytes, group_bytes);
+      st.static_peak_worker_bytes = std::max(st.static_peak_worker_bytes, worker_bytes);
+      u64 retained = requests.capacity() * sizeof(Request);
+      add(retained, static_targets.capacity() * sizeof(BallId));
+      add(retained, seed_bytes); add(retained, group_bytes); add(retained, worker_bytes);
+      // Sampled retained capacities only, not transient reallocations or RSS.
+      st.static_peak_retained_bytes = std::max(st.static_peak_retained_bytes, retained);
+      for (const auto& w : workers) {
+        merge_static_work(w.work);
+        add(st.static_seeded[current_k], w.seeded);
+      }
+    };
+    const auto job = [&](size_t begin, size_t end, size_t worker) {
+      auto& w = workers[worker];
+      for (size_t group = begin; group < end; ++group) {
+        const auto& first = requests[groups[group]];
+        const auto& before = balls[first.consumer].level;
+        const auto seed = std::lower_bound(seeds.begin(), seeds.end(), first.key,
+            [](const StaticSeed& a, const ResolverCache::Key& key) { return a.key < key; });
+        BallId target;
+        if (seed != seeds.end() && seed->key == first.key) {
+          target = seed->ball;
+          require(compare_exact_level(balls[target].level, before) < 0, "full_ball_static_seed_not_strict");
+          add(w.seeded);
+        } else target = static_terminal(first.key, before, w.work, w.scratch, seeds);
+        for (size_t r = groups[group]; r < groups[group + 1]; ++r) {
+          const auto& request = requests[r];
+          require(compare_exact_level(before, balls[request.consumer].level) <= 0,
+                  "full_ball_static_request_chronology");
+          static_targets[request.ordinal] = target;
+        }
+      }
+    };
+    try {
+      const size_t lanes = parallel_ranges(groups.size() - 1, geometry_threads, job);
+      add(st.static_lanes_used, lanes);
+      if (lanes > 1) add(st.static_workers_created, lanes);  // one lane uses the caller
+    }
+    catch (...) {
+      account();
+      throw;
+    }
+    account();
+  }
+  u64 resolve(std::vector<i32> sites, const ExactLevel& before, u64 prior_count) {
+    add(st.representatives);
+    std::sort(sites.begin(), sites.end());
+    require(sites.size() == current_k && std::adjacent_find(sites.begin(), sites.end()) == sites.end(),
+            "full_ball_representative_cardinality");
+    if (current_k == 1) {
+      const PointId id = ix.point_id(sites.front());
+      return root(std::lower_bound(domain.begin(), domain.end(), id) - domain.begin(), prior_count);
+    }
+    if (geometry_threads) {
+      require(static_cursor < static_targets.size(), "full_ball_static_target_missing");
+      const BallId target = static_targets[static_cursor++];
+      require(target < balls.size() && compare_exact_level(balls[target].level, before) < 0,
+              "full_ball_static_target_not_strict");
+      require(anchors[target] != absent, "full_ball_static_closed_anchor_missing");
+      return root(anchors[target], prior_count);
+    }
+    const auto initial_key = ResolverCache::key(sites);
+    const u64 cached = resolver_cache.lookup(initial_key);
+    if (cached != absent) return root(cached, prior_count);
+    auto local = meb(sites, st.resolve_work);
+    u64 length = 0;
+    for (;;) {
+      require(compare_exact_level(local.level, before) < 0, "full_ball_representative_not_strict");
+      add(st.key_lookups);
+      const auto found = std::lower_bound(by_key.begin(), by_key.end(), local.key,
+          [&](BallId id, const BallKey& key) { return balls[id].key < key; });
+      if (found != by_key.end() && balls[*found].key == local.key) {
+        require(same_exact_level(balls[*found].level, local.level), "full_ball_anchor_level");
+        if (anchors[*found] != absent) {
+          add(st.anchor_hits); st.max_chain_steps = std::max(st.max_chain_steps, length);
+          const u64 resolved = root(anchors[*found], prior_count);
+          resolver_cache.store(initial_key, resolved);
+          return resolved;  // hit BEFORE spatial query
+        }
+        const auto& ball = balls[*found];
+        const unsigned lo = ball.n_interior + ball.arity - 1;
+        require(current_k < lo || current_k > ball.n_interior + ball.n_shell,
+                "full_ball_missing_closed_anchor");
+      }
+      const i32 z = intruder(local.key, sites);
+      require(z >= 0, "full_ball_missing_weak_terminal");
+      require(local.support_size > 0 && local.support_slots[0] < sites.size(), "full_ball_missing_support");
+      sites[local.support_slots[0]] = z;
+      std::sort(sites.begin(), sites.end());
+      auto next = meb(sites, st.resolve_work);
+      const int cmp = compare_exact_level(next.level, local.level);
+      require(cmp <= 0, "full_ball_radius_increased");
+      if (cmp == 0) {
+        require(next.key == local.key && next.selected_shell_count + 1 == local.selected_shell_count,
+                "full_ball_equal_radius_shell_not_decreased");
+        add(st.same_radius_steps);
+      } else add(st.descending_steps);
+      add(length); local = next;
+    }
+  }
+
+  void seed_closed_anchor(BallId ball, u64 target) {
+    if (geometry_threads) return;  // Static seeds are BallIds, not temporal tokens.
+    const auto& b = balls[ball];
+    if (current_k < 2 || current_k != static_cast<unsigned>(b.n_interior) + b.n_shell) return;
+    // I union U is the unique K-facet of this closed population. Its positive
+    // support certifies its MEB. The whole lot has closed before publication,
+    // so any later lookup is strictly after this birth and normalizes its token.
+    ResolverCache::Key key{};
+    size_t n = 0;
+    for (i32 site : b.interior()) key[n++] = site;
+    for (i32 site : b.shell()) key[n++] = site;
+    std::sort(key.begin(), key.begin() + n);
+    resolver_cache.store(key, target, true);
+  }
+
+  template<class Emit>
+  void visit_block(BallId id, u16& contribution, bool& interior, Emit&& emit) const {
+    const auto& b = balls[id];
+    if (b.n_shell == b.arity) {
+      if (current_k == b.n_interior + b.n_shell) {
+        contribution = static_cast<u16>((1u << b.n_shell) - 1);
+        interior = b.n_interior != 0;
+      } else {
+        require(current_k + 1 == b.n_interior + b.n_shell, "full_ball_regular_rank");
+        for (size_t omit = 0; omit < b.n_shell; ++omit) {
+          std::vector<i32> sites(b.interior().begin(), b.interior().end());
+          for (size_t j = 0; j < b.n_shell; ++j) if (j != omit) sites.push_back(b.shell_ids[j]);
+          emit(std::move(sites));
+        }
+      }
+    } else {
+      const auto& table = extra.at(id);
+      const auto rank = table.rank(current_k);
+      require(rank.present, "full_ball_absent_scheduled_block");
+      contribution = rank.contribution_shell; interior = rank.contribution_interior;
+      for (const auto& component : rank.strict_components) {
+        std::vector<i32> sites;
+        for (size_t j = 0; j < component.interior_prefix; ++j)
+          sites.push_back(geometry_id(table.census().interior[j].id));
+        for (size_t j = 0; j < table.census().shell.size(); ++j)
+          if (component.representative_shell & (u16{1} << j))
+            sites.push_back(geometry_id(table.census().shell[j].id));
+        emit(std::move(sites));
+      }
+    }
+  }
+  Block prepare_block(BallId id, const ExactLevel& level, u64 prior_count) {
+    Block block{id, {}, 0, false};
+    add(st.anchor_blocks);
+    if (balls[id].n_shell == balls[id].arity) add(st.regular_blocks); else add(st.extra_blocks);
+    visit_block(id, block.contribution, block.interior, [&](std::vector<i32> sites) {
+      block.roots.push_back(resolve(std::move(sites), level, prior_count));
+    });
+    std::sort(block.roots.begin(), block.roots.end());
+    block.roots.erase(std::unique(block.roots.begin(), block.roots.end()), block.roots.end());
+    return block;
+  }
+  u64 population(BallId id) {
+    if (population_ids[id] != absent) return population_ids[id];
+    FullCoveragePopulation row;
+    for (i32 site : balls[id].interior()) row.interior.push_back(ix.point_id(site));
+    for (i32 site : balls[id].shell()) row.shell.push_back(ix.point_id(site));
+    std::sort(row.interior.begin(), row.interior.end()); std::sort(row.shell.begin(), row.shell.end());
+    population_ids[id] = populations.size(); populations.push_back(std::move(row));
+    return population_ids[id];
+  }
+  u64 new_node(const ExactLevel& level, const std::vector<u64>& parents, Draft& draft,
+      MonotoneHistory& lower, u64 birth_image) {
+    u64 image = birth_image;
+    if (current_k > 1 && !parents.empty()) {
+      image = lower.root_at(draft.lower_nodes[parents.front()], level, true);
+      for (u64 p : parents)
+        require(lower.root_at(draft.lower_nodes[p], level, true) == image, "full_ball_vertical_naturality");
+    }
+    const u64 id = current.levels.size();
+    require(id != absent, "full_ball_node_representation", FullBallStatus::kResourceExhausted);
+    current.levels.push_back(level); current.next.push_back(absent); compressed.push_back(id);
+    for (u64 parent : parents) { current.next[parent] = id; compressed[parent] = id; }
+    draft.lower_nodes.push_back(image);
+    if (parents.empty()) add(st.births); else add(st.merges);
+    return id;
+  }
+  void close_lot(const std::vector<Block>& blocks, const ExactLevel& level, Draft& draft,
+      MonotoneHistory& lower, const std::vector<u64>& lower_anchors) {
+    if (blocks.size() == 1) {
+      add(st.singleton_lots);
+      const auto& block = blocks.front();
+      FullCoverageAction action;
+      action.parents = block.roots;  // Already sorted and unique in prepare_block.
+      if (block.contribution || block.interior) {
+        action.contributions.push_back({population(block.ball), block.contribution, block.interior});
+        add(st.contributions);
+      }
+      u64 target;
+      if (action.parents.size() == 1) target = action.parents.front();
+      else {
+        u64 birth_image = absent;
+        if (action.parents.empty()) {
+          require(action.contributions.size() == 1, "full_ball_distinct_births");
+          if (current_k > 1) {
+            require(block.ball < lower_anchors.size() && lower_anchors[block.ball] != absent,
+                "full_ball_vertical_birth_anchor");
+            birth_image = lower.root_at(lower_anchors[block.ball], level, true);
+          }
+        }
+        target = new_node(level, action.parents, draft, lower, birth_image);
+      }
+      if (action.parents.size() != 1 || !action.contributions.empty()) {
+        FullCoverageBatch batch{level, {}};
+        batch.actions.push_back(std::move(action));
+        draft.batches.push_back(std::move(batch));
+      } else add(st.inert_blocks);
+      require(anchors[block.ball] == absent && target != absent, "full_ball_anchor_duplicate");
+      anchors[block.ball] = target;  // All representatives and the whole lot are closed.
+      seed_closed_anchor(block.ball, target);
+      return;
+    }
+    add(st.grouped_lots);
+    // Prospectively account the actual DSU initialization; unitary lots never
+    // reach this path and create no DSU, owner groups or target array.
+    add(st.lot_dsu_slots, blocks.size());
+    std::vector<size_t> dsu(blocks.size()); std::iota(dsu.begin(), dsu.end(), size_t{0});
+    const auto find = [&](size_t a) { while (dsu[a] != a) { dsu[a] = dsu[dsu[a]]; a = dsu[a]; } return a; };
+    std::vector<std::pair<u64,size_t>> owners;
+    for (size_t b = 0; b < blocks.size(); ++b) for (u64 p : blocks[b].roots) owners.emplace_back(p,b);
+    std::sort(owners.begin(), owners.end());
+    for (size_t j = 1; j < owners.size(); ++j) if (owners[j - 1].first == owners[j].first) {
+      const auto a = find(owners[j - 1].second), b = find(owners[j].second);
+      dsu[std::max(a,b)] = std::min(a,b);
+    }
+    std::vector<std::vector<size_t>> groups(blocks.size());
+    for (size_t b = 0; b < blocks.size(); ++b) groups[find(b)].push_back(b);
+    FullCoverageBatch batch{level, {}};
+    std::vector<u64> targets(blocks.size(), absent);
+    for (const auto& group : groups) {
+      if (group.empty()) continue;
+      FullCoverageAction action;
+      for (size_t b : group) {
+        const auto& block = blocks[b];
+        action.parents.insert(action.parents.end(), block.roots.begin(), block.roots.end());
+        if (block.contribution || block.interior) {
+          action.contributions.push_back({population(block.ball), block.contribution, block.interior});
+          add(st.contributions);
+        }
+      }
+      std::sort(action.parents.begin(), action.parents.end());
+      action.parents.erase(std::unique(action.parents.begin(), action.parents.end()), action.parents.end());
+      u64 target;
+      if (action.parents.size() == 1) target = action.parents.front();
+      else {
+        u64 birth_image = absent;
+        if (action.parents.empty()) {
+          require(group.size() == 1 && action.contributions.size() == 1, "full_ball_distinct_births");
+          if (current_k > 1) {
+            const auto ball = blocks[group.front()].ball;
+            require(ball < lower_anchors.size() && lower_anchors[ball] != absent, "full_ball_vertical_birth_anchor");
+            birth_image = lower.root_at(lower_anchors[ball], level, true);
+          }
+        }
+        target = new_node(level, action.parents, draft, lower, birth_image);
+      }
+      for (size_t b : group) targets[b] = target;
+      if (action.parents.size() != 1 || !action.contributions.empty()) batch.actions.push_back(std::move(action));
+      else add(st.inert_blocks, group.size());
+    }
+    if (!batch.actions.empty()) draft.batches.push_back(std::move(batch));
+    // Publish anchors only AFTER the complete atomic group has been staged.
+    // Failure anywhere invalidates the whole result, not just this lot.
+    for (size_t b = 0; b < blocks.size(); ++b) {
+      require(anchors[blocks[b].ball] == absent && targets[b] != absent, "full_ball_anchor_duplicate");
+      anchors[blocks[b].ball] = targets[b];
+      seed_closed_anchor(blocks[b].ball, targets[b]);
+    }
+  }
+};
+}  // namespace full_ball_detail
+
+inline FullBallTowerResult build_full_ball_tower(const CloudIndex& ix, std::span<const BallData> balls,
+    unsigned kmax, int static_threads = 0) {
+  FullBallTowerResult result;
+  try {
+    result.orders = full_ball_detail::Builder(ix, balls, kmax, result.stats, static_threads).run();
+    result.status = FullBallStatus::kCompleteRelative; result.reason = kFullBallAuthority;
+  } catch (const full_ball_detail::Failure& error) {
+    result.status = error.status; result.reason = error.reason;
+  } catch (const std::bad_alloc&) {
+    result.status = FullBallStatus::kResourceExhausted; result.reason = "full_ball_allocation_failed";
+  } catch (const std::length_error&) {
+    result.status = FullBallStatus::kResourceExhausted; result.reason = "full_ball_size_overflow";
+  } catch (const std::invalid_argument&) {
+    result.status = FullBallStatus::kInvalidInput; result.reason = "full_ball_local_census_invalid";
+  } catch (const std::system_error&) {
+    result.status = FullBallStatus::kResourceExhausted; result.reason = "full_ball_thread_launch_failed";
+  }
+  if (result.status != FullBallStatus::kCompleteRelative) result.orders.clear();
+  return result;
+}
+
+inline FullNodeId full_ball_vertical_root_at(const FullBallTowerResult& tower, unsigned k,
+    FullNodeId root, const ExactLevel& cut, bool closed) {
+  if (tower.status != FullBallStatus::kCompleteRelative || k < 2 || k > tower.orders.size())
+    return kFullCoverageAbsent;
+  const auto& upper = tower.orders[k - 1];
+  if (root >= upper.lower_nodes.size() || full_coverage_root_at(upper.forest, root, cut, closed) != root)
+    return kFullCoverageAbsent;
+  return full_coverage_root_at(tower.orders[k - 2].forest, upper.lower_nodes[root], cut, closed);
+}
+
+}  // namespace mhgp7

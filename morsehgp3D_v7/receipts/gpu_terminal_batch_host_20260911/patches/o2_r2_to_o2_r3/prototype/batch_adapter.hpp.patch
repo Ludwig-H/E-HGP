@@ -1,0 +1,33 @@
+--- o2_r2/prototype/batch_adapter.hpp
++++ o2_r3/prototype/batch_adapter.hpp
+@@ -18,6 +18,15 @@
+   add(out.static_post_seed_queries[k], w.post_seed_queries);
+   add(out.static_post_seed_hits[k], w.post_seed_hits);
+   add(out.static_post_seed_terminals[k], w.post_seed_terminals);
++}
++// Publish only a complete, representable aggregate. If any checked addition
++// throws, the caller must not mistake the partial sum for known paid work.
++inline void publish_work(std::span<const WireResult> rows, unsigned k, FullBallBatchResult& output) {
++  output.work_known = false;
++  FullBallStats aggregate;
++  for (const auto& row : rows) accumulate(aggregate, row.result.work, k);
++  output.work = std::move(aggregate);
++  output.work_known = true;
+ }
+ inline void resolve_batch(void* opaque, const FullBallGeometryView& geometry,
+     const FullBallBatchView& batch, FullBallBatchResult& output) {
+@@ -48,11 +57,11 @@
+   }
+   output.work_known = false;
+   const auto result = context.execute(requests);
+-  output.work_known = result.raw_work_known;
++  if (result.raw_work_known) publish_work(result.diagnostic, batch.k, output);
+   // Device buffers are reused; sampled capacity only, not peak VRAM/RSS.
++  if (context.capacity() > std::numeric_limits<u64>::max() /
++      (sizeof(terminal::Request) + sizeof(WireResult))) throw std::overflow_error("batch_retained_bytes");
+   output.retained_bytes = context.capacity() * (sizeof(terminal::Request) + sizeof(WireResult));
+-  if (result.raw_work_known)
+-    for (const auto& row : result.diagnostic) accumulate(output.work, row.result.work, batch.k);
+   if (!result.complete) { output.reason = result.failure; return; }
+   std::vector<FullBallBatchTarget> accepted;
+   accepted.reserve(result.accepted.size());

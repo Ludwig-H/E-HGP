@@ -1,0 +1,34 @@
+{
+  "argv": [
+    "g++",
+    "-O1",
+    "-g",
+    "-fsanitize=address,undefined",
+    "-fno-omit-frame-pointer",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-isystem",
+    "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-DMHGP7_FULL_HEADER=\"/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/source/morsehgp3D_v7/src/forest/full_ball_tower.hpp\"",
+    "-DMHGP7_GATE_SOURCE=\"/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/source/morsehgp3D_v7/tests/full_ball_tower_gate.cpp\"",
+    "-M",
+    "-MF",
+    "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/all.d",
+    "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/qualification.cpp"
+  ],
+  "ended_ns": 1789129617155472750,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "dependencies",
+  "sanitizer_environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "started_ns": 1789129615133090607,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

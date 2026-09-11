@@ -1,0 +1,66 @@
+--- k8/cuda_trial/record.py
++++ k10/cuda_trial/record.py
+@@ -76,7 +76,7 @@
+     sources = sorted(path for path in (BASE / "source").rglob("*") if path.is_file())
+     sources += sorted(path for path in BASE.iterdir() if path.is_file() and
+         (path.suffix in (".cpp", ".cu", ".cuh", ".hpp", ".py") or
+-         path.name in ("baseline_pins.json", "ownerfix_import.json")))
++         path.name in ("baseline_pins.json", "ownerfix_import.json", "import.json")))
+     sources += sorted(path for path in ROOT.iterdir() if path.is_file())
+     before = {str(path.relative_to(BASE)): sha(path) for path in sources}
+     snapshot = out / "source_snapshot"
+@@ -120,29 +120,50 @@
+             for relative in ("o2_r1/receipt.json", "san_root_r1/receipt.json",
+                 "t2_trial/o2_r1/receipt.json", "t2_trial/san_root_r1/receipt.json",
+                 "guards_trial/o2_r1/receipt.json", "guards_trial/san_root_r1/receipt.json"):
+-                path = BASE / relative
++                path = BASE / "qualification" / relative
+                 data = json.loads(path.read_text())
+                 if not compatible_prerequisite(data, shared):
+                     raise RuntimeError("ownerfix prerequisite not closed: " + relative)
+                 verify_snapshot(path.parent / "source_snapshot", shared)
+                 prerequisites[relative] = sha(path)
+             receipt["ownerfix_prerequisites"] = prerequisites
++            host_manifest = BASE / "qualification/host_manifest.json"
++            host_capture = BASE / "qualification/host_capture_manifest.json"
++            if sha(host_manifest) != "3ac9ca12fc22433fcedff2d7130f2a78031799fff81687c4b87c2d7945ca5ef1" or \
++                    json.loads(host_manifest.read_text())["files"]["capture_manifest.json"]["sha256"] != sha(host_capture):
++                raise RuntimeError("published host qualification authority changed")
++            authority = json.loads(host_capture.read_text())
++            for relative, pin in prerequisites.items():
++                if authority["files"]["ownerfix/" + relative]["sha256"] != pin:
++                    raise RuntimeError("unbound reconstructed prerequisite")
++            receipt["host_qualification_manifest_sha256"] = sha(host_manifest)
+             run("provenance_normal", ["python3", "-B", str(snapshot / "cuda_trial/provenance_gate.py")])
+             run("provenance_optimized", ["python3", "-B", "-O", str(snapshot / "cuda_trial/provenance_gate.py")])
+             run("compiler", ["g++", "--version"])
+             run("compile", ["g++", "-std=c++20", "-O2", "-Wall", "-Wextra", "-Wpedantic", "-Werror", "-pthread",
+-                "-isystem", str(REPO / "build/v7_boost_gate/extracted/usr/include"), "-MMD", "-MF", str(out / "gate.d"),
++                "-isystem", str(REPO / "build/v7_boost_gate/extracted/usr/include"), "-I", str(snapshot),
++                "-MMD", "-MF", str(out / "gate.d"),
+                 str(snapshot / "cuda_trial/export.cpp"), "-o", str(out / "export_gate")])
+             receipt["binary_sha256"] = sha(out / "export_gate")
++            run("plan", [str(out / "export_gate"), "--plan"])
++            plan = json.loads((out / "plan.stdout").read_text())
++            if plan.get("status") != "declared" or plan.get("geometry_executed") is not False or \
++                    len(plan.get("clouds", [])) != 17 or plan.get("K9_requests") != 468 or plan.get("K10_requests") != 160 or \
++                    sum(len(cloud["masks"]) for cloud in plan["clouds"]) != 1577:
++                raise RuntimeError("predeclared corpus invalid")
++            receipt["plan_sha256"] = sha(out / "plan.stdout")
+             run("export", [str(out / "export_gate"), "--export"])
+             summary = json.loads((out / "export.stderr").read_text())
+-            if summary.get("status") != "passed" or summary.get("clouds") != 14 or \
++            if summary.get("status") != "passed" or summary.get("clouds") != 17 or \
++                    summary.get("requests") != 1577 or summary.get("K9_requests") != 468 or summary.get("K10_requests") != 160 or \
++                    summary.get("model_cross_checks") != 1022 or \
+                     summary.get("all_declared_facets_nominal") is not True or \
+                     summary.get("silently_filtered_failures") != 0 or \
+                     summary.get("large_ordinals") != summary.get("requests") or \
+                     any(type(summary.get(key)) is not int or summary[key] <= 0 for key in
+                         ("requests", "trace_rows", "Gram_checked_rows", "q2", "q3", "q4", "extra_shells",
+-                         "strict_steps", "same_radius_steps", "intruder_queries")) or \
++                         "strict_steps", "same_radius_steps", "intruder_queries", "K9_strict_steps", "K10_strict_steps",
++                         "K9_intruder_queries", "K10_intruder_queries", "K9_q3", "K10_q3", "K9_q4", "K10_q4")) or \
+                     summary["trace_rows"] != summary["Gram_checked_rows"]:
+                 raise RuntimeError("export nonvacuity or accounting failed")
+             shutil.copy2(out / "export.stdout", out / "terminal_fixtures.inc")

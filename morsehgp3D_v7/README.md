@@ -56,7 +56,7 @@ est aussi close à 8k : mêmes tours et travail MEB, quelques candidats amont
 en moins à s10/s12 ; aucun optimum de temps déduit de la charge variable.
 
 Le [complément après échange](docs/SEMIS_APRES_ECHANGE_20260911.md) est
-maintenant intégré à cette option : header `6763a877…`. Retrouver exactement
+intégré à cette option depuis le header `6763a877…`. Retrouver exactement
 une population complète évite la dernière MEB d'une descente, sans changer
 son terminal ni les parents. O2/SAN propres au patch : 34 nuages, 150 ordres,
 87 230 vérifications verticales ; trois mutants ciblés réfutés, avec les
@@ -74,6 +74,16 @@ mono 8k/16k/32k](receipts/post_exchange_scale_20260911/README.md) est clos :
 8,687 Gio de pic RSS à 32k. Ce sont des observations sur l'uniforme s8,
 pas un speedup apparié aux anciens temps ni une qualification 50k.
 
+La [couture par lots](docs/PARALLELISATION_PAR_LOTS_20260911.md) est maintenant
+intégrée au Builder `83f1c78e…`, sans modifier le cache par défaut : un appel
+synchrone par ordre non vide pour les clés uniques non semées. Seize CTests
+permanents protègent le raccord census→tour et le callback CPU1/4 ; leurs
+candidats passent O2/SAN, la [reconstruction active commune](receipts/full_ball_batch_active_cmake_20260911/README.md) passe les 40
+CTests ciblés et la sonde n200, avec les mêmes sorties et travail géométrique.
+Le contexte GPU résident demeure séparé : tests hôte FULL/T2 et compilation
+CUDA stricte corrigée, mais aucune exécution sur carte. Il évite 232 octets
+H2D et 192 octets de copie hôte par requête, sans gain de latence revendiqué.
+
 Le [triplet nominal du 10 septembre](docs/RESULTATS_TOUR_CACHE_G4_20260910.md) termine
 à 235,724 s / 354,144 s / 736,819 s pour 8k/16k/32k, s=8, un thread.
 Les sorties ont 3,98 M / 8,31 M / 17,17 M nœuds. Ce sont des diagnostics
@@ -90,8 +100,8 @@ Les [refus historiques 50k du 6 septembre](docs/RESULTATS_G4_FULL_20260906.md)
 restent distincts, sans réétiquetage. Contrats 1 s/100 ms non acquis.
 La séparation statique des résolutions géométriques est désormais
 [prouvée sous census complet par l'auditeur](audits/receipts_raccord_ancres_20260910/suite_cache_20260910/NOTE_PHASE_STATIQUE_MEB.md) ;
-son backend CPU par lots est maintenant optionnel ; son backend GPU reste
-à implémenter. Les mesures 50k ci-dessus portent sur le moteur du 10 septembre,
+son backend CPU par lots est maintenant optionnel ; son prototype GPU reste
+à qualifier sur carte et à intégrer. Les mesures 50k ci-dessus portent sur le moteur du 10 septembre,
 pas sur cette nouvelle option. Aucun nouveau temps 50k n'est encore mesuré.
 Le [nouveau lot de primitives GPU](docs/RESULTATS_PRIMITIVES_GPU_20260911.md)
 du 11 septembre passe maintenant sur la vraie G4 SM12.0 : 605 MEB,
@@ -118,8 +128,19 @@ n'est déduite de ces gates hôte.
 Son [transport CUDA autonome](receipts/gpu_static_terminal_cuda_20260911/README.md)
 passe aussi O2/SAN et compilation/lien NVCC stricts SM120 : 949 facettes
 K2..8, 1 428 traces, douze rejets et huit corruptions de transport réfutées.
-Le kernel compilé n'a pas été exécuté ; K9/K10 sur ce transport et les vrais
-lots de la tour restent à qualifier avant une nouvelle campagne G4.
+Son [extension K9/K10](receipts/gpu_static_terminal_k10_20260911/README.md)
+passe à son tour O2/SAN ROOT et compilation/lien NVCC stricts : 1 577 requêtes,
+2 763 traces contre Gram, dont 468 requêtes K9 et 160 K10. Le premier échec
+NVCC, dû au droit d'exécution perdu d'un script importé, est conservé ;
+le correctif ne change pas ses octets. Aucun kernel de ce terminal exécuté,
+et aucun transfert de résultat au nouveau helper avec semis ni aux vrais lots
+de la tour, qui gardent leurs qualifications distinctes.
+
+La [proposition de graphe filtré](docs/GRAPHE_FILTRE_BOULES_PROPOSITION_20260911.md)
+a reçu l'accord conditionnel de l'auditeur : les hubs non natifs peuvent
+être éliminés au profit des naissances, sous conservation des dates,
+contributions et ancres verticales. Aucun raccord C++/GPU ni gain mesuré
+pour cette réduction.
 
 Le [premier raccord privé du journal incrémental](receipts/incremental_full_trial_20260911/README.md)
 préserve les sorties physiques O2/SAN dans quatre modes, mais augmente

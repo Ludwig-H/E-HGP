@@ -1,0 +1,38 @@
+# Variante privée : trafic et copies du lot terminal
+
+Cadre v7 hors registre, profil `quantized_u16_input_only`, backend à qualifier `HOST_STUB`, `public_status=not_claimed`. Sources préparées seulement : aucune compilation ni exécution de cette variante au moment de sa rédaction. GCP non utilisé, aucune modification de ROOT, du produit, des audits ou de Git.
+
+## Provenance et périmètre
+
+`prepare.py` copie et vérifie le snapshot clos `build/v7_terminal_batch_20260911/o2_r2` : route `35262d9a…`, adapter `143bcbfe…`, cœur `8725dda5…`. Le reçu original et tous les pins figurent dans `source_receipt.json` et `import.json`. Son succès n'est pas attribué à cette variante. La modification produit privée porte sur `prototype/batch_route.cuh` ; `prototype/batch_gate.cpp` étend le juge. L'interface publique de l'adapter est inchangée.
+
+La correction indépendante de l'agrégation atomique `work_known` appartient à ROOT : l'adapter copié conserve encore ce défaut de son état r2. Ce prototype ne constitue donc pas une qualification de cette frontière d'erreur, ni un terminal industriel complet.
+
+## Modification et argument de sûreté
+
+Les résultats device sont mis à zéro uniquement lorsque `reserve` crée un nouveau buffer. Le zeroing est un `cudaMemset` dans le futur chemin CUDA et un `memset` dans le stub ; il ne transfère aucune sentinelle depuis l'hôte. Les octets et appels d'initialisation sont comptés séparément des octets H2D. Une faute de transport au stade initialisation libère les deux nouvelles allocations et conserve les anciens buffers jusqu'à la fermeture du contexte empoisonné.
+
+Avant le premier kernel, toute ligne a `written=0`. Après réutilisation, chaque ligne écrite conserve son ancien numéro de lot. `next_batch_` commence à 1, augmente strictement et refuse l'épuisement u64 avant réutilisation d'un numéro. Un kernel correct écrit le nouveau numéro dans chaque sortie ; une ligne omise a donc soit `written=0`, soit un numéro strictement antérieur. `valid_result` refuse les deux. Cela reste vrai après un rétrécissement logique du lot, lorsque certaines lignes conservent un numéro encore plus ancien. Une nouvelle allocation est toujours initialisée, indépendamment du contenu éventuellement recyclé par l'allocateur. Aucun plafond du nombre de requêtes ou de la descente n'est ajouté.
+
+La totalité des lignes est toujours validée avant de marquer le travail brut connu et de publier. La publication utilise maintenant `AcceptedTarget {BallId target; u64 ordinal;}` au lieu d'une seconde copie complète de `terminal::Result` et de tous ses compteurs. Les lignes brutes restent quarantinées pour l'agrégation exacte de l'adapter ; une faute ne publie aucun préfixe. La copie compacte finale de l'adapter reste présente.
+
+## Effet analytique, pas mesure de vitesse
+
+Pour un lot de m requêtes, le H2D répétitif évité vaut exactement `m*sizeof(WireResult)` ; le H2D restant contient seulement les requêtes. Chaque agrandissement paie encore une écriture locale de `capacity*sizeof(WireResult)`, deux allocations et la libération des anciens buffers. Le D2H des résultats est inchangé. Les compteurs décrivent les opérations acceptées par le backend ; aucune exécution device ni latence n'est inférée du stub.
+
+La seconde copie hôte économise `m*(sizeof(terminal::Result)-sizeof(AcceptedTarget))` octets de charge utile de vecteur. Le staging de diagnostic, les demandes hôte, la copie compacte finale, les index/catalogue/semis hôte et device existent toujours. Cette variante ne réduit pas la capacité VRAM du lot et ne prétend pas résoudre la résidence de plusieurs dizaines de millions de points.
+
+## Gates préparées
+
+Les 64 paires de tours historiques et géométries de hits post-échange sont conservées avec comparaison de payload et de tous les compteurs géométriques. Les 28 rejets initiaux restent distincts. S'ajoutent six omissions : premier, milieu et dernier slot après réutilisation, puis après croissance ; la réutilisation vérifie que la ligne rejetée était réellement écrite à un ancien epoch. Une faute d'initialisation pendant une croissance vérifie le rollback et la fermeture certifiée, soit 35 rejets au total.
+
+Une séquence vide, taille 1, croissance, réduction puis réutilisation pleine vérifie exactement les H2D/D2H, deux initialisations et quatre allocations. Les omissions contrôlent aussi les différences de compteurs : zéro allocation/initialisation en reuse, deux allocations/une initialisation en growth, aucun H2D de sentinelles. Le JSON expose les tailles réelles des structures lors du futur test, sans estimation d'ABI.
+
+Commandes seulement après attribution de créneau ; SAN depuis ROOT avec LSan actif :
+
+```bash
+python3 -B build/v7_terminal_batch_traffic_20260911/record.py --out o2_r1 --mode o2
+python3 -B build/v7_terminal_batch_traffic_20260911/record.py --out san_root_r1 --mode san
+```
+
+Le recorder est create-only, compile ses snapshots, conserve commandes/logs/MMD et vérifie sources, snapshots et ELF avant/après. NVCC et une vraie carte restent des qualifications futures distinctes, notamment pour l'ordre du memset et des kernels dans le même flux CUDA par défaut. Aucune promotion GPU ni résultat FULL 50k n'est revendiqué.

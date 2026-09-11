@@ -1,0 +1,107 @@
+--- k8/cuda_trial/device_gate.cu
++++ k10/cuda_trial/device_gate.cu
+@@ -89,6 +89,8 @@
+ u64 checks = 0, compared = 0, trace_rows = 0, q[5]{}, extra = 0, strict = 0, equal = 0;
+ u64 zero_trace = 0, rejections = 0, causal_mutations = 0, intruder_queries = 0;
+ u64 large_ordinals = 0;
++u64 requests_k[11]{}, strict_k[11]{}, intruders_k[11]{}, q3_k[11]{}, q4_k[11]{};
++u64 high_k_rejections = 0;
+ void check(bool good,const char* why) { ++checks; need(good,why); }
+ 
+ // Gate-lifetime storage only, reusing the already qualified allocation/copy/
+@@ -201,12 +203,18 @@
+       const auto& row = actual.trace[requests[i].trace_begin+j];
+       const auto& pinned = fixture_traces[expected.trace_begin+j];
+       check(terminal::same_trace(row,pinned),"gate.exact_complete_trace");
+-      if (account) { ++q[row.selection.q]; extra += row.selection.shell > row.selection.q; ++trace_rows; }
++      if (account) {
++        ++q[row.selection.q]; extra += row.selection.shell > row.selection.q; ++trace_rows;
++        q3_k[row.k] += row.selection.q == 3; q4_k[row.k] += row.selection.q == 4;
++      }
+     }
+     if (account) {
+       ++compared; strict += got.result.work.descending_steps; equal += got.result.work.same_radius_steps;
+       intruder_queries += got.result.work.intruder_queries;
+       large_ordinals += got.result.ordinal > (u64{1} << 32);
++      const auto k = requests[i].request.k;
++      ++requests_k[k]; strict_k[k] += got.result.work.descending_steps;
++      intruders_k[k] += got.result.work.intruder_queries;
+     }
+   }
+ }
+@@ -218,6 +226,7 @@
+       "gate.empty_has_no_launch");
+   u64 batch = 1;
+   bool faults_done = false;
++  bool high_rejected[11]{};
+   for (const auto& cloud : fixture_clouds) {
+     const auto index = build_cloud_index(std::vector<P3>(fixture_points+cloud.point_begin,
+         fixture_points+cloud.point_begin+cloud.point_count));
+@@ -246,6 +255,26 @@
+     for (auto& request : no_trace) request.trace_begin = request.trace_capacity = 0;
+     const auto without = execute(backend,device,no_trace,0,batch);
+     compare(without,cloud,no_trace,host.index.snapshot,batch,true,true); ++batch;
++    for (u32 k : {9u,10u}) if (!high_rejected[k]) {
++      const auto selected = std::find_if(requests.begin(),requests.end(),[&](const auto& r) { return r.request.k == k; });
++      if (selected != requests.end()) {
++        for (u32 mutation = 0; mutation < 3; ++mutation) {
++          auto request = *selected;
++          request.trace_begin = request.trace_capacity = 0;
++          if (mutation == 0) request.request.selected[k-1] = -1;
++          if (mutation == 1) request.request.selected[k-1] = request.request.selected[k-2];
++          if (mutation == 2) request.request.selected[k-1] = static_cast<i32>(cloud.point_count);
++          const auto bad = execute(backend,device,{request},0,batch);
++          check(bad.output.size() == 1 && bad.output[0].written == 1 &&
++              bad.output[0].result.status == terminal::Status::kInvalidRequest &&
++              bad.output[0].result.ordinal == request.request.ordinal &&
++              bad.output[0].result.target == terminal::kAbsentBall && bad.output[0].result.work.calls == 0,
++              "gate.high_K_last_slot_refused_before_work");
++          ++high_k_rejections; ++batch;
++        }
++        high_rejected[k] = true;
++      }
++    }
+     if (!faults_done) {
+       for (u32 flags : {kOmitLast,kWrongTarget,kWrongOrdinal,kWrongWork,kWrongKey,kWrongSlot,kWrongSnapshot,kWrongBatch}) {
+         const auto bad = execute(backend,device,requests,row_count,batch,flags);
+@@ -295,6 +324,8 @@
+       strict && equal && extra && intruder_queries && large_ordinals == compared &&
+       rejections == 12 && causal_mutations == 8,
+       "gate.nonvacuity");
++  check(requests_k[9] == 468 && requests_k[10] == 160 && high_k_rejections == 6,"gate.high_K_count");
++  for (u32 k : {9u,10u}) check(strict_k[k] && intruders_k[k] && q3_k[k] && q4_k[k],"gate.high_K_nonvacuity");
+   check(backend.cleanup_certified && backend.free_failures == 0 &&
+       backend.certified_free_bytes == backend.allocation_bytes,"gate.all_allocations_released");
+ }
+@@ -315,13 +346,16 @@
+ #else
+     constexpr const char* name = "HOST_STUB";
+ #endif
+-    std::printf("{\"status\":\"passed\",\"scope\":\"terminal_geometry_only_c03\",\"backend\":\"%s\","
++    std::printf("{\"status\":\"passed\",\"scope\":\"terminal_geometry_only_c03_K2_K10\",\"backend\":\"%s\","
+         "\"sm\":\"%d.%d\",\"checks\":%llu,\"compared\":%llu,\"trace_rows\":%llu,"
+         "\"q2\":%llu,\"q3\":%llu,\"q4\":%llu,\"extra_shells\":%llu,"
+         "\"strict_steps\":%llu,\"same_radius_steps\":%llu,\"intruder_queries\":%llu,"
+         "\"zero_trace_complete_results\":%llu,\"large_ordinals\":%llu,\"rejections\":%llu,\"causal_transport_mutations\":%llu,"
+         "\"launches\":%llu,\"h2d_bytes\":%llu,\"d2h_bytes\":%llu,\"allocation_bytes\":%llu,"
+         "\"certified_free_bytes\":%llu,\"cleanup_certified\":true,\"failures\":0,"
++        "\"K9_requests\":%llu,\"K10_requests\":%llu,\"K9_strict_steps\":%llu,\"K10_strict_steps\":%llu,"
++        "\"K9_intruder_queries\":%llu,\"K10_intruder_queries\":%llu,\"K9_q3\":%llu,\"K10_q3\":%llu,"
++        "\"K9_q4\":%llu,\"K10_q4\":%llu,\"high_K_last_slot_rejections\":%llu,"
+         "\"infrastructure_authority\":\"external_controller\"}\n",
+         name,backend.major,backend.minor,(unsigned long long)gate::checks,(unsigned long long)gate::compared,
+         (unsigned long long)gate::trace_rows,(unsigned long long)gate::q[2],(unsigned long long)gate::q[3],
+@@ -330,7 +364,12 @@
+         (unsigned long long)gate::large_ordinals,(unsigned long long)gate::rejections,(unsigned long long)gate::causal_mutations,
+         (unsigned long long)backend.work.launches,(unsigned long long)backend.work.h2d_bytes,
+         (unsigned long long)backend.work.d2h_bytes,(unsigned long long)backend.allocation_bytes,
+-        (unsigned long long)backend.certified_free_bytes);
++        (unsigned long long)backend.certified_free_bytes,
++        (unsigned long long)gate::requests_k[9],(unsigned long long)gate::requests_k[10],
++        (unsigned long long)gate::strict_k[9],(unsigned long long)gate::strict_k[10],
++        (unsigned long long)gate::intruders_k[9],(unsigned long long)gate::intruders_k[10],
++        (unsigned long long)gate::q3_k[9],(unsigned long long)gate::q3_k[10],
++        (unsigned long long)gate::q4_k[9],(unsigned long long)gate::q4_k[10],(unsigned long long)gate::high_k_rejections);
+     return 0;
+   } catch (const gate::transport::Error& error) {
+     std::fprintf(stderr,"FAIL transport: %s\n",error.reason); return 1;

@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_batch_active_20260911/cmake_build/mhgp7_full_ball_tower_probe",
+    "--n=200",
+    "--s=8",
+    "--kmax=10",
+    "--threads=1",
+    "--static-threads=1"
+  ],
+  "ended_ns": 1789131976814531432,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "probe_200_static1",
+  "started_ns": 1789131975625713820,
+  "stderr_sha256": "5550c5645e4e0828866ace1b714c91aa51292cf27bcad16e5f0b06c295753b8a",
+  "stdout_sha256": "f524f0c4cc837256a86604fcb23c5421d7b9d460e95c2549c1bca7b1e77f67a7"
+}

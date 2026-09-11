@@ -1,0 +1,66 @@
+In file included from /usr/include/c++/13/vector:65,
+                 from /workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/source/morsehgp3D_v7/src/gpu/../forest/../lanes/../core/mutants.hpp:27,
+                 from /workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/source/morsehgp3D_v7/src/gpu/../forest/../lanes/../core/wide.hpp:13,
+                 from /workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/source/morsehgp3D_v7/src/gpu/../forest/../lanes/level.hpp:13,
+                 from /workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/source/morsehgp3D_v7/src/gpu/../forest/../lanes/q2.hpp:12,
+                 from /workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/source/morsehgp3D_v7/src/gpu/../forest/anchor_meb.hpp:12,
+                 from /workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/source/morsehgp3D_v7/src/gpu/anchor_meb_selection_private.cuh:4,
+                 from /workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/source/morsehgp3D_v7/src/gpu/anchor_meb_key.cuh:3,
+                 from /workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/terminal.cuh:4,
+                 from /workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/terminal_owner.hpp:4,
+                 from /workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/seed_owner.hpp:4,
+                 from /workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/batch_route.cuh:5,
+                 from /workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/batch_adapter.hpp:3,
+                 from /workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/batch_t2_gate.cpp:3:
+/usr/include/c++/13/bits/stl_uninitialized.h: In instantiation of ‘constexpr bool std::__check_constructible() [with _ValueType = mhgp7::FullBallOrder; _Tp = const mhgp7::FullBallOrder&]’:
+/usr/include/c++/13/bits/stl_uninitialized.h:182:4:   required from ‘_ForwardIterator std::uninitialized_copy(_InputIterator, _InputIterator, _ForwardIterator) [with _InputIterator = __gnu_cxx::__normal_iterator<const mhgp7::FullBallOrder*, vector<mhgp7::FullBallOrder> >; _ForwardIterator = mhgp7::FullBallOrder*]’
+/usr/include/c++/13/bits/stl_uninitialized.h:373:37:   required from ‘constexpr _ForwardIterator std::__uninitialized_copy_a(_InputIterator, _InputIterator, _ForwardIterator, allocator<_Tp>&) [with _InputIterator = __gnu_cxx::__normal_iterator<const mhgp7::FullBallOrder*, vector<mhgp7::FullBallOrder> >; _ForwardIterator = mhgp7::FullBallOrder*; _Tp = mhgp7::FullBallOrder]’
+/usr/include/c++/13/bits/stl_vector.h:606:31:   required from ‘constexpr std::vector<_Tp, _Alloc>::vector(const std::vector<_Tp, _Alloc>&) [with _Tp = mhgp7::FullBallOrder; _Alloc = std::allocator<mhgp7::FullBallOrder>]’
+/workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/source/morsehgp3D_v7/src/forest/full_ball_tower.hpp:101:8:   required from here
+/usr/include/c++/13/bits/stl_uninitialized.h:90:56: error: static assertion failed: result type must be constructible from input type
+   90 |       static_assert(is_constructible<_ValueType, _Tp>::value,
+      |                                                        ^~~~~
+/usr/include/c++/13/bits/stl_uninitialized.h:90:56: note: ‘std::integral_constant<bool, false>::value’ evaluates to false
+In file included from /usr/include/c++/13/bits/stl_iterator.h:85,
+                 from /usr/include/c++/13/bits/stl_algobase.h:67,
+                 from /usr/include/c++/13/array:43,
+                 from /usr/include/c++/13/span:41,
+                 from /workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/batch_route.cuh:4:
+/usr/include/c++/13/bits/stl_construct.h: In instantiation of ‘constexpr void std::_Construct(_Tp*, _Args&& ...) [with _Tp = mhgp7::FullBallOrder; _Args = {const mhgp7::FullBallOrder&}]’:
+/usr/include/c++/13/bits/stl_uninitialized.h:120:21:   required from ‘constexpr _ForwardIterator std::__do_uninit_copy(_InputIterator, _InputIterator, _ForwardIterator) [with _InputIterator = __gnu_cxx::__normal_iterator<const mhgp7::FullBallOrder*, vector<mhgp7::FullBallOrder> >; _ForwardIterator = mhgp7::FullBallOrder*]’
+/usr/include/c++/13/bits/stl_uninitialized.h:371:30:   required from ‘constexpr _ForwardIterator std::__uninitialized_copy_a(_InputIterator, _InputIterator, _ForwardIterator, allocator<_Tp>&) [with _InputIterator = __gnu_cxx::__normal_iterator<const mhgp7::FullBallOrder*, vector<mhgp7::FullBallOrder> >; _ForwardIterator = mhgp7::FullBallOrder*; _Tp = mhgp7::FullBallOrder]’
+/usr/include/c++/13/bits/stl_vector.h:606:31:   required from ‘constexpr std::vector<_Tp, _Alloc>::vector(const std::vector<_Tp, _Alloc>&) [with _Tp = mhgp7::FullBallOrder; _Alloc = std::allocator<mhgp7::FullBallOrder>]’
+/workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/source/morsehgp3D_v7/src/forest/full_ball_tower.hpp:101:8:   required from here
+/usr/include/c++/13/bits/stl_construct.h:115:28: error: no matching function for call to ‘construct_at(mhgp7::FullBallOrder*&, const mhgp7::FullBallOrder&)’
+  115 |           std::construct_at(__p, std::forward<_Args>(__args)...);
+      |           ~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/include/c++/13/bits/stl_construct.h:94:5: note: candidate: ‘template<class _Tp, class ... _Args> constexpr decltype (::new(void*(0)) _Tp) std::construct_at(_Tp*, _Args&& ...)’
+   94 |     construct_at(_Tp* __location, _Args&&... __args)
+      |     ^~~~~~~~~~~~
+/usr/include/c++/13/bits/stl_construct.h:94:5: note:   template argument deduction/substitution failed:
+/usr/include/c++/13/bits/stl_construct.h: In substitution of ‘template<class _Tp, class ... _Args> constexpr decltype (::new(void*(0)) _Tp) std::construct_at(_Tp*, _Args&& ...) [with _Tp = mhgp7::FullBallOrder; _Args = {const mhgp7::FullBallOrder&}]’:
+/usr/include/c++/13/bits/stl_construct.h:115:21:   required from ‘constexpr void std::_Construct(_Tp*, _Args&& ...) [with _Tp = mhgp7::FullBallOrder; _Args = {const mhgp7::FullBallOrder&}]’
+/usr/include/c++/13/bits/stl_uninitialized.h:120:21:   required from ‘constexpr _ForwardIterator std::__do_uninit_copy(_InputIterator, _InputIterator, _ForwardIterator) [with _InputIterator = __gnu_cxx::__normal_iterator<const mhgp7::FullBallOrder*, vector<mhgp7::FullBallOrder> >; _ForwardIterator = mhgp7::FullBallOrder*]’
+/usr/include/c++/13/bits/stl_uninitialized.h:371:30:   required from ‘constexpr _ForwardIterator std::__uninitialized_copy_a(_InputIterator, _InputIterator, _ForwardIterator, allocator<_Tp>&) [with _InputIterator = __gnu_cxx::__normal_iterator<const mhgp7::FullBallOrder*, vector<mhgp7::FullBallOrder> >; _ForwardIterator = mhgp7::FullBallOrder*; _Tp = mhgp7::FullBallOrder]’
+/usr/include/c++/13/bits/stl_vector.h:606:31:   required from ‘constexpr std::vector<_Tp, _Alloc>::vector(const std::vector<_Tp, _Alloc>&) [with _Tp = mhgp7::FullBallOrder; _Alloc = std::allocator<mhgp7::FullBallOrder>]’
+/workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/source/morsehgp3D_v7/src/forest/full_ball_tower.hpp:101:8:   required from here
+/usr/include/c++/13/bits/stl_construct.h:96:17: error: use of deleted function ‘mhgp7::FullBallOrder::FullBallOrder(const mhgp7::FullBallOrder&)’
+   96 |     -> decltype(::new((void*)0) _Tp(std::declval<_Args>()...))
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from /workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/batch_adapter.hpp:4:
+/workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/source/morsehgp3D_v7/src/forest/full_ball_tower.hpp:95:8: note: ‘mhgp7::FullBallOrder::FullBallOrder(const mhgp7::FullBallOrder&)’ is implicitly deleted because the default definition would be ill-formed:
+   95 | struct FullBallOrder {
+      |        ^~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/source/morsehgp3D_v7/src/forest/full_ball_tower.hpp:95:8: error: use of deleted function ‘mhgp7::FullCoverageCertificate::FullCoverageCertificate(const mhgp7::FullCoverageCertificate&)’
+In file included from /workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/source/morsehgp3D_v7/src/forest/full_ball_tower.hpp:9:
+/workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/source/morsehgp3D_v7/src/forest/full_coverage_certificate.hpp:110:3: note: declared here
+  110 |   FullCoverageCertificate(const FullCoverageCertificate&) = delete;
+      |   ^~~~~~~~~~~~~~~~~~~~~~~
+/usr/include/c++/13/bits/stl_construct.h: In instantiation of ‘constexpr void std::_Construct(_Tp*, _Args&& ...) [with _Tp = mhgp7::FullBallOrder; _Args = {const mhgp7::FullBallOrder&}]’:
+/usr/include/c++/13/bits/stl_uninitialized.h:120:21:   required from ‘constexpr _ForwardIterator std::__do_uninit_copy(_InputIterator, _InputIterator, _ForwardIterator) [with _InputIterator = __gnu_cxx::__normal_iterator<const mhgp7::FullBallOrder*, vector<mhgp7::FullBallOrder> >; _ForwardIterator = mhgp7::FullBallOrder*]’
+/usr/include/c++/13/bits/stl_uninitialized.h:371:30:   required from ‘constexpr _ForwardIterator std::__uninitialized_copy_a(_InputIterator, _InputIterator, _ForwardIterator, allocator<_Tp>&) [with _InputIterator = __gnu_cxx::__normal_iterator<const mhgp7::FullBallOrder*, vector<mhgp7::FullBallOrder> >; _ForwardIterator = mhgp7::FullBallOrder*; _Tp = mhgp7::FullBallOrder]’
+/usr/include/c++/13/bits/stl_vector.h:606:31:   required from ‘constexpr std::vector<_Tp, _Alloc>::vector(const std::vector<_Tp, _Alloc>&) [with _Tp = mhgp7::FullBallOrder; _Alloc = std::allocator<mhgp7::FullBallOrder>]’
+/workspaces/E-HGP/build/v7_terminal_batch_t2_20260911/o2_r1/source_snapshot/prototype/source/morsehgp3D_v7/src/forest/full_ball_tower.hpp:101:8:   required from here
+/usr/include/c++/13/bits/stl_construct.h:119:7: error: use of deleted function ‘mhgp7::FullBallOrder::FullBallOrder(const mhgp7::FullBallOrder&)’
+  119 |       ::new((void*)__p) _Tp(std::forward<_Args>(__args)...);
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -1,0 +1,59 @@
+[
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/closed_o2_san_r1/verify.py",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/o2_r1"
+    ],
+    "exit_code": 0
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/closed_o2_san_r1/verify.py",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/o2_r1"
+    ],
+    "exit_code": 0
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/closed_o2_san_r1/verify.py",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/o2_r2"
+    ],
+    "exit_code": 0
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/closed_o2_san_r1/verify.py",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/o2_r2"
+    ],
+    "exit_code": 0
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/closed_o2_san_r1/verify.py",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1"
+    ],
+    "exit_code": 0
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/closed_o2_san_r1/verify.py",
+      "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1"
+    ],
+    "exit_code": 0
+  }
+]

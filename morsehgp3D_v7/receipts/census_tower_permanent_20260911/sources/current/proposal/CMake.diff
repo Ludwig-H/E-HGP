@@ -1,0 +1,34 @@
+--- a/morsehgp3D_v7/CMakeLists.txt
++++ b/morsehgp3D_v7/CMakeLists.txt
+@@ -217,6 +217,31 @@
+            ARGS --static-1 LABELS "gate;full_ball_tower;full_ball_static;oracle" TIMEOUT 120)
+ mhgp7_gate(mhgp7_full_ball_static_cpu4 0 mhgp7_full_ball_tower_gate
+            ARGS --static-4 LABELS "gate;full_ball_tower;full_ball_static;oracle" TIMEOUT 120)
++# Real generation -> census -> FULL tower; independent bounded Gram/Gamma
++# oracle stays in tests/. Bounds n<=14 limit only this judge, never the product.
++mhgp7_product_executable(mhgp7_census_tower_gate tests/census_tower_gate.cpp)
++target_include_directories(mhgp7_census_tower_gate SYSTEM PRIVATE ${MHGP7_DIGEST_BOOST_INCLUDE_DIR})
++foreach(kind IN ITEMS historical line12 shell14 spatial12 rejects)
++  mhgp7_gate(mhgp7_census_tower_${kind} 0 mhgp7_census_tower_gate
++             ARGS --${kind} LABELS "gate;census_tower;full_ball_tower;oracle" TIMEOUT 120)
++endforeach()
++mhgp7_gate(mhgp7_census_tower_bad_argument 2 mhgp7_census_tower_gate
++           ARGS --unknown LABELS "gate;census_tower" TIMEOUT 60)
++mhgp7_gate(mhgp7_census_tower_missing_argument 2 mhgp7_census_tower_gate
++           LABELS "gate;census_tower" TIMEOUT 60)
++mhgp7_gate(mhgp7_census_tower_mutant_assignment 1 mhgp7_census_tower_gate
++           ARGS --mutant-assignment EXPECT_LINE "cause=T2 unassigned subset"
++           LABELS "gate;census_tower;oracle;mutant" TIMEOUT 60)
++mhgp7_gate(mhgp7_census_tower_mutant_open 1 mhgp7_census_tower_gate
++           ARGS --mutant-open EXPECT_LINE "cause=T2.historical.exact_Gamma"
++           LABELS "gate;census_tower;oracle;mutant" TIMEOUT 60)
++mhgp7_gate(mhgp7_census_tower_mutant_adjacency 1 mhgp7_census_tower_gate
++           ARGS --mutant-adjacency EXPECT_LINE "cause=T2.historical.exact_Gamma"
++           LABELS "gate;census_tower;oracle;mutant" TIMEOUT 60)
++mhgp7_gate(mhgp7_census_tower_mutant_census 1 mhgp7_census_tower_gate
++           ARGS --mutant-census EXPECT_LINE "cause=T2.census.exhaustive_ball_inventory"
++           LABELS "gate;census_tower;oracle;mutant" TIMEOUT 60)
++
+ mhgp7_product_executable(mhgp7_full_ball_work_gate tests/full_ball_work_gate.cpp)
+ target_include_directories(mhgp7_full_ball_work_gate SYSTEM PRIVATE ${MHGP7_DIGEST_BOOST_INCLUDE_DIR})
+ mhgp7_gate(mhgp7_full_ball_work 0 mhgp7_full_ball_work_gate

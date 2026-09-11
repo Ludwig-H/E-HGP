@@ -1,0 +1,101 @@
+Start testing: Sep 11 12:51 UTC
+----------------------------------------------------------
+55/454 Testing: mhgp7_full_ball_batch_cpu1
+55/454 Test: mhgp7_full_ball_batch_cpu1
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_batch_permanent_20260911/o2_r1/cmake_build/mhgp7_full_ball_batch_gate" "-DARGS=--selftest-1" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/build/v7_batch_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_batch_permanent_20260911/o2_r1/cmake_build
+"mhgp7_full_ball_batch_cpu1" start time: Sep 11 12:51 UTC
+Output:
+----------------------------------------------------------
+static_threads=1 paired_payload_checks=5704 deduplicated=337 seeded_unique=492
+post_seed_queries=20 post_seed_hits=4 post_seed_terminals=4
+{"status":"passed","authority":"bounded_independent_Gram_Gamma_not_WSPD_completeness","checks":298742,"clouds":34,"orders":150,"cuts":3916,"facets":33870,"vertical_checks":87230,"births":712,"merges":316,"continuation_snapshots":1632,"growth_snapshots":8,"overlap_cuts":764,"duplicate_cover_cuts":0,"regular_blocks":960,"extra_blocks":216,"anchor_hits":99,"representatives":1390,"intruder_queries":20,"same_radius_steps":4,"rejections":8}
+{"status":"passed_batch_callback","workers":1,"batch_calls":49,"batch_requests":103,"direct_terminals":103,"diagnostic_reference_MEB_calls":119,"payload_checks":5704,"work_checks":442,"product_instrumentation":false}
+
+<end of output>
+Test time =   0.95 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_ball_batch_cpu1" end time: Sep 11 12:51 UTC
+"mhgp7_full_ball_batch_cpu1" time elapsed: 00:00:00
+----------------------------------------------------------
+
+56/454 Testing: mhgp7_full_ball_batch_cpu4
+56/454 Test: mhgp7_full_ball_batch_cpu4
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_batch_permanent_20260911/o2_r1/cmake_build/mhgp7_full_ball_batch_gate" "-DARGS=--selftest-4" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/build/v7_batch_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_batch_permanent_20260911/o2_r1/cmake_build
+"mhgp7_full_ball_batch_cpu4" start time: Sep 11 12:51 UTC
+Output:
+----------------------------------------------------------
+static_threads=4 paired_payload_checks=5704 deduplicated=337 seeded_unique=492
+post_seed_queries=20 post_seed_hits=4 post_seed_terminals=4
+{"status":"passed","authority":"bounded_independent_Gram_Gamma_not_WSPD_completeness","checks":298742,"clouds":34,"orders":150,"cuts":3916,"facets":33870,"vertical_checks":87230,"births":712,"merges":316,"continuation_snapshots":1632,"growth_snapshots":8,"overlap_cuts":764,"duplicate_cover_cuts":0,"regular_blocks":960,"extra_blocks":216,"anchor_hits":99,"representatives":1390,"intruder_queries":20,"same_radius_steps":4,"rejections":8}
+{"status":"passed_batch_callback","workers":4,"batch_calls":49,"batch_requests":103,"direct_terminals":103,"diagnostic_reference_MEB_calls":119,"payload_checks":5704,"work_checks":442,"product_instrumentation":false}
+
+<end of output>
+Test time =   0.96 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_ball_batch_cpu4" end time: Sep 11 12:51 UTC
+"mhgp7_full_ball_batch_cpu4" time elapsed: 00:00:00
+----------------------------------------------------------
+
+57/454 Testing: mhgp7_full_ball_batch_rejects
+57/454 Test: mhgp7_full_ball_batch_rejects
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_batch_permanent_20260911/o2_r1/cmake_build/mhgp7_full_ball_batch_gate" "-DARGS=--rejects" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/build/v7_batch_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_batch_permanent_20260911/o2_r1/cmake_build
+"mhgp7_full_ball_batch_rejects" start time: Sep 11 12:51 UTC
+Output:
+----------------------------------------------------------
+{"status":"passed_batch_rejections","cases":65,"prefix_cases":32,"known_paid":44,"product_instrumentation":false}
+
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_ball_batch_rejects" end time: Sep 11 12:51 UTC
+"mhgp7_full_ball_batch_rejects" time elapsed: 00:00:00
+----------------------------------------------------------
+
+58/454 Testing: mhgp7_full_ball_batch_bad_argument
+58/454 Test: mhgp7_full_ball_batch_bad_argument
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_batch_permanent_20260911/o2_r1/cmake_build/mhgp7_full_ball_batch_gate" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/build/v7_batch_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_batch_permanent_20260911/o2_r1/cmake_build
+"mhgp7_full_ball_batch_bad_argument" start time: Sep 11 12:51 UTC
+Output:
+----------------------------------------------------------
+
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_ball_batch_bad_argument" end time: Sep 11 12:51 UTC
+"mhgp7_full_ball_batch_bad_argument" time elapsed: 00:00:00
+----------------------------------------------------------
+
+59/454 Testing: mhgp7_full_ball_batch_missing_argument
+59/454 Test: mhgp7_full_ball_batch_missing_argument
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_batch_permanent_20260911/o2_r1/cmake_build/mhgp7_full_ball_batch_gate" "-DARGS=" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/build/v7_batch_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_batch_permanent_20260911/o2_r1/cmake_build
+"mhgp7_full_ball_batch_missing_argument" start time: Sep 11 12:51 UTC
+Output:
+----------------------------------------------------------
+
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_ball_batch_missing_argument" end time: Sep 11 12:51 UTC
+"mhgp7_full_ball_batch_missing_argument" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Sep 11 12:51 UTC
+
+full_ball_batch =   1.97 sec*proc
+
+full_ball_tower =   1.91 sec*proc
+
+gate =   1.97 sec*proc
+
+oracle =   1.93 sec*proc
+

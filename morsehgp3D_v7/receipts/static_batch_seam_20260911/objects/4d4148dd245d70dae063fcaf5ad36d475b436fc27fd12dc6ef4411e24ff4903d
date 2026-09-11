@@ -1,0 +1,159 @@
+#!/usr/bin/env python3
+"""Fresh private CPU qualification; no active writes, CUDA, Git or scale run."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import shlex
+import shutil
+import subprocess
+import sys
+import time
+
+BASE = Path(__file__).resolve().parent
+ROOT = BASE.parents[1]
+HEADER = 'morsehgp3D_v7/src/forest/full_ball_tower.hpp'
+PIN = '83f1c78e0656f08cd42522e4cd36d153ce283a6082246a36fe5225b3790c6366'
+
+
+def need(ok, why):
+    if not ok:
+        raise RuntimeError(why)
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def save(path, value):
+    with path.open('x') as stream:
+        json.dump(value, stream, indent=2, sort_keys=True)
+        stream.write('\n')
+
+
+def pins(directory):
+    return {p.relative_to(directory).as_posix(): sha(p)
+            for p in sorted(directory.rglob('*')) if p.is_file()}
+
+
+def main():
+    need(len(sys.argv) in (2, 3) and sys.argv[1].isidentifier() and
+         (len(sys.argv) == 2 or sys.argv[2] == '--san'), 'fresh_output [--san]')
+    san = len(sys.argv) == 3
+    need(sha(BASE/'source'/HEADER) == PIN, 'candidate_header_pin')
+    out = BASE/sys.argv[1]
+    out.mkdir(exist_ok=False)
+    shutil.copytree(BASE/'source', out/'source')
+    for name in ('qualification.cpp', 'cpu_geometry.hpp', 'cpu_owner.hpp', 'record.py', 'prepare_cpu.py'):
+        shutil.copyfile(BASE/name, out/name)
+    header = out/'source'/HEADER
+    original = header.read_text()
+    cache = 'if (kmax > 1 && !geometry_threads) resolver_cache.configure(ix.upos.size());'
+    hook = ('} else target = static_terminal(first.key, before, w.work, w.scratch, seeds);\n'
+            '        for (size_t r = groups[group];')
+    need(original.count(cache) == 1 and original.count(hook) == 1, 'one_test_hook_each')
+    instrumented = original.replace(cache,
+        'if (kmax > 1 && !geometry_threads && post_seed_test::cache_enabled) resolver_cache.configure(ix.upos.size());')
+    instrumented = instrumented.replace(hook,
+        '} else target = static_terminal(first.key, before, w.work, w.scratch, seeds);\n'
+        '        batch_trace::record(current_k, first.key, first.consumer, first.ordinal, target);\n'
+        '        for (size_t r = groups[group];')
+    header.write_text(instrumented)
+    save(out/'test_hooks.json', dict(candidate_header_sha256=PIN,
+        instrumented_header_sha256=sha(header),
+        hooks=['cache enabled test-only toggle', 'observe scalar BallId after resolution before scatter'],
+        no_geometry_decision_changed=True))
+    before = pins(out/'source')
+    harness_before = {name: sha(out/name) for name in
+                      ('qualification.cpp', 'cpu_geometry.hpp', 'cpu_owner.hpp', 'record.py', 'prepare_cpu.py')}
+    save(out/'sources_before.json', before)
+    save(out/'harness_before.json', harness_before)
+    commands = []
+    status, error = 'failed', None
+    env = dict(os.environ)
+    if san:
+        env.update(ASAN_OPTIONS='detect_leaks=1:halt_on_error=1',
+                   UBSAN_OPTIONS='halt_on_error=1:print_stacktrace=1')
+
+    def run(name, argv, expected=0):
+        started = time.time_ns()
+        with (out/(name+'.stdout')).open('xb') as so, (out/(name+'.stderr')).open('xb') as se:
+            result = subprocess.run(argv, stdin=subprocess.DEVNULL, stdout=so, stderr=se,
+                                    env=env, check=False)
+        row = dict(name=name, argv=argv, exit_code=result.returncode, expected_exit=expected,
+                   started_ns=started, ended_ns=time.time_ns(),
+                   stdout_sha256=sha(out/(name+'.stdout')), stderr_sha256=sha(out/(name+'.stderr')),
+                   sanitizer_environment={k: env[k] for k in ('ASAN_OPTIONS', 'UBSAN_OPTIONS')} if san else {})
+        commands.append(row)
+        save(out/(name+'.command.json'), row)
+        print(name, result.returncode, flush=True)
+        need(result.returncode == expected, 'unexpected_exit:'+name)
+
+    dependencies = {}
+    try:
+        flags = ['-O1', '-g', '-fsanitize=address,undefined', '-fno-omit-frame-pointer'] if san else ['-O2', '-DNDEBUG']
+        common = ['g++', *flags, '-std=c++20', '-Wall', '-Wextra', '-Wpedantic', '-Werror', '-pthread',
+                  '-isystem', str(ROOT/'build/v7_boost_gate/extracted/usr/include'),
+                  '-DMHGP7_FULL_HEADER="'+str(header)+'"',
+                  '-DMHGP7_GATE_SOURCE="'+str(out/'source/morsehgp3D_v7/tests/full_ball_tower_gate.cpp')+'"']
+        run('dependencies', [*common, '-M', '-MF', str(out/'all.d'), str(out/'qualification.cpp')])
+        tokens = shlex.split((out/'all.d').read_text().replace('\\\n', ' '))
+        for token in tokens[1:]:
+            path = Path(token).resolve()
+            dependencies[str(path)] = sha(path)
+        save(out/'dependencies_before.json', dependencies)
+        run('compile', [*common, str(out/'qualification.cpp'), '-o', str(out/'gate')])
+        binary_before = sha(out/'gate')
+        for mode, batch in [('cache', 0), ('no_cache', 0), ('static1', 0), ('static4', 0),
+                            ('cache', 1), ('static1', 1), ('static4', 1)]:
+            name = mode+'_batch'+str(batch)
+            run(name, [str(out/'gate'), mode, str(out/(name+'.physical')), str(batch)])
+        run('rejections', [str(out/'gate'), '--rejects'])
+        run('bad_arguments', [str(out/'gate')], 2)
+        # Every serialized physical field, including R/U/S, Q/H/T, all exact
+        # levels, bank rows, parents, successor and vertical arrays. Execution
+        # lane/capacity accounting is separately new, not required identical.
+        ignored = ('S static_workers_created ', 'S static_lanes_used ', 'S static_peak_worker_bytes ',
+                   'S static_peak_retained_bytes ')
+
+        def semantic(path):
+            return [line for line in path.read_text().splitlines() if not line.startswith(ignored)]
+
+        comparisons = []
+        for lhs, rhs in [('cache_batch0', 'cache_batch1'), ('static1_batch0', 'static1_batch1'),
+                         ('static4_batch0', 'static4_batch1')]:
+            need(semantic(out/(lhs+'.physical')) == semantic(out/(rhs+'.physical')),
+                 'physical_and_paid_work_mismatch:'+lhs+':'+rhs)
+            comparisons.append(dict(reference=lhs, candidate=rhs, full_physical_and_work_equal=True))
+        for arm in ('static1_batch1', 'static4_batch1'):
+            rows = [json.loads(line) for line in (out/(arm+'.stdout')).read_text().splitlines()]
+            direct = rows[-1]
+            need(direct['batch_calls'] > 20 and direct['batch_requests'] > 100 and
+                 direct['direct_terminals'] == direct['batch_requests'], 'direct_terminal_floors')
+        save(out/'comparison.json', dict(status='passed', comparisons=comparisons,
+             ignored_execution_capacity_fields=ignored, geometric_BallId_directly_compared=True))
+        need(sha(out/'gate') == binary_before, 'binary_changed')
+        save(out/'binary.json', dict(before=binary_before, after=sha(out/'gate')))
+        status = 'passed'
+    except BaseException as exc:
+        error = type(exc).__name__+': '+str(exc)
+    finally:
+        after = pins(out/'source')
+        harness_after = {name: sha(out/name) for name in harness_before}
+        deps_after = {name: sha(Path(name)) for name in dependencies}
+        save(out/'sources_after.json', after)
+        save(out/'harness_after.json', harness_after)
+        save(out/'dependencies_after.json', deps_after)
+        stable = before == after and harness_before == harness_after and dependencies == deps_after
+        if not stable:
+            status, error = 'failed', 'source_dependency_changed'
+        save(out/'commands.json', commands)
+        save(out/'receipt.json', dict(status=status, error=error, source_header_sha256=PIN,
+             sources_stable=stable, commands=len(commands), SAN=san, GCP_used=False,
+             active_source_modified=False, public_status='not_claimed', component_or_tower_timing_claimed=False))
+        print(json.dumps(dict(status=status, error=error, out=str(out))), flush=True)
+    need(status == 'passed', str(error))
+
+
+if __name__ == '__main__':
+    main()

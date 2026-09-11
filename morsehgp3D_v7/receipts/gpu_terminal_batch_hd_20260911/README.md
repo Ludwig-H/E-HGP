@@ -1,0 +1,13 @@
+# Annotation HD : correction privée qualifiée localement
+
+Ce paquet ferme une variante distincte du snapshot CPU r5, sans modifier le produit ni ses preuves CPU. Il conserve l'ancien build NVCC avec six avertissements, sa réfutation par `--Werror=cross-execution-space-call`, puis la compilation corrigée sans avertissement et les nouvelles qualifications hôte O2/SAN FULL et T2.
+
+Le delta est exactement quatre préfixes `MHGP7_HD` dans trois fichiers : `core/intmath.hpp` pour `ugcd64`/`ugcd128`, `lanes/q4.hpp` pour `q4_center_strictly_inside`, `lanes/keys.hpp` pour `ball_key_reduce`. Aucun corps arithmétique n'est changé. Le Builder reste 83f1, la route batch a62bd1d5. Le détail et les limites sont conservés au chemin logique `RESULTS_HD.md`.
+
+Compilation locale : ancien code refusé code 1 pour appel hôte illégal, variante corrigée compilée/liée sm_120 code 0 sans avertissement. Les 63 attentes ABI sont explicites dans les frontends hôte/device ; seul le programme ABI hôte a été exécuté. ptxas indique 238 registres, pile 1 392 octets, zéro spill pour le kernel batch corrigé : ce ne sont ni une mesure GPU ni un résultat de latence/occupation.
+
+Les nouveaux bras O2/SAN effectuent chacun 13 commandes : FULL 28 044 contrôles, 176 boules terminales directement comparées, 41 rejets transactionnels et un débordement synthétique ; T2 1 872 boules terminales directement comparées dans les tours, plus 3 575 sous-ensembles highK séparés. Les stdout et stderr des juges sont comparés octet pour octet aux références séparées. ASan, UBSan et LSan sont conservés. Les trois échecs de harnais antérieurs sont conservés, jamais réétiquetés PASS.
+
+`python3 -B verify.py` et `python3 -O -B verify.py` contrôlent les sources, captures, causes de rejet et bornes depuis ce dossier. Aucun compilateur ou moteur n'est lancé par ces lecteurs. `storage_map.json` associe chaque chemin logique à un objet zlib dont le SHA porte sur les **octets décompressés**, avec tailles et SHA du stockage comprimé. `python3 -B verify.py --extract RESULTS_HD.md` affiche un fichier logique exact sans modifier le paquet. La déduplication est réversible ; les ELF et corps des dépendances système/CUDA/Boost sont exclus. Leurs empreintes avant/après sont des attestations de capture, pas une revérification locale des octets omis.
+
+Statut : exploration privée, `public_status=not_claimed`. Pas d'exécution CUDA, pas de tour GPU, pas de contrat 50k ou grande échelle acquis. Aucun résultat du terminal GPU antérieur n'est transféré. GCP non utilisé. L'ancien paquet privé ABI pré-correction ne doit pas être présenté comme qualification CUDA utilisable.

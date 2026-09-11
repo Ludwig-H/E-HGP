@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "g++",
+    "-print-prog-name=cc1plus"
+  ],
+  "ended_ns": 1789131742827601206,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "compiler_frontend",
+  "started_ns": 1789131742824837420,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "3cf1bad0c4b2b5e0a6d569f800f949510f194bb594dcfaeddb1394fd3cc91758"
+}

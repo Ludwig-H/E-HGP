@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "g++",
+    "--version"
+  ],
+  "ended_ns": 1789131742795705216,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "compiler_version",
+  "started_ns": 1789131742792509047,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8"
+}

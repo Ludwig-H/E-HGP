@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "ctest",
+    "--version"
+  ],
+  "ended_ns": 1789131742824257137,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "ctest_version",
+  "started_ns": 1789131742811220728,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "fd61d05e1e746f5652d87e0b6c9bafa334e95b89d1e53b1bfeb7d2af3ab208dc"
+}

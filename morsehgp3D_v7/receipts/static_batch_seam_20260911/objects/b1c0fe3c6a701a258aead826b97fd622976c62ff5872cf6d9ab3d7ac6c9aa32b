@@ -1,0 +1,27 @@
+{
+  "comparisons": [
+    {
+      "candidate": "cache_batch1",
+      "full_physical_and_work_equal": true,
+      "reference": "cache_batch0"
+    },
+    {
+      "candidate": "static1_batch1",
+      "full_physical_and_work_equal": true,
+      "reference": "static1_batch0"
+    },
+    {
+      "candidate": "static4_batch1",
+      "full_physical_and_work_equal": true,
+      "reference": "static4_batch0"
+    }
+  ],
+  "geometric_BallId_directly_compared": true,
+  "ignored_execution_capacity_fields": [
+    "S static_workers_created ",
+    "S static_lanes_used ",
+    "S static_peak_worker_bytes ",
+    "S static_peak_retained_bytes "
+  ],
+  "status": "passed"
+}

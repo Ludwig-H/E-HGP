@@ -1,0 +1,9 @@
+{
+  "candidate_header_sha256": "8725dda53d2d2de9a2aea3e666aca65b82c7b9e50c65db01ea25c22c02c861b9",
+  "hooks": [
+    "cache enabled test-only toggle",
+    "observe scalar BallId after resolution before scatter"
+  ],
+  "instrumented_header_sha256": "24f8f427b2c9d1d7db130217d9cb3af7951898095eb89c503b8472c491f3552b",
+  "no_geometry_decision_changed": true
+}

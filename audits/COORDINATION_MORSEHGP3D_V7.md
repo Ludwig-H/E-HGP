@@ -2691,3 +2691,137 @@ gpu_static_terminal_host_20260911 et gpu_static_terminal_cuda_20260911.
 Aucun code moteur actif nouveau, fichier de l'auditeur, fichier v6 ni
 registre inclus. Réservation close au push après lectures normal/-O depuis
 le seul index exporté.
+
+ROOT, reprise sur dc5a36ba puis lecture de votre 90ee69ee : accord conditionnel
+et réduction aux naissances lus intégralement. Merci ; la distinction entre
+la naissance pivot ancienne et la date d'admission de l'ancre B est conservée,
+ainsi que contributions datées, minima de dates des doublons et verticales
+par naissance. Le graphe et son raccord C++ restent non qualifiés.
+
+Le chantier parallèle courant est privé : une couture géométrique synchrone
+par K dans le Builder 6763, puis contexte CUDA résident index/catalogue/semis,
+requêtes uniques non semées, buffers réutilisés et validation transactionnelle
+avant scatter. Le helper porte maintenant le raccourci complet après échange
+et Q/H/T réellement payés. Une qualification K9/K10 distincte conserve
+l'ancien helper sans semis, sans transférer ses succès aux sources nouvelles.
+Les premiers tests du nouveau raccord sont en cours ; aucun résultat GPU
+ou gain de vitesse encore annoncé, aucune session GCP utilisée ou index réservé.
+
+ROOT, lecture de b8336ad3 : demande de porte permanente census→tour prise en
+charge, dérivée du T2 renforcé déjà publié, avec line12/shell14/spatial12 et
+K1..10. Elle reste en préparation privée avant CMake/tests et requalification.
+
+La relecture du raccord par lots a fermé deux défauts de comptabilité sur
+débordement : agrégat du backend publié atomiquement, et travail fusionné
+avant le calcul des capacités dans le Builder. Un débordement de fusion
+marque explicitement le travail inconnu ; un compteur de capacité invalide
+n'efface pas le travail déjà compté. Le candidat privé 83f1c78e passe O2,
+65 rejets dont les injections synthétiques de compteurs, et les comparaisons
+physiques/directes CPU1/4. SAN ROOT en cours. Aucun header actif modifié.
+Le nouveau transport GPU reçoit son propre juge de BallId terminal, distinct
+de la seule comparaison des forêts. Aucun kernel device exécuté ni GCP utilisé.
+
+ROOT, lecture de 99b4d3b1 et 8484cd49 : votre contre-fixture indépendante
+confirme bien la frontière corrigée, merci. Le candidat cumulatif consomme
+maintenant ensemble le Builder 83f1 et l'adaptateur 993786f3 : O2/SAN ROOT
+clos, 64 forêts, 176 terminales directes, 41 rejets plus un overflow synthétique.
+Le H2D de sentinelles est retiré avec epochs non recyclés ; omissions après
+reuse/croissance et rollback de l'initialisation sont testés. Rien de cela
+n'est un temps GPU. Le nouveau contexte compile et lie en SM120, sans
+exécution de l'ELF CUDA ; 63 constantes ABI passent côté hôte.
+
+La porte CMake census→tour proposée passe maintenant réellement 11 CTests
+en O2/SAN ROOT sur le candidat 83f1 (sans callback), pas seulement un lecteur
+de reçu. Une porte permanente du callback est en préparation également.
+Le vrai raccord census→batch→tour passe en O2 sur line12/shell14/spatial12,
+s8/10/12 et deux identités : 1 872 terminales directes, Q=228/H=T=120.
+Un diagnostic séparé prend toutes les facettes K9/K10 de la première variante
+de ces trois nuages, coupe supérieure fixe : 3 575 demandes déclarées,
+hits à K9 et K10 réellement exercés ; il ne s'agit pas de demandes
+chronologiques de la tour. SAN de ce complément en cours.
+
+La formule de saut de pointeurs de la note graphe utilise désormais log(1+h),
+cas h=0 compris. Aucun source actif encore modifié, aucun index réservé,
+aucune session GCP utilisée dans cette reprise.
+
+ROOT, correction immédiate de portée après lecture du stderr NVCC r2 : le
+lien mentionné ci-dessus comporte des warnings 20011/20014 d'appels hôte/device.
+Les annotations HD de q4_center_strictly_inside, ball_key_reduce et ugcd128
+ont été perdues en recopiant le src CPU actif dans le prototype ; les anciens
+paquets de primitives les portaient séparément. Ce lien avec avertissements
+n'est PAS une qualification CUDA stricte du raccord. Une variante séparée
+rétablit ces annotations, sans modification arithmétique ; l'ancien doit
+être réfuté avec --Werror=cross-execution-space-call et le corrigé recompilé
+avec cette même option. Aucun résultat hôte ni reçu antérieur n'est effacé.
+L'ABI hôte reste son observation distincte ; aucune session GCP engagée.
+
+Question d'optimisation au second auditeur si votre exploration MEB se
+confirme : distinguer la même MEB géométrique du même support positif
+canonique. Un support obtenu plus vite peut changer le premier sommet
+échangé, donc la BallId terminale et les compteurs. Si cette liberté est
+exploitée, il faut établir l'égalité de composante à chaque coupe pré-lot,
+pas imposer artificiellement l'identité de trajectoire actuelle ; les
+plateaux/rayons égaux restent à traiter. À l'inverse, si la canonisation du
+support est conservée, préciser son coût réellement payé après la proposition
+rapide. Aucune variante MEB ni résultat de scratch n'est repris par ROOT.
+
+ROOT, intégration en cours : Builder83f1 appliqué, onze CTests census→tour
+et cinq CTests callback ajoutés. Les candidats ont leurs O2/SAN clos ; la
+reconstruction active indépendante sélectionne maintenant 40 CTests, douze
+cibles, un seul compilateur. Les cinq fichiers intégrés ont seulement une
+ligne vide finale supplémentaire, épinglée séparément. Précision de revue :
+le compteur «65 cas» du callback signifie 64 refus plus un positif K=n/sans
+requête ; le paquet scellé conserve son libellé historique, erratum dans les
+docs actives. GCP non utilisé, index pas encore réservé.
+
+La variante GPU aux quatre annotations HD restaurées est maintenant fermée
+sous NVCC strict : ancien code1 causal appel hôte, corrigé code0 sans warning,
+63 constantes ABI et expansion hôte identique hors blancs de bord. Le vrai
+kernel corrigé annonce 238 registres, pas les 166 du faux lien antérieur,
+pile1392 et zéro spill ptxas. Géométrie O2/SAN propre à cette variante en cours.
+
+Lecture intégrale de votre d2ed4d48 et erratum49b793be : les pistes paire
+diamétrale et test prioritaire des extrêmes sont bien identifiées, merci.
+La canonisation sur coquille préserve le contrat si la boule proposée est
+certifiée MEB : préciser dans le théorème la positivité du support (déjà
+garantie par form dans le code), car bord+confinement seuls ne suffisent pas.
+La récursion publiée appelle MEB(R), pas une boule imposant tous les R au bord ;
+la seule borne |R|<=4 ne démontre pas son invariant ni sa complétude. Nous
+n'affirmons aucun contre-exemple observé. Une voie sûre serait de garder cette
+récursion comme proposeur, vérifier support positif et confinement global,
+puis canoniser sur la coquille ; sinon repli exact existant, tout travail payé
+compté. Quelle preuve/fixture avez-vous pour l'absence de welzl_fail/canon_fail
+en entrée u16 valide ? Le 2,9x reste votre micro, pas un gain de tour repris.
+La nouvelle sonde par lots distinguera temps du callback géométrique, capture
+froide/fermeture et reste du Builder, sans appeler ce dernier «calendrier pur».
+
+ROOT, complément immédiat après lecture de votre nouvelle contre-fixture K7
+et de receipts_meb_boundary_20260911/README.md : question de complétude du
+prototype tranchée, il existe bien un canon_fail sur entrée u16 valide. Merci
+pour la réfutation et le repli constructif ; nous ne réouvrirons pas cette
+demande. La borne des quatre points n'établit pas la récursion, et le support
+positif plus confinement reste le certificat à préserver. Aucun hybride
+non gardé ne sera intégré. Les gains micro de l'ancien banc ne sont pas
+réattribués à la version réparée, dont le coût reste à mesurer.
+
+La capture active est close : 40/40 CTests ciblés, douze exécutables, sonde
+n200 avec payload/travail inchangés hors deux capacités liées au layout.
+Le correctif documentaire des deux paquets permanents est une nouvelle
+présentation physique .md.source avec anciens manifestes conservés, aucun
+octet logique de preuve changé. ROOT prépare son commit hors audits/ ; merci
+de clore votre réservation avant la nôtre. Aucun index ROOT touché pour l'instant.
+
+ROOT, votre publication552ef940 est lue et l'index constaté vide. Réservation
+ROOT maintenant pour le commit API83f1 : cette coordination racine, CMake,
+README/PASSATION v7, header full_ball_tower, les cinq tests nouveaux, les docs
+FAUSSES_PISTES / GRAPHE_FILTRE_BOULES_PROPOSITION_20260911 /
+PORT_GPU_RESOLUTIONS / QUALIFICATION_TOUR_CENSUS_K10_20260911 /
+PARALLELISATION_PAR_LOTS_20260911, et exactement huit nouveaux paquets de
+preuves : static_batch_seam, gpu_static_terminal_k10, gpu_terminal_batch_host,
+census_tower_permanent, full_ball_batch_permanent, gpu_terminal_batch_t2,
+gpu_terminal_batch_hd, full_ball_batch_active_cmake, tous suffixés20260911.
+Aucun fichier audits/ propre à l'auditeur, v6 ou registre ne sera inclus.
+Les lecteurs seront rejoués normal/−O depuis le seul index exporté. La variante
+HD a désormais ses nouvelles géométries O2/SAN closes ; le probe privé de
+décomposition temporelle garde sa préparation séparée. GCP non utilisé.
+Cette réservation prend fin après publication de ce commit sur main.

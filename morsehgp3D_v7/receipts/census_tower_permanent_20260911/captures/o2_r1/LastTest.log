@@ -1,0 +1,233 @@
+Start testing: Sep 11 12:35 UTC
+----------------------------------------------------------
+55/460 Testing: mhgp7_census_tower_historical
+55/460 Test: mhgp7_census_tower_historical
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build/mhgp7_census_tower_gate" "-DARGS=--historical" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build
+"mhgp7_census_tower_historical" start time: Sep 11 12:35 UTC
+Output:
+----------------------------------------------------------
+start=historical/pair
+start=historical/E5
+start=historical/square
+start=historical/growth_ABCZ
+start=historical/growth_redundant
+start=historical/inert_ball
+start=historical/shell7_window
+start=historical/support3
+start=historical/support4
+start=historical/u16_tetra
+start=historical/portal_equal
+start=historical/actual_equal_radius_descent
+start=historical/growth_ABCZ_doubled_lot
+start=historical/inert_ball_doubled_lot
+{"status":"passed","oracle_mebs":1022,"oracle_components":14724}
+
+<end of output>
+Test time =   0.70 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_census_tower_historical" end time: Sep 11 12:35 UTC
+"mhgp7_census_tower_historical" time elapsed: 00:00:00
+----------------------------------------------------------
+
+56/460 Testing: mhgp7_census_tower_line12
+56/460 Test: mhgp7_census_tower_line12
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build/mhgp7_census_tower_gate" "-DARGS=--line12" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build
+"mhgp7_census_tower_line12" start time: Sep 11 12:35 UTC
+Output:
+----------------------------------------------------------
+start=line12/variant0
+complete=line12/variant0 gram=793 assignments=4095
+start=line12/variant1
+complete=line12/variant1 gram=793 assignments=4095
+{"status":"passed","scope":"bounded_real_census_FULL_K1_K10","checks":525085,"clouds":2,"orders":180,"census_runs":6,"catalogue_rows":390,"physical_tower_pairs":16,"cuts":720,"vertical_checks":352752,"high_order_facets":2392,"high_order_verticals":22024,"shell12_rows":0,"q3_rows":0,"q4_rows":0}
+
+<end of output>
+Test time =   0.66 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_census_tower_line12" end time: Sep 11 12:35 UTC
+"mhgp7_census_tower_line12" time elapsed: 00:00:00
+----------------------------------------------------------
+
+57/460 Testing: mhgp7_census_tower_shell14
+57/460 Test: mhgp7_census_tower_shell14
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build/mhgp7_census_tower_gate" "-DARGS=--shell14" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build
+"mhgp7_census_tower_shell14" start time: Sep 11 12:35 UTC
+Output:
+----------------------------------------------------------
+start=shell12_center_external14/variant0
+complete=shell12_center_external14/variant0 gram=1470 assignments=34861
+start=shell12_center_external14/variant1
+complete=shell12_center_external14/variant1 gram=1470 assignments=34861
+{"status":"passed","scope":"bounded_real_census_FULL_K1_K10","checks":6326828,"clouds":2,"orders":180,"census_runs":6,"catalogue_rows":1242,"physical_tower_pairs":16,"cuts":2080,"vertical_checks":4658780,"high_order_facets":91638,"high_order_verticals":851740,"shell12_rows":6,"q3_rows":702,"q4_rows":36}
+
+<end of output>
+Test time =   2.10 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_census_tower_shell14" end time: Sep 11 12:35 UTC
+"mhgp7_census_tower_shell14" time elapsed: 00:00:02
+----------------------------------------------------------
+
+58/460 Testing: mhgp7_census_tower_spatial12
+58/460 Test: mhgp7_census_tower_spatial12
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build/mhgp7_census_tower_gate" "-DARGS=--spatial12" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build
+"mhgp7_census_tower_spatial12" start time: Sep 11 12:35 UTC
+Output:
+----------------------------------------------------------
+start=spatial12/variant0
+complete=spatial12/variant0 gram=793 assignments=4095
+start=spatial12/variant1
+complete=spatial12/variant1 gram=793 assignments=4095
+{"status":"passed","scope":"bounded_real_census_FULL_K1_K10","checks":5463812,"clouds":2,"orders":180,"census_runs":6,"catalogue_rows":1512,"physical_tower_pairs":16,"cuts":10200,"vertical_checks":3092416,"high_order_facets":7540,"high_order_verticals":69020,"shell12_rows":0,"q3_rows":738,"q4_rows":378}
+
+<end of output>
+Test time =   2.79 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_census_tower_spatial12" end time: Sep 11 12:35 UTC
+"mhgp7_census_tower_spatial12" time elapsed: 00:00:02
+----------------------------------------------------------
+
+59/460 Testing: mhgp7_census_tower_rejects
+59/460 Test: mhgp7_census_tower_rejects
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build/mhgp7_census_tower_gate" "-DARGS=--rejects" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build
+"mhgp7_census_tower_rejects" start time: Sep 11 12:35 UTC
+Output:
+----------------------------------------------------------
+{"status":"passed","rejections":9}
+
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_census_tower_rejects" end time: Sep 11 12:35 UTC
+"mhgp7_census_tower_rejects" time elapsed: 00:00:00
+----------------------------------------------------------
+
+60/460 Testing: mhgp7_census_tower_bad_argument
+60/460 Test: mhgp7_census_tower_bad_argument
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build/mhgp7_census_tower_gate" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build
+"mhgp7_census_tower_bad_argument" start time: Sep 11 12:35 UTC
+Output:
+----------------------------------------------------------
+
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_census_tower_bad_argument" end time: Sep 11 12:35 UTC
+"mhgp7_census_tower_bad_argument" time elapsed: 00:00:00
+----------------------------------------------------------
+
+61/460 Testing: mhgp7_census_tower_missing_argument
+61/460 Test: mhgp7_census_tower_missing_argument
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build/mhgp7_census_tower_gate" "-DARGS=" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build
+"mhgp7_census_tower_missing_argument" start time: Sep 11 12:35 UTC
+Output:
+----------------------------------------------------------
+
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_census_tower_missing_argument" end time: Sep 11 12:35 UTC
+"mhgp7_census_tower_missing_argument" time elapsed: 00:00:00
+----------------------------------------------------------
+
+62/460 Testing: mhgp7_census_tower_mutant_assignment
+62/460 Test: mhgp7_census_tower_mutant_assignment
+Command: "/usr/bin/cmake" "-DEXPECTED=1" "-DCMD=/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build/mhgp7_census_tower_gate" "-DARGS=--mutant-assignment" "-DEXPECT_LINE=cause=T2 unassigned subset" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build
+"mhgp7_census_tower_mutant_assignment" start time: Sep 11 12:35 UTC
+Output:
+----------------------------------------------------------
+start=historical/pair
+EXCEPTION [historical/pair] T2 unassigned subset
+cause=T2 unassigned subset
+
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_census_tower_mutant_assignment" end time: Sep 11 12:35 UTC
+"mhgp7_census_tower_mutant_assignment" time elapsed: 00:00:00
+----------------------------------------------------------
+
+63/460 Testing: mhgp7_census_tower_mutant_open
+63/460 Test: mhgp7_census_tower_mutant_open
+Command: "/usr/bin/cmake" "-DEXPECTED=1" "-DCMD=/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build/mhgp7_census_tower_gate" "-DARGS=--mutant-open" "-DEXPECT_LINE=cause=T2.historical.exact_Gamma" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build
+"mhgp7_census_tower_mutant_open" start time: Sep 11 12:35 UTC
+Output:
+----------------------------------------------------------
+start=historical/pair
+FAIL [historical/pair] T2.historical.exact_Gamma
+cause=T2.historical.exact_Gamma
+
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_census_tower_mutant_open" end time: Sep 11 12:35 UTC
+"mhgp7_census_tower_mutant_open" time elapsed: 00:00:00
+----------------------------------------------------------
+
+64/460 Testing: mhgp7_census_tower_mutant_adjacency
+64/460 Test: mhgp7_census_tower_mutant_adjacency
+Command: "/usr/bin/cmake" "-DEXPECTED=1" "-DCMD=/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build/mhgp7_census_tower_gate" "-DARGS=--mutant-adjacency" "-DEXPECT_LINE=cause=T2.historical.exact_Gamma" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build
+"mhgp7_census_tower_mutant_adjacency" start time: Sep 11 12:35 UTC
+Output:
+----------------------------------------------------------
+start=historical/pair
+FAIL [historical/pair] T2.historical.exact_Gamma
+cause=T2.historical.exact_Gamma
+
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_census_tower_mutant_adjacency" end time: Sep 11 12:35 UTC
+"mhgp7_census_tower_mutant_adjacency" time elapsed: 00:00:00
+----------------------------------------------------------
+
+65/460 Testing: mhgp7_census_tower_mutant_census
+65/460 Test: mhgp7_census_tower_mutant_census
+Command: "/usr/bin/cmake" "-DEXPECTED=1" "-DCMD=/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build/mhgp7_census_tower_gate" "-DARGS=--mutant-census" "-DEXPECT_LINE=cause=T2.census.exhaustive_ball_inventory" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build
+"mhgp7_census_tower_mutant_census" start time: Sep 11 12:35 UTC
+Output:
+----------------------------------------------------------
+start=line12/variant0
+FAIL [line12/variant0] T2.census.exhaustive_ball_inventory
+cause=T2.census.exhaustive_ball_inventory
+
+<end of output>
+Test time =   0.07 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_census_tower_mutant_census" end time: Sep 11 12:35 UTC
+"mhgp7_census_tower_mutant_census" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Sep 11 12:35 UTC
+
+census_tower =   6.50 sec*proc
+
+full_ball_tower =   6.30 sec*proc
+
+gate =   6.50 sec*proc
+
+mutant =   0.13 sec*proc
+
+oracle =   6.43 sec*proc
+

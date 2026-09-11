@@ -1,0 +1,19 @@
+{
+  "capture_manifest_sha256": "e1add97b9583c9be82eaa3a2904d270203a4ab1452a8b5d71f6bc9d2d15534fd",
+  "logical_aliases": [
+    "captures/o2_r1/source_snapshot/morsehgp3D_v7/bench/COMPARE_MONO.md",
+    "captures/san_root_r1/source_snapshot/morsehgp3D_v7/bench/COMPARE_MONO.md",
+    "current/morsehgp3D_v7/bench/COMPARE_MONO.md"
+  ],
+  "logical_paths_changed": false,
+  "logical_pins_changed": false,
+  "physical_rename": {
+    "from": "sources/current/morsehgp3D_v7/bench/COMPARE_MONO.md",
+    "to": "sources/current/morsehgp3D_v7/bench/COMPARE_MONO.md.source"
+  },
+  "previous_manifest_sha256": "f26e11a64ac44c6cc8f617b7e3b670b86fe75427a3aad5370705e8a98114f953",
+  "previous_storage_map_sha256": "6b1a51a40eff6b17d13a0024ff47f1d6bf761541528de036b3dbca128ab813f0",
+  "qualified_bytes_changed": false,
+  "reader_sha256_unchanged": "655e0103ec36b99d01e6f5823557a204d1c9d167567198497862f0813f2c4077",
+  "scope": "physical_layout_only"
+}

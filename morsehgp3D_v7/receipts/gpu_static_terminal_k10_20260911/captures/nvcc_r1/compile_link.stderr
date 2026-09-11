@@ -1,0 +1,2 @@
+/workspaces/E-HGP/build/v7_gpu_terminal_k10_20260911/cuda_trial/nvcc_r1/source_snapshot/nvcc_strict_host.py: Permission denied
+nvcc fatal   : Failed to preprocess host compiler properties.

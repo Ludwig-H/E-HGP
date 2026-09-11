@@ -46,7 +46,7 @@ La [comparaison statique s8/10/12](receipts/static_s_factors_20260911/README.md)
 est close à 8k : mêmes dix forêts et neuf lignes de résolutions par K,
 mêmes MEB/supports, seuls les candidats amont et les temps varient.
 
-Le header actif est maintenant `6763a877…` : [semis après échange](docs/SEMIS_APRES_ECHANGE_20260911.md),
+Le header `6763a877…` a intégré les [semis après échange](docs/SEMIS_APRES_ECHANGE_20260911.md),
 dans la même option statique, défaut temporel inchangé. Une recherche exacte
 dans la table complète existante évite la dernière MEB lorsqu'elle trouve
 la nouvelle facette entière. O2/SAN propres passent, 34 nuages/150 ordres,
@@ -64,7 +64,18 @@ est clos, un processus par taille sans compilation concurrente du chantier :
 et R/U/S par K coïncident. Totaux 141,366 / 318,968 / 694,459 s ; FULL
 58,977 / 134,329 / 292,341 s ; pic RSS 8,687 Gio à 32k. Pas de speedup
 historique ou de gain RSS revendiqué, ni de qualification s10/s12 ou 50k
-sur ce nouveau header.
+sur ce header.
+
+Le header actif est désormais `83f1c78e…` : [couture optionnelle par lots](docs/PARALLELISATION_PAR_LOTS_20260911.md),
+transactionnelle, sans changement du cache par défaut. Les onze CTests
+census→tour et cinq CTests du callback sont intégrés ; leurs candidats O2/SAN
+passent, puis la [reconstruction active commune](receipts/full_ball_batch_active_cmake_20260911/README.md) passe les 40 CTests ciblés
+et la sonde n200 (mêmes sorties/travail, deux capacités de layout distinguées).
+Le contexte GPU résident
+reste privé, qualifié géométriquement en émulation hôte et compilé sous NVCC
+strict après quatre annotations HD restaurées. Aucune nouvelle exécution
+device ni mesure 50k. Les économies de transfert/copie ne sont pas des temps.
+Les anciennes mesures du header 6763 ci-dessus restent leur propre témoin.
 
 L'[auditeur du journal](audits/receipts_coverage_cpp_20260910/README.md)
 a démontré que parent→0 échappait au juge antérieur. La gate renforcée
@@ -140,11 +151,15 @@ conservés. Pas d'exécution device dans ce paquet ni de raccord au constructeur
 actif ; ses gates paient aussi les références et ne sont pas des benchmarks.
 Le [paquet CUDA séparé](receipts/gpu_static_terminal_cuda_20260911/README.md)
 ferme export exact, O2/SAN ROOT et compilation/lien NVCC stricts, sans aucune
-exécution device. Il compare 949 facettes et 1 428 traces sur K2..8 seulement,
-avec douze rejets et huit corruptions de transport réfutées. La prochaine
-qualification doit ajouter K9/K10 sur le transport/kernel et choisir
-explicitement sa source cible avant G4 ; les six preuves hôte c03 ne
-qualifient pas silencieusement le nouveau header actif après échange.
+exécution device. Il compare 949 facettes et 1 428 traces sur K2..8,
+avec douze rejets et huit corruptions de transport réfutées. Son
+[extension K9/K10](receipts/gpu_static_terminal_k10_20260911/README.md) est
+maintenant close localement : 1 577 requêtes, 2 763 traces Gram et
+15 539 contrôles O2/SAN, puis compilation/lien NVCC SM120. Six rejets du
+dernier slot K9/K10 s'ajoutent ; le premier échec NVCC sur droit d'exécution
+du script importé est conservé. Le helper reste celui de la référence c03,
+sans les semis actifs. Aucun résultat device ni transfert aux nouveaux lots
+de tour semés ; leur qualification est distincte.
 
 Le [raccord FULL privé du journal incrémental](receipts/incremental_full_trial_20260911/README.md)
 passe les comparaisons physiques O2/SAN dans quatre modes et les refus
@@ -221,7 +236,7 @@ Prochaines coutures et prototypes séparés :
 - [Parcours droit des intrus](receipts/rightmost_intruder_20260910/README.md) : prototype de deux lignes non intégré ; 28 nuages O2/SAN et 72 840 requêtes contre un juge de choix. À n1000 : −18,7 % de visites et −3,07 % de MEB, pas de gain contractuel.
 - [Journal incrémental](docs/PLAN_JOURNAL_INCREMENTAL.md) : raccord privé FULL O2/SAN correct dans quatre modes, non intégré après micro défavorable sur allocations/rétention finale ; vues plates et suppression des copies restent à évaluer.
 - [Primitives de résolutions GPU](docs/RESULTATS_PRIMITIVES_GPU_20260911.md) : MEB par lots et clé/PGCD/division passent sur G4 après O2/SAN ; sources privées, ni terminal ni raccord de tour GPU. Le premier prototype et ses échecs restent conservés séparément.
-- [Graphe filtré des boules](docs/GRAPHE_FILTRE_BOULES_PROPOSITION_20260911.md) : proposition pour paralléliser ensuite les fusions, sous terminales exactes et quotient local corrects. L'induction conserve les parents ; les contributions datées et les verticales ne découlent pas d'un graphe nu. Aucun code ou gain mesuré, relecture indépendante demandée.
+- [Graphe filtré des boules](docs/GRAPHE_FILTRE_BOULES_PROPOSITION_20260911.md) : accord conditionnel de l'auditeur et réduction aux naissances avant forêt couvrante minimale. Contributions, dates d'admission et verticales restent nécessaires ; la table des pivots n'est pas gratuite. Aucun raccord C++/GPU ni gain mesuré.
 - [Front WSPD optionnel](receipts/witness_front_20260910/README.md) : 431 010 contrôles O2/SAN, liaison explicite à l'index et générations vérifiées. Le batch device reste privé et non exécuté sur GPU ; le générateur nominal reste scalaire.
 
 Le premier reçu des [quatre blocs nommés](receipts/full_ball_named_blocks_20260910/README.md)

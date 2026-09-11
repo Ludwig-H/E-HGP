@@ -1,0 +1,24 @@
+--- o2_r3/prototype/source/morsehgp3D_v7/src/forest/full_ball_tower.hpp
++++ o2_r4/prototype/source/morsehgp3D_v7/src/forest/full_ball_tower.hpp
+@@ -654,6 +654,12 @@
+     FullBallBatchResult result;
+     bool invoked = false;
+     const auto account = [&] {
++      // Account paid geometry before fallible capacity arithmetic. A partial
++      // global counter merge cannot retain a claim that all work is known.
++      if (result.work_known) {
++        try { merge_static_work(result.work); }
++        catch (...) { st.static_batch_work_known = false; throw; }
++      } else if (invoked) st.static_batch_work_known = false;
+       u64 bytes = pending.capacity() * sizeof(FullBallBatchRequest);
+       add(bytes, unique_targets.capacity() * sizeof(BallId));
+       add(bytes, result.targets.capacity() * sizeof(FullBallBatchTarget));
+@@ -667,8 +673,6 @@
+       add(bytes, static_targets.capacity() * sizeof(BallId));
+       add(bytes, seed_bytes); add(bytes, group_bytes);
+       st.static_peak_retained_bytes = std::max(st.static_peak_retained_bytes, bytes);
+-      if (result.work_known) merge_static_work(result.work);
+-      else if (invoked) st.static_batch_work_known = false;
+     };
+     try {
+       for (size_t group = 0; group + 1 < groups.size(); ++group) {

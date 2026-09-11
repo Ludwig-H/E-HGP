@@ -1,0 +1,110 @@
+# Couture privée de résolutions géométriques par lots
+
+11 septembre 2026. Exploration v7 hors registre, CPU u16, `public_status=not_claimed`.
+Base active immuable `6763a877…`, avec post-semis après échange. Aucun actif,
+Git, audit indépendant ou GCP modifié. Aucun test d'échelle autorisé ici.
+
+## API proposée
+
+`FullBallBatchResolver` contient seulement un pointeur propriétaire externe et
+un callback synchrone. Le propriétaire prépare son index et son catalogue une
+fois ; le cœur ne connaît ni CUDA, ni contexte device, ni cycle bind/end.
+
+Le callback reçoit `FullBallGeometryView{index, balls, by_key}` et
+`FullBallBatchView{k, seeds, requests}`. `requests` contient seulement les clés
+uniques non semées, dans l'ordre lexicographique. Chaque requête porte la clé
+entière de GeometryIndex, le BallId du consommateur le plus ancien et son
+ordinal d'occurrence original u64. Son niveau exact se lit dans `balls` ; il
+n'est pas sérialisé séparément par requête. Les semis complets I∪U sont triés
+et transmis une fois par K. Aucun appel vide ni appel à K1.
+
+Le résultat porte les BallId et ordinals dans le même ordre, un statut, une
+raison à durée de vie statique et le travail réellement payé. Tous les workers
+doivent être joints avant publication. Une erreur doit laisser les cibles
+vides. Si la récupération du travail échoue (par exemple readback CUDA),
+`work_known=false` l'indique : les compteurs déjà connus restent conservés,
+mais ne sont pas présentés comme le travail total exact.
+
+Les vues sont empruntées : index et catalogue sont immuables pendant le run ;
+`by_key` appartient au Builder et ne doit pas survivre au run. Seeds et demandes
+ne survivent pas au callback. Le propriétaire doit vérifier l'identité de
+l'index ET du stockage des BallData, pas seulement leurs tailles. Les BallId
+indexent toujours `balls`, jamais sa permutation `by_key`. Côté GPU, un vrai
+token commun du snapshot index/catalogue reste nécessaire ; deux compteurs
+propriétaires indépendants ne suffisent pas.
+
+## Conservation et mémoire
+
+Le chemin sans callback, le cache nominal et les règles temporelles restent
+inchangés. Le cœur garde tri/unique, semis initiaux S, scatter original, ancres
+pré-lot, normalisation et verticales. La branche batch contrôle toutes les
+réponses avant tout scatter : cardinal, ordinal, domaine, admission K, niveau
+strict et identités des compteurs. Elle ne certifie pas la géométrie d'une
+BallId seulement admissible : les comparaisons directes au scalaire sont une
+qualification distincte.
+
+R/U/S restent ceux du producteur. En succès, Q égale les échanges payés D,
+H=T, M=anchor_hits+intruder_queries et anchor_hits+T=U−S. Le dernier échange
+court-circuité est payé ; sa MEB, son lookup de boule et son anchor_hit ne le
+sont pas. Les lois de succès ne sont pas imposées à un travail interrompu.
+
+La branche ajoute au plus U−S requêtes compactes, U cibles uniques et U−S
+réponses, sans catalogue Gamma ni nouvelle population globale. Le coût reste
+O(R+A+n+workers×depth), avec les volumes propres du backend déclarés à part.
+Les capacités échantillonnées ne sont ni un pic de RSS ni un pic de VRAM.
+Cette couture ne promet ni borne universelle sous-quadratique ni gain de temps.
+
+Le commit du travail précède les additions de capacités : un dépassement de
+capacité ne perd donc pas le travail déjà payé. Si la fusion des compteurs
+globaux échoue elle-même, leur état partiel est explicitement marqué inconnu.
+Le backend CPU de qualification agrège aussi dans un temporaire avant de
+publier `work_known=true`. Les injections de dépassement sont des états fautifs
+de comptabilité, pas des contre-exemples géométriques sur des entrées valides.
+
+## Qualification prévue
+
+`record.py` crée une capture neuve ; O2 par cet agent après créneau, SAN par ROOT.
+Le harnais extrait mécaniquement les trois helpers géométriques de 6763, sans
+accès aux ancres/DSU. Une instrumentation séparée et déclarée observe les
+vraies terminales du Builder scalaire avant scatter ; chaque réponse batch
+est comparée à sa BallId, sa clé, son consommateur et son ordinal.
+
+La gate Gram/Gamma et les fixtures cinq points/carré huit points sont reprises,
+avec permutations, lots groupés, intérieurs, extra-shells et K=n. Comparaison
+physique complète des journaux et du travail contre le scalaire en modes
+cache/no-cache/statique1/statique4. Les capacités/lanes changées restent à part.
+Les fautes portent sur publication partielle, nombre/ordinal/BallId, admission,
+niveau, Q/H/T, travail inconnu, exception et panne après travail d'un worker,
+y compris après un ordre complet. Un mauvais terminal géométriquement
+admissible est refusé par le juge direct, pas prétendument par le validateur
+structurel. Aucun verdict O2/SAN n'est acquis avant sa capture close.
+
+## Captures et limites
+
+`o2_r1/` est clos PASS : 11 commandes, 56 lots et 118 terminales comparées
+directement pour chacun des deux modes batch 1/4 ; 34 nuages, 150 ordres et
+87 230 contrôles verticaux. Les champs physiques sérialisés, R/U/S, Q/H/T et
+travail sont identiques aux bras scalaires correspondants. Ce harnais expose
+une observation après résolution, jamais une modification de la décision.
+
+Les 55 rejets r1 incluent 26 cas après un préfixe clos et 40 cas où le travail
+connu est non nul. Son header `8725dda5…` et son harnais sont conservés.
+La relecture a ensuite trouvé que la fusion du travail et les additions de
+capacités devaient être ordonnées et transactionnelles, cas non injecté dans
+r1. Le candidat `83f1c78e…` corrige ce point sans changement d'API. `o2_r2/`
+est maintenant clos PASS, 11 commandes et mêmes planchers géométriques et
+physiques. Ses 65 rejets comprennent 32 cas après préfixe et 44 avec travail
+connu non nul. Le dépassement de capacité conserve exactement les MEB payées ;
+les dépassements de fusion de travail marquent leur compte global inconnu.
+`san_root_r1/` est maintenant clos PASS par ROOT : 11 commandes, même header
+83f1, mêmes 65 rejets et mêmes planchers. Les options conservent AddressSanitizer,
+UndefinedBehaviorSanitizer et LeakSanitizer ; aucune désactivation de détection.
+Aucun grand nuage, timing, CUDA ni contrat 50k ici.
+
+La comparaison directe porte sur la terminale exacte choisie par le scalaire,
+pas sur une preuve indépendante de toutes ses trajectoires internes. La gate
+Gram/Gamma est une autorité bornée distincte ; la complétude du census WSPD,
+la représentation massive, l'archive industrielle et les contrats de temps
+ne découlent pas de cette couture. Le protocole instrumente le chemin scalaire
+hérité de 6763 dans le nouveau header : il ne prétend pas exécuter un ELF
+historique 6763 inchangé ni comparer des temps contre cet ancien moteur.

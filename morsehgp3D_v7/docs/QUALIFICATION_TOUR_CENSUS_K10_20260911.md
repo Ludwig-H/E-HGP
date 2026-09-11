@@ -110,3 +110,23 @@ La [qualification CMake propre](../receipts/post_exchange_active_cmake_20260911/
 reconstruit séparément le probe actif et passe les 24 CTests pertinents.
 Les trois reçus T2 — initial c03, supplément de métadonnées c03 et nouveau
 producteur CPU — gardent chacun leurs sources et leur autorité.
+
+## Portes permanentes et callback par lots
+
+Les [onze CTests permanents](../receipts/census_tower_permanent_20260911/README.md)
+relocalisent le juge renforcé dans `tests/`, avec codes et diagnostics causaux
+exigés dans la même exécution. Les candidats passent O2/SAN sur le Builder
+83f1 sans callback. Ils sont maintenant intégrés, ainsi que les
+[cinq CTests du callback CPU](../receipts/full_ball_batch_permanent_20260911/README.md) ;
+la qualification active commune passe 40 CTests ciblés dans un build Release
+neuf. Une ligne vide finale ajoutée
+à chacun des cinq fichiers de test explique leurs pins actifs différents.
+Le compteur de 65 cas du callback comprend 64 refus et un cas positif sans
+requête : le libellé « 65 refus » du paquet historique est trop large.
+
+Le [supplément de vrai raccord batch](../receipts/gpu_terminal_batch_t2_20260911/README.md)
+recalcule les 54 tours retenues sur le contexte GPU en émulation hôte,
+36 avec callback, plus 36 références scalaires complètes payées. Il ajoute
+1 872 comparaisons directes de terminales et le diagnostic haut-K séparé
+de 3 575 facettes sans filtrage. Il ne rejoue pas les mutants ni les rejets
+de transport, conservés dans leurs preuves distinctes. Aucune exécution CUDA.

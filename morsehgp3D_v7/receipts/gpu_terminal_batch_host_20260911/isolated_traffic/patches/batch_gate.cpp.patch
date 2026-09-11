@@ -1,0 +1,133 @@
+--- o2_r2/prototype/batch_gate.cpp
++++ traffic/prototype/batch_gate.cpp
+@@ -8,6 +8,8 @@
+ namespace terminal = mhgp7::gpu_terminal_private;
+ using namespace mhgp7;
+ u64 pairs = 0, batches = 0, hits = 0, requests_compared = 0, rejects = 0;
++u64 omission_reuse = 0, omission_growth = 0, initialization_rollbacks = 0;
++u64 reuse_h2d_bytes = 0, reuse_initialization_bytes = 0;
+ 
+ void work_equal(const FullBallStats& a, const FullBallStats& b) {
+   need(a.resolve_work.calls == b.resolve_work.calls &&
+@@ -78,8 +80,12 @@
+     auto requests = make_requests(device);
+     const auto launch_before = device.backend().work.launches;
+     const auto allocation_before = device.backend().work.allocations;
++    const auto upload_before = device.backend().work.h2d_bytes;
++    const auto download_before = device.backend().work.d2h_bytes;
+     need(device.execute({}).complete && device.backend().work.launches == launch_before &&
+-        device.backend().work.allocations == allocation_before, "batch.empty_no_work");
++        device.backend().work.allocations == allocation_before &&
++        device.backend().work.h2d_bytes == upload_before && device.initialization_calls() == 0,
++        "batch.empty_no_work");
+     need(device.execute(std::span<const terminal::Request>(requests).first(1)).complete, "batch.singleton");
+     need(device.execute(requests).complete, "batch.growth");
+     const auto allocated = device.backend().work.allocations;
+@@ -87,8 +93,76 @@
+     need(device.execute(std::span<const terminal::Request>(requests).first(3)).complete &&
+         device.execute(requests).complete && device.backend().work.allocations == allocated &&
+         device.capacity() == capacity, "batch.capacity_reuse");
++    const u64 slots = 1 + requests.size() + 3 + requests.size();
++    reuse_h2d_bytes = device.backend().work.h2d_bytes - upload_before;
++    reuse_initialization_bytes = device.initialization_bytes();
++    need(reuse_h2d_bytes == slots * sizeof(terminal::Request) &&
++        device.backend().work.d2h_bytes - download_before == slots * sizeof(route::WireResult),
++        "traffic.requests_only_H2D_results_only_D2H");
++    need(device.backend().work.allocations - allocation_before == 4 &&
++        device.initialization_calls() == 2 &&
++        reuse_initialization_bytes == (1 + requests.size()) * sizeof(route::WireResult),
++        "traffic.initialize_only_new_capacity");
+     need(device.close(), "batch.reuse_close");
+   }
++  // Reuse must refuse an omitted row whose old result is otherwise valid for
++  // exactly the same request. Growth must refuse a never-written new row.
++  for (bool growth : {false, true}) for (u64 slot : {0ull, 5ull, 9ull}) {
++    route::Context device(ix, balls);
++    const auto requests = make_requests(device);
++    if (growth) {
++      need(device.execute(std::span<const terminal::Request>(requests).first(1)).complete,
++          "traffic.growth_prime");
++    } else {
++      need(device.execute(requests).complete &&
++          device.execute(std::span<const terminal::Request>(requests).first(3)).complete,
++          "traffic.reuse_prime");
++    }
++    const auto allocations = device.backend().work.allocations;
++    const auto uploads = device.backend().work.h2d_bytes;
++    const auto init_calls = device.initialization_calls(), init_bytes = device.initialization_bytes();
++    const auto rejected = device.execute(requests, route::Mutation::kOmit, slot);
++    need(!rejected.complete && rejected.accepted.empty() && !rejected.raw_work_known &&
++        std::string_view(rejected.failure) == "batch_result_rejected",
++        growth ? "traffic.omission_after_growth" : "traffic.omission_after_reuse");
++    need(device.backend().work.allocations - allocations == (growth ? 2u : 0u) &&
++        device.initialization_calls() - init_calls == (growth ? 1u : 0u) &&
++        device.initialization_bytes() - init_bytes == (growth ? requests.size() * sizeof(route::WireResult) : 0u) &&
++        device.backend().work.h2d_bytes - uploads == requests.size() * sizeof(terminal::Request),
++        "traffic.omission_exact_transfers");
++    if (growth) {
++      need(rejected.diagnostic[slot].written == 0, "traffic.grown_omission_unwritten");
++      ++omission_growth;
++    } else {
++      need(rejected.diagnostic[slot].written == 1 &&
++          rejected.diagnostic[slot].batch < rejected.diagnostic[slot == 0 ? 1 : 0].batch,
++          "traffic.reused_omission_stale_epoch");
++      ++omission_reuse;
++    }
++    need(!device.execute(requests).complete, "traffic.omission_poisons_owner");
++    need(device.close() && device.backend().allocation_bytes == device.backend().certified_free_bytes,
++        "traffic.omission_cleanup");
++    ++rejects;
++  }
++  {
++    route::Context device(ix, balls);
++    const auto requests = make_requests(device);
++    need(device.execute(std::span<const terminal::Request>(requests).first(1)).complete,
++        "traffic.rollback_prime");
++    const auto allocations = device.backend().work.allocations, uploads = device.backend().work.h2d_bytes;
++    const auto launches = device.backend().work.launches, init_calls = device.initialization_calls();
++    device.inject(route::transport::Fault::kUpload);  // new-buffer initialization write, not request upload
++    const auto rejected = device.execute(requests);
++    need(!rejected.complete && rejected.accepted.empty() && !rejected.raw_work_known &&
++        std::string_view(rejected.failure) == "injected_transport_failure" &&
++        device.capacity() == 1 && device.backend().work.allocations == allocations + 2 &&
++        device.initialization_calls() == init_calls && device.backend().work.launches == launches &&
++        device.backend().work.h2d_bytes == uploads, "traffic.initialization_failure_keeps_old_buffers");
++    device.inject(route::transport::Fault::kNone);
++    need(device.close() && device.backend().allocation_bytes == device.backend().certified_free_bytes,
++        "traffic.initialization_failure_cleanup");
++    ++initialization_rollbacks; ++rejects;
++  }
+   for (auto mutation : {route::Mutation::kOmit, route::Mutation::kOrdinal, route::Mutation::kSnapshot,
+       route::Mutation::kBatch, route::Mutation::kStatus, route::Mutation::kTarget, route::Mutation::kWork}) {
+     for (u64 slot : {0ull, 5ull, 9ull}) {
+@@ -137,13 +211,26 @@
+     for (const auto& f : cases) for (unsigned variant : {0u, 1u}) batch_gate::fixture(f, variant);
+     batch_gate::transaction_tests();
+     need(batch_gate::pairs >= 64 && batch_gate::hits >= 4 && batch_gate::requests_compared > 100 &&
+-        batch_gate::batches > 0 && batch_gate::rejects == 28, "batch.nonvacuity");
+-    std::printf("{\"status\":\"passed\",\"scope\":\"private_seeded_terminal_batch_host\","
++        batch_gate::batches > 0 && batch_gate::rejects == 35 && batch_gate::omission_reuse == 3 &&
++        batch_gate::omission_growth == 3 && batch_gate::initialization_rollbacks == 1,
++        "batch.nonvacuity");
++    std::printf("{\"status\":\"passed\",\"scope\":\"private_seeded_terminal_batch_traffic_host\","
+         "\"checks\":%llu,\"physical_pairs\":%llu,\"batches\":%llu,\"requests\":%llu,"
+-        "\"seed_hits\":%llu,\"transaction_rejections\":%llu,\"device_executed\":false}\n",
++        "\"seed_hits\":%llu,\"transaction_rejections\":%llu,\"omissions_after_reuse\":%llu,"
++        "\"omissions_after_growth\":%llu,\"initialization_rollbacks\":%llu,"
++        "\"reuse_H2D_bytes\":%llu,\"reuse_initialization_bytes\":%llu,"
++        "\"request_size\":%zu,\"wire_result_size\":%zu,\"compact_target_size\":%zu,"
++        "\"former_full_result_size\":%zu,\"device_executed\":false}\n",
+         static_cast<unsigned long long>(checks), static_cast<unsigned long long>(batch_gate::pairs),
+         static_cast<unsigned long long>(batch_gate::batches), static_cast<unsigned long long>(batch_gate::requests_compared),
+-        static_cast<unsigned long long>(batch_gate::hits), static_cast<unsigned long long>(batch_gate::rejects));
++        static_cast<unsigned long long>(batch_gate::hits), static_cast<unsigned long long>(batch_gate::rejects),
++        static_cast<unsigned long long>(batch_gate::omission_reuse),
++        static_cast<unsigned long long>(batch_gate::omission_growth),
++        static_cast<unsigned long long>(batch_gate::initialization_rollbacks),
++        static_cast<unsigned long long>(batch_gate::reuse_h2d_bytes),
++        static_cast<unsigned long long>(batch_gate::reuse_initialization_bytes),
++        sizeof(batch_gate::terminal::Request), sizeof(batch_gate::route::WireResult),
++        sizeof(batch_gate::route::AcceptedTarget), sizeof(batch_gate::terminal::Result));
+     return 0;
+   } catch (const Failure& error) { std::fprintf(stderr, "%s: %s\n", context.c_str(), error.why); }
+     catch (const batch_gate::route::transport::Error& error) { std::fprintf(stderr, "%s\n", error.reason); }

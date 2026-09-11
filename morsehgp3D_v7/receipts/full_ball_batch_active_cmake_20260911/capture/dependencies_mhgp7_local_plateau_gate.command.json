@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/usr/bin/c++",
+    "-M",
+    "-isystem",
+    "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-O3",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "/workspaces/E-HGP/morsehgp3D_v7/tests/local_plateau_gate.cpp"
+  ],
+  "ended_ns": 1789131746938343154,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "dependencies_mhgp7_local_plateau_gate",
+  "started_ns": 1789131746623219783,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "9931c964758ef96b04ad824ed072304e8575a9ead6037a59879f235b09de25df"
+}

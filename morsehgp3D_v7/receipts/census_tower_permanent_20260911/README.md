@@ -1,0 +1,51 @@
+# Porte permanente census → tour : CMake/CTest CPU
+
+Qualification privée v7 hors registre, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `public_status=not_claimed`. Les deux captures O2 et ASan/UBSan, LSan actif, construisent et exécutent **la cible census_tower_gate et ses onze CTests seulement**. Ce n'est pas la suite CTest complète. Aucun callback, terminal GPU, test CUDA/GCP, benchmark ou contrat de latence n'est qualifié ici.
+
+## Source effectivement consommée
+
+La base active `b8336ad3` porte le header `6763a877…`. Un overlay explicitement épinglé remplace seulement ce header par `83f1c78e0656f08cd42522e4cd36d153ce283a6082246a36fe5225b3790c6366`, la couture privée CPU avec son backend par défaut. Aucun callback n'est fourni. `origin.json`, `overlay.json`, les originaux et les snapshots de composition sont conservés ; les résultats antérieurs ne sont pas hérités.
+
+Deux fichiers sont candidats à une installation permanente : `tests/census_tower_gate.cpp` et `tests/census_tower_oracle.hpp`. Ils relocalisent le juge metadata renforcé `13f06875…` et l'oracle `57b61524…`. Le juge ajoute une ligne `cause=…` pour les quatre mutants, afin que le wrapper CMake contrôle code exact et diagnostic dans la même exécution. `CMake.diff` ajoute une cible et onze CTests. Les sources de preuve restent dans `tests/`, jamais dans le chemin produit.
+
+La fermeture O2/SAN des snapshots est identique, dont les deux candidats réellement compilés, le header overlay, CMake et le wrapper `run_expect.cmake`. Les sources qualifiées sont visibles sous `sources/current/morsehgp3D_v7/`, la préparation sous `sources/current/proposal/` ; les autres copies logiques sont dédupliquées en objets. Les READMEs des snapshots restent des documents préparatoires historiques, pas le statut final du présent paquet.
+
+## Non-vacuité et résultats
+
+Chaque capture exerce trois géométries : ligne12, coquille12+centre+extérieur14 et spatial12 ; deux variantes d'identités, s WSPD=8/10/12, CPU0/1/4. Cela représente **54 tours K1..10, 540 ordres et 18 vrais census**, avec 48 comparaisons physiques appariées. La génération/préfiltration/census sont réels ; l'oracle Gram confronte leur inventaire, mais seul le census produit alimente les tours. Les coupes ouvertes/fermées, identités, parents et verticales sont confrontés au juge indépendant. Les gardes `forest.order()==K` et `lower_nodes.size()==nodes.size()` précèdent les coupes.
+
+| Géométrie | Contrôles | Coupes | Comparaisons verticales | Lignes census cumulées | Coquilles de 12 |
+|---|---:|---:|---:|---:|---:|
+| ligne12 | 525 085 | 720 | 352 752 | 390 | 0 |
+| coquille14 | 6 326 828 | 2 080 | 4 658 780 | 1 242 | 6 |
+| spatial12 | 5 463 812 | 10 200 | 3 092 416 | 1 512 | 0 |
+
+Totaux par capture : **12 315 725 contrôles des vrais cas, 13 000 coupes, 8 103 948 comparaisons verticales**. K9/K10 sont non vacuants. Les cas coquille et spatial exercent des supports q3/q4. Ces nombres sont identiques O2/SAN ; ils ne constituent pas une qualification supplémentaire en les additionnant.
+
+Deux autres JSON physiques attestent 1 022 MEB et 14 724 comparaisons de composantes contre l'oracle historique, puis neuf refus de l'oracle borné. Le journal CTest contient donc cinq JSON nominaux. Les arguments inconnus/absents exigent le code 2. Quatre mutants exigent le code 1 **et** leur ligne entière : assignment→`T2 unassigned subset`, coupe ouverte/adjacence→`T2.historical.exact_Gamma`, omission d'une boule de census→`T2.census.exhaustive_ball_inventory`. Un signal ou une autre erreur ne peut pas remplacer ce verdict : le wrapper vérifie le code numérique et la ligne issue de la même exécution.
+
+Chaque capture ferme ses cinq commandes contrôleur : version compilateur, configuration CMake, construction de la seule cible, inventaire des onze CTests et exécution séquentielle. Les streams, `LastTest.log`, l'inventaire JSON, `compile_commands.json`, flags/link/deps de la cible, cache et fichiers CMake générés utiles sont conservés. Le lecteur confronte les flags stricts C++20 ainsi que les flags SAN à la compilation **et** au lien. Le recorder impose `ASAN_OPTIONS=detect_leaks=1:halt_on_error=1` et UBSan en arrêt immédiat.
+
+## Artefacts exclus explicitement
+
+Les deux ELF principaux ne sont pas distribués : leur contenu présent a été reconfronté au hash du reçu avant scellement, et seuls pins/tailles subsistent. Les objets compilés et composants du toolkit/vendor ne sont pas embarqués.
+
+Les snapshots ont aussi copié sept fichiers `__pycache__/*.pyc` par capture, dont cinq sous `bench/` et deux sous `tests/`. Leurs **quatorze pins logiques** restent liés aux maps de fermeture, mais aucun bytecode n'est distribué. Le lecteur vérifie leur absence des commandes contrôleur, des commandes CTest, des commandes de compilation et du fichier de dépendances réellement consommé par la cible. Cette exclusion ne retire aucune source C++/CMake/Python textuelle ni une dépendance de la cible qualifiée. Une extraction reproduit les sources consommables, pas ces caches incidents non nécessaires.
+
+## Lecteur portable et portée
+
+```bash
+python3 -B verify.py
+python3 -B -O verify.py
+python3 -B verify.py --extract /tmp/mhgp7_census_permanent_neuf
+```
+
+Les conditions sont explicites, sans `assert`. Le lecteur vérifie hashes, fermetures, candidats, overlay, CMake.diff, commandes et drapeaux, onze identités CTest et leurs diagnostics physiques, les cinq JSON et planchers, puis l'égalité O2/SAN. Il ne relance ni compilateur ni géométrie. La copie des sources/logs est dédupliquée via `storage_map.json`. Les chemins exacts historiques des compilations sont dans les reçus ; Boost reste une dépendance externe pour reconstruire le juge local.
+
+Les bornes n≤14 et les TIMEOUT CTest appartiennent au juge, pas à l'algorithme produit. La preuve ne s'étend pas à une borne sous-quadratique universelle, au pondéré, à des entrées non u16, à un backend callback/CUDA, à la résidence massive ou aux contrats de toute la tour 50k en une seconde puis 100 ms. GCP non utilisé.
+
+## Révision physique du stockage documentaire
+
+La copie qualifiée `sources/current/morsehgp3D_v7/bench/COMPARE_MONO.md` est stockée physiquement sous `COMPARE_MONO.md.source`, avec exactement les mêmes octets. Ce snapshot documentaire n'est pas une documentation autonome dont les liens relatifs auraient été relocalisés. Les trois chemins logiques restent inchangés dans `storage_map.json` ; l'extraction rétablit le nom `.md`. Aucune source, commande, sortie, attente ou observation qualifiée n'est modifiée. Le manifeste de capture et le lecteur sont byte-identiques à la version précédente.
+
+L'ancien manifeste physique, son stockage et son README sont conservés sous `provenance/layout_v1/`. Le nouveau manifeste désigne seulement ce nouveau conditionnement ; il ne remplace ni ne réinterprète le hash historique `f26e11a64ac44c6cc8f617b7e3b670b86fe75427a3aad5370705e8a98114f953`. Les chemins historiques restent attribuables via cette provenance. Les détails du renommage sont dans `provenance/layout_v2.json`. Cette révision n'ajoute aucun résultat géométrique, CTest, CUDA ou de performance.

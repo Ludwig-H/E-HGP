@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/o2_r2/gate",
+    "static4",
+    "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/o2_r2/static4_batch0.physical",
+    "0"
+  ],
+  "ended_ns": 1789129526603983050,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "static4_batch0",
+  "sanitizer_environment": {},
+  "started_ns": 1789129521526720683,
+  "stderr_sha256": "7bab9570b8fd962497dcccab6b11aa96391b4953d8a5d88ce3489cd7a52adf34",
+  "stdout_sha256": "f49e3967ef708a1630d2918d7f59071c2fec584bfdbbcc6d046240f345a5f193"
+}

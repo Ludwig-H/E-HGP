@@ -1,0 +1,17 @@
+{
+  "capacities": [
+    "static_sampled_retained_capacity_peak_bytes",
+    "static_worker_capacity_peak_bytes"
+  ],
+  "reason": "FullBallStats_batch_fields_change_Worker_size_only",
+  "timings": [
+    "census_s",
+    "digest_s",
+    "generate_s",
+    "index_s",
+    "prefilter_s",
+    "sort_s",
+    "total_s",
+    "tower_s"
+  ]
+}

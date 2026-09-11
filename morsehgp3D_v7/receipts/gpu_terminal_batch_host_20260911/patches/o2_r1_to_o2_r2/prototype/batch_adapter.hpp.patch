@@ -1,0 +1,11 @@
+--- o2_r1/prototype/batch_adapter.hpp
++++ o2_r2/prototype/batch_adapter.hpp
+@@ -58,7 +58,7 @@
+   accepted.reserve(result.accepted.size());
+   for (const auto& row : result.accepted) accepted.push_back({row.target, row.ordinal});
+   output.targets = std::move(accepted);
+-  output.status = FullBallStatus::kOk; output.reason = "ok";
++  output.status = FullBallStatus::kCompleteRelative; output.reason = "ok";
+ }
+ inline FullBallBatchResolver resolver(Context& context) { return {&context, resolve_batch}; }
+ }  // namespace mhgp7::gpu_terminal_batch_private

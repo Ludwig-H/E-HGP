@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="40"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname=""
+	time="11"
+	timestamp="2026-09-11T13:06:04"
+	>
+	<testcase name="mhgp7_witness_front" classname="mhgp7_witness_front" time="1.02428" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;witness_front"/>
+		</properties>
+		<system-out>witness_front_gate=passed checks=431010 cases=1728 rows=88560 requests=311968 rejections=15 singleton_reuses=1 backend=cpu_only
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_witness_front_bad_argument" classname="mhgp7_witness_front_bad_argument" time="0.0173775" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;witness_front"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_facet_resolver_cache" classname="mhgp7_facet_resolver_cache" time="0.532292" status="run">
+		<properties>
+			<property name="cmake_labels" value="facet_resolver_cache;gate;oracle"/>
+		</properties>
+		<system-out>{"status":"passed","clouds":28,"cache_hits":556,"seeds":352,"released_slots":2752,"entry_bytes":48}
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_facet_resolver_cache_bad_argument" classname="mhgp7_facet_resolver_cache_bad_argument" time="0.0163966" status="run">
+		<properties>
+			<property name="cmake_labels" value="facet_resolver_cache;gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel_digest" classname="mhgp7_full_gabriel_digest" time="0.0200749" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_gabriel_digest;gate"/>
+		</properties>
+		<system-out>full_gabriel_digest authority=bench_serializer_only oracle=Boost_cpp_int divisions=672 reductions=672 rejections=6 checks=2695 failures=0 floor=1
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_gabriel_digest_bad_argument" classname="mhgp7_full_gabriel_digest_bad_argument" time="0.0176406" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_gabriel_digest;gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_local_plateau" classname="mhgp7_local_plateau" time="0.0703819" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;local_plateau;oracle"/>
+		</properties>
+		<system-out>{"schema":"mhgp7-local-plateau-v1","status":"passed","public_status":"not_claimed","tables":18,"ranks":96,"components":96,"representatives":96,"inert":14,"local_births":26,"supports_q2_q3_q4":[20,14,4],"large_p":5000,"external_global_parent_counts":[2,1],"real_tables":4,"real_ranks":40,"complete_support_sets":18,"diameter_hubs":17,"dsu_ranks":68,"u2_exclusions":1}
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_local_plateau_bad_argument" classname="mhgp7_local_plateau_bad_argument" time="0.0161645" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;local_plateau"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_coverage_certificate" classname="mhgp7_full_coverage_certificate" time="0.0203791" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_coverage_certificate;gate;oracle"/>
+		</properties>
+		<system-out>full_coverage_certificate checks=823 rejects=30 replay_cuts=30 gamma_cuts=40 allocation_rejects=20 authority=structural_only
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_coverage_certificate_bad_argument" classname="mhgp7_full_coverage_certificate_bad_argument" time="0.0171297" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_coverage_certificate;gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_route_stub" classname="mhgp7_census_route_stub" time="0.04529" status="run">
+		<properties>
+			<property name="cmake_labels" value="stub"/>
+		</properties>
+		<system-out>backend=stub-hote device=stub-hote sm=0.0
+census_route_gate=passed backend=stub-hote checks=16627 compared=4116 extra_shells=3 q2=846 q3=2085 q4=1185 rejections=17 failures=0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_route_stub_bad_argument" classname="mhgp7_census_route_stub_bad_argument" time="0.0161368" status="run">
+		<properties>
+			<property name="cmake_labels" value="stub"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_anchor_meb" classname="mhgp7_anchor_meb" time="0.400961" status="run">
+		<properties>
+			<property name="cmake_labels" value="anchor_meb;gate;oracle"/>
+		</properties>
+		<system-out>{"status":"pass","checks":11752,"comparisons":605,"permutations":300,"extra_shells":197,"accepted_supports":[82,393,110,20],"scope":"exact_local_meb_only","gcp_used":false}
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_anchor_meb_bad_argument" classname="mhgp7_anchor_meb_bad_argument" time="0.0178612" status="run">
+		<properties>
+			<property name="cmake_labels" value="anchor_meb;gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_ball_tower" classname="mhgp7_full_ball_tower" time="0.570223" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_ball_tower;gate;oracle"/>
+		</properties>
+		<system-out>{"status":"passed","authority":"bounded_independent_Gram_Gamma_not_WSPD_completeness","checks":170320,"clouds":28,"orders":112,"cuts":2508,"facets":20054,"vertical_checks":45948,"births":504,"merges":224,"continuation_snapshots":1036,"growth_snapshots":8,"overlap_cuts":484,"duplicate_cover_cuts":0,"regular_blocks":666,"extra_blocks":160,"anchor_hits":74,"representatives":992,"intruder_queries":12,"same_radius_steps":2,"rejections":8}
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_ball_tower_bad_argument" classname="mhgp7_full_ball_tower_bad_argument" time="0.015699" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_ball_tower;gate"/>
+		</properties>
+		<system-out>usage: mhgp7_full_ball_tower_gate --selftest
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_ball_static_cpu1" classname="mhgp7_full_ball_static_cpu1" time="0.959144" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_ball_static;full_ball_tower;gate;oracle"/>
+		</properties>
+		<system-out>static_threads=1 paired_payload_checks=5704 deduplicated=337 seeded_unique=492
+post_seed_queries=20 post_seed_hits=4 post_seed_terminals=4
+{"status":"passed","authority":"bounded_independent_Gram_Gamma_not_WSPD_completeness","checks":292528,"clouds":34,"orders":150,"cuts":3916,"facets":33870,"vertical_checks":87230,"births":712,"merges":316,"continuation_snapshots":1632,"growth_snapshots":8,"overlap_cuts":764,"duplicate_cover_cuts":0,"regular_blocks":960,"extra_blocks":216,"anchor_hits":99,"representatives":1390,"intruder_queries":20,"same_radius_steps":4,"rejections":8}
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_ball_static_cpu4" classname="mhgp7_full_ball_static_cpu4" time="1.07783" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_ball_static;full_ball_tower;gate;oracle"/>
+		</properties>
+		<system-out>static_threads=4 paired_payload_checks=5704 deduplicated=337 seeded_unique=492
+post_seed_queries=20 post_seed_hits=4 post_seed_terminals=4
+{"status":"passed","authority":"bounded_independent_Gram_Gamma_not_WSPD_completeness","checks":292528,"clouds":34,"orders":150,"cuts":3916,"facets":33870,"vertical_checks":87230,"births":712,"merges":316,"continuation_snapshots":1632,"growth_snapshots":8,"overlap_cuts":764,"duplicate_cover_cuts":0,"regular_blocks":960,"extra_blocks":216,"anchor_hits":99,"representatives":1390,"intruder_queries":20,"same_radius_steps":4,"rejections":8}
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_tower_historical" classname="mhgp7_census_tower_historical" time="0.384251" status="run">
+		<properties>
+			<property name="cmake_labels" value="census_tower;full_ball_tower;gate;oracle"/>
+		</properties>
+		<system-out>start=historical/pair
+start=historical/E5
+start=historical/square
+start=historical/growth_ABCZ
+start=historical/growth_redundant
+start=historical/inert_ball
+start=historical/shell7_window
+start=historical/support3
+start=historical/support4
+start=historical/u16_tetra
+start=historical/portal_equal
+start=historical/actual_equal_radius_descent
+start=historical/growth_ABCZ_doubled_lot
+start=historical/inert_ball_doubled_lot
+{"status":"passed","oracle_mebs":1022,"oracle_components":14724}
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_tower_line12" classname="mhgp7_census_tower_line12" time="0.199233" status="run">
+		<properties>
+			<property name="cmake_labels" value="census_tower;full_ball_tower;gate;oracle"/>
+		</properties>
+		<system-out>start=line12/variant0
+complete=line12/variant0 gram=793 assignments=4095
+start=line12/variant1
+complete=line12/variant1 gram=793 assignments=4095
+{"status":"passed","scope":"bounded_real_census_FULL_K1_K10","checks":525085,"clouds":2,"orders":180,"census_runs":6,"catalogue_rows":390,"physical_tower_pairs":16,"cuts":720,"vertical_checks":352752,"high_order_facets":2392,"high_order_verticals":22024,"shell12_rows":0,"q3_rows":0,"q4_rows":0}
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_tower_shell14" classname="mhgp7_census_tower_shell14" time="1.28318" status="run">
+		<properties>
+			<property name="cmake_labels" value="census_tower;full_ball_tower;gate;oracle"/>
+		</properties>
+		<system-out>start=shell12_center_external14/variant0
+complete=shell12_center_external14/variant0 gram=1470 assignments=34861
+start=shell12_center_external14/variant1
+complete=shell12_center_external14/variant1 gram=1470 assignments=34861
+{"status":"passed","scope":"bounded_real_census_FULL_K1_K10","checks":6326828,"clouds":2,"orders":180,"census_runs":6,"catalogue_rows":1242,"physical_tower_pairs":16,"cuts":2080,"vertical_checks":4658780,"high_order_facets":91638,"high_order_verticals":851740,"shell12_rows":6,"q3_rows":702,"q4_rows":36}
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_tower_spatial12" classname="mhgp7_census_tower_spatial12" time="1.55555" status="run">
+		<properties>
+			<property name="cmake_labels" value="census_tower;full_ball_tower;gate;oracle"/>
+		</properties>
+		<system-out>start=spatial12/variant0
+complete=spatial12/variant0 gram=793 assignments=4095
+start=spatial12/variant1
+complete=spatial12/variant1 gram=793 assignments=4095
+{"status":"passed","scope":"bounded_real_census_FULL_K1_K10","checks":5463812,"clouds":2,"orders":180,"census_runs":6,"catalogue_rows":1512,"physical_tower_pairs":16,"cuts":10200,"vertical_checks":3092416,"high_order_facets":7540,"high_order_verticals":69020,"shell12_rows":0,"q3_rows":738,"q4_rows":378}
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_tower_rejects" classname="mhgp7_census_tower_rejects" time="0.0182533" status="run">
+		<properties>
+			<property name="cmake_labels" value="census_tower;full_ball_tower;gate;oracle"/>
+		</properties>
+		<system-out>{"status":"passed","rejections":9}
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_tower_bad_argument" classname="mhgp7_census_tower_bad_argument" time="0.0162983" status="run">
+		<properties>
+			<property name="cmake_labels" value="census_tower;gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_tower_missing_argument" classname="mhgp7_census_tower_missing_argument" time="0.0159329" status="run">
+		<properties>
+			<property name="cmake_labels" value="census_tower;gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_tower_mutant_assignment" classname="mhgp7_census_tower_mutant_assignment" time="0.0154695" status="run">
+		<properties>
+			<property name="cmake_labels" value="census_tower;gate;mutant;oracle"/>
+		</properties>
+		<system-out>start=historical/pair
+EXCEPTION [historical/pair] T2 unassigned subset
+cause=T2 unassigned subset
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_tower_mutant_open" classname="mhgp7_census_tower_mutant_open" time="0.0170481" status="run">
+		<properties>
+			<property name="cmake_labels" value="census_tower;gate;mutant;oracle"/>
+		</properties>
+		<system-out>start=historical/pair
+FAIL [historical/pair] T2.historical.exact_Gamma
+cause=T2.historical.exact_Gamma
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_tower_mutant_adjacency" classname="mhgp7_census_tower_mutant_adjacency" time="0.0163779" status="run">
+		<properties>
+			<property name="cmake_labels" value="census_tower;gate;mutant;oracle"/>
+		</properties>
+		<system-out>start=historical/pair
+FAIL [historical/pair] T2.historical.exact_Gamma
+cause=T2.historical.exact_Gamma
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_census_tower_mutant_census" classname="mhgp7_census_tower_mutant_census" time="0.0462952" status="run">
+		<properties>
+			<property name="cmake_labels" value="census_tower;gate;mutant;oracle"/>
+		</properties>
+		<system-out>start=line12/variant0
+FAIL [line12/variant0] T2.census.exhaustive_ball_inventory
+cause=T2.census.exhaustive_ball_inventory
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_ball_batch_cpu1" classname="mhgp7_full_ball_batch_cpu1" time="0.920175" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_ball_batch;full_ball_tower;gate;oracle"/>
+		</properties>
+		<system-out>static_threads=1 paired_payload_checks=5704 deduplicated=337 seeded_unique=492
+post_seed_queries=20 post_seed_hits=4 post_seed_terminals=4
+{"status":"passed","authority":"bounded_independent_Gram_Gamma_not_WSPD_completeness","checks":298742,"clouds":34,"orders":150,"cuts":3916,"facets":33870,"vertical_checks":87230,"births":712,"merges":316,"continuation_snapshots":1632,"growth_snapshots":8,"overlap_cuts":764,"duplicate_cover_cuts":0,"regular_blocks":960,"extra_blocks":216,"anchor_hits":99,"representatives":1390,"intruder_queries":20,"same_radius_steps":4,"rejections":8}
+{"status":"passed_batch_callback","workers":1,"batch_calls":49,"batch_requests":103,"direct_terminals":103,"diagnostic_reference_MEB_calls":119,"payload_checks":5704,"work_checks":442,"product_instrumentation":false}
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_ball_batch_cpu4" classname="mhgp7_full_ball_batch_cpu4" time="1.01047" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_ball_batch;full_ball_tower;gate;oracle"/>
+		</properties>
+		<system-out>static_threads=4 paired_payload_checks=5704 deduplicated=337 seeded_unique=492
+post_seed_queries=20 post_seed_hits=4 post_seed_terminals=4
+{"status":"passed","authority":"bounded_independent_Gram_Gamma_not_WSPD_completeness","checks":298742,"clouds":34,"orders":150,"cuts":3916,"facets":33870,"vertical_checks":87230,"births":712,"merges":316,"continuation_snapshots":1632,"growth_snapshots":8,"overlap_cuts":764,"duplicate_cover_cuts":0,"regular_blocks":960,"extra_blocks":216,"anchor_hits":99,"representatives":1390,"intruder_queries":20,"same_radius_steps":4,"rejections":8}
+{"status":"passed_batch_callback","workers":4,"batch_calls":49,"batch_requests":103,"direct_terminals":103,"diagnostic_reference_MEB_calls":119,"payload_checks":5704,"work_checks":442,"product_instrumentation":false}
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_ball_batch_rejects" classname="mhgp7_full_ball_batch_rejects" time="0.0199229" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_ball_batch;gate;oracle"/>
+		</properties>
+		<system-out>{"status":"passed_batch_rejections","cases":65,"prefix_cases":32,"known_paid":44,"product_instrumentation":false}
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_ball_batch_bad_argument" classname="mhgp7_full_ball_batch_bad_argument" time="0.0171574" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_ball_batch;gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_ball_batch_missing_argument" classname="mhgp7_full_ball_batch_missing_argument" time="0.0158708" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_ball_batch;gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_ball_work" classname="mhgp7_full_ball_work" time="0.582605" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_ball_tower;gate;oracle"/>
+		</properties>
+		<system-out>{"merges":256,"nodes":513,"baseline_edges":32896,"activated_edges":512,"find_steps":1022,"path_writes":512}
+{"merges":512,"nodes":1025,"baseline_edges":131328,"activated_edges":1024,"find_steps":2046,"path_writes":1024}
+{"merges":1024,"nodes":2049,"baseline_edges":524800,"activated_edges":2048,"find_steps":4094,"path_writes":2048}
+{"status":"passed","clouds":28,"declared_support_checks":352,"extra_MEB_calls":50,"extra_MEB_supports":56,"singleton_lots":306,"grouped_lots":176,"lot_dsu_slots":520,"gcp_used":false}
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_ball_work_bad_argument" classname="mhgp7_full_ball_work_bad_argument" time="0.0179638" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_ball_tower;gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_ball_tower_probe_smoke" classname="mhgp7_full_ball_tower_probe_smoke" time="0.0192899" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_ball_tower;gate"/>
+		</properties>
+		<system-out>stage_start=index
+stage_complete=index seconds=0.000006870
+stage_start=generate
+stage_complete=generate seconds=0.000280297
+stage_start=sort_rle
+stage_complete=sort_rle seconds=0.000009104
+stage_start=prefilter
+stage_complete=prefilter seconds=0.000042913
+stage_start=census
+stage_complete=census seconds=0.000038037
+stage_start=full_ball_tower
+stage_complete=full_ball_tower seconds=0.000333515
+stage_start=payload_digest
+stage_complete=payload_digest seconds=0.000089133
+{"schema":"mhgp7-full-ball-tower-probe-v1","status":"completed_relative","public_status":"not_claimed","backend":"cpu_reference","contract_qualified":false,"n":8,"s":8,"kmax":8,"threads":1,"seed":3,"coord":65536,"orders":8,"raw":71,"unique":71,"balls":71,"nodes":123,"parent_refs":115,"contributions":79,"vertical_refs":108,"extra_records":0,"anchor_blocks":142,"representatives":198,"anchor_hits":17,"intruder_queries":2,"same_radius_steps":0,"validation_meb_calls":0,"resolver_meb_calls":19,"input_digest":"3c95479be68aeb3af8d367b56f6a78e4fa07a0c193...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_ball_tower_probe_bad_argument" classname="mhgp7_full_ball_tower_probe_bad_argument" time="0.0169841" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_ball_tower;gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_ball_static_probe_smoke" classname="mhgp7_full_ball_static_probe_smoke" time="0.0185066" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_ball_static;full_ball_tower;gate"/>
+		</properties>
+		<system-out>stage_start=index
+stage_complete=index seconds=0.000005368
+stage_start=generate
+stage_complete=generate seconds=0.000244253
+stage_start=sort_rle
+stage_complete=sort_rle seconds=0.000007451
+stage_start=prefilter
+stage_complete=prefilter seconds=0.000041221
+stage_start=census
+stage_complete=census seconds=0.000036033
+stage_start=full_ball_tower
+stage_complete=full_ball_tower seconds=0.000983331
+stage_start=payload_digest
+stage_complete=payload_digest seconds=0.000094431
+{"schema":"mhgp7-full-ball-tower-probe-v1","status":"completed_relative","public_status":"not_claimed","backend":"cpu_reference","contract_qualified":false,"n":8,"s":8,"kmax":8,"threads":1,"seed":3,"coord":65536,"orders":8,"raw":71,"unique":71,"balls":71,"nodes":123,"parent_refs":115,"contributions":79,"vertical_refs":108,"extra_records":0,"anchor_blocks":142,"representatives":198,"anchor_hits":17,"intruder_queries":2,"same_radius_steps":0,"validation_meb_calls":0,"resolver_meb_calls":19,"input_digest":"3c95479be68aeb3af8d367b56f6a78e4fa07a0c193...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp7_full_ball_static_probe_bad_threads" classname="mhgp7_full_ball_static_probe_bad_threads" time="0.0160607" status="run">
+		<properties>
+			<property name="cmake_labels" value="full_ball_static;full_ball_tower;gate"/>
+		</properties>
+		<system-out>
+</system-out>
+	</testcase>
+</testsuite>

@@ -7,6 +7,15 @@ Plan de port mis à jour après une première exécution de primitives sur G4.
 Le terminal complet dispose maintenant d'un prototype qualifié sur hôte ;
 son exécution device et son raccord à la tour GPU restent à qualifier.
 
+La [couture par lots résidents](PARALLELISATION_PAR_LOTS_20260911.md) est
+maintenant intégrée au Builder côté API CPU. Le prototype sépare index,
+catalogue et semis résidents des buffers de requêtes réutilisés ; il conserve
+le raccourci exact après échange. Les vrais census→batch→tour passent sur
+hôte. Après correction des annotations HD, le kernel complet compile et lie
+sans avertissement sous `--Werror=cross-execution-space-call` ; sa qualification
+sur carte reste à faire. Ni l'API ni ces preuves locales n'activent le GPU
+dans la sonde active ou le worker G4 nominal.
+
 Après la session G4, la [couture MEB + clé](../receipts/gpu_meb_key_route_20260911/README.md)
 est qualifiée O2/SAN ROOT et NVCC strict : le backend forme désormais la
 clé primitive, sans matérialisation ni revalidation de puissance sur CPU.
@@ -124,8 +133,10 @@ Une [proposition distincte de graphe filtré](GRAPHE_FILTRE_BOULES_PROPOSITION_2
 étudie ensuite la parallélisation du calendrier lui-même, une fois les
 terminales géométriques connues. L'argument compare ses composantes au
 biparti blocs/parents du constructeur ; dates de sommets, contributions,
-plateaux et verticales restent indispensables. Ce n'est pas une implémentation
-ni une optimisation mesurée ; la question est transmise à l'auditeur.
+plateaux et verticales restent indispensables. L'auditeur a confirmé cette
+équivalence conditionnelle et montré la réduction supplémentaire aux seules
+naissances ; la table de correspondances datées reste nécessaire. Ce n'est
+pas encore une implémentation ni une optimisation mesurée.
 
 Le [plan détaillé du terminal suivant](../receipts/gpu_meb_key_route_20260911/PLAN_TERMINAL.md)
 réunit ces helpers sans aller-retour hôte par étape. Les niveaux internes
@@ -172,6 +183,15 @@ une campagne statique CPU/GPU ; recompiler le nouveau header ne suffit pas
 à activer la voie optionnelle.
 Le nouveau worker `anchor_meb_worker_v7.py` ne lance que les deux gates
 de primitives ; il ne remplace pas ce worker de tours.
+
+L'[extension locale du terminal c03 à K9/K10](../receipts/gpu_static_terminal_k10_20260911/README.md)
+est close : 1 577 requêtes prédéclarées, 2 763 traces contre Gram,
+15 539 contrôles en stub O2/SAN ROOT, compilation/lien NVCC SM120 réussis.
+468 requêtes K9 et 160 K10 exercent descentes strictes et supports q3/q4.
+Le helper reste `6846376a…`, sans semis post-échange ; la référence c03 et
+le propriétaire corrigé restent explicitement épinglés. Aucune exécution
+device, aucun raccord au Builder actif ni transfert au nouveau helper semé.
+Le premier échec NVCC sur mode exécutable importé est conservé dans le paquet.
 
 Base de cette analyse : `full_ball_tower.hpp` `33e7d05e…`,
 `anchor_meb.hpp` `386072c8…`, `q3.hpp` `4155a1c3…`, `q4.hpp` `58aac9bd…`,

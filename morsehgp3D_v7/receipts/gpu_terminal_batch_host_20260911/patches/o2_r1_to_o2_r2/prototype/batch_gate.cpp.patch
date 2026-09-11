@@ -1,0 +1,18 @@
+--- o2_r1/prototype/batch_gate.cpp
++++ o2_r2/prototype/batch_gate.cpp
+@@ -33,13 +33,13 @@
+   auto balls = catalogue(points, ix, model, f.kmax);
+   if (variant) std::reverse(balls.begin(), balls.end());
+   const auto expected = build_full_ball_tower(ix, balls, f.kmax, 1);
+-  need(expected.status == FullBallStatus::kOk, "batch.CPU_reference_success");
++  need(expected.status == FullBallStatus::kCompleteRelative, "batch.CPU_reference_success");
+   route::Context device(ix, balls);
+   const auto source_uploads = device.backend().work.h2d_bytes;
+   const auto source_allocations = device.backend().work.allocations;
+   for (int threads : {1, 4}) {
+     const auto actual = build_full_ball_tower(ix, balls, f.kmax, threads, route::resolver(device));
+-    if (actual.status != FullBallStatus::kOk)
++    if (actual.status != FullBallStatus::kCompleteRelative)
+       std::fprintf(stderr, "batch_tower_failure=%s\n", actual.reason);
+     same_payload(expected, actual); work_equal(expected.stats, actual.stats);
+     need(actual.stats.static_batch_work_known, "batch.known_work_on_success");

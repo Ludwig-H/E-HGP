@@ -1,0 +1,12 @@
+{
+  "GCP_used": false,
+  "SAN": false,
+  "active_source_modified": false,
+  "commands": 11,
+  "component_or_tower_timing_claimed": false,
+  "error": null,
+  "public_status": "not_claimed",
+  "source_header_sha256": "8725dda53d2d2de9a2aea3e666aca65b82c7b9e50c65db01ea25c22c02c861b9",
+  "sources_stable": true,
+  "status": "passed"
+}

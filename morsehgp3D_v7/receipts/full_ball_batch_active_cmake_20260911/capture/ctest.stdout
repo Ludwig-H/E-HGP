@@ -1,0 +1,102 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v7_batch_active_20260911/cmake_build
+Test project /workspaces/E-HGP/build/v7_batch_active_20260911/cmake_build
+      Start  3: mhgp7_witness_front
+ 1/40 Test  #3: mhgp7_witness_front ............................   Passed    1.02 sec
+      Start  4: mhgp7_witness_front_bad_argument
+ 2/40 Test  #4: mhgp7_witness_front_bad_argument ...............   Passed    0.02 sec
+      Start 33: mhgp7_facet_resolver_cache
+ 3/40 Test #33: mhgp7_facet_resolver_cache .....................   Passed    0.53 sec
+      Start 34: mhgp7_facet_resolver_cache_bad_argument
+ 4/40 Test #34: mhgp7_facet_resolver_cache_bad_argument ........   Passed    0.02 sec
+      Start 35: mhgp7_full_gabriel_digest
+ 5/40 Test #35: mhgp7_full_gabriel_digest ......................   Passed    0.02 sec
+      Start 36: mhgp7_full_gabriel_digest_bad_argument
+ 6/40 Test #36: mhgp7_full_gabriel_digest_bad_argument .........   Passed    0.02 sec
+      Start 43: mhgp7_local_plateau
+ 7/40 Test #43: mhgp7_local_plateau ............................   Passed    0.07 sec
+      Start 44: mhgp7_local_plateau_bad_argument
+ 8/40 Test #44: mhgp7_local_plateau_bad_argument ...............   Passed    0.02 sec
+      Start 45: mhgp7_full_coverage_certificate
+ 9/40 Test #45: mhgp7_full_coverage_certificate ................   Passed    0.02 sec
+      Start 46: mhgp7_full_coverage_certificate_bad_argument
+10/40 Test #46: mhgp7_full_coverage_certificate_bad_argument ...   Passed    0.02 sec
+      Start 47: mhgp7_census_route_stub
+11/40 Test #47: mhgp7_census_route_stub ........................   Passed    0.05 sec
+      Start 48: mhgp7_census_route_stub_bad_argument
+12/40 Test #48: mhgp7_census_route_stub_bad_argument ...........   Passed    0.02 sec
+      Start 49: mhgp7_anchor_meb
+13/40 Test #49: mhgp7_anchor_meb ...............................   Passed    0.40 sec
+      Start 50: mhgp7_anchor_meb_bad_argument
+14/40 Test #50: mhgp7_anchor_meb_bad_argument ..................   Passed    0.02 sec
+      Start 51: mhgp7_full_ball_tower
+15/40 Test #51: mhgp7_full_ball_tower ..........................   Passed    0.57 sec
+      Start 52: mhgp7_full_ball_tower_bad_argument
+16/40 Test #52: mhgp7_full_ball_tower_bad_argument .............   Passed    0.02 sec
+      Start 53: mhgp7_full_ball_static_cpu1
+17/40 Test #53: mhgp7_full_ball_static_cpu1 ....................   Passed    0.96 sec
+      Start 54: mhgp7_full_ball_static_cpu4
+18/40 Test #54: mhgp7_full_ball_static_cpu4 ....................   Passed    1.08 sec
+      Start 55: mhgp7_census_tower_historical
+19/40 Test #55: mhgp7_census_tower_historical ..................   Passed    0.38 sec
+      Start 56: mhgp7_census_tower_line12
+20/40 Test #56: mhgp7_census_tower_line12 ......................   Passed    0.20 sec
+      Start 57: mhgp7_census_tower_shell14
+21/40 Test #57: mhgp7_census_tower_shell14 .....................   Passed    1.28 sec
+      Start 58: mhgp7_census_tower_spatial12
+22/40 Test #58: mhgp7_census_tower_spatial12 ...................   Passed    1.56 sec
+      Start 59: mhgp7_census_tower_rejects
+23/40 Test #59: mhgp7_census_tower_rejects .....................   Passed    0.02 sec
+      Start 60: mhgp7_census_tower_bad_argument
+24/40 Test #60: mhgp7_census_tower_bad_argument ................   Passed    0.02 sec
+      Start 61: mhgp7_census_tower_missing_argument
+25/40 Test #61: mhgp7_census_tower_missing_argument ............   Passed    0.02 sec
+      Start 62: mhgp7_census_tower_mutant_assignment
+26/40 Test #62: mhgp7_census_tower_mutant_assignment ...........   Passed    0.02 sec
+      Start 63: mhgp7_census_tower_mutant_open
+27/40 Test #63: mhgp7_census_tower_mutant_open .................   Passed    0.02 sec
+      Start 64: mhgp7_census_tower_mutant_adjacency
+28/40 Test #64: mhgp7_census_tower_mutant_adjacency ............   Passed    0.02 sec
+      Start 65: mhgp7_census_tower_mutant_census
+29/40 Test #65: mhgp7_census_tower_mutant_census ...............   Passed    0.05 sec
+      Start 66: mhgp7_full_ball_batch_cpu1
+30/40 Test #66: mhgp7_full_ball_batch_cpu1 .....................   Passed    0.92 sec
+      Start 67: mhgp7_full_ball_batch_cpu4
+31/40 Test #67: mhgp7_full_ball_batch_cpu4 .....................   Passed    1.01 sec
+      Start 68: mhgp7_full_ball_batch_rejects
+32/40 Test #68: mhgp7_full_ball_batch_rejects ..................   Passed    0.02 sec
+      Start 69: mhgp7_full_ball_batch_bad_argument
+33/40 Test #69: mhgp7_full_ball_batch_bad_argument .............   Passed    0.02 sec
+      Start 70: mhgp7_full_ball_batch_missing_argument
+34/40 Test #70: mhgp7_full_ball_batch_missing_argument .........   Passed    0.02 sec
+      Start 71: mhgp7_full_ball_work
+35/40 Test #71: mhgp7_full_ball_work ...........................   Passed    0.58 sec
+      Start 72: mhgp7_full_ball_work_bad_argument
+36/40 Test #72: mhgp7_full_ball_work_bad_argument ..............   Passed    0.02 sec
+      Start 73: mhgp7_full_ball_tower_probe_smoke
+37/40 Test #73: mhgp7_full_ball_tower_probe_smoke ..............   Passed    0.02 sec
+      Start 74: mhgp7_full_ball_tower_probe_bad_argument
+38/40 Test #74: mhgp7_full_ball_tower_probe_bad_argument .......   Passed    0.02 sec
+      Start 75: mhgp7_full_ball_static_probe_smoke
+39/40 Test #75: mhgp7_full_ball_static_probe_smoke .............   Passed    0.02 sec
+      Start 76: mhgp7_full_ball_static_probe_bad_threads
+40/40 Test #76: mhgp7_full_ball_static_probe_bad_threads .......   Passed    0.02 sec
+
+100% tests passed, 0 tests failed out of 40
+
+Label Time Summary:
+anchor_meb                   =   0.42 sec*proc (2 tests)
+census_tower                 =   3.57 sec*proc (11 tests)
+facet_resolver_cache         =   0.55 sec*proc (2 tests)
+full_ball_batch              =   1.98 sec*proc (5 tests)
+full_ball_static             =   2.07 sec*proc (4 tests)
+full_ball_tower              =   8.67 sec*proc (17 tests)
+full_coverage_certificate    =   0.04 sec*proc (2 tests)
+full_gabriel_digest          =   0.04 sec*proc (2 tests)
+gate                         =  11.02 sec*proc (38 tests)
+local_plateau                =   0.09 sec*proc (2 tests)
+mutant                       =   0.10 sec*proc (4 tests)
+oracle                       =   9.70 sec*proc (20 tests)
+stub                         =   0.06 sec*proc (2 tests)
+witness_front                =   1.04 sec*proc (2 tests)
+
+Total Test time (real) =  11.11 sec

@@ -1,0 +1,1 @@
+{"status": "passed", "capture": "san_root_r1", "commands": 11, "SAN": true, "direct_terminals": [118, 118], "rejections": {"status": "passed_batch_rejections", "cases": 65, "prefix_cases": 32, "known_paid": 44}, "large_scale_or_GPU_claimed": false}

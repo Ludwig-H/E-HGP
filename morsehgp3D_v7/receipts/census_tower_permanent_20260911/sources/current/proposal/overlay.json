@@ -1,0 +1,11 @@
+{
+  "callback_supplied": false,
+  "files": {
+    "src/forest/full_ball_tower.hpp": "83f1c78e0656f08cd42522e4cd36d153ce283a6082246a36fe5225b3790c6366"
+  },
+  "gcp_used": false,
+  "new_helpers": [],
+  "results_inherited": false,
+  "scope": "future_CPU_static_batch_seam_default_backend_only",
+  "source": "build/v7_static_batch_seam_20260911/source/morsehgp3D_v7/src/forest/full_ball_tower.hpp"
+}

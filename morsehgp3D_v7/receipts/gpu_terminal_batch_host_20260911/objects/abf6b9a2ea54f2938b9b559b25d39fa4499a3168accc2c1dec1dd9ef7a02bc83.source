@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+"""Create a private source copy from ROOT's CLOSED o2_r2 snapshot; no compile."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+
+HERE = Path(__file__).resolve().parent
+SOURCE = HERE.parent / "v7_terminal_batch_20260911/o2_r2"
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main():
+    receipt_path = SOURCE / "receipt.json"
+    receipt = json.loads(receipt_path.read_text())
+    if receipt["status"] != "passed" or receipt["sources_stable"] is not True or \
+            receipt["snapshot_stable"] is not True:
+        raise RuntimeError("closed source capture required")
+    if (HERE / "prototype").exists():
+        raise RuntimeError("create-only source import")
+    pins = receipt["sources_before"]
+    for relative, pin in pins.items():
+        if sha(SOURCE / "source_snapshot" / relative) != pin:
+            raise RuntimeError("source pin mismatch: " + relative)
+    shutil.copytree(SOURCE / "source_snapshot/prototype", HERE / "prototype")
+    shutil.copy2(SOURCE / "source_snapshot/record.py", HERE / "record.py")
+    shutil.copy2(receipt_path, HERE / "source_receipt.json")
+    for relative, pin in pins.items():
+        if sha(HERE / relative) != pin or sha(SOURCE / "source_snapshot" / relative) != pin:
+            raise RuntimeError("copy or source drift: " + relative)
+    metadata = {"source_capture": str(SOURCE), "source_receipt_sha256": sha(receipt_path),
+        "source_pins": pins, "source_status": "passed", "inherited_results": False,
+        "device_executed": False, "GCP_used": False}
+    with (HERE / "import.json").open("x") as output:
+        json.dump(metadata, output, indent=2, sort_keys=True)
+        output.write("\n")
+    print(json.dumps({"status": "source_copied", "files": len(pins), "geometry_executed": False}))
+
+
+if __name__ == "__main__":
+    main()

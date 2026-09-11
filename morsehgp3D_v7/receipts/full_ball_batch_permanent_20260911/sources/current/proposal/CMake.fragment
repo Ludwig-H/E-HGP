@@ -1,0 +1,14 @@
+# Optional geometry callback: test-only scalar owner, unchanged product header.
+mhgp7_product_executable(mhgp7_full_ball_batch_gate tests/full_ball_batch_gate.cpp)
+target_include_directories(mhgp7_full_ball_batch_gate SYSTEM PRIVATE ${MHGP7_DIGEST_BOOST_INCLUDE_DIR})
+foreach(workers IN ITEMS 1 4)
+  mhgp7_gate(mhgp7_full_ball_batch_cpu${workers} 0 mhgp7_full_ball_batch_gate
+             ARGS --selftest-${workers} LABELS "gate;full_ball_batch;full_ball_tower;oracle" TIMEOUT 120)
+endforeach()
+mhgp7_gate(mhgp7_full_ball_batch_rejects 0 mhgp7_full_ball_batch_gate
+           ARGS --rejects LABELS "gate;full_ball_batch;oracle" TIMEOUT 120)
+mhgp7_gate(mhgp7_full_ball_batch_bad_argument 2 mhgp7_full_ball_batch_gate
+           ARGS --unknown LABELS "gate;full_ball_batch" TIMEOUT 60)
+mhgp7_gate(mhgp7_full_ball_batch_missing_argument 2 mhgp7_full_ball_batch_gate
+           LABELS "gate;full_ball_batch" TIMEOUT 60)
+

@@ -1,0 +1,215 @@
+--- morsehgp3D_v7/src/forest/full_ball_tower.hpp
++++ morsehgp3D_v7/src/forest/full_ball_tower.hpp
+@@ -49,7 +49,48 @@
+   u64 static_workers_created = 0, static_peak_request_bytes = 0, static_peak_target_bytes = 0;
+   u64 static_lanes_used = 0, static_peak_retained_bytes = 0;
+   u64 static_peak_seed_bytes = 0, static_peak_group_bytes = 0, static_peak_worker_bytes = 0;
++  u64 static_batch_calls = 0, static_peak_batch_bytes = 0;
++  // False after a backend failure whose paid work could not be recovered.
++  bool static_batch_work_known = true;
+   AnchorMebWork validation_work, resolve_work;
++};
++
++// Optional, synchronous geometry-only seam. The external owner is bound once
++// to the SAME immutable index and BallData storage, not merely equal sizes.
++// BallIds always index balls in its original order. by_key is a borrowed lookup
++// permutation owned by this build; no view may outlive the callback/run.
++struct FullBallGeometryView {
++  const CloudIndex& index;
++  std::span<const BallData> balls;
++  std::span<const u32> by_key;
++};
++using FullBallFacetKey = std::array<i32, kFacetMaxK>;
++struct FullBallBatchSeed { FullBallFacetKey key; u32 ball; };
++struct FullBallBatchRequest {
++  FullBallFacetKey key;
++  u32 consumer;  // before = geometry.balls[consumer].level, exactly
++  u64 ordinal;  // earliest original occurrence; stable, not a sorted index
++};
++struct FullBallBatchView {
++  unsigned k;
++  std::span<const FullBallBatchSeed> seeds;  // whole I union U, sorted exact keys
++  std::span<const FullBallBatchRequest> requests;  // sorted unique, initial seeds removed
++};
++struct FullBallBatchTarget { u32 ball; u64 ordinal; };
++struct FullBallBatchResult {
++  FullBallStatus status = FullBallStatus::kInvariantViolated;
++  const char* reason = "full_ball_batch_uninitialized";  // static lifetime
++  bool work_known = false;
++  FullBallStats work;  // only geometric counters are merged, including Q/H/T
++  u64 retained_bytes = 0;  // backend-owned sampled capacities, not RSS/VRAM peak
++  // Transactional: empty on error; publish only after every admitted worker is
++  // joined and every slot checked. Same order and ordinals as requests.
++  std::vector<FullBallBatchTarget> targets;
++};
++struct FullBallBatchResolver {
++  void* owner = nullptr;
++  void (*resolve)(void*, const FullBallGeometryView&, const FullBallBatchView&,
++                  FullBallBatchResult&) = nullptr;
+ };
+ struct FullBallOrder {
+   FullCoverageCertificate forest;
+@@ -249,13 +290,15 @@
+ class Builder {
+  public:
+   Builder(const CloudIndex& index, std::span<const BallData> census, unsigned max_k, FullBallStats& stats,
+-      int static_threads = 0)
++      int static_threads = 0, FullBallBatchResolver batch = {})
+       : ix(index), balls(census), requested(max_k), st(stats), resolver_cache(stats),
+-        geometry_threads(static_threads) {}
++        geometry_threads(static_threads), batch_resolver(batch) {}
+ 
+   std::vector<FullBallOrder> run() {
+     validate_catalogue();
+     require(geometry_threads >= 0, "full_ball_static_threads", FullBallStatus::kInvalidInput);
++    require(!batch_resolver.resolve || geometry_threads > 0,
++        "full_ball_batch_requires_static", FullBallStatus::kInvalidInput);
+     if (kmax > 1 && !geometry_threads) resolver_cache.configure(ix.upos.size());
+     std::vector<Draft> drafts;
+     History lower_history;
+@@ -345,7 +388,8 @@
+   FullBallStats& st;
+   ResolverCache resolver_cache;
+   int geometry_threads = 0;
+-  struct StaticSeed { ResolverCache::Key key; BallId ball; };
++  FullBallBatchResolver batch_resolver;
++  using StaticSeed = FullBallBatchSeed;
+   std::vector<BallId> static_targets;
+   size_t static_cursor = 0;
+   std::vector<PointId> domain;
+@@ -602,8 +646,110 @@
+       add(st.resolve_work.supports_by_size[q], w.resolve_work.supports_by_size[q]);
+   }
+ 
++  void prepare_external_batch(const std::vector<FullBallBatchRequest>& requests,
++      const std::vector<size_t>& groups, const std::vector<StaticSeed>& seeds) {
++    const BallId missing = std::numeric_limits<BallId>::max();
++    std::vector<BallId> unique_targets(groups.size() - 1, missing);
++    std::vector<FullBallBatchRequest> pending;
++    FullBallBatchResult result;
++    bool invoked = false;
++    const auto account = [&] {
++      // Account paid geometry before fallible capacity arithmetic. A partial
++      // global counter merge cannot retain a claim that all work is known.
++      if (result.work_known) {
++        try { merge_static_work(result.work); }
++        catch (...) { st.static_batch_work_known = false; throw; }
++      } else if (invoked) st.static_batch_work_known = false;
++      u64 bytes = pending.capacity() * sizeof(FullBallBatchRequest);
++      add(bytes, unique_targets.capacity() * sizeof(BallId));
++      add(bytes, result.targets.capacity() * sizeof(FullBallBatchTarget));
++      add(bytes, result.retained_bytes);
++      st.static_peak_batch_bytes = std::max(st.static_peak_batch_bytes, bytes);
++      const u64 seed_bytes = seeds.capacity() * sizeof(StaticSeed);
++      const u64 group_bytes = groups.capacity() * sizeof(size_t);
++      st.static_peak_seed_bytes = std::max(st.static_peak_seed_bytes, seed_bytes);
++      st.static_peak_group_bytes = std::max(st.static_peak_group_bytes, group_bytes);
++      add(bytes, requests.capacity() * sizeof(FullBallBatchRequest));
++      add(bytes, static_targets.capacity() * sizeof(BallId));
++      add(bytes, seed_bytes); add(bytes, group_bytes);
++      st.static_peak_retained_bytes = std::max(st.static_peak_retained_bytes, bytes);
++    };
++    try {
++      for (size_t group = 0; group + 1 < groups.size(); ++group) {
++        const auto& first = requests[groups[group]];
++        const auto seed = std::lower_bound(seeds.begin(), seeds.end(), first.key,
++            [](const StaticSeed& a, const FullBallFacetKey& key) { return a.key < key; });
++        if (seed != seeds.end() && seed->key == first.key) {
++          require(compare_exact_level(balls[seed->ball].level, balls[first.consumer].level) < 0,
++                  "full_ball_static_seed_not_strict");
++          unique_targets[group] = seed->ball;
++          add(st.static_seeded[current_k]);
++        } else pending.push_back(first);
++      }
++      if (!pending.empty()) {
++        add(st.static_batch_calls);
++        invoked = true;
++        batch_resolver.resolve(batch_resolver.owner, {ix, balls, by_key},
++            {current_k, seeds, pending}, result);
++      } else result.work_known = true;  // no callback and no geometric work
++    } catch (const std::bad_alloc&) { account(); throw; }
++      catch (const std::length_error&) { account(); throw; }
++      catch (const std::system_error&) { account(); throw; }
++      catch (const Failure&) { account(); throw; }
++      catch (...) {
++        account();
++        throw Failure{FullBallStatus::kInvariantViolated, "full_ball_batch_exception"};
++      }
++    account();  // retain paid work even if validation below rejects publication
++    if (!pending.empty()) {
++      if (result.status != FullBallStatus::kCompleteRelative) {
++        require(result.targets.empty(), "full_ball_batch_partial_publication");
++        require(result.status == FullBallStatus::kInvalidInput ||
++            result.status == FullBallStatus::kResourceExhausted ||
++            result.status == FullBallStatus::kInvariantViolated, "full_ball_batch_status");
++        throw Failure{result.status, result.reason ? result.reason : "full_ball_batch_failed"};
++      }
++      require(result.work_known, "full_ball_batch_success_work_unknown");
++      require(result.targets.size() == pending.size(), "full_ball_batch_target_count");
++      const auto& w = result.work;
++      const u64 q = w.static_post_seed_queries[current_k], h = w.static_post_seed_hits[current_k];
++      const u64 t = w.static_post_seed_terminals[current_k];
++      u64 steps = w.descending_steps; add(steps, w.same_radius_steps);
++      u64 paid = w.anchor_hits; add(paid, w.intruder_queries);
++      u64 terminals = w.anchor_hits; add(terminals, t);
++      require(q == steps && h == t && h <= std::min<u64>(steps, pending.size()) &&
++          w.resolve_work.calls == paid && terminals == pending.size() &&
++          w.intruder_queries == steps && w.key_lookups == w.resolve_work.calls,
++          "full_ball_batch_work_identity");
++      for (size_t k = 0; k < w.static_post_seed_queries.size(); ++k)
++        require(k == current_k || (!w.static_post_seed_queries[k] && !w.static_post_seed_hits[k] &&
++            !w.static_post_seed_terminals[k]), "full_ball_batch_work_order");
++      for (size_t j = 0; j < pending.size(); ++j) {
++        const auto& target = result.targets[j];
++        require(target.ordinal == pending[j].ordinal, "full_ball_batch_target_ordinal");
++        require(target.ball < balls.size(), "full_ball_batch_target_domain");
++        const auto& b = balls[target.ball];
++        require(current_k >= static_cast<unsigned>(b.n_interior) + b.arity - 1 &&
++            current_k <= b.n_interior + b.n_shell, "full_ball_batch_target_rank");
++        require(compare_exact_level(b.level, balls[pending[j].consumer].level) < 0,
++                "full_ball_batch_target_not_strict");
++      }
++    }
++    size_t next = 0;
++    for (size_t group = 0; group + 1 < groups.size(); ++group) {
++      if (unique_targets[group] == missing) unique_targets[group] = result.targets[next++].ball;
++      const auto& before = balls[requests[groups[group]].consumer].level;
++      for (size_t r = groups[group]; r < groups[group + 1]; ++r) {
++        require(compare_exact_level(before, balls[requests[r].consumer].level) <= 0,
++                "full_ball_static_request_chronology");
++        static_targets[requests[r].ordinal] = unique_targets[group];
++      }
++    }
++    require(next == pending.size(), "full_ball_batch_unconsumed_results");
++  }
++
+   void prepare_static_order() {
+-    struct Request { ResolverCache::Key key; BallId consumer; size_t ordinal; };
++    using Request = FullBallBatchRequest;
+     std::vector<Request> requests;
+     std::vector<StaticSeed> seeds;
+     for (BallId id : programs[current_k]) {
+@@ -643,6 +789,10 @@
+     static_targets.assign(requests.size(), std::numeric_limits<BallId>::max());
+     st.static_peak_target_bytes = std::max<u64>(st.static_peak_target_bytes,
+         static_targets.capacity() * sizeof(BallId));
++    if (batch_resolver.resolve) {
++      prepare_external_batch(requests, groups, seeds);
++      return;
++    }
+     struct Worker { FullBallStats work; std::vector<NodeRef> scratch; u64 seeded = 0; };
+     std::vector<Worker> workers(planned_workers(groups.size() - 1, geometry_threads));
+     const auto account = [&] {
+@@ -930,10 +1080,10 @@
+ }  // namespace full_ball_detail
+ 
+ inline FullBallTowerResult build_full_ball_tower(const CloudIndex& ix, std::span<const BallData> balls,
+-    unsigned kmax, int static_threads = 0) {
++    unsigned kmax, int static_threads = 0, FullBallBatchResolver batch = {}) {
+   FullBallTowerResult result;
+   try {
+-    result.orders = full_ball_detail::Builder(ix, balls, kmax, result.stats, static_threads).run();
++    result.orders = full_ball_detail::Builder(ix, balls, kmax, result.stats, static_threads, batch).run();
+     result.status = FullBallStatus::kCompleteRelative; result.reason = kFullBallAuthority;
+   } catch (const full_ball_detail::Failure& error) {
+     result.status = error.status; result.reason = error.reason;

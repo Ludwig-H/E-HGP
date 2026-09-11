@@ -1,0 +1,583 @@
+{
+  "backtraceGraph" : 
+  {
+    "commands" : 
+    [
+      "add_test",
+      "mhgp7_gate"
+    ],
+    "files" : 
+    [
+      "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/CMakeLists.txt"
+    ],
+    "nodes" : 
+    [
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 225,
+        "parent" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 1
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 225,
+        "parent" : 3
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 4
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 225,
+        "parent" : 6
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 7
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 225,
+        "parent" : 9
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 10
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 225,
+        "parent" : 12
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 13
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 228,
+        "parent" : 15
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 16
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 230,
+        "parent" : 18
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 19
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 232,
+        "parent" : 21
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 22
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 235,
+        "parent" : 24
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 25
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 238,
+        "parent" : 27
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 28
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 241,
+        "parent" : 30
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 34,
+        "parent" : 31
+      }
+    ]
+  },
+  "kind" : "ctestInfo",
+  "tests" : 
+  [
+    {
+      "backtrace" : 2,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build/mhgp7_census_tower_gate",
+        "-DARGS=--historical",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_census_tower_historical",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "census_tower",
+            "full_ball_tower",
+            "gate",
+            "oracle"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 5,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build/mhgp7_census_tower_gate",
+        "-DARGS=--line12",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_census_tower_line12",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "census_tower",
+            "full_ball_tower",
+            "gate",
+            "oracle"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 8,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build/mhgp7_census_tower_gate",
+        "-DARGS=--shell14",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_census_tower_shell14",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "census_tower",
+            "full_ball_tower",
+            "gate",
+            "oracle"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 11,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build/mhgp7_census_tower_gate",
+        "-DARGS=--spatial12",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_census_tower_spatial12",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "census_tower",
+            "full_ball_tower",
+            "gate",
+            "oracle"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 14,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DCMD=/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build/mhgp7_census_tower_gate",
+        "-DARGS=--rejects",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_census_tower_rejects",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "census_tower",
+            "full_ball_tower",
+            "gate",
+            "oracle"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 17,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build/mhgp7_census_tower_gate",
+        "-DARGS=--unknown",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_census_tower_bad_argument",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "census_tower",
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 20,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=2",
+        "-DCMD=/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build/mhgp7_census_tower_gate",
+        "-DARGS=",
+        "-DEXPECT_LINE=",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_census_tower_missing_argument",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "census_tower",
+            "gate"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 23,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=1",
+        "-DCMD=/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build/mhgp7_census_tower_gate",
+        "-DARGS=--mutant-assignment",
+        "-DEXPECT_LINE=cause=T2 unassigned subset",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_census_tower_mutant_assignment",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "census_tower",
+            "gate",
+            "mutant",
+            "oracle"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 26,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=1",
+        "-DCMD=/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build/mhgp7_census_tower_gate",
+        "-DARGS=--mutant-open",
+        "-DEXPECT_LINE=cause=T2.historical.exact_Gamma",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_census_tower_mutant_open",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "census_tower",
+            "gate",
+            "mutant",
+            "oracle"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 29,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=1",
+        "-DCMD=/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build/mhgp7_census_tower_gate",
+        "-DARGS=--mutant-adjacency",
+        "-DEXPECT_LINE=cause=T2.historical.exact_Gamma",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_census_tower_mutant_adjacency",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "census_tower",
+            "gate",
+            "mutant",
+            "oracle"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build"
+        }
+      ]
+    },
+    {
+      "backtrace" : 32,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DEXPECTED=1",
+        "-DCMD=/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build/mhgp7_census_tower_gate",
+        "-DARGS=--mutant-census",
+        "-DEXPECT_LINE=cause=T2.census.exhaustive_ball_inventory",
+        "-DEXPECT_PREFIX=",
+        "-P",
+        "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/source_snapshot/morsehgp3D_v7/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp7_census_tower_mutant_census",
+      "properties" : 
+      [
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "census_tower",
+            "gate",
+            "mutant",
+            "oracle"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/workspaces/E-HGP/build/v7_census_tower_permanent_20260911/o2_r1/cmake_build"
+        }
+      ]
+    }
+  ],
+  "version" : 
+  {
+    "major" : 1,
+    "minor" : 0
+  }
+}

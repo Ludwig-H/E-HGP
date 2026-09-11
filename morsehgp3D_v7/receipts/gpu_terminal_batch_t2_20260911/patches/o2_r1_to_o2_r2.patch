@@ -1,0 +1,11 @@
+--- o2_r1/prototype/batch_t2_gate.cpp
++++ o2_r2/prototype/batch_t2_gate.cpp
+@@ -58,7 +58,7 @@
+ }  // namespace batch_t2
+ FullBallTowerResult batch_t2_builder(const CloudIndex& ix, std::span<const BallData> balls,
+     unsigned kmax, int threads = 0) {
+-  const auto scalar = build_full_ball_tower(ix, balls, kmax, threads);
++  auto scalar = build_full_ball_tower(ix, balls, kmax, threads);
+   if (!threads) return scalar;
+   batch_t2::Owner owner(ix, balls);
+   auto result = build_full_ball_tower(ix, balls, kmax, threads, {&owner, batch_t2::Owner::resolve});

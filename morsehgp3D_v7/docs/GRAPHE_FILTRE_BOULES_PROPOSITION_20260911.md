@@ -1,6 +1,6 @@
 # Graphe filtré des boules : proposition pour paralléliser les fusions
 
-11 septembre 2026. Proposition d'architecture argumentée, soumise à relecture indépendante par l'auditeur. Aucune implémentation, expérience ou qualification nouvelle ; aucun claim de performance. Cadre : phase=exploration_v7_hors_registre, backend=cpu_reference, profile=quantized_u16_input_only, mode=audit_independant_math_and_architecture, public_status=not_claimed.
+11 septembre 2026. Proposition d'architecture argumentée, relue indépendamment à `90ee69ee` : accord conditionnel et réduction supplémentaire aux naissances. Aucun raccord C++/GPU ni claim de performance. Cadre : phase=exploration_v7_hors_registre, backend=cpu_reference, profile=quantized_u16_input_only, mode=audit_independant_math_and_architecture, public_status=not_claimed.
 
 ## 1. Objet et prémisses
 
@@ -85,3 +85,15 @@ Questions proposées à l'auditeur : l'induction couvre-t-elle bien tout bloc ad
 Sources locales : [constructeur](../src/forest/full_ball_tower.hpp) `6763a877…`, [ancres de boules](../audits/receipts_plateaux_full_20260906/BALL_ANCHORS.md), [contre-fixtures de couverture](../audits/receipts_plateaux_full_20260906/LOCAL_DIAGNOSTICS.md), [contrat courant](../audits/NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md). Leurs qualifications antérieures gardent leur portée ; cette proposition n'en hérite aucune. Le constructeur n'est pas modifié par cette note. GCP non utilisé.
 
 Une piste d'implémentation ultérieure serait de trier et regrouper exactement les niveaux de boules une fois, puis d'utiliser leurs rangs entiers comme dates du graphe. Cela conserve l'ordre et les égalités sans comparer des rationnels à chaque arête sur GPU. Le tri certifié, le coût de stockage des rangs, la reconstruction de l'histoire et l'export resteraient à qualifier et à chronométrer. Aucun gain n'est mesuré ici.
+
+## 6. Retour de l'auditeur : éliminer les hubs non natifs
+
+La [preuve et son modèle indépendant](../audits/receipts_filtered_graph_20260911/README.md), publiés à `90ee69ee`, confirment l'induction sous ses prémisses et donnent une réduction avant même le calcul de forêt couvrante. Pour chaque bloc non natif, choisir un terminal pivot déterministe, strictement antérieur. En répétant ces pivots, on atteint une naissance ; noter cette naissance φ(B). À K1, les points jouent le rôle de naissances.
+
+Ne conserver comme sommets du graphe que ces naissances. Pour chaque terminal non pivot T du bloc B, émettre une arête φ(B)–φ(T), datée **λ_B**. Supprimer les boucles ; pour les arêtes parallèles, garder le **minimum exact** des dates. Cette réduction préserve les composantes à chaque coupe ouverte et fermée, pas les adjacences d'origine. Si L est le nombre de naissances, le graphe avant suppression des boucles/doublons a L sommets et R−A+L arêtes, avec la convention du § 5 incluant les points K1 dans A.
+
+La naissance φ(B) peut être ancienne, mais l'ancre du bloc B n'est disponible qu'à λ_B. Les marques `(K,B,λ_B,φ(B))`, les dates de naissance et les contributions datées restent donc nécessaires. Pour une naissance à K>1, conserver la référence inférieure de même boule, puis normaliser son image à λ_B **fermé**. La naturalité des parents n'est pas remplacée par le seul graphe horizontal.
+
+Le calcul des pivots peut employer le saut de pointeurs en parallèle : hauteur h, O(log(1+h)) rondes et O(A(1+log(1+h))) travail pour la variante discutée, y compris h=0. Il reste une table φ de taille O(A) ; réduire le graphe ne signifie donc pas automatiquement réduire la mémoire totale. Le modèle indépendant rapporte 267 cas et 37 356 coupes, avec mutants de dates et d'ancres ; ces graphes abstraits ne sont pas tous des nuages 3D réalisables. Ce résultat ne certifie ni le census ni la géométrie, et n'est pas une mesure de vitesse.
+
+La [seconde contre-lecture](../audits/NOTE_CLAUDE_RACCORD_PERMANENT_ET_GRAPHE_20260911.md) confirme par le code la fenêtre des blocs, y compris les coquilles supplémentaires et K=n, ainsi que l'antériorité stricte. Le prochain verrou reste une implémentation comparée au calendrier actuel sur les mêmes géométries, coupes, contributions et verticales ; aucun remplacement du moteur n'est encore effectué.

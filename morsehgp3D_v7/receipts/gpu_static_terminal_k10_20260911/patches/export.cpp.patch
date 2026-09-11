@@ -1,0 +1,108 @@
+--- k8/cuda_trial/export.cpp
++++ k10/cuda_trial/export.cpp
+@@ -5,6 +5,7 @@
+ #undef main
+ #include "fixture_types.hpp"
+ #include "reference.hpp"
++#include "large_cases.hpp"
+ 
+ namespace export_terminal {
+ namespace tc = mhgp7::terminal_cuda_gate;
+@@ -50,13 +51,25 @@
+   std::vector<tc::CloudFixture> clouds;
+   std::vector<tc::PinnedRequest> requests;
+   std::vector<t::TraceRow> traces;
+-  u64 q[5]{}, equal = 0, strict = 0, intruders = 0, extra = 0, gram = 0;
+-  for (const auto& fixture : fixtures()) {
++  u64 q[5]{}, equal = 0, strict = 0, intruders = 0, extra = 0, gram = 0, model_cross_checks = 0;
++  u64 count_k[11]{}, strict_k[11]{}, intruder_k[11]{}, q3_k[11]{}, q4_k[11]{};
++  const auto plans = planned_fixtures();
++  // Build every mask list before any MEB/model/catalogue computation.
++  std::vector<std::vector<u32>> mask_plans;
++  for (const auto& fixture : plans) mask_plans.push_back(declared_masks(fixture));
++  size_t plan_index = 0;
++  for (const auto& fixture : plans) {
+     context = fixture.name;
+     const auto ix = build_cloud_index(fixture.points);
+-    const oracle::Model model(fixture.points);
++    const FixtureOracle model(fixture);
++    if (model.historical) for (u32 mask = 1; mask < (u32{1} << fixture.points.size()); ++mask) {
++      const auto old = model.historical->meb(mask), assigned = model.assigned->meb(mask);
++      need(old.center == assigned.center && old.radius2 == assigned.radius2,"export.T2_historical_model_equality");
++      ++model_cross_checks;
++    }
+     // Full finite fixture catalogue, not a large-cloud product algorithm.
+-    const auto catalogue_rows = catalogue(fixture.points, ix, model, static_cast<unsigned>(fixture.points.size()));
++    const auto catalogue_rows = model.historical ? catalogue(fixture.points, ix, *model.historical,
++        static_cast<unsigned>(fixture.points.size())) : large_catalogue(fixture.points,ix);
+     tc::CpuTerminal reference(ix, catalogue_rows);
+     tc::CloudFixture cloud{static_cast<u32>(points.size()),static_cast<u32>(ix.upos.size()),
+         static_cast<u32>(balls.size()),static_cast<u32>(catalogue_rows.size()),
+@@ -65,10 +78,9 @@
+     for (const auto& ball : catalogue_rows)
+       balls.push_back({t::meb_key::encode_key(ball.key),t::encode_level(ball.level),ball.arity,
+           ball.n_interior,ball.n_shell,0});
+-    const u32 domain = (u32{1} << ix.upos.size()) - 1;
+-    for (u32 mask = 1; mask <= domain; ++mask) {
++    const auto& masks = mask_plans[plan_index++];
++    for (u32 mask : masks) {
+       const auto k = static_cast<u32>(std::popcount(mask));
+-      if (k < 2) continue;  // K1 is explicitly outside this terminal API.
+       context = std::string(fixture.name) + "/mask=" + std::to_string(mask);
+       tc::PinnedRequest pinned{};
+       pinned.request.ordinal = (u64{1} << 40) + requests.size();
+@@ -95,17 +107,22 @@
+         need(same_exact_level(t::decode_level(row.level),level(independent.radius2)),
+             "export.trace_Gram_level");
+         ++gram; ++q[row.selection.q];
++        q3_k[k] += row.selection.q == 3; q4_k[k] += row.selection.q == 4;
+         extra += row.selection.shell > row.selection.q;
+       }
+       equal += pinned.result.work.same_radius_steps; strict += pinned.result.work.descending_steps;
+       intruders += pinned.result.work.intruder_queries;
++      ++count_k[k]; strict_k[k] += pinned.result.work.descending_steps;
++      intruder_k[k] += pinned.result.work.intruder_queries;
+       requests.push_back(pinned); ++cloud.request_count;
+     }
+-    need(cloud.request_count == domain - ix.upos.size(),"export.all_facets_accounted");
++    need(cloud.request_count == masks.size(),"export.all_declared_facets_accounted");
+     clouds.push_back(cloud);
+   }
+-  need(clouds.size() == 14 && q[2] && q[3] && q[4] && equal && strict && intruders && extra,
++  need(clouds.size() == 17 && requests.size() == 1577 && q[2] && q[3] && q[4] && equal && strict && intruders && extra &&
++      model_cross_checks == 1022 && count_k[9] == 468 && count_k[10] == 160,
+       "export.nonvacuity");
++  for (u32 k : {9u,10u}) need(strict_k[k] && intruder_k[k] && q3_k[k] && q4_k[k],"export.high_K_nonvacuity");
+   for (const auto& p : requests) need(p.request.ordinal > (u64{1} << 32) &&
+       p.result.ordinal == p.request.ordinal,"export.large_ordinal_identity");
+   std::printf("// Generated from pinned Gram catalogues and c03 CPU terminal; no inherited GPU result.\n");
+@@ -127,16 +144,25 @@
+   std::fprintf(stderr,"{\"status\":\"passed\",\"clouds\":%zu,\"requests\":%zu,\"trace_rows\":%zu,"
+       "\"Gram_checked_rows\":%llu,\"q2\":%llu,\"q3\":%llu,\"q4\":%llu,\"extra_shells\":%llu,"
+       "\"strict_steps\":%llu,\"same_radius_steps\":%llu,\"intruder_queries\":%llu,"
+-      "\"large_ordinals\":%zu,\"all_declared_facets_nominal\":true,\"silently_filtered_failures\":0}\n",
++      "\"large_ordinals\":%zu,\"model_cross_checks\":%llu,\"K9_requests\":%llu,\"K10_requests\":%llu,"
++      "\"K9_strict_steps\":%llu,\"K10_strict_steps\":%llu,\"K9_intruder_queries\":%llu,\"K10_intruder_queries\":%llu,"
++      "\"K9_q3\":%llu,\"K10_q3\":%llu,\"K9_q4\":%llu,\"K10_q4\":%llu,"
++      "\"all_declared_facets_nominal\":true,\"silently_filtered_failures\":0}\n",
+       clouds.size(),requests.size(),traces.size(),(unsigned long long)gram,(unsigned long long)q[2],
+       (unsigned long long)q[3],(unsigned long long)q[4],(unsigned long long)extra,
+-      (unsigned long long)strict,(unsigned long long)equal,(unsigned long long)intruders,requests.size());
++      (unsigned long long)strict,(unsigned long long)equal,(unsigned long long)intruders,requests.size(),
++      (unsigned long long)model_cross_checks,(unsigned long long)count_k[9],(unsigned long long)count_k[10],
++      (unsigned long long)strict_k[9],(unsigned long long)strict_k[10],
++      (unsigned long long)intruder_k[9],(unsigned long long)intruder_k[10],
++      (unsigned long long)q3_k[9],(unsigned long long)q3_k[10],(unsigned long long)q4_k[9],(unsigned long long)q4_k[10]);
+   return 0;
+ }
+ }  // namespace export_terminal
+ int main(int argc,char** argv) {
+-  if (argc != 2 || std::string_view(argv[1]) != "--export") return 2;
+-  try { return export_terminal::run(); }
++  if (argc != 2) return 2;
++  const auto mode = std::string_view(argv[1]);
++  if (mode != "--export" && mode != "--plan") return 2;
++  try { return mode == "--plan" ? export_terminal::print_plan() : export_terminal::run(); }
+   catch (const Failure& error) { std::fprintf(stderr,"FAIL %s: %s\n",context.c_str(),error.why); return 1; }
+   catch (const std::exception& error) { std::fprintf(stderr,"FAIL %s: %s\n",context.c_str(),error.what()); return 1; }
+ }

@@ -1,0 +1,14 @@
+--- o2_r3/prototype/batch_gate.cpp
++++ o2_r4/prototype/batch_gate.cpp
+@@ -99,7 +99,10 @@
+     FullBallBatchResult output;
+     bool rejected = false;
+     try { route::publish_work(rows, 2, output); }
+-    catch (const std::overflow_error&) { rejected = true; }
++    catch (const full_ball_detail::Failure& error) {
++      rejected = error.status == FullBallStatus::kResourceExhausted &&
++          std::string_view(error.reason) == "full_ball_counter_overflow";
++    }
+     need(rejected && !output.work_known && output.work.resolve_work.calls == 0 && output.targets.empty(),
+         "batch.synthetic_aggregate_overflow_is_unknown");
+     ++aggregate_rejects;

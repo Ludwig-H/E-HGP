@@ -1,0 +1,458 @@
+[
+  {
+    "argv": [
+      "g++",
+      "--version"
+    ],
+    "ended_ns": 1789131742795705216,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "compiler_version",
+    "started_ns": 1789131742792509047,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8"
+  },
+  {
+    "argv": [
+      "cmake",
+      "--version"
+    ],
+    "ended_ns": 1789131742810582550,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "cmake_version",
+    "started_ns": 1789131742796209555,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "d3d5b682f3f5ef5b24a79ed8cf4b8c5868fc950dad48cab1be0e3c060a77f8ee"
+  },
+  {
+    "argv": [
+      "ctest",
+      "--version"
+    ],
+    "ended_ns": 1789131742824257137,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "ctest_version",
+    "started_ns": 1789131742811220728,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "fd61d05e1e746f5652d87e0b6c9bafa334e95b89d1e53b1bfeb7d2af3ab208dc"
+  },
+  {
+    "argv": [
+      "g++",
+      "-print-prog-name=cc1plus"
+    ],
+    "ended_ns": 1789131742827601206,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "compiler_frontend",
+    "started_ns": 1789131742824837420,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "3cf1bad0c4b2b5e0a6d569f800f949510f194bb594dcfaeddb1394fd3cc91758"
+  },
+  {
+    "argv": [
+      "cmake",
+      "-S",
+      "/workspaces/E-HGP/morsehgp3D_v7",
+      "-B",
+      "/workspaces/E-HGP/build/v7_batch_active_20260911/cmake_build",
+      "-DCMAKE_BUILD_TYPE=Release",
+      "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+      "-DMHGP7_ENABLE_CUDA=OFF",
+      "-DMHGP7_DIGEST_BOOST_INCLUDE_DIR=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include"
+    ],
+    "ended_ns": 1789131743743382473,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "configure",
+    "started_ns": 1789131743094946315,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "d4b8fe829059da9d1cf9926cfe3885a689551026f493858261ed94885d2305c2"
+  },
+  {
+    "argv": [
+      "/usr/bin/c++",
+      "-M",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-O3",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "/workspaces/E-HGP/morsehgp3D_v7/tests/anchor_meb_gate.cpp"
+    ],
+    "ended_ns": 1789131744664524079,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "dependencies_mhgp7_anchor_meb_gate",
+    "started_ns": 1789131743745050942,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "2096bdbe6e0639a86e02fb9050fbbde42fd5cab5a4357678599fab6b92d74580"
+  },
+  {
+    "argv": [
+      "/usr/bin/c++",
+      "-M",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-O3",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "/workspaces/E-HGP/morsehgp3D_v7/tests/full_ball_tower_gate.cpp"
+    ],
+    "ended_ns": 1789131745192119235,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "dependencies_mhgp7_full_ball_tower_gate",
+    "started_ns": 1789131744804489886,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "92154ad6c4435bff8587748ab922b773a69b5591074588dbbfa95d2f22b9fcd1"
+  },
+  {
+    "argv": [
+      "/usr/bin/c++",
+      "-M",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-O3",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "/workspaces/E-HGP/morsehgp3D_v7/tests/full_ball_work_gate.cpp"
+    ],
+    "ended_ns": 1789131745749358886,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "dependencies_mhgp7_full_ball_work_gate",
+    "started_ns": 1789131745334967364,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "882f3cd829480e6cee6ca15092758fc1d075de9c632bc7c15c8d5073ce882935"
+  },
+  {
+    "argv": [
+      "/usr/bin/c++",
+      "-M",
+      "-O3",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "/workspaces/E-HGP/morsehgp3D_v7/bench/full_ball_tower_probe.cpp"
+    ],
+    "ended_ns": 1789131746037446077,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "dependencies_mhgp7_full_ball_tower_probe",
+    "started_ns": 1789131745894189210,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "5a3eb72e955249e5a87ed3a6d284edc2d24a26a1b1913288399552f90e8441a1"
+  },
+  {
+    "argv": [
+      "/usr/bin/c++",
+      "-M",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-O3",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "/workspaces/E-HGP/morsehgp3D_v7/tests/full_coverage_certificate_gate.cpp"
+    ],
+    "ended_ns": 1789131746475249593,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "dependencies_mhgp7_full_coverage_certificate_gate",
+    "started_ns": 1789131746104023085,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "7d33e734bfd9db25b727443d856c6cba403035deb98c3d88772c37fd33dcec58"
+  },
+  {
+    "argv": [
+      "/usr/bin/c++",
+      "-M",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-O3",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "/workspaces/E-HGP/morsehgp3D_v7/tests/local_plateau_gate.cpp"
+    ],
+    "ended_ns": 1789131746938343154,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "dependencies_mhgp7_local_plateau_gate",
+    "started_ns": 1789131746623219783,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "9931c964758ef96b04ad824ed072304e8575a9ead6037a59879f235b09de25df"
+  },
+  {
+    "argv": [
+      "/usr/bin/c++",
+      "-M",
+      "-DMHGP7_TESTING=1",
+      "-O3",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "/workspaces/E-HGP/morsehgp3D_v7/tests/census_route_stub_gate.cpp"
+    ],
+    "ended_ns": 1789131747258947189,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "dependencies_mhgp7_census_route_stub_gate",
+    "started_ns": 1789131747069702134,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "3c6c3b219ef60bb5da621416c44f3d5290ec2bd29688125804da14a5b38298f8"
+  },
+  {
+    "argv": [
+      "/usr/bin/c++",
+      "-M",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-O3",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "/workspaces/E-HGP/morsehgp3D_v7/tests/full_gabriel_digest_gate.cpp"
+    ],
+    "ended_ns": 1789131747717892371,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "dependencies_mhgp7_full_gabriel_digest_gate",
+    "started_ns": 1789131747351779150,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "39d0ebeb2b7dc90f0b199d3014aa56b4fb1192de7bcfbcb03230de7ba1a298bc"
+  },
+  {
+    "argv": [
+      "/usr/bin/c++",
+      "-M",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-O3",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "/workspaces/E-HGP/morsehgp3D_v7/tests/facet_resolver_cache_gate.cpp"
+    ],
+    "ended_ns": 1789131748564928008,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "dependencies_mhgp7_facet_resolver_cache_gate",
+    "started_ns": 1789131747936274793,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "8e51da3b360254a58b6a9c90bc7ad7b05ed283defdbba3a2f6b3edc49bd5992d"
+  },
+  {
+    "argv": [
+      "/usr/bin/c++",
+      "-M",
+      "-O3",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "/workspaces/E-HGP/morsehgp3D_v7/tests/witness_front_gate.cpp"
+    ],
+    "ended_ns": 1789131748880124908,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "dependencies_mhgp7_witness_front_gate",
+    "started_ns": 1789131748771724289,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "df0a845d62e106bb1d4f2437df07025168b122bffac536bd7cfb4ec1687e9d44"
+  },
+  {
+    "argv": [
+      "/usr/bin/c++",
+      "-M",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-O3",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "/workspaces/E-HGP/morsehgp3D_v7/tests/census_tower_gate.cpp"
+    ],
+    "ended_ns": 1789131749468024853,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "dependencies_mhgp7_census_tower_gate",
+    "started_ns": 1789131748935915110,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "e9349d004876f0124fb59e5d6072caa5916d7636cbbbd96d0cae66a5c68ec795"
+  },
+  {
+    "argv": [
+      "/usr/bin/c++",
+      "-M",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-O3",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "/workspaces/E-HGP/morsehgp3D_v7/tests/full_ball_batch_gate.cpp"
+    ],
+    "ended_ns": 1789131749992369289,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "dependencies_mhgp7_full_ball_batch_gate",
+    "started_ns": 1789131749620504433,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "4a3d5172bc213b1d6b495add7b67c370240cb1ad234b2f418feeb55d02afe1c5"
+  },
+  {
+    "argv": [
+      "cmake",
+      "--build",
+      "/workspaces/E-HGP/build/v7_batch_active_20260911/cmake_build",
+      "--parallel",
+      "1",
+      "--target",
+      "mhgp7_anchor_meb_gate",
+      "mhgp7_full_ball_tower_gate",
+      "mhgp7_full_ball_work_gate",
+      "mhgp7_full_ball_tower_probe",
+      "mhgp7_full_coverage_certificate_gate",
+      "mhgp7_local_plateau_gate",
+      "mhgp7_census_route_stub_gate",
+      "mhgp7_full_gabriel_digest_gate",
+      "mhgp7_facet_resolver_cache_gate",
+      "mhgp7_witness_front_gate",
+      "mhgp7_census_tower_gate",
+      "mhgp7_full_ball_batch_gate"
+    ],
+    "ended_ns": 1789131964157076131,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "build",
+    "started_ns": 1789131750144313383,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "cf5e02605786049fedbb48ecb2ba916bc98fa2c48b3496c20fef7535c9c0111e"
+  },
+  {
+    "argv": [
+      "ctest",
+      "--test-dir",
+      "/workspaces/E-HGP/build/v7_batch_active_20260911/cmake_build",
+      "--show-only=json-v1",
+      "-R",
+      "^mhgp7_(anchor_meb|full_ball_tower|full_ball_work|full_ball_static|census_route_stub|local_plateau|full_coverage_certificate|facet_resolver_cache|witness_front|full_gabriel_digest|census_tower|full_ball_batch)"
+    ],
+    "ended_ns": 1789131964200275966,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "ctest_list",
+    "started_ns": 1789131964163597590,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "4d60b5fa5f977071ae470e2c67dfaef2477edc85a00265b32f57f7ff0289fa24"
+  },
+  {
+    "argv": [
+      "ctest",
+      "--test-dir",
+      "/workspaces/E-HGP/build/v7_batch_active_20260911/cmake_build",
+      "--output-on-failure",
+      "--parallel",
+      "1",
+      "--output-junit",
+      "/workspaces/E-HGP/build/v7_batch_active_20260911/capture_r1/ctest.junit.xml",
+      "-R",
+      "^mhgp7_(anchor_meb|full_ball_tower|full_ball_work|full_ball_static|census_route_stub|local_plateau|full_coverage_certificate|facet_resolver_cache|witness_front|full_gabriel_digest|census_tower|full_ball_batch)"
+    ],
+    "ended_ns": 1789131975331348285,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "ctest",
+    "started_ns": 1789131964202018004,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "1b8919b0c919486500774f4bfaed3a49b446b803954c59e74d56e440cb101da3"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "gcp-migration/selftest_full_ball_worker_v7.py"
+    ],
+    "ended_ns": 1789131975491467446,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "worker_normal",
+    "started_ns": 1789131975332231127,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "630be61c687049f9dedfe4d09762545e8de9d55a7649cf32fe91b436714e4f5e"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "gcp-migration/selftest_full_ball_worker_v7.py"
+    ],
+    "ended_ns": 1789131975625023164,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "worker_optimized",
+    "started_ns": 1789131975492268836,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "630be61c687049f9dedfe4d09762545e8de9d55a7649cf32fe91b436714e4f5e"
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_batch_active_20260911/cmake_build/mhgp7_full_ball_tower_probe",
+      "--n=200",
+      "--s=8",
+      "--kmax=10",
+      "--threads=1",
+      "--static-threads=1"
+    ],
+    "ended_ns": 1789131976814531432,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "probe_200_static1",
+    "started_ns": 1789131975625713820,
+    "stderr_sha256": "5550c5645e4e0828866ace1b714c91aa51292cf27bcad16e5f0b06c295753b8a",
+    "stdout_sha256": "f524f0c4cc837256a86604fcb23c5421d7b9d460e95c2549c1bca7b1e77f67a7"
+  }
+]

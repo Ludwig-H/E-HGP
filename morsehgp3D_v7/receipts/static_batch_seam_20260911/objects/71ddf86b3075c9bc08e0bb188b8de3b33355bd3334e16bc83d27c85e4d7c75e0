@@ -1,0 +1,320 @@
+// Private physical recorder around the unchanged independent Gram/Gamma gate.
+// Serialized fields, not object padding/capacity and not only a payload digest.
+#include <cstdio>
+#include <string_view>
+#include <mutex>
+#include <array>
+#include <cstdint>
+#include <vector>
+
+namespace batch_trace {
+struct Row { unsigned k; std::array<std::int32_t, 10> key; unsigned consumer; std::uint64_t ordinal; unsigned ball; };
+std::vector<Row> rows;
+std::mutex mutex;
+bool enabled = false;
+template<class Key> void record(unsigned k, const Key& key, unsigned consumer, std::uint64_t ordinal, unsigned ball) {
+  if (!enabled) return;
+  std::lock_guard<std::mutex> lock(mutex);
+  rows.push_back({k, key, consumer, ordinal, ball});
+}
+}
+
+namespace post_seed_test { bool cache_enabled = true; int mode = 0; }
+#include MHGP7_FULL_HEADER
+#include "cpu_owner.hpp"
+bool use_batch = false;
+mhgp7::u64 batch_calls = 0, batch_requests = 0, batch_direct_terminals = 0;
+
+namespace physical {
+using namespace mhgp7;
+std::FILE* stream = nullptr;
+u64 calls = 0, complete = 0, failed = 0, nodes = 0, parents = 0, contributions = 0;
+u64 post_hits = 0, post_queries = 0;
+void number(u64 value) { std::fprintf(stream, " %llu", static_cast<unsigned long long>(value)); }
+void level(const ExactLevel& value) {
+  for (auto limb : value.num) number(limb);
+  number(static_cast<u64>(static_cast<u128>(value.den)));
+  number(static_cast<u64>(static_cast<u128>(value.den) >> 64));
+}
+template<class T> void vector(const T& values) {
+  number(values.size()); for (auto value : values) number(value);
+}
+void work(const AnchorMebWork& w) {
+  number(w.calls); vector(w.supports_by_size); number(w.power_tests); number(w.materializations);
+}
+void stats(const FullBallStats& s) {
+#define FIELD(name) std::fprintf(stream, "\nS " #name); number(s.name)
+  FIELD(records); FIELD(extra_records); FIELD(anchor_blocks); FIELD(regular_blocks); FIELD(extra_blocks);
+  FIELD(representatives); FIELD(anchor_hits); FIELD(key_lookups); FIELD(intruder_queries);
+  FIELD(intruder_nodes); FIELD(intruder_power_tests); FIELD(interior_ranges);
+  FIELD(same_radius_steps); FIELD(descending_steps); FIELD(max_chain_steps);
+  FIELD(births); FIELD(merges); FIELD(contributions); FIELD(inert_blocks);
+  FIELD(declared_support_checks); FIELD(singleton_lots); FIELD(grouped_lots); FIELD(lot_dsu_slots);
+  FIELD(lower_edges_indexed); FIELD(lower_nodes_activated); FIELD(lower_edges_activated);
+  FIELD(lower_queries); FIELD(lower_find_steps); FIELD(lower_path_writes);
+  FIELD(resolver_cache_queries); FIELD(resolver_cache_hits); FIELD(resolver_cache_stores);
+  FIELD(resolver_cache_evictions); FIELD(resolver_cache_seed_stores); FIELD(resolver_cache_slots);
+  FIELD(resolver_cache_reset_slots); FIELD(resolver_cache_bytes); FIELD(resolver_cache_released_slots);
+  FIELD(static_workers_created); FIELD(static_peak_request_bytes); FIELD(static_peak_target_bytes);
+  FIELD(static_lanes_used); FIELD(static_peak_retained_bytes); FIELD(static_peak_seed_bytes);
+  FIELD(static_peak_group_bytes); FIELD(static_peak_worker_bytes);
+#undef FIELD
+  std::fputs("\nS static_requests", stream); vector(s.static_requests);
+  std::fputs("\nS static_unique", stream); vector(s.static_unique);
+  std::fputs("\nS static_seeded", stream); vector(s.static_seeded);
+  std::fputs("\nS validation_work", stream); work(s.validation_work);
+  std::fputs("\nS resolve_work", stream); work(s.resolve_work);
+  std::fputs("\nS post_seed_queries", stream); vector(s.static_post_seed_queries);
+  std::fputs("\nS post_seed_hits", stream); vector(s.static_post_seed_hits);
+  std::fputs("\nS post_seed_terminal", stream); vector(s.static_post_seed_terminals);
+}
+void write(const FullBallTowerResult& result, unsigned requested, int workers) {
+  ++calls;
+  std::fputs("BEGIN", stream); number(calls); number(requested); number(static_cast<u64>(workers));
+  number(static_cast<u64>(result.status));
+  std::fprintf(stream, " %s", result.reason); number(result.orders.size());
+  stats(result.stats);
+  if (result.status != FullBallStatus::kCompleteRelative) {
+    ++failed;
+    if (!result.orders.empty()) throw std::runtime_error("physical.failure_has_orders");
+  } else {
+    ++complete;
+    const auto bank = result.orders.front().forest.populations();
+    if (!bank) throw std::runtime_error("physical.bank_missing");
+    std::fputs("\nDOMAIN", stream); vector(bank->domain());
+    std::fputs("\nPOPULATIONS", stream); number(bank->rows().size());
+    for (const auto& row : bank->rows()) {
+      std::fputs("\nROW", stream); vector(row.interior); vector(row.shell);
+    }
+    for (const auto& order : result.orders) {
+      const auto& f = order.forest;
+      if (f.populations() != bank) throw std::runtime_error("physical.bank_not_shared");
+      std::fputs("\nORDER", stream); number(f.order()); number(f.nodes().size());
+      nodes += f.nodes().size(); parents += f.parents().size(); contributions += f.contributions().size();
+      for (const auto& node : f.nodes()) {
+        std::fputs("\nNODE", stream); level(node.level); number(node.first); number(node.parent_count);
+      }
+      std::fputs("\nPARENTS", stream); vector(f.parents());
+      std::fputs("\nSUCCESSORS", stream); vector(f.successors());
+      std::fputs("\nVERTICAL", stream); vector(order.lower_nodes);
+      std::fputs("\nCONTRIBUTIONS", stream); number(f.contributions().size());
+      for (const auto& c : f.contributions()) {
+        std::fputs("\nCONTRIBUTION", stream); level(c.level); number(c.segment);
+        number(c.ref.population); number(c.ref.shell_mask); number(c.ref.include_interior);
+      }
+    }
+  }
+  std::fputs("\nEND\n", stream);
+  if (std::ferror(stream)) throw std::runtime_error("physical.write_failed");
+}
+}  // namespace physical
+
+mhgp7::FullBallTowerResult observed_full_ball_tower(const mhgp7::CloudIndex& ix,
+    std::span<const mhgp7::BallData> balls, unsigned kmax, int workers = 0) {
+  auto result = mhgp7::build_full_ball_tower(ix, balls, kmax, workers);
+  if (use_batch && workers > 0 && result.status == mhgp7::FullBallStatus::kCompleteRelative) {
+    batch_trace::rows.clear(); batch_trace::enabled = true;
+    auto scalar = mhgp7::build_full_ball_tower(ix, balls, kmax, 1);
+    batch_trace::enabled = false;
+    std::vector<batch_cpu::Trace> expected;
+    for (const auto& row : batch_trace::rows)
+      expected.push_back({row.k, row.key, row.consumer, row.ordinal, row.ball});
+    batch_cpu::Owner owner{&ix, balls.data(), balls.size(), workers, &expected, 0, 0, 0, {}, 0, 0, 0};
+    result = mhgp7::build_full_ball_tower(ix, balls, kmax, workers, owner.resolver());
+    if (result.status != mhgp7::FullBallStatus::kCompleteRelative ||
+        scalar.status != mhgp7::FullBallStatus::kCompleteRelative)
+      throw std::runtime_error(std::string("batch_complete:") + result.reason);
+    batch_calls += owner.batches; batch_requests += owner.requests; batch_direct_terminals += owner.checked_terminals;
+    if (owner.requests != owner.checked_terminals || owner.batches != result.stats.static_batch_calls)
+      throw std::runtime_error("batch_direct_terminal_floor");
+  }
+  if (workers > 0 && result.status == mhgp7::FullBallStatus::kCompleteRelative) {
+    const auto& s = result.stats;
+    const auto sum = [](const auto& values) { return std::accumulate(values.begin(), values.end(), mhgp7::u64{0}); };
+    const auto unique = sum(s.static_unique), seeded = sum(s.static_seeded);
+    const auto hits = sum(s.static_post_seed_hits), queries = sum(s.static_post_seed_queries);
+    physical::post_hits += hits; physical::post_queries += queries;
+    const auto terminals = sum(s.static_post_seed_terminals);
+    if (s.resolve_work.calls != s.anchor_hits + s.intruder_queries || s.anchor_hits + terminals != unique - seeded)
+      throw std::runtime_error("post_seed.observation_work_identity");
+    if (queries != s.descending_steps + s.same_radius_steps ||
+        hits > std::min(queries, unique - seeded) || terminals != hits)
+      throw std::runtime_error("post_seed.observation_bounds");
+  }
+  physical::write(result, kmax, workers);
+  return result;
+}
+
+#define build_full_ball_tower observed_full_ball_tower
+#define main inherited_gate_main
+#include MHGP7_GATE_SOURCE
+#undef main
+#undef build_full_ball_tower
+
+void square_partial_seed_fixture(unsigned variant) {
+  const Fixture fixture{"post_seed_square_partial_unit", {{0,0,0},{10,0,0},{0,10,0},{10,10,0},
+      {4,4,0},{4,6,0},{6,4,0},{6,6,0}}, 8};
+  const auto in = input(fixture, variant);
+  const auto ix = build_cloud_index(in);
+  const oracle::Model model(fixture.points);
+  const auto balls = catalogue(fixture.points, ix, model, fixture.kmax);
+  const auto circle = q2_ball_key(fixture.points[0], fixture.points[3]);
+  const auto found = std::find_if(balls.begin(), balls.end(), [&](const BallData& b) { return b.key == circle; });
+  need(found != balls.end() && found->n_interior == 4 && found->n_shell == 4,
+       "post_seed.square_whole_population_eight");
+  std::array<P3,4> original{fixture.points[0],fixture.points[1],fixture.points[2],fixture.points[3]};
+  std::array<P3,4> next{fixture.points[1],fixture.points[2],fixture.points[3],fixture.points[4]};
+  AnchorMebWork work;
+  const auto a = anchor_meb(original, work), b = anchor_meb(next, work);
+  need(a.status == AnchorMebStatus::kOk && b.status == AnchorMebStatus::kOk && a.key == circle &&
+       b.key == circle && same_exact_level(a.level, b.level) && a.selected_shell_count == 4 &&
+       b.selected_shell_count == 3, "post_seed.square_same_radius_shell_decreases");
+  std::array<i32,4> selected{};
+  for (size_t j = 0; j < next.size(); ++j) {
+    const auto at = std::find(ix.upos.begin(), ix.upos.end(), next[j]);
+    need(at != ix.upos.end(), "post_seed.square_index_remap");
+    selected[j] = static_cast<i32>(at - ix.upos.begin());
+  }
+  std::sort(selected.begin(), selected.end());
+  const auto selected_key = full_ball_detail::ResolverCache::key(selected);
+  bool matched = false;
+  for (const auto& seed : balls) {
+    // A partial support/shell equality is expressly not the seed admission rule.
+    if (static_cast<unsigned>(seed.n_interior) + seed.n_shell != selected.size()) continue;
+    full_ball_detail::ResolverCache::Key entire{};
+    size_t size = 0;
+    for (i32 site : seed.interior()) entire[size++] = site;
+    for (i32 site : seed.shell()) entire[size++] = site;
+    std::sort(entire.begin(), entire.begin() + size);
+    if (entire == selected_key) matched = true;
+  }
+  need(!matched, "post_seed.square_partial_population_misses_lookup");
+}
+
+int reject_gate() {
+  try {
+    const Fixture fixture{"batch_rejections", {{0,3,0},{8,3,0},{4,2,0},{6,0,0},{4,23,0}}, 5};
+    const auto in = input(fixture, 0);
+    const auto ix = build_cloud_index(in);
+    const oracle::Model model(fixture.points);
+    const auto balls = catalogue(fixture.points, ix, model, fixture.kmax);
+    batch_trace::rows.clear(); batch_trace::enabled = true;
+    const auto scalar = mhgp7::build_full_ball_tower(ix, balls, fixture.kmax, 1);
+    batch_trace::enabled = false;
+    need(scalar.status == FullBallStatus::kCompleteRelative, "batch_reject_reference");
+    std::vector<batch_cpu::Trace> expected;
+    for (const auto& row : batch_trace::rows)
+      expected.push_back({row.k, row.key, row.consumer, row.ordinal, row.ball});
+    struct Fault { const char* name; const char* reason; FullBallStatus status; bool known; };
+    const std::vector<Fault> faults{
+      {"short_targets", "full_ball_batch_target_count", FullBallStatus::kInvariantViolated, true},
+      {"ordinal", "full_ball_batch_target_ordinal", FullBallStatus::kInvariantViolated, true},
+      {"out_of_domain", "full_ball_batch_target_domain", FullBallStatus::kInvariantViolated, true},
+      {"not_strict", "full_ball_batch_target_not_strict", FullBallStatus::kInvariantViolated, true},
+      {"omit_q", "full_ball_batch_work_identity", FullBallStatus::kInvariantViolated, true},
+      {"other_k", "full_ball_batch_work_order", FullBallStatus::kInvariantViolated, true},
+      {"partial_failure", "full_ball_batch_partial_publication", FullBallStatus::kInvariantViolated, true},
+      {"failure_unknown", "batch_cpu_unknown_device_work", FullBallStatus::kResourceExhausted, false},
+      {"throw_unknown", "full_ball_batch_exception", FullBallStatus::kInvariantViolated, false},
+      {"success_unknown", "full_ball_batch_success_work_unknown", FullBallStatus::kInvariantViolated, false},
+      {"worker_after_paid", "batch_cpu_worker_allocation", FullBallStatus::kResourceExhausted, true},
+      {"wrong_admission", "full_ball_batch_target_rank", FullBallStatus::kInvariantViolated, true},
+      {"wrong_admissible", "batch_cpu_actual_terminal_mismatch", FullBallStatus::kInvariantViolated, true}
+    };
+    u64 cases = 0, paid_after_fault = 0, prefix_cases = 0;
+    for (int workers : {1, 4}) for (unsigned k : {2u, 3u}) for (const auto& fault : faults) {
+      batch_cpu::Owner owner{&ix, balls.data(), balls.size(), workers, &expected,
+          0, 0, 0, fault.name, k, 0, 0};
+      const auto result = mhgp7::build_full_ball_tower(ix, balls, fixture.kmax, workers, owner.resolver());
+      if (result.status != fault.status || std::string_view(result.reason) != fault.reason)
+        throw std::runtime_error(std::string("fault:") + fault.name + ":K" + std::to_string(k) + ":" + result.reason);
+      need(result.orders.empty() && owner.active.load() == 0, "batch_failure_closed_joined");
+      need(result.stats.static_batch_work_known == fault.known, "batch_failure_work_known");
+      if (fault.known) { need(result.stats.resolve_work.calls > 0, "batch_paid_failure_nonzero"); ++paid_after_fault; }
+      if (k == 3) { need(result.stats.static_batch_calls >= 2, "batch_failure_after_prefix"); ++prefix_cases; }
+      ++cases;
+    }
+    auto different_index = build_cloud_index(in);
+    batch_cpu::Owner wrong_owner{&different_index, balls.data(), balls.size(), 1, nullptr,
+        0, 0, 0, {}, 0, 0, 0};
+    const auto rejected_owner = mhgp7::build_full_ball_tower(ix, balls, 5, 1, wrong_owner.resolver());
+    need(rejected_owner.status == FullBallStatus::kInvalidInput && rejected_owner.orders.empty() &&
+        std::string_view(rejected_owner.reason) == "batch_cpu_owner_mismatch" &&
+        rejected_owner.stats.resolve_work.calls == 0, "batch_same_shape_foreign_owner");
+    const auto invalid_mode = mhgp7::build_full_ball_tower(ix, balls, 5, 0, wrong_owner.resolver());
+    need(invalid_mode.status == FullBallStatus::kInvalidInput && invalid_mode.orders.empty() &&
+        std::string_view(invalid_mode.reason) == "full_ball_batch_requires_static", "batch_explicit_opt_in");
+    const Fixture pair{"pair_batch_empty", {{0,0,0},{2,0,0}}, 2};
+    const auto pair_ix = build_cloud_index(input(pair, 0));
+    const oracle::Model pair_model(pair.points);
+    const auto pair_balls = catalogue(pair.points, pair_ix, pair_model, pair.kmax);
+    batch_cpu::Owner unused{&pair_ix, pair_balls.data(), pair_balls.size(), 4, nullptr,
+        0, 0, 0, {}, 0, 0, 0};
+    const auto no_requests = mhgp7::build_full_ball_tower(pair_ix, pair_balls, 2, 4, unused.resolver());
+    need(no_requests.status == FullBallStatus::kCompleteRelative && no_requests.orders.size() == 2 &&
+        unused.batches == 0, "batch_zero_representatives_and_Kn");
+    std::printf("{\"status\":\"passed_batch_rejections\",\"cases\":%llu,\"prefix_cases\":%llu,\"known_paid\":%llu}\n",
+        static_cast<unsigned long long>(cases + 3), static_cast<unsigned long long>(prefix_cases),
+        static_cast<unsigned long long>(paid_after_fault));
+    return 0;
+  } catch (const Failure& error) { std::fprintf(stderr, "%s\n", error.why); return 1; }
+    catch (const std::exception& error) { std::fprintf(stderr, "%s\n", error.what()); return 1; }
+}
+
+int main(int argc, char** argv) {
+  if (argc == 2 && std::string_view(argv[1]) == "--rejects") return reject_gate();
+  if (argc != 4) return 2;
+  const std::string_view mode(argv[1]);
+  if (mode != "cache" && mode != "no_cache" && mode != "static1" && mode != "static4") return 2;
+  if (std::string_view(argv[3]) != "0" && std::string_view(argv[3]) != "1") return 2;
+  use_batch = std::string_view(argv[3]) == "1";
+  post_seed_test::mode = argv[3][0] - '0';
+  post_seed_test::cache_enabled = mode != "no_cache";
+  physical::stream = std::fopen(argv[2], "wb");
+  if (!physical::stream) return 2;
+  char nominal[] = "--selftest", one[] = "--static-1", four[] = "--static-4";
+  char* selected = mode == "static1" ? one : (mode == "static4" ? four : nominal);
+  char* args[]{argv[0], selected};
+  int code = inherited_gate_main(2, args);
+  try {
+    if (!code) {
+      const std::vector<Fixture> additional{
+        {"post_seed_ABEZW", {{0,3,0},{8,3,0},{4,2,0},{6,0,0},{4,23,0}}, 5},
+        {"post_seed_square_partial", {{0,0,0},{10,0,0},{0,10,0},{10,10,0},
+          {4,4,0},{4,6,0},{6,4,0},{6,6,0}}, 8}};
+      for (const auto& fixture : additional) {
+        const auto old_hits = physical::post_hits;
+        for (unsigned variant = 0; variant < 2; ++variant) check_fixture(fixture, variant);
+        if (static_threads && std::string_view(fixture.name) == "post_seed_ABEZW" &&
+            physical::post_hits <= old_hits) throw std::runtime_error("post_seed.five_point_hit_floor");
+      }
+      square_partial_seed_fixture(0);
+      square_partial_seed_fixture(1);
+      const auto ix = mhgp7::build_cloud_index(std::vector<mhgp7::InputPoint>{{902, {1,2,3}}});
+      const auto singleton = observed_full_ball_tower(ix, {}, 10, mode == "static4" ? 4 : 0);
+      if (singleton.status != mhgp7::FullBallStatus::kCompleteRelative || singleton.orders.size() != 1 ||
+          singleton.orders[0].forest.nodes().size() != 1 ||
+          singleton.orders[0].lower_nodes != std::vector<mhgp7::FullNodeId>{mhgp7::kFullCoverageAbsent})
+        throw std::runtime_error("singleton_terminal_K1");
+      const auto rejected = observed_full_ball_tower(ix, {}, 1, -1);
+      if (rejected.status != mhgp7::FullBallStatus::kInvalidInput || !rejected.orders.empty())
+        throw std::runtime_error("negative_static_threads");
+      if (physical::complete < 33 || physical::failed < 9 || physical::nodes < 100)
+        throw std::runtime_error("physical.nonvacuity");
+    }
+  } catch (const std::exception& error) {
+    std::fprintf(stderr, "FAIL qualification %s\n", error.what()); code = 1;
+  }
+  if (std::fclose(physical::stream) != 0) code = 1;
+  if (!code) std::printf("{\"status\":\"physical_recorded\",\"calls\":%llu,\"complete\":%llu,"
+      "\"rejected\":%llu,\"nodes\":%llu,\"parents\":%llu,\"contributions\":%llu,"
+      "\"post_seed_hits\":%llu,\"post_seed_queries\":%llu}\n",
+      static_cast<unsigned long long>(physical::calls), static_cast<unsigned long long>(physical::complete),
+      static_cast<unsigned long long>(physical::failed), static_cast<unsigned long long>(physical::nodes),
+      static_cast<unsigned long long>(physical::parents), static_cast<unsigned long long>(physical::contributions),
+      static_cast<unsigned long long>(physical::post_hits), static_cast<unsigned long long>(physical::post_queries));
+  if (!code) std::printf("{\"batch_calls\":%llu,\"batch_requests\":%llu,\"direct_terminals\":%llu}\n",
+      static_cast<unsigned long long>(batch_calls), static_cast<unsigned long long>(batch_requests),
+      static_cast<unsigned long long>(batch_direct_terminals));
+  return code;
+}

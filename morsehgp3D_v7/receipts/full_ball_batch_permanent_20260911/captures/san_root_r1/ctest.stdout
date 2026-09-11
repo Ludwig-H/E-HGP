@@ -1,0 +1,22 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v7_batch_permanent_20260911/san_root_r1/cmake_build
+Test project /workspaces/E-HGP/build/v7_batch_permanent_20260911/san_root_r1/cmake_build
+    Start 55: mhgp7_full_ball_batch_cpu1
+1/5 Test #55: mhgp7_full_ball_batch_cpu1 ...............   Passed    9.83 sec
+    Start 56: mhgp7_full_ball_batch_cpu4
+2/5 Test #56: mhgp7_full_ball_batch_cpu4 ...............   Passed   10.48 sec
+    Start 57: mhgp7_full_ball_batch_rejects
+3/5 Test #57: mhgp7_full_ball_batch_rejects ............   Passed    0.09 sec
+    Start 58: mhgp7_full_ball_batch_bad_argument
+4/5 Test #58: mhgp7_full_ball_batch_bad_argument .......   Passed    0.03 sec
+    Start 59: mhgp7_full_ball_batch_missing_argument
+5/5 Test #59: mhgp7_full_ball_batch_missing_argument ...   Passed    0.03 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Label Time Summary:
+full_ball_batch    =  20.46 sec*proc (5 tests)
+full_ball_tower    =  20.31 sec*proc (2 tests)
+gate               =  20.46 sec*proc (5 tests)
+oracle             =  20.40 sec*proc (3 tests)
+
+Total Test time (real) =  20.48 sec

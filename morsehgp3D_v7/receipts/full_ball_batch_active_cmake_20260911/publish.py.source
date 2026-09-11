@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+"""Create-only compact active Release packet; no compiler or geometry."""
+import json
+from pathlib import Path
+
+import verify
+
+BASE = Path(__file__).resolve().parent
+ROOT = BASE.parents[1]
+SOURCE = ROOT / "build/v7_batch_active_20260911/capture_r1"
+TARGET = BASE / "packet"
+PRIOR = {
+    "census": ROOT / "build/v7_census_tower_permanent_publish_20260911/packet",
+    "callback": ROOT / "build/v7_batch_permanent_publish_20260911/packet",
+}
+
+
+def encoded(value):
+    return (json.dumps(value, indent=2, sort_keys=True) + "\n").encode()
+
+
+def write(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("xb") as output:
+        output.write(data)
+
+
+def main():
+    verify.need(not TARGET.exists(), "fresh packet")
+    receipt = json.loads((SOURCE / "receipt.json").read_bytes())
+    verify.need(receipt["status"] == "passed" and receipt["selected_CTests"] == 40, "active capture closed")
+    data, originals, selections = {}, {}, {}
+    def include(logical, path):
+        verify.need(not path.is_symlink(), "no input symlink")
+        raw = path.read_bytes()
+        verify.need(raw[:4] != b"\x7fELF" and path.suffix not in (".pyc", ".pyo"), "no ELF or bytecode included")
+        raw.decode("utf-8")
+        data[logical] = raw
+        originals[str(path)] = verify.sha(raw)
+    for path in sorted(SOURCE.rglob("*")):
+        if path.is_file():
+            include("active/" + path.relative_to(SOURCE).as_posix(), path)
+    include("references/historical_24.stdout", ROOT / "build/v7_static_resolver_20260911/cmake_capture_r1/ctest.stdout")
+    for name, directory in PRIOR.items():
+        verify.need(verify.sha((directory / "manifest.json").read_bytes()) == verify.IMPORTS[name], "prior original manifest")
+        include("references/" + name + "/manifest.json", directory / "manifest.json")
+        selected = ["captures/" + mode + "/receipt.json" for mode in ("o2_r1", "san_root_r1")]
+        selected += ["sources/current/proposal/" + entry for entry in
+            ("origin.json", "overlay.json", "CMake.fragment", "CMake.diff", "baseline/CMakeLists.txt")]
+        selected += ["sources/current/morsehgp3D_v7/tests/" + filename for filename in verify.FILES[name]]
+        selections[name] = selected
+        for logical in selected:
+            include("references/" + name + "/" + logical, directory / logical)
+    captured = {"scope": "active_Release_CPU83f1_40_CTests", "public_status": "not_claimed",
+        "GCP_used": False, "device_executed": False, "reference_selections": selections,
+        "reference_manifest_pins": verify.IMPORTS,
+        "files": {name: {"sha256": verify.sha(raw), "size": len(raw)} for name, raw in data.items()}}
+    report = verify.qualify(lambda name: data[name], captured)
+    for name, pin in receipt["binary_sha256"].items():
+        verify.need(verify.sha((SOURCE.parent / "cmake_build" / name).read_bytes()) == pin, "active ELF final hash only")
+    verify.need(all(verify.sha(Path(path).read_bytes()) == pin for path, pin in originals.items()), "all inputs stable before sealing")
+    TARGET.mkdir(exist_ok=False)
+    mapping, stored = {}, {}
+    for logical, raw in sorted(data.items(), key=lambda item: (not item[0].startswith("active/source/"), item[0])):
+        pin = verify.sha(raw)
+        if logical.startswith("active/source/"):
+            destination = "sources/" + logical[len("active/source/"):]
+        elif logical.startswith("active/") and len(Path(logical).parts) == 2:
+            destination = "capture/" + logical[len("active/"):]
+        else:
+            destination = stored.get(pin, "objects/" + pin + ".source")
+        if destination.endswith(".md"):
+            destination += ".source"
+        if not (TARGET / destination).exists():
+            write(TARGET / destination, raw)
+        stored.setdefault(pin, destination)
+        mapping[logical] = {"sha256": pin, "size": len(raw), "storage": destination}
+    capture_bytes = encoded(captured)
+    write(TARGET / "capture_manifest.json", capture_bytes)
+    write(TARGET / "source_map.json", encoded(mapping))
+    write(TARGET / "README.md", (BASE / "README.md").read_bytes())
+    write(TARGET / "publish.py.source", Path(__file__).read_bytes())
+    write(TARGET / "verify.py", (BASE / "verify.py").read_text().replace("@CAPTURE_PIN@", verify.sha(capture_bytes)).encode())
+    physical = {path.relative_to(TARGET).as_posix(): {"sha256": verify.sha(path.read_bytes()), "size": path.stat().st_size}
+        for path in sorted(TARGET.rglob("*")) if path.is_file()}
+    write(TARGET / "manifest.json", encoded({"scope": captured["scope"], "files": physical,
+        "public_status": "not_claimed", "GCP_used": False, "device_executed": False, "ELF_included": False, "vendor_included": False}))
+    report.update(manifest_sha256=verify.sha((TARGET / "manifest.json").read_bytes()),
+                  logical_files=len(data), physical_files=len(physical) + 1)
+    print(json.dumps(report, sort_keys=True))
+
+
+if __name__ == "__main__":
+    main()

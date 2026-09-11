@@ -1,0 +1,100 @@
+--- o2_r2/prototype/batch_t2_gate.cpp
++++ o2_r3/prototype/batch_t2_gate.cpp
+@@ -8,6 +8,8 @@
+ namespace route = gpu_terminal_batch_private;
+ namespace terminal = gpu_terminal_private;
+ u64 towers = 0, calls = 0, direct[11]{}, queries[11]{}, hits[11]{};
++bool high_k_done = false;
++u64 high_direct[11]{}, high_queries[11]{}, high_hits[11]{}, high_q3[11]{}, high_q4[11]{};
+ void require(bool good, const char* reason) {
+   if (!good) throw std::runtime_error(reason);
+ }
+@@ -41,6 +43,60 @@
+     ++calls;
+   }
+ };
++// Separate diagnostic: all K9/K10 subsets of the first declared geometry
++// variant/census, BEFORE any outcome is known. This is a bounded judge only;
++// these upper-cut requests are not claimed to be chronological FULL demands.
++void high_k_probe(Owner& owner, const CloudIndex& ix) {
++  require(ix.upos.size() >= 10 && ix.upos.size() <= 14, "T2.highK.fixture_domain");
++  std::vector<terminal::Request> requests;
++  for (u32 mask = 1; mask < (u32{1} << ix.upos.size()); ++mask) {
++    const unsigned k = std::popcount(mask);
++    if (k != 9 && k != 10) continue;
++    terminal::Request r;
++    r.snapshot = owner.device.snapshot(); r.k = k; r.ordinal = (u64{1} << 40) + mask;
++    r.before = terminal::encode_level(ExactLevel{{12884508676ull, 0, 0}, 1});
++    unsigned at = 0;
++    for (u32 bits = mask; bits; bits &= bits - 1) r.selected[at++] = static_cast<i32>(std::countr_zero(bits));
++    requests.push_back(r);
++  }
++  require(!requests.empty(), "T2.highK.declared_nonempty");
++  const auto batch = owner.device.execute(requests);
++  require(batch.complete && batch.raw_work_known && batch.accepted.size() == requests.size(),
++      "T2.highK.all_declared_requests_nominal");
++  for (size_t j = 0; j < requests.size(); ++j) {
++    const auto& r = requests[j];
++    std::vector<terminal::TraceRow> trace;
++    const auto expected = owner.reference.resolve(r, trace);
++    const auto& actual = batch.diagnostic[j].result;
++    const auto& w = actual.work;
++    const u64 hit = w.post_seed_hits;
++    require(expected.status == terminal::Status::kOk && actual.target == expected.target &&
++        actual.ordinal == expected.ordinal && batch.accepted[j].target == expected.target &&
++        batch.accepted[j].ordinal == expected.ordinal, "T2.highK.direct_terminal");
++    require(hit <= 1 && !trace.empty() && expected.work.calls == w.calls + hit &&
++        expected.work.materializations == w.materializations + hit &&
++        expected.work.key_lookups == w.key_lookups + hit &&
++        expected.work.anchor_hits == w.anchor_hits + hit &&
++        expected.work.powers == w.powers + (hit ? trace.back().selection.powers : 0),
++        "T2.highK.exact_saved_MEB_work");
++    for (size_t q = 0; q < 5; ++q)
++      require(expected.work.supports[q] == w.supports[q] + (hit ? trace.back().selection.supports[q] : 0),
++          "T2.highK.exact_saved_support_work");
++    for (auto member : {&terminal::Work::intruder_queries, &terminal::Work::intruder_nodes,
++        &terminal::Work::intruder_power_tests, &terminal::Work::interior_ranges,
++        &terminal::Work::same_radius_steps, &terminal::Work::descending_steps,
++        &terminal::Work::max_chain_steps, &terminal::Work::axis_divisions})
++      require(expected.work.*member == w.*member, "T2.highK.unchanged_descent_work");
++    ++high_direct[r.k]; high_queries[r.k] += w.post_seed_queries; high_hits[r.k] += hit;
++    // Reference q counts describe the paid observation, including the final
++    // MEB deliberately absent from the seeded production result on a hit.
++    for (const auto& row : trace) {
++      high_q3[r.k] += row.selection.q == 3;
++      high_q4[r.k] += row.selection.q == 4;
++    }
++  }
++  high_k_done = true;
++}
+ void same_work(const FullBallStats& a, const FullBallStats& b) {
+   require(a.resolve_work.calls == b.resolve_work.calls &&
+       a.resolve_work.materializations == b.resolve_work.materializations &&
+@@ -62,6 +118,7 @@
+   if (!threads) return scalar;
+   batch_t2::Owner owner(ix, balls);
+   auto result = build_full_ball_tower(ix, balls, kmax, threads, {&owner, batch_t2::Owner::resolve});
++  if (!batch_t2::high_k_done) batch_t2::high_k_probe(owner, ix);
+   batch_t2::require(owner.device.close(), "T2.batch.cleanup");
+   batch_t2::require(result.status == FullBallStatus::kCompleteRelative &&
+       scalar.status == FullBallStatus::kCompleteRelative, "T2.batch.tower_success");
+@@ -94,6 +151,19 @@
+           static_cast<unsigned long long>(mhgp7::batch_t2::queries[k]),
+           static_cast<unsigned long long>(mhgp7::batch_t2::hits[k]));
+     std::printf("]}\n");
++    mhgp7::batch_t2::require(mhgp7::batch_t2::high_k_done && mhgp7::batch_t2::high_direct[9] > 0 &&
++        mhgp7::batch_t2::high_direct[10] > 0, "T2.highK.both_orders_nonempty");
++    std::printf("{\"status\":\"passed\",\"scope\":\"separate_all_highK_subsets_upper_cut\","
++        "\"device_executed\":false,\"failures_filtered\":0,\"per_k\":[");
++    for (unsigned k : {9u, 10u})
++      std::printf("%s{\"K\":%u,\"direct_terminals\":%llu,\"Q\":%llu,\"H\":%llu,"
++          "\"reference_q3\":%llu,\"reference_q4\":%llu}", k == 9 ? "" : ",", k,
++          static_cast<unsigned long long>(mhgp7::batch_t2::high_direct[k]),
++          static_cast<unsigned long long>(mhgp7::batch_t2::high_queries[k]),
++          static_cast<unsigned long long>(mhgp7::batch_t2::high_hits[k]),
++          static_cast<unsigned long long>(mhgp7::batch_t2::high_q3[k]),
++          static_cast<unsigned long long>(mhgp7::batch_t2::high_q4[k]));
++    std::printf("]}\n");
+     return 0;
+   } catch (const std::exception& error) { std::fprintf(stderr, "%s\n", error.what()); return 1; }
+ }

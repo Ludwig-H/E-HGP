@@ -1,0 +1,17 @@
+{
+  "baseline_source_pins": {
+    "CMakeLists.txt": "7315e64ce701b9b103f27e37b9946eca04edc2f317eabec910ba50e03e889503",
+    "cmake/run_expect.cmake": "7bb9af4eddbea7e7a66619c92491dc11c22a49d7b3b46bddd6b2c25b20b2d605",
+    "oracle/local_plateau_oracle.hpp": "7a002853749784bb14a8db178fbfe637244bd3019a08ae1daf92fd20aeae670d",
+    "src/forest/full_ball_tower.hpp": "6763a877f43d79a45532bce4426feca645b6ee97f18c9a4ee1fea4c47cd408a5",
+    "tests/full_ball_tower_gate.cpp": "c4f39462487610e32fd5b23210c268a4f7300490aff511252a3cf859afe9cb88"
+  },
+  "gcp_used": false,
+  "inherited_results": false,
+  "source_helper_pins": {
+    "cpu_geometry.hpp": "c81fba952428c1237549e6d17610e247cf1c917ca32e28c1ddb114933fd0b5a8",
+    "cpu_owner.hpp": "4d0797b43a7d32fe3538abd76baf8b9b5eec0d0b77aa1a9a5268d9eb99392b20",
+    "qualification.cpp": "f2b68162ad581ab7b4d54de95330bc88f4ac94e1a8159e288fa94ebd172d45fe"
+  },
+  "status": "prepared_not_compiled"
+}

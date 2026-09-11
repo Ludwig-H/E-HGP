@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/gate",
+    "static1",
+    "/workspaces/E-HGP/build/v7_static_batch_seam_20260911/san_root_r1/static1_batch0.physical",
+    "0"
+  ],
+  "ended_ns": 1789129783747923005,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "static1_batch0",
+  "sanitizer_environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "started_ns": 1789129758025165035,
+  "stderr_sha256": "c684dd04be62c1d522f5e91ad5d5b4e4434f9365a2f9907767d99ebabb581ac7",
+  "stdout_sha256": "f49e3967ef708a1630d2918d7f59071c2fec584bfdbbcc6d046240f345a5f193"
+}

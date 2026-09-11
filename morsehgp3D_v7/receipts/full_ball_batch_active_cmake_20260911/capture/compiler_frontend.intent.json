@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "g++",
+    "-print-prog-name=cc1plus"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "expected_exit": 0
+}
