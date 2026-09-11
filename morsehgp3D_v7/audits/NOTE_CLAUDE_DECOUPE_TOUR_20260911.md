@@ -239,10 +239,30 @@ conception, soit une numérotation des populations indépendante de l'ordre de
 découverte, soit une passe de canonisation de la banque. Cette passe est du
 travail supplémentaire, et il tombe dans l'épilogue.
 
-**Un angle mort de test, au passage.** Le chemin des lots **groupés** porte le
-second site d'ancre de naissance, et il est quasi inexercé : 474 lots groupés
-pour 5 510 027 blocs d'ancrage à 8 000, et un seul à n=2000. Ni plancher de
-couverture, ni mutant causal ne le gardent aujourd'hui.
+**Un angle mort de test qui se referme à l'échelle, et c'est le problème.** Le
+chemin des lots **groupés** porte le second site d'ancre de naissance. Je l'ai
+mesuré aux six tailles, moteur non modifié.
+
+| n | lots groupés | blocs par lot groupé | part des blocs d'ancrage |
+| ---: | ---: | ---: | ---: |
+| 500 | 0 | — | 0 |
+| 2 000 | 1 | 2,0000 | 0,000083 % |
+| 4 000 | 75 | 2,0000 | 0,0029 % |
+| 8 000 | 474 | 2,0000 | 0,0086 % |
+| 16 000 | 3 046 | 2,0020 | 0,0264 % |
+| 32 000 | 20 095 | 2,0093 | 0,0843 % |
+
+La part croît d'environ un facteur trois par doublement. **Un chemin quasi
+inexercé là où les portes tournent devient matériellement emprunté à l'échelle
+visée** : c'est la configuration classique du défaut latent. Aujourd'hui ce
+chemin n'a ni plancher de couverture, ni mutant causal.
+
+**Correction que je me fais à moi-même.** En ne regardant que les tailles
+jusqu'à 8 000, où le rapport vaut exactement deux, j'avais conclu que tout lot
+groupé contient exactement deux blocs et que toute arité supérieure était hors
+d'atteinte des tests. C'est faux : l'excès sur l'arité deux vaut 6 à 16 000 et
+186 à 32 000. Le plan de tests le dit pourtant, et j'aurais dû l'appliquer à
+moi-même : quelques tailles basses n'établissent jamais une pente.
 
 ## 5. Sur le contrat lui-même
 
