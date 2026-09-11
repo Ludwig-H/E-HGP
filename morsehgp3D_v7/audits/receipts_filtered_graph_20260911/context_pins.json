@@ -1,0 +1,52 @@
+{
+  "reviewed_commit": "dc5a36ba64d5f41027d6acb23a949a38e75d0d56",
+  "source_pins": {
+    "morsehgp3D_v7/docs/GRAPHE_FILTRE_BOULES_PROPOSITION_20260911.md": "9aeb6c6413188fadf223f0ae41f6549969b4be63e14c0b5b6009a8f3c35392a5",
+    "morsehgp3D_v7/src/forest/full_ball_tower.hpp": "6763a877f43d79a45532bce4426feca645b6ee97f18c9a4ee1fea4c47cd408a5",
+    "morsehgp3D_v7/src/forest/local_plateau.hpp": "df56fbf33ea3088218174f88a646c65702d97a0366ec848887f1846ae7666f2e"
+  },
+  "receipt_packages": [
+    {
+      "reader": "morsehgp3D_v7/receipts/post_exchange_seed_20260911/verify.py",
+      "reader_sha256": "e1fb4e6cf3c6f8e4f8799648cba3e3372294d9edd9cd4e9bec357618b27e2700",
+      "manifest": "morsehgp3D_v7/receipts/post_exchange_seed_20260911/MANIFEST.json",
+      "manifest_sha256": "6a8858b1c8372ced09a30cdd18ec9df6410bbf46f51e7f1ac07a83b368797246"
+    },
+    {
+      "reader": "morsehgp3D_v7/receipts/post_exchange_active_cmake_20260911/verify.py",
+      "reader_sha256": "fc370df4b17e1c5cd648ed9e49531e375b65b71eca206a1d90c501f23753e425",
+      "manifest": "morsehgp3D_v7/receipts/post_exchange_active_cmake_20260911/MANIFEST.json",
+      "manifest_sha256": "a59f2b0b103c7b9db31ac2149f404fe540eafd41a94c1cbd605df0e79ffcc404"
+    },
+    {
+      "reader": "morsehgp3D_v7/receipts/post_exchange_scale_20260911/verify.py",
+      "reader_sha256": "de33c5530ad8f2ce96c69500f450fcf964a2da8737f4411e00f15f15eb62c939",
+      "manifest": "morsehgp3D_v7/receipts/post_exchange_scale_20260911/MANIFEST.json",
+      "manifest_sha256": "5884f25fce7f6c3b72828a56b58552ad7997e651ee5bf2c7e4224efe0c340c47"
+    },
+    {
+      "reader": "morsehgp3D_v7/receipts/full_t2_metadata_20260911/reader.py",
+      "reader_sha256": "380aa44765f0fb33badf84e229223231604e4a9c7b908c7b24bca7c04e5ca57e",
+      "manifest": "morsehgp3D_v7/receipts/full_t2_metadata_20260911/manifest.json",
+      "manifest_sha256": "13c14a7c9e3847d7301c49f6e9cb650bdc865b4d4aad34563147c65c402ddc8e"
+    },
+    {
+      "reader": "morsehgp3D_v7/receipts/full_t2_post_exchange_20260911/reader.py",
+      "reader_sha256": "9eb059836c456e48d9a6a61b649d0aabf36a2f3930e420285bd62bb150be713e",
+      "manifest": "morsehgp3D_v7/receipts/full_t2_post_exchange_20260911/manifest.json",
+      "manifest_sha256": "acb9341d62b037c02a79404488b1bb691f4b7ccb495ec9f5a2c9073b7d1da3e9"
+    },
+    {
+      "reader": "morsehgp3D_v7/receipts/full_t2_census_tower_20260911/verify.py",
+      "reader_sha256": "2fd39363934f1ae092e07e47b64d84de86136f37b095ccba25a2137abbac8e1d",
+      "manifest": "morsehgp3D_v7/receipts/full_t2_census_tower_20260911/manifest.json",
+      "manifest_sha256": "970914896be18980b2a5bc0e586bdd3fac685384efc0e029157d436f6e02ca0d"
+    },
+    {
+      "reader": "morsehgp3D_v7/receipts/incremental_full_trial_20260911/verify.py",
+      "reader_sha256": "41bd73de87e4a0e6b1dd056ed106c5248bf83512941dc699c88bbc32f91ad87a",
+      "manifest": "morsehgp3D_v7/receipts/incremental_full_trial_20260911/manifest.json",
+      "manifest_sha256": "456c5747b496e6bb98c386950b6d6180b327388ee72506df4a8f9d866cafb614"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "schema": "mhgp7-current-audit-validation-v2",
-  "updated_utc": "2026-09-11T08:18:17.213437+00:00",
+  "updated_utc": "2026-09-11T12:10:20.484687+00:00",
   "phase": "exploration_v7_hors_registre",
   "backend": "cpu_reference",
   "profile": "quantized_u16_input_only",
@@ -17,23 +17,23 @@
     "audits/AUTORITE_VOTE_P3_COURANTE.md": "c11db52d2df31e864702252de4b75da59d568c6fa071cd0f67ad3e4cc844723f",
     "audits/CACHE_FULL_COURANT.md": "f58fbc12b61469d2bf1a37a00899200841a7e21bbfb470534eeab10f2a24c8bc",
     "audits/CELLULES_COURANT.md": "328d8dff75ce6612f6242ccd727c59989dfe73c72ff8e0ad7b516f1e5cad0b08",
-    "audits/CERTIFICAT_FULL_CPP_COURANT.md": "0ac1d153132e08bab048856007fe92307f98fb85a576850ae7fce93a62bd8671",
+    "audits/CERTIFICAT_FULL_CPP_COURANT.md": "93ad2e0d73fdd4a60351599a5b12180bfa388982f19bdddfa6b11079f653f4db",
     "audits/CERTIFICAT_HORIZONTAL_COURANT.md": "e76714730f4ce24f4451a8d9bab0c365d29b25e9d18008d3675d2ea9f036c611",
     "audits/CONTRAT_MASSES_VOTE_COURANT.md": "2ed2a8eebef68fbb12b2a23fc18067d36a343b0a206c1330c2ca823ee26f2b72",
     "audits/CONTRAT_VERTICAL_COURANT.md": "09b2f2a8d0b59a540e4eba865b2f7754225e1583ca97d42cbc43b4dc0e4868c9",
-    "audits/DIALOGUE_COURANT.md": "6365f1c28ba246a939f7e6c11a0f12990619e2e3b13baae9a6fa948b8885be1d",
+    "audits/DIALOGUE_COURANT.md": "501c9680cc4abf345ea8cb9d43b38a55974bc97a9e010985fc7e6b0ab563647e",
     "audits/DOMAINE_CPU_COURANT.md": "18258334cfc7d74f3a262ea1dab798ff621245b079bfd5cbe8b48c987404cd33",
-    "audits/ENTRETIEN.json": "82d12349052b32e8f6e4fa5cb643b0e7de20738c8244e963e16cae0a27e88f03",
-    "audits/ETAT_COURANT.md": "181400976db41ab93d6d6f57fe1a2d40c14754378a20706106eec840be7e480a",
+    "audits/ENTRETIEN.json": "c4602939ad064db2e23037e33c34495116165364ad58a87161012be6e8d527be",
+    "audits/ETAT_COURANT.md": "6b8bf313bb7002aff9c4c0c796dac2713efbd9e1d3b9e0acf8597442addccf0d",
     "audits/FILTRES_FLOTTANTS_COURANTS.md": "7ba3d325a007b12e45baaa5d7d6ee00abb2cb978a1006af9bc7e9a8a3bc2af03",
     "audits/FRONT_ET_TEMOINS_COURANT.md": "3fb7202d0d56720ac8325d46473eb86d329669b27dff8a51fd9ead8afb4dde08",
     "audits/MEB_DOUBLE_BUDGET_COURANT.md": "134b91b9cbdda6c23255807474e1f2010ac872fc54636b975bd3f6cea3e1187c",
-    "audits/MONO_FULL_COURANT.md": "477253b379ac1746a1c91984b8841cc83f7348e9ebf22329e3d3163d8b07585a",
+    "audits/MONO_FULL_COURANT.md": "e3ae7f4bb1421d3e1ed302219eb6cb31e498f750f03f84e6de293f32fe026ae1",
     "audits/NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md": "ac50b500d7c982f08160e513721a3ec9496bc0204a86153a384dffaa145a89f0",
     "audits/PREUVE_CHORD_SECTOR_COURANTE.md": "2e4d1494957c8f5849234ada2e86edfd0dbcb4a2945e5a9fbfeb778b1ed432e7",
     "audits/PRODUCTEUR_FULL_GABRIEL_COURANT.md": "5a3e80d338c6c18f346224d811997e08e40b55876e12d3e9e8f837b8ef963910",
     "audits/QUESTIONS_SECONDAIRES.md": "d41daf7b69827114c19991984ba5bb4652886b4197350b2809e748caba68c9d8",
-    "audits/README.md": "7baf309f6d22a9b97c58e801ae662220979ff006b5f79af2d62cec53af74fada",
+    "audits/README.md": "1158e9ee899ac67ab03b9d532d5b6c7d3e5774a8fd7c79bcd4683cf837c55931",
     "audits/S1_COURANT.md": "e4c79bc1cb57df636c226765c7a7be616998ff7248b86f93e61976e77fa173eb",
     "audits/archive_cleanup_probe.cpp": "f94bc8032d4a55f4afccf43a56497866f803eb3e42f2d96b05dc9420b964a63d",
     "audits/cell_compiled_bridge.cpp": "0a8045ec5b9691cb1db627fedaeca60042bf76714f4eca62db48264a8d6842fb",
@@ -2275,7 +2275,7 @@
     "audits/receipts_plateaux_full_20260906/real_parent_certificates_normal.json": "7cc7e28d44f09bf1a29874b8892599d7814811f339bee3b1d62459ba41920444",
     "audits/receipts_plateaux_full_20260906/real_parent_certificates_optimized.json": "7cc7e28d44f09bf1a29874b8892599d7814811f339bee3b1d62459ba41920444",
     "audits/receipts_plateaux_full_20260906/global_parent_review.json": "28da3f09d5ece7724db2fd5756acc2f5ea2f5cf660c0e89013bb9de630546f94",
-    "audits/COORDINATION_AUDITEURS.md": "fb2e896e0953e4f45fee5217d3e4e3337d9f2a5e28e6177e2efaf8ece0eb8e63",
+    "audits/COORDINATION_AUDITEURS.md": "7a35345baa3dfc9bd333bd4550641814034c659de62e831798eb1d5f66ef30ab",
     "audits/receipts_coverage_cpp_20260910/README.md": "42987980fc3f62a308764c4ef2b6b5517069952775d5bf1cd8cc7e5068cacf21",
     "audits/receipts_coverage_cpp_20260910/SHA256SUMS": "1db0c71a67c76458d2c6f87f11b1f37bdb4105fa93f3f177b37ae1d0bba0359a",
     "audits/receipts_coverage_cpp_20260910/bridge.cpp": "b38034d1c33afa0488d345db517a4ec206542191df8358facf2484cf768202f6",
@@ -2760,7 +2760,13 @@
     "audits/receipts_static_followup_20260911/worker_san.json": "3040d41a2f2b0eae01d6288c9168486e86afb62bbb62e6e15f9b90908b0b2f3d",
     "audits/receipts_cache_commit_20260911/README.md": "a5a400d380d7b8c3c74abb15c6210885659ad03c02eaf9146e4e65c270ea8b2f",
     "audits/receipts_cache_commit_20260911/review.json": "4aee8e1cdb0a9d57057767ae0bb6f150933ffd424df89737563b1a2f29066d32",
-    "audits/receipts_cache_commit_20260911/verify.py": "474059d115619d200f74476b2af0069286f46aa32472b8e72d432898ab732838"
+    "audits/receipts_cache_commit_20260911/verify.py": "474059d115619d200f74476b2af0069286f46aa32472b8e72d432898ab732838",
+    "audits/receipts_filtered_graph_20260911/README.md": "180943436fb0a1e38b9a19bd8baf8d5e350d76cb3f901d457f57e8874be0eb3e",
+    "audits/receipts_filtered_graph_20260911/SHA256SUMS": "269a285c296fb661fbc4e7142dc5ed5dbf53ccfc017cbd459b61b870bd8e016d",
+    "audits/receipts_filtered_graph_20260911/context_pins.json": "df4f9bdccaa34e5909ed2fdf7a55f0e40dcdc1df05c9ec26bd080096abe5811c",
+    "audits/receipts_filtered_graph_20260911/graph_model.py": "e9a363a93d6709d09973705d9c6f25a6fdfadd9459c04109589312f1367245a5",
+    "audits/receipts_filtered_graph_20260911/review.json": "15ffb209904c3744b714d3590af6275f44b09fe7be0b2b52e75a4eece0d87c87",
+    "audits/receipts_filtered_graph_20260911/verify.py": "0b09c69f88a4f3f1f95c0520e9508fd181c5fa8f7816d5f06c4c8114200a32b7"
   },
   "source_variants": [
     {
@@ -12843,5 +12849,10 @@
     "source_variants_D_to_P_unchanged": true,
     "new_engine_variant": false,
     "gcp": "not_used"
+  },
+  "filtered_graph_followup": {
+    "reviewed_head": "dc5a36ba",
+    "packet": "audits/receipts_filtered_graph_20260911",
+    "scope": "Conditional proof and bounded product-independent graph model; seven constructor receipt readers pass normal/-O. No new global variant or performance qualification."
   }
 }

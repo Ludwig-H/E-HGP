@@ -5,9 +5,10 @@ Lire l’[état courant](ETAT_COURANT.md), puis le [dialogue actif](DIALOGUE_COU
 | Sujet courant | Qualification indépendante |
 | --- | --- |
 | Raccord par ancres et cache ad7ffd28 | [Rejeu sur octets commités, corpus et quatre blocs nommés 50k](receipts_cache_commit_20260911/README.md) ; second auditeur ; deux verrous clos sur CPU, qualification relative au census fourni |
-| Phase statique CPU et pistes suivantes | [SAN après admission, décomposition du travail, semis après échange et support survivant](receipts_static_followup_20260911/README.md) ; R/U, triplet et s8/10/12 livrés par ce842a3f, raccourcis non implémentés |
-| Gardes du journal réservé, publié | [Dix cas valides, neuf rejets, six lectures, neuf mutants et pannes d’allocation](receipts_journal_guards_20260910/README.md) ; reprises dans le prototype incrémental, sans qualification de son raccord FULL |
-| Journal incrémental privé | [Préfixes et lots mixtes O2/SAN, trois mutants causaux](receipts_incremental_prefix_20260911/README.md) ; [preuve et écart net de résidence](receipts_incremental_review_20260911/README.md), raccord FULL restant à qualifier |
+| Graphe filtré et vraies hiérarchies | [Réduction aux naissances, forêts minimales, contributions et verticales](receipts_filtered_graph_20260911/README.md) ; preuve et modèle borné, sans nouveau raccord produit |
+| Phase statique CPU | [SAN et preuves des raccourcis](receipts_static_followup_20260911/README.md) ; semis après échange désormais intégré et mesuré, support survivant encore non mesuré |
+| Gardes du journal réservé, publié | [Dix cas valides, neuf rejets, six lectures, neuf mutants et pannes d’allocation](receipts_journal_guards_20260910/README.md) ; preuves indépendantes conservées du prototype incrémental |
+| Journal incrémental privé | [Préfixes et lots mixtes O2/SAN, trois mutants causaux](receipts_incremental_prefix_20260911/README.md) ; [preuve et écart net de résidence](receipts_incremental_review_20260911/README.md), premier raccord FULL testé puis non retenu pour ses coûts |
 | Résidence de la nouvelle tour retenue | [Durées de vie, borne des brouillons et format des naissances](receipts_tower_cost_review_20260910/README.md) ; calculs statiques, pas gains mesurés |
 | Journal daté v2 et parents exportés | [184 cas O2/SAN, 2 976 coupes et mutant du tableau de parents](receipts_coverage_cpp_20260910/README.md) ; [lacune du test constructeur corrigée](../receipts/coverage_parent_array_20260910/README.md), raccord FULL distinct |
 | Modèle FULL et taille de sortie | [Décision et domaine](NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md), [borne à K fixé et témoins u16](receipts_probe_meb_review_20260906/full_output_growth.md) |
@@ -39,7 +40,7 @@ Les sondes et juges datés du 4 au 6 septembre restent à la racine : 39 d’ent
 python3 -B -O morsehgp3D_v7/audits/verify_current.py
 ```
 
-Le [manifeste](validation_current.json) vérifie des sources et preuves épinglées, affiche leur portée et ne réexécute aucun test. Code 0 : une variante entière correspond ; 1 : sources ou documents à actualiser ; 2 : manifeste invalide. Un fichier non épinglé n’est pas qualifié par ce contrôle. Les variantes D à O gardent leurs autorités distinctes ; P épingle la contrelecture du second auditeur, explicitement sans réception du raccord.
+Le [manifeste](validation_current.json) vérifie des sources et preuves épinglées, affiche leur portée et ne réexécute aucun test. Code 0 : une variante entière correspond ; 1 : sources ou documents à actualiser ; 2 : manifeste invalide. Un fichier non épinglé n’est pas qualifié par ce contrôle. Les variantes D à Q gardent leurs autorités distinctes ; P et Q épinglent les contrelectures du second auditeur, sans réception générale du raccord ni réattribution aux sources courantes.
 
 Le [registre d’entretien](ENTRETIEN.json) donne les notes supprimées, leurs remplacements et leur version Git antérieure. Les sources, reçus scellés, contre-fixtures et échecs restent intacts. Les questions sans incidence immédiate sont raccourcies dans un seul fichier. Un nouvel audit ou push doit apporter une décision, une preuve, une correction ou un entretien utile ; aucune publication de routine sans contenu pertinent.
 

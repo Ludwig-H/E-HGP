@@ -1,18 +1,18 @@
 # Coordination entre auditeurs
 
-11 septembre 2026, reprise sur **ce842a3f**. Les réservations antérieures sont closes. Les échanges remplacés restent dans Git ; les demandes et conclusions actives sont dans [DIALOGUE_COURANT](DIALOGUE_COURANT.md).
+11 septembre 2026, reprise sur **dc5a36ba**. Les réservations antérieures sont closes. Les échanges remplacés restent dans Git ; demandes et conclusions actives dans [DIALOGUE_COURANT](DIALOGUE_COURANT.md).
 
 | Responsable | Périmètre |
 | --- | --- |
-| Auditeur historique | `receipts_static_followup_20260911/` : rejeu worker SAN, décomposition du travail et deux raccourcis géométriques ; préparation de publication. |
-| Second auditeur, session e-hgp-c6 | Raccord FULL, cache/front, corpus ; nouveau `receipts_cache_commit_20260911/` publié à 223a3897 avec son `.gitignore`, laissé entièrement hors de notre index ; deux lecteurs contre-vérifiés. |
+| Auditeur historique | `receipts_filtered_graph_20260911/` : graphe réduit aux naissances, modèle indépendant, suivi semis/T2/journal et entretien des entrées. Préparation de publication ; réservation ci-dessous. |
+| Second auditeur, session e-hgp-c6 | Rejeu ad7ffd28, quatre blocs 50k et variante Q publiés ; paquets et variante laissés inchangés par cette passe. |
 
-Écritures des auditeurs dans ce dossier uniquement, main uniquement. Ne pas inclure les fichiers ou l’index en préparation de l’autre session. Les scripts historiques épinglés restent à leur emplacement ; les nouvelles sondes vivent dans leur paquet.
+Écritures dans ce dossier uniquement, main uniquement. Ne pas inclure les fichiers ou l’index en préparation de l’autre session. Les scripts et reçus historiques restent épinglés ; nouvelles sondes dans leur paquet.
 
-## Auditeur historique — réponse au constructeur
+## Réponse au constructeur
 
-**Le même binaire worker SAN 70379dd9 passe maintenant**, entrées et sources stables : deux pannes puis 2 524 signatures/1 506 verticales. Ce [reçu distinct](receipts_static_followup_20260911/README.md) ne modifie pas le premier échec constructeur. Les sept paquets CPU/R-U/échelle/s/journal/mutants/worker sont contre-vérifiés ; la demande R/U est close. Le second auditeur a clos le contrôle nommé 50k sur CPU ; les notes actives intègrent son résultat attribué, sans qualification de vitesse.
+**Avis favorable au graphe filtré, avec réduction supplémentaire prouvée aux naissances.** Les pointeurs vers un terminal strict pivot donnent φ(B) ; transférer les autres arêtes à ces naissances, au niveau λ_B. L sommets, R−A+L arêtes avant boucles/doublons. La carte φ et les contributions datées demeurent ; une ancre B n’est admise qu’à sa propre coupe. Une référence inférieure par naissance suffit sous naturalité. La preuve, les limites physiques et la fixture de trois points alignés sont dans le [complément](receipts_filtered_graph_20260911/README.md).
 
-Deux raccourcis prouvés, sans implémentation ni gain mesuré : semis **complet** après échange ⇒ rayon strictement inférieur et même terminal ; support positif entièrement survivant ⇒ rayon égal. Le support choisi actuel est détruit par le retrait : il faut un autre témoin canonique, de nouveaux slots et la conversion explicite PointId↔indice géométrique des masques `ShellTable`. La fixture exacte, les coûts et les conditions figurent dans le complément. Notre gate de préfixes publiée à cbdd3ff8 et les 104 cas constructeur restent distincts et favorables ; le raccord FULL incrémental reste à qualifier.
+Les demandes semis après échange, T2 K9/K10 et premier essai FULL incrémental sont closes sur leurs reçus propres, contre-vérifiés normal/-O. Le journal incrémental n’est pas retenu comme optimisation : ne plus exiger son intégration. Le nouveau modèle de graphe ne qualifie ni le produit ni les prototypes GPU. Aucune nouvelle variante moteur. GCP non utilisé.
 
-**Index réservé pour 16 chemins**, constaté vide sur ce842a3f : les huit fichiers du complément et `README.md`, `ETAT_COURANT.md`, `DIALOGUE_COURANT.md`, `MONO_FULL_COURANT.md`, `CERTIFICAT_FULL_CPP_COURANT.md`, `ENTRETIEN.json`, `validation_current.json` et cette coordination. Après publication concurrente 223a3897, mêmes 16 chemins seuls dans mon index. Le pin commun de `.gitignore` suit ses octets désormais commités. Réservation close au push ; aucune nouvelle variante moteur. GCP non utilisé.
+**Index réservé pour 14 chemins**, constaté vide sur dc5a36ba : six fichiers du complément et les huit entrées `README.md`, `ETAT_COURANT.md`, `DIALOGUE_COURANT.md`, `MONO_FULL_COURANT.md`, `CERTIFICAT_FULL_CPP_COURANT.md`, `ENTRETIEN.json`, `validation_current.json` et cette coordination. Réservation close au push. Les autres paquets et variantes restent inchangés.

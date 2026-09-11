@@ -2997,5 +2997,69 @@
       "common_gitignore_pin": "Advance to bytes already committed by the second auditor, without staging that file.",
       "global_source_variants": "unchanged"
     }
+  },
+  "latest_filtered_graph_review_20260911": {
+    "date_utc": "2026-09-11T12:10:20.465134+00:00",
+    "base_commit": "dc5a36ba64d5f41027d6acb23a949a38e75d0d56",
+    "packet": "receipts_filtered_graph_20260911",
+    "packet_manifest_sha256": "269a285c296fb661fbc4e7142dc5ed5dbf53ccfc017cbd459b61b870bd8e016d",
+    "scope": "Conditional filtered-hub equivalence and reduction to births; independent graph model, no new product/backend qualification. Seven constructor packages read, no engine rerun.",
+    "checks": {
+      "normal_and_optimized_exit": 0,
+      "graph_cases": 267,
+      "cut_comparisons": 37356,
+      "lot_group_comparisons": 14226,
+      "model_mutants_rejected": 7,
+      "negative_fixtures": 2,
+      "invalid_inputs_rejected": 4,
+      "constructor_readers": 7,
+      "documentation_exit": 0,
+      "documentation_files": 473,
+      "implementation_status_exit": 0,
+      "implementation_phases": 20
+    },
+    "maintenance": {
+      "action": "Close post-exchange/T2/first incremental trial requests, retain the measured rejection of the journal optimization, replace adopted prose with current constructor links; acknowledge existing variant Q without changing it. Historical packets preserved.",
+      "entries": [
+        {
+          "path": "CERTIFICAT_FULL_CPP_COURANT.md",
+          "previous_sha256": "0ac1d153132e08bab048856007fe92307f98fb85a576850ae7fce93a62bd8671",
+          "previous_words": 285,
+          "words": 296
+        },
+        {
+          "path": "COORDINATION_AUDITEURS.md",
+          "previous_sha256": "fb2e896e0953e4f45fee5217d3e4e3337d9f2a5e28e6177e2efaf8ece0eb8e63",
+          "previous_words": 352,
+          "words": 297
+        },
+        {
+          "path": "DIALOGUE_COURANT.md",
+          "previous_sha256": "6365f1c28ba246a939f7e6c11a0f12990619e2e3b13baae9a6fa948b8885be1d",
+          "previous_words": 524,
+          "words": 415
+        },
+        {
+          "path": "ETAT_COURANT.md",
+          "previous_sha256": "181400976db41ab93d6d6f57fe1a2d40c14754378a20706106eec840be7e480a",
+          "previous_words": 720,
+          "words": 634
+        },
+        {
+          "path": "MONO_FULL_COURANT.md",
+          "previous_sha256": "477253b379ac1746a1c91984b8841cc83f7348e9ebf22329e3d3163d8b07585a",
+          "previous_words": 737,
+          "words": 775
+        },
+        {
+          "path": "README.md",
+          "previous_sha256": "7baf309f6d22a9b97c58e801ae662220979ff006b5f79af2d62cec53af74fada",
+          "previous_words": 714,
+          "words": 738
+        }
+      ]
+    },
+    "source_variants_D_to_Q_unchanged": true,
+    "gcp_used": false
   }
 }

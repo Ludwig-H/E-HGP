@@ -1,6 +1,8 @@
 # Mono FULL : mesures courantes et preuves de travail
 
-La [voie statique CPU, ce842a3f](../docs/RESOLUTION_STATIQUE_CPU_20260911.md) conserve les sorties comparées et économise 32,79 à 34,16 % de MEB sur le triplet uniforme 8k/16k/32k, avec un thread amont et quatre statiques. s8/10/12 concordent à 8k ; les temps restent partagés, sans accélération attribuable. Le [complément indépendant](receipts_static_followup_20260911/README.md) décompose cette baisse : environ 98 % vient des MEB initiales évitées. Le lookup de semis après échange est une piste prouvée, non mesurée.
+Le [triplet mono après échange](../receipts/post_exchange_scale_20260911/README.md), header 6763a877, conserve les sorties et évite 237 557 / 501 258 / 1 045 620 MEB supplémentaires à 8k/16k/32k : environ 5,7 % du travail statique précédent. Les lecteurs sont [contre-vérifiés](receipts_filtered_graph_20260911/README.md), sans nouveau run moteur. Les anciens temps statique4 ne sont pas une paire causale avec ce triplet mono ; aucun gain de latence ou RSS ne lui est attribué.
+
+La [voie statique initiale](../docs/RESOLUTION_STATIQUE_CPU_20260911.md) et sa [décomposition](receipts_static_followup_20260911/README.md) restent historiques : environ 98 % de sa baisse MEB venait des résolutions initiales évitées. Le semis après échange, alors proposé, est désormais intégré ; le critère de support survivant reste non mesuré.
 
 Les [tours 50k cache CPU/hybride, ad7ffd28](../docs/RESULTATS_TOUR_CACHE_G4_20260910.md) restent distinctes. Contrats 1 s/100 ms et régime massif ouverts. Notre [relecture de résidence](receipts_tower_cost_review_20260910/README.md) et le [calcul net incrémental](receipts_incremental_review_20260911/README.md) conservent leurs bornes historiques, sans nouveau gain RSS.
 
