@@ -1,0 +1,47 @@
+--- original/fixture_generator
++++ source/morsehgp3D_v7/tests/anchor_meb_fixture_generator.cpp
+@@ -98,6 +98,7 @@
+   AnchorMebWork expected = cumulative;
+   u32 selected = 0;
+   const auto truth = judge(points, expected, selected);
++  const auto paid_before = cumulative;
+   const auto got = anchor_meb(points, cumulative);
+   need(points == before, "input.modified");
+   need(got.status == AnchorMebStatus::kOk, "meb.expected_success");
+@@ -126,6 +127,27 @@
+   if (shell > got.support_size) ++extra_shells;
+   ++accepted_supports[got.support_size];
+   ++comparisons;
++  std::printf("{%zu, {", points.size());
++  for (const auto& point : points)
++    std::printf("{%lld,%lld,%lld},", static_cast<long long>(point.x),
++        static_cast<long long>(point.y), static_cast<long long>(point.z));
++  std::printf("}, %u, %u, {%u,%u,%u,%u}, {", got.support_size, got.selected_shell_count,
++      got.support_slots[0], got.support_slots[1], got.support_slots[2], got.support_slots[3]);
++  for (unsigned q = 0; q < 5; ++q)
++    std::printf("%lluULL,", static_cast<unsigned long long>(cumulative.supports_by_size[q] - paid_before.supports_by_size[q]));
++  std::printf("}, %lluULL, {", static_cast<unsigned long long>(cumulative.power_tests - paid_before.power_tests));
++  const auto words = [](i128 value) {
++    const auto raw = static_cast<u128>(value);
++    std::printf("%lluULL,%lluULL,", static_cast<unsigned long long>(raw),
++        static_cast<unsigned long long>(raw >> 64));
++  };
++  words(got.key.a);
++  for (i128 value : got.key.b) words(value);
++  words(got.key.c);
++  std::printf("}, {");
++  for (u64 word : got.level.num) std::printf("%lluULL,", static_cast<unsigned long long>(word));
++  words(got.level.den);
++  std::printf("}},\n");
+   return got;
+ }
+ void check_failure(const std::vector<P3>& sites, AnchorMebWork work, AnchorMebStatus status) {
+@@ -223,7 +245,7 @@
+   need(comparisons >= 600 && permutations >= 300 && extra_shells >= 30 && accepted_supports[1] > 0 &&
+        accepted_supports[2] > 0 && accepted_supports[3] > 0 && accepted_supports[4] > 0,
+        "nonvacuity");
+-  std::printf("{\"status\":\"pass\",\"checks\":%llu,\"comparisons\":%llu,\"permutations\":%llu,"
++  std::fprintf(stderr, "{\"status\":\"pass\",\"checks\":%llu,\"comparisons\":%llu,\"permutations\":%llu,"
+               "\"extra_shells\":%llu,\"accepted_supports\":[%llu,%llu,%llu,%llu],"
+               "\"scope\":\"exact_local_meb_only\",\"gcp_used\":false}\n",
+               static_cast<unsigned long long>(checks), static_cast<unsigned long long>(comparisons),

@@ -1,0 +1,29 @@
+[
+  {
+    "name": "normal",
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/verify.py"
+    ],
+    "started_ns": 1789114344916412658,
+    "ended_ns": 1789114345062660645,
+    "exit_code": 0,
+    "stdout_sha256": "d57df72d81743ad599d2993551bfb09ef1c68c2372b73423b1819de86e0d6440",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "optimized",
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/verify.py"
+    ],
+    "started_ns": 1789114345062835334,
+    "ended_ns": 1789114345231362477,
+    "exit_code": 0,
+    "stdout_sha256": "d57df72d81743ad599d2993551bfb09ef1c68c2372b73423b1819de86e0d6440",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

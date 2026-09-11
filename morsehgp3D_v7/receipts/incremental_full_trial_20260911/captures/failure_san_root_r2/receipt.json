@@ -1,0 +1,9 @@
+{
+  "status": "failed",
+  "error": "command_failed:run",
+  "sources_stable": true,
+  "sanitizer": true,
+  "commands": 2,
+  "public_status": "not_claimed",
+  "GCP_used": false
+}

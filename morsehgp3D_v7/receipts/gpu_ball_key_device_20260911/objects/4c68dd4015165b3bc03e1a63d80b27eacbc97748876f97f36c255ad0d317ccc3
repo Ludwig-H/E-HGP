@@ -1,0 +1,325 @@
+#include <algorithm>
+#include <array>
+#include <cstdio>
+#include <cstring>
+#include <stdexcept>
+#include <vector>
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/rational.hpp>
+
+#include "wire.cuh"
+
+namespace {
+using namespace mhgp7;
+using namespace mhgp7::gpu_ball_key_private;
+using Big = boost::multiprecision::cpp_int;
+using Rat = boost::rational<Big>;
+u64 checks = 0, raw_cases = 0, gcd_cases = 0, division_cases = 0, rejects = 0;
+u64 high_gcd = 0, high_divisor = 0, negative_remainders = 0, min_values = 0;
+u64 support_cases[5]{}, degenerates = 0, permutations = 0, cross_lane = 0;
+bool export_mode = false;
+struct Pair { WireInput input; WireOutput expected; };
+std::vector<Pair> exported;
+
+void store_big(u64* words, Big value) {
+  if (value < 0) value += Big(1) << 128;
+  const Big mask = (Big(1) << 64) - 1;
+  words[0] = (value & mask).convert_to<u64>();
+  words[1] = ((value >> 64) & mask).convert_to<u64>();
+}
+void export_pair(const Pair& pair) { if (export_mode) exported.push_back(pair); }
+
+void need(bool yes, const char* why) {
+  ++checks;
+  if (!yes) throw std::runtime_error(why);
+}
+u64 random64() {
+  static u64 state = 0x71b65a32940cdeadULL;
+  state ^= state << 13;
+  state ^= state >> 7;
+  state ^= state << 17;
+  return state;
+}
+u128 random128() { return ((u128)random64() << 64) | random64(); }
+Big big_u(u128 value) { return (Big((u64)(value >> 64)) << 64) + (u64)value; }
+Big big_i(i128 value) { return big_u((u128)value) - (value < 0 ? (Big(1) << 128) : Big(0)); }
+Big gcd(Big a, Big b) {
+  if (a < 0) a = -a;
+  if (b < 0) b = -b;
+  while (b != 0) { Big next = a % b; a = b; b = next; }
+  return a;
+}
+std::array<i128, 5> values(const BallKey& key) { return {key.a, key.b[0], key.b[1], key.b[2], key.c}; }
+std::array<i128, 5> values(const BallForm& form) { return {form.a, form.b[0], form.b[1], form.b[2], form.c}; }
+bool zero_key(const BallKey& key) {
+  for (auto value : values(key)) if (value != 0) return false;
+  return true;
+}
+void check_gcd(u128 a, u128 b) {
+  ++gcd_cases;
+  const u128 actual = ugcd128(a, b);
+  const Big expected = gcd(big_u(a), big_u(b));
+  need(big_u(actual) == expected, "gcd.full_unsigned_domain");
+  need(ugcd128(b, a) == actual, "gcd.symmetric");
+  if (actual >> 64) ++high_gcd;
+  Pair pair{};
+  pair.input.words[0] = 2;
+  wire_store(pair.input.words + 1, a);
+  wire_store(pair.input.words + 3, b);
+  store_big(pair.expected.words + 1, expected);
+  export_pair(pair);
+}
+void check_division(i128 a, i128 b) {
+  ++division_cases;
+  const i128 min_value = -((i128)1 << 126) - ((i128)1 << 126);
+  const Division actual = divide128(a, b);
+  Pair pair{};
+  pair.input.words[0] = 3;
+  wire_store(pair.input.words + 1, (u128)a);
+  wire_store(pair.input.words + 3, (u128)b);
+  if (b == 0 || (a == min_value && b == -1)) {
+    ++rejects;
+    need(actual.status == (b == 0 ? Status::division_zero : Status::division_overflow), "division.rejection");
+    need(actual.quotient == 0 && actual.remainder == 0, "division.no_partial_output");
+    pair.expected.words[0] = (u64)(b == 0 ? Status::division_zero : Status::division_overflow);
+    export_pair(pair);
+    return;
+  }
+  need(actual.status == Status::ok, "division.admitted");
+  const Big x = big_i(a), y = big_i(b);
+  need(big_i(actual.quotient) == x / y, "division.full_signed_quotient");
+  need(big_i(actual.remainder) == x % y, "division.signed_remainder");
+  need(big_i(actual.quotient) * y + big_i(actual.remainder) == x, "division.identity");
+  if (uabs128(b) >> 64) ++high_divisor;
+  if (actual.remainder < 0) ++negative_remainders;
+  if (a == min_value || b == min_value) ++min_values;
+  store_big(pair.expected.words + 1, x / y);
+  store_big(pair.expected.words + 3, x % y);
+  export_pair(pair);
+}
+void check_raw(const BallForm& form) {
+  ++raw_cases;
+  const Reduction result = reduce(form);
+  Pair pair{};
+  pair.input.words[0] = 1;
+  const auto input_words = values(form);
+  for (size_t i = 0; i < input_words.size(); ++i) wire_store(pair.input.words + 1 + 2 * i, (u128)input_words[i]);
+  if (form.a <= 0) {
+    ++rejects;
+    need(result.status == Status::invalid_leading && zero_key(result.key), "reduce.invalid_leading");
+    pair.expected.words[0] = (u64)Status::invalid_leading;
+    export_pair(pair);
+    return;
+  }
+  need(result.status == Status::ok, "reduce.admitted");
+  const auto input = values(form);
+  const auto actual = values(result.key);
+  Big common = 0, output_common = 0;
+  for (auto value : input) common = gcd(common, big_i(value));
+  for (size_t i = 0; i < input.size(); ++i) {
+    need(big_i(actual[i]) == big_i(input[i]) / common, "reduce.boost_coefficient");
+    output_common = gcd(output_common, big_i(actual[i]));
+    store_big(pair.expected.words + 1 + 2 * i, big_i(input[i]) / common);
+  }
+  need(output_common == 1 && result.key.a > 0, "reduce.primitive_positive");
+  const auto repeated = reduce(BallForm{result.key.a, {result.key.b[0], result.key.b[1], result.key.b[2]}, result.key.c});
+  need(repeated.status == Status::ok && repeated.key == result.key, "reduce.idempotent");
+  if (common >= (Big(1) << 64)) ++high_gcd;
+  export_pair(pair);
+}
+
+// Independent rational Gram solve, no q2/q3/q4 forms or fixed-width determinant.
+bool oracle(const SupportRequest& request, std::array<Big, 5>& output) {
+  const unsigned dimension = request.arity - 1;
+  Big edges[3][3]{};
+  const auto coordinate = [](const P3& p, unsigned i) { return i == 0 ? p.x : (i == 1 ? p.y : p.z); };
+  for (unsigned i = 0; i < dimension; ++i)
+    for (unsigned j = 0; j < 3; ++j)
+      edges[i][j] = Big(coordinate(request.points[i + 1], j)) - coordinate(request.points[0], j);
+  Rat matrix[3][4]{};
+  for (unsigned i = 0; i < dimension; ++i) {
+    for (unsigned j = 0; j < dimension; ++j) {
+      Big dot = 0;
+      for (unsigned axis = 0; axis < 3; ++axis) dot += 2 * edges[i][axis] * edges[j][axis];
+      matrix[i][j] = Rat(dot);
+    }
+    Big norm = 0;
+    for (unsigned axis = 0; axis < 3; ++axis) norm += edges[i][axis] * edges[i][axis];
+    matrix[i][dimension] = Rat(norm);
+  }
+  for (unsigned column = 0; column < dimension; ++column) {
+    unsigned pivot = column;
+    while (pivot < dimension && matrix[pivot][column] == Rat(0)) ++pivot;
+    if (pivot == dimension) return false;
+    for (unsigned j = column; j <= dimension; ++j) std::swap(matrix[pivot][j], matrix[column][j]);
+    const Rat scale = matrix[column][column];
+    for (unsigned j = column; j <= dimension; ++j) matrix[column][j] /= scale;
+    for (unsigned i = 0; i < dimension; ++i) {
+      if (i == column) continue;
+      const Rat factor = matrix[i][column];
+      for (unsigned j = column; j <= dimension; ++j) matrix[i][j] -= factor * matrix[column][j];
+    }
+  }
+  Rat coefficients[5]{Rat(1), Rat(0), Rat(0), Rat(0), Rat(0)};
+  for (unsigned axis = 0; axis < 3; ++axis) {
+    const Big anchor = coordinate(request.points[0], axis);
+    Rat center(anchor);
+    for (unsigned i = 0; i < dimension; ++i) center += matrix[i][dimension] * Rat(edges[i][axis]);
+    coefficients[axis + 1] = -Rat(2) * center;
+    coefficients[4] += Rat(2) * center * Rat(anchor) - Rat(anchor * anchor);
+  }
+  Big scale = 1;
+  for (const auto& coefficient : coefficients)
+    scale = (scale / gcd(scale, coefficient.denominator())) * coefficient.denominator();
+  Big common = 0;
+  for (unsigned i = 0; i < 5; ++i) {
+    output[i] = coefficients[i].numerator() * (scale / coefficients[i].denominator());
+    common = gcd(common, output[i]);
+  }
+  for (auto& value : output) value /= common;
+  return true;
+}
+Reduction check_support(const SupportRequest& request) {
+  const Reduction actual = support_key(request);
+  Pair pair{};
+  pair.input.words[0] = 4;
+  pair.input.words[1] = request.arity;
+  for (unsigned i = 0; i < 4; ++i) {
+    pair.input.words[2 + 3 * i] = (u64)request.points[i].x;
+    pair.input.words[3 + 3 * i] = (u64)request.points[i].y;
+    pair.input.words[4 + 3 * i] = (u64)request.points[i].z;
+  }
+  if (request.arity < 2 || request.arity > 4) {
+    ++rejects;
+    need(actual.status == Status::invalid_support && zero_key(actual.key), "support.invalid_arity");
+    pair.expected.words[0] = (u64)Status::invalid_support;
+    export_pair(pair);
+    return actual;
+  }
+  for (unsigned i = 0; i < request.arity; ++i) {
+    bool invalid = !p3_in_profile(request.points[i]);
+    for (unsigned j = 0; j < i; ++j) invalid |= request.points[i] == request.points[j];
+    if (invalid) {
+      ++rejects;
+      need(actual.status == Status::invalid_support && zero_key(actual.key), "support.invalid_site");
+      pair.expected.words[0] = (u64)Status::invalid_support;
+      export_pair(pair);
+      return actual;
+    }
+  }
+  std::array<Big, 5> expected{};
+  const bool exists = oracle(request, expected);
+  if (!exists) {
+    ++degenerates;
+    need(actual.status == Status::invalid_leading && zero_key(actual.key), "support.degenerate");
+    pair.expected.words[0] = (u64)Status::invalid_leading;
+    export_pair(pair);
+    return actual;
+  }
+  ++support_cases[request.arity];
+  need(actual.status == Status::ok, "support.admitted");
+  const auto coefficients = values(actual.key);
+  for (unsigned i = 0; i < 5; ++i)
+    need(big_i(coefficients[i]) == expected[i], "support.independent_gram_key");
+  for (unsigned i = 0; i < request.arity; ++i)
+    need(actual.key.power(request.points[i]) == 0, "support.shell_exact");
+  for (unsigned i = 0; i < 5; ++i) store_big(pair.expected.words + 1 + 2 * i, expected[i]);
+  export_pair(pair);
+  return actual;
+}
+void run() {
+  const i128 minimum = -((i128)1 << 126) - ((i128)1 << 126);
+  const i128 maximum = (i128)(((u128)1 << 127) - 1);
+  const i128 high = ((i128)1 << 64) + 1;
+  const std::vector<i128> boundary{0, 1, -1, 2, -2, high, -high, maximum, minimum,
+                                  (i128)1 << 126, -((i128)1 << 126)};
+  for (const auto x : boundary) for (const auto y : boundary) {
+    check_division(x, y);
+    check_gcd((u128)x, (u128)y);
+  }
+  check_gcd(~(u128)0, ~(u128)0);
+  check_gcd((u128)1 << 127, (u128)1 << 126);
+  check_raw({6, {12, 18, 24}, 5});
+  check_raw({high, {3 * high, -2 * high, 0}, 5 * high});
+  check_raw({(i128)1 << 126, {minimum, 0, (i128)1 << 125}, 0});
+  check_raw({1, {minimum, 0, maximum}, minimum});
+  check_raw({0, {0, 0, 0}, 0});
+  check_raw({-1, {2, 3, 4}, 5});
+  check_raw({minimum, {0, 0, 0}, 0});
+  for (unsigned i = 0; i < 2048; ++i) {
+    const u128 x = random128(), y = random128();
+    check_gcd(x, y);
+    check_division((i128)x, (i128)y);
+    check_division((i128)x, (i128)(i64)random64());
+    const i128 a = (i128)(random128() & (u128)maximum);
+    check_raw({a ? a : 1, {(i128)random128(), (i128)random128(), (i128)random128()}, (i128)random128()});
+    const i128 factor = (i128)(random64() | 1);
+    const i128 coefficients[5]{(i128)(random64() % 65535 + 1), (i64)(random64() % 65535) - 32768,
+                              (i64)(random64() % 65535) - 32768, 0, (i64)(random64() % 65535) - 32768};
+    check_raw({factor * coefficients[0], {factor * coefficients[1], factor * coefficients[2], 0}, factor * coefficients[4]});
+  }
+  // Three generators, one primitive ball; q3/q4 need not be positive MEB supports.
+  const P3 shell[4]{{0, 1, 1}, {2, 1, 1}, {1, 0, 1}, {1, 1, 2}};
+  BallKey previous{};
+  for (unsigned arity = 2; arity <= 4; ++arity) {
+    SupportRequest request{{shell[0], shell[1], shell[2], shell[3]}, arity};
+    const auto actual = check_support(request);
+    if (arity > 2) { need(actual.key == previous, "support.cross_lane_identity"); ++cross_lane; }
+    previous = actual.key;
+  }
+  for (unsigned sample = 0; sample < 512; ++sample) {
+    P3 p[4];
+    for (auto& point : p) point = {(i64)(random64() & 65535), (i64)(random64() & 65535), (i64)(random64() & 65535)};
+    if (sample == 0) { p[0] = {0, 0, 0}; p[1] = {65535, 65535, 0}; p[2] = {65535, 0, 65535}; p[3] = {0, 65535, 65535}; }
+    for (unsigned arity = 2; arity <= 4; ++arity) {
+      SupportRequest request{{p[0], p[1], p[2], p[3]}, arity};
+      const auto first = check_support(request);
+      std::reverse(request.points, request.points + arity);
+      const auto second = check_support(request);
+      need(first.status == second.status && first.key == second.key, "support.permutation");
+      ++permutations;
+    }
+  }
+  check_support({{{0, 0, 0}, {1, 0, 0}, {2, 0, 0}, {3, 0, 0}}, 3});
+  check_support({{{0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {1, 1, 0}}, 4});
+  check_support({{}, 1});
+  check_support({{}, 5});
+  check_support({{{0, 0, 0}, {0, 0, 0}}, 2});
+  check_support({{{-1, 0, 0}, {1, 0, 0}}, 2});
+  check_support({{{0, 0, 0}, {65536, 0, 0}}, 2});
+  need(raw_cases > 4000 && gcd_cases > 2000 && division_cases > 4000, "nonvacuity.arithmetic");
+  need(high_gcd > 10 && high_divisor > 2000 && negative_remainders > 1000 && min_values >= 10,
+       "nonvacuity.full_width_and_sign");
+  need(rejects >= 15 && degenerates >= 2 && cross_lane == 2 && permutations == 1536,
+       "nonvacuity.rejections_and_geometry");
+  for (unsigned arity = 2; arity <= 4; ++arity)
+    need(support_cases[arity] >= 1024, "nonvacuity.all_lanes");
+}
+}  // namespace
+
+int main(int argc, char** argv) {
+  if (argc == 2 && std::strcmp(argv[1], "--export") == 0) export_mode = true;
+  else if (argc != 1) return 2;
+  try {
+    run();
+    if (export_mode) {
+      std::printf("MHGP7_BALL_KEY_V1 %llu\n", (unsigned long long)exported.size());
+      for (const auto& pair : exported) {
+        for (const u64 word : pair.input.words) std::printf("%016llx ", (unsigned long long)word);
+        for (const u64 word : pair.expected.words) std::printf("%016llx ", (unsigned long long)word);
+        std::printf("\n");
+      }
+      return 0;
+    }
+    std::printf("{\"status\":\"passed\",\"checks\":%llu,\"raw_cases\":%llu,\"gcd_cases\":%llu,\"division_cases\":%llu,\"high_gcd\":%llu,\"high_divisor\":%llu,\"negative_remainders\":%llu,\"min_values\":%llu,\"rejects\":%llu,\"q2\":%llu,\"q3\":%llu,\"q4\":%llu,\"degenerates\":%llu,\"permutations\":%llu,\"cross_lane\":%llu,\"device_executed\":false}\n",
+      (unsigned long long)checks, (unsigned long long)raw_cases, (unsigned long long)gcd_cases,
+      (unsigned long long)division_cases, (unsigned long long)high_gcd, (unsigned long long)high_divisor,
+      (unsigned long long)negative_remainders, (unsigned long long)min_values, (unsigned long long)rejects,
+      (unsigned long long)support_cases[2], (unsigned long long)support_cases[3], (unsigned long long)support_cases[4],
+      (unsigned long long)degenerates, (unsigned long long)permutations, (unsigned long long)cross_lane);
+    return 0;
+  } catch (const std::exception& error) {
+    std::fprintf(stderr, "FAIL %s checks=%llu\n", error.what(), (unsigned long long)checks);
+    return 1;
+  }
+}

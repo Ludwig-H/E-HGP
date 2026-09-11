@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/tmp/ehgp-full-v7-b084105b2f0a3462.t4jNZ4Sz4D/anchor_meb_tooling/ball_key_gate",
+    "--selftest",
+    "/tmp/ehgp-full-v7-b084105b2f0a3462.t4jNZ4Sz4D/source/morsehgp3D_v7/bench/ball_key_device_private/vectors.txt",
+    "--expected-sha=4bf82467f04ab30a78c9704603578b4ae8838f44cbc2620ef59fdd6bcb06b679"
+  ],
+  "cwd": "/tmp/ehgp-full-v7-b084105b2f0a3462.t4jNZ4Sz4D/output",
+  "elapsed_seconds": 0.2639129459999907,
+  "ended_utc": "2026-09-11T08:21:49.616591+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 1897,
+  "session_work_deadline_epoch": 1789116351,
+  "started_utc": "2026-09-11T08:21:49.352638+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "325bc47124b4560a4257538c9e2502ceae877e66edde1b634d960e117d4fda58"
+}

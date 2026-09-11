@@ -1,0 +1,32 @@
+{
+  "fixture_r1/generator": {
+    "distributed": false,
+    "executed": true,
+    "sha256": "56a27911502aa92b50250e0d44332bd6f3cce3635e40e5fb19ec1da980b61745",
+    "size": 160704
+  },
+  "nvcc_r1/device_gate": {
+    "distributed": false,
+    "executed": false,
+    "sha256": "6d00a687197ced0f22eeedfd19e13bff738cfeaa6533b0983f94280848ddeba4",
+    "size": 1516088
+  },
+  "san_root_r1/stub_gate": {
+    "distributed": false,
+    "executed": true,
+    "sha256": "e9ea1b9f837cc125ed0a7ee6fe73639d1288317a0595ba142c9e7fc23b54280f",
+    "size": 4447176
+  },
+  "stub_r2/stub_gate": {
+    "distributed": false,
+    "executed": true,
+    "sha256": "7c5c58a8e7bed5693a816bad85577b1f7baa8cc0b13e6f73c5254438489d2b67",
+    "size": 373736
+  },
+  "stub_r3/stub_gate": {
+    "distributed": false,
+    "executed": true,
+    "sha256": "017825eeade70b666250faa54db1dabe90ea980282db2dd51a6d43f39a3e3d80",
+    "size": 373736
+  }
+}

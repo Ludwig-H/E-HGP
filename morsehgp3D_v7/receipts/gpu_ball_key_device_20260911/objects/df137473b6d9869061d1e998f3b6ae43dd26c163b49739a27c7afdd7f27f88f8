@@ -1,0 +1,1 @@
+{"status":"passed","checks":83215,"raw_cases":4103,"gcd_cases":2171,"division_cases":4217,"high_gcd":118,"high_divisor":2114,"negative_remainders":2097,"min_values":19,"rejects":20,"q2":1025,"q3":1025,"q4":1025,"degenerates":2,"permutations":1536,"cross_lane":2,"device_executed":false}

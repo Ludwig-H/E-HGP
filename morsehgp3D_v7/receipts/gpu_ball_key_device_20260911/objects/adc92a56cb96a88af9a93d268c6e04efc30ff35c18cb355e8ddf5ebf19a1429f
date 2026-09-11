@@ -1,0 +1,5 @@
+/workspaces/E-HGP/build/v7_gpu_ball_key_20260911/device_gate.cu(37): error: identifier "__CUDA_ARCH__" is undefined
+    output[6] = __CUDA_ARCH__;
+                ^
+
+1 error detected in the compilation of "/workspaces/E-HGP/build/v7_gpu_ball_key_20260911/device_gate.cu".

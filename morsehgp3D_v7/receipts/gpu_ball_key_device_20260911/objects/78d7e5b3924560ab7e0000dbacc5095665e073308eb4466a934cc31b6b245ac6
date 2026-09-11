@@ -1,0 +1,25 @@
+#!/usr/bin/env python3
+"""Pin a private copy of the current v7 without modifying active sources."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+
+HERE = Path(__file__).resolve().parent
+REPO = HERE.parents[1]
+out = HERE / "source"
+out.mkdir(exist_ok=False)
+names = subprocess.check_output(["git", "ls-files", "morsehgp3D_v7/src", "morsehgp3D_v7/oracle"],
+                                cwd=REPO).decode().splitlines()
+pins = {}
+for name in names:
+    source = REPO / name
+    target = out / name
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, target)
+    pins[name] = hashlib.sha256(source.read_bytes()).hexdigest()
+(HERE / "baseline.json").write_text(json.dumps(dict(commit=subprocess.check_output(
+    ["git", "rev-parse", "HEAD"], cwd=REPO).decode().strip(), files=pins), indent=2) + "\n")
+shutil.copy2(REPO / "build/v7_static_gpu_meb_20260911/nvcc_strict_host.py", HERE / "nvcc_strict_host.py")
+print("private sources copied", len(pins))

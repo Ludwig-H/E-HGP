@@ -1,0 +1,41 @@
+Start testing: Sep 06 13:03 UTC
+----------------------------------------------------------
+35/425 Testing: mhgp7_full_gabriel_census_payload
+35/425 Test: mhgp7_full_gabriel_census_payload
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v7_probe_census_payload_20260906/cmake_r1/mhgp7_full_gabriel_census_payload_gate" "-DARGS=--selftest" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_probe_census_payload_20260906/cmake_r1
+"mhgp7_full_gabriel_census_payload" start time: Sep 06 13:03 UTC
+Output:
+----------------------------------------------------------
+{"schema":"mhgp7-full-census-payload-gate-v1","status":"passed","public_status":"not_claimed","checks":40,"sizeof_candidate":144,"sizeof_survivor":16,"sizeof_ball":224,"full_hierarchy_built":false}
+
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_gabriel_census_payload" end time: Sep 06 13:03 UTC
+"mhgp7_full_gabriel_census_payload" time elapsed: 00:00:00
+----------------------------------------------------------
+
+36/425 Testing: mhgp7_full_gabriel_census_payload_bad_argument
+36/425 Test: mhgp7_full_gabriel_census_payload_bad_argument
+Command: "/usr/bin/cmake" "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v7_probe_census_payload_20260906/cmake_r1/mhgp7_full_gabriel_census_payload_gate" "-DARGS=--unknown" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/workspaces/E-HGP/morsehgp3D_v7/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v7_probe_census_payload_20260906/cmake_r1
+"mhgp7_full_gabriel_census_payload_bad_argument" start time: Sep 06 13:03 UTC
+Output:
+----------------------------------------------------------
+
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp7_full_gabriel_census_payload_bad_argument" end time: Sep 06 13:03 UTC
+"mhgp7_full_gabriel_census_payload_bad_argument" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Sep 06 13:03 UTC
+
+full_census_payload =   0.02 sec*proc
+
+gate =   0.02 sec*proc
+

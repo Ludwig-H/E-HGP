@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "error": null,
+  "sources_stable": true,
+  "commands": 4,
+  "modes": "cache_default_mono",
+  "sizes": [
+    200,
+    400,
+    800
+  ],
+  "shared_host": true,
+  "public_status": "not_claimed",
+  "contract_qualified": false,
+  "GCP_used": false
+}

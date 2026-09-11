@@ -1,0 +1,32 @@
+{
+  "status": "passed",
+  "commands": [
+    {
+      "name": "normal",
+      "argv": [
+        "python3",
+        "-B",
+        "/workspaces/E-HGP/build/v7_gpu_ball_key_20260911/verify.py"
+      ],
+      "started_ns": 1789114890879569036,
+      "ended_ns": 1789114891091612834,
+      "exit_code": 0,
+      "stdout_sha256": "d9a3aa91ff3609af6f92d45d3ec737381244cc4ef2b6943bd3a45b87f087b06c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "optimized",
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v7_gpu_ball_key_20260911/verify.py"
+      ],
+      "started_ns": 1789114891091826572,
+      "ended_ns": 1789114891313290296,
+      "exit_code": 0,
+      "stdout_sha256": "d9a3aa91ff3609af6f92d45d3ec737381244cc4ef2b6943bd3a45b87f087b06c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "status": "preserved_expected_failure",
+  "scope": "publication_script_parse_only",
+  "initial_tool_chunk": "8b5d6e",
+  "argv": [
+    "python3",
+    "-B",
+    "/workspaces/E-HGP/build/v7_gpu_ball_key_20260911/publication_failure_r1/publish.py.source"
+  ],
+  "started_ns": 1789114890222622663,
+  "ended_ns": 1789114890240227445,
+  "exit_code": 1,
+  "scientific_captures_affected": false,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "c8431d750fd258c2af54eb6a8cb1a30a3e1834403d6cac2a57325f589c944112",
+  "publish.py.source_sha256": "cef282fd2a00130e9402e071a492766f08c949683238311ee3cb7e1d670ea6ee"
+}

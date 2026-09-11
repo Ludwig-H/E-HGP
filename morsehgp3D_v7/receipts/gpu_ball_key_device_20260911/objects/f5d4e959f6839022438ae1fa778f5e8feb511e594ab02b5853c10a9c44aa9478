@@ -1,0 +1,12 @@
+#include "ball_key_device.cuh"
+
+void mhgp7_private_launch_raw(const mhgp7::gpu_ball_key_private::RawRequest* input,
+    mhgp7::gpu_ball_key_private::RawResult* output, mhgp7::u32 count) {
+  if (count) mhgp7::gpu_ball_key_private::raw_kernel<<<(static_cast<mhgp7::u64>(count) + 63) / 64, 64>>>(input, output, count);
+}
+void mhgp7_private_launch_support(const mhgp7::gpu_ball_key_private::SupportRequest* input,
+    mhgp7::gpu_ball_key_private::Reduction* output, mhgp7::u32 count) {
+  if (count) mhgp7::gpu_ball_key_private::support_kernel<<<(static_cast<mhgp7::u64>(count) + 63) / 64, 64>>>(input, output, count);
+}
+// Compile and link only. Never launches a device when executed accidentally.
+int main() { return 2; }

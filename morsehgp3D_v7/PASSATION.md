@@ -78,9 +78,29 @@ est historique et ne décrit plus l'issue de cette nouvelle campagne.
 
 Les [deux processus G4 historiques K10/K5](docs/RESULTATS_G4_FULL_20260906.md)
 restent des refus (21,372 s / 5,646 s), pas des mesures de la nouvelle tour.
-Les parents globaux réels 1/2/2 prouvés par l'auditeur restent à retrouver
-par le nouvel instrument sur l'entrée 50k entière. Contrats 1 s/100 ms et
-plusieurs dizaines de millions de points non atteints.
+Le [rejeu nommé indépendant publié à 223a3897](audits/receipts_cache_commit_20260911/README.md)
+retrouve maintenant les parents pré-lot 1/2/2 et l'ancre inerte K10 sur
+l'entrée 50k, depuis les octets du moteur du 10 septembre. Ce verrou est
+clos sur CPU, sans certifier l'arité finale, la complétude du catalogue,
+ni la nouvelle voie statique. Contrats 1 s/100 ms et plusieurs dizaines
+de millions de points non atteints. Le jugement du raccord réel
+génération/census→tour à K9/K10 par un oracle rationnel indépendant reste
+une porte de qualification distincte des comparaisons de payloads.
+
+Nouvelle session du 11 septembre : [deux primitives CUDA](docs/RESULTATS_PRIMITIVES_GPU_20260911.md)
+passent sur la vraie G4 SM12.0, après O2/SAN hôte et compilation stricte.
+Sélection MEB : 605 cas, 21 432 contrôles, 44 rejets ; clé/PGCD/division
+128 bits : 13 573 cas, 325 752 mots comparés. Deux mutants de transport
+sont réfutés sur carte. Aucun résolveur complet ou assemblage FULL GPU
+livré par ces gates, aucun nouveau benchmark 50k. La génération SPOT
+`2026-09-11T01:20:08.309-07:00` de la même cible est maintenant certifiée
+`TERMINATED` ; aucune autre VM active détectée à la clôture.
+
+Le [raccord FULL privé du journal incrémental](receipts/incremental_full_trial_20260911/README.md)
+passe les comparaisons physiques O2/SAN dans quatre modes et les refus
+transactionnels, mais n'est pas intégré : les allocations et capacités
+finales augmentent. Les limites et résultats négatifs sont conservés ;
+la suppression des copies doit précéder toute promotion de performance.
 
 ## Objet à conserver
 
@@ -149,14 +169,15 @@ Prochaines coutures et prototypes séparés :
 
 - [Résolutions géométriques statiques](docs/RESOLUTION_STATIQUE_CPU_20260911.md) : option CPU intégrée, triplet 8k/16k/32k et s8/10/12 à 8k clos ; suivre maintenant le [port GPU des résolutions](docs/PORT_GPU_RESOLUTIONS.md). Les [clés initiales mesurées](receipts/initial_representatives_20260911/README.md) à 8k ont 50,4 % de doublons ; ce ratio ne vaut pas gain de vitesse, le cache nominal en exploite déjà une partie.
 - [Parcours droit des intrus](receipts/rightmost_intruder_20260910/README.md) : prototype de deux lignes non intégré ; 28 nuages O2/SAN et 72 840 requêtes contre un juge de choix. À n1000 : −18,7 % de visites et −3,07 % de MEB, pas de gain contractuel.
-- [Journal incrémental](docs/PLAN_JOURNAL_INCREMENTAL.md) : prototype transactionnel qualifié séparément, pas encore raccordé au producteur FULL ; stabilité de préfixes et refus global vérifiés, gain net de pic et de temps non mesuré.
-- [Sélection MEB destinée au GPU](receipts/gpu_meb_selection_prototype_20260911/README.md) : prototype privé O2, 605 cas et 253 contrôles de transport ; vrai kernel compilé/lié en SM120 mais jamais exécuté. SAN refusé par LSan/ptrace, aucun replay. Ni terminal ni raccord de tour GPU livré par cette primitive.
+- [Journal incrémental](docs/PLAN_JOURNAL_INCREMENTAL.md) : raccord privé FULL O2/SAN correct dans quatre modes, non intégré après micro défavorable sur allocations/rétention finale ; vues plates et suppression des copies restent à évaluer.
+- [Primitives de résolutions GPU](docs/RESULTATS_PRIMITIVES_GPU_20260911.md) : MEB par lots et clé/PGCD/division passent sur G4 après O2/SAN ; sources privées, ni terminal ni raccord de tour GPU. Le premier prototype et ses échecs restent conservés séparément.
 - [Front WSPD optionnel](receipts/witness_front_20260910/README.md) : 431 010 contrôles O2/SAN, liaison explicite à l'index et générations vérifiées. Le batch device reste privé et non exécuté sur GPU ; le générateur nominal reste scalaire.
 
-Les [quatre blocs nommés](receipts/full_ball_named_blocks_20260910/README.md)
-restent **NOT_EXECUTED_50K**. Leur observateur passe de petits tests mais
-les digests des nouvelles paires ne lèvent pas ce verrou. Aucun temps de
-composant ni extrapolation 8k/16k/32k ne qualifie 1 s ou le massif.
+Le premier reçu des [quatre blocs nommés](receipts/full_ball_named_blocks_20260910/README.md)
+reste historiquement `NOT_EXECUTED_50K`. Le [nouveau rejeu indépendant](audits/receipts_cache_commit_20260911/README.md)
+ferme maintenant ce verrou sur les mêmes octets épinglés, sans modifier le
+premier reçu. Aucun temps de composant ni extrapolation 8k/16k/32k ne
+qualifie 1 s ou le massif.
 
 Les [notes de la sonde régulière au 6 septembre](docs/HISTORIQUE_SONDE_REGULIERE_20260906.md)
 conservent les variantes eager/lazy, quotas retirés, MEB filtrées, mesures
@@ -172,8 +193,9 @@ anciens reçus restent conservés, sans copies d'ELF dans la livraison.
 - [Primitives et autorités mathématiques](docs/QUALIFICATION_S1_PRIMITIVES.md), [MEB à double budget](docs/RESULTATS_MEB_DOUBLE_BUDGET_20260905.md) et [coût local défavorable](docs/RESULTATS_COUT_MEB_20260905.md) : qualification locale, pas accélération de tour intégrée.
 - [G4 historique](docs/RESULTATS_G4_20260904.md) et [arrêt certifié historique](receipts/gcp_handoff_20260905.json) : aucune qualification FULL ou nouvelle mesure massive héritée.
 
-GCP non utilisé pour le delta du 11 septembre. Les deux sessions G4 du
-10 septembre sont closes et leur cible E-HGP est certifiée arrêtée.
+Le delta statique CPU du 11 septembre n'utilise pas GCP. Les deux sessions
+du 10 septembre et la nouvelle session de primitives GPU du 11 sont closes ;
+leur cible E-HGP exacte est certifiée arrêtée pour chaque génération.
 Les CTests locaux, la CI et les sessions G4 sont
 trois autorités distinctes. Aucun
 succès CI d'un ancien commit n'est attribué automatiquement au nouveau.

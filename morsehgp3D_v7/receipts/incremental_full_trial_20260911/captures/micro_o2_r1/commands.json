@@ -1,0 +1,86 @@
+[
+  {
+    "name": "compile_baseline",
+    "argv": [
+      "g++",
+      "-O2",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-I",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/micro_o2_r1/source/baseline",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/micro_o2_r1/baseline.d",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/micro_o2_r1/source/micro.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/micro_o2_r1/baseline"
+    ],
+    "started_ns": 1789114053827418571,
+    "ended_ns": 1789114068893156745,
+    "exit_code": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "run_baseline",
+    "argv": [
+      "/usr/bin/time",
+      "-v",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/micro_o2_r1/baseline"
+    ],
+    "started_ns": 1789114068893623118,
+    "ended_ns": 1789114085068913122,
+    "exit_code": 0,
+    "stdout_sha256": "7fe3162fe07b5b1e468aa41f239d2e1f8546f6584b313d25269b7d5f9c6bfa2f",
+    "stderr_sha256": "fb0eef72e3e7f7bb247bac7a197a36c9517c4a9d8e6c23b64b274a13ce56fb38"
+  },
+  {
+    "name": "compile_candidate",
+    "argv": [
+      "g++",
+      "-O2",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-I",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/micro_o2_r1/source/candidate",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/micro_o2_r1/candidate.d",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/micro_o2_r1/source/micro.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/micro_o2_r1/candidate"
+    ],
+    "started_ns": 1789114085069496508,
+    "ended_ns": 1789114100843402899,
+    "exit_code": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "run_candidate",
+    "argv": [
+      "/usr/bin/time",
+      "-v",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/micro_o2_r1/candidate"
+    ],
+    "started_ns": 1789114100843991935,
+    "ended_ns": 1789114117168221609,
+    "exit_code": 0,
+    "stdout_sha256": "f4d7a53fb2a2f7131c5ec9946871720526075c25b8ecf373545cc05eb475dd91",
+    "stderr_sha256": "49a30213372140fe7a03ddbe6ffe8152c9712634d24f963695fd4808a0559885"
+  }
+]

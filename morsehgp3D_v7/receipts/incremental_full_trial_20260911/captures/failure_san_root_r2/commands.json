@@ -1,0 +1,50 @@
+[
+  {
+    "name": "compile",
+    "argv": [
+      "g++",
+      "-O1",
+      "-g",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-DMHGP7_FULL_HEADER=\"/workspaces/E-HGP/build/v7_incremental_full_20260911/failure_san_root_r2/source/morsehgp3D_v7/src/forest/full_ball_tower.hpp\"",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/failure_san_root_r2/gate.d",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/failure_san_root_r2/source/failure_gate.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/failure_san_root_r2/gate"
+    ],
+    "started_ns": 1789113817695318983,
+    "ended_ns": 1789113843863751639,
+    "exit_code": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    }
+  },
+  {
+    "name": "run",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/failure_san_root_r2/gate",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/failure_san_root_r2/fixtures.txt"
+    ],
+    "started_ns": 1789113843864344560,
+    "ended_ns": 1789113844607143770,
+    "exit_code": 1,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "f393f4a0b5fefb0e73936c6bc3da818c499454fe8fc727da33e391794d1332c1",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    }
+  }
+]

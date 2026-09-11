@@ -1,8 +1,9 @@
 # Plan de journal FULL incrémental — prototype hors producteur
 
 Conception du 10 septembre, mise à jour le 11 septembre 2026.
-Un prototype d'assembleur est désormais qualifié séparément ; **il n'est pas
-encore raccordé au producteur FULL**. Les signatures et pins de l'analyse
+Un prototype d'assembleur est qualifié séparément ; **un raccord FULL privé
+est maintenant testé mais n'est pas intégré**, faute de bénéfice établi.
+Les signatures et pins de l'analyse
 initiale ci-dessous restent historiques, pas des octets réattribués.
 GCP non utilisé pour ce travail. Cadre :
 `phase=exploration_v7_hors_registre`, `backend=cpu_reference`,
@@ -30,12 +31,28 @@ ajoute 13 905 contrôles O2/SAN, 20 préfixes, 260 paires de coupes historiques,
 16 suffixes invalides et trois mutants réfutés sur son propre snapshot.
 Cela ne certifie ni l'ordre complet K1..10 ni les verticales : l'API prototype
 assemble une collection de journaux structurels, pas une tour géométrique.
-Les étapes de raccord FULL et les mesures de temps/RSS ci-dessous restent à faire.
+Le [premier raccord FULL privé](../receipts/incremental_full_trial_20260911/README.md)
+est désormais testé : exports physiques O2/SAN identiques au nominal dans
+quatre modes (cache, sans cache, statique 1/4), verticales et compteurs
+géométriques inclus ; 1 402 refus d'allocation et trois lots tardifs invalides
+ne publient aucun préfixe. Le premier échec SAN de l'injecteur `nothrow`
+reste conservé, séparé du harnais v2 corrigé et qualifié.
 
-## Choix recommandé
+La micro mono 200/400/800 donne un résultat mixte qui interdit l'intégration
+comme optimisation : à n800, appels new 4 983 612 → 5 349 633, rétention finale
+57 757 460 → 75 097 940 octets. Le pic demandé varie selon la taille ; le RSS
+processus de toute la série baisse de 191 860 à 163 800 Kio, mais inclut
+préparation et trois tailles, sans isoler le pic FULL. Les copies owning de
+populations et surcapacités des arènes sont les coûts à supprimer ensuite.
+Aucun triplet 8k/16k/32k ni gain de latence de cette variante n'est déclaré.
+
+## Choix recommandé après ce premier essai
 
 Ajouter un **assembleur interne incrémental**, alimenté par un lot exact complet,
-qui écrit directement les quatre arènes finales v2. Il reste privé jusqu'au
+qui écrit directement les quatre arènes finales v2. Le premier raccord
+correct ne suffit pas : mesurer capacité/taille, copies et pic de toute la
+tour avant activation ; une compaction finale peut elle-même payer un pic
+de copie. Il reste privé jusqu'au
 scellement de toute la tour sur sa banque immuable. Conserver le constructeur
 public actuel comme façade de validation/encodage, avec les mêmes règles
 factorisées : ne pas créer un deuxième juge, ni modifier le resolver géométrique.

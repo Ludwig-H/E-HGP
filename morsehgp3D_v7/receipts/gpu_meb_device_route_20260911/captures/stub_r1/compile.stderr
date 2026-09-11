@@ -1,0 +1,15 @@
+/workspaces/E-HGP/build/v7_gpu_meb_device_20260911/source/morsehgp3D_v7/tests/anchor_meb_route_device_gate.cu: In function ‘void {anonymous}::run()’:
+/workspaces/E-HGP/build/v7_gpu_meb_device_20260911/source/morsehgp3D_v7/tests/anchor_meb_route_device_gate.cu:191:78: error: call of overloaded ‘build_cloud_index(<brace-enclosed initializer list>)’ is ambiguous
+  191 |   const auto empty_snapshot = route::IndexSnapshot::capture(build_cloud_index({}));
+      |                                                             ~~~~~~~~~~~~~~~~~^~~~
+In file included from /workspaces/E-HGP/build/v7_gpu_meb_device_20260911/source/morsehgp3D_v7/tests/../src/gpu/../forest/../lanes/q3.hpp:25,
+                 from /workspaces/E-HGP/build/v7_gpu_meb_device_20260911/source/morsehgp3D_v7/tests/../src/gpu/../forest/anchor_meb.hpp:13,
+                 from /workspaces/E-HGP/build/v7_gpu_meb_device_20260911/source/morsehgp3D_v7/tests/../src/gpu/anchor_meb_selection_private.cuh:4,
+                 from /workspaces/E-HGP/build/v7_gpu_meb_device_20260911/source/morsehgp3D_v7/tests/../src/gpu/anchor_meb_route.cuh:17,
+                 from /workspaces/E-HGP/build/v7_gpu_meb_device_20260911/source/morsehgp3D_v7/tests/anchor_meb_route_device_gate.cu:10:
+/workspaces/E-HGP/build/v7_gpu_meb_device_20260911/source/morsehgp3D_v7/tests/../src/gpu/../forest/../lanes/../tree/cloud_index.hpp:127:19: note: candidate: ‘mhgp7::CloudIndex mhgp7::build_cloud_index(const std::vector<InputPoint>&)’
+  127 | inline CloudIndex build_cloud_index(const std::vector<InputPoint>& pts) {
+      |                   ^~~~~~~~~~~~~~~~~
+/workspaces/E-HGP/build/v7_gpu_meb_device_20260911/source/morsehgp3D_v7/tests/../src/gpu/../forest/../lanes/../tree/cloud_index.hpp:249:19: note: candidate: ‘mhgp7::CloudIndex mhgp7::build_cloud_index(const std::vector<P3>&)’
+  249 | inline CloudIndex build_cloud_index(const std::vector<P3>& pts) {
+      |                   ^~~~~~~~~~~~~~~~~

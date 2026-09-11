@@ -1,0 +1,4 @@
+  File "/workspaces/E-HGP/build/v7_gpu_ball_key_20260911/publication_failure_r1/publish.py.source", line 70
+    print(json.dumps(dict(path=str(TARGET), manifest_sha256=sha(TARGET / "manifest.json"),
+         ^
+SyntaxError: '(' was never closed

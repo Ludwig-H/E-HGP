@@ -1,0 +1,25 @@
+#!/usr/bin/env python3
+"""Preserve the first publisher's syntax error; scientific captures unchanged."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+import time
+
+here = Path(__file__).resolve().parent
+out = here / "publication_failure_r1"
+out.mkdir(exist_ok=False)
+shutil.copy2(here / "publish.py", out / "publish.py.source")
+argv = ["python3", "-B", str(out / "publish.py.source")]
+started = time.time_ns()
+with (out / "stdout").open("wb") as stdout, (out / "stderr").open("wb") as stderr:
+    result = subprocess.run(argv, stdout=stdout, stderr=stderr)
+receipt = dict(status="preserved_expected_failure", scope="publication_script_parse_only",
+               initial_tool_chunk="8b5d6e", argv=argv, started_ns=started, ended_ns=time.time_ns(),
+               exit_code=result.returncode, scientific_captures_affected=False)
+for name in ("stdout", "stderr", "publish.py.source"):
+    receipt[name + "_sha256"] = hashlib.sha256((out / name).read_bytes()).hexdigest()
+(out / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
+if result.returncode != 1:
+    raise SystemExit("expected syntax failure missing")

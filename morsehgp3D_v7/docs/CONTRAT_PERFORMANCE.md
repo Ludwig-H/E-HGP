@@ -24,6 +24,12 @@ Ses tests locaux et sa compilation CUDA ne réattribuent pas les temps 50k
 précédents et ne qualifient pas un backend de résolutions GPU. GCP non utilisé
 pour cette étape ; le chemin nominal reste sélectionné par défaut.
 
+La [session distincte de primitives CUDA du 11 septembre](RESULTATS_PRIMITIVES_GPU_20260911.md)
+est désormais close et sa cible SPOT certifiée arrêtée. MEB par lots et
+normalisation/division 128 bits passent sur la vraie carte ; aucune mesure
+de tour ne leur est attribuée. Le prochain raccord de résolutions GPU
+garde son propre contrat de correction et de temps complet.
+
 Le statut demeure `public_status=not_claimed`, profil d'entrée u16.
 La cible de 100 ms du plan transverse est ainsi conservée comme jalon
 suivant, et non comme premier délai à valider. Les rattachements certifiés,

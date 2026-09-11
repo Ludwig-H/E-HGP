@@ -6,6 +6,7 @@ non encore qualifiée n'est pas, à elle seule, une fausse piste.
 
 | Idée écartée ou corrigée | Pourquoi ; décision retenue |
 | --- | --- |
+| Intégrer immédiatement le premier raccord owning du journal incrémental | O2/SAN préservent la tour, mais les copies de populations et capacités de croissance augmentent les allocations et la rétention finale. À n800 : +7,34 % d'appels new, +30,02 % de mémoire finale retenue. Le RSS de la série est favorable mais ne qualifie pas le pic FULL par taille. Garder ce raccord comme [essai documenté](../receipts/incremental_full_trial_20260911/README.md), puis tester vues/scratchs plats et adoption de banque séparément. |
 | Mémoriser seulement le hash d'une facette ou son ancienne racine | Une collision n'identifie pas une facette ; une racine historique peut déjà avoir fusionné. Comparer la clé complète et normaliser chaque hit au pré-lot courant. [Cache qualifié](OPTIMISATIONS_CACHE_ET_GPU_20260910.md) |
 | Utiliser toute clé du census comme ancre statique à tous les ordres | La présence globale ne garantit pas l'admission à K. Vérifier l'intervalle de rang et la naissance strictement antérieure, puis lire l'ancre fermée et sa racine pré-lot. [Voie statique](RESOLUTION_STATIQUE_CPU_20260911.md) |
 | Assimiler 50 % de doublons de représentants à un facteur deux de vitesse | À 8k, le cache/semis nominal évite déjà une partie des MEB initiales et 1,45 M de MEB proviennent des descentes. Le gain statique mesuré est de 32,8 % de MEB, pas 50 %. [Diagnostic](../receipts/initial_representatives_20260911/README.md) |

@@ -1,0 +1,71 @@
+#pragma once
+
+#include "source/morsehgp3D_v7/src/lanes/q2.hpp"
+#include "source/morsehgp3D_v7/src/lanes/q4.hpp"
+
+namespace mhgp7::gpu_ball_key_private {
+
+enum class Status : u32 { ok = 0, invalid_leading = 1, division_zero = 2, division_overflow = 3, invalid_support = 4 };
+struct Division {
+  Status status = Status::division_zero;
+  i128 quotient = 0;
+  i128 remainder = 0;
+};
+struct Reduction {
+  Status status = Status::invalid_leading;
+  BallKey key{};
+};
+
+// Full signed i128 domain, C++ truncation towards zero. The sole overflowing
+// pair MIN/-1 and zero denominator are rejected before any native division.
+MHGP7_HD inline Division divide128(i128 numerator, i128 denominator) {
+  if (denominator == 0) return {};
+  const i128 min_value = -((i128)1 << 126) - ((i128)1 << 126);
+  if (numerator == min_value && denominator == -1) return {Status::division_overflow, 0, 0};
+  return {Status::ok, numerator / denominator, numerator % denominator};
+}
+
+// Algebraic canonicalization, not positivity/MEB/existence certification.
+// The positive leading term ensures 1 <= gcd <= a <= INT128_MAX, so every
+// cast/division inside the existing reducer is defined even if b/c is MIN.
+MHGP7_HD inline Reduction reduce(const BallForm& form) {
+  if (form.a <= 0) return {};
+  return {Status::ok, ball_key_reduce(form)};
+}
+
+struct RawRequest { BallForm form{}; i128 numerator = 0, denominator = 0; u128 x = 0, y = 0; };
+struct RawResult { Reduction reduction{}; Division division{}; u128 gcd = 0; };
+MHGP7_HD inline RawResult evaluate(const RawRequest& request) {
+  return {reduce(request.form), divide128(request.numerator, request.denominator), ugcd128(request.x, request.y)};
+}
+
+struct SupportRequest { P3 points[4]{}; u32 arity = 0; };
+// A support is only used to form a circumball, not certify MEB positivity.
+MHGP7_HD inline Reduction support_key(const SupportRequest& request) {
+  const P3* p = request.points;
+  if (request.arity < 2 || request.arity > 4) return {Status::invalid_support, {}};
+  for (u32 i = 0; i < request.arity; ++i) {
+    if (p[i].x < 0 || p[i].x > 65535 || p[i].y < 0 || p[i].y > 65535 || p[i].z < 0 || p[i].z > 65535)
+      return {Status::invalid_support, {}};
+    for (u32 j = 0; j < i; ++j)
+      if (p[i].x == p[j].x && p[i].y == p[j].y && p[i].z == p[j].z)
+        return {Status::invalid_support, {}};
+  }
+  if (request.arity == 2) return {Status::ok, q2_ball_key(p[0], p[1])};
+  if (request.arity == 3) return reduce(q3_ball_form(q3_form(p[0], p[1], p[2])));
+  if (request.arity == 4) return reduce(q4_ball_form(q4_form(p[0], p[1], p[2], p[3])));
+  return {};
+}
+
+#if defined(__CUDACC__)
+__global__ void raw_kernel(const RawRequest* input, RawResult* output, u32 count) {
+  const u64 index = (u64)blockIdx.x * blockDim.x + threadIdx.x;
+  if (index < count) output[index] = evaluate(input[index]);
+}
+__global__ void support_kernel(const SupportRequest* input, Reduction* output, u32 count) {
+  const u64 index = (u64)blockIdx.x * blockDim.x + threadIdx.x;
+  if (index < count) output[index] = support_key(input[index]);
+}
+#endif
+
+}  // namespace mhgp7::gpu_ball_key_private

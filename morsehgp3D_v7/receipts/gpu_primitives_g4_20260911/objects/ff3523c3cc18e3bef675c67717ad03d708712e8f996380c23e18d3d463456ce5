@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+"""Compile exactly the frozen guest sources locally; never execute CUDA."""
+import argparse
+import hashlib
+import importlib.util
+import json
+from pathlib import Path
+import shlex
+import shutil
+import subprocess
+import sys
+import time
+
+BASE = Path(__file__).resolve().parent
+ROOT = BASE.parents[1]
+sys.dont_write_bytecode = True
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def need(ok, reason):
+    if not ok:
+        raise ValueError(reason)
+
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--input', type=Path, required=True)
+parser.add_argument('--out', required=True)
+args = parser.parse_args()
+need(args.out.isidentifier(), 'fresh output name')
+out = BASE / args.out
+out.mkdir(exist_ok=False)
+source = args.input.resolve() / 'source'
+manifest = json.loads((args.input / 'source_manifest.json').read_text())
+pins = json.loads((args.input / 'pins.json').read_text())
+worker_path = ROOT / 'gcp-migration/anchor_meb_worker_v7.py'
+need(sha(worker_path) == pins['worker']['sha256'], 'worker pin')
+spec = importlib.util.spec_from_file_location('worker_compile_only', worker_path)
+worker = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(worker)
+before = worker.source_map(source, manifest)
+adapter = out / 'nvcc_strict_host.py'
+shutil.copyfile(source / worker.STRICT_HOST, adapter)
+adapter.chmod(0o700)
+toolkit = ROOT / 'build/v7_nvcc_pedantic_20260910/toolkit'
+receipt = dict(status='failed', device_executed=False, GCP_used=False, commands=[],
+               worker_sha256=sha(worker_path), source_manifest_sha256=sha(args.input / 'source_manifest.json'),
+               before=before)
+try:
+    for kind in ('gate', 'key_gate'):
+        command = worker.compile_command(str(toolkit / 'bin/nvcc'), source, out, out, kind)
+        # This extracted local toolkit requires its lib directory explicitly;
+        # the guest command uses its installed toolkit without this addition.
+        command.insert(-2, '-L' + str(toolkit / 'lib'))
+        binary = Path(command[-1])
+        start = time.time()
+        with (out / (kind + '.stdout')).open('xb') as stdout, (out / (kind + '.stderr')).open('xb') as stderr:
+            process = subprocess.run(command, stdin=subprocess.DEVNULL, stdout=stdout, stderr=stderr)
+        row = dict(kind=kind, argv=command, exit_code=process.returncode,
+                   started_epoch=start, ended_epoch=time.time(),
+                   stdout_sha256=sha(out / (kind + '.stdout')), stderr_sha256=sha(out / (kind + '.stderr')))
+        receipt['commands'].append(row)
+        print(kind, process.returncode, flush=True)
+        need(process.returncode == 0, 'strict compile failed: ' + kind)
+        depfile = out / (kind + '.d')
+        project, external = {}, {}
+        for spelling in shlex.split(depfile.read_text().replace('\\\n', ' ').split(':', 1)[1]):
+            path = Path(spelling).resolve()
+            if path.is_relative_to(source):
+                name = path.relative_to(source).as_posix()
+                need(name in before and sha(path) == before[name], 'unpinned source dependency')
+                project[name] = before[name]
+            else:
+                external[str(path)] = sha(path)
+        need((worker.DEVICE_GATE if kind == 'gate' else worker.KEY_GATE) in project, 'entry source missing')
+        row.update(binary_sha256=sha(binary), depfile_sha256=sha(depfile), project=project, external=external)
+    receipt['status'] = 'passed'
+except BaseException as error:
+    receipt['error'] = type(error).__name__ + ': ' + str(error)
+finally:
+    receipt['after'] = worker.source_map(source, manifest)
+    if receipt['after'] != before or sha(worker_path) != receipt['worker_sha256']:
+        receipt['status'] = 'failed'
+    with (out / 'receipt.json').open('x') as stream:
+        json.dump(receipt, stream, indent=2, sort_keys=True)
+        stream.write('\n')
+raise SystemExit(0 if receipt['status'] == 'passed' else 1)

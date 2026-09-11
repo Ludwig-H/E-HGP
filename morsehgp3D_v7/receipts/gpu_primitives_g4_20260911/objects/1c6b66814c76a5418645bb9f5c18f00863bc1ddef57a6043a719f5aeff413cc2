@@ -1,0 +1,128 @@
+{
+  "canIpForward": false,
+  "cpuPlatform": "AMD Turin",
+  "creationTimestamp": "2026-09-04T14:11:04.341-07:00",
+  "deletionProtection": true,
+  "disks": [
+    {
+      "autoDelete": true,
+      "boot": true,
+      "deviceName": "persistent-disk-0",
+      "diskSizeGb": "100",
+      "guestOsFeatures": [
+        {
+          "type": "VIRTIO_SCSI_MULTIQUEUE"
+        },
+        {
+          "type": "UEFI_COMPATIBLE"
+        },
+        {
+          "type": "GVNIC"
+        }
+      ],
+      "index": 0,
+      "interface": "NVME",
+      "kind": "compute#attachedDisk",
+      "licenses": [
+        "https://www.googleapis.com/compute/v1/projects/click-to-deploy-images/global/licenses/c2d-dl-platform-dlvm",
+        "https://www.googleapis.com/compute/v1/projects/click-to-deploy-images/global/licenses/c2d-dl-platform-gvnic",
+        "https://www.googleapis.com/compute/v1/projects/click-to-deploy-images/global/licenses/c2d-dl-platform-py310",
+        "https://www.googleapis.com/compute/v1/projects/click-to-deploy-images/global/licenses/c2d-dl-platform-gpu-common-cu129",
+        "https://www.googleapis.com/compute/v1/projects/click-to-deploy-images/global/licenses/c2d-dl-platform-ubuntu-2204"
+      ],
+      "mode": "READ_WRITE",
+      "source": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/disks/ehgp-v7-4fa0e0789a7d5bb06b787d35",
+      "type": "PERSISTENT"
+    }
+  ],
+  "fingerprint": "dDDWLSV_wwQ=",
+  "guestAccelerators": [
+    {
+      "acceleratorCount": 1,
+      "acceleratorType": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/acceleratorTypes/nvidia-rtx-pro-6000"
+    }
+  ],
+  "id": "4526841274685623561",
+  "kind": "compute#instance",
+  "labelFingerprint": "Odts2LIBomI=",
+  "labels": {
+    "ehgp-create": "4fa0e0789a7d5bb06b787d35",
+    "project": "e-hgp",
+    "role": "gpu-benchmark"
+  },
+  "lastStartTimestamp": "2026-09-11T01:20:08.309-07:00",
+  "lastStopTimestamp": "2026-09-10T14:00:30.940-07:00",
+  "machineType": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/machineTypes/g4-standard-48",
+  "metadata": {
+    "fingerprint": "eMe0rrVgKBE=",
+    "items": [
+      {
+        "key": "enable-oslogin",
+        "value": "TRUE"
+      },
+      {
+        "key": "startup-script",
+        "value": "#!/bin/bash\nset -euo pipefail\nfail_closed() { /sbin/shutdown -P now || /sbin/poweroff -f; exit 1; }\nif [[ -e /var/lib/ehgp-v7-create || -L /var/lib/ehgp-v7-create ]]; then\n  [[ -d /var/lib/ehgp-v7-create && ! -L /var/lib/ehgp-v7-create && $(stat -c '%u:%a' /var/lib/ehgp-v7-create) == 0:700 ]] || fail_closed\nfi\nif [[ -e /var/lib/ehgp-v7-create/4fa0e0789a7d5bb06b787d35 || -L /var/lib/ehgp-v7-create/4fa0e0789a7d5bb06b787d35 ]]; then\n  [[ -f /var/lib/ehgp-v7-create/4fa0e0789a7d5bb06b787d35 && ! -L /var/lib/ehgp-v7-create/4fa0e0789a7d5bb06b787d35 && $(stat -c '%u:%a' /var/lib/ehgp-v7-create/4fa0e0789a7d5bb06b787d35) == 0:600 && \"$(cat /var/lib/ehgp-v7-create/4fa0e0789a7d5bb06b787d35)\" == 4fa0e0789a7d5bb06b787d35 ]] || fail_closed\n  exit 0\nfi\nif ! /bin/bash -c 'set -euo pipefail; readonly requested_minutes=\"$1\"; readonly gce_deadline_epoch=\"$2\"; readonly tolerance_seconds=120; readonly scheduled_file=\"${3:-/run/systemd/shutdown/scheduled}\"; [[ \"${requested_minutes}\" =~ ^[1-9][0-9]*$ ]]; [[ \"${gce_deadline_epoch}\" =~ ^[0-9]+$ ]]; shutdown -c >/dev/null 2>&1 || true; shutdown -P \"+${requested_minutes}\" \"Coupe-circuit E-HGP\"; [[ -r \"${scheduled_file}\" ]]; mode=\"$(sed -n \"s/^MODE=\\\\(.*\\\\)$/\\\\1/p\" \"${scheduled_file}\")\"; scheduled_usec=\"$(sed -n \"s/^USEC=\\\\([0-9][0-9]*\\\\)$/\\\\1/p\" \"${scheduled_file}\")\"; [[ \"${mode}\" == \"poweroff\" ]]; [[ \"${scheduled_usec}\" =~ ^[0-9]{1,18}$ ]]; now_epoch=\"$(date +%s)\"; scheduled_epoch=$((10#${scheduled_usec} / 1000000)); expected_epoch=$((now_epoch + requested_minutes * 60)); minimum_expected=$((expected_epoch - tolerance_seconds)); maximum_expected=$((expected_epoch + tolerance_seconds)); ((scheduled_epoch > now_epoch)); ((scheduled_epoch >= minimum_expected && scheduled_epoch <= maximum_expected)); ((scheduled_epoch <= gce_deadline_epoch)); printf \"MODE=%s\\nUSEC=%s\\n\" \"${mode}\" \"${scheduled_usec}\"; printf \"__EHGP_GUEST_GUARD_VERIFIED__\\n\";' -- 45 1788559558; then\n  /sbin/shutdown -P now || /sbin/poweroff -f\n  exit 1\nfi\ninstall -d -m 700 /var/lib/ehgp-v7-create || fail_closed\n[[ ! -L /var/lib/ehgp-v7-create && $(stat -c '%u:%a' /var/lib/ehgp-v7-create) == 0:700 ]] || fail_closed\n(umask 077; set -o noclobber; printf '%s\\n' 4fa0e0789a7d5bb06b787d35 > /var/lib/ehgp-v7-create/4fa0e0789a7d5bb06b787d35) || fail_closed\nchmod 600 /var/lib/ehgp-v7-create/4fa0e0789a7d5bb06b787d35 || fail_closed\n[[ -f /var/lib/ehgp-v7-create/4fa0e0789a7d5bb06b787d35 && ! -L /var/lib/ehgp-v7-create/4fa0e0789a7d5bb06b787d35 && $(stat -c '%u:%a' /var/lib/ehgp-v7-create/4fa0e0789a7d5bb06b787d35) == 0:600 && \"$(cat /var/lib/ehgp-v7-create/4fa0e0789a7d5bb06b787d35)\" == 4fa0e0789a7d5bb06b787d35 ]] || fail_closed\n"
+      }
+    ],
+    "kind": "compute#metadata"
+  },
+  "name": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+  "networkInterfaces": [
+    {
+      "accessConfigs": [
+        {
+          "kind": "compute#accessConfig",
+          "name": "external-nat",
+          "natIP": "136.112.28.54",
+          "networkTier": "PREMIUM",
+          "type": "ONE_TO_ONE_NAT"
+        }
+      ],
+      "fingerprint": "d0o5EmXlyUQ=",
+      "kind": "compute#networkInterface",
+      "name": "nic0",
+      "network": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/global/networks/default",
+      "networkIP": "10.128.0.2",
+      "nicType": "GVNIC",
+      "stackType": "IPV4_ONLY",
+      "subnetwork": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/regions/us-central1/subnetworks/default"
+    }
+  ],
+  "resourceStatus": {
+    "effectiveInstanceMetadata": {
+      "enableOsloginMetadataValue": true,
+      "vmDnsSettingMetadataValue": "ZonalOnly"
+    },
+    "scheduling": {
+      "terminationTimestamp": "2026-09-11T09:19:59.078985Z"
+    }
+  },
+  "satisfiesPzi": true,
+  "scheduling": {
+    "automaticRestart": false,
+    "instanceTerminationAction": "STOP",
+    "maxRunDuration": {
+      "nanos": 0,
+      "seconds": "3600"
+    },
+    "onHostMaintenance": "TERMINATE",
+    "preemptible": true,
+    "provisioningModel": "SPOT"
+  },
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35",
+  "shieldedInstanceConfig": {
+    "enableIntegrityMonitoring": true,
+    "enableSecureBoot": false,
+    "enableVtpm": true
+  },
+  "shieldedInstanceIntegrityPolicy": {
+    "updateAutoLearnPolicy": true
+  },
+  "startRestricted": false,
+  "status": "RUNNING",
+  "tags": {
+    "fingerprint": "42WmSpB8rSM="
+  },
+  "zone": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b"
+}

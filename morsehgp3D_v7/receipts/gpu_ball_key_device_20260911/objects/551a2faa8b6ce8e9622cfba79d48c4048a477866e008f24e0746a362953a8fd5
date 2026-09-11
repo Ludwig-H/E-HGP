@@ -1,0 +1,81 @@
+# Prototype privé de normalisation BallKey et gate device autonome
+
+Voir [NOTE_MATH_ET_DEVICE.md](NOTE_MATH_ET_DEVICE.md) pour les domaines,
+la preuve, les limites et le coût. Le moteur actif n'est pas modifié.
+`public_status=not_claimed`. GCP non utilisé par ce sous-agent.
+
+## Exécution de la gate autonome
+
+La gate autonome n'inclut pas Boost. Attentes indépendantes :
+`export_r1/export_vectors.stdout`, SHA-256
+`4bf82467f04ab30a78c9704603578b4ae8838f44cbc2620ef59fdd6bcb06b679`.
+Elles viennent du juge cpp_int/Gram rationnel local ; 13 573 cas et
+325 752 comparaisons de mots dans chaque exécution nominale de la gate.
+
+```bash
+gate --selftest vectors.txt --expected-sha=4bf82467f04ab30a78c9704603578b4ae8838f44cbc2620ef59fdd6bcb06b679
+```
+
+Un binaire NVCC exécute alors CUDA et exige SM120. `--host` choisit
+explicitement la voie hôte du même TU ; un binaire g++ utilise toujours
+`backend=host_stub`. Le JSON restitue aussi `device_executed` et `device_arch`.
+Les options `--inject=skip-write` et `--inject=corrupt-word` doivent donner
+le code 1 et `FAIL backend.expected_word`, jamais seulement un refus nominal
+de l'option. Un mauvais SHA donne 1 / `FAIL vectors.sha256`, un argument
+inconnu donne 2. Aucun résultat GPU n'est acquis par `--host`.
+
+Pour exporter une nouvelle qualification indépendante (Boost local requis) :
+
+```bash
+python3 -B build/v7_gpu_ball_key_20260911/record_device.py --out export_fresh --mode export
+```
+
+Pour qualifier la gate sans Boost, remplacer OUT par un nom neuf :
+
+```bash
+python3 -B build/v7_gpu_ball_key_20260911/record_device.py --out OUT --mode host --vectors build/v7_gpu_ball_key_20260911/export_r1/export_vectors.stdout
+python3 -B build/v7_gpu_ball_key_20260911/record_device.py --out OUT --mode nvcc --vectors build/v7_gpu_ball_key_20260911/export_r1/export_vectors.stdout
+```
+
+Le mode `nvcc` compile et lie les vrais kernels puis exécute uniquement
+`--host` localement. Il ne lance aucun device. `host-san` doit être exécuté
+depuis le processus ROOT dans cet environnement, les sous-agents étant
+tracés et incompatibles avec LeakSanitizer. Il ne désactive pas les fuites.
+
+## Captures conservées
+
+| Capture | Objet |
+| --- | --- |
+| `nvcc_r1` | Premier kernel réel GCD/divisions/normalisation : compilation et lien SM120 réussis, avant instrumentation des mutants |
+| `o2_r1` | Premier juge cpp_int/Gram : 83 215 contrôles et refus d'arguments réussi |
+| `san_r1` | Compilation réussie, exécution refusée par LSan/ptrace ; échec conservé |
+| `san_root_r2` | Juge avec export disponible, compilation/run/arguments réussis sous ASan/UBSan et detect_leaks=1, depuis ROOT |
+| `export_r1` | Juge O2 recompilé, mêmes 83 215 contrôles, attentes indépendantes exportées |
+| `host_r1` | Gate portable sans Boost : nominal, deux mutants transport, mauvais SHA et arguments qualifiés |
+| `device_nvcc_r1` | Refus de compilation de la nouvelle gate : __CUDA_ARCH__ absent à la passe hôte ; source fautive et logs conservés |
+| `device_nvcc_r2` | Branche de métadonnée hôte corrigée : compilation/lien réels SM120, nominal et rejets en mode --host réussis |
+| `host_san_root_r1` | Gate portable SAN depuis ROOT ; son reçu fermé reste l'autorité du statut |
+| `mutants_r1` | Cinq mutations arithmétiques compilées séparément ; leur reçu fermé reste l'autorité du statut |
+
+Les cinq mutations arithmétiques sont : mot haut ignoré par le PGCD,
+coefficient c omis de la réduction, diviseur large tronqué, signe du reste
+perdu et admission de a=0. Elles ne s'activent jamais sans macro de test.
+Le script `verify.py` exige leurs reçus clos et celui du SAN portable ;
+`--partial` est explicitement une lecture partielle, jamais une qualification
+complète. Il fonctionne sous Python normal et `-O` sans `assert`.
+
+## Remise au worker G4
+
+Copier ensemble `device_gate.cu`, `wire.cuh`, `ball_key_device.cuh`,
+`nvcc_strict_host.py` et `source/morsehgp3D_v7/src/`, en conservant leurs
+includes relatifs. Le fichier d'attentes reste une donnée séparée épinglée.
+Les flags et commandes exacts sont dans `device_nvcc_r2/receipt.json`.
+Le worker peut recompiler le même TU avec g++ `-x c++ -DMHGP7_FAKE_DEVICE`
+pour SAN, puis NVCC SM120 pour la vraie exécution. Recompiler crée un nouveau
+binaire à épingler ; aucun ELF local n'est une preuve d'exécution G4.
+
+La gate rapporte un kernel générique à 82 registres et 104 octets de stack,
+sans spills, dans cette compilation précise. Les petits kernels séparés
+non lancés par cette gate utilisent respectivement 58 et 80 registres :
+ne pas attribuer leurs ressources à la gate, ni au futur terminal fusionné.
+Il n'y a ici ni terminal de descente GPU ni tour FULL GPU ni contrat de latence.

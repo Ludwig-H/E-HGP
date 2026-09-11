@@ -1,0 +1,13 @@
+{
+  "failure_o2_r1/gate": "ed7c116f753750b12e6b48967686e0182e7cb15bc6756a7eece9d06866c29b0f",
+  "failure_o2_v2/gate": "9015e9ce94fd6b3cbad6387289cf1bec67fe639a35af7c617005265369c5e197",
+  "failure_san_root_r2/gate": "5ad462dce567d1df250792847d5f13440785fb01b8eb1b75d0d9bf06c005fad6",
+  "failure_san_root_v2/gate": "526c57923edf21ae72fee377012cc90070576724bde4223edc84c25f40203fe1",
+  "micro_o2_r1/baseline": "77bfcd6e96c94a67660b5a04f1e0d870fb1f381cf02c1a3bbeb8b2b9e28ead34",
+  "micro_o2_r1/candidate": "f21a4fa11ca14d6f614cfc4dc49604b9c4ff6c520f1119ca9c2c82e2aee4dd50",
+  "o2_r1/baseline": "61aa12890d8491c6301715180c4ce776a9345bfae3a25016457166a538c18f5e",
+  "o2_r1/candidate": "f764bc9526ef4c638214943cf88238e629fccecf44db2b5e09cee7514d507cc5",
+  "san_r1/baseline": "b2021c8c2233da81d6efd45b78d8fdd741e39274d3395d0d531193ea0941bbcd",
+  "san_root_r2/baseline": "5ff65b5ddabf236b7209f7dc677e9eb11a98f0623b7144d6cddce6bba7753fa4",
+  "san_root_r2/candidate": "75256a8dca287b61a46013d71050d9e0eaef45a59879a912bac481dcab18d63c"
+}

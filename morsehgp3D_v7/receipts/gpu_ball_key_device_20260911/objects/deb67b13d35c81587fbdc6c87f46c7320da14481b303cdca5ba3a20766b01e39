@@ -1,0 +1,11 @@
+ptxas info    : 0 bytes gmem
+ptxas info    : Compiling entry function '_ZN5mhgp720gpu_ball_key_private14support_kernelEPKNS0_14SupportRequestEPNS0_9ReductionEj' for 'sm_120'
+ptxas info    : Function properties for _ZN5mhgp720gpu_ball_key_private14support_kernelEPKNS0_14SupportRequestEPNS0_9ReductionEj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 80 registers, used 0 barriers
+ptxas info    : Compile time = 353.236 ms
+ptxas info    : Compiling entry function '_ZN5mhgp720gpu_ball_key_private10raw_kernelEPKNS0_10RawRequestEPNS0_9RawResultEj' for 'sm_120'
+ptxas info    : Function properties for _ZN5mhgp720gpu_ball_key_private10raw_kernelEPKNS0_10RawRequestEPNS0_9RawResultEj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 58 registers, used 0 barriers
+ptxas info    : Compile time = 163.508 ms

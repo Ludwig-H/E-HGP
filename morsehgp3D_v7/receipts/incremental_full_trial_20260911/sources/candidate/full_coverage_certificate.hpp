@@ -1,0 +1,396 @@
+// Dated FULL coverage journal, structural authority ONLY. This is not the
+// regular minima certificate v1, a geometric producer, or a completeness proof.
+#pragma once
+
+#include <memory>
+
+#include "full_certificate.hpp"
+
+namespace mhgp7 {
+
+inline constexpr const char* kFullCoverageSchema = "full_dated_coverage_forest_v2";
+inline constexpr const char* kFullCoverageArenaAccounting = "exact_structural_sizes_reserved_v1";
+inline constexpr FullNodeId kFullCoverageAbsent = std::numeric_limits<FullNodeId>::max();
+
+// Stored once across the orders sharing this bank. Point identifiers, not
+// coordinates: association with a certified ball/census belongs to the producer.
+struct FullCoveragePopulation {
+  std::vector<PointId> interior, shell;
+};
+class FullCoveragePopulations;
+struct FullCoveragePopulationResult {
+  FullCertificateStatus status = FullCertificateStatus::kInvalidInput;
+  const char* reason = "coverage_invalid_population";
+  std::shared_ptr<const FullCoveragePopulations> value;
+};
+FullCoveragePopulationResult build_full_coverage_populations(
+    std::span<const PointId>, std::span<const FullCoveragePopulation>);
+
+class FullCoveragePopulations {
+ public:
+  FullCoveragePopulations() = default;
+  FullCoveragePopulations(const FullCoveragePopulations&) = delete;
+  FullCoveragePopulations& operator=(const FullCoveragePopulations&) = delete;
+  FullCoveragePopulations(FullCoveragePopulations&&) = delete;
+  FullCoveragePopulations& operator=(FullCoveragePopulations&&) = delete;
+  const std::vector<PointId>& domain() const { return domain_; }
+  const std::vector<FullCoveragePopulation>& rows() const { return rows_; }
+ private:
+  friend FullCoveragePopulationResult build_full_coverage_populations(
+      std::span<const PointId>, std::span<const FullCoveragePopulation>);
+  std::vector<PointId> domain_;
+  std::vector<FullCoveragePopulation> rows_;
+};
+
+inline FullCoveragePopulationResult build_full_coverage_populations(
+    std::span<const PointId> domain, std::span<const FullCoveragePopulation> rows) {
+  FullCoveragePopulationResult result;
+  if (domain.empty() || rows.empty()) return result;
+  const auto ordered = [](const auto& points) {
+    for (size_t i = 1; i < points.size(); ++i)
+      if (points[i - 1] >= points[i]) return false;
+    return true;
+  };
+  if (!ordered(domain)) return result;
+  for (const auto& row : rows) {
+    // A representation bound of the mask, NOT a cloud/work/time ceiling.
+    if (row.shell.size() > std::numeric_limits<u16>::digits ||
+        (row.interior.empty() && row.shell.empty()) ||
+        !ordered(row.interior) || !ordered(row.shell)) return result;
+    for (const auto* points : {&row.interior, &row.shell})
+      for (PointId p : *points)
+        if (!std::binary_search(domain.begin(), domain.end(), p)) return result;
+    for (PointId p : row.shell)
+      if (std::binary_search(row.interior.begin(), row.interior.end(), p)) return result;
+  }
+  try {
+    auto bank = std::make_shared<FullCoveragePopulations>();
+    bank->domain_.assign(domain.begin(), domain.end());
+    bank->rows_.assign(rows.begin(), rows.end());
+    result.value = std::move(bank);
+    result.status = FullCertificateStatus::kOk;
+    result.reason = "structural_only";
+  } catch (const std::bad_alloc&) {
+    result.status = FullCertificateStatus::kResourceExhausted;
+    result.reason = "coverage_allocation_failed";
+  } catch (const std::length_error&) {
+    result.status = FullCertificateStatus::kResourceExhausted;
+    result.reason = "coverage_size_overflow";
+  }
+  return result;
+}
+
+struct FullCoverageRef {
+  u64 population = 0;
+  u16 shell_mask = 0;
+  bool include_interior = false;
+};
+struct FullCoverageAction {
+  // Empty: birth. One: continuation, NO new node. Two or more: multifusion.
+  std::vector<FullNodeId> parents;
+  std::vector<FullCoverageRef> contributions;
+};
+struct FullCoverageBatch {
+  ExactLevel level{{0, 0, 0}, 1};
+  std::vector<FullCoverageAction> actions;
+};
+struct FullDatedContribution {
+  ExactLevel level;
+  FullNodeId segment;
+  FullCoverageRef ref;
+};
+class FullCoverageCertificate;
+struct FullCoverageBuildResult;
+namespace full_coverage_detail { class CoverageJournalState; }
+FullCoverageBuildResult build_full_coverage_certificate(unsigned,
+    std::shared_ptr<const FullCoveragePopulations>, std::span<const FullCoverageBatch>);
+
+class FullCoverageCertificate {
+ public:
+  FullCoverageCertificate() = default;
+  FullCoverageCertificate(const FullCoverageCertificate&) = delete;
+  FullCoverageCertificate& operator=(const FullCoverageCertificate&) = delete;
+  FullCoverageCertificate(FullCoverageCertificate&& other) noexcept { swap(other); }
+  FullCoverageCertificate& operator=(FullCoverageCertificate&& other) noexcept {
+    if (this != &other) { FullCoverageCertificate fresh(std::move(other)); swap(fresh); }
+    return *this;
+  }
+  unsigned order() const { return order_; }
+  const auto& populations() const { return populations_; }
+  const auto& nodes() const { return nodes_; }
+  const auto& parents() const { return parents_; }
+  const auto& successors() const { return successors_; }
+  const auto& contributions() const { return contributions_; }
+ private:
+  friend class full_coverage_detail::CoverageJournalState;
+  friend FullCoverageBuildResult build_full_coverage_certificate(unsigned,
+      std::shared_ptr<const FullCoveragePopulations>, std::span<const FullCoverageBatch>);
+  void swap(FullCoverageCertificate& other) noexcept {
+    std::swap(order_, other.order_);
+    populations_.swap(other.populations_);
+    nodes_.swap(other.nodes_); parents_.swap(other.parents_);
+    successors_.swap(other.successors_); contributions_.swap(other.contributions_);
+  }
+  unsigned order_ = 0;
+  std::shared_ptr<const FullCoveragePopulations> populations_;
+  std::vector<FullNode> nodes_;  // first is always a CSR offset, including births.
+  std::vector<FullNodeId> parents_, successors_;
+  std::vector<FullDatedContribution> contributions_;
+};
+struct FullCoverageBuildResult {
+  FullCertificateStatus status = FullCertificateStatus::kInvalidInput;
+  const char* reason = "coverage_invalid_input";
+  FullCoverageCertificate value;
+};
+
+namespace full_coverage_detail {
+inline u16 all_shell(const FullCoveragePopulation& row) {
+  return static_cast<u16>((u32{1} << row.shell.size()) - 1);
+}
+inline bool admitted(const ExactLevel& level, const ExactLevel& cut, bool closed) {
+  const int cmp = compare_exact_level(level, cut);
+  return cmp < 0 || (closed && cmp == 0);
+}
+}  // namespace full_coverage_detail
+
+namespace full_coverage_detail {
+class CoverageTowerAssembler;
+
+struct CoverageActionView {
+  std::span<const FullNodeId> parents;
+  std::span<const FullCoverageRef> contributions;
+};
+struct CoverageAppendResult {
+  FullCertificateStatus status = FullCertificateStatus::kInvalidInput;
+  const char* reason = "coverage_invalid_input";
+  FullNodeId first_new_node = kFullCoverageAbsent;
+  size_t new_node_count = 0;
+};
+
+// One validation/encoding kernel for both APIs. Partial state is private and
+// permanently poisoned on any failure; no rollback or published prefix exists.
+class CoverageJournalState {
+ public:
+  explicit CoverageJournalState(unsigned order) : order_(order) {}
+  CoverageJournalState(CoverageJournalState&&) noexcept = default;
+  CoverageJournalState& operator=(CoverageJournalState&&) noexcept = default;
+  CoverageJournalState(const CoverageJournalState&) = delete;
+  CoverageJournalState& operator=(const CoverageJournalState&) = delete;
+
+  void reserve_exact(size_t nodes, size_t parents, size_t contributions) {
+    out_.nodes_.reserve(nodes); out_.parents_.reserve(parents);
+    out_.successors_.reserve(nodes); out_.contributions_.reserve(contributions);
+    live_.reserve(nodes);
+  }
+  template <class Action>
+  CoverageAppendResult append(const ExactLevel& level, std::span<const Action> actions,
+      std::span<const PointId> domain, std::span<const FullCoveragePopulation> rows) {
+    if (status_ != FullCertificateStatus::kOk) return {status_, reason_};
+    if (closed_) return fail("coverage_order_closed");
+    if (order_ < 1 || order_ > kFacetMaxK || rows.empty() || domain.size() < order_)
+      return fail("coverage_invalid_domain");
+    try {
+      if (level.den <= 0) return fail("coverage_invalid_level");
+      if (has_batch_ && compare_exact_level(previous_, level) >= 0)
+        return fail("coverage_nonincreasing_batch");
+      if (actions.empty()) return fail("coverage_empty_batch");
+      if (order_ > 1 && full_certificate_detail::zero(level))
+        return fail("coverage_positive_level_required");
+      if (order_ == 1 && !has_batch_ && (!full_certificate_detail::zero(level) ||
+          actions.size() != domain.size())) return fail("coverage_k1_roots");
+      const size_t prior_count = out_.nodes_.size();
+      // Every action sees the same pre-lot root set. Continuations must NOT be
+      // restored until every action has consumed/validated its old parents.
+      for (size_t a = 0; a < actions.size(); ++a) {
+        const auto& action = actions[a];
+        for (size_t j = 0; j < action.parents.size(); ++j) {
+          const auto parent = action.parents[j];
+          if ((j && action.parents[j - 1] >= parent) || parent >= prior_count || !live_[parent])
+            return fail("coverage_parent_not_unique_prebatch_root");
+          live_[parent] = 0;
+        }
+        if (action.parents.size() == 1 && action.contributions.empty())
+          return fail("coverage_empty_continuation");
+        for (const auto& ref : action.contributions) {
+          if (ref.population >= rows.size()) return fail("coverage_population_reference");
+          const auto& row = rows[ref.population];
+          // The append-only owner is not frozen yet. Never shift by an
+          // unchecked width even for a subsequently rejected population.
+          if (row.shell.size() > std::numeric_limits<u16>::digits)
+            return fail("coverage_invalid_population");
+          if ((ref.shell_mask & ~all_shell(row)) ||
+              (ref.include_interior && row.interior.empty()) ||
+              (!ref.include_interior && ref.shell_mask == 0))
+            return fail("coverage_empty_or_invalid_mask");
+        }
+        if (action.parents.empty()) {
+          if (action.contributions.size() != 1) return fail("coverage_birth_population");
+          const auto& ref = action.contributions.front();
+          const auto& row = rows[ref.population];
+          if (ref.include_interior != !row.interior.empty() ||
+              ref.shell_mask != all_shell(row) ||
+              row.interior.size() + row.shell.size() < order_)
+            return fail("coverage_birth_population");
+          if (order_ == 1) {
+            if (has_batch_ || row.interior.size() + row.shell.size() != 1)
+              return fail("coverage_k1_roots");
+            const auto id = row.interior.empty() ? row.shell.front() : row.interior.front();
+            if (id != domain[a]) return fail("coverage_k1_roots");
+          }
+        }
+      }
+      for (const auto& action : actions) {
+        FullNodeId segment;
+        if (action.parents.size() == 1) {
+          segment = action.parents.front();
+          live_[segment] = 1;
+        } else {
+          if (out_.nodes_.size() == kFullCoverageAbsent)
+            throw std::length_error("coverage node identifiers exhausted");
+          segment = out_.nodes_.size();
+          out_.nodes_.push_back({level, static_cast<u64>(out_.parents_.size()),
+                                static_cast<u64>(action.parents.size())});
+          out_.successors_.push_back(kFullCoverageAbsent); live_.push_back(1);
+          for (auto parent : action.parents) {
+            out_.parents_.push_back(parent);
+            out_.successors_[parent] = segment;
+          }
+        }
+        for (const auto& ref : action.contributions)
+          out_.contributions_.push_back({level, segment, ref});
+      }
+      previous_ = level; has_batch_ = true;
+      return {FullCertificateStatus::kOk, "structural_only", prior_count,
+              out_.nodes_.size() - prior_count};
+    } catch (const std::bad_alloc&) {
+      return fail("coverage_allocation_failed", FullCertificateStatus::kResourceExhausted);
+    } catch (const std::length_error&) {
+      return fail("coverage_size_overflow", FullCertificateStatus::kResourceExhausted);
+    }
+  }
+
+ private:
+  friend class CoverageTowerAssembler;
+  friend FullCoverageBuildResult mhgp7::build_full_coverage_certificate(unsigned,
+      std::shared_ptr<const FullCoveragePopulations>, std::span<const FullCoverageBatch>);
+  CoverageAppendResult fail(const char* reason,
+      FullCertificateStatus status = FullCertificateStatus::kInvalidInput) {
+    status_ = status; reason_ = reason; return {status_, reason_};
+  }
+  CoverageAppendResult close() {
+    if (status_ != FullCertificateStatus::kOk) return {status_, reason_};
+    if (closed_) return fail("coverage_order_closed");
+    if (!has_batch_) return fail("coverage_invalid_domain");
+    std::vector<u8>().swap(live_); closed_ = true;
+    return {FullCertificateStatus::kOk, "structural_only", out_.nodes_.size(), 0};
+  }
+  FullCoverageCertificate publish(std::shared_ptr<const FullCoveragePopulations> bank) noexcept {
+    out_.order_ = order_; out_.populations_ = std::move(bank);
+    return std::move(out_);
+  }
+  unsigned order_;
+  FullCertificateStatus status_ = FullCertificateStatus::kOk;
+  const char* reason_ = "structural_only";
+  bool has_batch_ = false, closed_ = false;
+  ExactLevel previous_{{0, 0, 0}, 1};
+  FullCoverageCertificate out_;
+  std::vector<u8> live_;
+};
+}  // namespace full_coverage_detail
+
+// Public owning facade retains exact pre-reservations and its existing API.
+// The append-only path below shares the whole-lot kernel, not a second judge.
+inline FullCoverageBuildResult build_full_coverage_certificate(unsigned order,
+    std::shared_ptr<const FullCoveragePopulations> bank,
+    std::span<const FullCoverageBatch> batches) {
+  const auto invalid = [](const char* reason,
+      FullCertificateStatus status = FullCertificateStatus::kInvalidInput) {
+    FullCoverageBuildResult result; result.reason = reason; result.status = status;
+    return result;
+  };
+  if (order < 1 || order > kFacetMaxK || !bank || bank->rows().empty() ||
+      bank->domain().size() < order || batches.empty()) return invalid("coverage_invalid_domain");
+  try {
+    full_coverage_detail::CoverageJournalState state(order);
+    size_t node_count = 0, parent_count = 0, contribution_count = 0;
+    const auto count = [](size_t& total, size_t amount) {
+      if (amount > std::numeric_limits<size_t>::max() - total)
+        throw std::length_error("coverage arena size overflow");
+      total += amount;
+    };
+    for (const auto& batch : batches) for (const auto& action : batch.actions) {
+      if (action.parents.size() != 1) {
+        count(node_count, 1); count(parent_count, action.parents.size());
+      }
+      count(contribution_count, action.contributions.size());
+    }
+    state.reserve_exact(node_count, parent_count, contribution_count);
+    for (const auto& batch : batches) {
+      const auto appended = state.append<FullCoverageAction>(
+          batch.level, batch.actions, bank->domain(), bank->rows());
+      if (appended.status != FullCertificateStatus::kOk)
+        return invalid(appended.reason, appended.status);
+    }
+    FullCoverageBuildResult result;
+    result.value = state.publish(std::move(bank));
+    result.status = FullCertificateStatus::kOk; result.reason = "structural_only";
+    return result;
+  } catch (const std::bad_alloc&) {
+    return invalid("coverage_allocation_failed", FullCertificateStatus::kResourceExhausted);
+  } catch (const std::length_error&) {
+    return invalid("coverage_size_overflow", FullCertificateStatus::kResourceExhausted);
+  }
+}
+
+// Immutable successor history. In particular, NOT a path-compressed final root.
+inline FullNodeId full_coverage_root_at(const FullCoverageCertificate& forest,
+    FullNodeId segment, const ExactLevel& cut, bool closed) {
+  if (!forest.order() || cut.den <= 0 || segment >= forest.nodes().size() ||
+      !full_coverage_detail::admitted(forest.nodes()[segment].level, cut, closed))
+    return kFullCoverageAbsent;
+  while (forest.successors()[segment] != kFullCoverageAbsent) {
+    const auto next = forest.successors()[segment];
+    if (!full_coverage_detail::admitted(forest.nodes()[next].level, cut, closed)) break;
+    segment = next;
+  }
+  return segment;
+}
+
+// Explicit point-set reconstruction is a READER cost, never a constructor cost.
+// root must be live at the requested cut. Overlapping roots stay distinct;
+// repeated contributions within the requested root use UNION, not addition.
+inline FullReadResult<PointId> full_coverage_at(const FullCoverageCertificate& forest,
+    FullNodeId root, const ExactLevel& cut, bool closed) {
+  FullReadResult<PointId> out;
+  if (root == kFullCoverageAbsent || full_coverage_root_at(forest, root, cut, closed) != root)
+    return out;
+  try {
+    std::vector<FullNodeId> roots(forest.nodes().size(), kFullCoverageAbsent);
+    for (size_t i = roots.size(); i-- > 0;) {
+      if (!full_coverage_detail::admitted(forest.nodes()[i].level, cut, closed)) continue;
+      const auto next = forest.successors()[i];
+      roots[i] = next == kFullCoverageAbsent || roots[next] == kFullCoverageAbsent ? i : roots[next];
+    }
+    for (const auto& record : forest.contributions()) {
+      if (!full_coverage_detail::admitted(record.level, cut, closed)) break;
+      if (roots[record.segment] != root) continue;
+      const auto& row = forest.populations()->rows()[record.ref.population];
+      if (record.ref.include_interior)
+        out.values.insert(out.values.end(), row.interior.begin(), row.interior.end());
+      for (size_t j = 0; j < row.shell.size(); ++j)
+        if (record.ref.shell_mask & (u16{1} << j)) out.values.push_back(row.shell[j]);
+    }
+    std::sort(out.values.begin(), out.values.end());
+    out.values.erase(std::unique(out.values.begin(), out.values.end()), out.values.end());
+    out.status = FullCertificateStatus::kOk; out.reason = "structural_only";
+  } catch (const std::bad_alloc&) {
+    out.status = FullCertificateStatus::kResourceExhausted;
+    out.reason = "coverage_read_allocation_failed"; out.values.clear();
+  } catch (const std::length_error&) {
+    out.status = FullCertificateStatus::kResourceExhausted;
+    out.reason = "coverage_read_size_overflow"; out.values.clear();
+  }
+  return out;
+}
+
+}  // namespace mhgp7

@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/tmp/ehgp-v7-meb-g4-20260911.PxVVJkOLaW/full_host/start_and_verify.sh",
+    "--yes",
+    "--guest-shutdown-minutes",
+    "30",
+    "--handoff-file",
+    "/tmp/ehgp-v7-meb-g4-20260911.PxVVJkOLaW/full_host/handoff.json",
+    "--lifecycle-state-file",
+    "/tmp/ehgp-v7-meb-g4-20260911.PxVVJkOLaW/full_host/lifecycle.txt",
+    "--guard-mark-dir",
+    "/tmp/ehgp-v7-meb-g4-20260911.PxVVJkOLaW/full_host/guardmarks"
+  ],
+  "name": "guarded_start",
+  "started_epoch": 1789114778.8068566,
+  "timeout_seconds": null
+}

@@ -3,7 +3,8 @@
 11 septembre 2026. `phase=exploration_v7_hors_registre`,
 `backend=cpu_reference`, `profile=quantized_u16_input_only`,
 `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
-Plan de port, pas un résultat device. GCP non utilisé pour cette analyse.
+Plan de port mis à jour après une première exécution de primitives sur G4.
+Le résolveur complet et son raccord à la tour GPU restent à implémenter.
 
 La [voie statique CPU](RESOLUTION_STATIQUE_CPU_20260911.md) sépare désormais
 les résolutions géométriques des composantes temporelles. La première
@@ -13,6 +14,17 @@ Les [tours G4 du 10 septembre](RESULTATS_TOUR_CACHE_G4_20260910.md) ne faisaient
 que prefilter/census sur device : leur coût FULL restait CPU.
 
 ## Première primitive : sélection du support MEB
+
+Le [wrapper propriétaire et sa gate](../receipts/gpu_meb_device_route_20260911/README.md)
+sont maintenant qualifiés O2/SAN hôte, puis **sur la vraie G4** dans le
+[nouveau reçu de session](RESULTATS_PRIMITIVES_GPU_20260911.md) : 605 cas,
+21 432 contrôles, 44 rejets, identité de snapshot, ABI et transaction de lot.
+Le contexte garde les positions résidentes et réutilise ses buffers ; il
+matérialise encore les clés et niveaux sur CPU. Le moteur FULL actif ne
+consomme pas encore cette route privée.
+
+Les paragraphes suivants décrivent la première étape historique, conservée
+dans son reçu sans lui réattribuer le nouveau succès :
 
 Un [prototype privé est maintenant conservé avec ses preuves](../receipts/gpu_meb_selection_prototype_20260911/README.md) :
 O2 passe 605 cas CPU/Gram (16 592 contrôles, 197 extra-shells) et 253 contrôles
@@ -40,8 +52,9 @@ Les formes et puissances q2/q3/q4 sont déjà partiellement marquées
 et certaines réductions restent hôte. Le test de compilation doit instancier
 le kernel réel ; inclure seulement un header dans une unité NVCC ne prouve
 pas que son code est compilable sur device. Le prototype a franchi cette
-compilation/lien et ses juges O2 hôte ; son wrapper et sa vraie gate G4 restent
-à construire. Il reste hors du moteur actif.
+compilation/lien et ses juges O2 hôte ; son wrapper et sa vraie gate G4
+n'étaient alors pas construits. Le nouveau wrapper est qualifié séparément
+ci-dessus ; il reste hors du moteur actif.
 
 Le validateur de matérialisation certifie le support positif et sa MEB, pas
 l'exécution de tout le préfixe lexicographique : un support ultérieur peut
@@ -55,7 +68,7 @@ de cette interface locale.
 
 | Travail nécessaire | Réutilisation et obligation distincte |
 | --- | --- |
-| Clé de boule primitive | Qualifier le GCD128 et sa réduction ; les divisions bornées du témoin device historique ne prouvent pas une division générale i128/i128 |
+| Clé de boule primitive | PGCD/réduction et division pleine largeur maintenant qualifiés séparément sur G4, 13 573 cas ; les joindre à la sélection MEB dans le futur résolveur |
 | Recherche de catalogue | Comparer la clé entière, contrôler l'intervalle de K et l'antériorité stricte ; ni hash seul ni présence globale sans admission |
 | Recherche de l'intrus | Reprendre exclusions des sites sélectionnés et ordre gauche d'abord/ranges croissants du resolver ; le census device existant visite droite d'abord |
 | Élagage de l'index | Produire les minimiseurs entiers pour chaque nouvelle boule ; ceux du census courant arrivent déjà calculés par l'hôte |
@@ -94,10 +107,12 @@ puis compilation **et lien NVCC stricts**, puis seulement exécution device.
 Le terminal et le raccord de tour reçoivent ensuite leurs propres gates.
 Toute session G4 reste SPOT, bornée et doublement gardée, avec arrêt ciblé
 certifié avant relais. Aucune durée ni accélération n'est extrapolée ici.
-Le worker G4 publié conserve la configuration nominale sans `--static-threads`.
+Le worker de tours G4 conserve la configuration nominale sans `--static-threads`.
 Son adaptation et ses validations de configuration sont nécessaires avant
 une campagne statique CPU/GPU ; recompiler le nouveau header ne suffit pas
 à activer la voie optionnelle.
+Le nouveau worker `anchor_meb_worker_v7.py` ne lance que les deux gates
+de primitives ; il ne remplace pas ce worker de tours.
 
 Base de cette analyse : `full_ball_tower.hpp` `33e7d05e…`,
 `anchor_meb.hpp` `386072c8…`, `q3.hpp` `4155a1c3…`, `q4.hpp` `58aac9bd…`,

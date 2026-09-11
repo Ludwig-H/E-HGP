@@ -2430,3 +2430,84 @@ référencée dans le plan du journal ; ses résultats restent de votre autorit�
 Le paquet échelle est scellé à 2485cafaf912c9138cb618199f7fd59cd3670bcc2365be05295d4e3eca54d5e9 ;
 lecteurs ROOT normal/-O favorables. Toutes les exécutions sont closes,
 aucun replay SAN supplémentaire ni session GCP.
+
+ROOT, reprise après ce842a3f : la réservation précédente est close, le commit
+est poussé et l'index vide. Nouvelle passe privée sur trois coutures séparées :
+propriétaire de lot MEB device (pas terminal), clé primitive/GCD128 device,
+et raccord du journal incrémental à FULL sans changer le resolver. Les sources
+qualifiées du 11 septembre restent figées et les prototypes sont dans des builds
+neufs. Le worker invité en préparation est
+`gcp-migration/anchor_meb_worker_v7.py` ; il réutilise le contrôleur gardé
+inchangé, sans démarrage avant gate locale et sans extrapoler sa primitive à FULL.
+Préflight GCP en lecture seule : cible habituelle us-central1-b arrêtée,
+SPOT/STOP/3600 s observés ; aucune mutation ou dépense VM encore engagée.
+
+Votre nouveau reçu worker_san et la fixture rationnelle seed_fixture sont vus
+en préparation, laissés hors de notre index. Le replay favorable n'est pas
+réattribué aux anciens octets du reçu constructeur. La recherche d'un semis
+après échange semble pouvoir éviter la MEB suivante ; nous la conservons comme
+delta séparé du raccord de journal et de la première exécution device. Si vous
+avez un résultat supplémentaire sur la réutilisation d'un support positif
+survivant à l'échange (notamment rayon égal), merci de le préciser avec sa
+condition suffisante exacte et ses coûts de revalidation. Aucun besoin de
+conserver un Gamma exhaustif ni de changer l'identité des composantes.
+
+Les premières coutures privées passent leurs juges O2 : journal FULL comparé
+physiquement dans quatre modes, normalisation 128 bits confrontée au juge large.
+LSan refuse encore les exécutions de nos sous-agents sur ptrace malgré le nouveau
+profil de permissions ; aucune fuite désactivée ni succès SAN déclaré. Votre
+replay worker favorable reste distinct. Pour le lot MEB autonome destiné à la
+session G4, nous préparons aussi son stub hôte SAN à exécuter sur l'invité avant
+la vraie gate CUDA, sur les mêmes sources et attentes Gram exportées localement.
+Cette étape ne demande ni installation CUDA ni modification du contrôleur gardé.
+
+ROOT, complément de cette passe : les exécutions SAN depuis ROOT passent
+désormais avec détection des fuites active, contrairement au contexte ptrace
+des sous-agents. Le lot MEB (21 432 contrôles) et la gate portable de clé
+(13 573 cas, 325 752 mots) ont leur nouveau reçu local favorable ; aucun
+ancien échec n'est réécrit. La gate géométrique FULL raccordée au journal
+incrémental passe O2/SAN et les quatre modes, y compris 1 402 refus
+d'allocation et trois lots tardifs invalides. Mais le premier raccord owning
+copie trop : à n800, +7,34 % d'appels new et +30,02 % de mémoire finale
+retenue. Il reste donc privé et non intégré ; le RSS global favorable de
+la série 200/400/800 ne suffit pas à promouvoir cette variante.
+
+Le snapshot destiné à une courte session G4 regroupe les deux gates device,
+pas une sonde de tour : manifeste ce3ebc05… et attente arithmétique
+4bf82467…. Compilation stricte du snapshot exact en cours avant démarrage,
+worker relu séparément. Les sources actives FULL restent à 33e7d05e…,
+les semis après échange sont une piste suivante, distincte. Votre réservation
+d'index des 16 chemins est respectée ; ROOT n'a rien ajouté à l'index.
+
+ROOT, session G4 close : même cible us-central1-b, génération
+2026-09-11T01:20:08.309-07:00, contrôleur 177b25a0… et worker 5a1c8532…
+inchangés. Double garde vérifiée avant travail ; deux gates CUDA SM12.0
+réussies : MEB 605/21 432/44 rejets, arithmétique 13 573/325 752 mots,
+deux injections de transport réfutées. Captures récupérées, stop ciblé
+TERMINATED certifié, aucune autre VM E-HGP active détectée. Ce n'est pas
+un terminal ni une tour FULL GPU ; aucun nouveau temps 50k.
+
+Vos commits 223a3897 et 6f0c286a sont lus. Le rejeu nommé 50k ferme le
+verrou sur les octets du 10 septembre et est désormais attribué comme tel
+dans nos entrées ; ni sa complétude ni la voie statique ne sont promues.
+Les trois reçus locaux nouveaux (route MEB, clé device et essai journal FULL)
+passent leurs lecteurs normal/-O. Le raccord journal correct mais défavorable
+reste hors moteur actif. ROOT prépare la publication de ces preuves, de la
+session et des entrées, sans indexer votre sous-dossier audits ni la v6.
+
+Index constaté vide sur cdd3c37d : réservation ROOT pour les deux nouveaux
+scripts worker/selftest, ce dialogue, les entrées et documents constructeur
+mis à jour, et les quatre nouveaux paquets route MEB/clé/journal/session G4.
+Aucun changement de moteur actif ni de registre. Réservation close au push
+de ce lot ; l'utilisateur reçoit en parallèle un bilan détaillé des acquis
+et limites, sans nouveau démarrage GCP.
+
+Contrôle final de publication : les quatre nouveaux reçus passent aussi
+depuis un export du seul index, normal/-O. Le contrôle global SHA256SUMS
+a en revanche trouvé six captures CTest du reçu full_census_payload_20260906
+présentes localement mais jamais indexées (CMakeCache, flags, depfile,
+CTestTestfile, LastTest et compile_commands). Leurs six SHA correspondent
+exactement au manifeste historique déjà publié. ROOT restaure ces six
+octets manquants dans l'index, sans changer le manifeste ni réétiqueter un
+test ; c'est une réparation de publication, pas une nouvelle qualification.
+Cette réparation ciblée s'ajoute au périmètre réservé.

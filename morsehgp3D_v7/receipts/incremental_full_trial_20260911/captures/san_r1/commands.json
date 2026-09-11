@@ -1,0 +1,54 @@
+[
+  {
+    "name": "compile_baseline",
+    "argv": [
+      "g++",
+      "-O1",
+      "-g",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-DMHGP7_FULL_HEADER=\"/workspaces/E-HGP/build/v7_incremental_full_20260911/san_r1/source/baseline/morsehgp3D_v7/src/forest/full_ball_tower.hpp\"",
+      "-DMHGP7_GATE_SOURCE=\"/workspaces/E-HGP/build/v7_incremental_full_20260911/san_r1/source/baseline/morsehgp3D_v7/tests/full_ball_tower_gate.cpp\"",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/san_r1/baseline.d",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/san_r1/source/qualification.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/san_r1/baseline"
+    ],
+    "started_ns": 1789113465760716221,
+    "ended_ns": 1789113507326396473,
+    "exit_code": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    }
+  },
+  {
+    "name": "baseline_cache",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/san_r1/baseline",
+      "cache",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/san_r1/baseline_cache.physical"
+    ],
+    "started_ns": 1789113507326960971,
+    "ended_ns": 1789113513631785390,
+    "exit_code": 1,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "1fe1d65d3f238fe683584f4cbb1bd053787a87a451be4f3592b70f3c24bd7225",
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    }
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/tmp/ehgp-v7-meb-g4-20260911.PxVVJkOLaW/full_host/start_and_verify.sh",
+    "--yes",
+    "--guest-shutdown-minutes",
+    "30",
+    "--handoff-file",
+    "/tmp/ehgp-v7-meb-g4-20260911.PxVVJkOLaW/full_host/handoff.json",
+    "--lifecycle-state-file",
+    "/tmp/ehgp-v7-meb-g4-20260911.PxVVJkOLaW/full_host/lifecycle.txt",
+    "--guard-mark-dir",
+    "/tmp/ehgp-v7-meb-g4-20260911.PxVVJkOLaW/full_host/guardmarks"
+  ],
+  "ended_epoch": 1789114868.6086218,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "guarded_start",
+  "pid": 649887,
+  "started_epoch": 1789114778.8068566,
+  "stderr_sha256": "fb66344f0cfa1d79f8a6526530f20838ecdbf5a39c99ccf000cfa109338b5ced",
+  "stdout_sha256": "83088e6fdef4a08f9a4ce16c6647621aec73cffef791632c109082a1f6fa1cbf",
+  "timeout_seconds": null
+}

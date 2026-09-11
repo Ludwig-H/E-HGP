@@ -1,0 +1,1 @@
+{"status": "verified_closed", "captures": ["nvcc_r1", "o2_r1", "san_root_r2", "export_r1", "host_r1", "device_nvcc_r2", "host_san_root_r1", "mutants_r1"], "expected_cases": 13573, "oracle_checks": 83215, "host_wire_checks": 325752, "device_executed": false, "GCP_used": false, "public_status": "not_claimed"}

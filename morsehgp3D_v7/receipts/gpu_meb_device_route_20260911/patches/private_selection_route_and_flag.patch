@@ -1,0 +1,52 @@
+--- original/private_selection_route_and_flag
++++ source/morsehgp3D_v7/src/gpu/anchor_meb_selection_private.cuh
+@@ -1,7 +1,7 @@
+ #pragma once
+ 
+ // Private selection primitive only. No terminal lookup, intruder or FULL path.
+-#include "source/morsehgp3D_v7/src/forest/anchor_meb.hpp"
++#include "../forest/anchor_meb.hpp"
+ #if defined(__CUDACC__)
+ #include <cuda_runtime.h>
+ #endif
+@@ -10,6 +10,7 @@
+ 
+ enum class Status : u8 { kOk = 0, kInvalidInput = 1, kInvariant = 2, kUnwritten = 0xee };
+ inline constexpr u32 kSkipContainment = 1, kDiscardFirst = 2, kShellIsSupport = 4, kSkipWrite = 8;
++inline constexpr u32 kSkipPositive = 16;  // private causal test, never a product option
+ struct Request {
+   u32 ordinal = 0;
+   u8 count = 0;
+@@ -47,27 +48,27 @@
+   }
+ };
+ 
+-MHGP7_HD inline bool form(const P3* sites, const u8 slots[4], u8 q, Candidate& candidate) {
++MHGP7_HD inline bool form(const P3* sites, const u8 slots[4], u8 q, Candidate& candidate, u32 flags = 0) {
+   candidate.q = q; candidate.a = sites[slots[0]]; candidate.b = sites[slots[1]];
+   if (q == 2) return true;
+   const P3 a = candidate.a, b = candidate.b, c = sites[slots[2]];
+   if (q == 3) {
+-    if (p3_dot(p3_sub(b, a), p3_sub(c, a)) <= 0 ||
++    if (!(flags & kSkipPositive) && (p3_dot(p3_sub(b, a), p3_sub(c, a)) <= 0 ||
+         p3_dot(p3_sub(a, b), p3_sub(c, b)) <= 0 ||
+-        p3_dot(p3_sub(a, c), p3_sub(b, c)) <= 0) return false;
++        p3_dot(p3_sub(a, c), p3_sub(b, c)) <= 0)) return false;
+     candidate.three = q3_form(a, b, c);
+     return candidate.three.g > 0;
+   }
+   const P3 d = sites[slots[3]];
+   candidate.four = q4_form(a, b, c, d);
+-  return candidate.four.det > 0 && q4_center_strictly_inside(candidate.four, a, b, c, d);
++  return candidate.four.det > 0 && ((flags & kSkipPositive) || q4_center_strictly_inside(candidate.four, a, b, c, d));
+ }
+ 
+ MHGP7_HD inline bool attempt(const P3* sites, u8 count, const u8 slots[4], u8 q,
+     Selection& result, u32 flags, bool& discarded) {
+   ++result.supports[q];
+   Candidate candidate;
+-  if (!form(sites, slots, q, candidate)) return false;
++  if (!form(sites, slots, q, candidate, flags)) return false;
+   u8 shell = 0;
+   if (!(flags & kSkipContainment)) {
+     for (u8 i = 0; i < count; ++i) {

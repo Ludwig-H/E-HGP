@@ -1,0 +1,28 @@
+[
+  {
+    "logical": "local/local_o3_r1/anchor_meb_gate",
+    "reason": "ELF omitted; hash retained",
+    "sha256": "ee5bcce490a7b61324beef822c82db2f396de045261b366750580fc1ac374084"
+  },
+  {
+    "logical": "local/local_o3_r1/ball_key_gate",
+    "reason": "ELF omitted; hash retained",
+    "sha256": "7869e447dbffb62c780203d8a0751c907d23bc29ca19ba53946012ea15290d6d"
+  },
+  {
+    "logical": "host/oslogin_add.command.json",
+    "reason": "OSLogin material omitted without reading or hashing"
+  },
+  {
+    "logical": "host/oslogin_add.intent.json",
+    "reason": "OSLogin material omitted without reading or hashing"
+  },
+  {
+    "logical": "host/oslogin_add.stderr",
+    "reason": "OSLogin material omitted without reading or hashing"
+  },
+  {
+    "logical": "host/oslogin_add.stdout",
+    "reason": "OSLogin material omitted without reading or hashing"
+  }
+]

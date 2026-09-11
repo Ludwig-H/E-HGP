@@ -65,9 +65,18 @@ La séparation statique des résolutions géométriques est désormais
 [prouvée sous census complet par l'auditeur](audits/receipts_raccord_ancres_20260910/suite_cache_20260910/NOTE_PHASE_STATIQUE_MEB.md) ;
 son backend CPU par lots est maintenant optionnel ; son backend GPU reste
 à implémenter. Les mesures 50k ci-dessus portent sur le moteur du 10 septembre,
-pas sur cette nouvelle option. GCP non utilisé pour l'étape du 11 septembre.
-Le [prototype de sélection MEB pour GPU](docs/PORT_GPU_RESOLUTIONS.md) passe
-ses juges O2 et la compilation/lien CUDA, sans exécution device ni raccord FULL.
+pas sur cette nouvelle option. Aucun nouveau temps 50k n'est encore mesuré.
+Le [nouveau lot de primitives GPU](docs/RESULTATS_PRIMITIVES_GPU_20260911.md)
+du 11 septembre passe maintenant sur la vraie G4 SM12.0 : 605 MEB,
+21 432 contrôles ; 13 573 cas de clés/PGCD/divisions 128 bits et
+325 752 mots comparés. O2/SAN hôte précèdent cette exécution. La session
+SPOT est close, arrêt ciblé `TERMINATED` certifié. Ces primitives restent
+des prototypes séparés : ni résolveur complet ni tour FULL GPU intégrés.
+
+Le [premier raccord privé du journal incrémental](receipts/incremental_full_trial_20260911/README.md)
+préserve les sorties physiques O2/SAN dans quatre modes, mais augmente
+allocations et rétention finale sur la micro 200/400/800. Il n'est pas
+intégré comme optimisation ; les copies et surcapacités restent à retirer.
 
 L'[audit indépendant du journal](audits/receipts_coverage_cpp_20260910/README.md)
 a exposé un angle mort du juge, pas un défaut nominal : le tableau des
@@ -216,3 +225,5 @@ négatifs restent dans `receipts/` ; les builds et brouillons vont dans
 `build/`, pas dans les entrées actives. Les benchmarks G4 du 10 septembre sont
 clos ; leurs deux arrêts ciblés E-HGP sont certifiés dans leur reçu.
 Le delta statique CPU du 11 septembre n'utilise pas GCP.
+La session de primitives GPU du même jour est distincte et maintenant close,
+avec ses propres sources, résultats et preuve d'arrêt ciblé.

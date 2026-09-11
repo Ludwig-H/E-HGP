@@ -1,0 +1,54 @@
+[
+  {
+    "name": "compile",
+    "argv": [
+      "g++",
+      "-O2",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-DMHGP7_FULL_HEADER=\"/workspaces/E-HGP/build/v7_incremental_full_20260911/failure_o2_v2/source/morsehgp3D_v7/src/forest/full_ball_tower.hpp\"",
+      "-MMD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/failure_o2_v2/gate.d",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/failure_o2_v2/source/failure_gate_v2.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/failure_o2_v2/gate"
+    ],
+    "started_ns": 1789114015351870349,
+    "ended_ns": 1789114025458338331,
+    "exit_code": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sanitizer_environment": {}
+  },
+  {
+    "name": "run",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/failure_o2_v2/gate",
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/failure_o2_v2/fixtures.txt"
+    ],
+    "started_ns": 1789114025458956590,
+    "ended_ns": 1789114025785413034,
+    "exit_code": 0,
+    "stdout_sha256": "1260f8cf875db8828fe76f09dbf4e901348c2f59411072ff1a744128a9236a11",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sanitizer_environment": {}
+  },
+  {
+    "name": "arguments",
+    "argv": [
+      "/workspaces/E-HGP/build/v7_incremental_full_20260911/failure_o2_v2/gate"
+    ],
+    "started_ns": 1789114025786071652,
+    "ended_ns": 1789114025788707318,
+    "exit_code": 2,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sanitizer_environment": {}
+  }
+]

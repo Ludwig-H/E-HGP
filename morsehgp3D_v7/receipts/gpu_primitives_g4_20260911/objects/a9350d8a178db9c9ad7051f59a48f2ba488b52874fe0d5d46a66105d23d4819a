@@ -1,0 +1,26 @@
+ M audits/COORDINATION_MORSEHGP3D_V7.md
+ M morsehgp3D_v6/src/gpu/lot_ring.hpp
+ M morsehgp3D_v6/src/parallel/sort.hpp
+ M morsehgp3D_v6/src/pipeline/census.hpp
+ M morsehgp3D_v6/src/pipeline/expand.hpp
+M  morsehgp3D_v7/audits/CERTIFICAT_FULL_CPP_COURANT.md
+MM morsehgp3D_v7/audits/COORDINATION_AUDITEURS.md
+MM morsehgp3D_v7/audits/DIALOGUE_COURANT.md
+M  morsehgp3D_v7/audits/ENTRETIEN.json
+MM morsehgp3D_v7/audits/ETAT_COURANT.md
+M  morsehgp3D_v7/audits/MONO_FULL_COURANT.md
+MM morsehgp3D_v7/audits/README.md
+A  morsehgp3D_v7/audits/receipts_static_followup_20260911/README.md
+A  morsehgp3D_v7/audits/receipts_static_followup_20260911/SHA256SUMS
+A  morsehgp3D_v7/audits/receipts_static_followup_20260911/context_pins.json
+A  morsehgp3D_v7/audits/receipts_static_followup_20260911/review.json
+A  morsehgp3D_v7/audits/receipts_static_followup_20260911/seed_fixture.py
+A  morsehgp3D_v7/audits/receipts_static_followup_20260911/verify.py
+A  morsehgp3D_v7/audits/receipts_static_followup_20260911/worker_replay.py
+A  morsehgp3D_v7/audits/receipts_static_followup_20260911/worker_san.json
+M  morsehgp3D_v7/audits/validation_current.json
+?? gcp-migration/anchor_meb_worker_v7.py
+?? gcp-migration/selftest_anchor_meb_worker_v7.py
+?? morsehgp3D_v6/src/gpu/route_c6.hpp
+?? morsehgp3D_v6/tests/perm_sort_gate.cpp
+?? morsehgp3D_v6/tests/route_c6_gate.cpp

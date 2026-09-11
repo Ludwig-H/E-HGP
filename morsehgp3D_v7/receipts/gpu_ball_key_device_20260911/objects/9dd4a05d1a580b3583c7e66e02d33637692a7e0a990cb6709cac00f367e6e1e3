@@ -1,0 +1,120 @@
+#!/usr/bin/env python3
+"""Read-only proof reader; never runs C++, CUDA or GCP, also effective under -O."""
+import hashlib
+import json
+from pathlib import Path
+import sys
+
+HERE = Path(__file__).resolve().parent
+VECTORS_SHA = "4bf82467f04ab30a78c9704603578b4ae8838f44cbc2620ef59fdd6bcb06b679"
+EXPECTED_ORACLE = dict(status="passed", checks=83215, raw_cases=4103, gcd_cases=2171,
+    division_cases=4217, high_gcd=118, high_divisor=2114, negative_remainders=2097,
+    min_values=19, rejects=20, q2=1025, q3=1025, q4=1025, degenerates=2,
+    permutations=1536, cross_lane=2, device_executed=False)
+
+
+def need(ok, reason):
+    if not ok:
+        raise ValueError(reason)
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def read_capture(name, expected_status):
+    folder = HERE / name
+    receipt = json.loads((folder / "receipt.json").read_text())
+    need(receipt["status"] == expected_status, "receipt_status:" + name)
+    need(receipt["sources_stable"] and receipt["sources_before"] == receipt["sources_after"],
+         "stable_sources:" + name)
+    need(receipt["device_executed"] is False and receipt["GCP_used"] is False
+         and receipt["public_status"] == "not_claimed", "bounded_capture_authority")
+    for file, expected_sha in receipt["sources_before"].items():
+        need(sha(folder / "source_snapshot" / file) == expected_sha, "frozen_source:" + file)
+    for command in receipt["commands"]:
+        need(command["ended_ns"] >= command["started_ns"], "command_closed")
+        for stream in ("stdout", "stderr"):
+            need(sha(folder / (command["name"] + "." + stream)) == command[stream + "_sha256"],
+                 "command_stream_pin")
+        if expected_status == "passed":
+            need(command["exit_code"] == command["expected_exit_code"], "command_exit:" + name)
+    return receipt
+
+
+def main():
+    need(len(sys.argv) <= 2 and (len(sys.argv) == 1 or sys.argv[1] == "--partial"), "reader_arguments")
+    partial = len(sys.argv) == 2
+    closed = []
+    for name in ("nvcc_r1", "o2_r1", "san_root_r2", "export_r1", "host_r1", "device_nvcc_r2"):
+        read_capture(name, "passed")
+        closed.append(name)
+    for name in ("san_r1", "device_nvcc_r1"):
+        read_capture(name, "failed")
+    need("LeakSanitizer does not work under ptrace" in (HERE / "san_r1/run_gate.stderr").read_text(),
+         "preserved_LSan_environment_failure")
+    need('identifier "__CUDA_ARCH__" is undefined' in (HERE / "device_nvcc_r1/compile_link.stderr").read_text(),
+         "preserved_host_parser_compile_failure")
+    for name, output in (("o2_r1", "run_gate"), ("san_root_r2", "run_gate"), ("export_r1", "nominal")):
+        need(json.loads((HERE / name / (output + ".stdout")).read_text()) == EXPECTED_ORACLE,
+             "exact_oracle_domain_and_nonvacuity:" + name)
+    vectors = HERE / "export_r1/export_vectors.stdout"
+    need(sha(vectors) == VECTORS_SHA, "independent_expected_vectors_pin")
+    lines = vectors.read_text().splitlines()
+    need(lines[0] == "MHGP7_BALL_KEY_V1 13573" and len(lines) == 13574, "vectors_closed_count")
+    kinds = [0] * 5
+    statuses = [0] * 5
+    for line in lines[1:]:
+        values = [int(word, 16) for word in line.split()]
+        need(len(values) == 26 and all(0 <= word < 2**64 for word in values), "vectors_wire_width")
+        need(1 <= values[0] <= 4 and 0 <= values[14] <= 4, "vectors_kind_and_status")
+        kinds[values[0]] += 1
+        statuses[values[14]] += 1
+    need(kinds == [0, 4103, 2171, 4217, 3082] and sum(statuses[1:]) == 22,
+         "all_exported_domains_nonempty")
+    portable_captures = ["host_r1", "device_nvcc_r2"]
+    host_san = HERE / "host_san_root_r1/receipt.json"
+    if host_san.exists():
+        read_capture("host_san_root_r1", "passed")
+        portable_captures.append("host_san_root_r1")
+        closed.append("host_san_root_r1")
+    elif not partial:
+        raise ValueError("host_SAN_not_yet_closed")
+    for name in portable_captures:
+        receipt = json.loads((HERE / name / "receipt.json").read_text())
+        need(receipt["vectors_sha256"] == VECTORS_SHA and sha(HERE / name / "vectors.txt") == VECTORS_SHA,
+             "portable_gate_vector_pin")
+        result = json.loads((HERE / name / "host_nominal.stdout").read_text())
+        need(result["status"] == "passed" and result["backend"] == "host_stub"
+             and result["cases"] == 13573 and result["checked_words"] == 325752
+             and result["rejected_cases"] == 22 and result["device_executed"] is False
+             and result["device_arch"] == 0 and result["vectors_sha256"] == VECTORS_SHA,
+             "portable_gate_positive")
+        for mutant in ("skip_write", "corrupt_word"):
+            need((HERE / name / (mutant + ".stderr")).read_text().strip() == "FAIL backend.expected_word",
+                 "causal_transport_rejection")
+        need((HERE / name / "wrong_pin.stderr").read_text().strip() == "FAIL vectors.sha256",
+             "causal_vector_pin_rejection")
+    ptxas = (HERE / "device_nvcc_r2/compile_link.stderr").read_text()
+    need("evaluate_wire_kernel" in ptxas and "layout_kernel" in ptxas and "for 'sm_120'" in ptxas,
+         "actual_device_kernels_compiled")
+    need("Used 82 registers" in ptxas and "104 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads" in ptxas,
+         "reported_kernel_resource_usage")
+    if (HERE / "mutants_r1/receipt.json").exists():
+        receipt = read_capture("mutants_r1", "passed")
+        need(len(receipt["commands"]) == 10, "five_compiled_arithmetic_mutants")
+        failures = ["gcd.full_unsigned_domain", "reduce.boost_coefficient", "division.full_signed_quotient",
+                    "division.signed_remainder", "reduce.invalid_leading"]
+        for number, failure in enumerate(failures, 1):
+            stderr = (HERE / f"mutants_r1/run_mutant{number}.stderr").read_text()
+            need(stderr.startswith("FAIL " + failure + " checks="), "causal_arithmetic_mutant")
+        closed.append("mutants_r1")
+    elif not partial:
+        raise ValueError("arithmetic_mutants_not_yet_closed")
+    print(json.dumps(dict(status="verified_partial" if partial else "verified_closed", captures=closed,
+        expected_cases=13573, oracle_checks=83215, host_wire_checks=325752,
+        device_executed=False, GCP_used=False, public_status="not_claimed")))
+
+
+if __name__ == "__main__":
+    main()

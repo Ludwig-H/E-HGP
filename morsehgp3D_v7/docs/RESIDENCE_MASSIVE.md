@@ -17,12 +17,20 @@ les workers ni utilisé par cette option. Ce compte n'est ni le pic transitoire
 des réallocations ni un gain RSS. Sa dépendance à R_K, nombre de représentants,
 interdit de présenter ce layout comme déjà qualifié pour des dizaines de millions.
 
-Le [journal incrémental](PLAN_JOURNAL_INCREMENTAL.md) est qualifié en prototype
-structurel, non raccordé à FULL. Il pourrait retirer les brouillons retenus,
-mais les arènes finales résident alors plus tôt : compter leur coût net.
+Le [journal incrémental](PLAN_JOURNAL_INCREMENTAL.md) est désormais raccordé
+à FULL dans un essai privé O2/SAN, mais pas intégré. La micro 200/400/800
+révèle des allocations et une rétention finale accrues : copies de populations
+et surcapacités doivent être retirées avant promotion. Le RSS global favorable
+de cette série n'est pas un pic FULL isolé par taille.
 La banque, le census et les identités des sorties restent obligatoires dans
 l'API actuelle. Ni un batch GPU ni le traitement ordre par ordre ne constituent
-à eux seuls une exécution externe. GCP non utilisé le 11 septembre.
+à eux seuls une exécution externe. L'étude de résidence reste locale.
+La [session G4 de primitives du 11 septembre](RESULTATS_PRIMITIVES_GPU_20260911.md)
+est distincte : petites gates exactes réussies et VM arrêtée, aucune
+qualification de résidence massive. À 32k, la voie statique retient déjà
+1 235 849 528 octets de capacités temporaires et le processus atteint
+9 109 204 Kio de RSS dans sa capture uniforme ; ne pas extrapoler un palier
+massif depuis ce seul régime.
 
 ## Analyse historique du snapshot C
 

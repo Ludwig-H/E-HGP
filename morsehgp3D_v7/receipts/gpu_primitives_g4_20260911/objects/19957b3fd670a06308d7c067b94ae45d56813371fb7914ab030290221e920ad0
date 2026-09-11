@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+"""Capture local guarded-worker tests without cloud or expensive geometry."""
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+import sys
+import time
+
+ROOT = Path('/workspaces/E-HGP')
+BASE = Path(__file__).resolve().parent
+
+
+def pins():
+    names = ('anchor_meb_worker_v7.py', 'selftest_anchor_meb_worker_v7.py',
+             'full_probe_worker_v7.py', 'full_probe_session_v7.py', 'selftest_full_probe_session_v7.py',
+             'start_and_verify.sh', 'stop_and_verify.sh', 'selftest_session_v7.py')
+    return {str(ROOT / 'gcp-migration' / name): hashlib.sha256((ROOT / 'gcp-migration' / name).read_bytes()).hexdigest()
+            for name in names}
+
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--out', required=True)
+args = parser.parse_args()
+if not args.out.isidentifier():
+    raise SystemExit('fresh output name required')
+out = BASE / args.out
+out.mkdir(exist_ok=False)
+before = pins()
+rows = []
+for name in ('selftest_anchor_meb_worker_v7.py', 'selftest_full_probe_session_v7.py'):
+    for mode in ('normal', 'optimized'):
+        tag = name.removesuffix('.py') + '_' + mode
+        argv = [sys.executable, '-B', *(['-O'] if mode == 'optimized' else []), str(ROOT / 'gcp-migration' / name)]
+        start = time.time()
+        with (out / (tag + '.stdout')).open('xb') as stdout, (out / (tag + '.stderr')).open('xb') as stderr:
+            result = subprocess.run(argv, cwd=ROOT, stdin=subprocess.DEVNULL, stdout=stdout, stderr=stderr, check=False)
+        rows.append(dict(name=tag, argv=argv, exit_code=result.returncode, started_epoch=start, ended_epoch=time.time()))
+after = pins()
+receipt = dict(status='passed' if before == after and all(row['exit_code'] == 0 for row in rows) else 'failed',
+               before=before, after=after, commands=rows, GCP_used=False)
+with (out / 'receipt.json').open('x') as stream:
+    json.dump(receipt, stream, indent=2, sort_keys=True)
+    stream.write('\n')
+print(json.dumps(dict(status=receipt['status'], commands=len(rows), out=str(out), GCP_used=False), sort_keys=True))
+raise SystemExit(0 if receipt['status'] == 'passed' else 1)

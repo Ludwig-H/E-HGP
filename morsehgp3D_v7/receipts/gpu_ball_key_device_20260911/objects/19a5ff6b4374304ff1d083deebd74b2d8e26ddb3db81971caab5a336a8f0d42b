@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+"""Export independent expectations or qualify the no-Boost portable device gate."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import time
+
+HERE = Path(__file__).resolve().parent
+REPO = HERE.parents[1]
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--out", required=True)
+    parser.add_argument("--mode", choices=("export", "host", "host-san", "nvcc"), required=True)
+    parser.add_argument("--vectors", type=Path)
+    args = parser.parse_args()
+    out = HERE / args.out
+    out.mkdir(exist_ok=False)
+    sources = sorted([p for p in (HERE / "source").rglob("*") if p.is_file()] +
+                     [p for p in HERE.iterdir() if p.is_file() and p.suffix in (".hpp", ".cuh", ".cpp", ".cu", ".py", ".json")])
+    before = {p.relative_to(HERE).as_posix(): sha(p) for p in sources}
+    for path in sources:
+        target = out / "source_snapshot" / path.relative_to(HERE)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(path, target)
+    receipt = dict(status="running", mode=args.mode, sources_before=before, commands=[],
+                   device_executed=False, GCP_used=False, public_status="not_claimed")
+    environment = os.environ.copy()
+    environment["ASAN_OPTIONS"] = "detect_leaks=1:halt_on_error=1"
+    environment["UBSAN_OPTIONS"] = "halt_on_error=1:print_stacktrace=1"
+
+    def save():
+        (out / "receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
+
+    def command(name, argv, expected=0):
+        started = time.time_ns()
+        with (out / (name + ".stdout")).open("wb") as stdout, (out / (name + ".stderr")).open("wb") as stderr:
+            proc = subprocess.run(argv, stdout=stdout, stderr=stderr, cwd=REPO, env=environment)
+        receipt["commands"].append(dict(name=name, argv=argv, started_ns=started, ended_ns=time.time_ns(),
+                   exit_code=proc.returncode, expected_exit_code=expected,
+                   stdout_sha256=sha(out / (name + ".stdout")), stderr_sha256=sha(out / (name + ".stderr"))))
+        save()
+        print(name, proc.returncode, flush=True)
+        if proc.returncode != expected:
+            raise ValueError(name + ":unexpected_exit")
+
+    try:
+        binary = out / "gate"
+        strict = ["-Wall", "-Wextra", "-Wpedantic", "-Werror"]
+        if args.mode == "export":
+            command("compile", ["g++", "-std=c++20", "-O2", *strict, "-isystem",
+                str(REPO / "build/v7_boost_gate/extracted/usr/include"), "-MMD", "-MF", str(out / "gate.d"),
+                str(HERE / "gate.cpp"), "-o", str(binary)])
+            command("nominal", [str(binary)])
+            command("export_vectors", [str(binary), "--export"])
+            receipt["vectors_sha256"] = sha(out / "export_vectors.stdout")
+        else:
+            if args.vectors is None or not args.vectors.is_file():
+                raise ValueError("vectors_required")
+            vectors = out / "vectors.txt"
+            shutil.copy2(args.vectors, vectors)
+            receipt["vectors_source"] = str(args.vectors)
+            receipt["vectors_sha256"] = sha(vectors)
+            if args.mode == "nvcc":
+                toolkit = REPO / "build/v7_nvcc_pedantic_20260910/toolkit"
+                command("compiler", [str(toolkit / "bin/nvcc"), "--version"])
+                command("compile_link", [str(toolkit / "bin/nvcc"), "-std=c++20", "-O2",
+                    "--gpu-architecture=sm_120", "-fmad=false", "--expt-relaxed-constexpr", "-Xptxas=-v",
+                    "-Xcompiler=-Wall,-Wextra,-Wpedantic,-Werror", "-ccbin", str(HERE / "nvcc_strict_host.py"),
+                    "-L" + str(toolkit / "lib"), "-MMD", "-MF", str(out / "gate.d"),
+                    str(HERE / "device_gate.cu"), "-o", str(binary)])
+            else:
+                flags = ["-O1", "-g", "-fno-omit-frame-pointer", "-fsanitize=address,undefined"] if args.mode == "host-san" else ["-O2"]
+                command("compile", ["g++", "-std=c++20", *flags, *strict, "-DMHGP7_FAKE_DEVICE", "-x", "c++",
+                    "-MMD", "-MF", str(out / "gate.d"), str(HERE / "device_gate.cu"), "-o", str(binary)])
+            arguments = ["--selftest", str(vectors), "--expected-sha=" + receipt["vectors_sha256"]]
+            if args.mode == "nvcc":
+                arguments.append("--host")
+            command("host_nominal", [str(binary), *arguments])
+            command("skip_write", [str(binary), *arguments, "--inject=skip-write"], 1)
+            command("corrupt_word", [str(binary), *arguments, "--inject=corrupt-word"], 1)
+            command("wrong_pin", [str(binary), "--selftest", str(vectors), "--expected-sha=" + "0" * 64], 1)
+            command("invalid_args", [str(binary), "invalid"], 2)
+        receipt["binary_sha256"] = sha(binary)
+        receipt["status"] = "passed"
+    except Exception as error:
+        receipt["status"] = "failed"
+        receipt["error"] = str(error)
+    finally:
+        after = {p.relative_to(HERE).as_posix(): sha(p) for p in sources}
+        receipt["sources_after"] = after
+        receipt["sources_stable"] = before == after
+        if before != after:
+            receipt["status"] = "failed"
+        save()
+    return 0 if receipt["status"] == "passed" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

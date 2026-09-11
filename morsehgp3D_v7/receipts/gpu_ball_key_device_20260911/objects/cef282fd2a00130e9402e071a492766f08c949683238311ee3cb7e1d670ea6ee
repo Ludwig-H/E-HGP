@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+"""Create-only compact local evidence packet; never includes ELF or vendor."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+import time
+
+HERE = Path(__file__).resolve().parent
+TARGET = HERE.parents[1] / "morsehgp3D_v7/receipts/gpu_ball_key_device_20260911"
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main():
+    if TARGET.exists():
+        raise ValueError("publication_must_be_new")
+    dependencies = HERE / "dependency_observation.json"
+    if dependencies.exists():
+        raise ValueError("dependency_observation_already_exists")
+    boost_root = HERE.parents[1] / "build/v7_boost_gate"
+    package = json.loads((boost_root / "receipts/package.json").read_text())
+    header_root = boost_root / "extracted/usr/include/boost"
+    if sha(header_root / "version.hpp") != package["version_header_sha256"] or sha(
+            header_root / "multiprecision/cpp_int.hpp") != package["cpp_int_header_sha256"]:
+        raise ValueError("post_capture_boost_identity_changed")
+    dependencies.write_text(json.dumps(dict(role="post_capture_reproduction_dependency_observation",
+        no_retroactive_stability_claim=True, package=package, observed_ns=time.time_ns()), indent=2) + "\n")
+    out = HERE / "reader_checks"
+    out.mkdir(exist_ok=False)
+    commands = []
+    for name, option in (("normal", []), ("optimized", ["-O"])):
+        argv = ["python3", "-B", *option, str(HERE / "verify.py")]
+        started = time.time_ns()
+        with (out / (name + ".stdout")).open("wb") as stdout, (out / (name + ".stderr")).open("wb") as stderr:
+            result = subprocess.run(argv, stdout=stdout, stderr=stderr)
+        commands.append(dict(name=name, argv=argv, started_ns=started, ended_ns=time.time_ns(),
+            exit_code=result.returncode, stdout_sha256=sha(out / (name + ".stdout")),
+            stderr_sha256=sha(out / (name + ".stderr"))))
+    status = "passed" if all(row["exit_code"] == 0 for row in commands) else "failed"
+    (out / "receipt.json").write_text(json.dumps(dict(status=status, commands=commands), indent=2) + "\n")
+    if status != "passed":
+        raise ValueError("reader_qualification_failed_preserved")
+    TARGET.mkdir()
+    (TARGET / "objects").mkdir()
+    entries = []
+    skipped_binaries = []
+    for path in sorted(HERE.rglob("*")):
+        if not path.is_file() or "__pycache__" in path.parts:
+            continue
+        name = path.relative_to(HERE).as_posix()
+        payload = path.read_bytes()
+        if payload.startswith(b"\x7fELF"):
+            skipped_binaries.append(dict(path=name, sha256=sha(path)))
+            continue
+        digest = hashlib.sha256(payload).hexdigest()
+        target = TARGET / "objects" / digest
+        if not target.exists():
+            target.write_bytes(payload)
+        entries.append(dict(path=name, sha256=digest, bytes=len(payload), object="objects/" + digest))
+    manifest = dict(schema="mhgp7-gpu-ball-key-private-local-v1", public_status="not_claimed",
+                    device_executed=False, GCP_used=False, files=entries, omitted_ELF_hashes=skipped_binaries)
+    (TARGET / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+    shutil.copy2(HERE / "portable_verify.py", TARGET / "verify.py")
+    shutil.copy2(HERE / "PUBLIC_README.md", TARGET / "README.md")
+    shutil.copy2(HERE / "NOTE_MATH_ET_DEVICE.md", TARGET / "NOTE_MATH_ET_DEVICE.md")
+    print(json.dumps(dict(path=str(TARGET), manifest_sha256=sha(TARGET / "manifest.json"),
+                          files=len(entries), objects=len(list((TARGET / "objects").iterdir()))))
+
+
+if __name__ == "__main__":
+    main()

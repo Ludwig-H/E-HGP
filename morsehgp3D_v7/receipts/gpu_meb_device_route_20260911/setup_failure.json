@@ -1,0 +1,10 @@
+{
+  "status": "failed_setup_attempt_preserved_from_tool_output",
+  "action": "git archive ce842a3f with nonexistent morsehgp3D_v7/tools/nvcc_strict_host.py path then tar extraction",
+  "archive_stderr": "fatal: pathspec 'morsehgp3D_v7/tools/nvcc_strict_host.py' did not match any files",
+  "tar_stderr": "tar: This does not look like a tar archive\ntar: Exiting with failure status due to previous errors",
+  "pipeline_exit_code": 2,
+  "following_copies": "three cp commands failed because their destination source directories were absent; apply_patch then failed on absent destination",
+  "recovery": "fresh archive of src, oracle and anchor_meb_gate.cpp succeeded; adapter copied from immutable published prototype",
+  "no_compilation_or_test_executed_in_this_setup_attempt": true
+}

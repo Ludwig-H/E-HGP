@@ -1,0 +1,21 @@
+ptxas info    : 0 bytes gmem
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__c7eb172f_14_device_gate_cu_f4ad0ae813layout_kernelEPm' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__c7eb172f_14_device_gate_cu_f4ad0ae813layout_kernelEPm
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 14 registers, used 0 barriers
+ptxas info    : Compile time = 2.843 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__c7eb172f_14_device_gate_cu_f4ad0ae820evaluate_wire_kernelEPKN5mhgp720gpu_ball_key_private9WireInputEPNS1_10WireOutputEmj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__c7eb172f_14_device_gate_cu_f4ad0ae820evaluate_wire_kernelEPKN5mhgp720gpu_ball_key_private9WireInputEPNS1_10WireOutputEmj
+    104 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 82 registers, used 0 barriers, 104 bytes cumulative stack size
+ptxas info    : Compile time = 634.036 ms
+ptxas info    : Compiling entry function '_ZN5mhgp720gpu_ball_key_private14support_kernelEPKNS0_14SupportRequestEPNS0_9ReductionEj' for 'sm_120'
+ptxas info    : Function properties for _ZN5mhgp720gpu_ball_key_private14support_kernelEPKNS0_14SupportRequestEPNS0_9ReductionEj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 80 registers, used 0 barriers
+ptxas info    : Compile time = 384.763 ms
+ptxas info    : Compiling entry function '_ZN5mhgp720gpu_ball_key_private10raw_kernelEPKNS0_10RawRequestEPNS0_9RawResultEj' for 'sm_120'
+ptxas info    : Function properties for _ZN5mhgp720gpu_ball_key_private10raw_kernelEPKNS0_10RawRequestEPNS0_9RawResultEj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 58 registers, used 0 barriers
+ptxas info    : Compile time = 155.451 ms

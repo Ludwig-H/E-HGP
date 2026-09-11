@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "error": null,
+  "sources_stable": true,
+  "sanitizer": true,
+  "commands": 3,
+  "interposer": "v2_includes_nothrow",
+  "public_status": "not_claimed",
+  "GCP_used": false
+}

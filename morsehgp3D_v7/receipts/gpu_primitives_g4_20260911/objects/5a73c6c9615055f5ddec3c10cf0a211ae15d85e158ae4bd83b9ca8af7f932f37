@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "/usr/local/cuda/bin/nvcc",
+    "-O3",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-arch=sm_120",
+    "-fmad=false",
+    "--expt-relaxed-constexpr",
+    "-Xcompiler=-Wall,-Wextra,-Wpedantic,-Werror,-pthread",
+    "-ccbin",
+    "/tmp/ehgp-full-v7-b084105b2f0a3462.t4jNZ4Sz4D/output/nvcc_strict_host.py",
+    "-MMD",
+    "-MF",
+    "/tmp/ehgp-full-v7-b084105b2f0a3462.t4jNZ4Sz4D/output/key_gate.d",
+    "/tmp/ehgp-full-v7-b084105b2f0a3462.t4jNZ4Sz4D/source/morsehgp3D_v7/bench/ball_key_device_private/device_gate.cu",
+    "-o",
+    "/tmp/ehgp-full-v7-b084105b2f0a3462.t4jNZ4Sz4D/anchor_meb_tooling/ball_key_gate"
+  ],
+  "cwd": "/tmp/ehgp-full-v7-b084105b2f0a3462.t4jNZ4Sz4D/output",
+  "exit_code": null,
+  "group_closed": false,
+  "per_command_watchdog": null,
+  "pid": null,
+  "session_work_deadline_epoch": 1789116351,
+  "started_utc": "2026-09-11T08:21:45.375254+00:00"
+}

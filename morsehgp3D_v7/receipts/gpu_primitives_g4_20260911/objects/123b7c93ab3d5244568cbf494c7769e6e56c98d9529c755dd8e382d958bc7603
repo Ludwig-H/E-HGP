@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/tmp/ehgp-full-v7-b084105b2f0a3462.t4jNZ4Sz4D/anchor_meb_tooling/anchor_meb_gate",
+    "--selftest"
+  ],
+  "cwd": "/tmp/ehgp-full-v7-b084105b2f0a3462.t4jNZ4Sz4D/output",
+  "exit_code": null,
+  "group_closed": false,
+  "per_command_watchdog": null,
+  "pid": null,
+  "session_work_deadline_epoch": 1789116351,
+  "started_utc": "2026-09-11T08:21:44.860607+00:00"
+}

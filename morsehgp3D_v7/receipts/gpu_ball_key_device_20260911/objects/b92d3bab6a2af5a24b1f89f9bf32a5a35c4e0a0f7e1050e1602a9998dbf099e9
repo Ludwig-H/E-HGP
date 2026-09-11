@@ -1,0 +1,154 @@
+#include <array>
+#include <bit>
+#include <cstdio>
+#include <fstream>
+#include <iterator>
+#include <limits>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
+#include "wire.cuh"
+#include "source/morsehgp3D_v7/src/core/sha256.hpp"
+#if defined(__CUDACC__)
+#include <cuda_runtime.h>
+#endif
+
+namespace {
+using namespace mhgp7;
+using namespace mhgp7::gpu_ball_key_private;
+void need(bool condition, const char* message) { if (!condition) throw std::runtime_error(message); }
+
+#if defined(__CUDACC__)
+__global__ void evaluate_wire_kernel(const WireInput* input, WireOutput* output, u64 count, unsigned injection) {
+  const u64 index = (u64)blockIdx.x * blockDim.x + threadIdx.x;
+  if (index >= count || (injection == 1 && index == count / 2)) return;
+  output[index] = wire_evaluate(input[index]);
+  if (injection == 2 && index == 0) output[index].words[3] ^= 1;
+}
+__global__ void layout_kernel(u64* output) {
+  output[0] = sizeof(WireInput);
+  output[1] = alignof(WireInput);
+  output[2] = offsetof(WireInput, words);
+  output[3] = sizeof(WireOutput);
+  output[4] = alignof(WireOutput);
+  output[5] = offsetof(WireOutput, words);
+  output[6] = __CUDA_ARCH__;
+  const u64 sample = 0x0102030405060708ULL;
+  output[7] = *reinterpret_cast<const unsigned char*>(&sample);
+}
+struct DeviceAllocation {
+  void* value = nullptr;
+  ~DeviceAllocation() { if (value) cudaFree(value); }
+  void allocate(size_t bytes) { need(cudaMalloc(&value, bytes) == cudaSuccess, "cuda.allocate"); }
+};
+#endif
+
+int execute(int argc, char** argv) {
+  if (argc < 4 || std::string(argv[1]) != "--selftest") return 2;
+  const std::string file_name = argv[2], sha_option = argv[3];
+  if (!sha_option.starts_with("--expected-sha=") || sha_option.size() != 79) return 2;
+  const std::string expected_sha = sha_option.substr(15);
+  bool host_only = false;
+  unsigned injection = 0;
+  for (int i = 4; i < argc; ++i) {
+    const std::string arg = argv[i];
+    if (arg == "--host" && !host_only) host_only = true;
+    else if (arg == "--inject=skip-write" && !injection) injection = 1;
+    else if (arg == "--inject=corrupt-word" && !injection) injection = 2;
+    else return 2;
+  }
+  need(std::endian::native == std::endian::little, "host.little_endian_required");
+  std::ifstream file(file_name, std::ios::binary);
+  need(file.good(), "vectors.open");
+  const std::string text((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+  Sha256 hash;
+  hash.update(text.data(), text.size());
+  need(hash.hex() == expected_sha, "vectors.sha256");
+  std::istringstream stream(text);
+  std::string magic;
+  u64 count = 0;
+  need(bool(stream >> magic >> count) && magic == "MHGP7_BALL_KEY_V1", "vectors.header");
+  // Bound allocations by the authenticated input's physical extent, not n/K.
+  need(count > 10000 && count <= text.size() / (26 * 17), "vectors.nonvacuity_and_extent");
+  need(count <= std::numeric_limits<size_t>::max() / sizeof(WireInput), "vectors.allocation_overflow");
+  std::vector<WireInput> input((size_t)count);
+  std::vector<WireOutput> expected((size_t)count), output((size_t)count);
+  u64 kinds[5]{}, rejected = 0;
+  stream >> std::hex;
+  for (u64 i = 0; i < count; ++i) {
+    for (auto& word : input[(size_t)i].words) need(bool(stream >> word), "vectors.input_word");
+    for (auto& word : expected[(size_t)i].words) need(bool(stream >> word), "vectors.expected_word");
+    need(input[(size_t)i].words[0] >= 1 && input[(size_t)i].words[0] <= 4, "vectors.kind");
+    ++kinds[input[(size_t)i].words[0]];
+    rejected += expected[(size_t)i].words[0] != 0;
+  }
+  std::string extra;
+  need(!(stream >> extra), "vectors.trailing_data");
+  need(kinds[1] >= 4000 && kinds[2] >= 2000 && kinds[3] >= 4000 && kinds[4] >= 3000 && rejected >= 20,
+       "vectors.all_families_nonvacuous");
+  u64 checked_words = 0;
+  for (u64 i = 0; i < count; ++i) {
+    const auto actual = wire_evaluate(input[(size_t)i]);
+    for (unsigned j = 0; j < 12; ++j) {
+      need(actual.words[j] == expected[(size_t)i].words[j], "host.independent_expected_word");
+      ++checked_words;
+    }
+  }
+  bool device_executed = false;
+  std::array<u64, 8> layout{sizeof(WireInput), alignof(WireInput), offsetof(WireInput, words),
+                            sizeof(WireOutput), alignof(WireOutput), offsetof(WireOutput, words), 0, 8};
+#if defined(__CUDACC__)
+  if (!host_only) {
+    cudaDeviceProp properties{};
+    need(cudaGetDeviceProperties(&properties, 0) == cudaSuccess, "cuda.device_properties");
+    need(properties.major == 12 && properties.minor == 0, "cuda.sm120_required");
+    DeviceAllocation in, out, meta;
+    in.allocate(input.size() * sizeof(WireInput));
+    out.allocate(output.size() * sizeof(WireOutput));
+    meta.allocate(layout.size() * sizeof(u64));
+    need(cudaMemcpy(in.value, input.data(), input.size() * sizeof(WireInput), cudaMemcpyHostToDevice) == cudaSuccess,
+         "cuda.H2D");
+    need(cudaMemset(out.value, 0xa5, output.size() * sizeof(WireOutput)) == cudaSuccess, "cuda.output_sentinel");
+    need(cudaMemset(meta.value, 0, layout.size() * sizeof(u64)) == cudaSuccess, "cuda.layout_sentinel");
+    layout_kernel<<<1, 1>>>(static_cast<u64*>(meta.value));
+    evaluate_wire_kernel<<<(count + 127) / 128, 128>>>(static_cast<const WireInput*>(in.value),
+        static_cast<WireOutput*>(out.value), count, injection);
+    need(cudaGetLastError() == cudaSuccess && cudaDeviceSynchronize() == cudaSuccess, "cuda.kernel_completion");
+    need(cudaMemcpy(output.data(), out.value, output.size() * sizeof(WireOutput), cudaMemcpyDeviceToHost) == cudaSuccess,
+         "cuda.output_D2H");
+    need(cudaMemcpy(layout.data(), meta.value, layout.size() * sizeof(u64), cudaMemcpyDeviceToHost) == cudaSuccess,
+         "cuda.layout_D2H");
+    need(layout == std::array<u64, 8>{112, 8, 0, 96, 8, 0, 1200, 8}, "cuda.wire_layout_and_arch");
+    device_executed = true;
+  } else
+#else
+  (void)host_only;
+#endif
+  {
+    for (auto& row : output) for (auto& word : row.words) word = 0xa5a5a5a5a5a5a5a5ULL;
+    for (u64 i = 0; i < count; ++i) {
+      if (injection == 1 && i == count / 2) continue;
+      output[(size_t)i] = wire_evaluate(input[(size_t)i]);
+    }
+    if (injection == 2) output[0].words[3] ^= 1;
+  }
+  for (u64 i = 0; i < count; ++i) for (unsigned j = 0; j < 12; ++j) {
+    need(output[(size_t)i].words[j] == expected[(size_t)i].words[j], "backend.expected_word");
+    ++checked_words;
+  }
+  need(injection == 0, "injection_must_be_refuted");
+  std::printf("{\"status\":\"passed\",\"backend\":\"%s\",\"cases\":%llu,\"checked_words\":%llu,\"raw_cases\":%llu,\"gcd_cases\":%llu,\"division_cases\":%llu,\"support_cases\":%llu,\"rejected_cases\":%llu,\"vectors_sha256\":\"%s\",\"input_bytes\":112,\"output_bytes\":96,\"alignment\":8,\"device_arch\":%llu,\"device_executed\":%s,\"public_status\":\"not_claimed\"}\n",
+      device_executed ? "CUDA" : "host_stub", (unsigned long long)count, (unsigned long long)checked_words,
+      (unsigned long long)kinds[1], (unsigned long long)kinds[2], (unsigned long long)kinds[3],
+      (unsigned long long)kinds[4], (unsigned long long)rejected, expected_sha.c_str(),
+      (unsigned long long)layout[6], device_executed ? "true" : "false");
+  return 0;
+}
+}  // namespace
+
+int main(int argc, char** argv) {
+  try { return execute(argc, argv); }
+  catch (const std::exception& error) { std::fprintf(stderr, "FAIL %s\n", error.what()); return 1; }
+}

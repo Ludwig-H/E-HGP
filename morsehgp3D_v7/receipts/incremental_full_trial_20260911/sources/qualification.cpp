@@ -1,0 +1,137 @@
+// Private physical recorder around the unchanged independent Gram/Gamma gate.
+// Serialized fields, not object padding/capacity and not only a payload digest.
+#include <cstdio>
+#include <string_view>
+
+namespace incremental_full_test { bool cache_enabled = true; }
+#include MHGP7_FULL_HEADER
+
+namespace physical {
+using namespace mhgp7;
+std::FILE* stream = nullptr;
+u64 calls = 0, complete = 0, failed = 0, nodes = 0, parents = 0, contributions = 0;
+void number(u64 value) { std::fprintf(stream, " %llu", static_cast<unsigned long long>(value)); }
+void level(const ExactLevel& value) {
+  for (auto limb : value.num) number(limb);
+  number(static_cast<u64>(static_cast<u128>(value.den)));
+  number(static_cast<u64>(static_cast<u128>(value.den) >> 64));
+}
+template<class T> void vector(const T& values) {
+  number(values.size()); for (auto value : values) number(value);
+}
+void work(const AnchorMebWork& w) {
+  number(w.calls); vector(w.supports_by_size); number(w.power_tests); number(w.materializations);
+}
+void stats(const FullBallStats& s) {
+#define FIELD(name) std::fprintf(stream, "\nS " #name); number(s.name)
+  FIELD(records); FIELD(extra_records); FIELD(anchor_blocks); FIELD(regular_blocks); FIELD(extra_blocks);
+  FIELD(representatives); FIELD(anchor_hits); FIELD(key_lookups); FIELD(intruder_queries);
+  FIELD(intruder_nodes); FIELD(intruder_power_tests); FIELD(interior_ranges);
+  FIELD(same_radius_steps); FIELD(descending_steps); FIELD(max_chain_steps);
+  FIELD(births); FIELD(merges); FIELD(contributions); FIELD(inert_blocks);
+  FIELD(declared_support_checks); FIELD(singleton_lots); FIELD(grouped_lots); FIELD(lot_dsu_slots);
+  FIELD(lower_edges_indexed); FIELD(lower_nodes_activated); FIELD(lower_edges_activated);
+  FIELD(lower_queries); FIELD(lower_find_steps); FIELD(lower_path_writes);
+  FIELD(resolver_cache_queries); FIELD(resolver_cache_hits); FIELD(resolver_cache_stores);
+  FIELD(resolver_cache_evictions); FIELD(resolver_cache_seed_stores); FIELD(resolver_cache_slots);
+  FIELD(resolver_cache_reset_slots); FIELD(resolver_cache_bytes); FIELD(resolver_cache_released_slots);
+  FIELD(static_workers_created); FIELD(static_peak_request_bytes); FIELD(static_peak_target_bytes);
+  FIELD(static_lanes_used); FIELD(static_peak_retained_bytes); FIELD(static_peak_seed_bytes);
+  FIELD(static_peak_group_bytes); FIELD(static_peak_worker_bytes);
+#undef FIELD
+  std::fputs("\nS static_requests", stream); vector(s.static_requests);
+  std::fputs("\nS static_unique", stream); vector(s.static_unique);
+  std::fputs("\nS static_seeded", stream); vector(s.static_seeded);
+  std::fputs("\nS validation_work", stream); work(s.validation_work);
+  std::fputs("\nS resolve_work", stream); work(s.resolve_work);
+}
+void write(const FullBallTowerResult& result, unsigned requested, int workers) {
+  ++calls;
+  std::fputs("BEGIN", stream); number(calls); number(requested); number(static_cast<u64>(workers));
+  number(static_cast<u64>(result.status));
+  std::fprintf(stream, " %s", result.reason); number(result.orders.size());
+  stats(result.stats);
+  if (result.status != FullBallStatus::kCompleteRelative) {
+    ++failed;
+    if (!result.orders.empty()) throw std::runtime_error("physical.failure_has_orders");
+  } else {
+    ++complete;
+    const auto bank = result.orders.front().forest.populations();
+    if (!bank) throw std::runtime_error("physical.bank_missing");
+    std::fputs("\nDOMAIN", stream); vector(bank->domain());
+    std::fputs("\nPOPULATIONS", stream); number(bank->rows().size());
+    for (const auto& row : bank->rows()) {
+      std::fputs("\nROW", stream); vector(row.interior); vector(row.shell);
+    }
+    for (const auto& order : result.orders) {
+      const auto& f = order.forest;
+      if (f.populations() != bank) throw std::runtime_error("physical.bank_not_shared");
+      std::fputs("\nORDER", stream); number(f.order()); number(f.nodes().size());
+      nodes += f.nodes().size(); parents += f.parents().size(); contributions += f.contributions().size();
+      for (const auto& node : f.nodes()) {
+        std::fputs("\nNODE", stream); level(node.level); number(node.first); number(node.parent_count);
+      }
+      std::fputs("\nPARENTS", stream); vector(f.parents());
+      std::fputs("\nSUCCESSORS", stream); vector(f.successors());
+      std::fputs("\nVERTICAL", stream); vector(order.lower_nodes);
+      std::fputs("\nCONTRIBUTIONS", stream); number(f.contributions().size());
+      for (const auto& c : f.contributions()) {
+        std::fputs("\nCONTRIBUTION", stream); level(c.level); number(c.segment);
+        number(c.ref.population); number(c.ref.shell_mask); number(c.ref.include_interior);
+      }
+    }
+  }
+  std::fputs("\nEND\n", stream);
+  if (std::ferror(stream)) throw std::runtime_error("physical.write_failed");
+}
+}  // namespace physical
+
+mhgp7::FullBallTowerResult observed_full_ball_tower(const mhgp7::CloudIndex& ix,
+    std::span<const mhgp7::BallData> balls, unsigned kmax, int workers = 0) {
+  auto result = mhgp7::build_full_ball_tower(ix, balls, kmax, workers);
+  physical::write(result, kmax, workers);
+  return result;
+}
+
+#define build_full_ball_tower observed_full_ball_tower
+#define main inherited_gate_main
+#include MHGP7_GATE_SOURCE
+#undef main
+#undef build_full_ball_tower
+
+int main(int argc, char** argv) {
+  if (argc != 3) return 2;
+  const std::string_view mode(argv[1]);
+  if (mode != "cache" && mode != "no_cache" && mode != "static1" && mode != "static4") return 2;
+  incremental_full_test::cache_enabled = mode != "no_cache";
+  physical::stream = std::fopen(argv[2], "wb");
+  if (!physical::stream) return 2;
+  char nominal[] = "--selftest", one[] = "--static-1", four[] = "--static-4";
+  char* selected = mode == "static1" ? one : (mode == "static4" ? four : nominal);
+  char* args[]{argv[0], selected};
+  int code = inherited_gate_main(2, args);
+  try {
+    if (!code) {
+      const auto ix = mhgp7::build_cloud_index(std::vector<mhgp7::InputPoint>{{902, {1,2,3}}});
+      const auto singleton = observed_full_ball_tower(ix, {}, 10, mode == "static4" ? 4 : 0);
+      if (singleton.status != mhgp7::FullBallStatus::kCompleteRelative || singleton.orders.size() != 1 ||
+          singleton.orders[0].forest.nodes().size() != 1 ||
+          singleton.orders[0].lower_nodes != std::vector<mhgp7::FullNodeId>{mhgp7::kFullCoverageAbsent})
+        throw std::runtime_error("singleton_terminal_K1");
+      const auto rejected = observed_full_ball_tower(ix, {}, 1, -1);
+      if (rejected.status != mhgp7::FullBallStatus::kInvalidInput || !rejected.orders.empty())
+        throw std::runtime_error("negative_static_threads");
+      if (physical::complete < 29 || physical::failed < 9 || physical::nodes < 100)
+        throw std::runtime_error("physical.nonvacuity");
+    }
+  } catch (const std::exception& error) {
+    std::fprintf(stderr, "FAIL qualification %s\n", error.what()); code = 1;
+  }
+  if (std::fclose(physical::stream) != 0) code = 1;
+  if (!code) std::printf("{\"status\":\"physical_recorded\",\"calls\":%llu,\"complete\":%llu,"
+      "\"rejected\":%llu,\"nodes\":%llu,\"parents\":%llu,\"contributions\":%llu}\n",
+      static_cast<unsigned long long>(physical::calls), static_cast<unsigned long long>(physical::complete),
+      static_cast<unsigned long long>(physical::failed), static_cast<unsigned long long>(physical::nodes),
+      static_cast<unsigned long long>(physical::parents), static_cast<unsigned long long>(physical::contributions));
+  return code;
+}

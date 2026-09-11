@@ -1,0 +1,72 @@
+{
+  "GCP_used": false,
+  "after": {
+    "/workspaces/E-HGP/gcp-migration/anchor_meb_worker_v7.py": "23c53739dc4640283571c7f1cd0ad6986c128dc0245f7ed3ec18df03f1a3d0c1",
+    "/workspaces/E-HGP/gcp-migration/full_probe_session_v7.py": "177b25a0d72150dc331661fdf8da1ccde77ea17fb694d9c6af5b0929755160d8",
+    "/workspaces/E-HGP/gcp-migration/full_probe_worker_v7.py": "da967163bdb7247bc6aad4df0c294cda1071076a0127cd5bd9f59bc0e4788439",
+    "/workspaces/E-HGP/gcp-migration/selftest_anchor_meb_worker_v7.py": "eb1a1de1787ca27990f18207a8d5699de2098ea7893cab7ac32aead8ed5e169c",
+    "/workspaces/E-HGP/gcp-migration/selftest_full_probe_session_v7.py": "764bb9c322695ca3333cb954861a5677d76ab00dff708396216a29cce0e6c389",
+    "/workspaces/E-HGP/gcp-migration/selftest_session_v7.py": "04cc199bba3cef1cd63a1d62ec6e4fd95222afe726ae55c952ef3dde973a4671",
+    "/workspaces/E-HGP/gcp-migration/start_and_verify.sh": "73d76c674c71d997a803587a0b20186f668e7aa44f62d4c8b516e22e13469bc0",
+    "/workspaces/E-HGP/gcp-migration/stop_and_verify.sh": "ddcad77aa995ebb334fd3f341f7bb81ac94f749593fec98f885fb1c4b7956f3c"
+  },
+  "before": {
+    "/workspaces/E-HGP/gcp-migration/anchor_meb_worker_v7.py": "23c53739dc4640283571c7f1cd0ad6986c128dc0245f7ed3ec18df03f1a3d0c1",
+    "/workspaces/E-HGP/gcp-migration/full_probe_session_v7.py": "177b25a0d72150dc331661fdf8da1ccde77ea17fb694d9c6af5b0929755160d8",
+    "/workspaces/E-HGP/gcp-migration/full_probe_worker_v7.py": "da967163bdb7247bc6aad4df0c294cda1071076a0127cd5bd9f59bc0e4788439",
+    "/workspaces/E-HGP/gcp-migration/selftest_anchor_meb_worker_v7.py": "eb1a1de1787ca27990f18207a8d5699de2098ea7893cab7ac32aead8ed5e169c",
+    "/workspaces/E-HGP/gcp-migration/selftest_full_probe_session_v7.py": "764bb9c322695ca3333cb954861a5677d76ab00dff708396216a29cce0e6c389",
+    "/workspaces/E-HGP/gcp-migration/selftest_session_v7.py": "04cc199bba3cef1cd63a1d62ec6e4fd95222afe726ae55c952ef3dde973a4671",
+    "/workspaces/E-HGP/gcp-migration/start_and_verify.sh": "73d76c674c71d997a803587a0b20186f668e7aa44f62d4c8b516e22e13469bc0",
+    "/workspaces/E-HGP/gcp-migration/stop_and_verify.sh": "ddcad77aa995ebb334fd3f341f7bb81ac94f749593fec98f885fb1c4b7956f3c"
+  },
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/gcp-migration/selftest_anchor_meb_worker_v7.py"
+      ],
+      "ended_epoch": 1789114066.643789,
+      "exit_code": 0,
+      "name": "selftest_anchor_meb_worker_v7_normal",
+      "started_epoch": 1789114066.5357215
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/gcp-migration/selftest_anchor_meb_worker_v7.py"
+      ],
+      "ended_epoch": 1789114066.752191,
+      "exit_code": 0,
+      "name": "selftest_anchor_meb_worker_v7_optimized",
+      "started_epoch": 1789114066.643871
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/gcp-migration/selftest_full_probe_session_v7.py"
+      ],
+      "ended_epoch": 1789114066.87493,
+      "exit_code": 0,
+      "name": "selftest_full_probe_session_v7_normal",
+      "started_epoch": 1789114066.7522826
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/gcp-migration/selftest_full_probe_session_v7.py"
+      ],
+      "ended_epoch": 1789114066.9981787,
+      "exit_code": 0,
+      "name": "selftest_full_probe_session_v7_optimized",
+      "started_epoch": 1789114066.8750005
+    }
+  ],
+  "status": "passed"
+}

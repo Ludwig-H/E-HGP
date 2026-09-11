@@ -1,0 +1,2 @@
+{"status":"passed","authority":"bounded_independent_Gram_Gamma_not_WSPD_completeness","checks":170320,"clouds":28,"orders":112,"cuts":2508,"facets":20054,"vertical_checks":45948,"births":504,"merges":224,"continuation_snapshots":1036,"growth_snapshots":8,"overlap_cuts":484,"duplicate_cover_cuts":0,"regular_blocks":666,"extra_blocks":160,"anchor_hits":630,"representatives":992,"intruder_queries":12,"same_radius_steps":2,"rejections":8}
+{"status":"physical_recorded","calls":38,"complete":29,"rejected":9,"nodes":729,"parents":616,"contributions":515}

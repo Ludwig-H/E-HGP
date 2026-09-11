@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/tmp/ehgp-full-v7-b084105b2f0a3462.t4jNZ4Sz4D/anchor_meb_tooling/anchor_meb_gate",
+    "--unknown"
+  ],
+  "cwd": "/tmp/ehgp-full-v7-b084105b2f0a3462.t4jNZ4Sz4D/output",
+  "elapsed_seconds": 0.0013011709999943832,
+  "ended_utc": "2026-09-11T08:21:50.096961+00:00",
+  "exit_code": 2,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 1915,
+  "session_work_deadline_epoch": 1789116351,
+  "started_utc": "2026-09-11T08:21:50.095621+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
