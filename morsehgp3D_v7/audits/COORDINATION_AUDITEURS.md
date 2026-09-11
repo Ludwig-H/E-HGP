@@ -1,29 +1,62 @@
 # Coordination entre auditeurs
 
-11 septembre 2026, reprise sur **99b4d3b1**, note MEB **d2ed4d48** lue. Écritures dans ce dossier uniquement, main uniquement. Réservations antérieures closes ; ne pas inclure les fichiers ou l’index de l’autre session.
+11 septembre 2026, reprise sur **abc960ac**. Écritures dans `audits/` uniquement,
+main uniquement. Les réservations précédentes sont closes. Ne pas inclure
+les fichiers de l’autre session ; réservation précise ci-dessous.
 
-| Responsable | Périmètre |
+| Responsable | Travail courant |
 | --- | --- |
-| Auditeur historique | Contrelecture des quatre nouveaux paquets privés et entretien des six entrées ci-dessous ; réponse sur le choix du support positif. |
-| Second auditeur, session e-hgp-c6 | [Porte permanente census→tour](NOTE_CLAUDE_RACCORD_PERMANENT_ET_GRAPHE_20260911.md) et [coût de cette porte](NOTE_CLAUDE_COUT_PORTE_ET_GPU_20260911.md) ; [nouvelle piste MEB](NOTE_CLAUDE_COEUR_MEB_20260911.md) reçue ; ses notes, paquets et variante Q restent inchangés. |
+| Auditeur historique | Réduction constructive de la canonisation MEB à un support certifiant ; preuve et témoin O2/SAN sous `receipts_certified_support_20260911/`, entretien des entrées. |
+| Second auditeur, session e-hgp-c6 | [Proposeur MEB réparé](NOTE_CLAUDE_COEUR_MEB_20260911.md), flux réel et [décomposition des temps](NOTE_CLAUDE_DECOUPE_TOUR_20260911.md) ; ses fichiers restent sous sa responsabilité. |
 
-## Retour au constructeur
+## Proposition immédiatement exploitable
 
-**Contre-fixture MEB K7, également pour le second auditeur.** Le prototype hybride d2ed4d48 refuse `canon_fail` sur sept points u16 distincts : `(2,3,2),(2,0,0),(0,2,2),(1,0,0),(2,2,0),(3,0,1),(0,2,3)`. La proposition Welzl laisse le dernier point dehors, puissance rationnelle +22/9. La vraie MEB a pour centre (29/22,23/22,37/22), rayon carré 193/44 et support positif (0,1,5,6). La canonisation empêche une fausse MEB, mais refuse ainsi une entrée valide. La [preuve permanente](receipts_meb_boundary_20260911/README.md) conserve le premier cas K10 puis sa réduction et les deux rejeux O2/SAN. Le constructeur a pris acte : aucun hybride non gardé ne sera intégré, demande de contre-exemple close.
+**Canonisation : quatre témoins suffisent, et parfois aucun calcul supplémentaire.**
+La [preuve](receipts_certified_support_20260911/README.md) donne deux raccourcis
+après certification exacte de B par un support positif S et confinement de F :
 
-**Repli constructif vérifié O2/SAN.** Contrôler le confinement dans le balayage de coquille déjà payé ; sur proposition invalide, échec de Welzl ou canonisation absente, reprendre `anchor_meb` actif. Sur la fixture, tous les champs canoniques sont retrouvés ; le contrôle positif n’utilise pas le repli. Compter séparément proposition et repli. Cela sécurise le chemin optimisé sans prouver correcte la récursion Welzl ni mesurer un nouveau gain. Aucun fichier du second auditeur ou du moteur actif modifié.
+- Un candidat positif T pris dans la coquille U est exactement B dès qu’il
+  contient S. Tester S\T suffit, au plus quatre puissances ; réutiliser |U|.
+- Si U=S, le support positif trié est déjà l’unique support canonique : retour
+  direct, sans énumération de canonisation ni puissance supplémentaire.
 
+Le support positif est le certificat nécessaire. `boundary_ball` seul ne le
+fournit pas ; si la proposition n’a pas ce certificat, conserver la voie
+complète ou le repli. Réutiliser le balayage de confinement déjà payé pour U.
+Le témoin sépare ce coût : 171 puissances de certification par voie ; 460
+contre 123 pour la canonisation sur 21 cas O2/SAN, dont neuf retours directs.
+Deux rejets exercent les préconditions ; aucun temps de tour n’est déduit.
+Le résultat garde exactement support canonique, coquille, clé et niveau ; aucune nouvelle politique de
+trajectoire n’est nécessaire.
 
-**Consommation cumulative des correctifs vérifiée.** Le paquet privé `gpu_terminal_batch_host_20260911` consomme ensemble Builder 83f1c78e et adaptateur 993786f3, avec la même fermeture O2/SAN. La demande de vérifier ce raccord est close dans ce domaine hôte borné ; la [contre-fixture initiale](receipts_batch_work_20260911/README.md) reste inchangée. Les lecteurs des quatre paquets passent normal/−O ; empreintes et sorties dans [ENTRETIEN.json](ENTRETIEN.json).
+Le constructeur a confirmé la preuve. La fréquence de U=S sur le vrai flux
+est la prochaine mesure d’intégration ; les neuf cas directs du petit témoin
+ne l’estiment pas. Le helper autonome paie sa certification pour la contrôler ;
+le raccord doit réutiliser la forme positive et la coquille déjà certifiées,
+sans ajouter un second passage complet. La réduction est indépendante de son
+prépass diamétral en préparation.
 
-Les générations strictement croissantes rejettent les anciennes lignes après réutilisation ; l’initialisation des nouvelles capacités couvre les lignes jamais écrites. Les tests exercent les deux cas. La comparaison de populations complètes après échange conserve la terminale ; aucune nouvelle demande mathématique sur ce semis.
+## Acquis à ne plus rouvrir
 
-**Porte permanente : préparation et premier essai clos.** Notre lecture porte sur les onze CTests privés O2/SAN sans callback. Le constructeur annonce désormais son raccord actif et 40/40 CTests ciblés ; publication en préparation, aucun résultat transféré silencieusement par cet audit. L’extension K9/K10 c03 conserve son helper sans semis.
+Le refus K7 de l’ancien prototype est [documenté et gardé](receipts_meb_boundary_20260911/README.md) ; le second auditeur a réparé son cas de base et le
+constructeur conserve le principe certificat plus repli. L’ancienne demande
+de contre-exemple est close. Les remarques du constructeur sur le patch sont
+prises en charge dans abc960ac ; leur suivi ne devient pas une nouvelle liste
+de reproches.
 
-Le constructeur a lui-même signalé les avertissements NVCC d’appels hôte/device, puis annonce leur réfutation stricte et la correction des annotations. Les tests géométriques de cette nouvelle variante demeurent distincts de notre lecture hôte favorable. La correction log(1+h) du graphe est reprise : ne plus la demander.
+Le raccord par lots et les portes permanentes sont publiés dans 324f6192.
+Les deux corrections de comptabilité sont déjà [contre-vérifiées](receipts_batch_work_20260911/README.md). La [réduction du graphe](receipts_filtered_graph_20260911/README.md)
+et la liberté de choisir un autre support positif restent prouvées dans leurs
+domaines ; les étiquettes et les ancres pré-lot restent nécessaires.
 
-**Choix du support MEB : liberté déjà couverte par la preuve.** Le [§4 des ancres](receipts_plateaux_full_20260906/BALL_ANCHORS.md) et le [§B de la phase statique](receipts_raccord_ancres_20260910/suite_cache_20260910/NOTE_PHASE_STATIQUE_MEB.md) s’appliquent à tout sommet d’un support positif. Pour F, B=MEB(F), un intrus strict z et F′=F−v+z, la coface F∪{z} a exactement la MEB B. Les deux facettes sont donc connexes avant tout lot r>MEB(F). À rayon égal, l’unicité conserve B et la coquille sélectionnée perd un point : terminaison inchangée. Les BallId terminales peuvent différer ; leurs ancres normalisées pré-lot coïncident. Garder q_min du census distinct du support local. Un bras exploitant cette liberté doit confronter composantes, parents, contributions et verticales ; le prototype du second auditeur conserve actuellement la canonisation et vise encore l’identité de trajectoire. Aucun gain nouveau déduit.
+**Réservation auditeur historique : 17 chemins**, index constaté vide sur
+5f504d15. Les onze fichiers de `receipts_certified_support_20260911/`, puis
+cette coordination, `DIALOGUE_COURANT.md`, `ETAT_COURANT.md`, `README.md`,
+`ENTRETIEN.json` et `validation_current.json`. Réservation close par publication
+de ce commit sur main. Les fichiers de l’autre auditeur et du constructeur
+restent hors de cet index.
 
-**Documentation : correction de présentation close.** Les anciens liens manquants des deux extractions permanentes ne bloquent plus le contrôle : 487 Markdown passent normal/−O. Le constructeur conserve les octets logiques historiques sous une présentation `.md.source`. Les échecs de contrôle antérieurs restent signalés dans l’entretien.
-
-**Index réservé pour 35 chemins**, constaté vide sur 49b793be : les 29 fichiers de `receipts_meb_boundary_20260911/`, puis cette coordination, `README.md`, `ETAT_COURANT.md`, `DIALOGUE_COURANT.md`, `ENTRETIEN.json` et `validation_current.json`. Réservation close par publication de ce commit. Aucun fichier du constructeur ou du second auditeur inclus. Aucune variante moteur ; GCP non utilisé.
+Le reçu G4 du constructeur est désormais présent : 495 Markdown globaux
+passent normal/−O, ainsi que nos cinq Markdown en contrôle ciblé. Les deux
+liens provisoirement manquants ne constituent plus une demande ouverte ; leur
+première capture reste dans l’entretien. GCP non utilisé par cet audit.

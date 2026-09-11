@@ -1,6 +1,6 @@
 {
   "schema": "mhgp7-current-audit-validation-v2",
-  "updated_utc": "2026-09-11T13:11:50.179299+00:00",
+  "updated_utc": "2026-09-11T14:13:01.531252+00:00",
   "phase": "exploration_v7_hors_registre",
   "backend": "cpu_reference",
   "profile": "quantized_u16_input_only",
@@ -21,10 +21,10 @@
     "audits/CERTIFICAT_HORIZONTAL_COURANT.md": "e76714730f4ce24f4451a8d9bab0c365d29b25e9d18008d3675d2ea9f036c611",
     "audits/CONTRAT_MASSES_VOTE_COURANT.md": "2ed2a8eebef68fbb12b2a23fc18067d36a343b0a206c1330c2ca823ee26f2b72",
     "audits/CONTRAT_VERTICAL_COURANT.md": "09b2f2a8d0b59a540e4eba865b2f7754225e1583ca97d42cbc43b4dc0e4868c9",
-    "audits/DIALOGUE_COURANT.md": "16be690a364304828b0f92d06f8dd25cbfda0c394989f92376d7fbeadd589689",
+    "audits/DIALOGUE_COURANT.md": "bb373ff3ec1272287290bc4c9245ec7ec1f568301ca423662c5c8d2f2d3c10cc",
     "audits/DOMAINE_CPU_COURANT.md": "18258334cfc7d74f3a262ea1dab798ff621245b079bfd5cbe8b48c987404cd33",
-    "audits/ENTRETIEN.json": "829b2ddf324d0f1c0ced979ffb274889c1efd5649662d22a693a85317638d549",
-    "audits/ETAT_COURANT.md": "853ef3095c75c52878a6fad27c7fbf5edc2de729b8dcd04acf2182ae7fa20cfa",
+    "audits/ENTRETIEN.json": "d506458d720a301eb64d9438ef00842770513313cc64496b4ae737de8b55aa21",
+    "audits/ETAT_COURANT.md": "161070d2e92276dcb7cc6079716b6a04bb5953467dd8403ed54762034006bc48",
     "audits/FILTRES_FLOTTANTS_COURANTS.md": "7ba3d325a007b12e45baaa5d7d6ee00abb2cb978a1006af9bc7e9a8a3bc2af03",
     "audits/FRONT_ET_TEMOINS_COURANT.md": "3fb7202d0d56720ac8325d46473eb86d329669b27dff8a51fd9ead8afb4dde08",
     "audits/MEB_DOUBLE_BUDGET_COURANT.md": "134b91b9cbdda6c23255807474e1f2010ac872fc54636b975bd3f6cea3e1187c",
@@ -33,7 +33,7 @@
     "audits/PREUVE_CHORD_SECTOR_COURANTE.md": "2e4d1494957c8f5849234ada2e86edfd0dbcb4a2945e5a9fbfeb778b1ed432e7",
     "audits/PRODUCTEUR_FULL_GABRIEL_COURANT.md": "5a3e80d338c6c18f346224d811997e08e40b55876e12d3e9e8f837b8ef963910",
     "audits/QUESTIONS_SECONDAIRES.md": "d41daf7b69827114c19991984ba5bb4652886b4197350b2809e748caba68c9d8",
-    "audits/README.md": "3ca4a63e3c67ae3ac8fbb72948cc35c9b7555f7151498ad3139876ef2baa1e31",
+    "audits/README.md": "e8b83e7c5e002c758a0b884b8b40210bcb07f51b50107f07b9021d40dc1ab769",
     "audits/S1_COURANT.md": "e4c79bc1cb57df636c226765c7a7be616998ff7248b86f93e61976e77fa173eb",
     "audits/archive_cleanup_probe.cpp": "f94bc8032d4a55f4afccf43a56497866f803eb3e42f2d96b05dc9420b964a63d",
     "audits/cell_compiled_bridge.cpp": "0a8045ec5b9691cb1db627fedaeca60042bf76714f4eca62db48264a8d6842fb",
@@ -2275,7 +2275,7 @@
     "audits/receipts_plateaux_full_20260906/real_parent_certificates_normal.json": "7cc7e28d44f09bf1a29874b8892599d7814811f339bee3b1d62459ba41920444",
     "audits/receipts_plateaux_full_20260906/real_parent_certificates_optimized.json": "7cc7e28d44f09bf1a29874b8892599d7814811f339bee3b1d62459ba41920444",
     "audits/receipts_plateaux_full_20260906/global_parent_review.json": "28da3f09d5ece7724db2fd5756acc2f5ea2f5cf660c0e89013bb9de630546f94",
-    "audits/COORDINATION_AUDITEURS.md": "2da80f00289158cc61fdb0b64ee1a57ba28f9527e3b69781dc988294f7fc1d91",
+    "audits/COORDINATION_AUDITEURS.md": "b407def9e60e6b17d1206bfbcb9acea1d1d5f97092abbfc025343bb52214d79e",
     "audits/receipts_coverage_cpp_20260910/README.md": "42987980fc3f62a308764c4ef2b6b5517069952775d5bf1cd8cc7e5068cacf21",
     "audits/receipts_coverage_cpp_20260910/SHA256SUMS": "1db0c71a67c76458d2c6f87f11b1f37bdb4105fa93f3f177b37ae1d0bba0359a",
     "audits/receipts_coverage_cpp_20260910/bridge.cpp": "b38034d1c33afa0488d345db517a4ec206542191df8358facf2484cf768202f6",
@@ -2776,7 +2776,7 @@
     "audits/receipts_batch_work_20260911/source_pins.json": "822b8dd0bbbb4ad9b7247068f8963fd2ac5df8901429b1fcb651a7d684bfe2df",
     "audits/receipts_batch_work_20260911/source_snapshot.tar.gz": "f844b5bd139048ab3ed0175864141296f5510b5ed1b0c62a43749c02eae5f723",
     "audits/receipts_batch_work_20260911/verify.py": "c40a8e4ba2bb3930ac446d619447001302c5a3b0d22505ae4eebc79776b52081",
-    "audits/NOTE_CLAUDE_RACCORD_PERMANENT_ET_GRAPHE_20260911.md": "f1bdb8ad63089366ec238beec8e65b71fb87bf28676b3fa9d0f16760e44be525",
+    "audits/NOTE_CLAUDE_RACCORD_PERMANENT_ET_GRAPHE_20260911.md": "38f53d93502ac93614ff36610663ed359f4b2411eaa44ff0c06ccc5d5823e7c8",
     "audits/NOTE_CLAUDE_COUT_PORTE_ET_GPU_20260911.md": "69d9af2fc1f31b700ee8a3911a12d56083e653155d89fe04cade10e77ea5cc52",
     "audits/receipts_meb_boundary_20260911/O2_compile.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "audits/receipts_meb_boundary_20260911/O2_compile.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -2806,7 +2806,18 @@
     "audits/receipts_meb_boundary_20260911/reproduce.py": "0864842915600104c430b6e2726aced3b59cc7385c7493b90b755b580d9f199f",
     "audits/receipts_meb_boundary_20260911/root_replay.json": "1fb3c85a22b159780f0286d684b925b6d7b573da3cf6701c8812b4aece84015f",
     "audits/receipts_meb_boundary_20260911/source_manifest.json": "cc18ab596a41313d22dfd3bd2120748f9bb5962cfc3b5428da0de731ff450e94",
-    "audits/receipts_meb_boundary_20260911/verify.py": "3119b0a1406506b93f8c6671b6cbc5c484be103dc96d496985e166bb1716b9c6"
+    "audits/receipts_meb_boundary_20260911/verify.py": "3119b0a1406506b93f8c6671b6cbc5c484be103dc96d496985e166bb1716b9c6",
+    "audits/receipts_certified_support_20260911/certified_support.hpp": "7c76b223cb892faeb37bd30af6e77d8bf9db463c2ddf7472ac68892a184b7335",
+    "audits/receipts_certified_support_20260911/verify.py": "b12e59f0844a14a81b20e4c31535ab92267373160868f6a5a48c4e739dabb7fd",
+    "audits/receipts_certified_support_20260911/initial_probe.cpp": "ffd8b3aed98d419e9c42439dcfeb7bfdf56d16544f4650563b7f28a1c96cf43d",
+    "audits/receipts_certified_support_20260911/initial_commands.json": "ac35e6b7e19f7223aa3973da2a0a3db602a2a0c79fa0fec8fb7ebd7e9e0d50b8",
+    "audits/receipts_certified_support_20260911/initial_certified_support.hpp": "d854c2f55cd2c1bbae0af33ecdf4be611558408b98f414928b9bc8f4f896e414",
+    "audits/receipts_certified_support_20260911/probe.cpp": "cdf46ab12ae6e94488686c7dfff423048438df748f2b4df48163d7a318fafd55",
+    "audits/receipts_certified_support_20260911/reproduce.py": "40b1c5adae4de2cbfa5856d93d67e8c158d573d15828779651bacea865fc5735",
+    "audits/receipts_certified_support_20260911/source_pins.json": "3ec76095fcdf0b23b38c4598ff299edcaa4610e2cc480b9ed11bf7f4e72ebf22",
+    "audits/receipts_certified_support_20260911/README.md": "54fee3c55dadce7b3354903a870f57b72dcd5ac0af28c9399bfee2dc5d52cee8",
+    "audits/receipts_certified_support_20260911/commands.json": "efa2ce7584ee41b792bb246e68eb6b4d93a61a5e65e48c35da6098c7d325ab90",
+    "audits/receipts_certified_support_20260911/SHA256SUMS": "c99c9454dcc525e9b9e36e74d872406d57c192916d9f3035a677e5d733ed1e55"
   },
   "source_variants": [
     {
@@ -12915,5 +12926,10 @@
     "new_engine_variant": false,
     "source_variants_D_to_Q_unchanged": true,
     "gcp_used": false
+  },
+  "certified_support_followup": {
+    "source_head_at_review": "5f504d156fcde3de8571ddd76755e1f49af585ce",
+    "packet": "audits/receipts_certified_support_20260911/README.md",
+    "scope": "Local canonicalization proof and 21 cases O2/SAN; source variants D-Q unchanged; no runtime claim."
   }
 }

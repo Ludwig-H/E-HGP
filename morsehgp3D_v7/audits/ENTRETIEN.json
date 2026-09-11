@@ -3400,5 +3400,314 @@
     },
     "new_engine_variant": false,
     "gcp_used": false
+  },
+  "latest_certified_support_20260911": {
+    "date_utc": "2026-09-11T14:13:01.531252+00:00",
+    "source_head_at_start": "abc960ac",
+    "source_head_during_review": "5f504d156fcde3de8571ddd76755e1f49af585ce",
+    "objective": "Constructive exact canonicalization using a certified positive support; close already integrated constructor requests.",
+    "proof": "Candidate T lies on certified MEB shell and is positive; containing S implies t^2 >= r^2 + |c-d|^2 while t <= r, hence same MEB. If U=S, affine independence and strict positivity give unique canonical S without enumeration.",
+    "packet": {
+      "path": "receipts_certified_support_20260911",
+      "files": {
+        "README.md": "54fee3c55dadce7b3354903a870f57b72dcd5ac0af28c9399bfee2dc5d52cee8",
+        "SHA256SUMS": "c99c9454dcc525e9b9e36e74d872406d57c192916d9f3035a677e5d733ed1e55",
+        "certified_support.hpp": "7c76b223cb892faeb37bd30af6e77d8bf9db463c2ddf7472ac68892a184b7335",
+        "commands.json": "efa2ce7584ee41b792bb246e68eb6b4d93a61a5e65e48c35da6098c7d325ab90",
+        "initial_certified_support.hpp": "d854c2f55cd2c1bbae0af33ecdf4be611558408b98f414928b9bc8f4f896e414",
+        "initial_commands.json": "ac35e6b7e19f7223aa3973da2a0a3db602a2a0c79fa0fec8fb7ebd7e9e0d50b8",
+        "initial_probe.cpp": "ffd8b3aed98d419e9c42439dcfeb7bfdf56d16544f4650563b7f28a1c96cf43d",
+        "probe.cpp": "cdf46ab12ae6e94488686c7dfff423048438df748f2b4df48163d7a318fafd55",
+        "reproduce.py": "40b1c5adae4de2cbfa5856d93d67e8c158d573d15828779651bacea865fc5735",
+        "source_pins.json": "3ec76095fcdf0b23b38c4598ff299edcaa4610e2cc480b9ed11bf7f4e72ebf22",
+        "verify.py": "b12e59f0844a14a81b20e4c31535ab92267373160868f6a5a48c4e739dabb7fd"
+      },
+      "cases_each_build": 21,
+      "rejections_each_build": 2,
+      "different_supports": 12,
+      "q4_to_q2": 6,
+      "direct_returns_U_equals_S": 9,
+      "certificate_powers_each_path": 171,
+      "canonical_powers_full_F": 460,
+      "canonical_powers_certified_support": 123,
+      "full_total_powers": 631,
+      "support_total_powers": 294,
+      "commands_initial_and_final": 8,
+      "all_command_exit_codes": 0,
+      "all_command_stderr_empty": true,
+      "all_mode_stdout_equal": true,
+      "six_result_fields_equal": true,
+      "inactive_support_slots_255_normalized_and_tested": true,
+      "archive_reused": "receipts_meb_boundary_20260911/base.tar.gz",
+      "header_anchor_meb_sha256": "386072c8a02bbb836d0070a10e1421418a36d3f4024ade63b4c9014c5536f786",
+      "scope": "Bounded local helper only; no proposal generation, full tower execution or timing; no new engine variant.",
+      "readers": [
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "morsehgp3D_v7/audits/receipts_certified_support_20260911/verify.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"cases\": 21, \"certification_powers\": 171, \"commands\": 8, \"device_executed\": false, \"different_arities\": 6, \"different_supports\": 12, \"direct_returns\": 9, \"full_canonical_powers\": 460, \"full_total_powers\": 631, \"gcp_used\": false, \"public_status\": \"not_claimed\", \"rejections\": 2, \"source_files\": 57, \"status\": \"passed_certified_support_canonicalization\", \"support_canonical_powers\": 123, \"support_total_powers\": 294}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "-O",
+            "morsehgp3D_v7/audits/receipts_certified_support_20260911/verify.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"cases\": 21, \"certification_powers\": 171, \"commands\": 8, \"device_executed\": false, \"different_arities\": 6, \"different_supports\": 12, \"direct_returns\": 9, \"full_canonical_powers\": 460, \"full_total_powers\": 631, \"gcp_used\": false, \"public_status\": \"not_claimed\", \"rejections\": 2, \"source_files\": 57, \"status\": \"passed_certified_support_canonicalization\", \"support_canonical_powers\": 123, \"support_total_powers\": 294}\n",
+          "stderr": ""
+        }
+      ]
+    },
+    "published_constructor_readers": [
+      {
+        "packet": "full_ball_batch_active_cmake_20260911",
+        "root_pins": {
+          "verify.py": "e4b0c3d1be106cd713453482e682604462b7abe3b02132e94aebd0ef70683cdb",
+          "source_map.json": "ba9be128c629d7ed4571c95f2e9a111be4ece409993d690edeab204c81bda488",
+          "capture_manifest.json": "aaf5d7b5d74e293416d4e9e1d00e152eb1ead931c180665771ab68dfe8f4e60a",
+          "publish.py.source": "ae5b421c8f43a2f1fc31c7442566e278d5dd3e28eab9c0ca419a517319d58b08",
+          "manifest.json": "5f77c9a95b45adca052f68c564430f5f749fa16c2a52d1fbb100211aac188094",
+          "README.md": "b1e744aa99cda76092d0e4a55026d92f919799d6218bc609c19bc325efa45dbe"
+        },
+        "root_files_stable": true,
+        "commands": [
+          {
+            "argv": [
+              "python3",
+              "-B",
+              "morsehgp3D_v7/receipts/full_ball_batch_active_cmake_20260911/verify.py"
+            ],
+            "exit_code": 0,
+            "stdout": "{\"GCP_used\": false, \"active_ELF_hashes_only\": 12, \"active_Release_CTests\": 40, \"active_commands\": 23, \"callback_actual_rejections\": 64, \"callback_positive_empty_case\": 1, \"callback_suite_cases\": 65, \"compiler_executed_here\": false, \"latency_contract_qualified\": false, \"logical_files\": 312, \"only_final_newline_changed_candidates\": 5, \"own_sources\": 178, \"physical_files\": 317, \"prior_SAN_not_inherited_by_active_Release\": true, \"prior_private_CTests_O2_and_SAN_each\": 16, \"probe_H\": 2945, \"probe_M\": 48618, \"probe_Q\": 17419, \"probe_T\": 2945, \"probe_layout_capacities_excluded\": 2, \"probe_n\": 200, \"public_status\": \"not_claimed\", \"source_header_sha256\": \"83f1c78e0656f08cd42522e4cd36d153ce283a6082246a36fe5225b3790c6366\", \"status\": \"passed\", \"used_dependency_pins\": 1053}\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "python3",
+              "-B",
+              "-O",
+              "morsehgp3D_v7/receipts/full_ball_batch_active_cmake_20260911/verify.py"
+            ],
+            "exit_code": 0,
+            "stdout": "{\"GCP_used\": false, \"active_ELF_hashes_only\": 12, \"active_Release_CTests\": 40, \"active_commands\": 23, \"callback_actual_rejections\": 64, \"callback_positive_empty_case\": 1, \"callback_suite_cases\": 65, \"compiler_executed_here\": false, \"latency_contract_qualified\": false, \"logical_files\": 312, \"only_final_newline_changed_candidates\": 5, \"own_sources\": 178, \"physical_files\": 317, \"prior_SAN_not_inherited_by_active_Release\": true, \"prior_private_CTests_O2_and_SAN_each\": 16, \"probe_H\": 2945, \"probe_M\": 48618, \"probe_Q\": 17419, \"probe_T\": 2945, \"probe_layout_capacities_excluded\": 2, \"probe_n\": 200, \"public_status\": \"not_claimed\", \"source_header_sha256\": \"83f1c78e0656f08cd42522e4cd36d153ce283a6082246a36fe5225b3790c6366\", \"status\": \"passed\", \"used_dependency_pins\": 1053}\n",
+            "stderr": ""
+          }
+        ]
+      },
+      {
+        "packet": "gpu_terminal_batch_t2_20260911",
+        "root_pins": {
+          "verify.py": "62fde64b40ccf3063cde4ec08f9c1a2c91e68a203369fdeb514a24cf7d520abd",
+          "capture_manifest.json": "1799fe59b841022ceccaf42b910b1e63798341d1eae7ac4f78c8a8f41c1d8393",
+          "storage_map.json": "e90cd11531d01e301b5e777c9162f53a6bffd696dd99c385c0d534da605a6fe2",
+          "manifest.json": "ec4e999e56fdaf075bf3038aa4f9857ed824c71fd15edea266df99ca8c2024da",
+          "README.md": "423b7a5d1aa1070c715c275a684e49d08edd32fbb07ed6059db9641c3d3bec6e"
+        },
+        "root_files_stable": true,
+        "commands": [
+          {
+            "argv": [
+              "python3",
+              "-B",
+              "morsehgp3D_v7/receipts/gpu_terminal_batch_t2_20260911/verify.py"
+            ],
+            "exit_code": 0,
+            "stdout": "{\"ELF_pins_only\": 3, \"additional_scalar_towers_each\": 36, \"batch_towers_each\": 36, \"captures\": 4, \"chronological_H_each\": 120, \"chronological_Q_each\": 228, \"chronological_direct_terminals_each\": 1872, \"commands\": 23, \"cuda_compiled\": false, \"device_executed\": false, \"gcp_used\": false, \"geometry_executed_by_reader\": false, \"historical_failures\": 1, \"logical_files\": 547, \"paid_tower_constructions_each\": 90, \"physical_files\": 163, \"retained_towers_each\": 54, \"separate_H10_each\": 5, \"separate_H9_each\": 36, \"separate_Q10_each\": 1761, \"separate_Q9_each\": 3448, \"separate_highK_each\": 3575, \"status\": \"passed\"}\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "python3",
+              "-B",
+              "-O",
+              "morsehgp3D_v7/receipts/gpu_terminal_batch_t2_20260911/verify.py"
+            ],
+            "exit_code": 0,
+            "stdout": "{\"ELF_pins_only\": 3, \"additional_scalar_towers_each\": 36, \"batch_towers_each\": 36, \"captures\": 4, \"chronological_H_each\": 120, \"chronological_Q_each\": 228, \"chronological_direct_terminals_each\": 1872, \"commands\": 23, \"cuda_compiled\": false, \"device_executed\": false, \"gcp_used\": false, \"geometry_executed_by_reader\": false, \"historical_failures\": 1, \"logical_files\": 547, \"paid_tower_constructions_each\": 90, \"physical_files\": 163, \"retained_towers_each\": 54, \"separate_H10_each\": 5, \"separate_H9_each\": 36, \"separate_Q10_each\": 1761, \"separate_Q9_each\": 3448, \"separate_highK_each\": 3575, \"status\": \"passed\"}\n",
+            "stderr": ""
+          }
+        ]
+      },
+      {
+        "packet": "gpu_terminal_batch_hd_20260911",
+        "root_pins": {
+          "verify.py": "139fdec9881f68ba7402722e5e3e48a19a93903a07f177101b8f6a38bf7d76f4",
+          "storage_map.json": "f2f89d5ff450be5329dca81d587c5c4c8b36346d2c657b3a2521e91bf95136b0",
+          "MANIFEST.json": "aebc006d06b03fed530d8c9468648b8b52769f0140e03b9f6ffd723840a967d7",
+          "README.md": "3cae224b52d15d8af5363b6d8c23305f3780d4e7f6bcdd0b7340aea4b87beaeb"
+        },
+        "root_files_stable": true,
+        "commands": [
+          {
+            "argv": [
+              "python3",
+              "-B",
+              "morsehgp3D_v7/receipts/gpu_terminal_batch_hd_20260911/verify.py"
+            ],
+            "exit_code": 0,
+            "stdout": "{\"ABI_fields\": 63, \"ELF_and_dependencies_before_after_attested\": true, \"GCP_used\": false, \"corrected_compile_exit\": 0, \"corrected_warnings\": 0, \"device_executed\": false, \"direct_T2_terminals\": 1872, \"host_commands_per_mode\": 13, \"old_compile_exit\": 1, \"old_warnings\": 6, \"omitted_ELF_live_bytes_rechecked\": false, \"public_status\": \"not_claimed\", \"separate_highK_terminals\": 3575, \"source_annotation_changes\": 4, \"status\": \"passed_portable_HD_compile_and_host\", \"strict_commands\": 15}\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "python3",
+              "-B",
+              "-O",
+              "morsehgp3D_v7/receipts/gpu_terminal_batch_hd_20260911/verify.py"
+            ],
+            "exit_code": 0,
+            "stdout": "{\"ABI_fields\": 63, \"ELF_and_dependencies_before_after_attested\": true, \"GCP_used\": false, \"corrected_compile_exit\": 0, \"corrected_warnings\": 0, \"device_executed\": false, \"direct_T2_terminals\": 1872, \"host_commands_per_mode\": 13, \"old_compile_exit\": 1, \"old_warnings\": 6, \"omitted_ELF_live_bytes_rechecked\": false, \"public_status\": \"not_claimed\", \"separate_highK_terminals\": 3575, \"source_annotation_changes\": 4, \"status\": \"passed_portable_HD_compile_and_host\", \"strict_commands\": 15}\n",
+            "stderr": ""
+          }
+        ]
+      }
+    ],
+    "checks": {
+      "docs_normal": {
+        "argv": [
+          "python3",
+          "-B",
+          "tools/check_docs.py"
+        ],
+        "exit_code": 0,
+        "stdout": "Validated 495 active Markdown files.\n",
+        "stderr": ""
+      },
+      "docs_optimized": {
+        "argv": [
+          "python3",
+          "-B",
+          "-O",
+          "tools/check_docs.py"
+        ],
+        "exit_code": 0,
+        "stdout": "Validated 495 active Markdown files.\n",
+        "stderr": ""
+      },
+      "registry": {
+        "argv": [
+          "python3",
+          "-B",
+          "tools/check_implementation_status.py"
+        ],
+        "exit_code": 0,
+        "stdout": "Validated 20 implementation phases and their gates.\n",
+        "stderr": ""
+      },
+      "own_markdown": {
+        "files": [
+          "morsehgp3D_v7/audits/COORDINATION_AUDITEURS.md",
+          "morsehgp3D_v7/audits/DIALOGUE_COURANT.md",
+          "morsehgp3D_v7/audits/ETAT_COURANT.md",
+          "morsehgp3D_v7/audits/README.md",
+          "morsehgp3D_v7/audits/receipts_certified_support_20260911/README.md"
+        ],
+        "errors": []
+      },
+      "whole_source_freshness": [
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "/workspaces/E-HGP/morsehgp3D_v7/audits/verify_current.py"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "Audit à actualiser : aucune variante complète ne correspond.\nvariante=D\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/core/mutants.hpp\nsrc/forest/silent_incidence.hpp\nsrc/pipeline/generate.hpp\nsrc/spindle/witness_count.hpp\ntests/meb_lazy_gate.cpp\nvariante=E_qualified\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/pipeline/generate.hpp\nsrc/spindle/witness_count.hpp\nvariante=F_qualified\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/pipeline/generate.hpp\nvariante=G_full_structural\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/pipeline/generate.hpp\nvariante=H_full_relative\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/COMPARE_MONO.md\nbench/full_gabriel_probe.cpp\ndocs/CONTRAT_CERTIFICAT_FULL.md\ndocs/CONTRAT_PERFORMANCE.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\nvariante=I_full_mono_published\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/COMPARE_MONO.md\nbench/full_gabriel_probe.cpp\ndocs/CONTRAT_CERTIFICAT_FULL.md\ndocs/CONTRAT_PERFORMANCE.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/RESIDENCE_MASSIVE.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\nvariante=J_full_lazy\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/COMPARE_MONO.md\nbench/full_gabriel_cache_policy_audit.py\nbench/full_gabriel_lazy_probe.cpp\nbench/full_gabriel_lazy_probe_audit.py\nbench/full_gabriel_probe.cpp\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_CACHE_FULL_PARESSEUX.md\ndocs/CONTRAT_CERTIFICAT_FULL.md\ndocs/CONTRAT_DIGEST_FULL.md\ndocs/CONTRAT_PERFORMANCE.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/RESIDENCE_MASSIVE.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\nvariante=K_full_singleton\nCMakeLists.txt\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_CACHE_FULL_PARESSEUX.md\ndocs/CONTRAT_LOT_UNITAIRE_FULL.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=L_full_successor_v2\nCMakeLists.txt\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_NORMALISATION_FULL.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=M_successor_publication_review\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=N_filtered_publication_review\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/FAUSSES_PISTES.md\ndocs/RESIDENCE_MASSIVE.md\ndocs/RESULTATS_MEB_FILTREE_20260906.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=O_full_meb_composition\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/FAUSSES_PISTES.md\ndocs/RESIDENCE_MASSIVE.md\nsrc/pipeline/generate.hpp\ntests/meb_proposal_local_gate.cpp\nvariante=P_raccord_ancres_counter_reading\nCMakeLists.txt\nREADME.md\nPASSATION.md\ndocs/TOUR_FULL_PAR_BOULES.md\ndocs/FAUSSES_PISTES.md\nsrc/forest/full_ball_tower.hpp\nsrc/forest/full_coverage_certificate.hpp\ntests/full_ball_tower_gate.cpp\ntests/full_ball_work_gate.cpp\nbench/full_ball_tower_probe.cpp\nvariante=Q_cache_commit_replay_named_blocks\nCMakeLists.txt\nREADME.md\nPASSATION.md\ndocs/TOUR_FULL_PAR_BOULES.md\ndocs/FAUSSES_PISTES.md\ndocs/OPTIMISATIONS_CACHE_ET_GPU_20260910.md\ndocs/PLAN_JOURNAL_INCREMENTAL.md\nsrc/forest/full_ball_tower.hpp\ntests/full_ball_tower_gate.cpp\nbench/full_ball_tower_probe.cpp\n"
+        },
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "-O",
+            "/workspaces/E-HGP/morsehgp3D_v7/audits/verify_current.py"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "Audit à actualiser : aucune variante complète ne correspond.\nvariante=D\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/core/mutants.hpp\nsrc/forest/silent_incidence.hpp\nsrc/pipeline/generate.hpp\nsrc/spindle/witness_count.hpp\ntests/meb_lazy_gate.cpp\nvariante=E_qualified\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/pipeline/generate.hpp\nsrc/spindle/witness_count.hpp\nvariante=F_qualified\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/pipeline/generate.hpp\nvariante=G_full_structural\nCMakeLists.txt\nbench/COMPARE_MONO.md\ndocs/CONTRAT_PERFORMANCE.md\nsrc/pipeline/generate.hpp\nvariante=H_full_relative\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/COMPARE_MONO.md\nbench/full_gabriel_probe.cpp\ndocs/CONTRAT_CERTIFICAT_FULL.md\ndocs/CONTRAT_PERFORMANCE.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\nvariante=I_full_mono_published\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/COMPARE_MONO.md\nbench/full_gabriel_probe.cpp\ndocs/CONTRAT_CERTIFICAT_FULL.md\ndocs/CONTRAT_PERFORMANCE.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/RESIDENCE_MASSIVE.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\nvariante=J_full_lazy\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/COMPARE_MONO.md\nbench/full_gabriel_cache_policy_audit.py\nbench/full_gabriel_lazy_probe.cpp\nbench/full_gabriel_lazy_probe_audit.py\nbench/full_gabriel_probe.cpp\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_CACHE_FULL_PARESSEUX.md\ndocs/CONTRAT_CERTIFICAT_FULL.md\ndocs/CONTRAT_DIGEST_FULL.md\ndocs/CONTRAT_PERFORMANCE.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/RESIDENCE_MASSIVE.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\nvariante=K_full_singleton\nCMakeLists.txt\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_CACHE_FULL_PARESSEUX.md\ndocs/CONTRAT_LOT_UNITAIRE_FULL.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=L_full_successor_v2\nCMakeLists.txt\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_NORMALISATION_FULL.md\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=M_successor_publication_review\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=N_filtered_publication_review\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/FAUSSES_PISTES.md\ndocs/RESIDENCE_MASSIVE.md\ndocs/RESULTATS_MEB_FILTREE_20260906.md\nsrc/forest/full_gabriel.hpp\nsrc/pipeline/generate.hpp\ntests/full_gabriel_allocation_gate.cpp\ntests/full_gabriel_lazy_allocation_gate.cpp\ntests/full_gabriel_singleton_fixtures.hpp\nvariante=O_full_meb_composition\nCMakeLists.txt\nPASSATION.md\nREADME.md\nbench/full_gabriel_semantic_digest.hpp\ndocs/CONTRAT_PRODUCTEUR_FULL_GABRIEL.md\ndocs/FAUSSES_PISTES.md\ndocs/RESIDENCE_MASSIVE.md\nsrc/pipeline/generate.hpp\ntests/meb_proposal_local_gate.cpp\nvariante=P_raccord_ancres_counter_reading\nCMakeLists.txt\nREADME.md\nPASSATION.md\ndocs/TOUR_FULL_PAR_BOULES.md\ndocs/FAUSSES_PISTES.md\nsrc/forest/full_ball_tower.hpp\nsrc/forest/full_coverage_certificate.hpp\ntests/full_ball_tower_gate.cpp\ntests/full_ball_work_gate.cpp\nbench/full_ball_tower_probe.cpp\nvariante=Q_cache_commit_replay_named_blocks\nCMakeLists.txt\nREADME.md\nPASSATION.md\ndocs/TOUR_FULL_PAR_BOULES.md\ndocs/FAUSSES_PISTES.md\ndocs/OPTIMISATIONS_CACHE_ET_GPU_20260910.md\ndocs/PLAN_JOURNAL_INCREMENTAL.md\nsrc/forest/full_ball_tower.hpp\ntests/full_ball_tower_gate.cpp\nbench/full_ball_tower_probe.cpp\n"
+        }
+      ],
+      "whole_source_scope": "All 2810 common pins pass; historical D-Q source variants retained. Code 1 reflects absence of a matching whole engine, not a failed local proof.",
+      "earlier_global_documentation": {
+        "docs_normal": {
+          "argv": [
+            "python3",
+            "-B",
+            "tools/check_docs.py"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "Documentation validation failed:\n- morsehgp3D_v7/PASSATION.md:279: missing local link 'receipts/terminal_batch_g4_20260911/README.md'\n- morsehgp3D_v7/docs/QUALIFICATION_BATCH_ET_MEB_20260911.md:45: missing local link '../receipts/terminal_batch_g4_20260911/README.md'\n"
+        },
+        "docs_optimized": {
+          "argv": [
+            "python3",
+            "-B",
+            "-O",
+            "tools/check_docs.py"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "Documentation validation failed:\n- morsehgp3D_v7/PASSATION.md:279: missing local link 'receipts/terminal_batch_g4_20260911/README.md'\n- morsehgp3D_v7/docs/QUALIFICATION_BATCH_ET_MEB_20260911.md:45: missing local link '../receipts/terminal_batch_g4_20260911/README.md'\n"
+        }
+      }
+    },
+    "maintenance": {
+      "entries": [
+        {
+          "path": "COORDINATION_AUDITEURS.md",
+          "previous_sha256": "2da80f00289158cc61fdb0b64ee1a57ba28f9527e3b69781dc988294f7fc1d91",
+          "previous_words": 675,
+          "words": 542
+        },
+        {
+          "path": "DIALOGUE_COURANT.md",
+          "previous_sha256": "16be690a364304828b0f92d06f8dd25cbfda0c394989f92376d7fbeadd589689",
+          "previous_words": 551,
+          "words": 433
+        },
+        {
+          "path": "ETAT_COURANT.md",
+          "previous_sha256": "853ef3095c75c52878a6fad27c7fbf5edc2de729b8dcd04acf2182ae7fa20cfa",
+          "previous_words": 748,
+          "words": 707
+        },
+        {
+          "path": "README.md",
+          "previous_sha256": "3ca4a63e3c67ae3ac8fbb72948cc35c9b7555f7151498ad3139876ef2baa1e31",
+          "previous_words": 783,
+          "words": 791
+        }
+      ],
+      "closed_requests": [
+        "initial K7 defect now repaired by second auditor",
+        "active publication of 40 permanent CTests in 324f6192",
+        "cumulative batch accounting consumption",
+        "published host T2 and corrected HD reader review"
+      ],
+      "erratum": "65 callback cases comprise 64 actual rejects plus 1 positive empty case. Historical sealed captures unchanged.",
+      "historical_packets_unchanged": true,
+      "source_variants_D_to_Q_unchanged": true,
+      "scratch_and_ELF_removed": true,
+      "other_auditor_sources_untouched": true,
+      "committed_document_pin_refresh": {
+        "path": "audits/NOTE_CLAUDE_RACCORD_PERMANENT_ET_GRAPHE_20260911.md",
+        "previous_sha256": "f1bdb8ad63089366ec238beec8e65b71fb87bf28676b3fa9d0f16760e44be525",
+        "sha256": "38f53d93502ac93614ff36610663ed359f4b2411eaa44ff0c06ccc5d5823e7c8",
+        "source_commit": "602adc51",
+        "change": "Second auditor added DEMANDE CLOSE after 324f6192; identical committed/current bytes, documentation-only pin, source variants unchanged."
+      },
+      "constructor_response": "Proof accepted in root coordination; real-flow frequency U=S remains unmeasured here. Integration should reuse the already certified form and shell instead of adding a second global pass.",
+      "temporary_global_document_links_closed": true
+    },
+    "new_engine_variant": false,
+    "gcp_used": false
   }
 }

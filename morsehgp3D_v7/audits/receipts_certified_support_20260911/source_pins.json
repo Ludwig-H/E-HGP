@@ -1,0 +1,9 @@
+{
+  "base_commit": "99b4d3b1bb21277ae7b2d9ad55eb7491fbb5a2ba",
+  "archive": "../receipts_meb_boundary_20260911/base.tar.gz",
+  "archive_sha256": "3c19daf12862fd12d186430d9f3e07368c6630f50fc6fc1dcd5db2ba1ca49777",
+  "source_manifest": "../receipts_meb_boundary_20260911/source_manifest.json",
+  "source_manifest_sha256": "cc18ab596a41313d22dfd3bd2120748f9bb5962cfc3b5428da0de731ff450e94",
+  "source_files": 57,
+  "scope": "bounded_certification_and_canonicalization_cpu_only_no_proposal_generation_no_device"
+}
