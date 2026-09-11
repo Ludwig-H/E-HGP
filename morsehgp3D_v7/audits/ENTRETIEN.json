@@ -4130,5 +4130,248 @@
         }
       ]
     }
+  },
+  "latest_historical_export_20260911": {
+    "date_utc": "2026-09-11T15:50:56.577614+00:00",
+    "source_head_at_start": "30c10246b01d8a9c78b2376beb0bed07be24abc7",
+    "source_head_at_publication_preparation": "1b56359af6010d1f33af5c62e4606db9e3606a20",
+    "objective": "Recover Builder83f1 physical export after independent horizontal histories using closed-group minima, per-K raw levels and first-use sorting, with one immutable bank shared across orders.",
+    "constructive_results": [
+      "Closed historical anchors partition each K/level lot exactly as the temporal close_lot groups.",
+      "Group minima include silent roles; a separate whole-lot minimum preserves the first raw ExactLevel for that K.",
+      "First lexicographic use (K,rank,group minimum,BallKey rank) per BallId reproduces population IDs after the PointId singleton prefix.",
+      "Group creation order reproduces node IDs; parent/contribution/successor/vertical references are transported by explicit permutations.",
+      "One immutable final population bank suffices; no K-bank construction or geometry-calendar replay is mathematically required.",
+      "The witness is sequential, with inherited semantic verticals and a measured-scope boundary: no export throughput or memory gain claim."
+    ],
+    "packet": {
+      "path": "receipts_historical_export_20260911",
+      "pins": {
+        "README.md": "08226618c0005972bf71376c1a357c7f60f4443b61d4e85328ed792e721e6854",
+        "SHA256SUMS": "9bb21e3e156e8f7a0269d546cf544d29891ca50201984737756e1e9e0c4b1bc5",
+        "historical_export_gate.cpp": "40027ffc1fff920f9c6475bdff7d39bf52ea49049ffe5018636ae5d97f6e8d54",
+        "o2.json": "b23df2b9a813b249c44f75f5aee74801c73a9908623636b29e01f6ff6f917578",
+        "record.py": "e8acb0f72eeb3040164cdaf9aacb8859cfbf11c2f045778a8879634d1bdb9c1c",
+        "result.json": "622a69c70fd4ad02f05c1e4cbd9a4ba8d92cfc4bbb504d4ce78883e1a17e5e8c",
+        "san.json": "44d387c97550504fd66e83888a4fa332a1ec3f97e9fd5a3edd3abab7ff1160a5",
+        "verify.py": "aa9182a965e1617f092b9d95fb3f3a2576e95f8da80f057fecaa7549615e97ff"
+      },
+      "result": {
+        "status": "passed",
+        "scope": "bounded_Builder83f1_physical_payload",
+        "runs": 10,
+        "orders": 60,
+        "census_balls": 1384,
+        "normal_export_block_queries": 2704,
+        "nodes": 2184,
+        "contributions": 1390,
+        "verticals": 2056,
+        "population_rows": 1388,
+        "silent_blocks": 1386,
+        "silent_min_contributing_groups": 0,
+        "differing_global_raw_lots": 2,
+        "differing_history_node_orders": 2,
+        "equivalent_raw_metadata_rescalings": 2,
+        "real_mutant_rejections": [
+          10,
+          0,
+          2,
+          2
+        ],
+        "real_mutant_causes": [
+          "physical.bank_rows",
+          "",
+          "physical.raw_node",
+          "physical.raw_contribution"
+        ],
+        "mutant_order": [
+          "bank_ball_id",
+          "exclude_silent",
+          "global_raw",
+          "history_node_order"
+        ],
+        "abstract_causal_witnesses": 4,
+        "abstract_geometry_claimed": false,
+        "counter_scope": "normal export once per fixture; reference, mutant and diagnostic reruns excluded",
+        "vertical_method": "pinned graph_full export then explicit ID transport",
+        "parallel_backend": false,
+        "gcp_used": false
+      },
+      "modes": [
+        "O2",
+        "ASan_UBSan_LSan"
+      ],
+      "commands_per_mode": 8,
+      "project_files_per_mode": 42,
+      "scope": "New audit C++ physical export witness against sealed actual Builder with its read-only friend declaration; 8 untouched-census inputs plus 2 equivalent raw-rational recodings. Parent extraction/histories and semantic verticals are borrowed; no new geometry, active backend or measured speed."
+    },
+    "checks": [
+      {
+        "name": "packet_normal",
+        "command": "python3 -B morsehgp3D_v7/audits/receipts_historical_export_20260911/verify.py",
+        "exit_code": 0,
+        "output": "{\"gcp_used\": false, \"modes\": [\"O2\", \"SAN\"], \"nodes_per_mode\": 2184, \"orders_per_mode\": 60, \"parallel_backend\": false, \"performance_claim\": false, \"project_sources\": 42, \"public_status\": \"not_claimed\", \"real_mutant_rejections_per_mode\": [10, 0, 2, 2], \"runs_per_mode\": 10, \"silent_minimum_witness\": \"abstract_only\", \"status\": \"passed_historical_export_receipt\"}\n"
+      },
+      {
+        "name": "packet_optimized",
+        "command": "python3 -B -O morsehgp3D_v7/audits/receipts_historical_export_20260911/verify.py",
+        "exit_code": 0,
+        "output": "{\"gcp_used\": false, \"modes\": [\"O2\", \"SAN\"], \"nodes_per_mode\": 2184, \"orders_per_mode\": 60, \"parallel_backend\": false, \"performance_claim\": false, \"project_sources\": 42, \"public_status\": \"not_claimed\", \"real_mutant_rejections_per_mode\": [10, 0, 2, 2], \"runs_per_mode\": 10, \"silent_minimum_witness\": \"abstract_only\", \"status\": \"passed_historical_export_receipt\"}\n"
+      },
+      {
+        "name": "docs_normal",
+        "command": "python3 -B tools/check_docs.py",
+        "exit_code": 0,
+        "output": "Validated 502 active Markdown files.\n"
+      },
+      {
+        "name": "docs_optimized",
+        "command": "python3 -B -O tools/check_docs.py",
+        "exit_code": 0,
+        "output": "Validated 502 active Markdown files.\n"
+      },
+      {
+        "name": "registry",
+        "command": "python3 -B tools/check_implementation_status.py",
+        "exit_code": 0,
+        "output": "Validated 20 implementation phases and their gates.\n"
+      },
+      {
+        "name": "own_markdown",
+        "command": "python3 -B - <<'PY'\nfrom pathlib import Path\nimport importlib.util,json\nspec=importlib.util.spec_from_file_location('doccheck','tools/check_docs.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)\np=Path('morsehgp3D_v7/audits').resolve();files=[p/n for n in ['COORDINATION_AUDITEURS.md','DIALOGUE_COURANT.md','ETAT_COURANT.md','README.md','receipts_historical_export_20260911/README.md']];errors=[e for f in files for e in m.validate(f)]\nprint(json.dumps({'files':len(files),'errors':errors}))\nraise SystemExit(bool(errors))\nPY",
+        "exit_code": 0,
+        "output": "{\"files\": 5, \"errors\": []}\n"
+      }
+    ],
+    "constructor_review": {
+      "reader_agent": "/root/prototype_review",
+      "published_commit": "679f4a6f",
+      "commands": [
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "morsehgp3D_v7/receipts/atlas_graph_full_20260911/verify.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"borrowed_files\": 174, \"gcp_used\": false, \"logical_files\": 480, \"qualification\": {\"FULL\": {\"oracle_cuts\": 29784, \"oracle_verticals\": 15594832, \"paired_contributions\": 150240, \"paired_nodes\": 237840, \"paired_verticals\": 237840, \"runs\": 114}, \"all_commands\": 66, \"extraction_pin_additions_between_O2_SAN\": [], \"historical_smoke_commands\": 4, \"mutations_per_sanitizer_mode\": {\"FULL\": 7, \"MSF\": 4, \"extraction\": 6}, \"qualification_commands_excluding_smoke\": 62, \"scope\": \"bounded private CPU composition, no industrial or GPU claim\"}, \"status\": \"passed\"}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "-O",
+            "morsehgp3D_v7/receipts/atlas_graph_full_20260911/verify.py"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"borrowed_files\": 174, \"gcp_used\": false, \"logical_files\": 480, \"qualification\": {\"FULL\": {\"oracle_cuts\": 29784, \"oracle_verticals\": 15594832, \"paired_contributions\": 150240, \"paired_nodes\": 237840, \"paired_verticals\": 237840, \"runs\": 114}, \"all_commands\": 66, \"extraction_pin_additions_between_O2_SAN\": [], \"historical_smoke_commands\": 4, \"mutations_per_sanitizer_mode\": {\"FULL\": 7, \"MSF\": 4, \"extraction\": 6}, \"qualification_commands_excluding_smoke\": 62, \"scope\": \"bounded private CPU composition, no industrial or GPU claim\"}, \"status\": \"passed\"}\n",
+          "stderr": ""
+        }
+      ],
+      "manifest_sha256": "bb4a482385a7f75537c38d41397d4410d02c04f2a899c6377df79515caf0f9bc",
+      "parent_manifest_sha256": "341c8c228a9d008084010db7b010adac77beefba123fa8a59d1d7c9023652013",
+      "source_pins": {
+        "atlas_graph.hpp": "bb2b84d990a99289c2cc08198cedf44ec7c3013901a32af7ee7ecbcfaec6a7c0",
+        "graph_full.hpp": "bad5051fca4d78345841b4171dfb8a438c0f5a752452f784f4c9c196966a3f2d",
+        "composable_msf.hpp": "dba0ae644a6aa5911519e2a4130180d9bfa371253134f065d61808bec91e065a",
+        "tower_gate.cpp": "05340a05757524c61f79cb3eeb3e5eaae43c4bf81cc0ad60b6b36e6f4365debb"
+      },
+      "closed_findings": [
+        "One bank built before the K loop, shared owner conserved.",
+        "Native-birth bijection preserves identities beyond overlapping point coverage.",
+        "Dated masks and offline vertical naturality guarded; all MSF histories checked against the original graph before reconstruction.",
+        "Different physical convention is correctly declared, not falsely qualified by dereferenced digest."
+      ],
+      "work_in_progress_at_close": "Constructor preparing actual terminal windows with local deduplication and paid-work identities; full targets and request arrays to be removed there. Preliminary smoke is not promoted into this audit result."
+    },
+    "counterreading": {
+      "math_agent": "/root/streaming_msf_math",
+      "code_agent": "/root/prototype_review",
+      "result": "Both agree on the two minima and first-use proof; source40027ffc and O2/SAN captures counter-read; no serious defect found. Silent-group geometry non-vacuity remains zero and abstract evidence is separately reported."
+    },
+    "coordination": {
+      "second_auditor_physical_gates": "Accepted diagnosis from 30c10246 §4ter. Ten-bank construction is unnecessary with symbolic references and one final bank.",
+      "amdahl_scope": "The sum/max ceiling applies to ten intact calendars; no factor transferred to the intra-K graph/MSF architecture.",
+      "constructor_acknowledgment": "Root coordination confirms agreement after reading README/gate; no audit files modified by constructor."
+    },
+    "maintenance": {
+      "entries": [
+        {
+          "path": "COORDINATION_AUDITEURS.md",
+          "previous_sha256": "5d6cc65cb0dfe27b44059652f8707b310c283128507061db55641e3c0ca4f1e6",
+          "previous_words": 564,
+          "words": 546
+        },
+        {
+          "path": "DIALOGUE_COURANT.md",
+          "previous_sha256": "1842c4185b2aabc397d1e71ea0b14c15330b5fc9b2245157eb0ace33aa9f237f",
+          "previous_words": 563,
+          "words": 555
+        },
+        {
+          "path": "ETAT_COURANT.md",
+          "previous_sha256": "35ab3deaaa222c06b229c0ea4d67e8f037481d8647aa906e18097b15c29c7ba7",
+          "previous_words": 683,
+          "words": 674
+        },
+        {
+          "path": "README.md",
+          "previous_sha256": "2810884a2b16682a92a45ff92ec987e8ea8335ff61b58c83515e38f722c20f0d",
+          "previous_words": 867,
+          "words": 914
+        }
+      ],
+      "current_priority_rewritten_not_appended": true,
+      "historical_packets_unchanged": true,
+      "source_variants_D_to_Q_unchanged": true,
+      "other_session_files_untouched": true,
+      "new_scattered_root_probe_files": false,
+      "new_engine_variant": false,
+      "temporary_directory_removed": "audits/.work_historical_export",
+      "reader_after_temporary_removal": {
+        "argv": [
+          "python3",
+          "-B",
+          "-O",
+          "morsehgp3D_v7/audits/receipts_historical_export_20260911/verify.py"
+        ],
+        "exit_code": 0,
+        "same_output_as_optimized_check": true
+      }
+    },
+    "gcp_used": false,
+    "whole_source_freshness": {
+      "common_pins_valid": 2832,
+      "source_variants_D_to_Q_unchanged": true,
+      "scope": "All common pins pass. Code1 records no complete current-engine match in unchanged historical variants D-Q; it is not a failure of the bounded export gate.",
+      "commands": [
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "morsehgp3D_v7/audits/verify_current.py"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr_first_line": "Audit à actualiser : aucune variante complète ne correspond.",
+          "stderr_sha256": "6b7321b69dcf56cd8795142cd9c8692b62968d6e321388a490eaf538868d0c4e",
+          "stderr_lines": 149
+        },
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "-O",
+            "morsehgp3D_v7/audits/verify_current.py"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr_first_line": "Audit à actualiser : aucune variante complète ne correspond.",
+          "stderr_sha256": "6b7321b69dcf56cd8795142cd9c8692b62968d6e321388a490eaf538868d0c4e",
+          "stderr_lines": 149
+        }
+      ]
+    }
   }
 }

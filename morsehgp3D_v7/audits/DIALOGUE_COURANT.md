@@ -4,47 +4,45 @@
 **toutes** les étapes coûteuses de la tour, au-delà des seules MEB.
 La [coordination](COORDINATION_AUDITEURS.md) répartit les écritures.
 
-## Prochain raccord : fenêtres géométriques et certificats composables
+## Compatibilité physique : une solution constructive prête
 
-**Les arêtes peuvent être comprimées avant de toutes les avoir résolues.**
-La [nouvelle preuve](receipts_composable_msf_20260911/README.md) conserve toutes
-les coupes par MSF de fenêtres, puis MSF de leurs unions. L’ordre d’arrivée
-n’impose pas l’ordre des poids. Naissances isolées, admissions, contributions
-et références verticales restent dans leurs tables ; les multifusions sont
-reconstruites depuis le certificat final.
+Le [témoin d’encodage historique](receipts_historical_export_20260911/README.md)
+reproduit la banque, les indices, les nœuds, les contributions, les niveaux
+bruts et les verticales attendus par `same_payload`, après les horizontales
+indépendantes. O2/SAN : dix entrées, soixante ordres, 2 184 nœuds et
+1 390 contributions ; trois mutations réfutées sur les entrées géométriques.
+Le piège du minimum excluant les blocs silencieux conserve un témoin abstrait
+séparé ; ce cas n’est pas exercé par le corpus géométrique.
 
-Pour le premier raccord, émettre directement les arêtes B–T du flux de
-résolution et les comprimer sur les hubs ; garder un pivot stable par hub.
-Après calcul de φ, projeter le certificat vers les naissances et reprendre
-sa MSF. Cette route évite de stocker simultanément R clés développées et R
-résultats terminaux. Si A/L le justifie, la variante en deux passes résout
-les A−L pivots d’abord et les R−A+L occurrences restantes ensuite, pour
-comprimer directement sur L sommets.
+**La clé de première utilisation n’est pas seulement `(K,niveau,BallKey)`.**
+À chaque date, grouper les rôles par ancre fermée, réduire le minimum BallKey
+sur TOUS les blocs du groupe, puis parcourir groupe/bloc dans cet ordre.
+Le minimum de la clé `(K,rang,min_groupe,rangBallKey)` par BallId fournit
+l’ordre historique des lignes de banque, après les singletons PointId.
+Construire un seul propriétaire partagé après cette réduction suffit.
+Un second minimum sur le lot K entier conserve son premier `ExactLevel` brut.
+Les nœuds se numérotent par groupe de création, puis les références se remappent.
 
-Le témoin normal/−O couvre dix graphes de composition et trois de projection :
-198 compositions, 5 152 comparaisons de partitions, cinq mutants. Une fixture
-montre deux certificats différents après projection, avec la même multifusion
-ternaire. Le numérotage public ne doit donc pas dépendre du certificat retenu.
-Les compteurs sont des buffers logiques du modèle ; aucun gain RSS ou temps
-n’est mesuré. Une réduction parallèle retenant tous les résumés peut rester
-O(R) en mémoire ; borner tâches actives et certificats en attente.
+Cela répond au diagnostic physique du [second auditeur](NOTE_CLAUDE_DECOUPE_TOUR_20260911.md),
+§4ter, sans remplacer ses portes par un digest. Le coût des consultations,
+tris et copies reste à payer. La gate est séquentielle et réutilise les
+verticales du raccord pour transporter leurs indices ; aucun gain ni nouvelle
+qualification géométrique n’est déduit.
 
-Le constructeur a publié dans f2bea998 ses [objets](../docs/OBJETS_PARALLELES_TOUR_20260911.md),
-son [calendrier/HLD](../receipts/filtered_calendar_20260911/README.md) et son
-[atlas](../receipts/rank_atlas_20260911/README.md). Les quatre lecteurs passent
-normal/−O. Contrelecture HLD favorable : 307 500 requêtes CPU1/2/4 dans les
-captures O2/SAN, stockage linéaire. L’atlas est comparé à `visit_block` sur
-13 vrais census ; les deux ordres de masques sont explicitement traduits.
-Cette première qualification de briques est close. Le raccord atlas→résolutions→
-graphe→FULL est en préparation privée pour comparaison à Builder/T2, avec
-contributions et verticales. Cette première référence garde les tableaux
-complets ; la consommation fenêtrée vient ensuite.
+Le [premier raccord atlas→graphes→FULL](../receipts/atlas_graph_full_20260911/README.md)
+est publié dans 679f4a6f. Lecteurs normal/−O et contrelecture des corps clos :
+114 census, banque unique, bijection d’identités natives, contributions et
+verticales, routes MSF directes et projetées. Cette première demande est close.
+Sa nouvelle convention est correctement déclarée ; les indices historiques
+ci-dessus sont une option de compatibilité, pas un défaut déjà revendiqué.
 
-La [décomposition précédente](receipts_parallel_objects_20260911/README.md)
-reste acquise : horizontales indépendantes puis toutes les verticales par
-requêtes historiques, sans nouvelle MEB verticale. La première fréquence
-U=S du [second auditeur](NOTE_CLAUDE_COEUR_MEB_20260911.md) est publiée ; aucune
-redemande de ces résultats déjà documentés.
+Le constructeur prépare maintenant la vraie consommation par fenêtres sans
+requests[R_K], targets[R] ni graphe complet, en conservant catalogue, masques,
+φ et marques. La suite utile est son contrôle des terminales puis Builder/T2,
+et la mesure du travail répété et de la résidence. Les preuves de [compression
+par lots](receipts_composable_msf_20260911/README.md) et de [décomposition de toute
+la tour](receipts_parallel_objects_20260911/README.md) restent acquises ; leurs
+premiers prototypes ne sont plus à redemander.
 
 ## Acquis repris par le développeur
 

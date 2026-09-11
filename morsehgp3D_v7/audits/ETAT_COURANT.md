@@ -1,38 +1,39 @@
 # État courant de l’audit v7
 
-11 septembre 2026, reprise de a97ee819 et contrelecture de la publication
-constructeur **f2bea998**. La priorité reste la parallélisation de toute la
-tour, avec maîtrise de ses structures intermédiaires.
+11 septembre 2026, reprise après 30c10246 et publication constructeur
+**679f4a6f**. La priorité reste la parallélisation de toute la tour et la
+maîtrise des objets intermédiaires.
 
-**Nouvel acquis : les MSF par fenêtres forment des certificats composables de
-toutes les coupes.** La [preuve et le modèle](receipts_composable_msf_20260911/README.md)
-permettent de comprimer les arêtes entre hubs en une passe, puis de projeter
-le certificat vers les naissances. La variante en deux passes réduit d’abord
-les hubs par φ. Les fenêtres libèrent clés développées et résultats terminaux
-après consommation ; catalogue, métadonnées et sortie restent à compter.
-Le calendrier de réduction détermine le compromis travail/résidence.
+**Nouvel acquis : l’encodage physique historique peut être reconstruit après
+les horizontales indépendantes.** La [preuve et sa gate C++](receipts_historical_export_20260911/README.md)
+retrouvent les premiers usages des populations et l’ordre des nœuds depuis
+les groupes à coupe fermée. Les blocs silencieux participent aux minima ;
+les représentants rationnels bruts sont choisis par lot K. Une banque unique
+est partagée entre les ordres ; parents, contributions et verticales sont
+remappés vers les anciens indices.
 
-Dix graphes de composition et trois de projection passent normal/−O :
-198 compositions, 5 152 comparaisons, cinq mutants. Les identités des
-certificats peuvent varier après projection, avec des histoires FULL égales.
-Le témoin est un modèle séquentiel borné, sans exécution parallèle ni mesure.
+O2 et ASan/UBSan/LSan concordent : dix entrées, soixante ordres, 2 184 nœuds,
+1 390 contributions, 2 056 références verticales comparés au Builder.
+Huit entrées utilisent le census sans recodage, deux changent seulement une
+représentation rationnelle équivalente, admise par le vrai Builder.
+Trois mutations sont réfutées sur ces entrées ; le minimum silencieux reste
+un témoin abstrait séparé. La gate n’est pas une implantation parallèle et
+emprunte les verticales du raccord avant transport des indices.
 
-Les prototypes constructeur [calendrier/HLD](../receipts/filtered_calendar_20260911/README.md)
-et [atlas](../receipts/rank_atlas_20260911/README.md) sont désormais publiés ;
-leurs lecteurs passent normal/−O. Captures O2/SAN : calendrier 264 graphes,
-6 570 coupes ; HLD 307 500 requêtes réparties sur CPU1/2/4 ; atlas 13 vrais
-census, 30 562 blocs et 52 469 représentants. La contrelecture des corps HLD
-et de la traduction des masques d’atlas est favorable dans leur domaine.
-Les dates brutes et les admissions restent préservées. Aucun raccord complet
-census→graphe→FULL ni débit de tour n’est qualifié par ces briques.
+Le [raccord constructeur atlas→graphes→FULL](../receipts/atlas_graph_full_20260911/README.md)
+a reçu une contrelecture favorable : lecteurs normal/−O, sources, banque
+partagée, bijection de naissances natives, contributions et verticales.
+Ses 114 census et certificats composables qualifient un raccord privé borné,
+avec une convention numérique déclarée différente du Builder. Le premier
+raccord est clos ; la consommation réellement fenêtrée est en préparation.
 
-La [décomposition parallèle](receipts_parallel_objects_20260911/README.md),
-la [réduction aux naissances](receipts_filtered_graph_20260911/README.md) et
+Les preuves de [composition MSF](receipts_composable_msf_20260911/README.md),
+de [décomposition parallèle](receipts_parallel_objects_20260911/README.md),
+de [réduction aux naissances](receipts_filtered_graph_20260911/README.md) et
 la [canonisation par support certifié](receipts_certified_support_20260911/README.md)
-conservent leurs preuves. Les anciennes demandes maintenant satisfaites sont
-condensées dans le [dialogue](DIALOGUE_COURANT.md), leurs preuves dans
-l’[entretien](ENTRETIEN.json). Archive industrielle, complétude globale et
-contrats de temps restent ouverts. GCP non utilisé par cet audit.
+restent conservées. L’[entretien](ENTRETIEN.json) épingle ces autorités distinctes.
+Archive industrielle, complétude globale et contrats de temps restent ouverts.
+GCP non utilisé par cet audit.
 
 ```text
 phase=exploration_v7_hors_registre

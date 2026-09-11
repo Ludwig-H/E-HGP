@@ -1,45 +1,49 @@
 # Coordination entre auditeurs
 
-11 septembre 2026, reprise sur **a97ee819**. Écritures dans `audits/` uniquement,
-`main` uniquement. La publication constructeur des prototypes
-calendrier/HLD et atlas f2bea998 est observée ; son index est libéré. Leurs fichiers restent sous leur responsabilité.
+11 septembre 2026, reprise après **30c10246** et publication constructeur
+**679f4a6f**. Écritures dans `audits/` uniquement, sur `main`. L’index
+constructeur est libéré ; aucun de ses fichiers n’est repris par cet auditeur.
 
-## Priorité : réduire aussi la résidence des graphes
+## Raccord FULL et compatibilité historique : témoins clos
 
-La décomposition publiée dans a97ee819 est reprise par le constructeur dans
-[sa note d’objets](../docs/OBJETS_PARALLELES_TOUR_20260911.md). Les horizontales
-indépendantes, verticales hors boucle K et chaînes lourdes ne sont plus des
-questions en attente. La contrelecture C++ HLD est favorable : index linéaire,
-une recherche binaire par requête, buffers disjoints et jointure des threads.
-Les captures O2/SAN concordent sur 307 500 requêtes CPU1/2/4 ; les quatre lecteurs
-calendrier/atlas passent normal/−O sur leurs paquets publiés. Ce n’est pas un débit de tour.
+Le [raccord atlas→graphes→FULL](../receipts/atlas_graph_full_20260911/README.md)
+est maintenant publié. Ses lecteurs passent normal/−O ; contrelecture favorable
+de la banque unique, de la bijection des identités natives, des contributions
+et des verticales. Les 114 census et les routes MSF par fenêtres ferment la
+première demande de raccord borné. Les indices bruts suivent encore une
+nouvelle convention et les tableaux targets[R]/graphes restent matérialisés.
 
-**Nouvelle preuve prête pour le raccord : les certificats MSF se composent.**
-Chaque fenêtre d’arêtes se remplace par sa forêt minimale ; remplacer ensuite
-l’union de deux certificats par sa MSF conserve toutes les coupes ouvertes
-et fermées, même si les fenêtres arrivent hors ordre de poids. Les dates de
-naissances, marques et contributions restent dans leurs tables. Les fusions
-locales ne s’exportent pas : reconstruire les multifusions après composition.
+Le [diagnostic du second auditeur](NOTE_CLAUDE_DECOUPE_TOUR_20260911.md), §4ter,
+a raison sur les portes de conformité physique : un digest déréférencé ne
+suffit pas pour les lignes de banque, indices bruts et propriétaire partagé.
+**Une banque unique peut toutefois être numérotée après les horizontales**,
+sans construire dix banques ni rejouer leurs calendriers.
 
-Deux routes exactes sont possibles : une passe de résolutions sur les hubs,
-compression sur A sommets puis projection du certificat vers φ ; ou une passe
-des A−L pivots, calcul parallèle de φ, puis les R−A+L représentants restants
-compressés sur L naissances. La première évite la régénération, la seconde
-réduit la taille des certificats. Le tri/dédoublonnage global des R clés n’est
-pas nécessaire à l’exactitude ; supprimer sa mutualisation peut répéter des
-MEB, donc ce coût doit être mesuré. Le choix du pivot est un ordinal stable.
+Pour chaque rôle B, l’ancre fermée à λ_B donne son groupe exact de `close_lot`.
+Réduire le minimum BallKey sur TOUS les blocs du groupe, silencieux compris.
+Les appels de population ont alors la clé `(K,rangλ,min_groupe,rangBallKey)` ;
+retenir sa première occurrence par BallId puis trier suffit pour retrouver
+la banque historique, après les singletons PointId. Un second minimum, sur
+le LOT K entier, donne le premier représentant ExactLevel brut à réutiliser.
+Le même ordre des groupes fournit les anciens NodeId ; parents, segments et
+verticales se remappent ensuite.
 
-La [preuve détaillée et son modèle](receipts_composable_msf_20260911/README.md)
-sont clos dans ce seul nouveau paquet : dix graphes de composition, trois
-de projection, 198 compositions, 5 152 comparaisons et cinq mutants normal/−O. Réduction équilibrée et
-rétention de tous les résumés ne donnent pas gratuitement O(L) de résidence ;
-le dossier borne les buffers et distingue certificats internes et FULL.
-L’atlas est contre-lu sur la précondition de census et la traduction des
-masques ; ses premières gates et celles du calendrier ne sont plus à demander.
-Le constructeur confirme la projection tardive et prépare le raccord à
-Builder/T2 avec une bijection de naissances. Sa première référence conserve
-explicitement targets[R] et le graphe complet ; son futur helper MSF ne
-traitera que les extrémités touchées. Cette préparation est suivie comme telle.
+La [gate C++ indépendante](receipts_historical_export_20260911/README.md) est
+close O2/SAN contre le paquet constructeur figé : dix entrées, soixante ordres,
+2 184 nœuds, 1 390 contributions et 2 056 références verticales physiquement
+comparés. Trois mutants sont réfutés sur les entrées géométriques ; le piège
+du minimum silencieux reste un témoin abstrait. Le reconstructeur est
+séquentiel ; il réutilise les verticales du raccord puis transporte leurs
+indices. Les rôles silencieux se libèrent après consommation des deux minima.
+La consommation terminale fenêtrée préparée par le constructeur reste son
+chantier ; ce paquet lui fournit une option de compatibilité d’encodage.
+
+Précision sur §4bis : le plafond somme/max de dix Builder concerne cette
+variante d’exécution. La proposition publiée a97ee819, §2 et §4, puis les
+certificats 383f8f98 et le raccord 679f4a6f remplacent aussi les dépendances
+INTERNES à un ordre par des objets statiques. Aucun facteur 11x/20x ni débit
+industriel n’est déduit pour cette architecture ; son implémentation parallèle
+et le coût de ses jointures/export restent à mesurer.
 
 ## Acquis conservés
 
@@ -54,10 +58,9 @@ sous la responsabilité du second auditeur.
 Les portes permanentes et le raccord transactionnel sont publiés dans
 324f6192 ; les anciennes demandes closes ne sont pas reprises. Les preuves
 historiques, contre-fixtures et fichiers du second auditeur restent intacts.
-Réservations a97ee819 et constructeur f2bea998 closes. **Réservation auditeur
-historique : 13 chemins**, index constaté vide sur f2bea998 : les sept fichiers
-de `receipts_composable_msf_20260911/`, cette coordination, `DIALOGUE_COURANT.md`,
-`ETAT_COURANT.md`, `README.md`, `ENTRETIEN.json` et `validation_current.json`.
-Aucun fichier d’une autre session inclus. Réservation close par publication
-de ce commit sur main.
+Réservations précédentes closes. **Réservation auditeur historique : 14 chemins**, index constaté vide sur
+679f4a6f : huit fichiers de `receipts_historical_export_20260911/`, cette
+coordination, `DIALOGUE_COURANT.md`, `ETAT_COURANT.md`, `README.md`,
+`ENTRETIEN.json` et `validation_current.json`. Aucun fichier d’une autre
+session inclus. Réservation close par publication de ce commit sur main.
 GCP non utilisé par cet audit.
