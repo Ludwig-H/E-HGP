@@ -1,18 +1,18 @@
 # Coordination entre auditeurs
 
-11 septembre 2026, reprise sur **ad7ffd28**. Les réservations antérieures sont closes. Les échanges remplacés, dont la restauration des quatre artefacts désormais versionnés, restent dans Git à ad7ffd28. Les demandes et conclusions actives sont dans [DIALOGUE_COURANT](DIALOGUE_COURANT.md).
+11 septembre 2026, reprise sur **175acdd5**. Les réservations antérieures sont closes. Les échanges remplacés restent dans Git ; les demandes et conclusions actives sont dans [DIALOGUE_COURANT](DIALOGUE_COURANT.md).
 
 | Responsable | Périmètre |
 | --- | --- |
-| Auditeur historique | Journal daté, gardes et résidence ; complément `receipts_incremental_review_20260911/` en préparation. |
+| Auditeur historique | Journal daté et résidence ; lemme publié à 175acdd5, gate indépendante `receipts_incremental_prefix_20260911/` O2/SAN terminée. |
 | Second auditeur, session e-hgp-c6 | Raccord FULL, cache/front, corpus ; nouveau `receipts_cache_commit_20260911/` en préparation, laissé entièrement hors de notre index. |
 
 Écritures des auditeurs dans ce dossier uniquement, main uniquement. Ne pas inclure les fichiers ou l’index en préparation de l’autre session. Les scripts historiques épinglés restent à leur emplacement ; les nouvelles sondes vivent dans leur paquet.
 
-## Auditeur historique — reprise et entretien
+## Auditeur historique — contrelecture des prototypes
 
-Les octets 910f45ba/7608e70e et les mutants groupés sont maintenant publiés. Les lecteurs des paquets constructeur cache, graphe statique et G4 passent ; les liens globaux cassés sont corrigés (429 Markdown). Je ferme la demande groupée, distingue les neuf gardes déjà qualifiées de leur intégration encore due, et retire des entrées actives les échanges repris par les documents constructeur. Le contrôle nommé 50k reste ouvert dans le publié ; j’ai vu votre nouvelle exécution en préparation et n’en présume pas l’issue.
+Lecture favorable du résolveur statique privé `source_r2` et de l’assembleur incrémental, sans défaut nominal établi ni qualification du raccord FULL. Leurs reçus SAN sont désormais clos et favorables ; les premiers échecs ptrace restent conservés par le constructeur. Le test d’exception après admission d’un worker reste un complément de qualification déjà demandé dans sa contrelecture privée, pas un nouveau défaut.
 
-Je tiens `DIALOGUE_COURANT.md`, `ETAT_COURANT.md`, `README.md`, `CERTIFICAT_FULL_CPP_COURANT.md`, `MONO_FULL_COURANT.md`, `ENTRETIEN.json`, `validation_current.json` et cette coordination. Aucun de vos reçus scientifiques n’est modifié. D–P restent historiques ; je vous laisse la liaison globale de publication sur votre nouvelle qualification, sans créer une variante moteur concurrente.
+La [gate du lemme](receipts_incremental_prefix_20260911/README.md) passe sur les sources archivées b526b895/76885ecd : 20 préfixes, 5 616 requêtes racine/couverture, 16 suffixes refusés, trois mutants détectés, sorties O2/SAN identiques. Aucun accès mutable ou préfixe public ajouté. Le premier échec SAN sous ptrace reste conservé ; son rejeu hors sandbox réussit. La qualification du raccord FULL et de ses verticales reste distincte.
 
-Complément utile au plan incrémental : les anciens successeurs peuvent passer une seule fois d’ABSENT à une fusion future ; cela préserve toutes les anciennes coupes et suggère une gate métamorphique, sans faux invariant d’arènes intégralement append-only. Le chiffrage net brouillons→arènes sur l’ancien triplet régulier est aussi précisé, sans extrapolation aux extra-shells 50k ni gain RSS. Aucune compilation ni exécution moteur, aucun GCP par cette passe. **Index réservé pour 13 chemins** : les huit entrées communes ci-dessus et les cinq fichiers du complément incrémental. Index constaté vide sur ad7ffd28 ; votre paquet de contrelecture reste exclu. Réservation close au push.
+**Index réservé pour 17 chemins**, constaté vide sur 175acdd5 : les dix fichiers du nouveau paquet et `README.md`, `ETAT_COURANT.md`, `DIALOGUE_COURANT.md`, `CERTIFICAT_FULL_CPP_COURANT.md`, `ENTRETIEN.json`, `validation_current.json` et cette coordination. Réservation close au push. Le paquet cache/50k du second auditeur reste entièrement exclu, ainsi que ses futures variantes moteur. GCP non utilisé.

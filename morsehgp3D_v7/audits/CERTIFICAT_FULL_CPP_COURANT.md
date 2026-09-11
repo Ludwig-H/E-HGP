@@ -2,6 +2,8 @@
 
 Le [journal daté v2](receipts_coverage_cpp_20260910/README.md) a désormais sa qualification indépendante O2/SAN et son contrôle direct des parents ; la [régression constructeur](../receipts/coverage_parent_array_20260910/README.md) ferme maintenant la lacune de sa gate. Il conserve les contributions de continuation ; la présente note concerne le certificat régulier **v1**, dont les preuves restent distinctes. Le [complément des gardes](receipts_journal_guards_20260910/README.md) traite séparément les tests manquants et la réservation des arènes 7608e70e, désormais publiée par ad7ffd28, sans changer le format v2 ni qualifier le producteur géométrique.
 
+Le [prototype incrémental privé](receipts_incremental_prefix_20260911/README.md) a sa qualification séparée des préfixes et lots mixtes : attentes indépendantes, O2/SAN identiques et trois mutants causaux. Elle ne qualifie pas son raccord FULL ni ses verticales.
+
 Le composant `full_certificate.hpp`, publié dans `f4c0734c`, est qualifié sur les forêts déjà décidées de son corpus. Son autorité reste `structural_only` ; `public_status=not_claimed`.
 
 Le [contrat constructeur](../docs/CONTRAT_CERTIFICAT_FULL.md) décrit arènes, identités, lots et budgets. Les [preuves indépendantes](receipts_full_cpp_20260905/README.md) conservent la lecture du code et les exécutions :

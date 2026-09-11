@@ -2844,5 +2844,72 @@
       "reservation_closes_on_push": true
     },
     "source_variants_D_to_P_unchanged": true
+  },
+  "latest_incremental_prefix_qualification_20260911": {
+    "date_utc": "2026-09-11T07:35:16.461025+00:00",
+    "base_commit": "175acdd50c4bfeb163a6d1a662c2361eceb869ac",
+    "scope": "independent fixed expectations for private structural assembler b526b895/76885ecd; no FULL integration or geometric/vertical/performance qualification",
+    "packet": "receipts_incremental_prefix_20260911",
+    "packet_manifest_sha256": "54477c4e221013897d8f2af4d7ff3cf619e47edf54a694943bedbd5351f74bc5",
+    "checks": {
+      "o2_san_checks": 13905,
+      "encodings": 4,
+      "sealed_prefixes": 20,
+      "cut_root_and_read_queries": 5616,
+      "historical_cut_pairs": 260,
+      "rejected_suffixes": 16,
+      "causal_mutants": 3,
+      "first_san_ptrace_refusal_preserved": true,
+      "portable_readers_normal_and_optimized": 0,
+      "documentation_files": 439,
+      "documentation_exit": 0,
+      "implementation_phases": 20,
+      "implementation_status_exit": 0,
+      "documentation_optimized_files": 441,
+      "documentation_optimized_exit": 0,
+      "common_pins": 2742,
+      "common_mismatches": 0,
+      "current_manifest_normal_and_optimized_exit": 1,
+      "current_manifest_reason": "No complete historical D-P source variant matches the published/cache or concurrent static implementation; no new engine variant is claimed."
+    },
+    "maintenance": {
+      "action": "Replace proposed prefix regression by executed bounded result; retire obsolete absence-of-prototype wording and previous index reservation. Immutable receipts unchanged.",
+      "entries": [
+        {
+          "path": "CERTIFICAT_FULL_CPP_COURANT.md",
+          "previous_sha256": "37a63e5f62f3e8d4bace170525e7cd101d01dd4428d72fc3afd53b58ea62a9d0",
+          "previous_words": 248,
+          "words": 280
+        },
+        {
+          "path": "COORDINATION_AUDITEURS.md",
+          "previous_sha256": "3044e514429a26b8a69083b953e622ec312d9656d08b6900a79643b3cf766cd8",
+          "previous_words": 351,
+          "words": 291
+        },
+        {
+          "path": "DIALOGUE_COURANT.md",
+          "previous_sha256": "b198fe4637fa1cfe35f3c7852e4f2f5f67e70cb85d0ae13b05467be7e29e9d83",
+          "previous_words": 710,
+          "words": 678
+        },
+        {
+          "path": "ETAT_COURANT.md",
+          "previous_sha256": "a6775d16bf0990f6faa3401517b9cd5ba4b5fcd3e1dde5cfbd2848a84a715e95",
+          "previous_words": 696,
+          "words": 704
+        },
+        {
+          "path": "README.md",
+          "previous_sha256": "76c3699beff8bd85167ba83ce0dfab0452e1caf79ca8f9998367e9f954d1e342",
+          "previous_words": 673,
+          "words": 677
+        }
+      ]
+    },
+    "source_variants_D_to_P_unchanged": true,
+    "other_auditor_packet_excluded": "receipts_cache_commit_20260911",
+    "gcp_used": false,
+    "independent_final_read": "Fixture tables, wide cuts, CSR and poisoned suffixes reviewed; wording narrowed to observed successor transitions and receipt reader now checks compiler/sanitizer options."
   }
 }

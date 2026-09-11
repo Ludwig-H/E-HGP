@@ -1,0 +1,210 @@
+{
+  "schema": "mhgp7-independent-prefix-capture-v1",
+  "status": "passed",
+  "authority": "private_structural_prototype_only",
+  "public_status": "not_claimed",
+  "gcp_used": false,
+  "sanitizers": false,
+  "mutants": true,
+  "inputs_before": {
+    "record.py": "0a1098143db4c3c1661c0a8fe49a2f096927f2b147facaf4773d2ecda922eac7",
+    "prefix_gate.cpp": "c1eede442d494d511002cceca3b58dda1f52119d54dfdcde017607a4659963a6",
+    "source_pins.json": "eb5ff1e1731ac5aef0fc86f731ebc5ecca52e3357439c7f4ae1728fc18babacb",
+    "source_snapshot.tar.gz": "043356a935d38a5bc98892661d8d433caa06a99fbb11fd2401b1f80c1234a2e8"
+  },
+  "commands": [
+    {
+      "name": "compiler_version",
+      "argv": [
+        "/usr/bin/g++",
+        "--version"
+      ],
+      "expected_exit": 0,
+      "exit_code": 0,
+      "started_unix": 1789109761.305932,
+      "seconds": 0.0059680938720703125,
+      "stdout": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+      "stderr": ""
+    },
+    {
+      "name": "compile_nominal",
+      "argv": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O2",
+        "-DMHGP7_AUDIT_HEADER=\"/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_incremental_prefix_20260911/.work_o2_mutants/source/morsehgp3D_v7/src/forest/full_coverage_incremental.hpp\"",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_incremental_prefix_20260911/prefix_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_incremental_prefix_20260911/.work_o2_mutants/nominal"
+      ],
+      "expected_exit": 0,
+      "exit_code": 0,
+      "started_unix": 1789109761.3130894,
+      "seconds": 18.403964281082153,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "run_nominal",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_incremental_prefix_20260911/.work_o2_mutants/nominal"
+      ],
+      "expected_exit": 0,
+      "exit_code": 0,
+      "started_unix": 1789109779.7180853,
+      "seconds": 0.012469291687011719,
+      "stdout": "{\"status\":\"passed\",\"authority\":\"independent_structural_prefix_expectations\",\"encodings\":4,\"prefixes\":20,\"checks\":13905,\"cut_root_and_read_queries\":5616,\"invariant_cut_pairs\":260,\"successor_writes\":24,\"closed_changes\":16,\"rejects\":16,\"same_kernel_facade_comparisons\":20}\n",
+      "stderr": ""
+    },
+    {
+      "name": "reject_arguments",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_incremental_prefix_20260911/.work_o2_mutants/nominal",
+        "unexpected"
+      ],
+      "expected_exit": 2,
+      "exit_code": 2,
+      "started_unix": 1789109779.7313719,
+      "seconds": 0.003282308578491211,
+      "stdout": "",
+      "stderr": "FAIL invalid_arguments\n"
+    },
+    {
+      "name": "compile_future_root",
+      "argv": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O2",
+        "-DMHGP7_AUDIT_HEADER=\"/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_incremental_prefix_20260911/.work_o2_mutants/source/morsehgp3D_v7/src/forest/full_coverage_incremental.hpp\"",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_incremental_prefix_20260911/prefix_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_incremental_prefix_20260911/.work_o2_mutants/future_root"
+      ],
+      "expected_exit": 0,
+      "exit_code": 0,
+      "started_unix": 1789109779.741002,
+      "seconds": 15.142125368118286,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "run_future_root",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_incremental_prefix_20260911/.work_o2_mutants/future_root"
+      ],
+      "expected_exit": 1,
+      "exit_code": 1,
+      "started_unix": 1789109794.8837895,
+      "seconds": 0.007922172546386719,
+      "stdout": "",
+      "stderr": "FAIL prefix.old.cut.immutable\n"
+    },
+    {
+      "name": "compile_backdated_contribution",
+      "argv": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O2",
+        "-DMHGP7_AUDIT_HEADER=\"/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_incremental_prefix_20260911/.work_o2_mutants/source/morsehgp3D_v7/src/forest/full_coverage_incremental.hpp\"",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_incremental_prefix_20260911/prefix_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_incremental_prefix_20260911/.work_o2_mutants/backdated_contribution"
+      ],
+      "expected_exit": 0,
+      "exit_code": 0,
+      "started_unix": 1789109794.8938026,
+      "seconds": 16.15745496749878,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "run_backdated_contribution",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_incremental_prefix_20260911/.work_o2_mutants/backdated_contribution"
+      ],
+      "expected_exit": 1,
+      "exit_code": 1,
+      "started_unix": 1789109811.052508,
+      "seconds": 0.00750279426574707,
+      "stdout": "",
+      "stderr": "FAIL contribution.level\n"
+    },
+    {
+      "name": "compile_reused_continuation",
+      "argv": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-isystem",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O2",
+        "-DMHGP7_AUDIT_HEADER=\"/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_incremental_prefix_20260911/.work_o2_mutants/source/morsehgp3D_v7/src/forest/full_coverage_incremental.hpp\"",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_incremental_prefix_20260911/prefix_gate.cpp",
+        "-o",
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_incremental_prefix_20260911/.work_o2_mutants/reused_continuation"
+      ],
+      "expected_exit": 0,
+      "exit_code": 0,
+      "started_unix": 1789109811.0614955,
+      "seconds": 13.16939401626587,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "run_reused_continuation",
+      "argv": [
+        "/workspaces/E-HGP/morsehgp3D_v7/audits/receipts_incremental_prefix_20260911/.work_o2_mutants/reused_continuation"
+      ],
+      "expected_exit": 1,
+      "exit_code": 1,
+      "started_unix": 1789109824.2319012,
+      "seconds": 0.0067729949951171875,
+      "stdout": "",
+      "stderr": "FAIL late.parent.or.level.rejection\n"
+    }
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "compiler_sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+  "boost_version_sha256": "a547ee7eddf1b96695027922345b471feba8bcba79a8572399d282247c02e4ab",
+  "sanitizer_options": {},
+  "inputs_after": {
+    "record.py": "0a1098143db4c3c1661c0a8fe49a2f096927f2b147facaf4773d2ecda922eac7",
+    "prefix_gate.cpp": "c1eede442d494d511002cceca3b58dda1f52119d54dfdcde017607a4659963a6",
+    "source_pins.json": "eb5ff1e1731ac5aef0fc86f731ebc5ecca52e3357439c7f4ae1728fc18babacb",
+    "source_snapshot.tar.gz": "043356a935d38a5bc98892661d8d433caa06a99fbb11fd2401b1f80c1234a2e8"
+  },
+  "inputs_stable": true,
+  "compiled_source_final_pins": {
+    "morsehgp3D_v7/src/core/device.hpp": "1f7150b21138c4450e2cc23c6253a82e80c770e2a9f3b4c08c708ed889fc1d37",
+    "morsehgp3D_v7/src/core/intmath.hpp": "6f807dbd01c07ba2153aef170dadb26057778d8c689d664487a465740405ee54",
+    "morsehgp3D_v7/src/core/mutants.hpp": "870266d181c67b2dbc6b43740d12bff92c990eafbadb8691c22c0d91b858b0b5",
+    "morsehgp3D_v7/src/core/types.hpp": "913e9e89ebf40b7a64d54ea0608e2a76e8ea85f0a61d5a6657a04cfeb537aeca",
+    "morsehgp3D_v7/src/core/wide.hpp": "a4ac26dd4968e0d45a882bd8210060784d34361fd5d60ec2261d639507833a85",
+    "morsehgp3D_v7/src/forest/full_certificate.hpp": "463724b74c7c31e162218b349e40c3952c1a2fcd74ac23cfbc438b24869e38c2",
+    "morsehgp3D_v7/src/forest/full_coverage_certificate.hpp": "b526b895238d454c7b5df6b8d40a7af8682551e71fb2582bcc8e016f0018650b",
+    "morsehgp3D_v7/src/forest/full_coverage_incremental.hpp": "76885ecd317eaa6a4277a3545e18efd739209ca53cdf9f7c08f9007b33b57a12",
+    "morsehgp3D_v7/src/lanes/keys.hpp": "c4fcf2044ebe2bbf94b12b7eb60571c41114dfabf69b00e529760f9b4fd16ae0",
+    "morsehgp3D_v7/src/lanes/level.hpp": "acd6641e0616c926f6ce8afb6e294ae9982dcf9c518fa807cc9cfd713da7f34c"
+  }
+}
