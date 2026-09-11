@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/gate",
+    "--uniform32"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot",
+  "elapsed_seconds_observation_only": 16.71453651799675,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "uniform32",
+  "stderr": {
+    "sha256": "9b3a17b5606de384213ca712a650aa72deee60a98704ac2264b9d06f11097d1e",
+    "size": 290
+  },
+  "stdout": {
+    "sha256": "0daab1cf1433651d211405148c23b59fd253ebc2f4d76ebb16f4a5cc93a547a4",
+    "size": 1816
+  }
+}

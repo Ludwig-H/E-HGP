@@ -33,9 +33,20 @@ par build ; mêmes forêts, contributions et verticales. Catalogue, masques
 compacts et sortie restent présents ; les répétitions géométriques sont
 comptées, pas masquées. Le moteur actif reste inchangé ; extraction et
 reconstruction ne sont pas encore massivement parallèles.
-La première paire mono n8000 est défavorable : 188,638 → 250,408 s et
-aucune baisse du RSS. Le prochain correctif vise les recompactions de
-certificats ; ce flux n'est pas activé comme optimisation du moteur.
+La première paire mono n8000 était défavorable : 188,638 → 250,408 s et
+aucune baisse du RSS. Le [correctif ordonné](receipts/ordered_streaming_20260911/README.md)
+est maintenant qualifié O2/SAN : une seule visite par arête sur les hubs,
+sans leurs retris ni recompactions. À n8000, le travail passe de 48,39 à
+10,46 millions de visites, pour 207,867 s jusqu'à FULL ; même tour et MEB,
+RSS pratiquement inchangé. Ce résultat ne suffit pas à promouvoir la voie
+mono devant la référence matérialisée. La contraction immédiate sur les
+naissances, proposée avec l'auditeur, est le delta suivant : brouillon
+distinct, non compilé et non crédité de ces tests.
+Le triplet mono 8k/16k/32k est clos : 207,867 / 595,244 / 1 076,969 s
+pour toute la tour, avec charge extérieure documentée. Le travail augmente
+d'environ 2,1 par doublement sur uniforme/s8 ; cela ne prouve pas une borne
+tous régimes. Le pic atteint 11,07 Gio à 32k, pour 17,17 millions de nœuds.
+Les comparaisons s8/10/12 à n800 préservent la tour, sans optimum temps déduit.
 Cette décomposition vise aussi WSPD, census et export, pas seulement les MEB.
 
 Jalon précédent : [sonde complète par lots, gate census→FULL et réduction MEB](docs/QUALIFICATION_BATCH_ET_MEB_20260911.md).

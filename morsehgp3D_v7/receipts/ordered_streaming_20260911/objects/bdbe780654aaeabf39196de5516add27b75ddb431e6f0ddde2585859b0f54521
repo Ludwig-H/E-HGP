@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_o2/gate",
+    "--mutant-drop-birth"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_o2/source_snapshot",
+  "elapsed_seconds_observation_only": 0.002259806999063585,
+  "exit_code": 4,
+  "expected_exit": 4,
+  "name": "mutant-drop-birth",
+  "stderr": {
+    "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+    "size": 18
+  },
+  "stdout": {
+    "sha256": "4e531726c1edd84cc5ad188b9e84f367125976673cdd71a2a6fe136c4008c6d8",
+    "size": 112
+  }
+}

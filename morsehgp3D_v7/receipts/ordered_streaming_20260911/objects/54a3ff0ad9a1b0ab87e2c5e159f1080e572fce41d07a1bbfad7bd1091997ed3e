@@ -1,0 +1,223 @@
+# Contrelecture du raccord ordonné : obligations du premier delta
+
+11 septembre 2026. Lecture et raisonnement seulement ; aucun C++ exécuté,
+aucune source de route modifiée, GCP non utilisé. Cadre hors registre v7,
+CPU de référence, entrée quantifiée u16 seulement, audit mathématique et
+architecture, `public_status=not_claimed`.
+
+Sources effectivement relues : `ordered_msf.hpp` 852627a5,
+`streaming_graph.hpp` 6f341cff et `NOTE_ORDERED_MONO.md` 527bed99, dans
+`build/v7_streaming_graph_20260911/`, plus les helpers calendrier 1cf438cb,
+atlas 9fc118a2 et MSF composable dba0ae64. Cette revue ne qualifie pas une
+révision ultérieure du raccord en cours de préparation dans ce dossier.
+
+## Verdict : pas de défaut bloquant trouvé, deux contrats à séparer
+
+Le réducteur respecte son contrat annoncé : dates non décroissantes, IDs
+strictement croissants, extrémités appartenant au domaine immutable et déjà
+nées, DSU unique, certificat edges-only et empoisonnement après exception.
+Le lookup renvoie bien une référence dans le même tableau contigu ; sa
+soustraction avec `vertices().data()` donne l'indice DSU, pas le BlockId.
+Les identités du domaine n'ont pas besoin d'être denses ou ordonnées.
+
+La preuve des coupes ouvertes et fermées est valide : chaque arête rejetée
+possède déjà un chemin retenu de dates au plus égales à la sienne. Les sommets
+intermédiaires sont nés par la garde sur les extrémités. Les choix dans les
+égalités peuvent différer du tri date/extrémités/id sans changer ces coupes.
+
+Il faut toutefois distinguer :
+
+1. **Premier raccord, compaction native conservée.** N'importe quel certificat
+   hub préservant toutes les coupes convient. Projeter par le φ prévu, garder
+   les dates et IDs, retirer les boucles et compacter sur les naissances suffit.
+   Que tous les pivots aient été retenus, ou que la projection soit déjà une
+   forêt, n'est PAS une prémisse nécessaire à ce premier raccord.
+2. **Suppression ultérieure de la compaction native.** Elle utilise la propriété
+   supplémentaire du flux HGP original : chaque `local==0` est la première
+   arête incidente à son hub et est retenue. Alors toutes les fibres de φ sont
+   des sous-arbres connexes du certificat ; leur contraction reste forestière.
+   Cette propriété ne vient pas de l'API générique `OrderedReducer`.
+
+La preuve supplémentaire de la note est correcte sous ses prémisses : un hub
+plus ancien ou du même niveau ne peut viser B, car la terminale est strictement
+antérieure au consommateur. B n'a donc aucune incidence avant son propre
+`local==0`. La source 6f341cff préserve cet ordre aux lignes 213–229 et 233–243,
+même quand un hub chevauche plusieurs fenêtres. Le tri des clés aux lignes
+175–178 ne doit jamais se substituer à cette émission originale.
+
+## Assertions et gates nécessaires au premier raccord
+
+- Domaine et calendrier : contrôler dans la primitive les dates non décroissantes
+  et IDs64 croissants ENTRE fenêtres, y compris autour d'une fenêtre vide ;
+  refuser les extrémités absentes et `date < naissance`. Accepter l'égalité du
+  côté du hub. Ne pas employer directement `normalized/verify_certificate`
+  du graphe réduit pour juger le graphe des hubs : ce validateur exige, lui,
+  des naissances strictement antérieures aux arêtes.
+- Juge abstrait : BFS indépendant sur chaque coupe ouverte/fermée, naissances
+  futures et isolées comprises ; étoile ternaire de même niveau, doublons et
+  boucles. Arête légère tardive ab9/ac9/bc1 : sans refus de monotonie, la coupe1
+  serait fausse. Exercer ce refus après un premier `push` réussi, puis vérifier
+  que `push` et `finish` refusent l'objet empoisonné. Tester aussi deux `finish`.
+- Raccord réel : callback des terminales, identités `(K,B,local,ordinal)`,
+  φ identique au témoin par pivot `local0`, naissances et marques identiques.
+  Après projection ET compaction native, `verify_certificate` contre le graphe
+  réduit initial, puis Builder/T2 et comparaison des contributions/verticales.
+  Le même certificat brut entre BinaryPile et ordered n'est pas requis.
+- Fenêtres 1/7/31/4096 : vérifier les frontières effectivement franchies,
+  préserver le travail géométrique M/Uw/Sw/Q/H/T pour une même largeur et
+  conserver les rejets d'observateur après préfixe. Le changement du seul
+  réducteur ne doit changer aucune terminale ni appel MEB. L'identité du
+  certificat ordonné entre frontières est un contrôle utile de déterminisme,
+  mais pas un remplacement du juge de toutes les coupes.
+- Mutants pertinents : date de projection changée, pivot absent ou choisi
+  selon le tri des clés, union publiée au milieu d'un plateau, date décroissante
+  tolérée, et réinitialisation du dernier ordinal à chaque fenêtre. Les mutants
+  de juge existants ne prouvent pas à eux seuls le refus d'un flux fautif dans
+  le nouveau réducteur : il faut lui soumettre ces entrées directement.
+
+La stricte antériorité géométrique est déjà vérifiée pour CHAQUE occurrence
+aux lignes 202–207 ; le garde-fou générique ≥ du réducteur ne la remplace pas.
+Le domaine, l'index et le census restent empruntés et immuables : l'API ne
+certifie pas la durée de vie d'une vue forgée ou conservée après son propriétaire.
+
+## Propriétés supplémentaires à mesurer avant de supprimer le compact natif
+
+Pour P hubs non natifs d'un ordre : identifier leurs P ordinaux pivots depuis
+l'atlas et vérifier leur présence exacte dans le certificat brut ordonné.
+Une gate bornée peut le faire sans ajouter une table globale R au producteur.
+Un simple compte P ne certifie pas l'identité des pivots retenus.
+
+Avec ces identités vérifiées, exiger : `projected_loops == P`,
+`projected_edges == hub_certificate_edges - P`, et aucune arête retranchée par
+la compaction native. Vérifier aussi l'acyclicité projetée et l'identité des
+arêtes avant/après ce compact, comme ensembles, pas comme vecteurs ordonnés.
+Exercer P>0 et des arêtes projetées non bouclées ; un graphe de seules
+naissances ne qualifie pas cette propriété.
+
+Contre-fixture de portée : a,b naissent à0 ; J à1 émet J→a puis J→b ; B à5
+émet B→a puis B→b, mais on déclare B→b comme pivot. Le flux satisfait les
+gardes génériques du réducteur. Il garde les deux arêtes de J et B→a, donc
+omet le pivot déclaré de B. Avec φ(J)=a et φ(B)=b, la projection contient ab1
+et ba5, un cycle à deux arêtes parallèles. La compaction native le corrige.
+Ce n'est pas le flux HGP canonique, puisque le pivot B n'est pas sa première
+occurrence ; cela réfute précisément l'héritage de la propriété de pivots
+depuis le seul type `OrderedReducer`.
+
+## Travail et résidence : ne pas interpréter les anciens zéros
+
+Sur un ordre nominal complet de N sommets et R arêtes, contrôler :
+initialisations DSU=1, sommets initialisés=N, arêtes validées=R,
+`input_edges=source_edges=dsu_attempts=R`, lookups=2R, comparaisons de naissance=2R,
+comparaisons de date et d'ordinal=max(R−1,0),
+`output_edges=dsu_unions=|certificat|`, `finish_calls=1`.
+
+Les compteurs de compaction, fusion, tri d'arêtes et sommets touchés de
+`cm::Work` restent légitimement à zéro pour le réducteur ordonné ; le tri du
+domaine reste compté séparément. Ces zéros ne signifient NI DSU vide NI mémoire
+nulle : publier les nouvelles capacités parent/size et certificat. La DSU
+initialise tous les N hubs une fois, contrairement au DSU local touch-only.
+Ce compromis peut augmenter une allocation même s'il supprime la pile de
+certificats et ses recompressions. La note d'analyse ne démontre aucun gain RSS.
+
+Conserver distincts : volumes logiques, capacités nommées, pics de réallocation
+et RSS simultané. Les statistiques du draft ne mesurent pas les deux buffers
+coexistant durant une croissance de `vector`, ni les capacités du domaine
+emprunté. Sa borne élémentaire avec lookup binaire est
+O(N log(N+1) + R log(N+1)), pas un temps linéaire de toute la tour.
+
+## Dernières réponses des auditeurs consultées
+
+Le chemin actuel de coordination racine est `audits/COORDINATION_MORSEHGP3D_V7.md`
+(f650bd5c), pas le chemin absent sous `morsehgp3D_v7/audits/`. Ses dernières
+entrées décrivent les captures du flux BinaryPile et la question ordered de
+ROOT ; je n'y ai pas trouvé de nouvelle réponse indépendante qualifiant ordered.
+
+`DIALOGUE_COURANT.md` (9104e0d8), `COORDINATION_AUDITEURS.md` (f1d5f1cb à la première lecture),
+`NOTE_CLAUDE_DECOUPE_TOUR_20260911.md` (2709bd19) et le README composable MSF
+ont été relus. La preuve indépendante de projection/composition appuie le
+premier raccord, sans transférer ses exécutions au nouveau code. La distinction
+identité FULL / identité du certificat reste impérative. Les rappels sur les
+indices bruts de banque et son propriétaire partagé empêchent de remplacer
+les comparaisons physiques ou par bijection annoncées par un seul digest.
+L'option de réencodage historique est séparée de cette optimisation ; aucun
+changement d'encodage n'est nécessaire pour brancher ordered dans le nouvel export.
+
+Aucune reprise des facteurs de temps d'un auditeur ou du résultat 8k du
+réducteur précédent. Le raccord ordonné requiert ses propres captures.
+
+## Complément : nouvelle proposition de contraction pendant le flux
+
+Après cette première lecture, la coordination auditeur a changé : version
+130fc29b, reprise sur 069bb6a2, lue intégralement. Elle propose un DSU sur les
+seules L naissances et une affectation directe de φ au premier représentant.
+La gate annoncée `receipts_birth_stream_20260911/` est encore en préparation
+dans ce texte : ceci est une contre-vérification de preuve, pas de ses résultats.
+
+La proposition est correcte sous les prémisses du flux original. À chaque
+préfixe d'émission, maintenir la correspondance suivante : deux hubs déjà
+traités sont unis dans le DSU ordonné sur hubs exactement quand leurs labels
+natifs φ sont unis dans le DSU dense des naissances. Une naissance ajoute son
+identité distincte. Le premier représentant ajoute un hub B encore isolé à
+la composante de T : affecter φ(B)=φ(T) réalise cette extension sans union
+entre naissances. Pour toute occurrence suivante, les deux tests d'union ont
+les mêmes composantes par l'invariant. Ils acceptent donc exactement les mêmes
+arêtes non pivots, avec mêmes ordinaux et dates. Les fenêtres n'interviennent
+pas dans cette induction.
+
+Une fenêtre peut commencer à `local>0` : φ(B) a été conservé depuis la fenêtre
+précédente. Si T et B sont traités dans la même fenêtre géométrique, le niveau
+strictement inférieur de T place déjà ses occurrences avant celles de B lors
+de l'émission originale. Les hubs du même niveau ne dépendent pas de leurs φ
+respectifs ; ils peuvent partager des parents et être unis par les autres
+occurrences, sans que les identités φ changent. Les fusions publiques restent
+groupées atomiquement par date après construction du certificat.
+
+Plan minimal pour un delta distinct, après le différentiel ordered sur hubs :
+
+1. Préparer les naissances en ordre déterministe, avec leur BlockId stable et
+   leur date. Affecter à chaque naissance son indice dense dans ce tableau.
+   À K1, les points conservent leur correspondance géométrique explicite.
+2. Réutiliser φ[A] pour les labels denses du K courant, avec une sentinelle pour
+   les hubs non traités ; initialiser les naissances, puis un DSU de taille L.
+   Ne pas ajouter une seconde table A de pointeurs ou une table R de terminales.
+3. À `local0(B)`, vérifier que φ(B) est absent, lire le label natif connu de T,
+   l'affecter à B et compter un pivot. Ne jamais appliquer `find` à cette
+   affectation. Pour les autres occurrences, contrôler les deux labels puis
+   tester l'union ; conserver les arêtes acceptées avec les BlockId des deux
+   naissances, l'ordinal original et la date du consommateur.
+4. Garder tous ces labels denses immuables jusqu'à la FIN du K. Convertir φ
+   dense→BlockId dans la boucle déjà nécessaire aux marques, après les dernières
+   terminales de cet ordre. Convertir un hub immédiatement après son émission
+   mélangerait labels denses et BlockId quand ce hub sert de terminal plus tard.
+5. Remettre directement le certificat natif à la reconstruction existante,
+   sans DSU hubs, passe de descente φ, projection ou compaction native finale.
+   Cette suppression ne concerne pas les tris/DSU de reconstruction de
+   l'histoire ni l'export FULL ; leurs coûts demeurent.
+6. Qualifier cette route contre ordered-hubs ET contre la référence initiale :
+   terminales, φ stable, certificat natif comme ensemble d'arêtes, toutes les
+   coupes, contributions, banque et verticales. Les labels internes denses ne
+   doivent pas devenir une nouvelle convention publique d'identités.
+
+Pour un K, poser N=|program(K)|+n à K1, et N=|program(K)| autrement. Alors
+P=N−L compte les pivots, R−P les occurrences non pivots et L−C les arêtes
+retenues. Si les boucles denses sont filtrées avant `unite`, compter séparément
+ce filtre : ne plus annoncer R−P appels DSU effectivement payés. La géométrie
+M/Uw/Sw/Q/H/T reste inchangée à largeur égale. Les accès aux extrémités deviennent
+O(1) via φ et le tableau natif ; les opérations DSU et le reste de la tour ne
+deviennent pas pour autant un contrat de temps linéaire.
+
+Deux nouveaux mutants sont indispensables à cette spécialisation : effacer
+φ(B) entre deux fenêtres coupant B, et remplacer son label natif par `find(label)`.
+Le second peut préserver H0 tout en changeant le pivot natif attendu après
+une fusion antérieure ; le juge doit comparer φ et les identités, pas seulement
+les partitions. Ajouter une conversion dense→BlockId prématurée sur un hub
+réutilisé comme terminal, un `local>0` avant `local0`, et un niveau égal utilisé
+comme terminal : chacun doit être réfuté par la porte pertinente, pas par une
+limite arbitraire de taille. Une naissance future préinitialisée dans le DSU
+ne devient pas visible : la garde stricte sur les extrémités natives et les
+dates de naissance de la reconstruction doivent rester exercées.
+
+Le risque principal est donc une confusion d'identités ou d'unités des compteurs,
+pas un défaut de la preuve de contraction. Cette proposition retire du travail
+et des objets précis du réducteur ; elle ne démontre pas encore une baisse de
+RSS ni une accélération de toute la tour.

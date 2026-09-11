@@ -1,0 +1,113 @@
+# Contrelecture bornée du raccord ordonné réel
+
+11 septembre 2026. Lecture seule du C++, sans nouvelle compilation, mesure ou
+GCP. Aucune édition des sources figées ni des captures. Cette revue porte sur
+la route privée CPU, `public_status=not_claimed`, pas sur un backend produit.
+
+Sources lues et épinglées :
+
+- `streaming_graph.hpp` fb9f0c0c255e319277ccd464215ce179169cc4382f981815c91829a04b7efe5c ;
+- `gate.cpp` b954dce7a72e5142ad69c71c08aaa12ddea05b2301fb928f43feb1d2494bf7d1 ;
+- `bench.cpp` f702e9dded8eab9e3e597b4c5eb2d9b9c80367c912ca8528b31f6f159b578adc ;
+- réducteur `../v7_streaming_graph_20260911/ordered_msf.hpp` 852627a512454f7572a1779211e64f91ad998c21e9477158905f71cb2c9e8920.
+
+La route, la gate et le helper courant concordent avec leurs pins dans
+`qualification_o2/sources_before.json`. La sonde est relue comme source,
+sans lui transférer la qualification de la TU gate.
+
+## Conclusion
+
+Aucun défaut bloquant trouvé dans la projection en place, le maintien des
+ordinaux, la vérification des pivots ou le raccord des nouveaux compteurs.
+La nouvelle source change le réducteur des hubs, pas la résolution terminale,
+les semis complets par K, l'ordre des consommateurs, les contributions ni les
+ancres verticales. La compaction native reste présente et payée.
+
+## Ordre, fenêtres et pivots
+
+Le tri de clés agit uniquement sur les indices temporaires de la fenêtre.
+Après scatter des terminales, la boucle d'émission parcourt `requests[j]`
+dans l'ordre original. L'ordinal u64 est incrémenté une fois par occurrence,
+n'est pas réinitialisé au flush et devient directement l'ID d'arête.
+Le réducteur vérifie dates non décroissantes et IDs strictement croissants,
+donc une erreur de remise en ordre entre fenêtres est refusée. Les terminales
+restent contrôlées STRICTEMENT avant chaque consommateur, indépendamment de
+la garde générique non stricte autorisée pour la naissance du hub.
+
+`local==0` écrit le pivot une seule fois. φ est ensuite déroulé dans l'ordre
+des rangs ; ses valeurs sont des identités de blocs, pas des racines DSU.
+Le scan des pivots conservés cumule les nombres de représentants de l'atlas :
+`first_ordinal` désigne exactement le premier ID du bloc. Les blocs natifs
+vides n'avancent pas cet ordinal et ne sont pas traités comme pivots.
+Le curseur du certificat ne revient jamais en arrière ; les IDs conservés
+sont une sous-suite strictement croissante du flux. Il vérifie l'ID ET le
+bloc consommateur `edge.a`, pas seulement un nombre total de pivots.
+
+Ce contrôle ne recalcule pas séparément `edge.b` après aplatissement de φ.
+Il s'appuie sur la conservation exacte des arêtes par le réducteur, qualifiée
+dans la gate primitive, et la gate réelle compare chaque vraie BallId avant
+normalisation. Ce n'est donc pas un validateur géométrique indépendant ajouté
+dans le producteur. Sous ce contrat, aucun pivot alternatif n'est introduit.
+
+## Projection en place
+
+Au début de chaque itération, `write` compte les arêtes déjà conservées : il
+ne dépasse donc jamais l'indice de l'arête actuellement lue. Une écriture
+ne touche qu'une position déjà lue ou la position courante ; aucune arête
+future n'est écrasée. Les endpoints projetés et les champs `id/date` sont
+évalués dans le temporaire de droite avant l'affectation C++20, y compris
+lorsque source et destination désignent le même élément. Le `resize` vient
+uniquement après la boucle ; aucun itérateur n'est invalidé pendant celle-ci.
+
+Les dates restent celles des consommateurs d'origine. Les seules arêtes
+retirées sont les boucles après φ. Les tests imposent `projected_loops==pivots`
+et `retained_pivots==pivots`, conformément aux fibres connexes des pivots de
+ce flux particulier. Puis la compaction native vérifie encore le domaine et
+les dates ; l'égalité des nombres d'arêtes avant/après impose l'absence de
+cycle dans la projection. La propriété ne serait pas transférable telle
+quelle à un certificat composable arbitraire pouvant omettre un pivot.
+
+## Stats, sonde et résidence
+
+`ordered_work[K]` est copié APRÈS `finish`, donc contient bien un finish et
+la taille du certificat complet. `hub_work` garde les vrais R tentatives,
+2R lookups et zéro compaction/tri/merge de hubs. Le tri du domaine est séparé.
+`native_work` rapporte la compaction finale : « une DSU » décrit le réducteur
+des hubs, pas l'ensemble de la route qui initialise aussi cette DSU native.
+La sonde expose les deux travaux et nomme son backend
+`ordered_one_dsu_then_native_compact`, sans cacher cette seconde étape.
+
+Les champs MEB, Uw/Sw et Q/H/T viennent toujours du travail géométrique payé.
+Uw reste une somme d'uniques par fenêtre, pas U global. La gate vérifie leurs
+identités par K et leurs sommes globales ; les nouveaux mutants altèrent
+séparément le travail ordonné et les pivots conservés.
+
+La DSU ordonnée reste vivante pendant la projection et la compaction native,
+jusqu'à la fin du scope K. Ses capacités apparaissent dans `ordered_work`,
+pas automatiquement dans tous les anciens pics de métadonnées. Les anciens
+et nouveaux buffers peuvent coexister lors d'une réallocation de certificat.
+Les maxima nommés ne sont donc ni un RSS ni une somme additive. Atlas et ses
+masques u16[R], φ, semis, domaines, naissances/marques et sortie FULL subsistent.
+Le scan de vérification des pivots ajoute un passage O(A_K+E_cert), non un
+catalogue R ; les lookups des extrémités restent O(log N).
+
+La sonde chronomètre le raccord entier jusqu'à une tour FULL retenue, avec
+validation commune, libération des temporaires et compaction native. Les
+digests et la comparaison physique sont exclus et déclarés. En mode compare,
+les deux tours restent vivantes : ce RSS n'est pas celui d'un bras isolé.
+Aucune conclusion de speedup ou contrat 50k ne découle de cette lecture.
+
+## Captures effectivement consultées
+
+`qualification_o2` est close PASS, 23 commandes et fermetures vraies.
+Les trois modes couvrent 114 census et 456 configurations de fenêtres,
+253 224 terminales observées, 2 184 DSU ordonnées, 82 368 pivots retenus
+et autant de boucles projetées. 54 612 arêtes de certificats sont comparées
+entre largeurs. Les 13 causes ciblées sont des refus code 4 ; les deux
+refus CLI sont code 2. L'oracle reste borné aux petits cas prévus ; n32
+est différentiel, sans nouvel oracle exhaustif.
+
+La primitive abstraite est close O2 et SAN ROOT, avec résultat identique,
+LSan actif ; son premier refus environnemental LSan/ptrace est conservé.
+Cette présente revue ne relance aucun moteur et ne prétend pas avoir exécuté
+les campagnes ROOT. Elle ne qualifie pas une révision C++ ultérieure.

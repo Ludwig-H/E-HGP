@@ -1,0 +1,232 @@
+#include "../v7_streaming_graph_20260911/ordered_msf.hpp"
+#include <cstdio>
+#include <functional>
+#include <map>
+#include <set>
+#include <string>
+
+namespace fc = mhgp7::filtered_calendar_private;
+namespace cm = mhgp7::composable_msf_private;
+namespace om = mhgp7::ordered_msf_private;
+using Id = fc::Id;
+using Date = std::uint64_t;
+using Edge = fc::Edge<Date>;
+using Graph = fc::Graph<Date>;
+using Domain = cm::BorrowedDomain<Date, std::less<Date>>;
+using Reducer = om::OrderedReducer<Date, std::less<Date>>;
+using Partition = std::vector<std::vector<Id>>;
+Id checks = 0, graphs = 0, runs = 0, cut_pairs = 0, rejections = 0, poison_checks = 0;
+Id observed_edges = 0, retained_edges = 0, empty_windows = 0, width4096_crossings = 0;
+Id differing_ties = 0, ternary = 0, rational = 0, causal_fixtures = 0, initialized_vertices = 0;
+
+void need(bool condition, const char* reason) {
+  ++checks; if (!condition) throw std::runtime_error(reason);
+}
+template<class F> void reject(F&& fn, const char* expected) {
+  try { fn(); } catch (const std::invalid_argument& error) {
+    need(std::string(error.what()) == expected, "ordered_gate.exact_rejection"); ++rejections; return;
+  }
+  throw std::runtime_error("ordered_gate.missing_rejection");
+}
+bool same_edges(const std::vector<Edge>& a, const std::vector<Edge>& b) {
+  return a.size() == b.size() && std::equal(a.begin(), a.end(), b.begin(), [](const auto& x, const auto& y) {
+    return x.id == y.id && x.a == y.a && x.b == y.b && x.date == y.date;
+  });
+}
+bool active(Date date, Date cut, bool closed) { return closed ? date <= cut : date < cut; }
+Partition bfs(const Graph& graph, std::span<const Edge> edges, Date cut, bool closed) {
+  std::map<Id, std::vector<Id>> adjacent;
+  for (const auto& vertex : graph.births) if (active(vertex.date, cut, closed)) adjacent[vertex.id];
+  for (const auto& edge : edges) if (active(edge.date, cut, closed)) {
+    need(adjacent.contains(edge.a) && adjacent.contains(edge.b), "ordered_gate.bfs_unborn_endpoint");
+    adjacent[edge.a].push_back(edge.b); adjacent[edge.b].push_back(edge.a);
+  }
+  std::set<Id> seen;
+  Partition result;
+  for (const auto& [first, unused] : adjacent) {
+    (void)unused;
+    if (!seen.insert(first).second) continue;
+    std::vector<Id> pending{first}, component;
+    while (!pending.empty()) {
+      const auto v = pending.back(); pending.pop_back(); component.push_back(v);
+      for (Id next : adjacent.at(v)) if (seen.insert(next).second) pending.push_back(next);
+    }
+    std::sort(component.begin(), component.end()); result.push_back(std::move(component));
+  }
+  std::sort(result.begin(), result.end()); return result;
+}
+void compare_cuts(const Graph& graph, std::span<const Edge> candidate) {
+  std::set<Date> levels{0};
+  for (const auto& vertex : graph.births) levels.insert(vertex.date);
+  for (const auto& edge : graph.edges) levels.insert(edge.date);
+  levels.insert(*levels.rbegin() + 1);
+  for (Date cut : levels) for (bool closed : {false, true}) {
+    need(bfs(graph, graph.edges, cut, closed) == bfs(graph, candidate, cut, closed), "ordered_gate.all_cuts"); ++cut_pairs;
+  }
+  // Membership and acyclicity, separately from the BFS cut equality.
+  std::vector<Edge> prefix;
+  for (const auto& edge : candidate) {
+    const auto found = std::find_if(graph.edges.begin(), graph.edges.end(), [&](const auto& original) { return original.id == edge.id; });
+    need(found != graph.edges.end() && same_edges({*found}, {edge}), "ordered_gate.input_edge_identity");
+    const auto before = bfs(graph, prefix, *levels.rbegin(), true).size();
+    prefix.push_back(edge);
+    need(bfs(graph, prefix, *levels.rbegin(), true).size() + 1 == before, "ordered_gate.certificate_acyclic");
+  }
+}
+
+void qualify(const Graph& graph, bool strict, bool triangle = false) {
+  cm::Work reference_work;
+  Domain reference_domain(graph.births, {}, reference_work);
+  const auto reference = cm::compact_msf(reference_domain, std::span<const Edge>(graph.edges), reference_work);
+  compare_cuts(graph, reference.edges);
+  std::vector<Edge> first_certificate;
+  bool first = true;
+  for (std::size_t width : {std::size_t{1}, std::size_t{7}, std::size_t{31}, std::size_t{4096}}) {
+    cm::Work work, pile_work;
+    Domain domain(graph.births, {}, work), pile_domain(graph.births, {}, pile_work);
+    const auto domain_comparisons = work.domain_sort_comparisons;
+    Reducer reducer(domain, work);
+    cm::BinaryPile<Date, std::less<Date>> pile(pile_domain, pile_work);
+    reducer.push({}); pile.push({}); ++empty_windows;
+    Id windows = 1, nonempty = 0;
+    for (std::size_t at = 0; at < graph.edges.size(); at += width) {
+      const auto part = std::span<const Edge>(graph.edges).subspan(at, std::min(width, graph.edges.size() - at));
+      reducer.push(part); pile.push(part); ++windows; ++nonempty;
+      reducer.push({}); pile.push({}); ++windows; ++empty_windows;
+    }
+    if (width == 4096 && nonempty > 1) ++width4096_crossings;
+    const auto candidate = reducer.finish(), composed = pile.finish();
+    compare_cuts(graph, candidate.edges); compare_cuts(graph, composed.edges);
+    if (first) { first_certificate = candidate.edges; first = false; }
+    else need(same_edges(first_certificate, candidate.edges), "ordered_gate.window_invariance");
+    need(same_edges(reference.edges, composed.edges), "ordered_gate.composed_reference");
+    const auto& stats = reducer.stats();
+    need(stats.dsu_initializations == 1 && stats.initialized_vertices == graph.births.size() && stats.finish_calls == 1,
+         "ordered_gate.one_dsu");
+    need(work.domain_sort_comparisons == domain_comparisons && work.domain_vertices == graph.births.size() &&
+         work.compact_calls == 0 && work.sort_calls == 0 && work.sort_items == 0 && work.merges == 0 &&
+         work.identity_sort_comparisons == 0 && work.sort_date_comparisons == 0 && work.touched_vertices == 0 &&
+         work.peak_call_edge_slots == 0 && work.peak_merge_input_edges == 0, "ordered_gate.no_forged_compaction");
+    need(work.windows == windows && work.nonempty_windows == nonempty && work.source_edges == graph.edges.size() &&
+         work.input_edges == graph.edges.size() && stats.validated_edges == graph.edges.size() &&
+         work.endpoint_queries == 2 * graph.edges.size() && work.validation_date_comparisons == 2 * graph.edges.size() &&
+         work.dsu_attempts == graph.edges.size() && work.dsu_unions == candidate.edges.size() &&
+         work.output_edges == candidate.edges.size(), "ordered_gate.paid_work");
+    const auto comparisons = graph.edges.empty() ? 0 : graph.edges.size() - 1;
+    need(stats.order_date_comparisons == comparisons && stats.order_identity_comparisons == comparisons &&
+         stats.peak_input_edges == std::min(width, graph.edges.size()) &&
+         stats.peak_certificate_edges == candidate.edges.size() &&
+         stats.dsu_logical_bytes == 2 * graph.births.size() * sizeof(std::size_t) &&
+         stats.dsu_capacity_bytes >= stats.dsu_logical_bytes &&
+         stats.peak_certificate_capacity_bytes >= candidate.edges.size() * sizeof(Edge), "ordered_gate.named_memory_order_work");
+    if (strict) {
+      fc::Certificate<Date> certificate{graph.births, candidate.edges, graph.marks};
+      fc::verify_certificate(graph, certificate, std::less<Date>{});
+      if (triangle) {
+        const auto history = fc::reconstruct(certificate, std::less<Date>{});
+        need(history.nodes.size() == 4 && history.nodes.back().parent_count == 3, "ordered_gate.atomic_triangle"); ++ternary;
+        need(!same_edges(reference.edges, candidate.edges), "ordered_gate.tie_break_nonvacuity"); ++differing_ties;
+      }
+    }
+    reject([&] { (void)reducer.finish(); }, "ordered.closed_or_failed");
+    reject([&] { reducer.push({}); }, "ordered.closed_or_failed");
+    ++runs; observed_edges += graph.edges.size(); retained_edges += candidate.edges.size(); initialized_vertices += graph.births.size();
+  }
+  ++graphs;
+}
+
+void fail_after_prefix(const std::vector<fc::Birth<Date>>& vertices, const Edge& first, const Edge& bad, const char* cause) {
+  cm::Work work;
+  Domain domain(vertices, {}, work);
+  Reducer reducer(domain, work);
+  reducer.push(std::span<const Edge>(&first, 1)); reducer.push({});
+  need(work.source_edges == 1 && work.dsu_unions == 1, "ordered_gate.paid_prefix");
+  reject([&] { reducer.push(std::span<const Edge>(&bad, 1)); }, cause);
+  reject([&] { reducer.push({}); }, "ordered.closed_or_failed");
+  reject([&] { (void)reducer.finish(); }, "ordered.closed_or_failed");
+  poison_checks += 2;
+  need(work.dsu_unions == 1 && work.output_edges == 0, "ordered_gate.no_partial_publication");
+}
+void guards() {
+  const std::vector<fc::Birth<Date>> vertices{{30, 0}, {10, 0}, {20, 0}, {40, 12}};
+  const Edge first{Id{1} << 40, 10, 20, 9};
+  fail_after_prefix(vertices, first, {first.id + 1, 20, 30, 1}, "ordered.edge_order");
+  fail_after_prefix(vertices, first, {first.id, 20, 30, 9}, "ordered.edge_identity");
+  fail_after_prefix(vertices, first, {first.id - 1, 20, 30, 9}, "ordered.edge_identity");
+  fail_after_prefix(vertices, first, {fc::absent, 20, 30, 9}, "ordered.edge_identity");
+  fail_after_prefix(vertices, first, {first.id + 1, 20, 99, 9}, "composable.unknown_endpoint");
+  fail_after_prefix(vertices, first, {first.id + 1, 40, 20, 9}, "ordered.edge_before_endpoint");
+  fail_after_prefix(vertices, first, {first.id + 1, 20, 40, 9}, "ordered.edge_before_endpoint");
+  // Exact causal 9/9/1 counterexample, across a window boundary and an empty push.
+  const Graph late{{{10, 0}, {20, 0}, {30, 0}}, {{0, 10, 20, 9}, {1, 10, 30, 9}, {2, 20, 30, 1}}, {}};
+  const std::vector<Edge> truncated(late.edges.begin(), late.edges.begin() + 2);
+  need(bfs(late, late.edges, 1, true) != bfs(late, truncated, 1, true), "ordered_gate.late_light_edge_causal"); ++causal_fixtures;
+  cm::Work work; Domain domain(late.births, {}, work); Reducer reducer(domain, work);
+  reducer.push(std::span<const Edge>(late.edges).first(2)); reducer.push({});
+  reject([&] { reducer.push(std::span<const Edge>(late.edges).last(1)); }, "ordered.edge_order");
+  reject([&] { (void)reducer.finish(); }, "ordered.closed_or_failed"); ++poison_checks;
+  need(work.dsu_unions == 2 && work.output_edges == 0, "ordered_gate.late_paid_prefix");
+  cm::Work overflow_work; Domain overflow_domain(late.births, {}, overflow_work); Reducer overflow(overflow_domain, overflow_work);
+  overflow_work.windows = fc::absent;
+  reject([&] { overflow.push({}); }, "composable.counter_overflow");
+  reject([&] { (void)overflow.finish(); }, "ordered.closed_or_failed"); ++poison_checks;
+}
+
+struct Rational { Id numerator, denominator; };
+struct RationalLess {
+  bool operator()(const Rational& a, const Rational& b) const {
+    __extension__ using Wide = unsigned __int128;
+    return static_cast<Wide>(a.numerator) * b.denominator < static_cast<Wide>(b.numerator) * a.denominator;
+  }
+};
+void rational_dates() {
+  const std::vector<fc::Birth<Rational>> vertices{{9, {0, 1}}, {Id{1} << 40, {0, 1}}, {2, {0, 1}}};
+  const std::vector<fc::Edge<Rational>> edges{{Id{1} << 40, 9, 2, {1, 2}},
+      {(Id{1} << 40) + 1, 2, Id{1} << 40, {2, 4}}, {(Id{1} << 40) + 2, 9, Id{1} << 40, {3, 6}}};
+  cm::Work work; cm::BorrowedDomain<Rational, RationalLess> domain(vertices, {}, work);
+  om::OrderedReducer<Rational, RationalLess> reducer(domain, work);
+  for (const auto& edge : edges) { reducer.push(std::span<const fc::Edge<Rational>>(&edge, 1)); reducer.push({}); }
+  const auto result = reducer.finish();
+  need(result.edges.size() == 2 && result.edges[0].id == edges[0].id && result.edges[1].id == edges[1].id &&
+       result.edges[1].date.numerator == 2 && result.edges[1].date.denominator == 4, "ordered_gate.exact_rational_tie");
+  fc::verify_certificate(fc::Graph<Rational>{vertices, edges, {}}, fc::Certificate<Rational>{vertices, result.edges, {}}, RationalLess{});
+  ++rational;
+}
+
+int main(int argc, char** argv) {
+  if (argc != 2 || std::string(argv[1]) != "--selftest") return 2;
+  try {
+    qualify({}, true);
+    qualify({{{Id{1} << 40, 9}, {5, 0}}, {}, {}}, true);
+    qualify({{{2, 0}, {0, 0}, {1, 0}}, {{0, 1, 2, 1}, {1, 0, 2, 1}, {2, 0, 1, 1}}, {}}, true, true);
+    qualify({{{8, 20}, {3, 4}, {2, 0}, {1, 0}}, {{Id{1} << 40, 3, 1, 4}, {(Id{1} << 40) + 1, 3, 2, 4},
+        {(Id{1} << 40) + 2, 2, 2, 8}}, {}}, false);
+    for (Id seed = 0; seed < 24; ++seed) {
+      Graph graph;
+      for (Id j = 0; j < 8; ++j) graph.births.push_back({(Id{1} << 40) + (7 - j) * 17, j % 3});
+      Id ordinal = Id{1} << 42;
+      for (Date date = 3; date < 7; ++date) for (Id a = 0; a < 8; ++a) for (Id b = a; b < 8; ++b)
+        if ((a * 11 + b * 7 + seed + date) % 3 != 0)
+          graph.edges.push_back({ordinal++, graph.births[a].id, graph.births[b].id, date});
+      qualify(graph, true);
+    }
+    Graph large{{{2, 0}, {1, 0}, {0, 0}, {8, 30}}, {}, {}};
+    for (Id j = 0; j < 4103; ++j) large.edges.push_back({(Id{1} << 40) + j, j % 3, (j + 1) % 3, 1 + j / 1000});
+    qualify(large, true); guards(); rational_dates();
+    need(graphs == 29 && runs == 116 && width4096_crossings == 1 && differing_ties == 4 && ternary == 4 &&
+         rational == 1 && causal_fixtures == 1 && poison_checks == 16 && rejections > 250 &&
+         observed_edges > 20000 && retained_edges > 0 && cut_pairs > 1000 && empty_windows > 4096,
+         "ordered_gate.nonvacuity");
+    std::printf("{\"status\":\"passed\",\"checks\":%llu,\"graphs\":%llu,\"runs\":%llu,\"cut_pairs\":%llu,"
+        "\"rejections\":%llu,\"poison_checks\":%llu,\"observed_edges\":%llu,\"retained_edges\":%llu,"
+        "\"empty_windows\":%llu,\"width4096_crossings\":%llu,\"differing_ties\":%llu,\"ternary\":%llu,"
+        "\"rational\":%llu,\"causal_fixtures\":%llu,\"initialized_vertices\":%llu,\"geometry_qualified\":false,"
+        "\"public_status\":\"not_claimed\",\"gcp_used\":false}\n",
+        static_cast<unsigned long long>(checks), static_cast<unsigned long long>(graphs), static_cast<unsigned long long>(runs),
+        static_cast<unsigned long long>(cut_pairs), static_cast<unsigned long long>(rejections), static_cast<unsigned long long>(poison_checks),
+        static_cast<unsigned long long>(observed_edges), static_cast<unsigned long long>(retained_edges), static_cast<unsigned long long>(empty_windows),
+        static_cast<unsigned long long>(width4096_crossings), static_cast<unsigned long long>(differing_ties), static_cast<unsigned long long>(ternary),
+        static_cast<unsigned long long>(rational), static_cast<unsigned long long>(causal_fixtures), static_cast<unsigned long long>(initialized_vertices));
+    return 0;
+  } catch (const std::exception& error) { std::fprintf(stderr, "%s\n", error.what()); return 1; }
+}

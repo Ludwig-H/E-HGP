@@ -1,0 +1,32 @@
+phase_start=synthetic_input
+phase_complete=synthetic_input seconds=0.001818322
+phase_start=input_digest
+phase_complete=input_digest seconds=0.000501335
+phase_start=index
+phase_complete=index seconds=0.003652217
+phase_start=generate
+phase_complete=generate seconds=73.230701997
+phase_start=sort_rle
+phase_complete=sort_rle seconds=2.036624518
+phase_start=prefilter
+phase_complete=prefilter seconds=14.272922452
+phase_start=census
+phase_complete=census seconds=11.484287296
+phase_start=release_upstream
+phase_complete=release_upstream seconds=0.049710057
+phase_start=common_validate_catalogue
+phase_complete=common_validate_catalogue seconds=9.760652278
+phase_start=reference_extract
+phase_complete=reference_extract seconds=59.344379867
+phase_start=reference_release_targets
+phase_complete=reference_release_targets seconds=0.003587130
+phase_start=reference_certificates
+phase_complete=reference_certificates seconds=6.453759612
+phase_start=reference_histories
+phase_complete=reference_histories seconds=12.491227204
+phase_start=reference_export
+phase_complete=reference_export seconds=23.867385365
+phase_start=reference_release_metadata
+phase_complete=reference_release_metadata seconds=0.059272406
+phase_start=reference_digest
+phase_complete=reference_digest seconds=1.480806731

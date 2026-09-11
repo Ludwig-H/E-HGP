@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_o2/gate"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_o2/source_snapshot",
+  "elapsed_seconds_observation_only": 0.0019315399986226112,
+  "exit_code": 2,
+  "expected_exit": 2,
+  "name": "missing",
+  "stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  "stdout": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  }
+}

@@ -84,6 +84,18 @@ entre ces naissances portent **la date du bloc émetteur**, non celle d'une
 extrémité. Leurs deux naissances sont strictement antérieures à cette date.
 Les doublons gardent le minimum exact ; les boucles disparaissent.
 
+Pour la voie **mono déjà ordonnée**, le [correctif fenêtré](RESOLUTIONS_PAR_FENETRES_20260911.md#correctif-ordonné-qualifié-séparément)
+qualifie maintenant un DSU persistant sur les hubs, sans retris de leurs
+certificats. Ses pivots sont tous retenus et la projection est forestière.
+La spécialisation proposée ensuite avec l'auditeur peut contracter chaque
+pivot dès sa consommation : φ porte un indice dense de naissance stable,
+pas une racine DSU. Un DSU sur les seules naissances suffit alors aux autres
+occurrences. Le brouillon C++ de cette spécialisation n'est pas compilé.
+Cela ne supprime pas l'obligation de remettre les résultats géométriques
+dans l'ordre source avant leur consommation. Les fenêtres indépendantes
+arrivant hors ordre gardent le contrat distinct de composition ; ce raccourci
+mono ne constitue donc pas, à lui seul, une parallélisation massive.
+
 Une forêt couvrante **minimale pour ces dates** conserve toutes les composantes
 aux coupes ouvertes et fermées. Une forêt arbitraire ou le MST euclidien des
 points ne suffit pas pour K≥2. Conserver les dates et les identités des
@@ -299,3 +311,38 @@ index historiques. Seules les consultations historiques sont distribuées
 sur CPU1/4. Aucun débit GPU, gain de latence ou contrat 50k ne découle de ce
 raccord ; les prochains benchmarks 8k/16k/32k doivent porter sur un moteur
 réellement raccordé, avec travail et résidence de toutes les phases.
+
+## 8. Préparations partagées : doublons identifiés, retrait non implémenté
+
+La sonde ordonnée conserve entièrement `Builder::validate_catalogue`, puis
+en détruit les temporaires avant de préparer l'atlas. Ce parcours trie
+trois fois les clés de boules : validateur, atlas et index de la géométrie.
+Il trie deux fois les niveaux exacts et recrée les programmes par K.
+Le prochain partage envisageable est un catalogue immuable préparé et
+validé, avec ses permutations réutilisées par les consommateurs. Ce n'est
+ni une option pour ignorer la validation d'une entrée extérieure, ni une
+preuve de complétude du producteur. La question est transmise à l'auditeur.
+
+Après vérification des niveaux distincts et de chaque correspondance
+boule→rang, les vérifications d'ordre pourraient aussi comparer les rangs
+entiers, avec départage par clé, plutôt que répéter les comparaisons exactes.
+Ces deux deltas restent à prouver et qualifier séparément ; aucun de leurs
+gains possibles n'est soustrait des chronométrages publiés.
+
+Pour le raccord géométrique parallèle, l'unité indépendante reste le groupe
+de facettes entières identiques dans une fenêtre, après les hits du semis
+initial. Le résultat terminal est redistribué aux occurrences, puis consommé
+dans leur ordre original. Le calcul parallèle ne doit lire ni modifier φ
+ou le DSU ; ses scratchs et compteurs sont propres aux workers. Les semis
+complets, l'index et le catalogue sont partagés en lecture seule.
+
+Un doublon précis doit être évité lors du réemploi de l'[adaptateur GPU
+par lots](../receipts/gpu_terminal_batch_t2_20260911/sources/current/prototype/batch_adapter.hpp) :
+`resolve_batch` compare actuellement tous les semis à chaque appel.
+L'appeler pour chacune des J fenêtres d'un K répéterait J fois le parcours
+des S semis. La liaison complète au résident doit donc être établie une
+fois par propriétaire immuable et par K, puis vérifiée par les vues liées,
+sans affaiblir l'identité des données ni leur durée de vie. Un même contexte
+mutable ne peut pas être appelé concurremment sans emplacements indépendants.
+Ce raccord n'est pas encore implémenté ; les transferts réels comprennent
+aussi les statuts, la provenance et le travail, pas seulement le BallId utile.

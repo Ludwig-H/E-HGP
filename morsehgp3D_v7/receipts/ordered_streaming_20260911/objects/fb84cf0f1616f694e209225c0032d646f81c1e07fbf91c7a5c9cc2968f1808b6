@@ -1,0 +1,18 @@
+{
+  "closure": {
+    "binary": true,
+    "compiler": true,
+    "dependencies": true,
+    "sources": true
+  },
+  "commands": 7,
+  "error": null,
+  "gcp_used": false,
+  "geometry_qualified": false,
+  "locale": "C",
+  "sanitizer": false,
+  "sanitizer_environment": {},
+  "scope": "bounded_abstract_ordered_graph_reducer",
+  "status": "passed",
+  "system_scope": "compiler binary/version and consumed headers, not hermetic linker/runtime"
+}

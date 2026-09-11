@@ -20,15 +20,30 @@ produit et consomme désormais les terminales sans garder targets[R] ni le
 graphe complet. O2/SAN : 114 census, 456 essais, 253 224 terminales comparées
 par build ; huit mutations et trois refus causaux. Les compteurs distinguent
 uniques globaux et locaux cumulés, travail répété et capacités nommées.
-Prochain delta : exploiter l'ordre d'émission pour éviter les recompactions
-mono inutiles, puis distribuer les réductions et la reconstruction.
+Le [delta ordonné](receipts/ordered_streaming_20260911/README.md) exploite
+maintenant l'ordre d'émission pour éviter les recompactions des hubs.
+O2/SAN clos : 114 census, 456 essais, 253 224 terminales, 82 368 pivots
+retenus et 54 612 comparaisons du certificat entre fenêtres par build.
+La compaction native finale est encore exécutée ; aucun de ses retris
+n'est annoncé supprimé. Prochain delta : contracter les pivots au fil
+sur les seules identités de naissance, puis distribuer la géométrie et
+la reconstruction. Le brouillon dense séparé n'est pas encore compilé.
 Les consultations seules sont CPU1/4 ; pas de débit massif annoncé.
 La paire n8000/s8/K1..10 donne le même digest et les mêmes compteurs FULL,
 mais 188,638 → 250,408 s, MEB +10,4 %, RSS +1,4 %. La pile traite
 48,4 millions d'arêtes pour 10,5 millions d'arêtes source. Pas de promotion
-mono ; le nouveau triplet 8k/16k/32k et s10/s12 à grande taille attendent
-le réducteur corrigé. Le brouillon ordonné et sa preuve sont conservés,
-non compilés et non crédités des tests du flux composé.
+mono depuis cette première mesure. Le correctif donne 207,867 s à 8k,
+10 456 312 visites de hubs (une par arête), mêmes 4 359 540 MEB et digest
+dense, RSS 2 769 680 KiB. La référence fraîche donne 213,064 s ; les
+écarts de sous-phases interdisent d'en déduire un speedup stable de 2,4 %.
+Le triplet ordonné 8k/16k/32k est clos : 207,867 / 595,244 / 1 076,969 s,
+RSS 2 769 680 / 5 663 636 / 11 604 252 KiB. Les temps sont sur hôte
+partagé, avec forte charge extérieure documentée à 16k. Les occurrences
+croissent par facteurs 2,099 puis 2,071, les MEB par 2,148 puis 2,113 :
+observation sur uniforme/s8 seulement, pas une preuve tous régimes.
+À n800, s8/10/12 donnent même digest dense et mêmes comptes géométriques ;
+leur comparaison à grande taille reste ouverte. Aucun transfert de ces
+qualifications au futur réducteur dense et aucun contrat 50k acquis.
 GCP non utilisé pour ce nouveau jalon architectural.
 
 Complément précédent après `324f6192` : [lots complets, MEB et tentatives G4](docs/QUALIFICATION_BATCH_ET_MEB_20260911.md).

@@ -1,0 +1,133 @@
+#!/usr/bin/env python3
+"""Create a private one-parent package from explicit sources and closed run folders."""
+import argparse
+import importlib.util
+import json
+import sys
+from pathlib import Path
+
+sys.dont_write_bytecode = True
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+PREFIX = 'build/v7_ordered_streaming_20260911/'
+SOURCES = (
+    'streaming_graph.hpp', 'gate.cpp', 'bench.cpp', 'ordered_gate.cpp',
+    'record.py', 'record_primitive.py', 'package_ordered.py', 'verify_ordered.py',
+    'PRIMITIVE_QUALIFICATION.md', 'ROUTE_REVIEW.md', 'REVIEW.md',
+    'birth_streaming_graph.hpp',  # Future draft, never consumed by these captures.
+)
+
+
+def module():
+    spec = importlib.util.spec_from_file_location('streaming_private_reader', HERE / 'verify_ordered.py')
+    reader = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(reader)
+    return reader
+
+
+def write_new(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open('xb') as stream:
+        stream.write(data)
+
+
+def main():
+    v = module()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--run', action='append', required=True, help='exact closed folder relative to repository')
+    parser.add_argument('--readme', type=Path, required=True, help='ROOT final package README, not the preparatory source note')
+    args = parser.parse_args()
+    out = args.out.resolve()
+    build = (ROOT / 'build').resolve()
+    v.need(out.is_relative_to(build) and out != build and not out.exists() and not out.is_symlink(),
+           'private create-only output under build required')
+    parent = v.load_parent(ROOT / 'morsehgp3D_v7/receipts/streaming_graph_20260911')
+    base, selected_runs, captured_sources = set(), [], set()
+    local_sources = {PREFIX + name for name in SOURCES}
+    for name in args.run:
+        v.safe(name)
+        path = ROOT / name
+        v.need(name.startswith('build/') and len(Path(name).parts) >= 3 and
+               path.is_dir() and not path.is_symlink() and name not in selected_runs, 'explicit run folder')
+        v.need(not out.is_relative_to(path.absolute()), 'output cannot be inside selected run')
+        receipt = json.loads(v.plain(path / 'receipt.json'))
+        v.need(receipt.get('status') in ('passed', 'failed'), f'terminal run status required:{name}')
+        for source in json.loads(v.plain(path / 'sources_before.json')):
+            v.safe(source)
+            logical = 'build/' + source
+            captured_sources.add(logical)
+            if logical.startswith(PREFIX):
+                v.need(logical in local_sources, 'new consumed source must be selected explicitly')
+            else:
+                base.add(logical)
+        selected_runs.append(name)
+    v.need(base.issubset(parent.manifest['files']), 'parent shared closure')
+    parent_by_sha = {}
+    for name in sorted(base):
+        parent_by_sha.setdefault(v.sha(parent.bytes(name)), name)
+    files, data_by_sha, omitted, runs = {}, {}, {}, {}
+
+    def add(logical, data, parent_path=None):
+        v.safe(logical)
+        v.need(logical not in files and logical not in omitted, f'duplicate logical file:{logical}')
+        digest = v.sha(data)
+        parent_path = parent_path or parent_by_sha.get(digest)
+        if parent_path:
+            v.need(parent.bytes(parent_path) == data, 'parent bytes equal')
+            provider, storage = 'parent', parent_path
+        else:
+            provider, storage = 'object', 'objects/' + digest
+            data_by_sha[digest] = data
+        files[logical] = {'provider': provider, 'path': storage, **v.pin(data)}
+
+    sources = sorted([PREFIX + name for name in SOURCES] + list(base))
+    v.need(PREFIX + 'birth_streaming_graph.hpp' not in captured_sources, 'draft cannot inherit capture qualification')
+    roles = {name: ('captured_source' if name in captured_sources else
+                    'uncompiled_draft' if name == PREFIX + 'birth_streaming_graph.hpp' else
+                    'documentation' if name.endswith('.md') else 'packaging_tool') for name in sources}
+    for name in sources:
+        add(name, parent.bytes(name) if name in base else v.plain(ROOT / name), name if name in base else None)
+    for name in selected_runs:
+        path = ROOT / name
+        run = {'files': [], 'omitted_binaries': []}
+        for item in sorted(path.rglob('*')):
+            v.need(not item.is_symlink(), f'run symlink:{item}')
+            if not item.is_file():
+                continue
+            logical = item.relative_to(ROOT).as_posix()
+            v.need(not set(item.relative_to(path).parts).intersection(
+                {'vendor', 'node_modules', '.git', '__pycache__', 'site-packages'}), f'excluded tree:{logical}')
+            data = v.plain(item)
+            reason = ('ELF' if data.startswith(b'\x7fELF') else
+                      'archive' if data.startswith(b'!<arch>\n') else
+                      'executable' if data.startswith(b'MZ') else
+                      'object' if item.suffix in ('.o', '.obj', '.a', '.so', '.pyc') else None)
+            if reason:
+                v.need(logical not in files and logical not in omitted, 'duplicate binary selection')
+                omitted[logical] = {**v.pin(data), 'reason': reason}
+                run['omitted_binaries'].append(logical)
+            else:
+                add(logical, data)
+                run['files'].append(logical)
+        runs[name] = run
+    readme = v.plain(args.readme)
+    reader_bytes = v.plain(HERE / 'verify_ordered.py')
+    manifest = {'format': v.FORMAT, 'parent': v.PARENT,
+                'package_files': {'README.md': v.sha(readme), 'verify.py': v.sha(reader_bytes)},
+                'sources': sources, 'source_roles': roles, 'runs': runs, 'files': files, 'omitted_binaries': omitted}
+    # No output mutation until every selected input has been read successfully.
+    out.mkdir(parents=True, exist_ok=False)
+    write_new(out / 'README.md', readme)
+    write_new(out / 'verify.py', reader_bytes)
+    for digest, data in sorted(data_by_sha.items()):
+        write_new(out / 'objects' / digest, data)
+    write_new(out / 'MANIFEST.json', (json.dumps(manifest, indent=2, sort_keys=True) + '\n').encode())
+    result = v.Reader(out, ROOT / 'morsehgp3D_v7/receipts/streaming_graph_20260911').verify()
+    result['package'] = str(out)
+    result['manifest_sha256'] = v.sha(v.plain(out / 'MANIFEST.json'))
+    print(json.dumps(result, sort_keys=True))
+
+
+if __name__ == '__main__':
+    main()

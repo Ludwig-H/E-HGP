@@ -1,0 +1,1 @@
+{"status":"passed","checks":521934,"graphs":29,"runs":116,"cut_pairs":3834,"rejections":257,"poison_checks":16,"observed_edges":25652,"retained_edges":696,"empty_windows":7713,"width4096_crossings":1,"differing_ties":4,"ternary":4,"rational":1,"causal_fixtures":1,"initialized_vertices":820,"geometry_qualified":false,"public_status":"not_claimed","gcp_used":false}

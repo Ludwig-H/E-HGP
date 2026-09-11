@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_o2/gate",
+    "--mutant-window-work"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_o2/source_snapshot",
+  "elapsed_seconds_observation_only": 0.002356010998482816,
+  "exit_code": 4,
+  "expected_exit": 4,
+  "name": "mutant-window-work",
+  "stderr": {
+    "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+    "size": 18
+  },
+  "stdout": {
+    "sha256": "b174cf00a7627ffa002a343f7212f36ef4420b6d6090a73271d23c765fa22b65",
+    "size": 108
+  }
+}

@@ -1,0 +1,3 @@
+==88==LeakSanitizer has encountered a fatal error.
+==88==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==88==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)

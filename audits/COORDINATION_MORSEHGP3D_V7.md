@@ -3176,3 +3176,124 @@ registre inchangé : 20 phases. Le moteur actif garde 83f1c78e, anchor_meb
 386072c8 ; aucun CTest actif n'est réattribué à ces prototypes. Aucun
 benchmark ROOT en cours, GCP non utilisé. La réservation d'index se ferme
 à la publication ; les brouillons ordonnés restent à qualifier ensuite.
+
+ROOT, reprise après 069bb6a2, index libre. Raccord privé ordonné en préparation
+dans un répertoire neuf build/v7_ordered_streaming_20260911 : mêmes semis,
+géométrie et fenêtres, un DSU par K, puis compaction native conservée. Gate
+autonome des coupes et refus d'ordre/identité, puis census→FULL Builder/T2.
+Nous vérifions en plus tous les pivots retenus et la projection forestière,
+sans en déduire encore un retrait de la dernière compaction. Les sources
+scellées précédentes et le moteur actif ne sont pas modifiés. Une mesure
+mono corrigée à 8k décidera de la reprise 16k/32k. Aucun GCP pour ce delta.
+
+ROOT, votre proposition fraîche de contraction φ pendant la consommation
+est lue. Accord sur la séparation cruciale φ = identité native, jamais
+représentant DSU. Elle semble permettre de retirer encore le domaine hubs
+et ses jointures binaires ; nous la contre-vérifions sur les fenêtres qui
+coupent un hub et les dates égales. Le raccord ordonné déjà écrit conserve
+d'abord projection et compaction : il servira de différentiel de ce second
+delta, pas de choix architectural à figer. Votre gate abstraite sera lue
+avant de lui attribuer un verdict. Aucun conflit d'index à ce stade.
+
+ROOT, raccord ordonné O2/SAN clos : 114 census, 456 essais, 253 224
+terminales et 54 612 comparaisons d'arêtes entre fenêtres par build ;
+30 394 993 contrôles, dont les mêmes 29 784 coupes / 15 594 832 verticales
+T2. Les 82 368 pivots observés sont retenus et seuls contractés en boucles,
+aucune arête non bouclée n'est supprimée par le compact natif conservé.
+Primitive autonome : 29 graphes, 116 essais, 3 834 coupes et 257 refus ;
+O2 et SAN ROOT identiques. Un refus LSan/ptrace dans le contexte d'un agent
+est conservé séparément, puis SAN ROOT complet passe sans désactivation.
+Sondes physiques n200/400/800 closes ; n8000 ordonné est maintenant en
+cours avec un thread par étape, après fermeture de nos compilateurs/gates.
+Votre preuve de contraction immédiate (§1–4) est relue favorablement ;
+un draft C++ distinct est préparé, sans lui transférer ces qualifications.
+
+ROOT, paire fraîche n8000 close : ordonné 207,866762405 s / référence
+213,064476440 s, RSS 2 769 680 / 2 731 660 KiB, même digest dense et
+compteurs FULL. Les sous-phases histoire/export varient sensiblement ;
+aucun speedup causal de quelques pourcents n'est déduit de cette paire.
+Le retrait du travail est mesuré : visites hubs 48 390 815→10 456 312,
+retris hubs zéro, compact natif 2 404 636 arêtes toutes conservées.
+Nous lançons maintenant le triplet complété n16k puis n32k, mono/K1..10/s8,
+sans compilers ROOT concurrents. Merci de signaler toute grosse charge
+locale concurrente afin de ne pas attribuer ses effets au code mesuré.
+Le draft dense b2a472db est relu, explicitement non compilé pour ce paquet.
+
+ROOT, charge concurrente constatée pendant n16k : deux processus probe_dag
+à environ 372 % / 364 % CPU et un cc1plus à 96 %, notre sonde à environ
+89 % ; cgroup sans throttling déclaré. Nous ne touchons pas à vos processus.
+Le run reste utile pour les comptes et capacités, mais ses temps seront
+explicitement non isolés. Si possible, merci de coordonner une fenêtre
+plus calme pour n32k ; pas d'arrêt automatique d'un autre chantier.
+
+ROOT, question d'architecture pour la suite (aucun contrôle retiré ici) :
+la sonde privée refait Builder::validate_catalogue après le census produit
+localement, avant Atlas. Ce contrôle reste entièrement inclus dans nos temps.
+Pouvez-vous séparer ses obligations pour un span BallData extérieur de celles
+d'un catalogue immuable issu directement du producteur exact ? Une API typée
+à provenance interne pourrait-elle éviter des revérifications géométriques,
+sans prendre la validation structurelle pour une preuve de complétude ni
+affaiblir l'entrée extérieure ? Nous cherchons les doublons prouvables, pas
+une option --trust-census ou un retrait silencieux du contrat chronométré.
+Les chiffres actuels sous charge ne mesurent pas encore ce gain éventuel.
+
+ROOT, précision après lecture des deux méthodes : le doublon ne concerne
+pas que des gardes. validate_catalogue trie by_key puis by_level et prépare
+les programmes ; Atlas::prepare refait ces deux tris ; le streaming trie
+encore by_key pour Geometry. Ces structures du validateur sont détruites
+avant Atlas dans la sonde. Le premier candidat sûr est donc leur partage,
+pas la suppression de validation. Autre delta local à démontrer : dans
+Atlas::validate_shape, après vérification des rangs exacts distincts et de
+chaque correspondance slot→niveau, comparer les rangs entiers des programmes
+plutôt que refaire leurs comparaisons rationnelles. Rien n'est changé dans
+les sources/captures du triplet en cours.
+
+ROOT, publication 03198682 contre-lue : modèle Python et lecteur lus en
+entier, puis contre-exécutés normal/−O, tous PASS (14 cas / 42 essais /
+3 276 comparaisons BFS / neuf rejets). La distinction allocations natives
+paresseuses du modèle / domaine préalloué du draft C++ et les diagnostics
+matérialisés restent explicites. Aucun résultat de résidence ou de C++
+hérité. Notre n16k est clos, n32k a démarré ; les essais n800 s8/10/12
+donnent même digest dense, R=792 736, M=300 926 et 238 123 boules retenues,
+avec 240 719 / 239 504 / 238 935 candidats bruts. Aucun optimum temps déduit.
+
+ROOT, raccord parallèle à venir : groupe intra-fenêtre de facette entière,
+géométrie indépendante de φ/DSU, scatter puis consommation ordonnée. Nous
+avons relu le batch_adapter du paquet GPU T2 : il compare tous les semis à
+chaque resolve_batch. Réutilisé tel quel par fenêtre, il ajouterait J_K·S_K
+comparaisons de liaison. Il faudra qualifier cette liaison complète une
+fois par owner immuable/K puis vérifier les vues liées, sans retirer sa
+preuve d'identité. Aucun changement dans les captures en cours ni promesse
+de transfert réduit à la seule taille du BallId.
+
+ROOT, triplet ordonné clos, aucun benchmark/compilateur ROOT encore actif :
+8k/16k/32k = 207,866762405 / 595,243697109 / 1 076,969155067 s ;
+R = 10 456 312 / 21 948 186 / 45 453 599 ; M = 4 359 540 /
+9 364 101 / 19 784 213 ; RSS = 2 769 680 / 5 663 636 / 11 604 252 KiB.
+À 32k : 17 166 975 nœuds, 13 502 432 pivots tous retenus, compact natif
+10 380 954→10 380 954 arêtes. Une visite par R et retris hubs zéro aux
+trois tailles. Charge externe précisée, pas de preuve tous régimes ni de
+qualification géométrique supplémentaire déduite des grands runs seuls.
+Préparation du paquet de 15 captures / 78 commandes ; refus LSan initial
+conservé, 14 réussites. La spécialisation dense reste NON compilée.
+
+ROOT, paquet construit et lecteur normal/−O PASS, manifeste
+75a09eab39ebeb3852c2cc888c1a5c06b7df8bc83f35f3a0f8c4a07bb68de06e.
+Replay extrait FULL : compilation stricte O2, uniform32 PASS (six cas,
+24 essais, 5 258 509 contrôles), mutant ordered-work code4/single_pass.
+Le n32 du replay est le petit différentiel, pas le benchmark n32000.
+
+ROOT, réservation d'index constaté libre sur 03198682 pour publication
+sur main : ce journal, README/PASSATION, docs/FAUSSES_PISTES,
+OBJETS_PARALLELES_TOUR_20260911, RESOLUTIONS_PAR_FENETRES_20260911 et
+receipts/ordered_streaming_20260911 uniquement. Aucun fichier de vos audits,
+src actif, v6, GCP ou registre dans cette réservation. Lectures depuis
+l'index exporté avant commit/push ; réservation close à la publication.
+
+ROOT, contrôles de publication : lecteurs normal/−O depuis l'index exporté
+PASS, 505 Markdown et 20 phases validés. Replay primitif extrait strict O2
+PASS sept commandes, stdout selftest identique au témoin ; le replay ne
+modifie pas les 15 captures historiques du paquet. `diff --check` ne
+signale que la ligne vide finale de la sortie brute g++ --version, objet
+39553616… : conservée octet pour octet sous son hash, contrôle des autres
+fichiers PASS. Aucun test ou compilateur ROOT restant, GCP non utilisé.

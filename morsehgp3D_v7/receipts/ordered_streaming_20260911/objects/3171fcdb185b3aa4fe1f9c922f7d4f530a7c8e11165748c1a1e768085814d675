@@ -1,0 +1,524 @@
+[
+  {
+    "argv": [
+      "/usr/bin/x86_64-linux-gnu-g++-13",
+      "--version"
+    ],
+    "cwd": "/workspaces/E-HGP/build",
+    "elapsed_seconds_observation_only": 0.0017471359969931655,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "compiler",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "39553616934606f58b27c04bed0cdbbe5b00c92c831a9aaadebd7ceda61d1334",
+      "size": 266
+    }
+  },
+  {
+    "argv": [
+      "/usr/bin/x86_64-linux-gnu-g++-13",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-O1",
+      "-g",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-fno-pie",
+      "-no-pie",
+      "-I",
+      "/workspaces/E-HGP/build/v7_atlas_graph_20260911",
+      "-MM",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/local_dependencies.d",
+      "-MT",
+      "mhgp7_ordered_streaming",
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/gate.cpp"
+    ],
+    "cwd": "/workspaces/E-HGP/build",
+    "elapsed_seconds_observation_only": 0.4055524590003188,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "local_dependencies",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    }
+  },
+  {
+    "argv": [
+      "/usr/bin/x86_64-linux-gnu-g++-13",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-O1",
+      "-g",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-fno-pie",
+      "-no-pie",
+      "-I",
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot/v7_atlas_graph_20260911",
+      "-M",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/dependencies_before.d",
+      "-MT",
+      "mhgp7_ordered_streaming",
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot/v7_ordered_streaming_20260911/gate.cpp"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot",
+    "elapsed_seconds_observation_only": 0.4176301230036188,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "dependencies_before",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    }
+  },
+  {
+    "argv": [
+      "/usr/bin/x86_64-linux-gnu-g++-13",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-O1",
+      "-g",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-fno-pie",
+      "-no-pie",
+      "-I",
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot/v7_atlas_graph_20260911",
+      "-MD",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/compile.d",
+      "-MT",
+      "mhgp7_ordered_streaming",
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot/v7_ordered_streaming_20260911/gate.cpp",
+      "-o",
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/gate"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot",
+    "elapsed_seconds_observation_only": 100.58362416899763,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "compile",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/gate",
+      "--selftest"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot",
+    "elapsed_seconds_observation_only": 5.357756375997269,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "selftest",
+    "stderr": {
+      "sha256": "f9e1c68d001709739171c9139af98c5bbc793dc683a12fd02de1201775143746",
+      "size": 5132
+    },
+    "stdout": {
+      "sha256": "b76a690aaf73cf7c587f0b5577e7b3ea0d254836132be15b6cedc1040932b40b",
+      "size": 1759
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/gate",
+      "--high"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot",
+    "elapsed_seconds_observation_only": 55.15099862000352,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "high",
+    "stderr": {
+      "sha256": "bb4b86b140dce94ef7c171e7598855749203e6ef5d7d2d3ba3a9c80ccda973b8",
+      "size": 556
+    },
+    "stdout": {
+      "sha256": "348488431fa83bf46ee9a470cc9973c8430e326652f9a60adc008f62062a7d1d",
+      "size": 1793
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/gate",
+      "--uniform32"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot",
+    "elapsed_seconds_observation_only": 16.71453651799675,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "uniform32",
+    "stderr": {
+      "sha256": "9b3a17b5606de384213ca712a650aa72deee60a98704ac2264b9d06f11097d1e",
+      "size": 290
+    },
+    "stdout": {
+      "sha256": "0daab1cf1433651d211405148c23b59fd253ebc2f4d76ebb16f4a5cc93a547a4",
+      "size": 1816
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/gate",
+      "--mutant-terminal"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot",
+    "elapsed_seconds_observation_only": 0.03109024299919838,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-terminal",
+    "stderr": {
+      "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+      "size": 18
+    },
+    "stdout": {
+      "sha256": "473e0d7c003ec693bfdbe9d058fccd279cda9bea36b0c2a78f046d45d07368a4",
+      "size": 111
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/gate",
+      "--mutant-pivot"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot",
+    "elapsed_seconds_observation_only": 0.03236008000385482,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-pivot",
+    "stderr": {
+      "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+      "size": 18
+    },
+    "stdout": {
+      "sha256": "d2ab540b91f58c3346e746332498ec7fa9de749aa92b0a8b6ecdc6039ec5f04a",
+      "size": 116
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/gate",
+      "--mutant-edge-date"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot",
+    "elapsed_seconds_observation_only": 0.031083873996976763,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-edge-date",
+    "stderr": {
+      "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+      "size": 18
+    },
+    "stdout": {
+      "sha256": "f72cc40d15a733ca1318d6d8facfea7e9b87546619e7304af0309e3da3c61a89",
+      "size": 123
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/gate",
+      "--mutant-drop-edge"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot",
+    "elapsed_seconds_observation_only": 0.03246777000458678,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-drop-edge",
+    "stderr": {
+      "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+      "size": 18
+    },
+    "stdout": {
+      "sha256": "38dd500a0a8e21f314c04b6487a29d9e2ba2d45285149ba4967e1f3488cb866a",
+      "size": 110
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/gate",
+      "--mutant-mark-date"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot",
+    "elapsed_seconds_observation_only": 0.032081950004794635,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-mark-date",
+    "stderr": {
+      "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+      "size": 18
+    },
+    "stdout": {
+      "sha256": "d041e486646216a731df091d380189a20769bb714632b96e82180e50e66e8036",
+      "size": 107
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/gate",
+      "--mutant-drop-birth"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot",
+    "elapsed_seconds_observation_only": 0.03438888399978168,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-drop-birth",
+    "stderr": {
+      "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+      "size": 18
+    },
+    "stdout": {
+      "sha256": "4e531726c1edd84cc5ad188b9e84f367125976673cdd71a2a6fe136c4008c6d8",
+      "size": 112
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/gate",
+      "--mutant-work"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot",
+    "elapsed_seconds_observation_only": 0.03142812499572756,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-work",
+    "stderr": {
+      "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+      "size": 18
+    },
+    "stdout": {
+      "sha256": "751725ee4d52c6269053d5d68a75292616d64514f12d71016af4c6bba31ff0d9",
+      "size": 114
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/gate",
+      "--mutant-window-work"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot",
+    "elapsed_seconds_observation_only": 0.031430849005118944,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-window-work",
+    "stderr": {
+      "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+      "size": 18
+    },
+    "stdout": {
+      "sha256": "b174cf00a7627ffa002a343f7212f36ef4420b6d6090a73271d23c765fa22b65",
+      "size": 108
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/gate",
+      "--reject-zero-window"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot",
+    "elapsed_seconds_observation_only": 0.02951736099930713,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "reject-zero-window",
+    "stderr": {
+      "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+      "size": 18
+    },
+    "stdout": {
+      "sha256": "4ea27533f58f86ca3597c2523e855a7c3ddd36b855394efe19bd408f4ddc173b",
+      "size": 106
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/gate",
+      "--reject-observer"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot",
+    "elapsed_seconds_observation_only": 0.028879457997391,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "reject-observer",
+    "stderr": {
+      "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+      "size": 18
+    },
+    "stdout": {
+      "sha256": "a6992353ce47a19e9ea573d3c52e96b4c9b39a72a9d56cd63ee668e1dfd4cc7d",
+      "size": 122
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/gate",
+      "--reject-observer-pair"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot",
+    "elapsed_seconds_observation_only": 0.028232676995685324,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "reject-observer-pair",
+    "stderr": {
+      "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+      "size": 18
+    },
+    "stdout": {
+      "sha256": "6a396e07740c881a76deb93379ba1ec7dc8570156e04074aa0c85ea662f836a5",
+      "size": 107
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/gate",
+      "--mutant-ordered-work"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot",
+    "elapsed_seconds_observation_only": 0.02962830000615213,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-ordered-work",
+    "stderr": {
+      "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+      "size": 18
+    },
+    "stdout": {
+      "sha256": "22d0350cdc53f181a593f2145e40fa520419d83dfe166377bc03d0a2c35e531a",
+      "size": 116
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/gate",
+      "--mutant-retained-pivots"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot",
+    "elapsed_seconds_observation_only": 0.029254465000121854,
+    "exit_code": 4,
+    "expected_exit": 4,
+    "name": "mutant-retained-pivots",
+    "stderr": {
+      "sha256": "9add152fe9b03662b7c7e873cd6b51404a7f93b799fbc516dfd7004e8063daae",
+      "size": 18
+    },
+    "stdout": {
+      "sha256": "caab1b62c3fd4566374160e4b2ed2682896adfbd8b3e88a2588fb3bd24e3041b",
+      "size": 121
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/gate",
+      "--unknown"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot",
+    "elapsed_seconds_observation_only": 0.017383457998221274,
+    "exit_code": 2,
+    "expected_exit": 2,
+    "name": "unknown",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    }
+  },
+  {
+    "argv": [
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/gate"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot",
+    "elapsed_seconds_observation_only": 0.017871447002107743,
+    "exit_code": 2,
+    "expected_exit": 2,
+    "name": "missing",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    }
+  },
+  {
+    "argv": [
+      "/usr/bin/x86_64-linux-gnu-g++-13",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-pthread",
+      "-isystem",
+      "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "-O1",
+      "-g",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-fno-pie",
+      "-no-pie",
+      "-I",
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot/v7_atlas_graph_20260911",
+      "-M",
+      "-MF",
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/dependencies_after.d",
+      "-MT",
+      "mhgp7_ordered_streaming",
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot/v7_ordered_streaming_20260911/gate.cpp"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_san/source_snapshot",
+    "elapsed_seconds_observation_only": 0.3902997159966617,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "dependencies_after",
+    "stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    }
+  }
+]

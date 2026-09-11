@@ -1,0 +1,29 @@
+[
+  {
+    "argv": [
+      "/usr/bin/time",
+      "-v",
+      "-o",
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/bench_n8000_streaming/rss.txt",
+      "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/bench_build_r1/bench",
+      "--n=8000",
+      "--s=8",
+      "--kmax=10",
+      "--window=65536",
+      "--mode=streaming"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/bench_build_r1/source_snapshot",
+    "elapsed_seconds_observation_only": 209.4272990160025,
+    "exit_code": 0,
+    "expected_exit": 0,
+    "name": "bench",
+    "stderr": {
+      "sha256": "70f0b862a883cc31259a6ff6395cd0e1966884a1d442ae664822b17dcf615501",
+      "size": 1131
+    },
+    "stdout": {
+      "sha256": "d115e710cf1c6ed1b41be30c2438793f8397ae18f2cdf37c9a4f6db3cd01ba7a",
+      "size": 26245
+    }
+  }
+]

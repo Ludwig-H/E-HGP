@@ -103,7 +103,43 @@ réduit : la taille des naissances et de la sortie explicite doit elle-même
 être prise en compte. Les contrats 50k/1 s, 100 ms et plusieurs dizaines de
 millions de points sur G4 restent ouverts.
 
-Une piste mono séparée exploite l'ordre déjà croissant des arêtes : Kruskal
-incrémental, DSU unique, aucun retri de fenêtre. Le brouillon et sa preuve
-sont conservés dans le paquet, explicitement non compilés/non intégrés.
-Il ne faut pas leur transférer les qualifications de la pile composée.
+## Correctif ordonné qualifié séparément
+
+Le [nouveau paquet](../receipts/ordered_streaming_20260911/README.md)
+qualifie maintenant Kruskal incrémental sur l'ordre déjà croissant des
+arêtes. Il initialise un seul DSU **pour les hubs de chaque K**, conserve
+un certificat et ne retrie plus les arêtes à chaque fenêtre. La compaction
+native finale reste exécutée et comptée séparément : ce n'est pas un
+retrait de tous les tris ou DSU de la tour.
+
+Les 114 census O2/SAN conservent FULL, contributions et verticales. Les
+82 368 pivots sont identifiés et retenus ; leur projection ne supprime que
+ces pivots en boucles et reste forestière. Les 54 612 comparaisons d'arêtes
+entre fenêtres vérifient le déterminisme du nouveau certificat. Le juge
+abstrait distingue les coupes ouvertes/fermées, les égalités de naissance,
+les sommets futurs/isolés et les refus d'ordre, puis l'empoisonnement de
+l'objet après erreur. Aucun ancien verdict n'est simplement transféré.
+
+À n8000/s8/K1..10/W65536 : 10 456 312 visites au lieu des 48 390 815
+de la pile, zéro tri d'arêtes de hubs, 2 404 636 arêtes présentées au
+compact natif. Même digest FULL et 4 359 540 MEB. Le total observé vaut
+207,867 s, le RSS 2 769 680 KiB ; le retrait des retris ne suffit donc
+toujours pas à revendiquer le contrat 50k ou une baisse de mémoire.
+
+Le triplet complet est maintenant enregistré dans le paquet : à 16k,
+595,244 s, 21 948 186 occurrences et 9 364 101 MEB ; à 32k,
+1 076,969 s, 45 453 599 occurrences et 19 784 213 MEB, pic 11,07 Gio.
+Les volumes croissent près du linéaire sur ce nuage uniforme/s8 ; aucune
+preuve sous-quadratique tous régimes ni extrapolation de latence depuis
+ces mesures sur hôte partagé. Les comparaisons n800/s8/10/12 donnent
+le même digest dense, les mêmes comptes par K et le même travail géométrique.
+
+L'auditeur propose ensuite de contracter les pivots **pendant** leur
+consommation. Le DSU ne porterait plus que les naissances, dont les
+identités doivent rester stables même après union. Cela retirerait les
+hubs du DSU, les recherches binaires d'extrémités, leur certificat et la
+projection/compaction finale. Le brouillon C++ est conservé séparément,
+explicitement non compilé. La conversion des indices denses en identités
+natives doit attendre la fin de K ; elle ne change ni les marques datées
+ni les ancres verticales. Qualifier ce delta avant son propre triplet
+d'échelle et les benchmarks multi-CPU/GPU, sans hériter des mesures ci-dessus.

@@ -77,8 +77,13 @@ Le [flux de terminales du 11 septembre](RESOLUTIONS_PAR_FENETRES_20260911.md)
 à 8k, W=65 536 conserve la même tour mais paie 188,638 → 250,408 s,
 10,4 % de MEB supplémentaires et un RSS légèrement supérieur. Les
 recompactions de la pile sont coûteuses. La voie reste pertinente comme
-référence des fenêtres indépendantes, pas comme optimisation mono validée ;
-exploiter d'abord l'ordre d'émission pour ne pas répéter ces tris.
+référence des fenêtres indépendantes, pas comme optimisation mono validée.
+Le correctif ordonné supprime effectivement ces retris de hubs : une visite
+par arête au lieu de 4,63 en moyenne dans le reçu précédent. La mesure
+complète devient 207,867 s, sans baisse notable de RSS ; le travail MEB
+répété reste inchangé. Ce correctif ne suffit donc pas non plus à faire
+du stockage fenêtré une optimisation globale acquise. La contraction directe
+sur les naissances est préparée séparément, sans résultat anticipé.
 
 Le 11 septembre, la [décomposition en objets parallèles](OBJETS_PARALLELES_TOUR_20260911.md)
 écarte aussi ces raccourcis d'architecture :

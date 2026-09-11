@@ -1,0 +1,60 @@
+# Gate autonome du réducteur ordonné
+
+Qualification abstraite du graphe, sans census, sans autorité géométrique et
+sans résultat de performance. GCP non utilisé ; aucun fichier actif modifié.
+
+Sources figées : helper `ordered_msf.hpp` 852627a512454f7572a1779211e64f91ad998c21e9477158905f71cb2c9e8920,
+gate `ordered_gate.cpp` 98bb3a6df45a3d358669517d6b3a54109ccbcf7c23b05547bb523dbd37593b1f,
+recorder `record_primitive.py` 7dda6dbfb1ab352d8c2731f25f4b8a8afc7d745db71a9271458bc00935b13b2c.
+Le recorder copie quatre sources C++ et lui-même dans un arbre commun ; les
+commandes compilent ce snapshot, avec les en-têtes consommés et l'ELF épinglés.
+Le compilateur et les headers sont fermés avant/après, sans prétendre capturer
+un sysroot complet du linker ou du runtime. Aucun fichier ELF n'est une source
+à publier.
+
+Les commandes exactes exécutées depuis la racine sont :
+
+```bash
+python3 -B build/v7_ordered_streaming_20260911/record_primitive.py --out primitive_o2_r1
+python3 -B build/v7_ordered_streaming_20260911/record_primitive.py --out primitive_san_r1 --san
+```
+
+Ces destinations sont fermées et ne doivent pas être écrasées lors d'un replay.
+`primitive_o2_r1` passe ses sept commandes : compilation stricte O2, selftest,
+CLI inconnue/manquante refusées par code 2 et fermetures des dépendances.
+La gate rapporte 521 934 checks, 29 graphes, 116 configurations, 3 834 paires de
+coupes ouvertes/fermées, 257 rejets exacts, 16 contrôles d'état empoisonné,
+25 652 arêtes proposées et 696 arêtes retenues sur l'ensemble des configurations.
+
+La référence de coupe est un BFS indépendant. `compact_msf` et `BinaryPile`
+constituent des comparateurs supplémentaires, pas ce BFS. Les quatre largeurs
+1/7/31/4096 gardent le même certificat ordonné ; une fixture de 4 103 arêtes
+traverse réellement la frontière 4096. Les quatre triangles à plateau gardent
+des arêtes différentes du départage par endpoints tout en reconstruisant une
+unique multifusion ternaire. Sont aussi exercés dates rationnelles égales
+de représentations différentes, IDs >2^32, naissance égale à l'arête, sommets
+futurs/isolés, arêtes légères tardives 9/9/1, IDs dupliqués/inversés/réservés,
+extrémité inconnue, naissance violée de chaque côté, débordement de compteur,
+double finish et push après fermeture. Les comptes attestent une DSU par bras
+sans inventer compactions, tris ni merges.
+
+Le draft initial de la gate avait un plancher de 17 contrôles d'empoisonnement.
+La comptabilité réelle vaut 7×2+1+1=16 ; cette erreur de draft a été corrigée
+AVANT le premier lancement. Les deux snapshots exécutés contiennent 16.
+Aucun échec C++ correspondant au draft 17 n'a été exécuté ou reconstruit.
+
+`primitive_san_r1` est en revanche un échec RÉEL conservé : compilation SAN
+réussie, selftest code 1, arrêt à quatre commandes. Son stderr indique
+`LeakSanitizer does not work under ptrace`. Les options ASAN/UBSAN et
+`detect_leaks=1` restent actives. Sources, compilateur, headers et ELF sont
+stables, mais ce run NE qualifie PAS SAN. Tous ses processus sont clos.
+
+Le replay distinct `primitive_san_root_r1`, exécuté ensuite par ROOT avec
+`record_primitive.py --out primitive_san_root_r1 --san`, est clos PASS : sept
+commandes, compilation stricte, selftest code 0, CLI codes 2 et toutes les
+fermetures vraies. `ASAN_OPTIONS=detect_leaks=1:halt_on_error=1` et
+`UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1` sont inchangées ; aucun
+diagnostic sanitaire n'est observé dans ce replay. Son `result.json` est
+byte-identique à O2 (comparaison `cmp`, code 0). La source C++ et le recorder
+n'ont pas changé. Ce succès dans le contexte ROOT ne réécrit pas le refus
+LSan du premier contexte, qui reste conservé séparément.

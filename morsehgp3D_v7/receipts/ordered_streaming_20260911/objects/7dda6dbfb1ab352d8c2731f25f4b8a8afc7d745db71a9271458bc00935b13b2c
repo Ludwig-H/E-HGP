@@ -1,0 +1,133 @@
+#!/usr/bin/env python3
+"""Create-only local O2/SAN capture for the standalone ordered graph reducer."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import shlex
+import shutil
+import subprocess
+import time
+
+BASE = Path(__file__).resolve().parent
+FILES = ("v7_ordered_streaming_20260911/ordered_gate.cpp", "v7_ordered_streaming_20260911/record_primitive.py",
+         "v7_streaming_graph_20260911/ordered_msf.hpp", "v7_composable_msf_20260911/composable_msf.hpp",
+         "v7_atlas_graph_20260911/filtered_calendar.hpp")
+SAN = {"ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1", "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"}
+
+
+def need(value, reason):
+    if not value: raise ValueError(reason)
+
+
+def pin(path):
+    data = Path(path).read_bytes()
+    return {"sha256": hashlib.sha256(data).hexdigest(), "size": len(data)}
+
+
+def save(path, value):
+    with path.open("x") as stream:
+        json.dump(value, stream, indent=2, sort_keys=True); stream.write("\n")
+
+
+def deps(path):
+    target, colon, body = path.read_text().replace("\\\n", " ").partition(":")
+    need(colon and target.strip() == "ordered_gate", "dependency target")
+    return sorted({str(Path(name).resolve(strict=True)) for name in shlex.split(body)})
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--out", required=True); parser.add_argument("--san", action="store_true")
+    args = parser.parse_args()
+    need(args.out.isidentifier(), "fresh output child identifier")
+    out = BASE / args.out; out.mkdir(exist_ok=False)
+    source = out / "source_snapshot"; source.mkdir()
+    commands, before, headers, compiler_pin = [], {}, {}, {}
+    binary_before, result, error, status = None, None, None, "failed"
+    binary = out / "ordered_gate"
+    env = dict(os.environ, LC_ALL="C")
+    if args.san: env.update(SAN)
+
+    def run(name, argv, expected=0):
+        row = {"name": name, "argv": [str(v) for v in argv], "cwd": str(source), "expected_exit": expected, "exit_code": None}
+        commands.append(row); save(out / (name + ".launch.json"), row)
+        start = time.monotonic()
+        try:
+            with (out / (name + ".stdout")).open("xb") as so, (out / (name + ".stderr")).open("xb") as se:
+                row["exit_code"] = subprocess.run(row["argv"], cwd=source, env=env, stdout=so, stderr=se, check=False).returncode
+        finally:
+            row["elapsed_seconds_observation_only"] = time.monotonic() - start
+            for channel in ("stdout", "stderr"):
+                path = out / (name + "." + channel)
+                if path.exists(): row[channel] = pin(path)
+            save(out / (name + ".command.json"), row)
+            print(json.dumps({"command": name, "exit_code": row["exit_code"]}), flush=True)
+        need(row["exit_code"] == expected, "exit: " + name)
+        stdout, stderr = (out / (name + ".stdout")).read_bytes(), (out / (name + ".stderr")).read_bytes()
+        need(not stderr, "diagnostic: " + name)
+        need(bool(stdout) if name in ("compiler", "selftest") else not stdout, "stdout: " + name)
+        return stdout
+
+    try:
+        before = {name: pin(BASE.parent / name) for name in FILES}; save(out / "sources_before.json", before)
+        for name in FILES:
+            target = source / name; target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(BASE.parent / name, target)
+        need(before == {name: pin(source / name) for name in FILES}, "snapshot copy")
+        compiler_name = shutil.which("g++"); need(compiler_name, "existing g++ required")
+        compiler = Path(compiler_name).resolve(strict=True)
+        compiler_pin = {str(compiler): pin(compiler)}; save(out / "compiler_before.json", compiler_pin)
+        run("compiler", [compiler, "--version"])
+        flags = [compiler, "-std=c++20", "-Wall", "-Wextra", "-Wpedantic", "-Werror",
+                 "-I", source / "v7_atlas_graph_20260911"]
+        flags += (["-O1", "-g", "-fsanitize=address,undefined", "-fno-omit-frame-pointer", "-fno-pie", "-no-pie"]
+                  if args.san else ["-O2"])
+        tu = source / "v7_ordered_streaming_20260911/ordered_gate.cpp"
+        run("dependencies_before", [*flags, "-M", "-MF", out / "dependencies_before.d", "-MT", "ordered_gate", tu])
+        headers = {name: pin(name) for name in deps(out / "dependencies_before.d")}; save(out / "dependencies_before.json", headers)
+        run("compile", [*flags, "-MD", "-MF", out / "compile.d", "-MT", "ordered_gate", tu, "-o", binary])
+        need(deps(out / "compile.d") == list(headers), "compile dependencies")
+        binary_before = pin(binary); save(out / "binary_before.json", binary_before)
+        stdout = run("selftest", [binary, "--selftest"])
+        need(len(stdout.splitlines()) == 1, "single result JSON")
+        result = json.loads(stdout)
+        need(result["status"] == "passed" and result["graphs"] == 29 and result["runs"] == 116 and
+             result["width4096_crossings"] == 1 and result["poison_checks"] == 16 and result["rejections"] > 250 and
+             result["cut_pairs"] > 1000 and result["geometry_qualified"] is False and result["gcp_used"] is False,
+             "result nonvacuity/scope")
+        run("unknown", [binary, "--unknown"], 2); run("missing", [binary], 2)
+        run("dependencies_after", [*flags, "-M", "-MF", out / "dependencies_after.d", "-MT", "ordered_gate", tu])
+        need(deps(out / "dependencies_after.d") == list(headers), "post dependencies")
+        status = "passed"
+    except BaseException as exc:
+        error = type(exc).__name__ + ": " + str(exc)
+    finally:
+        closure = {}
+        try:
+            after = {name: pin(BASE.parent / name) for name in before}
+            copied = {name: pin(source / name) for name in before}
+            headers_after = {name: pin(name) for name in headers}
+            compiler_after = {name: pin(name) for name in compiler_pin}
+            binary_after = pin(binary) if binary.is_file() else None
+            for name, value in (("sources_after", after), ("sources_copied_after", copied), ("dependencies_after", headers_after),
+                                ("compiler_after", compiler_after), ("binary_after", binary_after)):
+                save(out / (name + ".json"), value)
+            closure = {"sources": bool(before) and before == after == copied, "dependencies": bool(headers) and headers == headers_after,
+                       "compiler": bool(compiler_pin) and compiler_pin == compiler_after,
+                       "binary": binary_before is not None and binary_before == binary_after}
+            need(all(closure.values()), "closure")
+        except BaseException as exc:
+            status = "failed"; error = (error + "; " if error else "") + "closure: " + str(exc)
+        save(out / "commands.json", commands); save(out / "result.json", result)
+        save(out / "receipt.json", {"status": status, "error": error, "closure": closure, "commands": len(commands),
+             "sanitizer": args.san, "sanitizer_environment": SAN if args.san else {}, "locale": "C",
+             "scope": "bounded_abstract_ordered_graph_reducer", "geometry_qualified": False, "gcp_used": False,
+             "system_scope": "compiler binary/version and consumed headers, not hermetic linker/runtime"})
+    print(json.dumps({"status": status, "error": error}), flush=True)
+    return 0 if status == "passed" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_o2/gate",
+    "--mutant-mark-date"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_o2/source_snapshot",
+  "exit_code": null,
+  "expected_exit": 4,
+  "name": "mutant-mark-date"
+}

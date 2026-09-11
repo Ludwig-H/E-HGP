@@ -1,0 +1,21 @@
+{
+  "causal_fixtures": 1,
+  "checks": 521934,
+  "cut_pairs": 3834,
+  "differing_ties": 4,
+  "empty_windows": 7713,
+  "gcp_used": false,
+  "geometry_qualified": false,
+  "graphs": 29,
+  "initialized_vertices": 820,
+  "observed_edges": 25652,
+  "poison_checks": 16,
+  "public_status": "not_claimed",
+  "rational": 1,
+  "rejections": 257,
+  "retained_edges": 696,
+  "runs": 116,
+  "status": "passed",
+  "ternary": 4,
+  "width4096_crossings": 1
+}

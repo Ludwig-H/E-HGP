@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_o2/gate",
+    "--high"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/qualification_o2/source_snapshot",
+  "elapsed_seconds_observation_only": 5.8717503389998456,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "high",
+  "stderr": {
+    "sha256": "bb4b86b140dce94ef7c171e7598855749203e6ef5d7d2d3ba3a9c80ccda973b8",
+    "size": 556
+  },
+  "stdout": {
+    "sha256": "348488431fa83bf46ee9a470cc9973c8430e326652f9a60adc008f62062a7d1d",
+    "size": 1793
+  }
+}

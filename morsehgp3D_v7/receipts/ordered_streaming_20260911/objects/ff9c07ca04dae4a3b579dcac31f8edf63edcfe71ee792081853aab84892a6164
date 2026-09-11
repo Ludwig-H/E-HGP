@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/primitive_san_root_r1/ordered_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v7_ordered_streaming_20260911/primitive_san_root_r1/source_snapshot",
+  "elapsed_seconds_observation_only": 0.9074684610022814,
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "selftest",
+  "stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  "stdout": {
+    "sha256": "09dbe0961ab02e5ff1ce89e982d5c72c9a11837b77a0326c1ec1c83d266864fe",
+    "size": 366
+  }
+}

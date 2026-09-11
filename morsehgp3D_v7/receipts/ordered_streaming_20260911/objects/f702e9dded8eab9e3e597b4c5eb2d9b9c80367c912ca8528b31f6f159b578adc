@@ -1,0 +1,584 @@
+// Private performance probe, no exhaustive oracle. One composed source tree.
+// Example (RSS is external and covers the WHOLE process, validation included):
+// /usr/bin/time -v ./bench --n=200 --s=8 --kmax=10 --window=1024 --mode=compare
+// For separate-arm RSS/timing use --mode=reference and --mode=streaming.
+#include "streaming_graph.hpp"
+#include "../v7_graph_full_20260911/graph_full.hpp"
+#include "../v7_atlas_graph_20260911/source/morsehgp3D_v7/src/cloud/families.hpp"
+#include "../v7_atlas_graph_20260911/source/morsehgp3D_v7/src/core/parse.hpp"
+#include "../v7_atlas_graph_20260911/source/morsehgp3D_v7/src/core/sha256.hpp"
+#include "../v7_atlas_graph_20260911/source/morsehgp3D_v7/src/pipeline/generate.hpp"
+#include <chrono>
+#include <cstdio>
+#include <cstring>
+#include <iomanip>
+#include <iostream>
+#include <optional>
+#include <string_view>
+
+#ifdef MHGP7_TESTING
+#error This probe consumes only nominal primitives.
+#endif
+
+// Already-declared private friend, no product instrumentation or Builder::run.
+namespace mhgp7::full_ball_detail {
+struct RankAtlasReference {
+  static void validate(const CloudIndex& index, std::span<const BallData> balls,
+                       unsigned k, FullBallStats& work) {
+    Builder builder(index, balls, k, work);
+    builder.validate_catalogue();
+  }  // All validation temporaries are destroyed before either measured route.
+};
+}  // namespace mhgp7::full_ball_detail
+
+namespace {
+using namespace mhgp7;
+namespace ag = atlas_graph_private;
+namespace sg = ordered_streaming_graph_private;
+namespace gf = graph_full_private;
+namespace fc = filtered_calendar_private;
+using Clock = std::chrono::steady_clock;
+
+void need(bool value, const char* reason) {
+  if (!value) throw std::runtime_error(reason);
+}
+
+struct Options {
+  i64 n = 0, s = 0, kmax = 0, window = 0, threads = 1, history_threads = 1;
+  std::string_view mode;
+};
+bool options(int argc, char** argv, Options& out) {
+  unsigned seen = 0;
+  for (int i = 1; i < argc; ++i) {
+    const std::string_view arg(argv[i]);
+    i64* target = nullptr;
+    std::size_t offset = 0;
+    unsigned bit = 0;
+    if (arg.starts_with("--n=")) { target = &out.n; offset = 4; bit = 1; }
+    else if (arg.starts_with("--s=")) { target = &out.s; offset = 4; bit = 2; }
+    else if (arg.starts_with("--kmax=")) { target = &out.kmax; offset = 7; bit = 4; }
+    else if (arg.starts_with("--window=")) { target = &out.window; offset = 9; bit = 8; }
+    else if (arg.starts_with("--threads=")) { target = &out.threads; offset = 10; bit = 32; }
+    else if (arg.starts_with("--history-threads=")) { target = &out.history_threads; offset = 18; bit = 64; }
+    else if (arg.starts_with("--mode=")) { out.mode = arg.substr(7); bit = 16; }
+    else return false;
+    if ((seen & bit) || (target && !parse_i64_exact(argv[i] + offset, target))) return false;
+    seen |= bit;
+  }
+  return (seen & 31) == 31 && out.n > 0 && out.n <= std::numeric_limits<i32>::max() &&
+      out.s >= 8 && out.s <= 32767 && out.kmax >= 1 && out.kmax <= kFacetMaxK && out.window > 0 &&
+      static_cast<u64>(out.window) <= std::numeric_limits<std::size_t>::max() &&
+      out.threads > 0 && out.threads <= std::numeric_limits<int>::max() &&
+      out.history_threads > 0 && out.history_threads <= std::numeric_limits<int>::max() &&
+      (out.mode == "reference" || out.mode == "streaming" || out.mode == "compare");
+}
+double elapsed(Clock::time_point start) {
+  return std::chrono::duration<double>(Clock::now() - start).count();
+}
+template<class Function> double phase(const char* label, Function&& function) {
+  std::fprintf(stderr, "phase_start=%s\n", label); std::fflush(stderr);
+  const auto start = Clock::now(); function();
+  const double seconds = elapsed(start);
+  std::fprintf(stderr, "phase_complete=%s seconds=%.9f\n", label, seconds); std::fflush(stderr);
+  return seconds;
+}
+
+// Dense serialization is intentionally physical within the NEW convention.
+// Raw levels are the identical representative chosen by the SAME atlas, not
+// normalized rational numbers. It is NOT a geometric/isomorphism oracle.
+class DenseHash {
+ public:
+  void u64v(u64 value) {
+    if (used_ + 8 > buffer_.size()) flush();
+    for (unsigned i = 0; i < 8; ++i) buffer_[used_++] = static_cast<u8>(value >> (8 * i));
+  }
+  void tag(const char* value) {
+    flush(); hash_.tag(value);
+  }
+  void level(const ExactLevel& value) {
+    need(value.den > 0, "digest.level_denominator");
+    for (u64 word : value.num) u64v(word);
+    const u128 denominator = static_cast<u128>(value.den);
+    u64v(static_cast<u64>(denominator)); u64v(static_cast<u64>(denominator >> 64));
+  }
+  template<class T> void integers(const std::vector<T>& values) {
+    u64v(values.size()); for (const auto value : values) u64v(static_cast<u64>(value));
+  }
+  std::string hex() { flush(); return hash_.hex(); }
+ private:
+  void flush() { if (used_) hash_.update(buffer_.data(), used_); used_ = 0; }
+  Sha256 hash_;
+  std::array<u8, 65536> buffer_{};
+  std::size_t used_ = 0;
+};
+
+std::string input_digest(const std::vector<InputPoint>& input) {
+  DenseHash hash; hash.tag("mhgp7-streaming-bench-input-order-v1"); hash.u64v(input.size());
+  for (const auto& p : input) {
+    hash.u64v(p.id); hash.u64v(static_cast<u64>(p.position.x));
+    hash.u64v(static_cast<u64>(p.position.y)); hash.u64v(static_cast<u64>(p.position.z));
+  }
+  return hash.hex();
+}
+std::string payload_digest(const FullBallTowerResult& tower) {
+  need(tower.status == FullBallStatus::kCompleteRelative && !tower.orders.empty(), "digest.complete_tower");
+  DenseHash hash; hash.tag("mhgp7-graph-FULL-dense-raw-level-bank-v1"); hash.u64v(tower.orders.size());
+  const auto& bank = tower.orders.front().forest.populations();
+  need(static_cast<bool>(bank), "digest.population_bank");
+  hash.integers(bank->domain()); hash.u64v(bank->rows().size());
+  for (const auto& row : bank->rows()) { hash.integers(row.interior); hash.integers(row.shell); }
+  for (const auto& order : tower.orders) {
+    const auto& f = order.forest;
+    need(f.populations().get() == bank.get(), "digest.single_shared_bank");
+    hash.u64v(f.order()); hash.u64v(f.nodes().size());
+    for (const auto& node : f.nodes()) {
+      hash.level(node.level); hash.u64v(node.first); hash.u64v(node.parent_count);
+    }
+    hash.integers(f.parents()); hash.integers(f.successors());
+    hash.u64v(f.contributions().size());
+    for (const auto& row : f.contributions()) {
+      hash.level(row.level); hash.u64v(row.segment); hash.u64v(row.ref.population);
+      hash.u64v(row.ref.shell_mask); hash.u64v(row.ref.include_interior);
+    }
+    hash.integers(order.lower_nodes);
+  }
+  return hash.hex();
+}
+
+// Linear, allocation-free comparison: no descendant labels or point-set union.
+void same_payload(const FullBallTowerResult& a, const FullBallTowerResult& b) {
+  need(a.status == FullBallStatus::kCompleteRelative && a.status == b.status &&
+       !a.orders.empty() && a.orders.size() == b.orders.size(), "compare.tower_shape");
+  const auto& bank_a = a.orders.front().forest.populations();
+  const auto& bank_b = b.orders.front().forest.populations();
+  need(bank_a && bank_b && bank_a->domain() == bank_b->domain() && bank_a->rows().size() == bank_b->rows().size(),
+       "compare.bank_shape");
+  for (size_t j = 0; j < bank_a->rows().size(); ++j)
+    need(bank_a->rows()[j].interior == bank_b->rows()[j].interior && bank_a->rows()[j].shell == bank_b->rows()[j].shell,
+         "compare.bank_row");
+  for (size_t k = 0; k < a.orders.size(); ++k) {
+    const auto& x = a.orders[k].forest; const auto& y = b.orders[k].forest;
+    need(x.populations().get() == bank_a.get() && y.populations().get() == bank_b.get() &&
+        x.order() == y.order() && x.nodes().size() == y.nodes().size() && x.parents() == y.parents() &&
+        x.successors() == y.successors() && a.orders[k].lower_nodes == b.orders[k].lower_nodes,
+        "compare.structure_and_verticals");
+    for (size_t i = 0; i < x.nodes().size(); ++i)
+      need(x.nodes()[i].level == y.nodes()[i].level && x.nodes()[i].first == y.nodes()[i].first &&
+           x.nodes()[i].parent_count == y.nodes()[i].parent_count, "compare.node");
+    need(x.contributions().size() == y.contributions().size(), "compare.contribution_shape");
+    for (size_t i = 0; i < x.contributions().size(); ++i) {
+      const auto& u = x.contributions()[i]; const auto& v = y.contributions()[i];
+      need(u.level == v.level && u.segment == v.segment && u.ref.population == v.ref.population &&
+           u.ref.shell_mask == v.ref.shell_mask && u.ref.include_interior == v.ref.include_interior,
+           "compare.dated_contribution");
+    }
+  }
+}
+
+template<class T> u64 capacity_bytes(const std::vector<T>& values) {
+  return static_cast<u64>(values.capacity()) * sizeof(T);
+}
+u64 extraction_capacity(const ag::Extraction& extraction) {
+  u64 bytes = extraction.atlas.capacity_bytes();
+  for (u64 part : {capacity_bytes(extraction.phi), capacity_bytes(extraction.targets), capacity_bytes(extraction.orders)})
+    full_ball_detail::add(bytes, part);
+  for (const auto& order : extraction.orders)
+    for (u64 part : {capacity_bytes(order.graph.births), capacity_bytes(order.graph.edges), capacity_bytes(order.graph.marks)})
+      full_ball_detail::add(bytes, part);
+  return bytes;
+}
+u64 histories_capacity(const std::vector<gf::History>& histories) {
+  u64 bytes = capacity_bytes(histories);
+  for (const auto& history : histories)
+    for (u64 part : {capacity_bytes(history.nodes), capacity_bytes(history.parents), capacity_bytes(history.successors),
+                    capacity_bytes(history.roots), capacity_bytes(history.births), capacity_bytes(history.marks)})
+      full_ball_detail::add(bytes, part);
+  return bytes;
+}
+u64 tower_capacity(const FullBallTowerResult& tower) {
+  u64 bytes = capacity_bytes(tower.orders);
+  const auto& bank = tower.orders.front().forest.populations();
+  full_ball_detail::add(bytes, capacity_bytes(bank->domain()));
+  full_ball_detail::add(bytes, capacity_bytes(bank->rows()));
+  for (const auto& row : bank->rows()) {
+    full_ball_detail::add(bytes, capacity_bytes(row.interior)); full_ball_detail::add(bytes, capacity_bytes(row.shell));
+  }
+  for (const auto& order : tower.orders)
+    for (u64 part : {capacity_bytes(order.forest.nodes()), capacity_bytes(order.forest.parents()),
+                    capacity_bytes(order.forest.successors()), capacity_bytes(order.forest.contributions()),
+                    capacity_bytes(order.lower_nodes)}) full_ball_detail::add(bytes, part);
+  return bytes;
+}
+
+class Json {
+ public:
+  explicit Json(std::ostream& out) : out_(out) { out_ << '{'; }
+  ~Json() { out_ << '}'; }
+  void key(const char* name) {
+    if (comma_) out_ << ',';
+    comma_ = true; out_ << std::quoted(name) << ':';
+  }
+  template<class T> void field(const char* name, const T& value) { key(name); out_ << value; }
+  void field(const char* name, const char* value) { key(name); out_ << std::quoted(value); }
+  void field(const char* name, const std::string& value) { key(name); out_ << std::quoted(value); }
+  void field(const char* name, std::string_view value) { field(name, std::string(value)); }
+  template<class Function> void object(const char* name, Function&& function) {
+    key(name); Json child(out_); function(child);
+  }
+ private:
+  std::ostream& out_;
+  bool comma_ = false;
+};
+
+struct Route {
+  FullBallTowerResult tower;
+  FullBallStats geometry;
+  gf::Work historical_work;
+  double extraction_s = 0, certificate_s = 0, history_s = 0, export_s = 0, release_s = 0, route_s = 0, digest_s = 0;
+  u64 atlas_logical_bytes = 0, atlas_capacity_bytes = 0, extraction_capacity_bytes = 0;
+  u64 histories_capacity_bytes = 0, full_capacity_bytes = 0, export_mapping_capacity_bytes = 0;
+  u64 request_capacity_peak_bytes = 0, ordinal_capacity_peak_bytes = 0, occurrences = 0;
+  u64 native_edges = 0, native_births = 0, marks = 0, certificate_edges = 0;
+  std::array<u64, kFacetMaxK + 1> window_counts{}, occurrence_counts{}, unique_counts{}, initial_seed_counts{};
+  std::optional<sg::Stats> streaming_stats;
+  u64 certificate_capacity_bytes = 0;
+  std::string digest;
+};
+
+void account_extraction(Route& route, const ag::Extraction& extraction) {
+  route.geometry = extraction.work;
+  route.atlas_logical_bytes = extraction.atlas.logical_bytes();
+  route.atlas_capacity_bytes = extraction.atlas.capacity_bytes();
+  route.extraction_capacity_bytes = extraction_capacity(extraction);
+  for (const auto& order : extraction.orders) {
+    full_ball_detail::add(route.native_edges, order.graph.edges.size());
+    full_ball_detail::add(route.native_births, order.graph.births.size());
+    full_ball_detail::add(route.marks, order.graph.marks.size());
+  }
+}
+void export_history(Route& route, ag::Extraction& extraction, std::vector<gf::History>& histories,
+                    const Options& opt, const char* label) {
+  route.histories_capacity_bytes = histories_capacity(histories);
+  route.export_s = phase(label, [&] {
+    auto exported = gf::build(extraction, histories, static_cast<size_t>(opt.history_threads));
+    route.historical_work = exported.work;
+    for (const auto* matrix : {&exported.history_to_full, &exported.descendant_native}) {
+      full_ball_detail::add(route.export_mapping_capacity_bytes, capacity_bytes(*matrix));
+      for (const auto& row : *matrix) full_ball_detail::add(route.export_mapping_capacity_bytes, capacity_bytes(row));
+    }
+    route.tower = std::move(exported.tower);
+  });
+  route.full_capacity_bytes = tower_capacity(route.tower);
+}
+
+void reconstruct_histories(Route& route, std::vector<fc::Certificate<u32>>& certificates,
+                           std::vector<gf::History>& histories, const char* label) {
+  route.certificate_capacity_bytes = capacity_bytes(certificates);
+  for (const auto& certificate : certificates) {
+    full_ball_detail::add(route.certificate_edges, certificate.edges.size());
+    for (u64 part : {capacity_bytes(certificate.births), capacity_bytes(certificate.edges),
+                    capacity_bytes(certificate.marks)}) full_ball_detail::add(route.certificate_capacity_bytes, part);
+  }
+  route.history_s = phase(label, [&] {
+    histories.reserve(certificates.size());
+    for (auto& certificate : certificates) {
+      histories.push_back(fc::reconstruct(certificate, std::less<u32>{}));
+      certificate = {};  // This certificate's last consumer has completed.
+    }
+    std::vector<fc::Certificate<u32>>().swap(certificates);
+  });
+}
+Route reference_route(const CloudIndex& index, std::span<const BallData> balls, const Options& opt) {
+  Route route;
+  const auto start = Clock::now();
+  {
+    std::optional<ag::Extraction> extraction;
+    route.extraction_s = phase("reference_extract", [&] {
+      extraction.emplace(ag::extract(index, balls, static_cast<unsigned>(opt.kmax)));
+    });
+    account_extraction(route, *extraction);
+    route.occurrences = extraction->stats.representatives;
+    route.request_capacity_peak_bytes = extraction->stats.peak_request_capacity_bytes;
+    route.ordinal_capacity_peak_bytes = extraction->stats.peak_slot_map_capacity_bytes;
+    u64 higher_occurrences = 0;
+    for (unsigned k = 2; k <= extraction->atlas.kmax; ++k) {
+      route.occurrence_counts[k] = extraction->work.static_requests[k];
+      route.unique_counts[k] = extraction->work.static_unique[k];
+      route.initial_seed_counts[k] = extraction->work.static_seeded[k];
+      full_ball_detail::add(higher_occurrences, route.occurrence_counts[k]);
+    }
+    need(higher_occurrences <= route.occurrences, "reference.occurrence_accounting");
+    route.occurrence_counts[1] = route.occurrences - higher_occurrences;
+    route.release_s += phase("reference_release_targets", [&] { std::vector<u32>().swap(extraction->targets); });
+    std::vector<fc::Certificate<u32>> certificates;
+    route.certificate_s = phase("reference_certificates", [&] {
+      certificates.reserve(extraction->orders.size());
+      for (auto& order : extraction->orders) {
+        certificates.push_back(fc::spanning_certificate(order.graph, std::less<u32>{}));
+        std::vector<fc::Edge<u32>>().swap(order.graph.edges);
+      }  // Per-order dead edges are released here, within certificate_s.
+    });
+    std::vector<gf::History> histories;
+    reconstruct_histories(route, certificates, histories, "reference_histories");
+    export_history(route, *extraction, histories, opt, "reference_export");
+    route.release_s += phase("reference_release_metadata", [&] {
+      std::vector<gf::History>().swap(histories); extraction.reset();
+    });
+  }
+  route.route_s = elapsed(start);  // Includes final temporary destruction.
+  return route;
+}
+Route streaming_route(const CloudIndex& index, std::span<const BallData> balls, const Options& opt) {
+  Route route;
+  const auto start = Clock::now();
+  {
+    std::optional<sg::Streaming> streaming;
+    route.extraction_s = phase("streaming_atlas_geometry_msf_projection", [&] {
+      streaming.emplace(sg::build(index, balls, static_cast<unsigned>(opt.kmax), static_cast<size_t>(opt.window)));
+    });
+    account_extraction(route, streaming->extraction);
+    route.streaming_stats.emplace(streaming->stats);
+    need(!sg::Streaming::has_terminal_tape && streaming->extraction.targets.capacity() == 0,
+         "streaming.retained_terminal_tape");
+    for (const auto& order : streaming->extraction.orders)
+      need(order.graph.edges.capacity() == 0, "streaming.retained_full_graph");
+    for (unsigned k = 1; k <= streaming->extraction.atlas.kmax; ++k) {
+      const auto& order = streaming->stats.orders[k];
+      route.occurrence_counts[k] = order.occurrences;
+      route.unique_counts[k] = order.window_unique;
+      route.initial_seed_counts[k] = order.initial_seed_hits;
+      route.window_counts[k] = order.windows;
+      full_ball_detail::add(route.occurrences, order.occurrences);
+    }
+    std::vector<gf::History> histories;
+    reconstruct_histories(route, streaming->certificates, histories, "streaming_histories");
+    export_history(route, streaming->extraction, histories, opt, "streaming_export");
+    route.release_s = phase("streaming_release_metadata", [&] {
+      std::vector<gf::History>().swap(histories); streaming.reset();
+    });
+  }
+  route.route_s = elapsed(start);
+  return route;
+}
+
+void meb_json(Json& json, const AnchorMebWork& work) {
+  json.field("calls", work.calls); json.field("power_tests", work.power_tests);
+  json.field("materializations", work.materializations);
+  json.field("supports_q1", work.supports_by_size[1]); json.field("supports_q2", work.supports_by_size[2]);
+  json.field("supports_q3", work.supports_by_size[3]); json.field("supports_q4", work.supports_by_size[4]);
+}
+void geometry_json(Json& json, const FullBallStats& work) {
+  json.object("meb", [&](Json& child) { meb_json(child, work.resolve_work); });
+  json.field("anchor_hits", work.anchor_hits); json.field("key_lookups", work.key_lookups);
+  json.field("intruder_queries", work.intruder_queries); json.field("intruder_nodes", work.intruder_nodes);
+  json.field("intruder_power_tests", work.intruder_power_tests); json.field("interior_ranges", work.interior_ranges);
+  json.field("descending_steps", work.descending_steps); json.field("same_radius_steps", work.same_radius_steps);
+  json.field("max_chain_steps", work.max_chain_steps);
+}
+void msf_json(Json& json, const composable_msf_private::Work& work) {
+#define MHGP7_BENCH_WORK(name) json.field(#name, work.name)
+  MHGP7_BENCH_WORK(domain_vertices); MHGP7_BENCH_WORK(domain_sort_items); MHGP7_BENCH_WORK(domain_sort_comparisons);
+  MHGP7_BENCH_WORK(compact_calls); MHGP7_BENCH_WORK(input_edges); MHGP7_BENCH_WORK(output_edges);
+  MHGP7_BENCH_WORK(sort_calls); MHGP7_BENCH_WORK(sort_items); MHGP7_BENCH_WORK(identity_sort_comparisons);
+  MHGP7_BENCH_WORK(sort_date_comparisons); MHGP7_BENCH_WORK(endpoint_queries); MHGP7_BENCH_WORK(endpoint_comparisons);
+  MHGP7_BENCH_WORK(validation_date_comparisons); MHGP7_BENCH_WORK(touched_vertices); MHGP7_BENCH_WORK(peak_touched_vertices);
+  MHGP7_BENCH_WORK(dsu_attempts); MHGP7_BENCH_WORK(dsu_unions); MHGP7_BENCH_WORK(windows);
+  MHGP7_BENCH_WORK(nonempty_windows); MHGP7_BENCH_WORK(source_edges); MHGP7_BENCH_WORK(merges);
+  MHGP7_BENCH_WORK(peak_retained_edges); MHGP7_BENCH_WORK(peak_call_edge_slots); MHGP7_BENCH_WORK(peak_merge_input_edges);
+#undef MHGP7_BENCH_WORK
+}
+void streaming_memory_json(Json& json, const sg::Stats& stats) {
+#define MHGP7_BENCH_MEMORY(name) json.field(#name, stats.name)
+  MHGP7_BENCH_MEMORY(peak_window_items);
+  MHGP7_BENCH_MEMORY(peak_window_logical_bytes); MHGP7_BENCH_MEMORY(peak_window_capacity_bytes);
+  MHGP7_BENCH_MEMORY(peak_seed_logical_bytes); MHGP7_BENCH_MEMORY(peak_seed_capacity_bytes);
+  MHGP7_BENCH_MEMORY(peak_hub_domain_logical_bytes); MHGP7_BENCH_MEMORY(peak_hub_domain_capacity_bytes);
+  MHGP7_BENCH_MEMORY(by_key_logical_bytes); MHGP7_BENCH_MEMORY(by_key_capacity_bytes);
+  MHGP7_BENCH_MEMORY(peak_intruder_scratch_logical_bytes); MHGP7_BENCH_MEMORY(peak_intruder_scratch_capacity_bytes);
+  MHGP7_BENCH_MEMORY(peak_hub_certificate_logical_bytes); MHGP7_BENCH_MEMORY(peak_hub_certificate_capacity_bytes);
+  MHGP7_BENCH_MEMORY(peak_native_certificate_logical_bytes); MHGP7_BENCH_MEMORY(peak_native_certificate_capacity_bytes);
+  MHGP7_BENCH_MEMORY(output_metadata_logical_bytes); MHGP7_BENCH_MEMORY(output_metadata_capacity_bytes);
+  MHGP7_BENCH_MEMORY(output_certificates_logical_bytes); MHGP7_BENCH_MEMORY(output_certificates_capacity_bytes);
+#undef MHGP7_BENCH_MEMORY
+}
+void ordered_json(Json& json, const ordered_msf_private::Stats& stats) {
+#define MHGP7_BENCH_ORDERED(name) json.field(#name, stats.name)
+  MHGP7_BENCH_ORDERED(dsu_initializations); MHGP7_BENCH_ORDERED(initialized_vertices);
+  MHGP7_BENCH_ORDERED(order_date_comparisons); MHGP7_BENCH_ORDERED(order_identity_comparisons);
+  MHGP7_BENCH_ORDERED(validated_edges); MHGP7_BENCH_ORDERED(finish_calls);
+  MHGP7_BENCH_ORDERED(peak_input_edges); MHGP7_BENCH_ORDERED(peak_certificate_edges);
+  MHGP7_BENCH_ORDERED(dsu_logical_bytes); MHGP7_BENCH_ORDERED(dsu_capacity_bytes);
+  MHGP7_BENCH_ORDERED(peak_certificate_capacity_bytes);
+#undef MHGP7_BENCH_ORDERED
+}
+void route_json(Json& json, const Route& route, double common_s) {
+  const bool streaming = route.streaming_stats.has_value();
+  json.field("reducer", streaming ? "ordered_one_dsu_then_native_compact" : "materialized_reference");
+  json.field("whole_s", common_s + route.route_s); json.field("route_s", route.route_s);
+  json.field("extract_or_stream_s", route.extraction_s); json.field("certificate_s", route.certificate_s);
+  json.field("certificate_included_in_stream", streaming); json.field("history_s", route.history_s);
+  json.field("export_s", route.export_s); json.field("other_release_s", route.release_s);
+  json.field("digest_s_excluded", route.digest_s); json.field("payload_digest", route.digest);
+  json.field("full_status", "complete_relative"); json.field("orders", route.tower.orders.size());
+  u64 nodes = 0, parents = 0, contributions = 0, verticals = 0;
+  for (const auto& order : route.tower.orders) {
+    full_ball_detail::add(nodes, order.forest.nodes().size());
+    full_ball_detail::add(parents, order.forest.parents().size());
+    full_ball_detail::add(contributions, order.forest.contributions().size());
+    full_ball_detail::add(verticals, order.lower_nodes.size());
+  }
+  json.field("nodes", nodes); json.field("parent_refs", parents);
+  json.field("contributions", contributions); json.field("vertical_refs", verticals);
+  json.field("occurrences", route.occurrences); json.field("native_births", route.native_births);
+  json.field("marks", route.marks); json.field("materialized_native_edges", route.native_edges);
+  json.field("retained_certificate_edges", route.certificate_edges);
+  json.field("global_unique_measured_K_ge_2", !streaming);
+  json.field("unique_accounting", streaming ? "sum_distinct_keys_per_window_including_K1" : "whole_order_distinct_K_ge_2_K1_unmeasured");
+  json.object("geometry_work", [&](Json& child) { geometry_json(child, route.geometry); });
+  json.object("history_work", [&](Json& child) {
+    const auto& w = route.historical_work;
+    child.field("contribution_queries", w.contribution_queries); child.field("lower_queries", w.lower_queries);
+    child.field("naturality_queries", w.naturality_queries); child.field("light_steps", w.light_steps);
+    child.field("binary_steps", w.binary_steps);
+  });
+  json.object("sampled_capacities_not_RSS", [&](Json& child) {
+    child.field("atlas_logical_bytes", route.atlas_logical_bytes); child.field("atlas_capacity_bytes", route.atlas_capacity_bytes);
+    child.field("extraction_capacity_bytes", route.extraction_capacity_bytes);
+    child.field("certificates_capacity_bytes", route.certificate_capacity_bytes);
+    child.field("histories_capacity_bytes", route.histories_capacity_bytes);
+    child.field("export_mapping_capacity_bytes", route.export_mapping_capacity_bytes);
+    child.field("retained_full_capacity_bytes", route.full_capacity_bytes);
+    child.field("reference_request_peak_bytes", route.request_capacity_peak_bytes);
+    child.field("reference_ordinal_peak_bytes", route.ordinal_capacity_peak_bytes);
+    if (streaming) child.object("streaming", [&](Json& memory) { streaming_memory_json(memory, *route.streaming_stats); });
+  });
+  json.key("per_order"); std::cout << '[';
+  for (unsigned k = 1; k <= route.tower.orders.size(); ++k) {
+    if (k != 1) std::cout << ',';
+    Json child(std::cout);
+    child.field("K", k); child.field("occurrences", route.occurrence_counts[k]);
+    child.field("windows", route.window_counts[k]); child.field("unique_measured", streaming || k >= 2);
+    child.field("unique", route.unique_counts[k]); child.field("initial_seed_hits", route.initial_seed_counts[k]);
+    child.field("Q", route.geometry.static_post_seed_queries[k]); child.field("H", route.geometry.static_post_seed_hits[k]);
+    child.field("T", route.geometry.static_post_seed_terminals[k]);
+    if (streaming) {
+      const auto& stats = *route.streaming_stats; const auto& order = stats.orders[k];
+      child.field("seed_rows", order.seed_rows); child.field("pivots", order.pivots);
+      child.field("retained_pivots", order.retained_pivots);
+      child.field("hub_certificate_edges", order.hub_certificate_edges); child.field("projected_edges", order.projected_edges);
+      child.field("projected_loops", order.projected_loops); child.field("native_certificate_edges", order.native_certificate_edges);
+      child.object("geometry_work", [&](Json& work) { geometry_json(work, order.geometry_work); });
+      child.object("hub_msf_work", [&](Json& work) { msf_json(work, stats.hub_work[k]); });
+      child.object("ordered_work", [&](Json& work) { ordered_json(work, stats.ordered_work[k]); });
+      child.object("native_msf_work", [&](Json& work) { msf_json(work, stats.native_work[k]); });
+    }
+  }
+  std::cout << ']';
+}
+}  // namespace
+
+int main(int argc, char** argv) {
+  Options opt;
+  if (!options(argc, argv, opt)) return 2;
+  const auto process_start = Clock::now();
+  try {
+    std::vector<InputPoint> input;
+    const double input_s = phase("synthetic_input", [&] {
+      input = make_family_input(CloudFamily::kUniform, static_cast<int>(opt.n), 65536, 3);
+      need(input.size() == static_cast<size_t>(opt.n), "bench.incomplete_input");
+    });
+    std::string input_hash;
+    const double input_digest_s = phase("input_digest", [&] { input_hash = input_digest(input); });
+    const auto common_start = Clock::now();
+    CloudIndex index;
+    const double index_s = phase("index", [&] { index = build_cloud_index(input); });
+    need(index.valid && !index.has_duplicate_positions(), "bench.invalid_index");
+    const unsigned kmax = static_cast<unsigned>(std::min<i64>(opt.kmax, opt.n));
+    const u64 smax = std::min<u64>(kmax + 1, index.input_count);
+    std::vector<BallCandidate> candidates;
+    GenerateOptions generation; generation.s = opt.s; generation.smax = smax;
+    generation.threads = static_cast<int>(opt.threads);
+    GenerateStats generated;
+    const double generate_s = phase("generate", [&] { generate_candidates(index, generation, &candidates, &generated); });
+    need(generated.cap_refus == kCapRefusNone && !generated.invariant_jneg, "bench.generation_refused");
+    const u128 mass = expected_pair_mass(index);
+    for (size_t q = 0; q < 3; ++q)
+      need(generated.ledger_emitted_mass[q] + generated.ledger_killed_mass[q] == mass, "bench.pair_mass_ledger");
+    const u64 raw_candidates = candidates.size();
+    const double sort_s = phase("sort_rle", [&] { rle_candidates(&candidates, static_cast<int>(opt.threads)); });
+    need(candidates_capacity_ok(candidates.size()), "bench.candidate_representation");
+    const u64 unique_candidates = candidates.size(), candidate_capacity = capacity_bytes(candidates);
+    std::vector<Survivor> survivors;
+    std::vector<BallData> balls;
+    ExpandStats census_stats;
+    const double prefilter_s = phase("prefilter", [&] {
+      prefilter_balls(index, candidates, smax, static_cast<int>(opt.threads), &survivors, &census_stats);
+    });
+    const double census_s = phase("census", [&] {
+      need(census_balls(index, candidates, survivors, smax, kBallShellMax, static_cast<int>(opt.threads),
+                       &balls, &census_stats) == PipelineStatus::kCompleteRegular, "bench.census_refused");
+    });
+    const u64 survivor_count = survivors.size(), survivor_capacity = capacity_bytes(survivors);
+    const double upstream_release_s = phase("release_upstream", [&] {
+      std::vector<InputPoint>().swap(input);
+      std::vector<Survivor>().swap(survivors); std::vector<BallCandidate>().swap(candidates);
+    });
+    FullBallStats validation;
+    const double validation_s = phase("common_validate_catalogue", [&] {
+      full_ball_detail::RankAtlasReference::validate(index, balls, kmax, validation);
+    });
+    const double common_s = elapsed(common_start);
+    std::optional<Route> reference, streaming;
+    if (opt.mode != "streaming") reference.emplace(reference_route(index, balls, opt));
+    if (opt.mode != "reference") streaming.emplace(streaming_route(index, balls, opt));
+    if (reference) reference->digest_s = phase("reference_digest", [&] { reference->digest = payload_digest(reference->tower); });
+    if (streaming) streaming->digest_s = phase("streaming_digest", [&] { streaming->digest = payload_digest(streaming->tower); });
+    double compare_s = 0;
+    if (reference && streaming) compare_s = phase("direct_physical_compare", [&] {
+      same_payload(reference->tower, streaming->tower);
+      need(reference->digest == streaming->digest, "bench.digest_agreement");
+      need(reference->occurrence_counts == streaming->occurrence_counts, "bench.occurrence_agreement");
+    });
+    const double process_s = elapsed(process_start);
+    std::cout << std::boolalpha << std::fixed << std::setprecision(9);
+    {
+      Json json(std::cout);
+      json.field("status", "passed"); json.field("scope", "private_real_census_graph_FULL_probe");
+      json.field("backend", "cpu_reference"); json.field("public_status", "not_claimed");
+      json.field("mode", opt.mode); json.field("n", opt.n); json.field("s", opt.s);
+      json.field("requested_K", opt.kmax); json.field("effective_K", kmax); json.field("smax", smax);
+      json.field("window", opt.window); json.field("generation_threads", opt.threads);
+      json.field("geometry_threads", 1); json.field("history_query_threads", opt.history_threads);
+      json.field("family", "uniform"); json.field("coord", 65536); json.field("seed", 3);
+      json.field("input_digest", input_hash); json.field("physical_comparison_executed", opt.mode == "compare");
+      json.field("geometric_oracle_executed", false);
+      json.field("digest_convention", "mhgp7-graph-FULL-dense-raw-level-bank-v1");
+      json.field("RSS_protocol", opt.mode == "compare" ? "external_process_peak_two_retained_towers" : "external_process_peak_single_arm_including_validation");
+      json.field("whole_protocol", "common_index_through_validation_plus_route_until_retained_FULL_excludes_synthetic_input_digests_comparison");
+      json.field("release_protocol", "targets_after_extraction_edges_after_each_certificate_certificates_after_each_history_debug_maps_after_export_metadata_after_FULL");
+      json.field("sampled_memory_not_additive_peak", true);
+      json.field("synthetic_input_s_excluded", input_s); json.field("input_digest_s_excluded", input_digest_s);
+      json.field("comparison_s_excluded", compare_s); json.field("observed_process_s_before_json", process_s);
+      json.object("common", [&](Json& child) {
+        child.field("common_s", common_s); child.field("index_s", index_s); child.field("generate_s", generate_s);
+        child.field("sort_s", sort_s); child.field("prefilter_s", prefilter_s); child.field("census_s", census_s);
+        child.field("upstream_release_s", upstream_release_s); child.field("validation_s", validation_s);
+        child.field("raw_candidates", raw_candidates); child.field("unique_candidates", unique_candidates);
+        child.field("survivors", survivor_count); child.field("balls", balls.size());
+        child.field("candidate_capacity_bytes_after_rle", candidate_capacity);
+        child.field("survivor_capacity_bytes", survivor_capacity); child.field("ball_capacity_bytes", capacity_bytes(balls));
+        child.field("declared_support_checks", validation.declared_support_checks);
+        child.object("validation_meb", [&](Json& work) { meb_json(work, validation.validation_work); });
+      });
+      if (reference) json.object("reference", [&](Json& child) { route_json(child, *reference, common_s); });
+      if (streaming) json.object("streaming", [&](Json& child) { route_json(child, *streaming, common_s); });
+    }
+    std::cout << '\n'; std::cout.flush();
+    return std::cout.good() ? 0 : 1;
+  } catch (const full_ball_detail::Failure& error) {
+    std::fprintf(stderr, "bench_failure=%s\n", error.reason);
+  } catch (const std::exception& error) {
+    std::fprintf(stderr, "bench_exception=%s\n", error.what());
+  }
+  return 1;
+}
