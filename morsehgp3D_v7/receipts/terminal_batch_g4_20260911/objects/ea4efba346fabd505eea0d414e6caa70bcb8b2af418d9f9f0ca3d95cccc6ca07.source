@@ -1,0 +1,9 @@
+schema=e-hgp.guard-mark.v1
+mark=double_guard_verified
+project=devpod-gpu-exploration
+zone=europe-west4-a
+instance=ehgp-blackwell-spot
+generation=2026-09-11T06:59:41.712-07:00
+max_run_seconds=3600
+guest_shutdown_minutes=30
+date_utc=2026-09-11T14:00:39Z

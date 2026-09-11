@@ -1,0 +1,1 @@
+{"GCP_used": false, "checks": 13, "mocked_execute_calls": 1, "real_subprocesses": 0, "rejections": 13, "status": "passed", "target": {"instance": "ehgp-blackwell-spot", "project": "devpod-gpu-exploration", "zone": "europe-west4-a"}}

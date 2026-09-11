@@ -1,0 +1,73 @@
+--- worker_043197.py
++++ worker_aaf8bcc1.py
+@@ -288,6 +288,55 @@
+     return dict(name=name, driver=driver, memory_mib=int(memory), compute_capability=compute)
+ 
+ 
++def discover_existing_tools(*, which, is_file, executable, resolve):
++    """Read-only discovery, with injected readers for pure fixture tests.
++
++    Preserve the original admission rules: PATH wins for nvcc; only its two
++    historical fallback paths need both a regular file and executable access.
++    time is still checked as a file, not a new executable or PATH requirement.
++    """
++    path_candidates = {name: which(name) for name in ('nvcc', 'g++', 'nvidia-smi')}
++    cuda_candidates = [dict(path=path, checked=False, is_file=None, executable=None) for path in CUDA_PATHS]
++    selected = dict(path_candidates)
++    if not selected['nvcc']:
++        for row in cuda_candidates:
++            row['checked'] = True
++            row['is_file'] = bool(is_file(row['path']))
++            if row['is_file']:
++                row['executable'] = bool(executable(row['path']))
++                if row['executable']:
++                    selected['nvcc'] = row['path']
++                    break
++    time_is_file = bool(is_file('/usr/bin/time'))
++    selected['/usr/bin/time'] = '/usr/bin/time' if time_is_file else None
++    missing = [name for name, path in selected.items() if not path]
++    compiler_binding = dict(selected=selected['g++'], resolved=None, required='/usr/bin/g++',
++                            required_resolved=None, error=None)
++    if not missing:
++        try:
++            compiler_binding['resolved'] = str(resolve(selected['g++']))
++            compiler_binding['required_resolved'] = str(resolve('/usr/bin/g++'))
++        except OSError as error:
++            compiler_binding['error'] = type(error).__name__ + ': ' + str(error)
++    return dict(schema='mhgp7-existing-tools-discovery-v1', path_candidates=path_candidates,
++                cuda_fallback_candidates=cuda_candidates, time_is_file=time_is_file,
++                selected=selected, missing=missing, compiler_binding=compiler_binding,
++                installation_attempted=False, version_checks_performed=False)
++
++
++def require_existing_tools(discovery):
++    """Reject only after the caller has retained the complete observation."""
++    need(not discovery['missing'], 'existing tools required, no installation; missing: ' +
++         ', '.join(discovery['missing']))
++    binding = discovery['compiler_binding']
++    need(binding['error'] is None and binding['resolved'] == binding['required_resolved'],
++         'strict adapter g++ binding: selected=' + str(binding['selected']) +
++         ', resolved=' + str(binding['resolved']) + ', required=' + str(binding['required_resolved']) +
++         ', error=' + str(binding['error']))
++    selected = discovery['selected']
++    return selected['nvcc'], selected['g++'], selected['nvidia-smi']
++
++
+ def main():
+     parser = argparse.ArgumentParser(description=__doc__)
+     for name in ('source-root', 'source-manifest', 'guard-mark', 'output'):
+@@ -338,10 +387,10 @@
+                       resource_limits={'RLIMIT_AS': resource.getrlimit(resource.RLIMIT_AS),
+                                        'RLIMIT_CPU': resource.getrlimit(resource.RLIMIT_CPU)})
+         support.save(output / 'guard_evidence.json', dict(mark=mark, schedule=schedule, metadata=observed, bounds=guards))
+-        nvcc = shutil.which('nvcc') or next((p for p in CUDA_PATHS if Path(p).is_file() and os.access(p, os.X_OK)), None)
+-        compiler, smi = shutil.which('g++'), shutil.which('nvidia-smi')
+-        need(nvcc and compiler and smi and Path('/usr/bin/time').is_file(), 'existing tools required, no installation')
+-        need(Path(compiler).resolve() == Path('/usr/bin/g++').resolve(), 'strict adapter g++ binding')
++        result['tool_discovery'] = discover_existing_tools(
++            which=shutil.which, is_file=lambda path: Path(path).is_file(),
++            executable=lambda path: os.access(path, os.X_OK), resolve=lambda path: Path(path).resolve())
++        nvcc, compiler, smi = require_existing_tools(result['tool_discovery'])
+         adapter = output / 'nvcc_strict_host.py'
+         shutil.copyfile(root / STRICT_HOST, adapter)
+         adapter.chmod(0o700)

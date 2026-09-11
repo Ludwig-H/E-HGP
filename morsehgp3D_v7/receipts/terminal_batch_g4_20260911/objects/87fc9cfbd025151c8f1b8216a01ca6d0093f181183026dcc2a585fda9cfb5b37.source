@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_terminal_batch_g4_20260911/session_r2/full_host/stop_and_verify.sh",
+    "--yes",
+    "--expected-last-start-timestamp",
+    "2026-09-11T06:53:44.713-07:00"
+  ],
+  "ended_epoch": 1789134851.7337084,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "guarded_stop",
+  "pid": 1444615,
+  "started_epoch": 1789134841.1037524,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "542c8f8747cc337aa2489b769bbe0b1fa2dfa5de04511953ffe0b7d385f16688",
+  "timeout_seconds": null
+}

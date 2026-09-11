@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "python3",
+    "-B",
+    "/workspaces/E-HGP/gcp-migration/selftest_terminal_batch_worker_v7.py"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": 0,
+  "name": "pure_normal",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "5deb3df4e2f3eca0e8607998ae048444e23e7004542028833fddb1b7e41fb65b"
+}

@@ -1,0 +1,33 @@
+{
+  "GCP_used": false,
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "/workspaces/E-HGP/gcp-migration/selftest_terminal_batch_worker_v7.py"
+      ],
+      "exit_code": 0,
+      "name": "normal",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "c3de7264130c25d457e77b2e929fa70bf962756b0c954e2f997a832350caacd5"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/gcp-migration/selftest_terminal_batch_worker_v7.py"
+      ],
+      "exit_code": 0,
+      "name": "optimized",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "c3de7264130c25d457e77b2e929fa70bf962756b0c954e2f997a832350caacd5"
+    }
+  ],
+  "compiled": false,
+  "device_executed": false,
+  "error": null,
+  "source_stable": true,
+  "status": "passed"
+}

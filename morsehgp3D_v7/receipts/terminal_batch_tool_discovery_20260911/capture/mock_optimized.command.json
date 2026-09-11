@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/gcp-migration/selftest_terminal_batch_tool_preflight_v7.py"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": 0,
+  "name": "mock_optimized",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "835c9813c2c81dea2b8063a42a13f8b78580d6dbaac966266432ec443c70dc88"
+}

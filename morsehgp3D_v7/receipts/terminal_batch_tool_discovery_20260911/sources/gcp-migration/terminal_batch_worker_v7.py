@@ -1,0 +1,537 @@
+#!/usr/bin/env python3
+"""Guarded guest work only: CPU census + CUDA terminal batches, never GPU FULL.
+
+The fixed session support owns processes and the closing deadline. This worker
+does not mutate cloud resources, guards, drivers or packages. A 900-second work
+window is an economic session policy, not an algorithmic quota or a GCE cap.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import importlib.util
+import json
+import math
+import os
+from pathlib import Path
+import re
+import resource
+import shlex
+import shutil
+import signal
+import sys
+import time
+
+SUPPORT = 'morsehgp3D_v7/bench/session_support/full_probe_worker_v7.py'
+SUPPORT_SHA256 = 'da967163bdb7247bc6aad4df0c294cda1071076a0127cd5bd9f59bc0e4788439'
+LEGACY_PROBE = 'morsehgp3D_v7/bench/full_gabriel_lazy_probe.cpp'
+STRICT_HOST = 'morsehgp3D_v7/bench/nvcc_strict_host.py'
+STRICT_HOST_SHA256 = '994d9e6970797594efa2d333275594ef2085cdd166b345b0000135e94e395fb7'
+BASE = 'morsehgp3D_v7/bench/terminal_batch_private/'
+GATE = BASE + 'whole_gate.cu'
+GATE_SHA256 = '98e426f288d52d0331b3480f3a8233ac525814069893296794a46e1a19b30d29'
+PROBE = BASE + 'prototype/source/morsehgp3D_v7/bench/full_ball_tower_probe.cpp'
+PROBE_SHA256 = '21d0a5dd8e086506c91a8d3c0aec55c009bcbb901885085878f7cf3f5f450216'
+BACKEND = 'cpu_census_cuda_terminal_batch'
+WORK_SECONDS = 900
+CUDA_PATHS = ('/usr/local/cuda/bin/nvcc', '/usr/local/cuda-12.9/bin/nvcc')
+TIMES = ('index_s', 'generate_s', 'sort_s', 'prefilter_s', 'census_s', 'tower_s', 'digest_s', 'total_s')
+IDENTICAL = ('anchor_blocks', 'balls', 'contract_qualified', 'contributions', 'coord',
+    'declared_support_checks', 'extra_records', 'grouped_lots', 'input_digest', 'kmax', 'lot_dsu_slots',
+    'lower_edges_activated', 'lower_edges_indexed', 'lower_find_steps', 'lower_nodes_activated',
+    'lower_path_writes', 'lower_queries', 'n', 'nodes', 'orders', 'parent_refs', 'payload_digest',
+    'public_status', 'raw', 'representatives', 'residence_accounting', 's', 'schema', 'seed',
+    'singleton_lots', 'status', 'threads', 'unique', 'vertical_refs', 'static_orders', 'anchor_hits',
+    'intruder_queries', 'same_radius_steps', 'validation_meb_calls', 'resolver_meb_calls',
+    'resolver_supports_tested', 'resolver_power_tests', 'resolver_materializations',
+    'resolver_supports_by_size', 'resolver_cache_accounting', 'resolver_cache_queries',
+    'resolver_cache_hits', 'resolver_cache_stores', 'resolver_cache_evictions', 'resolver_cache_seed_stores',
+    'resolver_cache_slots', 'resolver_cache_reset_slots', 'resolver_cache_bytes',
+    'resolver_cache_released_slots')
+CAPACITIES = ('static_request_capacity_peak_bytes', 'static_target_capacity_peak_bytes',
+    'static_seed_capacity_peak_bytes', 'static_group_capacity_peak_bytes',
+    'static_worker_capacity_peak_bytes', 'static_sampled_retained_capacity_peak_bytes')
+STATIC = ('K', 'requests', 'unique', 'seeded_unique', 'post_seed_queries', 'post_seed_hits', 'post_seed_terminals')
+TRACE_TIMES = ('cold_capture_s', 'builder_s', 'callbacks_s', 'builder_excluding_callbacks_s',
+               'close_s', 'context_lifetime_s')
+TRACE_COUNTS = ('context_capture_count', 'close_calls', 'capacity_before_close_requests',
+    'sampled_live_transport_bytes_before_close', 'allocations', 'allocation_bytes_total', 'free_attempts',
+    'free_failures', 'certified_free_bytes', 'h2d_bytes', 'd2h_bytes', 'initialization_calls',
+    'initialization_bytes', 'launches', 'synchronizations')
+
+
+def need(ok, reason):
+    if not ok:
+        raise ValueError(reason)
+
+
+def sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def unique(pairs):
+    row = {}
+    for key, value in pairs:
+        need(key not in row, 'duplicate JSON key: ' + key)
+        row[key] = value
+    return row
+
+
+def strict_json(raw):
+    def finite(value):
+        parsed = float(value)
+        need(math.isfinite(parsed), 'nonfinite JSON float')
+        return parsed
+
+    def invalid(_value):
+        raise ValueError('nonfinite JSON constant')
+    return json.loads(raw, object_pairs_hook=unique, parse_float=finite, parse_constant=invalid)
+
+
+def uint(value):
+    return type(value) is int and 0 <= value < (1 << 64)
+
+
+def duration(value):
+    return type(value) in (int, float) and math.isfinite(value) and value >= 0
+
+
+def one_json(raw, code):
+    need(type(code) is int and code == 0 and len(raw.splitlines()) == 1, 'one successful JSON line')
+    row = strict_json(raw)
+    need(type(row) is dict, 'JSON object')
+    return row
+
+
+def source_map(root, manifest):
+    required = {SUPPORT, LEGACY_PROBE, STRICT_HOST, PROBE, GATE}
+    need(type(manifest) is dict and required <= set(manifest), 'complete source inventory')
+    result = {}
+    for name, pin in manifest.items():
+        need(type(name) is str and (name in required or name.startswith(BASE + 'prototype/')),
+             'source scope')
+        relative = Path(name)
+        need(not relative.is_absolute() and '..' not in relative.parts and str(relative) == name,
+             'source relative path')
+        path = root / relative
+        need(not path.is_symlink() and path.is_file() and path.resolve().is_relative_to(root)
+             and type(pin) is str and re.fullmatch('[0-9a-f]{64}', pin), 'source path/hash')
+        result[name] = sha(path)
+        need(result[name] == pin, 'source changed: ' + name)
+    for name, pin in ((SUPPORT, SUPPORT_SHA256), (STRICT_HOST, STRICT_HOST_SHA256),
+                      (PROBE, PROBE_SHA256), (GATE, GATE_SHA256)):
+        need(result[name] == pin, 'reviewed fixed source: ' + name)
+    return result
+
+
+def load_support(root, manifest):
+    need(manifest.get(SUPPORT) == SUPPORT_SHA256 and sha(root / SUPPORT) == SUPPORT_SHA256, 'support import pin')
+    spec = importlib.util.spec_from_file_location('mhgp7_terminal_reviewed_support', root / SUPPORT)
+    need(spec is not None and spec.loader is not None, 'support module')
+    module = importlib.util.module_from_spec(spec)
+    sys.dont_write_bytecode = True
+    spec.loader.exec_module(module)
+    return module
+
+
+def compile_command(nvcc, root, output, tooling, kind):
+    need(kind in ('gate', 'probe'), 'compile kind')
+    return [nvcc, '-x', 'cu', '-O3', '-DNDEBUG', '-std=c++20', '-arch=sm_120', '-fmad=false',
+            '--expt-relaxed-constexpr', '--Werror=cross-execution-space-call',
+            '-Xcompiler=-Wall,-Wextra,-Wpedantic,-Werror,-pthread',
+            '-ccbin', str(output / 'nvcc_strict_host.py'), '-MMD', '-MF', str(output / (kind + '.d')),
+            str(root / (GATE if kind == 'gate' else PROBE)), '-o', str(tooling / kind)]
+
+
+def gate_summary(raw, code):
+    row = one_json(raw, code)
+    need(row.get('status') == 'passed' and row.get('scope') == 'bounded_real_census_batch_FULL'
+         and row.get('backend') == BACKEND and row.get('device_executed') is True
+         and row.get('public_status') == 'not_claimed', 'actual device gate authority')
+    counters = ('checks', 'fixtures', 'physical_pairs', 'nodes_compared', 'contributions_compared',
+                'contexts', 'closed_contexts', 'zero_context_cases', 'launches', 'batches',
+                'q3_rows', 'q4_rows', 'extra_shell_rows')
+    need(all(uint(row.get(key)) for key in counters), 'gate counters')
+    need(row['fixtures'] == 10 and row['physical_pairs'] == 20 and row['contexts'] == row['closed_contexts'] == 9
+         and row['zero_context_cases'] == 1 and row['launches'] == row['batches'] > 0
+         and all(row[key] > 0 for key in ('checks', 'nodes_compared', 'contributions_compared',
+                                        'q3_rows', 'q4_rows', 'extra_shell_rows')), 'whole gate nonvacuity')
+    for key, expected in (('checks', 372537), ('nodes_compared', 46732), ('contributions_compared', 28666),
+                          ('launches', 59), ('batches', 59), ('q3_rows', 7808), ('q4_rows', 5976), ('extra_shell_rows', 7)):
+        # CUDA executes one additional need(device_nonvacuity) vs host stub.
+        need(row[key] == expected, 'fixed whole gate count: ' + key)
+    orders = row.get('per_k')
+    need(type(orders) is list and len(orders) == 10, 'gate complete K1..10')
+    for k, order in enumerate(orders, 1):
+        need(type(order) is dict and set(order) == {'K', 'direct_terminals', 'Q', 'H'}
+             and all(uint(x) for x in order.values()) and order['K'] == k and order['Q'] >= order['H'],
+             'gate ordered direct terminals')
+    need(orders[8]['direct_terminals'] > 0 and orders[9]['direct_terminals'] > 0
+         and sum(order['H'] for order in orders) > 0, 'high K and post-seed nonvacuity')
+    expected = [(0, 0, 0), (201, 43, 7), (515, 120, 48), (820, 150, 42), (984, 204, 48),
+                (1224, 336, 84), (1482, 402, 72), (1590, 438, 120), (1752, 546, 150), (1758, 672, 144)]
+    need([(order['direct_terminals'], order['Q'], order['H']) for order in orders] == expected,
+         'fixed direct terminal and Q/H corpus')
+    return row
+
+
+def probe_summary(raw, code, n, kmax, s, batch, threads=48, static_threads=1):
+    row = one_json(raw, code)
+    required = set(IDENTICAL + TIMES + CAPACITIES) | {
+        'backend', 'batch_geometry', 'static_threads', 'static_worker_threads_created_in_completed_pools', 'static_lanes_used'}
+    need(set(row) == required, 'exact probe schema fields')
+    need(row['schema'] == 'mhgp7-full-ball-tower-probe-v1' and row['status'] == 'completed_relative'
+         and row['public_status'] == 'not_claimed' and row['contract_qualified'] is False
+         and row['backend'] == (BACKEND if batch else 'cpu_reference'), 'probe authority')
+    for key, expected in (('n', n), ('s', s), ('kmax', min(n, kmax)), ('orders', min(n, kmax)),
+                          ('threads', threads), ('static_threads', static_threads), ('seed', 3), ('coord', 65536)):
+        need(type(row[key]) is int and row[key] == expected, 'probe configuration: ' + key)
+    for key in ('input_digest', 'payload_digest'):
+        need(type(row[key]) is str and re.fullmatch('[0-9a-f]{64}', row[key]), 'digest format')
+    strings = {'schema', 'status', 'public_status', 'backend', 'input_digest', 'payload_digest',
+               'residence_accounting', 'resolver_cache_accounting'}
+    need(row['residence_accounting'] == 'release_dead_construction_before_population_copy_v1'
+         and row['resolver_cache_accounting'] == 'static_exact_sort_unique_complete_population_seeds_after_exchange_v2',
+         'accounting contract')
+    for key in required - strings - set(TIMES) - {'contract_qualified', 'static_orders',
+                                                 'resolver_supports_by_size', 'batch_geometry'}:
+        need(uint(row[key]), 'nonnegative integer: ' + key)
+    need(all(duration(row[key]) for key in TIMES), 'finite nonnegative phase times')
+    need(row['total_s'] + 1e-6 >= sum(row[key] for key in TIMES[:-1]), 'end-to-end includes all phases')
+    supports = row['resolver_supports_by_size']
+    need(type(supports) is list and len(supports) == 5 and all(uint(x) for x in supports)
+         and sum(supports) == row['resolver_supports_tested'], 'global support work')
+    orders = row['static_orders']
+    need(type(orders) is list and len(orders) == row['kmax'], 'all static K orders')
+    for k, order in enumerate(orders, 1):
+        need(type(order) is dict and set(order) == set(STATIC) and all(uint(x) for x in order.values())
+             and order['K'] == k and order['requests'] >= order['unique'] >= order['seeded_unique']
+             and order['post_seed_queries'] >= order['post_seed_hits'] == order['post_seed_terminals'],
+             'R/U/S/Q/H/T ordered values')
+    trace = row['batch_geometry']
+    trace_fields = set(TRACE_TIMES + TRACE_COUNTS) | {'selected', 'transport_kind', 'device_executed',
+        'callback_work_scope', 'builder_remainder_is_pure_calendar', 'close_certified',
+        'capacity_is_VRAM_peak', 'work_known', 'callback_orders'}
+    need(type(trace) is dict and set(trace) == trace_fields and all(uint(trace.get(key)) for key in TRACE_COUNTS)
+         and all(duration(trace.get(key)) for key in TRACE_TIMES), 'trace times/counters')
+    need(trace.get('selected') is bool(batch) and trace.get('transport_kind') == 'device_transport'
+         and trace.get('close_certified') is True and trace.get('work_known') is True
+         and trace.get('capacity_is_VRAM_peak') is False
+         and trace.get('builder_remainder_is_pure_calendar') is False
+         and trace.get('callback_work_scope') == 'terminal_requests_only', 'trace scope')
+    need(abs(trace['builder_s'] - trace['callbacks_s'] - trace['builder_excluding_callbacks_s']) <= 3e-9
+         and row['tower_s'] + 2e-9 >= max(trace['builder_s'], trace['context_lifetime_s']), 'cold tower timing partition')
+    need(trace['allocation_bytes_total'] == trace['certified_free_bytes'] and trace['free_failures'] == 0,
+         'transport cleanup certified')
+    callbacks = trace.get('callback_orders')
+    need(type(callbacks) is list and len(callbacks) == row['kmax'], 'all callback K orders')
+    for k, order in enumerate(callbacks, 1):
+        need(type(order) is dict and set(order) == {'K', 'callbacks', 'callback_s', 'work_known',
+             'meb_calls', 'powers', 'materializations', 'supports_by_size'}
+             and all(uint(order.get(key)) for key in ('K', 'callbacks', 'meb_calls', 'powers', 'materializations'))
+             and order['K'] == k and order['work_known'] is True and duration(order['callback_s'])
+             and type(order['supports_by_size']) is list and len(order['supports_by_size']) == 5
+             and all(uint(x) for x in order['supports_by_size']), 'callback order data')
+    active = bool(batch and row['kmax'] > 1 and row['balls'] > 0)
+    if not active:
+        need(trace['device_executed'] is False and trace['context_capture_count'] == 0
+             and all(trace[key] == 0 for key in TRACE_COUNTS)
+             and all(order['callbacks'] == order['meb_calls'] == order['powers'] == order['materializations'] ==
+                     sum(order['supports_by_size']) == 0 for order in callbacks), 'scalar/empty has no device work')
+    else:
+        need(trace['device_executed'] is True and trace['context_capture_count'] == trace['close_calls'] == 1
+             and trace['launches'] == trace['synchronizations'] == sum(order['callbacks'] for order in callbacks) > 0
+             and row['static_worker_threads_created_in_completed_pools'] == row['static_lanes_used'] == 0,
+             'actual device batches, not CPU worker lanes')
+        need(all(trace[key] > 0 for key in ('h2d_bytes', 'd2h_bytes', 'initialization_bytes', 'allocations')),
+             'nonvacuous transport')
+        for callback, static in zip(callbacks, orders, strict=True):
+            need(callback['callbacks'] == int(static['unique'] > static['seeded_unique'])
+                 and callback['materializations'] == callback['meb_calls'], 'one callback per unresolved K')
+        for key, source in (('resolver_meb_calls', 'meb_calls'), ('resolver_power_tests', 'powers'),
+                            ('resolver_materializations', 'materializations')):
+            need(row[key] == sum(order[source] for order in callbacks), 'global/per-K work: ' + key)
+        need(supports == [sum(order['supports_by_size'][q] for order in callbacks) for q in range(5)],
+             'global/per-K support work')
+    return row
+
+
+def compare(cpu, gpu):
+    need(cpu['backend'] == 'cpu_reference' and gpu['backend'] == BACKEND, 'distinct paired backends')
+    for key in IDENTICAL:
+        need(type(cpu[key]) is type(gpu[key]) and cpu[key] == gpu[key], 'paired deterministic field: ' + key)
+    return dict(status='passed', equal_fields=len(IDENTICAL), equal_RUSQHT=True,
+                payload_digest=cpu['payload_digest'], n=cpu['n'], kmax=cpu['kmax'], s=cpu['s'],
+                device_executed=gpu['batch_geometry']['device_executed'], contract_qualified=False)
+
+
+def compare_s(baseline, other):
+    fields = ('n', 'kmax', 'orders', 'input_digest', 'payload_digest', 'nodes', 'parent_refs',
+              'contributions', 'vertical_refs', 'static_orders', 'anchor_hits', 'intruder_queries',
+              'same_radius_steps', 'validation_meb_calls', 'resolver_meb_calls', 'resolver_supports_tested',
+              'resolver_power_tests', 'resolver_materializations', 'resolver_supports_by_size')
+    need(baseline['backend'] == other['backend'] == BACKEND and baseline['s'] != other['s'], 'inter-s configuration')
+    for key in fields:
+        need(type(baseline[key]) is type(other[key]) and baseline[key] == other[key], 'inter-s field: ' + key)
+    return dict(status='passed', n=baseline['n'], kmax=baseline['kmax'], s=[baseline['s'], other['s']],
+                equal_fields=len(fields), payload_digest=baseline['payload_digest'], contract_qualified=False)
+
+
+def gpu_inventory(raw):
+    lines = raw.splitlines()
+    need(len(lines) == 1, 'one G4 GPU')
+    values = [value.strip() for value in lines[0].split(',')]
+    need(len(values) == 4, 'GPU inventory fields')
+    name, driver, memory, compute = values
+    need('RTX PRO 6000' in name and driver.startswith('580.') and compute in ('12', '12.0')
+         and re.fullmatch('[0-9]+', memory) and int(memory) >= 95000, 'G4 Blackwell 96GB / 580 / SM120')
+    return dict(name=name, driver=driver, memory_mib=int(memory), compute_capability=compute)
+
+
+def discover_existing_tools(*, which, is_file, executable, resolve):
+    """Read-only discovery, with injected readers for pure fixture tests.
+
+    Preserve the original admission rules: PATH wins for nvcc; only its two
+    historical fallback paths need both a regular file and executable access.
+    time is still checked as a file, not a new executable or PATH requirement.
+    """
+    path_candidates = {name: which(name) for name in ('nvcc', 'g++', 'nvidia-smi')}
+    cuda_candidates = [dict(path=path, checked=False, is_file=None, executable=None) for path in CUDA_PATHS]
+    selected = dict(path_candidates)
+    if not selected['nvcc']:
+        for row in cuda_candidates:
+            row['checked'] = True
+            row['is_file'] = bool(is_file(row['path']))
+            if row['is_file']:
+                row['executable'] = bool(executable(row['path']))
+                if row['executable']:
+                    selected['nvcc'] = row['path']
+                    break
+    time_is_file = bool(is_file('/usr/bin/time'))
+    selected['/usr/bin/time'] = '/usr/bin/time' if time_is_file else None
+    missing = [name for name, path in selected.items() if not path]
+    compiler_binding = dict(selected=selected['g++'], resolved=None, required='/usr/bin/g++',
+                            required_resolved=None, error=None)
+    if not missing:
+        try:
+            compiler_binding['resolved'] = str(resolve(selected['g++']))
+            compiler_binding['required_resolved'] = str(resolve('/usr/bin/g++'))
+        except OSError as error:
+            compiler_binding['error'] = type(error).__name__ + ': ' + str(error)
+    return dict(schema='mhgp7-existing-tools-discovery-v1', path_candidates=path_candidates,
+                cuda_fallback_candidates=cuda_candidates, time_is_file=time_is_file,
+                selected=selected, missing=missing, compiler_binding=compiler_binding,
+                installation_attempted=False, version_checks_performed=False)
+
+
+def require_existing_tools(discovery):
+    """Reject only after the caller has retained the complete observation."""
+    need(not discovery['missing'], 'existing tools required, no installation; missing: ' +
+         ', '.join(discovery['missing']))
+    binding = discovery['compiler_binding']
+    need(binding['error'] is None and binding['resolved'] == binding['required_resolved'],
+         'strict adapter g++ binding: selected=' + str(binding['selected']) +
+         ', resolved=' + str(binding['resolved']) + ', required=' + str(binding['required_resolved']) +
+         ', error=' + str(binding['error']))
+    selected = discovery['selected']
+    return selected['nvcc'], selected['g++'], selected['nvidia-smi']
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    for name in ('source-root', 'source-manifest', 'guard-mark', 'output'):
+        parser.add_argument('--' + name, type=Path, required=True)
+    for name in ('source-manifest-sha256', 'guard-mark-sha256', 'project', 'zone', 'instance', 'generation'):
+        parser.add_argument('--' + name, required=True)
+    parser.add_argument('--session-deadline-epoch', type=int, required=True)
+    parser.add_argument('--closing-margin-seconds', type=int, default=300)
+    args = parser.parse_args()
+    root, output = args.source_root.resolve(), args.output.resolve()
+    tooling = output.parent / 'terminal_batch_tooling'
+    need(not output.exists() and not output.is_relative_to(root) and not tooling.exists()
+         and not tooling.is_relative_to(root), 'fresh output/tooling outside immutable snapshot')
+    output.mkdir(parents=True)
+    tooling.mkdir(mode=0o700)
+    result = dict(status='failed', GCP_used=True, public_status='not_claimed', contract_qualified=False,
+                  FULL_GPU_available=False, backend=BACKEND, worker_sha256=sha(__file__), worker_argv=list(sys.argv),
+                  targeted_GCP_stop_required_by_ROOT=True, VM_shutdown_certified_by_worker=False,
+                  work_policy_seconds=WORK_SECONDS, work_policy_is_GCE_cap=False, runs=[], skipped=[])
+    support, worker, before, manifest, binaries, dependencies = None, None, None, None, {}, {}
+
+    def interrupted(signum, _frame):
+        raise InterruptedError('received signal ' + str(signum))
+    handlers = {sig: signal.signal(sig, interrupted) for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP)}
+    try:
+        need(sha(args.source_manifest) == args.source_manifest_sha256, 'external source manifest pin')
+        manifest = strict_json(args.source_manifest.read_text())
+        before = source_map(root, manifest)
+        support = load_support(root, manifest)
+        support.save(output / 'sources_before.json', before)
+        need(sha(args.guard_mark) == args.guard_mark_sha256, 'external guard mark pin')
+        mark, schedule = support.fields(args.guard_mark.read_text()), support.fields(support.scheduled_text())
+        target = {key: getattr(args, key) for key in ('project', 'zone', 'instance')}
+        guards = support.guard_values(mark, schedule, target, args.generation, args.session_deadline_epoch,
+                                      args.closing_margin_seconds, time.time())
+        observed = support.metadata()
+        need(all(observed[key] == value for key, value in target.items()) and observed['machine'] == 'g4-standard-48',
+             'guest metadata target/type')
+        boot_epoch = time.time() - float(Path('/proc/uptime').read_text().split()[0])
+        need(abs(boot_epoch - support.epoch(args.generation)) <= 300, 'guest boot/generation')
+        cpus = sorted(os.sched_getaffinity(0))
+        need(len(cpus) == 48, '48 available vCPUs')
+        deadline = min(guards['work_deadline_epoch'], time.time() + WORK_SECONDS)
+        worker = support.Worker(output, deadline, schedule)
+        result.update(target=target, generation=args.generation, guards=guards, guest_metadata=observed,
+                      available_cpus=cpus, effective_work_deadline_epoch=deadline,
+                      source_manifest_sha256=args.source_manifest_sha256, guard_mark_sha256=args.guard_mark_sha256,
+                      resource_limits={'RLIMIT_AS': resource.getrlimit(resource.RLIMIT_AS),
+                                       'RLIMIT_CPU': resource.getrlimit(resource.RLIMIT_CPU)})
+        support.save(output / 'guard_evidence.json', dict(mark=mark, schedule=schedule, metadata=observed, bounds=guards))
+        result['tool_discovery'] = discover_existing_tools(
+            which=shutil.which, is_file=lambda path: Path(path).is_file(),
+            executable=lambda path: os.access(path, os.X_OK), resolve=lambda path: Path(path).resolve())
+        nvcc, compiler, smi = require_existing_tools(result['tool_discovery'])
+        adapter = output / 'nvcc_strict_host.py'
+        shutil.copyfile(root / STRICT_HOST, adapter)
+        adapter.chmod(0o700)
+        for name, argv in [('compiler_version', [compiler, '--version']), ('nvcc_version', [nvcc, '--version']),
+                           ('time_version', ['/usr/bin/time', '--version']), ('cpu_inventory', ['lscpu']),
+                           ('gpu_inventory', [smi, '--query-gpu=name,driver_version,memory.total,compute_cap',
+                                              '--format=csv,noheader,nounits'])]:
+            need(worker.command(name, argv)['exit_code'] == 0, name)
+        result['gpu_inventory'] = gpu_inventory((output / 'gpu_inventory.stdout').read_text())
+        need('release 12.9' in (output / 'nvcc_version.stdout').read_text(), 'reviewed CUDA 12.9 toolkit')
+        for filename in ('/etc/os-release', '/proc/meminfo', '/proc/self/cgroup'):
+            (output / (Path(filename).name + '.txt')).write_text(Path(filename).read_text())
+        for kind in ('gate', 'probe'):
+            need(sha(adapter) == STRICT_HOST_SHA256, 'strict adapter before compile')
+            command = compile_command(nvcc, root, output, tooling, kind)
+            row = worker.command('compile_' + kind, command)
+            need(row['exit_code'] == 0 and not (output / ('compile_' + kind + '.stdout')).read_bytes()
+                 and not (output / ('compile_' + kind + '.stderr')).read_bytes(), 'strict compile/link, zero diagnostics')
+            need(sha(adapter) == STRICT_HOST_SHA256, 'strict adapter after compile')
+            binary, depfile = Path(command[-1]), output / (kind + '.d')
+            consumed, external = {}, {}
+            for spelling in shlex.split(depfile.read_text().replace('\\\n', ' ').split(':', 1)[1]):
+                path = Path(spelling).resolve()
+                need(path.is_file() and '/boost/' not in str(path), 'dependency exists, no Boost oracle')
+                if path.is_relative_to(root):
+                    relative = path.relative_to(root).as_posix()
+                    need(relative in before and sha(path) == before[relative], 'project dependency pin')
+                    consumed[relative] = before[relative]
+                else:
+                    external[str(path)] = sha(path)
+            need((GATE if kind == 'gate' else PROBE) in consumed, 'depfile entry source')
+            dependencies.update(external)
+            support.save(output / (kind + '_dependencies.json'), dict(project=consumed, external=external))
+            binaries[kind] = dict(path=str(binary), sha256=sha(binary), depfile_sha256=sha(depfile))
+            if kind == 'gate':
+                row = worker.command('gate_selftest', [str(binary), '--selftest'])
+                result['gate'] = gate_summary((output / 'gate_selftest.stdout').read_text(), row['exit_code'])
+                for name, argv, expected, cause in (
+                    ('unknown', ['--unknown'], 2, None), ('missing', [], 2, None),
+                    ('wrong_terminal', ['--wrong-terminal'], 4, 'causal_direct_terminal_rejected'),
+                    ('after_prefix', ['--fail-after-prefix'], 4, 'causal_after_prefix_global_empty')):
+                    row = worker.command('gate_' + name, [str(binary), *argv])
+                    need(row['exit_code'] == expected and not (output / ('gate_' + name + '.stdout')).read_bytes(),
+                         'gate refusal: ' + name)
+                    if cause:
+                        need(cause in (output / ('gate_' + name + '.stderr')).read_text().splitlines(), 'causal refusal: ' + name)
+        probe = binaries['probe']['path']
+        for name, argv in [('unknown', ['--unknown']), ('missing', []),
+                           ('batch_without_static', ['--n=200', '--s=8', '--kmax=10', '--threads=48', '--batch=1'])]:
+            row = worker.command('probe_' + name, [probe, *argv])
+            need(row['exit_code'] == 2 and not (output / ('probe_' + name + '.stdout')).read_bytes(), 'probe refusal')
+
+        def run_probe(n, k, s, batch, static_threads=1):
+            name = f'n{n}_k{k}_s{s}_batch{batch}_static{static_threads}'
+            command = ['/usr/bin/time', '-v', '-o', str(output / (name + '.time')), probe,
+                       f'--n={n}', f'--s={s}', f'--kmax={k}', '--threads=48',
+                       f'--static-threads={static_threads}', f'--batch={batch}']
+            observed_run = worker.command(name, command)
+            summary = probe_summary((output / (name + '.stdout')).read_text(), observed_run['exit_code'],
+                                    n, k, s, batch, static_threads=static_threads)
+            support.save(output / (name + '.summary.json'), summary)
+            result['runs'].append(dict(name=name, n=n, kmax=k, s=s, batch=batch, total_s=summary['total_s'],
+                tower_s=summary['tower_s'], static_threads=static_threads, elapsed_s=observed_run['elapsed_seconds'],
+                device_executed=summary['batch_geometry']['device_executed'],
+                within_one_second_observed=summary['total_s'] <= 1, contract_qualified=False))
+            return summary
+
+        cpu, gpu = run_probe(200, 10, 8, 0), run_probe(200, 10, 8, 1)
+        result['paired_n200'] = compare(cpu, gpu)
+        support.save(output / 'paired_n200.json', result['paired_n200'])
+        # One K10 target first. No linear extrapolation from n200 and no three
+        # 50k runs before a first result. Session timeout remains a failed run.
+        if worker.remaining() >= 120:
+            first = run_probe(50000, 10, 8, 1)
+            last = first
+            if first['total_s'] > 1:
+                if worker.remaining() >= max(120, 1.5 * first['total_s'] + 30):
+                    last = run_probe(50000, 5, 8, 1)
+                else:
+                    result['skipped'].append(dict(n=50000, kmax=5, s=8, reason='economic_remaining_window'))
+            # A real CPU48 comparison uses the same CUDA-compiled executable,
+            # but batch0 never constructs a Context or launches a kernel.
+            if worker.remaining() >= max(120, 2 * first['total_s'] + 30):
+                cpu48 = run_probe(50000, 10, 8, 0, 48)
+                result['paired_n50000_k10_cpu48'] = compare(cpu48, first)
+                support.save(output / 'paired_n50000_k10_cpu48.json', result['paired_n50000_k10_cpu48'])
+            else:
+                result['skipped'].append(dict(n=50000, kmax=10, s=8, batch=0, static_threads=48,
+                                              reason='economic_remaining_window'))
+            # Compare WSPD s at the same n/K. If 50k is costly, use bounded
+            # n8000 observations, including its own s8 baseline, not a fit.
+            small = first['total_s'] > 30
+            n, k = (8000, 10) if small else (50000, last['kmax'])
+            s_baseline = None if small else last
+            result['comparisons_s'] = []
+            estimate = max(60, 1.5 * last['total_s'] + 30)
+            for s in ((8, 10, 12) if small else (10, 12)):
+                if worker.remaining() < estimate:
+                    result['skipped'].append(dict(n=n, kmax=k, s=s, reason='economic_remaining_window'))
+                    break
+                observation = run_probe(n, k, s, 1)
+                if s_baseline is None:
+                    s_baseline = observation
+                else:
+                    result['comparisons_s'].append(compare_s(s_baseline, observation))
+                    support.save(output / f'inter_s_n{n}_k{k}_s{s}.json', result['comparisons_s'][-1])
+                estimate = max(60, 1.5 * observation['total_s'] + 30)
+        else:
+            result['skipped'].append(dict(n=50000, kmax=10, s=8, reason='economic_remaining_window'))
+        result['status'] = 'completed'
+    except BaseException as error:
+        result.update(status='session_deadline' if support and isinstance(error, support.SessionDeadline) else 'failed',
+                      error=type(error).__name__ + ': ' + str(error))
+    finally:
+        for sig in handlers:
+            signal.signal(sig, signal.SIG_IGN)
+        result['commands'], result['binaries'] = worker.commands if worker else [], binaries
+        try:
+            if before is not None:
+                after = source_map(root, manifest)
+                need(before == after, 'source snapshot stability')
+                support.save(output / 'sources_after.json', after)
+                result['sources_stable'] = True
+            for binary in binaries.values():
+                binary['sha256_after'] = sha(binary['path'])
+                need(binary['sha256'] == binary['sha256_after'], 'binary stability')
+            need(all(sha(name) == pin for name, pin in dependencies.items()), 'external dependency stability')
+            if support:
+                support.save(output / 'external_dependencies_after.json', {name: sha(name) for name in dependencies})
+        except Exception as error:
+            result.update(status='failed', closing_error=str(error))
+        try:
+            with (output / 'receipt.json').open('x') as stream:
+                json.dump(result, stream, indent=2, sort_keys=True)
+                stream.write('\n')
+        finally:
+            for sig, handler in handlers.items():
+                signal.signal(sig, handler)
+        print(json.dumps(dict(status=result['status'], output=str(output), targeted_GCP_stop_required_by_ROOT=True), sort_keys=True))
+    return 0 if result['status'] == 'completed' else 1
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

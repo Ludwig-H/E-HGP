@@ -1,0 +1,8 @@
+Starting instance(s) ehgp-v7-4fa0e0789a7d5bb06b787d35...
+.............................................done.
+Updated [https://compute.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35].
+Instance internal IP is 10.128.0.2
+Instance external IP is 34.60.99.94
+[ERREUR] La VM Spot a été préemptée pendant le démarrage; la génération 2026-09-11T06:51:01.668-07:00 sera certifiée arrêtée.
+[URGENCE] Démarrage non certifié : tentative d’arrêt de la génération 2026-09-11T06:51:01.668-07:00 sur ehgp-v7-4fa0e0789a7d5bb06b787d35.
+[URGENCE] Arrêt ciblé certifié pour la génération 2026-09-11T06:51:01.668-07:00.

@@ -1,0 +1,20 @@
+{
+  "changed_controller_globals": [
+    "TARGET"
+  ],
+  "controller_receipt_identifies_wrapper": false,
+  "controller_sha256": "177b25a0d72150dc331661fdf8da1ccde77ea17fb694d9c6af5b0929755160d8",
+  "no_cloud_command_in_wrapper": true,
+  "original_target": {
+    "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-b"
+  },
+  "schema": "ehgp.v7.exact_session_wrapper.v1",
+  "target": {
+    "instance": "ehgp-blackwell-spot",
+    "project": "devpod-gpu-exploration",
+    "zone": "europe-west4-a"
+  },
+  "wrapper_sha256": "3ec16f9b8777d6fc5527f65b7080d207f7dee0d8e89a7f9180789083ce15dab7"
+}

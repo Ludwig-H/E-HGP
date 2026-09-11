@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/gcp-migration/terminal_batch_session_eu_v7.py",
+    "--snapshot=/absent/snapshot",
+    "--manifest=/absent/manifest",
+    "--worker=/absent/worker",
+    "--session-dir=/absent/session",
+    "--ssh-key=/absent/key",
+    "--snapshot-sha256=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "--manifest-sha256=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "--worker-sha256=cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "--expected-controller-sha256=177b25a0d72150dc331661fdf8da1ccde77ea17fb694d9c6af5b0929755160d8"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "expected_exit": 0
+}

@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+"""Create-only compact packet: source snapshot and pure Python tests only."""
+import hashlib
+import json
+from pathlib import Path
+import shutil
+
+BASE = Path(__file__).resolve().parent
+ROOT = BASE.parents[1]
+OUT = BASE / 'packet'
+
+
+def sha(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+
+def save(path, value):
+    with path.open('x') as stream:
+        json.dump(value, stream, indent=2, sort_keys=True)
+        stream.write('\n')
+
+
+def main():
+    logical = {}
+    for folder, prefix in ((BASE / 'snapshot_r1', 'snapshot'),
+                           (BASE / 'pure_r1', 'tests/pure_r1'), (BASE / 'pure_r2', 'tests/pure_r2')):
+        for path in sorted(folder.rglob('*')):
+            if path.is_file():
+                if path.is_symlink():
+                    raise ValueError('symlink refused')
+                logical[prefix + '/' + path.relative_to(folder).as_posix()] = path.read_bytes()
+    for name in ('full_probe_session_v7.py', 'start_and_verify.sh', 'stop_and_verify.sh'):
+        logical['origins/' + name] = (ROOT / 'gcp-migration' / name).read_bytes()
+    logical['origins/gate_sources_before.json'] = (ROOT / 'build/v7_whole_batch_device_gate_20260911/san_root_r1/sources_before.json').read_bytes()
+    logical['origins/gate_sources_after.json'] = (ROOT / 'build/v7_whole_batch_device_gate_20260911/san_root_r1/sources_after.json').read_bytes()
+    logical['packaging/publish.py'] = Path(__file__).read_bytes()
+    OUT.mkdir()
+    (OUT / 'objects').mkdir()
+    mapping, manifest = {}, {}
+    for name, raw in sorted(logical.items()):
+        if raw.startswith(b'\x7fELF') or b'\n-----BEGIN OPENSSH PRIVATE KEY-----\n' in raw:
+            raise ValueError('ELF/private credential forbidden')
+        pin = sha(raw)
+        physical = 'objects/' + pin + '.source'
+        mapping[name] = physical
+        manifest[name] = dict(sha256=pin, bytes=len(raw))
+        target = OUT / physical
+        if not target.exists():
+            with target.open('xb') as stream:
+                stream.write(raw)
+    save(OUT / 'storage_map.json', mapping)
+    save(OUT / 'logical_manifest.json', manifest)
+    for source, target in (('verify.py', 'verify.py'), ('PACKAGE_README.md', 'README.md')):
+        shutil.copyfile(BASE / source, OUT / target)
+    physical = {path.relative_to(OUT).as_posix(): dict(sha256=sha(path.read_bytes()), bytes=path.stat().st_size)
+                for path in sorted(OUT.rglob('*')) if path.is_file()}
+    save(OUT / 'manifest.json', dict(schema='mhgp7-terminal-batch-worker-packet-v1', files=physical))
+    print(json.dumps(dict(status='passed', logical_files=len(logical), physical_files=len(physical) + 1,
+                          manifest_sha256=sha((OUT / 'manifest.json').read_bytes()), output=str(OUT)), sort_keys=True))
+
+
+if __name__ == '__main__':
+    main()

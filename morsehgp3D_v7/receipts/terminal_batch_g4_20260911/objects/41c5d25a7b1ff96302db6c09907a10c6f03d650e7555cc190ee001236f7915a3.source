@@ -1,0 +1,108 @@
+#!/usr/bin/env python3
+"""Create-only proof packaging; never invoke cloud, SSH, compiler or key files."""
+import hashlib
+import json
+from pathlib import Path
+import re
+import shutil
+
+BASE = Path(__file__).resolve().parent
+ROOT = BASE.parents[1]
+INPUT = ROOT / 'build/v7_terminal_batch_g4_20260911'
+QUALIFICATION = ROOT / 'build/v7_terminal_batch_session_eu_20260911/qualification_r1'
+WORKER_PACKET = ROOT / 'morsehgp3D_v7/receipts/terminal_batch_worker_20260911'
+OUT = BASE / 'packet'
+
+
+def sha(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+
+def encoded(value):
+    return (json.dumps(value, indent=2, sort_keys=True) + '\n').encode()
+
+
+def main():
+    source_paths = {}
+    for name in ('session_r1', 'session_r2', 'session_eu_r1', 'preemption_diagnostics_r1', 'session_key_closure_r1'):
+        for path in sorted((INPUT / name).rglob('*')):
+            if path.is_file():
+                source_paths['captures/' + path.relative_to(INPUT).as_posix()] = path
+    for name in ('read_diagnostics.py', 'close_session_key.py', 'PRE_START_FAILURE.md'):
+        source_paths['captures/' + name] = INPUT / name
+    for path in sorted(QUALIFICATION.rglob('*')):
+        if path.is_file():
+            source_paths['qualification/' + path.relative_to(QUALIFICATION).as_posix()] = path
+    source_paths['imports/terminal_batch_worker_manifest.json'] = WORKER_PACKET / 'manifest.json'
+    data, omissions, inventory, projections = {}, {}, {}, {}
+    for name, path in source_paths.items():
+        if path.is_symlink() or path.name in ('key', 'key.pub', 'id_rsa', 'id_ed25519'):
+            raise ValueError('unsafe input file name/type')
+        raw = path.read_bytes()
+        pin = dict(sha256=sha(raw), bytes=len(raw))
+        inventory[name] = pin
+        if raw.startswith(b'\x7fELF') or b'\n-----BEGIN OPENSSH PRIVATE KEY-----\n' in raw:
+            raise ValueError('ELF/private credential payload forbidden')
+        reason = None
+        if name.endswith('/oslogin_add.stdout'):
+            reason = 'personal_oslogin_profile_omitted'
+        elif name.endswith('/snapshot.tar.gz'):
+            reason = 'published_source_archive_linked_not_duplicated'
+        elif name.endswith('/guarded_start.stdout'):
+            reason = 'account_line_redacted_in_separate_derivative'
+            sanitized, count = re.subn(rb'(?m)^  compte[^\n]*$', b'  compte                 : [personal account omitted]', raw)
+            if count != 1:
+                raise ValueError('expected exactly one account line')
+            derivative = name + '.redacted'
+            data[derivative] = sanitized
+            projections[derivative] = dict(source=name, source_sha256=pin['sha256'],
+                                           transformation='replace_only_the_single_compte_line')
+        elif name.endswith(('/before_upload.stdout', '/before_worker.stdout', '/before_retrieve.stdout')):
+            reason = 'rich_instance_metadata_with_ssh_keys_omitted'
+            value = json.loads(raw)
+            selected = {key: value[key] for key in ('name', 'zone', 'selfLink', 'status', 'lastStartTimestamp',
+                                                     'machineType', 'labels', 'scheduling')}
+            selected['terminationTimestamp'] = value['resourceStatus']['scheduling']['terminationTimestamp']
+            derivative = name + '.safety_projection.json'
+            data[derivative] = encoded(selected)
+            projections[derivative] = dict(source=name, source_sha256=pin['sha256'],
+                transformation='declared_safety_fields_only; terminationTimestamp from resourceStatus.scheduling')
+        if reason:
+            omissions[name] = dict(pin, reason=reason)
+        else:
+            data[name] = raw
+    if any(path.read_bytes() != data[name] for name, path in source_paths.items() if name in data):
+        raise ValueError('capture changed while copying')
+    if any(sha(path.read_bytes()) != inventory[name]['sha256'] for name, path in source_paths.items()):
+        raise ValueError('source/omission hash changed')
+    data['provenance/source_inventory.json'] = encoded(inventory)
+    data['provenance/omissions.json'] = encoded(omissions)
+    data['provenance/projections.json'] = encoded(projections)
+    data['provenance/publish.py'] = Path(__file__).read_bytes()
+    OUT.mkdir()
+    (OUT / 'objects').mkdir()
+    mapping, logical = {}, {}
+    for name, raw in sorted(data.items()):
+        pin = sha(raw)
+        physical = 'objects/' + pin + '.source'
+        mapping[name] = physical
+        logical[name] = dict(sha256=pin, bytes=len(raw))
+        target = OUT / physical
+        if not target.exists():
+            with target.open('xb') as stream:
+                stream.write(raw)
+    for name, value in (('storage_map.json', mapping), ('logical_manifest.json', logical)):
+        with (OUT / name).open('xb') as stream:
+            stream.write(encoded(value))
+    for source, target in (('verify.py', 'verify.py'), ('README.md', 'README.md')):
+        shutil.copyfile(BASE / source, OUT / target)
+    physical = {p.relative_to(OUT).as_posix(): dict(sha256=sha(p.read_bytes()), bytes=p.stat().st_size)
+                for p in sorted(OUT.rglob('*')) if p.is_file()}
+    with (OUT / 'manifest.json').open('xb') as stream:
+        stream.write(encoded(dict(schema='mhgp7-terminal-batch-g4-attempts-v1', files=physical)))
+    print(json.dumps(dict(status='passed', logical_files=len(data), physical_files=len(physical) + 1,
+                          omitted=len(omissions), manifest_sha256=sha((OUT / 'manifest.json').read_bytes())), sort_keys=True))
+
+
+if __name__ == '__main__':
+    main()

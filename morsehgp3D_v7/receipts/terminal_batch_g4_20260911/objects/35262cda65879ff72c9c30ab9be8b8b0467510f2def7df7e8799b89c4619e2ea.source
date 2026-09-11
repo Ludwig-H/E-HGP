@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/gcp-migration/selftest_terminal_batch_session_eu_v7.py"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": 0,
+  "expected_exit": 0,
+  "name": "normal",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "5a7162b4f3596d1bbad469f9aa9d888a76225b9d7376faf97104569e20520905"
+}

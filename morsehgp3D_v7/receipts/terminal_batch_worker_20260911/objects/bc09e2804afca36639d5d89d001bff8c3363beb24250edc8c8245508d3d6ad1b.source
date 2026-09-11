@@ -1,0 +1,7 @@
+{
+  "/workspaces/E-HGP/build/v7_terminal_batch_worker_20260911/build_snapshot.py": "3e219a31a26514c5a5091e8a2b0232be33942b8ff5f11c09ddb32463382eedd5",
+  "/workspaces/E-HGP/build/v7_terminal_batch_worker_20260911/record_pure.py": "e2260ba19f615d5d8a0046ab3027b35b8214399b765397c2a78ad7cacbcaec70",
+  "/workspaces/E-HGP/gcp-migration/README_TERMINAL_BATCH_V7.md": "9392bc3d2a286d83392132bdd242f03f45e138c7c2be83c2820d840069bea020",
+  "/workspaces/E-HGP/gcp-migration/selftest_terminal_batch_worker_v7.py": "6bfedb84d265677feb1a25a3003185192c4e6ec5f47426631ef2088375263081",
+  "/workspaces/E-HGP/gcp-migration/terminal_batch_worker_v7.py": "043197e4c73d92ff8845ddb5836c11fbb9ed9bdbd9a609edf7ce4a946d2c0fb3"
+}

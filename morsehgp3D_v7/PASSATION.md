@@ -6,6 +6,14 @@
 Chantier sur `main` uniquement. Cette entrée décrit le travail courant ;
 les récits des anciens jalons sont retirés, leurs preuves restent liées.
 
+Dernier complément après `324f6192` : [lots complets, MEB et tentatives G4](docs/QUALIFICATION_BATCH_ET_MEB_20260911.md).
+Sonde et gate privées compilées/liées NVCC strict ; la gate O2/SAN compare
+10 326 terminales directes et vingt paires physiques. La réduction q2 est
+qualifiée séparément sur 6 416 MEB, non intégrée et sans benchmark de vitesse.
+Deux préemptions US, puis outils invités manquants au précontrôle européen :
+aucun calcul GPU de cette campagne. Trois arrêts ciblés certifiés, clé de
+session révoquée ; aucun nouveau temps 50k ni contrat de performance acquis.
+
 Le [nouveau raccord par boules](docs/TOUR_FULL_PAR_BOULES.md) est implémenté :
 MEB à coquille libre, ancres fermées, parents pré-lot, plateaux, journal v2
 et cartes verticales. Les dix forêts et leurs images adjacentes sont retenues.
@@ -212,17 +220,24 @@ Les sondes CPU et CUDA-census sont dans `bench/full_ball_tower_probe.*`.
 Leurs sorties sont relatives, sans archive industrielle ni claim produit.
 
 Construire dans un répertoire neuf ; 24 CTests ciblés passent sur sources
-stables : MEB, tour, cache, travail temporel, journal, quotient, front WSPD
-et simulation de route. O2/SAN et vrai device restent des autorités distinctes.
+stables pour le jalon antérieur : MEB, tour, cache, travail temporel, journal,
+quotient, front WSPD et simulation de route. La reconstruction active `83f1`
+ajoute les seize portes census/batch, soit 40 CTests ciblés ; aucune nouvelle
+campagne CMake du moteur n'est revendiquée par les paquets privés suivants.
+O2/SAN et vrai device restent des autorités distinctes.
 Le worker `gcp-migration/full_ball_worker_v7.py` réutilise le contrôleur
 SPOT gardé et le support CPU épinglé. Il vérifie d'abord le vrai device
 SM120, puis compare CPU/hybride sur n8 et sur 50k K10/K5, avec s8 puis
 s10/s12 selon le temps observé et la fenêtre de fermeture. Aucune installation
 CUDA, aucun reboot, aucune mutation d'une autre VM n'est autorisé par ce worker.
-Ce worker conserve encore le défaut `static_threads=0` : il ne transmet pas
-l'option statique de la sonde. Une prochaine campagne statique G4 devra
-raccorder explicitement cette configuration à ses validations et selftests,
-pas supposer que le nouveau header active automatiquement le parallélisme.
+Ce worker conserve encore le défaut `static_threads=0`. Le nouveau
+[worker terminal par lots](../gcp-migration/README_TERMINAL_BATCH_V7.md) est
+distinct : son instantané privé transmet explicitement `--static-threads=1`
+et `--batch=1`, puis statique CPU à 48 threads pour la paire complète,
+avec validations de configuration.
+Ses tests locaux sont clos ; les trois tentatives G4 n'ont pas atteint la
+compilation invitée. Reprendre ce worker et son instantané, pas le worker
+historique en supposant que le header active automatiquement le GPU.
 
 Le [triplet nominal retenu du 10 septembre](docs/RESULTATS_TOUR_CACHE_G4_20260910.md)
 est clos : 235,724 s / 354,144 s / 736,819 s, dix ordres et verticales,
@@ -262,6 +277,9 @@ anciens reçus restent conservés, sans copies d'ELF dans la livraison.
 Le delta statique CPU du 11 septembre n'utilise pas GCP. Les deux sessions
 du 10 septembre et la nouvelle session de primitives GPU du 11 sont closes ;
 leur cible E-HGP exacte est certifiée arrêtée pour chaque génération.
+Les [trois tentatives suivantes de lots terminaux](receipts/terminal_batch_g4_20260911/README.md)
+sont également closes, sans benchmark ni installation. Leur inventaire final
+ne détecte aucune autre VM E-HGP active ; aucune autre cible n'a été arrêtée.
 Les CTests locaux, la CI et les sessions G4 sont
 trois autorités distinctes. Aucun
 succès CI d'un ancien commit n'est attribué automatiquement au nouveau.

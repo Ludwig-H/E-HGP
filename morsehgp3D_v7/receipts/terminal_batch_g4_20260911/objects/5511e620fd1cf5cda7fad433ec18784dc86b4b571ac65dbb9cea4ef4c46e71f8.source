@@ -1,0 +1,20 @@
+[
+  {
+    "lastStartTimestamp": "2026-09-11T06:53:44.713-07:00",
+    "name": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "status": "TERMINATED",
+    "zone": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b"
+  },
+  {
+    "lastStartTimestamp": "2026-09-11T06:59:41.712-07:00",
+    "name": "ehgp-blackwell-spot",
+    "status": "TERMINATED",
+    "zone": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-a"
+  },
+  {
+    "lastStartTimestamp": "2026-09-01T18:34:33.420-07:00",
+    "name": "ehgp-blackwell-spot-ai1a",
+    "status": "TERMINATED",
+    "zone": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a"
+  }
+]

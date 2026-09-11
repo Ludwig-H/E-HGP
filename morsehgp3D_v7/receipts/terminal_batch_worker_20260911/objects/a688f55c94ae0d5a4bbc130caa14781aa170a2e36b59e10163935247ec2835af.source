@@ -1,0 +1,16 @@
+{
+  "GCP_used": false,
+  "commands": 8,
+  "cuda_ELF_invoked": false,
+  "device_executed": false,
+  "error": null,
+  "mode": "san",
+  "public_status": "not_claimed",
+  "sanitizer_environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "source_gate_sha256": "98e426f288d52d0331b3480f3a8233ac525814069893296794a46e1a19b30d29",
+  "stable": true,
+  "status": "passed"
+}

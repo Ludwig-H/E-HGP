@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+"""Close local wrapper predicates/inert CLI only. Never passes --execute."""
+import hashlib
+import importlib.util
+import json
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+
+sys.dont_write_bytecode = True
+ROOT = Path(__file__).resolve().parents[2]
+BASE = Path(__file__).resolve().parent
+OUT = BASE / 'qualification_r1'
+WRAPPER = ROOT / 'gcp-migration/terminal_batch_session_eu_v7.py'
+TEST = ROOT / 'gcp-migration/selftest_terminal_batch_session_eu_v7.py'
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def save(path, value):
+    with path.open('x') as stream:
+        json.dump(value, stream, indent=2, sort_keys=True)
+        stream.write('\n')
+
+
+def main():
+    OUT.mkdir()
+    sources = [WRAPPER, TEST, BASE / 'README.md', Path(__file__),
+               ROOT / 'gcp-migration/full_probe_session_v7.py',
+               ROOT / 'gcp-migration/start_and_verify.sh', ROOT / 'gcp-migration/stop_and_verify.sh']
+    before = {str(path): sha(path) for path in sources}
+    save(OUT / 'sources_before.json', before)
+    for path in sources:
+        shutil.copyfile(path, OUT / path.name)
+    spec = importlib.util.spec_from_file_location('eu_binding_capture', WRAPPER)
+    wrapper = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(wrapper)
+    wrapper.load_controller()
+    save(OUT / 'session_wrapper_binding.json', wrapper.binding())
+    commands = [
+        ('normal', [sys.executable, '-B', str(TEST)]),
+        ('optimized', [sys.executable, '-B', '-O', str(TEST)]),
+        ('inert', [sys.executable, '-B', str(WRAPPER), '--snapshot=/absent/snapshot',
+                   '--manifest=/absent/manifest', '--worker=/absent/worker', '--session-dir=/absent/session',
+                   '--ssh-key=/absent/key', '--snapshot-sha256=' + 'a' * 64,
+                   '--manifest-sha256=' + 'b' * 64, '--worker-sha256=' + 'c' * 64,
+                   '--expected-controller-sha256=' + wrapper.CONTROLLER_SHA256])]
+    rows = []
+    for name, argv in commands:
+        save(OUT / (name + '.intent.json'), dict(argv=argv, cwd=str(ROOT), expected_exit=0))
+        with (OUT / (name + '.stdout')).open('xb') as stdout, (OUT / (name + '.stderr')).open('xb') as stderr:
+            process = subprocess.run(argv, cwd=ROOT, stdout=stdout, stderr=stderr, timeout=30, check=False)
+        row = dict(name=name, argv=argv, cwd=str(ROOT), expected_exit=0, exit_code=process.returncode,
+                   stdout_sha256=sha(OUT / (name + '.stdout')), stderr_sha256=sha(OUT / (name + '.stderr')))
+        rows.append(row)
+        save(OUT / (name + '.command.json'), row)
+        if process.returncode != 0 or (OUT / (name + '.stderr')).read_bytes():
+            raise ValueError('local qualification failed: ' + name)
+    normal = json.loads((OUT / 'normal.stdout').read_text())
+    if normal != json.loads((OUT / 'optimized.stdout').read_text()) or normal.get('checks') != 13 or normal.get('rejections') != 13:
+        raise ValueError('normal/-O predicates mismatch')
+    inert = json.loads((OUT / 'inert.stdout').read_text())
+    if inert != dict(status='inert', target=wrapper.TARGET, guest_minutes=30, OSLogin_TTL='70m'):
+        raise ValueError('inert EU identity')
+    after = {str(path): sha(path) for path in sources}
+    save(OUT / 'sources_after.json', after)
+    if before != after:
+        raise ValueError('qualification source changed')
+    save(OUT / 'receipt.json', dict(status='passed', commands=rows, sources_stable=True, GCP_used=False,
+         engine_tests=0, wrapper_sha256=sha(WRAPPER), controller_sha256=wrapper.CONTROLLER_SHA256,
+         binding_sha256=sha(OUT / 'session_wrapper_binding.json'), checks=13, rejections=13))
+    save(OUT / 'manifest.json', {path.name: sha(path) for path in sorted(OUT.iterdir()) if path.is_file()})
+    print(json.dumps(dict(status='passed', output=str(OUT), manifest_sha256=sha(OUT / 'manifest.json')), sort_keys=True))
+
+
+if __name__ == '__main__':
+    main()

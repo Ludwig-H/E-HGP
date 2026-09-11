@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/gcp-migration/selftest_terminal_batch_session_eu_v7.py"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "expected_exit": 0
+}

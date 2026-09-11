@@ -1,0 +1,7 @@
+{
+  "logical_worker": "snapshot/worker.py",
+  "new_GPU_snapshot_created": false,
+  "old_snapshots_unchanged": true,
+  "parent_manifest_sha256": "8758776c41abbbe08009a55c6e97bc10f7d040ccaadb4d5bcc5a6d93d5bf16b2",
+  "worker_sha256": "043197e4c73d92ff8845ddb5836c11fbb9ed9bdbd9a609edf7ce4a946d2c0fb3"
+}

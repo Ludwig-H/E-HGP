@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+"""Record exact-key revocation after all three targeted shutdowns, no restart."""
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+import time
+
+BASE = Path('/workspaces/E-HGP/build/v7_terminal_batch_g4_20260911')
+KEY = Path('/tmp/ehgp-v7-terminal-key.V3ZnBoPd/key')
+GCLOUD = '/home/codespace/google-cloud-sdk/bin/gcloud'
+OUT = BASE / 'session_key_closure_r1'
+
+
+def need(condition, message):
+    if not condition:
+        raise RuntimeError(message)
+
+
+def main():
+    OUT.mkdir(exist_ok=False)
+    sessions = {}
+    for name in ('session_r1', 'session_r2', 'session_eu_r1'):
+        raw = (BASE / name / 'full_host/receipt.json').read_bytes()
+        receipt = json.loads(raw)
+        need(receipt['targeted_shutdown_certified'] is True, name + ': shutdown')
+        need(all(c['group_closed'] is True for c in receipt['commands']), name + ': live group')
+        sessions[name] = dict(receipt_sha256=hashlib.sha256(raw).hexdigest(),
+                              target=receipt['target'], generation=receipt['generation'])
+    commands = []
+    for name, argv in (
+        ('revoke_exact_key', [GCLOUD, 'compute', 'os-login', 'ssh-keys', 'remove',
+                             '--project=devpod-gpu-exploration', '--key-file=' + str(KEY) + '.pub', '--quiet']),
+        ('labelled_inventory', [GCLOUD, 'compute', 'instances', 'list',
+                               '--project=devpod-gpu-exploration', '--filter=labels.project=e-hgp',
+                               '--format=json(name,zone,status,lastStartTimestamp)']),
+    ):
+        started = time.time()
+        run = subprocess.run(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=90, check=False)
+        entry = dict(name=name, argv=argv, exit_code=run.returncode,
+                     started_epoch=started, ended_epoch=time.time())
+        for stream in ('stdout', 'stderr'):
+            raw = getattr(run, stream)
+            (OUT / (name + '.' + stream)).write_bytes(raw)
+            entry[stream + '_sha256'] = hashlib.sha256(raw).hexdigest()
+        commands.append(entry)
+        (OUT / 'commands.json').write_text(json.dumps(commands, indent=2) + '\n')
+        need(run.returncode == 0, name + ': failed')
+    inventory = json.loads((OUT / 'labelled_inventory.stdout').read_bytes())
+    for session in sessions.values():
+        target = session['target']
+        matches = [row for row in inventory if row['name'] == target['instance']
+                   and row['zone'].endswith('/' + target['zone'])]
+        need(len(matches) == 1 and matches[0]['status'] == 'TERMINATED', 'exact target no longer terminated')
+    public = Path(str(KEY) + '.pub')
+    need(KEY.parent.is_dir() and not KEY.parent.is_symlink(), 'key directory')
+    need(set(KEY.parent.iterdir()) == {KEY, public}, 'unexpected key directory content')
+    need(all(p.is_file() and not p.is_symlink() for p in (KEY, public)), 'key path types')
+    KEY.unlink()
+    public.unlink()
+    KEY.parent.rmdir()
+    result = dict(status='completed', sessions=sessions, commands=commands,
+                  exact_oslogin_key_revoked=True, exact_private_public_key_files_removed=True,
+                  private_key_body_read=False, other_VM_mutations=False,
+                  other_active_instances=[row for row in inventory if row['status'] != 'TERMINATED'])
+    (OUT / 'receipt.json').write_text(json.dumps(result, indent=2, sort_keys=True) + '\n')
+    print(json.dumps(result, sort_keys=True))
+
+
+if __name__ == '__main__':
+    main()

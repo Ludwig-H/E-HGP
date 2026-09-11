@@ -1,0 +1,37 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "logging",
+        "read",
+        "resource.type=\"gce_instance\" AND timestamp>=\"2026-09-11T13:50:00Z\" AND timestamp<=\"2026-09-11T13:52:00Z\" AND protoPayload.resourceName:\"ehgp-v7-4fa0e0789a7d5bb06b787d35\"",
+        "--limit=15",
+        "--format=json(timestamp,protoPayload.methodName,protoPayload.resourceName,protoPayload.status)",
+        "--project=devpod-gpu-exploration"
+      ],
+      "exit_code": 0,
+      "name": "logging",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "f0a7780d14ccf7bfbadc5b2124d9ab1d923e76ba06fb0c71b6cf6c404989701c"
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "operations",
+        "list",
+        "--filter=targetLink:ehgp-v7-4fa0e0789a7d5bb06b787d35",
+        "--sort-by=~insertTime",
+        "--limit=8",
+        "--format=json(operationType,status,insertTime,startTime,endTime,error,statusMessage)",
+        "--project=devpod-gpu-exploration"
+      ],
+      "exit_code": 0,
+      "name": "operations",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "9c8e77ddb0b17bff8d08543465768a57e9daa65be9df680b12d3eda2b1aed07d"
+    }
+  ],
+  "read_only": true
+}

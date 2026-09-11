@@ -17,6 +17,14 @@ contrats de performance ne sont pas encore livrés.**
 
 ## État courant
 
+Dernier jalon : [sonde complète par lots, gate census→FULL et réduction MEB](docs/QUALIFICATION_BATCH_ET_MEB_20260911.md).
+Le raccord privé passe 372 536 contrôles O2/SAN et compile avec la sonde
+entière sous NVCC strict. La variante q2 indépendante préserve les résultats
+sur 6 416 MEB, avec moins de supports/puissances et ses distances nouvelles
+comptées ; elle n'est pas intégrée. Trois tentatives G4 sont closes : deux
+préemptions, puis précontrôle d'outils échoué en Europe. Aucun nouveau kernel
+de ce raccord ni temps 50k exécuté ; contrats 1 s/100 ms toujours non acquis.
+
 Le [nouveau raccord FULL](docs/TOUR_FULL_PAR_BOULES.md) produit les forêts
 datées et leurs cartes verticales à partir de census exacts complets fournis,
 y compris les plateaux non réguliers. O2/SAN : 170 320 contrôles,

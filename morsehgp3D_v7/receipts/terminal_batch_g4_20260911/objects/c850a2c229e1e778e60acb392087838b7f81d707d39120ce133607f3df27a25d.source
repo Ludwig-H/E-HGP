@@ -1,0 +1,32 @@
+{
+  "captures/session_eu_r1/full_host/before_retrieve.stdout.safety_projection.json": {
+    "source": "captures/session_eu_r1/full_host/before_retrieve.stdout",
+    "source_sha256": "a0f9cfaa7d8ab568c29f34f922b886bff3256d5651d7f89b47356cbd78426609",
+    "transformation": "declared_safety_fields_only; terminationTimestamp from resourceStatus.scheduling"
+  },
+  "captures/session_eu_r1/full_host/before_upload.stdout.safety_projection.json": {
+    "source": "captures/session_eu_r1/full_host/before_upload.stdout",
+    "source_sha256": "a0f9cfaa7d8ab568c29f34f922b886bff3256d5651d7f89b47356cbd78426609",
+    "transformation": "declared_safety_fields_only; terminationTimestamp from resourceStatus.scheduling"
+  },
+  "captures/session_eu_r1/full_host/before_worker.stdout.safety_projection.json": {
+    "source": "captures/session_eu_r1/full_host/before_worker.stdout",
+    "source_sha256": "a0f9cfaa7d8ab568c29f34f922b886bff3256d5651d7f89b47356cbd78426609",
+    "transformation": "declared_safety_fields_only; terminationTimestamp from resourceStatus.scheduling"
+  },
+  "captures/session_eu_r1/full_host/guarded_start.stdout.redacted": {
+    "source": "captures/session_eu_r1/full_host/guarded_start.stdout",
+    "source_sha256": "947fcf9000cbb2e1662f997568bceade5c034e8e1b384dc449fc57aefc8e59dc",
+    "transformation": "replace_only_the_single_compte_line"
+  },
+  "captures/session_r1/full_host/guarded_start.stdout.redacted": {
+    "source": "captures/session_r1/full_host/guarded_start.stdout",
+    "source_sha256": "20d693085d810f9574170b78c56f62d02807ac60651c47f78bad7324ca5eb19e",
+    "transformation": "replace_only_the_single_compte_line"
+  },
+  "captures/session_r2/full_host/guarded_start.stdout.redacted": {
+    "source": "captures/session_r2/full_host/guarded_start.stdout",
+    "source_sha256": "d2e0f976308878b8c05755b2a5caf7166755643f17cd6d36edbbff269cd99818",
+    "transformation": "replace_only_the_single_compte_line"
+  }
+}

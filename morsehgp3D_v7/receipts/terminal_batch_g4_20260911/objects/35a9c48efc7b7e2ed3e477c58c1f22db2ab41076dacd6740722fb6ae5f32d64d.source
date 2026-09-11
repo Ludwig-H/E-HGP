@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/home/codespace/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "instances",
+    "describe",
+    "ehgp-blackwell-spot",
+    "--project=devpod-gpu-exploration",
+    "--zone=europe-west4-a",
+    "--format=json"
+  ],
+  "name": "before_retrieve",
+  "started_epoch": 1789135251.3290923,
+  "timeout_seconds": 60
+}

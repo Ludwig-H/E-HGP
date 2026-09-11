@@ -1,0 +1,1 @@
+{"guest_shutdown_minutes":30,"instance":"ehgp-blackwell-spot","last_start_timestamp":"2026-09-11T06:59:41.712-07:00","project":"devpod-gpu-exploration","schema":"e-hgp.start-handoff.v3","status":"targeted_running","zone":"europe-west4-a"}

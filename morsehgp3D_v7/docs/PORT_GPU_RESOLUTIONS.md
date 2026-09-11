@@ -16,6 +16,13 @@ sans avertissement sous `--Werror=cross-execution-space-call` ; sa qualification
 sur carte reste à faire. Ni l'API ni ces preuves locales n'activent le GPU
 dans la sonde active ou le worker G4 nominal.
 
+Le [jalon suivant de sonde complète](QUALIFICATION_BATCH_ET_MEB_20260911.md)
+ferme O2/SAN de la gate compacte census→batch→FULL et le lien NVCC strict
+de cette gate et de la sonde entière. Le nouveau worker privé est prêt,
+mais ses trois tentatives G4 s'arrêtent avant calcul : deux préemptions US,
+puis outils manquants au précontrôle EU. Tous les arrêts ciblés sont certifiés.
+Les preuves sur carte des primitives précédentes ne qualifient pas ces lots.
+
 Après la session G4, la [couture MEB + clé](../receipts/gpu_meb_key_route_20260911/README.md)
 est qualifiée O2/SAN ROOT et NVCC strict : le backend forme désormais la
 clé primitive, sans matérialisation ni revalidation de puissance sur CPU.
@@ -177,10 +184,12 @@ puis compilation **et lien NVCC stricts**, puis seulement exécution device.
 Le terminal et le raccord de tour reçoivent ensuite leurs propres gates.
 Toute session G4 reste SPOT, bornée et doublement gardée, avec arrêt ciblé
 certifié avant relais. Aucune durée ni accélération n'est extrapolée ici.
-Le worker de tours G4 conserve la configuration nominale sans `--static-threads`.
-Son adaptation et ses validations de configuration sont nécessaires avant
-une campagne statique CPU/GPU ; recompiler le nouveau header ne suffit pas
-à activer la voie optionnelle.
+Le worker historique de tours G4 conserve la configuration nominale sans
+`--static-threads`. Le [worker terminal par lots](../../gcp-migration/README_TERMINAL_BATCH_V7.md)
+est maintenant une voie séparée, sur instantané privé qualifié : statique1
+et batchGPU, puis CPU48 apparié, avec schéma et compteurs vérifiés.
+Ses tests locaux ne valent pas exécution GPU ; recompiler le nouveau header
+dans l'ancien worker ne suffit toujours pas à activer cette voie.
 Le nouveau worker `anchor_meb_worker_v7.py` ne lance que les deux gates
 de primitives ; il ne remplace pas ce worker de tours.
 

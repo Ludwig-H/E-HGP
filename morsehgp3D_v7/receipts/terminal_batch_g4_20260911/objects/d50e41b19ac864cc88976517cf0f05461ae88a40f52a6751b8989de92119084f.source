@@ -1,0 +1,12 @@
+# Refus local avant toute commande GCP
+
+La première invocation du contrôleur s'est arrêtée à `existing private/public
+key files`, avant la création de `full_host` et avant tout appel gcloud. La clé
+nouvellement générée avait le mode 0644 à l'intérieur du dossier temporaire
+0700. ROOT a constaté ce mode par `stat`, puis appliqué et relu 0600 avant
+l'invocation enregistrée dans `session_r1/full_host`. Aucun contenu privé
+n'a été affiché, copié dans un reçu ou transmis autre part qu'au client SSH.
+
+Cette note décrit l'échec observé dans la sortie du terminal ; ce premier
+refus n'a pas de capture de processus indépendante. Il ne constitue ni une
+session GPU ni une preuve géométrique.

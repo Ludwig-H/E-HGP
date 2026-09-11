@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "/home/codespace/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "instances",
+    "describe",
+    "ehgp-blackwell-spot",
+    "--project=devpod-gpu-exploration",
+    "--zone=europe-west4-a",
+    "--format=json"
+  ],
+  "ended_epoch": 1789135240.387319,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "before_upload",
+  "pid": 1462240,
+  "started_epoch": 1789135239.1476653,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "a0f9cfaa7d8ab568c29f34f922b886bff3256d5651d7f89b47356cbd78426609",
+  "timeout_seconds": 60
+}

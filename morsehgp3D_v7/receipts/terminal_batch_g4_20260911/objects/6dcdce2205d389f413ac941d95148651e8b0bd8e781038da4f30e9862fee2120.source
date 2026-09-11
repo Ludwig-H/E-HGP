@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+"""Capture read-only evidence for the first preempted generation."""
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+
+BASE = Path(__file__).resolve().parent
+GCLOUD = '/home/codespace/google-cloud-sdk/bin/gcloud'
+PROJECT = 'devpod-gpu-exploration'
+INSTANCE = 'ehgp-v7-4fa0e0789a7d5bb06b787d35'
+OUT = BASE / 'preemption_diagnostics_r1'
+OUT.mkdir(exist_ok=False)
+commands = [
+    ('logging', ['logging', 'read', 'resource.type="gce_instance" AND '
+      'timestamp>="2026-09-11T13:50:00Z" AND timestamp<="2026-09-11T13:52:00Z" AND '
+      'protoPayload.resourceName:"' + INSTANCE + '"', '--limit=15',
+      '--format=json(timestamp,protoPayload.methodName,protoPayload.resourceName,protoPayload.status)']),
+    ('operations', ['compute', 'operations', 'list', '--filter=targetLink:' + INSTANCE,
+      '--sort-by=~insertTime', '--limit=8',
+      '--format=json(operationType,status,insertTime,startTime,endTime,error,statusMessage)']),
+]
+rows = []
+for name, tail in commands:
+    argv = [GCLOUD, *tail, '--project=' + PROJECT]
+    result = subprocess.run(argv, capture_output=True, check=False, timeout=60)
+    for suffix, value in (('stdout', result.stdout), ('stderr', result.stderr)):
+        with (OUT / (name + '.' + suffix)).open('xb') as stream:
+            stream.write(value)
+    rows.append(dict(name=name, argv=argv, exit_code=result.returncode,
+        stdout_sha256=hashlib.sha256(result.stdout).hexdigest(),
+        stderr_sha256=hashlib.sha256(result.stderr).hexdigest()))
+with (OUT / 'receipt.json').open('x') as stream:
+    json.dump(dict(read_only=True, commands=rows), stream, indent=2, sort_keys=True)
+print(json.dumps(rows, sort_keys=True))
+if any(row['exit_code'] != 0 for row in rows):
+    raise SystemExit(1)

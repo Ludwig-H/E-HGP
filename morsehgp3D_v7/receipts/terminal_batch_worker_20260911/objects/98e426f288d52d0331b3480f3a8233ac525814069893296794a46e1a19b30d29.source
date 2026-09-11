@@ -1,0 +1,245 @@
+// Bounded complete CPU census -> device batch -> FULL physical comparison.
+// No exhaustive oracle, no new MEB implementation, no runtime benchmark.
+#include "prototype/batch_adapter.hpp"
+#include "prototype/cuda_trial/reference.hpp"
+#include "prototype/source/morsehgp3D_v7/src/cloud/families.hpp"
+#include "prototype/source/morsehgp3D_v7/src/pipeline/generate.hpp"
+
+#if !defined(__CUDACC__) && !defined(MHGP7_FAKE_DEVICE)
+#error Select CUDA or the explicit host-stub qualification backend
+#endif
+#ifdef MHGP7_TESTING
+#error The whole-census gate consumes nominal product primitives
+#endif
+
+namespace whole {
+using namespace mhgp7;
+namespace route = gpu_terminal_batch_private;
+namespace terminal = gpu_terminal_private;
+enum class Fault { none, wrong_terminal, after_prefix };
+struct Totals {
+  u64 checks = 0, fixtures = 0, physical_pairs = 0, nodes = 0, contributions = 0;
+  u64 direct[11]{}, hits[11]{}, queries[11]{}, batches = 0, launches = 0, contexts = 0;
+  u64 zero_contexts = 0, closed_contexts = 0, q3 = 0, q4 = 0, extras = 0;
+  bool direct_fault_detected = false, prefix_fault_detected = false;
+} total;
+void need(bool ok, const char* message) {
+  ++total.checks;
+  if (!ok) throw std::runtime_error(message);
+}
+void physical(const FullBallTowerResult& a, const FullBallTowerResult& b) {
+  const auto exact = [](const ExactLevel& x, const ExactLevel& y) {
+    return std::equal(std::begin(x.num), std::end(x.num), std::begin(y.num)) && x.den == y.den;
+  };
+  need(a.status == FullBallStatus::kCompleteRelative && a.status == b.status &&
+       a.orders.size() == b.orders.size(), "whole.complete_towers");
+  for (size_t k = 0; k < a.orders.size(); ++k) {
+    const auto& x = a.orders[k].forest;
+    const auto& y = b.orders[k].forest;
+    need(x.order() == y.order() && x.nodes().size() == y.nodes().size() &&
+         x.parents() == y.parents() && x.successors() == y.successors() &&
+         a.orders[k].lower_nodes == b.orders[k].lower_nodes, "whole.physical_topology_vertical");
+    need(x.populations()->domain() == y.populations()->domain() &&
+         x.populations()->rows().size() == y.populations()->rows().size(), "whole.bank_shape");
+    for (size_t p = 0; p < x.populations()->rows().size(); ++p)
+      need(x.populations()->rows()[p].interior == y.populations()->rows()[p].interior &&
+           x.populations()->rows()[p].shell == y.populations()->rows()[p].shell, "whole.bank_rows");
+    for (size_t n = 0; n < x.nodes().size(); ++n)
+      need(exact(x.nodes()[n].level, y.nodes()[n].level) && x.nodes()[n].first == y.nodes()[n].first &&
+           x.nodes()[n].parent_count == y.nodes()[n].parent_count, "whole.physical_node");
+    need(x.contributions().size() == y.contributions().size(), "whole.contribution_shape");
+    for (size_t c = 0; c < x.contributions().size(); ++c) {
+      const auto& u = x.contributions()[c]; const auto& v = y.contributions()[c];
+      need(exact(u.level, v.level) && u.segment == v.segment && u.ref.population == v.ref.population &&
+           u.ref.shell_mask == v.ref.shell_mask && u.ref.include_interior == v.ref.include_interior,
+           "whole.physical_contribution");
+    }
+    total.nodes += x.nodes().size(); total.contributions += x.contributions().size();
+  }
+  ++total.physical_pairs;
+}
+void work(const FullBallStats& a, const FullBallStats& b) {
+  need(a.resolve_work.calls == b.resolve_work.calls &&
+       a.resolve_work.materializations == b.resolve_work.materializations &&
+       a.resolve_work.power_tests == b.resolve_work.power_tests &&
+       a.resolve_work.supports_by_size == b.resolve_work.supports_by_size, "whole.MEB_work");
+  for (auto member : {&FullBallStats::key_lookups, &FullBallStats::anchor_hits,
+       &FullBallStats::intruder_queries, &FullBallStats::intruder_nodes, &FullBallStats::intruder_power_tests,
+       &FullBallStats::interior_ranges, &FullBallStats::same_radius_steps, &FullBallStats::descending_steps,
+       &FullBallStats::max_chain_steps}) need(a.*member == b.*member, "whole.descent_work");
+  need(a.static_requests == b.static_requests && a.static_unique == b.static_unique &&
+       a.static_seeded == b.static_seeded && a.static_post_seed_queries == b.static_post_seed_queries &&
+       a.static_post_seed_hits == b.static_post_seed_hits &&
+       a.static_post_seed_terminals == b.static_post_seed_terminals, "whole.RUSQHT");
+  need(b.static_batch_work_known, "whole.paid_work_known");
+}
+struct Checked {
+  route::Context& context;
+  terminal_cuda_gate::CpuTerminal reference;
+  Fault fault = Fault::none;
+  u64 callbacks = 0, successful_callbacks = 0;
+  static void resolve(void* opaque, const FullBallGeometryView& geometry,
+      const FullBallBatchView& batch, FullBallBatchResult& output) {
+    auto& owner = *static_cast<Checked*>(opaque);
+    ++owner.callbacks;
+    if (owner.fault == Fault::after_prefix && owner.successful_callbacks == 1)
+      owner.context.inject(route::transport::Fault::kDownload);
+    route::resolve_batch(&owner.context, geometry, batch, output);
+    if (owner.fault == Fault::after_prefix && owner.successful_callbacks == 1) {
+      need(output.status != FullBallStatus::kCompleteRelative && output.targets.empty() &&
+           !output.work_known, "whole.after_prefix_callback_closed_unknown");
+      total.prefix_fault_detected = true;
+      return;
+    }
+    need(output.status == FullBallStatus::kCompleteRelative && output.work_known &&
+         output.targets.size() == batch.requests.size(), "whole.complete_batch");
+    if (owner.fault == Fault::wrong_terminal && !batch.requests.empty()) {
+      // Reader fault only: a syntactically valid but wrong BallId, independent
+      // of whether both identities later normalize to the same component.
+      need(geometry.balls.size() > 1, "whole.fault_nonempty_ball_domain");
+      output.targets[0].ball = static_cast<u32>((output.targets[0].ball + 1ull) % geometry.balls.size());
+    }
+    u64 reference_calls = 0;
+    for (size_t j = 0; j < batch.requests.size(); ++j) {
+      const auto& source = batch.requests[j];
+      terminal::Request request;
+      request.snapshot = owner.context.snapshot(); request.k = batch.k; request.ordinal = source.ordinal;
+      request.before = terminal::encode_level(geometry.balls[source.consumer].level);
+      std::copy(source.key.begin(), source.key.end(), request.selected);
+      std::vector<terminal::TraceRow> trace;
+      const auto expected = owner.reference.resolve(request, trace);
+      const bool exact = expected.status == terminal::Status::kOk &&
+          output.targets[j].ball == expected.target && output.targets[j].ordinal == expected.ordinal;
+      if (owner.fault == Fault::wrong_terminal && !exact) total.direct_fault_detected = true;
+      need(exact, "whole.direct_terminal_identity");
+      full_ball_detail::add(reference_calls, expected.work.calls);
+      ++total.direct[batch.k];
+    }
+    need(reference_calls == output.work.resolve_work.calls + output.work.static_post_seed_hits[batch.k],
+         "whole.saved_last_MEB");
+    total.hits[batch.k] += output.work.static_post_seed_hits[batch.k];
+    total.queries[batch.k] += output.work.static_post_seed_queries[batch.k];
+    ++total.batches; ++owner.successful_callbacks;
+  }
+};
+std::vector<InputPoint> points(std::initializer_list<P3> values) {
+  std::vector<InputPoint> result;
+  PointId id = 1009;
+  for (const auto& value : values) { result.push_back({id, value}); id += 37; }
+  return result;
+}
+void fixture(const char* name, std::vector<InputPoint> input, unsigned kmax, int s, Fault fault) {
+  std::fprintf(stderr, "fixture_start=%s n=%zu K=%u s=%d\n", name, input.size(), kmax, s);
+  const auto index = build_cloud_index(input);
+  need(index.valid && !index.has_duplicate_positions(), "whole.index");
+  const auto smax = std::min<u64>(kmax + 1, index.input_count);
+  GenerateOptions options; options.s = s; options.smax = smax; options.threads = 1;
+  GenerateStats generated;
+  std::vector<BallCandidate> candidates;
+  generate_candidates(index, options, &candidates, &generated);
+  need(generated.cap_refus == kCapRefusNone && !generated.invariant_jneg, "whole.generation");
+  const u128 mass = expected_pair_mass(index);
+  for (size_t q = 0; q < 3; ++q)
+    need(generated.ledger_emitted_mass[q] + generated.ledger_killed_mass[q] == mass, "whole.pair_ledger");
+  rle_candidates(&candidates, 1);
+  need(candidates_capacity_ok(candidates.size()), "whole.candidate_representation");
+  ExpandStats census;
+  std::vector<Survivor> survivors;
+  prefilter_balls(index, candidates, smax, 1, &survivors, &census);
+  std::vector<BallData> balls;
+  need(census_balls(index, candidates, survivors, smax, kBallShellMax, 1, &balls, &census) ==
+       PipelineStatus::kCompleteRegular, "whole.real_census");
+  for (const auto& ball : balls) {
+    total.q3 += ball.arity == 3; total.q4 += ball.arity == 4; total.extras += ball.n_shell > ball.arity;
+  }
+  const auto scalar = build_full_ball_tower(index, balls, kmax, 1);
+  need(scalar.status == FullBallStatus::kCompleteRelative, "whole.scalar_complete");
+  const auto cached = build_full_ball_tower(index, balls, kmax);
+  physical(scalar, cached);
+  FullBallTowerResult actual;
+  if (kmax == 1 || balls.empty()) {
+    actual = build_full_ball_tower(index, balls, kmax, 1); ++total.zero_contexts;
+  } else {
+    route::Context context(index, balls); ++total.contexts;
+    Checked owner{context, terminal_cuda_gate::CpuTerminal(index, balls), fault};
+    actual = build_full_ball_tower(index, balls, kmax, 1, {&owner, Checked::resolve});
+    total.launches += context.backend().work.launches;
+    need(context.close() && context.backend().cleanup_certified &&
+         context.backend().allocation_bytes == context.backend().certified_free_bytes,
+         "whole.context_closed");
+    ++total.closed_contexts;
+    if (fault != Fault::none) {
+      need(actual.status != FullBallStatus::kCompleteRelative && actual.orders.empty(), "whole.failure_global_empty");
+      if (fault == Fault::wrong_terminal) need(total.direct_fault_detected, "whole.direct_fault_causal");
+      else need(total.prefix_fault_detected && owner.successful_callbacks == 1 &&
+                owner.callbacks == 2 && !actual.stats.static_batch_work_known && actual.stats.resolve_work.calls > 0,
+                "whole.paid_prefix_retained_not_published");
+      return;
+    }
+  }
+  physical(scalar, actual); work(scalar.stats, actual.stats);
+  ++total.fixtures;
+  std::fprintf(stderr, "fixture_complete=%s balls=%zu\n", name, balls.size());
+}
+}  // namespace whole
+
+int main(int argc, char** argv) {
+  if (argc != 2) return 2;
+  const std::string_view mode(argv[1]);
+  if (mode != "--selftest" && mode != "--wrong-terminal" && mode != "--fail-after-prefix") return 2;
+  try {
+    using namespace whole;
+    const auto fault = mode == "--wrong-terminal" ? Fault::wrong_terminal :
+                       mode == "--fail-after-prefix" ? Fault::after_prefix : Fault::none;
+    auto uniform = make_family_input(CloudFamily::kUniform, 32, 65536, 3);
+    if (fault != Fault::none) {
+      fixture("uniform32_causal", uniform, 10, 8, fault);
+      std::fprintf(stderr, "%s\n", fault == Fault::wrong_terminal ?
+          "causal_direct_terminal_rejected" : "causal_after_prefix_global_empty");
+      return 4;
+    }
+    for (int s : {8, 10, 12}) {
+      fixture("uniform32", uniform, 10, s, fault);
+      auto permutation = uniform;
+      std::reverse(permutation.begin(), permutation.end());
+      fixture("uniform32_permutation", permutation, 10, s, fault);
+    }
+    fixture("post_seed_ABEZW", points({{0,3,0},{8,3,0},{4,2,0},{6,0,0},{4,23,0}}), 5, 8, fault);
+    fixture("square_partial", points({{0,0,0},{10,0,0},{0,10,0},{10,10,0},
+        {4,4,0},{5,4,0},{4,5,0},{5,5,0}}), 4, 8, fault);
+    fixture("terminal_pair", points({{0,0,0},{2,0,0}}), 2, 8, fault);
+    fixture("terminal_singleton", points({{0,0,0}}), 1, 8, fault);
+    need(total.fixtures == 10 && total.physical_pairs == 20 && total.closed_contexts == total.contexts &&
+         total.zero_contexts == 1 && total.launches == total.batches && total.batches > 0 &&
+         total.direct[9] > 0 && total.direct[10] > 0 && total.q3 > 0 && total.q4 > 0 && total.extras > 0 &&
+         std::accumulate(std::begin(total.hits), std::end(total.hits), u64{0}) > 0, "whole.nonvacuity");
+#if defined(__CUDACC__)
+    need(total.launches > 0, "whole.device_nonvacuity");
+    constexpr const char* backend = "cpu_census_cuda_terminal_batch";
+    constexpr bool device_executed = true;
+#else
+    constexpr const char* backend = "cpu_census_host_stub_terminal_batch";
+    constexpr bool device_executed = false;
+#endif
+    std::printf("{\"status\":\"passed\",\"scope\":\"bounded_real_census_batch_FULL\",\"backend\":\"%s\","
+        "\"device_executed\":%s,\"public_status\":\"not_claimed\",\"checks\":%llu,\"fixtures\":%llu,"
+        "\"physical_pairs\":%llu,\"nodes_compared\":%llu,\"contributions_compared\":%llu,"
+        "\"contexts\":%llu,\"closed_contexts\":%llu,\"zero_context_cases\":%llu,\"launches\":%llu,"
+        "\"batches\":%llu,\"q3_rows\":%llu,\"q4_rows\":%llu,\"extra_shell_rows\":%llu,\"per_k\":[",
+        backend, device_executed ? "true" : "false", static_cast<unsigned long long>(total.checks),
+        static_cast<unsigned long long>(total.fixtures), static_cast<unsigned long long>(total.physical_pairs),
+        static_cast<unsigned long long>(total.nodes), static_cast<unsigned long long>(total.contributions),
+        static_cast<unsigned long long>(total.contexts), static_cast<unsigned long long>(total.closed_contexts),
+        static_cast<unsigned long long>(total.zero_contexts), static_cast<unsigned long long>(total.launches),
+        static_cast<unsigned long long>(total.batches), static_cast<unsigned long long>(total.q3),
+        static_cast<unsigned long long>(total.q4), static_cast<unsigned long long>(total.extras));
+    for (unsigned k = 1; k <= 10; ++k)
+      std::printf("%s{\"K\":%u,\"direct_terminals\":%llu,\"Q\":%llu,\"H\":%llu}", k == 1 ? "" : ",", k,
+          static_cast<unsigned long long>(total.direct[k]), static_cast<unsigned long long>(total.queries[k]),
+          static_cast<unsigned long long>(total.hits[k]));
+    std::printf("]}\n");
+    return 0;
+  } catch (const whole::route::transport::Error& error) { std::fprintf(stderr, "transport_error=%s\n", error.reason); }
+    catch (const std::exception& error) { std::fprintf(stderr, "error=%s\n", error.what()); }
+  return 1;
+}

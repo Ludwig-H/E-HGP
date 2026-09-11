@@ -1,0 +1,103 @@
+#pragma once
+
+#include <array>
+#include <chrono>
+#include "../../../batch_adapter.hpp"
+
+#if !defined(__CUDACC__) && !defined(MHGP7_FAKE_DEVICE)
+#error This private probe requires an explicit CUDA or fake-device backend
+#endif
+
+namespace mhgp7::batch_probe_private {
+using Clock = std::chrono::steady_clock;
+namespace route = gpu_terminal_batch_private;
+inline double seconds(Clock::time_point start) {
+  return std::chrono::duration<double>(Clock::now() - start).count();
+}
+struct Order {
+  u64 callbacks = 0;
+  double callback_s = 0;
+  bool work_known = true;
+  FullBallStats paid;
+};
+struct Trace {
+  route::Context* context = nullptr;
+  std::array<Order, kFacetMaxK + 1> orders{};
+  route::transport::Phases transport;
+  u64 contexts = 0, close_calls = 0, capacity_before_close = 0;
+  u64 allocation_bytes = 0, free_attempts = 0, free_failures = 0, certified_free_bytes = 0;
+  u64 initialization_calls = 0, initialization_bytes = 0, sampled_live_storage_before_close = 0;
+  bool close_certified = true;
+  double capture_s = 0, builder_s = 0, close_s = 0, context_lifetime_s = 0;
+  double callback_sum() const {
+    double sum = 0;
+    for (const auto& order : orders) sum += order.callback_s;
+    return sum;
+  }
+};
+inline void callback(void* opaque, const FullBallGeometryView& geometry,
+    const FullBallBatchView& batch, FullBallBatchResult& output) {
+  auto& trace = *static_cast<Trace*>(opaque);
+  full_ball_detail::require(trace.context && batch.k >= 2 && batch.k <= kFacetMaxK,
+                           "probe_callback_binding");
+  auto& order = trace.orders[batch.k];
+  full_ball_detail::require(order.callbacks == 0, "probe_one_callback_per_K");
+  ++order.callbacks;
+  const auto start = Clock::now();
+  try {
+    route::resolve_batch(trace.context, geometry, batch, output);
+    order.work_known = output.work_known;
+    if (output.work_known) order.paid = output.work;
+    order.callback_s = seconds(start);
+  } catch (...) {
+    order.work_known = false;
+    order.callback_s = seconds(start);
+    throw;
+  }
+}
+inline FullBallTowerResult build(const CloudIndex& index, std::span<const BallData> balls,
+    unsigned kmax, int static_threads, bool batch, Trace& trace) {
+  FullBallTowerResult result;
+  // K1 has no geometric batch; terminal singleton has no catalogue. Do not
+  // create a CUDA context or copy a resident snapshot for either empty job.
+  if (!batch || kmax == 1 || balls.empty()) {
+    const auto start = Clock::now();
+    result = build_full_ball_tower(index, balls, kmax, static_threads);
+    trace.builder_s = seconds(start);
+    return result;
+  }
+  const auto lifetime = Clock::now();
+  {
+    const auto capture = Clock::now();
+    route::Context context(index, balls);
+    trace.capture_s = seconds(capture);
+    trace.contexts = 1;
+    trace.context = &context;
+    const auto builder = Clock::now();
+    result = build_full_ball_tower(index, balls, kmax, static_threads, {&trace, callback});
+    trace.builder_s = seconds(builder);
+    trace.capacity_before_close = context.capacity();
+    trace.initialization_calls = context.initialization_calls();
+    trace.initialization_bytes = context.initialization_bytes();
+    full_ball_detail::require(context.backend().allocation_bytes >= context.backend().certified_free_bytes,
+                             "probe_transport_live_bytes");
+    trace.sampled_live_storage_before_close =
+        context.backend().allocation_bytes - context.backend().certified_free_bytes;
+    const auto closing = Clock::now();
+    trace.close_certified = context.close();
+    trace.close_calls = 1;
+    trace.close_s = seconds(closing);
+    const auto& backend = context.backend();
+    trace.transport = backend.work;
+    trace.allocation_bytes = backend.allocation_bytes;
+    trace.free_attempts = backend.free_attempts;
+    trace.free_failures = backend.free_failures;
+    trace.certified_free_bytes = backend.certified_free_bytes;
+    trace.context = nullptr;
+    full_ball_detail::require(trace.close_certified, "probe_context_close_uncertified");
+  }  // Owner, seeds, resident metadata and Context destructor are timed here.
+  trace.context_lifetime_s = seconds(lifetime);
+  full_ball_detail::require(trace.builder_s >= trace.callback_sum(), "probe_callback_timing_partition");
+  return result;
+}
+}  // namespace mhgp7::batch_probe_private

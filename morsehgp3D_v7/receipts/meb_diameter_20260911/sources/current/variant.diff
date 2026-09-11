@@ -1,0 +1,73 @@
+--- baseline/anchor_meb
++++ private/anchor_meb_diameter
+@@ -1,4 +1,4 @@
+-inline AnchorMebResult anchor_meb(std::span<const P3> sites, AnchorMebWork& work) noexcept {
++inline AnchorMebResult anchor_meb_diameter(std::span<const P3> sites, AnchorMebWork& work, u64& diameter_pairs) noexcept {
+   const auto failure = [](AnchorMebStatus status, const char* reason) {
+     AnchorMebResult result;
+     result.status = status;
+@@ -28,6 +28,28 @@
+     result.reason = "anchor_meb_exact_local";
+     return result;
+   }
++  const auto n = static_cast<u8>(sites.size());
++  i64 diameter = -1;
++  u8 extreme_a = 0, extreme_b = 1;
++  for (u8 a = 0; a < n; ++a) for (u8 b = a + 1; b < n; ++b) {
++    if (!anchor_meb_detail::charge(diameter_pairs))
++      return failure(AnchorMebStatus::kCounterOverflow, "anchor_meb_diameter_pairs_overflow");
++#if MHGP7_DIAMETER_MUTANT == 2
++    --diameter_pairs;  // Deliberately hide a physically evaluated distance.
++#endif
++    const i64 distance = p3_norm2(p3_sub(sites[a], sites[b]));
++#if MHGP7_DIAMETER_MUTANT == 1
++    const bool farther = distance >= diameter;
++#else
++    const bool farther = distance > diameter;
++#endif
++    if (farther) { diameter = distance; extreme_a = a; extreme_b = b; }
++  }
++  // Visit each site exactly once: the two witnesses first, then the old order.
++  std::array<u8, kFacetMaxK> power_order{};
++  power_order[0] = extreme_a; power_order[1] = extreme_b;
++  u8 at = 2;
++  for (u8 i = 0; i < n; ++i) if (i != extreme_a && i != extreme_b) power_order[at++] = i;
+   bool finished = false;
+   const auto attempt = [&](std::array<u8, 4> slots, u8 q) {
+     if (!anchor_meb_detail::charge(work.supports_by_size[q])) {
+@@ -37,7 +59,12 @@
+     anchor_meb_detail::Candidate candidate;
+     if (!anchor_meb_detail::form(sites, slots, q, candidate)) return false;
+     u8 shell = 0;
+-    for (const auto& point : sites) {
++    for (u8 position = 0; position < n; ++position) {
++#if MHGP7_DIAMETER_MUTANT == 3
++      const auto& point = sites[position];
++#else
++      const auto& point = sites[power_order[position]];
++#endif
+       if (!anchor_meb_detail::charge(work.power_tests)) {
+         result = failure(AnchorMebStatus::kCounterOverflow, "anchor_meb_power_tests_overflow");
+         return true;
+@@ -45,6 +72,9 @@
+       const i128 power = candidate.power(point);
+       if (power > 0) return false;
+       if (power == 0) ++shell;
++#if MHGP7_DIAMETER_MUTANT == 4
++      if (position < 2 && power == 0) ++shell;
++#endif
+     }
+     if (!anchor_meb_detail::charge(work.materializations)) {
+       result = failure(AnchorMebStatus::kCounterOverflow, "anchor_meb_materializations_overflow");
+@@ -69,10 +99,7 @@
+     result.reason = "anchor_meb_exact_local";
+     return true;
+   };
+-  const auto n = static_cast<u8>(sites.size());
+-  for (u8 a = 0; a < n && !finished; ++a)
+-    for (u8 b = a + 1; b < n && !finished; ++b)
+-      finished = attempt({a, b, 0, 0}, 2);
++  finished = attempt({extreme_a, extreme_b, 0, 0}, 2);
+   for (u8 a = 0; a < n && !finished; ++a)
+     for (u8 b = a + 1; b < n && !finished; ++b)
+       for (u8 c = b + 1; c < n && !finished; ++c)

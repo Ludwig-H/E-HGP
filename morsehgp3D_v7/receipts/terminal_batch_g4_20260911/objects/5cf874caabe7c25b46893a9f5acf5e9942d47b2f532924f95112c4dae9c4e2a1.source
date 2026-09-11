@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_terminal_batch_g4_20260911/session_r1/full_host/start_and_verify.sh",
+    "--yes",
+    "--guest-shutdown-minutes",
+    "30",
+    "--handoff-file",
+    "/workspaces/E-HGP/build/v7_terminal_batch_g4_20260911/session_r1/full_host/handoff.json",
+    "--lifecycle-state-file",
+    "/workspaces/E-HGP/build/v7_terminal_batch_g4_20260911/session_r1/full_host/lifecycle.txt",
+    "--guard-mark-dir",
+    "/workspaces/E-HGP/build/v7_terminal_batch_g4_20260911/session_r1/full_host/guardmarks"
+  ],
+  "name": "guarded_start",
+  "started_epoch": 1789134632.5128927,
+  "timeout_seconds": null
+}

@@ -1,0 +1,74 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "os-login",
+        "ssh-keys",
+        "remove",
+        "--project=devpod-gpu-exploration",
+        "--key-file=/tmp/ehgp-v7-terminal-key.V3ZnBoPd/key.pub",
+        "--quiet"
+      ],
+      "ended_epoch": 1789135502.671582,
+      "exit_code": 0,
+      "name": "revoke_exact_key",
+      "started_epoch": 1789135501.112962,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "instances",
+        "list",
+        "--project=devpod-gpu-exploration",
+        "--filter=labels.project=e-hgp",
+        "--format=json(name,zone,status,lastStartTimestamp)"
+      ],
+      "ended_epoch": 1789135504.1149035,
+      "exit_code": 0,
+      "name": "labelled_inventory",
+      "started_epoch": 1789135502.6722035,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "5511e620fd1cf5cda7fad433ec18784dc86b4b571ac65dbb9cea4ef4c46e71f8"
+    }
+  ],
+  "exact_oslogin_key_revoked": true,
+  "exact_private_public_key_files_removed": true,
+  "other_VM_mutations": false,
+  "other_active_instances": [],
+  "private_key_body_read": false,
+  "sessions": {
+    "session_eu_r1": {
+      "generation": "2026-09-11T06:59:41.712-07:00",
+      "receipt_sha256": "d9b174338eb207a8493ba54a129d07940946db6113636a1970af3f5a97872c81",
+      "target": {
+        "instance": "ehgp-blackwell-spot",
+        "project": "devpod-gpu-exploration",
+        "zone": "europe-west4-a"
+      }
+    },
+    "session_r1": {
+      "generation": "2026-09-11T06:51:01.668-07:00",
+      "receipt_sha256": "a07b064088be189d104f44584300767b7a783a7e17ad939c87ac6668b3ab7a8b",
+      "target": {
+        "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+        "project": "devpod-gpu-exploration",
+        "zone": "us-central1-b"
+      }
+    },
+    "session_r2": {
+      "generation": "2026-09-11T06:53:44.713-07:00",
+      "receipt_sha256": "cf8809299c3c370dff94c484f0a874d58d70fdb01be4dab33dcdbc0271b03e03",
+      "target": {
+        "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+        "project": "devpod-gpu-exploration",
+        "zone": "us-central1-b"
+      }
+    }
+  },
+  "status": "completed"
+}

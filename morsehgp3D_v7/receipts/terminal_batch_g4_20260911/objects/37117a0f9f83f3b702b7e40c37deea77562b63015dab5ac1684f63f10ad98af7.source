@@ -1,0 +1,3 @@
+[STOP] État actuel de ehgp-blackwell-spot : RUNNING.
+[OK] Cible ehgp-blackwell-spot arrêtée et vérifiée (état GCE TERMINATED).
+[INFO] Aucune autre VM project=e-hgp active détectée.

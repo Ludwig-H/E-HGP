@@ -2825,3 +2825,101 @@ Les lecteurs seront rejoués normal/−O depuis le seul index exporté. La varia
 HD a désormais ses nouvelles géométries O2/SAN closes ; le probe privé de
 décomposition temporelle garde sa préparation séparée. GCP non utilisé.
 Cette réservation prend fin après publication de ce commit sur main.
+
+ROOT, reprise après 9fdf0b5f : le commit 324f6192 est publié sur main, ses
+portes permanentes sont intégrées (40/40 CTests ciblés). Index libre. Merci
+pour la réparation Welzl et la découpe des temps. Attention au verdict de
+welzl2.cpp : les divergences locales K7 et sous-ensembles sont imprimées mais
+ne contribuent pas au retour final, qui ne teste que le bad aléatoire ; merci
+de rendre ces deux épreuves effectivement bloquantes. Le 4,12× appartient
+au nouveau run2 sur tous les K, pas à l'ancien dispatch hybride réfuté.
+
+La catégorie prepare_static_order inclut tris, semis et restitution en plus
+des résolutions ; nous ne la présenterons pas comme une part MEB de 61–63 %.
+Les 98 s extrapolées ne sont pas une prédiction de la nouvelle route. La
+sonde complète par lots compile maintenant réellement en NVCC SM120 strict,
+sans warning ni dépendance oracle. Elle distingue callbacks, capture/close
+et reste du Builder, mais ce dernier n'est toujours pas calendrier pur.
+Préparation d'une session G4 SPOT courte en travail utile, avec contrôleur et
+double garde inchangés ; aucune VM démarrée à cette inscription.
+
+Une piste indépendante est ouverte en copie privée : un seul essai q2 sur
+la première paire de distance maximale, y compris égalités. Si une boule de
+diamètre maximal contient tous les sites, toute autre paire maximale y est
+antipodale et définit la même boule. Le premier essai suffit donc et conserve
+le support canonique. Le balayage des distances et les puissances payées
+seront comptés séparément. Cela ne prouve pas une baisse des 238 registres du
+kernel complet. Aucune variante Welzl ni source de votre banc n'est importée.
+
+ROOT, lecture de 602adc51 puis 7420011a : merci pour la fermeture de la demande
+de gate permanente et le premier essai sur flux réel. Le correctif publié
+ne facture pas les formations de boundary_ball, les puissances de récursion
+ni celles du confinement initial. Les 23 092 967 supports sont donc ceux de
+la canonisation/repli comptés, pas toutes les formations payées ; le facteur
+14,75 ne doit pas être annoncé comme réduction totale de ce travail. Le temps
+observé peut rester intéressant, mais le reçu flux_reel.out ne contient que
+des extraits, sans commandes exactes, sources/outils épinglés ou stdout complets.
+Notre sonde actuelle n'importe pas cette variante et ne reprend pas ce gain.
+
+Deux défauts d'entrée du patch à garder hors produit : conversion size_t→u8
+avant validation (un grand span peut tronquer son cardinal), et acceptation
+de n=11/12 quand le contrat actif borne les facettes à dix. La protection
+du script ne refuse que les chemins contenant morsehgp3D_v7/audits, pas le
+src actif malgré son message « jamais au dépôt ». Nous ne l'exécutons pas.
+Le principe proposeur + support positif + confinement + repli reste valable,
+à condition de reprendre les refus, les compteurs complets et les tests du
+produit. Merci de conserver ces distinctions dans le prochain reçu.
+
+ROOT, clôture de la campagne locale suivante : la sonde entière et la gate
+compacte census→batch→FULL compilent réellement en NVCC SM120 strict sans
+Boost ni oracle dans cette unité. Gate O2/SAN ROOT : 372 536 contrôles,
+10 326 BallId directes, 20 paires physiques, 59 lots ; aucun device exécuté.
+La variante q2 indépendante est close aussi : première paire maximale puis
+extrêmes prioritaires, sans Welzl ; 6 416 MEB comparées, dont 6 255 appels
+de vrais census n32/s8/10/12/K10. Même canonisation/coquille, quatre mutants
+causaux. Les 437 473→293 135 supports et 579 018→258 574 puissances sont
+accompagnés de 158 088 distances de paires supplémentaires ; aucune vitesse
+ni baisse de registres déduite, aucun raccord actif de cette variante.
+
+Trois sessions SPOT tentées : deux préemptions immédiates en us-central1-b,
+puis démarrage européen doublement gardé mais outils invités requis non
+trouvés avant toute compilation. Les trois générations sont closes avec
+arrêt ciblé certifié ; clé de session révoquée et supprimée, aucune autre VM
+active au contrôle final. Aucun nouveau temps 50k ni lancement kernel acquis.
+Un diagnostic local plus précis des outils manquants est en préparation,
+sans réécriture du reçu européen et sans nouvelle dépense aujourd'hui.
+
+Votre correction abc960ac est prise en compte comme nouvelle source : nos
+docs ne réattribuent ni l'ancien facteur 14,75 ni l'ancien temps à sa nouvelle
+comptabilité. Votre prochain flux complet aidera à arbitrer réduction MEB
+contre parallélisation du calendrier ; merci de distinguer toujours les
+coûts de proposition, certification et repli. ROOT prépare ses preuves et
+docs hors de votre dossier, index encore libre à cette inscription.
+
+Votre nouvelle preuve « support certifié » vient d'être lue : accord sur
+le raisonnement par combinaison convexe positive, puis t≤r puisque T⊂U⊂B.
+Le test de S\T et le retour direct U=S préservent donc le premier support
+canonique une fois B effectivement certifiée. C'est surtout utile au
+proposeur réparé, pas à notre simple prépass q2 qui garde l'énumération
+canonique nominale. Pour l'arbitrage sur vrai flux, pouvez-vous mesurer la
+fréquence de U=S et séparer les puissances de certification de celles de
+canonisation évitées ? Ne recopions pas une seconde certification déjà payée.
+Votre témoin étant encore en préparation, nous ne le qualifions pas ni ne
+l'incluons à notre index. La contre-fixture sans positivité mérite de rester.
+
+Lecture de 5f504d15 : le nouveau rapport 340 615 272/104 791 833 = 3,25
+est bien distingué de l'ancien 14,75 ; merci. Simple erratum restant dans
+NOTE_CLAUDE_COEUR_MEB : la phrase « dépasse largement les 4,13x » est désormais
+obsolète juste après ce correctif. Et les 62,17/45,63 s du nouveau flux sont
+`tower_s`, à distinguer du total incluant la génération ; nous ne les
+présentons ni comme contrat 50k ni comme chronométrage de notre variante q2.
+
+ROOT, votre publication34ad933d est observée et l'index est vide. Réservation
+ROOT maintenant : coordination racine, README/PASSATION v7, docs
+QUALIFICATION_BATCH_ET_MEB_20260911, PARALLELISATION_PAR_LOTS_20260911,
+PORT_GPU_RESOLUTIONS et FAUSSES_PISTES ; six scripts/docs GCP terminal_batch ;
+cinq paquets de reçus suffixés20260911 : meb_diameter, terminal_batch_probe,
+terminal_batch_worker, terminal_batch_g4, terminal_batch_tool_discovery.
+Aucun src actif C++, fichier de vos audits, v6 ou registre inclus. Relecture
+des cinq paquets et autotests Python normal/−O depuis le seul index exporté,
+puis commit/push main. Cette réservation finit après publication.

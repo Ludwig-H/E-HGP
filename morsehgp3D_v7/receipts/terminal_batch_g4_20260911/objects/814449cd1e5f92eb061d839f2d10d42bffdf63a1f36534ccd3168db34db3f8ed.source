@@ -1,0 +1,1 @@
+{"OSLogin_TTL": "70m", "guest_minutes": 30, "status": "inert", "target": {"instance": "ehgp-blackwell-spot", "project": "devpod-gpu-exploration", "zone": "europe-west4-a"}}

@@ -1,0 +1,37 @@
+[
+  {
+    "name": "revoke_exact_key",
+    "argv": [
+      "/home/codespace/google-cloud-sdk/bin/gcloud",
+      "compute",
+      "os-login",
+      "ssh-keys",
+      "remove",
+      "--project=devpod-gpu-exploration",
+      "--key-file=/tmp/ehgp-v7-terminal-key.V3ZnBoPd/key.pub",
+      "--quiet"
+    ],
+    "exit_code": 0,
+    "started_epoch": 1789135501.112962,
+    "ended_epoch": 1789135502.671582,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "labelled_inventory",
+    "argv": [
+      "/home/codespace/google-cloud-sdk/bin/gcloud",
+      "compute",
+      "instances",
+      "list",
+      "--project=devpod-gpu-exploration",
+      "--filter=labels.project=e-hgp",
+      "--format=json(name,zone,status,lastStartTimestamp)"
+    ],
+    "exit_code": 0,
+    "started_epoch": 1789135502.6722035,
+    "ended_epoch": 1789135504.1149035,
+    "stdout_sha256": "5511e620fd1cf5cda7fad433ec18784dc86b4b571ac65dbb9cea4ef4c46e71f8",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

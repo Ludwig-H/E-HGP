@@ -1,0 +1,104 @@
+#!/usr/bin/env python3
+"""Create-only source closure for the reviewed controller; no cloud or build."""
+import argparse
+import hashlib
+import importlib.util
+import json
+from pathlib import Path
+import re
+import shutil
+import sys
+import tarfile
+
+ROOT = Path(__file__).resolve().parents[2]
+WORKER = ROOT / 'gcp-migration/terminal_batch_worker_v7.py'
+sys.dont_write_bytecode = True
+spec = importlib.util.spec_from_file_location('terminal_worker_snapshot', WORKER)
+worker = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(worker)
+GATE_ROOT = ROOT / 'build/v7_whole_batch_device_gate_20260911'
+PROBE_ROOT = ROOT / 'build/v7_full_batch_probe_20260911'
+
+
+def save(path, row):
+    with path.open('x') as stream:
+        json.dump(row, stream, indent=2, sort_keys=True)
+        stream.write('\n')
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--gate-qualified-receipt', type=Path, required=True)
+    args = parser.parse_args()
+    out = args.out.resolve()
+    worker.need(out.is_relative_to(ROOT / 'build') and not out.exists(), 'fresh scoped build output')
+    receipt = worker.strict_json(args.gate_qualified_receipt.read_text())
+    worker.need(receipt.get('status') == 'passed' and receipt.get('stable') is True
+                and receipt.get('source_gate_sha256') == worker.GATE_SHA256, 'closed gate qualification required')
+    qualified_before = worker.strict_json((args.gate_qualified_receipt.parent / 'sources_before.json').read_text())
+    qualified_after = worker.strict_json((args.gate_qualified_receipt.parent / 'sources_after.json').read_text())
+    worker.need(qualified_before == qualified_after, 'qualified source closure stable')
+    provenance = worker.strict_json((PROBE_ROOT / 'PROVENANCE.json').read_text())
+    prototype_pins = dict(provenance['unchanged_HD_sources'], **provenance['bench_sources'])
+    roots = [GATE_ROOT / 'whole_gate.cu', GATE_ROOT / 'prototype/source/morsehgp3D_v7/bench/full_ball_tower_probe.cpp']
+    todo, selected = roots[:], {}
+    while todo:
+        path = todo.pop().resolve()
+        worker.need(path.is_relative_to(GATE_ROOT) and path.is_file() and not path.is_symlink(),
+                    'quoted include within private source closure')
+        relative = path.relative_to(GATE_ROOT).as_posix()
+        if relative in selected:
+            continue
+        pin = worker.sha(path)
+        worker.need(qualified_before.get(str(path)) == pin, 'source belongs to qualified gate snapshot')
+        if relative == 'whole_gate.cu':
+            worker.need(pin == worker.GATE_SHA256, 'closed gate pin')
+        else:
+            worker.need(relative.startswith('prototype/') and
+                        prototype_pins.get(relative.removeprefix('prototype/')) == pin, 'common HD/probe source pin')
+        selected[relative] = dict(path=path, sha256=pin)
+        raw = path.read_text()
+        worker.need(not re.search(r'^\s*#\s*include\s*[<"]boost/', raw, re.M), 'no Boost source closure')
+        todo.extend(path.parent / name for name in re.findall(r'^\s*#\s*include\s*"([^"\n]+)"', raw, re.M))
+    source_inputs = {worker.BASE + name: row['path'] for name, row in selected.items()}
+    source_inputs.update({worker.SUPPORT: ROOT / 'gcp-migration/full_probe_worker_v7.py',
+                         worker.LEGACY_PROBE: ROOT / worker.LEGACY_PROBE,
+                         worker.STRICT_HOST: PROBE_ROOT / 'prototype/nvcc_strict_host.py'})
+    before = {name: worker.sha(path) for name, path in source_inputs.items()}
+    out.mkdir()
+    snapshot = out / 'snapshot'
+    snapshot.mkdir()
+    for name, path in source_inputs.items():
+        target = snapshot / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(path, target)
+        target.chmod(0o600)
+    worker.need(worker.source_map(snapshot, before) == before, 'complete copied snapshot')
+    worker.need(before == {name: worker.sha(path) for name, path in source_inputs.items()}, 'inputs stable')
+    save(out / 'source_manifest.json', before)
+    shutil.copyfile(WORKER, out / 'worker.py')
+    shutil.copyfile(Path(__file__), out / 'build_snapshot.py')
+    shutil.copyfile(args.gate_qualified_receipt, out / 'gate_qualification.receipt.json')
+    save(out / 'gate_qualified_sources.json', {str(row['path']): row['sha256'] for row in selected.values()})
+    with tarfile.open(out / 'source_snapshot.tar.gz', 'w:gz') as archive:
+        for name in sorted(before):
+            path = snapshot / name
+            info = archive.gettarinfo(str(path), arcname=name)
+            info.uid = info.gid = 0
+            info.uname = info.gname = ''
+            info.mtime = 0
+            with path.open('rb') as stream:
+                archive.addfile(info, stream)
+    save(out / 'receipt.json', dict(status='passed', worker_sha256=worker.sha(out / 'worker.py'),
+         source_manifest_sha256=worker.sha(out / 'source_manifest.json'),
+         snapshot_sha256=worker.sha(out / 'source_snapshot.tar.gz'), files=len(before),
+         gate_qualification_receipt_sha256=worker.sha(out / 'gate_qualification.receipt.json'),
+         gate_sha256=worker.GATE_SHA256, probe_sha256=worker.PROBE_SHA256,
+         support_sha256=worker.SUPPORT_SHA256, no_ELF=True, no_vendor=True, GCP_used=False,
+         inherited_device_results=False, source_inputs={name: str(path) for name, path in source_inputs.items()}))
+    print(json.dumps(dict(status='passed', output=str(out), files=len(before)), sort_keys=True))
+
+
+if __name__ == '__main__':
+    main()

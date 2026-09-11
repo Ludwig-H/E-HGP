@@ -1,0 +1,15 @@
+[GARDE SSH] Clé de session ssh-ed25519 utilisable sans interaction (SHA256:oJi3v8AwEVSpvZ1F/4UiHh9giHCGi4xqX+p56nbUjUQ).
+[GARDE SSH] Clé OS Login unique, expiration fixe=2026-09-11T15:00:31.513139Z, durée restante=4181s.
+[START] Démarrage protégé demandé :
+  compte                 : [personal account omitted]
+  projet                 : devpod-gpu-exploration
+  instance               : ehgp-v7-4fa0e0789a7d5bb06b787d35
+  zone                   : us-central1-b
+  machine/provisioning   : g4-standard-48 / SPOT
+  maxRunDuration GCE     : 3600 s
+  arrêt invité secondaire : 30 min
+[STOP] État actuel de ehgp-v7-4fa0e0789a7d5bb06b787d35 : STOPPING.
+[ATTENTE] État GCE : STOPPING
+[ATTENTE] État GCE : STOPPING
+[OK] Cible ehgp-v7-4fa0e0789a7d5bb06b787d35 arrêtée et vérifiée (état GCE TERMINATED).
+[INFO] Aucune autre VM project=e-hgp active détectée.

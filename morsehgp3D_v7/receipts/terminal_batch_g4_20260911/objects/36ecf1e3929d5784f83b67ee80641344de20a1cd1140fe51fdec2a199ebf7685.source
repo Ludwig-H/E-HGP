@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v7_terminal_batch_g4_20260911/session_r2/full_host/stop_and_verify.sh",
+    "--yes",
+    "--expected-last-start-timestamp",
+    "2026-09-11T06:53:44.713-07:00"
+  ],
+  "name": "guarded_stop",
+  "started_epoch": 1789134841.1037524,
+  "timeout_seconds": null
+}

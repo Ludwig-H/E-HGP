@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "/home/codespace/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "ssh",
+    "ehgp-blackwell-spot",
+    "--project=devpod-gpu-exploration",
+    "--zone=europe-west4-a",
+    "--quiet",
+    "--ssh-key-file=/tmp/ehgp-v7-terminal-key.V3ZnBoPd/key",
+    "--ssh-key-expiration=2026-09-11T15:00:31.513139Z",
+    "--ssh-flag=-n",
+    "--ssh-flag=-o BatchMode=yes",
+    "--ssh-flag=-o ConnectTimeout=15",
+    "--command=exec python3 /tmp/ehgp-full-v7-b511b3d2d5194da3.dgj3eMdPZD/worker.py --source-root /tmp/ehgp-full-v7-b511b3d2d5194da3.dgj3eMdPZD/source --source-manifest /tmp/ehgp-full-v7-b511b3d2d5194da3.dgj3eMdPZD/source_manifest.json --source-manifest-sha256 803f1fcfdd9369f1d13900a5793a446d455caf1b938fb2c36aa7f9c83d850f76 --guard-mark /tmp/ehgp-full-v7-b511b3d2d5194da3.dgj3eMdPZD/double_guard_verified --guard-mark-sha256 ea4efba346fabd505eea0d414e6caa70bcb8b2af418d9f9f0ca3d95cccc6ca07 --generation 2026-09-11T06:59:41.712-07:00 --session-deadline-epoch 1789137027 --closing-margin-seconds 300 --output /tmp/ehgp-full-v7-b511b3d2d5194da3.dgj3eMdPZD/output --project devpod-gpu-exploration --zone europe-west4-a --instance ehgp-blackwell-spot"
+  ],
+  "ended_epoch": 1789135251.3284426,
+  "exit_code": 1,
+  "group_closed": true,
+  "name": "worker",
+  "pid": 1462650,
+  "started_epoch": 1789135249.4661038,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "7ed518ab7f121ca76df89cf3958faf4183d72ded4d8faeaeb3cd06a33e5b969c",
+  "timeout_seconds": 1537.5339027620794
+}

@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/gcp-migration/selftest_terminal_batch_worker_v7.py"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "expected_exit": 0
+}

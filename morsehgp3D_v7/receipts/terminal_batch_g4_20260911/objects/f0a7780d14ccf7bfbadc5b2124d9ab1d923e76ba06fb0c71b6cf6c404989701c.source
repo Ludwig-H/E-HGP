@@ -1,0 +1,28 @@
+[
+  {
+    "protoPayload": {
+      "methodName": "v1.compute.instances.start",
+      "resourceName": "projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35",
+      "status": {}
+    },
+    "timestamp": "2026-09-11T13:51:01.753951Z"
+  },
+  {
+    "protoPayload": {
+      "methodName": "compute.instances.preempted",
+      "resourceName": "projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35",
+      "status": {
+        "message": "Instance was preempted."
+      }
+    },
+    "timestamp": "2026-09-11T13:51:01.101982Z"
+  },
+  {
+    "protoPayload": {
+      "methodName": "v1.compute.instances.start",
+      "resourceName": "projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35",
+      "status": {}
+    },
+    "timestamp": "2026-09-11T13:50:52.347295Z"
+  }
+]

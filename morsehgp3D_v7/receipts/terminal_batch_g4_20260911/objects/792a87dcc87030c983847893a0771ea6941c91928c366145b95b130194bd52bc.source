@@ -1,0 +1,25 @@
+{
+  "labels": {
+    "managed-by": "manual-script",
+    "project": "e-hgp",
+    "role": "gpu-benchmark"
+  },
+  "lastStartTimestamp": "2026-09-11T06:59:41.712-07:00",
+  "machineType": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-a/machineTypes/g4-standard-48",
+  "name": "ehgp-blackwell-spot",
+  "scheduling": {
+    "automaticRestart": false,
+    "instanceTerminationAction": "STOP",
+    "maxRunDuration": {
+      "nanos": 0,
+      "seconds": "3600"
+    },
+    "onHostMaintenance": "TERMINATE",
+    "preemptible": true,
+    "provisioningModel": "SPOT"
+  },
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-a/instances/ehgp-blackwell-spot",
+  "status": "RUNNING",
+  "terminationTimestamp": "2026-09-11T14:59:31.672774Z",
+  "zone": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-a"
+}

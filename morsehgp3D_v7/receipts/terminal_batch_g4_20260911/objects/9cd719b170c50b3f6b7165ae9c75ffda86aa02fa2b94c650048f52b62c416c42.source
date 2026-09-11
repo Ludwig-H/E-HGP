@@ -1,0 +1,62 @@
+{
+  "captures/session_eu_r1/full_host/before_retrieve.stdout": {
+    "bytes": 15050,
+    "reason": "rich_instance_metadata_with_ssh_keys_omitted",
+    "sha256": "a0f9cfaa7d8ab568c29f34f922b886bff3256d5651d7f89b47356cbd78426609"
+  },
+  "captures/session_eu_r1/full_host/before_upload.stdout": {
+    "bytes": 15050,
+    "reason": "rich_instance_metadata_with_ssh_keys_omitted",
+    "sha256": "a0f9cfaa7d8ab568c29f34f922b886bff3256d5651d7f89b47356cbd78426609"
+  },
+  "captures/session_eu_r1/full_host/before_worker.stdout": {
+    "bytes": 15050,
+    "reason": "rich_instance_metadata_with_ssh_keys_omitted",
+    "sha256": "a0f9cfaa7d8ab568c29f34f922b886bff3256d5651d7f89b47356cbd78426609"
+  },
+  "captures/session_eu_r1/full_host/guarded_start.stdout": {
+    "bytes": 1508,
+    "reason": "account_line_redacted_in_separate_derivative",
+    "sha256": "947fcf9000cbb2e1662f997568bceade5c034e8e1b384dc449fc57aefc8e59dc"
+  },
+  "captures/session_eu_r1/full_host/oslogin_add.stdout": {
+    "bytes": 4588,
+    "reason": "personal_oslogin_profile_omitted",
+    "sha256": "8c012e50393f8d94f4c805588e6df628ed8162491c2fa81af79e6dab0a95ddc0"
+  },
+  "captures/session_eu_r1/full_host/snapshot.tar.gz": {
+    "bytes": 201155,
+    "reason": "published_source_archive_linked_not_duplicated",
+    "sha256": "15f0abbd41bc77d3c3c6e0bb0bce3bb373f5d41ea525b53d02e8879ea90d2c4b"
+  },
+  "captures/session_r1/full_host/guarded_start.stdout": {
+    "bytes": 864,
+    "reason": "account_line_redacted_in_separate_derivative",
+    "sha256": "20d693085d810f9574170b78c56f62d02807ac60651c47f78bad7324ca5eb19e"
+  },
+  "captures/session_r1/full_host/oslogin_add.stdout": {
+    "bytes": 4588,
+    "reason": "personal_oslogin_profile_omitted",
+    "sha256": "8c012e50393f8d94f4c805588e6df628ed8162491c2fa81af79e6dab0a95ddc0"
+  },
+  "captures/session_r1/full_host/snapshot.tar.gz": {
+    "bytes": 201155,
+    "reason": "published_source_archive_linked_not_duplicated",
+    "sha256": "15f0abbd41bc77d3c3c6e0bb0bce3bb373f5d41ea525b53d02e8879ea90d2c4b"
+  },
+  "captures/session_r2/full_host/guarded_start.stdout": {
+    "bytes": 756,
+    "reason": "account_line_redacted_in_separate_derivative",
+    "sha256": "d2e0f976308878b8c05755b2a5caf7166755643f17cd6d36edbbff269cd99818"
+  },
+  "captures/session_r2/full_host/oslogin_add.stdout": {
+    "bytes": 4588,
+    "reason": "personal_oslogin_profile_omitted",
+    "sha256": "8c012e50393f8d94f4c805588e6df628ed8162491c2fa81af79e6dab0a95ddc0"
+  },
+  "captures/session_r2/full_host/snapshot.tar.gz": {
+    "bytes": 201155,
+    "reason": "published_source_archive_linked_not_duplicated",
+    "sha256": "15f0abbd41bc77d3c3c6e0bb0bce3bb373f5d41ea525b53d02e8879ea90d2c4b"
+  }
+}

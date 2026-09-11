@@ -1,0 +1,12 @@
+{
+  "/workspaces/E-HGP/build/v7_terminal_tool_diagnostic_20260911/PACKAGE_README.md": "b5be02459f7603d79da5dd6d921f043bb55cd0822cf8e5507883be73a9f9da8a",
+  "/workspaces/E-HGP/build/v7_terminal_tool_diagnostic_20260911/publish.py": "7d077fdf3be0e9b146cab0e36a80f168888f358188d3d7948500396d811ae4dd",
+  "/workspaces/E-HGP/build/v7_terminal_tool_diagnostic_20260911/verify.py": "fb870aaa4d2cb7e79e186e1b718ccfc4b1886defcb164408eda5f0e6f10ff215",
+  "/workspaces/E-HGP/gcp-migration/README_TERMINAL_BATCH_V7.md": "43129de6c0467d64d4e0640a08c74a18925a14bcd3369e22c845ba695b8c249e",
+  "/workspaces/E-HGP/gcp-migration/selftest_terminal_batch_tool_preflight_v7.py": "ae05455cc6c1180e1da6247cbbf2fde9f7e196a330aeaec8fa073725b4d5cb60",
+  "/workspaces/E-HGP/gcp-migration/selftest_terminal_batch_worker_v7.py": "466365a64279d4d0e223de438166c243b371d1a897ea72ca9d9224300d40fdd7",
+  "/workspaces/E-HGP/gcp-migration/terminal_batch_worker_v7.py": "aaf8bcc1f703fbe5f5f02258bf5d82610a20720ed481aa1397385708aaaa7ec9",
+  "/workspaces/E-HGP/morsehgp3D_v7/receipts/terminal_batch_worker_20260911/objects/043197e4c73d92ff8845ddb5836c11fbb9ed9bdbd9a609edf7ce4a946d2c0fb3.source": "043197e4c73d92ff8845ddb5836c11fbb9ed9bdbd9a609edf7ce4a946d2c0fb3",
+  "/workspaces/E-HGP/morsehgp3D_v7/receipts/terminal_batch_worker_20260911/objects/994d9e6970797594efa2d333275594ef2085cdd166b345b0000135e94e395fb7.source": "994d9e6970797594efa2d333275594ef2085cdd166b345b0000135e94e395fb7",
+  "/workspaces/E-HGP/morsehgp3D_v7/receipts/terminal_batch_worker_20260911/objects/da967163bdb7247bc6aad4df0c294cda1071076a0127cd5bd9f59bc0e4788439.source": "da967163bdb7247bc6aad4df0c294cda1071076a0127cd5bd9f59bc0e4788439"
+}

@@ -1,0 +1,23 @@
+[GARDE SSH] Clé de session ssh-ed25519 utilisable sans interaction (SHA256:oJi3v8AwEVSpvZ1F/4UiHh9giHCGi4xqX+p56nbUjUQ).
+[GARDE SSH] Clé OS Login unique, expiration fixe=2026-09-11T15:00:31.513139Z, durée restante=3662s.
+[START] Démarrage protégé demandé :
+  compte                 : [personal account omitted]
+  projet                 : devpod-gpu-exploration
+  instance               : ehgp-blackwell-spot
+  zone                   : europe-west4-a
+  machine/provisioning   : g4-standard-48 / SPOT
+  maxRunDuration GCE     : 3600 s
+  arrêt invité secondaire : 30 min
+[GARDE-FOU GCE] action=STOP, maxRunDuration=3600s, échéance calculée=1789138781, échéance sûre=1789138481, terminationTimestamp=2026-09-11T14:59:31.672774Z
+[GARDE-FOU INVITÉ] Armement de shutdown -P +30 via SSH.
+Updating project ssh metadata...
+...............................................................................Updated [https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration].
+..done.
+Waiting for SSH key to propagate.
+Warning: Permanently added 'compute.6138498692773983463' (ED25519) to the list of known hosts.
+Shutdown scheduled for Fri 2026-09-11 14:30:27 UTC, use 'shutdown -c' to cancel.
+MODE=poweroff
+USEC=1789137027915776
+
+[GARDE-FOU GCE] action=STOP, maxRunDuration=3600s, échéance calculée=1789138781, échéance sûre=1789138481, terminationTimestamp=2026-09-11T14:59:31.672774Z
+[SUCCÈS] VM démarrée avec deux coupe-circuits vérifiés. Fermez la session avec stop_and_verify.sh.
