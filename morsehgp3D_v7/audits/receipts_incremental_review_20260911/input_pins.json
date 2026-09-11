@@ -1,0 +1,21 @@
+{
+  "files": {
+    "morsehgp3D_v7/audits/receipts_tower_cost_review_20260910/SHA256SUMS": "0cb19cf6edd0d1008b652496b7231c812e4f4b28a7ee4ca5f2e7afea7d56737e",
+    "morsehgp3D_v7/audits/receipts_tower_cost_review_20260910/input_pins.json": "71b18a34d2330af2ae5828a2dfe6cc5496d707baee77ad983ca1daefa3134ef2",
+    "morsehgp3D_v7/audits/receipts_tower_cost_review_20260910/layout.cpp": "86867f0fe5552fdd2b5416a29225148ff0eed5837f87ba1244a32038771ba8d8",
+    "morsehgp3D_v7/audits/receipts_tower_cost_review_20260910/layout_capture/commands.json": "c5f5cde030d774abcaf0488cded05de76489b77c9a153e81c0ffb517dde096b2",
+    "morsehgp3D_v7/audits/receipts_tower_cost_review_20260910/layout_capture/receipt.json": "a1079e6002bad8c375c6abe97d8453670f30ca0bbeef9c18ecddfed8cbb68952",
+    "morsehgp3D_v7/audits/receipts_tower_cost_review_20260910/layout_capture/run.stdout": "15d096d011d33ac248e4b0217031e481e5c0a216747d6cd4c74499e7b667b6f8",
+    "morsehgp3D_v7/audits/receipts_tower_cost_review_20260910/review.json": "7157f83704ec6ddbe0698d49a40f7110ec1e0e1ac0a4af75cc5a864dd26bf328",
+    "morsehgp3D_v7/audits/receipts_tower_cost_review_20260910/verify.py": "e7d23d681877c574a426ee5ffff24419b417e3672e54bd357b5ef3c4407e2d4f",
+    "morsehgp3D_v7/receipts/coverage_parent_array_20260910/manifest.json": "4846a705a4f83db47c87d94f41dcf42cfb78bd8ed352d120411f558c11baa474",
+    "morsehgp3D_v7/receipts/full_ball_runs_20260910/manifest.json": "16c14f8732a5d32d537ba673d116fd9815cc2daa1082e647d267d43ffa3c38df"
+  },
+  "reviewed_design": {
+    "authority": "read_context_only; future edits to this live document are not historical-input corruption",
+    "commit": "ad7ffd28",
+    "path": "morsehgp3D_v7/docs/PLAN_JOURNAL_INCREMENTAL.md",
+    "sha256": "4e4e76252a12d41a20925bdfa686615735dd105cbd564a7b911e8b111a4013ec"
+  },
+  "schema": "mhgp7-incremental-review-input-pins-v1"
+}

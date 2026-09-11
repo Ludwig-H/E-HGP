@@ -1,0 +1,116 @@
+{
+  "abi": {
+    "ExactLevel": 48,
+    "FullCoverageAction": 48,
+    "FullCoverageBatch": 80,
+    "FullCoveragePopulation": 48,
+    "FullCoverageRef": 16,
+    "FullDatedContribution": 80,
+    "FullNode": 64,
+    "u32": 4,
+    "u64": 8
+  },
+  "comparison_boundary": "after last order, before immutable population bank copy",
+  "excluded_storage": [
+    "bank",
+    "vertical_refs",
+    "histories",
+    "shared_catalogue",
+    "index",
+    "live",
+    "scratchs",
+    "vector_slack",
+    "allocator_metadata",
+    "reallocation_overlap"
+  ],
+  "gcp_used": false,
+  "historical_integrity_reader": "receipts_tower_cost_review_20260910/verify.py::compute",
+  "historical_measurements": "full_ball_runs_20260910; d188e3de source lineage",
+  "incremental_implementation_executed": false,
+  "new_engine_measurement": false,
+  "new_oracle_executed": false,
+  "proposed_gate": "prefix_vs_append_at_old_open_and_closed_cuts",
+  "public_status": "not_claimed",
+  "reviewed_design": {
+    "authority": "read_context_only; future edits to this live document are not historical-input corruption",
+    "commit": "ad7ffd28",
+    "path": "morsehgp3D_v7/docs/PLAN_JOURNAL_INCREMENTAL.md",
+    "sha256": "4e4e76252a12d41a20925bdfa686615735dd105cbd564a7b911e8b111a4013ec"
+  },
+  "rss_reduction_measured": false,
+  "runs": [
+    {
+      "birth_nodes": 2404646,
+      "contributions": 2404646,
+      "draft_batches_interval": [
+        3967999,
+        3968473
+      ],
+      "draft_logical_bytes_interval": [
+        578596608,
+        578634528
+      ],
+      "final_arena_logical_bytes": 510489360,
+      "n": 8000,
+      "net_draft_minus_final_logical_bytes_interval": [
+        68107248,
+        68145168
+      ],
+      "nodes": 3976472,
+      "orders": 10,
+      "parent_refs": 3976462,
+      "published_actions": 3976472,
+      "published_continuations": 0
+    },
+    {
+      "birth_nodes": 5026402,
+      "contributions": 5026402,
+      "draft_batches_interval": [
+        8291348,
+        8294400
+      ],
+      "draft_logical_bytes_interval": [
+        1209112536,
+        1209356696
+      ],
+      "final_arena_logical_bytes": 1066944000,
+      "n": 16000,
+      "net_draft_minus_final_logical_bytes_interval": [
+        142168536,
+        142412696
+      ],
+      "nodes": 8310399,
+      "orders": 10,
+      "parent_refs": 8310389,
+      "published_actions": 8310399,
+      "published_continuations": 0
+    },
+    {
+      "birth_nodes": 10380964,
+      "contributions": 10380964,
+      "draft_batches_interval": [
+        17114695,
+        17134976
+      ],
+      "draft_logical_bytes_interval": [
+        2496621544,
+        2498244024
+      ],
+      "final_arena_logical_bytes": 2203835040,
+      "n": 32000,
+      "net_draft_minus_final_logical_bytes_interval": [
+        292786504,
+        294408984
+      ],
+      "nodes": 17166975,
+      "orders": 10,
+      "parent_refs": 17166965,
+      "published_actions": 17166975,
+      "published_continuations": 0
+    }
+  ],
+  "schema": "mhgp7-incremental-journal-review-v1",
+  "status": "passed",
+  "temporal_stability": "proved_in_README_not_an_executed_incremental_gate",
+  "verification_scope": "sealed_inputs_and_net_logical_storage_recalculation_only"
+}

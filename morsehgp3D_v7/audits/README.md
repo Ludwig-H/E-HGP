@@ -4,8 +4,9 @@ Lire l’[état courant](ETAT_COURANT.md), puis le [dialogue actif](DIALOGUE_COU
 
 | Sujet courant | Qualification indépendante |
 | --- | --- |
-| Raccord par ancres de boule `d188e3de` | [Contre-lecture, rejeux, corpus aléatoire, normaliseur temporel et verrous](receipts_raccord_ancres_20260910/README.md) ; second auditeur, deux verrous P1, non reçu |
-| Gardes du journal et réserve WIP | [Dix cas valides, neuf rejets, six lectures, neuf mutants et pannes d’allocation](receipts_journal_guards_20260910/README.md) ; fixtures à intégrer, sans qualification de la tour |
+| Raccord par ancres de boule `d188e3de` | [Contre-lecture, rejeux, corpus aléatoire, normaliseur temporel et verrous](receipts_raccord_ancres_20260910/README.md) ; second auditeur ; verrou groupé clos par ad7ffd28, contrôle nommé 50k encore dû |
+| Gardes du journal réservé, publié | [Dix cas valides, neuf rejets, six lectures, neuf mutants et pannes d’allocation](receipts_journal_guards_20260910/README.md) ; fixtures à intégrer, sans qualification de la tour |
+| Journal incrémental : complément de conception | [Stabilité des anciennes coupes et écart logique net brouillons→arènes](receipts_incremental_review_20260911/README.md) ; pas d’assembleur implémenté |
 | Résidence de la nouvelle tour retenue | [Durées de vie, borne des brouillons et format des naissances](receipts_tower_cost_review_20260910/README.md) ; calculs statiques, pas gains mesurés |
 | Journal daté v2 et parents exportés | [184 cas O2/SAN, 2 976 coupes et mutant du tableau de parents](receipts_coverage_cpp_20260910/README.md) ; [lacune du test constructeur corrigée](../receipts/coverage_parent_array_20260910/README.md), raccord FULL distinct |
 | Modèle FULL et taille de sortie | [Décision et domaine](NIVEAUX_ET_CERTIFICAT_HGP_COURANT.md), [borne à K fixé et témoins u16](receipts_probe_meb_review_20260906/full_output_growth.md) |

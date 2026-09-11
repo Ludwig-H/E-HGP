@@ -2669,5 +2669,180 @@
     "removed_local_bytes_approx": 365953024,
     "historical_receipts_or_code_modified": false,
     "gcp": "not_used"
+  },
+  "latest_incremental_review_20260911": {
+    "date": "2026-09-11T06:33:21.961335+00:00",
+    "base_head": "ad7ffd28b35e153a20bd8cf42534d1cd29160bcd",
+    "receipt": "receipts_incremental_review_20260911/README.md",
+    "scope": "Conditional old-cut stability lemma and exact net logical draft-to-arena bounds on the historical regular triplet; current publication binding and closure of already-corrected requests.",
+    "cpp_compilations": 0,
+    "engine_executions": 0,
+    "new_geometric_oracles": 0,
+    "gcp": "not_used_by_auditor",
+    "packet": {
+      "files_excluding_manifest": 4,
+      "manifest_sha256": "cef397ed955c3cc4f66a34f6c90bc122df1726ad68f43f516610962375a5518a"
+    },
+    "net_logical_storage_intervals": [
+      [
+        68107248,
+        68145168
+      ],
+      [
+        142168536,
+        142412696
+      ],
+      [
+        292786504,
+        294408984
+      ]
+    ],
+    "proposed_metamorphic_gate_executed": false,
+    "rss_gain_measured": false,
+    "published_source_bindings": {
+      "src/forest/full_ball_tower.hpp": {
+        "sha256": "910f45baea1750b11d2b34f40c893c9d1a34f950705cdb127ffa226de60f7b2e",
+        "snapshot": "receipts/ball_resolver_residence_20260910/combined/combined_repaired/src/forest/full_ball_tower.hpp"
+      },
+      "src/forest/full_coverage_certificate.hpp": {
+        "sha256": "7608e70ec0bf7df7ed726ae2388a39e800ab2db35043b4ba42c619ceef13bac0",
+        "snapshot": "receipts/ball_resolver_residence_20260910/combined/combined_repaired/src/forest/full_coverage_certificate.hpp"
+      },
+      "tests/facet_resolver_cache_gate.cpp": {
+        "sha256": "898533cacf20b5d3444cd63250bba8f7727f709c3e5ee6b97ad7a68d71e42a64",
+        "snapshot": "receipts/ball_resolver_residence_20260910/combined/combined_repaired/tests/facet_resolver_cache_gate.cpp"
+      },
+      "tests/full_ball_tower_gate.cpp": {
+        "sha256": "bf1a28242dd2d6897f3dc02edff8c6077dbec1caa3f9b9a67813dcc748e3d75a",
+        "snapshot": "receipts/ball_resolver_residence_20260910/combined/combined_repaired/tests/full_ball_tower_gate.cpp"
+      },
+      "tests/full_ball_work_gate.cpp": {
+        "sha256": "25d5cf9a193db2eefe432f21bf823941402d82975c53f92660a9f984fb57498c",
+        "snapshot": "receipts/ball_resolver_residence_20260910/combined/combined_repaired/tests/full_ball_work_gate.cpp"
+      },
+      "tests/full_coverage_certificate_gate.cpp": {
+        "sha256": "2ebd45d8b03e81f8d1c18a58b1d205f528030ddad2a0ee78031dd13e06fe767b",
+        "snapshot": "receipts/ball_resolver_residence_20260910/combined/combined_repaired/tests/full_coverage_certificate_gate.cpp"
+      }
+    },
+    "constructor_reader_inputs": {
+      "receipts/ball_resolver_residence_20260910/MANIFEST.json": "d9095d9a96031eba6e3d6038bdd99d425c8da846b698c88eae393526a3578d89",
+      "receipts/ball_resolver_residence_20260910/verify.py": "a9576ba34c55affc042eddbbe42086fc079912b3f28620f4d44d4f9ef4df0d04",
+      "receipts/static_anchor_graph_20260910/MANIFEST.json": "0f81a05157a60a756f1bd7b8c5b69c700d648e0401958ea86e198c02bd8b60d0",
+      "receipts/static_anchor_graph_20260910/verify.py": "97826296f0a69f3dace085b1c450d99f3119fc28e97685544e08ccb2d30455fa",
+      "receipts/full_ball_scale_gpu_20260910/manifest.json": "c9913094b6479a61a0395be2dc0f09ef2d25672f170e19d3c6e01c584ba08b2c",
+      "receipts/full_ball_scale_gpu_20260910/verify.py": "c3cb6f3f58397e9cd7f1b67eb8ec2da1ed08b7863f3a3e76ae890f3c1ace81a6"
+    },
+    "closures": {
+      "grouped_growth_and_inert_mutants": "closed on published 910f45ba; exact reasons checked, compiled snapshots equal current gate",
+      "cache_nothrow_injector": "published corrected 898533ca; initial failure preserved",
+      "journal_guards": "same 7608e70e now published; independent qualification retained, integration still requested",
+      "restored_historical_artifacts": "all four tracked with existing hashes",
+      "named_50000_blocks": "still not executed in published constructor packet; second auditor preparing a distinct run"
+    },
+    "checks": {
+      "portable_normal_exit": 0,
+      "portable_optimized_exit": 0,
+      "portable_outputs_identical": true,
+      "portable_output_sha256": "fbf27a95537c89ce76b59924887ba4fb96c9364dbeb2fc276ddea784311d98b8",
+      "constructor_cache_readers_normal_optimized": [
+        0,
+        0
+      ],
+      "constructor_cache_files": 1260,
+      "constructor_cache_commands": 124,
+      "constructor_static_graph_readers_normal_optimized": [
+        0,
+        0
+      ],
+      "constructor_static_graph_mutants": 7,
+      "constructor_g4_readers_normal_optimized": [
+        0,
+        0
+      ],
+      "constructor_g4_files": 329,
+      "constructor_ctests_read_only": 20,
+      "constructor_shutdowns_read_from_receipts": 2,
+      "docs_normal_exit": 0,
+      "docs_optimized_exit": 0,
+      "active_markdown": 429,
+      "registry_exit": 0,
+      "registry_phases": 20,
+      "authored_markdown": 7,
+      "local_links": 134,
+      "link_math_errors": 0,
+      "tracked_diff_check_exit": 0,
+      "metadata_preflight": "First metadata preparation stopped on wrong-case constructor MANIFEST.json filename; no metadata written. Corrected to actual manifest.json before completing.",
+      "freshness": {
+        "normal_exit": 1,
+        "optimized_exit": 1,
+        "common_pins": 2732,
+        "common_mismatches": 0,
+        "messages_identical": true,
+        "scope": "D-P intentionally historical. No new complete-engine variant; second auditor owns its new execution/publication review.",
+        "last_variant_deltas": [
+          "CMakeLists.txt",
+          "README.md",
+          "PASSATION.md",
+          "docs/TOUR_FULL_PAR_BOULES.md",
+          "docs/FAUSSES_PISTES.md",
+          "src/forest/full_ball_tower.hpp",
+          "src/forest/full_coverage_certificate.hpp",
+          "tests/full_ball_tower_gate.cpp",
+          "tests/full_ball_work_gate.cpp",
+          "bench/full_ball_tower_probe.cpp"
+        ]
+      }
+    },
+    "maintenance": {
+      "entries": [
+        {
+          "path": "CERTIFICAT_FULL_CPP_COURANT.md",
+          "previous_sha256": "112016825a92ef41afd2a500e197fb93b0e085f0f6d6bb1bab137cb3a3ff9311",
+          "previous_words": 246,
+          "words": 248
+        },
+        {
+          "path": "COORDINATION_AUDITEURS.md",
+          "previous_sha256": "b63da8b1fa340380cd37666af32b2b9bd93f943a9ccc71d387b2043e59bae1b0",
+          "previous_words": 1247,
+          "words": 351
+        },
+        {
+          "path": "DIALOGUE_COURANT.md",
+          "previous_sha256": "07238d76231b9e3b78c6a679318abf2a467d439b67af5329bce972693b062a31",
+          "previous_words": 2007,
+          "words": 710
+        },
+        {
+          "path": "ETAT_COURANT.md",
+          "previous_sha256": "302505bbabe69d6554a9061535ab761bf01e2187e21753718b114b7de9dd791e",
+          "previous_words": 899,
+          "words": 696
+        },
+        {
+          "path": "MONO_FULL_COURANT.md",
+          "previous_sha256": "dc9198e1dcfb8f60d513a2f941cb385c2fc75f9399f44870bf6b853d669cdb21",
+          "previous_words": 701,
+          "words": 709
+        },
+        {
+          "path": "README.md",
+          "previous_sha256": "310c9fd6a4fa1ef6f42c5e24bd225231892b32e78ab3a961f3b7e35380a13288",
+          "previous_words": 646,
+          "words": 673
+        }
+      ],
+      "action": "Condense closed coordination and adopted design/test requests into current status with constructor links; historical scientific receipts and D-P unchanged.",
+      "closed_corpus_words_removed": 2359
+    },
+    "publication": {
+      "paths": 13,
+      "index_observed_empty": true,
+      "only_auditor_directory": true,
+      "other_auditor_packet_excluded": "receipts_cache_commit_20260911",
+      "reservation_closes_on_push": true
+    },
+    "source_variants_D_to_P_unchanged": true
   }
 }
