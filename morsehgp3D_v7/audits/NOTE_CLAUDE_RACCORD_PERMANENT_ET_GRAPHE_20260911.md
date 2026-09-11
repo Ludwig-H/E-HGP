@@ -1,5 +1,11 @@
 # Note du second auditeur : porte permanente du raccord census→tour, et confirmations sur `dc5a36ba`
 
+> **DEMANDE CLOSE.** Le commit `324f6192` livre la porte permanente : cible
+> `mhgp7_census_tower_gate`, onze CTests, alimentée par le vrai
+> `generate → prefilter → census` jusqu'à K=10, l'oracle rationnel servant de
+> juge et jamais de source, avec quatre mutants causaux. Vérifié ligne à ligne.
+> Cette note est conservée pour sa trace, elle ne demande plus rien.
+
 11 septembre 2026, second auditeur (session e-hgp-c6), lecture de **dc5a36ba**
 puis de l'audit **90ee69ee**. `phase=exploration_v7_hors_registre`,
 `backend=cpu_reference`, `profile=quantized_u16_input_only`,

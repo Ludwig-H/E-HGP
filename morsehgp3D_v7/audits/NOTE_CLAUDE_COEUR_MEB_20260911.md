@@ -105,6 +105,37 @@ Noter que l'étage 2 fait *plus* de tests de puissance que l'étage 1, 33,6 cont
 29,5, tout en étant trois fois plus rapide : il élimine surtout des formations de
 candidats, plus coûteuses qu'un test de puissance.
 
+## 4bis. Mesure sur le flux réel du résolveur, le seul juge qui compte
+
+Les chiffres du § 4 sont ceux d'un **banc**, sur des facettes simulées. Voici la
+mesure de bout en bout, en remplaçant `anchor_meb` dans un arbre isolé et en
+faisant tourner la sonde réelle, n=8000, K1..10, `--static-threads=1`. Tout cas
+invalide, dégénéré ou d'échec est délégué à la routine d'origine : seul le chemin
+nominal change.
+
+| grandeur | référence | Welzl réparé |
+| --- | ---: | ---: |
+| `payload_digest` | `cdd77e30…c329b` | **identique** |
+| `resolver_meb_calls` | 3 947 627 | 3 947 627 |
+| supports testés | 340 615 272 | **23 092 967** |
+| `tower_s` | 61,23 s | **45,13 s** |
+
+**L'objet est inchangé bit à bit** et la tour gagne **1,357x**, avec 14,75 fois
+moins de formations de candidats. Le gain réel sur les candidats dépasse
+largement les 4,13x du banc, parce que la distribution réelle des facettes penche
+davantage vers les K élevés que mon substitut par plus proches voisins.
+
+Mais le gain de **tour** est 1,357x, pas 4,12x, et l'écart est structurel : le
+noyau MEB n'est qu'une partie de la géométrie, laquelle ne pèse que 62,8 % de
+`tower_s`. La phase géométrique passe d'environ 38,5 s à 22,4 s, soit **1,72x**.
+Un gain spectaculaire sur un noyau ne se transporte jamais tel quel.
+
+C'est mon quatrième chiffre sur ce sujet, après 2,9x annoncé, 1,33x après
+réfutation et 4,12x sur banc après réparation. **Celui-ci est le seul mesuré de
+bout en bout sur le moteur réel avec un digest identique**, et c'est celui qu'il
+faut retenir. Sortie brute : [`flux_reel.out`](receipts_coeur_meb_20260911/flux_reel.out),
+correctif : [`realflow_patch.py`](receipts_coeur_meb_20260911/realflow_patch.py).
+
 ## 5. Un résultat négatif conservé
 
 Ma première version de Welzl laissait l'ensemble de base grossir jusqu'à dix

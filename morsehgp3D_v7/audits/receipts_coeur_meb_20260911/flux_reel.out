@@ -1,0 +1,15 @@
+anchor_meb remplace (compte work.calls: True)
+compile base rc=0
+compile var rc=0
+### base
+"resolver_meb_calls":3947627
+"payload_digest":"cdd77e308f765d643ce6707ba0f613f94b4cf560124c0079ee8bfa58ca0c329b"
+"tower_s":61.233169296
+"resolver_supports_tested":340615272
+### var
+"resolver_meb_calls":3947627
+"payload_digest":"cdd77e308f765d643ce6707ba0f613f94b4cf560124c0079ee8bfa58ca0c329b"
+"tower_s":45.129815722
+"resolver_supports_tested":23092967
+
+[exited with code 0]

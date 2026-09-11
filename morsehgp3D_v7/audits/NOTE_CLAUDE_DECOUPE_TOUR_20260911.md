@@ -56,29 +56,30 @@ indicative, pas une mesure à 50k.
 
 | étage | aujourd'hui | après noyau MEB | après parallélisme |
 | --- | ---: | ---: | ---: |
-| géométrie | ~238 s | ~58 s | ~3 s |
+| géométrie | ~238 s | ~138 s | ~7 s |
 | prologue | ~60 s | ~60 s | ~3 s |
 | calendrier | ~71 s | ~71 s | ~71 s |
 | épilogue | ~21 s | ~21 s | ~21 s |
-| total | ~390 s | ~210 s | **~98 s** |
+| total | ~390 s | ~290 s | **~102 s** |
 
-Le gain du noyau MEB retenu ici est **4,12x**, après réfutation puis réparation
-de ma voie Welzl : voir les § 4 et § 9 de la
-[note MEB](NOTE_CLAUDE_COEUR_MEB_20260911.md).
+Le gain retenu ici est celui **mesuré de bout en bout sur le flux réel**, soit
+1,72x sur la phase géométrique et 1,357x sur la tour entière, à `payload_digest`
+identique : voir le § 4bis de la [note MEB](NOTE_CLAUDE_COEUR_MEB_20260911.md).
+Le 4,12x du banc ne se transporte pas.
 
-Deux lectures s'imposent. D'abord, les deux leviers réunis donnent environ 4,0x,
+Deux lectures s'imposent. D'abord, les deux leviers réunis donnent environ 3,8x,
 ce qui laisse le contrat d'une seconde à **environ cent fois**. Ensuite, et c'est
-le point structurel, après ces leviers **94 % du temps restant est le calendrier
+le point structurel, après ces leviers **90 % du temps restant est le calendrier
 et l'épilogue**, tous deux séquentiels. Le goulot se déplace complètement.
 
-Point notable : ce total vaut 104, 98 ou 99 secondes selon que le noyau MEB
-gagne 1,33x, 4,12x ou 2,9x, parce que la géométrie finit parallélisée de toute
+Point notable : ce total vaut 102, 98 ou 104 secondes selon que le noyau MEB
+gagne 1,357x, 4,12x ou 1,33x, parce que la géométrie finit parallélisée de toute
 façon. **La conclusion stratégique ne dépend donc pas du sort de mon prototype**,
-et elle a survécu à sa réfutation comme à sa réparation.
+et elle a survécu à sa réfutation, à sa réparation et à sa mesure réelle.
 
 ## 4. Ce que cela dit de l'ordre des travaux
 
-Le noyau MEB d'abord, parce que son gain mesuré de 4,12x porte sur les 61 à 63 %
+Le noyau MEB d'abord, parce que son gain mesuré de 1,357x porte sur les 61 à 63 %
 géométriques et ne rencontre aucun plafond d'Amdahl, et parce qu'il améliore
 aussi le mono-thread. Le prologue ensuite, dont la parallélisation fait passer
 le plafond de 2,56x à 4,26x à 16 000 : le laisser séquentiel, c'est abandonner
