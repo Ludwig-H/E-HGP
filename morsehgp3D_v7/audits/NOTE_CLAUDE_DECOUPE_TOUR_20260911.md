@@ -34,7 +34,8 @@ stables quand les temps ne le sont pas.
 
 La géométrie est démontrée séparable, donc parallélisable. Le calendrier, qui
 ferme les lots par niveau et fait l'union-find sur les racines pré-lot, est
-séquentiel par construction. Le prologue valide le catalogue boule par boule et
+séquentiel **tel qu'il est écrit aujourd'hui** ; j'ai d'abord écrit « par
+construction », ce qui était trop fort, et le § 4bis corrige ce point. Le prologue valide le catalogue boule par boule et
 paraît parallélisable ; l'épilogue construit la banque immuable.
 
 | n | géométrie seule parallélisée | géométrie et prologue |
@@ -112,8 +113,9 @@ améliore aussi le mono-thread. Le prologue ensuite, dont la parallélisation fa
 le plafond de 2,56x à 4,26x à 16 000 : le laisser séquentiel, c'est abandonner
 15 % gratuitement.
 
-Puis vient le mur. Le calendrier séquentiel devient dominant, et il croît plus
-vite que le reste. Le constructeur l'a déjà vu qualitativement, en écrivant
+Puis vient l'obstacle. Le calendrier séquentiel devient dominant, et il croît
+plus vite que le reste. Qu'il soit un mur **définitif** est précisément ce que
+conteste l'auditeur historique, voir le § 4bis. Le constructeur l'a déjà vu qualitativement, en écrivant
 qu'accélérer les seules descentes ne supprime pas le coût des fusions CPU ; sa
 [voie par lots](../docs/PARALLELISATION_PAR_LOTS_20260911.md) rend d'ailleurs
 une identité de boule terminale et jamais un identifiant union-find, ce qui est
@@ -124,6 +126,40 @@ qui remplace la dépendance temporelle des ancres par un graphe statique, et de
 sa [réduction aux naissances](receipts_filtered_graph_20260911/README.md). Cette
 piste ne vient pas en premier dans l'ordre d'exécution, mais elle vise le seul
 obstacle que ni l'optimisation du noyau ni le parallélisme ne peuvent lever.
+
+## 4bis. Correction : « séquentiel par construction » était trop fort
+
+L'auditeur historique conteste ma conclusion centrale, et il a raison sur le
+point de droit. Sa préparation soutient que **chaque horizontal K se calcule
+indépendamment du précédent**, et qu'une fois les horizontaux construits, les
+verticales de tous les ordres se calculent ensemble par requêtes d'ancêtre à
+coupe fermée, sans dépendre des verticales de K−1. Si cela se démontre, la
+séquentialité du calendrier est une propriété du **moteur**, pas de l'**objet**.
+
+Ma mesure reste vraie et ma qualification était fausse. J'ai mesuré que la
+boucle des lots, telle qu'elle est écrite, est séquentielle et coûte 16,8 % à
+8 000 et 18,2 % à 16 000, avec un exposant local de 1,243 contre 1,094 pour la
+géométrie. Cela n'est pas contesté. Mais écrire « séquentiel par construction »
+puis « le vrai mur », c'est transformer une observation sur le code en nécessité
+mathématique. Ma mesure n'autorise pas ce pas, et je le retire.
+
+**Ce que sa thèse vaut, chiffré.** Si le calendrier quitte la part irréductible,
+seul l'épilogue y reste.
+
+| n | plafond, géométrie et prologue | plafond si le calendrier tombe aussi |
+| ---: | ---: | ---: |
+| 8 000 | 4,58x | **20,0x** |
+| 16 000 | 4,26x | **18,9x** |
+
+L'écart n'est pas marginal, il change la nature du problème. On passe d'un
+facteur quatre à un facteur vingt, et le contrat 50k cesse d'être fermé par le
+plafond. C'est la raison pour laquelle cette thèse mérite une démonstration
+avant d'être crue, et la raison pour laquelle je ne maintiens plus ma formule.
+
+Deux réserves que je conserve. L'épilogue, 5,0 % puis 5,3 %, deviendrait alors
+le facteur limitant, et personne ne l'a étudié. Et un plafond n'est pas un gain :
+il suppose une efficacité de parallélisation que nul n'a mesurée ici. Le § 3
+reste donc une allocation sous l'hypothèse du moteur actuel.
 
 ## 5. Sur le contrat lui-même
 

@@ -122,31 +122,41 @@ nominal change.
 | --- | ---: | ---: |
 | `payload_digest` | `cdd77e30…c329b` | **identique** |
 | `resolver_meb_calls` | 3 947 627 | 3 947 627 |
-| supports testés | 340 615 272 | **23 092 967** |
+| supports testés, **tout chemin facturé** | 340 615 272 | **104 791 833** |
+| dont canonisation et repli seuls | — | 23 092 967 |
 | `tower_s` | 61,23 s | **45,13 s** |
 
-**L'objet est inchangé bit à bit** et la tour gagne **1,357x**, . Le rapport de **14,75** sur les supports
-testés était en revanche **mal compté de ma part**, comme le développeur l'a
+**L'objet est inchangé bit à bit** et la tour gagne **1,357x** sur cette
+exécution. Le rapport de **14,75** que j'avais d'abord publié sur les supports
+testés était **mal compté de ma part**, comme le développeur l'a
 relevé : mon correctif ne facturait ni les formations de `boundary_ball`, ni les
-puissances de la récursion et du balayage de coquille. Ces 23 092 967 supports ne
-sont donc que ceux de la canonisation et du repli, **pas tout le travail payé**,
-et ce facteur ne doit pas être présenté comme une réduction totale. La comptabilité est corrigée, la mesure refaite, et le
-**chiffre honnête est 3,25x** : 340 615 272 supports contre 104 791 833, et non
-les 14,75 annoncés. Mon comptage incomplet gonflait le rapport d'un facteur
-quatre et demi. Le
-**temps** mesuré n'est pas affecté : 61,23 s contre 45,13 s restent des mesures
-de bout en bout. Le gain réel sur les candidats dépasse
-largement les 4,13x du banc, parce que la distribution réelle des facettes penche
-davantage vers les K élevés que mon substitut par plus proches voisins.
+puissances de la récursion et du balayage de coquille. Les 23 092 967 de la seconde ligne ne
+sont que ceux de la canonisation et du repli, **pas tout le travail payé** : ce
+n'est pas une réduction totale. La comptabilité est corrigée et la mesure
+refaite, le **chiffre honnête est 3,25x**, 340 615 272 supports contre
+104 791 833. Mon comptage incomplet gonflait le rapport d'un facteur quatre et
+demi. Le **temps** n'est pas affecté : un chronomètre ne peut pas oublier de
+compter une branche. Une fois toutes les branches facturées, ce 3,25x est **en
+dessous** des 4,13x du banc, et non au-dessus : mon substitut par plus proches
+voisins surestimait le gain au lieu de le sous-estimer.
 
 **Confirmé à une seconde échelle.** À n=16000, les deux digests sont de nouveau
 identiques (`8eb94f8f…f4e45`) et la tour passe de 139,15 s à 107,03 s, soit
-**1,300x**. Le gain recule légèrement avec la taille, 1,357x puis 1,300x, ce qui
+**1,300x**. Le gain recule légèrement avec la taille, 1,36x puis 1,30x, ce qui
 est cohérent avec la part géométrique qui recule aussi, 62,8 % puis 61,0 %. Les
 mesures se recoupent donc entre elles. Sortie brute :
 [`flux_reel_16k.out`](receipts_coeur_meb_20260911/flux_reel_16k.out).
 
-Mais le gain de **tour** est 1,357x, pas 4,12x, et l'écart est structurel : le
+**Trois exécutions du même bras, pour situer la dispersion.** Le facteur de tour
+à 8 000 vaut 1,357x, 1,362x puis 1,365x selon l'exécution, sur une machine
+partagée dont je ne maîtrise pas la charge. Je retiens donc **1,36x** et non un
+chiffre à trois décimales. La troisième exécution est accompagnée de sa
+provenance complète, commit, version de `g++`, empreintes des sources et lignes
+de commande, dans
+[`provenance/`](receipts_coeur_meb_20260911/provenance/sources.sha256) ; le
+lecteur du reçu échoue si les deux bras portent le même noyau.
+
+Mais le gain de **tour** est 1,36x, pas 4,12x, et l'écart est structurel : le
 noyau MEB n'est qu'une partie de la géométrie, laquelle ne pèse que 62,8 % de
 `tower_s`. La phase géométrique passe d'environ 38,5 s à 22,4 s, soit **1,72x**.
 Un gain spectaculaire sur un noyau ne se transporte jamais tel quel.
