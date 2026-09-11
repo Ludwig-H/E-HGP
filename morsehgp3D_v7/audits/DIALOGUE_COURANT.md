@@ -1,64 +1,80 @@
 # Dialogue actif avec le constructeur
 
-11 septembre 2026. Priorité utilisateur : les objets permettant de paralléliser
-**toutes** les étapes coûteuses de la tour. La [coordination](COORDINATION_AUDITEURS.md)
+11 septembre 2026, après **e3903b2a**. Priorité : les objets permettant de
+paralléliser toutes les étapes coûteuses. Le développeur a accepté le delta
+de rangs ci-dessous comme étape séparée des sources déjà figées. La [coordination](COORDINATION_AUDITEURS.md)
 répartit les écritures.
 
-## Partager les objets déjà validés
+## Prochain delta : conserver les gardes avec des rangs entiers
 
-Le [nouvel audit](receipts_prepared_catalogue_20260911/README.md) répond aux
-questions de préparation et de liaison. Le premier delta sûr retourne les
-métadonnées du validateur, aujourd’hui détruites avant Atlas : ordre par clé,
-ordre exact stable, programmes et ShellTable extras. Une fabrique commune
-peut garder tous les contrôles existants et servir ses vues à Builder,
-Atlas et Geometry. Elle ne doit pas retenir un Builder complet pour cela.
+La [preuve publiée](receipts_prepared_catalogue_20260911/README.md), §2,
+porte sur toutes les paires de boules du catalogue. Une fois les niveaux
+représentants strictement ordonnés et **chaque liaison BallId→rang→niveau
+certifiée**, la comparaison exacte des niveaux a le même signe que celle
+des rangs. Cela couvre les plateaux et les fractions brutes équivalentes.
+Le propriétaire et sa génération doivent rester identiques et immuables.
 
-Les rangs entiers remplacent les comparaisons rationnelles répétées des
-programmes après vérification des représentants stricts et de chaque liaison
-BallId→rang→niveau. Préserver égalités, ordre des clés, couverture des cellules,
-fractions brutes et permutation des masques PointId/BallData. Le partage
-ne transforme pas la validation locale en preuve de complétude productrice.
-Le constructeur a lu et accepté ce delta ; il le séparera de son premier
-raccord dense pour conserver un différentiel clair.
+Appliquer cette preuve aux gardes du scatter et des semis initiaux :
 
-## Semis partagés, état privé par worker
+| Garde actuelle | Prédicat entier équivalent |
+| --- | --- |
+| `first_consumer` | `rank(leader) <= rank(consumer)` |
+| `terminal_admission_strict` | `target < balls.size() && admitted(target, K) && rank(target) < rank(consumer)` |
+| `seed_not_strict` | `rank(seed_target) < rank(leader)` |
 
-Une liaison exhaustive une fois par owner/génération/K peut produire un
-objet opaque consommé par toutes les fenêtres, avec stockage vivant et
-fermé aux mutations. Puisque chaque boule fournit un semis complet au seul
-ordre |I|+|U|, Σ S_K≤B pour la tour. L’adapter actuel paie au contraire
-Σ J_K·S_K comparaisons de liaison. Construction, tri et transferts restent
-à compter ; il ne s’agit pas d’un gain de temps déjà mesuré.
+`admitted` représente ici le contrôle `atlas.block_id(target, K).has_value()`
+existant. Garder cet ordre et le court-circuit **avant** l’accès au rang de
+la terminale. K1 garde le contrôle de premier consommateur ; sa terminale
+est un point, sans comparaison de rang BallId. Les semis conservent leur
+liaison exhaustive au propriétaire et à K.
 
-Le Context actuel porte des buffers, un compteur batch et un état d’échec
-mutables. Le pool partage seulement les objets immuables, avec espaces de
-travail distincts et couverture explicite des résultats. Borner ensemble
-fenêtres en vol et résultats terminés en attente évite une accumulation
-si une ancienne fenêtre tarde. Le constructeur confirme que ses workers
-ne recevront ni φ ni le DSU et ne partageront pas ce Context concurremment.
+Les captures [ordonnées scellées](../receipts/ordered_streaming_20260911/README.md)
+et le source **fb9f0c0c** donnent le travail logique suivant. Chaque occurrence
+paye `first_consumer` ; chaque occurrence K≥2 paye aussi la garde terminale.
+Ainsi le scatter évalue `2R − R_K1` comparaisons rationnelles ; chaque hit
+de semis initial ajoute une comparaison distincte :
 
-Pour un mémo de terminales, garder aussi le seuil sous lequel la requête
-était certifiée. Réemploi direct sous un seuil supérieur ou égal ; en dessous,
-**miss et repli**, pas rejet automatique. Le seul niveau de la terminale ne
-suffit pas : la MEB initiale peut être plus haute. Le paquet conserve un
-témoin exact à quatre points, et un seuil intermédiaire valide qui nécessite
-le repli. Ce témoin d’API ne prétend pas être une occurrence FULL authentique.
+| n, s8, K1..10 | Scatter | Semis initiaux | Total substituable |
+| ---: | ---: | ---: | ---: |
+| 8 000 | 20 852 874 | 5 054 875 | 25 907 749 |
+| 16 000 | 43 775 268 | 11 997 933 | 55 773 201 |
+| 32 000 | 90 662 398 | 26 901 500 | 117 563 898 |
 
-## Qualifications précédentes closes
+Ce calcul est reproduit depuis les compteurs scellés dans l’[entretien](ENTRETIEN.json).
+Il compte des prédicats du source sur les exécutions réussies, sans les
+assimiler à des instructions machine ou à un gain chronométré. Il ne retire
+aucune garde et ne réduit aucun appel MEB. Les boules dynamiques initiales
+et intermédiaires de Geometry n’ont pas automatiquement de rang certifié :
+leurs contrôles exacts restent nécessaires. La contre-fixture du §4 du
+paquet montre pourquoi le niveau de la seule terminale ne suffit pas.
 
-Le [réducteur ordonné](../receipts/ordered_streaming_20260911/README.md) et son
-triplet 8k/16k/32k sont publiés et contre-lus, lecteurs normal/−O PASS.
-Une visite par R et zéro retri de hubs sont établis ; le compact natif reste
-exécuté. Les temps sous charge et le RSS sont correctement bornés. Le refus
-LSan initial est conservé séparément ; aucune mesure n’est réattribuée.
+## Workers : avancer sur le raccord déjà préparé
 
-La [preuve de contraction directe](receipts_birth_stream_20260911/README.md)
-a été contre-exécutée par le développeur. Son draft C++ dense est favorable
-en lecture ; son premier raccord et son pool CPU sont en préparation.
-Les preuves d’[export historique](receipts_historical_export_20260911/README.md),
-de [composition](receipts_composable_msf_20260911/README.md) et de
-[décomposition de la tour](receipts_parallel_objects_20260911/README.md)
-restent acquises à leur portée, sans redemander leurs premières gates.
+La lecture du pool persistant et du raccord dense est favorable : résultats
+séparés par leader, scratch privé, barrière avant scatter, puis consommation
+de φ/DSU dans l’ordre source. Un pool sert tous les K, avec une seule fenêtre
+active. Le tri et la réduction restent séquentiels. Les hashes et la lecture
+de la capture dense O2, 114 census/456 essais, sont consignés séparément ;
+aucune exécution C++ supplémentaire par cet audit.
+
+Une amélioration du runner est utile : borner les commandes de
+`record_workers.py` par un timeout et préserver les captures échouées.
+Les fixtures à latch rendent détectable une perte de participation seulement
+si le runner sait aussi terminer un test bloqué. Aucun tel blocage observé.
+
+## Décisions déjà prises
+
+Le [plan préparé, les rangs liés et les semis par propriétaire/K](receipts_prepared_catalogue_20260911/README.md)
+sont acceptés comme delta séparé du premier reçu dense : validation commune
+conservée, métadonnées partagées, état mutable privé. Le réemploi d’une
+terminale garde son seuil certifié et un repli sous ce seuil. Ces arguments
+et leurs contre-fixtures ne sont plus répétés ici.
+
+Le [raccord ordonné et son triplet](../receipts/ordered_streaming_20260911/README.md),
+la [contraction directe](receipts_birth_stream_20260911/README.md),
+l’[export](receipts_historical_export_20260911/README.md) et la
+[composition](receipts_composable_msf_20260911/README.md) gardent leurs preuves
+propres. Leurs premières gates ne sont pas redemandées.
 
 ## Acquis repris par le développeur
 

@@ -4922,5 +4922,261 @@
         }
       ]
     }
+  },
+  "latest_scatter_rank_review_20260911": {
+    "objective": "Apply the published rank-equivalence proof to catalogue scatter and seed guards; constructively review dense reduction and persistent CPU workers without changing implementation.",
+    "static_guard_derivation": {
+      "command": "python3 -B - <<'PY'\nimport hashlib,json,subprocess\nfrom pathlib import Path\nroot=Path.cwd();p=root/'morsehgp3D_v7/receipts/ordered_streaming_20260911';m=json.loads((p/'MANIFEST.json').read_text());head=subprocess.check_output(['git','rev-parse','ac3e8b9f'],text=True).strip();sha=lambda b:hashlib.sha256(b).hexdigest();rows=[]\nfor n in [8000,16000,32000]:\n logical=f'build/v7_ordered_streaming_20260911/bench_n{n}_streaming/results.json';record=m['files'][logical];name=str((p/record['path']).relative_to(root));raw=subprocess.check_output(['git','show',head+':'+name])\n if sha(raw)!=record['sha256'] or len(raw)!=record['size']:raise SystemExit('pinned benchmark differs')\n data=json.loads(raw);b=data['bench'];s=b['streaming'];orders=s['per_order']\n if (b['n'],b['s'],b['requested_K'],b['window'],b['status'])!=(n,8,10,65536,'passed'):raise SystemExit('benchmark scope differs')\n if [r['K']for r in orders]!=list(range(1,11)):raise SystemExit('order domain differs')\n R=s['occurrences'];r1=orders[0]['occurrences']\n if sum(r['occurrences']for r in orders)!=R or orders[0]['initial_seed_hits']!=0:raise SystemExit('counter partition differs')\n rows.append({'n':n,'object':name,'sha256':sha(raw),'R':R,'R_K1':r1,'scatter_rational_comparisons_derived':2*R-r1,'initial_seed_rational_comparisons_derived':sum(r['initial_seed_hits']for r in orders)})\nif [r['scatter_rational_comparisons_derived']for r in rows]!=[20852874,43775268,90662398]:raise SystemExit('derivation differs')\nprint(json.dumps({'status':'passed_static_guard_count_derivation','source_commit':head,'streaming_source_sha256':'fb9f0c0c255e319277ccd464215ce179169cc4382f981815c91829a04b7efe5c','scope':'Nominal completed windows only; comparisons derived from sealed R and seed-hit counters, not directly instrumented. Replacements keep guards and do not reduce MEB calls or qualify latency.','rows':rows},sort_keys=True))\nPY",
+      "exit_code": 0,
+      "output": "{\"rows\": [{\"R\": 10456312, \"R_K1\": 59750, \"initial_seed_rational_comparisons_derived\": 5054875, \"n\": 8000, \"object\": \"morsehgp3D_v7/receipts/ordered_streaming_20260911/objects/5f7afaf5cef01505f4ded7948bfcbb3c1cd5396b8109949b9d249a57f1561ba0\", \"scatter_rational_comparisons_derived\": 20852874, \"sha256\": \"5f7afaf5cef01505f4ded7948bfcbb3c1cd5396b8109949b9d249a57f1561ba0\"}, {\"R\": 21948186, \"R_K1\": 121104, \"initial_seed_rational_comparisons_derived\": 11997933, \"n\": 16000, \"object\": \"morsehgp3D_v7/receipts/ordered_streaming_20260911/objects/031e1a0a5b6334309eae2774db822ee1ba0cf461fbf70c4e557807b5e4c48719\", \"scatter_rational_comparisons_derived\": 43775268, \"sha256\": \"031e1a0a5b6334309eae2774db822ee1ba0cf461fbf70c4e557807b5e4c48719\"}, {\"R\": 45453599, \"R_K1\": 244800, \"initial_seed_rational_comparisons_derived\": 26901500, \"n\": 32000, \"object\": \"morsehgp3D_v7/receipts/ordered_streaming_20260911/objects/c292804f556b81317bda13c7565e33f37397c2c6151338f8bea919ebdb0401d0\", \"scatter_rational_comparisons_derived\": 90662398, \"sha256\": \"c292804f556b81317bda13c7565e33f37397c2c6151338f8bea919ebdb0401d0\"}], \"scope\": \"Nominal completed windows only; comparisons derived from sealed R and seed-hit counters, not directly instrumented. Replacements keep guards and do not reduce MEB calls or qualify latency.\", \"source_commit\": \"ac3e8b9f6f9e61facf186887485c8519a1ea6019\", \"status\": \"passed_static_guard_count_derivation\", \"streaming_source_sha256\": \"fb9f0c0c255e319277ccd464215ce179169cc4382f981815c91829a04b7efe5c\"}\n",
+      "result": {
+        "rows": [
+          {
+            "R": 10456312,
+            "R_K1": 59750,
+            "initial_seed_rational_comparisons_derived": 5054875,
+            "n": 8000,
+            "object": "morsehgp3D_v7/receipts/ordered_streaming_20260911/objects/5f7afaf5cef01505f4ded7948bfcbb3c1cd5396b8109949b9d249a57f1561ba0",
+            "scatter_rational_comparisons_derived": 20852874,
+            "sha256": "5f7afaf5cef01505f4ded7948bfcbb3c1cd5396b8109949b9d249a57f1561ba0"
+          },
+          {
+            "R": 21948186,
+            "R_K1": 121104,
+            "initial_seed_rational_comparisons_derived": 11997933,
+            "n": 16000,
+            "object": "morsehgp3D_v7/receipts/ordered_streaming_20260911/objects/031e1a0a5b6334309eae2774db822ee1ba0cf461fbf70c4e557807b5e4c48719",
+            "scatter_rational_comparisons_derived": 43775268,
+            "sha256": "031e1a0a5b6334309eae2774db822ee1ba0cf461fbf70c4e557807b5e4c48719"
+          },
+          {
+            "R": 45453599,
+            "R_K1": 244800,
+            "initial_seed_rational_comparisons_derived": 26901500,
+            "n": 32000,
+            "object": "morsehgp3D_v7/receipts/ordered_streaming_20260911/objects/c292804f556b81317bda13c7565e33f37397c2c6151338f8bea919ebdb0401d0",
+            "scatter_rational_comparisons_derived": 90662398,
+            "sha256": "c292804f556b81317bda13c7565e33f37397c2c6151338f8bea919ebdb0401d0"
+          }
+        ],
+        "scope": "Nominal completed windows only; comparisons derived from sealed R and seed-hit counters, not directly instrumented. Replacements keep guards and do not reduce MEB calls or qualify latency.",
+        "source_commit": "ac3e8b9f6f9e61facf186887485c8519a1ea6019",
+        "status": "passed_static_guard_count_derivation",
+        "streaming_source_sha256": "fb9f0c0c255e319277ccd464215ce179169cc4382f981815c91829a04b7efe5c"
+      },
+      "nominal_predicate_evaluations_not_instructions": true,
+      "guards_preserved": true,
+      "meb_calls_reduced": false,
+      "performance_claim": false
+    },
+    "private_dense_capture_review": {
+      "command": "python3 -B - <<'PY'\nimport hashlib,json\nfrom pathlib import Path\np=Path('build/v7_birth_streaming_20260911/qualification_o2_r1');sha=lambda b:hashlib.sha256(b).hexdigest();get=lambda name:json.loads((p/name).read_text())\ndef need(good,why):\n if not good:raise SystemExit(why)\nreceipt=get('receipt.json');need(receipt['status']=='passed' and all(receipt['closure'].values()),'capture not closed')\nfor stem in ['sources','sources_copied','compiler','dependencies','binary']:\n need(get(stem+'_before.json')==get(stem+'_after.json'),'closure differs: '+stem)\nsources=get('sources_copied_before.json')\nfor name,pin in sources.items():\n raw=(p/'source_snapshot'/name).read_bytes();need(sha(raw)==pin['sha256'] and len(raw)==pin['size'],'snapshot differs '+name)\ncommands=get('commands.json');need(len(commands)==26,'command count');results=get('results.json')\nfor row in commands:\n need(row['exit_code']==row['expected_exit'],'unexpected exit '+row['name'])\n for channel in ['stdout','stderr']:\n  raw=(p/(row['name']+'.'+channel)).read_bytes();need({'sha256':sha(raw),'size':len(raw)}==row[channel],'capture differs')\n if row['name'] in results:\n  raw=(p/(row['name']+'.stdout')).read_text();need((json.loads(raw) if raw.strip() else None)==results[row['name']],'result summary differs')\npositive=[results[n] for n in ['selftest','high','uniform32']]\nfields=['cases','stream_trials','observed_terminals','birth_occurrences','dense_dsu_initializations','pivot_assignments','nonpivot_attempts','native_edge_comparisons','split_hub_windows','oracle_cuts','oracle_verticals']\nsummary={k:sum(r[k]for r in positive)for k in fields}\ncausal={name:r for name,r in results.items() if isinstance(r,dict)and r.get('status')=='causal_rejection'}\nneed(summary['birth_occurrences']==summary['observed_terminals']==summary['pivot_assignments']+summary['nonpivot_attempts'],'aggregate occurrence partition')\nfor n in ['mutant-root-pivot','mutant-forget-pivot','mutant-early-conversion']:need(causal[n]['fault_hits']>0,'injected mutant vacuous')\nprint(json.dumps({'status':'passed_read_only_private_O2_capture_review','receipt_sha256':sha((p/'receipt.json').read_bytes()),'results_sha256':sha((p/'results.json').read_bytes()),'commands':len(commands),'project_sources':len(sources),'recorded_preprocessor_files':len(get('dependencies_before.json')),'counts':summary,'causal_rejections':len(causal),'three_injected_mutants':{n:causal[n]for n in ['mutant-root-pivot','mutant-forget-pivot','mutant-early-conversion']},'source_pins':{n:v for n,v in sources.items()if n.startswith('v7_birth_streaming_20260911/')},'own_cpp_executed':False,'unpublished_capture_not_engine_qualification':True,'gcp_used':False},sort_keys=True))\nPY",
+      "exit_code": 0,
+      "output": "{\"causal_rejections\": 16, \"commands\": 26, \"counts\": {\"birth_occurrences\": 253224, \"cases\": 114, \"dense_dsu_initializations\": 2184, \"native_edge_comparisons\": 72816, \"nonpivot_attempts\": 170856, \"observed_terminals\": 253224, \"oracle_cuts\": 29784, \"oracle_verticals\": 15594832, \"pivot_assignments\": 82368, \"split_hub_windows\": 50046, \"stream_trials\": 456}, \"gcp_used\": false, \"own_cpp_executed\": false, \"project_sources\": 52, \"receipt_sha256\": \"dd3284cff1d52b5d4eb1e8f6bda3cf542a24265dbf37b3864c88fa5541074ff4\", \"recorded_preprocessor_files\": 1041, \"results_sha256\": \"d5fe09fb7d6a7c43cdb4cc109caada3bd33911b2f2ed41add7bd0621f823b937\", \"source_pins\": {\"v7_birth_streaming_20260911/gate.cpp\": {\"sha256\": \"b2427c24b1aaf29b6cf7525194889843d0ce812f602e8ecbb04dd4ea8f2fc014\", \"size\": 34033}, \"v7_birth_streaming_20260911/record.py\": {\"sha256\": \"923c58237ebc56041b8f0867cedd6eec40bc767ccc22e1afa790558b4701010c\", \"size\": 26799}, \"v7_birth_streaming_20260911/streaming_graph.hpp\": {\"sha256\": \"87eb210e7b355dfc2788b68fbc155b2910733cc98785ad03735f55e6f79a2470\", \"size\": 22060}}, \"status\": \"passed_read_only_private_O2_capture_review\", \"three_injected_mutants\": {\"mutant-early-conversion\": {\"callback_aborts\": 0, \"cause\": \"birth_stream.source_label\", \"fault_hits\": 1, \"observed_terminals\": 8, \"status\": \"causal_rejection\"}, \"mutant-forget-pivot\": {\"callback_aborts\": 0, \"cause\": \"birth_stream.source_label\", \"fault_hits\": 1, \"observed_terminals\": 2, \"status\": \"causal_rejection\"}, \"mutant-root-pivot\": {\"callback_aborts\": 0, \"cause\": \"stream_gate.ordinal_zero_pivots\", \"fault_hits\": 1, \"observed_terminals\": 12, \"status\": \"causal_rejection\"}}, \"unpublished_capture_not_engine_qualification\": true}\n",
+      "result": {
+        "causal_rejections": 16,
+        "commands": 26,
+        "counts": {
+          "birth_occurrences": 253224,
+          "cases": 114,
+          "dense_dsu_initializations": 2184,
+          "native_edge_comparisons": 72816,
+          "nonpivot_attempts": 170856,
+          "observed_terminals": 253224,
+          "oracle_cuts": 29784,
+          "oracle_verticals": 15594832,
+          "pivot_assignments": 82368,
+          "split_hub_windows": 50046,
+          "stream_trials": 456
+        },
+        "gcp_used": false,
+        "own_cpp_executed": false,
+        "project_sources": 52,
+        "receipt_sha256": "dd3284cff1d52b5d4eb1e8f6bda3cf542a24265dbf37b3864c88fa5541074ff4",
+        "recorded_preprocessor_files": 1041,
+        "results_sha256": "d5fe09fb7d6a7c43cdb4cc109caada3bd33911b2f2ed41add7bd0621f823b937",
+        "source_pins": {
+          "v7_birth_streaming_20260911/gate.cpp": {
+            "sha256": "b2427c24b1aaf29b6cf7525194889843d0ce812f602e8ecbb04dd4ea8f2fc014",
+            "size": 34033
+          },
+          "v7_birth_streaming_20260911/record.py": {
+            "sha256": "923c58237ebc56041b8f0867cedd6eec40bc767ccc22e1afa790558b4701010c",
+            "size": 26799
+          },
+          "v7_birth_streaming_20260911/streaming_graph.hpp": {
+            "sha256": "87eb210e7b355dfc2788b68fbc155b2910733cc98785ad03735f55e6f79a2470",
+            "size": 22060
+          }
+        },
+        "status": "passed_read_only_private_O2_capture_review",
+        "three_injected_mutants": {
+          "mutant-early-conversion": {
+            "callback_aborts": 0,
+            "cause": "birth_stream.source_label",
+            "fault_hits": 1,
+            "observed_terminals": 8,
+            "status": "causal_rejection"
+          },
+          "mutant-forget-pivot": {
+            "callback_aborts": 0,
+            "cause": "birth_stream.source_label",
+            "fault_hits": 1,
+            "observed_terminals": 2,
+            "status": "causal_rejection"
+          },
+          "mutant-root-pivot": {
+            "callback_aborts": 0,
+            "cause": "stream_gate.ordinal_zero_pivots",
+            "fault_hits": 1,
+            "observed_terminals": 12,
+            "status": "causal_rejection"
+          }
+        },
+        "unpublished_capture_not_engine_qualification": true
+      },
+      "scope": "Read-only verification of private O2 capture; no new C++ execution or SAN attribution. Constructor publication in preparation."
+    },
+    "reviewed_wip_sources": {
+      "build/v7_birth_streaming_20260911/streaming_graph.hpp": "87eb210e7b355dfc2788b68fbc155b2910733cc98785ad03735f55e6f79a2470",
+      "build/v7_birth_streaming_20260911/gate.cpp": "b2427c24b1aaf29b6cf7525194889843d0ce812f602e8ecbb04dd4ea8f2fc014",
+      "build/v7_birth_streaming_20260911/window_workers.hpp": "4ec1a206a3d6a500237e3f7e2cf2d219384ca4fa71fb24236515c5ea77e8238d",
+      "build/v7_birth_streaming_20260911/window_workers_gate.cpp": "2c7358a7033cc7732eb528aca8e64ad06a73ce15d45f40cc025ab110e07f2884",
+      "build/v7_parallel_birth_streaming_20260911/streaming_graph.hpp": "f400de796713b25889dd18838262b1f6e95086dff9fafdaee840238f40247b54",
+      "build/v7_parallel_birth_streaming_20260911/gate.cpp": "ce2e18b52958eef6a9a188ffd23bc06432ce5e4405b79230d2dfb09ea88cf7aa",
+      "build/v7_parallel_birth_streaming_20260911/bench.cpp": "0b478f4cf4d92e95e0257980d28d6e52a72c5124c7171ce7bf1362255c03104c",
+      "build/v7_birth_streaming_20260911/record_workers.py": "cf770591ec8b43c05dd8e66eee83dffc081b53fd8b4f22f83551a7cec88be222"
+    },
+    "constructive_results": [
+      "Representative strict exact order and every BallId-level-rank binding imply first_consumer rank(leader)<=rank(consumer), terminal rank(target)<rank(consumer), seed rank(seed_target)<rank(leader).",
+      "Keep target bounds and order admission before target rank access, owner/generation immutable, K1 point terminal special case, and all dynamic initial/intermediate MEB exact comparisons.",
+      "Nominal scatter uses 2R-R_K1 rational predicates; initial seed hits add one each. Totals at8k/16k/32k are25907749/55773201/117563898, independently derived from sealed captures.",
+      "Dense producer preserves immutable phi, delayed conversion and native edge identity; three injected source faults have real hits in the O2 capture.",
+      "Persistent worker pool publishes callbacks under mutex and reaches quiescence before return or rethrow; partial startup, reentrancy refusal and reuse reviewed favorably.",
+      "Parallel seam uses private scratch/counters and distinct leader targets, one pool across K, one live window and five O(W) vectors, then barrier/scatter/ordered phi and DSU.",
+      "Geometry batches include seed-only windows; actual geometry tasks count non-seeded groups. Preparation, sorting, scatter, reduction and K iteration remain sequential.",
+      "record_workers.py subprocess calls lack a timeout. Add a bounded command timeout with failed captures for latch regressions; no actual hang observed.",
+      "Mono dense and pool captures do not qualify parallel geometry. Constructor is preparing separate birth_streaming and parallel_birth_streaming packets. TSan code66 unexpected memory mapping is a pre-test failure, not a race check pass."
+    ],
+    "counterreading": {
+      "rank_guards": "/root/parallel_seam_review independently confirms exact predicates, domain short-circuit, plateaus/raw fractions, all three counter totals and dynamic-MEB limitation.",
+      "parallel_seam": "/root/parallel_seam_review favorable static source reading, no C++ execution.",
+      "worker_pool": "/root/worker_pool_review favorable static source reading; timeout recommendation and separate mono/parallel capture authority. New packet manifests still absent at review."
+    },
+    "checks": [
+      {
+        "name": "docs_normal",
+        "command": "python3 -B tools/check_docs.py",
+        "exit_code": 0,
+        "output": "Validated 507 active Markdown files.\n"
+      },
+      {
+        "name": "docs_optimized",
+        "command": "python3 -B -O tools/check_docs.py",
+        "exit_code": 0,
+        "output": "Validated 507 active Markdown files.\n"
+      },
+      {
+        "name": "registry",
+        "command": "python3 -B tools/check_implementation_status.py",
+        "exit_code": 0,
+        "output": "Validated 20 implementation phases and their gates.\n"
+      },
+      {
+        "name": "own_markdown",
+        "command": "python3 -B - <<'PY'\nfrom pathlib import Path\nimport importlib.util,json\nspec=importlib.util.spec_from_file_location('doccheck','tools/check_docs.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)\np=Path('morsehgp3D_v7/audits').resolve();files=[p/n for n in ['COORDINATION_AUDITEURS.md','DIALOGUE_COURANT.md','ETAT_COURANT.md','README.md']];errors=[e for f in files for e in m.validate(f)]\nprint(json.dumps({'files':len(files),'errors':errors}));raise SystemExit(bool(errors))\nPY",
+        "exit_code": 0,
+        "output": "{\"files\": 4, \"errors\": []}\n"
+      }
+    ],
+    "gcp_used": false,
+    "new_engine_variant": false,
+    "new_packet": false,
+    "new_cpp_execution": false,
+    "date_utc": "2026-09-11T19:18:08.804274+00:00",
+    "source_head_at_start": "e3903b2ac757f5d1b9c6c091f22794ba62a12bdd",
+    "source_head_at_review": "e3903b2ac757f5d1b9c6c091f22794ba62a12bdd",
+    "maintenance": {
+      "entries": [
+        {
+          "path": "COORDINATION_AUDITEURS.md",
+          "previous_sha256": "0c496c447e2eacd2a71e2b4ac1f54814f36a35bdbfdeab7685a81962f0915b12",
+          "previous_words": 702,
+          "words": 387
+        },
+        {
+          "path": "DIALOGUE_COURANT.md",
+          "previous_sha256": "cbc975009904f972fa7b1b2e8e259e778e905476113dd9a255c37b7814fb83ac",
+          "previous_words": 683,
+          "words": 798
+        },
+        {
+          "path": "ETAT_COURANT.md",
+          "previous_sha256": "ab5059cce2aa46ea8b1dbf9742ab370250643f2212fcdae3ddbbdafae482bf92",
+          "previous_words": 689,
+          "words": 657
+        },
+        {
+          "path": "README.md",
+          "previous_sha256": "60024b448cc3ed08577ea72759dde8a8e9e44d77adbba7487c797dd61f040c73",
+          "previous_words": 982,
+          "words": 1031
+        }
+      ],
+      "active_notes_rewritten_not_appended": true,
+      "accepted_preparation_and_seed_advice_condensed": true,
+      "historical_packets_unchanged": true,
+      "source_variants_D_to_Q_unchanged": true,
+      "other_session_files_untouched": true,
+      "new_scattered_root_probe_files": false,
+      "temporary_directory_created": false,
+      "reservation_files": 6
+    },
+    "whole_source_freshness": {
+      "common_pins_valid": 2849,
+      "source_variants_D_to_Q_unchanged": true,
+      "scope": "All common pins pass; no historical engine variant fully matches current sources. No new engine qualification.",
+      "commands": [
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "morsehgp3D_v7/audits/verify_current.py"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr_first_line": "Audit à actualiser : aucune variante complète ne correspond.",
+          "stderr_sha256": "6b7321b69dcf56cd8795142cd9c8692b62968d6e321388a490eaf538868d0c4e",
+          "stderr_lines": 149
+        },
+        {
+          "argv": [
+            "python3",
+            "-B",
+            "-O",
+            "morsehgp3D_v7/audits/verify_current.py"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr_first_line": "Audit à actualiser : aucune variante complète ne correspond.",
+          "stderr_sha256": "6b7321b69dcf56cd8795142cd9c8692b62968d6e321388a490eaf538868d0c4e",
+          "stderr_lines": 149
+        }
+      ]
+    },
+    "coordination": {
+      "constructor_accepted_scatter_rank_delta": true,
+      "source": "audits/COORDINATION_MORSEHGP3D_V7.md read only",
+      "reservation_files": [
+        "COORDINATION_AUDITEURS.md",
+        "DIALOGUE_COURANT.md",
+        "ETAT_COURANT.md",
+        "README.md",
+        "ENTRETIEN.json",
+        "validation_current.json"
+      ],
+      "reservation_base": "e3903b2ac757f5d1b9c6c091f22794ba62a12bdd",
+      "constructor_SAN_parallel_announced_separately_not_reverified": true
+    }
   }
 }

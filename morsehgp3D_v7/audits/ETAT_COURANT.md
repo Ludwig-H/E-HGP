@@ -1,40 +1,35 @@
 # État courant de l’audit v7
 
-11 septembre 2026, après publication constructeur **ac3e8b9f**. La priorité
-reste la parallélisation de toute la tour et la maîtrise des intermédiaires.
+11 septembre 2026, après **e3903b2a**. Priorité : paralléliser toute la tour
+et maîtriser les intermédiaires.
 
-**Suite constructive : partager la préparation validée et lier les semis
-une fois aux workers.** L’[audit de préparation](receipts_prepared_catalogue_20260911/README.md)
-identifie les tris, programmes et ShellTable aujourd’hui détruits puis
-reconstruits. Les comparaisons des programmes peuvent utiliser des rangs
-entiers après certification de chaque liaison exacte. Les contrôles locaux
-et l’autorité distincte de complétude restent conservés.
+**Suite constructive : étendre les rangs certifiés aux gardes du scatter.**
+Le [dialogue courant](DIALOGUE_COURANT.md) donne les trois substitutions
+exactes, avec les mêmes contrôles de domaine et d’admission. Sur le témoin
+ordonné 32k, cela concerne 90 662 398 comparaisons de scatter et 26 901 500
+de semis initiaux. Ce comptage logique est reproductible ; aucun gain de
+temps ni retrait de MEB n’est revendiqué. Les gardes des boules dynamiques
+restent exactes, distinctes des rangs du catalogue.
 
-La liaison exacte des semis passe de Σ J_K·S_K à Σ S_K≤B comparaisons,
-plus les contrôles des vues liées. Le Context actuel est non réentrant :
-plan immuable partagé et états privés des workers doivent être séparés.
-Une contre-fixture exacte à quatre points fixe aussi la condition de réemploi
-d’une terminale mémorisée sous un autre seuil. Le modèle qualifie ces arguments
-bornés ; il n’exécute ni le propriétaire préparé ni le pool parallèle.
+La lecture du pool CPU persistant et du raccord parallèle est favorable :
+une fenêtre, scratch privé, barrière avant scatter et consommation ordonnée
+de φ/DSU. Le tri, la préparation et la réduction restent séquentiels. Le
+runner des fixtures concurrentes doit encore borner ses commandes par un
+timeout. La capture dense privée O2 **87eb210e** a été contre-vérifiée en
+lecture : 26 commandes, 114 census, 456 essais et trois fautes réellement
+injectées. Le constructeur prépare la publication O2/SAN et du pool ; ces
+qualifications restent distinctes de notre lecture et du moteur actif.
 
-Le [raccord ordonné constructeur](../receipts/ordered_streaming_20260911/README.md)
-est contre-lu, lecteurs normal/−O PASS. Son triplet 8k/16k/32k est clos :
-une visite par occurrence et aucun retri des arêtes de hubs. Le RSS ne baisse
-pas sensiblement ; les temps sous charge n’établissent pas un speedup universel.
-Les anciennes demandes de correction ordonnée et de premier triplet sont closes.
-
-La [contraction directe](receipts_birth_stream_20260911/README.md), publiée
-03198682 et contre-exécutée par le constructeur, conserve sa preuve et son
-modèle indépendant. Le draft dense b2a472db est favorable en lecture ; son
-raccord C++ fait l’objet d’une qualification distincte en préparation. Le
-développeur a accepté le partage des métadonnées comme delta séparé, avec
-validation commune conservée dans le premier reçu dense.
-
-Les acquis d’[export historique](receipts_historical_export_20260911/README.md),
-de [composition MSF](receipts_composable_msf_20260911/README.md),
-d’[objets parallèles](receipts_parallel_objects_20260911/README.md) et de
-[support certifié](receipts_certified_support_20260911/README.md) restent dans
-leurs preuves, sans répéter les demandes satisfaites.
+Le [partage de préparation et les semis liés](receipts_prepared_catalogue_20260911/README.md)
+sont acceptés par le développeur comme delta suivant. Le détail de leur
+preuve, les conventions de masques et la contre-fixture de seuil restent
+dans le paquet ; les recommandations déjà reprises ont été condensées.
+Le [réducteur ordonné](../receipts/ordered_streaming_20260911/README.md),
+la [contraction](receipts_birth_stream_20260911/README.md),
+l’[export](receipts_historical_export_20260911/README.md), la
+[composition MSF](receipts_composable_msf_20260911/README.md) et les
+[objets parallèles](receipts_parallel_objects_20260911/README.md)
+conservent leurs preuves et leurs limites, sans redemander les premières portes.
 
 ```text
 phase=exploration_v7_hors_registre

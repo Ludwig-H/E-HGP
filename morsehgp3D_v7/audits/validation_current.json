@@ -1,6 +1,6 @@
 {
   "schema": "mhgp7-current-audit-validation-v2",
-  "updated_utc": "2026-09-11T18:57:59.376160+00:00",
+  "updated_utc": "2026-09-11T19:18:08.804274+00:00",
   "phase": "exploration_v7_hors_registre",
   "backend": "cpu_reference",
   "profile": "quantized_u16_input_only",
@@ -21,10 +21,10 @@
     "audits/CERTIFICAT_HORIZONTAL_COURANT.md": "e76714730f4ce24f4451a8d9bab0c365d29b25e9d18008d3675d2ea9f036c611",
     "audits/CONTRAT_MASSES_VOTE_COURANT.md": "2ed2a8eebef68fbb12b2a23fc18067d36a343b0a206c1330c2ca823ee26f2b72",
     "audits/CONTRAT_VERTICAL_COURANT.md": "09b2f2a8d0b59a540e4eba865b2f7754225e1583ca97d42cbc43b4dc0e4868c9",
-    "audits/DIALOGUE_COURANT.md": "cbc975009904f972fa7b1b2e8e259e778e905476113dd9a255c37b7814fb83ac",
+    "audits/DIALOGUE_COURANT.md": "a13f83bfdfe6816e1f1ee59f448a5e1c42f64edd2efb9f8d43d6807c00855bc7",
     "audits/DOMAINE_CPU_COURANT.md": "18258334cfc7d74f3a262ea1dab798ff621245b079bfd5cbe8b48c987404cd33",
-    "audits/ENTRETIEN.json": "5c046e003d23dabeb708f000ce963108494898aea62d829038807536300d8409",
-    "audits/ETAT_COURANT.md": "ab5059cce2aa46ea8b1dbf9742ab370250643f2212fcdae3ddbbdafae482bf92",
+    "audits/ENTRETIEN.json": "ce35a9ceb04fea66bac37a592537723ff4cb0736cf3dcd1c5f284508346f88f8",
+    "audits/ETAT_COURANT.md": "85d0a48c905dfdb049ce118edbc8fb16586d2032bb0d539167a8f80bbc25a007",
     "audits/FILTRES_FLOTTANTS_COURANTS.md": "7ba3d325a007b12e45baaa5d7d6ee00abb2cb978a1006af9bc7e9a8a3bc2af03",
     "audits/FRONT_ET_TEMOINS_COURANT.md": "3fb7202d0d56720ac8325d46473eb86d329669b27dff8a51fd9ead8afb4dde08",
     "audits/MEB_DOUBLE_BUDGET_COURANT.md": "134b91b9cbdda6c23255807474e1f2010ac872fc54636b975bd3f6cea3e1187c",
@@ -33,7 +33,7 @@
     "audits/PREUVE_CHORD_SECTOR_COURANTE.md": "2e4d1494957c8f5849234ada2e86edfd0dbcb4a2945e5a9fbfeb778b1ed432e7",
     "audits/PRODUCTEUR_FULL_GABRIEL_COURANT.md": "5a3e80d338c6c18f346224d811997e08e40b55876e12d3e9e8f837b8ef963910",
     "audits/QUESTIONS_SECONDAIRES.md": "d41daf7b69827114c19991984ba5bb4652886b4197350b2809e748caba68c9d8",
-    "audits/README.md": "60024b448cc3ed08577ea72759dde8a8e9e44d77adbba7487c797dd61f040c73",
+    "audits/README.md": "e9181a79771db4ffea1ef6d4b26e423aa69afdda0f33f829b5751a757239e1a7",
     "audits/S1_COURANT.md": "e4c79bc1cb57df636c226765c7a7be616998ff7248b86f93e61976e77fa173eb",
     "audits/archive_cleanup_probe.cpp": "f94bc8032d4a55f4afccf43a56497866f803eb3e42f2d96b05dc9420b964a63d",
     "audits/cell_compiled_bridge.cpp": "0a8045ec5b9691cb1db627fedaeca60042bf76714f4eca62db48264a8d6842fb",
@@ -2275,7 +2275,7 @@
     "audits/receipts_plateaux_full_20260906/real_parent_certificates_normal.json": "7cc7e28d44f09bf1a29874b8892599d7814811f339bee3b1d62459ba41920444",
     "audits/receipts_plateaux_full_20260906/real_parent_certificates_optimized.json": "7cc7e28d44f09bf1a29874b8892599d7814811f339bee3b1d62459ba41920444",
     "audits/receipts_plateaux_full_20260906/global_parent_review.json": "28da3f09d5ece7724db2fd5756acc2f5ea2f5cf660c0e89013bb9de630546f94",
-    "audits/COORDINATION_AUDITEURS.md": "0c496c447e2eacd2a71e2b4ac1f54814f36a35bdbfdeab7685a81962f0915b12",
+    "audits/COORDINATION_AUDITEURS.md": "d6a577059abf5e3c5db21f1e91ea16eeb411a0cca7c1f93ce65db9e4fcf1c225",
     "audits/receipts_coverage_cpp_20260910/README.md": "42987980fc3f62a308764c4ef2b6b5517069952775d5bf1cd8cc7e5068cacf21",
     "audits/receipts_coverage_cpp_20260910/SHA256SUMS": "1db0c71a67c76458d2c6f87f11b1f37bdb4105fa93f3f177b37ae1d0bba0359a",
     "audits/receipts_coverage_cpp_20260910/bridge.cpp": "b38034d1c33afa0488d345db517a4ec206542191df8358facf2484cf768202f6",
@@ -2853,7 +2853,10 @@
     "audits/receipts_prepared_catalogue_20260911/README.md": "b0dd9a64a98949abd9f55c13278a06eb2f8540515aa02ba5c6153d7ff666faa2",
     "audits/receipts_prepared_catalogue_20260911/model.py": "44942facb8ecf65e35adf08fc96391172d4b8ab66070db2408b1d71d1d550f6e",
     "audits/receipts_prepared_catalogue_20260911/commands.json": "50a41f2740001286173e559945880e4eab5cdbe2f732a568a765375503083a0e",
-    "audits/receipts_prepared_catalogue_20260911/SHA256SUMS": "d9e21821af51dd85d27327fe61637b7018f9729312619cd7fbf4d02a410d91a4"
+    "audits/receipts_prepared_catalogue_20260911/SHA256SUMS": "d9e21821af51dd85d27327fe61637b7018f9729312619cd7fbf4d02a410d91a4",
+    "receipts/ordered_streaming_20260911/objects/5f7afaf5cef01505f4ded7948bfcbb3c1cd5396b8109949b9d249a57f1561ba0": "5f7afaf5cef01505f4ded7948bfcbb3c1cd5396b8109949b9d249a57f1561ba0",
+    "receipts/ordered_streaming_20260911/objects/031e1a0a5b6334309eae2774db822ee1ba0cf461fbf70c4e557807b5e4c48719": "031e1a0a5b6334309eae2774db822ee1ba0cf461fbf70c4e557807b5e4c48719",
+    "receipts/ordered_streaming_20260911/objects/c292804f556b81317bda13c7565e33f37397c2c6151338f8bea919ebdb0401d0": "c292804f556b81317bda13c7565e33f37397c2c6151338f8bea919ebdb0401d0"
   },
   "source_variants": [
     {
@@ -12992,5 +12995,13 @@
     "source_head_at_review": "ac3e8b9f6f9e61facf186887485c8519a1ea6019",
     "packet": "audits/receipts_prepared_catalogue_20260911/README.md",
     "scope": "Conditional prepared-owner and bound-seed architecture; exact integer-rank equivalence proof,84 pair comparisons18 programs5 causal mutants and four-point threshold counterfixture with positive fallback. Ordered constructor packet readers pass; no prepared C++, worker pool, dense reducer runtime or new engine variant."
+  },
+  "scatter_rank_followup": {
+    "source_head_at_review": "e3903b2ac757f5d1b9c6c091f22794ba62a12bdd",
+    "review": "audits/DIALOGUE_COURANT.md",
+    "scope": "Existing exact rank proof applied to catalogue guards, static counts from three sealed ordered captures. Favorable static dense/pool/parallel review plus read-only private dense O2 capture verification; no C++ execution, new engine variant or performance qualification.",
+    "source_variants_D_to_Q_unchanged": true,
+    "new_cpp_qualification": false,
+    "new_engine_variant": false
   }
 }
