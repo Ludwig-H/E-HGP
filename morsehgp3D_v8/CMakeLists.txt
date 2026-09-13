@@ -8,7 +8,7 @@ endif()
 include(CTest)
 option(MHGP8_SANITIZE "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 
-add_library(mhgp8_p0 STATIC src/pipeline/local_credits.cpp)
+add_library(mhgp8_p0 STATIC src/pipeline/local_credits.cpp src/pipeline/axis_q2.cpp)
 target_include_directories(mhgp8_p0 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_features(mhgp8_p0 PUBLIC cxx_std_20)
 set_target_properties(mhgp8_p0 PROPERTIES CXX_EXTENSIONS OFF)
@@ -20,6 +20,10 @@ endif()
 
 add_executable(mhgp8_p0_probe bench/p0_probe.cpp)
 target_link_libraries(mhgp8_p0_probe PRIVATE mhgp8_p0)
+add_executable(mhgp8_batch_probe bench/batch_probe.cpp)
+target_link_libraries(mhgp8_batch_probe PRIVATE mhgp8_p0)
+add_executable(mhgp8_axis_probe bench/axis_probe.cpp)
+target_link_libraries(mhgp8_axis_probe PRIVATE mhgp8_p0)
 
 if(BUILD_TESTING)
   # Boost arbitrary precision is used only by the bounded independent judge.
@@ -34,6 +38,18 @@ if(BUILD_TESTING)
   target_include_directories(mhgp8_tube_gate SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
   target_link_libraries(mhgp8_tube_gate PRIVATE mhgp8_p0)
   add_test(NAME mhgp8_tube_gate COMMAND mhgp8_tube_gate --selftest)
+  add_executable(mhgp8_batch_gate tests/batch_gate.cpp)
+  target_include_directories(mhgp8_batch_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  target_link_libraries(mhgp8_batch_gate PRIVATE mhgp8_p0)
+  add_test(NAME mhgp8_batch_gate COMMAND mhgp8_batch_gate --selftest)
+  add_executable(mhgp8_axis_q2_gate tests/axis_q2_gate.cpp)
+  target_include_directories(mhgp8_axis_q2_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  target_include_directories(mhgp8_axis_q2_gate SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
+  target_link_libraries(mhgp8_axis_q2_gate PRIVATE mhgp8_p0)
+  add_test(NAME mhgp8_axis_q2_gate COMMAND mhgp8_axis_q2_gate --selftest)
+  add_executable(mhgp8_plan_assignment_gate tests/plan_assignment_gate.cpp)
+  target_link_libraries(mhgp8_plan_assignment_gate PRIVATE mhgp8_p0)
+  add_test(NAME mhgp8_plan_assignment_gate COMMAND mhgp8_plan_assignment_gate --selftest)
   find_package(Python3 COMPONENTS Interpreter REQUIRED)
   add_test(NAME mhgp8_docs_scope COMMAND ${Python3_EXECUTABLE} -B
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/docs_scope_gate.py" --selftest)
@@ -51,4 +67,38 @@ if(BUILD_TESTING)
   add_test(NAME mhgp8_campaign_gate_optimized COMMAND ${Python3_EXECUTABLE} -B -O
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/campaign_gate.py"
     --probe $<TARGET_FILE:mhgp8_p0_probe> --selftest)
+  add_test(NAME mhgp8_batch_probe_cli COMMAND ${Python3_EXECUTABLE} -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/batch_probe_cli_gate.py"
+    --probe $<TARGET_FILE:mhgp8_batch_probe> --selftest)
+  add_test(NAME mhgp8_batch_probe_cli_optimized COMMAND ${Python3_EXECUTABLE} -B -O
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/batch_probe_cli_gate.py"
+    --probe $<TARGET_FILE:mhgp8_batch_probe> --selftest)
+  add_test(NAME mhgp8_axis_probe_cli COMMAND ${Python3_EXECUTABLE} -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/axis_probe_cli_gate.py"
+    --probe $<TARGET_FILE:mhgp8_axis_probe> --selftest)
+  add_test(NAME mhgp8_axis_probe_cli_optimized COMMAND ${Python3_EXECUTABLE} -B -O
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/axis_probe_cli_gate.py"
+    --probe $<TARGET_FILE:mhgp8_axis_probe> --selftest)
+  add_test(NAME mhgp8_paired_campaign_gate COMMAND ${Python3_EXECUTABLE} -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/paired_campaign_gate.py"
+    --batch-probe $<TARGET_FILE:mhgp8_batch_probe>
+    --axis-probe $<TARGET_FILE:mhgp8_axis_probe> --selftest)
+  add_test(NAME mhgp8_paired_campaign_gate_optimized COMMAND ${Python3_EXECUTABLE} -B -O
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/paired_campaign_gate.py"
+    --batch-probe $<TARGET_FILE:mhgp8_batch_probe>
+    --axis-probe $<TARGET_FILE:mhgp8_axis_probe> --selftest)
+  add_test(NAME mhgp8_campaign_reader_gate COMMAND ${Python3_EXECUTABLE} -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/campaign_reader_gate.py"
+    --probe $<TARGET_FILE:mhgp8_p0_probe> --selftest)
+  add_test(NAME mhgp8_campaign_reader_gate_optimized COMMAND ${Python3_EXECUTABLE} -B -O
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/campaign_reader_gate.py"
+    --probe $<TARGET_FILE:mhgp8_p0_probe> --selftest)
+  add_test(NAME mhgp8_paired_reader_gate COMMAND ${Python3_EXECUTABLE} -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/paired_reader_gate.py"
+    --batch-probe $<TARGET_FILE:mhgp8_batch_probe>
+    --axis-probe $<TARGET_FILE:mhgp8_axis_probe> --selftest)
+  add_test(NAME mhgp8_paired_reader_gate_optimized COMMAND ${Python3_EXECUTABLE} -B -O
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/paired_reader_gate.py"
+    --batch-probe $<TARGET_FILE:mhgp8_batch_probe>
+    --axis-probe $<TARGET_FILE:mhgp8_axis_probe> --selftest)
 endif()

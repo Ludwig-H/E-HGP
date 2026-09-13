@@ -28,6 +28,29 @@ Voir les [preuves et mesures](../receipts/p0_local_credits_20260913/README.md).
 Les méthodes explorées restent des variantes utiles du même module,
 pas trois copies concurrentes d'un moteur FULL.
 
+## Leçons de la préparation partagée et du filtre axial
+
+- Trois voies q2/q3/q4 partagées ne sont pas la tour K=1..10 : le gain
+  porte sur une préparation locale, pas sur les objets FULL ni leurs parents.
+- Un rang projeté ne suffit pas en 3D. Le filtre axial exige les deux
+  autres coordonnées exactement égales ; une colonne approximative
+  réclamerait un autre certificat géométrique.
+- La borne par ancre d'une grille complète ne vaut pas pour une dernière
+  rangée tronquée : une fixture conserve 540 candidates contre la borne
+  abusivement transférée de 441. Les entrées `sheet` et `sheet_full` restent distinctes.
+- Une préparation non quadratique et des plages compactes ne rendent
+  pas automatiquement le résidu, les visites d'index ou l'aval linéaires.
+  Le filtre axial peut conserver toutes les paires hors de ses alignements.
+- Une nappe alignée ne représente pas toutes ses orientations : une
+  rotation entière conserve les profondeurs mais peut supprimer toutes
+  les colonnes exploitables. L'auditeur conserve ce contrepoint isométrique ;
+  les gains sur alignements ne sont pas des gains génériques.
+- L'affectation membre par membre d'un plan peut changer le propriétaire
+  avant une panne d'allocation de ses vecteurs. Copier entièrement puis
+  échanger conserve l'identité de la cible même en cas d'exception.
+
+Voir le [contrat de cette tranche](P0_PARTAGE_ET_FILTRE_AXIAL.md).
+
 ## Leçons conservées de l'audit
 
 | Piste | Pourquoi elle ne suffit pas ou échoue | Remplacement proposé |

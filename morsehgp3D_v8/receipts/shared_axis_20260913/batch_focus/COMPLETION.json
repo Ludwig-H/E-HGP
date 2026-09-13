@@ -1,0 +1,26 @@
+{
+  "status": "completed",
+  "runs": 54,
+  "attempts": 54,
+  "finished_utc": "2026-09-13T19:00:23.216784+00:00",
+  "source_hashes_unchanged": true,
+  "probe_hash_unchanged": true,
+  "source_sha256_closing": {
+    "morsehgp3D_v8/CMakeLists.txt": "defc8d1a69ced3906a762b880df4eeee19f30fb6da99bfa9e5dc5886bf81e2a2",
+    "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+    "morsehgp3D_v8/src/pipeline/axis_q2.hpp": "b19981a14339c6bce8cafec6ee6630aace5e9e743267c7655b5295c2d41653f8",
+    "morsehgp3D_v8/src/pipeline/local_credits.hpp": "7d96b38571bacf504d79b4139aaead8042bf1dca26396abd08bd8811799496db",
+    "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+    "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+    "morsehgp3D_v8/src/pipeline/axis_q2.cpp": "db1b23431d6515074cf33b3ab5fb94781d88a67488d395a4b094fac540f1e7f1",
+    "morsehgp3D_v8/src/pipeline/local_credits.cpp": "24dcbc9839d862e7b9e78864bb41baf726f89c3d48321f0ef8ec1c382aa8d151",
+    "morsehgp3D_v8/bench/p0_fixtures.hpp": "3c3a7bde624fde5c513ac4946fdceddaf6a392b61643d9f9a847c1b4f470520a",
+    "morsehgp3D_v8/bench/probe_emit.hpp": "236331337c44bf25229899a798003e9ce7605ad5df98d90957c0d1ca2dc476d2",
+    "morsehgp3D_v8/bench/p0_probe.cpp": "a95bb5cdce20ecec07c544fc596b684f39a9b573b3a4c6afdbb64c97ae3be552",
+    "morsehgp3D_v8/bench/run_p0_matrix.py": "751420bba712c30334709ee32bd51af7c796d6de5df01fadb9282e74f11ddbe9",
+    "morsehgp3D_v8/bench/batch_probe.cpp": "1feaab9c065f6b438ce7d7bd90cc29991e16505f181f0d5e5ba7dcd2dac16532",
+    "morsehgp3D_v8/bench/paired_receipts.py": "212efc6e143707bda33fce8415f00d62c581026542e41daca365072ef640636d"
+  },
+  "probe_sha256_closing": "2978ca664a1292d57f7822a6ac64b602b056a841047acd495e4d8d4fb35ac80d",
+  "error": ""
+}

@@ -233,10 +233,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--probe", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--probe-kind", choices=["single", "batch", "axis"], default="single")
+    parser.add_argument("--orders", nargs="+", choices=["baseline-first", "batch-first", "axis-first"])
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--sizes", type=int, nargs="+", default=[8000, 16000, 32000])
     parser.add_argument("--families", nargs="+",
-                        choices=["grid", "sheet", "skew", "tube", "rails"],
+                        choices=["grid", "sheet", "sheet_full", "skew", "tube", "rails"],
                         default=["grid", "sheet", "skew"])
     parser.add_argument("--strategies", nargs="+", choices=["pool", "dual", "tubes"],
                         default=["pool", "dual", "tubes"])
@@ -245,10 +247,17 @@ def main() -> int:
     parser.add_argument("--kmax", type=int, nargs="+", default=[10])
     parser.add_argument("--s", type=int, nargs="+", default=[8])
     args = parser.parse_args()
+    if args.orders is None:
+        args.orders = ["baseline-first", "axis-first" if args.probe_kind == "axis" else "batch-first"]
+    allowed_orders = {"baseline-first", "axis-first" if args.probe_kind == "axis" else "batch-first"}
+    if not set(args.orders) <= allowed_orders:
+        parser.error("execution order does not match the selected probe kind")
+    if "sheet_full" in args.families and args.probe_kind != "axis":
+        parser.error("sheet_full belongs to the axis probe only")
     if (args.repeats < 1 or min(args.sizes) < 2 or min(args.kmax) < 1 or
             max(args.kmax) > 10 or min(args.s) < 1):
         parser.error("require repeats >= 1, sizes >= 2, 1 <= kmax <= 10, s >= 1")
-    for field in ("sizes", "families", "strategies", "lanes", "kmax", "s"):
+    for field in ("sizes", "families", "strategies", "lanes", "kmax", "s", "orders"):
         values = getattr(args, field)
         if len(set(values)) != len(values):
             parser.error(f"duplicate matrix values: {field}")
@@ -261,7 +270,14 @@ def main() -> int:
         parser.error(f"cannot create a fresh campaign directory: {error}")
     sources = [source_root / "CMakeLists.txt", *sorted((source_root / "src").rglob("*.hpp")),
                *sorted((source_root / "src").rglob("*.cpp")),
+               *sorted((source_root / "bench").glob("*.hpp")),
                source_root / "bench/p0_probe.cpp", Path(__file__).resolve()]
+    if args.probe_kind != "single":
+        sources += [source_root / f"bench/{args.probe_kind}_probe.cpp",
+                    source_root / "bench/paired_receipts.py"]
+        from paired_receipts import stable_signature, validate_axis, validate_batch
+    validator = (validate_result if args.probe_kind == "single" else
+                 validate_batch if args.probe_kind == "batch" else validate_axis)
     hashes: dict[str, str] = {}
     binary_hash: str | None = None
     completed = attempts = 0
@@ -279,7 +295,10 @@ def main() -> int:
         compiler = compilers[0]
         metadata = {
             "schema": "mhgp8_p0_campaign_v1", "receipt_validation_version": 2,
-            "started_utc": utc_stamp(), "scope": "single_separated_rectangle_credits",
+            "started_utc": utc_stamp(), "probe_kind": args.probe_kind,
+            "scope": ("single_separated_rectangle_credits" if args.probe_kind == "single" else
+                      "single_rectangle_three_lane_credit_batch" if args.probe_kind == "batch" else
+                      "single_rectangle_axis_q2_residual"),
             "public_status": "not_claimed", "downstream_measured": False,
             "gcp_used": False, "threads": 1,
             "commit": subprocess.check_output(
@@ -293,6 +312,7 @@ def main() -> int:
             "runner_command": [sys.executable, *sys.argv], "sizes": args.sizes,
             "families": args.families, "strategies": args.strategies, "lanes": args.lanes,
             "kmax": args.kmax, "separations": args.s, "repeats": args.repeats,
+            "orders": args.orders if args.probe_kind != "single" else [],
             "compiler_version": subprocess.check_output([compiler, "--version"], text=True),
             "boost_scope": "test-only headers; no boost in the measured product library",
             "s_role": "precondition_only_not_wspd_generation",
@@ -301,12 +321,15 @@ def main() -> int:
         environment = dict(os.environ, OMP_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1")
         identities: dict[tuple[str, int], str] = {}
         signatures: dict[tuple[Any, ...], Any] = {}
-        matrix = itertools.product(args.families, args.kmax, args.s, args.lanes,
+        selectors = args.lanes if args.probe_kind == "single" else args.orders
+        matrix = itertools.product(args.families, args.kmax, args.s, selectors,
                                    args.sizes, args.strategies, range(args.repeats))
         with (args.output / "MEASURES.jsonl").open("x") as stream:
-            for family, kmax, separation, lane, n, strategy, repeat in matrix:
-                command = [str(binary), str(n), strategy, str(lane), family,
-                           str(kmax), str(separation)]
+            for family, kmax, separation, selector, n, strategy, repeat in matrix:
+                command = ([str(binary), str(n), strategy, str(selector), family,
+                            str(kmax), str(separation)] if args.probe_kind == "single" else
+                           [str(binary), str(n), strategy, family, str(kmax),
+                            str(separation), str(selector)])
                 record: dict[str, Any] = {
                     "command": command, "repeat": repeat, "exit_code": None,
                     "status": "failed", "stdout": "", "stderr": "",
@@ -326,17 +349,19 @@ def main() -> int:
                         raise RuntimeError(f"probe exited with code {record['exit_code']}")
                     require(not record["stderr_base64"], "unexpected probe stderr")
                     row = parse_result(base64.b64decode(record["stdout_base64"]))
-                    validate_result(row, command)
+                    validator(row, command)
                     record["result"] = row
                     identity = (family, n)
                     fingerprint = row["input_fnv1a64_le_u16_xyz"]
                     require(identity not in identities or identities[identity] == fingerprint,
                             "point identities changed between paired configurations")
                     identities[identity] = fingerprint
-                    stable_key = (family, n, kmax, lane, strategy)
-                    signature = (fingerprint, row["candidate_pairs"],
-                                 row["candidate_descriptors"], row["preparation_work"],
-                                 row["plan_work"])
+                    stable_key = (family, n, kmax,
+                                  selector if args.probe_kind == "single" else "paired", strategy)
+                    signature = ((fingerprint, row["candidate_pairs"],
+                                  row["candidate_descriptors"], row["preparation_work"],
+                                  row["plan_work"]) if args.probe_kind == "single" else
+                                 stable_signature(row, args.probe_kind))
                     require(stable_key not in signatures or
                             signatures[stable_key] == signature,
                             "work or residual changed across repetitions/s preconditions")
@@ -355,8 +380,14 @@ def main() -> int:
                 finally:
                     stream.write(json.dumps(record, allow_nan=False) + "\n")
                     stream.flush()
-                print(json.dumps({"completed": completed, "plan_ms": row["plan_ms"],
-                                  "candidate_pairs": row["candidate_pairs"]}), flush=True)
+                progress = {"completed": completed}
+                if args.probe_kind == "single":
+                    progress.update(plan_ms=row["plan_ms"], candidate_pairs=row["candidate_pairs"])
+                elif args.probe_kind == "batch":
+                    progress.update(batch_ms=row["batch_ms"])
+                else:
+                    progress.update(axis_ms=row["axis_ms"], candidate_pairs=row["axis_candidates"])
+                print(json.dumps(progress), flush=True)
         status, error_text, exit_code = "completed", "", 0
     except InvalidReceipt as error:
         status, error_text = "invalid", str(error)

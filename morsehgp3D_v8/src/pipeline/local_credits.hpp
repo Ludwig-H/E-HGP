@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <memory>
 #include <span>
+#include <utility>
 #include <vector>
 
 #include "core/types.hpp"
@@ -101,12 +102,37 @@ struct CandidateBlock {
 };
 
 class CreditPlan;
+class CreditBatch;
 [[nodiscard]] CreditPlan make_credit_plan(RectanglePtr rectangle,
                                           Lane lane, Strategy strategy);
+// Three geometric lanes, NOT an HGP hierarchy tower. Tubes share their
+// factor preparation; the other strategies keep their independent work.
+[[nodiscard]] CreditBatch make_credit_batch(RectanglePtr rectangle, Strategy strategy);
 
 class CreditPlan final {
  public:
-  [[nodiscard]] const PreparedRectangle& rectangle() const noexcept { return *rectangle_; }
+  CreditPlan(const CreditPlan&) = default;
+  CreditPlan(CreditPlan&& other) noexcept { swap(other); }
+  CreditPlan& operator=(const CreditPlan& other) {
+    if (this != &other) {
+      CreditPlan replacement(other);
+      swap(replacement);
+    }
+    return *this;
+  }
+  CreditPlan& operator=(CreditPlan&& other) noexcept {
+    if (this != &other) {
+      CreditPlan replacement(std::move(other));
+      swap(replacement);
+    }
+    return *this;
+  }
+  [[nodiscard]] const PreparedRectangle& rectangle() const {
+    if (!rectangle_) {
+      throw std::logic_error("mhgp8 moved-from credit plan has no geometry");
+    }
+    return *rectangle_;
+  }
   [[nodiscard]] Lane lane() const noexcept { return lane_; }
   [[nodiscard]] Strategy strategy() const noexcept { return strategy_; }
   [[nodiscard]] std::uint8_t threshold() const noexcept { return threshold_; }
@@ -125,6 +151,7 @@ class CreditPlan final {
   // merely to construct/count this plan. The callback receives original IDs.
   template <class Consumer>
   void for_each_candidate(Consumer&& consumer) const {
+    static_cast<void>(rectangle());
     for (const auto& block : blocks_)
       for (std::size_t a = block.a.first; a < block.a.last; ++a)
         for (std::size_t b = block.b.first; b < block.b.last; ++b)
@@ -134,6 +161,27 @@ class CreditPlan final {
  private:
   CreditPlan() = default;
   friend CreditPlan make_credit_plan(RectanglePtr, Lane, Strategy);
+  friend CreditBatch make_credit_batch(RectanglePtr, Strategy);
+  friend class CreditBatch;
+  // Copy assignment must not install a new owner before allocating all of
+  // its associated arrays. Swapping a complete replacement cannot throw.
+  void swap(CreditPlan& other) noexcept {
+    rectangle_.swap(other.rectangle_);
+    std::swap(lane_, other.lane_);
+    std::swap(strategy_, other.strategy_);
+    std::swap(threshold_, other.threshold_);
+    std::swap(core_, other.core_);
+    a_.swap(other.a_);
+    b_.swap(other.b_);
+    a_order_.swap(other.a_order_);
+    b_order_.swap(other.b_order_);
+    blocks_.swap(other.blocks_);
+    std::swap(total_, other.total_);
+    std::swap(candidates_, other.candidates_);
+    std::swap(work_, other.work_);
+  }
+  void initialize(RectanglePtr rectangle, Lane lane, Strategy strategy);
+  void group_residual();
   RectanglePtr rectangle_;
   Lane lane_{Lane::Q2};
   Strategy strategy_{Strategy::Pool};
@@ -147,6 +195,45 @@ class CreditPlan final {
   std::uint64_t total_{};
   std::uint64_t candidates_{};
   Work work_;
+};
+
+class CreditBatch final {
+ public:
+  CreditBatch(const CreditBatch&) = default;
+  CreditBatch(CreditBatch&&) noexcept = default;
+  CreditBatch& operator=(const CreditBatch& other) {
+    if (this != &other) {
+      CreditBatch replacement(other);
+      swap(replacement);
+    }
+    return *this;
+  }
+  CreditBatch& operator=(CreditBatch&& other) noexcept {
+    if (this != &other) {
+      CreditBatch replacement(std::move(other));
+      swap(replacement);
+    }
+    return *this;
+  }
+  [[nodiscard]] const CreditPlan& plan(Lane lane) const {
+    return plans_[arity(lane) - 2];
+  }
+  // Count once, not once per plan. For Tubes, per-plan work contains only
+  // the lane-dependent sweep, whereas grid/sort/cells belong here.
+  [[nodiscard]] const Work& shared_work() const noexcept { return shared_work_; }
+
+ private:
+  friend CreditBatch make_credit_batch(RectanglePtr, Strategy);
+  void swap(CreditBatch& other) noexcept {
+    for (std::size_t index = 0; index < plans_.size(); ++index) {
+      plans_[index].swap(other.plans_[index]);
+    }
+    std::swap(shared_work_, other.shared_work_);
+  }
+  CreditBatch(std::array<CreditPlan, 3> plans, Work shared_work)
+      : plans_(std::move(plans)), shared_work_(shared_work) {}
+  std::array<CreditPlan, 3> plans_;
+  Work shared_work_;
 };
 
 }  // namespace mhgp8

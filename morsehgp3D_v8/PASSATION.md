@@ -1,10 +1,42 @@
-# Passation v8 — première tranche P0 implémentée
+# Passation v8 — préparation partagée et filtre q2 qualifiés localement
 
 13 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`. Aucun contrat de tour n'est encore acquis.
 
 ## À reprendre maintenant
+
+La deuxième tranche implémente `CreditBatch` (trois voies géométriques,
+pas une tour K) et `AxisQ2Plan` (colonnes exactes + plages de l'index B).
+Vingt et un CTests passent en Release GCC et Clang ASan/UBSan ;
+[594 mesures appariées](receipts/shared_axis_20260913/README.md) couvrent
+8k/16k/32k, Kmax5/10, s8/10/12 et deux ordres sur le même propriétaire.
+Lire le [contrat expliqué](docs/P0_PARTAGE_ET_FILTRE_AXIAL.md).
+
+Acquis bornés : préparation Tubes divisée par trois à plans identiques ;
+résidu q2 des nappes complètes passant de 256 millions à 6,48 millions
+de paires à n32k. Le filtre axial coûte environ 57 ms, hors propriétaire,
+sans expansion/census. Il peut faire moins bien que Pool sur les cubes,
+et une rotation peut lui faire conserver toutes les paires. Aucun
+algorithme général ni contrat de tour n'est acquis.
+
+Suite prioritaire : additionner les colonnes exactes disjointes dans les
+requêtes d'index, supprimer les tableaux initialisés puis remplacés,
+comparer queues/fenêtres A/B et intersections de résidus. Puis implémenter
+le consommateur q2 exact avec un index sur tous les sites, pas un scan
+de n sites pour chaque paire ; ne pas recompter le cœur implicitement.
+Le partage de validation sur toute la WSPD reste à faire. Les groupes
+collectifs q3/q4 restent une piste distincte à qualifier avec l'auditeur.
+
+Les pannes d'affectation de plans/batches sont désormais injectées et
+couvertes par la garantie forte. Les reçus appariés vérifient sources,
+matrices, identités, convention de checksum et provenances déclarées.
+Les captures préliminaires exclues sont conservées avec leur motif.
+Les nouveaux builds `v8_shared_axis_20260913` et sa variante sanitizer
+sont épinglés ; ne pas les écraser. Aucun fichier v6/v7 ni statut formel
+n'est modifié par cette tranche. GCP non utilisé.
+
+## Première tranche publiée : historique à 3589a2c9
 
 La bibliothèque `mhgp8_p0`, ses deux gates C++ et sa sonde sont implémentées.
 Pool/DualBlocks/Tubes produisent des crédits sûrs et un résidu compact

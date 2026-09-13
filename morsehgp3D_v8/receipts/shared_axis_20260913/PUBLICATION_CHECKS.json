@@ -1,0 +1,83 @@
+{
+  "schema": "mhgp8_shared_axis_publication_checks_v1",
+  "recorded_utc": "2026-09-13T19:10:57.562074+00:00",
+  "status": "passed",
+  "branch": "main",
+  "base_commit": "95548c52c5804232fbe957b9eea3522ed273f87b",
+  "public_status": "not_claimed",
+  "gcp_used": false,
+  "export_directory": "/workspaces/E-HGP/build/v8_index_shared_20260913.jRoeEH",
+  "exported_index_entries_sha256": "fd5210e1497c4f7321d352d478d3f566e2e49ab6459399d148bccefe818d217c",
+  "exported_tree": "c7f3268493915908e09e408991034a3012b86fb0",
+  "private_index_used": true,
+  "original_index_entries_unchanged": true,
+  "source_pins_matched_in_export_and_index": 31,
+  "qualification_sha256": "9f3fc999b68973690262f3ed72d147ab28e053e49801ca7f699f22a31ff480a1",
+  "checks": [
+    {
+      "command": "python3 -B tools/check_docs.py",
+      "scope": "fresh indexed tree",
+      "exit_code": 0,
+      "active_markdown_files": 532
+    },
+    {
+      "command": "python3 -B tools/check_implementation_status.py",
+      "scope": "fresh indexed tree",
+      "exit_code": 0,
+      "phases": 20
+    },
+    {
+      "command": "cmake -S morsehgp3D_v8 -B /workspaces/E-HGP/build/v8_index_shared_20260913.jRoeEH/build -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr",
+      "exit_code": 0
+    },
+    {
+      "command": "cmake --build /workspaces/E-HGP/build/v8_index_shared_20260913.jRoeEH/build --parallel 2",
+      "exit_code": 0
+    },
+    {
+      "command": "ctest --test-dir /workspaces/E-HGP/build/v8_index_shared_20260913.jRoeEH/build --output-on-failure --output-junit /workspaces/E-HGP/morsehgp3D_v8/receipts/shared_axis_20260913/INDEX_TESTS.xml",
+      "exit_code": 0,
+      "ctests_passed": 21,
+      "ctests_failed": 0,
+      "xml_sha256": "37350e4dcef3eeb420eae32f28ab9ca0a5f15c24da7592f84aeb5a53650d59a8"
+    }
+  ],
+  "paired_reader_checks_in_export": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/bench/check_paired_campaign.py",
+        "morsehgp3D_v8/receipts/shared_axis_20260913"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "measurements": 594,
+      "configurations": 504
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/bench/check_paired_campaign.py",
+        "morsehgp3D_v8/receipts/shared_axis_20260913"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "measurements": 594,
+      "configurations": 504
+    }
+  ],
+  "post_export_allowed_additions": [
+    "morsehgp3D_v8/receipts/shared_axis_20260913/INDEX_TESTS.xml",
+    "morsehgp3D_v8/receipts/shared_axis_20260913/PUBLICATION_CHECKS.json",
+    "audits/COORDINATION_MORSEHGP3D_V8.md"
+  ],
+  "scope_notes": [
+    "No v6/v7 dirty changes or independent auditor changes were included.",
+    "The exported tree is a full index export, not the dirty working tree.",
+    "No source, test or runner changes after the exported build; only the publication record, XML and journal closure are added.",
+    "Local GCC/Clang qualifications remain distinct from the fresh index GCC build."
+  ]
+}

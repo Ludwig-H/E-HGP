@@ -73,6 +73,16 @@ préparation entre voies et rectangles, puis traiter le résidu des nappes
 par une couverture raffinée, sans recopier les tableaux à chaque enfant.
 Le census exact minimal doit juger la suite, pas seulement compter M.
 
+Deuxième tranche : [préparation partagée et filtre axial q2](P0_PARTAGE_ET_FILTRE_AXIAL.md).
+Le tri/cellules Tubes est commun aux trois voies ; un filtre par colonnes
+exactes et index B émet des plages sans développer A×B. Les nappes
+complètes ont un résidu borné par m(2h+1)², mais le cas général reste
+ouvert. Les prochaines variantes précises sont l'addition des colonnes
+exactes disjointes, les queues/fenêtres A/B proposées par les auditeurs,
+puis le consommateur q2. Ne pas remplacer cette comparaison par un port
+GPU prématuré d'un résidu inutile. La validation partagée sur toute la
+WSPD et la mémoire de pointe restent à traiter.
+
 Deux nouveaux résultats de l'auditeur précisent ce prochain choix :
 sur ses [rangées transverses](../../audits/morsehgp3D_v8_complementaire/P0_RESIDU_TRANSVERSE.md),
 les crédits universels parfaits sont tous nuls mais seules 11m−30 paires

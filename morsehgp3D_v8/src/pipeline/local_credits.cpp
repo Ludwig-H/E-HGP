@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <limits>
 #include <numeric>
+#include <optional>
 #include <stdexcept>
 #include <utility>
 
@@ -357,23 +358,27 @@ std::uint8_t PreparedRectangle::core_credit(Lane lane) const {
   return core_[arity(lane) - 2];
 }
 
-CreditPlan make_credit_plan(RectanglePtr rectangle, Lane lane, Strategy strategy) {
+void CreditPlan::initialize(RectanglePtr rectangle, Lane lane, Strategy strategy) {
   require_valid_lane(lane);
   if (!rectangle || (strategy != Strategy::Pool && strategy != Strategy::DualBlocks &&
                      strategy != Strategy::Tubes)) {
     throw std::invalid_argument("mhgp8 requires an owned rectangle and valid strategy");
   }
+  rectangle_ = std::move(rectangle);
+  lane_ = lane;
+  strategy_ = strategy;
+  threshold_ = rectangle_->threshold(lane);
+  core_ = rectangle_->core_credit(lane);
+  total_ = pair_count(rectangle_->a_range().size(), rectangle_->b_range().size());
+  a_.resize(rectangle_->a_range().size(), 0);
+  b_.resize(rectangle_->b_range().size(), 0);
+}
+
+CreditPlan make_credit_plan(RectanglePtr rectangle, Lane lane, Strategy strategy) {
   CreditPlan plan;
-  plan.rectangle_ = std::move(rectangle);
-  plan.lane_ = lane;
-  plan.strategy_ = strategy;
+  plan.initialize(std::move(rectangle), lane, strategy);
   const auto& r = *plan.rectangle_;
-  plan.threshold_ = r.threshold(lane);
-  plan.core_ = r.core_credit(lane);
-  plan.total_ = pair_count(r.a_range().size(), r.b_range().size());
   const auto need = static_cast<std::uint8_t>(plan.threshold_ - plan.core_);
-  plan.a_.resize(r.a_range().size(), 0);
-  plan.b_.resize(r.b_range().size(), 0);
   if (need == 0) {
     return plan;
   }
@@ -387,25 +392,64 @@ CreditPlan make_credit_plan(RectanglePtr rectangle, Lane lane, Strategy strategy
     plan.a_ = tube_detail::credits(r, r.a_range(), r.a_box(), r.b_box(), lane, need, plan.work_);
     plan.b_ = tube_detail::credits(r, r.b_range(), r.b_box(), r.a_box(), lane, need, plan.work_);
   }
-  const auto a_groups = group(plan.a_, r.a_range(), need, plan.a_order_);
-  const auto b_groups = group(plan.b_, r.b_range(), need, plan.b_order_);
+  plan.group_residual();
+  return plan;
+}
+
+void CreditPlan::group_residual() {
+  const auto& r = *rectangle_;
+  const auto need = static_cast<std::uint8_t>(threshold_ - core_);
+  if (need == 0) {
+    return;
+  }
+  const auto a_groups = group(a_, r.a_range(), need, a_order_);
+  const auto b_groups = group(b_, r.b_range(), need, b_order_);
   for (std::size_t a = 0; a < need; ++a) {
     if (a_groups[a].size() == 0) {
       continue;
     }
     for (std::size_t b = 0; a + b < need; ++b) {
       if (b_groups[b].size() != 0) {
-        plan.blocks_.push_back({a_groups[a], b_groups[b]});
-        counter_add(plan.candidates_, pair_count(a_groups[a].size(), b_groups[b].size()));
+        blocks_.push_back({a_groups[a], b_groups[b]});
+        counter_add(candidates_, pair_count(a_groups[a].size(), b_groups[b].size()));
       }
     }
   }
-  return plan;
+}
+
+CreditBatch make_credit_batch(RectanglePtr rectangle, Strategy strategy) {
+  if (strategy != Strategy::Tubes) {
+    return CreditBatch({make_credit_plan(rectangle, Lane::Q2, strategy),
+                        make_credit_plan(rectangle, Lane::Q3, strategy),
+                        make_credit_plan(rectangle, Lane::Q4, strategy)}, Work{});
+  }
+  std::array<CreditPlan, 3> plans{CreditPlan{}, CreditPlan{}, CreditPlan{}};
+  Work preparation_work;
+  std::optional<tube_detail::PreparedTubes> a_tubes;
+  std::optional<tube_detail::PreparedTubes> b_tubes;
+  for (const auto lane : {Lane::Q2, Lane::Q3, Lane::Q4}) {
+    auto& plan = plans[arity(lane) - 2];
+    plan.initialize(rectangle, lane, strategy);
+    const auto need = static_cast<std::uint8_t>(plan.threshold_ - plan.core_);
+    if (need == 0) {
+      continue;
+    }
+    if (!a_tubes) {
+      a_tubes.emplace(*rectangle, rectangle->a_range(), rectangle->a_box(),
+                      rectangle->b_box(), preparation_work);
+      b_tubes.emplace(*rectangle, rectangle->b_range(), rectangle->b_box(),
+                      rectangle->a_box(), preparation_work);
+    }
+    plan.a_ = tube_detail::credits(*a_tubes, lane, need, plan.work_);
+    plan.b_ = tube_detail::credits(*b_tubes, lane, need, plan.work_);
+    plan.group_residual();
+  }
+  return CreditBatch(std::move(plans), preparation_work);
 }
 
 bool CreditPlan::keeps(std::size_t a_id, std::size_t b_id) const {
-  const auto a = rectangle_->a_range();
-  const auto b = rectangle_->b_range();
+  const auto a = rectangle().a_range();
+  const auto b = rectangle().b_range();
   if (!contains(a, a_id) || !contains(b, b_id)) {
     throw std::invalid_argument("mhgp8 pair IDs do not belong to this ordered rectangle");
   }

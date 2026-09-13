@@ -96,7 +96,9 @@ def main() -> int:
             if stable_key in signatures:
                 require(signatures[stable_key] == invariant, "nondeterministic work or residual")
             signatures[stable_key] = invariant
-            if row["family"] == "sheet":
+            # No-core sheets defeat local universal credits only on active
+            # lanes. A zero threshold (e.g. q3/Kmax=1) emits no candidates.
+            if row["family"] == "sheet" and row["threshold"] > 0:
                 require(row["candidate_pairs"] == row["total_pairs"], "sheet counter-fixture changed")
             if row["family"] == "rails" and row["lane"] == 4 and row["kmax"] == 10:
                 require(row["candidate_pairs"] == (1846881 if row["strategy"] == "pool" else 2916),

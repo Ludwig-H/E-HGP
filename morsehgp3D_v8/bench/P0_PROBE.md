@@ -97,3 +97,43 @@ pas un nombre de boules utiles ni de nœuds FULL. Les feuilles parallèles
 peuvent laisser un résidu quadratique malgré un préfiltre rapide. Il faut
 conserver et expliquer ce résultat négatif, puis payer le travail aval
 avant de conclure à une meilleure architecture.
+
+## Sondes appariées : partage et filtre axial
+
+La deuxième tranche ajoute deux points d'entrée, décrits dans le
+[contrat de partage et de filtrage](../docs/P0_PARTAGE_ET_FILTRE_AXIAL.md) :
+
+```text
+mhgp8_batch_probe n pool|dual|tubes grid|sheet|skew|tube|rails kmax s baseline-first|batch-first
+mhgp8_axis_probe n pool|dual|tubes grid|sheet|sheet_full|skew|tube|rails kmax s baseline-first|axis-first
+```
+
+Le batch partage la préparation de trois voies géométriques avec une
+comparaison physique aux trois appels séparés. L'axe compare deux
+préfiltrages q2 dont les résidus diffèrent ; il ne revendique pas une
+égalité des plans. Chaque paire de mesures utilise le même propriétaire,
+avec deux ordres d'exécution pour rendre visible l'effet de cet ordre.
+L'inspection des plans est hors des temps de chaque bras et mesurée à part.
+Les sorties restent compactes ; leur développement et le census sont absents.
+
+`sheet_full` est une recette **v2 propre à la sonde axe**. Pour n pair,
+m=n/2, sa largeur est le plus grand diviseur de m inférieur ou égal à
+sa racine entière, et sa hauteur est m/largeur. Les deux plans x=1000 et
+x=60000 portent la même grille y/z commençant à 1000. Les coordonnées
+et la séparation sont vérifiées ; aucune rangée n'est tronquée. Les
+recettes v1 précédentes et leurs empreintes ne changent pas.
+
+`run_p0_matrix.py --probe-kind batch|axis` emploie les deux ordres par
+défaut (`--orders` peut les expliciter). Les listes tailles/familles/K/s/
+stratégies/répétitions définissent le produit cartésien enregistré.
+`check_paired_campaign.py` relit les sous-dossiers de campagnes et leurs
+sources épinglées ; `--summary` donne les médianes **par ordre**. Les
+valeurs s restent des préconditions d'un rectangle fixe, pas une WSPD.
+Les résumés exigent un build homogène par type de sonde et des métadonnées
+machine communes ; la seule ligne volatile `cpu MHz` est exclue de cette
+comparaison, pas de la capture brute. Cette provenance déclarée ne prétend
+pas identifier de manière unique une machine physique. Les identifiants
+de provenance figurent dans le résumé, au lieu de mélanger les builds.
+Les anciens reçus r3 se rejouent sur leur commit `3589a2c9`, pas en
+leur attribuant les nouvelles sources. Les lecteurs ne qualifient jamais
+la géométrie ou la complétude de la tour.

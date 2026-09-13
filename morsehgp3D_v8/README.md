@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — première implémentation P0
+# Morse HGP 3D v8 — crédits partagés et raffinement q2
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -18,15 +18,17 @@ HGP FULL K=1..10 à 50 000 points sous une seconde, repli sur toute la tour
 
 La structure v7 est conservée pour organiser la refonte : `src/`, `cli/`,
 `oracle/`, `tests/`, `bench/`, `cmake/`, `docs/`, `audits/`, `receipts/`.
-Le premier module C++20 compare trois méthodes de crédits locaux sur un
+Le module C++20 compare trois méthodes de crédits locaux sur un
 rectangle séparé : pool directionnel, parcours conjoint de blocs et tubes
-à suffixes certifiés. Le résidu est conservé en sous-produits compacts.
+à suffixes certifiés. Il partage maintenant la préparation des tubes
+entre q2/q3/q4 et ajoute un filtre q2 par colonnes exactes et index B.
+Les résidus sont conservés en sous-produits ou plages compacts.
 Ce n'est encore ni une WSPD complète, ni un census général, ni une tour
 FULL. Les mesures historiques citées restent v7.
 
 ## État exécutable
 
-Huit CTests locaux passent en Release GCC 13.3 et en Debug Clang 18.1
+Vingt et un CTests locaux passent en Release GCC 13.3 et en Debug Clang 18.1
 avec ASan/UBSan. Les juges géométriques indépendants utilisent des entiers
 multiprécision ; le produit utilise des entiers 64/128 bits sur u16.
 Les tests couvrent notamment les crédits, les frontières, les identités,
@@ -34,15 +36,24 @@ les résidus, la séparation et les contre-fixtures des auditeurs.
 Le propriétaire copie les coordonnées dans un stockage privé avant
 validation et interdit copie/déplacement/affectation ; le runner rejette
 les reçus incohérents et conserve les sorties brutes des essais invalides.
+Les affectations de plans/batches conservent intégralement leur cible
+en cas de panne mémoire. Les résumés refusent les provenances déclarées
+hétérogènes de builds/machines et séparent les deux ordres de mesure.
 
-729 mesures mono sont conservées, dont n=8 000/16 000/32 000, Kmax5/10,
-s8/10/12, grilles équilibrées/déséquilibrées et nappes. Sur ces rectangles
-fixes, s vérifie seulement la séparation ; **la vraie comparaison des WSPD
-s8/10/12 reste ouverte**. La préparation des tubes est sous-quadratique,
-mais les nappes conservent un résidu quadratique : P0 n'est pas close.
+594 nouvelles mesures mono comparent les deux variantes à leurs références,
+avec n=8 000/16 000/32 000, Kmax5/10, s8/10/12 et deux ordres d'exécution.
+Pour trois voies actives, le partage divise par trois la préparation
+tri/cellules Tubes, à plans
+identiques. Le filtre axial q2 réduit le résidu des nappes alignées mais
+pas celui de tous les nuages : il est notamment sensible aux rotations.
+Les 729 mesures r3 restent historiques, épinglées à `3589a2c9`.
+Sur ces rectangles fixes, s vérifie seulement la séparation ; **la vraie
+comparaison des WSPD s8/10/12 reste ouverte**. P0 n'est pas close.
 
 - [Contrat et algorithmes P0](docs/P0_CREDITS_LOCAUX.md).
-- [Mesures, limites et décision suivante](receipts/p0_local_credits_20260913/README.md).
+- [Partage et filtre axial expliqués](docs/P0_PARTAGE_ET_FILTRE_AXIAL.md).
+- [Nouvelles mesures, limites et suite](receipts/shared_axis_20260913/README.md).
+- [Première tranche historique](receipts/p0_local_credits_20260913/README.md).
 - [Sonde reproductible](bench/P0_PROBE.md).
 
 Construction dans un répertoire **neuf**, avec GCC/Clang, CMake et les
@@ -62,7 +73,8 @@ ni résultat v7 n'en est repris. Le build produit seul est possible avec
 `build/v8_p0_r3_20260913/` et `build/v8_p0_sanitize_r3_20260913/` portent
 la version corrigée ; les builds r2 et sans suffixe conservent les passes
 antérieures aux corrections de propriété. Tous sont épinglés ; ne pas
-les écraser pour poursuivre.
+les écraser pour poursuivre. La présente tranche est épinglée dans
+`build/v8_shared_axis_20260913/` et `build/v8_shared_axis_sanitize_20260913/`.
 
 ## Commencer ici
 
@@ -91,4 +103,4 @@ multi-millions. Les optimisations privées ultérieures n'ont pas leur
 nouvelle mesure 50k. La v8 démarre sur ces constats, sans statut hérité.
 
 Entrées de suivi : [passation](PASSATION.md), [état de l'audit](audits/ETAT_COURANT.md).
-GCP non utilisé pour l'audit d'ouverture et cette première tranche mono.
+GCP non utilisé pour l'audit d'ouverture et ces deux tranches mono.

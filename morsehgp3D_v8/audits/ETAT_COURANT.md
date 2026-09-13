@@ -3,6 +3,21 @@
 13 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
+État constructeur courant, deuxième tranche P0 : préparation Tubes partagée
+entre q2/q3/q4 et filtre axial q2 par colonnes exactes et index B.
+`cpu_reference`, `quantized_u16_input_only`, `implementation_v8_p0`,
+`not_claimed`, hors registre. Vingt et un CTests Release/sanitizers et
+[594 mesures appariées](../receipts/shared_axis_20260913/README.md), sur
+un rectangle à la fois, sans census ni FULL. Le partage garde les mêmes
+plans ; le filtre axial est sûr mais spécialisé et peut être inopérant
+après rotation. Voir le [contrat](../docs/P0_PARTAGE_ET_FILTRE_AXIAL.md).
+L'auditeur a fait corriger l'affectation après panne mémoire et deux
+omissions des reçus appariés. Ses propositions additives et de queues
+A/B restent distinctes des optimisations effectivement mesurées.
+P0, contrats 50k, GPU et massif ouverts ; GCP non utilisé.
+
+## Historique : première tranche P0 publiée à 3589a2c9
+
 Implémentation ouverte ensuite par l'utilisateur le 13 septembre :
 `phase=exploration_v8_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`, `mode=implementation_v8_p0`,
