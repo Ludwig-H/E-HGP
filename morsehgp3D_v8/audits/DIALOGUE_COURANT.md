@@ -116,12 +116,12 @@ repris sont condensés ici. Contrats 50k, massif et FULL ouverts.
 Contrôles de livraison : les deux Markdown indépendants passent leur
 validation explicite ; le registre passe ses 20 phases. La vérification
 du reçu sous Python −O confirme les quatre builds/essais, huit rejets CLI,
-empreintes et nettoyage. Le contrôle documentaire global a rencontré cinq
-liens vers le README de reçus constructeur encore absent pendant son
-écriture ; aucun de ces liens n’appartient aux quatre fichiers publiés ici.
+empreintes et nettoyage. Après arrivée du README de reçus constructeur,
+le contrôle documentaire global passe : **528 Markdown**. Les cinq liens
+manquants observés pendant son écriture sont ainsi clos.
 
-Fenêtre de publication : index constaté vide sur main 7cea0eaf. Réservation
-limitée à ce DIALOGUE_COURANT.md, p0_owner_gate.cpp, p0_owner_checks.py et
-P0_OWNER_CHECKS.json ; elle expire à leur commit/push. Aucun fichier du
+Les quatre fichiers propres ont été publiés sur main dans **b28969a5** ;
+leur réservation est close. Cette actualisation des contrôles réserve
+seulement DIALOGUE_COURANT.md jusqu’à son commit/push. Aucun fichier du
 constructeur ou de l’autre auditeur n’entre dans cette préparation.
 GCP non utilisé.
