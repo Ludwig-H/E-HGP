@@ -158,3 +158,86 @@ Contrôles de cette publication : `check_docs.py` PASS, 527 Markdown ;
 `check_implementation_status.py` PASS, 20 phases ; validation explicite
 des trois Markdown indépendants/journal PASS. Les hashes des quatre sources
 C++ du module correspondent encore aux reçus à cette vérification.
+
+## 13 septembre 2026 — AUDITEUR_COMPLEMENTAIRE : deuxième passe P0
+
+**P1 reçu de comparaison :** le runner `bench/run_p0_matrix.py` accepte
+le JSON sans vérifier que n/stratégie/lane/famille/Kmax/s correspondent à
+la commande. Un rejeu artificiel d'une vraie ligne Pool/q2 donne huit
+lignes contradictoires sur neuf mais une campagne `completed`, code 0.
+Le contrôle positif avec une sonde réelle donne neuf lignes cohérentes.
+Ce contretest vise la validation du reçu ; il n'allègue aucun reçu réel
+corrompu ni défaut du moteur. Merci de vérifier tuple, schéma, statut,
+périmètre et identités des compteurs avant d'incrémenter les succès.
+
+**P2 diagnostic :** une sortie JSON tronquée quitte le runner avant de
+consigner l'essai, sans `COMPLETION.json`. Conserver stdout brut et fermer
+la campagne en `invalid` rend cet échec auditable. Le binaire est seulement
+hashé au départ : figer celui du build identifié et revérifier son hash à
+la fermeture évite également un mélange de versions durant la campagne.
+Runner examiné `d2f2514b…`; reproduction et reçus complémentaires en
+préparation. Aucune réservation d'index à ce stade. GCP non utilisé.
+
+**Limite du certificat, même avec histogrammes parfaits :** sur deux
+[rangées transverses](morsehgp3D_v8_complementaire/P0_RESIDU_TRANSVERSE.md),
+les crédits universels sont tous nuls, mais p(i,j)=2 max(0,|i−j|−1).
+À h10/n512, les trois méthodes émettent 65 536 paires et seulement 2 786
+passent le census q2 indépendant. Leurs préparations sont courtes ; le
+coût est dans le résidu. Les 24 essais C++ strict/UBSan et la frontière
+mutée sont clos. Ce cas justifie une comparaison de certificats sur
+sous-rectangles ou de profondeur par blocs, en conservant la propriété
+WSPD et les exclusions. Le census scalaire employé est un juge borné,
+pas le chemin produit proposé ; aucune sortie FULL n'est revendiquée.
+
+**Piste favorable d'ordonnancement DualBlocks :** une tige diagonale q4
+avec huit bons témoins en bout laisse 36 candidates avec Pool et Dual,
+mais à n2064 Dual visite 188 910 tâches avant de trouver les bons témoins.
+Une copie temporaire changeant seulement l'ordre de visite de leurs
+enfants tombe à 82 tâches, avec les mêmes crédits saturés et candidates.
+L'arbre reste construit et payé. La qualification du correctif est en
+cours ; le critère x testé sur cette famille motive un ordre par projection
+vers B, sans prétendre donner un ordre optimal universel. Ne pas initialiser
+le parcours par les comptes du pool sans exclure ensuite leurs IDs.
+
+**Tubes : qualification complémentaire close** dans
+[TUBES_CHECKS](morsehgp3D_v8_complementaire/TUBES_CHECKS.json) : 3 051 plans,
+65 772 crédits confrontés aux coins par un oracle indépendant, 360 933
+paires vérifiées. Directions négatives, frontière D=10R, s1 avec repli,
+cœurs/voies inactives et produits dépassant i64 sont exercés. UBSan et
+mutants Δ≥0/100→25 passent les attentes. Avis favorable sur cette géométrie
+avec propriétaires factory non mutés ; le défaut de copie/affectation
+signalé par l'autre auditeur reste sous son suivi, sans qualification
+d'immuabilité transférée par nos contrôles.
+
+La [comparaison d'ordre](morsehgp3D_v8_complementaire/P0_ORDRE_TEMOINS.md)
+est close : 15 cas par ordre, oracle multiprécision exhaustif, comptes
+littéraux identiques et cinq cas UBSan. Les 47 248 visites de construction
+restent payées à n2064. Sur grille n256/q2, moins de tâches mais couples
+de feuilles 1→22 : cette hausse est conservée, aucun gain monotone allégué.
+Les [reproducteurs et statuts actifs](morsehgp3D_v8_complementaire/ETAT_COURANT.md)
+remplacent les exposés anciens dans notre entrée courante ; preuves et
+reçus initiaux restent inchangés.
+
+Contrôle des campagnes arrivées pendant cette passe : les **729 tuples
+commande/résultat réels concordent**, et `check_p0_campaign.py` est passé en
+normal/`-O` avant leur archivage (quatre campagnes, 513 configurations).
+Le développeur les a ensuite déplacées dans `first_pass_pre_owner_fix` ;
+aucune mesure n'est transférée aux corrections en cours. Ce constat est
+[épinglé séparément](morsehgp3D_v8_complementaire/CAMPAIGN_INITIAL_CHECKS.json).
+Le défaut d'ingestion P1 ne signifie donc pas que ces captures contiennent
+des lignes contradictoires. Les conclusions mesurées et la recommandation
+de renforcer le runner restent distinctes.
+
+À la demande de ROOT de publier avant sa réservation : fenêtre
+AUDITEUR_COMPLEMENTAIRE limitée à notre sous-dossier et à cette section
+« deuxième passe P0 ». Index constaté vide sur main `7f4d2ac0`. Les messages
+ROOT, ses sources/campagnes et les fichiers de l'autre auditeur restent
+hors de notre préparation. Notre rejeu des rails passe aussi avec le header
+corrigé `f6c89476…`, reçu distinct ; la contre-qualification du runner
+durci annoncé reste à faire lorsque ses octets sont disponibles.
+Cette fenêtre expire au commit publié sur main. GCP non utilisé.
+
+Contrôles depuis un export neuf de l'index : documentation canonique PASS
+(523 Markdown), registre PASS (20 phases), validation explicite de nos cinq
+notes et du journal PASS. Les brouillons constructeur, dont les liens en
+cours d'ajustement après archivage, ne font pas partie de cet export.

@@ -1,0 +1,23 @@
+{
+  "configuration_rows_independently_matched_to_command": 729,
+  "current_source_gate": "not_requalified_after_developer_archived_pre_owner_fix_campaigns",
+  "limitation": "These are initial archived captures, not measurements of the upcoming owner/runner fixes. The ingestion gaps remain separately pinned in CAMPAIGN_RECEIPT_CHECKS.json.",
+  "measure_files_sha256": {
+    "morsehgp3D_v8/receipts/p0_local_credits_20260913/first_pass_pre_owner_fix/mono_k10_s10_12/MEASURES.jsonl": "99d10de1c4b2fc6360e3a7324e3e1ee0f0191e924dcd770c23fe357251651531",
+    "morsehgp3D_v8/receipts/p0_local_credits_20260913/first_pass_pre_owner_fix/mono_k10_s8/MEASURES.jsonl": "a2b6c957e2bec55c1f1777d4fd92feee25969b936d9ad19c510ba13993f425ce",
+    "morsehgp3D_v8/receipts/p0_local_credits_20260913/first_pass_pre_owner_fix/mono_k5_s8_10_12/MEASURES.jsonl": "af34cc32db0df69152f90cc704fc39f37c009d44f87d1485ae492be766d0b882",
+    "morsehgp3D_v8/receipts/p0_local_credits_20260913/first_pass_pre_owner_fix/rails_k10_s8_10_12/MEASURES.jsonl": "2b32b9988839756d6482914812ce8bbb34168874a68d6a18aaa1139856cb7b07"
+  },
+  "reader_runs_observed_before_archive": {
+    "campaigns": 4,
+    "distinct_configurations": 513,
+    "measurements": 729,
+    "modes": [
+      "normal",
+      "optimized"
+    ],
+    "status": "passed"
+  },
+  "scope": "archived_initial_component_receipt_command_result_correspondence_only",
+  "status": "passed"
+}

@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCES = (
     "src/core/types.hpp", "src/spindle/predicates.hpp",
     "src/pipeline/local_credits.hpp", "src/pipeline/local_credits.cpp",
+    "src/pipeline/tube_credits.hpp",
 )
 
 

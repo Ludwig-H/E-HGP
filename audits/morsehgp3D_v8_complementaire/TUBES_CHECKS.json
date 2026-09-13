@@ -1,0 +1,193 @@
+{
+  "compiler": {
+    "argv": [
+      "/usr/bin/g++",
+      "--version"
+    ],
+    "returncode": 0,
+    "stderr": "",
+    "stdout": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
+  },
+  "compiler_sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+  "gcp_used": false,
+  "owner_scope": "factory_created_owner_without_copy_assignment_or_mutation",
+  "ownership_review": "morsehgp3D_v8/audits/DIALOGUE_COURANT.md",
+  "probe_sha256": "08ae6336f08bb648da935413a994a4dd41779563bc85762060bdfc8c0939227d",
+  "python": {
+    "argv": [
+      "audits/morsehgp3D_v8_complementaire/tubes_checks.py",
+      "--output",
+      "audits/morsehgp3D_v8_complementaire/TUBES_CHECKS.json"
+    ],
+    "executable": "/home/codespace/.python/current/bin/python3",
+    "optimization": 1,
+    "version": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]"
+  },
+  "runner_sha256": "7d395ffdb1670139672936570e71a24382e977c68fb203cf191ae7b45d160ea6",
+  "schema": "mhgp8_complementary_tubes_v1",
+  "scope": "bounded_tube_splice_only_not_wspd_or_full_qualification",
+  "seed": 930174,
+  "sources": {
+    "core/types.hpp": {
+      "actual": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+      "expected": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b"
+    },
+    "pipeline/local_credits.cpp": {
+      "actual": "b8a7eef8ca112ed0921772e4a7d380d802f479814ca686da8a1a856647a626c6",
+      "expected": "b8a7eef8ca112ed0921772e4a7d380d802f479814ca686da8a1a856647a626c6"
+    },
+    "pipeline/local_credits.hpp": {
+      "actual": "791dfe12079278e31904b02552dbc7d852ec6ddcc610e9ab4d1489ccb5df6e65",
+      "expected": "791dfe12079278e31904b02552dbc7d852ec6ddcc610e9ab4d1489ccb5df6e65"
+    },
+    "pipeline/tube_credits.hpp": {
+      "actual": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c",
+      "expected": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c"
+    },
+    "spindle/predicates.hpp": {
+      "actual": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+      "expected": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+    }
+  },
+  "status": "passed",
+  "variants": [
+    {
+      "compile": {
+        "argv": [
+          "/usr/bin/g++",
+          "-std=c++20",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror",
+          "-O1",
+          "-fsanitize=undefined",
+          "-fno-sanitize-recover=all",
+          "-I",
+          "/tmp/mhgp8_tubes_audit_ny2g7wm9/original",
+          "/tmp/mhgp8_tubes_audit_ny2g7wm9/original/probe.cpp",
+          "/tmp/mhgp8_tubes_audit_ny2g7wm9/original/pipeline/local_credits.cpp",
+          "-o",
+          "/tmp/mhgp8_tubes_audit_ny2g7wm9/original/probe"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": ""
+      },
+      "counters": {
+        "credited_sites": 30881,
+        "credits_checked": 65772,
+        "fallbacks": 24,
+        "inactive_or_core_saturated": 343,
+        "pair_checks": 360933,
+        "plans": 3051,
+        "sweep_tests": 76538
+      },
+      "executable_sha256": "36abf04045a6b0ecc228df7404e9807f2bfe052fa369ad5b3ef68940ca21b80e",
+      "expected_returncode": 0,
+      "name": "original",
+      "run": {
+        "argv": [
+          "/tmp/mhgp8_tubes_audit_ny2g7wm9/original/probe"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "PASS plans=3051 credits_checked=65772 pair_checks=360933 credited_sites=30881 sweep_tests=76538 fallbacks=24 inactive_or_core_saturated=343\n"
+      },
+      "snapshot_sha256": {
+        "core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+        "pipeline/local_credits.cpp": "b8a7eef8ca112ed0921772e4a7d380d802f479814ca686da8a1a856647a626c6",
+        "pipeline/local_credits.hpp": "791dfe12079278e31904b02552dbc7d852ec6ddcc610e9ab4d1489ccb5df6e65",
+        "pipeline/tube_credits.hpp": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c",
+        "spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+      },
+      "status": "passed"
+    },
+    {
+      "compile": {
+        "argv": [
+          "/usr/bin/g++",
+          "-std=c++20",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror",
+          "-O1",
+          "-fsanitize=undefined",
+          "-fno-sanitize-recover=all",
+          "-I",
+          "/tmp/mhgp8_tubes_audit_ny2g7wm9/self_credit_at_zero_gap",
+          "/tmp/mhgp8_tubes_audit_ny2g7wm9/self_credit_at_zero_gap/probe.cpp",
+          "/tmp/mhgp8_tubes_audit_ny2g7wm9/self_credit_at_zero_gap/pipeline/local_credits.cpp",
+          "-o",
+          "/tmp/mhgp8_tubes_audit_ny2g7wm9/self_credit_at_zero_gap/probe"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": ""
+      },
+      "executable_sha256": "fa572165cdc02fd3b5a531903cb849bae911cc9fb98a4838ae89b64e1005daf3",
+      "expected_returncode": 1,
+      "name": "self_credit_at_zero_gap",
+      "run": {
+        "argv": [
+          "/tmp/mhgp8_tubes_audit_ny2g7wm9/self_credit_at_zero_gap/probe"
+        ],
+        "returncode": 1,
+        "stderr": "unsafe tube credit\n",
+        "stdout": ""
+      },
+      "snapshot_sha256": {
+        "core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+        "pipeline/local_credits.cpp": "b8a7eef8ca112ed0921772e4a7d380d802f479814ca686da8a1a856647a626c6",
+        "pipeline/local_credits.hpp": "791dfe12079278e31904b02552dbc7d852ec6ddcc610e9ab4d1489ccb5df6e65",
+        "pipeline/tube_credits.hpp": "90ab6c6f1089bab4de3f0bdb3d159e8036c45cb100a2fe1c311157d19f107304",
+        "spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+      },
+      "status": "refuted"
+    },
+    {
+      "compile": {
+        "argv": [
+          "/usr/bin/g++",
+          "-std=c++20",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror",
+          "-O1",
+          "-fsanitize=undefined",
+          "-fno-sanitize-recover=all",
+          "-I",
+          "/tmp/mhgp8_tubes_audit_ny2g7wm9/insufficient_separation_25",
+          "/tmp/mhgp8_tubes_audit_ny2g7wm9/insufficient_separation_25/probe.cpp",
+          "/tmp/mhgp8_tubes_audit_ny2g7wm9/insufficient_separation_25/pipeline/local_credits.cpp",
+          "-o",
+          "/tmp/mhgp8_tubes_audit_ny2g7wm9/insufficient_separation_25/probe"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": ""
+      },
+      "executable_sha256": "1048a58b1b93cfa4b8a2d07e746f0f41b83b60a5452dfb14c2e1c85deaff7da6",
+      "expected_returncode": 1,
+      "name": "insufficient_separation_25",
+      "run": {
+        "argv": [
+          "/tmp/mhgp8_tubes_audit_ny2g7wm9/insufficient_separation_25/probe"
+        ],
+        "returncode": 1,
+        "stderr": "fallback boundary\n",
+        "stdout": ""
+      },
+      "snapshot_sha256": {
+        "core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+        "pipeline/local_credits.cpp": "b8a7eef8ca112ed0921772e4a7d380d802f479814ca686da8a1a856647a626c6",
+        "pipeline/local_credits.hpp": "791dfe12079278e31904b02552dbc7d852ec6ddcc610e9ab4d1489ccb5df6e65",
+        "pipeline/tube_credits.hpp": "983569b4cd822bb359993b8b567d3e1cc308fa70ecde28e0c5eb81bbf5dbcefb",
+        "spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+      },
+      "status": "refuted"
+    }
+  ]
+}

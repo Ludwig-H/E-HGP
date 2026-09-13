@@ -1,0 +1,699 @@
+{
+  "schema": "mhgp8_complementary_campaign_receipt_checks_v1",
+  "status": "diagnostic_receipt_gaps_confirmed",
+  "phase": "exploration_v8_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "scope": "artificial_receipt_ingestion_tests_not_a_product_measurement",
+  "gcp_used": false,
+  "initial_campaign_started_utc": "2026-09-13T17:35:06.757067+00:00",
+  "initial_git_head": "7cea0eaf227b34f1c882a07d0e384aaedff183e7",
+  "initial_worktree_status": [
+    " M AGENTS.md",
+    " M audits/COORDINATION_MORSEHGP3D_V7.md",
+    " M audits/COORDINATION_MORSEHGP3D_V8.md",
+    " M morsehgp3D_v6/src/gpu/lot_ring.hpp",
+    " M morsehgp3D_v6/src/parallel/sort.hpp",
+    " M morsehgp3D_v6/src/pipeline/census.hpp",
+    " M morsehgp3D_v6/src/pipeline/expand.hpp",
+    " M morsehgp3D_v7/PASSATION.md",
+    " M morsehgp3D_v7/README.md",
+    " M morsehgp3D_v7/docs/FAUSSES_PISTES.md",
+    " M morsehgp3D_v7/docs/OBJETS_PARALLELES_TOUR_20260911.md",
+    " M morsehgp3D_v8/PASSATION.md",
+    " M morsehgp3D_v8/README.md",
+    " M morsehgp3D_v8/audits/ETAT_COURANT.md",
+    " D morsehgp3D_v8/bench/.gitkeep",
+    " D morsehgp3D_v8/oracle/.gitkeep",
+    " D morsehgp3D_v8/src/core/.gitkeep",
+    " D morsehgp3D_v8/src/pipeline/.gitkeep",
+    " D morsehgp3D_v8/src/spindle/.gitkeep",
+    " D morsehgp3D_v8/tests/.gitkeep",
+    "?? morsehgp3D_v6/src/gpu/route_c6.hpp",
+    "?? morsehgp3D_v6/tests/perm_sort_gate.cpp",
+    "?? morsehgp3D_v6/tests/route_c6_gate.cpp",
+    "?? morsehgp3D_v7/docs/MARQUES_PREMIER_PARCOURS_20260911.md",
+    "?? morsehgp3D_v7/receipts/fused_history_streaming_20260911/",
+    "?? morsehgp3D_v8/CMakeLists.txt",
+    "?? morsehgp3D_v8/bench/P0_PROBE.md",
+    "?? morsehgp3D_v8/bench/p0_probe.cpp",
+    "?? morsehgp3D_v8/bench/run_p0_matrix.py",
+    "?? morsehgp3D_v8/docs/P0_CREDITS_LOCAUX.md",
+    "?? morsehgp3D_v8/oracle/p0_oracle.hpp",
+    "?? morsehgp3D_v8/src/core/types.hpp",
+    "?? morsehgp3D_v8/src/pipeline/local_credits.cpp",
+    "?? morsehgp3D_v8/src/pipeline/local_credits.hpp",
+    "?? morsehgp3D_v8/src/pipeline/tube_credits.hpp",
+    "?? morsehgp3D_v8/src/spindle/predicates.hpp",
+    "?? morsehgp3D_v8/tests/p0_gate.cpp",
+    "?? morsehgp3D_v8/tests/probe_cli_gate.py"
+  ],
+  "initial_runner_source_sha256": {
+    "morsehgp3D_v8/CMakeLists.txt": "9174f9969c0bd874937afeeb3e78fe4b1ca34d55baffddd5141cce8185be0663",
+    "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+    "morsehgp3D_v8/src/pipeline/local_credits.hpp": "791dfe12079278e31904b02552dbc7d852ec6ddcc610e9ab4d1489ccb5df6e65",
+    "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c",
+    "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+    "morsehgp3D_v8/src/pipeline/local_credits.cpp": "b8a7eef8ca112ed0921772e4a7d380d802f479814ca686da8a1a856647a626c6",
+    "morsehgp3D_v8/bench/p0_probe.cpp": "8d0a471fcab21758d38e553ce18ea977a6774f63376218288c8da0e31a411a94",
+    "morsehgp3D_v8/bench/run_p0_matrix.py": "d2f2514b284d7cfe00ba8cd009f3d2a46782047db3dbd5f8a8eb9243159a0c09"
+  },
+  "initial_probe_sha256": "fbbd027269c88a20bd24ae8edf15f705b9a1fac3f094b377a752918eef54d0a0",
+  "initial_probe_origin": "build/v8_p0_20260913/mhgp8_p0_probe",
+  "source_binary_binding": "not established; source and binary hashes are separate observations",
+  "artifact_policy": "The initial observations below are preserved. The reproducer prints new JSON and refuses changed pinned inputs with exit code 2.",
+  "interpretation": [
+    "The real copied probe is only a positive control for receipt ingestion.",
+    "The stale-output and malformed-output executables are explicit artificial stand-ins; no actual corrupted developer campaign is alleged.",
+    "P1: the audited runner completes despite eight command/result configuration contradictions; the independent audit gate rejects those eight rows.",
+    "P2: malformed stdout causes an exception before the failed attempt or a completion status is recorded.",
+    "No product geometry, FULL completeness, speed or performance qualification follows from these tests."
+  ],
+  "initial_observations": {
+    "scope": "artificial_receipt_ingestion_tests_not_a_product_measurement",
+    "runner_sha256": "d2f2514b284d7cfe00ba8cd009f3d2a46782047db3dbd5f8a8eb9243159a0c09",
+    "genuine_probe_sha256": "fbbd027269c88a20bd24ae8edf15f705b9a1fac3f094b377a752918eef54d0a0",
+    "results": [
+      {
+        "case": "genuine",
+        "exit_code": 0,
+        "rows": 9,
+        "mismatches": [],
+        "completion": {
+          "status": "completed",
+          "runs": 9,
+          "finished_utc": "2026-09-13T17:35:06.889463+00:00",
+          "source_hashes_unchanged": true
+        },
+        "last_stderr_line": ""
+      },
+      {
+        "case": "stale_replay",
+        "exit_code": 0,
+        "rows": 9,
+        "mismatches": [
+          {
+            "row": 1,
+            "expected": [
+              8,
+              "dual",
+              2,
+              "grid",
+              10,
+              8
+            ],
+            "observed": [
+              8,
+              "pool",
+              2,
+              "grid",
+              10,
+              8
+            ]
+          },
+          {
+            "row": 2,
+            "expected": [
+              8,
+              "tubes",
+              2,
+              "grid",
+              10,
+              8
+            ],
+            "observed": [
+              8,
+              "pool",
+              2,
+              "grid",
+              10,
+              8
+            ]
+          },
+          {
+            "row": 3,
+            "expected": [
+              8,
+              "pool",
+              3,
+              "grid",
+              10,
+              8
+            ],
+            "observed": [
+              8,
+              "pool",
+              2,
+              "grid",
+              10,
+              8
+            ]
+          },
+          {
+            "row": 4,
+            "expected": [
+              8,
+              "dual",
+              3,
+              "grid",
+              10,
+              8
+            ],
+            "observed": [
+              8,
+              "pool",
+              2,
+              "grid",
+              10,
+              8
+            ]
+          },
+          {
+            "row": 5,
+            "expected": [
+              8,
+              "tubes",
+              3,
+              "grid",
+              10,
+              8
+            ],
+            "observed": [
+              8,
+              "pool",
+              2,
+              "grid",
+              10,
+              8
+            ]
+          },
+          {
+            "row": 6,
+            "expected": [
+              8,
+              "pool",
+              4,
+              "grid",
+              10,
+              8
+            ],
+            "observed": [
+              8,
+              "pool",
+              2,
+              "grid",
+              10,
+              8
+            ]
+          },
+          {
+            "row": 7,
+            "expected": [
+              8,
+              "dual",
+              4,
+              "grid",
+              10,
+              8
+            ],
+            "observed": [
+              8,
+              "pool",
+              2,
+              "grid",
+              10,
+              8
+            ]
+          },
+          {
+            "row": 8,
+            "expected": [
+              8,
+              "tubes",
+              4,
+              "grid",
+              10,
+              8
+            ],
+            "observed": [
+              8,
+              "pool",
+              2,
+              "grid",
+              10,
+              8
+            ]
+          }
+        ],
+        "completion": {
+          "status": "completed",
+          "runs": 9,
+          "finished_utc": "2026-09-13T17:35:07.341889+00:00",
+          "source_hashes_unchanged": true
+        },
+        "last_stderr_line": ""
+      },
+      {
+        "case": "truncated_json",
+        "exit_code": 1,
+        "rows": 0,
+        "mismatches": [],
+        "completion": null,
+        "last_stderr_line": "json.decoder.JSONDecodeError: Expecting value: line 1 column 11 (char 10)"
+      }
+    ]
+  },
+  "reproducer": "audits/morsehgp3D_v8_complementaire/campaign_receipt_probe.py",
+  "reproducer_sha256": "79e0a00ae01b64681d3840125186072f2d44b4e4988c780a487463ea09d408b2",
+  "replay_commands": [
+    "python3 -B audits/morsehgp3D_v8_complementaire/campaign_receipt_probe.py --selftest",
+    "python3 -B -O audits/morsehgp3D_v8_complementaire/campaign_receipt_probe.py --selftest"
+  ],
+  "replay_exit_codes": [
+    0,
+    0
+  ],
+  "replays": [
+    {
+      "audit_script_sha256": "79e0a00ae01b64681d3840125186072f2d44b4e4988c780a487463ea09d408b2",
+      "configuration_fields": [
+        "n",
+        "strategy",
+        "lane",
+        "family",
+        "kmax",
+        "separation_s"
+      ],
+      "gcp_used": false,
+      "genuine_probe_sha256": "fbbd027269c88a20bd24ae8edf15f705b9a1fac3f094b377a752918eef54d0a0",
+      "public_status": "not_claimed",
+      "python_optimized": false,
+      "results": [
+        {
+          "audit_rejected_rows": [],
+          "campaign_exit_code": 0,
+          "case": "genuine",
+          "completion": {
+            "finished_utc": "2026-09-13T17:38:05.956730+00:00",
+            "runs": 9,
+            "source_hashes_unchanged": true,
+            "status": "completed"
+          },
+          "last_stderr_line": "",
+          "recorded_rows": 9
+        },
+        {
+          "audit_rejected_rows": [
+            {
+              "expected": [
+                8,
+                "dual",
+                2,
+                "grid",
+                10,
+                8
+              ],
+              "observed": [
+                8,
+                "pool",
+                2,
+                "grid",
+                10,
+                8
+              ],
+              "row": 1
+            },
+            {
+              "expected": [
+                8,
+                "tubes",
+                2,
+                "grid",
+                10,
+                8
+              ],
+              "observed": [
+                8,
+                "pool",
+                2,
+                "grid",
+                10,
+                8
+              ],
+              "row": 2
+            },
+            {
+              "expected": [
+                8,
+                "pool",
+                3,
+                "grid",
+                10,
+                8
+              ],
+              "observed": [
+                8,
+                "pool",
+                2,
+                "grid",
+                10,
+                8
+              ],
+              "row": 3
+            },
+            {
+              "expected": [
+                8,
+                "dual",
+                3,
+                "grid",
+                10,
+                8
+              ],
+              "observed": [
+                8,
+                "pool",
+                2,
+                "grid",
+                10,
+                8
+              ],
+              "row": 4
+            },
+            {
+              "expected": [
+                8,
+                "tubes",
+                3,
+                "grid",
+                10,
+                8
+              ],
+              "observed": [
+                8,
+                "pool",
+                2,
+                "grid",
+                10,
+                8
+              ],
+              "row": 5
+            },
+            {
+              "expected": [
+                8,
+                "pool",
+                4,
+                "grid",
+                10,
+                8
+              ],
+              "observed": [
+                8,
+                "pool",
+                2,
+                "grid",
+                10,
+                8
+              ],
+              "row": 6
+            },
+            {
+              "expected": [
+                8,
+                "dual",
+                4,
+                "grid",
+                10,
+                8
+              ],
+              "observed": [
+                8,
+                "pool",
+                2,
+                "grid",
+                10,
+                8
+              ],
+              "row": 7
+            },
+            {
+              "expected": [
+                8,
+                "tubes",
+                4,
+                "grid",
+                10,
+                8
+              ],
+              "observed": [
+                8,
+                "pool",
+                2,
+                "grid",
+                10,
+                8
+              ],
+              "row": 8
+            }
+          ],
+          "campaign_exit_code": 0,
+          "case": "stale_replay",
+          "completion": {
+            "finished_utc": "2026-09-13T17:38:06.490340+00:00",
+            "runs": 9,
+            "source_hashes_unchanged": true,
+            "status": "completed"
+          },
+          "last_stderr_line": "",
+          "recorded_rows": 9
+        },
+        {
+          "audit_rejected_rows": [],
+          "campaign_exit_code": 1,
+          "case": "truncated_json",
+          "completion": null,
+          "last_stderr_line": "json.decoder.JSONDecodeError: Expecting value: line 1 column 11 (char 10)",
+          "recorded_rows": 0
+        }
+      ],
+      "runner_sha256": "d2f2514b284d7cfe00ba8cd009f3d2a46782047db3dbd5f8a8eb9243159a0c09",
+      "scope": "artificial_receipt_ingestion_tests_not_a_product_measurement",
+      "status": "diagnostic_receipt_gaps_confirmed"
+    },
+    {
+      "audit_script_sha256": "79e0a00ae01b64681d3840125186072f2d44b4e4988c780a487463ea09d408b2",
+      "configuration_fields": [
+        "n",
+        "strategy",
+        "lane",
+        "family",
+        "kmax",
+        "separation_s"
+      ],
+      "gcp_used": false,
+      "genuine_probe_sha256": "fbbd027269c88a20bd24ae8edf15f705b9a1fac3f094b377a752918eef54d0a0",
+      "public_status": "not_claimed",
+      "python_optimized": true,
+      "results": [
+        {
+          "audit_rejected_rows": [],
+          "campaign_exit_code": 0,
+          "case": "genuine",
+          "completion": {
+            "finished_utc": "2026-09-13T17:38:06.011662+00:00",
+            "runs": 9,
+            "source_hashes_unchanged": true,
+            "status": "completed"
+          },
+          "last_stderr_line": "",
+          "recorded_rows": 9
+        },
+        {
+          "audit_rejected_rows": [
+            {
+              "expected": [
+                8,
+                "dual",
+                2,
+                "grid",
+                10,
+                8
+              ],
+              "observed": [
+                8,
+                "pool",
+                2,
+                "grid",
+                10,
+                8
+              ],
+              "row": 1
+            },
+            {
+              "expected": [
+                8,
+                "tubes",
+                2,
+                "grid",
+                10,
+                8
+              ],
+              "observed": [
+                8,
+                "pool",
+                2,
+                "grid",
+                10,
+                8
+              ],
+              "row": 2
+            },
+            {
+              "expected": [
+                8,
+                "pool",
+                3,
+                "grid",
+                10,
+                8
+              ],
+              "observed": [
+                8,
+                "pool",
+                2,
+                "grid",
+                10,
+                8
+              ],
+              "row": 3
+            },
+            {
+              "expected": [
+                8,
+                "dual",
+                3,
+                "grid",
+                10,
+                8
+              ],
+              "observed": [
+                8,
+                "pool",
+                2,
+                "grid",
+                10,
+                8
+              ],
+              "row": 4
+            },
+            {
+              "expected": [
+                8,
+                "tubes",
+                3,
+                "grid",
+                10,
+                8
+              ],
+              "observed": [
+                8,
+                "pool",
+                2,
+                "grid",
+                10,
+                8
+              ],
+              "row": 5
+            },
+            {
+              "expected": [
+                8,
+                "pool",
+                4,
+                "grid",
+                10,
+                8
+              ],
+              "observed": [
+                8,
+                "pool",
+                2,
+                "grid",
+                10,
+                8
+              ],
+              "row": 6
+            },
+            {
+              "expected": [
+                8,
+                "dual",
+                4,
+                "grid",
+                10,
+                8
+              ],
+              "observed": [
+                8,
+                "pool",
+                2,
+                "grid",
+                10,
+                8
+              ],
+              "row": 7
+            },
+            {
+              "expected": [
+                8,
+                "tubes",
+                4,
+                "grid",
+                10,
+                8
+              ],
+              "observed": [
+                8,
+                "pool",
+                2,
+                "grid",
+                10,
+                8
+              ],
+              "row": 8
+            }
+          ],
+          "campaign_exit_code": 0,
+          "case": "stale_replay",
+          "completion": {
+            "finished_utc": "2026-09-13T17:38:06.536392+00:00",
+            "runs": 9,
+            "source_hashes_unchanged": true,
+            "status": "completed"
+          },
+          "last_stderr_line": "",
+          "recorded_rows": 9
+        },
+        {
+          "audit_rejected_rows": [],
+          "campaign_exit_code": 1,
+          "case": "truncated_json",
+          "completion": null,
+          "last_stderr_line": "json.decoder.JSONDecodeError: Expecting value: line 1 column 11 (char 10)",
+          "recorded_rows": 0
+        }
+      ],
+      "runner_sha256": "d2f2514b284d7cfe00ba8cd009f3d2a46782047db3dbd5f8a8eb9243159a0c09",
+      "scope": "artificial_receipt_ingestion_tests_not_a_product_measurement",
+      "status": "diagnostic_receipt_gaps_confirmed"
+    }
+  ],
+  "missing_pin_refusal": {
+    "exit_code": 2,
+    "stdout_empty": true,
+    "diagnostic": "audit input changed; historical receipt preserved: unavailable or changed audited input: /nonexistent_mhgp8_audit_probe"
+  }
+}
