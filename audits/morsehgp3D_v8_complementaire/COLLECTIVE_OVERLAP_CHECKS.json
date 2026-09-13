@@ -1,0 +1,396 @@
+{
+  "created_utc": "2026-09-13T18:38:24.829672+00:00",
+  "executed_model_mutants": [
+    {
+      "category": "unsafe",
+      "exit_code": 1,
+      "name": "omit_id_capacity",
+      "python_flags": [
+        "-B"
+      ],
+      "source_sha256": "a35fa813d73b89b388ebcbceef79cfd4d9a10a7b89646f3799b0582902d4287b",
+      "stderr": "collective overlap gate failed: overloaded capacity accepted"
+    },
+    {
+      "category": "unsafe",
+      "exit_code": 1,
+      "name": "omit_id_capacity",
+      "python_flags": [
+        "-O",
+        "-B"
+      ],
+      "source_sha256": "a35fa813d73b89b388ebcbceef79cfd4d9a10a7b89646f3799b0582902d4287b",
+      "stderr": "collective overlap gate failed: overloaded capacity accepted"
+    },
+    {
+      "category": "unsafe",
+      "exit_code": 1,
+      "name": "raw_group_count",
+      "python_flags": [
+        "-B"
+      ],
+      "source_sha256": "b09ecb435518c983e1ee5ec8943a3f6942e6c66a3e0e493edad5ff1522fa9c91",
+      "stderr": "collective overlap gate failed: fractional credit did not reach two"
+    },
+    {
+      "category": "unsafe",
+      "exit_code": 1,
+      "name": "raw_group_count",
+      "python_flags": [
+        "-O",
+        "-B"
+      ],
+      "source_sha256": "b09ecb435518c983e1ee5ec8943a3f6942e6c66a3e0e493edad5ff1522fa9c91",
+      "stderr": "collective overlap gate failed: fractional credit did not reach two"
+    },
+    {
+      "category": "safe_but_weaker",
+      "exit_code": 1,
+      "name": "floor_instead_of_ceiling",
+      "python_flags": [
+        "-B"
+      ],
+      "source_sha256": "7ea234321feb2cc6b810d5494e843ff4432e840054b66f532b4b9e8db04536e2",
+      "stderr": "collective overlap gate failed: fractional credit did not reach two"
+    },
+    {
+      "category": "safe_but_weaker",
+      "exit_code": 1,
+      "name": "floor_instead_of_ceiling",
+      "python_flags": [
+        "-O",
+        "-B"
+      ],
+      "source_sha256": "7ea234321feb2cc6b810d5494e843ff4432e840054b66f532b4b9e8db04536e2",
+      "stderr": "collective overlap gate failed: fractional credit did not reach two"
+    }
+  ],
+  "gcp_used": false,
+  "invalid_cli_exit": 2,
+  "public_status": "not_claimed",
+  "reviewed_auditor_sha256": "277cb92cc7475806c300b8c011cb6f18aee9c447ce9d5c5acb73e9352295eb24",
+  "reviewed_auditor_source": "morsehgp3D_v8/audits/p0_collective_probe.py",
+  "reviewed_auditor_source_still_matches": true,
+  "runs": [
+    {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/audits/morsehgp3D_v8_complementaire/collective_overlap_gate.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "kind": "complementary",
+      "result": {
+        "boundary_members": 17,
+        "compression_final_gap": "-200/11",
+        "compression_initial_gap": "-61283/3476",
+        "compression_input_ids": 5,
+        "compression_output_ids": 3,
+        "compression_steps": 2,
+        "compression_weights": [
+          "0",
+          "2/11",
+          "4/11",
+          "0",
+          "5/11"
+        ],
+        "fractional_packing_credit": 2,
+        "group_margins": [
+          "-1384/79",
+          "-67/4",
+          "-1384/79",
+          "-200/11",
+          "-200/11"
+        ],
+        "groups": [
+          [
+            0,
+            1,
+            3
+          ],
+          [
+            0,
+            2,
+            3
+          ],
+          [
+            0,
+            2,
+            4
+          ],
+          [
+            1,
+            2,
+            4
+          ],
+          [
+            1,
+            3,
+            4
+          ]
+        ],
+        "hitting_set_minimum": 2,
+        "id_degrees": [
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "incidences": 15,
+        "individual_w3_w4_failures": 5,
+        "maximum_disjoint_packing": 1,
+        "positive_q4_power_values": [
+          "35",
+          "4",
+          "-57",
+          "-57",
+          "4"
+        ],
+        "public_status": "not_claimed",
+        "refuted_unsafe_rules": [
+          "omit_id_capacity",
+          "raw_group_count"
+        ],
+        "refuted_weakening": "floor_instead_of_ceiling_is_safe_but_loses_second_credit",
+        "scope": "independent_collective_model_not_v8_producer",
+        "sites": [
+          [
+            10,
+            26,
+            10
+          ],
+          [
+            10,
+            21,
+            18
+          ],
+          [
+            10,
+            10,
+            16
+          ],
+          [
+            10,
+            10,
+            4
+          ],
+          [
+            10,
+            21,
+            2
+          ]
+        ],
+        "source_sha256": "048be30ae35e28c5a810b80051fceb0bfa2e59ecbc8d4e8ab1f222690d5a603e",
+        "sphere_checks": 208,
+        "status": "passed",
+        "weighted_power_identities": 1040
+      }
+    },
+    {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-O",
+        "-B",
+        "/workspaces/E-HGP/audits/morsehgp3D_v8_complementaire/collective_overlap_gate.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "kind": "complementary",
+      "result": {
+        "boundary_members": 17,
+        "compression_final_gap": "-200/11",
+        "compression_initial_gap": "-61283/3476",
+        "compression_input_ids": 5,
+        "compression_output_ids": 3,
+        "compression_steps": 2,
+        "compression_weights": [
+          "0",
+          "2/11",
+          "4/11",
+          "0",
+          "5/11"
+        ],
+        "fractional_packing_credit": 2,
+        "group_margins": [
+          "-1384/79",
+          "-67/4",
+          "-1384/79",
+          "-200/11",
+          "-200/11"
+        ],
+        "groups": [
+          [
+            0,
+            1,
+            3
+          ],
+          [
+            0,
+            2,
+            3
+          ],
+          [
+            0,
+            2,
+            4
+          ],
+          [
+            1,
+            2,
+            4
+          ],
+          [
+            1,
+            3,
+            4
+          ]
+        ],
+        "hitting_set_minimum": 2,
+        "id_degrees": [
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "incidences": 15,
+        "individual_w3_w4_failures": 5,
+        "maximum_disjoint_packing": 1,
+        "positive_q4_power_values": [
+          "35",
+          "4",
+          "-57",
+          "-57",
+          "4"
+        ],
+        "public_status": "not_claimed",
+        "refuted_unsafe_rules": [
+          "omit_id_capacity",
+          "raw_group_count"
+        ],
+        "refuted_weakening": "floor_instead_of_ceiling_is_safe_but_loses_second_credit",
+        "scope": "independent_collective_model_not_v8_producer",
+        "sites": [
+          [
+            10,
+            26,
+            10
+          ],
+          [
+            10,
+            21,
+            18
+          ],
+          [
+            10,
+            10,
+            16
+          ],
+          [
+            10,
+            10,
+            4
+          ],
+          [
+            10,
+            21,
+            2
+          ]
+        ],
+        "source_sha256": "048be30ae35e28c5a810b80051fceb0bfa2e59ecbc8d4e8ab1f222690d5a603e",
+        "sphere_checks": 208,
+        "status": "passed",
+        "weighted_power_identities": 1040
+      }
+    },
+    {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/p0_collective_probe.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "kind": "reviewed_auditor_model",
+      "result": {
+        "boundary_members": 816,
+        "full_qualification": false,
+        "gcp_used": false,
+        "individual_w3_w4_failures_in_positive_q4": 2,
+        "moment_corner_checks": 14,
+        "moment_model_mutants": [
+          "missing_variance",
+          "mean_square_h",
+          "per_corner_reweighting"
+        ],
+        "moment_positive_q4_supports": 2,
+        "moment_power_checks": 12,
+        "moment_rational_box_samples": 75,
+        "moment_scope": "fixed integer proof weights; aggregate H and C before squaring; no product port",
+        "moment_weight_rejections": 3,
+        "moment_weighted_lane_checks": 2,
+        "performance_claim": false,
+        "positive_noncoplanar_q4": 2,
+        "rank_groups": 204,
+        "refuted_model_mutants": [
+          "closed_margin",
+          "missing_barycenter",
+          "overlapping_groups"
+        ],
+        "source_sha256": "277cb92cc7475806c300b8c011cb6f18aee9c447ce9d5c5acb73e9352295eb24",
+        "sphere_checks": 2040,
+        "status": "passed_bounded_collective_model",
+        "strict_inside_members": 2448
+      }
+    },
+    {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-O",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/p0_collective_probe.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "kind": "reviewed_auditor_model",
+      "result": {
+        "boundary_members": 816,
+        "full_qualification": false,
+        "gcp_used": false,
+        "individual_w3_w4_failures_in_positive_q4": 2,
+        "moment_corner_checks": 14,
+        "moment_model_mutants": [
+          "missing_variance",
+          "mean_square_h",
+          "per_corner_reweighting"
+        ],
+        "moment_positive_q4_supports": 2,
+        "moment_power_checks": 12,
+        "moment_rational_box_samples": 75,
+        "moment_scope": "fixed integer proof weights; aggregate H and C before squaring; no product port",
+        "moment_weight_rejections": 3,
+        "moment_weighted_lane_checks": 2,
+        "performance_claim": false,
+        "positive_noncoplanar_q4": 2,
+        "rank_groups": 204,
+        "refuted_model_mutants": [
+          "closed_margin",
+          "missing_barycenter",
+          "overlapping_groups"
+        ],
+        "source_sha256": "277cb92cc7475806c300b8c011cb6f18aee9c447ce9d5c5acb73e9352295eb24",
+        "sphere_checks": 2040,
+        "status": "passed_bounded_collective_model",
+        "strict_inside_members": 2448
+      }
+    }
+  ],
+  "schema": "mhgp8_collective_overlap_checks_v1",
+  "scope": "independent_mathematical_model_not_product",
+  "source": "audits/morsehgp3D_v8_complementaire/collective_overlap_gate.py",
+  "source_sha256": "048be30ae35e28c5a810b80051fceb0bfa2e59ecbc8d4e8ab1f222690d5a603e",
+  "source_still_matches": true,
+  "status": "passed"
+}

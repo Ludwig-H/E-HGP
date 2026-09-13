@@ -1,0 +1,191 @@
+{
+  "compiler": {
+    "argv": [
+      "/usr/bin/g++",
+      "--version"
+    ],
+    "returncode": 0,
+    "stderr": "",
+    "stdout": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
+  },
+  "compiler_sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+  "gcp_used": false,
+  "invocation": [
+    "audits/morsehgp3D_v8_complementaire/plan_assignment_checks.py",
+    "--output",
+    "audits/morsehgp3D_v8_complementaire/PLAN_ASSIGNMENT_CHECKS.json"
+  ],
+  "normal_execution_regression_claimed": false,
+  "probe_sha256": "53d76834d9468c56a05a56fc51bae3f8839aa0addc727326460d402af2363628",
+  "python_optimization": 1,
+  "runner_sha256": "39eb9423091239ac405741af6ab41c555a293f1238eb6de9bd40cf50bcfe990f",
+  "schema": "mhgp8_plan_assignment_exception_v1",
+  "scope": "copy_assignment_allocation_failure_then_target_reuse",
+  "source_commit": "3589a2c92de29da9f140e97cdb6b2970f1d4012c",
+  "sources": {
+    "core/types.hpp": {
+      "actual_sha256": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+      "expected_sha256": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+      "read_command": [
+        "git",
+        "show",
+        "3589a2c92de29da9f140e97cdb6b2970f1d4012c:morsehgp3D_v8/src/core/types.hpp"
+      ],
+      "read_returncode": 0
+    },
+    "pipeline/local_credits.cpp": {
+      "actual_sha256": "d68e694ea841ddc25af5f8fe82fe6961b8e5a6c4d64744c7d3824141c5784e39",
+      "expected_sha256": "d68e694ea841ddc25af5f8fe82fe6961b8e5a6c4d64744c7d3824141c5784e39",
+      "read_command": [
+        "git",
+        "show",
+        "3589a2c92de29da9f140e97cdb6b2970f1d4012c:morsehgp3D_v8/src/pipeline/local_credits.cpp"
+      ],
+      "read_returncode": 0
+    },
+    "pipeline/local_credits.hpp": {
+      "actual_sha256": "af01776e5263abebd20b46c6739f64f72a8834c1eebcfa7a2a012eb0f2b837c5",
+      "expected_sha256": "af01776e5263abebd20b46c6739f64f72a8834c1eebcfa7a2a012eb0f2b837c5",
+      "read_command": [
+        "git",
+        "show",
+        "3589a2c92de29da9f140e97cdb6b2970f1d4012c:morsehgp3D_v8/src/pipeline/local_credits.hpp"
+      ],
+      "read_returncode": 0
+    },
+    "pipeline/tube_credits.hpp": {
+      "actual_sha256": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c",
+      "expected_sha256": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c",
+      "read_command": [
+        "git",
+        "show",
+        "3589a2c92de29da9f140e97cdb6b2970f1d4012c:morsehgp3D_v8/src/pipeline/tube_credits.hpp"
+      ],
+      "read_returncode": 0
+    },
+    "spindle/predicates.hpp": {
+      "actual_sha256": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+      "expected_sha256": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+      "read_command": [
+        "git",
+        "show",
+        "3589a2c92de29da9f140e97cdb6b2970f1d4012c:morsehgp3D_v8/src/spindle/predicates.hpp"
+      ],
+      "read_returncode": 0
+    }
+  },
+  "status": "passed",
+  "undefined_behavior_executed_by_probe": false,
+  "variants": [
+    {
+      "compile": {
+        "argv": [
+          "/usr/bin/g++",
+          "-std=c++20",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror",
+          "-O1",
+          "-fsanitize=undefined",
+          "-fno-sanitize-recover=all",
+          "-I",
+          "/tmp/mhgp8_plan_assignment_80oba11n/original",
+          "/tmp/mhgp8_plan_assignment_80oba11n/original/probe.cpp",
+          "/tmp/mhgp8_plan_assignment_80oba11n/original/pipeline/local_credits.cpp",
+          "-o",
+          "/tmp/mhgp8_plan_assignment_80oba11n/original/probe"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": ""
+      },
+      "executable_sha256": "71f1fe56bc6c178e814fe7d78aa88f00de030131366e4ca83708d5d87cca0eb7",
+      "name": "original",
+      "observed": {
+        "allocation_failure_caught": 1,
+        "invalid_emissions": 1,
+        "new_owner_a_size": 3,
+        "new_owner_b_size": 3,
+        "owner_changed": 1,
+        "retained_a_credits_size": 2,
+        "retained_b_credits_size": 2,
+        "retained_candidates": 1,
+        "source_candidates": 9,
+        "wrong_lengths": 1
+      },
+      "run": {
+        "argv": [
+          "/tmp/mhgp8_plan_assignment_80oba11n/original/probe",
+          "--expect-vulnerable"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "{\"allocation_failure_caught\":1,\"owner_changed\":1,\"new_owner_a_size\":3,\"retained_a_credits_size\":2,\"new_owner_b_size\":3,\"retained_b_credits_size\":2,\"retained_candidates\":1,\"source_candidates\":9,\"invalid_emissions\":1,\"wrong_lengths\":1}\n"
+      },
+      "snapshot_sha256": {
+        "core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+        "pipeline/local_credits.cpp": "d68e694ea841ddc25af5f8fe82fe6961b8e5a6c4d64744c7d3824141c5784e39",
+        "pipeline/local_credits.hpp": "af01776e5263abebd20b46c6739f64f72a8834c1eebcfa7a2a012eb0f2b837c5",
+        "pipeline/tube_credits.hpp": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c",
+        "spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+      },
+      "status": "defect_reproduced"
+    },
+    {
+      "compile": {
+        "argv": [
+          "/usr/bin/g++",
+          "-std=c++20",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror",
+          "-O1",
+          "-fsanitize=undefined",
+          "-fno-sanitize-recover=all",
+          "-I",
+          "/tmp/mhgp8_plan_assignment_80oba11n/temporary_copy_and_swap",
+          "/tmp/mhgp8_plan_assignment_80oba11n/temporary_copy_and_swap/probe.cpp",
+          "/tmp/mhgp8_plan_assignment_80oba11n/temporary_copy_and_swap/pipeline/local_credits.cpp",
+          "-o",
+          "/tmp/mhgp8_plan_assignment_80oba11n/temporary_copy_and_swap/probe"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": ""
+      },
+      "executable_sha256": "9f29c3ddacfa1b24398b61a3ea21870d07e5d1cec71c0bfe9e68c6d52e50429f",
+      "name": "temporary_copy_and_swap",
+      "observed": {
+        "allocation_failure_caught": 1,
+        "invalid_emissions": 0,
+        "new_owner_a_size": 2,
+        "new_owner_b_size": 2,
+        "owner_changed": 0,
+        "retained_a_credits_size": 2,
+        "retained_b_credits_size": 2,
+        "retained_candidates": 1,
+        "source_candidates": 9,
+        "wrong_lengths": 0
+      },
+      "run": {
+        "argv": [
+          "/tmp/mhgp8_plan_assignment_80oba11n/temporary_copy_and_swap/probe",
+          "--expect-strong"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "{\"allocation_failure_caught\":1,\"owner_changed\":0,\"new_owner_a_size\":2,\"retained_a_credits_size\":2,\"new_owner_b_size\":2,\"retained_b_credits_size\":2,\"retained_candidates\":1,\"source_candidates\":9,\"invalid_emissions\":0,\"wrong_lengths\":0}\n"
+      },
+      "snapshot_sha256": {
+        "core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+        "pipeline/local_credits.cpp": "d68e694ea841ddc25af5f8fe82fe6961b8e5a6c4d64744c7d3824141c5784e39",
+        "pipeline/local_credits.hpp": "d1c2d9ff294506c0750bf2613b3fa10ff4adeca2b458463785847f68acbae0a3",
+        "pipeline/tube_credits.hpp": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c",
+        "spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+      },
+      "status": "repair_verified"
+    }
+  ]
+}

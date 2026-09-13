@@ -356,3 +356,61 @@ CTests PASS, documentation PASS528, registre PASS20, lecteur de campagnes
 seuls le XML et les comptes rendus de publication sont ajoutés. Le cache
 statistique de l'index a été rafraîchi pour cet export, sans changement
 de son arbre Git. Aucun fichier indépendant préparé, aucune branche créée.
+
+## 13 septembre 2026 — AUDITEUR_COMPLEMENTAIRE : nappes 2D et contre-qualification R3
+
+Réponse concrète à la question ROOT : les queues q2 s'étendent aux vraies
+nappes 2D tronquées de la sonde. Notre [prototype indépendant](morsehgp3D_v8_complementaire/P0_NAPPES_2D.md)
+utilise les certificats de boîtes de `3589a2c9`, des caches de queues O(m)
+et des IDs distincts. À n8k/16k/32k, h10, s12, il conserve respectivement
+445 940 / 917 580 / 1 865 300 candidates, contre 16 / 64 / 256 millions.
+Les 42 cas par mode normal/−O passent avec UBSan ; le mutant « rangs sans
+certificat » échoue. Coût des propositions et descripteurs compté ; aucun
+census des grandes entrées, chronométrage ou résultat FULL revendiqué.
+Cela donne un proposeur à comparer au raffinement général par boîtes.
+
+Le [rejeu R3 du runner](morsehgp3D_v8_complementaire/CAMPAIGN_RECEIPT_R3_CHECKS.json)
+ferme nos deux défauts initiaux : JSON contradictoire et tronqué rejetés,
+sortie brute conservée, changement de binaire détecté jusqu'en clôture.
+Un P2 reste dans le lecteur : n8/sheet/dual/q3/Kmax1 est une voie inactive
+valide (seuil nul, zéro candidate), mais l'invariant inconditionnel `sheet`
+la refuse. Restreindre « toutes les paires restent » aux voies actives ;
+les 729 mesures publiées de R3 ne sont pas mises en cause.
+
+Autre cas borné, [affectation de CreditPlan](morsehgp3D_v8_complementaire/P0_PLAN_ASSIGNMENT.md) :
+si une réallocation lève `bad_alloc` et que l'appelant réutilise la cible,
+l'affectation implicite peut avoir changé son propriétaire avant ses
+vecteurs. Le juge reproduit une émission hors du facteur B. Interdire
+cette affectation si elle est inutile, ou lui donner la garantie forte
+par copie puis échange ; ce dernier correctif temporaire passe le même
+échec injecté. Les correctifs R3 de PreparedRectangle restent reconnus.
+Nous ne modifions pas les sources du constructeur. Index encore libre.
+
+Complément : les [quatre captures R3 réelles](morsehgp3D_v8_complementaire/CAMPAIGN_R3_MEASURES_CHECKS.json)
+passent le lecteur normal/−O et notre contrôle indépendant de 729 tuples,
+513 configurations, sur les sources exactes de `3589a2c9`. Le refus des
+sources maintenant modifiées est correct ; aucune mesure n'est relancée
+ni transférée au nouveau partage entre voies.
+
+À l'autre auditeur et au constructeur : la preuve de
+[groupes recouvrants](morsehgp3D_v8_complementaire/P0_GROUPES_RECOUVRANTS.md)
+complète votre certificat collectif. Des poids β_G dont la charge par ID
+reste ≤1 donnent un crédit ceil(Σβ_G). Le choix β=1/degré maximal ne
+demande aucun solveur : cinq triplets certifiés sur cinq IDs donnent deux
+crédits, contre un avec des groupes disjoints ; la borne est atteinte sur
+une vraie boule q4 positive. Le juge rationnel inclut frontières et capacités.
+Deux petites preuves bornent aussi la taille des certificats : trois IDs
+pour toutes les sphères d'une paire, quatre pour les moments sur un bloc,
+sans borne de recherche ni héritage de la porte arithmétique des poids.
+
+Réservation d'index AUDITEUR_COMPLEMENTAIRE sur main `3589a2c9` : uniquement
+`audits/morsehgp3D_v8_complementaire/` et cette section du journal. Index
+constaté vide avant réservation ; toutes les modifications ROOT et celles
+de l'autre auditeur restent hors de notre préparation. La fenêtre expire
+au commit/push de cette passe. GCP non utilisé.
+
+Export neuf de l'index `a38f7e91` : documentation PASS528, registre PASS20,
+validation explicite de nos huit Markdown et du journal PASS9. Les gates
+ci-dessus sont exécutées dans leurs snapshots propres ; ce contrôle
+d'export n'annonce pas un nouveau build du développeur. Aucun fichier
+extérieur à notre dossier et notre section du journal n'est préparé.

@@ -1,0 +1,1704 @@
+{
+  "schema": "mhgp8_complementary_campaign_receipt_r3_checks_v1",
+  "recorded_utc": "2026-09-13T18:32:13.078527+00:00",
+  "status": "repairs_confirmed_with_inactive_sheet_reader_counterexample",
+  "scope": "tiny_campaign_receipt_audit_not_product_geometry_or_performance",
+  "phase": "exploration_v8_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "gcp_used": false,
+  "git_head": "3589a2c92de29da9f140e97cdb6b2970f1d4012c",
+  "source_pins": {
+    "morsehgp3D_v8/bench/check_p0_campaign.py": "6fdfd8fe3b59f025eb8d999480f436895d4c0783c5bf67a2ff7c9874eb4da935",
+    "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715"
+  },
+  "audit_script": "audits/morsehgp3D_v8_complementaire/campaign_receipt_r3_checks.py",
+  "audit_script_sha256": "96e827a75c61379b5e10f62fa77a48f9804bcee0ff137f4a338c234a26b7049c",
+  "source_binary_binding": "separate observed hashes; no build binding claimed",
+  "commands": [
+    "python3 -B audits/morsehgp3D_v8_complementaire/campaign_receipt_r3_checks.py --selftest",
+    "python3 -B -O audits/morsehgp3D_v8_complementaire/campaign_receipt_r3_checks.py --selftest"
+  ],
+  "exit_codes": [
+    0,
+    0
+  ],
+  "replays": [
+    {
+      "audit_script_sha256": "96e827a75c61379b5e10f62fa77a48f9804bcee0ff137f4a338c234a26b7049c",
+      "backend": "cpu_reference",
+      "cases": 7,
+      "gcp_used": false,
+      "git_head": "3589a2c92de29da9f140e97cdb6b2970f1d4012c",
+      "mode": "audit_independant_math_and_architecture",
+      "phase": "exploration_v8_hors_registre",
+      "probe_origin": "build/v8_p0_r3_20260913/mhgp8_p0_probe",
+      "probe_sha256": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+      "profile": "quantized_u16_input_only",
+      "public_status": "not_claimed",
+      "python_optimized": false,
+      "results": {
+        "active_sheet": {
+          "campaign_exit_code": 0,
+          "completion": {
+            "attempts": 1,
+            "error": "",
+            "finished_utc": "2026-09-13T18:31:09.778562+00:00",
+            "probe_hash_unchanged": true,
+            "probe_sha256_closing": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+            "runs": 1,
+            "source_hashes_unchanged": true,
+            "source_sha256_closing": {
+              "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+              "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+              "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+              "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+              "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+              "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+              "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+              "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+            },
+            "status": "completed"
+          },
+          "manifest_probe_sha256": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+          "reader": {
+            "exit_code": 0,
+            "last_stderr_line": "",
+            "result": {
+              "campaigns": 1,
+              "distinct_configurations": 1,
+              "full_contract_qualified": false,
+              "gcp_used": false,
+              "measurements": 1,
+              "scope": "p0_component_receipts",
+              "status": "passed"
+            }
+          },
+          "rows": [
+            {
+              "arguments": [
+                "8",
+                "dual",
+                "3",
+                "sheet",
+                "10",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 16,
+                "family": "sheet",
+                "input_fnv1a64_le_u16_xyz": "f4050cbe0d251ad9",
+                "kmax": 10,
+                "lane": 3,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "dual",
+                "threshold": 9,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1837
+            }
+          ],
+          "source_sha256": {
+            "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+            "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+            "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+            "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+            "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+            "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+            "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+            "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+          }
+        },
+        "binary_changed_last_run": {
+          "campaign_exit_code": 1,
+          "completion": {
+            "attempts": 1,
+            "error": "probe binary changed during invocation",
+            "finished_utc": "2026-09-13T18:31:11.128993+00:00",
+            "probe_hash_unchanged": false,
+            "probe_sha256_closing": "d410ed10db85ade43e7c076f5a1a9c0cc967ad29a4e0b9e9a64b92d22e128cfb",
+            "runs": 0,
+            "source_hashes_unchanged": true,
+            "source_sha256_closing": {
+              "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+              "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+              "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+              "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+              "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+              "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+              "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+              "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+            },
+            "status": "invalid"
+          },
+          "manifest_probe_sha256": "710293e0fc833f485e53b1fdba5a0b8babb434a95c2f1aeb5a042c883dd3678e",
+          "reader": {
+            "exit_code": 1,
+            "last_stderr_line": "RuntimeError: incomplete/invalid campaign: <temporary_campaign_bundle>/case/MANIFEST.json",
+            "result": null
+          },
+          "rows": [
+            {
+              "arguments": [
+                "8",
+                "pool",
+                "2",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "probe binary changed during invocation",
+              "exit_code": 0,
+              "probe_sha256_after": "d410ed10db85ade43e7c076f5a1a9c0cc967ad29a4e0b9e9a64b92d22e128cfb",
+              "probe_sha256_before": "710293e0fc833f485e53b1fdba5a0b8babb434a95c2f1aeb5a042c883dd3678e",
+              "repeat": 0,
+              "status": "invalid",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1848
+            }
+          ],
+          "source_sha256": {
+            "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+            "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+            "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+            "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+            "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+            "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+            "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+            "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+          }
+        },
+        "genuine_grid": {
+          "campaign_exit_code": 0,
+          "completion": {
+            "attempts": 9,
+            "error": "",
+            "finished_utc": "2026-09-13T18:31:09.526483+00:00",
+            "probe_hash_unchanged": true,
+            "probe_sha256_closing": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+            "runs": 9,
+            "source_hashes_unchanged": true,
+            "source_sha256_closing": {
+              "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+              "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+              "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+              "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+              "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+              "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+              "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+              "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+            },
+            "status": "completed"
+          },
+          "manifest_probe_sha256": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+          "reader": {
+            "exit_code": 0,
+            "last_stderr_line": "",
+            "result": {
+              "campaigns": 1,
+              "distinct_configurations": 9,
+              "full_contract_qualified": false,
+              "gcp_used": false,
+              "measurements": 9,
+              "scope": "p0_component_receipts",
+              "status": "passed"
+            }
+          },
+          "rows": [
+            {
+              "arguments": [
+                "8",
+                "pool",
+                "2",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 16,
+                "family": "grid",
+                "input_fnv1a64_le_u16_xyz": "fe66dfc43652b429",
+                "kmax": 10,
+                "lane": 2,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "pool",
+                "threshold": 10,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1848
+            },
+            {
+              "arguments": [
+                "8",
+                "dual",
+                "2",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 16,
+                "family": "grid",
+                "input_fnv1a64_le_u16_xyz": "fe66dfc43652b429",
+                "kmax": 10,
+                "lane": 2,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "dual",
+                "threshold": 10,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1851
+            },
+            {
+              "arguments": [
+                "8",
+                "tubes",
+                "2",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 16,
+                "family": "grid",
+                "input_fnv1a64_le_u16_xyz": "fe66dfc43652b429",
+                "kmax": 10,
+                "lane": 2,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "tubes",
+                "threshold": 10,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1848
+            },
+            {
+              "arguments": [
+                "8",
+                "pool",
+                "3",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 16,
+                "family": "grid",
+                "input_fnv1a64_le_u16_xyz": "fe66dfc43652b429",
+                "kmax": 10,
+                "lane": 3,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "pool",
+                "threshold": 9,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1834
+            },
+            {
+              "arguments": [
+                "8",
+                "dual",
+                "3",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 16,
+                "family": "grid",
+                "input_fnv1a64_le_u16_xyz": "fe66dfc43652b429",
+                "kmax": 10,
+                "lane": 3,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "dual",
+                "threshold": 9,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1850
+            },
+            {
+              "arguments": [
+                "8",
+                "tubes",
+                "3",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 16,
+                "family": "grid",
+                "input_fnv1a64_le_u16_xyz": "fe66dfc43652b429",
+                "kmax": 10,
+                "lane": 3,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "tubes",
+                "threshold": 9,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1833
+            },
+            {
+              "arguments": [
+                "8",
+                "pool",
+                "4",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 16,
+                "family": "grid",
+                "input_fnv1a64_le_u16_xyz": "fe66dfc43652b429",
+                "kmax": 10,
+                "lane": 4,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "pool",
+                "threshold": 8,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1834
+            },
+            {
+              "arguments": [
+                "8",
+                "dual",
+                "4",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 16,
+                "family": "grid",
+                "input_fnv1a64_le_u16_xyz": "fe66dfc43652b429",
+                "kmax": 10,
+                "lane": 4,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "dual",
+                "threshold": 8,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1848
+            },
+            {
+              "arguments": [
+                "8",
+                "tubes",
+                "4",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 16,
+                "family": "grid",
+                "input_fnv1a64_le_u16_xyz": "fe66dfc43652b429",
+                "kmax": 10,
+                "lane": 4,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "tubes",
+                "threshold": 8,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1833
+            }
+          ],
+          "source_sha256": {
+            "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+            "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+            "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+            "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+            "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+            "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+            "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+            "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+          }
+        },
+        "inactive_grid": {
+          "campaign_exit_code": 0,
+          "completion": {
+            "attempts": 1,
+            "error": "",
+            "finished_utc": "2026-09-13T18:31:10.028311+00:00",
+            "probe_hash_unchanged": true,
+            "probe_sha256_closing": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+            "runs": 1,
+            "source_hashes_unchanged": true,
+            "source_sha256_closing": {
+              "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+              "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+              "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+              "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+              "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+              "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+              "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+              "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+            },
+            "status": "completed"
+          },
+          "manifest_probe_sha256": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+          "reader": {
+            "exit_code": 0,
+            "last_stderr_line": "",
+            "result": {
+              "campaigns": 1,
+              "distinct_configurations": 1,
+              "full_contract_qualified": false,
+              "gcp_used": false,
+              "measurements": 1,
+              "scope": "p0_component_receipts",
+              "status": "passed"
+            }
+          },
+          "rows": [
+            {
+              "arguments": [
+                "8",
+                "dual",
+                "3",
+                "grid",
+                "1",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 0,
+                "family": "grid",
+                "input_fnv1a64_le_u16_xyz": "fe66dfc43652b429",
+                "kmax": 1,
+                "lane": 3,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "dual",
+                "threshold": 0,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1817
+            }
+          ],
+          "source_sha256": {
+            "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+            "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+            "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+            "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+            "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+            "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+            "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+            "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+          }
+        },
+        "inactive_sheet": {
+          "campaign_exit_code": 0,
+          "completion": {
+            "attempts": 1,
+            "error": "",
+            "finished_utc": "2026-09-13T18:31:10.276161+00:00",
+            "probe_hash_unchanged": true,
+            "probe_sha256_closing": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+            "runs": 1,
+            "source_hashes_unchanged": true,
+            "source_sha256_closing": {
+              "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+              "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+              "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+              "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+              "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+              "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+              "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+              "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+            },
+            "status": "completed"
+          },
+          "manifest_probe_sha256": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+          "reader": {
+            "exit_code": 1,
+            "last_stderr_line": "RuntimeError: sheet counter-fixture changed",
+            "result": null
+          },
+          "rows": [
+            {
+              "arguments": [
+                "8",
+                "dual",
+                "3",
+                "sheet",
+                "1",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 0,
+                "family": "sheet",
+                "input_fnv1a64_le_u16_xyz": "f4050cbe0d251ad9",
+                "kmax": 1,
+                "lane": 3,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "dual",
+                "threshold": 0,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1831
+            }
+          ],
+          "source_sha256": {
+            "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+            "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+            "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+            "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+            "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+            "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+            "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+            "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+          }
+        },
+        "stale_replay": {
+          "campaign_exit_code": 1,
+          "completion": {
+            "attempts": 2,
+            "error": "command/result mismatch: strategy",
+            "finished_utc": "2026-09-13T18:31:10.589805+00:00",
+            "probe_hash_unchanged": true,
+            "probe_sha256_closing": "f2d8420a6f1d404e9c7d2f35b7eb26d17bd9e4b1794fceed0ecb120b59718a53",
+            "runs": 1,
+            "source_hashes_unchanged": true,
+            "source_sha256_closing": {
+              "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+              "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+              "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+              "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+              "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+              "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+              "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+              "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+            },
+            "status": "invalid"
+          },
+          "manifest_probe_sha256": "f2d8420a6f1d404e9c7d2f35b7eb26d17bd9e4b1794fceed0ecb120b59718a53",
+          "reader": {
+            "exit_code": 1,
+            "last_stderr_line": "RuntimeError: incomplete/invalid campaign: <temporary_campaign_bundle>/case/MANIFEST.json",
+            "result": null
+          },
+          "rows": [
+            {
+              "arguments": [
+                "8",
+                "pool",
+                "2",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "f2d8420a6f1d404e9c7d2f35b7eb26d17bd9e4b1794fceed0ecb120b59718a53",
+              "probe_sha256_before": "f2d8420a6f1d404e9c7d2f35b7eb26d17bd9e4b1794fceed0ecb120b59718a53",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 16,
+                "family": "grid",
+                "input_fnv1a64_le_u16_xyz": "fe66dfc43652b429",
+                "kmax": 10,
+                "lane": 2,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "pool",
+                "threshold": 10,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1848
+            },
+            {
+              "arguments": [
+                "8",
+                "dual",
+                "2",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "command/result mismatch: strategy",
+              "exit_code": 0,
+              "probe_sha256_after": "f2d8420a6f1d404e9c7d2f35b7eb26d17bd9e4b1794fceed0ecb120b59718a53",
+              "probe_sha256_before": "f2d8420a6f1d404e9c7d2f35b7eb26d17bd9e4b1794fceed0ecb120b59718a53",
+              "repeat": 0,
+              "status": "invalid",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1848
+            }
+          ],
+          "source_sha256": {
+            "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+            "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+            "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+            "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+            "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+            "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+            "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+            "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+          }
+        },
+        "truncated_json": {
+          "campaign_exit_code": 1,
+          "completion": {
+            "attempts": 1,
+            "error": "Expecting value: line 1 column 11 (char 10)",
+            "finished_utc": "2026-09-13T18:31:10.860305+00:00",
+            "probe_hash_unchanged": true,
+            "probe_sha256_closing": "857471a123c8d1f0bc415f73c1804b421ca0df1e66ade3b968e135a1b0b0e1d6",
+            "runs": 0,
+            "source_hashes_unchanged": true,
+            "source_sha256_closing": {
+              "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+              "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+              "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+              "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+              "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+              "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+              "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+              "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+            },
+            "status": "invalid"
+          },
+          "manifest_probe_sha256": "857471a123c8d1f0bc415f73c1804b421ca0df1e66ade3b968e135a1b0b0e1d6",
+          "reader": {
+            "exit_code": 1,
+            "last_stderr_line": "RuntimeError: incomplete/invalid campaign: <temporary_campaign_bundle>/case/MANIFEST.json",
+            "result": null
+          },
+          "rows": [
+            {
+              "arguments": [
+                "8",
+                "pool",
+                "2",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "Expecting value: line 1 column 11 (char 10)",
+              "exit_code": 0,
+              "probe_sha256_after": "857471a123c8d1f0bc415f73c1804b421ca0df1e66ade3b968e135a1b0b0e1d6",
+              "probe_sha256_before": "857471a123c8d1f0bc415f73c1804b421ca0df1e66ade3b968e135a1b0b0e1d6",
+              "repeat": 0,
+              "status": "invalid",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 10
+            }
+          ],
+          "source_sha256": {
+            "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+            "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+            "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+            "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+            "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+            "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+            "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+            "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+          }
+        }
+      },
+      "scope": "tiny_campaign_receipt_audit_not_product_geometry_or_performance",
+      "source_binary_binding": "separate observed hashes; no build binding claimed",
+      "source_pins": {
+        "morsehgp3D_v8/bench/check_p0_campaign.py": "6fdfd8fe3b59f025eb8d999480f436895d4c0783c5bf67a2ff7c9874eb4da935",
+        "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715"
+      },
+      "status": "repairs_confirmed_with_inactive_sheet_reader_counterexample",
+      "verdicts": {
+        "P2_inactive_sheet_reader": "open_false_rejection_of_valid_receipt",
+        "binary_last_invocation_mutation": "detected_and_closed_invalid",
+        "initial_P1_command_result_mismatch": "closed_for_tested_runner",
+        "initial_P2_truncated_stdout_closure": "closed_for_tested_runner"
+      }
+    },
+    {
+      "audit_script_sha256": "96e827a75c61379b5e10f62fa77a48f9804bcee0ff137f4a338c234a26b7049c",
+      "backend": "cpu_reference",
+      "cases": 7,
+      "gcp_used": false,
+      "git_head": "3589a2c92de29da9f140e97cdb6b2970f1d4012c",
+      "mode": "audit_independant_math_and_architecture",
+      "phase": "exploration_v8_hors_registre",
+      "probe_origin": "build/v8_p0_r3_20260913/mhgp8_p0_probe",
+      "probe_sha256": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+      "profile": "quantized_u16_input_only",
+      "public_status": "not_claimed",
+      "python_optimized": true,
+      "results": {
+        "active_sheet": {
+          "campaign_exit_code": 0,
+          "completion": {
+            "attempts": 1,
+            "error": "",
+            "finished_utc": "2026-09-13T18:31:09.778573+00:00",
+            "probe_hash_unchanged": true,
+            "probe_sha256_closing": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+            "runs": 1,
+            "source_hashes_unchanged": true,
+            "source_sha256_closing": {
+              "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+              "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+              "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+              "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+              "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+              "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+              "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+              "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+            },
+            "status": "completed"
+          },
+          "manifest_probe_sha256": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+          "reader": {
+            "exit_code": 0,
+            "last_stderr_line": "",
+            "result": {
+              "campaigns": 1,
+              "distinct_configurations": 1,
+              "full_contract_qualified": false,
+              "gcp_used": false,
+              "measurements": 1,
+              "scope": "p0_component_receipts",
+              "status": "passed"
+            }
+          },
+          "rows": [
+            {
+              "arguments": [
+                "8",
+                "dual",
+                "3",
+                "sheet",
+                "10",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 16,
+                "family": "sheet",
+                "input_fnv1a64_le_u16_xyz": "f4050cbe0d251ad9",
+                "kmax": 10,
+                "lane": 3,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "dual",
+                "threshold": 9,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1850
+            }
+          ],
+          "source_sha256": {
+            "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+            "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+            "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+            "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+            "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+            "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+            "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+            "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+          }
+        },
+        "binary_changed_last_run": {
+          "campaign_exit_code": 1,
+          "completion": {
+            "attempts": 1,
+            "error": "probe binary changed during invocation",
+            "finished_utc": "2026-09-13T18:31:11.129333+00:00",
+            "probe_hash_unchanged": false,
+            "probe_sha256_closing": "d410ed10db85ade43e7c076f5a1a9c0cc967ad29a4e0b9e9a64b92d22e128cfb",
+            "runs": 0,
+            "source_hashes_unchanged": true,
+            "source_sha256_closing": {
+              "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+              "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+              "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+              "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+              "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+              "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+              "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+              "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+            },
+            "status": "invalid"
+          },
+          "manifest_probe_sha256": "710293e0fc833f485e53b1fdba5a0b8babb434a95c2f1aeb5a042c883dd3678e",
+          "reader": {
+            "exit_code": 1,
+            "last_stderr_line": "RuntimeError: incomplete/invalid campaign: <temporary_campaign_bundle>/case/MANIFEST.json",
+            "result": null
+          },
+          "rows": [
+            {
+              "arguments": [
+                "8",
+                "pool",
+                "2",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "probe binary changed during invocation",
+              "exit_code": 0,
+              "probe_sha256_after": "d410ed10db85ade43e7c076f5a1a9c0cc967ad29a4e0b9e9a64b92d22e128cfb",
+              "probe_sha256_before": "710293e0fc833f485e53b1fdba5a0b8babb434a95c2f1aeb5a042c883dd3678e",
+              "repeat": 0,
+              "status": "invalid",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1835
+            }
+          ],
+          "source_sha256": {
+            "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+            "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+            "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+            "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+            "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+            "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+            "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+            "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+          }
+        },
+        "genuine_grid": {
+          "campaign_exit_code": 0,
+          "completion": {
+            "attempts": 9,
+            "error": "",
+            "finished_utc": "2026-09-13T18:31:09.526350+00:00",
+            "probe_hash_unchanged": true,
+            "probe_sha256_closing": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+            "runs": 9,
+            "source_hashes_unchanged": true,
+            "source_sha256_closing": {
+              "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+              "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+              "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+              "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+              "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+              "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+              "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+              "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+            },
+            "status": "completed"
+          },
+          "manifest_probe_sha256": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+          "reader": {
+            "exit_code": 0,
+            "last_stderr_line": "",
+            "result": {
+              "campaigns": 1,
+              "distinct_configurations": 9,
+              "full_contract_qualified": false,
+              "gcp_used": false,
+              "measurements": 9,
+              "scope": "p0_component_receipts",
+              "status": "passed"
+            }
+          },
+          "rows": [
+            {
+              "arguments": [
+                "8",
+                "pool",
+                "2",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 16,
+                "family": "grid",
+                "input_fnv1a64_le_u16_xyz": "fe66dfc43652b429",
+                "kmax": 10,
+                "lane": 2,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "pool",
+                "threshold": 10,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1835
+            },
+            {
+              "arguments": [
+                "8",
+                "dual",
+                "2",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 16,
+                "family": "grid",
+                "input_fnv1a64_le_u16_xyz": "fe66dfc43652b429",
+                "kmax": 10,
+                "lane": 2,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "dual",
+                "threshold": 10,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1838
+            },
+            {
+              "arguments": [
+                "8",
+                "tubes",
+                "2",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 16,
+                "family": "grid",
+                "input_fnv1a64_le_u16_xyz": "fe66dfc43652b429",
+                "kmax": 10,
+                "lane": 2,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "tubes",
+                "threshold": 10,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1835
+            },
+            {
+              "arguments": [
+                "8",
+                "pool",
+                "3",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 16,
+                "family": "grid",
+                "input_fnv1a64_le_u16_xyz": "fe66dfc43652b429",
+                "kmax": 10,
+                "lane": 3,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "pool",
+                "threshold": 9,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1848
+            },
+            {
+              "arguments": [
+                "8",
+                "dual",
+                "3",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 16,
+                "family": "grid",
+                "input_fnv1a64_le_u16_xyz": "fe66dfc43652b429",
+                "kmax": 10,
+                "lane": 3,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "dual",
+                "threshold": 9,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1824
+            },
+            {
+              "arguments": [
+                "8",
+                "tubes",
+                "3",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 16,
+                "family": "grid",
+                "input_fnv1a64_le_u16_xyz": "fe66dfc43652b429",
+                "kmax": 10,
+                "lane": 3,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "tubes",
+                "threshold": 9,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1847
+            },
+            {
+              "arguments": [
+                "8",
+                "pool",
+                "4",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 16,
+                "family": "grid",
+                "input_fnv1a64_le_u16_xyz": "fe66dfc43652b429",
+                "kmax": 10,
+                "lane": 4,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "pool",
+                "threshold": 8,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1834
+            },
+            {
+              "arguments": [
+                "8",
+                "dual",
+                "4",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 16,
+                "family": "grid",
+                "input_fnv1a64_le_u16_xyz": "fe66dfc43652b429",
+                "kmax": 10,
+                "lane": 4,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "dual",
+                "threshold": 8,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1850
+            },
+            {
+              "arguments": [
+                "8",
+                "tubes",
+                "4",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 16,
+                "family": "grid",
+                "input_fnv1a64_le_u16_xyz": "fe66dfc43652b429",
+                "kmax": 10,
+                "lane": 4,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "tubes",
+                "threshold": 8,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1846
+            }
+          ],
+          "source_sha256": {
+            "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+            "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+            "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+            "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+            "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+            "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+            "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+            "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+          }
+        },
+        "inactive_grid": {
+          "campaign_exit_code": 0,
+          "completion": {
+            "attempts": 1,
+            "error": "",
+            "finished_utc": "2026-09-13T18:31:10.028338+00:00",
+            "probe_hash_unchanged": true,
+            "probe_sha256_closing": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+            "runs": 1,
+            "source_hashes_unchanged": true,
+            "source_sha256_closing": {
+              "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+              "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+              "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+              "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+              "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+              "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+              "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+              "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+            },
+            "status": "completed"
+          },
+          "manifest_probe_sha256": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+          "reader": {
+            "exit_code": 0,
+            "last_stderr_line": "",
+            "result": {
+              "campaigns": 1,
+              "distinct_configurations": 1,
+              "full_contract_qualified": false,
+              "gcp_used": false,
+              "measurements": 1,
+              "scope": "p0_component_receipts",
+              "status": "passed"
+            }
+          },
+          "rows": [
+            {
+              "arguments": [
+                "8",
+                "dual",
+                "3",
+                "grid",
+                "1",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 0,
+                "family": "grid",
+                "input_fnv1a64_le_u16_xyz": "fe66dfc43652b429",
+                "kmax": 1,
+                "lane": 3,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "dual",
+                "threshold": 0,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1831
+            }
+          ],
+          "source_sha256": {
+            "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+            "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+            "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+            "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+            "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+            "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+            "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+            "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+          }
+        },
+        "inactive_sheet": {
+          "campaign_exit_code": 0,
+          "completion": {
+            "attempts": 1,
+            "error": "",
+            "finished_utc": "2026-09-13T18:31:10.276089+00:00",
+            "probe_hash_unchanged": true,
+            "probe_sha256_closing": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+            "runs": 1,
+            "source_hashes_unchanged": true,
+            "source_sha256_closing": {
+              "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+              "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+              "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+              "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+              "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+              "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+              "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+              "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+            },
+            "status": "completed"
+          },
+          "manifest_probe_sha256": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+          "reader": {
+            "exit_code": 1,
+            "last_stderr_line": "RuntimeError: sheet counter-fixture changed",
+            "result": null
+          },
+          "rows": [
+            {
+              "arguments": [
+                "8",
+                "dual",
+                "3",
+                "sheet",
+                "1",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "probe_sha256_before": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 0,
+                "family": "sheet",
+                "input_fnv1a64_le_u16_xyz": "f4050cbe0d251ad9",
+                "kmax": 1,
+                "lane": 3,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "dual",
+                "threshold": 0,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1844
+            }
+          ],
+          "source_sha256": {
+            "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+            "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+            "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+            "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+            "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+            "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+            "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+            "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+          }
+        },
+        "stale_replay": {
+          "campaign_exit_code": 1,
+          "completion": {
+            "attempts": 2,
+            "error": "command/result mismatch: strategy",
+            "finished_utc": "2026-09-13T18:31:10.590126+00:00",
+            "probe_hash_unchanged": true,
+            "probe_sha256_closing": "f2d8420a6f1d404e9c7d2f35b7eb26d17bd9e4b1794fceed0ecb120b59718a53",
+            "runs": 1,
+            "source_hashes_unchanged": true,
+            "source_sha256_closing": {
+              "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+              "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+              "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+              "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+              "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+              "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+              "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+              "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+            },
+            "status": "invalid"
+          },
+          "manifest_probe_sha256": "f2d8420a6f1d404e9c7d2f35b7eb26d17bd9e4b1794fceed0ecb120b59718a53",
+          "reader": {
+            "exit_code": 1,
+            "last_stderr_line": "RuntimeError: incomplete/invalid campaign: <temporary_campaign_bundle>/case/MANIFEST.json",
+            "result": null
+          },
+          "rows": [
+            {
+              "arguments": [
+                "8",
+                "pool",
+                "2",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "",
+              "exit_code": 0,
+              "probe_sha256_after": "f2d8420a6f1d404e9c7d2f35b7eb26d17bd9e4b1794fceed0ecb120b59718a53",
+              "probe_sha256_before": "f2d8420a6f1d404e9c7d2f35b7eb26d17bd9e4b1794fceed0ecb120b59718a53",
+              "repeat": 0,
+              "result": {
+                "candidate_pairs": 16,
+                "family": "grid",
+                "input_fnv1a64_le_u16_xyz": "fe66dfc43652b429",
+                "kmax": 10,
+                "lane": 2,
+                "n": 8,
+                "separation_s": 8,
+                "strategy": "pool",
+                "threshold": 10,
+                "total_pairs": 16
+              },
+              "status": "completed",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1835
+            },
+            {
+              "arguments": [
+                "8",
+                "dual",
+                "2",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "command/result mismatch: strategy",
+              "exit_code": 0,
+              "probe_sha256_after": "f2d8420a6f1d404e9c7d2f35b7eb26d17bd9e4b1794fceed0ecb120b59718a53",
+              "probe_sha256_before": "f2d8420a6f1d404e9c7d2f35b7eb26d17bd9e4b1794fceed0ecb120b59718a53",
+              "repeat": 0,
+              "status": "invalid",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 1835
+            }
+          ],
+          "source_sha256": {
+            "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+            "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+            "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+            "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+            "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+            "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+            "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+            "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+          }
+        },
+        "truncated_json": {
+          "campaign_exit_code": 1,
+          "completion": {
+            "attempts": 1,
+            "error": "Expecting value: line 1 column 11 (char 10)",
+            "finished_utc": "2026-09-13T18:31:10.863420+00:00",
+            "probe_hash_unchanged": true,
+            "probe_sha256_closing": "857471a123c8d1f0bc415f73c1804b421ca0df1e66ade3b968e135a1b0b0e1d6",
+            "runs": 0,
+            "source_hashes_unchanged": true,
+            "source_sha256_closing": {
+              "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+              "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+              "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+              "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+              "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+              "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+              "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+              "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+            },
+            "status": "invalid"
+          },
+          "manifest_probe_sha256": "857471a123c8d1f0bc415f73c1804b421ca0df1e66ade3b968e135a1b0b0e1d6",
+          "reader": {
+            "exit_code": 1,
+            "last_stderr_line": "RuntimeError: incomplete/invalid campaign: <temporary_campaign_bundle>/case/MANIFEST.json",
+            "result": null
+          },
+          "rows": [
+            {
+              "arguments": [
+                "8",
+                "pool",
+                "2",
+                "grid",
+                "10",
+                "8"
+              ],
+              "error": "Expecting value: line 1 column 11 (char 10)",
+              "exit_code": 0,
+              "probe_sha256_after": "857471a123c8d1f0bc415f73c1804b421ca0df1e66ade3b968e135a1b0b0e1d6",
+              "probe_sha256_before": "857471a123c8d1f0bc415f73c1804b421ca0df1e66ade3b968e135a1b0b0e1d6",
+              "repeat": 0,
+              "status": "invalid",
+              "stderr_bytes_preserved": true,
+              "stdout_bytes_preserved": true,
+              "stdout_length": 10
+            }
+          ],
+          "source_sha256": {
+            "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+            "morsehgp3D_v8/bench/p0_probe.cpp": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7",
+            "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715",
+            "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+            "morsehgp3D_v8/src/pipeline/local_credits.cpp": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081",
+            "morsehgp3D_v8/src/pipeline/local_credits.hpp": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255",
+            "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+            "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+          }
+        }
+      },
+      "scope": "tiny_campaign_receipt_audit_not_product_geometry_or_performance",
+      "source_binary_binding": "separate observed hashes; no build binding claimed",
+      "source_pins": {
+        "morsehgp3D_v8/bench/check_p0_campaign.py": "6fdfd8fe3b59f025eb8d999480f436895d4c0783c5bf67a2ff7c9874eb4da935",
+        "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715"
+      },
+      "status": "repairs_confirmed_with_inactive_sheet_reader_counterexample",
+      "verdicts": {
+        "P2_inactive_sheet_reader": "open_false_rejection_of_valid_receipt",
+        "binary_last_invocation_mutation": "detected_and_closed_invalid",
+        "initial_P1_command_result_mismatch": "closed_for_tested_runner",
+        "initial_P2_truncated_stdout_closure": "closed_for_tested_runner"
+      }
+    }
+  ],
+  "verdicts": {
+    "P2_inactive_sheet_reader": "open_false_rejection_of_valid_receipt",
+    "binary_last_invocation_mutation": "detected_and_closed_invalid",
+    "initial_P1_command_result_mismatch": "closed_for_tested_runner",
+    "initial_P2_truncated_stdout_closure": "closed_for_tested_runner"
+  },
+  "remaining_counterexample": {
+    "classification": "P2_reader_false_rejection",
+    "real_probe_arguments": [
+      "8",
+      "dual",
+      "3",
+      "sheet",
+      "1",
+      "8"
+    ],
+    "threshold": 0,
+    "candidate_pairs": 0,
+    "total_pairs": 16,
+    "runner_exit_code": 0,
+    "runner_status": "completed",
+    "checker_exit_code": 1,
+    "checker_diagnostic": "RuntimeError: sheet counter-fixture changed",
+    "controls": "active sheet and inactive grid are accepted; same real executable, no output mutation",
+    "recommendation": "Apply the sheet all-pairs invariant only when threshold > 0; preserve explicit inactive-lane checks."
+  },
+  "constructor_gate": {
+    "path": "morsehgp3D_v8/tests/campaign_gate.py",
+    "sha256": "a040c75f8d8457d5f45ae2e0b25308f54b43394635787596d06a79916125f321",
+    "sequential_replays": [
+      {
+        "exit_code": 0,
+        "result": {
+          "status": "passed",
+          "checks": 41,
+          "python_optimized": false,
+          "scope": "p0_campaign_receipt_ingestion_not_geometry"
+        }
+      },
+      {
+        "exit_code": 0,
+        "result": {
+          "status": "passed",
+          "checks": 41,
+          "python_optimized": true,
+          "scope": "p0_campaign_receipt_ingestion_not_geometry"
+        }
+      }
+    ],
+    "earlier_parallel_attempts": [
+      {
+        "python_optimized": false,
+        "exit_code": 1,
+        "diagnostic": "RuntimeError: non-FILEPATH compiler cache was rejected"
+      },
+      {
+        "python_optimized": true,
+        "exit_code": 1,
+        "diagnostic": "RuntimeError: non-FILEPATH compiler cache was rejected"
+      }
+    ],
+    "earlier_failure_status": "cause unassigned; temporary campaign diagnostics were deleted by the constructor gate; isolated UNINITIALIZED-cache reproduction and subsequent sequential gates passed; no product defect inferred"
+  },
+  "missing_pin_refusal": {
+    "exit_code": 2,
+    "stdout_empty": true,
+    "diagnostic": "audit inputs changed; historical R3 receipt preserved: unavailable or changed audited input: /nonexistent_mhgp8_r3_audit_probe"
+  },
+  "limitations": [
+    "Tiny genuine cases and explicit artificial result-ingestion failures only; not a campaign-performance or geometry certificate.",
+    "Binary mutation affects only a temporary stand-in, never a developer binary.",
+    "The historical pre-fix receipt and its script remain unchanged.",
+    "New source or binary bytes require a separate audit; the reproducer refuses them with exit code 2 and never rewrites receipts."
+  ]
+}

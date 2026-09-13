@@ -1,0 +1,172 @@
+{
+  "schema": "mhgp8_complementary_r3_measures_checks_v1",
+  "status": "passed_for_pinned_r3_snapshot",
+  "recorded_utc": "2026-09-13T18:36:10.557399+00:00",
+  "phase": "exploration_v8_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "gcp_used": false,
+  "scope": "four_actual_r3_component_captures_source_pins_and_receipt_correspondence",
+  "new_measurements_executed": 0,
+  "old_archived_captures_consumed": false,
+  "current_worktree_qualified": false,
+  "source_snapshot_commit": "3589a2c92de29da9f140e97cdb6b2970f1d4012c",
+  "reader_runs_on_snapshot": [
+    {
+      "python_optimized": false,
+      "exit_code": 0,
+      "result": {
+        "status": "passed",
+        "campaigns": 4,
+        "measurements": 729,
+        "distinct_configurations": 513,
+        "scope": "p0_component_receipts",
+        "full_contract_qualified": false,
+        "gcp_used": false
+      }
+    },
+    {
+      "python_optimized": true,
+      "exit_code": 0,
+      "result": {
+        "status": "passed",
+        "campaigns": 4,
+        "measurements": 729,
+        "distinct_configurations": 513,
+        "scope": "p0_component_receipts",
+        "full_contract_qualified": false,
+        "gcp_used": false
+      }
+    }
+  ],
+  "reader_sha256": "6fdfd8fe3b59f025eb8d999480f436895d4c0783c5bf67a2ff7c9874eb4da935",
+  "reader_commands_from_snapshot_root": [
+    "python3 -B morsehgp3D_v8/bench/check_p0_campaign.py morsehgp3D_v8/receipts/p0_local_credits_20260913",
+    "python3 -B -O morsehgp3D_v8/bench/check_p0_campaign.py morsehgp3D_v8/receipts/p0_local_credits_20260913"
+  ],
+  "snapshot_construction": [
+    "For each source_sha256 entry, read the corresponding blob from commit 3589a2c92de29da9f140e97cdb6b2970f1d4012c and verify its SHA256 before writing it into a fresh temporary directory with the same relative path.",
+    "Read the checker from that same commit and verify reader_sha256; its bytes also matched the live checker at this check.",
+    "Copy only the twelve receipt_files_sha256 entries into the temporary tree and verify those hashes; no first_pass_pre_owner_fix or second_pass_pre_alias_fix capture is used.",
+    "Run the two reader commands from the temporary snapshot. The live worktree is never changed."
+  ],
+  "independent_checks": [
+    "All four manifests use receipt validation version 2, completed closure, identical recorded source maps and unchanged source/binary closing hashes.",
+    "Every raw base64 stdout decodes exactly to its stored text and strictly parsed result; no duplicate JSON keys, nonfinite constants or floats are accepted.",
+    "Each of 729 command/result tuples agrees in n, strategy, lane, family, kmax and separation_s; the executable path and before/after binary hashes agree with its manifest.",
+    "Every expected Cartesian-product matrix including repeat indices is complete without duplicate rows; attempts, successes and row counts agree.",
+    "Independent integer, scope, pair conservation, threshold, core credit, finite time and timing partition checks pass for all 729 rows.",
+    "The union has 513 distinct configurations across 4 campaigns; the twelve receipt files remain unchanged at closure."
+  ],
+  "independent_result": {
+    "status": "independent_r3_receipt_correspondence_passed",
+    "source_snapshot_commit": "3589a2c92de29da9f140e97cdb6b2970f1d4012c",
+    "source_sha256": {
+      "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+      "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+      "morsehgp3D_v8/src/pipeline/local_credits.hpp": "af01776e5263abebd20b46c6739f64f72a8834c1eebcfa7a2a012eb0f2b837c5",
+      "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c",
+      "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+      "morsehgp3D_v8/src/pipeline/local_credits.cpp": "d68e694ea841ddc25af5f8fe82fe6961b8e5a6c4d64744c7d3824141c5784e39",
+      "morsehgp3D_v8/bench/p0_probe.cpp": "8d0a471fcab21758d38e553ce18ea977a6774f63376218288c8da0e31a411a94",
+      "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715"
+    },
+    "receipt_files_sha256": {
+      "morsehgp3D_v8/receipts/p0_local_credits_20260913/mono_k10_s10_12/MANIFEST.json": "d5fba1d4538e6bf1d4d979f776d9741085fb56963ae13042a453725e70fda424",
+      "morsehgp3D_v8/receipts/p0_local_credits_20260913/mono_k10_s10_12/MEASURES.jsonl": "6dc66aac65c441fcbff535767386bf3f1a539b359fd81b441c77f93b249afa8a",
+      "morsehgp3D_v8/receipts/p0_local_credits_20260913/mono_k10_s10_12/COMPLETION.json": "05ad0b1f1df497b4f79a811c13a506891556827cb83ab535b6ee7cdc7be3d604",
+      "morsehgp3D_v8/receipts/p0_local_credits_20260913/mono_k10_s8/MANIFEST.json": "7f2351156a9fd1e7683dff68d608bee8fad480a7690fc70f6b5512d59dc42e89",
+      "morsehgp3D_v8/receipts/p0_local_credits_20260913/mono_k10_s8/MEASURES.jsonl": "f3acc5807e08e8e0820680e0a35de4b3f6ca6bfdc8a32ea344f13bfc251066cc",
+      "morsehgp3D_v8/receipts/p0_local_credits_20260913/mono_k10_s8/COMPLETION.json": "15fa309dd82af694e75554cccd62f55cf2fce213c820860881483f2e4b0afef9",
+      "morsehgp3D_v8/receipts/p0_local_credits_20260913/mono_k5_s8_10_12/MANIFEST.json": "1e5ef50a3e5eed4620b4fc5c2beb2f7c68ca519ee22e3d90e0e54d964844cbf5",
+      "morsehgp3D_v8/receipts/p0_local_credits_20260913/mono_k5_s8_10_12/MEASURES.jsonl": "398cec80beb582e6d8c2382bb1f48cd039e9cf9e5c1c872ded49be26814d970d",
+      "morsehgp3D_v8/receipts/p0_local_credits_20260913/mono_k5_s8_10_12/COMPLETION.json": "fe29683035ad032296118cc1e902e23443277f21061c9adc376fe0fe10c16f3e",
+      "morsehgp3D_v8/receipts/p0_local_credits_20260913/rails_k10_s8_10_12/MANIFEST.json": "6d41df5a6eea56cfe0216830e5c1c018d6c507e4513231c4442a57cade6e7cbe",
+      "morsehgp3D_v8/receipts/p0_local_credits_20260913/rails_k10_s8_10_12/MEASURES.jsonl": "3c63d1067aaa587b34c01e54736a2f5f0d71fff02f0902aa80ded040f62c9a49",
+      "morsehgp3D_v8/receipts/p0_local_credits_20260913/rails_k10_s8_10_12/COMPLETION.json": "dcaba396699c0efdbebed535972b31c30e76bd59ddf624ec445c54077543ec96"
+    },
+    "checker_sha256": "6fdfd8fe3b59f025eb8d999480f436895d4c0783c5bf67a2ff7c9874eb4da935",
+    "campaigns": {
+      "mono_k10_s10_12": {
+        "measurements": 162,
+        "distinct_configurations": 162,
+        "status": "passed",
+        "captured_commit_base": "e9e97e64c57c0d25888e6de0be3c5388c4399260",
+        "started_utc": "2026-09-13T18:13:10.314544+00:00",
+        "probe_sha256": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2"
+      },
+      "mono_k10_s8": {
+        "measurements": 243,
+        "distinct_configurations": 81,
+        "status": "passed",
+        "captured_commit_base": "e9e97e64c57c0d25888e6de0be3c5388c4399260",
+        "started_utc": "2026-09-13T18:12:57.743831+00:00",
+        "probe_sha256": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2"
+      },
+      "mono_k5_s8_10_12": {
+        "measurements": 243,
+        "distinct_configurations": 243,
+        "status": "passed",
+        "captured_commit_base": "e9e97e64c57c0d25888e6de0be3c5388c4399260",
+        "started_utc": "2026-09-13T18:13:04.832198+00:00",
+        "probe_sha256": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2"
+      },
+      "rails_k10_s8_10_12": {
+        "measurements": 81,
+        "distinct_configurations": 27,
+        "status": "passed",
+        "captured_commit_base": "e9e97e64c57c0d25888e6de0be3c5388c4399260",
+        "started_utc": "2026-09-13T18:13:15.117709+00:00",
+        "probe_sha256": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2"
+      }
+    },
+    "measurements": 729,
+    "distinct_configurations": 513,
+    "current_worktree_differences": {
+      "morsehgp3D_v8/CMakeLists.txt": {
+        "captured": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+        "current_observed": "f50e38454cb181ef5d20cab483396af147f6a09594a3001de8329f334a6a7ad8"
+      },
+      "morsehgp3D_v8/src/pipeline/local_credits.hpp": {
+        "captured": "af01776e5263abebd20b46c6739f64f72a8834c1eebcfa7a2a012eb0f2b837c5",
+        "current_observed": "27fd3025f4a1e08886a92e9fde1a8b89c98712803537bcdf08dfe80adce8f255"
+      },
+      "morsehgp3D_v8/src/pipeline/tube_credits.hpp": {
+        "captured": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c",
+        "current_observed": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c"
+      },
+      "morsehgp3D_v8/src/pipeline/local_credits.cpp": {
+        "captured": "d68e694ea841ddc25af5f8fe82fe6961b8e5a6c4d64744c7d3824141c5784e39",
+        "current_observed": "70106c476053d3c0b4b313e9c9a1ea316c057cca9b7ef335db6f71e93473e081"
+      },
+      "morsehgp3D_v8/bench/p0_probe.cpp": {
+        "captured": "8d0a471fcab21758d38e553ce18ea977a6774f63376218288c8da0e31a411a94",
+        "current_observed": "6d7ded016c39bf95c61323517bc68ac7736b95f59847ad61ed3f6e7ed69343d7"
+      }
+    },
+    "current_probe_observations": {
+      "build/v8_p0_r3_20260913/mhgp8_p0_probe": {
+        "recorded": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+        "current": "9b19bc7eff0c5d20f06b70c792528537c663255998a22239f2d5a0d6c860cfd2",
+        "matches": true
+      }
+    },
+    "independent_check_sha256": "af5b1d8d52c1281b680b5ad7d5b037da7d6452e39fd9118518c81b6d72a660c1"
+  },
+  "live_worktree_reader_observations": [
+    {
+      "python_optimized": false,
+      "exit_code": 1,
+      "diagnostic": "RuntimeError: source has changed since this campaign: morsehgp3D_v8/CMakeLists.txt"
+    },
+    {
+      "python_optimized": true,
+      "exit_code": 1,
+      "diagnostic": "RuntimeError: source has changed since this campaign: morsehgp3D_v8/CMakeLists.txt"
+    }
+  ],
+  "interpretation": "The live refusal correctly prevents transferring R3 captures to ongoing code changes. The recorded R3 source blobs match the committed snapshot and its four actual captures pass readback. This does not qualify later code, geometry, FULL completeness or total pipeline performance.",
+  "remaining_reader_limitation": "The separately recorded inactive-sheet false rejection does not affect these captures: all use active lanes at Kmax5 or Kmax10."
+}
