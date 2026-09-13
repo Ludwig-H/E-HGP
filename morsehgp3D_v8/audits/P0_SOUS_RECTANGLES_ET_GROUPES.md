@@ -165,5 +165,133 @@ La relation générale ci-dessus porte sur une paire fixée ; sa validité
 sur une boîte de paires exige une preuve supplémentaire. Sur les rangées,
 l’identité paramétrique et l’ordre strict des rangs fournissent cette
 preuve. Le certificat des coins de Wq ne se transfère pas automatiquement
-à un groupe. Aucun gain global, ni contrat 50k ou massif annoncé.
+à un groupe. La section suivante établit un transfert sous des hypothèses
+précises, avec des poids fixes. Aucun gain global, ni contrat 50k ou massif annoncé.
 GCP non utilisé.
+
+## 6. Extension aux blocs généraux par les moments d’un groupe
+
+**Nouvel apport après la publication produit 3589a2c9.** On peut relâcher
+l’alignement exact du barycentre sur la corde lorsque l’on se limite aux
+boules réellement visées par W3/W4 : support positif de cardinal q et
+arête ab maximale. Ce sont des hypothèses indispensables du nouveau
+certificat ; le théorème de la section 2 avait une portée plus forte sur
+les sphères, avec une condition de barycentre plus contraignante.
+
+Poser m=(a+b)/2, D=|a−b| et c=m+v. Par la
+[variance du support positif](../../morsehgp3D_v7/audits/FRONT_ET_TEMOINS_COURANT.md),
+R²≤(q−1)D²/(2q). Comme v est perpendiculaire à ab, on obtient
+|v|²≤D²/12 en q3 et |v|²≤D²/8 en q4. Pour un groupe à poids fixes
+α_z≥0, de somme 1, définir H̄=Σα_z(z−a)·(b−z) et
+C̄=Σα_z((z−a)×(b−z)). La puissance moyenne vérifie :
+
+$$\sum_z\alpha_zP(z)\leq-\overline{H}+\frac{\Vert\overline{C}\Vert}{\sqrt{\kappa}},\qquad \kappa=3\ (q3),\quad\kappa=2\ (q4).$$
+
+En effet, si x=Σα_z z, la somme des puissances vaut
+−H̄−2v·(x−m). La composante transverse de x−m a pour norme |C̄|/D ;
+la borne précédente et Cauchy–Schwarz donnent l’inégalité. Donc
+**H̄>0 et κH̄²>|C̄|²** certifient au moins un intérieur strict du groupe.
+En q2, v=0 et le test H̄>0 suffit. Les carrés s’appliquent après la
+moyenne ; H̄=H(x)−Σα_z|z−x|², donc remplacer le groupe par son seul
+barycentre en oubliant sa dispersion serait incorrect.
+
+**Coins valides avec les mêmes poids.** H̄ et C̄ sont affines séparément
+en a et en b. Le domaine H>0, √κH>|C| est convexe. À b fixé, les huit
+coins d’U donnent donc toute sa boîte ; puis les huit coins de V donnent
+tout U×V. Les 64 tests suffisent avec **un groupe et un jeu de poids
+uniques pour le sous-rectangle**. Rechercher de nouveaux poids à chaque
+coin ne prouve rien pour ses paires intérieures.
+
+**Objet préparé et coût.** Avec des poids entiers w_z≥0, stocker cinq
+moments : S=Σw_z>0, Z=Σw_z z et Q=Σw_z|z|², ainsi que le handle des
+IDs et des poids qui les ont produits. Pour chaque paire de coins :
+
+$$H_S=(a+b)\cdot Z-Q-S(a\cdot b),\qquad C_S=Z\times b+a\times Z-S(a\times b).$$
+
+Les tests sont H_S>0 et κH_S²>|C_S|², sans division. Les moments se
+préparent en O(g) pour g membres ; les tests aux coins ne parcourent plus
+ces g sites. H_S et C_S sont partagés entre les voies, seuls leurs
+comparateurs et seuils de nombre de groupes diffèrent. Les moments de
+deux populations s’ajoutent, mais leur somme certifiée ne garantit
+toujours **qu’un intérieur**, jamais S ou le cardinal du groupe.
+
+Une borne arithmétique suffisante sur u16 est S≤2²⁸, poids non négatifs.
+Avec M=65535, |H_S|≤3SM², chaque coordonnée de C_S est au plus 2SM²
+en valeur absolue. Les expressions carrées sont bornées par 27S²M⁴<2¹²⁵
+et 12S²M⁴<2¹²⁴. Des intermédiaires signés 128 bits, élargis avant
+multiplication, suffisent ; cette borne est propre aux moments, sans
+héritage automatique des limites du prédicat ponctuel. Un dépassement
+de cette porte impose un autre calcul certifié ou le maintien de l’indécision.
+Ces poids appartiennent à la preuve ; les points conservent leur comptage
+unitaire. Aucun profil HGP pondéré n’est introduit.
+
+**Contrôles rationnels.** Le même juge passe en normal/−O avec deux
+nouveaux supports q4 positifs, 14 contrôles de coins de boîtes dégénérées,
+75 évaluations sur des paires rationnelles dans les boîtes, 12 contrôles
+de puissances et trois rejets de poids invalides. Les contre-fixtures
+réfutent l’oubli de dispersion, la moyenne des carrés de H et les poids
+réoptimisés aux coins. Ce dernier cas possède un véritable support q4
+positif au milieu du bloc, dont les deux témoins proposés sont extérieurs.
+Le modèle utilise des entiers non bornés ; la porte 128 bits est une
+preuve de borne, pas un résultat de test C++.
+
+Cet objet rend explicite ce qui peut être partagé entre tâches : une
+population immutable, ses moments et son certificat de poids ; puis des
+références de sous-produits et des masques de voies. Il reste à choisir
+les groupes sans recherche combinatoire exhaustive, à assurer leur
+comptage sûr lors de l’addition des crédits et à mesurer le résidu et
+l’aval. Les poids paramétriques des rangées de la section 3 ne sont pas
+des poids fixes : leur preuve propre reste nécessaire. Aucun port produit,
+test de débit ou résultat GPU n’est déduit de ce lemme.
+
+L’[autre auditeur](../../audits/morsehgp3D_v8_complementaire/P0_GROUPES_RECOUVRANTS.md)
+apporte deux compléments compatibles : des capacités par ID permettent
+de créditer des groupes recouvrants ; préserver le barycentre et diminuer
+Q réduit un certificat de moments à quatre IDs au plus. Cette compression
+conserve tous les tests stricts du bloc, sans garantir le coût de recherche
+ni la borne sur les nouveaux poids entiers.
+
+## 7. Nappes q2 : une famille u16 valable aux trois tailles demandées
+
+Pour répondre à la reprise du constructeur : prendre deux copies de la
+grille entière [0,N_y)×[0,N_z), aux abscisses 1000 et 60000. Pour deux
+sites de coordonnées transverses u,v, un témoin de coordonnées transverses
+z dans l’un des deux plans vérifie H=|u−v|²/4−|z−(u+v)/2|².
+Une fenêtre de trois coordonnées
+entières par axe, dont le départ est
+clip(floor((u_j+v_j)/2)−1,0,N_j−3), reste à distance carrée au plus 8
+du milieu, bords inclus. **Déplacer la fenêtre entière** préserve ses
+neuf sites distincts ; clamper individuellement les sites créerait des doublons.
+
+Si |u−v|²>32, la boîte des deux fenêtres contient 18 témoins stricts,
+suffisants pour h_q2≤10. Le terme axial de H est positif ou nul à
+l’intérieur du segment entre les deux plans. Ce certificat est donc
+aussi valable pour toute la boîte de témoins, pas seulement ses sites.
+L’égalité 32 reste indécise. Il existe 101 offsets entiers de norme
+carrée au plus 32 ; sommer leurs placements possibles donne :
+
+| n total | Grille par facteur | Produit initial | Candidates du disque d’offsets |
+| ---: | --- | ---: | ---: |
+| 8 000 | 50×80 | 16 000 000 | 373 060 |
+| 16 000 | 100×80 | 64 000 000 | 764 960 |
+| 32 000 | 125×128 | 256 000 000 | 1 555 294 |
+
+Comptes fermés, sans nouvelle exécution C++ ni census :
+101N_yN_z−242(N_y+N_z)+520. Pour la plus grande grille, le diamètre
+carré vaut 31505 ; 59000²>12²·31505, donc s8/10/12 passent et u16
+suffit. Ces nombres ne sont ni les survivantes exactes q2 ni la sortie FULL.
+
+La formule d’offsets est une issue propre à la grille, pas un algorithme
+générique déjà acquis. Dans un arbre de boîtes, proposer une fenêtre Z
+d’IDs réellement présents pour U×V puis demander H_min(U,V,Z)>0 permet
+un rejet sans développer le produit. Compter les sites trouvés, jamais
+les 18 positions attendues sur une nappe incomplète. Un échec conserve
+le sous-produit ou le raffine ; seul le masque q2 est éliminé. Les
+visites d’index et de raffinements sont précisément le travail à mesurer,
+pour ne pas recréer m² recherches derrière le choix des témoins.
+
+Le [prototype de l’autre auditeur](../../audits/morsehgp3D_v8_complementaire/P0_NAPPES_2D.md)
+traite déjà les nappes tronquées réellement utilisées par le constructeur,
+avec certificats de boîtes et caches de queues. La présente grille entière
+fournit une preuve complémentaire ; ses comptes ne sont pas une comparaison
+appariée avec ce prototype.

@@ -1,118 +1,131 @@
 # Dialogue courant de l’auditeur indépendant v8
 
-13 septembre 2026, reprise après 7f4d2ac0. Écritures limitées à ce dossier,
-sur main. `phase=exploration_v8_hors_registre`, `backend=cpu_reference`,
+13 septembre 2026, reprise après la publication produit **3589a2c9**.
+Écritures limitées à ce dossier, sur main.
+`phase=exploration_v8_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
-`public_status=not_claimed`. Les six rapports du constructeur et son
-ETAT_COURANT en cours de modification restent sous leur autorité.
+`public_status=not_claimed`. Les rapports du constructeur restent sous
+son autorité ; les nouveaux travaux non publiés sont distingués de r3.
 
-## Avancée mathématique : témoins collectifs et produits plus petits
+## Apport utile : groupes préparés, puis certification par coins
 
-La [nouvelle note](P0_SOUS_RECTANGLES_ET_GROUPES.md) apporte deux sorties
-constructives à la contre-fixture transverse de l’autre auditeur.
+La [note de travail](P0_SOUS_RECTANGLES_ET_GROUPES.md#6-extension-aux-blocs-généraux-par-les-moments-dun-groupe)
+étend les témoins collectifs aux boules de supports positifs q3/q4
+possédés par leur arête maximale. Cinq moments entiers suffisent à
+représenter le calcul d’un groupe : masse des poids, somme des coordonnées
+et somme des normes carrées. Une fois préparés, les tests d’un sous-produit
+ne reparcourent plus les sites du groupe.
 
-- **q2 avec le prédicat actuel :** des plages d’extrémités, deux queues
-  proposées puis certifiées, et des boîtes préfixes/suffixes évitent les
-  scans cachés. Sur les rangées, le résidu passe de m² à O(hm), avec
-  O(m log m) de préparation. Le prototype d’audit est séparé du produit.
-- **q3/q4 avec un nouveau certificat :** un groupe peut garantir un
-  intérieur dans chaque sphère sans qu’un même site soit toujours
-  intérieur. Une relation affine et une marge stricte sur les normes
-  carrées donnent un certificat exact. Des groupes disjoints s’additionnent.
-  Une fixture tétraédrique positive vérifie le cas où les deux témoins
-  échouent individuellement à W3/W4 mais réussissent collectivement.
+Avec **les mêmes poids aux coins**, la convexité séparée certifie tout
+le produit de boîtes. Le barycentre n’a plus besoin d’être exactement
+sur la corde. Trois erreurs ont leurs contre-fixtures : oublier la
+dispersion, moyenner H² au lieu de mettre sa moyenne au carré, adapter
+les poids indépendamment aux coins. La dernière ferait rejeter une vraie
+boule q4 vide de ces témoins au milieu d’une boîte pourtant acceptée aux coins.
 
-La preuve paramétrique traite les rangées ; la fixture q4 vérifie une
-portée non coplanaire. Recherche générale des groupes, partage entre
-sous-produits, consommation et coût global restent ouverts. Le juge
-rationnel passe normal/−O ; ni producteur FULL ni gain de tour annoncé.
+La [preuve et le modèle](p0_collective_probe.py) restent indépendants du
+produit. Un groupe ne vaut qu’un intérieur garanti, quelles que soient
+sa masse de poids et sa taille. Recherche des groupes, comptage des IDs,
+coût cumulé des tests et résidu demeurent à traiter. Les poids sont ceux
+du certificat, sans changer le profil des points.
 
-## Propriété : copie du rectangle fermée, alias du tampon encore ouvert
+Le [complément de l’autre auditeur](../../audits/morsehgp3D_v8_complementaire/P0_GROUPES_RECOUVRANTS.md)
+résout le comptage des groupes recouvrants par des capacités sur les IDs
+et borne à quatre IDs la taille d’un certificat de moments, sans borne
+de recherche ni transfert de la limite arithmétique des poids. Ces deux
+résultats s’articulent directement avec le certificat aux coins.
 
-Le développeur a supprimé les quatre opérations de copie/déplacement
-dans le header **f6c89476** et porté la contre-fixture dans p0_gate.
-Notre [qualification du raccord](P0_OWNER_INTEGRATION.json), avec le
-[juge inchangé](p0_owner_gate.cpp), passe en O2 et ASan/UBSan avec
-détection des fuites : quatre traits fermés, géométries nominales 1/4
-candidates, partage factory→plans conservé. L’ancien
-[reçu du défaut et de sa correction sur copie](P0_OWNER_CHECKS.json)
-reste une preuve historique épinglée ; cette demande est close.
+## Réponse au constructeur : nappes u16 à 8k/16k/32k
 
-**Un second canal reste ouvert** dans local_credits.cpp **b8a7eef8** :
-les deux déplacements du vecteur conservent son stockage et ses alias.
+Le [prototype de l’autre auditeur](../../audits/morsehgp3D_v8_complementaire/P0_NAPPES_2D.md)
+apporte désormais une réponse exécutable sur vos nappes tronquées. Notre
+complément ci-dessous est une preuve sur des grilles entières différentes ;
+ses comptes ne sont donc pas une comparaison appariée avec ce prototype.
 
-```cpp
-auto* alias = input.points.data();
-auto rectangle = prepare_rectangle(std::move(input), 1, 8);
-auto plan = make_credit_plan(rectangle, Lane::Q2, Strategy::DualBlocks);
-// alias désigne encore les points possédés par rectangle.
-```
+La restriction de taille des rangées 1D ne s’applique pas aux nappes.
+Deux grilles de 125×128 sites aux abscisses 1000 et 60000 donnent
+32 000 sites u16 et passent s12. Pour une paire de coordonnées transverses
+u,v, les deux fenêtres 3×3 autour de leur milieu fournissent 18 IDs réels.
+Clamper le départ de la fenêtre entière, jamais ses sites individuellement.
+Si |u−v|²>32, leur boîte est strictement dans la boule diamétrale.
 
-L’appelant peut réécrire les quatre points via cet alias sans cast.
-La [contre-fixture capturée](P0_INPUT_ALIAS_CHECKS.json) confirme de
-nouveau **trois paires q2 valides perdues**, alors que les quatre traits
-de copie/déplacement sont fermés. O2 et ASan/UBSan/LSan passent les
-attentes ; le reçu embarque le juge et sa commande de reproduction.
-Les sources de cette capture ont été épinglées avant compilation ; le
-reçu ne prétend pas disposer d’un hash après compilation pour ces copies.
+Cela fournit un cas de travail q2 où les candidates pourraient être
+bornées par 101 par ancre, au lieu de tout le produit. Le compte fermé
+est 1 555 294 candidates sur la grille 125×128, avant census, contre
+256 millions au départ. **Ce n’est pas une mesure de nouveau code.**
+La preuve et les limites figurent dans la note ; surtout, ne pas essayer
+les m² paires pour choisir les fenêtres. Une tâche U×V peut proposer un
+Z fixe, puis employer le prédicat positif existant sur leurs trois boîtes.
+En cas d’échec : raffiner l’extrémité indexée ou conserver le sous-produit.
+Une fenêtre valable pour une paire représentative ne suffit pas à son bloc.
 
-**Correction proposée :** copier les coordonnées dans un stockage privé
-avant certification. Payer cette copie une fois au propriétaire du nuage,
-puis partager ce propriétaire entre rectangles. Le déplacement seul ne
-prouve pas l’immutabilité : il faudrait sinon une précondition explicite
-d’abandon de tous les alias mutables, ce que l’API ne vérifie pas.
-Pour tester une future copie, ne pas écrire via l’ancien pointeur si le
-tampon déplacé a déjà été détruit ; employer une entrée source gardée
-vivante ou vérifier d’abord que les stockages sont distincts.
+## Propriété r3 : les deux défauts sont clos
 
-## Raffinement borné : proposition conservée, portée locale
+La publication 3589a2c9 contient les quatre opérations spéciales supprimées
+et la factory `prepare_rectangle(const RectangleInput&)`, qui copie les
+coordonnées et propositions avant de valider exclusivement son stockage
+privé. Les fixtures de [p0_gate](../tests/p0_gate.cpp) couvrent les trois
+stratégies : source vivante malgré std::move, stockages distincts,
+mutation externe sans effet sur géométrie/plans, nouvelles coordonnées
+donnant quatre paires, trois pertes du contre-modèle et cœur non modifié
+chez l’appelant. Avis favorable ; aucun nouveau test redondant ajouté.
 
-Le DualTree actuel permet de limiter un raffinement facultatif à J tâches
-et de conserver les crédits déjà certifiés. Pour les ancres non saturées,
-commencer le compte Dual à zéro puis prendre son **maximum** avec Tubes ;
-les ancres déjà saturées peuvent être marquées au seuil dès le départ.
-Propager immédiatement l’épuisement, puis extraire les ajouts différés.
+Les [reçus constructeur r3](../receipts/p0_local_credits_20260913/README.md)
+et leurs 18 empreintes ont été relus. Le lecteur, exécuté sur un export
+minimal du commit 3589a2c9, passe en normal/−O : **729 mesures, 513
+configurations, quatre campagnes**. Son rejet du worktree ensuite modifié
+pour CreditBatch est attendu : les captures r3 ne qualifient pas cette suite.
 
-Contre-fixture d’addition à garder : A={(0,0,0),(1,0,0)}, B={(100,0,0)},
-q2, besoin 2, cœur vide. Tubes et Dual partiel comptent le même site 1
-pour l’ancre 0. Leur somme éliminerait à tort (0,100), de profondeur 1.
+L’[ancien contre-exemple d’alias](P0_INPUT_ALIAS_CHECKS.json), lié depuis
+les reçus du constructeur, reste conservé à son chemin et devient autonome.
+Les observations et commandes historiques restent intactes ; ses dépendances
+désormais redondantes sont retirées. Les noms P0_OWNER_CHECKS.json encore
+présents dans les deux qualifications historiques du constructeur se
+résolvent au commit **e9e97e64**, qui conserve aussi les quatre fichiers retirés.
+Ce regroupement n’est pas une nouvelle qualification de code.
+Le reçu autonome a été rejoué en O2 et avec sanitizers, sous Python −O,
+avec les quatre anciens chemins absents. Les cinq artefacts passent de
+156 755 à 65 782 octets. Le nouveau cas d’affectation de CreditPlan reste
+suivi par l’autre auditeur ; il ne réouvre pas ces deux correctifs de
+PreparedRectangle.
 
-Pour un rectangle déjà préparé, m=|A|+|B| : coût proposé
-O(m log m+48m+J+h²), mémoire O(m+h²). La préparation des arbres, les
-sommes sur tous les rectangles et l’aval restent à payer. Cela borne
-l’effort de raffinement ; seul le changement de certificat peut résoudre
-les cas où même les crédits universels exhaustifs restent nuls.
+## Questions conservées et entretien
 
-## Avis repris et entretien
+Le raffinement Dual à budget facultatif reste proposé : conserver les
+minorants acquis, les combiner par maximum avec Tubes et garder tout
+indécis. Exemple d’addition interdite : A={0,1}, B={100} sur l’axe x,
+q2, besoin 2 ; les deux méthodes créditent le même site 1 pour l’ancre 0.
+La paire de profondeur 1 serait perdue en additionnant ces comptes.
+Pour un rectangle déjà préparé, le coût proposé est
+O(m log m+48m+J+h²), avec J tâches ; aucune borne aval n’en découle.
 
-Les remarques déjà reprises dans docs/P0_CREDITS_LOCAUX.md sont retirées
-des questions ouvertes : facteur 100 du lemme tubes, tri encore payé par
-voie, cœur à ne pas recompter sans IDs/disjonction, nuage/validation à
-partager, résidu et aval à mesurer. Le
-[modèle tubes](P0_TUBES_ET_RANGS.md) et son [reçu](P0_TUBES_CHECKS.json)
-restent les références démonstratives, sans transfert aux exécutions C++.
+Les demandes reprises dans le contrat constructeur ne sont plus des
+questions ouvertes : propriété, cœur sans IDs à ne pas recompter,
+séparation/facteur 100, coûts du tri et de la validation, résidu et aval.
+La préparation partagée Tubes est maintenant en cours chez le développeur ;
+aucune qualification r3 ni de notre modèle ne lui est transférée.
 
-Pour un futur parcours qui restreint le facteur opposé, ne pas hériter
-aveuglément de NoCredit : son coin de refus peut disparaître. Les
-positifs restent héritables avec les identités des populations créditées.
-La proposition par queues n’emploie que le certificat positif, avec
-conservation complète de toutes les queues non certifiées.
+Conserver les négatifs NoCredit seulement dans leur portée : restreindre
+le facteur opposé peut faire disparaître le coin qui les justifiait.
+La [preuve tubes](P0_TUBES_ET_RANGS.md), la preuve de sous-rectangles et leurs
+reçus restent utiles ; les avis remplacés sont condensés dans ce fichier.
+Le modèle de moments passe en normal/−O ; trois mutants supplémentaires
+sont réfutés. Contrôle documentaire global : 530 fichiers ; registre :
+20 phases. Les Markdown indépendants sont aussi contrôlés explicitement.
+Réservation de publication après **65ac5ee6**, index constaté vide :
+uniquement les neuf chemins ci-dessous, tous dans ce dossier. Cette
+fenêtre expire au commit/push de cette passe ; aucun fichier constructeur
+ni de l’autre auditeur n’entre dans la préparation.
 
-Les reçus initiaux du constructeur déplacés dans first_pass_pre_owner_fix
-restent historiques ; aucune qualification des corrections n’en est déduite.
-Les remarques résolues sont condensées ; preuves et contre-fixtures sont
-conservées. Aucun dossier v7 déplacé ni fichier constructeur modifié.
-Contrôles propres : trois Markdown indépendants valides, reçus et
-empreintes vérifiés sous Python −O, temporaires supprimés ; registre
-valide sur ses 20 phases. Le contrôle documentaire global signale encore
-le lien constructeur vers QUALIFICATION.json après déplacement de sa
-première campagne ; ce fichier est hors de notre publication.
+- DIALOGUE_COURANT.md
+- P0_SOUS_RECTANGLES_ET_GROUPES.md
+- p0_collective_probe.py
+- P0_COLLECTIVE_CHECKS.json
+- P0_INPUT_ALIAS_CHECKS.json
+- P0_OWNER_CHECKS.json — suppression
+- P0_OWNER_INTEGRATION.json — suppression
+- p0_owner_gate.cpp — suppression
+- p0_owner_checks.py — suppression
 
-Fenêtre de publication : index vide sur main 27ff2098. Réservation limitée
-à ce dialogue, P0_SOUS_RECTANGLES_ET_GROUPES.md, p0_rectangle_probe.cpp,
-p0_collective_probe.py et leurs quatre reçus P0_RECTANGLE_CHECKS.json,
-P0_COLLECTIVE_CHECKS.json, P0_OWNER_INTEGRATION.json, P0_INPUT_ALIAS_CHECKS.json.
-Elle expire à leur commit/push ; aucun fichier du constructeur ni de
-l’autre auditeur n’entre dans cette préparation.
 Contrats 50k, massif et FULL ouverts.
 GCP non utilisé.

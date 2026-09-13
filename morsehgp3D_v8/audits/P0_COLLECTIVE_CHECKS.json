@@ -1,8 +1,8 @@
 {
   "status": "passed_bounded_collective_model",
-  "scope": "exact rational collective-witness model, no producer",
+  "scope": "exact rational collective-witness model, fixed-weight moment SOC and box corners; no producer",
   "source": "morsehgp3D_v8/audits/p0_collective_probe.py",
-  "source_before": "947718291b762f7c2e77fd1b236db548fc8c940e64d37fd1bbced3cb3f95a4a3",
+  "source_before": "277cb92cc7475806c300b8c011cb6f18aee9c447ce9d5c5acb73e9352295eb24",
   "interpreter": "/usr/local/python/3.12.1/bin/python3.12",
   "runs": [
     {
@@ -13,7 +13,7 @@
         "--selftest"
       ],
       "exit_code": 0,
-      "stdout": "{\"boundary_members\": 816, \"full_qualification\": false, \"gcp_used\": false, \"individual_w3_w4_failures_in_positive_q4\": 2, \"performance_claim\": false, \"positive_noncoplanar_q4\": 2, \"rank_groups\": 204, \"refuted_model_mutants\": [\"closed_margin\", \"missing_barycenter\", \"overlapping_groups\"], \"source_sha256\": \"947718291b762f7c2e77fd1b236db548fc8c940e64d37fd1bbced3cb3f95a4a3\", \"sphere_checks\": 2040, \"status\": \"passed_bounded_collective_model\", \"strict_inside_members\": 2448}\n",
+      "stdout": "{\"boundary_members\": 816, \"full_qualification\": false, \"gcp_used\": false, \"individual_w3_w4_failures_in_positive_q4\": 2, \"moment_corner_checks\": 14, \"moment_model_mutants\": [\"missing_variance\", \"mean_square_h\", \"per_corner_reweighting\"], \"moment_positive_q4_supports\": 2, \"moment_power_checks\": 12, \"moment_rational_box_samples\": 75, \"moment_scope\": \"fixed integer proof weights; aggregate H and C before squaring; no product port\", \"moment_weight_rejections\": 3, \"moment_weighted_lane_checks\": 2, \"performance_claim\": false, \"positive_noncoplanar_q4\": 2, \"rank_groups\": 204, \"refuted_model_mutants\": [\"closed_margin\", \"missing_barycenter\", \"overlapping_groups\"], \"source_sha256\": \"277cb92cc7475806c300b8c011cb6f18aee9c447ce9d5c5acb73e9352295eb24\", \"sphere_checks\": 2040, \"status\": \"passed_bounded_collective_model\", \"strict_inside_members\": 2448}\n",
       "stderr": "",
       "timeout_seconds": 15
     },
@@ -26,7 +26,7 @@
         "--selftest"
       ],
       "exit_code": 0,
-      "stdout": "{\"boundary_members\": 816, \"full_qualification\": false, \"gcp_used\": false, \"individual_w3_w4_failures_in_positive_q4\": 2, \"performance_claim\": false, \"positive_noncoplanar_q4\": 2, \"rank_groups\": 204, \"refuted_model_mutants\": [\"closed_margin\", \"missing_barycenter\", \"overlapping_groups\"], \"source_sha256\": \"947718291b762f7c2e77fd1b236db548fc8c940e64d37fd1bbced3cb3f95a4a3\", \"sphere_checks\": 2040, \"status\": \"passed_bounded_collective_model\", \"strict_inside_members\": 2448}\n",
+      "stdout": "{\"boundary_members\": 816, \"full_qualification\": false, \"gcp_used\": false, \"individual_w3_w4_failures_in_positive_q4\": 2, \"moment_corner_checks\": 14, \"moment_model_mutants\": [\"missing_variance\", \"mean_square_h\", \"per_corner_reweighting\"], \"moment_positive_q4_supports\": 2, \"moment_power_checks\": 12, \"moment_rational_box_samples\": 75, \"moment_scope\": \"fixed integer proof weights; aggregate H and C before squaring; no product port\", \"moment_weight_rejections\": 3, \"moment_weighted_lane_checks\": 2, \"performance_claim\": false, \"positive_noncoplanar_q4\": 2, \"rank_groups\": 204, \"refuted_model_mutants\": [\"closed_margin\", \"missing_barycenter\", \"overlapping_groups\"], \"source_sha256\": \"277cb92cc7475806c300b8c011cb6f18aee9c447ce9d5c5acb73e9352295eb24\", \"sphere_checks\": 2040, \"status\": \"passed_bounded_collective_model\", \"strict_inside_members\": 2448}\n",
       "stderr": "",
       "timeout_seconds": 15
     }
@@ -34,5 +34,33 @@
   "full_qualification": false,
   "performance_claim": false,
   "gcp_used": false,
-  "source_after": "947718291b762f7c2e77fd1b236db548fc8c940e64d37fd1bbced3cb3f95a4a3"
+  "source_after": "277cb92cc7475806c300b8c011cb6f18aee9c447ce9d5c5acb73e9352295eb24",
+  "previous_model_revision": "e9e97e64",
+  "sheet_closed_counts": {
+    "scope": "finite offset summation, no geometry engine or census",
+    "offsets": 101,
+    "rows": [
+      {
+        "n": 8000,
+        "ny": 50,
+        "nz": 80,
+        "offset_candidate_count": 373060,
+        "s12_verified": true
+      },
+      {
+        "n": 16000,
+        "ny": 100,
+        "nz": 80,
+        "offset_candidate_count": 764960,
+        "s12_verified": true
+      },
+      {
+        "n": 32000,
+        "ny": 125,
+        "nz": 128,
+        "offset_candidate_count": 1555294,
+        "s12_verified": true
+      }
+    ]
+  }
 }
