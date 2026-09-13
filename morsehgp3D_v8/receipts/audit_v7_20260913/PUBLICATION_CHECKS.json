@@ -1,0 +1,163 @@
+{
+  "schema": "mhgp8-audit-publication-checks-v1",
+  "status": "passed",
+  "recorded_utc": "2026-09-13 14:05:55 UTC",
+  "scope": "Documentation, register consistency, source inventory and closed receipt readers; no engine qualification",
+  "source_head": "dc57ffd5fec5b73aff9bc7f79f280fb8bc92a6d1",
+  "GCP_used": false,
+  "cpp_compilations": 0,
+  "new_engine_tests": 0,
+  "new_benchmarks": 0,
+  "tested_snapshot": {
+    "kind": "fresh git checkout-index export",
+    "root": "/tmp/mhgp8-audit-index-aV4YLL",
+    "preexisting_v6_v7_changes_included": false,
+    "note": "Publication receipt itself completed after checks; checked scripts, reports and referenced v7 evidence unchanged. Final re-export/check before commit."
+  },
+  "workspace_inventory_check": {
+    "command": "python3 -B - <<'PY'\nimport hashlib, json, pathlib, subprocess\nroot=pathlib.Path.cwd()\nd=json.loads((root/'morsehgp3D_v8/receipts/audit_v7_20260913/INVENTORY.json').read_text())\ndef need(ok, msg):\n    if not ok: raise RuntimeError(msg)\nhead=d['v7_head']\npaths=subprocess.check_output(['git','ls-tree','-r','--name-only','-z',head,'--','morsehgp3D_v7']).decode().split('\\0')[:-1]\nneed(len(paths)==d['tracked_paths'],'path count')\nneed(hashlib.sha256(b''.join(p.encode()+b'\\0' for p in sorted(paths))).hexdigest()==d['all_tracked_paths_sha256'],'path hash')\nfor item in d['selected_files']:\n    data=subprocess.check_output(['git','show',head+':'+item['path']])\n    need(hashlib.sha256(data).hexdigest()==item['head_sha256'],item['path']+' published hash')\n    need(hashlib.sha256((root/item['path']).read_bytes()).hexdigest()==item['live_sha256'],item['path']+' live hash')\nneed(len(d['selected_files'])==240,'selected count')\nprint(json.dumps({'status':'passed','paths':len(paths),'selected_published_and_live_hashes':len(d['selected_files']),'engine_test':False}))\nPY",
+    "exit_code": 0,
+    "stdout_stderr": "{\"status\": \"passed\", \"paths\": 26777, \"selected_published_and_live_hashes\": 240, \"engine_test\": false}\n"
+  },
+  "index_checks": [
+    {
+      "command": "python3 -B tools/check_docs.py",
+      "expected_exit_code": 0,
+      "exit_code": 0,
+      "observed_utc": "2026-09-13 14:04:51 UTC",
+      "output": "Validated 522 active Markdown files.\n"
+    },
+    {
+      "command": "python3 -B tools/check_implementation_status.py",
+      "expected_exit_code": 0,
+      "exit_code": 0,
+      "observed_utc": "2026-09-13 14:04:53 UTC",
+      "output": "Validated 20 implementation phases and their gates.\n"
+    },
+    {
+      "command": "python3 -B morsehgp3D_v8/tests/docs_scope_gate.py --selftest",
+      "expected_exit_code": 0,
+      "exit_code": 0,
+      "observed_utc": "2026-09-13 14:04:54 UTC",
+      "output": "{\"checks\": 27, \"independent_audits_excluded\": true, \"missing_link_mutants_refuted\": 1, \"positive_validations\": 1, \"recursive_directories\": 3, \"required_entries\": 8, \"scope\": \"documentation_only_not_an_engine_test\", \"status\": \"passed\", \"writes\": 0}\n"
+    },
+    {
+      "command": "python3 -B -O morsehgp3D_v8/tests/docs_scope_gate.py --selftest",
+      "expected_exit_code": 0,
+      "exit_code": 0,
+      "observed_utc": "2026-09-13 14:04:54 UTC",
+      "output": "{\"checks\": 27, \"independent_audits_excluded\": true, \"missing_link_mutants_refuted\": 1, \"positive_validations\": 1, \"recursive_directories\": 3, \"required_entries\": 8, \"scope\": \"documentation_only_not_an_engine_test\", \"status\": \"passed\", \"writes\": 0}\n"
+    },
+    {
+      "command": "python3 -B morsehgp3D_v8/tests/docs_scope_gate.py --unknown",
+      "expected_exit_code": 2,
+      "exit_code": 2,
+      "observed_utc": "2026-09-13 14:04:55 UTC",
+      "output": "usage: docs_scope_gate.py --selftest\n"
+    },
+    {
+      "command": "python3 -B -O morsehgp3D_v8/tests/docs_scope_gate.py --unknown",
+      "expected_exit_code": 2,
+      "exit_code": 2,
+      "observed_utc": "2026-09-13 14:04:55 UTC",
+      "output": "usage: docs_scope_gate.py --selftest\n"
+    }
+  ],
+  "index_closed_receipt_readers": [
+    {
+      "command": "python3 -B morsehgp3D_v7/receipts/full_ball_scale_gpu_20260910/verify.py",
+      "exit_code": 0,
+      "output_selected": {
+        "status": "passed",
+        "files": 329,
+        "contract_qualified": false,
+        "targeted_shutdowns_certified": 2
+      }
+    },
+    {
+      "command": "python3 -B -O morsehgp3D_v7/receipts/full_ball_scale_gpu_20260910/verify.py",
+      "exit_code": 0,
+      "output_selected": {
+        "status": "passed",
+        "files": 329,
+        "contract_qualified": false,
+        "targeted_shutdowns_certified": 2
+      }
+    },
+    {
+      "command": "python3 -B morsehgp3D_v7/receipts/rank_guard_streaming_20260911/verify.py",
+      "exit_code": 0,
+      "output_selected": {
+        "status": "passed",
+        "logical_files": 894,
+        "runs": 12
+      }
+    },
+    {
+      "command": "python3 -B -O morsehgp3D_v7/receipts/rank_guard_streaming_20260911/verify.py",
+      "exit_code": 0,
+      "output_selected": {
+        "status": "passed",
+        "logical_files": 894,
+        "runs": 12
+      }
+    },
+    {
+      "command": "python3 -B morsehgp3D_v7/receipts/terminal_batch_g4_20260911/verify.py",
+      "exit_code": 0,
+      "output_selected": {
+        "status": "passed",
+        "targeted_shutdowns_certified": 3,
+        "sessions": 3,
+        "guest_commands": 0,
+        "benchmarks": 0,
+        "compiled": false,
+        "device_executed": false,
+        "reader_GCP_used": false
+      }
+    },
+    {
+      "command": "python3 -B -O morsehgp3D_v7/receipts/terminal_batch_g4_20260911/verify.py",
+      "exit_code": 0,
+      "output_selected": {
+        "status": "passed",
+        "targeted_shutdowns_certified": 3,
+        "sessions": 3,
+        "guest_commands": 0,
+        "benchmarks": 0,
+        "compiled": false,
+        "device_executed": false,
+        "reader_GCP_used": false
+      }
+    }
+  ],
+  "source_pins": [
+    {
+      "path": "tools/check_docs.py",
+      "sha256": "9b25c5ad241fc57efbd7057bfe61f7f389249f61b62e3bc31926bb1d4c4281cd"
+    },
+    {
+      "path": "morsehgp3D_v8/tests/docs_scope_gate.py",
+      "sha256": "3ff0e6fd3478331450925a5a15a82199982d7679ed3d23fd74892ad889bfc480"
+    },
+    {
+      "path": "morsehgp3D_v8/receipts/audit_v7_20260913/INVENTORY.json",
+      "sha256": "9b284c74353311642d60bf4859165d1418daa460b8c9a25343caef135ef07c4a"
+    },
+    {
+      "path": "morsehgp3D_v8/receipts/audit_v7_20260913/CONTRACT_CHECKS.json",
+      "sha256": "30d83a7fdb904aadbb20410147ecc0dc16ab895fa46541011e992af0453b78bb"
+    },
+    {
+      "path": "morsehgp3D_v8/receipts/audit_v7_20260913/MATH_CHECKS.json",
+      "sha256": "c63fbb6352b1d935a35774d0998f92dd674afad34834dbd89f24d872c774391a"
+    }
+  ],
+  "documentation_count_note": "522 Markdown in the clean index export versus 524 in the dirty workspace: the two unpublished v7 Markdown additions are intentionally not published.",
+  "limitations": [
+    "No full C++ rerun or new GPU measurement",
+    "Reader output describes historical tests, not CTests rerun in this audit",
+    "No public exact or performance claim inherited",
+    "Git push confirmation is reported separately after the commit"
+  ]
+}

@@ -86,6 +86,24 @@ def active_markdown() -> list[Path]:
     paths.extend(sorted((v7 / "docs").rglob("*.md")))
     paths.extend(sorted((v7 / "receipts").rglob("*.md")))
     paths.extend(sorted((v7 / "bench").rglob("*.md")))
+    # V8 : documents de la refonte et six rapports du constructeur seulement.
+    # Les futurs rapports d'auditeurs independants ne sont pas englobes par
+    # un rglob sur audits/. Les huit entrees nommees sont obligatoires.
+    v8 = ROOT / "morsehgp3D_v8"
+    paths.extend((v8 / "README.md", v8 / "PASSATION.md"))
+    for directory in ("docs", "receipts", "bench"):
+        paths.extend(sorted((v8 / directory).rglob("*.md")))
+    paths.extend(
+        v8 / "audits" / name
+        for name in (
+            "ETAT_COURANT.md",
+            "CONTRATS_ET_MESURES.md",
+            "IMPLEMENTATION_PARALLELISATION.md",
+            "WSPD_Q2_Q3_Q4.md",
+            "FONDEMENTS_ET_OBJET.md",
+            "PERIMETRE_ET_PREUVES.md",
+        )
+    )
     return list(dict.fromkeys(paths))
 
 

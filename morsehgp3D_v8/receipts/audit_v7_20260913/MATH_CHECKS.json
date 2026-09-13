@@ -1,0 +1,119 @@
+{
+  "schema": "mhgp8-v7-math-audit-read-only-v1",
+  "public_status": "not_claimed",
+  "new_cpp_execution": false,
+  "GCP_used": false,
+  "recording_kind": "Selected fields from actual parsed stdout; finite arithmetic checks, not a FULL engine qualification",
+  "checks": [
+    {
+      "command": "set -o pipefail; python3 -B morsehgp3D_v7/audits/receipts_probe_meb_review_20260906/full_output_growth.py | python3 -c 'import json,sys; d=json.load(sys.stdin); print(json.dumps({k:v for k,v in d.items() if k != \"rational\"}, sort_keys=True))'",
+      "started_utc": "2026-09-13 13:50:20 UTC",
+      "exit_code": 0,
+      "parsed_stdout": {
+        "gcp": "not_used",
+        "integer_u16": [
+          {
+            "cross_pair_births_k2": 9,
+            "foreign_power_checks": 36,
+            "m": 2,
+            "minimum_foreign_power": 2877505,
+            "n": 6
+          },
+          {
+            "cross_pair_births_k2": 25,
+            "foreign_power_checks": 200,
+            "m": 4,
+            "minimum_foreign_power": 718129,
+            "n": 10
+          },
+          {
+            "cross_pair_births_k2": 81,
+            "foreign_power_checks": 1296,
+            "m": 8,
+            "minimum_foreign_power": 178009,
+            "n": 18
+          },
+          {
+            "cross_pair_births_k2": 289,
+            "foreign_power_checks": 9248,
+            "m": 16,
+            "minimum_foreign_power": 29464,
+            "n": 34
+          }
+        ],
+        "limitations": [
+          "No asymptotic sequence in fixed u16 universe",
+          "The explicit rational clouds are not claimed globally regular",
+          "No inherited v6 execution or q3/q4 C++ result",
+          "No performance or complete finite-cloud FULL qualification"
+        ],
+        "pins": {
+          "morsehgp3D_v7/audits/receipts_probe_meb_review_20260906/full_output_growth.py": "b3136c1f264be084527d9883c0ce5ac4c415f8da46308863f185b807a71701bc",
+          "morsehgp3D_v7/tests/linked_arcs_gate.cpp": "cb11c5e16ba613ee87b2c27848adaa25d5722373f4d16ab5aa151cacfc047614"
+        },
+        "public_status": "not_claimed",
+        "rational_anchor_power_checks": 3740,
+        "rational_foreign_power_checks": 34720,
+        "rational_tested_labels": 1360,
+        "scope": "exact rational and integer arithmetic only; no FULL engine",
+        "status": "passed",
+        "theorem_scope": "For each fixed K>=2, growing rational precision permits Omega(N^2) FULL birth labels on generically perturbed regular 3D clouds"
+      }
+    },
+    {
+      "command": "set -o pipefail; python3 -B -O morsehgp3D_v7/audits/receipts_probe_meb_review_20260906/full_output_growth.py | python3 -c 'import json,sys; d=json.load(sys.stdin); print(json.dumps({k:v for k,v in d.items() if k != \"rational\"}, sort_keys=True))'",
+      "started_utc": "2026-09-13 13:50:22 UTC",
+      "exit_code": 0,
+      "parsed_stdout": {
+        "gcp": "not_used",
+        "integer_u16": [
+          {
+            "cross_pair_births_k2": 9,
+            "foreign_power_checks": 36,
+            "m": 2,
+            "minimum_foreign_power": 2877505,
+            "n": 6
+          },
+          {
+            "cross_pair_births_k2": 25,
+            "foreign_power_checks": 200,
+            "m": 4,
+            "minimum_foreign_power": 718129,
+            "n": 10
+          },
+          {
+            "cross_pair_births_k2": 81,
+            "foreign_power_checks": 1296,
+            "m": 8,
+            "minimum_foreign_power": 178009,
+            "n": 18
+          },
+          {
+            "cross_pair_births_k2": 289,
+            "foreign_power_checks": 9248,
+            "m": 16,
+            "minimum_foreign_power": 29464,
+            "n": 34
+          }
+        ],
+        "limitations": [
+          "No asymptotic sequence in fixed u16 universe",
+          "The explicit rational clouds are not claimed globally regular",
+          "No inherited v6 execution or q3/q4 C++ result",
+          "No performance or complete finite-cloud FULL qualification"
+        ],
+        "pins": {
+          "morsehgp3D_v7/audits/receipts_probe_meb_review_20260906/full_output_growth.py": "b3136c1f264be084527d9883c0ce5ac4c415f8da46308863f185b807a71701bc",
+          "morsehgp3D_v7/tests/linked_arcs_gate.cpp": "cb11c5e16ba613ee87b2c27848adaa25d5722373f4d16ab5aa151cacfc047614"
+        },
+        "public_status": "not_claimed",
+        "rational_anchor_power_checks": 3740,
+        "rational_foreign_power_checks": 34720,
+        "rational_tested_labels": 1360,
+        "scope": "exact rational and integer arithmetic only; no FULL engine",
+        "status": "passed",
+        "theorem_scope": "For each fixed K>=2, growing rational precision permits Omega(N^2) FULL birth labels on generically perturbed regular 3D clouds"
+      }
+    }
+  ]
+}

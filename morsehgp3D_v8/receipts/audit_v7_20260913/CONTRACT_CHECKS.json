@@ -1,0 +1,227 @@
+{
+  "schema": "mhgp8-v7-contract-audit-read-only-v1",
+  "scope": "Relecture locale de lecteurs clos v7, pas une nouvelle exécution des gates ou benchmarks C++ historiques.",
+  "v7_committed_head": "dc57ffd5fec5b73aff9bc7f79f280fb8bc92a6d1",
+  "v7_dirty_worktree_preserved": true,
+  "GCP_used": false,
+  "benchmarks_executed": 0,
+  "cpp_compilations_executed": 0,
+  "public_status": "not_claimed",
+  "source_pins_observed_after_checks": [
+    {
+      "path": "morsehgp3D_v7/receipts/full_ball_scale_gpu_20260910/manifest.json",
+      "sha256": "c9913094b6479a61a0395be2dc0f09ef2d25672f170e19d3c6e01c584ba08b2c"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/full_ball_scale_gpu_20260910/verify.py",
+      "sha256": "c3cb6f3f58397e9cd7f1b67eb8ec2da1ed08b7863f3a3e76ae890f3c1ace81a6"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/rank_guard_streaming_20260911/MANIFEST.json",
+      "sha256": "e97e07ee140030624bf6cdafb80cadee2787450be399ef550fc0fdf23fa780cb"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/rank_guard_streaming_20260911/verify.py",
+      "sha256": "e4394c2a496e160b1d22e5d96f3243369a5e782bfa3e93461163a3e9ad09ca91"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/terminal_batch_g4_20260911/logical_manifest.json",
+      "sha256": "7df2fb3b8ed7a90e20c543848a075e8aca7df2fc0ccf8b592ad8154a85294a77"
+    },
+    {
+      "path": "morsehgp3D_v7/receipts/terminal_batch_g4_20260911/verify.py",
+      "sha256": "2d03036ed3e28fe2fb664fc9775ae3b7296a530c0626fb54f0176846870a2b6c"
+    }
+  ],
+  "checks": [
+    {
+      "command": "python3 -B morsehgp3D_v7/receipts/full_ball_scale_gpu_20260910/verify.py",
+      "started_utc": "2026-09-13 13:37:11 UTC",
+      "finished_utc": "2026-09-13 13:37:11 UTC",
+      "exit_code": 0,
+      "elapsed_wait_seconds": 0.163924574,
+      "parsed_stdout_selected": {
+        "status": "passed",
+        "files": 329,
+        "CTests": 20,
+        "contract_qualified": false,
+        "targeted_shutdowns_certified": 2,
+        "cloud": [
+          {
+            "backend": "cpu_reference",
+            "kmax": 10,
+            "n": 50000,
+            "nodes": 27273218,
+            "s": 8,
+            "total_s": 418.872898083,
+            "tower_s": 389.667560517
+          },
+          {
+            "backend": "cuda_census_cpu_full",
+            "kmax": 10,
+            "n": 50000,
+            "nodes": 27273218,
+            "s": 8,
+            "total_s": 418.920853529,
+            "tower_s": 390.48077754
+          },
+          {
+            "backend": "cpu_reference",
+            "kmax": 5,
+            "n": 50000,
+            "nodes": 4209792,
+            "s": 8,
+            "total_s": 33.8527126,
+            "tower_s": 27.22778026
+          },
+          {
+            "backend": "cuda_census_cpu_full",
+            "kmax": 5,
+            "n": 50000,
+            "nodes": 4209792,
+            "s": 8,
+            "total_s": 33.569244795,
+            "tower_s": 26.983110521
+          }
+        ]
+      }
+    },
+    {
+      "command": "python3 -B -O morsehgp3D_v7/receipts/full_ball_scale_gpu_20260910/verify.py",
+      "started_utc": "2026-09-13 13:37:11 UTC",
+      "finished_utc": "2026-09-13 13:37:12 UTC",
+      "exit_code": 0,
+      "elapsed_wait_seconds": 1.240940777,
+      "parsed_stdout_selected": {
+        "status": "passed",
+        "files": 329,
+        "CTests": 20,
+        "contract_qualified": false,
+        "targeted_shutdowns_certified": 2,
+        "cloud": [
+          {
+            "backend": "cpu_reference",
+            "kmax": 10,
+            "n": 50000,
+            "nodes": 27273218,
+            "s": 8,
+            "total_s": 418.872898083,
+            "tower_s": 389.667560517
+          },
+          {
+            "backend": "cuda_census_cpu_full",
+            "kmax": 10,
+            "n": 50000,
+            "nodes": 27273218,
+            "s": 8,
+            "total_s": 418.920853529,
+            "tower_s": 390.48077754
+          },
+          {
+            "backend": "cpu_reference",
+            "kmax": 5,
+            "n": 50000,
+            "nodes": 4209792,
+            "s": 8,
+            "total_s": 33.8527126,
+            "tower_s": 27.22778026
+          },
+          {
+            "backend": "cuda_census_cpu_full",
+            "kmax": 5,
+            "n": 50000,
+            "nodes": 4209792,
+            "s": 8,
+            "total_s": 33.569244795,
+            "tower_s": 26.983110521
+          }
+        ]
+      }
+    },
+    {
+      "command": "python3 -B morsehgp3D_v7/receipts/rank_guard_streaming_20260911/verify.py",
+      "started_utc": "2026-09-13 13:37:12 UTC",
+      "finished_utc": "2026-09-13 13:37:17 UTC",
+      "exit_code": 0,
+      "elapsed_wait_seconds": 4.609357198,
+      "parsed_stdout_selected": {
+        "status": "passed",
+        "logical_files": 894,
+        "local_objects": 324,
+        "borrowed_files": 263,
+        "runs": 12,
+        "qualification_status": "checked",
+        "performance_contract_claim": false,
+        "parent_comparison_count": 10,
+        "gate_corpus_comparison_count": 6
+      }
+    },
+    {
+      "command": "python3 -B -O morsehgp3D_v7/receipts/rank_guard_streaming_20260911/verify.py",
+      "started_utc": "2026-09-13 13:37:17 UTC",
+      "finished_utc": "2026-09-13 13:37:22 UTC",
+      "exit_code": 0,
+      "elapsed_wait_seconds": 4.653255019,
+      "parsed_stdout_selected": {
+        "status": "passed",
+        "logical_files": 894,
+        "local_objects": 324,
+        "borrowed_files": 263,
+        "runs": 12,
+        "qualification_status": "checked",
+        "performance_contract_claim": false,
+        "parent_comparison_count": 10,
+        "gate_corpus_comparison_count": 6
+      }
+    },
+    {
+      "command": "python3 -B morsehgp3D_v7/receipts/terminal_batch_g4_20260911/verify.py",
+      "started_utc": "2026-09-13 13:37:22 UTC",
+      "finished_utc": "2026-09-13 13:37:22 UTC",
+      "exit_code": 0,
+      "elapsed_wait_seconds": 0.099459998,
+      "parsed_stdout_selected": {
+        "EU_doubleguard_verified": true,
+        "US_preemptions_reported": 2,
+        "benchmarks": 0,
+        "compiled": false,
+        "device_executed": false,
+        "exact_oslogin_key_revoked": true,
+        "extracted": false,
+        "guest_commands": 0,
+        "personal_or_duplicate_omissions": 12,
+        "reader_GCP_used": false,
+        "sessions": 3,
+        "status": "passed",
+        "targeted_shutdowns_certified": 3,
+        "wrapper_binding_bytes_equal": false,
+        "wrapper_binding_values_equal": true
+      }
+    },
+    {
+      "command": "python3 -B -O morsehgp3D_v7/receipts/terminal_batch_g4_20260911/verify.py",
+      "started_utc": "2026-09-13 13:37:22 UTC",
+      "finished_utc": "2026-09-13 13:37:23 UTC",
+      "exit_code": 0,
+      "elapsed_wait_seconds": 0.11464616,
+      "parsed_stdout_selected": {
+        "EU_doubleguard_verified": true,
+        "US_preemptions_reported": 2,
+        "benchmarks": 0,
+        "compiled": false,
+        "device_executed": false,
+        "exact_oslogin_key_revoked": true,
+        "extracted": false,
+        "guest_commands": 0,
+        "personal_or_duplicate_omissions": 12,
+        "reader_GCP_used": false,
+        "sessions": 3,
+        "status": "passed",
+        "targeted_shutdowns_certified": 3,
+        "wrapper_binding_bytes_equal": false,
+        "wrapper_binding_values_equal": true
+      }
+    }
+  ],
+  "recording_kind": "Selected fields from actual parsed reader stdout; not a raw process capture or a new benchmark receipt."
+}
