@@ -1,0 +1,255 @@
+{
+  "schema": "mhgp8-independent-p0-tube-review-v1",
+  "base_commit": "e409aa46aa71915d5afe1d70d032dda6c93e6727",
+  "date_utc": "2026-09-13T17:22:31.494284+00:00",
+  "frame": {
+    "phase": "exploration_v8_hors_registre",
+    "backend": "none",
+    "profile": "quantized_u16_input_only",
+    "mode": "audit_v7_math_and_architecture",
+    "public_status": "not_claimed"
+  },
+  "scope": "Independent geometric certificate and bounded Python filter model only. Constructor C++ currently under development; no runtime qualification transferred. No FULL tower or performance claim.",
+  "model_checks": {
+    "tested_utc": "2026-09-13T17:21:31.755255+00:00",
+    "source_sha256": "bc3c70ec93b426cd9a0ff70a25db0d2d4ebf34ad31c3c150c498ec7b13670a25",
+    "source_stable": true,
+    "python_version": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+    "python_executable": "/usr/local/python/3.12.1/bin/python3.12",
+    "python_executable_sha256": "0d9afd17e565411cbff3f942ccd0ba7cd2c0a9a623cf00448034b2e50f0220f9",
+    "commands": [
+      {
+        "argv": [
+          "python3",
+          "-B",
+          "morsehgp3D_v8/audits/p0_tube_probe.py",
+          "--selftest"
+        ],
+        "exit_code": 0,
+        "stdout": "{\"brute_tube_comparisons\": 26008, \"connection_corner_checks\": 1920, \"corner_predicates\": 95040, \"credited_identities\": 11880, \"exact_coefficient_checks\": 3, \"exact_q2_site_tests\": 98216, \"fallback_q2_pairs\": 1724, \"full_qualification\": false, \"gcp_used\": false, \"indecisive_lane_runs\": 3, \"isotropic_uncredited_witnesses\": 12, \"lane_runs\": 90, \"model_comparisons\": 4140, \"negative_restriction_fixtures\": 1, \"performance_claim\": false, \"permutation_comparisons\": 45, \"physical_mutants_rejected\": 5, \"product_executed\": false, \"q2_final_comparisons\": 30, \"residual_pairs\": 4080, \"scope\": \"integer structural filter model; bounded geometric judges; no FULL engine\", \"separated_fixtures\": 30, \"status\": \"passed_bounded_tube_model\"}\n",
+        "stderr": "",
+        "timeout_s": 10
+      },
+      {
+        "argv": [
+          "python3",
+          "-B",
+          "-O",
+          "morsehgp3D_v8/audits/p0_tube_probe.py",
+          "--selftest"
+        ],
+        "exit_code": 0,
+        "stdout": "{\"brute_tube_comparisons\": 26008, \"connection_corner_checks\": 1920, \"corner_predicates\": 95040, \"credited_identities\": 11880, \"exact_coefficient_checks\": 3, \"exact_q2_site_tests\": 98216, \"fallback_q2_pairs\": 1724, \"full_qualification\": false, \"gcp_used\": false, \"indecisive_lane_runs\": 3, \"isotropic_uncredited_witnesses\": 12, \"lane_runs\": 90, \"model_comparisons\": 4140, \"negative_restriction_fixtures\": 1, \"performance_claim\": false, \"permutation_comparisons\": 45, \"physical_mutants_rejected\": 5, \"product_executed\": false, \"q2_final_comparisons\": 30, \"residual_pairs\": 4080, \"scope\": \"integer structural filter model; bounded geometric judges; no FULL engine\", \"separated_fixtures\": 30, \"status\": \"passed_bounded_tube_model\"}\n",
+        "stderr": "",
+        "timeout_s": 10
+      },
+      {
+        "argv": [
+          "python3",
+          "-B",
+          "morsehgp3D_v8/audits/p0_tube_probe.py"
+        ],
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "",
+        "timeout_s": 10
+      },
+      {
+        "argv": [
+          "python3",
+          "-B",
+          "morsehgp3D_v8/audits/p0_tube_probe.py",
+          "--unknown"
+        ],
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "",
+        "timeout_s": 10
+      }
+    ],
+    "result": {
+      "brute_tube_comparisons": 26008,
+      "connection_corner_checks": 1920,
+      "corner_predicates": 95040,
+      "credited_identities": 11880,
+      "exact_coefficient_checks": 3,
+      "exact_q2_site_tests": 98216,
+      "fallback_q2_pairs": 1724,
+      "full_qualification": false,
+      "gcp_used": false,
+      "indecisive_lane_runs": 3,
+      "isotropic_uncredited_witnesses": 12,
+      "lane_runs": 90,
+      "model_comparisons": 4140,
+      "negative_restriction_fixtures": 1,
+      "performance_claim": false,
+      "permutation_comparisons": 45,
+      "physical_mutants_rejected": 5,
+      "product_executed": false,
+      "q2_final_comparisons": 30,
+      "residual_pairs": 4080,
+      "scope": "integer structural filter model; bounded geometric judges; no FULL engine",
+      "separated_fixtures": 30,
+      "status": "passed_bounded_tube_model"
+    }
+  },
+  "capture_command": "python3 -B - <<'PY'\nfrom pathlib import Path\nimport subprocess,sys,hashlib,json,datetime\np=Path('morsehgp3D_v8/audits/p0_tube_probe.py');sha=lambda b:hashlib.sha256(b).hexdigest();expected='bc3c70ec93b426cd9a0ff70a25db0d2d4ebf34ad31c3c150c498ec7b13670a25'\nif sha(p.read_bytes())!=expected:raise SystemExit('source not frozen')\ncommands=[['python3','-B',str(p),'--selftest'],['python3','-B','-O',str(p),'--selftest'],['python3','-B',str(p)],['python3','-B',str(p),'--unknown']]\nrows=[]\nfor i,cmd in enumerate(commands):\n r=subprocess.run(cmd,capture_output=True,text=True,timeout=10);rows.append({'argv':cmd,'exit_code':r.returncode,'stdout':r.stdout,'stderr':r.stderr,'timeout_s':10})\n if r.returncode!=(0 if i<2 else 2) or r.stderr or (i>=2 and r.stdout):raise SystemExit('unexpected command result '+json.dumps(rows[-1]))\nif rows[0]['stdout']!=rows[1]['stdout']:raise SystemExit('optimized result mismatch')\nif sha(p.read_bytes())!=expected:raise SystemExit('source changed during tests')\ninterpreter=Path(sys.executable).resolve()\nprint(json.dumps({'tested_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'source_sha256':expected,'source_stable':True,'python_version':sys.version,'python_executable':str(interpreter),'python_executable_sha256':sha(interpreter.read_bytes()),'commands':rows,'result':json.loads(rows[0]['stdout'])},ensure_ascii=False))\nPY",
+  "source_pins": {
+    "P0_TUBES_ET_RANGS.md": "3abfadeaf78994363098451702a36f68099265cbf8424476d464c07c4953c767",
+    "p0_tube_probe.py": "bc3c70ec93b426cd9a0ff70a25db0d2d4ebf34ad31c3c150c498ec7b13670a25"
+  },
+  "read_references": [
+    {
+      "path": "morsehgp3D_v7/src/wspd/wavefront.hpp",
+      "sha256": "481a0d05da0631c71d74b52d90ea84233ad9c7624221a3783f322554fdb32063",
+      "bytes": 6557,
+      "committed_identical_at_review": true
+    },
+    {
+      "path": "morsehgp3D_v7/src/spindle/spindle.hpp",
+      "sha256": "f64af67ff1b6aa7a70f10e410bd53841600b44722b7d035fe86b51c25b808577",
+      "bytes": 9887,
+      "committed_identical_at_review": true
+    },
+    {
+      "path": "morsehgp3D_v7/src/lanes/sector_kill.hpp",
+      "sha256": "4742ccccbcfdec847ea2e6bdded9f73b78d62e32585058b09d4b45b5951b7e06",
+      "bytes": 14129,
+      "committed_identical_at_review": true
+    },
+    {
+      "path": "morsehgp3D_v7/audits/FRONT_ET_TEMOINS_COURANT.md",
+      "sha256": "3fb7202d0d56720ac8325d46473eb86d329669b27dff8a51fd9ead8afb4dde08",
+      "bytes": 4791,
+      "committed_identical_at_review": true
+    },
+    {
+      "path": "morsehgp3D_v8/docs/PLAN_DE_REFONTE.md",
+      "sha256": "732b44acb4a44c11f4bdcf1209b2d8f4fd9ac9e3d9178b6e739c371f043f70b1",
+      "bytes": 18783,
+      "committed_identical_at_review": true
+    },
+    {
+      "path": "morsehgp3D_v8/docs/VERROUS_ARCHITECTURE.md",
+      "sha256": "9eecf78a72317bed288b3c03bee4e6de67ffa47602328bf234b6746ec529f556",
+      "bytes": 15168,
+      "committed_identical_at_review": true
+    },
+    {
+      "path": "morsehgp3D_v8/src/pipeline/local_credits.hpp",
+      "sha256": "f75759fae8cf1e364d95ee07c0127d288b882a91a063ec0bbd28802a346cd80a",
+      "bytes": 5111,
+      "committed_identical_at_review": false
+    },
+    {
+      "path": "morsehgp3D_v8/src/spindle/predicates.hpp",
+      "sha256": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+      "bytes": 9194,
+      "committed_identical_at_review": false
+    },
+    {
+      "path": "morsehgp3D_v8/src/core/types.hpp",
+      "sha256": "b25f9b2b9041f4d27d9846b30a74d46981d20d71e4ef20920dd683775d411b80",
+      "bytes": 2636,
+      "committed_identical_at_review": false
+    }
+  ],
+  "counterreading": {
+    "tube_derivation_and_model": "p0_geometric_certificate",
+    "independent_proof_and_code_review": "cone_proof_review: margins, arithmetic, suffixes, dominance, hmax fixture favorable; rho domain and separate per-lane preparation clarified.",
+    "constructor_headers": "v8_p0_review plus root: favorable static owner/block predicate review, external-core ID and full-cloud residence integration conditions retained."
+  },
+  "limitations": [
+    "The same Python point spindle predicate is used for ALL-corner checks and q2 direct/fallback census; no compiled producer or independent arithmetic-width test.",
+    "Grid/sort/Q are rebuilt per lane in the model; shared preparation and class selector are proposed, not exercised.",
+    "Dominance algorithm is mathematical only, not implemented or benchmarked.",
+    "Unhelpful wide and isotropic grids are preserved; the isotropic fixture misses twelve real W4 witnesses.",
+    "No global bound over all rectangles or residual/q3/q4/census/tower cost is acquired.",
+    "Interpreter executable hash/version recorded; standard library/runtime are not a hermetic closure."
+  ],
+  "maintenance": {
+    "new_independent_files": [
+      "DIALOGUE_COURANT.md",
+      "P0_TUBES_ET_RANGS.md",
+      "p0_tube_probe.py",
+      "P0_TUBES_CHECKS.json"
+    ],
+    "constructor_reports_and_pending_ETAT_untouched": true,
+    "v7_proofs_not_copied_or_moved": true,
+    "temporary_directories_created": false,
+    "gcp_used": false
+  },
+  "publication_checks": [
+    {
+      "name": "docs",
+      "command": "python3 -B tools/check_docs.py",
+      "exit_code": 0,
+      "output": "Validated 525 active Markdown files.\n"
+    },
+    {
+      "name": "docs_optimized",
+      "command": "python3 -B -O tools/check_docs.py",
+      "exit_code": 0,
+      "output": "Validated 525 active Markdown files.\n"
+    },
+    {
+      "name": "registry",
+      "command": "python3 -B tools/check_implementation_status.py",
+      "exit_code": 0,
+      "output": "Validated 20 implementation phases and their gates.\n"
+    },
+    {
+      "name": "independent_markdown",
+      "command": "python3 -B - <<'PY'\nfrom pathlib import Path\nimport importlib.util,json\nspec=importlib.util.spec_from_file_location('doccheck','tools/check_docs.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)\np=Path('morsehgp3D_v8/audits').resolve();files=[p/'DIALOGUE_COURANT.md',p/'P0_TUBES_ET_RANGS.md'];errors=[e for f in files for e in m.validate(f)]\nprint(json.dumps({'files':len(files),'errors':errors}));raise SystemExit(bool(errors))\nPY",
+      "exit_code": 0,
+      "output": "{\"files\": 2, \"errors\": []}\n"
+    },
+    {
+      "name": "final_independent_markdown",
+      "validator": "tools/check_docs.py validate(Path), both independent notes after final edits",
+      "files": 2,
+      "errors": [],
+      "exit_code": 0
+    }
+  ],
+  "rails_bridge": {
+    "command": "python3 -B - <<'PY'\nfrom pathlib import Path\nfrom collections import Counter\nimport importlib.util,hashlib,json\np=Path('morsehgp3D_v8/audits/p0_tube_probe.py');sha=lambda b:hashlib.sha256(b).hexdigest();expected='bc3c70ec93b426cd9a0ff70a25db0d2d4ebf34ad31c3c150c498ec7b13670a25'\nif sha(p.read_bytes())!=expected:raise SystemExit('source changed')\nspec=importlib.util.spec_from_file_location('tube',p);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)\nh,r,L=8,9,150;D=48*r*L\nA=[(j*(L+1)+x,(x,4*L*j,0)) for j in range(r) for x in range(L+1)];B=[(len(A)+i,(x+D,y,z)) for i,(x,y,z) in A]\nfor s in (8,10,12):axis=m.axis_and_separation(A,B,s)\na=m.tube_credits(A,axis,4,h);b=m.tube_credits(B,tuple(-x for x in axis),4,h)\nfor i,(x,y,z) in A:\n if a['counts'][i]!=min(h,L-x):raise SystemExit('A formula differs')\nfor i,(x,y,z) in B:\n if b['counts'][i]!=min(h,x-D):raise SystemExit('B formula differs')\nca,cb=Counter(a['counts'].values()),Counter(b['counts'].values());res=sum(na*nb for va,na in ca.items() for vb,nb in cb.items() if va+vb<h)\nif res!=r*r*h*(h+1)//2 or any(Q!=0 for model in [a,b] for Q,rows in model['cells']):raise SystemExit('residue or cell differs')\nif sha(p.read_bytes())!=expected:raise SystemExit('source changed')\nprint(json.dumps({'status':'passed_tube_rails_bridge','points':len(A)+len(B),'input_u16':all(0<=v<=65535 for _,pt in A+B for v in pt),'s_checked':[8,10,12],'lane':4,'h':h,'width_factor':4,'cells_per_factor':[len(a['cells']),len(b['cells'])],'credits_compared_to_proved_formula':len(A)+len(B),'total_cross_pairs':len(A)*len(B),'residual_by_credit_classes':res,'model_sweep_comparisons':a['comparisons']+b['comparisons'],'source_sha256':expected,'rails_note_sha256':sha(Path('audits/morsehgp3D_v8_complementaire/P0_RAILS.md').read_bytes()),'scope':'Execute bounded tube model and compare to proved rail credits; aggregate residue without pair expansion; no exhaustive 2718-site geometric census, C++, FULL or timing claim'},sort_keys=True))\nPY",
+    "exit_code": 0,
+    "output": "{\"cells_per_factor\": [9, 9], \"credits_compared_to_proved_formula\": 2718, \"h\": 8, \"input_u16\": true, \"lane\": 4, \"model_sweep_comparisons\": 5418, \"points\": 2718, \"rails_note_sha256\": \"5dbaba8078953def4baa42791835de86e14726dab519e678727554697825f52a\", \"residual_by_credit_classes\": 2916, \"s_checked\": [8, 10, 12], \"scope\": \"Execute bounded tube model and compare to proved rail credits; aggregate residue without pair expansion; no exhaustive 2718-site geometric census, C++, FULL or timing claim\", \"source_sha256\": \"bc3c70ec93b426cd9a0ff70a25db0d2d4ebf34ad31c3c150c498ec7b13670a25\", \"status\": \"passed_tube_rails_bridge\", \"total_cross_pairs\": 1846881, \"width_factor\": 4}\n",
+    "result": {
+      "cells_per_factor": [
+        9,
+        9
+      ],
+      "credits_compared_to_proved_formula": 2718,
+      "h": 8,
+      "input_u16": true,
+      "lane": 4,
+      "model_sweep_comparisons": 5418,
+      "points": 2718,
+      "rails_note_sha256": "5dbaba8078953def4baa42791835de86e14726dab519e678727554697825f52a",
+      "residual_by_credit_classes": 2916,
+      "s_checked": [
+        8,
+        10,
+        12
+      ],
+      "scope": "Execute bounded tube model and compare to proved rail credits; aggregate residue without pair expansion; no exhaustive 2718-site geometric census, C++, FULL or timing claim",
+      "source_sha256": "bc3c70ec93b426cd9a0ff70a25db0d2d4ebf34ad31c3c150c498ec7b13670a25",
+      "status": "passed_tube_rails_bridge",
+      "total_cross_pairs": 1846881,
+      "width_factor": 4
+    }
+  },
+  "publication_reservation": {
+    "observed_empty_index_on": "e409aa46aa71915d5afe1d70d032dda6c93e6727",
+    "paths": [
+      "morsehgp3D_v8/audits/DIALOGUE_COURANT.md",
+      "morsehgp3D_v8/audits/P0_TUBES_ET_RANGS.md",
+      "morsehgp3D_v8/audits/p0_tube_probe.py",
+      "morsehgp3D_v8/audits/P0_TUBES_CHECKS.json"
+    ],
+    "release": "automatic at publication commit",
+    "scope": "four independent audit files only; constructor ETAT and source files excluded"
+  }
+}
