@@ -1,8 +1,34 @@
 # Fausses pistes et simplifications refusées
 
-13 septembre 2026. Mémoire courte de l'audit ; ce fichier n'introduit
-aucun résultat moteur v8. Les sources et contre-fixtures complètes sont
-dans les rapports liés.
+13 septembre 2026. Mémoire courte de l'audit et de la première tranche P0.
+Les sources et contre-fixtures complètes sont dans les rapports liés.
+
+## Constats exécutés dans la première brique P0
+
+- Un pool global ne couvre pas toutes les régions utiles : sur les rails
+  q4/n2718, il laisse 1 846 881 paires ; blocs et tubes en laissent 2 916.
+  Le pool reste pertinent pour certains rectangles q2, pas comme réponse unique.
+- Un préfiltre en quelques millisecondes ne règle pas le coût des nappes :
+  les trois méthodes gardent 256 millions de paires à n32k. Raffiner le
+  produit ou employer un autre certificat, sans annoncer le carré supprimé.
+- Les tubes ne dominent pas les blocs en volume résiduel ; les blocs ne
+  dominent pas les tubes en temps de préparation. Choisir sur le coût total,
+  pas sur l'un de ces deux chiffres isolés.
+- Ne pas confondre D≥10R et d²≥25 diam² lorsque d=2(cB−cA) : il faut le
+  facteur 100. Une consigne erronée a été corrigée avant codage ; une
+  fixture permanente expose le faux témoin q4 que donnerait 25.
+- Un shared_ptr vers const ne rend pas immuable une copie mutable de
+  l'objet : interdire les copies/déplacements/affectations du propriétaire
+  lui-même. La contre-fixture de réaffectation perdait trois paires q2.
+- Une ligne JSON réussie n'est pas un reçu conforme : la confronter à la
+  commande, garder les sorties brutes en échec et vérifier la stabilité
+  du binaire et des sources avant de fermer la campagne.
+
+Voir les [preuves et mesures](../receipts/p0_local_credits_20260913/README.md).
+Les méthodes explorées restent des variantes utiles du même module,
+pas trois copies concurrentes d'un moteur FULL.
+
+## Leçons conservées de l'audit
 
 | Piste | Pourquoi elle ne suffit pas ou échoue | Remplacement proposé |
 | --- | --- | --- |
@@ -39,6 +65,7 @@ Références : [audit WSPD](../audits/WSPD_Q2_Q3_Q4.md).
 | Compiler CUDA prouve l'exécution GPU | Les dernières tentatives de terminal n'ont exécuté aucun kernel | Gate réelle sur carte puis chaîne complète |
 | Un même digest suffit à certifier tous les parents | Des erreurs locales peuvent être masquées par une normalisation finale | Comparaison physique avant normalisation, oracles et mutants |
 | Un propriétaire immuable valide toute extraction adoptée | Il peut conserver fidèlement un certificat forgé ou des vues empruntées | Factory qualifiée avec provenance et durée de vie réelles |
+| Déplacer un vecteur suffit à rendre ses coordonnées immuables | Les pointeurs mutables vers son tampon survivent au déplacement | Copie privée à la frontière du propriétaire, ensuite partage sans mutation |
 | Réutiliser des marques simplement bien formées | Elles peuvent désigner une autre histoire/composante vivante | Appartenance certifiée avant réemploi |
 | Supprimer les contrôles pour tenir le temps | Transforme un gain supposé en perte du contrat | Certifier une fois, réutiliser la preuve compacte |
 

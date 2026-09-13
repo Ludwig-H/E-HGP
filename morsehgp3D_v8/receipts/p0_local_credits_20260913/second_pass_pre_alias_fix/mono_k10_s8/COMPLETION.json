@@ -1,0 +1,20 @@
+{
+  "status": "completed",
+  "runs": 243,
+  "attempts": 243,
+  "finished_utc": "2026-09-13T18:01:47.413220+00:00",
+  "source_hashes_unchanged": true,
+  "probe_hash_unchanged": true,
+  "source_sha256_closing": {
+    "morsehgp3D_v8/CMakeLists.txt": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0",
+    "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+    "morsehgp3D_v8/src/pipeline/local_credits.hpp": "f6c89476f959c74dbaae1b2e52b3319dd46f863299fcfd7453bee5ebd42360a0",
+    "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c",
+    "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+    "morsehgp3D_v8/src/pipeline/local_credits.cpp": "b8a7eef8ca112ed0921772e4a7d380d802f479814ca686da8a1a856647a626c6",
+    "morsehgp3D_v8/bench/p0_probe.cpp": "8d0a471fcab21758d38e553ce18ea977a6774f63376218288c8da0e31a411a94",
+    "morsehgp3D_v8/bench/run_p0_matrix.py": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715"
+  },
+  "probe_sha256_closing": "fbbd027269c88a20bd24ae8edf15f705b9a1fac3f094b377a752918eef54d0a0",
+  "error": ""
+}

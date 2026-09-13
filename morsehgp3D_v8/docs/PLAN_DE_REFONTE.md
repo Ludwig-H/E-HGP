@@ -1,7 +1,9 @@
 # Plan de refonte : moins de travail, puis davantage de parallélisme
 
-13 septembre 2026. Propositions issues de l'audit, **pas implémentations v8
-validées**. Le [rapport de synthèse](AUDIT_V7_SYNTHESE.md) situe les mesures.
+13 septembre 2026. Plan issu de l'audit ; une première brique P0 est
+maintenant implémentée et testée, pas la chaîne complète. Le
+[rapport de synthèse](AUDIT_V7_SYNTHESE.md) situe les mesures historiques ;
+les [mesures P0](../receipts/p0_local_credits_20260913/README.md) sont propres à la v8.
 L'ordre demandé reste mono-thread, multi-CPU local, puis GPU G4 SPOT.
 
 ## Priorité P0 — supprimer la préparation quadratique des témoins locaux
@@ -62,7 +64,38 @@ et l'exhaustif borné un juge différentiel ; ni l'un ni l'autre ne doit
 réintroduire un histogramme quadratique systématique sur les gros facteurs.
 Le cadrage de l'API et les petites fixtures FULL ci-dessous soutiennent
 ce chantier ; ils ne le repoussent pas derrière un port général de la v7.
-P0 reste **ouverte, sans solution finale choisie ni gain mesuré en v8**.
+P0 reste **ouverte, sans solution finale choisie**. Première tranche
+réalisée : [Pool/DualBlocks/Tubes](P0_CREDITS_LOCAUX.md), oracles C++
+indépendants, huit CTests Release/sanitizers et mesures mono 8k/16k/32k.
+La préparation des tubes évite le carré local obligatoire ; les résidus
+et le coût aval ne sont pas résolus. Priorité suivante : partager la
+préparation entre voies et rectangles, puis traiter le résidu des nappes
+par une couverture raffinée, sans recopier les tableaux à chaque enfant.
+Le census exact minimal doit juger la suite, pas seulement compter M.
+
+Deux nouveaux résultats de l'auditeur précisent ce prochain choix :
+sur ses [rangées transverses](../../audits/morsehgp3D_v8_complementaire/P0_RESIDU_TRANSVERSE.md),
+les crédits universels parfaits sont tous nuls mais seules 11m−30 paires
+q2 sur m² restent sous le seuil 10, pour m>5. Le raffinement doit donc
+agir sur les produits ou la profondeur, pas seulement rechercher davantage
+de témoins universels. Sur sa
+[tige avec témoins en bout](../../audits/morsehgp3D_v8_complementaire/P0_ORDRE_TEMOINS.md),
+changer l'ordre de visite réduit fortement les tâches Dual à comptes
+inchangés. Une priorité par projection vers le facteur opposé mérite un
+différentiel tous axes et tous régimes ; cette optimisation n'est pas
+encore intégrée. Ne pas confondre l'ordonnancement des témoins avec le
+préchargement de leurs crédits, qui exigerait une disjonction.
+
+Le second auditeur propose désormais des
+[sous-rectangles couvrants et des groupes de témoins](../audits/P0_SOUS_RECTANGLES_ET_GROUPES.md).
+Son prototype q2 réduit le résidu transverse n512 de 65 536 à 4 032
+candidates, avant les 2 786 paires réellement sous seuil ; ce n'est pas
+encore une intégration au produit. Préfixes/suffixes donnent les boîtes
+des queues sans rescanner leurs points. Pour q3/q4, son certificat collectif
+garantit au moins un intérieur par groupe, sans exiger le même témoin
+dans toutes les boules. Les groupes doivent avoir des IDs disjoints pour
+additionner leurs crédits. Comparer ces certificats après partage des
+préparations ; ne pas transférer les résultats du prototype au moteur v8.
 
 Les [consignes au futur développeur](VERROUS_ARCHITECTURE.md) détaillent
 les cinq verrous suivants : recherches de témoins répétées, interactions

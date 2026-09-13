@@ -1,7 +1,51 @@
-# Passation v8 — audit d'ouverture
+# Passation v8 — première tranche P0 implémentée
 
-13 septembre 2026. Cadre : `exploration_v8_hors_registre`, `backend=none`,
-`quantized_u16_input_only`, `audit_v7_math_and_architecture`, `not_claimed`.
+13 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
+`backend=cpu_reference`, `quantized_u16_input_only`,
+`implementation_v8_p0`, `not_claimed`. Aucun contrat de tour n'est encore acquis.
+
+## À reprendre maintenant
+
+La bibliothèque `mhgp8_p0`, ses deux gates C++ et sa sonde sont implémentées.
+Pool/DualBlocks/Tubes produisent des crédits sûrs et un résidu compact
+sur un seul rectangle séparé. Huit CTests passent en Release GCC et en
+Debug Clang ASan/UBSan ; 729 mesures mono sont conservées avec sources,
+commandes, entrée et compteurs. Voir le
+[contrat](docs/P0_CREDITS_LOCAUX.md) et les
+[résultats](receipts/p0_local_credits_20260913/README.md).
+
+Trois défauts d'audit sont corrigés avant livraison : le propriétaire
+n'est plus copiable/réaffectable derrière un plan, ses coordonnées sont
+copiées dans un stockage privé sans alias mutable hérité, et les reçus sont
+confrontés strictement aux commandes avec sorties brutes et hashes de
+fermeture. La première capture, antérieure aux correctifs, reste dans
+`first_pass_pre_owner_fix/`, la deuxième dans `second_pass_pre_alias_fix/` ;
+seules les nouvelles captures r3, copie des coordonnées incluse, font autorité.
+
+La préparation quadratique systématique a une alternative effective :
+les tubes coûtent O(m log m) par facteur. Mais **ni cette borne locale,
+ni les petites latences ne ferment P0**. Les nappes gardent toutes les
+paires ; sur les grilles q3/q4, les tubes sont rapides mais créditent
+moins que DualBlocks. Le pool global peut rater les régions utiles :
+contre-fixture des rails à 2 718 sites, q4, 1 846 881 paires contre 2 916
+pour DualBlocks et Tubes. Ne pas généraliser un gagnant unique.
+
+Suite prioritaire : partager le tri des tubes entre voies, partager la
+validation du nuage, puis raffiner les produits résiduels difficiles en
+préservant couverture et IDs. Il faut tester notamment les nappes, où
+l'universalité sur toute la boîte opposée est trop restrictive. Une
+combinaison de crédits utilise leur maximum, jamais leur somme sans
+disjonction. Le cœur n'a pas encore ses IDs exportés : ne pas le recompter
+implicitement dans le census. Mesurer ensuite le consommateur exact q2
+minimal avant d'étendre census/FULL et la parallélisation.
+
+Le vrai constructeur WSPD et sa comparaison s8/10/12, les voies complètes
+q3/q4, census, parents et tour FULL restent à implémenter. Les benchmarks
+actuels n'effectuent pas ce travail. Les builds v8 datés du 13 septembre
+et les reçus sont épinglés. Aucun statut formel ni fichier v6/v7 modifié
+par cette tranche ; aucun GPU/GCP utilisé.
+
+## Historique de l'audit d'ouverture
 
 La demande remplace l'optimisation incrémentale v7 par un audit complet
 avant reconstruction. La base publiée examinée est main `dc57ffd5`.

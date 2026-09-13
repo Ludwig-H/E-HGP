@@ -1,0 +1,230 @@
+{
+  "schema": "mhgp8_p0_qualification_v2",
+  "recorded_utc": "2026-09-13 18:08:50 UTC",
+  "scope": "single separated rectangle credits, not WSPD producer or HGP FULL",
+  "phase": "exploration_v8_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "implementation_v8_p0",
+  "public_status": "not_claimed",
+  "gcp_used": false,
+  "base_commit": "27ff2098",
+  "qualification_revision": "r2: immutable owner and hardened campaign receipts",
+  "code_written_from_scratch": true,
+  "independent_sources": [
+    "morsehgp3D_v8/audits/P0_TUBES_ET_RANGS.md",
+    "morsehgp3D_v8/audits/P0_OWNER_CHECKS.json",
+    "audits/morsehgp3D_v8_complementaire/P0_RAILS.md",
+    "audits/morsehgp3D_v8_complementaire/P0_RESIDU_TRANSVERSE.md"
+  ],
+  "release": {
+    "configure": "cmake -S morsehgp3D_v8 -B build/v8_p0_r2_20260913 -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr",
+    "build": "cmake --build build/v8_p0_r2_20260913 --parallel 2",
+    "test": "ctest --test-dir build/v8_p0_r2_20260913 --output-on-failure --output-junit /workspaces/E-HGP/morsehgp3D_v8/receipts/p0_local_credits_20260913/RELEASE_TESTS.xml",
+    "compiler": "GCC 13.3.0",
+    "ctests_passed": 8,
+    "ctests_failed": 0,
+    "cpp_gates": {
+      "p0": {
+        "checks": 148546,
+        "plans": 390,
+        "rejections": 32,
+        "strict_boundary_countermodels": 3,
+        "killed_pairs": 40763,
+        "retained_pairs": 9592,
+        "credited_blocks": 605,
+        "noncredit_blocks": 1628,
+        "leaf_pairs": 2750,
+        "saturated_tasks": 220
+      },
+      "tubes": {
+        "checks": 108730,
+        "small_plans": 295,
+        "permutations": 135,
+        "geometric_rejections": 28995,
+        "retained_pairs": 8073,
+        "missed_credits": 10,
+        "countermodels": 5,
+        "fallback_cases": 3,
+        "large_rails_residual": 2916
+      }
+    }
+  },
+  "sanitizer": {
+    "configure": "cmake -S morsehgp3D_v8 -B build/v8_p0_sanitize_r2_20260913 -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug -DMHGP8_SANITIZE=ON -DBOOST_ROOT=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr",
+    "build": "cmake --build build/v8_p0_sanitize_r2_20260913 --parallel 2",
+    "test": "ctest --test-dir build/v8_p0_sanitize_r2_20260913 --output-on-failure --output-junit /workspaces/E-HGP/morsehgp3D_v8/receipts/p0_local_credits_20260913/SANITIZER_TESTS.xml",
+    "compiler": "Clang 18.1.3",
+    "sanitizers": [
+      "address",
+      "undefined"
+    ],
+    "ctests_passed": 8,
+    "ctests_failed": 0
+  },
+  "python_gates": {
+    "normal_and_optimized": true,
+    "docs_scope_checks": 27,
+    "probe_cli_cases": 118,
+    "campaign_cases": 41
+  },
+  "measurements": {
+    "campaigns": 4,
+    "completed_runs": 729,
+    "distinct_configurations": 513,
+    "source_changes_during_captures": false,
+    "candidates_expanded": false,
+    "downstream_measured": false,
+    "peak_memory_measured": false,
+    "s_parameter": "passed precondition on identical rectangles, not WSPD generation",
+    "mono_thread": true
+  },
+  "verification": [
+    {
+      "command": "python3 -B morsehgp3D_v8/bench/check_p0_campaign.py morsehgp3D_v8/receipts/p0_local_credits_20260913",
+      "observed_utc": "2026-09-13 18:08:50 UTC",
+      "expected_exit_code": 0,
+      "exit_code": 0,
+      "output": "{\n  \"status\": \"passed\",\n  \"campaigns\": 4,\n  \"measurements\": 729,\n  \"distinct_configurations\": 513,\n  \"scope\": \"p0_component_receipts\",\n  \"full_contract_qualified\": false,\n  \"gcp_used\": false\n}\n"
+    },
+    {
+      "command": "python3 -B -O morsehgp3D_v8/bench/check_p0_campaign.py morsehgp3D_v8/receipts/p0_local_credits_20260913",
+      "observed_utc": "2026-09-13 18:08:50 UTC",
+      "expected_exit_code": 0,
+      "exit_code": 0,
+      "output": "{\n  \"status\": \"passed\",\n  \"campaigns\": 4,\n  \"measurements\": 729,\n  \"distinct_configurations\": 513,\n  \"scope\": \"p0_component_receipts\",\n  \"full_contract_qualified\": false,\n  \"gcp_used\": false\n}\n"
+    },
+    {
+      "command": "build/v8_p0_r2_20260913/mhgp8_p0_gate --unknown",
+      "observed_utc": "2026-09-13 18:08:50 UTC",
+      "expected_exit_code": 2,
+      "exit_code": 2,
+      "output": "usage: mhgp8_p0_gate --selftest\n"
+    },
+    {
+      "command": "build/v8_p0_r2_20260913/mhgp8_tube_gate --unknown",
+      "observed_utc": "2026-09-13 18:08:50 UTC",
+      "expected_exit_code": 2,
+      "exit_code": 2,
+      "output": "usage: mhgp8_tube_gate --selftest\n"
+    },
+    {
+      "command": "python3 -B tools/check_implementation_status.py",
+      "observed_utc": "2026-09-13 18:08:50 UTC",
+      "expected_exit_code": 0,
+      "exit_code": 0,
+      "output": "Validated 20 implementation phases and their gates.\n"
+    },
+    {
+      "command": "git diff --check",
+      "observed_utc": "2026-09-13 18:08:50 UTC",
+      "expected_exit_code": 0,
+      "exit_code": 0,
+      "output": ""
+    }
+  ],
+  "source_and_test_evidence_sha256": [
+    {
+      "path": "morsehgp3D_v8/CMakeLists.txt",
+      "sha256": "a7e4d5d3e9cb0a13e40d6f277d28aa8966f8b323ed3f7157884eed2cfd1e7ba0"
+    },
+    {
+      "path": "morsehgp3D_v8/src/core/types.hpp",
+      "sha256": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b"
+    },
+    {
+      "path": "morsehgp3D_v8/src/spindle/predicates.hpp",
+      "sha256": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+    },
+    {
+      "path": "morsehgp3D_v8/src/pipeline/local_credits.hpp",
+      "sha256": "f6c89476f959c74dbaae1b2e52b3319dd46f863299fcfd7453bee5ebd42360a0"
+    },
+    {
+      "path": "morsehgp3D_v8/src/pipeline/local_credits.cpp",
+      "sha256": "b8a7eef8ca112ed0921772e4a7d380d802f479814ca686da8a1a856647a626c6"
+    },
+    {
+      "path": "morsehgp3D_v8/src/pipeline/tube_credits.hpp",
+      "sha256": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c"
+    },
+    {
+      "path": "morsehgp3D_v8/oracle/p0_oracle.hpp",
+      "sha256": "6f50a553df522c59dd047ecb82f61b70c9aff1ad3e351c243e5c1bf387c0e674"
+    },
+    {
+      "path": "morsehgp3D_v8/tests/p0_gate.cpp",
+      "sha256": "864d7db3d9f0c49184a5f4edc86d431d808edbab50c1b9797706463f88c3ae97"
+    },
+    {
+      "path": "morsehgp3D_v8/tests/tube_gate.cpp",
+      "sha256": "363c6d89c60afb9d490cf3c2f4a10e9df359f889046ac12c029a0eca9e9f349c"
+    },
+    {
+      "path": "morsehgp3D_v8/tests/docs_scope_gate.py",
+      "sha256": "3ff0e6fd3478331450925a5a15a82199982d7679ed3d23fd74892ad889bfc480"
+    },
+    {
+      "path": "morsehgp3D_v8/tests/probe_cli_gate.py",
+      "sha256": "6d614ff1c19a8129f5bb65ea15e11b0f12e171913b63ac106f9b0f1fbc9d694d"
+    },
+    {
+      "path": "morsehgp3D_v8/tests/campaign_gate.py",
+      "sha256": "a040c75f8d8457d5f45ae2e0b25308f54b43394635787596d06a79916125f321"
+    },
+    {
+      "path": "morsehgp3D_v8/bench/check_p0_campaign.py",
+      "sha256": "6fdfd8fe3b59f025eb8d999480f436895d4c0783c5bf67a2ff7c9874eb4da935"
+    },
+    {
+      "path": "morsehgp3D_v8/bench/run_p0_matrix.py",
+      "sha256": "aefd76e59574d3b663f0f6112e413f32d1393d50ddf95c1cace1541ec59a3715"
+    },
+    {
+      "path": "morsehgp3D_v8/bench/p0_probe.cpp",
+      "sha256": "8d0a471fcab21758d38e553ce18ea977a6774f63376218288c8da0e31a411a94"
+    },
+    {
+      "path": "morsehgp3D_v8/receipts/p0_local_credits_20260913/RELEASE_TESTS.xml",
+      "sha256": "e8d5d632541a72f7e030f2bccc85765000293fb4143353d46159ab216186799d"
+    },
+    {
+      "path": "morsehgp3D_v8/receipts/p0_local_credits_20260913/SANITIZER_TESTS.xml",
+      "sha256": "08a7c5b125472929c21604b6d3f34f62ba1f0f0a56ae582544b0e078b33b5880"
+    }
+  ],
+  "historical_evidence": [
+    {
+      "path": "first_pass_pre_owner_fix/README.md",
+      "status": "preserved, not qualification of corrected r2 code"
+    },
+    {
+      "path": "RELEASE_RUNNER_EDIT_RACE.xml",
+      "status": "failed: runner changed during test before source freeze"
+    },
+    {
+      "path": "SANITIZER_CACHE_TYPE_FAILURE.xml",
+      "status": "failed: compiler cache type UNINITIALIZED unrecognized; fixed with permanent test"
+    },
+    {
+      "path": "RELEASE_BEFORE_CACHE_TYPE_FIX.xml",
+      "status": "passed before final cache parser correction, not final authority"
+    }
+  ],
+  "initial_diagnostics": [
+    "Default Boost discovery failed; reused preexisting test-only Boost 1.83 headers read-only.",
+    "Third-party Boost include directory marked SYSTEM; project strict flags retained.",
+    "Test range-loop copy warning corrected before final build.",
+    "Deleted all four PreparedRectangle copy/move special members after auditor's ownership counterexample.",
+    "Receipt protocol v2 checks requested tuples, raw bytes and changing executables.",
+    "No VM created or started; no GCP package installation."
+  ],
+  "open_items": [
+    "shared cloud validation and tube preparation across lanes and WSPD rectangles",
+    "quadratic residuals on transverse sheets",
+    "worst-case DualBlocks visits and witness ordering",
+    "exact q2 consumer with core witness identities",
+    "WSPD production, full q3/q4 supports, HGP FULL tower and whole-pipeline contracts",
+    "multi-CPU and GPU qualification"
+  ]
+}

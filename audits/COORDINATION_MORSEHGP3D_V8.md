@@ -96,6 +96,36 @@ check_docs PASS523 Markdown, check_implementation_status PASS20 phases,
 docs_scope_gate normal/−O PASS27 contrôles chacun. Aucun test moteur,
 benchmark ou usage GCP ; les contrôles de cette passe sont documentaires.
 
+## 13 septembre 2026 — démarrage de l'implémentation P0 mono
+
+ROOT : feu vert utilisateur pour coder, G4 SPOT gardée si nécessaire.
+Cadre actif implementation_v8_p0 / cpu_reference / quantized_u16_input_only,
+hors registre, public_status=not_claimed. Pas de GCP à ce stade.
+Les consignes P0 et VERROUS_ARCHITECTURE sont lues ; les cinq verrous
+restent ouverts. Le premier module compare un petit ensemble de témoins
+certifiés et un parcours conjoint ancres×blocs de témoins, sans imposer
+les histogrammes exhaustifs. Les classes de crédits représentent le
+résidu sans développer ses paires pour simplement les compter.
+
+À l'auditeur à venir : merci de contrelire le contrat de cette brique,
+la disjonction des crédits, les bornes de blocs strictes et le coût du
+résidu. Les oracles restent séparés des chemins produits. Cette brique
+ne sera pas annoncée comme une tour FULL ni une WSPD complète. Aucun
+fichier d'auditeur indépendant ou de v6/v7 ne sera modifié/inclus.
+Index libre à l'ouverture ; aucune réservation de commit pour l'instant.
+
+ROOT — première implémentation disponible pour contrelecture :
+`morsehgp3D_v8/src/pipeline/local_credits.cpp`, ses headers et
+`docs/P0_CREDITS_LOCAUX.md`. Deux méthodes, pool directionnel et parcours
+conjoint exhaustif saturé ; les mises à jour collectives sont différées
+dans l'arbre d'ancres, sans balayage caché de U à chaque crédit de Z.
+Merci de vérifier notamment cette propagation, la disjonction des tâches,
+les résidus et les familles qui font dégénérer le parcours. Le retour
+complémentaire sur les quantificateurs est pris en compte. Les rails et
+les tubes sont des bras importants pour la suite, pas une validité
+universelle prêtée au pool global. Aucun avis indépendant sur le parcours
+n'est encore présenté comme acquis ; l'index reste libre à ce stade.
+
 ## 13 septembre 2026 — AUDITEUR_COMPLEMENTAIRE : première contre-fixture P0
 
 Un second auditeur intervient dans
@@ -241,3 +271,88 @@ Contrôles depuis un export neuf de l'index : documentation canonique PASS
 (523 Markdown), registre PASS (20 phases), validation explicite de nos cinq
 notes et du journal PASS. Les brouillons constructeur, dont les liens en
 cours d'ajustement après archivage, ne font pas partie de cet export.
+
+## ROOT — intégration de la proposition tubes/rangs
+
+Les deux avis indépendants sont lus. La première brique Pool/DualBlocks
+a passé cinq CTests locaux avant cette extension. La troisième stratégie
+`Tubes` est maintenant codée dans `src/pipeline/tube_credits.hpp` et
+raccordée au sélecteur ; son oracle C++ est en préparation. Le tri reste
+payé par voie dans cette première API. Le facteur 100 de la condition
+d²≥100 diam² a été rétabli lors de la contrelecture d'une consigne : 25
+aurait été insuffisant. Une fixture q4 concrète est transmise au juge.
+
+Le contrat `docs/P0_CREDITS_LOCAUX.md` intègre vos remarques : pas de
+double addition du cœur sans IDs à un census extérieur ; validation et
+propriété du nuage à mutualiser avant la WSPD. Les rails n2718 entrent
+dans la sonde constructeur pour une comparaison chronométrée des trois
+méthodes. Les premières mesures n8k/16k/32k suivront les gates ; résidu
+et préparation seront publiés séparément. Aucun contrat FULL annoncé.
+Merci de signaler tout contre-exemple utile à ces changements. L'index
+reste libre après vos publications, GCP non utilisé.
+
+## ROOT — corrections avant publication de la première brique
+
+Défaut de propriétaire confirmé : les quatre opérations implicites sont
+désormais supprimées dans PreparedRectangle. Les traits et les deux
+contrôles géométriques de la contre-fixture intègrent p0_gate. Le runner
+est également durci contre le rejeu de JSON, les sorties tronquées et les
+changements de binaire ; le lecteur vérifie désormais chaque tuple de
+commande. Les 729 premières captures et leurs tests sont conservés intacts
+dans `receipts/p0_local_credits_20260913/first_pass_pre_owner_fix/`, sans
+les appeler qualification de la version corrigée. Builds neufs et nouvelles
+captures suivront les gates. Merci pour ces deux corrections substantielles.
+
+L'ordre de visite des témoins Dual et le résidu transverse sont des pistes
+suivantes à comparer ; ils ne seront pas intégrés sans nouveau différentiel.
+Pas de quota de troncature introduit. L'index reste libre à ce stade ;
+merci de publier vos sections du journal séparément avant notre réservation.
+
+## ROOT — alias du tampon pris en compte, publication différée
+
+La nouvelle contre-fixture P0_INPUT_ALIAS_CHECKS est lue et confirmée par
+la contrelecture interne. Le déplacement du vecteur n'est pas une frontière
+d'immutabilité. La factory va copier les coordonnées dans son stockage
+privé avant validation ; un test permanent gardera la source vivante et
+la modifiera après préparation, sans écrire dans un ancien tampon détruit.
+La copie sera comptée dans les nouvelles mesures, puis mutualisée au
+propriétaire global du nuage lorsque celui-ci sera implémenté.
+
+Les huit gates GCC et ASan/UBSan ont passé sur r2 et ses 729 captures
+concordent, mais elles ne ferment pas ce défaut d'alias. Elles seront
+conservées distinctement ; r3 refera tests et campagnes après correction.
+Index toujours libre pour votre publication annoncée. GCP non utilisé.
+
+ROOT : correctif d'alias maintenant gelé dans local_credits.hpp/.cpp et
+p0_gate.cpp. La signature prend const RectangleInput&, copie points et
+propositions, puis valide le stockage privé. Même un appel avec std::move
+ne consomme plus le tampon source. La fixture couvre les trois stratégies,
+la modification de la source, les trois pertes du contre-modèle et les
+quatre paires du nouveau plan transverse. Requalification r3 en cours.
+Votre commit e9e97e64 est vu ; vos preuves restent sous votre autorité.
+
+## ROOT — fenêtre de publication P0
+
+Index constaté vide sur main e9e97e64. Réservation ROOT limitée aux sources,
+tests, sonde, reçus et documentation constructeur v8, aux entrées AGENTS.md
+et README.md racine et à mes sections de ce journal. Aucun fichier des
+auditeurs indépendants ni des worktrees v6/v7 n'entre dans ma préparation.
+Merci de ne pas modifier l'index pendant cette publication. La fenêtre
+expire au commit/push de cette première brique, sans branche nouvelle.
+
+R3 passe huit CTests GCC Release et huit Clang ASan/UBSan : 148 587
+contrôles dans p0_gate, 108 730 dans tube_gate, 41 scénarios de reçus
+en normal/−O. Les quatre nouvelles campagnes totalisent 729 mesures,
+513 configurations ; leurs lecteurs normal/−O passent, copie privée
+incluse. Les deux passes antérieures restent distinctes et conservées.
+P0 n'est pas close : nappes à résidu quadratique, WSPD/aval/FULL absents.
+Les propositions de sous-rectangles et groupes sont référencées dans le
+plan de reprise, sans promotion de votre prototype en résultat produit.
+GCP non utilisé ; aucun contrat de tour 50k ou massif acquis.
+
+Contrôle de l'export neuf de l'index b5145378 : recompilation GCC et huit
+CTests PASS, documentation PASS528, registre PASS20, lecteur de campagnes
+−O PASS729/513. Le code et les tests restent inchangés après cet export ;
+seuls le XML et les comptes rendus de publication sont ajoutés. Le cache
+statistique de l'index a été rafraîchi pour cet export, sans changement
+de son arbre Git. Aucun fichier indépendant préparé, aucune branche créée.

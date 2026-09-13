@@ -1,0 +1,54 @@
+cmake_minimum_required(VERSION 3.20)
+project(morsehgp3D_v8 LANGUAGES CXX)
+set(CMAKE_CXX_EXTENSIONS OFF)
+if(POLICY CMP0144)
+  cmake_policy(SET CMP0144 NEW)
+endif()
+
+include(CTest)
+option(MHGP8_SANITIZE "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
+
+add_library(mhgp8_p0 STATIC src/pipeline/local_credits.cpp)
+target_include_directories(mhgp8_p0 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
+target_compile_features(mhgp8_p0 PUBLIC cxx_std_20)
+set_target_properties(mhgp8_p0 PROPERTIES CXX_EXTENSIONS OFF)
+target_compile_options(mhgp8_p0 PUBLIC -Wall -Wextra -Wpedantic -Werror)
+if(MHGP8_SANITIZE)
+  target_compile_options(mhgp8_p0 PUBLIC -fsanitize=address,undefined -fno-omit-frame-pointer)
+  target_link_options(mhgp8_p0 PUBLIC -fsanitize=address,undefined)
+endif()
+
+add_executable(mhgp8_p0_probe bench/p0_probe.cpp)
+target_link_libraries(mhgp8_p0_probe PRIVATE mhgp8_p0)
+
+if(BUILD_TESTING)
+  # Boost arbitrary precision is used only by the bounded independent judge.
+  find_package(Boost REQUIRED)
+  add_executable(mhgp8_p0_gate tests/p0_gate.cpp)
+  target_include_directories(mhgp8_p0_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  target_include_directories(mhgp8_p0_gate SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
+  target_link_libraries(mhgp8_p0_gate PRIVATE mhgp8_p0)
+  add_test(NAME mhgp8_p0_gate COMMAND mhgp8_p0_gate --selftest)
+  add_executable(mhgp8_tube_gate tests/tube_gate.cpp)
+  target_include_directories(mhgp8_tube_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  target_include_directories(mhgp8_tube_gate SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
+  target_link_libraries(mhgp8_tube_gate PRIVATE mhgp8_p0)
+  add_test(NAME mhgp8_tube_gate COMMAND mhgp8_tube_gate --selftest)
+  find_package(Python3 COMPONENTS Interpreter REQUIRED)
+  add_test(NAME mhgp8_docs_scope COMMAND ${Python3_EXECUTABLE} -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/docs_scope_gate.py" --selftest)
+  add_test(NAME mhgp8_docs_scope_optimized COMMAND ${Python3_EXECUTABLE} -B -O
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/docs_scope_gate.py" --selftest)
+  add_test(NAME mhgp8_probe_cli COMMAND ${Python3_EXECUTABLE} -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/probe_cli_gate.py"
+    --probe $<TARGET_FILE:mhgp8_p0_probe> --selftest)
+  add_test(NAME mhgp8_probe_cli_optimized COMMAND ${Python3_EXECUTABLE} -B -O
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/probe_cli_gate.py"
+    --probe $<TARGET_FILE:mhgp8_p0_probe> --selftest)
+  add_test(NAME mhgp8_campaign_gate COMMAND ${Python3_EXECUTABLE} -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/campaign_gate.py"
+    --probe $<TARGET_FILE:mhgp8_p0_probe> --selftest)
+  add_test(NAME mhgp8_campaign_gate_optimized COMMAND ${Python3_EXECUTABLE} -B -O
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/campaign_gate.py"
+    --probe $<TARGET_FILE:mhgp8_p0_probe> --selftest)
+endif()

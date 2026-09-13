@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Linux-c++"
+	tests="8"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname="codespaces-0bcb78"
+	time="25"
+	timestamp="2026-09-13T17:58:11"
+	>
+	<testcase name="mhgp8_p0_gate" classname="mhgp8_p0_gate" time="0.647656" status="run">
+		<properties/>
+		<system-out>mhgp8_p0_gate passed checks=148546 plans=390 rejections=32 strict_mutants=3 killed_pairs=40763 retained_pairs=9592 credited_blocks=605 noncredit_blocks=1628 leaf_pairs=2750 saturated_tasks=220
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_tube_gate" classname="mhgp8_tube_gate" time="0.343132" status="run">
+		<properties/>
+		<system-out>mhgp8_tube_gate passed checks=108730 small_plans=295 permutations=135 geometric_rejections=28995 retained_pairs=8073 missed_credits=10 mutants=5 fallback_cases=3 large_rails_residual=2916
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_docs_scope" classname="mhgp8_docs_scope" time="0.381837" status="run">
+		<properties/>
+		<system-out>{"checks": 27, "independent_audits_excluded": true, "missing_link_mutants_refuted": 1, "positive_validations": 1, "recursive_directories": 3, "required_entries": 8, "scope": "documentation_only_not_an_engine_test", "status": "passed", "writes": 0}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_docs_scope_optimized" classname="mhgp8_docs_scope_optimized" time="0.398437" status="run">
+		<properties/>
+		<system-out>{"checks": 27, "independent_audits_excluded": true, "missing_link_mutants_refuted": 1, "positive_validations": 1, "recursive_directories": 3, "required_entries": 8, "scope": "documentation_only_not_an_engine_test", "status": "passed", "writes": 0}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_probe_cli" classname="mhgp8_probe_cli" time="0.26611" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 118, "scope": "p0_probe_cli"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_probe_cli_optimized" classname="mhgp8_probe_cli_optimized" time="0.277223" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 118, "scope": "p0_probe_cli"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_campaign_gate" classname="mhgp8_campaign_gate" time="11.4961" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 40, "python_optimized": false, "scope": "p0_campaign_receipt_ingestion_not_geometry"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_campaign_gate_optimized" classname="mhgp8_campaign_gate_optimized" time="11.1956" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 40, "python_optimized": true, "scope": "p0_campaign_receipt_ingestion_not_geometry"}
+</system-out>
+	</testcase>
+</testsuite>
