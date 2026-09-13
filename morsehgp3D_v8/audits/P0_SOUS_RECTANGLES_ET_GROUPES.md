@@ -579,7 +579,54 @@ de profondeur 48 propre au découpage spatial u16 de ce prototype.
 
 La sélection du facteur à partager reste une heuristique par étendue.
 Le coût des divisions et des journaux peut annuler le partage des tests ;
-aucune borne globale sous-quadratique ni clôture P0 n’en découle. Le
-prochain raccord doit comparer le census individuel et ce partage sur
-les **mêmes résidus réellement produits**, construction des index et
-sorties incluses, avant de choisir leur ordonnancement parallèle.
+aucune borne globale sous-quadratique ni clôture P0 n’en découle. La
+[comparaison C++ publiée à f4815cd4](../receipts/q2_census_20260913/README.md)
+paie les mêmes résidus, les index et les sorties. Ses conclusions de
+coût restent distinctes de ce modèle et précèdent le choix parallèle.
+
+### 9.2. Raccorder Pool seul sans reconstruire le filtre axial
+
+13 septembre, après 2e75b2f3. Les campagnes q2 comparent désormais
+trois préfiltres axiaux ; leur contrat précise que **Pool seul** n'est
+pas encore consommé. Le `CreditPlan` existant fournit pourtant déjà
+le résidu nécessaire, sans devoir produire un `AxisQ2Plan` artificiel.
+Cette adaptation reste proposée, sans mesure ni modification du moteur.
+
+Poser h=seuil−crédit_cœur. Dans `CreditPlan::group_residual`, les
+permutations A et B regroupent les crédits par valeur croissante, y
+compris la classe saturée h à la fin. Pour une ancre a de crédit c_a<h :
+
+$$\{b:c_a+c_b<h\}=\mathrm{b\_order}[0:N(c_a)],\qquad N(c)=\sum_{j=0}^{h-c-1}|B_j|.$$
+
+Les classes vides ne créent aucun trou. Les classes admises sont
+consécutives depuis zéro : **une seule plage B par ancre suffit**, avec
+les IDs originaux de l'ancre et de la permutation B. Une ancre saturée,
+un préfixe vide ou h=0 n'émet rien. Les produits sont disjoints par ancre
+et leur union égale exactement le résidu du plan, sans développer A×B.
+
+On peut même éviter un nouveau balayage B. Initialiser h bornes N à zéro ;
+pour chaque `CandidateBlock` du plan, retrouver son crédit A par
+`a_order[block.a.first]`, puis porter N[c] au maximum des `block.b.last`
+de cette classe. Les blocs groupés existants prouvent que ce maximum
+est précisément l'extrémité du préfixe pour chaque classe A présente ;
+les autres valeurs ne sont pas utilisées. Parcourir ensuite les ancres une
+fois. Depuis le plan **déjà construit**, le travail supplémentaire est
+O(|A|+D_credit), avec D_credit≤h(h+1)/2 ; l'état auxiliaire est O(h) en
+diffusion, ou O(h+|A|) en matérialisant les descripteurs. Le tri et les
+crédits du plan initial restent payés. Pour le parcours partagé, les au
+plus h préfixes distincts peuvent aussi être couverts une fois dans l'arbre
+B, puis leurs racines réutilisées pour les ancres de même crédit ; cette
+option paie O(h(1+log |B|)) en préparation et stockage sur l'arbre B
+équilibré actuel, plus toutes les tâches effectivement lancées.
+
+Un raccord propre est une surcharge q2 ou une vue résiduelle contrôlée :
+même propriétaire que l'index, voie q2, contrôles avant le retour vide.
+Le compte repart de zéro sur tous les sites. Emprunter le `CreditPlan`
+interdit son affectation, déplacement ou destruction pendant l'appel et
+ses callbacks ; garder seulement son propriétaire ne protège pas ses
+permutations. Une copie possédée paie au contraire ses tableaux.
+L'ordre par crédit peut donner des boîtes B moins serrées que l'ordre
+axial : ni baisse des visites ni gain de temps n'est présumé.
+Le test du raccord devra comparer les incidences canoniques à l'expansion
+native du plan, avec classes vides, saturation, cœur et refus de mauvais
+propriétaire/voie. L'ordre d'émission n'est pas une identité géométrique.

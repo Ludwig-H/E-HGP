@@ -1,10 +1,13 @@
 # P0 : compter des suffixes certifiés plutôt que des couples locaux
 
-13 septembre 2026. Proposition de l’auditeur indépendant, après e409aa46.
-Cadre de cette analyse : `exploration_v8_hors_registre`, `backend=none`,
+13 septembre 2026. Preuve et modèle indépendants, ouverts après e409aa46.
+Cadre initial de cette analyse : `exploration_v8_hors_registre`, `backend=none`,
 `profile=quantized_u16_input_only`, `mode=audit_v7_math_and_architecture`,
-`public_status=not_claimed`. Le constructeur développe séparément sa
-première brique P0 ; cette note ne qualifie pas ce code.
+`public_status=not_claimed`. Les tubes et leur préparation partagée sont
+désormais implémentés et qualifiés séparément dans le
+[contrat constructeur](../docs/P0_PARTAGE_ET_FILTRE_AXIAL.md). Cette note
+conserve leurs preuves sources et le modèle indépendant ; elle ne
+constitue pas une demande d'intégration encore ouverte.
 
 **Un rang projeté devient un crédit sûr si une borne transverse l’accompagne.**
 Une partition en tubes, un tri et trois balayages peuvent produire les
@@ -87,8 +90,8 @@ inclut la préparation si la largeur est choisie par une règle de coût
 constant. Chercher une largeur par tests répétés ou reconstruire plusieurs
 grilles doit être compté. Pour plusieurs grilles qui se recouvrent,
 prendre le maximum des minorants est sûr ; les additionner ne l’est pas.
-Le modèle de comparaison prépare chaque voie séparément ; le partage
-effectif du tri et de Q_C reste une décision du futur raccord C++.
+Le modèle de comparaison prépare chaque voie séparément ; le C++ partage
+désormais effectivement le tri et Q_C entre les trois voies.
 
 Sous u16, avec M=65535, on a |d_i|≤2M, |Δ|≤6M² et Q_C≤48M⁴.
 Ainsi 16Q_C et 9Δ² sont inférieurs à 2^74 : i128 suffit pour ces produits,
@@ -181,7 +184,7 @@ peuvent être héritées. Cette distinction concerne B1 et les parcours
 conjoints de P0 ; elle n’implique pas une erreur du code v7 qui refait sa
 recherche. Payer réouvertures, extractions d’IDs et éventuelles copies.
 
-Le nouveau `NoCredit` lu dans `src/spindle/predicates.hpp`, encore en préparation,
+Le `NoCredit` de `src/spindle/predicates.hpp`, désormais publié,
 est plus fort dans la direction A : il fixe un b₀ et majore H sur tout
 A×Z. Il reste donc valide en scindant A/Z avec B constant. Il ne se
 transporte pas automatiquement en scindant B si b₀ disparaît. La fixture
@@ -223,9 +226,7 @@ python3 -B morsehgp3D_v8/audits/p0_tube_probe.py --selftest
 python3 -B -O morsehgp3D_v8/audits/p0_tube_probe.py --selftest
 ```
 
-Comparer cette voie aux stratégies courantes sur les mêmes rectangles,
-avec grilles déclarées, nombre de cellules, positions de balayage, crédits,
-blocs résiduels, paires développées et coût aval. Conserver les essais
-défavorables ; ne pas imposer un repli quadratique pour achever l’histogramme
-lorsqu’un minorant suffit. Toute intégration doit requalifier la séparation,
-l’arithmétique, la sélection et les consommateurs. GCP non utilisé.
+Les comparaisons C++ et leur qualification sont maintenant suivies dans
+les documents du constructeur. La dominance reste une alternative non
+exécutée ici ; le coût aval et le partage sur toute la WSPD restent ouverts.
+Les contre-fixtures et preuves sources sont conservées. GCP non utilisé.
