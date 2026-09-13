@@ -1,10 +1,43 @@
-# Passation v8 — addition et intersection q2 qualifiées localement
+# Passation v8 — census q2 partagé
 
 13 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`. Aucun contrat de tour n'est encore acquis.
 
 ## À reprendre maintenant
+
+La quatrième tranche implémente le [census q2](docs/P0_CENSUS_Q2_PARTAGE.md)
+sur les résidus compacts. Le parcours partagé emploie les échappements
+DFS proposés par l'auditeur : compte uniforme et curseur, sans arena de
+continuations. Il est comparé au parcours individuel sur le même index de
+tous les sites. La seconde collecte émet réellement intérieurs, coquille
+et support/clé entière ; son temps et son callback sont inclus. Le gate
+géométrique passe 277 cas ; les 31 CTests Release/ASan/UBSan et les lecteurs
+normal/−O passent. Les [204 mesures](receipts/q2_census_20260913/README.md)
+ferment quatre campagnes, avec 164 configurations distinctes. Les builds
+`v8_census_20260913` et `v8_census_sanitize_20260913` sont épinglés.
+
+Résultat : l'intersection paie son coût sur les grilles (environ 131 ms
+à n32k/K10 avec census individuel, contre 3,74–3,79 s après Additive seul).
+Sur nappes32k, le census partagé réduit les visites mais reste plus lent.
+À 50k/K10, individuel après intersection : 176–186 ms sur grilles,
+4,05–4,09 s sur nappes ; K5 sur nappes reste à environ 1,55 s. Ce ne sont
+pas des tours FULL. Les doublements 8k/16k/32k sont inférieurs à ×4
+dans ces familles ; aucune borne globale n'en découle.
+
+Suite mono bornée : préparer les constantes de bornes `(a,B)` une fois
+par tâche, vérifier les mêmes décisions/visites/sorties puis mesurer le
+temps complet. Éviter de choisir automatiquement Shared sur les petits
+résidus. Le coût Pool seul doit encore être comparé via une interface de
+résidu non liée à l'axe. Ne pas prolonger ces variantes au détriment du
+propriétaire global WSPD et de la tranche q3/q4/FULL minimale.
+
+La déduplication globale des boules, q3/q4, le partage du propriétaire
+sur une vraie WSPD et les parents FULL restent distincts. Ne pas reprendre
+un compte saturé à un seuil supérieur comme s'il était exact. L'ancien
+parcours à listes n'est pas conservé comme moteur parallèle. GCP non utilisé.
+
+## Troisième tranche publiée à f5430f57
 
 La troisième tranche ajoute le mode `Additive`, son intersection intégrée
 avec un plan local q2 et la suppression des allocations actives aussitôt

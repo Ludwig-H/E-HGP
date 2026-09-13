@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — crédits partagés, addition et intersection q2
+# Morse HGP 3D v8 — crédits et census q2 partagés
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -24,11 +24,40 @@ rectangle séparé : pool directionnel, parcours conjoint de blocs et tubes
 entre q2/q3/q4 et ajoute un filtre q2 par colonnes exactes et index B.
 Le mode additif cumule les témoins disjoints de ces colonnes ; une
 intersection facultative conserve les rejets d'un plan local q2.
-Les résidus sont conservés en sous-produits ou plages compacts.
-Ce n'est encore ni une WSPD complète, ni un census général, ni une tour
-FULL. Les mesures historiques citées restent v7.
+Les résidus sont conservés en sous-produits ou plages compacts. Un nouveau
+census q2 interroge tous les sites, compte par paire ou par groupes, puis
+émet les supports sous le seuil avec leurs IDs intérieurs et de coquille.
+Ce n'est encore ni une WSPD complète, ni un census q3/q4, ni une tour FULL.
+Les mesures historiques citées restent v7.
 
 ## État exécutable
+
+La quatrième tranche implémente le [census q2 partagé](docs/P0_CENSUS_Q2_PARTAGE.md).
+L'état de recherche tient dans un groupe B, un compte et un curseur de
+l'index global ; aucune liste de continuation n'est recopiée ou allouée
+par requête. Le premier gate géométrique passe 277 cas et 557 exécutions,
+avec 8 376 paires confrontées à l'oracle indépendant et 10 contre-modèles.
+Les **31 CTests passent en Release et sous Clang ASan/UBSan**. Le flux
+conserve les supports et leurs clés exactes, sans dédupliquer encore les
+boules entre supports.
+
+Les [204 mesures appariées](receipts/q2_census_20260913/README.md) paient
+maintenant génération, index, préfiltre, census, collecte et émission.
+Elles couvrent 8k/16k/32k, Kmax5/10 et s8/10/12 sur rectangles fixes,
+puis des essais de composant à 50k. Sur les grilles32k/Kmax10,
+l'intersection ∩ Pool avec census individuel prend environ 131 ms,
+contre 3,74–3,79 s après le seul filtre additif. Sur les nappes, l'addition
+réduit le coût total malgré sa sélection plus chère. Le census partagé
+gagne sur certains grands résidus mais perd après l'intersection : moins
+de visites ne suffit pas si les tests de groupes sont plus coûteux.
+
+À 50k/Kmax10, le composant individuel mesure 176–186 ms sur les grilles,
+mais 4,05–4,09 s sur les nappes. **Ni le contrat de tour à 1 s ni celui à
+100 ms n'est acquis.** La croissance mesurée est sous-quadratique dans
+ces familles seulement ; WSPD complète, q3/q4, FULL et grande échelle
+restent à qualifier. GCP non utilisé.
+
+Les paragraphes suivants décrivent les trois tranches précédentes.
 
 Vingt-six CTests locaux passent en Release GCC 13.3 et en Debug Clang 18.1
 avec ASan/UBSan. Les juges géométriques indépendants utilisent des entiers
@@ -89,6 +118,8 @@ les écraser pour poursuivre. La deuxième tranche est épinglée dans
 `build/v8_shared_axis_20260913/` et `build/v8_shared_axis_sanitize_20260913/`.
 La troisième utilise `build/v8_additive_20260913/` et
 `build/v8_additive_sanitize_20260913/`, également épinglés.
+La quatrième utilise `build/v8_census_20260913/` et
+`build/v8_census_sanitize_20260913/`, désormais épinglés.
 
 ## Commencer ici
 
@@ -117,4 +148,4 @@ multi-millions. Les optimisations privées ultérieures n'ont pas leur
 nouvelle mesure 50k. La v8 démarre sur ces constats, sans statut hérité.
 
 Entrées de suivi : [passation](PASSATION.md), [état de l'audit](audits/ETAT_COURANT.md).
-GCP non utilisé pour l'audit d'ouverture et ces trois tranches mono.
+GCP non utilisé pour l'audit d'ouverture et ces quatre tranches mono.

@@ -53,6 +53,36 @@ Voir le [contrat de cette tranche](P0_PARTAGE_ET_FILTRE_AXIAL.md).
 
 ## Leçons conservées de l'audit
 
+Le raccord census doit bloquer quatre raccourcis supplémentaires : ne
+pas prendre `NoCredit` pour un certificat d'extériorité globale ; ne pas
+chercher le maximum d'une fonction concave uniquement aux coins ; ne pas
+supprimer les égalités pendant la collecte de coquille ; ne pas redémarrer
+un parcours avec le crédit de témoins qu'il rencontrera de nouveau.
+Une clé exacte commune à deux diamètres identifie une boule, mais ne rend
+pas son flux de supports automatiquement dédupliqué. Ces obligations sont
+expliquées dans le [contrat census](P0_CENSUS_Q2_PARTAGE.md).
+
+La première écriture du census partagé utilisait un arena de listes
+persistantes, recyclé entre enfants. Il est supprimé avant qualification :
+l'ordre Z fixe permet de représenter exactement le même travail restant
+avec un seul curseur et les échappements de l'index. Les listes auraient
+ajouté des écritures et de la gestion d'état inutiles. Aucun gain temporel
+par rapport à cette écriture intermédiaire non mesurée n'est revendiqué.
+
+Les mesures du census confirment une autre limite : partager moins de
+visites ne veut pas dire aller plus vite. Après l'intersection des résidus,
+les tests sur groupes et la couverture des fragments annulent ici l'économie.
+Shared reste utile sur certaines grilles moins filtrées ; il n'est pas un
+mode gagnant universel. Le coût complet, et non la seule taille du résidu
+ou le nombre de visites, gouverne le choix.
+
+Une fermeture échouée sans manifeste doit rester visible dans la lecture
+d'un dossier de campagnes : ne découvrir que les manifestes masquait un
+frère arrêté avant sa première mesure. Le lecteur q2 découvre désormais
+aussi fermetures et mesures, puis rejette les triplets incomplets. Une
+correction de lecteur ne doit pas réécrire les pins historiques : conserver
+le snapshot de capture et qualifier séparément le contrôle renforcé.
+
 Troisième tranche : additionner les colonnes exactes est sûr, parce que
 leurs témoins sont disjoints hors de l'ancre. Additionner ensuite ces
 comptes à ceux de Pool/Dual/Tubes ne l'est pas : une fixture à trois sites

@@ -4,11 +4,21 @@
 consigne les obstacles discutés après l'audit et le choix de priorité P0.
 Elle complète le [plan de refonte](PLAN_DE_REFONTE.md), sans le remplacer.
 
-Cadre : `exploration_v8_hors_registre`, `backend=none`,
+Cadre de l'audit initial : `exploration_v8_hors_registre`, `backend=none`,
 `quantized_u16_input_only`, `audit_v7_math_and_architecture`,
-`public_status=not_claimed`. Aucun nouveau moteur, benchmark ou usage GCP.
+`public_status=not_claimed`. Aucun moteur ou benchmark v8 lors de cet audit.
 Les mesures restent celles des sources v7 publiées examinées par l'audit ;
 les derniers changements documentaires ne sont pas de nouvelles mesures.
+
+Suivi actuel : l'implémentation mono P0 est ouverte (`cpu_reference`,
+`implementation_v8_p0`, toujours `not_claimed`). Le
+[census q2 partagé](P0_CENSUS_Q2_PARTAGE.md) traite maintenant une partie
+de B1 : compte uniforme et curseur DFS transmis entre sous-requêtes,
+sans liste ni racine recommencée après crédit. Le coût de la couverture,
+des tests sur groupes et de la collecte reste mesuré ; cette première
+comparaison ne clôt ni B1 pour toute la WSPD ni les verrous suivants.
+Les résultats v8 sont séparés dans leurs [reçus](../receipts/q2_census_20260913/README.md).
+GCP non utilisé.
 
 ## 1. Ordre des travaux et sens de « rédhibitoire »
 

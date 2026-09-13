@@ -3,7 +3,24 @@
 13 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
-État constructeur courant, troisième tranche P0 : mode axial additif,
+État constructeur courant, quatrième tranche P0 : census q2 individuel
+et partagé, index global immuable et curseur de continuation DFS ; collecte
+séparée des IDs intérieurs/coquille. `cpu_reference`, `quantized_u16_input_only`,
+`implementation_v8_p0`, `not_claimed`. Le nouveau gate géométrique passe
+277 cas. Les 31 CTests Release et Clang ASan/UBSan passent ; les
+[204 mesures appariées](../receipts/q2_census_20260913/README.md) et leurs
+lecteurs normal/−O sont clos. L'intersection gagne sur les grilles quand
+on paie l'aval ; le partage seul ne domine pas tous les résidus. À 50k/K10,
+le composant individuel mesure 176–186 ms sur grilles et 4,05–4,09 s sur
+nappes, sans tour. Lire le
+[contrat census](../docs/P0_CENSUS_Q2_PARTAGE.md). La représentation à curseur
+reprend explicitement la preuve publiée `f47559b1` de l'auditeur, sans
+transférer ses résultats de prototype au produit. Canonisation globale,
+q3/q4, WSPD complète et FULL restent ouverts. GCP non utilisé.
+
+## Historique : troisième tranche P0 publiée à f5430f57
+
+Mode axial additif,
 intersection intégrée avec un plan local q2 et suppression des allocations
 aussitôt remplacées. `cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`, hors registre. 26 CTests Release

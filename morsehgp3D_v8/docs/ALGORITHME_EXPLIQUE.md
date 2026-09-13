@@ -1,8 +1,12 @@
 # L'algorithme entier, expliqué simplement
 
 13 septembre 2026. Ce texte décrit la cible mathématique et les mécanismes
-de la v7, puis leur organisation souhaitée en v8. Il ne décrit pas un moteur
-v8 déjà implémenté. Les détails de preuve sont dans
+de la v7, puis leur organisation souhaitée en v8. Il ne décrit pas une chaîne
+v8 complète déjà implémentée. Les briques désormais exécutables couvrent les
+[crédits locaux](P0_CREDITS_LOCAUX.md), leur préparation partagée, le
+[filtre axial additif](P0_ADDITION_ET_INTERSECTION.md) et le
+[census q2 individuel ou partagé](P0_CENSUS_Q2_PARTAGE.md), sur un rectangle.
+Les détails de preuve sont dans
 [l'audit mathématique](../audits/FONDEMENTS_ET_OBJET.md).
 
 ## 1. Ce que l'on veut obtenir

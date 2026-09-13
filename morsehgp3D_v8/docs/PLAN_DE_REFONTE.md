@@ -107,6 +107,19 @@ dans toutes les boules. Les groupes doivent avoir des IDs disjoints pour
 additionner leurs crédits. Comparer ces certificats après partage des
 préparations ; ne pas transférer les résultats du prototype au moteur v8.
 
+Après la qualification de l'addition et de l'intersection q2, le
+[census partagé](P0_CENSUS_Q2_PARTAGE.md) est maintenant implémenté et
+comparé à la recherche par paire sur les mêmes plages résiduelles. Son
+état `(ancre, groupe B, compte, curseur non consommé)` ne copie aucune
+liste de continuation. Les mesures paient l'index de tous les sites, les
+subdivisions et la collecte des IDs d'intérieur/coquille. Après intersection,
+moins de visites ne suffit pas à compenser le prix des tests de groupes.
+Prochaine économie bornée : préparer leurs constantes par tâche, puis
+comparer à coût complet, avec la référence individuelle conservée.
+Le flux conserve les supports et les clés exactes ; la comparaison à Pool
+seul, la déduplication globale, la vraie WSPD et la tranche FULL minimale
+restent les raccords suivants, sans nouvelle préparation quadratique.
+
 Les [consignes au futur développeur](VERROUS_ARCHITECTURE.md) détaillent
 les cinq verrous suivants : recherches de témoins répétées, interactions
 triangles–voisinages q3/q4, rattachements MEB, histoire/export centraux,
@@ -141,7 +154,7 @@ annoncée comme telle, jamais transformée en preuve de complétude universelle.
 | --- | --- | --- | --- |
 | Front WSPD | Descripteurs plats de rectangles, masques q, témoins identifiés | Rectangle ou sous-tâche spatiale selon coût | Redémarrer tous les parcours et recréer une équipe à chaque vague |
 | Témoins locaux, P0 | Minorants certifiés, classes de crédits et preuves de blocs | Selon l'architecture comparée, sans histogrammes complets imposés | Préparation systématique A×A et B×B |
-| q2 | Tuile de paires survivantes | Paires ou petits paquets | Sérialiser tout A×B derrière un seul worker |
+| q2 | Ancre, groupe B, compte uniforme et curseur de témoins restant | Groupes puis paires indécises | Repartir de l'index racine après crédit ou copier de longues frontières |
 | q3 | Seed canonique et plage de cover | Seed×plage de sites | Recherche complète séquentielle par seed |
 | q4 | Intervalles/racines exacts, segments identifiés | Calculs de racines puis tri/scan segmentés | Balayage mono de tous les événements d'une seed |
 | Catalogue/census | Une boule canonique, intérieur/coquille, rang partagé | Boules ou blocs de parcours | Clés, tris et validations identiques répétés |

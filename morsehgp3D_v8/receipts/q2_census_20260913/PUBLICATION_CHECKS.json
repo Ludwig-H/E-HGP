@@ -1,0 +1,152 @@
+{
+  "schema": "mhgp8_q2_census_publication_checks_v1",
+  "status": "passed",
+  "scope": "fresh_index_export_and_receipts_not_full_hgp",
+  "public_status": "not_claimed",
+  "gcp_used": false,
+  "source_base_commit": "2e75b2f3a27292858ee776e056896de8448c91e8",
+  "export_path": "/workspaces/E-HGP/build/v8_index_census_20260913.5OH9JA",
+  "test_index_entries_sha256": "463ff167a83e72a5138197de5355971fe991fcfbc89bad2ed19185785ba0bc2c",
+  "post_documentation_index_entries_sha256": "e5d140beca5147e5d743c78ab54f101cff350b32c7ea348f49f9c0fdee945588",
+  "index_hash_convention": "SHA256 of git ls-files --stage stdout; private refresh preserved entries; this publication receipt itself is excluded to avoid self-reference.",
+  "post_test_changes": [
+    "audits/COORDINATION_MORSEHGP3D_V8.md",
+    "morsehgp3D_v8/receipts/q2_census_20260913/QUALIFICATION.json"
+  ],
+  "post_test_change_scope": "Only constructor journal sections and final qualification XML/source pins refreshed. No executable, judge, fixture or capture-source changes.",
+  "candidate_blobs_sha256": {
+    "AGENTS.md": "798b0f9db37dc99af2df95836af5c641a67b7e70d21bcd27834800862c942856",
+    "audits/COORDINATION_MORSEHGP3D_V8.md": "35d52bb43ce85c70d03007fb074a859d7640e4336848aca4b1b66b0c1b6b6f9d",
+    "morsehgp3D_v8/CMakeLists.txt": "e11f2e744073e5955f55d21a9605bb5e8931bc58e2eb0d23d0e6ad33ededbac5",
+    "morsehgp3D_v8/PASSATION.md": "832b5364b4532eea72eea034f483ae29a1eade68dda2b33fc6b0db0fb8f1ab58",
+    "morsehgp3D_v8/README.md": "33f67029f3fe812fabce52b5c789333a83867a042acb43c1ba19350c25becfec",
+    "morsehgp3D_v8/audits/ETAT_COURANT.md": "3a07c249d0353c9cfdf9a5898a81027855ab2ea02feba73d50a5879ee1b4525d",
+    "morsehgp3D_v8/bench/P0_PROBE.md": "74863ebd2dbb2c172dc90dd1f9cdb8ce443c0c89429eaef59df8ea8780c94a00",
+    "morsehgp3D_v8/bench/q2_census_probe.cpp": "6367a01b1aabccb1bf648e6aca83651f285047da385875a547b4f014a3899c14",
+    "morsehgp3D_v8/bench/run_q2_census_matrix.py": "892bd3ae84b45748e8c99e65265f948382a1affce7c2d0c44abd57772be9c36e",
+    "morsehgp3D_v8/docs/ALGORITHME_EXPLIQUE.md": "d527e399ba17e0dce6b4d9f67517f94e2cb0c7346e284427b7041d9ec24eb93c",
+    "morsehgp3D_v8/docs/FAUSSES_PISTES.md": "8317f06dcf4fe1e2112b9e595485c2b03941967b9dbe00d42b95d2cd1ebd6e96",
+    "morsehgp3D_v8/docs/P0_CENSUS_Q2_PARTAGE.md": "3174d13bcef97afb6848e2b6b52d786a9c292e8375b4d6dc4024bb527be580f2",
+    "morsehgp3D_v8/docs/PLAN_DE_REFONTE.md": "302c35c0f878a185117ca01e4c464b9083a1e85ca3a0bc0f49fa157aab3aa421",
+    "morsehgp3D_v8/docs/VERROUS_ARCHITECTURE.md": "6db60100048906126ffc3a791e25cdecd6f5c9d05f6d6e95ebbdea2c80e9113a",
+    "morsehgp3D_v8/oracle/q2_census_oracle.hpp": "cc2bb6d9a4a6a796701fa1353d048b2fb09f68b579b951abd981c63d5f662b49",
+    "morsehgp3D_v8/receipts/q2_census_20260913/50k_component/COMPLETION.json": "044a281b893fd76bd7c274c78c546d0bec4b3639480a2810db5196573f800774",
+    "morsehgp3D_v8/receipts/q2_census_20260913/50k_component/MANIFEST.json": "8685f37987cd716015587c6aeef62c9b0ca221506871b87c6a1742db7598b19d",
+    "morsehgp3D_v8/receipts/q2_census_20260913/50k_component/MEASURES.jsonl": "77bc3b6a90195b555d5ad3f5f5f32dd6c5ec31d07a8758a3fc8cbd57b77a19ca",
+    "morsehgp3D_v8/receipts/q2_census_20260913/CAPTURE_RUNNER.json": "8be1dbfd786a43264137eb0f39f0f5b8b2fc7d3977de94e59d55da097ec01fb7",
+    "morsehgp3D_v8/receipts/q2_census_20260913/QUALIFICATION.json": "0992d953f731f2788674965e331e65cf8a5f39c8d2ef0e1e370188160fc32995",
+    "morsehgp3D_v8/receipts/q2_census_20260913/README.md": "87de189c74459e5b6ed980e193802786cc0a59c99bf125e8d28bede503c30722",
+    "morsehgp3D_v8/receipts/q2_census_20260913/SUMMARY.json": "958ab252847f7aa366624b82879abdc6756f853b16938ea63ed6dc541b8959c3",
+    "morsehgp3D_v8/receipts/q2_census_20260913/focus/COMPLETION.json": "60e86b80f3342a3712c41cc3c6aacb6fa6431bccff7314acc607c1a027de685b",
+    "morsehgp3D_v8/receipts/q2_census_20260913/focus/MANIFEST.json": "1c90835ad58e81fad65aa5027dd9aca5cd9f4eef3d969d197c4090ed6fe94f5c",
+    "morsehgp3D_v8/receipts/q2_census_20260913/focus/MEASURES.jsonl": "e6a6d6fec59bc388a6dd45fa3979fa8bae1106a06ad44a8945011a16aa0be726",
+    "morsehgp3D_v8/receipts/q2_census_20260913/main_matrix/COMPLETION.json": "70bc2ab1bf4bd2b1942afdb6295a6c11ca52946b96f7941e116eb8c38122ac00",
+    "morsehgp3D_v8/receipts/q2_census_20260913/main_matrix/MANIFEST.json": "463b39dfff6770724ddb2e9a798a6f05a931df1129f59ecd0c34173761bb30b7",
+    "morsehgp3D_v8/receipts/q2_census_20260913/main_matrix/MEASURES.jsonl": "21446e416a4fdb43289f1ee2647a150d2fefee2adc9eec339d4ffe8fd9e4257a",
+    "morsehgp3D_v8/receipts/q2_census_20260913/prefilter_comparison/COMPLETION.json": "7fd37fc993ce295fac672292d128ac6cdd33ab8617485cf861dfe555db47f91c",
+    "morsehgp3D_v8/receipts/q2_census_20260913/prefilter_comparison/MANIFEST.json": "acd33419e7e7e739d77971c56a9a8b029266f59a5c08cf877328ba5b6e01d581",
+    "morsehgp3D_v8/receipts/q2_census_20260913/prefilter_comparison/MEASURES.jsonl": "423bf945ff303f304dec4fba2f45afbee4ca4a41f1668e57e696e8fe664453da",
+    "morsehgp3D_v8/src/pipeline/q2_census.cpp": "3c513cc474c3d3a249779032f5cd03dac47198cf4b25d7698855bd118e0e593a",
+    "morsehgp3D_v8/src/pipeline/q2_census.hpp": "2116ac4ba0fcc896e4daa89583ecff6b32f307fcfa579121403b77b52d6b7a9e",
+    "morsehgp3D_v8/tests/q2_census_campaign_gate.py": "0c863c2ce7241fb65059897822fc6e133227756d13abae069f30d561b7c1f5c7",
+    "morsehgp3D_v8/tests/q2_census_gate.cpp": "cfb1bcd8efaa7bf00cafbacedf3879875bdf5816c506158e05e329b6101d583f",
+    "morsehgp3D_v8/tests/q2_census_probe_gate.py": "e581711753c137b2c211676f80e2160a958da41573f168859b052ef32673c36c"
+  },
+  "qualification_source_pins_checked_against_index_and_export": 46,
+  "configure_command": [
+    "cmake",
+    "-S",
+    "/workspaces/E-HGP/build/v8_index_census_20260913.5OH9JA/tree/morsehgp3D_v8",
+    "-B",
+    "/workspaces/E-HGP/build/v8_index_census_20260913.5OH9JA/build",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DBOOST_ROOT=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr"
+  ],
+  "build_command": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v8_index_census_20260913.5OH9JA/build",
+    "--parallel",
+    "2"
+  ],
+  "configure_exit_code": 0,
+  "build_exit_code": 0,
+  "ctest_command": [
+    "ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v8_index_census_20260913.5OH9JA/build",
+    "--output-on-failure",
+    "--output-junit",
+    "/workspaces/E-HGP/build/v8_index_census_20260913.5OH9JA/ctest.xml"
+  ],
+  "ctest_exit_code": 0,
+  "ctest_tests": 31,
+  "ctest_failures": 0,
+  "ctest_xml_sha256": "bb83d8231380a5ee9ff30d09afcab55048c313a94d440648408846c2269ff20f",
+  "ctest_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<testsuite name=\"Linux-c++\"\n\ttests=\"31\"\n\tfailures=\"0\"\n\tdisabled=\"0\"\n\tskipped=\"0\"\n\thostname=\"codespaces-0bcb78\"\n\ttime=\"79\"\n\ttimestamp=\"2026-09-13T20:56:44\"\n\t>\n\t<testcase name=\"mhgp8_p0_gate\" classname=\"mhgp8_p0_gate\" time=\"0.717761\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>mhgp8_p0_gate passed checks=148587 plans=390 rejections=32 strict_mutants=3 killed_pairs=40763 retained_pairs=9592 credited_blocks=605 noncredit_blocks=1628 leaf_pairs=2750 saturated_tasks=220\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_tube_gate\" classname=\"mhgp8_tube_gate\" time=\"0.360923\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>mhgp8_tube_gate passed checks=108730 small_plans=295 permutations=135 geometric_rejections=28995 retained_pairs=8073 missed_credits=10 mutants=5 fallback_cases=3 large_rails_residual=2916\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_batch_gate\" classname=\"mhgp8_batch_gate\" time=\"0.00693488\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>mhgp8_batch_gate passed checks=10872 batches=195 lane_comparisons=585 shared_preparations=27 saturated_batches=81 fallback_batches=5 rejections=3\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_axis_q2_gate\" classname=\"mhgp8_axis_q2_gate\" time=\"0.511502\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>mhgp8_axis_q2_gate passed checks=1495478 small_plans=158 exact_census_pairs=58556 rejected_pairs=14752 retained_pairs=43804 permutations=72 model_mutants=5 conservative_cases=1 invalid_inputs=5 moved_rejections=3 large_grid_points=56000 large_grid_candidates=11067600\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_axis_additive_gate\" classname=\"mhgp8_axis_additive_gate\" time=\"0.807825\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>mhgp8_axis_additive_gate passed checks=2947081 small_cases=81 checked_plans=650 census_pairs=29946 additive_prunes=572 intersection_prunes=1894 axis_queries=5569431 restriction_queries=55856 restriction_copies=15916 rejected_pairs=81918 retained_pairs=157988 core_partial=3 core_saturated=5 model_mutants=7 rejections=15 ownership_cases=2 large_points=56000 large_candidates=6759210\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_plan_assignment_gate\" classname=\"mhgp8_plan_assignment_gate\" time=\"0.00306078\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>mhgp8_plan_assignment_gate passed checks=1110 plan_allocation_failures=5 batch_allocation_failures=15 physical_comparisons=70 successful_assignments=2 self_operations=4 move_operations=4 moved_rejections=24\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_q2_census_gate\" classname=\"mhgp8_q2_census_gate\" time=\"0.0420676\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>mhgp8_q2_census_gate passed checks=186162 cases=277 runs=557 oracle_pairs=8376 oracle_sites=259780 prefilter_rejections=1501 census_rejections=4970 accepted=8828 shell_sites=51896 interior_sites=15248 uniform_credit=276 uniform_accept=144 uniform_reject=76 query_splits=5472 witness_splits=116536 split_after_credit=130 cursor_reuses=10944 cursor_advances=113941 deep_indices=3 root_savings=75 permutations=72 model_mutants=10 rejections=10\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_q2_census_probe_gate\" classname=\"mhgp8_q2_census_probe_gate\" time=\"3.11961\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"status\": \"passed\", \"invalid_cli\": 17, \"oracle_cases\": 47, \"probe_rows\": 846, \"python_optimized\": false, \"scope\": \"tiny_q2_payload_digest_oracle_not_full_hgp\"}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_q2_census_probe_gate_optimized\" classname=\"mhgp8_q2_census_probe_gate_optimized\" time=\"3.02543\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"status\": \"passed\", \"invalid_cli\": 17, \"oracle_cases\": 47, \"probe_rows\": 846, \"python_optimized\": true, \"scope\": \"tiny_q2_payload_digest_oracle_not_full_hgp\"}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_q2_census_campaign_gate\" classname=\"mhgp8_q2_census_campaign_gate\" time=\"6.51984\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"status\": \"passed\", \"genuine_rows\": 12, \"positive_reads\": 2, \"index_scan_boundary_controls\": 1, \"runner_mutants\": 15, \"initial_failure_group_controls\": 1, \"reader_mutants\": 17, \"archive_mutants\": 4, \"python_optimized\": false, \"scope\": \"q2_materialized_receipts_not_geometry_or_full\"}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_q2_census_campaign_gate_optimized\" classname=\"mhgp8_q2_census_campaign_gate_optimized\" time=\"6.53306\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"status\": \"passed\", \"genuine_rows\": 12, \"positive_reads\": 2, \"index_scan_boundary_controls\": 1, \"runner_mutants\": 15, \"initial_failure_group_controls\": 1, \"reader_mutants\": 17, \"archive_mutants\": 4, \"python_optimized\": true, \"scope\": \"q2_materialized_receipts_not_geometry_or_full\"}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_docs_scope\" classname=\"mhgp8_docs_scope\" time=\"0.371514\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"checks\": 27, \"independent_audits_excluded\": true, \"missing_link_mutants_refuted\": 1, \"positive_validations\": 1, \"recursive_directories\": 3, \"required_entries\": 8, \"scope\": \"documentation_only_not_an_engine_test\", \"status\": \"passed\", \"writes\": 0}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_docs_scope_optimized\" classname=\"mhgp8_docs_scope_optimized\" time=\"0.371259\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"checks\": 27, \"independent_audits_excluded\": true, \"missing_link_mutants_refuted\": 1, \"positive_validations\": 1, \"recursive_directories\": 3, \"required_entries\": 8, \"scope\": \"documentation_only_not_an_engine_test\", \"status\": \"passed\", \"writes\": 0}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_probe_cli\" classname=\"mhgp8_probe_cli\" time=\"0.263758\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"status\": \"passed\", \"checks\": 118, \"scope\": \"p0_probe_cli\"}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_probe_cli_optimized\" classname=\"mhgp8_probe_cli_optimized\" time=\"0.259023\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"status\": \"passed\", \"checks\": 118, \"scope\": \"p0_probe_cli\"}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_campaign_gate\" classname=\"mhgp8_campaign_gate\" time=\"11.5187\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"status\": \"passed\", \"checks\": 41, \"python_optimized\": false, \"scope\": \"p0_campaign_receipt_ingestion_not_geometry\"}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_campaign_gate_optimized\" classname=\"mhgp8_campaign_gate_optimized\" time=\"11.3561\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"status\": \"passed\", \"checks\": 41, \"python_optimized\": true, \"scope\": \"p0_campaign_receipt_ingestion_not_geometry\"}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_batch_probe_cli\" classname=\"mhgp8_batch_probe_cli\" time=\"1.03508\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"status\": \"passed\", \"checks\": 301, \"literal_checksum_plans\": 72, \"historical_recipe_differentials\": 12, \"python_optimized\": false, \"scope\": \"paired_three_lane_probe_not_full_tower\"}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_batch_probe_cli_optimized\" classname=\"mhgp8_batch_probe_cli_optimized\" time=\"0.998132\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"status\": \"passed\", \"checks\": 301, \"literal_checksum_plans\": 72, \"historical_recipe_differentials\": 12, \"python_optimized\": true, \"scope\": \"paired_three_lane_probe_not_full_tower\"}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_axis_probe_cli\" classname=\"mhgp8_axis_probe_cli\" time=\"1.3913\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"status\": \"passed\", \"checks\": 466, \"literal_checksums\": 144, \"reduced_sheet_cases\": 126, \"single_q2_controls\": 90, \"python_optimized\": false, \"scope\": \"axis_probe_receipts_and_full_sheet_formula_not_full_hgp\"}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_axis_probe_cli_optimized\" classname=\"mhgp8_axis_probe_cli_optimized\" time=\"1.33109\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"status\": \"passed\", \"checks\": 466, \"literal_checksums\": 144, \"reduced_sheet_cases\": 126, \"single_q2_controls\": 90, \"python_optimized\": true, \"scope\": \"axis_probe_receipts_and_full_sheet_formula_not_full_hgp\"}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_additive_probe_cli\" classname=\"mhgp8_additive_probe_cli\" time=\"2.58428\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"status\": \"passed\", \"checks\": 809, \"literal_checksums\": 396, \"reduced_sheet_cases\": 72, \"intersection_improvements\": 144, \"independent_axis_controls\": 198, \"python_optimized\": false, \"scope\": \"additive_probe_receipts_and_sheet_formula_not_full_hgp\"}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_additive_probe_cli_optimized\" classname=\"mhgp8_additive_probe_cli_optimized\" time=\"2.37151\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"status\": \"passed\", \"checks\": 809, \"literal_checksums\": 396, \"reduced_sheet_cases\": 72, \"intersection_improvements\": 144, \"independent_axis_controls\": 198, \"python_optimized\": true, \"scope\": \"additive_probe_receipts_and_sheet_formula_not_full_hgp\"}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_additive_campaign_gate\" classname=\"mhgp8_additive_campaign_gate\" time=\"3.96827\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"status\": \"passed\", \"genuine_campaigns\": 2, \"genuine_measurements\": 24, \"positive_reads\": 1, \"runner_mutants\": 7, \"reader_mutants\": 14, \"python_optimized\": false, \"scope\": \"additive_component_receipts_not_geometry_or_full\"}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_additive_campaign_gate_optimized\" classname=\"mhgp8_additive_campaign_gate_optimized\" time=\"3.90948\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"status\": \"passed\", \"genuine_campaigns\": 2, \"genuine_measurements\": 24, \"positive_reads\": 1, \"runner_mutants\": 7, \"reader_mutants\": 14, \"python_optimized\": true, \"scope\": \"additive_component_receipts_not_geometry_or_full\"}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_paired_campaign_gate\" classname=\"mhgp8_paired_campaign_gate\" time=\"1.04872\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"status\": \"passed\", \"genuine_probe_rows\": 4, \"direct_rejections\": 132, \"tuple_rejections\": 12, \"parser_rejections\": 8, \"genuine_campaigns\": 2, \"genuine_campaign_rows\": 4, \"proxy_campaigns_rejected\": 2, \"python_optimized\": false, \"scope\": \"paired_component_receipt_ingestion_not_geometry_or_full\"}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_paired_campaign_gate_optimized\" classname=\"mhgp8_paired_campaign_gate_optimized\" time=\"1.06472\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"status\": \"passed\", \"genuine_probe_rows\": 4, \"direct_rejections\": 132, \"tuple_rejections\": 12, \"parser_rejections\": 8, \"genuine_campaigns\": 2, \"genuine_campaign_rows\": 4, \"proxy_campaigns_rejected\": 2, \"python_optimized\": true, \"scope\": \"paired_component_receipt_ingestion_not_geometry_or_full\"}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_campaign_reader_gate\" classname=\"mhgp8_campaign_reader_gate\" time=\"0.499581\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"status\": \"passed\", \"checks\": 4, \"genuine_measurements\": 9, \"active_sheet_mutants\": 3, \"inactive_q3_controls\": 3, \"python_optimized\": false, \"scope\": \"sheet_receipt_active_lane_invariant_not_full_hgp\"}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_campaign_reader_gate_optimized\" classname=\"mhgp8_campaign_reader_gate_optimized\" time=\"0.510715\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"status\": \"passed\", \"checks\": 4, \"genuine_measurements\": 9, \"active_sheet_mutants\": 3, \"inactive_q3_controls\": 3, \"python_optimized\": true, \"scope\": \"sheet_receipt_active_lane_invariant_not_full_hgp\"}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_paired_reader_gate\" classname=\"mhgp8_paired_reader_gate\" time=\"6.57345\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"status\": \"passed\", \"genuine_campaigns\": 5, \"genuine_measurements\": 10, \"positive_reads\": 2, \"cpu_frequency_policy_controls\": 1, \"mutants_rejected\": 46, \"empty_matrix_rejections\": 8, \"duplicate_matrix_rejections\": 7, \"source_coverage_rejections\": 8, \"cross_campaign_identity_rejections\": 3, \"heterogeneous_provenance_rejections\": 6, \"invalid_provenance_rejections\": 5, \"python_optimized\": false, \"scope\": \"paired_campaign_reader_not_geometry_or_full\"}\n</system-out>\n\t</testcase>\n\t<testcase name=\"mhgp8_paired_reader_gate_optimized\" classname=\"mhgp8_paired_reader_gate_optimized\" time=\"6.46611\" status=\"run\">\n\t\t<properties/>\n\t\t<system-out>{\"status\": \"passed\", \"genuine_campaigns\": 5, \"genuine_measurements\": 10, \"positive_reads\": 2, \"cpu_frequency_policy_controls\": 1, \"mutants_rejected\": 46, \"empty_matrix_rejections\": 8, \"duplicate_matrix_rejections\": 7, \"source_coverage_rejections\": 8, \"cross_campaign_identity_rejections\": 3, \"heterogeneous_provenance_rejections\": 6, \"invalid_provenance_rejections\": 5, \"python_optimized\": true, \"scope\": \"paired_campaign_reader_not_geometry_or_full\"}\n</system-out>\n\t</testcase>\n</testsuite>\n",
+  "all_31_export_test_stdout_equal_main_release": true,
+  "export_binary_sha256": "243387ac6df40e3f0f0c38a1d7d7a86735ed260ba11d904bf032bc4eb1c6e432",
+  "export_binary_equal_capture_binary": true,
+  "documentation_checks": {
+    "exit_code": 0,
+    "active_markdown": 536,
+    "command": [
+      "python3",
+      "tools/check_docs.py"
+    ],
+    "cwd": "/workspaces/E-HGP/build/v8_index_census_20260913.5OH9JA/tree",
+    "environment": {
+      "GIT_DIR": "/workspaces/E-HGP/.git",
+      "GIT_INDEX_FILE": "/workspaces/E-HGP/build/v8_index_census_20260913.5OH9JA/index",
+      "GIT_WORK_TREE": "/workspaces/E-HGP/build/v8_index_census_20260913.5OH9JA/tree",
+      "GIT_OPTIONAL_LOCKS": "0"
+    }
+  },
+  "registry_checks": {
+    "exit_code": 0,
+    "phases": 20,
+    "command": [
+      "python3",
+      "tools/check_implementation_status.py"
+    ],
+    "same_cwd_and_environment_as_documentation": true
+  },
+  "git_diff_cached_check_exit_code": 0,
+  "receipt_checks_normal_and_optimized_exit_codes": [
+    0,
+    0
+  ],
+  "receipt_reader_result": {
+    "status": "passed",
+    "campaigns": 4,
+    "measurements": 204,
+    "configurations_including_order": 164,
+    "scope": "materialized_q2_component_receipts",
+    "full_contract_qualified": false,
+    "gcp_used": false,
+    "provenance_policy": {
+      "version": "paired_provenance_v1",
+      "grouping": "homogeneous_build_per_probe_kind_and_common_machine_metadata",
+      "cpuinfo_ignored_fields": [
+        "cpu MHz"
+      ],
+      "machine_identity_scope": "recorded_metadata_not_unique_physical_host"
+    },
+    "provenance": {
+      "build_id": "142ad22103c52368d08584632979c4d9fc5ac42bf75b4643aa92560c639ad136",
+      "machine_id": "e80f1a6289419a1cfa85b12ade71c12aba3cf7302a1a6305937631f57314ecf9",
+      "probe_sha256": "243387ac6df40e3f0f0c38a1d7d7a86735ed260ba11d904bf032bc4eb1c6e432",
+      "compiler_version": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+      "cmake_cache_sha256": "42e9522b1672daa7311f8d7d198efe7c56ec564236d7065797ad6ba0945d18b5",
+      "cpuinfo_normalized_sha256": "caa45cccbc6ea70ee9f72919bd19f8897c628cdfae681376b7fc3e7c3ad19875",
+      "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+      "logical_cpu_count": 8,
+      "threads": 1
+    },
+    "current_reader_sha256": "892bd3ae84b45748e8c99e65265f948382a1affce7c2d0c44abd57772be9c36e",
+    "capture_runner_sha256": [
+      "311fce7f66e3b0d6e9a0a8d60ad07ad22382e21255416d5f49b27df7219e00c4"
+    ]
+  },
+  "summary_projection_check": "All preexisting summary counts, work and median values equal a projection of the current reader --summary; only explicit capture/reader lineage metadata added."
+}

@@ -168,3 +168,54 @@ fusion des plages. Les identités entre compteurs interdisent de masquer
 un travail effectué derrière des zéros arbitraires. Elles ne constituent
 ni un oracle géométrique ni une mesure de l'aval absent. Voir le
 [contrat additif](../docs/P0_ADDITION_ET_INTERSECTION.md).
+
+## Census q2 avec émission des intérieurs et coquilles
+
+La quatrième sonde consomme vraiment le résidu et compare les recherches
+individuelles au parcours partagé à curseur, sur le même propriétaire,
+index global et préfiltre. Voir le [contrat](../docs/P0_CENSUS_Q2_PARTAGE.md).
+
+```text
+mhgp8_q2_census_probe n grid|sheet|sheet_full|skew|tube|rails kmax s independent|additive|intersection_pool pairwise-first|shared-first
+```
+
+La recette `sheet_full` v2 et les autres recettes v1 sont inchangées.
+Le consommateur reçoit et calcule un digest de chaque support conservé,
+de sa clé exacte et de tous les IDs intérieurs/coquille. Ces IDs sont
+matérialisés pendant le callback, puis les buffers sont réutilisés.
+Il n'y a ni catalogue global dédupliqué ni nœud FULL dans la sortie.
+L'égalité des digests appariés ne remplace pas l'oracle physique des gates.
+
+Le temps de chaque bras inclut génération/hash, copie et validation du
+propriétaire, construction de l'index global, préfiltre, comptage, collecte,
+digest et destructions. L'intersection paie aussi Pool. `query_index_ms`
+mesure l'arbre de requêtes B construit seulement par Shared ; `payload_ms`
+mesure collecte et callback ; `count_ms` est le reste du temps englobant,
+y compris instrumentation et destruction des temporaires. L'inspection
+diagnostique qui confronte les deux bras est publiée séparément. Parsing,
+sérialisation JSON et capture externe ne font pas partie de ce total
+de composant. Les deux ordres évitent d'attribuer au seul second bras
+les effets d'un index déjà parcouru.
+
+Le [runner spécialisé](run_q2_census_matrix.py) conserve les mêmes conventions
+de sources/binaire épinglés, sorties brutes, erreurs et fermeture des matrices :
+
+```bash
+python3 -B morsehgp3D_v8/bench/run_q2_census_matrix.py run --probe build/v8_new/mhgp8_q2_census_probe --output morsehgp3D_v8/receipts/q2_new --sizes 8000 16000 32000 --families grid sheet_full --kmax 5 10 --s 8 10 12 --prefilters intersection_pool
+python3 -B morsehgp3D_v8/bench/run_q2_census_matrix.py check morsehgp3D_v8/receipts/q2_new --summary
+```
+
+`--repeats` vaut 1 par défaut ; les deux ordres sont inclus. Employer un
+répertoire de sortie neuf. Le lecteur contrôle aussi que tous les préfiltres
+conservent les mêmes supports finaux à famille/n/K fixés, même si leurs résidus
+diffèrent. Les comparaisons de K différents restent séparées. Le rejeu de
+captures historiques demande leurs sources épinglées ; aucun schéma antérieur
+n'est silencieusement requalifié en census exécuté.
+
+Exception de filiation explicite pour les captures q2 du 13 septembre :
+le runner original `311fce7f…` est conservé comme snapshot authentifié dans
+leur reçu. Le lecteur corrigé impose les comptes de construction B et
+refuse aussi les frères échoués avant création de MANIFEST. Il relit les
+bruts sans les modifier, distingue les hashes capture/lecteur et exige
+l'égalité de toutes les autres sources. Voir le
+[détail des corrections et des mutants](../receipts/q2_census_20260913/README.md).
