@@ -504,9 +504,17 @@ de propriétaire, de facteurs et de journaux doivent accompagner le
 curseur. Les mises à jour de comptes restent locales aux tâches ; une
 réduction de compteurs peut se faire séparément.
 
-La préparation ajoute O(n) échappements à un index binaire existant.
-Elle ne copie aucune liste de témoins à chaque partage. Pour un index
-portant des plages de feuilles, vérifier `escape[Z].first=Z.last`, ou
+Un tableau d’échappements ajoute O(n) indices à un arbre existant.
+Il ne copie aucune liste de témoins à chaque partage. Dans un arbre
+binaire plein en préordre avec une feuille par site, un sous-arbre de
+m sites comporte exactement 2m−1 nœuds : son échappement est aussi
+calculable par `node_id + 2*m - 1`, avec arithmétique contrôlée par la
+taille de l’index. Le C++ q2 relu pendant la passe après f47559b1 possède
+ce format. Conserver son champ explicite et ses contrôles est néanmoins
+un choix valable ; supprimer ce champ est une option de représentation,
+pas une condition préalable aux mesures. Le juge conserve les indices
+explicites et vérifie déjà cette identité de taille de sous-arbre.
+Pour un index portant des plages de feuilles, vérifier `escape[Z].first=Z.last`, ou
 fin de l’index lorsque `Z.last=n`, ainsi que la partition par les enfants.
 Le juge vérifie la taille de chaque sous-arbre préordonné ; ses mutants
 sautant un frère ou revenant sur un préfixe consommé sont rejetés avant
