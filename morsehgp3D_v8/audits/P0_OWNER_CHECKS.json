@@ -1,0 +1,840 @@
+{
+  "status": "passed_bounded_owner_observation_and_closure",
+  "full_qualification": false,
+  "performance_claim": false,
+  "gcp_used": false,
+  "scope": "P0 owner API, two four-point q2 fixtures",
+  "commands": [
+    {
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "--version"
+      ],
+      "timeout_seconds": 10,
+      "timed_out": false,
+      "exit_code": 0,
+      "elapsed_seconds": 0.002112381998813362,
+      "stdout": "x86_64-linux-gnu-g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+      "stderr": "",
+      "stdout_sha256": "39553616934606f58b27c04bed0cdbbe5b00c92c831a9aaadebd7ceda61d1334",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "executable_before": {
+        "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+        "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+        "bytes": 1027128
+      },
+      "executable_after": {
+        "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+        "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+        "bytes": 1027128
+      }
+    }
+  ],
+  "runs": [
+    {
+      "mode": "o2",
+      "variant": "original",
+      "source_before": {
+        "core/types.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/src/core/types.hpp",
+          "sha256": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+          "bytes": 2654
+        },
+        "spindle/predicates.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/src/spindle/predicates.hpp",
+          "sha256": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+          "bytes": 9194
+        },
+        "pipeline/local_credits.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/src/pipeline/local_credits.hpp",
+          "sha256": "791dfe12079278e31904b02552dbc7d852ec6ddcc610e9ab4d1489ccb5df6e65",
+          "bytes": 5341
+        },
+        "pipeline/local_credits.cpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/src/pipeline/local_credits.cpp",
+          "sha256": "b8a7eef8ca112ed0921772e4a7d380d802f479814ca686da8a1a856647a626c6",
+          "bytes": 15285
+        },
+        "pipeline/tube_credits.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/src/pipeline/tube_credits.hpp",
+          "sha256": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c",
+          "bytes": 6854
+        },
+        "gate.cpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/gate.cpp",
+          "sha256": "6fdbc188cbe4e7ef7597866ec771d47ceea01ea2550808dd033a56a697b94ef0",
+          "bytes": 4296
+        }
+      },
+      "commands": [
+        {
+          "argv": [
+            "/usr/bin/x86_64-linux-gnu-g++-13",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Werror",
+            "-O2",
+            "-I",
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/src",
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/gate.cpp",
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/src/pipeline/local_credits.cpp",
+            "-o",
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/owner_gate"
+          ],
+          "timeout_seconds": 30,
+          "timed_out": false,
+          "exit_code": 0,
+          "elapsed_seconds": 2.8105482800001482,
+          "stdout": "",
+          "stderr": "",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "executable_before": {
+            "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+            "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+            "bytes": 1027128
+          },
+          "executable_after": {
+            "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+            "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+            "bytes": 1027128
+          }
+        },
+        {
+          "argv": [
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/owner_gate",
+            "--selftest"
+          ],
+          "timeout_seconds": 10,
+          "timed_out": false,
+          "exit_code": 0,
+          "elapsed_seconds": 0.0021754049994342495,
+          "stdout": "{\"status\":\"observed_owner_rebinding\",\"lost_q2_pairs\":3,\"nominal_pairs\":[1,4],\"product_scope\":\"P0_only\",\"full_qualification\":false,\"gcp_used\":false}\n",
+          "stderr": "",
+          "stdout_sha256": "4da613a1173a63ca743df61f80f947ff267334fd7ed4837ac031c43c912ff895",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "executable_before": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/owner_gate",
+            "sha256": "d78963c184e01f57503e995964fa42ea99254e2eed29f364de03adb1499b2130",
+            "bytes": 72712
+          },
+          "executable_after": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/owner_gate",
+            "sha256": "d78963c184e01f57503e995964fa42ea99254e2eed29f364de03adb1499b2130",
+            "bytes": 72712
+          },
+          "label": "selftest"
+        },
+        {
+          "argv": [
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/owner_gate"
+          ],
+          "timeout_seconds": 10,
+          "timed_out": false,
+          "exit_code": 2,
+          "elapsed_seconds": 0.0017906129996845266,
+          "stdout": "",
+          "stderr": "",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "executable_before": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/owner_gate",
+            "sha256": "d78963c184e01f57503e995964fa42ea99254e2eed29f364de03adb1499b2130",
+            "bytes": 72712
+          },
+          "executable_after": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/owner_gate",
+            "sha256": "d78963c184e01f57503e995964fa42ea99254e2eed29f364de03adb1499b2130",
+            "bytes": 72712
+          },
+          "label": "missing"
+        },
+        {
+          "argv": [
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/owner_gate",
+            "--unknown"
+          ],
+          "timeout_seconds": 10,
+          "timed_out": false,
+          "exit_code": 2,
+          "elapsed_seconds": 0.0016635539996059379,
+          "stdout": "",
+          "stderr": "",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "executable_before": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/owner_gate",
+            "sha256": "d78963c184e01f57503e995964fa42ea99254e2eed29f364de03adb1499b2130",
+            "bytes": 72712
+          },
+          "executable_after": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/owner_gate",
+            "sha256": "d78963c184e01f57503e995964fa42ea99254e2eed29f364de03adb1499b2130",
+            "bytes": 72712
+          },
+          "label": "unknown"
+        }
+      ],
+      "sanitizer_environment": {},
+      "source_after": {
+        "core/types.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/src/core/types.hpp",
+          "sha256": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+          "bytes": 2654
+        },
+        "spindle/predicates.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/src/spindle/predicates.hpp",
+          "sha256": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+          "bytes": 9194
+        },
+        "pipeline/local_credits.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/src/pipeline/local_credits.hpp",
+          "sha256": "791dfe12079278e31904b02552dbc7d852ec6ddcc610e9ab4d1489ccb5df6e65",
+          "bytes": 5341
+        },
+        "pipeline/local_credits.cpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/src/pipeline/local_credits.cpp",
+          "sha256": "b8a7eef8ca112ed0921772e4a7d380d802f479814ca686da8a1a856647a626c6",
+          "bytes": 15285
+        },
+        "pipeline/tube_credits.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/src/pipeline/tube_credits.hpp",
+          "sha256": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c",
+          "bytes": 6854
+        },
+        "gate.cpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_original/gate.cpp",
+          "sha256": "6fdbc188cbe4e7ef7597866ec771d47ceea01ea2550808dd033a56a697b94ef0",
+          "bytes": 4296
+        }
+      }
+    },
+    {
+      "mode": "o2",
+      "variant": "closed",
+      "source_before": {
+        "core/types.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/src/core/types.hpp",
+          "sha256": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+          "bytes": 2654
+        },
+        "spindle/predicates.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/src/spindle/predicates.hpp",
+          "sha256": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+          "bytes": 9194
+        },
+        "pipeline/local_credits.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/src/pipeline/local_credits.hpp",
+          "sha256": "5f4f6bad6d8b4e6fe8e193263adf014ca19391bda2767f9eec476283138357a5",
+          "bytes": 5577
+        },
+        "pipeline/local_credits.cpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/src/pipeline/local_credits.cpp",
+          "sha256": "b8a7eef8ca112ed0921772e4a7d380d802f479814ca686da8a1a856647a626c6",
+          "bytes": 15285
+        },
+        "pipeline/tube_credits.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/src/pipeline/tube_credits.hpp",
+          "sha256": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c",
+          "bytes": 6854
+        },
+        "gate.cpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/gate.cpp",
+          "sha256": "6fdbc188cbe4e7ef7597866ec771d47ceea01ea2550808dd033a56a697b94ef0",
+          "bytes": 4296
+        }
+      },
+      "commands": [
+        {
+          "argv": [
+            "/usr/bin/x86_64-linux-gnu-g++-13",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Werror",
+            "-O2",
+            "-I",
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/src",
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/gate.cpp",
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/src/pipeline/local_credits.cpp",
+            "-o",
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/owner_gate"
+          ],
+          "timeout_seconds": 30,
+          "timed_out": false,
+          "exit_code": 0,
+          "elapsed_seconds": 2.6958754200004478,
+          "stdout": "",
+          "stderr": "",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "executable_before": {
+            "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+            "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+            "bytes": 1027128
+          },
+          "executable_after": {
+            "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+            "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+            "bytes": 1027128
+          }
+        },
+        {
+          "argv": [
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/owner_gate",
+            "--selftest"
+          ],
+          "timeout_seconds": 10,
+          "timed_out": false,
+          "exit_code": 0,
+          "elapsed_seconds": 0.0021917899994150503,
+          "stdout": "{\"status\":\"passed_owner_closure\",\"closed_special_members\":4,\"nominal_pairs\":[1,4],\"product_scope\":\"P0_only\",\"full_qualification\":false,\"gcp_used\":false}\n",
+          "stderr": "",
+          "stdout_sha256": "801f5007ef904a55ce2313f28f408c2977eac7ed0f4fe2edbdf8d3a033ef851e",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "executable_before": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/owner_gate",
+            "sha256": "b17eee697047c50b42352829363c32009c7bb21b6a450e66a29689afd70f153b",
+            "bytes": 71280
+          },
+          "executable_after": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/owner_gate",
+            "sha256": "b17eee697047c50b42352829363c32009c7bb21b6a450e66a29689afd70f153b",
+            "bytes": 71280
+          },
+          "label": "selftest"
+        },
+        {
+          "argv": [
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/owner_gate"
+          ],
+          "timeout_seconds": 10,
+          "timed_out": false,
+          "exit_code": 2,
+          "elapsed_seconds": 0.001795039999706205,
+          "stdout": "",
+          "stderr": "",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "executable_before": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/owner_gate",
+            "sha256": "b17eee697047c50b42352829363c32009c7bb21b6a450e66a29689afd70f153b",
+            "bytes": 71280
+          },
+          "executable_after": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/owner_gate",
+            "sha256": "b17eee697047c50b42352829363c32009c7bb21b6a450e66a29689afd70f153b",
+            "bytes": 71280
+          },
+          "label": "missing"
+        },
+        {
+          "argv": [
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/owner_gate",
+            "--unknown"
+          ],
+          "timeout_seconds": 10,
+          "timed_out": false,
+          "exit_code": 2,
+          "elapsed_seconds": 0.001648622001084732,
+          "stdout": "",
+          "stderr": "",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "executable_before": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/owner_gate",
+            "sha256": "b17eee697047c50b42352829363c32009c7bb21b6a450e66a29689afd70f153b",
+            "bytes": 71280
+          },
+          "executable_after": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/owner_gate",
+            "sha256": "b17eee697047c50b42352829363c32009c7bb21b6a450e66a29689afd70f153b",
+            "bytes": 71280
+          },
+          "label": "unknown"
+        }
+      ],
+      "sanitizer_environment": {},
+      "source_after": {
+        "core/types.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/src/core/types.hpp",
+          "sha256": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+          "bytes": 2654
+        },
+        "spindle/predicates.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/src/spindle/predicates.hpp",
+          "sha256": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+          "bytes": 9194
+        },
+        "pipeline/local_credits.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/src/pipeline/local_credits.hpp",
+          "sha256": "5f4f6bad6d8b4e6fe8e193263adf014ca19391bda2767f9eec476283138357a5",
+          "bytes": 5577
+        },
+        "pipeline/local_credits.cpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/src/pipeline/local_credits.cpp",
+          "sha256": "b8a7eef8ca112ed0921772e4a7d380d802f479814ca686da8a1a856647a626c6",
+          "bytes": 15285
+        },
+        "pipeline/tube_credits.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/src/pipeline/tube_credits.hpp",
+          "sha256": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c",
+          "bytes": 6854
+        },
+        "gate.cpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/o2_closed/gate.cpp",
+          "sha256": "6fdbc188cbe4e7ef7597866ec771d47ceea01ea2550808dd033a56a697b94ef0",
+          "bytes": 4296
+        }
+      }
+    },
+    {
+      "mode": "san",
+      "variant": "original",
+      "source_before": {
+        "core/types.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/src/core/types.hpp",
+          "sha256": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+          "bytes": 2654
+        },
+        "spindle/predicates.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/src/spindle/predicates.hpp",
+          "sha256": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+          "bytes": 9194
+        },
+        "pipeline/local_credits.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/src/pipeline/local_credits.hpp",
+          "sha256": "791dfe12079278e31904b02552dbc7d852ec6ddcc610e9ab4d1489ccb5df6e65",
+          "bytes": 5341
+        },
+        "pipeline/local_credits.cpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/src/pipeline/local_credits.cpp",
+          "sha256": "b8a7eef8ca112ed0921772e4a7d380d802f479814ca686da8a1a856647a626c6",
+          "bytes": 15285
+        },
+        "pipeline/tube_credits.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/src/pipeline/tube_credits.hpp",
+          "sha256": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c",
+          "bytes": 6854
+        },
+        "gate.cpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/gate.cpp",
+          "sha256": "6fdbc188cbe4e7ef7597866ec771d47ceea01ea2550808dd033a56a697b94ef0",
+          "bytes": 4296
+        }
+      },
+      "commands": [
+        {
+          "argv": [
+            "/usr/bin/x86_64-linux-gnu-g++-13",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Werror",
+            "-O1",
+            "-g0",
+            "-fsanitize=address,undefined",
+            "-fno-omit-frame-pointer",
+            "-no-pie",
+            "-I",
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/src",
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/gate.cpp",
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/src/pipeline/local_credits.cpp",
+            "-o",
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/owner_gate"
+          ],
+          "timeout_seconds": 30,
+          "timed_out": false,
+          "exit_code": 0,
+          "elapsed_seconds": 4.896673573999578,
+          "stdout": "",
+          "stderr": "",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "executable_before": {
+            "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+            "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+            "bytes": 1027128
+          },
+          "executable_after": {
+            "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+            "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+            "bytes": 1027128
+          }
+        },
+        {
+          "argv": [
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/owner_gate",
+            "--selftest"
+          ],
+          "timeout_seconds": 10,
+          "timed_out": false,
+          "exit_code": 0,
+          "elapsed_seconds": 0.10215343499839946,
+          "stdout": "{\"status\":\"observed_owner_rebinding\",\"lost_q2_pairs\":3,\"nominal_pairs\":[1,4],\"product_scope\":\"P0_only\",\"full_qualification\":false,\"gcp_used\":false}\n",
+          "stderr": "",
+          "stdout_sha256": "4da613a1173a63ca743df61f80f947ff267334fd7ed4837ac031c43c912ff895",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "executable_before": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/owner_gate",
+            "sha256": "be61ce400230d9ff3e51ee139b1da24250e9b1c797ed711c6616c07e43389c81",
+            "bytes": 1163208
+          },
+          "executable_after": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/owner_gate",
+            "sha256": "be61ce400230d9ff3e51ee139b1da24250e9b1c797ed711c6616c07e43389c81",
+            "bytes": 1163208
+          },
+          "label": "selftest"
+        },
+        {
+          "argv": [
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/owner_gate"
+          ],
+          "timeout_seconds": 10,
+          "timed_out": false,
+          "exit_code": 2,
+          "elapsed_seconds": 0.011728534000212676,
+          "stdout": "",
+          "stderr": "",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "executable_before": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/owner_gate",
+            "sha256": "be61ce400230d9ff3e51ee139b1da24250e9b1c797ed711c6616c07e43389c81",
+            "bytes": 1163208
+          },
+          "executable_after": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/owner_gate",
+            "sha256": "be61ce400230d9ff3e51ee139b1da24250e9b1c797ed711c6616c07e43389c81",
+            "bytes": 1163208
+          },
+          "label": "missing"
+        },
+        {
+          "argv": [
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/owner_gate",
+            "--unknown"
+          ],
+          "timeout_seconds": 10,
+          "timed_out": false,
+          "exit_code": 2,
+          "elapsed_seconds": 0.011277714000243577,
+          "stdout": "",
+          "stderr": "",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "executable_before": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/owner_gate",
+            "sha256": "be61ce400230d9ff3e51ee139b1da24250e9b1c797ed711c6616c07e43389c81",
+            "bytes": 1163208
+          },
+          "executable_after": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/owner_gate",
+            "sha256": "be61ce400230d9ff3e51ee139b1da24250e9b1c797ed711c6616c07e43389c81",
+            "bytes": 1163208
+          },
+          "label": "unknown"
+        }
+      ],
+      "sanitizer_environment": {
+        "ASAN_OPTIONS": "detect_leaks=1:abort_on_error=1",
+        "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+      },
+      "source_after": {
+        "core/types.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/src/core/types.hpp",
+          "sha256": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+          "bytes": 2654
+        },
+        "spindle/predicates.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/src/spindle/predicates.hpp",
+          "sha256": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+          "bytes": 9194
+        },
+        "pipeline/local_credits.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/src/pipeline/local_credits.hpp",
+          "sha256": "791dfe12079278e31904b02552dbc7d852ec6ddcc610e9ab4d1489ccb5df6e65",
+          "bytes": 5341
+        },
+        "pipeline/local_credits.cpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/src/pipeline/local_credits.cpp",
+          "sha256": "b8a7eef8ca112ed0921772e4a7d380d802f479814ca686da8a1a856647a626c6",
+          "bytes": 15285
+        },
+        "pipeline/tube_credits.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/src/pipeline/tube_credits.hpp",
+          "sha256": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c",
+          "bytes": 6854
+        },
+        "gate.cpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_original/gate.cpp",
+          "sha256": "6fdbc188cbe4e7ef7597866ec771d47ceea01ea2550808dd033a56a697b94ef0",
+          "bytes": 4296
+        }
+      }
+    },
+    {
+      "mode": "san",
+      "variant": "closed",
+      "source_before": {
+        "core/types.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/src/core/types.hpp",
+          "sha256": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+          "bytes": 2654
+        },
+        "spindle/predicates.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/src/spindle/predicates.hpp",
+          "sha256": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+          "bytes": 9194
+        },
+        "pipeline/local_credits.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/src/pipeline/local_credits.hpp",
+          "sha256": "5f4f6bad6d8b4e6fe8e193263adf014ca19391bda2767f9eec476283138357a5",
+          "bytes": 5577
+        },
+        "pipeline/local_credits.cpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/src/pipeline/local_credits.cpp",
+          "sha256": "b8a7eef8ca112ed0921772e4a7d380d802f479814ca686da8a1a856647a626c6",
+          "bytes": 15285
+        },
+        "pipeline/tube_credits.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/src/pipeline/tube_credits.hpp",
+          "sha256": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c",
+          "bytes": 6854
+        },
+        "gate.cpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/gate.cpp",
+          "sha256": "6fdbc188cbe4e7ef7597866ec771d47ceea01ea2550808dd033a56a697b94ef0",
+          "bytes": 4296
+        }
+      },
+      "commands": [
+        {
+          "argv": [
+            "/usr/bin/x86_64-linux-gnu-g++-13",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Werror",
+            "-O1",
+            "-g0",
+            "-fsanitize=address,undefined",
+            "-fno-omit-frame-pointer",
+            "-no-pie",
+            "-I",
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/src",
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/gate.cpp",
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/src/pipeline/local_credits.cpp",
+            "-o",
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/owner_gate"
+          ],
+          "timeout_seconds": 30,
+          "timed_out": false,
+          "exit_code": 0,
+          "elapsed_seconds": 4.460175057000015,
+          "stdout": "",
+          "stderr": "",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "executable_before": {
+            "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+            "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+            "bytes": 1027128
+          },
+          "executable_after": {
+            "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+            "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+            "bytes": 1027128
+          }
+        },
+        {
+          "argv": [
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/owner_gate",
+            "--selftest"
+          ],
+          "timeout_seconds": 10,
+          "timed_out": false,
+          "exit_code": 0,
+          "elapsed_seconds": 0.013522182000087923,
+          "stdout": "{\"status\":\"passed_owner_closure\",\"closed_special_members\":4,\"nominal_pairs\":[1,4],\"product_scope\":\"P0_only\",\"full_qualification\":false,\"gcp_used\":false}\n",
+          "stderr": "",
+          "stdout_sha256": "801f5007ef904a55ce2313f28f408c2977eac7ed0f4fe2edbdf8d3a033ef851e",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "executable_before": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/owner_gate",
+            "sha256": "e76c3c8fd47dba878581617fc1ca8d6d2400a05acd49c168d312ade998871b39",
+            "bytes": 1077632
+          },
+          "executable_after": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/owner_gate",
+            "sha256": "e76c3c8fd47dba878581617fc1ca8d6d2400a05acd49c168d312ade998871b39",
+            "bytes": 1077632
+          },
+          "label": "selftest"
+        },
+        {
+          "argv": [
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/owner_gate"
+          ],
+          "timeout_seconds": 10,
+          "timed_out": false,
+          "exit_code": 2,
+          "elapsed_seconds": 0.011634324000624474,
+          "stdout": "",
+          "stderr": "",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "executable_before": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/owner_gate",
+            "sha256": "e76c3c8fd47dba878581617fc1ca8d6d2400a05acd49c168d312ade998871b39",
+            "bytes": 1077632
+          },
+          "executable_after": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/owner_gate",
+            "sha256": "e76c3c8fd47dba878581617fc1ca8d6d2400a05acd49c168d312ade998871b39",
+            "bytes": 1077632
+          },
+          "label": "missing"
+        },
+        {
+          "argv": [
+            "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/owner_gate",
+            "--unknown"
+          ],
+          "timeout_seconds": 10,
+          "timed_out": false,
+          "exit_code": 2,
+          "elapsed_seconds": 0.012082511000699014,
+          "stdout": "",
+          "stderr": "",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "executable_before": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/owner_gate",
+            "sha256": "e76c3c8fd47dba878581617fc1ca8d6d2400a05acd49c168d312ade998871b39",
+            "bytes": 1077632
+          },
+          "executable_after": {
+            "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/owner_gate",
+            "sha256": "e76c3c8fd47dba878581617fc1ca8d6d2400a05acd49c168d312ade998871b39",
+            "bytes": 1077632
+          },
+          "label": "unknown"
+        }
+      ],
+      "sanitizer_environment": {
+        "ASAN_OPTIONS": "detect_leaks=1:abort_on_error=1",
+        "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+      },
+      "source_after": {
+        "core/types.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/src/core/types.hpp",
+          "sha256": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+          "bytes": 2654
+        },
+        "spindle/predicates.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/src/spindle/predicates.hpp",
+          "sha256": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+          "bytes": 9194
+        },
+        "pipeline/local_credits.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/src/pipeline/local_credits.hpp",
+          "sha256": "5f4f6bad6d8b4e6fe8e193263adf014ca19391bda2767f9eec476283138357a5",
+          "bytes": 5577
+        },
+        "pipeline/local_credits.cpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/src/pipeline/local_credits.cpp",
+          "sha256": "b8a7eef8ca112ed0921772e4a7d380d802f479814ca686da8a1a856647a626c6",
+          "bytes": 15285
+        },
+        "pipeline/tube_credits.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/src/pipeline/tube_credits.hpp",
+          "sha256": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c",
+          "bytes": 6854
+        },
+        "gate.cpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_erl9qs86/san_closed/gate.cpp",
+          "sha256": "6fdbc188cbe4e7ef7597866ec771d47ceea01ea2550808dd033a56a697b94ef0",
+          "bytes": 4296
+        }
+      }
+    }
+  ],
+  "runner": {
+    "path": "morsehgp3D_v8/audits/p0_owner_checks.py",
+    "sha256": "725dab5cb9e44edd885beaccf96dfb5788958dd39ec51b80659ae6256891358d",
+    "text": "#!/usr/bin/env python3\n\"\"\"Capture/replay the bounded P0 owner observation and its local correction.\"\"\"\nfrom __future__ import annotations\n\nimport argparse\nimport hashlib\nimport json\nimport os\nfrom pathlib import Path\nimport shutil\nimport signal\nimport subprocess\nimport tempfile\nimport time\n\nBASE = Path(__file__).resolve().parent\nROOT = BASE.parents[1]\nSOURCES = (\n    \"core/types.hpp\", \"spindle/predicates.hpp\", \"pipeline/local_credits.hpp\",\n    \"pipeline/local_credits.cpp\", \"pipeline/tube_credits.hpp\",\n)\nHEADER = \"pipeline/local_credits.hpp\"\nOPEN_HASH = \"791dfe12079278e31904b02552dbc7d852ec6ddcc610e9ab4d1489ccb5df6e65\"\nANCHOR = \"  PreparedRectangle() = default;\"\nPATCH = ANCHOR + \"\\n\" + \"\\n\".join((\n    \"  PreparedRectangle(const PreparedRectangle&) = delete;\",\n    \"  PreparedRectangle(PreparedRectangle&&) = delete;\",\n    \"  PreparedRectangle& operator=(const PreparedRectangle&) = delete;\",\n    \"  PreparedRectangle& operator=(PreparedRectangle&&) = delete;\",\n))\n\n\ndef digest(data: bytes) -> str:\n    return hashlib.sha256(data).hexdigest()\n\n\ndef pin(path: Path) -> dict:\n    raw = path.read_bytes()\n    return {\"path\": str(path), \"sha256\": digest(raw), \"bytes\": len(raw)}\n\n\ndef snapshot(path: Path) -> dict:\n    raw = path.read_bytes()\n    return {\"path\": str(path.relative_to(ROOT)), \"sha256\": digest(raw),\n            \"text\": raw.decode(\"utf-8\")}\n\n\ndef require(condition: bool, cause: str) -> None:\n    if not condition:\n        raise RuntimeError(cause)\n\n\ndef command(argv: list[str], timeout: int, env: dict, executable: Path) -> dict:\n    before = pin(executable)\n    started = time.monotonic()\n    process = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE,\n                               env=env, start_new_session=True)\n    expired = False\n    try:\n        stdout, stderr = process.communicate(timeout=timeout)\n    except subprocess.TimeoutExpired:\n        expired = True\n        os.killpg(process.pid, signal.SIGKILL)\n        stdout, stderr = process.communicate()\n    return {\"argv\": argv, \"timeout_seconds\": timeout, \"timed_out\": expired,\n            \"exit_code\": process.returncode, \"elapsed_seconds\": time.monotonic() - started,\n            \"stdout\": stdout.decode(\"utf-8\", errors=\"replace\"),\n            \"stderr\": stderr.decode(\"utf-8\", errors=\"replace\"),\n            \"stdout_sha256\": digest(stdout), \"stderr_sha256\": digest(stderr),\n            \"executable_before\": before, \"executable_after\": pin(executable)}\n\n\ndef main() -> int:\n    parser = argparse.ArgumentParser(description=__doc__)\n    parser.add_argument(\"--selftest\", action=\"store_true\", required=True)\n    parser.add_argument(\"--output\", type=Path, required=True)\n    parser.add_argument(\"--snapshot\", type=Path)\n    args = parser.parse_args()\n    output = args.output.resolve()\n    require(output.parent == BASE and not output.exists(), \"owner.output_create_only_in_audits\")\n    receipt = {\"status\": \"failed\", \"full_qualification\": False, \"performance_claim\": False,\n               \"gcp_used\": False, \"scope\": \"P0 owner API, two four-point q2 fixtures\",\n               \"commands\": [], \"runs\": [], \"runner\": snapshot(Path(__file__).resolve()),\n               \"replay_source\": str(args.snapshot) if args.snapshot else None}\n    workspace = Path(tempfile.mkdtemp(prefix=\".work_owner_\", dir=BASE))\n    try:\n        old = json.loads(args.snapshot.read_text()) if args.snapshot else None\n        receipt[\"sources\"] = old[\"sources\"] if old else {\n            name: snapshot(ROOT / \"morsehgp3D_v8/src\" / name) for name in SOURCES}\n        receipt[\"gate\"] = old[\"gate\"] if old else snapshot(BASE / \"p0_owner_gate.cpp\")\n        require(set(receipt[\"sources\"]) == set(SOURCES), \"owner.source_set\")\n        for item in [*receipt[\"sources\"].values(), receipt[\"gate\"]]:\n            require(digest(item[\"text\"].encode()) == item[\"sha256\"], \"owner.snapshot_hash\")\n        header = receipt[\"sources\"][HEADER]\n        require(header[\"sha256\"] == OPEN_HASH, \"owner.open_header_changed\")\n        require(header[\"text\"].count(ANCHOR) == 1, \"owner.patch_anchor\")\n        receipt[\"local_patch\"] = {\"path\": HEADER, \"old\": ANCHOR, \"new\": PATCH}\n        compiler = Path(shutil.which(\"g++\") or \"missing-g++\").resolve()\n        env = dict(os.environ, TMPDIR=str(workspace))\n        version = command([str(compiler), \"--version\"], 10, env, compiler)\n        receipt[\"commands\"].append(version)\n        require(version[\"exit_code\"] == 0, \"owner.compiler_version\")\n        for mode in (\"o2\", \"san\"):\n            for variant in (\"original\", \"closed\"):\n                folder = workspace / (mode + \"_\" + variant)\n                source_pins = {}\n                for name, item in receipt[\"sources\"].items():\n                    path = folder / \"src\" / name\n                    path.parent.mkdir(parents=True, exist_ok=True)\n                    text = item[\"text\"]\n                    if variant == \"closed\" and name == HEADER:\n                        text = text.replace(ANCHOR, PATCH)\n                    path.write_text(text)\n                    source_pins[name] = pin(path)\n                gate = folder / \"gate.cpp\"\n                gate.write_text(receipt[\"gate\"][\"text\"])\n                source_pins[\"gate.cpp\"] = pin(gate)\n                binary = folder / \"owner_gate\"\n                flags = [\"-O2\"] if mode == \"o2\" else [\"-O1\", \"-g0\",\n                    \"-fsanitize=address,undefined\", \"-fno-omit-frame-pointer\", \"-no-pie\"]\n                run = {\"mode\": mode, \"variant\": variant, \"source_before\": source_pins,\n                       \"commands\": []}\n                receipt[\"runs\"].append(run)\n                argv = [str(compiler), \"-std=c++20\", \"-Wall\", \"-Wextra\", \"-Wpedantic\",\n                        \"-Werror\", *flags, \"-I\", str(folder / \"src\"), str(gate),\n                        str(folder / \"src/pipeline/local_credits.cpp\"), \"-o\", str(binary)]\n                build = command(argv, 30, env, compiler)\n                run[\"commands\"].append(build)\n                require(build[\"exit_code\"] == 0 and not build[\"timed_out\"], \"owner.compile\")\n                run_env = dict(env)\n                if mode == \"san\":\n                    run_env.update(ASAN_OPTIONS=\"detect_leaks=1:abort_on_error=1\",\n                                   UBSAN_OPTIONS=\"halt_on_error=1:print_stacktrace=1\")\n                run[\"sanitizer_environment\"] = {key: run_env[key] for key in (\n                    \"ASAN_OPTIONS\", \"UBSAN_OPTIONS\") if key in run_env}\n                for label, options, code in ((\"selftest\", [\"--selftest\"], 0),\n                                               (\"missing\", [], 2), (\"unknown\", [\"--unknown\"], 2)):\n                    result = command([str(binary), *options], 10, run_env, binary)\n                    result[\"label\"] = label\n                    run[\"commands\"].append(result)\n                    require(result[\"exit_code\"] == code and not result[\"timed_out\"]\n                            and result[\"stderr\"] == \"\", \"owner.execution_\" + label)\n                    if label != \"selftest\":\n                        require(result[\"stdout\"] == \"\", \"owner.cli_stdout\")\n                        continue\n                    expected = {\"nominal_pairs\": [1, 4], \"product_scope\": \"P0_only\",\n                                \"full_qualification\": False, \"gcp_used\": False}\n                    expected.update({\"status\": \"observed_owner_rebinding\", \"lost_q2_pairs\": 3}\n                                    if variant == \"original\" else {\n                                        \"status\": \"passed_owner_closure\", \"closed_special_members\": 4})\n                    require(json.loads(result[\"stdout\"]) == expected, \"owner.result\")\n                run[\"source_after\"] = {name: pin(Path(item[\"path\"]))\n                                       for name, item in source_pins.items()}\n                require(run[\"source_before\"] == run[\"source_after\"], \"owner.source_changed\")\n        for item in receipt[\"commands\"] + [c for r in receipt[\"runs\"] for c in r[\"commands\"]]:\n            require(item[\"executable_before\"] == item[\"executable_after\"], \"owner.executable_changed\")\n        receipt[\"status\"] = \"passed_bounded_owner_observation_and_closure\"\n    except Exception as error:\n        receipt[\"error\"] = str(error)\n    finally:\n        shutil.rmtree(workspace)\n        receipt[\"temporary_workspace_removed\"] = not workspace.exists()\n        receipt[\"live_source_after\"] = {name: pin(ROOT / \"morsehgp3D_v8/src\" / name)\n                                        for name in SOURCES}\n        with output.open(\"x\") as stream:\n            json.dump(receipt, stream, ensure_ascii=False, indent=2)\n            stream.write(\"\\n\")\n    print(json.dumps({\"status\": receipt[\"status\"], \"receipt\": str(output)}))\n    return 0 if receipt[\"status\"].startswith(\"passed_\") else 1\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n"
+  },
+  "replay_source": null,
+  "sources": {
+    "core/types.hpp": {
+      "path": "morsehgp3D_v8/src/core/types.hpp",
+      "sha256": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+      "text": "#pragma once\n\n#include <cstddef>\n#include <cstdint>\n#include <limits>\n#include <stdexcept>\n\nnamespace mhgp8 {\n\nusing u64 = std::uint64_t;\nusing i64 = std::int64_t;\n\n// The u16 geometry (including tube bounds) needs at most 75 signed bits. This first CPU\n// implementation requires the compiler's native integer extension; it does\n// not silently replace exact predicates with floating-point arithmetic.\n#if defined(__SIZEOF_INT128__)\n__extension__ typedef signed __int128 i128;\n#else\n#error \"mhgp8 CPU predicates require a compiler with signed 128-bit integers\"\n#endif\n\nstruct Point3 {\n  std::uint16_t x{};\n  std::uint16_t y{};\n  std::uint16_t z{};\n\n  [[nodiscard]] constexpr std::uint16_t operator[](std::size_t axis) const {\n    switch (axis) {\n      case 0: return x;\n      case 1: return y;\n      case 2: return z;\n      default: throw std::out_of_range(\"mhgp8 point axis must be 0, 1 or 2\");\n    }\n  }\n\n  bool operator==(const Point3&) const = default;\n};\n\nstruct Box3 {\n  Point3 low{};\n  Point3 high{};\n};\n\nenum class Lane : std::uint8_t { Q2 = 2, Q3 = 3, Q4 = 4 };\n\n[[nodiscard]] constexpr bool valid_lane(Lane lane) noexcept {\n  return lane == Lane::Q2 || lane == Lane::Q3 || lane == Lane::Q4;\n}\n\ninline void require_valid_lane(Lane lane) {\n  if (!valid_lane(lane)) {\n    throw std::invalid_argument(\"mhgp8 lane must be Q2, Q3 or Q4\");\n  }\n}\n\n[[nodiscard]] inline unsigned arity(Lane lane) {\n  require_valid_lane(lane);\n  return static_cast<unsigned>(lane);\n}\n\n[[nodiscard]] constexpr bool valid_box(const Box3& box) noexcept {\n  return box.low.x <= box.high.x && box.low.y <= box.high.y &&\n         box.low.z <= box.high.z;\n}\n\ninline void require_valid_box(const Box3& box) {\n  if (!valid_box(box)) {\n    throw std::invalid_argument(\"mhgp8 box has inverted bounds\");\n  }\n}\n\n[[nodiscard]] constexpr Box3 singleton_box(const Point3& point) noexcept {\n  return {point, point};\n}\n\n[[nodiscard]] inline Point3 box_corner(const Box3& box, unsigned corner) {\n  require_valid_box(box);\n  if (corner >= 8) {\n    throw std::out_of_range(\"mhgp8 box corner must be in [0, 8)\");\n  }\n  return {(corner & 1U) != 0U ? box.high.x : box.low.x,\n          (corner & 2U) != 0U ? box.high.y : box.low.y,\n          (corner & 4U) != 0U ? box.high.z : box.low.z};\n}\n\nstruct PredicateWork {\n  u64 point_tests{};\n  u64 universal_queries{};\n  u64 q2_axis_terms{};\n  u64 corner_tests{};\n  u64 block_bound_tests{};\n  u64 negative_probes{};\n};\n\ninline void counter_add(u64& value, u64 increment = 1) {\n  if (increment > std::numeric_limits<u64>::max() - value) {\n    throw std::overflow_error(\"mhgp8 work counter overflow\");\n  }\n  value += increment;\n}\n\n}  // namespace mhgp8\n"
+    },
+    "spindle/predicates.hpp": {
+      "path": "morsehgp3D_v8/src/spindle/predicates.hpp",
+      "sha256": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+      "text": "#pragma once\n\n#include \"../core/types.hpp\"\n\n#include <algorithm>\n#include <array>\n\nnamespace mhgp8 {\n\n// A, B and Z below are continuous boxes, not just the stored sites in them.\n// This decision concerns witness credit, never the death of an anchor.\n// Credit: every z in Z witnesses every (a,b) in A x B.\n// NoCredit: every (a,z) in A x Z fails universality over the BOX B. A failing\n// box corner need not itself be a stored site: this does not refute a weaker\n// certificate concerning only the discrete sites of B.\n// Uncertain: neither statement is certified; it is not a rejection.\nenum class BlockDecision : std::uint8_t { Credit, NoCredit, Uncertain };\n\nnamespace spindle_detail {\n\nstruct Interval {\n  i64 low;\n  i64 high;\n};\n\n[[nodiscard]] inline Interval coordinate(const Box3& box, std::size_t axis) {\n  return {static_cast<i64>(box.low[axis]), static_cast<i64>(box.high[axis])};\n}\n\n[[nodiscard]] inline Interval subtract(Interval left, Interval right) {\n  return {left.low - right.high, left.high - right.low};\n}\n\n[[nodiscard]] inline Interval multiply(Interval left, Interval right) {\n  const std::array<i64, 4> products{\n      left.low * right.low, left.low * right.high,\n      left.high * right.low, left.high * right.high};\n  const auto bounds = std::minmax_element(products.begin(), products.end());\n  return {*bounds.first, *bounds.second};\n}\n\n[[nodiscard]] inline i128 square(i64 value) {\n  return static_cast<i128>(value) * value;\n}\n\nstruct SquaredBounds {\n  i128 low;\n  i128 high;\n};\n\n[[nodiscard]] inline SquaredBounds square_bounds(Interval value) {\n  const i128 left = square(value.low);\n  const i128 right = square(value.high);\n  return {value.low <= 0 && value.high >= 0 ? 0 : std::min(left, right),\n          std::max(left, right)};\n}\n\n// M=65535. Coordinate differences have magnitude <=M, products <=M^2,\n// cross components <=2M^2, hence Xi<=12M^4<2^68. Dependencies between\n// intervals are discarded only outward: both Xi bounds remain certified.\n[[nodiscard]] inline SquaredBounds xi_bounds(const Box3& a, const Box3& b,\n                                           const Box3& z) {\n  std::array<Interval, 3> u{};\n  std::array<Interval, 3> w{};\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    u[axis] = subtract(coordinate(z, axis), coordinate(a, axis));\n    w[axis] = subtract(coordinate(b, axis), coordinate(z, axis));\n  }\n  SquaredBounds result{0, 0};\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const std::size_t j = (axis + 1) % 3;\n    const std::size_t k = (axis + 2) % 3;\n    const auto component = square_bounds(\n        subtract(multiply(u[j], w[k]), multiply(u[k], w[j])));\n    result.low += component.low;\n    result.high += component.high;\n  }\n  return result;\n}\n\n// H=(z-a).(b-z) is separable by coordinate, affine separately in a and b,\n// and concave in z. Its minimum over three boxes is therefore attained at\n// coordinate endpoints. The largest partial sum has magnitude <=3M^2.\n[[nodiscard]] inline i64 h_minimum(const Box3& a, const Box3& b,\n                                 const Box3& z) {\n  i64 result = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const Interval ac = coordinate(a, axis);\n    const Interval bc = coordinate(b, axis);\n    const Interval zc = coordinate(z, axis);\n    const auto at_z = [ac, bc](i64 value) {\n      return multiply({value - ac.high, value - ac.low},\n                      {bc.low - value, bc.high - value}).low;\n    };\n    result += std::min(at_z(zc.low), at_z(zc.high));\n  }\n  return result;\n}\n\n// Four times the exact maximum of H over A x {b} x Z. For each coordinate,\n// maximize over a at an endpoint, then over z at clamp((a+b)/2,Z).\n// Doubling the vertex and multiplying H by four avoids division/rounding.\n// Each term is in [-4M^2,M^2], so the sum is in [-12M^2,3M^2].\n[[nodiscard]] inline i64 h_maximum_times_four(const Box3& a, const Point3& b,\n                                            const Box3& z) {\n  i64 result = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const i64 bc = static_cast<i64>(b[axis]);\n    const i64 low_twice = 2 * static_cast<i64>(z.low[axis]);\n    const i64 high_twice = 2 * static_cast<i64>(z.high[axis]);\n    const auto at_a = [bc, low_twice, high_twice](i64 ac) {\n      const i64 sum = ac + bc;\n      const i64 closest = std::clamp(sum, low_twice, high_twice);\n      const i64 delta = closest - sum;\n      const i64 distance = bc - ac;\n      return distance * distance - delta * delta;\n    };\n    result += std::max(at_a(static_cast<i64>(a.low[axis])),\n                       at_a(static_cast<i64>(a.high[axis])));\n  }\n  return result;\n}\n\n[[nodiscard]] inline unsigned multiplier(Lane lane) {\n  return lane == Lane::Q3 ? 3U : 2U;\n}\n\n}  // namespace spindle_detail\n\n[[nodiscard]] inline bool point_witness(Lane lane, const Point3& a,\n                                       const Point3& b, const Point3& z,\n                                       PredicateWork& work) {\n  require_valid_lane(lane);\n  counter_add(work.point_tests);\n  std::array<i64, 3> u{};\n  std::array<i64, 3> w{};\n  i64 h = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    u[axis] = static_cast<i64>(z[axis]) - static_cast<i64>(a[axis]);\n    w[axis] = static_cast<i64>(b[axis]) - static_cast<i64>(z[axis]);\n    h += u[axis] * w[axis];\n  }\n  if (h <= 0) {\n    return false;\n  }\n  if (lane == Lane::Q2) {\n    return true;\n  }\n  i128 xi = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const std::size_t j = (axis + 1) % 3;\n    const std::size_t k = (axis + 2) % 3;\n    const i64 cross = u[j] * w[k] - u[k] * w[j];\n    xi += spindle_detail::square(cross);\n  }\n  // 3H^2<=27M^4<2^69. Promotion occurs before either multiplication.\n  return static_cast<i128>(spindle_detail::multiplier(lane)) *\n             spindle_detail::square(h) > xi;\n}\n\n[[nodiscard]] inline bool universal_witness(Lane lane, const Point3& a,\n                                           const Box3& b, const Point3& z,\n                                           PredicateWork& work) {\n  require_valid_lane(lane);\n  require_valid_box(b);\n  counter_add(work.universal_queries);\n  if (lane == Lane::Q2) {\n    // H is affine in b: choose the minimizing bound independently per axis.\n    // This is the exact continuous-box minimum, not a heuristic proposal.\n    i64 h = 0;\n    for (std::size_t axis = 0; axis < 3; ++axis) {\n      const i64 delta = static_cast<i64>(z[axis]) - static_cast<i64>(a[axis]);\n      const i64 bound =\n          static_cast<i64>(delta >= 0 ? b.low[axis] : b.high[axis]);\n      h += delta * (bound - static_cast<i64>(z[axis]));\n      counter_add(work.q2_axis_terms);\n    }\n    return h > 0;\n  }\n  // For fixed a,z, H>0 and sqrt(t)H>|(z-a)x(b-z)| is an open convex\n  // cone in b. All eight corners are necessary and sufficient for the box.\n  for (unsigned corner = 0; corner < 8; ++corner) {\n    counter_add(work.corner_tests);\n    if (!point_witness(lane, a, box_corner(b, corner), z, work)) {\n      return false;\n    }\n  }\n  return true;\n}\n\n[[nodiscard]] inline bool box_witness(Lane lane, const Box3& a,\n                                     const Box3& b, const Point3& z,\n                                     PredicateWork& work) {\n  require_valid_lane(lane);\n  require_valid_box(a);\n  require_valid_box(b);\n  // Convexity is separate in a and b, not assumed joint. Applying the\n  // corner certificate successively proves the entire Cartesian product.\n  for (unsigned corner = 0; corner < 8; ++corner) {\n    if (!universal_witness(lane, box_corner(a, corner), b, z, work)) {\n      return false;\n    }\n  }\n  return true;\n}\n\n[[nodiscard]] inline BlockDecision classify_witness_block(\n    Lane lane, const Box3& a, const Box3& b, const Box3& z,\n    PredicateWork& work) {\n  require_valid_lane(lane);\n  require_valid_box(a);\n  require_valid_box(b);\n  require_valid_box(z);\n  counter_add(work.block_bound_tests);\n\n  const i64 h_min = spindle_detail::h_minimum(a, b, z);\n  if (h_min > 0) {\n    if (lane == Lane::Q2) {\n      return BlockDecision::Credit;\n    }\n    const auto xi = spindle_detail::xi_bounds(a, b, z);\n    if (static_cast<i128>(spindle_detail::multiplier(lane)) *\n            spindle_detail::square(h_min) > xi.high) {\n      return BlockDecision::Credit;\n    }\n  }\n\n  // A single fixed b0 in B which fails for ALL a in A and z in Z proves\n  // that no (a,z) can supply a universal-over-B credit. This does NOT\n  // prove that those anchors or their candidate supports may be dropped.\n  for (unsigned corner = 0; corner < 8; ++corner) {\n    counter_add(work.negative_probes);\n    const Point3 b0 = box_corner(b, corner);\n    const i64 h_max4 = spindle_detail::h_maximum_times_four(a, b0, z);\n    if (h_max4 <= 0) {\n      return BlockDecision::NoCredit;\n    }\n    if (lane != Lane::Q2) {\n      const auto xi = spindle_detail::xi_bounds(a, singleton_box(b0), z);\n      // H_max = h_max4/4; equality fails the required strict witness test.\n      // 16Xi<=192M^4<2^72; all products are promoted to i128 first.\n      if (static_cast<i128>(spindle_detail::multiplier(lane)) *\n              spindle_detail::square(h_max4) <= 16 * xi.low) {\n        return BlockDecision::NoCredit;\n      }\n    }\n  }\n  return BlockDecision::Uncertain;\n}\n\n}  // namespace mhgp8\n"
+    },
+    "pipeline/local_credits.hpp": {
+      "path": "morsehgp3D_v8/src/pipeline/local_credits.hpp",
+      "sha256": "791dfe12079278e31904b02552dbc7d852ec6ddcc610e9ab4d1489ccb5df6e65",
+      "text": "#pragma once\n\n#include <array>\n#include <cstddef>\n#include <cstdint>\n#include <memory>\n#include <span>\n#include <vector>\n\n#include \"core/types.hpp\"\n\nnamespace mhgp8 {\n\n// Half-open ranges into the original, immutable input order. Not Morton IDs.\nstruct Range {\n  std::size_t first{};\n  std::size_t last{};\n  [[nodiscard]] std::size_t size() const noexcept { return last - first; }\n};\n\nstruct RectangleInput {\n  std::vector<Point3> points;\n  Range a;\n  Range b;\n  // Proposals, not an externally trusted count. All IDs are checked; only\n  // strictly certified universal sites outside A union B receive credit.\n  std::vector<std::size_t> core_candidates;\n};\n\nstruct Work {\n  PredicateWork predicates{};\n  std::uint64_t validation_points{};\n  std::uint64_t uniqueness_comparisons{};\n  std::uint64_t pool_selection_tests{};\n  std::uint64_t pool_selected{};\n  std::uint64_t tree_nodes{};\n  std::uint64_t tree_point_visits{};\n  std::uint64_t dual_tasks{};\n  std::uint64_t credited_blocks{};\n  std::uint64_t noncredit_blocks{};\n  std::uint64_t leaf_pairs{};\n  std::uint64_t saturated_tasks{};\n  std::uint64_t max_tree_depth{};\n  std::uint64_t max_task_depth{};\n  std::uint64_t tube_records{};\n  std::uint64_t tube_cells{};\n  std::uint64_t tube_sort_comparisons{};\n  std::uint64_t tube_sweep_tests{};\n  std::uint64_t tube_credited_sites{};\n  std::uint64_t tube_separation_fallbacks{};\n};\n\nclass PreparedRectangle;\nusing RectanglePtr = std::shared_ptr<const PreparedRectangle>;\n\n// Throws invalid_argument for an unsupported/invalid input, before exposing\n// any plan. Separation convention: box_gap >= s * max(box_diameter).\n[[nodiscard]] RectanglePtr prepare_rectangle(RectangleInput input,\n                                             unsigned kmax,\n                                             unsigned separation_s);\n\nclass PreparedRectangle final {\n public:\n  [[nodiscard]] std::span<const Point3> points() const noexcept { return points_; }\n  [[nodiscard]] Range a_range() const noexcept { return a_; }\n  [[nodiscard]] Range b_range() const noexcept { return b_; }\n  [[nodiscard]] const Box3& a_box() const noexcept { return box_a_; }\n  [[nodiscard]] const Box3& b_box() const noexcept { return box_b_; }\n  [[nodiscard]] unsigned kmax() const noexcept { return kmax_; }\n  [[nodiscard]] unsigned separation_s() const noexcept { return separation_s_; }\n  [[nodiscard]] std::uint8_t threshold(Lane lane) const;\n  [[nodiscard]] std::uint8_t core_credit(Lane lane) const;\n  [[nodiscard]] const Work& preparation_work() const noexcept { return work_; }\n\n private:\n  PreparedRectangle() = default;\n  friend RectanglePtr prepare_rectangle(RectangleInput, unsigned, unsigned);\n  std::vector<Point3> points_;\n  Range a_;\n  Range b_;\n  Box3 box_a_;\n  Box3 box_b_;\n  unsigned kmax_{};\n  unsigned separation_s_{};\n  std::array<std::uint8_t, 3> core_{};\n  Work work_;\n};\n\nenum class Strategy { Pool, DualBlocks, Tubes };\n\n// Index ranges into the plan's grouped a_order()/b_order(), not point ranges.\nstruct CandidateBlock {\n  Range a;\n  Range b;\n};\n\nclass CreditPlan;\n[[nodiscard]] CreditPlan make_credit_plan(RectanglePtr rectangle,\n                                          Lane lane, Strategy strategy);\n\nclass CreditPlan final {\n public:\n  [[nodiscard]] const PreparedRectangle& rectangle() const noexcept { return *rectangle_; }\n  [[nodiscard]] Lane lane() const noexcept { return lane_; }\n  [[nodiscard]] Strategy strategy() const noexcept { return strategy_; }\n  [[nodiscard]] std::uint8_t threshold() const noexcept { return threshold_; }\n  [[nodiscard]] std::uint8_t core_credit() const noexcept { return core_; }\n  [[nodiscard]] std::span<const std::uint8_t> a_credits() const noexcept { return a_; }\n  [[nodiscard]] std::span<const std::uint8_t> b_credits() const noexcept { return b_; }\n  [[nodiscard]] std::span<const std::size_t> a_order() const noexcept { return a_order_; }\n  [[nodiscard]] std::span<const std::size_t> b_order() const noexcept { return b_order_; }\n  [[nodiscard]] std::span<const CandidateBlock> blocks() const noexcept { return blocks_; }\n  [[nodiscard]] std::uint64_t total_pairs() const noexcept { return total_; }\n  [[nodiscard]] std::uint64_t candidate_pairs() const noexcept { return candidates_; }\n  [[nodiscard]] const Work& work() const noexcept { return work_; }\n  [[nodiscard]] bool keeps(std::size_t a_id, std::size_t b_id) const;\n\n  // Explicit expansion is consumer work O(candidate_pairs), never required\n  // merely to construct/count this plan. The callback receives original IDs.\n  template <class Consumer>\n  void for_each_candidate(Consumer&& consumer) const {\n    for (const auto& block : blocks_)\n      for (std::size_t a = block.a.first; a < block.a.last; ++a)\n        for (std::size_t b = block.b.first; b < block.b.last; ++b)\n          consumer(a_order_[a], b_order_[b]);\n  }\n\n private:\n  CreditPlan() = default;\n  friend CreditPlan make_credit_plan(RectanglePtr, Lane, Strategy);\n  RectanglePtr rectangle_;\n  Lane lane_{Lane::Q2};\n  Strategy strategy_{Strategy::Pool};\n  std::uint8_t threshold_{};\n  std::uint8_t core_{};\n  std::vector<std::uint8_t> a_;\n  std::vector<std::uint8_t> b_;\n  std::vector<std::size_t> a_order_;\n  std::vector<std::size_t> b_order_;\n  std::vector<CandidateBlock> blocks_;\n  std::uint64_t total_{};\n  std::uint64_t candidates_{};\n  Work work_;\n};\n\n}  // namespace mhgp8\n"
+    },
+    "pipeline/local_credits.cpp": {
+      "path": "morsehgp3D_v8/src/pipeline/local_credits.cpp",
+      "sha256": "b8a7eef8ca112ed0921772e4a7d380d802f479814ca686da8a1a856647a626c6",
+      "text": "#include \"local_credits.hpp\"\n\n#include <algorithm>\n#include <limits>\n#include <numeric>\n#include <stdexcept>\n#include <utility>\n\n#include \"spindle/predicates.hpp\"\n#include \"tube_credits.hpp\"\n\nnamespace mhgp8 {\nnamespace {\n\n[[nodiscard]] bool contains(Range range, std::size_t id) {\n  return range.first <= id && id < range.last;\n}\n\n[[nodiscard]] Box3 bounds(std::span<const Point3> points, Range range) {\n  Box3 result{points[range.first], points[range.first]};\n  for (std::size_t id = range.first + 1; id < range.last; ++id) {\n    const auto& p = points[id];\n    result.low = {std::min(result.low.x, p.x), std::min(result.low.y, p.y),\n                  std::min(result.low.z, p.z)};\n    result.high = {std::max(result.high.x, p.x), std::max(result.high.y, p.y),\n                   std::max(result.high.z, p.z)};\n  }\n  return result;\n}\n\n[[nodiscard]] i64 diameter_squared(const Box3& box) {\n  i64 value = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const i64 width = static_cast<i64>(box.high[axis]) - box.low[axis];\n    value += width * width;\n  }\n  return value;\n}\n\n[[nodiscard]] u64 pair_count(std::size_t a, std::size_t b) {\n  if (b != 0 && a > std::numeric_limits<u64>::max() / b) {\n    throw std::overflow_error(\"mhgp8 candidate cardinal exceeds u64\");\n  }\n  return static_cast<u64>(a) * static_cast<u64>(b);\n}\n\n[[nodiscard]] std::vector<std::uint8_t> pool_credits(\n    const PreparedRectangle& rectangle, Range range, const Box3& own,\n    const Box3& opposite, Lane lane, std::uint8_t need, Work& work) {\n  // Proposal only: the h+1 best projections include alternatives for the\n  // anchor itself. Failing to find a witness never removes a candidate.\n  struct Proposal { i64 score; std::size_t id; };\n  std::array<i64, 3> direction{};\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    direction[axis] = static_cast<i64>(opposite.low[axis]) + opposite.high[axis]\n                      - own.low[axis] - own.high[axis];\n  }\n  std::vector<Proposal> pool;\n  const std::size_t capacity = std::min(range.size(), std::size_t{need} + 1);\n  pool.reserve(capacity);\n  for (std::size_t id = range.first; id < range.last; ++id) {\n    i64 score = 0;\n    for (std::size_t axis = 0; axis < 3; ++axis) {\n      score += direction[axis] * rectangle.points()[id][axis];\n    }\n    auto position = pool.begin();\n    while (position != pool.end()) {\n      counter_add(work.pool_selection_tests);\n      if (score > position->score || (score == position->score && id < position->id)) {\n        break;\n      }\n      ++position;\n    }\n    if (position != pool.end() || pool.size() < capacity) {\n      pool.insert(position, Proposal{score, id});\n      if (pool.size() > capacity) {\n        pool.pop_back();\n      }\n    }\n  }\n  counter_add(work.pool_selected, pool.size());\n  std::vector<std::uint8_t> credits(range.size(), 0);\n  for (std::size_t id = range.first; id < range.last; ++id) {\n    auto& value = credits[id - range.first];\n    for (const auto& proposal : pool) {\n      if (proposal.id != id && universal_witness(\n              lane, rectangle.points()[id], opposite,\n              rectangle.points()[proposal.id], work.predicates)) {\n        ++value;\n        if (value == need) {\n          break;\n        }\n      }\n    }\n  }\n  return credits;\n}\n\nclass DualTree {\n public:\n  DualTree(std::span<const Point3> points, Range range, const Box3& opposite,\n           Lane lane, std::uint8_t need, Work& work)\n      : points_(points), range_(range), opposite_(opposite), lane_(lane),\n        need_(need), work_(work), order_(range.size()) {\n    std::iota(order_.begin(), order_.end(), range.first);\n    // Do not reserve 2*n speculatively or store an anchor x witness matrix.\n    build({0, order_.size()}, 0);\n  }\n\n  [[nodiscard]] std::vector<std::uint8_t> run() {\n    visit(0, 0, 0);\n    std::vector<std::uint8_t> values(range_.size(), 0);\n    extract(0, values);\n    return values;\n  }\n\n private:\n  static constexpr std::size_t absent = std::numeric_limits<std::size_t>::max();\n  struct Node {\n    Range range;\n    Box3 box;\n    std::size_t left{absent};\n    std::size_t right{absent};\n    std::uint8_t minimum{};\n    std::uint8_t lazy{};\n    [[nodiscard]] bool leaf() const noexcept { return left == absent; }\n  };\n  std::span<const Point3> points_;\n  Range range_;\n  const Box3& opposite_;\n  Lane lane_;\n  std::uint8_t need_;\n  Work& work_;\n  std::vector<std::size_t> order_;\n  std::vector<Node> nodes_;\n\n  std::size_t build(Range range, u64 depth) {\n    Box3 box{points_[order_[range.first]], points_[order_[range.first]]};\n    for (std::size_t i = range.first; i < range.last; ++i) {\n      counter_add(work_.tree_point_visits);\n      const auto& p = points_[order_[i]];\n      box.low = {std::min(box.low.x, p.x), std::min(box.low.y, p.y),\n                 std::min(box.low.z, p.z)};\n      box.high = {std::max(box.high.x, p.x), std::max(box.high.y, p.y),\n                  std::max(box.high.z, p.z)};\n    }\n    const std::size_t index = nodes_.size();\n    nodes_.push_back(Node{range, box});\n    counter_add(work_.tree_nodes);\n    work_.max_tree_depth = std::max(work_.max_tree_depth, depth);\n    if (range.size() == 1) {\n      return index;\n    }\n    std::size_t axis = 0;\n    for (std::size_t candidate = 1; candidate < 3; ++candidate) {\n      if (box.high[candidate] - box.low[candidate] > box.high[axis] - box.low[axis]) {\n        axis = candidate;\n      }\n    }\n    const unsigned middle = (static_cast<unsigned>(box.low[axis]) + box.high[axis]) / 2;\n    const auto first = order_.begin() + static_cast<std::ptrdiff_t>(range.first);\n    const auto last = order_.begin() + static_cast<std::ptrdiff_t>(range.last);\n    const auto cut = std::partition(first, last, [&](std::size_t id) {\n      counter_add(work_.tree_point_visits);\n      return points_[id][axis] <= middle;\n    });\n    const auto split = static_cast<std::size_t>(cut - order_.begin());\n    if (split == range.first || split == range.last) {\n      throw std::logic_error(\"mhgp8 distinct points failed midpoint split\");\n    }\n    // u16 midpoint splits halve a positive coordinate span: depth <=48.\n    // This is an input representation bound, not a run-time truncation.\n    const auto left = build({range.first, split}, depth + 1);\n    const auto right = build({split, range.last}, depth + 1);\n    nodes_[index].left = left;\n    nodes_[index].right = right;\n    return index;\n  }\n\n  void add(std::size_t index, std::size_t amount) {\n    auto& node = nodes_[index];\n    const auto increment = std::min<std::size_t>(need_, amount);\n    node.minimum = static_cast<std::uint8_t>(\n        std::min<std::size_t>(need_, node.minimum + increment));\n    node.lazy = static_cast<std::uint8_t>(\n        std::min<std::size_t>(need_, node.lazy + increment));\n  }\n\n  void push(std::size_t index) {\n    auto& node = nodes_[index];\n    if (!node.leaf() && node.lazy != 0) {\n      add(node.left, node.lazy);\n      add(node.right, node.lazy);\n      node.lazy = 0;\n    }\n  }\n\n  void visit(std::size_t anchors, std::size_t witnesses, u64 depth) {\n    counter_add(work_.dual_tasks);\n    work_.max_task_depth = std::max(work_.max_task_depth, depth);\n    auto& a = nodes_[anchors];\n    const auto& z = nodes_[witnesses];\n    if (a.minimum == need_) {\n      counter_add(work_.saturated_tasks);\n      return;\n    }\n    if (a.leaf() && z.leaf()) {\n      counter_add(work_.leaf_pairs);\n      const auto aid = order_[a.range.first];\n      const auto zid = order_[z.range.first];\n      if (aid != zid && universal_witness(lane_, points_[aid], opposite_,\n                                          points_[zid], work_.predicates)) {\n        add(anchors, 1);\n      }\n      return;\n    }\n    const auto decision = classify_witness_block(\n        lane_, a.box, opposite_, z.box, work_.predicates);\n    if (decision == BlockDecision::Credit) {\n      // H>0 excludes any shared site between these boxes. Every site in Z\n      // is therefore a distinct non-self witness of every anchor in U.\n      add(anchors, z.range.size());\n      counter_add(work_.credited_blocks);\n      return;\n    }\n    if (decision == BlockDecision::NoCredit) {\n      counter_add(work_.noncredit_blocks);\n      return;\n    }\n    if (!a.leaf() && (z.leaf() || a.range.size() >= z.range.size())) {\n      push(anchors);\n      visit(a.left, witnesses, depth + 1);\n      visit(a.right, witnesses, depth + 1);\n      a.minimum = std::min(nodes_[a.left].minimum, nodes_[a.right].minimum);\n    } else {\n      visit(anchors, z.left, depth + 1);\n      visit(anchors, z.right, depth + 1);\n    }\n  }\n\n  void extract(std::size_t index, std::vector<std::uint8_t>& values) {\n    const auto& node = nodes_[index];\n    if (node.leaf()) {\n      values[order_[node.range.first] - range_.first] = node.minimum;\n      return;\n    }\n    push(index);\n    extract(node.left, values);\n    extract(node.right, values);\n  }\n};\n\n[[nodiscard]] std::vector<Range> group(std::span<const std::uint8_t> credits,\n                                      Range original, std::uint8_t need,\n                                      std::vector<std::size_t>& order) {\n  std::vector<Range> groups(std::size_t{need} + 1);\n  for (const auto credit : credits) {\n    ++groups[credit].last;\n  }\n  std::size_t offset = 0;\n  for (auto& range : groups) {\n    const auto count = range.last;\n    range = {offset, offset + count};\n    offset += count;\n  }\n  auto cursors = groups;\n  order.resize(credits.size());\n  for (std::size_t i = 0; i < credits.size(); ++i) {\n    order[cursors[credits[i]].first++] = original.first + i;\n  }\n  return groups;\n}\n\n}  // namespace\n\nRectanglePtr prepare_rectangle(RectangleInput input, unsigned kmax,\n                               unsigned separation_s) {\n  if (kmax == 0 || kmax > 10 || separation_s == 0) {\n    throw std::invalid_argument(\"mhgp8 P0 requires Kmax in [1,10] and s>0\");\n  }\n  const auto valid_range = [&input](Range range) {\n    return range.first < range.last && range.last <= input.points.size();\n  };\n  if (!valid_range(input.a) || !valid_range(input.b) ||\n      (input.a.first < input.b.last && input.b.first < input.a.last)) {\n    throw std::invalid_argument(\"mhgp8 requires nonempty disjoint in-range factors\");\n  }\n  auto result = std::shared_ptr<PreparedRectangle>(new PreparedRectangle());\n  result->points_ = std::move(input.points);\n  result->a_ = input.a;\n  result->b_ = input.b;\n  result->kmax_ = kmax;\n  result->separation_s_ = separation_s;\n  result->box_a_ = bounds(result->points_, input.a);\n  result->box_b_ = bounds(result->points_, input.b);\n  i64 gap2 = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const auto& a = result->box_a_;\n    const auto& b = result->box_b_;\n    const i64 gap = std::max({i64{0}, static_cast<i64>(a.low[axis]) - b.high[axis],\n                             static_cast<i64>(b.low[axis]) - a.high[axis]});\n    gap2 += gap * gap;\n  }\n  const auto diameter2 = std::max(diameter_squared(result->box_a_),\n                                  diameter_squared(result->box_b_));\n  if (static_cast<i128>(gap2) < static_cast<i128>(separation_s) * separation_s * diameter2) {\n    throw std::invalid_argument(\"mhgp8 rectangle fails declared box separation\");\n  }\n  std::vector<u64> keys;\n  keys.reserve(result->points_.size());\n  for (const auto& point : result->points_) {\n    counter_add(result->work_.validation_points);\n    keys.push_back((static_cast<u64>(point.x) << 32) |\n                   (static_cast<u64>(point.y) << 16) | point.z);\n  }\n  std::sort(keys.begin(), keys.end(), [&result](u64 a, u64 b) {\n    counter_add(result->work_.uniqueness_comparisons);\n    return a < b;\n  });\n  if (std::adjacent_find(keys.begin(), keys.end()) != keys.end()) {\n    throw std::invalid_argument(\"mhgp8 P0 requires distinct u16 sites\");\n  }\n  std::sort(input.core_candidates.begin(), input.core_candidates.end());\n  if (std::adjacent_find(input.core_candidates.begin(), input.core_candidates.end()) !=\n      input.core_candidates.end()) {\n    throw std::invalid_argument(\"mhgp8 core proposals contain duplicate IDs\");\n  }\n  for (const auto id : input.core_candidates) {\n    if (id >= result->points_.size() || contains(input.a, id) || contains(input.b, id)) {\n      throw std::invalid_argument(\"mhgp8 core proposals must be outside both factors\");\n    }\n  }\n  for (const auto lane : {Lane::Q2, Lane::Q3, Lane::Q4}) {\n    auto& credit = result->core_[arity(lane) - 2];\n    for (const auto id : input.core_candidates) {\n      if (credit == result->threshold(lane)) {\n        break;\n      }\n      if (box_witness(lane, result->box_a_, result->box_b_, result->points_[id],\n                       result->work_.predicates)) {\n        ++credit;\n      }\n    }\n  }\n  return result;\n}\n\nstd::uint8_t PreparedRectangle::threshold(Lane lane) const {\n  const auto q = arity(lane);\n  return q > kmax_ + 1 ? 0 : static_cast<std::uint8_t>(kmax_ + 2 - q);\n}\n\nstd::uint8_t PreparedRectangle::core_credit(Lane lane) const {\n  return core_[arity(lane) - 2];\n}\n\nCreditPlan make_credit_plan(RectanglePtr rectangle, Lane lane, Strategy strategy) {\n  require_valid_lane(lane);\n  if (!rectangle || (strategy != Strategy::Pool && strategy != Strategy::DualBlocks &&\n                     strategy != Strategy::Tubes)) {\n    throw std::invalid_argument(\"mhgp8 requires an owned rectangle and valid strategy\");\n  }\n  CreditPlan plan;\n  plan.rectangle_ = std::move(rectangle);\n  plan.lane_ = lane;\n  plan.strategy_ = strategy;\n  const auto& r = *plan.rectangle_;\n  plan.threshold_ = r.threshold(lane);\n  plan.core_ = r.core_credit(lane);\n  plan.total_ = pair_count(r.a_range().size(), r.b_range().size());\n  const auto need = static_cast<std::uint8_t>(plan.threshold_ - plan.core_);\n  plan.a_.resize(r.a_range().size(), 0);\n  plan.b_.resize(r.b_range().size(), 0);\n  if (need == 0) {\n    return plan;\n  }\n  if (strategy == Strategy::Pool) {\n    plan.a_ = pool_credits(r, r.a_range(), r.a_box(), r.b_box(), lane, need, plan.work_);\n    plan.b_ = pool_credits(r, r.b_range(), r.b_box(), r.a_box(), lane, need, plan.work_);\n  } else if (strategy == Strategy::DualBlocks) {\n    plan.a_ = DualTree(r.points(), r.a_range(), r.b_box(), lane, need, plan.work_).run();\n    plan.b_ = DualTree(r.points(), r.b_range(), r.a_box(), lane, need, plan.work_).run();\n  } else {\n    plan.a_ = tube_detail::credits(r, r.a_range(), r.a_box(), r.b_box(), lane, need, plan.work_);\n    plan.b_ = tube_detail::credits(r, r.b_range(), r.b_box(), r.a_box(), lane, need, plan.work_);\n  }\n  const auto a_groups = group(plan.a_, r.a_range(), need, plan.a_order_);\n  const auto b_groups = group(plan.b_, r.b_range(), need, plan.b_order_);\n  for (std::size_t a = 0; a < need; ++a) {\n    if (a_groups[a].size() == 0) {\n      continue;\n    }\n    for (std::size_t b = 0; a + b < need; ++b) {\n      if (b_groups[b].size() != 0) {\n        plan.blocks_.push_back({a_groups[a], b_groups[b]});\n        counter_add(plan.candidates_, pair_count(a_groups[a].size(), b_groups[b].size()));\n      }\n    }\n  }\n  return plan;\n}\n\nbool CreditPlan::keeps(std::size_t a_id, std::size_t b_id) const {\n  const auto a = rectangle_->a_range();\n  const auto b = rectangle_->b_range();\n  if (!contains(a, a_id) || !contains(b, b_id)) {\n    throw std::invalid_argument(\"mhgp8 pair IDs do not belong to this ordered rectangle\");\n  }\n  return core_ + a_[a_id - a.first] + b_[b_id - b.first] < threshold_;\n}\n\n}  // namespace mhgp8\n"
+    },
+    "pipeline/tube_credits.hpp": {
+      "path": "morsehgp3D_v8/src/pipeline/tube_credits.hpp",
+      "sha256": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c",
+      "text": "#pragma once\n\n#include \"local_credits.hpp\"\n\n#include <algorithm>\n#include <array>\n#include <limits>\n#include <stdexcept>\n#include <vector>\n\nnamespace mhgp8::tube_detail {\n\n// New C++ realization of the independently supplied geometric certificate:\n// audits/P0_TUBES_ET_RANGS.md, sections 1-3. No historical qualification is\n// inherited. This first interface pays its grid/sort separately for each lane.\n// It counts suffix populations, never expands their witness identities.\nstruct Record {\n  std::array<i64, 3> cell{};\n  i64 projection{};\n  std::size_t point_id{};\n  std::array<i64, 3> transverse{};\n};\n\n[[nodiscard]] inline i64 diameter_squared(const Box3& box) {\n  i64 result = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const i64 delta = static_cast<i64>(box.high[axis]) -\n                      static_cast<i64>(box.low[axis]);\n    result += delta * delta;\n  }\n  return result;\n}\n\n[[nodiscard]] inline std::vector<std::uint8_t> credits(\n    const PreparedRectangle& rectangle, Range range, const Box3& own,\n    const Box3& opposite, Lane lane, std::uint8_t need, Work& work) {\n  require_valid_lane(lane);\n  require_valid_box(own);\n  require_valid_box(opposite);\n  const auto points = rectangle.points();\n  if (range.first > range.last || range.last > points.size()) {\n    throw std::invalid_argument(\"mhgp8 tube range is outside its owner\");\n  }\n  std::vector<std::uint8_t> result(range.size(), 0);\n  if (need == 0 || range.first == range.last) {\n    return result;\n  }\n\n  std::array<i64, 3> direction{};\n  i64 direction_squared = 0;\n  i64 maximum_component = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    direction[axis] = static_cast<i64>(opposite.low[axis]) +\n                      static_cast<i64>(opposite.high[axis]) -\n                      static_cast<i64>(own.low[axis]) -\n                      static_cast<i64>(own.high[axis]);\n    direction_squared += direction[axis] * direction[axis];\n    const i64 magnitude = direction[axis] < 0 ? -direction[axis] : direction[axis];\n    maximum_component = std::max(maximum_component, magnitude);\n  }\n\n  // d=2(c_opposite-c_own), whereas each box diagonal has length 2R.\n  // Thus D>=10R is d^2>=100*max(diagonal^2), NOT 25 times that quantity.\n  // The factory also admits weaker separation settings. Do not silently use\n  // the tube lemma on those: zero is still a valid minorant and retains the\n  // complete residual. This is an observable fallback, not an inactive lane.\n  const i64 maximum_diameter_squared =\n      std::max(diameter_squared(own), diameter_squared(opposite));\n  if (direction_squared == 0 ||\n      static_cast<i128>(direction_squared) <\n          100 * static_cast<i128>(maximum_diameter_squared)) {\n    counter_add(work.tube_separation_fallbacks);\n    return result;\n  }\n\n  // M=65535: |d_i|<=2M, |d.p|<=6M^2, |d cross p|_i<=4M^2.\n  // Differences along the same d satisfy |Delta|<=6M^2 and transverse\n  // coordinate spans <=4M^2. Q<=48M^4, so 16Q and 9Delta^2 are <2^74.\n  // Products in Q and the acceptance test are widened BEFORE multiplying.\n  // Raw coordinates, signed differences, cell offsets and width fit i64.\n  const i64 width = 4 * maximum_component;\n  std::array<i64, 3> origin{\n      std::numeric_limits<i64>::max(), std::numeric_limits<i64>::max(),\n      std::numeric_limits<i64>::max()};\n  std::vector<Record> records;\n  records.reserve(range.size());\n  for (std::size_t id = range.first; id < range.last; ++id) {\n    const Point3& point = points[id];\n    Record record;\n    record.point_id = id;\n    for (std::size_t axis = 0; axis < 3; ++axis) {\n      if (point[axis] < own.low[axis] || point[axis] > own.high[axis]) {\n        throw std::invalid_argument(\"mhgp8 tube point is outside its own box\");\n      }\n      record.projection += direction[axis] * static_cast<i64>(point[axis]);\n      const std::size_t j = (axis + 1) % 3;\n      const std::size_t k = (axis + 2) % 3;\n      record.transverse[axis] = direction[j] * static_cast<i64>(point[k]) -\n                                direction[k] * static_cast<i64>(point[j]);\n      origin[axis] = std::min(origin[axis], record.transverse[axis]);\n    }\n    records.push_back(record);\n    counter_add(work.tube_records);\n  }\n  for (Record& record : records) {\n    for (std::size_t axis = 0; axis < 3; ++axis) {\n      // Translation by the common minimum makes the numerator nonnegative:\n      // C++ integer division is exactly the desired floor, even when the\n      // original cross-product coordinates or d itself were negative.\n      record.cell[axis] = (record.transverse[axis] - origin[axis]) / width;\n    }\n  }\n  std::sort(records.begin(), records.end(), [&work](const Record& left,\n                                                  const Record& right) {\n    counter_add(work.tube_sort_comparisons);\n    if (left.cell != right.cell) {\n      return left.cell < right.cell;\n    }\n    if (left.projection != right.projection) {\n      return left.projection < right.projection;\n    }\n    return left.point_id < right.point_id;\n  });\n\n  const i128 q_coefficient = lane == Lane::Q4 ? 16 : 1;\n  const i128 gap_coefficient = lane == Lane::Q3 ? 1 : 9;\n  std::size_t begin = 0;\n  while (begin < records.size()) {\n    std::size_t end = begin + 1;\n    std::array<i64, 3> low = records[begin].transverse;\n    std::array<i64, 3> high = low;\n    while (end < records.size() && records[end].cell == records[begin].cell) {\n      for (std::size_t axis = 0; axis < 3; ++axis) {\n        low[axis] = std::min(low[axis], records[end].transverse[axis]);\n        high[axis] = std::max(high[axis], records[end].transverse[axis]);\n      }\n      ++end;\n    }\n    counter_add(work.tube_cells);\n    i128 bound = 0;\n    for (std::size_t axis = 0; axis < 3; ++axis) {\n      const i64 span = high[axis] - low[axis];\n      bound += static_cast<i128>(span) * span;\n    }\n\n    // For increasing anchor projections the first admissible witness never\n    // moves backwards. The loop pays <=2m tests in all cells, not m^2; every\n    // success denotes a suffix whose cardinal is obtained by subtraction.\n    std::size_t first = begin;\n    for (std::size_t anchor = begin; anchor < end; ++anchor) {\n      while (first < end) {\n        counter_add(work.tube_sweep_tests);\n        const i64 delta = records[first].projection - records[anchor].projection;\n        if (delta > 0 && q_coefficient * bound <=\n                             gap_coefficient * static_cast<i128>(delta) * delta) {\n          break;\n        }\n        ++first;\n      }\n      const auto count = static_cast<std::uint8_t>(\n          std::min<std::size_t>(need, end - first));\n      result[records[anchor].point_id - range.first] = count;\n      // Sum of SATURATED per-anchor credits, not expanded witness identities.\n      counter_add(work.tube_credited_sites, count);\n    }\n    begin = end;\n  }\n  return result;\n}\n\n}  // namespace mhgp8::tube_detail\n"
+    }
+  },
+  "gate": {
+    "path": "morsehgp3D_v8/audits/p0_owner_gate.cpp",
+    "sha256": "6fdbc188cbe4e7ef7597866ec771d47ceea01ea2550808dd033a56a697b94ef0",
+    "text": "#include \"pipeline/local_credits.hpp\"\n\n#include <cstddef>\n#include <iostream>\n#include <memory>\n#include <stdexcept>\n#include <string_view>\n#include <type_traits>\n\nnamespace {\n\nvoid require(bool condition, const char* cause) {\n  if (!condition) throw std::runtime_error(cause);\n}\n\nmhgp8::RectangleInput input(bool square) {\n  mhgp8::RectangleInput result;\n  if (square) {\n    result.points = {{0, 0, 0}, {0, 10, 0}, {1000, 0, 0}, {1000, 10, 0}};\n  } else {\n    result.points = {{0, 0, 0}, {1, 0, 0}, {100, 0, 0}, {101, 0, 0}};\n  }\n  result.a = {0, 2};\n  result.b = {2, 4};\n  return result;\n}\n\n// Independent bounded q2 judge: direct dot product, no product predicate.\n// All coordinates here are <=1000, so these products fit signed long long.\nbool alive(const mhgp8::PreparedRectangle& rectangle,\n           std::size_t a, std::size_t b) {\n  const auto points = rectangle.points();\n  unsigned interior = 0;\n  for (std::size_t z = 0; z < points.size(); ++z) {\n    if (z == a || z == b) continue;\n    long long h = 0;\n    for (std::size_t axis = 0; axis < 3; ++axis) {\n      const auto u = static_cast<long long>(points[z][axis]) - points[a][axis];\n      const auto v = static_cast<long long>(points[b][axis]) - points[z][axis];\n      h += u * v;\n    }\n    interior += static_cast<unsigned>(h > 0);\n  }\n  return interior < rectangle.threshold(mhgp8::Lane::Q2);\n}\n\nstd::size_t lost_pairs(const mhgp8::CreditPlan& plan) {\n  std::size_t count = 0;\n  for (std::size_t a = 0; a < 2; ++a)\n    for (std::size_t b = 2; b < 4; ++b)\n      count += static_cast<std::size_t>(alive(plan.rectangle(), a, b) &&\n                                       !plan.keeps(a, b));\n  return count;\n}\n\ntemplate <typename Rectangle>\nvoid run() {\n  const auto source = mhgp8::prepare_rectangle(input(false), 1, 8);\n  const auto replacement = mhgp8::prepare_rectangle(input(true), 1, 8);\n  const auto first = mhgp8::make_credit_plan(source, mhgp8::Lane::Q2,\n                                            mhgp8::Strategy::DualBlocks);\n  const auto second = mhgp8::make_credit_plan(replacement, mhgp8::Lane::Q2,\n                                             mhgp8::Strategy::DualBlocks);\n  require(first.candidate_pairs() == 1 && second.candidate_pairs() == 4,\n          \"owner.nominal_pair_counts\");\n  require(lost_pairs(first) == 0 && lost_pairs(second) == 0,\n          \"owner.nominal_geometry\");\n  if constexpr (std::is_copy_constructible_v<Rectangle> &&\n                std::is_copy_assignable_v<Rectangle>) {\n    // These are ordinary public API operations, with no const_cast or UB.\n    auto mutable_owner = std::make_shared<Rectangle>(*source);\n    const auto plan = mhgp8::make_credit_plan(mutable_owner, mhgp8::Lane::Q2,\n                                             mhgp8::Strategy::DualBlocks);\n    require(lost_pairs(plan) == 0, \"owner.before_assignment\");\n    *mutable_owner = *replacement;\n    require(lost_pairs(plan) == 3, \"owner.mutation_not_exercised\");\n    require(lost_pairs(first) == 0, \"owner.source_was_not_copied\");\n    std::cout << \"{\\\"status\\\":\\\"observed_owner_rebinding\\\",\\\"lost_q2_pairs\\\":3,\"\n                 \"\\\"nominal_pairs\\\":[1,4],\\\"product_scope\\\":\\\"P0_only\\\",\"\n                 \"\\\"full_qualification\\\":false,\\\"gcp_used\\\":false}\\n\";\n  } else {\n    require(!std::is_copy_constructible_v<Rectangle> &&\n            !std::is_copy_assignable_v<Rectangle> &&\n            !std::is_move_constructible_v<Rectangle> &&\n            !std::is_move_assignable_v<Rectangle>, \"owner.special_members_open\");\n    auto shared_copy = source;\n    const auto plan = mhgp8::make_credit_plan(shared_copy, mhgp8::Lane::Q2,\n                                             mhgp8::Strategy::DualBlocks);\n    require(plan.candidate_pairs() == 1 && lost_pairs(plan) == 0,\n            \"owner.shared_factory_use\");\n    std::cout << \"{\\\"status\\\":\\\"passed_owner_closure\\\",\\\"closed_special_members\\\":4,\"\n                 \"\\\"nominal_pairs\\\":[1,4],\\\"product_scope\\\":\\\"P0_only\\\",\"\n                 \"\\\"full_qualification\\\":false,\\\"gcp_used\\\":false}\\n\";\n  }\n}\n\n}  // namespace\n\nint main(int argc, char** argv) {\n  if (argc != 2 || std::string_view(argv[1]) != \"--selftest\") return 2;\n  try {\n    run<mhgp8::PreparedRectangle>();\n    return 0;\n  } catch (const std::exception& error) {\n    std::cerr << error.what() << '\\n';\n    return 1;\n  }\n}\n"
+  },
+  "local_patch": {
+    "path": "pipeline/local_credits.hpp",
+    "old": "  PreparedRectangle() = default;",
+    "new": "  PreparedRectangle() = default;\n  PreparedRectangle(const PreparedRectangle&) = delete;\n  PreparedRectangle(PreparedRectangle&&) = delete;\n  PreparedRectangle& operator=(const PreparedRectangle&) = delete;\n  PreparedRectangle& operator=(PreparedRectangle&&) = delete;"
+  },
+  "temporary_workspace_removed": true,
+  "live_source_after": {
+    "core/types.hpp": {
+      "path": "/workspaces/E-HGP/morsehgp3D_v8/src/core/types.hpp",
+      "sha256": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+      "bytes": 2654
+    },
+    "spindle/predicates.hpp": {
+      "path": "/workspaces/E-HGP/morsehgp3D_v8/src/spindle/predicates.hpp",
+      "sha256": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+      "bytes": 9194
+    },
+    "pipeline/local_credits.hpp": {
+      "path": "/workspaces/E-HGP/morsehgp3D_v8/src/pipeline/local_credits.hpp",
+      "sha256": "791dfe12079278e31904b02552dbc7d852ec6ddcc610e9ab4d1489ccb5df6e65",
+      "bytes": 5341
+    },
+    "pipeline/local_credits.cpp": {
+      "path": "/workspaces/E-HGP/morsehgp3D_v8/src/pipeline/local_credits.cpp",
+      "sha256": "b8a7eef8ca112ed0921772e4a7d380d802f479814ca686da8a1a856647a626c6",
+      "bytes": 15285
+    },
+    "pipeline/tube_credits.hpp": {
+      "path": "/workspaces/E-HGP/morsehgp3D_v8/src/pipeline/tube_credits.hpp",
+      "sha256": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c",
+      "bytes": 6854
+    }
+  }
+}

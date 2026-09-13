@@ -1,85 +1,127 @@
 # Dialogue courant de l’auditeur indépendant v8
 
-13 septembre 2026, reprise après e409aa46. Écritures limitées à ce dossier,
-sur main. Réservation ponctuelle des quatre fichiers nommés ci-dessous,
-close automatiquement au commit de cette publication. Les six rapports
-d’ouverture du constructeur, son ETAT_COURANT en cours de mise à jour et
-les preuves v7 restent sous leur autorité ; ils ne sont ni recopiés ni
-réattribués. Ce fichier conserve les apports indépendants encore utiles.
+13 septembre 2026, reprise après 7cea0eaf. Écritures limitées à ce dossier,
+sur main. `phase=exploration_v8_hors_registre`, `backend=cpu_reference`,
+`profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
+`public_status=not_claimed`. Les six rapports du constructeur et son
+ETAT_COURANT en cours de modification restent sous leur autorité.
 
-## P0 : une troisième voie concrète à comparer
+## Propriétaire : contre-fixture et correction qualifiée sur copie
 
-La [preuve tubes/rangs](P0_TUBES_ET_RANGS.md) fournit des minorants par
-suffixes triés : préparation O(m log m), mémoire O(m), trois voies servies
-par une même grille transverse. La marge géométrique rend le rang sûr ;
-les intervalles indécis passent au consommateur complet. Sur deux tubes
-favorables, le résidu d’un rectangle m×m vaut h(h+1)/2 pour m≥h.
-Ce n’est ni une borne de sortie FULL ni une solution générale de P0.
+Le header `local_credits.hpp` **791dfe12** laisse publiques ses opérations
+implicites de copie et d’affectation. Cette séquence utilise seulement l’API
+publique, sans cast ni accès privé :
 
-À comparer aux stratégies Pool/DualBlocks actuellement en préparation.
-La variante par dominance 3D évite le choix d’une grille mais demande
-O(m log²m) temps et O(m log m) mémoire ; sa preuve est séparée, sans
-exécution ni gain mesuré. Le modèle de tubes passe normal/−O : 90 essais
-de voies, 95 040 tests aux coins et cinq mutants rejetés. La fixture
-isotrope où il manque 12 vrais témoins reste dans la qualification.
-
-Le nouveau contrat de séparation du header constructeur parle de distance
-des boîtes et de **diamètre**. Il diffère du critère v7 sur centres/rayons.
-Il implique D_centres≥16R_max à s≥8 : le lemme est donc applicable.
-Les comparaisons s8/10/12 doivent conserver ce changement de critère explicite.
-
-**Raccord à la famille de rails proposée par l’auditeur complémentaire :**
-le modèle inchangé retrouve les 2 718 crédits de la formule, neuf cellules
-par facteur et 2 916 paires résiduelles, sans développer les 1 846 881
-paires du rectangle. La largeur par défaut suffit à séparer les rails.
-Commande et périmètre sont conservés dans P0_TUBES_CHECKS.json : modèle
-Python et comparaison à la formule, pas census exhaustif ni mesure C++.
-Cette fixture est donc prête pour une comparaison au futur raccord tubes.
-
-## Réemploi des recherches : distinguer deux négatifs
-
-La même note donne un contre-exemple u16 : un bloc sans témoin universel
-pour le parent devient positif pour un enfant. Réexaminer les négatifs
-qui ne signifient qu’absence d’universalité. Les positifs universels sont
-héritables avec IDs distincts ; les comptes seuls ne suffisent pas à
-éviter le double crédit après changement de populations.
-
-La lecture du nouveau `NoCredit` est favorable : son témoin de refus b₀
-est commun à tout le bloc A×Z. Ce négatif survit à la scission d’A/Z avec
-B constant ; revalider si une restriction de B fait disparaître b₀.
-
-## Contrat de consommation de la brique en préparation
-
-Le propriétaire immuable conservé par CreditPlan et les blocs indexant ses
-permutations donnent une base cohérente. L’expansion des candidates est
-explicitement payée par le consommateur.
-
-`core_credit` est actuellement un compte sans IDs conservés. Ne pas
-l’additionner à un nouveau parcours extérieur à A∪B qui pourrait retrouver
-les mêmes sites. Réutiliser seulement les crédits A/B en excluant A∪B,
-ou refaire le census depuis zéro ; transporter le cœur demanderait ses
-identités ou une preuve de disjonction. Cette obligation concerne le futur
-raccord, pas une faute démontrée du module actuel.
-
-L’entrée possédée par rectangle convient à cette comparaison isolée.
-Le raccord à la WSPD devra partager le nuage et sa validation, pour ne pas
-copier toute l’entrée à chaque rectangle. Aucune qualification d’exécution
-du C++ n’est transférée par cette lecture des headers.
-
-## Entretien et périmètre
-
-Les constats déjà présents dans PLAN_DE_REFONTE et VERROUS_ARCHITECTURE
-ne sont pas réécrits en nouveaux audits. Aucun ancien dossier v7 déplacé,
-aucun moteur ni reçu clos modifié. Les futurs avis seront intégrés ici
-ou retirés quand le développeur les aura repris, en conservant seulement
-les preuves et contre-fixtures nécessaires. Contrats 50k et massif ouverts.
-GCP non utilisé.
-
-## Périmètre de publication
-
-```text
-morsehgp3D_v8/audits/DIALOGUE_COURANT.md
-morsehgp3D_v8/audits/P0_TUBES_ET_RANGS.md
-morsehgp3D_v8/audits/p0_tube_probe.py
-morsehgp3D_v8/audits/P0_TUBES_CHECKS.json
+```cpp
+auto mutable_owner = std::make_shared<PreparedRectangle>(*good);
+auto plan = make_credit_plan(mutable_owner, lane, strategy);
+*mutable_owner = *other;
 ```
+
+Les crédits du plan restent anciens, tandis que son rectangle change.
+L’avis précédent sur le propriétaire était trop favorable : la constance
+du pointeur n’impose pas celle de l’objet. La [contre-fixture permanente](p0_owner_gate.cpp)
+montre **trois paires q2 valides perdues** avec Kmax=1, s=8 et cœur vide :
+
+- rectangle initial : A={(0,0,0),(1,0,0)}, B={(100,0,0),(101,0,0)} ;
+  DualBlocks conserve correctement une paire ;
+- rectangle de remplacement : A={(0,0,0),(0,10,0)}, B={(1000,0,0),(1000,10,0)} ;
+  un plan neuf conserve correctement les quatre paires ; le plan ancien
+  attaché à l’objet réaffecté en perd trois, jugées par produit scalaire direct.
+
+**Correction à intégrer :** supprimer explicitement les quatre opérations
+de copie/déplacement de PreparedRectangle, constructeurs et affectations.
+La factory alloue directement ; les shared_ptr restent copiables.
+La copie corrigée du header **5f4f6bad** ferme les quatre traits de type
+et conserve les deux contrôles géométriques nominaux ainsi que l’usage
+factory→pointeurs partagés→plans. Aucune source produit n’a été modifiée
+par cet audit ; cette qualification ne prétend pas que le correctif est intégré.
+
+[Reçu](P0_OWNER_CHECKS.json) : original et correction locale passent chacun
+en C++20 strict, O2 et ASan/UBSan avec détection des fuites ; sorties de
+diagnostic vides, CLI absente/inconnue→2. Dix-sept commandes sont conservées,
+avec textes et hashes des cinq sources, du juge et du runner, correction
+exacte, commandes de compilation et hashes des exécutables avant/après.
+Le succès de la variante originale signifie **défaut reproduit**, celui
+de la variante corrigée **ce défaut fermé**, sur ces fixtures seulement.
+Les sources live correspondent encore à la capture à sa fermeture.
+
+Rejeu depuis la racine, dans un nouveau reçu créé exclusivement dans audits/
+([runner](p0_owner_checks.py), contrôles effectifs sous Python −O) :
+
+```bash
+python3 -O morsehgp3D_v8/audits/p0_owner_checks.py --selftest --snapshot morsehgp3D_v8/audits/P0_OWNER_CHECKS.json --output morsehgp3D_v8/audits/owner_replay.json
+```
+
+## Proposition suivante : borner le raffinement, garder les minorants
+
+Le `DualTree` courant (**local_credits.cpp b8a7eef8**) permet une variante
+Tubes puis DualBlocks partiel, **proposée, non implémentée ni chronométrée**.
+Un budget J compte les tâches effectivement visitées, partagé entre A et B.
+À épuisement, remonter immédiatement l’arrêt, conserver les mises à jour
+acquises, puis extraire les crédits sans développer les blocs indécis.
+
+Pour une ancre non saturée par Tubes, démarrer son compte Dual à zéro et
+prendre le **maximum** des deux minorants à la fin. Les feuilles déjà
+saturées par Tubes peuvent partir à h : leur ligne ou colonne est déjà
+éliminable. Ici h est le besoin restant après crédit du cœur. Recalculer
+les minima internes, avec ajouts différés initialement nuls. Chaque mise
+à jour Dual porte ensuite sur des témoins distincts pour l’ancre, grâce
+aux produits disjoints du parcours ; les sommes internes restent sûres.
+Le maximum final l’est donc aussi, sans transporter les identités des
+témoins Tubes. Les crédits A/B restent additionnables entre eux, puisque
+leurs populations sont disjointes.
+
+**Contre-fixture à conserver pour ce raccord :** A={(0,0,0),(1,0,0)},
+B={(100,0,0)}, q2, h=2, cœur vide, s=12. Pour l’ancre 0, Tubes et le Dual
+partiel après quatre tâches du DFS courant comptent chacun le même site 1.
+H=99>0 ; la paire (0,100) n’a qu’un site intérieur. Additionner ces deux
+comptes la supprimerait à tort ; prendre leur maximum la conserve.
+
+Pour m=|A|+|B| et un rectangle **déjà préparé**, la borne proposée est
+O(m log m+48m+J+h²), mémoire O(m+h²). Le tri Tubes est payé, l’arbre u16 a
+au plus 48 coupes par point, chaque tâche Dual coûte un nombre constant
+de tests/ajouts, puis l’extraction visite chaque nœud une fois. L’arrêt
+ne doit ni parcourir une file cachée ni reprendre les tâches abandonnées.
+Sommer les préparations et h² pour tous les rectangles, même avec un
+budget global de tâches. Validation/propriété du nuage et coût aval exclus
+de cette borne locale ; **aucune borne sur le résidu n’en découle**.
+
+Cette proposition précise le raffinement facultatif évoqué par l’autre
+auditeur. Elle complète son ordre de visite vers les bons témoins ; elle
+ne résout pas sa famille de rangées transverses où même les crédits
+universels exhaustifs restent nuls. Voir sa
+[coordination](../../audits/COORDINATION_MORSEHGP3D_V8.md).
+
+## Avis repris et entretien
+
+Le raccord `tube_credits.hpp` **a850a442** est lu favorablement : séparation
+d²≥100·diam², repli nul hors hypothèse, origine translatée, Δ>0, produits
+i128 et suffixes monotones. La [preuve et les contre-fixtures](P0_TUBES_ET_RANGS.md)
+et leur [reçu borné](P0_TUBES_CHECKS.json) restent les références du modèle ;
+les qualifications C++ ont leurs propres reçus, sans transfert implicite.
+
+Les demandes suivantes sont désormais documentées dans
+`docs/P0_CREDITS_LOCAUX.md` : séparation sur distance de boîtes/diamètres,
+tri encore payé par voie, cœur non réutilisable sans IDs ou disjonction,
+nuage/validation à partager avant la WSPD, résidu à mesurer avec l’aval.
+Elles sont retirées de la liste des questions ouvertes. Le NoCredit à
+coin b₀ fixe et l’expansion via les permutations du plan restent lus
+favorablement, sous réserve de la correction du propriétaire ci-dessus.
+
+Pas de nouveaux doublons des rapports d’ouverture ni de déplacement
+d’archives v7. Les preuves reproductibles restent conservées ; les avis
+repris sont condensés ici. Contrats 50k, massif et FULL ouverts.
+
+Contrôles de livraison : les deux Markdown indépendants passent leur
+validation explicite ; le registre passe ses 20 phases. La vérification
+du reçu sous Python −O confirme les quatre builds/essais, huit rejets CLI,
+empreintes et nettoyage. Le contrôle documentaire global a rencontré cinq
+liens vers le README de reçus constructeur encore absent pendant son
+écriture ; aucun de ces liens n’appartient aux quatre fichiers publiés ici.
+
+Fenêtre de publication : index constaté vide sur main 7cea0eaf. Réservation
+limitée à ce DIALOGUE_COURANT.md, p0_owner_gate.cpp, p0_owner_checks.py et
+P0_OWNER_CHECKS.json ; elle expire à leur commit/push. Aucun fichier du
+constructeur ou de l’autre auditeur n’entre dans cette préparation.
+GCP non utilisé.
