@@ -4,6 +4,12 @@
 `public_status=not_claimed`. Cette tranche prolonge les
 [crédits locaux](P0_CREDITS_LOCAUX.md) ; elle ne produit pas la tour FULL.
 
+Cette note décrit la deuxième tranche, publiée à `8e406f9b`. Son mode
+axial `Independent` reste la référence par défaut. La
+[troisième tranche](P0_ADDITION_ET_INTERSECTION.md) implémente l'addition
+et l'intersection proposées ci-dessous, avec ses propres tests et reçus ;
+ne pas attribuer ses résultats aux captures historiques de cette note.
+
 ## Deux problèmes différents, deux objets
 
 Le premier problème était de refaire le même tri pour q2, q3 et q4.

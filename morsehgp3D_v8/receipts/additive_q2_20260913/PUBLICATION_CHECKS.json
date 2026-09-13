@@ -1,0 +1,78 @@
+{
+  "schema": "mhgp8_additive_index_publication_v1",
+  "status": "passed",
+  "public_status": "not_claimed",
+  "gcp_used": false,
+  "head_at_close": "4f8017f7bc7f00f54e6f328908710ee06e0fa33a",
+  "export_root": "/workspaces/E-HGP/build/v8_index_additive_20260913.KTAC7N/tree",
+  "private_index": "/workspaces/E-HGP/build/v8_index_additive_20260913.KTAC7N/index",
+  "index_entries_sha256_before_and_after": "bf14c38a7b93c32214df63846705e64c930d589cc54d77a8177ab543499a8ada",
+  "qualification_source_pins_matched_in_export_and_staged_blobs": 36,
+  "build_directory": "/workspaces/E-HGP/build/v8_index_additive_20260913.KTAC7N/build",
+  "compiler": "GCC 13.3.0",
+  "test_command": [
+    "ctest",
+    "--test-dir",
+    "/workspaces/E-HGP/build/v8_index_additive_20260913.KTAC7N/build",
+    "--output-on-failure",
+    "--output-junit",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/additive_q2_20260913/INDEX_TESTS.xml",
+    "--parallel",
+    "2"
+  ],
+  "tests_passed": 26,
+  "tests_failed": 0,
+  "same_gate_outputs_as_primary_release": true,
+  "index_test_xml": "morsehgp3D_v8/receipts/additive_q2_20260913/INDEX_TESTS.xml",
+  "index_test_xml_sha256": "dee62b8e419e6d684d12b5555cfb04567ebd0dae9a94460625b7d1c8da6e2da3",
+  "export_checks": [
+    {
+      "command": [
+        "python",
+        "tools/check_docs.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Validated 534 active Markdown files.",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python",
+        "tools/check_implementation_status.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Validated 20 implementation phases and their gates.",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/bench/check_paired_campaign.py",
+        "morsehgp3D_v8/receipts/additive_q2_20260913"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"status\": \"passed\",\n  \"campaigns\": 3,\n  \"measurements\": 648,\n  \"configurations_including_order\": 576,\n  \"scope\": \"paired_components_only\",\n  \"full_contract_qualified\": false,\n  \"gcp_used\": false,\n  \"provenance_policy\": {\n    \"version\": \"paired_provenance_v1\",\n    \"grouping\": \"homogeneous_build_per_probe_kind_and_common_machine_metadata\",\n    \"cpuinfo_ignored_fields\": [\n      \"cpu MHz\"\n    ],\n    \"machine_identity_scope\": \"recorded_metadata_not_unique_physical_host\"\n  },\n  \"provenance_by_probe_kind\": {\n    \"additive\": {\n      \"build_id\": \"18bc1cb5fb685a4ead662a87d761e9e3baf53ce0aa1a4958ea6db6cbd3a96f6e\",\n      \"machine_id\": \"e80f1a6289419a1cfa85b12ade71c12aba3cf7302a1a6305937631f57314ecf9\",\n      \"probe_sha256\": \"0fced1dbe6d9e63c3caa0d94ca19141aba81dec2919bdece947311e2b3078012\",\n      \"compiler_version\": \"c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\\nCopyright (C) 2023 Free Software Foundation, Inc.\\nThis is free software; see the source for copying conditions.  There is NO\\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\\n\\n\",\n      \"cmake_cache_sha256\": \"d27a0abfa38fc40cf60b435bed331f8c0aa1476cf60c2ac0763b723778adbbd3\",\n      \"cpuinfo_normalized_sha256\": \"caa45cccbc6ea70ee9f72919bd19f8897c628cdfae681376b7fc3e7c3ad19875\",\n      \"platform\": \"Linux-6.8.0-1064-azure-x86_64-with-glibc2.39\",\n      \"logical_cpu_count\": 8,\n      \"threads\": 1\n    }\n  }\n}",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/bench/check_paired_campaign.py",
+        "morsehgp3D_v8/receipts/additive_q2_20260913"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"status\": \"passed\",\n  \"campaigns\": 3,\n  \"measurements\": 648,\n  \"configurations_including_order\": 576,\n  \"scope\": \"paired_components_only\",\n  \"full_contract_qualified\": false,\n  \"gcp_used\": false,\n  \"provenance_policy\": {\n    \"version\": \"paired_provenance_v1\",\n    \"grouping\": \"homogeneous_build_per_probe_kind_and_common_machine_metadata\",\n    \"cpuinfo_ignored_fields\": [\n      \"cpu MHz\"\n    ],\n    \"machine_identity_scope\": \"recorded_metadata_not_unique_physical_host\"\n  },\n  \"provenance_by_probe_kind\": {\n    \"additive\": {\n      \"build_id\": \"18bc1cb5fb685a4ead662a87d761e9e3baf53ce0aa1a4958ea6db6cbd3a96f6e\",\n      \"machine_id\": \"e80f1a6289419a1cfa85b12ade71c12aba3cf7302a1a6305937631f57314ecf9\",\n      \"probe_sha256\": \"0fced1dbe6d9e63c3caa0d94ca19141aba81dec2919bdece947311e2b3078012\",\n      \"compiler_version\": \"c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\\nCopyright (C) 2023 Free Software Foundation, Inc.\\nThis is free software; see the source for copying conditions.  There is NO\\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\\n\\n\",\n      \"cmake_cache_sha256\": \"d27a0abfa38fc40cf60b435bed331f8c0aa1476cf60c2ac0763b723778adbbd3\",\n      \"cpuinfo_normalized_sha256\": \"caa45cccbc6ea70ee9f72919bd19f8897c628cdfae681376b7fc3e7c3ad19875\",\n      \"platform\": \"Linux-6.8.0-1064-azure-x86_64-with-glibc2.39\",\n      \"logical_cpu_count\": 8,\n      \"threads\": 1\n    }\n  }\n}",
+      "stderr": ""
+    }
+  ],
+  "notes": [
+    "Export uses a private index; its refresh never rewrites the shared index against another worktree.",
+    "Only the INDEX_TESTS.xml, this publication receipt and closing documentation are added after that export; compiled source pins are checked against staged blobs.",
+    "The 534 exported active Markdown files exclude the two unrelated untracked v7 documents present in the 536-file working-tree check.",
+    "Independent audit 4f8017f7 changes only its dialogue; root product changes and v6/v7 edits remain separate.",
+    "This verifies staged component delivery, not WSPD completeness, global subquadratic complexity or the 50k FULL contract."
+  ]
+}

@@ -53,6 +53,15 @@ Voir le [contrat de cette tranche](P0_PARTAGE_ET_FILTRE_AXIAL.md).
 
 ## Leçons conservées de l'audit
 
+Troisième tranche : additionner les colonnes exactes est sûr, parce que
+leurs témoins sont disjoints hors de l'ancre. Additionner ensuite ces
+comptes à ceux de Pool/Dual/Tubes ne l'est pas : une fixture à trois sites
+réfute ce double comptage. Leur **intersection de résidus** est implémentée.
+Un filtre plus sélectif peut néanmoins coûter plus cher à construire :
+le nombre de candidates ne remplace pas le temps de sélection plus census.
+La spécialisation aux axes ne résout pas les nuages tournés. Voir le
+[contrat additif](P0_ADDITION_ET_INTERSECTION.md).
+
 | Piste | Pourquoi elle ne suffit pas ou échoue | Remplacement proposé |
 | --- | --- | --- |
 | Garder le graphe induit des seuls minima Gabriel | Supprime des chemins silencieux et retarde certaines fusions | Minima avec connexions datées issues des vrais rattachements |

@@ -3,7 +3,23 @@
 13 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
-État constructeur courant, deuxième tranche P0 : préparation Tubes partagée
+État constructeur courant, troisième tranche P0 : mode axial additif,
+intersection intégrée avec un plan local q2 et suppression des allocations
+aussitôt remplacées. `cpu_reference`, `quantized_u16_input_only`,
+`implementation_v8_p0`, `not_claimed`, hors registre. 26 CTests Release
+et Clang ASan/UBSan ; [648 mesures valides](../receipts/additive_q2_20260913/README.md),
+sans expansion des grandes candidates, census ou FULL. Le résidu des
+nappes alignées diminue mais leur sélection ralentit. L'intersection
+est plus sélective que Pool seul, dont la préparation reste plus rapide.
+Lire le [contrat](../docs/P0_ADDITION_ET_INTERSECTION.md). Les contrelectures
+mathématiques des deux auditeurs sont intégrées ; leurs prototypes de
+census et composition restent distincts des résultats du produit courant.
+La prochaine étape doit mesurer le coût complet du census q2 partagé.
+P0, complexité générale, contrats 50k et massif restent ouverts. GCP non utilisé.
+
+## Historique : deuxième tranche P0 publiée à 8e406f9b
+
+Préparation Tubes partagée
 entre q2/q3/q4 et filtre axial q2 par colonnes exactes et index B.
 `cpu_reference`, `quantized_u16_input_only`, `implementation_v8_p0`,
 `not_claimed`, hors registre. Vingt et un CTests Release/sanitizers et

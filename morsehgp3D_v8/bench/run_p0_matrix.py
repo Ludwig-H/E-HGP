@@ -233,8 +233,10 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--probe", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--probe-kind", choices=["single", "batch", "axis"], default="single")
-    parser.add_argument("--orders", nargs="+", choices=["baseline-first", "batch-first", "axis-first"])
+    parser.add_argument("--probe-kind", choices=["single", "batch", "axis", "additive"], default="single")
+    parser.add_argument("--orders", nargs="+", choices=["baseline-first", "batch-first", "axis-first",
+                                                       "independent-first", "variant-first"])
+    parser.add_argument("--variants", nargs="+", choices=["additive", "intersection"])
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--sizes", type=int, nargs="+", default=[8000, 16000, 32000])
     parser.add_argument("--families", nargs="+",
@@ -247,13 +249,20 @@ def main() -> int:
     parser.add_argument("--kmax", type=int, nargs="+", default=[10])
     parser.add_argument("--s", type=int, nargs="+", default=[8])
     args = parser.parse_args()
+    default_orders = (["independent-first", "variant-first"] if args.probe_kind == "additive" else
+                      ["baseline-first", "axis-first" if args.probe_kind == "axis" else "batch-first"])
     if args.orders is None:
-        args.orders = ["baseline-first", "axis-first" if args.probe_kind == "axis" else "batch-first"]
-    allowed_orders = {"baseline-first", "axis-first" if args.probe_kind == "axis" else "batch-first"}
+        args.orders = default_orders
+    allowed_orders = set(default_orders)
     if not set(args.orders) <= allowed_orders:
         parser.error("execution order does not match the selected probe kind")
-    if "sheet_full" in args.families and args.probe_kind != "axis":
-        parser.error("sheet_full belongs to the axis probe only")
+    if "sheet_full" in args.families and args.probe_kind not in ("axis", "additive"):
+        parser.error("sheet_full belongs to the axis/additive probes only")
+    if args.variants is not None and args.probe_kind != "additive":
+        parser.error("variants belong to the additive probe only")
+    variants = args.variants or (["additive", "intersection"] if args.probe_kind == "additive" else [None])
+    if len(set(variants)) != len(variants):
+        parser.error("duplicate matrix values: variants")
     if (args.repeats < 1 or min(args.sizes) < 2 or min(args.kmax) < 1 or
             max(args.kmax) > 10 or min(args.s) < 1):
         parser.error("require repeats >= 1, sizes >= 2, 1 <= kmax <= 10, s >= 1")
@@ -275,9 +284,11 @@ def main() -> int:
     if args.probe_kind != "single":
         sources += [source_root / f"bench/{args.probe_kind}_probe.cpp",
                     source_root / "bench/paired_receipts.py"]
-        from paired_receipts import stable_signature, validate_axis, validate_batch
+        from paired_receipts import (additive_invariants, stable_signature, validate_additive,
+                                     validate_axis, validate_batch)
     validator = (validate_result if args.probe_kind == "single" else
-                 validate_batch if args.probe_kind == "batch" else validate_axis)
+                 validate_batch if args.probe_kind == "batch" else
+                 validate_axis if args.probe_kind == "axis" else validate_additive)
     hashes: dict[str, str] = {}
     binary_hash: str | None = None
     completed = attempts = 0
@@ -298,7 +309,8 @@ def main() -> int:
             "started_utc": utc_stamp(), "probe_kind": args.probe_kind,
             "scope": ("single_separated_rectangle_credits" if args.probe_kind == "single" else
                       "single_rectangle_three_lane_credit_batch" if args.probe_kind == "batch" else
-                      "single_rectangle_axis_q2_residual"),
+                      "single_rectangle_axis_q2_residual" if args.probe_kind == "axis" else
+                      "single_rectangle_additive_axis_q2_residual"),
             "public_status": "not_claimed", "downstream_measured": False,
             "gcp_used": False, "threads": 1,
             "commit": subprocess.check_output(
@@ -317,19 +329,24 @@ def main() -> int:
             "boost_scope": "test-only headers; no boost in the measured product library",
             "s_role": "precondition_only_not_wspd_generation",
         }
+        if args.probe_kind == "additive":
+            metadata["variants"] = variants
         write_json(args.output / "MANIFEST.json", metadata)
         environment = dict(os.environ, OMP_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1")
         identities: dict[tuple[str, int], str] = {}
         signatures: dict[tuple[Any, ...], Any] = {}
+        additive_references: dict[tuple[Any, ...], Any] = {}
         selectors = args.lanes if args.probe_kind == "single" else args.orders
         matrix = itertools.product(args.families, args.kmax, args.s, selectors,
-                                   args.sizes, args.strategies, range(args.repeats))
+                                   args.sizes, args.strategies, range(args.repeats), variants)
         with (args.output / "MEASURES.jsonl").open("x") as stream:
-            for family, kmax, separation, selector, n, strategy, repeat in matrix:
+            for family, kmax, separation, selector, n, strategy, repeat, variant in matrix:
                 command = ([str(binary), str(n), strategy, str(selector), family,
                             str(kmax), str(separation)] if args.probe_kind == "single" else
                            [str(binary), str(n), strategy, family, str(kmax),
                             str(separation), str(selector)])
+                if variant is not None:
+                    command.append(variant)
                 record: dict[str, Any] = {
                     "command": command, "repeat": repeat, "exit_code": None,
                     "status": "failed", "stdout": "", "stderr": "",
@@ -357,7 +374,7 @@ def main() -> int:
                             "point identities changed between paired configurations")
                     identities[identity] = fingerprint
                     stable_key = (family, n, kmax,
-                                  selector if args.probe_kind == "single" else "paired", strategy)
+                                  selector if args.probe_kind == "single" else "paired", strategy, variant)
                     signature = ((fingerprint, row["candidate_pairs"],
                                   row["candidate_descriptors"], row["preparation_work"],
                                   row["plan_work"]) if args.probe_kind == "single" else
@@ -366,6 +383,11 @@ def main() -> int:
                             signatures[stable_key] == signature,
                             "work or residual changed across repetitions/s preconditions")
                     signatures[stable_key] = signature
+                    if args.probe_kind == "additive":
+                        for key, value in additive_invariants(row):
+                            require(key not in additive_references or additive_references[key] == value,
+                                    "unrestricted reference changed across strategies or variants")
+                            additive_references[key] = value
                     record["status"] = "completed"
                     completed += 1
                 except (InvalidReceipt, ValueError, UnicodeError, KeyError, TypeError) as error:
@@ -385,8 +407,10 @@ def main() -> int:
                     progress.update(plan_ms=row["plan_ms"], candidate_pairs=row["candidate_pairs"])
                 elif args.probe_kind == "batch":
                     progress.update(batch_ms=row["batch_ms"])
-                else:
+                elif args.probe_kind == "axis":
                     progress.update(axis_ms=row["axis_ms"], candidate_pairs=row["axis_candidates"])
+                else:
+                    progress.update(variant_ms=row["variant_ms"], candidate_pairs=row["variant_candidates"])
                 print(json.dumps(progress), flush=True)
         status, error_text, exit_code = "completed", "", 0
     except InvalidReceipt as error:

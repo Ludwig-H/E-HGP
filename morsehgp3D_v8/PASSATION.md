@@ -1,10 +1,46 @@
-# Passation v8 — préparation partagée et filtre q2 qualifiés localement
+# Passation v8 — addition et intersection q2 qualifiées localement
 
 13 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`. Aucun contrat de tour n'est encore acquis.
 
 ## À reprendre maintenant
+
+La troisième tranche ajoute le mode `Additive`, son intersection intégrée
+avec un plan local q2 et la suppression des allocations actives aussitôt
+remplacées. Lire le [contrat](docs/P0_ADDITION_ET_INTERSECTION.md) et les
+[648 mesures](receipts/additive_q2_20260913/README.md). 26 CTests Release
+et Clang ASan/UBSan passent, incluant 650 plans confrontés au nouveau juge,
+frontières, cœur, copie de restriction, 7 contre-modèles et 15 rejets d'API.
+
+Résultat précis : la nappe complète n32k/K10 garde 3 928 390 candidates
+contre 6 483 670 auparavant, mais la sélection additive seule coûte
+environ 238 ms contre 57 ms. Sur la grille, l'intersection Pool garde
+114 716 candidates en 34–35 ms ; Pool seul garde 378 840 candidates en
+2,4–2,6 ms. Ne pas confondre moins de candidates et moins de temps total.
+La croissance mesurée à 8k/16k/32k est inférieure au quadratique dans
+ces familles, pas une qualification générale. Aucun choix automatique
+de filtre ni changement du mode `Independent` par défaut n'est installé.
+
+**Prochain jalon : payer le census q2 et partager ses requêtes par blocs.**
+Il doit indexer tous les sites, distinguer intérieurs stricts et coquille,
+conserver les IDs et canoniser les boules. Comparer une référence de
+requêtes individuelles avec le traitement partagé, coût total inclus.
+L'auditeur a livré les [bornes sur trois boîtes](audits/P0_SOUS_RECTANGLES_ET_GROUPES.md#9-census-q2--des-extrema-exacts-pour-partager-les-recherches)
+et un [prototype de consommation indexée](../audits/morsehgp3D_v8_complementaire/P0_CONSOMMATION_INDEXEE_Q2.md).
+Ce dernier épingle `8e406f9b`, pas les nouvelles sources : ses grandes
+mesures sont exploratoires. Ne pas précharger le cœur puis revoir ses IDs.
+
+Les rangs filtrés B proposés pour composer deux plans déjà construits
+restent une alternative au parcours intégré. Les fenêtres A/B peuvent
+encore réduire le résidu des nappes ; ne pas retarder le census et la
+tranche FULL minimale derrière une optimisation sans fin du seul cas axial.
+Le vrai partage du propriétaire/index sur la WSPD, q3/q4, parents FULL,
+parallélisation et contrats 50k/massif restent ouverts. GCP non utilisé.
+Les builds `v8_additive_20260913` et `v8_additive_sanitize_20260913` sont
+épinglés ; repartir dans un nouveau répertoire de construction.
+
+## Deuxième tranche publiée à 8e406f9b
 
 La deuxième tranche implémente `CreditBatch` (trois voies géométriques,
 pas une tour K) et `AxisQ2Plan` (colonnes exactes + plages de l'index B).

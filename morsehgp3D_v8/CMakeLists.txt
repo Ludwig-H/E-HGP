@@ -24,6 +24,8 @@ add_executable(mhgp8_batch_probe bench/batch_probe.cpp)
 target_link_libraries(mhgp8_batch_probe PRIVATE mhgp8_p0)
 add_executable(mhgp8_axis_probe bench/axis_probe.cpp)
 target_link_libraries(mhgp8_axis_probe PRIVATE mhgp8_p0)
+add_executable(mhgp8_additive_probe bench/additive_probe.cpp)
+target_link_libraries(mhgp8_additive_probe PRIVATE mhgp8_p0)
 
 if(BUILD_TESTING)
   # Boost arbitrary precision is used only by the bounded independent judge.
@@ -47,6 +49,11 @@ if(BUILD_TESTING)
   target_include_directories(mhgp8_axis_q2_gate SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
   target_link_libraries(mhgp8_axis_q2_gate PRIVATE mhgp8_p0)
   add_test(NAME mhgp8_axis_q2_gate COMMAND mhgp8_axis_q2_gate --selftest)
+  add_executable(mhgp8_axis_additive_gate tests/axis_additive_gate.cpp)
+  target_include_directories(mhgp8_axis_additive_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  target_include_directories(mhgp8_axis_additive_gate SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
+  target_link_libraries(mhgp8_axis_additive_gate PRIVATE mhgp8_p0)
+  add_test(NAME mhgp8_axis_additive_gate COMMAND mhgp8_axis_additive_gate --selftest)
   add_executable(mhgp8_plan_assignment_gate tests/plan_assignment_gate.cpp)
   target_link_libraries(mhgp8_plan_assignment_gate PRIVATE mhgp8_p0)
   add_test(NAME mhgp8_plan_assignment_gate COMMAND mhgp8_plan_assignment_gate --selftest)
@@ -79,6 +86,18 @@ if(BUILD_TESTING)
   add_test(NAME mhgp8_axis_probe_cli_optimized COMMAND ${Python3_EXECUTABLE} -B -O
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/axis_probe_cli_gate.py"
     --probe $<TARGET_FILE:mhgp8_axis_probe> --selftest)
+  add_test(NAME mhgp8_additive_probe_cli COMMAND ${Python3_EXECUTABLE} -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/additive_probe_cli_gate.py"
+    --probe $<TARGET_FILE:mhgp8_additive_probe> --selftest)
+  add_test(NAME mhgp8_additive_probe_cli_optimized COMMAND ${Python3_EXECUTABLE} -B -O
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/additive_probe_cli_gate.py"
+    --probe $<TARGET_FILE:mhgp8_additive_probe> --selftest)
+  add_test(NAME mhgp8_additive_campaign_gate COMMAND ${Python3_EXECUTABLE} -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/additive_campaign_gate.py"
+    --probe $<TARGET_FILE:mhgp8_additive_probe> --selftest)
+  add_test(NAME mhgp8_additive_campaign_gate_optimized COMMAND ${Python3_EXECUTABLE} -B -O
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/additive_campaign_gate.py"
+    --probe $<TARGET_FILE:mhgp8_additive_probe> --selftest)
   add_test(NAME mhgp8_paired_campaign_gate COMMAND ${Python3_EXECUTABLE} -B
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/paired_campaign_gate.py"
     --batch-probe $<TARGET_FILE:mhgp8_batch_probe>

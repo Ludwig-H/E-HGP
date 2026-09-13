@@ -14,7 +14,8 @@ import statistics
 from collections import defaultdict
 from pathlib import Path
 
-from paired_receipts import stable_signature, validate_axis, validate_batch
+from paired_receipts import (additive_invariants, stable_signature, validate_additive,
+                             validate_axis, validate_batch)
 from run_p0_matrix import digest, parse_result, require, uint
 
 
@@ -81,9 +82,10 @@ def sha256(value: object, name: str) -> None:
 def validate_manifest(manifest: dict, root: Path) -> int:
     """Reject empty/duplicate/mistyped matrices before constructing their product."""
     kind = manifest.get("probe_kind")
-    require(kind in ("batch", "axis"), "not a paired campaign")
+    require(kind in ("batch", "axis", "additive"), "not a paired campaign")
     scope = ("single_rectangle_three_lane_credit_batch" if kind == "batch"
-             else "single_rectangle_axis_q2_residual")
+             else "single_rectangle_axis_q2_residual" if kind == "axis"
+             else "single_rectangle_additive_axis_q2_residual")
     require(manifest.get("schema") == "mhgp8_p0_campaign_v1" and
             manifest.get("scope") == scope and
             manifest.get("public_status") == "not_claimed" and
@@ -99,16 +101,21 @@ def validate_manifest(manifest: dict, root: Path) -> int:
     choices = {
         "families": {"grid", "sheet", "sheet_full", "skew", "tube", "rails"},
         "strategies": {"pool", "dual", "tubes"},
-        "orders": {"baseline-first", "batch-first" if kind == "batch" else "axis-first"},
+        "orders": ({"independent-first", "variant-first"} if kind == "additive" else
+                   {"baseline-first", "batch-first" if kind == "batch" else "axis-first"}),
     }
+    if kind == "additive":
+        choices["variants"] = {"additive", "intersection"}
+    else:
+        require("variants" not in manifest, "variants on a non-additive campaign")
     for field, permitted in choices.items():
         values = manifest.get(field)
         require(type(values) is list and bool(values) and
                 all(type(value) is str and value in permitted for value in values),
                 f"{field}: empty or invalid matrix values")
         require(len(set(values)) == len(values), f"{field}: duplicate matrix values")
-    require(kind == "axis" or "sheet_full" not in manifest["families"],
-            "sheet_full belongs to the axis probe")
+    require(kind in ("axis", "additive") or "sheet_full" not in manifest["families"],
+            "sheet_full belongs to the axis/additive probes")
     for field in ("sizes", "kmax", "separations", "lanes"):
         values = manifest.get(field)
         require(type(values) is list and bool(values), f"{field}: empty matrix values")
@@ -133,7 +140,8 @@ def validate_manifest(manifest: dict, root: Path) -> int:
                 "source path escapes the repository")
         sha256(value, name)
     return repeats * math.prod(len(manifest[field]) for field in (
-        "families", "kmax", "separations", "orders", "sizes", "strategies"))
+        "families", "kmax", "separations", "orders", "sizes", "strategies")) * len(
+            manifest.get("variants", [None]))
 
 
 def main() -> int:
@@ -146,6 +154,7 @@ def main() -> int:
     require(bool(manifests), "no paired campaigns")
     groups = defaultdict(list)
     signatures = {}
+    additive_references = {}
     identities = {}
     builds = {}
     published_provenance = {}
@@ -179,11 +188,12 @@ def main() -> int:
             require(digest(root / name) == sha, f"source differs from captured version: {name}")
         expected = set(itertools.product(manifest["families"], manifest["kmax"],
                        manifest["separations"], manifest["orders"], manifest["sizes"],
-                       manifest["strategies"], range(manifest["repeats"])))
+                       manifest["strategies"], range(manifest["repeats"]),
+                       manifest.get("variants", [None])))
         seen = set()
         for raw in raw_rows:
             record = parse_result(raw)
-            require(record["status"] == "completed" and record["exit_code"] == 0 and
+            require(record["status"] == "completed" and uint(record.get("exit_code"), "exit_code") == 0 and
                     record["stderr"] == record["stderr_base64"] == "" and
                     record["probe_sha256_before"] == record["probe_sha256_after"] ==
                     manifest["probe_sha256"], "invalid invocation")
@@ -193,8 +203,11 @@ def main() -> int:
                     "raw and parsed receipts differ")
             command = [manifest["probe"], str(row["n"]), row["strategy"], row["family"],
                        str(row["kmax"]), str(row["separation_s"]), row["order"]]
+            if kind == "additive":
+                command.append(row["variant"])
             require(command == record["command"], "stored command differs from tuple")
-            (validate_batch if kind == "batch" else validate_axis)(row, command)
+            (validate_batch if kind == "batch" else
+             validate_axis if kind == "axis" else validate_additive)(row, command)
             input_key = (row["family"], row["n"])
             fingerprint = row["input_fnv1a64_le_u16_xyz"]
             require(input_key not in identities or identities[input_key] == fingerprint,
@@ -202,16 +215,22 @@ def main() -> int:
             identities[input_key] = fingerprint
             uint(record.get("repeat"), "repeat")
             identity = (row["family"], row["kmax"], row["separation_s"], row["order"],
-                        row["n"], row["strategy"], record["repeat"])
+                        row["n"], row["strategy"], record["repeat"], row.get("variant"))
             require(identity not in seen, "duplicate invocation")
             seen.add(identity)
             signature = stable_signature(row, kind)
-            stable_key = (kind, row["family"], row["n"], row["kmax"], row["strategy"])
+            stable_key = (kind, row["family"], row["n"], row["kmax"], row["strategy"], row.get("variant"))
             require(stable_key not in signatures or signatures[stable_key] == signature,
                     "work/identity/residual changed across execution order, repetitions or s")
             signatures[stable_key] = signature
+            if kind == "additive":
+                for reference_key, value in additive_invariants(row):
+                    require(reference_key not in additive_references or
+                            additive_references[reference_key] == value,
+                            "unrestricted reference changed across strategies or variants")
+                    additive_references[reference_key] = value
             key = (kind, row["family"], row["n"], row["kmax"], row["separation_s"],
-                   row["strategy"], row["order"])
+                   row["strategy"], row["order"], row.get("variant"))
             groups[key].append(row)
             attempts += 1
         require(seen == expected and len(seen) == completion["runs"] == completion["attempts"],
@@ -226,18 +245,28 @@ def main() -> int:
         for key, rows in sorted(groups.items()):
             kind = key[0]
             item = dict(zip(("kind", "family", "n", "kmax", "s", "strategy", "order"), key))
+            if kind == "additive":
+                item["variant"] = key[7]
             item["repeats"] = len(rows)
             item["provenance"] = published_provenance[kind]
             time_fields = ("prepare_ms", "baseline_shared_owner_ms", "batch_ms",
                            "baseline_total_ms", "batch_total_ms") if kind == "batch" else (
                            "prepare_ms", "baseline_ms", "axis_ms", "baseline_total_ms", "axis_total_ms")
+            if kind == "additive":
+                time_fields = ("prepare_ms", "independent_ms", "local_plan_ms", "selection_ms",
+                               "variant_ms", "independent_total_ms", "variant_total_ms")
             for field in time_fields:
                 item[f"median_{field}"] = statistics.median(row[field] for row in rows)
             if kind == "batch":
                 item["shared_work"] = rows[0]["shared_work"]
                 item["lanes"] = rows[0]["lanes"]
-            else:
+            elif kind == "axis":
                 for field in ("axis_candidates", "baseline_candidates", "axis_descriptors", "axis_work"):
+                    item[field] = rows[0][field]
+            else:
+                for field in ("independent_candidates", "independent_descriptors", "independent_work",
+                              "variant_candidates", "variant_descriptors", "variant_work",
+                              "local_candidates", "local_descriptors", "local_work"):
                     item[field] = rows[0][field]
             summary.append(item)
         result["summary"] = summary

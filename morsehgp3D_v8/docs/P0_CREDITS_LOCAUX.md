@@ -134,10 +134,11 @@ hors de ses hypothèses. La précondition s≥8 de nos campagnes suffit au lemme
 
 Les produits des tubes sont inférieurs à $2^{74}$ en valeur absolue et
 sont élargis en i128 avant multiplication. Le tri donne O(m log m) et le
-balayage O(m), mémoire O(m), pour un facteur de m sites. Ce premier raccord
-calcule une voie par plan : **il refait le tri pour chaque voie**. Partager
-ce travail entre q2/q3/q4 est une optimisation suivante, pas un gain déjà
-implémenté. Des cellules trop fines ou trop larges peuvent laisser un
+balayage O(m), mémoire O(m), pour un facteur de m sites. Le premier raccord
+calculait une voie par plan et refaisait le tri pour chaque voie. Depuis
+la [deuxième tranche](P0_PARTAGE_ET_FILTRE_AXIAL.md), `CreditBatch` partage
+ce travail entre q2/q3/q4 ; les appels isolés restent la référence comparée.
+Des cellules trop fines ou trop larges peuvent laisser un
 mauvais résidu ; cette méthode n'a donc pas la garantie de retrouver tous
 les crédits que donne DualBlocks. Ne pas additionner les crédits issus
 de méthodes ou grilles différentes : les sites témoins peuvent se recouvrir.

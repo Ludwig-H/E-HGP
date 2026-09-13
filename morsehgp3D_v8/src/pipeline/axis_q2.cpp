@@ -50,10 +50,14 @@ void set_coordinate(Point3& point, std::size_t axis, std::uint16_t value) {
   return a * b;
 }
 
+enum class BoxDecision { Accept, Reject, Refine };
+
 class BoxIndex final {
  public:
   BoxIndex(std::span<const Point3> points, std::vector<std::size_t>& order,
-           AxisQ2Work& work) : points_(points), order_(order), work_(work) {
+           AxisQ2Work& work, std::span<const std::uint8_t> credits = {},
+           std::size_t b_first = 0)
+      : points_(points), order_(order), work_(work), credits_(credits), b_first_(b_first) {
     if (order_.empty()) {
       throw std::logic_error("mhgp8 axis index requires a nonempty factor");
     }
@@ -65,6 +69,18 @@ class BoxIndex final {
     query_node(0, box, consume);
   }
 
+  template <class Classifier, class Consumer>
+  void query_refined(Classifier&& classify, Consumer&& consume) const {
+    // The factor root was already classified before deciding to build B.
+    // Reuse that result, while still counting its actual query visit.
+    counter_add(work_.query_nodes);
+    if (nodes_[0].left == absent) {
+      throw std::logic_error("mhgp8 axis point root cannot need refinement");
+    }
+    query_classified_node(nodes_[0].left, classify, consume);
+    query_classified_node(nodes_[0].right, classify, consume);
+  }
+
  private:
   static constexpr std::size_t absent = std::numeric_limits<std::size_t>::max();
   struct Node {
@@ -72,16 +88,22 @@ class BoxIndex final {
     Box3 box;
     std::size_t left{absent};
     std::size_t right{absent};
+    std::uint8_t min_credit{};
+    std::uint8_t max_credit{};
   };
 
   std::span<const Point3> points_;
   std::vector<std::size_t>& order_;
   AxisQ2Work& work_;
+  std::span<const std::uint8_t> credits_;
+  std::size_t b_first_{};
   std::vector<Node> nodes_;
 
   [[nodiscard]] std::size_t build(Range range, u64 depth) {
     const auto& first = points_[order_[range.first]];
     Box3 box{first, first};
+    std::uint8_t min_credit = std::numeric_limits<std::uint8_t>::max();
+    std::uint8_t max_credit = 0;
     for (std::size_t index = range.first; index < range.last; ++index) {
       counter_add(work_.tree_point_visits);
       const auto& point = points_[order_[index]];
@@ -89,9 +111,19 @@ class BoxIndex final {
                  std::min(box.low.z, point.z)};
       box.high = {std::max(box.high.x, point.x), std::max(box.high.y, point.y),
                   std::max(box.high.z, point.z)};
+      if (!credits_.empty()) {
+        counter_add(work_.restriction_credit_visits);
+        const auto credit = credits_[order_[index] - b_first_];
+        min_credit = std::min(min_credit, credit);
+        max_credit = std::max(max_credit, credit);
+      }
     }
     const auto node_id = nodes_.size();
     nodes_.push_back(Node{range, box});
+    if (!credits_.empty()) {
+      nodes_.back().min_credit = min_credit;
+      nodes_.back().max_credit = max_credit;
+    }
     counter_add(work_.tree_nodes);
     work_.max_tree_depth = std::max(work_.max_tree_depth, depth);
     if (range.size() == 1) {
@@ -143,13 +175,48 @@ class BoxIndex final {
     query_node(node.left, box, consume);
     query_node(node.right, box, consume);
   }
+
+  template <class Classifier, class Consumer>
+  void query_classified_node(std::size_t node_id, Classifier& classify,
+                             Consumer& consume) const {
+    counter_add(work_.query_nodes);
+    const auto& node = nodes_[node_id];
+    const auto decision = classify(node.box, node.min_credit, node.max_credit);
+    if (decision == BoxDecision::Reject) {
+      counter_add(work_.disjoint_nodes);
+      return;
+    }
+    if (decision == BoxDecision::Accept) {
+      counter_add(work_.contained_nodes);
+      consume(node.range);
+      return;
+    }
+    if (node.left == absent) {
+      throw std::logic_error("mhgp8 axis point counts must have exact bounds");
+    }
+    query_classified_node(node.left, classify, consume);
+    query_classified_node(node.right, classify, consume);
+  }
 };
 
 }  // namespace
 
-AxisQ2Plan::AxisQ2Plan(RectanglePtr rectangle) : rectangle_(std::move(rectangle)) {
+AxisQ2Plan::AxisQ2Plan(RectanglePtr rectangle, AxisQ2Mode mode,
+                     const CreditPlan* restriction)
+    : rectangle_(std::move(rectangle)), mode_(mode),
+      has_restriction_(restriction != nullptr) {
   if (!rectangle_) {
     throw std::invalid_argument("mhgp8 axis filter requires an owned rectangle");
+  }
+  if (mode_ != AxisQ2Mode::Independent && mode_ != AxisQ2Mode::Additive) {
+    throw std::invalid_argument("mhgp8 axis filter mode is invalid");
+  }
+  // Validate even for a rectangle already killed by its core. A moved-from
+  // restriction throws through its checked owner accessor, before any alias
+  // or credit could be consumed.
+  if (restriction != nullptr &&
+      (&restriction->rectangle() != rectangle_.get() || restriction->lane() != Lane::Q2)) {
+    throw std::invalid_argument("mhgp8 axis restriction must be q2 on the same owner");
   }
   const auto& r = *rectangle_;
   const auto a = r.a_range();
@@ -160,10 +227,24 @@ AxisQ2Plan::AxisQ2Plan(RectanglePtr rectangle) : rectangle_(std::move(rectangle)
   if (need_ == 0) {
     return;
   }
+  if (restriction != nullptr) {
+    const auto ca = restriction->a_credits();
+    const auto cb = restriction->b_credits();
+    if (ca.size() != a.size() || cb.size() != b.size()) {
+      throw std::invalid_argument("mhgp8 axis restriction credit sizes disagree");
+    }
+    restriction_a_.assign(ca.begin(), ca.end());
+    restriction_b_.assign(cb.begin(), cb.end());
+    counter_add(work_.restriction_credit_copies, restriction_a_.size());
+    counter_add(work_.restriction_credit_copies, restriction_b_.size());
+  }
 
   constexpr auto maximum = std::numeric_limits<std::uint16_t>::max();
   const Box3 universe{{0, 0, 0}, {maximum, maximum, maximum}};
   anchor_bounds_.assign(a.size(), universe);
+  if (mode_ == AxisQ2Mode::Additive) {
+    column_windows_.resize(a.size());
+  }
   std::vector<std::size_t> order(a.size());
   std::iota(order.begin(), order.end(), a.first);
   for (std::size_t axis = 0; axis < 3; ++axis) {
@@ -201,6 +282,15 @@ AxisQ2Plan::AxisQ2Plan(RectanglePtr rectangle) : rectangle_(std::move(rectangle)
       counter_add(work_.columns);
       for (std::size_t index = begin; index < end; ++index) {
         auto& slab = anchor_bounds_[order[index] - a.first];
+        if (mode_ == AxisQ2Mode::Additive) {
+          // The window includes the anchor but excludes it from both searches.
+          // Subtractions are bounded by the existing column; no index+need
+          // expression can overflow near size_t's upper boundary.
+          const auto before = std::min<std::size_t>(need_, index - begin);
+          const auto after = std::min<std::size_t>(need_, end - index - 1);
+          column_windows_[order[index] - a.first][axis] =
+              ColumnWindow{index - before, index, index + 1 + after};
+        }
         // Within a column the varying coordinates are strictly increasing:
         // equality would duplicate all three coordinates, rejected by r.
         // Every one of these need sites alone satisfies H>0 if b lies
@@ -222,13 +312,17 @@ AxisQ2Plan::AxisQ2Plan(RectanglePtr rectangle) : rectangle_(std::move(rectangle)
       }
       begin = end;
     }
+    if (mode_ == AxisQ2Mode::Additive) {
+      // Preserve the same initial order of the next sort as Independent while
+      // retaining only IDs, never a duplicate coordinate buffer.
+      column_orders_[axis] = order;
+    }
   }
 
-  // Each of the six exclusions certifies need witnesses independently. The
-  // closed box intersects their complements. This conservative variant does
-  // not add axes, although exact coordinate columns only intersect at the
-  // excluded anchor and thus have disjoint witness populations. The core
-  // remains disjoint from A and B by the rectangle's own certification.
+  // These slabs preserve the Independent certificate and its statistics.
+  // Additive additionally uses the retained column ranks below: the exact
+  // columns meet only at the excluded anchor, so their witnesses are disjoint.
+  // The core remains outside A and B by the rectangle's own certification.
   bool needs_index = false;
   for (const auto& slab : anchor_bounds_) {
     if (slab.low != universe.low || slab.high != universe.high) {
@@ -240,6 +334,105 @@ AxisQ2Plan::AxisQ2Plan(RectanglePtr rectangle) : rectangle_(std::move(rectangle)
   }
   b_order_.resize(b.size());
   std::iota(b_order_.begin(), b_order_.end(), b.first);
+
+  if (mode_ == AxisQ2Mode::Additive || has_restriction_) {
+    std::uint8_t min_credit = 0;
+    std::uint8_t max_credit = 0;
+    if (has_restriction_) {
+      min_credit = std::numeric_limits<std::uint8_t>::max();
+      for (const auto credit : restriction_b_) {
+        counter_add(work_.restriction_credit_visits);
+        min_credit = std::min(min_credit, credit);
+        max_credit = std::max(max_credit, credit);
+      }
+    }
+    const auto classify = [&](std::size_t a_index, const Box3& box,
+                              std::uint8_t min_cb, std::uint8_t max_cb) {
+      bool restriction_accepts = true;
+      if (has_restriction_) {
+        counter_add(work_.restriction_bound_queries);
+        const unsigned ca = restriction_a_[a_index];
+        // Local A/B populations are disjoint from each other, but may overlap
+        // the axial witnesses. Intersect the two residuals; never add axes
+        // to ca+cb. Integer promotion bounds this sum by 2*255, not u8.
+        if (ca + min_cb >= need_) {
+          counter_add(work_.restriction_pruned_nodes);
+          return BoxDecision::Reject;
+        }
+        restriction_accepts = ca + max_cb < need_;
+      }
+      // The h-th-neighbour slab already certifies h witnesses on one axis.
+      // Its constant-cost exclusion avoids rank searches without changing
+      // the additive residual: a rejected slab implies sum >= need.
+      if (disjoint(anchor_bounds_[a_index], box)) {
+        counter_add(work_.axis_slab_rejects);
+        return BoxDecision::Reject;
+      }
+      unsigned axis_min = 0;
+      unsigned axis_max = 0;
+      if (mode_ == AxisQ2Mode::Additive) {
+        const auto bounds = axis_bounds(a_index, box, &work_);
+        axis_min = bounds.first;
+        axis_max = bounds.second;
+      } else {
+        counter_add(work_.axis_bound_queries);
+        axis_max = contains(anchor_bounds_[a_index], box) ? 0 : need_;
+      }
+      if (axis_min >= need_) {
+        counter_add(work_.axis_pruned_nodes);
+        return BoxDecision::Reject;
+      }
+      return axis_max < need_ && restriction_accepts ? BoxDecision::Accept
+                                                   : BoxDecision::Refine;
+    };
+
+    std::vector<BoxDecision> roots;
+    roots.reserve(a.size());
+    needs_index = false;
+    for (std::size_t a_index = 0; a_index < a.size(); ++a_index) {
+      const auto decision = classify(a_index, r.b_box(), min_credit, max_credit);
+      roots.push_back(decision);
+      needs_index = needs_index || decision == BoxDecision::Refine;
+    }
+    std::unique_ptr<BoxIndex> index;
+    if (needs_index) {
+      index = std::make_unique<BoxIndex>(points, b_order_, work_, restriction_b_, b.first);
+    }
+    for (std::size_t a_id = a.first; a_id < a.last; ++a_id) {
+      const auto a_index = a_id - a.first;
+      const auto emit = [&](Range range) {
+        counter_add(candidates_, range.size());
+        if (mode_ == AxisQ2Mode::Additive && !blocks_.empty() &&
+            blocks_.back().a_id == a_id && blocks_.back().b.last == range.first) {
+          blocks_.back().b.last = range.last;
+          counter_add(work_.coalesced_blocks);
+          return;
+        }
+        blocks_.push_back(AxisQ2Block{a_id, range});
+        counter_add(work_.emitted_blocks);
+      };
+      if (roots[a_index] == BoxDecision::Accept) {
+        counter_add(work_.whole_factor_accepts);
+        emit({0, b_order_.size()});
+      } else if (roots[a_index] == BoxDecision::Reject) {
+        counter_add(work_.whole_factor_rejects);
+      } else {
+        if (!index) {
+          throw std::logic_error("mhgp8 axis query has no prepared index");
+        }
+        const auto classify_anchor = [&](const Box3& box, std::uint8_t low,
+                                         std::uint8_t high) {
+          return classify(a_index, box, low, high);
+        };
+        index->query_refined(classify_anchor, emit);
+      }
+    }
+    // Queries emit disjoint index ranges. Coalescing changes only adjacent
+    // descriptors, not their IDs or cardinality. J visits and D retained
+    // fragments still have no global subquadratic guarantee on general data.
+    return;
+  }
+
   std::unique_ptr<BoxIndex> index;
   if (needs_index) {
     index = std::make_unique<BoxIndex>(points, b_order_, work_);
@@ -270,19 +463,96 @@ AxisQ2Plan::AxisQ2Plan(RectanglePtr rectangle) : rectangle_(std::move(rectangle)
   // the number of visited nodes nor D has a global linear guarantee here.
 }
 
-AxisQ2Plan make_axis_q2_plan(RectanglePtr rectangle) {
-  return AxisQ2Plan(std::move(rectangle));
+AxisQ2Plan make_axis_q2_plan(RectanglePtr rectangle, AxisQ2Mode mode,
+                           const CreditPlan* restriction) {
+  return AxisQ2Plan(std::move(rectangle), mode, restriction);
 }
 
 AxisQ2Plan::AxisQ2Plan(AxisQ2Plan&& other) noexcept
     : rectangle_(std::move(other.rectangle_)), need_(std::exchange(other.need_, 0)),
+      mode_(std::exchange(other.mode_, AxisQ2Mode::Independent)),
+      has_restriction_(std::exchange(other.has_restriction_, false)),
       anchor_bounds_(std::move(other.anchor_bounds_)),
+      column_orders_(std::move(other.column_orders_)),
+      column_windows_(std::move(other.column_windows_)),
+      restriction_a_(std::move(other.restriction_a_)),
+      restriction_b_(std::move(other.restriction_b_)),
       b_order_(std::move(other.b_order_)), blocks_(std::move(other.blocks_)),
       work_(std::exchange(other.work_, AxisQ2Work{})),
       total_(std::exchange(other.total_, 0)), candidates_(std::exchange(other.candidates_, 0)) {
   other.anchor_bounds_.clear();
+  for (auto& order : other.column_orders_) {
+    order.clear();
+  }
+  other.column_windows_.clear();
+  other.restriction_a_.clear();
+  other.restriction_b_.clear();
   other.b_order_.clear();
   other.blocks_.clear();
+}
+
+unsigned AxisQ2Plan::axis_count(std::size_t a_index, std::size_t axis,
+                               std::uint16_t value, AxisQ2Work* work) const {
+  if (work != nullptr) {
+    counter_add(work->axis_count_queries);
+  }
+  const auto& window = column_windows_[a_index][axis];
+  const auto& order = column_orders_[axis];
+  const auto points = rectangle_->points();
+  const auto coordinate = points[order[window.rank]][axis];
+  if (value == coordinate) {
+    return 0;
+  }
+  const bool before = value < coordinate;
+  std::size_t first = before ? window.first : window.rank + 1;
+  std::size_t last = before ? window.rank : window.last;
+  // Strict count: before a, upper_bound(value) excludes equality with b;
+  // after a, lower_bound(value) does likewise. Each searched window has at
+  // most need <= 255 sites, giving O(log(need+1)) comparisons, not O(log|A|).
+  while (first < last) {
+    const auto middle = first + (last - first) / 2;
+    if (work != nullptr) {
+      counter_add(work->axis_rank_comparisons);
+    }
+    const auto candidate = points[order[middle]][axis];
+    if (before ? candidate <= value : candidate < value) {
+      first = middle + 1;
+    } else {
+      last = middle;
+    }
+  }
+  const auto count = before ? window.rank - first : first - (window.rank + 1);
+  return static_cast<unsigned>(count);  // count <= need <= 255
+}
+
+std::pair<unsigned, unsigned> AxisQ2Plan::axis_bounds(
+    std::size_t a_index, const Box3& box, AxisQ2Work* work) const {
+  if (work != nullptr) {
+    counter_add(work->axis_bound_queries);
+  }
+  const auto& anchor = rectangle_->points()[rectangle_->a_range().first + a_index];
+  unsigned minimum = 0;
+  unsigned maximum = 0;
+  for (std::size_t axis = 0; axis < 3; ++axis) {
+    const auto& window = column_windows_[a_index][axis];
+    if (window.first == window.rank && window.last == window.rank + 1) {
+      continue;  // An exact singleton column supplies no witness at any t.
+    }
+    const auto low = axis_count(a_index, axis, box.low[axis], work);
+    const auto high = box.low[axis] == box.high[axis]
+                          ? low : axis_count(a_index, axis, box.high[axis], work);
+    const auto lower = box.low[axis] <= anchor[axis] && anchor[axis] <= box.high[axis]
+                           ? 0U : std::min(low, high);
+    // Coordinate columns meet only at the excluded anchor. Their certified
+    // witness IDs are disjoint; saturating their sum preserves both tests.
+    // Each addition is at most 2*need <= 510, safely inside unsigned.
+    minimum = std::min<unsigned>(need_, minimum + lower);
+    maximum = std::min<unsigned>(need_, maximum + std::max(low, high));
+    if (minimum == need_) {
+      return {need_, need_};
+    }
+  }
+  return {minimum, maximum};
 }
 
 bool AxisQ2Plan::keeps(std::size_t a_id, std::size_t b_id) const {
@@ -294,7 +564,19 @@ bool AxisQ2Plan::keeps(std::size_t a_id, std::size_t b_id) const {
   if (!contains(a, a_id) || !contains(b, b_id)) {
     throw std::invalid_argument("mhgp8 axis pair IDs do not belong to this rectangle");
   }
-  return need_ != 0 && contains(anchor_bounds_[a_id - a.first], rectangle_->points()[b_id]);
+  if (need_ == 0) {
+    return false;
+  }
+  if (has_restriction_ &&
+      static_cast<unsigned>(restriction_a_[a_id - a.first]) + restriction_b_[b_id - b.first]
+          >= need_) {
+    return false;
+  }
+  const auto& point = rectangle_->points()[b_id];
+  if (mode_ == AxisQ2Mode::Additive) {
+    return axis_bounds(a_id - a.first, Box3{point, point}, nullptr).first < need_;
+  }
+  return contains(anchor_bounds_[a_id - a.first], point);
 }
 
 }  // namespace mhgp8

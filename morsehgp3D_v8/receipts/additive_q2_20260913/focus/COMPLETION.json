@@ -1,0 +1,27 @@
+{
+  "status": "completed",
+  "runs": 72,
+  "attempts": 72,
+  "finished_utc": "2026-09-13T19:43:28.539026+00:00",
+  "source_hashes_unchanged": true,
+  "probe_hash_unchanged": true,
+  "source_sha256_closing": {
+    "morsehgp3D_v8/CMakeLists.txt": "80f7238bc9661c2f34b5abe9e0257cd7550892495c2ab1782d5b5b148763d687",
+    "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+    "morsehgp3D_v8/src/pipeline/axis_q2.hpp": "5d0022c7776b1c382f65e5bff9fe9e125c81c701c08a0d8db8e4e40672c4cac4",
+    "morsehgp3D_v8/src/pipeline/local_credits.hpp": "7d96b38571bacf504d79b4139aaead8042bf1dca26396abd08bd8811799496db",
+    "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+    "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+    "morsehgp3D_v8/src/pipeline/axis_q2.cpp": "8c91d5c9ca4427cf20e0909a5f35616ab76c9dc387268e7a6e28511de9e3e61a",
+    "morsehgp3D_v8/src/pipeline/local_credits.cpp": "522009add5e85501215c562ab6a56548535ea09bd6deff0ebe41df0ae1a52255",
+    "morsehgp3D_v8/bench/p0_fixtures.hpp": "3c3a7bde624fde5c513ac4946fdceddaf6a392b61643d9f9a847c1b4f470520a",
+    "morsehgp3D_v8/bench/probe_emit.hpp": "236331337c44bf25229899a798003e9ce7605ad5df98d90957c0d1ca2dc476d2",
+    "morsehgp3D_v8/bench/sheet_full_fixture.hpp": "ccde4f4649e7e6cd3c2bb5adab4a5dc574df9b360b6f11705d323b39a01f6d49",
+    "morsehgp3D_v8/bench/p0_probe.cpp": "a95bb5cdce20ecec07c544fc596b684f39a9b573b3a4c6afdbb64c97ae3be552",
+    "morsehgp3D_v8/bench/run_p0_matrix.py": "0e66c1e3a6ebee31640e8041fe83f2c458a15cb4169ffb93015334e010d20690",
+    "morsehgp3D_v8/bench/additive_probe.cpp": "408078cc93ebea2002a425174d912f38f652ea55e5487a13375902fdb2fe7c4f",
+    "morsehgp3D_v8/bench/paired_receipts.py": "7fbf345f2a217691a737cb78f8db194397aaf87e4271de4835c89aea860a0120"
+  },
+  "probe_sha256_closing": "0fced1dbe6d9e63c3caa0d94ca19141aba81dec2919bdece947311e2b3078012",
+  "error": ""
+}

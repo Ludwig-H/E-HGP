@@ -116,7 +116,7 @@ avec deux ordres d'exécution pour rendre visible l'effet de cet ordre.
 L'inspection des plans est hors des temps de chaque bras et mesurée à part.
 Les sorties restent compactes ; leur développement et le census sont absents.
 
-`sheet_full` est une recette **v2 propre à la sonde axe**. Pour n pair,
+`sheet_full` est une recette **v2 des sondes axe et additive**. Pour n pair,
 m=n/2, sa largeur est le plus grand diviseur de m inférieur ou égal à
 sa racine entière, et sa hauteur est m/largeur. Les deux plans x=1000 et
 x=60000 portent la même grille y/z commençant à 1000. Les coordonnées
@@ -137,3 +137,34 @@ de provenance figurent dans le résumé, au lieu de mélanger les builds.
 Les anciens reçus r3 se rejouent sur leur commit `3589a2c9`, pas en
 leur attribuant les nouvelles sources. Les lecteurs ne qualifient jamais
 la géométrie ou la complétude de la tour.
+
+## Comparaison additive et intersection
+
+La troisième sonde conserve `Independent` comme référence et mesure
+`Additive`, seul ou intersecté avec un plan local q2 :
+
+```text
+mhgp8_additive_probe n pool|dual|tubes grid|sheet|sheet_full|skew|tube|rails kmax s independent-first|variant-first additive|intersection
+```
+
+`variant_ms` inclut `local_plan_ms` puis `selection_ms`. Sans intersection,
+le coût local vaut zéro et ses champs de résultat sont explicitement nuls.
+Avec intersection, la copie des crédits et l'index de sélection sont
+compris dans `selection_ms`. L'inspection des descripteurs reste séparée ;
+elle ne développe pas les paires. La génération et le propriétaire sont
+comptés une fois par total normalisé, sur le même propriétaire pour les bras.
+
+Le runner existant accepte `--probe-kind additive` et `--variants additive
+intersection` (ces deux variantes par défaut). Les deux nouveaux ordres
+sont employés par défaut. Les variantes figurent dans le produit cartésien
+du manifeste et dans les clés des résumés : leurs temps ne sont jamais
+mélangés. La référence Independent doit rester identique entre variantes
+et stratégies ; l'Additive sans restriction ne dépend pas de la stratégie
+locale inutilisée. Les lecteurs vérifient aussi ces invariants croisés.
+
+Les compteurs distinguent copies de crédits, scans de l'index, rejets
+locaux, rejets par boîte axiale, bornes additives, recherches de rang et
+fusion des plages. Les identités entre compteurs interdisent de masquer
+un travail effectué derrière des zéros arbitraires. Elles ne constituent
+ni un oracle géométrique ni une mesure de l'aval absent. Voir le
+[contrat additif](../docs/P0_ADDITION_ET_INTERSECTION.md).

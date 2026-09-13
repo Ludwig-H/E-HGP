@@ -370,8 +370,13 @@ void CreditPlan::initialize(RectanglePtr rectangle, Lane lane, Strategy strategy
   threshold_ = rectangle_->threshold(lane);
   core_ = rectangle_->core_credit(lane);
   total_ = pair_count(rectangle_->a_range().size(), rectangle_->b_range().size());
-  a_.resize(rectangle_->a_range().size(), 0);
-  b_.resize(rectangle_->b_range().size(), 0);
+  // Active factories install their computed vectors directly. Only the
+  // zero-need return needs zero-filled arrays here; allocating them on the
+  // active path would immediately discard two buffers per geometric lane.
+  if (threshold_ == core_) {
+    a_.resize(rectangle_->a_range().size(), 0);
+    b_.resize(rectangle_->b_range().size(), 0);
+  }
 }
 
 CreditPlan make_credit_plan(RectanglePtr rectangle, Lane lane, Strategy strategy) {

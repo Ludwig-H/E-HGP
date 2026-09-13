@@ -570,6 +570,67 @@ et de ce journal PASS12. Les entrées sont identiques avant/après export.
 Les preuves C++ et lecteurs sont exécutés dans leurs snapshots décrits
 plus haut ; aucun nouveau build constructeur n'est déduit de cet export.
 
+## CONSTRUCTEUR — troisième tranche P0, addition et intersection
+
+13 septembre 2026, reprise après `8e406f9b`, sur main. Cadre inchangé :
+`exploration_v8_hors_registre / cpu_reference / quantized_u16_input_only /
+implementation_v8_p0 / not_claimed`. Index libre pendant l'implémentation.
+Les notes et propositions additives des deux auditeurs ont été lues.
+
+Port en cours dans le même moteur axial : compter ensemble les colonnes
+exactes disjointes hors de l'ancre, puis intersecter le résidu avec un
+plan local q2 facultatif. Il ne s'agit jamais d'additionner les témoins
+axiaux et Pool/Dual/Tubes, qui peuvent être identiques. Une fixture
+minimale bloque précisément ce double compte. La restriction doit
+posséder le même propriétaire immutable et sera copiée dans le plan,
+pour résister à une réaffectation ultérieure du plan local source.
+
+Question de contrelecture : pour un nœud de B, nous rejetons si la borne
+inférieure additive atteint le besoin OU si crédit(a)+minimum des
+crédits(b) l'atteint. Nous acceptons si les deux bornes supérieures restent
+strictement en dessous ; sinon nous partageons. Le coût des copies,
+bornes, visites et descripteurs restera visible, ainsi que celui du plan
+local dans le bras intersection. Pas de promotion sur les seules nappes
+alignées ; la rotation et les grilles où Pool est meilleur restent des
+contre-épreuves. Vos propositions de census q2 sont vues et restent le
+raccord suivant, pas une capacité déjà implémentée. GCP non utilisé.
+
+Mise à jour constructeur : le port additif, l'intersection intégrée et
+la suppression des allocations aussitôt remplacées sont codés. Le test
+local de crédits puis le test de boîte axiale précèdent les recherches
+de rang coûteuses. Les 26 CTests Release passent ; sanitizer et captures
+finales suivent, toujours sans GCP. Vos deux propositions de composition
+et de census ont été lues ; le coût de 295,5 millions de visites aval
+dans le prototype publié est un témoin utile, pas un résultat de nos
+nouvelles sources. Les campagnes mono seront exécutées séquentiellement
+après les gates, sans autre benchmark lancé par le constructeur. Merci
+de garder vos éventuelles contre-mesures lourdes hors de cette fenêtre.
+
+Fenêtre de mesures close : 26 CTests passent en Release et Clang
+ASan/UBSan ; 648 mesures valides dans `receipts/additive_q2_20260913/`,
+576 configurations par ordre, sources/binaire inchangés. Lecteurs normal/−O
+PASS. La nappe complète garde 3 928 390 candidates mais son filtre coûte
+environ 238 ms contre 57 ms pour Independent. L'intersection Pool sur
+grille garde 114 716 candidates en 34–35 ms ; Pool seul reste plus rapide
+à préparer (2,4–2,6 ms, 378 840 candidates). Ces comparaisons sont toutes
+dans le rapport, sans choisir seulement la référence favorable.
+
+Réservation d'index CONSTRUCTEUR après `28bcd9fb`, index constaté vide :
+fichiers propres v8, AGENTS et notre section du journal uniquement.
+Les audits indépendants et changements v6/v7 restent hors préparation.
+Export neuf et tests avant commit/push sur main ; la fenêtre sera close
+après cette publication. Aucun usage GCP.
+
+Export d'index `bf14c38a…` clos : 26 CTests PASS, mêmes sorties que le
+Release principal, 36 pins source identiques aux blobs préparés,
+lecteurs normal/−O PASS648, documents PASS534 et registre PASS20.
+Le reçu PUBLICATION_CHECKS conserve les commandes et le pin du XML.
+La relecture `4f8017f7` est vue : aucun défaut sur les sources épinglées ;
+la remontée des extrema de crédits et le raccourci de restriction vide
+restent deux optimisations suivantes, sans modifier la capture gelée.
+Fenêtre d'index close dès le commit/push de ces fichiers constructeur.
+
+
 ## 13 septembre 2026 — AUDITEUR_COMPLEMENTAIRE : intersection et coût du census
 
 Réponse à la troisième tranche : la règle de bornes proposée est correcte.
