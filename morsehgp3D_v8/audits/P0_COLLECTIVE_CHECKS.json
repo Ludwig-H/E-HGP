@@ -1,0 +1,38 @@
+{
+  "status": "passed_bounded_collective_model",
+  "scope": "exact rational collective-witness model, no producer",
+  "source": "morsehgp3D_v8/audits/p0_collective_probe.py",
+  "source_before": "947718291b762f7c2e77fd1b236db548fc8c940e64d37fd1bbced3cb3f95a4a3",
+  "interpreter": "/usr/local/python/3.12.1/bin/python3.12",
+  "runs": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v8/audits/p0_collective_probe.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"boundary_members\": 816, \"full_qualification\": false, \"gcp_used\": false, \"individual_w3_w4_failures_in_positive_q4\": 2, \"performance_claim\": false, \"positive_noncoplanar_q4\": 2, \"rank_groups\": 204, \"refuted_model_mutants\": [\"closed_margin\", \"missing_barycenter\", \"overlapping_groups\"], \"source_sha256\": \"947718291b762f7c2e77fd1b236db548fc8c940e64d37fd1bbced3cb3f95a4a3\", \"sphere_checks\": 2040, \"status\": \"passed_bounded_collective_model\", \"strict_inside_members\": 2448}\n",
+      "stderr": "",
+      "timeout_seconds": 15
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/audits/p0_collective_probe.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"boundary_members\": 816, \"full_qualification\": false, \"gcp_used\": false, \"individual_w3_w4_failures_in_positive_q4\": 2, \"performance_claim\": false, \"positive_noncoplanar_q4\": 2, \"rank_groups\": 204, \"refuted_model_mutants\": [\"closed_margin\", \"missing_barycenter\", \"overlapping_groups\"], \"source_sha256\": \"947718291b762f7c2e77fd1b236db548fc8c940e64d37fd1bbced3cb3f95a4a3\", \"sphere_checks\": 2040, \"status\": \"passed_bounded_collective_model\", \"strict_inside_members\": 2448}\n",
+      "stderr": "",
+      "timeout_seconds": 15
+    }
+  ],
+  "full_qualification": false,
+  "performance_claim": false,
+  "gcp_used": false,
+  "source_after": "947718291b762f7c2e77fd1b236db548fc8c940e64d37fd1bbced3cb3f95a4a3"
+}

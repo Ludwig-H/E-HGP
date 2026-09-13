@@ -1,0 +1,626 @@
+{
+  "status": "passed_bounded_rectangle_model_o2_ubsan_asan",
+  "attempts": [
+    {
+      "status": "passed_bounded_rectangle_model_o2_ubsan_asan",
+      "sources": {
+        "gate.cpp": {
+          "path": "morsehgp3D_v8/audits/p0_rectangle_probe.cpp",
+          "sha256": "8a1891c58a7b3cc41c67b9ce606fd9ba40a785ff4651ae6fbfb3ac756f77eca7",
+          "bytes": 20282,
+          "text": "// Independent bounded audit prototype. It proposes rank slabs, certifies\n// whole tails with the current Wq block predicate, and retains every failed\n// certificate. It does not modify the producer, construct a WSPD or execute\n// a FULL tower. Cartesian enumeration occurs only in the bounded judges.\n#include \"spindle/predicates.hpp\"\n\n#include <boost/multiprecision/cpp_int.hpp>\n\n#include <algorithm>\n#include <array>\n#include <cstddef>\n#include <cstdint>\n#include <iostream>\n#include <limits>\n#include <numeric>\n#include <set>\n#include <stdexcept>\n#include <string_view>\n#include <tuple>\n#include <utility>\n#include <vector>\n\nnamespace {\n\nusing mhgp8::Box3;\nusing mhgp8::Lane;\nusing mhgp8::Point3;\nusing mhgp8::u64;\nusing Big = boost::multiprecision::cpp_int;\nusing Pair = std::pair<std::size_t, std::size_t>;\n\nstruct Failure : std::runtime_error {\n  using std::runtime_error::runtime_error;\n};\n\nvoid require(bool condition, const char* cause) {\n  if (!condition) throw Failure(cause);\n}\n\nstruct Range {\n  std::size_t begin{};\n  std::size_t end{};\n  [[nodiscard]] std::size_t size() const { return end - begin; }\n};\n\nstruct Input {\n  std::vector<Point3> points;\n  std::size_t m{};\n};\n\nstruct Work {\n  u64 sort_comparisons{};\n  u64 prefix_sites{};\n  u64 suffix_sites{};\n  u64 anchor_box_sites{};\n  u64 witness_sites{};\n  u64 chunks{};\n  u64 attempted_tails{};\n  u64 retained_tails{};\n  u64 certified_tails{};\n  u64 mutation_hits{};\n  mhgp8::PredicateWork predicates;\n};\n\nstruct Task {\n  Range a;\n  Range b;\n  Range witness_ranks;\n  bool killed{};\n  bool proposed_tail{};\n};\n\nstruct Plan {\n  std::vector<std::size_t> a_order;\n  std::vector<std::size_t> b_order;\n  std::vector<Task> tasks;\n  u64 candidate_pairs{};\n  Work work;\n};\n\nenum class Mutation { None, ClosedBoundary };\n\nu64 product(std::size_t a, std::size_t b) {\n  require(b == 0 || a <= std::numeric_limits<u64>::max() / b,\n          \"model.pair_count_overflow\");\n  return static_cast<u64>(a) * static_cast<u64>(b);\n}\n\nvoid extend(Box3& box, const Point3& point) {\n  box.low = {std::min(box.low.x, point.x), std::min(box.low.y, point.y),\n             std::min(box.low.z, point.z)};\n  box.high = {std::max(box.high.x, point.x), std::max(box.high.y, point.y),\n              std::max(box.high.z, point.z)};\n}\n\nvoid validate(const Input& input, unsigned separation) {\n  require(input.m > 0 && input.m <= input.points.size() &&\n          input.points.size() - input.m == input.m, \"input.equal_nonempty_factors\");\n  require(separation >= 8 && separation <= 12, \"input.separation_domain\");\n  std::set<std::tuple<unsigned, unsigned, unsigned>> positions;\n  for (const auto& point : input.points)\n    require(positions.emplace(point.x, point.y, point.z).second,\n            \"input.duplicate_position\");\n  Box3 a{input.points[0], input.points[0]};\n  Box3 b{input.points[input.m], input.points[input.m]};\n  for (std::size_t i = 0; i < input.m; ++i) {\n    extend(a, input.points[i]);\n    extend(b, input.points[input.m + i]);\n  }\n  mhgp8::i64 gap2 = 0;\n  mhgp8::i64 a_diagonal2 = 0;\n  mhgp8::i64 b_diagonal2 = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const auto gap = std::max({mhgp8::i64{0},\n        static_cast<mhgp8::i64>(a.low[axis]) - b.high[axis],\n        static_cast<mhgp8::i64>(b.low[axis]) - a.high[axis]});\n    const auto aw = static_cast<mhgp8::i64>(a.high[axis]) - a.low[axis];\n    const auto bw = static_cast<mhgp8::i64>(b.high[axis]) - b.low[axis];\n    gap2 += gap * gap;\n    a_diagonal2 += aw * aw;\n    b_diagonal2 += bw * bw;\n  }\n  require(static_cast<mhgp8::i128>(gap2) >=\n          static_cast<mhgp8::i128>(separation) * separation *\n              std::max(a_diagonal2, b_diagonal2), \"input.actual_separation\");\n}\n\nPlan propose(const Input& input, Lane lane, unsigned h,\n             Mutation mutation = Mutation::None) {\n  require(h > 0 && h <= 10, \"model.threshold\");\n  mhgp8::require_valid_lane(lane);\n  Plan plan;\n  const auto m = input.m;\n  const std::size_t w = (h + 1U) / 2U;\n  const std::size_t length = w + 1;\n  plan.a_order.resize(m);\n  plan.b_order.resize(m);\n  std::iota(plan.a_order.begin(), plan.a_order.end(), std::size_t{0});\n  std::iota(plan.b_order.begin(), plan.b_order.end(), m);\n  const auto less = [&](std::size_t left, std::size_t right) {\n    mhgp8::counter_add(plan.work.sort_comparisons);\n    const auto& a = input.points[left];\n    const auto& b = input.points[right];\n    return std::tie(a.y, a.x, a.z, left) < std::tie(b.y, b.x, b.z, right);\n  };\n  std::sort(plan.a_order.begin(), plan.a_order.end(), less);\n  std::sort(plan.b_order.begin(), plan.b_order.end(), less);\n\n  // These scans prevent rebuilding each long B tail by visiting all its sites.\n  std::vector<Box3> prefixes(m);\n  std::vector<Box3> suffixes(m);\n  Box3 prefix{input.points[plan.b_order[0]], input.points[plan.b_order[0]]};\n  Box3 suffix{input.points[plan.b_order[m - 1]], input.points[plan.b_order[m - 1]]};\n  for (std::size_t i = 0; i < m; ++i) {\n    extend(prefix, input.points[plan.b_order[i]]);\n    prefixes[i] = prefix;\n    mhgp8::counter_add(plan.work.prefix_sites);\n    const auto j = m - 1 - i;\n    extend(suffix, input.points[plan.b_order[j]]);\n    suffixes[j] = suffix;\n    mhgp8::counter_add(plan.work.suffix_sites);\n  }\n\n  for (std::size_t begin = 0; begin < m;) {\n    const std::size_t end = begin + std::min(length, m - begin);\n    const Range anchors{begin, end};\n    Box3 a_box{input.points[plan.a_order[begin]], input.points[plan.a_order[begin]]};\n    for (std::size_t i = begin; i < end; ++i) {\n      extend(a_box, input.points[plan.a_order[i]]);\n      mhgp8::counter_add(plan.work.anchor_box_sites);\n    }\n    mhgp8::counter_add(plan.work.chunks);\n    const std::size_t left_end = begin > w ? begin - w : 0;\n    const std::size_t right_begin = end + std::min(w, m - end);\n    const auto retain = [&](Range columns) {\n      plan.tasks.push_back({anchors, columns, {}, false, false});\n      mhgp8::counter_add(plan.candidate_pairs, product(anchors.size(), columns.size()));\n    };\n    const auto tail = [&](Range columns, Range witnesses, const Box3& b_box) {\n      require(witnesses.size() == w, \"model.witness_rank_count\");\n      mhgp8::counter_add(plan.work.attempted_tails);\n      Box3 z_box{input.points[plan.a_order[witnesses.begin]],\n                 input.points[plan.a_order[witnesses.begin]]};\n      // Two disjoint ID ranges, one in each factor. The box is merely their\n      // geometric enclosure; its volume never supplies a population count.\n      for (std::size_t i = witnesses.begin; i < witnesses.end; ++i) {\n        extend(z_box, input.points[plan.a_order[i]]);\n        extend(z_box, input.points[plan.b_order[i]]);\n        mhgp8::counter_add(plan.work.witness_sites, 2);\n      }\n      const auto decision = mhgp8::classify_witness_block(\n          lane, a_box, b_box, z_box, plan.work.predicates);\n      bool certified = decision == mhgp8::BlockDecision::Credit;\n      if (mutation == Mutation::ClosedBoundary && lane == Lane::Q2 && !certified &&\n          mhgp8::spindle_detail::h_minimum(a_box, b_box, z_box) >= 0) {\n        certified = true;\n        mhgp8::counter_add(plan.work.mutation_hits);\n      }\n      const bool killed = certified && product(2, witnesses.size()) >= h;\n      plan.tasks.push_back({anchors, columns, witnesses, killed, true});\n      if (killed) {\n        mhgp8::counter_add(plan.work.certified_tails);\n      } else {\n        // NoCredit refutes this proposed witness population, not its anchors.\n        mhgp8::counter_add(plan.work.retained_tails);\n        mhgp8::counter_add(plan.candidate_pairs, product(anchors.size(), columns.size()));\n      }\n    };\n    if (left_end != 0) tail({0, left_end}, {left_end, begin}, prefixes[left_end - 1]);\n    retain({left_end, right_begin});\n    if (right_begin != m) tail({right_begin, m}, {end, right_begin}, suffixes[right_begin]);\n    begin = end;\n  }\n  return plan;\n}\n\n// Independent bounded predicate: Gram determinant in arbitrary precision,\n// rather than the product's interval or cross-product implementation.\nbool oracle_witness(Lane lane, const Point3& a, const Point3& b, const Point3& z) {\n  mhgp8::i64 h = 0;\n  mhgp8::i64 u2 = 0;\n  mhgp8::i64 v2 = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const auto u = static_cast<mhgp8::i64>(z[axis]) - a[axis];\n    const auto v = static_cast<mhgp8::i64>(b[axis]) - z[axis];\n    h += u * v;\n    u2 += u * u;\n    v2 += v * v;\n  }\n  if (h <= 0) return false;\n  if (lane == Lane::Q2) return true;\n  const Big h2 = Big(h) * h;\n  const Big xi = Big(u2) * v2 - h2;\n  return (lane == Lane::Q3 ? 3 : 2) * h2 > xi;\n}\n\nstruct Checks {\n  u64 plans{};\n  u64 q2_plans{};\n  u64 q34_plans{};\n  u64 coverage_pairs{};\n  u64 certificate_predicates{};\n  u64 census_site_tests{};\n  u64 q34_zero_predicates{};\n  u64 candidate_pairs{};\n  u64 final_q2_pairs{};\n  u64 certified_tails{};\n  u64 retained_tails{};\n  u64 witness_sites{};\n  u64 mutants_rejected{};\n};\n\nstruct Growth {\n  std::size_t n{};\n  u64 candidate_pairs{};\n  u64 proved_band_pairs{};\n  std::size_t tasks{};\n  u64 witness_sites{};\n};\n\nstd::set<Pair> candidates(const Plan& plan) {\n  std::set<Pair> result;\n  for (const auto& task : plan.tasks) {\n    if (task.killed) continue;\n    for (std::size_t a = task.a.begin; a < task.a.end; ++a)\n      for (std::size_t b = task.b.begin; b < task.b.end; ++b)\n        require(result.emplace(plan.a_order[a], plan.b_order[b]).second,\n                \"judge.duplicate_candidate\");\n  }\n  require(result.size() == plan.candidate_pairs, \"judge.candidate_cardinality\");\n  return result;\n}\n\nstd::set<Pair> exact_q2(const Input& input, unsigned h,\n                      const std::set<Pair>* allowed, Checks& checks) {\n  std::set<Pair> result;\n  for (std::size_t a = 0; a < input.m; ++a) {\n    for (std::size_t b = input.m; b < 2 * input.m; ++b) {\n      if (allowed != nullptr && !allowed->contains({a, b})) continue;\n      unsigned count = 0;\n      for (std::size_t z = 0; z < input.points.size(); ++z) {\n        if (z == a || z == b) continue;\n        count += static_cast<unsigned>(oracle_witness(\n            Lane::Q2, input.points[a], input.points[b], input.points[z]));\n        mhgp8::counter_add(checks.census_site_tests);\n      }\n      if (count < h) result.emplace(a, b);\n    }\n  }\n  return result;\n}\n\nvoid check_plan(const Input& input, const Plan& plan, Lane lane,\n                unsigned h, bool matched_rows, Checks& checks) {\n  mhgp8::counter_add(checks.plans);\n  const auto m = input.m;\n  const std::size_t w = (h + 1U) / 2U;\n  const std::size_t length = w + 1;\n  const auto chunks = (m + length - 1) / length;\n  require(plan.work.chunks == chunks && plan.tasks.size() <= 3 * chunks,\n          \"judge.task_bound\");\n  require(plan.work.prefix_sites == m && plan.work.suffix_sites == m &&\n          plan.work.anchor_box_sites == m, \"judge.paid_linear_boxes\");\n  require(plan.work.witness_sites == 2 * w * plan.work.attempted_tails &&\n          plan.work.witness_sites <= 4 * w * chunks, \"judge.paid_witness_bound\");\n  require(plan.work.predicates.block_bound_tests == plan.work.attempted_tails,\n          \"judge.one_predicate_per_tail\");\n  std::vector<unsigned> coverage(m * m, 0);  // Bounded judge only.\n  for (const auto& task : plan.tasks) {\n    for (std::size_t a = task.a.begin; a < task.a.end; ++a) {\n      for (std::size_t b = task.b.begin; b < task.b.end; ++b) {\n        const auto aid = plan.a_order[a];\n        const auto bid = plan.b_order[b];\n        require(aid < m && bid >= m && bid < 2 * m, \"judge.original_ids\");\n        ++coverage[aid * m + bid - m];\n        mhgp8::counter_add(checks.coverage_pairs);\n        if (!task.killed) continue;\n        require(task.proposed_tail && 2 * task.witness_ranks.size() >= h,\n                \"judge.positive_population_size\");\n        std::set<std::size_t> witness_ids;\n        for (std::size_t k = task.witness_ranks.begin; k < task.witness_ranks.end; ++k) {\n          for (const auto zid : {plan.a_order[k], plan.b_order[k]}) {\n            require(zid != aid && zid != bid && witness_ids.insert(zid).second,\n                    \"judge.witness_identity_disjointness\");\n            require(oracle_witness(lane, input.points[aid], input.points[bid],\n                                   input.points[zid]), \"judge.unsound_block_credit\");\n            mhgp8::counter_add(checks.certificate_predicates);\n          }\n        }\n      }\n    }\n  }\n  require(std::all_of(coverage.begin(), coverage.end(),\n                     [](unsigned count) { return count == 1; }), \"judge.coverage_partition\");\n  const auto kept = candidates(plan);\n  mhgp8::counter_add(checks.candidate_pairs, kept.size());\n  mhgp8::counter_add(checks.certified_tails, plan.work.certified_tails);\n  mhgp8::counter_add(checks.retained_tails, plan.work.retained_tails);\n  mhgp8::counter_add(checks.witness_sites, plan.work.witness_sites);\n  if (lane == Lane::Q2) {\n    mhgp8::counter_add(checks.q2_plans);\n    const auto exact = exact_q2(input, h, nullptr, checks);\n    const auto final = exact_q2(input, h, &kept, checks);\n    require(exact == final, \"judge.lost_q2_pairs\");\n    mhgp8::counter_add(checks.final_q2_pairs, final.size());\n    if (matched_rows) {\n      require(plan.work.retained_tails == 0, \"judge.row_tail_not_certified\");\n      require(plan.candidate_pairs <= product(m, length + 2 * w), \"judge.row_residue_bound\");\n      const auto expected = w >= m ? product(m, m) :\n          product(2 * w + 1, m) - product(w, w + 1);\n      require(exact.size() == expected, \"judge.row_band_size\");\n      for (std::size_t a = 0; a < m; ++a)\n        for (std::size_t b = m; b < 2 * m; ++b) {\n          const int delta = static_cast<int>(input.points[a].y) - input.points[b].y;\n          const bool in_band = static_cast<unsigned>(delta < 0 ? -delta : delta) <= w;\n          require(exact.contains({a, b}) == in_band, \"judge.physical_band\");\n        }\n    }\n  } else {\n    mhgp8::counter_add(checks.q34_plans);\n    require(matched_rows && plan.work.certified_tails == 0 &&\n            plan.candidate_pairs == product(m, m), \"judge.no_q2_transfer\");\n    for (std::size_t a = 0; a < m; ++a)\n      for (std::size_t b = m; b < 2 * m; ++b)\n        for (std::size_t z = 0; z < 2 * m; ++z) {\n          if (z == a || z == b) continue;\n          require(!oracle_witness(lane, input.points[a], input.points[b], input.points[z]),\n                  \"judge.row_q34_witness_not_empty\");\n          mhgp8::counter_add(checks.q34_zero_predicates);\n        }\n  }\n}\n\nInput rows(std::size_t m, bool permuted) {\n  Input result;\n  result.m = m;\n  for (unsigned side = 0; side < 2; ++side)\n    for (std::size_t i = 0; i < m; ++i) {\n      require(i <= 65535, \"fixture.u16\");\n      result.points.push_back({static_cast<std::uint16_t>(side == 0 ? 1000 : 60000),\n                               static_cast<std::uint16_t>(i), 0});\n    }\n  if (permuted) {\n    std::reverse(result.points.begin(), result.points.begin() + static_cast<std::ptrdiff_t>(m));\n    std::rotate(result.points.begin() + static_cast<std::ptrdiff_t>(m),\n                result.points.begin() + static_cast<std::ptrdiff_t>(m + m / 3),\n                result.points.end());\n  }\n  return result;\n}\n\nvoid run() {\n  Checks checks;\n  for (const auto m : {std::size_t{16}, std::size_t{32}}) {\n    for (const auto separation : {8U, 10U, 12U}) {\n      for (const bool permuted : {false, true}) {\n        const auto input = rows(m, permuted);\n        validate(input, separation);\n        for (const auto h : {1U, 5U, 10U})\n          check_plan(input, propose(input, Lane::Q2, h), Lane::Q2, h, true, checks);\n      }\n      if (m == 16) {\n        const auto input = rows(m, false);\n        validate(input, separation);\n        check_plan(input, propose(input, Lane::Q3, 9), Lane::Q3, 9, true, checks);\n        check_plan(input, propose(input, Lane::Q4, 8), Lane::Q4, 8, true, checks);\n      }\n    }\n  }\n  // Unequal ordinate spacings are a valid input, not a reason to assume the\n  // rank proposal successful. The sole tail has H_min=0: one of its proposed\n  // witnesses is on the diameter boundary, and the other is strictly inside.\n  const Input boundary{{{1000, 0, 0}, {1000, 1, 0}, {1000, 3, 0},\n                         {60000, 1, 0}, {60000, 2, 0}, {60000, 4, 0}}, 3};\n  validate(boundary, 12);\n  const auto nominal = propose(boundary, Lane::Q2, 2);\n  require(nominal.work.attempted_tails == 1 && nominal.work.retained_tails == 1 &&\n          nominal.work.certified_tails == 0, \"mutation.nominal_fallback\");\n  check_plan(boundary, nominal, Lane::Q2, 2, false, checks);\n  const auto changed = propose(boundary, Lane::Q2, 2, Mutation::ClosedBoundary);\n  require(changed.work.mutation_hits == 1 && changed.work.certified_tails == 1,\n          \"mutation.not_exercised\");\n  const auto all = exact_q2(boundary, 2, nullptr, checks);\n  const auto allowed = candidates(changed);\n  const auto wrong = exact_q2(boundary, 2, &allowed, checks);\n  require(all.size() == wrong.size() + 1 && all.contains({2, 3}) &&\n          !wrong.contains({2, 3}), \"mutation.missing_physical_pair\");\n  mhgp8::counter_add(checks.mutants_rejected);\n  require(checks.plans == 43 && checks.q2_plans == 37 && checks.q34_plans == 6 &&\n          checks.certified_tails > 0 && checks.retained_tails > 0 &&\n          checks.certificate_predicates > 1000 && checks.q34_zero_predicates > 1000 &&\n          checks.mutants_rejected == 1, \"gate.nonvacuity\");\n  // Valid u16 growth cases: count descriptors and proved formula bounds only.\n  // No Cartesian expansion, geometric census or FULL output is executed here.\n  std::vector<Growth> growth;\n  for (const auto m : {std::size_t{4000}, std::size_t{4096}}) {\n    const auto input = rows(m, false);\n    validate(input, 12);\n    const auto plan = propose(input, Lane::Q2, 10);\n    const auto chunks = (m + 5) / 6;\n    const auto band_pairs = product(11, m) - 30;\n    require(plan.work.chunks == chunks && plan.tasks.size() <= 3 * chunks,\n            \"growth.task_bound\");\n    require(plan.work.prefix_sites == m && plan.work.suffix_sites == m &&\n            plan.work.anchor_box_sites == m &&\n            plan.work.witness_sites == 10 * plan.work.attempted_tails &&\n            plan.work.witness_sites <= 20 * chunks, \"growth.linear_preparation\");\n    require(plan.work.retained_tails == 0 && plan.work.certified_tails > 0 &&\n            plan.candidate_pairs >= band_pairs &&\n            plan.candidate_pairs <= product(16, m), \"growth.proved_row_bound\");\n    growth.push_back({2 * m, plan.candidate_pairs, band_pairs,\n                      plan.tasks.size(), plan.work.witness_sites});\n  }\n  std::cout << \"{\\\"status\\\":\\\"passed_bounded_rectangle_model\\\",\\\"plans\\\":\" << checks.plans\n            << \",\\\"q2_plans\\\":\" << checks.q2_plans\n            << \",\\\"q34_plans\\\":\" << checks.q34_plans\n            << \",\\\"coverage_pairs\\\":\" << checks.coverage_pairs\n            << \",\\\"certificate_predicates\\\":\" << checks.certificate_predicates\n            << \",\\\"census_site_tests\\\":\" << checks.census_site_tests\n            << \",\\\"q34_zero_predicates\\\":\" << checks.q34_zero_predicates\n            << \",\\\"candidate_pairs\\\":\" << checks.candidate_pairs\n            << \",\\\"final_q2_pairs\\\":\" << checks.final_q2_pairs\n            << \",\\\"certified_tails\\\":\" << checks.certified_tails\n            << \",\\\"retained_tails\\\":\" << checks.retained_tails\n            << \",\\\"witness_sites\\\":\" << checks.witness_sites\n            << \",\\\"refuted_model_mutants\\\":\" << checks.mutants_rejected\n            << \",\\\"mutant_lost_q2_pairs\\\":1,\\\"product_predicate_called\\\":true\"\n               \",\\\"full_engine_executed\\\":false,\\\"performance_claim\\\":false\"\n               \",\\\"gcp_used\\\":false,\\\"growth_census_executed\\\":false,\\\"growth\\\":[\";\n  for (std::size_t i = 0; i < growth.size(); ++i) {\n    if (i != 0) std::cout << ',';\n    const auto& value = growth[i];\n    std::cout << \"{\\\"n\\\":\" << value.n << \",\\\"s\\\":12,\\\"h\\\":10,\\\"candidate_pairs\\\":\"\n              << value.candidate_pairs << \",\\\"proved_band_pairs\\\":\" << value.proved_band_pairs\n              << \",\\\"tasks\\\":\" << value.tasks << \",\\\"witness_sites\\\":\" << value.witness_sites << '}';\n  }\n  std::cout << \"]}\\n\";\n}\n\n}  // namespace\n\nint main(int argc, char** argv) {\n  if (argc != 2 || std::string_view(argv[1]) != \"--selftest\") return 2;\n  try {\n    run();\n    return 0;\n  } catch (const std::exception& error) {\n    std::cerr << error.what() << '\\n';\n    return 1;\n  }\n}\n"
+        },
+        "src/spindle/predicates.hpp": {
+          "path": "morsehgp3D_v8/src/spindle/predicates.hpp",
+          "sha256": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+          "bytes": 9194,
+          "text": "#pragma once\n\n#include \"../core/types.hpp\"\n\n#include <algorithm>\n#include <array>\n\nnamespace mhgp8 {\n\n// A, B and Z below are continuous boxes, not just the stored sites in them.\n// This decision concerns witness credit, never the death of an anchor.\n// Credit: every z in Z witnesses every (a,b) in A x B.\n// NoCredit: every (a,z) in A x Z fails universality over the BOX B. A failing\n// box corner need not itself be a stored site: this does not refute a weaker\n// certificate concerning only the discrete sites of B.\n// Uncertain: neither statement is certified; it is not a rejection.\nenum class BlockDecision : std::uint8_t { Credit, NoCredit, Uncertain };\n\nnamespace spindle_detail {\n\nstruct Interval {\n  i64 low;\n  i64 high;\n};\n\n[[nodiscard]] inline Interval coordinate(const Box3& box, std::size_t axis) {\n  return {static_cast<i64>(box.low[axis]), static_cast<i64>(box.high[axis])};\n}\n\n[[nodiscard]] inline Interval subtract(Interval left, Interval right) {\n  return {left.low - right.high, left.high - right.low};\n}\n\n[[nodiscard]] inline Interval multiply(Interval left, Interval right) {\n  const std::array<i64, 4> products{\n      left.low * right.low, left.low * right.high,\n      left.high * right.low, left.high * right.high};\n  const auto bounds = std::minmax_element(products.begin(), products.end());\n  return {*bounds.first, *bounds.second};\n}\n\n[[nodiscard]] inline i128 square(i64 value) {\n  return static_cast<i128>(value) * value;\n}\n\nstruct SquaredBounds {\n  i128 low;\n  i128 high;\n};\n\n[[nodiscard]] inline SquaredBounds square_bounds(Interval value) {\n  const i128 left = square(value.low);\n  const i128 right = square(value.high);\n  return {value.low <= 0 && value.high >= 0 ? 0 : std::min(left, right),\n          std::max(left, right)};\n}\n\n// M=65535. Coordinate differences have magnitude <=M, products <=M^2,\n// cross components <=2M^2, hence Xi<=12M^4<2^68. Dependencies between\n// intervals are discarded only outward: both Xi bounds remain certified.\n[[nodiscard]] inline SquaredBounds xi_bounds(const Box3& a, const Box3& b,\n                                           const Box3& z) {\n  std::array<Interval, 3> u{};\n  std::array<Interval, 3> w{};\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    u[axis] = subtract(coordinate(z, axis), coordinate(a, axis));\n    w[axis] = subtract(coordinate(b, axis), coordinate(z, axis));\n  }\n  SquaredBounds result{0, 0};\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const std::size_t j = (axis + 1) % 3;\n    const std::size_t k = (axis + 2) % 3;\n    const auto component = square_bounds(\n        subtract(multiply(u[j], w[k]), multiply(u[k], w[j])));\n    result.low += component.low;\n    result.high += component.high;\n  }\n  return result;\n}\n\n// H=(z-a).(b-z) is separable by coordinate, affine separately in a and b,\n// and concave in z. Its minimum over three boxes is therefore attained at\n// coordinate endpoints. The largest partial sum has magnitude <=3M^2.\n[[nodiscard]] inline i64 h_minimum(const Box3& a, const Box3& b,\n                                 const Box3& z) {\n  i64 result = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const Interval ac = coordinate(a, axis);\n    const Interval bc = coordinate(b, axis);\n    const Interval zc = coordinate(z, axis);\n    const auto at_z = [ac, bc](i64 value) {\n      return multiply({value - ac.high, value - ac.low},\n                      {bc.low - value, bc.high - value}).low;\n    };\n    result += std::min(at_z(zc.low), at_z(zc.high));\n  }\n  return result;\n}\n\n// Four times the exact maximum of H over A x {b} x Z. For each coordinate,\n// maximize over a at an endpoint, then over z at clamp((a+b)/2,Z).\n// Doubling the vertex and multiplying H by four avoids division/rounding.\n// Each term is in [-4M^2,M^2], so the sum is in [-12M^2,3M^2].\n[[nodiscard]] inline i64 h_maximum_times_four(const Box3& a, const Point3& b,\n                                            const Box3& z) {\n  i64 result = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const i64 bc = static_cast<i64>(b[axis]);\n    const i64 low_twice = 2 * static_cast<i64>(z.low[axis]);\n    const i64 high_twice = 2 * static_cast<i64>(z.high[axis]);\n    const auto at_a = [bc, low_twice, high_twice](i64 ac) {\n      const i64 sum = ac + bc;\n      const i64 closest = std::clamp(sum, low_twice, high_twice);\n      const i64 delta = closest - sum;\n      const i64 distance = bc - ac;\n      return distance * distance - delta * delta;\n    };\n    result += std::max(at_a(static_cast<i64>(a.low[axis])),\n                       at_a(static_cast<i64>(a.high[axis])));\n  }\n  return result;\n}\n\n[[nodiscard]] inline unsigned multiplier(Lane lane) {\n  return lane == Lane::Q3 ? 3U : 2U;\n}\n\n}  // namespace spindle_detail\n\n[[nodiscard]] inline bool point_witness(Lane lane, const Point3& a,\n                                       const Point3& b, const Point3& z,\n                                       PredicateWork& work) {\n  require_valid_lane(lane);\n  counter_add(work.point_tests);\n  std::array<i64, 3> u{};\n  std::array<i64, 3> w{};\n  i64 h = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    u[axis] = static_cast<i64>(z[axis]) - static_cast<i64>(a[axis]);\n    w[axis] = static_cast<i64>(b[axis]) - static_cast<i64>(z[axis]);\n    h += u[axis] * w[axis];\n  }\n  if (h <= 0) {\n    return false;\n  }\n  if (lane == Lane::Q2) {\n    return true;\n  }\n  i128 xi = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const std::size_t j = (axis + 1) % 3;\n    const std::size_t k = (axis + 2) % 3;\n    const i64 cross = u[j] * w[k] - u[k] * w[j];\n    xi += spindle_detail::square(cross);\n  }\n  // 3H^2<=27M^4<2^69. Promotion occurs before either multiplication.\n  return static_cast<i128>(spindle_detail::multiplier(lane)) *\n             spindle_detail::square(h) > xi;\n}\n\n[[nodiscard]] inline bool universal_witness(Lane lane, const Point3& a,\n                                           const Box3& b, const Point3& z,\n                                           PredicateWork& work) {\n  require_valid_lane(lane);\n  require_valid_box(b);\n  counter_add(work.universal_queries);\n  if (lane == Lane::Q2) {\n    // H is affine in b: choose the minimizing bound independently per axis.\n    // This is the exact continuous-box minimum, not a heuristic proposal.\n    i64 h = 0;\n    for (std::size_t axis = 0; axis < 3; ++axis) {\n      const i64 delta = static_cast<i64>(z[axis]) - static_cast<i64>(a[axis]);\n      const i64 bound =\n          static_cast<i64>(delta >= 0 ? b.low[axis] : b.high[axis]);\n      h += delta * (bound - static_cast<i64>(z[axis]));\n      counter_add(work.q2_axis_terms);\n    }\n    return h > 0;\n  }\n  // For fixed a,z, H>0 and sqrt(t)H>|(z-a)x(b-z)| is an open convex\n  // cone in b. All eight corners are necessary and sufficient for the box.\n  for (unsigned corner = 0; corner < 8; ++corner) {\n    counter_add(work.corner_tests);\n    if (!point_witness(lane, a, box_corner(b, corner), z, work)) {\n      return false;\n    }\n  }\n  return true;\n}\n\n[[nodiscard]] inline bool box_witness(Lane lane, const Box3& a,\n                                     const Box3& b, const Point3& z,\n                                     PredicateWork& work) {\n  require_valid_lane(lane);\n  require_valid_box(a);\n  require_valid_box(b);\n  // Convexity is separate in a and b, not assumed joint. Applying the\n  // corner certificate successively proves the entire Cartesian product.\n  for (unsigned corner = 0; corner < 8; ++corner) {\n    if (!universal_witness(lane, box_corner(a, corner), b, z, work)) {\n      return false;\n    }\n  }\n  return true;\n}\n\n[[nodiscard]] inline BlockDecision classify_witness_block(\n    Lane lane, const Box3& a, const Box3& b, const Box3& z,\n    PredicateWork& work) {\n  require_valid_lane(lane);\n  require_valid_box(a);\n  require_valid_box(b);\n  require_valid_box(z);\n  counter_add(work.block_bound_tests);\n\n  const i64 h_min = spindle_detail::h_minimum(a, b, z);\n  if (h_min > 0) {\n    if (lane == Lane::Q2) {\n      return BlockDecision::Credit;\n    }\n    const auto xi = spindle_detail::xi_bounds(a, b, z);\n    if (static_cast<i128>(spindle_detail::multiplier(lane)) *\n            spindle_detail::square(h_min) > xi.high) {\n      return BlockDecision::Credit;\n    }\n  }\n\n  // A single fixed b0 in B which fails for ALL a in A and z in Z proves\n  // that no (a,z) can supply a universal-over-B credit. This does NOT\n  // prove that those anchors or their candidate supports may be dropped.\n  for (unsigned corner = 0; corner < 8; ++corner) {\n    counter_add(work.negative_probes);\n    const Point3 b0 = box_corner(b, corner);\n    const i64 h_max4 = spindle_detail::h_maximum_times_four(a, b0, z);\n    if (h_max4 <= 0) {\n      return BlockDecision::NoCredit;\n    }\n    if (lane != Lane::Q2) {\n      const auto xi = spindle_detail::xi_bounds(a, singleton_box(b0), z);\n      // H_max = h_max4/4; equality fails the required strict witness test.\n      // 16Xi<=192M^4<2^72; all products are promoted to i128 first.\n      if (static_cast<i128>(spindle_detail::multiplier(lane)) *\n              spindle_detail::square(h_max4) <= 16 * xi.low) {\n        return BlockDecision::NoCredit;\n      }\n    }\n  }\n  return BlockDecision::Uncertain;\n}\n\n}  // namespace mhgp8\n"
+        },
+        "src/core/types.hpp": {
+          "path": "morsehgp3D_v8/src/core/types.hpp",
+          "sha256": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+          "bytes": 2654,
+          "text": "#pragma once\n\n#include <cstddef>\n#include <cstdint>\n#include <limits>\n#include <stdexcept>\n\nnamespace mhgp8 {\n\nusing u64 = std::uint64_t;\nusing i64 = std::int64_t;\n\n// The u16 geometry (including tube bounds) needs at most 75 signed bits. This first CPU\n// implementation requires the compiler's native integer extension; it does\n// not silently replace exact predicates with floating-point arithmetic.\n#if defined(__SIZEOF_INT128__)\n__extension__ typedef signed __int128 i128;\n#else\n#error \"mhgp8 CPU predicates require a compiler with signed 128-bit integers\"\n#endif\n\nstruct Point3 {\n  std::uint16_t x{};\n  std::uint16_t y{};\n  std::uint16_t z{};\n\n  [[nodiscard]] constexpr std::uint16_t operator[](std::size_t axis) const {\n    switch (axis) {\n      case 0: return x;\n      case 1: return y;\n      case 2: return z;\n      default: throw std::out_of_range(\"mhgp8 point axis must be 0, 1 or 2\");\n    }\n  }\n\n  bool operator==(const Point3&) const = default;\n};\n\nstruct Box3 {\n  Point3 low{};\n  Point3 high{};\n};\n\nenum class Lane : std::uint8_t { Q2 = 2, Q3 = 3, Q4 = 4 };\n\n[[nodiscard]] constexpr bool valid_lane(Lane lane) noexcept {\n  return lane == Lane::Q2 || lane == Lane::Q3 || lane == Lane::Q4;\n}\n\ninline void require_valid_lane(Lane lane) {\n  if (!valid_lane(lane)) {\n    throw std::invalid_argument(\"mhgp8 lane must be Q2, Q3 or Q4\");\n  }\n}\n\n[[nodiscard]] inline unsigned arity(Lane lane) {\n  require_valid_lane(lane);\n  return static_cast<unsigned>(lane);\n}\n\n[[nodiscard]] constexpr bool valid_box(const Box3& box) noexcept {\n  return box.low.x <= box.high.x && box.low.y <= box.high.y &&\n         box.low.z <= box.high.z;\n}\n\ninline void require_valid_box(const Box3& box) {\n  if (!valid_box(box)) {\n    throw std::invalid_argument(\"mhgp8 box has inverted bounds\");\n  }\n}\n\n[[nodiscard]] constexpr Box3 singleton_box(const Point3& point) noexcept {\n  return {point, point};\n}\n\n[[nodiscard]] inline Point3 box_corner(const Box3& box, unsigned corner) {\n  require_valid_box(box);\n  if (corner >= 8) {\n    throw std::out_of_range(\"mhgp8 box corner must be in [0, 8)\");\n  }\n  return {(corner & 1U) != 0U ? box.high.x : box.low.x,\n          (corner & 2U) != 0U ? box.high.y : box.low.y,\n          (corner & 4U) != 0U ? box.high.z : box.low.z};\n}\n\nstruct PredicateWork {\n  u64 point_tests{};\n  u64 universal_queries{};\n  u64 q2_axis_terms{};\n  u64 corner_tests{};\n  u64 block_bound_tests{};\n  u64 negative_probes{};\n};\n\ninline void counter_add(u64& value, u64 increment = 1) {\n  if (increment > std::numeric_limits<u64>::max() - value) {\n    throw std::overflow_error(\"mhgp8 work counter overflow\");\n  }\n  value += increment;\n}\n\n}  // namespace mhgp8\n"
+        }
+      },
+      "compiler": {
+        "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+        "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+        "bytes": 1027128
+      },
+      "boost_include_root": "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+      "boost_header_pins": [
+        {
+          "path": "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include/boost/multiprecision/cpp_int.hpp",
+          "sha256": "2677f6c5f854060c483f08500f2d7ddb16e4d3f5e64562e414fdd1ebb4226aa4",
+          "bytes": 103936
+        },
+        {
+          "path": "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include/boost/version.hpp",
+          "sha256": "a547ee7eddf1b96695027922345b471feba8bcba79a8572399d282247c02e4ab",
+          "bytes": 1117
+        }
+      ],
+      "dependency_scope": "Product headers and gate contents embedded; compiler executable pinned. Boost top headers pinned, transitive Boost/system headers/linker/runtime are not hermetically pinned.",
+      "commands": [
+        {
+          "argv": [
+            "/usr/bin/x86_64-linux-gnu-g++-13",
+            "--version"
+          ],
+          "timeout_seconds": 10,
+          "timed_out": false,
+          "exit_code": 0,
+          "elapsed_seconds": 0.001758204998623114,
+          "stdout": "x86_64-linux-gnu-g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+          "stderr": "",
+          "stdout_sha256": "39553616934606f58b27c04bed0cdbbe5b00c92c831a9aaadebd7ceda61d1334",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "executable_before": {
+            "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+            "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+            "bytes": 1027128
+          },
+          "executable_after": {
+            "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+            "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+            "bytes": 1027128
+          }
+        }
+      ],
+      "runs": [
+        {
+          "mode": "o2",
+          "commands": [
+            {
+              "argv": [
+                "/usr/bin/x86_64-linux-gnu-g++-13",
+                "-std=c++20",
+                "-Wall",
+                "-Wextra",
+                "-Wpedantic",
+                "-Werror",
+                "-O2",
+                "-I",
+                "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/src",
+                "-isystem",
+                "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+                "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/gate.cpp",
+                "-o",
+                "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_o2"
+              ],
+              "timeout_seconds": 30,
+              "timed_out": false,
+              "exit_code": 0,
+              "elapsed_seconds": 3.454382189000171,
+              "stdout": "",
+              "stderr": "",
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "executable_before": {
+                "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+                "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+                "bytes": 1027128
+              },
+              "executable_after": {
+                "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+                "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+                "bytes": 1027128
+              }
+            },
+            {
+              "argv": [
+                "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_o2",
+                "--selftest"
+              ],
+              "timeout_seconds": 20,
+              "timed_out": false,
+              "exit_code": 0,
+              "elapsed_seconds": 0.021342713000194635,
+              "stdout": "{\"status\":\"passed_bounded_rectangle_model\",\"plans\":43,\"q2_plans\":37,\"q34_plans\":6,\"coverage_pairs\":24585,\"certificate_predicates\":82200,\"census_site_tests\":1673156,\"q34_zero_predicates\":46080,\"candidate_pairs\":9069,\"final_q2_pairs\":5526,\"certified_tails\":456,\"retained_tails\":25,\"witness_sites\":2180,\"refuted_model_mutants\":1,\"mutant_lost_q2_pairs\":1,\"product_predicate_called\":true,\"full_engine_executed\":false,\"performance_claim\":false,\"gcp_used\":false,\"growth_census_executed\":false,\"growth\":[{\"n\":8000,\"s\":12,\"h\":10,\"candidate_pairs\":63936,\"proved_band_pairs\":43970,\"tasks\":1998,\"witness_sites\":13310},{\"n\":8192,\"s\":12,\"h\":10,\"candidate_pairs\":65472,\"proved_band_pairs\":45026,\"tasks\":2046,\"witness_sites\":13630}]}\n",
+              "stderr": "",
+              "stdout_sha256": "64fae9a46d905b1231d376850ca8f133b25919866c4ccffb47c493a84a1d488a",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "executable_before": {
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_o2",
+                "sha256": "9a21a59672e40adbc36cfca80bc2378955239c53ff369176d7375c7a14ad7ded",
+                "bytes": 73432
+              },
+              "executable_after": {
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_o2",
+                "sha256": "9a21a59672e40adbc36cfca80bc2378955239c53ff369176d7375c7a14ad7ded",
+                "bytes": 73432
+              },
+              "label": "selftest"
+            },
+            {
+              "argv": [
+                "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_o2"
+              ],
+              "timeout_seconds": 20,
+              "timed_out": false,
+              "exit_code": 2,
+              "elapsed_seconds": 0.002081655999063514,
+              "stdout": "",
+              "stderr": "",
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "executable_before": {
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_o2",
+                "sha256": "9a21a59672e40adbc36cfca80bc2378955239c53ff369176d7375c7a14ad7ded",
+                "bytes": 73432
+              },
+              "executable_after": {
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_o2",
+                "sha256": "9a21a59672e40adbc36cfca80bc2378955239c53ff369176d7375c7a14ad7ded",
+                "bytes": 73432
+              },
+              "label": "missing"
+            },
+            {
+              "argv": [
+                "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_o2",
+                "--unknown"
+              ],
+              "timeout_seconds": 20,
+              "timed_out": false,
+              "exit_code": 2,
+              "elapsed_seconds": 0.0019831999998132233,
+              "stdout": "",
+              "stderr": "",
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "executable_before": {
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_o2",
+                "sha256": "9a21a59672e40adbc36cfca80bc2378955239c53ff369176d7375c7a14ad7ded",
+                "bytes": 73432
+              },
+              "executable_after": {
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_o2",
+                "sha256": "9a21a59672e40adbc36cfca80bc2378955239c53ff369176d7375c7a14ad7ded",
+                "bytes": 73432
+              },
+              "label": "unknown"
+            }
+          ],
+          "sanitizer_environment": {},
+          "result": {
+            "status": "passed_bounded_rectangle_model",
+            "plans": 43,
+            "q2_plans": 37,
+            "q34_plans": 6,
+            "coverage_pairs": 24585,
+            "certificate_predicates": 82200,
+            "census_site_tests": 1673156,
+            "q34_zero_predicates": 46080,
+            "candidate_pairs": 9069,
+            "final_q2_pairs": 5526,
+            "certified_tails": 456,
+            "retained_tails": 25,
+            "witness_sites": 2180,
+            "refuted_model_mutants": 1,
+            "mutant_lost_q2_pairs": 1,
+            "product_predicate_called": true,
+            "full_engine_executed": false,
+            "performance_claim": false,
+            "gcp_used": false,
+            "growth_census_executed": false,
+            "growth": [
+              {
+                "n": 8000,
+                "s": 12,
+                "h": 10,
+                "candidate_pairs": 63936,
+                "proved_band_pairs": 43970,
+                "tasks": 1998,
+                "witness_sites": 13310
+              },
+              {
+                "n": 8192,
+                "s": 12,
+                "h": 10,
+                "candidate_pairs": 65472,
+                "proved_band_pairs": 45026,
+                "tasks": 2046,
+                "witness_sites": 13630
+              }
+            ]
+          }
+        },
+        {
+          "mode": "ubsan",
+          "commands": [
+            {
+              "argv": [
+                "/usr/bin/x86_64-linux-gnu-g++-13",
+                "-std=c++20",
+                "-Wall",
+                "-Wextra",
+                "-Wpedantic",
+                "-Werror",
+                "-O1",
+                "-g0",
+                "-fsanitize=undefined",
+                "-fno-omit-frame-pointer",
+                "-no-pie",
+                "-I",
+                "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/src",
+                "-isystem",
+                "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+                "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/gate.cpp",
+                "-o",
+                "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_ubsan"
+              ],
+              "timeout_seconds": 30,
+              "timed_out": false,
+              "exit_code": 0,
+              "elapsed_seconds": 4.120469893001427,
+              "stdout": "",
+              "stderr": "",
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "executable_before": {
+                "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+                "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+                "bytes": 1027128
+              },
+              "executable_after": {
+                "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+                "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+                "bytes": 1027128
+              }
+            },
+            {
+              "argv": [
+                "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_ubsan",
+                "--selftest"
+              ],
+              "timeout_seconds": 20,
+              "timed_out": false,
+              "exit_code": 0,
+              "elapsed_seconds": 0.11256796399902669,
+              "stdout": "{\"status\":\"passed_bounded_rectangle_model\",\"plans\":43,\"q2_plans\":37,\"q34_plans\":6,\"coverage_pairs\":24585,\"certificate_predicates\":82200,\"census_site_tests\":1673156,\"q34_zero_predicates\":46080,\"candidate_pairs\":9069,\"final_q2_pairs\":5526,\"certified_tails\":456,\"retained_tails\":25,\"witness_sites\":2180,\"refuted_model_mutants\":1,\"mutant_lost_q2_pairs\":1,\"product_predicate_called\":true,\"full_engine_executed\":false,\"performance_claim\":false,\"gcp_used\":false,\"growth_census_executed\":false,\"growth\":[{\"n\":8000,\"s\":12,\"h\":10,\"candidate_pairs\":63936,\"proved_band_pairs\":43970,\"tasks\":1998,\"witness_sites\":13310},{\"n\":8192,\"s\":12,\"h\":10,\"candidate_pairs\":65472,\"proved_band_pairs\":45026,\"tasks\":2046,\"witness_sites\":13630}]}\n",
+              "stderr": "",
+              "stdout_sha256": "64fae9a46d905b1231d376850ca8f133b25919866c4ccffb47c493a84a1d488a",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "executable_before": {
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_ubsan",
+                "sha256": "30710ab2a3ef902067903fe9b07c7427afa9ea100e0ac20904a9b917307d87a5",
+                "bytes": 354720
+              },
+              "executable_after": {
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_ubsan",
+                "sha256": "30710ab2a3ef902067903fe9b07c7427afa9ea100e0ac20904a9b917307d87a5",
+                "bytes": 354720
+              },
+              "label": "selftest"
+            },
+            {
+              "argv": [
+                "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_ubsan"
+              ],
+              "timeout_seconds": 20,
+              "timed_out": false,
+              "exit_code": 2,
+              "elapsed_seconds": 0.002224919000582304,
+              "stdout": "",
+              "stderr": "",
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "executable_before": {
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_ubsan",
+                "sha256": "30710ab2a3ef902067903fe9b07c7427afa9ea100e0ac20904a9b917307d87a5",
+                "bytes": 354720
+              },
+              "executable_after": {
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_ubsan",
+                "sha256": "30710ab2a3ef902067903fe9b07c7427afa9ea100e0ac20904a9b917307d87a5",
+                "bytes": 354720
+              },
+              "label": "missing"
+            },
+            {
+              "argv": [
+                "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_ubsan",
+                "--unknown"
+              ],
+              "timeout_seconds": 20,
+              "timed_out": false,
+              "exit_code": 2,
+              "elapsed_seconds": 0.0019108020023850258,
+              "stdout": "",
+              "stderr": "",
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "executable_before": {
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_ubsan",
+                "sha256": "30710ab2a3ef902067903fe9b07c7427afa9ea100e0ac20904a9b917307d87a5",
+                "bytes": 354720
+              },
+              "executable_after": {
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_ubsan",
+                "sha256": "30710ab2a3ef902067903fe9b07c7427afa9ea100e0ac20904a9b917307d87a5",
+                "bytes": 354720
+              },
+              "label": "unknown"
+            }
+          ],
+          "sanitizer_environment": {
+            "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+          },
+          "result": {
+            "status": "passed_bounded_rectangle_model",
+            "plans": 43,
+            "q2_plans": 37,
+            "q34_plans": 6,
+            "coverage_pairs": 24585,
+            "certificate_predicates": 82200,
+            "census_site_tests": 1673156,
+            "q34_zero_predicates": 46080,
+            "candidate_pairs": 9069,
+            "final_q2_pairs": 5526,
+            "certified_tails": 456,
+            "retained_tails": 25,
+            "witness_sites": 2180,
+            "refuted_model_mutants": 1,
+            "mutant_lost_q2_pairs": 1,
+            "product_predicate_called": true,
+            "full_engine_executed": false,
+            "performance_claim": false,
+            "gcp_used": false,
+            "growth_census_executed": false,
+            "growth": [
+              {
+                "n": 8000,
+                "s": 12,
+                "h": 10,
+                "candidate_pairs": 63936,
+                "proved_band_pairs": 43970,
+                "tasks": 1998,
+                "witness_sites": 13310
+              },
+              {
+                "n": 8192,
+                "s": 12,
+                "h": 10,
+                "candidate_pairs": 65472,
+                "proved_band_pairs": 45026,
+                "tasks": 2046,
+                "witness_sites": 13630
+              }
+            ]
+          }
+        },
+        {
+          "mode": "asan_ubsan",
+          "commands": [
+            {
+              "argv": [
+                "/usr/bin/x86_64-linux-gnu-g++-13",
+                "-std=c++20",
+                "-Wall",
+                "-Wextra",
+                "-Wpedantic",
+                "-Werror",
+                "-O1",
+                "-g0",
+                "-fsanitize=address,undefined",
+                "-fno-omit-frame-pointer",
+                "-no-pie",
+                "-I",
+                "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/src",
+                "-isystem",
+                "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+                "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/gate.cpp",
+                "-o",
+                "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_asan_ubsan"
+              ],
+              "timeout_seconds": 30,
+              "timed_out": false,
+              "exit_code": 0,
+              "elapsed_seconds": 4.980448237998644,
+              "stdout": "",
+              "stderr": "",
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "executable_before": {
+                "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+                "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+                "bytes": 1027128
+              },
+              "executable_after": {
+                "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+                "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+                "bytes": 1027128
+              }
+            },
+            {
+              "argv": [
+                "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_asan_ubsan",
+                "--selftest"
+              ],
+              "timeout_seconds": 20,
+              "timed_out": false,
+              "exit_code": 0,
+              "elapsed_seconds": 0.28719429400007357,
+              "stdout": "{\"status\":\"passed_bounded_rectangle_model\",\"plans\":43,\"q2_plans\":37,\"q34_plans\":6,\"coverage_pairs\":24585,\"certificate_predicates\":82200,\"census_site_tests\":1673156,\"q34_zero_predicates\":46080,\"candidate_pairs\":9069,\"final_q2_pairs\":5526,\"certified_tails\":456,\"retained_tails\":25,\"witness_sites\":2180,\"refuted_model_mutants\":1,\"mutant_lost_q2_pairs\":1,\"product_predicate_called\":true,\"full_engine_executed\":false,\"performance_claim\":false,\"gcp_used\":false,\"growth_census_executed\":false,\"growth\":[{\"n\":8000,\"s\":12,\"h\":10,\"candidate_pairs\":63936,\"proved_band_pairs\":43970,\"tasks\":1998,\"witness_sites\":13310},{\"n\":8192,\"s\":12,\"h\":10,\"candidate_pairs\":65472,\"proved_band_pairs\":45026,\"tasks\":2046,\"witness_sites\":13630}]}\n",
+              "stderr": "",
+              "stdout_sha256": "64fae9a46d905b1231d376850ca8f133b25919866c4ccffb47c493a84a1d488a",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "executable_before": {
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_asan_ubsan",
+                "sha256": "43a78ed7a236bc7b87b08d7061f3f33efe8a8fca04907167286a0718f8eda9e2",
+                "bytes": 985512
+              },
+              "executable_after": {
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_asan_ubsan",
+                "sha256": "43a78ed7a236bc7b87b08d7061f3f33efe8a8fca04907167286a0718f8eda9e2",
+                "bytes": 985512
+              },
+              "label": "selftest"
+            },
+            {
+              "argv": [
+                "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_asan_ubsan"
+              ],
+              "timeout_seconds": 20,
+              "timed_out": false,
+              "exit_code": 2,
+              "elapsed_seconds": 0.011590949001401896,
+              "stdout": "",
+              "stderr": "",
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "executable_before": {
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_asan_ubsan",
+                "sha256": "43a78ed7a236bc7b87b08d7061f3f33efe8a8fca04907167286a0718f8eda9e2",
+                "bytes": 985512
+              },
+              "executable_after": {
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_asan_ubsan",
+                "sha256": "43a78ed7a236bc7b87b08d7061f3f33efe8a8fca04907167286a0718f8eda9e2",
+                "bytes": 985512
+              },
+              "label": "missing"
+            },
+            {
+              "argv": [
+                "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_asan_ubsan",
+                "--unknown"
+              ],
+              "timeout_seconds": 20,
+              "timed_out": false,
+              "exit_code": 2,
+              "elapsed_seconds": 0.01112648900016211,
+              "stdout": "",
+              "stderr": "",
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "executable_before": {
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_asan_ubsan",
+                "sha256": "43a78ed7a236bc7b87b08d7061f3f33efe8a8fca04907167286a0718f8eda9e2",
+                "bytes": 985512
+              },
+              "executable_after": {
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/rectangle_asan_ubsan",
+                "sha256": "43a78ed7a236bc7b87b08d7061f3f33efe8a8fca04907167286a0718f8eda9e2",
+                "bytes": 985512
+              },
+              "label": "unknown"
+            }
+          ],
+          "sanitizer_environment": {
+            "ASAN_OPTIONS": "detect_leaks=1:abort_on_error=1",
+            "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+          },
+          "result": {
+            "status": "passed_bounded_rectangle_model",
+            "plans": 43,
+            "q2_plans": 37,
+            "q34_plans": 6,
+            "coverage_pairs": 24585,
+            "certificate_predicates": 82200,
+            "census_site_tests": 1673156,
+            "q34_zero_predicates": 46080,
+            "candidate_pairs": 9069,
+            "final_q2_pairs": 5526,
+            "certified_tails": 456,
+            "retained_tails": 25,
+            "witness_sites": 2180,
+            "refuted_model_mutants": 1,
+            "mutant_lost_q2_pairs": 1,
+            "product_predicate_called": true,
+            "full_engine_executed": false,
+            "performance_claim": false,
+            "gcp_used": false,
+            "growth_census_executed": false,
+            "growth": [
+              {
+                "n": 8000,
+                "s": 12,
+                "h": 10,
+                "candidate_pairs": 63936,
+                "proved_band_pairs": 43970,
+                "tasks": 1998,
+                "witness_sites": 13310
+              },
+              {
+                "n": 8192,
+                "s": 12,
+                "h": 10,
+                "candidate_pairs": 65472,
+                "proved_band_pairs": 45026,
+                "tasks": 2046,
+                "witness_sites": 13630
+              }
+            ]
+          }
+        }
+      ],
+      "source_before": {
+        "gate.cpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/gate.cpp",
+          "sha256": "8a1891c58a7b3cc41c67b9ce606fd9ba40a785ff4651ae6fbfb3ac756f77eca7",
+          "bytes": 20282
+        },
+        "src/spindle/predicates.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/src/spindle/predicates.hpp",
+          "sha256": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+          "bytes": 9194
+        },
+        "src/core/types.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/src/core/types.hpp",
+          "sha256": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+          "bytes": 2654
+        }
+      },
+      "source_after": {
+        "gate.cpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/gate.cpp",
+          "sha256": "8a1891c58a7b3cc41c67b9ce606fd9ba40a785ff4651ae6fbfb3ac756f77eca7",
+          "bytes": 20282
+        },
+        "src/spindle/predicates.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/src/spindle/predicates.hpp",
+          "sha256": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+          "bytes": 9194
+        },
+        "src/core/types.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_rect_yqk5cm1z/src/core/types.hpp",
+          "sha256": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+          "bytes": 2654
+        }
+      },
+      "audit_gate_after": {
+        "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/p0_rectangle_probe.cpp",
+        "sha256": "8a1891c58a7b3cc41c67b9ce606fd9ba40a785ff4651ae6fbfb3ac756f77eca7",
+        "bytes": 20282
+      },
+      "live_product_after": {
+        "src/spindle/predicates.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/src/spindle/predicates.hpp",
+          "sha256": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+          "bytes": 9194
+        },
+        "src/core/types.hpp": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/src/core/types.hpp",
+          "sha256": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+          "bytes": 2654
+        }
+      },
+      "temporary_workspace_removed": true
+    }
+  ],
+  "full_qualification": false,
+  "performance_claim": false,
+  "gcp_used": false,
+  "scope": "Standalone rank-slab audit model calling the product Wq block predicate; no producer or FULL tower. Small cases use exhaustive judges; n8000/n8192 use proved band bounds without census.",
+  "replay_protocol": {
+    "source_authority": "Each attempt.sources contains the exact gate and the two product headers, including SHA256. Reconstruct those relative paths in a fresh .work_rect_* directory under morsehgp3D_v8/audits/.",
+    "build": "Use the recorded compiler executable and flags, replace only the old workspace prefix in argv by the new workspace, retain the pinned readonly Boost include path. Compile each run with its recorded 30s timeout.",
+    "execute": "Apply each run.sanitizer_environment. Invoke --selftest, no argument, and --unknown using recorded 20s timeouts. Compare codes 0/2/2, empty stderr and byte-identical selftest stdout to the recorded run. Kill the created process group on timeout; remove only the new scratch directory afterward.",
+    "mutation_scope": "Mutation::ClosedBoundary is an executed fault mode of the audit proposer, compiled in the same binary. It is not a separately recompiled mutation of the product predicate.",
+    "counter_scope": "Input validation (set uniqueness and separation scans) is paid outside Work. Work is not a complete instruction count. No elapsed time in this receipt is a performance qualification.",
+    "python_optimization": "Capture checks use explicit require/if branches, not assert."
+  }
+}

@@ -1,0 +1,191 @@
+{
+  "gate": "#include \"pipeline/local_credits.hpp\"\n#include <iostream>\n#include <type_traits>\n#include <utility>\nunsigned lost(const mhgp8::CreditPlan& p) {\n  const auto points=p.rectangle().points();\n  unsigned result=0;\n  for (std::size_t a=0;a<2;++a) for (std::size_t b=2;b<4;++b) {\n    unsigned inside=0;\n    for (std::size_t z=0;z<4;++z) if (z!=a && z!=b) {\n      long long h=0;\n      for(std::size_t k=0;k<3;++k) h+=(static_cast<long long>(points[z][k])-points[a][k])*(static_cast<long long>(points[b][k])-points[z][k]);\n      inside+=static_cast<unsigned>(h>0);\n    }\n    result+=static_cast<unsigned>(inside==0 && !p.keeps(a,b));\n  }\n  return result;\n}\nint main() {\n  static_assert(!std::is_copy_constructible_v<mhgp8::PreparedRectangle>);\n  static_assert(!std::is_copy_assignable_v<mhgp8::PreparedRectangle>);\n  static_assert(!std::is_move_constructible_v<mhgp8::PreparedRectangle>);\n  static_assert(!std::is_move_assignable_v<mhgp8::PreparedRectangle>);\n  mhgp8::RectangleInput input;\n  input.points={{0,0,0},{1,0,0},{100,0,0},{101,0,0}};\n  input.a={0,2}; input.b={2,4};\n  mhgp8::Point3* alias=input.points.data();\n  const auto rectangle=mhgp8::prepare_rectangle(std::move(input),1,8);\n  if (alias!=rectangle->points().data()) return 3;\n  const auto plan=mhgp8::make_credit_plan(rectangle,mhgp8::Lane::Q2,mhgp8::Strategy::DualBlocks);\n  if (plan.candidate_pairs()!=1 || lost(plan)!=0) return 4;\n  alias[0]={0,0,0}; alias[1]={0,10,0}; alias[2]={1000,0,0}; alias[3]={1000,10,0};\n  if (lost(plan)!=3) return 5;\n  std::cout << \"{\\\"status\\\":\\\"observed_input_buffer_alias\\\",\\\"same_buffer\\\":true,\\\"closed_special_members\\\":4,\\\"lost_q2_pairs\\\":3}\\n\";\n}\n",
+  "sources": {
+    "core/types.hpp": {
+      "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_alias_id1mhr5b/src/core/types.hpp",
+      "sha256": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+      "bytes": 2654
+    },
+    "spindle/predicates.hpp": {
+      "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_alias_id1mhr5b/src/spindle/predicates.hpp",
+      "sha256": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+      "bytes": 9194
+    },
+    "pipeline/local_credits.hpp": {
+      "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_alias_id1mhr5b/src/pipeline/local_credits.hpp",
+      "sha256": "f6c89476f959c74dbaae1b2e52b3319dd46f863299fcfd7453bee5ebd42360a0",
+      "bytes": 5577
+    },
+    "pipeline/local_credits.cpp": {
+      "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_alias_id1mhr5b/src/pipeline/local_credits.cpp",
+      "sha256": "b8a7eef8ca112ed0921772e4a7d380d802f479814ca686da8a1a856647a626c6",
+      "bytes": 15285
+    },
+    "pipeline/tube_credits.hpp": {
+      "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_alias_id1mhr5b/src/pipeline/tube_credits.hpp",
+      "sha256": "a850a4425a7a2f79a46348e49fa7e662db155aaac871794138a6eb616fa17c2c",
+      "bytes": 6854
+    }
+  },
+  "runs": [
+    {
+      "mode": "o2",
+      "compile": {
+        "argv": [
+          "/usr/bin/x86_64-linux-gnu-g++-13",
+          "-std=c++20",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror",
+          "-O2",
+          "-I",
+          "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_alias_id1mhr5b/src",
+          "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_alias_id1mhr5b/gate.cpp",
+          "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_alias_id1mhr5b/src/pipeline/local_credits.cpp",
+          "-o",
+          "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_alias_id1mhr5b/alias_o2"
+        ],
+        "timeout_seconds": 30,
+        "timed_out": false,
+        "exit_code": 0,
+        "elapsed_seconds": 2.6123814429993217,
+        "stdout": "",
+        "stderr": "",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "executable_before": {
+          "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+          "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+          "bytes": 1027128
+        },
+        "executable_after": {
+          "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+          "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+          "bytes": 1027128
+        }
+      },
+      "execute": {
+        "argv": [
+          "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_alias_id1mhr5b/alias_o2"
+        ],
+        "timeout_seconds": 10,
+        "timed_out": false,
+        "exit_code": 0,
+        "elapsed_seconds": 0.0021813439998368267,
+        "stdout": "{\"status\":\"observed_input_buffer_alias\",\"same_buffer\":true,\"closed_special_members\":4,\"lost_q2_pairs\":3}\n",
+        "stderr": "",
+        "stdout_sha256": "9936bf6a897a899a2631563bc6a68a89b2798cc637bb9703cdab3420d54d85d4",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "executable_before": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_alias_id1mhr5b/alias_o2",
+          "sha256": "59554d569d5f6b1586b62b34affe81abf55ffb63d15de7c1fdb6f5e6cc9db5d4",
+          "bytes": 70048
+        },
+        "executable_after": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_alias_id1mhr5b/alias_o2",
+          "sha256": "59554d569d5f6b1586b62b34affe81abf55ffb63d15de7c1fdb6f5e6cc9db5d4",
+          "bytes": 70048
+        }
+      }
+    },
+    {
+      "mode": "san",
+      "compile": {
+        "argv": [
+          "/usr/bin/x86_64-linux-gnu-g++-13",
+          "-std=c++20",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror",
+          "-O1",
+          "-g0",
+          "-fsanitize=address,undefined",
+          "-fno-omit-frame-pointer",
+          "-no-pie",
+          "-I",
+          "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_alias_id1mhr5b/src",
+          "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_alias_id1mhr5b/gate.cpp",
+          "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_alias_id1mhr5b/src/pipeline/local_credits.cpp",
+          "-o",
+          "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_alias_id1mhr5b/alias_san"
+        ],
+        "timeout_seconds": 30,
+        "timed_out": false,
+        "exit_code": 0,
+        "elapsed_seconds": 4.173037863998616,
+        "stdout": "",
+        "stderr": "",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "executable_before": {
+          "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+          "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+          "bytes": 1027128
+        },
+        "executable_after": {
+          "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+          "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+          "bytes": 1027128
+        }
+      },
+      "execute": {
+        "argv": [
+          "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_alias_id1mhr5b/alias_san"
+        ],
+        "timeout_seconds": 10,
+        "timed_out": false,
+        "exit_code": 0,
+        "elapsed_seconds": 0.012603185001353268,
+        "stdout": "{\"status\":\"observed_input_buffer_alias\",\"same_buffer\":true,\"closed_special_members\":4,\"lost_q2_pairs\":3}\n",
+        "stderr": "",
+        "stdout_sha256": "9936bf6a897a899a2631563bc6a68a89b2798cc637bb9703cdab3420d54d85d4",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "executable_before": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_alias_id1mhr5b/alias_san",
+          "sha256": "11bd1da74874dc1ff31a227c93aa4df648148cb390b4b55ce00a1eaab2b55325",
+          "bytes": 1064488
+        },
+        "executable_after": {
+          "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/.work_owner_alias_id1mhr5b/alias_san",
+          "sha256": "11bd1da74874dc1ff31a227c93aa4df648148cb390b4b55ce00a1eaab2b55325",
+          "bytes": 1064488
+        }
+      }
+    }
+  ],
+  "status": "observed_input_buffer_alias_o2_san",
+  "temporary_removed": true,
+  "scope": "bounded mutation through the retained Point3* of a moved input buffer, despite four deleted owner special members",
+  "full_qualification": false,
+  "performance_claim": false,
+  "gcp_used": false,
+  "capture_kind": "archive of the two completed exploratory microprobe runs; no recompilation at sealing",
+  "source_capture": "copied sources hashed before both builds; no post-run source hashes captured in the initial microprobe",
+  "references": {
+    "original": {
+      "path": "morsehgp3D_v8/audits/P0_OWNER_CHECKS.json",
+      "sha256": "147e744f3aa30b76973cb66d31a580ae6c05e22592d0e8af11ea6095e5b248c2"
+    },
+    "integration": {
+      "path": "morsehgp3D_v8/audits/P0_OWNER_INTEGRATION.json",
+      "sha256": "6a893e97bf05976fa28df7a50c5c8d830df1ad3dfa187c455f59ad4b44ced587"
+    }
+  },
+  "sanitizer_environment": {
+    "san": {
+      "ASAN_OPTIONS": "detect_leaks=1:abort_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    }
+  },
+  "corrective_direction": "deep copy before certification at the cloud ownership boundary, paid once then shared; std::move alone does not revoke pre-existing mutable element aliases",
+  "safety_note": "do not write through the old pointer after a corrected consuming factory has copied then destroyed the original buffer; that pointer can then be dangling",
+  "language_sources": [
+    "https://timsong-cpp.github.io/cppwp/n4861/container.requirements.general#12",
+    "https://timsong-cpp.github.io/cppwp/n4861/default.allocator"
+  ],
+  "reproducer_source": "from pathlib import Path\nimport json, os, shutil, tempfile\n\nbase=Path(\"morsehgp3D_v8/audits\").resolve()\nroot=base.parents[1]\nresult=dict(RECEIPT)\noutput=Path(OUTPUT).resolve()\nif output.parent != base or output.exists():\n    raise RuntimeError(\"alias.replay_output_create_only\")\nreferences={}\nfor name,item in result[\"references\"].items():\n    raw=(root/item[\"path\"]).read_bytes()\n    import hashlib\n    if hashlib.sha256(raw).hexdigest()!=item[\"sha256\"]:\n        raise RuntimeError(\"alias.reference_hash\")\n    references[name]=json.loads(raw)\noriginal=references[\"original\"]\nintegrated=references[\"integration\"]\nhelpers={\"__name__\":\"alias_helpers\",\"__file__\":str(base/\"p0_owner_checks.py\")}\nexec(compile(original[\"runner\"][\"text\"],\"archived_owner_helpers\",\"exec\"),helpers)\npin,command,require=helpers[\"pin\"],helpers[\"command\"],helpers[\"require\"]\ndigest=helpers[\"digest\"]\nrequire(digest(original[\"runner\"][\"text\"].encode())==original[\"runner\"][\"sha256\"],\n        \"alias.archived_runner_hash\")\nrequire(digest(result[\"gate\"].encode())==result[\"gate_sha256\"],\"alias.gate_hash\")\nworkspace=Path(tempfile.mkdtemp(prefix=\".work_owner_alias_\",dir=base))\nresult[\"status\"]=\"failed\"\nresult[\"runs\"]=[]\nsource_paths={}\ntry:\n    for name,item in integrated[\"sources\"].items():\n        text=item.get(\"text\",original[\"sources\"][name][\"text\"])\n        require(digest(text.encode())==item[\"sha256\"],\"alias.source_reference\")\n        require(item[\"sha256\"]==RECEIPT[\"sources\"][name][\"sha256\"],\"alias.source_pin\")\n        dst=workspace/\"src\"/name\n        dst.parent.mkdir(parents=True,exist_ok=True)\n        dst.write_text(text)\n        source_paths[name]=dst\n    result[\"sources\"]={name:pin(path) for name,path in source_paths.items()}\n    (workspace/\"gate.cpp\").write_text(result[\"gate\"])\n    compiler=Path(shutil.which(\"g++\") or \"missing-g++\").resolve()\n    for mode,flags in [(\"o2\",[\"-O2\"]),(\"san\",[\"-O1\",\"-g0\",\"-fsanitize=address,undefined\",\n                                         \"-fno-omit-frame-pointer\",\"-no-pie\"])]:\n        binary=workspace/(\"alias_\"+mode)\n        env=dict(os.environ,TMPDIR=str(workspace))\n        if mode==\"san\":\n            env.update(ASAN_OPTIONS=\"detect_leaks=1:abort_on_error=1\",\n                       UBSAN_OPTIONS=\"halt_on_error=1:print_stacktrace=1\")\n        run={\"mode\":mode}\n        result[\"runs\"].append(run)\n        run[\"compile\"]=command([str(compiler),\"-std=c++20\",\"-Wall\",\"-Wextra\",\"-Wpedantic\",\n            \"-Werror\",*flags,\"-I\",str(workspace/\"src\"),str(workspace/\"gate.cpp\"),\n            str(workspace/\"src/pipeline/local_credits.cpp\"),\"-o\",str(binary)],30,env,compiler)\n        require(run[\"compile\"][\"exit_code\"]==0 and not run[\"compile\"][\"timed_out\"],\"alias.compile\")\n        run[\"execute\"]=command([str(binary)],10,env,binary)\n        require(run[\"execute\"][\"exit_code\"]==0 and not run[\"execute\"][\"timed_out\"]\n                and run[\"execute\"][\"stderr\"]==\"\",\"alias.execution\")\n        require(json.loads(run[\"execute\"][\"stdout\"])=={\n            \"status\":\"observed_input_buffer_alias\",\"same_buffer\":True,\n            \"closed_special_members\":4,\"lost_q2_pairs\":3},\"alias.observation\")\n        for operation in (\"compile\",\"execute\"):\n            require(run[operation][\"executable_before\"]==run[operation][\"executable_after\"],\n                    \"alias.executable_changed\")\n    result[\"source_after\"]={name:pin(path) for name,path in source_paths.items()}\n    require(result[\"sources\"]==result[\"source_after\"],\"alias.copied_sources_changed\")\n    result[\"status\"]=\"observed_input_buffer_alias_o2_san\"\n    result[\"source_capture\"]=\"copied source hashes checked before and after this replay\"\nexcept Exception as error:\n    result[\"error\"]=str(error)\nfinally:\n    shutil.rmtree(workspace)\n    result[\"temporary_removed\"]=not workspace.exists()\n    with output.open(\"x\") as stream:\n        json.dump(result,stream,ensure_ascii=False,indent=2)\n        stream.write(\"\\n\")\nprint(json.dumps({\"status\":result[\"status\"],\"receipt\":str(output)}))\nraise SystemExit(0 if result[\"status\"]==\"observed_input_buffer_alias_o2_san\" else 1)\n",
+  "replay_command": "python3 -B -c 'import json,sys; d=json.load(open(sys.argv[1])); exec(compile(d[\"reproducer_source\"],\"alias_replay\",\"exec\"),{\"RECEIPT\":d,\"OUTPUT\":sys.argv[2]})' morsehgp3D_v8/audits/P0_INPUT_ALIAS_CHECKS.json morsehgp3D_v8/audits/P0_INPUT_ALIAS_REPLAY.json",
+  "gate_sha256": "76ba93d6e4e54698a4ff6aa9d15fd17760aeff37df13e5f21f13e3b66146e643"
+}
