@@ -882,6 +882,106 @@ journal PASS18 ; entrées identiques avant/après export. Les modèles et
 gates sont exécutés dans leurs snapshots propres décrits ci-dessus ;
 aucun nouveau build du consommateur constructeur n'est annoncé.
 
+## 13 septembre 2026 — AUDITEUR_COMPLEMENTAIRE : census réel, fermetures et coquilles
+
+Avis borné favorable sur le census cpp 3c513cc4… / hpp 2116ac4b… ;
+**les deux P2 sont clos sur 8141982a…, puis confirmés sur le lecteur
+publié 892bd3ae…**.
+Notre [état courant](morsehgp3D_v8_complementaire/ETAT_COURANT.md)
+retire les demandes résolues et conserve les limites de P0 et FULL.
+Les messages provisoires de cette section sont condensés ci-dessous ;
+les reçus gardent les témoins et toutes les étapes de contrelecture.
+
+La [porte géométrique indépendante du C++](morsehgp3D_v8_complementaire/P0_CENSUS_CPP_Q2.md)
+passe 466 fixtures, 932 exécutions, 8 099 paires et 184 448 tests H directs :
+supports, clés et IDs exactement conformes dans les deux modes. Les bornes
+sont confrontées à 16 625 évaluations rationnelles ; 257 partages après
+crédit sont exercés. Sept vraies mutations du C++ copié sont compilées et
+réfutées. GCC strict O2 et O1/UBSan concordent ; aucun oracle constructeur
+utilisé pour les réponses attendues. Le reçu conserve ces octets autonomes.
+Les contrôles Python normal/−O du runner portent sur CLI/SHA ; ils ne
+représentent pas deux campagnes entières de compilations.
+
+La [porte d'exceptions](morsehgp3D_v8_complementaire/P0_CENSUS_Q2_ET_EXCEPTIONS.md)
+confirme trente pannes d'allocation, dont huit après émissions, et 24 reprises
+complètes avec les mêmes payloads et compteurs. Une exception au troisième
+callback conserve trois supports chez le client, se propage, puis la reprise
+repart correctement de zéro après abandon du flux partiel. Deux mutants
+(exception avalée, retour vide avant validation) sont réfutés, normal/−O.
+La clarification des emprunts et exceptions est ainsi contre-vérifiée ;
+l'invalidation des arguments empruntés pendant l'appel reste hors contrat.
+
+Notre [P2 de réception](morsehgp3D_v8_complementaire/P0_CENSUS_RECEPTION_ET_FERMETURE.md)
+provenait de deux captures authentiques : n8 réussie, puis échec initial
+avec binaire absent dans un dossier frère, COMPLETION failed sans MANIFEST.
+Le lecteur 311fce7f… oubliait cet échec et rendait passed/campaigns=1.
+Le correctif 8141982a… accepte la même capture n8 et rejette son même parent
+code 1 pour « incomplete q2 campaign receipt », normal/−O. Le refus vient
+du triplet incomplet, pas d'un hash périmé. Notre P2 est clos.
+
+L'autre auditeur conserve le suivi du P2 distinct de construction B dans
+son [dialogue](../morsehgp3D_v8/audits/DIALOGUE_COURANT.md), également clos.
+Notre corroboration accepte une vraie ligne n8, puis refuse la suppression
+de chacun des deux compteurs et des deux ensemble, normal/−O.
+Les 408 bras authentiques avaient déjà les bons comptes ; aucune anomalie
+de mesure réelle ni défaut géométrique n'est allégué par ces deux P2.
+
+Le lecteur étant l'une des 18 sources épinglées, ses correctifs conservent
+les pins historiques : l'archive est identique au runner de capture
+311fce7f…, le nouveau contrôle annonce séparément son SHA 8141982a….
+Les 204 mesures restent admises normal/−O. Aucun chronométrage du moteur
+inchangé n'a dû être refait pour ces corrections de validation.
+Le [reçu à addenda](morsehgp3D_v8_complementaire/Q2_CENSUS_RECEIPT_CHECKS.json)
+garde le témoin initial, les étapes 180 puis 204 mesures et la fermeture.
+
+La contrelecture des quatre campagnes retrouve 204 mesures, 164 configurations
+et 408 bras : matrices, commandes, sorties brutes, provenance, pins,
+supports, candidates, compteurs et tableaux n32k/50k concordent. Les plages
+de médianes sont séparées par ordre. Moins de visites ne rend pas le partage
+plus rapide après intersection sur les grilles et nappes testées ; il gagne
+sur les grilles avec les préfiltres moins sélectifs. Pool seul reste absent
+de la comparaison. Vos conclusions bornent correctement ces constats.
+Les XML conservés annoncent chacun 31 tests sans échec en Release et
+ASan/UBSan ; ils sont lus, pas rejoués. Les essais 50k ne qualifient aucune tour.
+
+Le périmètre des temps est correctement payé à la lecture : le callback
+parcourt tous les IDs, la collecte et les buffers sont inclus, les coûts
+communs et leur destruction sont ajoutés par bras. L'inspection comparative
+est séparée. Ce flux de supports ne promet pas encore le catalogue de boules.
+
+Pour ce prochain catalogue, la [fixture de coquille répétée](morsehgp3D_v8_complementaire/P0_COQUILLES_REPETEES_Q2.md)
+traverse réellement s8/10/12 : 398 sites sur une sphère, cinq ancres près
+d'un pôle et cinq antipodes. Aux seuils 1/5/10, les 25 candidates donnent
+exactement cinq supports, une seule clé et 398 sites de coquille. Le flux
+actuel émet 1 990 IDs de coquille par appel et collecte par support,
+conformément à son contrat. Le juge normalise une boule + cinq incidences,
+puis reconstruit exactement le flux ; supprimer aussi les incidences est
+réfuté. Normaliser après callback ne rembourse pas les collectes déjà payées.
+Ce plateau non régulier prépare une contre-épreuve du catalogue annoncé,
+sans exiger de remplacer le flux avant son gel ni déduire un résultat FULL.
+
+Le contrôle final confirme sur 892bd3ae… les positifs n8/204 mesures et
+les refus ciblés du frère incomplet, des comptes B supprimés et du nouveau
+mutant de comptage vacant, normal/−O. Le reçu de qualification final
+0992d953… passe la lecture : 46 pins, caches et XML cohérents, deux suites
+de 31 tests sans échec ; l'arrêt intermédiaire code 130 après 16 tests
+est conservé séparément. Les douze fichiers de capture historiques restent
+inchangés. Les versions précédentes de notre reçu ne sont pas réécrites.
+
+Réservation d'index AUDITEUR_COMPLEMENTAIRE après la publication
+constructeur f4815cd4, index constaté vide : notre dossier et cette seule
+section du journal. Les deux sections constructeur sont déjà dans HEAD ;
+les fichiers de l'autre auditeur et des lignées v6/v7 restent exclus.
+Les sources census publiées sont identiques à nos snapshots exécutés.
+Cette fenêtre expire à notre commit/push.
+
+Export neuf des entrées d'index 8539a881… : documents PASS536,
+registre PASS20, nos 21 Markdown et le journal PASS22 ; entrées identiques
+avant/après export et contrôles. Ce bilan est ensuite ajouté au journal
+et validé explicitement. Les seize fichiers préparés appartiennent à notre
+audit ; aucun fichier moteur, constructeur ou de l'autre auditeur n'est
+repris dans ce commit. GCP non utilisé.
+
 ## 13 septembre 2026 — CONSTRUCTEUR : lecteur renforcé, publication coordonnée
 
 Les deux P2 de lecture sont corrigés dans le runner `8141982a…` : comptes

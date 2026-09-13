@@ -1,63 +1,122 @@
 # État de l'audit complémentaire v8
 
-13 septembre 2026, sixième passe après la publication `f5430f57`.
+13 septembre 2026, septième passe, après publication produit `f4815cd4`.
 Intervenant **AUDITEUR_COMPLEMENTAIRE**, distinct du développeur et de
 l'auditeur historique. Cadre : `phase=exploration_v8_hors_registre`,
 `backend=cpu_reference`, `profile=quantized_u16_input_only`,
 `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
-L'addition des colonnes et l'intersection avec les crédits locaux sont
-publiées. La relecture des sources et des 648 mesures est favorable.
-Le développeur ouvre maintenant le census q2 partagé avec collecte des
-IDs : nos modèles et notre lecture de son API ne qualifient pas encore
-cette nouvelle implémentation.
+Avis borné favorable sur la géométrie et les exceptions du census q2
+publié dans `f4815cd4` : cpp `3c513cc4…`, hpp `2116ac4b…`, identiques
+aux snapshots audités avant publication et conservés dans nos reçus.
+Les 204 mesures achevées sont cohérentes à la lecture. Le lecteur corrigé
+`8141982a…` ferme les deux lacunes de réception après rejeux ciblés,
+sans modifier les pins des captures. Le dernier lecteur `892bd3ae…`
+ajoute un refus de comptage vacant ; les contrôles ciblés normal/−O
+confirment la fermeture et l'acceptation des mesures historiques sur
+cette version publiée.
 
 ## Suites actives transmises au développeur
 
 | Priorité | Constat vérifié et aide concrète |
 | --- | --- |
-| P0, partage aval | Le [parcours partagé](P0_FRONTIERE_PARTAGEE_Q2.md) consomme les résidus f5430f57 : à n32k sur nappe additive, 189 649 460 visites par paire contre 147 292 056 classifications partagées, mais 145 720 627 écritures de continuations. Aucun temps mesuré. Le curseur proposé par l'autre auditeur peut éviter ces écritures sous ordre Z fixe. |
-| P0, sortie et réutilisation | Le [contrat entre supports et seuils](P0_CENSUS_PARTAGE_ET_SEUILS.md) précise la clé nuage/IDs/boule, le surplus à conserver lors d'une reprise et les supports retrouvés par antipodes. La première API produit a un seul seuil et annonce correctement des vues temporaires, des coquilles complètes et des incidences distinctes. |
-| P0, orientation | La [rotation isométrique u16](P0_AXES_ET_ROTATIONS.md) reste une contre-épreuve de généralisation des colonnes. Le repli compact peut laisser tout A×B ; aucune recherche générale de directions n'est qualifiée. |
-| P0, autres comparaisons | La [composition par rangs](P0_INTERSECTION_RESIDUS.md), les [nappes 2D](P0_NAPPES_2D.md), l'[ordre des témoins](P0_ORDRE_TEMOINS.md) et les [groupes recouvrants](P0_GROUPES_RECOUVRANTS.md) gardent leurs preuves et limites. Le census et la tranche FULL minimale priment sur une optimisation indéfinie du seul cas axial. |
+| P0, catalogue et coût de sortie | La [sphère de 398 sites](P0_COQUILLES_REPETEES_Q2.md) produit cinq supports d'une même boule : 1 990 IDs de coquille émis par appel. Une boule + cinq incidences reconstruisent exactement le flux ; supprimer les incidences perd de l'information. La normalisation après callback ne réduit pas les collectes déjà payées. Fixture pour le prochain catalogue, sans bloquer le gel du flux actuel. |
+| P0, généralisation | La [rotation isométrique u16](P0_AXES_ET_ROTATIONS.md), les [nappes 2D](P0_NAPPES_2D.md) et les [groupes recouvrants](P0_GROUPES_RECOUVRANTS.md) conservent leurs contre-épreuves. Les crédits peuvent laisser tout A×B ; le travail total inclut le census et les sorties. |
 
 Les réponses figurent dans le [journal partagé](../COORDINATION_MORSEHGP3D_V8.md).
-**P0 reste ouverte** : coût des sorties, résidus généraux, q3/q4 complets,
-WSPD et tour FULL restent à payer. Nos prototypes ne qualifient aucun
-contrat 50k. Les modèles de l'autre auditeur conservent leur autorité
-propre dans sa [note de bornes et curseurs](../../morsehgp3D_v8/audits/P0_SOUS_RECTANGLES_ET_GROUPES.md).
+**P0 reste ouverte** : résidus généraux, catalogue, q3/q4 complets,
+générateur WSPD et tour FULL restent à payer. Aucun contrat 50k ni borne
+globale de coût n'est acquis. La saturation à un seul seuil de l'API
+actuelle ne promet pas la [reprise vers un seuil supérieur](P0_CENSUS_PARTAGE_ET_SEUILS.md).
 
 ## Contre-vérifications de cette passe
 
-Les [648 mesures additives](ADDITIVE_MEASURES_CHECKS.json) passent la
-lecture indépendante : 576 configurations, trois matrices, provenance,
-36 pins et tableaux concordants, lecteurs normal/−O. Aucun benchmark,
-build ou CTest relancé pour cette lecture ; aucune anomalie significative.
-Le rapport constructeur distingue bien réduction du résidu et temps total.
+Le [juge du vrai C++ census](P0_CENSUS_CPP_Q2.md) passe 466 fixtures,
+932 appels, 8 099 paires et 184 448 tests H directs indépendants du
+producteur : supports, clés, intérieurs et coquilles concordent dans les
+deux modes. Les bornes passent 3 375 cas et 16 625 évaluations rationnelles ;
+257 partages après crédit sont exercés. Sept vrais mutants C++ sont
+compilés et réfutés, GCC strict O2 et O1/UBSan concordent. Les contrôles
+Python normal/−O de ce runner portent sur CLI/SHA, pas sur une seconde
+campagne entière de compilations. Le premier plancher de non-vacuité
+erroné de notre harnais est conservé comme échec d'auditeur.
 
-La [propriété des nouveaux plans](AXIS_LIFETIME_CHECKS.json) passe 50 pannes
-de construction, quatre déplacements sans allocation et 12 accès déplacés
-refusés. Les 96 plans restreints confrontent keeps et fragments sur
-345 600 paires ; un mutant de déplacement perdant la restriction est
-réfuté. Aucun défaut moteur trouvé. Copie et affectations axiales restent
-interdites par cette API, contrairement à CreditPlan.
+La [porte de réemploi après exception](P0_CENSUS_Q2_ET_EXCEPTIONS.md)
+passe 30 pannes d'allocation, dont huit après émissions, et 24 reprises
+complètes avec les mêmes supports, IDs et compteurs. Deux exceptions
+au troisième callback se propagent ; les trois supports déjà reçus restent
+chez le client et sont abandonnés avant retry. Deux mutants sont réfutés,
+normal/−O concordent. Aucun changement des objets immuables ni déséquilibre
+des allocations ordinaires exercées n'est trouvé.
 
-La [preuve du minimum transversal](P0_PROPRIETE_ET_MINIMUM_Q2.md) écarte
-une optimisation sans cas actif : avec les crédits internes q2 actuels,
-un plan vide équivaut à h=0, déjà traité avant les tris. Le raccourci
-restriction vide proposé devient pertinent seulement si ce contrat change,
-par exemple avec des témoins extérieurs. Cette limite ne garantit pas
-une vraie survivante au census. 42 restrictions à besoin positif et six
-à besoin nul confirment le lemme sur les fixtures.
+La [fixture de coquille répétée](Q2_REPEATED_SHELL_CHECKS.json) exerce
+18 propriétaires, s8/10/12, seuils 1/5/10, deux ordres d'IDs et 36 appels
+aux deux parcours ; 179 100 tests directs contrôlent les 25 candidates
+par propriétaire. Les appels émettent 71 640 IDs de coquille et paient
+143 100 visites de collecte. Le normaliseur d'audit conserve toutes les
+incidences et reconstruit le flux ; un mutant d'audit qui les supprime
+est réfuté. Ce plateau non régulier ne qualifie pas FULL ; aucune économie
+de temps ou de RAM n'est mesurée. Normal/−O, C++ strict/UBSan concordent.
 
-Le [parcours partagé C++](Q2_SHARED_FRONTIER_CHECKS.json) passe 57 petits
-cas en O2/UBSan, 8 278 451 tests ponctuels indépendants, trois vrais mutants
-réfutés ; normal/−O concordent. Les six grandes consommations sont terminées,
-sans collecte des IDs ni oracle exhaustif géométrique. Les [42 demandes
-entre seuils](Q2_SHARED_CENSUS_CHECKS.json) et cinq contre-modèles ajoutent
-un contrat de réutilisation, pas une API produit nouvelle.
+Le [reçu de lecture des campagnes](Q2_CENSUS_RECEIPT_CHECKS.json)
+sépare le défaut reproductible initial, les trois premières campagnes
+et leur extension à 50k : 204 mesures / 164 configurations achevées,
+108 + 48 + 24 + 24, soit 408 bras,
+18 sources épinglées, matrices, commandes, sorties brutes et provenance
+cohérentes. La qualification initiale à 31 pins reste conservée dans
+l'historique. Le reçu final 0992d953… passe aussi la lecture : 46 pins,
+caches et XML cohérents, 31 tests sans échec chacun en Release GCC et
+ASan/UBSan Clang. L'arrêt intermédiaire code 130 après 16 tests est
+conservé distinctement. Aucun de ces CTests ni grande campagne n'est
+relancé par cette contrelecture. Les petites gates de campagne passent normal/−O.
+Le binaire emprunté est épinglé sans reconstruction indépendante dans
+cette lecture. Le résumé et les tableaux finaux concordent avec les bruts,
+y compris les plages des médianes séparées par ordre. Le partage est plus
+lent après intersection sur les grilles et nappes testées ; il gagne sur
+les grilles avec les préfiltres moins sélectifs. Les essais à 50k gardent
+leur portée de composant. La clôture des P2 repose sur les rejets ciblés ci-dessous, distincts de
+ces campagnes réussies.
 
 ## Points clos et preuves conservées
+
+Le [lecteur corrigé 8141982a…](P0_CENSUS_RECEPTION_ET_FERMETURE.md)
+accepte notre capture n8 originale et les 204 mesures historiques ;
+il rejette le même parent comportant le vrai échec initial frère, code 1
+pour campagne incomplète, normal/−O. Notre P2 de découverte est clos.
+L'archive conservée est identique au runner de capture `311fce7f…` ;
+les pins historiques restent intacts et le lecteur déclare son propre SHA.
+
+Le P2 de construction B est également clos dans le [dialogue de l'autre
+auditeur](../../morsehgp3D_v8/audits/DIALOGUE_COURANT.md). Notre contrôle
+complémentaire accepte une vraie ligne n8 et rejette la suppression de
+chacun des deux compteurs puis des deux ensemble, normal/−O. Il corrobore
+sa fermeture sans reprendre la propriété de son suivi. Les contre-exemples
+initiaux et les étapes 180/204 mesures restent dans notre reçu à addenda.
+Le lecteur final 892bd3ae… confirme ces rejets et refuse aussi le mutant
+de comptage vacant ; les positifs n8 et 204 mesures passent en normal/−O.
+
+Le développeur a intégré le curseur Z proposé par l'autre auditeur ;
+la liste de continuations de notre [prototype partagé](P0_FRONTIERE_PARTAGEE_Q2.md)
+reste une référence comparative ; cette représentation n'est plus une
+demande active. Les emprunts
+pendant le callback et la propagation des exceptions avec flux partiel
+sont désormais documentés et contre-vérifiés sur le census ci-dessus.
+
+La [preuve du minimum transversal](P0_PROPRIETE_ET_MINIMUM_Q2.md) ferme
+la proposition de raccourci supplémentaire sur restriction vide : pour
+les crédits internes q2 actuels, vide équivaut à h=0, déjà traité avant
+les tris. Des témoins extérieurs peuvent toujours éliminer toute paire
+au census ; aucune survivante géométrique n'est garantie par ce lemme.
+
+La sixième passe conserve la lecture favorable des [648 mesures additives](ADDITIVE_MEASURES_CHECKS.json)
+(576 configurations, 36 pins, normal/−O, sans nouveau benchmark) et les
+[50 pannes de construction axiale](AXIS_LIFETIME_CHECKS.json), quatre
+déplacements sans allocation, 96 plans et 345 600 paires contrôlées.
+Les [57 petits cas de frontière partagée](Q2_SHARED_FRONTIER_CHECKS.json)
+passent 8 278 451 tests directs et trois mutants ; les six grandes
+consommations n'incluaient pas les IDs. Les [42 demandes entre seuils](Q2_SHARED_CENSUS_CHECKS.json)
+et cinq contre-modèles définissent une éventuelle reprise, pas une API
+multi-seuil déjà fournie.
 
 Les [594 mesures](SHARED_AXIS_MEASURES_CHECKS.json), le [premier consommateur
 indexé](Q2_INDEXED_CONSUMER_CHECKS.json), les [fixtures de coquille](Q2_CENSUS_FIXTURE_CHECKS.json)
@@ -95,8 +154,9 @@ objets distincts ; aucun mélange réel de campagnes n'est allégué.
 
 ## Rejeu et entretien
 
-Les notes donnent les commandes exactes. Les nouveaux tests utilisent
-le commit publié `f5430f57` ou les snapshots embarqués dans leurs reçus.
+Les notes donnent les commandes exactes. Les tests de cette passe utilisent
+les snapshots census embarqués dans leurs reçus ; les passes antérieures
+gardent leurs commits et sources propres.
 Les anciennes gates peuvent donc refuser légitimement le worktree courant.
 Une correction demande une nouvelle qualification, jamais la réécriture
 d'un reçu clos. Les sujets résolus quittent la liste active ; les preuves
