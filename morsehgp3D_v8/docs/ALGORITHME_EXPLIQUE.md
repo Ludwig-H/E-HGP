@@ -216,6 +216,14 @@ industrielle FULL avec reprise de calcul.
 
 ## 12. La règle de conception v8
 
+Première priorité confirmée par l'utilisateur : ne plus calculer
+systématiquement tous les témoins de A contre A et de B contre B.
+Pour rejeter sûrement, des crédits inférieurs certifiés suffisent ;
+ils ne remplacent pas le census exact. Comparer plusieurs moyens de les
+obtenir, sans figer le petit ensemble de témoins proposé et sans déplacer
+le coût vers un excès de candidates. Le [P0 du plan](PLAN_DE_REFONTE.md)
+définit cette comparaison avant le port général ou le passage GPU.
+
 Réduire les objets inutiles ; rendre chaque étape restante indépendante
 autant que possible ; garder ses données résidentes ; compter ses octets,
 ses visites et ses calculs exacts ; mesurer enfin la tour complète.

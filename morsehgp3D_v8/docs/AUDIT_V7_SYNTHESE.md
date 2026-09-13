@@ -7,6 +7,13 @@ profil `quantized_u16_input_only`, audit mathématique et architectural,
 
 ## 1. Le verdict en quelques phrases
 
+**Priorité de refonte désormais confirmée par l'utilisateur : supprimer
+le passage systématique par A×A et B×B pour calculer les témoins locaux.**
+Le [P0 du plan](PLAN_DE_REFONTE.md) laisse les architectures en concurrence,
+petits ensembles certifiés compris, et exige de mesurer aussi le travail
+reporté sur les candidates restantes. Cette décision ne change pas les
+résultats historiques de l'audit ni les contrats encore ouverts.
+
 La v7 a établi des bases mathématiques utiles et produit des tours FULL
 50k, avec des confrontations indépendantes sur petits cas. Elle **n'a pas
 atteint** les contrats temporels, ni livré une chaîne GPU FULL industrielle.
@@ -172,7 +179,9 @@ techniques permettent ensuite d'aller au niveau voulu :
 [implémentation/parallélisation](../audits/IMPLEMENTATION_PARALLELISATION.md),
 [contrats/mesures](../audits/CONTRATS_ET_MESURES.md).
 
-La prochaine étape de code est une petite chaîne FULL v8 de référence,
-à objets stables et tâches géométriques indépendantes, avant d'y intégrer
-les optimisations mono, CPU et GPU. Le dossier v8 conserve la structure
-de la v7 mais ne copie pas son moteur en bloc. GCP non utilisé pour cet audit.
+Le premier chantier est P0 : comparer en mono les architectures évitant
+les histogrammes quadratiques systématiques, avec petits juges et tranche
+FULL minimale pour vérifier leur effet aval. Les optimisations CPU/GPU
+suivent cette priorité ; aucun port général ne doit figer l'ancien coût.
+Le dossier v8 conserve la structure de la v7 mais ne copie pas son moteur
+en bloc. GCP non utilisé pour cet audit et cette décision documentaire.

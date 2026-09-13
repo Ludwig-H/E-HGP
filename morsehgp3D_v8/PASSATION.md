@@ -36,9 +36,18 @@ Le contrôleur documentaire couvre désormais la v8 et possède un test
 positif/négatif de découverte, sans inclure les futurs audits indépendants.
 Aucun statut formel modifié, aucun moteur compilé, GCP non utilisé.
 
-Suite : ouvrir une tranche verticale FULL v8 mono de référence avec les
-bons propriétaires et les petites fixtures complètes, avant les campagnes
-8k/16k/32k s8/10/12 puis CPU et GPU. Ne pas reprendre le chantier fused v7
-comme si le changement de cap n'avait pas eu lieu. Le
+Suite réordonnée sur demande explicite du 13 septembre : **P0 d'abord,
+supprimer la préparation systématique O(|A|²+|B|²)** après l'échec des
+témoins universels. Comparer minorants issus de petits ensembles,
+parcours conjoints de blocs, requêtes géométriques groupées et sélection
+directe de sous-produits ; aucune solution n'est imposée. Le
+[plan](docs/PLAN_DE_REFONTE.md) fixe les preuves et mesures de travail
+total, coût aval compris, avant les campagnes CPU/GPU. P0 reste ouverte.
+
+La tranche FULL minimale et les petits juges servent cette comparaison ;
+ne pas la repousser derrière un port général de la v7. Garder les tailles
+8k/16k/32k et s8/10/12. Aucun moteur n'est modifié par cette décision.
+Ne pas reprendre le chantier fused v7 comme si le changement de cap
+n'avait pas eu lieu. Le
 [journal v8](../audits/COORDINATION_MORSEHGP3D_V8.md) porte les questions
 à l'auditeur indépendant et la coordination d'index.

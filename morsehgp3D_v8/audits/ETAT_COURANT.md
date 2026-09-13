@@ -27,3 +27,12 @@ Verdict public inchangé : `not_claimed`. Contrats 50k et massif ouverts.
 La CLI reste F, les sondes FULL et les prototypes privés sont distingués.
 Aucun moteur v8, aucun usage GCP. Les contrôles documentaires et d'index
 de livraison sont conservés dans les reçus v8, sans valeur de preuve moteur.
+
+Décision de priorité ultérieure à l'audit, 13 septembre : l'utilisateur
+place en **P0** la suppression des histogrammes systématiques
+O(|A|²+|B|²). Le [plan de refonte](../docs/PLAN_DE_REFONTE.md) compare
+plusieurs familles d'architectures ; le petit ensemble de témoins ne
+constitue pas un choix définitif. Minorants certifiés, coût des résidus
+et absence de déplacement du carré sont des critères obligatoires.
+C'est une orientation ouverte, pas un nouveau résultat mathématique,
+un test moteur ou une qualification de complexité globale.

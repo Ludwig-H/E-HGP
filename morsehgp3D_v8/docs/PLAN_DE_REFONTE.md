@@ -4,9 +4,69 @@
 validées**. Le [rapport de synthèse](AUDIT_V7_SYNTHESE.md) situe les mesures.
 L'ordre demandé reste mono-thread, multi-CPU local, puis GPU G4 SPOT.
 
+## Priorité P0 — supprimer la préparation quadratique des témoins locaux
+
+**Décision explicite de l'utilisateur, 13 septembre 2026 : ce changement
+radical passe au premier rang de la refonte.** Après l'échec des témoins
+universels, la v8 ne doit plus imposer les parcours exhaustifs A×A et B×B
+pour pouvoir sélectionner les paires de A×B. Le coût systématique
+O(|A|²+|B|²) des histogrammes v7 est un défaut d'architecture à supprimer,
+pas un passage obligatoire à accélérer sur GPU.
+
+L'objet requis pour le préfiltrage est un **minorant certifié** du nombre
+de témoins utiles, pas nécessairement l'histogramme exact. Une paire peut
+être rejetée dès que h_cœur+minorant_a+minorant_b atteint h_q, avec les
+populations disjointes et les prédicats stricts requis. Un minorant
+insuffisant signifie « indécis » : il ne prouve ni vacuité ni validité.
+Le census et la chaîne finale gardent leurs obligations d'exactitude
+et de complétude. Davantage de candidates intermédiaires est admissible
+mathématiquement, mais peut rendre une variante économiquement mauvaise.
+
+**Le petit ensemble de témoins est une piste, pas la solution retenue
+par avance.** Comparer les familles suivantes, ainsi que toute meilleure
+proposition de l'auditeur ; les combinaisons restent possibles :
+
+| Famille à étudier | Économie recherchée | Obligation encore ouverte |
+| --- | --- | --- |
+| Petits ensembles de témoins proposés puis certifiés | O(h) sites de chaque côté, testés sur toutes les extrémités : préparation O(h(|A|+|B|)) si leur sélection est payée dans cette borne | Choisir des témoins efficaces ; un ensemble fixe peut manquer de nombreuses configurations locales |
+| Parcours conjoints de blocs d'ancres et de témoins | Partager certificats positifs/négatifs et crédits entre plusieurs lignes, raffiner seulement les cas indécis | Borner les blocs réellement visités, garder les identités disjointes et ne pas recréer le carré dans les descentes |
+| Résumés directionnels, rangs ou enveloppes géométriques | Réutiliser une préparation pour proposer ou certifier beaucoup de crédits | Justifier chaque rejet, payer construction et requêtes ; un rang projeté seul ne prouve pas l'intérieur en 3D |
+| Sélection/réduction directe de sous-rectangles sans histogrammes complets | Éviter de compter tous les témoins d'une ligne avant de traiter les produits utiles | Préserver la couverture et la propriété canonique ; éviter que les raffinements ou la validation tardive explosent |
+
+Pour la première piste, la préparation puis la sélection par classes
+peuvent coûter O(h(|A|+|B|)+M), où M compte les paires **encore candidates**.
+Ce n'est ni le nombre de boules pertinentes ni la taille de sortie FULL.
+Cette borne locale ne prouve donc pas une génération globalement
+sous-quadratique. Elle ne borne pas non plus à elle seule la somme du
+travail sur tous les rectangles de la WSPD.
+
+Critères de choix et de clôture de P0 :
+
+1. Prouver la sûreté des rejets et la complétude du chemin résiduel, avec
+   fixtures de crédits partiels, témoins manqués, double comptage et
+   frontières. Ne pas exiger des candidates intermédiaires identiques
+   à celles de la v7 ; comparer les objets finaux requis.
+2. Mesurer en mono n=8 000/16 000/32 000, s=8/10/12, sur gros facteurs
+   équilibrés et déséquilibrés, amas, uniforme et géométries adverses :
+   coût de sélection des témoins, tests/visites, blocs, paires résiduelles,
+   coût q3/q4/census et mémoire. La préparation moins chère ne suffit pas
+   si elle augmente davantage le travail aval.
+3. Retenir la meilleure architecture sur le travail total observé et
+   justifié ; annoncer les régimes non résolus. Un simple gain constant,
+   une accélération GPU du même carré ou son déplacement vers les
+   candidates ne clôt pas cette priorité. Aucun quota de troncature
+   n'est un substitut à une sortie complète.
+
+Le scalaire sur petits sous-blocs peut rester une feuille d'exécution,
+et l'exhaustif borné un juge différentiel ; ni l'un ni l'autre ne doit
+réintroduire un histogramme quadratique systématique sur les gros facteurs.
+Le cadrage de l'API et les petites fixtures FULL ci-dessous soutiennent
+ce chantier ; ils ne le repoussent pas derrière un port général de la v7.
+P0 reste **ouverte, sans solution finale choisie ni gain mesuré en v8**.
+
 ## 1. Une seule chaîne et un seul contrat de sortie
 
-Le premier livrable de code devra être une API FULL explicite : entrée,
+Tout livrable de code devra respecter une API FULL explicite : entrée,
 métrique, Kmax, convention de coupe, nœuds, parents, contributions,
 verticales, statut de complétion. L'archive F et les probes privés ne
 seront pas réétiquetés en produit FULL.
@@ -29,7 +89,7 @@ annoncée comme telle, jamais transformée en preuve de complétude universelle.
 | Étape | Objet à conserver | Grain de tâche parallèle | Travail à éviter |
 | --- | --- | --- | --- |
 | Front WSPD | Descripteurs plats de rectangles, masques q, témoins identifiés | Rectangle ou sous-tâche spatiale selon coût | Redémarrer tous les parcours et recréer une équipe à chaque vague |
-| Témoins locaux | Crédit saturé par ligne/colonne, classes de sites et preuves de blocs | Bloc de crédits ou tuile de points | Comparaisons exhaustives dans de gros facteurs |
+| Témoins locaux, P0 | Minorants certifiés, classes de crédits et preuves de blocs | Selon l'architecture comparée, sans histogrammes complets imposés | Préparation systématique A×A et B×B |
 | q2 | Tuile de paires survivantes | Paires ou petits paquets | Sérialiser tout A×B derrière un seul worker |
 | q3 | Seed canonique et plage de cover | Seed×plage de sites | Recherche complète séquentielle par seed |
 | q4 | Intervalles/racines exacts, segments identifiés | Calculs de racines puis tri/scan segmentés | Balayage mono de tous les événements d'une seed |
@@ -45,7 +105,9 @@ en tuiles ne doit pas émettre plusieurs fois une paire ni perdre un crédit.
 ## 3. Éliminer tôt les rectangles, sans payer plus que ce que l'on épargne
 
 Les détails et les bornes entières sont dans
-[WSPD q2/q3/q4](../audits/WSPD_Q2_Q3_Q4.md). Priorités :
+[WSPD q2/q3/q4](../audits/WSPD_Q2_Q3_Q4.md). Les pistes ci-dessous sont
+subordonnées au choix ouvert de P0 ; elles n'imposent pas de reconstruire
+les histogrammes v7. Priorités :
 
 1. Proposer rapidement quelques témoins probables ; vérifier exactement
    qu'ils sont intérieurs pour **tout** le rectangle. Le proposeur peut
@@ -55,9 +117,10 @@ Les détails et les bornes entières sont dans
    Exclure ces identifiants des nouveaux crédits. Ce transport est une
    proposition nouvelle à contre-auditer ; copier seulement le compteur
    h peut compter deux fois les mêmes sites.
-3. Utiliser h extérieur à A∪B, puis h_a dans A privé de a et h_b dans B
-   privé de b. La disjonction est une partie de la preuve, pas un détail
-   d'implémentation. Saturer lorsque le seuil utile est acquis.
+3. Utiliser h extérieur à A∪B, puis des minorants de h_a dans A privé de
+   a et de h_b dans B privé de b. La disjonction est une partie de la
+   preuve, pas un détail d'implémentation. Saturer lorsque le seuil utile
+   est acquis ; il n'est pas obligatoire de connaître les autres comptes.
 4. Choisir les blocs positifs **et négatifs** en fonction du coût réel ;
    un petit facteur peut coûter moins cher en scalaire. Réutiliser la
    piste v7 négative/saturation seulement après raccord et requalification.
@@ -206,11 +269,13 @@ dizaines de millions. Ne pas extrapoler un pic 50k en succès massif.
 N'acheter du temps GPU que pour une expérience qui tranche une question
 ouverte ; arrêter la cible exacte dès le résultat utile acquis.
 
-## 10. Première décision à prendre après cet audit
+## 10. Premier chantier après cet audit
 
-Faire une petite tranche verticale v8 FULL, avec les bons objets, qui
-restitue les fixtures complètes et dont toutes les phases sont mesurables.
-Elle prépare les tâches géométriques indépendantes et la forêt datée ;
-le CPU mono sert de référence. Ensuite, raccorder les améliorations amont
-et aval une par une. Aucune réécriture géante sans différentiel, aucune
-accumulation de variantes non intégrées, aucun claim industriel anticipé.
+Commencer par P0 : comparer les architectures de rejet qui évitent les
+histogrammes quadratiques systématiques, d'abord en mono avec petits
+juges indépendants. Préparer en soutien le contrat et la tranche FULL
+minimale permettant de vérifier les sorties et de mesurer le coût aval.
+Le port général et la parallélisation ne doivent pas figer l'ancien
+passage A×A/B×B. Raccorder ensuite les améliorations amont et aval une
+par une. Aucune réécriture géante sans différentiel, aucune accumulation
+de variantes non intégrées, aucun claim industriel anticipé.

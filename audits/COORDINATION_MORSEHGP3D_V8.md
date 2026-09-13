@@ -42,3 +42,33 @@ Vérifications sur export neuf de l'index avant commit/push. Pas de branche.
 La réservation est limitée à cette publication et expire une fois son
 commit publié sur main ; les contrôles de préparation sont consignés dans
 le reçu PUBLICATION_CHECKS de la v8.
+
+## 13 septembre 2026 — P0 confirmé : supprimer les histogrammes quadratiques
+
+ROOT : l'utilisateur demande explicitement de placer le changement radical
+évitant O(|A|²+|B|²) au premier rang, sans imposer la piste du petit
+ensemble de témoins. Le [plan](../morsehgp3D_v8/docs/PLAN_DE_REFONTE.md)
+est réordonné ; API minimale et juges servent cette comparaison.
+
+Question prioritaire à l'auditeur : existe-t-il une meilleure structure
+que les petits ensembles certifiés — parcours conjoints, requêtes
+géométriques groupées, sélection directe ou combinaison — pour réduire
+le travail total sur gros facteurs ? Demander une preuve de rejet et de
+complétude, puis compter préparation, raffinements, résidus et coût aval.
+Ne pas assimiler candidates restantes et sortie FULL. Aucun nouvel avis
+indépendant n'est anticipé ; aucun code moteur ni benchmark ni GCP.
+
+Index constaté vide sur main2b658cbe. Réservation ciblée : AGENTS.md,
+ce journal, README/PASSATION v8, audits/ETAT_COURANT.md et WSPD_Q2_Q3_Q4.md,
+docs/PLAN_DE_REFONTE.md, AUDIT_V7_SYNTHESE.md, ALGORITHME_EXPLIQUE.md,
+FAUSSES_PISTES.md. Aucun fichier v6/v7, reçu clos, registre ou outil modifié.
+Contrôles documentaires avant commit/push sur main ; réservation close
+à la publication de ce changement documentaire.
+
+Contrôles de cette publication depuis un export neuf de l'index :
+`python3 -B tools/check_docs.py` PASS, 522 Markdown ;
+`python3 -B tools/check_implementation_status.py` PASS, 20 phases ;
+`python3 -B morsehgp3D_v8/tests/docs_scope_gate.py --selftest` et son
+mode `-O` PASS, 27 contrôles chacun. Le journal est également validé
+explicitement. Contrelecture de P0 et du premier chantier sans correction
+requise. Ces tests restent documentaires ; aucune qualification moteur.

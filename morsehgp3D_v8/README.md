@@ -23,6 +23,10 @@ documentaire v8. Les preuves et mesures géométriques citées restent v7.
 
 ## Commencer ici
 
+- **Priorité P0 confirmée :** [supprimer les histogrammes quadratiques systématiques](docs/PLAN_DE_REFONTE.md#priorité-p0--supprimer-la-préparation-quadratique-des-témoins-locaux).
+  Comparer les architectures avant de choisir ; les petits ensembles de
+  témoins certifiés sont une piste parmi d'autres. Coût des candidates
+  restantes et travail aval inclus, sans résultat v8 acquis à ce stade.
 - [Audit général et décisions](docs/AUDIT_V7_SYNTHESE.md) : verdict, contrats,
   causes de lenteur, ce qui doit être conservé ou refait.
 - [Tout l'algorithme expliqué simplement](docs/ALGORITHME_EXPLIQUE.md).

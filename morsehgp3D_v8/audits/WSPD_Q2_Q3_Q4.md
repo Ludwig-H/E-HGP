@@ -304,6 +304,16 @@ sections 1–4 ; celles du dernier point sont dans S1.
 
 ## 9. Proposition de refonte, par priorité
 
+**Actualisation sur demande utilisateur, après l'audit : P0 est la
+suppression du calcul systématique O(|A|²+|B|²).** Le
+[plan courant](../docs/PLAN_DE_REFONTE.md) prime pour l'ordre des travaux.
+Les propositions historiques B1–B3 ci-dessous sont des options à comparer,
+pas une obligation de reconstruire intégralement h_a et h_b avant de
+sélectionner. Des minorants certifiés suffisent au rejet ; petits ensembles
+de témoins, parcours conjoints, requêtes groupées et sélection directe
+restent en concurrence. Leur résidu et son coût aval doivent être mesurés.
+Cette priorité n'est pas un gain intégré ni une nouvelle borne globale.
+
 ### A. Réduire le travail du front avant de le déporter
 
 **A1 — Chercher quelques témoins probables, puis les certifier exactement.**
