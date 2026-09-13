@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """Bounded audit of q2 box extrema and strict-depth/shell semantics.
 
-This independent Python model is not a production census, a joint traversal
-of pair products, a WSPD, or a qualification of the HGP FULL tower.
+This independent Python model checks fixed-pair and shared pair-product
+continuations. It is not a production census, WSPD, or HGP FULL tower.
 """
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass
 from fractions import Fraction
-from itertools import combinations, product
+from itertools import combinations, permutations, product
 import json
 
 
@@ -237,6 +238,275 @@ def check_census() -> dict:
     }
 
 
+@dataclass(frozen=True)
+class Link:
+    """Persistent payload reference; no copy of the inherited ID blocks."""
+
+    node: Node
+    tail: Link | None
+
+
+def linked_ids(head: Link | None) -> list[int]:
+    ids = []
+    while head is not None:
+        ids.extend(head.node.ids)
+        head = head.tail
+    return sorted(ids)
+
+
+@dataclass(frozen=True)
+class ThreadedNode:
+    node: Node
+    escape: int
+
+
+def thread_tree(root: Node) -> tuple[ThreadedNode, ...]:
+    """Preorder, right child first as in tree_census; escape skips a subtree."""
+    entries = []
+
+    def visit(node: Node) -> None:
+        position = len(entries)
+        entries.append(ThreadedNode(node, -1))
+        for child in reversed(node.children):
+            visit(child)
+        entries[position] = ThreadedNode(node, len(entries))
+
+    visit(root)
+    result = tuple(entries)
+    validate_threaded(result)
+    return result
+
+
+def validate_threaded(index: tuple[ThreadedNode, ...]) -> None:
+    require(bool(index), "empty threaded index")
+    require(len(index) == 2 * len(index[0].node.ids) - 1, "threaded tree coverage")
+    for position, entry in enumerate(index):
+        require(position < entry.escape <= len(index), "invalid escape")
+        require(entry.escape == position + 2 * len(entry.node.ids) - 1,
+                "escape skips or repeats an ID interval")
+
+
+def joint_census(
+    points: tuple[Point, ...], u: Node, v: Node,
+    index: tuple[ThreadedNode, ...], cap: int,
+    split_budget: int | None = None, mutant: str = "",
+) -> tuple[list[dict], dict]:
+    """Shared traversal with one witness cursor per product continuation.
+
+    Fixed DFS ordering lets current_z encode every unconsumed witness subtree.
+    A product split copies this cursor, count and immutable payload heads.
+    The per-lineage split budget changes grain, never search completeness.
+    """
+    require(cap > 0, "positive census threshold required")
+    stats = {
+        "bound_tests": 0, "pair_splits": 0, "witness_splits": 0,
+        "cursor_copies": 0, "payload_links": 0, "max_call_depth": 0,
+        "fallback_pairs": 0, "splits_after_credit": 0,
+        "splits_after_shell": 0, "index_nodes": len(index),
+    }
+
+    def extent(node: Node) -> int:
+        return max(high - low for low, high in node.box)
+
+    def walk(
+        left: Node, right: Node, cursor: int, count: int,
+        inside: Link | None, shell: Link | None, depth: int, pair_depth: int,
+    ) -> Iterator[dict]:
+        stats["max_call_depth"] = max(stats["max_call_depth"], depth)
+        while cursor < len(index):
+            current, escape = index[cursor].node, index[cursor].escape
+            stats["bound_tests"] += 1
+            decision = classify(*box_bounds(left.box, right.box, current.box))
+            if decision == "interior":
+                count += len(current.ids)
+                if count >= cap:
+                    yield {"u": left.ids, "v": right.ids,
+                           "status": "saturated", "depth": cap}
+                    return
+                inside = Link(current, inside)
+                stats["payload_links"] += 1
+                cursor = escape
+            elif decision == "shell":
+                shell = Link(current, shell)
+                stats["payload_links"] += 1
+                cursor = escape
+            elif decision == "exterior":
+                cursor = escape
+            else:
+                pair_is_singleton = len(left.ids) == len(right.ids) == 1
+                budget_used = split_budget is not None and pair_depth >= split_budget
+                if not pair_is_singleton and budget_used:
+                    # No A*B array: continue each unresolved pair from cursor,
+                    # preserving previously acquired counts and payloads.
+                    for a, b in product(left.ids, right.ids):
+                        stats["fallback_pairs"] += 1
+                        stats["cursor_copies"] += 1
+                        aa = Node((a,), singleton(points[a]), ())
+                        bb = Node((b,), singleton(points[b]), ())
+                        yield from walk(aa, bb, cursor, count, inside, shell,
+                                        depth + 1, pair_depth)
+                    return
+                factors = [(extent(left), 0, left), (extent(right), 1, right)]
+                factors = [entry for entry in factors if entry[2].children]
+                candidate = max(factors, default=None,
+                                key=lambda entry: (entry[0], entry[1]))
+                if candidate is not None and (
+                    not current.children or candidate[0] >= extent(current)
+                ):
+                    stats["pair_splits"] += 1
+                    stats["splits_after_credit"] += int(count > 0)
+                    stats["splits_after_shell"] += int(shell is not None)
+                    inherited = cursor
+                    if mutant == "restart_root_after_credit" and count > 0:
+                        inherited = 0
+                    elif mutant == "drop_undecided_head":
+                        inherited = escape
+                    inherited_shell = None if mutant == "forget_inherited_shell" else shell
+                    for child in candidate[2].children:
+                        stats["cursor_copies"] += 1
+                        aa, bb = ((child, right) if candidate[1] == 0
+                                  else (left, child))
+                        yield from walk(aa, bb, inherited, count, inside,
+                                        inherited_shell, depth + 1, pair_depth + 1)
+                    return
+                require(bool(current.children), "three singleton boxes must decide")
+                stats["witness_splits"] += 1
+                cursor += 1  # first child in this fixed preorder
+        interior_ids, shell_ids = linked_ids(inside), linked_ids(shell)
+        require(len(interior_ids) == count, "continuation count lost its IDs")
+        require(len(set(interior_ids)) == count, "continuation counted an ID twice")
+        require(len(set(shell_ids)) == len(shell_ids), "continuation repeated shell")
+        require(not set(interior_ids).intersection(shell_ids), "continuation payload overlap")
+        yield {
+            "u": left.ids, "v": right.ids, "status": "complete", "depth": count,
+            "interior": interior_ids, "shell": shell_ids,
+        }
+
+    records = list(walk(u, v, 0, 0, None, None, 1, 0))
+    stats["output_records"] = len(records)
+    stats["largest_complete_shell"] = max(
+        (len(record["shell"]) for record in records if record["status"] == "complete"),
+        default=0,
+    )
+    stats["saturated_multi_pair_records"] = sum(
+        record["status"] == "saturated" and len(record["u"]) * len(record["v"]) > 1
+        for record in records
+    )
+    return records, stats
+
+
+def check_joint_result(points: tuple[Point, ...], a_ids: tuple, b_ids: tuple,
+                       cap: int, records: list[dict]) -> dict:
+    expected_pairs = set(product(a_ids, b_ids))
+    seen = set()
+    for record in records:
+        if record["status"] == "complete":
+            require(len(record["u"]) == len(record["v"]) == 1,
+                    "uniform complete shells must isolate distinct support pairs")
+        for a, b in product(record["u"], record["v"]):
+            require((a, b) in expected_pairs and (a, b) not in seen, "product coverage failure")
+            seen.add((a, b))
+            # Rational center/radius oracle; no traversal bounds reused.
+            powers = [power_value(points[a], points[b], z) for z in points]
+            interior = [i for i, value in enumerate(powers) if value > 0]
+            shell = [i for i, value in enumerate(powers) if value == 0]
+            require(record["depth"] == min(cap, len(interior)), "joint depth mismatch")
+            if len(interior) >= cap:
+                require(record["status"] == "saturated", "joint saturation lost")
+                require("shell" not in record and "interior" not in record,
+                        "partial payload advertised")
+            else:
+                require(record["status"] == "complete", "joint exact status lost")
+                require(record["interior"] == interior and record["shell"] == shell,
+                        "joint payload mismatch")
+    require(seen == expected_pairs, "joint product omitted pairs")
+    return {"pairs": len(seen), "point_oracle_evaluations": len(seen) * len(points)}
+
+
+def check_joint() -> dict:
+    fixtures = []
+    # Both ordinary and irregular transverse sheets, with sites outside A+B.
+    for width in (2, 3, 4):
+        a = tuple((100, 10 * y, 10 * z) for y in range(width) for z in range(width))
+        b = tuple((60000, 10 * y, 10 * z) for y in range(width) for z in range(width))
+        for exterior in ((), ((30000, 10, 10), (0, 0, 0), (65535, 65535, 65535))):
+            fixtures.append((f"sheet_{width}_extra{len(exterior)}", a + b + exterior,
+                             tuple(range(len(a))), tuple(range(len(a), len(a) + len(b)))))
+    points = ((10, 10, 10), (18, 10, 10), (14, 10, 10), (14, 14, 10),
+              (14, 6, 10), (14, 10, 14), (14, 10, 6), (30, 30, 30), (0, 0, 0))
+    fixtures.append(("shell_six", points, (0,), (1, 3, 4, 5, 6, 7)))
+    fixtures.append(("inherited_credit_and_shell",
+                     ((0, 0, 0), (0, 2, 0), (100, 0, 0), (50, 1, 0), (0, 1, 0)),
+                     (0, 1), (2,)))
+    sphere = tuple(sorted({
+        tuple(10 + sign * value for sign, value in zip(signs, xyz))
+        for base in ((5, 0, 0), (4, 3, 0))
+        for xyz in permutations(base) for signs in product((-1, 1), repeat=3)
+    }))
+    require(len(sphere) == 30, "large-shell fixture size")
+    fixtures.append(("shell_thirty", sphere,
+                     (sphere.index((5, 10, 10)), sphere.index((10, 5, 10))),
+                     (sphere.index((15, 10, 10)), sphere.index((10, 15, 10)))))
+    rows = []
+    pairs = oracle_tests = 0
+    mutant_hits = {name: None for name in (
+        "restart_root_after_credit", "drop_undecided_head", "forget_inherited_shell",
+    )}
+    for name, points, a_ids, b_ids in fixtures:
+        root = build_tree(points, tuple(range(len(points))))
+        u, v = build_tree(points, a_ids), build_tree(points, b_ids)
+        index = thread_tree(root)
+        for cap in (1, 2, 5, 10):
+            independent_visits = sum(
+                tree_census(points, a, b, root, cap)["visits"] for a, b in product(a_ids, b_ids)
+            )
+            for budget in (None, 0, 2):
+                records, work = joint_census(points, u, v, index, cap, budget)
+                checked = check_joint_result(points, a_ids, b_ids, cap, records)
+                pairs += checked["pairs"]
+                oracle_tests += checked["point_oracle_evaluations"]
+                rows.append({"fixture": name, "sites": len(points), "cap": cap,
+                             "split_budget": budget,
+                             "independent_visits": independent_visits, **work})
+            for mutant in mutant_hits:
+                if mutant_hits[mutant] is not None:
+                    continue
+                try:
+                    wrong, _ = joint_census(points, u, v, index, cap, mutant=mutant)
+                    check_joint_result(points, a_ids, b_ids, cap, wrong)
+                except RuntimeError as error:
+                    mutant_hits[mutant] = {"fixture": name, "cap": cap, "rejection": str(error)}
+    # The fixture tree visits x=4,2,0. Alter escape at the first leaf:
+    # skipping to end loses the interior; a backward jump could loop forever.
+    escape_root = build_tree(((0, 0, 0), (2, 0, 0), (4, 0, 0)), (0, 1, 2))
+    index = thread_tree(escape_root)
+    leaf = next(i for i, entry in enumerate(index) if not entry.node.children)
+    for name, destination in (("escape_skips_sibling", len(index)),
+                              ("escape_returns_to_consumed_prefix", 0)):
+        invalid = list(index)
+        invalid[leaf] = ThreadedNode(index[leaf].node, destination)
+        try:
+            validate_threaded(tuple(invalid))
+        except RuntimeError as error:
+            mutant_hits[name] = {"fixture": "line_three", "rejection": str(error)}
+        else:
+            raise RuntimeError("invalid escape accepted")
+    require(all(mutant_hits.values()), "continuation mutant not exercised")
+    require(any(row["splits_after_credit"] for row in rows), "credit inheritance vacuous")
+    require(any(row["splits_after_shell"] for row in rows), "shell inheritance vacuous")
+    require(any(row["fallback_pairs"] for row in rows), "bounded continuation vacuous")
+    require(any(row["largest_complete_shell"] == 30 for row in rows), "large shell not retained")
+    require(any(row["saturated_multi_pair_records"] for row in rows), "product saturation vacuous")
+    require(any(row["bound_tests"] < row["independent_visits"] for row in rows),
+            "shared work never observed")
+    require(any(row["bound_tests"] > row["independent_visits"]
+                for row in rows if row["split_budget"] == 0),
+            "initial fallback overhead not exercised")
+    return {"fixtures": len(fixtures), "runs": len(rows), "pairs_checked": pairs,
+            "point_oracle_evaluations": oracle_tests, "rows": rows,
+            "rejected_continuation_mutants": mutant_hits}
+
+
 def check_mutants() -> list[dict]:
     lower, upper4 = interval_bounds((1, 1), (5, 5), (0, 6))
     wrong_corner_max = max((z - 1) * (5 - z) for z in (0, 6))
@@ -267,12 +537,12 @@ def main() -> None:
     result = {
         "status": "passed",
         "scope": (
-            "Python exact-integer/rational bounds and fixed-pair tiny-tree "
-            "census; no product integration, joint pair traversal, "
-            "performance, or FULL claim"
+            "Python exact bounds, fixed-pair and joint tiny-tree census; "
+            "no product integration, performance, or FULL claim"
         ),
         "extrema": check_extrema(),
         "census": check_census(),
+        "joint_continuations": check_joint(),
         "rejected_model_mutants": check_mutants(),
     }
     require(len(result["rejected_model_mutants"]) == 4, "mutant floor")

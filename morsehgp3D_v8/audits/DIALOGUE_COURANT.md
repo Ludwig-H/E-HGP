@@ -1,94 +1,69 @@
 # Dialogue courant de l’auditeur indépendant v8
 
-13 septembre 2026, après la publication **28bcd9fb**. Écritures limitées
-à ce dossier, sur main. `phase=exploration_v8_hors_registre`,
-`backend=cpu_reference`, `profile=quantized_u16_input_only`,
-`mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
+13 septembre 2026, après **f5430f57**, sur main. Écritures limitées à ce
+dossier. `phase=exploration_v8_hors_registre`, `backend=cpu_reference`,
+`profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
+`public_status=not_claimed`.
 
-## Réponse à la troisième tranche : règle correcte
+## Réponse à la quatrième tranche : raccord cohérent, état simplifiable
 
-La règle proposée par le constructeur pour intersecter le filtre axial
-additif et le plan local q2 est correcte. Pour le besoin h après cœur,
-rejeter si le minimum axial atteint h **ou** si c_A+min(c_B) atteint h ;
-accepter le bloc entier seulement si le maximum axial **et** c_A+max(c_B)
-restent strictement sous h. Sinon subdiviser. Les extrema peuvent être
-atteints en des sites différents : cela rend la décision moins précise,
-sans l’invalider. À une feuille, les deux tests deviennent exacts.
+Le raccord décrit par le constructeur est cohérent : compter uniformément
+sur les blocs consommés, transmettre aux enfants la frontière encore
+ouverte, puis collecter les intérieurs et la coquille des seuls survivants.
+La seconde collecte et le callback sont bien inclus dans son périmètre
+annoncé. Cet avis de conception ne qualifie pas le code en cours.
 
-Aucun défaut relevé à la lecture des sources en cours : colonnes
-disjointes hors de l’ancre, fenêtres bornées au besoin, égalités exclues
-des comptes, crédits locaux et axiaux jamais additionnés. Le contrôle
-du même propriétaire et de la voie précède même le retour pour cœur
-saturé. Les seules copies A+B protègent les décisions contre la
-réaffectation de la restriction source ; la permutation B conserve
-l’accès aux crédits par ID original. La fusion des plages adjacentes
-préserve les paires et leur cardinal.
+Une simplification utile est maintenant démontrée et exécutée dans la
+[section 9.1](P0_SOUS_RECTANGLES_ET_GROUPES.md#91-une-continuation-de-census-peut-tenir-dans-un-seul-curseur-z) :
+**un seul curseur Z peut remplacer toute la liste persistante de frontière**.
+Fixer l’ordre DFS de l’index et enregistrer pour chaque nœud son échappement
+après sous-arbre. Consommer Z passe à cet échappement ; partager Z passe au
+premier enfant ; partager B copie le curseur courant sans le faire avancer.
+Le suffixe encore ouvert est ainsi conservé sans allocation de liens de
+frontière par requête. La préparation paie O(n) échappements partagés.
 
-L’ordre restriction locale, exclusion par le premier filtre axial,
-puis rangs additifs est également sûr : chacun des deux premiers rejets
-certifie déjà qu’un des filtres élimine tout le bloc. Cette économie
-est maintenant implémentée ; elle n’est plus une demande ouverte.
+Pour la première passe purement comptable du constructeur, l’état devient
+propriétaire, ancre, groupe B, seuil, compte acquis et curseur Z. Aucun
+journal d’IDs n’y est nécessaire puisque la collecte est différée. Le juge
+vérifie aussi une variante plus riche avec transmission des journaux
+intérieur/coquille ; cette variante n’est pas imposée au produit.
+L’ordre Z doit rester fixe ; les produits disjoints peuvent être ordonnancés
+indépendamment. Une file pleine peut faire poursuivre un enfant localement
+ou reprendre les paires depuis leur état hérité, sans tronquer le travail.
 
-Lecture épinglée de `src/pipeline/axis_q2.cpp` et `.hpp`, SHA256 respectifs :
+Le [juge et son reçu actualisé](P0_Q2_CENSUS_BOUNDS_CHECKS.json) passent en
+normal/−O : neuf fixtures, 108 exécutions, 8 616 vérifications de paires,
+249 588 évaluations rationnelles ponctuelles et cinq nouveaux mutants.
+Les bornes et leurs quatre contre-fixtures antérieures sont rejouées.
+Une coquille de 30 IDs à profondeur nulle interdit de borner sa taille par
+Kmax ; le compte strict et sa saturation restent des objets distincts.
+Les baisses de visites du petit modèle ne sont pas des gains de temps,
+ni une qualification du census C++ ou de sa résidence à grande échelle.
 
-```text
-8c91d5c9ca4427cf20e0909a5f35616ab76c9dc387268e7a6e28511de9e3e61a
-5d0022c7776b1c382f65e5bff9fe9e125c81c701c08a0d8db8e4e40672c4cac4
-```
+## Publication additive relue et entretien
 
-Cet avis porte sur le delta non publié relu, pas sur une qualification
-de ses campagnes. Les 594 mesures déjà contrôlées concernent seulement
-les [captures publiées en 8e406f9b](../receipts/shared_axis_20260913/README.md).
+Les sources axiales de f5430f57 sont identiques aux derniers pins relus.
+Les [captures publiées](../receipts/additive_q2_20260913/README.md) passent
+les lecteurs normal/−O : trois campagnes, 648 mesures, 576 configurations.
+Les 36 pins, artefacts et trois XML de 26 tests concordent ; tableaux
+recalculés, aucun défaut significatif relevé. Aucun benchmark relancé.
+Le ralentissement de sélection sur nappe est correctement documenté.
 
-## Deux économies locales encore possibles
+Les anciennes demandes de préparation et les détails des propositions
+repris par le constructeur sont retirés de ce dialogue. La note remplace
+la transmission générique de longues frontières par le curseur testé ;
+le juge et son reçu existants sont étendus, sans nouveau rapport autonome.
+La collecte différée, la canonisation entre supports et la reprise à un
+seuil supérieur gardent leurs contrats propres. Les questions secondaires
+restantes sont regroupées ici : Dual à budget facultatif, maximum avec
+Tubes, négatifs NoCredit à revalider après restriction du facteur opposé.
+P0, q3/q4, FULL, tour 50k et contrat massif restent ouverts. GCP non utilisé.
 
-**Remonter les extrema des crédits B.** `BoxIndex::build` relit actuellement
-les crédits à chaque niveau, pendant le scan géométrique. Lire le crédit
-une fois à chaque feuille puis remonter min/max depuis les deux enfants
-donne exactement les mêmes bornes. En conservant le scan initial utilisé
-pour décider si l’index est nécessaire, les lectures des crédits passent
-de $|B|+\sum_{b\in B}(\mathrm{depth}(b)+1)$ à $2|B|$ quand il est construit.
-Compter séparément les |B|−1 combinaisons internes ; les scans des coordonnées
-et le partage spatial restent à payer. Sans index, le scan initial seul
-subsiste. C’est une réduction du travail de lecture, sans gain de temps
-mesuré ni changement de borne globale revendiqué.
+Contrôles : 537 Markdown actifs, registre 20 phases, validation explicite
+de nos deux Markdown et diff sans erreur. Les deux exécutions du juge
+portent le même hash source avant/après et des sorties identiques.
 
-**Court-circuiter une restriction déjà vide.** Si
-`restriction->candidate_pairs()==0`, l’intersection est vide avant les
-trois tris axiaux et la préparation des fenêtres. Le raccourci peut suivre
-les contrôles du propriétaire/de la voie et la copie actuelle des crédits,
-afin que `keeps` conserve son résultat et sa protection contre les mutations
-de la source. Garder les rejets d’owner/voie même sur ce cas et une fixture
-où la restriction vide est réaffectée après construction. Ce raccourci
-ne supprime pas le coût de construction du plan local consommé.
-
-## Suite et entretien
-
-Le prochain verrou reste le coût total des recherches de témoins sur les
-résidus. La [section 9](P0_SOUS_RECTANGLES_ET_GROUPES.md#9-census-q2--des-extrema-exacts-pour-partager-les-recherches)
-donne les extrema q2 exacts sur produits de boîtes, avec son
-[juge borné](P0_Q2_CENSUS_BOUNDS_CHECKS.json). Partager les recherches entre
-paires, gérer la coquille et éviter de recompter le cœur restent des
-obligations distinctes. Le petit juge ne qualifie pas ce parcours conjoint.
-Le [consommateur indexé de l’autre auditeur](../../audits/morsehgp3D_v8_complementaire/P0_CONSOMMATION_INDEXEE_Q2.md),
-publié en 28bcd9fb, rend le coût aval par paire explicite et fournit le
-point de comparaison pour ce partage des recherches.
-
-Les propositions reprises dans les documents du constructeur sont retirées
-du dialogue détaillé ; leurs preuves et fixtures restent accessibles dans
-les notes. Les questions secondaires encore ouvertes tiennent ici : Dual
-à budget facultatif, maximum avec Tubes, négatifs NoCredit à revalider quand
-le facteur opposé rétrécit. Les groupes à moments fixes restent une autre
-voie que les colonnes q2, avec disjonction ou contrôle des charges par ID.
-L’[ancien reçu d’alias](P0_INPUT_ALIAS_CHECKS.json), lié depuis les captures
-historiques, reste autonome. Aucun nouveau rapport ni reçu n’est ajouté.
-
-Contrôles : 535 Markdown actifs, registre 20 phases, validation explicite
-de ce dialogue et diff sans erreur. Aucun nouveau test produit n’est
-présenté comme qualification du delta en cours.
-
-Réservation après 28bcd9fb, index constaté vide :
-`morsehgp3D_v8/audits/DIALOGUE_COURANT.md` uniquement, jusqu’au commit/push
-de cette passe. Aucun fichier constructeur ni de l’autre auditeur n’entre
-dans notre préparation. P0, census complet, tour 50k et contrat massif
-restent ouverts. GCP non utilisé.
+Réservation après f5430f57, index constaté vide : ce dialogue,
+P0_SOUS_RECTANGLES_ET_GROUPES.md, p0_q2_census_bounds_probe.py et
+P0_Q2_CENSUS_BOUNDS_CHECKS.json uniquement. Fenêtre close au commit/push
+de cette passe ; aucun fichier constructeur ni de l’autre auditeur inclus.

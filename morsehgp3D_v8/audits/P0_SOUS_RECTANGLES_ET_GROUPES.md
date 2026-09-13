@@ -449,35 +449,11 @@ les deux bornes z donnent H=0, mais z=1 donne H=1. Le maximum ne se
 calcule donc pas seulement aux coins de Z. Ce ne sont pas des défauts
 du filtre publié ; ils fixent le contrat de son futur consommateur.
 
-**Objet à faire circuler.** Une tâche porte le propriétaire du nuage,
-les références de U et V, le seuil, un compte acquis uniforme sur ce
-sous-produit et la frontière de blocs Z restant à traiter. Sous le seuil,
-ce compte est exact sur les blocs déjà consommés ; un crédit partiel
-exige de partager d’abord le produit de requêtes. Les IDs de tout le nuage, y
-compris ceux hors A∪B, sont partitionnés par l’index global. Partager
-un nœud Z remplace sa population par celles de ses enfants disjoints.
-Après un crédit, ne plus revisiter ce nœud pour les mêmes paires.
-Partager U ou V transmet le compte acquis et la seule frontière encore
-ouverte, sans recréditer les ancêtres de Z déjà consommés.
-
-Pour une première version simple, partir d’un compte nul sur l’index
-global : les crédits du préfiltre ont seulement supprimé des paires.
-Les réintroduire comme compte initial exigerait d’exclure leurs IDs du
-census. Une boule ayant un unique intérieur déjà crédité par le cœur
-serait sinon comptée deux fois. Les extrémités a,b sont de puissance
-nulle ; le test L>0 empêche automatiquement de les créditer en bloc.
-
-Un crédit sur U×V doit rester une mise à jour différée du sous-produit,
-sans parcourir ses paires pour leur ajouter la même valeur. De même,
-partager une longue liste de blocs Z ne signifie pas la recopier pour
-chaque enfant : employer des références persistantes ou une pile de
-continuations, et compter les reprises réellement effectuées. Ce sont
-des objets compatibles avec un front de tâches parallèle ; ni leur
-ordonnancement, ni un parcours conjoint complet ne sont implémentés par
-ce lemme. Comparer leur travail au census par requêtes indépendantes :
-constructions, visites, pires tâches, fragments d’états, IDs matérialisés
-et résidence simultanée. Le nombre de tests économisés ne borne pas
-automatiquement le nombre d’états ni le coût total.
+Un compte uniforme sur U×V représente les seuls blocs Z entièrement
+consommés. Partager le produit conserve ce compte et le travail encore
+ouvert, sans revisiter les blocs crédités. La section 9.1 précise un
+format plus simple que la liste de continuations initialement proposée.
+Le coût des états et des sorties reste à comparer au parcours par paire.
 
 **Qualification bornée.** Le [juge autonome](p0_q2_census_bounds_probe.py)
 et son [reçu](P0_Q2_CENSUS_BOUNDS_CHECKS.json) passent en normal/−O :
@@ -489,8 +465,113 @@ de six IDs est conservée. Les quatre contre-fixtures portent sur le
 maximum limité aux coins de Z, NoCredit pris pour extérieur global,
 l’égalité effaçant la coquille et le cœur recompté.
 
-Ce juge interroge **une paire fixée à la fois**. Il ne met pas en œuvre
-le parcours conjoint U×V, sa transmission d’états ou sa résidence proposée.
-Il conserve les IDs dans les nœuds de son petit arbre et utilise les
-entiers non bornés de Python : aucun format mémoire produit, port i64
+Cette première série conserve son rôle de juge des bornes et du census
+par paire. La série suivante vérifie désormais les continuations U×V.
+L’ensemble conserve les IDs dans les nœuds de son petit arbre et utilise
+les entiers non bornés de Python : aucun format mémoire produit, port i64
 ou gain de temps ne lui est attribué.
+
+### 9.1. Une continuation de census peut tenir dans un seul curseur Z
+
+13 septembre, après f5430f57. Fixer une fois l’ordre de parcours en
+profondeur de l’index global Z. Numéroter ses nœuds en préordre et
+conserver pour chacun `escape`, le premier nœud après tout son sous-arbre
+(ou la fin de l’index). Le premier enfant suit son parent dans ce format.
+Le curseur courant désigne alors **tout le suffixe encore ouvert** :
+son sous-arbre, puis ceux désignés successivement par les échappements.
+
+| Opération | Continuation exacte |
+| --- | --- |
+| Bloc intérieur, extérieur ou de coquille décidé | Mettre à jour le compte ou le journal nécessaire, puis passer à `escape[Z]`. |
+| Bloc Z indécis, raffinement des témoins | Passer au premier enfant, sans modifier le compte acquis. |
+| Produit U×V indécis, partage de U ou V | Les deux produits disjoints héritent du **même curseur Z courant**, compte et têtes de journaux immuables. |
+| Repli vers les requêtes individuelles | Chaque paire reprend depuis cet état hérité ; aucun redémarrage à la racine ni crédit ajouté deux fois. |
+
+La preuve est une induction sur le préfixe consommé de l’ordre des
+feuilles : consommer un sous-arbre ajoute un intervalle contigu à ce
+préfixe ; le partager ne change aucun ID ; partager les requêtes conserve
+ce même préfixe pour deux ensembles de paires disjoints. Le compte acquis
+est exact et uniforme sur le produit tant qu’il est sous Kmax. Les IDs
+intérieurs et de coquille consommés sont référencés par des journaux
+persistants ; seuls leurs nouveaux suffixes diffèrent entre enfants.
+Le cœur n’est pas préchargé : tous les sites sont visitables depuis zéro.
+
+Cette simplification exige le **même ordre Z fixe**. Un ordonnancement
+libre des tâches U×V reste possible puisque leurs curseurs sont privés ;
+réordonner arbitrairement les blocs Z ouverts à l’intérieur d’une tâche
+demanderait une autre représentation de sa frontière. Les références
+de propriétaire, de facteurs et de journaux doivent accompagner le
+curseur. Les mises à jour de comptes restent locales aux tâches ; une
+réduction de compteurs peut se faire séparément.
+
+La préparation ajoute O(n) échappements à un index binaire existant.
+Elle ne copie aucune liste de témoins à chaque partage. Pour un index
+portant des plages de feuilles, vérifier `escape[Z].first=Z.last`, ou
+fin de l’index lorsque `Z.last=n`, ainsi que la partition par les enfants.
+Le juge vérifie la taille de chaque sous-arbre préordonné ; ses mutants
+sautant un frère ou revenant sur un préfixe consommé sont rejetés avant
+de lancer une boucle de census.
+
+**Limiter les tâches sans limiter la recherche.** Le juge compare un
+nombre de divisions de produits par branche illimité, nul ou limité à
+deux. Quand cette limite est atteinte, il énumère le produit encore ouvert
+et poursuit chaque paire depuis son curseur hérité. C’est un choix de
+grain qui conserve la couverture, pas un quota de candidats. En exécution
+parallèle, une file pleine peut aussi conduire à exécuter un enfant
+localement en profondeur. Ni option ne supprime le travail résiduel.
+
+**La coquille ne tient pas dans Kmax.** Trente sites u16 sur une même
+sphère de rayon 5 donnent une profondeur nulle et une coquille de
+30 IDs, même à Kmax=1. Les journaux doivent être libérés lorsqu’ils ne
+sont plus référencés, ou diffusés par blocs ; un arena qui ne recycle
+jamais ses cellules transforme un faible état local en forte mémoire
+cumulée. Différer puis rejouer la collecte des coquilles est une autre
+option complète, dont le coût doit être payé séparément, sans modifier
+le compte strict déjà obtenu. Le juge actuel conserve les journaux et
+toutes ses sorties ; il ne qualifie pas un budget de résidence.
+
+Une terminale ayant une coquille **complète et uniforme** sur U×V isole
+nécessairement une paire, pour des sites distincts et des facteurs disjoints.
+Sinon, pour a≠a′ dans U et b dans V, chaque extrémité serait sur les
+deux coquilles, alors que $H(a';a,b)+H(a;a',b)=-\Vert a-a'\Vert^2<0$.
+L’argument est identique pour V. Les préfixes de recherche et les rejets
+saturés se partagent donc ; les paires retenues demandent encore leurs
+sorties propres dans cette représentation. Cela n’interdit pas de
+canoniser ensuite plusieurs diamètres d’une même boule par
+$(a+b,\Vert a-b\Vert^2)$, avec le même propriétaire. Cette canonisation
+et ses incidences ne sont pas implémentées par le juge.
+
+**Portée du contrôle conjoint.** Normal/−O donnent les mêmes résultats :
+neuf fixtures, 108 exécutions (Kmax=1/2/5/10, trois budgets de division),
+8 616 vérifications de paires et 249 588 évaluations rationnelles ponctuelles.
+Les cinq nouveaux mutants portent sur la reprise à la racine après crédit,
+le bloc indécis oublié, la coquille héritée oubliée et les deux échappements
+invalides. Ils s’ajoutent aux quatre contre-fixtures des bornes.
+
+| Fixture du juge, sans budget de division | Kmax | Visites par paire | Visites conjointes |
+| --- | --- | --- | --- |
+| Deux ancres et trois autres sites, crédit/coquille hérités | 10 | 18 | 14 |
+| Deux nappes 4×4 et trois sites supplémentaires | 10 | 10 452 | 9 419 |
+| Coquille sphérique à 30 sites | 1 | 153 | 147 |
+
+Le repli immédiat paie aussi son test initial : 154 visites sur la dernière
+fixture, contre 153 pour les requêtes individuelles directes. Ce surcoût
+observé concerne le repli ; aucun adversaire général du parcours sans
+budget n’est revendiqué. Le reçu conserve toutes les lignes,
+les compteurs de visites, divisions, copies de curseurs, allocations de
+journaux et profondeur d’appels, ainsi que les contre-fixtures de
+transmission. Les décisions sont confrontées au calcul indépendant par
+centre/rayon rationnels sur toutes les paires des petits produits.
+Les deux parcours comparés utilisent ici le même arbre et les mêmes
+bornes ; une visite d’un produit coûte davantage qu’un simple test
+ponctuel. Leur décompte ne devient ni un temps, ni une comparaison avec
+les 295,5 millions de visites du prototype C++ de l’autre auditeur.
+Le modèle coupe aux médianes de cardinalité, sans hériter de la preuve
+de profondeur 48 propre au découpage spatial u16 de ce prototype.
+
+La sélection du facteur à partager reste une heuristique par étendue.
+Le coût des divisions et des journaux peut annuler le partage des tests ;
+aucune borne globale sous-quadratique ni clôture P0 n’en découle. Le
+prochain raccord doit comparer le census individuel et ce partage sur
+les **mêmes résidus réellement produits**, construction des index et
+sorties incluses, avant de choisir leur ordonnancement parallèle.
