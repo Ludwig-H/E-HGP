@@ -1,0 +1,373 @@
+{
+  "git_head": "dc246d6b112b01cf8a2631ff21f573224c6243d8",
+  "runs": [
+    {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/audits/morsehgp3D_v8_complementaire/p0_quantifiers_gate.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "result": {
+        "cases": [
+          {
+            "exact_credit_residual": 1,
+            "factor_size": 3,
+            "need": 1,
+            "shared_bound4": 0,
+            "zero_credit_residual": 9
+          },
+          {
+            "exact_credit_residual": 3,
+            "factor_size": 3,
+            "need": 2,
+            "shared_bound4": 0,
+            "zero_credit_residual": 9
+          },
+          {
+            "exact_credit_residual": 6,
+            "factor_size": 3,
+            "need": 3,
+            "shared_bound4": 0,
+            "zero_credit_residual": 9
+          },
+          {
+            "exact_credit_residual": 1,
+            "factor_size": 16,
+            "need": 1,
+            "shared_bound4": 0,
+            "zero_credit_residual": 256
+          },
+          {
+            "exact_credit_residual": 3,
+            "factor_size": 16,
+            "need": 2,
+            "shared_bound4": 0,
+            "zero_credit_residual": 256
+          },
+          {
+            "exact_credit_residual": 55,
+            "factor_size": 16,
+            "need": 10,
+            "shared_bound4": 0,
+            "zero_credit_residual": 256
+          },
+          {
+            "exact_credit_residual": 1,
+            "factor_size": 64,
+            "need": 1,
+            "shared_bound4": 0,
+            "zero_credit_residual": 4096
+          },
+          {
+            "exact_credit_residual": 3,
+            "factor_size": 64,
+            "need": 2,
+            "shared_bound4": 0,
+            "zero_credit_residual": 4096
+          },
+          {
+            "exact_credit_residual": 55,
+            "factor_size": 64,
+            "need": 10,
+            "shared_bound4": 0,
+            "zero_credit_residual": 4096
+          }
+        ],
+        "lane_checks": 27,
+        "mutant_refutations": 18,
+        "scope": "exact_collinear_model_not_v8_cpp",
+        "source_sha256": "66f23b2e1c6fb13372233121c4acc9bed4fa8032587fe328a2545bc97a51b5f0",
+        "status": "passed"
+      }
+    },
+    {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/audits/morsehgp3D_v8_complementaire/p0_quantifiers_gate.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "result": {
+        "cases": [
+          {
+            "exact_credit_residual": 1,
+            "factor_size": 3,
+            "need": 1,
+            "shared_bound4": 0,
+            "zero_credit_residual": 9
+          },
+          {
+            "exact_credit_residual": 3,
+            "factor_size": 3,
+            "need": 2,
+            "shared_bound4": 0,
+            "zero_credit_residual": 9
+          },
+          {
+            "exact_credit_residual": 6,
+            "factor_size": 3,
+            "need": 3,
+            "shared_bound4": 0,
+            "zero_credit_residual": 9
+          },
+          {
+            "exact_credit_residual": 1,
+            "factor_size": 16,
+            "need": 1,
+            "shared_bound4": 0,
+            "zero_credit_residual": 256
+          },
+          {
+            "exact_credit_residual": 3,
+            "factor_size": 16,
+            "need": 2,
+            "shared_bound4": 0,
+            "zero_credit_residual": 256
+          },
+          {
+            "exact_credit_residual": 55,
+            "factor_size": 16,
+            "need": 10,
+            "shared_bound4": 0,
+            "zero_credit_residual": 256
+          },
+          {
+            "exact_credit_residual": 1,
+            "factor_size": 64,
+            "need": 1,
+            "shared_bound4": 0,
+            "zero_credit_residual": 4096
+          },
+          {
+            "exact_credit_residual": 3,
+            "factor_size": 64,
+            "need": 2,
+            "shared_bound4": 0,
+            "zero_credit_residual": 4096
+          },
+          {
+            "exact_credit_residual": 55,
+            "factor_size": 64,
+            "need": 10,
+            "shared_bound4": 0,
+            "zero_credit_residual": 4096
+          }
+        ],
+        "lane_checks": 27,
+        "mutant_refutations": 18,
+        "scope": "exact_collinear_model_not_v8_cpp",
+        "source_sha256": "66f23b2e1c6fb13372233121c4acc9bed4fa8032587fe328a2545bc97a51b5f0",
+        "status": "passed"
+      }
+    },
+    {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/audits/morsehgp3D_v8_complementaire/p0_rails_gate.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "result": {
+        "cases": [
+          {
+            "exact_local_residual": 4,
+            "grouped_directional_checks": 8,
+            "lane": 4,
+            "length": 1,
+            "minimum_over_all_fixed_pools": 9,
+            "need": 1,
+            "points": 8,
+            "pool_pairs_exhaustively_checked": 16,
+            "positive_classifications": 4,
+            "witness_classifications": 32
+          },
+          {
+            "exact_local_residual": 4,
+            "grouped_directional_checks": 12,
+            "lane": 4,
+            "length": 2,
+            "minimum_over_all_fixed_pools": 16,
+            "need": 1,
+            "points": 12,
+            "pool_pairs_exhaustively_checked": 36,
+            "positive_classifications": 12,
+            "witness_classifications": 72
+          },
+          {
+            "exact_local_residual": 4,
+            "grouped_directional_checks": 8,
+            "lane": 3,
+            "length": 1,
+            "minimum_over_all_fixed_pools": 9,
+            "need": 1,
+            "points": 8,
+            "pool_pairs_exhaustively_checked": 16,
+            "positive_classifications": 4,
+            "witness_classifications": 32
+          },
+          {
+            "exact_local_residual": 4,
+            "grouped_directional_checks": 12,
+            "lane": 3,
+            "length": 2,
+            "minimum_over_all_fixed_pools": 16,
+            "need": 1,
+            "points": 12,
+            "pool_pairs_exhaustively_checked": 36,
+            "positive_classifications": 12,
+            "witness_classifications": 72
+          },
+          {
+            "exact_local_residual": 2916,
+            "grouped_directional_checks": 162,
+            "lane": 4,
+            "length": 8,
+            "need": 8,
+            "points": 162,
+            "positive_classifications": 648,
+            "witness_classifications": 13122
+          },
+          {
+            "exact_local_residual": 4500,
+            "grouped_directional_checks": 200,
+            "lane": 3,
+            "length": 9,
+            "need": 9,
+            "points": 200,
+            "positive_classifications": 900,
+            "witness_classifications": 20000
+          }
+        ],
+        "grouped_directional_checks": 402,
+        "large_fixture": {
+          "arbitrary_fixed_pool_budget_per_side": 8,
+          "candidate_lower_bound": 1436463,
+          "exact_local_residual_by_formula": 2916,
+          "length": 150,
+          "maximum_coordinate": 64950,
+          "need": 8,
+          "points": 2718,
+          "rails": 9,
+          "scope": "proof_arithmetic_not_exhaustive_census",
+          "shift": 64800
+        },
+        "mutant_refutations": 8,
+        "pool_pairs_exhaustively_checked": 104,
+        "positive_classifications": 1580,
+        "scope": "exact_rails_model_not_v8_cpp",
+        "source_sha256": "ed4ef310b05d3fe0c279f29374d0dc8223d6c22e90b93030ab57831fea95d208",
+        "status": "passed",
+        "witness_classifications": 33330
+      }
+    },
+    {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/audits/morsehgp3D_v8_complementaire/p0_rails_gate.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "result": {
+        "cases": [
+          {
+            "exact_local_residual": 4,
+            "grouped_directional_checks": 8,
+            "lane": 4,
+            "length": 1,
+            "minimum_over_all_fixed_pools": 9,
+            "need": 1,
+            "points": 8,
+            "pool_pairs_exhaustively_checked": 16,
+            "positive_classifications": 4,
+            "witness_classifications": 32
+          },
+          {
+            "exact_local_residual": 4,
+            "grouped_directional_checks": 12,
+            "lane": 4,
+            "length": 2,
+            "minimum_over_all_fixed_pools": 16,
+            "need": 1,
+            "points": 12,
+            "pool_pairs_exhaustively_checked": 36,
+            "positive_classifications": 12,
+            "witness_classifications": 72
+          },
+          {
+            "exact_local_residual": 4,
+            "grouped_directional_checks": 8,
+            "lane": 3,
+            "length": 1,
+            "minimum_over_all_fixed_pools": 9,
+            "need": 1,
+            "points": 8,
+            "pool_pairs_exhaustively_checked": 16,
+            "positive_classifications": 4,
+            "witness_classifications": 32
+          },
+          {
+            "exact_local_residual": 4,
+            "grouped_directional_checks": 12,
+            "lane": 3,
+            "length": 2,
+            "minimum_over_all_fixed_pools": 16,
+            "need": 1,
+            "points": 12,
+            "pool_pairs_exhaustively_checked": 36,
+            "positive_classifications": 12,
+            "witness_classifications": 72
+          },
+          {
+            "exact_local_residual": 2916,
+            "grouped_directional_checks": 162,
+            "lane": 4,
+            "length": 8,
+            "need": 8,
+            "points": 162,
+            "positive_classifications": 648,
+            "witness_classifications": 13122
+          },
+          {
+            "exact_local_residual": 4500,
+            "grouped_directional_checks": 200,
+            "lane": 3,
+            "length": 9,
+            "need": 9,
+            "points": 200,
+            "positive_classifications": 900,
+            "witness_classifications": 20000
+          }
+        ],
+        "grouped_directional_checks": 402,
+        "large_fixture": {
+          "arbitrary_fixed_pool_budget_per_side": 8,
+          "candidate_lower_bound": 1436463,
+          "exact_local_residual_by_formula": 2916,
+          "length": 150,
+          "maximum_coordinate": 64950,
+          "need": 8,
+          "points": 2718,
+          "rails": 9,
+          "scope": "proof_arithmetic_not_exhaustive_census",
+          "shift": 64800
+        },
+        "mutant_refutations": 8,
+        "pool_pairs_exhaustively_checked": 104,
+        "positive_classifications": 1580,
+        "scope": "exact_rails_model_not_v8_cpp",
+        "source_sha256": "ed4ef310b05d3fe0c279f29374d0dc8223d6c22e90b93030ab57831fea95d208",
+        "status": "passed",
+        "witness_classifications": 33330
+      }
+    }
+  ],
+  "scope": "independent_bounded_models_not_v8_cpp",
+  "status": "passed"
+}

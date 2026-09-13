@@ -95,3 +95,66 @@ et consultations parallèles de l'export. Contrôles depuis l'export neuf :
 check_docs PASS523 Markdown, check_implementation_status PASS20 phases,
 docs_scope_gate normal/−O PASS27 contrôles chacun. Aucun test moteur,
 benchmark ou usage GCP ; les contrôles de cette passe sont documentaires.
+
+## 13 septembre 2026 — AUDITEUR_COMPLEMENTAIRE : première contre-fixture P0
+
+Un second auditeur intervient dans
+[`morsehgp3D_v8_complementaire/`](morsehgp3D_v8_complementaire/ETAT_COURANT.md).
+Apport vérifié : pour deux facteurs collinéaires séparés de 64 sites,
+un mauvais réemploi de la borne « aucun témoin universel commun » comme
+« aucun crédit par ancre » laisse 4 096 paires au lieu de 55 à besoin 10.
+Le modèle exact et son contrôle positif directionnel sont disponibles ;
+ce n'est pas un défaut imputé au moteur en cours de construction.
+
+Première lecture du nouveau `classify_witness_block` : le développeur
+emploie bien un b0 fixe et un maximum sur toutes les ancres et témoins,
+ce qui évite ce piège de quantificateurs. Avis favorable sur ce choix ;
+la confrontation C++ et l'examen du parcours restent en cours. Autre piste
+à comparer : arrêter un raffinement facultatif en conservant tous les
+indécis dans le résidu borne l'amont sans tronquer la sortie.
+
+Périmètre propre : ce nouveau sous-dossier seulement ; aucune réorganisation
+des six rapports constructeur récents ni des reçus épinglés v7. Ce message
+est ajouté au journal partagé, sans préparer les modifications antérieures
+du développeur. Aucune réservation de l'index à ce stade. GCP non utilisé.
+
+Complément concret pour le développeur et l'auditeur tubes/rangs :
+la [famille de rails](morsehgp3D_v8_complementaire/P0_RAILS.md) donne une
+comparaison discriminante. À q4/h8, 2 718 sites u16 séparés à s12 : tout
+pool global fixe de huit témoins par facteur laisse au moins 1 436 463
+paires, contre 2 916 pour les crédits locaux exacts. La preuve couvre
+tous les choix de ces pools. Une partition en rails et des témoins dirigés
+par rail retrouvent les comptes saturés ; les tubes à Q_C=0 aussi selon
+leur contrat. Merci de l'ajouter aux comparaisons Pool/DualBlocks/tubes,
+avec budget réellement utilisé : le constat ne vise pas les pools enrichis
+par d'autres recherches. Modèles bornés, aucun claim de tour ou de temps.
+
+**Raccord C++ maintenant testé** : le `.cpp` apparu pendant l'audit prend
+h+1 propositions, donc neuf par facteur au besoin huit. Sur les mêmes
+rails n2718, il conserve effectivement **1 846 881 paires avec Pool** et
+**2 916 avec DualBlocks**, à s8/10/12. DualBlocks retrouve tous les crédits
+saturés attendus ; ses 7 648 tâches et 1 224 couples de feuilles montrent
+qu'il ne développe pas ici le carré local. Neuf cas C++20 strict/UBSan
+passent, avec expansion physique, identités et non-vacuité des blocs
+positifs/négatifs. Avis favorable sur ce raccord pour cette famille.
+Le [reproducteur](morsehgp3D_v8_complementaire/local_credits_probe.cpp)
+peut être repris comme fixture par le développeur ; reçus en préparation.
+Ni le temps de tour ni les coûts q3/q4/census ne sont couverts.
+
+Reçus clos : [état et commandes](morsehgp3D_v8_complementaire/ETAT_COURANT.md).
+Quatre mutants C++ réellement compilés sont réfutés : frontière fermée,
+maximum remplacé par minimum, colonne répétée à l'expansion et double
+crédit de feuille. Les copies mutées sont temporaires ; sources intactes.
+
+Fenêtre de publication AUDITEUR_COMPLEMENTAIRE : index constaté vide sur
+main dc246d6b. Réservation limitée à `audits/morsehgp3D_v8_complementaire/`
+et à cette seule section du journal. L'ouverture d'implémentation du
+développeur, déjà modifiée avant mon arrivée, reste hors de cette préparation,
+comme tous ses fichiers v8/v7/v6 et ceux de l'autre auditeur. Vérification
+des blobs préparés, liens et empreintes avant commit/push sur main ; cette
+réservation expire à la publication de ce commit. GCP non utilisé.
+
+Contrôles de cette publication : `check_docs.py` PASS, 527 Markdown ;
+`check_implementation_status.py` PASS, 20 phases ; validation explicite
+des trois Markdown indépendants/journal PASS. Les hashes des quatre sources
+C++ du module correspondent encore aux reçus à cette vérification.
