@@ -4,8 +4,8 @@
 `quantized_u16_input_only`, `public_status=not_claimed`. Proposeurs q2 et
 certificats collectifs issus de la
 [contre-fixture transverse de l’autre auditeur](../../audits/morsehgp3D_v8_complementaire/P0_RESIDU_TRANSVERSE.md).
-Les sections 6 à 8 étendent ces preuves aux groupes à moments fixes,
-aux nappes et à l’addition des colonnes exactes du filtre axial en cours.
+Les sections 6 à 9 étendent ces preuves aux groupes à moments fixes,
+aux nappes, à l’addition des colonnes exactes et au raccord du census q2.
 Aucun producteur général ni résultat de tour FULL n’est qualifié ici.
 
 ## 1. Un grain plus petit suffit pour q2 sur les rangées
@@ -391,3 +391,106 @@ Le coût des requêtes et des fragments est donc réel, avant tout census.
 Ce Python recherche dans les colonnes entières, en O(log m) ; les vues
 limitées à h voisins et leur O(log(h+1)) restent un raccord proposé.
 Aucun temps ni résultat C++ ne sont qualifiés par ces exécutions.
+
+## 9. Census q2 : des extrema exacts pour partager les recherches
+
+**Raccord proposé après 8e406f9b.** Le prochain census peut réutiliser
+le minimum H déjà présent dans
+[les prédicats](../src/spindle/predicates.hpp), puis étendre leur maximum
+à une boîte B. Cela donne une décision portant sur un produit de requêtes
+U×V et un bloc global Z d’IDs, sans supposer de colonnes alignées. Les
+boîtes sont continues ; leurs extrema ne sont pas ceux des seuls sites
+discrets. Un résultat indécis entraîne un raffinement, pas un rejet.
+
+Noter E(I) les deux bornes de l’intervalle I. Comme H est séparément
+affine en a et b, concave en z et séparable par coordonnée :
+
+$$L=\sum_{j=1}^{3}\min_{a_j\in E(U_j),\,b_j\in E(V_j),\,z_j\in E(Z_j)}(z_j-a_j)(b_j-z_j).$$
+
+Pour le maximum, définir t_j=clip(a_j+b_j,2Z.low_j,2Z.high_j) :
+
+$$M_4=\sum_{j=1}^{3}\max_{a_j\in E(U_j),\,b_j\in E(V_j)}\left[(b_j-a_j)^2-(t_j-a_j-b_j)^2\right].$$
+
+L est le minimum exact de H sur les trois boîtes, et M_4 quatre fois
+son maximum exact. Pour maximiser, porter successivement a_j puis b_j
+à une borne sans diminuer H ; la parabole restante en z_j atteint son
+sommet en clip((a_j+b_j)/2,Z_j). Le double de ce sommet reste entier,
+même lorsqu’il est demi-entier. Les quatre couples de bornes par axe
+suffisent : aucune énumération de tous les triplets de coins 3D n’est
+nécessaire. Sur u16, −12·65535²≤4H≤3·65535² ; i64 suffit à ces deux
+bornes, sans division ni prédicat flottant.
+Les coordonnées doivent être promues en i64 avant les premiers calculs,
+comme dans le prédicat actuel ; une multiplication après promotion
+implicite de u16 en int peut déjà dépasser i32.
+
+| Certificat | Décision pour toutes les paires du sous-produit |
+| --- | --- |
+| L>0 | Tous les IDs de Z sont strictement intérieurs : créditer son cardinal, saturé au seuil demandé. |
+| M_4<0 | Tous les IDs de Z sont strictement extérieurs : terminer ce bloc. |
+| L=0 et M_4=0 | Tous sont sur la frontière : conserver leurs IDs pour la coquille. |
+| Sinon | Raffiner Z ou les facteurs du produit de requêtes. |
+
+Pour le **seul compte d’intérieurs stricts**, M_4≤0 permet aussi de
+terminer Z. Cette égalité ne permet pas d’oublier les IDs de frontière
+si le consommateur demande la coquille. Les bornes n’imposent aucune
+limite artificielle à sa taille. Sous le seuil de rejet, les intérieurs
+doivent être complets ; au seuil, rendre un statut saturé et non un faux
+compte exact. Une première passe strictement comptable peut différer la
+collecte des IDs, mais cette collecte et les recherches supplémentaires
+doivent alors être payées et déclarées.
+
+**Le prédicat négatif à raccorder est différent de NoCredit.** Dans
+l’API actuelle, NoCredit trouve un coin b0 qui réfute un témoin universel
+sur V ; il ne prouve pas son absence pour chaque b de V. Par exemple,
+a=(1000,1,0), z=(1000,2,0), b0=(60000,1,0) et b1=(60000,3,0) donnent
+H=−1 puis H=1. Le nouveau maximum sur V conserve ce bloc indécis.
+Autre frontière du calcul : pour a=0, b=2 et z∈[0,2] sur une droite,
+les deux bornes z donnent H=0, mais z=1 donne H=1. Le maximum ne se
+calcule donc pas seulement aux coins de Z. Ce ne sont pas des défauts
+du filtre publié ; ils fixent le contrat de son futur consommateur.
+
+**Objet à faire circuler.** Une tâche porte le propriétaire du nuage,
+les références de U et V, le seuil, un compte acquis uniforme sur ce
+sous-produit et la frontière de blocs Z restant à traiter. Sous le seuil,
+ce compte est exact sur les blocs déjà consommés ; un crédit partiel
+exige de partager d’abord le produit de requêtes. Les IDs de tout le nuage, y
+compris ceux hors A∪B, sont partitionnés par l’index global. Partager
+un nœud Z remplace sa population par celles de ses enfants disjoints.
+Après un crédit, ne plus revisiter ce nœud pour les mêmes paires.
+Partager U ou V transmet le compte acquis et la seule frontière encore
+ouverte, sans recréditer les ancêtres de Z déjà consommés.
+
+Pour une première version simple, partir d’un compte nul sur l’index
+global : les crédits du préfiltre ont seulement supprimé des paires.
+Les réintroduire comme compte initial exigerait d’exclure leurs IDs du
+census. Une boule ayant un unique intérieur déjà crédité par le cœur
+serait sinon comptée deux fois. Les extrémités a,b sont de puissance
+nulle ; le test L>0 empêche automatiquement de les créditer en bloc.
+
+Un crédit sur U×V doit rester une mise à jour différée du sous-produit,
+sans parcourir ses paires pour leur ajouter la même valeur. De même,
+partager une longue liste de blocs Z ne signifie pas la recopier pour
+chaque enfant : employer des références persistantes ou une pile de
+continuations, et compter les reprises réellement effectuées. Ce sont
+des objets compatibles avec un front de tâches parallèle ; ni leur
+ordonnancement, ni un parcours conjoint complet ne sont implémentés par
+ce lemme. Comparer leur travail au census par requêtes indépendantes :
+constructions, visites, pires tâches, fragments d’états, IDs matérialisés
+et résidence simultanée. Le nombre de tests économisés ne borne pas
+automatiquement le nombre d’états ni le coût total.
+
+**Qualification bornée.** Le [juge autonome](p0_q2_census_bounds_probe.py)
+et son [reçu](P0_Q2_CENSUS_BOUNDS_CHECKS.json) passent en normal/−O :
+1 000 triples d’intervalles, 7 400 évaluations rationnelles indépendantes,
+125 000 valeurs sur une grille au quart et cinq fixtures 3D. Un petit
+arbre Z est ensuite interrogé sur 36 paires : 36 census complets et 180
+avec seuil, dont 31 saturés et 149 complets sous le seuil. Une coquille
+de six IDs est conservée. Les quatre contre-fixtures portent sur le
+maximum limité aux coins de Z, NoCredit pris pour extérieur global,
+l’égalité effaçant la coquille et le cœur recompté.
+
+Ce juge interroge **une paire fixée à la fois**. Il ne met pas en œuvre
+le parcours conjoint U×V, sa transmission d’états ou sa résidence proposée.
+Il conserve les IDs dans les nœuds de son petit arbre et utilise les
+entiers non bornés de Python : aucun format mémoire produit, port i64
+ou gain de temps ne lui est attribué.
