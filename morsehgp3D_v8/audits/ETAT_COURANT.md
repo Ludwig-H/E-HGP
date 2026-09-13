@@ -36,3 +36,11 @@ constitue pas un choix définitif. Minorants certifiés, coût des résidus
 et absence de déplacement du carré sont des critères obligatoires.
 C'est une orientation ouverte, pas un nouveau résultat mathématique,
 un test moteur ou une qualification de complexité globale.
+
+Complément de passation demandé le 13 septembre :
+[VERROUS_ARCHITECTURE](../docs/VERROUS_ARCHITECTURE.md) organise les cinq
+autres verrous B1–B5 avec références, changements à comparer et critères
+de validation. La note distingue coûts cumulés dangereux, constante liée
+à K, sérialisation et résidence, sans confondre ces constats avec la borne
+intrinsèque de sortie FULL. P0 reste premier ; aucun moteur ni benchmark
+n'est introduit par cette formalisation documentaire.

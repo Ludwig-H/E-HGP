@@ -64,6 +64,14 @@ Le cadrage de l'API et les petites fixtures FULL ci-dessous soutiennent
 ce chantier ; ils ne le repoussent pas derrière un port général de la v7.
 P0 reste **ouverte, sans solution finale choisie ni gain mesuré en v8**.
 
+Les [consignes au futur développeur](VERROUS_ARCHITECTURE.md) détaillent
+les cinq verrous suivants : recherches de témoins répétées, interactions
+triangles–voisinages q3/q4, rattachements MEB, histoire/export centraux,
+puis mémoire et transport. B1/B2 doivent être mesurés dès le travail P0
+pour détecter un déplacement du coût ; B3–B5 guident les objets aval.
+Ces repères ne changent pas le premier rang de P0. Leur statut reste
+ouvert et leurs critères ne constituent pas des gains acquis.
+
 ## 1. Une seule chaîne et un seul contrat de sortie
 
 Tout livrable de code devra respecter une API FULL explicite : entrée,

@@ -31,6 +31,9 @@ documentaire v8. Les preuves et mesures géométriques citées restent v7.
   causes de lenteur, ce qui doit être conservé ou refait.
 - [Tout l'algorithme expliqué simplement](docs/ALGORITHME_EXPLIQUE.md).
 - [Plan de refonte priorisé](docs/PLAN_DE_REFONTE.md).
+- [Verrous d'architecture — consignes au futur développeur](docs/VERROUS_ARCHITECTURE.md) :
+  après P0, les cinq obstacles à ne pas reproduire, leurs sources,
+  changements à comparer et critères de validation.
 - [Fausses pistes à ne pas réintroduire](docs/FAUSSES_PISTES.md).
 
 Pour approfondir : [fondements et objet FULL](audits/FONDEMENTS_ET_OBJET.md),

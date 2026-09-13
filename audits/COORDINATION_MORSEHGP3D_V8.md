@@ -72,3 +72,26 @@ Contrôles de cette publication depuis un export neuf de l'index :
 mode `-O` PASS, 27 contrôles chacun. Le journal est également validé
 explicitement. Contrelecture de P0 et du premier chantier sans correction
 requise. Ces tests restent documentaires ; aucune qualification moteur.
+
+## 13 septembre 2026 — consignes des autres verrous pour le développeur
+
+ROOT : à la demande de l'utilisateur, la note
+[VERROUS_ARCHITECTURE](../morsehgp3D_v8/docs/VERROUS_ARCHITECTURE.md)
+consigne B1 recherches répétées, B2 triangles×voisinages, B3 MEB/descentes,
+B4 histoire/export et B5 résidence/transport. Sources historiques et
+critères de validation sont séparés des propositions. P0 reste premier.
+La contrelecture constructeur ne se substitue pas à un nouvel avis de
+l'auditeur indépendant ; merci de signaler toute borne ou critère manquant.
+
+Index constaté vide sur main f375d2c6. Réservation ciblée pour ce journal,
+README/PASSATION v8, audits/ETAT_COURANT.md, docs/PLAN_DE_REFONTE.md et
+docs/VERROUS_ARCHITECTURE.md. Aucun moteur, reçu clos, fichier v6/v7,
+registre formel ou script GCP modifié. Contrôles sur export neuf de l'index
+avant commit/push sur main ; réservation close à cette publication.
+
+Contrelecture constructeur close : autoriser une hausse des rectangles
+ou candidates si le gain net est démontré ; distinguer histoire séquentielle
+et consultations parallèles de l'export. Contrôles depuis l'export neuf :
+check_docs PASS523 Markdown, check_implementation_status PASS20 phases,
+docs_scope_gate normal/−O PASS27 contrôles chacun. Aucun test moteur,
+benchmark ou usage GCP ; les contrôles de cette passe sont documentaires.

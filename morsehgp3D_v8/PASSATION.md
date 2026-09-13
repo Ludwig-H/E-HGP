@@ -44,6 +44,14 @@ directe de sous-produits ; aucune solution n'est imposée. Le
 [plan](docs/PLAN_DE_REFONTE.md) fixe les preuves et mesures de travail
 total, coût aval compris, avant les campagnes CPU/GPU. P0 reste ouverte.
 
+Avant tout port, lire aussi [VERROUS_ARCHITECTURE](docs/VERROUS_ARCHITECTURE.md).
+La note conserve les cinq obstacles suivants : recherches spatiales
+répétées, triangles de départ × voisinages q3/q4, MEB/descentes répétées,
+histoire/export centraux, puis résidence et échanges CPU/GPU. Elle fixe
+les sources, nuances et critères de validation pour le futur développeur.
+P0 garde son premier rang ; B1–B5 restent ouverts et ne sont pas des
+impossibilités intrinsèques de HGP. Aucun nouveau résultat n'est revendiqué.
+
 La tranche FULL minimale et les petits juges servent cette comparaison ;
 ne pas la repousser derrière un port général de la v7. Garder les tailles
 8k/16k/32k et s8/10/12. Aucun moteur n'est modifié par cette décision.
