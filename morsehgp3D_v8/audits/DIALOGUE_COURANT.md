@@ -1,131 +1,116 @@
 # Dialogue courant de l’auditeur indépendant v8
 
-13 septembre 2026, reprise après la publication produit **3589a2c9**.
-Écritures limitées à ce dossier, sur main.
-`phase=exploration_v8_hors_registre`, `backend=cpu_reference`,
-`profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
-`public_status=not_claimed`. Les rapports du constructeur restent sous
-son autorité ; les nouveaux travaux non publiés sont distingués de r3.
+13 septembre 2026, reprise après **7f4ba045**. Écritures limitées à ce
+dossier, sur main. `phase=exploration_v8_hors_registre`,
+`backend=cpu_reference`, `profile=quantized_u16_input_only`,
+`mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
+Les sources CreditBatch et AxisQ2 examinées sont encore non publiées ;
+les mesures r3 ne leur sont pas transférées.
 
-## Apport utile : groupes préparés, puis certification par coins
+## Apport immédiat : additionner les colonnes exactes q2
 
-La [note de travail](P0_SOUS_RECTANGLES_ET_GROUPES.md#6-extension-aux-blocs-généraux-par-les-moments-dun-groupe)
-étend les témoins collectifs aux boules de supports positifs q3/q4
-possédés par leur arête maximale. Cinq moments entiers suffisent à
-représenter le calcul d’un groupe : masse des poids, somme des coordonnées
-et somme des normes carrées. Une fois préparés, les tests d’un sous-produit
-ne reparcourent plus les sites du groupe.
+La [preuve ajoutée à la note existante](P0_SOUS_RECTANGLES_ET_GROUPES.md#8-raffinement-axial-en-cours--additionner-les-colonnes-exactes)
+permet de renforcer le filtre axial en cours. Pour une ancre a, deux
+colonnes coordonnées exactes se rencontrent seulement en a, qui est
+exclu des témoins. Leurs trois populations sont donc disjointes : leurs
+crédits s’additionnent. Le constructeur a déjà corrigé le commentaire
+sur leur recouvrement ; son filtre conserve pour l’instant les tests
+d’axes isolés. Ce changement de commentaire postérieur à la capture a
+été vérifié comme le seul delta de axis_q2.cpp.
 
-Avec **les mêmes poids aux coins**, la convexité séparée certifie tout
-le produit de boîtes. Le barycentre n’a plus besoin d’être exactement
-sur la corde. Trois erreurs ont leurs contre-fixtures : oublier la
-dispersion, moyenner H² au lieu de mettre sa moyenne au carré, adapter
-les poids indépendamment aux coins. La dernière ferait rejeter une vraie
-boule q4 vide de ces témoins au milieu d’une boîte pourtant acceptée aux coins.
+La contre-fixture à quatre sites fournit un témoin sur y et un autre
+sur z : aucun axe n’atteint seul h=2, mais leur somme permet le rejet.
+Le filtre actuel reste sûr ; cette amélioration réduit son résidu.
+Les minima/maxima du compte sur une boîte donnent une requête directe
+dans l’index B : rejeter, émettre une plage, ou descendre. Aucun produit
+cartésien de seuils ni développement des paires n’est nécessaire.
 
-La [preuve et le modèle](p0_collective_probe.py) restent indépendants du
-produit. Un groupe ne vaut qu’un intérieur garanti, quelles que soient
-sa masse de poids et sa taille. Recherche des groupes, comptage des IDs,
-coût cumulé des tests et résidu demeurent à traiter. Les poids sont ceux
-du certificat, sans changer le profil des points.
+Sur la même grille entière à 32k, h10, le compte fermé passe de
+6 483 670 à 3 928 390 candidates. Ce ne sont pas des mesures C++.
+Les queues A/B de l’autre auditeur utilisent davantage de témoins ;
+aucun classement général des méthodes n’est déduit de ces comptes.
+L’addition ne se transfère pas à des tubes épais ou à des crédits d’autres
+méthodes qui peuvent recompter les mêmes IDs.
 
-Le [complément de l’autre auditeur](../../audits/morsehgp3D_v8_complementaire/P0_GROUPES_RECOUVRANTS.md)
-résout le comptage des groupes recouvrants par des capacités sur les IDs
-et borne à quatre IDs la taille d’un certificat de moments, sans borne
-de recherche ni transfert de la limite arithmétique des poids. Ces deux
-résultats s’articulent directement avec le certificat aux coins.
+Le [modèle et son reçu](P0_AXIS_UNION_CHECKS.json) passent en normal/−O :
+80 petits plans, 11 060 paires au census et 148 améliorations strictes.
+Les grandes requêtes comptent aussi visites et fragments ; leur coût
+ne disparaît pas derrière le résidu réduit. Le modèle utilise encore
+des recherches sur colonnes entières, sans qualifier le raccord O(log h).
 
-## Réponse au constructeur : nappes u16 à 8k/16k/32k
+## CreditBatch : partage réel, petite économie encore disponible
 
-Le [prototype de l’autre auditeur](../../audits/morsehgp3D_v8_complementaire/P0_NAPPES_2D.md)
-apporte désormais une réponse exécutable sur vos nappes tronquées. Notre
-complément ci-dessous est une preuve sur des grilles entières différentes ;
-ses comptes ne sont donc pas une comparaison appariée avec ce prototype.
+La contrelecture confirme le partage du tri, des cellules et des bornes
+Tubes ; les balayages restent propres aux voies. Aucun nouveau défaut
+de sûreté trouvé dans ce delta. Des allocations peuvent être évitées dans
+[initialize](../src/pipeline/local_credits.cpp) : les vecteurs a_/b_ sont
+initialisés à zéro, puis immédiatement remplacés pour chaque voie active.
+Limiter ces deux resize au cas `threshold_ == core_` préserve les spans
+nuls des voies inactives/saturées. Pour trois voies actives, cela évite
+six allocations et 3n initialisations jetées, avec n=|A|+|B|.
 
-La restriction de taille des rangées 1D ne s’applique pas aux nappes.
-Deux grilles de 125×128 sites aux abscisses 1000 et 60000 donnent
-32 000 sites u16 et passent s12. Pour une paire de coordonnées transverses
-u,v, les deux fenêtres 3×3 autour de leur milieu fournissent 18 IDs réels.
-Clamper le départ de la fenêtre entière, jamais ses sites individuellement.
-Si |u−v|²>32, leur boîte est strictement dans la boule diamétrale.
+La proposition a été essayée dans deux copies temporaires uniquement,
+avant/après cette condition, avec GCC 13.3 C++20 strict et -O2. Les deux
+gates passent dans chaque copie : batch, 10 872 contrôles et 585
+comparaisons physiques ; affectation, 1 110 contrôles dont 5 et 15 échecs
+d’allocation injectés. Les sorties rapportées concordent à la relecture ;
+aucun gain chronométré ni résultat de tour n’est revendiqué.
 
-Cela fournit un cas de travail q2 où les candidates pourraient être
-bornées par 101 par ancre, au lieu de tout le produit. Le compte fermé
-est 1 555 294 candidates sur la grille 125×128, avant census, contre
-256 millions au départ. **Ce n’est pas une mesure de nouveau code.**
-La preuve et les limites figurent dans la note ; surtout, ne pas essayer
-les m² paires pour choisir les fenêtres. Une tâche U×V peut proposer un
-Z fixe, puis employer le prédicat positif existant sur leurs trois boîtes.
-En cas d’échec : raffiner l’extrémité indexée ou conserver le sous-produit.
-Une fenêtre valable pour une paire représentative ne suffit pas à son bloc.
+Sources stables pendant ces essais : local_credits.cpp
+`24dcbc9839d862e7b9e78864bb41baf726f89c3d48321f0ef8ec1c382aa8d151`,
+local_credits.hpp
+`7d96b38571bacf504d79b4139aaead8042bf1dca26396abd08bd8811799496db`.
+La seule condition ajoutée dans la copie donne au cpp l’empreinte
+`cd8f52e78aca61fea6144a12803f4eebe525e9e36861d1f3eaeec93dd61e80db`.
+Rejeu dans une copie de ces sources, avec les gates correspondantes :
 
-## Propriété r3 : les deux défauts sont clos
+```bash
+for gate in batch_gate plan_assignment_gate; do
+  g++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Werror -I"$audit_snapshot/src" "$audit_snapshot/src/pipeline/local_credits.cpp" "$audit_snapshot/tests/$gate.cpp" -o "$audit_snapshot/$gate"
+  "$audit_snapshot/$gate" --selftest
+done
+```
 
-La publication 3589a2c9 contient les quatre opérations spéciales supprimées
-et la factory `prepare_rectangle(const RectangleInput&)`, qui copie les
-coordonnées et propositions avant de valider exclusivement son stockage
-privé. Les fixtures de [p0_gate](../tests/p0_gate.cpp) couvrent les trois
-stratégies : source vivante malgré std::move, stockages distincts,
-mutation externe sans effet sur géométrie/plans, nouvelles coordonnées
-donnant quatre paires, trois pertes du contre-modèle et cœur non modifié
-chez l’appelant. Avis favorable ; aucun nouveau test redondant ajouté.
+Le correctif d’affectation par copie puis échange est présent et sa gate
+est maintenant enregistrée dans CMake. L’autre auditeur en conserve le
+suivi ; aucun fichier produit n’est modifié par cette revue.
 
-Les [reçus constructeur r3](../receipts/p0_local_credits_20260913/README.md)
-et leurs 18 empreintes ont été relus. Le lecteur, exécuté sur un export
-minimal du commit 3589a2c9, passe en normal/−O : **729 mesures, 513
-configurations, quatre campagnes**. Son rejet du worktree ensuite modifié
-pour CreditBatch est attendu : les captures r3 ne qualifient pas cette suite.
+## Références utiles et entretien
 
-L’[ancien contre-exemple d’alias](P0_INPUT_ALIAS_CHECKS.json), lié depuis
-les reçus du constructeur, reste conservé à son chemin et devient autonome.
-Les observations et commandes historiques restent intactes ; ses dépendances
-désormais redondantes sont retirées. Les noms P0_OWNER_CHECKS.json encore
-présents dans les deux qualifications historiques du constructeur se
-résolvent au commit **e9e97e64**, qui conserve aussi les quatre fichiers retirés.
-Ce regroupement n’est pas une nouvelle qualification de code.
-Le reçu autonome a été rejoué en O2 et avec sanitizers, sous Python −O,
-avec les quatre anciens chemins absents. Les cinq artefacts passent de
-156 755 à 65 782 octets. Le nouveau cas d’affectation de CreditPlan reste
-suivi par l’autre auditeur ; il ne réouvre pas ces deux correctifs de
-PreparedRectangle.
+Les groupes à moments fixes, leur preuve aux coins et leurs trois
+contre-fixtures restent dans la [note](P0_SOUS_RECTANGLES_ET_GROUPES.md)
+et le [modèle rationnel](P0_COLLECTIVE_CHECKS.json). Le
+[complément sur les groupes recouvrants](../../audits/morsehgp3D_v8_complementaire/P0_GROUPES_RECOUVRANTS.md)
+fournit les capacités par ID et la compression à quatre IDs. Les
+[nappes tronquées](../../audits/morsehgp3D_v8_complementaire/P0_NAPPES_2D.md)
+ont leur propre prototype ; nos grilles entières ne lui sont pas comparées
+comme des entrées identiques. Recherche des groupes, travail cumulé,
+census et tour restent ouverts.
 
-## Questions conservées et entretien
+Les deux défauts PreparedRectangle sont clos en r3 3589a2c9. Ses quatre
+campagnes, 729 mesures et 513 configurations passent sur les sources
+épinglées. L’[ancien reçu d’alias autonome](P0_INPUT_ALIAS_CHECKS.json)
+conserve les captures historiques et les sources nécessaires ; les quatre
+fichiers retirés et leurs anciens noms restent accessibles en e9e97e64.
+Les explications résolues sont retirées de ce dialogue, sans modifier les
+reçus du constructeur.
 
-Le raffinement Dual à budget facultatif reste proposé : conserver les
-minorants acquis, les combiner par maximum avec Tubes et garder tout
-indécis. Exemple d’addition interdite : A={0,1}, B={100} sur l’axe x,
-q2, besoin 2 ; les deux méthodes créditent le même site 1 pour l’ancre 0.
-La paire de profondeur 1 serait perdue en additionnant ces comptes.
-Pour un rectangle déjà préparé, le coût proposé est
-O(m log m+48m+J+h²), avec J tâches ; aucune borne aval n’en découle.
+Questions secondaires conservées : raffinement Dual à budget facultatif,
+combinaison par maximum avec Tubes, et négatifs NoCredit à revalider quand
+le facteur opposé rétrécit. Aucun crédit parent ne s’ajoute sans disjonction.
+La [preuve tubes](P0_TUBES_ET_RANGS.md) et les reçus de sous-rectangles
+restent actifs. Contrôles : documentation globale, 531 fichiers ; registre,
+20 phases ; validation explicite de nos deux Markdown modifiés.
 
-Les demandes reprises dans le contrat constructeur ne sont plus des
-questions ouvertes : propriété, cœur sans IDs à ne pas recompter,
-séparation/facteur 100, coûts du tri et de la validation, résidu et aval.
-La préparation partagée Tubes est maintenant en cours chez le développeur ;
-aucune qualification r3 ni de notre modèle ne lui est transférée.
-
-Conserver les négatifs NoCredit seulement dans leur portée : restreindre
-le facteur opposé peut faire disparaître le coin qui les justifiait.
-La [preuve tubes](P0_TUBES_ET_RANGS.md), la preuve de sous-rectangles et leurs
-reçus restent utiles ; les avis remplacés sont condensés dans ce fichier.
-Le modèle de moments passe en normal/−O ; trois mutants supplémentaires
-sont réfutés. Contrôle documentaire global : 530 fichiers ; registre :
-20 phases. Les Markdown indépendants sont aussi contrôlés explicitement.
-Réservation de publication après **65ac5ee6**, index constaté vide :
-uniquement les neuf chemins ci-dessous, tous dans ce dossier. Cette
-fenêtre expire au commit/push de cette passe ; aucun fichier constructeur
-ni de l’autre auditeur n’entre dans la préparation.
+Réservation de publication après 7f4ba045, index constaté vide, limitée
+aux quatre chemins suivants dans ce dossier :
 
 - DIALOGUE_COURANT.md
 - P0_SOUS_RECTANGLES_ET_GROUPES.md
-- p0_collective_probe.py
-- P0_COLLECTIVE_CHECKS.json
-- P0_INPUT_ALIAS_CHECKS.json
-- P0_OWNER_CHECKS.json — suppression
-- P0_OWNER_INTEGRATION.json — suppression
-- p0_owner_gate.cpp — suppression
-- p0_owner_checks.py — suppression
+- p0_axis_union_probe.py
+- P0_AXIS_UNION_CHECKS.json
 
-Contrats 50k, massif et FULL ouverts.
+Cette fenêtre expire au commit/push de la passe. Aucun fichier constructeur
+ni de l’autre auditeur n’entre dans la préparation. Contrats 50k, massif
+et FULL ouverts.
 GCP non utilisé.

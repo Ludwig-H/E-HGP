@@ -1,11 +1,12 @@
 # Réduire le résidu : sous-rectangles et témoins collectifs
 
 13 septembre 2026. Audit indépendant v8, `cpu_reference`,
-`quantized_u16_input_only`, `public_status=not_claimed`. Deux apports
-constructifs à la [contre-fixture transverse de l’autre auditeur](../../audits/morsehgp3D_v8_complementaire/P0_RESIDU_TRANSVERSE.md) :
-un proposeur q2 utilisant le prédicat C++ actuel, puis une preuve de
-certificat collectif qui dépasse les témoins ponctuels W3/W4. Aucun
-producteur général ni résultat de tour FULL n’est qualifié ici.
+`quantized_u16_input_only`, `public_status=not_claimed`. Proposeurs q2 et
+certificats collectifs issus de la
+[contre-fixture transverse de l’autre auditeur](../../audits/morsehgp3D_v8_complementaire/P0_RESIDU_TRANSVERSE.md).
+Les sections 6 à 8 étendent ces preuves aux groupes à moments fixes,
+aux nappes et à l’addition des colonnes exactes du filtre axial en cours.
+Aucun producteur général ni résultat de tour FULL n’est qualifié ici.
 
 ## 1. Un grain plus petit suffit pour q2 sur les rangées
 
@@ -295,3 +296,98 @@ traite déjà les nappes tronquées réellement utilisées par le constructeur,
 avec certificats de boîtes et caches de queues. La présente grille entière
 fournit une preuve complémentaire ; ses comptes ne sont pas une comparaison
 appariée avec ce prototype.
+
+## 8. Raffinement axial en cours : additionner les colonnes exactes
+
+**Apport à la version non publiée après 7f4ba045.** Le nouveau filtre
+`axis_q2.cpp` conserve les paires lorsque chaque axe fournit moins de h
+témoins, où h est le seuil q2 diminué du crédit de cœur. Ce rejet est sûr,
+mais les colonnes exactes permettent une addition plus forte. Contrairement
+à des tubes épais ou des groupes arbitraires, deux droites coordonnées
+distinctes passant par a se rencontrent seulement en a. Ce site est exclu ;
+les autres IDs sont donc disjoints entre les trois axes.
+
+Pour l’axe j, soit C_j(a) l’ensemble des sites de A autres que a qui
+partagent avec a leurs deux autres coordonnées. Définir :
+
+$$c_j(t)=\#\left\lbrace z\in C_j(a):\min(a_j,t)<z_j<\max(a_j,t)\right\rbrace.$$
+
+Chaque site compté vérifie exactement H=(z_j−a_j)(b_j−z_j)>0 pour t=b_j,
+quelles que soient les deux autres coordonnées de b. Par disjonction,
+**c_x(b_x)+c_y(b_y)+c_z(b_z)≥h suffit au rejet**. Le cœur reste extérieur
+à A∪B. Une saturation individuelle des comptes à h préserve cette décision.
+Les égalités avec une coordonnée de témoin restent exclues du compte strict.
+
+Fixture minimale, Kmax=2 et sans cœur : a=(1000,1000,1000),
+z_y=(1000,1001,1000), z_z=(1000,1000,1001) dans A et
+b=(60000,1002,1002) dans B. y et z fournissent chacun un témoin, x aucun,
+donc le filtre actuel conserve (a,b) ; la somme en certifie deux et le
+rejette. Les deux valeurs de H valent 1, les sites sont distincts et la
+séparation s12 est satisfaite. C’est une possibilité de réduire le résidu,
+pas une erreur de sûreté du filtre conservateur.
+
+**Requête sur l’index B, sans développer les paires.** Pour une boîte V,
+poser l_j(V)=0 si son intervalle j contient a_j, sinon le compte c_j au
+bord le plus proche de a_j ; poser u_j(V)=max(c_j(V.low_j),c_j(V.high_j)).
+Le compte décroît vers a_j et croît en s’en éloignant. Ainsi la somme des
+l_j est le minimum du compte axial sur V et la somme des u_j son maximum.
+
+- Si la somme des minima atteint h, rejeter tout le nœud.
+- Si la somme des maxima reste sous h, émettre sa plage dans la permutation B.
+- Sinon, visiter ses deux enfants ; à une feuille les deux sommes coïncident.
+
+Les plages émises sont disjointes et représentent exactement le résidu
+du certificat axial additif. Il n’est pas nécessaire de construire les
+O(h³) cellules d’une grille de seuils, ni de parcourir toutes les paires
+pour choisir le rejet. Les tâches d’ancres peuvent partager le même index
+B immutable et adresser leurs résultats par préfixes de tailles.
+
+**Préparation et coût proposé.** Conserver les trois permutations par
+colonne déjà calculées, ainsi que rang et limites de colonne de chaque
+ancre, coûte O(m) mémoire pour m sites de A. Une vue sur au plus h voisins
+de chaque côté suffit pour un compte saturé ; une recherche binaire y
+coûte O(log(h+1)). Aucun tableau de h copies par ancre n’est obligatoire.
+Avec J visites de nœuds et D fragments émis, le coût proposé, préparation
+de l’index B incluse, est O(m log m+48|B|+J log(h+1)+D), avant census.
+La borne u16 limite la profondeur de l’index ; elle ne borne ni J ni D
+linéairement. Une nappe sans colonnes exactes peut toujours garder tout A×B.
+
+Sur les **mêmes grilles entières** que la section 7, le compte axial vaut
+(|Δy|−1)_+ + (|Δz|−1)_+. À h10, 261 décalages le laissent sous le seuil,
+contre 441 pour les tests d’axes isolés. Leur somme de placements donne
+261N_yN_z−990(N_y+N_z)+2860 :
+
+| n total | Axes isolés, compte fermé | Somme des axes, compte fermé |
+| ---: | ---: | ---: |
+| 8 000 | 1 475 800 | 918 160 |
+| 16 000 | 3 124 300 | 1 912 660 |
+| 32 000 | 6 483 670 | 3 928 390 |
+
+Ces nombres ne sont pas des mesures de l’implémentation C++, ni le census
+des survivantes. Les queues A/B de l’autre auditeur et les fenêtres de la
+section 7 utilisent d’autres témoins et peuvent mieux réduire ce résidu.
+Cette amélioration se juge sur son travail total et se raccorde au filtre
+actuel sans imposer un gagnant général. Elle reste propre à q2.
+
+Ne pas transférer l’addition à des tubes voisins, ni ajouter ces comptes
+aux crédits Tubes/Pool/Dual sans leurs IDs : le même site peut y être
+compté de nouveau. Deux filtres sûrs restent combinables en intersectant
+leurs résidus ; la somme de leurs crédits exige une preuve supplémentaire.
+
+**Contrôle indépendant.** Le [modèle entier](p0_axis_union_probe.py) et son
+[reçu](P0_AXIS_UNION_CHECKS.json) passent en normal/−O : 80 petits plans,
+11 060 paires jugées par census, 660 valeurs pour les bornes d’intervalles
+et 148 rejets supplémentaires permis par l’addition. Trois contre-modèles
+produisent un faux rejet : frontière incluse, colonne inexacte, maximum
+utilisé pour rejeter une boîte entière. Le maximum des crédits d’axes
+reste sûr mais plus faible ; sa contre-fixture mesure cette perte seulement.
+
+Le modèle construit aussi les plages aux tailles 8k/16k/32k, puis compare
+leur masse à la formule d’offsets, sans développer les grandes paires.
+Il utilise les dimensions 50×80, 80×100 et **100×160**, celles du gate
+axial lu ; la dernière diffère de la grille 125×128 du tableau. À 32k :
+3 921 460 candidates, 3 632 760 visites de nœuds et 769 506 fragments.
+Le coût des requêtes et des fragments est donc réel, avant tout census.
+Ce Python recherche dans les colonnes entières, en O(log m) ; les vues
+limitées à h voisins et leur O(log(h+1)) restent un raccord proposé.
+Aucun temps ni résultat C++ ne sont qualifiés par ces exécutions.

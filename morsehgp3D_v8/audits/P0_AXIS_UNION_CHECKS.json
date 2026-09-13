@@ -1,0 +1,116 @@
+{
+  "date": "2026-09-13",
+  "scope": "independent integer model of exact-column q2 union and box queries; observed C++ sources were read, not executed or qualified by these model runs",
+  "status": "passed_bounded_model_checks",
+  "source_hashes_before": {
+    "morsehgp3D_v8/audits/p0_axis_union_probe.py": "e4cabe66aed84b632a1b5d96e777c5ec425c6a9abee251d22ad99ad8c10b809b",
+    "morsehgp3D_v8/src/pipeline/axis_q2.hpp": "b19981a14339c6bce8cafec6ee6630aace5e9e743267c7655b5295c2d41653f8",
+    "morsehgp3D_v8/src/pipeline/axis_q2.cpp": "2cea8416e62886ff19168163975a34b678330eb904b8e291c6308841be975fa3",
+    "morsehgp3D_v8/tests/axis_q2_gate.cpp": "ff75429c92bd0425b2ede2fe19d89091dad5e44b1ae6001b68c2cfd069ca18d5"
+  },
+  "source_hashes_after": {
+    "morsehgp3D_v8/audits/p0_axis_union_probe.py": "e4cabe66aed84b632a1b5d96e777c5ec425c6a9abee251d22ad99ad8c10b809b",
+    "morsehgp3D_v8/src/pipeline/axis_q2.hpp": "b19981a14339c6bce8cafec6ee6630aace5e9e743267c7655b5295c2d41653f8",
+    "morsehgp3D_v8/src/pipeline/axis_q2.cpp": "2cea8416e62886ff19168163975a34b678330eb904b8e291c6308841be975fa3",
+    "morsehgp3D_v8/tests/axis_q2_gate.cpp": "ff75429c92bd0425b2ede2fe19d89091dad5e44b1ae6001b68c2cfd069ca18d5"
+  },
+  "observed_cpp_sources_stable": true,
+  "runs": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v8/audits/p0_axis_union_probe.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"complete_grids\": [{\"candidate_pairs\": 918160, \"emitted_blocks\": 175290, \"isolated_axis_model_candidates\": 1475800, \"n\": 8000, \"need\": 10, \"ny\": 50, \"nz\": 80, \"offsets\": 261, \"query_nodes\": 797168, \"rejected_nodes\": 225294, \"total_pairs\": 16000000, \"tree_nodes\": 7999, \"tree_point_visits\": 100960}, {\"candidate_pairs\": 1912660, \"emitted_blocks\": 371290, \"isolated_axis_model_candidates\": 3124300, \"n\": 16000, \"need\": 10, \"ny\": 80, \"nz\": 100, \"offsets\": 261, \"query_nodes\": 1724728, \"rejected_nodes\": 495074, \"total_pairs\": 64000000, \"tree_nodes\": 15999, \"tree_point_visits\": 217920}, {\"candidate_pairs\": 3921460, \"emitted_blocks\": 769506, \"isolated_axis_model_candidates\": 6467500, \"n\": 32000, \"need\": 10, \"ny\": 100, \"nz\": 160, \"offsets\": 261, \"query_nodes\": 3632760, \"rejected_nodes\": 1054874, \"total_pairs\": 256000000, \"tree_nodes\": 31999, \"tree_point_visits\": 467840}], \"countermodels\": [\"maximum_only_loses_a_valid_improvement\", \"closed_boundary_can_overcredit\", \"approximate_column_can_overcredit\", \"interval_maximum_cannot_reject_whole_node\"], \"scope\": \"independent integer model; q2 exact-column union; no C++ qualification, large census, timing, WSPD, FULL or tower claim\", \"small\": {\"census_pairs\": 11060, \"cross_axis_improvements\": 148, \"interval_samples\": 660, \"mutants\": 4, \"plans\": 80, \"rejected_pairs\": 4364, \"retained_pairs\": 6696}}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/audits/p0_axis_union_probe.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"complete_grids\": [{\"candidate_pairs\": 918160, \"emitted_blocks\": 175290, \"isolated_axis_model_candidates\": 1475800, \"n\": 8000, \"need\": 10, \"ny\": 50, \"nz\": 80, \"offsets\": 261, \"query_nodes\": 797168, \"rejected_nodes\": 225294, \"total_pairs\": 16000000, \"tree_nodes\": 7999, \"tree_point_visits\": 100960}, {\"candidate_pairs\": 1912660, \"emitted_blocks\": 371290, \"isolated_axis_model_candidates\": 3124300, \"n\": 16000, \"need\": 10, \"ny\": 80, \"nz\": 100, \"offsets\": 261, \"query_nodes\": 1724728, \"rejected_nodes\": 495074, \"total_pairs\": 64000000, \"tree_nodes\": 15999, \"tree_point_visits\": 217920}, {\"candidate_pairs\": 3921460, \"emitted_blocks\": 769506, \"isolated_axis_model_candidates\": 6467500, \"n\": 32000, \"need\": 10, \"ny\": 100, \"nz\": 160, \"offsets\": 261, \"query_nodes\": 3632760, \"rejected_nodes\": 1054874, \"total_pairs\": 256000000, \"tree_nodes\": 31999, \"tree_point_visits\": 467840}], \"countermodels\": [\"maximum_only_loses_a_valid_improvement\", \"closed_boundary_can_overcredit\", \"approximate_column_can_overcredit\", \"interval_maximum_cannot_reject_whole_node\"], \"scope\": \"independent integer model; q2 exact-column union; no C++ qualification, large census, timing, WSPD, FULL or tower claim\", \"small\": {\"census_pairs\": 11060, \"cross_axis_improvements\": 148, \"interval_samples\": 660, \"mutants\": 4, \"plans\": 80, \"rejected_pairs\": 4364, \"retained_pairs\": 6696}}\n",
+      "stderr": ""
+    }
+  ],
+  "result": {
+    "complete_grids": [
+      {
+        "candidate_pairs": 918160,
+        "emitted_blocks": 175290,
+        "isolated_axis_model_candidates": 1475800,
+        "n": 8000,
+        "need": 10,
+        "ny": 50,
+        "nz": 80,
+        "offsets": 261,
+        "query_nodes": 797168,
+        "rejected_nodes": 225294,
+        "total_pairs": 16000000,
+        "tree_nodes": 7999,
+        "tree_point_visits": 100960
+      },
+      {
+        "candidate_pairs": 1912660,
+        "emitted_blocks": 371290,
+        "isolated_axis_model_candidates": 3124300,
+        "n": 16000,
+        "need": 10,
+        "ny": 80,
+        "nz": 100,
+        "offsets": 261,
+        "query_nodes": 1724728,
+        "rejected_nodes": 495074,
+        "total_pairs": 64000000,
+        "tree_nodes": 15999,
+        "tree_point_visits": 217920
+      },
+      {
+        "candidate_pairs": 3921460,
+        "emitted_blocks": 769506,
+        "isolated_axis_model_candidates": 6467500,
+        "n": 32000,
+        "need": 10,
+        "ny": 100,
+        "nz": 160,
+        "offsets": 261,
+        "query_nodes": 3632760,
+        "rejected_nodes": 1054874,
+        "total_pairs": 256000000,
+        "tree_nodes": 31999,
+        "tree_point_visits": 467840
+      }
+    ],
+    "countermodels": [
+      "maximum_only_loses_a_valid_improvement",
+      "closed_boundary_can_overcredit",
+      "approximate_column_can_overcredit",
+      "interval_maximum_cannot_reject_whole_node"
+    ],
+    "scope": "independent integer model; q2 exact-column union; no C++ qualification, large census, timing, WSPD, FULL or tower claim",
+    "small": {
+      "census_pairs": 11060,
+      "cross_axis_improvements": 148,
+      "interval_samples": 660,
+      "mutants": 4,
+      "plans": 80,
+      "rejected_pairs": 4364,
+      "retained_pairs": 6696
+    }
+  },
+  "limits": [
+    "The maximum-only countermodel is safe but weaker; the other three countermodels can falsely reject q2 candidates.",
+    "Large complete-grid counts use descriptor masses and a finite offset formula, not a geometric census of their full Cartesian products.",
+    "No port to C++, elapsed-time claim, generic linear query bound, WSPD, q3/q4, FULL or tower qualification.",
+    "Axis populations are disjoint only for exact columns through the same anchor with the anchor excluded; the credit cannot be added to arbitrary tube credits without accounting for shared IDs.",
+    "Complete-grid candidate formulas do not automatically extend to truncated sheets or rotated point clouds.",
+    "This model uses binary searches over whole exact columns, O(log m) per count. Restriction to at most h ranks on each side and O(log h) queries is a proposed implementation improvement, not executed here."
+  ]
+}
