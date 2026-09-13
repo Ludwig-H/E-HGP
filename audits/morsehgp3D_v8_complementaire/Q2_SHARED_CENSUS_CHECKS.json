@@ -1,0 +1,237 @@
+{
+  "command": [
+    "python3",
+    "audits/morsehgp3D_v8_complementaire/q2_shared_census_gate.py",
+    "--selftest"
+  ],
+  "context_commit": "f5430f57",
+  "created_utc": "2026-09-13T20:02:52.359949+00:00",
+  "gcp_used": false,
+  "per_mode": [
+    {
+      "invalid_cli_exit": 2,
+      "mode": "normal",
+      "mutants": [
+        {
+          "exit": 1,
+          "name": "clip_consumed_block_then_resume",
+          "result": {
+            "mutant": "clip_consumed_block_then_resume",
+            "reason": "census reuse differs: cloud=X, pair=(2, 3), threshold=2",
+            "status": "rejected"
+          },
+          "stderr": ""
+        },
+        {
+          "exit": 1,
+          "name": "rejected_for_all_thresholds",
+          "result": {
+            "mutant": "rejected_for_all_thresholds",
+            "reason": "census reuse differs: cloud=X, pair=(1, 0), threshold=3",
+            "status": "rejected"
+          },
+          "stderr": ""
+        },
+        {
+          "exit": 1,
+          "name": "omit_radius",
+          "result": {
+            "mutant": "omit_radius",
+            "reason": "census reuse differs: cloud=X, pair=(4, 5), threshold=1",
+            "status": "rejected"
+          },
+          "stderr": ""
+        },
+        {
+          "exit": 1,
+          "name": "omit_cloud_identity",
+          "result": {
+            "mutant": "omit_cloud_identity",
+            "reason": "census reuse differs: cloud=Y, pair=(0, 1), threshold=2",
+            "status": "rejected"
+          },
+          "stderr": ""
+        },
+        {
+          "exit": 1,
+          "name": "all_shell_pairs_are_diameters",
+          "result": {
+            "mutant": "all_shell_pairs_are_diameters",
+            "reason": "antipodal support matching",
+            "status": "rejected"
+          },
+          "stderr": ""
+        }
+      ],
+      "selftest_exit": 0
+    },
+    {
+      "invalid_cli_exit": 2,
+      "mode": "optimized",
+      "mutants": [
+        {
+          "exit": 1,
+          "name": "clip_consumed_block_then_resume",
+          "result": {
+            "mutant": "clip_consumed_block_then_resume",
+            "reason": "census reuse differs: cloud=X, pair=(2, 3), threshold=2",
+            "status": "rejected"
+          },
+          "stderr": ""
+        },
+        {
+          "exit": 1,
+          "name": "rejected_for_all_thresholds",
+          "result": {
+            "mutant": "rejected_for_all_thresholds",
+            "reason": "census reuse differs: cloud=X, pair=(1, 0), threshold=3",
+            "status": "rejected"
+          },
+          "stderr": ""
+        },
+        {
+          "exit": 1,
+          "name": "omit_radius",
+          "result": {
+            "mutant": "omit_radius",
+            "reason": "census reuse differs: cloud=X, pair=(4, 5), threshold=1",
+            "status": "rejected"
+          },
+          "stderr": ""
+        },
+        {
+          "exit": 1,
+          "name": "omit_cloud_identity",
+          "result": {
+            "mutant": "omit_cloud_identity",
+            "reason": "census reuse differs: cloud=Y, pair=(0, 1), threshold=2",
+            "status": "rejected"
+          },
+          "stderr": ""
+        },
+        {
+          "exit": 1,
+          "name": "all_shell_pairs_are_diameters",
+          "result": {
+            "mutant": "all_shell_pairs_are_diameters",
+            "reason": "antipodal support matching",
+            "status": "rejected"
+          },
+          "stderr": ""
+        }
+      ],
+      "selftest_exit": 0
+    }
+  ],
+  "public_status": "not_claimed",
+  "results": {
+    "fixture": {
+      "certified_interior_block": [
+        4,
+        5
+      ],
+      "diameter_support_pairs": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "inner_key": [
+        [
+          3,
+          3,
+          3
+        ],
+        3
+      ],
+      "outer_decisions": {
+        "Kmax1": "reject",
+        "Kmax2": "reject",
+        "Kmax3": "keep"
+      },
+      "outer_interior_ids": [
+        4,
+        5
+      ],
+      "outer_key": [
+        [
+          3,
+          3,
+          3
+        ],
+        11
+      ],
+      "outer_shell_ids": [
+        0,
+        1,
+        2,
+        3,
+        6
+      ],
+      "points": [
+        [
+          0,
+          1,
+          1
+        ],
+        [
+          3,
+          2,
+          2
+        ],
+        [
+          1,
+          0,
+          1
+        ],
+        [
+          2,
+          3,
+          2
+        ],
+        [
+          1,
+          1,
+          1
+        ],
+        [
+          2,
+          2,
+          2
+        ],
+        [
+          1,
+          1,
+          0
+        ],
+        [
+          1,
+          1,
+          4
+        ]
+      ],
+      "unmatched_shell_id": 6
+    },
+    "mutants": [
+      "clip_consumed_block_then_resume",
+      "rejected_for_all_thresholds",
+      "omit_radius",
+      "omit_cloud_identity",
+      "all_shell_pairs_are_diameters"
+    ],
+    "queries": 42,
+    "scope": "bounded_reuse_model_no_production_index_or_full",
+    "source_sha256": "efb25a43bca28662cf0e896bbbe241f089baacc92dafeb051c001bb09e036d56",
+    "status": "passed",
+    "threshold_orders": 6
+  },
+  "schema": "mhgp8_q2_shared_census_checks_v1",
+  "source": "audits/morsehgp3D_v8_complementaire/q2_shared_census_gate.py",
+  "source_sha256": "efb25a43bca28662cf0e896bbbe241f089baacc92dafeb051c001bb09e036d56",
+  "source_state": "independent_mathematical_model",
+  "status": "passed"
+}

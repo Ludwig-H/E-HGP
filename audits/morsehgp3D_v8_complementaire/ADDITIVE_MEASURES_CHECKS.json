@@ -1,0 +1,332 @@
+{
+  "schema": "mhgp8_complementary_additive_measures_checks_v1",
+  "status": "passed_no_new_significant_receipt_issue_one_minor_README_rounding_observation",
+  "recorded_utc": "2026-09-13T20:03:38.425263+00:00",
+  "phase": "exploration_v8_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "gcp_used": false,
+  "scope": "published_additive_648_capture_readback_provenance_matrices_and_README_arithmetic",
+  "source_snapshot_commit": "f5430f57d42873cce44de482198f90d3068f0d77",
+  "new_probe_invocations": 0,
+  "new_builds": 0,
+  "new_ctest_runs": 0,
+  "older_594_measurement_captures_consumed": false,
+  "reader_runs": [
+    {
+      "python_optimized": false,
+      "exit_code": 0,
+      "status": "passed",
+      "campaigns": 3,
+      "measurements": 648,
+      "configurations_including_order": 576
+    },
+    {
+      "python_optimized": true,
+      "exit_code": 0,
+      "status": "passed",
+      "campaigns": 3,
+      "measurements": 648,
+      "configurations_including_order": 576
+    }
+  ],
+  "reader_commands_from_exact_snapshot": [
+    "python3 -B morsehgp3D_v8/bench/check_paired_campaign.py morsehgp3D_v8/receipts/additive_q2_20260913",
+    "python3 -B -O morsehgp3D_v8/bench/check_paired_campaign.py morsehgp3D_v8/receipts/additive_q2_20260913"
+  ],
+  "replay_setup": "Export the listed source blobs, checker, and three pinned MANIFEST/MEASURES/COMPLETION triplets from the exact commit into a fresh directory preserving repository-relative paths. Verify SHA256 values before running the two reader commands; do not rerun the captured probes.",
+  "independent_checks": [
+    "648 exact command/result tuples, variant and order included; strict JSON and raw base64 correspondence; complete matrices without duplicate repeat indices; recorded successes, attempts and closing hashes agree.",
+    "All three campaigns share one executable/build and normalized declared machine metadata. Capture time windows are successive and disjoint. The original pinned probe retains its recorded SHA256.",
+    "Input fingerprints agree across strategies, K, variants, orders and s. Independent reference candidates/descriptors/checksum/work agree across unused strategies and variants; each variant is stable across orders, repetitions and s.",
+    "Timing identities explicitly include local_plan_ms in variant_ms for intersections, and include common setup in both total times. Unrestricted addition declares absent local-arm fields as null and local time zero.",
+    "Every captured source blob matches f5430f57. All 36 qualification source pins also match the published commit; the two XMLs each record 26 successful tests without re-executing them.",
+    "All substantive README candidates, descriptors, classifications, rank comparisons, order-specific timing ranges and tested scaling counts match recalculation. The one minor rounding discrepancy is retained explicitly."
+  ],
+  "independent_result": {
+    "status": "independent_additive_capture_checks_passed",
+    "source_snapshot_commit": "f5430f57d42873cce44de482198f90d3068f0d77",
+    "source_sha256": {
+      "morsehgp3D_v8/CMakeLists.txt": "80f7238bc9661c2f34b5abe9e0257cd7550892495c2ab1782d5b5b148763d687",
+      "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+      "morsehgp3D_v8/src/pipeline/axis_q2.hpp": "5d0022c7776b1c382f65e5bff9fe9e125c81c701c08a0d8db8e4e40672c4cac4",
+      "morsehgp3D_v8/src/pipeline/local_credits.hpp": "7d96b38571bacf504d79b4139aaead8042bf1dca26396abd08bd8811799496db",
+      "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+      "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+      "morsehgp3D_v8/src/pipeline/axis_q2.cpp": "8c91d5c9ca4427cf20e0909a5f35616ab76c9dc387268e7a6e28511de9e3e61a",
+      "morsehgp3D_v8/src/pipeline/local_credits.cpp": "522009add5e85501215c562ab6a56548535ea09bd6deff0ebe41df0ae1a52255",
+      "morsehgp3D_v8/bench/p0_fixtures.hpp": "3c3a7bde624fde5c513ac4946fdceddaf6a392b61643d9f9a847c1b4f470520a",
+      "morsehgp3D_v8/bench/probe_emit.hpp": "236331337c44bf25229899a798003e9ce7605ad5df98d90957c0d1ca2dc476d2",
+      "morsehgp3D_v8/bench/sheet_full_fixture.hpp": "ccde4f4649e7e6cd3c2bb5adab4a5dc574df9b360b6f11705d323b39a01f6d49",
+      "morsehgp3D_v8/bench/p0_probe.cpp": "a95bb5cdce20ecec07c544fc596b684f39a9b573b3a4c6afdbb64c97ae3be552",
+      "morsehgp3D_v8/bench/run_p0_matrix.py": "0e66c1e3a6ebee31640e8041fe83f2c458a15cb4169ffb93015334e010d20690",
+      "morsehgp3D_v8/bench/additive_probe.cpp": "408078cc93ebea2002a425174d912f38f652ea55e5487a13375902fdb2fe7c4f",
+      "morsehgp3D_v8/bench/paired_receipts.py": "7fbf345f2a217691a737cb78f8db194397aaf87e4271de4835c89aea860a0120"
+    },
+    "qualification_source_count": 36,
+    "checked_files_sha256": {
+      "morsehgp3D_v8/receipts/additive_q2_20260913/additive_matrix/MANIFEST.json": "8901b3f0963e060c3334e31315f5c890866efe591c9c5563239cb9194872e3a8",
+      "morsehgp3D_v8/receipts/additive_q2_20260913/additive_matrix/MEASURES.jsonl": "6fb28b5a119bde318ce101e61f08efbb0ff561f58212026593b17dd826ffd973",
+      "morsehgp3D_v8/receipts/additive_q2_20260913/additive_matrix/COMPLETION.json": "a4b0ec74cb4a727a3e456313d469771dfcbd5f00c5e01215d57afa41c7fa54db",
+      "morsehgp3D_v8/receipts/additive_q2_20260913/intersection_matrix/MANIFEST.json": "5090f94aec8886e10466eb74d3866981e3944d8844ac235b4599c13c7ce25983",
+      "morsehgp3D_v8/receipts/additive_q2_20260913/intersection_matrix/MEASURES.jsonl": "816492b76e92250f406820fdb2303072d2bb0b510301a12ab4fe6290fcfaf027",
+      "morsehgp3D_v8/receipts/additive_q2_20260913/intersection_matrix/COMPLETION.json": "13831c392d1f63afd3f3ab7b2bbc992c5112bb051bbda06dc58f41f34dc94c98",
+      "morsehgp3D_v8/receipts/additive_q2_20260913/focus/MANIFEST.json": "77d93ccdd4fefc415267e1017da282ec51218bcd79e4e864dddd1a5019c8d1b9",
+      "morsehgp3D_v8/receipts/additive_q2_20260913/focus/MEASURES.jsonl": "105af6b5bd4dd3b98bcdd964e044eb42cf5947415b6de295759771f5fb34a417",
+      "morsehgp3D_v8/receipts/additive_q2_20260913/focus/COMPLETION.json": "0dcde126928c5386d8062dbf73d2aa61cdbbc0fd9a4ade5d8eb37a599ed3f5cc",
+      "morsehgp3D_v8/bench/check_paired_campaign.py": "f93f291e3cc2090f6b3a7352a883e869203cdbf132c829b1110b29a4254152e0",
+      "morsehgp3D_v8/receipts/additive_q2_20260913/README.md": "ff064adcb000c0ba66b985bf689a7d1780481ae8aafbe112000b8ec4abce82d9",
+      "morsehgp3D_v8/receipts/additive_q2_20260913/QUALIFICATION.json": "2c7c77c66ea08676c4265241eb1d84f06ecceca6f1befffad65d4fce218390b8",
+      "morsehgp3D_v8/receipts/additive_q2_20260913/PUBLICATION_CHECKS.json": "ca4cb1226a624d47c005391516ad104a5deac469704de3b1f198e0be17501df4",
+      "morsehgp3D_v8/receipts/additive_q2_20260913/RELEASE_TESTS.xml": "43786122c99c28fa44a3861460599090fe3e67f42ef313f34253e0c5b089d2e3",
+      "morsehgp3D_v8/receipts/additive_q2_20260913/SANITIZER_TESTS.xml": "5230fb4a024891852067bd467a98b5a8340ea8d16d2b9d105994f1d0534ea220"
+    },
+    "campaigns": {
+      "additive_matrix": {
+        "measurements": 144,
+        "configurations": 144,
+        "repeats": 1,
+        "started_utc": "2026-09-13T19:41:45.058415+00:00",
+        "finished_utc": "2026-09-13T19:42:12.418921+00:00"
+      },
+      "intersection_matrix": {
+        "measurements": 432,
+        "configurations": 432,
+        "repeats": 1,
+        "started_utc": "2026-09-13T19:42:12.496336+00:00",
+        "finished_utc": "2026-09-13T19:43:07.550106+00:00"
+      },
+      "focus": {
+        "measurements": 72,
+        "configurations": 24,
+        "repeats": 3,
+        "started_utc": "2026-09-13T19:43:07.635371+00:00",
+        "finished_utc": "2026-09-13T19:43:28.539026+00:00"
+      }
+    },
+    "measurements": 648,
+    "configurations_including_order": 576,
+    "campaign_windows_disjoint": true,
+    "build_and_declared_machine_homogeneous": true,
+    "pinned_probe": "build/v8_additive_20260913/mhgp8_additive_probe",
+    "pinned_probe_sha256": "0fced1dbe6d9e63c3caa0d94ca19141aba81dec2919bdece947311e2b3078012",
+    "minor_readme_rounding": [
+      {
+        "claim": "grid intersection Pool n32000 independent-first",
+        "exact_median_ms": 33.814918500000005,
+        "reported_ms": 33.82,
+        "correct_two_decimal_rounding_ms": 33.81,
+        "impact": "does not change the performance conclusion"
+      }
+    ],
+    "readme_checks": {
+      "main_intersection_table": {
+        "grid": {
+          "local_candidates": 378840,
+          "intersection_candidates": 114716,
+          "local_ms_by_order": {
+            "independent-first": 2.4160630000000003,
+            "variant-first": 2.6058760000000003
+          },
+          "intersection_ms_by_order": {
+            "independent-first": 33.814918500000005,
+            "variant-first": 35.389581
+          }
+        },
+        "sheet_full": {
+          "local_candidates": 256000000,
+          "intersection_candidates": 3928390,
+          "local_ms_by_order": {
+            "independent-first": 2.2712985000000003,
+            "variant-first": 2.4519520000000004
+          },
+          "intersection_ms_by_order": {
+            "independent-first": 238.639588,
+            "variant-first": 243.2307265
+          }
+        },
+        "skew": {
+          "local_candidates": 144298,
+          "intersection_candidates": 28534,
+          "local_ms_by_order": {
+            "independent-first": 2.409654,
+            "variant-first": 2.563602
+          },
+          "intersection_ms_by_order": {
+            "independent-first": 20.637244,
+            "variant-first": 21.161293
+          }
+        }
+      },
+      "sheet_full_additive_ms_by_order": {
+        "independent-first": 238.144647,
+        "variant-first": 237.29129749999998
+      },
+      "sheet_full_independent_ms_by_order": {
+        "independent-first": 58.1601125,
+        "variant-first": 56.449533
+      },
+      "sheet_full_candidate_reduction_percent": 39.41101259009172,
+      "work_counts_matched": [
+        [
+          "sheet_full",
+          "additive",
+          32000,
+          "axis_rank_comparisons",
+          38195381
+        ],
+        [
+          "grid",
+          "additive",
+          32000,
+          "classifications",
+          10052730
+        ],
+        [
+          "grid",
+          "intersection",
+          32000,
+          "classifications",
+          308362
+        ],
+        [
+          "grid",
+          "additive",
+          32000,
+          "axis_rank_comparisons",
+          119725550
+        ],
+        [
+          "grid",
+          "intersection",
+          32000,
+          "axis_rank_comparisons",
+          2271251
+        ]
+      ],
+      "alternative_methods": {
+        "grid/dual": {
+          "candidates": 114716,
+          "variant_ms_by_order": {
+            "independent-first": 73.856788,
+            "variant-first": 79.175509
+          }
+        },
+        "grid/tubes": {
+          "candidates": 445422,
+          "variant_ms_by_order": {
+            "independent-first": 43.009779,
+            "variant-first": 44.311275
+          }
+        },
+        "skew/dual": {
+          "candidates": 26594,
+          "variant_ms_by_order": {
+            "independent-first": 72.698566,
+            "variant-first": 76.654349
+          }
+        }
+      },
+      "scaling_table": {
+        "sheet_full/additive": [
+          {
+            "n": 8000,
+            "candidates": 918160,
+            "classifications": 797168,
+            "descriptors": 100864
+          },
+          {
+            "n": 16000,
+            "candidates": 1912660,
+            "classifications": 1724728,
+            "descriptors": 214748
+          },
+          {
+            "n": 32000,
+            "candidates": 3928390,
+            "classifications": 3567584,
+            "descriptors": 438362
+          }
+        ],
+        "grid/intersection": [
+          {
+            "n": 8000,
+            "candidates": 36960,
+            "classifications": 65108,
+            "descriptors": 10918
+          },
+          {
+            "n": 16000,
+            "candidates": 67660,
+            "classifications": 175726,
+            "descriptors": 27112
+          },
+          {
+            "n": 32000,
+            "candidates": 114716,
+            "classifications": 308362,
+            "descriptors": 51344
+          }
+        ]
+      },
+      "truncated_sheet_and_skew_counts": "matched"
+    },
+    "independent_script_sha256": "6f04e15b1d7c2fd69537f39e564d8d8aa93000921b3357c520d5be30082c3f85"
+  },
+  "published_provenance": {
+    "additive": {
+      "build_id": "18bc1cb5fb685a4ead662a87d761e9e3baf53ce0aa1a4958ea6db6cbd3a96f6e",
+      "machine_id": "e80f1a6289419a1cfa85b12ade71c12aba3cf7302a1a6305937631f57314ecf9",
+      "probe_sha256": "0fced1dbe6d9e63c3caa0d94ca19141aba81dec2919bdece947311e2b3078012",
+      "compiler_version": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+      "cmake_cache_sha256": "d27a0abfa38fc40cf60b435bed331f8c0aa1476cf60c2ac0763b723778adbbd3",
+      "cpuinfo_normalized_sha256": "caa45cccbc6ea70ee9f72919bd19f8897c628cdfae681376b7fc3e7c3ad19875",
+      "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+      "logical_cpu_count": 8,
+      "threads": 1
+    }
+  },
+  "provenance_policy": {
+    "version": "paired_provenance_v1",
+    "grouping": "homogeneous_build_per_probe_kind_and_common_machine_metadata",
+    "cpuinfo_ignored_fields": [
+      "cpu MHz"
+    ],
+    "machine_identity_scope": "recorded_metadata_not_unique_physical_host"
+  },
+  "published_ctest_receipts_checked": {
+    "release": {
+      "tests": 26,
+      "failed": 0,
+      "skipped": 0,
+      "receipt_sha256": "43786122c99c28fa44a3861460599090fe3e67f42ef313f34253e0c5b089d2e3",
+      "scope": "published_XML_read_only_not_a_new_CTest_run"
+    },
+    "sanitizer": {
+      "tests": 26,
+      "failed": 0,
+      "skipped": 0,
+      "receipt_sha256": "5230fb4a024891852067bd467a98b5a8340ea8d16d2b9d105994f1d0534ea220",
+      "scope": "published_XML_read_only_not_a_new_CTest_run"
+    }
+  },
+  "README_assessment": {
+    "intersection_cost_includes_local_plan": true,
+    "four_observations_per_focus_order_otherwise_one": true,
+    "orders_and_variants_kept_separate": true,
+    "sheet_full_addition_reduces_candidates_but_is_slower_than_its_paired_reference": true,
+    "Pool_remains_faster_than_the_reported_intersections": true,
+    "scaling_claims_limited_to_measured_counts_and_families": true,
+    "minor_rounding_does_not_change_any_conclusion": true
+  },
+  "new_significant_findings": [],
+  "unqualified": [
+    "Geometric completeness or safety of the additive producer is not established by receipt checks.",
+    "No global census, full candidate expansion, reconstruction or WSPD pipeline time is measured here.",
+    "No global subquadratic complexity, 50k/1s, 100 ms, GPU or massive-G4 contract is established.",
+    "Peak RAM/VRAM and object destruction remain outside the reported timing scope.",
+    "No timing or qualification is transferred from older captures or to later source revisions."
+  ]
+}

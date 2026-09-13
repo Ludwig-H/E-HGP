@@ -1,59 +1,71 @@
 # État de l'audit complémentaire v8
 
-13 septembre 2026, cinquième passe après la publication `8e406f9b`.
+13 septembre 2026, sixième passe après la publication `f5430f57`.
 Intervenant **AUDITEUR_COMPLEMENTAIRE**, distinct du développeur et de
 l'auditeur historique. Cadre : `phase=exploration_v8_hors_registre`,
 `backend=cpu_reference`, `profile=quantized_u16_input_only`,
 `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
-Le partage Tubes et le filtre axial par maximum sont publiés et leurs
-sources correspondent aux snapshots déjà audités. La troisième tranche,
-addition des colonnes et intersection avec les crédits locaux, est en
-construction : ses capacités et ses mesures ne sont pas héritées de
-cette publication.
+L'addition des colonnes et l'intersection avec les crédits locaux sont
+publiées. La relecture des sources et des 648 mesures est favorable.
+Le développeur ouvre maintenant le census q2 partagé avec collecte des
+IDs : nos modèles et notre lecture de son API ne qualifient pas encore
+cette nouvelle implémentation.
 
 ## Suites actives transmises au développeur
 
 | Priorité | Constat vérifié et aide concrète |
 | --- | --- |
-| P0, coût aval | Le [consommateur indexé q2](P0_CONSOMMATION_INDEXEE_Q2.md) paie les candidates publiées : à n32k/Kmax10, 6 483 670 requêtes, 455 418 paires sous le seuil, 295 540 004 visites. Comparer filtres et partage des recherches sur leur travail total. Temps bruts non qualifiés. |
-| P0, intersection | La [composition par rangs](P0_INTERSECTION_RESIDUS.md) construit l'intersection exacte en O(h|B|+D), sans expansion des paires ; 48 plans, 172 800 paires vérifiées, deux mutants rejetés. Alternative à comparer au parcours intégré du constructeur, dont la règle de bornes est mathématiquement correcte. |
-| P0, orientation | Une [rotation isométrique u16](P0_AXES_ET_ROTATIONS.md) fait passer le filtre axial publié de 6 483 670 à 256 millions de candidates à n32k/h10. Le repli est compact ; la recherche générale de directions reste ouverte. |
-| P0, raccord | Les [fixtures de census](P0_CENSUS_Q2_ET_COQUILLE.md) distinguent profondeur stricte, coquille, supports et boules. Elles complètent les [bornes de l'autre auditeur](../../morsehgp3D_v8/audits/P0_SOUS_RECTANGLES_ET_GROUPES.md#9-census-q2--des-extrema-exacts-pour-partager-les-recherches), lues dans sa publication 9633d8ef. |
-| P0, autres pistes | La [somme des colonnes](P0_SOMME_TEMOINS_AXIAUX.md), les [nappes 2D](P0_NAPPES_2D.md), l'[ordre des témoins](P0_ORDRE_TEMOINS.md) et les [groupes recouvrants](P0_GROUPES_RECOUVRANTS.md) restent des apports bornés, à comparer sans qualification globale. |
+| P0, partage aval | Le [parcours partagé](P0_FRONTIERE_PARTAGEE_Q2.md) consomme les résidus f5430f57 : à n32k sur nappe additive, 189 649 460 visites par paire contre 147 292 056 classifications partagées, mais 145 720 627 écritures de continuations. Aucun temps mesuré. Le curseur proposé par l'autre auditeur peut éviter ces écritures sous ordre Z fixe. |
+| P0, sortie et réutilisation | Le [contrat entre supports et seuils](P0_CENSUS_PARTAGE_ET_SEUILS.md) précise la clé nuage/IDs/boule, le surplus à conserver lors d'une reprise et les supports retrouvés par antipodes. La première API produit a un seul seuil et annonce correctement des vues temporaires, des coquilles complètes et des incidences distinctes. |
+| P0, orientation | La [rotation isométrique u16](P0_AXES_ET_ROTATIONS.md) reste une contre-épreuve de généralisation des colonnes. Le repli compact peut laisser tout A×B ; aucune recherche générale de directions n'est qualifiée. |
+| P0, autres comparaisons | La [composition par rangs](P0_INTERSECTION_RESIDUS.md), les [nappes 2D](P0_NAPPES_2D.md), l'[ordre des témoins](P0_ORDRE_TEMOINS.md) et les [groupes recouvrants](P0_GROUPES_RECOUVRANTS.md) gardent leurs preuves et limites. Le census et la tranche FULL minimale priment sur une optimisation indéfinie du seul cas axial. |
 
-Les réponses et la coordination figurent dans le
-[journal partagé](../COORDINATION_MORSEHGP3D_V8.md). **P0 reste ouverte** :
-les résidus généraux, les requêtes de census, q3/q4 complets et la tour
-FULL ne sont pas payés par un gain sur les seules nappes alignées.
-Aucun consommateur produit ni contrat 50k n'est qualifié par nos prototypes.
+Les réponses figurent dans le [journal partagé](../COORDINATION_MORSEHGP3D_V8.md).
+**P0 reste ouverte** : coût des sorties, résidus généraux, q3/q4 complets,
+WSPD et tour FULL restent à payer. Nos prototypes ne qualifient aucun
+contrat 50k. Les modèles de l'autre auditeur conservent leur autorité
+propre dans sa [note de bornes et curseurs](../../morsehgp3D_v8/audits/P0_SOUS_RECTANGLES_ET_GROUPES.md).
 
 ## Contre-vérifications de cette passe
 
-Le [reçu des 594 mesures publiées](SHARED_AXIS_MEASURES_CHECKS.json)
-confirme 504 configurations, cinq matrices, les sources et la provenance
-communes, les comptes et les tableaux du README. Les lecteurs normal/−O
-passent ; aucune mesure, compilation ou suite CTest relancée pour cette
-lecture. Aucun nouveau défaut de protocole relevé sur `8e406f9b`.
+Les [648 mesures additives](ADDITIVE_MEASURES_CHECKS.json) passent la
+lecture indépendante : 576 configurations, trois matrices, provenance,
+36 pins et tableaux concordants, lecteurs normal/−O. Aucun benchmark,
+build ou CTest relancé pour cette lecture ; aucune anomalie significative.
+Le rapport constructeur distingue bien réduction du résidu et temps total.
 
-Le [consommateur indépendant](Q2_INDEXED_CONSUMER_CHECKS.json) passe 16 cas
-O2 et UBSan, 3 076 448 tests ponctuels par exécution, trois vrais mutants
-C++ réfutés. Le runner normal/−O concorde. Les six grandes consommations
-sont réellement exécutées, sans oracle exhaustif de leurs produits.
-Les [fixtures de coquille](Q2_CENSUS_FIXTURE_CHECKS.json) ajoutent 192
-requêtes et quatre contre-modèles ; elles ne prétendent pas fournir FULL.
-L'[intersection](RESIDUAL_INTERSECTION_CHECKS.json) a son propre snapshot
-embarqué, ses rejets de propriétaires/voies et ses mutants de rangs.
+La [propriété des nouveaux plans](AXIS_LIFETIME_CHECKS.json) passe 50 pannes
+de construction, quatre déplacements sans allocation et 12 accès déplacés
+refusés. Les 96 plans restreints confrontent keeps et fragments sur
+345 600 paires ; un mutant de déplacement perdant la restriction est
+réfuté. Aucun défaut moteur trouvé. Copie et affectations axiales restent
+interdites par cette API, contrairement à CreditPlan.
 
-Le [delta d'allocation](ALLOCATION_DELTA_CHECKS.json), cpp `522009ad…`,
-conserve les garanties des plans : batch passe 10 872 contrôles, affectation
-1 110, dont 20 pannes avec cible conservée et 24 accès déplacés refusés.
-Ce contrôle GCC strict -O1/UBSan porte uniquement sur l'initialisation
-conditionnelle des tableaux. La compilation supplémentaire -O2/UBSan
-refusée par GCC est conservée séparément ; aucun succès O2 n'en est déduit.
-Les nouveaux changements axiaux restent hors de ce contrôle.
+La [preuve du minimum transversal](P0_PROPRIETE_ET_MINIMUM_Q2.md) écarte
+une optimisation sans cas actif : avec les crédits internes q2 actuels,
+un plan vide équivaut à h=0, déjà traité avant les tris. Le raccourci
+restriction vide proposé devient pertinent seulement si ce contrat change,
+par exemple avec des témoins extérieurs. Cette limite ne garantit pas
+une vraie survivante au census. 42 restrictions à besoin positif et six
+à besoin nul confirment le lemme sur les fixtures.
+
+Le [parcours partagé C++](Q2_SHARED_FRONTIER_CHECKS.json) passe 57 petits
+cas en O2/UBSan, 8 278 451 tests ponctuels indépendants, trois vrais mutants
+réfutés ; normal/−O concordent. Les six grandes consommations sont terminées,
+sans collecte des IDs ni oracle exhaustif géométrique. Les [42 demandes
+entre seuils](Q2_SHARED_CENSUS_CHECKS.json) et cinq contre-modèles ajoutent
+un contrat de réutilisation, pas une API produit nouvelle.
 
 ## Points clos et preuves conservées
+
+Les [594 mesures](SHARED_AXIS_MEASURES_CHECKS.json), le [premier consommateur
+indexé](Q2_INDEXED_CONSUMER_CHECKS.json), les [fixtures de coquille](Q2_CENSUS_FIXTURE_CHECKS.json)
+et le [delta d'allocation local](ALLOCATION_DELTA_CHECKS.json) gardent leurs
+pins et périmètres antérieurs. Les nouvelles gates ne réécrivent pas ces
+reçus ; les échecs exploratoires et calibrations y restent explicités.
+La [somme des colonnes exactes](P0_SOMME_TEMOINS_AXIAUX.md) est désormais
+portée et qualifiée localement dans la troisième tranche publiée.
 
 L'[affectation après panne](P0_PLAN_ASSIGNMENT.md) est corrigée dans les
 sources publiées : le [reçu du partage](BATCH_EXCEPTION_REVIEW.json)
@@ -84,7 +96,7 @@ objets distincts ; aucun mélange réel de campagnes n'est allégué.
 ## Rejeu et entretien
 
 Les notes donnent les commandes exactes. Les nouveaux tests utilisent
-le commit publié `8e406f9b` ou les snapshots embarqués dans leurs reçus.
+le commit publié `f5430f57` ou les snapshots embarqués dans leurs reçus.
 Les anciennes gates peuvent donc refuser légitimement le worktree courant.
 Une correction demande une nouvelle qualification, jamais la réécriture
 d'un reçu clos. Les sujets résolus quittent la liste active ; les preuves

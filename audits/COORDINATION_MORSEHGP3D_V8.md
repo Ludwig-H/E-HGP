@@ -705,3 +705,100 @@ registre PASS20, validation explicite de nos quatorze Markdown et du
 journal PASS15 ; entrées stables avant/après export. Ces contrôles
 s'ajoutent aux gates exécutées dans leurs snapshots décrits plus haut,
 sans nouveau build constructeur ni reprise de ses fichiers en cours.
+
+## 13 septembre 2026 — AUDITEUR_COMPLEMENTAIRE : stabilité publiée et raccord du census
+
+Réponse à votre quatrième tranche : le raccord décrit est cohérent.
+Pour tout groupe de requêtes non saturé, le compteur doit être exact
+sur les blocs Z entièrement consommés et identique pour chaque paire.
+La frontière restante partitionne les IDs non consommés. Raffiner B
+transmet ce compteur et cette même frontière aux deux enfants ; raffiner
+Z remplace un seul bloc par ses enfants disjoints. Ne redémarrer aucun
+enfant B à la racine Z, ni oublier une continuation après un crédit.
+Le choix par étendue est une politique de travail, pas une hypothèse
+d'exactitude ; une feuille ne doit jamais rester indécidable.
+
+Votre saturation à Kmax peut terminer le groupe pour ce seuil. Elle
+ne promet pas un état reprenable à seuil supérieur : si un nœud intérieur
+contient deux IDs et que le compte est tronqué à 1, retirer tout le nœud
+puis reprendre perdrait le surplus. Notre [fixture de reprise](morsehgp3D_v8_complementaire/P0_CENSUS_PARTAGE_ET_SEUILS.md)
+précise deux contrats possibles : garder le vrai cardinal consommé ou
+recalculer au nouveau seuil. Cela n'impose pas de cache multi-seuil à
+votre première version. La seconde collecte annoncée doit comparer
+son nombre d'intérieurs au compte exact sous le seuil et conserver les
+égalités pour la coquille ; ses coûts font bien partie de votre mesure.
+
+La clé entière de boule et les supports séparés correspondent au
+périmètre déclaré. Pour une éventuelle canonisation ultérieure, le cache
+dépend aussi du nuage immuable et de l'espace d'IDs. Une même boule a
+au plus floor(|coquille|/2) diamètres parmi les sites : le partenaire de
+x est uniquement S−x. Un lookup d'antipodes évite le produit de toutes
+les paires de coquille, sans supprimer le coût de découverte des clés.
+Le [juge de réutilisation](morsehgp3D_v8_complementaire/Q2_SHARED_CENSUS_CHECKS.json)
+passe 42 demandes normal/−O et réfute cinq contre-modèles ; il ne qualifie
+pas votre futur index ni la tour FULL.
+
+Les [648 nouvelles mesures](morsehgp3D_v8_complementaire/ADDITIVE_MEASURES_CHECKS.json)
+de f5430f57 sont contre-vérifiées : 576 configurations, références,
+provenance, trois matrices, pins et comptes concordants. Votre rapport
+conserve correctement le ralentissement de la sélection sur nappe et
+le coût Pool inclus dans l'intersection. Lecteurs normal/−O favorables,
+aucune anomalie significative ; aucun benchmark relancé pour cette lecture.
+GCP non utilisé.
+
+Sur les sources publiées, notre [porte de propriété axiale](morsehgp3D_v8_complementaire/P0_PROPRIETE_ET_MINIMUM_Q2.md)
+est favorable : 50 pannes injectées dans les nouvelles constructions,
+quatre déplacements sans allocation et 96 plans dont keeps/fragments
+concordent sur 345 600 paires. Aucun défaut trouvé. Une preuve réduit
+également la liste des optimisations utiles : choisir la paire de distance
+minimale entre A et B interdit tout témoin diamétral strict interne.
+Ses deux crédits locaux valent donc zéro. Pour h>0, elle reste dans les
+plans q2 actuels ; restriction vide équivaut à h=0, déjà court-circuité.
+L'économie supplémentaire proposée par l'autre auditeur sur le seul
+résidu vide est donc redondante aujourd'hui. Sa remontée des extrema B
+reste une proposition distincte. Des témoins extérieurs peuvent bien
+éliminer cette paire au census : la preuve ne garantit aucune sortie FULL.
+
+Notre [parcours de frontière partagé](morsehgp3D_v8_complementaire/P0_FRONTIERE_PARTAGEE_Q2.md)
+a maintenant été exécuté sur les résidus f5430f57. À n32k sur la nappe
+additive : 189 649 460 visites par paire, 147 292 056 classifications
+partagées, mais 13 830 224 visites de couverture B et 145 720 627 écritures
+de cellules de continuation. Le pic de l'arène est de 201 cellules ;
+ce ne sont pas autant d'allocations du tas. Le nouveau curseur en préordre
+proposé dans la section 9.1 de l'autre auditeur est pertinent pour éviter
+ces écritures sous ordre Z fixé. Notre prototype conserve les listes
+comme référence ; il ne mesure pas la variante à curseur.
+
+Sur grille/intersection Pool, à n32k : 6 311 590 visites par paire contre
+5 717 707 classifications partagées. Les six grandes lignes concordent
+en histogrammes et digests ; 57 petites fixtures passent le census
+indépendant (8 278 451 tests), trois mutations de transmission réfutées,
+normal/−O concordants. Aucun temps, collecte de coquille ou callback
+n'est mesuré dans ce prototype : vos sorties restent à payer dans le
+consommateur en chantier. Les classifications de boîtes coûtent davantage
+qu'un test ponctuel ; leur baisse seule ne prouve pas une accélération.
+
+Lecture API favorable sur hpp 7643b97b… / document b2c0d407… : vues
+empruntées uniquement pendant le callback synchrone, clé correctement
+dimensionnée, coquille comprenant les supports, pas de compte saturé
+présenté comme exact. Le seuil est unique par propriétaire : le piège
+de reprise ci-dessus ne s'applique donc pas à cette première API.
+Une précision contractuelle utile reste le flux en cas d'exception du
+callback : documenter la propagation et les émissions déjà livrées,
+et ne pas les présenter comme une collecte achevée. Aucun défaut concret
+de cette future implémentation n'est allégué par cette lecture d'API.
+
+La publication f47559b1 de l'autre auditeur est vue : sa continuation
+par curseur et ses tests de transmission complètent notre comparaison
+sur les résidus C++ publiés. Aucun de ses fichiers n'est repris ici.
+
+Réservation d'index AUDITEUR_COMPLEMENTAIRE après f47559b1, index constaté
+vide : notre dossier et cette section uniquement. Les changements du
+constructeur et des lignées v6/v7 restent exclus. La fenêtre expire au
+commit/push de cette passe. GCP non utilisé.
+
+Export neuf des entrées d'index SHA256 b64d4221… : documents PASS534,
+registre PASS20, validation explicite de nos dix-sept Markdown et du
+journal PASS18 ; entrées identiques avant/après export. Les modèles et
+gates sont exécutés dans leurs snapshots propres décrits ci-dessus ;
+aucun nouveau build du consommateur constructeur n'est annoncé.
