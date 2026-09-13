@@ -1,0 +1,478 @@
+{
+  "backend": "cpu_reference",
+  "commands": [
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/tmp/mhgp8_residual_intersection_e7tjub2i/src",
+        "-c",
+        "/tmp/mhgp8_residual_intersection_e7tjub2i/src/pipeline/local_credits.cpp",
+        "-o",
+        "/tmp/mhgp8_residual_intersection_e7tjub2i/local_credits.o"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/tmp/mhgp8_residual_intersection_e7tjub2i/src",
+        "-c",
+        "/tmp/mhgp8_residual_intersection_e7tjub2i/src/pipeline/axis_q2.cpp",
+        "-o",
+        "/tmp/mhgp8_residual_intersection_e7tjub2i/axis_q2.o"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/tmp/mhgp8_residual_intersection_e7tjub2i/src",
+        "/tmp/mhgp8_residual_intersection_e7tjub2i/positive.cpp",
+        "/tmp/mhgp8_residual_intersection_e7tjub2i/local_credits.o",
+        "/tmp/mhgp8_residual_intersection_e7tjub2i/axis_q2.o",
+        "-o",
+        "/tmp/mhgp8_residual_intersection_e7tjub2i/positive"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "/tmp/mhgp8_residual_intersection_e7tjub2i/positive"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "{\"plans\":48,\"pairs_checked\":172800,\"expanded_pairs\":24568,\"empty_plans\":6,\"improvements_credit\":18,\"improvements_axis\":42,\"improvements_both\":18,\"rank_tests\":11520,\"stored_ids\":4984,\"input_fragments\":5448,\"output_fragments\":2328,\"invalid_combinations_rejected\":5}\n"
+    },
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/tmp/mhgp8_residual_intersection_e7tjub2i/src",
+        "/tmp/mhgp8_residual_intersection_e7tjub2i/strict_boundary.cpp",
+        "/tmp/mhgp8_residual_intersection_e7tjub2i/local_credits.o",
+        "/tmp/mhgp8_residual_intersection_e7tjub2i/axis_q2.o",
+        "-o",
+        "/tmp/mhgp8_residual_intersection_e7tjub2i/strict_boundary"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "/tmp/mhgp8_residual_intersection_e7tjub2i/strict_boundary"
+      ],
+      "exit_code": 1,
+      "stderr": "residual intersection audit: intersection differs from conjunction\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I/tmp/mhgp8_residual_intersection_e7tjub2i/src",
+        "/tmp/mhgp8_residual_intersection_e7tjub2i/confuse_original_id_and_rank.cpp",
+        "/tmp/mhgp8_residual_intersection_e7tjub2i/local_credits.o",
+        "/tmp/mhgp8_residual_intersection_e7tjub2i/axis_q2.o",
+        "-o",
+        "/tmp/mhgp8_residual_intersection_e7tjub2i/confuse_original_id_and_rank"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "/tmp/mhgp8_residual_intersection_e7tjub2i/confuse_original_id_and_rank"
+      ],
+      "exit_code": 1,
+      "stderr": "residual intersection audit: intersection differs from conjunction\n",
+      "stdout": ""
+    }
+  ],
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "gcp_used": false,
+  "live_sources_differing_at_closing": [
+    "morsehgp3D_v8/src/pipeline/axis_q2.cpp",
+    "morsehgp3D_v8/src/pipeline/axis_q2.hpp",
+    "morsehgp3D_v8/src/pipeline/local_credits.cpp"
+  ],
+  "modes_equal": true,
+  "normal_capture_sha256": "902748a87265f8a76ff606e9d81eda5fc51d3c36efa728454c7fce7783da0e35",
+  "optimized_capture_sha256": "e38f0990ab435a7fc00af05edf47480a8e99c2c1e15d63b7090785a816cc0093",
+  "optimized_replay": {
+    "backend": "cpu_reference",
+    "commands": [
+      {
+        "argv": [
+          "g++",
+          "-std=c++20",
+          "-O2",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror",
+          "-fsanitize=undefined",
+          "-fno-sanitize-recover=all",
+          "-I/tmp/mhgp8_residual_intersection_nzng_nnb/src",
+          "-c",
+          "/tmp/mhgp8_residual_intersection_nzng_nnb/src/pipeline/local_credits.cpp",
+          "-o",
+          "/tmp/mhgp8_residual_intersection_nzng_nnb/local_credits.o"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "argv": [
+          "g++",
+          "-std=c++20",
+          "-O2",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror",
+          "-fsanitize=undefined",
+          "-fno-sanitize-recover=all",
+          "-I/tmp/mhgp8_residual_intersection_nzng_nnb/src",
+          "-c",
+          "/tmp/mhgp8_residual_intersection_nzng_nnb/src/pipeline/axis_q2.cpp",
+          "-o",
+          "/tmp/mhgp8_residual_intersection_nzng_nnb/axis_q2.o"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "argv": [
+          "g++",
+          "-std=c++20",
+          "-O2",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror",
+          "-fsanitize=undefined",
+          "-fno-sanitize-recover=all",
+          "-I/tmp/mhgp8_residual_intersection_nzng_nnb/src",
+          "/tmp/mhgp8_residual_intersection_nzng_nnb/positive.cpp",
+          "/tmp/mhgp8_residual_intersection_nzng_nnb/local_credits.o",
+          "/tmp/mhgp8_residual_intersection_nzng_nnb/axis_q2.o",
+          "-o",
+          "/tmp/mhgp8_residual_intersection_nzng_nnb/positive"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "argv": [
+          "/tmp/mhgp8_residual_intersection_nzng_nnb/positive"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "{\"plans\":48,\"pairs_checked\":172800,\"expanded_pairs\":24568,\"empty_plans\":6,\"improvements_credit\":18,\"improvements_axis\":42,\"improvements_both\":18,\"rank_tests\":11520,\"stored_ids\":4984,\"input_fragments\":5448,\"output_fragments\":2328,\"invalid_combinations_rejected\":5}\n"
+      },
+      {
+        "argv": [
+          "g++",
+          "-std=c++20",
+          "-O2",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror",
+          "-fsanitize=undefined",
+          "-fno-sanitize-recover=all",
+          "-I/tmp/mhgp8_residual_intersection_nzng_nnb/src",
+          "/tmp/mhgp8_residual_intersection_nzng_nnb/strict_boundary.cpp",
+          "/tmp/mhgp8_residual_intersection_nzng_nnb/local_credits.o",
+          "/tmp/mhgp8_residual_intersection_nzng_nnb/axis_q2.o",
+          "-o",
+          "/tmp/mhgp8_residual_intersection_nzng_nnb/strict_boundary"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "argv": [
+          "/tmp/mhgp8_residual_intersection_nzng_nnb/strict_boundary"
+        ],
+        "exit_code": 1,
+        "stderr": "residual intersection audit: intersection differs from conjunction\n",
+        "stdout": ""
+      },
+      {
+        "argv": [
+          "g++",
+          "-std=c++20",
+          "-O2",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror",
+          "-fsanitize=undefined",
+          "-fno-sanitize-recover=all",
+          "-I/tmp/mhgp8_residual_intersection_nzng_nnb/src",
+          "/tmp/mhgp8_residual_intersection_nzng_nnb/confuse_original_id_and_rank.cpp",
+          "/tmp/mhgp8_residual_intersection_nzng_nnb/local_credits.o",
+          "/tmp/mhgp8_residual_intersection_nzng_nnb/axis_q2.o",
+          "-o",
+          "/tmp/mhgp8_residual_intersection_nzng_nnb/confuse_original_id_and_rank"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": ""
+      },
+      {
+        "argv": [
+          "/tmp/mhgp8_residual_intersection_nzng_nnb/confuse_original_id_and_rank"
+        ],
+        "exit_code": 1,
+        "stderr": "residual intersection audit: intersection differs from conjunction\n",
+        "stdout": ""
+      }
+    ],
+    "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+    "gcp_used": false,
+    "phase": "exploration_v8_hors_registre",
+    "profile": "quantized_u16_input_only",
+    "public_status": "not_claimed",
+    "python_optimized": true,
+    "results": {
+      "confuse_original_id_and_rank": {
+        "argv": [
+          "/tmp/mhgp8_residual_intersection_nzng_nnb/confuse_original_id_and_rank"
+        ],
+        "binary_sha256": "91d61d5530099ea028ba2fef11a0c64f5586fe2b403530a2348394682d077805",
+        "exit_code": 1,
+        "probe_sha256": "5ef4e3e7f862c81c7b73b19a49712670e94a8b7926934f6ba0978c7d7acdfa6d",
+        "stderr": "residual intersection audit: intersection differs from conjunction\n",
+        "stdout": ""
+      },
+      "positive": {
+        "argv": [
+          "/tmp/mhgp8_residual_intersection_nzng_nnb/positive"
+        ],
+        "binary_sha256": "298421504dd2cef518a196713dd3ced186ec1fb7aee5abddadc6da0c743b1e32",
+        "exit_code": 0,
+        "probe_sha256": "e94f383a9e66e6fa197445a8af38f3fdf56150953982ace0860e0fab906232d4",
+        "stderr": "",
+        "stdout": "{\"plans\":48,\"pairs_checked\":172800,\"expanded_pairs\":24568,\"empty_plans\":6,\"improvements_credit\":18,\"improvements_axis\":42,\"improvements_both\":18,\"rank_tests\":11520,\"stored_ids\":4984,\"input_fragments\":5448,\"output_fragments\":2328,\"invalid_combinations_rejected\":5}\n"
+      },
+      "strict_boundary": {
+        "argv": [
+          "/tmp/mhgp8_residual_intersection_nzng_nnb/strict_boundary"
+        ],
+        "binary_sha256": "550ef49c005f4783f7516846c72104e18d2e6378c63827402a2c72798525bae6",
+        "exit_code": 1,
+        "probe_sha256": "6dc3a139612f59f506411b7ca4422aa3d18a5a6c9dc7b5b70a60ea5d1945787a",
+        "stderr": "residual intersection audit: intersection differs from conjunction\n",
+        "stdout": ""
+      }
+    },
+    "runner_sha256": "199723acedfb369a8161bc47d03c9aeda8d0ce28b65983edd7931d3083b1ab89",
+    "schema": "mhgp8_residual_intersection_audit_v1",
+    "scope": "exact set intersection of two existing q2 residuals, no census",
+    "source_commit": "8e406f9b82f2a3da967e1a80c0bdcbfd50822fef",
+    "source_sha256": {
+      "core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+      "pipeline/axis_q2.cpp": "db1b23431d6515074cf33b3ab5fb94781d88a67488d395a4b094fac540f1e7f1",
+      "pipeline/axis_q2.hpp": "b19981a14339c6bce8cafec6ee6630aace5e9e743267c7655b5295c2d41653f8",
+      "pipeline/local_credits.cpp": "24dcbc9839d862e7b9e78864bb41baf726f89c3d48321f0ef8ec1c382aa8d151",
+      "pipeline/local_credits.hpp": "7d96b38571bacf504d79b4139aaead8042bf1dca26396abd08bd8811799496db",
+      "pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+      "probe.cpp": "e94f383a9e66e6fa197445a8af38f3fdf56150953982ace0860e0fab906232d4",
+      "spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+    },
+    "statistics": {
+      "empty_plans": 6,
+      "expanded_pairs": 24568,
+      "improvements_axis": 42,
+      "improvements_both": 18,
+      "improvements_credit": 18,
+      "input_fragments": 5448,
+      "invalid_combinations_rejected": 5,
+      "output_fragments": 2328,
+      "pairs_checked": 172800,
+      "plans": 48,
+      "rank_tests": 11520,
+      "stored_ids": 4984
+    },
+    "status": "passed"
+  },
+  "phase": "exploration_v8_hors_registre",
+  "prior_snapshot_comparison": {
+    "morsehgp3D_v8/src/core/types.hpp": {
+      "identical_to_live_on_closing": true,
+      "identical_to_prior_snapshot": true,
+      "live_closing_sha256": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+      "prior_receipt": "BATCH_EXCEPTION_REVIEW.json",
+      "published_sha256": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b"
+    },
+    "morsehgp3D_v8/src/pipeline/axis_q2.cpp": {
+      "identical_to_live_on_closing": false,
+      "identical_to_prior_snapshot": true,
+      "live_closing_sha256": "938df81088c0757db8d065c644d5f04ebd22b787f0f8d2508b281a1a435b7a85",
+      "prior_receipt": "AXIS_ROTATION_CHECKS.json",
+      "published_sha256": "db1b23431d6515074cf33b3ab5fb94781d88a67488d395a4b094fac540f1e7f1"
+    },
+    "morsehgp3D_v8/src/pipeline/axis_q2.hpp": {
+      "identical_to_live_on_closing": false,
+      "identical_to_prior_snapshot": true,
+      "live_closing_sha256": "854d72e21df75d434abc6a5b2e9b0704951d54278e37e2882cf2a25d94e544a2",
+      "prior_receipt": "AXIS_ROTATION_CHECKS.json",
+      "published_sha256": "b19981a14339c6bce8cafec6ee6630aace5e9e743267c7655b5295c2d41653f8"
+    },
+    "morsehgp3D_v8/src/pipeline/local_credits.cpp": {
+      "identical_to_live_on_closing": false,
+      "identical_to_prior_snapshot": true,
+      "live_closing_sha256": "522009add5e85501215c562ab6a56548535ea09bd6deff0ebe41df0ae1a52255",
+      "prior_receipt": "BATCH_EXCEPTION_REVIEW.json",
+      "published_sha256": "24dcbc9839d862e7b9e78864bb41baf726f89c3d48321f0ef8ec1c382aa8d151"
+    },
+    "morsehgp3D_v8/src/pipeline/local_credits.hpp": {
+      "identical_to_live_on_closing": true,
+      "identical_to_prior_snapshot": true,
+      "live_closing_sha256": "7d96b38571bacf504d79b4139aaead8042bf1dca26396abd08bd8811799496db",
+      "prior_receipt": "BATCH_EXCEPTION_REVIEW.json",
+      "published_sha256": "7d96b38571bacf504d79b4139aaead8042bf1dca26396abd08bd8811799496db"
+    },
+    "morsehgp3D_v8/src/pipeline/tube_credits.hpp": {
+      "identical_to_live_on_closing": true,
+      "identical_to_prior_snapshot": true,
+      "live_closing_sha256": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+      "prior_receipt": "BATCH_EXCEPTION_REVIEW.json",
+      "published_sha256": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c"
+    },
+    "morsehgp3D_v8/src/spindle/predicates.hpp": {
+      "identical_to_live_on_closing": true,
+      "identical_to_prior_snapshot": true,
+      "live_closing_sha256": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+      "prior_receipt": "BATCH_EXCEPTION_REVIEW.json",
+      "published_sha256": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+    }
+  },
+  "profile": "quantized_u16_input_only",
+  "public_status": "not_claimed",
+  "python_optimized": false,
+  "qualification_scope": "immutable published commit only; concurrent live edits are not qualified",
+  "results": {
+    "confuse_original_id_and_rank": {
+      "argv": [
+        "/tmp/mhgp8_residual_intersection_e7tjub2i/confuse_original_id_and_rank"
+      ],
+      "binary_sha256": "8c7c5d51d1b3eb7727afa22d232f928b53d830ed364ae749c025849e30081d47",
+      "exit_code": 1,
+      "probe_sha256": "5ef4e3e7f862c81c7b73b19a49712670e94a8b7926934f6ba0978c7d7acdfa6d",
+      "stderr": "residual intersection audit: intersection differs from conjunction\n",
+      "stdout": ""
+    },
+    "positive": {
+      "argv": [
+        "/tmp/mhgp8_residual_intersection_e7tjub2i/positive"
+      ],
+      "binary_sha256": "618b07d5c055917e0d45aee2426b8e7647264e1aaaec408b7827a777bb223a11",
+      "exit_code": 0,
+      "probe_sha256": "e94f383a9e66e6fa197445a8af38f3fdf56150953982ace0860e0fab906232d4",
+      "stderr": "",
+      "stdout": "{\"plans\":48,\"pairs_checked\":172800,\"expanded_pairs\":24568,\"empty_plans\":6,\"improvements_credit\":18,\"improvements_axis\":42,\"improvements_both\":18,\"rank_tests\":11520,\"stored_ids\":4984,\"input_fragments\":5448,\"output_fragments\":2328,\"invalid_combinations_rejected\":5}\n"
+    },
+    "strict_boundary": {
+      "argv": [
+        "/tmp/mhgp8_residual_intersection_e7tjub2i/strict_boundary"
+      ],
+      "binary_sha256": "3b472043c28caa6e79aef22ae39efde88ba4aaafcbeb7baa56a487510fc3f9c3",
+      "exit_code": 1,
+      "probe_sha256": "6dc3a139612f59f506411b7ca4422aa3d18a5a6c9dc7b5b70a60ea5d1945787a",
+      "stderr": "residual intersection audit: intersection differs from conjunction\n",
+      "stdout": ""
+    }
+  },
+  "runner_sha256": "199723acedfb369a8161bc47d03c9aeda8d0ce28b65983edd7931d3083b1ab89",
+  "schema": "mhgp8_residual_intersection_audit_v1",
+  "scope": "exact set intersection of two existing q2 residuals, no census",
+  "snapshot_utf8": {
+    "core/types.hpp": "#pragma once\n\n#include <cstddef>\n#include <cstdint>\n#include <limits>\n#include <stdexcept>\n\nnamespace mhgp8 {\n\nusing u64 = std::uint64_t;\nusing i64 = std::int64_t;\n\n// The u16 geometry (including tube bounds) needs at most 75 signed bits. This first CPU\n// implementation requires the compiler's native integer extension; it does\n// not silently replace exact predicates with floating-point arithmetic.\n#if defined(__SIZEOF_INT128__)\n__extension__ typedef signed __int128 i128;\n#else\n#error \"mhgp8 CPU predicates require a compiler with signed 128-bit integers\"\n#endif\n\nstruct Point3 {\n  std::uint16_t x{};\n  std::uint16_t y{};\n  std::uint16_t z{};\n\n  [[nodiscard]] constexpr std::uint16_t operator[](std::size_t axis) const {\n    switch (axis) {\n      case 0: return x;\n      case 1: return y;\n      case 2: return z;\n      default: throw std::out_of_range(\"mhgp8 point axis must be 0, 1 or 2\");\n    }\n  }\n\n  bool operator==(const Point3&) const = default;\n};\n\nstruct Box3 {\n  Point3 low{};\n  Point3 high{};\n};\n\nenum class Lane : std::uint8_t { Q2 = 2, Q3 = 3, Q4 = 4 };\n\n[[nodiscard]] constexpr bool valid_lane(Lane lane) noexcept {\n  return lane == Lane::Q2 || lane == Lane::Q3 || lane == Lane::Q4;\n}\n\ninline void require_valid_lane(Lane lane) {\n  if (!valid_lane(lane)) {\n    throw std::invalid_argument(\"mhgp8 lane must be Q2, Q3 or Q4\");\n  }\n}\n\n[[nodiscard]] inline unsigned arity(Lane lane) {\n  require_valid_lane(lane);\n  return static_cast<unsigned>(lane);\n}\n\n[[nodiscard]] constexpr bool valid_box(const Box3& box) noexcept {\n  return box.low.x <= box.high.x && box.low.y <= box.high.y &&\n         box.low.z <= box.high.z;\n}\n\ninline void require_valid_box(const Box3& box) {\n  if (!valid_box(box)) {\n    throw std::invalid_argument(\"mhgp8 box has inverted bounds\");\n  }\n}\n\n[[nodiscard]] constexpr Box3 singleton_box(const Point3& point) noexcept {\n  return {point, point};\n}\n\n[[nodiscard]] inline Point3 box_corner(const Box3& box, unsigned corner) {\n  require_valid_box(box);\n  if (corner >= 8) {\n    throw std::out_of_range(\"mhgp8 box corner must be in [0, 8)\");\n  }\n  return {(corner & 1U) != 0U ? box.high.x : box.low.x,\n          (corner & 2U) != 0U ? box.high.y : box.low.y,\n          (corner & 4U) != 0U ? box.high.z : box.low.z};\n}\n\nstruct PredicateWork {\n  u64 point_tests{};\n  u64 universal_queries{};\n  u64 q2_axis_terms{};\n  u64 corner_tests{};\n  u64 block_bound_tests{};\n  u64 negative_probes{};\n};\n\ninline void counter_add(u64& value, u64 increment = 1) {\n  if (increment > std::numeric_limits<u64>::max() - value) {\n    throw std::overflow_error(\"mhgp8 work counter overflow\");\n  }\n  value += increment;\n}\n\n}  // namespace mhgp8\n",
+    "pipeline/axis_q2.cpp": "#include \"axis_q2.hpp\"\n\n#include <algorithm>\n#include <array>\n#include <limits>\n#include <memory>\n#include <numeric>\n#include <stdexcept>\n#include <utility>\n\nnamespace mhgp8 {\nnamespace {\n\n[[nodiscard]] bool contains(Range range, std::size_t id) {\n  return range.first <= id && id < range.last;\n}\n\n[[nodiscard]] bool contains(const Box3& box, const Point3& point) {\n  return box.low.x <= point.x && point.x <= box.high.x &&\n         box.low.y <= point.y && point.y <= box.high.y &&\n         box.low.z <= point.z && point.z <= box.high.z;\n}\n\n[[nodiscard]] bool contains(const Box3& outer, const Box3& inner) {\n  return contains(outer, inner.low) && contains(outer, inner.high);\n}\n\n[[nodiscard]] bool disjoint(const Box3& left, const Box3& right) {\n  return left.high.x < right.low.x || right.high.x < left.low.x ||\n         left.high.y < right.low.y || right.high.y < left.low.y ||\n         left.high.z < right.low.z || right.high.z < left.low.z;\n}\n\nvoid set_coordinate(Point3& point, std::size_t axis, std::uint16_t value) {\n  switch (axis) {\n    case 0: point.x = value; return;\n    case 1: point.y = value; return;\n    case 2: point.z = value; return;\n    default: throw std::logic_error(\"mhgp8 axis filter has an invalid axis\");\n  }\n}\n\n[[nodiscard]] u64 pair_count(std::size_t a_size, std::size_t b_size) {\n  static_assert(sizeof(std::size_t) <= sizeof(u64));\n  const auto a = static_cast<u64>(a_size);\n  const auto b = static_cast<u64>(b_size);\n  if (b != 0 && a > std::numeric_limits<u64>::max() / b) {\n    throw std::overflow_error(\"mhgp8 axis candidate cardinal exceeds u64\");\n  }\n  return a * b;\n}\n\nclass BoxIndex final {\n public:\n  BoxIndex(std::span<const Point3> points, std::vector<std::size_t>& order,\n           AxisQ2Work& work) : points_(points), order_(order), work_(work) {\n    if (order_.empty()) {\n      throw std::logic_error(\"mhgp8 axis index requires a nonempty factor\");\n    }\n    static_cast<void>(build({0, order_.size()}, 0));\n  }\n\n  template <class Consumer>\n  void query(const Box3& box, Consumer&& consume) const {\n    query_node(0, box, consume);\n  }\n\n private:\n  static constexpr std::size_t absent = std::numeric_limits<std::size_t>::max();\n  struct Node {\n    Range range;\n    Box3 box;\n    std::size_t left{absent};\n    std::size_t right{absent};\n  };\n\n  std::span<const Point3> points_;\n  std::vector<std::size_t>& order_;\n  AxisQ2Work& work_;\n  std::vector<Node> nodes_;\n\n  [[nodiscard]] std::size_t build(Range range, u64 depth) {\n    const auto& first = points_[order_[range.first]];\n    Box3 box{first, first};\n    for (std::size_t index = range.first; index < range.last; ++index) {\n      counter_add(work_.tree_point_visits);\n      const auto& point = points_[order_[index]];\n      box.low = {std::min(box.low.x, point.x), std::min(box.low.y, point.y),\n                 std::min(box.low.z, point.z)};\n      box.high = {std::max(box.high.x, point.x), std::max(box.high.y, point.y),\n                  std::max(box.high.z, point.z)};\n    }\n    const auto node_id = nodes_.size();\n    nodes_.push_back(Node{range, box});\n    counter_add(work_.tree_nodes);\n    work_.max_tree_depth = std::max(work_.max_tree_depth, depth);\n    if (range.size() == 1) {\n      return node_id;\n    }\n    std::size_t axis = 0;\n    for (std::size_t candidate = 1; candidate < 3; ++candidate) {\n      if (box.high[candidate] - box.low[candidate] > box.high[axis] - box.low[axis]) {\n        axis = candidate;\n      }\n    }\n    const unsigned middle =\n        (static_cast<unsigned>(box.low[axis]) + box.high[axis]) / 2;\n    const auto begin = order_.begin() + static_cast<std::ptrdiff_t>(range.first);\n    const auto end = order_.begin() + static_cast<std::ptrdiff_t>(range.last);\n    const auto cut = std::partition(begin, end, [&](std::size_t id) {\n      counter_add(work_.tree_point_visits);\n      return points_[id][axis] <= middle;\n    });\n    const auto split = static_cast<std::size_t>(cut - order_.begin());\n    if (split == range.first || split == range.last) {\n      throw std::logic_error(\"mhgp8 axis midpoint split failed on distinct sites\");\n    }\n    // Every split halves a positive u16 coordinate extent. A path has at most\n    // 48 splits; this is an input-width proof, not a truncation of queries.\n    const auto left = build({range.first, split}, depth + 1);\n    const auto right = build({split, range.last}, depth + 1);\n    nodes_[node_id].left = left;\n    nodes_[node_id].right = right;\n    return node_id;\n  }\n\n  template <class Consumer>\n  void query_node(std::size_t node_id, const Box3& box, Consumer& consume) const {\n    counter_add(work_.query_nodes);\n    const auto& node = nodes_[node_id];\n    if (disjoint(box, node.box)) {\n      counter_add(work_.disjoint_nodes);\n      return;\n    }\n    if (contains(box, node.box)) {\n      counter_add(work_.contained_nodes);\n      consume(node.range);\n      return;\n    }\n    if (node.left == absent) {\n      throw std::logic_error(\"mhgp8 axis point box is neither contained nor disjoint\");\n    }\n    query_node(node.left, box, consume);\n    query_node(node.right, box, consume);\n  }\n};\n\n}  // namespace\n\nAxisQ2Plan::AxisQ2Plan(RectanglePtr rectangle) : rectangle_(std::move(rectangle)) {\n  if (!rectangle_) {\n    throw std::invalid_argument(\"mhgp8 axis filter requires an owned rectangle\");\n  }\n  const auto& r = *rectangle_;\n  const auto a = r.a_range();\n  const auto b = r.b_range();\n  const auto points = r.points();\n  total_ = pair_count(a.size(), b.size());\n  need_ = static_cast<std::uint8_t>(r.threshold(Lane::Q2) - r.core_credit(Lane::Q2));\n  if (need_ == 0) {\n    return;\n  }\n\n  constexpr auto maximum = std::numeric_limits<std::uint16_t>::max();\n  const Box3 universe{{0, 0, 0}, {maximum, maximum, maximum}};\n  anchor_bounds_.assign(a.size(), universe);\n  std::vector<std::size_t> order(a.size());\n  std::iota(order.begin(), order.end(), a.first);\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    std::array<std::size_t, 2> other{};\n    std::size_t offset = 0;\n    for (std::size_t candidate = 0; candidate < 3; ++candidate) {\n      if (candidate != axis) {\n        other[offset++] = candidate;\n      }\n    }\n    counter_add(work_.sort_passes);\n    counter_add(work_.sorted_sites, order.size());\n    std::sort(order.begin(), order.end(), [&](std::size_t left, std::size_t right) {\n      counter_add(work_.sort_comparisons);\n      for (const auto coordinate : other) {\n        if (points[left][coordinate] != points[right][coordinate]) {\n          return points[left][coordinate] < points[right][coordinate];\n        }\n      }\n      if (points[left][axis] != points[right][axis]) {\n        return points[left][axis] < points[right][axis];\n      }\n      return left < right;\n    });\n    const auto same_column = [&](std::size_t left, std::size_t right) {\n      return points[left][other[0]] == points[right][other[0]] &&\n             points[left][other[1]] == points[right][other[1]];\n    };\n    std::size_t begin = 0;\n    while (begin < order.size()) {\n      std::size_t end = begin + 1;\n      while (end < order.size() && same_column(order[begin], order[end])) {\n        ++end;\n      }\n      counter_add(work_.columns);\n      for (std::size_t index = begin; index < end; ++index) {\n        auto& slab = anchor_bounds_[order[index] - a.first];\n        // Within a column the varying coordinates are strictly increasing:\n        // equality would duplicate all three coordinates, rejected by r.\n        // Every one of these need sites alone satisfies H>0 if b lies\n        // STRICTLY beyond the kth coordinate. Equality remains a candidate.\n        if (index - begin >= need_) {\n          const auto bound = points[order[index - need_]][axis];\n          if (bound > slab.low[axis]) {\n            set_coordinate(slab.low, axis, bound);\n            counter_add(work_.slab_bound_updates);\n          }\n        }\n        if (end - index > need_) {\n          const auto bound = points[order[index + need_]][axis];\n          if (bound < slab.high[axis]) {\n            set_coordinate(slab.high, axis, bound);\n            counter_add(work_.slab_bound_updates);\n          }\n        }\n      }\n      begin = end;\n    }\n  }\n\n  // Each of the six exclusions certifies need witnesses independently. The\n  // closed box intersects their complements. This conservative variant does\n  // not add axes, although exact coordinate columns only intersect at the\n  // excluded anchor and thus have disjoint witness populations. The core\n  // remains disjoint from A and B by the rectangle's own certification.\n  bool needs_index = false;\n  for (const auto& slab : anchor_bounds_) {\n    if (slab.low != universe.low || slab.high != universe.high) {\n      counter_add(work_.constrained_anchors);\n    }\n    if (!contains(slab, r.b_box()) && !disjoint(slab, r.b_box())) {\n      needs_index = true;\n    }\n  }\n  b_order_.resize(b.size());\n  std::iota(b_order_.begin(), b_order_.end(), b.first);\n  std::unique_ptr<BoxIndex> index;\n  if (needs_index) {\n    index = std::make_unique<BoxIndex>(points, b_order_, work_);\n  }\n  for (std::size_t a_id = a.first; a_id < a.last; ++a_id) {\n    const auto& slab = anchor_bounds_[a_id - a.first];\n    const auto emit = [&](Range range) {\n      blocks_.push_back(AxisQ2Block{a_id, range});\n      counter_add(work_.emitted_blocks);\n      counter_add(candidates_, range.size());\n    };\n    if (contains(slab, r.b_box())) {\n      // Generic data with no repeated transverse coordinates takes this path:\n      // one descriptor per anchor, without visiting the B tree or its sites.\n      counter_add(work_.whole_factor_accepts);\n      emit({0, b_order_.size()});\n    } else if (disjoint(slab, r.b_box())) {\n      counter_add(work_.whole_factor_rejects);\n    } else {\n      if (!index) {\n        throw std::logic_error(\"mhgp8 axis query has no prepared index\");\n      }\n      index->query(slab, emit);\n    }\n  }\n  // Only range descriptors survive. Index nodes and their borrowed point span\n  // are local to construction. D emitted fragments cost O(D) memory; neither\n  // the number of visited nodes nor D has a global linear guarantee here.\n}\n\nAxisQ2Plan make_axis_q2_plan(RectanglePtr rectangle) {\n  return AxisQ2Plan(std::move(rectangle));\n}\n\nAxisQ2Plan::AxisQ2Plan(AxisQ2Plan&& other) noexcept\n    : rectangle_(std::move(other.rectangle_)), need_(std::exchange(other.need_, 0)),\n      anchor_bounds_(std::move(other.anchor_bounds_)),\n      b_order_(std::move(other.b_order_)), blocks_(std::move(other.blocks_)),\n      work_(std::exchange(other.work_, AxisQ2Work{})),\n      total_(std::exchange(other.total_, 0)), candidates_(std::exchange(other.candidates_, 0)) {\n  other.anchor_bounds_.clear();\n  other.b_order_.clear();\n  other.blocks_.clear();\n}\n\nbool AxisQ2Plan::keeps(std::size_t a_id, std::size_t b_id) const {\n  if (!rectangle_) {\n    throw std::logic_error(\"mhgp8 axis plan was moved from\");\n  }\n  const auto a = rectangle_->a_range();\n  const auto b = rectangle_->b_range();\n  if (!contains(a, a_id) || !contains(b, b_id)) {\n    throw std::invalid_argument(\"mhgp8 axis pair IDs do not belong to this rectangle\");\n  }\n  return need_ != 0 && contains(anchor_bounds_[a_id - a.first], rectangle_->points()[b_id]);\n}\n\n}  // namespace mhgp8\n",
+    "pipeline/axis_q2.hpp": "#pragma once\n\n#include \"local_credits.hpp\"\n\n#include <cstddef>\n#include <cstdint>\n#include <span>\n#include <stdexcept>\n#include <vector>\n\nnamespace mhgp8 {\n\nstruct AxisQ2Work {\n  u64 sort_passes{};\n  u64 sorted_sites{};\n  u64 sort_comparisons{};\n  u64 columns{};\n  u64 constrained_anchors{};\n  u64 slab_bound_updates{};\n  u64 tree_point_visits{};\n  u64 tree_nodes{};\n  u64 query_nodes{};\n  u64 contained_nodes{};\n  u64 disjoint_nodes{};\n  u64 whole_factor_accepts{};\n  u64 whole_factor_rejects{};\n  u64 emitted_blocks{};\n  u64 max_tree_depth{};\n};\n\n// A range in b_order(), not in the original point array. Each block contains\n// one original A point ID and a disjoint contiguous part of the B permutation.\nstruct AxisQ2Block {\n  std::size_t a_id{};\n  Range b;\n};\n\nclass AxisQ2Plan;\n[[nodiscard]] AxisQ2Plan make_axis_q2_plan(RectanglePtr rectangle);\n\nclass AxisQ2Plan final {\n public:\n  AxisQ2Plan(const AxisQ2Plan&) = delete;\n  AxisQ2Plan& operator=(const AxisQ2Plan&) = delete;\n  AxisQ2Plan(AxisQ2Plan&& other) noexcept;\n  AxisQ2Plan& operator=(AxisQ2Plan&&) = delete;\n\n  [[nodiscard]] const PreparedRectangle& rectangle() const {\n    if (!rectangle_) {\n      throw std::logic_error(\"mhgp8 axis plan was moved from\");\n    }\n    return *rectangle_;\n  }\n  [[nodiscard]] std::uint8_t need() const noexcept { return need_; }\n  [[nodiscard]] bool keeps(std::size_t a_id, std::size_t b_id) const;\n  [[nodiscard]] u64 candidate_pairs() const noexcept { return candidates_; }\n  [[nodiscard]] u64 total_pairs() const noexcept { return total_; }\n  [[nodiscard]] const AxisQ2Work& work() const noexcept { return work_; }\n  [[nodiscard]] std::span<const AxisQ2Block> blocks() const noexcept { return blocks_; }\n  [[nodiscard]] std::span<const std::size_t> b_order() const noexcept { return b_order_; }\n\n  // Expanding the represented residual really pays O(candidate_pairs).\n  // Neither construction nor counting invokes this callback implicitly.\n  template <class Consumer>\n  void for_each_candidate(Consumer&& consumer) const {\n    if (!rectangle_) {\n      throw std::logic_error(\"mhgp8 axis plan was moved from\");\n    }\n    for (const auto& block : blocks_) {\n      for (std::size_t index = block.b.first; index < block.b.last; ++index) {\n        consumer(block.a_id, b_order_[index]);\n      }\n    }\n  }\n\n private:\n  explicit AxisQ2Plan(RectanglePtr rectangle);\n  friend AxisQ2Plan make_axis_q2_plan(RectanglePtr rectangle);\n\n  RectanglePtr rectangle_;\n  std::uint8_t need_{};\n  std::vector<Box3> anchor_bounds_;\n  std::vector<std::size_t> b_order_;\n  std::vector<AxisQ2Block> blocks_;\n  AxisQ2Work work_;\n  u64 total_{};\n  u64 candidates_{};\n};\n\n}  // namespace mhgp8\n",
+    "pipeline/local_credits.cpp": "#include \"local_credits.hpp\"\n\n#include <algorithm>\n#include <limits>\n#include <numeric>\n#include <optional>\n#include <stdexcept>\n#include <utility>\n\n#include \"spindle/predicates.hpp\"\n#include \"tube_credits.hpp\"\n\nnamespace mhgp8 {\nnamespace {\n\n[[nodiscard]] bool contains(Range range, std::size_t id) {\n  return range.first <= id && id < range.last;\n}\n\n[[nodiscard]] Box3 bounds(std::span<const Point3> points, Range range) {\n  Box3 result{points[range.first], points[range.first]};\n  for (std::size_t id = range.first + 1; id < range.last; ++id) {\n    const auto& p = points[id];\n    result.low = {std::min(result.low.x, p.x), std::min(result.low.y, p.y),\n                  std::min(result.low.z, p.z)};\n    result.high = {std::max(result.high.x, p.x), std::max(result.high.y, p.y),\n                   std::max(result.high.z, p.z)};\n  }\n  return result;\n}\n\n[[nodiscard]] i64 diameter_squared(const Box3& box) {\n  i64 value = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const i64 width = static_cast<i64>(box.high[axis]) - box.low[axis];\n    value += width * width;\n  }\n  return value;\n}\n\n[[nodiscard]] u64 pair_count(std::size_t a, std::size_t b) {\n  if (b != 0 && a > std::numeric_limits<u64>::max() / b) {\n    throw std::overflow_error(\"mhgp8 candidate cardinal exceeds u64\");\n  }\n  return static_cast<u64>(a) * static_cast<u64>(b);\n}\n\n[[nodiscard]] std::vector<std::uint8_t> pool_credits(\n    const PreparedRectangle& rectangle, Range range, const Box3& own,\n    const Box3& opposite, Lane lane, std::uint8_t need, Work& work) {\n  // Proposal only: the h+1 best projections include alternatives for the\n  // anchor itself. Failing to find a witness never removes a candidate.\n  struct Proposal { i64 score; std::size_t id; };\n  std::array<i64, 3> direction{};\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    direction[axis] = static_cast<i64>(opposite.low[axis]) + opposite.high[axis]\n                      - own.low[axis] - own.high[axis];\n  }\n  std::vector<Proposal> pool;\n  const std::size_t capacity = std::min(range.size(), std::size_t{need} + 1);\n  pool.reserve(capacity);\n  for (std::size_t id = range.first; id < range.last; ++id) {\n    i64 score = 0;\n    for (std::size_t axis = 0; axis < 3; ++axis) {\n      score += direction[axis] * rectangle.points()[id][axis];\n    }\n    auto position = pool.begin();\n    while (position != pool.end()) {\n      counter_add(work.pool_selection_tests);\n      if (score > position->score || (score == position->score && id < position->id)) {\n        break;\n      }\n      ++position;\n    }\n    if (position != pool.end() || pool.size() < capacity) {\n      pool.insert(position, Proposal{score, id});\n      if (pool.size() > capacity) {\n        pool.pop_back();\n      }\n    }\n  }\n  counter_add(work.pool_selected, pool.size());\n  std::vector<std::uint8_t> credits(range.size(), 0);\n  for (std::size_t id = range.first; id < range.last; ++id) {\n    auto& value = credits[id - range.first];\n    for (const auto& proposal : pool) {\n      if (proposal.id != id && universal_witness(\n              lane, rectangle.points()[id], opposite,\n              rectangle.points()[proposal.id], work.predicates)) {\n        ++value;\n        if (value == need) {\n          break;\n        }\n      }\n    }\n  }\n  return credits;\n}\n\nclass DualTree {\n public:\n  DualTree(std::span<const Point3> points, Range range, const Box3& opposite,\n           Lane lane, std::uint8_t need, Work& work)\n      : points_(points), range_(range), opposite_(opposite), lane_(lane),\n        need_(need), work_(work), order_(range.size()) {\n    std::iota(order_.begin(), order_.end(), range.first);\n    // Do not reserve 2*n speculatively or store an anchor x witness matrix.\n    build({0, order_.size()}, 0);\n  }\n\n  [[nodiscard]] std::vector<std::uint8_t> run() {\n    visit(0, 0, 0);\n    std::vector<std::uint8_t> values(range_.size(), 0);\n    extract(0, values);\n    return values;\n  }\n\n private:\n  static constexpr std::size_t absent = std::numeric_limits<std::size_t>::max();\n  struct Node {\n    Range range;\n    Box3 box;\n    std::size_t left{absent};\n    std::size_t right{absent};\n    std::uint8_t minimum{};\n    std::uint8_t lazy{};\n    [[nodiscard]] bool leaf() const noexcept { return left == absent; }\n  };\n  std::span<const Point3> points_;\n  Range range_;\n  const Box3& opposite_;\n  Lane lane_;\n  std::uint8_t need_;\n  Work& work_;\n  std::vector<std::size_t> order_;\n  std::vector<Node> nodes_;\n\n  std::size_t build(Range range, u64 depth) {\n    Box3 box{points_[order_[range.first]], points_[order_[range.first]]};\n    for (std::size_t i = range.first; i < range.last; ++i) {\n      counter_add(work_.tree_point_visits);\n      const auto& p = points_[order_[i]];\n      box.low = {std::min(box.low.x, p.x), std::min(box.low.y, p.y),\n                 std::min(box.low.z, p.z)};\n      box.high = {std::max(box.high.x, p.x), std::max(box.high.y, p.y),\n                  std::max(box.high.z, p.z)};\n    }\n    const std::size_t index = nodes_.size();\n    nodes_.push_back(Node{range, box});\n    counter_add(work_.tree_nodes);\n    work_.max_tree_depth = std::max(work_.max_tree_depth, depth);\n    if (range.size() == 1) {\n      return index;\n    }\n    std::size_t axis = 0;\n    for (std::size_t candidate = 1; candidate < 3; ++candidate) {\n      if (box.high[candidate] - box.low[candidate] > box.high[axis] - box.low[axis]) {\n        axis = candidate;\n      }\n    }\n    const unsigned middle = (static_cast<unsigned>(box.low[axis]) + box.high[axis]) / 2;\n    const auto first = order_.begin() + static_cast<std::ptrdiff_t>(range.first);\n    const auto last = order_.begin() + static_cast<std::ptrdiff_t>(range.last);\n    const auto cut = std::partition(first, last, [&](std::size_t id) {\n      counter_add(work_.tree_point_visits);\n      return points_[id][axis] <= middle;\n    });\n    const auto split = static_cast<std::size_t>(cut - order_.begin());\n    if (split == range.first || split == range.last) {\n      throw std::logic_error(\"mhgp8 distinct points failed midpoint split\");\n    }\n    // u16 midpoint splits halve a positive coordinate span: depth <=48.\n    // This is an input representation bound, not a run-time truncation.\n    const auto left = build({range.first, split}, depth + 1);\n    const auto right = build({split, range.last}, depth + 1);\n    nodes_[index].left = left;\n    nodes_[index].right = right;\n    return index;\n  }\n\n  void add(std::size_t index, std::size_t amount) {\n    auto& node = nodes_[index];\n    const auto increment = std::min<std::size_t>(need_, amount);\n    node.minimum = static_cast<std::uint8_t>(\n        std::min<std::size_t>(need_, node.minimum + increment));\n    node.lazy = static_cast<std::uint8_t>(\n        std::min<std::size_t>(need_, node.lazy + increment));\n  }\n\n  void push(std::size_t index) {\n    auto& node = nodes_[index];\n    if (!node.leaf() && node.lazy != 0) {\n      add(node.left, node.lazy);\n      add(node.right, node.lazy);\n      node.lazy = 0;\n    }\n  }\n\n  void visit(std::size_t anchors, std::size_t witnesses, u64 depth) {\n    counter_add(work_.dual_tasks);\n    work_.max_task_depth = std::max(work_.max_task_depth, depth);\n    auto& a = nodes_[anchors];\n    const auto& z = nodes_[witnesses];\n    if (a.minimum == need_) {\n      counter_add(work_.saturated_tasks);\n      return;\n    }\n    if (a.leaf() && z.leaf()) {\n      counter_add(work_.leaf_pairs);\n      const auto aid = order_[a.range.first];\n      const auto zid = order_[z.range.first];\n      if (aid != zid && universal_witness(lane_, points_[aid], opposite_,\n                                          points_[zid], work_.predicates)) {\n        add(anchors, 1);\n      }\n      return;\n    }\n    const auto decision = classify_witness_block(\n        lane_, a.box, opposite_, z.box, work_.predicates);\n    if (decision == BlockDecision::Credit) {\n      // H>0 excludes any shared site between these boxes. Every site in Z\n      // is therefore a distinct non-self witness of every anchor in U.\n      add(anchors, z.range.size());\n      counter_add(work_.credited_blocks);\n      return;\n    }\n    if (decision == BlockDecision::NoCredit) {\n      counter_add(work_.noncredit_blocks);\n      return;\n    }\n    if (!a.leaf() && (z.leaf() || a.range.size() >= z.range.size())) {\n      push(anchors);\n      visit(a.left, witnesses, depth + 1);\n      visit(a.right, witnesses, depth + 1);\n      a.minimum = std::min(nodes_[a.left].minimum, nodes_[a.right].minimum);\n    } else {\n      visit(anchors, z.left, depth + 1);\n      visit(anchors, z.right, depth + 1);\n    }\n  }\n\n  void extract(std::size_t index, std::vector<std::uint8_t>& values) {\n    const auto& node = nodes_[index];\n    if (node.leaf()) {\n      values[order_[node.range.first] - range_.first] = node.minimum;\n      return;\n    }\n    push(index);\n    extract(node.left, values);\n    extract(node.right, values);\n  }\n};\n\n[[nodiscard]] std::vector<Range> group(std::span<const std::uint8_t> credits,\n                                      Range original, std::uint8_t need,\n                                      std::vector<std::size_t>& order) {\n  std::vector<Range> groups(std::size_t{need} + 1);\n  for (const auto credit : credits) {\n    ++groups[credit].last;\n  }\n  std::size_t offset = 0;\n  for (auto& range : groups) {\n    const auto count = range.last;\n    range = {offset, offset + count};\n    offset += count;\n  }\n  auto cursors = groups;\n  order.resize(credits.size());\n  for (std::size_t i = 0; i < credits.size(); ++i) {\n    order[cursors[credits[i]].first++] = original.first + i;\n  }\n  return groups;\n}\n\n}  // namespace\n\nRectanglePtr prepare_rectangle(const RectangleInput& input, unsigned kmax,\n                               unsigned separation_s) {\n  // A move does not revoke pointers previously taken by the caller. Certify\n  // only a private copy, then share this owner between immutable plans.\n  auto result = std::shared_ptr<PreparedRectangle>(new PreparedRectangle());\n  result->points_ = input.points;\n  result->a_ = input.a;\n  result->b_ = input.b;\n  result->kmax_ = kmax;\n  result->separation_s_ = separation_s;\n  auto core_candidates = input.core_candidates;\n  if (kmax == 0 || kmax > 10 || separation_s == 0) {\n    throw std::invalid_argument(\"mhgp8 P0 requires Kmax in [1,10] and s>0\");\n  }\n  const auto valid_range = [&result](Range range) {\n    return range.first < range.last && range.last <= result->points_.size();\n  };\n  if (!valid_range(result->a_) || !valid_range(result->b_) ||\n      (result->a_.first < result->b_.last && result->b_.first < result->a_.last)) {\n    throw std::invalid_argument(\"mhgp8 requires nonempty disjoint in-range factors\");\n  }\n  result->box_a_ = bounds(result->points_, result->a_);\n  result->box_b_ = bounds(result->points_, result->b_);\n  i64 gap2 = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const auto& a = result->box_a_;\n    const auto& b = result->box_b_;\n    const i64 gap = std::max({i64{0}, static_cast<i64>(a.low[axis]) - b.high[axis],\n                             static_cast<i64>(b.low[axis]) - a.high[axis]});\n    gap2 += gap * gap;\n  }\n  const auto diameter2 = std::max(diameter_squared(result->box_a_),\n                                  diameter_squared(result->box_b_));\n  if (static_cast<i128>(gap2) < static_cast<i128>(separation_s) * separation_s * diameter2) {\n    throw std::invalid_argument(\"mhgp8 rectangle fails declared box separation\");\n  }\n  std::vector<u64> keys;\n  keys.reserve(result->points_.size());\n  for (const auto& point : result->points_) {\n    counter_add(result->work_.validation_points);\n    keys.push_back((static_cast<u64>(point.x) << 32) |\n                   (static_cast<u64>(point.y) << 16) | point.z);\n  }\n  std::sort(keys.begin(), keys.end(), [&result](u64 a, u64 b) {\n    counter_add(result->work_.uniqueness_comparisons);\n    return a < b;\n  });\n  if (std::adjacent_find(keys.begin(), keys.end()) != keys.end()) {\n    throw std::invalid_argument(\"mhgp8 P0 requires distinct u16 sites\");\n  }\n  std::sort(core_candidates.begin(), core_candidates.end());\n  if (std::adjacent_find(core_candidates.begin(), core_candidates.end()) !=\n      core_candidates.end()) {\n    throw std::invalid_argument(\"mhgp8 core proposals contain duplicate IDs\");\n  }\n  for (const auto id : core_candidates) {\n    if (id >= result->points_.size() || contains(result->a_, id) || contains(result->b_, id)) {\n      throw std::invalid_argument(\"mhgp8 core proposals must be outside both factors\");\n    }\n  }\n  for (const auto lane : {Lane::Q2, Lane::Q3, Lane::Q4}) {\n    auto& credit = result->core_[arity(lane) - 2];\n    for (const auto id : core_candidates) {\n      if (credit == result->threshold(lane)) {\n        break;\n      }\n      if (box_witness(lane, result->box_a_, result->box_b_, result->points_[id],\n                       result->work_.predicates)) {\n        ++credit;\n      }\n    }\n  }\n  return result;\n}\n\nstd::uint8_t PreparedRectangle::threshold(Lane lane) const {\n  const auto q = arity(lane);\n  return q > kmax_ + 1 ? 0 : static_cast<std::uint8_t>(kmax_ + 2 - q);\n}\n\nstd::uint8_t PreparedRectangle::core_credit(Lane lane) const {\n  return core_[arity(lane) - 2];\n}\n\nvoid CreditPlan::initialize(RectanglePtr rectangle, Lane lane, Strategy strategy) {\n  require_valid_lane(lane);\n  if (!rectangle || (strategy != Strategy::Pool && strategy != Strategy::DualBlocks &&\n                     strategy != Strategy::Tubes)) {\n    throw std::invalid_argument(\"mhgp8 requires an owned rectangle and valid strategy\");\n  }\n  rectangle_ = std::move(rectangle);\n  lane_ = lane;\n  strategy_ = strategy;\n  threshold_ = rectangle_->threshold(lane);\n  core_ = rectangle_->core_credit(lane);\n  total_ = pair_count(rectangle_->a_range().size(), rectangle_->b_range().size());\n  a_.resize(rectangle_->a_range().size(), 0);\n  b_.resize(rectangle_->b_range().size(), 0);\n}\n\nCreditPlan make_credit_plan(RectanglePtr rectangle, Lane lane, Strategy strategy) {\n  CreditPlan plan;\n  plan.initialize(std::move(rectangle), lane, strategy);\n  const auto& r = *plan.rectangle_;\n  const auto need = static_cast<std::uint8_t>(plan.threshold_ - plan.core_);\n  if (need == 0) {\n    return plan;\n  }\n  if (strategy == Strategy::Pool) {\n    plan.a_ = pool_credits(r, r.a_range(), r.a_box(), r.b_box(), lane, need, plan.work_);\n    plan.b_ = pool_credits(r, r.b_range(), r.b_box(), r.a_box(), lane, need, plan.work_);\n  } else if (strategy == Strategy::DualBlocks) {\n    plan.a_ = DualTree(r.points(), r.a_range(), r.b_box(), lane, need, plan.work_).run();\n    plan.b_ = DualTree(r.points(), r.b_range(), r.a_box(), lane, need, plan.work_).run();\n  } else {\n    plan.a_ = tube_detail::credits(r, r.a_range(), r.a_box(), r.b_box(), lane, need, plan.work_);\n    plan.b_ = tube_detail::credits(r, r.b_range(), r.b_box(), r.a_box(), lane, need, plan.work_);\n  }\n  plan.group_residual();\n  return plan;\n}\n\nvoid CreditPlan::group_residual() {\n  const auto& r = *rectangle_;\n  const auto need = static_cast<std::uint8_t>(threshold_ - core_);\n  if (need == 0) {\n    return;\n  }\n  const auto a_groups = group(a_, r.a_range(), need, a_order_);\n  const auto b_groups = group(b_, r.b_range(), need, b_order_);\n  for (std::size_t a = 0; a < need; ++a) {\n    if (a_groups[a].size() == 0) {\n      continue;\n    }\n    for (std::size_t b = 0; a + b < need; ++b) {\n      if (b_groups[b].size() != 0) {\n        blocks_.push_back({a_groups[a], b_groups[b]});\n        counter_add(candidates_, pair_count(a_groups[a].size(), b_groups[b].size()));\n      }\n    }\n  }\n}\n\nCreditBatch make_credit_batch(RectanglePtr rectangle, Strategy strategy) {\n  if (strategy != Strategy::Tubes) {\n    return CreditBatch({make_credit_plan(rectangle, Lane::Q2, strategy),\n                        make_credit_plan(rectangle, Lane::Q3, strategy),\n                        make_credit_plan(rectangle, Lane::Q4, strategy)}, Work{});\n  }\n  std::array<CreditPlan, 3> plans{CreditPlan{}, CreditPlan{}, CreditPlan{}};\n  Work preparation_work;\n  std::optional<tube_detail::PreparedTubes> a_tubes;\n  std::optional<tube_detail::PreparedTubes> b_tubes;\n  for (const auto lane : {Lane::Q2, Lane::Q3, Lane::Q4}) {\n    auto& plan = plans[arity(lane) - 2];\n    plan.initialize(rectangle, lane, strategy);\n    const auto need = static_cast<std::uint8_t>(plan.threshold_ - plan.core_);\n    if (need == 0) {\n      continue;\n    }\n    if (!a_tubes) {\n      a_tubes.emplace(*rectangle, rectangle->a_range(), rectangle->a_box(),\n                      rectangle->b_box(), preparation_work);\n      b_tubes.emplace(*rectangle, rectangle->b_range(), rectangle->b_box(),\n                      rectangle->a_box(), preparation_work);\n    }\n    plan.a_ = tube_detail::credits(*a_tubes, lane, need, plan.work_);\n    plan.b_ = tube_detail::credits(*b_tubes, lane, need, plan.work_);\n    plan.group_residual();\n  }\n  return CreditBatch(std::move(plans), preparation_work);\n}\n\nbool CreditPlan::keeps(std::size_t a_id, std::size_t b_id) const {\n  const auto a = rectangle().a_range();\n  const auto b = rectangle().b_range();\n  if (!contains(a, a_id) || !contains(b, b_id)) {\n    throw std::invalid_argument(\"mhgp8 pair IDs do not belong to this ordered rectangle\");\n  }\n  return core_ + a_[a_id - a.first] + b_[b_id - b.first] < threshold_;\n}\n\n}  // namespace mhgp8\n",
+    "pipeline/local_credits.hpp": "#pragma once\n\n#include <array>\n#include <cstddef>\n#include <cstdint>\n#include <memory>\n#include <span>\n#include <utility>\n#include <vector>\n\n#include \"core/types.hpp\"\n\nnamespace mhgp8 {\n\n// Half-open ranges into the original, immutable input order. Not Morton IDs.\nstruct Range {\n  std::size_t first{};\n  std::size_t last{};\n  [[nodiscard]] std::size_t size() const noexcept { return last - first; }\n};\n\nstruct RectangleInput {\n  std::vector<Point3> points;\n  Range a;\n  Range b;\n  // Proposals, not an externally trusted count. All IDs are checked; only\n  // strictly certified universal sites outside A union B receive credit.\n  std::vector<std::size_t> core_candidates;\n};\n\nstruct Work {\n  PredicateWork predicates{};\n  std::uint64_t validation_points{};\n  std::uint64_t uniqueness_comparisons{};\n  std::uint64_t pool_selection_tests{};\n  std::uint64_t pool_selected{};\n  std::uint64_t tree_nodes{};\n  std::uint64_t tree_point_visits{};\n  std::uint64_t dual_tasks{};\n  std::uint64_t credited_blocks{};\n  std::uint64_t noncredit_blocks{};\n  std::uint64_t leaf_pairs{};\n  std::uint64_t saturated_tasks{};\n  std::uint64_t max_tree_depth{};\n  std::uint64_t max_task_depth{};\n  std::uint64_t tube_records{};\n  std::uint64_t tube_cells{};\n  std::uint64_t tube_sort_comparisons{};\n  std::uint64_t tube_sweep_tests{};\n  std::uint64_t tube_credited_sites{};\n  std::uint64_t tube_separation_fallbacks{};\n};\n\nclass PreparedRectangle;\nusing RectanglePtr = std::shared_ptr<const PreparedRectangle>;\n\n// Throws invalid_argument for an unsupported/invalid input, before exposing\n// any plan. Separation convention: box_gap >= s * max(box_diameter).\n// Copies into private storage before certification. Even an rvalue argument\n// is not consumed: moving a vector would retain the caller's mutable aliases.\n[[nodiscard]] RectanglePtr prepare_rectangle(const RectangleInput& input,\n                                             unsigned kmax,\n                                             unsigned separation_s);\n\nclass PreparedRectangle final {\n public:\n  PreparedRectangle(const PreparedRectangle&) = delete;\n  PreparedRectangle& operator=(const PreparedRectangle&) = delete;\n  PreparedRectangle(PreparedRectangle&&) = delete;\n  PreparedRectangle& operator=(PreparedRectangle&&) = delete;\n  [[nodiscard]] std::span<const Point3> points() const noexcept { return points_; }\n  [[nodiscard]] Range a_range() const noexcept { return a_; }\n  [[nodiscard]] Range b_range() const noexcept { return b_; }\n  [[nodiscard]] const Box3& a_box() const noexcept { return box_a_; }\n  [[nodiscard]] const Box3& b_box() const noexcept { return box_b_; }\n  [[nodiscard]] unsigned kmax() const noexcept { return kmax_; }\n  [[nodiscard]] unsigned separation_s() const noexcept { return separation_s_; }\n  [[nodiscard]] std::uint8_t threshold(Lane lane) const;\n  [[nodiscard]] std::uint8_t core_credit(Lane lane) const;\n  [[nodiscard]] const Work& preparation_work() const noexcept { return work_; }\n\n private:\n  PreparedRectangle() = default;\n  friend RectanglePtr prepare_rectangle(const RectangleInput&, unsigned, unsigned);\n  std::vector<Point3> points_;\n  Range a_;\n  Range b_;\n  Box3 box_a_;\n  Box3 box_b_;\n  unsigned kmax_{};\n  unsigned separation_s_{};\n  std::array<std::uint8_t, 3> core_{};\n  Work work_;\n};\n\nenum class Strategy { Pool, DualBlocks, Tubes };\n\n// Index ranges into the plan's grouped a_order()/b_order(), not point ranges.\nstruct CandidateBlock {\n  Range a;\n  Range b;\n};\n\nclass CreditPlan;\nclass CreditBatch;\n[[nodiscard]] CreditPlan make_credit_plan(RectanglePtr rectangle,\n                                          Lane lane, Strategy strategy);\n// Three geometric lanes, NOT an HGP hierarchy tower. Tubes share their\n// factor preparation; the other strategies keep their independent work.\n[[nodiscard]] CreditBatch make_credit_batch(RectanglePtr rectangle, Strategy strategy);\n\nclass CreditPlan final {\n public:\n  CreditPlan(const CreditPlan&) = default;\n  CreditPlan(CreditPlan&& other) noexcept { swap(other); }\n  CreditPlan& operator=(const CreditPlan& other) {\n    if (this != &other) {\n      CreditPlan replacement(other);\n      swap(replacement);\n    }\n    return *this;\n  }\n  CreditPlan& operator=(CreditPlan&& other) noexcept {\n    if (this != &other) {\n      CreditPlan replacement(std::move(other));\n      swap(replacement);\n    }\n    return *this;\n  }\n  [[nodiscard]] const PreparedRectangle& rectangle() const {\n    if (!rectangle_) {\n      throw std::logic_error(\"mhgp8 moved-from credit plan has no geometry\");\n    }\n    return *rectangle_;\n  }\n  [[nodiscard]] Lane lane() const noexcept { return lane_; }\n  [[nodiscard]] Strategy strategy() const noexcept { return strategy_; }\n  [[nodiscard]] std::uint8_t threshold() const noexcept { return threshold_; }\n  [[nodiscard]] std::uint8_t core_credit() const noexcept { return core_; }\n  [[nodiscard]] std::span<const std::uint8_t> a_credits() const noexcept { return a_; }\n  [[nodiscard]] std::span<const std::uint8_t> b_credits() const noexcept { return b_; }\n  [[nodiscard]] std::span<const std::size_t> a_order() const noexcept { return a_order_; }\n  [[nodiscard]] std::span<const std::size_t> b_order() const noexcept { return b_order_; }\n  [[nodiscard]] std::span<const CandidateBlock> blocks() const noexcept { return blocks_; }\n  [[nodiscard]] std::uint64_t total_pairs() const noexcept { return total_; }\n  [[nodiscard]] std::uint64_t candidate_pairs() const noexcept { return candidates_; }\n  [[nodiscard]] const Work& work() const noexcept { return work_; }\n  [[nodiscard]] bool keeps(std::size_t a_id, std::size_t b_id) const;\n\n  // Explicit expansion is consumer work O(candidate_pairs), never required\n  // merely to construct/count this plan. The callback receives original IDs.\n  template <class Consumer>\n  void for_each_candidate(Consumer&& consumer) const {\n    static_cast<void>(rectangle());\n    for (const auto& block : blocks_)\n      for (std::size_t a = block.a.first; a < block.a.last; ++a)\n        for (std::size_t b = block.b.first; b < block.b.last; ++b)\n          consumer(a_order_[a], b_order_[b]);\n  }\n\n private:\n  CreditPlan() = default;\n  friend CreditPlan make_credit_plan(RectanglePtr, Lane, Strategy);\n  friend CreditBatch make_credit_batch(RectanglePtr, Strategy);\n  friend class CreditBatch;\n  // Copy assignment must not install a new owner before allocating all of\n  // its associated arrays. Swapping a complete replacement cannot throw.\n  void swap(CreditPlan& other) noexcept {\n    rectangle_.swap(other.rectangle_);\n    std::swap(lane_, other.lane_);\n    std::swap(strategy_, other.strategy_);\n    std::swap(threshold_, other.threshold_);\n    std::swap(core_, other.core_);\n    a_.swap(other.a_);\n    b_.swap(other.b_);\n    a_order_.swap(other.a_order_);\n    b_order_.swap(other.b_order_);\n    blocks_.swap(other.blocks_);\n    std::swap(total_, other.total_);\n    std::swap(candidates_, other.candidates_);\n    std::swap(work_, other.work_);\n  }\n  void initialize(RectanglePtr rectangle, Lane lane, Strategy strategy);\n  void group_residual();\n  RectanglePtr rectangle_;\n  Lane lane_{Lane::Q2};\n  Strategy strategy_{Strategy::Pool};\n  std::uint8_t threshold_{};\n  std::uint8_t core_{};\n  std::vector<std::uint8_t> a_;\n  std::vector<std::uint8_t> b_;\n  std::vector<std::size_t> a_order_;\n  std::vector<std::size_t> b_order_;\n  std::vector<CandidateBlock> blocks_;\n  std::uint64_t total_{};\n  std::uint64_t candidates_{};\n  Work work_;\n};\n\nclass CreditBatch final {\n public:\n  CreditBatch(const CreditBatch&) = default;\n  CreditBatch(CreditBatch&&) noexcept = default;\n  CreditBatch& operator=(const CreditBatch& other) {\n    if (this != &other) {\n      CreditBatch replacement(other);\n      swap(replacement);\n    }\n    return *this;\n  }\n  CreditBatch& operator=(CreditBatch&& other) noexcept {\n    if (this != &other) {\n      CreditBatch replacement(std::move(other));\n      swap(replacement);\n    }\n    return *this;\n  }\n  [[nodiscard]] const CreditPlan& plan(Lane lane) const {\n    return plans_[arity(lane) - 2];\n  }\n  // Count once, not once per plan. For Tubes, per-plan work contains only\n  // the lane-dependent sweep, whereas grid/sort/cells belong here.\n  [[nodiscard]] const Work& shared_work() const noexcept { return shared_work_; }\n\n private:\n  friend CreditBatch make_credit_batch(RectanglePtr, Strategy);\n  void swap(CreditBatch& other) noexcept {\n    for (std::size_t index = 0; index < plans_.size(); ++index) {\n      plans_[index].swap(other.plans_[index]);\n    }\n    std::swap(shared_work_, other.shared_work_);\n  }\n  CreditBatch(std::array<CreditPlan, 3> plans, Work shared_work)\n      : plans_(std::move(plans)), shared_work_(shared_work) {}\n  std::array<CreditPlan, 3> plans_;\n  Work shared_work_;\n};\n\n}  // namespace mhgp8\n",
+    "pipeline/tube_credits.hpp": "#pragma once\n\n#include \"local_credits.hpp\"\n\n#include <algorithm>\n#include <array>\n#include <limits>\n#include <stdexcept>\n#include <vector>\n\nnamespace mhgp8::tube_detail {\n\n// New C++ realization of the independently supplied geometric certificate:\n// audits/P0_TUBES_ET_RANGS.md, sections 1-3. No historical qualification is\n// inherited. Geometry, grid, sort and transverse bounds can now be prepared\n// once for all lanes. Only this temporary record holds grid/transverse data;\n// the immutable preparation retains compact projections/IDs and cell bounds.\n// Suffix populations are counted without expanding witness identities.\nstruct Record {\n  std::array<i64, 3> cell{};\n  i64 projection{};\n  std::size_t point_id{};\n  std::array<i64, 3> transverse{};\n};\n\n[[nodiscard]] inline i64 diameter_squared(const Box3& box) {\n  i64 result = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const i64 delta = static_cast<i64>(box.high[axis]) -\n                      static_cast<i64>(box.low[axis]);\n    result += delta * delta;\n  }\n  return result;\n}\n\nclass PreparedTubes final {\n private:\n  struct Projection {\n    i64 projection;\n    std::size_t point_id;\n  };\n\n  struct Cell {\n    Range records;\n    i128 bound;\n  };\n\n  Range range_;\n  std::vector<Projection> records_;\n  std::vector<Cell> cells_;\n\n public:\n  // The input span exists only while constructing this object. No borrowed\n  // coordinates, mutable records or externally supplied credits survive.\n  // The API which publishes the resulting plans keeps their RectanglePtr.\n  PreparedTubes(const PreparedRectangle& rectangle, Range range, const Box3& own,\n                const Box3& opposite, Work& work) : range_(range) {\n    require_valid_box(own);\n    require_valid_box(opposite);\n    const auto points = rectangle.points();\n    if (range.first > range.last || range.last > points.size()) {\n      throw std::invalid_argument(\"mhgp8 tube range is outside its owner\");\n    }\n    if (range.first == range.last) {\n      return;\n    }\n\n    std::array<i64, 3> direction{};\n    i64 direction_squared = 0;\n    i64 maximum_component = 0;\n    for (std::size_t axis = 0; axis < 3; ++axis) {\n      direction[axis] = static_cast<i64>(opposite.low[axis]) +\n                        static_cast<i64>(opposite.high[axis]) -\n                        static_cast<i64>(own.low[axis]) -\n                        static_cast<i64>(own.high[axis]);\n      direction_squared += direction[axis] * direction[axis];\n      const i64 magnitude = direction[axis] < 0 ? -direction[axis] : direction[axis];\n      maximum_component = std::max(maximum_component, magnitude);\n    }\n\n    // d=2(c_opposite-c_own), whereas each box diagonal has length 2R.\n    // Thus D>=10R is d^2>=100*max(diagonal^2), NOT 25 times that quantity.\n    // The factory also admits weaker separation settings. Do not silently use\n    // the tube lemma on those: zero is still a valid minorant and retains the\n    // complete residual. This is an observable fallback, not an inactive lane.\n    const i64 maximum_diameter_squared =\n        std::max(diameter_squared(own), diameter_squared(opposite));\n    if (direction_squared == 0 ||\n        static_cast<i128>(direction_squared) <\n            100 * static_cast<i128>(maximum_diameter_squared)) {\n      counter_add(work.tube_separation_fallbacks);\n      return;\n    }\n\n    // M=65535: |d_i|<=2M, |d.p|<=6M^2, |d cross p|_i<=4M^2.\n    // Differences along the same d satisfy |Delta|<=6M^2 and transverse\n    // coordinate spans <=4M^2. Q<=48M^4, so 16Q and 9Delta^2 are <2^74.\n    // Products in Q and the acceptance test are widened BEFORE multiplying.\n    // Raw coordinates, signed differences, cell offsets and width fit i64.\n    const i64 width = 4 * maximum_component;\n    std::array<i64, 3> origin{\n        std::numeric_limits<i64>::max(), std::numeric_limits<i64>::max(),\n        std::numeric_limits<i64>::max()};\n    std::vector<Record> records;\n    records.reserve(range.size());\n    for (std::size_t id = range.first; id < range.last; ++id) {\n      const Point3& point = points[id];\n      Record record;\n      record.point_id = id;\n      for (std::size_t axis = 0; axis < 3; ++axis) {\n        if (point[axis] < own.low[axis] || point[axis] > own.high[axis]) {\n          throw std::invalid_argument(\"mhgp8 tube point is outside its own box\");\n        }\n        record.projection += direction[axis] * static_cast<i64>(point[axis]);\n        const std::size_t j = (axis + 1) % 3;\n        const std::size_t k = (axis + 2) % 3;\n        record.transverse[axis] = direction[j] * static_cast<i64>(point[k]) -\n                                  direction[k] * static_cast<i64>(point[j]);\n        origin[axis] = std::min(origin[axis], record.transverse[axis]);\n      }\n      records.push_back(record);\n      counter_add(work.tube_records);\n    }\n    for (Record& record : records) {\n      for (std::size_t axis = 0; axis < 3; ++axis) {\n        // Translation by the common minimum makes the numerator nonnegative:\n        // C++ integer division is exactly the desired floor, even when the\n        // original cross-product coordinates or d itself were negative.\n        record.cell[axis] = (record.transverse[axis] - origin[axis]) / width;\n      }\n    }\n    std::sort(records.begin(), records.end(), [&work](const Record& left,\n                                                    const Record& right) {\n      counter_add(work.tube_sort_comparisons);\n      if (left.cell != right.cell) {\n        return left.cell < right.cell;\n      }\n      if (left.projection != right.projection) {\n        return left.projection < right.projection;\n      }\n      return left.point_id < right.point_id;\n    });\n\n    records_.reserve(records.size());\n    std::size_t begin = 0;\n    while (begin < records.size()) {\n      std::size_t end = begin + 1;\n      std::array<i64, 3> low = records[begin].transverse;\n      std::array<i64, 3> high = low;\n      while (end < records.size() && records[end].cell == records[begin].cell) {\n        for (std::size_t axis = 0; axis < 3; ++axis) {\n          low[axis] = std::min(low[axis], records[end].transverse[axis]);\n          high[axis] = std::max(high[axis], records[end].transverse[axis]);\n        }\n        ++end;\n      }\n      counter_add(work.tube_cells);\n      i128 bound = 0;\n      for (std::size_t axis = 0; axis < 3; ++axis) {\n        const i64 span = high[axis] - low[axis];\n        bound += static_cast<i128>(span) * span;\n      }\n      cells_.push_back(Cell{{begin, end}, bound});\n      for (std::size_t index = begin; index < end; ++index) {\n        records_.push_back(Projection{records[index].projection, records[index].point_id});\n      }\n      begin = end;\n    }\n    // Temporary cell coordinates/transverse vectors are released here. Each\n    // permanent record stores only its projection and original point ID.\n  }\n\n  PreparedTubes(const PreparedTubes&) = delete;\n  PreparedTubes& operator=(const PreparedTubes&) = delete;\n  PreparedTubes(PreparedTubes&&) = delete;\n  PreparedTubes& operator=(PreparedTubes&&) = delete;\n\n  [[nodiscard]] Range range() const noexcept { return range_; }\n\n  [[nodiscard]] std::vector<std::uint8_t> credits(\n      Lane lane, std::uint8_t need, Work& work) const {\n    require_valid_lane(lane);\n    std::vector<std::uint8_t> result(range_.size(), 0);\n    if (need == 0) {\n      return result;\n    }\n    const i128 q_coefficient = lane == Lane::Q4 ? 16 : 1;\n    const i128 gap_coefficient = lane == Lane::Q3 ? 1 : 9;\n    for (const Cell& cell : cells_) {\n      // For increasing anchor projections the first admissible witness never\n      // moves backwards. Each lane pays <=2m tests over all cells, not m^2;\n      // every success denotes a suffix counted by one subtraction.\n      const auto begin = cell.records.first;\n      const auto end = cell.records.last;\n      std::size_t first = begin;\n      for (std::size_t anchor = begin; anchor < end; ++anchor) {\n        while (first < end) {\n          counter_add(work.tube_sweep_tests);\n          const i64 delta = records_[first].projection - records_[anchor].projection;\n          if (delta > 0 && q_coefficient * cell.bound <=\n                               gap_coefficient * static_cast<i128>(delta) * delta) {\n            break;\n          }\n          ++first;\n        }\n        const auto count = static_cast<std::uint8_t>(\n            std::min<std::size_t>(need, end - first));\n        result[records_[anchor].point_id - range_.first] = count;\n        // Sum of SATURATED per-anchor credits, not expanded witness identities.\n        counter_add(work.tube_credited_sites, count);\n      }\n    }\n    return result;\n  }\n};\n\n// Preparation counters (records/cells/sort/fallback) are charged only by the\n// constructor. This overload changes only sweep_tests and credited_sites;\n// callers can pass separate Work objects instead of counting preparation\n// three times or silently charging it to one particular lane.\n[[nodiscard]] inline std::vector<std::uint8_t> credits(\n    const PreparedTubes& prepared, Lane lane, std::uint8_t need, Work& work) {\n  return prepared.credits(lane, need, work);\n}\n\n// Compatibility path: one preparation and one query, as before. Its zero-need\n// case validates the same cheap inputs but does not prepare unused geometry.\n[[nodiscard]] inline std::vector<std::uint8_t> credits(\n    const PreparedRectangle& rectangle, Range range, const Box3& own,\n    const Box3& opposite, Lane lane, std::uint8_t need, Work& work) {\n  require_valid_lane(lane);\n  if (need == 0) {\n    require_valid_box(own);\n    require_valid_box(opposite);\n    if (range.first > range.last || range.last > rectangle.points().size()) {\n      throw std::invalid_argument(\"mhgp8 tube range is outside its owner\");\n    }\n    return std::vector<std::uint8_t>(range.size(), 0);\n  }\n  const PreparedTubes prepared(rectangle, range, own, opposite, work);\n  return credits(prepared, lane, need, work);\n}\n\n}  // namespace mhgp8::tube_detail\n",
+    "probe.cpp": "// Audit-only composition of existing plans. No product implementation.\n#include \"pipeline/axis_q2.hpp\"\n\n#include <algorithm>\n#include <cstdint>\n#include <iostream>\n#include <numeric>\n#include <stdexcept>\n#include <utility>\n#include <vector>\n\nnamespace {\nusing mhgp8::u64;\nvoid require(bool value, const char* reason) {\n  if (!value) throw std::runtime_error(reason);\n}\n\nstruct Fragment {\n  std::size_t a_id;\n  unsigned threshold;\n  mhgp8::Range range;\n};\nstruct Result {\n  std::vector<std::vector<std::size_t>> selected;\n  std::vector<Fragment> fragments;\n  u64 candidates{};\n  u64 rank_tests{};\n  u64 rank_entries{};\n  u64 stored_ids{};\n  u64 input_fragments{};\n};\n\nResult intersect(const mhgp8::RectanglePtr& owner, const mhgp8::CreditPlan& credit,\n                 const mhgp8::AxisQ2Plan& axis) {\n  // Call rectangle() first: moved-from input access must fail closed.\n  const auto& c = credit.rectangle();\n  const auto& x = axis.rectangle();\n  require(owner && owner.get() == &c && owner.get() == &x, \"different owner\");\n  require(credit.lane() == mhgp8::Lane::Q2, \"intersection requires q2\");\n  const unsigned h = credit.threshold() - credit.core_credit();\n  require(h == axis.need(), \"inconsistent need\");\n  Result result;\n  if (h == 0 || credit.candidate_pairs() == 0 || axis.candidate_pairs() == 0)\n    return result;\n  const auto a = owner->a_range();\n  const auto b = owner->b_range();\n  require(credit.a_credits().size() == a.size() &&\n          credit.b_credits().size() == b.size() && axis.b_order().size() == b.size(),\n          \"inconsistent input arrays\");\n  result.selected.resize(h + 1);\n  std::vector<std::vector<std::size_t>> rank(h + 1);\n  for (unsigned t = 1; t <= h; ++t) {\n    rank[t].push_back(0);\n    ++result.rank_entries;\n    for (std::size_t i = 0; i < b.size(); ++i) {\n      const auto id = axis.b_order()[i];\n      require(id >= b.first && id < b.last, \"foreign input ID\");\n      const auto value = credit.b_credits()[id - b.first];\n      ++result.rank_tests;\n      if (value < t) {  // MUTATION_STRICT_BOUNDARY\n        result.selected[t].push_back(id);\n        ++result.stored_ids;\n      }\n      rank[t].push_back(result.selected[t].size());\n      ++result.rank_entries;\n    }\n  }\n  for (const auto& block : axis.blocks()) {\n    ++result.input_fragments;\n    require(block.a_id >= a.first && block.a_id < a.last &&\n            block.b.first <= block.b.last && block.b.last <= b.size(),\n            \"invalid input fragment\");\n    const unsigned a_credit = credit.a_credits()[block.a_id - a.first];\n    if (a_credit >= h) continue;\n    const unsigned t = h - a_credit;\n    const mhgp8::Range selected{rank[t][block.b.first], rank[t][block.b.last]};\n    if (selected.size() != 0) {\n      result.fragments.push_back({block.a_id, t, selected});\n      mhgp8::counter_add(result.candidates, selected.size());\n    }\n  }\n  require(result.fragments.size() <= axis.blocks().size(), \"fragment expansion\");\n  return result;\n}\n\nmhgp8::RectangleInput fixture(bool reverse, bool core) {\n  mhgp8::RectangleInput input;\n  input.points = {{65000, 65000, 65000}, {65001, 65000, 65000},\n                  {65002, 65000, 65000}};\n  const auto add_factor = [&](unsigned side) {\n    const auto first = input.points.size();\n    constexpr unsigned m = 60;\n    for (unsigned i = 0; i < m; ++i) {\n      // Deliberately permute original IDs, independently of geometric sorting.\n      const unsigned k = (17 * i + 5) % m;\n      input.points.push_back({static_cast<std::uint16_t>(1000 + side * 40000 + k / 20),\n                              static_cast<std::uint16_t>(1000 + (k / 5) % 4),\n                              static_cast<std::uint16_t>(1000 + k % 5)});\n    }\n    return mhgp8::Range{first, input.points.size()};\n  };\n  if (reverse) { input.b = add_factor(1); input.a = add_factor(0); }\n  else { input.a = add_factor(0); input.b = add_factor(1); }\n  if (core) {\n    input.core_candidates.push_back(input.points.size());\n    input.points.push_back({21000, 1000, 1000});\n  }\n  return input;\n}\n\ntemplate <class Function>\nvoid must_reject(Function function, u64& rejections) {\n  bool rejected = false;\n  try { function(); } catch (const std::exception&) { rejected = true; }\n  require(rejected, \"invalid plan combination accepted\");\n  ++rejections;\n}\n\nvoid run() {\n  u64 plans = 0, pairs_checked = 0, expanded_pairs = 0, improvements_credit = 0;\n  u64 improvements_axis = 0, improvements_both = 0, empty = 0, rejections = 0;\n  u64 rank_tests = 0, stored_ids = 0, fragments = 0, input_fragments = 0;\n  for (const bool reverse : {false, true})\n    for (const bool core : {false, true})\n      for (const unsigned h : {1U, 2U, 5U, 10U}) {\n        const auto owner = mhgp8::prepare_rectangle(fixture(reverse, core), h, 12);\n        const auto axis = mhgp8::make_axis_q2_plan(owner);\n        for (const auto strategy : {mhgp8::Strategy::Pool, mhgp8::Strategy::DualBlocks,\n                                    mhgp8::Strategy::Tubes}) {\n          const auto credit = mhgp8::make_credit_plan(owner, mhgp8::Lane::Q2, strategy);\n          const auto result = intersect(owner, credit, axis);\n          const auto a = owner->a_range();\n          const auto b = owner->b_range();\n          std::vector<bool> coverage(a.size() * b.size(), false);\n          u64 expanded = 0;\n          for (const auto& fragment : result.fragments) {\n            require(fragment.threshold < result.selected.size() &&\n                    fragment.range.first < fragment.range.last &&\n                    fragment.range.last <= result.selected[fragment.threshold].size(),\n                    \"invalid output fragment\");\n            for (std::size_t i = fragment.range.first; i < fragment.range.last; ++i) {\n              const auto bid = result.selected[fragment.threshold][i];\n              require(fragment.a_id >= a.first && fragment.a_id < a.last &&\n                      bid >= b.first && bid < b.last, \"foreign output ID\");\n              const auto key = (fragment.a_id - a.first) * b.size() + bid - b.first;\n              require(!coverage[key], \"duplicated intersection pair\");\n              coverage[key] = true;\n              ++expanded;\n            }\n          }\n          for (std::size_t aid = a.first; aid < a.last; ++aid)\n            for (std::size_t bid = b.first; bid < b.last; ++bid) {\n              require(coverage[(aid - a.first) * b.size() + bid - b.first] ==\n                      (credit.keeps(aid, bid) && axis.keeps(aid, bid)),\n                      \"intersection differs from conjunction\");\n              ++pairs_checked;\n            }\n          require(expanded == result.candidates, \"candidate count mismatch\");\n          const bool better_c = result.candidates < credit.candidate_pairs();\n          const bool better_x = result.candidates < axis.candidate_pairs();\n          improvements_credit += better_c;\n          improvements_axis += better_x;\n          improvements_both += better_c && better_x;\n          empty += result.candidates == 0;\n          rank_tests += result.rank_tests;\n          stored_ids += result.stored_ids;\n          fragments += result.fragments.size();\n          input_fragments += result.input_fragments;\n          expanded_pairs += expanded;\n          ++plans;\n        }\n      }\n  const auto owner = mhgp8::prepare_rectangle(fixture(false, false), 2, 12);\n  const auto twin = mhgp8::prepare_rectangle(fixture(false, false), 2, 12);\n  auto credit = mhgp8::make_credit_plan(owner, mhgp8::Lane::Q2, mhgp8::Strategy::Pool);\n  auto axis = mhgp8::make_axis_q2_plan(owner);\n  const auto foreign = mhgp8::make_axis_q2_plan(twin);\n  const auto q3 = mhgp8::make_credit_plan(owner, mhgp8::Lane::Q3, mhgp8::Strategy::Pool);\n  must_reject([&] { static_cast<void>(intersect(owner, credit, foreign)); }, rejections);\n  must_reject([&] { static_cast<void>(intersect(twin, credit, axis)); }, rejections);\n  must_reject([&] { static_cast<void>(intersect(owner, q3, axis)); }, rejections);\n  const auto moved_credit = std::move(credit);\n  must_reject([&] { static_cast<void>(intersect(owner, credit, axis)); }, rejections);\n  const auto moved_axis = std::move(axis);\n  must_reject([&] { static_cast<void>(intersect(owner, moved_credit, axis)); }, rejections);\n  require(moved_axis.candidate_pairs() > 0, \"nonvacuous move fixture\");\n  require(plans == 48 && pairs_checked == 172800 && improvements_both > 0 && empty > 0 &&\n          rejections == 5 && fragments > 0 && expanded_pairs > 0, \"vacuous campaign\");\n  std::cout << \"{\\\"plans\\\":\" << plans << \",\\\"pairs_checked\\\":\" << pairs_checked\n            << \",\\\"expanded_pairs\\\":\" << expanded_pairs << \",\\\"empty_plans\\\":\" << empty\n            << \",\\\"improvements_credit\\\":\" << improvements_credit\n            << \",\\\"improvements_axis\\\":\" << improvements_axis\n            << \",\\\"improvements_both\\\":\" << improvements_both\n            << \",\\\"rank_tests\\\":\" << rank_tests << \",\\\"stored_ids\\\":\" << stored_ids\n            << \",\\\"input_fragments\\\":\" << input_fragments\n            << \",\\\"output_fragments\\\":\" << fragments\n            << \",\\\"invalid_combinations_rejected\\\":\" << rejections << \"}\\n\";\n}\n}  // namespace\n\nint main() {\n  try { run(); }\n  catch (const std::exception& error) {\n    std::cerr << \"residual intersection audit: \" << error.what() << '\\n';\n    return 1;\n  }\n}\n",
+    "spindle/predicates.hpp": "#pragma once\n\n#include \"../core/types.hpp\"\n\n#include <algorithm>\n#include <array>\n\nnamespace mhgp8 {\n\n// A, B and Z below are continuous boxes, not just the stored sites in them.\n// This decision concerns witness credit, never the death of an anchor.\n// Credit: every z in Z witnesses every (a,b) in A x B.\n// NoCredit: every (a,z) in A x Z fails universality over the BOX B. A failing\n// box corner need not itself be a stored site: this does not refute a weaker\n// certificate concerning only the discrete sites of B.\n// Uncertain: neither statement is certified; it is not a rejection.\nenum class BlockDecision : std::uint8_t { Credit, NoCredit, Uncertain };\n\nnamespace spindle_detail {\n\nstruct Interval {\n  i64 low;\n  i64 high;\n};\n\n[[nodiscard]] inline Interval coordinate(const Box3& box, std::size_t axis) {\n  return {static_cast<i64>(box.low[axis]), static_cast<i64>(box.high[axis])};\n}\n\n[[nodiscard]] inline Interval subtract(Interval left, Interval right) {\n  return {left.low - right.high, left.high - right.low};\n}\n\n[[nodiscard]] inline Interval multiply(Interval left, Interval right) {\n  const std::array<i64, 4> products{\n      left.low * right.low, left.low * right.high,\n      left.high * right.low, left.high * right.high};\n  const auto bounds = std::minmax_element(products.begin(), products.end());\n  return {*bounds.first, *bounds.second};\n}\n\n[[nodiscard]] inline i128 square(i64 value) {\n  return static_cast<i128>(value) * value;\n}\n\nstruct SquaredBounds {\n  i128 low;\n  i128 high;\n};\n\n[[nodiscard]] inline SquaredBounds square_bounds(Interval value) {\n  const i128 left = square(value.low);\n  const i128 right = square(value.high);\n  return {value.low <= 0 && value.high >= 0 ? 0 : std::min(left, right),\n          std::max(left, right)};\n}\n\n// M=65535. Coordinate differences have magnitude <=M, products <=M^2,\n// cross components <=2M^2, hence Xi<=12M^4<2^68. Dependencies between\n// intervals are discarded only outward: both Xi bounds remain certified.\n[[nodiscard]] inline SquaredBounds xi_bounds(const Box3& a, const Box3& b,\n                                           const Box3& z) {\n  std::array<Interval, 3> u{};\n  std::array<Interval, 3> w{};\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    u[axis] = subtract(coordinate(z, axis), coordinate(a, axis));\n    w[axis] = subtract(coordinate(b, axis), coordinate(z, axis));\n  }\n  SquaredBounds result{0, 0};\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const std::size_t j = (axis + 1) % 3;\n    const std::size_t k = (axis + 2) % 3;\n    const auto component = square_bounds(\n        subtract(multiply(u[j], w[k]), multiply(u[k], w[j])));\n    result.low += component.low;\n    result.high += component.high;\n  }\n  return result;\n}\n\n// H=(z-a).(b-z) is separable by coordinate, affine separately in a and b,\n// and concave in z. Its minimum over three boxes is therefore attained at\n// coordinate endpoints. The largest partial sum has magnitude <=3M^2.\n[[nodiscard]] inline i64 h_minimum(const Box3& a, const Box3& b,\n                                 const Box3& z) {\n  i64 result = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const Interval ac = coordinate(a, axis);\n    const Interval bc = coordinate(b, axis);\n    const Interval zc = coordinate(z, axis);\n    const auto at_z = [ac, bc](i64 value) {\n      return multiply({value - ac.high, value - ac.low},\n                      {bc.low - value, bc.high - value}).low;\n    };\n    result += std::min(at_z(zc.low), at_z(zc.high));\n  }\n  return result;\n}\n\n// Four times the exact maximum of H over A x {b} x Z. For each coordinate,\n// maximize over a at an endpoint, then over z at clamp((a+b)/2,Z).\n// Doubling the vertex and multiplying H by four avoids division/rounding.\n// Each term is in [-4M^2,M^2], so the sum is in [-12M^2,3M^2].\n[[nodiscard]] inline i64 h_maximum_times_four(const Box3& a, const Point3& b,\n                                            const Box3& z) {\n  i64 result = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const i64 bc = static_cast<i64>(b[axis]);\n    const i64 low_twice = 2 * static_cast<i64>(z.low[axis]);\n    const i64 high_twice = 2 * static_cast<i64>(z.high[axis]);\n    const auto at_a = [bc, low_twice, high_twice](i64 ac) {\n      const i64 sum = ac + bc;\n      const i64 closest = std::clamp(sum, low_twice, high_twice);\n      const i64 delta = closest - sum;\n      const i64 distance = bc - ac;\n      return distance * distance - delta * delta;\n    };\n    result += std::max(at_a(static_cast<i64>(a.low[axis])),\n                       at_a(static_cast<i64>(a.high[axis])));\n  }\n  return result;\n}\n\n[[nodiscard]] inline unsigned multiplier(Lane lane) {\n  return lane == Lane::Q3 ? 3U : 2U;\n}\n\n}  // namespace spindle_detail\n\n[[nodiscard]] inline bool point_witness(Lane lane, const Point3& a,\n                                       const Point3& b, const Point3& z,\n                                       PredicateWork& work) {\n  require_valid_lane(lane);\n  counter_add(work.point_tests);\n  std::array<i64, 3> u{};\n  std::array<i64, 3> w{};\n  i64 h = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    u[axis] = static_cast<i64>(z[axis]) - static_cast<i64>(a[axis]);\n    w[axis] = static_cast<i64>(b[axis]) - static_cast<i64>(z[axis]);\n    h += u[axis] * w[axis];\n  }\n  if (h <= 0) {\n    return false;\n  }\n  if (lane == Lane::Q2) {\n    return true;\n  }\n  i128 xi = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const std::size_t j = (axis + 1) % 3;\n    const std::size_t k = (axis + 2) % 3;\n    const i64 cross = u[j] * w[k] - u[k] * w[j];\n    xi += spindle_detail::square(cross);\n  }\n  // 3H^2<=27M^4<2^69. Promotion occurs before either multiplication.\n  return static_cast<i128>(spindle_detail::multiplier(lane)) *\n             spindle_detail::square(h) > xi;\n}\n\n[[nodiscard]] inline bool universal_witness(Lane lane, const Point3& a,\n                                           const Box3& b, const Point3& z,\n                                           PredicateWork& work) {\n  require_valid_lane(lane);\n  require_valid_box(b);\n  counter_add(work.universal_queries);\n  if (lane == Lane::Q2) {\n    // H is affine in b: choose the minimizing bound independently per axis.\n    // This is the exact continuous-box minimum, not a heuristic proposal.\n    i64 h = 0;\n    for (std::size_t axis = 0; axis < 3; ++axis) {\n      const i64 delta = static_cast<i64>(z[axis]) - static_cast<i64>(a[axis]);\n      const i64 bound =\n          static_cast<i64>(delta >= 0 ? b.low[axis] : b.high[axis]);\n      h += delta * (bound - static_cast<i64>(z[axis]));\n      counter_add(work.q2_axis_terms);\n    }\n    return h > 0;\n  }\n  // For fixed a,z, H>0 and sqrt(t)H>|(z-a)x(b-z)| is an open convex\n  // cone in b. All eight corners are necessary and sufficient for the box.\n  for (unsigned corner = 0; corner < 8; ++corner) {\n    counter_add(work.corner_tests);\n    if (!point_witness(lane, a, box_corner(b, corner), z, work)) {\n      return false;\n    }\n  }\n  return true;\n}\n\n[[nodiscard]] inline bool box_witness(Lane lane, const Box3& a,\n                                     const Box3& b, const Point3& z,\n                                     PredicateWork& work) {\n  require_valid_lane(lane);\n  require_valid_box(a);\n  require_valid_box(b);\n  // Convexity is separate in a and b, not assumed joint. Applying the\n  // corner certificate successively proves the entire Cartesian product.\n  for (unsigned corner = 0; corner < 8; ++corner) {\n    if (!universal_witness(lane, box_corner(a, corner), b, z, work)) {\n      return false;\n    }\n  }\n  return true;\n}\n\n[[nodiscard]] inline BlockDecision classify_witness_block(\n    Lane lane, const Box3& a, const Box3& b, const Box3& z,\n    PredicateWork& work) {\n  require_valid_lane(lane);\n  require_valid_box(a);\n  require_valid_box(b);\n  require_valid_box(z);\n  counter_add(work.block_bound_tests);\n\n  const i64 h_min = spindle_detail::h_minimum(a, b, z);\n  if (h_min > 0) {\n    if (lane == Lane::Q2) {\n      return BlockDecision::Credit;\n    }\n    const auto xi = spindle_detail::xi_bounds(a, b, z);\n    if (static_cast<i128>(spindle_detail::multiplier(lane)) *\n            spindle_detail::square(h_min) > xi.high) {\n      return BlockDecision::Credit;\n    }\n  }\n\n  // A single fixed b0 in B which fails for ALL a in A and z in Z proves\n  // that no (a,z) can supply a universal-over-B credit. This does NOT\n  // prove that those anchors or their candidate supports may be dropped.\n  for (unsigned corner = 0; corner < 8; ++corner) {\n    counter_add(work.negative_probes);\n    const Point3 b0 = box_corner(b, corner);\n    const i64 h_max4 = spindle_detail::h_maximum_times_four(a, b0, z);\n    if (h_max4 <= 0) {\n      return BlockDecision::NoCredit;\n    }\n    if (lane != Lane::Q2) {\n      const auto xi = spindle_detail::xi_bounds(a, singleton_box(b0), z);\n      // H_max = h_max4/4; equality fails the required strict witness test.\n      // 16Xi<=192M^4<2^72; all products are promoted to i128 first.\n      if (static_cast<i128>(spindle_detail::multiplier(lane)) *\n              spindle_detail::square(h_max4) <= 16 * xi.low) {\n        return BlockDecision::NoCredit;\n      }\n    }\n  }\n  return BlockDecision::Uncertain;\n}\n\n}  // namespace mhgp8\n"
+  },
+  "source_commit": "8e406f9b82f2a3da967e1a80c0bdcbfd50822fef",
+  "source_sha256": {
+    "core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+    "pipeline/axis_q2.cpp": "db1b23431d6515074cf33b3ab5fb94781d88a67488d395a4b094fac540f1e7f1",
+    "pipeline/axis_q2.hpp": "b19981a14339c6bce8cafec6ee6630aace5e9e743267c7655b5295c2d41653f8",
+    "pipeline/local_credits.cpp": "24dcbc9839d862e7b9e78864bb41baf726f89c3d48321f0ef8ec1c382aa8d151",
+    "pipeline/local_credits.hpp": "7d96b38571bacf504d79b4139aaead8042bf1dca26396abd08bd8811799496db",
+    "pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+    "probe.cpp": "e94f383a9e66e6fa197445a8af38f3fdf56150953982ace0860e0fab906232d4",
+    "spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+  },
+  "statistics": {
+    "empty_plans": 6,
+    "expanded_pairs": 24568,
+    "improvements_axis": 42,
+    "improvements_both": 18,
+    "improvements_credit": 18,
+    "input_fragments": 5448,
+    "invalid_combinations_rejected": 5,
+    "output_fragments": 2328,
+    "pairs_checked": 172800,
+    "plans": 48,
+    "rank_tests": 11520,
+    "stored_ids": 4984
+  },
+  "status": "passed"
+}

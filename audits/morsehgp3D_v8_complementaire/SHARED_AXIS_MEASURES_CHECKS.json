@@ -1,0 +1,328 @@
+{
+  "schema": "mhgp8_complementary_shared_axis_measures_checks_v1",
+  "status": "passed_no_new_significant_receipt_or_README_issue_found",
+  "recorded_utc": "2026-09-13T19:29:04.624529+00:00",
+  "phase": "exploration_v8_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "gcp_used": false,
+  "scope": "published_594_capture_readback_provenance_matrices_and_README_arithmetic",
+  "source_snapshot_commit": "8e406f9b82f2a3da967e1a80c0bdcbfd50822fef",
+  "new_probe_invocations": 0,
+  "new_builds": 0,
+  "new_ctest_runs": 0,
+  "old_or_preliminary_captures_consumed": false,
+  "reader_runs": [
+    {
+      "python_optimized": false,
+      "exit_code": 0,
+      "status": "passed",
+      "campaigns": 5,
+      "measurements": 594,
+      "configurations_including_order": 504
+    },
+    {
+      "python_optimized": true,
+      "exit_code": 0,
+      "status": "passed",
+      "campaigns": 5,
+      "measurements": 594,
+      "configurations_including_order": 504
+    }
+  ],
+  "reader_commands_from_exact_snapshot": [
+    "python3 -B morsehgp3D_v8/bench/check_paired_campaign.py morsehgp3D_v8/receipts/shared_axis_20260913",
+    "python3 -B -O morsehgp3D_v8/bench/check_paired_campaign.py morsehgp3D_v8/receipts/shared_axis_20260913"
+  ],
+  "replay_setup": "Export the listed source blobs, checker and the five pinned MANIFEST/MEASURES/COMPLETION triplets from the exact commit into a fresh directory preserving repository-relative paths. Verify their SHA256 values before running the two reader commands. No captured benchmark is rerun.",
+  "independent_checks": [
+    "594 command/result tuples, strict JSON and raw base64 correspondence, complete Cartesian matrices without duplicate repeat indices, exact closing counts and binary hashes.",
+    "Input fingerprints agree across strategies, K values, separation preconditions and execution orders; build metadata is homogeneous per probe kind and normalized declared machine metadata is common.",
+    "The five capture time windows are pairwise disjoint and ordered. This corroborates sequential captured campaigns, without claiming an otherwise idle host.",
+    "Every recorded source blob matches commit 8e406f9b; all 31 qualification source pins also match; both pinned measurement executables retain their recorded hashes.",
+    "Every published table and approximate timing range is independently recalculated by execution order, with exactly four observations per focus tuple (one matrix plus three focus observations).",
+    "For Tubes, summed baseline preparation and sort counters equal three shared preparations, while per-lane query work and plan checksums remain equal. This is not a threefold runtime claim."
+  ],
+  "independent_result": {
+    "status": "independent_shared_axis_capture_checks_passed",
+    "source_snapshot_commit": "8e406f9b82f2a3da967e1a80c0bdcbfd50822fef",
+    "source_sha256": {
+      "morsehgp3D_v8/CMakeLists.txt": "defc8d1a69ced3906a762b880df4eeee19f30fb6da99bfa9e5dc5886bf81e2a2",
+      "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+      "morsehgp3D_v8/src/pipeline/axis_q2.hpp": "b19981a14339c6bce8cafec6ee6630aace5e9e743267c7655b5295c2d41653f8",
+      "morsehgp3D_v8/src/pipeline/local_credits.hpp": "7d96b38571bacf504d79b4139aaead8042bf1dca26396abd08bd8811799496db",
+      "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+      "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+      "morsehgp3D_v8/src/pipeline/axis_q2.cpp": "db1b23431d6515074cf33b3ab5fb94781d88a67488d395a4b094fac540f1e7f1",
+      "morsehgp3D_v8/src/pipeline/local_credits.cpp": "24dcbc9839d862e7b9e78864bb41baf726f89c3d48321f0ef8ec1c382aa8d151",
+      "morsehgp3D_v8/bench/p0_fixtures.hpp": "3c3a7bde624fde5c513ac4946fdceddaf6a392b61643d9f9a847c1b4f470520a",
+      "morsehgp3D_v8/bench/probe_emit.hpp": "236331337c44bf25229899a798003e9ce7605ad5df98d90957c0d1ca2dc476d2",
+      "morsehgp3D_v8/bench/p0_probe.cpp": "a95bb5cdce20ecec07c544fc596b684f39a9b573b3a4c6afdbb64c97ae3be552",
+      "morsehgp3D_v8/bench/run_p0_matrix.py": "751420bba712c30334709ee32bd51af7c796d6de5df01fadb9282e74f11ddbe9",
+      "morsehgp3D_v8/bench/axis_probe.cpp": "eda7da120fbd32bb99e3e3fb626eb90100e72bfe369089db8412797715846ad2",
+      "morsehgp3D_v8/bench/paired_receipts.py": "212efc6e143707bda33fce8415f00d62c581026542e41daca365072ef640636d",
+      "morsehgp3D_v8/bench/batch_probe.cpp": "1feaab9c065f6b438ce7d7bd90cc29991e16505f181f0d5e5ba7dcd2dac16532"
+    },
+    "qualification_source_count": 31,
+    "checked_files_sha256": {
+      "morsehgp3D_v8/receipts/shared_axis_20260913/axis_focus/MANIFEST.json": "dfb4462c8a481ab8bf01838b786d5ce073ff985a8c978e7b69f05f43ceadec51",
+      "morsehgp3D_v8/receipts/shared_axis_20260913/axis_focus/MEASURES.jsonl": "acf3ef71e1dcccc4c668fef546b0eb8c644609eba6ebb730d2fb6a710a9b15e2",
+      "morsehgp3D_v8/receipts/shared_axis_20260913/axis_focus/COMPLETION.json": "21a4660d0fe825b387b6a34a058a6bcd4f8f487bd682415a955e9c0efdf4a67c",
+      "morsehgp3D_v8/receipts/shared_axis_20260913/axis_matrix/MANIFEST.json": "7c66d358867d461696a6e29f40e58616079554882b2a8a7b1ae2851a1d0a6f68",
+      "morsehgp3D_v8/receipts/shared_axis_20260913/axis_matrix/MEASURES.jsonl": "2db43898d89fcff09b1032ebc0cff0a59cc19ebb477a1bb24eab0b5cbff1123c",
+      "morsehgp3D_v8/receipts/shared_axis_20260913/axis_matrix/COMPLETION.json": "8ac13b043c6a2e4d27d47b1dfa4e302baa2314e86cff3744b7e681a9cb2c820d",
+      "morsehgp3D_v8/receipts/shared_axis_20260913/batch_focus/MANIFEST.json": "386369a1ecedf58783a4e7427a0ffabf3c1275f76b77568d5981671aa0432f9a",
+      "morsehgp3D_v8/receipts/shared_axis_20260913/batch_focus/MEASURES.jsonl": "fbca905a8f62322ae79d0f65c5313eb94af2647149df35cb6f916d3ccc9d3198",
+      "morsehgp3D_v8/receipts/shared_axis_20260913/batch_focus/COMPLETION.json": "1516dde4d386206b7f81e2c6baeacd765782b7f866d28a094fe130b6854ac9f0",
+      "morsehgp3D_v8/receipts/shared_axis_20260913/batch_matrix/MANIFEST.json": "269232e847393b1ed6fd52c1427dfdf850b48eacf37aa21c4310a77bb784bd89",
+      "morsehgp3D_v8/receipts/shared_axis_20260913/batch_matrix/MEASURES.jsonl": "bb3270a93f63be972f7b3f5e2534831a216a7b08ad48c85ea2d73b176ee2610f",
+      "morsehgp3D_v8/receipts/shared_axis_20260913/batch_matrix/COMPLETION.json": "b69ca12edeebcdcea267d5a2ac0100a1811025c82006587716807f0a1c143691",
+      "morsehgp3D_v8/receipts/shared_axis_20260913/batch_rails/MANIFEST.json": "ca01c8eefbdd79310c97dcfa09c056ff98ddd1f4c940d7c0338ca1dac971f9ba",
+      "morsehgp3D_v8/receipts/shared_axis_20260913/batch_rails/MEASURES.jsonl": "40794611c41d2095c2aa172e60fe98b8d5b896ad7d29fe0c6b1ba04ef58a7dfc",
+      "morsehgp3D_v8/receipts/shared_axis_20260913/batch_rails/COMPLETION.json": "9085447c5e1daec6d32ad73a1016538c0051fd572ef55a8f13198e2ad4c75ff1",
+      "morsehgp3D_v8/bench/check_paired_campaign.py": "f4148e223880ca5e39a67dfe70b327dd905e4d26e6edcc33b8d81db2038514e0",
+      "morsehgp3D_v8/receipts/shared_axis_20260913/README.md": "23a506e3144a821d3c366a5f94817a2094f1f85b909d12925e4d1e4441d6e982",
+      "morsehgp3D_v8/receipts/shared_axis_20260913/QUALIFICATION.json": "9f3fc999b68973690262f3ed72d147ab28e053e49801ca7f699f22a31ff480a1",
+      "morsehgp3D_v8/receipts/shared_axis_20260913/RELEASE_TESTS.xml": "e67f1f01b1f7f4cbd262770b145622eff2b5159102b2db9ee9435ab62169980b",
+      "morsehgp3D_v8/receipts/shared_axis_20260913/SANITIZER_TESTS.xml": "181b57d82528cf2b2487ad0151f35721f72a90bdb2f1d945a3c070a5924155a3"
+    },
+    "campaigns": {
+      "axis_focus": {
+        "kind": "axis",
+        "measurements": 36,
+        "configurations": 12,
+        "repeats": 3,
+        "started_utc": "2026-09-13T19:00:23.300341+00:00",
+        "finished_utc": "2026-09-13T19:00:25.372061+00:00",
+        "probe_sha256": "c7f2172d706aa0aea54715e4eba618d76098a2312e1ab73954833e37a47a5523"
+      },
+      "axis_matrix": {
+        "kind": "axis",
+        "measurements": 144,
+        "configurations": 144,
+        "repeats": 1,
+        "started_utc": "2026-09-13T19:00:13.984079+00:00",
+        "finished_utc": "2026-09-13T19:00:22.199171+00:00",
+        "probe_sha256": "c7f2172d706aa0aea54715e4eba618d76098a2312e1ab73954833e37a47a5523"
+      },
+      "batch_focus": {
+        "kind": "batch",
+        "measurements": 54,
+        "configurations": 18,
+        "repeats": 3,
+        "started_utc": "2026-09-13T19:00:22.275888+00:00",
+        "finished_utc": "2026-09-13T19:00:23.216784+00:00",
+        "probe_sha256": "2978ca664a1292d57f7822a6ac64b602b056a841047acd495e4d8d4fb35ac80d"
+      },
+      "batch_matrix": {
+        "kind": "batch",
+        "measurements": 324,
+        "configurations": 324,
+        "repeats": 1,
+        "started_utc": "2026-09-13T18:59:27.278276+00:00",
+        "finished_utc": "2026-09-13T19:00:13.907962+00:00",
+        "probe_sha256": "2978ca664a1292d57f7822a6ac64b602b056a841047acd495e4d8d4fb35ac80d"
+      },
+      "batch_rails": {
+        "kind": "batch",
+        "measurements": 36,
+        "configurations": 36,
+        "repeats": 1,
+        "started_utc": "2026-09-13T19:00:25.447540+00:00",
+        "finished_utc": "2026-09-13T19:00:25.836859+00:00",
+        "probe_sha256": "2978ca664a1292d57f7822a6ac64b602b056a841047acd495e4d8d4fb35ac80d"
+      }
+    },
+    "measurements": 594,
+    "configurations_including_order": 504,
+    "campaign_windows_disjoint": true,
+    "declared_machine_consistent": true,
+    "homogeneous_builds_by_kind": {
+      "axis": "c7f2172d706aa0aea54715e4eba618d76098a2312e1ab73954833e37a47a5523",
+      "batch": "2978ca664a1292d57f7822a6ac64b602b056a841047acd495e4d8d4fb35ac80d"
+    },
+    "pinned_binary_files_match": {
+      "build/v8_shared_axis_20260913/mhgp8_axis_probe": "c7f2172d706aa0aea54715e4eba618d76098a2312e1ab73954833e37a47a5523",
+      "build/v8_shared_axis_20260913/mhgp8_batch_probe": "2978ca664a1292d57f7822a6ac64b602b056a841047acd495e4d8d4fb35ac80d"
+    },
+    "readme_checks": {
+      "batch_plan_table": {
+        "grid": {
+          "baseline_ms_by_order": {
+            "baseline-first": 12.504117999999998,
+            "batch-first": 11.552642500000001
+          },
+          "batch_ms_by_order": {
+            "baseline-first": 4.68942,
+            "batch-first": 5.8286394999999995
+          }
+        },
+        "sheet": {
+          "baseline_ms_by_order": {
+            "baseline-first": 10.330749999999998,
+            "batch-first": 9.079975000000001
+          },
+          "batch_ms_by_order": {
+            "baseline-first": 3.0535259999999997,
+            "batch-first": 4.4616205
+          }
+        },
+        "skew": {
+          "baseline_ms_by_order": {
+            "baseline-first": 12.898063,
+            "batch-first": 11.6620405
+          },
+          "batch_ms_by_order": {
+            "baseline-first": 4.2861845,
+            "batch-first": 6.1450695
+          }
+        }
+      },
+      "grid_baseline_total_ms_by_order": {
+        "baseline-first": 15.19483,
+        "batch-first": 14.239413500000001
+      },
+      "grid_batch_total_ms_by_order": {
+        "baseline-first": 7.380132,
+        "batch-first": 8.5154105
+      },
+      "axis_full_sheet_table": {
+        "8000": {
+          "candidate_pairs": 1475800,
+          "descriptors": 171878,
+          "query_nodes": 764148,
+          "tree_point_visits": 100960,
+          "axis_ms_by_order": {
+            "baseline-first": 12.787493999999999,
+            "axis-first": 12.866987
+          }
+        },
+        "16000": {
+          "candidate_pairs": 3124300,
+          "descriptors": 371932,
+          "query_nodes": 1686564,
+          "tree_point_visits": 217920,
+          "axis_ms_by_order": {
+            "baseline-first": 26.9575525,
+            "axis-first": 27.3100885
+          }
+        },
+        "32000": {
+          "candidate_pairs": 6483670,
+          "descriptors": 766418,
+          "query_nodes": 3529456,
+          "tree_point_visits": 463232,
+          "axis_ms_by_order": {
+            "baseline-first": 56.683386,
+            "axis-first": 57.201622
+          }
+        }
+      },
+      "axis_full_sheet_n32000_total_ms_by_order": {
+        "baseline-first": 59.022450000000006,
+        "axis-first": 59.5260895
+      },
+      "pool_full_sheet_n32000_plan_ms_by_order": {
+        "baseline-first": 2.4288325,
+        "axis-first": 2.3518179999999997
+      },
+      "truncated_sheet": {
+        "8000": {
+          "candidate_pairs": 1486480,
+          "axis_ms_by_order": {
+            "baseline-first": 12.838870499999999,
+            "axis-first": 12.540181
+          }
+        },
+        "16000": {
+          "candidate_pairs": 3128160,
+          "axis_ms_by_order": {
+            "baseline-first": 27.2685265,
+            "axis-first": 27.4591785
+          }
+        },
+        "32000": {
+          "candidate_pairs": 6484060,
+          "axis_ms_by_order": {
+            "baseline-first": 57.4689195,
+            "axis-first": 56.416214
+          }
+        }
+      },
+      "negative_axis_grid_skew_residuals": "matched",
+      "preparation_and_sort_work_factor": 3,
+      "preparation_records_n32000_before": 96000,
+      "preparation_records_n32000_after": 32000
+    },
+    "independent_script_sha256": "4284c9c37b5726d385cc1970c91eeec8443a6493556e58f0e17fd0ddd619c702"
+  },
+  "published_provenance": {
+    "axis": {
+      "build_id": "f3a51d00bec4bdce76b766c81506029e6fd6e34bd180bede3dd46cafdbdfc65f",
+      "machine_id": "e80f1a6289419a1cfa85b12ade71c12aba3cf7302a1a6305937631f57314ecf9",
+      "probe_sha256": "c7f2172d706aa0aea54715e4eba618d76098a2312e1ab73954833e37a47a5523",
+      "compiler_version": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+      "cmake_cache_sha256": "b677307c72e44011ca1f1ec1fd4793171a9eb01f4d56e688030142b2a74b3b2f",
+      "cpuinfo_normalized_sha256": "caa45cccbc6ea70ee9f72919bd19f8897c628cdfae681376b7fc3e7c3ad19875",
+      "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+      "logical_cpu_count": 8,
+      "threads": 1
+    },
+    "batch": {
+      "build_id": "e52613adfa379c120193ed177dc0265d7463fa194820a231d97a4c48d5a0da8e",
+      "machine_id": "e80f1a6289419a1cfa85b12ade71c12aba3cf7302a1a6305937631f57314ecf9",
+      "probe_sha256": "2978ca664a1292d57f7822a6ac64b602b056a841047acd495e4d8d4fb35ac80d",
+      "compiler_version": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+      "cmake_cache_sha256": "b677307c72e44011ca1f1ec1fd4793171a9eb01f4d56e688030142b2a74b3b2f",
+      "cpuinfo_normalized_sha256": "caa45cccbc6ea70ee9f72919bd19f8897c628cdfae681376b7fc3e7c3ad19875",
+      "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+      "logical_cpu_count": 8,
+      "threads": 1
+    }
+  },
+  "provenance_policy": {
+    "version": "paired_provenance_v1",
+    "grouping": "homogeneous_build_per_probe_kind_and_common_machine_metadata",
+    "cpuinfo_ignored_fields": [
+      "cpu MHz"
+    ],
+    "machine_identity_scope": "recorded_metadata_not_unique_physical_host"
+  },
+  "published_ctest_receipts_checked": {
+    "release": {
+      "tests": 21,
+      "failed": 0,
+      "skipped": 0,
+      "receipt_sha256": "e67f1f01b1f7f4cbd262770b145622eff2b5159102b2db9ee9435ab62169980b",
+      "scope": "published_XML_read_only_not_a_new_CTest_run"
+    },
+    "sanitizer": {
+      "tests": 21,
+      "failed": 0,
+      "skipped": 0,
+      "receipt_sha256": "181b57d82528cf2b2487ad0151f35721f72a90bdb2f1d945a3c070a5924155a3",
+      "scope": "published_XML_read_only_not_a_new_CTest_run"
+    }
+  },
+  "README_assessment": {
+    "batch_record_and_sort_factor": 3,
+    "time_claims_separate_from_work_factor": true,
+    "execution_orders_kept_separate": true,
+    "displayed_ranges_are_between_order_medians_not_confidence_intervals": true,
+    "n32000_full_sheet_axis_plan_ms_range": [
+      56.683386,
+      57.201622
+    ],
+    "n32000_full_sheet_axis_with_setup_ms_range": [
+      59.022450000000006,
+      59.5260895
+    ],
+    "n32000_full_sheet_candidates": 6483670,
+    "negative_grid_and_skew_results_preserved": true,
+    "P0_and_FULL_contracts_remain_open": true
+  },
+  "new_findings": [],
+  "limits": "This checks published receipts and the arithmetic/provenance of their conclusions. It does not rerun 594 measurements, requalify geometry or FULL completeness, establish an end-to-end speed gain, or transfer evidence to later source revisions."
+}

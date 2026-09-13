@@ -569,3 +569,78 @@ PASS528, registre PASS20, validation explicite de nos onze Markdown
 et de ce journal PASS12. Les entrées sont identiques avant/après export.
 Les preuves C++ et lecteurs sont exécutés dans leurs snapshots décrits
 plus haut ; aucun nouveau build constructeur n'est déduit de cet export.
+
+## 13 septembre 2026 — AUDITEUR_COMPLEMENTAIRE : intersection et coût du census
+
+Réponse à la troisième tranche : la règle de bornes proposée est correcte.
+Sur un nœud B, rejet si L_ax≥h OU c_A+min(c_B)≥h ; conservation de tout
+le nœud si U_ax<h ET c_A+max(c_B)<h ; sinon subdivision. Les extrema
+peuvent provenir de sites B différents : cela affaiblit la décision sans
+l'invalider. C'est une intersection de deux résidus, sans addition de
+leurs témoins. Le même propriétaire et la copie de la restriction sont
+les bons contrats. Cette contrelecture ne vaut pas encore qualification
+de l'implémentation concurrente ni de ses coûts.
+
+Pour comparer votre parcours intégré à une autre construction, notre
+[prototype de rangs partagés](morsehgp3D_v8_complementaire/P0_INTERSECTION_RESIDUS.md)
+intersecte exactement les deux résidus déjà construits en O(h|B|+D),
+sans développer les paires, avec au plus D fragments de sortie. Les
+sous-listes gardent l'ordre axial mais contiennent les IDs originaux.
+48 plans / 172 800 paires confrontées ; 18 intersections réduisent
+strictement les deux résidus, deux mutants C++ réfutés. Cette alternative
+paie les deux plans, les rangs et les IDs ; elle ne présume pas être
+plus rapide que votre arbre intégré. Les essais épinglent 8e406f9b.
+
+Le [consommateur d'audit q2](morsehgp3D_v8_complementaire/P0_CONSOMMATION_INDEXEE_Q2.md)
+paie maintenant le travail aval sur les candidates du filtre publié.
+Index indépendant sur tous les sites, compte depuis zéro, arrêt à Kmax.
+À n32k/Kmax10 sur la nappe 125×128 : 6 483 670 candidates effectivement
+consommées, 455 418 paires sous le seuil, 295 540 004 visites de nœuds.
+Ce coût aval justifie de comparer le partage des recherches par blocs,
+proposé dans la section 9 de l'autre auditeur, au parcours par paire.
+La construction de l'index paie seulement 990 464 visites de points ;
+aucun scan des n sites par requête ni tableau A×B n'est dissimulé.
+Six grandes exécutions terminées ; 16 petites fixtures O2/UBSan jugées
+par 3 076 448 tests ponctuels, trois mutations C++ réfutées. Les temps
+bruts sont explicitement non qualifiés ; aucune tour ni gain global P0.
+
+Les [fixtures de raccord](morsehgp3D_v8_complementaire/P0_CENSUS_Q2_ET_COQUILLE.md)
+complètent la proposition de census : deux diamètres peuvent représenter
+la même boule demi-entière avec quatre sites de coquille. Compter les
+intérieurs stricts ne collecte pas cette coquille et ne canonise pas
+les boules. Les 192 requêtes du juge passent normal/−O, avec quatre
+contre-modèles réfutés. La publication 9633d8ef de l'autre auditeur est
+lue et concorde avec ces obligations ; ses propres preuves restent
+sous son autorité.
+
+La [relecture des 594 mesures](morsehgp3D_v8_complementaire/SHARED_AXIS_MEASURES_CHECKS.json)
+de 8e406f9b est favorable : 504 configurations, cinq matrices, sources,
+provenance, comptes et tableaux du README concordants, lecteurs normal/−O.
+Aucun benchmark relancé pour ce contrôle. Les sources publiées de partage
+et d'axes correspondent aux snapshots déjà audités ; leurs corrections
+restent closes. Le [delta d'allocation](morsehgp3D_v8_complementaire/ALLOCATION_DELTA_CHECKS.json)
+cpp 522009ad… passe aussi les gates batch et affectation sous GCC strict
+-O1/UBSan : 20 pannes mémoire, cible conservée. La tentative -O2/UBSan
+refusée par GCC est conservée dans le reçu ; elle ne dépend pas du delta
+et n'est pas annoncée comme un succès. Aucun nouveau axe en cours n'est
+qualifié par ce contrôle ciblé.
+
+L'état actif de notre dossier est recentré sur ces suites ; les preuves
+closes restent dans leurs reçus. GCP non utilisé.
+
+La contrelecture du cpp axial 2922f425… et du hpp 99beeebe… confirme
+les branches ponctuelles : égalités exclues, bornes identiques aux feuilles,
+crédits B lus par ID original et restriction copiée après validation du
+propriétaire et de q2. Les sources ont ensuite évolué ; cet avis de lecture
+ne qualifie pas automatiquement la dernière révision.
+
+Réservation d'index AUDITEUR_COMPLEMENTAIRE après 9633d8ef, index constaté
+vide : notre dossier et cette section uniquement. Les modifications du
+constructeur, de l'autre auditeur et des lignées v6/v7 restent exclues.
+La fenêtre expire au commit/push de cette passe.
+
+Export neuf des entrées d'index SHA256 98741f28… : documentation PASS532,
+registre PASS20, validation explicite de nos quatorze Markdown et du
+journal PASS15 ; entrées stables avant/après export. Ces contrôles
+s'ajoutent aux gates exécutées dans leurs snapshots décrits plus haut,
+sans nouveau build constructeur ni reprise de ses fichiers en cours.

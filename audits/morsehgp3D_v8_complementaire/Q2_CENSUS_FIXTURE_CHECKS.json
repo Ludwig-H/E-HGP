@@ -1,0 +1,285 @@
+{
+  "command": [
+    "python3",
+    "audits/morsehgp3D_v8_complementaire/q2_census_fixtures.py",
+    "--selftest"
+  ],
+  "context_commit": "8e406f9b82f2a3da967e1a80c0bdcbfd50822fef",
+  "created_utc": "2026-09-13T19:28:43.056704+00:00",
+  "gcp_used": false,
+  "per_mode": [
+    {
+      "invalid_cli_exit": 2,
+      "mode": "normal",
+      "mutants": [
+        {
+          "exit": 1,
+          "name": "floor_center",
+          "result": {
+            "mutant": "floor_center",
+            "reason": "interior/shell IDs differ",
+            "status": "rejected"
+          },
+          "stderr": ""
+        },
+        {
+          "exit": 1,
+          "name": "pair_ids_count_distinct_balls",
+          "result": {
+            "mutant": "pair_ids_count_distinct_balls",
+            "reason": "two pair IDs represent only one ball",
+            "status": "rejected"
+          },
+          "stderr": ""
+        },
+        {
+          "exit": 1,
+          "name": "outside_from_maximum_corners",
+          "result": {
+            "mutant": "outside_from_maximum_corners",
+            "reason": "outside corners do not exclude interior sites",
+            "status": "rejected"
+          },
+          "stderr": ""
+        },
+        {
+          "exit": 1,
+          "name": "strict_pruning_delivers_full_shell",
+          "result": {
+            "mutant": "strict_pruning_delivers_full_shell",
+            "reason": "strict-depth pruning loses a shell site",
+            "status": "rejected"
+          },
+          "stderr": ""
+        }
+      ],
+      "selftest_exit": 0
+    },
+    {
+      "invalid_cli_exit": 2,
+      "mode": "optimized",
+      "mutants": [
+        {
+          "exit": 1,
+          "name": "floor_center",
+          "result": {
+            "mutant": "floor_center",
+            "reason": "interior/shell IDs differ",
+            "status": "rejected"
+          },
+          "stderr": ""
+        },
+        {
+          "exit": 1,
+          "name": "pair_ids_count_distinct_balls",
+          "result": {
+            "mutant": "pair_ids_count_distinct_balls",
+            "reason": "two pair IDs represent only one ball",
+            "status": "rejected"
+          },
+          "stderr": ""
+        },
+        {
+          "exit": 1,
+          "name": "outside_from_maximum_corners",
+          "result": {
+            "mutant": "outside_from_maximum_corners",
+            "reason": "outside corners do not exclude interior sites",
+            "status": "rejected"
+          },
+          "stderr": ""
+        },
+        {
+          "exit": 1,
+          "name": "strict_pruning_delivers_full_shell",
+          "result": {
+            "mutant": "strict_pruning_delivers_full_shell",
+            "reason": "strict-depth pruning loses a shell site",
+            "status": "rejected"
+          },
+          "stderr": ""
+        }
+      ],
+      "selftest_exit": 0
+    }
+  ],
+  "public_status": "not_claimed",
+  "results": {
+    "fractional_shared_ball": {
+      "candidate_kmax": [
+        2,
+        3
+      ],
+      "center_twice": [
+        3,
+        3,
+        3
+      ],
+      "distinct_geometric_balls": 1,
+      "distinct_support_pairs": 2,
+      "h_by_id": [
+        0,
+        0,
+        0,
+        0,
+        2,
+        -4
+      ],
+      "interior_ids": [
+        4
+      ],
+      "points": [
+        [
+          0,
+          1,
+          1
+        ],
+        [
+          3,
+          2,
+          2
+        ],
+        [
+          1,
+          0,
+          1
+        ],
+        [
+          2,
+          3,
+          2
+        ],
+        [
+          1,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          4
+        ]
+      ],
+      "radius_squared_times_four": 11,
+      "rejected_kmax": [
+        1
+      ],
+      "shell_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "support_pairs": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "without_id_4": {
+        "candidate_kmax_1": true,
+        "interior_ids": [],
+        "shell_ids": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "strict_gabriel_pair": false
+      }
+    },
+    "mutants": [
+      "floor_center",
+      "pair_ids_count_distinct_balls",
+      "outside_from_maximum_corners",
+      "strict_pruning_delivers_full_shell"
+    ],
+    "outside_corners_inside_site": {
+      "a": [
+        0,
+        2,
+        2
+      ],
+      "b": [
+        4,
+        2,
+        2
+      ],
+      "continuous_h_times_four_bounds": [
+        -16,
+        16
+      ],
+      "corner_h": [
+        -4,
+        -4,
+        -4,
+        -4,
+        -4,
+        -4,
+        -4,
+        -4
+      ],
+      "node_box": [
+        [
+          2,
+          0,
+          0
+        ],
+        [
+          2,
+          4,
+          4
+        ]
+      ],
+      "node_points": [
+        [
+          2,
+          0,
+          0
+        ],
+        [
+          2,
+          4,
+          4
+        ],
+        [
+          2,
+          2,
+          2
+        ]
+      ],
+      "point_h": [
+        -4,
+        -4,
+        4
+      ]
+    },
+    "queries": 192,
+    "scope": "exact_math_fixtures_no_production_consumer_or_full_qualification",
+    "source_sha256": "4e56ad85e32f7ad92b20009b93614f668710a2f03350d4e3d47d12be8a3a3a62",
+    "status": "passed",
+    "tangent_shell": {
+      "h_times_four_bounds": [
+        0,
+        0
+      ],
+      "pair": [
+        0,
+        1
+      ],
+      "point_id": 2
+    },
+    "tested_sites": 1152,
+    "threshold_decisions": 576,
+    "transforms": 48
+  },
+  "schema": "mhgp8_q2_census_fixture_checks_v1",
+  "source": "audits/morsehgp3D_v8_complementaire/q2_census_fixtures.py",
+  "source_sha256": "4e56ad85e32f7ad92b20009b93614f668710a2f03350d4e3d47d12be8a3a3a62",
+  "source_state": "independent_math_fixture_only",
+  "status": "passed"
+}
