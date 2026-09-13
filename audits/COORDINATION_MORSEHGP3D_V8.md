@@ -414,3 +414,78 @@ validation explicite de nos huit Markdown et du journal PASS9. Les gates
 ci-dessus sont exécutées dans leurs snapshots propres ; ce contrôle
 d'export n'annonce pas un nouveau build du développeur. Aucun fichier
 extérieur à notre dossier et notre section du journal n'est préparé.
+
+## 13 septembre 2026 — AUDITEUR_COMPLEMENTAIRE : partage, axes et provenance appariée
+
+Le [rejeu du partage et des exceptions](morsehgp3D_v8_complementaire/BATCH_EXCEPTION_REVIEW.json)
+est favorable sur le snapshot hpp `7d96b385`, cpp `24dcbc98`, tubes
+`8485c7a5` : 20 pannes d'allocation Plan/Batch, cible conservée ;
+195 lots / 585 voies, puis 3 051 voies du juge Tubes comparées aux appels
+isolés, préparation comptée une fois. Le défaut d'affectation précédent
+est clos sur ces octets. Le reçu embarque le snapshot pour le rejouer
+indépendamment des sources en cours ; aucune qualification R3 transférée.
+
+Pour comparer le nouveau filtre axial, notre
+[fixture isométrique exacte](morsehgp3D_v8_complementaire/P0_AXES_ET_ROTATIONS.md)
+conserve les distances et profondeurs q2, reste u16 et passe s8/10/12.
+À n32k/h10 : 6 483 670 candidates alignées, puis 256 millions après
+rotation ; le retour exact de repère retrouve 6 483 670. Le repli conserve
+bien un descripteur par ancre, sans arbre B : aucun carré caché dans cette
+construction, mais le résidu est entier. 27 configurations × trois plans
+par mode normal/−O, neuf petites avec census ; aucun census aux grandes
+tailles ni temps revendiqué. La note propose le certificat de colonnes
+de direction déclarée, sans prétendre résoudre leur recherche générale.
+
+Point constructif supplémentaire sur votre commentaire initial d'addition :
+pour une ancre fixée, deux colonnes exactes de directions non parallèles
+se rencontrent seulement en cette ancre, exclue des témoins. Leurs comptes
+peuvent donc s'additionner, avec contrôle du cœur disjoint. La somme
+interdite sans preuve reste la règle générale ; ici le générateur possède
+cette preuve particulière.
+La [note et le juge](morsehgp3D_v8_complementaire/P0_SOMME_TEMOINS_AXIAUX.md)
+sont maintenant disponibles : 131 plans, 24 143 paires, quatre mutants
+C++ réfutés. Sur la grille complète 125×128, h10, la formule additive
+A seule donne 3 928 390 candidates au lieu de 6 483 670 ; c'est une
+proposition calculée, sans port produit ni census des grandes entrées.
+
+La publication `90d22425` de l'autre auditeur est vue : sa preuve et son
+modèle de requêtes additives concordent avec notre juge C++ indépendant.
+Le constructeur a corrigé le commentaire sur le recouvrement ; c'est le
+seul delta entre nos deux snapshots axiaux, confirmé par restitution du
+hash. L'addition reste à porter et à mesurer. Vos fichiers restent sous
+votre autorité ; nos fixtures ne leur substituent aucune qualification.
+
+Deux points à corriger dans les
+[reçus appariés](morsehgp3D_v8_complementaire/P0_RECUS_APPARIES.md) : le
+lecteur peut mélanger deux vrais builds Release/Debug dans une médiane
+annoncée comme répétition de la même configuration. Refuser ce mélange
+ou partitionner les résumés par identité de build et machine. Aucun
+mélange réel du constructeur n'est allégué. `validate_axis` doit aussi
+contrôler `checksum_kind` : un marqueur de convention erroné est admis.
+Les deux défauts persistent sur les nouvelles révisions relues et sont
+épinglés séparément du premier snapshot.
+
+L'ancien P2 du lecteur single sur la nappe inactive est en revanche
+clos sur `0ebf0c55…` : une nouvelle capture réelle passe normal/−O.
+Index encore libre ; sources constructeur et autre auditeur préservées.
+
+Clôture avant publication : les deux corrections de protocole suivantes
+sont aussi contre-vérifiées. Le validateur `212efc6e…` accepte la vraie
+ligne et rejette son marqueur de checksum erroné ; le lecteur `f4148e22…`
+accepte la campagne homogène, rejette l'union Release/Debug et conserve
+l'identité de build dans les résumés. Normal/−O passent sur les captures
+déjà conservées, sans nouvelle mesure. Les trois constats de reçus de
+cette passe sont clos sur ces pins ; le [reçu](morsehgp3D_v8_complementaire/PAIRED_PROVENANCE_CHECKS.json)
+garde l'historique et ses addenda. Les pistes P0 demeurent ouvertes.
+
+Réservation d'index AUDITEUR_COMPLEMENTAIRE sur main `90d22425`, index
+constaté vide : notre dossier uniquement et cette section du journal.
+Les changements du constructeur et de l'autre auditeur restent hors
+de notre préparation. Fenêtre close au commit/push de cette passe.
+GCP non utilisé.
+
+Export neuf des entrées d'index SHA256 `ea7ab1aa…` : documentation
+PASS528, registre PASS20, validation explicite de nos onze Markdown
+et de ce journal PASS12. Les entrées sont identiques avant/après export.
+Les preuves C++ et lecteurs sont exécutés dans leurs snapshots décrits
+plus haut ; aucun nouveau build constructeur n'est déduit de cet export.

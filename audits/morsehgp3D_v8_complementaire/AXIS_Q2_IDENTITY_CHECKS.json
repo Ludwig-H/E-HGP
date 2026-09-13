@@ -1,0 +1,201 @@
+{
+  "auditor_source": "audits/morsehgp3D_v8_complementaire/axis_q2_identity_probe.cpp",
+  "auditor_source_sha256": "2e83da72d4ae7ec89b968d0938b3b537abeaec0326e0a20826c49ab7fc3c8006",
+  "created_utc": "2026-09-13T18:52:28.641773+00:00",
+  "executed_cpp_mutants": [
+    {
+      "build_exit": 0,
+      "compile_flags": [
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror"
+      ],
+      "exit_code": 1,
+      "mutant_sha256": "da0ecf5155e4a230ae8d95de9625e8e7f80fb024f8783628891df67938469a1c",
+      "name": "closed_tail",
+      "stderr": "axis q2 independent judge: mhgp8 axis point box is neither contained nor disjoint\n",
+      "stdout": ""
+    },
+    {
+      "build_exit": 0,
+      "compile_flags": [
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror"
+      ],
+      "exit_code": 1,
+      "mutant_sha256": "e04302e6ff8dfd405bdfeef7acca659b649b89228544fd41f755aa5e5714b1b8",
+      "name": "repeat_index_child",
+      "stderr": "axis q2 independent judge: duplicate expanded pair\n",
+      "stdout": ""
+    },
+    {
+      "build_exit": 0,
+      "compile_flags": [
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror"
+      ],
+      "exit_code": 1,
+      "mutant_sha256": "e1c724b856ecbf90218f30bfa338d19ebec797ffd723b3f2b07bf6c7a60c16c1",
+      "name": "false_exact_column",
+      "stderr": "axis q2 independent judge: plan/index differs from direct halfspace witnesses\n",
+      "stdout": ""
+    },
+    {
+      "build_exit": 0,
+      "compile_flags": [
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror"
+      ],
+      "exit_code": 1,
+      "mutant_sha256": "20915a6c64294c3c2b886f29e46bee9937df40fac9aab5a5d7f07c9863058f16",
+      "name": "shift_kth_successor",
+      "stderr": "axis q2 independent judge: plan/index differs from direct halfspace witnesses\n",
+      "stdout": ""
+    }
+  ],
+  "gcp_used": false,
+  "invalid_cli_exit": 2,
+  "normal": {
+    "build_exit": 0,
+    "command": [
+      "g++",
+      "-std=c++20",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-I",
+      "/tmp/mhgp8_axis_identity_tyu_u63j/morsehgp3D_v8/src",
+      "/tmp/mhgp8_axis_identity_tyu_u63j/probe.cpp",
+      "/tmp/mhgp8_axis_identity_tyu_u63j/morsehgp3D_v8/src/pipeline/local_credits.cpp",
+      "/tmp/mhgp8_axis_identity_tyu_u63j/morsehgp3D_v8/src/pipeline/axis_q2.cpp",
+      "-o",
+      "/tmp/mhgp8_axis_identity_tyu_u63j/probe"
+    ],
+    "run_exit": 0,
+    "stderr": "",
+    "stdout": "{\"status\":\"passed\",\"scope\":\"independent_bounded_axis_q2_judge\",\"plans\":131,\"pairs\":24143,\"census_point_tests\":874128,\"accepted\":11750,\"rejected\":12393,\"additive_opportunities\":689,\"index_plans\":60,\"inactive_plans\":36,\"core_positive_plans\":96,\"boundary_witness_tests\":2898,\"permutation_pairs\":64,\"minimal_current_candidates\":3,\"minimal_additive_candidates\":2}\n"
+  },
+  "public_status": "not_claimed",
+  "qualification_scope_note": "All original tests qualify the exact seven-source working-tree snapshot pinned here. The later axis comment correction is not substituted into this snapshot. Reconstruction verifies all eight source hashes and repeats the nominal bounded judge; original UBSan and mutant results remain the earlier recorded executions.",
+  "results": {
+    "accepted": 11750,
+    "additive_opportunities": 689,
+    "boundary_witness_tests": 2898,
+    "census_point_tests": 874128,
+    "core_positive_plans": 96,
+    "inactive_plans": 36,
+    "index_plans": 60,
+    "minimal_additive_candidates": 2,
+    "minimal_current_candidates": 3,
+    "pairs": 24143,
+    "permutation_pairs": 64,
+    "plans": 131,
+    "rejected": 12393,
+    "scope": "independent_bounded_axis_q2_judge",
+    "status": "passed"
+  },
+  "schema": "mhgp8_axis_q2_identity_checks_v1",
+  "scope": "bounded_axial_halfspaces_and_distinct_IDs_not_full_or_performance",
+  "shared_snapshot_ref": {
+    "receipt_relative_to_this_receipt": "AXIS_ROTATION_CHECKS.json",
+    "scope": "only these six source strings; rotation axis_q2.cpp is deliberately excluded",
+    "source_dictionary_field": "snapshot_utf8",
+    "source_sha256": {
+      "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+      "morsehgp3D_v8/src/pipeline/axis_q2.hpp": "b19981a14339c6bce8cafec6ee6630aace5e9e743267c7655b5295c2d41653f8",
+      "morsehgp3D_v8/src/pipeline/local_credits.cpp": "24dcbc9839d862e7b9e78864bb41baf726f89c3d48321f0ef8ec1c382aa8d151",
+      "morsehgp3D_v8/src/pipeline/local_credits.hpp": "7d96b38571bacf504d79b4139aaead8042bf1dca26396abd08bd8811799496db",
+      "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+      "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+    }
+  },
+  "snapshot_utf8": {
+    "audits/morsehgp3D_v8_complementaire/axis_q2_identity_probe.cpp": "// Independent bounded q2 judge: direct point powers and distinct witness IDs.\n// No production predicate, spatial index or column sort is used by the oracle.\n#include \"pipeline/axis_q2.hpp\"\n\n#include <algorithm>\n#include <array>\n#include <cstddef>\n#include <cstdint>\n#include <iostream>\n#include <set>\n#include <stdexcept>\n#include <string_view>\n#include <vector>\n\nnamespace {\nusing Point = mhgp8::Point3;\nusing Signature = std::set<std::array<std::uint16_t, 6>>;\n\nvoid require(bool value, const char* cause) {\n  if (!value) throw std::runtime_error(cause);\n}\n\nstd::int64_t h(const Point& a, const Point& b, const Point& z) {\n  std::int64_t result = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const auto left = static_cast<std::int64_t>(z[axis]) - a[axis];\n    const auto right = static_cast<std::int64_t>(b[axis]) - z[axis];\n    result += left * right;\n  }\n  // Every term has magnitude <=65535^2; the signed sum fits int64.\n  return result;\n}\n\nstd::array<Point, 8> corners(const mhgp8::RectangleInput& input, mhgp8::Range range) {\n  std::array<std::uint16_t, 3> low{65535, 65535, 65535}, high{};\n  for (auto i = range.first; i < range.last; ++i) {\n    for (std::size_t axis = 0; axis < 3; ++axis) {\n      low[axis] = std::min(low[axis], input.points[i][axis]);\n      high[axis] = std::max(high[axis], input.points[i][axis]);\n    }\n  }\n  std::array<Point, 8> result{};\n  for (unsigned i = 0; i < 8; ++i) {\n    result[i] = {(i & 1U) != 0 ? high[0] : low[0],\n                 (i & 2U) != 0 ? high[1] : low[1],\n                 (i & 4U) != 0 ? high[2] : low[2]};\n  }\n  return result;\n}\n\nstruct Checks {\n  std::uint64_t plans{}, pairs{}, census_point_tests{}, accepted{}, rejected{};\n  std::uint64_t additive_opportunities{}, index_plans{}, inactive_plans{}, core_positive_plans{};\n  std::uint64_t boundary_witness_tests{}, permutation_pairs{};\n};\n\nSignature check(const mhgp8::RectangleInput& input, unsigned kmax,\n                unsigned separation, Checks& checks) {\n  const auto owner = mhgp8::prepare_rectangle(input, kmax, separation);\n  const auto plan = mhgp8::make_axis_q2_plan(owner);\n  unsigned core = 0;\n  for (const auto zid : input.core_candidates) {\n    bool universal = true;\n    for (const auto& a : corners(input, input.a)) {\n      for (const auto& b : corners(input, input.b)) {\n        universal = universal && h(a, b, input.points[zid]) > 0;\n      }\n    }\n    core += universal ? 1U : 0U;\n  }\n  core = std::min(core, kmax);\n  require(plan.need() == kmax - core, \"wrong threshold/core transfer\");\n  ++checks.plans;\n  checks.core_positive_plans += core > 0 ? 1U : 0U;\n  checks.index_plans += plan.work().tree_nodes > 0 ? 1U : 0U;\n  checks.inactive_plans += plan.need() == 0 ? 1U : 0U;\n  std::vector<unsigned> expanded(input.a.size() * input.b.size(), 0);\n  plan.for_each_candidate([&](std::size_t a, std::size_t b) {\n    require(input.a.first <= a && a < input.a.last && input.b.first <= b && b < input.b.last,\n            \"expansion has wrong original IDs\");\n    auto& count = expanded[(a - input.a.first) * input.b.size() + b - input.b.first];\n    require(++count == 1, \"duplicate expanded pair\");\n  });\n  Signature signature;\n  std::uint64_t mass = 0;\n  for (const auto& block : plan.blocks()) {\n    require(input.a.first <= block.a_id && block.a_id < input.a.last &&\n            block.b.first < block.b.last && block.b.last <= plan.b_order().size(),\n            \"invalid index descriptor\");\n    mass += block.b.size();\n  }\n  require(mass == plan.candidate_pairs(), \"descriptor cardinality\");\n  for (auto aid = input.a.first; aid < input.a.last; ++aid) {\n    const auto& a = input.points[aid];\n    for (auto bid = input.b.first; bid < input.b.last; ++bid) {\n      const auto& b = input.points[bid];\n      std::array<unsigned, 3> axis_counts{};\n      std::set<std::size_t> axial_ids;\n      for (auto zid = input.a.first; zid < input.a.last; ++zid) {\n        const auto& z = input.points[zid];\n        for (std::size_t axis = 0; axis < 3; ++axis) {\n          bool column = true;\n          for (std::size_t other = 0; other < 3; ++other) {\n            if (other != axis && a[other] != z[other]) column = false;\n          }\n          if (!column || zid == aid) continue;\n          const auto value = h(a, b, z);\n          checks.boundary_witness_tests += value == 0 ? 1U : 0U;\n          if (value > 0) {\n            ++axis_counts[axis];\n            require(axial_ids.insert(zid).second, \"two exact axes share a non-self witness\");\n          }\n        }\n      }\n      const auto maximum = *std::max_element(axis_counts.begin(), axis_counts.end());\n      const auto summed = axis_counts[0] + axis_counts[1] + axis_counts[2];\n      require(summed == axial_ids.size(), \"axis sum does not count distinct identities\");\n      const bool expected = core + maximum < kmax;\n      require(plan.keeps(aid, bid) == expected &&\n              (expanded[(aid - input.a.first) * input.b.size() + bid - input.b.first] != 0) == expected,\n              \"plan/index differs from direct halfspace witnesses\");\n      unsigned depth = 0;\n      for (const auto& z : input.points) {\n        depth += h(a, b, z) > 0 ? 1U : 0U;\n        ++checks.census_point_tests;\n      }\n      require(depth >= core + summed, \"core plus disjoint axial sum exceeds actual depth\");\n      if (!expected) require(depth >= kmax, \"unsafe q2 rejection\");\n      checks.additive_opportunities += expected && core + summed >= kmax ? 1U : 0U;\n      checks.accepted += expected ? 1U : 0U;\n      checks.rejected += expected ? 0U : 1U;\n      ++checks.pairs;\n      if (expected) signature.insert({a.x, a.y, a.z, b.x, b.y, b.z});\n    }\n  }\n  require(signature.size() == plan.candidate_pairs(), \"physical signature cardinality\");\n  if (plan.need() == 0) {\n    require(plan.blocks().empty() && plan.b_order().empty() && plan.work().sort_passes == 0 &&\n            plan.work().tree_nodes == 0 && plan.work().query_nodes == 0,\n            \"inactive plan paid unused preparation\");\n  }\n  return signature;\n}\n\nstd::uint32_t next(std::uint32_t& state) {\n  state = state * 1664525U + 1013904223U;\n  return state;\n}\n\nPoint transform(Point point, unsigned seed) {\n  std::array<std::uint16_t, 3> values{point.x, point.y, point.z};\n  if ((seed & 4U) != 0) {\n    for (auto& value : values) value = static_cast<std::uint16_t>(65535 - value);\n  }\n  const auto shift = seed % 3;\n  return {values[shift], values[(shift + 1) % 3], values[(shift + 2) % 3]};\n}\n\nmhgp8::RectangleInput varied(unsigned seed, bool reordered) {\n  std::uint32_t state = 0x5A17U + seed;\n  std::vector<Point> a, b, extra;\n  constexpr std::array<unsigned, 5> coordinates{0, 1, 4, 10, 31};\n  std::set<std::array<unsigned, 3>> used;\n  const auto count_a = 8 + seed % 17;\n  const auto count_b = 1 + (seed * 7) % 24;\n  while (a.size() < count_a) {\n    const auto x = seed % 3 == 0 ? next(state) % 3 : 0;\n    const auto y = coordinates[next(state) % 5];\n    const auto z = coordinates[next(state) % 5];\n    if (used.insert({x, y, z}).second) {\n      a.push_back({static_cast<std::uint16_t>(x), static_cast<std::uint16_t>(y),\n                   static_cast<std::uint16_t>(z)});\n    }\n  }\n  while (b.size() < count_b) {\n    const auto x = 60000 + next(state) % 3;\n    const auto y = next(state) % 33;\n    const auto z = next(state) % 33;\n    if (used.insert({x, y, z}).second) {\n      b.push_back({static_cast<std::uint16_t>(x), static_cast<std::uint16_t>(y),\n                   static_cast<std::uint16_t>(z)});\n    }\n  }\n  for (unsigned i = 0; i < seed % 4; ++i) {\n    extra.push_back({static_cast<std::uint16_t>(30000 + i), 16, 16});\n  }\n  extra.push_back({30000, 65535, 65535});  // Proposed but not universal.\n  extra.push_back({29900, 17, 17});       // Real input, deliberately not proposed.\n  mhgp8::RectangleInput result;\n  const auto append = [&](const std::vector<Point>& points) {\n    const auto first = result.points.size();\n    for (const auto point : points) result.points.push_back(transform(point, seed));\n    return mhgp8::Range{first, result.points.size()};\n  };\n  if (reordered) {\n    std::reverse(a.begin(), a.end());\n    std::reverse(b.begin(), b.end());\n    result.b = append(b);\n  }\n  const auto external = append(extra);\n  for (auto id = external.first; id + 1 < external.last; ++id) result.core_candidates.push_back(id);\n  result.a = append(a);\n  if (!reordered) result.b = append(b);\n  return result;\n}\n\nvoid run() {\n  Checks checks;\n  const mhgp8::RectangleInput crossing{\n      {{0, 0, 0}, {0, 1, 0}, {0, 0, 1}, {100, 2, 2}}, {0, 3}, {3, 4}, {}};\n  static_cast<void>(check(crossing, 2, 12, checks));\n  require(checks.additive_opportunities == 1, \"minimal additive improvement missing\");\n  const auto crossing_plan = mhgp8::make_axis_q2_plan(mhgp8::prepare_rectangle(crossing, 2, 12));\n  require(crossing_plan.keeps(0, 3) && h(crossing.points[0], crossing.points[3], crossing.points[1]) == 1 &&\n          h(crossing.points[0], crossing.points[3], crossing.points[2]) == 1,\n          \"minimal fixture changed\");\n  for (unsigned seed = 0; seed < 64; ++seed) {\n    const unsigned kmax = 1 + seed % 5;\n    const unsigned separation = std::array<unsigned, 3>{8, 10, 12}[seed % 3];\n    require(check(varied(seed, false), kmax, separation, checks) ==\n            check(varied(seed, true), kmax, separation, checks),\n            \"permuting points/range layout changed physical residual\");\n    ++checks.permutation_pairs;\n  }\n  const mhgp8::RectangleInput boundary{\n      {{0, 0, 0}, {0, 1, 0}, {0, 4, 0}, {100, 1, 0}, {100, 2, 0}, {100, 4, 0}, {100, 5, 0}},\n      {0, 3}, {3, 7}, {}};\n  static_cast<void>(check(boundary, 1, 12, checks));\n  static_cast<void>(check(boundary, 2, 12, checks));\n  require(checks.plans == 131 && checks.permutation_pairs == 64 && checks.pairs > 10000 &&\n          checks.accepted > 1000 && checks.rejected > 1000 && checks.index_plans > 0 &&\n          checks.inactive_plans > 0 && checks.core_positive_plans > 0 &&\n          checks.boundary_witness_tests > 0 && checks.additive_opportunities > 1,\n          \"campaign nonvacuity\");\n  std::cout << \"{\\\"status\\\":\\\"passed\\\",\\\"scope\\\":\\\"independent_bounded_axis_q2_judge\\\"\"\n            << \",\\\"plans\\\":\" << checks.plans << \",\\\"pairs\\\":\" << checks.pairs\n            << \",\\\"census_point_tests\\\":\" << checks.census_point_tests\n            << \",\\\"accepted\\\":\" << checks.accepted << \",\\\"rejected\\\":\" << checks.rejected\n            << \",\\\"additive_opportunities\\\":\" << checks.additive_opportunities\n            << \",\\\"index_plans\\\":\" << checks.index_plans\n            << \",\\\"inactive_plans\\\":\" << checks.inactive_plans\n            << \",\\\"core_positive_plans\\\":\" << checks.core_positive_plans\n            << \",\\\"boundary_witness_tests\\\":\" << checks.boundary_witness_tests\n            << \",\\\"permutation_pairs\\\":\" << checks.permutation_pairs\n            << \",\\\"minimal_current_candidates\\\":3,\\\"minimal_additive_candidates\\\":2}\\n\";\n}\n}  // namespace\n\nint main(int argc, char** argv) {\n  if (argc != 2 || std::string_view(argv[1]) != \"--selftest\") return 2;\n  try {\n    run();\n    return 0;\n  } catch (const std::exception& error) {\n    std::cerr << \"axis q2 independent judge: \" << error.what() << '\\n';\n    return 1;\n  }\n}\n",
+    "morsehgp3D_v8/src/pipeline/axis_q2.cpp": "#include \"axis_q2.hpp\"\n\n#include <algorithm>\n#include <array>\n#include <limits>\n#include <memory>\n#include <numeric>\n#include <stdexcept>\n#include <utility>\n\nnamespace mhgp8 {\nnamespace {\n\n[[nodiscard]] bool contains(Range range, std::size_t id) {\n  return range.first <= id && id < range.last;\n}\n\n[[nodiscard]] bool contains(const Box3& box, const Point3& point) {\n  return box.low.x <= point.x && point.x <= box.high.x &&\n         box.low.y <= point.y && point.y <= box.high.y &&\n         box.low.z <= point.z && point.z <= box.high.z;\n}\n\n[[nodiscard]] bool contains(const Box3& outer, const Box3& inner) {\n  return contains(outer, inner.low) && contains(outer, inner.high);\n}\n\n[[nodiscard]] bool disjoint(const Box3& left, const Box3& right) {\n  return left.high.x < right.low.x || right.high.x < left.low.x ||\n         left.high.y < right.low.y || right.high.y < left.low.y ||\n         left.high.z < right.low.z || right.high.z < left.low.z;\n}\n\nvoid set_coordinate(Point3& point, std::size_t axis, std::uint16_t value) {\n  switch (axis) {\n    case 0: point.x = value; return;\n    case 1: point.y = value; return;\n    case 2: point.z = value; return;\n    default: throw std::logic_error(\"mhgp8 axis filter has an invalid axis\");\n  }\n}\n\n[[nodiscard]] u64 pair_count(std::size_t a_size, std::size_t b_size) {\n  static_assert(sizeof(std::size_t) <= sizeof(u64));\n  const auto a = static_cast<u64>(a_size);\n  const auto b = static_cast<u64>(b_size);\n  if (b != 0 && a > std::numeric_limits<u64>::max() / b) {\n    throw std::overflow_error(\"mhgp8 axis candidate cardinal exceeds u64\");\n  }\n  return a * b;\n}\n\nclass BoxIndex final {\n public:\n  BoxIndex(std::span<const Point3> points, std::vector<std::size_t>& order,\n           AxisQ2Work& work) : points_(points), order_(order), work_(work) {\n    if (order_.empty()) {\n      throw std::logic_error(\"mhgp8 axis index requires a nonempty factor\");\n    }\n    static_cast<void>(build({0, order_.size()}, 0));\n  }\n\n  template <class Consumer>\n  void query(const Box3& box, Consumer&& consume) const {\n    query_node(0, box, consume);\n  }\n\n private:\n  static constexpr std::size_t absent = std::numeric_limits<std::size_t>::max();\n  struct Node {\n    Range range;\n    Box3 box;\n    std::size_t left{absent};\n    std::size_t right{absent};\n  };\n\n  std::span<const Point3> points_;\n  std::vector<std::size_t>& order_;\n  AxisQ2Work& work_;\n  std::vector<Node> nodes_;\n\n  [[nodiscard]] std::size_t build(Range range, u64 depth) {\n    const auto& first = points_[order_[range.first]];\n    Box3 box{first, first};\n    for (std::size_t index = range.first; index < range.last; ++index) {\n      counter_add(work_.tree_point_visits);\n      const auto& point = points_[order_[index]];\n      box.low = {std::min(box.low.x, point.x), std::min(box.low.y, point.y),\n                 std::min(box.low.z, point.z)};\n      box.high = {std::max(box.high.x, point.x), std::max(box.high.y, point.y),\n                  std::max(box.high.z, point.z)};\n    }\n    const auto node_id = nodes_.size();\n    nodes_.push_back(Node{range, box});\n    counter_add(work_.tree_nodes);\n    work_.max_tree_depth = std::max(work_.max_tree_depth, depth);\n    if (range.size() == 1) {\n      return node_id;\n    }\n    std::size_t axis = 0;\n    for (std::size_t candidate = 1; candidate < 3; ++candidate) {\n      if (box.high[candidate] - box.low[candidate] > box.high[axis] - box.low[axis]) {\n        axis = candidate;\n      }\n    }\n    const unsigned middle =\n        (static_cast<unsigned>(box.low[axis]) + box.high[axis]) / 2;\n    const auto begin = order_.begin() + static_cast<std::ptrdiff_t>(range.first);\n    const auto end = order_.begin() + static_cast<std::ptrdiff_t>(range.last);\n    const auto cut = std::partition(begin, end, [&](std::size_t id) {\n      counter_add(work_.tree_point_visits);\n      return points_[id][axis] <= middle;\n    });\n    const auto split = static_cast<std::size_t>(cut - order_.begin());\n    if (split == range.first || split == range.last) {\n      throw std::logic_error(\"mhgp8 axis midpoint split failed on distinct sites\");\n    }\n    // Every split halves a positive u16 coordinate extent. A path has at most\n    // 48 splits; this is an input-width proof, not a truncation of queries.\n    const auto left = build({range.first, split}, depth + 1);\n    const auto right = build({split, range.last}, depth + 1);\n    nodes_[node_id].left = left;\n    nodes_[node_id].right = right;\n    return node_id;\n  }\n\n  template <class Consumer>\n  void query_node(std::size_t node_id, const Box3& box, Consumer& consume) const {\n    counter_add(work_.query_nodes);\n    const auto& node = nodes_[node_id];\n    if (disjoint(box, node.box)) {\n      counter_add(work_.disjoint_nodes);\n      return;\n    }\n    if (contains(box, node.box)) {\n      counter_add(work_.contained_nodes);\n      consume(node.range);\n      return;\n    }\n    if (node.left == absent) {\n      throw std::logic_error(\"mhgp8 axis point box is neither contained nor disjoint\");\n    }\n    query_node(node.left, box, consume);\n    query_node(node.right, box, consume);\n  }\n};\n\n}  // namespace\n\nAxisQ2Plan::AxisQ2Plan(RectanglePtr rectangle) : rectangle_(std::move(rectangle)) {\n  if (!rectangle_) {\n    throw std::invalid_argument(\"mhgp8 axis filter requires an owned rectangle\");\n  }\n  const auto& r = *rectangle_;\n  const auto a = r.a_range();\n  const auto b = r.b_range();\n  const auto points = r.points();\n  total_ = pair_count(a.size(), b.size());\n  need_ = static_cast<std::uint8_t>(r.threshold(Lane::Q2) - r.core_credit(Lane::Q2));\n  if (need_ == 0) {\n    return;\n  }\n\n  constexpr auto maximum = std::numeric_limits<std::uint16_t>::max();\n  const Box3 universe{{0, 0, 0}, {maximum, maximum, maximum}};\n  anchor_bounds_.assign(a.size(), universe);\n  std::vector<std::size_t> order(a.size());\n  std::iota(order.begin(), order.end(), a.first);\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    std::array<std::size_t, 2> other{};\n    std::size_t offset = 0;\n    for (std::size_t candidate = 0; candidate < 3; ++candidate) {\n      if (candidate != axis) {\n        other[offset++] = candidate;\n      }\n    }\n    counter_add(work_.sort_passes);\n    counter_add(work_.sorted_sites, order.size());\n    std::sort(order.begin(), order.end(), [&](std::size_t left, std::size_t right) {\n      counter_add(work_.sort_comparisons);\n      for (const auto coordinate : other) {\n        if (points[left][coordinate] != points[right][coordinate]) {\n          return points[left][coordinate] < points[right][coordinate];\n        }\n      }\n      if (points[left][axis] != points[right][axis]) {\n        return points[left][axis] < points[right][axis];\n      }\n      return left < right;\n    });\n    const auto same_column = [&](std::size_t left, std::size_t right) {\n      return points[left][other[0]] == points[right][other[0]] &&\n             points[left][other[1]] == points[right][other[1]];\n    };\n    std::size_t begin = 0;\n    while (begin < order.size()) {\n      std::size_t end = begin + 1;\n      while (end < order.size() && same_column(order[begin], order[end])) {\n        ++end;\n      }\n      counter_add(work_.columns);\n      for (std::size_t index = begin; index < end; ++index) {\n        auto& slab = anchor_bounds_[order[index] - a.first];\n        // Within a column the varying coordinates are strictly increasing:\n        // equality would duplicate all three coordinates, rejected by r.\n        // Every one of these need sites alone satisfies H>0 if b lies\n        // STRICTLY beyond the kth coordinate. Equality remains a candidate.\n        if (index - begin >= need_) {\n          const auto bound = points[order[index - need_]][axis];\n          if (bound > slab.low[axis]) {\n            set_coordinate(slab.low, axis, bound);\n            counter_add(work_.slab_bound_updates);\n          }\n        }\n        if (end - index > need_) {\n          const auto bound = points[order[index + need_]][axis];\n          if (bound < slab.high[axis]) {\n            set_coordinate(slab.high, axis, bound);\n            counter_add(work_.slab_bound_updates);\n          }\n        }\n      }\n      begin = end;\n    }\n  }\n\n  // Each of the six exclusions certifies need witnesses independently. The\n  // closed box intersects their complements; counts from different axes are\n  // never added, because their populations can overlap. The core remains\n  // disjoint from A and B by the immutable rectangle's own certification.\n  bool needs_index = false;\n  for (const auto& slab : anchor_bounds_) {\n    if (slab.low != universe.low || slab.high != universe.high) {\n      counter_add(work_.constrained_anchors);\n    }\n    if (!contains(slab, r.b_box()) && !disjoint(slab, r.b_box())) {\n      needs_index = true;\n    }\n  }\n  b_order_.resize(b.size());\n  std::iota(b_order_.begin(), b_order_.end(), b.first);\n  std::unique_ptr<BoxIndex> index;\n  if (needs_index) {\n    index = std::make_unique<BoxIndex>(points, b_order_, work_);\n  }\n  for (std::size_t a_id = a.first; a_id < a.last; ++a_id) {\n    const auto& slab = anchor_bounds_[a_id - a.first];\n    const auto emit = [&](Range range) {\n      blocks_.push_back(AxisQ2Block{a_id, range});\n      counter_add(work_.emitted_blocks);\n      counter_add(candidates_, range.size());\n    };\n    if (contains(slab, r.b_box())) {\n      // Generic data with no repeated transverse coordinates takes this path:\n      // one descriptor per anchor, without visiting the B tree or its sites.\n      counter_add(work_.whole_factor_accepts);\n      emit({0, b_order_.size()});\n    } else if (disjoint(slab, r.b_box())) {\n      counter_add(work_.whole_factor_rejects);\n    } else {\n      if (!index) {\n        throw std::logic_error(\"mhgp8 axis query has no prepared index\");\n      }\n      index->query(slab, emit);\n    }\n  }\n  // Only range descriptors survive. Index nodes and their borrowed point span\n  // are local to construction. D emitted fragments cost O(D) memory; neither\n  // the number of visited nodes nor D has a global linear guarantee here.\n}\n\nAxisQ2Plan make_axis_q2_plan(RectanglePtr rectangle) {\n  return AxisQ2Plan(std::move(rectangle));\n}\n\nAxisQ2Plan::AxisQ2Plan(AxisQ2Plan&& other) noexcept\n    : rectangle_(std::move(other.rectangle_)), need_(std::exchange(other.need_, 0)),\n      anchor_bounds_(std::move(other.anchor_bounds_)),\n      b_order_(std::move(other.b_order_)), blocks_(std::move(other.blocks_)),\n      work_(std::exchange(other.work_, AxisQ2Work{})),\n      total_(std::exchange(other.total_, 0)), candidates_(std::exchange(other.candidates_, 0)) {\n  other.anchor_bounds_.clear();\n  other.b_order_.clear();\n  other.blocks_.clear();\n}\n\nbool AxisQ2Plan::keeps(std::size_t a_id, std::size_t b_id) const {\n  if (!rectangle_) {\n    throw std::logic_error(\"mhgp8 axis plan was moved from\");\n  }\n  const auto a = rectangle_->a_range();\n  const auto b = rectangle_->b_range();\n  if (!contains(a, a_id) || !contains(b, b_id)) {\n    throw std::invalid_argument(\"mhgp8 axis pair IDs do not belong to this rectangle\");\n  }\n  return need_ != 0 && contains(anchor_bounds_[a_id - a.first], rectangle_->points()[b_id]);\n}\n\n}  // namespace mhgp8\n"
+  },
+  "source_hashes_match_at_initial_execution": true,
+  "source_hashes_still_match_worktree": false,
+  "source_reconstruction": {
+    "all_source_sha256_verified": true,
+    "auditor_source_files": 1,
+    "build_exit": 0,
+    "checked_utc": "2026-09-13T19:02:28.317346+00:00",
+    "command_template": [
+      "g++",
+      "-std=c++20",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-I",
+      "<reconstructed_snapshot>/morsehgp3D_v8/src",
+      "<reconstructed_snapshot>/audits/morsehgp3D_v8_complementaire/axis_q2_identity_probe.cpp",
+      "<reconstructed_snapshot>/morsehgp3D_v8/src/pipeline/local_credits.cpp",
+      "<reconstructed_snapshot>/morsehgp3D_v8/src/pipeline/axis_q2.cpp",
+      "-o",
+      "<reconstructed_snapshot>/probe"
+    ],
+    "invalid_cli_exit": 2,
+    "product_source_files": 7,
+    "results_equal_original": true,
+    "run_argv_template": [
+      "<reconstructed_snapshot>/probe",
+      "--selftest"
+    ],
+    "run_exit": 0,
+    "sources_read_from": [
+      "this receipt snapshot_utf8",
+      "shared_snapshot_ref receipt and field"
+    ],
+    "status": "passed",
+    "stderr": "",
+    "stdout": "{\"status\":\"passed\",\"scope\":\"independent_bounded_axis_q2_judge\",\"plans\":131,\"pairs\":24143,\"census_point_tests\":874128,\"accepted\":11750,\"rejected\":12393,\"additive_opportunities\":689,\"index_plans\":60,\"inactive_plans\":36,\"core_positive_plans\":96,\"boundary_witness_tests\":2898,\"permutation_pairs\":64,\"minimal_current_candidates\":3,\"minimal_additive_candidates\":2}\n"
+  },
+  "source_sha256": {
+    "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+    "morsehgp3D_v8/src/pipeline/axis_q2.cpp": "2cea8416e62886ff19168163975a34b678330eb904b8e291c6308841be975fa3",
+    "morsehgp3D_v8/src/pipeline/axis_q2.hpp": "b19981a14339c6bce8cafec6ee6630aace5e9e743267c7655b5295c2d41653f8",
+    "morsehgp3D_v8/src/pipeline/local_credits.cpp": "24dcbc9839d862e7b9e78864bb41baf726f89c3d48321f0ef8ec1c382aa8d151",
+    "morsehgp3D_v8/src/pipeline/local_credits.hpp": "7d96b38571bacf504d79b4139aaead8042bf1dca26396abd08bd8811799496db",
+    "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+    "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+  },
+  "source_state": "working_tree_snapshot",
+  "status": "passed",
+  "ubsan": {
+    "build_exit": 0,
+    "compile_flags": [
+      "-std=c++20",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Werror",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=all"
+    ],
+    "exit_code": 0,
+    "name": "ubsan",
+    "stderr": "",
+    "stdout": "{\"status\":\"passed\",\"scope\":\"independent_bounded_axis_q2_judge\",\"plans\":131,\"pairs\":24143,\"census_point_tests\":874128,\"accepted\":11750,\"rejected\":12393,\"additive_opportunities\":689,\"index_plans\":60,\"inactive_plans\":36,\"core_positive_plans\":96,\"boundary_witness_tests\":2898,\"permutation_pairs\":64,\"minimal_current_candidates\":3,\"minimal_additive_candidates\":2}\n"
+  },
+  "worktree_hash_check_utc": "2026-09-13T19:02:28.318747+00:00"
+}
