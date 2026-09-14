@@ -1,0 +1,54 @@
+{
+  "allowed_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "binary": "morsehgp3D_v8/audits/q2_front_20260914/.build/r1/lidar_q2_probe",
+  "command": [
+    "morsehgp3D_v8/audits/q2_front_20260914/measure.py",
+    "--plan",
+    "other_scans"
+  ],
+  "input_preparation": "lidar08_20260914/INPUTS.json",
+  "input_sha256": {
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/MANIFEST.json": "52cb29679b6ff135508910d176a1450cbea7c96449e30f965166f232d979edc5",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n8000.u16le": "813d595e799ff00d93fb94980d2e406c3775217b93aa4efbea0a675aaab3b402",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n8000.u16le": "edc1a7980b366034984d0c3b020f5fa94777277b1618db7c16116c5ccfea4446",
+    "morsehgp3D_v8/audits/q2_front_20260914/.build/r1/lidar_q2_probe": "7d72c453d8e49a2d1a13399459277430d219e648acae15e303a2a44c2676d8f5",
+    "morsehgp3D_v8/audits/q2_front_20260914/r1_BUILD.json": "0b86df532ed76dfdc39c732029fd4a2ee7fe16abae4d19282bd6bc3454949eee",
+    "morsehgp3D_v8/audits/q2_front_20260914/r1_sources.zip": "29bfa1b40eed6e6fa7f8167c9868067ceec5ebd4e6b856f9ef26cfa928e96ef3"
+  },
+  "matrix": [
+    [
+      "single_000100",
+      8000,
+      8,
+      "samples",
+      "shared"
+    ],
+    [
+      "single_000200",
+      8000,
+      8,
+      "samples",
+      "shared"
+    ]
+  ],
+  "plan": "other_scans",
+  "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+  "public_status": "not_claimed",
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "runner_sha256": "8add7d2849eee2c7cf67ed2461c73cd0ad1c4105e26fbceb68774dd176079509",
+  "schema": "mhgp8_q2_lidar_campaign_v2",
+  "scope": "q2_integration_not_full_tower",
+  "selected_cpu": 7,
+  "started_utc": "2026-09-14T09:21:24.711946+00:00",
+  "timeout_policy": "failed_run_no_truncated_result",
+  "timeout_seconds": 180
+}

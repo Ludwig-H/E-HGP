@@ -1,0 +1,184 @@
+{
+  "guard_source": "from pathlib import Path\nimport importlib.util,io,json,subprocess\nfrom unittest.mock import patch\nbase=Path('morsehgp3D_v8/audits/q2_front_20260914').resolve()\ndef load(name,path):\n    spec=importlib.util.spec_from_file_location(name,path)\n    m=importlib.util.module_from_spec(spec)\n    spec.loader.exec_module(m)\n    return m\nm=load('q2_measure_guard',base/'measure.py')\nlegacy=load('q2_measure_legacy_guard',base/'measure_r1.py')\ndef require(ok,message):\n    if not ok: raise RuntimeError(message)\noriginal=json.loads((base/'campaign_pilot/MEASURES.jsonl').read_text().splitlines()[0])\npath=Path(original['command'][1])\nkey=tuple(original['key'])\ncommand=original['command']\nclass Stream(io.StringIO):\n    def __init__(self): super().__init__(); self.flushes=0\n    def flush(self): self.flushes+=1; super().flush()\ncases=[]\ndef exercise(label, outcome, expected_exception, expected_status, expected_code):\n    stream=Stream(); caught=None\n    with patch.object(m.subprocess,'run',side_effect=outcome if isinstance(outcome,BaseException) else None,\n                      return_value=outcome if not isinstance(outcome,BaseException) else None):\n        try: m.run_attempt(key,command,path,0,stream)\n        except BaseException as error: caught=error\n    require((caught is None) if expected_exception is None else isinstance(caught,expected_exception),label+' propagation')\n    if isinstance(outcome,(OSError,KeyboardInterrupt)): require(caught is outcome,label+' original exception changed')\n    rows=stream.getvalue().splitlines()\n    require(len(rows)==1 and stream.flushes==1,label+' lost/duplicated attempt or flush')\n    row=json.loads(rows[0])\n    require(row['status']==expected_status and row['returncode']==expected_code,label+' wrong status/code')\n    require(row['command']==command and row['key']==list(key) and row['finished_utc']>=row['started_utc'],label+' lost identity/time')\n    if caught is not None: require(row['error_type']==type(caught).__name__,label+' lost error type')\n    if label=='timeout': require(row['stdout']=='partial output' and row['stderr']=='partial error' and row['timeout'] is True,'timeout bytes lost')\n    cases.append(dict(name=label,status=row['status'],returncode=row['returncode'],rows=1,flushes=stream.flushes,error_type=row.get('error_type')))\nexercise('success',subprocess.CompletedProcess(command,0,original['stdout'],''),None,'completed',0)\nexercise('startup_oserror',OSError('synthetic startup refusal'),OSError,'failed',None)\nexercise('keyboard_interrupt',KeyboardInterrupt('synthetic interrupt'),KeyboardInterrupt,'interrupted',None)\nexercise('timeout',subprocess.TimeoutExpired(command,180,output=b'partial output',stderr=b'partial error'),RuntimeError,'failed',124)\nexercise('nonzero_process',subprocess.CompletedProcess(command,7,'partial','synthetic failure'),RuntimeError,'failed',7)\nexercise('malformed_json',subprocess.CompletedProcess(command,0,'{',''),KeyError,'failed',0)\nwrong=dict(original['result'],kmax=5)\nexercise('invalid_result',subprocess.CompletedProcess(command,0,json.dumps(wrong),''),RuntimeError,'failed',0)\nrequire(m.validate_runner_pin(m.sha(base/'measure.py'))=='current_v2','current authority')\nrequire(m.validate_runner_pin(m.LEGACY_RUNNER_SHA256)=='archived_r1','legacy authority')\nrejections=0\nfor pin in ('0'*64,):\n    try: m.validate_runner_pin(pin)\n    except RuntimeError: rejections+=1\nreal_sha=m.sha\nwith patch.object(m,'sha',side_effect=lambda p: 'f'*64 if Path(p).name=='measure_r1.py' else real_sha(p)):\n    try: m.validate_runner_pin(m.LEGACY_RUNNER_SHA256)\n    except RuntimeError: rejections+=1\nrequire(rejections==2,'unknown/tampered authority survived')\nrequire(all(m.PLANS[name]==matrix for name,matrix in legacy.PLANS.items()),'old matrix changed')\nrequire(m.PLANS['repeat_pilot']==list(reversed(legacy.PLANS['pilot'])),'reversed pilot')\nrequire(m.PLANS['check50k']==[('single_000000',50000,8,'samples','shared')],'50k plan')\nrequire(m.validate(base/'campaign_pilot')==legacy.validate(base/'campaign_pilot'),'legacy pilot projection changed')\nprint(json.dumps(dict(status='passed',cases=cases,authority_rejections=rejections,legacy_pilot_rows=4,old_plans_unchanged=True,new_plans=['repeat_pilot','check50k'],performance_processes_started=0),sort_keys=True))\n",
+  "legacy_source_bytes_exact": true,
+  "performance_processes_started": 0,
+  "protected_files_unchanged": {
+    "morsehgp3D_v8/audits/q2_front_20260914/campaign_pilot/COMPLETION.json": "cd2d6f615b80a801a7e6270b9c07fed7bf4ee782638f9b4fdea06c20335605c7",
+    "morsehgp3D_v8/audits/q2_front_20260914/campaign_pilot/MANIFEST.json": "fd903be3ad1ebf16fa53bb5d56d1de1746ed79421fa07a63d95445d2605db575",
+    "morsehgp3D_v8/audits/q2_front_20260914/campaign_pilot/MEASURES.jsonl": "072a3b8f8f772c01a35a2762ba1e2b1886309dd3fd5662ea60e0c027b047c559",
+    "morsehgp3D_v8/audits/q2_front_20260914/r1_BUILD.json": "0b86df532ed76dfdc39c732029fd4a2ee7fe16abae4d19282bd6bc3454949eee",
+    "morsehgp3D_v8/audits/q2_front_20260914/r1_sources.zip": "29bfa1b40eed6e6fa7f8167c9868067ceec5ebd4e6b856f9ef26cfa928e96ef3"
+  },
+  "runs": [
+    {
+      "command_prefix": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-c"
+      ],
+      "optimized": false,
+      "result": {
+        "authority_rejections": 2,
+        "cases": [
+          {
+            "error_type": null,
+            "flushes": 1,
+            "name": "success",
+            "returncode": 0,
+            "rows": 1,
+            "status": "completed"
+          },
+          {
+            "error_type": "OSError",
+            "flushes": 1,
+            "name": "startup_oserror",
+            "returncode": null,
+            "rows": 1,
+            "status": "failed"
+          },
+          {
+            "error_type": "KeyboardInterrupt",
+            "flushes": 1,
+            "name": "keyboard_interrupt",
+            "returncode": null,
+            "rows": 1,
+            "status": "interrupted"
+          },
+          {
+            "error_type": "RuntimeError",
+            "flushes": 1,
+            "name": "timeout",
+            "returncode": 124,
+            "rows": 1,
+            "status": "failed"
+          },
+          {
+            "error_type": "RuntimeError",
+            "flushes": 1,
+            "name": "nonzero_process",
+            "returncode": 7,
+            "rows": 1,
+            "status": "failed"
+          },
+          {
+            "error_type": "KeyError",
+            "flushes": 1,
+            "name": "malformed_json",
+            "returncode": 0,
+            "rows": 1,
+            "status": "failed"
+          },
+          {
+            "error_type": "RuntimeError",
+            "flushes": 1,
+            "name": "invalid_result",
+            "returncode": 0,
+            "rows": 1,
+            "status": "failed"
+          }
+        ],
+        "legacy_pilot_rows": 4,
+        "new_plans": [
+          "repeat_pilot",
+          "check50k"
+        ],
+        "old_plans_unchanged": true,
+        "performance_processes_started": 0,
+        "status": "passed"
+      },
+      "returncode": 0,
+      "source_argument": "guard_source",
+      "stderr": "",
+      "stdout": "{\"authority_rejections\": 2, \"cases\": [{\"error_type\": null, \"flushes\": 1, \"name\": \"success\", \"returncode\": 0, \"rows\": 1, \"status\": \"completed\"}, {\"error_type\": \"OSError\", \"flushes\": 1, \"name\": \"startup_oserror\", \"returncode\": null, \"rows\": 1, \"status\": \"failed\"}, {\"error_type\": \"KeyboardInterrupt\", \"flushes\": 1, \"name\": \"keyboard_interrupt\", \"returncode\": null, \"rows\": 1, \"status\": \"interrupted\"}, {\"error_type\": \"RuntimeError\", \"flushes\": 1, \"name\": \"timeout\", \"returncode\": 124, \"rows\": 1, \"status\": \"failed\"}, {\"error_type\": \"RuntimeError\", \"flushes\": 1, \"name\": \"nonzero_process\", \"returncode\": 7, \"rows\": 1, \"status\": \"failed\"}, {\"error_type\": \"KeyError\", \"flushes\": 1, \"name\": \"malformed_json\", \"returncode\": 0, \"rows\": 1, \"status\": \"failed\"}, {\"error_type\": \"RuntimeError\", \"flushes\": 1, \"name\": \"invalid_result\", \"returncode\": 0, \"rows\": 1, \"status\": \"failed\"}], \"legacy_pilot_rows\": 4, \"new_plans\": [\"repeat_pilot\", \"check50k\"], \"old_plans_unchanged\": true, \"performance_processes_started\": 0, \"status\": \"passed\"}\n"
+    },
+    {
+      "command_prefix": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "-c"
+      ],
+      "optimized": true,
+      "result": {
+        "authority_rejections": 2,
+        "cases": [
+          {
+            "error_type": null,
+            "flushes": 1,
+            "name": "success",
+            "returncode": 0,
+            "rows": 1,
+            "status": "completed"
+          },
+          {
+            "error_type": "OSError",
+            "flushes": 1,
+            "name": "startup_oserror",
+            "returncode": null,
+            "rows": 1,
+            "status": "failed"
+          },
+          {
+            "error_type": "KeyboardInterrupt",
+            "flushes": 1,
+            "name": "keyboard_interrupt",
+            "returncode": null,
+            "rows": 1,
+            "status": "interrupted"
+          },
+          {
+            "error_type": "RuntimeError",
+            "flushes": 1,
+            "name": "timeout",
+            "returncode": 124,
+            "rows": 1,
+            "status": "failed"
+          },
+          {
+            "error_type": "RuntimeError",
+            "flushes": 1,
+            "name": "nonzero_process",
+            "returncode": 7,
+            "rows": 1,
+            "status": "failed"
+          },
+          {
+            "error_type": "KeyError",
+            "flushes": 1,
+            "name": "malformed_json",
+            "returncode": 0,
+            "rows": 1,
+            "status": "failed"
+          },
+          {
+            "error_type": "RuntimeError",
+            "flushes": 1,
+            "name": "invalid_result",
+            "returncode": 0,
+            "rows": 1,
+            "status": "failed"
+          }
+        ],
+        "legacy_pilot_rows": 4,
+        "new_plans": [
+          "repeat_pilot",
+          "check50k"
+        ],
+        "old_plans_unchanged": true,
+        "performance_processes_started": 0,
+        "status": "passed"
+      },
+      "returncode": 0,
+      "source_argument": "guard_source",
+      "stderr": "",
+      "stdout": "{\"authority_rejections\": 2, \"cases\": [{\"error_type\": null, \"flushes\": 1, \"name\": \"success\", \"returncode\": 0, \"rows\": 1, \"status\": \"completed\"}, {\"error_type\": \"OSError\", \"flushes\": 1, \"name\": \"startup_oserror\", \"returncode\": null, \"rows\": 1, \"status\": \"failed\"}, {\"error_type\": \"KeyboardInterrupt\", \"flushes\": 1, \"name\": \"keyboard_interrupt\", \"returncode\": null, \"rows\": 1, \"status\": \"interrupted\"}, {\"error_type\": \"RuntimeError\", \"flushes\": 1, \"name\": \"timeout\", \"returncode\": 124, \"rows\": 1, \"status\": \"failed\"}, {\"error_type\": \"RuntimeError\", \"flushes\": 1, \"name\": \"nonzero_process\", \"returncode\": 7, \"rows\": 1, \"status\": \"failed\"}, {\"error_type\": \"KeyError\", \"flushes\": 1, \"name\": \"malformed_json\", \"returncode\": 0, \"rows\": 1, \"status\": \"failed\"}, {\"error_type\": \"RuntimeError\", \"flushes\": 1, \"name\": \"invalid_result\", \"returncode\": 0, \"rows\": 1, \"status\": \"failed\"}], \"legacy_pilot_rows\": 4, \"new_plans\": [\"repeat_pilot\", \"check50k\"], \"old_plans_unchanged\": true, \"performance_processes_started\": 0, \"status\": \"passed\"}\n"
+    }
+  ],
+  "schema": "mhgp8_q2_lidar_runner_guards_v1",
+  "scope": "runner_failure_serialization_and_legacy_authority_not_performance",
+  "source_sha256": {
+    "measure.py": "8add7d2849eee2c7cf67ed2461c73cd0ad1c4105e26fbceb68774dd176079509",
+    "measure_r1.py": "c7357644d19fe3102a2b548cc7e82e438538b25fa9934d74fa113ec0cbef05e9"
+  },
+  "status": "passed"
+}

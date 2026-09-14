@@ -1,77 +1,75 @@
 # Dialogue courant de l’auditeur indépendant A v8
 
-14 septembre 2026, sources produit auditées **da366f7f**, sur main.
-Écritures limitées à ce dossier. `phase=exploration_v8_hors_registre`,
-`backend=cpu_reference`, `profile=quantized_u16_input_only`,
-`mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
+14 septembre 2026, sur main. Écritures limitées à ce dossier.
+`phase=exploration_v8_hors_registre`, `backend=cpu_reference`,
+`profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
+`public_status=not_claimed`. GCP non utilisé.
 
-## Priorité utilisateur : aucune hypothèse d’alignement des points
+## Résultat utile : le filtre paie son coût avec le census LiDAR
 
-Des nuages correctement recalés gardent un échantillonnage irrégulier.
-Les colonnes ou lignes exactes ne peuvent donc pas conditionner le
-chemin général ni ses performances. La précision de l’utilisateur ne
-demandait pas de faire de SemanticKITTI un benchmark de recalage.
+Le [raccord q2 sur LiDAR](q2_front_20260914/README.md) est mesuré sur un
+snapshot figé, dont les seize sources produit/test correspondent au commit
+constructeur f7edd646. Quinze appels
+clos, dont le pilote à 8k dans les deux ordres d’exécution : Samples/Shared
+1,668–2,128 s contre Pure/Shared 12,233–16,463 s, soit ×7,3–7,7 dans
+les deux campagnes. Front, census, collecte et callback sont payés ;
+les quatre modes rendent le même digest et les mêmes compteurs de sortie.
+Cette comparaison garde le masque q2 identique, sans utiliser les temps
+du précédent front trois voies comme référence.
 
-L’[audit LiDAR réel](lidar08_20260914/README.md) fournit trois scans isolés
-primaires de KITTI 08 et 36 mesures closes du front général. À 50k sites
-uniques quantifiés, Kmax=10 et s=8, MidpointSamples élimine 96,93–98,67 %
-des paires q2 sans filtre axial. Le front avec callback coûte cependant
-7,810–10,476 s en mono, contre 0,777–1,136 s en Pure ; il paie
-177–197 millions de pas de recherche. Aucun gain de chaîne complète
-n’est acquis sans census. Le contrôle de cinq scans voisins reste
-secondaire et ne qualifie aucun recalage de captures indépendantes.
+La montée Samples/Shared donne 3,733 s à 16k, 7,582 s à 32k et
+13,778 s à 50k sur le même scan. À 50k, 1 040 133 supports sont émis,
+avec 579,8 millions de visites de comptage, 3,83 millions de démarrages
+racine et 29,92 millions de tâches. La collecte/callback vaut 8,6 % du
+temps intégré observé. Priorité mesurée : partager davantage le comptage
+et réduire les recherches du proposeur, en suivant aussi le nombre de
+tâches. Le résidu légèrement inférieur à s10/12 ne diminue pas ici
+nettement le travail total. Aucune borne générale ni qualification G4.
 
-Suite utile au constructeur : mesurer le raccord direct des nœuds WSPD
-au census sur ces mêmes fichiers, coût front + census + collecte compris,
-avec s8 en référence appariée et s10/12 conservés. Les données locales,
-matrices, collisions de quantification, correspondances et hashes sont
-disponibles ; le dépôt ne contient pas les scans bruts. La grille isotrope
-2 cm définit un ensemble de sites distinct de celui des retours bruts.
-Cette première capture ne couvre ni toute la diversité LiDAR ni le massif.
-La capture actuelle active q2/q3/q4 ; le raccord q2 seul annoncé ensuite
-appelle une comparaison des modes à masque q2 identique, avec de nouveaux
-reçus. Le coût des branches Xi retirées ne doit pas être attribué à un
-meilleur partage du census.
+La revue de code est favorable : nœuds B partagés, compte initial nul,
+reprise conjointe compte/curseur Z, IDs originaux préservés, coquille
+complète. Le gate du snapshot passe 1 255 appels intégrés ; l’adaptateur
+concorde avec un calcul indépendant sur 496 paires. Les erreurs et leurs
+correctifs de harnais sont conservés, sans rejouer ni réécrire les reçus
+antérieurs. Les six campagnes passent les lecteurs normal/−O.
 
-Le [snapshot et son gate](lidar08_20260914/BUILD.json) sont clos ; ses seize
-fichiers produit correspondent au commit publié. Les travaux constructeur
-ultérieurs sur le raccord restent à auditer sur leurs propres sources.
-Les 36 lignes passent les lecteurs normal/−O ; les 18 contrôles de
-préparation passent également. Les limites et erreurs d’invocation sont
-conservées dans les reçus. GCP non utilisé.
+## Prochain objet à confronter aux mesures
 
-## Propositions encore distinctes du produit
+Les preuves de [§9–9.1](P0_SOUS_RECTANGLES_ET_GROUPES.md#9-census-q2--des-extrema-exacts-pour-partager-les-recherches)
+couvrent déjà A×B×Z et les divisions de A/B. Le complément de port C++
+est précisé dans la nouvelle note : 96 octets de constantes par activation,
+file portant trois IDs et un compte avec index/seuil au niveau du batch,
+et repli vers le parcours actuel dès qu’un facteur devient singleton.
+Le coût de préparation après suspension doit rester explicite.
 
-La [répartition du plan parent, §9.5](P0_SOUS_RECTANGLES_ET_GROUPES.md#95-partager-le-plan-parent-puis-découper-ses-tâches)
-reste disponible pour une future API de jobs : rangs A disjoints, même
-ordre B emprunté, témoins du parent conservés. Le probe et son reçu
-Release/UBSan couvrent 108 plans, 288 répartitions et 756 jobs. Cette preuve
-ne regroupe pas une WSPD entière en parents admissibles ; elle interdit
-aussi d’additionner sans exclusion crédit parental et nouveau cœur enfant.
-La [collecte suspendable, §9.3](P0_SOUS_RECTANGLES_ET_GROUPES.md#93-reprendre-la-collecte-avec-un-budget-de-travail-et-de-sortie)
-reste une proposition pour les continuations.
+L’ordre Z peut provoquer un partage de B avant un témoin commun utile :
+une fixture à quatre points en pleine dimension, conservée dans ce dossier,
+le vérifie par modèle après réflexion. Tester d’abord le certificat
+autonome saturant du frère proposé par le constructeur. Pour conserver
+un crédit partiel, le modèle vérifie un état avec un bloc E explicitement
+exclu du comptage ultérieur ; son mutant sans exclusion est rejeté.
+Ces mécanismes ne sont pas encore mesurés sur amas ou scans réels.
 
-Contrelecture à terminer par B dans sa note des verrous, §2 :
-`h_q ≤ h_qmin` rend le rejet sûr **pour les supports de la lane q**,
-sans rendre nécessairement la boule inerte. Son exemple qmin=2,
-p=Kmax−1 élimine q3 et conserve q2. La complétude globale passe par
-la lane minimale et la rétention d’une clé dès qu’une présentation
-pertinente la conserve. Le constructeur respecte déjà cette distinction ;
-les fichiers de B restent à leur propriétaire.
+Les [jobs d’un plan parent, §9.5](P0_SOUS_RECTANGLES_ET_GROUPES.md#95-partager-le-plan-parent-puis-découper-ses-tâches)
+et la [collecte suspendable, §9.3](P0_SOUS_RECTANGLES_ET_GROUPES.md#93-reprendre-la-collecte-avec-un-budget-de-travail-et-de-sortie)
+restent des propositions distinctes du produit. La correction I1 de B
+à 1ca8f62d clôt la réserve sur l’inertie globale des boules ; son ancien
+développement a été retiré du dialogue.
 
-Les défauts de propriétaire, de lien/IPO, le risque d’ordre B et la
-spécialisation de `terrain` sont désormais documentés par le constructeur ;
-leurs développements ont quitté ce dialogue. Le modèle axial préliminaire
-et son reçu redondants ont été supprimés au commit précédent ; §8 conserve
-l’ancre et la fixture citées par le produit. Les propositions de fenêtres
-A/B et les preuves encore épinglées restent en place. Le
-[dialogue de B](DIALOGUE_AUDITEUR_B.md) garde son étude propre du front.
+## Entrées et entretien
 
-P0, q3/q4, FULL, parallélisation massive et contrat de tour 50k/G4 restent
-ouverts. La publication présente reste limitée à ce dialogue et au dossier
-`lidar08_20260914/` ; les fichiers des autres intervenants sont exclus.
+Aucune hypothèse d’alignement des points, même pour des nuages recalés.
+Les [entrées réelles et leur provenance](lidar08_20260914/README.md)
+restent disponibles : trois scans isolés primaires, grille isotrope fixe
+2 cm, sites uniques et correspondances avec les retours bruts. Le contrôle
+d’accumulation voisin reste secondaire. Les mesures anciennes du front
+restent épinglées et distinctes de celles du raccord.
 
-Réservation d’index A après da366f7f, index constaté vide : ce dialogue
-et les sources, reçus et métadonnées de `lidar08_20260914/` uniquement.
-Les répertoires ignorés data/prepared/.build/.snapshot restent locaux.
-Fenêtre close au commit/push main ; aucun fichier constructeur ou B inclus.
+Les points corrigés et documentés par le constructeur ont quitté ce
+dialogue. Les preuves encore consommées sont conservées ; les fichiers
+et chantiers des autres auditeurs restent à leurs propriétaires.
+P0, q3/q4, FULL, parallélisation massive et contrats de tour restent ouverts.
+Réservation d’index A après publication constructeur f7edd646, index
+constaté vide : ce dialogue et `q2_front_20260914/` uniquement.
+`.build/` et `.snapshot/` restent ignorés. Fenêtre close au commit/push
+main ; aucun fichier des autres intervenants inclus.

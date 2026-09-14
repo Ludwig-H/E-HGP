@@ -1,0 +1,75 @@
+{
+  "binary_sha256": "7d72c453d8e49a2d1a13399459277430d219e648acae15e303a2a44c2676d8f5",
+  "expected_digest": {
+    "encoding": "canonical_q2_support_v2",
+    "interior_ids": 1282,
+    "shell_ids": 676,
+    "sum": "f22ed42819e546c5",
+    "supports": 338,
+    "xor": "b481f87d5798e971"
+  },
+  "fixture_rule": "first 32 records of pinned source, same little-endian order",
+  "fixture_sha256": "17fa59d7e4d2097bb7b7fe8198595c685c3bdaeb21977effd9586d80c4f33626",
+  "input_source": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n8000.u16le",
+  "input_source_sha256": "ed5aa97941551e027a76d7c4eb4a03c739cdf0a83cbaf53035c1536bed0b5194",
+  "oracle_pairs": 496,
+  "oracle_point_tests": 15872,
+  "runs": [
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_front_20260914/.build/r1/lidar_q2_probe",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_front_20260914/.build/probe_input32.u16le",
+        "10",
+        "8",
+        "pure",
+        "pairwise"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\":\"completed\",\"schema\":\"mhgp8_lidar_q2_audit_v1\",\"scope\":\"q2_support_stream_not_full_checksums_not_oracle\",\"public_status\":\"not_claimed\",\"threads\":1,\"gcp_used\":false,\"profile\":\"quantized_u16_input_only\",\"separation_convention\":\"box_gap_diameter_v1\",\"input_format\":\"xyz_u16_little_endian\",\"n\":32,\"kmax\":10,\"s\":8,\"front_mode\":\"pure\",\"census_mode\":\"pairwise\",\"input_fnv64\":\"36f053c29a836789\",\"total_unordered_pairs\":496,\"active_lane_mask\":1,\"input_rectangles\":332,\"anchor_queries\":343,\"candidate_pairs\":496,\"accepted_pairs\":338,\"rejected_pairs\":158,\"front_work\":{\"product_visits\":696,\"diagonal_splits\":31,\"diagonal_leaves\":32,\"disjoint_splits\":301,\"separation_tests\":633,\"witness_searches\":0,\"witness_descent_steps\":0,\"witness_box_distance_tests\":0,\"proposed_sites\":0,\"proposals_in_factors\":0,\"h_bound_tests\":0,\"xi_bound_tests\":0,\"witness_lane_credits\":0,\"fully_rejected_products\":0,\"emitted_rectangles\":332,\"emitted_factor_sites\":812,\"max_factor_size\":3,\"leaf_pair_rectangles\":220,\"max_stack_size\":11,\"max_product_depth\":11,\"size_class_rectangles\":[220,112,0,0,0],\"size_class_pair_mass\":[220,276,0,0,0],\"rejected_pair_mass\":[0,0,0],\"residual_pair_mass\":[496,0,0],\"lane_rectangles\":[332,0,0]},\"census_work\":{\"query_build_point_visits\":0,\"query_build_nodes\":0,\"query_build_max_depth\":0,\"input_descriptors\":332,\"query_cover_visits\":0,\"query_tasks\":496,\"query_splits\":0,\"witness_splits\":5552,\"count_root_starts\":496,\"shared_splits_after_credit\":0,\"cursor_advances\":0,\"cursor_reuses\":0,\"count_node_visits\":11236,\"count_bound_tests\":8302,\"count_point_tests\":2934,\"uniform_credited_pairs\":0,\"uniform_rejected_pairs\":0,\"uniform_accepted_pairs\":0,\"consumed_witness_sites\":13962,\"frontier_restarts\":0,\"payload_node_visits\":8138,\"payload_bound_tests\":5867,\"payload_point_tests\":2271,\"payload_interior_sites\":1282,\"payload_shell_sites\":676,\"payload_supports\":338},\"callback_work\":{\"copied_ids\":1958,\"sort_calls\":676,\"sort_comparisons\":3078,\"validation_ids\":1958,\"adjacent_tests\":1334,\"cross_set_comparisons\":1294,\"support_key_axis_checks\":1014,\"hash_words\":5000},\"digest\":{\"encoding\":\"canonical_q2_support_v2\",\"supports\":338,\"interior_ids\":1282,\"shell_ids\":676,\"sum\":\"f22ed42819e546c5\",\"xor\":\"b481f87d5798e971\"},\"index_point_visits\":394,\"index_max_depth\":7,\"cloud_retained_bytes\":960,\"index_retained_bytes\":3840,\"callback_buffers_capacity_bytes\":88,\"load_ms\":0.061411,\"cloud_ms\":0.0091940000000000008,\"index_ms\":0.015663,\"pipeline_and_callback_ms\":0.46143400000000001,\"validation_ms\":0.00064099999999999997,\"destruction_ms\":0.00060099999999999997,\"total_ms\":0.54894399999999999,\"pipeline_total_ms\":0.46104299999999998,\"front_and_count_ms\":0.22840999999999995,\"payload_ms\":0.23263300000000003,\"query_index_ms\":0}\n"
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_front_20260914/.build/r1/lidar_q2_probe",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_front_20260914/.build/probe_input32.u16le",
+        "10",
+        "8",
+        "pure",
+        "shared"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\":\"completed\",\"schema\":\"mhgp8_lidar_q2_audit_v1\",\"scope\":\"q2_support_stream_not_full_checksums_not_oracle\",\"public_status\":\"not_claimed\",\"threads\":1,\"gcp_used\":false,\"profile\":\"quantized_u16_input_only\",\"separation_convention\":\"box_gap_diameter_v1\",\"input_format\":\"xyz_u16_little_endian\",\"n\":32,\"kmax\":10,\"s\":8,\"front_mode\":\"pure\",\"census_mode\":\"shared\",\"input_fnv64\":\"36f053c29a836789\",\"total_unordered_pairs\":496,\"active_lane_mask\":1,\"input_rectangles\":332,\"anchor_queries\":343,\"candidate_pairs\":496,\"accepted_pairs\":338,\"rejected_pairs\":158,\"front_work\":{\"product_visits\":696,\"diagonal_splits\":31,\"diagonal_leaves\":32,\"disjoint_splits\":301,\"separation_tests\":633,\"witness_searches\":0,\"witness_descent_steps\":0,\"witness_box_distance_tests\":0,\"proposed_sites\":0,\"proposals_in_factors\":0,\"h_bound_tests\":0,\"xi_bound_tests\":0,\"witness_lane_credits\":0,\"fully_rejected_products\":0,\"emitted_rectangles\":332,\"emitted_factor_sites\":812,\"max_factor_size\":3,\"leaf_pair_rectangles\":220,\"max_stack_size\":11,\"max_product_depth\":11,\"size_class_rectangles\":[220,112,0,0,0],\"size_class_pair_mass\":[220,276,0,0,0],\"rejected_pair_mass\":[0,0,0],\"residual_pair_mass\":[496,0,0],\"lane_rectangles\":[332,0,0]},\"census_work\":{\"query_build_point_visits\":0,\"query_build_nodes\":0,\"query_build_max_depth\":0,\"input_descriptors\":332,\"query_cover_visits\":0,\"query_tasks\":615,\"query_splits\":136,\"witness_splits\":4352,\"count_root_starts\":343,\"shared_splits_after_credit\":76,\"cursor_advances\":9338,\"cursor_reuses\":272,\"count_node_visits\":9474,\"count_bound_tests\":7124,\"count_point_tests\":2350,\"uniform_credited_pairs\":411,\"uniform_rejected_pairs\":28,\"uniform_accepted_pairs\":0,\"consumed_witness_sites\":12093,\"frontier_restarts\":0,\"payload_node_visits\":8138,\"payload_bound_tests\":5867,\"payload_point_tests\":2271,\"payload_interior_sites\":1282,\"payload_shell_sites\":676,\"payload_supports\":338},\"callback_work\":{\"copied_ids\":1958,\"sort_calls\":676,\"sort_comparisons\":3078,\"validation_ids\":1958,\"adjacent_tests\":1334,\"cross_set_comparisons\":1294,\"support_key_axis_checks\":1014,\"hash_words\":5000},\"digest\":{\"encoding\":\"canonical_q2_support_v2\",\"supports\":338,\"interior_ids\":1282,\"shell_ids\":676,\"sum\":\"f22ed42819e546c5\",\"xor\":\"b481f87d5798e971\"},\"index_point_visits\":394,\"index_max_depth\":7,\"cloud_retained_bytes\":960,\"index_retained_bytes\":3840,\"callback_buffers_capacity_bytes\":88,\"load_ms\":0.059457999999999997,\"cloud_ms\":0.0067999999999999996,\"index_ms\":0.014382000000000001,\"pipeline_and_callback_ms\":0.50013099999999999,\"validation_ms\":0.00046099999999999998,\"destruction_ms\":0.00048000000000000001,\"total_ms\":0.58171200000000001,\"pipeline_total_ms\":0.49984099999999998,\"front_and_count_ms\":0.22361099999999995,\"payload_ms\":0.27623000000000003,\"query_index_ms\":0}\n"
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_front_20260914/.build/r1/lidar_q2_probe",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_front_20260914/.build/probe_input32.u16le",
+        "10",
+        "8",
+        "samples",
+        "pairwise"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\":\"completed\",\"schema\":\"mhgp8_lidar_q2_audit_v1\",\"scope\":\"q2_support_stream_not_full_checksums_not_oracle\",\"public_status\":\"not_claimed\",\"threads\":1,\"gcp_used\":false,\"profile\":\"quantized_u16_input_only\",\"separation_convention\":\"box_gap_diameter_v1\",\"input_format\":\"xyz_u16_little_endian\",\"n\":32,\"kmax\":10,\"s\":8,\"front_mode\":\"samples\",\"census_mode\":\"pairwise\",\"input_fnv64\":\"36f053c29a836789\",\"total_unordered_pairs\":496,\"active_lane_mask\":1,\"input_rectangles\":325,\"anchor_queries\":336,\"candidate_pairs\":486,\"accepted_pairs\":338,\"rejected_pairs\":148,\"front_work\":{\"product_visits\":694,\"diagonal_splits\":31,\"diagonal_leaves\":32,\"disjoint_splits\":300,\"separation_tests\":625,\"witness_searches\":629,\"witness_descent_steps\":3661,\"witness_box_distance_tests\":7322,\"proposed_sites\":6290,\"proposals_in_factors\":1320,\"h_bound_tests\":4970,\"xi_bound_tests\":0,\"witness_lane_credits\":1675,\"fully_rejected_products\":6,\"emitted_rectangles\":325,\"emitted_factor_sites\":795,\"max_factor_size\":3,\"leaf_pair_rectangles\":215,\"max_stack_size\":11,\"max_product_depth\":11,\"size_class_rectangles\":[215,110,0,0,0],\"size_class_pair_mass\":[215,271,0,0,0],\"rejected_pair_mass\":[10,0,0],\"residual_pair_mass\":[486,0,0],\"lane_rectangles\":[325,0,0]},\"census_work\":{\"query_build_point_visits\":0,\"query_build_nodes\":0,\"query_build_max_depth\":0,\"input_descriptors\":325,\"query_cover_visits\":0,\"query_tasks\":486,\"query_splits\":0,\"witness_splits\":5446,\"count_root_starts\":486,\"shared_splits_after_credit\":0,\"cursor_advances\":0,\"cursor_reuses\":0,\"count_node_visits\":11034,\"count_bound_tests\":8149,\"count_point_tests\":2885,\"uniform_credited_pairs\":0,\"uniform_rejected_pairs\":0,\"uniform_accepted_pairs\":0,\"consumed_witness_sites\":13754,\"frontier_restarts\":0,\"payload_node_visits\":8138,\"payload_bound_tests\":5867,\"payload_point_tests\":2271,\"payload_interior_sites\":1282,\"payload_shell_sites\":676,\"payload_supports\":338},\"callback_work\":{\"copied_ids\":1958,\"sort_calls\":676,\"sort_comparisons\":3078,\"validation_ids\":1958,\"adjacent_tests\":1334,\"cross_set_comparisons\":1294,\"support_key_axis_checks\":1014,\"hash_words\":5000},\"digest\":{\"encoding\":\"canonical_q2_support_v2\",\"supports\":338,\"interior_ids\":1282,\"shell_ids\":676,\"sum\":\"f22ed42819e546c5\",\"xor\":\"b481f87d5798e971\"},\"index_point_visits\":394,\"index_max_depth\":7,\"cloud_retained_bytes\":960,\"index_retained_bytes\":3840,\"callback_buffers_capacity_bytes\":88,\"load_ms\":0.043004000000000001,\"cloud_ms\":0.0066699999999999997,\"index_ms\":0.011516999999999999,\"pipeline_and_callback_ms\":0.682562,\"validation_ms\":0.00035,\"destruction_ms\":0.00055099999999999995,\"total_ms\":0.74465400000000004,\"pipeline_total_ms\":0.68227099999999996,\"front_and_count_ms\":0.42238700000000001,\"payload_ms\":0.25988399999999995,\"query_index_ms\":0}\n"
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_front_20260914/.build/r1/lidar_q2_probe",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_front_20260914/.build/probe_input32.u16le",
+        "10",
+        "8",
+        "samples",
+        "shared"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\":\"completed\",\"schema\":\"mhgp8_lidar_q2_audit_v1\",\"scope\":\"q2_support_stream_not_full_checksums_not_oracle\",\"public_status\":\"not_claimed\",\"threads\":1,\"gcp_used\":false,\"profile\":\"quantized_u16_input_only\",\"separation_convention\":\"box_gap_diameter_v1\",\"input_format\":\"xyz_u16_little_endian\",\"n\":32,\"kmax\":10,\"s\":8,\"front_mode\":\"samples\",\"census_mode\":\"shared\",\"input_fnv64\":\"36f053c29a836789\",\"total_unordered_pairs\":496,\"active_lane_mask\":1,\"input_rectangles\":325,\"anchor_queries\":336,\"candidate_pairs\":486,\"accepted_pairs\":338,\"rejected_pairs\":148,\"front_work\":{\"product_visits\":694,\"diagonal_splits\":31,\"diagonal_leaves\":32,\"disjoint_splits\":300,\"separation_tests\":625,\"witness_searches\":629,\"witness_descent_steps\":3661,\"witness_box_distance_tests\":7322,\"proposed_sites\":6290,\"proposals_in_factors\":1320,\"h_bound_tests\":4970,\"xi_bound_tests\":0,\"witness_lane_credits\":1675,\"fully_rejected_products\":6,\"emitted_rectangles\":325,\"emitted_factor_sites\":795,\"max_factor_size\":3,\"leaf_pair_rectangles\":215,\"max_stack_size\":11,\"max_product_depth\":11,\"size_class_rectangles\":[215,110,0,0,0],\"size_class_pair_mass\":[215,271,0,0,0],\"rejected_pair_mass\":[10,0,0],\"residual_pair_mass\":[486,0,0],\"lane_rectangles\":[325,0,0]},\"census_work\":{\"query_build_point_visits\":0,\"query_build_nodes\":0,\"query_build_max_depth\":0,\"input_descriptors\":325,\"query_cover_visits\":0,\"query_tasks\":602,\"query_splits\":133,\"witness_splits\":4274,\"count_root_starts\":336,\"shared_splits_after_credit\":74,\"cursor_advances\":9180,\"cursor_reuses\":266,\"count_node_visits\":9313,\"count_bound_tests\":6993,\"count_point_tests\":2320,\"uniform_credited_pairs\":401,\"uniform_rejected_pairs\":28,\"uniform_accepted_pairs\":0,\"consumed_witness_sites\":11910,\"frontier_restarts\":0,\"payload_node_visits\":8138,\"payload_bound_tests\":5867,\"payload_point_tests\":2271,\"payload_interior_sites\":1282,\"payload_shell_sites\":676,\"payload_supports\":338},\"callback_work\":{\"copied_ids\":1958,\"sort_calls\":676,\"sort_comparisons\":3078,\"validation_ids\":1958,\"adjacent_tests\":1334,\"cross_set_comparisons\":1294,\"support_key_axis_checks\":1014,\"hash_words\":5000},\"digest\":{\"encoding\":\"canonical_q2_support_v2\",\"supports\":338,\"interior_ids\":1282,\"shell_ids\":676,\"sum\":\"f22ed42819e546c5\",\"xor\":\"b481f87d5798e971\"},\"index_point_visits\":394,\"index_max_depth\":7,\"cloud_retained_bytes\":960,\"index_retained_bytes\":3840,\"callback_buffers_capacity_bytes\":88,\"load_ms\":0.048762,\"cloud_ms\":0.0061190000000000003,\"index_ms\":0.011377,\"pipeline_and_callback_ms\":0.58831199999999995,\"validation_ms\":0.00035100000000000002,\"destruction_ms\":0.00046999999999999999,\"total_ms\":0.65539099999999995,\"pipeline_total_ms\":0.58808199999999999,\"front_and_count_ms\":0.36373300000000003,\"payload_ms\":0.22434899999999997,\"query_index_ms\":0}\n"
+    }
+  ],
+  "schema": "mhgp8_lidar_q2_probe_checks_v1",
+  "scope": "bounded_digest_comparison_not_collision_free_geometry_certificate",
+  "source_sha256": "92d17d33d2336f38c4324282f3aa9a9b7674ff2c010b1a20c7f3fb14328acc36",
+  "status": "passed"
+}

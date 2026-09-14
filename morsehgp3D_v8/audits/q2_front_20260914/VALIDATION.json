@@ -1,0 +1,231 @@
+{
+  "delivery_pins": {
+    "morsehgp3D_v8/audits/DIALOGUE_COURANT.md": "3a393b05eb91b0c14618df5118ae8fe8595dfba969744abb36c24898bbecb5f9",
+    "morsehgp3D_v8/audits/q2_front_20260914/.gitignore": "96384628e611ed94278d769c092356f8e87e38b19ea78c697869b1e9695096a6",
+    "morsehgp3D_v8/audits/q2_front_20260914/ORDER_CHECKS.json": "77a8419877cd27e34df4d53d3b1c2b9882f52b03aa244463101848cd997f0058",
+    "morsehgp3D_v8/audits/q2_front_20260914/PROBE_CHECKS.json": "11d062ed34b1f00b048632a3316b727dcb6ee281b27b9d2c0a6f0b97bcca988b",
+    "morsehgp3D_v8/audits/q2_front_20260914/README.md": "ca4dca09add47dcf3db04d0e8d7046e37946ea47b8b4a20fa897de9427e69de3",
+    "morsehgp3D_v8/audits/q2_front_20260914/RUNNER_GUARDS.json": "f6a949a0666445bd0629f75a4b5be267fe503f2b70d729792aae50f47d4f9cf6",
+    "morsehgp3D_v8/audits/q2_front_20260914/SOURCE_PUBLICATION.json": "31068b994a51e199ae0c24a2f4cd070b1359d3c073f86328c070f05307de6eca",
+    "morsehgp3D_v8/audits/q2_front_20260914/SUMMARY.json": "aa1290ccc590f8601e09b2213b041d9f07389804cb1c5fe783903cd5eee33cf0",
+    "morsehgp3D_v8/audits/q2_front_20260914/build_snapshot.py": "356ec1fc28489393efc778f92cb9e5ad148eade455e1b717ab95ff86c4505e23",
+    "morsehgp3D_v8/audits/q2_front_20260914/check_probe.py": "92d17d33d2336f38c4324282f3aa9a9b7674ff2c010b1a20c7f3fb14328acc36",
+    "morsehgp3D_v8/audits/q2_front_20260914/lidar_q2_probe.cpp": "217b2bca2956e75df52a4ad1877959a5bd3e2078384b4c06faabf7c0123e8f99",
+    "morsehgp3D_v8/audits/q2_front_20260914/measure.py": "8add7d2849eee2c7cf67ed2461c73cd0ad1c4105e26fbceb68774dd176079509",
+    "morsehgp3D_v8/audits/q2_front_20260914/measure_r1.py": "c7357644d19fe3102a2b548cc7e82e438538b25fa9934d74fa113ec0cbef05e9",
+    "morsehgp3D_v8/audits/q2_front_20260914/order_fixture.py": "a5971188669ccb821371e4f10c42e94027f50a3e429c4b167e44e0e2c380d7c3",
+    "morsehgp3D_v8/audits/q2_front_20260914/r1_BUILD.json": "0b86df532ed76dfdc39c732029fd4a2ee7fe16abae4d19282bd6bc3454949eee",
+    "morsehgp3D_v8/audits/q2_front_20260914/r1_sources.zip": "29bfa1b40eed6e6fa7f8167c9868067ceec5ebd4e6b856f9ef26cfa928e96ef3"
+  },
+  "finished_utc": "2026-09-14T09:40:18.051137+00:00",
+  "runs": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/audits/q2_front_20260914/measure.py",
+        "--validate",
+        "morsehgp3D_v8/audits/q2_front_20260914/campaign_check50k"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\": \"passed\", \"plan\": \"check50k\", \"rows\": 1, \"output_groups\": 1}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/audits/q2_front_20260914/measure.py",
+        "--validate",
+        "morsehgp3D_v8/audits/q2_front_20260914/campaign_growth"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\": \"passed\", \"plan\": \"growth\", \"rows\": 2, \"output_groups\": 2}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/audits/q2_front_20260914/measure.py",
+        "--validate",
+        "morsehgp3D_v8/audits/q2_front_20260914/campaign_other_scans"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\": \"passed\", \"plan\": \"other_scans\", \"rows\": 2, \"output_groups\": 2}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/audits/q2_front_20260914/measure.py",
+        "--validate",
+        "morsehgp3D_v8/audits/q2_front_20260914/campaign_pilot"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\": \"passed\", \"plan\": \"pilot\", \"rows\": 4, \"output_groups\": 1}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/audits/q2_front_20260914/measure.py",
+        "--validate",
+        "morsehgp3D_v8/audits/q2_front_20260914/campaign_repeat_pilot"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\": \"passed\", \"plan\": \"repeat_pilot\", \"rows\": 4, \"output_groups\": 1}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/audits/q2_front_20260914/measure.py",
+        "--validate",
+        "morsehgp3D_v8/audits/q2_front_20260914/campaign_separation"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\": \"passed\", \"plan\": \"separation\", \"rows\": 2, \"output_groups\": 1}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/audits/q2_front_20260914/measure.py",
+        "--validate",
+        "morsehgp3D_v8/audits/q2_front_20260914/campaign_check50k"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\": \"passed\", \"plan\": \"check50k\", \"rows\": 1, \"output_groups\": 1}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/audits/q2_front_20260914/measure.py",
+        "--validate",
+        "morsehgp3D_v8/audits/q2_front_20260914/campaign_growth"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\": \"passed\", \"plan\": \"growth\", \"rows\": 2, \"output_groups\": 2}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/audits/q2_front_20260914/measure.py",
+        "--validate",
+        "morsehgp3D_v8/audits/q2_front_20260914/campaign_other_scans"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\": \"passed\", \"plan\": \"other_scans\", \"rows\": 2, \"output_groups\": 2}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/audits/q2_front_20260914/measure.py",
+        "--validate",
+        "morsehgp3D_v8/audits/q2_front_20260914/campaign_pilot"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\": \"passed\", \"plan\": \"pilot\", \"rows\": 4, \"output_groups\": 1}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/audits/q2_front_20260914/measure.py",
+        "--validate",
+        "morsehgp3D_v8/audits/q2_front_20260914/campaign_repeat_pilot"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\": \"passed\", \"plan\": \"repeat_pilot\", \"rows\": 4, \"output_groups\": 1}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/audits/q2_front_20260914/measure.py",
+        "--validate",
+        "morsehgp3D_v8/audits/q2_front_20260914/campaign_separation"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\": \"passed\", \"plan\": \"separation\", \"rows\": 2, \"output_groups\": 1}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tools/check_docs.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Validated 546 active Markdown files.\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tools/check_implementation_status.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Validated 20 implementation phases and their gates.\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-c",
+        "from pathlib import Path; from tools.check_docs import validate; paths=[Path('morsehgp3D_v8/audits/DIALOGUE_COURANT.md').resolve(),Path('morsehgp3D_v8/audits/q2_front_20260914/README.md').resolve()]; errors=[error for path in paths for error in validate(path)]; print(errors); raise SystemExit(bool(errors))"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "[]\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tools/check_docs.py"
+      ],
+      "context": "final documentation after source publication f7edd646",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Validated 546 active Markdown files.\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-c",
+        "from pathlib import Path; from tools.check_docs import validate; paths=[Path('morsehgp3D_v8/audits/DIALOGUE_COURANT.md').resolve(),Path('morsehgp3D_v8/audits/q2_front_20260914/README.md').resolve()]; errors=[error for path in paths for error in validate(path)]; print(errors); raise SystemExit(bool(errors))"
+      ],
+      "context": "final documentation after source publication f7edd646",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "[]\n"
+    }
+  ],
+  "schema": "mhgp8_q2_lidar_delivery_checks_v1",
+  "scope": "receipt_and_document_validation_no_new_measurements",
+  "started_utc": "2026-09-14T09:31:41.802833+00:00",
+  "status": "passed"
+}

@@ -1,0 +1,460 @@
+{
+  "closure_sha256": {
+    "campaign_check50k/COMPLETION.json": "76a182aebfaef102c44dcef7ed9fd1b62a09b6e943aa508cd4083c78fdc6ce27",
+    "campaign_check50k/MANIFEST.json": "1f6571a12409d168e03a75aa16c1094cd3aa6456ec312337188ece4d42c542c1",
+    "campaign_check50k/MEASURES.jsonl": "3ff51891827575ee901edbc15d51f5ce75a8650f2e6bc01596328054358a17e3",
+    "campaign_growth/COMPLETION.json": "86f92888ef9ac6bb2caa9925900fb010ce32edee3a90ecb900c7baf97ac8907a",
+    "campaign_growth/MANIFEST.json": "c5f699838b2eec7cc31d9a6f2230341acd54b82bab049d35954a32c3cfc074ef",
+    "campaign_growth/MEASURES.jsonl": "b24b5c287208a7ddb628bc6ebd6170052ee6b956c488155e0bf0a71d28dc2e89",
+    "campaign_other_scans/COMPLETION.json": "9bad3eda414923db0de73beb3e10fe03790d631fd30f4c6649d8df0a20b74f46",
+    "campaign_other_scans/MANIFEST.json": "9cbd9beecc7c93223738a4d2e7bddd2a221ea72232b110a78c4109785ad462fd",
+    "campaign_other_scans/MEASURES.jsonl": "6e5812a8cf05b21d917db66d950e8c176b5214e0bebfa2c9975bdc07b848a3ce",
+    "campaign_pilot/COMPLETION.json": "cd2d6f615b80a801a7e6270b9c07fed7bf4ee782638f9b4fdea06c20335605c7",
+    "campaign_pilot/MANIFEST.json": "fd903be3ad1ebf16fa53bb5d56d1de1746ed79421fa07a63d95445d2605db575",
+    "campaign_pilot/MEASURES.jsonl": "072a3b8f8f772c01a35a2762ba1e2b1886309dd3fd5662ea60e0c027b047c559",
+    "campaign_repeat_pilot/COMPLETION.json": "02c4ed3da27f8e66c19ba4a4296a7882064638570d306e7306f3964e215ed12d",
+    "campaign_repeat_pilot/MANIFEST.json": "d61b5857495932fbec5662aa9e0bac1a0f48fb641d7f336857c3bca2b3214482",
+    "campaign_repeat_pilot/MEASURES.jsonl": "bbb542de11d4a40c3633c57c22526d703ffe02169c82a0e7eafc8114b6faae04",
+    "campaign_separation/COMPLETION.json": "f6960e2079375b346e3f90c46d26e3d136bc1b569b967d18198681bcd285e2b3",
+    "campaign_separation/MANIFEST.json": "75fd6c096b939a5dc312c48b119de6b4285479227c00514a20a27f788d615577",
+    "campaign_separation/MEASURES.jsonl": "e59e1a7a46d0d3510bc06ff2efd0db651d8cd05b89a2a7d9a6e94806f47e61b2"
+  },
+  "grouping": "dataset,n,s,front,census",
+  "groups": [
+    {
+      "anchor_queries": 2788325,
+      "candidate_pairs": 31996000,
+      "count_node_visits": 1559287316,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 710926,
+        "shell_ids": 323968,
+        "sum": "23645ccf8d3501b",
+        "supports": 160237,
+        "xor": "294e6be30be6301d"
+      },
+      "front_descent_steps": 0,
+      "input_fnv64": "24d38903b28418dc",
+      "input_rectangles": 1218734,
+      "key": [
+        "single_000000",
+        8000,
+        8,
+        "pure",
+        "pairwise"
+      ],
+      "payload_ms": [
+        170.22705199998384,
+        213.36163499999827
+      ],
+      "payload_node_visits": 9256963,
+      "pipeline_ms": [
+        16299.417083,
+        21078.722822
+      ],
+      "query_splits": 0,
+      "query_tasks": 31996000,
+      "repetitions": 2,
+      "total_ms": [
+        16305.174888,
+        21083.758427
+      ]
+    },
+    {
+      "anchor_queries": 2788325,
+      "candidate_pairs": 31996000,
+      "count_node_visits": 694940756,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 710926,
+        "shell_ids": 323968,
+        "sum": "23645ccf8d3501b",
+        "supports": 160237,
+        "xor": "294e6be30be6301d"
+      },
+      "front_descent_steps": 0,
+      "input_fnv64": "24d38903b28418dc",
+      "input_rectangles": 1218734,
+      "key": [
+        "single_000000",
+        8000,
+        8,
+        "pure",
+        "shared"
+      ],
+      "payload_ms": [
+        175.11531599998403,
+        221.6791879999781
+      ],
+      "payload_node_visits": 9256963,
+      "pipeline_ms": [
+        12233.156391,
+        16463.115104
+      ],
+      "query_splits": 21916012,
+      "query_tasks": 46620349,
+      "repetitions": 2,
+      "total_ms": [
+        12237.954474,
+        16469.906181
+      ]
+    },
+    {
+      "anchor_queries": 575505,
+      "candidate_pairs": 1956115,
+      "count_node_visits": 102372640,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 710926,
+        "shell_ids": 323968,
+        "sum": "23645ccf8d3501b",
+        "supports": 160237,
+        "xor": "294e6be30be6301d"
+      },
+      "front_descent_steps": 16898730,
+      "input_fnv64": "24d38903b28418dc",
+      "input_rectangles": 437610,
+      "key": [
+        "single_000000",
+        8000,
+        8,
+        "samples",
+        "pairwise"
+      ],
+      "payload_ms": [
+        173.96091399998284,
+        224.48628999999625
+      ],
+      "payload_node_visits": 9256963,
+      "pipeline_ms": [
+        1753.727127,
+        2521.051757
+      ],
+      "query_splits": 0,
+      "query_tasks": 1956115,
+      "repetitions": 2,
+      "total_ms": [
+        1759.377302,
+        2527.946137
+      ]
+    },
+    {
+      "anchor_queries": 575505,
+      "candidate_pairs": 1956115,
+      "count_node_visits": 59226897,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 710926,
+        "shell_ids": 323968,
+        "sum": "23645ccf8d3501b",
+        "supports": 160237,
+        "xor": "294e6be30be6301d"
+      },
+      "front_descent_steps": 16898730,
+      "input_fnv64": "24d38903b28418dc",
+      "input_rectangles": 437610,
+      "key": [
+        "single_000000",
+        8000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "payload_ms": [
+        180.88569499998786,
+        225.38185199998975
+      ],
+      "payload_node_visits": 9256963,
+      "pipeline_ms": [
+        1668.010983,
+        2127.959127
+      ],
+      "query_splits": 1129538,
+      "query_tasks": 2834581,
+      "repetitions": 2,
+      "total_ms": [
+        1673.307465,
+        2149.474772
+      ]
+    },
+    {
+      "anchor_queries": 644844,
+      "candidate_pairs": 1887124,
+      "count_node_visits": 59172859,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 710926,
+        "shell_ids": 323968,
+        "sum": "23645ccf8d3501b",
+        "supports": 160237,
+        "xor": "294e6be30be6301d"
+      },
+      "front_descent_steps": 19738457,
+      "input_fnv64": "24d38903b28418dc",
+      "input_rectangles": 513842,
+      "key": [
+        "single_000000",
+        8000,
+        10,
+        "samples",
+        "shared"
+      ],
+      "payload_ms": [
+        177.04346299998596,
+        177.04346299998596
+      ],
+      "payload_node_visits": 9256963,
+      "pipeline_ms": [
+        1705.344526,
+        1705.344526
+      ],
+      "query_splits": 1000367,
+      "query_tasks": 2645578,
+      "repetitions": 1,
+      "total_ms": [
+        1710.563662,
+        1710.563662
+      ]
+    },
+    {
+      "anchor_queries": 704584,
+      "candidate_pairs": 1845352,
+      "count_node_visits": 59635113,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 710926,
+        "shell_ids": 323968,
+        "sum": "23645ccf8d3501b",
+        "supports": 160237,
+        "xor": "294e6be30be6301d"
+      },
+      "front_descent_steps": 22103329,
+      "input_fnv64": "24d38903b28418dc",
+      "input_rectangles": 579042,
+      "key": [
+        "single_000000",
+        8000,
+        12,
+        "samples",
+        "shared"
+      ],
+      "payload_ms": [
+        175.79255199998366,
+        175.79255199998366
+      ],
+      "payload_node_visits": 9256963,
+      "pipeline_ms": [
+        1737.031878,
+        1737.031878
+      ],
+      "query_splits": 905318,
+      "query_tasks": 2515220,
+      "repetitions": 1,
+      "total_ms": [
+        1741.934264,
+        1741.934264
+      ]
+    },
+    {
+      "anchor_queries": 1170559,
+      "candidate_pairs": 4294798,
+      "count_node_visits": 135805996,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 1456339,
+        "shell_ids": 667153,
+        "sum": "994a375069125b1",
+        "supports": 326754,
+        "xor": "387e42f2f5dcea67"
+      },
+      "front_descent_steps": 36581598,
+      "input_fnv64": "5a218bcfc21309a3",
+      "input_rectangles": 876197,
+      "key": [
+        "single_000000",
+        16000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "payload_ms": [
+        368.9003439998855,
+        368.9003439998855
+      ],
+      "payload_node_visits": 19808904,
+      "pipeline_ms": [
+        3733.396804,
+        3733.396804
+      ],
+      "query_splits": 2606401,
+      "query_tasks": 6383361,
+      "repetitions": 1,
+      "total_ms": [
+        3745.803625,
+        3745.803625
+      ]
+    },
+    {
+      "anchor_queries": 2360364,
+      "candidate_pairs": 9264177,
+      "count_node_visits": 280997181,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 2940477,
+        "shell_ids": 1376563,
+        "sum": "8a3cd30abab6dda4",
+        "supports": 660726,
+        "xor": "4ad4c979f3d33ddc"
+      },
+      "front_descent_steps": 75665699,
+      "input_fnv64": "d0f265c1c8917dfd",
+      "input_rectangles": 1700300,
+      "key": [
+        "single_000000",
+        32000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "payload_ms": [
+        767.6894219993325,
+        767.6894219993325
+      ],
+      "payload_node_visits": 41640034,
+      "pipeline_ms": [
+        7581.613363,
+        7581.613363
+      ],
+      "query_splits": 5549010,
+      "query_tasks": 13458384,
+      "repetitions": 1,
+      "total_ms": [
+        7602.083006,
+        7602.083006
+      ]
+    },
+    {
+      "anchor_queries": 3829093,
+      "candidate_pairs": 19820147,
+      "count_node_visits": 579839306,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 4619158,
+        "shell_ids": 2213035,
+        "sum": "792052c567e1bb36",
+        "supports": 1040133,
+        "xor": "b0147cc4f2694c30"
+      },
+      "front_descent_steps": 123240906,
+      "input_fnv64": "1e8fc04289f84ad0",
+      "input_rectangles": 2657844,
+      "key": [
+        "single_000000",
+        50000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "payload_ms": [
+        1187.7660109995709,
+        1187.7660109995709
+      ],
+      "payload_node_visits": 67157307,
+      "pipeline_ms": [
+        13778.486014,
+        13778.486014
+      ],
+      "query_splits": 13044133,
+      "query_tasks": 29917359,
+      "repetitions": 1,
+      "total_ms": [
+        13816.560906,
+        13816.560906
+      ]
+    },
+    {
+      "anchor_queries": 525660,
+      "candidate_pairs": 1661776,
+      "count_node_visits": 46737390,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 694061,
+        "shell_ids": 315975,
+        "sum": "1e37793fda4f7c5b",
+        "supports": 156422,
+        "xor": "d08f79a52f09cd15"
+      },
+      "front_descent_steps": 15387548,
+      "input_fnv64": "22b061620fff5de2",
+      "input_rectangles": 407531,
+      "key": [
+        "single_000100",
+        8000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "payload_ms": [
+        166.08670399998604,
+        166.08670399998604
+      ],
+      "payload_node_visits": 8846096,
+      "pipeline_ms": [
+        1385.620575,
+        1385.620575
+      ],
+      "query_splits": 886739,
+      "query_tasks": 2299138,
+      "repetitions": 1,
+      "total_ms": [
+        1391.06774,
+        1391.06774
+      ]
+    },
+    {
+      "anchor_queries": 543536,
+      "candidate_pairs": 1952715,
+      "count_node_visits": 55662731,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 680555,
+        "shell_ids": 311958,
+        "sum": "ca7e4dc59d7a6f7b",
+        "supports": 153796,
+        "xor": "9b67566e1b4869d9"
+      },
+      "front_descent_steps": 14893537,
+      "input_fnv64": "5157f9bfe1a123ee",
+      "input_rectangles": 404172,
+      "key": [
+        "single_000200",
+        8000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "payload_ms": [
+        165.65349599998956,
+        165.65349599998956
+      ],
+      "payload_node_visits": 8478746,
+      "pipeline_ms": [
+        1517.644214,
+        1517.644214
+      ],
+      "query_splits": 1130515,
+      "query_tasks": 2804566,
+      "repetitions": 1,
+      "total_ms": [
+        1523.046291,
+        1523.046291
+      ]
+    }
+  ],
+  "physical_input_groups": 6,
+  "public_status": "not_claimed",
+  "rows": 15,
+  "schema": "mhgp8_lidar_q2_summary_v1",
+  "scope": "provisional_integrated_q2_local_not_full",
+  "timing_aggregation": "observed_min_max_not_confidence_interval"
+}
