@@ -69,6 +69,15 @@ def capture_sibling(probe: Path, output: Path) -> subprocess.CompletedProcess:
         capture_output=True, cwd=ROOT)
 
 
+def capture_order(probe: Path, output: Path) -> subprocess.CompletedProcess:
+    return subprocess.run(command("run", "--probe", str(probe), "--output", str(output),
+        "--sizes", "16", "--families", "uniform", "rows", "--kmax", "1", "5",
+        "--s", "8", "--seeds", "3", "--modes", "pure", "samples",
+        "--census-modes", "shared", "--sibling-modes", "none", "sibling",
+        "--witness-orders", "global", "complement", "--repeats", "1"),
+        capture_output=True, cwd=ROOT)
+
+
 def checked(root: Path) -> subprocess.CompletedProcess:
     return subprocess.run(command("check", str(root), "--summary"), capture_output=True, cwd=ROOT)
 
@@ -351,12 +360,89 @@ def main() -> int:
         require(subprocess.run(invalid_cli, cwd=ROOT, capture_output=True).returncode == 2,
                 "probe accepted an unknown sibling mode")
         stats["sibling_cli_rejects"] += 2
+
+        # v3 retains the same fixture, front and physical output; only the
+        # witness traversal order and its separately paid structural work vary.
+        ordered = temporary / "ordered"
+        ordered.mkdir()
+        shutil.copytree(versioned, ordered / "legacy")
+        for name in ("first", "second"):
+            destination = ordered / name
+            result = capture_order(binary, destination)
+            require(result.returncode == 0 and not result.stderr,
+                    f"genuine witness-order capture failed: {result.stdout!r} {result.stderr!r}")
+            rows = records(destination)
+            manifest, completion = read(destination / "MANIFEST.json"), read(destination / "COMPLETION.json")
+            require(manifest["schema"] == "mhgp8_wspd_q2_campaign_v3" and
+                    manifest["witness_orders"] == ["global", "complement"] and
+                    completion["status"] == "completed" and completion["runs"] == completion["attempts"] == len(rows) == 32,
+                    "v3 capture lost version, witness orders or tuples")
+            require(all(row["result"]["schema"] == "mhgp8_wspd_q2_census_probe_v3" and
+                        row["result"]["digest"]["supports"] > 0 for row in rows),
+                    "v3 physical output fixture is vacuous or mislabeled")
+            enabled = [row["result"]["order_work"] for row in rows
+                       if row["result"]["witness_order"] == "complement"]
+            require(all(any(work[field] > 0 for work in enabled) for field in
+                        ("structural_splits", "deferred_skips", "anchor_skips", "phase_switches")),
+                    "v3 fixture did not exercise each structural traversal action")
+            stats["order_rows"] += len(rows)
+        result = checked(ordered)
+        require(result.returncode == 0 and not result.stderr,
+                f"mixed v1/v2/v3 reader failed: {result.stdout!r} {result.stderr!r}")
+        summary = parse_result(result.stdout)
+        require(summary["measurements"] == 256 and len(summary["summary"]) == 128 and
+                sum("witness_order" in row for row in summary["summary"]) == 32 and
+                summary.get("witness_order_comparison") ==
+                    "same_front_candidates_and_canonical_digest_not_equal_traversal_work",
+                "mixed-version summary lost witness-order keys or comparison scope")
+        stats["order_positive_reads"] += 1
+
+        def order_change(root: Path, update: Callable[[dict], None], complement: bool = True) -> None:
+            directory = root / "first"
+            rows = records(directory)
+            chosen = next(row for row in rows if
+                          (row["result"]["witness_order"] == "complement") == complement)
+            update(chosen)
+            refresh(chosen)
+            write_records(directory, rows)
+
+        mutant("order_unknown", lambda root: manifest_change(root, lambda m: m.update(witness_orders=["wrong"])), ordered)
+        mutant("order_duplicate", lambda root: manifest_change(root, lambda m: m.update(witness_orders=["global", "global"])), ordered)
+        mutant("order_requires_sibling_mode", lambda root: manifest_change(root, lambda m: m.pop("sibling_modes")), ordered)
+        mutant("order_pairwise_matrix", lambda root: manifest_change(root, lambda m: m.update(
+            census_modes=["pairwise"], sibling_modes=["none"])), ordered)
+        mutant("order_unversioned_manifest", lambda root: manifest_change(root, lambda m: m.update(schema="mhgp8_wspd_q2_campaign_v2")), ordered)
+        mutant("order_unversioned_result", lambda root: order_change(root, lambda r: r["result"].update(schema="mhgp8_wspd_q2_census_probe_v2")), ordered)
+        mutant("order_wrong_command", lambda root: order_change(root, lambda r: r["command"].__setitem__(9, "global")), ordered)
+        mutant("order_missing_work", lambda root: order_change(root, lambda r: r["result"].pop("order_work")), ordered)
+        mutant("order_missing_counter", lambda root: order_change(root, lambda r: r["result"]["order_work"].pop("anchor_skips")), ordered)
+        mutant("order_boolean_counter", lambda root: order_change(root, lambda r: r["result"]["order_work"].update(structural_splits=True)), ordered)
+        for field in ("structural_splits", "deferred_skips", "anchor_skips", "phase_switches"):
+            multiplier = 96 if field == "structural_splits" else 1
+            mutant(f"order_excess_{field}", lambda root, field=field, multiplier=multiplier:
+                order_change(root, lambda r: r["result"]["order_work"].update(
+                    {field: multiplier * r["result"]["census_work"]["query_tasks"] + 1})), ordered)
+        mutant("order_global_work", lambda root: order_change(root, lambda r:
+            r["result"]["order_work"].update(anchor_skips=1), False), ordered)
+        mutant("order_changed_front", lambda root: order_change(root, lambda r:
+            r["result"]["front_work"].update(max_factor_size=r["result"]["front_work"]["max_factor_size"] + 1)), ordered)
+        mutant("order_changed_digest", lambda root: order_change(root, lambda r:
+            r["result"]["digest"].update(sum="0")), ordered)
+        valid_order_cli = [str(original), "16", "rows", "5", "8", "3", "pure", "shared", "none", "global"]
+        for command_args in ([*valid_order_cli[:7], "pairwise", "none", "complement"],
+                             [*valid_order_cli[:-1], "foo"], [*valid_order_cli, "foo"]):
+            require(subprocess.run(command_args, cwd=ROOT, capture_output=True).returncode == 2,
+                    "probe accepted an invalid witness order or extra CLI argument")
+            stats["order_cli_rejects"] += 1
     require(stats["genuine_rows"] == 128 and stats["mutants"] >= 48 and stats["failed_captures"] == 2 and
             stats["positive_reads"] == 1 and stats["domain_checks"] == 2,
             "receipt gate lost its non-vacuity floor")
     require(stats["sibling_rows"] == 64 and stats["sibling_positive_reads"] == 1 and
             stats["sibling_cli_rejects"] == 2 and stats["mutants"] >= 67,
             "sibling extension lost its non-vacuity floor")
+    require(stats["order_rows"] == 64 and stats["order_positive_reads"] == 1 and
+            stats["order_cli_rejects"] == 3 and stats["mutants"] >= 84,
+            "witness-order extension lost its non-vacuity floor")
     require(sources() == pins and digest(original) == binary_pin, "gate modified sources or actual probe")
     print(json.dumps(dict(status="passed", **stats), sort_keys=True))
     return 0

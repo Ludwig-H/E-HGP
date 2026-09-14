@@ -1,10 +1,40 @@
-# Passation v8 — certificat frère q2, coût global à réduire
+# Passation v8 — ordre de témoins qualifié, partage des ancres à réaliser
 
 14 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`. Aucun contrat de tour n'est encore acquis.
 
 ## À reprendre maintenant
+
+L'[ordre complément/B original](docs/P0_ORDRE_TEMOINS_Q2.md) est implémenté
+et qualifié localement. `ComplementFirst` garde le B original
+et le rang de a dans un contexte immuable, puis transmet phase/cursor/count
+aux enfants. Les ascendants de B original et de a sont divisés avant
+toute borne ; a est exclu du seul comptage, jamais de la coquille.
+Builds `v8_witness_order_20260914` et
+`v8_witness_order_sanitize_20260914` désormais épinglés : 45 CTests
+Release/Clang ASan/UBSan passent, détection des fuites conservée.
+[56 mesures propres](receipts/q2_witness_order_20260914/README.md) :
+s8/10/12 à 8k et croissance s8 en Complement/sibling. Temps q2
+8k/16k/32k : rangées 0,201/0,437/0,942 s ; amas
+11,378/43,750/173,471 s. Les visites des amas font encore ×4,106 puis
+×4,229. Uniforme8k ne gagne pas en temps ; les visites retirées sont
+en grande partie remplacées par des opérations structurelles.
+
+**Priorité suivante : un census conjoint A×B**, puis reprise du chemin
+actuel dès A singleton, avec le même compte/curseur/phase, sans racine
+recommencée. Ne pas exclure tout A du compte : d'autres ancres peuvent
+être intérieures. Lire la dernière section du contrat pour invariant,
+fixture K1/K2 et compteurs de masses/tâches/bornes conjointes. Les
+preuves de bornes A §9 existent, pas encore ce raccord produit. Garder
+le coût plus élevé d'une borne conjointe dans la comparaison. L'audit A
+publié à a1ee8cb0 contre-vérifie l'ordre actuel et propose aussi une
+comparaison isolée de l'ancien ordre sur les seules racines B singleton.
+Ne pas transformer les enfants déjà crédités par ce raccourci.
+La représentation de contexte doit devenir possédée avant une file
+asynchrone CPU/GPU. Aucun contrat FULL/G4 acquis ; GCP non utilisé.
+
+## Neuvième tranche publiée à 39b58f37 — historique
 
 L'option [certificat autonome du frère](docs/P0_CERTIFICAT_FRERE_Q2.md)
 est implémentée dans le seul raccord WSPD q2. Elle n'additionne aucun

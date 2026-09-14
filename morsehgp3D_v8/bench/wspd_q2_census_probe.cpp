@@ -58,21 +58,25 @@ struct Options {
   std::string_view front_mode;
   std::string_view census_mode;
   std::string_view sibling_mode;  // Empty preserves the historical v1 CLI/schema.
+  std::string_view witness_order;  // Empty preserves the v1/v2 schemas.
 };
 
 Options options(int argc, char** argv) {
-  if (argc != 8 && argc != 9)
+  if (argc != 8 && argc != 9 && argc != 10)
     throw std::invalid_argument("usage: mhgp8_wspd_q2_census_probe n uniform|terrain|clusters|rows "
-                                "Kmax s seed pure|samples pairwise|shared [none|sibling]");
+                                "Kmax s seed pure|samples pairwise|shared [none|sibling [global|complement]]");
   const Options result{integer<std::size_t>(argv[1]), argv[2], integer<unsigned>(argv[3]),
                        integer<unsigned>(argv[4]), integer<u64>(argv[5]), argv[6], argv[7],
-                       argc == 9 ? std::string_view(argv[8]) : std::string_view{}};
+                       argc >= 9 ? std::string_view(argv[8]) : std::string_view{},
+                       argc == 10 ? std::string_view(argv[9]) : std::string_view{}};
   mhgp8::bench::validate_front_fixture_size(result.n, result.family);
   if (result.kmax == 0 || result.kmax > 10 || result.separation == 0 ||
       (result.front_mode != "pure" && result.front_mode != "samples") ||
       (result.census_mode != "pairwise" && result.census_mode != "shared") ||
-      (argc == 9 && result.sibling_mode != "none" && result.sibling_mode != "sibling") ||
-      (result.sibling_mode == "sibling" && result.census_mode != "shared"))
+      (argc >= 9 && result.sibling_mode != "none" && result.sibling_mode != "sibling") ||
+      (result.sibling_mode == "sibling" && result.census_mode != "shared") ||
+      (argc == 10 && result.witness_order != "global" && result.witness_order != "complement") ||
+      (result.witness_order == "complement" && result.census_mode != "shared"))
     throw std::invalid_argument("WSPD census requires Kmax 1..10, positive s, valid front/census modes");
   return result;
 }
@@ -266,6 +270,10 @@ const std::array sibling_fields{
   MHGP8_FIELD(SiblingWork, proposals), MHGP8_FIELD(SiblingWork, cardinality_skips),
   MHGP8_FIELD(SiblingWork, bound_tests), MHGP8_FIELD(SiblingWork, rejected_tasks),
   MHGP8_FIELD(SiblingWork, rejected_pairs), MHGP8_FIELD(SiblingWork, rejected_after_credit)};
+using OrderWork = decltype(mhgp8::WspdQ2CensusResult{}.order_work);
+const std::array order_fields{
+  MHGP8_FIELD(OrderWork, structural_splits), MHGP8_FIELD(OrderWork, deferred_skips),
+  MHGP8_FIELD(OrderWork, anchor_skips), MHGP8_FIELD(OrderWork, phase_switches)};
 #undef MHGP8_FIELD
 
 template <class T, std::size_t N>
@@ -343,6 +351,15 @@ void validate(const mhgp8::WspdQ2CensusResult& result, const OutputDigest& diges
     for (const auto& field : sibling_fields)
       require(sibling.*(field.member) == 0, "disabled sibling filter performed work");
   }
+  const auto& order = result.order_work;
+  if (o.witness_order == "complement") {
+    require(order.structural_splits <= product(96, c.work.query_tasks) &&
+            order.deferred_skips <= c.work.query_tasks && order.anchor_skips <= c.work.query_tasks &&
+            order.phase_switches <= c.work.query_tasks, "complement witness-order work exceeds structural bounds");
+  } else {
+    for (const auto& field : order_fields)
+      require(order.*(field.member) == 0, "global witness order performed complement work");
+  }
 }
 
 int run(const Options& o) {
@@ -358,7 +375,8 @@ int run(const Options& o) {
       o.front_mode == "pure" ? mhgp8::WspdFrontMode::Pure : mhgp8::WspdFrontMode::MidpointSamples,
       o.census_mode == "pairwise" ? mhgp8::Q2CensusMode::Pairwise : mhgp8::Q2CensusMode::SharedBlocks,
       [&](const mhgp8::Q2Support& support) { digest.consume(support, cloud->points(), o.kmax); },
-      o.sibling_mode == "sibling" ? mhgp8::Q2SiblingMode::Saturating : mhgp8::Q2SiblingMode::Disabled);
+      o.sibling_mode == "sibling" ? mhgp8::Q2SiblingMode::Saturating : mhgp8::Q2SiblingMode::Disabled,
+      o.witness_order == "complement" ? mhgp8::Q2WitnessOrder::ComplementFirst : mhgp8::Q2WitnessOrder::GlobalDfs);
   const auto processed = Clock::now();
   validate(result, digest, o);
   require(&index->cloud() == cloud.get(), "WSPD census index lost immutable cloud identity");
@@ -384,7 +402,8 @@ int run(const Options& o) {
 
   std::cout.imbue(std::locale::classic());
   std::cout << std::setprecision(17)
-            << "{\"schema\":\"mhgp8_wspd_q2_census_probe_" << (o.sibling_mode.empty() ? "v1" : "v2")
+            << "{\"schema\":\"mhgp8_wspd_q2_census_probe_"
+            << (!o.witness_order.empty() ? "v3" : o.sibling_mode.empty() ? "v1" : "v2")
             << "\",\"status\":\"completed\""
             << ",\"phase\":\"exploration_v8_hors_registre\",\"backend\":\"cpu_reference\""
             << ",\"profile\":\"quantized_u16_input_only\",\"mode\":\"implementation_v8_p0\""
@@ -426,6 +445,10 @@ int run(const Options& o) {
   if (!o.sibling_mode.empty()) {
     std::cout << "},\"sibling_mode\":\"" << o.sibling_mode << "\",\"sibling_work\":{";
     print_fields(result.sibling_work, sibling_fields);
+  }
+  if (!o.witness_order.empty()) {
+    std::cout << "},\"witness_order\":\"" << o.witness_order << "\",\"order_work\":{";
+    print_fields(result.order_work, order_fields);
   }
   std::cout << "},\"callback_work\":{";
   print_fields(digest.work, callback_fields);

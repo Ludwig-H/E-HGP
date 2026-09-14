@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — réduire la fragmentation du census q2
+# Morse HGP 3D v8 — ordre de témoins et fragmentation du census q2
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -35,6 +35,24 @@ catalogue q3/q4 ni une tour FULL.
 Les mesures historiques citées restent v7.
 
 ## État exécutable
+
+La dixième tranche expérimente un [ordre de témoins propre à la requête](docs/P0_ORDRE_TEMOINS_Q2.md) :
+complément du B original sans l'ancre, puis B original. Le contexte et
+la continuation restent compacts ; aucune liste de frontières ni
+préparation de facteur n'est ajoutée. Les coquilles sont inchangées.
+Le défaut reste l'ordre DFS global. Les [56 mesures propres](receipts/q2_witness_order_20260914/README.md)
+sont closes ; **45 CTests Release et Clang ASan/UBSan passent**.
+À s8, avec le frère, les temps q2 8k/16k/32k valent
+0,201/0,437/0,942 s sur les rangées et 11,378/43,750/173,471 s sur
+les amas. Ces derniers restent non résolus : visites géométriques
+×4,106 puis ×4,229. Le nouvel ordre ne gagne pas en temps sur uniforme8k ;
+son coût structurel est publié séparément. s8/10/12 comparés à 8k,
+croissance à s8 seulement, sans nouveau temps baseline aux grandes tailles.
+La prochaine tâche partagera encore A et B avant le passage aux ancres,
+sans réinitialiser le compte ni sa continuation. Non implémentée ici.
+P0, q3/q4, FULL, multi-CPU, GPU et contrats G4 restent ouverts.
+
+## Neuvième tranche publiée à 39b58f37 — historique
 
 La neuvième tranche ajoute un [certificat autonome du bloc frère](docs/P0_CERTIFICAT_FRERE_Q2.md)
 au raccord q2, en option. À chaque division d'un groupe B, l'autre

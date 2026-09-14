@@ -30,6 +30,9 @@ RUNNER_SOURCE = "morsehgp3D_v8/bench/run_wspd_q2_matrix.py"
 SCOPE = "q2_all_cloud_supports_not_full"
 SCHEMA = "mhgp8_wspd_q2_campaign_v1"
 SIBLING_SCHEMA = "mhgp8_wspd_q2_campaign_v2"
+ORDER_SCHEMA = "mhgp8_wspd_q2_campaign_v3"
+WITNESS_ORDERS = ("global", "complement")
+ORDER_FIELDS = ("structural_splits", "deferred_skips", "anchor_skips", "phase_switches")
 SIBLING_MODES = ("none", "sibling")
 SIBLING_FIELDS = ("proposals", "cardinality_skips", "bound_tests", "rejected_tasks",
                   "rejected_pairs", "rejected_after_credit")
@@ -98,20 +101,46 @@ def array(value: Any, length: int, name: str) -> None:
 
 
 def command_for(probe: str, key: tuple[Any, ...]) -> list[str]:
-    require(len(key) in (7, 8), "wrong command tuple length")
+    require(len(key) in (7, 8, 9), "wrong command tuple length")
     family, n, kmax, separation, seed, mode, census_mode = key[:7]
     return [probe, str(n), family, str(kmax), str(separation), str(seed), mode, census_mode, *key[7:]]
 
 
 def row_keys(row: dict[str, Any]) -> tuple[str, ...]:
+    if row.get("schema") == "mhgp8_wspd_q2_census_probe_v3":
+        return KEYS + ("sibling_mode", "witness_order")
     return KEYS + (("sibling_mode",) if row.get("schema") == "mhgp8_wspd_q2_census_probe_v2" else ())
 
 
 def discrete_fields(row: dict[str, Any]) -> tuple[str, ...]:
-    return DISCRETE_FIELDS + (("sibling_work",) if len(row_keys(row)) == 8 else ())
+    length = len(row_keys(row))
+    return DISCRETE_FIELDS + (("sibling_work",) if length >= 8 else ()) + (("order_work",) if length == 9 else ())
+
+
+def campaign_schema(manifest: dict[str, Any]) -> str:
+    return ORDER_SCHEMA if "witness_orders" in manifest else SIBLING_SCHEMA if "sibling_modes" in manifest else SCHEMA
 
 
 def validate_result(row: dict[str, Any], command: list[str]) -> None:
+    if row.get("schema") == "mhgp8_wspd_q2_census_probe_v3":
+        require(len(command) == 10 and row.get("witness_order") in WITNESS_ORDERS and
+                command[9] == row["witness_order"], "wrong witness-order command or value")
+        require(row["witness_order"] != "complement" or row.get("census_mode") == "shared",
+                "pairwise complement order is invalid")
+        projected = {key: value for key, value in row.items() if key not in ("witness_order", "order_work")}
+        projected["schema"] = "mhgp8_wspd_q2_census_probe_v2"
+        validate_result(projected, command[:9])
+        order = row.get("order_work")
+        counters(order, ORDER_FIELDS, "order_work")
+        if row["witness_order"] == "global":
+            require(all(value == 0 for value in order.values()), "global witness order performed complement work")
+        else:
+            tasks = row["census_work"]["query_tasks"]
+            require(order["structural_splits"] <= 96 * tasks and
+                    all(order[name] <= tasks for name in ORDER_FIELDS[1:]),
+                    "complement witness-order work exceeds structural bounds")
+        return
+    require("witness_order" not in row and "order_work" not in row, "v1/v2 contains unversioned witness-order fields")
     if row.get("schema") == "mhgp8_wspd_q2_census_probe_v2":
         require(len(command) == 9 and row.get("sibling_mode") in SIBLING_MODES and
                 command[8] == row["sibling_mode"], "wrong sibling command or mode")
@@ -303,13 +332,16 @@ def validate_v1_result(row: dict[str, Any], command: list[str]) -> None:
 def matrix(manifest: dict[str, Any]) -> list[tuple[Any, ...]]:
     require(uint(manifest.get("repeats"), "repeats") >= 1, "empty repetitions")
     keys = MATRIX_KEYS + (("sibling_modes",) if "sibling_modes" in manifest else ())
+    if "witness_orders" in manifest:
+        require("sibling_modes" in manifest, "witness orders require explicit --sibling-modes")
+        keys += ("witness_orders",)
     for name in keys:
         values = manifest.get(name)
         require(type(values) is list and bool(values), f"{name}: empty matrix")
         for value in values:
-            if name in ("families", "modes", "census_modes", "sibling_modes"):
+            if name in ("families", "modes", "census_modes", "sibling_modes", "witness_orders"):
                 choices = dict(families=FAMILIES, modes=MODES, census_modes=CENSUS_MODES,
-                               sibling_modes=SIBLING_MODES)
+                               sibling_modes=SIBLING_MODES, witness_orders=WITNESS_ORDERS)
                 require(type(value) is str and value in choices[name], f"{name}: invalid value")
             else:
                 uint(value, name)
@@ -320,6 +352,9 @@ def matrix(manifest: dict[str, Any]) -> list[tuple[Any, ...]]:
     if "sibling_modes" in manifest:
         require("sibling" not in manifest["sibling_modes"] or "pairwise" not in manifest["census_modes"],
                 "pairwise+sibling is invalid; explicitly select --census-modes shared")
+    if "witness_orders" in manifest:
+        require("complement" not in manifest["witness_orders"] or "pairwise" not in manifest["census_modes"],
+                "pairwise+complement is invalid; explicitly select --census-modes shared")
     cases = list(itertools.product(*(manifest[name] for name in keys), range(manifest["repeats"])))
     for family, n, *_ in cases:
         limits = dict(uniform=1 << 48, terrain=1 << 40, clusters=1 << 33, rows=131072)
@@ -366,6 +401,8 @@ def capture(args: argparse.Namespace) -> int:
                       seeds=args.seeds, modes=args.modes, census_modes=args.census_modes, repeats=args.repeats)
     if args.sibling_modes is not None:
         parameters["sibling_modes"] = args.sibling_modes
+    if args.witness_orders is not None:
+        parameters["witness_orders"] = args.witness_orders
     cases = matrix(parameters)
     args.output.mkdir(parents=True, exist_ok=False)
     binary = args.probe.resolve()
@@ -378,7 +415,7 @@ def capture(args: argparse.Namespace) -> int:
         cache = (binary.parent / "CMakeCache.txt").read_text()
         compilers = [line.split("=", 1)[1] for line in cache.splitlines() if line.startswith("CMAKE_CXX_COMPILER:") and "=" in line]
         require(len(compilers) == 1 and bool(compilers[0]), "missing compiler provenance")
-        manifest = {**parameters, "schema": SIBLING_SCHEMA if "sibling_modes" in parameters else SCHEMA,
+        manifest = {**parameters, "schema": campaign_schema(parameters),
             "scope": SCOPE, "public_status": "not_claimed",
             "separation_convention": "box_gap_diameter_v1", "started_utc": utc_stamp(),
             "threads": 1, "gcp_used": False, "processes_sequential": True, "warmup_runs": 0,
@@ -460,8 +497,8 @@ def check(args: argparse.Namespace) -> int:
     for directory in directories:
         manifest = parse_result((directory / "MANIFEST.json").read_bytes())
         completion = parse_result((directory / "COMPLETION.json").read_bytes())
-        version2 = "sibling_modes" in manifest
-        require(manifest.get("schema") == (SIBLING_SCHEMA if version2 else SCHEMA) and manifest.get("scope") == SCOPE and
+        version = 3 if "witness_orders" in manifest else 2 if "sibling_modes" in manifest else 1
+        require(manifest.get("schema") == campaign_schema(manifest) and manifest.get("scope") == SCOPE and
                 manifest.get("public_status") == "not_claimed" and manifest.get("gcp_used") is False and
                 manifest.get("separation_convention") == "box_gap_diameter_v1" and
                 uint(manifest.get("threads"), "threads") == 1 and manifest.get("processes_sequential") is True and
@@ -495,8 +532,7 @@ def check(args: argparse.Namespace) -> int:
                     "invalid invocation or binary pin")
             raw = base64.b64decode(record["stdout_base64"], validate=True)
             row = parse_result(raw)
-            require(row.get("schema") == ("mhgp8_wspd_q2_census_probe_v2" if version2 else
-                    "mhgp8_wspd_q2_census_probe_v1"), "campaign/probe schema mismatch")
+            require(row.get("schema") == f"mhgp8_wspd_q2_census_probe_v{version}", "campaign/probe schema mismatch")
             key = tuple(row[name] for name in row_keys(row))
             command = command_for(manifest["probe"], key)
             require(raw.decode() == record.get("stdout") and row == record.get("result") and
@@ -515,8 +551,10 @@ def check(args: argparse.Namespace) -> int:
                   gcp_used=False, provenance_policy=PROVENANCE_POLICY, provenance=published,
                   current_reader_sha256=pins[RUNNER_SOURCE], source_check="current_content_and_closing_pins_not_a_rebuild",
                   mode_comparison="same_canonical_q2_support_digest_not_equal_front_or_census_work")
-    if any(len(key) == 8 for key in groups):
+    if any(len(key) >= 8 for key in groups):
         result["sibling_comparison"] = "same_front_candidates_and_canonical_digest_not_equal_census_work"
+    if any(len(key) == 9 for key in groups):
+        result["witness_order_comparison"] = "same_front_candidates_and_canonical_digest_not_equal_traversal_work"
     if args.summary:
         result["summary"] = []
         for key, rows in sorted(groups.items()):
@@ -543,6 +581,8 @@ def main() -> int:
     run.add_argument("--census-modes", nargs="+", choices=CENSUS_MODES, default=list(CENSUS_MODES))
     run.add_argument("--sibling-modes", nargs="+", choices=SIBLING_MODES,
                      help="Explicit option selects v2; sibling requires --census-modes shared")
+    run.add_argument("--witness-orders", nargs="+", choices=WITNESS_ORDERS,
+                     help="Selects v3 and requires explicit --sibling-modes; complement requires shared census")
     run.add_argument("--repeats", type=int, default=1)
     reader = sub.add_parser("check")
     reader.add_argument("receipt", type=Path)

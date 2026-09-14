@@ -1,0 +1,35 @@
+Start testing: Sep 14 10:25 UTC
+----------------------------------------------------------
+13/44 Testing: mhgp8_wspd_q2_receipts_gate
+13/44 Test: mhgp8_wspd_q2_receipts_gate
+Command: "/home/codespace/.python/current/bin/python3" "-B" "/workspaces/E-HGP/morsehgp3D_v8/tests/wspd_q2_receipts_gate.py" "--probe" "/workspaces/E-HGP/build/v8_witness_order_20260914/mhgp8_wspd_q2_census_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_witness_order_20260914
+"mhgp8_wspd_q2_receipts_gate" start time: Sep 14 10:25 UTC
+Output:
+----------------------------------------------------------
+{"domain_checks": 2, "failed_captures": 2, "genuine_rows": 128, "mutants": 89, "order_cli_rejects": 3, "order_positive_reads": 1, "order_rows": 64, "positive_reads": 1, "sibling_cli_rejects": 2, "sibling_positive_reads": 1, "sibling_rows": 64, "status": "passed"}
+<end of output>
+Test time =  15.96 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_wspd_q2_receipts_gate" end time: Sep 14 10:25 UTC
+"mhgp8_wspd_q2_receipts_gate" time elapsed: 00:00:15
+----------------------------------------------------------
+
+14/44 Testing: mhgp8_wspd_q2_receipts_gate_optimized
+14/44 Test: mhgp8_wspd_q2_receipts_gate_optimized
+Command: "/home/codespace/.python/current/bin/python3" "-B" "-O" "/workspaces/E-HGP/morsehgp3D_v8/tests/wspd_q2_receipts_gate.py" "--probe" "/workspaces/E-HGP/build/v8_witness_order_20260914/mhgp8_wspd_q2_census_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_witness_order_20260914
+"mhgp8_wspd_q2_receipts_gate_optimized" start time: Sep 14 10:25 UTC
+Output:
+----------------------------------------------------------
+WSPD q2 receipt gate failed: mixed v1/v2 reader failed: b'' b'WSPD q2 receipt rejected: source coverage/hash differs from current version\n'
+<end of output>
+Test time =  10.54 sec
+----------------------------------------------------------
+Test Failed.
+"mhgp8_wspd_q2_receipts_gate_optimized" end time: Sep 14 10:25 UTC
+"mhgp8_wspd_q2_receipts_gate_optimized" time elapsed: 00:00:10
+----------------------------------------------------------
+
+End testing: Sep 14 10:25 UTC

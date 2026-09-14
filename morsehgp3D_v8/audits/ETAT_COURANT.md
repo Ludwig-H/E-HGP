@@ -3,7 +3,24 @@
 14 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
-État constructeur courant, neuvième tranche P0 :
+État constructeur courant, dixième tranche P0 :
+[ordre complément/B original](../docs/P0_ORDRE_TEMOINS_Q2.md), option
+SharedBlocks à contexte et continuation compacts. Aucun crédit préchargé,
+aucune modification de la collecte. Les quatre opérations structurelles
+sont comptées séparément. 45 CTests Release/Clang ASan/UBSan passent ;
+[56 mesures propres](../receipts/q2_witness_order_20260914/README.md) closes,
+sans transfert des résultats antérieurs. Préflight avant gel conservé.
+À s8, Complement/sibling donne 0,201/0,437/0,942 s sur rangées
+8k/16k/32k, contre 11,378/43,750/173,471 s sur amas. Les visites des
+amas font ×4,106 puis ×4,229 : croissance non résolue, malgré des
+supports proches du linéaire. Uniforme8k ne gagne pas en temps ; le
+coût structurel est explicite. Le défaut reste Global/none.
+La contrelecture modèle A est publiée à a1ee8cb0 et reste indépendante.
+Partage conjoint A×B et reprise singleton sans redémarrage : prochaine
+proposition, non implémentée ; P0 et contrats FULL/G4 ouverts. GCP non utilisé.
+
+## Historique : neuvième tranche P0 publiée à 39b58f37
+
 [certificat autonome du frère q2](../docs/P0_CERTIFICAT_FRERE_Q2.md),
 option intégré SharedBlocks seulement. Le frère doit certifier K sites
 stricts à lui seul ; jamais d'ajout au compte ou de modification du

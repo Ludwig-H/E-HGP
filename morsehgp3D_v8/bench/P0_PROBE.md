@@ -1,14 +1,13 @@
 # Sonde P0 : un rectangle séparé, pas une tour HGP
 
 Complément du 14 septembre, raccord WSPD q2 :
-`mhgp8_wspd_q2_census_probe n famille Kmax s seed pure|samples pairwise|shared [none|sibling]`.
-Sans dernier argument, le schéma historique v1 est conservé. L'option
-explicite produit v2 et six compteurs séparés du certificat frère ;
-`sibling` exige `shared`. Le runner `run_wspd_q2_matrix.py` accepte
-`--sibling-modes none sibling` ; sans cette option, il garde les campagnes
-v1. Les lecteurs contrôlent l'identité du front, des candidates et des
-supports entre variantes, mais autorisent un travail census différent.
-Voir le [contrat du certificat](../docs/P0_CERTIFICAT_FRERE_Q2.md).
+`mhgp8_wspd_q2_census_probe n famille Kmax s seed pure|samples pairwise|shared [none|sibling [global|complement]]`.
+Les arguments facultatifs choisissent le certificat frère puis l'ordre
+des témoins. Les schémas v1 et v2 restent disponibles ; l'ordre explicite
+produit v3 et quatre compteurs structurels distincts. Le détail des CLI,
+reçus et coûts figure dans la section finale de cette note. Voir les
+contrats du [certificat frère](../docs/P0_CERTIFICAT_FRERE_Q2.md) et de
+l'[ordre des témoins](../docs/P0_ORDRE_TEMOINS_Q2.md).
 
 13 septembre 2026. Cadre `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `profile=quantized_u16_input_only`,
@@ -329,7 +328,7 @@ aucun census, support, catalogue ou parent FULL n'est construit. Lire le
 ## Raccord WSPD et census q2 de tout le nuage
 
 ```text
-mhgp8_wspd_q2_census_probe n uniform|terrain|clusters|rows Kmax s seed pure|samples pairwise|shared
+mhgp8_wspd_q2_census_probe n uniform|terrain|clusters|rows Kmax s seed pure|samples pairwise|shared [none|sibling [global|complement]]
 ```
 
 Même recette d'entrée que le front, mais **q2 seul**, suivi de son census,
@@ -350,3 +349,94 @@ mais pas le temps. `input_descriptors` compte les rectangles ;
 scan de couverture local n'est payé. Le total inclut le coût du callback
 (copies, tris, validation, hash) ; les sous-chronos sont imbriqués.
 Lire le [contrat complet](../docs/P0_FRONT_ET_CENSUS_Q2.md).
+
+### Schémas v1, v2 et v3 : des options explicites
+
+Le suffixe des deux schémas suit les arguments effectivement fournis,
+pas seulement leur effet : `none global` produit bien v3. Les préfixes
+sont `mhgp8_wspd_q2_census_probe_` pour la sonde et
+`mhgp8_wspd_q2_campaign_` pour la campagne.
+
+| Arguments facultatifs de la sonde | Options facultatives du runner | Version et champs ajoutés |
+| --- | --- | --- |
+| Aucun | Aucune | v1, ni certificat frère ni ordre explicite |
+| `none` ou `sibling` | `--sibling-modes none sibling` | v2, `sibling_mode` et `sibling_work` |
+| `none\|sibling global\|complement` | `--sibling-modes none sibling --witness-orders global complement` | v3, champs v2 plus `witness_order` et `order_work` |
+
+Chaque liste du runner peut ne contenir qu'une des valeurs permises.
+`--witness-orders` exige `--sibling-modes` explicite, même pour `none`.
+`sibling` et `complement` exigent tous deux `--census-modes shared` ;
+une matrice comportant une combinaison interdite est refusée, jamais
+filtrée silencieusement. La sonde refuse aussi une valeur inconnue ou
+un argument supplémentaire (code 2, sans JSON de succès). Une exception
+d'exécution donne le code 1 ; un succès donne 0 et une ligne JSON.
+
+`global` conserve le parcours DFS de référence. `complement` visite
+d'abord les témoins hors du facteur B initial, sans l'ancre a, puis B.
+L'ancre contribue zéro au compte d'intérieur ; elle reste dans la
+collecte de la coquille. Le B initial et l'ordre ainsi défini restent
+fixes pendant les subdivisions de la requête. Ce choix ne change ni
+l'index ni le front ; il peut changer la quantité de travail du census.
+
+### Compter aussi les déplacements structurels
+
+`order_work` contient quatre entiers non négatifs. Ils sont tous nuls
+avec `global`, y compris lorsque celui-ci est explicitement demandé
+en v3. Pour `complement`, le lecteur vérifie les bornes suivantes,
+avec T = `census_work.query_tasks`.
+
+| Compteur | Travail compté | Borne vérifiée |
+| --- | --- | --- |
+| `structural_splits` | Descentes nécessaires pour isoler B initial ou l'ancre, avant les tests géométriques | Au plus 96T |
+| `deferred_skips` | Sauts de B initial pendant la première phase, sans consommer ses sites | Au plus T |
+| `anchor_skips` | Reconnaissances de l'ancre comme contribution intérieure nulle | Au plus T |
+| `phase_switches` | Passages du complément vers B initial | Au plus T |
+
+`count_node_visits` et `witness_splits` gardent leur sens géométrique ;
+les descentes structurelles ne sont pas cachées dans ces champs.
+`cursor_advances` inclut aussi les mouvements structurels, sauts et
+changements de phase. `sibling_work` conserve séparément ses six comptes
+de propositions et certifications. Ces compteurs ont des unités et des
+recouvrements différents : une baisse des seules visites géométriques
+ne suffit pas à conclure à une baisse du travail total. Les bornes par
+tâche ci-dessus ne bornent pas T et ne prouvent pas une complexité
+globale sous-quadratique.
+
+Les chronomètres ne changent pas : `pipeline_total_ms` englobe le front,
+le census et la destruction des buffers privés ; il est décomposé en
+`front_and_count_ms` et `payload_ms`. Ce dernier comprend collecte et
+callback. `query_index_ms` reste nul. Le `total_ms` extérieur paie aussi
+génération, préparation du nuage, index global, validation et destructions.
+Il n'y a ni chronomètre de front isolé dans ce raccord ni temps census
+isolé à reconstruire par soustractions de mesures par rectangle.
+
+### Exemple v3 et lecture comparative
+
+Exemple de petite capture, à exécuter dans un répertoire neuf après
+construction et validation du binaire ; ces commandes ne constituent
+pas un résultat de mesure :
+
+```bash
+python3 -B morsehgp3D_v8/bench/run_wspd_q2_matrix.py run --probe build/v8_new/mhgp8_wspd_q2_census_probe --output morsehgp3D_v8/receipts/front_q2_order_new/main_matrix --sizes 64 --families uniform rows --kmax 5 10 --s 8 10 12 --seeds 3 --modes samples --census-modes shared --sibling-modes none sibling --witness-orders global complement --repeats 1
+python3 -B morsehgp3D_v8/bench/run_wspd_q2_matrix.py check morsehgp3D_v8/receipts/front_q2_order_new --summary
+python3 -B -O morsehgp3D_v8/bench/run_wspd_q2_matrix.py check morsehgp3D_v8/receipts/front_q2_order_new --summary
+```
+
+Les campagnes de croissance utilisent séparément les tailles
+`8000 16000 32000` et les quatre familles, sans confondre cette petite
+capture de contrôle avec leur qualification. Le lecteur peut réunir
+des captures v1/v2/v3 de provenance compatible et de sources épinglées
+conformes ; cela ne réattribue pas les sources courantes aux anciens
+reçus. Les clés de résumé incluent chaque option effectivement présente.
+À entrée/Kmax/front/s identiques, changer le certificat frère ou l'ordre
+doit préserver exactement le front et les candidates. Le digest canonique
+des supports doit aussi rester identique entre les ordres, modes et s.
+Les compteurs de parcours peuvent différer ; les répétitions d'un même
+tuple complet doivent retrouver le même travail discret. La validation
+v3 réemploie les contrôles v2 puis v1, en ajoutant ceux du nouvel ordre.
+
+Le périmètre reste `q2_all_cloud_supports_not_full`, mono-thread CPU,
+`public_status=not_claimed`. Ni les schémas, ni les digests, ni les bornes
+de compteurs ne qualifient une tour FULL, le contrat 50k en une seconde,
+le GPU ou plusieurs dizaines de millions de points. Aucun chiffre de
+performance de cette tranche n'est ajouté ici pendant sa qualification.

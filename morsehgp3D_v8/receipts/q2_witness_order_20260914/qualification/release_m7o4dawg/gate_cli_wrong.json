@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_witness_order_20260914/mhgp8_q2_witness_order_gate",
+    "--wrong"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "gate_cli_wrong",
+  "expected_exit_code": 2,
+  "started_utc": "2026-09-14T10:34:50.023022+00:00",
+  "status": "passed",
+  "exit_code": 2,
+  "stdout": "",
+  "stderr": "usage: mhgp8_q2_witness_order_gate --selftest\n",
+  "stdout_base64": "",
+  "stderr_base64": "dXNhZ2U6IG1oZ3A4X3EyX3dpdG5lc3Nfb3JkZXJfZ2F0ZSAtLXNlbGZ0ZXN0Cg==",
+  "finished_utc": "2026-09-14T10:34:50.025407+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/q2_witness_order_20260914/qualification/release_m7o4dawg/gate_cli_wrong.stdout.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/q2_witness_order_20260914/qualification/release_m7o4dawg/gate_cli_wrong.stderr.bin",
+      "sha256": "e8570210223661d4ddc122e176adc7230510bbf5e7851f1fb848f6e5372fce85",
+      "bytes": 46
+    }
+  }
+}

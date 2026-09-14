@@ -21,6 +21,15 @@ visites, propositions et tâches, pas seulement le nombre de paires
 éliminées par ce certificat. Le partage entre ancres et le choix des
 blocs témoins restent à traiter si cette option ne réduit qu'une constante.
 
+Dixième tranche : [ordre complément/B original](P0_ORDRE_TEMOINS_Q2.md),
+avec exclusion de l'ancre du seul comptage. Mesurer le coût structurel
+en plus des tests géométriques ; moins de bornes ne signifie pas moins
+de travail total. La prochaine expérience garde A et B comme groupes
+dans le census, puis reprend le chemin à ancre fixe depuis le même
+préfixe quand A devient singleton. Aucun redémarrage ni tableau de
+paires. Cette piste reste à implémenter et à comparer, sans preuve de
+gain global ; elle ne dispense pas de traiter l'ordre des témoins.
+
 ## Priorité P0 — supprimer la préparation quadratique des témoins locaux
 
 **Décision explicite de l'utilisateur, 13 septembre 2026 : ce changement

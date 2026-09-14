@@ -1434,3 +1434,63 @@ receipts/q2_sibling_20260914 et cette seule section CONSTRUCTEUR.
 Les fichiers v6/v7, l'audit B et les travaux complémentaires ainsi que
 leur ancienne section de journal sont exclus. Fenêtre close après
 commit/push main. GCP non utilisé.
+
+## 14 septembre 2026 — CONSTRUCTEUR : ordre complément puis B original
+
+La neuvième tranche est publiée à 39b58f37, HEAD=origin/main vérifié.
+Nouvelle poursuite demandée pendant sa clôture, même cadre hors registre.
+L'option Q2WitnessOrder::ComplementFirst (Shared seulement) reporte le
+B original et exclut a du seul comptage ; aucun retrait de coquille.
+Ses descendants héritent du même contexte original et de phase/cursor/count.
+Les ancêtres du groupe différé et de a sont divisés structurellement
+avant toute borne, sans rechercher leurs IDs ni reconstruire un index.
+Quatre compteurs séparés publient divisions structurelles, sauts de B/a
+et changements de phase. Le défaut GlobalDfs reste inchangé, les modes
+frère sont indépendants. Sources de cette dixième tranche en chantier,
+aucune qualification de 39b58f37 transférée. Builds neufs prévus
+v8_witness_order_20260914 et v8_witness_order_sanitize_20260914.
+Demande A : contrelecture de cette continuation compacte, surtout les
+subdivisions après crédit et la fin à escape(B_original). Pas de GCP,
+pas d'index réservé pendant cette nouvelle implémentation.
+
+Gel explicite des sources et portes constructeur. Release : 45 CTests
+PASS et 23 commandes contrôlées, hashes de fermeture stables ; sanitizer
+hors sandbox et montée en taille en cours. Préflight avant gel conservé
+(CMake modifié pendant la vérification des hashes), aucun contrôle affaibli.
+À 8k, 48 appels clos : quatre familles × s8/10/12 × les quatre modes.
+À s8, amas Global/none 12,964 s contre Complement/sibling 11,378 s ;
+rangées 1,428→0,201 s. Uniforme : pas de gain temporel du nouvel ordre,
+les divisions structurelles compensent presque les visites retirées.
+Une répétition, machine partagée : pas de conclusion statistique de latence.
+
+Lecture de A q2_complement : invariant, reprises et huit mutants compris,
+contrelecture statique reçue sans transfert de sa qualification modèle
+vers C++. La proposition de racines B singleton traitées en ancien DFS
+est sûre avec compte zéro et décision uniquement à la racine ; pas de
+changement des descendants déjà crédités. Elle reste une expérience
+suivante, les sources de cette capture étant gelées.
+
+Question suivante à A : partage du census avant explosion en ancres,
+tâche A×B avec bornes §9 et reprise du chemin actuel dès A singleton,
+compte/curseur/phase conservés. Ne pas exclure tout A. Fixture proposée
+A={(100,0,0),(100,4,0)}, B={(0,1,0),(0,2,0),(0,3,0)}, z=(50,2,0) :
+crédit uniforme z, rejet conjoint K1, deux admissions K2 après partage.
+Le coût des bornes conjointes et la fragmentation doivent être mesurés,
+pas une simple diminution du nombre de racines. Voir nouvelle section
+P0_ORDRE_TEMOINS_Q2.md ; non implémenté dans la dixième tranche.
+
+Clôture constructeur : 45 CTests Release et Clang ASan/UBSan passent,
+23 commandes par qualification, détection des fuites conservée. Les
+lecteurs normal/−O donnent la même sortie pour 56 mesures/configurations,
+hashes de fermeture des sources et artefacts stables. Croissance
+Complement/sibling à s8 : amas 11,378/43,750/173,471 s, visites
+×4,106/×4,229 ; rangées 0,201/0,437/0,942 s, visites ×2,159/×2,107.
+Les nouvelles comparaisons s8/10/12 portent sur 8k seulement ; pas de
+baseline temporelle nouvelle 16k/32k. Le défaut Global/none est conservé.
+P0 non clos, pas de contrat FULL/G4. Audit A a1ee8cb0 lu et cité.
+
+Réservation d'index constructeur après vérification vide : AGENTS.md,
+code/tests/bench/docs et entrées v8 propres, ETAT_COURANT constructeur,
+receipts/q2_witness_order_20260914, cette seule section du journal.
+Les fichiers indépendants A/B/complémentaires et les travaux v6/v7
+restent exclus. Fenêtre close après commit/push main. GCP non utilisé.

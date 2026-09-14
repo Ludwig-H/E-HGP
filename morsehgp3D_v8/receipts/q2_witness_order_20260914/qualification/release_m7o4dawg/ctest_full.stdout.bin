@@ -1,0 +1,96 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v8_witness_order_20260914
+Test project /workspaces/E-HGP/build/v8_witness_order_20260914
+      Start  1: mhgp8_q2_witness_order_gate
+ 1/45 Test  #1: mhgp8_q2_witness_order_gate ...................   Passed    0.05 sec
+      Start  2: mhgp8_q2_sibling_gate
+ 2/45 Test  #2: mhgp8_q2_sibling_gate .........................   Passed    0.07 sec
+      Start  3: mhgp8_wspd_q2_census_gate
+ 3/45 Test  #3: mhgp8_wspd_q2_census_gate .....................   Passed    0.05 sec
+      Start  4: mhgp8_wspd_front_gate
+ 4/45 Test  #4: mhgp8_wspd_front_gate .........................   Passed    0.10 sec
+      Start  5: mhgp8_cloud_owner_gate
+ 5/45 Test  #5: mhgp8_cloud_owner_gate ........................   Passed    0.00 sec
+      Start  6: mhgp8_p0_gate
+ 6/45 Test  #6: mhgp8_p0_gate .................................   Passed    0.70 sec
+      Start  7: mhgp8_tube_gate
+ 7/45 Test  #7: mhgp8_tube_gate ...............................   Passed    0.34 sec
+      Start  8: mhgp8_batch_gate
+ 8/45 Test  #8: mhgp8_batch_gate ..............................   Passed    0.01 sec
+      Start  9: mhgp8_axis_q2_gate
+ 9/45 Test  #9: mhgp8_axis_q2_gate ............................   Passed    0.53 sec
+      Start 10: mhgp8_axis_additive_gate
+10/45 Test #10: mhgp8_axis_additive_gate ......................   Passed    0.80 sec
+      Start 11: mhgp8_plan_assignment_gate
+11/45 Test #11: mhgp8_plan_assignment_gate ....................   Passed    0.00 sec
+      Start 12: mhgp8_q2_census_gate
+12/45 Test #12: mhgp8_q2_census_gate ..........................   Passed    0.05 sec
+      Start 13: mhgp8_q2_prepared_bounds_gate
+13/45 Test #13: mhgp8_q2_prepared_bounds_gate .................   Passed    0.04 sec
+      Start 14: mhgp8_wspd_q2_receipts_gate
+14/45 Test #14: mhgp8_wspd_q2_receipts_gate ...................   Passed   16.05 sec
+      Start 15: mhgp8_wspd_q2_receipts_gate_optimized
+15/45 Test #15: mhgp8_wspd_q2_receipts_gate_optimized .........   Passed   16.69 sec
+      Start 16: mhgp8_wspd_front_receipts_gate
+16/45 Test #16: mhgp8_wspd_front_receipts_gate ................   Passed    5.90 sec
+      Start 17: mhgp8_wspd_front_receipts_gate_optimized
+17/45 Test #17: mhgp8_wspd_front_receipts_gate_optimized ......   Passed    6.33 sec
+      Start 18: mhgp8_cloud_reuse_receipts_gate
+18/45 Test #18: mhgp8_cloud_reuse_receipts_gate ...............   Passed    5.35 sec
+      Start 19: mhgp8_cloud_reuse_receipts_gate_optimized
+19/45 Test #19: mhgp8_cloud_reuse_receipts_gate_optimized .....   Passed    5.62 sec
+      Start 20: mhgp8_q2_revision_comparison_gate
+20/45 Test #20: mhgp8_q2_revision_comparison_gate .............   Passed    4.21 sec
+      Start 21: mhgp8_q2_revision_comparison_gate_optimized
+21/45 Test #21: mhgp8_q2_revision_comparison_gate_optimized ...   Passed    4.38 sec
+      Start 22: mhgp8_q2_census_probe_gate
+22/45 Test #22: mhgp8_q2_census_probe_gate ....................   Passed    3.06 sec
+      Start 23: mhgp8_q2_census_probe_gate_optimized
+23/45 Test #23: mhgp8_q2_census_probe_gate_optimized ..........   Passed    3.02 sec
+      Start 24: mhgp8_q2_census_campaign_gate
+24/45 Test #24: mhgp8_q2_census_campaign_gate .................   Passed   12.49 sec
+      Start 25: mhgp8_q2_census_campaign_gate_optimized
+25/45 Test #25: mhgp8_q2_census_campaign_gate_optimized .......   Passed   12.92 sec
+      Start 26: mhgp8_docs_scope
+26/45 Test #26: mhgp8_docs_scope ..............................   Passed    0.38 sec
+      Start 27: mhgp8_docs_scope_optimized
+27/45 Test #27: mhgp8_docs_scope_optimized ....................   Passed    0.38 sec
+      Start 28: mhgp8_probe_cli
+28/45 Test #28: mhgp8_probe_cli ...............................   Passed    0.27 sec
+      Start 29: mhgp8_probe_cli_optimized
+29/45 Test #29: mhgp8_probe_cli_optimized .....................   Passed    0.27 sec
+      Start 30: mhgp8_campaign_gate
+30/45 Test #30: mhgp8_campaign_gate ...........................   Passed   29.31 sec
+      Start 31: mhgp8_campaign_gate_optimized
+31/45 Test #31: mhgp8_campaign_gate_optimized .................   Passed   29.47 sec
+      Start 32: mhgp8_batch_probe_cli
+32/45 Test #32: mhgp8_batch_probe_cli .........................   Passed    0.91 sec
+      Start 33: mhgp8_batch_probe_cli_optimized
+33/45 Test #33: mhgp8_batch_probe_cli_optimized ...............   Passed    0.93 sec
+      Start 34: mhgp8_axis_probe_cli
+34/45 Test #34: mhgp8_axis_probe_cli ..........................   Passed    1.26 sec
+      Start 35: mhgp8_axis_probe_cli_optimized
+35/45 Test #35: mhgp8_axis_probe_cli_optimized ................   Passed    1.21 sec
+      Start 36: mhgp8_additive_probe_cli
+36/45 Test #36: mhgp8_additive_probe_cli ......................   Passed    2.29 sec
+      Start 37: mhgp8_additive_probe_cli_optimized
+37/45 Test #37: mhgp8_additive_probe_cli_optimized ............   Passed    2.30 sec
+      Start 38: mhgp8_additive_campaign_gate
+38/45 Test #38: mhgp8_additive_campaign_gate ..................   Passed    7.24 sec
+      Start 39: mhgp8_additive_campaign_gate_optimized
+39/45 Test #39: mhgp8_additive_campaign_gate_optimized ........   Passed    7.35 sec
+      Start 40: mhgp8_paired_campaign_gate
+40/45 Test #40: mhgp8_paired_campaign_gate ....................   Passed    2.56 sec
+      Start 41: mhgp8_paired_campaign_gate_optimized
+41/45 Test #41: mhgp8_paired_campaign_gate_optimized ..........   Passed    2.56 sec
+      Start 42: mhgp8_campaign_reader_gate
+42/45 Test #42: mhgp8_campaign_reader_gate ....................   Passed    0.89 sec
+      Start 43: mhgp8_campaign_reader_gate_optimized
+43/45 Test #43: mhgp8_campaign_reader_gate_optimized ..........   Passed    0.88 sec
+      Start 44: mhgp8_paired_reader_gate
+44/45 Test #44: mhgp8_paired_reader_gate ......................   Passed    8.12 sec
+      Start 45: mhgp8_paired_reader_gate_optimized
+45/45 Test #45: mhgp8_paired_reader_gate_optimized ............   Passed    8.23 sec
+
+100% tests passed, 0 tests failed out of 45
+
+Total Test time (real) = 205.58 sec

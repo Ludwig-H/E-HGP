@@ -184,6 +184,11 @@ struct Q2CensusEngine {
     std::size_t left{absent};
     std::size_t right{absent};
   };
+  struct OrderContext {
+    std::size_t deferred;
+    std::size_t escape;
+    std::size_t anchor_rank;
+  };
   const Q2CensusIndex& index;
   const Q2CensusConsumer& consumer;
   std::span<const Point3> points;
@@ -191,6 +196,7 @@ struct Q2CensusEngine {
   unsigned threshold;
   Q2CensusResult result;
   Q2SiblingWork sibling_work;
+  Q2OrderWork order_work;
   std::vector<QueryNode> queries;
   std::span<const Q2SpatialNode> shared_queries;
   std::vector<std::size_t> interior;
@@ -352,9 +358,10 @@ struct Q2CensusEngine {
     }
   }
 
-  template<bool sibling_certificate = false>
+  template<bool sibling_certificate = false, bool complement_first = false>
   void shared_task(std::size_t a_id, std::size_t query, unsigned count,
-                    std::size_t cursor, std::size_t sibling = absent) {
+                    std::size_t cursor, std::size_t sibling = absent,
+                    const OrderContext* context = nullptr, bool inside_deferred = false) {
     counter_add(result.work.query_tasks);
     const auto b = query_node(query);
     const bool singleton = b.range.size() == 1;
@@ -391,11 +398,54 @@ struct Q2CensusEngine {
         }
       }
     }
-    while (cursor != index.nodes_.size()) {
+    while (true) {
+      if constexpr (complement_first) {
+        // context is created by this integrated root and borrowed throughout
+        // its synchronous descendants. It never changes to the current B.
+        if (inside_deferred) {
+          if (cursor == context->escape) break;
+        } else if (cursor == index.nodes_.size()) {
+          inside_deferred = true;
+          cursor = context->deferred;
+          counter_add(order_work.phase_switches);
+          counter_add(result.work.cursor_advances);
+        }
+      } else if (cursor == index.nodes_.size()) {
+        break;
+      }
       if (cursor >= index.nodes_.size()) {
         throw std::logic_error("mhgp8 q2 witness cursor exceeds the immutable index");
       }
       const auto& z = index.nodes_[cursor];
+      if constexpr (complement_first) {
+        if (!inside_deferred && cursor == context->deferred) {
+          // Defer, do not consume: every site remains available in phase two.
+          cursor = context->escape;
+          counter_add(order_work.deferred_skips);
+          counter_add(result.work.cursor_advances);
+          continue;
+        }
+        const bool contains_anchor = z.range.first <= context->anchor_rank &&
+                                     context->anchor_rank < z.range.last;
+        const bool contains_deferred = !inside_deferred && cursor < context->deferred &&
+                                       context->deferred < z.escape;
+        if (contains_anchor || contains_deferred) {
+          // These topological exclusions precede ALL geometric decisions.
+          // Consuming an ancestor first could include a deferred population,
+          // even if a later, narrower query made that ancestor uniform.
+          if (z.left == absent) {
+            // Only the anchor can be a leaf here: H(a,b,a)=0 for every b.
+            cursor = z.escape;
+            consume_witnesses(1);
+            counter_add(order_work.anchor_skips);
+          } else {
+            cursor = z.left;
+            counter_add(order_work.structural_splits);
+          }
+          counter_add(result.work.cursor_advances);
+          continue;
+        }
+      }
       counter_add(result.work.count_node_visits);
       PowerBounds bounds;
       if (singleton && z.left == absent) {
@@ -444,8 +494,10 @@ struct Q2CensusEngine {
         // exact acquired count. No frontier list, allocation, root restart,
         // or copy of a long continuation is needed. Query tasks may later be
         // scheduled independently, but their internal Z order must stay fixed.
-        shared_task<sibling_certificate>(a_id, b.left, count, cursor, b.right);
-        shared_task<sibling_certificate>(a_id, b.right, count, cursor, b.left);
+        shared_task<sibling_certificate, complement_first>(a_id, b.left, count, cursor,
+                                                          b.right, context, inside_deferred);
+        shared_task<sibling_certificate, complement_first>(a_id, b.right, count, cursor,
+                                                          b.left, context, inside_deferred);
         return;
       }
     }
@@ -534,7 +586,8 @@ Q2CensusResult run_q2_census(const Q2CensusIndex& index, const AxisQ2Plan& plan,
 WspdQ2CensusResult run_wspd_q2_census(
     const Q2CensusIndex& index, unsigned kmax, unsigned separation_s,
     WspdFrontMode front_mode, Q2CensusMode census_mode,
-    const Q2CensusConsumer& consumer, Q2SiblingMode sibling_mode) {
+    const Q2CensusConsumer& consumer, Q2SiblingMode sibling_mode,
+    Q2WitnessOrder witness_order) {
   const auto started = Clock::now();
   if (census_mode != Q2CensusMode::Pairwise && census_mode != Q2CensusMode::SharedBlocks) {
     throw std::invalid_argument("mhgp8 integrated q2 census mode is invalid");
@@ -542,6 +595,10 @@ WspdQ2CensusResult run_wspd_q2_census(
   if ((sibling_mode != Q2SiblingMode::Disabled && sibling_mode != Q2SiblingMode::Saturating) ||
       (sibling_mode == Q2SiblingMode::Saturating && census_mode != Q2CensusMode::SharedBlocks)) {
     throw std::invalid_argument("mhgp8 sibling certificate requires a valid SharedBlocks mode");
+  }
+  if ((witness_order != Q2WitnessOrder::GlobalDfs && witness_order != Q2WitnessOrder::ComplementFirst) ||
+      (witness_order == Q2WitnessOrder::ComplementFirst && census_mode != Q2CensusMode::SharedBlocks)) {
+    throw std::invalid_argument("mhgp8 q2 witness reordering requires a valid SharedBlocks mode");
   }
   if (!consumer) {
     throw std::invalid_argument("mhgp8 integrated q2 census requires a payload consumer");
@@ -576,7 +633,14 @@ WspdQ2CensusResult run_wspd_q2_census(
             const auto a_id = order[rank];
             if (census_mode == Q2CensusMode::SharedBlocks) {
               engine.root_start(0);
-              if (sibling_mode == Q2SiblingMode::Saturating) {
+              if (witness_order == Q2WitnessOrder::ComplementFirst) {
+                const Q2CensusEngine::OrderContext context{b_node, nodes[b_node].escape, rank};
+                if (sibling_mode == Q2SiblingMode::Saturating) {
+                  engine.shared_task<true, true>(a_id, b_node, 0, 0, absent, &context);
+                } else {
+                  engine.shared_task<false, true>(a_id, b_node, 0, 0, absent, &context);
+                }
+              } else if (sibling_mode == Q2SiblingMode::Saturating) {
                 engine.shared_task<true>(a_id, b_node, 0, 0);
               } else {
                 engine.shared_task(a_id, b_node, 0, 0);
@@ -588,6 +652,7 @@ WspdQ2CensusResult run_wspd_q2_census(
         }, 1);
     result.census = engine.result;
     result.sibling_work = engine.sibling_work;
+    result.order_work = engine.order_work;
     if (result.census.candidate_pairs != result.front.work.residual_pair_mass[0] ||
         result.input_rectangles != result.front.work.emitted_rectangles ||
         result.census.accepted_pairs > result.census.candidate_pairs ||

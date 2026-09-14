@@ -59,6 +59,16 @@ une tâche (A,B,Z) est une piste suivante, pas une borne acquise. Le
 proposeur WSPD et le premier groupe census repartent encore de la racine ;
 B1 reste ouvert malgré l'absence de redémarrage des enfants B.
 
+La [dixième tranche](P0_ORDRE_TEMOINS_Q2.md) change l'ordre Z avec un
+contexte original et un bit de phase. Le préfixe n'est plus celui du
+DFS global ; une tâche distribuée devra posséder contexte, phase,
+curseur et compte ensemble. Le pointeur emprunté à la pile racine
+actuelle n'est pas un format de file CPU/GPU. Les divisions des chemins
+d'ancêtres peuvent être répétées après subdivision B : les mesurer
+séparément au lieu d'attribuer tout gain aux seules visites géométriques.
+Pour le futur groupe A×B, ne pas exclure A du compte : seuls les sites
+égaux à une extrémité donnée contribuent nécessairement zéro à sa paire.
+
 La [neuvième tranche](P0_CERTIFICAT_FRERE_Q2.md) teste un seul bloc frère
 après chaque division, avant le raffinement suivant. Sa population
 suffisante certifie un rejet autonome, jamais un crédit à additionner.
