@@ -61,7 +61,8 @@ front passe. Une force brute exacte sur tous les sites (chaque paire
 rejetée doit avoir au moins `h_q` témoins W_q distincts hors d'elle-même)
 donne **0 rejet non sûr** sur les quatre familles à n = 600, Kmax 10, et
 sur uniforme/huit amas à n = 900 pour Kmax 1, 2, 3, 5, pour la copie avec
-propagation comme pour la bibliothèque inchangée. Les décisions d'un
+propagation, pour le mode à blocs et pour la bibliothèque inchangée
+(28 vérifications). Les décisions d'un
 produit ne dépendant que de ses boîtes, tout rejet du front d'origine est
 aussi obtenu avec propagation : le résidu avec propagation est inclus dans
 le résidu d'origine, voie par voie.
@@ -74,17 +75,17 @@ propagation, qui reproduit exactement les compteurs de `ref`, `propagate`
 
 | Famille | n | Résidu q2 (M paires) `ref` → `propagate` | q3 | q4 | Rectangles émis (M) | Visites | Certificats évalués | Temps (s) `ref` / `copy` / `propagate` |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Uniforme | 8 000 | 3.19 → 1.44 (×0.45) | ×0.61 | ×0.67 | 3.85 → 2.89 (×0.75) | ×0.86 | ×0.24 | 6.1 / 8.5 / 9.1 |
-| Uniforme | 16 000 | 7.35 → 3.24 (×0.44) | ×0.57 | ×0.63 | 9.37 → 6.79 (×0.72) | ×0.83 | ×0.22 | 15.5 / 21.7 / 22.7 |
-| Uniforme | 32 000 | 17.33 → 6.99 (×0.40) | ×0.53 | ×0.60 | 20.91 → 14.54 (×0.70) | ×0.80 | ×0.21 | 37.2 / 52.2 / 50.8 |
-| Terrain mince | 8 000 | 0.94 → 0.50 (×0.53) | ×0.62 | ×0.68 | 0.60 → 0.47 (×0.79) | ×0.86 | ×0.21 | 0.8 / 1.2 / 1.2 |
-| Terrain mince | 16 000 | 1.89 → 1.00 (×0.53) | ×0.62 | ×0.67 | 1.27 → 1.01 (×0.79) | ×0.86 | ×0.21 | 1.8 / 2.5 / 2.6 |
-| Terrain mince | 32 000 | 4.02 → 2.09 (×0.52) | ×0.61 | ×0.66 | 2.75 → 2.18 (×0.79) | ×0.86 | ×0.20 | 4.0 / 6.0 / 6.3 |
-| Huit amas | 8 000 | 29.73 → 28.96 (×0.97) | ×0.98 | ×0.98 | 1.84 → 1.58 (×0.86) | ×0.95 | ×0.28 | 2.2 / 3.1 / 3.8 |
-| Huit amas | 16 000 | 116.75 → 114.42 (×0.98) | ×0.98 | ×0.98 | 5.25 → 4.25 (×0.81) | ×0.91 | ×0.25 | 7.1 / 9.4 / 11.0 |
-| Huit amas | 32 000 | 460.08 → 453.50 (×0.99) | ×0.98 | ×0.98 | 13.27 → 10.17 (×0.77) | ×0.87 | ×0.23 | 19.1 / 26.9 / 29.5 |
+| Uniforme | 8 000 | 3.19 → 1.44 (×0.45) | ×0.61 | ×0.67 | 3.85 → 2.89 (×0.75) | ×0.86 | ×0.24 | 6.4 / 9.8 / 10.4 |
+| Uniforme | 16 000 | 7.35 → 3.24 (×0.44) | ×0.57 | ×0.63 | 9.37 → 6.79 (×0.72) | ×0.83 | ×0.22 | 16.1 / 25.0 / 25.8 |
+| Uniforme | 32 000 | 17.33 → 6.99 (×0.40) | ×0.53 | ×0.60 | 20.91 → 14.54 (×0.70) | ×0.80 | ×0.21 | 37.7 / 57.7 / 57.6 |
+| Terrain mince | 8 000 | 0.94 → 0.50 (×0.53) | ×0.62 | ×0.68 | 0.60 → 0.47 (×0.79) | ×0.86 | ×0.21 | 0.8 / 1.3 / 1.4 |
+| Terrain mince | 16 000 | 1.89 → 1.00 (×0.53) | ×0.62 | ×0.67 | 1.27 → 1.01 (×0.79) | ×0.86 | ×0.21 | 1.8 / 2.8 / 3.1 |
+| Terrain mince | 32 000 | 4.02 → 2.09 (×0.52) | ×0.61 | ×0.66 | 2.75 → 2.18 (×0.79) | ×0.86 | ×0.20 | 4.0 / 6.2 / 6.7 |
+| Huit amas | 8 000 | 29.73 → 28.96 (×0.97) | ×0.98 | ×0.98 | 1.84 → 1.58 (×0.86) | ×0.95 | ×0.28 | 2.3 / 3.5 / 4.3 |
+| Huit amas | 16 000 | 116.75 → 114.42 (×0.98) | ×0.98 | ×0.98 | 5.25 → 4.25 (×0.81) | ×0.91 | ×0.25 | 7.2 / 11.1 / 12.9 |
+| Huit amas | 32 000 | 460.08 → 453.50 (×0.99) | ×0.98 | ×0.98 | 13.27 → 10.17 (×0.77) | ×0.87 | ×0.23 | 20.1 / 31.1 / 34.4 |
 | Deux rangées | 8 000 | 16.09 → 16.09 (×1.00) | ×1.00 | ×1.00 | 0.07 → 0.07 (×1.00) | ×1.00 | ×0.20 | 0.0 / 0.1 / 0.1 |
-| Deux rangées | 16 000 | 64.18 → 64.18 (×1.00) | ×1.00 | ×1.00 | 0.14 → 0.14 (×1.00) | ×1.00 | ×0.20 | 0.1 / 0.1 / 0.1 |
+| Deux rangées | 16 000 | 64.18 → 64.18 (×1.00) | ×1.00 | ×1.00 | 0.14 → 0.14 (×1.00) | ×1.00 | ×0.20 | 0.1 / 0.2 / 0.2 |
 | Deux rangées | 32 000 | 160.37 → 160.37 (×1.00) | ×1.00 | ×1.00 | 0.28 → 0.28 (×1.00) | ×1.00 | ×0.20 | 0.2 / 0.3 / 0.3 |
 
 Les compteurs sont déterministes ; les temps sont ceux d'une machine
@@ -96,16 +97,56 @@ seulement que les crédits partiels perdus valent un gain substantiel sur
 le résidu et sur le nombre de rectangles émis, sans coût discret
 supplémentaire.
 
+## 2 bis. Blocs Z certifiés le long de la descente
+
+Question ouverte du constructeur : « efficacité d'un bloc Z certifié
+pendant la descente (max avec les échantillons, pas somme emboîtée) ». Le
+mode `blocks` de la copie ajoute, à la propagation ci-dessus, le test de
+chaque bloc frère du chemin de descente par les bornes exactes de trois
+boîtes (`h_minimum`, puis `xi_bounds` pour q3/q4) ; un bloc certifié est
+crédité comme plage de rangs, et ni les rangs hérités ni les échantillons
+de la fenêtre situés dans un bloc crédité ne sont comptés une seconde fois.
+Les blocs frères d'un même chemin sont deux à deux disjoints ; un bloc qui
+chevauche un bloc déjà crédité de la même voie est écarté. Les blocs
+inclus dans un facteur sont exclus par leurs plages de rangs.
+
+| Famille | n | Résidu q2 (M) `propagate` → `blocks` | q3 (rapport à `ref`) `propagate` → `blocks` | q4 | Rectangles émis (M) `propagate` → `blocks` | Tests de blocs par recherche | Temps (s) `propagate` / `blocks` |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Uniforme | 8 000 | 1.44 → 1.17 (×0.45 → ×0.37) | ×0.61 → ×0.53 | ×0.67 → ×0.62 | 2.89 → 2.73 | 9.5 | 10.4 / 13.9 |
+| Uniforme | 16 000 | 3.24 → 2.76 (×0.44 → ×0.38) | ×0.57 → ×0.51 | ×0.63 → ×0.58 | 6.79 → 6.46 | 10.4 | 25.8 / 35.3 |
+| Uniforme | 32 000 | 6.99 → 5.82 (×0.40 → ×0.34) | ×0.53 → ×0.46 | ×0.60 → ×0.54 | 14.54 → 13.61 | 11.4 | 57.6 / 78.6 |
+| Terrain mince | 8 000 | 0.50 → 0.43 (×0.53 → ×0.46) | ×0.62 → ×0.53 | ×0.68 → ×0.61 | 0.47 → 0.45 | 9.5 | 1.4 / 1.8 |
+| Terrain mince | 16 000 | 1.00 → 0.83 (×0.53 → ×0.44) | ×0.62 → ×0.51 | ×0.67 → ×0.59 | 1.01 → 0.95 | 10.5 | 3.1 / 4.0 |
+| Terrain mince | 32 000 | 2.09 → 1.79 (×0.52 → ×0.45) | ×0.61 → ×0.51 | ×0.66 → ×0.58 | 2.18 → 2.05 | 11.5 | 6.7 / 8.8 |
+| Huit amas | 8 000 | 28.96 → 28.83 (×0.97 → ×0.97) | ×0.98 → ×0.98 | ×0.98 → ×0.98 | 1.58 → 1.55 | 9.7 | 4.3 / 5.8 |
+| Huit amas | 16 000 | 114.42 → 114.13 (×0.98 → ×0.98) | ×0.98 → ×0.97 | ×0.98 → ×0.98 | 4.25 → 4.14 | 10.6 | 12.9 / 17.5 |
+| Huit amas | 32 000 | 453.50 → 452.71 (×0.99 → ×0.98) | ×0.98 → ×0.98 | ×0.98 → ×0.98 | 10.17 → 9.71 | 11.5 | 34.4 / 47.1 |
+| Deux rangées | 8 000 | 16.09 → 16.09 (×1.00 → ×1.00) | ×1.00 → ×1.00 | ×1.00 → ×1.00 | 0.07 → 0.07 | 9.7 | 0.1 / 0.1 |
+| Deux rangées | 16 000 | 64.18 → 64.18 (×1.00 → ×1.00) | ×1.00 → ×1.00 | ×1.00 → ×1.00 | 0.14 → 0.14 | 10.7 | 0.2 / 0.2 |
+| Deux rangées | 32 000 | 160.37 → 160.37 (×1.00 → ×1.00) | ×1.00 → ×1.00 | ×1.00 → ×1.00 | 0.28 → 0.28 | 11.7 | 0.3 / 0.5 |
+
+Résultat : un gain supplémentaire réel mais modeste sur le résidu, payé
+par environ dix tests de blocs par recherche (autant que la descente
+elle-même). Restreindre les tests aux frères proches du milieu (distance
+au milieu au plus deux ou quatre fois celle de l'enfant choisi) divise
+les tests par douze mais ne garde que 2 à 4 % du gain : les blocs
+utiles sont ceux, éloignés du chemin, qui tombent dans la lentille. La
+force brute exacte donne 0 rejet non sûr pour ce mode sur les quatre
+familles à n = 600. Ce prototype ne dit rien du coût de census évité par
+le résidu supplémentaire retiré ; c'est cette comparaison, front plus
+census, qui doit trancher.
+
 ## 3. Ce que j'en conclus pour le pilote
 
 1. Transmettre les témoins certifiés (identifiants, par voie, avec
    exclusion des doublons) est sûr par restriction et rentable ; c'est le
    schéma A2 de `WSPD_Q2_Q3_Q4.md` §9, dont le constructeur demandait la
    contre-lecture : la présente mesure en est une première.
-2. Les blocs Z certifiés pendant la descente (max avec les échantillons,
-   jamais somme emboîtée) sont le levier suivant, puisque 71 % des
-   recherches n'aboutissent pas faute de proposition : un bloc entièrement
-   dans la lentille crédite d'un coup sa population.
+2. Les blocs Z certifiés pendant la descente apportent un complément
+   modeste au prix d'autant de tests que la descente ; leur intérêt dépend
+   du coût de census évité, à mesurer avec le raccord en cours. Le vrai
+   gisement restant est le proposeur lui-même : 71 % des recherches
+   n'aboutissent pas faute de proposition.
 3. Le test de lentille exact ne mérite pas sa place dans le chemin chaud ;
    il reste un outil d'audit.
 
@@ -124,4 +165,4 @@ demandé), et l'édition de lien échoue alors contre la bibliothèque
 épinglée. Le reçu épingle `src/wspd/front.{cpp,hpp}` d'origine (blobs de
 da366f7f), la copie, la bibliothèque liée, et conserve le diff
 copie/source intégral. Le rejeu `python3 -O` aux tailles 8k rend les
-mêmes compteurs que le reçu sur ses 36 exécutions.
+mêmes compteurs que le reçu sur ses exécutions rejouées.

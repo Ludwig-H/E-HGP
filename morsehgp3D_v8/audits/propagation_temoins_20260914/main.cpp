@@ -1,8 +1,9 @@
 // Auditeur B (14 sept. 2026) — pilote du prototype : modes ref (bibliotheque
 // constructeur, inchangee), copy (copie sans propagation ni lentille), audit
-// (lentille), propagate (temoins herites), verify_ref / verify_propagate
-// (force brute exacte sur tous les sites : chaque paire rejetee doit avoir
-// >= h_q temoins W_q distincts).
+// (lentille), propagate (temoins herites), blocks (temoins herites + blocs Z
+// certifies le long de la descente), verify_ref / verify_propagate /
+// verify_blocks (force brute exacte sur tous les sites : chaque paire rejetee
+// doit avoir >= h_q temoins W_q distincts).
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -11,12 +12,13 @@
 #include "wspd/front.hpp"
 #include "pipeline/q2_census.hpp"
 #include "front_fixtures.hpp"
-namespace mhgp8 { struct LensStats; WspdFrontResult run_wspd_front_lens(const Q2CensusIndex&, unsigned, unsigned, WspdFrontMode, const WspdRectangleConsumer&, LensStats*, bool, bool, bool); }
+namespace mhgp8 { struct LensStats; WspdFrontResult run_wspd_front_lens(const Q2CensusIndex&, unsigned, unsigned, WspdFrontMode, const WspdRectangleConsumer&, LensStats*, bool, bool, bool, bool); }
 namespace mhgp8 { struct LensStats {
   u64 lens_tests{}, lens_empty{}, lens_empty_skipped_searches{}, lens_nonempty_searches{};
   u64 lens_empty_but_rejected{}, lens_nonempty_no_rejection{}, lens_nonempty_full_rejection{}, lens_nonempty_partial_rejection{};
   u64 lens_empty_leaf_pairs{}, lens_candidates{};
-  u64 inherited_nonzero_products{}, rejections_by_inheritance{}, duplicate_proposals{}; }; }
+  u64 inherited_nonzero_products{}, rejections_by_inheritance{}, duplicate_proposals{};
+  u64 block_tests{}, block_credits{}, block_credit_population{}, block_overlaps_dropped{}, samples_inside_blocks{}; }; }
 using namespace mhgp8;
 using Clock = std::chrono::steady_clock;
 static double ms(Clock::time_point a, Clock::time_point b){ return std::chrono::duration<double,std::milli>(b-a).count(); }
@@ -29,14 +31,14 @@ int main(int argc, char** argv) {
   auto cloud = prepare_cloud(fx.points);
   auto index = make_q2_cloud_index(cloud);
   u64 count = 0;
-  const bool verify = mode == "verify_ref" || mode == "verify_propagate";
+  const bool verify = mode == "verify_ref" || mode == "verify_propagate" || mode == "verify_blocks";
   std::vector<WspdRectangle> rects;
   auto consumer = [&](const WspdRectangle& r) { ++count; if (verify) rects.push_back(r); };
   LensStats st;
   const auto t0 = Clock::now();
   WspdFrontResult r;
   if (mode == "ref" || mode == "verify_ref") r = run_wspd_front(*index, kmax, s, WspdFrontMode::MidpointSamples, consumer);
-  else r = run_wspd_front_lens(*index, kmax, s, WspdFrontMode::MidpointSamples, consumer, &st, mode == "skip", mode == "propagate" || mode == "verify_propagate", mode == "audit" || mode == "skip");
+  else r = run_wspd_front_lens(*index, kmax, s, WspdFrontMode::MidpointSamples, consumer, &st, mode == "skip", mode == "propagate" || mode == "verify_propagate" || mode == "blocks" || mode == "verify_blocks", mode == "audit" || mode == "skip", mode == "blocks" || mode == "verify_blocks");
   const auto t1 = Clock::now();
   const auto& w = r.work;
   std::printf("mode=%s family=%s n=%zu kmax=%u s=%u seed=%llu front_ms=%.1f visits=%llu searches=%llu rejected_full=%llu emitted=%llu steps=%llu credits=%llu residual_q2=%llu residual_q3=%llu residual_q4=%llu\n",
@@ -79,7 +81,9 @@ int main(int argc, char** argv) {
     }
     std::printf("  verify: pairs=%llu rejected(q2/q3/q4)=%llu/%llu/%llu UNSOUND=%llu\n", (unsigned long long)checked, (unsigned long long)rejected_pairs[0], (unsigned long long)rejected_pairs[1], (unsigned long long)rejected_pairs[2], (unsigned long long)unsound);
   }
-  if (mode == "propagate" || mode == "verify_propagate")
+  if (mode == "blocks" || mode == "verify_blocks")
+    std::printf("  block_tests=%llu block_credits=%llu block_population=%llu overlaps_dropped=%llu samples_inside_blocks=%llu\n", (unsigned long long)st.block_tests, (unsigned long long)st.block_credits, (unsigned long long)st.block_credit_population, (unsigned long long)st.block_overlaps_dropped, (unsigned long long)st.samples_inside_blocks);
+  if (mode == "propagate" || mode == "verify_propagate" || mode == "blocks" || mode == "verify_blocks")
     std::printf("  inherited_nonzero_products=%llu rejections_by_inheritance=%llu duplicate_proposals=%llu\n", (unsigned long long)st.inherited_nonzero_products, (unsigned long long)st.rejections_by_inheritance, (unsigned long long)st.duplicate_proposals);
   if (mode == "audit" || mode == "skip")
     std::printf("  lens_tests=%llu lens_empty=%llu (%.1f%%) lens_empty_leaf_pairs=%llu empty_but_rejected=%llu nonempty_searches=%llu nonempty_no_rejection=%llu nonempty_partial=%llu nonempty_full=%llu skipped=%llu candidates=%llu\n",

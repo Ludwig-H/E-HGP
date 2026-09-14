@@ -88,9 +88,9 @@ def main() -> int:
         return fail("compilation refusée :\n" + compiled.stderr)
     sizes = [int(x) for x in args.sizes.split(",")]
     matrix = [(fam, n, 10, 8, 3, mode) for fam in ("uniform", "terrain", "clusters", "rows")
-              for n in sizes for mode in ("ref", "copy", "propagate")]
+              for n in sizes for mode in ("ref", "copy", "propagate", "blocks")]
     verify = [] if args.skip_verify else (
-        [(fam, 600, 10, 8, 3, mode) for fam in ("uniform", "terrain", "clusters", "rows") for mode in ("verify_ref", "verify_propagate")]
+        [(fam, 600, 10, 8, 3, mode) for fam in ("uniform", "terrain", "clusters", "rows") for mode in ("verify_ref", "verify_propagate", "verify_blocks")]
         + [(fam, 900, k, 8, 7, mode) for fam in ("uniform", "clusters") for k in (1, 2, 3, 5) for mode in ("verify_ref", "verify_propagate")])
     runs = []
     for fam, n, kmax, s, seed, mode in verify + matrix:
@@ -111,11 +111,11 @@ def main() -> int:
         runs.append(parsed)
     # comparaisons ref/copy/propagate par (famille, n)
     comparisons = []
-    by = {(r["family"], r["n"], r["mode"]): r for r in runs if r["mode"] in ("ref", "copy", "propagate")}
+    by = {(r["family"], r["n"], r["mode"]): r for r in runs if r["mode"] in ("ref", "copy", "propagate", "blocks")}
     for fam in ("uniform", "terrain", "clusters", "rows"):
         for n in sizes:
-            ref, copy, prop = by.get((fam, n, "ref")), by.get((fam, n, "copy")), by.get((fam, n, "propagate"))
-            if not (ref and copy and prop):
+            ref, copy, prop, blk = by.get((fam, n, "ref")), by.get((fam, n, "copy")), by.get((fam, n, "propagate")), by.get((fam, n, "blocks"))
+            if not (ref and copy and prop and blk):
                 continue
             if any(ref[k] != copy[k] for k in ("visits", "searches", "rejected_full", "emitted", "steps", "credits", "residual_q2", "residual_q3", "residual_q4")):
                 return fail(f"la copie sans propagation ne reproduit pas la bibliothèque sur {fam} {n}")
@@ -127,9 +127,15 @@ def main() -> int:
                                 "visits_ratio": round(prop["visits"] / max(1, ref["visits"]), 4),
                                 "steps_ratio": round(prop["steps"] / max(1, ref["steps"]), 4),
                                 "credits_ratio": round(prop["credits"] / max(1, ref["credits"]), 4),
-                                "front_ms": {"ref": ref["front_ms"], "copy": copy["front_ms"], "propagate": prop["front_ms"]}})
+                                "blocks_residual_ratio_q2": round(blk["residual_q2"] / max(1, ref["residual_q2"]), 4),
+                                "blocks_residual_ratio_q3": round(blk["residual_q3"] / max(1, ref["residual_q3"]), 4),
+                                "blocks_residual_ratio_q4": round(blk["residual_q4"] / max(1, ref["residual_q4"]), 4),
+                                "blocks_emitted_ratio": round(blk["emitted"] / max(1, ref["emitted"]), 4),
+                                "blocks_visits_ratio": round(blk["visits"] / max(1, ref["visits"]), 4),
+                                "blocks_tests_per_search": round(blk.get("block_tests", 0) / max(1, blk["searches"]), 2),
+                                "front_ms": {"ref": ref["front_ms"], "copy": copy["front_ms"], "propagate": prop["front_ms"], "blocks": blk["front_ms"]}})
     receipt = {
-        "title": "Propagation des témoins certifiés parent→enfants sur le premier front v8 : prototype d'audit",
+        "title": "Propagation des témoins certifiés parent→enfants et blocs Z certifiés sur le premier front v8 : prototype d'audit",
         "date": "2026-09-14", "author_role": "auditeur indépendant B", "git_head": head,
         "compile_command": " ".join(compile_cmd), "src_root": str(src_root), "pins_sha256": pins,
         "copy_vs_origin_diff": diff.stdout, "runs": runs, "comparisons": comparisons,

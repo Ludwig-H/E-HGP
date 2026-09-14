@@ -2,7 +2,11 @@
 // (da366f7f). Prototype d audit, pas un moteur : (1) test de lentille exact
 // (max_z h_min(A,B,{z}) > 0, rationnels) compte les recherches de temoins sans
 // espoir ; (2) propagation des temoins certifies du parent vers ses enfants,
-// par voie et par rang distinct (surete par restriction des boites). Le diff
+// par voie et par rang distinct (surete par restriction des boites) ; (3) mode
+// blocks : le long de la descente du proposeur, chaque bloc Z frere du chemin
+// est teste par les bornes exactes de trois boites (h_minimum, xi_bounds) et
+// credite comme plage de rangs disjointe ; les rangs deja comptes a l'interieur
+// d'un bloc credite ne sont jamais recomptes (max, pas somme emboitee). Le diff
 // avec la source constructeur est conserve dans le recu.
 #include "wspd/front.hpp"
 
@@ -13,6 +17,7 @@
 #include <limits>
 #include <stdexcept>
 #include <vector>
+#include <cstdlib>
 
 #include <boost/multiprecision/cpp_int.hpp>
 namespace mhgp8 {
@@ -21,6 +26,7 @@ struct LensStats {
   u64 lens_empty_but_rejected{}, lens_nonempty_no_rejection{}, lens_nonempty_full_rejection{}, lens_nonempty_partial_rejection{};
   u64 lens_empty_leaf_pairs{}, lens_candidates{};
   u64 inherited_nonzero_products{}, rejections_by_inheritance{}, duplicate_proposals{};
+  u64 block_tests{}, block_credits{}, block_credit_population{}, block_overlaps_dropped{}, samples_inside_blocks{};
 };
 namespace lensaudit {
 using i128 = mhgp8::i128;
@@ -104,6 +110,8 @@ struct Task {
   u64 depth;
   std::array<std::uint8_t, 3> inherited{};            // certified witnesses inherited per lane
   std::array<std::array<std::uint32_t, 10>, 3> ranks{};  // their spatial ranks (distinct per lane)
+  std::array<std::uint8_t, 3> nblocks{};                 // certified disjoint Z blocks per lane (rank ranges)
+  std::array<std::array<std::array<std::uint32_t, 2>, 4>, 3> blocks{};
 };
 
 class Front {
@@ -111,8 +119,8 @@ class Front {
   LensStats* lens_{};
   bool skip_when_empty_{};
   Front(const Q2CensusIndex& index, unsigned kmax, unsigned separation,
-        WspdFrontMode mode, const WspdRectangleConsumer& consumer, LensStats* lens, bool skip, bool propagate, bool do_lens)
-      : lens_(lens), skip_when_empty_(skip), propagate_(propagate), do_lens_(do_lens), nodes_(index.spatial_nodes()), order_(index.spatial_order()),
+        WspdFrontMode mode, const WspdRectangleConsumer& consumer, LensStats* lens, bool skip, bool propagate, bool do_lens, bool blocks)
+      : lens_(lens), skip_when_empty_(skip), propagate_(propagate), do_lens_(do_lens), blocks_(blocks), block_gate_(std::getenv("MHGP8_BLOCK_GATE") ? std::atoll(std::getenv("MHGP8_BLOCK_GATE")) : 0), block_slack_(std::getenv("MHGP8_BLOCK_SLACK") ? std::atoll(std::getenv("MHGP8_BLOCK_SLACK")) : 0), nodes_(index.spatial_nodes()), order_(index.spatial_order()),
         points_(index.cloud().points()), kmax_(kmax), separation_(separation),
         mode_(mode), consumer_(consumer) {
     const auto n = points_.size();
@@ -153,7 +161,7 @@ class Front {
         continue;
       }
       auto mask = task.mask;
-      found_inherited_ = task.inherited; found_ranks_ = task.ranks;
+      found_inherited_ = task.inherited; found_ranks_ = task.ranks; found_nblocks_ = task.nblocks; found_blocks_ = task.blocks;
       if (propagate_) for (unsigned lane = 0; lane < 3; ++lane) if (task.inherited[lane] > 0) ++lens_->inherited_nonzero_products;
       if (mode_ == WspdFrontMode::MidpointSamples) {
         bool nonempty = true;
@@ -202,7 +210,8 @@ class Front {
       {
         Task child_r{split_a ? split.right : task.a, split_a ? task.b : split.right, mask, task.depth + 1};
         Task child_l{split_a ? split.left : task.a, split_a ? task.b : split.left, mask, task.depth + 1};
-        if (propagate_) { child_r.inherited = found_inherited_; child_r.ranks = found_ranks_; child_l.inherited = found_inherited_; child_l.ranks = found_ranks_; }
+        if (propagate_) { child_r.inherited = found_inherited_; child_r.ranks = found_ranks_; child_l.inherited = found_inherited_; child_l.ranks = found_ranks_;
+                          child_r.nblocks = found_nblocks_; child_r.blocks = found_blocks_; child_l.nblocks = found_nblocks_; child_l.blocks = found_blocks_; }
         push(child_r);
         push(child_l);
       }
@@ -237,6 +246,19 @@ class Front {
 
   bool propagate_{};
   bool do_lens_{true};
+  bool blocks_{};
+  i64 block_gate_{0};
+  i64 block_slack_{0};
+  std::array<std::uint8_t, 3> found_nblocks_{};
+  std::array<std::array<std::array<std::uint32_t, 2>, 4>, 3> found_blocks_{};
+  static bool in_blocks(const std::array<std::array<std::uint32_t, 2>, 4>& bl, unsigned nb, std::size_t rank) {
+    for (unsigned i = 0; i < nb; ++i) if (rank >= bl[i][0] && rank < bl[i][1]) return true;
+    return false;
+  }
+  static bool overlaps(const std::array<std::array<std::uint32_t, 2>, 4>& bl, unsigned nb, std::size_t f, std::size_t l) {
+    for (unsigned i = 0; i < nb; ++i) if (f < bl[i][1] && bl[i][0] < l) return true;
+    return false;
+  }
   std::array<std::uint8_t, 3> found_inherited_{};
   std::array<std::array<std::uint32_t, 10>, 3> found_ranks_{};
   std::uint8_t filter(const Q2SpatialNode& a, const Q2SpatialNode& b, std::uint8_t mask) {
@@ -250,11 +272,45 @@ class Front {
       for (unsigned lane = 0; lane < 3; ++lane) {
         const auto bit = static_cast<std::uint8_t>(1U << lane);
         if ((mask & bit) == 0) continue;
-        credits[lane] = found_inherited_[lane];
+        unsigned c = 0;
+        for (unsigned i = 0; i < found_nblocks_[lane]; ++i) c += found_blocks_[lane][i][1] - found_blocks_[lane][i][0];
+        for (unsigned i = 0; i < found_inherited_[lane]; ++i) if (!in_blocks(found_blocks_[lane], found_nblocks_[lane], found_ranks_[lane][i])) ++c;
+        credits[lane] = c;
         if (credits[lane] >= thresholds_[lane]) { mask &= static_cast<std::uint8_t>(~bit); ++lens_->rejections_by_inheritance; }
       }
       if (mask == 0) return mask;
     }
+    const auto try_block = [&](std::size_t node_id) {
+      const auto& zn = nodes_[node_id];
+      if (zn.range.size() < 2) return;  // singletons are handled as samples
+      // The block must be outside both factors as a rank range.
+      if (zn.range.first < a.range.last && a.range.first < zn.range.last) return;
+      if (zn.range.first < b.range.last && b.range.first < zn.range.last) return;
+      bool need_any = false;
+      for (unsigned lane = 0; lane < 3; ++lane) if ((mask & (1U << lane)) != 0 && found_nblocks_[lane] < 4 && !overlaps(found_blocks_[lane], found_nblocks_[lane], zn.range.first, zn.range.last)) need_any = true;
+      if (!need_any) return;
+      ++lens_->block_tests;
+      PredicateWork pw{};
+      const auto hmin = spindle_detail::h_minimum(a.box, b.box, zn.box);
+      if (hmin <= 0) return;
+      i128 xih = 0; bool have_xi = false;
+      for (unsigned lane = 0; lane < 3; ++lane) {
+        const auto bit = static_cast<std::uint8_t>(1U << lane);
+        if ((mask & bit) == 0 || found_nblocks_[lane] >= 4) continue;
+        if (overlaps(found_blocks_[lane], found_nblocks_[lane], zn.range.first, zn.range.last)) { ++lens_->block_overlaps_dropped; continue; }
+        bool ok = lane == 0;
+        if (!ok) { if (!have_xi) { xih = spindle_detail::xi_bounds(a.box, b.box, zn.box).high; have_xi = true; } ok = (lane == 1 ? 3 : 2) * spindle_detail::square(hmin) > xih; }
+        if (!ok) continue;
+        ++lens_->block_credits; lens_->block_credit_population += zn.range.size();
+        found_blocks_[lane][found_nblocks_[lane]++] = {static_cast<std::uint32_t>(zn.range.first), static_cast<std::uint32_t>(zn.range.last)};
+        // ranks already counted individually inside this block must not be double counted
+        unsigned inside = 0;
+        for (unsigned i = 0; i < found_inherited_[lane]; ++i) if (found_ranks_[lane][i] >= zn.range.first && found_ranks_[lane][i] < zn.range.last) ++inside;
+        credits[lane] += static_cast<unsigned>(zn.range.size()) - inside;
+        if (credits[lane] >= thresholds_[lane]) mask &= static_cast<std::uint8_t>(~bit);
+      }
+      static_cast<void>(pw);
+    };
     // A strict universal witness cannot belong to A or B: choose that
     // endpoint and H is zero. If too few exterior sites exist, skip search.
     if (points_.size() - a.range.size() - b.range.size() < needed) return mask;
@@ -273,7 +329,15 @@ class Front {
       // query. Ties choose left; no hidden search of the other subtree.
       const auto left_distance = midpoint_distance4(center4, nodes_[left].box);
       const auto right_distance = midpoint_distance4(center4, nodes_[right].box);
-      node = left_distance <= right_distance ? left : right;
+      const auto chosen = left_distance <= right_distance ? left : right;
+      if (blocks_ && propagate_) {
+        const auto other = chosen == left ? right : left;
+        const auto dc = chosen == left ? left_distance : right_distance;
+        const auto dother = chosen == left ? right_distance : left_distance;
+        // Gate: only siblings whose box is about as close to the midpoint as the chosen path (factor block_gate_).
+        if (block_gate_ == 0 || dother <= block_gate_ * dc + block_slack_) { try_block(other); if (mask == 0) return mask; }
+      }
+      node = chosen;
     }
     const auto count = std::min<std::size_t>(kmax_, order_.size());
     const auto pivot = nodes_[node].range.first;
@@ -288,7 +352,10 @@ class Front {
       }
       std::array<bool, 3> already{};
       if (propagate_) {
-        for (unsigned lane = 0; lane < 3; ++lane) for (unsigned i = 0; i < found_inherited_[lane]; ++i) if (found_ranks_[lane][i] == rank) { already[lane] = true; ++lens_->duplicate_proposals; break; }
+        for (unsigned lane = 0; lane < 3; ++lane) {
+          for (unsigned i = 0; i < found_inherited_[lane]; ++i) if (found_ranks_[lane][i] == rank) { already[lane] = true; ++lens_->duplicate_proposals; break; }
+          if (!already[lane] && in_blocks(found_blocks_[lane], found_nblocks_[lane], rank)) { already[lane] = true; ++lens_->samples_inside_blocks; }
+        }
       }
       const auto z = singleton_box(points_[order_[rank]]);
       counter_add(result_.work.h_bound_tests);
@@ -351,12 +418,12 @@ class Front {
 
 WspdFrontResult run_wspd_front_lens(const Q2CensusIndex& index, unsigned kmax,
                                unsigned separation_s, WspdFrontMode mode,
-                               const WspdRectangleConsumer& consumer, LensStats* lens, bool skip, bool propagate, bool do_lens) {
+                               const WspdRectangleConsumer& consumer, LensStats* lens, bool skip, bool propagate, bool do_lens, bool blocks) {
   if (kmax == 0 || kmax > 10 || separation_s == 0 ||
       (mode != WspdFrontMode::Pure && mode != WspdFrontMode::MidpointSamples) || !consumer) {
     throw std::invalid_argument("mhgp8 WSPD requires Kmax1..10, positive s, valid mode and consumer");
   }
-  return Front(index, kmax, separation_s, mode, consumer, lens, skip, propagate, do_lens).run();
+  return Front(index, kmax, separation_s, mode, consumer, lens, skip, propagate, do_lens, blocks).run();
 }
 
 }  // namespace mhgp8
