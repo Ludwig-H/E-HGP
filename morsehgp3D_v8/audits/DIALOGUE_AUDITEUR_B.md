@@ -137,13 +137,14 @@ chiffres de la prose venaient d'une exécution préliminaire : titre et
 chiffres sont alignés sur le reçu (60 ms à 8k, +1,04 s au seuil 2), et
 la limite est écrite ; la comparaison q2 complète lui appartient.
 
-## Continuations de census et ouverture q3/q4 : réponses aux questions du journal
+## Continuations de census et ouverture q3/q4 : réponses aux questions du journal, continuations vérifiées
 
 Réponse à la section « continuations census et ouverture q3/q4 » du
-constructeur (sources en chantier, non gelées : `q2_census_resume.hpp`
-ne compile pas encore avec `q2_census.cpp` du worktree, accès privés de
-`Q2PreparedBounds`). Les mathématiques ci-dessous ne dépendent pas des
-sources ; le harnais de continuations est écrit et sera exécuté au gel.
+constructeur. Les sources de la brique de continuation sont en chantier,
+non gelées ; elles ont compilé à 20 h 51 UTC et j'en ai pris un
+instantané à manifeste SHA-256 sur lequel la campagne ci-dessous a été
+exécutée (à comparer aux blobs du commit qui la publiera). Les
+mathématiques ne dépendent pas des sources.
 
 **Invariants pour transférer une continuation entre workers.** L'état
 listé dans l'en-tête (index possédé, B original, compte acquis, curseur
@@ -180,7 +181,16 @@ chaque pas exécuté dans un fil neuf joint avant le suivant. C'est ce que
 fait `chaine_q2_20260914/chain_verify_resume.cpp` (couples ancre × nœud
 B tirés de l'index, trois réglages d'options, budgets 1, 3, 1000,
 transfert de fil au budget 3, pas supplémentaire après Done, compteurs
-finaux, pauses classées) ; il tournera dès que les sources compileront.
+finaux, pauses classées), runner `run_chain_verify_resume.py`, reçu
+[CHAINE_Q2_RESUME_CHECKS.json](chaine_q2_20260914/CHAINE_Q2_RESUME_CHECKS.json) :
+74 nuages, 21 552 couples (ancre, B), 258 624 continuations dont 64 656
+avec transfert de fil à chaque pas, **0 désaccord** avec la référence
+série (elle-même égale à la force brute sur 27 341 supports), compteurs
+discrets finaux identiques, aucune émission après Done ; les trois
+suspensions demandées sont exercées massivement (2 629 838 pauses après
+crédit, 852 339 en phase différée, 135 901 pendant une émission), avec
+au plus 8 sœurs pendantes ; rejeu `-O` conforme. Sur cet instantané, la
+brique tient donc son contrat ; il restera à l'ancrer sur le commit.
 
 **q3/q4, point (1) : l'arête rejetée à q2 peut posséder un simplexe de
 profondeur nulle.** C'est exact, et l'argument est géométrique : pour un
@@ -229,7 +239,15 @@ plateau est le déterminant nul. Pour q3 de même, « z strictement
 intérieur à la circumboule de (a, b, c) » se décide par le signe de
 2D·|z − a|² − 2 (z − a)·W avec D = |u × v|², u = b − a, v = c − a et
 W = |v|²(u·u − u·v)·u + |u|²(v·v − u·v)·v, entier, borné par 2^104 :
-i128 suffit encore, sans U192/U320.
+i128 suffit encore, sans U192/U320. Le brouillon
+`Q3_Q4_OBJETS_ET_STRATEGIE_20260914.md` (§ 6.1) écrit la même famille
+avec P(z) = G(|z − c0|² − R0²) et B_z = n·(z − a) : attention, comparer
+deux racines par P1·B2 contre P2·B1 dépasse i128 (P ≈ 2^102, B ≈ 2^50,
+produit ≈ 2^152) ; le facteur G y est commun et la différence réduite
+est précisément le déterminant InSphere ci-dessus. Ordonner les racines
+par ce déterminant, calculé depuis les coordonnées, garde tout en i128 ;
+c'est la requalification des « bornes de produits croisés larges » que
+le brouillon demande.
 
 **Point (3) : les m² arêtes entre deux rangées.** Sur deux rangées de m
 sites à distance D et pas δ, une arête croisée (a, b') décalée de u le
@@ -739,7 +757,7 @@ Fichiers de B : ce dialogue, sept notes datées et les reçus
 `credits_terminaux_20260914/` (deux reçus : crédits et survivantes),
 `chaine_q2_20260914/` (six reçus : e3af11a7, modes conjoints b2106c3c,
 filtre Pool ba11e3ab, chaîne parallèle et équilibre b268cf6f,
-redistribution dynamique 4e878754) et
+redistribution dynamique 4e878754, continuations sur sources gelées) et
 `separation_20260914/`. Aucun
 fichier des autres auditeurs ni du constructeur n'est modifié. Mes
 propositions d'archivage des anciens reçus Rectangle/Tubes sont retirées :
