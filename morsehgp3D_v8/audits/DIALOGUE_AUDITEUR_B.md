@@ -182,6 +182,47 @@ petits. C'est cohérent avec la note du constructeur (frère limité au
 chemin à ancre fixe) ; à lui de dire, sur 8k/16k/32k, si les rejets
 conjoints de SharedProduct paient leurs tâches.
 
+## Pourquoi le census conjoint ne remplace pas Pool sur les amas (lecture des 36 mesures r2)
+
+Les mesures appariées du reçu r2 en chantier (`receipts/q2_joint_r2_20260914/paired_8k`,
+Kmax 10, s 8/10/12, Complement/frère, un fil, hôte partagé) disent la
+même chose que mes comptages structurels. À 8k, `joint` (SharedProduct)
+ne gagne nulle part : uniforme 5,00 → 5,07 s, terrain 0,92 → 0,94 s,
+amas 12,08 → 13,28 s bien qu'il rejette 7,49 des 29,7 millions de
+candidates en phase conjointe (25 %), et deux rangées 0,24 → 1,88 s
+(×8, 16,3 millions de tâches conjointes pour 16,1 millions de candidates,
+soit le relais singleton partout). `joint-a` (SharedAnchors) est neutre
+en temps (amas 12,12 s, rangées 0,23 s) avec 391 540 rejets conjoints
+sur les amas et zéro sur les rangées.
+
+L'explication est géométrique, pas une question de constantes. Le
+certificat conjoint est **uniforme sur trois boîtes** : il faut
+H(a, b, z) > 0 pour tout a ∈ A', b ∈ B', z ∈ Z. Sur un produit
+inter-amas, les seuls témoins existants sont les sites de A « en avant »
+de a vers B (les autres amas sont hors des boules diamétrales). Un bloc
+Z de l'amas A n'est uniformément intérieur pour A' × B' que si Z est
+tout entier devant A' le long de l'axe du produit, avec une marge de
+l'ordre de |z − a|² / D : il faut donc d'abord découper A en blocs
+assez petits et séparés le long de cet axe, ce que la bisection au
+milieu ne fait qu'après plusieurs niveaux, et chaque niveau double les
+tâches. C'est ce que montrent 31 millions de tâches conjointes pour
+7,5 millions de rejets sur les amas, et sur mes petits nuages 87 % de
+la masse transmise au relais singleton après 15,3 millions de tests de
+bornes. Le crédit Pool `h_a`, lui, fixe l'ancre : il ne boxe que B, et
+l'ensemble des z ∈ A devant a est un suffixe de l'ordre de projection,
+obtenu en un tri par rectangle. Il certifie 99,98 % des paires du
+produit 0×1 pour 7 ms, là où le certificat à trois boîtes en certifie un
+quart pour une seconde de plus.
+
+Conséquence pour la décision en cours : garder Individual ou
+SharedAnchors comme chemin de census (neutres), et confier les gros
+rectangles au filtre Pool sur le propriétaire global, comme A le mesure
+(amas 32k : 204,7 → 21,9 s, supports identiques). Le partage conjoint
+reste correct (vérifié ci-dessus) mais ne porte pas les témoins
+intra-facteur ; il ne faut pas lui demander ce que seul un certificat à
+ancre fixe peut donner. Les rangées sont la contre-fixture à conserver
+pour SharedProduct.
+
 ## Survivantes de Pool : ce que le census résiduel devra produire (question A/B du raccord)
 
 Réponse à la question posée au journal (« partager le plan local sur le
