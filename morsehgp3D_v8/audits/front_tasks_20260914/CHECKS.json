@@ -1,0 +1,465 @@
+{
+  "finished_utc": "2026-09-14T14:57:34.466181+00:00",
+  "gcp_used": false,
+  "own_markdown": {
+    "errors": [],
+    "paths": {
+      "morsehgp3D_v8/audits/DIALOGUE_COURANT.md": "7379d60174f37e58d585fc74ec79e1df1ee98a68fdf9d1d87bc3d345aa077196",
+      "morsehgp3D_v8/audits/front_tasks_20260914/README.md": "6f69977b091e1cdd623376a1f7fb4c3b2c1f3f438223faefe4b94bd011ddaf26"
+    },
+    "validator_sha256": "9b25c5ad241fc57efbd7057bfe61f7f389249f61b62e3bc31926bb1d4c4281cd"
+  },
+  "public_status": "not_claimed",
+  "schema": "mhgp8_front_tasks_delivery_v1",
+  "serial_front_job_dispersion": [
+    {
+      "front_ms": 468.244873,
+      "input": [
+        "single_000000",
+        8000,
+        64
+      ],
+      "jobs": 64,
+      "maximum_descent_fraction": 0.2899121310722601,
+      "maximum_mass_job": {
+        "a": 4001,
+        "b": 8203,
+        "depth": 4,
+        "elapsed_ms": 1.59232,
+        "mask": 1,
+        "pair_mass": 235387,
+        "product_visits": 3765,
+        "rectangles": 1525,
+        "seed_mass": 4571776,
+        "witness_descent_steps": 57298
+      },
+      "maximum_work_job": {
+        "a": 8296,
+        "b": 8296,
+        "depth": 4,
+        "elapsed_ms": 137.03035,
+        "mask": 1,
+        "pair_mass": 326228,
+        "product_visits": 289176,
+        "rectangles": 122315,
+        "seed_mass": 2104326,
+        "witness_descent_steps": 4899070
+      },
+      "prefix_ms": 0.012589
+    },
+    {
+      "front_ms": 457.841512,
+      "input": [
+        "single_000000",
+        8000,
+        256
+      ],
+      "jobs": 257,
+      "maximum_descent_fraction": 0.2634489397554753,
+      "maximum_mass_job": {
+        "a": 4002,
+        "b": 8295,
+        "depth": 6,
+        "elapsed_ms": 2.176526,
+        "mask": 1,
+        "pair_mass": 235387,
+        "product_visits": 3755,
+        "rectangles": 1525,
+        "seed_mass": 4402710,
+        "witness_descent_steps": 57148
+      },
+      "maximum_work_job": {
+        "a": 8715,
+        "b": 8715,
+        "depth": 6,
+        "elapsed_ms": 113.667317,
+        "mask": 1,
+        "pair_mass": 260498,
+        "product_visits": 256335,
+        "rectangles": 108301,
+        "seed_mass": 1466328,
+        "witness_descent_steps": 4451546
+      },
+      "prefix_ms": 0.069293
+    },
+    {
+      "front_ms": 429.724752,
+      "input": [
+        "single_000100",
+        8000,
+        64
+      ],
+      "jobs": 64,
+      "maximum_descent_fraction": 0.24828787020541918,
+      "maximum_mass_job": {
+        "a": 3485,
+        "b": 8270,
+        "depth": 4,
+        "elapsed_ms": 2.068026,
+        "mask": 1,
+        "pair_mass": 171251,
+        "product_visits": 4541,
+        "rectangles": 1753,
+        "seed_mass": 5802992,
+        "witness_descent_steps": 67634
+      },
+      "maximum_work_job": {
+        "a": 8866,
+        "b": 8866,
+        "depth": 4,
+        "elapsed_ms": 104.399079,
+        "mask": 1,
+        "pair_mass": 234852,
+        "product_visits": 225668,
+        "rectangles": 94722,
+        "seed_mass": 2263128,
+        "witness_descent_steps": 3820472
+      },
+      "prefix_ms": 0.012278
+    },
+    {
+      "front_ms": 406.899296,
+      "input": [
+        "single_000100",
+        8000,
+        256
+      ],
+      "jobs": 256,
+      "maximum_descent_fraction": 0.22701988821006108,
+      "maximum_mass_job": {
+        "a": 3751,
+        "b": 8866,
+        "depth": 6,
+        "elapsed_ms": 1.849261,
+        "mask": 1,
+        "pair_mass": 171251,
+        "product_visits": 4535,
+        "rectangles": 1753,
+        "seed_mass": 4807152,
+        "witness_descent_steps": 67546
+      },
+      "maximum_work_job": {
+        "a": 9103,
+        "b": 9103,
+        "depth": 6,
+        "elapsed_ms": 87.665964,
+        "mask": 1,
+        "pair_mass": 205739,
+        "product_visits": 200775,
+        "rectangles": 84226,
+        "seed_mass": 1768140,
+        "witness_descent_steps": 3492928
+      },
+      "prefix_ms": 0.070124
+    },
+    {
+      "front_ms": 406.598921,
+      "input": [
+        "single_000200",
+        8000,
+        64
+      ],
+      "jobs": 64,
+      "maximum_descent_fraction": 0.27855869945268674,
+      "maximum_mass_job": {
+        "a": 657,
+        "b": 9632,
+        "depth": 4,
+        "elapsed_ms": 20.552026,
+        "mask": 1,
+        "pair_mass": 367295,
+        "product_visits": 45233,
+        "rectangles": 17264,
+        "seed_mass": 13576576,
+        "witness_descent_steps": 731239
+      },
+      "maximum_work_job": {
+        "a": 4601,
+        "b": 4601,
+        "depth": 4,
+        "elapsed_ms": 114.215941,
+        "mask": 1,
+        "pair_mass": 484698,
+        "product_visits": 259694,
+        "rectangles": 112841,
+        "seed_mass": 2625486,
+        "witness_descent_steps": 4148658
+      },
+      "prefix_ms": 0.009995
+    },
+    {
+      "front_ms": 403.533567,
+      "input": [
+        "single_000200",
+        8000,
+        256
+      ],
+      "jobs": 256,
+      "maximum_descent_fraction": 0.19987155700003942,
+      "maximum_mass_job": {
+        "a": 4601,
+        "b": 9633,
+        "depth": 6,
+        "elapsed_ms": 9.120971,
+        "mask": 1,
+        "pair_mass": 227191,
+        "product_visits": 22561,
+        "rectangles": 8585,
+        "seed_mass": 7157916,
+        "witness_descent_steps": 352904
+      },
+      "maximum_work_job": {
+        "a": 1346,
+        "b": 1346,
+        "depth": 6,
+        "elapsed_ms": 79.214716,
+        "mask": 1,
+        "pair_mass": 194416,
+        "product_visits": 173306,
+        "rectangles": 74216,
+        "seed_mass": 1324378,
+        "witness_descent_steps": 2976529
+      },
+      "prefix_ms": 0.06021
+    },
+    {
+      "front_ms": 964.215576,
+      "input": [
+        "single_000000",
+        16000,
+        64
+      ],
+      "jobs": 64,
+      "maximum_descent_fraction": 0.3075585718627511,
+      "maximum_mass_job": {
+        "a": 296,
+        "b": 16065,
+        "depth": 4,
+        "elapsed_ms": 13.522315,
+        "mask": 1,
+        "pair_mass": 454253,
+        "product_visits": 33451,
+        "rectangles": 12033,
+        "seed_mass": 19171130,
+        "witness_descent_steps": 511438
+      },
+      "maximum_work_job": {
+        "a": 16264,
+        "b": 16264,
+        "depth": 4,
+        "elapsed_ms": 284.647433,
+        "mask": 1,
+        "pair_mass": 822767,
+        "product_visits": 627781,
+        "rectangles": 262037,
+        "seed_mass": 8472786,
+        "witness_descent_steps": 11250893
+      },
+      "prefix_ms": 0.014691
+    },
+    {
+      "front_ms": 970.883961,
+      "input": [
+        "single_000000",
+        16000,
+        256
+      ],
+      "jobs": 256,
+      "maximum_descent_fraction": 0.27915395831492046,
+      "maximum_mass_job": {
+        "a": 562,
+        "b": 16263,
+        "depth": 6,
+        "elapsed_ms": 11.823757,
+        "mask": 1,
+        "pair_mass": 444203,
+        "product_visits": 28539,
+        "rectangles": 9992,
+        "seed_mass": 18168094,
+        "witness_descent_steps": 456481
+      },
+      "maximum_work_job": {
+        "a": 17115,
+        "b": 17115,
+        "depth": 6,
+        "elapsed_ms": 261.079487,
+        "mask": 1,
+        "pair_mass": 616742,
+        "product_visits": 555321,
+        "rectangles": 230555,
+        "seed_mass": 5959878,
+        "witness_descent_steps": 10211437
+      },
+      "prefix_ms": 0.156602
+    },
+    {
+      "front_ms": 1997.827434,
+      "input": [
+        "single_000000",
+        32000,
+        64
+      ],
+      "jobs": 64,
+      "maximum_descent_fraction": 0.3122882783717026,
+      "maximum_mass_job": {
+        "a": 16211,
+        "b": 32528,
+        "depth": 4,
+        "elapsed_ms": 0.848678,
+        "mask": 1,
+        "pair_mass": 700790,
+        "product_visits": 1303,
+        "rectangles": 415,
+        "seed_mass": 64138196,
+        "witness_descent_steps": 20746
+      },
+      "maximum_work_job": {
+        "a": 16572,
+        "b": 16572,
+        "depth": 4,
+        "elapsed_ms": 635.786723,
+        "mask": 1,
+        "pair_mass": 2047831,
+        "product_visits": 1242408,
+        "rectangles": 513760,
+        "seed_mass": 29135161,
+        "witness_descent_steps": 23629415
+      },
+      "prefix_ms": 0.041371
+    },
+    {
+      "front_ms": 1902.563126,
+      "input": [
+        "single_000000",
+        32000,
+        256
+      ],
+      "jobs": 257,
+      "maximum_descent_fraction": 0.2832641793579943,
+      "maximum_mass_job": {
+        "a": 16571,
+        "b": 32890,
+        "depth": 6,
+        "elapsed_ms": 0.551037,
+        "mask": 1,
+        "pair_mass": 700790,
+        "product_visits": 1293,
+        "rectangles": 415,
+        "seed_mass": 61279018,
+        "witness_descent_steps": 20574
+      },
+      "maximum_work_job": {
+        "a": 18085,
+        "b": 18085,
+        "depth": 6,
+        "elapsed_ms": 542.314351,
+        "mask": 1,
+        "pair_mass": 1481755,
+        "product_visits": 1094149,
+        "rectangles": 450179,
+        "seed_mass": 20894880,
+        "witness_descent_steps": 21432902
+      },
+      "prefix_ms": 0.08097
+    },
+    {
+      "front_ms": 3108.831796,
+      "input": [
+        "single_000000",
+        50000,
+        64
+      ],
+      "jobs": 64,
+      "maximum_descent_fraction": 0.3297119828549979,
+      "maximum_mass_job": {
+        "a": 2,
+        "b": 73905,
+        "depth": 4,
+        "elapsed_ms": 1.383942,
+        "mask": 1,
+        "pair_mass": 4741293,
+        "product_visits": 3331,
+        "rectangles": 1310,
+        "seed_mass": 173815518,
+        "witness_descent_steps": 52531
+      },
+      "maximum_work_job": {
+        "a": 48754,
+        "b": 48754,
+        "depth": 4,
+        "elapsed_ms": 1026.563419,
+        "mask": 1,
+        "pair_mass": 3186375,
+        "product_visits": 2040042,
+        "rectangles": 841675,
+        "seed_mass": 72715770,
+        "witness_descent_steps": 40633896
+      },
+      "prefix_ms": 0.031687
+    },
+    {
+      "front_ms": 3136.538507,
+      "input": [
+        "single_000000",
+        50000,
+        256
+      ],
+      "jobs": 256,
+      "maximum_descent_fraction": 0.2992884951984875,
+      "maximum_mass_job": {
+        "a": 896,
+        "b": 73906,
+        "depth": 6,
+        "elapsed_ms": 1.474396,
+        "mask": 1,
+        "pair_mass": 4741293,
+        "product_visits": 3325,
+        "rectangles": 1310,
+        "seed_mass": 161064432,
+        "witness_descent_steps": 52429
+      },
+      "maximum_work_job": {
+        "a": 51069,
+        "b": 51069,
+        "depth": 6,
+        "elapsed_ms": 961.986752,
+        "mask": 1,
+        "pair_mass": 2638867,
+        "product_visits": 1808822,
+        "rectangles": 742977,
+        "seed_mass": 52567131,
+        "witness_descent_steps": 36884040
+      },
+      "prefix_ms": 0.099508
+    }
+  ],
+  "started_utc": "2026-09-14T14:57:32.521881+00:00",
+  "status": "passed",
+  "steps": [
+    {
+      "command": [
+        "python3",
+        "tools/check_docs.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Validated 558 active Markdown files.\n"
+    },
+    {
+      "command": [
+        "python3",
+        "tools/check_implementation_status.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Validated 20 implementation phases and their gates.\n"
+    }
+  ],
+  "validation": {
+    "identical": true,
+    "normal_sha256": "d98f4636870928268d8c244c766d6c82a62b74f3f725a8dc3580ed7046b6984b",
+    "optimized_sha256": "d98f4636870928268d8c244c766d6c82a62b74f3f725a8dc3580ed7046b6984b",
+    "receipt_mutants": 7,
+    "rows": 24
+  }
+}

@@ -5,47 +5,40 @@
 `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`. GCP non utilisé.
 
-## Petits rectangles après Pool : conserver le chemin actuel
+## Front : point de reprise vérifié, charge à redistribuer dynamiquement
 
-Le [nouvel essai sur les racines singleton](q2_small_roots_20260914/README.md)
-compare Complement, Global itératif et Global récursif, après le même
-Pool/paires64. Changement limité aux rectangles initiaux A=B=singleton,
-avant tout crédit ; aucun descendant ni préfixe Pool modifié.
+Le [prototype de reprise du front](front_tasks_20260914/README.md), épinglé
+à ba11e3ab, conserve exactement rectangles, masques, profondeur et travail
+géométrique : 4 320 reprises contre 864 fronts publics, oracle scalaire
+sur petits nuages, Release et Clang ASan/UBSan. La tâche non traitée
+`{a,b,mask,depth}` occupe ici 32 octets. Les émissions et rejets du
+préambule sont conservés ; les témoins restent cherchés dans l’index global.
 
-Les 360 flux du gate passent l’oracle indépendant en Release et Clang
-ASan/UBSan. Les 30 mesures conservent front, Pool et supports complets.
-À LiDAR50k, Global élimine 26,18 millions d’opérations structurelles mais
-ajoute 24,11 millions de visites géométriques. Le total passe de 11,027 s
-à 11,304/11,275 s ; la répétition inversée ne montre pas de gain non plus.
-Les tailles 8k/16k/32k et s10/12 ne justifient pas de changement général.
-**Ne pas ajouter cette variante au raccord Pool sur cette seule intuition.**
+Les 24 mesures LiDAR portent sur le **front seul, exécuté en série**.
+À 50k, préparer 64 tâches laisse 32,97 % des descentes dans une tâche ;
+256 tâches laissent encore 29,93 %. Ce gros job coûte 0,962 s, contre
+1,47 ms pour le job représentant le plus de paires. La masse initiale
+ne suffit donc pas à répartir la charge. Aucun gain parallèle n’est mesuré.
 
-Les préparations singleton n’utilisent déjà pas les constantes de 48 octets
-et le certificat frère n’y intervient déjà pas. La simplification déplace
-surtout le coût entre parcours structurel et tests de boîtes. Après Pool,
-continuer à viser une réduction du travail géométrique et du front ; les
-chronomètres actuels ne séparent pas le temps propre du front du comptage.
-Les résultats portent sur e3af11a7 plus l’adaptateur A ; le port Pool en
-cours chez le constructeur devra conserver ses propres preuves.
+**Prochaine étape proposée : redistribuer les sous-arbres pendants des
+DFS locaux**, sans refaire leurs ancêtres ni changer les décisions du front.
+Une pile par worker, contexte et index partagés, état/buffers privés.
+Si la file globale est pleine, poursuivre localement au lieu de bloquer
+les producteurs. Le plafond Q+97W borne les descripteurs en attente,
+pas les plans ni les sorties : les coquilles restent non bornées par K.
+Le prochain essai devra payer le census, la collecte et les transferts,
+et traiter les gros rectangles dont le callback reste indivisible ici.
 
-Une suite constructive est détaillée dans la même note : pour une paire
-fixée, une boîte de maximum H nul contient au plus un site de coquille,
-à rechercher après admission. Un tampon borné de descripteurs pourrait
-éviter une partie de la seconde collecte, avec repli global au débordement.
-Les fixtures distinguent tangence réelle et tangence sans site ; aucun
-gain n'est encore mesuré et ce cache n'est pas implémenté.
+## Entretien et acquis repris par le constructeur
 
-## Entretien et preuves utiles
+Le port Pool publié et sa contrelecture B répondent aux points de raccord
+précédents ; notre lecture ne révèle pas de défaut nouveau. Les détails
+consommés quittent ce dialogue. Les preuves du [raccord Pool](q2_pool_bridge_20260914/README.md)
+et des [racines singleton et obligations de coquille](q2_small_roots_20260914/README.md)
+restent à leur chemin. Le cache tangent n’est toujours pas implémenté.
+Les reçus anciens utilisés comme dépendances ne sont pas déplacés ;
+fichiers B, constructeur et complémentaire préservés. P0, q3/q4 aval,
+FULL, multi-CPU/GPU, tour50k/G4 et régime multi-millions restent ouverts.
 
-Les détails du raccord Pool déjà repris dans les documents du constructeur
-quittent ce dialogue. Le [prototype et ses reçus](q2_pool_bridge_20260914/README.md)
-restent la référence du gain précédent. Les audits d’[ordre LiDAR](q2_order_lidar_20260914/README.md),
-de [relais conjoint](q2_product_20260914/README.md) et de
-[plans partagés](P0_SOUS_RECTANGLES_ET_GROUPES.md#95-partager-le-plan-parent-puis-découper-ses-tâches)
-restent consultables à leur chemin ; les reçus Rectangle/Tubes utilisés
-par leurs reproductions ne sont pas déplacés. Fichiers B, constructeur
-et auditeur complémentaire préservés. P0, q3/q4, FULL, multi-CPU/GPU,
-contrats de tour 50k et régime multi-millions restent ouverts.
-
-Réservation courte d’index A : ce dialogue et `q2_small_roots_20260914/`
-seulement. Elle est close dès publication du commit correspondant sur main.
+Réservation courte d’index A : ce dialogue et `front_tasks_20260914/`
+seulement ; close dès publication du commit correspondant sur main.

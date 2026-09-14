@@ -1,0 +1,169 @@
+{
+  "allowed_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "command": [
+    "morsehgp3D_v8/audits/front_tasks_20260914/measure.py"
+  ],
+  "gcp_used": false,
+  "matrix": [
+    [
+      "single_000000",
+      8000,
+      0
+    ],
+    [
+      "single_000000",
+      8000,
+      1
+    ],
+    [
+      "single_000000",
+      8000,
+      64
+    ],
+    [
+      "single_000000",
+      8000,
+      256
+    ],
+    [
+      "single_000100",
+      8000,
+      0
+    ],
+    [
+      "single_000100",
+      8000,
+      1
+    ],
+    [
+      "single_000100",
+      8000,
+      64
+    ],
+    [
+      "single_000100",
+      8000,
+      256
+    ],
+    [
+      "single_000200",
+      8000,
+      0
+    ],
+    [
+      "single_000200",
+      8000,
+      1
+    ],
+    [
+      "single_000200",
+      8000,
+      64
+    ],
+    [
+      "single_000200",
+      8000,
+      256
+    ],
+    [
+      "single_000000",
+      16000,
+      0
+    ],
+    [
+      "single_000000",
+      16000,
+      1
+    ],
+    [
+      "single_000000",
+      16000,
+      64
+    ],
+    [
+      "single_000000",
+      16000,
+      256
+    ],
+    [
+      "single_000000",
+      32000,
+      0
+    ],
+    [
+      "single_000000",
+      32000,
+      1
+    ],
+    [
+      "single_000000",
+      32000,
+      64
+    ],
+    [
+      "single_000000",
+      32000,
+      256
+    ],
+    [
+      "single_000000",
+      50000,
+      0
+    ],
+    [
+      "single_000000",
+      50000,
+      1
+    ],
+    [
+      "single_000000",
+      50000,
+      64
+    ],
+    [
+      "single_000000",
+      50000,
+      256
+    ]
+  ],
+  "pins": {
+    "morsehgp3D_v8/audits/front_tasks_20260914/.build/r1/probe": "d4e2d1f267b3270aa8084acf215c0b98aec0d165183a5ebefbc008afc97bc7af",
+    "morsehgp3D_v8/audits/front_tasks_20260914/build.py": "c543829e3764a3ae01cc25bc5ecf67cb81756a35316cb7ed3b9b5bc27899ee39",
+    "morsehgp3D_v8/audits/front_tasks_20260914/front_tasks.hpp": "0e8de854f3f446fa22ecd568ad080766372d9a89cbbea4796a424003ef0402db",
+    "morsehgp3D_v8/audits/front_tasks_20260914/gate.cpp": "579606e0ff10a326150d14176b564dc56db4598cfceb019dd337309d98802511",
+    "morsehgp3D_v8/audits/front_tasks_20260914/measure.py": "42b279d89e2bd07fd73aefe3879c355b5a99c4255123fc2c5a6f25764aa0af89",
+    "morsehgp3D_v8/audits/front_tasks_20260914/probe.cpp": "0198cf4654a070ee83f271bd1923ca024443215d15d379593711ebf7c4cd28fb",
+    "morsehgp3D_v8/audits/front_tasks_20260914/r1_BUILD.json": "6b961f0b581623e7d9ad22d77f426cf0f1a5c96bd9e60d1bb72d5ab753c1147c",
+    "morsehgp3D_v8/audits/front_tasks_20260914/r1_sources.zip": "e86f9224e69f549ca1c7042da08ca23ce899a112e8e83c93573b4e48206a1392",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n16000.u16le": "fbd31be0f4de345b1b7f027a6a9536e6f0e776c46f6caf6a4f3b82f91d4e8595",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n32000.u16le": "ac03426026406e79c154a557b91f054f815237cbd69a61c9a1d4c0e9e0993550",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n50000.u16le": "2a0c79ef95d7f34f1447f47c3bcf6cbff43156e7aa2d2f8c2eb1795109617426",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n8000.u16le": "ed5aa97941551e027a76d7c4eb4a03c739cdf0a83cbaf53035c1536bed0b5194",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n8000.u16le": "813d595e799ff00d93fb94980d2e406c3775217b93aa4efbea0a675aaab3b402",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n8000.u16le": "edc1a7980b366034984d0c3b020f5fa94777277b1618db7c16116c5ccfea4446",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/measure.py": "3e97507f7f42ec3161f7175c05add82ea5036956860f82e0ec0f50b2019a98e8",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/probe.cpp": "027e90cace942f31195056d0e8694e6acb6b092ffa64e38111581fab3b2cf021",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/support_io.hpp": "2bfcf29394e321c2bea9c409545aab3df94b6093c7e6bfcb76109d7554e4387f",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/measure.py": "b3f9e39592004d12ff37d25edd2ca4a5f136f250fb6cb271cdb65c5e7a996eb7"
+  },
+  "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+  "public_status": "not_claimed",
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "runner_sha256": "42b279d89e2bd07fd73aefe3879c355b5a99c4255123fc2c5a6f25764aa0af89",
+  "schema": "mhgp8_front_tasks_campaign_v1",
+  "scope": "serial_front_only",
+  "selected_cpu": 7,
+  "shared_host": true,
+  "started_utc": "2026-09-14T14:50:25.202512+00:00",
+  "timeout_seconds": 180,
+  "warmups": 0
+}
