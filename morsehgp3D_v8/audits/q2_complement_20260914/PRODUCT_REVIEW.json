@@ -1,0 +1,41 @@
+{
+  "archive": "morsehgp3D_v8/audits/q2_complement_20260914/product_review_sources.zip",
+  "archive_sha256": "0f52e920cfb3cb27faa2cec05aece2cdae397ad092fbd522a20fd229be81e367",
+  "captured_utc": "2026-09-14T10:33:43.370334+00:00",
+  "findings": [
+    {
+      "finding": "Phase-two escape is checked before node read; structural B0/anchor treatment precedes geometry.",
+      "lines": "q2_census.cpp:402-448"
+    },
+    {
+      "finding": "Both descendants preserve original context, phase, cursor and count; singleton remains in the same traversal.",
+      "lines": "q2_census.cpp:497-500"
+    },
+    {
+      "finding": "Anchor rank already available. Stack context remains alive for synchronous recursive descendants; future asynchronous jobs must own a durable context.",
+      "lines": "q2_census.cpp:632-646"
+    },
+    {
+      "finding": "Shared cursor_advances = count_node_visits - query_splits + structural_splits + deferred_skips + anchor_skips + phase_switches. The numeric cursor may move backwards at a phase change.",
+      "lines": "q2_census.cpp:409-411, 421-501"
+    },
+    {
+      "finding": "Anchor skip consumes one work site, zero strict interiors. Deferred B0 skip consumes neither during complement.",
+      "lines": "q2_census.cpp:439-440"
+    }
+  ],
+  "head_at_read": "39b58f37f2b80cbc14bb41a45ba517c8726b13a4",
+  "limitations": [
+    "No C++ gate, runtime or complete product qualification in this audit.",
+    "No sources outside the three archived files are claimed captured.",
+    "Counters/model are different scopes: product count_node_visits counts geometric evaluations only; model node_visits includes structural node visits."
+  ],
+  "public_status": "not_claimed",
+  "schema": "mhgp8_q2_complement_static_review_v1",
+  "scope": "static inspection of three worktree files, no compilation or execution",
+  "sources": {
+    "morsehgp3D_v8/docs/P0_ORDRE_TEMOINS_Q2.md": "4cb6a01ce3591f82358cd2df6f6ce2d29e660f7e224533bf48fe0d3d6fb72f35",
+    "morsehgp3D_v8/src/pipeline/q2_census.cpp": "ab40ac7e4c679ab94ab743fb7c43db2dad5f80ba3d2665f1d9c1a4a41a60825a",
+    "morsehgp3D_v8/src/pipeline/wspd_q2_census.hpp": "22b643a30b67192899038ed0281fb9416092f2107ca44bae5c88cd74044c0e76"
+  }
+}
