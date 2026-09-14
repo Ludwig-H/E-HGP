@@ -1,0 +1,30 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "tools/check_docs.py"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "docs_checker",
+  "expected_exit_code": 0,
+  "started_utc": "2026-09-14T09:30:05.179549+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "Validated 546 active Markdown files.\n",
+  "stderr": "",
+  "stdout_base64": "VmFsaWRhdGVkIDU0NiBhY3RpdmUgTWFya2Rvd24gZmlsZXMuCg==",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-14T09:30:06.858244+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/wspd_q2_census_20260914/qualification/readers_bhl76hyp/docs_checker.stdout.bin",
+      "sha256": "4279ab45b212b99b3466c284fc62bbb906b26f24b9cc83fdffab508f9d196ca1",
+      "bytes": 37
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/wspd_q2_census_20260914/qualification/readers_bhl76hyp/docs_checker.stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  }
+}

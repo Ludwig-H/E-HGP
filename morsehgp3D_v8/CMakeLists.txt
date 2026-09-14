@@ -33,10 +33,17 @@ add_executable(mhgp8_cloud_reuse_probe bench/cloud_reuse_probe.cpp)
 target_link_libraries(mhgp8_cloud_reuse_probe PRIVATE mhgp8_p0)
 add_executable(mhgp8_wspd_front_probe bench/wspd_front_probe.cpp)
 target_link_libraries(mhgp8_wspd_front_probe PRIVATE mhgp8_p0)
+add_executable(mhgp8_wspd_q2_census_probe bench/wspd_q2_census_probe.cpp)
+target_link_libraries(mhgp8_wspd_q2_census_probe PRIVATE mhgp8_p0)
 
 if(BUILD_TESTING)
   # Boost arbitrary precision is used only by the bounded independent judge.
   find_package(Boost REQUIRED)
+  add_executable(mhgp8_wspd_q2_census_gate tests/wspd_q2_census_gate.cpp)
+  target_include_directories(mhgp8_wspd_q2_census_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  target_include_directories(mhgp8_wspd_q2_census_gate SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
+  target_link_libraries(mhgp8_wspd_q2_census_gate PRIVATE mhgp8_p0)
+  add_test(NAME mhgp8_wspd_q2_census_gate COMMAND mhgp8_wspd_q2_census_gate --selftest)
   add_executable(mhgp8_wspd_front_gate tests/wspd_front_gate.cpp)
   target_include_directories(mhgp8_wspd_front_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   target_include_directories(mhgp8_wspd_front_gate SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
@@ -84,6 +91,12 @@ if(BUILD_TESTING)
   target_link_libraries(mhgp8_q2_prepared_bounds_gate PRIVATE mhgp8_p0)
   add_test(NAME mhgp8_q2_prepared_bounds_gate COMMAND mhgp8_q2_prepared_bounds_gate --selftest)
   find_package(Python3 COMPONENTS Interpreter REQUIRED)
+  add_test(NAME mhgp8_wspd_q2_receipts_gate COMMAND ${Python3_EXECUTABLE} -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/wspd_q2_receipts_gate.py"
+    --probe $<TARGET_FILE:mhgp8_wspd_q2_census_probe> --selftest)
+  add_test(NAME mhgp8_wspd_q2_receipts_gate_optimized COMMAND ${Python3_EXECUTABLE} -B -O
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/wspd_q2_receipts_gate.py"
+    --probe $<TARGET_FILE:mhgp8_wspd_q2_census_probe> --selftest)
   add_test(NAME mhgp8_wspd_front_receipts_gate COMMAND ${Python3_EXECUTABLE} -B
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/wspd_front_receipts_gate.py"
     --probe $<TARGET_FILE:mhgp8_wspd_front_probe> --selftest)

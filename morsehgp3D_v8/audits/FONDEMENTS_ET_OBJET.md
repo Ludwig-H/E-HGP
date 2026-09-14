@@ -63,11 +63,15 @@ est pertinente **si les connexions portent les bons seuils des chemins
 supprimés**. Elle est fausse si l'on garde seulement leur graphe induit.
 
 Le [contre-exemple régulier à quatre points](../../morsehgp3D_v7/audits/receipts_gabriel_vertices_20260906/README.md)
-retarde alors une fusion de 169/9 à 41/2. La
+retarde alors une fusion de 169/9 à 41/2. Il réfute le graphe induit sur
+les seuls minima, pas à lui seul la proposition 6 littérale. La
 [contre-fixture E5](../../docs/math/INCIDENCES_SILENCIEUSES_GAMMA.md)
-montre également pourquoi supprimer brutalement les incidences silencieuses
-est faux. La proposition 6 et la réduction brute du théorème 5 du manuscrit
-ne sont donc **pas** des autorités valables pour cette suppression.
+réfute en revanche la proposition 6 littérale, comme égalité des collections
+d'ensembles de points, et le théorème 5 qui en dépend : voir leur statut
+`false_in_general` au [registre des preuves](../../docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md).
+Dans E5, AC n'est pas rattachée par le flot brut avant l'arrivée de ABC,
+qui crée une composante artificielle. Ces énoncés du manuscrit ne sont
+donc **pas** des autorités valables pour supprimer ces incidences.
 Le caractère Gabriel nécessaire des événements critiques réguliers
 (théorème 4) ne prouve pas, à lui seul, la suffisance d'un graphe amputé.
 

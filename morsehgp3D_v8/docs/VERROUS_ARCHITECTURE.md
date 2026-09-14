@@ -51,6 +51,14 @@ Sur deux rangées parallèles, les seuls témoins ponctuels W3/W4 laissent
 un résidu quadratique même s'ils sont tous examinés. Des objets collectifs
 et une génération canonique sont requis pour éviter de développer ce résidu.
 
+La [huitième tranche](P0_FRONT_ET_CENSUS_Q2.md) raccorde q2 directement :
+un seul index, pas de plan ni d'arbre B par rectangle, compte et curseur
+hérités au raffinement. Le coût des ancres Σmin(|A|,|B|), les recherches
+Z et la collecte restent payés. Le partage entre plusieurs ancres par
+une tâche (A,B,Z) est une piste suivante, pas une borne acquise. Le
+proposeur WSPD et le premier groupe census repartent encore de la racine ;
+B1 reste ouvert malgré l'absence de redémarrage des enfants B.
+
 ## 1. Ordre des travaux et sens de « rédhibitoire »
 
 **P0 reste la suppression du calcul systématique O(|A|²+|B|²) des

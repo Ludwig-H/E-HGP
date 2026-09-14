@@ -1,4 +1,5 @@
 #include "q2_census.hpp"
+#include "wspd_q2_census.hpp"
 #include "../spindle/q2_prepared_bounds.hpp"
 
 #include <algorithm>
@@ -184,23 +185,37 @@ struct Q2CensusEngine {
     std::size_t right{absent};
   };
   const Q2CensusIndex& index;
-  const AxisQ2Plan& plan;
   const Q2CensusConsumer& consumer;
   std::span<const Point3> points;
   std::span<const std::size_t> b_order;
   unsigned threshold;
   Q2CensusResult result;
   std::vector<QueryNode> queries;
+  std::span<const Q2SpatialNode> shared_queries;
   std::vector<std::size_t> interior;
   std::vector<std::size_t> shell;
 
   Q2CensusEngine(const Q2CensusIndex& input_index, const AxisQ2Plan& input_plan,
                  const Q2CensusConsumer& input_consumer)
-      : index(input_index), plan(input_plan), consumer(input_consumer),
+      : index(input_index), consumer(input_consumer),
         points(input_index.cloud().points()), b_order(input_plan.b_order()),
         threshold(input_plan.rectangle().kmax()) {
-    result.candidate_pairs = plan.candidate_pairs();
-    result.work.input_descriptors = static_cast<u64>(plan.blocks().size());
+    result.candidate_pairs = input_plan.candidate_pairs();
+    result.work.input_descriptors = static_cast<u64>(input_plan.blocks().size());
+  }
+
+  Q2CensusEngine(const Q2CensusIndex& input_index, unsigned kmax,
+                 const Q2CensusConsumer& input_consumer)
+      : index(input_index), consumer(input_consumer), points(input_index.cloud().points()),
+        b_order(input_index.spatial_order()), threshold(kmax),
+        shared_queries(input_index.spatial_nodes()) {}
+
+  [[nodiscard]] QueryNode query_node(std::size_t id) const {
+    if (!shared_queries.empty()) {
+      const auto& node = shared_queries[id];
+      return {node.range, node.box, node.left, node.right};
+    }
+    return queries[id];
   }
 
   [[nodiscard]] std::size_t build_queries(Range range, u64 depth) {
@@ -339,7 +354,7 @@ struct Q2CensusEngine {
   void shared_task(std::size_t a_id, std::size_t query, unsigned count,
                     std::size_t cursor) {
     counter_add(result.work.query_tasks);
-    const auto& b = queries[query];
+    const auto b = query_node(query);
     const bool singleton = b.range.size() == 1;
     const auto key = singleton ? ball_key(points[a_id], points[b_order[b.range.first]])
                                : Q2BallKey{};
@@ -430,7 +445,18 @@ struct Q2CensusEngine {
     cover(a_id, selected, node.right);
   }
 
-  void run(Q2CensusMode mode) {
+  void pair_task(std::size_t a_id, std::size_t position) {
+    counter_add(result.work.query_tasks);
+    root_start(0);
+    unsigned count = 0;
+    const auto key = ball_key(points[a_id], points[b_order[position]]);
+    count_pair(0, key, count);
+    const Range singleton{position, position + 1};
+    if (count == threshold) reject(singleton);
+    else accept(a_id, singleton, count);
+  }
+
+  void run(const AxisQ2Plan& plan, Q2CensusMode mode) {
     if (result.candidate_pairs == 0) {
       return;
     }
@@ -444,17 +470,7 @@ struct Q2CensusEngine {
     } else {
       for (const auto& block : plan.blocks()) {
         for (std::size_t position = block.b.first; position < block.b.last; ++position) {
-          counter_add(result.work.query_tasks);
-          root_start(0);
-          unsigned count = 0;
-          const auto key = ball_key(points[block.a_id], points[b_order[position]]);
-          count_pair(0, key, count);
-          const Range singleton{position, position + 1};
-          if (count == threshold) {
-            reject(singleton);
-          } else {
-            accept(block.a_id, singleton, count);
-          }
+          pair_task(block.a_id, position);
         }
       }
     }
@@ -476,7 +492,7 @@ Q2CensusResult run_q2_census(const Q2CensusIndex& index, const AxisQ2Plan& plan,
   Q2CensusResult result;
   {
     Q2CensusEngine engine(index, plan, consumer);
-    engine.run(mode);
+    engine.run(plan, mode);
     if (engine.result.accepted_pairs > engine.result.candidate_pairs ||
         engine.result.rejected_pairs != engine.result.candidate_pairs - engine.result.accepted_pairs) {
       throw std::logic_error("mhgp8 q2 census did not partition the candidate residual");
@@ -487,6 +503,67 @@ Q2CensusResult run_q2_census(const Q2CensusIndex& index, const AxisQ2Plan& plan,
   // in the enclosing interval, rather than reporting only active searches.
   result.total_ms = milliseconds(started, Clock::now());
   result.count_ms = result.total_ms - result.query_index_ms - result.payload_ms;
+  return result;
+}
+
+WspdQ2CensusResult run_wspd_q2_census(
+    const Q2CensusIndex& index, unsigned kmax, unsigned separation_s,
+    WspdFrontMode front_mode, Q2CensusMode census_mode,
+    const Q2CensusConsumer& consumer) {
+  const auto started = Clock::now();
+  if (census_mode != Q2CensusMode::Pairwise && census_mode != Q2CensusMode::SharedBlocks) {
+    throw std::invalid_argument("mhgp8 integrated q2 census mode is invalid");
+  }
+  if (!consumer) {
+    throw std::invalid_argument("mhgp8 integrated q2 census requires a payload consumer");
+  }
+  WspdQ2CensusResult result;
+  {
+    Q2CensusEngine engine(index, kmax, consumer);
+    const auto nodes = index.spatial_nodes();
+    const auto order = index.spatial_order();
+    // The producer validates K/s/mode before its first callback and emits
+    // handles from this exact index. No arbitrary externally forged handles
+    // are adopted, and no global or factor validation is repeated here.
+    result.front = run_wspd_front(index, kmax, separation_s, front_mode,
+        [&](const WspdRectangle& rectangle) {
+          if (rectangle.lane_mask != 1) {
+            throw std::logic_error("mhgp8 integrated census received a non-q2 lane");
+          }
+          auto a_node = rectangle.a_node;
+          auto b_node = rectangle.b_node;
+          if (nodes[a_node].range.size() > nodes[b_node].range.size()) std::swap(a_node, b_node);
+          const auto a = nodes[a_node].range;
+          const auto b = nodes[b_node].range;
+          counter_add(result.input_rectangles);
+          counter_add(result.anchor_queries, static_cast<u64>(a.size()));
+          counter_add(engine.result.work.input_descriptors);
+          const auto mass = static_cast<i128>(a.size()) * b.size();
+          if (mass > std::numeric_limits<u64>::max()) {
+            throw std::overflow_error("mhgp8 integrated q2 pair mass exceeds u64");
+          }
+          counter_add(engine.result.candidate_pairs, static_cast<u64>(mass));
+          for (auto rank = a.first; rank < a.last; ++rank) {
+            const auto a_id = order[rank];
+            if (census_mode == Q2CensusMode::SharedBlocks) {
+              engine.root_start(0);
+              engine.shared_task(a_id, b_node, 0, 0);
+            } else {
+              for (auto position = b.first; position < b.last; ++position) engine.pair_task(a_id, position);
+            }
+          }
+        }, 1);
+    result.census = engine.result;
+    if (result.census.candidate_pairs != result.front.work.residual_pair_mass[0] ||
+        result.input_rectangles != result.front.work.emitted_rectangles ||
+        result.census.accepted_pairs > result.census.candidate_pairs ||
+        result.census.rejected_pairs != result.census.candidate_pairs - result.census.accepted_pairs) {
+      throw std::logic_error("mhgp8 integrated q2 census lost the residual partition");
+    }
+  }
+  result.total_ms = milliseconds(started, Clock::now());
+  result.census.total_ms = result.total_ms;
+  result.census.count_ms = result.total_ms - result.census.payload_ms;
   return result;
 }
 

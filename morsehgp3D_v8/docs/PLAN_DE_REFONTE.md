@@ -6,6 +6,14 @@ maintenant implémentée et testée, pas la chaîne complète. Le
 les [mesures P0](../receipts/p0_local_credits_20260913/README.md) sont propres à la v8.
 L'ordre demandé reste mono-thread, multi-CPU local, puis GPU G4 SPOT.
 
+Suivi du 14 septembre : le [raccord direct front → census q2](P0_FRONT_ET_CENSUS_Q2.md)
+est implémenté. Il retire factories, copies et arbres B par rectangle,
+sans filtre axial obligatoire. Il reste à réduire le coût du front et
+celui des recherches par ancre, puis à fournir des continuations
+distribuables et un consommateur q3/q4 canonique. Aucune garantie globale
+sous-quadratique ou de tour ne découle de ce raccord. Les mesures portent
+sur les supports avec collecte, pas seulement sur les produits compacts.
+
 ## Priorité P0 — supprimer la préparation quadratique des témoins locaux
 
 **Décision explicite de l'utilisateur, 13 septembre 2026 : ce changement

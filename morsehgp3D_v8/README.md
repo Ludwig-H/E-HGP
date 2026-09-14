@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — premier front WSPD réel
+# Morse HGP 3D v8 — front et census q2 raccordés
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -29,11 +29,36 @@ Les résidus sont conservés en sous-produits ou plages compacts. Un nouveau
 census q2 interroge tous les sites, compte par paire ou par groupes, puis
 émet les supports sous le seuil avec leurs IDs intérieurs et de coquille.
 Un front WSPD réel couvre maintenant les paires ou les rejette par voie,
-sans développer les produits. Il n'est pas encore raccordé au census ;
-ce n'est ni un catalogue q3/q4 ni une tour FULL.
+sans développer les produits. Son raccord q2 réutilise maintenant les
+nœuds du même index et collecte les supports complets ; ce n'est ni un
+catalogue q3/q4 ni une tour FULL.
 Les mesures historiques citées restent v7.
 
 ## État exécutable
+
+La huitième tranche [raccorde le front au census q2 global](docs/P0_FRONT_ET_CENSUS_Q2.md).
+Elle ne reconstruit aucun plan local, tableau B ni arbre B par rectangle.
+Le plus petit facteur fournit les ancres ; les groupes B transmettent
+leur compte et leur curseur Z aux enfants. L'appel demande q2 seulement,
+sans tests Xi ni travail q3/q4. Les supports distincts d'une même boule
+gardent leurs incidences ; toute la coquille est réellement collectée.
+
+Le nouveau juge indépendant compare 46 762 supports complets sur
+1 255 appels intégrés, y compris les subdivisions après crédit. Les
+43 CTests passent en Release et sous Clang ASan/UBSan. Les
+[mesures et qualifications de cette tranche](receipts/wspd_q2_census_20260914/README.md)
+restent distinctes du front trois voies historique. Le coût des ancres
+et des visites Z demeure : partager l'index ne prouve pas la
+sous-quadraticité. À s8, uniforme8k/16k/32k fait environ
+4,68/11,16/26,13 s ; les amas 12,87/64,84/228,53 s. Sur les amas,
+les visites font ×4,31 puis ×4,21 malgré des supports proches du
+linéaire : ce régime échoue au critère de croissance demandé.
+À 8k, Samples améliore néanmoins le total face à Pure, nettement sur
+uniforme/terrain ; Shared n'est pas toujours meilleur que Pairwise.
+Les continuations multi-CPU/GPU, q3/q4, les parents
+FULL et les contrats de tour 50k/G4 restent ouverts. GCP non utilisé.
+
+## Septième tranche publiée à da366f7f — historique
 
 La septième tranche implémente le [front par nœuds partagés](docs/P0_FRONT_REEL.md).
 Il n'alloue aucun plan local ni tableau de facteur par produit. Les
@@ -222,4 +247,4 @@ multi-millions. Les optimisations privées ultérieures n'ont pas leur
 nouvelle mesure 50k. La v8 démarre sur ces constats, sans statut hérité.
 
 Entrées de suivi : [passation](PASSATION.md), [état de l'audit](audits/ETAT_COURANT.md).
-GCP non utilisé pour l'audit d'ouverture et ces sept tranches mono.
+GCP non utilisé pour l'audit d'ouverture et ces huit tranches mono.

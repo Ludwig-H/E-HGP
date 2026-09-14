@@ -52,7 +52,7 @@ struct Task {
 class Front {
  public:
   Front(const Q2CensusIndex& index, unsigned kmax, unsigned separation,
-        WspdFrontMode mode, const WspdRectangleConsumer& consumer)
+        WspdFrontMode mode, const WspdRectangleConsumer& consumer, std::uint8_t requested_mask)
       : nodes_(index.spatial_nodes()), order_(index.spatial_order()),
         points_(index.cloud().points()), kmax_(kmax), separation_(separation),
         mode_(mode), consumer_(consumer) {
@@ -62,7 +62,7 @@ class Front {
     result_.total_unordered_pairs = n % 2 == 0 ? product(n / 2, n - 1)
                                                : product(n, (n - 1) / 2);
     for (unsigned lane = 0; lane < 3; ++lane) {
-      if (lane < kmax_) {
+      if (lane < kmax_ && (requested_mask & (1U << lane)) != 0) {
         thresholds_[lane] = kmax_ - lane;
         result_.active_lane_mask |= static_cast<std::uint8_t>(1U << lane);
       }
@@ -249,12 +249,17 @@ class Front {
 
 WspdFrontResult run_wspd_front(const Q2CensusIndex& index, unsigned kmax,
                                unsigned separation_s, WspdFrontMode mode,
-                               const WspdRectangleConsumer& consumer) {
+                               const WspdRectangleConsumer& consumer, std::uint8_t requested_lane_mask) {
   if (kmax == 0 || kmax > 10 || separation_s == 0 ||
       (mode != WspdFrontMode::Pure && mode != WspdFrontMode::MidpointSamples) || !consumer) {
     throw std::invalid_argument("mhgp8 WSPD requires Kmax1..10, positive s, valid mode and consumer");
   }
-  return Front(index, kmax, separation_s, mode, consumer).run();
+  const unsigned available = (1U << std::min(kmax, 3U)) - 1;
+  if (requested_lane_mask == 0 || requested_lane_mask > 7 ||
+      (requested_lane_mask & available) == 0) {
+    throw std::invalid_argument("mhgp8 WSPD requires a mask in 1..7 intersecting available lanes");
+  }
+  return Front(index, kmax, separation_s, mode, consumer, requested_lane_mask).run();
 }
 
 }  // namespace mhgp8

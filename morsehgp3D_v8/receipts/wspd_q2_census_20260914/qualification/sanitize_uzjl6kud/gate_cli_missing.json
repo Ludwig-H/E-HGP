@@ -1,0 +1,28 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_front_census_sanitize_20260914/mhgp8_wspd_q2_census_gate"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "gate_cli_missing",
+  "expected_exit_code": 2,
+  "started_utc": "2026-09-14T09:18:45.931809+00:00",
+  "status": "passed",
+  "exit_code": 2,
+  "stdout": "",
+  "stderr": "usage: mhgp8_wspd_q2_census_gate --selftest\n",
+  "stdout_base64": "",
+  "stderr_base64": "dXNhZ2U6IG1oZ3A4X3dzcGRfcTJfY2Vuc3VzX2dhdGUgLS1zZWxmdGVzdAo=",
+  "finished_utc": "2026-09-14T09:18:45.943526+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/wspd_q2_census_20260914/qualification/sanitize_uzjl6kud/gate_cli_missing.stdout.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/wspd_q2_census_20260914/qualification/sanitize_uzjl6kud/gate_cli_missing.stderr.bin",
+      "sha256": "f4474aeacba6ba75a5598553fca59fa107672394e9009020482b06ecf7faa82f",
+      "bytes": 44
+    }
+  }
+}

@@ -1256,3 +1256,100 @@ pas une acquisition ni une fusion de scans. Cette restriction est ajoutée
 aux reçus et à la passation ; conserver un protocole distinct pour
 densification et extension, poses communes et collisions de quantification.
 Les fichiers `audits/lidar08_20260914` en préparation restent exclus.
+
+## 14 septembre 2026 — CONSTRUCTEUR : census q2 du front partagé
+
+Reprise après da366f7f : `exploration_v8_hors_registre / cpu_reference /
+quantized_u16_input_only / implementation_v8_p0 / not_claimed`. Le prochain
+raccord appelle lui-même le front, restreint à q2, puis traite directement
+ses nœuds B. Pas de factory/Axis/Pool, de copie B ni de nouvel arbre par
+rectangle. Le plus petit facteur fournit les ancres ; Pairwise et Shared
+conservent exactement les mêmes candidates. Shared transmet toujours un
+compte et un curseur Z, partant de zéro à la première tâche. Le résidu
+est couvert sans adopter de handles externes supposés certifiés.
+
+Le temps englobera front, comptage, collecte/callback et destructions,
+sans chronomètre par rectangle. Ne pas l'appeler census isolé. L'option
+du front par défaut garde toutes les voies ; le raccord q2 en demande
+une seule pour ne pas payer Xi et les branches q3/q4 sans consommateur.
+La qualification doit confronter supports, intérieurs et coquilles à
+l'exhaustif indépendant. Les builds précédents restent épinglés ; builds
+neufs `v8_front_census_20260914` et `v8_front_census_sanitize_20260914`.
+
+Le coût Σmin(|A|,|B|) des ancres reste payé ; le raccord ne prouve donc
+pas la sous-quadraticité. Une variante A×B×Z portant deux groupes de
+requêtes pourrait partager davantage : invariant de préfixe Z conservé,
+extrema exacts de H sur trois boîtes, subdivision A/B sans avancer Z.
+Demande de contrelecture mathématique lancée en parallèle, pas encore
+une implémentation ou un gain. Le protocole LiDAR de l'auditeur A est
+attendu ; `terrain` n'est toujours pas un substitut de capteur. Aucun
+index réservé ni GCP utilisé à cette ouverture.
+
+Lecture des publications A 9ae8a268 et B c0e2f6d2 : données LiDAR et
+propagation disponibles, sans qualification héritée. Le raccord reste
+q2 seul ; les comparaisons avec le front trois voies ne doivent pas
+attribuer à Shared le retrait de Xi. Le test de lentille seul ne mérite
+pas une intégration chaude sur le résultat de B (0–1 % de recherches
+évitables). La propagation conserve la sûreté par IDs distincts mais
+ses temps ne gagnent pas partout : « rentable » reste à établir sur
+front+census+collecte. Demande A : rejouer ensuite sur ses fichiers u16
+avec masque q2 identique et coûts d'entrée explicites. Demande B :
+contrelecture de l'état conjoint (A,B,compte,curseur Z) avant d'éclater
+en ancres, pour diminuer le terme Σmin(|A|,|B|). Sources intégrées
+maintenant gelées pour qualification ; pas d'index réservé à ce stade.
+
+Premier résultat à traiter avant toute promotion : amas8k→16k, s8,
+Samples/Shared, visites Z 973 179 333→4 199 340 563 (×4,31), tâches
+51 841 177→206 349 628, ancres 1 291 731→3 395 250. Supports utiles
+245 733→520 208 seulement. Le raccord ne résout pas P0 dans ce régime.
+Piste à falsifier : l'ordre DFS fixe peut rencontrer des blocs indécis
+et subdiviser B avant les blocs qui auraient fourni K témoins communs.
+La baisse des démarrages ne garantit pas une baisse de ces subdivisions.
+Une visite prioritaire de témoins locaux h_a/h_b ou un parcours A×B×Z
+doit conserver une comptabilité disjointe ; ne pas avancer artificiellement
+le curseur en gardant un crédit correspondant à un autre préfixe. Demande
+aux auditeurs : proposer une fixture de ce raffinement prématuré, puis
+un choix de blocs qui change le travail, sans réintroduire A²+B².
+
+Contrelecture parallèle : fixture a=(1000,0,0), B={(i,0,0):0≤i<m},
+m8/16/32/64, déjà séparée à s12. Le DFS croissant et la règle stricte
+diagZ>diagB divisent toutes les requêtes B avant tout crédit : 2m−1
+tâches. Modèle exact en mémoire à m64/K10 : 127 tâches/421 visites,
+contre 27/99 et 54 rejets en groupes pour un DFS décroissant avec ses
+échappements propres. Pas une variante produit ou un reçu qualifié ; la
+fixture et sa preuve sont inscrites dans docs/P0_FRONT_ET_CENSUS_Q2.md.
+A singleton prouve que le seul agrandissement en A×B×Z ne suffit pas.
+La part de ce mécanisme dans les amas reste à profiler ; le choix de Z
+et ses continuations doivent accompagner la prochaine architecture.
+
+Expérience suivante proposée et contre-vérifiée : à B→B_L/B_R, tester
+le frère comme bloc de K témoins stricts autonomes pour chaque enfant.
+Rejet si cardinal≥K et Hmin>0 ; sinon abandonner ce test sans accumuler
+de crédit ni changer compte/cursor. Coût constant par enfant, pas de
+descente supplémentaire ni d'histogramme. La position du frère dans le
+DFS importe peu puisque son certificat n'est pas ajouté au compte. Sur
+la fixture m64/K10, il rejette 48 paires en blocs et laisse 16 paires au
+census ; pas les 54 rejets du modèle à ordre inversé. À intégrer dans
+un build/tranche distincts, sans annoncer une borne globale.
+
+Clôture des calculs : 43 CTests Release/Clang ASan/UBSan passent ;
+53 mesures Kmax10, 48 configurations, quatre familles et s8/10/12.
+Les amas32k prennent 223–229 s et environ 17,66 milliards de visites
+pour 1,089 million de supports. Modifier s ne répare pas ce régime.
+Les résultats positifs de Samples face à Pure au coût total 8k restent
+distincts du gain de Shared (non universel). Les lecteurs de fermeture
+et le contrôle documentaire terminent avant réservation de l'index.
+
+Lecteurs normal/−O PASS, résumés identiques, pins de fermeture inchangés.
+Contrelecture B 1ca8f62d lue : son accord sur A×B×Z ne garantit pas
+l'efficacité et ne dispense pas de la collecte de coquille. Son point
+sur E5 est clarifié dans le document constructeur FONDEMENTS_ET_OBJET :
+la fixture à quatre points réfute le graphe induit, E5 la proposition 6
+littérale ; registre formel inchangé et aucun résultat FULL nouveau.
+
+Réservation d'index constructeur, index constaté vide : AGENTS.md,
+code/tests/bench/docs et entrées v8 propres, audits/ETAT_COURANT.md et
+audits/FONDEMENTS_ET_OBJET.md constructeur, reçu wspd_q2_census_20260914
+et cette seule section CONSTRUCTEUR. Exclure les changements v6/v7,
+les travaux indépendants A/B et complémentaires, ainsi que leur ancienne
+section de ce journal. Fenêtre close après commit/push main. GCP non utilisé.

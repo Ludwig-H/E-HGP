@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Linux-c++"
+	tests="43"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname="codespaces-0bcb78"
+	time="221"
+	timestamp="2026-09-14T09:11:42"
+	>
+	<testcase name="mhgp8_wspd_q2_census_gate" classname="mhgp8_wspd_q2_census_gate" time="0.048803" status="run">
+		<properties/>
+		<system-out>mhgp8_wspd_q2_census_gate passed checks=467858 clouds=26 oracle_pairs=1749 oracle_sites=28869 front_reference_runs=631 integrated_runs=1255 supports=46762 interior_sites=72204 shell_sites=125060 front_rejected_pairs=12628 census_rejected_pairs=22562 empty_runs=96 permutations=13 nonidentity_orders=20 query_splits=3178 split_after_credit=60 uniform_credit=1236 uniform_reject=512 root_savings=3434 invalid_inputs=11 callback_exceptions=4 model_mutants=8
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_front_gate" classname="mhgp8_wspd_front_gate" time="0.113514" status="run">
+		<properties/>
+		<system-out>mhgp8_wspd_front_gate passed checks=498148 clouds=30 spatial_nodes=1476 nonidentity_orders=52 oracle_point_tests=235134 front_runs=727 rectangles=65585 nonsingleton_rectangles=1214 partial_lane_rectangles=3917 absent_lane_pairs=20515 residual_lane_pairs=172634 q2_support_checks=47904 permutations=15 invalid_inputs=9 model_mutants=7 callback_exceptions=1 witness_searches=58330 witness_descent_steps=280556 proposed_sites=295418
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_cloud_owner_gate" classname="mhgp8_cloud_owner_gate" time="0.00339924" status="run">
+		<properties/>
+		<system-out>mhgp8_cloud_owner_gate passed checks=7780 clouds=19 range_queries=2404 multi_node_queries=2042 max_range_visits=8 max_range_steps=6 oracle_sites=299 census_runs=24 supports=38 invalid_inputs=89 model_mutants=17 lifetime_checks=2
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_p0_gate" classname="mhgp8_p0_gate" time="0.723439" status="run">
+		<properties/>
+		<system-out>mhgp8_p0_gate passed checks=148587 plans=390 rejections=32 strict_mutants=3 killed_pairs=40763 retained_pairs=9592 credited_blocks=605 noncredit_blocks=1628 leaf_pairs=2750 saturated_tasks=220
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_tube_gate" classname="mhgp8_tube_gate" time="0.371318" status="run">
+		<properties/>
+		<system-out>mhgp8_tube_gate passed checks=108730 small_plans=295 permutations=135 geometric_rejections=28995 retained_pairs=8073 missed_credits=10 mutants=5 fallback_cases=3 large_rails_residual=2916
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_batch_gate" classname="mhgp8_batch_gate" time="0.00675123" status="run">
+		<properties/>
+		<system-out>mhgp8_batch_gate passed checks=10872 batches=195 lane_comparisons=585 shared_preparations=27 saturated_batches=81 fallback_batches=5 rejections=3
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_axis_q2_gate" classname="mhgp8_axis_q2_gate" time="0.509137" status="run">
+		<properties/>
+		<system-out>mhgp8_axis_q2_gate passed checks=1495478 small_plans=158 exact_census_pairs=58556 rejected_pairs=14752 retained_pairs=43804 permutations=72 model_mutants=5 conservative_cases=1 invalid_inputs=5 moved_rejections=3 large_grid_points=56000 large_grid_candidates=11067600
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_axis_additive_gate" classname="mhgp8_axis_additive_gate" time="0.804698" status="run">
+		<properties/>
+		<system-out>mhgp8_axis_additive_gate passed checks=2947081 small_cases=81 checked_plans=650 census_pairs=29946 additive_prunes=572 intersection_prunes=1894 axis_queries=5569431 restriction_queries=55856 restriction_copies=15916 rejected_pairs=81918 retained_pairs=157988 core_partial=3 core_saturated=5 model_mutants=7 rejections=15 ownership_cases=2 large_points=56000 large_candidates=6759210
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_plan_assignment_gate" classname="mhgp8_plan_assignment_gate" time="0.00295348" status="run">
+		<properties/>
+		<system-out>mhgp8_plan_assignment_gate passed checks=1110 plan_allocation_failures=5 batch_allocation_failures=15 physical_comparisons=70 successful_assignments=2 self_operations=4 move_operations=4 moved_rejections=24
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_census_gate" classname="mhgp8_q2_census_gate" time="0.0431765" status="run">
+		<properties/>
+		<system-out>mhgp8_q2_census_gate passed checks=186162 cases=277 runs=557 oracle_pairs=8376 oracle_sites=259780 prefilter_rejections=1501 census_rejections=4970 accepted=8828 shell_sites=51896 interior_sites=15248 uniform_credit=276 uniform_accept=144 uniform_reject=76 query_splits=5472 witness_splits=116536 split_after_credit=130 cursor_reuses=10944 cursor_advances=113941 deep_indices=3 root_savings=75 permutations=72 model_mutants=10 rejections=10
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_prepared_bounds_gate" classname="mhgp8_q2_prepared_bounds_gate" time="0.0443198" status="run">
+		<properties/>
+		<system-out>mhgp8_q2_prepared_bounds_gate passed checks=61803 cases=1424 oracle_values=243167 dense_values=57675 interior=39 exterior=226 shell=158 mixed=1001 symmetries=48 model_mutants=8 invalid_inputs=6 copies=3 prepared_bytes=48
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_receipts_gate" classname="mhgp8_wspd_q2_receipts_gate" time="8.38807" status="run">
+		<properties/>
+		<system-out>{"domain_checks": 2, "failed_captures": 2, "genuine_rows": 128, "mutants": 53, "positive_reads": 1, "status": "passed"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_receipts_gate_optimized" classname="mhgp8_wspd_q2_receipts_gate_optimized" time="9.25643" status="run">
+		<properties/>
+		<system-out>{"domain_checks": 2, "failed_captures": 2, "genuine_rows": 128, "mutants": 53, "positive_reads": 1, "status": "passed"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_front_receipts_gate" classname="mhgp8_wspd_front_receipts_gate" time="5.94827" status="run">
+		<properties/>
+		<system-out>{"domain_checks": 2, "failed_captures": 2, "genuine_rows": 48, "mutants": 40, "positive_reads": 1, "status": "passed"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_front_receipts_gate_optimized" classname="mhgp8_wspd_front_receipts_gate_optimized" time="6.78944" status="run">
+		<properties/>
+		<system-out>{"domain_checks": 2, "failed_captures": 2, "genuine_rows": 48, "mutants": 40, "positive_reads": 1, "status": "passed"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_cloud_reuse_receipts_gate" classname="mhgp8_cloud_reuse_receipts_gate" time="5.39988" status="run">
+		<properties/>
+		<system-out>{"failed_captures": 2, "genuine_rows": 12, "mutants": 31, "positive_reads": 1, "status": "passed"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_cloud_reuse_receipts_gate_optimized" classname="mhgp8_cloud_reuse_receipts_gate_optimized" time="6.06094" status="run">
+		<properties/>
+		<system-out>{"failed_captures": 2, "genuine_rows": 12, "mutants": 31, "positive_reads": 1, "status": "passed"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_revision_comparison_gate" classname="mhgp8_q2_revision_comparison_gate" time="4.3513" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "genuine_probe_rows": 6, "positive_comparisons": 2, "mutants": 20, "python_optimized": false, "scope": "synthetic_revision_reader_fixtures_not_performance_qualification"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_revision_comparison_gate_optimized" classname="mhgp8_q2_revision_comparison_gate_optimized" time="4.90847" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "genuine_probe_rows": 6, "positive_comparisons": 2, "mutants": 20, "python_optimized": true, "scope": "synthetic_revision_reader_fixtures_not_performance_qualification"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_census_probe_gate" classname="mhgp8_q2_census_probe_gate" time="4.02167" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "invalid_cli": 17, "oracle_cases": 47, "probe_rows": 846, "python_optimized": false, "scope": "tiny_q2_payload_digest_oracle_not_full_hgp"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_census_probe_gate_optimized" classname="mhgp8_q2_census_probe_gate_optimized" time="3.70522" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "invalid_cli": 17, "oracle_cases": 47, "probe_rows": 846, "python_optimized": true, "scope": "tiny_q2_payload_digest_oracle_not_full_hgp"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_census_campaign_gate" classname="mhgp8_q2_census_campaign_gate" time="16.6203" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "genuine_rows": 12, "positive_reads": 2, "index_scan_boundary_controls": 1, "runner_mutants": 15, "initial_failure_group_controls": 1, "reader_mutants": 17, "archive_mutants": 4, "python_optimized": false, "scope": "q2_materialized_receipts_not_geometry_or_full"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_census_campaign_gate_optimized" classname="mhgp8_q2_census_campaign_gate_optimized" time="16.4532" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "genuine_rows": 12, "positive_reads": 2, "index_scan_boundary_controls": 1, "runner_mutants": 15, "initial_failure_group_controls": 1, "reader_mutants": 17, "archive_mutants": 4, "python_optimized": true, "scope": "q2_materialized_receipts_not_geometry_or_full"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_docs_scope" classname="mhgp8_docs_scope" time="0.391903" status="run">
+		<properties/>
+		<system-out>{"checks": 27, "independent_audits_excluded": true, "missing_link_mutants_refuted": 1, "positive_validations": 1, "recursive_directories": 3, "required_entries": 8, "scope": "documentation_only_not_an_engine_test", "status": "passed", "writes": 0}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_docs_scope_optimized" classname="mhgp8_docs_scope_optimized" time="0.429" status="run">
+		<properties/>
+		<system-out>{"checks": 27, "independent_audits_excluded": true, "missing_link_mutants_refuted": 1, "positive_validations": 1, "recursive_directories": 3, "required_entries": 8, "scope": "documentation_only_not_an_engine_test", "status": "passed", "writes": 0}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_probe_cli" classname="mhgp8_probe_cli" time="0.280411" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 118, "scope": "p0_probe_cli"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_probe_cli_optimized" classname="mhgp8_probe_cli_optimized" time="0.284532" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 118, "scope": "p0_probe_cli"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_campaign_gate" classname="mhgp8_campaign_gate" time="31.3687" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 41, "python_optimized": false, "scope": "p0_campaign_receipt_ingestion_not_geometry"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_campaign_gate_optimized" classname="mhgp8_campaign_gate_optimized" time="34.566" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 41, "python_optimized": true, "scope": "p0_campaign_receipt_ingestion_not_geometry"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_batch_probe_cli" classname="mhgp8_batch_probe_cli" time="1.14477" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 301, "literal_checksum_plans": 72, "historical_recipe_differentials": 12, "python_optimized": false, "scope": "paired_three_lane_probe_not_full_tower"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_batch_probe_cli_optimized" classname="mhgp8_batch_probe_cli_optimized" time="1.18491" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 301, "literal_checksum_plans": 72, "historical_recipe_differentials": 12, "python_optimized": true, "scope": "paired_three_lane_probe_not_full_tower"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_axis_probe_cli" classname="mhgp8_axis_probe_cli" time="1.62836" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 466, "literal_checksums": 144, "reduced_sheet_cases": 126, "single_q2_controls": 90, "python_optimized": false, "scope": "axis_probe_receipts_and_full_sheet_formula_not_full_hgp"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_axis_probe_cli_optimized" classname="mhgp8_axis_probe_cli_optimized" time="1.77834" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 466, "literal_checksums": 144, "reduced_sheet_cases": 126, "single_q2_controls": 90, "python_optimized": true, "scope": "axis_probe_receipts_and_full_sheet_formula_not_full_hgp"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_additive_probe_cli" classname="mhgp8_additive_probe_cli" time="3.08655" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 809, "literal_checksums": 396, "reduced_sheet_cases": 72, "intersection_improvements": 144, "independent_axis_controls": 198, "python_optimized": false, "scope": "additive_probe_receipts_and_sheet_formula_not_full_hgp"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_additive_probe_cli_optimized" classname="mhgp8_additive_probe_cli_optimized" time="3.26486" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 809, "literal_checksums": 396, "reduced_sheet_cases": 72, "intersection_improvements": 144, "independent_axis_controls": 198, "python_optimized": true, "scope": "additive_probe_receipts_and_sheet_formula_not_full_hgp"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_additive_campaign_gate" classname="mhgp8_additive_campaign_gate" time="9.19588" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "genuine_campaigns": 2, "genuine_measurements": 24, "positive_reads": 1, "runner_mutants": 7, "reader_mutants": 14, "python_optimized": false, "scope": "additive_component_receipts_not_geometry_or_full"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_additive_campaign_gate_optimized" classname="mhgp8_additive_campaign_gate_optimized" time="9.74651" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "genuine_campaigns": 2, "genuine_measurements": 24, "positive_reads": 1, "runner_mutants": 7, "reader_mutants": 14, "python_optimized": true, "scope": "additive_component_receipts_not_geometry_or_full"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_paired_campaign_gate" classname="mhgp8_paired_campaign_gate" time="3.18736" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "genuine_probe_rows": 4, "direct_rejections": 132, "tuple_rejections": 12, "parser_rejections": 8, "genuine_campaigns": 2, "genuine_campaign_rows": 4, "proxy_campaigns_rejected": 2, "python_optimized": false, "scope": "paired_component_receipt_ingestion_not_geometry_or_full"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_paired_campaign_gate_optimized" classname="mhgp8_paired_campaign_gate_optimized" time="3.5554" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "genuine_probe_rows": 4, "direct_rejections": 132, "tuple_rejections": 12, "parser_rejections": 8, "genuine_campaigns": 2, "genuine_campaign_rows": 4, "proxy_campaigns_rejected": 2, "python_optimized": true, "scope": "paired_component_receipt_ingestion_not_geometry_or_full"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_campaign_reader_gate" classname="mhgp8_campaign_reader_gate" time="1.23019" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 4, "genuine_measurements": 9, "active_sheet_mutants": 3, "inactive_q3_controls": 3, "python_optimized": false, "scope": "sheet_receipt_active_lane_invariant_not_full_hgp"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_campaign_reader_gate_optimized" classname="mhgp8_campaign_reader_gate_optimized" time="1.23572" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 4, "genuine_measurements": 9, "active_sheet_mutants": 3, "inactive_q3_controls": 3, "python_optimized": true, "scope": "sheet_receipt_active_lane_invariant_not_full_hgp"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_paired_reader_gate" classname="mhgp8_paired_reader_gate" time="9.39608" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "genuine_campaigns": 5, "genuine_measurements": 10, "positive_reads": 2, "cpu_frequency_policy_controls": 1, "mutants_rejected": 46, "empty_matrix_rejections": 8, "duplicate_matrix_rejections": 7, "source_coverage_rejections": 8, "cross_campaign_identity_rejections": 3, "heterogeneous_provenance_rejections": 6, "invalid_provenance_rejections": 5, "python_optimized": false, "scope": "paired_campaign_reader_not_geometry_or_full"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_paired_reader_gate_optimized" classname="mhgp8_paired_reader_gate_optimized" time="10.2038" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "genuine_campaigns": 5, "genuine_measurements": 10, "positive_reads": 2, "cpu_frequency_policy_controls": 1, "mutants_rejected": 46, "empty_matrix_rejections": 8, "duplicate_matrix_rejections": 7, "source_coverage_rejections": 8, "cross_campaign_identity_rejections": 3, "heterogeneous_provenance_rejections": 6, "invalid_provenance_rejections": 5, "python_optimized": true, "scope": "paired_campaign_reader_not_geometry_or_full"}
+</system-out>
+	</testcase>
+</testsuite>

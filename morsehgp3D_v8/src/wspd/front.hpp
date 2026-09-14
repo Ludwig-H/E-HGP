@@ -62,7 +62,9 @@ using WspdRectangleConsumer = std::function<void(const WspdRectangle&)>;
 // Stream a separated residual cover of every active lane, after safe
 // optional early rejection. No copies/validation/scans of n sites or of
 // factors per product; no stored complete frontier or rectangle catalogue.
-// Kmax is in 1..10; lane q is active iff q<=Kmax+1, threshold Kmax+2-q.
+// Kmax is in 1..10; lane q is active iff requested AND q<=Kmax+1, threshold
+// Kmax+2-q. requested_lane_mask uses bits 0..2; no other bit, zero mask, or
+// empty intersection with the supported lanes is accepted. Default=all.
 // MidpointSamples descends one spatial path, with no nearest-neighbor
 // backtracking, and proposes at most Kmax distinct adjacent ranks. It is
 // a rejection heuristic only: missing witnesses never remove any pair.
@@ -71,6 +73,7 @@ using WspdRectangleConsumer = std::function<void(const WspdRectangle&)>;
 // call. A callback exception propagates; prior emissions are not undone.
 [[nodiscard]] WspdFrontResult run_wspd_front(
     const Q2CensusIndex& index, unsigned kmax, unsigned separation_s,
-    WspdFrontMode mode, const WspdRectangleConsumer& consumer);
+    WspdFrontMode mode, const WspdRectangleConsumer& consumer,
+    std::uint8_t requested_lane_mask = 7);
 
 }  // namespace mhgp8

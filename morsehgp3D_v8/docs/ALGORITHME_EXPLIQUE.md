@@ -8,8 +8,10 @@ v8 complète déjà implémentée. Les briques désormais exécutables couvrent 
 [census q2 individuel ou partagé](P0_CENSUS_Q2_PARTAGE.md), sur un rectangle.
 Le [front WSPD réel](P0_FRONT_REEL.md) ajouté le 14 septembre couvre
 maintenant toutes les paires ou certifie leur rejet par voie, avec des
-descripteurs compacts. Il ne rejoint pas encore ce census : les deux
-briques exécutables ne constituent donc pas une chaîne complète.
+descripteurs compacts. Le [raccord q2 global](P0_FRONT_ET_CENSUS_Q2.md)
+consomme maintenant directement ces nœuds et émet les supports avec leurs
+intérieurs et coquilles. Cela ne construit encore ni q3/q4, ni les parents
+de la tour FULL.
 Les détails de preuve sont dans
 [l'audit mathématique](../audits/FONDEMENTS_ET_OBJET.md).
 

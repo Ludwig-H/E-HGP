@@ -3,7 +3,29 @@
 14 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
-État constructeur courant, septième tranche P0 :
+État constructeur courant, huitième tranche P0 :
+[front et census q2 raccordés](../docs/P0_FRONT_ET_CENSUS_Q2.md),
+`cpu_reference`, `quantized_u16_input_only`, `implementation_v8_p0`,
+`not_claimed`. Un seul nuage/index, pas de préparation B par rectangle,
+pas de scan de couverture ; collecte complète des intérieurs/coquilles.
+Le front demandé q2 seul ne paie pas Xi. Le gate indépendant passe
+1 255 appels et compare 46 762 supports, pas seulement leur masse.
+Les 43 CTests Release et Clang ASan/UBSan passent ; contrôles CLI et
+lecteurs normal/−O inclus, sans désactivation des fuites.
+Les [preuves propres à ce raccord](../receipts/wspd_q2_census_20260914/README.md)
+ne sont pas celles du front historique à trois voies. Les 53 mesures
+closes couvrent quatre familles, n8k/16k/32k et s8/10/12. Sur amas/s8,
+visites 0,973→4,199→17,665 milliards, soit ×4,315 puis ×4,207 malgré
+des supports proches du linéaire : la croissance demandée échoue dans
+ce régime. Le certificat autonome du bloc frère est une proposition
+contre-vérifiée, non intégrée, pour éviter le raffinement prématuré.
+Le coût des
+ancres et des visites Z, la canonisation globale des boules, q3/q4,
+FULL, les continuations parallèles et les contrats G4 restent ouverts.
+GCP non utilisé.
+
+## Historique : septième tranche P0 publiée à da366f7f
+
 [front WSPD réel](../docs/P0_FRONT_REEL.md), sans plan ni scan de facteur
 par produit, masques q2/q3/q4 et propositions de coût O(D+K) par produit.
 `cpu_reference`, `quantized_u16_input_only`, `implementation_v8_p0`,

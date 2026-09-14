@@ -1,10 +1,52 @@
-# Passation v8 — front réel implémenté, raccord census prioritaire
+# Passation v8 — raccord q2 global, partage entre ancres à traiter
 
 14 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`. Aucun contrat de tour n'est encore acquis.
 
 ## À reprendre maintenant
+
+Le [raccord q2 global](docs/P0_FRONT_ET_CENSUS_Q2.md) traite directement
+les nœuds WSPD du même index, sans factory, copie B ou arbre local.
+Pairwise et Shared comparent les mêmes supports sur le même nuage.
+Le plus petit facteur fournit les ancres ; le groupe opposé hérite du
+compte et du curseur DFS à chaque subdivision. Le front demande q2 seul,
+pas les trois voies de la capture historique. Les temps englobent front,
+census, collecte/callback et destructions : ne pas les appeler census isolé.
+
+Le [reçu courant](receipts/wspd_q2_census_20260914/README.md) conserve les
+tests et mesures de cette tranche. Le gate indépendant confronte 1 255
+appels et 46 762 supports complets, avec 60 subdivisions après crédit.
+43 CTests Release et Clang ASan/UBSan passent sur les sources courantes.
+Les builds `v8_front_census_20260914` et
+`v8_front_census_sanitize_20260914` sont désormais épinglés. Les 53
+mesures et lecteurs normal/−O sont clos ; repartir dans un build neuf.
+
+**Priorité : diminuer le travail par ancre et celui du proposeur.**
+Le raccord supprime une reconstruction mais conserve Σmin(|A|,|B|)
+démarrages et beaucoup de visites Z. Sur amas8k/16k/32k à s8, ces visites
+font 0,973/4,199/17,665 milliards, soit ×4,31 puis ×4,21, pour des
+supports proches du linéaire : le critère de croissance demandé échoue.
+Étudier un état portant encore deux groupes (A,B,compte,curseur Z), mais
+agir aussi sur le choix de Z : la contre-fixture collinéaire a=1000,
+B=0..63 montre que le DFS croissant fragmente B avant tout crédit.
+Avec A singleton, agrandir seulement l'état en A×B×Z ne résout rien.
+Expérience minimale contre-vérifiée : au split de B, tester son frère
+comme certificat autonome de K témoins stricts pour chaque enfant.
+S'il échoue, ne rien accumuler et reprendre compte/cursor inchangés.
+Ce test de coût constant par enfant reste à implémenter et qualifier.
+Un compte ne se réutilise qu'avec son préfixe consommé et son index précis. La
+propagation de témoins de B est une autre proposition, pas un gain de
+temps acquis pour le produit. Le test de lentille a un rendement faible
+dans son nouveau prototype (0–1 % de recherches évitables).
+
+L'auditeur A a publié ses données LiDAR et prépare la mesure q2 sur ces
+entrées ; son travail reste indépendant, avec ses propres sources/reçus.
+Le terrain synthétique ne remplace pas ce corpus. Ne pas confondre retrait
+de Xi, amélioration du front et partage du census. Reprises distribuables,
+workers CPU/GPU, q3/q4 et FULL sont encore absents ; contrats G4 ouverts.
+
+## Septième tranche publiée à da366f7f — historique
 
 Le [premier front WSPD réel](docs/P0_FRONT_REEL.md) manipule les nœuds du
 même index Z et leur permutation. Aucun plan Pool/Axis ni parcours de

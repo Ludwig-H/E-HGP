@@ -315,3 +315,28 @@ parcours, checksum synchrone par descripteur, contrôles et destructions ;
 ne sont ni le pic RSS ni une mesure GPU. Les produits restent compacts :
 aucun census, support, catalogue ou parent FULL n'est construit. Lire le
 [contrat et la preuve de couverture](../docs/P0_FRONT_REEL.md).
+
+## Raccord WSPD et census q2 de tout le nuage
+
+```text
+mhgp8_wspd_q2_census_probe n uniform|terrain|clusters|rows Kmax s seed pure|samples pairwise|shared
+```
+
+Même recette d'entrée que le front, mais **q2 seul**, suivi de son census,
+de la collecte complète et du hash canonique des supports avec populations.
+Les deux modes census voient les mêmes candidates pour un front donné.
+Les quatre combinaisons et les s doivent donner les mêmes supports à
+entrée/Kmax identiques. Aucun catalogue dédupliqué ni FULL n'est construit.
+
+```bash
+python3 -B morsehgp3D_v8/bench/run_wspd_q2_matrix.py run --probe build/v8_new/mhgp8_wspd_q2_census_probe --output morsehgp3D_v8/receipts/front_q2_new/main_matrix --sizes 8000 16000 32000 --families uniform terrain clusters rows --kmax 10 --s 8 10 12 --seeds 3 --modes samples --census-modes shared
+python3 -B morsehgp3D_v8/bench/run_wspd_q2_matrix.py check morsehgp3D_v8/receipts/front_q2_new --summary
+```
+
+Le runner conserve aussi les échecs et vérifie la fermeture des sources
+et du binaire. Répéter un tuple impose compteurs et digest identiques,
+mais pas le temps. `input_descriptors` compte les rectangles ;
+`anchor_queries` compte la somme des petits facteurs ; aucun arbre B ni
+scan de couverture local n'est payé. Le total inclut le coût du callback
+(copies, tris, validation, hash) ; les sous-chronos sont imbriqués.
+Lire le [contrat complet](../docs/P0_FRONT_ET_CENSUS_Q2.md).

@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_front_census_sanitize_20260914/mhgp8_wspd_q2_census_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "mhgp8_wspd_q2_census_gate",
+  "expected_exit_code": 0,
+  "started_utc": "2026-09-14T09:18:39.040283+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "mhgp8_wspd_q2_census_gate passed checks=467858 clouds=26 oracle_pairs=1749 oracle_sites=28869 front_reference_runs=631 integrated_runs=1255 supports=46762 interior_sites=72204 shell_sites=125060 front_rejected_pairs=12628 census_rejected_pairs=22562 empty_runs=96 permutations=13 nonidentity_orders=20 query_splits=3178 split_after_credit=60 uniform_credit=1236 uniform_reject=512 root_savings=3434 invalid_inputs=11 callback_exceptions=4 model_mutants=8\n",
+  "stderr": "",
+  "stdout_base64": "bWhncDhfd3NwZF9xMl9jZW5zdXNfZ2F0ZSBwYXNzZWQgY2hlY2tzPTQ2Nzg1OCBjbG91ZHM9MjYgb3JhY2xlX3BhaXJzPTE3NDkgb3JhY2xlX3NpdGVzPTI4ODY5IGZyb250X3JlZmVyZW5jZV9ydW5zPTYzMSBpbnRlZ3JhdGVkX3J1bnM9MTI1NSBzdXBwb3J0cz00Njc2MiBpbnRlcmlvcl9zaXRlcz03MjIwNCBzaGVsbF9zaXRlcz0xMjUwNjAgZnJvbnRfcmVqZWN0ZWRfcGFpcnM9MTI2MjggY2Vuc3VzX3JlamVjdGVkX3BhaXJzPTIyNTYyIGVtcHR5X3J1bnM9OTYgcGVybXV0YXRpb25zPTEzIG5vbmlkZW50aXR5X29yZGVycz0yMCBxdWVyeV9zcGxpdHM9MzE3OCBzcGxpdF9hZnRlcl9jcmVkaXQ9NjAgdW5pZm9ybV9jcmVkaXQ9MTIzNiB1bmlmb3JtX3JlamVjdD01MTIgcm9vdF9zYXZpbmdzPTM0MzQgaW52YWxpZF9pbnB1dHM9MTEgY2FsbGJhY2tfZXhjZXB0aW9ucz00IG1vZGVsX211dGFudHM9OAo=",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-14T09:18:41.002481+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/wspd_q2_census_20260914/qualification/sanitize_uzjl6kud/mhgp8_wspd_q2_census_gate.stdout.bin",
+      "sha256": "e2b29ab004eb7f2260d104841c408f370f6ab01234016ac5b692fc3a5f369290",
+      "bytes": 455
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/wspd_q2_census_20260914/qualification/sanitize_uzjl6kud/mhgp8_wspd_q2_census_gate.stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  }
+}
