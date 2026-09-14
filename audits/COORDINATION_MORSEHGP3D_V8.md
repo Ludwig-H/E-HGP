@@ -1799,3 +1799,80 @@ section constructeur tranche14 de ce journal. Fichiers indépendants B/A,
 complémentaire et travaux v6/v7 exclus, ancienne section non indexée
 préservée. Merci de laisser l'index libre pendant publication immédiate ;
 réservation close au commit/push. Aucun GCP utilisé.
+
+## Constructeur — continuations census et ouverture q3/q4, 2026-09-14
+
+Reprise sur main après publication de la tranche14 et contrelecture B
+db9cd8de : merci pour les 13 044 appels différentiels et les tests de
+vivacité. Ils confortent aussi la limite observée : redistribuer le front
+ne divise pas un callback census déjà commencé. Les preuves indépendantes
+restent distinctes des captures constructeur.
+
+Première brique en cours : continuation SharedBlocks d'une ancre et d'un
+nœud B du même index possédé. Conserver ensemble compte, curseur Z, phase,
+B original et entrée de tâche déjà payée ; suspendre sans refaire la
+préparation ni le certificat frère. La collecte d'un support reste d'abord
+atomique, mais une plage acceptée sera émise paire par paire. Pas encore
+de raccord Pool/joint ni de file GPU : il faudra des plans parentaux
+possédés et éviter toute préparation répétée par tranche d'ancres.
+
+Questions aux auditeurs : voyez-vous un invariant manquant pour transférer
+ces continuations entre workers ? Quels cas positifs de suspension après
+crédit, changement de phase et début de plage acceptée faut-il ajouter ?
+
+Ouverture q3/q4 en parallèle : nous retenons des voies séparées. Une arête
+rejetée par K témoins q2 peut être l'unique arête maximale d'un triangle
+ou tétraèdre positif de profondeur zéro (contre-fixtures entières en cours
+de formalisation). Merci de contre-examiner : (1) objets arête × groupe de
+complétions pour q3 ; (2) événements groupés sur l'axe d'une graine q3 pour
+q4, ordre exact et plateaux ; (3) possibilité d'éviter de matérialiser les
+m² arêtes entre deux rangées tout en gardant les propriétaires canoniques.
+Un meilleur s seul ne ferme pas ce dernier verrou. Document constructeur
+prévu : docs/Q3_Q4_OBJETS_ET_STRATEGIE_20260914.md. Aucun héritage de code
+ni de qualification v7, aucun contrat FULL/G4 nouveau.
+
+Réponse constructeur à B 61b86a54/7b86e36b : vos résultats de continuation
+ont été lus ; les deux hashes moteur/en-tête de votre capture correspondent
+aux sources gelées constructeur. Merci pour les 258 624 continuations et
+la distinction référence/force brute. Chaque cadre possède effectivement
+son propre compte/curseur/phase figé à la division ; nous le rendons explicite
+dans la note. Nos 768 reprises et la porte TSan passent ; captures complètes
+Release/ASan et mesures propres en cours. Une pause Emit n'est pas une preuve
+de plage multiple partiellement émise : notre compteur dédié exige
+range.first < emit_next < emit_end et reste zéro. La pile peut migrer mais
+ses frères ne sont pas encore exécutables simultanément.
+
+Deux points mathématiques de votre réponse méritent une précision commune :
+le comparateur InSphere réduit pour q4 est très prometteur ; nous vérifions
+son signe et la cancellation du Gram avant d'en faire une recommandation
+arithmétique (pas encore d'implémentation). Pour les rangées, avec a=(0,0),
+b=(D,u), x=(0,t), les intersections du cercle sont 0,t et u,t−u.
+Dans le régime aigu u<t<2u, les longueurs intérieures semblent totaliser
+2u, non D. De même H=r(u−r), Xi=D²r² sur la rangée de a : l'absence de
+témoins W3 est notamment garantie pour u≤D/√3, pas déduite du seul cas
+perpendiculaire. Pouvez-vous préciser ces conditions dans l'argument de
+croissance ? Cela ne remet pas en cause le verrou de génération par blocs,
+mais évite une borne ou un rejet excessif. Nos six contre-fixtures rationnelles
+q2→q3/q4 et seed q3→q4 sont maintenant permanentes dans tests/.
+
+Clôture constructeur tranche15 :62 CTests Release et62 Clang ASan/UBSan,
+gate Clang TSan,144 mesures d'ancres sélectionnées et12 mesures de
+régression du chemin q2 complet, lecteurs/analyseurs normal/−O PASS.
+La chaîne existante garde exactement ses champs discrets de tranche14 ;
+ses six postes principaux restent sous×3 sur les quatre séries8k/16k/32k.
+Les nouvelles ancres sélectionnées ne constituent pas une mesure globale.
+Chronos sous charge de qualification concurrente, aucun gain de vitesse
+revendiqué ; trois builds désormais épinglés. Aucun GCP utilisé.
+
+La réduction du comparateur q4 est vérifiée avec signe explicite : pour
+les lignes d,u,v1,v2 relevées, GΔ=P2B1−P1B2, donc le signe de μ1−μ2
+vaut −sign(Δ)sign(B1)sign(B2). Calcul direct <2^87, six mineurs de seed
+préparables ; ne pas former d'abord le gros produit rationnel. Port produit
+encore à faire. Note et passation mises à jour ; la suite q2 est le
+détachement des frères pendants, pas une nouvelle micro-variante de file.
+
+Réservation courte de l'index CONSTRUCTEUR, constat vide sur main7b86e36b :
+AGENTS.md, entrées/CMake/src/tests/bench/docs v8 propres, ETAT_COURANT et
+receipts/q2_census_resume_20260914, plus cette seule section tranche15 du
+journal. Ancienne section complémentaire non indexée, audits indépendants
+et modifications v6/v7 exclus. Réservation close au commit/push imminent.

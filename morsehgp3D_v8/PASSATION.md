@@ -1,10 +1,39 @@
-# Passation v8 — front et census q2 multi-CPU
+# Passation v8 — census reprenable et architecture q3/q4
 
 14 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`. Aucun contrat de tour n'est encore acquis.
 
 ## À reprendre maintenant
+
+La [continuation possédée d'une ancre q2](docs/P0_CENSUS_REPRENABLE_Q2.md)
+est qualifiée :62 CTests Release/Clang ASan/UBSan, gate Clang TSan,
+768 reprises contre référence et oracle,144 mesures d'ancres et12 de
+q2 complet closes ; lecteurs/analyseurs normal/−O égaux. Les trois builds
+`v8_census_resume_20260914`, `v8_census_resume_sanitize_20260914` et
+`v8_census_resume_tsan_clang_20260914` sont épinglés, ne pas les écraser.
+Le [bilan propre](receipts/q2_census_resume_20260914/README.md) distingue
+strictement l'ancre sélectionnée du chemin q2 complet inchangé.
+
+Prochaine brique : détacher un frère B encore non visité avec son propre
+compte/curseur/phase et le même B original ; répartir les masses et les
+compteurs déjà payés sans les répéter. La classe actuelle migre la pile
+entière, pas ses frères simultanément. Elle réserve6 272 octets de cadres :
+ne pas instancier ce stockage pour toutes les ancres à la fois. Aucun
+Pool/joint/Pairwise asynchrone n'est raccordé. Conserver une préparation
+Pool par rectangle parent, possédée et partagée, jamais par tranche A_i.
+La collecte d'un support reste atomique, donc le quantum ne borne pas sa durée.
+
+Lire la [proposition q3/q4](docs/Q3_Q4_OBJETS_ET_STRATEGIE_20260914.md) avant
+le futur port : six contre-fixtures d'indépendance des voies sont exécutées.
+Arête×bloc de complétions, lot de formes q3×Z et segment d'événements q4
+sont les objets proposés, pas des moteurs déjà qualifiés. L'identité
+`GΔ=P2B1−P1B2` permet un comparateur q4 direct i128, avec signes des
+dénominateurs ; elle ne réduit pas automatiquement corde/clés/niveaux.
+La réponse B7b86e36b est lue, ses preuves restent indépendantes.
+P0 global, FULL, GPU et contrats G4 ne sont pas clos.
+
+## Quatorzième tranche publiée à4e878754 — historique
 
 La [redistribution des produits pendants](docs/P0_REDISTRIBUTION_FRONT_Q2.md)
 est implémentée et qualifiée :57 CTests Release/Clang ASan/UBSan,

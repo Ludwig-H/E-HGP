@@ -3,7 +3,24 @@
 14 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
-État constructeur courant : quatorzième tranche P0,
+État constructeur courant : quinzième tranche P0,
+[continuations possédées d'une ancre q2](../docs/P0_CENSUS_REPRENABLE_Q2.md).
+62 CTests Release/Clang ASan/UBSan et la gate Clang TSan passent.
+Les [preuves propres](../receipts/q2_census_resume_20260914/README.md)
+sont closes :768 reprises,144 mesures d'ancres sélectionnées,12 mesures
+de q2 complet inchangé, lecteurs/analyseurs normal/−O conformes.
+Les trois builds de reprise sont épinglés. Le budget de transitions ne
+tronque rien ; collecte par support encore atomique, frères B encore
+séquentiels. Aucun raccord Pool/dispatcher, aucun gain de tour revendiqué.
+La croissance géométrique mesurée reste celle de la tranche14, pas une
+borne générale. [q3/q4](../docs/Q3_Q4_OBJETS_ET_STRATEGIE_20260914.md) :
+architecture proposée, six contre-fixtures rationnelles exécutées,
+comparateur de racines réduit en i128 prouvé mais non implémenté.
+Les contrelectures B7b86e36b restent indépendantes. Aucun GCP utilisé.
+
+## Historique : quatorzième tranche publiée à4e878754
+
+Quatorzième tranche P0,
 [redistribution des produits pendants](../docs/P0_REDISTRIBUTION_FRONT_Q2.md)
 implémentée et qualifiée :57 CTests Release/Clang ASan/UBSan, deux gates
 Clang TSan et32 différentiels PASS. Les [192 mesures propres](../receipts/q2_dynamic_front_20260914/README.md)

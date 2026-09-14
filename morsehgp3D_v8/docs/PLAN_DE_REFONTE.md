@@ -47,6 +47,14 @@ héritée du harnais d'audit ; le raccord et l'oracle restent à construire.
 
 ## Priorité P0 — supprimer la préparation quadratique des témoins locaux
 
+Quinzième tranche : [census d'une ancre reprenable](P0_CENSUS_REPRENABLE_Q2.md)
+qualifié, sans modification du pipeline existant. Extraire ensuite les
+frères B en attente pour les exécuter indépendamment ; leur simple migration
+dans la pile entière ne suffit pas. Garder les plans parentaux possédés,
+pas de préparation par job. La [stratégie q3/q4](Q3_Q4_OBJETS_ET_STRATEGIE_20260914.md)
+fixe séparément les formes, blocs de complétions et événements à considérer ;
+les voies acceptées ne sont pas des filtres d'accès successifs.
+
 Quatorzième tranche : [redistribution des produits pendants](P0_REDISTRIBUTION_FRONT_Q2.md)
 implémentée et qualifiée ;192 mesures propres closes. Le gain de temps
 n'est pas général, Coarse reste le défaut.

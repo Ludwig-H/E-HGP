@@ -41,12 +41,14 @@ add_executable(mhgp8_wspd_q2_parallel_probe bench/wspd_q2_parallel_probe.cpp)
 target_link_libraries(mhgp8_wspd_q2_parallel_probe PRIVATE mhgp8_p0)
 add_executable(mhgp8_wspd_q2_dynamic_probe bench/wspd_q2_dynamic_probe.cpp)
 target_link_libraries(mhgp8_wspd_q2_dynamic_probe PRIVATE mhgp8_p0)
+add_executable(mhgp8_q2_census_resume_probe bench/q2_census_resume_probe.cpp)
+target_link_libraries(mhgp8_q2_census_resume_probe PRIVATE mhgp8_p0)
 
 if(BUILD_TESTING)
   # Boost arbitrary precision is used only by the bounded independent judge.
   find_package(Boost REQUIRED)
   foreach(gate IN ITEMS q2_node_pool q2_terminal_pool wspd_front_jobs wspd_q2_parallel
-      wspd_front_dispatch wspd_q2_dynamic)
+      wspd_front_dispatch wspd_q2_dynamic q2_census_resume)
     add_executable(mhgp8_${gate}_gate tests/${gate}_gate.cpp)
     target_include_directories(mhgp8_${gate}_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     target_include_directories(mhgp8_${gate}_gate SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
@@ -124,6 +126,16 @@ if(BUILD_TESTING)
   target_link_libraries(mhgp8_q2_prepared_bounds_gate PRIVATE mhgp8_p0)
   add_test(NAME mhgp8_q2_prepared_bounds_gate COMMAND mhgp8_q2_prepared_bounds_gate --selftest)
   find_package(Python3 COMPONENTS Interpreter REQUIRED)
+  add_test(NAME mhgp8_q2_resume_receipts_gate COMMAND ${Python3_EXECUTABLE} -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/q2_resume_receipts_gate.py"
+    --probe $<TARGET_FILE:mhgp8_q2_census_resume_probe> --selftest)
+  add_test(NAME mhgp8_q2_resume_receipts_gate_optimized COMMAND ${Python3_EXECUTABLE} -B -O
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/q2_resume_receipts_gate.py"
+    --probe $<TARGET_FILE:mhgp8_q2_census_resume_probe> --selftest)
+  add_test(NAME mhgp8_q3_q4_owner_independence_gate COMMAND ${Python3_EXECUTABLE} -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/q3_q4_owner_independence_gate.py" --selftest)
+  add_test(NAME mhgp8_q3_q4_owner_independence_gate_optimized COMMAND ${Python3_EXECUTABLE} -B -O
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/q3_q4_owner_independence_gate.py" --selftest)
   add_test(NAME mhgp8_wspd_q2_dynamic_receipts_gate COMMAND ${Python3_EXECUTABLE} -B
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/wspd_q2_dynamic_receipts_gate.py"
     --probe $<TARGET_FILE:mhgp8_wspd_q2_dynamic_probe> --selftest)

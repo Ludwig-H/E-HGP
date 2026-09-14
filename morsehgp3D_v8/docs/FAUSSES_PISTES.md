@@ -3,6 +3,24 @@
 13 septembre 2026. Mémoire courte de l'audit et de la première tranche P0.
 Les sources et contre-fixtures complètes sont dans les rapports liés.
 
+## Reprise q2 et ouverture q3/q4 — 14 septembre
+
+- Rappeler le parcours partagé avec un curseur sauvegardé ne suffit pas :
+  cela repayerait l'entrée et son certificat frère. Conserver le stade et
+  les constantes, ainsi que l'état propre de chaque sœur en attente.
+- Une pause Emit après une sortie précédente ne prouve pas que l'on a
+  interrompu une même plage multiple. La gate exige un rang d'émission
+  strictement intérieur à cette plage et conserve honnêtement son zéro.
+- Migrer une pile n'exécute pas ses branches en parallèle. La brique de
+  reprise reste préalable au détachement des frères et au répartiteur.
+- Les seules arêtes acceptées en q2 ne donnent pas accès à tous les q3/q4 ;
+  les seuls triangles acceptés en q3 ne donnent pas accès aux q4. Six
+  [contre-fixtures exactes](../tests/q3_q4_owner_independence_gate.py) le réfutent.
+- Pour q4, ne pas saturer le compte à K avant un balayage comportant des
+  sorties : la profondeur peut redescendre. Regrouper les racines égales,
+  exclure leurs propres événements du compte strict, garder les témoins
+  hors lentille des complétions. Voir la [stratégie](Q3_Q4_OBJETS_ET_STRATEGIE_20260914.md).
+
 ## Constats exécutés dans la première brique P0
 
 - Un pool global ne couvre pas toutes les régions utiles : sur les rails

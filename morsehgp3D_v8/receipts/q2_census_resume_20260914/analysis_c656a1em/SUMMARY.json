@@ -1,0 +1,380 @@
+{
+  "complete_q2_growth": [
+    {
+      "family": "uniform",
+      "metrics": {
+        "candidate_pairs": {
+          "ratios": [
+            2.3002145418218807,
+            2.35800844319219
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            3194249,
+            7347458,
+            17325368
+          ]
+        },
+        "census_visits": {
+          "ratios": [
+            2.4058430572823974,
+            2.420974826158056
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            171895354,
+            413553244,
+            1001201993
+          ]
+        },
+        "front_products": {
+          "ratios": [
+            2.33541982806945,
+            2.2386630763944932
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            5358908,
+            12515300,
+            28017540
+          ]
+        },
+        "order_structural_splits": {
+          "ratios": [
+            2.4541784260085238,
+            2.3673687264830723
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            26562215,
+            65188415,
+            154325015
+          ]
+        },
+        "supports": {
+          "ratios": [
+            2.064236757004264,
+            2.045817917146843
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            279544,
+            577045,
+            1180529
+          ]
+        },
+        "witness_descents": {
+          "ratios": [
+            2.5170727034977745,
+            2.4013788824914197
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            69438241,
+            174781101,
+            419715645
+          ]
+        }
+      },
+      "sizes": [
+        8000,
+        16000,
+        32000
+      ],
+      "total_ms": [
+        2034.917968,
+        4869.14025,
+        10824.205664
+      ]
+    },
+    {
+      "family": "terrain",
+      "metrics": {
+        "candidate_pairs": {
+          "ratios": [
+            2.0163791988663022,
+            2.1293178016498437
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            935699,
+            1886724,
+            4017435
+          ]
+        },
+        "census_visits": {
+          "ratios": [
+            2.090517805841798,
+            2.2227115316999644
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            20472635,
+            42798408,
+            95128515
+          ]
+        },
+        "front_products": {
+          "ratios": [
+            2.0867123676103185,
+            2.1672997308903206
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            1043888,
+            2178294,
+            4721016
+          ]
+        },
+        "order_structural_splits": {
+          "ratios": [
+            2.197667581710971,
+            2.2818296733733217
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            7939142,
+            17447595,
+            39812440
+          ]
+        },
+        "supports": {
+          "ratios": [
+            2.025626200525501,
+            2.02445839187342
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            155661,
+            315311,
+            638334
+          ]
+        },
+        "witness_descents": {
+          "ratios": [
+            2.247831493932084,
+            2.3267588645883546
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            13330606,
+            29964956,
+            69721227
+          ]
+        }
+      },
+      "sizes": [
+        8000,
+        16000,
+        32000
+      ],
+      "total_ms": [
+        404.671536,
+        717.061055,
+        1597.821811
+      ]
+    },
+    {
+      "family": "clusters",
+      "metrics": {
+        "candidate_pairs": {
+          "ratios": [
+            2.7443843901700595,
+            2.5456922960561585
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            1743978,
+            4786146,
+            12184055
+          ]
+        },
+        "census_visits": {
+          "ratios": [
+            2.9582837397622646,
+            2.701379510742203
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            81112664,
+            239954275,
+            648207562
+          ]
+        },
+        "front_products": {
+          "ratios": [
+            2.681997882638625,
+            2.4451227525296133
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            3035854,
+            8142154,
+            19908566
+          ]
+        },
+        "order_structural_splits": {
+          "ratios": [
+            2.7361765485792264,
+            2.5148860534352897
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            17189014,
+            47032177,
+            118280566
+          ]
+        },
+        "supports": {
+          "ratios": [
+            2.116964347482837,
+            2.09280903023406
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            245733,
+            520208,
+            1088696
+          ]
+        },
+        "witness_descents": {
+          "ratios": [
+            2.889081764784345,
+            2.6175923096938103
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            39426619,
+            113906726,
+            298161370
+          ]
+        }
+      },
+      "sizes": [
+        8000,
+        16000,
+        32000
+      ],
+      "total_ms": [
+        1033.723382,
+        2871.030103,
+        7326.724363
+      ]
+    },
+    {
+      "family": "rows",
+      "metrics": {
+        "candidate_pairs": {
+          "ratios": [
+            2.000015536453865,
+            2.0000077681665878
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            16091188,
+            32182626,
+            64365502
+          ]
+        },
+        "census_visits": {
+          "ratios": [
+            2.0698831603391215,
+            2.066824058306586
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            5742485,
+            11886273,
+            24566835
+          ]
+        },
+        "front_products": {
+          "ratios": [
+            2.001732862865251,
+            2.00091586580684
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            159274,
+            318824,
+            637940
+          ]
+        },
+        "order_structural_splits": {
+          "ratios": [
+            2.1847716039380494,
+            2.168576400029877
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            1740354,
+            3802276,
+            8245526
+          ]
+        },
+        "supports": {
+          "ratios": [
+            2.001130308412724,
+            2.000564834987493
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            123860,
+            247860,
+            495860
+          ]
+        },
+        "witness_descents": {
+          "ratios": [
+            2.1561997299202136,
+            2.144203106481193
+          ],
+          "ratios_at_least_four": [],
+          "values": [
+            1858710,
+            4007750,
+            8593430
+          ]
+        }
+      },
+      "sizes": [
+        8000,
+        16000,
+        32000
+      ],
+      "total_ms": [
+        150.865055,
+        195.9757,
+        363.832706
+      ]
+    }
+  ],
+  "complete_q2_regression_measures": 12,
+  "full_contract_qualified": false,
+  "historical_data_policy": "read_only_discrete_differential_not_inherited_qualification",
+  "historical_sha256": {
+    "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/campaigns/growth/COMPLETION.json": "6ded7cb7167a0b28076f115aa69449689ead719a1b96ef545ec75752bf32e1ca",
+    "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/campaigns/growth/MANIFEST.json": "969d6b384f810bc7229dbadd1863d83c8473e810524780ef191b896f10e45830",
+    "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/campaigns/growth/MEASURES.jsonl": "7f4624628ef3fecdf561a147aa89b5e6bc1e2152a5d8f1c6e415d1a98b27d14e",
+    "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/campaigns/synthetic8k/COMPLETION.json": "030c4bdf0136748570b41703a14d6aa311547f0caecf0263450a41182f6933e2",
+    "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/campaigns/synthetic8k/MANIFEST.json": "529c897ac3901af3aa2d335c9626983f287ab89e05dd5af3f6b372f5b50a9024",
+    "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/campaigns/synthetic8k/MEASURES.jsonl": "d9f9e2669ccfa60e918e8506bf9b021df66f59dec333a0db25b96a26d95dfff9"
+  },
+  "reader_output": "{\"full_contract_qualified\": false, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q2_census_resume_20260914/qualification_0ir4r0bq\", \"records\": 3, \"selected_anchor_measures\": 0, \"status\": \"passed\"}\n{\"full_contract_qualified\": false, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q2_census_resume_20260914/qualification_g4tpzakt\", \"records\": 3, \"selected_anchor_measures\": 0, \"status\": \"passed\"}\n{\"full_contract_qualified\": false, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q2_census_resume_20260914/matrix_7ys75y08\", \"records\": 144, \"selected_anchor_measures\": 144, \"status\": \"passed\"}\n{\n  \"status\": \"passed\",\n  \"campaigns\": 1,\n  \"measurements\": 12,\n  \"configurations_including_threads_seed\": 12,\n  \"scope\": \"q2_all_cloud_supports_not_full\",\n  \"full_contract_qualified\": false,\n  \"gcp_used\": false,\n  \"provenance_policy\": {\n    \"version\": \"paired_provenance_v1\",\n    \"grouping\": \"homogeneous_build_per_probe_kind_and_common_machine_metadata\",\n    \"cpuinfo_ignored_fields\": [\n      \"cpu MHz\"\n    ],\n    \"machine_identity_scope\": \"recorded_metadata_not_unique_physical_host\"\n  },\n  \"provenance\": {\n    \"build_id\": \"97e870587c4319e867dd5b71d6d92d4b677b0d6cc3b84c849501beae2582ee54\",\n    \"machine_id\": \"8b9f14a82ba327f474b7080fdb92112832a153988d7200dbdd82f8a72260860a\",\n    \"probe_sha256\": \"9519f31743309380b4c787c3dea4a8042c50aa0dd4d2769119e2241aee26df21\",\n    \"compiler_version\": \"c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\\nCopyright (C) 2023 Free Software Foundation, Inc.\\nThis is free software; see the source for copying conditions.  There is NO\\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\\n\\n\",\n    \"cmake_cache_sha256\": \"0f35639b002b9aaef4080278e79b802336f2616693e95596bede78b40ee526d2\",\n    \"cpuinfo_normalized_sha256\": \"04ac550f7b421b258e9ea9c1e8c78d78d2f68d0d3aa178eaae7d085c7e19363d\",\n    \"platform\": \"Linux-6.8.0-1064-azure-x86_64-with-glibc2.39\",\n    \"logical_cpu_count\": 8,\n    \"threads\": \"per_measurement\",\n    \"cpu_affinity\": [\n      0,\n      2,\n      4,\n      6\n    ]\n  },\n  \"current_reader_sha256\": \"459f8762b90f05de64e1a0d4fda78d2dd7e15594ad535f5a170eaa4508d2a92e\",\n  \"source_check\": \"current_content_and_closing_pins_not_a_rebuild\",\n  \"mode_comparison\": \"same_input_supports_and_integer_geometry_across_threads_and_jobs\",\n  \"excluded_schedule_fields\": [\n    \"pool_time_sums\",\n    \"memory\",\n    \"parallel_work\",\n    \"workers\",\n    \"timings\"\n  ]\n}\n",
+  "release_ctests": 62,
+  "sanitize_ctests": 62,
+  "schema": "mhgp8_resume_evidence_summary_v1",
+  "selected_anchor_max_payload_capacity_bytes": 96,
+  "selected_anchor_max_stack_tasks": 12,
+  "selected_anchor_max_transitions": 101220,
+  "selected_anchor_measures": 144,
+  "selected_anchor_quantum1_max_slice_ms": 0.106188,
+  "selected_anchor_quantum256_max_slice_ms": 0.120348,
+  "selected_anchor_stack_capacity_bytes": [
+    6272
+  ],
+  "status": "passed",
+  "timings_policy": "concurrent_qualification_load_no_performance_gain_claim",
+  "tsan_gate": "passed",
+  "unchanged_complete_q2_against_tranche14": 12
+}

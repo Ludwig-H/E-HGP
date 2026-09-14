@@ -1,4 +1,5 @@
 #include "q2_census.hpp"
+#include "q2_census_resume.hpp"
 #include "wspd_q2_census.hpp"
 #include "wspd_q2_parallel.hpp"
 #include "q2_joint_bounds.hpp"
@@ -223,6 +224,13 @@ struct Q2CensusEngine {
       : index(input_index), consumer(input_consumer), points(input_index.cloud().points()),
         b_order(input_index.spatial_order()), threshold(kmax),
         shared_queries(input_index.spatial_nodes()) {}
+
+  // Owned continuations use the same trusted-box authority as shared_task.
+  // These helpers add no new operation to the historical execution paths.
+  [[nodiscard]] static Q2PreparedBounds inert_resume_bounds() { return {}; }
+  [[nodiscard]] Q2Bounds resume_bounds(const Q2PreparedBounds& prepared, std::size_t node) const {
+    return prepared.bounds_unchecked(index.nodes_[node].box);
+  }
 
   [[nodiscard]] QueryNode query_node(std::size_t id) const {
     if (!shared_queries.empty()) {
@@ -1071,5 +1079,430 @@ WspdQ2ParallelResult run_wspd_q2_census_parallel(
   result.total_ms = milliseconds(started, Clock::now());
   return result;
 }
+
+namespace {
+
+void validate_anchor_resume(const Q2CensusIndexPtr& index, std::size_t anchor_rank,
+                            std::size_t b_node, unsigned kmax,
+                            Q2SiblingMode sibling, Q2WitnessOrder order) {
+  if (!index || kmax == 0 || kmax > 10 ||
+      (sibling != Q2SiblingMode::Disabled && sibling != Q2SiblingMode::Saturating) ||
+      (order != Q2WitnessOrder::GlobalDfs && order != Q2WitnessOrder::ComplementFirst)) {
+    throw std::invalid_argument("mhgp8 q2 anchor requires an owned index, K1..10 and valid modes");
+  }
+  const auto nodes = index->spatial_nodes();
+  if (anchor_rank >= index->spatial_order().size() || b_node >= nodes.size()) {
+    throw std::invalid_argument("mhgp8 q2 anchor requires a global rank and node in this index");
+  }
+  const auto b = nodes[b_node].range;
+  if (b.size() == 0 || (b.first <= anchor_rank && anchor_rank < b.last)) {
+    throw std::invalid_argument("mhgp8 q2 anchor must be disjoint from its nonempty B node");
+  }
+}
+
+void initialize_anchor_result(Q2CensusEngine& engine, std::size_t b_node) {
+  engine.result.candidate_pairs = static_cast<u64>(engine.index.spatial_nodes()[b_node].range.size());
+  engine.result.work.input_descriptors = 1;
+  engine.root_start(0);
+}
+
+void check_completed_anchor(const Q2CensusResult& result) {
+  if (result.accepted_pairs > result.candidate_pairs ||
+      result.rejected_pairs != result.candidate_pairs - result.accepted_pairs ||
+      result.work.payload_supports != result.accepted_pairs) {
+    throw std::logic_error("mhgp8 q2 anchor did not complete its candidate and payload partition");
+  }
+}
+
+// This is an actual exclusive acquisition, not a racy observation followed
+// by an unprotected read. The public contract still requires single-owner
+// access and synchronization when handing the continuation to another thread.
+class ExclusiveResumeCall {
+ public:
+  explicit ExclusiveResumeCall(std::atomic_flag& flag) : flag_(flag) {
+    if (flag_.test_and_set(std::memory_order_acquire))
+      throw std::logic_error("mhgp8 q2 continuation call overlaps another call");
+  }
+  ~ExclusiveResumeCall() { flag_.clear(std::memory_order_release); }
+  ExclusiveResumeCall(const ExclusiveResumeCall&) = delete;
+  ExclusiveResumeCall& operator=(const ExclusiveResumeCall&) = delete;
+
+ private:
+  std::atomic_flag& flag_;
+};
+
+std::size_t resume_bytes(std::size_t capacity, std::size_t width) {
+  if (capacity > std::numeric_limits<std::size_t>::max() / width)
+    throw std::overflow_error("mhgp8 q2 continuation retained bytes exceed size_t");
+  return capacity * width;
+}
+
+std::size_t resume_byte_sum(std::size_t a, std::size_t b) {
+  if (b > std::numeric_limits<std::size_t>::max() - a)
+    throw std::overflow_error("mhgp8 q2 continuation retained byte sum exceeds size_t");
+  return a + b;
+}
+
+}  // namespace
+
+Q2CensusAnchorResult run_q2_anchor_reference(
+    Q2CensusIndexPtr index, std::size_t anchor_rank, std::size_t b_node,
+    unsigned kmax, const Q2CensusConsumer& consumer,
+    Q2SiblingMode sibling_mode, Q2WitnessOrder witness_order) {
+  const auto started = Clock::now();
+  validate_anchor_resume(index, anchor_rank, b_node, kmax, sibling_mode, witness_order);
+  if (!consumer) throw std::invalid_argument("mhgp8 q2 anchor requires a payload consumer");
+  Q2CensusAnchorResult result;
+  {
+    Q2CensusEngine engine(*index, kmax, consumer);
+    initialize_anchor_result(engine, b_node);
+    const auto a_id = index->spatial_order()[anchor_rank];
+    const Q2CensusEngine::OrderContext context{b_node, index->spatial_nodes()[b_node].escape, anchor_rank};
+    if (witness_order == Q2WitnessOrder::ComplementFirst) {
+      if (sibling_mode == Q2SiblingMode::Saturating)
+        engine.shared_task<true, true>(a_id, b_node, 0, 0, absent, &context);
+      else
+        engine.shared_task<false, true>(a_id, b_node, 0, 0, absent, &context);
+    } else {
+      if (sibling_mode == Q2SiblingMode::Saturating)
+        engine.shared_task<true, false>(a_id, b_node, 0, 0);
+      else
+        engine.shared_task<false, false>(a_id, b_node, 0, 0);
+    }
+    check_completed_anchor(engine.result);
+    result = {engine.result, engine.sibling_work, engine.order_work};
+  }
+  result.census.total_ms = milliseconds(started, Clock::now());
+  result.census.count_ms = result.census.total_ms - result.census.payload_ms;
+  return result;
+}
+
+struct Q2CensusContinuation::Impl {
+  struct Frame {
+    std::size_t query;
+    std::size_t cursor;
+    std::size_t sibling;
+    unsigned count;
+    bool inside_deferred;
+    Q2CensusResumeStage stage = Q2CensusResumeStage::Entry;
+    Q2PreparedBounds prepared = Q2CensusEngine::inert_resume_bounds();
+    Q2BallKey key;
+    i64 b_diagonal{};
+    std::size_t emit_next{};
+
+    Frame(std::size_t input_query, std::size_t input_cursor, std::size_t input_sibling,
+          unsigned input_count, bool input_phase)
+        : query(input_query), cursor(input_cursor), sibling(input_sibling),
+          count(input_count), inside_deferred(input_phase) {}
+  };
+
+  Q2CensusIndexPtr owner;
+  const std::size_t anchor_rank;
+  const std::size_t anchor_id;
+  const std::size_t original_b;
+  const std::size_t original_escape;
+  const Q2SiblingMode sibling_mode;
+  const Q2WitnessOrder witness_order;
+  // The existing engine borrows only this owned, unused sentinel. User
+  // callbacks are passed directly to emit() and NEVER stored in the object.
+  const Q2CensusConsumer unused_consumer = [](const Q2Support&) {
+    throw std::logic_error("mhgp8 q2 continuation used its inactive callback");
+  };
+  Q2CensusEngine engine;
+  std::vector<Frame> stack;
+  Q2CensusResumeWork resume_work;
+  Q2CensusContinuationStatus status = Q2CensusContinuationStatus::Ready;
+  mutable std::atomic_flag busy = ATOMIC_FLAG_INIT;
+
+  Impl(Q2CensusIndexPtr index, std::size_t a_rank, std::size_t b_node,
+       unsigned kmax, Q2SiblingMode sibling, Q2WitnessOrder order)
+      : owner(std::move(index)), anchor_rank(a_rank), anchor_id(owner->spatial_order()[a_rank]),
+        original_b(b_node), original_escape(owner->spatial_nodes()[b_node].escape),
+        sibling_mode(sibling), witness_order(order), engine(*owner, kmax, unused_consumer) {
+    initialize_anchor_result(engine, original_b);
+    // Only B splits. Its u16 tree depth is <=48, so a single-root DFS has
+    // at most49 pending frames. This reserves storage, never caps searches.
+    stack.reserve(49);
+    stack.emplace_back(original_b, 0, absent, 0, false);
+    resume_work.max_pending_tasks = 1;
+  }
+
+  void enter() {
+    counter_add(resume_work.entry_steps);
+    auto& frame = stack.back();
+    counter_add(engine.result.work.query_tasks);
+    const auto& b = owner->spatial_nodes()[frame.query];
+    const bool singleton = b.range.size() == 1;
+    if (singleton) {
+      frame.key = ball_key(engine.points[anchor_id], engine.points[engine.b_order[b.range.first]]);
+    } else {
+      frame.b_diagonal = squared_diagonal(b.box);
+      frame.prepared = Q2PreparedBounds(engine.points[anchor_id], b.box);
+    }
+    frame.stage = Q2CensusResumeStage::Witness;
+    if (sibling_mode == Q2SiblingMode::Saturating && frame.sibling != absent) {
+      auto& work = engine.sibling_work;
+      counter_add(work.proposals);
+      const auto& witness = owner->spatial_nodes()[frame.sibling];
+      if (witness.range.size() < engine.threshold) {
+        counter_add(work.cardinality_skips);
+      } else {
+        counter_add(work.bound_tests);
+        const auto bounds = singleton ? pair_bounds(frame.key, witness.box)
+                                      : engine.resume_bounds(frame.prepared, frame.sibling);
+        if (bounds.minimum4 > 0) {
+          counter_add(work.rejected_tasks);
+          counter_add(work.rejected_pairs, static_cast<u64>(b.range.size()));
+          if (frame.count != 0) counter_add(work.rejected_after_credit);
+          engine.reject(b.range);
+          stack.pop_back();
+        }
+      }
+    }
+  }
+
+  void admit() {
+    counter_add(resume_work.admission_steps);
+    auto& frame = stack.back();
+    if (frame.count >= engine.threshold)
+      throw std::logic_error("mhgp8 q2 continuation admitted a saturated query");
+    const auto range = owner->spatial_nodes()[frame.query].range;
+    counter_add(engine.result.accepted_pairs, static_cast<u64>(range.size()));
+    if (range.size() > 1)
+      counter_add(engine.result.work.uniform_accepted_pairs, static_cast<u64>(range.size()));
+    frame.emit_next = range.first;
+    frame.stage = Q2CensusResumeStage::Emit;
+  }
+
+  void witness() {
+    auto& frame = stack.back();
+    const auto nodes = owner->spatial_nodes();
+    const bool complement = witness_order == Q2WitnessOrder::ComplementFirst;
+    if ((!complement && frame.cursor == nodes.size()) ||
+        (complement && frame.inside_deferred && frame.cursor == original_escape)) {
+      admit();
+      return;
+    }
+    counter_add(resume_work.witness_steps);
+    auto& work = engine.result.work;
+    auto& order = engine.order_work;
+    if (complement && !frame.inside_deferred && frame.cursor == nodes.size()) {
+      frame.inside_deferred = true;
+      frame.cursor = original_b;
+      counter_add(order.phase_switches);
+      counter_add(work.cursor_advances);
+      return;  // Phase transition is paid once, before its first Z decision.
+    }
+    if (frame.cursor >= nodes.size())
+      throw std::logic_error("mhgp8 q2 continuation cursor exceeds its immutable index");
+    const auto& z = nodes[frame.cursor];
+    if (complement) {
+      if (!frame.inside_deferred && frame.cursor == original_b) {
+        frame.cursor = original_escape;
+        counter_add(order.deferred_skips);
+        counter_add(work.cursor_advances);
+        return;
+      }
+      const bool contains_anchor = z.range.first <= anchor_rank && anchor_rank < z.range.last;
+      const bool contains_deferred = !frame.inside_deferred && frame.cursor < original_b &&
+                                     original_b < z.escape;
+      if (contains_anchor || contains_deferred) {
+        if (z.left == absent) {
+          frame.cursor = z.escape;
+          engine.consume_witnesses(1);
+          counter_add(order.anchor_skips);
+        } else {
+          frame.cursor = z.left;
+          counter_add(order.structural_splits);
+        }
+        counter_add(work.cursor_advances);
+        return;
+      }
+    }
+    const auto& b = nodes[frame.query];
+    const bool singleton = b.range.size() == 1;
+    counter_add(work.count_node_visits);
+    PowerBounds bounds;
+    if (singleton && z.left == absent) {
+      counter_add(work.count_point_tests);
+      const auto value = point_power4(frame.key, engine.points[owner->spatial_order()[z.range.first]]);
+      bounds = {value, value};
+    } else {
+      counter_add(work.count_bound_tests);
+      bounds = singleton ? pair_bounds(frame.key, z.box) : engine.resume_bounds(frame.prepared, frame.cursor);
+    }
+    if (bounds.minimum4 > 0) {
+      engine.consume_witnesses(z.range.size());
+      if (!singleton) counter_add(work.uniform_credited_pairs, static_cast<u64>(b.range.size()));
+      engine.add_count(frame.count, z.range.size());
+      frame.cursor = z.escape;
+      counter_add(work.cursor_advances);
+      if (frame.count == engine.threshold) {
+        engine.reject(b.range);
+        stack.pop_back();
+      }
+    } else if (bounds.maximum4 <= 0) {
+      engine.consume_witnesses(z.range.size());
+      frame.cursor = z.escape;
+      counter_add(work.cursor_advances);
+    } else if (singleton || (z.left != absent && squared_diagonal(z.box) > frame.b_diagonal)) {
+      if (z.left == absent)
+        throw std::logic_error("mhgp8 q2 singleton continuation power cannot be uncertain");
+      counter_add(work.witness_splits);
+      frame.cursor = z.left;
+      counter_add(work.cursor_advances);
+    } else {
+      if (b.left == absent)
+        throw std::logic_error("mhgp8 q2 continuation query has no children");
+      counter_add(work.query_splits);
+      if (frame.count > 0) counter_add(work.shared_splits_after_credit);
+      counter_add(work.cursor_reuses, 2);
+      const auto count = frame.count;
+      const auto cursor = frame.cursor;
+      const auto phase = frame.inside_deferred;
+      // Discard the completed parent, push right then left. Children inherit
+      // the SAME count/cursor/phase and the immutable original-B context.
+      stack.pop_back();
+      stack.emplace_back(b.right, cursor, b.left, count, phase);
+      stack.emplace_back(b.left, cursor, b.right, count, phase);
+      resume_work.max_pending_tasks = std::max(resume_work.max_pending_tasks, static_cast<u64>(stack.size()));
+    }
+  }
+
+  void emit(const Q2CensusConsumer& consumer) {
+    counter_add(resume_work.payload_steps);
+    auto& frame = stack.back();
+    const auto started = Clock::now();
+    try {
+      const auto b_id = engine.b_order[frame.emit_next];
+      const auto key = ball_key(engine.points[anchor_id], engine.points[b_id]);
+      engine.interior.clear();
+      engine.shell.clear();
+      engine.collect(0, key);
+      if (engine.interior.size() != frame.count)
+        throw std::logic_error("mhgp8 q2 continuation count and global interior IDs disagree");
+      counter_add(engine.result.work.payload_interior_sites, static_cast<u64>(engine.interior.size()));
+      counter_add(engine.result.work.payload_shell_sites, static_cast<u64>(engine.shell.size()));
+      counter_add(engine.result.work.payload_supports);
+      consumer(Q2Support{anchor_id, b_id, key, engine.interior, engine.shell});
+      ++frame.emit_next;  // Only after this atomic emission succeeds.
+      if (frame.emit_next == owner->spatial_nodes()[frame.query].range.last) stack.pop_back();
+    } catch (...) {
+      engine.result.payload_ms += milliseconds(started, Clock::now());
+      throw;
+    }
+    engine.result.payload_ms += milliseconds(started, Clock::now());
+  }
+
+  void step(const Q2CensusConsumer& consumer) {
+    switch (stack.back().stage) {
+      case Q2CensusResumeStage::Entry: enter(); break;
+      case Q2CensusResumeStage::Witness: witness(); break;
+      case Q2CensusResumeStage::Emit: emit(consumer); break;
+      case Q2CensusResumeStage::None:
+        throw std::logic_error("mhgp8 q2 continuation has an empty active frame");
+    }
+  }
+
+  bool advance(std::size_t budget, const Q2CensusConsumer& consumer) {
+    if (budget == 0 || !consumer)
+      throw std::invalid_argument("mhgp8 q2 continuation requires positive budget and a consumer");
+    const ExclusiveResumeCall lock(busy);
+    if (status == Q2CensusContinuationStatus::Failed)
+      throw std::logic_error("mhgp8 q2 failed continuation cannot be resumed");
+    if (status == Q2CensusContinuationStatus::Done) return true;
+    const auto started = Clock::now();
+    const auto record_time = [&] {
+      engine.result.total_ms += milliseconds(started, Clock::now());
+      engine.result.count_ms = engine.result.total_ms - engine.result.payload_ms;
+    };
+    try {
+      counter_add(resume_work.advance_calls);
+      while (budget != 0 && !stack.empty()) {
+        counter_add(resume_work.transitions);
+        step(consumer);
+        --budget;
+      }
+      if (stack.empty()) {
+        check_completed_anchor(engine.result);
+        status = Q2CensusContinuationStatus::Done;
+      } else {
+        counter_add(resume_work.pauses);
+        const auto& frame = stack.back();
+        if (frame.count != 0) counter_add(resume_work.pauses_after_credit);
+        if (frame.inside_deferred) counter_add(resume_work.pauses_inside_deferred);
+        if (frame.stage == Q2CensusResumeStage::Emit) counter_add(resume_work.pauses_during_emission);
+      }
+    } catch (...) {
+      status = Q2CensusContinuationStatus::Failed;
+      record_time();
+      throw;
+    }
+    record_time();
+    return status == Q2CensusContinuationStatus::Done;
+  }
+};
+
+Q2CensusContinuation::Q2CensusContinuation(std::unique_ptr<Impl> implementation)
+    : implementation_(std::move(implementation)) {}
+Q2CensusContinuation::~Q2CensusContinuation() = default;
+
+std::unique_ptr<Q2CensusContinuation> make_q2_census_continuation(
+    Q2CensusIndexPtr index, std::size_t anchor_rank, std::size_t b_node,
+    unsigned kmax, Q2SiblingMode sibling_mode, Q2WitnessOrder witness_order) {
+  validate_anchor_resume(index, anchor_rank, b_node, kmax, sibling_mode, witness_order);
+  auto implementation = std::make_unique<Q2CensusContinuation::Impl>(
+      std::move(index), anchor_rank, b_node, kmax, sibling_mode, witness_order);
+  return std::unique_ptr<Q2CensusContinuation>(new Q2CensusContinuation(std::move(implementation)));
+}
+
+bool Q2CensusContinuation::advance(std::size_t budget, const Q2CensusConsumer& consumer) {
+  return implementation_->advance(budget, consumer);
+}
+
+Q2CensusResumeSnapshot Q2CensusContinuation::snapshot() const {
+  const auto& state = *implementation_;
+  const ExclusiveResumeCall lock(state.busy);
+  return {state.engine.result, state.engine.sibling_work, state.engine.order_work,
+          state.resume_work, state.status};
+}
+
+Q2CensusResumePending Q2CensusContinuation::pending() const {
+  const auto& state = *implementation_;
+  const ExclusiveResumeCall lock(state.busy);
+  Q2CensusResumePending result;
+  result.task_count = state.stack.size();
+  result.original_b_node = state.original_b;
+  if (!state.stack.empty()) {
+    const auto& frame = state.stack.back();
+    result.stage = frame.stage;
+    result.query_node = frame.query;
+    result.cursor = frame.cursor;
+    result.sibling_node = frame.sibling;
+    result.acquired_count = frame.count;
+    result.inside_deferred = frame.inside_deferred;
+    if (frame.stage == Q2CensusResumeStage::Emit) {
+      result.emit_next = frame.emit_next;
+      result.emit_end = state.owner->spatial_nodes()[frame.query].range.last;
+    }
+  }
+  return result;
+}
+
+Q2CensusResumeMemory Q2CensusContinuation::memory() const {
+  const auto& state = *implementation_;
+  const ExclusiveResumeCall lock(state.busy);
+  Q2CensusResumeMemory result;
+  result.stack_capacity = state.stack.capacity();
+  result.stack_bytes = resume_bytes(result.stack_capacity, sizeof(Impl::Frame));
+  result.interior_capacity = state.engine.interior.capacity();
+  result.shell_capacity = state.engine.shell.capacity();
+  result.payload_bytes = resume_byte_sum(resume_bytes(result.interior_capacity, sizeof(std::size_t)),
+                                        resume_bytes(result.shell_capacity, sizeof(std::size_t)));
+  result.retained_bytes = resume_byte_sum(result.stack_bytes, result.payload_bytes);
+  return result;
+}
+
+const Q2CensusIndex& Q2CensusContinuation::index() const noexcept { return *implementation_->owner; }
 
 }  // namespace mhgp8

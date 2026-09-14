@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — front et census q2 sur plusieurs CPU
+# Morse HGP 3D v8 — census q2 reprenable et préparation q3/q4
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -35,6 +35,30 @@ catalogue q3/q4 ni une tour FULL.
 Les mesures historiques citées restent v7.
 
 ## État exécutable
+
+La quinzième tranche ajoute un [census q2 reprenable](docs/P0_CENSUS_REPRENABLE_Q2.md)
+possédant son index et son état de parcours. Les 62 CTests Release et
+Clang ASan/UBSan passent, ainsi que la gate Clang TSan. Les
+[preuves propres](receipts/q2_census_resume_20260914/README.md) comprennent
+768 reprises contre référence et oracle, 144 mesures d'ancres sélectionnées
+à8k/16k/32k, K5/10, s8/10/12, et12 mesures de non-régression du q2 complet.
+Lecteurs/analyseurs normal/−O concordent. Les trois builds sont épinglés.
+
+La pile peut passer d'un thread à un autre sans refaire ses tests, mais ses
+frères B ne sont pas encore répartis simultanément. Le pipeline/Pool existant
+reste inchangé ; ses principaux comptes conservent une croissance sous×3
+sur les quatre séries mesurées, sans borne générale. Aucun nouveau gain de
+vitesse ni contrat de tour n'est revendiqué. Suite : détachement des frères
+pendants et plans parentaux possédés, puis raccord au répartiteur.
+
+La [stratégie q3/q4](docs/Q3_Q4_OBJETS_ET_STRATEGIE_20260914.md) distingue
+les voies, les blocs de triangles et les événements q4. Six contre-fixtures
+rationnelles montrent pourquoi les supports acceptés de la voie précédente
+ne peuvent pas servir de filtre d'accès. Un comparateur q4 réduit en i128,
+discuté avec B, est prouvé mathématiquement mais pas encore implémenté.
+FULL, GPU/G4 et plusieurs dizaines de millions de points restent ouverts.
+
+## Quatorzième tranche publiée à4e878754 — historique
 
 La quatorzième tranche ajoute la [redistribution des produits pendants](docs/P0_REDISTRIBUTION_FRONT_Q2.md).
 Le raccord `Donate` est implémenté :57 CTests Release/Clang ASan/UBSan,

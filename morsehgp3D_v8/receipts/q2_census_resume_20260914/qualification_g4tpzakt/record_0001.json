@@ -1,0 +1,16 @@
+{
+  "kind": "gate",
+  "command": [
+    "/workspaces/E-HGP/build/v8_census_resume_sanitize_20260914/mhgp8_q2_census_resume_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-14T21:02:55.923555+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"schema\":\"mhgp8_q2_census_resume_gate_v1\",\"status\":\"pass\",\"scope\":\"shared_anchor_continuations_not_full\",\"checks\":254668,\"fixtures\":12,\"roots\":12,\"oracle_pairs\":590,\"oracle_sites\":37188,\"references\":195,\"resumptions\":768,\"advances\":24644,\"supports\":1470,\"max_shell\":30,\"credit_pauses\":11049,\"split_credit_pauses\":2184,\"phase_pauses\":76,\"emission_pauses\":452,\"deferred_child_pauses\":1694,\"partial_range_pauses\":0,\"two_engines\":1,\"thread_transfers\":1,\"owner_resets\":1,\"callback_failures\":1,\"reentrant_calls\":2,\"overlap_rejections\":1,\"invalid_inputs\":26,\"mutants\":3}\n",
+  "stderr": "",
+  "stdout_base64": "eyJzY2hlbWEiOiJtaGdwOF9xMl9jZW5zdXNfcmVzdW1lX2dhdGVfdjEiLCJzdGF0dXMiOiJwYXNzIiwic2NvcGUiOiJzaGFyZWRfYW5jaG9yX2NvbnRpbnVhdGlvbnNfbm90X2Z1bGwiLCJjaGVja3MiOjI1NDY2OCwiZml4dHVyZXMiOjEyLCJyb290cyI6MTIsIm9yYWNsZV9wYWlycyI6NTkwLCJvcmFjbGVfc2l0ZXMiOjM3MTg4LCJyZWZlcmVuY2VzIjoxOTUsInJlc3VtcHRpb25zIjo3NjgsImFkdmFuY2VzIjoyNDY0NCwic3VwcG9ydHMiOjE0NzAsIm1heF9zaGVsbCI6MzAsImNyZWRpdF9wYXVzZXMiOjExMDQ5LCJzcGxpdF9jcmVkaXRfcGF1c2VzIjoyMTg0LCJwaGFzZV9wYXVzZXMiOjc2LCJlbWlzc2lvbl9wYXVzZXMiOjQ1MiwiZGVmZXJyZWRfY2hpbGRfcGF1c2VzIjoxNjk0LCJwYXJ0aWFsX3JhbmdlX3BhdXNlcyI6MCwidHdvX2VuZ2luZXMiOjEsInRocmVhZF90cmFuc2ZlcnMiOjEsIm93bmVyX3Jlc2V0cyI6MSwiY2FsbGJhY2tfZmFpbHVyZXMiOjEsInJlZW50cmFudF9jYWxscyI6Miwib3ZlcmxhcF9yZWplY3Rpb25zIjoxLCJpbnZhbGlkX2lucHV0cyI6MjYsIm11dGFudHMiOjN9Cg==",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-14T21:02:56.096672+00:00"
+}
