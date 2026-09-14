@@ -1,0 +1,1308 @@
+{
+  "title": "Régime des rectangles du front WSPD pur v4 (s=8 ; familles du plan de test)",
+  "date": "2026-09-14",
+  "author_role": "auditeur indépendant v8",
+  "git_head": "1bf806f0675f276ee7fdab113ef255c15e148b98",
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "compile_command": "g++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Werror -o /tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wspd_hist/receipt_build/wspd_factor_hist /workspaces/E-HGP/morsehgp3D_v8/audits/wspd_regime_20260914/wspd_factor_hist.cpp",
+  "pins_sha256": {
+    "morsehgp3D_v8/audits/wspd_regime_20260914/wspd_factor_hist.cpp": "9fadc0364e64dc87112e830a5bf7ea3247e57b4bb690ab61d1f03b362e8151dc",
+    "morsehgp3D_v4/src/cloud/families.hpp": "49ef96e02252f920678942558cef293ca19f86d43cd5c78d8e5828079b27b053",
+    "morsehgp3D_v4/src/tree/radix_tree.hpp": "aabde2a9cb5ef1103f64f977464060720d3b82542f787c949882e0ca3a3d364c",
+    "morsehgp3D_v4/src/wspd/wavefront.hpp": "a2ab3d0c3d2a6de655de773f94de25d7105fb8841b6f7099e928b3255b1baae6"
+  },
+  "matrix_size": 21,
+  "runs": [
+    {
+      "split": "diam",
+      "family": "uniform",
+      "n": 8000,
+      "s": 8,
+      "seed": 3,
+      "uniques": 8000,
+      "rectangles": 3435133,
+      "sum_factors": 17795205,
+      "max_factor": 46,
+      "both_ge8": 39206,
+      "both_ge64": 0,
+      "pair_mass": 31996000,
+      "expected_pair_mass": 31996000,
+      "buckets": [
+        {
+          "class": "max=1",
+          "rectangles": 832749,
+          "rect_pct": 24.24,
+          "pair_mass": 832749,
+          "mass_pct": 2.6
+        },
+        {
+          "class": "2-7",
+          "rectangles": 2394283,
+          "rect_pct": 69.7,
+          "pair_mass": 19194309,
+          "mass_pct": 59.99
+        },
+        {
+          "class": "8-63",
+          "rectangles": 208101,
+          "rect_pct": 6.06,
+          "pair_mass": 11968942,
+          "mass_pct": 37.41
+        },
+        {
+          "class": "64-1023",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        },
+        {
+          "class": ">=1024",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        }
+      ],
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wspd_hist/receipt_build/wspd_factor_hist --family=uniform --n=8000 --s=8 --seed=3",
+      "wall_seconds": 0.269,
+      "raw_stdout": "split=diam famille=uniform n=8000 s=8 seed=3 uniques=8000 rectangles=3435133 sum_factors=17795205 max_factor=46 both_ge8=39206 both_ge64=0 masse=31996000 masse_attendue=31996000\n  max=1    rect=    832749 ( 24.24%)  masse_paires=832749 (  2.60%)\n  2-7      rect=   2394283 ( 69.70%)  masse_paires=19194309 ( 59.99%)\n  8-63     rect=    208101 (  6.06%)  masse_paires=11968942 ( 37.41%)\n  64-1023  rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n  >=1024   rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n"
+    },
+    {
+      "split": "diam",
+      "family": "uniform",
+      "n": 16000,
+      "s": 8,
+      "seed": 3,
+      "uniques": 16000,
+      "rectangles": 8331756,
+      "sum_factors": 50761856,
+      "max_factor": 69,
+      "both_ge8": 277907,
+      "both_ge64": 0,
+      "pair_mass": 127992000,
+      "expected_pair_mass": 127992000,
+      "buckets": [
+        {
+          "class": "max=1",
+          "rectangles": 1800797,
+          "rect_pct": 21.61,
+          "pair_mass": 1800797,
+          "mass_pct": 1.41
+        },
+        {
+          "class": "2-7",
+          "rectangles": 5691245,
+          "rect_pct": 68.31,
+          "pair_mass": 50192613,
+          "mass_pct": 39.22
+        },
+        {
+          "class": "8-63",
+          "rectangles": 839713,
+          "rect_pct": 10.08,
+          "pair_mass": 75995347,
+          "mass_pct": 59.38
+        },
+        {
+          "class": "64-1023",
+          "rectangles": 1,
+          "rect_pct": 0.0,
+          "pair_mass": 3243,
+          "mass_pct": 0.0
+        },
+        {
+          "class": ">=1024",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        }
+      ],
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wspd_hist/receipt_build/wspd_factor_hist --family=uniform --n=16000 --s=8 --seed=3",
+      "wall_seconds": 0.633,
+      "raw_stdout": "split=diam famille=uniform n=16000 s=8 seed=3 uniques=16000 rectangles=8331756 sum_factors=50761856 max_factor=69 both_ge8=277907 both_ge64=0 masse=127992000 masse_attendue=127992000\n  max=1    rect=   1800797 ( 21.61%)  masse_paires=1800797 (  1.41%)\n  2-7      rect=   5691245 ( 68.31%)  masse_paires=50192613 ( 39.22%)\n  8-63     rect=    839713 ( 10.08%)  masse_paires=75995347 ( 59.38%)\n  64-1023  rect=         1 (  0.00%)  masse_paires=3243 (  0.00%)\n  >=1024   rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n"
+    },
+    {
+      "split": "diam",
+      "family": "uniform",
+      "n": 32000,
+      "s": 8,
+      "seed": 3,
+      "uniques": 32000,
+      "rectangles": 19574390,
+      "sum_factors": 140637101,
+      "max_factor": 146,
+      "both_ge8": 1131267,
+      "both_ge64": 212,
+      "pair_mass": 511984000,
+      "expected_pair_mass": 511984000,
+      "buckets": [
+        {
+          "class": "max=1",
+          "rectangles": 3689525,
+          "rect_pct": 18.85,
+          "pair_mass": 3689525,
+          "mass_pct": 0.72
+        },
+        {
+          "class": "2-7",
+          "rectangles": 13137343,
+          "rect_pct": 67.11,
+          "pair_mass": 122376489,
+          "mass_pct": 23.9
+        },
+        {
+          "class": "8-63",
+          "rectangles": 2745840,
+          "rect_pct": 14.03,
+          "pair_mass": 380306258,
+          "mass_pct": 74.28
+        },
+        {
+          "class": "64-1023",
+          "rectangles": 1682,
+          "rect_pct": 0.01,
+          "pair_mass": 5611728,
+          "mass_pct": 1.1
+        },
+        {
+          "class": ">=1024",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        }
+      ],
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wspd_hist/receipt_build/wspd_factor_hist --family=uniform --n=32000 --s=8 --seed=3",
+      "wall_seconds": 1.379,
+      "raw_stdout": "split=diam famille=uniform n=32000 s=8 seed=3 uniques=32000 rectangles=19574390 sum_factors=140637101 max_factor=146 both_ge8=1131267 both_ge64=212 masse=511984000 masse_attendue=511984000\n  max=1    rect=   3689525 ( 18.85%)  masse_paires=3689525 (  0.72%)\n  2-7      rect=  13137343 ( 67.11%)  masse_paires=122376489 ( 23.90%)\n  8-63     rect=   2745840 ( 14.03%)  masse_paires=380306258 ( 74.28%)\n  64-1023  rect=      1682 (  0.01%)  masse_paires=5611728 (  1.10%)\n  >=1024   rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n"
+    },
+    {
+      "split": "diam",
+      "family": "uniform",
+      "n": 64000,
+      "s": 8,
+      "seed": 3,
+      "uniques": 64000,
+      "rectangles": 44943695,
+      "sum_factors": 383497519,
+      "max_factor": 293,
+      "both_ge8": 3750686,
+      "both_ge64": 13993,
+      "pair_mass": 2047968000,
+      "expected_pair_mass": 2047968000,
+      "buckets": [
+        {
+          "class": "max=1",
+          "rectangles": 7780498,
+          "rect_pct": 17.31,
+          "pair_mass": 7780498,
+          "mass_pct": 0.38
+        },
+        {
+          "class": "2-7",
+          "rectangles": 29306474,
+          "rect_pct": 65.21,
+          "pair_mass": 285765799,
+          "mass_pct": 13.95
+        },
+        {
+          "class": "8-63",
+          "rectangles": 7795904,
+          "rect_pct": 17.35,
+          "pair_mass": 1532897783,
+          "mass_pct": 74.85
+        },
+        {
+          "class": "64-1023",
+          "rectangles": 60819,
+          "rect_pct": 0.14,
+          "pair_mass": 221523920,
+          "mass_pct": 10.82
+        },
+        {
+          "class": ">=1024",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        }
+      ],
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wspd_hist/receipt_build/wspd_factor_hist --family=uniform --n=64000 --s=8 --seed=3",
+      "wall_seconds": 2.971,
+      "raw_stdout": "split=diam famille=uniform n=64000 s=8 seed=3 uniques=64000 rectangles=44943695 sum_factors=383497519 max_factor=293 both_ge8=3750686 both_ge64=13993 masse=2047968000 masse_attendue=2047968000\n  max=1    rect=   7780498 ( 17.31%)  masse_paires=7780498 (  0.38%)\n  2-7      rect=  29306474 ( 65.21%)  masse_paires=285765799 ( 13.95%)\n  8-63     rect=   7795904 ( 17.35%)  masse_paires=1532897783 ( 74.85%)\n  64-1023  rect=     60819 (  0.14%)  masse_paires=221523920 ( 10.82%)\n  >=1024   rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n"
+    },
+    {
+      "split": "diam",
+      "family": "uniform",
+      "n": 128000,
+      "s": 8,
+      "seed": 3,
+      "uniques": 128000,
+      "rectangles": 100186048,
+      "sum_factors": 988428848,
+      "max_factor": 480,
+      "both_ge8": 10135798,
+      "both_ge64": 173408,
+      "pair_mass": 8191936000,
+      "expected_pair_mass": 8191936000,
+      "buckets": [
+        {
+          "class": "max=1",
+          "rectangles": 15998605,
+          "rect_pct": 15.97,
+          "pair_mass": 15998605,
+          "mass_pct": 0.2
+        },
+        {
+          "class": "2-7",
+          "rectangles": 64272639,
+          "rect_pct": 64.15,
+          "pair_mass": 643879567,
+          "mass_pct": 7.86
+        },
+        {
+          "class": "8-63",
+          "rectangles": 19490342,
+          "rect_pct": 19.45,
+          "pair_mass": 4733535882,
+          "mass_pct": 57.78
+        },
+        {
+          "class": "64-1023",
+          "rectangles": 424462,
+          "rect_pct": 0.42,
+          "pair_mass": 2798521946,
+          "mass_pct": 34.16
+        },
+        {
+          "class": ">=1024",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        }
+      ],
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wspd_hist/receipt_build/wspd_factor_hist --family=uniform --n=128000 --s=8 --seed=3",
+      "wall_seconds": 7.343,
+      "raw_stdout": "split=diam famille=uniform n=128000 s=8 seed=3 uniques=128000 rectangles=100186048 sum_factors=988428848 max_factor=480 both_ge8=10135798 both_ge64=173408 masse=8191936000 masse_attendue=8191936000\n  max=1    rect=  15998605 ( 15.97%)  masse_paires=15998605 (  0.20%)\n  2-7      rect=  64272639 ( 64.15%)  masse_paires=643879567 (  7.86%)\n  8-63     rect=  19490342 ( 19.45%)  masse_paires=4733535882 ( 57.78%)\n  64-1023  rect=    424462 (  0.42%)  masse_paires=2798521946 ( 34.16%)\n  >=1024   rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n"
+    },
+    {
+      "split": "diam",
+      "family": "uniform",
+      "n": 256000,
+      "s": 8,
+      "seed": 3,
+      "uniques": 256000,
+      "rectangles": 219063683,
+      "sum_factors": 2490195991,
+      "max_factor": 977,
+      "both_ge8": 26170260,
+      "both_ge64": 884976,
+      "pair_mass": 32767872000,
+      "expected_pair_mass": 32767872000,
+      "buckets": [
+        {
+          "class": "max=1",
+          "rectangles": 33173252,
+          "rect_pct": 15.14,
+          "pair_mass": 33173252,
+          "mass_pct": 0.1
+        },
+        {
+          "class": "2-7",
+          "rectangles": 137655807,
+          "rect_pct": 62.84,
+          "pair_mass": 1412962344,
+          "mass_pct": 4.31
+        },
+        {
+          "class": "8-63",
+          "rectangles": 46453729,
+          "rect_pct": 21.21,
+          "pair_mass": 12679003868,
+          "mass_pct": 38.69
+        },
+        {
+          "class": "64-1023",
+          "rectangles": 1780895,
+          "rect_pct": 0.81,
+          "pair_mass": 18642732536,
+          "mass_pct": 56.89
+        },
+        {
+          "class": ">=1024",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        }
+      ],
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wspd_hist/receipt_build/wspd_factor_hist --family=uniform --n=256000 --s=8 --seed=3",
+      "wall_seconds": 15.248,
+      "raw_stdout": "split=diam famille=uniform n=256000 s=8 seed=3 uniques=256000 rectangles=219063683 sum_factors=2490195991 max_factor=977 both_ge8=26170260 both_ge64=884976 masse=32767872000 masse_attendue=32767872000\n  max=1    rect=  33173252 ( 15.14%)  masse_paires=33173252 (  0.10%)\n  2-7      rect= 137655807 ( 62.84%)  masse_paires=1412962344 (  4.31%)\n  8-63     rect=  46453729 ( 21.21%)  masse_paires=12679003868 ( 38.69%)\n  64-1023  rect=   1780895 (  0.81%)  masse_paires=18642732536 ( 56.89%)\n  >=1024   rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n"
+    },
+    {
+      "split": "diam",
+      "family": "terrain",
+      "n": 8000,
+      "s": 8,
+      "seed": 3,
+      "uniques": 8000,
+      "rectangles": 682962,
+      "sum_factors": 5782172,
+      "max_factor": 186,
+      "both_ge8": 52853,
+      "both_ge64": 450,
+      "pair_mass": 31996000,
+      "expected_pair_mass": 31996000,
+      "buckets": [
+        {
+          "class": "max=1",
+          "rectangles": 154182,
+          "rect_pct": 22.58,
+          "pair_mass": 154182,
+          "mass_pct": 0.48
+        },
+        {
+          "class": "2-7",
+          "rectangles": 399362,
+          "rect_pct": 58.47,
+          "pair_mass": 3079669,
+          "mass_pct": 9.63
+        },
+        {
+          "class": "8-63",
+          "rectangles": 127713,
+          "rect_pct": 18.7,
+          "pair_mass": 23362873,
+          "mass_pct": 73.02
+        },
+        {
+          "class": "64-1023",
+          "rectangles": 1705,
+          "rect_pct": 0.25,
+          "pair_mass": 5399276,
+          "mass_pct": 16.87
+        },
+        {
+          "class": ">=1024",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        }
+      ],
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wspd_hist/receipt_build/wspd_factor_hist --family=terrain --n=8000 --s=8 --seed=3",
+      "wall_seconds": 0.079,
+      "raw_stdout": "split=diam famille=terrain n=8000 s=8 seed=3 uniques=8000 rectangles=682962 sum_factors=5782172 max_factor=186 both_ge8=52853 both_ge64=450 masse=31996000 masse_attendue=31996000\n  max=1    rect=    154182 ( 22.58%)  masse_paires=154182 (  0.48%)\n  2-7      rect=    399362 ( 58.47%)  masse_paires=3079669 (  9.63%)\n  8-63     rect=    127713 ( 18.70%)  masse_paires=23362873 ( 73.02%)\n  64-1023  rect=      1705 (  0.25%)  masse_paires=5399276 ( 16.87%)\n  >=1024   rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n"
+    },
+    {
+      "split": "diam",
+      "family": "terrain",
+      "n": 16000,
+      "s": 8,
+      "seed": 3,
+      "uniques": 16000,
+      "rectangles": 1467396,
+      "sum_factors": 15082448,
+      "max_factor": 329,
+      "both_ge8": 134546,
+      "both_ge64": 3360,
+      "pair_mass": 127992000,
+      "expected_pair_mass": 127992000,
+      "buckets": [
+        {
+          "class": "max=1",
+          "rectangles": 310398,
+          "rect_pct": 21.15,
+          "pair_mass": 310398,
+          "mass_pct": 0.24
+        },
+        {
+          "class": "2-7",
+          "rectangles": 830838,
+          "rect_pct": 56.62,
+          "pair_mass": 6492726,
+          "mass_pct": 5.07
+        },
+        {
+          "class": "8-63",
+          "rectangles": 313555,
+          "rect_pct": 21.37,
+          "pair_mass": 64507096,
+          "mass_pct": 50.4
+        },
+        {
+          "class": "64-1023",
+          "rectangles": 12605,
+          "rect_pct": 0.86,
+          "pair_mass": 56681780,
+          "mass_pct": 44.29
+        },
+        {
+          "class": ">=1024",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        }
+      ],
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wspd_hist/receipt_build/wspd_factor_hist --family=terrain --n=16000 --s=8 --seed=3",
+      "wall_seconds": 0.14,
+      "raw_stdout": "split=diam famille=terrain n=16000 s=8 seed=3 uniques=16000 rectangles=1467396 sum_factors=15082448 max_factor=329 both_ge8=134546 both_ge64=3360 masse=127992000 masse_attendue=127992000\n  max=1    rect=    310398 ( 21.15%)  masse_paires=310398 (  0.24%)\n  2-7      rect=    830838 ( 56.62%)  masse_paires=6492726 (  5.07%)\n  8-63     rect=    313555 ( 21.37%)  masse_paires=64507096 ( 50.40%)\n  64-1023  rect=     12605 (  0.86%)  masse_paires=56681780 ( 44.29%)\n  >=1024   rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n"
+    },
+    {
+      "split": "diam",
+      "family": "terrain",
+      "n": 32000,
+      "s": 8,
+      "seed": 3,
+      "uniques": 32000,
+      "rectangles": 3082791,
+      "sum_factors": 38409486,
+      "max_factor": 694,
+      "both_ge8": 318944,
+      "both_ge64": 16321,
+      "pair_mass": 511984000,
+      "expected_pair_mass": 511984000,
+      "buckets": [
+        {
+          "class": "max=1",
+          "rectangles": 626703,
+          "rect_pct": 20.33,
+          "pair_mass": 626703,
+          "mass_pct": 0.12
+        },
+        {
+          "class": "2-7",
+          "rectangles": 1686641,
+          "rect_pct": 54.71,
+          "pair_mass": 13404286,
+          "mass_pct": 2.62
+        },
+        {
+          "class": "8-63",
+          "rectangles": 716981,
+          "rect_pct": 23.26,
+          "pair_mass": 153860325,
+          "mass_pct": 30.05
+        },
+        {
+          "class": "64-1023",
+          "rectangles": 52466,
+          "rect_pct": 1.7,
+          "pair_mass": 344092686,
+          "mass_pct": 67.21
+        },
+        {
+          "class": ">=1024",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        }
+      ],
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wspd_hist/receipt_build/wspd_factor_hist --family=terrain --n=32000 --s=8 --seed=3",
+      "wall_seconds": 0.286,
+      "raw_stdout": "split=diam famille=terrain n=32000 s=8 seed=3 uniques=32000 rectangles=3082791 sum_factors=38409486 max_factor=694 both_ge8=318944 both_ge64=16321 masse=511984000 masse_attendue=511984000\n  max=1    rect=    626703 ( 20.33%)  masse_paires=626703 (  0.12%)\n  2-7      rect=   1686641 ( 54.71%)  masse_paires=13404286 (  2.62%)\n  8-63     rect=    716981 ( 23.26%)  masse_paires=153860325 ( 30.05%)\n  64-1023  rect=     52466 (  1.70%)  masse_paires=344092686 ( 67.21%)\n  >=1024   rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n"
+    },
+    {
+      "split": "diam",
+      "family": "eight_clusters",
+      "n": 8000,
+      "s": 8,
+      "seed": 3,
+      "uniques": 8000,
+      "rectangles": 1654169,
+      "sum_factors": 9216616,
+      "max_factor": 84,
+      "both_ge8": 70321,
+      "both_ge64": 17,
+      "pair_mass": 31996000,
+      "expected_pair_mass": 31996000,
+      "buckets": [
+        {
+          "class": "max=1",
+          "rectangles": 563725,
+          "rect_pct": 34.08,
+          "pair_mass": 563725,
+          "mass_pct": 1.76
+        },
+        {
+          "class": "2-7",
+          "rectangles": 930976,
+          "rect_pct": 56.28,
+          "pair_mass": 5165235,
+          "mass_pct": 16.14
+        },
+        {
+          "class": "8-63",
+          "rectangles": 159175,
+          "rect_pct": 9.62,
+          "pair_mass": 25725281,
+          "mass_pct": 80.4
+        },
+        {
+          "class": "64-1023",
+          "rectangles": 293,
+          "rect_pct": 0.02,
+          "pair_mass": 541759,
+          "mass_pct": 1.69
+        },
+        {
+          "class": ">=1024",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        }
+      ],
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wspd_hist/receipt_build/wspd_factor_hist --family=eight_clusters --n=8000 --s=8 --seed=3",
+      "wall_seconds": 0.152,
+      "raw_stdout": "split=diam famille=eight_clusters n=8000 s=8 seed=3 uniques=8000 rectangles=1654169 sum_factors=9216616 max_factor=84 both_ge8=70321 both_ge64=17 masse=31996000 masse_attendue=31996000\n  max=1    rect=    563725 ( 34.08%)  masse_paires=563725 (  1.76%)\n  2-7      rect=    930976 ( 56.28%)  masse_paires=5165235 ( 16.14%)\n  8-63     rect=    159175 (  9.62%)  masse_paires=25725281 ( 80.40%)\n  64-1023  rect=       293 (  0.02%)  masse_paires=541759 (  1.69%)\n  >=1024   rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n"
+    },
+    {
+      "split": "diam",
+      "family": "eight_clusters",
+      "n": 16000,
+      "s": 8,
+      "seed": 3,
+      "uniques": 16000,
+      "rectangles": 4368608,
+      "sum_factors": 25107400,
+      "max_factor": 269,
+      "both_ge8": 146343,
+      "both_ge64": 1479,
+      "pair_mass": 127992000,
+      "expected_pair_mass": 127992000,
+      "buckets": [
+        {
+          "class": "max=1",
+          "rectangles": 1367772,
+          "rect_pct": 31.31,
+          "pair_mass": 1367772,
+          "mass_pct": 1.07
+        },
+        {
+          "class": "2-7",
+          "rectangles": 2701149,
+          "rect_pct": 61.83,
+          "pair_mass": 15008403,
+          "mass_pct": 11.73
+        },
+        {
+          "class": "8-63",
+          "rectangles": 291287,
+          "rect_pct": 6.67,
+          "pair_mass": 83866723,
+          "mass_pct": 65.52
+        },
+        {
+          "class": "64-1023",
+          "rectangles": 8400,
+          "rect_pct": 0.19,
+          "pair_mass": 27749102,
+          "mass_pct": 21.68
+        },
+        {
+          "class": ">=1024",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        }
+      ],
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wspd_hist/receipt_build/wspd_factor_hist --family=eight_clusters --n=16000 --s=8 --seed=3",
+      "wall_seconds": 0.329,
+      "raw_stdout": "split=diam famille=eight_clusters n=16000 s=8 seed=3 uniques=16000 rectangles=4368608 sum_factors=25107400 max_factor=269 both_ge8=146343 both_ge64=1479 masse=127992000 masse_attendue=127992000\n  max=1    rect=   1367772 ( 31.31%)  masse_paires=1367772 (  1.07%)\n  2-7      rect=   2701149 ( 61.83%)  masse_paires=15008403 ( 11.73%)\n  8-63     rect=    291287 (  6.67%)  masse_paires=83866723 ( 65.52%)\n  64-1023  rect=      8400 (  0.19%)  masse_paires=27749102 ( 21.68%)\n  >=1024   rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n"
+    },
+    {
+      "split": "diam",
+      "family": "eight_clusters",
+      "n": 32000,
+      "s": 8,
+      "seed": 3,
+      "uniques": 32000,
+      "rectangles": 11062220,
+      "sum_factors": 66776845,
+      "max_factor": 314,
+      "both_ge8": 338987,
+      "both_ge64": 15819,
+      "pair_mass": 511984000,
+      "expected_pair_mass": 511984000,
+      "buckets": [
+        {
+          "class": "max=1",
+          "rectangles": 3037197,
+          "rect_pct": 27.46,
+          "pair_mass": 3037197,
+          "mass_pct": 0.59
+        },
+        {
+          "class": "2-7",
+          "rectangles": 7371060,
+          "rect_pct": 66.63,
+          "pair_mass": 49974599,
+          "mass_pct": 9.76
+        },
+        {
+          "class": "8-63",
+          "rectangles": 620567,
+          "rect_pct": 5.61,
+          "pair_mass": 187712582,
+          "mass_pct": 36.66
+        },
+        {
+          "class": "64-1023",
+          "rectangles": 33396,
+          "rect_pct": 0.3,
+          "pair_mass": 271259622,
+          "mass_pct": 52.98
+        },
+        {
+          "class": ">=1024",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        }
+      ],
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wspd_hist/receipt_build/wspd_factor_hist --family=eight_clusters --n=32000 --s=8 --seed=3",
+      "wall_seconds": 0.874,
+      "raw_stdout": "split=diam famille=eight_clusters n=32000 s=8 seed=3 uniques=32000 rectangles=11062220 sum_factors=66776845 max_factor=314 both_ge8=338987 both_ge64=15819 masse=511984000 masse_attendue=511984000\n  max=1    rect=   3037197 ( 27.46%)  masse_paires=3037197 (  0.59%)\n  2-7      rect=   7371060 ( 66.63%)  masse_paires=49974599 (  9.76%)\n  8-63     rect=    620567 (  5.61%)  masse_paires=187712582 ( 36.66%)\n  64-1023  rect=     33396 (  0.30%)  masse_paires=271259622 ( 52.98%)\n  >=1024   rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n"
+    },
+    {
+      "split": "diam",
+      "family": "uniform",
+      "n": 32000,
+      "s": 10,
+      "seed": 3,
+      "uniques": 32000,
+      "rectangles": 29690097,
+      "sum_factors": 187950484,
+      "max_factor": 85,
+      "both_ge8": 1163516,
+      "both_ge64": 2,
+      "pair_mass": 511984000,
+      "expected_pair_mass": 511984000,
+      "buckets": [
+        {
+          "class": "max=1",
+          "rectangles": 6108500,
+          "rect_pct": 20.57,
+          "pair_mass": 6108500,
+          "mass_pct": 1.19
+        },
+        {
+          "class": "2-7",
+          "rectangles": 20285543,
+          "rect_pct": 68.32,
+          "pair_mass": 180694080,
+          "mass_pct": 35.29
+        },
+        {
+          "class": "8-63",
+          "rectangles": 3295986,
+          "rect_pct": 11.1,
+          "pair_mass": 325009550,
+          "mass_pct": 63.48
+        },
+        {
+          "class": "64-1023",
+          "rectangles": 68,
+          "rect_pct": 0.0,
+          "pair_mass": 171870,
+          "mass_pct": 0.03
+        },
+        {
+          "class": ">=1024",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        }
+      ],
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wspd_hist/receipt_build/wspd_factor_hist --family=uniform --n=32000 --s=10 --seed=3",
+      "wall_seconds": 1.88,
+      "raw_stdout": "split=diam famille=uniform n=32000 s=10 seed=3 uniques=32000 rectangles=29690097 sum_factors=187950484 max_factor=85 both_ge8=1163516 both_ge64=2 masse=511984000 masse_attendue=511984000\n  max=1    rect=   6108500 ( 20.57%)  masse_paires=6108500 (  1.19%)\n  2-7      rect=  20285543 ( 68.32%)  masse_paires=180694080 ( 35.29%)\n  8-63     rect=   3295986 ( 11.10%)  masse_paires=325009550 ( 63.48%)\n  64-1023  rect=        68 (  0.00%)  masse_paires=171870 (  0.03%)\n  >=1024   rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n"
+    },
+    {
+      "split": "diam",
+      "family": "uniform",
+      "n": 32000,
+      "s": 12,
+      "seed": 3,
+      "uniques": 32000,
+      "rectangles": 41402177,
+      "sum_factors": 235136154,
+      "max_factor": 62,
+      "both_ge8": 1003215,
+      "both_ge64": 0,
+      "pair_mass": 511984000,
+      "expected_pair_mass": 511984000,
+      "buckets": [
+        {
+          "class": "max=1",
+          "rectangles": 9285436,
+          "rect_pct": 22.43,
+          "pair_mass": 9285436,
+          "mass_pct": 1.81
+        },
+        {
+          "class": "2-7",
+          "rectangles": 28640738,
+          "rect_pct": 69.18,
+          "pair_mass": 242420090,
+          "mass_pct": 47.35
+        },
+        {
+          "class": "8-63",
+          "rectangles": 3476003,
+          "rect_pct": 8.4,
+          "pair_mass": 260278474,
+          "mass_pct": 50.84
+        },
+        {
+          "class": "64-1023",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        },
+        {
+          "class": ">=1024",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        }
+      ],
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wspd_hist/receipt_build/wspd_factor_hist --family=uniform --n=32000 --s=12 --seed=3",
+      "wall_seconds": 2.945,
+      "raw_stdout": "split=diam famille=uniform n=32000 s=12 seed=3 uniques=32000 rectangles=41402177 sum_factors=235136154 max_factor=62 both_ge8=1003215 both_ge64=0 masse=511984000 masse_attendue=511984000\n  max=1    rect=   9285436 ( 22.43%)  masse_paires=9285436 (  1.81%)\n  2-7      rect=  28640738 ( 69.18%)  masse_paires=242420090 ( 47.35%)\n  8-63     rect=   3476003 (  8.40%)  masse_paires=260278474 ( 50.84%)\n  64-1023  rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n  >=1024   rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n"
+    },
+    {
+      "split": "diam",
+      "family": "uniform",
+      "n": 32000,
+      "s": 14,
+      "seed": 3,
+      "uniques": 32000,
+      "rectangles": 54323619,
+      "sum_factors": 280109615,
+      "max_factor": 52,
+      "both_ge8": 717593,
+      "both_ge64": 0,
+      "pair_mass": 511984000,
+      "expected_pair_mass": 511984000,
+      "buckets": [
+        {
+          "class": "max=1",
+          "rectangles": 13257927,
+          "rect_pct": 24.41,
+          "pair_mass": 13257927,
+          "mass_pct": 2.59
+        },
+        {
+          "class": "2-7",
+          "rectangles": 37815232,
+          "rect_pct": 69.61,
+          "pair_mass": 301632028,
+          "mass_pct": 58.91
+        },
+        {
+          "class": "8-63",
+          "rectangles": 3250460,
+          "rect_pct": 5.98,
+          "pair_mass": 197094045,
+          "mass_pct": 38.5
+        },
+        {
+          "class": "64-1023",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        },
+        {
+          "class": ">=1024",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        }
+      ],
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wspd_hist/receipt_build/wspd_factor_hist --family=uniform --n=32000 --s=14 --seed=3",
+      "wall_seconds": 3.832,
+      "raw_stdout": "split=diam famille=uniform n=32000 s=14 seed=3 uniques=32000 rectangles=54323619 sum_factors=280109615 max_factor=52 both_ge8=717593 both_ge64=0 masse=511984000 masse_attendue=511984000\n  max=1    rect=  13257927 ( 24.41%)  masse_paires=13257927 (  2.59%)\n  2-7      rect=  37815232 ( 69.61%)  masse_paires=301632028 ( 58.91%)\n  8-63     rect=   3250460 (  5.98%)  masse_paires=197094045 ( 38.50%)\n  64-1023  rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n  >=1024   rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n"
+    },
+    {
+      "split": "diam",
+      "family": "uniform",
+      "n": 32000,
+      "s": 16,
+      "seed": 3,
+      "uniques": 32000,
+      "rectangles": 68159956,
+      "sum_factors": 322562304,
+      "max_factor": 44,
+      "both_ge8": 435141,
+      "both_ge64": 0,
+      "pair_mass": 511984000,
+      "expected_pair_mass": 511984000,
+      "buckets": [
+        {
+          "class": "max=1",
+          "rectangles": 18038609,
+          "rect_pct": 26.47,
+          "pair_mass": 18038609,
+          "mass_pct": 3.52
+        },
+        {
+          "class": "2-7",
+          "rectangles": 47376865,
+          "rect_pct": 69.51,
+          "pair_mass": 352592542,
+          "mass_pct": 68.87
+        },
+        {
+          "class": "8-63",
+          "rectangles": 2744482,
+          "rect_pct": 4.03,
+          "pair_mass": 141352849,
+          "mass_pct": 27.61
+        },
+        {
+          "class": "64-1023",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        },
+        {
+          "class": ">=1024",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        }
+      ],
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wspd_hist/receipt_build/wspd_factor_hist --family=uniform --n=32000 --s=16 --seed=3",
+      "wall_seconds": 4.706,
+      "raw_stdout": "split=diam famille=uniform n=32000 s=16 seed=3 uniques=32000 rectangles=68159956 sum_factors=322562304 max_factor=44 both_ge8=435141 both_ge64=0 masse=511984000 masse_attendue=511984000\n  max=1    rect=  18038609 ( 26.47%)  masse_paires=18038609 (  3.52%)\n  2-7      rect=  47376865 ( 69.51%)  masse_paires=352592542 ( 68.87%)\n  8-63     rect=   2744482 (  4.03%)  masse_paires=141352849 ( 27.61%)\n  64-1023  rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n  >=1024   rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n"
+    },
+    {
+      "split": "diam",
+      "family": "uniform",
+      "n": 32000,
+      "s": 18,
+      "seed": 3,
+      "uniques": 32000,
+      "rectangles": 82677809,
+      "sum_factors": 362715061,
+      "max_factor": 36,
+      "both_ge8": 232825,
+      "both_ge64": 0,
+      "pair_mass": 511984000,
+      "expected_pair_mass": 511984000,
+      "buckets": [
+        {
+          "class": "max=1",
+          "rectangles": 23633137,
+          "rect_pct": 28.58,
+          "pair_mass": 23633137,
+          "mass_pct": 4.62
+        },
+        {
+          "class": "2-7",
+          "rectangles": 56896853,
+          "rect_pct": 68.82,
+          "pair_mass": 391232872,
+          "mass_pct": 76.42
+        },
+        {
+          "class": "8-63",
+          "rectangles": 2147819,
+          "rect_pct": 2.6,
+          "pair_mass": 97117991,
+          "mass_pct": 18.97
+        },
+        {
+          "class": "64-1023",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        },
+        {
+          "class": ">=1024",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        }
+      ],
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wspd_hist/receipt_build/wspd_factor_hist --family=uniform --n=32000 --s=18 --seed=3",
+      "wall_seconds": 6.085,
+      "raw_stdout": "split=diam famille=uniform n=32000 s=18 seed=3 uniques=32000 rectangles=82677809 sum_factors=362715061 max_factor=36 both_ge8=232825 both_ge64=0 masse=511984000 masse_attendue=511984000\n  max=1    rect=  23633137 ( 28.58%)  masse_paires=23633137 (  4.62%)\n  2-7      rect=  56896853 ( 68.82%)  masse_paires=391232872 ( 76.42%)\n  8-63     rect=   2147819 (  2.60%)  masse_paires=97117991 ( 18.97%)\n  64-1023  rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n  >=1024   rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n"
+    },
+    {
+      "split": "level",
+      "family": "uniform",
+      "n": 8000,
+      "s": 8,
+      "seed": 3,
+      "uniques": 8000,
+      "rectangles": 3904920,
+      "sum_factors": 19186261,
+      "max_factor": 46,
+      "both_ge8": 35118,
+      "both_ge64": 0,
+      "pair_mass": 31996000,
+      "expected_pair_mass": 31996000,
+      "buckets": [
+        {
+          "class": "max=1",
+          "rectangles": 1043827,
+          "rect_pct": 26.73,
+          "pair_mass": 1043827,
+          "mass_pct": 3.26
+        },
+        {
+          "class": "2-7",
+          "rectangles": 2645249,
+          "rect_pct": 67.74,
+          "pair_mass": 19708271,
+          "mass_pct": 61.6
+        },
+        {
+          "class": "8-63",
+          "rectangles": 215844,
+          "rect_pct": 5.53,
+          "pair_mass": 11243902,
+          "mass_pct": 35.14
+        },
+        {
+          "class": "64-1023",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        },
+        {
+          "class": ">=1024",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        }
+      ],
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wspd_hist/receipt_build/wspd_factor_hist --family=uniform --n=8000 --s=8 --seed=3 --split=level",
+      "wall_seconds": 0.304,
+      "raw_stdout": "split=level famille=uniform n=8000 s=8 seed=3 uniques=8000 rectangles=3904920 sum_factors=19186261 max_factor=46 both_ge8=35118 both_ge64=0 masse=31996000 masse_attendue=31996000\n  max=1    rect=   1043827 ( 26.73%)  masse_paires=1043827 (  3.26%)\n  2-7      rect=   2645249 ( 67.74%)  masse_paires=19708271 ( 61.60%)\n  8-63     rect=    215844 (  5.53%)  masse_paires=11243902 ( 35.14%)\n  64-1023  rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n  >=1024   rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n"
+    },
+    {
+      "split": "level",
+      "family": "uniform",
+      "n": 16000,
+      "s": 8,
+      "seed": 3,
+      "uniques": 16000,
+      "rectangles": 9447671,
+      "sum_factors": 54015236,
+      "max_factor": 69,
+      "both_ge8": 265861,
+      "both_ge64": 0,
+      "pair_mass": 127992000,
+      "expected_pair_mass": 127992000,
+      "buckets": [
+        {
+          "class": "max=1",
+          "rectangles": 2304760,
+          "rect_pct": 24.4,
+          "pair_mass": 2304760,
+          "mass_pct": 1.8
+        },
+        {
+          "class": "2-7",
+          "rectangles": 6305347,
+          "rect_pct": 66.74,
+          "pair_mass": 52292281,
+          "mass_pct": 40.86
+        },
+        {
+          "class": "8-63",
+          "rectangles": 837563,
+          "rect_pct": 8.87,
+          "pair_mass": 73391716,
+          "mass_pct": 57.34
+        },
+        {
+          "class": "64-1023",
+          "rectangles": 1,
+          "rect_pct": 0.0,
+          "pair_mass": 3243,
+          "mass_pct": 0.0
+        },
+        {
+          "class": ">=1024",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        }
+      ],
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wspd_hist/receipt_build/wspd_factor_hist --family=uniform --n=16000 --s=8 --seed=3 --split=level",
+      "wall_seconds": 1.215,
+      "raw_stdout": "split=level famille=uniform n=16000 s=8 seed=3 uniques=16000 rectangles=9447671 sum_factors=54015236 max_factor=69 both_ge8=265861 both_ge64=0 masse=127992000 masse_attendue=127992000\n  max=1    rect=   2304760 ( 24.40%)  masse_paires=2304760 (  1.80%)\n  2-7      rect=   6305347 ( 66.74%)  masse_paires=52292281 ( 40.86%)\n  8-63     rect=    837563 (  8.87%)  masse_paires=73391716 ( 57.34%)\n  64-1023  rect=         1 (  0.00%)  masse_paires=3243 (  0.00%)\n  >=1024   rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n"
+    },
+    {
+      "split": "level",
+      "family": "uniform",
+      "n": 32000,
+      "s": 8,
+      "seed": 3,
+      "uniques": 32000,
+      "rectangles": 22104371,
+      "sum_factors": 148242758,
+      "max_factor": 146,
+      "both_ge8": 1112504,
+      "both_ge64": 211,
+      "pair_mass": 511984000,
+      "expected_pair_mass": 511984000,
+      "buckets": [
+        {
+          "class": "max=1",
+          "rectangles": 4781983,
+          "rect_pct": 21.63,
+          "pair_mass": 4781983,
+          "mass_pct": 0.93
+        },
+        {
+          "class": "2-7",
+          "rectangles": 14602008,
+          "rect_pct": 66.06,
+          "pair_mass": 128751885,
+          "mass_pct": 25.15
+        },
+        {
+          "class": "8-63",
+          "rectangles": 2718862,
+          "rect_pct": 12.3,
+          "pair_mass": 373234444,
+          "mass_pct": 72.9
+        },
+        {
+          "class": "64-1023",
+          "rectangles": 1518,
+          "rect_pct": 0.01,
+          "pair_mass": 5215688,
+          "mass_pct": 1.02
+        },
+        {
+          "class": ">=1024",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        }
+      ],
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wspd_hist/receipt_build/wspd_factor_hist --family=uniform --n=32000 --s=8 --seed=3 --split=level",
+      "wall_seconds": 2.73,
+      "raw_stdout": "split=level famille=uniform n=32000 s=8 seed=3 uniques=32000 rectangles=22104371 sum_factors=148242758 max_factor=146 both_ge8=1112504 both_ge64=211 masse=511984000 masse_attendue=511984000\n  max=1    rect=   4781983 ( 21.63%)  masse_paires=4781983 (  0.93%)\n  2-7      rect=  14602008 ( 66.06%)  masse_paires=128751885 ( 25.15%)\n  8-63     rect=   2718862 ( 12.30%)  masse_paires=373234444 ( 72.90%)\n  64-1023  rect=      1518 (  0.01%)  masse_paires=5215688 (  1.02%)\n  >=1024   rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n"
+    },
+    {
+      "split": "level",
+      "family": "uniform",
+      "n": 64000,
+      "s": 8,
+      "seed": 3,
+      "uniques": 64000,
+      "rectangles": 50995545,
+      "sum_factors": 405774709,
+      "max_factor": 293,
+      "both_ge8": 3712611,
+      "both_ge64": 12882,
+      "pair_mass": 2047968000,
+      "expected_pair_mass": 2047968000,
+      "buckets": [
+        {
+          "class": "max=1",
+          "rectangles": 10109195,
+          "rect_pct": 19.82,
+          "pair_mass": 10109195,
+          "mass_pct": 0.49
+        },
+        {
+          "class": "2-7",
+          "rectangles": 32883698,
+          "rect_pct": 64.48,
+          "pair_mass": 302962834,
+          "mass_pct": 14.79
+        },
+        {
+          "class": "8-63",
+          "rectangles": 7936464,
+          "rect_pct": 15.56,
+          "pair_mass": 1517181529,
+          "mass_pct": 74.08
+        },
+        {
+          "class": "64-1023",
+          "rectangles": 66188,
+          "rect_pct": 0.13,
+          "pair_mass": 217714442,
+          "mass_pct": 10.63
+        },
+        {
+          "class": ">=1024",
+          "rectangles": 0,
+          "rect_pct": 0.0,
+          "pair_mass": 0,
+          "mass_pct": 0.0
+        }
+      ],
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wspd_hist/receipt_build/wspd_factor_hist --family=uniform --n=64000 --s=8 --seed=3 --split=level",
+      "wall_seconds": 7.403,
+      "raw_stdout": "split=level famille=uniform n=64000 s=8 seed=3 uniques=64000 rectangles=50995545 sum_factors=405774709 max_factor=293 both_ge8=3712611 both_ge64=12882 masse=2047968000 masse_attendue=2047968000\n  max=1    rect=  10109195 ( 19.82%)  masse_paires=10109195 (  0.49%)\n  2-7      rect=  32883698 ( 64.48%)  masse_paires=302962834 ( 14.79%)\n  8-63     rect=   7936464 ( 15.56%)  masse_paires=1517181529 ( 74.08%)\n  64-1023  rect=     66188 (  0.13%)  masse_paires=217714442 ( 10.63%)\n  >=1024   rect=         0 (  0.00%)  masse_paires=0 (  0.00%)\n"
+    }
+  ],
+  "doubling_ratios": [
+    {
+      "family": "uniform",
+      "s": 8,
+      "split": "diam",
+      "from_n": 8000,
+      "to_n": 16000,
+      "rectangles_ratio": 2.425,
+      "sum_factors_ratio": 2.853,
+      "rect_per_point_from": 429.4,
+      "rect_per_point_to": 520.7
+    },
+    {
+      "family": "uniform",
+      "s": 8,
+      "split": "diam",
+      "from_n": 16000,
+      "to_n": 32000,
+      "rectangles_ratio": 2.349,
+      "sum_factors_ratio": 2.771,
+      "rect_per_point_from": 520.7,
+      "rect_per_point_to": 611.7
+    },
+    {
+      "family": "uniform",
+      "s": 8,
+      "split": "diam",
+      "from_n": 32000,
+      "to_n": 64000,
+      "rectangles_ratio": 2.296,
+      "sum_factors_ratio": 2.727,
+      "rect_per_point_from": 611.7,
+      "rect_per_point_to": 702.2
+    },
+    {
+      "family": "uniform",
+      "s": 8,
+      "split": "diam",
+      "from_n": 64000,
+      "to_n": 128000,
+      "rectangles_ratio": 2.229,
+      "sum_factors_ratio": 2.577,
+      "rect_per_point_from": 702.2,
+      "rect_per_point_to": 782.7
+    },
+    {
+      "family": "uniform",
+      "s": 8,
+      "split": "diam",
+      "from_n": 128000,
+      "to_n": 256000,
+      "rectangles_ratio": 2.187,
+      "sum_factors_ratio": 2.519,
+      "rect_per_point_from": 782.7,
+      "rect_per_point_to": 855.7
+    },
+    {
+      "family": "terrain",
+      "s": 8,
+      "split": "diam",
+      "from_n": 8000,
+      "to_n": 16000,
+      "rectangles_ratio": 2.149,
+      "sum_factors_ratio": 2.608,
+      "rect_per_point_from": 85.4,
+      "rect_per_point_to": 91.7
+    },
+    {
+      "family": "terrain",
+      "s": 8,
+      "split": "diam",
+      "from_n": 16000,
+      "to_n": 32000,
+      "rectangles_ratio": 2.101,
+      "sum_factors_ratio": 2.547,
+      "rect_per_point_from": 91.7,
+      "rect_per_point_to": 96.3
+    },
+    {
+      "family": "eight_clusters",
+      "s": 8,
+      "split": "diam",
+      "from_n": 8000,
+      "to_n": 16000,
+      "rectangles_ratio": 2.641,
+      "sum_factors_ratio": 2.724,
+      "rect_per_point_from": 206.8,
+      "rect_per_point_to": 273.0
+    },
+    {
+      "family": "eight_clusters",
+      "s": 8,
+      "split": "diam",
+      "from_n": 16000,
+      "to_n": 32000,
+      "rectangles_ratio": 2.532,
+      "sum_factors_ratio": 2.66,
+      "rect_per_point_from": 273.0,
+      "rect_per_point_to": 345.7
+    },
+    {
+      "family": "uniform",
+      "s": 8,
+      "split": "level",
+      "from_n": 8000,
+      "to_n": 16000,
+      "rectangles_ratio": 2.419,
+      "sum_factors_ratio": 2.815,
+      "rect_per_point_from": 488.1,
+      "rect_per_point_to": 590.5
+    },
+    {
+      "family": "uniform",
+      "s": 8,
+      "split": "level",
+      "from_n": 16000,
+      "to_n": 32000,
+      "rectangles_ratio": 2.34,
+      "sum_factors_ratio": 2.744,
+      "rect_per_point_from": 590.5,
+      "rect_per_point_to": 690.8
+    },
+    {
+      "family": "uniform",
+      "s": 8,
+      "split": "level",
+      "from_n": 32000,
+      "to_n": 64000,
+      "rectangles_ratio": 2.307,
+      "sum_factors_ratio": 2.737,
+      "rect_per_point_from": 690.8,
+      "rect_per_point_to": 796.8
+    }
+  ],
+  "stable_digest_without_times": "eaf6e22c47d68a6b50c674d2133a46dd369d4ad610aed3bfe09ea9db7f5dc4a4",
+  "scope": "Front WSPD pur (sans élimination par témoins), rectangles terminaux ; ce n'est ni le front fusionné v7 ni un moteur v8. Les temps muraux sont indicatifs (machine partagée)."
+}
