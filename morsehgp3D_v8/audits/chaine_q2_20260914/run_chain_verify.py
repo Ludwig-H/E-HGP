@@ -7,6 +7,8 @@ combinaisons de modes (Pure/MidpointSamples × Pairwise/SharedBlocks × frère D
 ordre GlobalDfs/ComplementFirst), une force brute exacte : toute paire non ordonnée à moins de
 Kmax intérieurs stricts doit être émise exactement une fois avec ses IDs intérieurs, toute sa
 coquille et sa clé ; aucune autre paire ne doit l'être. Écrit CHAINE_Q2_CHECKS.json. Sans assert.
+Avec --joint (onzième tranche, `git archive b2106c3c`), dix combinaisons Q2AnchorMode SharedProduct/SharedAnchors
+s'ajoutent et le reçu attendu est CHAINE_Q2_JOINT_CHECKS.json (passer --output).
 """
 from __future__ import annotations
 

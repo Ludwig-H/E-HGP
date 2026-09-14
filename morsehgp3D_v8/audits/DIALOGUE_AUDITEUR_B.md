@@ -137,22 +137,23 @@ chiffres de la prose venaient d'une exécution préliminaire : titre et
 chiffres sont alignés sur le reçu (60 ms à 8k, +1,04 s au seuil 2), et
 la limite est écrite ; la comparaison q2 complète lui appartient.
 
-## Onzième tranche : les modes conjoints sont exacts de bout en bout (sources gelées, non commitées)
+## Onzième tranche (b2106c3c) : les modes conjoints sont exacts de bout en bout
 
 Les sources de la onzième tranche (`Q2AnchorMode::SharedProduct` /
-`SharedAnchors`, `q2_joint_bounds.hpp`, `q2_census.cpp` étendu) sont
-gelées dans le worktree mais pas encore sur `main`. Je les ai copiées
-telles quelles à 13 h 14 UTC dans un instantané à manifeste SHA-256, j'y
-ai construit `libmhgp8_p0.a`, et j'ai rejoué mon vérificateur de chaîne
-avec les dix combinaisons conjointes ajoutées (`chain_verify.cpp
--DMHGP8_AUDIT_JOINT`, option `--joint` du runner) : front Pure ou
-MidpointSamples, SharedBlocks, frère Disabled/Saturating, ordre
-GlobalDfs/ComplementFirst, ancre SharedProduct/SharedAnchors, toujours
-contre la force brute exacte sur tous les sites. Reçu :
-[CHAINE_Q2_JOINT_CHECKS.json](chaine_q2_20260914/CHAINE_Q2_JOINT_CHECKS.json)
-(les hachés des cinq fichiers produit consommés y sont ; à comparer aux
-blobs du commit qui publiera la tranche, puis rejouer contre
-`git archive` de ce commit).
+`SharedAnchors`, `q2_joint_bounds.hpp`, `q2_census.cpp` étendu) ont
+d'abord été vérifiées sur un instantané du worktree pris à 13 h 14 UTC,
+avant leur publication ; les 25 fichiers de `src/` de cet instantané
+sont octet pour octet ceux du commit b2106c3c. La vérification a ensuite
+été rejouée contre `git archive b2106c3c` avec les mêmes résultats et le
+même condensé stable ; c'est ce rejeu ancré sur le commit que le reçu
+conserve. Mon vérificateur de chaîne porte dix combinaisons conjointes
+de plus (`chain_verify.cpp -DMHGP8_AUDIT_JOINT`, option `--joint` du
+runner) : front Pure ou MidpointSamples, SharedBlocks, frère
+Disabled/Saturating, ordre GlobalDfs/ComplementFirst, ancre
+SharedProduct/SharedAnchors, toujours contre la force brute exacte sur
+tous les sites. Reçu :
+[CHAINE_Q2_JOINT_CHECKS.json](chaine_q2_20260914/CHAINE_Q2_JOINT_CHECKS.json),
+rejoué en `python3 -O` sur les familles adversariales.
 
 Résultat : 86 exécutions × 18 combinaisons, 235 658 160 paires
 contrôlées, 7 559 154 supports attendus et émis, **0 désaccord**, aucun
@@ -249,7 +250,12 @@ les douze produits d'arêtes, et cette population croît comme une surface
 rapport survivantes/vérité passe de 5,3 à 22 pour Pool, de 3,6 à 6,7
 pour DualBlocks : le filtre le moins cher se dégrade avec n, et c'est
 le nombre de survivantes, pas le nombre de rectangles, qui fixera le
-coût du census résiduel.
+coût du census résiduel. Une précision utile pour les portes à
+empreintes : A trouve 29 688 et 102 336 survivantes à 16k/32k contre
+mes 29 878 et 102 993, parce que les projections égales sont départagées
+par IDs (originaux chez A, locaux dans mon harnais). Le résidu Pool
+n'est donc pas une grandeur canonique ; seuls les supports complets le
+sont, et ce sont eux qui doivent porter l'empreinte d'une porte.
 
 Sur la composition elle-même, trois points mathématiques, sans surprise
 mais qu'il vaut mieux écrire :
