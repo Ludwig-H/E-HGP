@@ -137,6 +137,56 @@ chiffres de la prose venaient d'une exécution préliminaire : titre et
 chiffres sont alignés sur le reçu (60 ms à 8k, +1,04 s au seuil 2), et
 la limite est écrite ; la comparaison q2 complète lui appartient.
 
+## Workers du front et du census (sources gelées, non commitées) : multiensemble et compteurs identiques de 1 à 8 fils
+
+La tranche « sous-arbres du front et workers q2 » est gelée dans le
+worktree (`wspd_q2_parallel.hpp`, `parallel/joined_workers.hpp`,
+`parallel/work_reduction.hpp`, `front.cpp` et `q2_census.cpp` étendus) ;
+je l'ai instantanée à 14 h 58 UTC avec manifeste SHA-256, et les
+sources gelées lui sont restées identiques. Le contrat de sa note en
+chantier est précis : ordre inter-workers non déterministe, mais
+multiensemble des supports complets déterministe, compteurs de travail
+conservés par somme, décisions géométriques indépendantes de
+l'ordonnancement. C'est exactement ce que vérifie mon nouveau harnais
+[chain_verify_parallel.cpp](chaine_q2_20260914/chain_verify_parallel.cpp)
+(runner `run_chain_verify_parallel.py`), reçu
+[CHAINE_Q2_PARALLEL_CHECKS.json](chaine_q2_20260914/CHAINE_Q2_PARALLEL_CHECKS.json) :
+
+- **Exactitude** : sur 86 nuages (sept familles adversariales × K
+  1/2/5/10 × s 8/12, quatre familles à 800 sites, uniforme et amas à
+  2 000), cinq combinaisons d'options (Pool 64 ou 2, Pairwise, front
+  Pure, SharedAnchors), W ∈ {1, 2, 3, 4, 8} fils et lots de 1 ou 16
+  produits : 4 336 appels parallèles, 13 092 120 paires contrôlées
+  contre la force brute, **0 désaccord**, **0 doublon entre slots**.
+- **Identité** : le condensé canonique des supports réunis est le même
+  pour tous les W et égal à celui du chemin série ; 22 compteurs
+  discrets (candidates, admises, rejetées, rectangles, visites et tests
+  du comptage, tâches, racines, frère, phases, Pool, front) sont égaux
+  au chemin série pour chaque W (aucune rupture sur 4 336 appels).
+- **Échelle** (mode sans force brute, condensés et compteurs comparés au
+  série, un passage, hôte partagé à 8 cœurs, temps indicatifs) :
+
+| Entrée | Série | W = 1 | W = 2 | W = 4 | W = 8 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Uniforme 8k | 5,44 s | 5,51 s | 3,11 s (×1,75) | 2,15 s (×2,53) | 1,53 s (×3,55) |
+| Uniforme 16k | 13,17 s | 13,12 s | 7,00 s (×1,88) | 5,33 s (×2,47) | 3,06 s (×4,30) |
+| Uniforme 32k | 30,54 s | 30,89 s | 16,88 s (×1,81) | 10,70 s (×2,85) | 7,32 s (×4,17) |
+| Amas 8k | 3,01 s | 2,94 s | 1,65 s (×1,83) | 0,94 s (×3,19) | 0,68 s (×4,43) |
+| Amas 16k | 8,44 s | 8,29 s | 4,93 s (×1,71) | 3,40 s (×2,48) | 2,30 s (×3,67) |
+| Amas 32k | 21,88 s | 20,88 s | 11,71 s (×1,87) | 7,60 s (×2,88) | 4,92 s (×4,45) |
+| Terrain 8k | 1,05 s | 1,46 s | 0,81 s (×1,30) | 0,43 s (×2,48) | 0,32 s (×3,26) |
+| Terrain 16k | 3,04 s | 3,08 s | 1,66 s (×1,83) | 0,86 s (×3,55) | 0,71 s (×4,27) |
+| Terrain 32k | 6,77 s | 6,40 s | 3,75 s (×1,81) | 2,03 s (×3,33) | 1,55 s (×4,36) |
+
+Un worker coûte comme le chemin série (l'exception terrain 8k, 1,05 →
+1,46 s, est du bruit d'hôte : 16k et 32k sont à ×1). Huit workers sur
+huit cœurs partagés donnent ×3,3 à ×4,5 ; c'est une accélération murale
+à travail identique, sans changement de borne, comme la note du
+constructeur le dit elle-même. Le déséquilibre des gros jobs (28
+produits inter-amas, sous-arbres LiDAR relevés par A) reste la limite à
+mesurer par worker. Rien à objecter sur le contrat ; je rejouerai
+contre `git archive` du commit dès sa publication.
+
 ## Séparation s ∈ {8, 10, 12} : même objet, coûts voisins
 
 Sur la sonde produit de ba11e3ab, quatre familles à 8k et deux à 32k,
