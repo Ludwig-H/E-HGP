@@ -178,8 +178,33 @@ l'ordonnancement. C'est exactement ce que vérifie mon nouveau harnais
 | Terrain 16k | 3,04 s | 3,08 s | 1,66 s (×1,83) | 0,86 s (×3,55) | 0,71 s (×4,27) |
 | Terrain 32k | 6,77 s | 6,40 s | 3,75 s (×1,81) | 2,03 s (×3,33) | 1,55 s (×4,36) |
 
+**Déséquilibre par worker.** Un second passage, moins chargé, avec les
+statistiques par worker (reçu
+[CHAINE_Q2_PARALLEL_BALANCE_CHECKS.json](chaine_q2_20260914/CHAINE_Q2_PARALLEL_BALANCE_CHECKS.json),
+quatre familles dont les rangées, mêmes identités vérifiées) :
+
+| Entrée | W = 4 | W = 8 | Déséquilibre W = 8 (max / moyenne des temps worker) | Part des visites du worker le plus chargé |
+| --- | ---: | ---: | ---: | ---: |
+| Uniforme 8k / 16k / 32k | ×3,82 / ×3,60 / ×3,64 | ×4,86 / ×4,80 / ×4,56 | 1,01 / 1,02 / 1,01 | 0,13 / 0,13 / 0,13 |
+| Amas 8k / 16k / 32k | ×3,72 / ×3,60 / ×3,65 | ×4,84 / ×4,03 / ×4,34 | 1,02 / 1,02 / 1,01 | 0,14 / 0,14 / 0,14 |
+| Terrain 8k / 16k / 32k | ×3,73 / ×3,63 / ×3,48 | ×5,00 / ×4,74 / ×4,62 | 1,03 / 1,03 / 1,05 | 0,14 / 0,14 / 0,14 |
+| Rangées 8k / 16k / 32k | ×1,71 / ×3,11 / ×2,69 | ×1,79 / ×2,99 / ×3,00 | 2,98 / 1,65 / 1,10 | 0,79 / 0,39 / 0,20 |
+
+Uniforme, amas et terrain sont équilibrés (chaque worker porte 13 à
+14 % des visites à W = 8, comme 1/8) : les 28 gros produits inter-amas
+ne pèsent plus rien après Pool. Les rangées sont le contre-exemple
+attendu : à 8k, un seul worker porte 79 % des visites de comptage (le
+produit rangée × rangée, sans réduction Pool, dont le census reste
+entier dans un worker) et le gain plafonne à ×1,8 ; le déséquilibre
+décroît avec n (1,65 à 16k, 1,10 à 32k) parce que le front y découpe
+davantage de produits. C'est exactement la limite que le constructeur
+écrit (« un gros travail de census dans un worker ne sera pas résolu par
+le seul don des produits du front ») : elle ne concerne, sur ces
+familles, que les rangées, et seulement aux petites tailles.
+
 Un worker coûte comme le chemin série (l'exception terrain 8k, 1,05 →
-1,46 s, est du bruit d'hôte : 16k et 32k sont à ×1). Huit workers
+1,46 s, est du bruit d'hôte : 16k et 32k sont à ×1, et le second
+passage donne ×1,03). Huit workers
 donnent ×3,3 à ×4,5 sur un hôte qui n'a que 4 cœurs physiques pour
 8 fils logiques (2 fils par cœur, d'après `lscpu`), partagés
 avec les campagnes des autres acteurs : ×4,5 est donc proche du plafond

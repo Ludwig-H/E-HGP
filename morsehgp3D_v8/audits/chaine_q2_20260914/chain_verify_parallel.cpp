@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
     {WspdFrontMode::Pure, Q2CensusMode::SharedBlocks, Q2SiblingMode::Saturating, Q2WitnessOrder::ComplementFirst, Q2AnchorMode::Individual, 0, "pure/shared/sib+compl"},
     {WspdFrontMode::MidpointSamples, Q2CensusMode::SharedBlocks, Q2SiblingMode::Saturating, Q2WitnessOrder::ComplementFirst, Q2AnchorMode::SharedAnchors, 64, "samples/joint-anchors/sib+compl/pool64"},
   };
-  const std::vector<Combo> combos = scale ? std::vector<Combo>{all_combos[0]} : all_combos;
+  const std::vector<Combo> combos = scale ? std::vector<Combo>{all_combos[0]} : all_combos;  // échelle : Pool 64, frère, Complement
   const std::vector<std::size_t> workers_list = scale ? std::vector<std::size_t>{1, 2, 4, 8} : std::vector<std::size_t>{1, 2, 3, 4, 8};
   const std::vector<std::size_t> jobs_list = scale ? std::vector<std::size_t>{16} : std::vector<std::size_t>{1, 16};
   u64 total_mismatch = 0, total_checked = 0, total_alive = 0, total_runs = 0, cross_slot_dups = 0, digest_breaks = 0, counter_breaks = 0;
@@ -112,7 +112,11 @@ int main(int argc, char** argv) {
       if (dups) cross_slot_dups += dups;
       if (!digest_ok) ++digest_breaks;
       if (!counters_ok) ++counter_breaks;
-      std::printf("  W=%zu J=%-2zu started=%llu jobs=%llu completed=%llu terminal=%llu emitted=%zu dups=%llu ok=%s digest_eq=%s counters_eq=%s cand=%llu acc=%llu rej=%llu total_ms=%.1f\n", W, J, (unsigned long long)pres.started_workers, (unsigned long long)pres.jobs, (unsigned long long)pres.completed_jobs, (unsigned long long)pres.terminal_jobs, merged.size(), (unsigned long long)dups, ok ? "yes" : "NO", digest_ok ? "yes" : "NO", counters_ok ? "yes" : first_bad.c_str(), (unsigned long long)pres.candidate_pairs, (unsigned long long)pres.accepted_pairs, (unsigned long long)pres.rejected_pairs, pres.total_ms);
+      // Déséquilibre : temps du worker le plus chargé rapporté à la moyenne, et sa part des visites de comptage.
+      double max_ms = 0, sum_ms = 0; u64 max_visits = 0, sum_visits = 0, max_jobs = 0;
+      for (const auto& wk : pres.workers) { max_ms = std::max(max_ms, wk.elapsed_ms); sum_ms += wk.elapsed_ms; max_visits = std::max(max_visits, wk.count_node_visits); sum_visits += wk.count_node_visits; max_jobs = std::max(max_jobs, wk.jobs); }
+      const double mean_ms = pres.workers.empty() ? 0 : sum_ms / pres.workers.size();
+      std::printf("  W=%zu J=%-2zu started=%llu jobs=%llu completed=%llu terminal=%llu emitted=%zu dups=%llu ok=%s digest_eq=%s counters_eq=%s cand=%llu acc=%llu rej=%llu total_ms=%.1f worker_max_ms=%.1f worker_mean_ms=%.1f imbalance=%.2f max_visit_share=%.3f max_jobs=%llu\n", W, J, (unsigned long long)pres.started_workers, (unsigned long long)pres.jobs, (unsigned long long)pres.completed_jobs, (unsigned long long)pres.terminal_jobs, merged.size(), (unsigned long long)dups, ok ? "yes" : "NO", digest_ok ? "yes" : "NO", counters_ok ? "yes" : first_bad.c_str(), (unsigned long long)pres.candidate_pairs, (unsigned long long)pres.accepted_pairs, (unsigned long long)pres.rejected_pairs, pres.total_ms, max_ms, mean_ms, mean_ms > 0 ? max_ms / mean_ms : 0.0, sum_visits ? (double)max_visits / sum_visits : 0.0, (unsigned long long)max_jobs);
     }
   }
   std::printf("SUMMARY family=%s n=%zu kmax=%u s=%u combos=%zu parallel_runs=%llu checked=%llu alive=%llu mismatch=%llu cross_slot_dups=%llu digest_breaks=%llu counter_breaks=%llu\n", fam.c_str(), N, kmax, s, combos.size(), (unsigned long long)total_runs, (unsigned long long)total_checked, (unsigned long long)total_alive, (unsigned long long)total_mismatch, (unsigned long long)cross_slot_dups, (unsigned long long)digest_breaks, (unsigned long long)counter_breaks);

@@ -60,7 +60,9 @@ def parse_scale(stdout: str) -> list[dict]:
         if line.strip().startswith("W="):
             f = dict(FIELD_RE.findall(line))
             rows.append({"workers": int(f["W"]), "jobs_per_worker": int(f["J"]), "started": int(f["started"]),
-                         "jobs": int(f["jobs"]), "total_ms": float(f["total_ms"]), "digest_eq": f["digest_eq"], "counters_eq": f["counters_eq"]})
+                         "jobs": int(f["jobs"]), "total_ms": float(f["total_ms"]), "digest_eq": f["digest_eq"], "counters_eq": f["counters_eq"],
+                         "worker_max_ms": float(f.get("worker_max_ms", 0)), "worker_mean_ms": float(f.get("worker_mean_ms", 0)),
+                         "imbalance": float(f.get("imbalance", 0)), "max_visit_share": float(f.get("max_visit_share", 0)), "max_jobs": int(f.get("max_jobs", 0))})
         elif "serial:" in line:
             f = dict(FIELD_RE.findall(line))
             rows.append({"workers": 0, "serial_total_ms": float(f["serial_total_ms"]), "digest": f["digest"], "candidates": int(f["cand"]), "accepted": int(f["acc"])})
@@ -75,6 +77,7 @@ def main() -> int:
     parser.add_argument("--output", default=str(HERE / "CHAINE_Q2_PARALLEL_CHECKS.json"))
     parser.add_argument("--quick", action="store_true", help="familles adversariales seulement, pas d'échelle")
     parser.add_argument("--no-scale", action="store_true", help="pas de mesures 8k/16k/32k")
+    parser.add_argument("--scale-only", action="store_true", help="seulement les mesures 8k/16k/32k (quatre familles, dont rangées)")
     args = parser.parse_args()
     lib = Path(args.lib).resolve(); src = Path(args.src_root).resolve(); build = Path(args.build_dir).resolve()
     build.mkdir(parents=True, exist_ok=True)
@@ -92,11 +95,15 @@ def main() -> int:
     if done.returncode != 0:
         return fail("compilation refusée :\n" + done.stderr)
     plan = []
-    for adv in ("grid5", "cospherical", "collinear", "cube_corners", "extremes", "halfint", "dense_ball"):
+    if args.scale_only:
+        for fam in ("uniform", "clusters", "terrain", "rows"):
+            for n in (8000, 16000, 32000):
+                plan.append((fam, n, 10, 8, 3, True))
+    for adv in (() if args.scale_only else ("grid5", "cospherical", "collinear", "cube_corners", "extremes", "halfint", "dense_ball")):
         for k in (1, 2, 5, 10):
             for s in (8, 12):
                 plan.append((f"adv:{adv}", 0, k, s, 3, False))
-    if not args.quick:
+    if not args.quick and not args.scale_only:
         for fam in ("uniform", "terrain", "clusters", "rows"):
             for k in (1, 3, 10):
                 for s in (8, 12):
@@ -105,7 +112,7 @@ def main() -> int:
         plan.append(("uniform", 2000, 10, 8, 3, False))
         plan.append(("clusters", 2000, 10, 8, 3, False))
         if not args.no_scale:
-            for fam in ("uniform", "clusters", "terrain"):
+            for fam in ("uniform", "clusters", "terrain", "rows"):
                 for n in (8000, 16000, 32000):
                     plan.append((fam, n, 10, 8, 3, True))
     runs = []
