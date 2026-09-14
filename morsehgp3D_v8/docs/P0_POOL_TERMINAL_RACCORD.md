@@ -1,13 +1,15 @@
-# Prochain raccord proposé : Pool sur les gros rectangles terminaux
+# Proposition historique : Pool sur les gros rectangles terminaux
 
-14 septembre 2026, actualisé après fbbecc01. **Raccord non intégré au
-produit ; prototype d'audit complet désormais mesuré.** Cadre
+14 septembre 2026, actualisé après fbbecc01. **Proposition historique et
+preuves indépendantes ; [port produit qualifié localement](P0_POOL_TERMINAL_Q2.md).** Cadre
 `phase=exploration_v8_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`, `mode=implementation_v8_p0`,
 `public_status=not_claimed`. Le Pool P0 existe ; le raccord décrit ici
-reste à porter et à qualifier dans la ligne produit. L'auditeur A en a
-publié un prototype indépendant, distinct de la tranche conjointe en
-qualification. Cette note ne modifie aucune de leurs sources ni les
+est désormais implémenté avec ses propres 49 CTests et 80 mesures.
+La suite de cette note conserve les propositions et résultats historiques
+des auditeurs, sans les transformer en reçus du port. L'auditeur A en a
+publié un prototype indépendant, distinct de la tranche conjointe.
+Cette note ne modifie aucune de leurs sources ni les
 audits indépendants. GCP non utilisé.
 
 ## 1. Deux preuves distinctes : sélectivité puis chaîne q2 complète
@@ -343,9 +345,13 @@ La qualification du raccord devra notamment couvrir :
    singleton {a},{b}, K=1 : un census limité aux facteurs manque z.
    Ajouter aussi une grande coquille, non plafonnée par K.
 7. **Projections égales et couverture.** Propositions sans IDs répétés,
-   ancre propre exclue, classes vides et saturées, plans sans candidate,
+   ancre propre exclue, classes vides et saturées, préfixes sans candidate,
    seuil de taille évitant tous les rectangles ou en traitant davantage :
    chaque bras doit donner exactement les mêmes supports complets.
+   Précision au port : sans cœur extérieur, un plan Pool q2 complet ne
+   peut être vide. La paire croisée de distance minimale n'a aucun témoin
+   local strict, sinon ce témoin fournirait une paire croisée plus courte.
+   Ne pas imposer de plancher positif à une branche géométriquement impossible.
 8. **Coût répété.** R fixe puis R croissant avec n, facteurs partagés,
    jobs parentaux versus préparations indépendantes : compter F et les
    rescans, pas seulement les candidates finales.

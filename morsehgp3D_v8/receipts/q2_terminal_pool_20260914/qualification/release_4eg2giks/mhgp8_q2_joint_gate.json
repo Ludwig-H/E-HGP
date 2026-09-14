@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_pool_terminal_20260914/mhgp8_q2_joint_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "mhgp8_q2_joint_gate",
+  "expected_exit_code": 0,
+  "started_utc": "2026-09-14T14:15:13.608343+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "mhgp8_q2_joint_gate passed checks=1026250 clouds=18 oracle_pairs=725 oracle_sites=10372 runs=5336 supports=124698 shell_sites=285376 root_products=108008 joint_tasks=111740 splits_a=1674 splits_b=192 joint_tests=3436 joint_credits=90 joint_rejected_pairs=84 joint_accepted_pairs=0 handoffs=109860 handoffs_after_credit=152 handoff_pair_mass=116836 structural_splits=840 phase_switches=0 shared_anchor_runs=1732 default_comparisons=144 invalid_inputs=4 callback_failures=4 model_mutants=5\n",
+  "stderr": "",
+  "stdout_base64": "bWhncDhfcTJfam9pbnRfZ2F0ZSBwYXNzZWQgY2hlY2tzPTEwMjYyNTAgY2xvdWRzPTE4IG9yYWNsZV9wYWlycz03MjUgb3JhY2xlX3NpdGVzPTEwMzcyIHJ1bnM9NTMzNiBzdXBwb3J0cz0xMjQ2OTggc2hlbGxfc2l0ZXM9Mjg1Mzc2IHJvb3RfcHJvZHVjdHM9MTA4MDA4IGpvaW50X3Rhc2tzPTExMTc0MCBzcGxpdHNfYT0xNjc0IHNwbGl0c19iPTE5MiBqb2ludF90ZXN0cz0zNDM2IGpvaW50X2NyZWRpdHM9OTAgam9pbnRfcmVqZWN0ZWRfcGFpcnM9ODQgam9pbnRfYWNjZXB0ZWRfcGFpcnM9MCBoYW5kb2Zmcz0xMDk4NjAgaGFuZG9mZnNfYWZ0ZXJfY3JlZGl0PTE1MiBoYW5kb2ZmX3BhaXJfbWFzcz0xMTY4MzYgc3RydWN0dXJhbF9zcGxpdHM9ODQwIHBoYXNlX3N3aXRjaGVzPTAgc2hhcmVkX2FuY2hvcl9ydW5zPTE3MzIgZGVmYXVsdF9jb21wYXJpc29ucz0xNDQgaW52YWxpZF9pbnB1dHM9NCBjYWxsYmFja19mYWlsdXJlcz00IG1vZGVsX211dGFudHM9NQo=",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-14T14:15:13.712433+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/q2_terminal_pool_20260914/qualification/release_4eg2giks/mhgp8_q2_joint_gate.stdout.bin",
+      "sha256": "7b5adb460ccbcbf01760114c1c06da3417bdffe09c5b206cd862bea136fb75ef",
+      "bytes": 488
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/q2_terminal_pool_20260914/qualification/release_4eg2giks/mhgp8_q2_joint_gate.stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  }
+}

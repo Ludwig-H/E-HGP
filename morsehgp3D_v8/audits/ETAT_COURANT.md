@@ -3,7 +3,26 @@
 14 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
-État constructeur courant : onzième tranche P0,
+État constructeur courant : douzième tranche P0,
+[Pool terminal q2](../docs/P0_POOL_TERMINAL_Q2.md) implémenté et qualifié
+localement : 49 CTests Release/Clang ASan/UBSan PASS, lecteurs normal/−O
+identiques et 80 mesures closes. Les deux builds Pool terminal sont
+épinglés. Le plan partage
+l'index global et ne développe que les bandes résiduelles ; si aucune
+paire n'est éliminée, le chemin de census initial est conservé. Cette
+politique ne tronque rien et laisse visibles les coûts de préparation.
+Les [reçus propres](../receipts/q2_terminal_pool_20260914/README.md) sont
+distincts de ceux du prototype A fbbecc01 et de la tranche conjointe.
+À s8/K10, les amas8k/16k/32k passent de 13,412/47,179/184,306 s
+à 3,589/7,614/19,180 s ; les visites census font ×2,958/×2,701
+contre ×4,106/×4,229 sans Pool. Aucun gain de travail sur uniforme
+et terrain, où aucun plan n'est sélectionné. Croissance favorable
+observée, aucune borne globale déduite. Priorité suivante : sous-arbres
+du front et census des nombreux petits rectangles par workers privés.
+P0, FULL, parallélisation et contrats G4 ouverts ; GCP non utilisé.
+
+## Historique : onzième tranche P0 publiée à b2106c3c
+
 [census conjoint A×B](../docs/P0_CENSUS_CONJOINT_Q2.md) qualifié localement
 en r2 : 47 CTests Release/Clang ASan/UBSan passent, 44 mesures closes
 et lecteurs normal/−O identiques. Les compteurs conjoints sont séparés ; reprise à

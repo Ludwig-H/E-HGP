@@ -5,6 +5,7 @@
 #include <array>
 #include <charconv>
 #include <chrono>
+#include <cmath>
 #include <cstddef>
 #include <exception>
 #include <iomanip>
@@ -60,18 +61,20 @@ struct Options {
   std::string_view sibling_mode;  // Empty preserves the historical v1 CLI/schema.
   std::string_view witness_order;  // Empty preserves the v1/v2 schemas.
   std::string_view anchor_mode;  // Empty preserves the v1/v2/v3 schemas.
+  std::optional<std::size_t> pool_min_factor;  // Absent preserves v1..v4.
 };
 
 Options options(int argc, char** argv) {
-  if (argc != 8 && argc != 9 && argc != 10 && argc != 11)
+  if (argc < 8 || argc > 12)
     throw std::invalid_argument("usage: mhgp8_wspd_q2_census_probe n uniform|terrain|clusters|rows "
                                 "Kmax s seed pure|samples pairwise|shared "
-                                "[none|sibling [global|complement [anchors|joint|joint-a]]]");
+                                "[none|sibling [global|complement [anchors|joint|joint-a [pool_min_factor]]]]");
   const Options result{integer<std::size_t>(argv[1]), argv[2], integer<unsigned>(argv[3]),
                        integer<unsigned>(argv[4]), integer<u64>(argv[5]), argv[6], argv[7],
                        argc >= 9 ? std::string_view(argv[8]) : std::string_view{},
                        argc >= 10 ? std::string_view(argv[9]) : std::string_view{},
-                       argc == 11 ? std::string_view(argv[10]) : std::string_view{}};
+                       argc >= 11 ? std::string_view(argv[10]) : std::string_view{},
+                       argc == 12 ? std::optional(integer<std::size_t>(argv[11])) : std::nullopt};
   mhgp8::bench::validate_front_fixture_size(result.n, result.family);
   if (result.kmax == 0 || result.kmax > 10 || result.separation == 0 ||
       (result.front_mode != "pure" && result.front_mode != "samples") ||
@@ -80,7 +83,7 @@ Options options(int argc, char** argv) {
       (result.sibling_mode == "sibling" && result.census_mode != "shared") ||
       (argc >= 10 && result.witness_order != "global" && result.witness_order != "complement") ||
       (result.witness_order == "complement" && result.census_mode != "shared") ||
-      (argc == 11 && result.anchor_mode != "anchors" && result.anchor_mode != "joint" &&
+      (argc >= 11 && result.anchor_mode != "anchors" && result.anchor_mode != "joint" &&
        result.anchor_mode != "joint-a") ||
       ((result.anchor_mode == "joint" || result.anchor_mode == "joint-a") && result.census_mode != "shared"))
     throw std::invalid_argument("WSPD census requires Kmax 1..10, positive s, valid front/census modes");
@@ -292,6 +295,20 @@ const std::array joint_fields{
   MHGP8_FIELD(JointWork, singleton_handoffs), MHGP8_FIELD(JointWork, handoffs_after_credit),
   MHGP8_FIELD(JointWork, handoff_pair_mass), MHGP8_FIELD(JointWork, rejected_pairs),
   MHGP8_FIELD(JointWork, accepted_pairs), MHGP8_FIELD(JointWork, max_depth)};
+using PoolWork = decltype(mhgp8::WspdQ2CensusResult{}.pool_work);
+const std::array pool_fields{
+  MHGP8_FIELD(PoolWork, selected_rectangles), MHGP8_FIELD(PoolWork, selected_pairs),
+  MHGP8_FIELD(PoolWork, residual_pairs), MHGP8_FIELD(PoolWork, filtered_pairs),
+  MHGP8_FIELD(PoolWork, factor_sites), MHGP8_FIELD(PoolWork, selection_tests),
+  MHGP8_FIELD(PoolWork, witness_attempts), MHGP8_FIELD(PoolWork, universal_queries),
+  MHGP8_FIELD(PoolWork, q2_axis_terms), MHGP8_FIELD(PoolWork, pool_selected),
+  MHGP8_FIELD(PoolWork, pool_insertions), MHGP8_FIELD(PoolWork, pool_shifted_entries),
+  MHGP8_FIELD(PoolWork, prefix_class_visits), MHGP8_FIELD(PoolWork, factor_read_visits),
+  MHGP8_FIELD(PoolWork, grouping_visits), MHGP8_FIELD(PoolWork, bands),
+  MHGP8_FIELD(PoolWork, selected_anchors), MHGP8_FIELD(PoolWork, pair_roots),
+  MHGP8_FIELD(PoolWork, plan_peak_bytes), MHGP8_FIELD(PoolWork, original_selected_anchors),
+  MHGP8_FIELD(PoolWork, passthrough_rectangles), MHGP8_FIELD(PoolWork, passthrough_pairs),
+  MHGP8_FIELD(PoolWork, passthrough_anchors)};
 #undef MHGP8_FIELD
 
 template <class T, std::size_t N>
@@ -317,6 +334,7 @@ void validate(const mhgp8::WspdQ2CensusResult& result, const OutputDigest& diges
   const auto total = n % 2 == 0 ? product(n / 2, n - 1) : product(n, (n - 1) / 2);
   const auto& f = result.front;
   const auto& c = result.census;
+  const auto& pool = result.pool_work;
   const bool joint_mode = o.anchor_mode == "joint" || o.anchor_mode == "joint-a";
   require(f.total_unordered_pairs == total && f.active_lane_mask == 1,
           "q2-only front total or mask mismatch");
@@ -328,17 +346,27 @@ void validate(const mhgp8::WspdQ2CensusResult& result, const OutputDigest& diges
     require(f.work.rejected_pair_mass[lane] == 0 && f.work.residual_pair_mass[lane] == 0 &&
             f.work.lane_rectangles[lane] == 0, "q2 pipeline unexpectedly used a higher lane");
   }
-  require(c.candidate_pairs == f.work.residual_pair_mass[0] &&
+  require(pool.selected_rectangles <= result.input_rectangles && pool.selected_pairs <= f.work.residual_pair_mass[0] &&
+          pool.original_selected_anchors <= result.anchor_queries && pool.residual_pairs <= pool.selected_pairs &&
+          pool.filtered_pairs == pool.selected_pairs - pool.residual_pairs &&
+          pool.passthrough_rectangles <= pool.selected_rectangles && pool.passthrough_pairs <= pool.residual_pairs &&
+          pool.passthrough_anchors <= pool.original_selected_anchors &&
+          pool.pair_roots == pool.residual_pairs - pool.passthrough_pairs,
+          "Pool selected populations or residual pair mass mismatch");
+  require(c.candidate_pairs == f.work.residual_pair_mass[0] - pool.filtered_pairs &&
           c.accepted_pairs <= c.candidate_pairs &&
           c.rejected_pairs == c.candidate_pairs - c.accepted_pairs &&
           result.input_rectangles == f.work.emitted_rectangles &&
-          result.anchor_queries >= result.input_rectangles && result.anchor_queries <= c.candidate_pairs,
+          result.anchor_queries >= result.input_rectangles && result.anchor_queries <= f.work.residual_pair_mass[0],
           "WSPD census rectangle, anchor or candidate accounting mismatch");
+  auto shared_roots = joint_mode ? result.input_rectangles - pool.selected_rectangles :
+                                  result.anchor_queries - pool.original_selected_anchors;
+  mhgp8::counter_add(shared_roots, joint_mode ? pool.passthrough_rectangles : pool.passthrough_anchors);
+  mhgp8::counter_add(shared_roots, pool.pair_roots);
   require(c.work.query_build_point_visits == 0 && c.work.query_build_nodes == 0 &&
           c.work.query_build_max_depth == 0 && c.work.query_cover_visits == 0 &&
           c.work.input_descriptors == result.input_rectangles && c.work.frontier_restarts == 0 &&
-          c.work.count_root_starts == (joint_mode ? result.input_rectangles :
-            o.census_mode == "shared" ? result.anchor_queries : c.candidate_pairs),
+          c.work.count_root_starts == (o.census_mode == "shared" ? shared_roots : c.candidate_pairs),
           "WSPD census rebuilt local index or lost its root/continuation contract");
   require(digest.supports == c.accepted_pairs && digest.supports == c.work.payload_supports &&
           digest.interior_ids == c.work.payload_interior_sites &&
@@ -390,6 +418,7 @@ void validate(const mhgp8::WspdQ2CensusResult& result, const OutputDigest& diges
     mhgp8::counter_add(mass, joint.rejected_pairs);
     mhgp8::counter_add(mass, joint.handoff_pair_mass);
     auto query_tasks = joint.singleton_handoffs;
+    mhgp8::counter_add(query_tasks, pool.pair_roots);
     mhgp8::counter_add(query_tasks, product(2, c.work.query_splits));
     auto advances_and_splits = joint.cursor_advances;
     mhgp8::counter_add(advances_and_splits, splits);
@@ -397,8 +426,8 @@ void validate(const mhgp8::WspdQ2CensusResult& result, const OutputDigest& diges
     mhgp8::counter_add(classified_moves, joint.structural_splits);
     mhgp8::counter_add(classified_moves, joint.deferred_skips);
     mhgp8::counter_add(classified_moves, joint.phase_switches);
-    require(joint.root_products == result.input_rectangles && joint.tasks == tasks &&
-            c.work.query_tasks == query_tasks && mass == c.candidate_pairs &&
+    require(joint.root_products == result.input_rectangles - (pool.selected_rectangles - pool.passthrough_rectangles) &&
+            joint.tasks == tasks && c.work.query_tasks == query_tasks && mass == c.candidate_pairs - pool.pair_roots &&
             joint.accepted_pairs <= c.accepted_pairs && joint.rejected_pairs <= c.rejected_pairs &&
             joint.splits_after_credit <= splits && joint.handoffs_after_credit <= joint.singleton_handoffs &&
             joint.singleton_handoffs <= joint.tasks && joint.singleton_handoffs <= joint.handoff_pair_mass &&
@@ -410,11 +439,30 @@ void validate(const mhgp8::WspdQ2CensusResult& result, const OutputDigest& diges
       require(joint.structural_splits == 0 && joint.deferred_skips == 0 && joint.phase_switches == 0,
               "global joint traversal performed complement work");
     if (o.anchor_mode == "joint-a")
-      require(joint.splits_b == 0 && joint.singleton_handoffs <= result.anchor_queries,
+      require(joint.splits_b == 0 && joint.singleton_handoffs <=
+                result.anchor_queries - (pool.original_selected_anchors - pool.passthrough_anchors),
               "joint-a split B or exceeded the original anchor population");
   } else {
     for (const auto& field : joint_fields)
       require(joint.*(field.member) == 0, "individual anchors performed joint product work");
+  }
+  require(pool.factor_read_visits == product(2, pool.factor_sites) &&
+          pool.grouping_visits == product(2, pool.factor_sites) &&
+          pool.prefix_class_visits == product(o.kmax + 1, pool.selected_rectangles) &&
+          pool.bands <= product(o.kmax, pool.selected_rectangles) &&
+          pool.bands <= pool.selected_anchors &&
+          pool.selected_anchors <= pool.original_selected_anchors - pool.passthrough_anchors &&
+          pool.selected_anchors <= pool.pair_roots &&
+          (pool.selected_anchors == 0) == (pool.pair_roots == 0),
+          "Pool factor, grouping or residual anchor accounting mismatch");
+  require(std::isfinite(pool.preparation_ms) && std::isfinite(pool.selected_total_ms) &&
+          pool.preparation_ms >= 0 && pool.selected_total_ms >= 0 &&
+          pool.preparation_ms <= pool.selected_total_ms + 1e-6 && pool.selected_total_ms <= result.total_ms + 1e-6,
+          "Pool clocks escape their enclosing pipeline");
+  if (o.pool_min_factor.value_or(0) == 0 || pool.selected_rectangles == 0) {
+    for (const auto& field : pool_fields)
+      require(pool.*(field.member) == 0, "disabled or unselected Pool performed work");
+    require(pool.preparation_ms == 0 && pool.selected_total_ms == 0, "unselected Pool reported elapsed work");
   }
 }
 
@@ -434,7 +482,8 @@ int run(const Options& o) {
       o.sibling_mode == "sibling" ? mhgp8::Q2SiblingMode::Saturating : mhgp8::Q2SiblingMode::Disabled,
       o.witness_order == "complement" ? mhgp8::Q2WitnessOrder::ComplementFirst : mhgp8::Q2WitnessOrder::GlobalDfs,
       o.anchor_mode == "joint-a" ? mhgp8::Q2AnchorMode::SharedAnchors :
-      o.anchor_mode == "joint" ? mhgp8::Q2AnchorMode::SharedProduct : mhgp8::Q2AnchorMode::Individual);
+      o.anchor_mode == "joint" ? mhgp8::Q2AnchorMode::SharedProduct : mhgp8::Q2AnchorMode::Individual,
+      o.pool_min_factor.value_or(0));
   const auto processed = Clock::now();
   validate(result, digest, o);
   require(&index->cloud() == cloud.get(), "WSPD census index lost immutable cloud identity");
@@ -461,7 +510,8 @@ int run(const Options& o) {
   std::cout.imbue(std::locale::classic());
   std::cout << std::setprecision(17)
             << "{\"schema\":\"mhgp8_wspd_q2_census_probe_"
-            << (!o.anchor_mode.empty() ? "v4" : !o.witness_order.empty() ? "v3" : o.sibling_mode.empty() ? "v1" : "v2")
+            << (o.pool_min_factor.has_value() ? "v5" : !o.anchor_mode.empty() ? "v4" :
+                !o.witness_order.empty() ? "v3" : o.sibling_mode.empty() ? "v1" : "v2")
             << "\",\"status\":\"completed\""
             << ",\"phase\":\"exploration_v8_hors_registre\",\"backend\":\"cpu_reference\""
             << ",\"profile\":\"quantized_u16_input_only\",\"mode\":\"implementation_v8_p0\""
@@ -511,6 +561,12 @@ int run(const Options& o) {
   if (!o.anchor_mode.empty()) {
     std::cout << "},\"anchor_mode\":\"" << o.anchor_mode << "\",\"joint_work\":{";
     print_fields(result.joint_work, joint_fields);
+  }
+  if (o.pool_min_factor.has_value()) {
+    std::cout << "},\"pool_min_factor\":" << *o.pool_min_factor << ",\"pool_work\":{";
+    print_fields(result.pool_work, pool_fields);
+    std::cout << ",\"preparation_ms\":" << result.pool_work.preparation_ms
+              << ",\"selected_total_ms\":" << result.pool_work.selected_total_ms;
   }
   std::cout << "},\"callback_work\":{";
   print_fields(digest.work, callback_fields);

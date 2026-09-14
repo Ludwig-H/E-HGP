@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[2]
 BENCH = ROOT / "morsehgp3D_v8/bench"
 RUNNER = BENCH / "run_wspd_q2_matrix.py"
 sys.path.insert(0, str(BENCH))
-from run_wspd_q2_matrix import RUNNER_SOURCE, digest, matrix, parse_result, sources  # noqa: E402
+from run_wspd_q2_matrix import POOL_FIELDS, POOL_TIMES, RUNNER_SOURCE, digest, matrix, parse_result, sources  # noqa: E402
 
 
 def require(condition: bool, message: str) -> None:
@@ -84,6 +84,18 @@ def capture_joint(probe: Path, output: Path) -> subprocess.CompletedProcess:
         "--s", "8", "--seeds", "3", "--modes", "pure",
         "--census-modes", "shared", "--sibling-modes", "none", "sibling",
         "--witness-orders", "global", "complement", "--anchor-modes", "anchors", "joint", "joint-a", "--repeats", "1"),
+        capture_output=True, cwd=ROOT)
+
+
+def capture_pool(probe: Path, output: Path, pairwise: bool = False) -> subprocess.CompletedProcess:
+    return subprocess.run(command("run", "--probe", str(probe), "--output", str(output),
+        "--sizes", "16" if pairwise else "32", "--families", *(["uniform", "rows"] if pairwise else ["clusters", "rows"]),
+        "--kmax", "1", "5", "--s", "8", "--seeds", "3", "--modes", "pure",
+        "--census-modes", "pairwise" if pairwise else "shared",
+        "--sibling-modes", "none" if pairwise else "sibling",
+        "--witness-orders", "global" if pairwise else "complement",
+        "--anchor-modes", *(["anchors"] if pairwise else ["anchors", "joint", "joint-a"]),
+        "--pool-min-factors", "0", "1", "4", "64", "--repeats", "1"),
         capture_output=True, cwd=ROOT)
 
 
@@ -478,7 +490,6 @@ def main() -> int:
                     "same_front_candidates_and_canonical_digest_not_equal_product_or_handoff_work",
                 "v4 summary lost anchor modes, repetitions or comparison scope")
         stats["joint_positive_reads"] += 1
-
         def joint_change(root: Path, update: Callable[[dict], None], enabled: bool = True,
                          mode: str = "joint") -> None:
             directory = root / "first"
@@ -563,6 +574,113 @@ def main() -> int:
                 sum("anchor_mode" in row for row in summary["summary"]) == 48,
                 "mixed-version reader lost v4 or historical configurations")
         stats["joint_positive_reads"] += 1
+        # v5 adds Pool clocks inside pool_work; compare its integer work,
+        # but never demand identical durations across actual repetitions.
+        pooled = temporary / "pooled"
+        pooled.mkdir()
+        for name, pairwise in (("first", False), ("second", False),
+                               ("pairwise_first", True), ("pairwise_second", True)):
+            destination = pooled / name
+            result = capture_pool(binary, destination, pairwise)
+            require(result.returncode == 0 and not result.stderr,
+                    f"genuine Pool capture failed: {result.stdout!r} {result.stderr!r}")
+            rows = records(destination)
+            manifest, completion = read(destination / "MANIFEST.json"), read(destination / "COMPLETION.json")
+            expected = 16 if pairwise else 48
+            require(manifest["schema"] == "mhgp8_wspd_q2_campaign_v5" and
+                    manifest["pool_min_factors"] == [0, 1, 4, 64] and
+                    completion["status"] == "completed" and completion["runs"] == completion["attempts"] == len(rows) == expected,
+                    "v5 capture lost schema, thresholds or tuples")
+            require(all(row["result"]["schema"] == "mhgp8_wspd_q2_census_probe_v5" and
+                        row["result"]["digest"]["supports"] > 0 for row in rows), "v5 output fixture vacuous or mislabeled")
+            if not pairwise:
+                work = [row["result"]["pool_work"] for row in rows]
+                require(all(any(w[field] > 0 for w in work) for field in
+                            ("selected_rectangles", "filtered_pairs", "residual_pairs", "factor_sites", "bands", "pair_roots",
+                             "passthrough_rectangles", "passthrough_pairs", "passthrough_anchors")),
+                        "v5 fixture did not select, filter and count residual bands")
+            stats["pool_rows"] += len(rows)
+        result = checked(pooled)
+        require(result.returncode == 0 and not result.stderr,
+                f"v5 reader failed: {result.stdout!r} {result.stderr!r}")
+        summary = parse_result(result.stdout)
+        require(summary["measurements"] == 128 and len(summary["summary"]) == 64 and
+                all(row["repeats"] == 2 and set(row["pool_work"]) == set(POOL_FIELDS) and
+                    set(row["median_pool_timings"]) == set(POOL_TIMES) for row in summary["summary"]) and
+                summary.get("pool_comparison") == "same_front_and_canonical_digest_not_equal_census_candidates_or_work",
+                "v5 summary mixed times with discrete work or lost comparison scope")
+        stats["pool_positive_reads"] += 1
+
+        def pool_change(root: Path, update: Callable[[dict], None], threshold: int = 4) -> None:
+            directory = root / "first"
+            rows = records(directory)
+            chosen = next(row for row in rows if row["result"]["pool_min_factor"] == threshold)
+            update(chosen)
+            refresh(chosen)
+            write_records(directory, rows)
+
+        def pool_work(root: Path, field: str, value: Callable[[dict], Any], threshold: int = 4) -> None:
+            pool_change(root, lambda row: row["result"]["pool_work"].update({field: value(row["result"])}), threshold)
+
+        mutant("pool_negative", lambda root: manifest_change(root, lambda m: m.update(pool_min_factors=[-1])), pooled)
+        mutant("pool_boolean", lambda root: manifest_change(root, lambda m: m.update(pool_min_factors=[True])), pooled)
+        mutant("pool_overflow", lambda root: manifest_change(root, lambda m: m.update(pool_min_factors=[1 << 64])), pooled)
+        mutant("pool_duplicate", lambda root: manifest_change(root, lambda m: m.update(pool_min_factors=[0, 0])), pooled)
+        mutant("pool_requires_anchor", lambda root: manifest_change(root, lambda m: m.pop("anchor_modes")), pooled)
+        mutant("pool_unversioned_manifest", lambda root: manifest_change(root, lambda m: m.update(schema="mhgp8_wspd_q2_campaign_v4")), pooled)
+        mutant("pool_unversioned_result", lambda root: pool_change(root, lambda r: r["result"].update(schema="mhgp8_wspd_q2_census_probe_v4")), pooled)
+        mutant("pool_wrong_command", lambda root: pool_change(root, lambda r: r["command"].__setitem__(11, "0")), pooled)
+        mutant("pool_missing_work", lambda root: pool_change(root, lambda r: r["result"].pop("pool_work")), pooled)
+        mutant("pool_missing_counter", lambda root: pool_change(root, lambda r: r["result"]["pool_work"].pop("factor_sites")), pooled)
+        mutant("pool_missing_clock", lambda root: pool_change(root, lambda r: r["result"]["pool_work"].pop("preparation_ms")), pooled)
+        mutant("pool_boolean_counter", lambda root: pool_work(root, "selected_pairs", lambda _r: True), pooled)
+        mutant("pool_boolean_clock", lambda root: pool_work(root, "preparation_ms", lambda _r: True), pooled)
+        mutant("pool_negative_clock", lambda root: pool_work(root, "selected_total_ms", lambda _r: -1), pooled)
+        mutant("pool_clock_outside_pipeline", lambda root: pool_work(root, "selected_total_ms", lambda r:
+            r["timings"]["pipeline_total_ms"] + 1), pooled)
+        mutant("pool_prep_outside_selected", lambda root: pool_work(root, "preparation_ms", lambda r:
+            r["pool_work"]["selected_total_ms"] + 1), pooled)
+        for field in ("selected_pairs", "residual_pairs", "filtered_pairs", "pair_roots", "factor_read_visits",
+                      "grouping_visits", "prefix_class_visits", "passthrough_rectangles", "passthrough_pairs", "passthrough_anchors"):
+            mutant(f"pool_wrong_{field}", lambda root, field=field: pool_work(root, field, lambda r:
+                r["pool_work"][field] + 1), pooled)
+        mutant("pool_excess_bands", lambda root: pool_work(root, "bands", lambda r:
+            r["kmax"] * r["pool_work"]["selected_rectangles"] + 1), pooled)
+        mutant("pool_excess_original_anchors", lambda root: pool_work(root, "original_selected_anchors", lambda r:
+            r["anchor_queries"] + 1), pooled)
+        mutant("pool_disabled_work", lambda root: pool_work(root, "selection_tests", lambda _r: 1, 0), pooled)
+        mutant("pool_unselected_work", lambda root: pool_work(root, "selection_tests", lambda _r: 1, 64), pooled)
+        mutant("pool_old_candidate_identity", lambda root: pool_change(root, lambda r:
+            r["result"].update(candidate_pairs=r["result"]["front_work"]["residual_pair_mass"][0])), pooled)
+        mutant("pool_wrong_roots", lambda root: pool_change(root, lambda r:
+            r["result"]["census_work"].update(count_root_starts=r["result"]["census_work"]["count_root_starts"] + 1)), pooled)
+        mutant("pool_changed_digest", lambda root: pool_change(root, lambda r: r["result"]["digest"].update(sum="0")), pooled)
+        mutant("pool_changed_front", lambda root: pool_change(root, lambda r:
+            r["result"]["front_work"].update(max_factor_size=r["result"]["front_work"]["max_factor_size"] + 1)), pooled)
+
+        varied_times = temporary / "pool_synthetic_varied_times"
+        shutil.copytree(pooled, varied_times)
+        pool_change(varied_times, lambda r: r["result"]["pool_work"].update(
+            {name: r["result"]["pool_work"][name] / 2 for name in POOL_TIMES}))
+        require(checked(varied_times).returncode == 0, "reader treated Pool timings as deterministic integer work")
+        stats["pool_positive_reads"] += 1
+        valid_pool_cli = [*valid_joint_cli, "1"]
+        for command_args in ([*valid_joint_cli, "-1"], [*valid_joint_cli, "1.5"], [*valid_joint_cli, str(1 << 64)],
+                             [*valid_pool_cli, "extra"], [*valid_joint_cli[:7], "pairwise", "sibling", "global", "anchors", "1"],
+                             [*valid_joint_cli[:7], "pairwise", "none", "complement", "anchors", "1"],
+                             [*valid_joint_cli[:7], "pairwise", "none", "global", "joint", "1"]):
+            rejected = subprocess.run(command_args, cwd=ROOT, capture_output=True)
+            require(rejected.returncode == 2 and not rejected.stdout, "Pool bypassed an invalid threshold or historical CLI rejection")
+            stats["pool_cli_rejects"] += 1
+        shutil.copytree(pooled, ordered / "pool")
+        result = checked(ordered)
+        require(result.returncode == 0 and not result.stderr,
+                f"mixed v1..v5 reader failed: {result.stdout!r} {result.stderr!r}")
+        summary = parse_result(result.stdout)
+        require(summary["measurements"] == 480 and len(summary["summary"]) == 240 and
+                sum("pool_min_factor" in row for row in summary["summary"]) == 64,
+                "mixed-version reader lost Pool or historical configurations")
+        stats["pool_positive_reads"] += 1
     require(stats["genuine_rows"] == 128 and stats["mutants"] >= 48 and stats["failed_captures"] == 2 and
             stats["positive_reads"] == 1 and stats["domain_checks"] == 2,
             "receipt gate lost its non-vacuity floor")
@@ -575,6 +693,9 @@ def main() -> int:
     require(stats["joint_rows"] == 96 and stats["joint_positive_reads"] == 2 and
             stats["joint_cli_rejects"] == 4 and stats["mutants"] >= 113,
             "joint-product extension lost its non-vacuity floor")
+    require(stats["pool_rows"] == 128 and stats["pool_positive_reads"] == 3 and
+            stats["pool_cli_rejects"] == 7 and stats["mutants"] >= 147,
+            "Pool extension lost its non-vacuity floor")
     require(sources() == pins and digest(original) == binary_pin, "gate modified sources or actual probe")
     print(json.dumps(dict(status="passed", **stats), sort_keys=True))
     return 0

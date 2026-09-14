@@ -1,0 +1,28 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_pool_terminal_20260914/mhgp8_q2_terminal_pool_gate"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "gate_cli_missing",
+  "expected_exit_code": 2,
+  "started_utc": "2026-09-14T14:15:14.028142+00:00",
+  "status": "passed",
+  "exit_code": 2,
+  "stdout": "",
+  "stderr": "usage: mhgp8_q2_terminal_pool_gate --selftest\n",
+  "stdout_base64": "",
+  "stderr_base64": "dXNhZ2U6IG1oZ3A4X3EyX3Rlcm1pbmFsX3Bvb2xfZ2F0ZSAtLXNlbGZ0ZXN0Cg==",
+  "finished_utc": "2026-09-14T14:15:14.030130+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/q2_terminal_pool_20260914/qualification/release_4eg2giks/gate_cli_missing.stdout.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/q2_terminal_pool_20260914/qualification/release_4eg2giks/gate_cli_missing.stderr.bin",
+      "sha256": "bff5504ef6f402fbfb2c6c048404408bda0ce845221444e1174b5a53775bd645",
+      "bytes": 46
+    }
+  }
+}

@@ -95,6 +95,16 @@ inclure ses propositions et évaluations de bornes supplémentaires.
 
 ## 1. Ordre des travaux et sens de « rédhibitoire »
 
+La [douzième tranche Pool terminal](P0_POOL_TERMINAL_Q2.md) raccorde le
+filtre local aux vraies requêtes globales, sans reconstruire le nuage.
+Elle ne doit pas déplacer le carré vers un consommateur individuel :
+sur les rangées, un plan à crédits nuls retourne au parcours initial,
+avec coûts de préparation visibles. Des crédits partiels ne garantissent
+pas non plus que Pairwise batte Shared. Le travail F et les visites aval
+restent donc les critères, en plus des bandes compactes. Les plans futurs
+en vol devront être possédés jusqu'à leur dernier job, pas réempruntés à
+un callback terminé ou reconstruits sur chaque tranche A_i×B.
+
 **P0 reste la suppression du calcul systématique O(|A|²+|B|²) des
 histogrammes de témoins locaux.** Les petits ensembles de témoins ne sont
 pas imposés : plusieurs architectures sont en concurrence.

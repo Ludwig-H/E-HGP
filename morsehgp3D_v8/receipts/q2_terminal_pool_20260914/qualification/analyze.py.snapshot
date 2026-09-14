@@ -1,0 +1,267 @@
+#!/usr/bin/env python3
+"""Read-only snapshot of the terminal-Pool campaigns, never a qualification."""
+
+from __future__ import annotations
+
+import argparse
+import base64
+from collections import defaultdict
+import hashlib
+import json
+from pathlib import Path
+import statistics
+import sys
+from typing import Any
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "morsehgp3D_v8/bench"))
+from run_wspd_q2_matrix import (  # noqa: E402
+    POOL_FIELDS, POOL_TIMES, command_for, cross_check, discrete_values,
+    matrix, parse_result, provenance, require, row_keys, sources, validate_result,
+)
+
+CAMPAIGNS = ("paired_8k", "growth_s8")
+RECEIPTS = ROOT / "morsehgp3D_v8/receipts/q2_terminal_pool_20260914"
+KEYS = ("family", "n", "kmax", "s", "seed", "front_mode", "census_mode",
+        "sibling_mode", "witness_order", "anchor_mode", "pool_min_factor")
+COUNTERS = {
+    "root_visits": ("census_work", "count_root_starts"),
+    "count_visits": ("census_work", "count_node_visits"),
+    "count_box_tests": ("census_work", "count_bound_tests"),
+    "count_point_tests": ("census_work", "count_point_tests"),
+    "query_tasks": ("census_work", "query_tasks"),
+    "query_splits": ("census_work", "query_splits"),
+    "witness_splits": ("census_work", "witness_splits"),
+    "cursor_advances": ("census_work", "cursor_advances"),
+    "front_products": ("front_work", "product_visits"),
+    "front_descent_steps": ("front_work", "witness_descent_steps"),
+    "front_proposed_sites": ("front_work", "proposed_sites"),
+    "front_descriptors": ("front_work", "emitted_rectangles"),
+    "sibling_tests": ("sibling_work", "bound_tests"),
+    "sibling_rejected_pairs": ("sibling_work", "rejected_pairs"),
+    "joint_tasks": ("joint_work", "tasks"),
+    "joint_bound_tests": ("joint_work", "bound_tests"),
+    "joint_handoffs": ("joint_work", "singleton_handoffs"),
+    "payload_visits": ("census_work", "payload_node_visits"),
+    "payload_interior_ids": ("census_work", "payload_interior_sites"),
+    "payload_shell_ids": ("census_work", "payload_shell_sites"),
+    "supports": ("digest", "supports"),
+}
+TIME_FIELDS = ("total_ms", "pipeline_total_ms", "front_and_count_ms", "payload_ms",
+               "generation_ms", "cloud_ms", "index_ms", "validation_ms", "destruction_ms")
+RATIO_FIELDS = ("candidate_pairs", "root_visits", "count_visits", "query_tasks", "front_products",
+                "front_descent_steps", "front_proposed_sites", "front_descriptors", "supports",
+                "pool_factor_sites", "pool_selected_pairs", "pool_residual_pairs", "pool_filtered_pairs",
+                "pool_passthrough_pairs", "pool_pair_roots", "pool_selection_tests", "pool_witness_attempts")
+
+
+def ratio(numerator: int | float, denominator: int | float) -> float | None:
+    return numerator / denominator if denominator else None
+
+
+def read_campaign(name: str, pins: dict[str, str]) -> tuple[dict, list[dict], list[str]]:
+    directory = RECEIPTS / name
+    info: dict[str, Any] = {"campaign": name, "path": str(directory), "status": "incomplete",
+                            "closed": False, "rows": 0, "expected_rows": None}
+    issues: list[str] = []
+    records: list[dict] = []
+    manifest_path = directory / "MANIFEST.json"
+    measures_path = directory / "MEASURES.jsonl"
+    completion_path = directory / "COMPLETION.json"
+    if not manifest_path.exists():
+        info["reason"] = "manifest_not_present"
+        if measures_path.exists() or completion_path.exists():
+            issues.append(f"{name}: artifacts exist without a manifest")
+            info["status"] = "invalid"
+        return info, records, issues
+    try:
+        manifest = parse_result(manifest_path.read_bytes())
+        require(manifest.get("schema") == "mhgp8_wspd_q2_campaign_v5", "unexpected campaign schema")
+        require(manifest.get("source_sha256") == pins, "current sources differ from capture pins")
+        info["probe_sha256"] = manifest["probe_sha256"]
+        build, machine, _ = provenance(manifest)
+        info["provenance"] = {label: hashlib.sha256(json.dumps(value, sort_keys=True).encode()).hexdigest()
+                              for label, value in (("build_sha256", build), ("machine_sha256", machine))}
+        expected = set(matrix(manifest))
+        info["expected_rows"] = len(expected)
+        # Read completion first: an open campaign remains an open snapshot
+        # even if it closes while its final row is being read below.
+        completion = parse_result(completion_path.read_bytes()) if completion_path.exists() else None
+        raw = measures_path.read_bytes() if measures_path.exists() else b""
+        lines = raw.splitlines(keepends=True)
+        partial_bytes = 0
+        if lines and not lines[-1].endswith(b"\n"):
+            partial_bytes = len(lines.pop())
+        info["uncommitted_tail_bytes"] = partial_bytes
+        seen = set()
+        for line_number, line in enumerate(lines, 1):
+            record = parse_result(line)
+            require(record.get("status") == "completed" and record.get("exit_code") == 0,
+                    f"line {line_number}: failed/invalid/interrupted attempt retained")
+            require(record.get("stderr") == record.get("stderr_base64") == "", f"line {line_number}: stderr is not empty")
+            payload = base64.b64decode(record["stdout_base64"], validate=True)
+            row = parse_result(payload)
+            require(row == record["result"] and payload.decode() == record["stdout"], "raw/result divergence")
+            require(row.get("schema") == "mhgp8_wspd_q2_census_probe_v5", "unexpected probe schema")
+            key = tuple(row[field] for field in row_keys(row))
+            command = command_for(manifest["probe"], key)
+            require(record["command"] == command, "command/result divergence")
+            require(record["probe_sha256_before"] == record["probe_sha256_after"] == manifest["probe_sha256"],
+                    "binary pin changed during invocation")
+            validate_result(row, command)
+            require(type(record["repeat"]) is int, "invalid repetition index")
+            instance = (*key, record["repeat"])
+            require(instance in expected and instance not in seen, "duplicate or unexpected invocation")
+            seen.add(instance)
+            records.append({"campaign": name, "line": line_number, "row": row})
+        info["rows"] = len(records)
+        info["missing_rows"] = len(expected - seen)
+        if completion is None:
+            info["reason"] = "completion_not_present"
+        else:
+            info["completion_status"] = completion.get("status")
+            require(completion.get("status") == "completed", "campaign closed unsuccessfully")
+            require(partial_bytes == 0 and seen == expected, "closed campaign is missing complete rows")
+            require(completion.get("runs") == completion.get("attempts") == len(records), "completion counts disagree")
+            require(completion.get("source_hashes_unchanged") is True and completion.get("probe_hash_unchanged") is True and
+                    completion.get("source_sha256_closing") == pins and
+                    completion.get("probe_sha256_closing") == manifest["probe_sha256"], "closing pins disagree")
+            info.update(status="completed", closed=True)
+    except (ValueError, TypeError, KeyError, OSError) as error:
+        info.update(status="invalid", reason=str(error), rows=len(records))
+        issues.append(f"{name}: {error}")
+    return info, records, issues
+
+
+def measurements(record: dict) -> dict:
+    row = record["row"]
+    result = {name: row[name] for name in KEYS}
+    result.update(campaign=record["campaign"], receipt_line=record["line"],
+                  input_hash=row["input_hash"], digest=row["digest"],
+                  input_rectangles=row["input_rectangles"], anchor_queries=row["anchor_queries"],
+                  front_residual_pairs=row["front_work"]["residual_pair_mass"][0],
+                  candidate_pairs=row["candidate_pairs"], accepted_pairs=row["accepted_pairs"],
+                  rejected_pairs=row["rejected_pairs"])
+    result.update({name: row[group][field] for name, (group, field) in COUNTERS.items()})
+    result.update({f"pool_{name}": row["pool_work"][name] for name in POOL_FIELDS})
+    result["timings"] = {name: row["timings"][name] for name in TIME_FIELDS}
+    result["pool_timings"] = {name: row["pool_work"][name] for name in POOL_TIMES}
+    return result
+
+
+def compare_rows(numerator: dict, denominator: dict) -> dict:
+    return {"work_ratios": {name: ratio(numerator[name], denominator[name]) for name in RATIO_FIELDS},
+            "timing_ratios": {name: ratio(numerator["timings"][name], denominator["timings"][name])
+                              for name in TIME_FIELDS},
+            "pool_timing_ratios": {name: ratio(numerator["pool_timings"][name], denominator["pool_timings"][name])
+                                   for name in POOL_TIMES}}
+
+
+def analyze(campaign_names: list[str], include_measurements: bool = True) -> dict:
+    pins = sources()
+    campaign_info, records, issues = [], [], []
+    for name in campaign_names:
+        info, rows, errors = read_campaign(name, pins)
+        campaign_info.append(info)
+        records.extend(rows)
+        issues.extend(errors)
+    present = [info for info in campaign_info if "provenance" in info]
+    if present and any((info["provenance"], info["probe_sha256"]) !=
+                       (present[0]["provenance"], present[0]["probe_sha256"]) for info in present):
+        issues.append("cross-campaign build/machine/binary provenance differs")
+    identities, signatures = {}, {}
+    groups: dict[tuple, list[dict]] = defaultdict(list)
+    for record in records:
+        row = record["row"]
+        try:
+            cross_check(row, identities, signatures)
+        except (ValueError, TypeError, KeyError) as error:
+            issues.append(f"{record['campaign']}:{record['line']}: {error}")
+        groups[tuple(row[field] for field in KEYS)].append(record)
+    summaries = {}
+    for key, group in sorted(groups.items()):
+        summary = measurements(group[0])
+        summary.pop("campaign")
+        summary.pop("receipt_line")
+        summary["repeats"] = len(group)
+        summary["evidence"] = [{"campaign": item["campaign"], "line": item["line"]} for item in group]
+        summary["timings"] = {name: statistics.median(item["row"]["timings"][name] for item in group) for name in TIME_FIELDS}
+        summary["pool_timings"] = {name: statistics.median(item["row"]["pool_work"][name] for item in group) for name in POOL_TIMES}
+        # Cross-check already includes every integer work field, not only the
+        # extracted subset used in the diagnostic growth ratios below.
+        first = discrete_values(group[0]["row"])
+        require(all(discrete_values(item["row"]) == first for item in group), "repetition work differs")
+        summaries[key] = summary
+    pairs, growth, separation = [], [], []
+    for key, summary in summaries.items():
+        if summary["pool_min_factor"]:
+            baseline_key = (*key[:-1], 0)
+            baseline = summaries.get(baseline_key)
+            pair = {field: summary[field] for field in KEYS}
+            pair["baseline_present"] = baseline is not None
+            if baseline is not None:
+                pair.update(compare_rows(summary, baseline))
+                pair["front_equal"] = groups[key][0]["row"]["front_work"] == groups[baseline_key][0]["row"]["front_work"]
+                pair["input_hash_equal"] = summary["input_hash"] == baseline["input_hash"]
+                pair["digest_equal"] = summary["digest"] == baseline["digest"]
+                pair["candidate_reduction_fraction"] = 1 - ratio(summary["candidate_pairs"], baseline["candidate_pairs"]) if baseline["candidate_pairs"] else None
+            pairs.append(pair)
+        if summary["n"] in (16000, 32000):
+            lower_key = (key[0], key[1] // 2, *key[2:])
+            lower = summaries.get(lower_key)
+            item = {field: summary[field] for field in KEYS}
+            item.update(from_n=summary["n"] // 2, lower_size_present=lower is not None)
+            if lower is not None:
+                item.update(compare_rows(summary, lower))
+            growth.append(item)
+        if summary["n"] == 8000 and summary["s"] in (10, 12):
+            lower_s_key = (*key[:3], 8, *key[4:])
+            lower_s = summaries.get(lower_s_key)
+            item = {field: summary[field] for field in KEYS}
+            item.update(from_s=8, s8_present=lower_s is not None)
+            if lower_s is not None:
+                item.update(compare_rows(summary, lower_s))
+                item["digest_equal"] = summary["digest"] == lower_s["digest"]
+            separation.append(item)
+    if sources() != pins:
+        issues.append("sources changed while analyzing")
+    status = "invalid" if issues else "completed" if all(info["closed"] for info in campaign_info) else "incomplete"
+    result = {"schema": "mhgp8_terminal_pool_analysis_v1", "status": status,
+              "scope": "readonly_diagnostic_not_qualification", "full_contract_qualified": False,
+              "asymptotic_complexity_proved": False, "gcp_used": False,
+              "script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+              "reader_sha256": pins["morsehgp3D_v8/bench/run_wspd_q2_matrix.py"],
+              "campaigns": campaign_info, "issues": issues,
+              "identity_checks": "full_front_at_fixed_input_K_s_front_mode; canonical_digest_at_fixed_input_K_across_modes_s_thresholds; candidates_only_at_fixed_threshold_and_front",
+              "measurement_count": len(records), "configuration_count": len(summaries),
+              "summaries": list(summaries.values()), "pool_vs_disabled": pairs, "doublings": growth,
+              "separation_vs_s8": separation,
+              "interpretation": [
+                  "Time ratios use observed medians; one repetition is not a timing distribution.",
+                  "Different work units are never added; count visits already contain box and point tests.",
+                  "Pool preparation is inside selected_total, which overlaps payload and the pipeline.",
+                  "front_and_count_ms is not isolated front time; residual work is not an asymptotic bound.",
+                  "Ratios keep family, K, s, seed and every traversal/Pool option fixed.",
+                  "A missing denominator is reported, never replaced by an estimate."]}
+    if include_measurements:
+        result["measurements"] = [measurements(record) for record in records]
+    return result
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--campaigns", nargs="+", choices=CAMPAIGNS, default=list(CAMPAIGNS))
+    parser.add_argument("--summary-only", action="store_true", help="Omit individual measurement rows; retain summaries and comparisons")
+    args = parser.parse_args()
+    require(len(set(args.campaigns)) == len(args.campaigns), "duplicate campaign argument")
+    result = analyze(args.campaigns, not args.summary_only)
+    print(json.dumps(result, indent=2, allow_nan=False))
+    return 1 if result["status"] == "invalid" else 2 if result["status"] == "incomplete" else 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except (ValueError, TypeError, KeyError, OSError) as error:
+        print(json.dumps({"status": "invalid", "scope": "readonly_diagnostic_not_qualification", "error": str(error)}))
+        raise SystemExit(1) from error

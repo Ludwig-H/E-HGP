@@ -1,6 +1,7 @@
 #include "q2_census.hpp"
 #include "wspd_q2_census.hpp"
 #include "q2_joint_bounds.hpp"
+#include "q2_node_pool.hpp"
 #include "../spindle/q2_prepared_bounds.hpp"
 
 #include <algorithm>
@@ -646,6 +647,74 @@ struct Q2CensusEngine {
     else accept(a_id, singleton, count);
   }
 
+  // Explicit product adaptation of the audited fbbecc01 Pool/pairs bridge.
+  // The local B permutation only names pair queries; Z never changes. The
+  // global query-node view is NOT usable with this temporary permutation.
+  // Keep this route synchronous and pair-only until a separate query-tree
+  // contract is implemented. Restoring the view also covers callback failure.
+  [[nodiscard]] bool terminal_pool(std::size_t a_node, std::size_t b_node, Q2PoolWork& work) {
+    const auto started = Clock::now();
+    const auto a = index.nodes_[a_node].range;
+    const auto b = index.nodes_[b_node].range;
+    counter_add(work.selected_rectangles);
+    counter_add(work.original_selected_anchors, static_cast<u64>(a.size()));
+    counter_add(work.factor_sites, static_cast<u64>(a.size()));
+    counter_add(work.factor_sites, static_cast<u64>(b.size()));
+    {
+      const detail::Q2NodePoolPlan plan(index, a_node, b_node, threshold);
+      work.preparation_ms += milliseconds(started, Clock::now());
+      counter_add(work.selected_pairs, plan.total_pairs());
+      counter_add(work.residual_pairs, plan.candidate_pairs());
+      counter_add(work.filtered_pairs, plan.total_pairs() - plan.candidate_pairs());
+      const auto& pw = plan.work();
+      counter_add(work.selection_tests, pw.selection_tests);
+      counter_add(work.witness_attempts, pw.witness_attempts);
+      counter_add(work.universal_queries, pw.predicates.universal_queries);
+      counter_add(work.q2_axis_terms, pw.predicates.q2_axis_terms);
+      counter_add(work.pool_selected, pw.pool_selected);
+      counter_add(work.pool_insertions, pw.pool_insertions);
+      counter_add(work.pool_shifted_entries, pw.pool_shifted_entries);
+      counter_add(work.prefix_class_visits, pw.prefix_class_visits);
+      counter_add(work.factor_read_visits, pw.selection_point_visits);
+      counter_add(work.factor_read_visits, pw.certification_anchor_visits);
+      counter_add(work.grouping_visits, pw.group_credit_visits);
+      counter_add(work.grouping_visits, pw.group_scatter_visits);
+      work.plan_peak_bytes = std::max(work.plan_peak_bytes, static_cast<u64>(plan.retained_bytes()));
+      if (plan.candidate_pairs() == plan.total_pairs()) {
+        // No reduction must not replace a useful Shared/sibling/joint route
+        // by the full pair expansion (notably the parallel-row fixture).
+        counter_add(work.passthrough_rectangles);
+        counter_add(work.passthrough_pairs, plan.total_pairs());
+        counter_add(work.passthrough_anchors, static_cast<u64>(a.size()));
+        return false;
+      }
+      counter_add(result.candidate_pairs, plan.candidate_pairs());
+      const auto saved_order = b_order;
+      b_order = plan.b_order();
+      try {
+        for (unsigned credit = 0; credit < threshold; ++credit) {
+          const auto group = plan.a_groups()[credit];
+          const auto prefix = plan.prefix_for_credit(credit);
+          if (group.size() == 0 || prefix == 0) continue;
+          counter_add(work.bands);
+          for (auto position = group.first; position < group.last; ++position) {
+            counter_add(work.selected_anchors);
+            const auto a_id = index.order_[plan.a_ranks()[position]];
+            for (std::size_t j = 0; j < prefix; ++j) {
+              counter_add(work.pair_roots);
+              pair_task(a_id, j);  // Count zero, all of the original global Z.
+            }
+          }
+        }
+      } catch (...) {
+        b_order = saved_order;
+        throw;
+      }
+      b_order = saved_order;
+    }
+    return true;
+  }
+
   void run(const AxisQ2Plan& plan, Q2CensusMode mode) {
     if (result.candidate_pairs == 0) {
       return;
@@ -700,7 +769,7 @@ WspdQ2CensusResult run_wspd_q2_census(
     const Q2CensusIndex& index, unsigned kmax, unsigned separation_s,
     WspdFrontMode front_mode, Q2CensusMode census_mode,
     const Q2CensusConsumer& consumer, Q2SiblingMode sibling_mode,
-    Q2WitnessOrder witness_order, Q2AnchorMode anchor_mode) {
+    Q2WitnessOrder witness_order, Q2AnchorMode anchor_mode, std::size_t pool_min_factor) {
   const auto started = Clock::now();
   if (census_mode != Q2CensusMode::Pairwise && census_mode != Q2CensusMode::SharedBlocks) {
     throw std::invalid_argument("mhgp8 integrated q2 census mode is invalid");
@@ -746,57 +815,74 @@ WspdQ2CensusResult run_wspd_q2_census(
           if (mass > std::numeric_limits<u64>::max()) {
             throw std::overflow_error("mhgp8 integrated q2 pair mass exceeds u64");
           }
-          counter_add(engine.result.candidate_pairs, static_cast<u64>(mass));
-          if (anchor_mode != Q2AnchorMode::Individual) {
-            counter_add(engine.joint_work.root_products);
-            engine.root_start(0);
-            if (witness_order == Q2WitnessOrder::ComplementFirst) {
-              if (sibling_mode == Q2SiblingMode::Saturating)
-                engine.joint_root<true, true>(a_node, b_node, anchor_mode);
-              else
-                engine.joint_root<false, true>(a_node, b_node, anchor_mode);
-            } else {
-              if (sibling_mode == Q2SiblingMode::Saturating)
-                engine.joint_root<true, false>(a_node, b_node, anchor_mode);
-              else
-                engine.joint_root<false, false>(a_node, b_node, anchor_mode);
-            }
-            return;
-          }
-          for (auto rank = a.first; rank < a.last; ++rank) {
-            const auto a_id = order[rank];
-            if (census_mode == Q2CensusMode::SharedBlocks) {
+          const auto consume_unfiltered = [&] {
+            counter_add(engine.result.candidate_pairs, static_cast<u64>(mass));
+            if (anchor_mode != Q2AnchorMode::Individual) {
+              counter_add(engine.joint_work.root_products);
               engine.root_start(0);
               if (witness_order == Q2WitnessOrder::ComplementFirst) {
-                const Q2CensusEngine::OrderContext context{b_node, nodes[b_node].escape, rank};
-                if (sibling_mode == Q2SiblingMode::Saturating) {
-                  engine.shared_task<true, true>(a_id, b_node, 0, 0, absent, &context);
-                } else {
-                  engine.shared_task<false, true>(a_id, b_node, 0, 0, absent, &context);
-                }
-              } else if (sibling_mode == Q2SiblingMode::Saturating) {
-                engine.shared_task<true>(a_id, b_node, 0, 0);
+                if (sibling_mode == Q2SiblingMode::Saturating)
+                  engine.joint_root<true, true>(a_node, b_node, anchor_mode);
+                else
+                  engine.joint_root<false, true>(a_node, b_node, anchor_mode);
               } else {
-                engine.shared_task(a_id, b_node, 0, 0);
+                if (sibling_mode == Q2SiblingMode::Saturating)
+                  engine.joint_root<true, false>(a_node, b_node, anchor_mode);
+                else
+                  engine.joint_root<false, false>(a_node, b_node, anchor_mode);
               }
-            } else {
-              for (auto position = b.first; position < b.last; ++position) engine.pair_task(a_id, position);
+              return;
             }
+            for (auto rank = a.first; rank < a.last; ++rank) {
+              const auto a_id = order[rank];
+              if (census_mode == Q2CensusMode::SharedBlocks) {
+                engine.root_start(0);
+                if (witness_order == Q2WitnessOrder::ComplementFirst) {
+                  const Q2CensusEngine::OrderContext context{b_node, nodes[b_node].escape, rank};
+                  if (sibling_mode == Q2SiblingMode::Saturating) {
+                    engine.shared_task<true, true>(a_id, b_node, 0, 0, absent, &context);
+                  } else {
+                    engine.shared_task<false, true>(a_id, b_node, 0, 0, absent, &context);
+                  }
+                } else if (sibling_mode == Q2SiblingMode::Saturating) {
+                  engine.shared_task<true>(a_id, b_node, 0, 0);
+                } else {
+                  engine.shared_task(a_id, b_node, 0, 0);
+                }
+              } else {
+                for (auto position = b.first; position < b.last; ++position) engine.pair_task(a_id, position);
+              }
+            }
+          };
+          if (pool_min_factor != 0 && b.size() >= pool_min_factor) {
+            const auto pool_started = Clock::now();
+            if (!engine.terminal_pool(a_node, b_node, result.pool_work)) consume_unfiltered();
+            result.pool_work.selected_total_ms += milliseconds(pool_started, Clock::now());
+          } else {
+            consume_unfiltered();
           }
         }, 1);
     result.census = engine.result;
     result.sibling_work = engine.sibling_work;
     result.order_work = engine.order_work;
     result.joint_work = engine.joint_work;
+    const auto& pool = result.pool_work;
+    const auto front_mass = result.front.work.residual_pair_mass[0];
+    if (pool.selected_pairs > front_mass || pool.filtered_pairs > pool.selected_pairs ||
+        pool.residual_pairs != pool.selected_pairs - pool.filtered_pairs ||
+        pool.passthrough_pairs > pool.residual_pairs ||
+        pool.pair_roots != pool.residual_pairs - pool.passthrough_pairs ||
+        pool.pair_roots > result.census.candidate_pairs)
+      throw std::logic_error("mhgp8 Pool census lost its selected partition");
     if (anchor_mode != Q2AnchorMode::Individual) {
-      const auto candidates = result.census.candidate_pairs;
+      const auto candidates = result.census.candidate_pairs - pool.pair_roots;
       const auto& joint = result.joint_work;
       if (joint.rejected_pairs > candidates ||
           joint.accepted_pairs > candidates - joint.rejected_pairs ||
           joint.handoff_pair_mass != candidates - joint.rejected_pairs - joint.accepted_pairs)
         throw std::logic_error("mhgp8 joint q2 census lost its terminal mass partition");
     }
-    if (result.census.candidate_pairs != result.front.work.residual_pair_mass[0] ||
+    if (result.census.candidate_pairs != front_mass - pool.filtered_pairs ||
         result.input_rectangles != result.front.work.emitted_rectangles ||
         result.census.accepted_pairs > result.census.candidate_pairs ||
         result.census.rejected_pairs != result.census.candidate_pairs - result.census.accepted_pairs) {

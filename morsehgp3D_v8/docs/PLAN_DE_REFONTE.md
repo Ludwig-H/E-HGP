@@ -47,6 +47,19 @@ héritée du harnais d'audit ; le raccord et l'oracle restent à construire.
 
 ## Priorité P0 — supprimer la préparation quadratique des témoins locaux
 
+Suivi douzième tranche : le [raccord Pool terminal](P0_POOL_TERMINAL_Q2.md)
+est maintenant implémenté sur les nœuds globaux, avec au plus K bandes et
+census des survivantes à compte zéro. Le prototype A fbbecc01 a mesuré
+le coût q2 complet ; le port a désormais ses 49 CTests Release/Clang et
+80 mesures propres. À s8/K10, amas32k passe de184,306 à19,180 s,
+avec visites ×2,958/×2,701 aux doublements8k/16k/32k au lieu de
+×4,106/×4,229. Ce constat expérimental ne borne pas toutes les familles.
+Le repli
+sans réduction conserve le partagé sur les rangées, tout en comptant le
+plan tenté. Après le filtre, front et petits rectangles sont prioritaires.
+La taille du résidu partiellement réduit doit encore orienter le choix
+du consommateur ; pas de promotion universelle de Pairwise ou du seuil64.
+
 **Décision explicite de l'utilisateur, 13 septembre 2026 : ce changement
 radical passe au premier rang de la refonte.** Après l'échec des témoins
 universels, la v8 ne doit plus imposer les parcours exhaustifs A×A et B×B

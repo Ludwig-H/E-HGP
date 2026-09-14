@@ -9,6 +9,16 @@ enum class Q2SiblingMode { Disabled, Saturating };
 enum class Q2WitnessOrder { GlobalDfs, ComplementFirst };
 enum class Q2AnchorMode { Individual, SharedProduct, SharedAnchors };
 
+struct Q2PoolWork {
+  u64 selected_rectangles{}, selected_pairs{}, residual_pairs{}, filtered_pairs{};
+  u64 factor_sites{}, selection_tests{}, witness_attempts{}, universal_queries{};
+  u64 q2_axis_terms{}, pool_selected{}, pool_insertions{}, pool_shifted_entries{};
+  u64 prefix_class_visits{}, factor_read_visits{}, grouping_visits{}, bands{};
+  u64 selected_anchors{}, pair_roots{}, plan_peak_bytes{}, original_selected_anchors{};
+  u64 passthrough_rectangles{}, passthrough_pairs{}, passthrough_anchors{};
+  double preparation_ms{}, selected_total_ms{};
+};
+
 struct Q2JointWork {
   u64 root_products{}, tasks{}, splits_a{}, splits_b{};
   u64 witness_splits{}, bound_tests{}, cursor_advances{}, structural_splits{};
@@ -40,13 +50,14 @@ struct WspdQ2CensusResult {
   Q2SiblingWork sibling_work;
   Q2OrderWork order_work;
   Q2JointWork joint_work;
+  Q2PoolWork pool_work;
   u64 input_rectangles{};
   u64 anchor_queries{};  // Sum min(|A|,|B|), not expanded pair count.
   double total_ms{};
 };
 
 // Integrated q2-only traversal. Every unordered pair is either safely
-// rejected by the front or counted against ALL sites of this exact index.
+// rejected by the front/Pool or counted against ALL sites of this exact index.
 // The smaller factor supplies anchors (ties preserve front orientation).
 // SharedBlocks uses the other global node directly: no axis plan, factor
 // copy, local B tree or cover scan. Pairwise expands the same residual.
@@ -85,10 +96,32 @@ struct WspdQ2CensusResult {
 // singleton handoff, preserving the original B for its anchor task. Thus
 // it cannot hand off an original anchor more than once per rectangle.
 //
+// pool_min_factor=0 disables the terminal Pool filter (the default).
+// Otherwise a terminal rectangle with max(|A|,|B|)>=pool_min_factor
+// prepares ONE local credit plan on the same index. Its at most K disjoint
+// pair bands are expanded, without testing the rejected Cartesian product.
+// If Pool removes no pair, the original census route is retained; the paid
+// plan is still counted in selected_*, F, preparation and passthrough_*.
+// Otherwise each survivor starts its full global census at zero; h_a+h_b
+// is never preloaded. These reduced rectangles use Pairwise regardless of
+// the anchor/order/sibling options, which still govern every other rectangle.
+// All existing option compatibility checks remain mandatory before emission.
+// No new cloud, factor coordinates, query tree, or global pair array is built.
+// pool_work counts the extra O(K*sum factor sizes) preparation separately;
+// selected_pairs=residual_pairs+filtered_pairs and
+// front.residual_pair_mass[0]=census.candidate_pairs+filtered_pairs.
+// anchor_queries/input_descriptors still describe ALL front rectangles.
+// The plan and its permutations remain stable for its synchronous callbacks.
+// Future distributed jobs must retain that parent plan rather than prepare
+// new credits or rescan B per job. No async lifetime is provided here.
+//
 // total_ms and census.total_ms are the same enclosing FRONT+CENSUS interval,
 // including destruction of private payload buffers. census.count_ms includes
 // the front and counting overhead; payload_ms includes collection/callbacks;
-// query_index_ms is zero. No per-rectangle clocks are inserted. This is a
+// query_index_ms is zero. Only Pool-selected rectangles have local clocks:
+// selected_total_ms includes preparation, census, payload and plan destruction;
+// preparation_ms and payload_ms overlap it and must not be added to it.
+// plan_peak_bytes measures retained vector capacities, not peak RSS. This is a
 // stream of q2 supports, not a canonical ball catalogue or an HGP FULL tower.
 [[nodiscard]] WspdQ2CensusResult run_wspd_q2_census(
     const Q2CensusIndex& index, unsigned kmax, unsigned separation_s,
@@ -96,6 +129,7 @@ struct WspdQ2CensusResult {
     const Q2CensusConsumer& consumer,
     Q2SiblingMode sibling_mode = Q2SiblingMode::Disabled,
     Q2WitnessOrder witness_order = Q2WitnessOrder::GlobalDfs,
-    Q2AnchorMode anchor_mode = Q2AnchorMode::Individual);
+    Q2AnchorMode anchor_mode = Q2AnchorMode::Individual,
+    std::size_t pool_min_factor = 0);
 
 }  // namespace mhgp8

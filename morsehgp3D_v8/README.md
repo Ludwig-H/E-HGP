@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — census conjoint et partage des ancres
+# Morse HGP 3D v8 — Pool terminal sur le census global
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -35,6 +35,31 @@ catalogue q3/q4 ni une tour FULL.
 Les mesures historiques citées restent v7.
 
 ## État exécutable
+
+La douzième tranche raccorde [Pool terminal au census global](docs/P0_POOL_TERMINAL_Q2.md).
+Un plan par rectangle, sans nouvelle copie du nuage, sélectionne au plus
+K bandes résiduelles. Le census de leurs paires repart de zéro sur tous
+les sites. Si le filtre ne retire aucune paire, le parcours initial est
+conservé ; sa préparation supplémentaire reste comptée. Le défaut demeure
+Pool désactivé. Le seuil de taille choisit une méthode, jamais un plafond
+de sortie ou de recherche.
+
+Les [preuves et mesures propres](receipts/q2_terminal_pool_20260914/README.md)
+sont closes : **49 CTests Release/Clang ASan/UBSan passent**, lecteurs
+normal/−O identiques et **80 mesures** appariées K5/K10, s8/10/12 à8k
+puis croissance à16k/32k à s8. Sur les amas/K10/s8, le total q2 mono
+passe de 13,412/47,179/184,306 s sans Pool à **3,589/7,614/19,180 s**
+avec Pool64. Les visites census font alors ×2,958/×2,701, contre
+×4,106/×4,229 sans filtre. Ce régime mesuré progresse réellement,
+sans preuve générale de croissance sous-quadratique. Uniforme et terrain
+ne sélectionnent aucun plan : leurs variations de temps ne sont pas
+des gains du filtre. Les résultats du prototype A ne sont pas hérités.
+Prochaine priorité : paralléliser les sous-arbres du front et leurs petits
+rectangles, avec moteur/collecteur privés et contextes possédés.
+P0, q3/q4, FULL, multi-CPU, GPU et contrats de tour restent ouverts.
+GCP non utilisé.
+
+## Onzième tranche publiée à b2106c3c — historique
 
 La onzième tranche implémente le [census conjoint A×B](docs/P0_CENSUS_CONJOINT_Q2.md)
 et son bras A seul, avant le passage aux ancres individuelles. Compte,
@@ -311,4 +336,4 @@ multi-millions. Les optimisations privées ultérieures n'ont pas leur
 nouvelle mesure 50k. La v8 démarre sur ces constats, sans statut hérité.
 
 Entrées de suivi : [passation](PASSATION.md), [état de l'audit](audits/ETAT_COURANT.md).
-GCP non utilisé pour l'audit d'ouverture et ces huit tranches mono.
+GCP non utilisé pour l'audit d'ouverture et les douze tranches mono.

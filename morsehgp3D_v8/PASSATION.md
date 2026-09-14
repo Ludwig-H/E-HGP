@@ -1,10 +1,47 @@
-# Passation v8 — partage des ancres comparé, Pool terminal prioritaire
+# Passation v8 — Pool terminal qualifié localement, front parallèle à construire
 
 14 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`. Aucun contrat de tour n'est encore acquis.
 
 ## À reprendre maintenant
+
+Le [port Pool terminal](docs/P0_POOL_TERMINAL_Q2.md) est implémenté.
+Les crédits appartiennent aux deux nœuds du même index, regroupés en au
+plus K bandes disjointes. Ni nouveau nuage ni préparation par job, ni
+préchargement de crédit dans le census global. Le plan n'est ni copiable
+ni déplaçable ; seule sa durée synchrone est garantie pour l'instant.
+La permutation B locale sert aux requêtes individuelles, jamais à Z.
+Un filtre sans réduction retourne au parcours existant : les rangées
+ont motivé ce repli, qui conserve le coût de préparation dans les reçus.
+
+[Qualification et campagnes](receipts/q2_terminal_pool_20260914/README.md)
+closes dans les builds désormais épinglés v8_pool_terminal_20260914 et
+v8_pool_terminal_sanitize_20260914 : 49 CTests Release/Clang ASan/UBSan
+PASS, 32 commandes par qualification, lecteurs normal/−O identiques,
+80 mesures propres. Aucun temps hérité de fbbecc01.
+La décision porte sur toute la chaîne q2, F et census/sorties inclus,
+à K5/K10, s8/10/12 à8k et croissance s8 à16k/32k. Sur amas/K10,
+13,412/47,179/184,306 s deviennent 3,589/7,614/19,180 s ; les visites
+font ×2,958/×2,701 avec Pool, contre ×4,106/×4,229 sans. Le gain ne
+s'étend pas à uniforme/terrain, où aucun plan n'est sélectionné. Le
+travail mesuré est sous le quadruplement, pas une borne générale.
+Après ce port,
+prioriser front et petits rectangles ; un filtrage partiellement efficace
+peut encore perdre face au partagé. Les emplois massivement parallèles
+devront posséder et partager le plan parent, sans recopier B par job.
+q3/q4, FULL, multi-CPU, GPU et contrats G4 restent ouverts ; GCP non utilisé.
+
+L'audit A d608cc28 a été lu : Global sur les seules racines singleton
+ne gagne pas de façon stable, ne pas intégrer cette variante. La
+prochaine parallélisation doit partager le front et ses petits rectangles,
+avec moteur/collecteur par worker et réduction des compteurs, pas seulement
+les rares paires survivantes des gros plans Pool. Les tâches en vol
+doivent posséder contexte et plan, et les temps mur/temps cumulés ne
+doivent pas être soustraits entre eux. Proposition détaillée dans le
+contrat de cette tranche, non encore une implémentation multi-CPU.
+
+## Onzième tranche publiée à b2106c3c — historique
 
 Le [census conjoint A×B](docs/P0_CENSUS_CONJOINT_Q2.md) est implémenté :
 bornes 96 octets, compte/curseur/phase conservés à la reprise singleton.

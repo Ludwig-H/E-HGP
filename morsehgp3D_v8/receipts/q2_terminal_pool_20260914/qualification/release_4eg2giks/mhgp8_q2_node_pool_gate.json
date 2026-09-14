@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_pool_terminal_20260914/mhgp8_q2_node_pool_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "mhgp8_q2_node_pool_gate",
+  "expected_exit_code": 0,
+  "started_utc": "2026-09-14T14:15:13.762505+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "mhgp8_q2_node_pool_gate passed checks=55984 plans=2059 pairs=8190 oracle_corners=81160 rejected=3521 candidates=4669 empty_plans=0 saturated=2045 jobs=6177 jobs_pairs=4669 factor_sites=8166 fixed_rescans=236 growing_rescans=1400 model_mutants=3 invalid_inputs=7\n",
+  "stderr": "",
+  "stdout_base64": "bWhncDhfcTJfbm9kZV9wb29sX2dhdGUgcGFzc2VkIGNoZWNrcz01NTk4NCBwbGFucz0yMDU5IHBhaXJzPTgxOTAgb3JhY2xlX2Nvcm5lcnM9ODExNjAgcmVqZWN0ZWQ9MzUyMSBjYW5kaWRhdGVzPTQ2NjkgZW1wdHlfcGxhbnM9MCBzYXR1cmF0ZWQ9MjA0NSBqb2JzPTYxNzcgam9ic19wYWlycz00NjY5IGZhY3Rvcl9zaXRlcz04MTY2IGZpeGVkX3Jlc2NhbnM9MjM2IGdyb3dpbmdfcmVzY2Fucz0xNDAwIG1vZGVsX211dGFudHM9MyBpbnZhbGlkX2lucHV0cz03Cg==",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-14T14:15:13.767660+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/q2_terminal_pool_20260914/qualification/release_4eg2giks/mhgp8_q2_node_pool_gate.stdout.bin",
+      "sha256": "70db4d6e508f4f0060f7d324e89b290b264860bf625347843bb718adcfa53df6",
+      "bytes": 262
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/q2_terminal_pool_20260914/qualification/release_4eg2giks/mhgp8_q2_node_pool_gate.stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  }
+}

@@ -1,15 +1,17 @@
 # Sonde P0 : un rectangle séparé, pas une tour HGP
 
 Complément du 14 septembre, raccord WSPD q2 :
-`mhgp8_wspd_q2_census_probe n famille Kmax s seed pure|samples pairwise|shared [none|sibling [global|complement [anchors|joint|joint-a]]]`.
+`mhgp8_wspd_q2_census_probe n famille Kmax s seed pure|samples pairwise|shared [none|sibling [global|complement [anchors|joint|joint-a [pool_min_factor]]]]`.
 Les arguments facultatifs choisissent le certificat frère, l'ordre
-des témoins, puis le partage du travail entre ancres. Les schémas v1/v2/v3
-restent disponibles ; le dernier argument explicite produit v4 et vingt
-compteurs du traitement conjoint. Le détail des CLI,
+des témoins, le partage du travail entre ancres, puis le seuil de taille
+du filtre Pool terminal. Les schémas v1 à v4 restent disponibles ; le
+dernier argument numérique produit v5, avec vingt-trois compteurs Pool
+et deux temps imbriqués. Le détail des CLI,
 reçus et coûts figure dans la section finale de cette note. Voir les
 contrats du [certificat frère](../docs/P0_CERTIFICAT_FRERE_Q2.md) et de
 l'[ordre des témoins](../docs/P0_ORDRE_TEMOINS_Q2.md), puis le contrat du
-[census conjoint](../docs/P0_CENSUS_CONJOINT_Q2.md).
+[census conjoint](../docs/P0_CENSUS_CONJOINT_Q2.md) et le
+[raccord Pool terminal](../docs/P0_POOL_TERMINAL_RACCORD.md).
 
 13 septembre 2026. Cadre `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `profile=quantized_u16_input_only`,
@@ -330,7 +332,7 @@ aucun census, support, catalogue ou parent FULL n'est construit. Lire le
 ## Raccord WSPD et census q2 de tout le nuage
 
 ```text
-mhgp8_wspd_q2_census_probe n uniform|terrain|clusters|rows Kmax s seed pure|samples pairwise|shared [none|sibling [global|complement [anchors|joint|joint-a]]]
+mhgp8_wspd_q2_census_probe n uniform|terrain|clusters|rows Kmax s seed pure|samples pairwise|shared [none|sibling [global|complement [anchors|joint|joint-a [pool_min_factor]]]]
 ```
 
 Même recette d'entrée que le front, mais **q2 seul**, suivi de son census,
@@ -352,11 +354,12 @@ scan de couverture local n'est payé. Le total inclut le coût du callback
 (copies, tris, validation, hash) ; les sous-chronos sont imbriqués.
 Lire le [contrat complet](../docs/P0_FRONT_ET_CENSUS_Q2.md).
 
-### Schémas v1 à v4 : des options explicites
+### Schémas v1 à v5 : des options explicites
 
 Le suffixe du schéma suit les arguments effectivement fournis,
 pas seulement leur effet : `none global` produit v3 et
-`none global anchors` produit v4. Les préfixes
+`none global anchors` produit v4 et `none global anchors 0` produit v5,
+même si Pool reste désactivé. Les préfixes
 sont `mhgp8_wspd_q2_census_probe_` pour la sonde et
 `mhgp8_wspd_q2_campaign_` pour la campagne.
 
@@ -366,11 +369,14 @@ sont `mhgp8_wspd_q2_census_probe_` pour la sonde et
 | `none` ou `sibling` | `--sibling-modes none sibling` | v2, `sibling_mode` et `sibling_work` |
 | `none\|sibling global\|complement` | `--sibling-modes none sibling --witness-orders global complement` | v3, champs v2 plus `witness_order` et `order_work` |
 | `none\|sibling global\|complement anchors\|joint\|joint-a` | Options v3 puis `--anchor-modes anchors joint joint-a` | v4, champs v3 plus `anchor_mode` et `joint_work` |
+| Arguments v4 puis entier `pool_min_factor` | Options v4 puis `--pool-min-factors 0 64` | v5, champs v4 plus `pool_min_factor` et `pool_work` |
 
 Chaque liste du runner peut ne contenir qu'une des valeurs permises.
 `--witness-orders` exige `--sibling-modes` explicite, même pour `none`.
 `--anchor-modes` exige `--witness-orders` explicite, même pour `global`.
 Sans `--anchor-modes`, aucun champ joint n'est ajouté aux anciens schémas.
+`--pool-min-factors` exige `--anchor-modes` explicite ; omettre cette
+option conserve les schémas antérieurs, sans champs Pool supplémentaires.
 `sibling`, `complement`, `joint` et `joint-a` exigent
 `--census-modes shared` ;
 une matrice comportant une combinaison interdite est refusée, jamais
@@ -486,7 +492,79 @@ ne prouve pas un gain total. Aucun chronomètre n'isole artificiellement
 le temps conjoint du temps après relais : les temps englobants décrits
 plus haut restent la référence.
 
-### Exemples v3/v4 et lecture comparative
+### v5 : Pool sur les rectangles terminaux sélectionnés
+
+`pool_min_factor=0` désactive Pool. Un entier positif sélectionne les
+rectangles dont le plus grand facteur atteint cette taille ; 64 est
+un seuil de comparaison, pas un optimum ni un quota de troncature.
+Tous les rectangles non sélectionnés gardent le census, l'ordre et le
+mode d'ancres demandés. Les combinaisons d'options interdites restent
+refusées même si le seuil sélectionne tous les rectangles.
+
+Le plan Pool est préparé une seule fois par rectangle sélectionné,
+sur le propriétaire et l'index globaux. Il regroupe les crédits en au
+plus K bandes disjointes de paires. Seules les survivantes de ces bandes
+sont développées, puis comptées individuellement contre tout le nuage,
+avec compte initial nul : les crédits ne sont jamais préchargés dans
+le census. Aucun arbre de requêtes local n'est construit.
+
+Si le plan conserve toutes les paires, il ne sert pas à les développer
+individuellement : le rectangle reprend son parcours d'origine. Ce
+retour, nommé `passthrough`, évite notamment de remplacer un parcours
+partagé efficace des rangées par une expansion de tout leur produit.
+Le plan inutile reste payé et compté ; il n'est pas effacé des mesures.
+
+`pool_work` distingue les populations, le coût du plan et le parcours
+effectivement choisi :
+
+| Champs | Sens |
+| --- | --- |
+| `selected_rectangles`, `selected_pairs`, `factor_sites`, `original_selected_anchors` | Plans préparés, masse initiale sélectionnée, somme F des tailles des facteurs et ancres initiales concernées |
+| `residual_pairs`, `filtered_pairs` | Masse conservée par ces plans, passthrough compris, et masse éliminée par certificat |
+| `passthrough_rectangles`, `passthrough_pairs`, `passthrough_anchors` | Rectangles sans aucune élimination et populations rendues au parcours d'origine |
+| `selection_tests`, `pool_selected`, `pool_insertions`, `pool_shifted_entries` | Comparaisons de scores et opérations de sélection des propositions Pool ; `selection_tests` ne compte pas la politique de taille |
+| `witness_attempts`, `universal_queries`, `q2_axis_terms` | Propositions essayées et travail de certification géométrique |
+| `factor_read_visits`, `grouping_visits`, `prefix_class_visits` | Relectures des facteurs, regroupement et construction des préfixes |
+| `bands`, `selected_anchors`, `pair_roots` | Bandes et ancres effectivement développées hors passthrough, puis recherches individuelles lancées |
+| `plan_peak_bytes` | Maximum des octets de plan déclarés, pas un pic RSS/VRAM de tout le programme |
+
+Le lecteur impose `factor_read_visits = grouping_visits = 2F`,
+`prefix_class_visits = (K+1)*selected_rectangles` et au plus K bandes
+par rectangle. Pool désactivé, ou aucun rectangle sélectionné, implique
+zéro pour les vingt-trois compteurs et les deux temps Pool.
+
+Les masses se conservent selon
+`front_residual = candidate_pairs + pool_work.filtered_pairs`,
+`selected_pairs = residual_pairs + filtered_pairs` et
+`pair_roots = residual_pairs - passthrough_pairs`.
+`accepted_pairs + rejected_pairs = candidate_pairs` concerne ensuite
+le census, pas les rejets déjà certifiés par Pool.
+
+En Shared avec ancres individuelles, les racines comptées valent
+`anchor_queries - original_selected_anchors + passthrough_anchors + pair_roots`.
+En mode conjoint, `joint_work.root_products` vaut
+`input_rectangles - selected_rectangles + passthrough_rectangles` ;
+les racines génériques ajoutent `pair_roots` à ce nombre. La masse
+décidée ou relayée par l'étape conjointe exclut seulement les recherches
+Pool réellement développées, donc vaut `candidate_pairs - pair_roots`.
+Les tâches génériques valent alors
+`singleton_handoffs + pair_roots + 2*census_work.query_splits`.
+En Pairwise, les racines restent exactement `candidate_pairs`.
+Ces adaptations sont réservées à v5 ; les identités v1 à v4 restent
+inchangées pour leurs propres reçus.
+
+`pool_work.preparation_ms` mesure le plan ; `selected_total_ms` englobe
+le traitement sélectionné, y compris census, callback, destruction du
+plan et éventuel passthrough. Ces temps sont inclus dans le temps global
+et se recouvrent avec `payload_ms` : **ne pas les additionner**.
+Le lecteur ne les traite pas comme du travail entier reproductible.
+Il conserve les vingt-trois compteurs sous `pool_work` dans le résumé
+et publie leurs deux médianes temporelles sous `median_pool_timings`.
+Une baisse de résidu ne prouve encore ni un coût total sous-quadratique
+ni une qualification de tour FULL ; F, front, petits rectangles et
+sorties restent à mesurer ensemble.
+
+### Exemples v3/v4/v5 et lecture comparative
 
 Exemple de petite capture, à exécuter dans un répertoire neuf après
 construction et validation du binaire ; ces commandes ne constituent
@@ -507,20 +585,31 @@ python3 -B morsehgp3D_v8/bench/run_wspd_q2_matrix.py check morsehgp3D_v8/receipt
 python3 -B -O morsehgp3D_v8/bench/run_wspd_q2_matrix.py check morsehgp3D_v8/receipts/front_q2_joint_new --summary
 ```
 
+Exemple v5, avec Pool désactivé puis seuil 64 et le même parcours de
+repli pour les petits rectangles ou les plans sans élimination :
+
+```bash
+python3 -B morsehgp3D_v8/bench/run_wspd_q2_matrix.py run --probe build/v8_new/mhgp8_wspd_q2_census_probe --output morsehgp3D_v8/receipts/front_q2_pool_new/main_matrix --sizes 128 --families clusters rows --kmax 5 10 --s 8 10 12 --seeds 3 --modes samples --census-modes shared --sibling-modes sibling --witness-orders complement --anchor-modes anchors --pool-min-factors 0 64 --repeats 1
+python3 -B morsehgp3D_v8/bench/run_wspd_q2_matrix.py check morsehgp3D_v8/receipts/front_q2_pool_new --summary
+python3 -B -O morsehgp3D_v8/bench/run_wspd_q2_matrix.py check morsehgp3D_v8/receipts/front_q2_pool_new --summary
+```
+
 Les campagnes de croissance utilisent séparément les tailles
 `8000 16000 32000` et les quatre familles, sans confondre cette petite
 capture de contrôle avec leur qualification. Le lecteur peut réunir
-des captures v1/v2/v3/v4 de provenance compatible et de sources épinglées
+des captures v1/v2/v3/v4/v5 de provenance compatible et de sources épinglées
 conformes ; cela ne réattribue pas les sources courantes aux anciens
 reçus. Les clés de résumé incluent chaque option effectivement présente.
 À entrée/Kmax/front/s identiques, changer le certificat frère, l'ordre
-ou le mode d'ancres
-doit préserver exactement le front et les candidates. Le digest canonique
-des supports doit aussi rester identique entre les ordres, modes et s.
+ou le mode d'ancres doit préserver exactement le front et, à seuil Pool identique, les
+candidates. Changer le seuil Pool peut modifier les candidates du census,
+jamais le front ni le digest canonique des supports. Celui-ci
+doit aussi rester identique entre les ordres, modes et s.
 Les compteurs de parcours peuvent différer ; les répétitions d'un même
 tuple complet doivent retrouver le même travail discret. La validation
-v4 réemploie les contrôles v3/v2/v1 avec les seules adaptations explicites
-de racines, tâches et visites nécessaires aux modes conjoints.
+v5 réemploie les contrôles antérieurs avec les seules adaptations
+explicites de masses, racines, tâches et visites nécessaires aux modes
+conjoints et au filtrage Pool.
 
 Le périmètre reste `q2_all_cloud_supports_not_full`, mono-thread CPU,
 `public_status=not_claimed`. Ni les schémas, ni les digests, ni les bornes

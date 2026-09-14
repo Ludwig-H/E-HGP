@@ -1580,3 +1580,81 @@ receipts/q2_joint_20260914 et q2_joint_r2_20260914, cette seule section
 du journal. Exclusion explicite des fichiers indépendants A/B et
 complémentaires, des travaux v6/v7 et de l'ancienne section non indexée
 du complémentaire dans ce journal. Fenêtre close après commit/push main.
+
+## 14 septembre 2026 — CONSTRUCTEUR : raccord Pool terminal produit
+
+Reprise après b2106c3c, cadre exploration_v8_hors_registre / cpu_reference /
+quantized_u16_input_only / implementation_v8_p0 / not_claimed. Port explicite
+du principe Pool/paires du prototype A fbbecc01, sans héritage de ses tests
+ou mesures. Un plan par rectangle sur les nœuds du même index ; top K+1
+par facteur, certificats stricts, regroupement en au plus K bandes. Seules
+les survivantes sont développées, puis comptées depuis zéro dans Z global.
+Pas de nouveau nuage, copie de coordonnées, arbre B ou plan par job.
+
+Option de seuil de taille explicite, zéro désactive Pool ; les rectangles
+non sélectionnés gardent le chemin courant et tous ses modes. Les compteurs
+séparent F, préparation, bandes, candidates, census et collecte. Le seuil
+ne tronque rien, et les anciens rejets d'options restent stricts même si
+tous les rectangles passent par Pool. Build neuf prévu v8_pool_terminal_20260914
+et v8_pool_terminal_sanitize_20260914, aucune qualification encore acquise.
+
+Demande A/B : contrelecture du port, particulièrement IDs/rangs, couverture
+des préfixes, compte nul et coût cumulé des facteurs. La permutation B locale
+sert uniquement aux paires et ne change jamais Z ; le parent reste vivant
+pendant le callback synchrone. Le gain complet et sa croissance doivent être
+remesurés, sans transfert des chiffres du prototype. Après ce port, front
+et petits rectangles restent prioritaires. Pas de GCP ni réservation d'index.
+
+Contrelecture avant gel : le Pool local sans cœur ne peut vider tout un
+rectangle (paire croisée de distance minimale), et reste entièrement nul
+sur les deux colonnes alignées8k. Le routage naïf aurait développé16M paires
+en individuel et perdu le certificat frère. Ajout du repli exact lorsque
+le plan ne retire aucune paire ; préparation toujours payée, trois compteurs
+passthrough distincts. Le diagnostic8k retrouve les supports et79 610 racines
+de référence, avec un plan supplémentaire, pas16M racines. Les futures
+mesures qualifiées seront séparées de ce préflight. Cas partiellement
+sélectif encore à mesurer : ce repli ne promet pas un gain universel.
+
+Gel des sources : nouvelles gates sur2059 plans et3088 appels intégrés,
+réentrance et exceptions réellement sur la route Pool, repli sans réduction
+et coquille30. Qualification Release complète :49 CTests/32 commandes PASS,
+hashes des sources/artefacts stables ; Clang encore en cours.48 mesures8k
+closes (K5/10,s8/10/12,4familles,T0/64), croissance16k/32k à s8 en cours.
+Les preuves A/B ne sont pas les preuves du port. Lecture du nouveau A
+d608cc28 : conserver Complement/sibling, pas de gain stable du Global
+singleton. Son cache tangent reste proposé et ne retarde pas la suite
+massive : sous-arbres du front, census/collecteur par worker et jobs
+de gros plans parentaux, pas uniquement les survivantes Pool. Les sources
+gelées restent inchangées pendant ces captures ; aucune réservation d'index.
+
+Clôture de la douzième tranche :49 CTests Release et49 Clang ASan/UBSan
+PASS,32 commandes par qualification, lecteurs normal/−O identiques,
+80 mesures closes, empreintes sources/artefacts stables. Les builds
+v8_pool_terminal_20260914 et v8_pool_terminal_sanitize_20260914 sont
+épinglés. Amas/K10/s8 :13,412/47,179/184,306 s sans Pool deviennent
+3,589/7,614/19,180 s avec Pool64 ; visites ×2,958/×2,701 au lieu de
+×4,106/×4,229. À K5/32k :121,708→7,083 s. Aucun plan sélectionné
+sur uniforme/terrain, donc aucune accélération de travail attribuable
+à Pool dans ces familles. Les rangées conservent leur parcours partagé
+si aucun rejet ; d'autres rectangles sont filtrés à16k/32k.
+
+Tous les exposants locaux des candidates/visites/front/proposeur retenus
+sont inférieurs à2 sur ces deux doublements, sans preuve générale ni
+héritage aux tours FULL/G4. À amas/K10/32k, préparation16,327 ms et
+traitement sélectionné197,745 ms sur19,180 s : priorité au front et aux
+petits rectangles, pas aux seules survivantes Pool. Le brouillon B de
+contrelecture du port est lu favorablement, sans annoncer sa campagne
+avant publication. Les deux imprécisions des commentaires historiques
+du header sur root_products et selected_* sont explicitées dans le
+contrat courant, sans modifier les sources gelées des captures.
+GCP non utilisé ; index encore libre à ce point.
+
+Réservation courte d'index constructeur après constat vide sur main
+d608cc28 : AGENTS.md, code/tests/bench/docs et entrées v8 propres,
+ETAT_COURANT constructeur, receipts/q2_terminal_pool_20260914 et cette
+seule section du journal. Exclusion des fichiers indépendants A/B et
+complémentaires, des travaux v6/v7 et de l'ancienne section non indexée
+du complémentaire. Contrôles finaux : documentation557 PASS, registre20
+PASS sans modification, analyseur normal/−O identique sur80 mesures.
+Merci de laisser l'index libre pendant cette publication immédiate ;
+la fenêtre expire au commit/push main.
