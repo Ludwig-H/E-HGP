@@ -69,6 +69,23 @@ séparément au lieu d'attribuer tout gain aux seules visites géométriques.
 Pour le futur groupe A×B, ne pas exclure A du compte : seuls les sites
 égaux à une extrémité donnée contribuent nécessairement zéro à sa paire.
 
+L'[onzième tranche](P0_CENSUS_CONJOINT_Q2.md) commence ce partage avant
+le passage singleton. Le nombre de racines est maintenant celui des
+rectangles dans ce mode ; la somme des petits facteurs reste publiée
+pour comparaison, pas comme un nombre de recherches effectuées. La
+preuve du relais de compte doit distinguer un préfixe déjà consommé
+et l'exclusion ultérieure d'une contribution zéro. Aucun crédit WSPD
+ni liste de témoins n'est importé dans ce relais.
+
+Le partage ne doit pas retarder les certificats déjà utiles : diviser B
+avant le relais peut multiplier les tâches et faire disparaître le
+certificat frère, même si le compte initial était partagé. Le bras
+SharedAnchors garde B entier pour mesurer cette différence. Sur les
+amas, la prochaine [préparation Pool terminale](P0_POOL_TERMINAL_RACCORD.md)
+doit traiter les gros produits avant ce census, sans recréer de
+propriétaire, ni confondre rangs spatiaux et IDs. La réduction des
+candidates ne suffit pas : F, fragmentation et coût aval restent payés.
+
 La [neuvième tranche](P0_CERTIFICAT_FRERE_Q2.md) teste un seul bloc frère
 après chaque division, avant le raffinement suivant. Sa population
 suffisante certifie un rejet autonome, jamais un crédit à additionner.

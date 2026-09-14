@@ -1,10 +1,46 @@
-# Passation v8 — ordre de témoins qualifié, partage des ancres à réaliser
+# Passation v8 — partage des ancres comparé, Pool terminal prioritaire
 
 14 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`. Aucun contrat de tour n'est encore acquis.
 
 ## À reprendre maintenant
+
+Le [census conjoint A×B](docs/P0_CENSUS_CONJOINT_Q2.md) est implémenté :
+bornes 96 octets, compte/curseur/phase conservés à la reprise singleton.
+SharedProduct divise A/B ; SharedAnchors ne divise qu'A avant le relais.
+Aucun retrait de tout A, redémarrage de Z ou nouveau tableau de témoins.
+Le défaut reste Individual. Les trois modes et les supports complets
+sont confrontés à l'oracle sur 5 336 appels.
+
+L'[essai initial](receipts/q2_joint_20260914/README.md) est épinglé :
+Release47 PASS, Clang46/47, perte de stdout reproduite dans le collecteur
+Python lors d'une interruption. Le correctif protège aussi les lectures,
+pas seulement Popen ; six nouvelles fixtures complètent les six tests
+de lancement. Ni les octets perdus ni l'échec ne sont masqués.
+Les [captures corrigées r2](receipts/q2_joint_r2_20260914/README.md)
+utilisent v8_joint_r2_20260914 et v8_joint_sanitize_r2_20260914,
+sans changement C++ par rapport au premier gel. Les builds sont désormais
+épinglés : 47 CTests Release/Clang ASan/UBSan passent, 27 commandes par
+qualification, lecteurs normal/−O identiques et 44 mesures closes.
+Sur amas8k/16k/32k, A seul prend 12,121/45,934/182,155 s ; les visites
+après relais font ×4,107/×4,231. Ce n'est pas la réduction de croissance
+cherchée. Le bras équilibré est pire à 8k, notamment sur les rangées,
+car il fragmente B avant les certificats frère. Les trois s8/10/12
+sont comparés à 8k, la croissance à s8 seulement. Ne promouvoir ni
+un gain global ni le partage par défaut ; P0 reste ouvert.
+
+**Priorité suivante : [Pool terminal → census global](docs/P0_POOL_TERMINAL_RACCORD.md).**
+L'audit A fbbecc01 confirme le gain q2 complet sur amas/LiDAR50k,
+dans un prototype séparé. Porter d'abord Pool/paires, propriétaire et
+index uniques, rangs distincts des IDs, au plus K bandes résiduelles,
+compte census nul. Pas de crédit préchargé, de scan A×B rejeté, ni de
+plan recalculé par job. Le partagé local ne gagne pas de façon stable
+dans l'audit ; le front et les petits rectangles restent dominants
+après Pool. Ni ces preuves de prototype ni les tranches antérieures
+ne qualifient automatiquement le futur port produit. FULL/G4 restent ouverts.
+
+## Dixième tranche publiée à e3af11a7 — historique
 
 L'[ordre complément/B original](docs/P0_ORDRE_TEMOINS_Q2.md) est implémenté
 et qualifié localement. `ComplementFirst` garde le B original

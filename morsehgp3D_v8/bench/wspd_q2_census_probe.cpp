@@ -59,24 +59,30 @@ struct Options {
   std::string_view census_mode;
   std::string_view sibling_mode;  // Empty preserves the historical v1 CLI/schema.
   std::string_view witness_order;  // Empty preserves the v1/v2 schemas.
+  std::string_view anchor_mode;  // Empty preserves the v1/v2/v3 schemas.
 };
 
 Options options(int argc, char** argv) {
-  if (argc != 8 && argc != 9 && argc != 10)
+  if (argc != 8 && argc != 9 && argc != 10 && argc != 11)
     throw std::invalid_argument("usage: mhgp8_wspd_q2_census_probe n uniform|terrain|clusters|rows "
-                                "Kmax s seed pure|samples pairwise|shared [none|sibling [global|complement]]");
+                                "Kmax s seed pure|samples pairwise|shared "
+                                "[none|sibling [global|complement [anchors|joint|joint-a]]]");
   const Options result{integer<std::size_t>(argv[1]), argv[2], integer<unsigned>(argv[3]),
                        integer<unsigned>(argv[4]), integer<u64>(argv[5]), argv[6], argv[7],
                        argc >= 9 ? std::string_view(argv[8]) : std::string_view{},
-                       argc == 10 ? std::string_view(argv[9]) : std::string_view{}};
+                       argc >= 10 ? std::string_view(argv[9]) : std::string_view{},
+                       argc == 11 ? std::string_view(argv[10]) : std::string_view{}};
   mhgp8::bench::validate_front_fixture_size(result.n, result.family);
   if (result.kmax == 0 || result.kmax > 10 || result.separation == 0 ||
       (result.front_mode != "pure" && result.front_mode != "samples") ||
       (result.census_mode != "pairwise" && result.census_mode != "shared") ||
       (argc >= 9 && result.sibling_mode != "none" && result.sibling_mode != "sibling") ||
       (result.sibling_mode == "sibling" && result.census_mode != "shared") ||
-      (argc == 10 && result.witness_order != "global" && result.witness_order != "complement") ||
-      (result.witness_order == "complement" && result.census_mode != "shared"))
+      (argc >= 10 && result.witness_order != "global" && result.witness_order != "complement") ||
+      (result.witness_order == "complement" && result.census_mode != "shared") ||
+      (argc == 11 && result.anchor_mode != "anchors" && result.anchor_mode != "joint" &&
+       result.anchor_mode != "joint-a") ||
+      ((result.anchor_mode == "joint" || result.anchor_mode == "joint-a") && result.census_mode != "shared"))
     throw std::invalid_argument("WSPD census requires Kmax 1..10, positive s, valid front/census modes");
   return result;
 }
@@ -274,6 +280,18 @@ using OrderWork = decltype(mhgp8::WspdQ2CensusResult{}.order_work);
 const std::array order_fields{
   MHGP8_FIELD(OrderWork, structural_splits), MHGP8_FIELD(OrderWork, deferred_skips),
   MHGP8_FIELD(OrderWork, anchor_skips), MHGP8_FIELD(OrderWork, phase_switches)};
+using JointWork = decltype(mhgp8::WspdQ2CensusResult{}.joint_work);
+const std::array joint_fields{
+  MHGP8_FIELD(JointWork, root_products), MHGP8_FIELD(JointWork, tasks),
+  MHGP8_FIELD(JointWork, splits_a), MHGP8_FIELD(JointWork, splits_b),
+  MHGP8_FIELD(JointWork, witness_splits), MHGP8_FIELD(JointWork, bound_tests),
+  MHGP8_FIELD(JointWork, cursor_advances), MHGP8_FIELD(JointWork, structural_splits),
+  MHGP8_FIELD(JointWork, deferred_skips), MHGP8_FIELD(JointWork, phase_switches),
+  MHGP8_FIELD(JointWork, consumed_witness_sites), MHGP8_FIELD(JointWork, credit_events),
+  MHGP8_FIELD(JointWork, credited_pair_mass), MHGP8_FIELD(JointWork, splits_after_credit),
+  MHGP8_FIELD(JointWork, singleton_handoffs), MHGP8_FIELD(JointWork, handoffs_after_credit),
+  MHGP8_FIELD(JointWork, handoff_pair_mass), MHGP8_FIELD(JointWork, rejected_pairs),
+  MHGP8_FIELD(JointWork, accepted_pairs), MHGP8_FIELD(JointWork, max_depth)};
 #undef MHGP8_FIELD
 
 template <class T, std::size_t N>
@@ -299,6 +317,7 @@ void validate(const mhgp8::WspdQ2CensusResult& result, const OutputDigest& diges
   const auto total = n % 2 == 0 ? product(n / 2, n - 1) : product(n, (n - 1) / 2);
   const auto& f = result.front;
   const auto& c = result.census;
+  const bool joint_mode = o.anchor_mode == "joint" || o.anchor_mode == "joint-a";
   require(f.total_unordered_pairs == total && f.active_lane_mask == 1,
           "q2-only front total or mask mismatch");
   require(f.work.rejected_pair_mass[0] <= total &&
@@ -318,7 +337,8 @@ void validate(const mhgp8::WspdQ2CensusResult& result, const OutputDigest& diges
   require(c.work.query_build_point_visits == 0 && c.work.query_build_nodes == 0 &&
           c.work.query_build_max_depth == 0 && c.work.query_cover_visits == 0 &&
           c.work.input_descriptors == result.input_rectangles && c.work.frontier_restarts == 0 &&
-          c.work.count_root_starts == (o.census_mode == "shared" ? result.anchor_queries : c.candidate_pairs),
+          c.work.count_root_starts == (joint_mode ? result.input_rectangles :
+            o.census_mode == "shared" ? result.anchor_queries : c.candidate_pairs),
           "WSPD census rebuilt local index or lost its root/continuation contract");
   require(digest.supports == c.accepted_pairs && digest.supports == c.work.payload_supports &&
           digest.interior_ids == c.work.payload_interior_sites &&
@@ -360,6 +380,42 @@ void validate(const mhgp8::WspdQ2CensusResult& result, const OutputDigest& diges
     for (const auto& field : order_fields)
       require(order.*(field.member) == 0, "global witness order performed complement work");
   }
+  const auto& joint = result.joint_work;
+  if (joint_mode) {
+    auto splits = joint.splits_a;
+    mhgp8::counter_add(splits, joint.splits_b);
+    auto tasks = joint.root_products;
+    mhgp8::counter_add(tasks, product(2, splits));
+    auto mass = joint.accepted_pairs;
+    mhgp8::counter_add(mass, joint.rejected_pairs);
+    mhgp8::counter_add(mass, joint.handoff_pair_mass);
+    auto query_tasks = joint.singleton_handoffs;
+    mhgp8::counter_add(query_tasks, product(2, c.work.query_splits));
+    auto advances_and_splits = joint.cursor_advances;
+    mhgp8::counter_add(advances_and_splits, splits);
+    auto classified_moves = joint.bound_tests;
+    mhgp8::counter_add(classified_moves, joint.structural_splits);
+    mhgp8::counter_add(classified_moves, joint.deferred_skips);
+    mhgp8::counter_add(classified_moves, joint.phase_switches);
+    require(joint.root_products == result.input_rectangles && joint.tasks == tasks &&
+            c.work.query_tasks == query_tasks && mass == c.candidate_pairs &&
+            joint.accepted_pairs <= c.accepted_pairs && joint.rejected_pairs <= c.rejected_pairs &&
+            joint.splits_after_credit <= splits && joint.handoffs_after_credit <= joint.singleton_handoffs &&
+            joint.singleton_handoffs <= joint.tasks && joint.singleton_handoffs <= joint.handoff_pair_mass &&
+            (joint.singleton_handoffs == 0) == (joint.handoff_pair_mass == 0),
+            "joint product task, handoff or pair mass accounting mismatch");
+    require(advances_and_splits == classified_moves,
+            "joint cursor advances or subdivision work accounting mismatch");
+    if (o.witness_order == "global")
+      require(joint.structural_splits == 0 && joint.deferred_skips == 0 && joint.phase_switches == 0,
+              "global joint traversal performed complement work");
+    if (o.anchor_mode == "joint-a")
+      require(joint.splits_b == 0 && joint.singleton_handoffs <= result.anchor_queries,
+              "joint-a split B or exceeded the original anchor population");
+  } else {
+    for (const auto& field : joint_fields)
+      require(joint.*(field.member) == 0, "individual anchors performed joint product work");
+  }
 }
 
 int run(const Options& o) {
@@ -376,7 +432,9 @@ int run(const Options& o) {
       o.census_mode == "pairwise" ? mhgp8::Q2CensusMode::Pairwise : mhgp8::Q2CensusMode::SharedBlocks,
       [&](const mhgp8::Q2Support& support) { digest.consume(support, cloud->points(), o.kmax); },
       o.sibling_mode == "sibling" ? mhgp8::Q2SiblingMode::Saturating : mhgp8::Q2SiblingMode::Disabled,
-      o.witness_order == "complement" ? mhgp8::Q2WitnessOrder::ComplementFirst : mhgp8::Q2WitnessOrder::GlobalDfs);
+      o.witness_order == "complement" ? mhgp8::Q2WitnessOrder::ComplementFirst : mhgp8::Q2WitnessOrder::GlobalDfs,
+      o.anchor_mode == "joint-a" ? mhgp8::Q2AnchorMode::SharedAnchors :
+      o.anchor_mode == "joint" ? mhgp8::Q2AnchorMode::SharedProduct : mhgp8::Q2AnchorMode::Individual);
   const auto processed = Clock::now();
   validate(result, digest, o);
   require(&index->cloud() == cloud.get(), "WSPD census index lost immutable cloud identity");
@@ -403,7 +461,7 @@ int run(const Options& o) {
   std::cout.imbue(std::locale::classic());
   std::cout << std::setprecision(17)
             << "{\"schema\":\"mhgp8_wspd_q2_census_probe_"
-            << (!o.witness_order.empty() ? "v3" : o.sibling_mode.empty() ? "v1" : "v2")
+            << (!o.anchor_mode.empty() ? "v4" : !o.witness_order.empty() ? "v3" : o.sibling_mode.empty() ? "v1" : "v2")
             << "\",\"status\":\"completed\""
             << ",\"phase\":\"exploration_v8_hors_registre\",\"backend\":\"cpu_reference\""
             << ",\"profile\":\"quantized_u16_input_only\",\"mode\":\"implementation_v8_p0\""
@@ -449,6 +507,10 @@ int run(const Options& o) {
   if (!o.witness_order.empty()) {
     std::cout << "},\"witness_order\":\"" << o.witness_order << "\",\"order_work\":{";
     print_fields(result.order_work, order_fields);
+  }
+  if (!o.anchor_mode.empty()) {
+    std::cout << "},\"anchor_mode\":\"" << o.anchor_mode << "\",\"joint_work\":{";
+    print_fields(result.joint_work, joint_fields);
   }
   std::cout << "},\"callback_work\":{";
   print_fields(digest.work, callback_fields);

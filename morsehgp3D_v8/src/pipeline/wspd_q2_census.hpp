@@ -7,6 +7,16 @@ namespace mhgp8 {
 
 enum class Q2SiblingMode { Disabled, Saturating };
 enum class Q2WitnessOrder { GlobalDfs, ComplementFirst };
+enum class Q2AnchorMode { Individual, SharedProduct, SharedAnchors };
+
+struct Q2JointWork {
+  u64 root_products{}, tasks{}, splits_a{}, splits_b{};
+  u64 witness_splits{}, bound_tests{}, cursor_advances{}, structural_splits{};
+  u64 deferred_skips{}, phase_switches{}, consumed_witness_sites{};
+  u64 credit_events{}, credited_pair_mass{}, splits_after_credit{};
+  u64 singleton_handoffs{}, handoffs_after_credit{}, handoff_pair_mass{};
+  u64 rejected_pairs{}, accepted_pairs{}, max_depth{};
+};
 
 struct Q2OrderWork {
   u64 structural_splits{};
@@ -29,6 +39,7 @@ struct WspdQ2CensusResult {
   Q2CensusResult census;
   Q2SiblingWork sibling_work;
   Q2OrderWork order_work;
+  Q2JointWork joint_work;
   u64 input_rectangles{};
   u64 anchor_queries{};  // Sum min(|A|,|B|), not expanded pair count.
   double total_ms{};
@@ -61,6 +72,18 @@ struct WspdQ2CensusResult {
 // bound/consumption. Only the depth count omits the anchor (always H=0);
 // payload collection still includes every shell site. Structural work is
 // separate from count_node_visits, which still counts geometric tests.
+// SharedProduct (SharedBlocks only) keeps both factors until A is a
+// singleton. Its common count and continuation are then handed to the
+// existing anchor task without restarting Z. A is never excluded as a
+// whole: another anchor can be an interior witness. ComplementFirst
+// defers the original B while A is grouped; only singleton handoffs may
+// skip their own known-zero anchor. Joint work is separate from anchor
+// work. anchor_queries remains the descriptive sum of smaller factors,
+// while count_root_starts equals root_products in SharedProduct mode.
+// Sibling certificates are tested only at subsequent anchor-task B splits.
+// SharedAnchors uses the same joint bounds but splits only A before the
+// singleton handoff, preserving the original B for its anchor task. Thus
+// it cannot hand off an original anchor more than once per rectangle.
 //
 // total_ms and census.total_ms are the same enclosing FRONT+CENSUS interval,
 // including destruction of private payload buffers. census.count_ms includes
@@ -72,6 +95,7 @@ struct WspdQ2CensusResult {
     WspdFrontMode front_mode, Q2CensusMode census_mode,
     const Q2CensusConsumer& consumer,
     Q2SiblingMode sibling_mode = Q2SiblingMode::Disabled,
-    Q2WitnessOrder witness_order = Q2WitnessOrder::GlobalDfs);
+    Q2WitnessOrder witness_order = Q2WitnessOrder::GlobalDfs,
+    Q2AnchorMode anchor_mode = Q2AnchorMode::Individual);
 
 }  // namespace mhgp8

@@ -1,13 +1,15 @@
 # Sonde P0 : un rectangle séparé, pas une tour HGP
 
 Complément du 14 septembre, raccord WSPD q2 :
-`mhgp8_wspd_q2_census_probe n famille Kmax s seed pure|samples pairwise|shared [none|sibling [global|complement]]`.
-Les arguments facultatifs choisissent le certificat frère puis l'ordre
-des témoins. Les schémas v1 et v2 restent disponibles ; l'ordre explicite
-produit v3 et quatre compteurs structurels distincts. Le détail des CLI,
+`mhgp8_wspd_q2_census_probe n famille Kmax s seed pure|samples pairwise|shared [none|sibling [global|complement [anchors|joint|joint-a]]]`.
+Les arguments facultatifs choisissent le certificat frère, l'ordre
+des témoins, puis le partage du travail entre ancres. Les schémas v1/v2/v3
+restent disponibles ; le dernier argument explicite produit v4 et vingt
+compteurs du traitement conjoint. Le détail des CLI,
 reçus et coûts figure dans la section finale de cette note. Voir les
 contrats du [certificat frère](../docs/P0_CERTIFICAT_FRERE_Q2.md) et de
-l'[ordre des témoins](../docs/P0_ORDRE_TEMOINS_Q2.md).
+l'[ordre des témoins](../docs/P0_ORDRE_TEMOINS_Q2.md), puis le contrat du
+[census conjoint](../docs/P0_CENSUS_CONJOINT_Q2.md).
 
 13 septembre 2026. Cadre `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `profile=quantized_u16_input_only`,
@@ -328,13 +330,13 @@ aucun census, support, catalogue ou parent FULL n'est construit. Lire le
 ## Raccord WSPD et census q2 de tout le nuage
 
 ```text
-mhgp8_wspd_q2_census_probe n uniform|terrain|clusters|rows Kmax s seed pure|samples pairwise|shared [none|sibling [global|complement]]
+mhgp8_wspd_q2_census_probe n uniform|terrain|clusters|rows Kmax s seed pure|samples pairwise|shared [none|sibling [global|complement [anchors|joint|joint-a]]]
 ```
 
 Même recette d'entrée que le front, mais **q2 seul**, suivi de son census,
 de la collecte complète et du hash canonique des supports avec populations.
 Les deux modes census voient les mêmes candidates pour un front donné.
-Les quatre combinaisons et les s doivent donner les mêmes supports à
+Les combinaisons permises et les s doivent donner les mêmes supports à
 entrée/Kmax identiques. Aucun catalogue dédupliqué ni FULL n'est construit.
 
 ```bash
@@ -350,10 +352,11 @@ scan de couverture local n'est payé. Le total inclut le coût du callback
 (copies, tris, validation, hash) ; les sous-chronos sont imbriqués.
 Lire le [contrat complet](../docs/P0_FRONT_ET_CENSUS_Q2.md).
 
-### Schémas v1, v2 et v3 : des options explicites
+### Schémas v1 à v4 : des options explicites
 
-Le suffixe des deux schémas suit les arguments effectivement fournis,
-pas seulement leur effet : `none global` produit bien v3. Les préfixes
+Le suffixe du schéma suit les arguments effectivement fournis,
+pas seulement leur effet : `none global` produit v3 et
+`none global anchors` produit v4. Les préfixes
 sont `mhgp8_wspd_q2_census_probe_` pour la sonde et
 `mhgp8_wspd_q2_campaign_` pour la campagne.
 
@@ -362,17 +365,22 @@ sont `mhgp8_wspd_q2_census_probe_` pour la sonde et
 | Aucun | Aucune | v1, ni certificat frère ni ordre explicite |
 | `none` ou `sibling` | `--sibling-modes none sibling` | v2, `sibling_mode` et `sibling_work` |
 | `none\|sibling global\|complement` | `--sibling-modes none sibling --witness-orders global complement` | v3, champs v2 plus `witness_order` et `order_work` |
+| `none\|sibling global\|complement anchors\|joint\|joint-a` | Options v3 puis `--anchor-modes anchors joint joint-a` | v4, champs v3 plus `anchor_mode` et `joint_work` |
 
 Chaque liste du runner peut ne contenir qu'une des valeurs permises.
 `--witness-orders` exige `--sibling-modes` explicite, même pour `none`.
-`sibling` et `complement` exigent tous deux `--census-modes shared` ;
+`--anchor-modes` exige `--witness-orders` explicite, même pour `global`.
+Sans `--anchor-modes`, aucun champ joint n'est ajouté aux anciens schémas.
+`sibling`, `complement`, `joint` et `joint-a` exigent
+`--census-modes shared` ;
 une matrice comportant une combinaison interdite est refusée, jamais
 filtrée silencieusement. La sonde refuse aussi une valeur inconnue ou
 un argument supplémentaire (code 2, sans JSON de succès). Une exception
 d'exécution donne le code 1 ; un succès donne 0 et une ligne JSON.
 
-`global` conserve le parcours DFS de référence. `complement` visite
-d'abord les témoins hors du facteur B initial, sans l'ancre a, puis B.
+`global` conserve le parcours DFS de référence. Pour une ancre
+individuelle, `complement` visite d'abord les témoins hors du facteur B
+initial, sans l'ancre a, puis B.
 L'ancre contribue zéro au compte d'intérieur ; elle reste dans la
 collecte de la coquille. Le B initial et l'ordre ainsi défini restent
 fixes pendant les subdivisions de la requête. Ce choix ne change ni
@@ -381,8 +389,8 @@ l'index ni le front ; il peut changer la quantité de travail du census.
 ### Compter aussi les déplacements structurels
 
 `order_work` contient quatre entiers non négatifs. Ils sont tous nuls
-avec `global`, y compris lorsque celui-ci est explicitement demandé
-en v3. Pour `complement`, le lecteur vérifie les bornes suivantes,
+avec `global`, y compris lorsque celui-ci est explicitement demandé.
+Pour `complement`, le lecteur vérifie les bornes suivantes,
 avec T = `census_work.query_tasks`.
 
 | Compteur | Travail compté | Borne vérifiée |
@@ -410,7 +418,75 @@ génération, préparation du nuage, index global, validation et destructions.
 Il n'y a ni chronomètre de front isolé dans ce raccord ni temps census
 isolé à reconstruire par soustractions de mesures par rectangle.
 
-### Exemple v3 et lecture comparative
+### v4 : partager les ancres avant le relais individuel
+
+`anchors` conserve le chemin historique : une requête initiale par ancre
+du petit facteur A. Tous les champs de `joint_work` sont alors nuls.
+`joint` commence par un produit A×B et teste les blocs de témoins Z pour
+toutes ses paires à la fois. Si le test reste indécis, il peut subdiviser
+A ou B. `joint-a` utilise les mêmes bornes, mais ne subdivise que A tant
+que celui-ci contient plusieurs sites ; B reste entier à cette étape.
+
+Lorsqu'A devient un singleton, les deux modes conjoints transmettent
+le compte acquis, le curseur non consommé et la phase au parcours
+individuel existant. Ils ne recommencent ni le comptage ni l'index.
+Avec `complement`, le B différé reste le B du rectangle initial.
+Le groupe A n'est jamais retiré du comptage : une autre ancre peut être
+un témoin intérieur. Seule l'ancre devenue individuelle peut ensuite
+être reconnue comme contribution nulle. Collecte des intérieurs,
+coquilles et callback restent payés pour tous les supports acceptés.
+
+Les vingt champs de `joint_work` décrivent uniquement l'étape conjointe,
+y compris son action terminale de relais :
+
+| Champs | Sens |
+| --- | --- |
+| `root_products`, `tasks`, `max_depth` | Rectangles initiaux, tâches conjointes et profondeur observée de leurs subdivisions |
+| `splits_a`, `splits_b`, `splits_after_credit` | Subdivisions des facteurs, dont celles après acquisition d'un compte positif |
+| `bound_tests`, `witness_splits` | Bornes géométriques sur A×B×Z et descentes géométriques dans Z |
+| `cursor_advances`, `structural_splits`, `deferred_skips`, `phase_switches` | Mouvements de continuation, dont ceux imposés par le report de B |
+| `consumed_witness_sites`, `credit_events`, `credited_pair_mass` | Sites résolus, blocs crédités et somme des masses de paires bénéficiant de ces crédits |
+| `singleton_handoffs`, `handoffs_after_credit`, `handoff_pair_mass` | Relais individuels, relais après crédit et masse des paires confiées à ces relais |
+| `rejected_pairs`, `accepted_pairs` | Paires décidées avant relais individuel |
+
+`credited_pair_mass` compte une masse à chaque événement de crédit :
+une même paire peut contribuer plusieurs fois. Ce n'est pas une
+population dédupliquée ni une masse à ajouter aux paires terminales.
+Les visites de comptage `census_work.count_node_visits` et leurs
+sous-tests, `census_work.witness_splits` et les quatre champs
+`order_work` comptent seulement le parcours individuel après relais.
+`sibling_work` compte les certificats testés lors des subdivisions B de
+ce parcours, jamais les subdivisions conjointes. Les comptes globaux
+d'acceptation, de rejet et de payload incluent en revanche les deux
+étapes ; `count_root_starts` compte les rectangles initiaux.
+
+Le lecteur vérifie ces identités en mode conjoint, avec S égal à
+`joint_work.splits_a + joint_work.splits_b` :
+
+- `joint_work.root_products = input_rectangles = census_work.count_root_starts` ;
+- `joint_work.tasks = joint_work.root_products + 2S` ;
+- `census_work.query_tasks = joint_work.singleton_handoffs + 2*census_work.query_splits` ;
+- les masses jointes `accepted_pairs + rejected_pairs + handoff_pair_mass` donnent exactement `candidate_pairs` ;
+- `joint_work.cursor_advances + S = joint_work.bound_tests + joint_work.structural_splits + joint_work.deferred_skips + joint_work.phase_switches`.
+
+Avec `global`, les trois derniers compteurs structurels de cette
+identité sont nuls. `joint-a` impose en outre `splits_b = 0` et
+`singleton_handoffs <= anchor_queries`. En mode conjoint, `anchor_queries`
+reste la somme descriptive des petits facteurs, pas le nombre de
+recherches réellement lancées. `joint` peut confier plusieurs groupes
+B différents à une même ancre : son nombre de relais n'a donc pas cette
+borne. Les anciens contrôles de racines par ancre restent inchangés
+pour v1/v2/v3 et v4 `anchors` ; ils ne sont pas appliqués aveuglément
+aux nouveaux comptes conjoints.
+
+La validation n'impose aucun plafond arbitraire à `bound_tests` ou
+`max_depth`. Comparer les deux étapes, leurs subdivisions, leurs relais
+et le payload reste nécessaire ; un compteur individuel plus faible
+ne prouve pas un gain total. Aucun chronomètre n'isole artificiellement
+le temps conjoint du temps après relais : les temps englobants décrits
+plus haut restent la référence.
+
+### Exemples v3/v4 et lecture comparative
 
 Exemple de petite capture, à exécuter dans un répertoire neuf après
 construction et validation du binaire ; ces commandes ne constituent
@@ -422,18 +498,29 @@ python3 -B morsehgp3D_v8/bench/run_wspd_q2_matrix.py check morsehgp3D_v8/receipt
 python3 -B -O morsehgp3D_v8/bench/run_wspd_q2_matrix.py check morsehgp3D_v8/receipts/front_q2_order_new --summary
 ```
 
+Pour comparer les trois modes d'ancres en v4, conserver les mêmes
+entrées, K, s, certificats et ordres :
+
+```bash
+python3 -B morsehgp3D_v8/bench/run_wspd_q2_matrix.py run --probe build/v8_new/mhgp8_wspd_q2_census_probe --output morsehgp3D_v8/receipts/front_q2_joint_new/main_matrix --sizes 64 --families uniform rows --kmax 5 10 --s 8 10 12 --seeds 3 --modes samples --census-modes shared --sibling-modes none sibling --witness-orders global complement --anchor-modes anchors joint joint-a --repeats 1
+python3 -B morsehgp3D_v8/bench/run_wspd_q2_matrix.py check morsehgp3D_v8/receipts/front_q2_joint_new --summary
+python3 -B -O morsehgp3D_v8/bench/run_wspd_q2_matrix.py check morsehgp3D_v8/receipts/front_q2_joint_new --summary
+```
+
 Les campagnes de croissance utilisent séparément les tailles
 `8000 16000 32000` et les quatre familles, sans confondre cette petite
 capture de contrôle avec leur qualification. Le lecteur peut réunir
-des captures v1/v2/v3 de provenance compatible et de sources épinglées
+des captures v1/v2/v3/v4 de provenance compatible et de sources épinglées
 conformes ; cela ne réattribue pas les sources courantes aux anciens
 reçus. Les clés de résumé incluent chaque option effectivement présente.
-À entrée/Kmax/front/s identiques, changer le certificat frère ou l'ordre
+À entrée/Kmax/front/s identiques, changer le certificat frère, l'ordre
+ou le mode d'ancres
 doit préserver exactement le front et les candidates. Le digest canonique
 des supports doit aussi rester identique entre les ordres, modes et s.
 Les compteurs de parcours peuvent différer ; les répétitions d'un même
 tuple complet doivent retrouver le même travail discret. La validation
-v3 réemploie les contrôles v2 puis v1, en ajoutant ceux du nouvel ordre.
+v4 réemploie les contrôles v3/v2/v1 avec les seules adaptations explicites
+de racines, tâches et visites nécessaires aux modes conjoints.
 
 Le périmètre reste `q2_all_cloud_supports_not_full`, mono-thread CPU,
 `public_status=not_claimed`. Ni les schémas, ni les digests, ni les bornes

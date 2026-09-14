@@ -15,6 +15,7 @@ import re
 import signal
 import subprocess
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -205,10 +206,11 @@ def on_signal(signum: int, _frame: Any) -> None:
 
 def invoke(command: list[str], environment: dict[str, str], root: Path,
            record: dict[str, Any], *, new_session: bool = False) -> None:
-    # A fast child may flush and signal its parent before Popen returns. Do
-    # not let the campaign's raising handler escape before we own the child
-    # object and can drain its pipes. Deferring Python callbacks changes no
-    # OS signal mask and therefore passes no blocked mask to the child.
+    # Defer raising handlers throughout Popen AND every communicate call.
+    # A handler raised after os.read but before CPython saves its bytes can
+    # otherwise discard flushed output permanently. Short communicate
+    # timeouts provide safe replay points, not a benchmark-duration limit.
+    # No OS mask is changed or passed to the child.
     handlers = {signum: signal.getsignal(signum) for signum in (signal.SIGINT, signal.SIGTERM)}
     pending: list[tuple[int, Any]] = []
 
@@ -219,7 +221,22 @@ def invoke(command: list[str], environment: dict[str, str], root: Path,
         for signum, handler in handlers.items():
             signal.signal(signum, handler)
 
-    interrupted: KeyboardInterrupt | None = None
+    interrupted: BaseException | None = None
+    replayed = 0
+
+    def replay_pending() -> None:
+        nonlocal interrupted, replayed
+        while replayed < len(pending):
+            signum, frame = pending[replayed]
+            replayed += 1
+            try:
+                handlers[signum](signum, frame)
+            except BaseException as error:
+                # Preserve the first interruption while still draining an
+                # owned child if more signals arrive during cancellation.
+                if interrupted is None:
+                    interrupted = error
+
     try:
         for signum, handler in handlers.items():
             # Preserve SIG_IGN/SIG_DFL semantics; all campaign callers install
@@ -228,15 +245,28 @@ def invoke(command: list[str], environment: dict[str, str], root: Path,
                 signal.signal(signum, defer)
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                    env=environment, cwd=root, start_new_session=new_session)
-        try:
-            # Restoring/replaying is itself inside the collection handler;
-            # the process is now installed even if replay raises immediately.
-            restore()
-            for signum, frame in pending:
-                handlers[signum](signum, frame)
-            stdout, stderr = process.communicate()
-        except KeyboardInterrupt as error:
-            interrupted = error
+
+        def collect(*, deadline: float | None = None,
+                    stop_on_interrupt: bool = True) -> tuple[bytes, bytes] | None:
+            while True:
+                replay_pending()
+                if stop_on_interrupt and interrupted is not None:
+                    return None
+                interval = 0.05
+                if deadline is not None:
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        return None
+                    interval = min(interval, remaining)
+                try:
+                    captured = process.communicate(timeout=interval)
+                except subprocess.TimeoutExpired:
+                    continue
+                replay_pending()
+                return captured
+
+        captured = collect()
+        if interrupted is not None:
             if new_session:
                 # This process was made leader of its own session/group.
                 # Cancel descendants even if the group leader already exited.
@@ -246,10 +276,10 @@ def invoke(command: list[str], environment: dict[str, str], root: Path,
                     pass
             elif process.poll() is None:
                 process.terminate()
-            try:
-                # Bound cancellation cleanup, not the duration of a benchmark.
-                stdout, stderr = process.communicate(timeout=2)
-            except subprocess.TimeoutExpired:
+            # Further signals are replayed outside pipe reads but cannot
+            # abort cleanup. Only cancellation gets the existing 2 s budget.
+            captured = collect(deadline=time.monotonic() + 2, stop_on_interrupt=False)
+            if captured is None:
                 if new_session:
                     try:
                         os.killpg(process.pid, signal.SIGKILL)
@@ -257,12 +287,19 @@ def invoke(command: list[str], environment: dict[str, str], root: Path,
                         pass
                 else:
                     process.kill()
-                stdout, stderr = process.communicate()
+                captured = collect(stop_on_interrupt=False)
+        if captured is None:
+            raise RuntimeError("campaign collection ended without child output")
+        stdout, stderr = captured
         record.update(exit_code=process.returncode,
                       stdout=stdout.decode("utf-8", errors="replace"),
                       stderr=stderr.decode("utf-8", errors="replace"),
                       stdout_base64=base64.b64encode(stdout).decode("ascii"),
                       stderr_base64=base64.b64encode(stderr).decode("ascii"))
+        # The child is reaped and the record is complete before restoring
+        # potentially raising handlers. Replay any last deferred callbacks.
+        restore()
+        replay_pending()
         if interrupted is not None:
             raise interrupted
     finally:

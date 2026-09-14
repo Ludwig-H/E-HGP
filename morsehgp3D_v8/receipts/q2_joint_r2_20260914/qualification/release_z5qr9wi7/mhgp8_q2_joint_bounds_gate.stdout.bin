@@ -1,0 +1,1 @@
+mhgp8_q2_joint_bounds_gate passed checks=12058 cases=3190 oracle_values=211108 dense_values=120366 interior=45 exterior=348 shell=229 mixed=2568 swaps=3190 singleton_reductions=2413 symmetries=48 model_mutants=9 invalid_inputs=9 copies=3 prepared_bytes=96

@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_joint_20260914/mhgp8_q2_sibling_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "mhgp8_q2_sibling_gate",
+  "expected_exit_code": 0,
+  "started_utc": "2026-09-14T12:38:18.808313+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "mhgp8_q2_sibling_gate passed checks=485775 clouds=24 oracle_pairs=7442 oracle_sites=429028 runs=1449 supports=64725 proposals=23924 cardinality_skips=17088 bound_tests=6836 rejected_tasks=3417 rejected_pairs=7466 rejected_after_credit=10 transformed_clouds=16 permutations=16 default_comparisons=192 invalid_inputs=3 callback_failures=2 model_mutants=5 fragmentation_bound=2633 fragmentation_disabled_tasks=2261 fragmentation_enabled_tasks=1967\n",
+  "stderr": "",
+  "stdout_base64": "bWhncDhfcTJfc2libGluZ19nYXRlIHBhc3NlZCBjaGVja3M9NDg1Nzc1IGNsb3Vkcz0yNCBvcmFjbGVfcGFpcnM9NzQ0MiBvcmFjbGVfc2l0ZXM9NDI5MDI4IHJ1bnM9MTQ0OSBzdXBwb3J0cz02NDcyNSBwcm9wb3NhbHM9MjM5MjQgY2FyZGluYWxpdHlfc2tpcHM9MTcwODggYm91bmRfdGVzdHM9NjgzNiByZWplY3RlZF90YXNrcz0zNDE3IHJlamVjdGVkX3BhaXJzPTc0NjYgcmVqZWN0ZWRfYWZ0ZXJfY3JlZGl0PTEwIHRyYW5zZm9ybWVkX2Nsb3Vkcz0xNiBwZXJtdXRhdGlvbnM9MTYgZGVmYXVsdF9jb21wYXJpc29ucz0xOTIgaW52YWxpZF9pbnB1dHM9MyBjYWxsYmFja19mYWlsdXJlcz0yIG1vZGVsX211dGFudHM9NSBmcmFnbWVudGF0aW9uX2JvdW5kPTI2MzMgZnJhZ21lbnRhdGlvbl9kaXNhYmxlZF90YXNrcz0yMjYxIGZyYWdtZW50YXRpb25fZW5hYmxlZF90YXNrcz0xOTY3Cg==",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-14T12:38:18.878738+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/q2_joint_20260914/qualification/release_kuhtgvs4/mhgp8_q2_sibling_gate.stdout.bin",
+      "sha256": "0d18023281cae174199d425e3bb72d7a1ed17bd9845ab4a8d6cd53b145ee73e1",
+      "bytes": 445
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/q2_joint_20260914/qualification/release_kuhtgvs4/mhgp8_q2_sibling_gate.stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  }
+}

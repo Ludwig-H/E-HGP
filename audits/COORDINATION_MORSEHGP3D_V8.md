@@ -1494,3 +1494,89 @@ code/tests/bench/docs et entrées v8 propres, ETAT_COURANT constructeur,
 receipts/q2_witness_order_20260914, cette seule section du journal.
 Les fichiers indépendants A/B/complémentaires et les travaux v6/v7
 restent exclus. Fenêtre close après commit/push main. GCP non utilisé.
+
+## 14 septembre 2026 — CONSTRUCTEUR : census conjoint A×B
+
+Reprise explicite après e3af11a7, même cadre hors registre cpu_reference /
+quantized_u16_input_only / implementation_v8_p0 / not_claimed. Ouverture
+SharedProduct : une tâche par rectangle avant la division des ancres,
+bornes communes préparées à96 octets, compte/curseur/phase hérités.
+À A singleton, reprise du shared_task existant sans root_start ni
+réinitialisation ; en Complement, B original reste fixe et seul a est
+ensuite exclu du compte. Aucun retrait de tout A, aucun catalogue de
+paires ni liste de témoins. Frère testé seulement dans les descendants
+du chemin à ancre fixe. Individual reste le défaut ; Pairwise+joint refusé.
+Voir docs/P0_CENSUS_CONJOINT_Q2.md, code et gates en chantier.
+
+Demande A : vérifier transition groupe→ancre lorsque a est déjà dans
+le préfixe résolu, masses rejet/acceptation/reprise, et politique de
+division à diagonales. Les compteurs de la phase conjointe sont séparés
+des visites génériques ; une seule borne conjointe coûte davantage.
+Les résultats e3af11a7 restent épinglés, nouveaux builds v8_joint_20260914
+et v8_joint_sanitize_20260914. Pas de GCP ni réservation d'index.
+
+Premier essai exploratoire : la division équilibrée A/B multiplie les
+relais singleton sur les amas. Ajout du bras SharedAnchors (joint-a),
+qui ne divise qu'A avant le relais, à candidats et payload identiques.
+Les trois modes sont comparés ; défaut Individual inchangé. Sources
+gelées pour les qualifications, documentation encore en travail.
+
+Audits B 93c24dda/e6388e55 lus : les crédits Pool terminaux sur les
+28 gros produits inter-amas sont une piste prioritaire pour la suite.
+Leur réduction du résidu ne qualifie pas encore front+plan+census :
+ce raccord et son coût total seront testés séparément, sans recopier
+le nuage pour chaque rectangle ni changer les sources déjà en capture.
+Question A/B : partager le plan local sur le propriétaire global, puis
+restreindre les requêtes sans ajouter ses minorants au compte du census.
+Le crédit P0 sert de filtre, le census résiduel repart de zéro ; examiner
+les reprises de plages sélectionnées et l'amortissement des préparations.
+
+Capture initiale close : Release47 PASS, Clang46/47 ; seul le test
+historique campaign_gate_optimized échoue à l'interruption du collecteur.
+Reproduction déterministe Python : signal après os.read avant append,
+stdout perdu malgré TERM/KILL et code corrects. Sources/échec et 36
+mesures8k conservés dans receipts/q2_joint_20260914, archive pré-correctif
+et lecteurs normal/−O clos. Correction du collecteur en cours, aucun
+changement C++ prévu ; nouveaux builds v8_joint_r2_20260914 et
+v8_joint_sanitize_r2_20260914. La qualification finale repartira sur r2.
+
+Audit A 7e315009 lu : preuve du relais, invariant P disjoint d'A,
+obstacle de la règle des diagonales, relaxation Z=A encore modèle
+uniquement. Son coût plus élevé en bornes interdit de promouvoir la
+seule diminution des visites. Proposition Pool suivante décrite dans
+docs/P0_POOL_TERMINAL_RACCORD.md ; aucune copie du nuage ni expansion
+des produits déjà rejetés dans le raccord proposé.
+
+Collecteur corrigé et gelé : signaux différés pendant Popen et lectures,
+rejoués hors lecture ; annulation résistante à un second signal, première
+interruption conservée. Six nouvelles contre-fixtures précises passent
+en Python normal/−O, sans affaiblir les six tests de lancement. Une
+injection après os.read réfute l'ancien collecteur ; r2 relance les
+47 CTests et ses campagnes propres. Aucun changement C++ depuis le
+premier gel. Pas de GCP ni réservation d'index à ce stade.
+
+Retours intégrés : audit A fbbecc01 lu, gain Pool/paires mesuré avec
+census global et payload, pas seulement résidu ; audit B e931d8f6 lu,
+contre-vérification des trois modes conjoints et des survivantes. Les
+temps B corrigés sont acquittés dans notre proposition. Priorité du
+port Pool/paires confirmée, au plus K bandes/préfixes ; après filtre,
+front/petits rectangles/sorties dominent. Aucun transfert automatique
+des résultats de ces prototypes vers le produit encore non raccordé.
+
+Clôture r2 constructeur : 47 CTests Release/Clang ASan/UBSan PASS,
+27 commandes par qualification, empreintes des sources/binaires stables,
+lecteurs normal/−O identiques. 44 mesures closes : 36 comparaisons8k
+s8/10/12 et huit croissances16k/32k à s8 en joint-a. Amas :
+12,121/45,934/182,155 s ; visites après relais ×4,107/×4,231, bornes
+conjointes et structure publiées séparément. P0 reste non clos, défaut
+Individual conservé. Le bras A/B équilibré régresse notamment sur les
+rangées ; aucune nouvelle grande matrice sur ce contre-résultat.
+Les deux builds r2 sont épinglés. Sources, échec initial et essais
+précédents conservés, GCP non utilisé.
+
+Réservation courte d'index constructeur après constat vide : AGENTS.md,
+code/tests/bench/docs et entrées v8 propres, ETAT_COURANT constructeur,
+receipts/q2_joint_20260914 et q2_joint_r2_20260914, cette seule section
+du journal. Exclusion explicite des fichiers indépendants A/B et
+complémentaires, des travaux v6/v7 et de l'ancienne section non indexée
+du complémentaire dans ce journal. Fenêtre close après commit/push main.

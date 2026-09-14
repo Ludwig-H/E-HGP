@@ -78,6 +78,15 @@ def capture_order(probe: Path, output: Path) -> subprocess.CompletedProcess:
         capture_output=True, cwd=ROOT)
 
 
+def capture_joint(probe: Path, output: Path) -> subprocess.CompletedProcess:
+    return subprocess.run(command("run", "--probe", str(probe), "--output", str(output),
+        "--sizes", "16", "--families", "uniform", "rows", "--kmax", "1", "5",
+        "--s", "8", "--seeds", "3", "--modes", "pure",
+        "--census-modes", "shared", "--sibling-modes", "none", "sibling",
+        "--witness-orders", "global", "complement", "--anchor-modes", "anchors", "joint", "joint-a", "--repeats", "1"),
+        capture_output=True, cwd=ROOT)
+
+
 def checked(root: Path) -> subprocess.CompletedProcess:
     return subprocess.run(command("check", str(root), "--summary"), capture_output=True, cwd=ROOT)
 
@@ -434,6 +443,126 @@ def main() -> int:
             require(subprocess.run(command_args, cwd=ROOT, capture_output=True).returncode == 2,
                     "probe accepted an invalid witness order or extra CLI argument")
             stats["order_cli_rejects"] += 1
+
+        # Keep this extension's mutant fixture small: do not copy the entire
+        # historical matrix into every new mutant. Mixed-version checking is
+        # performed once after the bounded v4-only checks.
+        jointed = temporary / "jointed"
+        jointed.mkdir()
+        for name in ("first", "second"):
+            destination = jointed / name
+            result = capture_joint(binary, destination)
+            require(result.returncode == 0 and not result.stderr,
+                    f"genuine joint capture failed: {result.stdout!r} {result.stderr!r}")
+            rows = records(destination)
+            manifest, completion = read(destination / "MANIFEST.json"), read(destination / "COMPLETION.json")
+            require(manifest["schema"] == "mhgp8_wspd_q2_campaign_v4" and
+                    manifest["anchor_modes"] == ["anchors", "joint", "joint-a"] and
+                    completion["status"] == "completed" and completion["runs"] == completion["attempts"] == len(rows) == 48,
+                    "v4 capture lost version, anchor modes or tuples")
+            require(all(row["result"]["schema"] == "mhgp8_wspd_q2_census_probe_v4" and
+                        row["result"]["digest"]["supports"] > 0 for row in rows),
+                    "v4 physical output fixture is vacuous or mislabeled")
+            enabled = [row["result"]["joint_work"] for row in rows if row["result"]["anchor_mode"] != "anchors"]
+            require(all(work["root_products"] > 0 and work["tasks"] > 0 and work["singleton_handoffs"] > 0 for work in enabled) and
+                    any(work["splits_a"] + work["splits_b"] > 0 for work in enabled),
+                    "v4 fixture did not exercise products, subdivisions and singleton handoffs")
+            stats["joint_rows"] += len(rows)
+        result = checked(jointed)
+        require(result.returncode == 0 and not result.stderr,
+                f"v4 reader failed: {result.stdout!r} {result.stderr!r}")
+        summary = parse_result(result.stdout)
+        require(summary["measurements"] == 96 and len(summary["summary"]) == 48 and
+                all(row["repeats"] == 2 and "anchor_mode" in row for row in summary["summary"]) and
+                summary.get("anchor_mode_comparison") ==
+                    "same_front_candidates_and_canonical_digest_not_equal_product_or_handoff_work",
+                "v4 summary lost anchor modes, repetitions or comparison scope")
+        stats["joint_positive_reads"] += 1
+
+        def joint_change(root: Path, update: Callable[[dict], None], enabled: bool = True,
+                         mode: str = "joint") -> None:
+            directory = root / "first"
+            rows = records(directory)
+            chosen = next(row for row in rows if row["result"]["anchor_mode"] == (mode if enabled else "anchors"))
+            update(chosen)
+            refresh(chosen)
+            write_records(directory, rows)
+
+        def joint_work(root: Path, field: str, change: Callable[[dict], Any], enabled: bool = True,
+                       mode: str = "joint") -> None:
+            joint_change(root, lambda row: row["result"]["joint_work"].update({field: change(row["result"])}), enabled, mode)
+
+        mutant("joint_unknown", lambda root: manifest_change(root, lambda m: m.update(anchor_modes=["wrong"])), jointed)
+        mutant("joint_duplicate", lambda root: manifest_change(root, lambda m: m.update(anchor_modes=["joint", "joint"])), jointed)
+        mutant("joint_requires_order", lambda root: manifest_change(root, lambda m: m.pop("witness_orders")), jointed)
+        mutant("joint_pairwise_matrix", lambda root: manifest_change(root, lambda m: m.update(
+            census_modes=["pairwise"], sibling_modes=["none"], witness_orders=["global"])), jointed)
+        mutant("joint_a_pairwise_matrix", lambda root: manifest_change(root, lambda m: m.update(
+            census_modes=["pairwise"], sibling_modes=["none"], witness_orders=["global"], anchor_modes=["joint-a"])), jointed)
+        mutant("joint_unversioned_manifest", lambda root: manifest_change(root, lambda m: m.update(schema="mhgp8_wspd_q2_campaign_v3")), jointed)
+        mutant("joint_unversioned_result", lambda root: joint_change(root, lambda r: r["result"].update(schema="mhgp8_wspd_q2_census_probe_v3")), jointed)
+        mutant("joint_wrong_command", lambda root: joint_change(root, lambda r: r["command"].__setitem__(10, "anchors")), jointed)
+        mutant("joint_missing_work", lambda root: joint_change(root, lambda r: r["result"].pop("joint_work")), jointed)
+        mutant("joint_missing_counter", lambda root: joint_change(root, lambda r: r["result"]["joint_work"].pop("tasks")), jointed)
+        mutant("joint_extra_counter", lambda root: joint_work(root, "unexpected", lambda _r: 0), jointed)
+        mutant("joint_boolean_counter", lambda root: joint_work(root, "tasks", lambda _r: True), jointed)
+        mutant("joint_root_count", lambda root: joint_work(root, "root_products", lambda r: r["input_rectangles"] + 1), jointed)
+        mutant("joint_task_count", lambda root: joint_work(root, "tasks", lambda r: r["joint_work"]["tasks"] + 1), jointed)
+        mutant("joint_handoff_task_count", lambda root: joint_change(root, lambda r:
+            r["result"]["census_work"].update(query_tasks=r["result"]["census_work"]["query_tasks"] + 1)), jointed)
+        mutant("joint_generic_roots", lambda root: joint_change(root, lambda r:
+            r["result"]["census_work"].update(count_root_starts=r["result"]["input_rectangles"] + 1)), jointed)
+        mutant("joint_pair_mass", lambda root: joint_work(root, "handoff_pair_mass", lambda r:
+            r["joint_work"]["handoff_pair_mass"] + 1), jointed)
+        mutant("joint_excess_accept", lambda root: joint_work(root, "accepted_pairs", lambda r: r["accepted_pairs"] + 1), jointed)
+        mutant("joint_excess_reject", lambda root: joint_work(root, "rejected_pairs", lambda r: r["rejected_pairs"] + 1), jointed)
+        mutant("joint_excess_split_credit", lambda root: joint_work(root, "splits_after_credit", lambda r:
+            r["joint_work"]["splits_a"] + r["joint_work"]["splits_b"] + 1), jointed)
+        mutant("joint_excess_handoff_credit", lambda root: joint_work(root, "handoffs_after_credit", lambda r:
+            r["joint_work"]["singleton_handoffs"] + 1), jointed)
+        mutant("joint_excess_handoffs", lambda root: joint_work(root, "singleton_handoffs", lambda r:
+            r["joint_work"]["tasks"] + 1), jointed)
+        mutant("joint_disabled_work", lambda root: joint_work(root, "bound_tests", lambda _r: 1, False), jointed)
+        mutant("joint_hidden_cursor", lambda root: joint_work(root, "cursor_advances", lambda r:
+            r["joint_work"]["cursor_advances"] + 1), jointed)
+
+        def global_joint_structure(row: dict) -> None:
+            require(row["result"]["witness_order"] == "global", "joint mutant did not select global order")
+            work = row["result"]["joint_work"]
+            work["structural_splits"] += 1
+            work["cursor_advances"] += 1  # Preserve the movement identity.
+        mutant("joint_global_structure", lambda root: joint_change(root, global_joint_structure), jointed)
+
+        def joint_a_split_b(row: dict) -> None:
+            work = row["result"]["joint_work"]
+            work["splits_b"] += 1
+            work["tasks"] += 2
+            work["bound_tests"] += 1  # Preserve task and movement identities.
+        mutant("joint_a_split_b", lambda root: joint_change(root, joint_a_split_b, mode="joint-a"), jointed)
+        mutant("joint_a_excess_anchors", lambda root: joint_work(root, "singleton_handoffs", lambda r:
+            r["anchor_queries"] + 1, mode="joint-a"), jointed)
+        mutant("joint_changed_front", lambda root: joint_change(root, lambda r:
+            r["result"]["front_work"].update(max_factor_size=r["result"]["front_work"]["max_factor_size"] + 1)), jointed)
+        mutant("joint_changed_digest", lambda root: joint_change(root, lambda r:
+            r["result"]["digest"].update(sum="0")), jointed)
+
+        valid_joint_cli = [str(original), "16", "rows", "5", "8", "3", "pure", "shared", "none", "global", "anchors"]
+        for command_args in ([*valid_joint_cli[:7], "pairwise", "none", "global", "joint"],
+                             [*valid_joint_cli[:7], "pairwise", "none", "global", "joint-a"],
+                             [*valid_joint_cli[:-1], "foo"], [*valid_joint_cli, "foo"]):
+            rejected = subprocess.run(command_args, cwd=ROOT, capture_output=True)
+            require(rejected.returncode == 2 and not rejected.stdout,
+                    "probe accepted an invalid anchor mode or emitted a success for rejected CLI")
+            stats["joint_cli_rejects"] += 1
+        shutil.copytree(jointed, ordered / "joint")
+        result = checked(ordered)
+        require(result.returncode == 0 and not result.stderr,
+                f"mixed v1/v2/v3/v4 reader failed: {result.stdout!r} {result.stderr!r}")
+        summary = parse_result(result.stdout)
+        require(summary["measurements"] == 352 and len(summary["summary"]) == 176 and
+                sum("anchor_mode" in row for row in summary["summary"]) == 48,
+                "mixed-version reader lost v4 or historical configurations")
+        stats["joint_positive_reads"] += 1
     require(stats["genuine_rows"] == 128 and stats["mutants"] >= 48 and stats["failed_captures"] == 2 and
             stats["positive_reads"] == 1 and stats["domain_checks"] == 2,
             "receipt gate lost its non-vacuity floor")
@@ -443,6 +572,9 @@ def main() -> int:
     require(stats["order_rows"] == 64 and stats["order_positive_reads"] == 1 and
             stats["order_cli_rejects"] == 3 and stats["mutants"] >= 84,
             "witness-order extension lost its non-vacuity floor")
+    require(stats["joint_rows"] == 96 and stats["joint_positive_reads"] == 2 and
+            stats["joint_cli_rejects"] == 4 and stats["mutants"] >= 113,
+            "joint-product extension lost its non-vacuity floor")
     require(sources() == pins and digest(original) == binary_pin, "gate modified sources or actual probe")
     print(json.dumps(dict(status="passed", **stats), sort_keys=True))
     return 0

@@ -1,0 +1,30 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_joint_r2_20260914/mhgp8_q2_joint_gate",
+    "--selftest",
+    "extra"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "gate_cli_extra",
+  "expected_exit_code": 2,
+  "started_utc": "2026-09-14T13:14:57.223296+00:00",
+  "status": "passed",
+  "exit_code": 2,
+  "stdout": "",
+  "stderr": "usage: mhgp8_q2_joint_gate --selftest\n",
+  "stdout_base64": "",
+  "stderr_base64": "dXNhZ2U6IG1oZ3A4X3EyX2pvaW50X2dhdGUgLS1zZWxmdGVzdAo=",
+  "finished_utc": "2026-09-14T13:14:57.225189+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/q2_joint_r2_20260914/qualification/release_z5qr9wi7/gate_cli_extra.stdout.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/q2_joint_r2_20260914/qualification/release_z5qr9wi7/gate_cli_extra.stderr.bin",
+      "sha256": "f9eafaa20068ad20876b5d0a51d8554aa32f4636cd5ce16d07c3f79c8e79c659",
+      "bytes": 38
+    }
+  }
+}

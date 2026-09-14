@@ -163,6 +163,139 @@ def spawn_signal_checks() -> int:
     return checks
 
 
+def read_signal_checks() -> int:
+    """Signal exactly after an owned pipe read, before communicate saves it."""
+    real_popen, real_read, real_killpg = subprocess.Popen, os.read, os.killpg
+    children: list[Any] = []
+    delivered: list[int] = []
+    group_signals: list[int] = []
+
+    def raising_handler(signum: int, _frame: Any) -> None:
+        delivered.append(signum)
+        raise runner_module.CampaignInterrupted(signum)
+
+    previous = {signum: signal.signal(signum, raising_handler)
+                for signum in (signal.SIGINT, signal.SIGTERM)}
+
+    def tracked_popen(*args: Any, **kwargs: Any) -> Any:
+        child = real_popen(*args, **kwargs)
+        children.append(child)
+        require(os.getpgid(child.pid) == child.pid and child.pid != os.getpgrp(),
+                "read-signal child did not own its exact process group")
+        return child
+
+    def checked_killpg(group: int, signum: int) -> None:
+        require(group == children[-1].pid and group != os.getpgrp(),
+                "read-signal cleanup targeted an unowned process group")
+        group_signals.append(signum)
+        real_killpg(group, signum)
+
+    def check_record(record: dict[str, Any], stdout: bytes, stderr: bytes, code: int) -> None:
+        require(record.get("exit_code") == code and record.get("stdout") == stdout.decode() and
+                record.get("stderr") == stderr.decode() and
+                base64.b64decode(record.get("stdout_base64", "")) == stdout and
+                base64.b64decode(record.get("stderr_base64", "")) == stderr,
+                "read interruption lost output bytes, base64 or the final return code")
+
+    checks = 0
+    try:
+        subprocess.Popen, os.killpg = tracked_popen, checked_killpg
+        record: dict[str, Any] = {}
+        runner_module.invoke([sys.executable, "-B", "-c",
+                              "import sys; print('plain stdout'); print('plain stderr',file=sys.stderr)"],
+                             dict(os.environ), ROOT, record, new_session=True)
+        check_record(record, b"plain stdout\n", b"plain stderr\n", 0)
+        require(not delivered and not group_signals, "uninterrupted capture cancelled its child")
+        require(all(signal.getsignal(value) is raising_handler for value in previous),
+                "uninterrupted capture did not restore handlers")
+        checks += 1
+
+        for stream in ("stdout", "stderr"):
+            # Reading the targeted marker must prove BOTH initial writes
+            # completed, regardless of child scheduling or the poll interval.
+            output_order = ("stderr", "stdout") if stream == "stdout" else ("stdout", "stderr")
+
+            def messages(prefix: str, indent: str = "") -> str:
+                return "".join(f"{indent}print({(prefix + ' ' + channel)!r},file=sys.{channel},flush=True)\n"
+                               for channel in output_order)
+
+            body = ("import signal,sys\n"
+                    "def term(_signum,_frame):\n" + messages("cancel", " ") +
+                    "signal.signal(signal.SIGTERM,term)\n" + messages("read") +
+                    "while True: signal.pause()\n")
+            for signum in (signal.SIGINT, signal.SIGTERM):
+                delivered.clear()
+                group_signals.clear()
+                injected: list[int] = []
+                second_signal = signal.SIGTERM if signum == signal.SIGINT else signal.SIGINT
+                # Two cases isolate the original byte-loss window; two
+                # additionally interrupt cancellation with the other signal.
+                during_cancel = (stream == "stdout") == (signum == signal.SIGTERM)
+
+                def read_then_signal(fd: int, count: int) -> bytes:
+                    data = real_read(fd, count)
+                    pipe = getattr(children[-1], stream) if children else None
+                    if pipe is not None and not pipe.closed and fd == pipe.fileno():
+                        if not injected and ("read " + stream + "\n").encode() in data:
+                            injected.append(signum)
+                            os.kill(os.getpid(), signum)
+                        elif during_cancel and len(injected) == 1 and ("cancel " + stream + "\n").encode() in data:
+                            require(group_signals == [signal.SIGTERM],
+                                    "second read signal did not occur during TERM cancellation")
+                            injected.append(second_signal)
+                            os.kill(os.getpid(), second_signal)
+                    return data
+
+                os.read = read_then_signal
+                record = {}
+                try:
+                    runner_module.invoke([sys.executable, "-B", "-c", body], dict(os.environ), ROOT,
+                                         record, new_session=True)
+                except runner_module.CampaignInterrupted as error:
+                    require(error.signum == signum, "cleanup replaced the first interruption")
+                else:
+                    raise RuntimeError("read interruption was not replayed")
+                finally:
+                    os.read = real_read
+                expected_signals = [signum, second_signal] if during_cancel else [signum]
+                require(injected == delivered == expected_signals,
+                        "read/cancellation signals were not injected and replayed exactly once")
+                require(group_signals == [signal.SIGTERM, signal.SIGKILL] and children[-1].poll() == -signal.SIGKILL,
+                        "read-signal cancellation lost escalation or left an owned child alive")
+                check_record(record, b"read stdout\ncancel stdout\n", b"read stderr\ncancel stderr\n",
+                             -signal.SIGKILL)
+                require(all(signal.getsignal(value) is raising_handler for value in previous),
+                        "read interruption leaked deferred handlers")
+                checks += 1
+
+        delivered.clear()
+        group_signals.clear()
+
+        def returning_handler(signum: int, _frame: Any) -> None:
+            delivered.append(signum)
+
+        signal.signal(signal.SIGINT, returning_handler)
+        record = {}
+        runner_module.invoke([sys.executable, "-B", "-c",
+                              "import os,signal; print('return stdout',flush=True); os.kill(os.getppid(),signal.SIGINT)"],
+                             dict(os.environ), ROOT, record, new_session=True)
+        check_record(record, b"return stdout\n", b"", 0)
+        require(delivered == [signal.SIGINT] and not group_signals and
+                signal.getsignal(signal.SIGINT) is returning_handler and
+                signal.getsignal(signal.SIGTERM) is raising_handler,
+                "non-raising handler was changed, lost or turned into cancellation")
+        checks += 1
+    finally:
+        subprocess.Popen, os.read, os.killpg = real_popen, real_read, real_killpg
+        for signum, handler in previous.items():
+            signal.signal(signum, handler)
+        for child in children:
+            if child.poll() is None:
+                child.kill()
+            child.communicate()
+    return checks
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--probe", required=True, type=Path)
@@ -174,6 +307,8 @@ def main() -> int:
     checks = 0
     spawn_checks = spawn_signal_checks()
     require(spawn_checks == 6, "spawn-signal regression floor")
+    read_checks = read_signal_checks()
+    require(read_checks == 6, "read-signal regression floor")
     with tempfile.TemporaryDirectory(prefix="mhgp8_campaign_gate_") as temporary_name:
         temporary = Path(temporary_name)
         actual = temporary / "actual_probe"
@@ -336,6 +471,7 @@ def main() -> int:
                 digest(RUNNER) == runner_hash, "gate changed its genuine inputs")
     print(json.dumps({"status": "passed", "checks": checks,
                       "spawn_signal_checks": spawn_checks,
+                      "read_signal_checks": read_checks,
                       "python_optimized": bool(sys.flags.optimize),
                       "scope": "p0_campaign_receipt_ingestion_not_geometry"}))
     return 0

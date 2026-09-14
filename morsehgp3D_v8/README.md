@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — ordre de témoins et fragmentation du census q2
+# Morse HGP 3D v8 — census conjoint et partage des ancres
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -35,6 +35,32 @@ catalogue q3/q4 ni une tour FULL.
 Les mesures historiques citées restent v7.
 
 ## État exécutable
+
+La onzième tranche implémente le [census conjoint A×B](docs/P0_CENSUS_CONJOINT_Q2.md)
+et son bras A seul, avant le passage aux ancres individuelles. Compte,
+curseur et phase sont conservés ; aucun groupe A n'est retiré des témoins.
+Les [mesures r2](receipts/q2_joint_r2_20260914/README.md) distinguent
+bornes conjointes, reprises et travail après relais. Le partage A/B
+équilibré fragmente trop B ; A seul évite cette explosion, sans gain
+net déjà acquis. Individual reste le défaut.
+
+Le collecteur Python est aussi corrigé contre la perte de sorties à
+l'interruption ; six contre-tests déterministes supplémentaires sont
+conservés. La première capture et son échec restent historiques, sans
+remplacement silencieux. **47 CTests Release/Clang ASan/UBSan passent**,
+lecteurs normal/−O identiques, 44 mesures closes. À s8, le bras A seul
+prend 12,121/45,934/182,155 s sur amas8k/16k/32k ; ses visites après
+relais font ×4,107 puis ×4,231. La croissance reste donc non résolue
+dans ce régime, malgré des supports proches du linéaire. s8/10/12
+sont comparés à 8k ; la croissance nouvelle est mesurée à s8 seulement.
+
+Prochaine priorité : [Pool terminal sur le même index global](docs/P0_POOL_TERMINAL_RACCORD.md),
+puis census des seules survivantes. L'auditeur A a mesuré un gain q2
+complet dans son prototype publié à fbbecc01 ; ce raccord n'est pas
+encore intégré au produit. P0, q3/q4, FULL, parallélisation et contrats
+G4 restent ouverts. GCP non utilisé.
+
+## Dixième tranche publiée à e3af11a7 — historique
 
 La dixième tranche expérimente un [ordre de témoins propre à la requête](docs/P0_ORDRE_TEMOINS_Q2.md) :
 complément du B original sans l'ancre, puis B original. Le contexte et

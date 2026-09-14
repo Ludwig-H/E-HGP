@@ -30,6 +30,21 @@ préfixe quand A devient singleton. Aucun redémarrage ni tableau de
 paires. Cette piste reste à implémenter et à comparer, sans preuve de
 gain global ; elle ne dispense pas de traiter l'ordre des témoins.
 
+Onzième tranche : le [census conjoint A×B](P0_CENSUS_CONJOINT_Q2.md)
+ouvre ce raccord avec reprise singleton du même préfixe. Les coûts
+conjoints, ceux des ancres restantes et la collecte sont distingués.
+Les bornes à 96 octets ne constituent pas une optimisation gagnante
+par leur seul format : comparer le travail total sur les quatre régimes.
+
+Suite prioritaire après cette comparaison : [Pool terminal raccordé au
+census global](P0_POOL_TERMINAL_RACCORD.md). Le constat B à e6388e55
+montre que 28 gros produits dominent le résidu des amas ; il ne mesure
+pas encore leur census. Préparer un plan par parent sur les rangs du
+même index, ne développer que ses survivantes et repartir de zéro dans
+le census global. Mesurer F=Σ tailles de facteurs, pas seulement M.
+Ce n'est ni un retour aux histogrammes carrés ni une qualification
+héritée du harnais d'audit ; le raccord et l'oracle restent à construire.
+
 ## Priorité P0 — supprimer la préparation quadratique des témoins locaux
 
 **Décision explicite de l'utilisateur, 13 septembre 2026 : ce changement

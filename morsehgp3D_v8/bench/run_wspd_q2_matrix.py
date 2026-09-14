@@ -31,6 +31,13 @@ SCOPE = "q2_all_cloud_supports_not_full"
 SCHEMA = "mhgp8_wspd_q2_campaign_v1"
 SIBLING_SCHEMA = "mhgp8_wspd_q2_campaign_v2"
 ORDER_SCHEMA = "mhgp8_wspd_q2_campaign_v3"
+ANCHOR_SCHEMA = "mhgp8_wspd_q2_campaign_v4"
+ANCHOR_MODES = ("anchors", "joint", "joint-a")
+JOINT_FIELDS = ("root_products", "tasks", "splits_a", "splits_b", "witness_splits", "bound_tests",
+                "cursor_advances", "structural_splits", "deferred_skips", "phase_switches",
+                "consumed_witness_sites", "credit_events", "credited_pair_mass", "splits_after_credit",
+                "singleton_handoffs", "handoffs_after_credit", "handoff_pair_mass", "rejected_pairs",
+                "accepted_pairs", "max_depth")
 WITNESS_ORDERS = ("global", "complement")
 ORDER_FIELDS = ("structural_splits", "deferred_skips", "anchor_skips", "phase_switches")
 SIBLING_MODES = ("none", "sibling")
@@ -101,12 +108,14 @@ def array(value: Any, length: int, name: str) -> None:
 
 
 def command_for(probe: str, key: tuple[Any, ...]) -> list[str]:
-    require(len(key) in (7, 8, 9), "wrong command tuple length")
+    require(len(key) in (7, 8, 9, 10), "wrong command tuple length")
     family, n, kmax, separation, seed, mode, census_mode = key[:7]
     return [probe, str(n), family, str(kmax), str(separation), str(seed), mode, census_mode, *key[7:]]
 
 
 def row_keys(row: dict[str, Any]) -> tuple[str, ...]:
+    if row.get("schema") == "mhgp8_wspd_q2_census_probe_v4":
+        return KEYS + ("sibling_mode", "witness_order", "anchor_mode")
     if row.get("schema") == "mhgp8_wspd_q2_census_probe_v3":
         return KEYS + ("sibling_mode", "witness_order")
     return KEYS + (("sibling_mode",) if row.get("schema") == "mhgp8_wspd_q2_census_probe_v2" else ())
@@ -114,14 +123,59 @@ def row_keys(row: dict[str, Any]) -> tuple[str, ...]:
 
 def discrete_fields(row: dict[str, Any]) -> tuple[str, ...]:
     length = len(row_keys(row))
-    return DISCRETE_FIELDS + (("sibling_work",) if length >= 8 else ()) + (("order_work",) if length == 9 else ())
+    return (DISCRETE_FIELDS + (("sibling_work",) if length >= 8 else ()) +
+            (("order_work",) if length >= 9 else ()) + (("joint_work",) if length == 10 else ()))
 
 
 def campaign_schema(manifest: dict[str, Any]) -> str:
+    if "anchor_modes" in manifest:
+        return ANCHOR_SCHEMA
     return ORDER_SCHEMA if "witness_orders" in manifest else SIBLING_SCHEMA if "sibling_modes" in manifest else SCHEMA
 
 
 def validate_result(row: dict[str, Any], command: list[str]) -> None:
+    if row.get("schema") == "mhgp8_wspd_q2_census_probe_v4":
+        require(len(command) == 11 and row.get("anchor_mode") in ANCHOR_MODES and
+                command[10] == row["anchor_mode"], "wrong anchor-mode command or value")
+        enabled = row["anchor_mode"] != "anchors"
+        require(not enabled or row.get("census_mode") == "shared", "pairwise joint mode is invalid")
+        joint = row.get("joint_work")
+        counters(joint, JOINT_FIELDS, "joint_work")
+        projected = {key: value for key, value in row.items() if key not in ("anchor_mode", "joint_work")}
+        projected["schema"] = "mhgp8_wspd_q2_census_probe_v3"
+        # Only this explicitly versioned entry may replace the historical
+        # per-anchor root/task ledger by the product-to-singleton handoff.
+        _validate_legacy_result(projected, command[:10], joint=joint if enabled else None)
+        if enabled:
+            splits = joint["splits_a"] + joint["splits_b"]
+            require(joint["root_products"] == row["input_rectangles"] and
+                    joint["tasks"] == joint["root_products"] + 2 * splits and
+                    joint["accepted_pairs"] + joint["rejected_pairs"] + joint["handoff_pair_mass"] == row["candidate_pairs"] and
+                    joint["accepted_pairs"] <= row["accepted_pairs"] and joint["rejected_pairs"] <= row["rejected_pairs"],
+                    "joint product root, task or pair mass accounting mismatch")
+            require(joint["splits_after_credit"] <= splits and
+                    joint["handoffs_after_credit"] <= joint["singleton_handoffs"] <= joint["tasks"] and
+                    joint["singleton_handoffs"] <= joint["handoff_pair_mass"] and
+                    (joint["singleton_handoffs"] == 0) == (joint["handoff_pair_mass"] == 0),
+                    "joint credit or singleton handoff accounting mismatch")
+            require(joint["cursor_advances"] + splits == joint["bound_tests"] + joint["structural_splits"] +
+                    joint["deferred_skips"] + joint["phase_switches"],
+                    "joint cursor advances or subdivision work accounting mismatch")
+            if row["witness_order"] == "global":
+                require(all(joint[name] == 0 for name in ("structural_splits", "deferred_skips", "phase_switches")),
+                        "global joint traversal performed complement work")
+            if row["anchor_mode"] == "joint-a":
+                require(joint["splits_b"] == 0 and joint["singleton_handoffs"] <= row["anchor_queries"],
+                        "joint-a split B or exceeded the original anchor population")
+        else:
+            require(all(value == 0 for value in joint.values()), "individual anchors performed joint product work")
+        return
+    require("anchor_mode" not in row and "joint_work" not in row, "v1/v2/v3 contains unversioned joint fields")
+    _validate_legacy_result(row, command)
+
+
+def _validate_legacy_result(row: dict[str, Any], command: list[str], *,
+                            joint: dict[str, int] | None = None) -> None:
     if row.get("schema") == "mhgp8_wspd_q2_census_probe_v3":
         require(len(command) == 10 and row.get("witness_order") in WITNESS_ORDERS and
                 command[9] == row["witness_order"], "wrong witness-order command or value")
@@ -129,7 +183,7 @@ def validate_result(row: dict[str, Any], command: list[str]) -> None:
                 "pairwise complement order is invalid")
         projected = {key: value for key, value in row.items() if key not in ("witness_order", "order_work")}
         projected["schema"] = "mhgp8_wspd_q2_census_probe_v2"
-        validate_result(projected, command[:9])
+        _validate_legacy_result(projected, command[:9], joint=joint)
         order = row.get("order_work")
         counters(order, ORDER_FIELDS, "order_work")
         if row["witness_order"] == "global":
@@ -148,7 +202,7 @@ def validate_result(row: dict[str, Any], command: list[str]) -> None:
         require(not enabled or row.get("census_mode") == "shared", "pairwise sibling mode is invalid")
         projected = {key: value for key, value in row.items() if key not in ("sibling_mode", "sibling_work")}
         projected["schema"] = "mhgp8_wspd_q2_census_probe_v1"
-        validate_v1_result(projected, command[:8])
+        validate_v1_result(projected, command[:8], joint=joint)
         sibling = row.get("sibling_work")
         counters(sibling, SIBLING_FIELDS, "sibling_work")
         if enabled:
@@ -164,10 +218,11 @@ def validate_result(row: dict[str, Any], command: list[str]) -> None:
             require(all(value == 0 for value in sibling.values()), "disabled sibling mode performed work")
     else:
         require("sibling_mode" not in row and "sibling_work" not in row, "v1 contains unversioned sibling fields")
-        validate_v1_result(row, command)
+        validate_v1_result(row, command, joint=joint)
 
 
-def validate_v1_result(row: dict[str, Any], command: list[str]) -> None:
+def validate_v1_result(row: dict[str, Any], command: list[str], *,
+                       joint: dict[str, int] | None = None) -> None:
     fixed = dict(schema="mhgp8_wspd_q2_census_probe_v1", status="completed", scope=SCOPE,
         phase="exploration_v8_hors_registre", backend="cpu_reference", profile="quantized_u16_input_only",
         mode="implementation_v8_p0", public_status="not_claimed", separation_convention="box_gap_diameter_v1")
@@ -277,11 +332,13 @@ def validate_v1_result(row: dict[str, Any], command: list[str]) -> None:
             census["payload_node_visits"] == census["payload_bound_tests"] + census["payload_point_tests"],
             "census node classifications lost work")
     shared = row["census_mode"] == "shared"
-    require(census["count_root_starts"] == (anchors if shared else candidates) and
-            census["query_tasks"] == census["count_root_starts"] + 2 * census["query_splits"] and
+    expected_roots = rectangles if joint is not None else anchors if shared else candidates
+    expected_starts = joint["singleton_handoffs"] if joint is not None else expected_roots
+    require(census["count_root_starts"] == expected_roots and
+            census["query_tasks"] == expected_starts + 2 * census["query_splits"] and
             census["cursor_reuses"] == 2 * census["query_splits"] and
             census["shared_splits_after_credit"] <= census["query_splits"] and
-            census["count_node_visits"] >= census["count_root_starts"],
+            (joint is not None or census["count_node_visits"] >= census["count_root_starts"]),
             "census roots or inherited continuation accounting mismatch")
     require(census["uniform_rejected_pairs"] <= row["rejected_pairs"] and
             census["uniform_accepted_pairs"] <= accepted, "uniform decisions exceed census decisions")
@@ -335,13 +392,16 @@ def matrix(manifest: dict[str, Any]) -> list[tuple[Any, ...]]:
     if "witness_orders" in manifest:
         require("sibling_modes" in manifest, "witness orders require explicit --sibling-modes")
         keys += ("witness_orders",)
+    if "anchor_modes" in manifest:
+        require("witness_orders" in manifest, "anchor modes require explicit --witness-orders")
+        keys += ("anchor_modes",)
     for name in keys:
         values = manifest.get(name)
         require(type(values) is list and bool(values), f"{name}: empty matrix")
         for value in values:
-            if name in ("families", "modes", "census_modes", "sibling_modes", "witness_orders"):
+            if name in ("families", "modes", "census_modes", "sibling_modes", "witness_orders", "anchor_modes"):
                 choices = dict(families=FAMILIES, modes=MODES, census_modes=CENSUS_MODES,
-                               sibling_modes=SIBLING_MODES, witness_orders=WITNESS_ORDERS)
+                               sibling_modes=SIBLING_MODES, witness_orders=WITNESS_ORDERS, anchor_modes=ANCHOR_MODES)
                 require(type(value) is str and value in choices[name], f"{name}: invalid value")
             else:
                 uint(value, name)
@@ -355,6 +415,10 @@ def matrix(manifest: dict[str, Any]) -> list[tuple[Any, ...]]:
     if "witness_orders" in manifest:
         require("complement" not in manifest["witness_orders"] or "pairwise" not in manifest["census_modes"],
                 "pairwise+complement is invalid; explicitly select --census-modes shared")
+    if "anchor_modes" in manifest:
+        require(not any(mode != "anchors" for mode in manifest["anchor_modes"]) or
+                "pairwise" not in manifest["census_modes"],
+                "pairwise+joint/joint-a is invalid; explicitly select --census-modes shared")
     cases = list(itertools.product(*(manifest[name] for name in keys), range(manifest["repeats"])))
     for family, n, *_ in cases:
         limits = dict(uniform=1 << 48, terrain=1 << 40, clusters=1 << 33, rows=131072)
@@ -403,6 +467,8 @@ def capture(args: argparse.Namespace) -> int:
         parameters["sibling_modes"] = args.sibling_modes
     if args.witness_orders is not None:
         parameters["witness_orders"] = args.witness_orders
+    if args.anchor_modes is not None:
+        parameters["anchor_modes"] = args.anchor_modes
     cases = matrix(parameters)
     args.output.mkdir(parents=True, exist_ok=False)
     binary = args.probe.resolve()
@@ -497,7 +563,7 @@ def check(args: argparse.Namespace) -> int:
     for directory in directories:
         manifest = parse_result((directory / "MANIFEST.json").read_bytes())
         completion = parse_result((directory / "COMPLETION.json").read_bytes())
-        version = 3 if "witness_orders" in manifest else 2 if "sibling_modes" in manifest else 1
+        version = 4 if "anchor_modes" in manifest else 3 if "witness_orders" in manifest else 2 if "sibling_modes" in manifest else 1
         require(manifest.get("schema") == campaign_schema(manifest) and manifest.get("scope") == SCOPE and
                 manifest.get("public_status") == "not_claimed" and manifest.get("gcp_used") is False and
                 manifest.get("separation_convention") == "box_gap_diameter_v1" and
@@ -553,8 +619,10 @@ def check(args: argparse.Namespace) -> int:
                   mode_comparison="same_canonical_q2_support_digest_not_equal_front_or_census_work")
     if any(len(key) >= 8 for key in groups):
         result["sibling_comparison"] = "same_front_candidates_and_canonical_digest_not_equal_census_work"
-    if any(len(key) == 9 for key in groups):
+    if any(len(key) >= 9 for key in groups):
         result["witness_order_comparison"] = "same_front_candidates_and_canonical_digest_not_equal_traversal_work"
+    if any(len(key) == 10 for key in groups):
+        result["anchor_mode_comparison"] = "same_front_candidates_and_canonical_digest_not_equal_product_or_handoff_work"
     if args.summary:
         result["summary"] = []
         for key, rows in sorted(groups.items()):
@@ -583,6 +651,8 @@ def main() -> int:
                      help="Explicit option selects v2; sibling requires --census-modes shared")
     run.add_argument("--witness-orders", nargs="+", choices=WITNESS_ORDERS,
                      help="Selects v3 and requires explicit --sibling-modes; complement requires shared census")
+    run.add_argument("--anchor-modes", nargs="+", choices=ANCHOR_MODES,
+                     help="Selects v4 and requires explicit --witness-orders; joint and joint-a require shared census")
     run.add_argument("--repeats", type=int, default=1)
     reader = sub.add_parser("check")
     reader.add_argument("receipt", type=Path)

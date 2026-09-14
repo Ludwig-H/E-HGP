@@ -1,0 +1,1 @@
+mhgp8_wspd_q2_census_probe: usage: mhgp8_wspd_q2_census_probe n uniform|terrain|clusters|rows Kmax s seed pure|samples pairwise|shared [none|sibling [global|complement [anchors|joint|joint-a]]]

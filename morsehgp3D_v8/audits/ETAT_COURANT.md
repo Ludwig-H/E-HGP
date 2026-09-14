@@ -3,7 +3,23 @@
 14 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
-État constructeur courant, dixième tranche P0 :
+État constructeur courant : onzième tranche P0,
+[census conjoint A×B](../docs/P0_CENSUS_CONJOINT_Q2.md) qualifié localement
+en r2 : 47 CTests Release/Clang ASan/UBSan passent, 44 mesures closes
+et lecteurs normal/−O identiques. Les compteurs conjoints sont séparés ; reprise à
+ancre fixe sans perte ni redoublement de crédit. La capture initiale
+conserve un échec de collecteur à l'interruption, corrigé avec six
+contre-fixtures déterministes. Le code C++ ne change pas entre captures.
+[Preuves et mesures r2](../receipts/q2_joint_r2_20260914/README.md).
+Le [raccord Pool suivant](../docs/P0_POOL_TERMINAL_RACCORD.md) reste
+non intégré au produit ; l'audit A fbbecc01 en mesure désormais un
+prototype q2 complet. Aucun résultat de tour ou de parallélisation acquis.
+Sur les amas, les visites A seul font encore ×4,107 puis ×4,231 à
+8k/16k/32k, pour 12,121/45,934/182,155 s ; la croissance demandée
+reste en échec dans ce régime. Le défaut Individual est conservé.
+
+## Historique : dixième tranche P0 publiée à e3af11a7
+
 [ordre complément/B original](../docs/P0_ORDRE_TEMOINS_Q2.md), option
 SharedBlocks à contexte et continuation compacts. Aucun crédit préchargé,
 aucune modification de la collecte. Les quatre opérations structurelles

@@ -23,6 +23,12 @@ Les sources et contre-fixtures complètes sont dans les rapports liés.
 - Une ligne JSON réussie n'est pas un reçu conforme : la confronter à la
   commande, garder les sorties brutes en échec et vérifier la stabilité
   du binaire et des sources avant de fermer la campagne.
+- Protéger seulement le lancement du processus ne suffit pas : un signal
+  levant pendant `communicate`, entre lecture et stockage des octets,
+  peut encore perdre stdout/stderr. La tranche conjointe r2 diffère
+  aussi ces signaux pendant les lectures et les rejoue hors de cette
+  section ; l'échec initial est conservé et les deux flux sont testés
+  par injection déterministe, y compris pendant l'annulation.
 
 Voir les [preuves et mesures](../receipts/p0_local_credits_20260913/README.md).
 Les méthodes explorées restent des variantes utiles du même module,
@@ -141,6 +147,10 @@ Références : [fondements](../audits/FONDEMENTS_ET_OBJET.md).
 | Moins de visites Z après changement d'ordre prouve le gain total | Les chemins structurels ont aussi un coût, potentiellement répété aux splits B | Publier séparément bornes, opérations structurelles, tâches, collecte et temps englobant |
 | L'ordre complément règle la croissance des amas | Visites géométriques encore ×4,106 puis ×4,229 à 8k/16k/32k, malgré moins de travail absolu | Partager aussi les ancres et mesurer la fragmentation ; conserver cette option sans borne globale |
 | Exclure a du comptage autorise à exclure tout un groupe A | Une autre ancre a' peut être à l'intérieur de la boule de (a,b) | En mode A×B, conserver ces sites ; exclusion connue-zéro seulement après singleton |
+| Passer de A×B à une ancre autorise à relancer le census depuis zéro en gardant le crédit | Le témoin déjà crédité serait compté deux fois, donc certains supports seraient perdus | Reprendre compte, curseur, phase et contexte original ensemble |
+| Le compteur de racines suffit à comparer ancres et produits | Une borne conjointe coûte davantage et le travail restant peut se fragmenter | Séparer les bornes conjointes, reprises, tâches et visites aval, puis mesurer le total |
+| La règle des diagonales partage les ancres jusqu'à une admission de tout A×B | Au nœud Z=A non singleton, les bornes continues restent indécises et la règle force une subdivision de requête | Ne pas revendiquer cette branche comme exercée ; comparer séparément une autre priorité de descente |
+| La forte réduction Pool des rectangles inter-amas clôt déjà P0 | L'audit B compte le résidu, sans census ni sortie ; son temps de crédits n'est pas le total du front | Raccorder sur l'index global et mesurer préparation, résidu, census et payload complets |
 | Retrancher le temps historique du front trois voies donne le census q2 isolé | Le nouveau raccord demande q2 seulement, sans Xi, avec un autre callback et des temps imbriqués | Comparaisons appariées q2, temps englobant front+census+collecte |
 | La propagation de témoins est déjà un gain de temps validé | Le prototype indépendant réduit les résidus mais alourdit les tâches et ne gagne pas partout en temps | Garder les identifiants distincts ; comparer sur la chaîne consommée, pas promouvoir son seul compteur |
 | Une descente unique puis K propositions est automatiquement économique | À uniforme32k/s8, le nouveau front paie 954 millions de pas d'index et passe de 4,87 s à 37,4 s malgré moins de rectangles | Garder cette baseline négative ; mesurer recherche partagée, test de lentille et census consommant directement les produits |
