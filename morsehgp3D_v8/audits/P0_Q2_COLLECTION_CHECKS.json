@@ -1,0 +1,157 @@
+{
+  "backend": "cpu_reference",
+  "base_head": "1c523fbe6e3ebb4a6b0aefdcb809961891aef713",
+  "date_utc": "2026-09-14",
+  "limitations": [
+    "Not a product API or prepared-bounds qualification.",
+    "Producer state bound excludes immutable model index and judge output accumulation.",
+    "No timings, RSS, asynchronous workers, crash recovery, GPU or full-tower qualification."
+  ],
+  "mode": "audit_independant_math_and_architecture",
+  "phase": "exploration_v8_hors_registre",
+  "profile": "quantized_u16_input_only",
+  "public_status": "not_claimed",
+  "python_version": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "runs": [
+    {
+      "checks": {
+        "accepted_ids": 2304,
+        "calls": 3297,
+        "fixtures": 4,
+        "invalid_call_bounds_rejected": 3,
+        "largest_inside_block": 3,
+        "largest_shell": 30,
+        "proposed_ids": 2532,
+        "refusals": 288,
+        "rejected_model_mutants": {
+          "advance_on_rejected_chunk": {
+            "fixture": "shell_thirty",
+            "rejection": "refusal advanced continuation"
+          },
+          "drop_pending_at_done": {
+            "fixture": "shell_thirty",
+            "rejection": "shell oracle mismatch"
+          },
+          "emit_done_before_drain": {
+            "fixture": "shell_thirty",
+            "rejection": "shell oracle mismatch"
+          },
+          "incorrect_expected_count": {
+            "fixture": "shell_thirty",
+            "rejection": "terminal interior count mismatch"
+          },
+          "reset_offset_after_yield": {
+            "fixture": "interior_block",
+            "rejection": "accepted ID duplicated"
+          }
+        },
+        "runs": 192,
+        "scope": "independent_mono_protocol_model",
+        "status": "passed"
+      },
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/audits/p0_q2_collection_probe.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"accepted_ids\": 2304, \"calls\": 3297, \"fixtures\": 4, \"invalid_call_bounds_rejected\": 3, \"largest_inside_block\": 3, \"largest_shell\": 30, \"proposed_ids\": 2532, \"refusals\": 288, \"rejected_model_mutants\": {\"advance_on_rejected_chunk\": {\"fixture\": \"shell_thirty\", \"rejection\": \"refusal advanced continuation\"}, \"drop_pending_at_done\": {\"fixture\": \"shell_thirty\", \"rejection\": \"shell oracle mismatch\"}, \"emit_done_before_drain\": {\"fixture\": \"shell_thirty\", \"rejection\": \"shell oracle mismatch\"}, \"incorrect_expected_count\": {\"fixture\": \"shell_thirty\", \"rejection\": \"terminal interior count mismatch\"}, \"reset_offset_after_yield\": {\"fixture\": \"interior_block\", \"rejection\": \"accepted ID duplicated\"}}, \"runs\": 192, \"scope\": \"independent_mono_protocol_model\", \"status\": \"passed\"}\n"
+    },
+    {
+      "checks": {
+        "accepted_ids": 2304,
+        "calls": 3297,
+        "fixtures": 4,
+        "invalid_call_bounds_rejected": 3,
+        "largest_inside_block": 3,
+        "largest_shell": 30,
+        "proposed_ids": 2532,
+        "refusals": 288,
+        "rejected_model_mutants": {
+          "advance_on_rejected_chunk": {
+            "fixture": "shell_thirty",
+            "rejection": "refusal advanced continuation"
+          },
+          "drop_pending_at_done": {
+            "fixture": "shell_thirty",
+            "rejection": "shell oracle mismatch"
+          },
+          "emit_done_before_drain": {
+            "fixture": "shell_thirty",
+            "rejection": "shell oracle mismatch"
+          },
+          "incorrect_expected_count": {
+            "fixture": "shell_thirty",
+            "rejection": "terminal interior count mismatch"
+          },
+          "reset_offset_after_yield": {
+            "fixture": "interior_block",
+            "rejection": "accepted ID duplicated"
+          }
+        },
+        "runs": 192,
+        "scope": "independent_mono_protocol_model",
+        "status": "passed"
+      },
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/audits/p0_q2_collection_probe.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"accepted_ids\": 2304, \"calls\": 3297, \"fixtures\": 4, \"invalid_call_bounds_rejected\": 3, \"largest_inside_block\": 3, \"largest_shell\": 30, \"proposed_ids\": 2532, \"refusals\": 288, \"rejected_model_mutants\": {\"advance_on_rejected_chunk\": {\"fixture\": \"shell_thirty\", \"rejection\": \"refusal advanced continuation\"}, \"drop_pending_at_done\": {\"fixture\": \"shell_thirty\", \"rejection\": \"shell oracle mismatch\"}, \"emit_done_before_drain\": {\"fixture\": \"shell_thirty\", \"rejection\": \"shell oracle mismatch\"}, \"incorrect_expected_count\": {\"fixture\": \"shell_thirty\", \"rejection\": \"terminal interior count mismatch\"}, \"reset_offset_after_yield\": {\"fixture\": \"interior_block\", \"rejection\": \"accepted ID duplicated\"}}, \"runs\": 192, \"scope\": \"independent_mono_protocol_model\", \"status\": \"passed\"}\n"
+    }
+  ],
+  "schema": "mhgp8_independent_q2_collection_v1",
+  "scope": "single_support_mono_collection_protocol_model",
+  "source_sha256": {
+    "morsehgp3D_v8/audits/p0_q2_census_bounds_probe.py": "c33510de452250b83a67f3eddb9e6fe1ba9319e3e5510cd6f338c3f046de6ceb",
+    "morsehgp3D_v8/audits/p0_q2_collection_probe.py": "4b467d15f114a736ca7cea3f85860f33d4321baece1c0e0c11e49acaee0907c6"
+  },
+  "worktree_status": [
+    " M AGENTS.md",
+    " M audits/COORDINATION_MORSEHGP3D_V7.md",
+    " M audits/COORDINATION_MORSEHGP3D_V8.md",
+    " M morsehgp3D_v6/src/gpu/lot_ring.hpp",
+    " M morsehgp3D_v6/src/parallel/sort.hpp",
+    " M morsehgp3D_v6/src/pipeline/census.hpp",
+    " M morsehgp3D_v6/src/pipeline/expand.hpp",
+    " M morsehgp3D_v7/PASSATION.md",
+    " M morsehgp3D_v7/README.md",
+    " M morsehgp3D_v7/docs/FAUSSES_PISTES.md",
+    " M morsehgp3D_v7/docs/OBJETS_PARALLELES_TOUR_20260911.md",
+    " M morsehgp3D_v8/CMakeLists.txt",
+    " M morsehgp3D_v8/PASSATION.md",
+    " M morsehgp3D_v8/README.md",
+    " M morsehgp3D_v8/audits/ETAT_COURANT.md",
+    " M morsehgp3D_v8/bench/P0_PROBE.md",
+    " M morsehgp3D_v8/docs/VERROUS_ARCHITECTURE.md",
+    " M morsehgp3D_v8/src/pipeline/q2_census.cpp",
+    "?? audits/morsehgp3D_v8_complementaire/P0_CONSTANTES_CENSUS_Q2.md",
+    "?? audits/morsehgp3D_v8_complementaire/P0_IDENTITES_NUAGE_ET_RECTANGLES.md",
+    "?? audits/morsehgp3D_v8_complementaire/Q2_PREPARED_BOUNDS_CHECKS.json",
+    "?? audits/morsehgp3D_v8_complementaire/Q2_PREPARED_CENSUS_CHECKS.json",
+    "?? audits/morsehgp3D_v8_complementaire/archive/",
+    "?? audits/morsehgp3D_v8_complementaire/cloud_rectangle_identity_checks.py",
+    "?? audits/morsehgp3D_v8_complementaire/cloud_rectangle_identity_probe.cpp",
+    "?? audits/morsehgp3D_v8_complementaire/q2_prepared_bounds_checks.py",
+    "?? audits/morsehgp3D_v8_complementaire/q2_prepared_bounds_probe.cpp",
+    "?? audits/morsehgp3D_v8_complementaire/q2_prepared_census_checks.py",
+    "?? audits/morsehgp3D_v8_complementaire/q2_revision_protocol_checks.py",
+    "?? morsehgp3D_v6/src/gpu/route_c6.hpp",
+    "?? morsehgp3D_v6/tests/perm_sort_gate.cpp",
+    "?? morsehgp3D_v6/tests/route_c6_gate.cpp",
+    "?? morsehgp3D_v7/docs/MARQUES_PREMIER_PARCOURS_20260911.md",
+    "?? morsehgp3D_v7/receipts/fused_history_streaming_20260911/",
+    "?? morsehgp3D_v8/audits/p0_q2_collection_probe.py",
+    "?? morsehgp3D_v8/bench/compare_q2_revisions.py",
+    "?? morsehgp3D_v8/docs/P0_BORNES_PREPAREES_ET_PARALLELISATION.md",
+    "?? morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/",
+    "?? morsehgp3D_v8/src/spindle/q2_prepared_bounds.hpp",
+    "?? morsehgp3D_v8/tests/q2_prepared_bounds_gate.cpp",
+    "?? morsehgp3D_v8/tests/q2_revision_comparison_gate.py"
+  ]
+}

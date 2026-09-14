@@ -1,11 +1,12 @@
 # Réduire le résidu : sous-rectangles et témoins collectifs
 
-13 septembre 2026. Audit indépendant v8, `cpu_reference`,
+13 septembre 2026, complété le 14. Audit indépendant v8, `cpu_reference`,
 `quantized_u16_input_only`, `public_status=not_claimed`. Proposeurs q2 et
 certificats collectifs issus de la
 [contre-fixture transverse de l’autre auditeur](../../audits/morsehgp3D_v8_complementaire/P0_RESIDU_TRANSVERSE.md).
 Les sections 6 à 9 étendent ces preuves aux groupes à moments fixes,
-aux nappes, à l’addition des colonnes exactes et au raccord du census q2.
+aux nappes, à l’addition des colonnes exactes, au raccord du census q2
+et à sa collecte suspendable.
 Aucun producteur général ni résultat de tour FULL n’est qualifié ici.
 
 ## 1. Un grain plus petit suffit pour q2 sur les rangées
@@ -630,3 +631,90 @@ axial : ni baisse des visites ni gain de temps n'est présumé.
 Le test du raccord devra comparer les incidences canoniques à l'expansion
 native du plan, avec classes vides, saturation, cœur et refus de mauvais
 propriétaire/voie. L'ordre d'émission n'est pas une identité géométrique.
+
+### 9.3. Reprendre la collecte avec un budget de travail et de sortie
+
+14 septembre, après 1c523fbe. Une coquille complète peut dépasser Kmax,
+même à Kmax=1. Pour préparer des tâches réparties entre de nombreux
+travailleurs, borner le seul nombre de visites Z ne suffit donc pas :
+l'émission des IDs d'un bloc déjà classé doit aussi pouvoir s'interrompre.
+Le [modèle indépendant](p0_q2_collection_probe.py) rend ce protocole
+exécutable en mono ; il ne modifie pas l'API de census actuelle.
+
+Considérer un support fixé (a,b), admis après un comptage exact p<Kmax,
+et son index Z immuable. Comme dans le census publié, cette collecte
+repart à la racine avec ses propres comptes à zéro : p est une valeur
+à vérifier au terme, jamais un crédit ajouté aux IDs collectés. Outre
+les références au contexte et au support, l'état mutable contient seulement
+le curseur DFS, un bloc classé en attente avec offset et type
+intérieur/coquille, les deux comptes d'IDs acceptés et un numéro de fragment.
+Le bloc nomme une plage de l'ordre immuable ; sa suspension ne copie
+ni la plage entière ni le chemin de l'arbre.
+
+L'invariant est le suivant : avant le curseur, tous les sous-arbres
+écartés sont extérieurs ou entièrement émis, sauf l'éventuel suffixe
+du bloc en attente. Ce suffixe doit être vidé avant toute nouvelle visite Z.
+
+1. Sans bloc en attente, classer le nœud au curseur. S'il est indécis,
+   avancer vers son premier enfant ; sinon avancer à son échappement et,
+   pour un intérieur ou une coquille, installer sa plage comme bloc en attente.
+2. Depuis ce bloc, proposer au plus B IDs et au plus le budget restant.
+   Avancer l'offset, les comptes et la séquence seulement après acceptation.
+   Un refus rend immédiatement la main et conserve ces valeurs ; le
+   curseur déjà avancé reste associé au même suffixe non émis.
+3. Émettre le marqueur de fin seulement si le curseur est au-delà de
+   l'arbre **et** qu'aucun bloc n'attend, avec compte intérieur égal à p.
+   Un refus du marqueur permet de le proposer de nouveau ; il ne termine
+   pas la collecte.
+
+La preuve se fait par induction sur ces transitions : la partition DFS
+des IDs évite les pertes entre nœuds, puis les offsets évitent pertes et
+doublons dans un bloc. Le saut d'échappement ne suffit pas à certifier la
+fin : il peut déjà viser la sentinelle alors que le dernier bloc attend
+encore ses émissions. Chaque boîte est classée une seule fois ; aucune
+reprise ne reconstruit le préfixe consommé.
+
+Un fragment porte l'identité du contexte immuable, du support et de la
+tentative, sa séquence, son type et ses IDs. Les fragments restent
+provisoires jusqu'au marqueur
+de fin : leur réception isolée ne certifie pas une coquille complète.
+L'acceptation doit signifier un transfert de propriété indivisible ;
+un refus signifie qu'aucun ID n'a été consommé. Le modèle suppose une
+offre non bloquante, sans exception après consommation ni acquittement
+ambigu. Une file asynchrone devra fournir ce contrat, borner ses segments
+en vol et conserver le contexte ; la survie aux pannes et la déduplication
+entre tentatives demanderaient un protocole supplémentaire. Le juge teste
+une seule tentative, d'identifiant constant, dans un seul contexte par support.
+
+Pour un quantum q>0 et une capacité B>0, chaque appel paie au plus q
+unités **visites Z + IDs proposés**, y compris les copies d'un fragment
+finalement refusé. Le contrôle et l'offre du marqueur ajoutent un coût
+constant par appel ; le travail interne du consommateur n'est pas borné
+par q. Le producteur demande un état de continuation O(1) et O(B) de
+mémoire transitoire, hors index partagé, files et sorties aval. Le modèle
+stocke les IDs des nœuds explicitement et le juge accumule le résultat :
+ce n'est pas une mesure de résidence de l'index ou du processus Python.
+
+Le flux d'IDs acceptés et le nombre de classifications sont identiques
+au parcours sans budgets. Le nombre de fragments, les offres refusées,
+leurs copies et les reprises ajoutent du travail payé séparément.
+La terminaison suppose que le consommateur finisse par accepter ; aucun
+budget fini ne garantit de terminer face à des refus permanents.
+Le nombre de collectes simultanées reste à borner par l'ordonnanceur.
+
+Le [reçu distinct](P0_Q2_COLLECTION_CHECKS.json) épingle le nouveau modèle
+et sa dépendance géométrique, sans modifier le reçu des bornes de §9.1.
+Normal/−O donnent les mêmes résultats : quatre fixtures, 192 exécutions
+avec budgets, 3 297 appels, 288 refus, 2 532 IDs proposés et 2 304 acceptés.
+Les quanta 1/2/5/17 et capacités 1/2/7 sont croisés avec quatre politiques
+d'acceptation, dont un refus du marqueur final. Les IDs sont comparés au
+calcul rationnel par centre/rayon ; visites et flux typé sont comparés à
+la collecte sans budgets. Une coquille de 30 sites sous Kmax=1 exerce la
+sortie longue ; un bloc intérieur uniforme de trois sites sous Kmax=10
+exerce la reprise au milieu d'une plage. Cinq mutants de continuation ou
+de fin et trois budgets invalides sont rejetés, y compris sous Python −O.
+
+Ce protocole fournit une transition bornée à transposer et tester dans
+le moteur avant les files parallèles. Il ne réduit pas le nombre de
+visites ni le volume des coquilles, et ne qualifie ni le parallélisme,
+ni le GPU, ni la tour FULL ou les contrats de temps sur G4.
