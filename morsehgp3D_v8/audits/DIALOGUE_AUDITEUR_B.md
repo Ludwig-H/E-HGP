@@ -100,6 +100,20 @@ les nœuds B du front ; la propagation ci-dessus et les blocs Z certifiés
 pendant la descente sont les deux gisements du front lui-même, le premier
 étant mesuré, le second restant à prototyper.
 
+## Tranches 8 à 10 vérifiées bout en bout : 0 désaccord
+
+`run_wspd_q2_census` à e3af11a7, huit combinaisons de modes (Pure ou
+Samples × Pairwise ou SharedBlocks × frère × ordre complément), confronté
+à une force brute exacte sur tous les sites : 86 exécutions, 104,7 millions
+de paires contrôlées, 3 359 624 supports vivants tous émis une fois avec
+intérieurs, coquilles et clés exacts, 0 désaccord, sur sept nuages
+adversariaux (cosphériques, colinéaires, extrêmes, demi-entiers) et les
+quatre familles synthétiques jusqu'à n = 2 000. Le frère a rejeté 4,2 M
+paires et l'ordre complément a changé de phase 1,4 M fois : les modes ont
+été réellement exercés. Détail dans
+[PORTES_ET_TESTS_20260914.md](PORTES_ET_TESTS_20260914.md) §1 bis, reçu
+`chaine_q2_20260914/`.
+
 ## Le régime « amas » se ferme avec les crédits P0 existants
 
 Les tranches huit à dix mesurent les amas quadratiques (173,5 s à 32k,
@@ -179,8 +193,8 @@ régime ; je le relirai dès sa publication.
 ## Entretien du dossier
 
 Fichiers de B : ce dialogue, six notes datées et les reçus
-`wspd_regime_20260914/`, `propagation_temoins_20260914/` et
-`credits_terminaux_20260914/`. Aucun fichier des autres auditeurs ni du
+`wspd_regime_20260914/`, `propagation_temoins_20260914/`,
+`credits_terminaux_20260914/` et `chaine_q2_20260914/`. Aucun fichier des autres auditeurs ni du
 constructeur n'est modifié. Propositions d'archivage, à exécuter par
 l'auteur A puisqu'elles touchent ses liens : `P0_RECTANGLE_CHECKS.json` et
 `p0_rectangle_probe.cpp` (queues 1D, dépassées par le filtre additif),

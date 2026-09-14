@@ -1,6 +1,6 @@
 # Portes et tests v8 : ce qui mord, ce qui ne mord pas encore
 
-14 septembre 2026, après **85015a8c**. Auditeur indépendant B.
+14 septembre 2026, après **85015a8c**, complété après **e3af11a7**. Auditeur indépendant B.
 `phase=exploration_v8_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`. GCP non utilisé.
@@ -24,6 +24,33 @@ la main avec les coordonnées données.
 | Filtre axial et census q2 | ≈8 300 petits nuages adversariaux (colinéaires, cosphériques, grilles, colonnes longues, extrêmes), 8 variantes de plan × 2 modes de census, ≈118 000 paires | ensembles de paires, intérieurs, coquilles et clés identiques à la force brute ; partition des blocs exacte |
 | Pleine échelle u16 | 1 357 rectangles aléatoires sur tout le cube, 144 711 rejets locaux, 112 930 rejets de préfiltre, 60 672 supports | 0 désaccord avec un oracle Python entier |
 | Mutants tués par les portes | `h<=0`→`h<0` (point_witness), `Δ>0`→`Δ>=0` (tubes), coquille oubliée (collect), saturation un cran trop tôt (census), curseur réinitialisé à la racine, égalité au bord du slab rejetée, bornes préparées faussées | tous tués par au moins une porte C++ enregistrée |
+
+### 1 bis. Chaîne front + census q2 (tranches 8 à 10, e3af11a7) : vérifiée bout en bout
+
+Le point d'entrée `run_wspd_q2_census` a été confronté à une force brute
+exacte sur tous les sites, pour huit combinaisons de modes (front Pure ou
+MidpointSamples, census Pairwise ou SharedBlocks, frère Disabled ou
+Saturating, ordre GlobalDfs ou ComplementFirst) : toute paire non
+ordonnée à moins de Kmax intérieurs stricts doit être émise exactement
+une fois, avec ses IDs intérieurs, toute sa coquille (extrémités comprises)
+et sa clé ; aucune autre paire ne doit l'être. Familles : sept nuages
+adversariaux (grille 5³, deux sphères cosphériques concentriques de
+rayons 5 et 13 plus centre et voisins, colinéaires avec extrêmes u16,
+coins d'un cube avec doublons de centre, extrêmes 0/65535 et milieu
+demi-entier, coordonnées impaires, boule dense) à Kmax 1/2/5/10 et
+s 8/12, puis uniforme, terrain, amas et rangées à n = 800 (Kmax 1/3/10,
+s 8/12, deux graines) et n = 2 000 (uniforme, amas, Kmax 10).
+Résultat : **86 exécutions × 8 combinaisons, 104 736 960 paires contrôlées,
+3 359 624 paires vivantes toutes émises, 0 désaccord** (intérieurs, coquilles
+et clés identiques ; aucune émission en double ni en trop). Les modes
+optionnels ont bien travaillé : le certificat du frère a rejeté 4 212 717
+paires sur 133 exécutions et l'ordre complément a changé de phase
+1 421 827 fois sur 258. À n = 2 000 : 515 712 supports uniformes et
+412 928 supports d'amas, tous exacts.
+Reçu et harnais : [chaine_q2_20260914/](chaine_q2_20260914/CHAINE_Q2_CHECKS.json),
+compilés contre une extraction de e3af11a7 ; ce contrôle porte sur
+l'exactitude et la complétude du flux de supports q2, pas sur les temps
+ni sur la tour.
 
 ## 2. Lacunes de couverture, avec les fixtures qui les ferment
 

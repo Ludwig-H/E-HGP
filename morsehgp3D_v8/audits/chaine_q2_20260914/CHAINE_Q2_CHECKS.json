@@ -1,0 +1,1319 @@
+{
+  "title": "Chaîne front + census q2 (e3af11a7) : force brute exacte sur toutes les combinaisons de modes",
+  "date": "2026-09-14",
+  "author_role": "auditeur indépendant B",
+  "git_head": "7e31500997344c57ac22452893755b0a082903f5",
+  "src_root": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_e3af11a7/morsehgp3D_v8",
+  "compile_command": "g++ -std=c++20 -O2 -Wall -Wextra -I/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_e3af11a7/morsehgp3D_v8/src -I/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_e3af11a7/morsehgp3D_v8/bench /workspaces/E-HGP/morsehgp3D_v8/audits/chaine_q2_20260914/chain_verify.cpp /tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_e3af11a7/build/libmhgp8_p0.a -o /tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify",
+  "pins_sha256": {
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_e3af11a7/morsehgp3D_v8/src/pipeline/wspd_q2_census.hpp": "22b643a30b67192899038ed0281fb9416092f2107ca44bae5c88cd74044c0e76",
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_e3af11a7/morsehgp3D_v8/src/pipeline/q2_census.cpp": "ab40ac7e4c679ab94ab743fb7c43db2dad5f80ba3d2665f1d9c1a4a41a60825a",
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_e3af11a7/morsehgp3D_v8/src/pipeline/q2_census.hpp": "4b8bd8c0680fb10d41e6fc5ea38ff8e9215b006714f5013f2d4a02596b64fe03",
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_e3af11a7/morsehgp3D_v8/src/wspd/front.cpp": "1af797b322e28f0b3e5bf1dc5014c2397ea2acfbe486a5d273a30aa716985f89",
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_e3af11a7/morsehgp3D_v8/bench/front_fixtures.hpp": "a2d3ddbbff837de1609a2e1104c8797682cd7a435d4fa417d31388eb1f402b3b",
+    "morsehgp3D_v8/audits/chaine_q2_20260914/chain_verify.cpp": "cd8da6c801ce8f10a8ef22427e390ee90613c0b3d952de5206212c080f1f737c",
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_e3af11a7/build/libmhgp8_p0.a": "aba595dc88a76050466bac21c0cb608b3d8441dbeb9a85403312a7ff0c44d6de"
+  },
+  "totals": {
+    "runs": 86,
+    "combos_per_run": 8,
+    "pairs_checked": 104736960,
+    "alive_pairs": 3359624,
+    "emitted": 3359624,
+    "mismatch": 0
+  },
+  "runs": [
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:grid5 0 1 8 3",
+      "wall_seconds": 0.039,
+      "summary": {
+        "family": "adv:grid5",
+        "n": 125,
+        "kmax": 1,
+        "s": 8,
+        "checked": 62000,
+        "alive": 8288,
+        "emitted": 8288,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=125 kmax=1 s=8 emitted=1036 alive=1036 dup=0 mismatch=0 accepted=1036 rejected=6714 sibling_rejected=0 order_switches=0 \npure/shared                          n=125 kmax=1 s=8 emitted=1036 alive=1036 dup=0 mismatch=0 accepted=1036 rejected=6714 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=125 kmax=1 s=8 emitted=1036 alive=1036 dup=0 mismatch=0 accepted=1036 rejected=0 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=125 kmax=1 s=8 emitted=1036 alive=1036 dup=0 mismatch=0 accepted=1036 rejected=0 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=125 kmax=1 s=8 emitted=1036 alive=1036 dup=0 mismatch=0 accepted=1036 rejected=0 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=125 kmax=1 s=8 emitted=1036 alive=1036 dup=0 mismatch=0 accepted=1036 rejected=0 sibling_rejected=0 order_switches=1036 \nsamples/shared/sibling+complement    n=125 kmax=1 s=8 emitted=1036 alive=1036 dup=0 mismatch=0 accepted=1036 rejected=0 sibling_rejected=0 order_switches=1036 \npure/shared/sibling+complement       n=125 kmax=1 s=8 emitted=1036 alive=1036 dup=0 mismatch=0 accepted=1036 rejected=6714 sibling_rejected=0 order_switches=1036 \nSUMMARY family=adv:grid5 n=125 kmax=1 s=8 checked=62000 alive=8288 emitted=8288 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:grid5 0 1 12 3",
+      "wall_seconds": 0.039,
+      "summary": {
+        "family": "adv:grid5",
+        "n": 125,
+        "kmax": 1,
+        "s": 12,
+        "checked": 62000,
+        "alive": 8288,
+        "emitted": 8288,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=125 kmax=1 s=12 emitted=1036 alive=1036 dup=0 mismatch=0 accepted=1036 rejected=6714 sibling_rejected=0 order_switches=0 \npure/shared                          n=125 kmax=1 s=12 emitted=1036 alive=1036 dup=0 mismatch=0 accepted=1036 rejected=6714 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=125 kmax=1 s=12 emitted=1036 alive=1036 dup=0 mismatch=0 accepted=1036 rejected=0 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=125 kmax=1 s=12 emitted=1036 alive=1036 dup=0 mismatch=0 accepted=1036 rejected=0 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=125 kmax=1 s=12 emitted=1036 alive=1036 dup=0 mismatch=0 accepted=1036 rejected=0 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=125 kmax=1 s=12 emitted=1036 alive=1036 dup=0 mismatch=0 accepted=1036 rejected=0 sibling_rejected=0 order_switches=1036 \nsamples/shared/sibling+complement    n=125 kmax=1 s=12 emitted=1036 alive=1036 dup=0 mismatch=0 accepted=1036 rejected=0 sibling_rejected=0 order_switches=1036 \npure/shared/sibling+complement       n=125 kmax=1 s=12 emitted=1036 alive=1036 dup=0 mismatch=0 accepted=1036 rejected=6714 sibling_rejected=0 order_switches=1036 \nSUMMARY family=adv:grid5 n=125 kmax=1 s=12 checked=62000 alive=8288 emitted=8288 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:grid5 0 2 8 3",
+      "wall_seconds": 0.052,
+      "summary": {
+        "family": "adv:grid5",
+        "n": 125,
+        "kmax": 2,
+        "s": 8,
+        "checked": 62000,
+        "alive": 10088,
+        "emitted": 10088,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=125 kmax=2 s=8 emitted=1261 alive=1261 dup=0 mismatch=0 accepted=1261 rejected=6489 sibling_rejected=0 order_switches=0 \npure/shared                          n=125 kmax=2 s=8 emitted=1261 alive=1261 dup=0 mismatch=0 accepted=1261 rejected=6489 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=125 kmax=2 s=8 emitted=1261 alive=1261 dup=0 mismatch=0 accepted=1261 rejected=2481 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=125 kmax=2 s=8 emitted=1261 alive=1261 dup=0 mismatch=0 accepted=1261 rejected=2481 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=125 kmax=2 s=8 emitted=1261 alive=1261 dup=0 mismatch=0 accepted=1261 rejected=2481 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=125 kmax=2 s=8 emitted=1261 alive=1261 dup=0 mismatch=0 accepted=1261 rejected=2481 sibling_rejected=0 order_switches=1261 \nsamples/shared/sibling+complement    n=125 kmax=2 s=8 emitted=1261 alive=1261 dup=0 mismatch=0 accepted=1261 rejected=2481 sibling_rejected=0 order_switches=1261 \npure/shared/sibling+complement       n=125 kmax=2 s=8 emitted=1261 alive=1261 dup=0 mismatch=0 accepted=1261 rejected=6489 sibling_rejected=0 order_switches=1261 \nSUMMARY family=adv:grid5 n=125 kmax=2 s=8 checked=62000 alive=10088 emitted=10088 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:grid5 0 2 12 3",
+      "wall_seconds": 0.052,
+      "summary": {
+        "family": "adv:grid5",
+        "n": 125,
+        "kmax": 2,
+        "s": 12,
+        "checked": 62000,
+        "alive": 10088,
+        "emitted": 10088,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=125 kmax=2 s=12 emitted=1261 alive=1261 dup=0 mismatch=0 accepted=1261 rejected=6489 sibling_rejected=0 order_switches=0 \npure/shared                          n=125 kmax=2 s=12 emitted=1261 alive=1261 dup=0 mismatch=0 accepted=1261 rejected=6489 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=125 kmax=2 s=12 emitted=1261 alive=1261 dup=0 mismatch=0 accepted=1261 rejected=2481 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=125 kmax=2 s=12 emitted=1261 alive=1261 dup=0 mismatch=0 accepted=1261 rejected=2481 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=125 kmax=2 s=12 emitted=1261 alive=1261 dup=0 mismatch=0 accepted=1261 rejected=2481 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=125 kmax=2 s=12 emitted=1261 alive=1261 dup=0 mismatch=0 accepted=1261 rejected=2481 sibling_rejected=0 order_switches=1261 \nsamples/shared/sibling+complement    n=125 kmax=2 s=12 emitted=1261 alive=1261 dup=0 mismatch=0 accepted=1261 rejected=2481 sibling_rejected=0 order_switches=1261 \npure/shared/sibling+complement       n=125 kmax=2 s=12 emitted=1261 alive=1261 dup=0 mismatch=0 accepted=1261 rejected=6489 sibling_rejected=0 order_switches=1261 \nSUMMARY family=adv:grid5 n=125 kmax=2 s=12 checked=62000 alive=10088 emitted=10088 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:grid5 0 5 8 3",
+      "wall_seconds": 0.074,
+      "summary": {
+        "family": "adv:grid5",
+        "n": 125,
+        "kmax": 5,
+        "s": 8,
+        "checked": 62000,
+        "alive": 20456,
+        "emitted": 20456,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=125 kmax=5 s=8 emitted=2557 alive=2557 dup=0 mismatch=0 accepted=2557 rejected=5193 sibling_rejected=0 order_switches=0 \npure/shared                          n=125 kmax=5 s=8 emitted=2557 alive=2557 dup=0 mismatch=0 accepted=2557 rejected=5193 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=125 kmax=5 s=8 emitted=2557 alive=2557 dup=0 mismatch=0 accepted=2557 rejected=4008 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=125 kmax=5 s=8 emitted=2557 alive=2557 dup=0 mismatch=0 accepted=2557 rejected=4008 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=125 kmax=5 s=8 emitted=2557 alive=2557 dup=0 mismatch=0 accepted=2557 rejected=4008 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=125 kmax=5 s=8 emitted=2557 alive=2557 dup=0 mismatch=0 accepted=2557 rejected=4008 sibling_rejected=0 order_switches=2557 \nsamples/shared/sibling+complement    n=125 kmax=5 s=8 emitted=2557 alive=2557 dup=0 mismatch=0 accepted=2557 rejected=4008 sibling_rejected=0 order_switches=2557 \npure/shared/sibling+complement       n=125 kmax=5 s=8 emitted=2557 alive=2557 dup=0 mismatch=0 accepted=2557 rejected=5193 sibling_rejected=0 order_switches=2557 \nSUMMARY family=adv:grid5 n=125 kmax=5 s=8 checked=62000 alive=20456 emitted=20456 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:grid5 0 5 12 3",
+      "wall_seconds": 0.074,
+      "summary": {
+        "family": "adv:grid5",
+        "n": 125,
+        "kmax": 5,
+        "s": 12,
+        "checked": 62000,
+        "alive": 20456,
+        "emitted": 20456,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=125 kmax=5 s=12 emitted=2557 alive=2557 dup=0 mismatch=0 accepted=2557 rejected=5193 sibling_rejected=0 order_switches=0 \npure/shared                          n=125 kmax=5 s=12 emitted=2557 alive=2557 dup=0 mismatch=0 accepted=2557 rejected=5193 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=125 kmax=5 s=12 emitted=2557 alive=2557 dup=0 mismatch=0 accepted=2557 rejected=4008 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=125 kmax=5 s=12 emitted=2557 alive=2557 dup=0 mismatch=0 accepted=2557 rejected=4008 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=125 kmax=5 s=12 emitted=2557 alive=2557 dup=0 mismatch=0 accepted=2557 rejected=4008 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=125 kmax=5 s=12 emitted=2557 alive=2557 dup=0 mismatch=0 accepted=2557 rejected=4008 sibling_rejected=0 order_switches=2557 \nsamples/shared/sibling+complement    n=125 kmax=5 s=12 emitted=2557 alive=2557 dup=0 mismatch=0 accepted=2557 rejected=4008 sibling_rejected=0 order_switches=2557 \npure/shared/sibling+complement       n=125 kmax=5 s=12 emitted=2557 alive=2557 dup=0 mismatch=0 accepted=2557 rejected=5193 sibling_rejected=0 order_switches=2557 \nSUMMARY family=adv:grid5 n=125 kmax=5 s=12 checked=62000 alive=20456 emitted=20456 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:grid5 0 10 8 3",
+      "wall_seconds": 0.097,
+      "summary": {
+        "family": "adv:grid5",
+        "n": 125,
+        "kmax": 10,
+        "s": 8,
+        "checked": 62000,
+        "alive": 27992,
+        "emitted": 27992,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=125 kmax=10 s=8 emitted=3499 alive=3499 dup=0 mismatch=0 accepted=3499 rejected=4251 sibling_rejected=0 order_switches=0 \npure/shared                          n=125 kmax=10 s=8 emitted=3499 alive=3499 dup=0 mismatch=0 accepted=3499 rejected=4251 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=125 kmax=10 s=8 emitted=3499 alive=3499 dup=0 mismatch=0 accepted=3499 rejected=4087 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=125 kmax=10 s=8 emitted=3499 alive=3499 dup=0 mismatch=0 accepted=3499 rejected=4087 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=125 kmax=10 s=8 emitted=3499 alive=3499 dup=0 mismatch=0 accepted=3499 rejected=4087 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=125 kmax=10 s=8 emitted=3499 alive=3499 dup=0 mismatch=0 accepted=3499 rejected=4087 sibling_rejected=0 order_switches=3499 \nsamples/shared/sibling+complement    n=125 kmax=10 s=8 emitted=3499 alive=3499 dup=0 mismatch=0 accepted=3499 rejected=4087 sibling_rejected=0 order_switches=3499 \npure/shared/sibling+complement       n=125 kmax=10 s=8 emitted=3499 alive=3499 dup=0 mismatch=0 accepted=3499 rejected=4251 sibling_rejected=0 order_switches=3499 \nSUMMARY family=adv:grid5 n=125 kmax=10 s=8 checked=62000 alive=27992 emitted=27992 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:grid5 0 10 12 3",
+      "wall_seconds": 0.099,
+      "summary": {
+        "family": "adv:grid5",
+        "n": 125,
+        "kmax": 10,
+        "s": 12,
+        "checked": 62000,
+        "alive": 27992,
+        "emitted": 27992,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=125 kmax=10 s=12 emitted=3499 alive=3499 dup=0 mismatch=0 accepted=3499 rejected=4251 sibling_rejected=0 order_switches=0 \npure/shared                          n=125 kmax=10 s=12 emitted=3499 alive=3499 dup=0 mismatch=0 accepted=3499 rejected=4251 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=125 kmax=10 s=12 emitted=3499 alive=3499 dup=0 mismatch=0 accepted=3499 rejected=4087 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=125 kmax=10 s=12 emitted=3499 alive=3499 dup=0 mismatch=0 accepted=3499 rejected=4087 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=125 kmax=10 s=12 emitted=3499 alive=3499 dup=0 mismatch=0 accepted=3499 rejected=4087 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=125 kmax=10 s=12 emitted=3499 alive=3499 dup=0 mismatch=0 accepted=3499 rejected=4087 sibling_rejected=0 order_switches=3499 \nsamples/shared/sibling+complement    n=125 kmax=10 s=12 emitted=3499 alive=3499 dup=0 mismatch=0 accepted=3499 rejected=4087 sibling_rejected=0 order_switches=3499 \npure/shared/sibling+complement       n=125 kmax=10 s=12 emitted=3499 alive=3499 dup=0 mismatch=0 accepted=3499 rejected=4251 sibling_rejected=0 order_switches=3499 \nSUMMARY family=adv:grid5 n=125 kmax=10 s=12 checked=62000 alive=27992 emitted=27992 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:cospherical 0 1 8 3",
+      "wall_seconds": 0.031,
+      "summary": {
+        "family": "adv:cospherical",
+        "n": 112,
+        "kmax": 1,
+        "s": 8,
+        "checked": 49728,
+        "alive": 3480,
+        "emitted": 3480,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=112 kmax=1 s=8 emitted=435 alive=435 dup=0 mismatch=0 accepted=435 rejected=5781 sibling_rejected=0 order_switches=0 \npure/shared                          n=112 kmax=1 s=8 emitted=435 alive=435 dup=0 mismatch=0 accepted=435 rejected=5781 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=112 kmax=1 s=8 emitted=435 alive=435 dup=0 mismatch=0 accepted=435 rejected=460 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=112 kmax=1 s=8 emitted=435 alive=435 dup=0 mismatch=0 accepted=435 rejected=460 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=112 kmax=1 s=8 emitted=435 alive=435 dup=0 mismatch=0 accepted=435 rejected=460 sibling_rejected=149 order_switches=0 \nsamples/shared/complement            n=112 kmax=1 s=8 emitted=435 alive=435 dup=0 mismatch=0 accepted=435 rejected=460 sibling_rejected=0 order_switches=436 \nsamples/shared/sibling+complement    n=112 kmax=1 s=8 emitted=435 alive=435 dup=0 mismatch=0 accepted=435 rejected=460 sibling_rejected=130 order_switches=436 \npure/shared/sibling+complement       n=112 kmax=1 s=8 emitted=435 alive=435 dup=0 mismatch=0 accepted=435 rejected=5781 sibling_rejected=814 order_switches=436 \nSUMMARY family=adv:cospherical n=112 kmax=1 s=8 checked=49728 alive=3480 emitted=3480 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:cospherical 0 1 12 3",
+      "wall_seconds": 0.03,
+      "summary": {
+        "family": "adv:cospherical",
+        "n": 112,
+        "kmax": 1,
+        "s": 12,
+        "checked": 49728,
+        "alive": 3480,
+        "emitted": 3480,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=112 kmax=1 s=12 emitted=435 alive=435 dup=0 mismatch=0 accepted=435 rejected=5781 sibling_rejected=0 order_switches=0 \npure/shared                          n=112 kmax=1 s=12 emitted=435 alive=435 dup=0 mismatch=0 accepted=435 rejected=5781 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=112 kmax=1 s=12 emitted=435 alive=435 dup=0 mismatch=0 accepted=435 rejected=307 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=112 kmax=1 s=12 emitted=435 alive=435 dup=0 mismatch=0 accepted=435 rejected=307 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=112 kmax=1 s=12 emitted=435 alive=435 dup=0 mismatch=0 accepted=435 rejected=307 sibling_rejected=35 order_switches=0 \nsamples/shared/complement            n=112 kmax=1 s=12 emitted=435 alive=435 dup=0 mismatch=0 accepted=435 rejected=307 sibling_rejected=0 order_switches=435 \nsamples/shared/sibling+complement    n=112 kmax=1 s=12 emitted=435 alive=435 dup=0 mismatch=0 accepted=435 rejected=307 sibling_rejected=35 order_switches=435 \npure/shared/sibling+complement       n=112 kmax=1 s=12 emitted=435 alive=435 dup=0 mismatch=0 accepted=435 rejected=5781 sibling_rejected=422 order_switches=435 \nSUMMARY family=adv:cospherical n=112 kmax=1 s=12 checked=49728 alive=3480 emitted=3480 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:cospherical 0 2 8 3",
+      "wall_seconds": 0.038,
+      "summary": {
+        "family": "adv:cospherical",
+        "n": 112,
+        "kmax": 2,
+        "s": 8,
+        "checked": 49728,
+        "alive": 6888,
+        "emitted": 6888,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=112 kmax=2 s=8 emitted=861 alive=861 dup=0 mismatch=0 accepted=861 rejected=5355 sibling_rejected=0 order_switches=0 \npure/shared                          n=112 kmax=2 s=8 emitted=861 alive=861 dup=0 mismatch=0 accepted=861 rejected=5355 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=112 kmax=2 s=8 emitted=861 alive=861 dup=0 mismatch=0 accepted=861 rejected=1700 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=112 kmax=2 s=8 emitted=861 alive=861 dup=0 mismatch=0 accepted=861 rejected=1700 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=112 kmax=2 s=8 emitted=861 alive=861 dup=0 mismatch=0 accepted=861 rejected=1700 sibling_rejected=74 order_switches=0 \nsamples/shared/complement            n=112 kmax=2 s=8 emitted=861 alive=861 dup=0 mismatch=0 accepted=861 rejected=1700 sibling_rejected=0 order_switches=888 \nsamples/shared/sibling+complement    n=112 kmax=2 s=8 emitted=861 alive=861 dup=0 mismatch=0 accepted=861 rejected=1700 sibling_rejected=74 order_switches=888 \npure/shared/sibling+complement       n=112 kmax=2 s=8 emitted=861 alive=861 dup=0 mismatch=0 accepted=861 rejected=5355 sibling_rejected=111 order_switches=888 \nSUMMARY family=adv:cospherical n=112 kmax=2 s=8 checked=49728 alive=6888 emitted=6888 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:cospherical 0 2 12 3",
+      "wall_seconds": 0.041,
+      "summary": {
+        "family": "adv:cospherical",
+        "n": 112,
+        "kmax": 2,
+        "s": 12,
+        "checked": 49728,
+        "alive": 6888,
+        "emitted": 6888,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=112 kmax=2 s=12 emitted=861 alive=861 dup=0 mismatch=0 accepted=861 rejected=5355 sibling_rejected=0 order_switches=0 \npure/shared                          n=112 kmax=2 s=12 emitted=861 alive=861 dup=0 mismatch=0 accepted=861 rejected=5355 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=112 kmax=2 s=12 emitted=861 alive=861 dup=0 mismatch=0 accepted=861 rejected=1587 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=112 kmax=2 s=12 emitted=861 alive=861 dup=0 mismatch=0 accepted=861 rejected=1587 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=112 kmax=2 s=12 emitted=861 alive=861 dup=0 mismatch=0 accepted=861 rejected=1587 sibling_rejected=74 order_switches=0 \nsamples/shared/complement            n=112 kmax=2 s=12 emitted=861 alive=861 dup=0 mismatch=0 accepted=861 rejected=1587 sibling_rejected=0 order_switches=845 \nsamples/shared/sibling+complement    n=112 kmax=2 s=12 emitted=861 alive=861 dup=0 mismatch=0 accepted=861 rejected=1587 sibling_rejected=74 order_switches=845 \npure/shared/sibling+complement       n=112 kmax=2 s=12 emitted=861 alive=861 dup=0 mismatch=0 accepted=861 rejected=5355 sibling_rejected=111 order_switches=845 \nSUMMARY family=adv:cospherical n=112 kmax=2 s=12 checked=49728 alive=6888 emitted=6888 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:cospherical 0 5 8 3",
+      "wall_seconds": 0.054,
+      "summary": {
+        "family": "adv:cospherical",
+        "n": 112,
+        "kmax": 5,
+        "s": 8,
+        "checked": 49728,
+        "alive": 11488,
+        "emitted": 11488,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=112 kmax=5 s=8 emitted=1436 alive=1436 dup=0 mismatch=0 accepted=1436 rejected=4780 sibling_rejected=0 order_switches=0 \npure/shared                          n=112 kmax=5 s=8 emitted=1436 alive=1436 dup=0 mismatch=0 accepted=1436 rejected=4780 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=112 kmax=5 s=8 emitted=1436 alive=1436 dup=0 mismatch=0 accepted=1436 rejected=3267 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=112 kmax=5 s=8 emitted=1436 alive=1436 dup=0 mismatch=0 accepted=1436 rejected=3267 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=112 kmax=5 s=8 emitted=1436 alive=1436 dup=0 mismatch=0 accepted=1436 rejected=3267 sibling_rejected=25 order_switches=0 \nsamples/shared/complement            n=112 kmax=5 s=8 emitted=1436 alive=1436 dup=0 mismatch=0 accepted=1436 rejected=3267 sibling_rejected=0 order_switches=1415 \nsamples/shared/sibling+complement    n=112 kmax=5 s=8 emitted=1436 alive=1436 dup=0 mismatch=0 accepted=1436 rejected=3267 sibling_rejected=25 order_switches=1415 \npure/shared/sibling+complement       n=112 kmax=5 s=8 emitted=1436 alive=1436 dup=0 mismatch=0 accepted=1436 rejected=4780 sibling_rejected=43 order_switches=1415 \nSUMMARY family=adv:cospherical n=112 kmax=5 s=8 checked=49728 alive=11488 emitted=11488 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:cospherical 0 5 12 3",
+      "wall_seconds": 0.059,
+      "summary": {
+        "family": "adv:cospherical",
+        "n": 112,
+        "kmax": 5,
+        "s": 12,
+        "checked": 49728,
+        "alive": 11488,
+        "emitted": 11488,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=112 kmax=5 s=12 emitted=1436 alive=1436 dup=0 mismatch=0 accepted=1436 rejected=4780 sibling_rejected=0 order_switches=0 \npure/shared                          n=112 kmax=5 s=12 emitted=1436 alive=1436 dup=0 mismatch=0 accepted=1436 rejected=4780 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=112 kmax=5 s=12 emitted=1436 alive=1436 dup=0 mismatch=0 accepted=1436 rejected=3219 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=112 kmax=5 s=12 emitted=1436 alive=1436 dup=0 mismatch=0 accepted=1436 rejected=3219 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=112 kmax=5 s=12 emitted=1436 alive=1436 dup=0 mismatch=0 accepted=1436 rejected=3219 sibling_rejected=25 order_switches=0 \nsamples/shared/complement            n=112 kmax=5 s=12 emitted=1436 alive=1436 dup=0 mismatch=0 accepted=1436 rejected=3219 sibling_rejected=0 order_switches=1420 \nsamples/shared/sibling+complement    n=112 kmax=5 s=12 emitted=1436 alive=1436 dup=0 mismatch=0 accepted=1436 rejected=3219 sibling_rejected=25 order_switches=1420 \npure/shared/sibling+complement       n=112 kmax=5 s=12 emitted=1436 alive=1436 dup=0 mismatch=0 accepted=1436 rejected=4780 sibling_rejected=43 order_switches=1420 \nSUMMARY family=adv:cospherical n=112 kmax=5 s=12 checked=49728 alive=11488 emitted=11488 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:cospherical 0 10 8 3",
+      "wall_seconds": 0.089,
+      "summary": {
+        "family": "adv:cospherical",
+        "n": 112,
+        "kmax": 10,
+        "s": 8,
+        "checked": 49728,
+        "alive": 20688,
+        "emitted": 20688,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=112 kmax=10 s=8 emitted=2586 alive=2586 dup=0 mismatch=0 accepted=2586 rejected=3630 sibling_rejected=0 order_switches=0 \npure/shared                          n=112 kmax=10 s=8 emitted=2586 alive=2586 dup=0 mismatch=0 accepted=2586 rejected=3630 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=112 kmax=10 s=8 emitted=2586 alive=2586 dup=0 mismatch=0 accepted=2586 rejected=3060 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=112 kmax=10 s=8 emitted=2586 alive=2586 dup=0 mismatch=0 accepted=2586 rejected=3060 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=112 kmax=10 s=8 emitted=2586 alive=2586 dup=0 mismatch=0 accepted=2586 rejected=3060 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=112 kmax=10 s=8 emitted=2586 alive=2586 dup=0 mismatch=0 accepted=2586 rejected=3060 sibling_rejected=0 order_switches=2559 \nsamples/shared/sibling+complement    n=112 kmax=10 s=8 emitted=2586 alive=2586 dup=0 mismatch=0 accepted=2586 rejected=3060 sibling_rejected=0 order_switches=2559 \npure/shared/sibling+complement       n=112 kmax=10 s=8 emitted=2586 alive=2586 dup=0 mismatch=0 accepted=2586 rejected=3630 sibling_rejected=11 order_switches=2559 \nSUMMARY family=adv:cospherical n=112 kmax=10 s=8 checked=49728 alive=20688 emitted=20688 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:cospherical 0 10 12 3",
+      "wall_seconds": 0.097,
+      "summary": {
+        "family": "adv:cospherical",
+        "n": 112,
+        "kmax": 10,
+        "s": 12,
+        "checked": 49728,
+        "alive": 20688,
+        "emitted": 20688,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=112 kmax=10 s=12 emitted=2586 alive=2586 dup=0 mismatch=0 accepted=2586 rejected=3630 sibling_rejected=0 order_switches=0 \npure/shared                          n=112 kmax=10 s=12 emitted=2586 alive=2586 dup=0 mismatch=0 accepted=2586 rejected=3630 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=112 kmax=10 s=12 emitted=2586 alive=2586 dup=0 mismatch=0 accepted=2586 rejected=3053 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=112 kmax=10 s=12 emitted=2586 alive=2586 dup=0 mismatch=0 accepted=2586 rejected=3053 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=112 kmax=10 s=12 emitted=2586 alive=2586 dup=0 mismatch=0 accepted=2586 rejected=3053 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=112 kmax=10 s=12 emitted=2586 alive=2586 dup=0 mismatch=0 accepted=2586 rejected=3053 sibling_rejected=0 order_switches=2576 \nsamples/shared/sibling+complement    n=112 kmax=10 s=12 emitted=2586 alive=2586 dup=0 mismatch=0 accepted=2586 rejected=3053 sibling_rejected=0 order_switches=2576 \npure/shared/sibling+complement       n=112 kmax=10 s=12 emitted=2586 alive=2586 dup=0 mismatch=0 accepted=2586 rejected=3630 sibling_rejected=11 order_switches=2576 \nSUMMARY family=adv:cospherical n=112 kmax=10 s=12 checked=49728 alive=20688 emitted=20688 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:collinear 0 1 8 3",
+      "wall_seconds": 0.004,
+      "summary": {
+        "family": "adv:collinear",
+        "n": 52,
+        "kmax": 1,
+        "s": 8,
+        "checked": 10608,
+        "alive": 408,
+        "emitted": 408,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=52 kmax=1 s=8 emitted=51 alive=51 dup=0 mismatch=0 accepted=51 rejected=1275 sibling_rejected=0 order_switches=0 \npure/shared                          n=52 kmax=1 s=8 emitted=51 alive=51 dup=0 mismatch=0 accepted=51 rejected=1275 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=52 kmax=1 s=8 emitted=51 alive=51 dup=0 mismatch=0 accepted=51 rejected=52 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=52 kmax=1 s=8 emitted=51 alive=51 dup=0 mismatch=0 accepted=51 rejected=52 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=52 kmax=1 s=8 emitted=51 alive=51 dup=0 mismatch=0 accepted=51 rejected=52 sibling_rejected=52 order_switches=0 \nsamples/shared/complement            n=52 kmax=1 s=8 emitted=51 alive=51 dup=0 mismatch=0 accepted=51 rejected=52 sibling_rejected=0 order_switches=51 \nsamples/shared/sibling+complement    n=52 kmax=1 s=8 emitted=51 alive=51 dup=0 mismatch=0 accepted=51 rejected=52 sibling_rejected=52 order_switches=51 \npure/shared/sibling+complement       n=52 kmax=1 s=8 emitted=51 alive=51 dup=0 mismatch=0 accepted=51 rejected=1275 sibling_rejected=52 order_switches=51 \nSUMMARY family=adv:collinear n=52 kmax=1 s=8 checked=10608 alive=408 emitted=408 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:collinear 0 1 12 3",
+      "wall_seconds": 0.004,
+      "summary": {
+        "family": "adv:collinear",
+        "n": 52,
+        "kmax": 1,
+        "s": 12,
+        "checked": 10608,
+        "alive": 408,
+        "emitted": 408,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=52 kmax=1 s=12 emitted=51 alive=51 dup=0 mismatch=0 accepted=51 rejected=1275 sibling_rejected=0 order_switches=0 \npure/shared                          n=52 kmax=1 s=12 emitted=51 alive=51 dup=0 mismatch=0 accepted=51 rejected=1275 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=52 kmax=1 s=12 emitted=51 alive=51 dup=0 mismatch=0 accepted=51 rejected=51 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=52 kmax=1 s=12 emitted=51 alive=51 dup=0 mismatch=0 accepted=51 rejected=51 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=52 kmax=1 s=12 emitted=51 alive=51 dup=0 mismatch=0 accepted=51 rejected=51 sibling_rejected=51 order_switches=0 \nsamples/shared/complement            n=52 kmax=1 s=12 emitted=51 alive=51 dup=0 mismatch=0 accepted=51 rejected=51 sibling_rejected=0 order_switches=51 \nsamples/shared/sibling+complement    n=52 kmax=1 s=12 emitted=51 alive=51 dup=0 mismatch=0 accepted=51 rejected=51 sibling_rejected=51 order_switches=51 \npure/shared/sibling+complement       n=52 kmax=1 s=12 emitted=51 alive=51 dup=0 mismatch=0 accepted=51 rejected=1275 sibling_rejected=51 order_switches=51 \nSUMMARY family=adv:collinear n=52 kmax=1 s=12 checked=10608 alive=408 emitted=408 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:collinear 0 2 8 3",
+      "wall_seconds": 0.005,
+      "summary": {
+        "family": "adv:collinear",
+        "n": 52,
+        "kmax": 2,
+        "s": 8,
+        "checked": 10608,
+        "alive": 808,
+        "emitted": 808,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=52 kmax=2 s=8 emitted=101 alive=101 dup=0 mismatch=0 accepted=101 rejected=1225 sibling_rejected=0 order_switches=0 \npure/shared                          n=52 kmax=2 s=8 emitted=101 alive=101 dup=0 mismatch=0 accepted=101 rejected=1225 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=52 kmax=2 s=8 emitted=101 alive=101 dup=0 mismatch=0 accepted=101 rejected=79 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=52 kmax=2 s=8 emitted=101 alive=101 dup=0 mismatch=0 accepted=101 rejected=79 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=52 kmax=2 s=8 emitted=101 alive=101 dup=0 mismatch=0 accepted=101 rejected=79 sibling_rejected=50 order_switches=0 \nsamples/shared/complement            n=52 kmax=2 s=8 emitted=101 alive=101 dup=0 mismatch=0 accepted=101 rejected=79 sibling_rejected=0 order_switches=99 \nsamples/shared/sibling+complement    n=52 kmax=2 s=8 emitted=101 alive=101 dup=0 mismatch=0 accepted=101 rejected=79 sibling_rejected=50 order_switches=99 \npure/shared/sibling+complement       n=52 kmax=2 s=8 emitted=101 alive=101 dup=0 mismatch=0 accepted=101 rejected=1225 sibling_rejected=50 order_switches=99 \nSUMMARY family=adv:collinear n=52 kmax=2 s=8 checked=10608 alive=808 emitted=808 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:collinear 0 2 12 3",
+      "wall_seconds": 0.005,
+      "summary": {
+        "family": "adv:collinear",
+        "n": 52,
+        "kmax": 2,
+        "s": 12,
+        "checked": 10608,
+        "alive": 808,
+        "emitted": 808,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=52 kmax=2 s=12 emitted=101 alive=101 dup=0 mismatch=0 accepted=101 rejected=1225 sibling_rejected=0 order_switches=0 \npure/shared                          n=52 kmax=2 s=12 emitted=101 alive=101 dup=0 mismatch=0 accepted=101 rejected=1225 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=52 kmax=2 s=12 emitted=101 alive=101 dup=0 mismatch=0 accepted=101 rejected=78 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=52 kmax=2 s=12 emitted=101 alive=101 dup=0 mismatch=0 accepted=101 rejected=78 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=52 kmax=2 s=12 emitted=101 alive=101 dup=0 mismatch=0 accepted=101 rejected=78 sibling_rejected=49 order_switches=0 \nsamples/shared/complement            n=52 kmax=2 s=12 emitted=101 alive=101 dup=0 mismatch=0 accepted=101 rejected=78 sibling_rejected=0 order_switches=99 \nsamples/shared/sibling+complement    n=52 kmax=2 s=12 emitted=101 alive=101 dup=0 mismatch=0 accepted=101 rejected=78 sibling_rejected=49 order_switches=99 \npure/shared/sibling+complement       n=52 kmax=2 s=12 emitted=101 alive=101 dup=0 mismatch=0 accepted=101 rejected=1225 sibling_rejected=49 order_switches=99 \nSUMMARY family=adv:collinear n=52 kmax=2 s=12 checked=10608 alive=808 emitted=808 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:collinear 0 5 8 3",
+      "wall_seconds": 0.006,
+      "summary": {
+        "family": "adv:collinear",
+        "n": 52,
+        "kmax": 5,
+        "s": 8,
+        "checked": 10608,
+        "alive": 1960,
+        "emitted": 1960,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=52 kmax=5 s=8 emitted=245 alive=245 dup=0 mismatch=0 accepted=245 rejected=1081 sibling_rejected=0 order_switches=0 \npure/shared                          n=52 kmax=5 s=8 emitted=245 alive=245 dup=0 mismatch=0 accepted=245 rejected=1081 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=52 kmax=5 s=8 emitted=245 alive=245 dup=0 mismatch=0 accepted=245 rejected=93 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=52 kmax=5 s=8 emitted=245 alive=245 dup=0 mismatch=0 accepted=245 rejected=93 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=52 kmax=5 s=8 emitted=245 alive=245 dup=0 mismatch=0 accepted=245 rejected=93 sibling_rejected=46 order_switches=0 \nsamples/shared/complement            n=52 kmax=5 s=8 emitted=245 alive=245 dup=0 mismatch=0 accepted=245 rejected=93 sibling_rejected=0 order_switches=226 \nsamples/shared/sibling+complement    n=52 kmax=5 s=8 emitted=245 alive=245 dup=0 mismatch=0 accepted=245 rejected=93 sibling_rejected=46 order_switches=226 \npure/shared/sibling+complement       n=52 kmax=5 s=8 emitted=245 alive=245 dup=0 mismatch=0 accepted=245 rejected=1081 sibling_rejected=46 order_switches=226 \nSUMMARY family=adv:collinear n=52 kmax=5 s=8 checked=10608 alive=1960 emitted=1960 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:collinear 0 5 12 3",
+      "wall_seconds": 0.006,
+      "summary": {
+        "family": "adv:collinear",
+        "n": 52,
+        "kmax": 5,
+        "s": 12,
+        "checked": 10608,
+        "alive": 1960,
+        "emitted": 1960,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=52 kmax=5 s=12 emitted=245 alive=245 dup=0 mismatch=0 accepted=245 rejected=1081 sibling_rejected=0 order_switches=0 \npure/shared                          n=52 kmax=5 s=12 emitted=245 alive=245 dup=0 mismatch=0 accepted=245 rejected=1081 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=52 kmax=5 s=12 emitted=245 alive=245 dup=0 mismatch=0 accepted=245 rejected=85 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=52 kmax=5 s=12 emitted=245 alive=245 dup=0 mismatch=0 accepted=245 rejected=85 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=52 kmax=5 s=12 emitted=245 alive=245 dup=0 mismatch=0 accepted=245 rejected=85 sibling_rejected=46 order_switches=0 \nsamples/shared/complement            n=52 kmax=5 s=12 emitted=245 alive=245 dup=0 mismatch=0 accepted=245 rejected=85 sibling_rejected=0 order_switches=231 \nsamples/shared/sibling+complement    n=52 kmax=5 s=12 emitted=245 alive=245 dup=0 mismatch=0 accepted=245 rejected=85 sibling_rejected=46 order_switches=231 \npure/shared/sibling+complement       n=52 kmax=5 s=12 emitted=245 alive=245 dup=0 mismatch=0 accepted=245 rejected=1081 sibling_rejected=46 order_switches=231 \nSUMMARY family=adv:collinear n=52 kmax=5 s=12 checked=10608 alive=1960 emitted=1960 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:collinear 0 10 8 3",
+      "wall_seconds": 0.009,
+      "summary": {
+        "family": "adv:collinear",
+        "n": 52,
+        "kmax": 10,
+        "s": 8,
+        "checked": 10608,
+        "alive": 3720,
+        "emitted": 3720,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=52 kmax=10 s=8 emitted=465 alive=465 dup=0 mismatch=0 accepted=465 rejected=861 sibling_rejected=0 order_switches=0 \npure/shared                          n=52 kmax=10 s=8 emitted=465 alive=465 dup=0 mismatch=0 accepted=465 rejected=861 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=52 kmax=10 s=8 emitted=465 alive=465 dup=0 mismatch=0 accepted=465 rejected=153 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=52 kmax=10 s=8 emitted=465 alive=465 dup=0 mismatch=0 accepted=465 rejected=153 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=52 kmax=10 s=8 emitted=465 alive=465 dup=0 mismatch=0 accepted=465 rejected=153 sibling_rejected=41 order_switches=0 \nsamples/shared/complement            n=52 kmax=10 s=8 emitted=465 alive=465 dup=0 mismatch=0 accepted=465 rejected=153 sibling_rejected=0 order_switches=371 \nsamples/shared/sibling+complement    n=52 kmax=10 s=8 emitted=465 alive=465 dup=0 mismatch=0 accepted=465 rejected=153 sibling_rejected=41 order_switches=371 \npure/shared/sibling+complement       n=52 kmax=10 s=8 emitted=465 alive=465 dup=0 mismatch=0 accepted=465 rejected=861 sibling_rejected=41 order_switches=371 \nSUMMARY family=adv:collinear n=52 kmax=10 s=8 checked=10608 alive=3720 emitted=3720 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:collinear 0 10 12 3",
+      "wall_seconds": 0.008,
+      "summary": {
+        "family": "adv:collinear",
+        "n": 52,
+        "kmax": 10,
+        "s": 12,
+        "checked": 10608,
+        "alive": 3720,
+        "emitted": 3720,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=52 kmax=10 s=12 emitted=465 alive=465 dup=0 mismatch=0 accepted=465 rejected=861 sibling_rejected=0 order_switches=0 \npure/shared                          n=52 kmax=10 s=12 emitted=465 alive=465 dup=0 mismatch=0 accepted=465 rejected=861 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=52 kmax=10 s=12 emitted=465 alive=465 dup=0 mismatch=0 accepted=465 rejected=143 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=52 kmax=10 s=12 emitted=465 alive=465 dup=0 mismatch=0 accepted=465 rejected=143 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=52 kmax=10 s=12 emitted=465 alive=465 dup=0 mismatch=0 accepted=465 rejected=143 sibling_rejected=41 order_switches=0 \nsamples/shared/complement            n=52 kmax=10 s=12 emitted=465 alive=465 dup=0 mismatch=0 accepted=465 rejected=143 sibling_rejected=0 order_switches=410 \nsamples/shared/sibling+complement    n=52 kmax=10 s=12 emitted=465 alive=465 dup=0 mismatch=0 accepted=465 rejected=143 sibling_rejected=41 order_switches=410 \npure/shared/sibling+complement       n=52 kmax=10 s=12 emitted=465 alive=465 dup=0 mismatch=0 accepted=465 rejected=861 sibling_rejected=41 order_switches=410 \nSUMMARY family=adv:collinear n=52 kmax=10 s=12 checked=10608 alive=3720 emitted=3720 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:cube_corners 0 1 8 3",
+      "wall_seconds": 0.002,
+      "summary": {
+        "family": "adv:cube_corners",
+        "n": 14,
+        "kmax": 1,
+        "s": 8,
+        "checked": 728,
+        "alive": 248,
+        "emitted": 248,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=14 kmax=1 s=8 emitted=31 alive=31 dup=0 mismatch=0 accepted=31 rejected=60 sibling_rejected=0 order_switches=0 \npure/shared                          n=14 kmax=1 s=8 emitted=31 alive=31 dup=0 mismatch=0 accepted=31 rejected=60 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=14 kmax=1 s=8 emitted=31 alive=31 dup=0 mismatch=0 accepted=31 rejected=36 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=14 kmax=1 s=8 emitted=31 alive=31 dup=0 mismatch=0 accepted=31 rejected=36 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=14 kmax=1 s=8 emitted=31 alive=31 dup=0 mismatch=0 accepted=31 rejected=36 sibling_rejected=18 order_switches=0 \nsamples/shared/complement            n=14 kmax=1 s=8 emitted=31 alive=31 dup=0 mismatch=0 accepted=31 rejected=36 sibling_rejected=0 order_switches=31 \nsamples/shared/sibling+complement    n=14 kmax=1 s=8 emitted=31 alive=31 dup=0 mismatch=0 accepted=31 rejected=36 sibling_rejected=12 order_switches=31 \npure/shared/sibling+complement       n=14 kmax=1 s=8 emitted=31 alive=31 dup=0 mismatch=0 accepted=31 rejected=60 sibling_rejected=12 order_switches=31 \nSUMMARY family=adv:cube_corners n=14 kmax=1 s=8 checked=728 alive=248 emitted=248 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:cube_corners 0 1 12 3",
+      "wall_seconds": 0.002,
+      "summary": {
+        "family": "adv:cube_corners",
+        "n": 14,
+        "kmax": 1,
+        "s": 12,
+        "checked": 728,
+        "alive": 248,
+        "emitted": 248,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=14 kmax=1 s=12 emitted=31 alive=31 dup=0 mismatch=0 accepted=31 rejected=60 sibling_rejected=0 order_switches=0 \npure/shared                          n=14 kmax=1 s=12 emitted=31 alive=31 dup=0 mismatch=0 accepted=31 rejected=60 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=14 kmax=1 s=12 emitted=31 alive=31 dup=0 mismatch=0 accepted=31 rejected=36 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=14 kmax=1 s=12 emitted=31 alive=31 dup=0 mismatch=0 accepted=31 rejected=36 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=14 kmax=1 s=12 emitted=31 alive=31 dup=0 mismatch=0 accepted=31 rejected=36 sibling_rejected=18 order_switches=0 \nsamples/shared/complement            n=14 kmax=1 s=12 emitted=31 alive=31 dup=0 mismatch=0 accepted=31 rejected=36 sibling_rejected=0 order_switches=31 \nsamples/shared/sibling+complement    n=14 kmax=1 s=12 emitted=31 alive=31 dup=0 mismatch=0 accepted=31 rejected=36 sibling_rejected=12 order_switches=31 \npure/shared/sibling+complement       n=14 kmax=1 s=12 emitted=31 alive=31 dup=0 mismatch=0 accepted=31 rejected=60 sibling_rejected=12 order_switches=31 \nSUMMARY family=adv:cube_corners n=14 kmax=1 s=12 checked=728 alive=248 emitted=248 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:cube_corners 0 2 8 3",
+      "wall_seconds": 0.002,
+      "summary": {
+        "family": "adv:cube_corners",
+        "n": 14,
+        "kmax": 2,
+        "s": 8,
+        "checked": 728,
+        "alive": 336,
+        "emitted": 336,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=14 kmax=2 s=8 emitted=42 alive=42 dup=0 mismatch=0 accepted=42 rejected=49 sibling_rejected=0 order_switches=0 \npure/shared                          n=14 kmax=2 s=8 emitted=42 alive=42 dup=0 mismatch=0 accepted=42 rejected=49 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=14 kmax=2 s=8 emitted=42 alive=42 dup=0 mismatch=0 accepted=42 rejected=45 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=14 kmax=2 s=8 emitted=42 alive=42 dup=0 mismatch=0 accepted=42 rejected=45 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=14 kmax=2 s=8 emitted=42 alive=42 dup=0 mismatch=0 accepted=42 rejected=45 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=14 kmax=2 s=8 emitted=42 alive=42 dup=0 mismatch=0 accepted=42 rejected=45 sibling_rejected=0 order_switches=51 \nsamples/shared/sibling+complement    n=14 kmax=2 s=8 emitted=42 alive=42 dup=0 mismatch=0 accepted=42 rejected=45 sibling_rejected=0 order_switches=51 \npure/shared/sibling+complement       n=14 kmax=2 s=8 emitted=42 alive=42 dup=0 mismatch=0 accepted=42 rejected=49 sibling_rejected=0 order_switches=51 \nSUMMARY family=adv:cube_corners n=14 kmax=2 s=8 checked=728 alive=336 emitted=336 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:cube_corners 0 2 12 3",
+      "wall_seconds": 0.002,
+      "summary": {
+        "family": "adv:cube_corners",
+        "n": 14,
+        "kmax": 2,
+        "s": 12,
+        "checked": 728,
+        "alive": 336,
+        "emitted": 336,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=14 kmax=2 s=12 emitted=42 alive=42 dup=0 mismatch=0 accepted=42 rejected=49 sibling_rejected=0 order_switches=0 \npure/shared                          n=14 kmax=2 s=12 emitted=42 alive=42 dup=0 mismatch=0 accepted=42 rejected=49 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=14 kmax=2 s=12 emitted=42 alive=42 dup=0 mismatch=0 accepted=42 rejected=45 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=14 kmax=2 s=12 emitted=42 alive=42 dup=0 mismatch=0 accepted=42 rejected=45 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=14 kmax=2 s=12 emitted=42 alive=42 dup=0 mismatch=0 accepted=42 rejected=45 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=14 kmax=2 s=12 emitted=42 alive=42 dup=0 mismatch=0 accepted=42 rejected=45 sibling_rejected=0 order_switches=51 \nsamples/shared/sibling+complement    n=14 kmax=2 s=12 emitted=42 alive=42 dup=0 mismatch=0 accepted=42 rejected=45 sibling_rejected=0 order_switches=51 \npure/shared/sibling+complement       n=14 kmax=2 s=12 emitted=42 alive=42 dup=0 mismatch=0 accepted=42 rejected=49 sibling_rejected=0 order_switches=51 \nSUMMARY family=adv:cube_corners n=14 kmax=2 s=12 checked=728 alive=336 emitted=336 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:cube_corners 0 5 8 3",
+      "wall_seconds": 0.002,
+      "summary": {
+        "family": "adv:cube_corners",
+        "n": 14,
+        "kmax": 5,
+        "s": 8,
+        "checked": 728,
+        "alive": 568,
+        "emitted": 568,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=14 kmax=5 s=8 emitted=71 alive=71 dup=0 mismatch=0 accepted=71 rejected=20 sibling_rejected=0 order_switches=0 \npure/shared                          n=14 kmax=5 s=8 emitted=71 alive=71 dup=0 mismatch=0 accepted=71 rejected=20 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=14 kmax=5 s=8 emitted=71 alive=71 dup=0 mismatch=0 accepted=71 rejected=20 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=14 kmax=5 s=8 emitted=71 alive=71 dup=0 mismatch=0 accepted=71 rejected=20 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=14 kmax=5 s=8 emitted=71 alive=71 dup=0 mismatch=0 accepted=71 rejected=20 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=14 kmax=5 s=8 emitted=71 alive=71 dup=0 mismatch=0 accepted=71 rejected=20 sibling_rejected=0 order_switches=78 \nsamples/shared/sibling+complement    n=14 kmax=5 s=8 emitted=71 alive=71 dup=0 mismatch=0 accepted=71 rejected=20 sibling_rejected=0 order_switches=78 \npure/shared/sibling+complement       n=14 kmax=5 s=8 emitted=71 alive=71 dup=0 mismatch=0 accepted=71 rejected=20 sibling_rejected=0 order_switches=78 \nSUMMARY family=adv:cube_corners n=14 kmax=5 s=8 checked=728 alive=568 emitted=568 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:cube_corners 0 5 12 3",
+      "wall_seconds": 0.002,
+      "summary": {
+        "family": "adv:cube_corners",
+        "n": 14,
+        "kmax": 5,
+        "s": 12,
+        "checked": 728,
+        "alive": 568,
+        "emitted": 568,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=14 kmax=5 s=12 emitted=71 alive=71 dup=0 mismatch=0 accepted=71 rejected=20 sibling_rejected=0 order_switches=0 \npure/shared                          n=14 kmax=5 s=12 emitted=71 alive=71 dup=0 mismatch=0 accepted=71 rejected=20 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=14 kmax=5 s=12 emitted=71 alive=71 dup=0 mismatch=0 accepted=71 rejected=20 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=14 kmax=5 s=12 emitted=71 alive=71 dup=0 mismatch=0 accepted=71 rejected=20 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=14 kmax=5 s=12 emitted=71 alive=71 dup=0 mismatch=0 accepted=71 rejected=20 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=14 kmax=5 s=12 emitted=71 alive=71 dup=0 mismatch=0 accepted=71 rejected=20 sibling_rejected=0 order_switches=78 \nsamples/shared/sibling+complement    n=14 kmax=5 s=12 emitted=71 alive=71 dup=0 mismatch=0 accepted=71 rejected=20 sibling_rejected=0 order_switches=78 \npure/shared/sibling+complement       n=14 kmax=5 s=12 emitted=71 alive=71 dup=0 mismatch=0 accepted=71 rejected=20 sibling_rejected=0 order_switches=78 \nSUMMARY family=adv:cube_corners n=14 kmax=5 s=12 checked=728 alive=568 emitted=568 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:cube_corners 0 10 8 3",
+      "wall_seconds": 0.002,
+      "summary": {
+        "family": "adv:cube_corners",
+        "n": 14,
+        "kmax": 10,
+        "s": 8,
+        "checked": 728,
+        "alive": 704,
+        "emitted": 704,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=14 kmax=10 s=8 emitted=88 alive=88 dup=0 mismatch=0 accepted=88 rejected=3 sibling_rejected=0 order_switches=0 \npure/shared                          n=14 kmax=10 s=8 emitted=88 alive=88 dup=0 mismatch=0 accepted=88 rejected=3 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=14 kmax=10 s=8 emitted=88 alive=88 dup=0 mismatch=0 accepted=88 rejected=3 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=14 kmax=10 s=8 emitted=88 alive=88 dup=0 mismatch=0 accepted=88 rejected=3 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=14 kmax=10 s=8 emitted=88 alive=88 dup=0 mismatch=0 accepted=88 rejected=3 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=14 kmax=10 s=8 emitted=88 alive=88 dup=0 mismatch=0 accepted=88 rejected=3 sibling_rejected=0 order_switches=78 \nsamples/shared/sibling+complement    n=14 kmax=10 s=8 emitted=88 alive=88 dup=0 mismatch=0 accepted=88 rejected=3 sibling_rejected=0 order_switches=78 \npure/shared/sibling+complement       n=14 kmax=10 s=8 emitted=88 alive=88 dup=0 mismatch=0 accepted=88 rejected=3 sibling_rejected=0 order_switches=78 \nSUMMARY family=adv:cube_corners n=14 kmax=10 s=8 checked=728 alive=704 emitted=704 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:cube_corners 0 10 12 3",
+      "wall_seconds": 0.002,
+      "summary": {
+        "family": "adv:cube_corners",
+        "n": 14,
+        "kmax": 10,
+        "s": 12,
+        "checked": 728,
+        "alive": 704,
+        "emitted": 704,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=14 kmax=10 s=12 emitted=88 alive=88 dup=0 mismatch=0 accepted=88 rejected=3 sibling_rejected=0 order_switches=0 \npure/shared                          n=14 kmax=10 s=12 emitted=88 alive=88 dup=0 mismatch=0 accepted=88 rejected=3 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=14 kmax=10 s=12 emitted=88 alive=88 dup=0 mismatch=0 accepted=88 rejected=3 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=14 kmax=10 s=12 emitted=88 alive=88 dup=0 mismatch=0 accepted=88 rejected=3 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=14 kmax=10 s=12 emitted=88 alive=88 dup=0 mismatch=0 accepted=88 rejected=3 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=14 kmax=10 s=12 emitted=88 alive=88 dup=0 mismatch=0 accepted=88 rejected=3 sibling_rejected=0 order_switches=78 \nsamples/shared/sibling+complement    n=14 kmax=10 s=12 emitted=88 alive=88 dup=0 mismatch=0 accepted=88 rejected=3 sibling_rejected=0 order_switches=78 \npure/shared/sibling+complement       n=14 kmax=10 s=12 emitted=88 alive=88 dup=0 mismatch=0 accepted=88 rejected=3 sibling_rejected=0 order_switches=78 \nSUMMARY family=adv:cube_corners n=14 kmax=10 s=12 checked=728 alive=704 emitted=704 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:extremes 0 1 8 3",
+      "wall_seconds": 0.002,
+      "summary": {
+        "family": "adv:extremes",
+        "n": 12,
+        "kmax": 1,
+        "s": 8,
+        "checked": 528,
+        "alive": 128,
+        "emitted": 128,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=12 kmax=1 s=8 emitted=16 alive=16 dup=0 mismatch=0 accepted=16 rejected=50 sibling_rejected=0 order_switches=0 \npure/shared                          n=12 kmax=1 s=8 emitted=16 alive=16 dup=0 mismatch=0 accepted=16 rejected=50 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=12 kmax=1 s=8 emitted=16 alive=16 dup=0 mismatch=0 accepted=16 rejected=22 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=12 kmax=1 s=8 emitted=16 alive=16 dup=0 mismatch=0 accepted=16 rejected=22 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=12 kmax=1 s=8 emitted=16 alive=16 dup=0 mismatch=0 accepted=16 rejected=22 sibling_rejected=11 order_switches=0 \nsamples/shared/complement            n=12 kmax=1 s=8 emitted=16 alive=16 dup=0 mismatch=0 accepted=16 rejected=22 sibling_rejected=0 order_switches=16 \nsamples/shared/sibling+complement    n=12 kmax=1 s=8 emitted=16 alive=16 dup=0 mismatch=0 accepted=16 rejected=22 sibling_rejected=10 order_switches=16 \npure/shared/sibling+complement       n=12 kmax=1 s=8 emitted=16 alive=16 dup=0 mismatch=0 accepted=16 rejected=50 sibling_rejected=10 order_switches=16 \nSUMMARY family=adv:extremes n=12 kmax=1 s=8 checked=528 alive=128 emitted=128 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:extremes 0 1 12 3",
+      "wall_seconds": 0.002,
+      "summary": {
+        "family": "adv:extremes",
+        "n": 12,
+        "kmax": 1,
+        "s": 12,
+        "checked": 528,
+        "alive": 128,
+        "emitted": 128,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=12 kmax=1 s=12 emitted=16 alive=16 dup=0 mismatch=0 accepted=16 rejected=50 sibling_rejected=0 order_switches=0 \npure/shared                          n=12 kmax=1 s=12 emitted=16 alive=16 dup=0 mismatch=0 accepted=16 rejected=50 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=12 kmax=1 s=12 emitted=16 alive=16 dup=0 mismatch=0 accepted=16 rejected=22 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=12 kmax=1 s=12 emitted=16 alive=16 dup=0 mismatch=0 accepted=16 rejected=22 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=12 kmax=1 s=12 emitted=16 alive=16 dup=0 mismatch=0 accepted=16 rejected=22 sibling_rejected=11 order_switches=0 \nsamples/shared/complement            n=12 kmax=1 s=12 emitted=16 alive=16 dup=0 mismatch=0 accepted=16 rejected=22 sibling_rejected=0 order_switches=16 \nsamples/shared/sibling+complement    n=12 kmax=1 s=12 emitted=16 alive=16 dup=0 mismatch=0 accepted=16 rejected=22 sibling_rejected=10 order_switches=16 \npure/shared/sibling+complement       n=12 kmax=1 s=12 emitted=16 alive=16 dup=0 mismatch=0 accepted=16 rejected=50 sibling_rejected=10 order_switches=16 \nSUMMARY family=adv:extremes n=12 kmax=1 s=12 checked=528 alive=128 emitted=128 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:extremes 0 2 8 3",
+      "wall_seconds": 0.002,
+      "summary": {
+        "family": "adv:extremes",
+        "n": 12,
+        "kmax": 2,
+        "s": 8,
+        "checked": 528,
+        "alive": 240,
+        "emitted": 240,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=12 kmax=2 s=8 emitted=30 alive=30 dup=0 mismatch=0 accepted=30 rejected=36 sibling_rejected=0 order_switches=0 \npure/shared                          n=12 kmax=2 s=8 emitted=30 alive=30 dup=0 mismatch=0 accepted=30 rejected=36 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=12 kmax=2 s=8 emitted=30 alive=30 dup=0 mismatch=0 accepted=30 rejected=36 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=12 kmax=2 s=8 emitted=30 alive=30 dup=0 mismatch=0 accepted=30 rejected=36 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=12 kmax=2 s=8 emitted=30 alive=30 dup=0 mismatch=0 accepted=30 rejected=36 sibling_rejected=3 order_switches=0 \nsamples/shared/complement            n=12 kmax=2 s=8 emitted=30 alive=30 dup=0 mismatch=0 accepted=30 rejected=36 sibling_rejected=0 order_switches=22 \nsamples/shared/sibling+complement    n=12 kmax=2 s=8 emitted=30 alive=30 dup=0 mismatch=0 accepted=30 rejected=36 sibling_rejected=3 order_switches=22 \npure/shared/sibling+complement       n=12 kmax=2 s=8 emitted=30 alive=30 dup=0 mismatch=0 accepted=30 rejected=36 sibling_rejected=3 order_switches=22 \nSUMMARY family=adv:extremes n=12 kmax=2 s=8 checked=528 alive=240 emitted=240 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:extremes 0 2 12 3",
+      "wall_seconds": 0.002,
+      "summary": {
+        "family": "adv:extremes",
+        "n": 12,
+        "kmax": 2,
+        "s": 12,
+        "checked": 528,
+        "alive": 240,
+        "emitted": 240,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=12 kmax=2 s=12 emitted=30 alive=30 dup=0 mismatch=0 accepted=30 rejected=36 sibling_rejected=0 order_switches=0 \npure/shared                          n=12 kmax=2 s=12 emitted=30 alive=30 dup=0 mismatch=0 accepted=30 rejected=36 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=12 kmax=2 s=12 emitted=30 alive=30 dup=0 mismatch=0 accepted=30 rejected=36 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=12 kmax=2 s=12 emitted=30 alive=30 dup=0 mismatch=0 accepted=30 rejected=36 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=12 kmax=2 s=12 emitted=30 alive=30 dup=0 mismatch=0 accepted=30 rejected=36 sibling_rejected=3 order_switches=0 \nsamples/shared/complement            n=12 kmax=2 s=12 emitted=30 alive=30 dup=0 mismatch=0 accepted=30 rejected=36 sibling_rejected=0 order_switches=22 \nsamples/shared/sibling+complement    n=12 kmax=2 s=12 emitted=30 alive=30 dup=0 mismatch=0 accepted=30 rejected=36 sibling_rejected=3 order_switches=22 \npure/shared/sibling+complement       n=12 kmax=2 s=12 emitted=30 alive=30 dup=0 mismatch=0 accepted=30 rejected=36 sibling_rejected=3 order_switches=22 \nSUMMARY family=adv:extremes n=12 kmax=2 s=12 checked=528 alive=240 emitted=240 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:extremes 0 5 8 3",
+      "wall_seconds": 0.002,
+      "summary": {
+        "family": "adv:extremes",
+        "n": 12,
+        "kmax": 5,
+        "s": 8,
+        "checked": 528,
+        "alive": 448,
+        "emitted": 448,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=12 kmax=5 s=8 emitted=56 alive=56 dup=0 mismatch=0 accepted=56 rejected=10 sibling_rejected=0 order_switches=0 \npure/shared                          n=12 kmax=5 s=8 emitted=56 alive=56 dup=0 mismatch=0 accepted=56 rejected=10 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=12 kmax=5 s=8 emitted=56 alive=56 dup=0 mismatch=0 accepted=56 rejected=10 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=12 kmax=5 s=8 emitted=56 alive=56 dup=0 mismatch=0 accepted=56 rejected=10 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=12 kmax=5 s=8 emitted=56 alive=56 dup=0 mismatch=0 accepted=56 rejected=10 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=12 kmax=5 s=8 emitted=56 alive=56 dup=0 mismatch=0 accepted=56 rejected=10 sibling_rejected=0 order_switches=31 \nsamples/shared/sibling+complement    n=12 kmax=5 s=8 emitted=56 alive=56 dup=0 mismatch=0 accepted=56 rejected=10 sibling_rejected=0 order_switches=31 \npure/shared/sibling+complement       n=12 kmax=5 s=8 emitted=56 alive=56 dup=0 mismatch=0 accepted=56 rejected=10 sibling_rejected=0 order_switches=31 \nSUMMARY family=adv:extremes n=12 kmax=5 s=8 checked=528 alive=448 emitted=448 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:extremes 0 5 12 3",
+      "wall_seconds": 0.002,
+      "summary": {
+        "family": "adv:extremes",
+        "n": 12,
+        "kmax": 5,
+        "s": 12,
+        "checked": 528,
+        "alive": 448,
+        "emitted": 448,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=12 kmax=5 s=12 emitted=56 alive=56 dup=0 mismatch=0 accepted=56 rejected=10 sibling_rejected=0 order_switches=0 \npure/shared                          n=12 kmax=5 s=12 emitted=56 alive=56 dup=0 mismatch=0 accepted=56 rejected=10 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=12 kmax=5 s=12 emitted=56 alive=56 dup=0 mismatch=0 accepted=56 rejected=10 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=12 kmax=5 s=12 emitted=56 alive=56 dup=0 mismatch=0 accepted=56 rejected=10 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=12 kmax=5 s=12 emitted=56 alive=56 dup=0 mismatch=0 accepted=56 rejected=10 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=12 kmax=5 s=12 emitted=56 alive=56 dup=0 mismatch=0 accepted=56 rejected=10 sibling_rejected=0 order_switches=31 \nsamples/shared/sibling+complement    n=12 kmax=5 s=12 emitted=56 alive=56 dup=0 mismatch=0 accepted=56 rejected=10 sibling_rejected=0 order_switches=31 \npure/shared/sibling+complement       n=12 kmax=5 s=12 emitted=56 alive=56 dup=0 mismatch=0 accepted=56 rejected=10 sibling_rejected=0 order_switches=31 \nSUMMARY family=adv:extremes n=12 kmax=5 s=12 checked=528 alive=448 emitted=448 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:extremes 0 10 8 3",
+      "wall_seconds": 0.002,
+      "summary": {
+        "family": "adv:extremes",
+        "n": 12,
+        "kmax": 10,
+        "s": 8,
+        "checked": 528,
+        "alive": 528,
+        "emitted": 528,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=12 kmax=10 s=8 emitted=66 alive=66 dup=0 mismatch=0 accepted=66 rejected=0 sibling_rejected=0 order_switches=0 \npure/shared                          n=12 kmax=10 s=8 emitted=66 alive=66 dup=0 mismatch=0 accepted=66 rejected=0 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=12 kmax=10 s=8 emitted=66 alive=66 dup=0 mismatch=0 accepted=66 rejected=0 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=12 kmax=10 s=8 emitted=66 alive=66 dup=0 mismatch=0 accepted=66 rejected=0 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=12 kmax=10 s=8 emitted=66 alive=66 dup=0 mismatch=0 accepted=66 rejected=0 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=12 kmax=10 s=8 emitted=66 alive=66 dup=0 mismatch=0 accepted=66 rejected=0 sibling_rejected=0 order_switches=36 \nsamples/shared/sibling+complement    n=12 kmax=10 s=8 emitted=66 alive=66 dup=0 mismatch=0 accepted=66 rejected=0 sibling_rejected=0 order_switches=36 \npure/shared/sibling+complement       n=12 kmax=10 s=8 emitted=66 alive=66 dup=0 mismatch=0 accepted=66 rejected=0 sibling_rejected=0 order_switches=36 \nSUMMARY family=adv:extremes n=12 kmax=10 s=8 checked=528 alive=528 emitted=528 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:extremes 0 10 12 3",
+      "wall_seconds": 0.002,
+      "summary": {
+        "family": "adv:extremes",
+        "n": 12,
+        "kmax": 10,
+        "s": 12,
+        "checked": 528,
+        "alive": 528,
+        "emitted": 528,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=12 kmax=10 s=12 emitted=66 alive=66 dup=0 mismatch=0 accepted=66 rejected=0 sibling_rejected=0 order_switches=0 \npure/shared                          n=12 kmax=10 s=12 emitted=66 alive=66 dup=0 mismatch=0 accepted=66 rejected=0 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=12 kmax=10 s=12 emitted=66 alive=66 dup=0 mismatch=0 accepted=66 rejected=0 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=12 kmax=10 s=12 emitted=66 alive=66 dup=0 mismatch=0 accepted=66 rejected=0 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=12 kmax=10 s=12 emitted=66 alive=66 dup=0 mismatch=0 accepted=66 rejected=0 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=12 kmax=10 s=12 emitted=66 alive=66 dup=0 mismatch=0 accepted=66 rejected=0 sibling_rejected=0 order_switches=36 \nsamples/shared/sibling+complement    n=12 kmax=10 s=12 emitted=66 alive=66 dup=0 mismatch=0 accepted=66 rejected=0 sibling_rejected=0 order_switches=36 \npure/shared/sibling+complement       n=12 kmax=10 s=12 emitted=66 alive=66 dup=0 mismatch=0 accepted=66 rejected=0 sibling_rejected=0 order_switches=36 \nSUMMARY family=adv:extremes n=12 kmax=10 s=12 checked=528 alive=528 emitted=528 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:halfint 0 1 8 3",
+      "wall_seconds": 0.009,
+      "summary": {
+        "family": "adv:halfint",
+        "n": 60,
+        "kmax": 1,
+        "s": 8,
+        "checked": 14160,
+        "alive": 1216,
+        "emitted": 1216,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=60 kmax=1 s=8 emitted=152 alive=152 dup=0 mismatch=0 accepted=152 rejected=1618 sibling_rejected=0 order_switches=0 \npure/shared                          n=60 kmax=1 s=8 emitted=152 alive=152 dup=0 mismatch=0 accepted=152 rejected=1618 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=60 kmax=1 s=8 emitted=152 alive=152 dup=0 mismatch=0 accepted=152 rejected=105 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=60 kmax=1 s=8 emitted=152 alive=152 dup=0 mismatch=0 accepted=152 rejected=105 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=60 kmax=1 s=8 emitted=152 alive=152 dup=0 mismatch=0 accepted=152 rejected=105 sibling_rejected=5 order_switches=0 \nsamples/shared/complement            n=60 kmax=1 s=8 emitted=152 alive=152 dup=0 mismatch=0 accepted=152 rejected=105 sibling_rejected=0 order_switches=151 \nsamples/shared/sibling+complement    n=60 kmax=1 s=8 emitted=152 alive=152 dup=0 mismatch=0 accepted=152 rejected=105 sibling_rejected=5 order_switches=151 \npure/shared/sibling+complement       n=60 kmax=1 s=8 emitted=152 alive=152 dup=0 mismatch=0 accepted=152 rejected=1618 sibling_rejected=44 order_switches=151 \nSUMMARY family=adv:halfint n=60 kmax=1 s=8 checked=14160 alive=1216 emitted=1216 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:halfint 0 1 12 3",
+      "wall_seconds": 0.009,
+      "summary": {
+        "family": "adv:halfint",
+        "n": 60,
+        "kmax": 1,
+        "s": 12,
+        "checked": 14160,
+        "alive": 1216,
+        "emitted": 1216,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=60 kmax=1 s=12 emitted=152 alive=152 dup=0 mismatch=0 accepted=152 rejected=1618 sibling_rejected=0 order_switches=0 \npure/shared                          n=60 kmax=1 s=12 emitted=152 alive=152 dup=0 mismatch=0 accepted=152 rejected=1618 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=60 kmax=1 s=12 emitted=152 alive=152 dup=0 mismatch=0 accepted=152 rejected=99 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=60 kmax=1 s=12 emitted=152 alive=152 dup=0 mismatch=0 accepted=152 rejected=99 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=60 kmax=1 s=12 emitted=152 alive=152 dup=0 mismatch=0 accepted=152 rejected=99 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=60 kmax=1 s=12 emitted=152 alive=152 dup=0 mismatch=0 accepted=152 rejected=99 sibling_rejected=0 order_switches=152 \nsamples/shared/sibling+complement    n=60 kmax=1 s=12 emitted=152 alive=152 dup=0 mismatch=0 accepted=152 rejected=99 sibling_rejected=0 order_switches=152 \npure/shared/sibling+complement       n=60 kmax=1 s=12 emitted=152 alive=152 dup=0 mismatch=0 accepted=152 rejected=1618 sibling_rejected=8 order_switches=152 \nSUMMARY family=adv:halfint n=60 kmax=1 s=12 checked=14160 alive=1216 emitted=1216 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:halfint 0 2 8 3",
+      "wall_seconds": 0.012,
+      "summary": {
+        "family": "adv:halfint",
+        "n": 60,
+        "kmax": 2,
+        "s": 8,
+        "checked": 14160,
+        "alive": 2360,
+        "emitted": 2360,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=60 kmax=2 s=8 emitted=295 alive=295 dup=0 mismatch=0 accepted=295 rejected=1475 sibling_rejected=0 order_switches=0 \npure/shared                          n=60 kmax=2 s=8 emitted=295 alive=295 dup=0 mismatch=0 accepted=295 rejected=1475 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=60 kmax=2 s=8 emitted=295 alive=295 dup=0 mismatch=0 accepted=295 rejected=508 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=60 kmax=2 s=8 emitted=295 alive=295 dup=0 mismatch=0 accepted=295 rejected=508 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=60 kmax=2 s=8 emitted=295 alive=295 dup=0 mismatch=0 accepted=295 rejected=508 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=60 kmax=2 s=8 emitted=295 alive=295 dup=0 mismatch=0 accepted=295 rejected=508 sibling_rejected=0 order_switches=295 \nsamples/shared/sibling+complement    n=60 kmax=2 s=8 emitted=295 alive=295 dup=0 mismatch=0 accepted=295 rejected=508 sibling_rejected=0 order_switches=295 \npure/shared/sibling+complement       n=60 kmax=2 s=8 emitted=295 alive=295 dup=0 mismatch=0 accepted=295 rejected=1475 sibling_rejected=0 order_switches=295 \nSUMMARY family=adv:halfint n=60 kmax=2 s=8 checked=14160 alive=2360 emitted=2360 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:halfint 0 2 12 3",
+      "wall_seconds": 0.013,
+      "summary": {
+        "family": "adv:halfint",
+        "n": 60,
+        "kmax": 2,
+        "s": 12,
+        "checked": 14160,
+        "alive": 2360,
+        "emitted": 2360,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=60 kmax=2 s=12 emitted=295 alive=295 dup=0 mismatch=0 accepted=295 rejected=1475 sibling_rejected=0 order_switches=0 \npure/shared                          n=60 kmax=2 s=12 emitted=295 alive=295 dup=0 mismatch=0 accepted=295 rejected=1475 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=60 kmax=2 s=12 emitted=295 alive=295 dup=0 mismatch=0 accepted=295 rejected=496 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=60 kmax=2 s=12 emitted=295 alive=295 dup=0 mismatch=0 accepted=295 rejected=496 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=60 kmax=2 s=12 emitted=295 alive=295 dup=0 mismatch=0 accepted=295 rejected=496 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=60 kmax=2 s=12 emitted=295 alive=295 dup=0 mismatch=0 accepted=295 rejected=496 sibling_rejected=0 order_switches=295 \nsamples/shared/sibling+complement    n=60 kmax=2 s=12 emitted=295 alive=295 dup=0 mismatch=0 accepted=295 rejected=496 sibling_rejected=0 order_switches=295 \npure/shared/sibling+complement       n=60 kmax=2 s=12 emitted=295 alive=295 dup=0 mismatch=0 accepted=295 rejected=1475 sibling_rejected=0 order_switches=295 \nSUMMARY family=adv:halfint n=60 kmax=2 s=12 checked=14160 alive=2360 emitted=2360 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:halfint 0 5 8 3",
+      "wall_seconds": 0.019,
+      "summary": {
+        "family": "adv:halfint",
+        "n": 60,
+        "kmax": 5,
+        "s": 8,
+        "checked": 14160,
+        "alive": 5008,
+        "emitted": 5008,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=60 kmax=5 s=8 emitted=626 alive=626 dup=0 mismatch=0 accepted=626 rejected=1144 sibling_rejected=0 order_switches=0 \npure/shared                          n=60 kmax=5 s=8 emitted=626 alive=626 dup=0 mismatch=0 accepted=626 rejected=1144 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=60 kmax=5 s=8 emitted=626 alive=626 dup=0 mismatch=0 accepted=626 rejected=974 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=60 kmax=5 s=8 emitted=626 alive=626 dup=0 mismatch=0 accepted=626 rejected=974 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=60 kmax=5 s=8 emitted=626 alive=626 dup=0 mismatch=0 accepted=626 rejected=974 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=60 kmax=5 s=8 emitted=626 alive=626 dup=0 mismatch=0 accepted=626 rejected=974 sibling_rejected=0 order_switches=625 \nsamples/shared/sibling+complement    n=60 kmax=5 s=8 emitted=626 alive=626 dup=0 mismatch=0 accepted=626 rejected=974 sibling_rejected=0 order_switches=625 \npure/shared/sibling+complement       n=60 kmax=5 s=8 emitted=626 alive=626 dup=0 mismatch=0 accepted=626 rejected=1144 sibling_rejected=0 order_switches=625 \nSUMMARY family=adv:halfint n=60 kmax=5 s=8 checked=14160 alive=5008 emitted=5008 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:halfint 0 5 12 3",
+      "wall_seconds": 0.02,
+      "summary": {
+        "family": "adv:halfint",
+        "n": 60,
+        "kmax": 5,
+        "s": 12,
+        "checked": 14160,
+        "alive": 5008,
+        "emitted": 5008,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=60 kmax=5 s=12 emitted=626 alive=626 dup=0 mismatch=0 accepted=626 rejected=1144 sibling_rejected=0 order_switches=0 \npure/shared                          n=60 kmax=5 s=12 emitted=626 alive=626 dup=0 mismatch=0 accepted=626 rejected=1144 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=60 kmax=5 s=12 emitted=626 alive=626 dup=0 mismatch=0 accepted=626 rejected=971 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=60 kmax=5 s=12 emitted=626 alive=626 dup=0 mismatch=0 accepted=626 rejected=971 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=60 kmax=5 s=12 emitted=626 alive=626 dup=0 mismatch=0 accepted=626 rejected=971 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=60 kmax=5 s=12 emitted=626 alive=626 dup=0 mismatch=0 accepted=626 rejected=971 sibling_rejected=0 order_switches=626 \nsamples/shared/sibling+complement    n=60 kmax=5 s=12 emitted=626 alive=626 dup=0 mismatch=0 accepted=626 rejected=971 sibling_rejected=0 order_switches=626 \npure/shared/sibling+complement       n=60 kmax=5 s=12 emitted=626 alive=626 dup=0 mismatch=0 accepted=626 rejected=1144 sibling_rejected=0 order_switches=626 \nSUMMARY family=adv:halfint n=60 kmax=5 s=12 checked=14160 alive=5008 emitted=5008 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:halfint 0 10 8 3",
+      "wall_seconds": 0.026,
+      "summary": {
+        "family": "adv:halfint",
+        "n": 60,
+        "kmax": 10,
+        "s": 8,
+        "checked": 14160,
+        "alive": 8344,
+        "emitted": 8344,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=60 kmax=10 s=8 emitted=1043 alive=1043 dup=0 mismatch=0 accepted=1043 rejected=727 sibling_rejected=0 order_switches=0 \npure/shared                          n=60 kmax=10 s=8 emitted=1043 alive=1043 dup=0 mismatch=0 accepted=1043 rejected=727 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=60 kmax=10 s=8 emitted=1043 alive=1043 dup=0 mismatch=0 accepted=1043 rejected=701 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=60 kmax=10 s=8 emitted=1043 alive=1043 dup=0 mismatch=0 accepted=1043 rejected=701 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=60 kmax=10 s=8 emitted=1043 alive=1043 dup=0 mismatch=0 accepted=1043 rejected=701 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=60 kmax=10 s=8 emitted=1043 alive=1043 dup=0 mismatch=0 accepted=1043 rejected=701 sibling_rejected=0 order_switches=1028 \nsamples/shared/sibling+complement    n=60 kmax=10 s=8 emitted=1043 alive=1043 dup=0 mismatch=0 accepted=1043 rejected=701 sibling_rejected=0 order_switches=1028 \npure/shared/sibling+complement       n=60 kmax=10 s=8 emitted=1043 alive=1043 dup=0 mismatch=0 accepted=1043 rejected=727 sibling_rejected=0 order_switches=1028 \nSUMMARY family=adv:halfint n=60 kmax=10 s=8 checked=14160 alive=8344 emitted=8344 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:halfint 0 10 12 3",
+      "wall_seconds": 0.026,
+      "summary": {
+        "family": "adv:halfint",
+        "n": 60,
+        "kmax": 10,
+        "s": 12,
+        "checked": 14160,
+        "alive": 8344,
+        "emitted": 8344,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=60 kmax=10 s=12 emitted=1043 alive=1043 dup=0 mismatch=0 accepted=1043 rejected=727 sibling_rejected=0 order_switches=0 \npure/shared                          n=60 kmax=10 s=12 emitted=1043 alive=1043 dup=0 mismatch=0 accepted=1043 rejected=727 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=60 kmax=10 s=12 emitted=1043 alive=1043 dup=0 mismatch=0 accepted=1043 rejected=701 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=60 kmax=10 s=12 emitted=1043 alive=1043 dup=0 mismatch=0 accepted=1043 rejected=701 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=60 kmax=10 s=12 emitted=1043 alive=1043 dup=0 mismatch=0 accepted=1043 rejected=701 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=60 kmax=10 s=12 emitted=1043 alive=1043 dup=0 mismatch=0 accepted=1043 rejected=701 sibling_rejected=0 order_switches=1040 \nsamples/shared/sibling+complement    n=60 kmax=10 s=12 emitted=1043 alive=1043 dup=0 mismatch=0 accepted=1043 rejected=701 sibling_rejected=0 order_switches=1040 \npure/shared/sibling+complement       n=60 kmax=10 s=12 emitted=1043 alive=1043 dup=0 mismatch=0 accepted=1043 rejected=727 sibling_rejected=0 order_switches=1040 \nSUMMARY family=adv:halfint n=60 kmax=10 s=12 checked=14160 alive=8344 emitted=8344 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:dense_ball 0 1 8 3",
+      "wall_seconds": 0.006,
+      "summary": {
+        "family": "adv:dense_ball",
+        "n": 44,
+        "kmax": 1,
+        "s": 8,
+        "checked": 7568,
+        "alive": 1096,
+        "emitted": 1096,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=44 kmax=1 s=8 emitted=137 alive=137 dup=0 mismatch=0 accepted=137 rejected=809 sibling_rejected=0 order_switches=0 \npure/shared                          n=44 kmax=1 s=8 emitted=137 alive=137 dup=0 mismatch=0 accepted=137 rejected=809 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=44 kmax=1 s=8 emitted=137 alive=137 dup=0 mismatch=0 accepted=137 rejected=58 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=44 kmax=1 s=8 emitted=137 alive=137 dup=0 mismatch=0 accepted=137 rejected=58 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=44 kmax=1 s=8 emitted=137 alive=137 dup=0 mismatch=0 accepted=137 rejected=58 sibling_rejected=1 order_switches=0 \nsamples/shared/complement            n=44 kmax=1 s=8 emitted=137 alive=137 dup=0 mismatch=0 accepted=137 rejected=58 sibling_rejected=0 order_switches=137 \nsamples/shared/sibling+complement    n=44 kmax=1 s=8 emitted=137 alive=137 dup=0 mismatch=0 accepted=137 rejected=58 sibling_rejected=1 order_switches=137 \npure/shared/sibling+complement       n=44 kmax=1 s=8 emitted=137 alive=137 dup=0 mismatch=0 accepted=137 rejected=809 sibling_rejected=47 order_switches=137 \nSUMMARY family=adv:dense_ball n=44 kmax=1 s=8 checked=7568 alive=1096 emitted=1096 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:dense_ball 0 1 12 3",
+      "wall_seconds": 0.006,
+      "summary": {
+        "family": "adv:dense_ball",
+        "n": 44,
+        "kmax": 1,
+        "s": 12,
+        "checked": 7568,
+        "alive": 1096,
+        "emitted": 1096,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=44 kmax=1 s=12 emitted=137 alive=137 dup=0 mismatch=0 accepted=137 rejected=809 sibling_rejected=0 order_switches=0 \npure/shared                          n=44 kmax=1 s=12 emitted=137 alive=137 dup=0 mismatch=0 accepted=137 rejected=809 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=44 kmax=1 s=12 emitted=137 alive=137 dup=0 mismatch=0 accepted=137 rejected=58 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=44 kmax=1 s=12 emitted=137 alive=137 dup=0 mismatch=0 accepted=137 rejected=58 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=44 kmax=1 s=12 emitted=137 alive=137 dup=0 mismatch=0 accepted=137 rejected=58 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=44 kmax=1 s=12 emitted=137 alive=137 dup=0 mismatch=0 accepted=137 rejected=58 sibling_rejected=0 order_switches=137 \nsamples/shared/sibling+complement    n=44 kmax=1 s=12 emitted=137 alive=137 dup=0 mismatch=0 accepted=137 rejected=58 sibling_rejected=0 order_switches=137 \npure/shared/sibling+complement       n=44 kmax=1 s=12 emitted=137 alive=137 dup=0 mismatch=0 accepted=137 rejected=809 sibling_rejected=3 order_switches=137 \nSUMMARY family=adv:dense_ball n=44 kmax=1 s=12 checked=7568 alive=1096 emitted=1096 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:dense_ball 0 2 8 3",
+      "wall_seconds": 0.007,
+      "summary": {
+        "family": "adv:dense_ball",
+        "n": 44,
+        "kmax": 2,
+        "s": 8,
+        "checked": 7568,
+        "alive": 1760,
+        "emitted": 1760,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=44 kmax=2 s=8 emitted=220 alive=220 dup=0 mismatch=0 accepted=220 rejected=726 sibling_rejected=0 order_switches=0 \npure/shared                          n=44 kmax=2 s=8 emitted=220 alive=220 dup=0 mismatch=0 accepted=220 rejected=726 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=44 kmax=2 s=8 emitted=220 alive=220 dup=0 mismatch=0 accepted=220 rejected=323 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=44 kmax=2 s=8 emitted=220 alive=220 dup=0 mismatch=0 accepted=220 rejected=323 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=44 kmax=2 s=8 emitted=220 alive=220 dup=0 mismatch=0 accepted=220 rejected=323 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=44 kmax=2 s=8 emitted=220 alive=220 dup=0 mismatch=0 accepted=220 rejected=323 sibling_rejected=0 order_switches=220 \nsamples/shared/sibling+complement    n=44 kmax=2 s=8 emitted=220 alive=220 dup=0 mismatch=0 accepted=220 rejected=323 sibling_rejected=0 order_switches=220 \npure/shared/sibling+complement       n=44 kmax=2 s=8 emitted=220 alive=220 dup=0 mismatch=0 accepted=220 rejected=726 sibling_rejected=0 order_switches=220 \nSUMMARY family=adv:dense_ball n=44 kmax=2 s=8 checked=7568 alive=1760 emitted=1760 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:dense_ball 0 2 12 3",
+      "wall_seconds": 0.007,
+      "summary": {
+        "family": "adv:dense_ball",
+        "n": 44,
+        "kmax": 2,
+        "s": 12,
+        "checked": 7568,
+        "alive": 1760,
+        "emitted": 1760,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=44 kmax=2 s=12 emitted=220 alive=220 dup=0 mismatch=0 accepted=220 rejected=726 sibling_rejected=0 order_switches=0 \npure/shared                          n=44 kmax=2 s=12 emitted=220 alive=220 dup=0 mismatch=0 accepted=220 rejected=726 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=44 kmax=2 s=12 emitted=220 alive=220 dup=0 mismatch=0 accepted=220 rejected=309 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=44 kmax=2 s=12 emitted=220 alive=220 dup=0 mismatch=0 accepted=220 rejected=309 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=44 kmax=2 s=12 emitted=220 alive=220 dup=0 mismatch=0 accepted=220 rejected=309 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=44 kmax=2 s=12 emitted=220 alive=220 dup=0 mismatch=0 accepted=220 rejected=309 sibling_rejected=0 order_switches=220 \nsamples/shared/sibling+complement    n=44 kmax=2 s=12 emitted=220 alive=220 dup=0 mismatch=0 accepted=220 rejected=309 sibling_rejected=0 order_switches=220 \npure/shared/sibling+complement       n=44 kmax=2 s=12 emitted=220 alive=220 dup=0 mismatch=0 accepted=220 rejected=726 sibling_rejected=0 order_switches=220 \nSUMMARY family=adv:dense_ball n=44 kmax=2 s=12 checked=7568 alive=1760 emitted=1760 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:dense_ball 0 5 8 3",
+      "wall_seconds": 0.011,
+      "summary": {
+        "family": "adv:dense_ball",
+        "n": 44,
+        "kmax": 5,
+        "s": 8,
+        "checked": 7568,
+        "alive": 3512,
+        "emitted": 3512,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=44 kmax=5 s=8 emitted=439 alive=439 dup=0 mismatch=0 accepted=439 rejected=507 sibling_rejected=0 order_switches=0 \npure/shared                          n=44 kmax=5 s=8 emitted=439 alive=439 dup=0 mismatch=0 accepted=439 rejected=507 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=44 kmax=5 s=8 emitted=439 alive=439 dup=0 mismatch=0 accepted=439 rejected=418 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=44 kmax=5 s=8 emitted=439 alive=439 dup=0 mismatch=0 accepted=439 rejected=418 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=44 kmax=5 s=8 emitted=439 alive=439 dup=0 mismatch=0 accepted=439 rejected=418 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=44 kmax=5 s=8 emitted=439 alive=439 dup=0 mismatch=0 accepted=439 rejected=418 sibling_rejected=0 order_switches=440 \nsamples/shared/sibling+complement    n=44 kmax=5 s=8 emitted=439 alive=439 dup=0 mismatch=0 accepted=439 rejected=418 sibling_rejected=0 order_switches=440 \npure/shared/sibling+complement       n=44 kmax=5 s=8 emitted=439 alive=439 dup=0 mismatch=0 accepted=439 rejected=507 sibling_rejected=0 order_switches=440 \nSUMMARY family=adv:dense_ball n=44 kmax=5 s=8 checked=7568 alive=3512 emitted=3512 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:dense_ball 0 5 12 3",
+      "wall_seconds": 0.011,
+      "summary": {
+        "family": "adv:dense_ball",
+        "n": 44,
+        "kmax": 5,
+        "s": 12,
+        "checked": 7568,
+        "alive": 3512,
+        "emitted": 3512,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=44 kmax=5 s=12 emitted=439 alive=439 dup=0 mismatch=0 accepted=439 rejected=507 sibling_rejected=0 order_switches=0 \npure/shared                          n=44 kmax=5 s=12 emitted=439 alive=439 dup=0 mismatch=0 accepted=439 rejected=507 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=44 kmax=5 s=12 emitted=439 alive=439 dup=0 mismatch=0 accepted=439 rejected=412 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=44 kmax=5 s=12 emitted=439 alive=439 dup=0 mismatch=0 accepted=439 rejected=412 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=44 kmax=5 s=12 emitted=439 alive=439 dup=0 mismatch=0 accepted=439 rejected=412 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=44 kmax=5 s=12 emitted=439 alive=439 dup=0 mismatch=0 accepted=439 rejected=412 sibling_rejected=0 order_switches=439 \nsamples/shared/sibling+complement    n=44 kmax=5 s=12 emitted=439 alive=439 dup=0 mismatch=0 accepted=439 rejected=412 sibling_rejected=0 order_switches=439 \npure/shared/sibling+complement       n=44 kmax=5 s=12 emitted=439 alive=439 dup=0 mismatch=0 accepted=439 rejected=507 sibling_rejected=0 order_switches=439 \nSUMMARY family=adv:dense_ball n=44 kmax=5 s=12 checked=7568 alive=3512 emitted=3512 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:dense_ball 0 10 8 3",
+      "wall_seconds": 0.016,
+      "summary": {
+        "family": "adv:dense_ball",
+        "n": 44,
+        "kmax": 10,
+        "s": 8,
+        "checked": 7568,
+        "alive": 5320,
+        "emitted": 5320,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=44 kmax=10 s=8 emitted=665 alive=665 dup=0 mismatch=0 accepted=665 rejected=281 sibling_rejected=0 order_switches=0 \npure/shared                          n=44 kmax=10 s=8 emitted=665 alive=665 dup=0 mismatch=0 accepted=665 rejected=281 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=44 kmax=10 s=8 emitted=665 alive=665 dup=0 mismatch=0 accepted=665 rejected=274 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=44 kmax=10 s=8 emitted=665 alive=665 dup=0 mismatch=0 accepted=665 rejected=274 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=44 kmax=10 s=8 emitted=665 alive=665 dup=0 mismatch=0 accepted=665 rejected=274 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=44 kmax=10 s=8 emitted=665 alive=665 dup=0 mismatch=0 accepted=665 rejected=274 sibling_rejected=0 order_switches=669 \nsamples/shared/sibling+complement    n=44 kmax=10 s=8 emitted=665 alive=665 dup=0 mismatch=0 accepted=665 rejected=274 sibling_rejected=0 order_switches=669 \npure/shared/sibling+complement       n=44 kmax=10 s=8 emitted=665 alive=665 dup=0 mismatch=0 accepted=665 rejected=281 sibling_rejected=0 order_switches=669 \nSUMMARY family=adv:dense_ball n=44 kmax=10 s=8 checked=7568 alive=5320 emitted=5320 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify adv:dense_ball 0 10 12 3",
+      "wall_seconds": 0.014,
+      "summary": {
+        "family": "adv:dense_ball",
+        "n": 44,
+        "kmax": 10,
+        "s": 12,
+        "checked": 7568,
+        "alive": 5320,
+        "emitted": 5320,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=44 kmax=10 s=12 emitted=665 alive=665 dup=0 mismatch=0 accepted=665 rejected=281 sibling_rejected=0 order_switches=0 \npure/shared                          n=44 kmax=10 s=12 emitted=665 alive=665 dup=0 mismatch=0 accepted=665 rejected=281 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=44 kmax=10 s=12 emitted=665 alive=665 dup=0 mismatch=0 accepted=665 rejected=274 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=44 kmax=10 s=12 emitted=665 alive=665 dup=0 mismatch=0 accepted=665 rejected=274 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=44 kmax=10 s=12 emitted=665 alive=665 dup=0 mismatch=0 accepted=665 rejected=274 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=44 kmax=10 s=12 emitted=665 alive=665 dup=0 mismatch=0 accepted=665 rejected=274 sibling_rejected=0 order_switches=665 \nsamples/shared/sibling+complement    n=44 kmax=10 s=12 emitted=665 alive=665 dup=0 mismatch=0 accepted=665 rejected=274 sibling_rejected=0 order_switches=665 \npure/shared/sibling+complement       n=44 kmax=10 s=12 emitted=665 alive=665 dup=0 mismatch=0 accepted=665 rejected=281 sibling_rejected=0 order_switches=665 \nSUMMARY family=adv:dense_ball n=44 kmax=10 s=12 checked=7568 alive=5320 emitted=5320 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify uniform 800 1 8 3",
+      "wall_seconds": 7.846,
+      "summary": {
+        "family": "uniform",
+        "n": 800,
+        "kmax": 1,
+        "s": 8,
+        "checked": 2556800,
+        "alive": 21936,
+        "emitted": 21936,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=1 s=8 emitted=2742 alive=2742 dup=0 mismatch=0 accepted=2742 rejected=316858 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=1 s=8 emitted=2742 alive=2742 dup=0 mismatch=0 accepted=2742 rejected=316858 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=1 s=8 emitted=2742 alive=2742 dup=0 mismatch=0 accepted=2742 rejected=2812 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=1 s=8 emitted=2742 alive=2742 dup=0 mismatch=0 accepted=2742 rejected=2812 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=1 s=8 emitted=2742 alive=2742 dup=0 mismatch=0 accepted=2742 rejected=2812 sibling_rejected=97 order_switches=0 \nsamples/shared/complement            n=800 kmax=1 s=8 emitted=2742 alive=2742 dup=0 mismatch=0 accepted=2742 rejected=2812 sibling_rejected=0 order_switches=2746 \nsamples/shared/sibling+complement    n=800 kmax=1 s=8 emitted=2742 alive=2742 dup=0 mismatch=0 accepted=2742 rejected=2812 sibling_rejected=76 order_switches=2742 \npure/shared/sibling+complement       n=800 kmax=1 s=8 emitted=2742 alive=2742 dup=0 mismatch=0 accepted=2742 rejected=316858 sibling_rejected=69422 order_switches=2742 \nSUMMARY family=uniform n=800 kmax=1 s=8 checked=2556800 alive=21936 emitted=21936 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify uniform 800 1 12 3",
+      "wall_seconds": 8.238,
+      "summary": {
+        "family": "uniform",
+        "n": 800,
+        "kmax": 1,
+        "s": 12,
+        "checked": 2556800,
+        "alive": 21936,
+        "emitted": 21936,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=1 s=12 emitted=2742 alive=2742 dup=0 mismatch=0 accepted=2742 rejected=316858 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=1 s=12 emitted=2742 alive=2742 dup=0 mismatch=0 accepted=2742 rejected=316858 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=1 s=12 emitted=2742 alive=2742 dup=0 mismatch=0 accepted=2742 rejected=2733 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=1 s=12 emitted=2742 alive=2742 dup=0 mismatch=0 accepted=2742 rejected=2733 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=1 s=12 emitted=2742 alive=2742 dup=0 mismatch=0 accepted=2742 rejected=2733 sibling_rejected=20 order_switches=0 \nsamples/shared/complement            n=800 kmax=1 s=12 emitted=2742 alive=2742 dup=0 mismatch=0 accepted=2742 rejected=2733 sibling_rejected=0 order_switches=2742 \nsamples/shared/sibling+complement    n=800 kmax=1 s=12 emitted=2742 alive=2742 dup=0 mismatch=0 accepted=2742 rejected=2733 sibling_rejected=14 order_switches=2742 \npure/shared/sibling+complement       n=800 kmax=1 s=12 emitted=2742 alive=2742 dup=0 mismatch=0 accepted=2742 rejected=316858 sibling_rejected=37463 order_switches=2742 \nSUMMARY family=uniform n=800 kmax=1 s=12 checked=2556800 alive=21936 emitted=21936 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify uniform 800 3 8 3",
+      "wall_seconds": 8.496,
+      "summary": {
+        "family": "uniform",
+        "n": 800,
+        "kmax": 3,
+        "s": 8,
+        "checked": 2556800,
+        "alive": 61960,
+        "emitted": 61960,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=3 s=8 emitted=7745 alive=7745 dup=0 mismatch=0 accepted=7745 rejected=311855 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=3 s=8 emitted=7745 alive=7745 dup=0 mismatch=0 accepted=7745 rejected=311855 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=3 s=8 emitted=7745 alive=7745 dup=0 mismatch=0 accepted=7745 rejected=40342 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=3 s=8 emitted=7745 alive=7745 dup=0 mismatch=0 accepted=7745 rejected=40342 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=3 s=8 emitted=7745 alive=7745 dup=0 mismatch=0 accepted=7745 rejected=40342 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=800 kmax=3 s=8 emitted=7745 alive=7745 dup=0 mismatch=0 accepted=7745 rejected=40342 sibling_rejected=0 order_switches=7717 \nsamples/shared/sibling+complement    n=800 kmax=3 s=8 emitted=7745 alive=7745 dup=0 mismatch=0 accepted=7745 rejected=40342 sibling_rejected=0 order_switches=7717 \npure/shared/sibling+complement       n=800 kmax=3 s=8 emitted=7745 alive=7745 dup=0 mismatch=0 accepted=7745 rejected=311855 sibling_rejected=594 order_switches=7717 \nSUMMARY family=uniform n=800 kmax=3 s=8 checked=2556800 alive=61960 emitted=61960 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify uniform 800 3 12 3",
+      "wall_seconds": 8.152,
+      "summary": {
+        "family": "uniform",
+        "n": 800,
+        "kmax": 3,
+        "s": 12,
+        "checked": 2556800,
+        "alive": 61960,
+        "emitted": 61960,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=3 s=12 emitted=7745 alive=7745 dup=0 mismatch=0 accepted=7745 rejected=311855 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=3 s=12 emitted=7745 alive=7745 dup=0 mismatch=0 accepted=7745 rejected=311855 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=3 s=12 emitted=7745 alive=7745 dup=0 mismatch=0 accepted=7745 rejected=38878 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=3 s=12 emitted=7745 alive=7745 dup=0 mismatch=0 accepted=7745 rejected=38878 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=3 s=12 emitted=7745 alive=7745 dup=0 mismatch=0 accepted=7745 rejected=38878 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=800 kmax=3 s=12 emitted=7745 alive=7745 dup=0 mismatch=0 accepted=7745 rejected=38878 sibling_rejected=0 order_switches=7740 \nsamples/shared/sibling+complement    n=800 kmax=3 s=12 emitted=7745 alive=7745 dup=0 mismatch=0 accepted=7745 rejected=38878 sibling_rejected=0 order_switches=7740 \npure/shared/sibling+complement       n=800 kmax=3 s=12 emitted=7745 alive=7745 dup=0 mismatch=0 accepted=7745 rejected=311855 sibling_rejected=26 order_switches=7740 \nSUMMARY family=uniform n=800 kmax=3 s=12 checked=2556800 alive=61960 emitted=61960 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify uniform 800 10 8 3",
+      "wall_seconds": 9.642,
+      "summary": {
+        "family": "uniform",
+        "n": 800,
+        "kmax": 10,
+        "s": 8,
+        "checked": 2556800,
+        "alive": 189088,
+        "emitted": 189088,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=10 s=8 emitted=23636 alive=23636 dup=0 mismatch=0 accepted=23636 rejected=295964 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=10 s=8 emitted=23636 alive=23636 dup=0 mismatch=0 accepted=23636 rejected=295964 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=10 s=8 emitted=23636 alive=23636 dup=0 mismatch=0 accepted=23636 rejected=142491 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=10 s=8 emitted=23636 alive=23636 dup=0 mismatch=0 accepted=23636 rejected=142491 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=10 s=8 emitted=23636 alive=23636 dup=0 mismatch=0 accepted=23636 rejected=142491 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=800 kmax=10 s=8 emitted=23636 alive=23636 dup=0 mismatch=0 accepted=23636 rejected=142491 sibling_rejected=0 order_switches=23527 \nsamples/shared/sibling+complement    n=800 kmax=10 s=8 emitted=23636 alive=23636 dup=0 mismatch=0 accepted=23636 rejected=142491 sibling_rejected=0 order_switches=23527 \npure/shared/sibling+complement       n=800 kmax=10 s=8 emitted=23636 alive=23636 dup=0 mismatch=0 accepted=23636 rejected=295964 sibling_rejected=0 order_switches=23527 \nSUMMARY family=uniform n=800 kmax=10 s=8 checked=2556800 alive=189088 emitted=189088 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify uniform 800 10 12 3",
+      "wall_seconds": 9.404,
+      "summary": {
+        "family": "uniform",
+        "n": 800,
+        "kmax": 10,
+        "s": 12,
+        "checked": 2556800,
+        "alive": 189088,
+        "emitted": 189088,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=10 s=12 emitted=23636 alive=23636 dup=0 mismatch=0 accepted=23636 rejected=295964 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=10 s=12 emitted=23636 alive=23636 dup=0 mismatch=0 accepted=23636 rejected=295964 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=10 s=12 emitted=23636 alive=23636 dup=0 mismatch=0 accepted=23636 rejected=135563 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=10 s=12 emitted=23636 alive=23636 dup=0 mismatch=0 accepted=23636 rejected=135563 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=10 s=12 emitted=23636 alive=23636 dup=0 mismatch=0 accepted=23636 rejected=135563 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=800 kmax=10 s=12 emitted=23636 alive=23636 dup=0 mismatch=0 accepted=23636 rejected=135563 sibling_rejected=0 order_switches=23591 \nsamples/shared/sibling+complement    n=800 kmax=10 s=12 emitted=23636 alive=23636 dup=0 mismatch=0 accepted=23636 rejected=135563 sibling_rejected=0 order_switches=23591 \npure/shared/sibling+complement       n=800 kmax=10 s=12 emitted=23636 alive=23636 dup=0 mismatch=0 accepted=23636 rejected=295964 sibling_rejected=0 order_switches=23591 \nSUMMARY family=uniform n=800 kmax=10 s=12 checked=2556800 alive=189088 emitted=189088 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify uniform 800 10 8 11",
+      "wall_seconds": 9.472,
+      "summary": {
+        "family": "uniform",
+        "n": 800,
+        "kmax": 10,
+        "s": 8,
+        "checked": 2556800,
+        "alive": 190416,
+        "emitted": 190416,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=10 s=8 emitted=23802 alive=23802 dup=0 mismatch=0 accepted=23802 rejected=295798 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=10 s=8 emitted=23802 alive=23802 dup=0 mismatch=0 accepted=23802 rejected=295798 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=10 s=8 emitted=23802 alive=23802 dup=0 mismatch=0 accepted=23802 rejected=131723 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=10 s=8 emitted=23802 alive=23802 dup=0 mismatch=0 accepted=23802 rejected=131723 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=10 s=8 emitted=23802 alive=23802 dup=0 mismatch=0 accepted=23802 rejected=131723 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=800 kmax=10 s=8 emitted=23802 alive=23802 dup=0 mismatch=0 accepted=23802 rejected=131723 sibling_rejected=0 order_switches=23550 \nsamples/shared/sibling+complement    n=800 kmax=10 s=8 emitted=23802 alive=23802 dup=0 mismatch=0 accepted=23802 rejected=131723 sibling_rejected=0 order_switches=23550 \npure/shared/sibling+complement       n=800 kmax=10 s=8 emitted=23802 alive=23802 dup=0 mismatch=0 accepted=23802 rejected=295798 sibling_rejected=0 order_switches=23550 \nSUMMARY family=uniform n=800 kmax=10 s=8 checked=2556800 alive=190416 emitted=190416 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify terrain 800 1 8 3",
+      "wall_seconds": 7.394,
+      "summary": {
+        "family": "terrain",
+        "n": 800,
+        "kmax": 1,
+        "s": 8,
+        "checked": 2556800,
+        "alive": 12528,
+        "emitted": 12528,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=1 s=8 emitted=1566 alive=1566 dup=0 mismatch=0 accepted=1566 rejected=318034 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=1 s=8 emitted=1566 alive=1566 dup=0 mismatch=0 accepted=1566 rejected=318034 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=1 s=8 emitted=1566 alive=1566 dup=0 mismatch=0 accepted=1566 rejected=750 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=1 s=8 emitted=1566 alive=1566 dup=0 mismatch=0 accepted=1566 rejected=750 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=1 s=8 emitted=1566 alive=1566 dup=0 mismatch=0 accepted=1566 rejected=750 sibling_rejected=119 order_switches=0 \nsamples/shared/complement            n=800 kmax=1 s=8 emitted=1566 alive=1566 dup=0 mismatch=0 accepted=1566 rejected=750 sibling_rejected=0 order_switches=1570 \nsamples/shared/sibling+complement    n=800 kmax=1 s=8 emitted=1566 alive=1566 dup=0 mismatch=0 accepted=1566 rejected=750 sibling_rejected=95 order_switches=1565 \npure/shared/sibling+complement       n=800 kmax=1 s=8 emitted=1566 alive=1566 dup=0 mismatch=0 accepted=1566 rejected=318034 sibling_rejected=123147 order_switches=1565 \nSUMMARY family=terrain n=800 kmax=1 s=8 checked=2556800 alive=12528 emitted=12528 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify terrain 800 1 12 3",
+      "wall_seconds": 7.336,
+      "summary": {
+        "family": "terrain",
+        "n": 800,
+        "kmax": 1,
+        "s": 12,
+        "checked": 2556800,
+        "alive": 12528,
+        "emitted": 12528,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=1 s=12 emitted=1566 alive=1566 dup=0 mismatch=0 accepted=1566 rejected=318034 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=1 s=12 emitted=1566 alive=1566 dup=0 mismatch=0 accepted=1566 rejected=318034 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=1 s=12 emitted=1566 alive=1566 dup=0 mismatch=0 accepted=1566 rejected=665 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=1 s=12 emitted=1566 alive=1566 dup=0 mismatch=0 accepted=1566 rejected=665 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=1 s=12 emitted=1566 alive=1566 dup=0 mismatch=0 accepted=1566 rejected=665 sibling_rejected=28 order_switches=0 \nsamples/shared/complement            n=800 kmax=1 s=12 emitted=1566 alive=1566 dup=0 mismatch=0 accepted=1566 rejected=665 sibling_rejected=0 order_switches=1567 \nsamples/shared/sibling+complement    n=800 kmax=1 s=12 emitted=1566 alive=1566 dup=0 mismatch=0 accepted=1566 rejected=665 sibling_rejected=22 order_switches=1566 \npure/shared/sibling+complement       n=800 kmax=1 s=12 emitted=1566 alive=1566 dup=0 mismatch=0 accepted=1566 rejected=318034 sibling_rejected=91448 order_switches=1566 \nSUMMARY family=terrain n=800 kmax=1 s=12 checked=2556800 alive=12528 emitted=12528 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify terrain 800 3 8 3",
+      "wall_seconds": 7.528,
+      "summary": {
+        "family": "terrain",
+        "n": 800,
+        "kmax": 3,
+        "s": 8,
+        "checked": 2556800,
+        "alive": 36504,
+        "emitted": 36504,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=3 s=8 emitted=4563 alive=4563 dup=0 mismatch=0 accepted=4563 rejected=315037 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=3 s=8 emitted=4563 alive=4563 dup=0 mismatch=0 accepted=4563 rejected=315037 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=3 s=8 emitted=4563 alive=4563 dup=0 mismatch=0 accepted=4563 rejected=13491 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=3 s=8 emitted=4563 alive=4563 dup=0 mismatch=0 accepted=4563 rejected=13491 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=3 s=8 emitted=4563 alive=4563 dup=0 mismatch=0 accepted=4563 rejected=13491 sibling_rejected=8 order_switches=0 \nsamples/shared/complement            n=800 kmax=3 s=8 emitted=4563 alive=4563 dup=0 mismatch=0 accepted=4563 rejected=13491 sibling_rejected=0 order_switches=4460 \nsamples/shared/sibling+complement    n=800 kmax=3 s=8 emitted=4563 alive=4563 dup=0 mismatch=0 accepted=4563 rejected=13491 sibling_rejected=5 order_switches=4460 \npure/shared/sibling+complement       n=800 kmax=3 s=8 emitted=4563 alive=4563 dup=0 mismatch=0 accepted=4563 rejected=315037 sibling_rejected=15842 order_switches=4460 \nSUMMARY family=terrain n=800 kmax=3 s=8 checked=2556800 alive=36504 emitted=36504 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify terrain 800 3 12 3",
+      "wall_seconds": 7.47,
+      "summary": {
+        "family": "terrain",
+        "n": 800,
+        "kmax": 3,
+        "s": 12,
+        "checked": 2556800,
+        "alive": 36504,
+        "emitted": 36504,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=3 s=12 emitted=4563 alive=4563 dup=0 mismatch=0 accepted=4563 rejected=315037 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=3 s=12 emitted=4563 alive=4563 dup=0 mismatch=0 accepted=4563 rejected=315037 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=3 s=12 emitted=4563 alive=4563 dup=0 mismatch=0 accepted=4563 rejected=12811 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=3 s=12 emitted=4563 alive=4563 dup=0 mismatch=0 accepted=4563 rejected=12811 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=3 s=12 emitted=4563 alive=4563 dup=0 mismatch=0 accepted=4563 rejected=12811 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=800 kmax=3 s=12 emitted=4563 alive=4563 dup=0 mismatch=0 accepted=4563 rejected=12811 sibling_rejected=0 order_switches=4537 \nsamples/shared/sibling+complement    n=800 kmax=3 s=12 emitted=4563 alive=4563 dup=0 mismatch=0 accepted=4563 rejected=12811 sibling_rejected=0 order_switches=4537 \npure/shared/sibling+complement       n=800 kmax=3 s=12 emitted=4563 alive=4563 dup=0 mismatch=0 accepted=4563 rejected=315037 sibling_rejected=5445 order_switches=4537 \nSUMMARY family=terrain n=800 kmax=3 s=12 checked=2556800 alive=36504 emitted=36504 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify terrain 800 10 8 3",
+      "wall_seconds": 8.056,
+      "summary": {
+        "family": "terrain",
+        "n": 800,
+        "kmax": 10,
+        "s": 8,
+        "checked": 2556800,
+        "alive": 115256,
+        "emitted": 115256,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=10 s=8 emitted=14407 alive=14407 dup=0 mismatch=0 accepted=14407 rejected=305193 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=10 s=8 emitted=14407 alive=14407 dup=0 mismatch=0 accepted=14407 rejected=305193 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=10 s=8 emitted=14407 alive=14407 dup=0 mismatch=0 accepted=14407 rejected=59530 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=10 s=8 emitted=14407 alive=14407 dup=0 mismatch=0 accepted=14407 rejected=59530 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=10 s=8 emitted=14407 alive=14407 dup=0 mismatch=0 accepted=14407 rejected=59530 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=800 kmax=10 s=8 emitted=14407 alive=14407 dup=0 mismatch=0 accepted=14407 rejected=59530 sibling_rejected=0 order_switches=13648 \nsamples/shared/sibling+complement    n=800 kmax=10 s=8 emitted=14407 alive=14407 dup=0 mismatch=0 accepted=14407 rejected=59530 sibling_rejected=0 order_switches=13648 \npure/shared/sibling+complement       n=800 kmax=10 s=8 emitted=14407 alive=14407 dup=0 mismatch=0 accepted=14407 rejected=305193 sibling_rejected=0 order_switches=13648 \nSUMMARY family=terrain n=800 kmax=10 s=8 checked=2556800 alive=115256 emitted=115256 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify terrain 800 10 12 3",
+      "wall_seconds": 8.253,
+      "summary": {
+        "family": "terrain",
+        "n": 800,
+        "kmax": 10,
+        "s": 12,
+        "checked": 2556800,
+        "alive": 115256,
+        "emitted": 115256,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=10 s=12 emitted=14407 alive=14407 dup=0 mismatch=0 accepted=14407 rejected=305193 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=10 s=12 emitted=14407 alive=14407 dup=0 mismatch=0 accepted=14407 rejected=305193 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=10 s=12 emitted=14407 alive=14407 dup=0 mismatch=0 accepted=14407 rejected=56071 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=10 s=12 emitted=14407 alive=14407 dup=0 mismatch=0 accepted=14407 rejected=56071 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=10 s=12 emitted=14407 alive=14407 dup=0 mismatch=0 accepted=14407 rejected=56071 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=800 kmax=10 s=12 emitted=14407 alive=14407 dup=0 mismatch=0 accepted=14407 rejected=56071 sibling_rejected=0 order_switches=13918 \nsamples/shared/sibling+complement    n=800 kmax=10 s=12 emitted=14407 alive=14407 dup=0 mismatch=0 accepted=14407 rejected=56071 sibling_rejected=0 order_switches=13918 \npure/shared/sibling+complement       n=800 kmax=10 s=12 emitted=14407 alive=14407 dup=0 mismatch=0 accepted=14407 rejected=305193 sibling_rejected=0 order_switches=13918 \nSUMMARY family=terrain n=800 kmax=10 s=12 checked=2556800 alive=115256 emitted=115256 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify terrain 800 10 8 11",
+      "wall_seconds": 7.867,
+      "summary": {
+        "family": "terrain",
+        "n": 800,
+        "kmax": 10,
+        "s": 8,
+        "checked": 2556800,
+        "alive": 115664,
+        "emitted": 115664,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=10 s=8 emitted=14458 alive=14458 dup=0 mismatch=0 accepted=14458 rejected=305142 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=10 s=8 emitted=14458 alive=14458 dup=0 mismatch=0 accepted=14458 rejected=305142 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=10 s=8 emitted=14458 alive=14458 dup=0 mismatch=0 accepted=14458 rejected=55969 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=10 s=8 emitted=14458 alive=14458 dup=0 mismatch=0 accepted=14458 rejected=55969 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=10 s=8 emitted=14458 alive=14458 dup=0 mismatch=0 accepted=14458 rejected=55969 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=800 kmax=10 s=8 emitted=14458 alive=14458 dup=0 mismatch=0 accepted=14458 rejected=55969 sibling_rejected=0 order_switches=13656 \nsamples/shared/sibling+complement    n=800 kmax=10 s=8 emitted=14458 alive=14458 dup=0 mismatch=0 accepted=14458 rejected=55969 sibling_rejected=0 order_switches=13656 \npure/shared/sibling+complement       n=800 kmax=10 s=8 emitted=14458 alive=14458 dup=0 mismatch=0 accepted=14458 rejected=305142 sibling_rejected=0 order_switches=13656 \nSUMMARY family=terrain n=800 kmax=10 s=8 checked=2556800 alive=115664 emitted=115664 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify clusters 800 1 8 3",
+      "wall_seconds": 7.13,
+      "summary": {
+        "family": "clusters",
+        "n": 800,
+        "kmax": 1,
+        "s": 8,
+        "checked": 2556800,
+        "alive": 19248,
+        "emitted": 19248,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=1 s=8 emitted=2406 alive=2406 dup=0 mismatch=0 accepted=2406 rejected=317194 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=1 s=8 emitted=2406 alive=2406 dup=0 mismatch=0 accepted=2406 rejected=317194 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=1 s=8 emitted=2406 alive=2406 dup=0 mismatch=0 accepted=2406 rejected=281508 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=1 s=8 emitted=2406 alive=2406 dup=0 mismatch=0 accepted=2406 rejected=281508 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=1 s=8 emitted=2406 alive=2406 dup=0 mismatch=0 accepted=2406 rejected=281508 sibling_rejected=156449 order_switches=0 \nsamples/shared/complement            n=800 kmax=1 s=8 emitted=2406 alive=2406 dup=0 mismatch=0 accepted=2406 rejected=281508 sibling_rejected=0 order_switches=2897 \nsamples/shared/sibling+complement    n=800 kmax=1 s=8 emitted=2406 alive=2406 dup=0 mismatch=0 accepted=2406 rejected=281508 sibling_rejected=110710 order_switches=2609 \npure/shared/sibling+complement       n=800 kmax=1 s=8 emitted=2406 alive=2406 dup=0 mismatch=0 accepted=2406 rejected=317194 sibling_rejected=112363 order_switches=2609 \nSUMMARY family=clusters n=800 kmax=1 s=8 checked=2556800 alive=19248 emitted=19248 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify clusters 800 1 12 3",
+      "wall_seconds": 7.128,
+      "summary": {
+        "family": "clusters",
+        "n": 800,
+        "kmax": 1,
+        "s": 12,
+        "checked": 2556800,
+        "alive": 19248,
+        "emitted": 19248,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=1 s=12 emitted=2406 alive=2406 dup=0 mismatch=0 accepted=2406 rejected=317194 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=1 s=12 emitted=2406 alive=2406 dup=0 mismatch=0 accepted=2406 rejected=317194 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=1 s=12 emitted=2406 alive=2406 dup=0 mismatch=0 accepted=2406 rejected=281457 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=1 s=12 emitted=2406 alive=2406 dup=0 mismatch=0 accepted=2406 rejected=281457 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=1 s=12 emitted=2406 alive=2406 dup=0 mismatch=0 accepted=2406 rejected=281457 sibling_rejected=156409 order_switches=0 \nsamples/shared/complement            n=800 kmax=1 s=12 emitted=2406 alive=2406 dup=0 mismatch=0 accepted=2406 rejected=281457 sibling_rejected=0 order_switches=2897 \nsamples/shared/sibling+complement    n=800 kmax=1 s=12 emitted=2406 alive=2406 dup=0 mismatch=0 accepted=2406 rejected=281457 sibling_rejected=110678 order_switches=2609 \npure/shared/sibling+complement       n=800 kmax=1 s=12 emitted=2406 alive=2406 dup=0 mismatch=0 accepted=2406 rejected=317194 sibling_rejected=111228 order_switches=2609 \nSUMMARY family=clusters n=800 kmax=1 s=12 checked=2556800 alive=19248 emitted=19248 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify clusters 800 3 8 3",
+      "wall_seconds": 7.626,
+      "summary": {
+        "family": "clusters",
+        "n": 800,
+        "kmax": 3,
+        "s": 8,
+        "checked": 2556800,
+        "alive": 51624,
+        "emitted": 51624,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=3 s=8 emitted=6453 alive=6453 dup=0 mismatch=0 accepted=6453 rejected=313147 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=3 s=8 emitted=6453 alive=6453 dup=0 mismatch=0 accepted=6453 rejected=313147 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=3 s=8 emitted=6453 alive=6453 dup=0 mismatch=0 accepted=6453 rejected=296468 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=3 s=8 emitted=6453 alive=6453 dup=0 mismatch=0 accepted=6453 rejected=296468 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=3 s=8 emitted=6453 alive=6453 dup=0 mismatch=0 accepted=6453 rejected=296468 sibling_rejected=69263 order_switches=0 \nsamples/shared/complement            n=800 kmax=3 s=8 emitted=6453 alive=6453 dup=0 mismatch=0 accepted=6453 rejected=296468 sibling_rejected=0 order_switches=9004 \nsamples/shared/sibling+complement    n=800 kmax=3 s=8 emitted=6453 alive=6453 dup=0 mismatch=0 accepted=6453 rejected=296468 sibling_rejected=48313 order_switches=7764 \npure/shared/sibling+complement       n=800 kmax=3 s=8 emitted=6453 alive=6453 dup=0 mismatch=0 accepted=6453 rejected=313147 sibling_rejected=48313 order_switches=7764 \nSUMMARY family=clusters n=800 kmax=3 s=8 checked=2556800 alive=51624 emitted=51624 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify clusters 800 3 12 3",
+      "wall_seconds": 7.556,
+      "summary": {
+        "family": "clusters",
+        "n": 800,
+        "kmax": 3,
+        "s": 12,
+        "checked": 2556800,
+        "alive": 51624,
+        "emitted": 51624,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=3 s=12 emitted=6453 alive=6453 dup=0 mismatch=0 accepted=6453 rejected=313147 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=3 s=12 emitted=6453 alive=6453 dup=0 mismatch=0 accepted=6453 rejected=313147 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=3 s=12 emitted=6453 alive=6453 dup=0 mismatch=0 accepted=6453 rejected=296145 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=3 s=12 emitted=6453 alive=6453 dup=0 mismatch=0 accepted=6453 rejected=296145 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=3 s=12 emitted=6453 alive=6453 dup=0 mismatch=0 accepted=6453 rejected=296145 sibling_rejected=69263 order_switches=0 \nsamples/shared/complement            n=800 kmax=3 s=12 emitted=6453 alive=6453 dup=0 mismatch=0 accepted=6453 rejected=296145 sibling_rejected=0 order_switches=9011 \nsamples/shared/sibling+complement    n=800 kmax=3 s=12 emitted=6453 alive=6453 dup=0 mismatch=0 accepted=6453 rejected=296145 sibling_rejected=48313 order_switches=7771 \npure/shared/sibling+complement       n=800 kmax=3 s=12 emitted=6453 alive=6453 dup=0 mismatch=0 accepted=6453 rejected=313147 sibling_rejected=48313 order_switches=7771 \nSUMMARY family=clusters n=800 kmax=3 s=12 checked=2556800 alive=51624 emitted=51624 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify clusters 800 10 8 3",
+      "wall_seconds": 8.17,
+      "summary": {
+        "family": "clusters",
+        "n": 800,
+        "kmax": 10,
+        "s": 8,
+        "checked": 2556800,
+        "alive": 139440,
+        "emitted": 139440,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=10 s=8 emitted=17430 alive=17430 dup=0 mismatch=0 accepted=17430 rejected=302170 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=10 s=8 emitted=17430 alive=17430 dup=0 mismatch=0 accepted=17430 rejected=302170 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=10 s=8 emitted=17430 alive=17430 dup=0 mismatch=0 accepted=17430 rejected=300498 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=10 s=8 emitted=17430 alive=17430 dup=0 mismatch=0 accepted=17430 rejected=300498 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=10 s=8 emitted=17430 alive=17430 dup=0 mismatch=0 accepted=17430 rejected=300498 sibling_rejected=22021 order_switches=0 \nsamples/shared/complement            n=800 kmax=10 s=8 emitted=17430 alive=17430 dup=0 mismatch=0 accepted=17430 rejected=300498 sibling_rejected=0 order_switches=26410 \nsamples/shared/sibling+complement    n=800 kmax=10 s=8 emitted=17430 alive=17430 dup=0 mismatch=0 accepted=17430 rejected=300498 sibling_rejected=15573 order_switches=24714 \npure/shared/sibling+complement       n=800 kmax=10 s=8 emitted=17430 alive=17430 dup=0 mismatch=0 accepted=17430 rejected=302170 sibling_rejected=15573 order_switches=24714 \nSUMMARY family=clusters n=800 kmax=10 s=8 checked=2556800 alive=139440 emitted=139440 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify clusters 800 10 12 3",
+      "wall_seconds": 8.255,
+      "summary": {
+        "family": "clusters",
+        "n": 800,
+        "kmax": 10,
+        "s": 12,
+        "checked": 2556800,
+        "alive": 139440,
+        "emitted": 139440,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=10 s=12 emitted=17430 alive=17430 dup=0 mismatch=0 accepted=17430 rejected=302170 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=10 s=12 emitted=17430 alive=17430 dup=0 mismatch=0 accepted=17430 rejected=302170 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=10 s=12 emitted=17430 alive=17430 dup=0 mismatch=0 accepted=17430 rejected=300342 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=10 s=12 emitted=17430 alive=17430 dup=0 mismatch=0 accepted=17430 rejected=300342 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=10 s=12 emitted=17430 alive=17430 dup=0 mismatch=0 accepted=17430 rejected=300342 sibling_rejected=22021 order_switches=0 \nsamples/shared/complement            n=800 kmax=10 s=12 emitted=17430 alive=17430 dup=0 mismatch=0 accepted=17430 rejected=300342 sibling_rejected=0 order_switches=26467 \nsamples/shared/sibling+complement    n=800 kmax=10 s=12 emitted=17430 alive=17430 dup=0 mismatch=0 accepted=17430 rejected=300342 sibling_rejected=15573 order_switches=24771 \npure/shared/sibling+complement       n=800 kmax=10 s=12 emitted=17430 alive=17430 dup=0 mismatch=0 accepted=17430 rejected=302170 sibling_rejected=15573 order_switches=24771 \nSUMMARY family=clusters n=800 kmax=10 s=12 checked=2556800 alive=139440 emitted=139440 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify clusters 800 10 8 11",
+      "wall_seconds": 8.002,
+      "summary": {
+        "family": "clusters",
+        "n": 800,
+        "kmax": 10,
+        "s": 8,
+        "checked": 2556800,
+        "alive": 137288,
+        "emitted": 137288,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=10 s=8 emitted=17161 alive=17161 dup=0 mismatch=0 accepted=17161 rejected=302439 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=10 s=8 emitted=17161 alive=17161 dup=0 mismatch=0 accepted=17161 rejected=302439 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=10 s=8 emitted=17161 alive=17161 dup=0 mismatch=0 accepted=17161 rejected=300341 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=10 s=8 emitted=17161 alive=17161 dup=0 mismatch=0 accepted=17161 rejected=300341 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=10 s=8 emitted=17161 alive=17161 dup=0 mismatch=0 accepted=17161 rejected=300341 sibling_rejected=27689 order_switches=0 \nsamples/shared/complement            n=800 kmax=10 s=8 emitted=17161 alive=17161 dup=0 mismatch=0 accepted=17161 rejected=300341 sibling_rejected=0 order_switches=26212 \nsamples/shared/sibling+complement    n=800 kmax=10 s=8 emitted=17161 alive=17161 dup=0 mismatch=0 accepted=17161 rejected=300341 sibling_rejected=23621 order_switches=24035 \npure/shared/sibling+complement       n=800 kmax=10 s=8 emitted=17161 alive=17161 dup=0 mismatch=0 accepted=17161 rejected=302439 sibling_rejected=23621 order_switches=24035 \nSUMMARY family=clusters n=800 kmax=10 s=8 checked=2556800 alive=137288 emitted=137288 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify rows 800 1 8 3",
+      "wall_seconds": 4.794,
+      "summary": {
+        "family": "rows",
+        "n": 800,
+        "kmax": 1,
+        "s": 8,
+        "checked": 2556800,
+        "alive": 15968,
+        "emitted": 15968,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=1 s=8 emitted=1996 alive=1996 dup=0 mismatch=0 accepted=1996 rejected=317604 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=1 s=8 emitted=1996 alive=1996 dup=0 mismatch=0 accepted=1996 rejected=317604 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=1 s=8 emitted=1996 alive=1996 dup=0 mismatch=0 accepted=1996 rejected=158802 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=1 s=8 emitted=1996 alive=1996 dup=0 mismatch=0 accepted=1996 rejected=158802 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=1 s=8 emitted=1996 alive=1996 dup=0 mismatch=0 accepted=1996 rejected=158802 sibling_rejected=153481 order_switches=0 \nsamples/shared/complement            n=800 kmax=1 s=8 emitted=1996 alive=1996 dup=0 mismatch=0 accepted=1996 rejected=158802 sibling_rejected=0 order_switches=1596 \nsamples/shared/sibling+complement    n=800 kmax=1 s=8 emitted=1996 alive=1996 dup=0 mismatch=0 accepted=1996 rejected=158802 sibling_rejected=79401 order_switches=1596 \npure/shared/sibling+complement       n=800 kmax=1 s=8 emitted=1996 alive=1996 dup=0 mismatch=0 accepted=1996 rejected=317604 sibling_rejected=79401 order_switches=1596 \nSUMMARY family=rows n=800 kmax=1 s=8 checked=2556800 alive=15968 emitted=15968 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify rows 800 1 12 3",
+      "wall_seconds": 4.629,
+      "summary": {
+        "family": "rows",
+        "n": 800,
+        "kmax": 1,
+        "s": 12,
+        "checked": 2556800,
+        "alive": 15968,
+        "emitted": 15968,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=1 s=12 emitted=1996 alive=1996 dup=0 mismatch=0 accepted=1996 rejected=317604 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=1 s=12 emitted=1996 alive=1996 dup=0 mismatch=0 accepted=1996 rejected=317604 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=1 s=12 emitted=1996 alive=1996 dup=0 mismatch=0 accepted=1996 rejected=158802 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=1 s=12 emitted=1996 alive=1996 dup=0 mismatch=0 accepted=1996 rejected=158802 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=1 s=12 emitted=1996 alive=1996 dup=0 mismatch=0 accepted=1996 rejected=158802 sibling_rejected=153481 order_switches=0 \nsamples/shared/complement            n=800 kmax=1 s=12 emitted=1996 alive=1996 dup=0 mismatch=0 accepted=1996 rejected=158802 sibling_rejected=0 order_switches=1596 \nsamples/shared/sibling+complement    n=800 kmax=1 s=12 emitted=1996 alive=1996 dup=0 mismatch=0 accepted=1996 rejected=158802 sibling_rejected=79401 order_switches=1596 \npure/shared/sibling+complement       n=800 kmax=1 s=12 emitted=1996 alive=1996 dup=0 mismatch=0 accepted=1996 rejected=317604 sibling_rejected=79401 order_switches=1596 \nSUMMARY family=rows n=800 kmax=1 s=12 checked=2556800 alive=15968 emitted=15968 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify rows 800 3 8 3",
+      "wall_seconds": 4.717,
+      "summary": {
+        "family": "rows",
+        "n": 800,
+        "kmax": 3,
+        "s": 8,
+        "checked": 2556800,
+        "alive": 35056,
+        "emitted": 35056,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=3 s=8 emitted=4382 alive=4382 dup=0 mismatch=0 accepted=4382 rejected=315218 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=3 s=8 emitted=4382 alive=4382 dup=0 mismatch=0 accepted=4382 rejected=315218 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=3 s=8 emitted=4382 alive=4382 dup=0 mismatch=0 accepted=4382 rejected=158006 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=3 s=8 emitted=4382 alive=4382 dup=0 mismatch=0 accepted=4382 rejected=158006 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=3 s=8 emitted=4382 alive=4382 dup=0 mismatch=0 accepted=4382 rejected=158006 sibling_rejected=148236 order_switches=0 \nsamples/shared/complement            n=800 kmax=3 s=8 emitted=4382 alive=4382 dup=0 mismatch=0 accepted=4382 rejected=158006 sibling_rejected=0 order_switches=4776 \nsamples/shared/sibling+complement    n=800 kmax=3 s=8 emitted=4382 alive=4382 dup=0 mismatch=0 accepted=4382 rejected=158006 sibling_rejected=78132 order_switches=4776 \npure/shared/sibling+complement       n=800 kmax=3 s=8 emitted=4382 alive=4382 dup=0 mismatch=0 accepted=4382 rejected=315218 sibling_rejected=78132 order_switches=4776 \nSUMMARY family=rows n=800 kmax=3 s=8 checked=2556800 alive=35056 emitted=35056 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify rows 800 3 12 3",
+      "wall_seconds": 4.622,
+      "summary": {
+        "family": "rows",
+        "n": 800,
+        "kmax": 3,
+        "s": 12,
+        "checked": 2556800,
+        "alive": 35056,
+        "emitted": 35056,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=3 s=12 emitted=4382 alive=4382 dup=0 mismatch=0 accepted=4382 rejected=315218 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=3 s=12 emitted=4382 alive=4382 dup=0 mismatch=0 accepted=4382 rejected=315218 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=3 s=12 emitted=4382 alive=4382 dup=0 mismatch=0 accepted=4382 rejected=158006 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=3 s=12 emitted=4382 alive=4382 dup=0 mismatch=0 accepted=4382 rejected=158006 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=3 s=12 emitted=4382 alive=4382 dup=0 mismatch=0 accepted=4382 rejected=158006 sibling_rejected=148236 order_switches=0 \nsamples/shared/complement            n=800 kmax=3 s=12 emitted=4382 alive=4382 dup=0 mismatch=0 accepted=4382 rejected=158006 sibling_rejected=0 order_switches=4776 \nsamples/shared/sibling+complement    n=800 kmax=3 s=12 emitted=4382 alive=4382 dup=0 mismatch=0 accepted=4382 rejected=158006 sibling_rejected=78132 order_switches=4776 \npure/shared/sibling+complement       n=800 kmax=3 s=12 emitted=4382 alive=4382 dup=0 mismatch=0 accepted=4382 rejected=315218 sibling_rejected=78132 order_switches=4776 \nSUMMARY family=rows n=800 kmax=3 s=12 checked=2556800 alive=35056 emitted=35056 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify rows 800 10 8 3",
+      "wall_seconds": 4.791,
+      "summary": {
+        "family": "rows",
+        "n": 800,
+        "kmax": 10,
+        "s": 8,
+        "checked": 2556800,
+        "alive": 98080,
+        "emitted": 98080,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=10 s=8 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=307340 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=10 s=8 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=307340 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=10 s=8 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=156466 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=10 s=8 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=156466 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=10 s=8 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=156466 sibling_rejected=129621 order_switches=0 \nsamples/shared/complement            n=800 kmax=10 s=8 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=156466 sibling_rejected=0 order_switches=15126 \nsamples/shared/sibling+complement    n=800 kmax=10 s=8 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=156466 sibling_rejected=71450 order_switches=15126 \npure/shared/sibling+complement       n=800 kmax=10 s=8 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=307340 sibling_rejected=71450 order_switches=15126 \nSUMMARY family=rows n=800 kmax=10 s=8 checked=2556800 alive=98080 emitted=98080 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify rows 800 10 12 3",
+      "wall_seconds": 4.922,
+      "summary": {
+        "family": "rows",
+        "n": 800,
+        "kmax": 10,
+        "s": 12,
+        "checked": 2556800,
+        "alive": 98080,
+        "emitted": 98080,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=10 s=12 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=307340 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=10 s=12 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=307340 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=10 s=12 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=156130 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=10 s=12 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=156130 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=10 s=12 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=156130 sibling_rejected=129621 order_switches=0 \nsamples/shared/complement            n=800 kmax=10 s=12 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=156130 sibling_rejected=0 order_switches=15780 \nsamples/shared/sibling+complement    n=800 kmax=10 s=12 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=156130 sibling_rejected=71450 order_switches=15780 \npure/shared/sibling+complement       n=800 kmax=10 s=12 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=307340 sibling_rejected=71450 order_switches=15780 \nSUMMARY family=rows n=800 kmax=10 s=12 checked=2556800 alive=98080 emitted=98080 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify rows 800 10 8 11",
+      "wall_seconds": 4.662,
+      "summary": {
+        "family": "rows",
+        "n": 800,
+        "kmax": 10,
+        "s": 8,
+        "checked": 2556800,
+        "alive": 98080,
+        "emitted": 98080,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=800 kmax=10 s=8 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=307340 sibling_rejected=0 order_switches=0 \npure/shared                          n=800 kmax=10 s=8 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=307340 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=800 kmax=10 s=8 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=156466 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=800 kmax=10 s=8 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=156466 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=800 kmax=10 s=8 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=156466 sibling_rejected=129621 order_switches=0 \nsamples/shared/complement            n=800 kmax=10 s=8 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=156466 sibling_rejected=0 order_switches=15126 \nsamples/shared/sibling+complement    n=800 kmax=10 s=8 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=156466 sibling_rejected=71450 order_switches=15126 \npure/shared/sibling+complement       n=800 kmax=10 s=8 emitted=12260 alive=12260 dup=0 mismatch=0 accepted=12260 rejected=307340 sibling_rejected=71450 order_switches=15126 \nSUMMARY family=rows n=800 kmax=10 s=8 checked=2556800 alive=98080 emitted=98080 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify uniform 2000 10 8 3",
+      "wall_seconds": 140.373,
+      "summary": {
+        "family": "uniform",
+        "n": 2000,
+        "kmax": 10,
+        "s": 8,
+        "checked": 15992000,
+        "alive": 515712,
+        "emitted": 515712,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=2000 kmax=10 s=8 emitted=64464 alive=64464 dup=0 mismatch=0 accepted=64464 rejected=1934536 sibling_rejected=0 order_switches=0 \npure/shared                          n=2000 kmax=10 s=8 emitted=64464 alive=64464 dup=0 mismatch=0 accepted=64464 rejected=1934536 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=2000 kmax=10 s=8 emitted=64464 alive=64464 dup=0 mismatch=0 accepted=64464 rejected=544608 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=2000 kmax=10 s=8 emitted=64464 alive=64464 dup=0 mismatch=0 accepted=64464 rejected=544608 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=2000 kmax=10 s=8 emitted=64464 alive=64464 dup=0 mismatch=0 accepted=64464 rejected=544608 sibling_rejected=0 order_switches=0 \nsamples/shared/complement            n=2000 kmax=10 s=8 emitted=64464 alive=64464 dup=0 mismatch=0 accepted=64464 rejected=544608 sibling_rejected=0 order_switches=64097 \nsamples/shared/sibling+complement    n=2000 kmax=10 s=8 emitted=64464 alive=64464 dup=0 mismatch=0 accepted=64464 rejected=544608 sibling_rejected=0 order_switches=64097 \npure/shared/sibling+complement       n=2000 kmax=10 s=8 emitted=64464 alive=64464 dup=0 mismatch=0 accepted=64464 rejected=1934536 sibling_rejected=0 order_switches=64097 \nSUMMARY family=uniform n=2000 kmax=10 s=8 checked=15992000 alive=515712 emitted=515712 mismatch=0\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/chain/receipt_build/chain_verify clusters 2000 10 8 3",
+      "wall_seconds": 117.39,
+      "summary": {
+        "family": "clusters",
+        "n": 2000,
+        "kmax": 10,
+        "s": 8,
+        "checked": 15992000,
+        "alive": 412928,
+        "emitted": 412928,
+        "mismatch": 0
+      },
+      "raw_stdout": "pure/pairwise                        n=2000 kmax=10 s=8 emitted=51616 alive=51616 dup=0 mismatch=0 accepted=51616 rejected=1947384 sibling_rejected=0 order_switches=0 \npure/shared                          n=2000 kmax=10 s=8 emitted=51616 alive=51616 dup=0 mismatch=0 accepted=51616 rejected=1947384 sibling_rejected=0 order_switches=0 \nsamples/pairwise                     n=2000 kmax=10 s=8 emitted=51616 alive=51616 dup=0 mismatch=0 accepted=51616 rejected=1911952 sibling_rejected=0 order_switches=0 \nsamples/shared                       n=2000 kmax=10 s=8 emitted=51616 alive=51616 dup=0 mismatch=0 accepted=51616 rejected=1911952 sibling_rejected=0 order_switches=0 \nsamples/shared/sibling               n=2000 kmax=10 s=8 emitted=51616 alive=51616 dup=0 mismatch=0 accepted=51616 rejected=1911952 sibling_rejected=220720 order_switches=0 \nsamples/shared/complement            n=2000 kmax=10 s=8 emitted=51616 alive=51616 dup=0 mismatch=0 accepted=51616 rejected=1911952 sibling_rejected=0 order_switches=77378 \nsamples/shared/sibling+complement    n=2000 kmax=10 s=8 emitted=51616 alive=51616 dup=0 mismatch=0 accepted=51616 rejected=1911952 sibling_rejected=161200 order_switches=69785 \npure/shared/sibling+complement       n=2000 kmax=10 s=8 emitted=51616 alive=51616 dup=0 mismatch=0 accepted=51616 rejected=1947384 sibling_rejected=161200 order_switches=69785 \nSUMMARY family=clusters n=2000 kmax=10 s=8 checked=15992000 alive=412928 emitted=412928 mismatch=0\n"
+    }
+  ],
+  "stable_digest_without_times": "3e30eb37a9a00ef4cede65f532e51887d7832a6fb06fd05e734d9031d601667d",
+  "scope": "Vérification d'exactitude et de complétude du flux de supports q2 sur petits nuages ; aucun temps produit, aucune tour FULL."
+}
