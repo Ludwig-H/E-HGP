@@ -136,6 +136,27 @@ avant de comparer les WSPD s8/10/12. Le raccord Pool par préfixes et la
 suspension du parcours doivent partir des objets communs et de leur ordre
 exact. Tester mono les reprises, puis plusieurs CPU, puis G4.
 
+Septième tranche : [premier front réel](P0_FRONT_REEL.md), par handles de
+nœuds et masques de voies, sans ces plans ni parcours de facteurs par
+produit. La convention est `box_gap_diameter_v1`. Les propositions
+ponctuelles sont bornées par O(D+K) par produit ; les masques de rejets
+sont transmis, pas les comptes partiels. La couverture est jugée par
+énumération indépendante sur petits nuages ; les grandes mesures
+comptent aussi les masses résiduelles par voie, sans les développer.
+Le contre-exemple des deux rangées montre qu'un proposeur ponctuel
+parfait laisserait encore m² candidates q3/q4. **Priorité suivante :
+raccord direct au census q2 global, puis certificats collectifs q3/q4**,
+sans recréer Pool/Axis ou recopier B par descripteur. Le test de lentille
+et la transmission de certificats sont des optimisations à juger sur
+ce chemin consommé ; le front seul ne clôt ni P0 ni la complexité aval.
+
+L'auditeur A fournit en §9.5 de
+[son étude des sous-rectangles](../audits/P0_SOUS_RECTANGLES_ET_GROUPES.md)
+une autre composition sûre : distribuer les rangs d'un plan parent
+déjà préparé, en conservant ses crédits et son ordre B. Ce n'est pas
+reconstruire chaque enfant comme dans le témoin de coût Ω(R|B|).
+Cette proposition n'est pas encore une API de jobs du moteur.
+
 Les [consignes au futur développeur](VERROUS_ARCHITECTURE.md) détaillent
 les cinq verrous suivants : recherches de témoins répétées, interactions
 triangles–voisinages q3/q4, rattachements MEB, histoire/export centraux,

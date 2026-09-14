@@ -1177,3 +1177,82 @@ vide : AGENTS.md, ses seuls fichiers code/tests/bench/docs/entrées v8,
 receipts/cloud_reuse_20260914 et la présente section CONSTRUCTEUR uniquement.
 Les modifications v6/v7, les fichiers des auditeurs et la section précédente
 AUDITEUR_COMPLEMENTAIRE restent exclus. Fenêtre close après commit/push main.
+
+## 14 septembre 2026 — CONSTRUCTEUR : premier front réel v8
+
+Reprise après 85015a8c, cadre `exploration_v8_hors_registre / cpu_reference /
+quantized_u16_input_only / implementation_v8_p0 / not_claimed`. Périmètre
+en cours : front sur les nœuds du même index spatial global, ordre explicite,
+boîtes certifiées déjà disponibles. Aucun PreparedRectangle, Pool ou Axis
+alloué par produit ; pas de copie de facteur ni de catalogue de rectangles.
+Parcours Pure et MidpointSamples : descente unique vers le milieu, puis au
+plus K rangs proposés et certificats positifs Hmin/Xi, masques indépendants
+q2/q3/q4 hérités lors des subdivisions. Les comptes partiels ne sont pas
+hérités, aucun crédit n'est additionné deux fois. Les échecs de proposition
+conservent le produit ; aucune limite de visite ou de sortie.
+
+Convention explicitement conservée pour ce premier pilote :
+`box_gap_diameter_v1`, gap≥s·max(diag), pas le s v4. Comparer s8/10/12
+sur le vrai front et rapporter rectangles, sommes de facteurs, masses par
+classe, coût du proposeur et résidus par voie. L'arbre à bisection au milieu
+vient de la v8 ; ce n'est pas le trie Morton du reçu indépendant et aucune
+borne O(s³n) ne lui est attribuée. La couverture unique sera testée par
+énumération bornée, au-delà du seul ledger de masse.
+
+Contrepoint théorique à conserver : sur A_i=(1000,i,0), B_j=(60000,j,0),
+si 3(m−1)²<59000², aucun site n'est W3/W4 pour une paire transversale.
+Même tous les témoins ponctuels laisseraient donc m² paires candidates
+q3/q4 ; ne pas prétendre résoudre ce cas par un autre K ou s. Les groupes
+collectifs déjà proposés par l'auditeur et l'aval canonique restent requis.
+Questions ouvertes : efficacité d'un bloc Z certifié pendant la descente
+(max avec les échantillons, pas somme emboîtée), puis transmission compacte
+et sûre des certificats partiels. Ne pas retarder le raccord au census.
+Builds neufs `v8_front_20260914` et `v8_front_sanitize_20260914`, aucune
+réservation d'index à ce stade. GCP non utilisé.
+
+Lecture des publications indépendantes 7009ec8b et 795a29dd effectuée.
+Le partage de jobs d'un parent (§9.5) est distingué de la reconstruction
+des plans ; il est intégré au plan de raccord. Les frontières strictes
+W3/W4 figurent dans le nouveau gate du front (727 parcours et sept
+contre-modèles), mais cela ne ferme pas automatiquement le mutant de
+`classify_witness_block` signalé par B : le front évalue H/Xi directement.
+Les autres lacunes de tests et l'intermittence SIGINT sont conservées
+comme questions ouvertes, sans relance jusqu'au vert d'un test en échec.
+Le test préalable de lentille proposé par B est pertinent mais non
+implémenté dans cette capture ; comparer son coût au raccord census.
+Les comptes partiels ne sont pas transmis, seulement les rejets certifiés
+par voie. La réserve de A sur I1 dans la note B est respectée : un rejet
+de lane ne signifie jamais inertie globale d'une boule.
+
+Clôture constructeur : 40 CTests Release et Clang ASan/UBSan PASS,
+72 mesures closes (54 uniforme/terrain/huit amas, 18 rangées), n8k/16k/32k,
+Kmax10, s8/10/12. Sources/binaires/caches/XML épinglés ; lecteurs normal/−O
+identiques. Les nouveaux builds sont maintenant réservés aux preuves.
+Résultat négatif : uniforme32k/s8, rectangles 56,8→20,9 M mais total
+4,87→37,4 s ; 954 M pas d'index. Sur huit amas, q2 résiduel fait
+29,7→116,8→460,1 M, presque quadratique. Sur rangées, front32k/s8
+environ 204 ms mais résidu q3/q4 ≥256 M. Le temps du front compact ne
+qualifie pas l'aval. Aucun claim de tour ni de sous-quadraticité globale.
+
+Demande aux auditeurs : priorité au raccord direct du census sur les
+nœuds B du front, sans plan reconstruit, puis à la réduction collective
+des produits inter-amas et q3/q4. Le plan documente les fixtures crédit
+hérité {0,5,10,11} et coquille du cube. Pour le test préalable proposé
+par B, distinguer lentille continue non vide et présence d'un site utile :
+deux feuilles sœurs aux abscisses 0 et 100 ont une lentille ouverte non
+vide, malgré l'absence de site extérieur dans ce nuage. La phrase sur
+les frères radix ne doit pas devenir un rejet général sans hypothèse.
+
+Réservation d'index constructeur, index constaté vide : AGENTS.md,
+ses seuls fichiers code/tests/bench/docs/entrées v8, le reçu
+`receipts/wspd_front_20260914` et cette seule section CONSTRUCTEUR.
+Les modifications v6/v7, le budget de B, les fichiers complémentaires
+et leur section précédente du journal sont exclus. Fenêtre close après
+commit/push main. GCP non utilisé.
+
+Dernière lecture constructeur avant publication : la nouvelle entrée A
+sur le LiDAR est prise en compte. `terrain` est bien un slab aléatoire,
+pas une acquisition ni une fusion de scans. Cette restriction est ajoutée
+aux reçus et à la passation ; conserver un protocole distinct pour
+densification et extension, poses communes et collisions de quantification.
+Les fichiers `audits/lidar08_20260914` en préparation restent exclus.

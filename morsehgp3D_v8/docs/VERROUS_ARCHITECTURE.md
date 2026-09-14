@@ -39,6 +39,18 @@ doivent maintenant être traités, pas seulement l'index Z. Le nouvel
 [audit de régime WSPD](../audits/REGIME_WSPD_20260914.md) montre aussi la
 nécessité d'un chemin sans préparation lourde sur les petits facteurs.
 
+La [septième tranche](P0_FRONT_REEL.md) implémente ce front par nœuds
+partagés et masques q2/q3/q4, sans plan ni scan de facteur par produit.
+Elle retire ce poste du front, pas de tous les anciens adaptateurs.
+Le proposeur ponctuel recommence encore une descente unique depuis la
+racine : son coût O(D+K) est payé et compté par produit. B1 n'est donc
+pas clos. Le test préalable de lentille et la transmission sans double
+crédit proposés par l'auditeur B sont à comparer au coût total du raccord
+census, pas à introduire comme nouvelles variantes sans consommateur.
+Sur deux rangées parallèles, les seuls témoins ponctuels W3/W4 laissent
+un résidu quadratique même s'ils sont tous examinés. Des objets collectifs
+et une génération canonique sont requis pour éviter de développer ce résidu.
+
 ## 1. Ordre des travaux et sens de « rédhibitoire »
 
 **P0 reste la suppression du calcul systématique O(|A|²+|B|²) des

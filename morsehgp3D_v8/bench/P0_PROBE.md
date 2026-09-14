@@ -282,3 +282,36 @@ local persiste malgré le partage global. Ajouter des campagnes séparées
 avec R proportionnel à n, par exemple (8k,32), (16k,64), (32k,128), pour
 ne pas dissimuler cette croissance. Aucun ratio local ne qualifie une tour
 ou une complexité générale ; s reste une précondition des rectangles.
+
+## Premier front WSPD réel, sans census
+
+La septième sonde emploie l'index spatial v8 partagé et la convention
+`box_gap_diameter_v1`, différente du s v4. `pure` couvre toutes les paires ;
+`samples` propose au plus Kmax sites par produit et certifie séparément
+les rejets q2/q3/q4 avant séparation. Aucun plan local n'est préparé.
+
+```text
+mhgp8_wspd_front_probe n uniform|terrain|clusters|rows Kmax s seed pure|samples
+```
+
+Les recettes uniformes, terrain mince et huit amas utilisent SplitMix64
+et une unicité contrôlée ; génération et comparaisons sont comptées.
+`rows` contient deux rangées parallèles, n pair jusqu'à 131072 (limite
+physique des coordonnées), et ignore explicitement seed. Ce domaine de
+recette n'étend pas la condition mathématique de résidu q3/q4 démontrée
+pour les tailles 8k/16k/32k. Une entrée invalide retourne 2, une exception
+d'exécution 1, le succès une seule ligne JSON et 0.
+
+```bash
+python3 -B morsehgp3D_v8/bench/run_wspd_front_matrix.py run --probe build/v8_new/mhgp8_wspd_front_probe --output morsehgp3D_v8/receipts/front_new/main_matrix --sizes 8000 16000 32000 --families uniform terrain clusters --kmax 10 --s 8 10 12 --seeds 3 --modes pure samples --repeats 1
+python3 -B morsehgp3D_v8/bench/run_wspd_front_matrix.py check morsehgp3D_v8/receipts/front_new --summary
+```
+
+Le lecteur compare les entrées et masses initiales entre modes, pas leurs
+descripteurs résiduels. Répéter exactement un tuple impose le même travail
+discret et le même digest. Le temps inclut génération, préparation unique,
+parcours, checksum synchrone par descripteur, contrôles et destructions ;
+`front_and_callback_ms` n'est pas le front seul. Les capacités retenues
+ne sont ni le pic RSS ni une mesure GPU. Les produits restent compacts :
+aucun census, support, catalogue ou parent FULL n'est construit. Lire le
+[contrat et la preuve de couverture](../docs/P0_FRONT_REEL.md).

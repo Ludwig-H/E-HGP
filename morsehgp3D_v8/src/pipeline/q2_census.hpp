@@ -89,6 +89,17 @@ using Q2CensusIndexPtr = std::shared_ptr<const Q2CensusIndex>;
 [[nodiscard]] Q2CensusIndexPtr make_q2_census_index(RectanglePtr rectangle);
 [[nodiscard]] Q2CensusIndexPtr make_q2_cloud_index(CloudPtr cloud);
 
+// Ranges are ranks in spatial_order(), never original point IDs. Nodes and
+// their boxes are immutable certificates built with this particular index.
+struct Q2SpatialNode {
+  static constexpr std::size_t absent = std::numeric_limits<std::size_t>::max();
+  Range range;
+  Box3 box;
+  std::size_t left{absent};
+  std::size_t right{absent};
+  std::size_t escape{absent};
+};
+
 // An immutable index over EVERY point of this owner, not just A union B.
 // The owner is already validated; its coordinates are neither copied nor
 // revalidated. Noncopyability prevents mutation through an aliased copy.
@@ -100,18 +111,14 @@ class Q2CensusIndex final {
   Q2CensusIndex& operator=(Q2CensusIndex&&) = delete;
   [[nodiscard]] const PreparedCloud& cloud() const noexcept { return *cloud_; }
   [[nodiscard]] const Q2IndexWork& work() const noexcept { return work_; }
+  [[nodiscard]] std::span<const std::size_t> spatial_order() const noexcept { return order_; }
+  [[nodiscard]] std::span<const Q2SpatialNode> spatial_nodes() const noexcept { return nodes_; }
   // Vector capacities only, excluding the shared cloud and object metadata.
   [[nodiscard]] std::size_t retained_bytes() const;
 
  private:
-  static constexpr std::size_t absent = std::numeric_limits<std::size_t>::max();
-  struct Node {
-    Range range;
-    Box3 box;
-    std::size_t left{absent};
-    std::size_t right{absent};
-    std::size_t escape{absent};
-  };
+  using Node = Q2SpatialNode;
+  static constexpr std::size_t absent = Node::absent;
   explicit Q2CensusIndex(CloudPtr cloud);
   [[nodiscard]] std::size_t build(Range range, u64 depth);
   friend Q2CensusIndexPtr make_q2_cloud_index(CloudPtr);

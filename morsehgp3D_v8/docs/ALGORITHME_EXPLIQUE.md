@@ -6,6 +6,10 @@ v8 complète déjà implémentée. Les briques désormais exécutables couvrent 
 [crédits locaux](P0_CREDITS_LOCAUX.md), leur préparation partagée, le
 [filtre axial additif](P0_ADDITION_ET_INTERSECTION.md) et le
 [census q2 individuel ou partagé](P0_CENSUS_Q2_PARTAGE.md), sur un rectangle.
+Le [front WSPD réel](P0_FRONT_REEL.md) ajouté le 14 septembre couvre
+maintenant toutes les paires ou certifie leur rejet par voie, avec des
+descripteurs compacts. Il ne rejoint pas encore ce census : les deux
+briques exécutables ne constituent donc pas une chaîne complète.
 Les détails de preuve sont dans
 [l'audit mathématique](../audits/FONDEMENTS_ET_OBJET.md).
 
@@ -65,6 +69,19 @@ principal, la sonde FULL et les derniers prototypes n'intègrent pas tous
 les mêmes étapes. Voir [la carte d'implémentation](../audits/IMPLEMENTATION_PARALLELISATION.md).
 
 ## 4. Index et WSPD : éliminer des familles de paires
+
+Dans le nouveau front v8, une tâche contient seulement deux numéros de
+groupes et les voies encore à traiter. Elle ne recopie pas les points et
+ne prépare pas un tableau pour chacune de leurs extrémités. Si quelques
+témoins certifient le rejet de tout le produit, on évite aussi de le
+découper davantage. Sinon, on conserve ou subdivise le produit : l'échec
+du filtre n'est jamais interprété comme une absence de résultat.
+
+Ce changement supprime un travail systématique, mais ne garantit pas
+encore la vitesse. Rechercher les témoins pour chaque tâche peut coûter
+plus que la réduction obtenue ; et les paires restantes peuvent encore
+être quadratiques. C'est pourquoi la mesure compte à la fois tâches,
+recherches et résidu, avant le raccord à la suite de l'algorithme.
 
 L'index range les points spatialement et associe des boîtes à des groupes.
 La WSPD représente les paires de points par des rectangles A×B : toutes les

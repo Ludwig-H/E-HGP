@@ -3,7 +3,27 @@
 14 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
-État constructeur courant, sixième tranche P0 :
+État constructeur courant, septième tranche P0 :
+[front WSPD réel](../docs/P0_FRONT_REEL.md), sans plan ni scan de facteur
+par produit, masques q2/q3/q4 et propositions de coût O(D+K) par produit.
+`cpu_reference`, `quantized_u16_input_only`, `implementation_v8_p0`,
+`not_claimed`. Les [preuves et mesures](../receipts/wspd_front_20260914/README.md)
+portent sur le front, pas encore son raccord au census ou FULL.
+Le ledger massif est distinct de la couverture exhaustive bornée du juge.
+40 CTests Release/Clang ASan/UBSan passent. Uniforme32k/s8 : réduction
+56,8→20,9 millions de rectangles mais coût 4,87→37,4 s, avec 954 millions
+de pas d'index. Résultat négatif conservé : filtre sûr, pas encore gagnant
+en temps de front. Le raccord census doit décider du coût total.
+72 mesures closes, lecteurs normal/−O identiques : quatre familles,
+n8k/16k/32k et s8/10/12. Les résidus des amas font presque ×4 à chaque
+doublement ; ne pas appeler cette chaîne sous-quadratique. Les builds
+`v8_front_20260914` et `v8_front_sanitize_20260914` sont épinglés.
+Les deux rangées parallèles réfutent une résolution universelle de q3/q4
+par témoins ponctuels seuls. Reprises, travailleurs CPU et GPU restent
+à implémenter ; contrats 50k/G4 et massif ouverts. GCP non utilisé.
+
+## Historique : sixième tranche P0 publiée à 85015a8c
+
 [nuage/index partagé](../docs/P0_NUAGE_ET_INDEX_PARTAGES.md),
 `cpu_reference`, `quantized_u16_input_only`, `implementation_v8_p0`,
 `not_claimed`. 37 CTests Release/Clang ASan/UBSan passent. Les identités

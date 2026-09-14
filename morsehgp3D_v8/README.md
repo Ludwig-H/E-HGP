@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — nuage et index partagés
+# Morse HGP 3D v8 — premier front WSPD réel
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -28,10 +28,39 @@ intersection facultative conserve les rejets d'un plan local q2.
 Les résidus sont conservés en sous-produits ou plages compacts. Un nouveau
 census q2 interroge tous les sites, compte par paire ou par groupes, puis
 émet les supports sous le seuil avec leurs IDs intérieurs et de coquille.
-Ce n'est encore ni une WSPD complète, ni un census q3/q4, ni une tour FULL.
+Un front WSPD réel couvre maintenant les paires ou les rejette par voie,
+sans développer les produits. Il n'est pas encore raccordé au census ;
+ce n'est ni un catalogue q3/q4 ni une tour FULL.
 Les mesures historiques citées restent v7.
 
 ## État exécutable
+
+La septième tranche implémente le [front par nœuds partagés](docs/P0_FRONT_REEL.md).
+Il n'alloue aucun plan local ni tableau de facteur par produit. Les
+rejets certifiés q2/q3/q4 sont transmis aux enfants ; les propositions
+coûtent au plus une descente d'index et Kmax tests de sites par produit.
+`Pure` est la référence sans rejet, `MidpointSamples` le filtre proposé.
+La séparation est explicitement `box_gap_diameter_v1`, pas le s v4.
+
+Les [tests et mesures propres à ce front](receipts/wspd_front_20260914/README.md)
+distinguent produits visités, propositions, rectangles et masses résiduelles.
+La couverture est confrontée à un oracle indépendant sur petits nuages.
+Les 40 CTests Release et Clang ASan/UBSan passent. Premier résultat
+important : sur uniforme32k/s8, le filtre réduit les rectangles de
+56,8 à 20,9 millions, mais coûte 37,4 s contre 4,87 s pour Pure.
+Il paie 954 millions de pas d'index : **ce proposeur n'est pas encore
+une optimisation de temps du front**, même s'il réduit les candidates.
+Les 72 mesures closes couvrent quatre familles, 8k/16k/32k et s8/10/12.
+Les tâches croissent moins vite que le carré sur ces tailles, mais le
+résidu des amas est presque quadratique. Aucune garantie globale n'est acquise.
+Le front conserve des produits compacts ; son temps ne comprend aucun
+census ni construction de la tour. Sur les deux rangées parallèles, même
+tous les témoins ponctuels laisseraient un résidu quadratique q3/q4.
+La prochaine étape est le raccord direct au census global, puis les
+certificats collectifs et la génération canonique q3/q4. Aucun contrat
+50k/G4 ou massif n'est encore acquis. GCP non utilisé.
+
+## Sixième tranche publiée à 85015a8c — historique
 
 La sixième tranche sépare [nuage global et rectangles](docs/P0_NUAGE_ET_INDEX_PARTAGES.md).
 Copie/unicité et index census Z sont payés une fois par nuage ; les boîtes
@@ -193,4 +222,4 @@ multi-millions. Les optimisations privées ultérieures n'ont pas leur
 nouvelle mesure 50k. La v8 démarre sur ces constats, sans statut hérité.
 
 Entrées de suivi : [passation](PASSATION.md), [état de l'audit](audits/ETAT_COURANT.md).
-GCP non utilisé pour l'audit d'ouverture et ces six tranches mono.
+GCP non utilisé pour l'audit d'ouverture et ces sept tranches mono.

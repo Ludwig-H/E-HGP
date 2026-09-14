@@ -1,0 +1,597 @@
+#include <algorithm>
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <iostream>
+#include <numeric>
+#include <span>
+#include <stdexcept>
+#include <string_view>
+#include <type_traits>
+#include <utility>
+#include <vector>
+
+#include "oracle/p0_oracle.hpp"
+#include "wspd/front.hpp"
+
+namespace {
+
+using mhgp8::Box3;
+using mhgp8::Lane;
+using mhgp8::Point3;
+using mhgp8::Q2CensusIndex;
+using mhgp8::Q2SpatialNode;
+using mhgp8::Range;
+using mhgp8::WspdFrontMode;
+using mhgp8::WspdRectangle;
+using mhgp8::u64;
+using mhgp8::oracle::Integer;
+using Pair = std::pair<std::size_t, std::size_t>;
+using Covers = std::array<std::vector<unsigned>, 3>;
+
+static_assert(std::is_same_v<decltype(std::declval<const Q2CensusIndex&>().spatial_order()),
+                             std::span<const std::size_t>>);
+static_assert(std::is_same_v<decltype(std::declval<const Q2CensusIndex&>().spatial_nodes()),
+                             std::span<const Q2SpatialNode>>);
+
+struct Gate {
+  u64 checks{};
+  u64 clouds{};
+  u64 spatial_nodes{};
+  u64 nonidentity_orders{};
+  u64 oracle_point_tests{};
+  u64 front_runs{};
+  u64 rectangles{};
+  u64 nonsingleton_rectangles{};
+  u64 partial_lane_rectangles{};
+  u64 absent_lane_pairs{};
+  u64 residual_lane_pairs{};
+  u64 q2_support_checks{};
+  u64 permutations{};
+  u64 invalid_inputs{};
+  u64 model_mutants{};
+  u64 callback_exceptions{};
+  u64 witness_searches{};
+  u64 witness_descent_steps{};
+  u64 proposed_sites{};
+
+  void require(bool condition, const char* message) {
+    ++checks;
+    if (!condition) throw std::runtime_error(message);
+  }
+
+  template <class Function>
+  void rejects(Function&& function, const char* message) {
+    bool caught = false;
+    try { function(); } catch (const std::invalid_argument&) { caught = true; }
+    require(caught, message);
+    ++invalid_inputs;
+  }
+};
+
+std::uint8_t active_mask(unsigned kmax) {
+  std::uint8_t result = 0;
+  for (unsigned lane = 0; lane < 3; ++lane) {
+    if (lane + 2 <= kmax + 1) result |= static_cast<std::uint8_t>(1U << lane);
+  }
+  return result;
+}
+
+std::size_t pair_offset(std::size_t a, std::size_t b, std::size_t n) {
+  if (a > b) std::swap(a, b);
+  return a * n + b;
+}
+
+bool disjoint(Range a, Range b) {
+  return a.last <= b.first || b.last <= a.first;
+}
+
+Box3 scanned_box(const Q2CensusIndex& index, Range range) {
+  const auto order = index.spatial_order();
+  const auto points = index.cloud().points();
+  Box3 result{points[order[range.first]], points[order[range.first]]};
+  for (std::size_t rank = range.first; rank < range.last; ++rank) {
+    const auto& point = points[order[rank]];
+    result.low.x = std::min(result.low.x, point.x);
+    result.low.y = std::min(result.low.y, point.y);
+    result.low.z = std::min(result.low.z, point.z);
+    result.high.x = std::max(result.high.x, point.x);
+    result.high.y = std::max(result.high.y, point.y);
+    result.high.z = std::max(result.high.z, point.z);
+  }
+  return result;
+}
+
+// Multiprecision, scalar box definition: no product separation helper.
+bool separated(const Box3& a, const Box3& b, unsigned s) {
+  Integer gap_squared = 0;
+  Integer a_squared = 0;
+  Integer b_squared = 0;
+  for (std::size_t axis = 0; axis < 3; ++axis) {
+    Integer gap = 0;
+    if (a.high[axis] < b.low[axis]) gap = Integer(b.low[axis]) - a.high[axis];
+    if (b.high[axis] < a.low[axis]) gap = Integer(a.low[axis]) - b.high[axis];
+    gap_squared += gap * gap;
+    const Integer a_delta = Integer(a.high[axis]) - a.low[axis];
+    const Integer b_delta = Integer(b.high[axis]) - b.low[axis];
+    a_squared += a_delta * a_delta;
+    b_squared += b_delta * b_delta;
+  }
+  return gap_squared >= Integer(s) * s * std::max(a_squared, b_squared);
+}
+
+void check_spatial_index(Gate& gate, const Q2CensusIndex& index) {
+  const auto order = index.spatial_order();
+  const auto nodes = index.spatial_nodes();
+  const auto n = index.cloud().points().size();
+  gate.require(order.size() == n && nodes.size() == 2 * n - 1,
+               "spatial index does not contain the full immutable cloud");
+  auto sorted = std::vector<std::size_t>(order.begin(), order.end());
+  std::sort(sorted.begin(), sorted.end());
+  bool nonidentity = false;
+  for (std::size_t i = 0; i < n; ++i) {
+    gate.require(sorted[i] == i, "spatial order is not a permutation of original IDs");
+    nonidentity = nonidentity || order[i] != i;
+  }
+  gate.nonidentity_orders += static_cast<u64>(nonidentity);
+  gate.require(nodes[0].range.first == 0 && nodes[0].range.last == n &&
+                 nodes[0].escape == nodes.size(), "spatial root or terminal escape changed");
+  gate.require(index.work().nodes == nodes.size() &&
+                 index.work().escape_links == nodes.size() && index.work().max_depth <= 48,
+               "spatial index ledger or u16 depth envelope changed");
+  for (std::size_t id = 0; id < nodes.size(); ++id) {
+    const auto& node = nodes[id];
+    gate.require(node.range.first < node.range.last && node.range.last <= n,
+                 "spatial node has invalid ranks");
+    const auto box = scanned_box(index, node.range);
+    gate.require(node.box.low == box.low && node.box.high == box.high,
+                 "spatial node box differs from its original-ID population");
+    gate.require(id < node.escape && node.escape <= nodes.size(),
+                 "spatial escape does not advance in this exact index");
+    if (node.range.size() == 1) {
+      gate.require(node.left == Q2SpatialNode::absent && node.right == Q2SpatialNode::absent &&
+                       node.escape == id + 1, "spatial leaf has invalid children or escape");
+    } else {
+      gate.require(node.left == id + 1 && node.left < nodes.size() && node.right < nodes.size(),
+                   "spatial children are not valid preorder node IDs");
+      const auto& left = nodes[node.left];
+      const auto& right = nodes[node.right];
+      gate.require(left.range.first == node.range.first && left.range.last == right.range.first &&
+                       right.range.last == node.range.last && left.escape == node.right &&
+                       right.escape == node.escape,
+                   "spatial children or continuation do not partition the parent");
+    }
+    ++gate.spatial_nodes;
+  }
+}
+
+struct PairOracle {
+  std::size_t n{};
+  std::array<std::vector<unsigned>, 3> counts;
+};
+
+PairOracle make_oracle(Gate& gate, std::span<const Point3> points) {
+  PairOracle result;
+  result.n = points.size();
+  for (auto& lane : result.counts) lane.resize(result.n * result.n);
+  for (std::size_t a = 0; a < result.n; ++a) {
+    for (std::size_t b = a + 1; b < result.n; ++b) {
+      for (std::size_t z = 0; z < result.n; ++z) {
+        for (unsigned lane = 0; lane < 3; ++lane) {
+          const auto q = static_cast<Lane>(lane + 2);
+          result.counts[lane][pair_offset(a, b, result.n)] += static_cast<unsigned>(
+              mhgp8::oracle::point_witness(q, points[a], points[b], points[z]));
+          ++gate.oracle_point_tests;
+        }
+      }
+    }
+  }
+  return result;
+}
+
+bool valid_cover(const Covers& covers, const PairOracle& oracle, unsigned kmax, bool pure) {
+  for (unsigned lane = 0; lane < 3; ++lane) {
+    const bool active = lane + 2 <= kmax + 1;
+    const unsigned h = active ? kmax - lane : 0;
+    for (std::size_t a = 0; a < oracle.n; ++a) {
+      for (std::size_t b = a + 1; b < oracle.n; ++b) {
+        const auto offset = pair_offset(a, b, oracle.n);
+        const unsigned count = covers[lane][offset];
+        if (!active && count != 0) return false;
+        if (active && (count > 1 || (pure && count != 1))) return false;
+        if (active && count == 0 && oracle.counts[lane][offset] < h) return false;
+      }
+    }
+  }
+  return true;
+}
+
+std::size_t size_class(std::size_t count) {
+  if (count == 1) return 0;
+  if (count < 8) return 1;
+  if (count < 64) return 2;
+  if (count < 1024) return 3;
+  return 4;
+}
+
+struct Capture {
+  Covers cover;
+  std::vector<WspdRectangle> rectangles;
+  mhgp8::WspdFrontResult result;
+};
+
+Capture checked_front(Gate& gate, const Q2CensusIndex& index, const PairOracle& oracle,
+                      unsigned kmax, unsigned separation_s, WspdFrontMode mode) {
+  Capture capture;
+  for (auto& lane : capture.cover) lane.resize(oracle.n * oracle.n);
+  const auto nodes = index.spatial_nodes();
+  const auto order = index.spatial_order();
+  const auto active = active_mask(kmax);
+  std::array<u64, 3> pair_mass{};
+  std::array<u64, 3> lane_rectangles{};
+  std::array<u64, 5> class_rectangles{};
+  std::array<u64, 5> class_pairs{};
+  u64 factor_sites = 0;
+  u64 maximum_factor = 0;
+  u64 leaf_pairs = 0;
+  capture.result = mhgp8::run_wspd_front(index, kmax, separation_s, mode,
+      [&](const WspdRectangle& rectangle) {
+    gate.require(rectangle.a_node < nodes.size() && rectangle.b_node < nodes.size(),
+                 "front emitted node IDs outside this exact spatial index");
+    const auto& a = nodes[rectangle.a_node];
+    const auto& b = nodes[rectangle.b_node];
+    gate.require(disjoint(a.range, b.range), "front emitted overlapping factors");
+    gate.require(rectangle.lane_mask != 0 && (rectangle.lane_mask & active) == rectangle.lane_mask,
+                 "front emitted empty or inactive lanes");
+    gate.require(separated(a.box, b.box, separation_s),
+                 "front emitted factors outside the v8 box-gap separation convention");
+    const auto maximum = std::max(a.range.size(), b.range.size());
+    const auto bin = size_class(maximum);
+    const auto mass = static_cast<u64>(a.range.size()) * b.range.size();
+    factor_sites += a.range.size() + b.range.size();
+    maximum_factor = std::max(maximum_factor, static_cast<u64>(maximum));
+    ++class_rectangles[bin];
+    class_pairs[bin] += mass;
+    leaf_pairs += static_cast<u64>(maximum == 1);
+    gate.nonsingleton_rectangles += static_cast<u64>(maximum > 1);
+    gate.partial_lane_rectangles += static_cast<u64>(rectangle.lane_mask != active);
+    for (unsigned lane = 0; lane < 3; ++lane) {
+      if ((rectangle.lane_mask & (1U << lane)) == 0) continue;
+      pair_mass[lane] += mass;
+      ++lane_rectangles[lane];
+      for (std::size_t ai = a.range.first; ai < a.range.last; ++ai) {
+        for (std::size_t bi = b.range.first; bi < b.range.last; ++bi) {
+          const auto a_id = order[ai];
+          const auto b_id = order[bi];
+          gate.require(a_id != b_id, "front emitted a diagonal original-ID pair");
+          ++capture.cover[lane][pair_offset(a_id, b_id, oracle.n)];
+        }
+      }
+    }
+    capture.rectangles.push_back(rectangle);
+    ++gate.rectangles;
+  });
+  const auto& result = capture.result;
+  const auto& work = result.work;
+  const u64 total = static_cast<u64>(oracle.n) * (oracle.n - 1) / 2;
+  gate.require(result.total_unordered_pairs == total && result.active_lane_mask == active,
+               "front changed the unordered-pair or active-lane domain");
+  gate.require(work.emitted_rectangles == capture.rectangles.size() &&
+                   work.emitted_factor_sites == factor_sites && work.max_factor_size == maximum_factor &&
+                   work.leaf_pair_rectangles == leaf_pairs && work.size_class_rectangles == class_rectangles &&
+                   work.size_class_pair_mass == class_pairs && work.residual_pair_mass == pair_mass &&
+                   work.lane_rectangles == lane_rectangles,
+               "front factor, size-class or residual ledger differs from independently expanded output");
+  gate.require(valid_cover(capture.cover, oracle, kmax, mode == WspdFrontMode::Pure),
+               "front lost, duplicated, or unsafely rejected an independently judged lane pair");
+  for (unsigned lane = 0; lane < 3; ++lane) {
+    const bool lane_active = (active & (1U << lane)) != 0;
+    gate.require(work.rejected_pair_mass[lane] + work.residual_pair_mass[lane] ==
+                     (lane_active ? total : 0), "front pair ledger does not close per lane");
+    if (!lane_active) continue;
+    for (std::size_t a = 0; a < oracle.n; ++a) {
+      for (std::size_t b = a + 1; b < oracle.n; ++b) {
+        const auto count = capture.cover[lane][pair_offset(a, b, oracle.n)];
+        gate.absent_lane_pairs += static_cast<u64>(count == 0);
+        gate.residual_lane_pairs += static_cast<u64>(count == 1);
+      }
+    }
+  }
+  gate.require(work.diagonal_splits == oracle.n - 1 && work.diagonal_leaves == oracle.n &&
+                   work.product_visits == 1 + 3 * work.diagonal_splits + 2 * work.disjoint_splits &&
+                   work.product_visits == work.diagonal_splits + work.diagonal_leaves +
+                       work.disjoint_splits + work.fully_rejected_products + work.emitted_rectangles,
+               "front product/diagonal/split event ledger does not close");
+  gate.require(work.product_visits > 0 &&
+                   work.max_product_depth <= 96 && work.max_stack_size <= 2 * work.max_product_depth + 1,
+               "front traversal exceeds the finite u16 depth/DFS stack envelope");
+  gate.require(work.witness_searches <= work.product_visits &&
+                   work.witness_descent_steps <= 48 * work.witness_searches &&
+                   work.witness_box_distance_tests <= 2 * work.witness_descent_steps &&
+                   work.proposed_sites <= kmax * work.witness_searches &&
+                   work.proposals_in_factors <= work.proposed_sites &&
+                   work.witness_lane_credits <= 3 * work.proposed_sites,
+               "midpoint sampling exceeded its bounded one-path proposal envelope");
+  if (mode == WspdFrontMode::Pure) {
+    gate.require(work.witness_searches == 0 && work.witness_descent_steps == 0 &&
+                     work.witness_box_distance_tests == 0 && work.proposed_sites == 0 &&
+                     work.proposals_in_factors == 0 && work.h_bound_tests == 0 && work.xi_bound_tests == 0 &&
+                     work.witness_lane_credits == 0 && work.fully_rejected_products == 0,
+                 "Pure front performed witness work or discarded a product");
+  }
+  gate.witness_searches += work.witness_searches;
+  gate.witness_descent_steps += work.witness_descent_steps;
+  gate.proposed_sites += work.proposed_sites;
+  ++gate.front_runs;
+  return capture;
+}
+
+std::vector<Pair> q2_supports(Gate& gate, const Covers& cover, const PairOracle& oracle,
+                             unsigned kmax, std::span<const std::size_t> original_ids) {
+  std::vector<Pair> result;
+  for (std::size_t a = 0; a < oracle.n; ++a) {
+    for (std::size_t b = a + 1; b < oracle.n; ++b) {
+      const auto offset = pair_offset(a, b, oracle.n);
+      if (oracle.counts[0][offset] >= kmax) continue;
+      gate.require(cover[0][offset] == 1,
+                   "q2 direct strict-interior census lost or duplicated an accepted support");
+      result.emplace_back(std::min(original_ids[a], original_ids[b]),
+                          std::max(original_ids[a], original_ids[b]));
+      ++gate.q2_support_checks;
+    }
+  }
+  std::sort(result.begin(), result.end());
+  return result;
+}
+
+std::vector<std::vector<Point3>> fixtures() {
+  std::vector<std::vector<Point3>> result{
+      {{7, 8, 9}},
+      {{0, 0, 0}, {65535, 65535, 65535}},
+      {{0, 0, 0}, {10, 0, 0}, {5, 0, 0}},
+      {{0, 0, 0}, {10, 0, 0}, {5, 5, 0}},
+      {{0, 3, 0}, {3, 0, 0}, {1, 1, 1}},
+      {{0, 0, 0}, {6, 0, 0}, {2, 1, 1}},
+      {{0, 0, 0}, {65535, 0, 0}, {0, 65535, 0}, {0, 0, 65535},
+       {65535, 65535, 65535}, {65535, 65535, 0}, {65535, 0, 65535}, {0, 65535, 65535}}};
+  std::vector<Point3> line;
+  for (unsigned i = 0; i < 17; ++i) {
+    line.push_back({static_cast<std::uint16_t>(i * 31), 9, 11});
+  }
+  result.push_back(line);
+  std::vector<Point3> grid;
+  for (unsigned x = 0; x < 3; ++x) {
+    for (unsigned y = 0; y < 3; ++y) {
+      for (unsigned z = 0; z < 3; ++z) {
+        grid.push_back({static_cast<std::uint16_t>(x * 100),
+                        static_cast<std::uint16_t>(y * 100),
+                        static_cast<std::uint16_t>(z * 100)});
+      }
+    }
+  }
+  result.push_back(grid);
+  std::vector<Point3> sheet;
+  for (unsigned x = 0; x < 5; ++x) {
+    for (unsigned y = 0; y < 5; ++y) {
+      sheet.push_back({static_cast<std::uint16_t>(x * 37), static_cast<std::uint16_t>(y * 41), 73});
+    }
+  }
+  result.push_back(sheet);
+  std::vector<Point3> clusters;
+  for (unsigned group = 0; group < 3; ++group) {
+    for (unsigned i = 0; i < 8; ++i) {
+      clusters.push_back({static_cast<std::uint16_t>(group * 20000 + (i & 1U)),
+                          static_cast<std::uint16_t>((i >> 1U) & 1U),
+                          static_cast<std::uint16_t>((i >> 2U) & 1U)});
+    }
+  }
+  result.push_back(clusters);
+  for (std::uint32_t seed : {1U, 7U, 29U, 311U}) {
+    std::vector<Point3> random;
+    auto state = seed;
+    const auto coordinate = [&]() {
+      state = state * 1664525U + 1013904223U;
+      return static_cast<std::uint16_t>(state >> 16U);
+    };
+    for (std::size_t i = 0; i < 19; ++i) {
+      // The first coordinate explicitly distinguishes sites independently
+      // of the pseudo-random remaining coordinates.
+      const auto x = static_cast<std::uint16_t>(i * 257 + seed % 101);
+      random.push_back({x, coordinate(), coordinate()});
+    }
+    result.push_back(random);
+  }
+  return result;
+}
+
+void corpus(Gate& gate) {
+  for (const auto& original : fixtures()) {
+    std::array<std::vector<Pair>, 4> reference_supports;
+    for (unsigned permutation = 0; permutation < 2; ++permutation) {
+      auto points = original;
+      std::vector<std::size_t> original_ids(points.size());
+      std::iota(original_ids.begin(), original_ids.end(), std::size_t{0});
+      if (permutation != 0) {
+        std::reverse(points.begin(), points.end());
+        std::reverse(original_ids.begin(), original_ids.end());
+        if (points.size() > 2) {
+          std::rotate(points.begin(), points.begin() + 1, points.end());
+          std::rotate(original_ids.begin(), original_ids.begin() + 1, original_ids.end());
+        }
+        ++gate.permutations;
+      }
+      const auto expected_points = points;
+      const auto cloud = mhgp8::prepare_cloud(points);
+      const auto index = mhgp8::make_q2_cloud_index(cloud);
+      ++gate.clouds;
+      check_spatial_index(gate, *index);
+      const auto oracle = make_oracle(gate, expected_points);
+      // Mutating the caller's storage after certification must not change
+      // the original-ID geometry or any subsequent front traversal.
+      std::fill(points.begin(), points.end(), Point3{65535, 65535, 65535});
+      gate.require(std::equal(cloud->points().begin(), cloud->points().end(), expected_points.begin()),
+                   "caller mutation reached immutable cloud geometry");
+      const auto nodes_before = index->spatial_nodes().data();
+      const auto order_before = index->spatial_order().data();
+      const auto work_before = index->work();
+      std::size_t k_slot = 0;
+      for (const unsigned kmax : {1U, 2U, 5U, 10U}) {
+        for (const unsigned separation_s : {8U, 10U, 12U}) {
+          const auto pure = checked_front(gate, *index, oracle, kmax, separation_s, WspdFrontMode::Pure);
+          const auto sampled = checked_front(gate, *index, oracle, kmax, separation_s,
+                                             WspdFrontMode::MidpointSamples);
+          const auto pure_supports = q2_supports(gate, pure.cover, oracle, kmax, original_ids);
+          gate.require(pure_supports == q2_supports(gate, sampled.cover, oracle, kmax, original_ids),
+                       "sampling changed direct-census q2 supports");
+          if (permutation == 0 && separation_s == 8) reference_supports[k_slot] = pure_supports;
+          gate.require(pure_supports == reference_supports[k_slot],
+                       "input permutation or separation changed independently accepted q2 supports");
+        }
+        ++k_slot;
+      }
+      const auto work_after = index->work();
+      gate.require(nodes_before == index->spatial_nodes().data() && order_before == index->spatial_order().data() &&
+                       work_before.nodes == work_after.nodes && work_before.point_visits == work_after.point_visits &&
+                       work_before.max_depth == work_after.max_depth && work_before.escape_links == work_after.escape_links,
+                   "front mutated or rebuilt the shared spatial index");
+      check_spatial_index(gate, *index);
+    }
+  }
+}
+
+void rejection_and_models(Gate& gate) {
+  const std::vector<Point3> line{{0, 0, 0}, {10, 0, 0}, {5, 0, 0}};
+  const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(line));
+  const auto oracle = make_oracle(gate, line);
+  const auto consumer = [](const WspdRectangle&) {};
+  for (const unsigned kmax : {0U, 11U, 999U}) {
+    gate.rejects([&] { static_cast<void>(mhgp8::run_wspd_front(*index, kmax, 8, WspdFrontMode::Pure, consumer)); },
+                 "front accepted an invalid Kmax");
+  }
+  for (const unsigned s : {0U}) {
+    gate.rejects([&] { static_cast<void>(mhgp8::run_wspd_front(*index, 2, s, WspdFrontMode::Pure, consumer)); },
+                 "front accepted a zero separation");
+  }
+  gate.rejects([&] { static_cast<void>(mhgp8::run_wspd_front(*index, 2, 8,
+                     static_cast<WspdFrontMode>(99), consumer)); }, "front accepted an invalid mode");
+  gate.rejects([&] { static_cast<void>(mhgp8::run_wspd_front(*index, 2, 8, WspdFrontMode::Pure, {})); },
+               "front accepted an empty callback");
+  gate.rejects([&] { static_cast<void>(mhgp8::prepare_cloud(std::vector<Point3>{{1, 2, 3}, {1, 2, 3}})); },
+               "front foundation accepted duplicate coordinates");
+  gate.rejects([&] { static_cast<void>(mhgp8::prepare_cloud({})); },
+               "front foundation accepted an empty cloud");
+  gate.rejects([&] { static_cast<void>(mhgp8::make_q2_cloud_index({})); },
+               "front foundation accepted a null cloud");
+
+  const auto pure = checked_front(gate, *index, oracle, 2, 8, WspdFrontMode::Pure);
+  const auto ab = pair_offset(0, 1, line.size());
+  auto loss = pure.cover;
+  loss[0][ab] = 0;
+  gate.require(!valid_cover(loss, oracle, 2, true) && !valid_cover(loss, oracle, 2, false),
+               "lost accepted pair model escaped independent coverage checks");
+  ++gate.model_mutants;
+  auto duplicate = pure.cover;
+  duplicate[0][ab] = 2;
+  gate.require(!valid_cover(duplicate, oracle, 2, true),
+               "duplicate emitted pair model escaped independent coverage checks");
+  ++gate.model_mutants;
+
+  gate.require(oracle.counts[0][ab] == 1 && oracle.counts[2][ab] == 1 &&
+                   oracle.counts[2][ab] >= mhgp8::oracle::threshold(3, Lane::Q4) &&
+                   oracle.counts[0][ab] < mhgp8::oracle::threshold(3, Lane::Q2),
+               "q4 rejection incorrectly implies q2 rejection fixture became vacuous");
+  const auto pure_k3 = checked_front(gate, *index, oracle, 3, 8, WspdFrontMode::Pure);
+  auto wrong_lane = pure_k3.cover;
+  wrong_lane[0][ab] = 0;
+  gate.require(!valid_cover(wrong_lane, oracle, 3, false), "q4-to-q2 lane erasure model survived");
+  ++gate.model_mutants;
+
+  gate.require(mhgp8::oracle::point_witness(Lane::Q2, line[0], line[1], line[2]) &&
+                   oracle.counts[0][ab] < 2 && 2 * oracle.counts[0][ab] >= 2,
+               "rechecking an inherited witness did not expose the double-credit model");
+  const auto sampled = checked_front(gate, *index, oracle, 2, 8, WspdFrontMode::MidpointSamples);
+  gate.require(sampled.cover[0][ab] == 1 && !valid_cover(loss, oracle, 2, false),
+               "repeated-ancestor credit removed an accepted q2 support");
+  ++gate.model_mutants;
+
+  const std::vector<Point3> shell{{0, 0, 0}, {10, 0, 0}, {5, 5, 0}};
+  const auto shell_oracle = make_oracle(gate, shell);
+  const auto shell_index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(shell));
+  const auto shell_front = checked_front(gate, *shell_index, shell_oracle, 1, 8,
+                                         WspdFrontMode::MidpointSamples);
+  const auto shell_h = mhgp8::oracle::metrics(shell[0], shell[1], shell[2]).h;
+  gate.require(shell_h == 0 && shell_h >= 0 && shell_oracle.counts[0][ab] == 0 && shell_front.cover[0][ab] == 1,
+               "nonstrict shell credit model no longer differs from the strict oracle");
+  auto shell_loss = shell_front.cover;
+  shell_loss[0][ab] = 0;
+  gate.require(!valid_cover(shell_loss, shell_oracle, 1, false), "nonstrict shell-credit model survived");
+  ++gate.model_mutants;
+
+  for (const unsigned q : {3U, 4U}) {
+    const std::vector<Point3> boundary = q == 3
+        ? std::vector<Point3>{{0, 3, 0}, {3, 0, 0}, {1, 1, 1}}
+        : std::vector<Point3>{{0, 0, 0}, {6, 0, 0}, {2, 1, 1}};
+    const auto value = mhgp8::oracle::metrics(boundary[0], boundary[1], boundary[2]);
+    const unsigned coefficient = q == 3 ? 3 : 2;
+    const auto boundary_oracle = make_oracle(gate, boundary);
+    const auto boundary_index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(boundary));
+    const auto boundary_front = checked_front(gate, *boundary_index, boundary_oracle, q - 1, 8,
+                                              WspdFrontMode::MidpointSamples);
+    gate.require(value.h > 0 && coefficient * value.h * value.h == value.xi &&
+                     boundary_oracle.counts[q - 2][ab] == 0 && boundary_front.cover[q - 2][ab] == 1,
+                 "strict spindle-boundary fixture no longer distinguishes equality from interior");
+    auto nonstrict = boundary_front.cover;
+    nonstrict[q - 2][ab] = 0;
+    gate.require(!valid_cover(nonstrict, boundary_oracle, q - 1, false),
+                 "nonstrict q3/q4 spindle-credit model survived");
+    ++gate.model_mutants;
+  }
+
+  struct CallbackFailure {};
+  unsigned emissions = 0;
+  bool caught = false;
+  try {
+    static_cast<void>(mhgp8::run_wspd_front(*index, 2, 8, WspdFrontMode::Pure,
+        [&](const WspdRectangle&) { ++emissions; throw CallbackFailure{}; }));
+  } catch (const CallbackFailure&) { caught = true; }
+  gate.require(caught && emissions == 1, "front swallowed a callback exception or continued emitting");
+  const auto retry = checked_front(gate, *index, oracle, 2, 8, WspdFrontMode::Pure);
+  gate.require(retry.cover == pure.cover, "callback failure changed a subsequent fresh front traversal");
+  ++gate.callback_exceptions;
+}
+
+}  // namespace
+
+int main(int argc, char** argv) {
+  if (argc != 2 || std::string_view(argv[1]) != "--selftest") {
+    std::cerr << "usage: mhgp8_wspd_front_gate --selftest\n";
+    return 2;
+  }
+  try {
+    Gate gate;
+    corpus(gate);
+    rejection_and_models(gate);
+    gate.require(gate.clouds >= 30 && gate.front_runs >= 720 && gate.spatial_nodes > 1000 &&
+                     gate.nonidentity_orders >= 10 && gate.oracle_point_tests > 200000 &&
+                     gate.nonsingleton_rectangles > 0 && gate.partial_lane_rectangles > 0 &&
+                     gate.absent_lane_pairs > 0 && gate.residual_lane_pairs > 0 &&
+                     gate.q2_support_checks > 1000 && gate.permutations == 15 &&
+                     gate.invalid_inputs >= 9 && gate.model_mutants >= 7 && gate.callback_exceptions == 1 &&
+                     gate.witness_searches > 0 && gate.witness_descent_steps > 0 && gate.proposed_sites > 0,
+                 "WSPD front qualification lost a non-vacuity floor");
+    std::cout << "mhgp8_wspd_front_gate passed checks=" << gate.checks << " clouds=" << gate.clouds
+              << " spatial_nodes=" << gate.spatial_nodes << " nonidentity_orders=" << gate.nonidentity_orders
+              << " oracle_point_tests=" << gate.oracle_point_tests << " front_runs=" << gate.front_runs
+              << " rectangles=" << gate.rectangles << " nonsingleton_rectangles=" << gate.nonsingleton_rectangles
+              << " partial_lane_rectangles=" << gate.partial_lane_rectangles
+              << " absent_lane_pairs=" << gate.absent_lane_pairs << " residual_lane_pairs=" << gate.residual_lane_pairs
+              << " q2_support_checks=" << gate.q2_support_checks << " permutations=" << gate.permutations
+              << " invalid_inputs=" << gate.invalid_inputs << " model_mutants=" << gate.model_mutants
+              << " callback_exceptions=" << gate.callback_exceptions << " witness_searches=" << gate.witness_searches
+              << " witness_descent_steps=" << gate.witness_descent_steps << " proposed_sites=" << gate.proposed_sites << '\n';
+    return 0;
+  } catch (const std::exception& error) {
+    std::cerr << "mhgp8_wspd_front_gate failed: " << error.what() << '\n';
+    return 1;
+  }
+}

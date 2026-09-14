@@ -1,0 +1,15 @@
+{
+  "command": [
+    "ctest",
+    "--test-dir",
+    "build/v8_front_sanitize_20260914",
+    "--output-on-failure",
+    "-R",
+    "^mhgp8_wspd_front_gate$"
+  ],
+  "exit_code": 8,
+  "output": "1/1 Test #1: mhgp8_wspd_front_gate Failed 3.44 sec\n==80==LeakSanitizer has encountered a fatal error.\n==80==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)\n0% tests passed, 1 tests failed out of 1.\n",
+  "scope": "sandbox infrastructure failure; not a passing qualification",
+  "output_kind": "observed tool-output excerpt",
+  "resolution": "same targeted test passed outside sandbox; full sanitized qualification recorded separately without disabling LSan"
+}

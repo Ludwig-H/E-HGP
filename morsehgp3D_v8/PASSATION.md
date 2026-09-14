@@ -1,10 +1,54 @@
-# Passation v8 — partage global acquis, front réel et facteurs prioritaires
+# Passation v8 — front réel implémenté, raccord census prioritaire
 
 14 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`. Aucun contrat de tour n'est encore acquis.
 
 ## À reprendre maintenant
+
+Le [premier front WSPD réel](docs/P0_FRONT_REEL.md) manipule les nœuds du
+même index Z et leur permutation. Aucun plan Pool/Axis ni parcours de
+facteur n'est préparé par produit. La convention de séparation est
+`box_gap_diameter_v1`, la comparaison `Pure`/`MidpointSamples` conserve
+les entrées, pas nécessairement les descripteurs. Les rejets sont propres
+à chaque voie et hérités ; les comptes partiels ne sont pas hérités.
+Les preuves et coûts sont dans le [nouveau reçu](receipts/wspd_front_20260914/README.md).
+
+40 CTests Release/Clang ASan/UBSan passent. La mesure uniforme32k/s8
+réduit le front de 56,8 à 20,9 millions de rectangles, mais passe de
+4,87 s à 37,4 s : le proposeur est trop cher (954 millions de pas
+d'index). Ne pas promouvoir `MidpointSamples` comme gain de temps
+acquis, ni retirer Pure de la comparaison du futur chemin consommé.
+Les 72 mesures sont closes : quatre familles, n8k/16k/32k, Kmax10,
+s8/10/12, deux modes. Les tâches croissent sous ×4 dans ces mesures,
+mais les résidus Samples des amas font presque ×4, comme q3/q4 sur les
+rangées. P0 n'est pas clos. Les deux builds `v8_front_20260914` et
+`v8_front_sanitize_20260914` sont épinglés ; reprendre dans des builds neufs.
+
+**Priorité immédiate : consommer directement le front par le census q2.**
+Ne pas reconstruire une factory de rectangle, Axis ou un arbre B par
+descripteur. Garder les nœuds et leur ordre spatial, factoriser l'état du
+census global et réutiliser ses tampons. Comparer à l'exhaustif les vrais
+supports, intérieurs et coquilles, puis mesurer le coût complet aux trois
+tailles. Le proposeur recommence encore depuis la racine : test préalable
+de lentille et certificats partiels distincts sont à comparer sur ce chemin.
+
+q3/q4 nécessitent aussi une réduction collective : deux rangées parallèles
+laissent m² candidates transversales même avec tous les témoins ponctuels.
+Ne pas développer ce résidu par défaut, ni conclure qu'il s'agit de m²
+supports utiles. La génération canonique par plus longue arête et la
+rétention par boule restent requises ; un rejet q4 ne tue pas q2.
+Les tâches par handles permettent une distribution future, mais le moteur
+courant est mono-thread. FULL, multi-CPU, GPU et contrats G4 restent ouverts.
+
+L'auditeur A prépare le régime LiDAR simple et superposé. Le `terrain`
+actuel est un slab aléatoire mince, pas un simulateur de capteur : ne pas
+choisir une variante pour le LiDAR sur cette seule mesure. Ajouter un
+corpus déclaré, poses/quantification et collisions explicites, en séparant
+densification de la même zone et extension du trajet. Ses captures en
+préparation restent indépendantes de la présente qualification.
+
+## Sixième tranche publiée à 85015a8c — historique
 
 La sixième tranche partage [le nuage et l'index Z](docs/P0_NUAGE_ET_INDEX_PARTAGES.md)
 entre rectangles et seuils. 37 CTests passent en Release et Clang ASan/UBSan.
