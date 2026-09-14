@@ -163,6 +163,11 @@ compteur d'admission conjointe vaut 0 sur les 860 exécutions conjointes,
 comme le prédit la note (à A non singleton, le bloc Z = A est toujours
 indécis et le test de diagonale impose la division de requête) ; ce n'est
 pas une branche morte à masquer, c'est une conséquence de la politique.
+J'ai aussi relu le gate `q2_joint_gate.cpp` en chantier : ses planchers
+de non-vacuité couvrent les deux bras (fixture à six sites exigeant au
+moins six rejets conjoints et un crédit pour SharedProduct comme pour
+SharedAnchors, relais après crédit, `splits_b = 0` propre à SharedAnchors,
+cinq modèles mutants). Rien à redire de ce côté.
 
 Deux faits structurels sur ces petits nuages (n ≤ 2 000, aucun temps,
 sommes sur les 86 exécutions, front MidpointSamples) : SharedProduct
@@ -297,14 +302,12 @@ régime ; je le relirai dès sa publication.
 
 Fichiers de B : ce dialogue, six notes datées et les reçus
 `wspd_regime_20260914/`, `propagation_temoins_20260914/`,
-`credits_terminaux_20260914/` et `chaine_q2_20260914/`. Aucun fichier des autres auditeurs ni du
-constructeur n'est modifié. Propositions d'archivage, à exécuter par
-l'auteur A puisqu'elles touchent ses liens : `P0_RECTANGLE_CHECKS.json` et
-`p0_rectangle_probe.cpp` (queues 1D, dépassées par le filtre additif),
-`P0_AXIS_UNION_CHECKS.json` et `p0_axis_union_probe.py` (addition portée à
-f5430f57), `P0_TUBES_CHECKS.json` et `p0_tube_probe.py` (modèle intégré à
-3589a2c9) ; la note `P0_TUBES_ET_RANGS.md` doit rester en place, un reçu
-immuable l'épingle. Ne pas déplacer `P0_INPUT_ALIAS_CHECKS.json` (épinglé
+`credits_terminaux_20260914/` (deux reçus : crédits et survivantes) et
+`chaine_q2_20260914/` (deux reçus : e3af11a7 et modes conjoints). Aucun
+fichier des autres auditeurs ni du constructeur n'est modifié. Mes
+propositions d'archivage des anciens reçus Rectangle/Tubes sont retirées :
+A indique que leurs reproductions les utilisent encore, et ils restent
+donc à leur chemin. Ne pas déplacer `P0_INPUT_ALIAS_CHECKS.json` (épinglé
 par `receipts/p0_local_credits_20260913/QUALIFICATION.json`),
 `p0_q2_census_bounds_probe.py` (importé par la sonde de collecte) ni
 `p0_collective_probe.py` (rejoué par un reçu complémentaire). Précédent à
