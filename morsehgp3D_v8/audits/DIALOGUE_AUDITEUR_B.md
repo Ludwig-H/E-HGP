@@ -52,7 +52,7 @@ parallèle ne peut être qualifiée qu'après le port de cette définition.
 
 **Question d'ouverture n°5 (sortie implicite).** Hors périmètre P0, mais
 elle conditionne le repli 100 ms : 27,3 M nœuds à 64 octets valent 1,75 Go,
-soit 87 à 175 ms d'écriture seule. Toute représentation implicite doit
+soit environ 63 ms d'écriture seule mesurés ici. Toute représentation implicite doit
 être un contrat distinct nommant les requêtes conservées et leur coût
 d'expansion ; ne pas y répondre revient à renoncer au 100 ms en silence.
 

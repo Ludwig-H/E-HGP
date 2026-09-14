@@ -27,26 +27,26 @@ kernel plat à 10⁴ threads ne dispense pas de compter le travail total.
 | Essais de supports MEB du constructeur FULL v7 | 3,90·10⁹ | ≈ 12 ns par essai | ≈ 1,2 ns |
 | Nœuds FULL retenus | 27,3 M | ≈ 1,8 µs par nœud | ≈ 180 ns |
 
-Les deux dernières lignes disent l'essentiel : à travail v7 inchangé, la
-seule somme des opérations comptées (≈ 1,6·10¹⁰ hors export) vaut environ
-160 s séquentiels à 10 ns l'opération, contre 48 s disponibles ; il faut
-donc **réduire le travail d'au moins un facteur 3,5 à mise à l'échelle
-parfaite**, en pratique d'un ordre de grandeur par poste, et non seulement
-paralléliser. Le front pur seul coûte environ 1,5 s séquentiels à 50k en
-emprise u16 pleine (probe v4, une mesure, machine partagée), soit trois
-pour cent du budget avant tout témoin ; la génération v7 complète du même
-run a coûté 682 s de temps utilisateur pour 12,2 s murales.
+Le chiffre mesuré qui compte est le temps CPU réellement consommé : la
+génération amont v7 du run 50k du 6 septembre (GNU time, `n50000_k10.stderr`)
+a coûté **682 s de temps utilisateur pour 21 s murales**, contre 48 s
+séquentiels disponibles pour toute la tour ; le constructeur FULL y ajoute
+390 s en mono. À mise à l'échelle parfaite, l'amont seul doit donc faire
+**quatorze fois moins de travail**, et non seulement mieux se paralléliser.
+Le front pur seul coûte environ 1,5 s séquentiels à 50k en emprise u16
+pleine (probe v4, quatre mesures entre 1,53 et 1,65 s), soit trois pour
+cent du budget avant tout témoin.
 
 ## 2. Plancher de la sortie
 
 La tour v7 retient 27 273 218 nœuds FULL. Au format v7 (64 octets par
 nœud d'après la ligne de configuration du reçu du 6 septembre), l'écriture
-seule représente 1,75 Go, soit 87 à 175 ms à 10–20 Go/s de bande passante
-mémoire. **Le repli 100 ms est donc sous le plancher d'écriture de la
-représentation v7** ; il exige soit un nœud d'au plus une quinzaine
-d'octets, soit une sortie implicite déclarée comme contrat distinct
-(question d'ouverture n°5 du journal, toujours sans réponse). Décider du
-format de nœud cible avant de réclamer 100 ms.
+seule représente 1,75 Go ; un réfutateur l'a mesurée sur cet hôte à 62,7 ms
+en mono-fil (27,9 Go/s) et 61,6 ms à huit fils. **Le repli 100 ms laisse
+donc moins de 40 ms à tout le reste de la tour** avec la représentation v7 ;
+il exige un nœud plus compact, ou une sortie implicite déclarée comme
+contrat distinct (question d'ouverture n°5 du journal). Décider du format
+de nœud cible avant de réclamer 100 ms ; mesurer ce plancher sur G4.
 
 ## 3. Où les tranches P0 pèsent, par famille
 
@@ -60,7 +60,10 @@ Extrapolé en n², ce poste vaudrait environ 3,7 s séquentiels à
 50k, soit moins d'un pour cent de la tour v7 mais huit pour cent du
 budget d'une seconde à 48 voies. Sur terrain et huit amas, la masse de
 paires se concentre sur des facteurs de 64 à 700 sites : le poste y est
-plus lourd, mais non mesuré. Il ne domine que sur les nappes et les amas
+plus lourd, mais son volume n'est publié qu'à petite taille (le compteur
+`p_factor` de `generate.hpp` v7, somme des auto-produits par lane, figure
+dans les reçus à n ≤ 1 000, pas dans le reçu 50k ni pour ces familles aux
+tailles d'intérêt). Il ne domine que sur les nappes et les amas
 séparés par au moins s fois leur diamètre (le « deux amas » v7, rectangle
 racine construit à la main, 31 s à 32k), régime absent des familles de
 mesure. Le poids réel de P0 par famille reste donc **inconnu tant qu'un
