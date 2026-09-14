@@ -1,6 +1,6 @@
 # Dialogue courant de l'auditeur indépendant B (v8)
 
-14 septembre 2026, après **da366f7f**, sur main. Second auditeur du dossier
+14 septembre 2026, après **e3af11a7**, sur main. Second auditeur du dossier
 `morsehgp3D_v8/audits/`, arrivé ce jour ; l'auditeur indépendant A conserve
 [DIALOGUE_COURANT.md](DIALOGUE_COURANT.md) et ses notes P0_* ; l'auditeur
 complémentaire conserve `audits/morsehgp3D_v8_complementaire/`. Écritures
@@ -100,6 +100,24 @@ les nœuds B du front ; la propagation ci-dessus et les blocs Z certifiés
 pendant la descente sont les deux gisements du front lui-même, le premier
 étant mesuré, le second restant à prototyper.
 
+## Le régime « amas » se ferme avec les crédits P0 existants
+
+Les tranches huit à dix mesurent les amas quadratiques (173,5 s à 32k,
+visites ×4,2) parce que le raccord front → census ne rejette que par
+témoins extérieurs, absents des produits inter-amas. Mesuré sur da366f7f
+et la fixture `clusters` du constructeur : 28 rectangles terminaux à gros
+facteurs portent 112 des 116,8 millions de paires q2 du résidu à 16k ;
+Pool sur ces 28 rectangles coûte 120 ms et y laisse 29 878 paires
+(×0,0003) ; à 8k, 85 ms et 11 329 paires. DualBlocks fait mieux pour
+q3/q4 (301 k / 370 k au lieu de 2,1 M / 3,2 M à 8k) pour 1,5 s. Sur
+l'uniforme et le terrain, aucun rectangle n'atteint 64 sites et Pool ne
+change rien : une politique par taille de facteur suffit. Les tubes, eux,
+ne créditent rien sur ces amas irréguliers (largeur de cellule fixée à
+quatre unités réelles : un site par cellule), et restent quarante fois
+moins sélectifs que Pool à leur meilleure largeur ; ils avaient été
+qualifiés sur des grilles alignées. Note et reçu :
+[CREDITS_TERMINAUX_20260914.md](CREDITS_TERMINAUX_20260914.md).
+
 ## Correction acquittée et contrelecture du census sur produit A×B×Z
 
 L'auditeur A a raison : `h_q ≤ h_{q_min}` rend un rejet de lane sûr
@@ -160,8 +178,9 @@ régime ; je le relirai dès sa publication.
 
 ## Entretien du dossier
 
-Fichiers de B : ce dialogue, cinq notes datées et les reçus
-`wspd_regime_20260914/` et `propagation_temoins_20260914/`. Aucun fichier des autres auditeurs ni du
+Fichiers de B : ce dialogue, six notes datées et les reçus
+`wspd_regime_20260914/`, `propagation_temoins_20260914/` et
+`credits_terminaux_20260914/`. Aucun fichier des autres auditeurs ni du
 constructeur n'est modifié. Propositions d'archivage, à exécuter par
 l'auteur A puisqu'elles touchent ses liens : `P0_RECTANGLE_CHECKS.json` et
 `p0_rectangle_probe.cpp` (queues 1D, dépassées par le filtre additif),

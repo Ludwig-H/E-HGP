@@ -1,0 +1,817 @@
+{
+  "title": "Crédits locaux P0 sur les rectangles terminaux du premier front v8 et largeur des tubes sur nuages irréguliers",
+  "date": "2026-09-14",
+  "author_role": "auditeur indépendant B",
+  "git_head": "93c24ddab4ab3a4ce5cd4df12421c502495eef2f",
+  "src_root": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_da366f7f/morsehgp3D_v8",
+  "compile_commands": {
+    "clusters_credits": "g++ -std=c++20 -O2 -Wall -Wextra -I/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_da366f7f/morsehgp3D_v8/src -I/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_da366f7f/morsehgp3D_v8/bench /workspaces/E-HGP/morsehgp3D_v8/audits/credits_terminaux_20260914/clusters_credits.cpp /workspaces/E-HGP/build/v8-audit-da366f7f/libmhgp8_p0.a -o /tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/clusters/receipt_build/clusters_credits",
+    "front_pool": "g++ -std=c++20 -O2 -Wall -Wextra -I/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_da366f7f/morsehgp3D_v8/src -I/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_da366f7f/morsehgp3D_v8/bench /workspaces/E-HGP/morsehgp3D_v8/audits/credits_terminaux_20260914/front_pool.cpp /workspaces/E-HGP/build/v8-audit-da366f7f/libmhgp8_p0.a -o /tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/clusters/receipt_build/front_pool",
+    "tube_width": "g++ -std=c++20 -O2 -Wall -Wextra -I/workspaces/E-HGP/morsehgp3D_v8/audits/credits_terminaux_20260914/wide/pipeline -I/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_da366f7f/morsehgp3D_v8/src/pipeline -I/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_da366f7f/morsehgp3D_v8/src -I/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_da366f7f/morsehgp3D_v8/bench /workspaces/E-HGP/morsehgp3D_v8/audits/credits_terminaux_20260914/tube_width.cpp /workspaces/E-HGP/build/v8-audit-da366f7f/libmhgp8_p0.a -o /tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/clusters/receipt_build/tube_width"
+  },
+  "pins_sha256": {
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_da366f7f/morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_da366f7f/morsehgp3D_v8/src/pipeline/local_credits.hpp": "a68fed7a40041ddc76b2a401d35cdafeaa66711ab3cd1d79ff41f3666b29a3d9",
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_da366f7f/morsehgp3D_v8/src/pipeline/local_credits.cpp": "0d069aca65dcffc96bb26d55874fdb34b2748eb5f0b956a991d584d928ab1392",
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_da366f7f/morsehgp3D_v8/src/wspd/front.cpp": "1459d0a2e01743e2f4e14e03de054e35dd204d2b9d34467e9f59d61fa1a4a162",
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_da366f7f/morsehgp3D_v8/bench/front_fixtures.hpp": "a2d3ddbbff837de1609a2e1104c8797682cd7a435d4fa417d31388eb1f402b3b",
+    "morsehgp3D_v8/audits/credits_terminaux_20260914/wide/pipeline/tube_credits.hpp": "8173c716f02e6bef5adb7fd6f371d9da1b19748d4d65ee26daf022b70129feec",
+    "build/v8-audit-da366f7f/libmhgp8_p0.a": "1565bd617657570a1f80fc29159c5b363898534fc3fbc720c36853bb1b85d2a2",
+    "morsehgp3D_v8/audits/credits_terminaux_20260914/clusters_credits.cpp": "413dcf0bab27983e727e99bd7ddeeb40c612b15191b32222fff8ded6fff484e5",
+    "morsehgp3D_v8/audits/credits_terminaux_20260914/front_pool.cpp": "632ba406ea9eb2b095d0135c9e13df2595da15b364c166e5043096da380b100f",
+    "morsehgp3D_v8/audits/credits_terminaux_20260914/tube_width.cpp": "394ae9e24c4ea5cb07e11ad61df736e70810b14e6bb9317a9e29b641f928b638"
+  },
+  "runs": [
+    {
+      "harness": "clusters_credits",
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/clusters/receipt_build/clusters_credits 8000",
+      "env": {},
+      "wall_seconds": 0.143,
+      "parsed_lines": [
+        {
+          "n": 8000
+        },
+        {
+          "pairs": 1017072,
+          "prepare_ms": 0.1
+        },
+        {
+          "batch_ms": 0.3,
+          "q2": 1017072,
+          "q3": 1017072,
+          "q4": 1017072
+        },
+        {
+          "batch_ms": 1.9,
+          "q2": 883,
+          "q3": 140089,
+          "q4": 196241
+        },
+        {
+          "batch_ms": 39.5,
+          "q2": 517,
+          "q3": 21995,
+          "q4": 25368
+        },
+        {
+          "pairs": 985793,
+          "prepare_ms": 0.1
+        },
+        {
+          "batch_ms": 0.3,
+          "q2": 985793,
+          "q3": 985793,
+          "q4": 985793
+        },
+        {
+          "batch_ms": 2.2,
+          "q2": 72,
+          "q3": 15940,
+          "q4": 34823
+        },
+        {
+          "batch_ms": 43.2,
+          "q2": 72,
+          "q3": 3139,
+          "q4": 5098
+        },
+        {
+          "pairs": 981757,
+          "prepare_ms": 0.1
+        },
+        {
+          "batch_ms": 0.2,
+          "q2": 981757,
+          "q3": 981757,
+          "q4": 981757
+        },
+        {
+          "batch_ms": 2.3,
+          "q2": 58,
+          "q3": 3239,
+          "q4": 8484
+        },
+        {
+          "batch_ms": 48.9,
+          "q2": 58,
+          "q3": 1250,
+          "q4": 2237
+        }
+      ],
+      "raw_stdout": "n=8000 cluster sizes: 1009 1008 942 977 1016 1019 1056 973\nproduct 0 x 1 : |A|=1009 |B|=1008 pairs=1017072 prepare_ms=0.1\n  Tubes      batch_ms=0.3 residual q2=1017072 q3=1017072 q4=1017072\n  Pool       batch_ms=1.9 residual q2=883 q3=140089 q4=196241\n  DualBlocks batch_ms=39.5 residual q2=517 q3=21995 q4=25368\nproduct 0 x 3 : |A|=1009 |B|=977 pairs=985793 prepare_ms=0.1\n  Tubes      batch_ms=0.3 residual q2=985793 q3=985793 q4=985793\n  Pool       batch_ms=2.2 residual q2=72 q3=15940 q4=34823\n  DualBlocks batch_ms=43.2 residual q2=72 q3=3139 q4=5098\nproduct 0 x 7 : |A|=1009 |B|=973 pairs=981757 prepare_ms=0.1\n  Tubes      batch_ms=0.2 residual q2=981757 q3=981757 q4=981757\n  Pool       batch_ms=2.3 residual q2=58 q3=3239 q4=8484\n  DualBlocks batch_ms=48.9 residual q2=58 q3=1250 q4=2237\n"
+    },
+    {
+      "harness": "clusters_credits",
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/clusters/receipt_build/clusters_credits 16000",
+      "env": {},
+      "wall_seconds": 0.315,
+      "parsed_lines": [
+        {
+          "n": 16000
+        },
+        {
+          "pairs": 4033202,
+          "prepare_ms": 0.2
+        },
+        {
+          "batch_ms": 0.5,
+          "q2": 4033202,
+          "q3": 4033202,
+          "q4": 4033202
+        },
+        {
+          "batch_ms": 4.4,
+          "q2": 2466,
+          "q3": 602793,
+          "q4": 820746
+        },
+        {
+          "batch_ms": 86.3,
+          "q2": 1108,
+          "q3": 54005,
+          "q4": 63457
+        },
+        {
+          "pairs": 4049506,
+          "prepare_ms": 0.2
+        },
+        {
+          "batch_ms": 0.5,
+          "q2": 4049506,
+          "q3": 4049506,
+          "q4": 4049506
+        },
+        {
+          "batch_ms": 4.2,
+          "q2": 74,
+          "q3": 34631,
+          "q4": 76745
+        },
+        {
+          "batch_ms": 94.3,
+          "q2": 74,
+          "q3": 4375,
+          "q4": 6660
+        },
+        {
+          "pairs": 4086190,
+          "prepare_ms": 0.2
+        },
+        {
+          "batch_ms": 0.5,
+          "q2": 4086190,
+          "q3": 4086190,
+          "q4": 4086190
+        },
+        {
+          "batch_ms": 4.4,
+          "q2": 61,
+          "q3": 3662,
+          "q4": 15015
+        },
+        {
+          "batch_ms": 112.9,
+          "q2": 61,
+          "q3": 1387,
+          "q4": 2950
+        }
+      ],
+      "raw_stdout": "n=16000 cluster sizes: 2038 1979 1948 1987 2029 2016 1998 2005\nproduct 0 x 1 : |A|=2038 |B|=1979 pairs=4033202 prepare_ms=0.2\n  Tubes      batch_ms=0.5 residual q2=4033202 q3=4033202 q4=4033202\n  Pool       batch_ms=4.4 residual q2=2466 q3=602793 q4=820746\n  DualBlocks batch_ms=86.3 residual q2=1108 q3=54005 q4=63457\nproduct 0 x 3 : |A|=2038 |B|=1987 pairs=4049506 prepare_ms=0.2\n  Tubes      batch_ms=0.5 residual q2=4049506 q3=4049506 q4=4049506\n  Pool       batch_ms=4.2 residual q2=74 q3=34631 q4=76745\n  DualBlocks batch_ms=94.3 residual q2=74 q3=4375 q4=6660\nproduct 0 x 7 : |A|=2038 |B|=2005 pairs=4086190 prepare_ms=0.2\n  Tubes      batch_ms=0.5 residual q2=4086190 q3=4086190 q4=4086190\n  Pool       batch_ms=4.4 residual q2=61 q3=3662 q4=15015\n  DualBlocks batch_ms=112.9 residual q2=61 q3=1387 q4=2950\n"
+    },
+    {
+      "harness": "clusters_credits",
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/clusters/receipt_build/clusters_credits 32000",
+      "env": {},
+      "wall_seconds": 0.679,
+      "parsed_lines": [
+        {
+          "n": 32000
+        },
+        {
+          "pairs": 16240576,
+          "prepare_ms": 0.5
+        },
+        {
+          "batch_ms": 1.2,
+          "q2": 16240576,
+          "q3": 16240576,
+          "q4": 16240576
+        },
+        {
+          "batch_ms": 8.2,
+          "q2": 8447,
+          "q3": 2516804,
+          "q4": 3797212
+        },
+        {
+          "batch_ms": 191.0,
+          "q2": 2665,
+          "q3": 133641,
+          "q4": 159525
+        },
+        {
+          "pairs": 16127232,
+          "prepare_ms": 0.5
+        },
+        {
+          "batch_ms": 1.1,
+          "q2": 16127232,
+          "q3": 16127232,
+          "q4": 16127232
+        },
+        {
+          "batch_ms": 8.8,
+          "q2": 95,
+          "q3": 111018,
+          "q4": 236080
+        },
+        {
+          "batch_ms": 203.4,
+          "q2": 95,
+          "q3": 7238,
+          "q4": 10915
+        },
+        {
+          "pairs": 16293200,
+          "prepare_ms": 0.5
+        },
+        {
+          "batch_ms": 1.0,
+          "q2": 16293200,
+          "q3": 16293200,
+          "q4": 16293200
+        },
+        {
+          "batch_ms": 8.9,
+          "q2": 60,
+          "q3": 4471,
+          "q4": 27875
+        },
+        {
+          "batch_ms": 243.1,
+          "q2": 60,
+          "q3": 1191,
+          "q4": 3708
+        }
+      ],
+      "raw_stdout": "n=32000 cluster sizes: 4048 4012 3992 3984 3990 4002 3947 4025\nproduct 0 x 1 : |A|=4048 |B|=4012 pairs=16240576 prepare_ms=0.5\n  Tubes      batch_ms=1.2 residual q2=16240576 q3=16240576 q4=16240576\n  Pool       batch_ms=8.2 residual q2=8447 q3=2516804 q4=3797212\n  DualBlocks batch_ms=191.0 residual q2=2665 q3=133641 q4=159525\nproduct 0 x 3 : |A|=4048 |B|=3984 pairs=16127232 prepare_ms=0.5\n  Tubes      batch_ms=1.1 residual q2=16127232 q3=16127232 q4=16127232\n  Pool       batch_ms=8.8 residual q2=95 q3=111018 q4=236080\n  DualBlocks batch_ms=203.4 residual q2=95 q3=7238 q4=10915\nproduct 0 x 7 : |A|=4048 |B|=4025 pairs=16293200 prepare_ms=0.5\n  Tubes      batch_ms=1.0 residual q2=16293200 q3=16293200 q4=16293200\n  Pool       batch_ms=8.9 residual q2=60 q3=4471 q4=27875\n  DualBlocks batch_ms=243.1 residual q2=60 q3=1191 q4=3708\n"
+    },
+    {
+      "harness": "tube_width",
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/clusters/receipt_build/tube_width 32000 0 1",
+      "env": {
+        "MHGP8_TUBE_WIDTH_MUL": "1"
+      },
+      "wall_seconds": 0.015,
+      "parsed_lines": [
+        {
+          "width_mul": 1,
+          "records": 8060,
+          "cells": 7818,
+          "fallbacks": 0,
+          "residual": 16240576,
+          "ms": 1.1
+        },
+        {
+          "width_mul": 1,
+          "records": 8060,
+          "cells": 7818,
+          "fallbacks": 0,
+          "residual": 16240576,
+          "ms": 1.1
+        },
+        {
+          "width_mul": 1,
+          "records": 8060,
+          "cells": 7818,
+          "fallbacks": 0,
+          "residual": 16240576,
+          "ms": 1.1
+        }
+      ],
+      "raw_stdout": "q2 width_mul=1 records=8060 cells=7818 fallbacks=0 residual=16240576 ms=1.1\nq3 width_mul=1 records=8060 cells=7818 fallbacks=0 residual=16240576 ms=1.1\nq4 width_mul=1 records=8060 cells=7818 fallbacks=0 residual=16240576 ms=1.1\n"
+    },
+    {
+      "harness": "tube_width",
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/clusters/receipt_build/tube_width 32000 0 1",
+      "env": {
+        "MHGP8_TUBE_WIDTH_MUL": "16"
+      },
+      "wall_seconds": 0.015,
+      "parsed_lines": [
+        {
+          "width_mul": 16,
+          "records": 8060,
+          "cells": 512,
+          "fallbacks": 0,
+          "residual": 4109450,
+          "ms": 1.3
+        },
+        {
+          "width_mul": 16,
+          "records": 8060,
+          "cells": 512,
+          "fallbacks": 0,
+          "residual": 4463706,
+          "ms": 1.3
+        },
+        {
+          "width_mul": 16,
+          "records": 8060,
+          "cells": 512,
+          "fallbacks": 0,
+          "residual": 4248139,
+          "ms": 1.4
+        }
+      ],
+      "raw_stdout": "q2 width_mul=16 records=8060 cells=512 fallbacks=0 residual=4109450 ms=1.3\nq3 width_mul=16 records=8060 cells=512 fallbacks=0 residual=4463706 ms=1.3\nq4 width_mul=16 records=8060 cells=512 fallbacks=0 residual=4248139 ms=1.4\n"
+    },
+    {
+      "harness": "tube_width",
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/clusters/receipt_build/tube_width 32000 0 1",
+      "env": {
+        "MHGP8_TUBE_WIDTH_MUL": "64"
+      },
+      "wall_seconds": 0.015,
+      "parsed_lines": [
+        {
+          "width_mul": 64,
+          "records": 8060,
+          "cells": 32,
+          "fallbacks": 0,
+          "residual": 377475,
+          "ms": 1.2
+        },
+        {
+          "width_mul": 64,
+          "records": 8060,
+          "cells": 32,
+          "fallbacks": 0,
+          "residual": 2445248,
+          "ms": 1.2
+        },
+        {
+          "width_mul": 64,
+          "records": 8060,
+          "cells": 32,
+          "fallbacks": 0,
+          "residual": 4051318,
+          "ms": 1.2
+        }
+      ],
+      "raw_stdout": "q2 width_mul=64 records=8060 cells=32 fallbacks=0 residual=377475 ms=1.2\nq3 width_mul=64 records=8060 cells=32 fallbacks=0 residual=2445248 ms=1.2\nq4 width_mul=64 records=8060 cells=32 fallbacks=0 residual=4051318 ms=1.2\n"
+    },
+    {
+      "harness": "tube_width",
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/clusters/receipt_build/tube_width 32000 0 1",
+      "env": {
+        "MHGP8_TUBE_WIDTH_MUL": "256"
+      },
+      "wall_seconds": 0.014,
+      "parsed_lines": [
+        {
+          "width_mul": 256,
+          "records": 8060,
+          "cells": 2,
+          "fallbacks": 0,
+          "residual": 3701240,
+          "ms": 1.1
+        },
+        {
+          "width_mul": 256,
+          "records": 8060,
+          "cells": 2,
+          "fallbacks": 0,
+          "residual": 16240576,
+          "ms": 1.0
+        },
+        {
+          "width_mul": 256,
+          "records": 8060,
+          "cells": 2,
+          "fallbacks": 0,
+          "residual": 16240576,
+          "ms": 1.0
+        }
+      ],
+      "raw_stdout": "q2 width_mul=256 records=8060 cells=2 fallbacks=0 residual=3701240 ms=1.1\nq3 width_mul=256 records=8060 cells=2 fallbacks=0 residual=16240576 ms=1.0\nq4 width_mul=256 records=8060 cells=2 fallbacks=0 residual=16240576 ms=1.0\n"
+    },
+    {
+      "harness": "tube_width",
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/clusters/receipt_build/tube_width 32000 0 1",
+      "env": {
+        "MHGP8_TUBE_WIDTH_MUL": "1024"
+      },
+      "wall_seconds": 0.014,
+      "parsed_lines": [
+        {
+          "width_mul": 1024,
+          "records": 8060,
+          "cells": 2,
+          "fallbacks": 0,
+          "residual": 3701240,
+          "ms": 1.1
+        },
+        {
+          "width_mul": 1024,
+          "records": 8060,
+          "cells": 2,
+          "fallbacks": 0,
+          "residual": 16240576,
+          "ms": 1.1
+        },
+        {
+          "width_mul": 1024,
+          "records": 8060,
+          "cells": 2,
+          "fallbacks": 0,
+          "residual": 16240576,
+          "ms": 1.0
+        }
+      ],
+      "raw_stdout": "q2 width_mul=1024 records=8060 cells=2 fallbacks=0 residual=3701240 ms=1.1\nq3 width_mul=1024 records=8060 cells=2 fallbacks=0 residual=16240576 ms=1.1\nq4 width_mul=1024 records=8060 cells=2 fallbacks=0 residual=16240576 ms=1.0\n"
+    },
+    {
+      "harness": "front_pool",
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/clusters/receipt_build/front_pool 8000 clusters 10 8 64 pool samples",
+      "env": {},
+      "wall_seconds": 2.34,
+      "parsed_lines": [
+        {
+          "family": "clusters",
+          "n": 8000,
+          "kmax": 10,
+          "s": 8,
+          "front": "samples",
+          "strategy": "pool",
+          "threshold": 64,
+          "rects": 1839366,
+          "big": 28,
+          "front_total_ms": 2332.9,
+          "credit_ms": 59.5,
+          "predicate_tests": 1559390
+        },
+        {
+          "residual_front": 29728389,
+          "residual_after_credits": 1743978,
+          "big_rects_pairs": 27995740
+        },
+        {
+          "residual_front": 30942861,
+          "residual_after_credits": 5030230,
+          "big_rects_pairs": 27995740
+        },
+        {
+          "residual_front": 30849757,
+          "residual_after_credits": 6012698,
+          "big_rects_pairs": 27995740
+        }
+      ],
+      "raw_stdout": "family=clusters n=8000 kmax=10 s=8 front=samples strategy=pool threshold=64 rects=1839366 big=28 front_total_ms=2332.9 credit_ms=59.5 predicate_tests=1559390\n  q2 residual_front=29728389 residual_after_credits=1743978 (x0.0587) | big_rects_pairs=27995740 -> 11329 (x0.0004)\n  q3 residual_front=30942861 residual_after_credits=5030230 (x0.1626) | big_rects_pairs=27995740 -> 2083109 (x0.0744)\n  q4 residual_front=30849757 residual_after_credits=6012698 (x0.1949) | big_rects_pairs=27995740 -> 3158681 (x0.1128)\n"
+    },
+    {
+      "harness": "front_pool",
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/clusters/receipt_build/front_pool 8000 clusters 10 8 64 dual samples",
+      "env": {},
+      "wall_seconds": 3.424,
+      "parsed_lines": [
+        {
+          "family": "clusters",
+          "n": 8000,
+          "kmax": 10,
+          "s": 8,
+          "front": "samples",
+          "strategy": "dual",
+          "threshold": 64,
+          "rects": 1839366,
+          "big": 28,
+          "front_total_ms": 3416.5,
+          "credit_ms": 1139.3,
+          "predicate_tests": 5748036
+        },
+        {
+          "residual_front": 29728389,
+          "residual_after_credits": 1740367,
+          "big_rects_pairs": 27995740
+        },
+        {
+          "residual_front": 30942861,
+          "residual_after_credits": 3248358,
+          "big_rects_pairs": 27995740
+        },
+        {
+          "residual_front": 30849757,
+          "residual_after_credits": 3224376,
+          "big_rects_pairs": 27995740
+        }
+      ],
+      "raw_stdout": "family=clusters n=8000 kmax=10 s=8 front=samples strategy=dual threshold=64 rects=1839366 big=28 front_total_ms=3416.5 credit_ms=1139.3 predicate_tests=5748036\n  q2 residual_front=29728389 residual_after_credits=1740367 (x0.0585) | big_rects_pairs=27995740 -> 7718 (x0.0003)\n  q3 residual_front=30942861 residual_after_credits=3248358 (x0.1050) | big_rects_pairs=27995740 -> 301237 (x0.0108)\n  q4 residual_front=30849757 residual_after_credits=3224376 (x0.1045) | big_rects_pairs=27995740 -> 370359 (x0.0132)\n"
+    },
+    {
+      "harness": "front_pool",
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/clusters/receipt_build/front_pool 16000 clusters 10 8 64 pool samples",
+      "env": {},
+      "wall_seconds": 7.248,
+      "parsed_lines": [
+        {
+          "family": "clusters",
+          "n": 16000,
+          "kmax": 10,
+          "s": 8,
+          "front": "samples",
+          "strategy": "pool",
+          "threshold": 64,
+          "rects": 5250240,
+          "big": 28,
+          "front_total_ms": 7235.5,
+          "credit_ms": 122.1,
+          "predicate_tests": 3115490
+        },
+        {
+          "residual_front": 116753516,
+          "residual_after_credits": 4786336,
+          "big_rects_pairs": 111997058
+        },
+        {
+          "residual_front": 121553187,
+          "residual_after_credits": 17458139,
+          "big_rects_pairs": 111997058
+        },
+        {
+          "residual_front": 121090644,
+          "residual_after_credits": 20765017,
+          "big_rects_pairs": 111997058
+        }
+      ],
+      "raw_stdout": "family=clusters n=16000 kmax=10 s=8 front=samples strategy=pool threshold=64 rects=5250240 big=28 front_total_ms=7235.5 credit_ms=122.1 predicate_tests=3115490\n  q2 residual_front=116753516 residual_after_credits=4786336 (x0.0410) | big_rects_pairs=111997058 -> 29878 (x0.0003)\n  q3 residual_front=121553187 residual_after_credits=17458139 (x0.1436) | big_rects_pairs=111997058 -> 7902010 (x0.0706)\n  q4 residual_front=121090644 residual_after_credits=20765017 (x0.1715) | big_rects_pairs=111997058 -> 11671431 (x0.1042)\n"
+    },
+    {
+      "harness": "front_pool",
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/clusters/receipt_build/front_pool 16000 clusters 10 8 64 dual samples",
+      "env": {},
+      "wall_seconds": 9.807,
+      "parsed_lines": [
+        {
+          "family": "clusters",
+          "n": 16000,
+          "kmax": 10,
+          "s": 8,
+          "front": "samples",
+          "strategy": "dual",
+          "threshold": 64,
+          "rects": 5250240,
+          "big": 28,
+          "front_total_ms": 9794.5,
+          "credit_ms": 2584.6,
+          "predicate_tests": 12766825
+        },
+        {
+          "residual_front": 116753516,
+          "residual_after_credits": 4770477,
+          "big_rects_pairs": 111997058
+        },
+        {
+          "residual_front": 121553187,
+          "residual_after_credits": 10259064,
+          "big_rects_pairs": 111997058
+        },
+        {
+          "residual_front": 121090644,
+          "residual_after_credits": 9957567,
+          "big_rects_pairs": 111997058
+        }
+      ],
+      "raw_stdout": "family=clusters n=16000 kmax=10 s=8 front=samples strategy=dual threshold=64 rects=5250240 big=28 front_total_ms=9794.5 credit_ms=2584.6 predicate_tests=12766825\n  q2 residual_front=116753516 residual_after_credits=4770477 (x0.0409) | big_rects_pairs=111997058 -> 14019 (x0.0001)\n  q3 residual_front=121553187 residual_after_credits=10259064 (x0.0844) | big_rects_pairs=111997058 -> 702935 (x0.0063)\n  q4 residual_front=121090644 residual_after_credits=9957567 (x0.0822) | big_rects_pairs=111997058 -> 863981 (x0.0077)\n"
+    },
+    {
+      "harness": "front_pool",
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/clusters/receipt_build/front_pool 32000 clusters 10 8 64 pool samples",
+      "env": {},
+      "wall_seconds": 20.663,
+      "parsed_lines": [
+        {
+          "family": "clusters",
+          "n": 32000,
+          "kmax": 10,
+          "s": 8,
+          "front": "samples",
+          "strategy": "pool",
+          "threshold": 64,
+          "rects": 13271306,
+          "big": 28,
+          "front_total_ms": 20639.5,
+          "credit_ms": 241.3,
+          "predicate_tests": 6223598
+        },
+        {
+          "residual_front": 460078566,
+          "residual_after_credits": 12184712,
+          "big_rects_pairs": 447996847
+        },
+        {
+          "residual_front": 474810064,
+          "residual_after_credits": 58847477,
+          "big_rects_pairs": 447996847
+        },
+        {
+          "residual_front": 472735702,
+          "residual_after_credits": 72490286,
+          "big_rects_pairs": 447996847
+        }
+      ],
+      "raw_stdout": "family=clusters n=32000 kmax=10 s=8 front=samples strategy=pool threshold=64 rects=13271306 big=28 front_total_ms=20639.5 credit_ms=241.3 predicate_tests=6223598\n  q2 residual_front=460078566 residual_after_credits=12184712 (x0.0265) | big_rects_pairs=447996847 -> 102993 (x0.0002)\n  q3 residual_front=474810064 residual_after_credits=58847477 (x0.1239) | big_rects_pairs=447996847 -> 32034260 (x0.0715)\n  q4 residual_front=472735702 residual_after_credits=72490286 (x0.1533) | big_rects_pairs=447996847 -> 47751431 (x0.1066)\n"
+    },
+    {
+      "harness": "front_pool",
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/clusters/receipt_build/front_pool 32000 clusters 10 8 64 dual samples",
+      "env": {},
+      "wall_seconds": 25.797,
+      "parsed_lines": [
+        {
+          "family": "clusters",
+          "n": 32000,
+          "kmax": 10,
+          "s": 8,
+          "front": "samples",
+          "strategy": "dual",
+          "threshold": 64,
+          "rects": 13271306,
+          "big": 28,
+          "front_total_ms": 25773.6,
+          "credit_ms": 5477.8,
+          "predicate_tests": 27649021
+        },
+        {
+          "residual_front": 460078566,
+          "residual_after_credits": 12113138,
+          "big_rects_pairs": 447996847
+        },
+        {
+          "residual_front": 474810064,
+          "residual_after_credits": 28493226,
+          "big_rects_pairs": 447996847
+        },
+        {
+          "residual_front": 472735702,
+          "residual_after_credits": 26783712,
+          "big_rects_pairs": 447996847
+        }
+      ],
+      "raw_stdout": "family=clusters n=32000 kmax=10 s=8 front=samples strategy=dual threshold=64 rects=13271306 big=28 front_total_ms=25773.6 credit_ms=5477.8 predicate_tests=27649021\n  q2 residual_front=460078566 residual_after_credits=12113138 (x0.0263) | big_rects_pairs=447996847 -> 31419 (x0.0001)\n  q3 residual_front=474810064 residual_after_credits=28493226 (x0.0600) | big_rects_pairs=447996847 -> 1680009 (x0.0038)\n  q4 residual_front=472735702 residual_after_credits=26783712 (x0.0567) | big_rects_pairs=447996847 -> 2044857 (x0.0046)\n"
+    },
+    {
+      "harness": "front_pool",
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/clusters/receipt_build/front_pool 8000 clusters 10 8 2 pool samples",
+      "env": {},
+      "wall_seconds": 3.493,
+      "parsed_lines": [
+        {
+          "family": "clusters",
+          "n": 8000,
+          "kmax": 10,
+          "s": 8,
+          "front": "samples",
+          "strategy": "pool",
+          "threshold": 2,
+          "rects": 1839366,
+          "big": 726885,
+          "front_total_ms": 3485.3,
+          "credit_ms": 1097.4,
+          "predicate_tests": 6908202
+        },
+        {
+          "residual_front": 29728389,
+          "residual_after_credits": 1743978,
+          "big_rects_pairs": 28873099
+        },
+        {
+          "residual_front": 30942861,
+          "residual_after_credits": 5030230,
+          "big_rects_pairs": 29852763
+        },
+        {
+          "residual_front": 30849757,
+          "residual_after_credits": 6012698,
+          "big_rects_pairs": 29784959
+        }
+      ],
+      "raw_stdout": "family=clusters n=8000 kmax=10 s=8 front=samples strategy=pool threshold=2 rects=1839366 big=726885 front_total_ms=3485.3 credit_ms=1097.4 predicate_tests=6908202\n  q2 residual_front=29728389 residual_after_credits=1743978 (x0.0587) | big_rects_pairs=28873099 -> 888688 (x0.0308)\n  q3 residual_front=30942861 residual_after_credits=5030230 (x0.1626) | big_rects_pairs=29852763 -> 3940132 (x0.1320)\n  q4 residual_front=30849757 residual_after_credits=6012698 (x0.1949) | big_rects_pairs=29784959 -> 4947900 (x0.1661)\n"
+    },
+    {
+      "harness": "front_pool",
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/clusters/receipt_build/front_pool 8000 uniform 10 8 8 pool samples",
+      "env": {},
+      "wall_seconds": 6.198,
+      "parsed_lines": [
+        {
+          "family": "uniform",
+          "n": 8000,
+          "kmax": 10,
+          "s": 8,
+          "front": "samples",
+          "strategy": "pool",
+          "threshold": 8,
+          "rects": 3846799,
+          "big": 956,
+          "front_total_ms": 6190.6,
+          "credit_ms": 5.1,
+          "predicate_tests": 100211
+        },
+        {
+          "residual_front": 3194249,
+          "residual_after_credits": 3194229,
+          "big_rects_pairs": 476
+        },
+        {
+          "residual_front": 8368964,
+          "residual_after_credits": 8368786,
+          "big_rects_pairs": 21202
+        },
+        {
+          "residual_front": 7801137,
+          "residual_after_credits": 7800940,
+          "big_rects_pairs": 18039
+        }
+      ],
+      "raw_stdout": "family=uniform n=8000 kmax=10 s=8 front=samples strategy=pool threshold=8 rects=3846799 big=956 front_total_ms=6190.6 credit_ms=5.1 predicate_tests=100211\n  q2 residual_front=3194249 residual_after_credits=3194229 (x1.0000) | big_rects_pairs=476 -> 456 (x0.9580)\n  q3 residual_front=8368964 residual_after_credits=8368786 (x1.0000) | big_rects_pairs=21202 -> 21024 (x0.9916)\n  q4 residual_front=7801137 residual_after_credits=7800940 (x1.0000) | big_rects_pairs=18039 -> 17842 (x0.9891)\n"
+    },
+    {
+      "harness": "front_pool",
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/clusters/receipt_build/front_pool 8000 uniform 10 8 2 pool samples",
+      "env": {},
+      "wall_seconds": 9.399,
+      "parsed_lines": [
+        {
+          "family": "uniform",
+          "n": 8000,
+          "kmax": 10,
+          "s": 8,
+          "front": "samples",
+          "strategy": "pool",
+          "threshold": 2,
+          "rects": 3846799,
+          "big": 2064957,
+          "front_total_ms": 9390.9,
+          "credit_ms": 2956.8,
+          "predicate_tests": 19628827
+        },
+        {
+          "residual_front": 3194249,
+          "residual_after_credits": 3194225,
+          "big_rects_pairs": 1946192
+        },
+        {
+          "residual_front": 8368964,
+          "residual_after_credits": 8368711,
+          "big_rects_pairs": 6638615
+        },
+        {
+          "residual_front": 7801137,
+          "residual_after_credits": 7800808,
+          "big_rects_pairs": 6130610
+        }
+      ],
+      "raw_stdout": "family=uniform n=8000 kmax=10 s=8 front=samples strategy=pool threshold=2 rects=3846799 big=2064957 front_total_ms=9390.9 credit_ms=2956.8 predicate_tests=19628827\n  q2 residual_front=3194249 residual_after_credits=3194225 (x1.0000) | big_rects_pairs=1946192 -> 1946168 (x1.0000)\n  q3 residual_front=8368964 residual_after_credits=8368711 (x1.0000) | big_rects_pairs=6638615 -> 6638362 (x1.0000)\n  q4 residual_front=7801137 residual_after_credits=7800808 (x1.0000) | big_rects_pairs=6130610 -> 6130281 (x0.9999)\n"
+    },
+    {
+      "harness": "front_pool",
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/clusters/receipt_build/front_pool 8000 terrain 10 8 8 pool samples",
+      "env": {},
+      "wall_seconds": 0.836,
+      "parsed_lines": [
+        {
+          "family": "terrain",
+          "n": 8000,
+          "kmax": 10,
+          "s": 8,
+          "front": "samples",
+          "strategy": "pool",
+          "threshold": 8,
+          "rects": 598230,
+          "big": 1748,
+          "front_total_ms": 828.3,
+          "credit_ms": 11.6,
+          "predicate_tests": 266232
+        },
+        {
+          "residual_front": 935699,
+          "residual_after_credits": 935358,
+          "big_rects_pairs": 3058
+        },
+        {
+          "residual_front": 1740109,
+          "residual_after_credits": 1730691,
+          "big_rects_pairs": 72873
+        },
+        {
+          "residual_front": 1507758,
+          "residual_after_credits": 1500640,
+          "big_rects_pairs": 55157
+        }
+      ],
+      "raw_stdout": "family=terrain n=8000 kmax=10 s=8 front=samples strategy=pool threshold=8 rects=598230 big=1748 front_total_ms=828.3 credit_ms=11.6 predicate_tests=266232\n  q2 residual_front=935699 residual_after_credits=935358 (x0.9996) | big_rects_pairs=3058 -> 2717 (x0.8885)\n  q3 residual_front=1740109 residual_after_credits=1730691 (x0.9946) | big_rects_pairs=72873 -> 63455 (x0.8708)\n  q4 residual_front=1507758 residual_after_credits=1500640 (x0.9953) | big_rects_pairs=55157 -> 48039 (x0.8710)\n"
+    }
+  ],
+  "stable_digest_without_times": "f7e253b2030898580feb1763b5a979dc5792586c13548987ed1f166ceac20487",
+  "scope": "Harnais d'audit hors produit, compilés contre da366f7f ; compteurs déterministes, temps indicatifs (machine partagée)."
+}
