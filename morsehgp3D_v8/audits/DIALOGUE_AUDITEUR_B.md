@@ -137,6 +137,86 @@ chiffres de la prose venaient d'une exécution préliminaire : titre et
 chiffres sont alignés sur le reçu (60 ms à 8k, +1,04 s au seuil 2), et
 la limite est écrite ; la comparaison q2 complète lui appartient.
 
+## Redistribution dynamique des produits DFS (sources gelées, non commitées) : contrelecture et campagne
+
+Réponse à la demande A/B du journal (terminaison sans perte de réveil,
+exception avec workers dormants, annulation après échec de lancement,
+bilan de tous les produits, coût réel du dispatch), sur l'instantané des
+sources gelées de la tranche 14 pris à 19 h 59 UTC (manifeste SHA-256).
+
+**Contrelecture du répartiteur (`front.cpp`, `WspdFrontDispatch::Impl`).**
+
+- *Pas de réveil perdu.* `take` fait tout sous un seul mutex : test
+  d'annulation, test de complétion, prise d'un don ou d'une graine, sinon
+  `active == 0` ⇒ complétion, sinon attente sur la variable de condition
+  avec un prédicat (annulation, file non vide, graine restante, ou
+  `active == 0`) réévalué sous le mutex au réveil. Chaque changement du
+  prédicat se fait sous ce mutex et est suivi d'une notification :
+  `offer` pousse puis `notify_one`, `release_fragment` décrémente `active`
+  et notifie tous si c'est la dernière libération, `cancel` pose le
+  drapeau sous le mutex puis notifie tous. La lecture relâchée du
+  drapeau externe ne sert qu'à l'observation ; la doc exige `cancel()`
+  pour réveiller, et le réducteur l'appelle sur toute défaillance.
+- *Terminaison.* Un donneur reste `active` pendant tout son travail
+  local et ne libère qu'à pile vide ; un preneur devient `active` à la
+  prise ; le prédicat de complétion exige `active == 0`, file vide et
+  graines épuisées, ce qui vaut « aucun produit non visité nulle part ».
+  Une offre ne cède qu'un produit entier non visité, jamais un terminal
+  (exception), jamais le dernier de la pile (`stack.size() > 1`), et le
+  donneur ne le retire qu'après publication réussie : aucun produit ne
+  peut être perdu ni traité deux fois. Avec moins d'appelants que de
+  slots déclarés, le donneur reprend ses propres dons.
+- *Exception et lancement.* `run` attrape tout, appelle `cancel()`,
+  libère son fragment s'il en possède un et relance ; `run_worker`
+  couvre les échecs antérieurs à la région de nettoyage ; le réducteur
+  `run_joined_workers` enregistre l'exception du slot, pose l'annulation,
+  appelle la notification de réveil, et joint tous les fils lancés, y
+  compris après un échec de lancement partiel. Les dormeurs se réveillent
+  sur `cancelled` et rendent `false`. Rien à objecter.
+
+**Campagne (reçu [CHAINE_Q2_DONATE_CHECKS.json](chaine_q2_20260914/CHAINE_Q2_DONATE_CHECKS.json),
+harnais `chain_verify_parallel.cpp -DMHGP8_AUDIT_DONATE`, option `--donate`).**
+Chaque appel parallèle est répété pour Coarse, Donate{64, 64} et
+Donate{1, 1} (file d'un seul produit, intervalle 1 : le cas le plus
+contentieux) ; un chien de garde tue tout appel dépassant 600 s.
+
+- **Bilan de tous les produits** : 86 nuages, cinq combinaisons,
+  W ∈ {1, 2, 3, 4, 8}, lots 1/16, trois ordonnancements = 13 044 appels
+  parallèles, 13 092 120 paires contre la force brute, **0 désaccord,
+  0 doublon entre slots**, condensé canonique et 22 compteurs discrets
+  égaux au chemin série pour chaque appel ; 1 945 101 dons, et
+  `donations = stolen_completed` sur chacun des 13 044 appels (aucun
+  don perdu ni pris deux fois).
+- **Vivacité** : 5 160 appels où le dernier slot lève une exception
+  après cinq supports (Donate{1, 1} maximise les dormeurs) ; 3 385 ont
+  propagé l'exception (les autres n'ont pas atteint cinq supports dans ce
+  slot), aucun blocage, chien de garde silencieux. Le rejeu `-O` sur les
+  familles adversariales est conforme.
+- **Coût réel du dispatch** (mode échelle, W = 8, hôte partagé, un
+  passage) :
+
+| Entrée | Coarse | Donate 64/64 | Donate 1/1 | Part des visites du worker le plus chargé |
+| --- | ---: | ---: | ---: | ---: |
+| Uniforme 8k / 16k / 32k | ×4,25 / ×4,63 / ×5,63 | ×4,55 / ×5,15 / ×5,43 | ×4,57 / ×5,31 / ×4,24 | 0,14 / 0,14 / 0,13 |
+| Amas 8k / 16k / 32k | ×5,69 / ×6,53 / ×4,60 | ×4,74 / ×6,61 / ×4,37 | ×4,66 / ×6,55 / ×4,59 | 0,14 / 0,14 / 0,13 |
+| Terrain 8k / 16k / 32k | ×4,32 / ×4,53 / ×4,52 | ×4,29 / ×4,61 / ×4,46 | ×4,47 / ×4,62 / ×4,49 | 0,14 / 0,13 / 0,14 |
+| Rangées 8k / 16k / 32k | ×1,80 / ×2,38 / ×3,73 | ×1,64 / ×2,75 / ×3,87 | ×1,81 / ×2,95 / ×4,04 | 0,79 / 0,39 / 0,20 |
+
+Sur les familles déjà équilibrées, le don est neutre au bruit près
+(±5 %, sauf Donate{1, 1} sur l'uniforme 32k, +33 %, qui est le réglage
+adversarial et paie 649 154 offres refusées pour file pleine). Sur les
+rangées, la part du worker le plus chargé ne bouge pas (79 % à 8k) et le
+gain reste ×1,6 à ×1,8 : comme prévu par la note du constructeur, le
+don de produits non visités ne divise pas un census déjà engagé, et
+c'est ce census-là qui domine. Deux précisions de lecture : en mode
+Donate, le temps par worker inclut les attentes sur la file, donc le
+rapport max/moyenne des temps vaut 1,00 par construction et ne mesure
+plus le déséquilibre ; seule la part des visites (ou du temps hors
+attente) le mesure. Et les familles synthétiques n'exercent pas la
+redistribution utile ; le constructeur a raison de vouloir la juger sur
+les sous-arbres LiDAR déséquilibrés relevés par A.
+
+
 ## Workers du front et du census (b268cf6f) : multiensemble et compteurs identiques de 1 à 8 fils
 
 La tranche « sous-arbres du front et workers q2 » (`wspd_q2_parallel.hpp`,
@@ -535,8 +615,9 @@ régime ; je le relirai dès sa publication.
 Fichiers de B : ce dialogue, sept notes datées et les reçus
 `wspd_regime_20260914/`, `propagation_temoins_20260914/`,
 `credits_terminaux_20260914/` (deux reçus : crédits et survivantes),
-`chaine_q2_20260914/` (quatre reçus : e3af11a7, modes conjoints b2106c3c,
-filtre Pool ba11e3ab, chaîne parallèle sur sources gelées) et
+`chaine_q2_20260914/` (six reçus : e3af11a7, modes conjoints b2106c3c,
+filtre Pool ba11e3ab, chaîne parallèle et équilibre b268cf6f,
+redistribution dynamique sur sources gelées) et
 `separation_20260914/`. Aucun
 fichier des autres auditeurs ni du constructeur n'est modifié. Mes
 propositions d'archivage des anciens reçus Rectangle/Tubes sont retirées :

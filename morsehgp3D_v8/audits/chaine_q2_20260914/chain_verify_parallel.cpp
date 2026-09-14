@@ -5,8 +5,17 @@
 // identiques d'un W à l'autre (condensé canonique indépendant de l'ordre), sans doublon entre slots ;
 // les compteurs discrets (rectangles, candidates, admises, rejetées) doivent égaler ceux du chemin
 // série run_wspd_q2_census avec les mêmes options.
+// Avec -DMHGP8_AUDIT_DONATE (redistribution dynamique, WspdQ2Schedule), chaque appel parallèle est
+// répété pour les ordonnancements Coarse, Donate{64,64} et Donate{1,1} (file minimale, adversarial),
+// un chien de garde signale tout appel dépassant 600 s (perte de réveil = blocage), et un scénario de
+// vivacité lève une exception depuis un slot pendant que d'autres workers peuvent dormir sur la file :
+// l'appel doit rendre la main en propageant l'exception (jamais de blocage, jamais de worker détaché).
 #include <algorithm>
+#include <atomic>
+#include <chrono>
 #include <cstdio>
+#include <stdexcept>
+#include <thread>
 #include <cstdlib>
 #include <map>
 #include <set>
@@ -39,7 +48,13 @@ static std::string canon(const std::map<Key, Emitted>& m) {
   for (const auto& [k, e] : m) { mix(k.first); mix(k.second); mix(e.interior.size()); for (auto v : e.interior) mix(v); mix(e.shell.size()); for (auto v : e.shell) mix(v); mix(e.key.diameter_squared); for (int ax=0;ax<3;++ax) mix(e.key.center_twice[ax]); }
   char buf[32]; std::snprintf(buf, sizeof buf, "%016llx", (unsigned long long)h); return buf;
 }
+static std::atomic<long long> g_call_started_ms{0};
+static std::atomic<bool> g_in_call{false};
+static long long now_ms() { return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count(); }
+struct CallGuard { CallGuard() { g_call_started_ms = now_ms(); g_in_call = true; } ~CallGuard() { g_in_call = false; } };
 int main(int argc, char** argv) {
+  std::thread watchdog([] { for (;;) { std::this_thread::sleep_for(std::chrono::seconds(5)); if (g_in_call && now_ms() - g_call_started_ms > 600000) { std::fprintf(stderr, "WATCHDOG: parallel call exceeded 600 s (lost wakeup or hang)\n"); std::fflush(stderr); std::abort(); } } });
+  watchdog.detach();
   if (argc < 5) { std::fprintf(stderr, "usage: family|adv:name n kmax s [seed] [scale]\n  scale : pas de force brute (grands nuages) ; une combinaison, W ∈ {1,2,4,8}, J = 16, identité des condensés et des compteurs seulement\n"); return 2; }
   const std::string fam = argv[1]; const std::size_t n = std::strtoull(argv[2], nullptr, 10);
   const unsigned kmax = std::atoi(argv[3]); const unsigned s = std::atoi(argv[4]); const unsigned seed = argc > 5 ? std::atoi(argv[5]) : 3;
@@ -63,7 +78,19 @@ int main(int argc, char** argv) {
   const std::vector<Combo> combos = scale ? std::vector<Combo>{all_combos[0]} : all_combos;  // échelle : Pool 64, frère, Complement
   const std::vector<std::size_t> workers_list = scale ? std::vector<std::size_t>{1, 2, 4, 8} : std::vector<std::size_t>{1, 2, 3, 4, 8};
   const std::vector<std::size_t> jobs_list = scale ? std::vector<std::size_t>{16} : std::vector<std::size_t>{1, 16};
+#ifdef MHGP8_AUDIT_DONATE
+  struct Sched { WspdQ2Schedule s; const char* name; };
+  const std::vector<Sched> schedules = {
+    {WspdQ2Schedule{WspdQ2ScheduleMode::Coarse, 64, 64}, "coarse"},
+    {WspdQ2Schedule{WspdQ2ScheduleMode::Donate, 64, 64}, "donate64/64"},
+    {WspdQ2Schedule{WspdQ2ScheduleMode::Donate, 1, 1}, "donate1/1"},
+  };
+#else
+  struct Sched { int s; const char* name; };
+  const std::vector<Sched> schedules = {{0, "coarse"}};
+#endif
   u64 total_mismatch = 0, total_checked = 0, total_alive = 0, total_runs = 0, cross_slot_dups = 0, digest_breaks = 0, counter_breaks = 0;
+  u64 donations_total = 0, stolen_total = 0;
   // vérité (une fois)
   std::map<Key, Emitted> truth;
   if (!scale) { std::vector<std::size_t> in, sh; for (std::size_t i = 0; i < N; ++i) for (std::size_t j = i + 1; j < N; ++j) { ++total_checked; truth_of(i, j, in, sh); if (in.size() < kmax) { Emitted e; e.interior = in; e.shell = sh; for (int ax=0;ax<3;++ax) { e.key.center_twice[ax] = (std::uint32_t)P[i][ax] + P[j][ax]; i64 d = (i64)P[i][ax]-P[j][ax]; e.key.diameter_squared += (u64)(d*d); } truth[{i, j}] = e; } } }
@@ -78,12 +105,18 @@ int main(int argc, char** argv) {
     const bool serial_ok = (serial == truth) && sdup == 0;
     if (!serial_ok) ++total_mismatch;
     std::printf("%-40s serial: emitted=%zu alive=%zu dup=%llu ok=%s digest=%s cand=%llu acc=%llu rej=%llu rects=%llu serial_total_ms=%.1f\n", cb.name, serial.size(), truth.size(), (unsigned long long)sdup, serial_ok ? "yes" : "NO", sdigest.c_str(), (unsigned long long)sres.census.candidate_pairs, (unsigned long long)sres.census.accepted_pairs, (unsigned long long)sres.census.rejected_pairs, (unsigned long long)sres.input_rectangles, sres.total_ms);
-    for (auto W : workers_list) for (auto J : jobs_list) {
+    for (auto W : workers_list) for (auto J : jobs_list) for (const auto& sched : schedules) {
       ++total_runs;
       std::vector<std::map<Key, Emitted>> slots(W);
       std::vector<Q2CensusConsumer> consumers;
       for (std::size_t w = 0; w < W; ++w) consumers.push_back([&slots, w](const Q2Support& sp) { Key k{std::min(sp.a_id, sp.b_id), std::max(sp.a_id, sp.b_id)}; Emitted e; e.interior.assign(sp.interior.begin(), sp.interior.end()); e.shell.assign(sp.shell.begin(), sp.shell.end()); e.key = sp.key; std::sort(e.interior.begin(), e.interior.end()); std::sort(e.shell.begin(), e.shell.end()); auto& m = slots[w]; if (m.count(k)) { /* doublon intra-slot */ e.interior.push_back(~std::size_t{0}); } m[k] = e; });
+#ifdef MHGP8_AUDIT_DONATE
+      CallGuard guard;
+      auto pres = run_wspd_q2_census_parallel(index, kmax, s, cb.f, cb.c, consumers, J, cb.sb, cb.o, cb.am, cb.pool, sched.s);
+#else
+      static_cast<void>(sched);
       auto pres = run_wspd_q2_census_parallel(index, kmax, s, cb.f, cb.c, consumers, J, cb.sb, cb.o, cb.am, cb.pool);
+#endif
       std::map<Key, Emitted> merged; u64 dups = 0;
       for (auto& m : slots) for (auto& [k, e] : m) { if (merged.count(k)) ++dups; merged[k] = e; }
       const std::string pdigest = canon(merged);
@@ -116,9 +149,31 @@ int main(int argc, char** argv) {
       double max_ms = 0, sum_ms = 0; u64 max_visits = 0, sum_visits = 0, max_jobs = 0;
       for (const auto& wk : pres.workers) { max_ms = std::max(max_ms, wk.elapsed_ms); sum_ms += wk.elapsed_ms; max_visits = std::max(max_visits, wk.count_node_visits); sum_visits += wk.count_node_visits; max_jobs = std::max(max_jobs, wk.jobs); }
       const double mean_ms = pres.workers.empty() ? 0 : sum_ms / pres.workers.size();
+#ifdef MHGP8_AUDIT_DONATE
+      const auto& dw = pres.dispatch_work;
+      std::printf("  sched=%s donations=%llu stolen_completed=%llu offer_full=%llu offer_busy=%llu max_queue=%llu\n", sched.name, (unsigned long long)dw.donations, (unsigned long long)dw.stolen_completed, (unsigned long long)dw.offer_full, (unsigned long long)dw.offer_busy, (unsigned long long)dw.max_queue_size);
+      donations_total += dw.donations; stolen_total += dw.stolen_completed;
+#endif
       std::printf("  W=%zu J=%-2zu started=%llu jobs=%llu completed=%llu terminal=%llu emitted=%zu dups=%llu ok=%s digest_eq=%s counters_eq=%s cand=%llu acc=%llu rej=%llu total_ms=%.1f worker_max_ms=%.1f worker_mean_ms=%.1f imbalance=%.2f max_visit_share=%.3f max_jobs=%llu\n", W, J, (unsigned long long)pres.started_workers, (unsigned long long)pres.jobs, (unsigned long long)pres.completed_jobs, (unsigned long long)pres.terminal_jobs, merged.size(), (unsigned long long)dups, ok ? "yes" : "NO", digest_ok ? "yes" : "NO", counters_ok ? "yes" : first_bad.c_str(), (unsigned long long)pres.candidate_pairs, (unsigned long long)pres.accepted_pairs, (unsigned long long)pres.rejected_pairs, pres.total_ms, max_ms, mean_ms, mean_ms > 0 ? max_ms / mean_ms : 0.0, sum_visits ? (double)max_visits / sum_visits : 0.0, (unsigned long long)max_jobs);
     }
   }
-  std::printf("SUMMARY family=%s n=%zu kmax=%u s=%u combos=%zu parallel_runs=%llu checked=%llu alive=%llu mismatch=%llu cross_slot_dups=%llu digest_breaks=%llu counter_breaks=%llu\n", fam.c_str(), N, kmax, s, combos.size(), (unsigned long long)total_runs, (unsigned long long)total_checked, (unsigned long long)total_alive, (unsigned long long)total_mismatch, (unsigned long long)cross_slot_dups, (unsigned long long)digest_breaks, (unsigned long long)counter_breaks);
+#ifdef MHGP8_AUDIT_DONATE
+  // Vivacité : exception levée par le dernier slot après cinq supports, pendant que les autres workers
+  // peuvent dormir sur la file (Donate{1,1} maximise les attentes). L'appel doit propager l'exception.
+  u64 liveness_runs = 0, liveness_exceptions = 0, liveness_no_throw = 0;
+  if (!scale) {
+    const auto& cb = all_combos[0];
+    for (const auto& sched : schedules) for (auto W : std::vector<std::size_t>{2, 8}) for (int rep = 0; rep < 10; ++rep) {
+      std::vector<std::atomic<unsigned>> seen(W);
+      std::vector<Q2CensusConsumer> consumers;
+      for (std::size_t w = 0; w < W; ++w) consumers.push_back([&seen, w, W](const Q2Support&) { if (w == W - 1 && ++seen[w] == 5) throw std::runtime_error("audit: slot failure"); else if (w != W - 1) ++seen[w]; });
+      ++liveness_runs; CallGuard guard;
+      try { auto r = run_wspd_q2_census_parallel(index, kmax, s, cb.f, cb.c, consumers, 1, cb.sb, cb.o, cb.am, cb.pool, sched.s); static_cast<void>(r); ++liveness_no_throw; }
+      catch (const std::runtime_error&) { ++liveness_exceptions; }
+    }
+  }
+  std::printf("  liveness: runs=%llu exceptions=%llu no_throw=%llu (no hang: watchdog silent)\n", (unsigned long long)liveness_runs, (unsigned long long)liveness_exceptions, (unsigned long long)liveness_no_throw);
+#endif
+  std::printf("SUMMARY family=%s n=%zu kmax=%u s=%u combos=%zu parallel_runs=%llu checked=%llu alive=%llu mismatch=%llu cross_slot_dups=%llu digest_breaks=%llu counter_breaks=%llu donations=%llu stolen=%llu\n", fam.c_str(), N, kmax, s, combos.size(), (unsigned long long)total_runs, (unsigned long long)total_checked, (unsigned long long)total_alive, (unsigned long long)total_mismatch, (unsigned long long)cross_slot_dups, (unsigned long long)digest_breaks, (unsigned long long)counter_breaks, (unsigned long long)donations_total, (unsigned long long)stolen_total);
   return (total_mismatch == 0 && cross_slot_dups == 0 && digest_breaks == 0 && counter_breaks == 0) ? 0 : 1;
 }

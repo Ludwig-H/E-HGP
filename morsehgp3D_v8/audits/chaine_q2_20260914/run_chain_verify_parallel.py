@@ -78,6 +78,7 @@ def main() -> int:
     parser.add_argument("--quick", action="store_true", help="familles adversariales seulement, pas d'échelle")
     parser.add_argument("--no-scale", action="store_true", help="pas de mesures 8k/16k/32k")
     parser.add_argument("--scale-only", action="store_true", help="seulement les mesures 8k/16k/32k (quatre familles, dont rangées)")
+    parser.add_argument("--donate", action="store_true", help="redistribution dynamique : répète chaque appel pour Coarse, Donate{64,64} et Donate{1,1}")
     args = parser.parse_args()
     lib = Path(args.lib).resolve(); src = Path(args.src_root).resolve(); build = Path(args.build_dir).resolve()
     build.mkdir(parents=True, exist_ok=True)
@@ -89,8 +90,10 @@ def main() -> int:
             return fail(f"fichier absent : {p}")
     pins = {str(p.relative_to(ROOT)) if str(p).startswith(str(ROOT)) else str(p): sha256(p) for p in pinned}
     binary = build / "chain_verify_parallel"
-    compile_cmd = ["g++", "-std=c++20", "-O2", "-Wall", "-Wextra", f"-I{src / 'src'}", f"-I{src / 'bench'}",
-                   str(HERE / "chain_verify_parallel.cpp"), str(lib), "-pthread", "-o", str(binary)]
+    compile_cmd = ["g++", "-std=c++20", "-O2", "-Wall", "-Wextra", f"-I{src / 'src'}", f"-I{src / 'bench'}"]
+    if args.donate:
+        compile_cmd.append("-DMHGP8_AUDIT_DONATE")
+    compile_cmd += [str(HERE / "chain_verify_parallel.cpp"), str(lib), "-pthread", "-o", str(binary)]
     done = run(compile_cmd, HERE)
     if done.returncode != 0:
         return fail("compilation refusée :\n" + done.stderr)
@@ -140,12 +143,14 @@ def main() -> int:
               "mismatch": sum(r["summary"]["mismatch"] for r in runs),
               "cross_slot_dups": sum(r["summary"]["cross_slot_dups"] for r in runs),
               "digest_breaks": sum(r["summary"]["digest_breaks"] for r in runs),
-              "counter_breaks": sum(r["summary"]["counter_breaks"] for r in runs)}
+              "counter_breaks": sum(r["summary"]["counter_breaks"] for r in runs),
+              "donations": sum(r["summary"].get("donations", 0) for r in runs),
+              "stolen": sum(r["summary"].get("stolen", 0) for r in runs)}
     receipt = {
         "title": "Chaîne parallèle front + census q2 : force brute, identité des condensés et des compteurs selon le nombre de fils",
         "date": "2026-09-14", "author_role": "auditeur indépendant B",
         "git_head": run(["git", "rev-parse", "HEAD"], ROOT).stdout.strip(), "src_root": str(src),
-        "compile_command": " ".join(compile_cmd), "pins_sha256": pins, "totals": totals, "runs": runs,
+        "compile_command": " ".join(compile_cmd), "pins_sha256": pins, "totals": totals, "runs": runs, "donate_schedules": bool(args.donate),
         "stable_digest_without_times": hashlib.sha256(json.dumps([r["summary"] for r in runs], sort_keys=True).encode()).hexdigest(),
         "scope": "Exactitude, absence de doublon entre slots, identité bit à bit des supports et des compteurs discrets selon W ; les temps d'échelle sont indicatifs (hôte partagé), jamais un contrat ; aucune tour FULL.",
     }
