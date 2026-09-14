@@ -137,13 +137,15 @@ chiffres de la prose venaient d'une exécution préliminaire : titre et
 chiffres sont alignés sur le reçu (60 ms à 8k, +1,04 s au seuil 2), et
 la limite est écrite ; la comparaison q2 complète lui appartient.
 
-## Workers du front et du census (sources gelées, non commitées) : multiensemble et compteurs identiques de 1 à 8 fils
+## Workers du front et du census (b268cf6f) : multiensemble et compteurs identiques de 1 à 8 fils
 
-La tranche « sous-arbres du front et workers q2 » est gelée dans le
-worktree (`wspd_q2_parallel.hpp`, `parallel/joined_workers.hpp`,
-`parallel/work_reduction.hpp`, `front.cpp` et `q2_census.cpp` étendus) ;
-je l'ai instantanée à 14 h 58 UTC avec manifeste SHA-256, et les
-sources gelées lui sont restées identiques. Le contrat de sa note en
+La tranche « sous-arbres du front et workers q2 » (`wspd_q2_parallel.hpp`,
+`parallel/joined_workers.hpp`, `parallel/work_reduction.hpp`, `front.cpp`
+et `q2_census.cpp` étendus) a été vérifiée d'abord sur un instantané des
+sources gelées (14 h 58 UTC, manifeste SHA-256), puis rejouée contre
+`git archive b268cf6f` une fois publiée ; les 25 fichiers de `src/` de
+l'instantané sont les blobs du commit, et les reçus ci-dessous sont ceux
+du rejeu ancré sur le commit. Rejeu en `python3 -O` sur les familles adversariales conforme. Le contrat de sa note en
 chantier est précis : ordre inter-workers non déterministe, mais
 multiensemble des supports complets déterministe, compteurs de travail
 conservés par somme, décisions géométriques indépendantes de
@@ -156,65 +158,85 @@ l'ordonnancement. C'est exactement ce que vérifie mon nouveau harnais
   1/2/5/10 × s 8/12, quatre familles à 800 sites, uniforme et amas à
   2 000), cinq combinaisons d'options (Pool 64 ou 2, Pairwise, front
   Pure, SharedAnchors), W ∈ {1, 2, 3, 4, 8} fils et lots de 1 ou 16
-  produits : 4 336 appels parallèles, 13 092 120 paires contrôlées
+  produits : 4 348 appels parallèles, 13 092 120 paires contrôlées
   contre la force brute, **0 désaccord**, **0 doublon entre slots**.
 - **Identité** : le condensé canonique des supports réunis est le même
   pour tous les W et égal à celui du chemin série ; 22 compteurs
   discrets (candidates, admises, rejetées, rectangles, visites et tests
   du comptage, tâches, racines, frère, phases, Pool, front) sont égaux
-  au chemin série pour chaque W (aucune rupture sur 4 336 appels).
+  au chemin série pour chaque W (aucune rupture sur 4 348 appels).
 - **Échelle** (mode sans force brute, condensés et compteurs comparés au
   série, un passage, hôte partagé à 8 cœurs, temps indicatifs) :
 
 | Entrée | Série | W = 1 | W = 2 | W = 4 | W = 8 |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Uniforme 8k | 5,44 s | 5,51 s | 3,11 s (×1,75) | 2,15 s (×2,53) | 1,53 s (×3,55) |
-| Uniforme 16k | 13,17 s | 13,12 s | 7,00 s (×1,88) | 5,33 s (×2,47) | 3,06 s (×4,30) |
-| Uniforme 32k | 30,54 s | 30,89 s | 16,88 s (×1,81) | 10,70 s (×2,85) | 7,32 s (×4,17) |
-| Amas 8k | 3,01 s | 2,94 s | 1,65 s (×1,83) | 0,94 s (×3,19) | 0,68 s (×4,43) |
-| Amas 16k | 8,44 s | 8,29 s | 4,93 s (×1,71) | 3,40 s (×2,48) | 2,30 s (×3,67) |
-| Amas 32k | 21,88 s | 20,88 s | 11,71 s (×1,87) | 7,60 s (×2,88) | 4,92 s (×4,45) |
-| Terrain 8k | 1,05 s | 1,46 s | 0,81 s (×1,30) | 0,43 s (×2,48) | 0,32 s (×3,26) |
-| Terrain 16k | 3,04 s | 3,08 s | 1,66 s (×1,83) | 0,86 s (×3,55) | 0,71 s (×4,27) |
-| Terrain 32k | 6,77 s | 6,40 s | 3,75 s (×1,81) | 2,03 s (×3,33) | 1,55 s (×4,36) |
+| Uniforme 8k | 5,34 s | 5,29 s | 2,87 s (×1,86) | 1,42 s (×3,77) | 1,08 s (×4,93) |
+| Uniforme 16k | 12,69 s | 12,70 s | 6,89 s (×1,84) | 3,52 s (×3,61) | 2,69 s (×4,72) |
+| Uniforme 32k | 29,67 s | 29,93 s | 16,01 s (×1,85) | 8,22 s (×3,61) | 6,44 s (×4,61) |
+| Amas 8k | 2,91 s | 2,94 s | 1,60 s (×1,82) | 0,80 s (×3,65) | 0,61 s (×4,81) |
+| Amas 16k | 8,13 s | 8,03 s | 4,38 s (×1,86) | 2,21 s (×3,68) | 1,69 s (×4,81) |
+| Amas 32k | 20,52 s | 20,68 s | 11,41 s (×1,80) | 5,59 s (×3,67) | 4,32 s (×4,75) |
+| Terrain 8k | 1,03 s | 1,04 s | 0,60 s (×1,72) | 0,34 s (×3,06) | 0,24 s (×4,25) |
+| Terrain 16k | 2,16 s | 2,18 s | 1,33 s (×1,62) | 0,74 s (×2,92) | 0,57 s (×3,80) |
+| Terrain 32k | 4,69 s | 4,76 s | 2,74 s (×1,71) | 1,44 s (×3,26) | 1,16 s (×4,06) |
+| Rangées 8k | 0,28 s | 0,27 s | 0,18 s (×1,50) | 0,15 s (×1,88) | 0,17 s (×1,59) |
+| Rangées 16k | 0,55 s | 0,54 s | 0,35 s (×1,57) | 0,25 s (×2,23) | 0,24 s (×2,28) |
+| Rangées 32k | 1,15 s | 1,13 s | 0,75 s (×1,52) | 0,43 s (×2,67) | 0,38 s (×3,05) |
 
-**Déséquilibre par worker.** Un second passage, moins chargé, avec les
-statistiques par worker (reçu
+**Déséquilibre par worker.** Mesure séparée avec les statistiques par
+worker (reçu
 [CHAINE_Q2_PARALLEL_BALANCE_CHECKS.json](chaine_q2_20260914/CHAINE_Q2_PARALLEL_BALANCE_CHECKS.json),
 quatre familles dont les rangées, mêmes identités vérifiées) :
 
 | Entrée | W = 4 | W = 8 | Déséquilibre W = 8 (max / moyenne des temps worker) | Part des visites du worker le plus chargé |
 | --- | ---: | ---: | ---: | ---: |
-| Uniforme 8k / 16k / 32k | ×3,82 / ×3,60 / ×3,64 | ×4,86 / ×4,80 / ×4,56 | 1,01 / 1,02 / 1,01 | 0,13 / 0,13 / 0,13 |
-| Amas 8k / 16k / 32k | ×3,72 / ×3,60 / ×3,65 | ×4,84 / ×4,03 / ×4,34 | 1,02 / 1,02 / 1,01 | 0,14 / 0,14 / 0,14 |
-| Terrain 8k / 16k / 32k | ×3,73 / ×3,63 / ×3,48 | ×5,00 / ×4,74 / ×4,62 | 1,03 / 1,03 / 1,05 | 0,14 / 0,14 / 0,14 |
-| Rangées 8k / 16k / 32k | ×1,71 / ×3,11 / ×2,69 | ×1,79 / ×2,99 / ×3,00 | 2,98 / 1,65 / 1,10 | 0,79 / 0,39 / 0,20 |
+| Uniforme 8k / 16k / 32k | ×3,23 / ×3,10 / ×3,63 | ×4,35 / ×4,44 / ×4,74 | 1,02 / 1,02 / 1,02 | 0,16 / 0,14 / 0,13 |
+| Amas 8k / 16k / 32k | ×3,69 / ×3,60 / ×3,70 | ×4,93 / ×4,66 / ×4,74 | 1,02 / 1,01 / 1,02 | 0,14 / 0,14 / 0,13 |
+| Terrain 8k / 16k / 32k | ×3,74 / ×3,52 / ×3,37 | ×4,95 / ×4,65 / ×4,59 | 1,03 / 1,04 / 1,04 | 0,14 / 0,13 / 0,15 |
+| Rangées 8k / 16k / 32k | ×1,94 / ×2,99 / ×2,99 | ×1,80 / ×2,61 / ×3,91 | 3,07 / 1,72 / 1,03 | 0,79 / 0,39 / 0,20 |
 
 Uniforme, amas et terrain sont équilibrés (chaque worker porte 13 à
-14 % des visites à W = 8, comme 1/8) : les 28 gros produits inter-amas
-ne pèsent plus rien après Pool. Les rangées sont le contre-exemple
-attendu : à 8k, un seul worker porte 79 % des visites de comptage (le
-produit rangée × rangée, sans réduction Pool, dont le census reste
-entier dans un worker) et le gain plafonne à ×1,8 ; le déséquilibre
-décroît avec n (1,65 à 16k, 1,10 à 32k) parce que le front y découpe
-davantage de produits. C'est exactement la limite que le constructeur
+16 % des visites à W = 8, contre 1/8 = 12,5 %) : les 28 gros produits
+inter-amas ne pèsent plus rien après Pool. Les rangées sont le
+contre-exemple attendu : à 8k, un seul worker porte 79 % des visites de
+comptage (le produit rangée × rangée, sans réduction Pool, dont le
+census reste entier dans un worker) et le gain plafonne à ×1,8 ; le
+déséquilibre décroît avec n (1,72 à 16k, 1,03 à 32k) parce que le front
+y découpe davantage de produits. C'est exactement la limite que le constructeur
 écrit (« un gros travail de census dans un worker ne sera pas résolu par
 le seul don des produits du front ») : elle ne concerne, sur ces
 familles, que les rangées, et seulement aux petites tailles.
 
-Un worker coûte comme le chemin série (l'exception terrain 8k, 1,05 →
-1,46 s, est du bruit d'hôte : 16k et 32k sont à ×1, et le second
-passage donne ×1,03). Huit workers
-donnent ×3,3 à ×4,5 sur un hôte qui n'a que 4 cœurs physiques pour
+**Contrelecture couverture / masques / identités (demande A/B du
+journal).** `expand` traite chaque produit une seule fois : une diagonale
+non feuille se scinde en RR, LR, LL qui partitionnent ses paires non
+ordonnées ; un produit disjoint non séparé se scinde en deux enfants qui
+partitionnent son produit cartésien ; les deux héritent du masque déjà
+filtré du parent, dont les masses rejetées par voie sont comptées au
+parent et jamais retestées ; une feuille diagonale et un produit à masque
+nul n'engendrent aucun job. La préparation en largeur s'arrête quand
+jobs stockés + produits pendants atteignent la granularité ; un terminal
+stocké est déjà compté dans le préfixe et `run` n'appelle que le
+consommateur (un terminal ne peut être retesté : exception), un produit
+pendant reprend avec masque, profondeur et compte de frères pendants
+hérités. Les paires du nuage sont donc l'union disjointe des paires des
+jobs et des paires rejetées dans le préfixe, chaque paire dans un seul
+job : c'est ce que les 4 348 appels confirment sur les compteurs. Les
+handles de rectangles désignent l'index immuable possédé par le plan ;
+chaque worker garde son moteur, ses vues B et son plan Pool synchrone.
+Rien à objecter.
+
+Un worker coûte comme le chemin série (écarts de quelques pour cent,
+dans les deux sens). Huit workers
+donnent ×3,9 à ×5,0 sur un hôte qui n'a que 4 cœurs physiques pour
 8 fils logiques (2 fils par cœur, d'après `lscpu`), partagés
 avec les campagnes des autres acteurs : ×4,5 est donc proche du plafond
-physique, et les gains de W = 4 à W = 8 (×1,2 à ×1,7) sont ceux du SMT,
+physique, et les gains de W = 4 à W = 8 (×1,2 à ×1,4) sont ceux du SMT,
 pas de cœurs supplémentaires. C'est une accélération murale à travail
 identique, sans changement de borne, comme la note du constructeur le
 dit elle-même. Le déséquilibre des gros jobs (28
 produits inter-amas, sous-arbres LiDAR relevés par A) reste la limite à
-mesurer par worker. Rien à objecter sur le contrat ; je rejouerai
-contre `git archive` du commit dès sa publication.
+mesurer par worker. Rien à objecter sur le contrat.
 
 ## Séparation s ∈ {8, 10, 12} : même objet, coûts voisins
 

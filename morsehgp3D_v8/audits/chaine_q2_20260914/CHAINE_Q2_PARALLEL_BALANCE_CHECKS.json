@@ -2,20 +2,20 @@
   "title": "Chaîne parallèle front + census q2 : force brute, identité des condensés et des compteurs selon le nombre de fils",
   "date": "2026-09-14",
   "author_role": "auditeur indépendant B",
-  "git_head": "0bc1f5fde15989e26dd28e97ddf29bebd7416ec5",
-  "src_root": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke",
-  "compile_command": "g++ -std=c++20 -O2 -Wall -Wextra -I/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/src -I/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/bench /workspaces/E-HGP/morsehgp3D_v8/audits/chaine_q2_20260914/chain_verify_parallel.cpp /tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/build/libmhgp8_p0.a -pthread -o /tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/verify_build/chain_verify_parallel",
+  "git_head": "6b1b68acf7824c68744d26bc48987b405926bc60",
+  "src_root": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/morsehgp3D_v8",
+  "compile_command": "g++ -std=c++20 -O2 -Wall -Wextra -I/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/morsehgp3D_v8/src -I/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/morsehgp3D_v8/bench /workspaces/E-HGP/morsehgp3D_v8/audits/chaine_q2_20260914/chain_verify_parallel.cpp /tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/build/libmhgp8_p0.a -pthread -o /tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/verify_build/chain_verify_parallel",
   "pins_sha256": {
-    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/src/pipeline/wspd_q2_parallel.hpp": "c9d3af5b61059402e644821f41a2e42d05bbee57622930213d1531a62c8ceca7",
-    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/src/pipeline/wspd_q2_census.hpp": "c904c91a4094c70069ba4640e1f74f12cdeb4199bd98ffc398918aa46601021d",
-    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/src/pipeline/q2_census.cpp": "7d766cea9c11936dd82f04d6c5d1e86fd7c5a9c4cd959e6198feeae6abe3ac6c",
-    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/src/pipeline/q2_node_pool.hpp": "5e9baa8da6945f9bbcbfe0434fe32b3f20224578b1d492c38ab6c63e4c837b63",
-    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/src/parallel/joined_workers.hpp": "c7ea51a337cdb7d54fa075ce88d9f45f1549165cda12c4ddb910fd26eb34be92",
-    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/src/parallel/work_reduction.hpp": "a99090bf6dfc823d6ae120e39db22f0f39cbd7e185b1e61d0d1cab37df6e7664",
-    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/src/wspd/front.cpp": "c3be982511374b8be50924403177482a208b0c91379584f14f2c3a69307faac2",
-    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/bench/front_fixtures.hpp": "a2d3ddbbff837de1609a2e1104c8797682cd7a435d4fa417d31388eb1f402b3b",
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/morsehgp3D_v8/src/pipeline/wspd_q2_parallel.hpp": "c9d3af5b61059402e644821f41a2e42d05bbee57622930213d1531a62c8ceca7",
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/morsehgp3D_v8/src/pipeline/wspd_q2_census.hpp": "c904c91a4094c70069ba4640e1f74f12cdeb4199bd98ffc398918aa46601021d",
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/morsehgp3D_v8/src/pipeline/q2_census.cpp": "7d766cea9c11936dd82f04d6c5d1e86fd7c5a9c4cd959e6198feeae6abe3ac6c",
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/morsehgp3D_v8/src/pipeline/q2_node_pool.hpp": "5e9baa8da6945f9bbcbfe0434fe32b3f20224578b1d492c38ab6c63e4c837b63",
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/morsehgp3D_v8/src/parallel/joined_workers.hpp": "c7ea51a337cdb7d54fa075ce88d9f45f1549165cda12c4ddb910fd26eb34be92",
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/morsehgp3D_v8/src/parallel/work_reduction.hpp": "a99090bf6dfc823d6ae120e39db22f0f39cbd7e185b1e61d0d1cab37df6e7664",
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/morsehgp3D_v8/src/wspd/front.cpp": "c3be982511374b8be50924403177482a208b0c91379584f14f2c3a69307faac2",
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/morsehgp3D_v8/bench/front_fixtures.hpp": "a2d3ddbbff837de1609a2e1104c8797682cd7a435d4fa417d31388eb1f402b3b",
     "morsehgp3D_v8/audits/chaine_q2_20260914/chain_verify_parallel.cpp": "616d5a22042493734d62f7f739d0eb05981261c9317eb23004d35766258684ad",
-    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/build/libmhgp8_p0.a": "6ca94e3b9511f696a0a31d7e5ad2f1fd2413f45e1925532d478e7e5423b069e4"
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/build/libmhgp8_p0.a": "6ca94e3b9511f696a0a31d7e5ad2f1fd2413f45e1925532d478e7e5423b069e4"
   },
   "totals": {
     "runs": 12,
@@ -31,8 +31,8 @@
   },
   "runs": [
     {
-      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/verify_build/chain_verify_parallel uniform 8000 10 8 3 scale",
-      "wall_seconds": 17.897,
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/verify_build/chain_verify_parallel uniform 8000 10 8 3 scale",
+      "wall_seconds": 18.067,
       "summary": {
         "family": "uniform",
         "n": 8000,
@@ -47,11 +47,11 @@
         "digest_breaks": 0,
         "counter_breaks": 0
       },
-      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=279544 alive=279544 dup=0 ok=yes digest=3949268a3b2b1d68 cand=3194249 acc=279544 rej=2914705 rects=1966080 serial_total_ms=5490.4\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=0 emitted=279544 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=3194249 acc=279544 rej=2914705 total_ms=5476.0 worker_max_ms=5475.9 worker_mean_ms=5475.9 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=0 emitted=279544 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=3194249 acc=279544 rej=2914705 total_ms=2958.7 worker_max_ms=2843.0 worker_mean_ms=2787.1 imbalance=1.02 max_visit_share=0.520 max_jobs=16\n  W=4 J=16 started=4 jobs=64 completed=64 terminal=0 emitted=279544 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=3194249 acc=279544 rej=2914705 total_ms=1438.8 worker_max_ms=1411.9 worker_mean_ms=1386.7 imbalance=1.02 max_visit_share=0.264 max_jobs=17\n  W=8 J=16 started=8 jobs=128 completed=128 terminal=0 emitted=279544 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=3194249 acc=279544 rej=2914705 total_ms=1129.8 worker_max_ms=1096.8 worker_mean_ms=1082.3 imbalance=1.01 max_visit_share=0.134 max_jobs=20\nSUMMARY family=uniform n=8000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
+      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=279544 alive=279544 dup=0 ok=yes digest=3949268a3b2b1d68 cand=3194249 acc=279544 rej=2914705 rects=1966080 serial_total_ms=5461.2\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=0 emitted=279544 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=3194249 acc=279544 rej=2914705 total_ms=5375.4 worker_max_ms=5375.4 worker_mean_ms=5375.4 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=0 emitted=279544 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=3194249 acc=279544 rej=2914705 total_ms=2919.0 worker_max_ms=2805.8 worker_mean_ms=2750.5 imbalance=1.02 max_visit_share=0.520 max_jobs=16\n  W=4 J=16 started=4 jobs=64 completed=64 terminal=0 emitted=279544 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=3194249 acc=279544 rej=2914705 total_ms=1690.6 worker_max_ms=1661.6 worker_mean_ms=1631.3 imbalance=1.02 max_visit_share=0.304 max_jobs=21\n  W=8 J=16 started=8 jobs=128 completed=128 terminal=0 emitted=279544 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=3194249 acc=279544 rej=2914705 total_ms=1254.6 worker_max_ms=1218.3 worker_mean_ms=1200.0 imbalance=1.02 max_visit_share=0.163 max_jobs=21\nSUMMARY family=uniform n=8000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
       "scale_rows": [
         {
           "workers": 0,
-          "serial_total_ms": 5490.4,
+          "serial_total_ms": 5461.2,
           "digest": "3949268a3b2b1d68",
           "candidates": 3194249,
           "accepted": 279544
@@ -61,11 +61,11 @@
           "jobs_per_worker": 16,
           "started": 1,
           "jobs": 17,
-          "total_ms": 5476.0,
+          "total_ms": 5375.4,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 5475.9,
-          "worker_mean_ms": 5475.9,
+          "worker_max_ms": 5375.4,
+          "worker_mean_ms": 5375.4,
           "imbalance": 1.0,
           "max_visit_share": 1.0,
           "max_jobs": 17
@@ -75,11 +75,11 @@
           "jobs_per_worker": 16,
           "started": 2,
           "jobs": 32,
-          "total_ms": 2958.7,
+          "total_ms": 2919.0,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 2843.0,
-          "worker_mean_ms": 2787.1,
+          "worker_max_ms": 2805.8,
+          "worker_mean_ms": 2750.5,
           "imbalance": 1.02,
           "max_visit_share": 0.52,
           "max_jobs": 16
@@ -89,34 +89,34 @@
           "jobs_per_worker": 16,
           "started": 4,
           "jobs": 64,
-          "total_ms": 1438.8,
+          "total_ms": 1690.6,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 1411.9,
-          "worker_mean_ms": 1386.7,
+          "worker_max_ms": 1661.6,
+          "worker_mean_ms": 1631.3,
           "imbalance": 1.02,
-          "max_visit_share": 0.264,
-          "max_jobs": 17
+          "max_visit_share": 0.304,
+          "max_jobs": 21
         },
         {
           "workers": 8,
           "jobs_per_worker": 16,
           "started": 8,
           "jobs": 128,
-          "total_ms": 1129.8,
+          "total_ms": 1254.6,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 1096.8,
-          "worker_mean_ms": 1082.3,
-          "imbalance": 1.01,
-          "max_visit_share": 0.134,
-          "max_jobs": 20
+          "worker_max_ms": 1218.3,
+          "worker_mean_ms": 1200.0,
+          "imbalance": 1.02,
+          "max_visit_share": 0.163,
+          "max_jobs": 21
         }
       ]
     },
     {
-      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/verify_build/chain_verify_parallel uniform 16000 10 8 3 scale",
-      "wall_seconds": 42.425,
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/verify_build/chain_verify_parallel uniform 16000 10 8 3 scale",
+      "wall_seconds": 43.149,
       "summary": {
         "family": "uniform",
         "n": 16000,
@@ -131,11 +131,11 @@
         "digest_breaks": 0,
         "counter_breaks": 0
       },
-      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=577045 alive=577045 dup=0 ok=yes digest=ab93656529c2697d cand=7347458 acc=577045 rej=6770413 rects=4532284 serial_total_ms=12986.4\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=0 emitted=577045 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=7347458 acc=577045 rej=6770413 total_ms=12874.4 worker_max_ms=12874.4 worker_mean_ms=12874.4 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=0 emitted=577045 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=7347458 acc=577045 rej=6770413 total_ms=6908.7 worker_max_ms=6656.9 worker_mean_ms=6518.6 imbalance=1.02 max_visit_share=0.521 max_jobs=18\n  W=4 J=16 started=4 jobs=64 completed=64 terminal=0 emitted=577045 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=7347458 acc=577045 rej=6770413 total_ms=3608.3 worker_max_ms=3547.3 worker_mean_ms=3330.8 imbalance=1.07 max_visit_share=0.264 max_jobs=21\n  W=8 J=16 started=8 jobs=128 completed=128 terminal=0 emitted=577045 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=7347458 acc=577045 rej=6770413 total_ms=2705.3 worker_max_ms=2633.8 worker_mean_ms=2586.5 imbalance=1.02 max_visit_share=0.133 max_jobs=20\nSUMMARY family=uniform n=16000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
+      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=577045 alive=577045 dup=0 ok=yes digest=ab93656529c2697d cand=7347458 acc=577045 rej=6770413 rects=4532284 serial_total_ms=12941.2\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=0 emitted=577045 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=7347458 acc=577045 rej=6770413 total_ms=12895.4 worker_max_ms=12895.4 worker_mean_ms=12895.4 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=0 emitted=577045 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=7347458 acc=577045 rej=6770413 total_ms=6904.3 worker_max_ms=6655.4 worker_mean_ms=6501.1 imbalance=1.02 max_visit_share=0.510 max_jobs=16\n  W=4 J=16 started=4 jobs=64 completed=64 terminal=0 emitted=577045 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=7347458 acc=577045 rej=6770413 total_ms=4178.6 worker_max_ms=4115.3 worker_mean_ms=3929.6 imbalance=1.05 max_visit_share=0.313 max_jobs=19\n  W=8 J=16 started=8 jobs=128 completed=128 terminal=0 emitted=577045 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=7347458 acc=577045 rej=6770413 total_ms=2913.0 worker_max_ms=2839.7 worker_mean_ms=2786.9 imbalance=1.02 max_visit_share=0.135 max_jobs=19\nSUMMARY family=uniform n=16000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
       "scale_rows": [
         {
           "workers": 0,
-          "serial_total_ms": 12986.4,
+          "serial_total_ms": 12941.2,
           "digest": "ab93656529c2697d",
           "candidates": 7347458,
           "accepted": 577045
@@ -145,11 +145,11 @@
           "jobs_per_worker": 16,
           "started": 1,
           "jobs": 17,
-          "total_ms": 12874.4,
+          "total_ms": 12895.4,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 12874.4,
-          "worker_mean_ms": 12874.4,
+          "worker_max_ms": 12895.4,
+          "worker_mean_ms": 12895.4,
           "imbalance": 1.0,
           "max_visit_share": 1.0,
           "max_jobs": 17
@@ -159,48 +159,48 @@
           "jobs_per_worker": 16,
           "started": 2,
           "jobs": 32,
-          "total_ms": 6908.7,
+          "total_ms": 6904.3,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 6656.9,
-          "worker_mean_ms": 6518.6,
+          "worker_max_ms": 6655.4,
+          "worker_mean_ms": 6501.1,
           "imbalance": 1.02,
-          "max_visit_share": 0.521,
-          "max_jobs": 18
+          "max_visit_share": 0.51,
+          "max_jobs": 16
         },
         {
           "workers": 4,
           "jobs_per_worker": 16,
           "started": 4,
           "jobs": 64,
-          "total_ms": 3608.3,
+          "total_ms": 4178.6,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 3547.3,
-          "worker_mean_ms": 3330.8,
-          "imbalance": 1.07,
-          "max_visit_share": 0.264,
-          "max_jobs": 21
+          "worker_max_ms": 4115.3,
+          "worker_mean_ms": 3929.6,
+          "imbalance": 1.05,
+          "max_visit_share": 0.313,
+          "max_jobs": 19
         },
         {
           "workers": 8,
           "jobs_per_worker": 16,
           "started": 8,
           "jobs": 128,
-          "total_ms": 2705.3,
+          "total_ms": 2913.0,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 2633.8,
-          "worker_mean_ms": 2586.5,
+          "worker_max_ms": 2839.7,
+          "worker_mean_ms": 2786.9,
           "imbalance": 1.02,
-          "max_visit_share": 0.133,
-          "max_jobs": 20
+          "max_visit_share": 0.135,
+          "max_jobs": 19
         }
       ]
     },
     {
-      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/verify_build/chain_verify_parallel uniform 32000 10 8 3 scale",
-      "wall_seconds": 100.014,
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/verify_build/chain_verify_parallel uniform 32000 10 8 3 scale",
+      "wall_seconds": 97.166,
       "summary": {
         "family": "uniform",
         "n": 32000,
@@ -215,11 +215,11 @@
         "digest_breaks": 0,
         "counter_breaks": 0
       },
-      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=1180529 alive=1180529 dup=0 ok=yes digest=6c1959ea184d7294 cand=17325368 acc=1180529 rej=16144839 rects=10180690 serial_total_ms=30559.7\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=0 emitted=1180529 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=17325368 acc=1180529 rej=16144839 total_ms=30837.2 worker_max_ms=30837.2 worker_mean_ms=30837.2 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=0 emitted=1180529 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=17325368 acc=1180529 rej=16144839 total_ms=16416.8 worker_max_ms=15877.9 worker_mean_ms=15450.7 imbalance=1.03 max_visit_share=0.504 max_jobs=16\n  W=4 J=16 started=4 jobs=64 completed=64 terminal=0 emitted=1180529 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=17325368 acc=1180529 rej=16144839 total_ms=8402.1 worker_max_ms=8271.5 worker_mean_ms=7821.6 imbalance=1.06 max_visit_share=0.267 max_jobs=17\n  W=8 J=16 started=8 jobs=128 completed=128 terminal=0 emitted=1180529 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=17325368 acc=1180529 rej=16144839 total_ms=6704.6 worker_max_ms=6547.0 worker_mean_ms=6458.9 imbalance=1.01 max_visit_share=0.132 max_jobs=19\nSUMMARY family=uniform n=32000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
+      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=1180529 alive=1180529 dup=0 ok=yes digest=6c1959ea184d7294 cand=17325368 acc=1180529 rej=16144839 rects=10180690 serial_total_ms=29689.3\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=0 emitted=1180529 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=17325368 acc=1180529 rej=16144839 total_ms=29915.1 worker_max_ms=29915.0 worker_mean_ms=29915.0 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=0 emitted=1180529 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=17325368 acc=1180529 rej=16144839 total_ms=16102.4 worker_max_ms=15567.3 worker_mean_ms=15105.3 imbalance=1.03 max_visit_share=0.504 max_jobs=16\n  W=4 J=16 started=4 jobs=64 completed=64 terminal=0 emitted=1180529 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=17325368 acc=1180529 rej=16144839 total_ms=8189.3 worker_max_ms=8057.8 worker_mean_ms=7636.7 imbalance=1.06 max_visit_share=0.265 max_jobs=23\n  W=8 J=16 started=8 jobs=128 completed=128 terminal=0 emitted=1180529 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=17325368 acc=1180529 rej=16144839 total_ms=6266.2 worker_max_ms=6112.2 worker_mean_ms=6015.2 imbalance=1.02 max_visit_share=0.131 max_jobs=19\nSUMMARY family=uniform n=32000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
       "scale_rows": [
         {
           "workers": 0,
-          "serial_total_ms": 30559.7,
+          "serial_total_ms": 29689.3,
           "digest": "6c1959ea184d7294",
           "candidates": 17325368,
           "accepted": 1180529
@@ -229,11 +229,11 @@
           "jobs_per_worker": 16,
           "started": 1,
           "jobs": 17,
-          "total_ms": 30837.2,
+          "total_ms": 29915.1,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 30837.2,
-          "worker_mean_ms": 30837.2,
+          "worker_max_ms": 29915.0,
+          "worker_mean_ms": 29915.0,
           "imbalance": 1.0,
           "max_visit_share": 1.0,
           "max_jobs": 17
@@ -243,11 +243,11 @@
           "jobs_per_worker": 16,
           "started": 2,
           "jobs": 32,
-          "total_ms": 16416.8,
+          "total_ms": 16102.4,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 15877.9,
-          "worker_mean_ms": 15450.7,
+          "worker_max_ms": 15567.3,
+          "worker_mean_ms": 15105.3,
           "imbalance": 1.03,
           "max_visit_share": 0.504,
           "max_jobs": 16
@@ -257,34 +257,34 @@
           "jobs_per_worker": 16,
           "started": 4,
           "jobs": 64,
-          "total_ms": 8402.1,
+          "total_ms": 8189.3,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 8271.5,
-          "worker_mean_ms": 7821.6,
+          "worker_max_ms": 8057.8,
+          "worker_mean_ms": 7636.7,
           "imbalance": 1.06,
-          "max_visit_share": 0.267,
-          "max_jobs": 17
+          "max_visit_share": 0.265,
+          "max_jobs": 23
         },
         {
           "workers": 8,
           "jobs_per_worker": 16,
           "started": 8,
           "jobs": 128,
-          "total_ms": 6704.6,
+          "total_ms": 6266.2,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 6547.0,
-          "worker_mean_ms": 6458.9,
-          "imbalance": 1.01,
-          "max_visit_share": 0.132,
+          "worker_max_ms": 6112.2,
+          "worker_mean_ms": 6015.2,
+          "imbalance": 1.02,
+          "max_visit_share": 0.131,
           "max_jobs": 19
         }
       ]
     },
     {
-      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/verify_build/chain_verify_parallel clusters 8000 10 8 3 scale",
-      "wall_seconds": 10.325,
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/verify_build/chain_verify_parallel clusters 8000 10 8 3 scale",
+      "wall_seconds": 9.987,
       "summary": {
         "family": "clusters",
         "n": 8000,
@@ -299,11 +299,11 @@
         "digest_breaks": 0,
         "counter_breaks": 0
       },
-      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=245733 alive=245733 dup=0 ok=yes digest=cd254c735f61a08a cand=1743978 acc=245733 rej=1498245 rects=1210070 serial_total_ms=3014.2\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=0 emitted=245733 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=1743978 acc=245733 rej=1498245 total_ms=3051.4 worker_max_ms=3051.3 worker_mean_ms=3051.3 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=2 emitted=245733 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=1743978 acc=245733 rej=1498245 total_ms=1629.7 worker_max_ms=1534.6 worker_mean_ms=1519.6 imbalance=1.01 max_visit_share=0.502 max_jobs=21\n  W=4 J=16 started=4 jobs=64 completed=64 terminal=8 emitted=245733 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=1743978 acc=245733 rej=1498245 total_ms=810.1 worker_max_ms=786.0 worker_mean_ms=763.2 imbalance=1.03 max_visit_share=0.261 max_jobs=22\n  W=8 J=16 started=8 jobs=128 completed=128 terminal=12 emitted=245733 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=1743978 acc=245733 rej=1498245 total_ms=623.4 worker_max_ms=593.9 worker_mean_ms=584.5 imbalance=1.02 max_visit_share=0.139 max_jobs=24\nSUMMARY family=clusters n=8000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
+      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=245733 alive=245733 dup=0 ok=yes digest=cd254c735f61a08a cand=1743978 acc=245733 rej=1498245 rects=1210070 serial_total_ms=2936.1\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=0 emitted=245733 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=1743978 acc=245733 rej=1498245 total_ms=2882.1 worker_max_ms=2882.1 worker_mean_ms=2882.1 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=2 emitted=245733 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=1743978 acc=245733 rej=1498245 total_ms=1598.1 worker_max_ms=1508.0 worker_mean_ms=1501.6 imbalance=1.00 max_visit_share=0.502 max_jobs=21\n  W=4 J=16 started=4 jobs=64 completed=64 terminal=8 emitted=245733 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=1743978 acc=245733 rej=1498245 total_ms=795.9 worker_max_ms=768.3 worker_mean_ms=746.8 imbalance=1.03 max_visit_share=0.256 max_jobs=21\n  W=8 J=16 started=8 jobs=128 completed=128 terminal=12 emitted=245733 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=1743978 acc=245733 rej=1498245 total_ms=595.2 worker_max_ms=566.8 worker_mean_ms=557.5 imbalance=1.02 max_visit_share=0.140 max_jobs=24\nSUMMARY family=clusters n=8000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
       "scale_rows": [
         {
           "workers": 0,
-          "serial_total_ms": 3014.2,
+          "serial_total_ms": 2936.1,
           "digest": "cd254c735f61a08a",
           "candidates": 1743978,
           "accepted": 245733
@@ -313,11 +313,11 @@
           "jobs_per_worker": 16,
           "started": 1,
           "jobs": 17,
-          "total_ms": 3051.4,
+          "total_ms": 2882.1,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 3051.3,
-          "worker_mean_ms": 3051.3,
+          "worker_max_ms": 2882.1,
+          "worker_mean_ms": 2882.1,
           "imbalance": 1.0,
           "max_visit_share": 1.0,
           "max_jobs": 17
@@ -327,12 +327,12 @@
           "jobs_per_worker": 16,
           "started": 2,
           "jobs": 32,
-          "total_ms": 1629.7,
+          "total_ms": 1598.1,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 1534.6,
-          "worker_mean_ms": 1519.6,
-          "imbalance": 1.01,
+          "worker_max_ms": 1508.0,
+          "worker_mean_ms": 1501.6,
+          "imbalance": 1.0,
           "max_visit_share": 0.502,
           "max_jobs": 21
         },
@@ -341,34 +341,34 @@
           "jobs_per_worker": 16,
           "started": 4,
           "jobs": 64,
-          "total_ms": 810.1,
+          "total_ms": 795.9,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 786.0,
-          "worker_mean_ms": 763.2,
+          "worker_max_ms": 768.3,
+          "worker_mean_ms": 746.8,
           "imbalance": 1.03,
-          "max_visit_share": 0.261,
-          "max_jobs": 22
+          "max_visit_share": 0.256,
+          "max_jobs": 21
         },
         {
           "workers": 8,
           "jobs_per_worker": 16,
           "started": 8,
           "jobs": 128,
-          "total_ms": 623.4,
+          "total_ms": 595.2,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 593.9,
-          "worker_mean_ms": 584.5,
+          "worker_max_ms": 566.8,
+          "worker_mean_ms": 557.5,
           "imbalance": 1.02,
-          "max_visit_share": 0.139,
+          "max_visit_share": 0.14,
           "max_jobs": 24
         }
       ]
     },
     {
-      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/verify_build/chain_verify_parallel clusters 16000 10 8 3 scale",
-      "wall_seconds": 28.535,
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/verify_build/chain_verify_parallel clusters 16000 10 8 3 scale",
+      "wall_seconds": 27.328,
       "summary": {
         "family": "clusters",
         "n": 16000,
@@ -383,11 +383,11 @@
         "digest_breaks": 0,
         "counter_breaks": 0
       },
-      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=520208 alive=520208 dup=0 ok=yes digest=48574ef00b411b83 cand=4786146 acc=520208 rej=4265938 rects=3164240 serial_total_ms=8224.3\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=0 emitted=520208 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=4786146 acc=520208 rej=4265938 total_ms=8371.9 worker_max_ms=8371.9 worker_mean_ms=8371.9 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=2 emitted=520208 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=4786146 acc=520208 rej=4265938 total_ms=4553.8 worker_max_ms=4330.9 worker_mean_ms=4257.1 imbalance=1.02 max_visit_share=0.502 max_jobs=17\n  W=4 J=16 started=4 jobs=64 completed=64 terminal=8 emitted=520208 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=4786146 acc=520208 rej=4265938 total_ms=2286.8 worker_max_ms=2230.8 worker_mean_ms=2164.5 imbalance=1.03 max_visit_share=0.253 max_jobs=24\n  W=8 J=16 started=8 jobs=128 completed=128 terminal=12 emitted=520208 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=4786146 acc=520208 rej=4265938 total_ms=2040.2 worker_max_ms=1972.5 worker_mean_ms=1939.1 imbalance=1.02 max_visit_share=0.135 max_jobs=22\nSUMMARY family=clusters n=16000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
+      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=520208 alive=520208 dup=0 ok=yes digest=48574ef00b411b83 cand=4786146 acc=520208 rej=4265938 rects=3164240 serial_total_ms=8029.7\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=0 emitted=520208 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=4786146 acc=520208 rej=4265938 total_ms=8050.7 worker_max_ms=8050.7 worker_mean_ms=8050.7 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=2 emitted=520208 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=4786146 acc=520208 rej=4265938 total_ms=4309.5 worker_max_ms=4086.7 worker_mean_ms=4038.0 imbalance=1.01 max_visit_share=0.501 max_jobs=19\n  W=4 J=16 started=4 jobs=64 completed=64 terminal=8 emitted=520208 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=4786146 acc=520208 rej=4265938 total_ms=2233.2 worker_max_ms=2175.6 worker_mean_ms=2094.7 imbalance=1.04 max_visit_share=0.260 max_jobs=22\n  W=8 J=16 started=8 jobs=128 completed=128 terminal=12 emitted=520208 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=4786146 acc=520208 rej=4265938 total_ms=1724.8 worker_max_ms=1660.2 worker_mean_ms=1644.7 imbalance=1.01 max_visit_share=0.136 max_jobs=22\nSUMMARY family=clusters n=16000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
       "scale_rows": [
         {
           "workers": 0,
-          "serial_total_ms": 8224.3,
+          "serial_total_ms": 8029.7,
           "digest": "48574ef00b411b83",
           "candidates": 4786146,
           "accepted": 520208
@@ -397,11 +397,11 @@
           "jobs_per_worker": 16,
           "started": 1,
           "jobs": 17,
-          "total_ms": 8371.9,
+          "total_ms": 8050.7,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 8371.9,
-          "worker_mean_ms": 8371.9,
+          "worker_max_ms": 8050.7,
+          "worker_mean_ms": 8050.7,
           "imbalance": 1.0,
           "max_visit_share": 1.0,
           "max_jobs": 17
@@ -411,48 +411,48 @@
           "jobs_per_worker": 16,
           "started": 2,
           "jobs": 32,
-          "total_ms": 4553.8,
+          "total_ms": 4309.5,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 4330.9,
-          "worker_mean_ms": 4257.1,
-          "imbalance": 1.02,
-          "max_visit_share": 0.502,
-          "max_jobs": 17
+          "worker_max_ms": 4086.7,
+          "worker_mean_ms": 4038.0,
+          "imbalance": 1.01,
+          "max_visit_share": 0.501,
+          "max_jobs": 19
         },
         {
           "workers": 4,
           "jobs_per_worker": 16,
           "started": 4,
           "jobs": 64,
-          "total_ms": 2286.8,
+          "total_ms": 2233.2,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 2230.8,
-          "worker_mean_ms": 2164.5,
-          "imbalance": 1.03,
-          "max_visit_share": 0.253,
-          "max_jobs": 24
+          "worker_max_ms": 2175.6,
+          "worker_mean_ms": 2094.7,
+          "imbalance": 1.04,
+          "max_visit_share": 0.26,
+          "max_jobs": 22
         },
         {
           "workers": 8,
           "jobs_per_worker": 16,
           "started": 8,
           "jobs": 128,
-          "total_ms": 2040.2,
+          "total_ms": 1724.8,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 1972.5,
-          "worker_mean_ms": 1939.1,
-          "imbalance": 1.02,
-          "max_visit_share": 0.135,
+          "worker_max_ms": 1660.2,
+          "worker_mean_ms": 1644.7,
+          "imbalance": 1.01,
+          "max_visit_share": 0.136,
           "max_jobs": 22
         }
       ]
     },
     {
-      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/verify_build/chain_verify_parallel clusters 32000 10 8 3 scale",
-      "wall_seconds": 70.856,
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/verify_build/chain_verify_parallel clusters 32000 10 8 3 scale",
+      "wall_seconds": 69.345,
       "summary": {
         "family": "clusters",
         "n": 32000,
@@ -467,11 +467,11 @@
         "digest_breaks": 0,
         "counter_breaks": 0
       },
-      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=1088696 alive=1088696 dup=0 ok=yes digest=83e5116725473d94 cand=12184055 acc=1088696 rej=11095359 rects=7579029 serial_total_ms=21043.9\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=0 emitted=1088696 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=12184055 acc=1088696 rej=11095359 total_ms=21133.6 worker_max_ms=21133.6 worker_mean_ms=21133.6 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=2 emitted=1088696 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=12184055 acc=1088696 rej=11095359 total_ms=11568.1 worker_max_ms=11077.4 worker_mean_ms=10702.8 imbalance=1.04 max_visit_share=0.517 max_jobs=20\n  W=4 J=16 started=4 jobs=64 completed=64 terminal=8 emitted=1088696 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=12184055 acc=1088696 rej=11095359 total_ms=5758.1 worker_max_ms=5628.1 worker_mean_ms=5467.2 imbalance=1.03 max_visit_share=0.256 max_jobs=20\n  W=8 J=16 started=8 jobs=128 completed=128 terminal=12 emitted=1088696 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=12184055 acc=1088696 rej=11095359 total_ms=4852.7 worker_max_ms=4709.7 worker_mean_ms=4644.2 imbalance=1.01 max_visit_share=0.136 max_jobs=27\nSUMMARY family=clusters n=32000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
+      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=1088696 alive=1088696 dup=0 ok=yes digest=83e5116725473d94 cand=12184055 acc=1088696 rej=11095359 rects=7579029 serial_total_ms=20599.3\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=0 emitted=1088696 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=12184055 acc=1088696 rej=11095359 total_ms=21041.1 worker_max_ms=21041.1 worker_mean_ms=21041.1 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=2 emitted=1088696 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=12184055 acc=1088696 rej=11095359 total_ms=11400.7 worker_max_ms=10916.0 worker_mean_ms=10469.7 imbalance=1.04 max_visit_share=0.519 max_jobs=20\n  W=4 J=16 started=4 jobs=64 completed=64 terminal=8 emitted=1088696 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=12184055 acc=1088696 rej=11095359 total_ms=5566.4 worker_max_ms=5442.5 worker_mean_ms=5283.2 imbalance=1.03 max_visit_share=0.266 max_jobs=23\n  W=8 J=16 started=8 jobs=128 completed=128 terminal=12 emitted=1088696 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=12184055 acc=1088696 rej=11095359 total_ms=4350.0 worker_max_ms=4209.2 worker_mean_ms=4125.3 imbalance=1.02 max_visit_share=0.133 max_jobs=33\nSUMMARY family=clusters n=32000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
       "scale_rows": [
         {
           "workers": 0,
-          "serial_total_ms": 21043.9,
+          "serial_total_ms": 20599.3,
           "digest": "83e5116725473d94",
           "candidates": 12184055,
           "accepted": 1088696
@@ -481,11 +481,11 @@
           "jobs_per_worker": 16,
           "started": 1,
           "jobs": 17,
-          "total_ms": 21133.6,
+          "total_ms": 21041.1,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 21133.6,
-          "worker_mean_ms": 21133.6,
+          "worker_max_ms": 21041.1,
+          "worker_mean_ms": 21041.1,
           "imbalance": 1.0,
           "max_visit_share": 1.0,
           "max_jobs": 17
@@ -495,13 +495,13 @@
           "jobs_per_worker": 16,
           "started": 2,
           "jobs": 32,
-          "total_ms": 11568.1,
+          "total_ms": 11400.7,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 11077.4,
-          "worker_mean_ms": 10702.8,
+          "worker_max_ms": 10916.0,
+          "worker_mean_ms": 10469.7,
           "imbalance": 1.04,
-          "max_visit_share": 0.517,
+          "max_visit_share": 0.519,
           "max_jobs": 20
         },
         {
@@ -509,34 +509,34 @@
           "jobs_per_worker": 16,
           "started": 4,
           "jobs": 64,
-          "total_ms": 5758.1,
+          "total_ms": 5566.4,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 5628.1,
-          "worker_mean_ms": 5467.2,
+          "worker_max_ms": 5442.5,
+          "worker_mean_ms": 5283.2,
           "imbalance": 1.03,
-          "max_visit_share": 0.256,
-          "max_jobs": 20
+          "max_visit_share": 0.266,
+          "max_jobs": 23
         },
         {
           "workers": 8,
           "jobs_per_worker": 16,
           "started": 8,
           "jobs": 128,
-          "total_ms": 4852.7,
+          "total_ms": 4350.0,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 4709.7,
-          "worker_mean_ms": 4644.2,
-          "imbalance": 1.01,
-          "max_visit_share": 0.136,
-          "max_jobs": 27
+          "worker_max_ms": 4209.2,
+          "worker_mean_ms": 4125.3,
+          "imbalance": 1.02,
+          "max_visit_share": 0.133,
+          "max_jobs": 33
         }
       ]
     },
     {
-      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/verify_build/chain_verify_parallel terrain 8000 10 8 3 scale",
-      "wall_seconds": 3.931,
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/verify_build/chain_verify_parallel terrain 8000 10 8 3 scale",
+      "wall_seconds": 3.792,
       "summary": {
         "family": "terrain",
         "n": 8000,
@@ -551,11 +551,11 @@
         "digest_breaks": 0,
         "counter_breaks": 0
       },
-      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=155661 alive=155661 dup=0 ok=yes digest=d283280a07b7a5c0 cand=935699 acc=155661 rej=780038 rects=432884 serial_total_ms=1065.0\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=0 emitted=155661 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=935699 acc=155661 rej=780038 total_ms=1038.6 worker_max_ms=1038.6 worker_mean_ms=1038.6 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=0 emitted=155661 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=935699 acc=155661 rej=780038 total_ms=610.7 worker_max_ms=560.4 worker_mean_ms=552.0 imbalance=1.02 max_visit_share=0.514 max_jobs=17\n  W=4 J=16 started=4 jobs=64 completed=64 terminal=0 emitted=155661 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=935699 acc=155661 rej=780038 total_ms=285.5 worker_max_ms=272.7 worker_mean_ms=268.2 imbalance=1.02 max_visit_share=0.254 max_jobs=21\n  W=8 J=16 started=8 jobs=128 completed=128 terminal=0 emitted=155661 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=935699 acc=155661 rej=780038 total_ms=213.1 worker_max_ms=197.4 worker_mean_ms=190.8 imbalance=1.03 max_visit_share=0.135 max_jobs=20\nSUMMARY family=terrain n=8000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
+      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=155661 alive=155661 dup=0 ok=yes digest=d283280a07b7a5c0 cand=935699 acc=155661 rej=780038 rects=432884 serial_total_ms=1020.8\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=0 emitted=155661 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=935699 acc=155661 rej=780038 total_ms=1009.7 worker_max_ms=1009.7 worker_mean_ms=1009.7 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=0 emitted=155661 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=935699 acc=155661 rej=780038 total_ms=569.7 worker_max_ms=522.5 worker_mean_ms=512.5 imbalance=1.02 max_visit_share=0.515 max_jobs=17\n  W=4 J=16 started=4 jobs=64 completed=64 terminal=0 emitted=155661 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=935699 acc=155661 rej=780038 total_ms=273.1 worker_max_ms=261.5 worker_mean_ms=255.5 imbalance=1.02 max_visit_share=0.255 max_jobs=20\n  W=8 J=16 started=8 jobs=128 completed=128 terminal=0 emitted=155661 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=935699 acc=155661 rej=780038 total_ms=206.2 worker_max_ms=193.0 worker_mean_ms=187.4 imbalance=1.03 max_visit_share=0.137 max_jobs=22\nSUMMARY family=terrain n=8000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
       "scale_rows": [
         {
           "workers": 0,
-          "serial_total_ms": 1065.0,
+          "serial_total_ms": 1020.8,
           "digest": "d283280a07b7a5c0",
           "candidates": 935699,
           "accepted": 155661
@@ -565,11 +565,11 @@
           "jobs_per_worker": 16,
           "started": 1,
           "jobs": 17,
-          "total_ms": 1038.6,
+          "total_ms": 1009.7,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 1038.6,
-          "worker_mean_ms": 1038.6,
+          "worker_max_ms": 1009.7,
+          "worker_mean_ms": 1009.7,
           "imbalance": 1.0,
           "max_visit_share": 1.0,
           "max_jobs": 17
@@ -579,13 +579,13 @@
           "jobs_per_worker": 16,
           "started": 2,
           "jobs": 32,
-          "total_ms": 610.7,
+          "total_ms": 569.7,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 560.4,
-          "worker_mean_ms": 552.0,
+          "worker_max_ms": 522.5,
+          "worker_mean_ms": 512.5,
           "imbalance": 1.02,
-          "max_visit_share": 0.514,
+          "max_visit_share": 0.515,
           "max_jobs": 17
         },
         {
@@ -593,34 +593,34 @@
           "jobs_per_worker": 16,
           "started": 4,
           "jobs": 64,
-          "total_ms": 285.5,
+          "total_ms": 273.1,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 272.7,
-          "worker_mean_ms": 268.2,
+          "worker_max_ms": 261.5,
+          "worker_mean_ms": 255.5,
           "imbalance": 1.02,
-          "max_visit_share": 0.254,
-          "max_jobs": 21
+          "max_visit_share": 0.255,
+          "max_jobs": 20
         },
         {
           "workers": 8,
           "jobs_per_worker": 16,
           "started": 8,
           "jobs": 128,
-          "total_ms": 213.1,
+          "total_ms": 206.2,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 197.4,
-          "worker_mean_ms": 190.8,
+          "worker_max_ms": 193.0,
+          "worker_mean_ms": 187.4,
           "imbalance": 1.03,
-          "max_visit_share": 0.135,
-          "max_jobs": 20
+          "max_visit_share": 0.137,
+          "max_jobs": 22
         }
       ]
     },
     {
-      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/verify_build/chain_verify_parallel terrain 16000 10 8 3 scale",
-      "wall_seconds": 8.497,
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/verify_build/chain_verify_parallel terrain 16000 10 8 3 scale",
+      "wall_seconds": 8.356,
       "summary": {
         "family": "terrain",
         "n": 16000,
@@ -635,11 +635,11 @@
         "digest_breaks": 0,
         "counter_breaks": 0
       },
-      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=315311 alive=315311 dup=0 ok=yes digest=2e0d3e600cfeb33c cand=1886724 acc=315311 rej=1571413 rects=901070 serial_total_ms=2198.9\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=0 emitted=315311 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=1886724 acc=315311 rej=1571413 total_ms=2159.4 worker_max_ms=2159.4 worker_mean_ms=2159.4 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=0 emitted=315311 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=1886724 acc=315311 rej=1571413 total_ms=1249.8 worker_max_ms=1118.9 worker_mean_ms=1109.8 imbalance=1.01 max_visit_share=0.509 max_jobs=17\n  W=4 J=16 started=4 jobs=64 completed=64 terminal=0 emitted=315311 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=1886724 acc=315311 rej=1571413 total_ms=606.4 worker_max_ms=573.2 worker_mean_ms=561.7 imbalance=1.02 max_visit_share=0.256 max_jobs=19\n  W=8 J=16 started=8 jobs=128 completed=128 terminal=0 emitted=315311 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=1886724 acc=315311 rej=1571413 total_ms=463.6 worker_max_ms=421.6 worker_mean_ms=409.2 imbalance=1.03 max_visit_share=0.139 max_jobs=32\nSUMMARY family=terrain n=16000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
+      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=315311 alive=315311 dup=0 ok=yes digest=2e0d3e600cfeb33c cand=1886724 acc=315311 rej=1571413 rects=901070 serial_total_ms=2148.6\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=0 emitted=315311 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=1886724 acc=315311 rej=1571413 total_ms=2144.4 worker_max_ms=2144.4 worker_mean_ms=2144.4 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=0 emitted=315311 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=1886724 acc=315311 rej=1571413 total_ms=1225.9 worker_max_ms=1098.9 worker_mean_ms=1084.4 imbalance=1.01 max_visit_share=0.501 max_jobs=17\n  W=4 J=16 started=4 jobs=64 completed=64 terminal=0 emitted=315311 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=1886724 acc=315311 rej=1571413 total_ms=611.2 worker_max_ms=575.8 worker_mean_ms=562.5 imbalance=1.02 max_visit_share=0.262 max_jobs=18\n  W=8 J=16 started=8 jobs=128 completed=128 terminal=0 emitted=315311 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=1886724 acc=315311 rej=1571413 total_ms=461.8 worker_max_ms=421.1 worker_mean_ms=404.6 imbalance=1.04 max_visit_share=0.132 max_jobs=23\nSUMMARY family=terrain n=16000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
       "scale_rows": [
         {
           "workers": 0,
-          "serial_total_ms": 2198.9,
+          "serial_total_ms": 2148.6,
           "digest": "2e0d3e600cfeb33c",
           "candidates": 1886724,
           "accepted": 315311
@@ -649,11 +649,11 @@
           "jobs_per_worker": 16,
           "started": 1,
           "jobs": 17,
-          "total_ms": 2159.4,
+          "total_ms": 2144.4,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 2159.4,
-          "worker_mean_ms": 2159.4,
+          "worker_max_ms": 2144.4,
+          "worker_mean_ms": 2144.4,
           "imbalance": 1.0,
           "max_visit_share": 1.0,
           "max_jobs": 17
@@ -663,13 +663,13 @@
           "jobs_per_worker": 16,
           "started": 2,
           "jobs": 32,
-          "total_ms": 1249.8,
+          "total_ms": 1225.9,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 1118.9,
-          "worker_mean_ms": 1109.8,
+          "worker_max_ms": 1098.9,
+          "worker_mean_ms": 1084.4,
           "imbalance": 1.01,
-          "max_visit_share": 0.509,
+          "max_visit_share": 0.501,
           "max_jobs": 17
         },
         {
@@ -677,34 +677,34 @@
           "jobs_per_worker": 16,
           "started": 4,
           "jobs": 64,
-          "total_ms": 606.4,
+          "total_ms": 611.2,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 573.2,
-          "worker_mean_ms": 561.7,
+          "worker_max_ms": 575.8,
+          "worker_mean_ms": 562.5,
           "imbalance": 1.02,
-          "max_visit_share": 0.256,
-          "max_jobs": 19
+          "max_visit_share": 0.262,
+          "max_jobs": 18
         },
         {
           "workers": 8,
           "jobs_per_worker": 16,
           "started": 8,
           "jobs": 128,
-          "total_ms": 463.6,
+          "total_ms": 461.8,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 421.6,
-          "worker_mean_ms": 409.2,
-          "imbalance": 1.03,
-          "max_visit_share": 0.139,
-          "max_jobs": 32
+          "worker_max_ms": 421.1,
+          "worker_mean_ms": 404.6,
+          "imbalance": 1.04,
+          "max_visit_share": 0.132,
+          "max_jobs": 23
         }
       ]
     },
     {
-      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/verify_build/chain_verify_parallel terrain 32000 10 8 3 scale",
-      "wall_seconds": 18.384,
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/verify_build/chain_verify_parallel terrain 32000 10 8 3 scale",
+      "wall_seconds": 18.124,
       "summary": {
         "family": "terrain",
         "n": 32000,
@@ -719,11 +719,11 @@
         "digest_breaks": 0,
         "counter_breaks": 0
       },
-      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=638334 alive=638334 dup=0 ok=yes digest=6abe690f95f3a47d cand=4017435 acc=638334 rej=3379101 rects=1961914 serial_total_ms=4771.0\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=0 emitted=638334 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=4017435 acc=638334 rej=3379101 total_ms=4743.2 worker_max_ms=4743.1 worker_mean_ms=4743.1 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=0 emitted=638334 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=4017435 acc=638334 rej=3379101 total_ms=2774.3 worker_max_ms=2493.6 worker_mean_ms=2463.4 imbalance=1.01 max_visit_share=0.506 max_jobs=19\n  W=4 J=16 started=4 jobs=64 completed=64 terminal=0 emitted=638334 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=4017435 acc=638334 rej=3379101 total_ms=1371.3 worker_max_ms=1297.9 worker_mean_ms=1254.7 imbalance=1.03 max_visit_share=0.265 max_jobs=19\n  W=8 J=16 started=8 jobs=128 completed=128 terminal=0 emitted=638334 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=4017435 acc=638334 rej=3379101 total_ms=1032.9 worker_max_ms=946.5 worker_mean_ms=903.6 imbalance=1.05 max_visit_share=0.137 max_jobs=24\nSUMMARY family=terrain n=32000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
+      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=638334 alive=638334 dup=0 ok=yes digest=6abe690f95f3a47d cand=4017435 acc=638334 rej=3379101 rects=1961914 serial_total_ms=4658.7\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=0 emitted=638334 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=4017435 acc=638334 rej=3379101 total_ms=4691.6 worker_max_ms=4691.6 worker_mean_ms=4691.6 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=0 emitted=638334 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=4017435 acc=638334 rej=3379101 total_ms=2675.9 worker_max_ms=2402.2 worker_mean_ms=2379.1 imbalance=1.01 max_visit_share=0.500 max_jobs=16\n  W=4 J=16 started=4 jobs=64 completed=64 terminal=0 emitted=638334 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=4017435 acc=638334 rej=3379101 total_ms=1382.4 worker_max_ms=1313.6 worker_mean_ms=1260.4 imbalance=1.04 max_visit_share=0.265 max_jobs=20\n  W=8 J=16 started=8 jobs=128 completed=128 terminal=0 emitted=638334 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=4017435 acc=638334 rej=3379101 total_ms=1014.1 worker_max_ms=929.9 worker_mean_ms=895.6 imbalance=1.04 max_visit_share=0.147 max_jobs=33\nSUMMARY family=terrain n=32000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
       "scale_rows": [
         {
           "workers": 0,
-          "serial_total_ms": 4771.0,
+          "serial_total_ms": 4658.7,
           "digest": "6abe690f95f3a47d",
           "candidates": 4017435,
           "accepted": 638334
@@ -733,11 +733,11 @@
           "jobs_per_worker": 16,
           "started": 1,
           "jobs": 17,
-          "total_ms": 4743.2,
+          "total_ms": 4691.6,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 4743.1,
-          "worker_mean_ms": 4743.1,
+          "worker_max_ms": 4691.6,
+          "worker_mean_ms": 4691.6,
           "imbalance": 1.0,
           "max_visit_share": 1.0,
           "max_jobs": 17
@@ -747,48 +747,48 @@
           "jobs_per_worker": 16,
           "started": 2,
           "jobs": 32,
-          "total_ms": 2774.3,
+          "total_ms": 2675.9,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 2493.6,
-          "worker_mean_ms": 2463.4,
+          "worker_max_ms": 2402.2,
+          "worker_mean_ms": 2379.1,
           "imbalance": 1.01,
-          "max_visit_share": 0.506,
-          "max_jobs": 19
+          "max_visit_share": 0.5,
+          "max_jobs": 16
         },
         {
           "workers": 4,
           "jobs_per_worker": 16,
           "started": 4,
           "jobs": 64,
-          "total_ms": 1371.3,
+          "total_ms": 1382.4,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 1297.9,
-          "worker_mean_ms": 1254.7,
-          "imbalance": 1.03,
+          "worker_max_ms": 1313.6,
+          "worker_mean_ms": 1260.4,
+          "imbalance": 1.04,
           "max_visit_share": 0.265,
-          "max_jobs": 19
+          "max_jobs": 20
         },
         {
           "workers": 8,
           "jobs_per_worker": 16,
           "started": 8,
           "jobs": 128,
-          "total_ms": 1032.9,
+          "total_ms": 1014.1,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 946.5,
-          "worker_mean_ms": 903.6,
-          "imbalance": 1.05,
-          "max_visit_share": 0.137,
-          "max_jobs": 24
+          "worker_max_ms": 929.9,
+          "worker_mean_ms": 895.6,
+          "imbalance": 1.04,
+          "max_visit_share": 0.147,
+          "max_jobs": 33
         }
       ]
     },
     {
-      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/verify_build/chain_verify_parallel rows 8000 10 8 3 scale",
-      "wall_seconds": 1.455,
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/verify_build/chain_verify_parallel rows 8000 10 8 3 scale",
+      "wall_seconds": 1.427,
       "summary": {
         "family": "rows",
         "n": 8000,
@@ -803,11 +803,11 @@
         "digest_breaks": 0,
         "counter_breaks": 0
       },
-      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=123860 alive=123860 dup=0 ok=yes digest=e6da9cc99e1a1b03 cand=16091188 acc=123860 rej=15967328 rects=69677 serial_total_ms=254.9\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=1 emitted=123860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=16091188 acc=123860 rej=15967328 total_ms=255.5 worker_max_ms=255.5 worker_mean_ms=255.5 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=1 emitted=123860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=16091188 acc=123860 rej=15967328 total_ms=185.7 worker_max_ms=156.2 worker_mean_ms=156.0 imbalance=1.00 max_visit_share=0.788 max_jobs=31\n  W=4 J=16 started=4 jobs=64 completed=64 terminal=1 emitted=123860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=16091188 acc=123860 rej=15967328 total_ms=148.9 worker_max_ms=139.3 worker_mean_ms=77.9 imbalance=1.79 max_visit_share=0.788 max_jobs=28\n  W=8 J=16 started=8 jobs=129 completed=129 terminal=1 emitted=123860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=16091188 acc=123860 rej=15967328 total_ms=142.3 worker_max_ms=135.5 worker_mean_ms=45.4 imbalance=2.98 max_visit_share=0.788 max_jobs=29\nSUMMARY family=rows n=8000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
+      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=123860 alive=123860 dup=0 ok=yes digest=e6da9cc99e1a1b03 cand=16091188 acc=123860 rej=15967328 rects=69677 serial_total_ms=259.5\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=1 emitted=123860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=16091188 acc=123860 rej=15967328 total_ms=251.5 worker_max_ms=251.5 worker_mean_ms=251.5 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=1 emitted=123860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=16091188 acc=123860 rej=15967328 total_ms=171.0 worker_max_ms=139.9 worker_mean_ms=135.8 imbalance=1.03 max_visit_share=0.801 max_jobs=29\n  W=4 J=16 started=4 jobs=64 completed=64 terminal=1 emitted=123860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=16091188 acc=123860 rej=15967328 total_ms=133.7 worker_max_ms=126.2 worker_mean_ms=67.2 imbalance=1.88 max_visit_share=0.788 max_jobs=23\n  W=8 J=16 started=8 jobs=129 completed=129 terminal=1 emitted=123860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=16091188 acc=123860 rej=15967328 total_ms=144.2 worker_max_ms=136.4 worker_mean_ms=44.4 imbalance=3.07 max_visit_share=0.788 max_jobs=34\nSUMMARY family=rows n=8000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
       "scale_rows": [
         {
           "workers": 0,
-          "serial_total_ms": 254.9,
+          "serial_total_ms": 259.5,
           "digest": "e6da9cc99e1a1b03",
           "candidates": 16091188,
           "accepted": 123860
@@ -817,11 +817,11 @@
           "jobs_per_worker": 16,
           "started": 1,
           "jobs": 17,
-          "total_ms": 255.5,
+          "total_ms": 251.5,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 255.5,
-          "worker_mean_ms": 255.5,
+          "worker_max_ms": 251.5,
+          "worker_mean_ms": 251.5,
           "imbalance": 1.0,
           "max_visit_share": 1.0,
           "max_jobs": 17
@@ -831,48 +831,48 @@
           "jobs_per_worker": 16,
           "started": 2,
           "jobs": 32,
-          "total_ms": 185.7,
+          "total_ms": 171.0,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 156.2,
-          "worker_mean_ms": 156.0,
-          "imbalance": 1.0,
-          "max_visit_share": 0.788,
-          "max_jobs": 31
+          "worker_max_ms": 139.9,
+          "worker_mean_ms": 135.8,
+          "imbalance": 1.03,
+          "max_visit_share": 0.801,
+          "max_jobs": 29
         },
         {
           "workers": 4,
           "jobs_per_worker": 16,
           "started": 4,
           "jobs": 64,
-          "total_ms": 148.9,
+          "total_ms": 133.7,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 139.3,
-          "worker_mean_ms": 77.9,
-          "imbalance": 1.79,
+          "worker_max_ms": 126.2,
+          "worker_mean_ms": 67.2,
+          "imbalance": 1.88,
           "max_visit_share": 0.788,
-          "max_jobs": 28
+          "max_jobs": 23
         },
         {
           "workers": 8,
           "jobs_per_worker": 16,
           "started": 8,
           "jobs": 129,
-          "total_ms": 142.3,
+          "total_ms": 144.2,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 135.5,
-          "worker_mean_ms": 45.4,
-          "imbalance": 2.98,
+          "worker_max_ms": 136.4,
+          "worker_mean_ms": 44.4,
+          "imbalance": 3.07,
           "max_visit_share": 0.788,
-          "max_jobs": 29
+          "max_jobs": 34
         }
       ]
     },
     {
-      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/verify_build/chain_verify_parallel rows 16000 10 8 3 scale",
-      "wall_seconds": 2.928,
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/verify_build/chain_verify_parallel rows 16000 10 8 3 scale",
+      "wall_seconds": 2.884,
       "summary": {
         "family": "rows",
         "n": 16000,
@@ -887,11 +887,11 @@
         "digest_breaks": 0,
         "counter_breaks": 0
       },
-      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=247860 alive=247860 dup=0 ok=yes digest=717dc82db050e77f cand=32182626 acc=247860 rej=31934766 rects=139440 serial_total_ms=553.8\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=0 emitted=247860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=32182626 acc=247860 rej=31934766 total_ms=566.9 worker_max_ms=566.9 worker_mean_ms=566.9 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=4 emitted=247860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=32182626 acc=247860 rej=31934766 total_ms=363.9 worker_max_ms=302.3 worker_mean_ms=302.1 imbalance=1.00 max_visit_share=0.504 max_jobs=18\n  W=4 J=16 started=4 jobs=65 completed=65 terminal=4 emitted=247860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=32182626 acc=247860 rej=31934766 total_ms=177.8 worker_max_ms=154.1 worker_mean_ms=149.9 imbalance=1.03 max_visit_share=0.401 max_jobs=29\n  W=8 J=16 started=8 jobs=128 completed=128 terminal=4 emitted=247860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=32182626 acc=247860 rej=31934766 total_ms=185.4 worker_max_ms=163.0 worker_mean_ms=98.6 imbalance=1.65 max_visit_share=0.394 max_jobs=24\nSUMMARY family=rows n=16000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
+      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=247860 alive=247860 dup=0 ok=yes digest=717dc82db050e77f cand=32182626 acc=247860 rej=31934766 rects=139440 serial_total_ms=529.1\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=0 emitted=247860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=32182626 acc=247860 rej=31934766 total_ms=562.4 worker_max_ms=562.3 worker_mean_ms=562.3 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=4 emitted=247860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=32182626 acc=247860 rej=31934766 total_ms=346.6 worker_max_ms=285.9 worker_mean_ms=285.8 imbalance=1.00 max_visit_share=0.504 max_jobs=17\n  W=4 J=16 started=4 jobs=65 completed=65 terminal=4 emitted=247860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=32182626 acc=247860 rej=31934766 total_ms=177.2 worker_max_ms=150.3 worker_mean_ms=146.1 imbalance=1.03 max_visit_share=0.401 max_jobs=34\n  W=8 J=16 started=8 jobs=128 completed=128 terminal=4 emitted=247860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=32182626 acc=247860 rej=31934766 total_ms=203.1 worker_max_ms=180.2 worker_mean_ms=104.7 imbalance=1.72 max_visit_share=0.394 max_jobs=25\nSUMMARY family=rows n=16000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
       "scale_rows": [
         {
           "workers": 0,
-          "serial_total_ms": 553.8,
+          "serial_total_ms": 529.1,
           "digest": "717dc82db050e77f",
           "candidates": 32182626,
           "accepted": 247860
@@ -901,11 +901,11 @@
           "jobs_per_worker": 16,
           "started": 1,
           "jobs": 17,
-          "total_ms": 566.9,
+          "total_ms": 562.4,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 566.9,
-          "worker_mean_ms": 566.9,
+          "worker_max_ms": 562.3,
+          "worker_mean_ms": 562.3,
           "imbalance": 1.0,
           "max_visit_share": 1.0,
           "max_jobs": 17
@@ -915,48 +915,48 @@
           "jobs_per_worker": 16,
           "started": 2,
           "jobs": 32,
-          "total_ms": 363.9,
+          "total_ms": 346.6,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 302.3,
-          "worker_mean_ms": 302.1,
+          "worker_max_ms": 285.9,
+          "worker_mean_ms": 285.8,
           "imbalance": 1.0,
           "max_visit_share": 0.504,
-          "max_jobs": 18
+          "max_jobs": 17
         },
         {
           "workers": 4,
           "jobs_per_worker": 16,
           "started": 4,
           "jobs": 65,
-          "total_ms": 177.8,
+          "total_ms": 177.2,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 154.1,
-          "worker_mean_ms": 149.9,
+          "worker_max_ms": 150.3,
+          "worker_mean_ms": 146.1,
           "imbalance": 1.03,
           "max_visit_share": 0.401,
-          "max_jobs": 29
+          "max_jobs": 34
         },
         {
           "workers": 8,
           "jobs_per_worker": 16,
           "started": 8,
           "jobs": 128,
-          "total_ms": 185.4,
+          "total_ms": 203.1,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 163.0,
-          "worker_mean_ms": 98.6,
-          "imbalance": 1.65,
+          "worker_max_ms": 180.2,
+          "worker_mean_ms": 104.7,
+          "imbalance": 1.72,
           "max_visit_share": 0.394,
-          "max_jobs": 24
+          "max_jobs": 25
         }
       ]
     },
     {
-      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_workers_smoke/verify_build/chain_verify_parallel rows 32000 10 8 3 scale",
-      "wall_seconds": 6.043,
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/pinned_b268cf6f/verify_build/chain_verify_parallel rows 32000 10 8 3 scale",
+      "wall_seconds": 5.786,
       "summary": {
         "family": "rows",
         "n": 32000,
@@ -971,11 +971,11 @@
         "digest_breaks": 0,
         "counter_breaks": 0
       },
-      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=495860 alive=495860 dup=0 ok=yes digest=546989636c04ce6f cand=64365502 acc=495860 rej=63869642 rects=278966 serial_total_ms=1103.0\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=0 emitted=495860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=64365502 acc=495860 rej=63869642 total_ms=1166.6 worker_max_ms=1166.5 worker_mean_ms=1166.5 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=0 emitted=495860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=64365502 acc=495860 rej=63869642 total_ms=753.9 worker_max_ms=624.2 worker_mean_ms=612.7 imbalance=1.02 max_visit_share=0.639 max_jobs=18\n  W=4 J=16 started=4 jobs=64 completed=64 terminal=0 emitted=495860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=64365502 acc=495860 rej=63869642 total_ms=409.9 worker_max_ms=360.8 worker_mean_ms=352.6 imbalance=1.02 max_visit_share=0.257 max_jobs=19\n  W=8 J=16 started=8 jobs=128 completed=128 terminal=0 emitted=495860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=64365502 acc=495860 rej=63869642 total_ms=368.0 worker_max_ms=317.2 worker_mean_ms=289.1 imbalance=1.10 max_visit_share=0.201 max_jobs=37\nSUMMARY family=rows n=32000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
+      "raw_stdout": "samples/shared/sib+compl/pool64          serial: emitted=495860 alive=495860 dup=0 ok=yes digest=546989636c04ce6f cand=64365502 acc=495860 rej=63869642 rects=278966 serial_total_ms=1108.9\n  W=1 J=16 started=1 jobs=17 completed=17 terminal=0 emitted=495860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=64365502 acc=495860 rej=63869642 total_ms=1076.7 worker_max_ms=1076.6 worker_mean_ms=1076.6 imbalance=1.00 max_visit_share=1.000 max_jobs=17\n  W=2 J=16 started=2 jobs=32 completed=32 terminal=0 emitted=495860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=64365502 acc=495860 rej=63869642 total_ms=759.0 worker_max_ms=624.0 worker_mean_ms=606.2 imbalance=1.03 max_visit_share=0.656 max_jobs=18\n  W=4 J=16 started=4 jobs=64 completed=64 terminal=0 emitted=495860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=64365502 acc=495860 rej=63869642 total_ms=371.2 worker_max_ms=325.4 worker_mean_ms=314.9 imbalance=1.03 max_visit_share=0.253 max_jobs=18\n  W=8 J=16 started=8 jobs=128 completed=128 terminal=0 emitted=495860 dups=0 ok=yes digest_eq=yes counters_eq=yes cand=64365502 acc=495860 rej=63869642 total_ms=283.6 worker_max_ms=234.8 worker_mean_ms=226.9 imbalance=1.03 max_visit_share=0.198 max_jobs=37\nSUMMARY family=rows n=32000 kmax=10 s=8 combos=1 parallel_runs=4 checked=0 alive=0 mismatch=0 cross_slot_dups=0 digest_breaks=0 counter_breaks=0\n",
       "scale_rows": [
         {
           "workers": 0,
-          "serial_total_ms": 1103.0,
+          "serial_total_ms": 1108.9,
           "digest": "546989636c04ce6f",
           "candidates": 64365502,
           "accepted": 495860
@@ -985,11 +985,11 @@
           "jobs_per_worker": 16,
           "started": 1,
           "jobs": 17,
-          "total_ms": 1166.6,
+          "total_ms": 1076.7,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 1166.5,
-          "worker_mean_ms": 1166.5,
+          "worker_max_ms": 1076.6,
+          "worker_mean_ms": 1076.6,
           "imbalance": 1.0,
           "max_visit_share": 1.0,
           "max_jobs": 17
@@ -999,13 +999,13 @@
           "jobs_per_worker": 16,
           "started": 2,
           "jobs": 32,
-          "total_ms": 753.9,
+          "total_ms": 759.0,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 624.2,
-          "worker_mean_ms": 612.7,
-          "imbalance": 1.02,
-          "max_visit_share": 0.639,
+          "worker_max_ms": 624.0,
+          "worker_mean_ms": 606.2,
+          "imbalance": 1.03,
+          "max_visit_share": 0.656,
           "max_jobs": 18
         },
         {
@@ -1013,27 +1013,27 @@
           "jobs_per_worker": 16,
           "started": 4,
           "jobs": 64,
-          "total_ms": 409.9,
+          "total_ms": 371.2,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 360.8,
-          "worker_mean_ms": 352.6,
-          "imbalance": 1.02,
-          "max_visit_share": 0.257,
-          "max_jobs": 19
+          "worker_max_ms": 325.4,
+          "worker_mean_ms": 314.9,
+          "imbalance": 1.03,
+          "max_visit_share": 0.253,
+          "max_jobs": 18
         },
         {
           "workers": 8,
           "jobs_per_worker": 16,
           "started": 8,
           "jobs": 128,
-          "total_ms": 368.0,
+          "total_ms": 283.6,
           "digest_eq": "yes",
           "counters_eq": "yes",
-          "worker_max_ms": 317.2,
-          "worker_mean_ms": 289.1,
-          "imbalance": 1.1,
-          "max_visit_share": 0.201,
+          "worker_max_ms": 234.8,
+          "worker_mean_ms": 226.9,
+          "imbalance": 1.03,
+          "max_visit_share": 0.198,
           "max_jobs": 37
         }
       ]
