@@ -1,0 +1,18 @@
+{
+  "status": "passed",
+  "error": "",
+  "source_hashes_unchanged": true,
+  "normal_optimized_equal": true,
+  "commands_completed": 2,
+  "gcp_used": false,
+  "recorded_artifact_sha256": {
+    "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/qualification/analysis_v8_47i6o/INVOCATION.json": "ea824457440fb7493c2387d888c78e42df2d2b339302f691d073a01644edd61d",
+    "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/qualification/analysis_v8_47i6o/SUMMARY.json": "236bd0bd8525083c76394cd450d4fd9ddfd006dc23dbc8b9ed3213ccdc30c3c7",
+    "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/qualification/analysis_v8_47i6o/normal.json": "fab6f2bbc1a3451991fbf7551962a8b75b32694e55e9b2a80faec10db722496f",
+    "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/qualification/analysis_v8_47i6o/normal.stderr.bin": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/qualification/analysis_v8_47i6o/normal.stdout.bin": "215ccd24f9cb13f577fde93db7e685635ea9804f3163d091495297c45bc698a3",
+    "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/qualification/analysis_v8_47i6o/optimized.json": "afa755fba8e33fe2d0de066ecf3d1e5790758bbed4eb23ccb6b585a3d90732da",
+    "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/qualification/analysis_v8_47i6o/optimized.stderr.bin": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/qualification/analysis_v8_47i6o/optimized.stdout.bin": "215ccd24f9cb13f577fde93db7e685635ea9804f3163d091495297c45bc698a3"
+  }
+}

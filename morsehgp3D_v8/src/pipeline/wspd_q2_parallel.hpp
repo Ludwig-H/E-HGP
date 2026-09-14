@@ -7,10 +7,20 @@
 
 namespace mhgp8 {
 
+enum class WspdQ2ScheduleMode { Coarse, Donate };
+
+struct WspdQ2Schedule {
+  WspdQ2ScheduleMode mode = WspdQ2ScheduleMode::Coarse;
+  std::size_t queue_capacity = 64;
+  std::size_t donation_interval = 64;
+};
+
 struct Q2ParallelWorkerStats {
   u64 jobs{}, front_products{}, input_rectangles{}, count_node_visits{}, supports{};
   u64 pool_peak_bytes{};
   double elapsed_ms{}, payload_ms{};
+  // jobs counts completed initial seeds only; donations are separate.
+  WspdFrontDispatchWork dispatch_work{};
 };
 
 // Integer work is summed over the prefix and workers; geometric decisions
@@ -27,13 +37,15 @@ struct WspdQ2ParallelResult {
   u64 candidate_pairs{}, accepted_pairs{}, rejected_pairs{};
   u64 requested_workers{}, started_workers{}, target_jobs{}, jobs{}, completed_jobs{};
   u64 terminal_jobs{}, prefix_product_visits{}, job_storage_bytes{};
+  WspdFrontDispatchWork dispatch_work{};
+  u64 queue_storage_bytes{};
   // Sum of per-worker maxima: an upper bound, NOT simultaneous peak RSS.
   u64 pool_peak_bytes_sum{};
   double partition_ms{}, worker_ms_sum{}, payload_ms_sum{}, total_ms{};
   std::vector<Q2ParallelWorkerStats> workers;
 };
 
-// Coarse front jobs: each original parent is evaluated once before its
+// Front jobs: each original parent is evaluated once before its
 // children are distributed. Every worker owns one reusable census engine
 // and its payload buffers. No complete WSPD or support catalogue is stored.
 // Consumers are copied before work starts; slot i is invoked only by worker
@@ -55,6 +67,10 @@ struct WspdQ2ParallelResult {
 // executes inline. Wall time includes partition, launches, joins, reductions
 // and destruction of private engines/contexts, not caller preprocessing.
 // Never subtract payload_ms_sum or worker_ms_sum from total_ms.
+// Donate additionally shares unvisited DFS products through a bounded
+// queue. A full/busy queue never blocks its producer: traversal continues
+// locally. It does not divide an already running census callback. Queue
+// capacity and donation interval must be positive, also in Coarse mode.
 [[nodiscard]] WspdQ2ParallelResult run_wspd_q2_census_parallel(
     Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s,
     WspdFrontMode front_mode, Q2CensusMode census_mode,
@@ -62,6 +78,6 @@ struct WspdQ2ParallelResult {
     Q2SiblingMode sibling_mode = Q2SiblingMode::Disabled,
     Q2WitnessOrder witness_order = Q2WitnessOrder::GlobalDfs,
     Q2AnchorMode anchor_mode = Q2AnchorMode::Individual,
-    std::size_t pool_min_factor = 0);
+    std::size_t pool_min_factor = 0, WspdQ2Schedule schedule = {});
 
 }  // namespace mhgp8

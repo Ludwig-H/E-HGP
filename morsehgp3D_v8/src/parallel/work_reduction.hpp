@@ -9,6 +9,23 @@ namespace mhgp8::parallel_detail {
 // Explicit member-wise reduction: no layout/padding or aliasing assumptions.
 // All additive counters use checked arithmetic; depths/capacities use maxima.
 
+inline void merge_work(WspdFrontDispatchWork& out, const WspdFrontDispatchWork& value) {
+  counter_add(out.seeds_started, value.seeds_started);
+  counter_add(out.seeds_completed, value.seeds_completed);
+  counter_add(out.donations, value.donations);
+  counter_add(out.donor_checks, value.donor_checks);
+  counter_add(out.offer_attempts, value.offer_attempts);
+  counter_add(out.offer_full, value.offer_full);
+  counter_add(out.offer_busy, value.offer_busy);
+  counter_add(out.offer_no_demand, value.offer_no_demand);
+  counter_add(out.stolen_started, value.stolen_started);
+  counter_add(out.stolen_completed, value.stolen_completed);
+  counter_add(out.waits, value.waits);
+  counter_add(out.wakes, value.wakes);
+  out.max_queue_size = std::max(out.max_queue_size, value.max_queue_size);
+  out.max_local_stack_size = std::max(out.max_local_stack_size, value.max_local_stack_size);
+}
+
 inline void merge_work(WspdFrontWork& out, const WspdFrontWork& value) {
   counter_add(out.product_visits, value.product_visits);
   counter_add(out.diagonal_splits, value.diagonal_splits);

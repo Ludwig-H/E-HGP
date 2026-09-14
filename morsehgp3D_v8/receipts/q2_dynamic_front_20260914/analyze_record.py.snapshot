@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+"""Capture both strict analysis interpreters, preserving errors and closure."""
+import base64
+import os
+from pathlib import Path
+import signal
+import sys
+import tempfile
+
+import record as q
+
+ANALYZER = q.RECEIPTS / "analysis/analyze.py"
+SERIES = q.SOURCE / "audits/lidar08_20260914/prepared/single_000000"
+
+
+def main():
+    output = Path(tempfile.mkdtemp(prefix="analysis_", dir=q.DEST))
+    before = q.source_pins()
+    before[str(ANALYZER.relative_to(q.ROOT))] = q.digest(ANALYZER)
+    before[str(Path(__file__).resolve().relative_to(q.ROOT))] = q.digest(Path(__file__))
+    previous = {s: signal.signal(s, q.on_signal) for s in (signal.SIGINT, signal.SIGTERM)}
+    records = []
+    status, error = "failed", "not started"
+    try:
+        q.write_json(output / "INVOCATION.json", dict(command=[sys.executable, *sys.argv],
+            source_sha256=before, public_status="not_claimed", gcp_used=False))
+        for optimized in (False, True):
+            command = [sys.executable, "-B", *(["-O"] if optimized else []), str(ANALYZER),
+                       "--root", str(q.RECEIPTS), "--file-series-directory", str(SERIES)]
+            records.append(q.capture(command, "optimized" if optimized else "normal", 0, output, dict(os.environ)))
+        q.require(records[0]["stdout_base64"] == records[1]["stdout_base64"] and
+                  records[0]["stderr_base64"] == records[1]["stderr_base64"] == "", "analysis differs between interpreters")
+        summary = q.parse_result(base64.b64decode(records[0]["stdout_base64"], validate=True))
+        q.require(summary["status"] == "passed" and summary["full_contract_qualified"] is False,
+                  "wrong analysis scope")
+        q.write_json(output / "SUMMARY.json", summary)
+        status, error = "passed", ""
+    except BaseException as cause:
+        error = repr(cause)
+    finally:
+        unchanged = all((q.ROOT / path).is_file() and q.digest(q.ROOT / path) == pin for path, pin in before.items())
+        if not unchanged:
+            status, error = "invalid", error + "; source changed"
+        q.write_json(output / "RESULT.json", dict(status=status, error=error, source_hashes_unchanged=unchanged,
+            normal_optimized_equal=status == "passed", commands_completed=len(records), gcp_used=False,
+            recorded_artifact_sha256={str(path.relative_to(q.ROOT)): q.digest(path)
+                for path in sorted(output.rglob("*")) if path.is_file()}))
+        for s, handler in previous.items():
+            signal.signal(s, handler)
+    print(dict(status=status, error=error, output=str(output.relative_to(q.ROOT))))
+    return 0 if status == "passed" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

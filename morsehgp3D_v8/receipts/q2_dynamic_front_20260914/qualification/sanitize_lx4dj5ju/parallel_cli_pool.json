@@ -1,0 +1,36 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_dynamic_front_sanitize_20260914/mhgp8_wspd_q2_parallel_probe",
+    "16",
+    "uniform",
+    "5",
+    "8",
+    "3",
+    "4",
+    "16",
+    "-1"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "parallel_cli_pool",
+  "expected_exit_code": 2,
+  "started_utc": "2026-09-14T19:53:54.948457+00:00",
+  "status": "passed",
+  "exit_code": 2,
+  "stdout": "",
+  "stderr": "mhgp8 parallel probe: invalid unsigned integer\n",
+  "stdout_base64": "",
+  "stderr_base64": "bWhncDggcGFyYWxsZWwgcHJvYmU6IGludmFsaWQgdW5zaWduZWQgaW50ZWdlcgo=",
+  "finished_utc": "2026-09-14T19:53:54.960031+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/qualification/sanitize_lx4dj5ju/parallel_cli_pool.stdout.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/qualification/sanitize_lx4dj5ju/parallel_cli_pool.stderr.bin",
+      "sha256": "eef351e3d06e153a4f7dff4da255a2dba945a7ca8e34d0b148140da795bbf9d2",
+      "bytes": 47
+    }
+  }
+}

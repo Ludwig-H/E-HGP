@@ -1,0 +1,13 @@
+{
+  "input_authority": "prepared_local_u16_data_read_only_not_inherited_engine_qualification",
+  "sequence": "KITTI odometry 08",
+  "metadata_sha256": {
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/METADATA.json": "b8abd52c6ffa6ecada01988e4ee4a313a89c1a924725849f53df766b84e977de",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/METADATA.json": "844e1a7e94b20bba4c77715bf686b37e234d415ab554bd3b9d5ffe602c40cdd8",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/METADATA.json": "5fb677c91f1420b78ddc1c820ae341d8b8fcc2fd5b116070e1d39ca4b37fffa1"
+  },
+  "preparation_sampling": "ascending blake2b_128(seed3_u32le + packed_u16le_xyz), lexicographic xyz tie-break",
+  "consumption": "entire prepared file, exact 6*n bytes, no new subsampling or quantization, probe seed0 (input already prepared)",
+  "measured_file_sha256_authority": "input_files in each campaign MANIFEST.json, checked before/after each invocation and at closure",
+  "gcp_used": false
+}

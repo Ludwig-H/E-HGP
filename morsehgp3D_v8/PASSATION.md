@@ -6,6 +6,26 @@
 
 ## À reprendre maintenant
 
+La [redistribution des produits pendants](docs/P0_REDISTRIBUTION_FRONT_Q2.md)
+est implémentée et qualifiée :57 CTests Release/Clang ASan/UBSan,
+deux gates Clang TSan,32 différentiels et192 mesures closes, lecteurs
+normal/−O identiques. Le défaut `Coarse` reste
+inchangé ; `Donate` ajoute une file bornée avec poursuite locale lorsqu'une
+offre échoue, et un réveil sûr des workers à l'annulation. Comparer sur les
+données LiDAR déjà préparées, pas seulement les familles déjà équilibrées.
+Ne pas écraser les trois builds workers historiques ci-dessous. Les nouveaux
+builds portent le préfixe `v8_dynamic_front` et sont également épinglés,
+y compris le GCC-TSan en échec conservé et sa reprise Clang distincte.
+Le [bilan propre](receipts/q2_dynamic_front_20260914/README.md) ne montre
+pas de gain général : ne pas promouvoir les médianes sans leurs étendues.
+Le dispatch garde la géométrie, mais n'abrège pas un callback déjà engagé.
+Suite : continuations de census possédées et plans parentaux partagés ;
+aucune reprise depuis une nouvelle racine, préparation par A_i ou pointeur
+vers la pile d'un worker fini. Mesurer aussi l'attente, aujourd'hui incluse
+dans le temps de présence. q3/q4, FULL et GPU restent à construire.
+
+## Treizième tranche publiée à b268cf6f — historique
+
 Le [front distribué et ses workers q2](docs/P0_FRONT_WORKERS_Q2.md)
 sont implémentés : 53 CTests Release/Clang ASan/UBSan et la porte
 ThreadSanitizer passent, 32 configurations ancien/nouveau mono concordent.

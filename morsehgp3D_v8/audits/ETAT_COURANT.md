@@ -3,7 +3,21 @@
 14 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
-État constructeur courant : treizième tranche P0,
+État constructeur courant : quatorzième tranche P0,
+[redistribution des produits pendants](../docs/P0_REDISTRIBUTION_FRONT_Q2.md)
+implémentée et qualifiée :57 CTests Release/Clang ASan/UBSan, deux gates
+Clang TSan et32 différentiels PASS. Les [192 mesures propres](../receipts/q2_dynamic_front_20260914/README.md)
+sont closes, lecteurs/analyseurs normal/−O identiques. `Coarse` conservé
+par défaut : gains modestes ou instables, régression mesurée sur amas8k.
+Compteurs de distribution distincts : les six principaux comptes géométriques
+restent sous×3 aux doublements8k/16k/32k sur cinq séries, mais pas tous les
+compteurs variables de dons/attentes. Aucune borne générale ni tour FULL.
+Les quatre builds sont épinglés, y compris l'échec GCC-TSan et sa reprise
+Clang distincte. GCP non utilisé.
+
+## Historique : treizième tranche publiée à b268cf6f
+
+Treizième tranche P0,
 [front et census q2 multi-CPU](../docs/P0_FRONT_WORKERS_Q2.md) implémentés.
 Qualification propre close : 53 CTests Release/Clang ASan/UBSan,
 ThreadSanitizer et32 différentiels ancien/nouveau mono passent.

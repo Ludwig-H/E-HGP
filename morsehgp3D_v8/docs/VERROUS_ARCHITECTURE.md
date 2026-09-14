@@ -95,6 +95,14 @@ inclure ses propositions et évaluations de bornes supplémentaires.
 
 ## 1. Ordre des travaux et sens de « rédhibitoire »
 
+La [quatorzième tranche](P0_REDISTRIBUTION_FRONT_Q2.md) ajoute une file de
+produits non visités, sans refaire les parents. Les57 CTests et Clang TSan
+passent ;192 mesures ne montrent pas de gain général, Coarse reste le défaut.
+Une file pleine
+ne bloque jamais son producteur, et la terminaison tient compte des piles
+privées. Ce format possède ses identités ; il ne rend pas distribuables les
+contextes empruntés internes au census ni les plans Pool synchrones.
+
 La [douzième tranche Pool terminal](P0_POOL_TERMINAL_Q2.md) raccorde le
 filtre local aux vraies requêtes globales, sans reconstruire le nuage.
 Elle ne doit pas déplacer le carré vers un consommateur individuel :

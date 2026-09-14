@@ -4,8 +4,10 @@
 
 #include <algorithm>
 #include <array>
+#include <condition_variable>
 #include <deque>
 #include <limits>
+#include <mutex>
 #include <stdexcept>
 #include <vector>
 
@@ -329,7 +331,7 @@ struct WspdFrontJobs::Impl {
   }
 };
 
-WspdFrontJobs::WspdFrontJobs(std::unique_ptr<Impl> implementation)
+WspdFrontJobs::WspdFrontJobs(std::shared_ptr<const Impl> implementation)
     : implementation_(std::move(implementation)) {}
 WspdFrontJobs::~WspdFrontJobs() = default;
 
@@ -358,9 +360,262 @@ std::unique_ptr<WspdFrontJobs> make_wspd_front_jobs(
   if (!index || target_jobs == 0)
     throw std::invalid_argument("mhgp8 WSPD jobs require an owning index and positive target");
   validate_front(kmax, separation_s, mode, requested_lane_mask);
-  auto implementation = std::make_unique<WspdFrontJobs::Impl>(
+  auto implementation = std::make_shared<WspdFrontJobs::Impl>(
       std::move(index), kmax, separation_s, mode, target_jobs, requested_lane_mask);
   return std::unique_ptr<WspdFrontJobs>(new WspdFrontJobs(std::move(implementation)));
+}
+
+struct WspdFrontDispatch::Impl {
+  std::shared_ptr<const WspdFrontJobs::Impl> plan;
+  const std::size_t interval;
+  const std::size_t workers;
+  std::vector<Task> queue;
+  std::mutex mutex;
+  std::condition_variable ready;
+  std::size_t head{};
+  std::size_t queued{};
+  std::size_t next_seed{};
+  std::size_t active{};
+  std::size_t entries{};
+  bool cancelled{};
+  bool complete{};
+  std::atomic<bool> stopped{false};
+  // The exact active count is protected by mutex. This atomic mirror is
+  // only a donation heuristic; a stale read cannot remove a product.
+  std::atomic<std::size_t> demand;
+  std::atomic<std::size_t> waiting{0};
+
+  Impl(std::shared_ptr<const WspdFrontJobs::Impl> owner, std::size_t capacity,
+       std::size_t donation_interval, std::size_t worker_count)
+      : plan(std::move(owner)), interval(donation_interval), workers(worker_count),
+        queue(capacity), demand(worker_count) {}
+
+  void cancel() noexcept {
+    // Change the wait predicate under the same mutex as condition.wait,
+    // including the interval between registering a waiter and sleeping.
+    // Notification without this lock could lose the last wakeup.
+    {
+      std::lock_guard lock(mutex);
+      cancelled = true;
+      stopped.store(true, std::memory_order_relaxed);
+    }
+    ready.notify_all();
+  }
+
+  void register_worker() {
+    std::lock_guard lock(mutex);
+    if (entries >= workers)
+      throw std::invalid_argument("mhgp8 WSPD dispatcher worker count was already consumed");
+    ++entries;  // Bounded by the validated worker count, without wrapping.
+  }
+
+  bool take(Task& task, bool& seed, WspdFrontDispatchWork& work,
+            const std::atomic<bool>& cancellation) {
+    std::unique_lock lock(mutex);
+    for (;;) {
+      if (cancelled || cancellation.load(std::memory_order_relaxed)) {
+        cancelled = true;
+        stopped.store(true, std::memory_order_relaxed);
+        ready.notify_all();
+        return false;
+      }
+      if (complete) return false;
+      if (queued != 0 || next_seed < plan->jobs.size()) {
+        if (active >= workers)
+          throw std::logic_error("mhgp8 WSPD dispatcher active workers exceed slots");
+        if (queued != 0) {
+          counter_add(work.stolen_started);
+          task = queue[head];
+          head = head + 1 == queue.size() ? 0 : head + 1;
+          --queued;
+          seed = false;
+        } else {
+          counter_add(work.seeds_started);
+          task = plan->jobs[next_seed++];
+          seed = true;
+        }
+        ++active;
+        demand.store(workers - active, std::memory_order_relaxed);
+        return true;
+      }
+      // Empty queue is insufficient while any private stack or callback
+      // remains active. Conversely not-yet-started slots own no work.
+      if (active == 0) {
+        complete = true;
+        ready.notify_all();
+        return false;
+      }
+      counter_add(work.waits);
+      const auto before = waiting.load(std::memory_order_relaxed);
+      if (before >= workers)
+        throw std::logic_error("mhgp8 WSPD dispatcher waiting workers exceed slots");
+      waiting.store(before + 1, std::memory_order_relaxed);
+      try {
+        ready.wait(lock, [&] {
+          return cancelled || cancellation.load(std::memory_order_relaxed) ||
+                 queued != 0 || next_seed < plan->jobs.size() || active == 0;
+        });
+      } catch (...) {
+        waiting.store(waiting.load(std::memory_order_relaxed) - 1, std::memory_order_relaxed);
+        throw;
+      }
+      waiting.store(waiting.load(std::memory_order_relaxed) - 1, std::memory_order_relaxed);
+      counter_add(work.wakes);
+    }
+  }
+
+  void release_fragment() noexcept {
+    bool last_active = false;
+    {
+      std::lock_guard lock(mutex);
+      --active;  // Exactly one release for each successful take().
+      demand.store(workers - active, std::memory_order_relaxed);
+      last_active = active == 0;
+    }
+    // Finishing a fragment creates no queued work. Only the last active
+    // worker can make the termination predicate newly true; donations and
+    // cancellation already send their own notifications.
+    if (last_active) ready.notify_all();
+  }
+
+  bool offer(const Task& task, WspdFrontDispatchWork& work) {
+    counter_add(work.donor_checks);
+    if (demand.load(std::memory_order_relaxed) == 0 || stopped.load(std::memory_order_relaxed)) {
+      counter_add(work.offer_no_demand);
+      return false;
+    }
+    std::unique_lock lock(mutex, std::try_to_lock);
+    if (!lock.owns_lock()) {
+      counter_add(work.offer_attempts);
+      counter_add(work.offer_busy);
+      return false;
+    }
+    if (cancelled) {
+      counter_add(work.offer_no_demand);
+      return false;
+    }
+    counter_add(work.offer_attempts);
+    if (queued == queue.size()) {
+      counter_add(work.offer_full);
+      return false;
+    }
+    if (task.terminal)
+      throw std::logic_error("mhgp8 WSPD donation must be an unvisited product");
+    counter_add(work.donations);
+    // Avoid overflow in head+queued even for an enormous representable
+    // capacity. Task assignment cannot throw or transfer a borrowed view.
+    const auto tail = queued >= queue.size() - head ? queued - (queue.size() - head) : head + queued;
+    queue[tail] = task;
+    ++queued;
+    work.max_queue_size = std::max(work.max_queue_size, static_cast<u64>(queued));
+    lock.unlock();
+    ready.notify_one();
+    return true;
+  }
+
+  template<bool Cooperate>
+  WspdFrontDispatchResult run(const WspdRectangleConsumer& consumer,
+                              const std::atomic<bool>& cancellation) {
+    if (!consumer)
+      throw std::invalid_argument("mhgp8 WSPD dispatcher requires a valid consumer");
+    register_worker();
+    Front front(*plan->index, plan->kmax, plan->separation, plan->mode, consumer, plan->requested_mask);
+    WspdFrontDispatchWork work;
+    std::vector<Task> stack;
+    bool owns_fragment = false;
+    bool seed = false;
+    try {
+      // One seed at a time: potential depth(A)+depth(B)<=96 implies at
+      // most 97 pending entries. Reservation, never an exploration cap.
+      stack.reserve(97);
+      std::size_t until_poll = interval;
+      Task initial;
+      while (take(initial, seed, work, cancellation)) {
+        owns_fragment = true;
+        if (initial.terminal) {
+          consumer(WspdRectangle{initial.a, initial.b, initial.mask});
+        } else {
+          stack.push_back(initial);
+          work.max_local_stack_size = std::max<u64>(work.max_local_stack_size, 1);
+          while (!stack.empty()) {
+            const auto task = stack.back();
+            stack.pop_back();
+            front.expand(task, [&](const Task& child) {
+              stack.push_back(child);
+              work.max_local_stack_size = std::max(work.max_local_stack_size, static_cast<u64>(stack.size()));
+            }, [&](const Task& terminal) {
+              consumer(WspdRectangle{terminal.a, terminal.b, terminal.mask});
+            });
+            if constexpr (Cooperate) {
+              if (--until_poll == 0) {
+                until_poll = interval;
+                if (stopped.load(std::memory_order_relaxed) || cancellation.load(std::memory_order_relaxed)) {
+                  cancel();
+                  break;
+                }
+                // Give a whole untouched product in O(1), retaining local
+                // work. The donor removes it only after publication succeeds.
+                if (stack.size() > 1 && offer(stack.back(), work)) stack.pop_back();
+              }
+            }
+          }
+          if (!stack.empty()) {
+            release_fragment();
+            owns_fragment = false;
+            break;  // Cancellation: this fragment is not completed.
+          }
+        }
+        counter_add(seed ? work.seeds_completed : work.stolen_completed);
+        release_fragment();
+        owns_fragment = false;
+      }
+    } catch (...) {
+      cancel();
+      if (owns_fragment) release_fragment();
+      throw;
+    }
+    return {front.result(), work};
+  }
+};
+
+WspdFrontDispatch::WspdFrontDispatch(std::unique_ptr<Impl> implementation)
+    : implementation_(std::move(implementation)) {}
+WspdFrontDispatch::~WspdFrontDispatch() = default;
+
+WspdFrontDispatchResult WspdFrontDispatch::run_worker(
+    const WspdRectangleConsumer& consumer, const std::atomic<bool>& cancellation) {
+  try {
+    return implementation_->workers == 1 ? implementation_->run<false>(consumer, cancellation)
+                                         : implementation_->run<true>(consumer, cancellation);
+  } catch (...) {
+    // Also cover validation/registration/Front-construction failures that
+    // precede the private stack's active-fragment cleanup region.
+    implementation_->cancel();
+    throw;
+  }
+}
+
+void WspdFrontDispatch::cancel() noexcept { implementation_->cancel(); }
+std::size_t WspdFrontDispatch::queue_capacity() const noexcept { return implementation_->queue.size(); }
+std::size_t WspdFrontDispatch::worker_count() const noexcept { return implementation_->workers; }
+std::size_t WspdFrontDispatch::waiting_workers() const noexcept {
+  return implementation_->waiting.load(std::memory_order_relaxed);
+}
+
+std::size_t WspdFrontDispatch::retained_bytes() const {
+  const auto capacity = implementation_->queue.capacity();
+  if (capacity > std::numeric_limits<std::size_t>::max() / sizeof(Task))
+    throw std::overflow_error("mhgp8 WSPD dispatch queue bytes exceed size_t");
+  return capacity * sizeof(Task);
+}
+
+std::unique_ptr<WspdFrontDispatch> WspdFrontJobs::make_dispatch(
+    std::size_t queue_capacity, std::size_t donation_interval, std::size_t worker_count) const {
+  if (queue_capacity == 0 || donation_interval == 0 || worker_count == 0)
+    throw std::invalid_argument("mhgp8 WSPD dispatcher requires positive capacity, interval and workers");
+  auto implementation = std::make_unique<WspdFrontDispatch::Impl>(
+      implementation_, queue_capacity, donation_interval, worker_count);
+  return std::unique_ptr<WspdFrontDispatch>(new WspdFrontDispatch(std::move(implementation)));
 }
 
 }  // namespace mhgp8

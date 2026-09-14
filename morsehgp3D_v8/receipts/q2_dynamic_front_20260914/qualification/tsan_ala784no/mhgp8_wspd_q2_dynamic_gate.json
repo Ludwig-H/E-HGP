@@ -1,0 +1,32 @@
+{
+  "command": [
+    "timeout",
+    "60s",
+    "/workspaces/E-HGP/build/v8_dynamic_front_tsan_20260914/mhgp8_wspd_q2_dynamic_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "mhgp8_wspd_q2_dynamic_gate",
+  "expected_exit_code": 0,
+  "started_utc": "2026-09-14T19:44:42.360528+00:00",
+  "status": "failed",
+  "exit_code": 66,
+  "stdout": "",
+  "stderr": "FATAL: ThreadSanitizer: unexpected memory mapping 0x7516dd472000-0x7516dd900000\n",
+  "stdout_base64": "",
+  "stderr_base64": "RkFUQUw6IFRocmVhZFNhbml0aXplcjogdW5leHBlY3RlZCBtZW1vcnkgbWFwcGluZyAweDc1MTZkZDQ3MjAwMC0weDc1MTZkZDkwMDAwMAo=",
+  "error": "mhgp8_wspd_q2_dynamic_gate: expected exit 0, got 66",
+  "finished_utc": "2026-09-14T19:44:42.375887+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/qualification/tsan_ala784no/mhgp8_wspd_q2_dynamic_gate.stdout.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/qualification/tsan_ala784no/mhgp8_wspd_q2_dynamic_gate.stderr.bin",
+      "sha256": "564b788308b67c7ae8f0349c2c357b24e11c14bd2e8e3c2571628820c273ae52",
+      "bytes": 80
+    }
+  }
+}

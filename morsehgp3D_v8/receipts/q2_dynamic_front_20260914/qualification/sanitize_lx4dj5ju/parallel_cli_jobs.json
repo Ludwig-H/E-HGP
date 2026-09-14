@@ -1,0 +1,36 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_dynamic_front_sanitize_20260914/mhgp8_wspd_q2_parallel_probe",
+    "16",
+    "uniform",
+    "5",
+    "8",
+    "3",
+    "4",
+    "0",
+    "64"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "parallel_cli_jobs",
+  "expected_exit_code": 2,
+  "started_utc": "2026-09-14T19:53:54.936031+00:00",
+  "status": "passed",
+  "exit_code": 2,
+  "stdout": "",
+  "stderr": "mhgp8 parallel probe: parallel probe requires K1..10, positive s and jobs_per_worker\n",
+  "stdout_base64": "",
+  "stderr_base64": "bWhncDggcGFyYWxsZWwgcHJvYmU6IHBhcmFsbGVsIHByb2JlIHJlcXVpcmVzIEsxLi4xMCwgcG9zaXRpdmUgcyBhbmQgam9ic19wZXJfd29ya2VyCg==",
+  "finished_utc": "2026-09-14T19:53:54.947711+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/qualification/sanitize_lx4dj5ju/parallel_cli_jobs.stdout.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/qualification/sanitize_lx4dj5ju/parallel_cli_jobs.stderr.bin",
+      "sha256": "7b547133bb29d5ef73116df3f5a8fa19b526dacdf1ff879f6ece5d2935a1f4c5",
+      "bytes": 85
+    }
+  }
+}

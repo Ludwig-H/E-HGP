@@ -1,0 +1,35 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_dynamic_front_sanitize_20260914/mhgp8_wspd_q2_census_probe",
+    "16",
+    "uniform",
+    "5",
+    "0",
+    "3",
+    "samples",
+    "shared"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "probe_cli_separation",
+  "expected_exit_code": 2,
+  "started_utc": "2026-09-14T19:53:54.837780+00:00",
+  "status": "passed",
+  "exit_code": 2,
+  "stdout": "",
+  "stderr": "mhgp8_wspd_q2_census_probe: WSPD census requires Kmax 1..10, positive s, valid front/census modes\n",
+  "stdout_base64": "",
+  "stderr_base64": "bWhncDhfd3NwZF9xMl9jZW5zdXNfcHJvYmU6IFdTUEQgY2Vuc3VzIHJlcXVpcmVzIEttYXggMS4uMTAsIHBvc2l0aXZlIHMsIHZhbGlkIGZyb250L2NlbnN1cyBtb2Rlcwo=",
+  "finished_utc": "2026-09-14T19:53:54.849455+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/qualification/sanitize_lx4dj5ju/probe_cli_separation.stdout.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/qualification/sanitize_lx4dj5ju/probe_cli_separation.stderr.bin",
+      "sha256": "d994a31086d3e928a63a1ca68f92f525971eec5ebe6b349c5d97cfe8a1d618dc",
+      "bytes": 98
+    }
+  }
+}

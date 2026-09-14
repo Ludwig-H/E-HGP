@@ -926,10 +926,15 @@ WspdQ2ParallelResult run_wspd_q2_census_parallel(
     WspdFrontMode front_mode, Q2CensusMode census_mode,
     std::span<const Q2CensusConsumer> consumers, std::size_t jobs_per_worker,
     Q2SiblingMode sibling_mode, Q2WitnessOrder witness_order,
-    Q2AnchorMode anchor_mode, std::size_t pool_min_factor) {
+    Q2AnchorMode anchor_mode, std::size_t pool_min_factor, WspdQ2Schedule schedule) {
   const auto started = Clock::now();
   if (!index || consumers.empty() || jobs_per_worker == 0) {
     throw std::invalid_argument("mhgp8 parallel q2 requires index, workers and positive job granularity");
+  }
+  if ((schedule.mode != WspdQ2ScheduleMode::Coarse &&
+       schedule.mode != WspdQ2ScheduleMode::Donate) ||
+      schedule.queue_capacity == 0 || schedule.donation_interval == 0) {
+    throw std::invalid_argument("mhgp8 parallel q2 invalid front schedule");
   }
   if (consumers.size() > std::numeric_limits<std::size_t>::max() / jobs_per_worker) {
     throw std::overflow_error("mhgp8 parallel q2 target job count overflow");
@@ -955,6 +960,10 @@ WspdQ2ParallelResult run_wspd_q2_census_parallel(
     result.job_storage_bytes = static_cast<u64>(plan->retained_bytes());
     const auto worker_count = std::min(callbacks.size(), plan->job_count());
     result.started_workers = static_cast<u64>(worker_count);
+    const auto dispatch = schedule.mode == WspdQ2ScheduleMode::Donate && worker_count != 0
+        ? plan->make_dispatch(schedule.queue_capacity, schedule.donation_interval, worker_count)
+        : nullptr;
+    if (dispatch) result.queue_storage_bytes = static_cast<u64>(dispatch->retained_bytes());
     struct alignas(64) WorkerState {
       WspdQ2CensusResult result;
       Q2ParallelWorkerStats stats;
@@ -974,14 +983,21 @@ WspdQ2ParallelResult run_wspd_q2_census_parallel(
                                      census_mode, sibling_mode, witness_order,
                                      anchor_mode, pool_min_factor);
             };
-            while (!cancel.load(std::memory_order_relaxed)) {
-              auto job = next.load(std::memory_order_relaxed);
-              while (job < plan->job_count() &&
-                     !next.compare_exchange_weak(job, job + 1, std::memory_order_relaxed)) {}
-              if (job == plan->job_count()) break;
-              const auto part = plan->run_job(job, receiver);
-              parallel_detail::merge_work(state.result.front.work, part.work);
-              counter_add(state.stats.jobs);  // Completed, not merely claimed.
+            if (dispatch) {
+              const auto part = dispatch->run_worker(receiver, cancel);
+              parallel_detail::merge_work(state.result.front.work, part.front.work);
+              state.stats.dispatch_work = part.work;
+              state.stats.jobs = part.work.seeds_completed;
+            } else {
+              while (!cancel.load(std::memory_order_relaxed)) {
+                auto job = next.load(std::memory_order_relaxed);
+                while (job < plan->job_count() &&
+                       !next.compare_exchange_weak(job, job + 1, std::memory_order_relaxed)) {}
+                if (job == plan->job_count()) break;
+                const auto part = plan->run_job(job, receiver);
+                parallel_detail::merge_work(state.result.front.work, part.work);
+                counter_add(state.stats.jobs);  // Completed, not merely claimed.
+              }
             }
             state.result.census = engine.result;
             state.result.sibling_work = engine.sibling_work;
@@ -995,6 +1011,8 @@ WspdQ2ParallelResult run_wspd_q2_census_parallel(
           state.stats.pool_peak_bytes = state.result.pool_work.plan_peak_bytes;
           state.stats.payload_ms = state.result.census.payload_ms;
           state.stats.elapsed_ms = milliseconds(worker_started, Clock::now());
+        }, parallel_detail::ThreadLauncher{}, [&]() noexcept {
+          if (dispatch) dispatch->cancel();
         });
     // No worker is alive during reduction, even on a callback/launch failure.
     result.workers.reserve(states.size());
@@ -1005,6 +1023,7 @@ WspdQ2ParallelResult run_wspd_q2_census_parallel(
       parallel_detail::merge_work(result.order_work, state.result.order_work);
       parallel_detail::merge_work(result.joint_work, state.result.joint_work);
       parallel_detail::merge_work(result.pool_work, state.result.pool_work);
+      parallel_detail::merge_work(result.dispatch_work, state.stats.dispatch_work);
       counter_add(result.input_rectangles, state.result.input_rectangles);
       counter_add(result.anchor_queries, state.result.anchor_queries);
       counter_add(result.candidate_pairs, state.result.census.candidate_pairs);
@@ -1019,6 +1038,13 @@ WspdQ2ParallelResult run_wspd_q2_census_parallel(
   }  // Plan, callback copies and per-worker accumulation buffers are dead.
   const auto front_mass = result.front.work.residual_pair_mass[0];
   const auto& pool = result.pool_work;
+  if (schedule.mode == WspdQ2ScheduleMode::Donate &&
+      (result.dispatch_work.seeds_started != result.jobs ||
+       result.dispatch_work.seeds_completed != result.jobs ||
+       result.dispatch_work.donations != result.dispatch_work.stolen_started ||
+       result.dispatch_work.donations != result.dispatch_work.stolen_completed)) {
+    throw std::logic_error("mhgp8 parallel q2 lost its donated work partition");
+  }
   if (result.completed_jobs != result.jobs || result.front.active_lane_mask != 1 ||
       result.front.work.rejected_pair_mass[0] > result.front.total_unordered_pairs ||
       front_mass != result.front.total_unordered_pairs - result.front.work.rejected_pair_mass[0] ||

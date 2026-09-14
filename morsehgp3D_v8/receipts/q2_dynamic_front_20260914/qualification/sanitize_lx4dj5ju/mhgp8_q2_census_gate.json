@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_dynamic_front_sanitize_20260914/mhgp8_q2_census_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "mhgp8_q2_census_gate",
+  "expected_exit_code": 0,
+  "started_utc": "2026-09-14T19:53:25.713579+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "mhgp8_q2_census_gate passed checks=186162 cases=277 runs=557 oracle_pairs=8376 oracle_sites=259780 prefilter_rejections=1501 census_rejections=4970 accepted=8828 shell_sites=51896 interior_sites=15248 uniform_credit=276 uniform_accept=144 uniform_reject=76 query_splits=5472 witness_splits=116536 split_after_credit=130 cursor_reuses=10944 cursor_advances=113941 deep_indices=3 root_savings=75 permutations=72 model_mutants=10 rejections=10\n",
+  "stderr": "",
+  "stdout_base64": "bWhncDhfcTJfY2Vuc3VzX2dhdGUgcGFzc2VkIGNoZWNrcz0xODYxNjIgY2FzZXM9Mjc3IHJ1bnM9NTU3IG9yYWNsZV9wYWlycz04Mzc2IG9yYWNsZV9zaXRlcz0yNTk3ODAgcHJlZmlsdGVyX3JlamVjdGlvbnM9MTUwMSBjZW5zdXNfcmVqZWN0aW9ucz00OTcwIGFjY2VwdGVkPTg4Mjggc2hlbGxfc2l0ZXM9NTE4OTYgaW50ZXJpb3Jfc2l0ZXM9MTUyNDggdW5pZm9ybV9jcmVkaXQ9Mjc2IHVuaWZvcm1fYWNjZXB0PTE0NCB1bmlmb3JtX3JlamVjdD03NiBxdWVyeV9zcGxpdHM9NTQ3MiB3aXRuZXNzX3NwbGl0cz0xMTY1MzYgc3BsaXRfYWZ0ZXJfY3JlZGl0PTEzMCBjdXJzb3JfcmV1c2VzPTEwOTQ0IGN1cnNvcl9hZHZhbmNlcz0xMTM5NDEgZGVlcF9pbmRpY2VzPTMgcm9vdF9zYXZpbmdzPTc1IHBlcm11dGF0aW9ucz03MiBtb2RlbF9tdXRhbnRzPTEwIHJlamVjdGlvbnM9MTAK",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-14T19:53:26.932711+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/qualification/sanitize_lx4dj5ju/mhgp8_q2_census_gate.stdout.bin",
+      "sha256": "2512faa7f9f1250f0e564ea41585b7637b6079a942c06f38a51706d09a2dd87a",
+      "bytes": 441
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/qualification/sanitize_lx4dj5ju/mhgp8_q2_census_gate.stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  }
+}

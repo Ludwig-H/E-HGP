@@ -3,6 +3,7 @@
 #include "pipeline/q2_census.hpp"
 
 #include <array>
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -79,6 +80,30 @@ using WspdRectangleConsumer = std::function<void(const WspdRectangle&)>;
     std::uint8_t requested_lane_mask = 7);
 
 class WspdFrontJobs;
+class WspdFrontDispatch;
+
+struct WspdFrontDispatchWork {
+  u64 seeds_started{};
+  u64 seeds_completed{};
+  u64 donations{};
+  u64 donor_checks{};
+  u64 offer_attempts{};
+  u64 offer_full{};
+  u64 offer_busy{};
+  u64 offer_no_demand{};
+  u64 stolen_started{};
+  u64 stolen_completed{};
+  u64 waits{};
+  u64 wakes{};
+  u64 max_queue_size{};
+  u64 max_local_stack_size{};
+  bool operator==(const WspdFrontDispatchWork&) const = default;
+};
+
+struct WspdFrontDispatchResult {
+  WspdFrontResult front;
+  WspdFrontDispatchWork work;
+};
 [[nodiscard]] std::unique_ptr<WspdFrontJobs> make_wspd_front_jobs(
     Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s,
     WspdFrontMode mode, std::size_t target_jobs,
@@ -121,13 +146,74 @@ class WspdFrontJobs final {
   // Retained job-vector capacity only; excludes the owned shared index,
   // plan metadata, preparation queue and independent worker stacks.
   [[nodiscard]] std::size_t retained_bytes() const;
+  // A new, single-use dispatcher over these immutable seeds. Its owning
+  // context survives destruction of this plan and of the external index.
+  // All three arguments must be positive; they never truncate exploration.
+  [[nodiscard]] std::unique_ptr<WspdFrontDispatch> make_dispatch(
+      std::size_t queue_capacity, std::size_t donation_interval,
+      std::size_t worker_count) const;
 
  private:
   struct Impl;
-  explicit WspdFrontJobs(std::unique_ptr<Impl> implementation);
-  std::unique_ptr<Impl> implementation_;
+  explicit WspdFrontJobs(std::shared_ptr<const Impl> implementation);
+  std::shared_ptr<const Impl> implementation_;
+  friend class WspdFrontDispatch;
   friend std::unique_ptr<WspdFrontJobs> make_wspd_front_jobs(
       Q2CensusIndexPtr, unsigned, unsigned, WspdFrontMode, std::size_t, std::uint8_t);
+};
+
+// Cooperative redistribution of UNVISITED products only. A terminal seed
+// merely invokes its callback; no filter/emission counter is paid twice.
+// Each worker has one private DFS stack; it acquires a seed or donation
+// only when that stack is empty. An offer never waits for queue space or
+// its mutex: failure retains the product locally. The queue is allocated
+// before any worker starts. No census/callback continuation is transferred.
+//
+// Call run_worker at most worker_count times, with independent consumers.
+// The declared count is also the number of available slots used to request
+// donations: not-yet-started slots are included. Fewer actual callers remain
+// correct but may make a worker consume its own donations. One declared
+// worker bypasses all per-product donation/cancellation polling and locks.
+// During multi-worker traversal cancellation is polled between bounded
+// batches of whole products, never within a callback. Setting an external
+// cancellation flag must be accompanied by cancel() to wake sleepers.
+// cancel() itself is sufficient, idempotent, and also called on exceptions.
+// A nested synchronous call must use a NEW dispatcher (or run_job/mono),
+// not this same single-use dispatcher: otherwise it could await its own
+// outer fragment. No worker synchronizes the caller's mutable captures.
+// All run_worker calls must finish before destroying this dispatcher.
+//
+// Normal completion: sums seeds_started=seeds_completed=job_count;
+// donations=stolen_started=stolen_completed. Completed seeds/fragments mean
+// their LOCAL remainder is complete; donated descendants close separately.
+// donor_checks=offer_no_demand+offer_attempts; offer_attempts=donations+
+// offer_full+offer_busy. Combine the two dispatch maxima by MAX, the other
+// counters by sum. Prefix/front work and metadata follow the Jobs contract.
+// Cancellation/exception does not roll back output or imply completion.
+class WspdFrontDispatch final {
+ public:
+  ~WspdFrontDispatch();
+  WspdFrontDispatch(const WspdFrontDispatch&) = delete;
+  WspdFrontDispatch& operator=(const WspdFrontDispatch&) = delete;
+  WspdFrontDispatch(WspdFrontDispatch&&) = delete;
+  WspdFrontDispatch& operator=(WspdFrontDispatch&&) = delete;
+  [[nodiscard]] WspdFrontDispatchResult run_worker(
+      const WspdRectangleConsumer& consumer, const std::atomic<bool>& cancellation);
+  void cancel() noexcept;
+  [[nodiscard]] std::size_t queue_capacity() const noexcept;
+  [[nodiscard]] std::size_t worker_count() const noexcept;
+  // Read-only observation, including the interval immediately before a
+  // receiver enters its condition wait. Not a completion certificate.
+  [[nodiscard]] std::size_t waiting_workers() const noexcept;
+  // Queue-vector capacity only. Excludes shared initial jobs/index, local
+  // stacks, callbacks, object metadata and allocations made by consumers.
+  [[nodiscard]] std::size_t retained_bytes() const;
+
+ private:
+  struct Impl;
+  explicit WspdFrontDispatch(std::unique_ptr<Impl> implementation);
+  std::unique_ptr<Impl> implementation_;
+  friend class WspdFrontJobs;
 };
 
 }  // namespace mhgp8

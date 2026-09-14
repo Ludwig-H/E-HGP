@@ -47,6 +47,13 @@ héritée du harnais d'audit ; le raccord et l'oracle restent à construire.
 
 ## Priorité P0 — supprimer la préparation quadratique des témoins locaux
 
+Quatorzième tranche : [redistribution des produits pendants](P0_REDISTRIBUTION_FRONT_Q2.md)
+implémentée et qualifiée ;192 mesures propres closes. Le gain de temps
+n'est pas général, Coarse reste le défaut.
+Le coût des dons/refus et la charge discrète doivent décider du bénéfice ;
+le temps de présence inclut désormais les attentes. La file bornée ne
+tronque rien et les callbacks déjà commencés restent indivisibles.
+
 Treizième tranche : [jobs du front et workers q2](P0_FRONT_WORKERS_Q2.md)
 implémentés sans dupliquer les tests parentaux ni préparer les facteurs
 par morceau. Tous les comptes géométriques restent ceux du mono.

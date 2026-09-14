@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_dynamic_front_20260914/mhgp8_wspd_q2_dynamic_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "mhgp8_wspd_q2_dynamic_gate",
+  "expected_exit_code": 0,
+  "started_utc": "2026-09-14T19:49:51.419984+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"schema\":\"mhgp8_wspd_q2_dynamic_gate_v1\",\"status\":\"passed\",\"public_status\":\"not_claimed\",\"checks\":3270,\"clouds\":8,\"oracle_pairs\":9073,\"oracle_sites\":1106432,\"mono_runs\":68,\"coarse_runs\":74,\"donate_runs\":142,\"default_runs\":8,\"supports\":24337,\"max_shell\":30,\"donations\":1573,\"full_refusals\":3794,\"empty_runs\":27,\"selected64\":11,\"filtered64\":46260,\"passthrough\":15,\"joint_runs\":45,\"pairwise_runs\":21,\"callback_failures\":1,\"reentrant_runs\":1,\"index_resets\":1,\"invalid_inputs\":8,\"mutants\":4}\n",
+  "stderr": "",
+  "stdout_base64": "eyJzY2hlbWEiOiJtaGdwOF93c3BkX3EyX2R5bmFtaWNfZ2F0ZV92MSIsInN0YXR1cyI6InBhc3NlZCIsInB1YmxpY19zdGF0dXMiOiJub3RfY2xhaW1lZCIsImNoZWNrcyI6MzI3MCwiY2xvdWRzIjo4LCJvcmFjbGVfcGFpcnMiOjkwNzMsIm9yYWNsZV9zaXRlcyI6MTEwNjQzMiwibW9ub19ydW5zIjo2OCwiY29hcnNlX3J1bnMiOjc0LCJkb25hdGVfcnVucyI6MTQyLCJkZWZhdWx0X3J1bnMiOjgsInN1cHBvcnRzIjoyNDMzNywibWF4X3NoZWxsIjozMCwiZG9uYXRpb25zIjoxNTczLCJmdWxsX3JlZnVzYWxzIjozNzk0LCJlbXB0eV9ydW5zIjoyNywic2VsZWN0ZWQ2NCI6MTEsImZpbHRlcmVkNjQiOjQ2MjYwLCJwYXNzdGhyb3VnaCI6MTUsImpvaW50X3J1bnMiOjQ1LCJwYWlyd2lzZV9ydW5zIjoyMSwiY2FsbGJhY2tfZmFpbHVyZXMiOjEsInJlZW50cmFudF9ydW5zIjoxLCJpbmRleF9yZXNldHMiOjEsImludmFsaWRfaW5wdXRzIjo4LCJtdXRhbnRzIjo0fQo=",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-14T19:49:51.472432+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/qualification/release_0arz_yju/mhgp8_wspd_q2_dynamic_gate.stdout.bin",
+      "sha256": "c75b65f1f6a775ad262abd623509c9a00f9db378bd5737d26337b63c37618542",
+      "bytes": 488
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/qualification/release_0arz_yju/mhgp8_wspd_q2_dynamic_gate.stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  }
+}

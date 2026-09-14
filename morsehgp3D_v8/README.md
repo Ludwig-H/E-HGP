@@ -36,6 +36,22 @@ Les mesures historiques citées restent v7.
 
 ## État exécutable
 
+La quatorzième tranche ajoute la [redistribution des produits pendants](docs/P0_REDISTRIBUTION_FRONT_Q2.md).
+Le raccord `Donate` est implémenté :57 CTests Release/Clang ASan/UBSan,
+deux gates Clang ThreadSanitizer et32 différentiels passent. Les
+[192 mesures propres](receipts/q2_dynamic_front_20260914/README.md) sont
+closes, lecteurs et analyseurs normal/−O identiques. La redistribution est
+exacte sur les fixtures, mais son gain n'est pas général : modestes gains
+LiDAR, régression mesurée sur amas8k, temps dispersés. `Coarse` reste donc
+le défaut. Les principaux comptes géométriques des cinq séries8k/16k/32k
+restent sous×3 à chaque doublement, sans borne générale ; certains comptes
+variables de dons/attentes dépassent×4 et sont explicitement conservés.
+Les quatre nouveaux builds sont épinglés. Prochaine priorité : continuations
+possédées pour les gros census indivisibles, sans préparer les facteurs par
+tranche. La tour FULL/G4, q3/q4 et le massif restent ouverts ; GCP non utilisé.
+
+## Treizième tranche publiée à b268cf6f — historique
+
 La treizième tranche répartit les [sous-arbres du front entre workers](docs/P0_FRONT_WORKERS_Q2.md).
 Le nuage et l'index sont partagés en lecture seule ; chaque worker possède
 son moteur de comptage et ses buffers de collecte. Les tests des parents

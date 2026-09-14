@@ -177,6 +177,8 @@ Références : [audit WSPD](../audits/WSPD_Q2_Q3_Q4.md).
 | Rendre le tri amont gratuit suffira au contrat | Seulement 0,75 % de la capture50k/K10 | Réduire MEB, génération, histoire et export |
 | Des sous-arbres initiaux suffisent à équilibrer le calcul | Sur le prototype LiDAR50k de A, un job garde environ30 % des descentes avec256 jobs ; sa masse de paires ne prédit pas son coût | Mesurer le déséquilibre, puis redistribuer les produits DFS pendants sans refaire les parents |
 | Davantage de CPU réduit la complexité | Les workers effectuent les mêmes décisions et le même nombre de tests que le mono | Conserver les comptes discrets et leurs ratios8k/16k/32k, indépendamment du gain mural |
+| Des temps workers Donate presque égaux prouvent l'équilibrage | Leur présence inclut les attentes jusqu'à la fermeture globale | Comparer aussi produits, visites census et supports par worker ; mesurer à l'avenir la durée d'attente séparément |
+| Attendre une place dans une file de dons bornée est sans danger | Tous les producteurs peuvent rester bloqués alors que du travail local reste disponible | Offre sans attente, refus conservé localement et receveurs réveillés à la fin ou à l'annulation |
 | Soustraire la somme du payload au temps mur isole le comptage parallèle | Les intervalles des workers se recouvrent ; leur somme peut dépasser le temps mur | Publier séparément temps englobant, préfixe et sommes workers/payload |
 | Un petit kernel rapide constitue une tour rapide | Reconstruction et transferts peuvent dominer sa phase | Objets résidents et temps de bout en bout |
 | Compiler CUDA prouve l'exécution GPU | Les dernières tentatives de terminal n'ont exécuté aucun kernel | Gate réelle sur carte puis chaîne complète |

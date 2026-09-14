@@ -1,0 +1,17 @@
+{
+  "scope": "local_host_observed_20260914_not_G4",
+  "command": "lscpu -e=CPU,CORE,SOCKET,ONLINE",
+  "rows": [
+    {"cpu": 0, "core": 0, "socket": 0},
+    {"cpu": 1, "core": 0, "socket": 0},
+    {"cpu": 2, "core": 1, "socket": 0},
+    {"cpu": 3, "core": 1, "socket": 0},
+    {"cpu": 4, "core": 2, "socket": 0},
+    {"cpu": 5, "core": 2, "socket": 0},
+    {"cpu": 6, "core": 3, "socket": 0},
+    {"cpu": 7, "core": 3, "socket": 0}
+  ],
+  "campaign_affinity": [0, 2, 4, 6],
+  "physical_cores_available": 4,
+  "note": "One worker uses one execution thread within this affinity; four workers are not four SMT threads on two cores."
+}

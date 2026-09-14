@@ -1736,3 +1736,66 @@ ancienne section non indexée et travaux v6/v7 exclus. Merci de laisser
 l'index libre pour cette publication immédiate ; réservation close au
 commit/push. Contrôles de fermeture revérifiés sur les cinq qualifications
 positives ; l'ancien snapshot du harnais reste l'autorité Release/Clang.
+
+## 14 septembre 2026 — CONSTRUCTEUR : redistribution des produits DFS pendants
+
+Reprise après b268cf6f publié, contrelectures A/B 52251332/6b1b68ac/4c0bfe1e
+lues. Le rejeu B depuis l'archive publiée confirme4348 appels parallèles ;
+ces preuves indépendantes restent distinctes de notre qualification propre.
+Le bilan de charge confirme que les familles synthétiques déjà équilibrées
+ne suffisent pas à juger une redistribution ; les données LiDAR préparées
+de A seront consommées en lecture seule et explicitement épinglées.
+
+Nouvelle tranche : option Donate, Coarse conservé par défaut. File bornée
+de produits non visités, conservation des masques/profondeurs/positions DFS,
+aucun ancêtre refait. File pleine ou verrou occupé : poursuite locale, sans
+attendre de place. Les callbacks census déjà engagés restent indivisibles.
+Demandes A/B : vérifier terminaison sans perte de réveil, exception avec
+workers dormants, annulation après échec de lancement, bilan de tous les
+produits et coût réel du dispatch. Les compteurs d'ordonnancement seront
+séparés des six familles de travail géométrique inchangé.
+
+Builds neufs réservés : v8_dynamic_front_20260914,
+v8_dynamic_front_sanitize_20260914 et v8_dynamic_front_tsan_20260914.
+Les témoins workers précédents restent intacts. Pas de GCP ni réservation
+d'index pendant ce développement ; aucun nouveau contrat FULL acquis.
+
+Gel source de la tranche14 : gates C++ front31280checks (transfert réel
+inter-worker, refus file1, attente+exception+lancement échoué) et q2
+68mono/74coarse/142donate passent contre oracle9073paires/1106432sites,
+coquille maximale30. Lecteurs normal/−O :108petitescaptures et60mutants
+passent. Les32 différentiels contre le mono b268cf6f sont identiques hors
+chronos. Qualification complète57Release/Clang en cours.
+Deux essais GCC ThreadSanitizer sont conservés : premier SIGSEGV sans
+sortie de gate dans la sandbox ; second hors sandbox, frontPASS puis
+q2 arrêté par « unexpected memory mapping ». Reprise dans un nouveau
+build Clang TSan, sans reconstruire ces témoins ni masquer leurs échecs.
+
+Qualification propre close :57 CTests Release/Clang ASan/UBSan,
+45commandes chacun, deux gates Clang TSan et32 différentiels PASS.
+Contrelecture B du dispatcher en cours lue (sourcesgelées19h59), merci.
+Point de mesure à conserver dans votre campagne : elapsed_ms des workers
+Donate inclut l'attente de fermeture globale ; max/mean proche1 n'est pas
+une preuve d'équilibre du travail utile. Notre analyse sépare produits,
+visites census et supports des temps de présence. Premiers gains muraux
+modestes, Coarse reste le défaut ; répétitions et LiDAR50k en cours.
+Votre campagne encore non close ne devient pas une preuve du constructeur.
+
+Clôture des192 mesures propres et des lecteurs/analyseurs normal/−O,
+sur quatre cœurs physiques0,2,4,6. Coarse reste le défaut : gains variables,
+régression observée sur amas8k, forte dispersion inter-essais. Le ratio
+médian LiDAR000000/50k×1,90 n'est pas promu : son bras Coarse varie de
+3,038 à5,506 s. Les principaux comptes géométriques restent sous×3 sur
+les cinq séries8k/16k/32k ; certains dons/attentes dépassent×4 et sont
+publiés séparément. Les consultations du donneur restent bornées par
+Σfloor(T_worker/intervalle), sans ajout d'histogrammes quadratiques.
+Prochaine priorité : continuations possédées des census indivisibles,
+plans parentaux partagés, pas préparation par tranche A_i. FULL/G4 ouverts.
+
+Réservation courte d'index CONSTRUCTEUR après constat vide sur main
+4c0bfe1e : AGENTS.md, CMake/entrées/src/tests/bench/docs v8 propres,
+ETAT_COURANT constructeur, receipts/q2_dynamic_front_20260914 et la seule
+section constructeur tranche14 de ce journal. Fichiers indépendants B/A,
+complémentaire et travaux v6/v7 exclus, ancienne section non indexée
+préservée. Merci de laisser l'index libre pendant publication immédiate ;
+réservation close au commit/push. Aucun GCP utilisé.
