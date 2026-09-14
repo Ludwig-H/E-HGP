@@ -1,0 +1,78 @@
+{
+  "schema": "mhgp8_lidar_preparation_checks_v1",
+  "runs": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/audits/lidar08_20260914/prepare_inputs.py",
+        "--selftest"
+      ],
+      "returncode": 0,
+      "stdout": "{\"checks\": 18, \"scope\": \"exact_u16_unique_sites_not_raw_returns_or_full_hgp_qualification\", \"status\": \"passed\"}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/audits/lidar08_20260914/prepare_inputs.py",
+        "--selftest"
+      ],
+      "returncode": 0,
+      "stdout": "{\"checks\": 18, \"scope\": \"exact_u16_unique_sites_not_raw_returns_or_full_hgp_qualification\", \"status\": \"passed\"}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/audits/lidar08_20260914/prepare_inputs.py",
+        "--data",
+        "morsehgp3D_v8/audits/lidar08_20260914/data",
+        "--out",
+        "morsehgp3D_v8/audits/lidar08_20260914/prepared"
+      ],
+      "returncode": 0,
+      "stdout": "{\"manifest\": {\"bytes\": 10014, \"path\": \"prepared/MANIFEST.json\", \"sha256\": \"52cb29679b6ff135508910d176a1450cbea7c96449e30f965166f232d979edc5\"}, \"scope\": \"exact_u16_unique_sites_not_raw_returns_or_full_hgp_qualification\", \"status\": \"prepared\"}\n",
+      "stderr": ""
+    }
+  ],
+  "source_sha256_before": "dcf92c9204d3c17a0b70e9a1d17d6b6d91f51bc15586fdc5ce0d12107ae6a9e5",
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+  "status": "passed",
+  "source_sha256_after": "dcf92c9204d3c17a0b70e9a1d17d6b6d91f51bc15586fdc5ce0d12107ae6a9e5",
+  "previous_selftest_invocations_same_source_sha256": {
+    "schema": "mhgp8_lidar_preparation_checks_v1",
+    "runs": [
+      {
+        "command": [
+          "python3",
+          "-B",
+          "morsehgp3D_v8/audits/lidar08_20260914/prepare_inputs.py",
+          "--selftest"
+        ],
+        "returncode": 0,
+        "stdout": "{\"checks\": 18, \"scope\": \"exact_u16_unique_sites_not_raw_returns_or_full_hgp_qualification\", \"status\": \"passed\"}\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "-O",
+          "morsehgp3D_v8/audits/lidar08_20260914/prepare_inputs.py",
+          "--selftest"
+        ],
+        "returncode": 0,
+        "stdout": "{\"checks\": 18, \"scope\": \"exact_u16_unique_sites_not_raw_returns_or_full_hgp_qualification\", \"status\": \"passed\"}\n",
+        "stderr": ""
+      }
+    ],
+    "source_sha256_before": "dcf92c9204d3c17a0b70e9a1d17d6b6d91f51bc15586fdc5ce0d12107ae6a9e5",
+    "source_sha256_after": "dcf92c9204d3c17a0b70e9a1d17d6b6d91f51bc15586fdc5ce0d12107ae6a9e5",
+    "status": "passed"
+  }
+}

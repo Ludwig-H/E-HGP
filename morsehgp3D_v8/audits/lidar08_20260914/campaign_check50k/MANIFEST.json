@@ -1,0 +1,160 @@
+{
+  "allowed_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "backend": "cpu_reference",
+  "closure_inputs": {
+    ".build/front_input_probe": "e626ee54d9435cf5eab71bfc1e9d8e734b639db5044a9272fc7ef329c7aa16ed",
+    "BUILD.json": "eb350167e875e7bbbd5d289e16ad3c0fe3db694fdbe0bad4a6b29a56879d7f74",
+    "FETCH_MANIFEST.json": "0cf23436a864f5bc40e509abfc49ae48d372a01c6693bf9fc99d5354946164db",
+    "prepare_inputs.py": "dcf92c9204d3c17a0b70e9a1d17d6b6d91f51bc15586fdc5ce0d12107ae6a9e5",
+    "prepared/MANIFEST.json": "52cb29679b6ff135508910d176a1450cbea7c96449e30f965166f232d979edc5",
+    "prepared/overlap_5/n50000.u16le": "d579bf36a72a273deb98c0db30d897554b43620497d88a51980433fb96198718",
+    "prepared/single_000000/n50000.u16le": "2a0c79ef95d7f34f1447f47c3bcf6cbff43156e7aa2d2f8c2eb1795109617426",
+    "prepared/single_000100/n50000.u16le": "1d8c524e75b21f82e23a067047ff1d7fb90ce5b610a63a2be842b356ae831628",
+    "prepared/single_000200/n50000.u16le": "aadeaefbacbcee7072fbdc1a4799e9e89334e10098dc5912edd47992847658e0",
+    "source_snapshot.zip": "e574e19d5dd8bf1d8dd15da3deeb6cc999d38acf9c92b43cf83f4f1ea8266120"
+  },
+  "command": [
+    "morsehgp3D_v8/audits/lidar08_20260914/measure_front.py",
+    "--plan",
+    "check50k"
+  ],
+  "execution_order": "pure,samples then samples,pure for repeat two",
+  "matrix": [
+    [
+      "single_000000",
+      50000,
+      8,
+      0,
+      "pure"
+    ],
+    [
+      "single_000000",
+      50000,
+      8,
+      0,
+      "samples"
+    ],
+    [
+      "single_000000",
+      50000,
+      8,
+      1,
+      "samples"
+    ],
+    [
+      "single_000000",
+      50000,
+      8,
+      1,
+      "pure"
+    ],
+    [
+      "single_000100",
+      50000,
+      8,
+      0,
+      "pure"
+    ],
+    [
+      "single_000100",
+      50000,
+      8,
+      0,
+      "samples"
+    ],
+    [
+      "single_000100",
+      50000,
+      8,
+      1,
+      "samples"
+    ],
+    [
+      "single_000100",
+      50000,
+      8,
+      1,
+      "pure"
+    ],
+    [
+      "single_000200",
+      50000,
+      8,
+      0,
+      "pure"
+    ],
+    [
+      "single_000200",
+      50000,
+      8,
+      0,
+      "samples"
+    ],
+    [
+      "single_000200",
+      50000,
+      8,
+      1,
+      "samples"
+    ],
+    [
+      "single_000200",
+      50000,
+      8,
+      1,
+      "pure"
+    ],
+    [
+      "overlap_5",
+      50000,
+      8,
+      0,
+      "pure"
+    ],
+    [
+      "overlap_5",
+      50000,
+      8,
+      0,
+      "samples"
+    ],
+    [
+      "overlap_5",
+      50000,
+      8,
+      1,
+      "samples"
+    ],
+    [
+      "overlap_5",
+      50000,
+      8,
+      1,
+      "pure"
+    ]
+  ],
+  "mode": "audit_independant_math_and_architecture",
+  "phase": "exploration_v8_hors_registre",
+  "plan": "check50k",
+  "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+  "probe": ".build/front_input_probe",
+  "profile": "quantized_u16_input_only",
+  "public_status": "not_claimed",
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "runner_sha256": "94db240108e153bc317bd81350065cf5c1f6c67ad3450d476bea67e4def22e95",
+  "schema": "mhgp8_real_lidar_front_campaign_v1",
+  "scope": "local_front_only_on_unique_quantized_real_returns",
+  "selected_cpu": 7,
+  "started_utc": "2026-09-14T08:48:49.638086+00:00",
+  "timeout_policy": "failed_campaign_no_truncated_result",
+  "timeout_seconds": 180
+}

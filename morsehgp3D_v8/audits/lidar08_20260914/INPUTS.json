@@ -1,0 +1,878 @@
+{
+  "common": {
+    "calibration_Tr": [
+      [
+        -0.001857739385241,
+        -0.999965951351,
+        -0.008039975204516,
+        -0.004784029760483
+      ],
+      [
+        -0.006481465826011,
+        0.008051860151134,
+        -0.9999466081774,
+        -0.07337429464231
+      ],
+      [
+        0.9999773098287,
+        -0.001805528627661,
+        -0.006496203536139,
+        -0.3339968064433
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "frame": "LiDAR_scan_000000",
+    "generator": {
+      "path": "prepare_inputs.py",
+      "sha256": "dcf92c9204d3c17a0b70e9a1d17d6b6d91f51bc15586fdc5ce0d12107ae6a9e5"
+    },
+    "input_files": [
+      {
+        "bytes": 1172,
+        "path": "data/dataset/sequences/08/calib.txt",
+        "sha256": "5e7b3136edf2799be47e472ca9c5362fcacbee5d21c6ab8038506b8691b8b9ec"
+      },
+      {
+        "bytes": 652483,
+        "path": "data/dataset/poses/08.txt",
+        "sha256": "cd7177170c7d7ba98cdbfe9417f97bd9586da5c70cbd5ccefa5db6bf88a5fe88"
+      },
+      {
+        "bytes": 1974224,
+        "path": "data/dataset/sequences/08/velodyne/000000.bin",
+        "sha256": "92e945f37a6cd4a58acc8aa15b275af2e271ecf69c0a44a311d888524473c451"
+      },
+      {
+        "bytes": 1974928,
+        "path": "data/dataset/sequences/08/velodyne/000001.bin",
+        "sha256": "815958ccbe65731b142b6fa8cc070ca9d8436fe8a69760ebb55be6db9771d6db"
+      },
+      {
+        "bytes": 1970544,
+        "path": "data/dataset/sequences/08/velodyne/000002.bin",
+        "sha256": "6e311b0965b84b934eafb62bf4ad976d7c2ef0f78960077a1159406c378b1b24"
+      },
+      {
+        "bytes": 1969104,
+        "path": "data/dataset/sequences/08/velodyne/000003.bin",
+        "sha256": "6eedae6ac6c0ccb3f17c48462fa837ada054eddabef7849aeb5bb787ee28bc18"
+      },
+      {
+        "bytes": 1965696,
+        "path": "data/dataset/sequences/08/velodyne/000004.bin",
+        "sha256": "82c30cd90867ef77af0184935e8c652305cb98d8d7dc3a5805bae07d080f5971"
+      },
+      {
+        "bytes": 1991664,
+        "path": "data/dataset/sequences/08/velodyne/000100.bin",
+        "sha256": "4dfb5701db9ff36bd592746e08e8fafd4d1c63cba1ef66d2c2791e405b800e80"
+      },
+      {
+        "bytes": 2008416,
+        "path": "data/dataset/sequences/08/velodyne/000200.bin",
+        "sha256": "132f437349e17c00a8a31539f10a3214d9391ae1251293e7794a26540412b5cd"
+      }
+    ],
+    "input_paths_relative_to": "directory_containing_prepare_inputs.py",
+    "matrix_formula": "inverse(Tr) * inverse(P0) * Pi * Tr",
+    "matrix_inverse": "4x4_Gauss_Jordan_partial_pivot_no_transpose_approximation",
+    "output_paths_relative_to": "prepared",
+    "poses": {
+      "0": [
+        [
+          1.0,
+          1.197624e-11,
+          1.704639e-10,
+          3.214096e-14
+        ],
+        [
+          1.197625e-11,
+          1.0,
+          3.562503e-10,
+          -1.998401e-15
+        ],
+        [
+          1.704639e-10,
+          3.562503e-10,
+          1.0,
+          -4.041212e-14
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "1": [
+        [
+          0.9999956,
+          0.002872219,
+          0.0006839952,
+          0.003879738
+        ],
+        [
+          -0.002873712,
+          0.9999934,
+          0.002190302,
+          -0.1849906
+        ],
+        [
+          -0.0006776995,
+          -0.002192257,
+          0.9999974,
+          0.8085136
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "100": [
+        [
+          -0.03776024,
+          0.06701814,
+          -0.997037,
+          -29.53257
+        ],
+        [
+          0.002963673,
+          0.9977516,
+          0.06695396,
+          -16.20289
+        ],
+        [
+          0.9992825,
+          -0.0004266899,
+          -0.03787396,
+          17.38267
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "2": [
+        [
+          0.9999832,
+          0.005587658,
+          0.001562738,
+          0.007192398
+        ],
+        [
+          -0.005592623,
+          0.9999792,
+          0.003190365,
+          -0.3682362
+        ],
+        [
+          -0.001544879,
+          -0.00319905,
+          0.9999937,
+          1.630418
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "200": [
+        [
+          -0.02139799,
+          0.06537338,
+          -0.9976314,
+          -147.6694
+        ],
+        [
+          -0.06242783,
+          0.9958253,
+          0.06659404,
+          -7.01338
+        ],
+        [
+          0.9978201,
+          0.06370494,
+          -0.01722754,
+          11.46581
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "3": [
+        [
+          0.9999733,
+          0.006921214,
+          0.002355063,
+          0.02045472
+        ],
+        [
+          -0.006928386,
+          0.9999713,
+          0.003050144,
+          -0.5523196
+        ],
+        [
+          -0.002333885,
+          -0.003066378,
+          0.9999926,
+          2.389887
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "4": [
+        [
+          0.9999566,
+          0.00889145,
+          0.002795368,
+          0.02958663
+        ],
+        [
+          -0.008899773,
+          0.9999559,
+          0.002978514,
+          -0.734327
+        ],
+        [
+          -0.002768761,
+          -0.003003261,
+          0.9999917,
+          3.173915
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "quantization": {
+      "all_axes_same_grid": true,
+      "clipping_jitter_adaptation": false,
+      "formula": "floor(50*x + 32768 + 0.5)",
+      "invalid_input_policy": "reject_entire_preparation",
+      "step_m": 0.02
+    },
+    "raw_geometry_policy": "source float32 xyzi retained unchanged; unique quantized sites define a different object",
+    "rotation_tolerance": 0.0001,
+    "sampling": {
+      "hash": "blake2b_128(seed_bytes + packed_u16le_xyz)",
+      "order": "ascending_priority",
+      "seed_u32_le": 3,
+      "targets": [
+        8000,
+        16000,
+        32000,
+        50000
+      ],
+      "tie_break": "lexicographic_xyz"
+    },
+    "scope": "exact_u16_unique_sites_not_raw_returns_or_full_hgp_qualification",
+    "transforms": {
+      "0": [
+        [
+          1.0000000000000002,
+          -2.0328790734103208e-19,
+          -6.081696561285876e-19,
+          1.1949940819863669e-17
+        ],
+        [
+          1.7618285302889447e-19,
+          1.0,
+          9.791700870259712e-19,
+          1.0842021724855044e-19
+        ],
+        [
+          -5.996993266560446e-19,
+          -1.5687050183149642e-18,
+          1.0000000000000002,
+          -5.1906179007743525e-18
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "1": [
+        [
+          0.9999974007875855,
+          0.0006413664123429607,
+          0.0022027992770022597,
+          0.8098574193886425
+        ],
+        [
+          -0.0006476931423530581,
+          0.9999956232795231,
+          0.0028725324666408927,
+          -0.00639582966127772
+        ],
+        [
+          -0.002200949131660818,
+          -0.0028739520518940445,
+          0.9999933759328914,
+          0.18041699312655718
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "100": [
+        [
+          -0.03826496730471395,
+          -0.999267348276834,
+          -0.0007799145802905685,
+          17.883571208861806
+        ],
+        [
+          0.9979033531531324,
+          -0.038253482727244575,
+          0.05220823411324494,
+          29.035876988090397
+        ],
+        [
+          -0.052199837921601475,
+          0.0012194732637956565,
+          0.9986358500070374,
+          16.34385531165989
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "2": [
+        [
+          0.9999937224126476,
+          0.0014827267582754001,
+          0.003221374694102995,
+          1.6330068943607283
+        ],
+        [
+          -0.001500724110866095,
+          0.9999832721217357,
+          0.005591750353198094,
+          -0.012177872011991955
+        ],
+        [
+          -0.003213031186619671,
+          -0.005596548560065711,
+          0.9999791054656169,
+          0.35861030467909355
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "200": [
+        [
+          -0.018029821366820076,
+          -0.9977192447501073,
+          -0.06504774851291932,
+          12.115153456106666
+        ],
+        [
+          0.9984791045392002,
+          -0.021357296784557465,
+          0.050827072122453444,
+          147.25314538072436
+        ],
+        [
+          -0.05210040392752731,
+          -0.06403241496207612,
+          0.9965868881048912,
+          8.142589754767753
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "3": [
+        [
+          0.9999926648322371,
+          0.0022640638288206043,
+          0.0030974233564895295,
+          2.3936218249065586
+        ],
+        [
+          -0.0022854871756765468,
+          0.9999733961520849,
+          0.006930642567716419,
+          -0.02793033335288186
+        ],
+        [
+          -0.0030816510045144066,
+          -0.006937670976610966,
+          0.9999711390156806,
+          0.5375927214993461
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "4": [
+        [
+          0.9999918092449644,
+          0.002686588847687777,
+          0.0030412728195441936,
+          3.1787927499433817
+        ],
+        [
+          -0.0027135741804921805,
+          0.9999567154812982,
+          0.008903795240876242,
+          -0.03965119894855429
+        ],
+        [
+          -0.0030172226789435042,
+          -0.00891197448832243,
+          0.999955675273742,
+          0.7143916427771114
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "datasets": {
+    "overlap_5": {
+      "metadata": {
+        "counts": {
+          "bbox_transformed_m": {
+            "high": [
+              82.51995599207198,
+              78.99701697927826,
+              4.106608429301244
+            ],
+            "low": [
+              -79.60240173339845,
+              -79.91690063476562,
+              -27.639139175415046
+            ]
+          },
+          "cross_scan_matches": 968,
+          "per_frame": {
+            "0": {
+              "cross_scan_matches_previous": 0,
+              "quantized_sites": 119142,
+              "raw_points": 123389,
+              "raw_sensor_unique_xyz": 123389,
+              "within_scan_quant_duplicates": 4247
+            },
+            "1": {
+              "cross_scan_matches_previous": 163,
+              "quantized_sites": 119185,
+              "raw_points": 123433,
+              "raw_sensor_unique_xyz": 123433,
+              "within_scan_quant_duplicates": 4248
+            },
+            "2": {
+              "cross_scan_matches_previous": 206,
+              "quantized_sites": 118882,
+              "raw_points": 123159,
+              "raw_sensor_unique_xyz": 123159,
+              "within_scan_quant_duplicates": 4277
+            },
+            "3": {
+              "cross_scan_matches_previous": 287,
+              "quantized_sites": 118749,
+              "raw_points": 123069,
+              "raw_sensor_unique_xyz": 123069,
+              "within_scan_quant_duplicates": 4320
+            },
+            "4": {
+              "cross_scan_matches_previous": 312,
+              "quantized_sites": 118552,
+              "raw_points": 122856,
+              "raw_sensor_unique_xyz": 122856,
+              "within_scan_quant_duplicates": 4304
+            }
+          },
+          "raw_minus_unique": 22364,
+          "raw_points": 615906,
+          "raw_sensor_unique_xyz_sum_per_frame": 615906,
+          "unique_sites": 593542,
+          "within_scan_quant_duplicates": 21396
+        },
+        "frames": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "full": {
+          "bytes": 3561252,
+          "n": 593542,
+          "order": "lexicographic_xyz_site_id",
+          "path": "overlap_5/full.u16le",
+          "sha256": "45c49908790b96a01ac8e2f33e1205ccf47a5b2c697f186bb149261ce7f8a3e8"
+        },
+        "mapping": {
+          "bytes": 7390872,
+          "n": 615906,
+          "path": "overlap_5/raw_to_site.u32le",
+          "record": "<III frame_id, original_return_id, lexicographic_site_id",
+          "sha256": "a93c18489b190c1a8cdee5243d8b809392827d89878d407e08913df83d7a4121"
+        },
+        "name": "overlap_5",
+        "samples": [
+          {
+            "bytes": 48000,
+            "n": 8000,
+            "path": "overlap_5/n8000.u16le",
+            "requested_n": 8000,
+            "sha256": "270ee100ad4cdab69416bc03c7380c56013a9a7833b56821e996e2901afe1950",
+            "status": "prepared"
+          },
+          {
+            "bytes": 96000,
+            "n": 16000,
+            "path": "overlap_5/n16000.u16le",
+            "requested_n": 16000,
+            "sha256": "94a9d864f28d47e9f03f14266d30ffd62b263dea99ff1a4dde64ad6c66fca4ce",
+            "status": "prepared"
+          },
+          {
+            "bytes": 192000,
+            "n": 32000,
+            "path": "overlap_5/n32000.u16le",
+            "requested_n": 32000,
+            "sha256": "06443b18f34c6ad47de95821c6c0d5dce820683e576febee313cf2eccc4e8c8d",
+            "status": "prepared"
+          },
+          {
+            "bytes": 300000,
+            "n": 50000,
+            "path": "overlap_5/n50000.u16le",
+            "requested_n": 50000,
+            "sha256": "d579bf36a72a273deb98c0db30d897554b43620497d88a51980433fb96198718",
+            "status": "prepared"
+          }
+        ]
+      },
+      "role": "secondary_accumulation_control_not_registration_benchmark",
+      "source": {
+        "bytes": 12335,
+        "path": "overlap_5/METADATA.json",
+        "sha256": "4220de2fd0ed16ee643a4643f4293ec53ada79ecf1bf354841b1d6eae2b3e379"
+      }
+    },
+    "single_000000": {
+      "metadata": {
+        "counts": {
+          "bbox_transformed_m": {
+            "high": [
+              79.00471496582033,
+              78.36708068847656,
+              2.956046104431153
+            ],
+            "low": [
+              -79.60240173339845,
+              -79.91690063476562,
+              -27.639139175415046
+            ]
+          },
+          "cross_scan_matches": 0,
+          "per_frame": {
+            "0": {
+              "cross_scan_matches_previous": 0,
+              "quantized_sites": 119142,
+              "raw_points": 123389,
+              "raw_sensor_unique_xyz": 123389,
+              "within_scan_quant_duplicates": 4247
+            }
+          },
+          "raw_minus_unique": 4247,
+          "raw_points": 123389,
+          "raw_sensor_unique_xyz_sum_per_frame": 123389,
+          "unique_sites": 119142,
+          "within_scan_quant_duplicates": 4247
+        },
+        "frames": [
+          0
+        ],
+        "full": {
+          "bytes": 714852,
+          "n": 119142,
+          "order": "lexicographic_xyz_site_id",
+          "path": "single_000000/full.u16le",
+          "sha256": "18212228802117f041fa76e2160aa397d8c7f7c7f5d94ea9047a8f7138f521a4"
+        },
+        "mapping": {
+          "bytes": 1480668,
+          "n": 123389,
+          "path": "single_000000/raw_to_site.u32le",
+          "record": "<III frame_id, original_return_id, lexicographic_site_id",
+          "sha256": "fa3ea69a52a6726e0554ea22d800d8954b261b9986fe5efe356b2d157841507b"
+        },
+        "name": "single_000000",
+        "samples": [
+          {
+            "bytes": 48000,
+            "n": 8000,
+            "path": "single_000000/n8000.u16le",
+            "requested_n": 8000,
+            "sha256": "ed5aa97941551e027a76d7c4eb4a03c739cdf0a83cbaf53035c1536bed0b5194",
+            "status": "prepared"
+          },
+          {
+            "bytes": 96000,
+            "n": 16000,
+            "path": "single_000000/n16000.u16le",
+            "requested_n": 16000,
+            "sha256": "fbd31be0f4de345b1b7f027a6a9536e6f0e776c46f6caf6a4f3b82f91d4e8595",
+            "status": "prepared"
+          },
+          {
+            "bytes": 192000,
+            "n": 32000,
+            "path": "single_000000/n32000.u16le",
+            "requested_n": 32000,
+            "sha256": "ac03426026406e79c154a557b91f054f815237cbd69a61c9a1d4c0e9e0993550",
+            "status": "prepared"
+          },
+          {
+            "bytes": 300000,
+            "n": 50000,
+            "path": "single_000000/n50000.u16le",
+            "requested_n": 50000,
+            "sha256": "2a0c79ef95d7f34f1447f47c3bcf6cbff43156e7aa2d2f8c2eb1795109617426",
+            "status": "prepared"
+          }
+        ]
+      },
+      "role": "primary_single_scan",
+      "source": {
+        "bytes": 11462,
+        "path": "single_000000/METADATA.json",
+        "sha256": "b8abd52c6ffa6ecada01988e4ee4a313a89c1a924725849f53df766b84e977de"
+      }
+    },
+    "single_000100": {
+      "metadata": {
+        "counts": {
+          "bbox_transformed_m": {
+            "high": [
+              97.07662028181922,
+              108.44468041772696,
+              23.615826572351697
+            ],
+            "low": [
+              -57.33774201981339,
+              -51.07175526069716,
+              9.634443831672959
+            ]
+          },
+          "cross_scan_matches": 0,
+          "per_frame": {
+            "100": {
+              "cross_scan_matches_previous": 0,
+              "quantized_sites": 119995,
+              "raw_points": 124479,
+              "raw_sensor_unique_xyz": 124479,
+              "within_scan_quant_duplicates": 4484
+            }
+          },
+          "raw_minus_unique": 4484,
+          "raw_points": 124479,
+          "raw_sensor_unique_xyz_sum_per_frame": 124479,
+          "unique_sites": 119995,
+          "within_scan_quant_duplicates": 4484
+        },
+        "frames": [
+          100
+        ],
+        "full": {
+          "bytes": 719970,
+          "n": 119995,
+          "order": "lexicographic_xyz_site_id",
+          "path": "single_000100/full.u16le",
+          "sha256": "6eca4c971c24e4eb31ffd1bdfc1b6dc944dd0e5f08f3f0bdda104a659236426e"
+        },
+        "mapping": {
+          "bytes": 1493748,
+          "n": 124479,
+          "path": "single_000100/raw_to_site.u32le",
+          "record": "<III frame_id, original_return_id, lexicographic_site_id",
+          "sha256": "01a42c93847932ea324d60a9a2a1c451ec8d28e67f6ff3b88aa35f92c531644e"
+        },
+        "name": "single_000100",
+        "samples": [
+          {
+            "bytes": 48000,
+            "n": 8000,
+            "path": "single_000100/n8000.u16le",
+            "requested_n": 8000,
+            "sha256": "813d595e799ff00d93fb94980d2e406c3775217b93aa4efbea0a675aaab3b402",
+            "status": "prepared"
+          },
+          {
+            "bytes": 96000,
+            "n": 16000,
+            "path": "single_000100/n16000.u16le",
+            "requested_n": 16000,
+            "sha256": "a96dd9fe13a47e6c65cd25a08910944b4386dff91ec2a87f93cda5b881a42e8b",
+            "status": "prepared"
+          },
+          {
+            "bytes": 192000,
+            "n": 32000,
+            "path": "single_000100/n32000.u16le",
+            "requested_n": 32000,
+            "sha256": "8791daeaf90f2116c13e5ea0fd69684c182c19f55f3612d657056b2c3707a417",
+            "status": "prepared"
+          },
+          {
+            "bytes": 300000,
+            "n": 50000,
+            "path": "single_000100/n50000.u16le",
+            "requested_n": 50000,
+            "sha256": "1d8c524e75b21f82e23a067047ff1d7fb90ce5b610a63a2be842b356ae831628",
+            "status": "prepared"
+          }
+        ]
+      },
+      "role": "primary_single_scan",
+      "source": {
+        "bytes": 11466,
+        "path": "single_000100/METADATA.json",
+        "sha256": "844e1a7e94b20bba4c77715bf686b37e234d415ab554bd3b9d5ffe602c40cdd8"
+      }
+    },
+    "single_000200": {
+      "metadata": {
+        "counts": {
+          "bbox_transformed_m": {
+            "high": [
+              34.328662588956576,
+              226.7843868902411,
+              14.019404820955657
+            ],
+            "low": [
+              -61.23621333221752,
+              66.90769918271414,
+              -6.977292910300282
+            ]
+          },
+          "cross_scan_matches": 0,
+          "per_frame": {
+            "200": {
+              "cross_scan_matches_previous": 0,
+              "quantized_sites": 120759,
+              "raw_points": 125526,
+              "raw_sensor_unique_xyz": 125526,
+              "within_scan_quant_duplicates": 4767
+            }
+          },
+          "raw_minus_unique": 4767,
+          "raw_points": 125526,
+          "raw_sensor_unique_xyz_sum_per_frame": 125526,
+          "unique_sites": 120759,
+          "within_scan_quant_duplicates": 4767
+        },
+        "frames": [
+          200
+        ],
+        "full": {
+          "bytes": 724554,
+          "n": 120759,
+          "order": "lexicographic_xyz_site_id",
+          "path": "single_000200/full.u16le",
+          "sha256": "2eb8117d1dbe5a1b823dfd6dddd477cc95046816d8fd9e4ae9043d73c79c7970"
+        },
+        "mapping": {
+          "bytes": 1506312,
+          "n": 125526,
+          "path": "single_000200/raw_to_site.u32le",
+          "record": "<III frame_id, original_return_id, lexicographic_site_id",
+          "sha256": "bf12f1a6f5abd5620e00ffa69792eaeebb18a3deb512b89f50ababa976a2ec1c"
+        },
+        "name": "single_000200",
+        "samples": [
+          {
+            "bytes": 48000,
+            "n": 8000,
+            "path": "single_000200/n8000.u16le",
+            "requested_n": 8000,
+            "sha256": "edc1a7980b366034984d0c3b020f5fa94777277b1618db7c16116c5ccfea4446",
+            "status": "prepared"
+          },
+          {
+            "bytes": 96000,
+            "n": 16000,
+            "path": "single_000200/n16000.u16le",
+            "requested_n": 16000,
+            "sha256": "c0616588a71ff72c77004aded32214e0d8c60b56286eabde04d592b5f0a909ed",
+            "status": "prepared"
+          },
+          {
+            "bytes": 192000,
+            "n": 32000,
+            "path": "single_000200/n32000.u16le",
+            "requested_n": 32000,
+            "sha256": "42fcd1a97753fdd854c81dbd9fdd4c5bc370f296eeec9c0da00e3dce2beeacf8",
+            "status": "prepared"
+          },
+          {
+            "bytes": 300000,
+            "n": 50000,
+            "path": "single_000200/n50000.u16le",
+            "requested_n": 50000,
+            "sha256": "aadeaefbacbcee7072fbdc1a4799e9e89334e10098dc5912edd47992847658e0",
+            "status": "prepared"
+          }
+        ]
+      },
+      "role": "primary_single_scan",
+      "source": {
+        "bytes": 11466,
+        "path": "single_000200/METADATA.json",
+        "sha256": "5fb677c91f1420b78ddc1c820ae341d8b8fcc2fd5b116070e1d39ca4b37fffa1"
+      }
+    }
+  },
+  "note": "common plus each dataset metadata reconstructs its METADATA.json; no return coordinates included",
+  "prepared_manifest_sha256": "52cb29679b6ff135508910d176a1450cbea7c96449e30f965166f232d979edc5",
+  "schema": "mhgp8_lidar_inputs_metadata_v1",
+  "status": "prepared"
+}

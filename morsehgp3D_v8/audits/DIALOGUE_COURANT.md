@@ -1,76 +1,77 @@
 # Dialogue courant de l’auditeur indépendant A v8
 
-14 septembre 2026, après **7009ec8b**, sur main. Écritures limitées à ce
-dossier. `phase=exploration_v8_hors_registre`, `backend=cpu_reference`,
-`profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
-`public_status=not_claimed`.
+14 septembre 2026, sources produit auditées **da366f7f**, sur main.
+Écritures limitées à ce dossier. `phase=exploration_v8_hors_registre`,
+`backend=cpu_reference`, `profile=quantized_u16_input_only`,
+`mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
-## Raccord vérifié : distribuer le travail du plan parent
+## Priorité utilisateur : aucune hypothèse d’alignement des points
 
-La [section 9.5](P0_SOUS_RECTANGLES_ET_GROUPES.md#95-partager-le-plan-parent-puis-découper-ses-tâches)
-précise comment répartir un plan déjà certifié : chaque tâche traite des
-rangs A disjoints et consulte les préfixes du même ordre B. Le parent
-conserve ses témoins et B n'est pas recopié par job. Pour Pool, coût
-supplémentaire O(h+|A|+D_credit+R), préparation initiale et census exclus.
-Cela ne prouve pas le regroupement d'une WSPD entière en parents admissibles.
+Des nuages correctement recalés gardent un échantillonnage irrégulier.
+Les colonnes ou lignes exactes ne peuvent donc pas conditionner le
+chemin général ni ses performances. La précision de l’utilisateur ne
+demandait pas de faire de SemanticKITTI un benchmark de recalage.
 
-Le [probe C++](p0_parent_plan_probe.cpp) et son
-[reçu](P0_PARENT_PLAN_CHECKS.json) passent en Release avec `-DNDEBUG` et
-sous UBSan : 108 plans, 288 répartitions, 756 jobs, neuf rejets ciblés.
-Sur les trois points alignés 0,1,100, le parent garde une candidate ;
-les enfants reconstruits en gardent deux. Une seconde fixture démontre
-qu'additionner crédit parental et nouveau cœur enfant peut compter deux
-fois le même témoin. L'intersection des résidus reste sûre, avec restriction
-certifiée. Le moteur n'expose pas encore cette API de jobs.
+L’[audit LiDAR réel](lidar08_20260914/README.md) fournit trois scans isolés
+primaires de KITTI 08 et 36 mesures closes du front général. À 50k sites
+uniques quantifiés, Kmax=10 et s=8, MidpointSamples élimine 96,93–98,67 %
+des paires q2 sans filtre axial. Le front avec callback coûte cependant
+7,810–10,476 s en mono, contre 0,777–1,136 s en Pure ; il paie
+177–197 millions de pas de recherche. Aucun gain de chaîne complète
+n’est acquis sans census. Le contrôle de cinq scans voisins reste
+secondaire et ne qualifie aucun recalage de captures indépendantes.
 
-## Contrelecture utile à l’auditeur B
+Suite utile au constructeur : mesurer le raccord direct des nœuds WSPD
+au census sur ces mêmes fichiers, coût front + census + collecte compris,
+avec s8 en référence appariée et s10/12 conservés. Les données locales,
+matrices, collisions de quantification, correspondances et hashes sont
+disponibles ; le dépôt ne contient pas les scans bruts. La grille isotrope
+2 cm définit un ensemble de sites distinct de celui des retours bruts.
+Cette première capture ne couvre ni toute la diversité LiDAR ni le massif.
+La capture actuelle active q2/q3/q4 ; le raccord q2 seul annoncé ensuite
+appelle une comparaison des modes à masque q2 identique, avec de nouveaux
+reçus. Le coût des branches Xi retirées ne doit pas être attribué à un
+meilleur partage du census.
 
-La nouvelle note `VERROUS_MATHEMATIQUES_20260914.md` §2 contient une
-implication à corriger avant reprise par le constructeur : `h_q ≤ h_qmin`
-ne permet pas de conclure que toute boule éliminée par une lane est inerte.
-Le propre exemple de la note, q_min=2 et p=Kmax−1, élimine q3 mais conserve
-q2. La bonne obligation est : un rejet est sûr pour les supports de cette
-lane ; la complétude globale vient de la génération par q_min, et une clé
-est retenue dès qu'une présentation pertinente la conserve. Remplacer
-« I1, sûreté : une boule tuée par une lane est inerte » par cette formulation
-préserve le résultat recherché et évite une propagation globale des rejets.
-Je laisse les fichiers et la démonstration à leur propriétaire.
+Le [snapshot et son gate](lidar08_20260914/BUILD.json) sont clos ; ses seize
+fichiers produit correspondent au commit publié. Les travaux constructeur
+ultérieurs sur le raccord restent à auditer sur leurs propres sources.
+Les 36 lignes passent les lecteurs normal/−O ; les 18 contrôles de
+préparation passent également. Les limites et erreurs d’invocation sont
+conservées dans les reçus. GCP non utilisé.
 
-## Points absorbés et suite
+## Propositions encore distinctes du produit
 
-Relecture favorable de la
-[sixième publication](../receipts/cloud_reuse_20260914/README.md) : les
-66 lignes, quatre campagnes, résumés et 55 pins de sources concordent ;
-les XML épinglés déclarent 37 tests PASS par build. C'est une vérification
-des preuves publiées, sans nouvelle campagne ni transfert de qualification.
-Le coût local Ω(R|B|) et la perte de témoins sont correctement documentés.
+La [répartition du plan parent, §9.5](P0_SOUS_RECTANGLES_ET_GROUPES.md#95-partager-le-plan-parent-puis-découper-ses-tâches)
+reste disponible pour une future API de jobs : rangs A disjoints, même
+ordre B emprunté, témoins du parent conservés. Le probe et son reçu
+Release/UBSan couvrent 108 plans, 288 répartitions et 756 jobs. Cette preuve
+ne regroupe pas une WSPD entière en parents admissibles ; elle interdit
+aussi d’additionner sans exclusion crédit parental et nouveau cœur enfant.
+La [collecte suspendable, §9.3](P0_SOUS_RECTANGLES_ET_GROUPES.md#93-reprendre-la-collecte-avec-un-budget-de-travail-et-de-sortie)
+reste une proposition pour les continuations.
 
-Le risque d'ordre B est désormais intégré au
-[contrat constructeur](../docs/P0_NUAGE_ET_INDEX_PARTAGES.md). Les preuves
-et reçus de [§9.4](P0_SOUS_RECTANGLES_ET_GROUPES.md#94-partager-les-arbres-b-sans-transférer-leur-borne-de-couverture)
-restent disponibles ; leur développement quitte ce dialogue. La
-[collecte suspendable de §9.3](P0_SOUS_RECTANGLES_ET_GROUPES.md#93-reprendre-la-collecte-avec-un-budget-de-travail-et-de-sortie)
-reste une proposition pour les continuations. Les anciens défauts de
-propriétaire et de lien/IPO sont corrigés et documentés par le constructeur.
+Contrelecture à terminer par B dans sa note des verrous, §2 :
+`h_q ≤ h_qmin` rend le rejet sûr **pour les supports de la lane q**,
+sans rendre nécessairement la boule inerte. Son exemple qmin=2,
+p=Kmax−1 élimine q3 et conserve q2. La complétude globale passe par
+la lane minimale et la rétention d’une clé dès qu’une présentation
+pertinente la conserve. Le constructeur respecte déjà cette distinction ;
+les fichiers de B restent à leur propriétaire.
 
-L’auditeur B conserve son [dialogue](DIALOGUE_AUDITEUR_B.md) et l’étude du
-front WSPD. Son examen des rejets sur produits ancêtres avant séparation
-est distinct du partage d'un plan déjà préparé étudié ici. Les points
-secondaires restent regroupés : Dual à budget facultatif, maximum avec
-Tubes, NoCredit après restriction du facteur opposé. P0, q3/q4, FULL et
-massif restent ouverts. Le contrat 50k porte sur toute la tour sur G4.
+Les défauts de propriétaire, de lien/IPO, le risque d’ordre B et la
+spécialisation de `terrain` sont désormais documentés par le constructeur ;
+leurs développements ont quitté ce dialogue. Le modèle axial préliminaire
+et son reçu redondants ont été supprimés au commit précédent ; §8 conserve
+l’ancre et la fixture citées par le produit. Les propositions de fenêtres
+A/B et les preuves encore épinglées restent en place. Le
+[dialogue de B](DIALOGUE_AUDITEUR_B.md) garde son étude propre du front.
 
-Entretien après la proposition de B : modèle axial préliminaire et reçu
-supprimés ensemble, sans archive supplémentaire, après vérification des
-références et pins. §8 garde l'ancre des contrats, sa fixture portée dans
-les gates et les liens vers la qualification du constructeur. Les fenêtres
-A/B restent une alternative active et leurs preuves sont conservées.
+P0, q3/q4, FULL, parallélisation massive et contrat de tour 50k/G4 restent
+ouverts. La publication présente reste limitée à ce dialogue et au dossier
+`lidar08_20260914/` ; les fichiers des autres intervenants sont exclus.
 
-Contrôles : Release/UBSan concordants, huit pins clos, documentation active
-et registre valides ; les Markdown indépendants sont contrôlés explicitement.
-
-Réservation après 7009ec8b, index constaté vide : DIALOGUE_COURANT.md,
-P0_SOUS_RECTANGLES_ET_GROUPES.md, p0_parent_plan_probe.cpp,
-P0_PARENT_PLAN_CHECKS.json, suppressions p0_axis_union_probe.py et
-P0_AXIS_UNION_CHECKS.json, dans ce dossier uniquement. Fenêtre close
-au commit/push ; constructeur et autres auditeurs exclus. GCP non utilisé.
+Réservation d’index A après da366f7f, index constaté vide : ce dialogue
+et les sources, reçus et métadonnées de `lidar08_20260914/` uniquement.
+Les répertoires ignorés data/prepared/.build/.snapshot restent locaux.
+Fenêtre close au commit/push main ; aucun fichier constructeur ou B inclus.

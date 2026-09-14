@@ -1,0 +1,1039 @@
+{
+  "closure_inputs": {
+    "campaign_check50k/COMPLETION.json": "2babba110899cad6426df0cb0d0d4c1d4d3f7410b1028e2d37bc5b2d8ff56036",
+    "campaign_check50k/MANIFEST.json": "1589d109d414c8796491feb8248f3abea94390d10b3851d578452aec01edc1eb",
+    "campaign_check50k/MEASURES.jsonl": "78c9e4e9293a43db3d1d5e92619bad103dfc915e8c40e9b497dcee7f6e98d252",
+    "campaign_growth/COMPLETION.json": "f6a5f845e19656b1aa2cd54d75fa093f04c3d2847b0a34b5a2a717f7f7c5ab26",
+    "campaign_growth/MANIFEST.json": "0861a4fc72d35cc24dd9026d9cc7a54fd550952974ebe1ebcf7e241a8d47002d",
+    "campaign_growth/MEASURES.jsonl": "ddee1f361b69ee85c1424e2460a79c9f2c7dc7507a2aa512a598f88743341789",
+    "campaign_pilot/COMPLETION.json": "437b0f6f3ff59c5d141901199636286522635940c19c092047de8ca1af7aabc0",
+    "campaign_pilot/MANIFEST.json": "4e8ad0119ac3b74f5aa14c18384dff00efd9e3eea7bec00f896537a11bfc896c",
+    "campaign_pilot/MEASURES.jsonl": "7b1f799d5cb388750d822c445e69a269cd0c495cf745579e11ca8bd288592b12",
+    "campaign_separation/COMPLETION.json": "1577d04fc0719a9672bfcaf5e775b8c0c22ecda6345b1d7750127a27bc05d1c7",
+    "campaign_separation/MANIFEST.json": "08d1cf68be16ad5bd72b55ac750a19f4dbedb532719b70c8fd754310f04ece71",
+    "campaign_separation/MEASURES.jsonl": "9b7c8cd94245513ab9572bad67c77ce6626c00b604949fb97ee496a6f3019aaf"
+  },
+  "groups": [
+    {
+      "dataset": "overlap_5",
+      "discrete": {
+        "emitted_factor_sites": 13130173,
+        "emitted_rectangles": 1774032,
+        "lane_rectangles": [
+          1774032,
+          1774032,
+          1774032
+        ],
+        "product_visits": 3556064,
+        "proposed_sites": 0,
+        "residual_pair_mass": [
+          31996000,
+          31996000,
+          31996000
+        ],
+        "total_unordered_pairs": 31996000,
+        "witness_box_distance_tests": 0,
+        "witness_descent_steps": 0,
+        "witness_searches": 0
+      },
+      "front_callback_ms": [
+        192.294071,
+        192.294071
+      ],
+      "mode": "pure",
+      "n": 8000,
+      "q2_residual_fraction": 1.0,
+      "repetitions": 1,
+      "s": 8,
+      "total_ms": [
+        197.087417,
+        197.087417
+      ]
+    },
+    {
+      "dataset": "overlap_5",
+      "discrete": {
+        "emitted_factor_sites": 3299095,
+        "emitted_rectangles": 903017,
+        "lane_rectangles": [
+          593145,
+          862660,
+          827923
+        ],
+        "product_visits": 2302116,
+        "proposed_sites": 22665769,
+        "residual_pair_mass": [
+          1461485,
+          3630838,
+          3554044
+        ],
+        "total_unordered_pairs": 31996000,
+        "witness_box_distance_tests": 76734332,
+        "witness_descent_steps": 38367166,
+        "witness_searches": 2286116
+      },
+      "front_callback_ms": [
+        1676.51532,
+        1676.51532
+      ],
+      "mode": "samples",
+      "n": 8000,
+      "q2_residual_fraction": 0.04567711588948618,
+      "repetitions": 1,
+      "s": 8,
+      "total_ms": [
+        1682.048702,
+        1682.048702
+      ]
+    },
+    {
+      "dataset": "overlap_5",
+      "discrete": {
+        "emitted_factor_sites": 16219056,
+        "emitted_rectangles": 2499640,
+        "lane_rectangles": [
+          2499640,
+          2499640,
+          2499640
+        ],
+        "product_visits": 5007280,
+        "proposed_sites": 0,
+        "residual_pair_mass": [
+          31996000,
+          31996000,
+          31996000
+        ],
+        "total_unordered_pairs": 31996000,
+        "witness_box_distance_tests": 0,
+        "witness_descent_steps": 0,
+        "witness_searches": 0
+      },
+      "front_callback_ms": [
+        234.089668,
+        234.089668
+      ],
+      "mode": "pure",
+      "n": 8000,
+      "q2_residual_fraction": 1.0,
+      "repetitions": 1,
+      "s": 10,
+      "total_ms": [
+        239.235977,
+        239.235977
+      ]
+    },
+    {
+      "dataset": "overlap_5",
+      "discrete": {
+        "emitted_factor_sites": 3544393,
+        "emitted_rectangles": 1072884,
+        "lane_rectangles": [
+          680658,
+          1020112,
+          969096
+        ],
+        "product_visits": 2760440,
+        "proposed_sites": 27204243,
+        "residual_pair_mass": [
+          1407515,
+          3319789,
+          3185964
+        ],
+        "total_unordered_pairs": 31996000,
+        "witness_box_distance_tests": 91640788,
+        "witness_descent_steps": 45820394,
+        "witness_searches": 2744440
+      },
+      "front_callback_ms": [
+        2063.96908,
+        2063.96908
+      ],
+      "mode": "samples",
+      "n": 8000,
+      "q2_residual_fraction": 0.043990342542817855,
+      "repetitions": 1,
+      "s": 10,
+      "total_ms": [
+        2068.739602,
+        2068.739602
+      ]
+    },
+    {
+      "dataset": "overlap_5",
+      "discrete": {
+        "emitted_factor_sites": 19078038,
+        "emitted_rectangles": 3282400,
+        "lane_rectangles": [
+          3282400,
+          3282400,
+          3282400
+        ],
+        "product_visits": 6572800,
+        "proposed_sites": 0,
+        "residual_pair_mass": [
+          31996000,
+          31996000,
+          31996000
+        ],
+        "total_unordered_pairs": 31996000,
+        "witness_box_distance_tests": 0,
+        "witness_descent_steps": 0,
+        "witness_searches": 0
+      },
+      "front_callback_ms": [
+        308.522095,
+        308.522095
+      ],
+      "mode": "pure",
+      "n": 8000,
+      "q2_residual_fraction": 1.0,
+      "repetitions": 1,
+      "s": 12,
+      "total_ms": [
+        313.532702,
+        313.532702
+      ]
+    },
+    {
+      "dataset": "overlap_5",
+      "discrete": {
+        "emitted_factor_sites": 3754761,
+        "emitted_rectangles": 1219341,
+        "lane_rectangles": [
+          750813,
+          1155034,
+          1089419
+        ],
+        "product_visits": 3145576,
+        "proposed_sites": 31021438,
+        "residual_pair_mass": [
+          1375484,
+          3145654,
+          2988808
+        ],
+        "total_unordered_pairs": 31996000,
+        "witness_box_distance_tests": 104027294,
+        "witness_descent_steps": 52013647,
+        "witness_searches": 3129576
+      },
+      "front_callback_ms": [
+        2389.459348,
+        2389.459348
+      ],
+      "mode": "samples",
+      "n": 8000,
+      "q2_residual_fraction": 0.04298924865608201,
+      "repetitions": 1,
+      "s": 12,
+      "total_ms": [
+        2394.261086,
+        2394.261086
+      ]
+    },
+    {
+      "dataset": "overlap_5",
+      "discrete": {
+        "emitted_factor_sites": 37091203,
+        "emitted_rectangles": 4332818,
+        "lane_rectangles": [
+          4332818,
+          4332818,
+          4332818
+        ],
+        "product_visits": 8681636,
+        "proposed_sites": 0,
+        "residual_pair_mass": [
+          127992000,
+          127992000,
+          127992000
+        ],
+        "total_unordered_pairs": 127992000,
+        "witness_box_distance_tests": 0,
+        "witness_descent_steps": 0,
+        "witness_searches": 0
+      },
+      "front_callback_ms": [
+        423.91485,
+        423.91485
+      ],
+      "mode": "pure",
+      "n": 16000,
+      "q2_residual_fraction": 1.0,
+      "repetitions": 1,
+      "s": 8,
+      "total_ms": [
+        433.799232,
+        433.799232
+      ]
+    },
+    {
+      "dataset": "overlap_5",
+      "discrete": {
+        "emitted_factor_sites": 8013091,
+        "emitted_rectangles": 2127290,
+        "lane_rectangles": [
+          1346049,
+          2025035,
+          1951859
+        ],
+        "product_visits": 5485266,
+        "proposed_sites": 54043288,
+        "residual_pair_mass": [
+          3701984,
+          10450903,
+          10615172
+        ],
+        "total_unordered_pairs": 127992000,
+        "witness_box_distance_tests": 196274676,
+        "witness_descent_steps": 98137338,
+        "witness_searches": 5453266
+      },
+      "front_callback_ms": [
+        4195.480724,
+        4195.480724
+      ],
+      "mode": "samples",
+      "n": 16000,
+      "q2_residual_fraction": 0.02892355772235765,
+      "repetitions": 1,
+      "s": 8,
+      "total_ms": [
+        4205.188475,
+        4205.188475
+      ]
+    },
+    {
+      "dataset": "overlap_5",
+      "discrete": {
+        "emitted_factor_sites": 101037559,
+        "emitted_rectangles": 10576335,
+        "lane_rectangles": [
+          10576335,
+          10576335,
+          10576335
+        ],
+        "product_visits": 21184670,
+        "proposed_sites": 0,
+        "residual_pair_mass": [
+          511984000,
+          511984000,
+          511984000
+        ],
+        "total_unordered_pairs": 511984000,
+        "witness_box_distance_tests": 0,
+        "witness_descent_steps": 0,
+        "witness_searches": 0
+      },
+      "front_callback_ms": [
+        1020.543655,
+        1020.543655
+      ],
+      "mode": "pure",
+      "n": 32000,
+      "q2_residual_fraction": 1.0,
+      "repetitions": 1,
+      "s": 8,
+      "total_ms": [
+        1042.870112,
+        1042.870112
+      ]
+    },
+    {
+      "dataset": "overlap_5",
+      "discrete": {
+        "emitted_factor_sites": 19203953,
+        "emitted_rectangles": 5070232,
+        "lane_rectangles": [
+          3057253,
+          4819383,
+          4658155
+        ],
+        "product_visits": 13258972,
+        "proposed_sites": 130696312,
+        "residual_pair_mass": [
+          9133057,
+          29078984,
+          27621703
+        ],
+        "total_unordered_pairs": 511984000,
+        "witness_box_distance_tests": 508168838,
+        "witness_descent_steps": 254084419,
+        "witness_searches": 13194972
+      },
+      "front_callback_ms": [
+        10746.912935,
+        10746.912935
+      ],
+      "mode": "samples",
+      "n": 32000,
+      "q2_residual_fraction": 0.017838559408106504,
+      "repetitions": 1,
+      "s": 8,
+      "total_ms": [
+        10767.170564,
+        10767.170564
+      ]
+    },
+    {
+      "dataset": "overlap_5",
+      "discrete": {
+        "emitted_factor_sites": 190334599,
+        "emitted_rectangles": 18434968,
+        "lane_rectangles": [
+          18434968,
+          18434968,
+          18434968
+        ],
+        "product_visits": 36919936,
+        "proposed_sites": 0,
+        "residual_pair_mass": [
+          1249975000,
+          1249975000,
+          1249975000
+        ],
+        "total_unordered_pairs": 1249975000,
+        "witness_box_distance_tests": 0,
+        "witness_descent_steps": 0,
+        "witness_searches": 0
+      },
+      "front_callback_ms": [
+        1780.079871,
+        1818.46385
+      ],
+      "mode": "pure",
+      "n": 50000,
+      "q2_residual_fraction": 1.0,
+      "repetitions": 2,
+      "s": 8,
+      "total_ms": [
+        1815.283395,
+        1854.084082
+      ]
+    },
+    {
+      "dataset": "overlap_5",
+      "discrete": {
+        "emitted_factor_sites": 34160339,
+        "emitted_rectangles": 8737992,
+        "lane_rectangles": [
+          5156874,
+          8292589,
+          8025336
+        ],
+        "product_visits": 23016194,
+        "proposed_sites": 226905758,
+        "residual_pair_mass": [
+          16814306,
+          55768319,
+          59998065
+        ],
+        "total_unordered_pairs": 1249975000,
+        "witness_box_distance_tests": 915911498,
+        "witness_descent_steps": 457955749,
+        "witness_searches": 22916194
+      },
+      "front_callback_ms": [
+        18598.413251,
+        18752.11948
+      ],
+      "mode": "samples",
+      "n": 50000,
+      "q2_residual_fraction": 0.013451713834276685,
+      "repetitions": 2,
+      "s": 8,
+      "total_ms": [
+        18631.80538,
+        18785.34935
+      ]
+    },
+    {
+      "dataset": "single_000000",
+      "discrete": {
+        "emitted_factor_sites": 11266172,
+        "emitted_rectangles": 1218734,
+        "lane_rectangles": [
+          1218734,
+          1218734,
+          1218734
+        ],
+        "product_visits": 2445468,
+        "proposed_sites": 0,
+        "residual_pair_mass": [
+          31996000,
+          31996000,
+          31996000
+        ],
+        "total_unordered_pairs": 31996000,
+        "witness_box_distance_tests": 0,
+        "witness_descent_steps": 0,
+        "witness_searches": 0
+      },
+      "front_callback_ms": [
+        120.55029,
+        120.55029
+      ],
+      "mode": "pure",
+      "n": 8000,
+      "q2_residual_fraction": 1.0,
+      "repetitions": 1,
+      "s": 8,
+      "total_ms": [
+        126.097844,
+        126.097844
+      ]
+    },
+    {
+      "dataset": "single_000000",
+      "discrete": {
+        "emitted_factor_sites": 2900349,
+        "emitted_rectangles": 635584,
+        "lane_rectangles": [
+          437610,
+          607096,
+          577570
+        ],
+        "product_visits": 1592076,
+        "proposed_sites": 15634438,
+        "residual_pair_mass": [
+          1956115,
+          4490003,
+          4329619
+        ],
+        "total_unordered_pairs": 31996000,
+        "witness_box_distance_tests": 51882618,
+        "witness_descent_steps": 25941309,
+        "witness_searches": 1576076
+      },
+      "front_callback_ms": [
+        1122.164385,
+        1122.164385
+      ],
+      "mode": "samples",
+      "n": 8000,
+      "q2_residual_fraction": 0.061136235779472435,
+      "repetitions": 1,
+      "s": 8,
+      "total_ms": [
+        1126.961125,
+        1126.961125
+      ]
+    },
+    {
+      "dataset": "single_000000",
+      "discrete": {
+        "emitted_factor_sites": 13812684,
+        "emitted_rectangles": 1703594,
+        "lane_rectangles": [
+          1703594,
+          1703594,
+          1703594
+        ],
+        "product_visits": 3415188,
+        "proposed_sites": 0,
+        "residual_pair_mass": [
+          31996000,
+          31996000,
+          31996000
+        ],
+        "total_unordered_pairs": 31996000,
+        "witness_box_distance_tests": 0,
+        "witness_descent_steps": 0,
+        "witness_searches": 0
+      },
+      "front_callback_ms": [
+        162.993196,
+        162.993196
+      ],
+      "mode": "pure",
+      "n": 8000,
+      "q2_residual_fraction": 1.0,
+      "repetitions": 1,
+      "s": 10,
+      "total_ms": [
+        169.077295,
+        169.077295
+      ]
+    },
+    {
+      "dataset": "single_000000",
+      "discrete": {
+        "emitted_factor_sites": 3171219,
+        "emitted_rectangles": 769747,
+        "lane_rectangles": [
+          513842,
+          731761,
+          690087
+        ],
+        "product_visits": 1933334,
+        "proposed_sites": 19019872,
+        "residual_pair_mass": [
+          1887124,
+          4175603,
+          3972756
+        ],
+        "total_unordered_pairs": 31996000,
+        "witness_box_distance_tests": 62852138,
+        "witness_descent_steps": 31426069,
+        "witness_searches": 1917334
+      },
+      "front_callback_ms": [
+        1403.763269,
+        1403.763269
+      ],
+      "mode": "samples",
+      "n": 8000,
+      "q2_residual_fraction": 0.058979997499687464,
+      "repetitions": 1,
+      "s": 10,
+      "total_ms": [
+        1408.530306,
+        1408.530306
+      ]
+    },
+    {
+      "dataset": "single_000000",
+      "discrete": {
+        "emitted_factor_sites": 16168551,
+        "emitted_rectangles": 2225619,
+        "lane_rectangles": [
+          2225619,
+          2225619,
+          2225619
+        ],
+        "product_visits": 4459238,
+        "proposed_sites": 0,
+        "residual_pair_mass": [
+          31996000,
+          31996000,
+          31996000
+        ],
+        "total_unordered_pairs": 31996000,
+        "witness_box_distance_tests": 0,
+        "witness_descent_steps": 0,
+        "witness_searches": 0
+      },
+      "front_callback_ms": [
+        227.68258,
+        227.68258
+      ],
+      "mode": "pure",
+      "n": 8000,
+      "q2_residual_fraction": 1.0,
+      "repetitions": 1,
+      "s": 12,
+      "total_ms": [
+        233.365905,
+        233.365905
+      ]
+    },
+    {
+      "dataset": "single_000000",
+      "discrete": {
+        "emitted_factor_sites": 3417559,
+        "emitted_rectangles": 891598,
+        "lane_rectangles": [
+          579042,
+          844357,
+          790974
+        ],
+        "product_visits": 2236760,
+        "proposed_sites": 22032196,
+        "residual_pair_mass": [
+          1845352,
+          3982072,
+          3757843
+        ],
+        "total_unordered_pairs": 31996000,
+        "witness_box_distance_tests": 72534802,
+        "witness_descent_steps": 36267401,
+        "witness_searches": 2220760
+      },
+      "front_callback_ms": [
+        1641.971794,
+        1641.971794
+      ],
+      "mode": "samples",
+      "n": 8000,
+      "q2_residual_fraction": 0.057674459307413425,
+      "repetitions": 1,
+      "s": 12,
+      "total_ms": [
+        1646.841962,
+        1646.841962
+      ]
+    },
+    {
+      "dataset": "single_000000",
+      "discrete": {
+        "emitted_factor_sites": 30188898,
+        "emitted_rectangles": 2630229,
+        "lane_rectangles": [
+          2630229,
+          2630229,
+          2630229
+        ],
+        "product_visits": 5276458,
+        "proposed_sites": 0,
+        "residual_pair_mass": [
+          127992000,
+          127992000,
+          127992000
+        ],
+        "total_unordered_pairs": 127992000,
+        "witness_box_distance_tests": 0,
+        "witness_descent_steps": 0,
+        "witness_searches": 0
+      },
+      "front_callback_ms": [
+        255.857866,
+        255.857866
+      ],
+      "mode": "pure",
+      "n": 16000,
+      "q2_residual_fraction": 1.0,
+      "repetitions": 1,
+      "s": 8,
+      "total_ms": [
+        267.317213,
+        267.317213
+      ]
+    },
+    {
+      "dataset": "single_000000",
+      "discrete": {
+        "emitted_factor_sites": 6276724,
+        "emitted_rectangles": 1313696,
+        "lane_rectangles": [
+          876197,
+          1250542,
+          1194060
+        ],
+        "product_visits": 3323454,
+        "proposed_sites": 32630706,
+        "residual_pair_mass": [
+          4294798,
+          11951285,
+          11928501
+        ],
+        "total_unordered_pairs": 127992000,
+        "witness_box_distance_tests": 115793512,
+        "witness_descent_steps": 57896756,
+        "witness_searches": 3291454
+      },
+      "front_callback_ms": [
+        2472.854631,
+        2472.854631
+      ],
+      "mode": "samples",
+      "n": 16000,
+      "q2_residual_fraction": 0.033555206575410966,
+      "repetitions": 1,
+      "s": 8,
+      "total_ms": [
+        2484.648814,
+        2484.648814
+      ]
+    },
+    {
+      "dataset": "single_000000",
+      "discrete": {
+        "emitted_factor_sites": 76601388,
+        "emitted_rectangles": 5245477,
+        "lane_rectangles": [
+          5245477,
+          5245477,
+          5245477
+        ],
+        "product_visits": 10522954,
+        "proposed_sites": 0,
+        "residual_pair_mass": [
+          511984000,
+          511984000,
+          511984000
+        ],
+        "total_unordered_pairs": 511984000,
+        "witness_box_distance_tests": 0,
+        "witness_descent_steps": 0,
+        "witness_searches": 0
+      },
+      "front_callback_ms": [
+        491.344605,
+        491.344605
+      ],
+      "mode": "pure",
+      "n": 32000,
+      "q2_residual_fraction": 1.0,
+      "repetitions": 1,
+      "s": 8,
+      "total_ms": [
+        513.205551,
+        513.205551
+      ]
+    },
+    {
+      "dataset": "single_000000",
+      "discrete": {
+        "emitted_factor_sites": 13369907,
+        "emitted_rectangles": 2580984,
+        "lane_rectangles": [
+          1700300,
+          2453542,
+          2364989
+        ],
+        "product_visits": 6530586,
+        "proposed_sites": 64090034,
+        "residual_pair_mass": [
+          9264177,
+          33392450,
+          34102956
+        ],
+        "total_unordered_pairs": 511984000,
+        "witness_box_distance_tests": 242045266,
+        "witness_descent_steps": 121022633,
+        "witness_searches": 6466586
+      },
+      "front_callback_ms": [
+        4875.824357,
+        4875.824357
+      ],
+      "mode": "samples",
+      "n": 32000,
+      "q2_residual_fraction": 0.01809466116128629,
+      "repetitions": 1,
+      "s": 8,
+      "total_ms": [
+        4896.971144,
+        4896.971144
+      ]
+    },
+    {
+      "dataset": "single_000000",
+      "discrete": {
+        "emitted_factor_sites": 137243447,
+        "emitted_rectangles": 8141679,
+        "lane_rectangles": [
+          8141679,
+          8141679,
+          8141679
+        ],
+        "product_visits": 16333358,
+        "proposed_sites": 0,
+        "residual_pair_mass": [
+          1249975000,
+          1249975000,
+          1249975000
+        ],
+        "total_unordered_pairs": 1249975000,
+        "witness_box_distance_tests": 0,
+        "witness_descent_steps": 0,
+        "witness_searches": 0
+      },
+      "front_callback_ms": [
+        803.92073,
+        1106.101954
+      ],
+      "mode": "pure",
+      "n": 50000,
+      "q2_residual_fraction": 1.0,
+      "repetitions": 2,
+      "s": 8,
+      "total_ms": [
+        838.779854,
+        1142.844281
+      ]
+    },
+    {
+      "dataset": "single_000000",
+      "discrete": {
+        "emitted_factor_sites": 21833054,
+        "emitted_rectangles": 4043611,
+        "lane_rectangles": [
+          2657844,
+          3840987,
+          3723339
+        ],
+        "product_visits": 10154928,
+        "proposed_sites": 99654096,
+        "residual_pair_mass": [
+          19820147,
+          66308629,
+          70520482
+        ],
+        "total_unordered_pairs": 1249975000,
+        "witness_box_distance_tests": 393743958,
+        "witness_descent_steps": 196871979,
+        "witness_searches": 10054928
+      },
+      "front_callback_ms": [
+        7810.032566,
+        10475.867916
+      ],
+      "mode": "samples",
+      "n": 50000,
+      "q2_residual_fraction": 0.015856434728694573,
+      "repetitions": 2,
+      "s": 8,
+      "total_ms": [
+        7847.287541,
+        10512.96685
+      ]
+    },
+    {
+      "dataset": "single_000100",
+      "discrete": {
+        "emitted_factor_sites": 131927490,
+        "emitted_rectangles": 7721161,
+        "lane_rectangles": [
+          7721161,
+          7721161,
+          7721161
+        ],
+        "product_visits": 15492322,
+        "proposed_sites": 0,
+        "residual_pair_mass": [
+          1249975000,
+          1249975000,
+          1249975000
+        ],
+        "total_unordered_pairs": 1249975000,
+        "witness_box_distance_tests": 0,
+        "witness_descent_steps": 0,
+        "witness_searches": 0
+      },
+      "front_callback_ms": [
+        987.931562,
+        1136.157439
+      ],
+      "mode": "pure",
+      "n": 50000,
+      "q2_residual_fraction": 1.0,
+      "repetitions": 2,
+      "s": 8,
+      "total_ms": [
+        1030.731818,
+        1193.770743
+      ]
+    },
+    {
+      "dataset": "single_000100",
+      "discrete": {
+        "emitted_factor_sites": 18897939,
+        "emitted_rectangles": 3705082,
+        "lane_rectangles": [
+          2521427,
+          3527674,
+          3394378
+        ],
+        "product_visits": 9353560,
+        "proposed_sites": 91718918,
+        "residual_pair_mass": [
+          16584556,
+          65261954,
+          70658226
+        ],
+        "total_unordered_pairs": 1249975000,
+        "witness_box_distance_tests": 354716914,
+        "witness_descent_steps": 177358457,
+        "witness_searches": 9253560
+      },
+      "front_callback_ms": [
+        7978.134164,
+        8328.068217
+      ],
+      "mode": "samples",
+      "n": 50000,
+      "q2_residual_fraction": 0.013267910158203165,
+      "repetitions": 2,
+      "s": 8,
+      "total_ms": [
+        8051.206324,
+        8368.71473
+      ]
+    },
+    {
+      "dataset": "single_000200",
+      "discrete": {
+        "emitted_factor_sites": 122338915,
+        "emitted_rectangles": 7973108,
+        "lane_rectangles": [
+          7973108,
+          7973108,
+          7973108
+        ],
+        "product_visits": 15996216,
+        "proposed_sites": 0,
+        "residual_pair_mass": [
+          1249975000,
+          1249975000,
+          1249975000
+        ],
+        "total_unordered_pairs": 1249975000,
+        "witness_box_distance_tests": 0,
+        "witness_descent_steps": 0,
+        "witness_searches": 0
+      },
+      "front_callback_ms": [
+        776.737053,
+        1037.464889
+      ],
+      "mode": "pure",
+      "n": 50000,
+      "q2_residual_fraction": 1.0,
+      "repetitions": 2,
+      "s": 8,
+      "total_ms": [
+        810.958913,
+        1075.572498
+      ]
+    },
+    {
+      "dataset": "single_000200",
+      "discrete": {
+        "emitted_factor_sites": 21157340,
+        "emitted_rectangles": 4023314,
+        "lane_rectangles": [
+          2749893,
+          3838371,
+          3681020
+        ],
+        "product_visits": 10063296,
+        "proposed_sites": 98816927,
+        "residual_pair_mass": [
+          38412850,
+          91490305,
+          94784492
+        ],
+        "total_unordered_pairs": 1249975000,
+        "witness_box_distance_tests": 378421858,
+        "witness_descent_steps": 189210929,
+        "witness_searches": 9963296
+      },
+      "front_callback_ms": [
+        9008.624364,
+        10397.232479
+      ],
+      "mode": "samples",
+      "n": 50000,
+      "q2_residual_fraction": 0.030730894617892357,
+      "repetitions": 2,
+      "s": 8,
+      "total_ms": [
+        9055.506882,
+        10459.651567
+      ]
+    }
+  ],
+  "kmax": 10,
+  "lane_array_order": [
+    2,
+    3,
+    4
+  ],
+  "product_commit": "da366f7faab86d184702c81945867537620fcd0e",
+  "public_status": "not_claimed",
+  "rows": 36,
+  "schema": "mhgp8_lidar_front_summary_v1",
+  "scope": "local_front_callback_only_no_census_or_full_tower",
+  "timing_aggregation": "observed_min_max_not_confidence_interval",
+  "timing_unit": "ms"
+}

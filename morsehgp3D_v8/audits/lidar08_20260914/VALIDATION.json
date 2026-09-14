@@ -1,0 +1,162 @@
+{
+  "schema": "mhgp8_lidar_delivery_validation_v1",
+  "status": "passed",
+  "started_utc": "2026-09-14T09:05:43.919886+00:00",
+  "scope": "receipt_validation_and_documentation_no_new_measurement",
+  "runs": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/audits/lidar08_20260914/measure_front.py",
+        "--validate",
+        "morsehgp3D_v8/audits/lidar08_20260914/campaign_pilot"
+      ],
+      "returncode": 0,
+      "stdout": "{\"status\": \"passed\", \"rows\": 4, \"plan\": \"pilot\"}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/audits/lidar08_20260914/measure_front.py",
+        "--validate",
+        "morsehgp3D_v8/audits/lidar08_20260914/campaign_growth"
+      ],
+      "returncode": 0,
+      "stdout": "{\"status\": \"passed\", \"rows\": 8, \"plan\": \"growth\"}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/audits/lidar08_20260914/measure_front.py",
+        "--validate",
+        "morsehgp3D_v8/audits/lidar08_20260914/campaign_check50k"
+      ],
+      "returncode": 0,
+      "stdout": "{\"status\": \"passed\", \"rows\": 16, \"plan\": \"check50k\"}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/audits/lidar08_20260914/measure_front.py",
+        "--validate",
+        "morsehgp3D_v8/audits/lidar08_20260914/campaign_separation"
+      ],
+      "returncode": 0,
+      "stdout": "{\"status\": \"passed\", \"rows\": 8, \"plan\": \"separation\"}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/audits/lidar08_20260914/measure_front.py",
+        "--validate",
+        "morsehgp3D_v8/audits/lidar08_20260914/campaign_pilot"
+      ],
+      "returncode": 0,
+      "stdout": "{\"status\": \"passed\", \"rows\": 4, \"plan\": \"pilot\"}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/audits/lidar08_20260914/measure_front.py",
+        "--validate",
+        "morsehgp3D_v8/audits/lidar08_20260914/campaign_growth"
+      ],
+      "returncode": 0,
+      "stdout": "{\"status\": \"passed\", \"rows\": 8, \"plan\": \"growth\"}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/audits/lidar08_20260914/measure_front.py",
+        "--validate",
+        "morsehgp3D_v8/audits/lidar08_20260914/campaign_check50k"
+      ],
+      "returncode": 0,
+      "stdout": "{\"status\": \"passed\", \"rows\": 16, \"plan\": \"check50k\"}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/audits/lidar08_20260914/measure_front.py",
+        "--validate",
+        "morsehgp3D_v8/audits/lidar08_20260914/campaign_separation"
+      ],
+      "returncode": 0,
+      "stdout": "{\"status\": \"passed\", \"rows\": 8, \"plan\": \"separation\"}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tools/check_docs.py"
+      ],
+      "returncode": 0,
+      "stdout": "Validated 544 active Markdown files.\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tools/check_implementation_status.py"
+      ],
+      "returncode": 0,
+      "stdout": "Validated 20 implementation phases and their gates.\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "morsehgp3D_v8/audits/DIALOGUE_COURANT.md"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-c",
+        "from pathlib import Path; from tools.check_docs import validate; paths=[Path('morsehgp3D_v8/audits/DIALOGUE_COURANT.md').resolve(),Path('morsehgp3D_v8/audits/lidar08_20260914/README.md').resolve()]; errors=[error for path in paths for error in validate(path)]; print(errors); raise SystemExit(bool(errors))"
+      ],
+      "returncode": 0,
+      "stdout": "[]\n",
+      "stderr": ""
+    }
+  ],
+  "source_pins": {
+    "morsehgp3D_v8/audits/lidar08_20260914/prepare_inputs.py": "dcf92c9204d3c17a0b70e9a1d17d6b6d91f51bc15586fdc5ce0d12107ae6a9e5",
+    "morsehgp3D_v8/audits/lidar08_20260914/measure_front.py": "94db240108e153bc317bd81350065cf5c1f6c67ad3450d476bea67e4def22e95",
+    "morsehgp3D_v8/audits/lidar08_20260914/front_input_probe.cpp": "c4aea05be88d2a07c775a926fdb7f525b3592d6968bcd5f0d54328bc3a553bcb",
+    "morsehgp3D_v8/audits/lidar08_20260914/README.md": "df6abbc22539793c2e225bc8283fd642067e180d06fb48820a8187e647142551",
+    "morsehgp3D_v8/audits/lidar08_20260914/INPUTS.json": "51cd24b2188cc0db526f0fc593852e7aa4c3d6985e320e2b152e4b879d9e103c",
+    "morsehgp3D_v8/audits/lidar08_20260914/SUMMARY.json": "df0d6503852d02d06acc77ec970f13cd35d817b99264a16ac87c998248e167bb",
+    "morsehgp3D_v8/audits/lidar08_20260914/PREPARATION_CHECKS.json": "220e84e4b21546429b6a2cac154a5c4a8264e0451dfa6a4e6af3eadc070c1980",
+    "morsehgp3D_v8/audits/DIALOGUE_COURANT.md": "d2409f78100d15f8466d7004abc4b18951ebf3c9d33cfaf6d75edf27d9ae3cb8"
+  },
+  "finished_utc": "2026-09-14T09:05:46.127372+00:00"
+}

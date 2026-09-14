@@ -1,0 +1,104 @@
+{
+  "allowed_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "backend": "cpu_reference",
+  "closure_inputs": {
+    ".build/front_input_probe": "e626ee54d9435cf5eab71bfc1e9d8e734b639db5044a9272fc7ef329c7aa16ed",
+    "BUILD.json": "eb350167e875e7bbbd5d289e16ad3c0fe3db694fdbe0bad4a6b29a56879d7f74",
+    "FETCH_MANIFEST.json": "0cf23436a864f5bc40e509abfc49ae48d372a01c6693bf9fc99d5354946164db",
+    "prepare_inputs.py": "dcf92c9204d3c17a0b70e9a1d17d6b6d91f51bc15586fdc5ce0d12107ae6a9e5",
+    "prepared/MANIFEST.json": "52cb29679b6ff135508910d176a1450cbea7c96449e30f965166f232d979edc5",
+    "prepared/overlap_5/n16000.u16le": "94a9d864f28d47e9f03f14266d30ffd62b263dea99ff1a4dde64ad6c66fca4ce",
+    "prepared/overlap_5/n32000.u16le": "06443b18f34c6ad47de95821c6c0d5dce820683e576febee313cf2eccc4e8c8d",
+    "prepared/single_000000/n16000.u16le": "fbd31be0f4de345b1b7f027a6a9536e6f0e776c46f6caf6a4f3b82f91d4e8595",
+    "prepared/single_000000/n32000.u16le": "ac03426026406e79c154a557b91f054f815237cbd69a61c9a1d4c0e9e0993550",
+    "source_snapshot.zip": "e574e19d5dd8bf1d8dd15da3deeb6cc999d38acf9c92b43cf83f4f1ea8266120"
+  },
+  "command": [
+    "morsehgp3D_v8/audits/lidar08_20260914/measure_front.py",
+    "--plan",
+    "growth"
+  ],
+  "execution_order": "pure,samples then samples,pure for repeat two",
+  "matrix": [
+    [
+      "single_000000",
+      16000,
+      8,
+      0,
+      "pure"
+    ],
+    [
+      "single_000000",
+      16000,
+      8,
+      0,
+      "samples"
+    ],
+    [
+      "single_000000",
+      32000,
+      8,
+      0,
+      "pure"
+    ],
+    [
+      "single_000000",
+      32000,
+      8,
+      0,
+      "samples"
+    ],
+    [
+      "overlap_5",
+      16000,
+      8,
+      0,
+      "pure"
+    ],
+    [
+      "overlap_5",
+      16000,
+      8,
+      0,
+      "samples"
+    ],
+    [
+      "overlap_5",
+      32000,
+      8,
+      0,
+      "pure"
+    ],
+    [
+      "overlap_5",
+      32000,
+      8,
+      0,
+      "samples"
+    ]
+  ],
+  "mode": "audit_independant_math_and_architecture",
+  "phase": "exploration_v8_hors_registre",
+  "plan": "growth",
+  "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+  "probe": ".build/front_input_probe",
+  "profile": "quantized_u16_input_only",
+  "public_status": "not_claimed",
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "runner_sha256": "94db240108e153bc317bd81350065cf5c1f6c67ad3450d476bea67e4def22e95",
+  "schema": "mhgp8_real_lidar_front_campaign_v1",
+  "scope": "local_front_only_on_unique_quantized_real_returns",
+  "selected_cpu": 7,
+  "started_utc": "2026-09-14T08:47:28.638833+00:00",
+  "timeout_policy": "failed_campaign_no_truncated_result",
+  "timeout_seconds": 180
+}

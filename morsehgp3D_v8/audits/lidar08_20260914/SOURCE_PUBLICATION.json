@@ -1,0 +1,72 @@
+{
+  "schema": "mhgp8_lidar_source_publication_v1",
+  "commit": "da366f7faab86d184702c81945867537620fcd0e",
+  "source_pins": {
+    "morsehgp3D_v8/oracle/p0_oracle.hpp": {
+      "expected": "6f50a553df522c59dd047ecb82f61b70c9aff1ad3e351c243e5c1bf387c0e674",
+      "published": "6f50a553df522c59dd047ecb82f61b70c9aff1ad3e351c243e5c1bf387c0e674"
+    },
+    "morsehgp3D_v8/src/core/types.hpp": {
+      "expected": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+      "published": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b"
+    },
+    "morsehgp3D_v8/src/pipeline/axis_q2.cpp": {
+      "expected": "8c91d5c9ca4427cf20e0909a5f35616ab76c9dc387268e7a6e28511de9e3e61a",
+      "published": "8c91d5c9ca4427cf20e0909a5f35616ab76c9dc387268e7a6e28511de9e3e61a"
+    },
+    "morsehgp3D_v8/src/pipeline/axis_q2.hpp": {
+      "expected": "5d0022c7776b1c382f65e5bff9fe9e125c81c701c08a0d8db8e4e40672c4cac4",
+      "published": "5d0022c7776b1c382f65e5bff9fe9e125c81c701c08a0d8db8e4e40672c4cac4"
+    },
+    "morsehgp3D_v8/src/pipeline/local_credits.cpp": {
+      "expected": "0d069aca65dcffc96bb26d55874fdb34b2748eb5f0b956a991d584d928ab1392",
+      "published": "0d069aca65dcffc96bb26d55874fdb34b2748eb5f0b956a991d584d928ab1392"
+    },
+    "morsehgp3D_v8/src/pipeline/local_credits.hpp": {
+      "expected": "a68fed7a40041ddc76b2a401d35cdafeaa66711ab3cd1d79ff41f3666b29a3d9",
+      "published": "a68fed7a40041ddc76b2a401d35cdafeaa66711ab3cd1d79ff41f3666b29a3d9"
+    },
+    "morsehgp3D_v8/src/pipeline/prepared_cloud.cpp": {
+      "expected": "accd0ec990e81e0352d37272ac5099d50fa97065edbb68864c1dcf8b5631afb7",
+      "published": "accd0ec990e81e0352d37272ac5099d50fa97065edbb68864c1dcf8b5631afb7"
+    },
+    "morsehgp3D_v8/src/pipeline/prepared_cloud.hpp": {
+      "expected": "2808e4e4609cbc11800894cf43824c1a6a7df1f2ca6e27931561848b9cde8352",
+      "published": "2808e4e4609cbc11800894cf43824c1a6a7df1f2ca6e27931561848b9cde8352"
+    },
+    "morsehgp3D_v8/src/pipeline/q2_census.cpp": {
+      "expected": "ea75eea92489100d864839989dbaa1b37e34359e9023acf3726ea6cbcc60de5b",
+      "published": "ea75eea92489100d864839989dbaa1b37e34359e9023acf3726ea6cbcc60de5b"
+    },
+    "morsehgp3D_v8/src/pipeline/q2_census.hpp": {
+      "expected": "4b8bd8c0680fb10d41e6fc5ea38ff8e9215b006714f5013f2d4a02596b64fe03",
+      "published": "4b8bd8c0680fb10d41e6fc5ea38ff8e9215b006714f5013f2d4a02596b64fe03"
+    },
+    "morsehgp3D_v8/src/pipeline/tube_credits.hpp": {
+      "expected": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+      "published": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c"
+    },
+    "morsehgp3D_v8/src/spindle/predicates.hpp": {
+      "expected": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+      "published": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+    },
+    "morsehgp3D_v8/src/spindle/q2_prepared_bounds.hpp": {
+      "expected": "7bb46b4b7af3beede9bc2fc8926bafda9c900eb573671583206a6d94ffac5d21",
+      "published": "7bb46b4b7af3beede9bc2fc8926bafda9c900eb573671583206a6d94ffac5d21"
+    },
+    "morsehgp3D_v8/src/wspd/front.cpp": {
+      "expected": "1459d0a2e01743e2f4e14e03de054e35dd204d2b9d34467e9f59d61fa1a4a162",
+      "published": "1459d0a2e01743e2f4e14e03de054e35dd204d2b9d34467e9f59d61fa1a4a162"
+    },
+    "morsehgp3D_v8/src/wspd/front.hpp": {
+      "expected": "0123f753b9f66d1cb1782aca4b5f5f88dba6f4353925c81c3d52b9726f4b9b9c",
+      "published": "0123f753b9f66d1cb1782aca4b5f5f88dba6f4353925c81c3d52b9726f4b9b9c"
+    },
+    "morsehgp3D_v8/tests/wspd_front_gate.cpp": {
+      "expected": "9d1d3a56043c9a5a3d3b12fa0f12f53d8ca7420586a9f77f42089c4b26e7c3ac",
+      "published": "9d1d3a56043c9a5a3d3b12fa0f12f53d8ca7420586a9f77f42089c4b26e7c3ac"
+    }
+  },
+  "all_match": true,
+  "note": "publication match only; audit captures retain their own commands and proof scope"
+}
