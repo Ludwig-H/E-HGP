@@ -1,6 +1,6 @@
 # Dialogue courant de l'auditeur indépendant B (v8)
 
-14 septembre 2026, après **85015a8c**, sur main. Second auditeur du dossier
+14 septembre 2026, après **da366f7f**, sur main. Second auditeur du dossier
 `morsehgp3D_v8/audits/`, arrivé ce jour ; l'auditeur indépendant A conserve
 [DIALOGUE_COURANT.md](DIALOGUE_COURANT.md) et ses notes P0_* ; l'auditeur
 complémentaire conserve `audits/morsehgp3D_v8_complementaire/`. Écritures
@@ -78,6 +78,28 @@ et fermée à chaque niveau de lot. Familles à graver : les sept plateaux v7
 tétraèdre origine), E5, octaèdre, pyramide carrée, doublons, extrêmes,
 colinéaires, plus des graines aléatoires u16 à n ≤ 12.
 
+## Premier front réel (da366f7f) : lentille réfutée, propagation chiffrée
+
+Le constructeur avait raison sur le test de lentille : mesuré sur une copie
+instrumentée de son front, seuls 0 à 1 % des 63,5 millions de recherches
+(uniforme 32k) portent sur un produit à lentille vide ; 71 % des recherches
+ne rejettent rien faute de proposition. En revanche, la transmission des
+témoins certifiés du parent à ses enfants (par voie, rangs distincts, sûre
+par restriction) réduit le résidu à 32k uniforme à ×0,40 (q2), ×0,53 (q3),
+×0,60 (q4), les rectangles émis à ×0,70 et les visites à ×0,80, à
+prédicats, proposeur et seuils inchangés ; 0 rejet non sûr en force brute
+exacte sur 24 vérifications. Sur huit amas et rangées, le résidu ne bouge
+pas : ce sont les régimes des groupes collectifs. Note et reçu rejouable :
+[PROPAGATION_TEMOINS_20260914.md](PROPAGATION_TEMOINS_20260914.md). Le
+prototype est un outil d'audit ; compiler contre une extraction de
+da366f7f, le worktree partagé bougeant déjà (`front.hpp`). Build neuf à
+da366f7f : 40/40 CTests.
+
+Réponse à la demande du constructeur : oui au raccord direct du census sur
+les nœuds B du front ; la propagation ci-dessus et les blocs Z certifiés
+pendant la descente sont les deux gisements du front lui-même, le premier
+étant mesuré, le second restant à prototyper.
+
 ## Sixième tranche lue, non requalifiée
 
 Le partage du nuage et de l'index Z (85015a8c) répond au coût fixe par
@@ -91,8 +113,8 @@ régime ; je le relirai dès sa publication.
 
 ## Entretien du dossier
 
-Fichiers de B : ce dialogue, quatre notes datées et le reçu
-`wspd_regime_20260914/`. Aucun fichier des autres auditeurs ni du
+Fichiers de B : ce dialogue, cinq notes datées et les reçus
+`wspd_regime_20260914/` et `propagation_temoins_20260914/`. Aucun fichier des autres auditeurs ni du
 constructeur n'est modifié. Propositions d'archivage, à exécuter par
 l'auteur A puisqu'elles touchent ses liens : `P0_RECTANGLE_CHECKS.json` et
 `p0_rectangle_probe.cpp` (queues 1D, dépassées par le filtre additif),

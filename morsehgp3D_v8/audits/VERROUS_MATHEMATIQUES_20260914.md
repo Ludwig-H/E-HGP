@@ -154,12 +154,18 @@ quantité `h_minimum(U, V, {z})`, concave et séparable par axe. Pour deux
 cubes de côté w alignés et distants de T (bord à bord T − w), le milieu des
 centres est universel dès que `T − w > √2·w` ; en rayons de boîte, la
 condition `D > 2(1+√2)R` est suffisante pour deux boules, et les boîtes
-font mieux. Les paires frères de l'arbre radix, au départ des vagues, ont
-une lentille vide et ne peuvent être tuées : un test de lentille par
-produit évite d'y lancer la recherche d'index qui a coûté 5·10⁹ visites au
-front v7. Les kills n'ont lieu que dans la bande entre la lentille vide
-et la séparation à `s` ; c'est là que le front fusionné v7 réduisait
-3 435 133 rectangles purs à 754 686 terminaux sur l'uniforme 8k.
+font mieux. Le test est seulement **nécessaire** : une lentille non vide
+peut ne contenir aucun site (deux feuilles sœurs aux abscisses 0 et 100
+ont une lentille ouverte non vide sans site extérieur, comme le note le
+constructeur) ; et deux boîtes qui se touchent ont une lentille vide.
+Mesuré sur le premier front v8 (da366f7f, uniforme 32k, s=8, Kmax 10) :
+seuls 0,4 % des 63,5 millions de recherches portent sur un produit à
+lentille vide ; 71 % des recherches sur lentille non vide ne rejettent
+aucune voie. Le test de lentille n'est donc pas le levier de ce front ;
+le gisement est le proposeur et la perte des crédits partiels entre parent
+et enfants (voir [PROPAGATION_TEMOINS_20260914.md](PROPAGATION_TEMOINS_20260914.md)).
+Le front fusionné v7 réduisait 3 435 133 rectangles purs à 754 686
+terminaux sur l'uniforme 8k par ce même mécanisme de rejet précoce.
 
 **Coût : ne pas repartir de la racine.** Un enfant U'×V' a une lentille
 plus grande que son parent, donc les témoins certifiés du parent restent
