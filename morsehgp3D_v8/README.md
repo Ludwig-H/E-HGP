@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — crédits et census q2 partagés
+# Morse HGP 3D v8 — nuage et index partagés
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -33,6 +33,33 @@ Les mesures historiques citées restent v7.
 
 ## État exécutable
 
+La sixième tranche sépare [nuage global et rectangles](docs/P0_NUAGE_ET_INDEX_PARTAGES.md).
+Copie/unicité et index census Z sont payés une fois par nuage ; les boîtes
+des facteurs sont interrogées sans rescanner leurs coordonnées. Les
+**37 CTests passent en Release et sous Clang ASan/UBSan**. Les trois
+identités nuage, rectangle/seuil et ordre d'index restent distinguées.
+Les builds `v8_cloud_20260914` et `v8_cloud_sanitize_20260914` sont réservés
+à cette qualification, pas aux travaux suivants.
+
+Les [66 essais](receipts/cloud_reuse_20260914/README.md) confrontent R
+préparations globales à une seule, avec tout le travail local et la collecte.
+À 32k/R32/s8, le composant grille passe de 732–919 à 457–465 ms selon
+l'ordre ; le cas déséquilibré de 409–424 à 87–95 ms. La nappe reste proche
+de 16 s à cause du résidu accru par subdivision. Ce ne sont pas des tours.
+Les temps sont bruités ; les compteurs, eux, restent identiques entre bras.
+
+La préparation globale n'est plus répétée, mais **la chaîne n'est pas
+encore garantie sous-quadratique** : Pool/Axis gardent un terme Ω(R|B|)
+sur les rectangles A_i×B. Faire croître R avec n révèle ce coût ; le
+découpage peut aussi affaiblir les filtres et augmenter le résidu. Le
+prochain chantier doit traiter le vrai front, les petits facteurs et les
+préparations des facteurs. Les boîtes par plages originales sont un pont,
+pas le futur chemin WSPD par nœuds certifiés. Aucun GPU ni tour FULL,
+contrats G4 toujours ouverts. GCP non utilisé.
+
+Les paragraphes suivants sont l'historique des cinq tranches précédentes,
+avec leurs versions et mesures propres, non transférées au moteur courant.
+
 La cinquième tranche prépare les [bornes q2 par tâche](docs/P0_BORNES_PREPAREES_ET_PARALLELISATION.md)
 dans 48 octets, sans changer parcours, compteurs ni sorties. Les **34 CTests
 passent en Release et sous Clang ASan/UBSan**. Les
@@ -46,9 +73,6 @@ pas une preuve globale sous-quadratique. Prochaine priorité : partager
 nuage/index sur les rectangles et rendre les continuations distribuables,
 sans confondre identités de nuage, rectangle, permutation et index.
 Ni tour FULL ni GPU implémentés ; les contrats G4 restent ouverts.
-
-Les paragraphes suivants sont l'historique des quatre tranches précédentes,
-avec leurs versions et mesures propres, non transférées au moteur courant.
 
 La quatrième tranche, publiée à f4815cd4, implémente le [census q2 partagé](docs/P0_CENSUS_Q2_PARTAGE.md).
 L'état de recherche tient dans un groupe B, un compte et un curseur de
@@ -169,4 +193,4 @@ multi-millions. Les optimisations privées ultérieures n'ont pas leur
 nouvelle mesure 50k. La v8 démarre sur ces constats, sans statut hérité.
 
 Entrées de suivi : [passation](PASSATION.md), [état de l'audit](audits/ETAT_COURANT.md).
-GCP non utilisé pour l'audit d'ouverture et ces cinq tranches mono.
+GCP non utilisé pour l'audit d'ouverture et ces six tranches mono.

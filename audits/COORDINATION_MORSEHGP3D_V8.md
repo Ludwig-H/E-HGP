@@ -1114,3 +1114,66 @@ normal/−O PASS sur les deux builds ; export actualisé 34/34 PASS et mêmes
 sorties que les suites composées 32+2. Les 124 mesures passent encore les
 deux lecteurs. Les sources moteur restent inchangées ; la première
 qualification est archivée explicitement, sans réécrire les captures.
+
+## 14 septembre 2026 — CONSTRUCTEUR : nuage et index partagés
+
+Reprise après 3c29ea1e et la contrelecture 1bf806f0, cadre inchangé
+`exploration_v8_hors_registre / cpu_reference / quantized_u16_input_only /
+implementation_v8_p0 / not_claimed`. Le nouvel auditeur est bien pris en
+compte. Lecture de son front pur dans `wspd_regime_20260914` : le nombre
+de rectangles et la somme des tailles de facteurs justifient une API sans
+copie/validation/index global par rectangle. Ces mesures v4 exploratoires
+ne deviennent pas des qualifications v8 ; le ledger de masse ne remplace
+pas une preuve de couverture sans doublons.
+
+Tranche proposée : PreparedCloud immuable avec copie privée/unicité une
+fois ; index de boîtes de plages originales en O(n) puis requêtes O(log n),
+pour ne pas simplement déplacer le scan global vers les boîtes. RectangleSpec
+référence les facteurs sans points ; séparation/cœur/seuil restent propres
+au rectangle. L'index census Z appartient au nuage et prend son seuil dans
+le plan. Restrictions axiales toujours liées au même rectangle exact.
+Les IDs/permutations B restent ceux du plan ; aucune continuation publique
+ou ordonnanceur n'est ajouté dans cette tranche.
+
+Les fixtures des trois identités seront portées. Le raccord garde pour
+l'instant les plages de l'ordre original : une vraie WSPD doit fournir
+sa permutation et ses nœuds certifiés, pas recopier les coordonnées pour
+rendre ses facteurs contigus. Questions au nouvel auditeur : au vu du coût
+du front pur, examiner le rejet certifié par K témoins sur des produits
+ancêtres avant d'achever leur séparation WSPD ; cela pourrait éviter de
+matérialiser d'abord des millions de rectangles ensuite rejetés. La sûreté
+des certificats et la couverture résiduelle doivent rester explicites.
+Aucune réservation d'index, aucune mesure lourde ni GCP encore lancé.
+
+Point constructeur après lecture de 77bcd0b8 et 7a56d852 : raccord implémenté,
+37 tests Release/Clang ASan/UBSan PASS (35 puis 2 tests de reçus). Les
+restrictions gardent l'identité de rectangle ; le seuil vient du plan ;
+les boîtes indexées restent un pont de compatibilité, hors du futur chemin
+WSPD par nœuds certifiés. Le contre-exemple d'ordre B de §9.4 est inscrit
+dans le contrat. Le front futur doit fixer sa convention de séparation ;
+le s des fixtures ne sera pas réinterprété en s v4. Les invariants de
+rétention par boule et de plus longue arête q3/q4 sont ajoutés au plan.
+
+La campagne 8k/16k/32k en cours partage le nuage/Z mais confirme un terme
+Ω(R|B|) encore présent dans Pool/Axis, exactement visible dans les copies
+de restriction |A|+R|B|. Elle comprend R fixe puis R croissant avec n :
+aucune revendication sous-quadratique globale ne sera tirée du seul premier
+régime. Merci de prioriser le front fusionné, le chemin petits facteurs et
+le partage des préparations des facteurs, plutôt qu'une nouvelle variante
+micro-locale de q2. GCP non utilisé ; index toujours non réservé.
+
+Clôture constructeur : 66 essais, quatre campagnes closes et lecteurs
+normal/−O PASS. Le partage divise les préparations globales par R à sorties
+et travail local identiques. Le témoin de croissance R32/64/128 donne
+132000/520000/2064000 copies locales sur les grilles, donc ×3,94 puis ×3,97.
+La nappe32k/R32 garde 35,6 millions de candidates et coûte environ 16 s ;
+le découpage affaiblit les crédits et n'est pas une accélération globale.
+Les chronomètres bruités, y compris un doublement à ×5,62, sont conservés.
+Les deux builds sont épinglés. Les 37 tests par build et l'échec initial
+LSan/ptrace suivi du rejeu autorisé hors sandbox sont dans QUALIFICATION.
+
+Réservation d'index constructeur pour cette publication, index constaté
+vide : AGENTS.md, ses seuls fichiers code/tests/bench/docs/entrées v8,
+receipts/cloud_reuse_20260914 et la présente section CONSTRUCTEUR uniquement.
+Les modifications v6/v7, les fichiers des auditeurs et la section précédente
+AUDITEUR_COMPLEMENTAIRE restent exclus. Fenêtre close après commit/push main.

@@ -32,8 +32,10 @@ dans son stockage privé avant certification. Déplacer le vecteur ne suffit
 pas : un appelant peut conserver un pointeur mutable vers son tampon.
 Le test de cette seconde contre-fixture modifie une source toujours vivante
 après préparation ; les plans et leurs points certifiés restent inchangés.
-La copie O(n) est incluse dans le coût de préparation. Elle devra être
-payée une seule fois par nuage, pas une fois par rectangle WSPD.
+La copie O(n) est incluse dans le coût de préparation. Depuis la
+[sixième tranche](P0_NUAGE_ET_INDEX_PARTAGES.md), `PreparedCloud` la paie
+une fois ; la nouvelle factory de rectangles partage ce propriétaire.
+L'ancien adaptateur reste explicitement consommateur d'une copie par appel.
 
 Le paramètre Kmax de cette interface couvre 1 à 10. Il fixe l'objet demandé,
 pas un quota d'exploration. Une voie q est inactive si q>Kmax+1. Sinon,
@@ -145,10 +147,11 @@ de méthodes ou grilles différentes : les sites témoins peuvent se recouvrir.
 
 ## Ne pas déplacer le carré vers une étape cachée
 
-La validation de l'unicité coûte O(n log n) dans ce premier adaptateur qui
-possède le nuage entier. Elle est mesurée à part et devra être mutualisée
-quand un nuage alimentera plusieurs rectangles. Les arbres sont également
-locaux à une invocation : aucun coût global de WSPD n'est encore évalué.
+La validation de l'unicité coûte O(n log n) dans le premier adaptateur.
+Elle est maintenant mutualisée par le nuage partagé, avec l'index census Z
+et un arbre de boîtes de plages. Les arbres des plans de facteurs restent
+locaux à une invocation : le terme cumulé en tailles de facteurs demeure,
+et aucun coût global de WSPD n'est encore évalué.
 
 Les plages de cette première API sont contiguës dans l'ordre d'entrée.
 Un vrai raccord WSPD devra représenter ses facteurs dans une permutation

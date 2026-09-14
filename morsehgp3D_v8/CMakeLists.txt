@@ -9,7 +9,7 @@ include(CTest)
 option(MHGP8_SANITIZE "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 
 add_library(mhgp8_p0 STATIC src/pipeline/local_credits.cpp src/pipeline/axis_q2.cpp
-  src/pipeline/q2_census.cpp)
+  src/pipeline/q2_census.cpp src/pipeline/prepared_cloud.cpp)
 target_include_directories(mhgp8_p0 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_features(mhgp8_p0 PUBLIC cxx_std_20)
 set_target_properties(mhgp8_p0 PROPERTIES CXX_EXTENSIONS OFF)
@@ -29,10 +29,16 @@ add_executable(mhgp8_additive_probe bench/additive_probe.cpp)
 target_link_libraries(mhgp8_additive_probe PRIVATE mhgp8_p0)
 add_executable(mhgp8_q2_census_probe bench/q2_census_probe.cpp)
 target_link_libraries(mhgp8_q2_census_probe PRIVATE mhgp8_p0)
+add_executable(mhgp8_cloud_reuse_probe bench/cloud_reuse_probe.cpp)
+target_link_libraries(mhgp8_cloud_reuse_probe PRIVATE mhgp8_p0)
 
 if(BUILD_TESTING)
   # Boost arbitrary precision is used only by the bounded independent judge.
   find_package(Boost REQUIRED)
+  add_executable(mhgp8_cloud_owner_gate tests/cloud_owner_gate.cpp)
+  target_include_directories(mhgp8_cloud_owner_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  target_link_libraries(mhgp8_cloud_owner_gate PRIVATE mhgp8_p0)
+  add_test(NAME mhgp8_cloud_owner_gate COMMAND mhgp8_cloud_owner_gate --selftest)
   add_executable(mhgp8_p0_gate tests/p0_gate.cpp)
   target_include_directories(mhgp8_p0_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   target_include_directories(mhgp8_p0_gate SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
@@ -71,6 +77,12 @@ if(BUILD_TESTING)
   target_link_libraries(mhgp8_q2_prepared_bounds_gate PRIVATE mhgp8_p0)
   add_test(NAME mhgp8_q2_prepared_bounds_gate COMMAND mhgp8_q2_prepared_bounds_gate --selftest)
   find_package(Python3 COMPONENTS Interpreter REQUIRED)
+  add_test(NAME mhgp8_cloud_reuse_receipts_gate COMMAND ${Python3_EXECUTABLE} -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/cloud_reuse_receipts_gate.py"
+    --probe $<TARGET_FILE:mhgp8_cloud_reuse_probe> --selftest)
+  add_test(NAME mhgp8_cloud_reuse_receipts_gate_optimized COMMAND ${Python3_EXECUTABLE} -B -O
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/cloud_reuse_receipts_gate.py"
+    --probe $<TARGET_FILE:mhgp8_cloud_reuse_probe> --selftest)
   add_test(NAME mhgp8_q2_revision_comparison_gate COMMAND ${Python3_EXECUTABLE} -B
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/q2_revision_comparison_gate.py"
     --probe $<TARGET_FILE:mhgp8_q2_census_probe> --selftest)

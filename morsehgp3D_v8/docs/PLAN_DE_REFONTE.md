@@ -121,13 +121,20 @@ Le flux conserve les supports et les clés exactes ; la comparaison à Pool
 seul, la déduplication globale, la vraie WSPD et la tranche FULL minimale
 restent les raccords suivants, sans nouvelle préparation quadratique.
 
-Priorité suivante : nuage/index global partagé, puis vues de rectangles
-et résidus sans validation ni copie de n sites par rectangle. Le contexte
-rectangle/seuil, la permutation B et l'identité de l'index Z restent
-distincts de la seule appartenance au nuage. Le raccord Pool par préfixes
-et la suspension du parcours doivent partir de ces objets communs.
-Tester mono les reprises, puis plusieurs CPU, puis G4 : ne pas porter
-en parallèle les copies globales répétées de l'API de composant actuelle.
+Sixième tranche : [nuage/index global partagé](P0_NUAGE_ET_INDEX_PARTAGES.md),
+rectangles sans copie ni validation de n sites, et boîtes de plages
+en O(log n). Le contexte rectangle/seuil, la permutation B et l'identité
+de l'index Z restent distincts de la seule appartenance au nuage.
+**Priorité suivante : pilote de front réel et coût cumulé des facteurs.**
+Le terme Ω(R|B|) de Pool/Axis subsiste sur A_i×B ; les tests doivent faire
+croître R aussi, et pas uniquement n à R fixé. Ne pas paralléliser ce
+carré sans le traiter. Le nouvel audit du front pur montre des millions
+de petits rectangles : chemin sans préparation pour petits facteurs,
+permutation spatiale globale et rejets certifiés avant séparation complète
+sont à examiner ensemble. Fixer la convention s, différente de la v4,
+avant de comparer les WSPD s8/10/12. Le raccord Pool par préfixes et la
+suspension du parcours doivent partir des objets communs et de leur ordre
+exact. Tester mono les reprises, puis plusieurs CPU, puis G4.
 
 Les [consignes au futur développeur](VERROUS_ARCHITECTURE.md) détaillent
 les cinq verrous suivants : recherches de témoins répétées, interactions
@@ -174,6 +181,15 @@ annoncée comme telle, jamais transformée en preuve de complétude universelle.
 Un rectangle est une unité logique de preuve et de couverture ; il n'est
 pas nécessairement une unité physique de lancement GPU. Découper le travail
 en tuiles ne doit pas émettre plusieurs fois une paire ni perdre un crédit.
+
+Invariant précisé par le [nouvel auditeur B](../audits/DIALOGUE_AUDITEUR_B.md) :
+l'élimination est propre à une voie q, tandis que la rétention du catalogue
+porte sur la boule canonique. Une clé est conservée dès qu'une voie la
+conserve ; un rejet q3 ne doit pas effacer une boule admissible produite
+par q2. Les supports q3/q4 doivent être engendrés depuis leur **plus longue
+arête**, avec départage déterministe des égalités, car les bornes de fuseau
+emploient cette longueur. Ces invariants devront recevoir leurs fixtures
+lors du raccord du catalogue et des producteurs, encore absents.
 
 ## 3. Éliminer tôt les rectangles, sans payer plus que ce que l'on épargne
 

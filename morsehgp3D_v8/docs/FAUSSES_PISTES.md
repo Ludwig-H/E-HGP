@@ -133,6 +133,9 @@ Références : [fondements](../audits/FONDEMENTS_ET_OBJET.md).
 | Un petit ensemble de témoins règle à lui seul toute la complexité | Il peut laisser un grand nombre de candidates inutiles | Comparer les alternatives et payer aussi raffinement, candidates et aval |
 | s plus grand est toujours plus rapide | Moins d'indécision peut coûter plus de rectangles et de parcours | Comparaison s8/10/12 par phase et régime |
 | Une WSPD linéaire implique un travail linéaire sur ses facteurs | La somme des tailles visitées peut être quadratique | Preuve de coût des parcours et crédits réellement payés |
+| Partager le nuage rend automatiquement le multi-rectangles sous-quadratique | Pool/Axis gardent un terme Ω(R\|B\|) sur A_i×B ; les boîtes indexées ne le suppriment pas | Mesurer R fixe et R croissant, puis partager les préparations de facteurs ou changer le front |
+| Un préfixe reste compact dans n'importe quel ordre B | Il peut devenir une union linéaire de singletons dans un autre arbre | Lier couverture et arbre à leur ordre précis, ou payer la fragmentation |
+| Les valeurs s8 des préconditions v8 et du front v4 sont équivalentes | Les prédicats entiers de séparation diffèrent | Fixer une convention explicite avant la mesure de WSPD réelle |
 | Copier le compteur h d'un parent puis recompter ses sites | Double crédit possible avec les populations locales | Identifiants et disjonction vérifiables |
 | Les blocs positifs suffisent pour de gros facteurs | Ils peuvent échouer tard et payer encore le quadratique | Certificats négatifs, saturation, raffinement des crédits |
 | Forcer les histogrammes par blocs même sur facteurs minuscules | Les mesures uniformes montrent un surcoût | Sélection adaptative explicitement mesurée |

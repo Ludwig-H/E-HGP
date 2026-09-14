@@ -509,7 +509,11 @@ void plan_gate(Gate& gate) {
   // Check the non-consuming signature before retaining/writing any alias:
   // an old by-value consuming factory could otherwise destroy that buffer.
   using CopyingFactory = mhgp8::RectanglePtr (*)(const RectangleInput&, unsigned, unsigned);
-  gate.require(std::is_same_v<decltype(&mhgp8::prepare_rectangle), CopyingFactory>,
+  // Select the coordinate-owning adapter explicitly now that a second
+  // overload accepts an already certified cloud. This cast only compiles
+  // for the required const-reference (non-consuming) function signature.
+  gate.require(std::is_same_v<decltype(static_cast<CopyingFactory>(
+                   &mhgp8::prepare_rectangle)), CopyingFactory>,
                "rectangle factory can consume the source buffer behind mutable aliases");
   for (const auto strategy : {Strategy::Pool, Strategy::DualBlocks, Strategy::Tubes}) {
     auto source = owner_line;

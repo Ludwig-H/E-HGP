@@ -212,7 +212,7 @@ Output check_fixture(Gate& gate, const RectangleInput& input, unsigned kmax,
   const auto index = mhgp8::make_q2_census_index(owner);
   const auto local = mhgp8::make_credit_plan(owner, Lane::Q2, strategy);
   const auto plan = mhgp8::make_axis_q2_plan(owner, axis_mode, restrict_local ? &local : nullptr);
-  gate.require(&index->rectangle() == owner.get(), "global witness index changed its immutable owner");
+  gate.require(&index->cloud() == &owner->cloud(), "global witness index changed its immutable cloud");
   const auto preparation = index->work();
   gate.require(preparation.point_visits >= input.points.size() && preparation.nodes > 0 &&
                    preparation.nodes == 2 * input.points.size() - 1 && preparation.max_depth <= 48,
@@ -599,11 +599,12 @@ void ownership_and_rejections(Gate& gate) {
   auto index = mhgp8::make_q2_census_index(owner);
   auto plan = mhgp8::make_axis_q2_plan(owner, AxisQ2Mode::Additive);
   const auto* address = owner.get();
+  const auto* cloud_address = &owner->cloud();
   gate.require(owner->points().data() != input.points.data(), "census owner inherited a mutable input alias");
   for (auto& point : input.points) point = {65535, 65535, 65535};
   owner.reset();
   auto moved_index = std::move(index);
-  gate.require(!index && &moved_index->rectangle() == address && &plan.rectangle() == address,
+  gate.require(!index && &moved_index->cloud() == cloud_address && &plan.rectangle() == address,
                "moving the index handle lost the shared immutable owner");
   std::map<Pair, oracle::Census> expected;
   for (std::size_t a = original.a.first; a < original.a.last; ++a) {

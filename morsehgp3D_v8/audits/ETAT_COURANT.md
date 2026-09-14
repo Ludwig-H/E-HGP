@@ -3,7 +3,27 @@
 14 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
-État constructeur courant, cinquième tranche P0 :
+État constructeur courant, sixième tranche P0 :
+[nuage/index partagé](../docs/P0_NUAGE_ET_INDEX_PARTAGES.md),
+`cpu_reference`, `quantized_u16_input_only`, `implementation_v8_p0`,
+`not_claimed`. 37 CTests Release/Clang ASan/UBSan passent. Les identités
+nuage/rectangle/ordre sont préservées, la préparation globale est unique
+et les boîtes des facteurs sont obtenues en O(log n), sans scan local.
+Le terme Ω(R|B|) de Pool/Axis reste ouvert ; R doit croître avec n dans
+les tests, et pas seulement rester fixe. Le nouvel auditeur B précise le
+régime du front pur v4 et la différence de convention s, sans qualification
+v8 héritée. Pilote WSPD, préparations de facteurs, continuations, q3/q4,
+FULL et GPU restent ouverts. GCP non utilisé.
+
+Les [66 essais locaux](../receipts/cloud_reuse_20260914/README.md) passent
+les lecteurs normal/−O. Le partage divise le travail de préparation globale
+par R, mais R croissant donne ×3,94 puis ×3,97 sur les copies locales de
+restrictions des grilles. Les nappes subdivisées restent coûteuses ; cette
+capture ne clôt donc ni P0 ni le contrat de tour. Les temps locaux et les
+preuves de préparation sont distingués de toute qualification G4.
+
+## Historique : cinquième tranche P0 publiée à 3c29ea1e
+
 [bornes préparées](../docs/P0_BORNES_PREPAREES_ET_PARALLELISATION.md),
 `cpu_reference`, `quantized_u16_input_only`, `implementation_v8_p0`,
 `not_claimed`. Les 34 CTests Release et Clang ASan/UBSan passent ;

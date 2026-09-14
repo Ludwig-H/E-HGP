@@ -22,13 +22,22 @@ GCP non utilisé.
 
 Suivi du 14 septembre : les [bornes préparées](P0_BORNES_PREPAREES_ET_PARALLELISATION.md)
 factorisent une constante de coût, sans changer les visites ni clore B1.
-Avant la vraie WSPD, séparer le stockage/index global et les contextes de
-rectangles : l'API actuelle recopie/valide n sites par propriétaire et
-ne doit pas être appelée ainsi sur chaque rectangle. Les restrictions
+La [sixième tranche](P0_NUAGE_ET_INDEX_PARTAGES.md) sépare maintenant
+stockage/index global et contextes de rectangles ; le nouvel appel partagé
+ne recopie/valide plus n sites par rectangle. L'ancien adaptateur doit
+rester hors du chemin massif. Les restrictions
 de crédits exigent le même rectangle/seuil ; les plages B exigent leur
 permutation et les continuations leur index Z précis. Un même nuage
 ne suffit pas à autoriser ces réemplois. Le contrat de reprise doit aussi
 remplacer l'emprunt synchrone des buffers si l'émission devient asynchrone.
+
+Le partage global laisse un verrou mesurable : Pool et Axis parcourent
+encore B pour chaque A_i×B. Le seul compteur de copie de restriction vaut
+|A|+R|B| dans ce régime ; R et |B| proportionnels à n donnent un terme
+quadratique. La somme des facteurs et le vrai front avec rejets précoces
+doivent maintenant être traités, pas seulement l'index Z. Le nouvel
+[audit de régime WSPD](../audits/REGIME_WSPD_20260914.md) montre aussi la
+nécessité d'un chemin sans préparation lourde sur les petits facteurs.
 
 ## 1. Ordre des travaux et sens de « rédhibitoire »
 

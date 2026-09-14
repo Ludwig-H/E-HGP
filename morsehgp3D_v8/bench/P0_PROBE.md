@@ -251,3 +251,34 @@ les médianes de trois répétitions ; ce ne sont pas des mesures de vitesse.
 L'option de gate `--baseline-probe` permet aussi le différentiel réel avec
 l'ancien binaire. Les futures modifications du moteur demanderont une
 nouvelle filiation explicite, pas la réécriture de ces captures.
+
+## Partage du nuage et de l'index entre rectangles
+
+La sixième sonde partitionne A en R bandes contiguës non vides et conserve
+B entier. Elle couvre une fois A×B, sans générer de WSPD. Voir le
+[contrat de propriété et de coûts](../docs/P0_NUAGE_ET_INDEX_PARTAGES.md).
+
+```text
+mhgp8_cloud_reuse_probe n grid|sheet_full|skew kmax s rectangles fresh-first|shared-first
+```
+
+Le bras `fresh` prépare R fois le nuage et Z ; `shared` les prépare une
+fois. Les deux paient le même chemin Pool ∩ Additive, le census individuel,
+la collecte et le digest des supports. Un contexte est actif à la fois ;
+les destructions sont payées. Le temps de composant exclut la comparaison
+des bras et le rapport JSON, pas les copies ni l'émission du payload.
+Les capacités nuage/index sont distinctes du pic mémoire total non mesuré.
+
+```bash
+python3 -B morsehgp3D_v8/bench/run_cloud_reuse_matrix.py run --probe build/v8_new/mhgp8_cloud_reuse_probe --output morsehgp3D_v8/receipts/cloud_new/main_matrix --sizes 8000 16000 32000 --families grid sheet_full skew --kmax 10 --s 8 10 12 --rectangles 32
+python3 -B morsehgp3D_v8/bench/run_cloud_reuse_matrix.py check morsehgp3D_v8/receipts/cloud_new --summary
+```
+
+Les deux ordres sont capturés, puis résumés séparément. Le lecteur refuse
+les campagnes incomplètes, les changements de sources/bruts/binaire,
+les provenances hétérogènes et les sorties incohérentes entre partitions.
+Il vérifie notamment `restriction_credit_copies = |A|+R|B|` : ce travail
+local persiste malgré le partage global. Ajouter des campagnes séparées
+avec R proportionnel à n, par exemple (8k,32), (16k,64), (32k,128), pour
+ne pas dissimuler cette croissance. Aucun ratio local ne qualifie une tour
+ou une complexité générale ; s reste une précondition des rectangles.

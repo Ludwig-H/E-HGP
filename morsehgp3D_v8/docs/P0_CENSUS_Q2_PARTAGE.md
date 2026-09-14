@@ -107,9 +107,10 @@ en |B|, plus la profondeur de l'index Z.
 
 La croissance à n=8 000/16 000/32 000 qualifie les familles exécutées, pas
 une borne sous-quadratique uniforme. La lecture de chaque support accepté
-et de ses IDs a son propre coût de sortie. L'index est pour l'instant partagé
-entre les requêtes d'un propriétaire de rectangle ; le propriétaire global
-d'une vraie WSPD reste un raccord distinct. Les paramètres s8/10/12 de ces
+et de ses IDs a son propre coût de sortie. Depuis la
+[sixième tranche](P0_NUAGE_ET_INDEX_PARTAGES.md), l'index appartient au nuage
+et sert plusieurs rectangles/seuils ; le seuil vient du plan et non de Z.
+Le raccord à une vraie WSPD reste distinct. Les paramètres s8/10/12 de ces
 fixtures vérifient la séparation d'un rectangle fixé, sans mesurer encore
 trois décompositions Callahan–Kosaraju différentes.
 

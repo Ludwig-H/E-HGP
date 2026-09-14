@@ -87,6 +87,7 @@ struct Q2CensusResult {
 class Q2CensusIndex;
 using Q2CensusIndexPtr = std::shared_ptr<const Q2CensusIndex>;
 [[nodiscard]] Q2CensusIndexPtr make_q2_census_index(RectanglePtr rectangle);
+[[nodiscard]] Q2CensusIndexPtr make_q2_cloud_index(CloudPtr cloud);
 
 // An immutable index over EVERY point of this owner, not just A union B.
 // The owner is already validated; its coordinates are neither copied nor
@@ -97,8 +98,10 @@ class Q2CensusIndex final {
   Q2CensusIndex& operator=(const Q2CensusIndex&) = delete;
   Q2CensusIndex(Q2CensusIndex&&) = delete;
   Q2CensusIndex& operator=(Q2CensusIndex&&) = delete;
-  [[nodiscard]] const PreparedRectangle& rectangle() const noexcept { return *rectangle_; }
+  [[nodiscard]] const PreparedCloud& cloud() const noexcept { return *cloud_; }
   [[nodiscard]] const Q2IndexWork& work() const noexcept { return work_; }
+  // Vector capacities only, excluding the shared cloud and object metadata.
+  [[nodiscard]] std::size_t retained_bytes() const;
 
  private:
   static constexpr std::size_t absent = std::numeric_limits<std::size_t>::max();
@@ -109,11 +112,11 @@ class Q2CensusIndex final {
     std::size_t right{absent};
     std::size_t escape{absent};
   };
-  explicit Q2CensusIndex(RectanglePtr rectangle);
+  explicit Q2CensusIndex(CloudPtr cloud);
   [[nodiscard]] std::size_t build(Range range, u64 depth);
-  friend Q2CensusIndexPtr make_q2_census_index(RectanglePtr);
+  friend Q2CensusIndexPtr make_q2_cloud_index(CloudPtr);
   friend struct Q2CensusEngine;
-  RectanglePtr rectangle_;
+  CloudPtr cloud_;
   std::vector<std::size_t> order_;
   std::vector<Node> nodes_;
   Q2IndexWork work_;
@@ -121,7 +124,8 @@ class Q2CensusIndex final {
 
 // No initial credit parameter: all census counts start from zero. The axis
 // plan is only a prefilter; its core/local credits cannot be counted twice.
-// The two arguments must refer to exactly the same immutable owner. A moved
+// Index and plan must refer to the same immutable CLOUD. The threshold comes
+// from the plan's rectangle; the index has no rectangle, core or Kmax. A moved
 // axis plan, invalid mode, or empty callback is rejected before processing.
 // Borrowing contract: index, plan and consumer must remain alive and must not
 // be invalidated for the ENTIRE call, including callbacks (in particular, do

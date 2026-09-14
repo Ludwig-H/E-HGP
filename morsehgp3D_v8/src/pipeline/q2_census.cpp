@@ -80,11 +80,11 @@ using PowerBounds = Q2Bounds;
 
 }  // namespace
 
-Q2CensusIndex::Q2CensusIndex(RectanglePtr rectangle) : rectangle_(std::move(rectangle)) {
-  if (!rectangle_) {
-    throw std::invalid_argument("mhgp8 q2 index requires an owned rectangle");
+Q2CensusIndex::Q2CensusIndex(CloudPtr cloud) : cloud_(std::move(cloud)) {
+  if (!cloud_) {
+    throw std::invalid_argument("mhgp8 q2 index requires an immutable cloud");
   }
-  order_.resize(rectangle_->points().size());
+  order_.resize(cloud_->points().size());
   std::iota(order_.begin(), order_.end(), std::size_t{0});
   if (order_.empty()) {
     throw std::logic_error("mhgp8 certified rectangle has no sites");
@@ -93,7 +93,7 @@ Q2CensusIndex::Q2CensusIndex(RectanglePtr rectangle) : rectangle_(std::move(rect
 }
 
 std::size_t Q2CensusIndex::build(Range range, u64 depth) {
-  const auto points = rectangle_->points();
+  const auto points = cloud_->points();
   Box3 box = singleton_box(points[order_[range.first]]);
   for (std::size_t position = range.first; position < range.last; ++position) {
     counter_add(work_.point_visits);
@@ -152,7 +152,28 @@ std::size_t Q2CensusIndex::build(Range range, u64 depth) {
 }
 
 Q2CensusIndexPtr make_q2_census_index(RectanglePtr rectangle) {
-  return Q2CensusIndexPtr(new Q2CensusIndex(std::move(rectangle)));
+  if (!rectangle) {
+    throw std::invalid_argument("mhgp8 q2 index adapter requires an owned rectangle");
+  }
+  return make_q2_cloud_index(rectangle->cloud_ptr());
+}
+
+Q2CensusIndexPtr make_q2_cloud_index(CloudPtr cloud) {
+  return Q2CensusIndexPtr(new Q2CensusIndex(std::move(cloud)));
+}
+
+std::size_t Q2CensusIndex::retained_bytes() const {
+  constexpr auto maximum = std::numeric_limits<std::size_t>::max();
+  if (order_.capacity() > maximum / sizeof(std::size_t) ||
+      nodes_.capacity() > maximum / sizeof(Node)) {
+    throw std::overflow_error("mhgp8 q2 index capacity byte count overflow");
+  }
+  const auto orders = order_.capacity() * sizeof(std::size_t);
+  const auto nodes = nodes_.capacity() * sizeof(Node);
+  if (orders > maximum - nodes) {
+    throw std::overflow_error("mhgp8 q2 index retained byte count overflow");
+  }
+  return orders + nodes;
 }
 
 struct Q2CensusEngine {
@@ -176,8 +197,8 @@ struct Q2CensusEngine {
   Q2CensusEngine(const Q2CensusIndex& input_index, const AxisQ2Plan& input_plan,
                  const Q2CensusConsumer& input_consumer)
       : index(input_index), plan(input_plan), consumer(input_consumer),
-        points(input_index.rectangle().points()), b_order(input_plan.b_order()),
-        threshold(input_index.rectangle().kmax()) {
+        points(input_index.cloud().points()), b_order(input_plan.b_order()),
+        threshold(input_plan.rectangle().kmax()) {
     result.candidate_pairs = plan.candidate_pairs();
     result.work.input_descriptors = static_cast<u64>(plan.blocks().size());
   }
@@ -443,8 +464,8 @@ struct Q2CensusEngine {
 Q2CensusResult run_q2_census(const Q2CensusIndex& index, const AxisQ2Plan& plan,
                             Q2CensusMode mode, const Q2CensusConsumer& consumer) {
   const auto started = Clock::now();
-  if (&index.rectangle() != &plan.rectangle()) {
-    throw std::invalid_argument("mhgp8 q2 index and plan require the same owner");
+  if (&index.cloud() != &plan.rectangle().cloud()) {
+    throw std::invalid_argument("mhgp8 q2 index and plan require the same cloud");
   }
   if (mode != Q2CensusMode::Pairwise && mode != Q2CensusMode::SharedBlocks) {
     throw std::invalid_argument("mhgp8 q2 census mode is invalid");

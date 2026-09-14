@@ -17,18 +17,6 @@ namespace {
   return range.first <= id && id < range.last;
 }
 
-[[nodiscard]] Box3 bounds(std::span<const Point3> points, Range range) {
-  Box3 result{points[range.first], points[range.first]};
-  for (std::size_t id = range.first + 1; id < range.last; ++id) {
-    const auto& p = points[id];
-    result.low = {std::min(result.low.x, p.x), std::min(result.low.y, p.y),
-                  std::min(result.low.z, p.z)};
-    result.high = {std::max(result.high.x, p.x), std::max(result.high.y, p.y),
-                   std::max(result.high.z, p.z)};
-  }
-  return result;
-}
-
 [[nodiscard]] i64 diameter_squared(const Box3& box) {
   i64 value = 0;
   for (std::size_t axis = 0; axis < 3; ++axis) {
@@ -276,27 +264,54 @@ class DualTree {
 
 RectanglePtr prepare_rectangle(const RectangleInput& input, unsigned kmax,
                                unsigned separation_s) {
-  // A move does not revoke pointers previously taken by the caller. Certify
-  // only a private copy, then share this owner between immutable plans.
+  auto cloud = prepare_cloud(input.points);
+  auto result = PreparedRectangle::build(cloud, input.a, input.b,
+                                         input.core_candidates, kmax, separation_s);
+  // Compatibility adapter: its legacy Work includes the one fresh cloud's
+  // validation. Callers sharing a cloud use the overload below and charge
+  // CloudWork once, not these fields once per rectangle.
+  result->work_.validation_points = cloud->work().validation_points;
+  result->work_.uniqueness_comparisons = cloud->work().uniqueness_comparisons;
+  return result;
+}
+
+RectanglePtr prepare_rectangle(CloudPtr cloud, const RectangleSpec& input,
+                               unsigned kmax, unsigned separation_s) {
+  return PreparedRectangle::build(std::move(cloud), input.a, input.b,
+                                   input.core_candidates, kmax, separation_s);
+}
+
+std::shared_ptr<PreparedRectangle> PreparedRectangle::build(
+    CloudPtr cloud, Range a, Range b, std::span<const std::size_t> proposals,
+    unsigned kmax, unsigned separation_s) {
+  if (!cloud) {
+    throw std::invalid_argument("mhgp8 rectangle requires an immutable cloud");
+  }
   auto result = std::shared_ptr<PreparedRectangle>(new PreparedRectangle());
-  result->points_ = input.points;
-  result->a_ = input.a;
-  result->b_ = input.b;
+  result->cloud_ = std::move(cloud);
+  result->a_ = a;
+  result->b_ = b;
   result->kmax_ = kmax;
   result->separation_s_ = separation_s;
-  auto core_candidates = input.core_candidates;
+  std::vector<std::size_t> core_candidates(proposals.begin(), proposals.end());
   if (kmax == 0 || kmax > 10 || separation_s == 0) {
     throw std::invalid_argument("mhgp8 P0 requires Kmax in [1,10] and s>0");
   }
   const auto valid_range = [&result](Range range) {
-    return range.first < range.last && range.last <= result->points_.size();
+    return range.first < range.last && range.last <= result->points().size();
   };
   if (!valid_range(result->a_) || !valid_range(result->b_) ||
       (result->a_.first < result->b_.last && result->b_.first < result->a_.last)) {
     throw std::invalid_argument("mhgp8 requires nonempty disjoint in-range factors");
   }
-  result->box_a_ = bounds(result->points_, result->a_);
-  result->box_b_ = bounds(result->points_, result->b_);
+  const auto a_bounds = result->cloud().bounds(result->a_);
+  const auto b_bounds = result->cloud().bounds(result->b_);
+  result->box_a_ = a_bounds.box;
+  result->box_b_ = b_bounds.box;
+  counter_add(result->factor_box_visits_, a_bounds.node_visits);
+  counter_add(result->factor_box_visits_, b_bounds.node_visits);
+  counter_add(result->factor_box_steps_, a_bounds.steps);
+  counter_add(result->factor_box_steps_, b_bounds.steps);
   i64 gap2 = 0;
   for (std::size_t axis = 0; axis < 3; ++axis) {
     const auto& a = result->box_a_;
@@ -310,27 +325,13 @@ RectanglePtr prepare_rectangle(const RectangleInput& input, unsigned kmax,
   if (static_cast<i128>(gap2) < static_cast<i128>(separation_s) * separation_s * diameter2) {
     throw std::invalid_argument("mhgp8 rectangle fails declared box separation");
   }
-  std::vector<u64> keys;
-  keys.reserve(result->points_.size());
-  for (const auto& point : result->points_) {
-    counter_add(result->work_.validation_points);
-    keys.push_back((static_cast<u64>(point.x) << 32) |
-                   (static_cast<u64>(point.y) << 16) | point.z);
-  }
-  std::sort(keys.begin(), keys.end(), [&result](u64 a, u64 b) {
-    counter_add(result->work_.uniqueness_comparisons);
-    return a < b;
-  });
-  if (std::adjacent_find(keys.begin(), keys.end()) != keys.end()) {
-    throw std::invalid_argument("mhgp8 P0 requires distinct u16 sites");
-  }
   std::sort(core_candidates.begin(), core_candidates.end());
   if (std::adjacent_find(core_candidates.begin(), core_candidates.end()) !=
       core_candidates.end()) {
     throw std::invalid_argument("mhgp8 core proposals contain duplicate IDs");
   }
   for (const auto id : core_candidates) {
-    if (id >= result->points_.size() || contains(result->a_, id) || contains(result->b_, id)) {
+    if (id >= result->points().size() || contains(result->a_, id) || contains(result->b_, id)) {
       throw std::invalid_argument("mhgp8 core proposals must be outside both factors");
     }
   }
@@ -340,7 +341,7 @@ RectanglePtr prepare_rectangle(const RectangleInput& input, unsigned kmax,
       if (credit == result->threshold(lane)) {
         break;
       }
-      if (box_witness(lane, result->box_a_, result->box_b_, result->points_[id],
+      if (box_witness(lane, result->box_a_, result->box_b_, result->points()[id],
                        result->work_.predicates)) {
         ++credit;
       }

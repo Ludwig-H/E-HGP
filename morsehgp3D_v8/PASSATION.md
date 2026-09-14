@@ -1,10 +1,51 @@
-# Passation v8 — bornes préparées et prochain raccord massif
+# Passation v8 — partage global acquis, front réel et facteurs prioritaires
 
 14 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`. Aucun contrat de tour n'est encore acquis.
 
 ## À reprendre maintenant
+
+La sixième tranche partage [le nuage et l'index Z](docs/P0_NUAGE_ET_INDEX_PARTAGES.md)
+entre rectangles et seuils. 37 CTests passent en Release et Clang ASan/UBSan.
+Les copies globales répétées et le scan des facteurs pour leurs boîtes
+sont retirés du nouvel appel partagé. L'ancien adaptateur reste coûteux
+par construction et ne doit pas alimenter un front WSPD. Les builds
+`v8_cloud_20260914` et `v8_cloud_sanitize_20260914` sont réservés à ces preuves.
+
+Les [66 essais clos](receipts/cloud_reuse_20260914/README.md) couvrent
+8k/16k/32k, Kmax10, s8/10/12 à R32, puis R32/64/128 sur grille/déséquilibré.
+À 32k/R32/s8, partage : grille 457–465 ms, déséquilibré 87–95 ms,
+nappe environ 16 s. Les mêmes sorties et compteurs locaux sont vérifiés,
+les préparations globales sont divisées exactement par R. En revanche,
+les copies de restrictions grilles font ×3,94 puis ×3,97 quand R et n
+doublent : ce verrou n'est pas résolu. La subdivision garde 35,6 millions
+de candidates sur nappe32k. Tous les chronomètres, y compris un doublement
+grille à ×5,62, sont conservés ; les temps restent bruités. Les builds sont
+désormais épinglés. Aucun résultat ancien n'est réattribué à ce moteur.
+
+**Priorité immédiate : pilote de front réel avec coût cumulé des facteurs.**
+Ne pas prendre le partage du nuage pour une solution complète : Pool/Axis
+gardent Ω(R|B|) sur une partition A_i×B et le découpage peut perdre des
+témoins utiles aux minorants. R croissant avec n doit rester dans les
+tests. Faire porter permutation et boîtes par les nœuds spatiaux certifiés ;
+l'arbre de plages originales n'est qu'un raccord de compatibilité.
+Tester les rejets sur produits ancêtres avant séparation complète et un
+chemin sans tris/allocations lourds pour petits facteurs. Le nouvel audit
+du front pur v4 montre leur nombre élevé, sans qualifier une WSPD v8.
+Fixer explicitement la convention de s avant la comparaison s8/10/12.
+
+Le seuil du census vient du rectangle du plan, l'index n'en possède plus.
+Les restrictions restent liées au même rectangle exact. Les ordres B/Z
+ne sont pas interchangeables ; l'auditeur précise en §9.4 pourquoi une
+couverture compacte dans un ordre peut devenir linéaire dans un autre.
+Raccorder Pool sans axe imposé, puis suspension mono, workers CPU et GPU.
+Les continuations doivent suspendre sur saturation, jamais tronquer.
+q3/q4 et FULL restent ouverts ; génération par plus longue arête et
+rétention par boule (union des voies qui la conservent) sont inscrites au
+plan. GCP non utilisé ; aucun contrat de tour n'est acquis.
+
+## Cinquième tranche publiée à 3c29ea1e — historique
 
 La cinquième tranche est qualifiée : [bornes préparées](docs/P0_BORNES_PREPAREES_ET_PARALLELISATION.md)
 de 48 octets, 34 CTests Release/Clang ASan/UBSan, oracle de 1 424 cas et

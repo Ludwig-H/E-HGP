@@ -8,16 +8,9 @@
 #include <utility>
 #include <vector>
 
-#include "core/types.hpp"
+#include "prepared_cloud.hpp"
 
 namespace mhgp8 {
-
-// Half-open ranges into the original, immutable input order. Not Morton IDs.
-struct Range {
-  std::size_t first{};
-  std::size_t last{};
-  [[nodiscard]] std::size_t size() const noexcept { return last - first; }
-};
 
 struct RectangleInput {
   std::vector<Point3> points;
@@ -25,6 +18,14 @@ struct RectangleInput {
   Range b;
   // Proposals, not an externally trusted count. All IDs are checked; only
   // strictly certified universal sites outside A union B receive credit.
+  std::vector<std::size_t> core_candidates;
+};
+
+// No coordinate storage. Ranges still refer to ORIGINAL IDs; a future WSPD
+// permutation must be represented explicitly rather than relabeling IDs.
+struct RectangleSpec {
+  Range a;
+  Range b;
   std::vector<std::size_t> core_candidates;
 };
 
@@ -61,6 +62,10 @@ using RectanglePtr = std::shared_ptr<const PreparedRectangle>;
 [[nodiscard]] RectanglePtr prepare_rectangle(const RectangleInput& input,
                                              unsigned kmax,
                                              unsigned separation_s);
+// Shares the validated cloud. Only factor boxes, separation and core belong
+// to this preparation; global copy/uniqueness/index costs are paid once.
+[[nodiscard]] RectanglePtr prepare_rectangle(CloudPtr cloud, const RectangleSpec& input,
+                                             unsigned kmax, unsigned separation_s);
 
 class PreparedRectangle final {
  public:
@@ -68,7 +73,11 @@ class PreparedRectangle final {
   PreparedRectangle& operator=(const PreparedRectangle&) = delete;
   PreparedRectangle(PreparedRectangle&&) = delete;
   PreparedRectangle& operator=(PreparedRectangle&&) = delete;
-  [[nodiscard]] std::span<const Point3> points() const noexcept { return points_; }
+  [[nodiscard]] const PreparedCloud& cloud() const noexcept { return *cloud_; }
+  [[nodiscard]] const CloudPtr& cloud_ptr() const noexcept { return cloud_; }
+  [[nodiscard]] std::span<const Point3> points() const noexcept { return cloud_->points(); }
+  [[nodiscard]] u64 factor_box_visits() const noexcept { return factor_box_visits_; }
+  [[nodiscard]] u64 factor_box_steps() const noexcept { return factor_box_steps_; }
   [[nodiscard]] Range a_range() const noexcept { return a_; }
   [[nodiscard]] Range b_range() const noexcept { return b_; }
   [[nodiscard]] const Box3& a_box() const noexcept { return box_a_; }
@@ -82,7 +91,12 @@ class PreparedRectangle final {
  private:
   PreparedRectangle() = default;
   friend RectanglePtr prepare_rectangle(const RectangleInput&, unsigned, unsigned);
-  std::vector<Point3> points_;
+  friend RectanglePtr prepare_rectangle(CloudPtr, const RectangleSpec&, unsigned, unsigned);
+  [[nodiscard]] static std::shared_ptr<PreparedRectangle> build(
+      CloudPtr, Range, Range, std::span<const std::size_t>, unsigned, unsigned);
+  CloudPtr cloud_;
+  u64 factor_box_visits_{};
+  u64 factor_box_steps_{};
   Range a_;
   Range b_;
   Box3 box_a_;

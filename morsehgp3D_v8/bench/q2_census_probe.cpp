@@ -136,7 +136,7 @@ Arm consume(const mhgp8::Q2CensusIndex& index, const mhgp8::AxisQ2Plan& plan,
   Arm arm;
   const auto started = Clock::now();
   arm.result = mhgp8::run_q2_census(index, plan, mode, [&](const mhgp8::Q2Support& support) {
-    arm.digest.consume(support, index.rectangle().points().size(), index.rectangle().kmax());
+    arm.digest.consume(support, index.cloud().points().size(), plan.rectangle().kmax());
   });
   arm.consumption_ms = milliseconds(started, Clock::now());
   return arm;
@@ -234,7 +234,7 @@ int run(const Options& o) {
     pairwise = consume(*index, *plan, mhgp8::Q2CensusMode::Pairwise);
   }
   const auto inspection_started = Clock::now();
-  require(&index->rectangle() == owner.get() && &plan->rectangle() == owner.get(),
+  require(&index->cloud() == &owner->cloud() && &plan->rectangle() == owner.get(),
           "index and prefilter must share one immutable owner");
   for (const auto* arm : {&pairwise, &shared}) {
     const auto& r = arm->result;
