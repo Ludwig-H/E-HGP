@@ -122,7 +122,7 @@ témoins extérieurs, absents des produits inter-amas. Mesuré sur da366f7f
 et la fixture `clusters` du constructeur : 28 rectangles terminaux à gros
 facteurs portent 112 des 116,8 millions de paires q2 du résidu à 16k ;
 Pool sur ces 28 rectangles coûte 120 ms et y laisse 29 878 paires
-(×0,0003) ; à 8k, 85 ms et 11 329 paires. DualBlocks fait mieux pour
+(×0,0003) ; à 8k, 60 ms et 11 329 paires. DualBlocks fait mieux pour
 q3/q4 (301 k / 370 k au lieu de 2,1 M / 3,2 M à 8k) pour 1,5 s. Sur
 l'uniforme et le terrain, aucun rectangle n'atteint 64 sites et Pool ne
 change rien : une politique par taille de facteur suffit. Les tubes, eux,
@@ -130,7 +130,12 @@ ne créditent rien sur ces amas irréguliers (largeur de cellule fixée à
 quatre unités réelles : un site par cellule), et restent quarante fois
 moins sélectifs que Pool à leur meilleure largeur ; ils avaient été
 qualifiés sur des grilles alignées. Note et reçu :
-[CREDITS_TERMINAUX_20260914.md](CREDITS_TERMINAUX_20260914.md).
+[CREDITS_TERMINAUX_20260914.md](CREDITS_TERMINAUX_20260914.md). Le
+constructeur relève à juste titre, dans son brouillon de raccord, que
+le harnais additionne des candidates sans exécuter le census et que deux
+chiffres de la prose venaient d'une exécution préliminaire : titre et
+chiffres sont alignés sur le reçu (60 ms à 8k, +1,04 s au seuil 2), et
+la limite est écrite ; la comparaison q2 complète lui appartient.
 
 ## Correction acquittée et contrelecture du census sur produit A×B×Z
 

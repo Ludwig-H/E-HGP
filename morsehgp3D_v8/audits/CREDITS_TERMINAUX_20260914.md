@@ -1,4 +1,4 @@
-# Le régime « amas » du front v8 se ferme avec les crédits locaux P0 déjà écrits
+# Le résidu q2 des amas du front v8 tombe de trente-huit fois avec les crédits Pool déjà écrits
 
 14 septembre 2026, après **e3af11a7**. Auditeur indépendant B.
 `phase=exploration_v8_hors_registre`, `backend=cpu_reference`,
@@ -15,7 +15,10 @@ seulement, or les produits inter-amas n'en ont aucun (la lentille est
 vide de sites). Cette note mesure, sur les sources épinglées de da366f7f
 et la fixture `clusters` du constructeur, ce que rapportent ces crédits
 appliqués aux seuls rectangles terminaux à gros facteurs, et diagnostique
-pourquoi les tubes n'y servent à rien. Reçu rejouable :
+pourquoi les tubes n'y servent à rien. Le harnais additionne les
+candidates des plans ; **il n'exécute ni census ni collecte après les
+crédits** : le gain est mesuré sur le résidu que le census aurait à
+payer, pas sur le temps de la chaîne. Reçu rejouable :
 [credits_terminaux_20260914/](credits_terminaux_20260914/CREDITS_TERMINAUX_CHECKS.json).
 
 ## 1. Un produit inter-amas isolé
@@ -67,16 +70,18 @@ incluse dans le temps) :
 
 | Famille, n | Rectangles émis | dont facteur ≥ 64 | Résidu q2 du front | Résidu q2 après Pool | Temps des crédits | q3 après Pool | q4 après Pool |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Amas 8k | 1 839 366 | 28 | 29,73 M | 1,74 M (×0,059) | 85 ms | 5,03 M (×0,16) | 6,01 M (×0,19) |
-| Amas 16k | 5 250 240 | 28 | 116,75 M | 4,79 M (×0,041) | 120 ms | 17,46 M (×0,14) | 20,77 M (×0,17) |
+| Amas 8k | 1 839 366 | 28 | 29,73 M | 1,74 M (×0,059) | 60 ms | 5,03 M (×0,16) | 6,01 M (×0,19) |
+| Amas 16k | 5 250 240 | 28 | 116,75 M | 4,79 M (×0,041) | 122 ms | 17,46 M (×0,14) | 20,77 M (×0,17) |
 | Amas 32k | 13 271 306 | 28 | 460,08 M | 12,18 M (×0,026) | 241 ms | 58,85 M (×0,12) | 72,49 M (×0,15) |
 
 Sur ces 28 rectangles, Pool ramène 28,0 millions de paires q2 à 11 329 à
 8k, 112,0 millions à 29 878 à 16k et 448,0 millions à 102 993 à 32k ; ce
 qui reste dans le résidu total (1,74 / 4,79 / 12,18 millions, soit ×2,75
 puis ×2,54 par doublement au lieu de ×3,9) vient des petits rectangles
-intra-amas, que Pool ne réduit pas (seuil 2 à 8k : même résidu, 1,8 s de
-plus). DualBlocks sur les mêmes 28 rectangles coûte 1,1 / 2,6 / 5,5 s et
+intra-amas, que Pool ne réduit pas (seuil 2 à 8k : même résidu q2, 1,04 s
+de crédits de plus d'après le reçu). Les temps de crédits incluent la
+copie des facteurs et la préparation du rectangle, pas leur destruction.
+DualBlocks sur les mêmes 28 rectangles coûte 1,1 / 2,6 / 5,5 s et
 laisse à 32k 31 419 / 1,68 M / 2,04 M paires q2/q3/q4 (contre 102 993 /
 32,0 M / 47,8 M avec Pool) : préférable pour q3/q4 quand le census de ces
 voies existera.
@@ -91,8 +96,11 @@ facteurs, plan local Pool (ou DualBlocks pour q3/q4) avant le census,
 sur les nœuds du front sans copie ni tri du nuage. À 32k, les 28 produits
 inter-amas portent 448 des 460 millions de paires q2 du résidu : Pool y
 coûte 241 ms (copie des facteurs comprise) et laisse 102 993 paires, ce
-qui divise par 38 le résidu q2 total que le census des amas doit payer,
-à comparer aux 173 s mesurés par le constructeur. Le seuil de taille
+qui divise par 38 le résidu q2 total que le census des amas aurait à
+payer. Ce n'est pas encore un temps de chaîne : la comparaison q2 seule,
+génération, front, crédits, census et collecte compris, sur les mêmes
+sources que son bras témoin, reste à faire par le constructeur ; les
+173 s mesurés à e3af11a7 en sont le point de départ. Le seuil de taille
 est une politique à mesurer, pas une hypothèse géométrique ; les crédits
 restent sûrs quel que soit le seuil, puisque chaque plan P0 est un
 minorant certifié (juges de la première tranche).
