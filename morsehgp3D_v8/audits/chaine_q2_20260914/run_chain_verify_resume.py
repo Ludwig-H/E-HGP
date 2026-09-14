@@ -100,7 +100,7 @@ def main() -> int:
         runs.append({"command": " ".join(cmd), "wall_seconds": round(elapsed, 3), "summary": summary, "raw_stdout": done.stdout})
         print(f"ok {' '.join(cmd[1:])} ({elapsed:.1f} s)", flush=True)
     keys = ("pairs", "continuations", "transfers", "alive", "ref_mismatch", "mismatch", "counter_breaks", "after_done_emissions",
-            "pauses", "pauses_after_credit", "pauses_inside_deferred", "pauses_during_emission")
+            "pauses", "pauses_after_credit", "pauses_inside_deferred", "pauses_during_emission", "mid_range_pauses")
     totals = {k: sum(r["summary"].get(k, 0) for r in runs) for k in keys}
     totals["runs"] = len(runs); totals["max_pending"] = max(r["summary"].get("max_pending", 0) for r in runs)
     if min(totals["pauses_after_credit"], totals["pauses_inside_deferred"], totals["pauses_during_emission"]) == 0:

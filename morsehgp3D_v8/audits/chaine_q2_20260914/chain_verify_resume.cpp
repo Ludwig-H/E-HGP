@@ -65,6 +65,7 @@ int main(int argc, char** argv) {
   const Opt opts[] = {{Q2SiblingMode::Disabled, Q2WitnessOrder::GlobalDfs, "global"}, {Q2SiblingMode::Saturating, Q2WitnessOrder::ComplementFirst, "sib+compl"}, {Q2SiblingMode::Disabled, Q2WitnessOrder::ComplementFirst, "compl"}};
   const std::vector<std::size_t> budgets = {1, 3, 1000};
   u64 continuations = 0, mismatch = 0, ref_mismatch = 0, counter_breaks = 0, pauses = 0, pauses_after_credit = 0, pauses_inside_deferred = 0, pauses_during_emission = 0, max_pending = 0, transfers = 0, after_done_emissions = 0, alive_total = 0;
+  u64 mid_range_pauses = 0;  // pause en Emit avec la même plage qu'à la pause précédente et emit_next strictement avancé et < emit_end
   auto collect = [](std::map<Key, Emitted>& m, u64& dups, const Q2Support& sp) { Key k{std::min(sp.a_id, sp.b_id), std::max(sp.a_id, sp.b_id)}; if (m.count(k)) ++dups; Emitted e; e.interior.assign(sp.interior.begin(), sp.interior.end()); e.shell.assign(sp.shell.begin(), sp.shell.end()); e.key = sp.key; std::sort(e.interior.begin(), e.interior.end()); std::sort(e.shell.begin(), e.shell.end()); m[k] = e; };
   std::vector<std::size_t> in, sh;
   for (const auto& [rank, bnode] : pairs) {
@@ -83,11 +84,16 @@ int main(int argc, char** argv) {
         auto cont = make_q2_census_continuation(index, rank, bnode, kmax, op.sb, op.o);
         std::map<Key, Emitted> got; u64 gdups = 0;
         Q2CensusConsumer consumer = [&](const Q2Support& sp) { collect(got, gdups, sp); };
-        bool done = false; unsigned guard = 0;
+        bool done = false; unsigned guard = 0; bool have_prev = false; Q2CensusResumePending prev{};
         while (!done) {
           if (++guard > 20000000U) { std::printf("GUARD rank=%zu b=%zu\n", rank, bnode); break; }
           if (transfer) { std::thread t([&] { done = cont->advance(budget, consumer); }); t.join(); }
           else done = cont->advance(budget, consumer);
+          if (!done) {
+            const auto cur = cont->pending();
+            if (have_prev && cur.stage == Q2CensusResumeStage::Emit && prev.stage == Q2CensusResumeStage::Emit && prev.emit_end == cur.emit_end && prev.emit_next < cur.emit_next && cur.emit_next < cur.emit_end) ++mid_range_pauses;
+            prev = cur; have_prev = true;
+          }
         }
         // après Done : un pas de plus rend true sans émission
         const auto before = got.size(); const bool again = cont->advance(1, consumer); if (!again || got.size() != before) ++after_done_emissions;
@@ -104,7 +110,7 @@ int main(int argc, char** argv) {
       }
     }
   }
-  std::printf("SUMMARY family=%s n=%zu kmax=%u pairs=%zu continuations=%llu transfers=%llu alive=%llu ref_mismatch=%llu mismatch=%llu counter_breaks=%llu after_done_emissions=%llu pauses=%llu pauses_after_credit=%llu pauses_inside_deferred=%llu pauses_during_emission=%llu max_pending=%llu\n",
-    fam.c_str(), N, kmax, pairs.size(), (unsigned long long)continuations, (unsigned long long)transfers, (unsigned long long)alive_total, (unsigned long long)ref_mismatch, (unsigned long long)mismatch, (unsigned long long)counter_breaks, (unsigned long long)after_done_emissions, (unsigned long long)pauses, (unsigned long long)pauses_after_credit, (unsigned long long)pauses_inside_deferred, (unsigned long long)pauses_during_emission, (unsigned long long)max_pending);
+  std::printf("SUMMARY family=%s n=%zu kmax=%u pairs=%zu continuations=%llu transfers=%llu alive=%llu ref_mismatch=%llu mismatch=%llu counter_breaks=%llu after_done_emissions=%llu pauses=%llu pauses_after_credit=%llu pauses_inside_deferred=%llu pauses_during_emission=%llu mid_range_pauses=%llu max_pending=%llu\n",
+    fam.c_str(), N, kmax, pairs.size(), (unsigned long long)continuations, (unsigned long long)transfers, (unsigned long long)alive_total, (unsigned long long)ref_mismatch, (unsigned long long)mismatch, (unsigned long long)counter_breaks, (unsigned long long)after_done_emissions, (unsigned long long)pauses, (unsigned long long)pauses_after_credit, (unsigned long long)pauses_inside_deferred, (unsigned long long)pauses_during_emission, (unsigned long long)mid_range_pauses, (unsigned long long)max_pending);
   return (mismatch == 0 && ref_mismatch == 0 && counter_breaks == 0 && after_done_emissions == 0) ? 0 : 1;
 }

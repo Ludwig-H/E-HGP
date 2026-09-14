@@ -2,7 +2,7 @@
   "title": "Continuations de census q2 : force brute, référence série, budgets 1/3/1000, transfert de fil, pauses classées",
   "date": "2026-09-14",
   "author_role": "auditeur indépendant B",
-  "git_head": "61b86a54013be8e59d5f5480ca4e178b637d98e8",
+  "git_head": "7e9c448d9df40e413c7c6c02c17fcc110a8a6cc3",
   "src_root": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke",
   "compile_command": "g++ -std=c++20 -O2 -Wall -Wextra -I/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/src -I/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/bench /workspaces/E-HGP/morsehgp3D_v8/audits/chaine_q2_20260914/chain_verify_resume.cpp /tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/build/libmhgp8_p0.a -pthread -o /tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume",
   "pins_sha256": {
@@ -11,7 +11,7 @@
     "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/src/pipeline/q2_census.hpp": "903f5ee92d72e0131096deefe04c51ba5f18000b214ee09276fa359b3972b8f7",
     "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/src/pipeline/wspd_q2_census.hpp": "c904c91a4094c70069ba4640e1f74f12cdeb4199bd98ffc398918aa46601021d",
     "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/bench/front_fixtures.hpp": "a2d3ddbbff837de1609a2e1104c8797682cd7a435d4fa417d31388eb1f402b3b",
-    "morsehgp3D_v8/audits/chaine_q2_20260914/chain_verify_resume.cpp": "d0eac10b1dcdb8db0a183486fa938b43eb4bda8ecf6bc22a60988ac11beb31d8",
+    "morsehgp3D_v8/audits/chaine_q2_20260914/chain_verify_resume.cpp": "efa661a342f1a60abb4c8ba7df9c5375271e88f471ca83bfc63b10dcfbd52f36",
     "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/build/libmhgp8_p0.a": "8fae3b015e7bbbb056df96d86db38a2d0f892c6da82f20cf19e2124dfc81d242"
   },
   "totals": {
@@ -27,13 +27,14 @@
     "pauses_after_credit": 2629838,
     "pauses_inside_deferred": 852339,
     "pauses_during_emission": 135901,
+    "mid_range_pauses": 0,
     "runs": 74,
     "max_pending": 8
   },
   "runs": [
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:grid5 0 1 8 3",
-      "wall_seconds": 0.733,
+      "wall_seconds": 0.738,
       "summary": {
         "family": "adv:grid5",
         "n": 125,
@@ -50,13 +51,14 @@
         "pauses_after_credit": 0,
         "pauses_inside_deferred": 9609,
         "pauses_during_emission": 2121,
+        "mid_range_pauses": 0,
         "max_pending": 8
       },
-      "raw_stdout": "SUMMARY family=adv:grid5 n=125 kmax=1 pairs=400 continuations=4800 transfers=1200 alive=419 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=78221 pauses_after_credit=0 pauses_inside_deferred=9609 pauses_during_emission=2121 max_pending=8\n"
+      "raw_stdout": "SUMMARY family=adv:grid5 n=125 kmax=1 pairs=400 continuations=4800 transfers=1200 alive=419 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=78221 pauses_after_credit=0 pauses_inside_deferred=9609 pauses_during_emission=2121 mid_range_pauses=0 max_pending=8\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:grid5 0 1 12 3",
-      "wall_seconds": 0.752,
+      "wall_seconds": 0.732,
       "summary": {
         "family": "adv:grid5",
         "n": 125,
@@ -73,13 +75,14 @@
         "pauses_after_credit": 0,
         "pauses_inside_deferred": 9609,
         "pauses_during_emission": 2121,
+        "mid_range_pauses": 0,
         "max_pending": 8
       },
-      "raw_stdout": "SUMMARY family=adv:grid5 n=125 kmax=1 pairs=400 continuations=4800 transfers=1200 alive=419 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=78221 pauses_after_credit=0 pauses_inside_deferred=9609 pauses_during_emission=2121 max_pending=8\n"
+      "raw_stdout": "SUMMARY family=adv:grid5 n=125 kmax=1 pairs=400 continuations=4800 transfers=1200 alive=419 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=78221 pauses_after_credit=0 pauses_inside_deferred=9609 pauses_during_emission=2121 mid_range_pauses=0 max_pending=8\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:grid5 0 2 8 3",
-      "wall_seconds": 0.95,
+      "wall_seconds": 0.888,
       "summary": {
         "family": "adv:grid5",
         "n": 125,
@@ -96,13 +99,14 @@
         "pauses_after_credit": 16218,
         "pauses_inside_deferred": 11919,
         "pauses_during_emission": 2269,
+        "mid_range_pauses": 0,
         "max_pending": 8
       },
-      "raw_stdout": "SUMMARY family=adv:grid5 n=125 kmax=2 pairs=400 continuations=4800 transfers=1200 alive=453 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=95981 pauses_after_credit=16218 pauses_inside_deferred=11919 pauses_during_emission=2269 max_pending=8\n"
+      "raw_stdout": "SUMMARY family=adv:grid5 n=125 kmax=2 pairs=400 continuations=4800 transfers=1200 alive=453 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=95981 pauses_after_credit=16218 pauses_inside_deferred=11919 pauses_during_emission=2269 mid_range_pauses=0 max_pending=8\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:grid5 0 2 12 3",
-      "wall_seconds": 0.891,
+      "wall_seconds": 0.893,
       "summary": {
         "family": "adv:grid5",
         "n": 125,
@@ -119,13 +123,14 @@
         "pauses_after_credit": 16218,
         "pauses_inside_deferred": 11919,
         "pauses_during_emission": 2269,
+        "mid_range_pauses": 0,
         "max_pending": 8
       },
-      "raw_stdout": "SUMMARY family=adv:grid5 n=125 kmax=2 pairs=400 continuations=4800 transfers=1200 alive=453 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=95981 pauses_after_credit=16218 pauses_inside_deferred=11919 pauses_during_emission=2269 max_pending=8\n"
+      "raw_stdout": "SUMMARY family=adv:grid5 n=125 kmax=2 pairs=400 continuations=4800 transfers=1200 alive=453 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=95981 pauses_after_credit=16218 pauses_inside_deferred=11919 pauses_during_emission=2269 mid_range_pauses=0 max_pending=8\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:grid5 0 5 8 3",
-      "wall_seconds": 1.289,
+      "wall_seconds": 1.233,
       "summary": {
         "family": "adv:grid5",
         "n": 125,
@@ -142,13 +147,14 @@
         "pauses_after_credit": 60571,
         "pauses_inside_deferred": 19902,
         "pauses_during_emission": 3443,
+        "mid_range_pauses": 0,
         "max_pending": 8
       },
-      "raw_stdout": "SUMMARY family=adv:grid5 n=125 kmax=5 pairs=400 continuations=4800 transfers=1200 alive=683 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=140839 pauses_after_credit=60571 pauses_inside_deferred=19902 pauses_during_emission=3443 max_pending=8\n"
+      "raw_stdout": "SUMMARY family=adv:grid5 n=125 kmax=5 pairs=400 continuations=4800 transfers=1200 alive=683 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=140839 pauses_after_credit=60571 pauses_inside_deferred=19902 pauses_during_emission=3443 mid_range_pauses=0 max_pending=8\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:grid5 0 5 12 3",
-      "wall_seconds": 1.333,
+      "wall_seconds": 1.295,
       "summary": {
         "family": "adv:grid5",
         "n": 125,
@@ -165,13 +171,14 @@
         "pauses_after_credit": 60571,
         "pauses_inside_deferred": 19902,
         "pauses_during_emission": 3443,
+        "mid_range_pauses": 0,
         "max_pending": 8
       },
-      "raw_stdout": "SUMMARY family=adv:grid5 n=125 kmax=5 pairs=400 continuations=4800 transfers=1200 alive=683 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=140839 pauses_after_credit=60571 pauses_inside_deferred=19902 pauses_during_emission=3443 max_pending=8\n"
+      "raw_stdout": "SUMMARY family=adv:grid5 n=125 kmax=5 pairs=400 continuations=4800 transfers=1200 alive=683 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=140839 pauses_after_credit=60571 pauses_inside_deferred=19902 pauses_during_emission=3443 mid_range_pauses=0 max_pending=8\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:grid5 0 10 8 3",
-      "wall_seconds": 1.645,
+      "wall_seconds": 1.602,
       "summary": {
         "family": "adv:grid5",
         "n": 125,
@@ -188,13 +195,14 @@
         "pauses_after_credit": 99064,
         "pauses_inside_deferred": 26596,
         "pauses_during_emission": 4017,
+        "mid_range_pauses": 0,
         "max_pending": 8
       },
-      "raw_stdout": "SUMMARY family=adv:grid5 n=125 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=790 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=179330 pauses_after_credit=99064 pauses_inside_deferred=26596 pauses_during_emission=4017 max_pending=8\n"
+      "raw_stdout": "SUMMARY family=adv:grid5 n=125 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=790 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=179330 pauses_after_credit=99064 pauses_inside_deferred=26596 pauses_during_emission=4017 mid_range_pauses=0 max_pending=8\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:grid5 0 10 12 3",
-      "wall_seconds": 1.635,
+      "wall_seconds": 1.62,
       "summary": {
         "family": "adv:grid5",
         "n": 125,
@@ -211,13 +219,14 @@
         "pauses_after_credit": 99064,
         "pauses_inside_deferred": 26596,
         "pauses_during_emission": 4017,
+        "mid_range_pauses": 0,
         "max_pending": 8
       },
-      "raw_stdout": "SUMMARY family=adv:grid5 n=125 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=790 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=179330 pauses_after_credit=99064 pauses_inside_deferred=26596 pauses_during_emission=4017 max_pending=8\n"
+      "raw_stdout": "SUMMARY family=adv:grid5 n=125 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=790 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=179330 pauses_after_credit=99064 pauses_inside_deferred=26596 pauses_during_emission=4017 mid_range_pauses=0 max_pending=8\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:cospherical 0 1 8 3",
-      "wall_seconds": 0.671,
+      "wall_seconds": 0.66,
       "summary": {
         "family": "adv:cospherical",
         "n": 112,
@@ -234,13 +243,14 @@
         "pauses_after_credit": 0,
         "pauses_inside_deferred": 5904,
         "pauses_during_emission": 1050,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=adv:cospherical n=112 kmax=1 pairs=400 continuations=4800 transfers=1200 alive=208 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=70865 pauses_after_credit=0 pauses_inside_deferred=5904 pauses_during_emission=1050 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=adv:cospherical n=112 kmax=1 pairs=400 continuations=4800 transfers=1200 alive=208 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=70865 pauses_after_credit=0 pauses_inside_deferred=5904 pauses_during_emission=1050 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:cospherical 0 1 12 3",
-      "wall_seconds": 0.685,
+      "wall_seconds": 0.67,
       "summary": {
         "family": "adv:cospherical",
         "n": 112,
@@ -257,13 +267,14 @@
         "pauses_after_credit": 0,
         "pauses_inside_deferred": 5904,
         "pauses_during_emission": 1050,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=adv:cospherical n=112 kmax=1 pairs=400 continuations=4800 transfers=1200 alive=208 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=70865 pauses_after_credit=0 pauses_inside_deferred=5904 pauses_during_emission=1050 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=adv:cospherical n=112 kmax=1 pairs=400 continuations=4800 transfers=1200 alive=208 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=70865 pauses_after_credit=0 pauses_inside_deferred=5904 pauses_during_emission=1050 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:cospherical 0 2 8 3",
-      "wall_seconds": 0.889,
+      "wall_seconds": 0.869,
       "summary": {
         "family": "adv:cospherical",
         "n": 112,
@@ -280,13 +291,14 @@
         "pauses_after_credit": 21761,
         "pauses_inside_deferred": 9715,
         "pauses_during_emission": 1822,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=adv:cospherical n=112 kmax=2 pairs=400 continuations=4800 transfers=1200 alive=358 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=94509 pauses_after_credit=21761 pauses_inside_deferred=9715 pauses_during_emission=1822 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=adv:cospherical n=112 kmax=2 pairs=400 continuations=4800 transfers=1200 alive=358 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=94509 pauses_after_credit=21761 pauses_inside_deferred=9715 pauses_during_emission=1822 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:cospherical 0 2 12 3",
-      "wall_seconds": 0.875,
+      "wall_seconds": 0.871,
       "summary": {
         "family": "adv:cospherical",
         "n": 112,
@@ -303,13 +315,14 @@
         "pauses_after_credit": 21761,
         "pauses_inside_deferred": 9715,
         "pauses_during_emission": 1822,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=adv:cospherical n=112 kmax=2 pairs=400 continuations=4800 transfers=1200 alive=358 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=94509 pauses_after_credit=21761 pauses_inside_deferred=9715 pauses_during_emission=1822 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=adv:cospherical n=112 kmax=2 pairs=400 continuations=4800 transfers=1200 alive=358 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=94509 pauses_after_credit=21761 pauses_inside_deferred=9715 pauses_during_emission=1822 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:cospherical 0 5 8 3",
-      "wall_seconds": 1.298,
+      "wall_seconds": 1.33,
       "summary": {
         "family": "adv:cospherical",
         "n": 112,
@@ -326,13 +339,14 @@
         "pauses_after_credit": 69778,
         "pauses_inside_deferred": 14983,
         "pauses_during_emission": 2588,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=adv:cospherical n=112 kmax=5 pairs=400 continuations=4800 transfers=1200 alive=500 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=143677 pauses_after_credit=69778 pauses_inside_deferred=14983 pauses_during_emission=2588 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=adv:cospherical n=112 kmax=5 pairs=400 continuations=4800 transfers=1200 alive=500 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=143677 pauses_after_credit=69778 pauses_inside_deferred=14983 pauses_during_emission=2588 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:cospherical 0 5 12 3",
-      "wall_seconds": 1.348,
+      "wall_seconds": 1.313,
       "summary": {
         "family": "adv:cospherical",
         "n": 112,
@@ -349,13 +363,14 @@
         "pauses_after_credit": 69778,
         "pauses_inside_deferred": 14983,
         "pauses_during_emission": 2588,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=adv:cospherical n=112 kmax=5 pairs=400 continuations=4800 transfers=1200 alive=500 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=143677 pauses_after_credit=69778 pauses_inside_deferred=14983 pauses_during_emission=2588 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=adv:cospherical n=112 kmax=5 pairs=400 continuations=4800 transfers=1200 alive=500 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=143677 pauses_after_credit=69778 pauses_inside_deferred=14983 pauses_during_emission=2588 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:cospherical 0 10 8 3",
-      "wall_seconds": 1.875,
+      "wall_seconds": 1.833,
       "summary": {
         "family": "adv:cospherical",
         "n": 112,
@@ -372,13 +387,14 @@
         "pauses_after_credit": 130955,
         "pauses_inside_deferred": 25178,
         "pauses_during_emission": 3861,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=adv:cospherical n=112 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=755 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=204913 pauses_after_credit=130955 pauses_inside_deferred=25178 pauses_during_emission=3861 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=adv:cospherical n=112 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=755 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=204913 pauses_after_credit=130955 pauses_inside_deferred=25178 pauses_during_emission=3861 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:cospherical 0 10 12 3",
-      "wall_seconds": 1.874,
+      "wall_seconds": 1.823,
       "summary": {
         "family": "adv:cospherical",
         "n": 112,
@@ -395,13 +411,14 @@
         "pauses_after_credit": 130955,
         "pauses_inside_deferred": 25178,
         "pauses_during_emission": 3861,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=adv:cospherical n=112 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=755 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=204913 pauses_after_credit=130955 pauses_inside_deferred=25178 pauses_during_emission=3861 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=adv:cospherical n=112 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=755 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=204913 pauses_after_credit=130955 pauses_inside_deferred=25178 pauses_during_emission=3861 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:collinear 0 1 8 3",
-      "wall_seconds": 0.363,
+      "wall_seconds": 0.33,
       "summary": {
         "family": "adv:collinear",
         "n": 52,
@@ -418,13 +435,14 @@
         "pauses_after_credit": 0,
         "pauses_inside_deferred": 7337,
         "pauses_during_emission": 946,
+        "mid_range_pauses": 0,
         "max_pending": 8
       },
-      "raw_stdout": "SUMMARY family=adv:collinear n=52 kmax=1 pairs=293 continuations=3516 transfers=879 alive=202 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=34434 pauses_after_credit=0 pauses_inside_deferred=7337 pauses_during_emission=946 max_pending=8\n"
+      "raw_stdout": "SUMMARY family=adv:collinear n=52 kmax=1 pairs=293 continuations=3516 transfers=879 alive=202 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=34434 pauses_after_credit=0 pauses_inside_deferred=7337 pauses_during_emission=946 mid_range_pauses=0 max_pending=8\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:collinear 0 1 12 3",
-      "wall_seconds": 0.337,
+      "wall_seconds": 0.336,
       "summary": {
         "family": "adv:collinear",
         "n": 52,
@@ -441,13 +459,14 @@
         "pauses_after_credit": 0,
         "pauses_inside_deferred": 7337,
         "pauses_during_emission": 946,
+        "mid_range_pauses": 0,
         "max_pending": 8
       },
-      "raw_stdout": "SUMMARY family=adv:collinear n=52 kmax=1 pairs=293 continuations=3516 transfers=879 alive=202 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=34434 pauses_after_credit=0 pauses_inside_deferred=7337 pauses_during_emission=946 max_pending=8\n"
+      "raw_stdout": "SUMMARY family=adv:collinear n=52 kmax=1 pairs=293 continuations=3516 transfers=879 alive=202 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=34434 pauses_after_credit=0 pauses_inside_deferred=7337 pauses_during_emission=946 mid_range_pauses=0 max_pending=8\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:collinear 0 2 8 3",
-      "wall_seconds": 0.378,
+      "wall_seconds": 0.374,
       "summary": {
         "family": "adv:collinear",
         "n": 52,
@@ -464,13 +483,14 @@
         "pauses_after_credit": 3165,
         "pauses_inside_deferred": 9133,
         "pauses_during_emission": 1426,
+        "mid_range_pauses": 0,
         "max_pending": 8
       },
-      "raw_stdout": "SUMMARY family=adv:collinear n=52 kmax=2 pairs=293 continuations=3516 transfers=879 alive=304 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=38048 pauses_after_credit=3165 pauses_inside_deferred=9133 pauses_during_emission=1426 max_pending=8\n"
+      "raw_stdout": "SUMMARY family=adv:collinear n=52 kmax=2 pairs=293 continuations=3516 transfers=879 alive=304 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=38048 pauses_after_credit=3165 pauses_inside_deferred=9133 pauses_during_emission=1426 mid_range_pauses=0 max_pending=8\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:collinear 0 2 12 3",
-      "wall_seconds": 0.381,
+      "wall_seconds": 0.38,
       "summary": {
         "family": "adv:collinear",
         "n": 52,
@@ -487,13 +507,14 @@
         "pauses_after_credit": 3165,
         "pauses_inside_deferred": 9133,
         "pauses_during_emission": 1426,
+        "mid_range_pauses": 0,
         "max_pending": 8
       },
-      "raw_stdout": "SUMMARY family=adv:collinear n=52 kmax=2 pairs=293 continuations=3516 transfers=879 alive=304 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=38048 pauses_after_credit=3165 pauses_inside_deferred=9133 pauses_during_emission=1426 max_pending=8\n"
+      "raw_stdout": "SUMMARY family=adv:collinear n=52 kmax=2 pairs=293 continuations=3516 transfers=879 alive=304 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=38048 pauses_after_credit=3165 pauses_inside_deferred=9133 pauses_during_emission=1426 mid_range_pauses=0 max_pending=8\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:collinear 0 5 8 3",
-      "wall_seconds": 0.414,
+      "wall_seconds": 0.449,
       "summary": {
         "family": "adv:collinear",
         "n": 52,
@@ -510,13 +531,14 @@
         "pauses_after_credit": 8120,
         "pauses_inside_deferred": 12110,
         "pauses_during_emission": 2155,
+        "mid_range_pauses": 0,
         "max_pending": 8
       },
-      "raw_stdout": "SUMMARY family=adv:collinear n=52 kmax=5 pairs=293 continuations=3516 transfers=879 alive=453 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=43767 pauses_after_credit=8120 pauses_inside_deferred=12110 pauses_during_emission=2155 max_pending=8\n"
+      "raw_stdout": "SUMMARY family=adv:collinear n=52 kmax=5 pairs=293 continuations=3516 transfers=879 alive=453 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=43767 pauses_after_credit=8120 pauses_inside_deferred=12110 pauses_during_emission=2155 mid_range_pauses=0 max_pending=8\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:collinear 0 5 12 3",
-      "wall_seconds": 0.424,
+      "wall_seconds": 0.406,
       "summary": {
         "family": "adv:collinear",
         "n": 52,
@@ -533,13 +555,14 @@
         "pauses_after_credit": 8120,
         "pauses_inside_deferred": 12110,
         "pauses_during_emission": 2155,
+        "mid_range_pauses": 0,
         "max_pending": 8
       },
-      "raw_stdout": "SUMMARY family=adv:collinear n=52 kmax=5 pairs=293 continuations=3516 transfers=879 alive=453 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=43767 pauses_after_credit=8120 pauses_inside_deferred=12110 pauses_during_emission=2155 max_pending=8\n"
+      "raw_stdout": "SUMMARY family=adv:collinear n=52 kmax=5 pairs=293 continuations=3516 transfers=879 alive=453 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=43767 pauses_after_credit=8120 pauses_inside_deferred=12110 pauses_during_emission=2155 mid_range_pauses=0 max_pending=8\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:collinear 0 10 8 3",
-      "wall_seconds": 0.47,
+      "wall_seconds": 0.463,
       "summary": {
         "family": "adv:collinear",
         "n": 52,
@@ -556,13 +579,14 @@
         "pauses_after_credit": 12784,
         "pauses_inside_deferred": 15142,
         "pauses_during_emission": 2689,
+        "mid_range_pauses": 0,
         "max_pending": 8
       },
-      "raw_stdout": "SUMMARY family=adv:collinear n=52 kmax=10 pairs=293 continuations=3516 transfers=879 alive=565 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=49088 pauses_after_credit=12784 pauses_inside_deferred=15142 pauses_during_emission=2689 max_pending=8\n"
+      "raw_stdout": "SUMMARY family=adv:collinear n=52 kmax=10 pairs=293 continuations=3516 transfers=879 alive=565 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=49088 pauses_after_credit=12784 pauses_inside_deferred=15142 pauses_during_emission=2689 mid_range_pauses=0 max_pending=8\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:collinear 0 10 12 3",
-      "wall_seconds": 0.469,
+      "wall_seconds": 0.458,
       "summary": {
         "family": "adv:collinear",
         "n": 52,
@@ -579,13 +603,14 @@
         "pauses_after_credit": 12784,
         "pauses_inside_deferred": 15142,
         "pauses_during_emission": 2689,
+        "mid_range_pauses": 0,
         "max_pending": 8
       },
-      "raw_stdout": "SUMMARY family=adv:collinear n=52 kmax=10 pairs=293 continuations=3516 transfers=879 alive=565 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=49088 pauses_after_credit=12784 pauses_inside_deferred=15142 pauses_during_emission=2689 max_pending=8\n"
+      "raw_stdout": "SUMMARY family=adv:collinear n=52 kmax=10 pairs=293 continuations=3516 transfers=879 alive=565 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=49088 pauses_after_credit=12784 pauses_inside_deferred=15142 pauses_during_emission=2689 mid_range_pauses=0 max_pending=8\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:cube_corners 0 1 8 3",
-      "wall_seconds": 0.063,
+      "wall_seconds": 0.064,
       "summary": {
         "family": "adv:cube_corners",
         "n": 14,
@@ -602,13 +627,14 @@
         "pauses_after_credit": 0,
         "pauses_inside_deferred": 1387,
         "pauses_during_emission": 220,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=adv:cube_corners n=14 kmax=1 pairs=66 continuations=792 transfers=198 alive=48 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=5957 pauses_after_credit=0 pauses_inside_deferred=1387 pauses_during_emission=220 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=adv:cube_corners n=14 kmax=1 pairs=66 continuations=792 transfers=198 alive=48 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=5957 pauses_after_credit=0 pauses_inside_deferred=1387 pauses_during_emission=220 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:cube_corners 0 1 12 3",
-      "wall_seconds": 0.066,
+      "wall_seconds": 0.062,
       "summary": {
         "family": "adv:cube_corners",
         "n": 14,
@@ -625,13 +651,14 @@
         "pauses_after_credit": 0,
         "pauses_inside_deferred": 1387,
         "pauses_during_emission": 220,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=adv:cube_corners n=14 kmax=1 pairs=66 continuations=792 transfers=198 alive=48 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=5957 pauses_after_credit=0 pauses_inside_deferred=1387 pauses_during_emission=220 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=adv:cube_corners n=14 kmax=1 pairs=66 continuations=792 transfers=198 alive=48 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=5957 pauses_after_credit=0 pauses_inside_deferred=1387 pauses_during_emission=220 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:cube_corners 0 2 8 3",
-      "wall_seconds": 0.075,
+      "wall_seconds": 0.07,
       "summary": {
         "family": "adv:cube_corners",
         "n": 14,
@@ -648,13 +675,14 @@
         "pauses_after_credit": 1084,
         "pauses_inside_deferred": 1794,
         "pauses_during_emission": 329,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=adv:cube_corners n=14 kmax=2 pairs=66 continuations=792 transfers=198 alive=69 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=7188 pauses_after_credit=1084 pauses_inside_deferred=1794 pauses_during_emission=329 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=adv:cube_corners n=14 kmax=2 pairs=66 continuations=792 transfers=198 alive=69 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=7188 pauses_after_credit=1084 pauses_inside_deferred=1794 pauses_during_emission=329 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:cube_corners 0 2 12 3",
-      "wall_seconds": 0.078,
+      "wall_seconds": 0.072,
       "summary": {
         "family": "adv:cube_corners",
         "n": 14,
@@ -671,13 +699,14 @@
         "pauses_after_credit": 1084,
         "pauses_inside_deferred": 1794,
         "pauses_during_emission": 329,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=adv:cube_corners n=14 kmax=2 pairs=66 continuations=792 transfers=198 alive=69 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=7188 pauses_after_credit=1084 pauses_inside_deferred=1794 pauses_during_emission=329 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=adv:cube_corners n=14 kmax=2 pairs=66 continuations=792 transfers=198 alive=69 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=7188 pauses_after_credit=1084 pauses_inside_deferred=1794 pauses_during_emission=329 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:cube_corners 0 5 8 3",
-      "wall_seconds": 0.098,
+      "wall_seconds": 0.094,
       "summary": {
         "family": "adv:cube_corners",
         "n": 14,
@@ -694,62 +723,41 @@
         "pauses_after_credit": 3538,
         "pauses_inside_deferred": 2450,
         "pauses_during_emission": 519,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=adv:cube_corners n=14 kmax=5 pairs=66 continuations=792 transfers=198 alive=105 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=9624 pauses_after_credit=3538 pauses_inside_deferred=2450 pauses_during_emission=519 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=adv:cube_corners n=14 kmax=5 pairs=66 continuations=792 transfers=198 alive=105 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=9624 pauses_after_credit=3538 pauses_inside_deferred=2450 pauses_during_emission=519 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:cube_corners 0 5 12 3",
-      "wall_seconds": 0.095,
-      "summary": {
-        "family": "adv:cube_corners",
-        "n": 14,
-        "kmax": 5,
-        "pairs": 66,
-        "continuations": 792,
-        "transfers": 198,
-        "alive": 105,
-        "ref_mismatch": 0,
-        "mismatch": 0,
-        "counter_breaks": 0,
-        "after_done_emissions": 0,
-        "pauses": 9624,
-        "pauses_after_credit": 3538,
-        "pauses_inside_deferred": 2450,
-        "pauses_during_emission": 519,
-        "max_pending": 6
-      },
-      "raw_stdout": "SUMMARY family=adv:cube_corners n=14 kmax=5 pairs=66 continuations=792 transfers=198 alive=105 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=9624 pauses_after_credit=3538 pauses_inside_deferred=2450 pauses_during_emission=519 max_pending=6\n"
-    },
-    {
-      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:cube_corners 0 10 8 3",
-      "wall_seconds": 0.098,
-      "summary": {
-        "family": "adv:cube_corners",
-        "n": 14,
-        "kmax": 10,
-        "pairs": 66,
-        "continuations": 792,
-        "transfers": 198,
-        "alive": 116,
-        "ref_mismatch": 0,
-        "mismatch": 0,
-        "counter_breaks": 0,
-        "after_done_emissions": 0,
-        "pauses": 9869,
-        "pauses_after_credit": 3797,
-        "pauses_inside_deferred": 2548,
-        "pauses_during_emission": 576,
-        "max_pending": 6
-      },
-      "raw_stdout": "SUMMARY family=adv:cube_corners n=14 kmax=10 pairs=66 continuations=792 transfers=198 alive=116 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=9869 pauses_after_credit=3797 pauses_inside_deferred=2548 pauses_during_emission=576 max_pending=6\n"
-    },
-    {
-      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:cube_corners 0 10 12 3",
       "wall_seconds": 0.097,
       "summary": {
         "family": "adv:cube_corners",
         "n": 14,
+        "kmax": 5,
+        "pairs": 66,
+        "continuations": 792,
+        "transfers": 198,
+        "alive": 105,
+        "ref_mismatch": 0,
+        "mismatch": 0,
+        "counter_breaks": 0,
+        "after_done_emissions": 0,
+        "pauses": 9624,
+        "pauses_after_credit": 3538,
+        "pauses_inside_deferred": 2450,
+        "pauses_during_emission": 519,
+        "mid_range_pauses": 0,
+        "max_pending": 6
+      },
+      "raw_stdout": "SUMMARY family=adv:cube_corners n=14 kmax=5 pairs=66 continuations=792 transfers=198 alive=105 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=9624 pauses_after_credit=3538 pauses_inside_deferred=2450 pauses_during_emission=519 mid_range_pauses=0 max_pending=6\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:cube_corners 0 10 8 3",
+      "wall_seconds": 0.092,
+      "summary": {
+        "family": "adv:cube_corners",
+        "n": 14,
         "kmax": 10,
         "pairs": 66,
         "continuations": 792,
@@ -763,13 +771,38 @@
         "pauses_after_credit": 3797,
         "pauses_inside_deferred": 2548,
         "pauses_during_emission": 576,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=adv:cube_corners n=14 kmax=10 pairs=66 continuations=792 transfers=198 alive=116 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=9869 pauses_after_credit=3797 pauses_inside_deferred=2548 pauses_during_emission=576 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=adv:cube_corners n=14 kmax=10 pairs=66 continuations=792 transfers=198 alive=116 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=9869 pauses_after_credit=3797 pauses_inside_deferred=2548 pauses_during_emission=576 mid_range_pauses=0 max_pending=6\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:cube_corners 0 10 12 3",
+      "wall_seconds": 0.096,
+      "summary": {
+        "family": "adv:cube_corners",
+        "n": 14,
+        "kmax": 10,
+        "pairs": 66,
+        "continuations": 792,
+        "transfers": 198,
+        "alive": 116,
+        "ref_mismatch": 0,
+        "mismatch": 0,
+        "counter_breaks": 0,
+        "after_done_emissions": 0,
+        "pauses": 9869,
+        "pauses_after_credit": 3797,
+        "pauses_inside_deferred": 2548,
+        "pauses_during_emission": 576,
+        "mid_range_pauses": 0,
+        "max_pending": 6
+      },
+      "raw_stdout": "SUMMARY family=adv:cube_corners n=14 kmax=10 pairs=66 continuations=792 transfers=198 alive=116 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=9869 pauses_after_credit=3797 pauses_inside_deferred=2548 pauses_during_emission=576 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:extremes 0 1 8 3",
-      "wall_seconds": 0.051,
+      "wall_seconds": 0.049,
       "summary": {
         "family": "adv:extremes",
         "n": 12,
@@ -786,13 +819,14 @@
         "pauses_after_credit": 0,
         "pauses_inside_deferred": 891,
         "pauses_during_emission": 189,
+        "mid_range_pauses": 0,
         "max_pending": 4
       },
-      "raw_stdout": "SUMMARY family=adv:extremes n=12 kmax=1 pairs=57 continuations=684 transfers=171 alive=37 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=4867 pauses_after_credit=0 pauses_inside_deferred=891 pauses_during_emission=189 max_pending=4\n"
+      "raw_stdout": "SUMMARY family=adv:extremes n=12 kmax=1 pairs=57 continuations=684 transfers=171 alive=37 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=4867 pauses_after_credit=0 pauses_inside_deferred=891 pauses_during_emission=189 mid_range_pauses=0 max_pending=4\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:extremes 0 1 12 3",
-      "wall_seconds": 0.048,
+      "wall_seconds": 0.054,
       "summary": {
         "family": "adv:extremes",
         "n": 12,
@@ -809,13 +843,14 @@
         "pauses_after_credit": 0,
         "pauses_inside_deferred": 891,
         "pauses_during_emission": 189,
+        "mid_range_pauses": 0,
         "max_pending": 4
       },
-      "raw_stdout": "SUMMARY family=adv:extremes n=12 kmax=1 pairs=57 continuations=684 transfers=171 alive=37 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=4867 pauses_after_credit=0 pauses_inside_deferred=891 pauses_during_emission=189 max_pending=4\n"
+      "raw_stdout": "SUMMARY family=adv:extremes n=12 kmax=1 pairs=57 continuations=684 transfers=171 alive=37 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=4867 pauses_after_credit=0 pauses_inside_deferred=891 pauses_during_emission=189 mid_range_pauses=0 max_pending=4\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:extremes 0 2 8 3",
-      "wall_seconds": 0.066,
+      "wall_seconds": 0.064,
       "summary": {
         "family": "adv:extremes",
         "n": 12,
@@ -832,13 +867,14 @@
         "pauses_after_credit": 1585,
         "pauses_inside_deferred": 1525,
         "pauses_during_emission": 341,
+        "mid_range_pauses": 0,
         "max_pending": 4
       },
-      "raw_stdout": "SUMMARY family=adv:extremes n=12 kmax=2 pairs=57 continuations=684 transfers=171 alive=67 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=6527 pauses_after_credit=1585 pauses_inside_deferred=1525 pauses_during_emission=341 max_pending=4\n"
+      "raw_stdout": "SUMMARY family=adv:extremes n=12 kmax=2 pairs=57 continuations=684 transfers=171 alive=67 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=6527 pauses_after_credit=1585 pauses_inside_deferred=1525 pauses_during_emission=341 mid_range_pauses=0 max_pending=4\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:extremes 0 2 12 3",
-      "wall_seconds": 0.067,
+      "wall_seconds": 0.063,
       "summary": {
         "family": "adv:extremes",
         "n": 12,
@@ -855,35 +891,13 @@
         "pauses_after_credit": 1585,
         "pauses_inside_deferred": 1525,
         "pauses_during_emission": 341,
+        "mid_range_pauses": 0,
         "max_pending": 4
       },
-      "raw_stdout": "SUMMARY family=adv:extremes n=12 kmax=2 pairs=57 continuations=684 transfers=171 alive=67 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=6527 pauses_after_credit=1585 pauses_inside_deferred=1525 pauses_during_emission=341 max_pending=4\n"
+      "raw_stdout": "SUMMARY family=adv:extremes n=12 kmax=2 pairs=57 continuations=684 transfers=171 alive=67 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=6527 pauses_after_credit=1585 pauses_inside_deferred=1525 pauses_during_emission=341 mid_range_pauses=0 max_pending=4\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:extremes 0 5 8 3",
-      "wall_seconds": 0.08,
-      "summary": {
-        "family": "adv:extremes",
-        "n": 12,
-        "kmax": 5,
-        "pairs": 57,
-        "continuations": 684,
-        "transfers": 171,
-        "alive": 100,
-        "ref_mismatch": 0,
-        "mismatch": 0,
-        "counter_breaks": 0,
-        "after_done_emissions": 0,
-        "pauses": 7759,
-        "pauses_after_credit": 2794,
-        "pauses_inside_deferred": 2108,
-        "pauses_during_emission": 524,
-        "max_pending": 4
-      },
-      "raw_stdout": "SUMMARY family=adv:extremes n=12 kmax=5 pairs=57 continuations=684 transfers=171 alive=100 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=7759 pauses_after_credit=2794 pauses_inside_deferred=2108 pauses_during_emission=524 max_pending=4\n"
-    },
-    {
-      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:extremes 0 5 12 3",
       "wall_seconds": 0.076,
       "summary": {
         "family": "adv:extremes",
@@ -901,13 +915,38 @@
         "pauses_after_credit": 2794,
         "pauses_inside_deferred": 2108,
         "pauses_during_emission": 524,
+        "mid_range_pauses": 0,
         "max_pending": 4
       },
-      "raw_stdout": "SUMMARY family=adv:extremes n=12 kmax=5 pairs=57 continuations=684 transfers=171 alive=100 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=7759 pauses_after_credit=2794 pauses_inside_deferred=2108 pauses_during_emission=524 max_pending=4\n"
+      "raw_stdout": "SUMMARY family=adv:extremes n=12 kmax=5 pairs=57 continuations=684 transfers=171 alive=100 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=7759 pauses_after_credit=2794 pauses_inside_deferred=2108 pauses_during_emission=524 mid_range_pauses=0 max_pending=4\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:extremes 0 5 12 3",
+      "wall_seconds": 0.089,
+      "summary": {
+        "family": "adv:extremes",
+        "n": 12,
+        "kmax": 5,
+        "pairs": 57,
+        "continuations": 684,
+        "transfers": 171,
+        "alive": 100,
+        "ref_mismatch": 0,
+        "mismatch": 0,
+        "counter_breaks": 0,
+        "after_done_emissions": 0,
+        "pauses": 7759,
+        "pauses_after_credit": 2794,
+        "pauses_inside_deferred": 2108,
+        "pauses_during_emission": 524,
+        "mid_range_pauses": 0,
+        "max_pending": 4
+      },
+      "raw_stdout": "SUMMARY family=adv:extremes n=12 kmax=5 pairs=57 continuations=684 transfers=171 alive=100 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=7759 pauses_after_credit=2794 pauses_inside_deferred=2108 pauses_during_emission=524 mid_range_pauses=0 max_pending=4\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:extremes 0 10 8 3",
-      "wall_seconds": 0.08,
+      "wall_seconds": 0.089,
       "summary": {
         "family": "adv:extremes",
         "n": 12,
@@ -924,13 +963,14 @@
         "pauses_after_credit": 3121,
         "pauses_inside_deferred": 2260,
         "pauses_during_emission": 579,
+        "mid_range_pauses": 0,
         "max_pending": 4
       },
-      "raw_stdout": "SUMMARY family=adv:extremes n=12 kmax=10 pairs=57 continuations=684 transfers=171 alive=111 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=8082 pauses_after_credit=3121 pauses_inside_deferred=2260 pauses_during_emission=579 max_pending=4\n"
+      "raw_stdout": "SUMMARY family=adv:extremes n=12 kmax=10 pairs=57 continuations=684 transfers=171 alive=111 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=8082 pauses_after_credit=3121 pauses_inside_deferred=2260 pauses_during_emission=579 mid_range_pauses=0 max_pending=4\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:extremes 0 10 12 3",
-      "wall_seconds": 0.083,
+      "wall_seconds": 0.082,
       "summary": {
         "family": "adv:extremes",
         "n": 12,
@@ -947,13 +987,14 @@
         "pauses_after_credit": 3121,
         "pauses_inside_deferred": 2260,
         "pauses_during_emission": 579,
+        "mid_range_pauses": 0,
         "max_pending": 4
       },
-      "raw_stdout": "SUMMARY family=adv:extremes n=12 kmax=10 pairs=57 continuations=684 transfers=171 alive=111 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=8082 pauses_after_credit=3121 pauses_inside_deferred=2260 pauses_during_emission=579 max_pending=4\n"
+      "raw_stdout": "SUMMARY family=adv:extremes n=12 kmax=10 pairs=57 continuations=684 transfers=171 alive=111 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=8082 pauses_after_credit=3121 pauses_inside_deferred=2260 pauses_during_emission=579 mid_range_pauses=0 max_pending=4\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:halfint 0 1 8 3",
-      "wall_seconds": 0.462,
+      "wall_seconds": 0.464,
       "summary": {
         "family": "adv:halfint",
         "n": 60,
@@ -970,13 +1011,14 @@
         "pauses_after_credit": 0,
         "pauses_inside_deferred": 5454,
         "pauses_during_emission": 909,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=adv:halfint n=60 kmax=1 pairs=335 continuations=4020 transfers=1005 alive=197 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=48652 pauses_after_credit=0 pauses_inside_deferred=5454 pauses_during_emission=909 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=adv:halfint n=60 kmax=1 pairs=335 continuations=4020 transfers=1005 alive=197 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=48652 pauses_after_credit=0 pauses_inside_deferred=5454 pauses_during_emission=909 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:halfint 0 1 12 3",
-      "wall_seconds": 0.532,
+      "wall_seconds": 0.466,
       "summary": {
         "family": "adv:halfint",
         "n": 60,
@@ -993,13 +1035,14 @@
         "pauses_after_credit": 0,
         "pauses_inside_deferred": 5454,
         "pauses_during_emission": 909,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=adv:halfint n=60 kmax=1 pairs=335 continuations=4020 transfers=1005 alive=197 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=48652 pauses_after_credit=0 pauses_inside_deferred=5454 pauses_during_emission=909 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=adv:halfint n=60 kmax=1 pairs=335 continuations=4020 transfers=1005 alive=197 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=48652 pauses_after_credit=0 pauses_inside_deferred=5454 pauses_during_emission=909 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:halfint 0 2 8 3",
-      "wall_seconds": 0.644,
+      "wall_seconds": 0.597,
       "summary": {
         "family": "adv:halfint",
         "n": 60,
@@ -1016,13 +1059,14 @@
         "pauses_after_credit": 15178,
         "pauses_inside_deferred": 8359,
         "pauses_during_emission": 1456,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=adv:halfint n=60 kmax=2 pairs=335 continuations=4020 transfers=1005 alive=304 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=65204 pauses_after_credit=15178 pauses_inside_deferred=8359 pauses_during_emission=1456 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=adv:halfint n=60 kmax=2 pairs=335 continuations=4020 transfers=1005 alive=304 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=65204 pauses_after_credit=15178 pauses_inside_deferred=8359 pauses_during_emission=1456 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:halfint 0 2 12 3",
-      "wall_seconds": 0.716,
+      "wall_seconds": 0.632,
       "summary": {
         "family": "adv:halfint",
         "n": 60,
@@ -1039,13 +1083,14 @@
         "pauses_after_credit": 15178,
         "pauses_inside_deferred": 8359,
         "pauses_during_emission": 1456,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=adv:halfint n=60 kmax=2 pairs=335 continuations=4020 transfers=1005 alive=304 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=65204 pauses_after_credit=15178 pauses_inside_deferred=8359 pauses_during_emission=1456 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=adv:halfint n=60 kmax=2 pairs=335 continuations=4020 transfers=1005 alive=304 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=65204 pauses_after_credit=15178 pauses_inside_deferred=8359 pauses_during_emission=1456 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:halfint 0 5 8 3",
-      "wall_seconds": 1.057,
+      "wall_seconds": 0.942,
       "summary": {
         "family": "adv:halfint",
         "n": 60,
@@ -1062,13 +1107,14 @@
         "pauses_after_credit": 51875,
         "pauses_inside_deferred": 15640,
         "pauses_during_emission": 2523,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=adv:halfint n=60 kmax=5 pairs=335 continuations=4020 transfers=1005 alive=523 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=102407 pauses_after_credit=51875 pauses_inside_deferred=15640 pauses_during_emission=2523 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=adv:halfint n=60 kmax=5 pairs=335 continuations=4020 transfers=1005 alive=523 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=102407 pauses_after_credit=51875 pauses_inside_deferred=15640 pauses_during_emission=2523 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:halfint 0 5 12 3",
-      "wall_seconds": 0.951,
+      "wall_seconds": 0.935,
       "summary": {
         "family": "adv:halfint",
         "n": 60,
@@ -1085,13 +1131,14 @@
         "pauses_after_credit": 51875,
         "pauses_inside_deferred": 15640,
         "pauses_during_emission": 2523,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=adv:halfint n=60 kmax=5 pairs=335 continuations=4020 transfers=1005 alive=523 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=102407 pauses_after_credit=51875 pauses_inside_deferred=15640 pauses_during_emission=2523 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=adv:halfint n=60 kmax=5 pairs=335 continuations=4020 transfers=1005 alive=523 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=102407 pauses_after_credit=51875 pauses_inside_deferred=15640 pauses_during_emission=2523 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:halfint 0 10 8 3",
-      "wall_seconds": 1.172,
+      "wall_seconds": 1.157,
       "summary": {
         "family": "adv:halfint",
         "n": 60,
@@ -1108,13 +1155,14 @@
         "pauses_after_credit": 77200,
         "pauses_inside_deferred": 20878,
         "pauses_during_emission": 3100,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=adv:halfint n=60 kmax=10 pairs=335 continuations=4020 transfers=1005 alive=646 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=127772 pauses_after_credit=77200 pauses_inside_deferred=20878 pauses_during_emission=3100 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=adv:halfint n=60 kmax=10 pairs=335 continuations=4020 transfers=1005 alive=646 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=127772 pauses_after_credit=77200 pauses_inside_deferred=20878 pauses_during_emission=3100 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:halfint 0 10 12 3",
-      "wall_seconds": 1.246,
+      "wall_seconds": 1.142,
       "summary": {
         "family": "adv:halfint",
         "n": 60,
@@ -1131,13 +1179,14 @@
         "pauses_after_credit": 77200,
         "pauses_inside_deferred": 20878,
         "pauses_during_emission": 3100,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=adv:halfint n=60 kmax=10 pairs=335 continuations=4020 transfers=1005 alive=646 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=127772 pauses_after_credit=77200 pauses_inside_deferred=20878 pauses_during_emission=3100 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=adv:halfint n=60 kmax=10 pairs=335 continuations=4020 transfers=1005 alive=646 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=127772 pauses_after_credit=77200 pauses_inside_deferred=20878 pauses_during_emission=3100 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:dense_ball 0 1 8 3",
-      "wall_seconds": 0.417,
+      "wall_seconds": 0.325,
       "summary": {
         "family": "adv:dense_ball",
         "n": 44,
@@ -1154,13 +1203,14 @@
         "pauses_after_credit": 0,
         "pauses_inside_deferred": 4075,
         "pauses_during_emission": 870,
+        "mid_range_pauses": 0,
         "max_pending": 7
       },
-      "raw_stdout": "SUMMARY family=adv:dense_ball n=44 kmax=1 pairs=243 continuations=2916 transfers=729 alive=172 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=33821 pauses_after_credit=0 pauses_inside_deferred=4075 pauses_during_emission=870 max_pending=7\n"
+      "raw_stdout": "SUMMARY family=adv:dense_ball n=44 kmax=1 pairs=243 continuations=2916 transfers=729 alive=172 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=33821 pauses_after_credit=0 pauses_inside_deferred=4075 pauses_during_emission=870 mid_range_pauses=0 max_pending=7\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:dense_ball 0 1 12 3",
-      "wall_seconds": 0.365,
+      "wall_seconds": 0.344,
       "summary": {
         "family": "adv:dense_ball",
         "n": 44,
@@ -1177,13 +1227,14 @@
         "pauses_after_credit": 0,
         "pauses_inside_deferred": 4075,
         "pauses_during_emission": 870,
+        "mid_range_pauses": 0,
         "max_pending": 7
       },
-      "raw_stdout": "SUMMARY family=adv:dense_ball n=44 kmax=1 pairs=243 continuations=2916 transfers=729 alive=172 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=33821 pauses_after_credit=0 pauses_inside_deferred=4075 pauses_during_emission=870 max_pending=7\n"
+      "raw_stdout": "SUMMARY family=adv:dense_ball n=44 kmax=1 pairs=243 continuations=2916 transfers=729 alive=172 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=33821 pauses_after_credit=0 pauses_inside_deferred=4075 pauses_during_emission=870 mid_range_pauses=0 max_pending=7\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:dense_ball 0 2 8 3",
-      "wall_seconds": 0.432,
+      "wall_seconds": 0.446,
       "summary": {
         "family": "adv:dense_ball",
         "n": 44,
@@ -1200,13 +1251,14 @@
         "pauses_after_credit": 12010,
         "pauses_inside_deferred": 6386,
         "pauses_during_emission": 1113,
+        "mid_range_pauses": 0,
         "max_pending": 7
       },
-      "raw_stdout": "SUMMARY family=adv:dense_ball n=44 kmax=2 pairs=243 continuations=2916 transfers=729 alive=231 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=46538 pauses_after_credit=12010 pauses_inside_deferred=6386 pauses_during_emission=1113 max_pending=7\n"
+      "raw_stdout": "SUMMARY family=adv:dense_ball n=44 kmax=2 pairs=243 continuations=2916 transfers=729 alive=231 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=46538 pauses_after_credit=12010 pauses_inside_deferred=6386 pauses_during_emission=1113 mid_range_pauses=0 max_pending=7\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:dense_ball 0 2 12 3",
-      "wall_seconds": 0.468,
+      "wall_seconds": 0.437,
       "summary": {
         "family": "adv:dense_ball",
         "n": 44,
@@ -1223,12 +1275,37 @@
         "pauses_after_credit": 12010,
         "pauses_inside_deferred": 6386,
         "pauses_during_emission": 1113,
+        "mid_range_pauses": 0,
         "max_pending": 7
       },
-      "raw_stdout": "SUMMARY family=adv:dense_ball n=44 kmax=2 pairs=243 continuations=2916 transfers=729 alive=231 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=46538 pauses_after_credit=12010 pauses_inside_deferred=6386 pauses_during_emission=1113 max_pending=7\n"
+      "raw_stdout": "SUMMARY family=adv:dense_ball n=44 kmax=2 pairs=243 continuations=2916 transfers=729 alive=231 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=46538 pauses_after_credit=12010 pauses_inside_deferred=6386 pauses_during_emission=1113 mid_range_pauses=0 max_pending=7\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:dense_ball 0 5 8 3",
+      "wall_seconds": 0.671,
+      "summary": {
+        "family": "adv:dense_ball",
+        "n": 44,
+        "kmax": 5,
+        "pairs": 243,
+        "continuations": 2916,
+        "transfers": 729,
+        "alive": 386,
+        "ref_mismatch": 0,
+        "mismatch": 0,
+        "counter_breaks": 0,
+        "after_done_emissions": 0,
+        "pauses": 72947,
+        "pauses_after_credit": 38170,
+        "pauses_inside_deferred": 12936,
+        "pauses_during_emission": 1922,
+        "mid_range_pauses": 0,
+        "max_pending": 7
+      },
+      "raw_stdout": "SUMMARY family=adv:dense_ball n=44 kmax=5 pairs=243 continuations=2916 transfers=729 alive=386 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=72947 pauses_after_credit=38170 pauses_inside_deferred=12936 pauses_during_emission=1922 mid_range_pauses=0 max_pending=7\n"
+    },
+    {
+      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:dense_ball 0 5 12 3",
       "wall_seconds": 0.675,
       "summary": {
         "family": "adv:dense_ball",
@@ -1246,36 +1323,14 @@
         "pauses_after_credit": 38170,
         "pauses_inside_deferred": 12936,
         "pauses_during_emission": 1922,
+        "mid_range_pauses": 0,
         "max_pending": 7
       },
-      "raw_stdout": "SUMMARY family=adv:dense_ball n=44 kmax=5 pairs=243 continuations=2916 transfers=729 alive=386 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=72947 pauses_after_credit=38170 pauses_inside_deferred=12936 pauses_during_emission=1922 max_pending=7\n"
-    },
-    {
-      "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:dense_ball 0 5 12 3",
-      "wall_seconds": 0.689,
-      "summary": {
-        "family": "adv:dense_ball",
-        "n": 44,
-        "kmax": 5,
-        "pairs": 243,
-        "continuations": 2916,
-        "transfers": 729,
-        "alive": 386,
-        "ref_mismatch": 0,
-        "mismatch": 0,
-        "counter_breaks": 0,
-        "after_done_emissions": 0,
-        "pauses": 72947,
-        "pauses_after_credit": 38170,
-        "pauses_inside_deferred": 12936,
-        "pauses_during_emission": 1922,
-        "max_pending": 7
-      },
-      "raw_stdout": "SUMMARY family=adv:dense_ball n=44 kmax=5 pairs=243 continuations=2916 transfers=729 alive=386 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=72947 pauses_after_credit=38170 pauses_inside_deferred=12936 pauses_during_emission=1922 max_pending=7\n"
+      "raw_stdout": "SUMMARY family=adv:dense_ball n=44 kmax=5 pairs=243 continuations=2916 transfers=729 alive=386 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=72947 pauses_after_credit=38170 pauses_inside_deferred=12936 pauses_during_emission=1922 mid_range_pauses=0 max_pending=7\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:dense_ball 0 10 8 3",
-      "wall_seconds": 0.806,
+      "wall_seconds": 0.802,
       "summary": {
         "family": "adv:dense_ball",
         "n": 44,
@@ -1292,13 +1347,14 @@
         "pauses_after_credit": 53498,
         "pauses_inside_deferred": 17058,
         "pauses_during_emission": 2613,
+        "mid_range_pauses": 0,
         "max_pending": 7
       },
-      "raw_stdout": "SUMMARY family=adv:dense_ball n=44 kmax=10 pairs=243 continuations=2916 transfers=729 alive=515 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=88337 pauses_after_credit=53498 pauses_inside_deferred=17058 pauses_during_emission=2613 max_pending=7\n"
+      "raw_stdout": "SUMMARY family=adv:dense_ball n=44 kmax=10 pairs=243 continuations=2916 transfers=729 alive=515 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=88337 pauses_after_credit=53498 pauses_inside_deferred=17058 pauses_during_emission=2613 mid_range_pauses=0 max_pending=7\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume adv:dense_ball 0 10 12 3",
-      "wall_seconds": 0.831,
+      "wall_seconds": 0.81,
       "summary": {
         "family": "adv:dense_ball",
         "n": 44,
@@ -1315,13 +1371,14 @@
         "pauses_after_credit": 53498,
         "pauses_inside_deferred": 17058,
         "pauses_during_emission": 2613,
+        "mid_range_pauses": 0,
         "max_pending": 7
       },
-      "raw_stdout": "SUMMARY family=adv:dense_ball n=44 kmax=10 pairs=243 continuations=2916 transfers=729 alive=515 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=88337 pauses_after_credit=53498 pauses_inside_deferred=17058 pauses_during_emission=2613 max_pending=7\n"
+      "raw_stdout": "SUMMARY family=adv:dense_ball n=44 kmax=10 pairs=243 continuations=2916 transfers=729 alive=515 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=88337 pauses_after_credit=53498 pauses_inside_deferred=17058 pauses_during_emission=2613 mid_range_pauses=0 max_pending=7\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume uniform 800 1 8 3",
-      "wall_seconds": 0.865,
+      "wall_seconds": 0.841,
       "summary": {
         "family": "uniform",
         "n": 800,
@@ -1338,13 +1395,14 @@
         "pauses_after_credit": 0,
         "pauses_inside_deferred": 6629,
         "pauses_during_emission": 1149,
+        "mid_range_pauses": 0,
         "max_pending": 7
       },
-      "raw_stdout": "SUMMARY family=uniform n=800 kmax=1 pairs=400 continuations=4800 transfers=1200 alive=235 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=89261 pauses_after_credit=0 pauses_inside_deferred=6629 pauses_during_emission=1149 max_pending=7\n"
+      "raw_stdout": "SUMMARY family=uniform n=800 kmax=1 pairs=400 continuations=4800 transfers=1200 alive=235 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=89261 pauses_after_credit=0 pauses_inside_deferred=6629 pauses_during_emission=1149 mid_range_pauses=0 max_pending=7\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume uniform 800 3 8 3",
-      "wall_seconds": 1.313,
+      "wall_seconds": 1.277,
       "summary": {
         "family": "uniform",
         "n": 800,
@@ -1361,13 +1419,14 @@
         "pauses_after_credit": 47047,
         "pauses_inside_deferred": 12234,
         "pauses_during_emission": 1976,
+        "mid_range_pauses": 0,
         "max_pending": 7
       },
-      "raw_stdout": "SUMMARY family=uniform n=800 kmax=3 pairs=400 continuations=4800 transfers=1200 alive=388 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=140311 pauses_after_credit=47047 pauses_inside_deferred=12234 pauses_during_emission=1976 max_pending=7\n"
+      "raw_stdout": "SUMMARY family=uniform n=800 kmax=3 pairs=400 continuations=4800 transfers=1200 alive=388 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=140311 pauses_after_credit=47047 pauses_inside_deferred=12234 pauses_during_emission=1976 mid_range_pauses=0 max_pending=7\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume uniform 800 10 8 3",
-      "wall_seconds": 2.195,
+      "wall_seconds": 2.127,
       "summary": {
         "family": "uniform",
         "n": 800,
@@ -1384,13 +1443,14 @@
         "pauses_after_credit": 144042,
         "pauses_inside_deferred": 24256,
         "pauses_during_emission": 3111,
+        "mid_range_pauses": 0,
         "max_pending": 7
       },
-      "raw_stdout": "SUMMARY family=uniform n=800 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=623 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=237901 pauses_after_credit=144042 pauses_inside_deferred=24256 pauses_during_emission=3111 max_pending=7\n"
+      "raw_stdout": "SUMMARY family=uniform n=800 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=623 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=237901 pauses_after_credit=144042 pauses_inside_deferred=24256 pauses_during_emission=3111 mid_range_pauses=0 max_pending=7\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume uniform 800 10 8 11",
-      "wall_seconds": 2.61,
+      "wall_seconds": 2.544,
       "summary": {
         "family": "uniform",
         "n": 800,
@@ -1407,13 +1467,14 @@
         "pauses_after_credit": 184700,
         "pauses_inside_deferred": 26712,
         "pauses_during_emission": 3088,
+        "mid_range_pauses": 0,
         "max_pending": 8
       },
-      "raw_stdout": "SUMMARY family=uniform n=800 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=622 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=287016 pauses_after_credit=184700 pauses_inside_deferred=26712 pauses_during_emission=3088 max_pending=8\n"
+      "raw_stdout": "SUMMARY family=uniform n=800 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=622 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=287016 pauses_after_credit=184700 pauses_inside_deferred=26712 pauses_during_emission=3088 mid_range_pauses=0 max_pending=8\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume terrain 800 1 8 3",
-      "wall_seconds": 0.678,
+      "wall_seconds": 0.654,
       "summary": {
         "family": "terrain",
         "n": 800,
@@ -1430,13 +1491,14 @@
         "pauses_after_credit": 0,
         "pauses_inside_deferred": 4838,
         "pauses_during_emission": 925,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=terrain n=800 kmax=1 pairs=400 continuations=4800 transfers=1200 alive=183 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=69052 pauses_after_credit=0 pauses_inside_deferred=4838 pauses_during_emission=925 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=terrain n=800 kmax=1 pairs=400 continuations=4800 transfers=1200 alive=183 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=69052 pauses_after_credit=0 pauses_inside_deferred=4838 pauses_during_emission=925 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume terrain 800 3 8 3",
-      "wall_seconds": 1.039,
+      "wall_seconds": 1.024,
       "summary": {
         "family": "terrain",
         "n": 800,
@@ -1453,13 +1515,14 @@
         "pauses_after_credit": 39383,
         "pauses_inside_deferred": 11488,
         "pauses_during_emission": 1713,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=terrain n=800 kmax=3 pairs=400 continuations=4800 transfers=1200 alive=345 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=110983 pauses_after_credit=39383 pauses_inside_deferred=11488 pauses_during_emission=1713 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=terrain n=800 kmax=3 pairs=400 continuations=4800 transfers=1200 alive=345 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=110983 pauses_after_credit=39383 pauses_inside_deferred=11488 pauses_during_emission=1713 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume terrain 800 10 8 3",
-      "wall_seconds": 1.664,
+      "wall_seconds": 1.622,
       "summary": {
         "family": "terrain",
         "n": 800,
@@ -1476,13 +1539,14 @@
         "pauses_after_credit": 104445,
         "pauses_inside_deferred": 24252,
         "pauses_during_emission": 3095,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=terrain n=800 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=619 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=177282 pauses_after_credit=104445 pauses_inside_deferred=24252 pauses_during_emission=3095 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=terrain n=800 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=619 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=177282 pauses_after_credit=104445 pauses_inside_deferred=24252 pauses_during_emission=3095 mid_range_pauses=0 max_pending=6\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume terrain 800 10 8 11",
-      "wall_seconds": 1.357,
+      "wall_seconds": 1.27,
       "summary": {
         "family": "terrain",
         "n": 800,
@@ -1499,13 +1563,14 @@
         "pauses_after_credit": 72123,
         "pauses_inside_deferred": 18494,
         "pauses_during_emission": 2829,
+        "mid_range_pauses": 0,
         "max_pending": 7
       },
-      "raw_stdout": "SUMMARY family=terrain n=800 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=581 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=138739 pauses_after_credit=72123 pauses_inside_deferred=18494 pauses_during_emission=2829 max_pending=7\n"
+      "raw_stdout": "SUMMARY family=terrain n=800 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=581 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=138739 pauses_after_credit=72123 pauses_inside_deferred=18494 pauses_during_emission=2829 mid_range_pauses=0 max_pending=7\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume clusters 800 1 8 3",
-      "wall_seconds": 0.813,
+      "wall_seconds": 0.802,
       "summary": {
         "family": "clusters",
         "n": 800,
@@ -1522,13 +1587,14 @@
         "pauses_after_credit": 0,
         "pauses_inside_deferred": 5055,
         "pauses_during_emission": 909,
+        "mid_range_pauses": 0,
         "max_pending": 7
       },
-      "raw_stdout": "SUMMARY family=clusters n=800 kmax=1 pairs=400 continuations=4800 transfers=1200 alive=177 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=86411 pauses_after_credit=0 pauses_inside_deferred=5055 pauses_during_emission=909 max_pending=7\n"
+      "raw_stdout": "SUMMARY family=clusters n=800 kmax=1 pairs=400 continuations=4800 transfers=1200 alive=177 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=86411 pauses_after_credit=0 pauses_inside_deferred=5055 pauses_during_emission=909 mid_range_pauses=0 max_pending=7\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume clusters 800 3 8 3",
-      "wall_seconds": 1.313,
+      "wall_seconds": 1.332,
       "summary": {
         "family": "clusters",
         "n": 800,
@@ -1545,13 +1611,14 @@
         "pauses_after_credit": 53509,
         "pauses_inside_deferred": 12255,
         "pauses_during_emission": 1714,
+        "mid_range_pauses": 0,
         "max_pending": 7
       },
-      "raw_stdout": "SUMMARY family=clusters n=800 kmax=3 pairs=400 continuations=4800 transfers=1200 alive=336 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=143326 pauses_after_credit=53509 pauses_inside_deferred=12255 pauses_during_emission=1714 max_pending=7\n"
+      "raw_stdout": "SUMMARY family=clusters n=800 kmax=3 pairs=400 continuations=4800 transfers=1200 alive=336 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=143326 pauses_after_credit=53509 pauses_inside_deferred=12255 pauses_during_emission=1714 mid_range_pauses=0 max_pending=7\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume clusters 800 10 8 3",
-      "wall_seconds": 2.224,
+      "wall_seconds": 2.193,
       "summary": {
         "family": "clusters",
         "n": 800,
@@ -1568,13 +1635,14 @@
         "pauses_after_credit": 154057,
         "pauses_inside_deferred": 27506,
         "pauses_during_emission": 3142,
+        "mid_range_pauses": 0,
         "max_pending": 7
       },
-      "raw_stdout": "SUMMARY family=clusters n=800 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=608 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=245008 pauses_after_credit=154057 pauses_inside_deferred=27506 pauses_during_emission=3142 max_pending=7\n"
+      "raw_stdout": "SUMMARY family=clusters n=800 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=608 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=245008 pauses_after_credit=154057 pauses_inside_deferred=27506 pauses_during_emission=3142 mid_range_pauses=0 max_pending=7\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume clusters 800 10 8 11",
-      "wall_seconds": 1.913,
+      "wall_seconds": 1.882,
       "summary": {
         "family": "clusters",
         "n": 800,
@@ -1591,13 +1659,14 @@
         "pauses_after_credit": 122507,
         "pauses_inside_deferred": 24214,
         "pauses_during_emission": 3001,
+        "mid_range_pauses": 0,
         "max_pending": 7
       },
-      "raw_stdout": "SUMMARY family=clusters n=800 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=621 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=209463 pauses_after_credit=122507 pauses_inside_deferred=24214 pauses_during_emission=3001 max_pending=7\n"
+      "raw_stdout": "SUMMARY family=clusters n=800 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=621 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=209463 pauses_after_credit=122507 pauses_inside_deferred=24214 pauses_during_emission=3001 mid_range_pauses=0 max_pending=7\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume rows 800 1 8 3",
-      "wall_seconds": 0.554,
+      "wall_seconds": 0.548,
       "summary": {
         "family": "rows",
         "n": 800,
@@ -1614,13 +1683,14 @@
         "pauses_after_credit": 0,
         "pauses_inside_deferred": 9896,
         "pauses_during_emission": 1314,
+        "mid_range_pauses": 0,
         "max_pending": 7
       },
-      "raw_stdout": "SUMMARY family=rows n=800 kmax=1 pairs=400 continuations=4800 transfers=1200 alive=276 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=57031 pauses_after_credit=0 pauses_inside_deferred=9896 pauses_during_emission=1314 max_pending=7\n"
+      "raw_stdout": "SUMMARY family=rows n=800 kmax=1 pairs=400 continuations=4800 transfers=1200 alive=276 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=57031 pauses_after_credit=0 pauses_inside_deferred=9896 pauses_during_emission=1314 mid_range_pauses=0 max_pending=7\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume rows 800 3 8 3",
-      "wall_seconds": 0.654,
+      "wall_seconds": 0.649,
       "summary": {
         "family": "rows",
         "n": 800,
@@ -1637,13 +1707,14 @@
         "pauses_after_credit": 8410,
         "pauses_inside_deferred": 14070,
         "pauses_during_emission": 2440,
+        "mid_range_pauses": 0,
         "max_pending": 7
       },
-      "raw_stdout": "SUMMARY family=rows n=800 kmax=3 pairs=400 continuations=4800 transfers=1200 alive=498 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=66667 pauses_after_credit=8410 pauses_inside_deferred=14070 pauses_during_emission=2440 max_pending=7\n"
+      "raw_stdout": "SUMMARY family=rows n=800 kmax=3 pairs=400 continuations=4800 transfers=1200 alive=498 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=66667 pauses_after_credit=8410 pauses_inside_deferred=14070 pauses_during_emission=2440 mid_range_pauses=0 max_pending=7\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume rows 800 10 8 3",
-      "wall_seconds": 0.796,
+      "wall_seconds": 0.774,
       "summary": {
         "family": "rows",
         "n": 800,
@@ -1660,13 +1731,14 @@
         "pauses_after_credit": 20400,
         "pauses_inside_deferred": 19949,
         "pauses_during_emission": 3587,
+        "mid_range_pauses": 0,
         "max_pending": 7
       },
-      "raw_stdout": "SUMMARY family=rows n=800 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=717 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=80217 pauses_after_credit=20400 pauses_inside_deferred=19949 pauses_during_emission=3587 max_pending=7\n"
+      "raw_stdout": "SUMMARY family=rows n=800 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=717 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=80217 pauses_after_credit=20400 pauses_inside_deferred=19949 pauses_during_emission=3587 mid_range_pauses=0 max_pending=7\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume rows 800 10 8 11",
-      "wall_seconds": 0.756,
+      "wall_seconds": 0.725,
       "summary": {
         "family": "rows",
         "n": 800,
@@ -1683,13 +1755,14 @@
         "pauses_after_credit": 18247,
         "pauses_inside_deferred": 19077,
         "pauses_during_emission": 3546,
+        "mid_range_pauses": 0,
         "max_pending": 7
       },
-      "raw_stdout": "SUMMARY family=rows n=800 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=700 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=76774 pauses_after_credit=18247 pauses_inside_deferred=19077 pauses_during_emission=3546 max_pending=7\n"
+      "raw_stdout": "SUMMARY family=rows n=800 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=700 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=76774 pauses_after_credit=18247 pauses_inside_deferred=19077 pauses_during_emission=3546 mid_range_pauses=0 max_pending=7\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume uniform 2000 10 8 3",
-      "wall_seconds": 2.307,
+      "wall_seconds": 2.217,
       "summary": {
         "family": "uniform",
         "n": 2000,
@@ -1706,13 +1779,14 @@
         "pauses_after_credit": 153638,
         "pauses_inside_deferred": 24616,
         "pauses_during_emission": 3072,
+        "mid_range_pauses": 0,
         "max_pending": 8
       },
-      "raw_stdout": "SUMMARY family=uniform n=2000 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=604 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=247797 pauses_after_credit=153638 pauses_inside_deferred=24616 pauses_during_emission=3072 max_pending=8\n"
+      "raw_stdout": "SUMMARY family=uniform n=2000 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=604 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=247797 pauses_after_credit=153638 pauses_inside_deferred=24616 pauses_during_emission=3072 mid_range_pauses=0 max_pending=8\n"
     },
     {
       "command": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/snapshot_resume_smoke/verify_build/chain_verify_resume clusters 2000 10 8 3",
-      "wall_seconds": 2.032,
+      "wall_seconds": 2.006,
       "summary": {
         "family": "clusters",
         "n": 2000,
@@ -1729,11 +1803,12 @@
         "pauses_after_credit": 134798,
         "pauses_inside_deferred": 20244,
         "pauses_during_emission": 2950,
+        "mid_range_pauses": 0,
         "max_pending": 6
       },
-      "raw_stdout": "SUMMARY family=clusters n=2000 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=574 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=223833 pauses_after_credit=134798 pauses_inside_deferred=20244 pauses_during_emission=2950 max_pending=6\n"
+      "raw_stdout": "SUMMARY family=clusters n=2000 kmax=10 pairs=400 continuations=4800 transfers=1200 alive=574 ref_mismatch=0 mismatch=0 counter_breaks=0 after_done_emissions=0 pauses=223833 pauses_after_credit=134798 pauses_inside_deferred=20244 pauses_during_emission=2950 mid_range_pauses=0 max_pending=6\n"
     }
   ],
-  "stable_digest_without_times": "79f2e1f63dfa527ccf8cd7a052541e563bbd67ac9716385487413b3a25cc0439",
+  "stable_digest_without_times": "cc23d385e8a6bed4dc62f228df12fcb7cfb673b3425929124a3a77a2abd01792",
   "scope": "Exactitude et reprise des continuations à ancre unique ; aucun temps produit, aucune tour FULL, aucun raccord Pool/joint."
 }

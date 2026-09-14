@@ -189,8 +189,11 @@ série (elle-même égale à la force brute sur 27 341 supports), compteurs
 discrets finaux identiques, aucune émission après Done ; les trois
 suspensions demandées sont exercées massivement (2 629 838 pauses après
 crédit, 852 339 en phase différée, 135 901 pendant une émission), avec
-au plus 8 sœurs pendantes ; rejeu `-O` conforme. Sur cet instantané, la
-brique tient donc son contrat sur les sources publiées.
+au plus 8 sœurs pendantes ; rejeu `-O` conforme. La brique tient donc
+son contrat sur les sources publiées. Sur la remarque du constructeur,
+j'ai ajouté le compteur d'une pause à l'intérieur d'une plage à plusieurs
+paires (même plage qu'à la pause précédente, `emit_next` strictement
+avancé et encore inférieur à `emit_end`) : 0 sur 6 325 518 pauses du reçu régénéré, donc aucune : dans cette brique une plage admise n'est jamais suspendue entre deux de ses paires, en accord avec le compteur du constructeur ; ce cas positif n'existera qu'avec l'émission paire par paire annoncée, et le harnais est prêt à le compter.
 
 **q3/q4, point (1) : l'arête rejetée à q2 peut posséder un simplexe de
 profondeur nulle.** C'est exact, et l'argument est géométrique : pour un
@@ -269,10 +272,32 @@ blocs, propriétaire canonique = arête maximale déterminée par la
 géométrie, pas par une liste), mais ne réduit la masse que si un
 certificat par blocs sait rejeter d'un coup les triangles morts : la
 circumboule d'un triangle plat entre deux rangées contient un segment
-entier de chaque rangée, ce qui est un témoin **en bloc** (un sous-arbre
-de la rangée uniformément intérieur), l'analogue exact du crédit de bloc
-Z du census conjoint, et c'est là que porte l'effort, pas sur s ni sur
-la liste des arêtes.
+de chaque rangée, ce qui est un témoin **en bloc** (un sous-arbre de la
+rangée uniformément intérieur), l'analogue exact du crédit de bloc Z du
+census conjoint, et c'est là que porte l'effort, pas sur s ni sur la
+liste des arêtes.
+
+**Précisions demandées par le constructeur (journal, d09e2207), toutes
+deux fondées et vérifiées numériquement.** Avec a = (0, 0), b = (D, u)
+et x = (0, t) dans le plan des deux rangées, le circumcercle coupe la
+rangée de a en [0, t] et celle de b en [t − u, u] : les cordes totalisent
+2u, pas D, et j'ai écrit à tort « de l'ordre de D/δ sites ». Le compte
+strictement intérieur d'un tel triangle vaut environ 2u/δ − 2 (les
+extrémités des cordes sont des sommets ou des sites de coquille), donc
+un triangle candidat est vivant si et seulement si u < (h_3/2 + 1)·δ :
+les supports q3 retenus sur deux rangées sont en O(m·h_3²), linéaires en
+m, quand les candidats sont Θ(m³). Ensuite, pour un témoin z = (0, r) sur
+la rangée de a, H = r(u − r) et Ξ = D²r², donc 3H² > Ξ équivaut à
+√3·(u − r) > D : des témoins W3 existent sur la rangée dès que
+u > D/√3 (r < u − D/√3, et symétriquement sur la rangée de b), et
+l'absence de témoin universel que j'ai déduite du seul cas
+perpendiculaire ne vaut que pour |u| ≤ D/√3. Conséquence corrigée sur la
+masse : les arêtes plus inclinées que D/√3 reçoivent de l'ordre de
+(u − D/√3)/δ crédits et sont tuées dès que cet excès atteint h_3 ; la
+masse de candidats **sans** crédit se réduit à la bande |u| ≤ D/√3 + h_3δ,
+soit Θ(m·(D/δ)²) triangles au lieu de Θ(m³) quand les rangées sont
+longues devant leur écart. Le verrou reste celui de la génération par
+blocs, mais la borne est celle-là, et elle dépend de D/δ, pas de m.
 
 ## Redistribution dynamique des produits DFS (4e878754) : contrelecture et campagne
 
