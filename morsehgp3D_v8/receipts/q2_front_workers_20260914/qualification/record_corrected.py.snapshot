@@ -1,0 +1,306 @@
+#!/usr/bin/env python3
+"""Capture local WSPD/q2 qualification attempts without overwriting evidence.
+
+Invoke release/sanitize to run the 53 CTests plus bounded C++/CLI checks.
+Invoke readers to run the normal/-O campaign readers and repository doc check.
+This script never builds binaries and never qualifies the FULL/G4 contracts.
+"""
+
+from __future__ import annotations
+
+import argparse
+import base64
+import hashlib
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+import tempfile
+from copy import deepcopy
+from typing import Any
+import xml.etree.ElementTree as ET
+
+
+ROOT = Path(__file__).resolve().parents[2]
+SOURCE = ROOT / "morsehgp3D_v8"
+RECEIPTS = SOURCE / "receipts/q2_front_workers_20260914"
+DEST = RECEIPTS / "qualification"
+RELEASE = ROOT / "build/v8_front_workers_20260914"
+SANITIZE = ROOT / "build/v8_front_workers_sanitize_20260914"
+OLD_RELEASE = ROOT / "build/v8_pool_terminal_20260914"
+READER = SOURCE / "bench/run_wspd_q2_parallel_matrix.py"
+sys.path.insert(0, str(SOURCE / "bench"))
+from run_p0_matrix import invoke as invoke_probe, on_signal, parse_result, utc_stamp  # noqa: E402
+
+
+def require(condition: bool, message: str) -> None:
+    if not condition:
+        raise RuntimeError(message)
+
+
+def digest(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def write_json(path: Path, value: Any) -> None:
+    with path.open("x", encoding="utf-8") as stream:
+        json.dump(value, stream, indent=2, allow_nan=False)
+        stream.write("\n")
+
+
+def source_pins() -> dict[str, str]:
+    paths = [Path(__file__).resolve(), SOURCE / "CMakeLists.txt", ROOT / "tools/check_docs.py"]
+    for directory in ("src", "tests", "oracle", "bench"):
+        paths.extend(path for path in (SOURCE / directory).rglob("*")
+                     if path.is_file() and path.suffix in (".cpp", ".hpp", ".py"))
+    return {str(path.relative_to(ROOT)): digest(path) for path in sorted(paths)}
+
+
+def artifact_pins(builds: list[Path], campaign: Path | None) -> dict[str, str]:
+    paths: set[Path] = set()
+    for build in builds:
+        paths.add(build / "CMakeCache.txt")
+        paths.update(path for path in build.glob("mhgp8_*")
+                     if path.is_file() and os.access(path, os.X_OK))
+        for name in ("mhgp8_wspd_q2_census_probe", "mhgp8_wspd_q2_parallel_probe", "mhgp8_wspd_q2_census_gate",
+                     "mhgp8_wspd_front_gate", "mhgp8_q2_census_gate", "mhgp8_q2_sibling_gate", "mhgp8_q2_witness_order_gate", "mhgp8_q2_joint_gate", "mhgp8_q2_joint_bounds_gate", "mhgp8_q2_node_pool_gate", "mhgp8_q2_terminal_pool_gate", "mhgp8_wspd_front_jobs_gate", "mhgp8_wspd_q2_parallel_gate"):
+            require((build / name) in paths, f"missing required qualification binary: {build / name}")
+    if campaign is not None:
+        for name in ("MANIFEST.json", "MEASURES.jsonl", "COMPLETION.json"):
+            paths.update(path for path in campaign.rglob(name) if DEST not in path.parents)
+        require(any(path.name == "MANIFEST.json" for path in paths), "no campaign manifest to read")
+    return {str(path.relative_to(ROOT)): digest(path) for path in sorted(paths)}
+
+
+def invoke(command: list[str], record: dict, environment: dict[str, str]) -> None:
+    """Use the shared interruption-safe collector, qualified by its own gate."""
+    invoke_probe(command, environment, ROOT, record, new_session=True)
+
+
+def capture(command: list[str], label: str, expected: int, output: Path,
+            environment: dict[str, str]) -> dict:
+    record: dict[str, Any] = dict(command=command, cwd=str(ROOT), label=label,
+        expected_exit_code=expected, started_utc=utc_stamp(), status="failed", exit_code=None,
+        stdout="", stderr="", stdout_base64="", stderr_base64="")
+    print(json.dumps(dict(starting=label, command=command)), flush=True)
+    try:
+        invoke(command, record, environment)
+        require(record["exit_code"] == expected,
+                f"{label}: expected exit {expected}, got {record['exit_code']}")
+        record["status"] = "passed"
+    except KeyboardInterrupt as cause:
+        record.update(status="interrupted", error=str(cause))
+        raise
+    except Exception as cause:
+        record.update(status="failed", error=str(cause))
+        raise
+    finally:
+        record["finished_utc"] = utc_stamp()
+        logs = {}
+        for channel in ("stdout", "stderr"):
+            path = output / f"{label}.{channel}.bin"
+            raw = base64.b64decode(record[f"{channel}_base64"], validate=True)
+            with path.open("xb") as stream:
+                stream.write(raw)
+            logs[channel] = dict(path=str(path.relative_to(ROOT)), sha256=digest(path), bytes=len(raw))
+        record["logs"] = logs
+        write_json(output / f"{label}.json", record)
+    return record
+
+
+def ctest_receipt(path: Path) -> dict:
+    raw = path.read_bytes()
+    suite = ET.fromstring(raw)
+    cases = list(suite.iter("testcase"))
+    names = [case.attrib["name"] for case in cases]
+    require(suite.tag == "testsuite" and len(cases) == len(set(names)) == 53 and
+            int(suite.attrib["tests"]) == 53 and int(suite.attrib["failures"]) == 0 and
+            int(suite.attrib.get("errors", "0")) == 0 and
+            int(suite.attrib.get("skipped", "0")) == 0 and
+            all(case.find("failure") is None and case.find("error") is None and
+                case.find("skipped") is None for case in cases), "expected 53 distinct passing CTests")
+    return dict(path=str(path.relative_to(ROOT)), sha256=hashlib.sha256(raw).hexdigest(),
+                tests=53, failures=0, test_names=names, xml=raw.decode("utf-8"))
+
+
+def build_commands(build: Path, output: Path) -> list[tuple[str, list[str], int]]:
+    probe = str(build / "mhgp8_wspd_q2_census_probe")
+    gate = str(build / "mhgp8_wspd_q2_parallel_gate")
+    commands = [("ctest_full", ["ctest", "--test-dir", str(build), "--output-on-failure",
+                  "--output-junit", str(output / "ctest_full.xml")], 0)]
+    for name in ("mhgp8_wspd_q2_census_gate", "mhgp8_wspd_front_gate", "mhgp8_q2_census_gate", "mhgp8_q2_sibling_gate", "mhgp8_q2_witness_order_gate", "mhgp8_q2_joint_gate", "mhgp8_q2_joint_bounds_gate", "mhgp8_q2_node_pool_gate", "mhgp8_q2_terminal_pool_gate", "mhgp8_wspd_front_jobs_gate", "mhgp8_wspd_q2_parallel_gate"):
+        commands.append((name, [str(build / name), "--selftest"], 0))
+    for label, args in (("missing", []), ("wrong", ["--wrong"]),
+                        ("extra", ["--selftest", "extra"])):
+        commands.append((f"gate_cli_{label}", [gate, *args], 2))
+    valid = ["16", "uniform", "5", "8", "3", "samples", "shared"]
+    invalid = dict(missing=[], extra=[*valid, "none", "extra"], sibling=[*valid, "extra"],
+        pairwise_sibling=[*valid[:6], "pairwise", "sibling"],
+        witness_order=[*valid, "none", "wrong"],
+        anchor_mode=[*valid, "none", "global", "wrong"],
+        pairwise_joint=[*valid[:6], "pairwise", "none", "global", "joint"],
+        pairwise_complement=[*valid[:6], "pairwise", "none", "complement"],
+        pool_negative=[*valid, "none", "global", "anchors", "-1"],
+        pool_bad=[*valid, "none", "global", "anchors", "bad"],
+        pool_extra=[*valid, "none", "global", "anchors", "64", "extra"],
+        n=["1", *valid[1:]], family=[valid[0], "wrong", *valid[2:]],
+        kmax=[*valid[:2], "0", *valid[3:]], separation=[*valid[:3], "0", *valid[4:]],
+        seed=[*valid[:4], "-1", *valid[5:]], front=[*valid[:5], "wrong", valid[6]],
+        census=[*valid[:6], "wrong"], rows_domain=["131074", "rows", *valid[2:]])
+    for label, args in invalid.items():
+        commands.append((f"probe_cli_{label}", [probe, *args], 2))
+    parallel = str(build / "mhgp8_wspd_q2_parallel_probe")
+    valid_parallel = ["16", "uniform", "5", "8", "3", "4", "16", "64"]
+    invalid_parallel = dict(missing=[], extra=[*valid_parallel, "extra"],
+        workers=[*valid_parallel[:5], "-1", *valid_parallel[6:]],
+        jobs=[*valid_parallel[:6], "0", valid_parallel[7]],
+        pool=[*valid_parallel[:7], "-1"],
+        family=[valid_parallel[0], "bad", *valid_parallel[2:]],
+        k=[*valid_parallel[:2], "0", *valid_parallel[3:]],
+        separation=[*valid_parallel[:3], "0", *valid_parallel[4:]],
+        seed=[*valid_parallel[:4], "-1", *valid_parallel[5:]])
+    for label, args in invalid_parallel.items():
+        commands.append((f"parallel_cli_{label}", [parallel, *args], 2))
+    return commands
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("operation", choices=("release", "sanitize", "readers", "differential"))
+    parser.add_argument("--execution-context", choices=("workspace", "approved-escalation", "not-reported"),
+                        default="not-reported", help="Recorded declaration; this script never changes permissions")
+    parser.add_argument("--campaign-root", type=Path, default=RECEIPTS,
+                        help="For readers only; incomplete/failed campaigns are not hidden")
+    args = parser.parse_args()
+    campaign = args.campaign_root.resolve() if args.operation == "readers" else None
+    if campaign is not None:
+        require(campaign.is_relative_to(ROOT), "campaign root must be inside this repository")
+    builds = [SANITIZE if args.operation == "sanitize" else RELEASE]
+    if args.operation == "differential":
+        # The historical binary is read only, never rebuilt/requalified.
+        builds = [RELEASE]
+    DEST.mkdir(parents=True, exist_ok=True)
+    output = Path(tempfile.mkdtemp(prefix=f"{args.operation}_", dir=DEST))
+    previous = {signum: signal.signal(signum, on_signal) for signum in (signal.SIGINT, signal.SIGTERM)}
+    environment = dict(os.environ, OMP_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1")
+    started = utc_stamp()
+    source_before: dict[str, str] = {}
+    artifacts_before: dict[str, str] = {}
+    records: list[dict] = []
+    status, error, code = "failed", "qualification did not start", 1
+    details: dict[str, Any] = {}
+    try:
+        source_before = source_pins()
+        artifacts_before = artifact_pins(builds, campaign)
+        if args.operation == "differential":
+            old_probe = OLD_RELEASE / "mhgp8_wspd_q2_census_probe"
+            require(digest(old_probe) == "67ca5595f458c9e26fef3cebef3a85bacd78df18a1128256b7fbcc759d5793da",
+                    "historical ba11e3ab probe pin differs")
+            artifacts_before[str(old_probe.relative_to(ROOT))] = digest(old_probe)
+        cache = (builds[0] / "CMakeCache.txt").read_text()
+        sanitized = args.operation == "sanitize"
+        require(f"MHGP8_SANITIZE:BOOL={'ON' if sanitized else 'OFF'}" in cache.splitlines(),
+                "wrong sanitizer configuration")
+        require(f"CMAKE_BUILD_TYPE:STRING={'Debug' if sanitized else 'Release'}" in cache.splitlines(),
+                "wrong build type")
+        write_json(output / "INVOCATION.json", dict(schema="mhgp8_wspd_q2_local_qualification_attempt_v1",
+            operation=args.operation, started_utc=started, command=[sys.executable, *sys.argv],
+            execution_context=args.execution_context, source_sha256=source_before,
+            artifact_sha256=artifacts_before, cmake_cache=cache, builds=[str(p.relative_to(ROOT)) for p in builds],
+            commit=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
+            worktree_status=subprocess.check_output(["git", "status", "--short"], cwd=ROOT, text=True),
+            parent_environment={name: environment.get(name) for name in
+                ("ASAN_OPTIONS", "LSAN_OPTIONS", "UBSAN_OPTIONS", "OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS")},
+            build_action="none_existing_binaries_are_tested_not_rebuilt", public_status="not_claimed",
+            scope="q2_front_workers_component_qualification_not_full_or_gpu", gcp_used=False,
+            full_contract_qualified=False, fifty_thousand_full_contract_qualified=False, gpu_qualified=False))
+        if args.operation == "differential":
+            pairs = 0
+            for family in ("uniform", "terrain", "clusters", "rows"):
+                for kmax in (5, 10):
+                    for separation in (8, 12):
+                        for pool in (0, 64):
+                            args_probe = ["128", family, str(kmax), str(separation), "3", "samples",
+                                          "shared", "sibling", "complement", "anchors", str(pool)]
+                            rows = []
+                            for label, build in (("old", OLD_RELEASE), ("new", RELEASE)):
+                                record = capture([str(build / "mhgp8_wspd_q2_census_probe"), *args_probe],
+                                                 f"pair_{pairs}_{label}", 0, output, environment)
+                                records.append(record)
+                                row = deepcopy(parse_result(base64.b64decode(record["stdout_base64"], validate=True)))
+                                row.pop("timings")
+                                row["pool_work"].pop("preparation_ms")
+                                row["pool_work"].pop("selected_total_ms")
+                                rows.append(row)
+                            require(rows[0] == rows[1], "mono refactor changed discrete work or supports")
+                            pairs += 1
+            details.update(paired_configurations=pairs, all_nontiming_fields_equal=True,
+                           historical_commit="ba11e3abfe686d8078c13bacfc066e372d6bfc10")
+        elif args.operation == "readers":
+            for manifest_path in campaign.rglob("MANIFEST.json"):
+                if DEST in manifest_path.parents:
+                    continue
+                manifest = parse_result(manifest_path.read_bytes())
+                binary = RELEASE / "mhgp8_wspd_q2_parallel_probe"
+                require(manifest.get("probe") == str(binary) and
+                        manifest.get("probe_sha256") == artifacts_before[str(binary.relative_to(ROOT))] and
+                        manifest.get("cmake_cache") == cache,
+                        "campaign is not bound to the current qualified Release probe/cache")
+            for optimized in (False, True):
+                command = [sys.executable, "-B", *(["-O"] if optimized else []), str(READER),
+                           "check", str(campaign), "--summary"]
+                records.append(capture(command, "reader_optimized" if optimized else "reader_normal",
+                                       0, output, environment))
+            require(records[0]["stdout_base64"] == records[1]["stdout_base64"] and
+                    records[0]["stderr_base64"] == records[1]["stderr_base64"] == "",
+                    "normal and optimized reader outputs differ or wrote stderr")
+            summary = parse_result(base64.b64decode(records[0]["stdout_base64"], validate=True))
+            require(summary.get("status") == "passed" and summary.get("full_contract_qualified") is False and
+                    summary.get("gcp_used") is False, "reader scope or status invalid")
+            records.append(capture([sys.executable, "-B", "tools/check_docs.py"], "docs_checker", 0,
+                                   output, environment))
+            details.update(strict_reader_output_equality=True, summary=summary)
+        else:
+            for label, command, expected in build_commands(builds[0], output):
+                records.append(capture(command, label, expected, output, environment))
+                if label == "ctest_full":
+                    details["ctest"] = ctest_receipt(output / "ctest_full.xml")
+        status, error, code = "passed", "", 0
+    except KeyboardInterrupt as cause:
+        status, error, code = "interrupted", str(cause), 128 + getattr(cause, "signum", signal.SIGINT)
+    except Exception as cause:
+        error = str(cause)
+    finally:
+        try:
+            source_after = source_pins()
+            artifacts_after = artifact_pins(builds, campaign)
+            if args.operation == "differential":
+                old_probe = OLD_RELEASE / "mhgp8_wspd_q2_census_probe"
+                artifacts_after[str(old_probe.relative_to(ROOT))] = digest(old_probe)
+            source_same = bool(source_before) and source_before == source_after
+            artifacts_same = bool(artifacts_before) and artifacts_before == artifacts_after
+        except Exception as cause:
+            source_after, artifacts_after = {}, {}
+            source_same = artifacts_same = False
+            error = f"{error}; closure failed: {cause}"
+        if status == "passed" and not (source_same and artifacts_same):
+            status, error, code = "invalid", "source/build/campaign changed during qualification", 1
+        logs = {str(path.relative_to(ROOT)): digest(path) for path in sorted(output.rglob("*")) if path.is_file()}
+        write_json(output / "RESULT.json", dict(status=status, error=error, operation=args.operation,
+            started_utc=started, finished_utc=utc_stamp(), commands_completed=len(records),
+            command_attempt_receipts=[str(path.relative_to(ROOT)) for path in sorted(output.glob("*.json"))
+                if path.name != "INVOCATION.json"],
+            source_hashes_unchanged=source_same, artifact_hashes_unchanged=artifacts_same,
+            source_sha256_closing=source_after, artifact_sha256_closing=artifacts_after,
+            recorded_artifact_sha256=logs, details=details, full_contract_qualified=False,
+            fifty_thousand_full_contract_qualified=False, gpu_qualified=False, gcp_used=False))
+        for signum, handler in previous.items():
+            signal.signal(signum, handler)
+    print(json.dumps(dict(status=status, error=error, receipt=str(output.relative_to(ROOT)))))
+    return code
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

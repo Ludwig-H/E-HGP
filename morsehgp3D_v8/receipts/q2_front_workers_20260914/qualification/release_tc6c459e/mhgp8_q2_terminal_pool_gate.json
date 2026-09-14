@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_front_workers_20260914/mhgp8_q2_terminal_pool_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "mhgp8_q2_terminal_pool_gate",
+  "expected_exit_code": 0,
+  "started_utc": "2026-09-14T14:59:50.627529+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "mhgp8_q2_terminal_pool_gate passed checks=1932787 clouds=22 runs=3088 oracle_pairs=5847 oracle_sites=352725 supports=183584 extra_shells=21796 max_shell=30 selected_rectangles=71489 filtered_pairs=71390 residual_pairs=126237 factor_sites=200732 bands=15441 selected64=56 default_comparisons=88 passthrough_rectangles=62253 unchanged_census=1856 reentrant_calls=1 joint_runs=354 pairwise_runs=4 invalid_inputs=6 callback_failures=3 model_mutants=5\n",
+  "stderr": "",
+  "stdout_base64": "bWhncDhfcTJfdGVybWluYWxfcG9vbF9nYXRlIHBhc3NlZCBjaGVja3M9MTkzMjc4NyBjbG91ZHM9MjIgcnVucz0zMDg4IG9yYWNsZV9wYWlycz01ODQ3IG9yYWNsZV9zaXRlcz0zNTI3MjUgc3VwcG9ydHM9MTgzNTg0IGV4dHJhX3NoZWxscz0yMTc5NiBtYXhfc2hlbGw9MzAgc2VsZWN0ZWRfcmVjdGFuZ2xlcz03MTQ4OSBmaWx0ZXJlZF9wYWlycz03MTM5MCByZXNpZHVhbF9wYWlycz0xMjYyMzcgZmFjdG9yX3NpdGVzPTIwMDczMiBiYW5kcz0xNTQ0MSBzZWxlY3RlZDY0PTU2IGRlZmF1bHRfY29tcGFyaXNvbnM9ODggcGFzc3Rocm91Z2hfcmVjdGFuZ2xlcz02MjI1MyB1bmNoYW5nZWRfY2Vuc3VzPTE4NTYgcmVlbnRyYW50X2NhbGxzPTEgam9pbnRfcnVucz0zNTQgcGFpcndpc2VfcnVucz00IGludmFsaWRfaW5wdXRzPTYgY2FsbGJhY2tfZmFpbHVyZXM9MyBtb2RlbF9tdXRhbnRzPTUK",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-14T14:59:50.907876+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/q2_front_workers_20260914/qualification/release_tc6c459e/mhgp8_q2_terminal_pool_gate.stdout.bin",
+      "sha256": "7f200979e82ca9a37dc3ce40f6162b42534593475c49adcb82c74f58cd9b48f2",
+      "bytes": 447
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/q2_front_workers_20260914/qualification/release_tc6c459e/mhgp8_q2_terminal_pool_gate.stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  }
+}

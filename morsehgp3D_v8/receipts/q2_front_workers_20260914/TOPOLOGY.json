@@ -1,0 +1,10 @@
+{
+  "command": [
+    "lscpu",
+    "-J",
+    "-e=CPU,CORE,SOCKET,ONLINE"
+  ],
+  "scope": "read_only_local_topology_not_host_isolation",
+  "exit_code": 0,
+  "stdout": "{\n   \"cpus\": [\n      {\n         \"cpu\": 0,\n         \"core\": 0,\n         \"socket\": 0,\n         \"online\": true\n      },{\n         \"cpu\": 1,\n         \"core\": 0,\n         \"socket\": 0,\n         \"online\": true\n      },{\n         \"cpu\": 2,\n         \"core\": 1,\n         \"socket\": 0,\n         \"online\": true\n      },{\n         \"cpu\": 3,\n         \"core\": 1,\n         \"socket\": 0,\n         \"online\": true\n      },{\n         \"cpu\": 4,\n         \"core\": 2,\n         \"socket\": 0,\n         \"online\": true\n      },{\n         \"cpu\": 5,\n         \"core\": 2,\n         \"socket\": 0,\n         \"online\": true\n      },{\n         \"cpu\": 6,\n         \"core\": 3,\n         \"socket\": 0,\n         \"online\": true\n      },{\n         \"cpu\": 7,\n         \"core\": 3,\n         \"socket\": 0,\n         \"online\": true\n      }\n   ]\n}\n"
+}

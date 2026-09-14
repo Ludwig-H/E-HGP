@@ -1,0 +1,37 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_front_workers_20260914/mhgp8_wspd_q2_parallel_probe",
+    "16",
+    "uniform",
+    "5",
+    "8",
+    "3",
+    "4",
+    "16",
+    "64",
+    "extra"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "parallel_cli_extra",
+  "expected_exit_code": 2,
+  "started_utc": "2026-09-14T14:59:51.201064+00:00",
+  "status": "passed",
+  "exit_code": 2,
+  "stdout": "",
+  "stderr": "mhgp8 parallel probe: usage: mhgp8_wspd_q2_parallel_probe n family K s seed threads jobs_per_worker [pool_min_factor=64]\n",
+  "stdout_base64": "",
+  "stderr_base64": "bWhncDggcGFyYWxsZWwgcHJvYmU6IHVzYWdlOiBtaGdwOF93c3BkX3EyX3BhcmFsbGVsX3Byb2JlIG4gZmFtaWx5IEsgcyBzZWVkIHRocmVhZHMgam9ic19wZXJfd29ya2VyIFtwb29sX21pbl9mYWN0b3I9NjRdCg==",
+  "finished_utc": "2026-09-14T14:59:51.202999+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/q2_front_workers_20260914/qualification/release_tc6c459e/parallel_cli_extra.stdout.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/q2_front_workers_20260914/qualification/release_tc6c459e/parallel_cli_extra.stderr.bin",
+      "sha256": "39771767ef69a09da23ac1de985e47bef8c5b99ebf86aff0b44a2a0c2008a3d7",
+      "bytes": 121
+    }
+  }
+}

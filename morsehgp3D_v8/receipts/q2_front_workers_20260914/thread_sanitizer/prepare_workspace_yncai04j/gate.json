@@ -1,0 +1,32 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_front_workers_tsan_20260914/mhgp8_wspd_q2_parallel_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "gate",
+  "started_utc": "2026-09-14T15:13:39.716092+00:00",
+  "exit_code": 0,
+  "stdout": "{\"schema\":\"mhgp8_wspd_q2_parallel_gate_v1\",\"status\":\"passed\",\"scope\":\"bounded_cpu_q2_jobs_not_full\",\"public_status\":\"not_claimed\",\"checks\":184537,\"clouds\":8,\"oracle_pairs\":9080,\"oracle_sites\":1106458,\"mono_runs\":152,\"parallel_runs\":438,\"supports\":45161,\"max_shell\":30,\"empty_job_runs\":36,\"excess_worker_runs\":100,\"multi_worker_runs\":232,\"pool_selected\":67,\"pool_filtered\":50415,\"pool_passthrough\":38,\"selected64\":12,\"filtered64\":50364,\"joint_runs\":24,\"pairwise_runs\":12,\"sibling_tests\":1062,\"structural_steps\":229661,\"callback_failures\":1,\"reentrant_runs\":1,\"ownership_resets\":1,\"joined_checks\":5,\"launch_failures\":1,\"invalid_inputs\":24,\"mutants\":6}\n",
+  "stderr": "",
+  "stdout_base64": "eyJzY2hlbWEiOiJtaGdwOF93c3BkX3EyX3BhcmFsbGVsX2dhdGVfdjEiLCJzdGF0dXMiOiJwYXNzZWQiLCJzY29wZSI6ImJvdW5kZWRfY3B1X3EyX2pvYnNfbm90X2Z1bGwiLCJwdWJsaWNfc3RhdHVzIjoibm90X2NsYWltZWQiLCJjaGVja3MiOjE4NDUzNywiY2xvdWRzIjo4LCJvcmFjbGVfcGFpcnMiOjkwODAsIm9yYWNsZV9zaXRlcyI6MTEwNjQ1OCwibW9ub19ydW5zIjoxNTIsInBhcmFsbGVsX3J1bnMiOjQzOCwic3VwcG9ydHMiOjQ1MTYxLCJtYXhfc2hlbGwiOjMwLCJlbXB0eV9qb2JfcnVucyI6MzYsImV4Y2Vzc193b3JrZXJfcnVucyI6MTAwLCJtdWx0aV93b3JrZXJfcnVucyI6MjMyLCJwb29sX3NlbGVjdGVkIjo2NywicG9vbF9maWx0ZXJlZCI6NTA0MTUsInBvb2xfcGFzc3Rocm91Z2giOjM4LCJzZWxlY3RlZDY0IjoxMiwiZmlsdGVyZWQ2NCI6NTAzNjQsImpvaW50X3J1bnMiOjI0LCJwYWlyd2lzZV9ydW5zIjoxMiwic2libGluZ190ZXN0cyI6MTA2Miwic3RydWN0dXJhbF9zdGVwcyI6MjI5NjYxLCJjYWxsYmFja19mYWlsdXJlcyI6MSwicmVlbnRyYW50X3J1bnMiOjEsIm93bmVyc2hpcF9yZXNldHMiOjEsImpvaW5lZF9jaGVja3MiOjUsImxhdW5jaF9mYWlsdXJlcyI6MSwiaW52YWxpZF9pbnB1dHMiOjI0LCJtdXRhbnRzIjo2fQo=",
+  "stderr_base64": "",
+  "status": "completed",
+  "finished_utc": "2026-09-14T15:13:42.224534+00:00",
+  "elapsed_seconds": 2.5084402120010054,
+  "child_user_seconds": 3.0021649999999998,
+  "child_system_seconds": 0.196056,
+  "child_maxrss_kib_cumulative": 204156,
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/q2_front_workers_20260914/thread_sanitizer/prepare_workspace_yncai04j/gate.stdout.bin",
+      "sha256": "bebd1eef6d743e71e6205778a3eb2bfb8c541f558c41f375745a4b48fc373f40",
+      "bytes": 650
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/q2_front_workers_20260914/thread_sanitizer/prepare_workspace_yncai04j/gate.stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  }
+}

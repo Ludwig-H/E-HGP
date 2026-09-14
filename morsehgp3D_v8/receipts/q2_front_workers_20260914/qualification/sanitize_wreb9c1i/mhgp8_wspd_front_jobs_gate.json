@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_front_workers_sanitize_20260914/mhgp8_wspd_front_jobs_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "mhgp8_wspd_front_jobs_gate",
+  "expected_exit_code": 0,
+  "started_utc": "2026-09-14T15:16:20.898650+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "mhgp8_wspd_front_jobs_gate passed checks=533873 clouds=11 oracle_point_tests=16209 mono_runs=1321 plans=9241 ordered_replays=27723 job_runs=239199 zero_job_plans=720 all_terminal_plans=3241 terminal_jobs=142053 pending_jobs=97146 sparse_masks=792 filtered_cuts=36 mixed_lane_cuts=9 rejected_lane_pairs=8860 residual_lane_pairs=67754 partial_lane_rectangles=717 nonsingleton_rectangles=1116 reentrant_runs=2 callback_failures=2 invalid_inputs=16 model_mutants=45\n",
+  "stderr": "",
+  "stdout_base64": "bWhncDhfd3NwZF9mcm9udF9qb2JzX2dhdGUgcGFzc2VkIGNoZWNrcz01MzM4NzMgY2xvdWRzPTExIG9yYWNsZV9wb2ludF90ZXN0cz0xNjIwOSBtb25vX3J1bnM9MTMyMSBwbGFucz05MjQxIG9yZGVyZWRfcmVwbGF5cz0yNzcyMyBqb2JfcnVucz0yMzkxOTkgemVyb19qb2JfcGxhbnM9NzIwIGFsbF90ZXJtaW5hbF9wbGFucz0zMjQxIHRlcm1pbmFsX2pvYnM9MTQyMDUzIHBlbmRpbmdfam9icz05NzE0NiBzcGFyc2VfbWFza3M9NzkyIGZpbHRlcmVkX2N1dHM9MzYgbWl4ZWRfbGFuZV9jdXRzPTkgcmVqZWN0ZWRfbGFuZV9wYWlycz04ODYwIHJlc2lkdWFsX2xhbmVfcGFpcnM9Njc3NTQgcGFydGlhbF9sYW5lX3JlY3RhbmdsZXM9NzE3IG5vbnNpbmdsZXRvbl9yZWN0YW5nbGVzPTExMTYgcmVlbnRyYW50X3J1bnM9MiBjYWxsYmFja19mYWlsdXJlcz0yIGludmFsaWRfaW5wdXRzPTE2IG1vZGVsX211dGFudHM9NDUK",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-14T15:16:30.727226+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/q2_front_workers_20260914/qualification/sanitize_wreb9c1i/mhgp8_wspd_front_jobs_gate.stdout.bin",
+      "sha256": "6453e447e92dd1f869446fc67370093f7a6e8d9f820bf6ce737bcaf6e0b614e7",
+      "bytes": 462
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/q2_front_workers_20260914/qualification/sanitize_wreb9c1i/mhgp8_wspd_front_jobs_gate.stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  }
+}

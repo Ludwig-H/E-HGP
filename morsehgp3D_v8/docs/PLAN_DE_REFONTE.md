@@ -47,6 +47,16 @@ héritée du harnais d'audit ; le raccord et l'oracle restent à construire.
 
 ## Priorité P0 — supprimer la préparation quadratique des témoins locaux
 
+Treizième tranche : [jobs du front et workers q2](P0_FRONT_WORKERS_Q2.md)
+implémentés sans dupliquer les tests parentaux ni préparer les facteurs
+par morceau. Tous les comptes géométriques restent ceux du mono.
+Cette première distribution ne partage pas une pile DFS après le départ
+du job : mesurer sa queue de durée, pas seulement la moyenne. L'audit A
+329e5b86 montre sur son prototype LiDAR50k qu'un seul sous-arbre garde
+environ30 % des descentes même avec256 jobs. Redistribuer les produits
+encore pendants est une suite ciblée ; les gros callbacks indivisibles
+restent à traiter séparément. Aucune borne globale ni tour G4 acquise.
+
 Suivi douzième tranche : le [raccord Pool terminal](P0_POOL_TERMINAL_Q2.md)
 est maintenant implémenté sur les nœuds globaux, avec au plus K bandes et
 census des survivantes à compte zéro. Le prototype A fbbecc01 a mesuré

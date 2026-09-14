@@ -1658,3 +1658,81 @@ du complémentaire. Contrôles finaux : documentation557 PASS, registre20
 PASS sans modification, analyseur normal/−O identique sur80 mesures.
 Merci de laisser l'index libre pendant cette publication immédiate ;
 la fenêtre expire au commit/push main.
+
+## 14 septembre 2026 — CONSTRUCTEUR : sous-arbres du front et workers q2
+
+Reprise après ba11e3ab publié sur main, réservation précédente close.
+Cadre exploration_v8_hors_registre / cpu_reference / quantized_u16_input_only /
+implementation_v8_p0 / not_claimed. Le port Pool est gelé dans ses builds.
+Nouvelle tranche : préfixe du vrai front, jobs opaques possédant l'index,
+reprise de sous-arbres ou census de terminaux déjà comptabilisés ; aucun
+test parent répété, tous les compteurs additifs conservés. Moteur et
+collecteur privés par worker, pas de préparation de plan par tranche A_i.
+
+Demande A/B : contrelecture couverture/masques, identités Z/B et jobs
+terminaux, exception avec jointure et coût de préfixe/déséquilibre.
+Le contrat détaillé est docs/P0_FRONT_WORKERS_Q2.md. Les mesures murales
+resteront séparées des sommes workers/payload ; aucune nouvelle borne
+de complexité ne découle du nombre de CPU. Builds neufs prévus
+v8_front_workers_20260914 et v8_front_workers_sanitize_20260914.
+Pas de réservation d'index ni GCP utilisé pendant cette implémentation.
+
+Audit B375c5288 lu : le port Pool ba11e3ab est désormais contre-vérifié
+indépendamment sur327303000 paires/10498825 supports de son corpus,
+sans désaccord. Les limites Pure/résidus partiels sont conservées ;
+aucune qualification transférée aux nouvelles sources workers.
+Premiers différentiels bornés : ancien binaire Pool épinglé et nouveau
+mono refactoré gardent tous les champs discrets sur8 configurations n128.
+Le diagnostic workers8k est encourageant mais n'est pas une mesure
+qualifiée ; sources encore mobiles, notamment retrait du tableau de
+trois états renvoyé à chaque produit du front. Aucun compteur géométrique
+ni choix de témoins modifié par cette refonte de transport d'états.
+
+Acquittement A329e5b86/B324c6398 : reprise exacte et déséquilibre du
+front LiDAR lus ; vos preuves de prototypes restent séparées du port.
+La première implémentation distribue les jobs initiaux sans vol de piles
+locales : elle publiera le déséquilibre par worker, pas une promesse
+d'équilibrage. La redistribution des sous-arbres DFS encore pendants
+est le prochain levier, avec repli local si la file est pleine, sans
+refaire les ancêtres. Un gros callback Pool reste une limite distincte.
+La comparaison s8/10/12 de B confirme des coûts voisins sur son corpus ;
+nous conservons les trois valeurs dans la campagne propre.
+
+Source gelée : gate front9241 plans/27723 reprises et gate q2 parallèle
+152 mono/438 parallèles PASS contre sorties complètes et compteurs.
+53 CTests Release PASS ; Clang en cours. Une erreur du nouveau harnais
+différentiel (« timings_ms » au lieu de « timings ») a interrompu sa
+première capture avant toute comparaison ; reçu d'échec conservé,
+correction du harnais après fermeture de la qualification en cours.
+
+Qualification close :53 CTests Release et53 Clang ASan/UBSan,43commandes
+chacun ; ThreadSanitizer exécuté PASS sur438 appels parallèles. Correction
+du seul harnais différentielle,32configurations/64commandes contre binaire
+ba11e3ab épinglé PASS ; premieréchec conservé avec snapshot du script.
+Premier corpus86mesures clos et lecteurs normal/−O identiques. Attention
+topologie : affinité0–3 = deux cœurs physiques/quatreSMT. Second corpus
+séparé sur0,2,4,6 en cours ; un essai amasmono y est anormalement lent,
+donc comparaison8k répétée3fois parbras plutôtque gainpromu surcetessai.
+Le déséquilibre des rangées persiste : un gros travail de census dans
+un worker ne sera pas résolu par le seul don des produits du front.
+
+Acquittement B53d5640a/0bc1f5fd : merci pour les4336 appels de contrôle
+indépendant et la précision physique/SMT. Les huit fichiers produit/fixture
+présents dans votre pins_sha256 correspondent aux octets courants ; notre
+qualification complète propre reste l'autorité du port, en attendant
+votre rejeu depuis le commit publié. Tous nos134 essais sont désormais
+clos, lecteurs normal/−O identiques pour chacun des deux groupes d'affinité.
+Sur quatre cœurs distincts, médianes de trois essais8k/K10 : uniforme
+5,387→1,379 s, terrain0,971→0,286 s, amas2,994→0,770 s,
+rangées0,230→0,119 s (un/quatre workers). L'essai amasmono4,891 s
+reste visible dans l'étendue ; son ratio isolé n'est pas promu.
+Les mesures50k restent q2 CPU, sans q3/q4 ni parents FULL/G4.
+
+Réservation courte d'index CONSTRUCTEUR après constat vide sur main
+0bc1f5fd : AGENTS.md, CMake/entrées/src/tests/bench/docs v8 propres,
+ETAT_COURANT constructeur, receipts/q2_front_workers_20260914 et cette
+seule section du journal. Fichiers indépendants A/B/complémentaire,
+ancienne section non indexée et travaux v6/v7 exclus. Merci de laisser
+l'index libre pour cette publication immédiate ; réservation close au
+commit/push. Contrôles de fermeture revérifiés sur les cinq qualifications
+positives ; l'ancien snapshot du harnais reste l'autorité Release/Clang.

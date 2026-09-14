@@ -6,6 +6,7 @@ if(POLICY CMP0144)
 endif()
 
 include(CTest)
+find_package(Threads REQUIRED)
 option(MHGP8_SANITIZE "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 
 add_library(mhgp8_p0 STATIC src/pipeline/local_credits.cpp src/pipeline/axis_q2.cpp
@@ -14,6 +15,7 @@ target_include_directories(mhgp8_p0 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_features(mhgp8_p0 PUBLIC cxx_std_20)
 set_target_properties(mhgp8_p0 PROPERTIES CXX_EXTENSIONS OFF)
 target_compile_options(mhgp8_p0 PUBLIC -Wall -Wextra -Wpedantic -Werror)
+target_link_libraries(mhgp8_p0 PUBLIC Threads::Threads)
 if(MHGP8_SANITIZE)
   target_compile_options(mhgp8_p0 PUBLIC -fsanitize=address,undefined -fno-omit-frame-pointer)
   target_link_options(mhgp8_p0 PUBLIC -fsanitize=address,undefined)
@@ -35,11 +37,13 @@ add_executable(mhgp8_wspd_front_probe bench/wspd_front_probe.cpp)
 target_link_libraries(mhgp8_wspd_front_probe PRIVATE mhgp8_p0)
 add_executable(mhgp8_wspd_q2_census_probe bench/wspd_q2_census_probe.cpp)
 target_link_libraries(mhgp8_wspd_q2_census_probe PRIVATE mhgp8_p0)
+add_executable(mhgp8_wspd_q2_parallel_probe bench/wspd_q2_parallel_probe.cpp)
+target_link_libraries(mhgp8_wspd_q2_parallel_probe PRIVATE mhgp8_p0)
 
 if(BUILD_TESTING)
   # Boost arbitrary precision is used only by the bounded independent judge.
   find_package(Boost REQUIRED)
-  foreach(gate IN ITEMS q2_node_pool q2_terminal_pool)
+  foreach(gate IN ITEMS q2_node_pool q2_terminal_pool wspd_front_jobs wspd_q2_parallel)
     add_executable(mhgp8_${gate}_gate tests/${gate}_gate.cpp)
     target_include_directories(mhgp8_${gate}_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     target_include_directories(mhgp8_${gate}_gate SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
@@ -147,6 +151,12 @@ if(BUILD_TESTING)
       "${CMAKE_CURRENT_SOURCE_DIR}/tests/q2_census_${gate}_gate.py"
       --probe $<TARGET_FILE:mhgp8_q2_census_probe> --selftest)
   endforeach()
+  add_test(NAME mhgp8_wspd_q2_parallel_receipts_gate COMMAND ${Python3_EXECUTABLE} -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/wspd_q2_parallel_receipts_gate.py"
+    --probe $<TARGET_FILE:mhgp8_wspd_q2_parallel_probe> --selftest)
+  add_test(NAME mhgp8_wspd_q2_parallel_receipts_gate_optimized COMMAND ${Python3_EXECUTABLE} -B -O
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/wspd_q2_parallel_receipts_gate.py"
+    --probe $<TARGET_FILE:mhgp8_wspd_q2_parallel_probe> --selftest)
   add_test(NAME mhgp8_docs_scope COMMAND ${Python3_EXECUTABLE} -B
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/docs_scope_gate.py" --selftest)
   add_test(NAME mhgp8_docs_scope_optimized COMMAND ${Python3_EXECUTABLE} -B -O

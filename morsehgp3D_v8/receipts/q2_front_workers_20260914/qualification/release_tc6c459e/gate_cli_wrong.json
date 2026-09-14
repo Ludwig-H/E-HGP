@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_front_workers_20260914/mhgp8_wspd_q2_parallel_gate",
+    "--wrong"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "gate_cli_wrong",
+  "expected_exit_code": 2,
+  "started_utc": "2026-09-14T14:59:51.144256+00:00",
+  "status": "passed",
+  "exit_code": 2,
+  "stdout": "",
+  "stderr": "usage: mhgp8_wspd_q2_parallel_gate --selftest\n",
+  "stdout_base64": "",
+  "stderr_base64": "dXNhZ2U6IG1oZ3A4X3dzcGRfcTJfcGFyYWxsZWxfZ2F0ZSAtLXNlbGZ0ZXN0Cg==",
+  "finished_utc": "2026-09-14T14:59:51.146289+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/q2_front_workers_20260914/qualification/release_tc6c459e/gate_cli_wrong.stdout.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/q2_front_workers_20260914/qualification/release_tc6c459e/gate_cli_wrong.stderr.bin",
+      "sha256": "3ac83dc860f3dd1ad0acc77ffabe93247eeca8cf5d8f7802d15d810afc9b047a",
+      "bytes": 46
+    }
+  }
+}

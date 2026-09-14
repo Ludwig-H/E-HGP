@@ -1,10 +1,37 @@
-# Passation v8 — Pool terminal qualifié localement, front parallèle à construire
+# Passation v8 — front et census q2 multi-CPU
 
 14 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`. Aucun contrat de tour n'est encore acquis.
 
 ## À reprendre maintenant
+
+Le [front distribué et ses workers q2](docs/P0_FRONT_WORKERS_Q2.md)
+sont implémentés : 53 CTests Release/Clang ASan/UBSan et la porte
+ThreadSanitizer passent, 32 configurations ancien/nouveau mono concordent.
+La [campagne propre](receipts/q2_front_workers_20260914/README.md) est close :
+134 mesures, lecteurs normal/−O identiques. Les trois builds workers
+Release/ASan/ThreadSanitizer sont désormais épinglés ; repartir dans un
+répertoire neuf. À 8k/K10 sur quatre cœurs physiques, médianes de trois
+essais : uniforme5,387→1,379 s, terrain0,971→0,286 s,
+amas2,994→0,770 s, rangées0,230→0,119 s. Ne pas mélanger avec
+le corpus86 sur deux cœurs physiques/quatre SMT. À s8, les principaux
+comptes restent sous ×4 à chaque doublement8k/16k/32k, sans preuve générale.
+Chaque job conserve les masques hérités et l'identité du même index.
+Les plans Pool et contextes d'ordre restent synchrones dans un worker,
+pas dans une file de tâches empruntées. Les callbacks d'un même slot
+sont séquentiels ; entre slots, leur état mutable doit être séparé.
+La fermeture des threads précède tout retour ou propagation d'exception.
+L'annulation est coopérative entre jobs, pas au milieu d'un gros job.
+La géométrie et le travail total restent ceux du mono : la parallélisation
+ne résout pas à elle seule la complexité. Prochaine implémentation :
+redistribuer les produits encore pendants sans refaire leurs parents,
+continuer localement si la file est pleine ; un réveil d'annulation est
+indispensable avant les joins si des workers peuvent dormir. Conserver
+la voie grossière comme référence, mesurer dons/refus/somme du travail.
+Les gros callbacks restent un sujet distinct. FULL/G4 restent ouverts.
+
+## Douzième tranche publiée à ba11e3ab — historique
 
 Le [port Pool terminal](docs/P0_POOL_TERMINAL_Q2.md) est implémenté.
 Les crédits appartiennent aux deux nœuds du même index, regroupés en au

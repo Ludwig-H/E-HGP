@@ -1,0 +1,14 @@
+-- The CXX compiler identification is Clang 18.1.3
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/clang++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Found Boost: /workspaces/E-HGP/build/v7_boost_gate/extracted/usr/lib/x86_64-linux-gnu/cmake/Boost-1.83.0/BoostConfig.cmake (found version "1.83.0")  
+-- Found Python3: /home/codespace/.python/current/bin/python3 (found version "3.12.1") found components: Interpreter 
+-- Configuring done (1.9s)
+-- Generating done (0.1s)
+-- Build files have been written to: /workspaces/E-HGP/build/v8_front_workers_tsan_20260914

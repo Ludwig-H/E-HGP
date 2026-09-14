@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <memory>
 
 namespace mhgp8 {
 
@@ -39,7 +40,7 @@ struct WspdFrontWork {
   u64 emitted_factor_sites{};
   u64 max_factor_size{};
   u64 leaf_pair_rectangles{};
-  u64 max_stack_size{};
+  u64 max_stack_size{};  // Canonical mono DFS high-water, not job storage or worker RAM.
   u64 max_product_depth{};
   // Classes of max(|A|,|B|): 1, 2..7, 8..63, 64..1023, >=1024.
   std::array<u64, 5> size_class_rectangles{};
@@ -47,6 +48,7 @@ struct WspdFrontWork {
   std::array<u64, 3> rejected_pair_mass{};
   std::array<u64, 3> residual_pair_mass{};
   std::array<u64, 3> lane_rectangles{};
+  bool operator==(const WspdFrontWork&) const = default;
 };
 
 struct WspdFrontResult {
@@ -75,5 +77,57 @@ using WspdRectangleConsumer = std::function<void(const WspdRectangle&)>;
     const Q2CensusIndex& index, unsigned kmax, unsigned separation_s,
     WspdFrontMode mode, const WspdRectangleConsumer& consumer,
     std::uint8_t requested_lane_mask = 7);
+
+class WspdFrontJobs;
+[[nodiscard]] std::unique_ptr<WspdFrontJobs> make_wspd_front_jobs(
+    Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s,
+    WspdFrontMode mode, std::size_t target_jobs,
+    std::uint8_t requested_lane_mask = 7);
+
+// An immutable, owning partition of ONE front traversal, not a catalogue
+// of its complete WSPD. The breadth-first preparation stops when pending
+// products plus stored terminal rectangles reach the requested granularity
+// (at most target_jobs+2 states). Fully rejected/diagonal leaves need no job.
+// Every parent is tested before subdivision; its counters belong only to
+// prefix_result(). A stored terminal has already been counted there, so its
+// run_job merely invokes the consumer. Other jobs resume an unvisited product
+// with the inherited lane mask, depth and canonical DFS pending-sibling count.
+//
+// Sum prefix and job work counters, but combine max_factor_size,
+// max_stack_size and max_product_depth by MAX. The stack maximum denotes
+// the equivalent mono DFS, not an actual worker stack or retained storage.
+// Every partial result repeats the GLOBAL pair-count/mask metadata; do not
+// add these metadata. Their lane mass ledger is complete only after all
+// jobs have been consumed exactly once. Different job orders are allowed.
+//
+// Jobs are reusable and const; concurrent calls need independent consumers
+// (or caller synchronization). No callback is retained. A callback exception
+// propagates without undoing prior emissions; retrying repeats that job and
+// requires discarding/distinguishing the earlier partial output. The plan
+// retains its exact immutable index even after the caller resets its handle.
+// There is no interruption point inside a running job in this API.
+class WspdFrontJobs final {
+ public:
+  ~WspdFrontJobs();
+  WspdFrontJobs(const WspdFrontJobs&) = delete;
+  WspdFrontJobs& operator=(const WspdFrontJobs&) = delete;
+  WspdFrontJobs(WspdFrontJobs&&) = delete;
+  WspdFrontJobs& operator=(WspdFrontJobs&&) = delete;
+  [[nodiscard]] std::size_t job_count() const noexcept;
+  [[nodiscard]] std::size_t terminal_job_count() const noexcept;
+  [[nodiscard]] const WspdFrontResult& prefix_result() const noexcept;
+  [[nodiscard]] const Q2CensusIndex& index() const noexcept;
+  [[nodiscard]] WspdFrontResult run_job(std::size_t id, const WspdRectangleConsumer& consumer) const;
+  // Retained job-vector capacity only; excludes the owned shared index,
+  // plan metadata, preparation queue and independent worker stacks.
+  [[nodiscard]] std::size_t retained_bytes() const;
+
+ private:
+  struct Impl;
+  explicit WspdFrontJobs(std::unique_ptr<Impl> implementation);
+  std::unique_ptr<Impl> implementation_;
+  friend std::unique_ptr<WspdFrontJobs> make_wspd_front_jobs(
+      Q2CensusIndexPtr, unsigned, unsigned, WspdFrontMode, std::size_t, std::uint8_t);
+};
 
 }  // namespace mhgp8

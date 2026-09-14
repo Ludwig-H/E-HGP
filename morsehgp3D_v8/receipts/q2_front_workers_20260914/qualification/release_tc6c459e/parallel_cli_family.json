@@ -1,0 +1,36 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_front_workers_20260914/mhgp8_wspd_q2_parallel_probe",
+    "16",
+    "bad",
+    "5",
+    "8",
+    "3",
+    "4",
+    "16",
+    "64"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "parallel_cli_family",
+  "expected_exit_code": 2,
+  "started_utc": "2026-09-14T14:59:51.211225+00:00",
+  "status": "passed",
+  "exit_code": 2,
+  "stdout": "",
+  "stderr": "mhgp8 parallel probe: unknown v8 front fixture family\n",
+  "stdout_base64": "",
+  "stderr_base64": "bWhncDggcGFyYWxsZWwgcHJvYmU6IHVua25vd24gdjggZnJvbnQgZml4dHVyZSBmYW1pbHkK",
+  "finished_utc": "2026-09-14T14:59:51.213102+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/q2_front_workers_20260914/qualification/release_tc6c459e/parallel_cli_family.stdout.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/q2_front_workers_20260914/qualification/release_tc6c459e/parallel_cli_family.stderr.bin",
+      "sha256": "ac59f210ad56c464a0ea849e602681506deea58f6b641d17ff4f1770764cf4d2",
+      "bytes": 54
+    }
+  }
+}

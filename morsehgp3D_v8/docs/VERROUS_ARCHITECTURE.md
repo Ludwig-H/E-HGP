@@ -318,6 +318,15 @@ rejetées, la répétition des recherches et les copies intermédiaires.
 
 ## 8. Feuille de route de reprise
 
+Suivi treizième tranche : le [raccord multi-CPU q2](P0_FRONT_WORKERS_Q2.md)
+possède l'index et privatise moteurs, buffers et compteurs. Il ne stocke
+pas la WSPD complète et ne répète pas le travail du préfixe. Ce contrat
+ne suffit pas à fermer le verrou de charge : des jobs de masse voisine
+peuvent avoir des coûts très différents. Prévoir le partage de piles
+pendantes, sans quota de résultats et sans attente circulaire entre
+producteurs, puis le traitement des gros rectangles individuellement
+dominants. Mesurer le temps mur et le travail total séparément.
+
 1. Lire P0 et comparer ses architectures avant le port général de la v7.
 2. Instrumenter les coûts B1/B2 dès cette comparaison : une meilleure
    présélection ne doit pas augmenter davantage leur travail.
@@ -350,7 +359,9 @@ Réduire huit tests à trois, réutiliser un index ou éviter une allocation
 peut être utile. Aucun de ces gains constants ne prouve à lui seul la
 résolution d'un produit de tailles, de la sérialisation ou de la résidence.
 
-**État à la passation : P0 et B1–B5 ouverts.** Les propositions ne sont
-pas des gains acquis ; les chiffres cités ne mesurent pas une v8 exécutée.
+**État à l'audit initial : P0 et B1–B5 ouverts.** Les propositions initiales
+ne sont pas des gains acquis ; leurs chiffres historiques ne mesurent
+pas une v8 exécutée. Les suivis P0 ci-dessus et leurs reçus propres
+décrivent les implémentations locales ultérieures, sans clore ces verrous.
 Les contrelectures du constructeur restent distinctes de l'auditeur
 indépendant et les reçus anciens ne sont pas réécrits.

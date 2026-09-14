@@ -1,0 +1,37 @@
+{
+  "command": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v8_front_workers_tsan_20260914",
+    "--target",
+    "mhgp8_wspd_q2_parallel_gate",
+    "--parallel",
+    "2"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "build",
+  "started_utc": "2026-09-14T15:13:32.563769+00:00",
+  "exit_code": 0,
+  "stdout": "[ 12%] Building CXX object CMakeFiles/mhgp8_p0.dir/src/pipeline/axis_q2.cpp.o\n[ 25%] Building CXX object CMakeFiles/mhgp8_p0.dir/src/pipeline/local_credits.cpp.o\n[ 37%] Building CXX object CMakeFiles/mhgp8_p0.dir/src/pipeline/q2_census.cpp.o\n[ 50%] Building CXX object CMakeFiles/mhgp8_p0.dir/src/pipeline/prepared_cloud.cpp.o\n[ 62%] Building CXX object CMakeFiles/mhgp8_p0.dir/src/wspd/front.cpp.o\n[ 75%] Linking CXX static library libmhgp8_p0.a\n[ 75%] Built target mhgp8_p0\n[ 87%] Building CXX object CMakeFiles/mhgp8_wspd_q2_parallel_gate.dir/tests/wspd_q2_parallel_gate.cpp.o\n[100%] Linking CXX executable mhgp8_wspd_q2_parallel_gate\n[100%] Built target mhgp8_wspd_q2_parallel_gate\n",
+  "stderr": "",
+  "stdout_base64": "WyAxMiVdIEJ1aWxkaW5nIENYWCBvYmplY3QgQ01ha2VGaWxlcy9taGdwOF9wMC5kaXIvc3JjL3BpcGVsaW5lL2F4aXNfcTIuY3BwLm8KWyAyNSVdIEJ1aWxkaW5nIENYWCBvYmplY3QgQ01ha2VGaWxlcy9taGdwOF9wMC5kaXIvc3JjL3BpcGVsaW5lL2xvY2FsX2NyZWRpdHMuY3BwLm8KWyAzNyVdIEJ1aWxkaW5nIENYWCBvYmplY3QgQ01ha2VGaWxlcy9taGdwOF9wMC5kaXIvc3JjL3BpcGVsaW5lL3EyX2NlbnN1cy5jcHAubwpbIDUwJV0gQnVpbGRpbmcgQ1hYIG9iamVjdCBDTWFrZUZpbGVzL21oZ3A4X3AwLmRpci9zcmMvcGlwZWxpbmUvcHJlcGFyZWRfY2xvdWQuY3BwLm8KWyA2MiVdIEJ1aWxkaW5nIENYWCBvYmplY3QgQ01ha2VGaWxlcy9taGdwOF9wMC5kaXIvc3JjL3dzcGQvZnJvbnQuY3BwLm8KWyA3NSVdIExpbmtpbmcgQ1hYIHN0YXRpYyBsaWJyYXJ5IGxpYm1oZ3A4X3AwLmEKWyA3NSVdIEJ1aWx0IHRhcmdldCBtaGdwOF9wMApbIDg3JV0gQnVpbGRpbmcgQ1hYIG9iamVjdCBDTWFrZUZpbGVzL21oZ3A4X3dzcGRfcTJfcGFyYWxsZWxfZ2F0ZS5kaXIvdGVzdHMvd3NwZF9xMl9wYXJhbGxlbF9nYXRlLmNwcC5vClsxMDAlXSBMaW5raW5nIENYWCBleGVjdXRhYmxlIG1oZ3A4X3dzcGRfcTJfcGFyYWxsZWxfZ2F0ZQpbMTAwJV0gQnVpbHQgdGFyZ2V0IG1oZ3A4X3dzcGRfcTJfcGFyYWxsZWxfZ2F0ZQo=",
+  "stderr_base64": "",
+  "status": "completed",
+  "finished_utc": "2026-09-14T15:13:39.702169+00:00",
+  "elapsed_seconds": 7.138402208998741,
+  "child_user_seconds": 9.72691,
+  "child_system_seconds": 1.088905,
+  "child_maxrss_kib_cumulative": 204156,
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/q2_front_workers_20260914/thread_sanitizer/prepare_workspace_yncai04j/build.stdout.bin",
+      "sha256": "439d25798917e8df41dc135f830ccbb93eec25473c222818d15a65081e8b9ba4",
+      "bytes": 686
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/q2_front_workers_20260914/thread_sanitizer/prepare_workspace_yncai04j/build.stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  }
+}

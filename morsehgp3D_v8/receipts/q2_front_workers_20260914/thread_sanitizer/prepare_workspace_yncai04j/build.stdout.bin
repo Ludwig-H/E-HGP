@@ -1,0 +1,10 @@
+[ 12%] Building CXX object CMakeFiles/mhgp8_p0.dir/src/pipeline/axis_q2.cpp.o
+[ 25%] Building CXX object CMakeFiles/mhgp8_p0.dir/src/pipeline/local_credits.cpp.o
+[ 37%] Building CXX object CMakeFiles/mhgp8_p0.dir/src/pipeline/q2_census.cpp.o
+[ 50%] Building CXX object CMakeFiles/mhgp8_p0.dir/src/pipeline/prepared_cloud.cpp.o
+[ 62%] Building CXX object CMakeFiles/mhgp8_p0.dir/src/wspd/front.cpp.o
+[ 75%] Linking CXX static library libmhgp8_p0.a
+[ 75%] Built target mhgp8_p0
+[ 87%] Building CXX object CMakeFiles/mhgp8_wspd_q2_parallel_gate.dir/tests/wspd_q2_parallel_gate.cpp.o
+[100%] Linking CXX executable mhgp8_wspd_q2_parallel_gate
+[100%] Built target mhgp8_wspd_q2_parallel_gate

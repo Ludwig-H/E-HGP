@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — Pool terminal sur le census global
+# Morse HGP 3D v8 — front et census q2 sur plusieurs CPU
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -35,6 +35,33 @@ catalogue q3/q4 ni une tour FULL.
 Les mesures historiques citées restent v7.
 
 ## État exécutable
+
+La treizième tranche répartit les [sous-arbres du front entre workers](docs/P0_FRONT_WORKERS_Q2.md).
+Le nuage et l'index sont partagés en lecture seule ; chaque worker possède
+son moteur de comptage et ses buffers de collecte. Les tests des parents
+ne sont pas répétés. La sortie complète q2 et tous les compteurs
+géométriques doivent être identiques au mono, indépendamment du nombre
+de workers et de la granularité. Le nombre de jobs règle la distribution,
+jamais la quantité de résultats conservés.
+
+La [qualification propre](receipts/q2_front_workers_20260914/README.md)
+est close : 53 CTests Release et53 Clang ASan/UBSan passent, ainsi que
+la porte ThreadSanitizer. Les 32 différentiels contre l'ancien mono
+conservent tous les champs hors chronos. Les 134 mesures sont closes,
+avec lecteurs normal/−O identiques. À 8k/K10, sur quatre cœurs physiques,
+les médianes de trois essais donnent ×3,91 uniforme, ×3,40 terrain,
+×3,89 amas et ×1,93 rangées entre un et quatre workers. Les principaux
+compteurs restent sous le quadruplement à chaque doublement8k/16k/32k,
+sans borne générale. Les mesures sur deux cœurs/quatre SMT sont séparées.
+Aucun nouveau contrat FULL/G4 n'est revendiqué. Les mesures détaillent
+le temps mur, les sommes d'intervalles des workers, le préfixe séquentiel
+et le déséquilibre ; ces différentes unités doivent rester distinctes.
+Les builds Release, ASan/UBSan et ThreadSanitizer sont épinglés.
+Suite : redistribuer les sous-arbres pendants, puis traiter les gros
+rectangles encore indivisibles. q3/q4, FULL et GPU restent ouverts.
+GCP non utilisé.
+
+## Douzième tranche publiée à ba11e3ab — historique
 
 La douzième tranche raccorde [Pool terminal au census global](docs/P0_POOL_TERMINAL_Q2.md).
 Un plan par rectangle, sans nouvelle copie du nuage, sélectionne au plus

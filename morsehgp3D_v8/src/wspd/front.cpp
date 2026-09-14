@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <array>
+#include <deque>
 #include <limits>
 #include <stdexcept>
 #include <vector>
@@ -43,10 +44,15 @@ bool contains(Range range, std::size_t rank) {
 }
 
 struct Task {
-  std::size_t a;
-  std::size_t b;
-  std::uint8_t mask;
-  u64 depth;
+  std::size_t a{};
+  std::size_t b{};
+  u64 depth{};
+  // An index path has at most 48 coordinate halvings. A product path
+  // has at most 96 levels and adds at most two pending siblings per level.
+  // This represents a proved bound, not a limit on exploration.
+  std::uint32_t dfs_pending{};
+  std::uint8_t mask{};
+  bool terminal{};
 };
 
 class Front {
@@ -67,63 +73,92 @@ class Front {
         result_.active_lane_mask |= static_cast<std::uint8_t>(1U << lane);
       }
     }
-    // A reservation, not an exploration cap. The u16 product path has
-    // at most 96 coordinate halvings; no result is truncated if it grows.
-    stack_.reserve(97);
+  }
+
+  [[nodiscard]] Task root_task() const { return {0, 0, 0, 0, result_.active_lane_mask, false}; }
+  [[nodiscard]] const WspdFrontResult& result() const { return result_; }
+
+  // Exactly one formerly unvisited product. Children are pushed in reverse
+  // canonical DFS order. Inlinable sinks avoid constructing/returning a
+  // three-task array on this hot path. A terminal has already paid every
+  // front test and emission counter before entering its separate sink.
+  template<class Push, class Emit>
+  void expand(const Task& task, Push&& push, Emit&& emit) {
+    if (task.terminal) throw std::logic_error("mhgp8 WSPD terminal cannot be tested twice");
+    counter_add(result_.work.product_visits);
+    result_.work.max_product_depth = std::max(result_.work.max_product_depth, task.depth);
+    result_.work.max_stack_size = std::max(result_.work.max_stack_size, static_cast<u64>(task.dfs_pending) + 1);
+    const auto& a = nodes_[task.a];
+    const auto& b = nodes_[task.b];
+    if (task.a == task.b) {
+      if (a.left == Q2SpatialNode::absent) {
+        counter_add(result_.work.diagonal_leaves);
+        return;
+      }
+      counter_add(result_.work.diagonal_splits);
+      // LCA decomposition: LL, LR and RR partition unordered pairs. The
+      // inherited pending count reconstructs mono stack high-water exactly
+      // even when these children are prepared/replayed in another order.
+      result_.work.max_stack_size = std::max(result_.work.max_stack_size, static_cast<u64>(task.dfs_pending) + 3);
+      push(Task{a.right, a.right, task.depth + 1, task.dfs_pending, task.mask, false});
+      push(Task{a.left, a.right, task.depth + 1, task.dfs_pending + 1, task.mask, false});
+      push(Task{a.left, a.left, task.depth + 1, task.dfs_pending + 2, task.mask, false});
+      return;
+    }
+    auto mask = task.mask;
+    if (mode_ == WspdFrontMode::MidpointSamples) mask = filter(a, b, mask);
+    const auto mass = product(a.range.size(), b.range.size());
+    for (unsigned lane = 0; lane < 3; ++lane) {
+      const auto bit = static_cast<std::uint8_t>(1U << lane);
+      if ((task.mask & bit) != 0 && (mask & bit) == 0)
+        counter_add(result_.work.rejected_pair_mass[lane], mass);
+    }
+    if (mask == 0) {
+      counter_add(result_.work.fully_rejected_products);
+      return;
+    }
+    counter_add(result_.work.separation_tests);
+    const auto da = diagonal2(a.box);
+    const auto db = diagonal2(b.box);
+    if (static_cast<i128>(gap2(a.box, b.box)) >=
+        static_cast<i128>(separation_) * separation_ * std::max(da, db)) {
+      account_emit(task.a, task.b, mask, mass);
+      emit(Task{task.a, task.b, task.depth, task.dfs_pending, mask, true});
+      return;
+    }
+    counter_add(result_.work.disjoint_splits);
+    const bool split_a = a.left != Q2SpatialNode::absent &&
+                        (b.left == Q2SpatialNode::absent || da >= db);
+    const auto& split = split_a ? a : b;
+    if (split.left == Q2SpatialNode::absent)
+      throw std::logic_error("mhgp8 WSPD distinct singleton boxes must be separated");
+    result_.work.max_stack_size = std::max(result_.work.max_stack_size, static_cast<u64>(task.dfs_pending) + 2);
+    push(Task{split_a ? split.right : task.a, split_a ? task.b : split.right,
+              task.depth + 1, task.dfs_pending, mask, false});
+    push(Task{split_a ? split.left : task.a, split_a ? task.b : split.left,
+              task.depth + 1, task.dfs_pending + 1, mask, false});
+  }
+
+  [[nodiscard]] WspdFrontResult run(Task initial) {
+    if (initial.terminal) {
+      consumer_(WspdRectangle{initial.a, initial.b, initial.mask});
+      return result_;
+    }
+    // A reservation, not an exploration cap. No result is truncated.
+    std::vector<Task> stack;
+    stack.reserve(97);
+    stack.push_back(initial);
+    while (!stack.empty()) {
+      const auto task = stack.back();
+      stack.pop_back();
+      expand(task, [&](const Task& child) { stack.push_back(child); },
+             [&](const Task& terminal) { consumer_(WspdRectangle{terminal.a, terminal.b, terminal.mask}); });
+    }
+    return result_;
   }
 
   WspdFrontResult run() {
-    push({0, 0, result_.active_lane_mask, 0});
-    while (!stack_.empty()) {
-      const auto task = stack_.back();
-      stack_.pop_back();
-      counter_add(result_.work.product_visits);
-      result_.work.max_product_depth = std::max(result_.work.max_product_depth, task.depth);
-      const auto& a = nodes_[task.a];
-      const auto& b = nodes_[task.b];
-      if (task.a == task.b) {
-        if (a.left == Q2SpatialNode::absent) {
-          counter_add(result_.work.diagonal_leaves);
-        } else {
-          counter_add(result_.work.diagonal_splits);
-          // LCA decomposition: LL, LR and RR partition unordered pairs.
-          push({a.right, a.right, task.mask, task.depth + 1});
-          push({a.left, a.right, task.mask, task.depth + 1});
-          push({a.left, a.left, task.mask, task.depth + 1});
-        }
-        continue;
-      }
-      auto mask = task.mask;
-      if (mode_ == WspdFrontMode::MidpointSamples) mask = filter(a, b, mask);
-      const auto mass = product(a.range.size(), b.range.size());
-      for (unsigned lane = 0; lane < 3; ++lane) {
-        const auto bit = static_cast<std::uint8_t>(1U << lane);
-        if ((task.mask & bit) != 0 && (mask & bit) == 0) {
-          counter_add(result_.work.rejected_pair_mass[lane], mass);
-        }
-      }
-      if (mask == 0) {
-        counter_add(result_.work.fully_rejected_products);
-        continue;
-      }
-      counter_add(result_.work.separation_tests);
-      const auto da = diagonal2(a.box);
-      const auto db = diagonal2(b.box);
-      if (static_cast<i128>(gap2(a.box, b.box)) >=
-          static_cast<i128>(separation_) * separation_ * std::max(da, db)) {
-        emit(task.a, task.b, mask, mass);
-        continue;
-      }
-      counter_add(result_.work.disjoint_splits);
-      const bool split_a = a.left != Q2SpatialNode::absent &&
-                          (b.left == Q2SpatialNode::absent || da >= db);
-      const auto& split = split_a ? a : b;
-      if (split.left == Q2SpatialNode::absent) {
-        throw std::logic_error("mhgp8 WSPD distinct singleton boxes must be separated");
-      }
-      push({split_a ? split.right : task.a, split_a ? task.b : split.right, mask, task.depth + 1});
-      push({split_a ? split.left : task.a, split_a ? task.b : split.left, mask, task.depth + 1});
-    }
+    static_cast<void>(run(root_task()));
     for (unsigned lane = 0; lane < 3; ++lane) {
       const auto expected = (result_.active_lane_mask & (1U << lane)) != 0
                                 ? result_.total_unordered_pairs : 0;
@@ -135,12 +170,6 @@ class Front {
   }
 
  private:
-  void push(Task task) {
-    stack_.push_back(task);
-    result_.work.max_stack_size = std::max(result_.work.max_stack_size,
-                                          static_cast<u64>(stack_.size()));
-  }
-
   i64 midpoint_distance4(const std::array<i64, 3>& center4, const Box3& box) {
     counter_add(result_.work.witness_box_distance_tests);
     i64 result = 0;
@@ -210,7 +239,7 @@ class Front {
     return mask;
   }
 
-  void emit(std::size_t a_id, std::size_t b_id, std::uint8_t mask, u64 mass) {
+  void account_emit(std::size_t a_id, std::size_t b_id, std::uint8_t mask, u64 mass) {
     const auto na = nodes_[a_id].range.size();
     const auto nb = nodes_[b_id].range.size();
     const auto maximum = std::max(na, nb);
@@ -230,7 +259,6 @@ class Front {
         counter_add(work.residual_pair_mass[lane], mass);
       }
     }
-    consumer_(WspdRectangle{a_id, b_id, mask});
   }
 
   std::span<const Q2SpatialNode> nodes_;
@@ -242,24 +270,97 @@ class Front {
   const WspdRectangleConsumer& consumer_;
   std::array<unsigned, 3> thresholds_{};
   WspdFrontResult result_;
-  std::vector<Task> stack_;
 };
+
+void validate_front(unsigned kmax, unsigned separation_s, WspdFrontMode mode, std::uint8_t requested_lane_mask) {
+  if (kmax == 0 || kmax > 10 || separation_s == 0 ||
+      (mode != WspdFrontMode::Pure && mode != WspdFrontMode::MidpointSamples))
+    throw std::invalid_argument("mhgp8 WSPD requires Kmax1..10, positive s and a valid mode");
+  const unsigned available = (1U << std::min(kmax, 3U)) - 1;
+  if (requested_lane_mask == 0 || requested_lane_mask > 7 || (requested_lane_mask & available) == 0)
+    throw std::invalid_argument("mhgp8 WSPD requires a mask in 1..7 intersecting available lanes");
+}
 
 }  // namespace
 
 WspdFrontResult run_wspd_front(const Q2CensusIndex& index, unsigned kmax,
                                unsigned separation_s, WspdFrontMode mode,
                                const WspdRectangleConsumer& consumer, std::uint8_t requested_lane_mask) {
-  if (kmax == 0 || kmax > 10 || separation_s == 0 ||
-      (mode != WspdFrontMode::Pure && mode != WspdFrontMode::MidpointSamples) || !consumer) {
-    throw std::invalid_argument("mhgp8 WSPD requires Kmax1..10, positive s, valid mode and consumer");
-  }
-  const unsigned available = (1U << std::min(kmax, 3U)) - 1;
-  if (requested_lane_mask == 0 || requested_lane_mask > 7 ||
-      (requested_lane_mask & available) == 0) {
-    throw std::invalid_argument("mhgp8 WSPD requires a mask in 1..7 intersecting available lanes");
-  }
+  if (!consumer) throw std::invalid_argument("mhgp8 WSPD requires a valid consumer");
+  validate_front(kmax, separation_s, mode, requested_lane_mask);
   return Front(index, kmax, separation_s, mode, consumer, requested_lane_mask).run();
+}
+
+struct WspdFrontJobs::Impl {
+  Q2CensusIndexPtr index;
+  unsigned kmax;
+  unsigned separation;
+  WspdFrontMode mode;
+  std::uint8_t requested_mask;
+  WspdFrontResult prefix;
+  std::vector<Task> jobs;
+  std::size_t terminals{};
+
+  Impl(Q2CensusIndexPtr owner, unsigned k, unsigned s, WspdFrontMode strategy,
+       std::size_t target, std::uint8_t mask)
+      : index(std::move(owner)), kmax(k), separation(s), mode(strategy), requested_mask(mask) {
+    const WspdRectangleConsumer unused = [](const WspdRectangle&) {};
+    Front preparation(*index, kmax, separation, mode, unused, requested_mask);
+    std::deque<Task> pending;
+    pending.push_back(preparation.root_task());
+    // A true FIFO of unvisited products, not a DFS stack whose small size
+    // could silently force preparation of the whole front. Count retained
+    // terminals as well: preparation stores only the chosen granularity.
+    while (!pending.empty() && jobs.size() < target && pending.size() < target - jobs.size()) {
+      const auto task = pending.front();
+      pending.pop_front();
+      preparation.expand(task, [&](const Task& child) { pending.push_back(child); },
+                         [&](const Task& terminal) { jobs.push_back(terminal); });
+    }
+    terminals = jobs.size();
+    if (pending.size() > jobs.max_size() - jobs.size())
+      throw std::length_error("mhgp8 WSPD job count exceeds vector capacity");
+    jobs.reserve(jobs.size() + pending.size());
+    while (!pending.empty()) {
+      jobs.push_back(pending.front());
+      pending.pop_front();
+    }
+    prefix = preparation.result();
+  }
+};
+
+WspdFrontJobs::WspdFrontJobs(std::unique_ptr<Impl> implementation)
+    : implementation_(std::move(implementation)) {}
+WspdFrontJobs::~WspdFrontJobs() = default;
+
+std::size_t WspdFrontJobs::job_count() const noexcept { return implementation_->jobs.size(); }
+std::size_t WspdFrontJobs::terminal_job_count() const noexcept { return implementation_->terminals; }
+const WspdFrontResult& WspdFrontJobs::prefix_result() const noexcept { return implementation_->prefix; }
+const Q2CensusIndex& WspdFrontJobs::index() const noexcept { return *implementation_->index; }
+
+std::size_t WspdFrontJobs::retained_bytes() const {
+  const auto capacity = implementation_->jobs.capacity();
+  if (capacity > std::numeric_limits<std::size_t>::max() / sizeof(Task))
+    throw std::overflow_error("mhgp8 WSPD retained job bytes exceed size_t");
+  return capacity * sizeof(Task);
+}
+
+WspdFrontResult WspdFrontJobs::run_job(std::size_t id, const WspdRectangleConsumer& consumer) const {
+  const auto& plan = *implementation_;
+  if (id >= plan.jobs.size() || !consumer)
+    throw std::invalid_argument("mhgp8 WSPD requires an existing job and valid consumer");
+  return Front(*plan.index, plan.kmax, plan.separation, plan.mode, consumer, plan.requested_mask).run(plan.jobs[id]);
+}
+
+std::unique_ptr<WspdFrontJobs> make_wspd_front_jobs(
+    Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s, WspdFrontMode mode,
+    std::size_t target_jobs, std::uint8_t requested_lane_mask) {
+  if (!index || target_jobs == 0)
+    throw std::invalid_argument("mhgp8 WSPD jobs require an owning index and positive target");
+  validate_front(kmax, separation_s, mode, requested_lane_mask);
+  auto implementation = std::make_unique<WspdFrontJobs::Impl>(
+      std::move(index), kmax, separation_s, mode, target_jobs, requested_lane_mask);
+  return std::unique_ptr<WspdFrontJobs>(new WspdFrontJobs(std::move(implementation)));
 }
 
 }  // namespace mhgp8

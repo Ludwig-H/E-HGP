@@ -3,7 +3,23 @@
 14 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
-État constructeur courant : douzième tranche P0,
+État constructeur courant : treizième tranche P0,
+[front et census q2 multi-CPU](../docs/P0_FRONT_WORKERS_Q2.md) implémentés.
+Qualification propre close : 53 CTests Release/Clang ASan/UBSan,
+ThreadSanitizer et32 différentiels ancien/nouveau mono passent.
+Les [134 mesures propres](../receipts/q2_front_workers_20260914/README.md)
+sont closes, lecteurs normal/−O identiques. Les trois builds sont épinglés.
+Sur quatre cœurs physiques, médianes8k/K10 un/quatre workers : ×3,91
+uniforme, ×3,40 terrain, ×3,89 amas, ×1,93 rangées. Les principaux
+comptes restent sous ×4 à chaque doublement8k/16k/32k ; aucune borne
+globale déduite. Les deux affinités de CPU restent séparées. Aucun résultat
+de tour FULL ou G4 transféré depuis le mono ni les prototypes d'audit.
+Les sorties et compteurs géométriques sont confrontés au mono et à
+une force brute indépendante, les threads sont joints même sur erreur.
+GCP non utilisé.
+
+## Historique : douzième tranche P0 publiée à ba11e3ab
+
 [Pool terminal q2](../docs/P0_POOL_TERMINAL_Q2.md) implémenté et qualifié
 localement : 49 CTests Release/Clang ASan/UBSan PASS, lecteurs normal/−O
 identiques et 80 mesures closes. Les deux builds Pool terminal sont

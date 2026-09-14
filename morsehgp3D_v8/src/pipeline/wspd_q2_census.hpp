@@ -17,6 +17,7 @@ struct Q2PoolWork {
   u64 selected_anchors{}, pair_roots{}, plan_peak_bytes{}, original_selected_anchors{};
   u64 passthrough_rectangles{}, passthrough_pairs{}, passthrough_anchors{};
   double preparation_ms{}, selected_total_ms{};
+  bool operator==(const Q2PoolWork&) const = default;
 };
 
 struct Q2JointWork {
@@ -26,6 +27,7 @@ struct Q2JointWork {
   u64 credit_events{}, credited_pair_mass{}, splits_after_credit{};
   u64 singleton_handoffs{}, handoffs_after_credit{}, handoff_pair_mass{};
   u64 rejected_pairs{}, accepted_pairs{}, max_depth{};
+  bool operator==(const Q2JointWork&) const = default;
 };
 
 struct Q2OrderWork {
@@ -33,6 +35,7 @@ struct Q2OrderWork {
   u64 deferred_skips{};
   u64 anchor_skips{};
   u64 phase_switches{};
+  bool operator==(const Q2OrderWork&) const = default;
 };
 
 struct Q2SiblingWork {
@@ -42,6 +45,7 @@ struct Q2SiblingWork {
   u64 rejected_tasks{};
   u64 rejected_pairs{};
   u64 rejected_after_credit{};
+  bool operator==(const Q2SiblingWork&) const = default;
 };
 
 struct WspdQ2CensusResult {
@@ -90,7 +94,8 @@ struct WspdQ2CensusResult {
 // defers the original B while A is grouped; only singleton handoffs may
 // skip their own known-zero anchor. Joint work is separate from anchor
 // work. anchor_queries remains the descriptive sum of smaller factors,
-// while count_root_starts equals root_products in SharedProduct mode.
+// while count_root_starts equals root_products + pool_work.pair_roots
+// in SharedProduct mode (the latter term is zero without effective Pool).
 // Sibling certificates are tested only at subsequent anchor-task B splits.
 // SharedAnchors uses the same joint bounds but splits only A before the
 // singleton handoff, preserving the original B for its anchor task. Thus
@@ -101,7 +106,9 @@ struct WspdQ2CensusResult {
 // prepares ONE local credit plan on the same index. Its at most K disjoint
 // pair bands are expanded, without testing the rejected Cartesian product.
 // If Pool removes no pair, the original census route is retained; the paid
-// plan is still counted in selected_*, F, preparation and passthrough_*.
+// plan is still counted in selected_rectangles/selected_pairs,
+// original_selected_anchors, F, preparation and passthrough_*.
+// selected_anchors counts only anchors expanded by an effective Pool plan.
 // Otherwise each survivor starts its full global census at zero; h_a+h_b
 // is never preloaded. These reduced rectangles use Pairwise regardless of
 // the anchor/order/sibling options, which still govern every other rectangle.

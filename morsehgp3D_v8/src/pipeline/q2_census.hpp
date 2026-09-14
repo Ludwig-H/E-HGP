@@ -52,6 +52,7 @@ struct Q2CensusWork {
   u64 payload_interior_sites{};
   u64 payload_shell_sites{};
   u64 payload_supports{};
+  bool operator==(const Q2CensusWork&) const = default;
 };
 
 struct Q2BallKey {

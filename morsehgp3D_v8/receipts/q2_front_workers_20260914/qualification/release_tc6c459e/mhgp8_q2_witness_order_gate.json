@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_front_workers_20260914/mhgp8_q2_witness_order_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "mhgp8_q2_witness_order_gate",
+  "expected_exit_code": 0,
+  "started_utc": "2026-09-14T14:59:50.410317+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "mhgp8_q2_witness_order_gate passed checks=436117 clouds=16 oracle_pairs=3612 oracle_sites=235572 runs=1798 supports=48922 shell_sites=138352 structural_splits=186274 deferred_skips=22258 anchor_skips=29722 phase_switches=22078 default_comparisons=256 transformed_clouds=8 invalid_inputs=3 callback_failures=2 model_mutants=5 fixture_global_splits=1638 fixture_complement_splits=1384 fixture_universal_witnesses=12\n",
+  "stderr": "",
+  "stdout_base64": "bWhncDhfcTJfd2l0bmVzc19vcmRlcl9nYXRlIHBhc3NlZCBjaGVja3M9NDM2MTE3IGNsb3Vkcz0xNiBvcmFjbGVfcGFpcnM9MzYxMiBvcmFjbGVfc2l0ZXM9MjM1NTcyIHJ1bnM9MTc5OCBzdXBwb3J0cz00ODkyMiBzaGVsbF9zaXRlcz0xMzgzNTIgc3RydWN0dXJhbF9zcGxpdHM9MTg2Mjc0IGRlZmVycmVkX3NraXBzPTIyMjU4IGFuY2hvcl9za2lwcz0yOTcyMiBwaGFzZV9zd2l0Y2hlcz0yMjA3OCBkZWZhdWx0X2NvbXBhcmlzb25zPTI1NiB0cmFuc2Zvcm1lZF9jbG91ZHM9OCBpbnZhbGlkX2lucHV0cz0zIGNhbGxiYWNrX2ZhaWx1cmVzPTIgbW9kZWxfbXV0YW50cz01IGZpeHR1cmVfZ2xvYmFsX3NwbGl0cz0xNjM4IGZpeHR1cmVfY29tcGxlbWVudF9zcGxpdHM9MTM4NCBmaXh0dXJlX3VuaXZlcnNhbF93aXRuZXNzZXM9MTIK",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-14T14:59:50.464467+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/q2_front_workers_20260914/qualification/release_tc6c459e/mhgp8_q2_witness_order_gate.stdout.bin",
+      "sha256": "54fbf0a21c276be58dfad05c491d1c8c7f3e197bb47b7128ee05aa63ff272248",
+      "bytes": 414
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/q2_front_workers_20260914/qualification/release_tc6c459e/mhgp8_q2_witness_order_gate.stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  }
+}

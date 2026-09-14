@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_front_workers_20260914/mhgp8_q2_joint_bounds_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "mhgp8_q2_joint_bounds_gate",
+  "expected_exit_code": 0,
+  "started_utc": "2026-09-14T14:59:50.570677+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "mhgp8_q2_joint_bounds_gate passed checks=12058 cases=3190 oracle_values=211108 dense_values=120366 interior=45 exterior=348 shell=229 mixed=2568 swaps=3190 singleton_reductions=2413 symmetries=48 model_mutants=9 invalid_inputs=9 copies=3 prepared_bytes=96\n",
+  "stderr": "",
+  "stdout_base64": "bWhncDhfcTJfam9pbnRfYm91bmRzX2dhdGUgcGFzc2VkIGNoZWNrcz0xMjA1OCBjYXNlcz0zMTkwIG9yYWNsZV92YWx1ZXM9MjExMTA4IGRlbnNlX3ZhbHVlcz0xMjAzNjYgaW50ZXJpb3I9NDUgZXh0ZXJpb3I9MzQ4IHNoZWxsPTIyOSBtaXhlZD0yNTY4IHN3YXBzPTMxOTAgc2luZ2xldG9uX3JlZHVjdGlvbnM9MjQxMyBzeW1tZXRyaWVzPTQ4IG1vZGVsX211dGFudHM9OSBpbnZhbGlkX2lucHV0cz05IGNvcGllcz0zIHByZXBhcmVkX2J5dGVzPTk2Cg==",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-14T14:59:50.620167+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/q2_front_workers_20260914/qualification/release_tc6c459e/mhgp8_q2_joint_bounds_gate.stdout.bin",
+      "sha256": "dd7767a156cdf41d6b9fc18e9ae5197804d29b9b3b71e8d035097a4da45943d4",
+      "bytes": 256
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/q2_front_workers_20260914/qualification/release_tc6c459e/mhgp8_q2_joint_bounds_gate.stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  }
+}
