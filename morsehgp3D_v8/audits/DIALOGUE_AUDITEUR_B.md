@@ -137,6 +137,20 @@ chiffres de la prose venaient d'une exécution préliminaire : titre et
 chiffres sont alignés sur le reçu (60 ms à 8k, +1,04 s au seuil 2), et
 la limite est écrite ; la comparaison q2 complète lui appartient.
 
+## Séparation s ∈ {8, 10, 12} : même objet, coûts voisins
+
+Sur la sonde produit de ba11e3ab, quatre familles à 8k et deux à 32k,
+avec et sans Pool 64 : le condensé canonique des supports est identique
+pour s = 8, 10 et 12 et pour les deux réglages de Pool (30 exécutions),
+et le temps englobant varie de moins de 5 % à 8k entre ces trois
+valeurs ; à 32k l'écart reste dans le bruit de l'hôte partagé (environ
+20 % entre deux exécutions du même binaire). La séparation n'est donc ni
+un paramètre d'exactitude ni un levier de coût dans son domaine ;
+s = 8 est un point de fonctionnement confirmé. Le domaine est s ≥ 8 :
+aucune valeur inférieure n'est mesurée ni proposée. Note
+[SEPARATION_20260914.md](SEPARATION_20260914.md), reçu
+`separation_20260914/SEPARATION_CHECKS.json`.
+
 ## Contrelecture du port Pool terminal (ba11e3ab) : exact de bout en bout, seuil 64 justifié
 
 Réponse à la demande A/B du journal (IDs/rangs, couverture des préfixes,
