@@ -1,0 +1,190 @@
+--- pinned/q2_census.cpp
++++ audit/q2_census.cpp
+@@ -1,4 +1,5 @@
+ #include "q2_census.hpp"
++#include "audit_sibling.hpp"
+ #include "wspd_q2_census.hpp"
+ #include "../spindle/q2_prepared_bounds.hpp"
+ 
+@@ -351,8 +352,10 @@
+     }
+   }
+ 
++  template <unsigned Sibling = 0>
+   void shared_task(std::size_t a_id, std::size_t query, unsigned count,
+-                    std::size_t cursor) {
++                    std::size_t cursor, audit::SiblingWork* sibling_work = nullptr,
++                    std::size_t sibling = absent) {
+     counter_add(result.work.query_tasks);
+     const auto b = query_node(query);
+     const bool singleton = b.range.size() == 1;
+@@ -365,6 +368,31 @@
+     Q2PreparedBounds prepared;
+     if (!singleton) {
+       prepared = Q2PreparedBounds(points[a_id], b.box);
++    }
++    // Audit-only early rejection. The child and sibling IDs belong to the
++    // same query tree and its b_order, not necessarily the witness Z tree.
++    // The exact inherited prefix counted only points outside their parent B:
++    // otherwise evaluating b=z would contradict the strict uniform H>0 test.
++    // Thus Remaining may combine the disjoint prefix with the sibling ONLY
++    // for immediate saturation. Failed tests change neither count nor cursor.
++    if constexpr (Sibling != 0) {
++      if (sibling != absent) {
++        counter_add(sibling_work->child_entries);
++        const auto sibling_node = query_node(sibling);
++        const auto needed = Sibling == 2 ? threshold - count : threshold;
++        if (sibling_node.range.size() >= needed) {
++          counter_add(sibling_work->population_eligible);
++          counter_add(sibling_work->bound_tests);
++          const auto sibling_bounds = singleton ? pair_bounds(key, sibling_node.box)
++              : prepared.bounds_unchecked(sibling_node.box);
++          if (sibling_bounds.minimum4 > 0) {
++            counter_add(sibling_work->rejected_children);
++            counter_add(sibling_work->rejected_pairs, static_cast<u64>(b.range.size()));
++            reject(b.range);
++            return;
++          }
++        }
++      }
+     }
+     while (cursor != index.nodes_.size()) {
+       if (cursor >= index.nodes_.size()) {
+@@ -419,8 +447,13 @@
+         // exact acquired count. No frontier list, allocation, root restart,
+         // or copy of a long continuation is needed. Query tasks may later be
+         // scheduled independently, but their internal Z order must stay fixed.
+-        shared_task(a_id, b.left, count, cursor);
+-        shared_task(a_id, b.right, count, cursor);
++        if constexpr (Sibling == 0) {
++          shared_task(a_id, b.left, count, cursor);
++          shared_task(a_id, b.right, count, cursor);
++        } else {
++          shared_task<Sibling>(a_id, b.left, count, cursor, sibling_work, b.right);
++          shared_task<Sibling>(a_id, b.right, count, cursor, sibling_work, b.left);
++        }
+         return;
+       }
+     }
+@@ -567,4 +600,121 @@
+   return result;
+ }
+ 
++template <unsigned Sibling>
++WspdQ2CensusResult run_audit_sibling(
++    const Q2CensusIndex& index, unsigned kmax, unsigned separation_s,
++    WspdFrontMode front_mode, Q2CensusMode census_mode,
++    const Q2CensusConsumer& consumer, audit::SiblingWork& work) {
++  const auto started = Clock::now();
++  if (census_mode != Q2CensusMode::Pairwise && census_mode != Q2CensusMode::SharedBlocks) {
++    throw std::invalid_argument("mhgp8 integrated q2 census mode is invalid");
++  }
++  if (!consumer) {
++    throw std::invalid_argument("mhgp8 integrated q2 census requires a payload consumer");
++  }
++  WspdQ2CensusResult result;
++  {
++    Q2CensusEngine engine(index, kmax, consumer);
++    const auto nodes = index.spatial_nodes();
++    const auto order = index.spatial_order();
++    // The producer validates K/s/mode before its first callback and emits
++    // handles from this exact index. No arbitrary externally forged handles
++    // are adopted, and no global or factor validation is repeated here.
++    result.front = run_wspd_front(index, kmax, separation_s, front_mode,
++        [&](const WspdRectangle& rectangle) {
++          if (rectangle.lane_mask != 1) {
++            throw std::logic_error("mhgp8 integrated census received a non-q2 lane");
++          }
++          auto a_node = rectangle.a_node;
++          auto b_node = rectangle.b_node;
++          if (nodes[a_node].range.size() > nodes[b_node].range.size()) std::swap(a_node, b_node);
++          const auto a = nodes[a_node].range;
++          const auto b = nodes[b_node].range;
++          counter_add(result.input_rectangles);
++          counter_add(result.anchor_queries, static_cast<u64>(a.size()));
++          counter_add(engine.result.work.input_descriptors);
++          const auto mass = static_cast<i128>(a.size()) * b.size();
++          if (mass > std::numeric_limits<u64>::max()) {
++            throw std::overflow_error("mhgp8 integrated q2 pair mass exceeds u64");
++          }
++          counter_add(engine.result.candidate_pairs, static_cast<u64>(mass));
++          for (auto rank = a.first; rank < a.last; ++rank) {
++            const auto a_id = order[rank];
++            if (census_mode == Q2CensusMode::SharedBlocks) {
++              engine.root_start(0);
++              engine.shared_task<Sibling>(a_id, b_node, 0, 0, &work);
++            } else {
++              for (auto position = b.first; position < b.last; ++position) engine.pair_task(a_id, position);
++            }
++          }
++        }, 1);
++    result.census = engine.result;
++    if (result.census.candidate_pairs != result.front.work.residual_pair_mass[0] ||
++        result.input_rectangles != result.front.work.emitted_rectangles ||
++        result.census.accepted_pairs > result.census.candidate_pairs ||
++        result.census.rejected_pairs != result.census.candidate_pairs - result.census.accepted_pairs) {
++      throw std::logic_error("mhgp8 integrated q2 census lost the residual partition");
++    }
++  }
++  result.total_ms = milliseconds(started, Clock::now());
++  result.census.total_ms = result.total_ms;
++  result.census.count_ms = result.total_ms - result.census.payload_ms;
++  return result;
++}
++namespace audit {
++
++WspdQ2CensusResult run_sibling_census(
++    const Q2CensusIndex& index, unsigned kmax, unsigned separation_s,
++    WspdFrontMode front_mode, Q2CensusMode census_mode,
++    const Q2CensusConsumer& consumer, SiblingMode mode, SiblingWork& work) {
++  work = {};
++  if (census_mode != Q2CensusMode::SharedBlocks) {
++    throw std::invalid_argument("audit sibling entry supports SharedBlocks only");
++  }
++  switch (mode) {
++    case SiblingMode::Baseline:
++      return run_wspd_q2_census(index, kmax, separation_s, front_mode, census_mode, consumer);
++    case SiblingMode::Autonomous:
++      return run_audit_sibling<1>(index, kmax, separation_s, front_mode, census_mode, consumer, work);
++    case SiblingMode::Remaining:
++      return run_audit_sibling<2>(index, kmax, separation_s, front_mode, census_mode, consumer, work);
++  }
++  throw std::invalid_argument("invalid audit sibling mode");
++}
++
++Q2CensusResult sibling_group_fixture(
++    const Q2CensusIndex& index, std::size_t a_id,
++    std::span<const std::size_t> b_ids, unsigned kmax,
++    const Q2CensusConsumer& consumer, SiblingMode mode, SiblingWork& work) {
++  work = {};
++  if (a_id >= index.cloud().points().size() || b_ids.empty() ||
++      kmax == 0 || kmax > 10 || !consumer) {
++    throw std::invalid_argument("invalid audit group fixture");
++  }
++  // Fixture-only validation/copy, outside every measured WSPD path.
++  std::vector<std::size_t> ids(b_ids.begin(), b_ids.end());
++  std::sort(ids.begin(), ids.end());
++  if (ids.back() >= index.cloud().points().size() ||
++      std::binary_search(ids.begin(), ids.end(), a_id) ||
++      std::adjacent_find(ids.begin(), ids.end()) != ids.end()) {
++    throw std::invalid_argument("audit group has invalid, duplicate or overlapping IDs");
++  }
++  Q2CensusEngine engine(index, kmax, consumer);
++  engine.b_order = b_ids;
++  engine.shared_queries = {};
++  static_cast<void>(engine.build_queries({0, b_ids.size()}, 0));
++  engine.result.candidate_pairs = static_cast<u64>(b_ids.size());
++  engine.result.work.input_descriptors = 1;
++  engine.root_start(0);
++  switch (mode) {
++    case SiblingMode::Baseline: engine.shared_task(a_id, 0, 0, 0); break;
++    case SiblingMode::Autonomous: engine.shared_task<1>(a_id, 0, 0, 0, &work); break;
++    case SiblingMode::Remaining: engine.shared_task<2>(a_id, 0, 0, 0, &work); break;
++    default: throw std::invalid_argument("invalid audit sibling mode");
++  }
++  return engine.result;
++}
++
++}  // namespace audit
++
+ }  // namespace mhgp8

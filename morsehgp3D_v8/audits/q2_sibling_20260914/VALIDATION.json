@@ -1,0 +1,272 @@
+{
+  "artifact_checks": [
+    {
+      "build": "morsehgp3D_v8/audits/q2_sibling_20260914/r1_BUILD.json",
+      "kind": "archive",
+      "match": true,
+      "path": "morsehgp3D_v8/audits/q2_front_20260914/r1_sources.zip",
+      "sha256": "29bfa1b40eed6e6fa7f8167c9868067ceec5ebd4e6b856f9ef26cfa928e96ef3"
+    },
+    {
+      "build": "morsehgp3D_v8/audits/q2_sibling_20260914/r1_BUILD.json",
+      "kind": "adapted_archive",
+      "match": true,
+      "path": "morsehgp3D_v8/audits/q2_sibling_20260914/r1_sources.zip",
+      "sha256": "5a1ef11638d71bb9d4be845ea6582acd1b363fdd838d90877ebb3ccb9e416577"
+    },
+    {
+      "build": "morsehgp3D_v8/audits/q2_sibling_20260914/r1_BUILD.json",
+      "kind": "gate",
+      "match": true,
+      "path": "morsehgp3D_v8/audits/q2_sibling_20260914/.build/r1/gate",
+      "sha256": "9e9c296e62652f89ac90f49537c24424bd04dbd35e112762a828e94f29442266"
+    },
+    {
+      "build": "morsehgp3D_v8/audits/q2_sibling_20260914/r1_BUILD.json",
+      "kind": "probe",
+      "match": true,
+      "path": "morsehgp3D_v8/audits/q2_sibling_20260914/.build/r1/lidar_sibling_probe",
+      "sha256": "3a8aa21b0303d8065c9bb340943e3fc0f1a0df19b2667e0ebceb946fda6f5d51"
+    },
+    {
+      "build": "morsehgp3D_v8/audits/q2_sibling_20260914/r2_BUILD.json",
+      "kind": "archive",
+      "match": true,
+      "path": "morsehgp3D_v8/audits/q2_front_20260914/r1_sources.zip",
+      "sha256": "29bfa1b40eed6e6fa7f8167c9868067ceec5ebd4e6b856f9ef26cfa928e96ef3"
+    },
+    {
+      "build": "morsehgp3D_v8/audits/q2_sibling_20260914/r2_BUILD.json",
+      "kind": "adapted_archive",
+      "match": true,
+      "path": "morsehgp3D_v8/audits/q2_sibling_20260914/r2_sources.zip",
+      "sha256": "3edb2e88e1ba729c5cbcc6d9db06d3eb958faa0d8991d5d6d04784df5f725649"
+    },
+    {
+      "build": "morsehgp3D_v8/audits/q2_sibling_20260914/r2_BUILD.json",
+      "kind": "fixture",
+      "match": true,
+      "path": "morsehgp3D_v8/audits/q2_sibling_20260914/.build/r2/fixture",
+      "sha256": "c51117c133d07883abb755da0a883c991bd096f81665e213920d9c7169a89f42"
+    },
+    {
+      "build": "morsehgp3D_v8/audits/q2_sibling_20260914/r2_BUILD.json",
+      "kind": "gate",
+      "match": true,
+      "path": "morsehgp3D_v8/audits/q2_sibling_20260914/.build/r2/gate",
+      "sha256": "9e9c296e62652f89ac90f49537c24424bd04dbd35e112762a828e94f29442266"
+    },
+    {
+      "build": "morsehgp3D_v8/audits/q2_sibling_20260914/r2_BUILD.json",
+      "kind": "probe",
+      "match": true,
+      "path": "morsehgp3D_v8/audits/q2_sibling_20260914/.build/r2/lidar_sibling_probe",
+      "sha256": "3a8aa21b0303d8065c9bb340943e3fc0f1a0df19b2667e0ebceb946fda6f5d51"
+    },
+    {
+      "build": "morsehgp3D_v8/audits/q2_sibling_20260914/san_r2_BUILD.json",
+      "kind": "archive",
+      "match": true,
+      "path": "morsehgp3D_v8/audits/q2_front_20260914/r1_sources.zip",
+      "sha256": "29bfa1b40eed6e6fa7f8167c9868067ceec5ebd4e6b856f9ef26cfa928e96ef3"
+    },
+    {
+      "build": "morsehgp3D_v8/audits/q2_sibling_20260914/san_r2_BUILD.json",
+      "kind": "adapted_archive",
+      "match": true,
+      "path": "morsehgp3D_v8/audits/q2_sibling_20260914/san_r2_sources.zip",
+      "sha256": "bde9a80420c30eed1ce1fcd75b1d7222d6e5257fb5c1cc7838a2c2eb7f1def2f"
+    },
+    {
+      "build": "morsehgp3D_v8/audits/q2_sibling_20260914/san_r2_BUILD.json",
+      "kind": "fixture",
+      "match": true,
+      "path": "morsehgp3D_v8/audits/q2_sibling_20260914/.build/san_r2/fixture",
+      "sha256": "f285ca220876d6ebb5ef50ff91b463ebab87947950b9370319183d81ac03f21f"
+    },
+    {
+      "build": "morsehgp3D_v8/audits/q2_sibling_20260914/san_r2_BUILD.json",
+      "kind": "gate",
+      "match": true,
+      "path": "morsehgp3D_v8/audits/q2_sibling_20260914/.build/san_r2/gate",
+      "sha256": "e826edcf27de405f02acc564b3d2862577bbac35af0e91e6e27a15ef0b6d3cb6"
+    },
+    {
+      "build": "morsehgp3D_v8/audits/q2_sibling_20260914/san_r2_BUILD.json",
+      "kind": "probe",
+      "match": true,
+      "path": "morsehgp3D_v8/audits/q2_sibling_20260914/.build/san_r2/lidar_sibling_probe",
+      "sha256": "261eba886134606be8934d55f348b5765b76fc322405e27deddd9329086701eb"
+    },
+    {
+      "build": "morsehgp3D_v8/audits/q2_sibling_20260914/san_r3_BUILD.json",
+      "kind": "archive",
+      "match": true,
+      "path": "morsehgp3D_v8/audits/q2_front_20260914/r1_sources.zip",
+      "sha256": "29bfa1b40eed6e6fa7f8167c9868067ceec5ebd4e6b856f9ef26cfa928e96ef3"
+    },
+    {
+      "build": "morsehgp3D_v8/audits/q2_sibling_20260914/san_r3_BUILD.json",
+      "kind": "adapted_archive",
+      "match": true,
+      "path": "morsehgp3D_v8/audits/q2_sibling_20260914/san_r3_sources.zip",
+      "sha256": "b07133051bb10f8fbbf32ab03f66ba1d1d401311202b5bb1dd1cc1f10357eeb5"
+    },
+    {
+      "build": "morsehgp3D_v8/audits/q2_sibling_20260914/san_r3_BUILD.json",
+      "kind": "fixture",
+      "match": true,
+      "path": "morsehgp3D_v8/audits/q2_sibling_20260914/.build/san_r3/fixture",
+      "sha256": "7659acfa0f7a99fd1b272dc4f98badd71248127920b65f1508120d394f2859be"
+    },
+    {
+      "build": "morsehgp3D_v8/audits/q2_sibling_20260914/san_r3_BUILD.json",
+      "kind": "gate",
+      "match": true,
+      "path": "morsehgp3D_v8/audits/q2_sibling_20260914/.build/san_r3/gate",
+      "sha256": "38841f12158894fe2cd1c3ac4f6fb73c9e63210dbb43f6608e87dc9439f11d27"
+    },
+    {
+      "build": "morsehgp3D_v8/audits/q2_sibling_20260914/san_r3_BUILD.json",
+      "kind": "probe",
+      "match": true,
+      "path": "morsehgp3D_v8/audits/q2_sibling_20260914/.build/san_r3/lidar_sibling_probe",
+      "sha256": "21fd1bf24e8ff050cf456a405b0b21f17188989772ef2a6526804f47f9335500"
+    }
+  ],
+  "delivery_pins": {
+    "morsehgp3D_v8/audits/DIALOGUE_COURANT.md": "162364a9221db6c67e82ac27fc5307f206994553f56b2e6c1bc9000b4f9c8001",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/.gitignore": "be07dd452a73aa5c53a338a9693a9fe3050c979c4f1e6a7630d7a8ba515cbe81",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/CHECKS.json": "36b6d1ae183f3e256d4aa0ad9478af9029831977e250bc6d51b5437c4ac1e6c6",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/INPUTS.json": "7f751e23e40bcaf4bea4ebdfaf451c24e2fe2c2ab24d283dae657752209805c9",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/README.md": "e1d63f1568b8002c00a7ab7674fd56b97b08892e66d84965b11f4a99474265cd",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/SUMMARY.json": "4111f836a6d5e2a820a37a8e69081c6e98902e97a153b5b338371cd7fa1d90a6",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/audit_sibling.hpp": "e0dcb00f9a64b12346b417a350dcd5638e7cf301471e5a941dc021a8328dfd0e",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/build_prototype.py": "a6abffdebe01b06e92f6a9c9e4077b5ddd261b8164f01ca0385050240d8b2f5e",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_check50k/COMPLETION.json": "cc0f2f2d40def3343a096042c9e7a9f16bb2856ab89b7e280164d40e8588e19c",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_check50k/MANIFEST.json": "db1210ff677854079e08c2640202b96ff4d99431b9cf810ce6ea409902636f7a",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_check50k/MEASURES.jsonl": "ba510a7fe838c4cd5711dab5e98f557bd1f2753279ad2a7105bf7839aa49c284",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_clusters16k/COMPLETION.json": "6d07fb6c1a8223251c60f43501a89f195220d2c3a40e5de5dcfdde0b7ef24a1d",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_clusters16k/MANIFEST.json": "9d8bd8201a63c31278202520e24a9bba4a5934e71d2135903ca5344b36e7b9ff",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_clusters16k/MEASURES.jsonl": "57f3e932b715c95bba0885942aab6a95dea1bb9f7404e3362af63d3eb21b25a6",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_clusters8k/COMPLETION.json": "36d2c7537b5ac38d6eab9ba150a430132e262585ba44ee340dea9b9ad52e4596",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_clusters8k/MANIFEST.json": "75be0e72ffc2bec4b2b526289b8e7961db10471ab3e60aaffa6f6693b227e4ec",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_clusters8k/MEASURES.jsonl": "c9fe3dda5212bcbb1a776bb1523ffd1381aa81afafebcbc962a5dc89f2a7b4b3",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_growth/COMPLETION.json": "6c1a199fe450cbe57fcd398a3485de4a07c51f37e22e31fdf9d9ef8a3be1b710",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_growth/MANIFEST.json": "e27f911721083337fca06c5068dd845c077a9ce148cdfcbc4880195db99629ce",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_growth/MEASURES.jsonl": "61e0f90b6068fd04ec69bd1dec7472f5323d69c0c61f7d6a1a5460fe4166eea3",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_other_scans/COMPLETION.json": "6000db3dae7625746206b55eee85a5192b1366017946b55babe4d23af1ff9f1e",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_other_scans/MANIFEST.json": "0260e16fb9e12b1075d516c20d3def952463a33aaf470a5730edd514f95b8047",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_other_scans/MEASURES.jsonl": "5d4eaa6eeace84ea9888c8a954c7f683c6604c04f6a69bcb526ea73f81250893",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_pilot/COMPLETION.json": "2d7ec43e75d84548aad4e00d184503579cba56c7e9121b241255214dd4150d7d",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_pilot/MANIFEST.json": "c629400ecea5a23d729e01848053b54a856706de01e9b9e4fb4624ea49ac2183",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_pilot/MEASURES.jsonl": "d688f714886a8fef94109b3ea4ae6b0850b7529362bea1b15d6b68a26319fd81",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_repeat_clusters8k/COMPLETION.json": "4290f7c133d3816635e95d5a26d9c709a942763ebc96d856eb420e3df895862f",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_repeat_clusters8k/MANIFEST.json": "b7486562faeb110f279621ebe34a4a54a0ceb556e891c27cb0ed9d1dd2aae5b8",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_repeat_clusters8k/MEASURES.jsonl": "aa0bef0d5f12c34727c5095e2e8e9c170fec92eef3ec1988ef70b2257e196057",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_repeat_pilot/COMPLETION.json": "c36bb8aabf5904b5499a467635c409545bd4ef471b7cc77fd4cf8984930f3d8e",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_repeat_pilot/MANIFEST.json": "88ae03c75bc8473d723f03c3a6f064501d21fff5d85824594927e8c03573fddf",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_repeat_pilot/MEASURES.jsonl": "dafd96b0b21a6c0d910e1735661580610ea2f785292256ba99d38225452dec61",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/check_reference.py": "1f3bb5a2b35458648e5b0b8d79a6060d827f84c42fa931819147766ed8c9958f",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/measure.py": "c4afe69a3b702501f9417ba002d2500bd31a0243aa31878fd771d50f472de6aa",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/prepare_clusters.py": "0f5b482a69c4be06f6af913c775a69c05b12294f4924be0b49ea13375054f497",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/r1_BUILD.json": "34e7209e046dfe2ff65622010ae8ae77ed25e4e0e766feea1dced886a0df5ffb",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/r1_builder.py": "a83a36080d6e73bf5144ab4e42b1f1c15f89e9a70c82119f1a308873ea1ac34c",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/r1_census.patch": "ff230000ddf4c1d159c6445133bab5772f3fd15f1da4a12fd000808e505820be",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/r1_sources.zip": "5a1ef11638d71bb9d4be845ea6582acd1b363fdd838d90877ebb3ccb9e416577",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/r2_BUILD.json": "1f4b09c21da9b9d6463d81d2f6f88915ad2e769a5fd4cb6061cb4d5cc425edc5",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/r2_census.patch": "ff230000ddf4c1d159c6445133bab5772f3fd15f1da4a12fd000808e505820be",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/r2_sources.zip": "3edb2e88e1ba729c5cbcc6d9db06d3eb958faa0d8991d5d6d04784df5f725649",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/report.py": "82564a277e8d84a4ce507f5553c88a75911f4fb75cffd71058f07602840f34c2",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/runner_guards.py": "f53535e29b43971c5f06f8f2045b1c47979a387b6204bbaa75444511f76a96ed",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/san_r2_BUILD.json": "1e97b40f5ab140b2d88dfa70cc059657d76ae6c59de0ea053a41afd79b18f753",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/san_r2_census.patch": "ff230000ddf4c1d159c6445133bab5772f3fd15f1da4a12fd000808e505820be",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/san_r2_sources.zip": "bde9a80420c30eed1ce1fcd75b1d7222d6e5257fb5c1cc7838a2c2eb7f1def2f",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/san_r3_BUILD.json": "d520c629f4653158a6559fe4e209df1558f6098bb2a90ed032fb559b59675608",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/san_r3_census.patch": "ff230000ddf4c1d159c6445133bab5772f3fd15f1da4a12fd000808e505820be",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/san_r3_sources.zip": "b07133051bb10f8fbbf32ab03f66ba1d1d401311202b5bb1dd1cc1f10357eeb5",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/sibling_fixture.cpp": "3e8ae48aedadc1faee610d86973f99e31211fa2b832d3e73d682c89df3582e6a"
+  },
+  "finished_utc": "2026-09-14T10:10:36.309265+00:00",
+  "runs": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/audits/q2_sibling_20260914/report.py",
+        "--check"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\": \"passed\", \"calls\": 30, \"configurations\": 24, \"campaigns\": 8}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/audits/q2_sibling_20260914/check_reference.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"checker_sha256\": \"1f3bb5a2b35458648e5b0b8d79a6060d827f84c42fa931819147766ed8c9958f\", \"comparisons\": [{\"baseline\": \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_check50k/MEASURES.jsonl\", \"key\": [\"single_000000\", 50000, 8], \"line\": 1, \"reference\": \"morsehgp3D_v8/audits/q2_front_20260914/campaign_check50k/MEASURES.jsonl\", \"reference_line\": 1}, {\"baseline\": \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_clusters16k/MEASURES.jsonl\", \"key\": [\"clusters_seed3\", 16000, 8], \"line\": 1, \"reference\": \"morsehgp3D_v8/receipts/wspd_q2_census_20260914/shared_matrix/MEASURES.jsonl\", \"reference_line\": 22}, {\"baseline\": \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_clusters8k/MEASURES.jsonl\", \"key\": [\"clusters_seed3\", 8000, 8], \"line\": 1, \"reference\": \"morsehgp3D_v8/receipts/wspd_q2_census_20260914/shared_matrix/MEASURES.jsonl\", \"reference_line\": 19}, {\"baseline\": \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_growth/MEASURES.jsonl\", \"key\": [\"single_000000\", 16000, 8], \"line\": 1, \"reference\": \"morsehgp3D_v8/audits/q2_front_20260914/campaign_growth/MEASURES.jsonl\", \"reference_line\": 1}, {\"baseline\": \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_growth/MEASURES.jsonl\", \"key\": [\"single_000000\", 32000, 8], \"line\": 4, \"reference\": \"morsehgp3D_v8/audits/q2_front_20260914/campaign_growth/MEASURES.jsonl\", \"reference_line\": 2}, {\"baseline\": \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_other_scans/MEASURES.jsonl\", \"key\": [\"single_000100\", 8000, 8], \"line\": 1, \"reference\": \"morsehgp3D_v8/audits/q2_front_20260914/campaign_other_scans/MEASURES.jsonl\", \"reference_line\": 1}, {\"baseline\": \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_other_scans/MEASURES.jsonl\", \"key\": [\"single_000200\", 8000, 8], \"line\": 4, \"reference\": \"morsehgp3D_v8/audits/q2_front_20260914/campaign_other_scans/MEASURES.jsonl\", \"reference_line\": 2}, {\"baseline\": \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_pilot/MEASURES.jsonl\", \"key\": [\"single_000000\", 8000, 8], \"line\": 1, \"reference\": \"morsehgp3D_v8/audits/q2_front_20260914/campaign_pilot/MEASURES.jsonl\", \"reference_line\": 1}, {\"baseline\": \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_repeat_clusters8k/MEASURES.jsonl\", \"key\": [\"clusters_seed3\", 8000, 8], \"line\": 3, \"reference\": \"morsehgp3D_v8/receipts/wspd_q2_census_20260914/shared_matrix/MEASURES.jsonl\", \"reference_line\": 19}, {\"baseline\": \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_repeat_pilot/MEASURES.jsonl\", \"key\": [\"single_000000\", 8000, 8], \"line\": 3, \"reference\": \"morsehgp3D_v8/audits/q2_front_20260914/campaign_pilot/MEASURES.jsonl\", \"reference_line\": 1}], \"fields\": [\"front_work\", \"census_work\", \"callback_work\", \"digest\", \"total_unordered_pairs\", \"active_lane_mask\", \"input_rectangles\", \"anchor_queries\", \"candidate_pairs\", \"accepted_pairs\", \"rejected_pairs\"], \"pins\": {\"morsehgp3D_v8/audits/q2_front_20260914/campaign_check50k/MEASURES.jsonl\": \"3ff51891827575ee901edbc15d51f5ce75a8650f2e6bc01596328054358a17e3\", \"morsehgp3D_v8/audits/q2_front_20260914/campaign_growth/MEASURES.jsonl\": \"b24b5c287208a7ddb628bc6ebd6170052ee6b956c488155e0bf0a71d28dc2e89\", \"morsehgp3D_v8/audits/q2_front_20260914/campaign_other_scans/MEASURES.jsonl\": \"6e5812a8cf05b21d917db66d950e8c176b5214e0bebfa2c9975bdc07b848a3ce\", \"morsehgp3D_v8/audits/q2_front_20260914/campaign_pilot/MEASURES.jsonl\": \"072a3b8f8f772c01a35a2762ba1e2b1886309dd3fd5662ea60e0c027b047c559\", \"morsehgp3D_v8/audits/q2_front_20260914/campaign_repeat_pilot/MEASURES.jsonl\": \"bbb542de11d4a40c3633c57c22526d703ffe02169c82a0e7eafc8114b6faae04\", \"morsehgp3D_v8/audits/q2_front_20260914/campaign_separation/MEASURES.jsonl\": \"e59e1a7a46d0d3510bc06ff2efd0db651d8cd05b89a2a7d9a6e94806f47e61b2\", \"morsehgp3D_v8/audits/q2_sibling_20260914/INPUTS.json\": \"7f751e23e40bcaf4bea4ebdfaf451c24e2fe2c2ab24d283dae657752209805c9\", \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_check50k/MEASURES.jsonl\": \"ba510a7fe838c4cd5711dab5e98f557bd1f2753279ad2a7105bf7839aa49c284\", \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_clusters16k/MEASURES.jsonl\": \"57f3e932b715c95bba0885942aab6a95dea1bb9f7404e3362af63d3eb21b25a6\", \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_clusters8k/MEASURES.jsonl\": \"c9fe3dda5212bcbb1a776bb1523ffd1381aa81afafebcbc962a5dc89f2a7b4b3\", \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_growth/MEASURES.jsonl\": \"61e0f90b6068fd04ec69bd1dec7472f5323d69c0c61f7d6a1a5460fe4166eea3\", \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_other_scans/MEASURES.jsonl\": \"5d4eaa6eeace84ea9888c8a954c7f683c6604c04f6a69bcb526ea73f81250893\", \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_pilot/MEASURES.jsonl\": \"d688f714886a8fef94109b3ea4ae6b0850b7529362bea1b15d6b68a26319fd81\", \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_repeat_clusters8k/MEASURES.jsonl\": \"aa0bef0d5f12c34727c5095e2e8e9c170fec92eef3ec1988ef70b2257e196057\", \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_repeat_pilot/MEASURES.jsonl\": \"dafd96b0b21a6c0d910e1735661580610ea2f785292256ba99d38225452dec61\", \"morsehgp3D_v8/receipts/wspd_q2_census_20260914/shared_matrix/MEASURES.jsonl\": \"0dc30b9a659477c9cac0f7f590b1c1646cf4d2a5e17a7d1803d9fda9548d757d\"}, \"scope\": \"baseline_discrete_work_and_physical_output_not_timings\", \"status\": \"passed\"}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/audits/q2_sibling_20260914/report.py",
+        "--check"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\": \"passed\", \"calls\": 30, \"configurations\": 24, \"campaigns\": 8}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/audits/q2_sibling_20260914/check_reference.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"checker_sha256\": \"1f3bb5a2b35458648e5b0b8d79a6060d827f84c42fa931819147766ed8c9958f\", \"comparisons\": [{\"baseline\": \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_check50k/MEASURES.jsonl\", \"key\": [\"single_000000\", 50000, 8], \"line\": 1, \"reference\": \"morsehgp3D_v8/audits/q2_front_20260914/campaign_check50k/MEASURES.jsonl\", \"reference_line\": 1}, {\"baseline\": \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_clusters16k/MEASURES.jsonl\", \"key\": [\"clusters_seed3\", 16000, 8], \"line\": 1, \"reference\": \"morsehgp3D_v8/receipts/wspd_q2_census_20260914/shared_matrix/MEASURES.jsonl\", \"reference_line\": 22}, {\"baseline\": \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_clusters8k/MEASURES.jsonl\", \"key\": [\"clusters_seed3\", 8000, 8], \"line\": 1, \"reference\": \"morsehgp3D_v8/receipts/wspd_q2_census_20260914/shared_matrix/MEASURES.jsonl\", \"reference_line\": 19}, {\"baseline\": \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_growth/MEASURES.jsonl\", \"key\": [\"single_000000\", 16000, 8], \"line\": 1, \"reference\": \"morsehgp3D_v8/audits/q2_front_20260914/campaign_growth/MEASURES.jsonl\", \"reference_line\": 1}, {\"baseline\": \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_growth/MEASURES.jsonl\", \"key\": [\"single_000000\", 32000, 8], \"line\": 4, \"reference\": \"morsehgp3D_v8/audits/q2_front_20260914/campaign_growth/MEASURES.jsonl\", \"reference_line\": 2}, {\"baseline\": \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_other_scans/MEASURES.jsonl\", \"key\": [\"single_000100\", 8000, 8], \"line\": 1, \"reference\": \"morsehgp3D_v8/audits/q2_front_20260914/campaign_other_scans/MEASURES.jsonl\", \"reference_line\": 1}, {\"baseline\": \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_other_scans/MEASURES.jsonl\", \"key\": [\"single_000200\", 8000, 8], \"line\": 4, \"reference\": \"morsehgp3D_v8/audits/q2_front_20260914/campaign_other_scans/MEASURES.jsonl\", \"reference_line\": 2}, {\"baseline\": \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_pilot/MEASURES.jsonl\", \"key\": [\"single_000000\", 8000, 8], \"line\": 1, \"reference\": \"morsehgp3D_v8/audits/q2_front_20260914/campaign_pilot/MEASURES.jsonl\", \"reference_line\": 1}, {\"baseline\": \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_repeat_clusters8k/MEASURES.jsonl\", \"key\": [\"clusters_seed3\", 8000, 8], \"line\": 3, \"reference\": \"morsehgp3D_v8/receipts/wspd_q2_census_20260914/shared_matrix/MEASURES.jsonl\", \"reference_line\": 19}, {\"baseline\": \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_repeat_pilot/MEASURES.jsonl\", \"key\": [\"single_000000\", 8000, 8], \"line\": 3, \"reference\": \"morsehgp3D_v8/audits/q2_front_20260914/campaign_pilot/MEASURES.jsonl\", \"reference_line\": 1}], \"fields\": [\"front_work\", \"census_work\", \"callback_work\", \"digest\", \"total_unordered_pairs\", \"active_lane_mask\", \"input_rectangles\", \"anchor_queries\", \"candidate_pairs\", \"accepted_pairs\", \"rejected_pairs\"], \"pins\": {\"morsehgp3D_v8/audits/q2_front_20260914/campaign_check50k/MEASURES.jsonl\": \"3ff51891827575ee901edbc15d51f5ce75a8650f2e6bc01596328054358a17e3\", \"morsehgp3D_v8/audits/q2_front_20260914/campaign_growth/MEASURES.jsonl\": \"b24b5c287208a7ddb628bc6ebd6170052ee6b956c488155e0bf0a71d28dc2e89\", \"morsehgp3D_v8/audits/q2_front_20260914/campaign_other_scans/MEASURES.jsonl\": \"6e5812a8cf05b21d917db66d950e8c176b5214e0bebfa2c9975bdc07b848a3ce\", \"morsehgp3D_v8/audits/q2_front_20260914/campaign_pilot/MEASURES.jsonl\": \"072a3b8f8f772c01a35a2762ba1e2b1886309dd3fd5662ea60e0c027b047c559\", \"morsehgp3D_v8/audits/q2_front_20260914/campaign_repeat_pilot/MEASURES.jsonl\": \"bbb542de11d4a40c3633c57c22526d703ffe02169c82a0e7eafc8114b6faae04\", \"morsehgp3D_v8/audits/q2_front_20260914/campaign_separation/MEASURES.jsonl\": \"e59e1a7a46d0d3510bc06ff2efd0db651d8cd05b89a2a7d9a6e94806f47e61b2\", \"morsehgp3D_v8/audits/q2_sibling_20260914/INPUTS.json\": \"7f751e23e40bcaf4bea4ebdfaf451c24e2fe2c2ab24d283dae657752209805c9\", \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_check50k/MEASURES.jsonl\": \"ba510a7fe838c4cd5711dab5e98f557bd1f2753279ad2a7105bf7839aa49c284\", \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_clusters16k/MEASURES.jsonl\": \"57f3e932b715c95bba0885942aab6a95dea1bb9f7404e3362af63d3eb21b25a6\", \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_clusters8k/MEASURES.jsonl\": \"c9fe3dda5212bcbb1a776bb1523ffd1381aa81afafebcbc962a5dc89f2a7b4b3\", \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_growth/MEASURES.jsonl\": \"61e0f90b6068fd04ec69bd1dec7472f5323d69c0c61f7d6a1a5460fe4166eea3\", \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_other_scans/MEASURES.jsonl\": \"5d4eaa6eeace84ea9888c8a954c7f683c6604c04f6a69bcb526ea73f81250893\", \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_pilot/MEASURES.jsonl\": \"d688f714886a8fef94109b3ea4ae6b0850b7529362bea1b15d6b68a26319fd81\", \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_repeat_clusters8k/MEASURES.jsonl\": \"aa0bef0d5f12c34727c5095e2e8e9c170fec92eef3ec1988ef70b2257e196057\", \"morsehgp3D_v8/audits/q2_sibling_20260914/campaign_repeat_pilot/MEASURES.jsonl\": \"dafd96b0b21a6c0d910e1735661580610ea2f785292256ba99d38225452dec61\", \"morsehgp3D_v8/receipts/wspd_q2_census_20260914/shared_matrix/MEASURES.jsonl\": \"0dc30b9a659477c9cac0f7f590b1c1646cf4d2a5e17a7d1803d9fda9548d757d\"}, \"scope\": \"baseline_discrete_work_and_physical_output_not_timings\", \"status\": \"passed\"}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tools/check_docs.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Validated 548 active Markdown files.\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tools/check_implementation_status.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Validated 20 implementation phases and their gates.\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-c",
+        "from pathlib import Path; from tools.check_docs import validate; paths=[Path('morsehgp3D_v8/audits/DIALOGUE_COURANT.md').resolve(),Path('morsehgp3D_v8/audits/q2_sibling_20260914/README.md').resolve()]; errors=[error for path in paths for error in validate(path)]; print(errors); raise SystemExit(bool(errors))"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "[]\n"
+    }
+  ],
+  "schema": "mhgp8_q2_sibling_final_validation_v1",
+  "scope": "closed prototype audit, no FULL or product qualification transfer",
+  "started_utc": "2026-09-14T10:10:34.427972+00:00",
+  "status": "passed"
+}

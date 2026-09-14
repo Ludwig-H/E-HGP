@@ -1,0 +1,193 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python3",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/prepare_clusters.py",
+    "--write"
+  ],
+  "constructor_input_hash_encoding1": "FNV1a64 on u64LE words: 1,n,x0,y0,z0,...",
+  "cpus": [
+    0
+  ],
+  "created_utc": "2026-09-14T09:47:50.452570+00:00",
+  "datasets": [
+    {
+      "bytes": 48000,
+      "constructor_input_hash_encoding1": "efa25f662dc5eaf2",
+      "constructor_references": [
+        {
+          "digest": {
+            "encoding": "canonical_q2_support_v2",
+            "interior_ids": 1060879,
+            "shell_ids": 491649,
+            "sum": "5febbad28ae1279e",
+            "supports": 245733,
+            "xor": "af4f738c2e0781ce"
+          },
+          "generation_work": {
+            "accepted_points": 8000,
+            "duplicate_rejections": 0,
+            "ordered_set_comparisons": 110255,
+            "proposed_points": 8000,
+            "rng_calls": 32000
+          },
+          "input_hash": "efa25f662dc5eaf2",
+          "line": 19,
+          "s": 8
+        },
+        {
+          "digest": {
+            "encoding": "canonical_q2_support_v2",
+            "interior_ids": 1060879,
+            "shell_ids": 491649,
+            "sum": "5febbad28ae1279e",
+            "supports": 245733,
+            "xor": "af4f738c2e0781ce"
+          },
+          "generation_work": {
+            "accepted_points": 8000,
+            "duplicate_rejections": 0,
+            "ordered_set_comparisons": 110255,
+            "proposed_points": 8000,
+            "rng_calls": 32000
+          },
+          "input_hash": "efa25f662dc5eaf2",
+          "line": 20,
+          "s": 10
+        },
+        {
+          "digest": {
+            "encoding": "canonical_q2_support_v2",
+            "interior_ids": 1060879,
+            "shell_ids": 491649,
+            "sum": "5febbad28ae1279e",
+            "supports": 245733,
+            "xor": "af4f738c2e0781ce"
+          },
+          "generation_work": {
+            "accepted_points": 8000,
+            "duplicate_rejections": 0,
+            "ordered_set_comparisons": 110255,
+            "proposed_points": 8000,
+            "rng_calls": 32000
+          },
+          "input_hash": "efa25f662dc5eaf2",
+          "line": 21,
+          "s": 12
+        }
+      ],
+      "generation_work": {
+        "accepted_points": 8000,
+        "duplicate_rejections": 0,
+        "proposed_points": 8000,
+        "rng_calls": 32000
+      },
+      "input_fnv64": "1149db772b12b0e",
+      "n": 8000,
+      "path": "inputs/clusters_n8000.u16le",
+      "seed": 3,
+      "sha256": "73b7b254b9427ff0b4c7bce7472c36dd413dde152fb5c9c5cae5f1d7f36c4936"
+    },
+    {
+      "bytes": 96000,
+      "constructor_input_hash_encoding1": "3b854361be22b30e",
+      "constructor_references": [
+        {
+          "digest": {
+            "encoding": "canonical_q2_support_v2",
+            "interior_ids": 2262795,
+            "shell_ids": 1041050,
+            "sum": "d118ad0e4bb8b686",
+            "supports": 520208,
+            "xor": "57f80fc6c4dfb464"
+          },
+          "generation_work": {
+            "accepted_points": 16000,
+            "duplicate_rejections": 0,
+            "ordered_set_comparisons": 236874,
+            "proposed_points": 16000,
+            "rng_calls": 64000
+          },
+          "input_hash": "3b854361be22b30e",
+          "line": 22,
+          "s": 8
+        },
+        {
+          "digest": {
+            "encoding": "canonical_q2_support_v2",
+            "interior_ids": 2262795,
+            "shell_ids": 1041050,
+            "sum": "d118ad0e4bb8b686",
+            "supports": 520208,
+            "xor": "57f80fc6c4dfb464"
+          },
+          "generation_work": {
+            "accepted_points": 16000,
+            "duplicate_rejections": 0,
+            "ordered_set_comparisons": 236874,
+            "proposed_points": 16000,
+            "rng_calls": 64000
+          },
+          "input_hash": "3b854361be22b30e",
+          "line": 23,
+          "s": 10
+        },
+        {
+          "digest": {
+            "encoding": "canonical_q2_support_v2",
+            "interior_ids": 2262795,
+            "shell_ids": 1041050,
+            "sum": "d118ad0e4bb8b686",
+            "supports": 520208,
+            "xor": "57f80fc6c4dfb464"
+          },
+          "generation_work": {
+            "accepted_points": 16000,
+            "duplicate_rejections": 0,
+            "ordered_set_comparisons": 236874,
+            "proposed_points": 16000,
+            "rng_calls": 64000
+          },
+          "input_hash": "3b854361be22b30e",
+          "line": 24,
+          "s": 12
+        }
+      ],
+      "generation_work": {
+        "accepted_points": 16000,
+        "duplicate_rejections": 0,
+        "proposed_points": 16000,
+        "rng_calls": 64000
+      },
+      "input_fnv64": "1ecc30bed7fc0b7d",
+      "n": 16000,
+      "path": "inputs/clusters_n16000.u16le",
+      "seed": 3,
+      "sha256": "e0834b04d969bfb523a1e9791610f4e3cd7194ab489640cd9b3d96773b96ba66"
+    }
+  ],
+  "format": "xyz_u16_little_endian_6_bytes_per_point",
+  "generation_and_reference_check_ns": 213975722,
+  "generator": {
+    "path": "prepare_clusters.py",
+    "sha256": "0f5b482a69c4be06f6af913c775a69c05b12294f4924be0b49ea13375054f497"
+  },
+  "input_fnv64": "FNV1a64 on emitted u16LE bytes, without version/count prefix",
+  "order": "generator_acceptance_order_original_ids",
+  "preparation_excluded_from_future_pipeline_timings": true,
+  "provenance": {
+    "capture_commit": "c0e2f6d22207b188418406600ff7f40f9716d6f1",
+    "header_text": "#pragma once\n\n#include \"core/types.hpp\"\n\n#include <cstddef>\n#include <cstdint>\n#include <set>\n#include <stdexcept>\n#include <string_view>\n#include <vector>\n\nnamespace mhgp8::bench {\n\n// These recipes are new v8 benchmark inputs, not ports of earlier fixtures.\n// SplitMix64 is fixed explicitly here; unsigned wraparound is intentional.\nstruct FrontGenerationWork {\n  u64 rng_calls{};\n  u64 proposed_points{};\n  u64 duplicate_rejections{};\n  u64 accepted_points{};\n  u64 ordered_set_comparisons{};\n};\n\nclass FrontSplitMix64 {\n public:\n  FrontSplitMix64(u64 seed, FrontGenerationWork& work) : state_(seed), work_(work) {}\n  u64 next() {\n    counter_add(work_.rng_calls);\n    auto value = (state_ += 0x9e3779b97f4a7c15ULL);\n    value = (value ^ (value >> 30U)) * 0xbf58476d1ce4e5b9ULL;\n    value = (value ^ (value >> 27U)) * 0x94d049bb133111ebULL;\n    return value ^ (value >> 31U);\n  }\n\n private:\n  u64 state_;\n  FrontGenerationWork& work_;\n};\n\ninline void front_hash_word(u64& hash, u64 word) {\n  for (unsigned byte = 0; byte < 8; ++byte) {\n    hash ^= word & 255U;\n    hash *= 1099511628211ULL;\n    word >>= 8U;\n  }\n}\n\nstruct FrontFixture {\n  std::vector<Point3> points;\n  FrontGenerationWork work;\n  u64 input_hash{14695981039346656037ULL};\n};\n\ninline std::string_view front_recipe(std::string_view family) {\n  if (family == \"uniform\") return \"uniform_splitmix64_v1\";\n  if (family == \"terrain\") return \"terrain_splitmix64_v1\";\n  if (family == \"clusters\") return \"eight_corner_clusters_splitmix64_v1\";\n  if (family == \"rows\") return \"parallel_rows_v1\";\n  throw std::invalid_argument(\"unknown v8 front fixture family\");\n}\n\ninline void validate_front_fixture_size(std::size_t n, std::string_view family) {\n  static_cast<void>(front_recipe(family));\n  if (n < 2) throw std::invalid_argument(\"v8 front fixture requires n >= 2\");\n  if (family == \"rows\") {\n    // Two distinct x columns each admit all 65536 u16 y coordinates.\n    // This is the physical recipe domain, not an exploration or result cap.\n    if (n % 2 != 0 || n > 131072)\n      throw std::invalid_argument(\"parallel_rows_v1 requires even n <= 131072\");\n    return;\n  }\n  const u64 domain = family == \"uniform\" ? (u64{1} << 48U)\n                    : family == \"terrain\" ? (u64{1} << 40U) : (u64{1} << 33U);\n  if (n > domain) throw std::invalid_argument(\"fixture cardinality exceeds its finite u16 domain\");\n}\n\ninline FrontFixture make_front_fixture(std::size_t n, std::string_view family, u64 seed) {\n  validate_front_fixture_size(n, family);\n  FrontFixture result;\n  result.points.reserve(n);\n  front_hash_word(result.input_hash, 1);  // Input hash encoding version.\n  front_hash_word(result.input_hash, static_cast<u64>(n));\n  const auto accept = [&](Point3 point) {\n    result.points.push_back(point);\n    counter_add(result.work.accepted_points);\n    front_hash_word(result.input_hash, point.x);\n    front_hash_word(result.input_hash, point.y);\n    front_hash_word(result.input_hash, point.z);\n  };\n  if (family == \"rows\") {\n    for (const std::uint16_t x : {std::uint16_t{1000}, std::uint16_t{60000}}) {\n      for (std::size_t i = 0; i < n / 2; ++i) {\n        counter_add(result.work.proposed_points);\n        accept({x, static_cast<std::uint16_t>(i), 0});\n      }\n    }\n    return result;  // This deliberately deterministic family ignores seed.\n  }\n\n  struct CountedLess {\n    u64* comparisons;\n    bool operator()(u64 left, u64 right) const {\n      counter_add(*comparisons);\n      return left < right;\n    }\n  };\n  // The temporary uniqueness set is part of generation time, including its\n  // destruction. Its allocations are not represented as a measured RSS peak.\n  std::set<u64, CountedLess> seen(CountedLess{&result.work.ordered_set_comparisons});\n  FrontSplitMix64 random(seed, result.work);\n  while (result.points.size() < n) {  // No attempt cap or silent truncation.\n    Point3 point;\n    if (family == \"clusters\") {\n      const auto corner = random.next() & 7U;\n      const auto coordinate = [&](unsigned axis) {\n        const u64 base = (corner & (u64{1} << axis)) != 0 ? 50000 : 20000;\n        return static_cast<std::uint16_t>(base + (random.next() & 1023U));\n      };\n      point = {coordinate(0), coordinate(1), coordinate(2)};\n    } else {\n      point = {static_cast<std::uint16_t>(random.next() & 65535U),\n               static_cast<std::uint16_t>(random.next() & 65535U),\n               static_cast<std::uint16_t>(random.next() & (family == \"terrain\" ? 255U : 65535U))};\n    }\n    counter_add(result.work.proposed_points);\n    const auto key = static_cast<u64>(point.x) | (static_cast<u64>(point.y) << 16U) |\n                     (static_cast<u64>(point.z) << 32U);\n    if (!seen.insert(key).second) {\n      counter_add(result.work.duplicate_rejections);\n      continue;\n    }\n    accept(point);\n  }\n  return result;\n}\n\n}  // namespace mhgp8::bench\n",
+    "reference_authority": "explicit_header_and_constructor_receipt_sha256",
+    "reference_commit": "f7edd646",
+    "source_sha256": {
+      "morsehgp3D_v8/bench/front_fixtures.hpp": "a2d3ddbbff837de1609a2e1104c8797682cd7a435d4fa417d31388eb1f402b3b",
+      "morsehgp3D_v8/receipts/wspd_q2_census_20260914/shared_matrix/MANIFEST.json": "63e5566e37e7c5c504e999516f0c34da3f13f18591eccede173149dc5ff06c3d",
+      "morsehgp3D_v8/receipts/wspd_q2_census_20260914/shared_matrix/MEASURES.jsonl": "0dc30b9a659477c9cac0f7f590b1c1646cf4d2a5e17a7d1803d9fda9548d757d"
+    }
+  },
+  "python_set_comparisons_not_cpp_set_comparisons": true,
+  "recipe": "eight_corner_clusters_splitmix64_v1",
+  "schema": "mhgp8_sibling_cluster_inputs_v1",
+  "scope": "input_recipe_reproduction_only_no_census_or_performance_qualification",
+  "status": "prepared"
+}

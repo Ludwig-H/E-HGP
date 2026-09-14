@@ -1,0 +1,1410 @@
+{
+  "calls": 30,
+  "campaigns": 8,
+  "comparisons": [
+    {
+      "campaign": "campaign_check50k",
+      "count_node_ratio": 0.9752337072506085,
+      "input": [
+        "single_000000",
+        50000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "mode": "sibling",
+      "pipeline_ratio": 0.997352915903937,
+      "query_task_ratio": 0.9700068445212694,
+      "sibling_success_rate": 0.05050116499846398,
+      "total_bound_ratio": 0.9779137223378495
+    },
+    {
+      "campaign": "campaign_check50k",
+      "count_node_ratio": 0.9738639242921555,
+      "input": [
+        "single_000000",
+        50000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "mode": "sibling_remaining",
+      "pipeline_ratio": 0.9972162866794069,
+      "query_task_ratio": 0.9685158706689317,
+      "sibling_success_rate": 0.15108544715239494,
+      "total_bound_ratio": 0.9778347994132777
+    },
+    {
+      "campaign": "campaign_clusters16k",
+      "count_node_ratio": 0.9430020608214242,
+      "input": [
+        "clusters_seed3",
+        16000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "mode": "sibling",
+      "pipeline_ratio": 0.9495213894268483,
+      "query_task_ratio": 0.8889085276179902,
+      "sibling_success_rate": 0.04835987407013343,
+      "total_bound_ratio": 0.9493479226300205
+    },
+    {
+      "campaign": "campaign_clusters16k",
+      "count_node_ratio": 0.9425094227586228,
+      "input": [
+        "clusters_seed3",
+        16000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "mode": "sibling_remaining",
+      "pipeline_ratio": 1.1914827473547156,
+      "query_task_ratio": 0.888234768225509,
+      "sibling_success_rate": 0.07186880138413519,
+      "total_bound_ratio": 0.9493408057395845
+    },
+    {
+      "campaign": "campaign_clusters8k",
+      "count_node_ratio": 0.9476979470545333,
+      "input": [
+        "clusters_seed3",
+        8000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "mode": "sibling",
+      "pipeline_ratio": 0.9539027007783317,
+      "query_task_ratio": 0.904739855732828,
+      "sibling_success_rate": 0.04665417841624818,
+      "total_bound_ratio": 0.954446734378803
+    },
+    {
+      "campaign": "campaign_clusters8k",
+      "count_node_ratio": 0.9470455780836028,
+      "input": [
+        "clusters_seed3",
+        8000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "mode": "sibling_remaining",
+      "pipeline_ratio": 0.9379986008817258,
+      "query_task_ratio": 0.9038849754510782,
+      "sibling_success_rate": 0.07419548284944817,
+      "total_bound_ratio": 0.9544167962955266
+    },
+    {
+      "campaign": "campaign_growth",
+      "count_node_ratio": 0.9899460698333231,
+      "input": [
+        "single_000000",
+        16000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "mode": "sibling",
+      "pipeline_ratio": 1.0538812145278333,
+      "query_task_ratio": 0.9871365570582644,
+      "sibling_success_rate": 0.04803379915502112,
+      "total_bound_ratio": 0.9913718404332321
+    },
+    {
+      "campaign": "campaign_growth",
+      "count_node_ratio": 0.9889879678066644,
+      "input": [
+        "single_000000",
+        16000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "mode": "sibling_remaining",
+      "pipeline_ratio": 1.0833832891814381,
+      "query_task_ratio": 0.9861411566727936,
+      "sibling_success_rate": 0.1833945208090361,
+      "total_bound_ratio": 0.9913822634148411
+    },
+    {
+      "campaign": "campaign_growth",
+      "count_node_ratio": 0.9867710309876738,
+      "input": [
+        "single_000000",
+        32000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "mode": "sibling",
+      "pipeline_ratio": 0.9927710274921984,
+      "query_task_ratio": 0.9833170163668982,
+      "sibling_success_rate": 0.05184480000482025,
+      "total_bound_ratio": 0.9882143730488583
+    },
+    {
+      "campaign": "campaign_growth",
+      "count_node_ratio": 0.9852806067830268,
+      "input": [
+        "single_000000",
+        32000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "mode": "sibling_remaining",
+      "pipeline_ratio": 0.9755529592444723,
+      "query_task_ratio": 0.9812846772688311,
+      "sibling_success_rate": 0.18312144397251087,
+      "total_bound_ratio": 0.9879562463058766
+    },
+    {
+      "campaign": "campaign_other_scans",
+      "count_node_ratio": 0.9932597220341144,
+      "input": [
+        "single_000100",
+        8000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "mode": "sibling",
+      "pipeline_ratio": 1.0392391889777015,
+      "query_task_ratio": 0.9910088041692148,
+      "sibling_success_rate": 0.08596270359587693,
+      "total_bound_ratio": 0.9941980323077386
+    },
+    {
+      "campaign": "campaign_other_scans",
+      "count_node_ratio": 0.9920940172311719,
+      "input": [
+        "single_000100",
+        8000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "mode": "sibling_remaining",
+      "pipeline_ratio": 0.9907881187035484,
+      "query_task_ratio": 0.9897022275304919,
+      "sibling_success_rate": 0.27154945344396153,
+      "total_bound_ratio": 0.9942522289259194
+    },
+    {
+      "campaign": "campaign_other_scans",
+      "count_node_ratio": 0.9926862912996489,
+      "input": [
+        "single_000200",
+        8000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "mode": "sibling",
+      "pipeline_ratio": 1.0223272390691829,
+      "query_task_ratio": 0.9910118000432152,
+      "sibling_success_rate": 0.07531990713244426,
+      "total_bound_ratio": 0.9936924352219908
+    },
+    {
+      "campaign": "campaign_other_scans",
+      "count_node_ratio": 0.9916512540500393,
+      "input": [
+        "single_000200",
+        8000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "mode": "sibling_remaining",
+      "pipeline_ratio": 1.0179037919829659,
+      "query_task_ratio": 0.98951210276385,
+      "sibling_success_rate": 0.2254165030571605,
+      "total_bound_ratio": 0.9936342115471168
+    },
+    {
+      "campaign": "campaign_pilot",
+      "count_node_ratio": 0.9960578383838006,
+      "input": [
+        "single_000000",
+        8000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "mode": "sibling",
+      "pipeline_ratio": 1.0003773533611653,
+      "query_task_ratio": 0.9946637615929832,
+      "sibling_success_rate": 0.04645863085290632,
+      "total_bound_ratio": 0.9968418311664663
+    },
+    {
+      "campaign": "campaign_pilot",
+      "count_node_ratio": 0.9952911934589448,
+      "input": [
+        "single_000000",
+        8000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "mode": "sibling_remaining",
+      "pipeline_ratio": 0.9997299716627225,
+      "query_task_ratio": 0.9938932773485746,
+      "sibling_success_rate": 0.2322244464479455,
+      "total_bound_ratio": 0.996965969175887
+    },
+    {
+      "campaign": "campaign_repeat_clusters8k",
+      "count_node_ratio": 0.9476979470545333,
+      "input": [
+        "clusters_seed3",
+        8000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "mode": "sibling",
+      "pipeline_ratio": 0.9674979199965658,
+      "query_task_ratio": 0.904739855732828,
+      "sibling_success_rate": 0.04665417841624818,
+      "total_bound_ratio": 0.954446734378803
+    },
+    {
+      "campaign": "campaign_repeat_clusters8k",
+      "count_node_ratio": 0.9470455780836028,
+      "input": [
+        "clusters_seed3",
+        8000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "mode": "sibling_remaining",
+      "pipeline_ratio": 0.9571539407100691,
+      "query_task_ratio": 0.9038849754510782,
+      "sibling_success_rate": 0.07419548284944817,
+      "total_bound_ratio": 0.9544167962955266
+    },
+    {
+      "campaign": "campaign_repeat_pilot",
+      "count_node_ratio": 0.9960578383838006,
+      "input": [
+        "single_000000",
+        8000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "mode": "sibling",
+      "pipeline_ratio": 1.0075568753890038,
+      "query_task_ratio": 0.9946637615929832,
+      "sibling_success_rate": 0.04645863085290632,
+      "total_bound_ratio": 0.9968418311664663
+    },
+    {
+      "campaign": "campaign_repeat_pilot",
+      "count_node_ratio": 0.9952911934589448,
+      "input": [
+        "single_000000",
+        8000,
+        8,
+        "samples",
+        "shared"
+      ],
+      "mode": "sibling_remaining",
+      "pipeline_ratio": 1.0268751437915478,
+      "query_task_ratio": 0.9938932773485746,
+      "sibling_success_rate": 0.2322244464479455,
+      "total_bound_ratio": 0.996965969175887
+    }
+  ],
+  "configurations": 24,
+  "pins": {
+    "campaign_check50k/COMPLETION.json": "cc0f2f2d40def3343a096042c9e7a9f16bb2856ab89b7e280164d40e8588e19c",
+    "campaign_check50k/MANIFEST.json": "db1210ff677854079e08c2640202b96ff4d99431b9cf810ce6ea409902636f7a",
+    "campaign_check50k/MEASURES.jsonl": "ba510a7fe838c4cd5711dab5e98f557bd1f2753279ad2a7105bf7839aa49c284",
+    "campaign_clusters16k/COMPLETION.json": "6d07fb6c1a8223251c60f43501a89f195220d2c3a40e5de5dcfdde0b7ef24a1d",
+    "campaign_clusters16k/MANIFEST.json": "9d8bd8201a63c31278202520e24a9bba4a5934e71d2135903ca5344b36e7b9ff",
+    "campaign_clusters16k/MEASURES.jsonl": "57f3e932b715c95bba0885942aab6a95dea1bb9f7404e3362af63d3eb21b25a6",
+    "campaign_clusters8k/COMPLETION.json": "36d2c7537b5ac38d6eab9ba150a430132e262585ba44ee340dea9b9ad52e4596",
+    "campaign_clusters8k/MANIFEST.json": "75be0e72ffc2bec4b2b526289b8e7961db10471ab3e60aaffa6f6693b227e4ec",
+    "campaign_clusters8k/MEASURES.jsonl": "c9fe3dda5212bcbb1a776bb1523ffd1381aa81afafebcbc962a5dc89f2a7b4b3",
+    "campaign_growth/COMPLETION.json": "6c1a199fe450cbe57fcd398a3485de4a07c51f37e22e31fdf9d9ef8a3be1b710",
+    "campaign_growth/MANIFEST.json": "e27f911721083337fca06c5068dd845c077a9ce148cdfcbc4880195db99629ce",
+    "campaign_growth/MEASURES.jsonl": "61e0f90b6068fd04ec69bd1dec7472f5323d69c0c61f7d6a1a5460fe4166eea3",
+    "campaign_other_scans/COMPLETION.json": "6000db3dae7625746206b55eee85a5192b1366017946b55babe4d23af1ff9f1e",
+    "campaign_other_scans/MANIFEST.json": "0260e16fb9e12b1075d516c20d3def952463a33aaf470a5730edd514f95b8047",
+    "campaign_other_scans/MEASURES.jsonl": "5d4eaa6eeace84ea9888c8a954c7f683c6604c04f6a69bcb526ea73f81250893",
+    "campaign_pilot/COMPLETION.json": "2d7ec43e75d84548aad4e00d184503579cba56c7e9121b241255214dd4150d7d",
+    "campaign_pilot/MANIFEST.json": "c629400ecea5a23d729e01848053b54a856706de01e9b9e4fb4624ea49ac2183",
+    "campaign_pilot/MEASURES.jsonl": "d688f714886a8fef94109b3ea4ae6b0850b7529362bea1b15d6b68a26319fd81",
+    "campaign_repeat_clusters8k/COMPLETION.json": "4290f7c133d3816635e95d5a26d9c709a942763ebc96d856eb420e3df895862f",
+    "campaign_repeat_clusters8k/MANIFEST.json": "b7486562faeb110f279621ebe34a4a54a0ceb556e891c27cb0ed9d1dd2aae5b8",
+    "campaign_repeat_clusters8k/MEASURES.jsonl": "aa0bef0d5f12c34727c5095e2e8e9c170fec92eef3ec1988ef70b2257e196057",
+    "campaign_repeat_pilot/COMPLETION.json": "c36bb8aabf5904b5499a467635c409545bd4ef471b7cc77fd4cf8984930f3d8e",
+    "campaign_repeat_pilot/MANIFEST.json": "88ae03c75bc8473d723f03c3a6f064501d21fff5d85824594927e8c03573fddf",
+    "campaign_repeat_pilot/MEASURES.jsonl": "dafd96b0b21a6c0d910e1735661580610ea2f785292256ba99d38225452dec61"
+  },
+  "report_sha256": "82564a277e8d84a4ce507f5553c88a75911f4fb75cffd71058f07602840f34c2",
+  "rows": [
+    {
+      "campaign": "campaign_check50k",
+      "count_bounds": 499208566,
+      "count_nodes": 579839306,
+      "count_plus_sibling_bounds": 499208566,
+      "count_points": 80630740,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 4619158,
+        "shell_ids": 2213035,
+        "sum": "792052c567e1bb36",
+        "supports": 1040133,
+        "xor": "b0147cc4f2694c30"
+      },
+      "key": [
+        "single_000000",
+        50000,
+        8,
+        "samples",
+        "shared",
+        "baseline"
+      ],
+      "payload_ms": 1141.1334039993003,
+      "pipeline_ms": 13711.246671,
+      "query_splits": 13044133,
+      "query_tasks": 29917359,
+      "sibling_work": {
+        "bound_tests": 0,
+        "child_entries": 0,
+        "population_eligible": 0,
+        "rejected_children": 0,
+        "rejected_pairs": 0
+      },
+      "total_ms": 13746.695369
+    },
+    {
+      "campaign": "campaign_check50k",
+      "count_bounds": 487046854,
+      "count_nodes": 565478836,
+      "count_plus_sibling_bounds": 488182907,
+      "count_points": 78431982,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 4619158,
+        "shell_ids": 2213035,
+        "sum": "792052c567e1bb36",
+        "supports": 1040133,
+        "xor": "b0147cc4f2694c30"
+      },
+      "key": [
+        "single_000000",
+        50000,
+        8,
+        "samples",
+        "shared",
+        "sibling"
+      ],
+      "payload_ms": 1151.071485999367,
+      "pipeline_ms": 13674.951848,
+      "query_splits": 12595475,
+      "query_tasks": 29020043,
+      "sibling_work": {
+        "bound_tests": 1136053,
+        "child_entries": 25190950,
+        "population_eligible": 1136053,
+        "rejected_children": 57372,
+        "rejected_pairs": 598924
+      },
+      "total_ms": 13711.689267
+    },
+    {
+      "campaign": "campaign_check50k",
+      "count_bounds": 486538317,
+      "count_nodes": 564684582,
+      "count_plus_sibling_bounds": 488143508,
+      "count_points": 78146265,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 4619158,
+        "shell_ids": 2213035,
+        "sum": "792052c567e1bb36",
+        "supports": 1040133,
+        "xor": "b0147cc4f2694c30"
+      },
+      "key": [
+        "single_000000",
+        50000,
+        8,
+        "samples",
+        "shared",
+        "sibling_remaining"
+      ],
+      "payload_ms": 1163.6412659994933,
+      "pipeline_ms": 13673.078491,
+      "query_splits": 12573172,
+      "query_tasks": 28975437,
+      "sibling_work": {
+        "bound_tests": 1605191,
+        "child_entries": 25146344,
+        "population_eligible": 1605191,
+        "rejected_children": 242521,
+        "rejected_pairs": 833610
+      },
+      "total_ms": 13709.598638
+    },
+    {
+      "campaign": "campaign_clusters16k",
+      "count_bounds": 3340363353,
+      "count_nodes": 4199340563,
+      "count_plus_sibling_bounds": 3340363353,
+      "count_points": 858977210,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 2262795,
+        "shell_ids": 1041050,
+        "sum": "d118ad0e4bb8b686",
+        "supports": 520208,
+        "xor": "57f80fc6c4dfb464"
+      },
+      "key": [
+        "clusters_seed3",
+        16000,
+        8,
+        "samples",
+        "shared",
+        "baseline"
+      ],
+      "payload_ms": 720.5648459994791,
+      "pipeline_ms": 66061.913534,
+      "query_splits": 101477189,
+      "query_tasks": 206349628,
+      "sibling_work": {
+        "bound_tests": 0,
+        "child_entries": 0,
+        "population_eligible": 0,
+        "rejected_children": 0,
+        "rejected_pairs": 0
+      },
+      "total_ms": 66071.330233
+    },
+    {
+      "campaign": "campaign_clusters16k",
+      "count_bounds": 3154726748,
+      "count_nodes": 3959986805,
+      "count_plus_sibling_bounds": 3171167010,
+      "count_points": 805260057,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 2262795,
+        "shell_ids": 1041050,
+        "sum": "d118ad0e4bb8b686",
+        "supports": 520208,
+        "xor": "57f80fc6c4dfb464"
+      },
+      "key": [
+        "clusters_seed3",
+        16000,
+        8,
+        "samples",
+        "shared",
+        "sibling"
+      ],
+      "payload_ms": 708.3566929994705,
+      "pipeline_ms": 62727.199927,
+      "query_splits": 90015347,
+      "query_tasks": 183425944,
+      "sibling_work": {
+        "bound_tests": 16440262,
+        "child_entries": 180030694,
+        "population_eligible": 16440262,
+        "rejected_children": 795049,
+        "rejected_pairs": 15252239
+      },
+      "total_ms": 62736.399795
+    },
+    {
+      "campaign": "campaign_clusters16k",
+      "count_bounds": 3153415489,
+      "count_nodes": 3957918050,
+      "count_plus_sibling_bounds": 3171143237,
+      "count_points": 804502561,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 2262795,
+        "shell_ids": 1041050,
+        "sum": "d118ad0e4bb8b686",
+        "supports": 520208,
+        "xor": "57f80fc6c4dfb464"
+      },
+      "key": [
+        "clusters_seed3",
+        16000,
+        8,
+        "samples",
+        "shared",
+        "sibling_remaining"
+      ],
+      "payload_ms": 718.2062079995067,
+      "pipeline_ms": 78711.630233,
+      "query_splits": 89945832,
+      "query_tasks": 183286914,
+      "sibling_work": {
+        "bound_tests": 17727748,
+        "child_entries": 179891664,
+        "population_eligible": 17727748,
+        "rejected_children": 1274072,
+        "rejected_pairs": 15948247
+      },
+      "total_ms": 78720.870089
+    },
+    {
+      "campaign": "campaign_clusters8k",
+      "count_bounds": 770657219,
+      "count_nodes": 973179333,
+      "count_plus_sibling_bounds": 770657219,
+      "count_points": 202522114,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 1060879,
+        "shell_ids": 491649,
+        "sum": "5febbad28ae1279e",
+        "supports": 245733,
+        "xor": "af4f738c2e0781ce"
+      },
+      "key": [
+        "clusters_seed3",
+        8000,
+        8,
+        "samples",
+        "shared",
+        "baseline"
+      ],
+      "payload_ms": 334.3398419999547,
+      "pipeline_ms": 16326.705484,
+      "query_splits": 25274723,
+      "query_tasks": 51841177,
+      "sibling_work": {
+        "bound_tests": 0,
+        "child_entries": 0,
+        "population_eligible": 0,
+        "rejected_children": 0,
+        "rejected_pairs": 0
+      },
+      "total_ms": 16331.5262
+    },
+    {
+      "campaign": "campaign_clusters8k",
+      "count_bounds": 731319555,
+      "count_nodes": 922280056,
+      "count_plus_sibling_bounds": 735551266,
+      "count_points": 190960501,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 1060879,
+        "shell_ids": 491649,
+        "sum": "5febbad28ae1279e",
+        "supports": 245733,
+        "xor": "af4f738c2e0781ce"
+      },
+      "key": [
+        "clusters_seed3",
+        8000,
+        8,
+        "samples",
+        "shared",
+        "sibling"
+      ],
+      "payload_ms": 326.76409199994856,
+      "pipeline_ms": 15574.088456,
+      "query_splits": 22805524,
+      "query_tasks": 46902779,
+      "sibling_work": {
+        "bound_tests": 4231711,
+        "child_entries": 45611048,
+        "population_eligible": 4231711,
+        "rejected_children": 197427,
+        "rejected_pairs": 3258114
+      },
+      "total_ms": 15578.703507
+    },
+    {
+      "campaign": "campaign_clusters8k",
+      "count_bounds": 730929100,
+      "count_nodes": 921645184,
+      "count_plus_sibling_bounds": 735528194,
+      "count_points": 190716084,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 1060879,
+        "shell_ids": 491649,
+        "sum": "5febbad28ae1279e",
+        "supports": 245733,
+        "xor": "af4f738c2e0781ce"
+      },
+      "key": [
+        "clusters_seed3",
+        8000,
+        8,
+        "samples",
+        "shared",
+        "sibling_remaining"
+      ],
+      "payload_ms": 322.2130899999539,
+      "pipeline_ms": 15314.426901,
+      "query_splits": 22783365,
+      "query_tasks": 46858461,
+      "sibling_work": {
+        "bound_tests": 4599094,
+        "child_entries": 45566730,
+        "population_eligible": 4599094,
+        "rejected_children": 341232,
+        "rejected_pairs": 3469379
+      },
+      "total_ms": 15318.947742
+    },
+    {
+      "campaign": "campaign_growth",
+      "count_bounds": 116953099,
+      "count_nodes": 135805996,
+      "count_plus_sibling_bounds": 116953099,
+      "count_points": 18852897,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 1456339,
+        "shell_ids": 667153,
+        "sum": "994a375069125b1",
+        "supports": 326754,
+        "xor": "387e42f2f5dcea67"
+      },
+      "key": [
+        "single_000000",
+        16000,
+        8,
+        "samples",
+        "shared",
+        "baseline"
+      ],
+      "payload_ms": 347.42010899989754,
+      "pipeline_ms": 3546.651828,
+      "query_splits": 2606401,
+      "query_tasks": 6383361,
+      "sibling_work": {
+        "bound_tests": 0,
+        "child_entries": 0,
+        "population_eligible": 0,
+        "rejected_children": 0,
+        "rejected_pairs": 0
+      },
+      "total_ms": 3557.362465
+    },
+    {
+      "campaign": "campaign_growth",
+      "count_bounds": 115805544,
+      "count_nodes": 134440612,
+      "count_plus_sibling_bounds": 115944009,
+      "count_points": 18635068,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 1456339,
+        "shell_ids": 667153,
+        "sum": "994a375069125b1",
+        "supports": 326754,
+        "xor": "387e42f2f5dcea67"
+      },
+      "key": [
+        "single_000000",
+        16000,
+        8,
+        "samples",
+        "shared",
+        "sibling"
+      ],
+      "payload_ms": 374.5731229998923,
+      "pipeline_ms": 3737.749736,
+      "query_splits": 2565345,
+      "query_tasks": 6301249,
+      "sibling_work": {
+        "bound_tests": 138465,
+        "child_entries": 5130690,
+        "population_eligible": 138465,
+        "rejected_children": 6651,
+        "rejected_pairs": 55662
+      },
+      "total_ms": 3747.671154
+    },
+    {
+      "campaign": "campaign_growth",
+      "count_bounds": 115724867,
+      "count_nodes": 134310496,
+      "count_plus_sibling_bounds": 115945228,
+      "count_points": 18585629,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 1456339,
+        "shell_ids": 667153,
+        "sum": "994a375069125b1",
+        "supports": 326754,
+        "xor": "387e42f2f5dcea67"
+      },
+      "key": [
+        "single_000000",
+        16000,
+        8,
+        "samples",
+        "shared",
+        "sibling_remaining"
+      ],
+      "payload_ms": 375.2528759998909,
+      "pipeline_ms": 3842.383323,
+      "query_splits": 2562168,
+      "query_tasks": 6294895,
+      "sibling_work": {
+        "bound_tests": 220361,
+        "child_entries": 5124336,
+        "population_eligible": 220361,
+        "rejected_children": 40413,
+        "rejected_pairs": 96516
+      },
+      "total_ms": 3852.351589
+    },
+    {
+      "campaign": "campaign_growth",
+      "count_bounds": 243562520,
+      "count_nodes": 280997181,
+      "count_plus_sibling_bounds": 243562520,
+      "count_points": 37434661,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 2940477,
+        "shell_ids": 1376563,
+        "sum": "8a3cd30abab6dda4",
+        "supports": 660726,
+        "xor": "4ad4c979f3d33ddc"
+      },
+      "key": [
+        "single_000000",
+        32000,
+        8,
+        "samples",
+        "shared",
+        "baseline"
+      ],
+      "payload_ms": 793.5460649992701,
+      "pipeline_ms": 7949.433469,
+      "query_splits": 5549010,
+      "query_tasks": 13458384,
+      "sibling_work": {
+        "bound_tests": 0,
+        "child_entries": 0,
+        "population_eligible": 0,
+        "rejected_children": 0,
+        "rejected_pairs": 0
+      },
+      "total_ms": 7970.476403
+    },
+    {
+      "campaign": "campaign_growth",
+      "count_bounds": 240360050,
+      "count_nodes": 277279878,
+      "count_plus_sibling_bounds": 240691983,
+      "count_points": 36919828,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 2940477,
+        "shell_ids": 1376563,
+        "sum": "8a3cd30abab6dda4",
+        "supports": 660726,
+        "xor": "4ad4c979f3d33ddc"
+      },
+      "key": [
+        "single_000000",
+        32000,
+        8,
+        "samples",
+        "shared",
+        "sibling"
+      ],
+      "payload_ms": 764.7705909993223,
+      "pipeline_ms": 7891.967233,
+      "query_splits": 5436747,
+      "query_tasks": 13233858,
+      "sibling_work": {
+        "bound_tests": 331933,
+        "child_entries": 10873494,
+        "population_eligible": 331933,
+        "rejected_children": 17209,
+        "rejected_pairs": 163720
+      },
+      "total_ms": 7918.276032
+    },
+    {
+      "campaign": "campaign_growth",
+      "count_bounds": 240074421,
+      "count_nodes": 276861073,
+      "count_plus_sibling_bounds": 240629113,
+      "count_points": 36786652,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 2940477,
+        "shell_ids": 1376563,
+        "sum": "8a3cd30abab6dda4",
+        "supports": 660726,
+        "xor": "4ad4c979f3d33ddc"
+      },
+      "key": [
+        "single_000000",
+        32000,
+        8,
+        "samples",
+        "shared",
+        "sibling_remaining"
+      ],
+      "payload_ms": 750.7970869993545,
+      "pipeline_ms": 7755.093345,
+      "query_splits": 5423071,
+      "query_tasks": 13206506,
+      "sibling_work": {
+        "bound_tests": 554692,
+        "child_entries": 10846142,
+        "population_eligible": 554692,
+        "rejected_children": 101576,
+        "rejected_pairs": 277739
+      },
+      "total_ms": 7779.199479
+    },
+    {
+      "campaign": "campaign_other_scans",
+      "count_bounds": 40279266,
+      "count_nodes": 46737390,
+      "count_plus_sibling_bounds": 40279266,
+      "count_points": 6458124,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 694061,
+        "shell_ids": 315975,
+        "sum": "1e37793fda4f7c5b",
+        "supports": 156422,
+        "xor": "d08f79a52f09cd15"
+      },
+      "key": [
+        "single_000100",
+        8000,
+        8,
+        "samples",
+        "shared",
+        "baseline"
+      ],
+      "payload_ms": 155.28759599998983,
+      "pipeline_ms": 1326.459016,
+      "query_splits": 886739,
+      "query_tasks": 2299138,
+      "sibling_work": {
+        "bound_tests": 0,
+        "child_entries": 0,
+        "population_eligible": 0,
+        "rejected_children": 0,
+        "rejected_pairs": 0
+      },
+      "total_ms": 1331.221596
+    },
+    {
+      "campaign": "campaign_other_scans",
+      "count_bounds": 40020149,
+      "count_nodes": 46422367,
+      "count_plus_sibling_bounds": 40045567,
+      "count_points": 6402218,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 694061,
+        "shell_ids": 315975,
+        "sum": "1e37793fda4f7c5b",
+        "supports": 156422,
+        "xor": "d08f79a52f09cd15"
+      },
+      "key": [
+        "single_000100",
+        8000,
+        8,
+        "samples",
+        "shared",
+        "sibling"
+      ],
+      "payload_ms": 157.41442799999044,
+      "pipeline_ms": 1378.508192,
+      "query_splits": 876403,
+      "query_tasks": 2278466,
+      "sibling_work": {
+        "bound_tests": 25418,
+        "child_entries": 1752806,
+        "population_eligible": 25418,
+        "rejected_children": 2185,
+        "rejected_pairs": 14919
+      },
+      "total_ms": 1383.531158
+    },
+    {
+      "campaign": "campaign_other_scans",
+      "count_bounds": 39987006,
+      "count_nodes": 46367885,
+      "count_plus_sibling_bounds": 40047750,
+      "count_points": 6380879,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 694061,
+        "shell_ids": 315975,
+        "sum": "1e37793fda4f7c5b",
+        "supports": 156422,
+        "xor": "d08f79a52f09cd15"
+      },
+      "key": [
+        "single_000100",
+        8000,
+        8,
+        "samples",
+        "shared",
+        "sibling_remaining"
+      ],
+      "payload_ms": 153.34026199999553,
+      "pipeline_ms": 1314.239833,
+      "query_splits": 874901,
+      "query_tasks": 2275462,
+      "sibling_work": {
+        "bound_tests": 60744,
+        "child_entries": 1749802,
+        "population_eligible": 60744,
+        "rejected_children": 16495,
+        "rejected_pairs": 33190
+      },
+      "total_ms": 1318.957956
+    },
+    {
+      "campaign": "campaign_other_scans",
+      "count_bounds": 47351872,
+      "count_nodes": 55662731,
+      "count_plus_sibling_bounds": 47351872,
+      "count_points": 8310859,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 680555,
+        "shell_ids": 311958,
+        "sum": "ca7e4dc59d7a6f7b",
+        "supports": 153796,
+        "xor": "9b67566e1b4869d9"
+      },
+      "key": [
+        "single_000200",
+        8000,
+        8,
+        "samples",
+        "shared",
+        "baseline"
+      ],
+      "payload_ms": 151.66998599999428,
+      "pipeline_ms": 1443.979746,
+      "query_splits": 1130515,
+      "query_tasks": 2804566,
+      "sibling_work": {
+        "bound_tests": 0,
+        "child_entries": 0,
+        "population_eligible": 0,
+        "rejected_children": 0,
+        "rejected_pairs": 0
+      },
+      "total_ms": 1448.770817
+    },
+    {
+      "campaign": "campaign_other_scans",
+      "count_bounds": 47016155,
+      "count_nodes": 55255630,
+      "count_plus_sibling_bounds": 47053197,
+      "count_points": 8239475,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 680555,
+        "shell_ids": 311958,
+        "sum": "ca7e4dc59d7a6f7b",
+        "supports": 153796,
+        "xor": "9b67566e1b4869d9"
+      },
+      "key": [
+        "single_000200",
+        8000,
+        8,
+        "samples",
+        "shared",
+        "sibling"
+      ],
+      "payload_ms": 153.00654999999108,
+      "pipeline_ms": 1476.219827,
+      "query_splits": 1117911,
+      "query_tasks": 2779358,
+      "sibling_work": {
+        "bound_tests": 37042,
+        "child_entries": 2235822,
+        "population_eligible": 37042,
+        "rejected_children": 2790,
+        "rejected_pairs": 18132
+      },
+      "total_ms": 1481.044169
+    },
+    {
+      "campaign": "campaign_other_scans",
+      "count_bounds": 46979132,
+      "count_nodes": 55198017,
+      "count_plus_sibling_bounds": 47050440,
+      "count_points": 8218885,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 680555,
+        "shell_ids": 311958,
+        "sum": "ca7e4dc59d7a6f7b",
+        "supports": 153796,
+        "xor": "9b67566e1b4869d9"
+      },
+      "key": [
+        "single_000200",
+        8000,
+        8,
+        "samples",
+        "shared",
+        "sibling_remaining"
+      ],
+      "payload_ms": 153.7085139999919,
+      "pipeline_ms": 1469.832459,
+      "query_splits": 1115808,
+      "query_tasks": 2775152,
+      "sibling_work": {
+        "bound_tests": 71308,
+        "child_entries": 2231616,
+        "population_eligible": 71308,
+        "rejected_children": 16074,
+        "rejected_pairs": 37201
+      },
+      "total_ms": 1474.543072
+    },
+    {
+      "campaign": "campaign_pilot",
+      "count_bounds": 50677468,
+      "count_nodes": 59226897,
+      "count_plus_sibling_bounds": 50677468,
+      "count_points": 8549429,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 710926,
+        "shell_ids": 323968,
+        "sum": "23645ccf8d3501b",
+        "supports": 160237,
+        "xor": "294e6be30be6301d"
+      },
+      "key": [
+        "single_000000",
+        8000,
+        8,
+        "samples",
+        "shared",
+        "baseline"
+      ],
+      "payload_ms": 159.58659499998546,
+      "pipeline_ms": 1537.786753,
+      "query_splits": 1129538,
+      "query_tasks": 2834581,
+      "sibling_work": {
+        "bound_tests": 0,
+        "child_entries": 0,
+        "population_eligible": 0,
+        "rejected_children": 0,
+        "rejected_pairs": 0
+      },
+      "total_ms": 1542.738222
+    },
+    {
+      "campaign": "campaign_pilot",
+      "count_bounds": 50484509,
+      "count_nodes": 58993415,
+      "count_plus_sibling_bounds": 50517420,
+      "count_points": 8508906,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 710926,
+        "shell_ids": 323968,
+        "sum": "23645ccf8d3501b",
+        "supports": 160237,
+        "xor": "294e6be30be6301d"
+      },
+      "key": [
+        "single_000000",
+        8000,
+        8,
+        "samples",
+        "shared",
+        "sibling"
+      ],
+      "payload_ms": 160.3514229999886,
+      "pipeline_ms": 1538.367042,
+      "query_splits": 1121975,
+      "query_tasks": 2819455,
+      "sibling_work": {
+        "bound_tests": 32911,
+        "child_entries": 2243950,
+        "population_eligible": 32911,
+        "rejected_children": 1529,
+        "rejected_pairs": 10522
+      },
+      "total_ms": 1543.742501
+    },
+    {
+      "campaign": "campaign_pilot",
+      "count_bounds": 50458270,
+      "count_nodes": 58948009,
+      "count_plus_sibling_bounds": 50523711,
+      "count_points": 8489739,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 710926,
+        "shell_ids": 323968,
+        "sum": "23645ccf8d3501b",
+        "supports": 160237,
+        "xor": "294e6be30be6301d"
+      },
+      "key": [
+        "single_000000",
+        8000,
+        8,
+        "samples",
+        "shared",
+        "sibling_remaining"
+      ],
+      "payload_ms": 159.553212999988,
+      "pipeline_ms": 1537.371507,
+      "query_splits": 1120883,
+      "query_tasks": 2817271,
+      "sibling_work": {
+        "bound_tests": 65441,
+        "child_entries": 2241766,
+        "population_eligible": 65441,
+        "rejected_children": 15197,
+        "rejected_pairs": 27161
+      },
+      "total_ms": 1542.122109
+    },
+    {
+      "campaign": "campaign_repeat_clusters8k",
+      "count_bounds": 730929100,
+      "count_nodes": 921645184,
+      "count_plus_sibling_bounds": 735528194,
+      "count_points": 190716084,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 1060879,
+        "shell_ids": 491649,
+        "sum": "5febbad28ae1279e",
+        "supports": 245733,
+        "xor": "af4f738c2e0781ce"
+      },
+      "key": [
+        "clusters_seed3",
+        8000,
+        8,
+        "samples",
+        "shared",
+        "sibling_remaining"
+      ],
+      "payload_ms": 318.97045999995584,
+      "pipeline_ms": 15103.76416,
+      "query_splits": 22783365,
+      "query_tasks": 46858461,
+      "sibling_work": {
+        "bound_tests": 4599094,
+        "child_entries": 45566730,
+        "population_eligible": 4599094,
+        "rejected_children": 341232,
+        "rejected_pairs": 3469379
+      },
+      "total_ms": 15108.319212
+    },
+    {
+      "campaign": "campaign_repeat_clusters8k",
+      "count_bounds": 731319555,
+      "count_nodes": 922280056,
+      "count_plus_sibling_bounds": 735551266,
+      "count_points": 190960501,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 1060879,
+        "shell_ids": 491649,
+        "sum": "5febbad28ae1279e",
+        "supports": 245733,
+        "xor": "af4f738c2e0781ce"
+      },
+      "key": [
+        "clusters_seed3",
+        8000,
+        8,
+        "samples",
+        "shared",
+        "sibling"
+      ],
+      "payload_ms": 319.9287259999417,
+      "pipeline_ms": 15266.990802,
+      "query_splits": 22805524,
+      "query_tasks": 46902779,
+      "sibling_work": {
+        "bound_tests": 4231711,
+        "child_entries": 45611048,
+        "population_eligible": 4231711,
+        "rejected_children": 197427,
+        "rejected_pairs": 3258114
+      },
+      "total_ms": 15271.554718
+    },
+    {
+      "campaign": "campaign_repeat_clusters8k",
+      "count_bounds": 770657219,
+      "count_nodes": 973179333,
+      "count_plus_sibling_bounds": 770657219,
+      "count_points": 202522114,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 1060879,
+        "shell_ids": 491649,
+        "sum": "5febbad28ae1279e",
+        "supports": 245733,
+        "xor": "af4f738c2e0781ce"
+      },
+      "key": [
+        "clusters_seed3",
+        8000,
+        8,
+        "samples",
+        "shared",
+        "baseline"
+      ],
+      "payload_ms": 320.4677999999481,
+      "pipeline_ms": 15779.869379,
+      "query_splits": 25274723,
+      "query_tasks": 51841177,
+      "sibling_work": {
+        "bound_tests": 0,
+        "child_entries": 0,
+        "population_eligible": 0,
+        "rejected_children": 0,
+        "rejected_pairs": 0
+      },
+      "total_ms": 15784.426966
+    },
+    {
+      "campaign": "campaign_repeat_pilot",
+      "count_bounds": 50458270,
+      "count_nodes": 58948009,
+      "count_plus_sibling_bounds": 50523711,
+      "count_points": 8489739,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 710926,
+        "shell_ids": 323968,
+        "sum": "23645ccf8d3501b",
+        "supports": 160237,
+        "xor": "294e6be30be6301d"
+      },
+      "key": [
+        "single_000000",
+        8000,
+        8,
+        "samples",
+        "shared",
+        "sibling_remaining"
+      ],
+      "payload_ms": 162.64892899998785,
+      "pipeline_ms": 1572.396797,
+      "query_splits": 1120883,
+      "query_tasks": 2817271,
+      "sibling_work": {
+        "bound_tests": 65441,
+        "child_entries": 2241766,
+        "population_eligible": 65441,
+        "rejected_children": 15197,
+        "rejected_pairs": 27161
+      },
+      "total_ms": 1578.139079
+    },
+    {
+      "campaign": "campaign_repeat_pilot",
+      "count_bounds": 50484509,
+      "count_nodes": 58993415,
+      "count_plus_sibling_bounds": 50517420,
+      "count_points": 8508906,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 710926,
+        "shell_ids": 323968,
+        "sum": "23645ccf8d3501b",
+        "supports": 160237,
+        "xor": "294e6be30be6301d"
+      },
+      "key": [
+        "single_000000",
+        8000,
+        8,
+        "samples",
+        "shared",
+        "sibling"
+      ],
+      "payload_ms": 159.44147199998602,
+      "pipeline_ms": 1542.815807,
+      "query_splits": 1121975,
+      "query_tasks": 2819455,
+      "sibling_work": {
+        "bound_tests": 32911,
+        "child_entries": 2243950,
+        "population_eligible": 32911,
+        "rejected_children": 1529,
+        "rejected_pairs": 10522
+      },
+      "total_ms": 1547.596944
+    },
+    {
+      "campaign": "campaign_repeat_pilot",
+      "count_bounds": 50677468,
+      "count_nodes": 59226897,
+      "count_plus_sibling_bounds": 50677468,
+      "count_points": 8549429,
+      "digest": {
+        "encoding": "canonical_q2_support_v2",
+        "interior_ids": 710926,
+        "shell_ids": 323968,
+        "sum": "23645ccf8d3501b",
+        "supports": 160237,
+        "xor": "294e6be30be6301d"
+      },
+      "key": [
+        "single_000000",
+        8000,
+        8,
+        "samples",
+        "shared",
+        "baseline"
+      ],
+      "payload_ms": 159.31213899998443,
+      "pipeline_ms": 1531.244384,
+      "query_splits": 1129538,
+      "query_tasks": 2834581,
+      "sibling_work": {
+        "bound_tests": 0,
+        "child_entries": 0,
+        "population_eligible": 0,
+        "rejected_children": 0,
+        "rejected_pairs": 0
+      },
+      "total_ms": 1536.014315
+    }
+  ],
+  "runner_sha256": "c4afe69a3b702501f9417ba002d2500bd31a0243aa31878fd771d50f472de6aa",
+  "schema": "mhgp8_q2_sibling_summary_v1",
+  "scope": "paired_audit_prototype_not_product_or_full_tower",
+  "status": "passed"
+}

@@ -5,71 +5,64 @@
 `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`. GCP non utilisé.
 
-## Résultat utile : le filtre paie son coût avec le census LiDAR
+## Certificat frère : preuve renforcée, rendement mesuré
 
-Le [raccord q2 sur LiDAR](q2_front_20260914/README.md) est mesuré sur un
-snapshot figé, dont les seize sources produit/test correspondent au commit
-constructeur f7edd646. Quinze appels
-clos, dont le pilote à 8k dans les deux ordres d’exécution : Samples/Shared
-1,668–2,128 s contre Pure/Shared 12,233–16,463 s, soit ×7,3–7,7 dans
-les deux campagnes. Front, census, collecte et callback sont payés ;
-les quatre modes rendent le même digest et les mêmes compteurs de sortie.
-Cette comparaison garde le masque q2 identique, sans utiliser les temps
-du précédent front trois voies comme référence.
+L’[audit du frère q2](q2_sibling_20260914/README.md) est clos : 30 appels,
+24 configurations sur sources f7edd646 adaptées explicitement, avec
+référence, certificat autonome Kmax et complément Kmax−count. Les trois
+modes passent le gate géométrique et le juge ciblé en Release et sous
+Clang ASan/UBSan avec détection des fuites. Les essais échoués restent
+conservés ; aucune qualification n’est transférée au produit en cours.
 
-La montée Samples/Shared donne 3,733 s à 16k, 7,582 s à 32k et
-13,778 s à 50k sur le même scan. À 50k, 1 040 133 supports sont émis,
-avec 579,8 millions de visites de comptage, 3,83 millions de démarrages
-racine et 29,92 millions de tâches. La collecte/callback vaut 8,6 % du
-temps intégré observé. Priorité mesurée : partager davantage le comptage
-et réduire les recherches du proposeur, en suivant aussi le nombre de
-tâches. Le résidu légèrement inférieur à s10/12 ne diminue pas ici
-nettement le travail total. Aucune borne générale ni qualification G4.
+**Le seuil restant est sûr au split de B.** Les témoins déjà crédités
+uniformément pour toutes les paires a×B sont hors de B : b=z donnerait
+H=0. Ils sont donc disjoints du frère S⊂B. Avec Hmin(a,enfant,S)>0,
+`|S|≥Kmax−count` suffit à un rejet immédiat ; un échec laisse compte et
+curseur inchangés. La fixture pleine dimension le vérifie. Cela n’autorise
+pas à importer des crédits du front dans le compte du census.
 
-La revue de code est favorable : nœuds B partagés, compte initial nul,
-reprise conjointe compte/curseur Z, IDs originaux préservés, coquille
-complète. Le gate du snapshot passe 1 255 appels intégrés ; l’adaptateur
-concorde avec un calcul indépendant sur 496 paires. Les erreurs et leurs
-correctifs de harnais sont conservés, sans rejouer ni réécrire les reçus
-antérieurs. Les six campagnes passent les lecteurs normal/−O.
+Sur les trois scans LiDAR à 8k, les visites baissent de moins de 1 %,
+sans gain temporel stable. À 50k, le complément restant retire 2,61 %
+des visites mais le temps intégré reste proche de 13,7 s pour q2 seul.
+À 8k amas, les deux ordres donnent quelques pourcents de gain temporel ;
+à 16k, le mode restant prend 78,71 s contre 66,06 s en référence.
+Le signe contraire est conservé sans attribution causale. Doubler n
+multiplie encore les visites par environ 4,3 dans les trois modes.
 
-## Prochain objet à confronter aux mesures
+Recommandation : garder le certificat comme option expérimentale et
+mesurer le gain total avant tout port du seuil restant. Son supplément
+de bornes évitées est très faible ici. Les bornes du frère sont payées
+et comptées séparément ; les sorties et la collecte sont identiques.
+Ce résultat ne résout pas le coût dominant de P0.
 
-Les preuves de [§9–9.1](P0_SOUS_RECTANGLES_ET_GROUPES.md#9-census-q2--des-extrema-exacts-pour-partager-les-recherches)
-couvrent déjà A×B×Z et les divisions de A/B. Le complément de port C++
-est précisé dans la nouvelle note : 96 octets de constantes par activation,
-file portant trois IDs et un compte avec index/seuil au niveau du batch,
-et repli vers le parcours actuel dès qu’un facteur devient singleton.
-Le coût de préparation après suspension doit rester explicite.
+## Objets encore utiles pour la suite
 
-L’ordre Z peut provoquer un partage de B avant un témoin commun utile :
-une fixture à quatre points en pleine dimension, conservée dans ce dossier,
-le vérifie par modèle après réflexion. Tester d’abord le certificat
-autonome saturant du frère proposé par le constructeur. Pour conserver
-un crédit partiel, le modèle vérifie un état avec un bloc E explicitement
-exclu du comptage ultérieur ; son mutant sans exclusion est rejeté.
-Ces mécanismes ne sont pas encore mesurés sur amas ou scans réels.
-
+Les [preuves A×B×Z, §9–9.1](P0_SOUS_RECTANGLES_ET_GROUPES.md#9-census-q2--des-extrema-exacts-pour-partager-les-recherches)
+et leur [port à 96 octets de constantes](q2_front_20260914/README.md#prolongement-vers-deux-groupes-de-requêtes)
+restent disponibles pour partager les ancres et leurs parcours.
 Les [jobs d’un plan parent, §9.5](P0_SOUS_RECTANGLES_ET_GROUPES.md#95-partager-le-plan-parent-puis-découper-ses-tâches)
 et la [collecte suspendable, §9.3](P0_SOUS_RECTANGLES_ET_GROUPES.md#93-reprendre-la-collecte-avec-un-budget-de-travail-et-de-sortie)
-restent des propositions distinctes du produit. La correction I1 de B
-à 1ca8f62d clôt la réserve sur l’inertie globale des boules ; son ancien
-développement a été retiré du dialogue.
+restent distincts du produit. Travail, nombre de tâches et sortie complète
+doivent accompagner toute mesure de parallélisation.
+
+Une garde supplémentaire de chevauchement du frère avec le préfixe serait
+inutile dans l’arbre global actuel : avant le split, le préfixe est déjà
+situé avant B. La preuve figure dans l’audit ; aucun test chaud ajouté.
 
 ## Entrées et entretien
 
 Aucune hypothèse d’alignement des points, même pour des nuages recalés.
-Les [entrées réelles et leur provenance](lidar08_20260914/README.md)
-restent disponibles : trois scans isolés primaires, grille isotrope fixe
-2 cm, sites uniques et correspondances avec les retours bruts. Le contrôle
-d’accumulation voisin reste secondaire. Les mesures anciennes du front
-restent épinglées et distinctes de celles du raccord.
+Les [trois scans LiDAR primaires](lidar08_20260914/README.md) gardent leur
+grille isotrope 2 cm, leurs sites uniques et leurs correspondances avec
+les retours bruts. Le contrôle d’accumulation voisin reste secondaire.
+Les mesures précédentes du [raccord complet q2](q2_front_20260914/README.md)
+conservent l’appariement Pure/Samples et Pairwise/Shared ; les nouvelles
+baselines reproduisent exactement leurs compteurs et sorties.
 
-Les points corrigés et documentés par le constructeur ont quitté ce
-dialogue. Les preuves encore consommées sont conservées ; les fichiers
-et chantiers des autres auditeurs restent à leurs propriétaires.
+Les points clos ont quitté ce dialogue. Les preuves et sources encore
+consommées restent en place ; les autres auditeurs gardent leurs fichiers.
 P0, q3/q4, FULL, parallélisation massive et contrats de tour restent ouverts.
-Réservation d’index A après publication constructeur f7edd646, index
-constaté vide : ce dialogue et `q2_front_20260914/` uniquement.
-`.build/` et `.snapshot/` restent ignorés. Fenêtre close au commit/push
-main ; aucun fichier des autres intervenants inclus.
+Réservation d’index A après 24a717d9, index constaté vide : ce dialogue
+et `q2_sibling_20260914/` uniquement. Données et builds restent ignorés.
+Fenêtre close au commit/push main ; aucun fichier d’un autre intervenant
+inclus, aucun fichier produit modifié par A.

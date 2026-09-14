@@ -1,0 +1,70 @@
+{
+  "finished_utc": "2026-09-14T09:53:53.914575+00:00",
+  "preclosure_checker_issue": {
+    "command": [
+      "python3",
+      "-B",
+      "morsehgp3D_v8/audits/q2_sibling_20260914/check_reference.py"
+    ],
+    "error": "KeyError: cloud_work; the audit input probe does not emit this product-only field",
+    "returncode": 1,
+    "scope": "checker only, before qualification; no census rerun or raw measurement changed",
+    "source": "#!/usr/bin/env python3\n\"\"\"Check unchanged baseline work against the earlier independent/product receipts.\"\"\"\nimport hashlib\nimport json\nfrom pathlib import Path\n\nBASE = Path(__file__).resolve().parent\nROOT = BASE.parents[2]\nFIELDS = ('front_work', 'census_work', 'callback_work', 'cloud_work', 'index_work',\n          'digest', 'total_unordered_pairs', 'active_lane_mask', 'input_rectangles',\n          'anchor_queries', 'candidate_pairs', 'accepted_pairs', 'rejected_pairs')\n\n\ndef require(ok, message):\n    if not ok:\n        raise RuntimeError(message)\n\n\ndef sha(path):\n    return hashlib.sha256(path.read_bytes()).hexdigest()\n\n\ndef run():\n    references = {}\n    pins = {}\n    previous = BASE.parent / 'q2_front_20260914'\n    for path in sorted(previous.glob('campaign_*/MEASURES.jsonl')):\n        pins[str(path.relative_to(ROOT))] = sha(path)\n        for line, raw in enumerate(path.read_text().splitlines(), 1):\n            row = json.loads(raw)\n            if row['key'][3:] == ['samples', 'shared']:\n                references.setdefault(tuple(row['key'][:3]), (path, line, row['result']))\n    path = ROOT / 'morsehgp3D_v8/receipts/wspd_q2_census_20260914/shared_matrix/MEASURES.jsonl'\n    pins[str(path.relative_to(ROOT))] = sha(path)\n    inputs_path = BASE / 'INPUTS.json'\n    pins[str(inputs_path.relative_to(ROOT))] = sha(inputs_path)\n    clusters = {row['n']: row for row in json.loads(inputs_path.read_text())['datasets']}\n    for line, raw in enumerate(path.read_text().splitlines(), 1):\n        row = json.loads(raw)\n        r = row['result']\n        if r['family'] == 'clusters' and r['n'] in clusters and r['s'] == 8:\n            require(row['status'] == 'completed' and row['exit_code'] == 0, 'failed reference')\n            require(r['input_hash'] == clusters[r['n']]['constructor_input_hash_encoding1'],\n                    'cluster recipe input hash mismatch')\n            references[('clusters_seed3', r['n'], 8)] = (path, line, r)\n    checked = []\n    for path in sorted(BASE.glob('campaign_*/MEASURES.jsonl')):\n        pins[str(path.relative_to(ROOT))] = sha(path)\n        for line, raw in enumerate(path.read_text().splitlines(), 1):\n            row = json.loads(raw)\n            if row['key'][-1] != 'baseline':\n                continue\n            key = tuple(row['key'][:3])\n            ref_path, ref_line, reference = references[key]\n            require(row['status'] == 'completed' and row['returncode'] == 0, 'failed baseline')\n            result = row['result']\n            require(all(result[field] == reference[field] for field in FIELDS),\n                    'baseline changed discrete work or output: ' + str(key))\n            expected_fnv = (clusters[key[1]]['input_fnv64'] if key[0] == 'clusters_seed3'\n                            else reference['input_fnv64'])\n            require(result['input_fnv64'] == expected_fnv, 'baseline changed physical input')\n            checked.append(dict(key=list(key), baseline=str(path.relative_to(ROOT)), line=line,\n                                reference=str(ref_path.relative_to(ROOT)), reference_line=ref_line))\n    require(len(checked) == 10, 'missing baseline comparisons')\n    return dict(status='passed', scope='baseline_discrete_work_and_physical_output_not_timings',\n                checker_sha256=sha(Path(__file__)), fields=FIELDS, pins=pins, comparisons=checked)\n\n\nif __name__ == '__main__':\n    print(json.dumps(run(), sort_keys=True))\n"
+  },
+  "runs": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/audits/q2_sibling_20260914/runner_guards.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"cases\": [{\"case\": \"success\", \"raised\": null, \"rows\": 1, \"status\": \"completed\"}, {\"case\": \"nonzero\", \"raised\": \"RuntimeError\", \"rows\": 1, \"status\": \"failed\"}, {\"case\": \"stderr\", \"raised\": \"RuntimeError\", \"rows\": 1, \"status\": \"failed\"}, {\"case\": \"invalid_json\", \"raised\": \"JSONDecodeError\", \"rows\": 1, \"status\": \"failed\"}, {\"case\": \"nan_json\", \"raised\": \"ValueError\", \"rows\": 1, \"status\": \"failed\"}, {\"case\": \"infinite_exponent\", \"raised\": \"ValueError\", \"rows\": 1, \"status\": \"failed\"}, {\"case\": \"timeout\", \"raised\": \"RuntimeError\", \"rows\": 1, \"status\": \"failed\"}, {\"case\": \"startup_failure\", \"raised\": \"OSError\", \"rows\": 1, \"status\": \"failed\"}, {\"case\": \"interrupt\", \"raised\": \"KeyboardInterrupt\", \"rows\": 1, \"status\": \"interrupted\"}], \"reference_rows_sha256\": \"072a3b8f8f772c01a35a2762ba1e2b1886309dd3fd5662ea60e0c027b047c559\", \"rejected_mutants\": [\"wrong_mode\", \"baseline_credit\", \"bad_eligibility\"], \"runner_sha256\": \"c4afe69a3b702501f9417ba002d2500bd31a0243aa31878fd771d50f472de6aa\", \"scope\": \"mocked_runner_no_census_execution\", \"status\": \"passed\"}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/audits/q2_sibling_20260914/prepare_clusters.py",
+        "--check"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"constructor_rows_checked\": 6, \"datasets\": 2, \"generator_sha256\": \"0f5b482a69c4be06f6af913c775a69c05b12294f4924be0b49ea13375054f497\", \"input_hashes_encoding1\": [\"efa25f662dc5eaf2\", \"3b854361be22b30e\"], \"receipt_sha256\": \"7f751e23e40bcaf4bea4ebdfaf451c24e2fe2c2ab24d283dae657752209805c9\", \"scope\": \"input_recipe_reproduction_only_no_census_or_performance_qualification\", \"status\": \"passed\"}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/audits/q2_sibling_20260914/runner_guards.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"cases\": [{\"case\": \"success\", \"raised\": null, \"rows\": 1, \"status\": \"completed\"}, {\"case\": \"nonzero\", \"raised\": \"RuntimeError\", \"rows\": 1, \"status\": \"failed\"}, {\"case\": \"stderr\", \"raised\": \"RuntimeError\", \"rows\": 1, \"status\": \"failed\"}, {\"case\": \"invalid_json\", \"raised\": \"JSONDecodeError\", \"rows\": 1, \"status\": \"failed\"}, {\"case\": \"nan_json\", \"raised\": \"ValueError\", \"rows\": 1, \"status\": \"failed\"}, {\"case\": \"infinite_exponent\", \"raised\": \"ValueError\", \"rows\": 1, \"status\": \"failed\"}, {\"case\": \"timeout\", \"raised\": \"RuntimeError\", \"rows\": 1, \"status\": \"failed\"}, {\"case\": \"startup_failure\", \"raised\": \"OSError\", \"rows\": 1, \"status\": \"failed\"}, {\"case\": \"interrupt\", \"raised\": \"KeyboardInterrupt\", \"rows\": 1, \"status\": \"interrupted\"}], \"reference_rows_sha256\": \"072a3b8f8f772c01a35a2762ba1e2b1886309dd3fd5662ea60e0c027b047c559\", \"rejected_mutants\": [\"wrong_mode\", \"baseline_credit\", \"bad_eligibility\"], \"runner_sha256\": \"c4afe69a3b702501f9417ba002d2500bd31a0243aa31878fd771d50f472de6aa\", \"scope\": \"mocked_runner_no_census_execution\", \"status\": \"passed\"}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/audits/q2_sibling_20260914/prepare_clusters.py",
+        "--check"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"constructor_rows_checked\": 6, \"datasets\": 2, \"generator_sha256\": \"0f5b482a69c4be06f6af913c775a69c05b12294f4924be0b49ea13375054f497\", \"input_hashes_encoding1\": [\"efa25f662dc5eaf2\", \"3b854361be22b30e\"], \"receipt_sha256\": \"7f751e23e40bcaf4bea4ebdfaf451c24e2fe2c2ab24d283dae657752209805c9\", \"scope\": \"input_recipe_reproduction_only_no_census_or_performance_qualification\", \"status\": \"passed\"}\n"
+    }
+  ],
+  "schema": "mhgp8_q2_sibling_audit_checks_v1",
+  "scope": "runner mocks and input recipe; not census timings",
+  "source_sha256": {
+    "morsehgp3D_v8/audits/q2_sibling_20260914/INPUTS.json": "7f751e23e40bcaf4bea4ebdfaf451c24e2fe2c2ab24d283dae657752209805c9",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/measure.py": "c4afe69a3b702501f9417ba002d2500bd31a0243aa31878fd771d50f472de6aa",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/prepare_clusters.py": "0f5b482a69c4be06f6af913c775a69c05b12294f4924be0b49ea13375054f497",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/runner_guards.py": "f53535e29b43971c5f06f8f2045b1c47979a387b6204bbaa75444511f76a96ed"
+  },
+  "started_utc": "2026-09-14T09:53:52.914653+00:00",
+  "status": "passed"
+}
