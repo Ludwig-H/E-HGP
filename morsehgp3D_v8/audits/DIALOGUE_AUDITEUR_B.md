@@ -1,6 +1,6 @@
 # Dialogue courant de l'auditeur indépendant B (v8)
 
-14 septembre 2026, après **1bf806f0**, sur main. Second auditeur du dossier
+14 septembre 2026, après **85015a8c**, sur main. Second auditeur du dossier
 `morsehgp3D_v8/audits/`, arrivé ce jour ; l'auditeur indépendant A conserve
 [DIALOGUE_COURANT.md](DIALOGUE_COURANT.md) et ses notes P0_* ; l'auditeur
 complémentaire conserve `audits/morsehgp3D_v8_complementaire/`. Écritures
@@ -9,80 +9,104 @@ limitées à ce dossier. `phase=exploration_v8_hors_registre`,
 `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 GCP non utilisé.
 
-## Ce qui est vérifié aujourd'hui
+## Verdict de la campagne adversariale : aucun défaut du produit
 
-Lecture intégrale des Parties I–II du manuscrit (chapitres 2 à 9, Défs 20–31,
-Th. 2–7, Prop. 5–9, Alg. 1), des six rapports d'ouverture, des cinq contrats
-P0, des sources `src/`, des juges et des deux corpus d'audit. Construction
-neuve `build/v8-audit-20260914` (GCC 13.3 Release) : **34/34 CTests en 29 s** ;
-`build/v8-audit-san-20260914` (Clang 18, ASan/UBSan) : **34/34 en 101 s**,
-aucun rapport de sanitizer. Ces deux builds ne touchent pas aux builds
-épinglés du constructeur.
+Huit dimensions ont été attaquées par des agents indépendants sur
+1bf806f0 (prédicats et bornes, tubes, filtre axial et census, robustesse
+et mutants, objet mathématique contre le manuscrit, trajectoire et
+contrat, corpus d'audit, oracle de référence), puis chaque constat a été
+soumis à trois réfutateurs. Aucun défaut d'exactitude n'a survécu : les
+harnais exacts (≈ 8 300 nuages adversariaux, 5 006 triplets de boîtes,
+1 728 plans, 1 357 rectangles pleine échelle u16, 997 rectangles à la
+frontière `D = 10R`) concordent avec le code, et sept mutants causaux sont
+tués par les portes enregistrées. Builds neufs : 34/34 CTests à 1bf806f0
+en Release et sous Clang ASan/UBSan ; 37 tests à 85015a8c avec un seul
+échec, intermittent et documenté ci-dessous. Détail et fixtures dans
+[PORTES_ET_TESTS_20260914.md](PORTES_ET_TESTS_20260914.md).
 
-Relecture mathématique favorable, sans réserve trouvée, sur : les seuils
-`h_q = Kmax + 2 − q` ; les fuseaux W3/W4 (Jung : circumrayon d'un support
-aigu ≤ |ab|/√3, d'un tétraèdre à circumcentre intérieur ≤ |ab|·√(3/8), la
-stricte inégalité étant nécessaire aux cas équilatéral et régulier) ; le
-lemme des tubes et ses marges (`3H² − Ξ ≥ x²y²/8`, `2H² − Ξ ≥ 41x²y²/128`)
-et sa réalisation entière (`d² ≥ 100·diam²`, égalité permise dans
-`Q_C ≤ c·Δ²`, `Δ > 0` strict) ; les extrema `h_minimum`,
-`h_maximum_times_four`, `Q2PreparedBounds` ; le parcours partagé à curseur
-DFS ; les certificats `Credit`/`NoCredit`. Une contre-vérification
-adversariale par agents (prédicats, tubes, filtre axial, census, robustesse,
-mutants) est en cours ; ses constats survivants seront ajoutés ici avec
-leurs entrées exactes, ou rien ne sera ajouté s'ils ne survivent pas.
+Ce qui survit est de trois natures : une lacune de couverture confirmée
+(le mutant « égalité W3/W4 créditée » passe toute la suite), des points
+de doctrine à écrire avant q3/q4 et FULL
+([VERROUS_MATHEMATIQUES_20260914.md](VERROUS_MATHEMATIQUES_20260914.md)),
+et des ordres de grandeur pour le contrat
+([BUDGET_CONTRAT_50K_20260914.md](BUDGET_CONTRAT_50K_20260914.md)).
 
-## Mesure nouvelle : le régime réel des rectangles WSPD
+## Réponses aux questions du journal encore ouvertes
 
-[REGIME_WSPD_20260914.md](REGIME_WSPD_20260914.md) et son reçu rejouable
-[wspd_regime_20260914/](wspd_regime_20260914/WSPD_REGIME_CHECKS.json)
-mesurent le front WSPD pur v4 (même arbre radix, sans élimination) sur les
-familles du plan de test. À `s=8` v4 : 3,4 M / 8,3 M / 19,6 M rectangles sur
-l'uniforme 8k/16k/32k, 45 M à 64k, 219 M à 256k, soit environ +90 rectangles
-par point à chaque doublement ; 75 à 94 % des rectangles ont deux facteurs
-d'au plus sept sites ; aucun facteur n'atteint 1 024 sites (maximum 694,
-terrain 32k). Les facteurs de 16 000 à 25 000 sites des fixtures P0
-n'apparaissent dans aucune de ces familles.
+**Produits ancêtres avant séparation (question du 14 septembre).** Sûr sans
+hypothèse de séparation, utile seulement quand la lentille des boules
+diamétrales est non vide, testable exactement avant toute recherche
+d'index ; transmettre les identifiants de témoins du parent aux enfants
+avec exclusion, jamais les rejets négatifs ; ledger de masse par lane.
+Détail et chiffres dans la note des verrous, §6.
 
-Trois demandes en découlent, toutes compatibles avec la passation courante :
+**Question d'ouverture n°4 (graphe daté et contraction parallèle).** Le
+K-MST de la définition 30 ne peut pas servir de définition : la
+proposition 6 est fausse en position générale (E5, registre). Les
+obligations minimales sont celles du reçu v7
+`receipts_gabriel_vertices_20260906` §3 : sommets = minima Gabriel stricts
+datés, poids = premier niveau de connexion dans Γ_K, forêt à L − R liens,
+tout lot de même niveau fermé atomiquement, coupes ouvertes et fermées.
+Rien n'oblige la géométrie à suivre le calendrier ; la contraction
+parallèle ne peut être qualifiée qu'après le port de cette définition.
 
-1. **Fixer une seule convention entière de séparation** et calibrer `s` sur
-   elle : `gap ≥ s·diam` (v8) à `s=8` est encadrée par `d ≥ (s+2)R` (v4) à
-   `s=16` et `s=14`, soit 54 à 68 millions de rectangles à 32k au lieu de
-   19,6 millions sur le même arbre. Les mesures « s8/10/12 » n'ont de sens
-   qu'après ce choix.
-2. **Aucun coût fixe par rectangle** sur le chemin des petits facteurs : à
-   50k, environ 33 millions de rectangles pour le seul front pur laissent un
-   budget de l'ordre de 30 ns par rectangle en séquentiel équivalent. La
-   boîte d'un facteur doit venir du nœud de l'arbre WSPD lui-même, pas d'une
-   requête par rectangle sur un arbre d'intervalles ; le `PreparedCloud` en
-   chantier est utile comme propriétaire unique de la copie validée, à
-   condition que sa requête `bounds(range)` reste hors du chemin par
-   rectangle du futur pilote.
-3. **Publier, avec le pilote WSPD, les compteurs de ce reçu** (rectangles,
-   Σ|A|+|B|, plus grand facteur, masse de paires par classe) aux séries
-   8k→64k, puis la somme du census q2 sur tous les rectangles : c'est le
-   seul juge possible du critère de clôture de P0 « travail total, aval
-   compris ».
+**Question d'ouverture n°5 (sortie implicite).** Hors périmètre P0, mais
+elle conditionne le repli 100 ms : 27,3 M nœuds à 64 octets valent 1,75 Go,
+soit 87 à 175 ms d'écriture seule. Toute représentation implicite doit
+être un contrat distinct nommant les requêtes conservées et leur coût
+d'expansion ; ne pas y répondre revient à renoncer au 100 ms en silence.
 
-## Invariant à écrire dans le futur catalogue
+## Vérité terrain disponible pour la tranche FULL minimale
 
-L'élimination est **par lane**, la rétention est **par boule**. Une lane de
-support q ne présente une boule qu'avec `q ≥ q_min`, donc `h_q ≤ h_{q_min}` :
-chaque élimination de lane est sûre. Une boule vivante (`p < h_{q_min}`) est
-produite par la lane `q_min` avec son seuil exact. Le catalogue doit donc
-conserver une clé exacte dès qu'**une** lane la conserve ; rejeter une clé
-parce que la lane q3 l'a éliminée alors que la lane q2 la garde serait faux
-(triangle aigu dont la circumsphère porte aussi une paire diamétrale, à
-`p = Kmax − 1`). Corollaire pour q3/q4 : le fuseau repose sur Jung avec
-`L = |ab|`, donc chaque support doit être engendré depuis sa **plus longue
-arête**, avec règle de départage des égalités écrite ; ce point n'est pas
-encore documenté côté v8.
+`reference/morsehgp3d_oracle` calcule l'objet de la thèse en rationnels
+exacts, mais ses deux entrées ne se valent pas. `run_oracle` et le contrat
+v2 refusent toute coquille cosphérique pertinente : le carré, le triangle
+avec un point sur sa sphère diamétrale et même le nuage d'exemple à quatre
+points sont rejetés (`UnsupportedDegeneracyError`), donc presque toutes
+les fixtures de plateaux u16. En revanche `build_exhaustive_hierarchy`
+(Γ_K par définition, forêt par lots de niveau exact, verticales
+naturelles) accepte carré, octaèdre, pyramide, coquille à sept sites et
+extrêmes u16, sans hypothèse de position générale ; coût 1,3 / 4,1 /
+14,2 s à n = 8 / 10 / 12 pour Kmax = 3. Les doublons y sont acceptés
+comme labels distincts de même position (multiplicité), alors que
+`run_oracle` les refuse : fixer côté v8 la sémantique des doublons avant le
+différentiel. Contrat de sortie minimal confrontable sans adaptateur : par
+ordre K, nœuds avec facette témoin de K identifiants, niveau ρ² en fraction
+réduite, parents d'arité libre, union des points couverts, coupes ouverte
+et fermée à chaque niveau de lot. Familles à graver : les sept plateaux v7
+(abcz, carré, triangle rectangle, pont extérieur, abczxy, coquille 7,
+tétraèdre origine), E5, octaèdre, pyramide carrée, doublons, extrêmes,
+colinéaires, plus des graines aléatoires u16 à n ≤ 12.
+
+## Sixième tranche lue, non requalifiée
+
+Le partage du nuage et de l'index Z (85015a8c) répond au coût fixe par
+rectangle signalé hier ; ses 66 essais sont lus, non rejoués, et le
+constructeur en tire lui-même la bonne conclusion : un terme Ω(R|B|)
+subsiste dans Pool/Axis, la subdivision affaiblit les minorants (35,6 M
+candidates sur la nappe 32k contre 3,9 M sans subdivision), l'arbre de
+plages originales est un pont. Le pilote de front en chantier doit porter
+la convention de `s`, le test de lentille et les compteurs du reçu de
+régime ; je le relirai dès sa publication.
 
 ## Entretien du dossier
 
-Aucun fichier des autres auditeurs ni du constructeur n'est modifié. Les
-candidats d'archivage seront proposés ici avant tout déplacement, avec la
-liste de leurs références entrantes. Contrôles : les Markdown de ce dossier
-hors périmètre canonique sont validés explicitement par la fonction
-`validate` de `tools/check_docs.py` ; reçu rejoué en `python3 -O`.
+Fichiers de B : ce dialogue, quatre notes datées et le reçu
+`wspd_regime_20260914/`. Aucun fichier des autres auditeurs ni du
+constructeur n'est modifié. Propositions d'archivage, à exécuter par
+l'auteur A puisqu'elles touchent ses liens : `P0_RECTANGLE_CHECKS.json` et
+`p0_rectangle_probe.cpp` (queues 1D, dépassées par le filtre additif),
+`P0_AXIS_UNION_CHECKS.json` et `p0_axis_union_probe.py` (addition portée à
+f5430f57), `P0_TUBES_CHECKS.json` et `p0_tube_probe.py` (modèle intégré à
+3589a2c9) ; la note `P0_TUBES_ET_RANGS.md` doit rester en place, un reçu
+immuable l'épingle. Ne pas déplacer `P0_INPUT_ALIAS_CHECKS.json` (épinglé
+par `receipts/p0_local_credits_20260913/QUALIFICATION.json`),
+`p0_q2_census_bounds_probe.py` (importé par la sonde de collecte) ni
+`p0_collective_probe.py` (rejoué par un reçu complémentaire). Précédent à
+ne pas répéter : `P0_OWNER_CHECKS.json`, supprimé à 7f4ba045, reste cité
+par ce même reçu immuable ; il se retrouve par `git show 7f4ba045^:…`.
+Signalé à l'auditeur complémentaire : sa note d'identités cite un reçu
+`CLOUD_RECTANGLE_IDENTITY_CHECKS.json` absent du dossier, et son reçu des
+tubes épingle d'anciens octets de `tube_credits.hpp`. Contrôles : les
+Markdown de ce dossier hors périmètre canonique sont validés par la
+fonction `validate` de `tools/check_docs.py` ; reçu rejoué en `python3 -O`.
