@@ -300,98 +300,34 @@ appariée avec ce prototype.
 
 ## 8. Raffinement axial en cours : additionner les colonnes exactes
 
-**Apport à la version non publiée après 7f4ba045.** Le nouveau filtre
-`axis_q2.cpp` conserve les paires lorsque chaque axe fournit moins de h
-témoins, où h est le seuil q2 diminué du crédit de cœur. Ce rejet est sûr,
-mais les colonnes exactes permettent une addition plus forte. Contrairement
-à des tubes épais ou des groupes arbitraires, deux droites coordonnées
-distinctes passant par a se rencontrent seulement en a. Ce site est exclu ;
-les autres IDs sont donc disjoints entre les trois axes.
+**Intégré à f5430f57.** Le [contrat constructeur](../docs/P0_ADDITION_ET_INTERSECTION.md)
+porte maintenant la preuve, l'API, les bornes de requêtes et les limites
+du mode `Additive` et de son intersection avec un plan local. Cette section
+conserve son ancre pour les liens des deux premières tranches.
 
-Pour l’axe j, soit C_j(a) l’ensemble des sites de A autres que a qui
-partagent avec a leurs deux autres coordonnées. Définir :
+Le principe reste : les trois colonnes exactes passant par une ancre a
+ne se rencontrent qu'en a, exclue des témoins. Chaque site strictement
+entre a_j et b_j donne H=(z_j−a_j)(b_j−z_j)>0 ; les trois comptes peuvent
+donc s'additionner, ainsi que le cœur extérieur aux facteurs. Sur une
+boîte B, la somme des minima de ces comptes donne le rejet universel,
+la somme des maxima donne la conservation universelle ; sinon on descend.
+Les plages émises suivent la permutation B et restent disjointes.
 
-$$c_j(t)=\#\left\lbrace z\in C_j(a):\min(a_j,t)<z_j<\max(a_j,t)\right\rbrace.$$
+La fixture de quatre sites est portée dans les gates `axis_q2` et
+`axis_additive` : a=(1000,1000,1000), témoins (1000,1001,1000) et
+(1000,1000,1001), b=(60000,1002,1002), Kmax=2, cœur vide, s12.
+Chaque axe isolé ne suffit pas ; les deux témoins distincts ont H=1
+et leur addition rejette la paire. Les deux comportements sont testés.
 
-Chaque site compté vérifie exactement H=(z_j−a_j)(b_j−z_j)>0 pour t=b_j,
-quelles que soient les deux autres coordonnées de b. Par disjonction,
-**c_x(b_x)+c_y(b_y)+c_z(b_z)≥h suffit au rejet**. Le cœur reste extérieur
-à A∪B. Une saturation individuelle des comptes à h préserve cette décision.
-Les égalités avec une coordonnée de témoin restent exclues du compte strict.
-
-Fixture minimale, Kmax=2 et sans cœur : a=(1000,1000,1000),
-z_y=(1000,1001,1000), z_z=(1000,1000,1001) dans A et
-b=(60000,1002,1002) dans B. y et z fournissent chacun un témoin, x aucun,
-donc le filtre actuel conserve (a,b) ; la somme en certifie deux et le
-rejette. Les deux valeurs de H valent 1, les sites sont distincts et la
-séparation s12 est satisfaite. C’est une possibilité de réduire le résidu,
-pas une erreur de sûreté du filtre conservateur.
-
-**Requête sur l’index B, sans développer les paires.** Pour une boîte V,
-poser l_j(V)=0 si son intervalle j contient a_j, sinon le compte c_j au
-bord le plus proche de a_j ; poser u_j(V)=max(c_j(V.low_j),c_j(V.high_j)).
-Le compte décroît vers a_j et croît en s’en éloignant. Ainsi la somme des
-l_j est le minimum du compte axial sur V et la somme des u_j son maximum.
-
-- Si la somme des minima atteint h, rejeter tout le nœud.
-- Si la somme des maxima reste sous h, émettre sa plage dans la permutation B.
-- Sinon, visiter ses deux enfants ; à une feuille les deux sommes coïncident.
-
-Les plages émises sont disjointes et représentent exactement le résidu
-du certificat axial additif. Il n’est pas nécessaire de construire les
-O(h³) cellules d’une grille de seuils, ni de parcourir toutes les paires
-pour choisir le rejet. Les tâches d’ancres peuvent partager le même index
-B immutable et adresser leurs résultats par préfixes de tailles.
-
-**Préparation et coût proposé.** Conserver les trois permutations par
-colonne déjà calculées, ainsi que rang et limites de colonne de chaque
-ancre, coûte O(m) mémoire pour m sites de A. Une vue sur au plus h voisins
-de chaque côté suffit pour un compte saturé ; une recherche binaire y
-coûte O(log(h+1)). Aucun tableau de h copies par ancre n’est obligatoire.
-Avec J visites de nœuds et D fragments émis, le coût proposé, préparation
-de l’index B incluse, est O(m log m+48|B|+J log(h+1)+D), avant census.
-La borne u16 limite la profondeur de l’index ; elle ne borne ni J ni D
-linéairement. Une nappe sans colonnes exactes peut toujours garder tout A×B.
-
-Sur les **mêmes grilles entières** que la section 7, le compte axial vaut
-(|Δy|−1)_+ + (|Δz|−1)_+. À h10, 261 décalages le laissent sous le seuil,
-contre 441 pour les tests d’axes isolés. Leur somme de placements donne
-261N_yN_z−990(N_y+N_z)+2860 :
-
-| n total | Axes isolés, compte fermé | Somme des axes, compte fermé |
-| ---: | ---: | ---: |
-| 8 000 | 1 475 800 | 918 160 |
-| 16 000 | 3 124 300 | 1 912 660 |
-| 32 000 | 6 483 670 | 3 928 390 |
-
-Ces nombres ne sont pas des mesures de l’implémentation C++, ni le census
-des survivantes. Les queues A/B de l’autre auditeur et les fenêtres de la
-section 7 utilisent d’autres témoins et peuvent mieux réduire ce résidu.
-Cette amélioration se juge sur son travail total et se raccorde au filtre
-actuel sans imposer un gagnant général. Elle reste propre à q2.
-
-Ne pas transférer l’addition à des tubes voisins, ni ajouter ces comptes
-aux crédits Tubes/Pool/Dual sans leurs IDs : le même site peut y être
-compté de nouveau. Deux filtres sûrs restent combinables en intersectant
-leurs résidus ; la somme de leurs crédits exige une preuve supplémentaire.
-
-**Contrôle indépendant.** Le [modèle entier](p0_axis_union_probe.py) et son
-[reçu](P0_AXIS_UNION_CHECKS.json) passent en normal/−O : 80 petits plans,
-11 060 paires jugées par census, 660 valeurs pour les bornes d’intervalles
-et 148 rejets supplémentaires permis par l’addition. Trois contre-modèles
-produisent un faux rejet : frontière incluse, colonne inexacte, maximum
-utilisé pour rejeter une boîte entière. Le maximum des crédits d’axes
-reste sûr mais plus faible ; sa contre-fixture mesure cette perte seulement.
-
-Le modèle construit aussi les plages aux tailles 8k/16k/32k, puis compare
-leur masse à la formule d’offsets, sans développer les grandes paires.
-Il utilise les dimensions 50×80, 80×100 et **100×160**, celles du gate
-axial lu ; la dernière diffère de la grille 125×128 du tableau. À 32k :
-3 921 460 candidates, 3 632 760 visites de nœuds et 769 506 fragments.
-Le coût des requêtes et des fragments est donc réel, avant tout census.
-Ce Python recherche dans les colonnes entières, en O(log m) ; les vues
-limitées à h voisins et leur O(log(h+1)) restent un raccord proposé.
-Aucun temps ni résultat C++ ne sont qualifiés par ces exécutions.
+Cette addition ne se transfère pas aux crédits Pool, Dual ou Tubes, qui
+peuvent compter les mêmes IDs. Leur intersection logique reste sûre.
+La formule des grilles, les contre-fixtures et les coûts J/D sont repris
+par les [preuves produit](../receipts/additive_q2_20260913/README.md),
+avec oracles et mutants permanents. Le modèle Python axial et son reçu
+préliminaire ont donc quitté le dossier actif ; leurs versions restent
+dans Git. Aucun résultat de ce modèle n'est transféré à la qualification.
+Les fenêtres et queues A/B de §1 et §7 demeurent des alternatives distinctes,
+encore citées au plan de refonte ; leurs preuves sont conservées.
 
 ## 9. Census q2 : des extrema exacts pour partager les recherches
 
@@ -787,3 +723,97 @@ rejetés. Sur le motif alterné, la couverture globale visite 2m−1 nœuds,
 contre trois dans l'ordre du plan. Les émissions pendant la préparation
 sont absentes par construction de ce modèle, pas testées sur une API
 produit. Aucun gain de temps, de mémoire globale ou de tour n'est qualifié.
+
+
+### 9.5. Partager le plan parent, puis découper ses tâches
+
+14 septembre, après 85015a8c. La sixième tranche confirme deux coûts du
+remplacement de A×B par R rectangles A_i×B préparés séparément : B est
+retraité R fois, et les témoins de A hors de A_i quittent son pool local.
+Pour distribuer le travail **d'un parent déjà certifié et préparé**, une
+partition de ses tâches suffit. Le rectangle, le seuil, les crédits et
+les permutations restent ceux du parent ; les A_i ne deviennent pas de
+nouveaux propriétaires géométriques.
+
+Soit F_P le résidu du plan parent P, et J_1,…,J_R une partition de ses
+rangs d'ancres. Pour chaque job, émettre les seules paires de F_P dont le
+rang A appartient à J_i. Chaque paire a un rang A unique ; les émissions
+sont donc disjointes et leur union est exactement F_P. La sûreté des
+crédits ne change pas : leurs témoins peuvent se trouver dans d'autres
+jobs, puisque le census porte toujours sur tous les sites du nuage.
+Aucun recalcul de crédit, aucune copie B par job n'est nécessaire.
+
+Pour Pool, les préfixes de §9.2 donnent un adaptateur direct : compiler
+les N(c) depuis les blocs du parent, puis découper `a_order` en R plages.
+Un job porte une référence au contexte et une plage de rangs ; il consulte
+le même `b_order[0:N(c)]`. Le travail supplémentaire, plan déjà payé, est
+O(h+|A|+D_credit+R), avec h≤10 actuellement. L'état partagé supplémentaire
+est O(h), les descripteurs O(R) ; matérialiser une entrée par ancre paierait
+O(|A|) de plus. Si le census partagé prépare un arbre B, celui-ci doit
+être conservé une fois dans le contexte et suivre §9.4. Ces économies
+ne retirent ni le coût initial des facteurs ni l'expansion et le census
+des candidates. Une partition égale des ancres ne prouve pas l'équilibrage
+du travail ; les continuations de §9.3 traitent une autre partie du problème.
+Un plan axial général peut porter plusieurs descripteurs par ancre : son
+adaptateur doit payer O(D+R), pas hériter sans preuve de la borne Pool.
+
+**Contexte effectivement immuable.** Retenir seulement le rectangle ne
+suffit pas : `CreditPlan` est affectable et déplaçable. Un futur contexte
+possédé doit garder en stockage privé le plan et ses ordres jusqu'à la
+fin de tous les jobs. Une variante empruntée interdit toute affectation,
+tout déplacement et toute destruction sur cette période. Nuage, rectangle,
+seuil, permutation B et index Z de continuation restent identifiés ;
+aucun contrôle d'identité du moteur actuel n'est à retirer. L'API census
+publiée consomme encore le plan entier et ne propose pas ce découpage.
+
+**Fixture minimale.** Sur la droite, les sites d'IDs 0,1,2 sont aux
+abscisses 0,1,100 ; A={0,1}, B={2}, cœur vide, Kmax=1. Le Pool parent
+crédite l'ancre 0 grâce au site 1 et ne conserve que (1,2). Deux plans
+reconstruits sur les A_i singleton conservent (0,2) et (1,2) : un census
+supplémentaire est nécessaire pour rejeter (0,2), de profondeur un.
+Partager les tâches du parent conserve exactement sa seule candidate.
+Cela vaut pour s=8/10/12 de la factory, sans comparer trois WSPD.
+
+**Si un véritable enfant est nécessaire.** Avec une relation de restriction
+certifiée A'⊆A, B'⊆B et le même seuil, restreindre F_P à A'×B', puis
+l'intersecter avec le résidu de l'enfant reste sûr. C'est prendre le maximum
+des minorants **totaux, cœur compris**, pas leur somme. Sur la même fixture à Kmax=2, le parent crédite (0,2) d'un
+témoin ; l'enfant A'={0}, B'={2}, cœur proposé {1}, le crédite encore du
+même témoin. Les deux minorants valent un et la profondeur vaut un.
+Les additionner éliminerait à tort ce support admissible au census q2.
+Ce témoin parental reste valable hors du facteur enfant ; le renommer « local enfant » pour
+l'additionner au nouveau cœur est précisément l'erreur. L'intersection
+demande une API de restriction prouvée ; partager le seul nuage ne suffit
+pas, et les gardes de rectangle actuelles restent justes.
+
+Ce raccord n'autorise pas à employer une factory exigeant la séparation
+sur un produit ancêtre non séparé. Il ne prouve pas non plus qu'une WSPD
+entière puisse se regrouper en parents assez peu nombreux pour supprimer
+son coût cumulé de préparation. Le front fusionné et les petits facteurs
+restent prioritaires. Il ferme une question plus précise : créer des jobs
+sur un plan admissible n'impose ni de répliquer B ni de perdre ses témoins.
+
+Le [probe C++ indépendant](p0_parent_plan_probe.cpp) utilise les vrais
+plans Pool publiés à 85015a8c. L'adaptateur de jobs appartient au juge,
+et l'oracle scalaire énumère tous les sites avec le produit
+`(z−a)·(b−z)>0`, sans appeler le census produit. Le
+[reçu](P0_PARENT_PLAN_CHECKS.json) conserve compilations, sorties, hashes
+des huit sources transitives et leur stabilité avant/après ; les sources
+produit ont été vérifiées contre ce commit, puis compilées dans un
+snapshot privé supprimé après capture. GCC 13.3, Release avec `-DNDEBUG`
+et UBSan donnent le même résultat : 108 plans collinéaires, 288 répartitions,
+756 jobs, 2 598 émissions comparées au résidu natif, 2 352 paires
+contrôlées géométriquement, neuf rejets ciblés (trois variantes sur s8/10/12).
+Le chevauchement de jobs, la confusion ID/rang et le mauvais plan sont
+rejetés ; la fixture de double crédit est contrôlée séparément.
+
+Pour rejouer après vérification des pins du reçu, depuis la racine :
+
+```bash
+g++ -std=c++20 -O2 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -I morsehgp3D_v8/src morsehgp3D_v8/audits/p0_parent_plan_probe.cpp morsehgp3D_v8/src/pipeline/local_credits.cpp morsehgp3D_v8/src/pipeline/prepared_cloud.cpp -o morsehgp3D_v8/audits/.p0_parent_plan_probe
+morsehgp3D_v8/audits/.p0_parent_plan_probe
+```
+
+Pour UBSan, remplacer `-O2 -DNDEBUG` par
+`-O1 -g -fsanitize=undefined -fno-sanitize-recover=all`. Aucun chronométrage,
+ordonnanceur parallèle, gain de RSS ou contrat de tour n'est qualifié.

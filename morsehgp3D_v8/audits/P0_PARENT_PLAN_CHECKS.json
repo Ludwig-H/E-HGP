@@ -1,0 +1,209 @@
+{
+  "schema": "mhgp8_independent_parent_plan_v1",
+  "phase": "exploration_v8_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u16_input_only",
+  "mode": "audit_independant_math_and_architecture",
+  "public_status": "not_claimed",
+  "base_head": "85015a8c20144992139b4ae2c050c9c13d92dabe",
+  "started_utc": "2026-09-14T08:21:59.239536+00:00",
+  "source_sha256_before": {
+    "morsehgp3D_v8/audits/p0_parent_plan_probe.cpp": "a4e8010e2732c2e6f4d01123c3ba176124d0f8d9ff6d036839c9ecf5da69c651",
+    "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+    "morsehgp3D_v8/src/pipeline/local_credits.cpp": "0d069aca65dcffc96bb26d55874fdb34b2748eb5f0b956a991d584d928ab1392",
+    "morsehgp3D_v8/src/pipeline/local_credits.hpp": "a68fed7a40041ddc76b2a401d35cdafeaa66711ab3cd1d79ff41f3666b29a3d9",
+    "morsehgp3D_v8/src/pipeline/prepared_cloud.cpp": "accd0ec990e81e0352d37272ac5099d50fa97065edbb68864c1dcf8b5631afb7",
+    "morsehgp3D_v8/src/pipeline/prepared_cloud.hpp": "2808e4e4609cbc11800894cf43824c1a6a7df1f2ca6e27931561848b9cde8352",
+    "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+    "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+  },
+  "worktree_status_before": [
+    " M audits/COORDINATION_MORSEHGP3D_V7.md",
+    " M audits/COORDINATION_MORSEHGP3D_V8.md",
+    " M morsehgp3D_v6/src/gpu/lot_ring.hpp",
+    " M morsehgp3D_v6/src/parallel/sort.hpp",
+    " M morsehgp3D_v6/src/pipeline/census.hpp",
+    " M morsehgp3D_v6/src/pipeline/expand.hpp",
+    " M morsehgp3D_v7/PASSATION.md",
+    " M morsehgp3D_v7/README.md",
+    " M morsehgp3D_v7/docs/FAUSSES_PISTES.md",
+    " M morsehgp3D_v7/docs/OBJETS_PARALLELES_TOUR_20260911.md",
+    " M morsehgp3D_v8/CMakeLists.txt",
+    " M morsehgp3D_v8/audits/DIALOGUE_AUDITEUR_B.md",
+    " M morsehgp3D_v8/audits/DIALOGUE_COURANT.md",
+    " M morsehgp3D_v8/audits/P0_SOUS_RECTANGLES_ET_GROUPES.md",
+    " M morsehgp3D_v8/src/pipeline/q2_census.hpp",
+    "?? audits/morsehgp3D_v8_complementaire/P0_CONSTANTES_CENSUS_Q2.md",
+    "?? audits/morsehgp3D_v8_complementaire/P0_IDENTITES_NUAGE_ET_RECTANGLES.md",
+    "?? audits/morsehgp3D_v8_complementaire/Q2_PREPARED_BOUNDS_CHECKS.json",
+    "?? audits/morsehgp3D_v8_complementaire/Q2_PREPARED_CENSUS_CHECKS.json",
+    "?? audits/morsehgp3D_v8_complementaire/archive/",
+    "?? audits/morsehgp3D_v8_complementaire/cloud_rectangle_identity_checks.py",
+    "?? audits/morsehgp3D_v8_complementaire/cloud_rectangle_identity_probe.cpp",
+    "?? audits/morsehgp3D_v8_complementaire/q2_prepared_bounds_checks.py",
+    "?? audits/morsehgp3D_v8_complementaire/q2_prepared_bounds_probe.cpp",
+    "?? audits/morsehgp3D_v8_complementaire/q2_prepared_census_checks.py",
+    "?? audits/morsehgp3D_v8_complementaire/q2_revision_protocol_checks.py",
+    "?? morsehgp3D_v6/src/gpu/route_c6.hpp",
+    "?? morsehgp3D_v6/tests/perm_sort_gate.cpp",
+    "?? morsehgp3D_v6/tests/route_c6_gate.cpp",
+    "?? morsehgp3D_v7/docs/MARQUES_PREMIER_PARCOURS_20260911.md",
+    "?? morsehgp3D_v7/receipts/fused_history_streaming_20260911/",
+    "?? morsehgp3D_v8/audits/BUDGET_CONTRAT_50K_20260914.md",
+    "?? morsehgp3D_v8/audits/PORTES_ET_TESTS_20260914.md",
+    "?? morsehgp3D_v8/audits/VERROUS_MATHEMATIQUES_20260914.md",
+    "?? morsehgp3D_v8/audits/p0_parent_plan_probe.cpp",
+    "?? morsehgp3D_v8/src/wspd/front.cpp",
+    "?? morsehgp3D_v8/src/wspd/front.hpp",
+    "?? morsehgp3D_v8/tests/wspd_front_gate.cpp"
+  ],
+  "compiler": {
+    "command": [
+      "g++",
+      "--version"
+    ],
+    "returncode": 0,
+    "stdout": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+    "stderr": ""
+  },
+  "runs": [
+    {
+      "kind": "release",
+      "compile": {
+        "command": [
+          "g++",
+          "-std=c++20",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror",
+          "-O2",
+          "-DNDEBUG",
+          "-I",
+          "/workspaces/E-HGP/morsehgp3D_v8/audits/.parent_plan_probe_64_ru4o7/morsehgp3D_v8/src",
+          "/workspaces/E-HGP/morsehgp3D_v8/audits/.parent_plan_probe_64_ru4o7/morsehgp3D_v8/audits/p0_parent_plan_probe.cpp",
+          "/workspaces/E-HGP/morsehgp3D_v8/audits/.parent_plan_probe_64_ru4o7/morsehgp3D_v8/src/pipeline/local_credits.cpp",
+          "/workspaces/E-HGP/morsehgp3D_v8/audits/.parent_plan_probe_64_ru4o7/morsehgp3D_v8/src/pipeline/prepared_cloud.cpp",
+          "-o",
+          "/workspaces/E-HGP/morsehgp3D_v8/audits/.parent_plan_probe_64_ru4o7/release"
+        ],
+        "returncode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "binary_sha256": "778c03bbbdd977eb9f67e6e7050770e46a461917e5a3b30789e8d37b4e2d1bac",
+      "execution": {
+        "command": [
+          "/workspaces/E-HGP/morsehgp3D_v8/audits/.parent_plan_probe_64_ru4o7/release"
+        ],
+        "returncode": 0,
+        "stdout": "{\"status\":\"passed\",\"scope\":\"independent_parent_plan_job_adapter\",\"minimal_fixture_separations\":3,\"parent_residual\":1,\"rebuilt_child_residual\":2,\"overlap_max\":1,\"overlap_false_sum\":2,\"matrix_plans\":108,\"partition_runs\":288,\"jobs\":756,\"candidate_pairs\":2598,\"geometric_pairs\":2352,\"scalar_point_tests\":28251,\"rejected_mutants\":9,\"product_parallel_api_tested\":false,\"timing_claim\":false}\n",
+        "stderr": ""
+      },
+      "checks": {
+        "status": "passed",
+        "scope": "independent_parent_plan_job_adapter",
+        "minimal_fixture_separations": 3,
+        "parent_residual": 1,
+        "rebuilt_child_residual": 2,
+        "overlap_max": 1,
+        "overlap_false_sum": 2,
+        "matrix_plans": 108,
+        "partition_runs": 288,
+        "jobs": 756,
+        "candidate_pairs": 2598,
+        "geometric_pairs": 2352,
+        "scalar_point_tests": 28251,
+        "rejected_mutants": 9,
+        "product_parallel_api_tested": false,
+        "timing_claim": false
+      }
+    },
+    {
+      "kind": "ubsan",
+      "compile": {
+        "command": [
+          "g++",
+          "-std=c++20",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror",
+          "-O1",
+          "-g",
+          "-fsanitize=undefined",
+          "-fno-sanitize-recover=all",
+          "-I",
+          "/workspaces/E-HGP/morsehgp3D_v8/audits/.parent_plan_probe_64_ru4o7/morsehgp3D_v8/src",
+          "/workspaces/E-HGP/morsehgp3D_v8/audits/.parent_plan_probe_64_ru4o7/morsehgp3D_v8/audits/p0_parent_plan_probe.cpp",
+          "/workspaces/E-HGP/morsehgp3D_v8/audits/.parent_plan_probe_64_ru4o7/morsehgp3D_v8/src/pipeline/local_credits.cpp",
+          "/workspaces/E-HGP/morsehgp3D_v8/audits/.parent_plan_probe_64_ru4o7/morsehgp3D_v8/src/pipeline/prepared_cloud.cpp",
+          "-o",
+          "/workspaces/E-HGP/morsehgp3D_v8/audits/.parent_plan_probe_64_ru4o7/ubsan"
+        ],
+        "returncode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "binary_sha256": "d3adb271126b3f7132b2fb9470a5a26659de5eedf3448e90212330528c303b67",
+      "environment_overrides": {
+        "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+      },
+      "execution": {
+        "command": [
+          "/workspaces/E-HGP/morsehgp3D_v8/audits/.parent_plan_probe_64_ru4o7/ubsan"
+        ],
+        "returncode": 0,
+        "stdout": "{\"status\":\"passed\",\"scope\":\"independent_parent_plan_job_adapter\",\"minimal_fixture_separations\":3,\"parent_residual\":1,\"rebuilt_child_residual\":2,\"overlap_max\":1,\"overlap_false_sum\":2,\"matrix_plans\":108,\"partition_runs\":288,\"jobs\":756,\"candidate_pairs\":2598,\"geometric_pairs\":2352,\"scalar_point_tests\":28251,\"rejected_mutants\":9,\"product_parallel_api_tested\":false,\"timing_claim\":false}\n",
+        "stderr": ""
+      },
+      "checks": {
+        "status": "passed",
+        "scope": "independent_parent_plan_job_adapter",
+        "minimal_fixture_separations": 3,
+        "parent_residual": 1,
+        "rebuilt_child_residual": 2,
+        "overlap_max": 1,
+        "overlap_false_sum": 2,
+        "matrix_plans": 108,
+        "partition_runs": 288,
+        "jobs": 756,
+        "candidate_pairs": 2598,
+        "geometric_pairs": 2352,
+        "scalar_point_tests": 28251,
+        "rejected_mutants": 9,
+        "product_parallel_api_tested": false,
+        "timing_claim": false
+      }
+    }
+  ],
+  "limitations": [
+    "Audit adapter uses the real published Pool plan but does not modify or exercise a product job API.",
+    "Scalar exact q2 judge; production census, WSPD, threads, GPU, RSS and timing not qualified.",
+    "108 collinear plans plus minimal fixtures, not a general geometric performance campaign."
+  ],
+  "snapshot_directory": "morsehgp3D_v8/audits/.parent_plan_probe_64_ru4o7",
+  "snapshot_sha256_after": {
+    "morsehgp3D_v8/audits/p0_parent_plan_probe.cpp": "a4e8010e2732c2e6f4d01123c3ba176124d0f8d9ff6d036839c9ecf5da69c651",
+    "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+    "morsehgp3D_v8/src/pipeline/local_credits.cpp": "0d069aca65dcffc96bb26d55874fdb34b2748eb5f0b956a991d584d928ab1392",
+    "morsehgp3D_v8/src/pipeline/local_credits.hpp": "a68fed7a40041ddc76b2a401d35cdafeaa66711ab3cd1d79ff41f3666b29a3d9",
+    "morsehgp3D_v8/src/pipeline/prepared_cloud.cpp": "accd0ec990e81e0352d37272ac5099d50fa97065edbb68864c1dcf8b5631afb7",
+    "morsehgp3D_v8/src/pipeline/prepared_cloud.hpp": "2808e4e4609cbc11800894cf43824c1a6a7df1f2ca6e27931561848b9cde8352",
+    "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+    "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+  },
+  "source_sha256_after": {
+    "morsehgp3D_v8/audits/p0_parent_plan_probe.cpp": "a4e8010e2732c2e6f4d01123c3ba176124d0f8d9ff6d036839c9ecf5da69c651",
+    "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+    "morsehgp3D_v8/src/pipeline/local_credits.cpp": "0d069aca65dcffc96bb26d55874fdb34b2748eb5f0b956a991d584d928ab1392",
+    "morsehgp3D_v8/src/pipeline/local_credits.hpp": "a68fed7a40041ddc76b2a401d35cdafeaa66711ab3cd1d79ff41f3666b29a3d9",
+    "morsehgp3D_v8/src/pipeline/prepared_cloud.cpp": "accd0ec990e81e0352d37272ac5099d50fa97065edbb68864c1dcf8b5631afb7",
+    "morsehgp3D_v8/src/pipeline/prepared_cloud.hpp": "2808e4e4609cbc11800894cf43824c1a6a7df1f2ca6e27931561848b9cde8352",
+    "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+    "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+  },
+  "finished_utc": "2026-09-14T08:22:11.223443+00:00",
+  "snapshot_removed": true,
+  "status": "passed"
+}
