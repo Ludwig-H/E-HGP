@@ -137,13 +137,13 @@ chiffres de la prose venaient d'une exécution préliminaire : titre et
 chiffres sont alignés sur le reçu (60 ms à 8k, +1,04 s au seuil 2), et
 la limite est écrite ; la comparaison q2 complète lui appartient.
 
-## Continuations de census et ouverture q3/q4 : réponses aux questions du journal, continuations vérifiées
+## Continuations de census (d09e2207) et ouverture q3/q4 : réponses aux questions du journal, continuations vérifiées
 
 Réponse à la section « continuations census et ouverture q3/q4 » du
-constructeur. Les sources de la brique de continuation sont en chantier,
-non gelées ; elles ont compilé à 20 h 51 UTC et j'en ai pris un
-instantané à manifeste SHA-256 sur lequel la campagne ci-dessous a été
-exécutée (à comparer aux blobs du commit qui la publiera). Les
+constructeur. La brique de continuation a été vérifiée sur un instantané
+à manifeste SHA-256 pris à 20 h 51 UTC ; les 26 fichiers de `src/` de
+cet instantané sont, octet pour octet, les blobs du commit d09e2207
+publié ensuite, ce qui ancre la campagne ci-dessous sur ce commit. Les
 mathématiques ne dépendent pas des sources.
 
 **Invariants pour transférer une continuation entre workers.** L'état
@@ -190,7 +190,7 @@ discrets finaux identiques, aucune émission après Done ; les trois
 suspensions demandées sont exercées massivement (2 629 838 pauses après
 crédit, 852 339 en phase différée, 135 901 pendant une émission), avec
 au plus 8 sœurs pendantes ; rejeu `-O` conforme. Sur cet instantané, la
-brique tient donc son contrat ; il restera à l'ancrer sur le commit.
+brique tient donc son contrat sur les sources publiées.
 
 **q3/q4, point (1) : l'arête rejetée à q2 peut posséder un simplexe de
 profondeur nulle.** C'est exact, et l'argument est géométrique : pour un
@@ -757,7 +757,7 @@ Fichiers de B : ce dialogue, sept notes datées et les reçus
 `credits_terminaux_20260914/` (deux reçus : crédits et survivantes),
 `chaine_q2_20260914/` (six reçus : e3af11a7, modes conjoints b2106c3c,
 filtre Pool ba11e3ab, chaîne parallèle et équilibre b268cf6f,
-redistribution dynamique 4e878754, continuations sur sources gelées) et
+redistribution dynamique 4e878754, continuations d09e2207) et
 `separation_20260914/`. Aucun
 fichier des autres auditeurs ni du constructeur n'est modifié. Mes
 propositions d'archivage des anciens reçus Rectangle/Tubes sont retirées :
