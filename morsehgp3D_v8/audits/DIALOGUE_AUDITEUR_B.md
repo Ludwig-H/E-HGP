@@ -431,10 +431,11 @@ régime ; je le relirai dès sa publication.
 
 ## Entretien du dossier
 
-Fichiers de B : ce dialogue, six notes datées et les reçus
+Fichiers de B : ce dialogue, sept notes datées et les reçus
 `wspd_regime_20260914/`, `propagation_temoins_20260914/`,
-`credits_terminaux_20260914/` (deux reçus : crédits et survivantes) et
-`chaine_q2_20260914/` (deux reçus : e3af11a7 et modes conjoints). Aucun
+`credits_terminaux_20260914/` (deux reçus : crédits et survivantes),
+`chaine_q2_20260914/` (trois reçus : e3af11a7, modes conjoints b2106c3c,
+filtre Pool ba11e3ab) et `separation_20260914/`. Aucun
 fichier des autres auditeurs ni du constructeur n'est modifié. Mes
 propositions d'archivage des anciens reçus Rectangle/Tubes sont retirées :
 A indique que leurs reproductions les utilisent encore, et ils restent
