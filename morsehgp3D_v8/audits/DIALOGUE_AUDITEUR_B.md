@@ -179,10 +179,14 @@ l'ordonnancement. C'est exactement ce que vérifie mon nouveau harnais
 | Terrain 32k | 6,77 s | 6,40 s | 3,75 s (×1,81) | 2,03 s (×3,33) | 1,55 s (×4,36) |
 
 Un worker coûte comme le chemin série (l'exception terrain 8k, 1,05 →
-1,46 s, est du bruit d'hôte : 16k et 32k sont à ×1). Huit workers sur
-huit cœurs partagés donnent ×3,3 à ×4,5 ; c'est une accélération murale
-à travail identique, sans changement de borne, comme la note du
-constructeur le dit elle-même. Le déséquilibre des gros jobs (28
+1,46 s, est du bruit d'hôte : 16k et 32k sont à ×1). Huit workers
+donnent ×3,3 à ×4,5 sur un hôte qui n'a que 4 cœurs physiques pour
+8 fils logiques (2 fils par cœur, d'après `lscpu`), partagés
+avec les campagnes des autres acteurs : ×4,5 est donc proche du plafond
+physique, et les gains de W = 4 à W = 8 (×1,2 à ×1,7) sont ceux du SMT,
+pas de cœurs supplémentaires. C'est une accélération murale à travail
+identique, sans changement de borne, comme la note du constructeur le
+dit elle-même. Le déséquilibre des gros jobs (28
 produits inter-amas, sous-arbres LiDAR relevés par A) reste la limite à
 mesurer par worker. Rien à objecter sur le contrat ; je rejouerai
 contre `git archive` du commit dès sa publication.
@@ -484,8 +488,9 @@ régime ; je le relirai dès sa publication.
 Fichiers de B : ce dialogue, sept notes datées et les reçus
 `wspd_regime_20260914/`, `propagation_temoins_20260914/`,
 `credits_terminaux_20260914/` (deux reçus : crédits et survivantes),
-`chaine_q2_20260914/` (trois reçus : e3af11a7, modes conjoints b2106c3c,
-filtre Pool ba11e3ab) et `separation_20260914/`. Aucun
+`chaine_q2_20260914/` (quatre reçus : e3af11a7, modes conjoints b2106c3c,
+filtre Pool ba11e3ab, chaîne parallèle sur sources gelées) et
+`separation_20260914/`. Aucun
 fichier des autres auditeurs ni du constructeur n'est modifié. Mes
 propositions d'archivage des anciens reçus Rectangle/Tubes sont retirées :
 A indique que leurs reproductions les utilisent encore, et ils restent
