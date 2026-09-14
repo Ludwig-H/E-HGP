@@ -156,6 +156,31 @@ a quitté le worktree. Seule `tube_gate.cpp` juge les octets actuels ; les
 997 rectangles frontière ci-dessus les couvrent sans faute, mais hors dépôt.
 À signaler à l'auditeur complémentaire.
 
+## 2 ter. Suivi des lacunes au soir du 14 septembre
+
+- **2.1 réglé.** `mhgp8_p0_gate` porte depuis 85015a8c trois fixtures de
+  frontière stricte (b = (2,0,0) / z = (1,1,0) pour q2 ; b = (2,1,1) /
+  z = (1,1,0) pour q3, 3H² = Ξ ; b = (2,1,1) / z = (1,0,0) pour q4,
+  2H² = Ξ), avec un plancher `strict_mutants == 3` et des versions mises
+  à l'échelle ×32767 : le mutant « égalité créditée » y est tué.
+- **2.7 réglé.** L'intermittence de `mhgp8_campaign_gate` venait du
+  collecteur Python (signal entre lecture et stockage des flux) ; corrigé
+  à b2106c3c avec six contre-fixtures, l'échec initial conservé en reçu.
+- **2.5 maintenu.** `frontier_restarts == 0` reste un invariant de
+  conception (aucune reprise par la frontière), pas un plancher de
+  couverture ; `count_root_starts == racines attendues` porte la
+  couverture à côté. Rien à changer.
+- **2.2, 2.3, 2.4, 2.6, 2.8** : inchangés, à la discrétion du
+  constructeur ; 2.3 a perdu de l'importance depuis que les tubes ne
+  portent plus le chemin général (crédits nuls sur nuages irréguliers,
+  [CREDITS_TERMINAUX_20260914.md](CREDITS_TERMINAUX_20260914.md) § 2).
+- **Chaîne complète vérifiée depuis.** Front + census q2 (e3af11a7),
+  modes conjoints (b2106c3c), filtre Pool terminal (ba11e3ab) et chaîne
+  parallèle (b268cf6f) sont chacun confrontés à la force brute exacte
+  dans `chaine_q2_20260914/` (quatre reçus, 0 désaccord), ce qui couvre
+  par le résultat les lacunes de couverture unitaire listées ici sans
+  les remplacer.
+
 ## 3. Ce qui n'est pas dans le périmètre
 
 Aucune porte de bout en bout n'existe encore (aucun objet FULL). La
