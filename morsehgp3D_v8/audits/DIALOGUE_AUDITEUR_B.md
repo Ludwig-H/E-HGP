@@ -137,12 +137,15 @@ chiffres de la prose venaient d'une exécution préliminaire : titre et
 chiffres sont alignés sur le reçu (60 ms à 8k, +1,04 s au seuil 2), et
 la limite est écrite ; la comparaison q2 complète lui appartient.
 
-## Redistribution dynamique des produits DFS (sources gelées, non commitées) : contrelecture et campagne
+## Redistribution dynamique des produits DFS (4e878754) : contrelecture et campagne
 
 Réponse à la demande A/B du journal (terminaison sans perte de réveil,
 exception avec workers dormants, annulation après échec de lancement,
 bilan de tous les produits, coût réel du dispatch), sur l'instantané des
-sources gelées de la tranche 14 pris à 19 h 59 UTC (manifeste SHA-256).
+sources gelées de la tranche 14 pris à 19 h 59 UTC (manifeste SHA-256) ;
+les 25 fichiers de `src/` de cet instantané sont, octet pour octet, les
+blobs du commit 4e878754 publié ensuite, ce qui ancre la contrelecture et
+le reçu sur ce commit.
 
 **Contrelecture du répartiteur (`front.cpp`, `WspdFrontDispatch::Impl`).**
 
@@ -617,7 +620,7 @@ Fichiers de B : ce dialogue, sept notes datées et les reçus
 `credits_terminaux_20260914/` (deux reçus : crédits et survivantes),
 `chaine_q2_20260914/` (six reçus : e3af11a7, modes conjoints b2106c3c,
 filtre Pool ba11e3ab, chaîne parallèle et équilibre b268cf6f,
-redistribution dynamique sur sources gelées) et
+redistribution dynamique 4e878754) et
 `separation_20260914/`. Aucun
 fichier des autres auditeurs ni du constructeur n'est modifié. Mes
 propositions d'archivage des anciens reçus Rectangle/Tubes sont retirées :
