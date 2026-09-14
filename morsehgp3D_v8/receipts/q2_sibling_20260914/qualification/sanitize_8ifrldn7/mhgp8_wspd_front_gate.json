@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_sibling_sanitize_r2_20260914/mhgp8_wspd_front_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "label": "mhgp8_wspd_front_gate",
+  "expected_exit_code": 0,
+  "started_utc": "2026-09-14T10:13:54.794289+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "mhgp8_wspd_front_gate passed checks=498148 clouds=30 spatial_nodes=1476 nonidentity_orders=52 oracle_point_tests=235134 front_runs=727 rectangles=65585 nonsingleton_rectangles=1214 partial_lane_rectangles=3917 absent_lane_pairs=20515 residual_lane_pairs=172634 q2_support_checks=47904 permutations=15 invalid_inputs=9 model_mutants=7 callback_exceptions=1 witness_searches=58330 witness_descent_steps=280556 proposed_sites=295418\n",
+  "stderr": "",
+  "stdout_base64": "bWhncDhfd3NwZF9mcm9udF9nYXRlIHBhc3NlZCBjaGVja3M9NDk4MTQ4IGNsb3Vkcz0zMCBzcGF0aWFsX25vZGVzPTE0NzYgbm9uaWRlbnRpdHlfb3JkZXJzPTUyIG9yYWNsZV9wb2ludF90ZXN0cz0yMzUxMzQgZnJvbnRfcnVucz03MjcgcmVjdGFuZ2xlcz02NTU4NSBub25zaW5nbGV0b25fcmVjdGFuZ2xlcz0xMjE0IHBhcnRpYWxfbGFuZV9yZWN0YW5nbGVzPTM5MTcgYWJzZW50X2xhbmVfcGFpcnM9MjA1MTUgcmVzaWR1YWxfbGFuZV9wYWlycz0xNzI2MzQgcTJfc3VwcG9ydF9jaGVja3M9NDc5MDQgcGVybXV0YXRpb25zPTE1IGludmFsaWRfaW5wdXRzPTkgbW9kZWxfbXV0YW50cz03IGNhbGxiYWNrX2V4Y2VwdGlvbnM9MSB3aXRuZXNzX3NlYXJjaGVzPTU4MzMwIHdpdG5lc3NfZGVzY2VudF9zdGVwcz0yODA1NTYgcHJvcG9zZWRfc2l0ZXM9Mjk1NDE4Cg==",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-14T10:13:58.100741+00:00",
+  "logs": {
+    "stdout": {
+      "path": "morsehgp3D_v8/receipts/q2_sibling_20260914/qualification/sanitize_8ifrldn7/mhgp8_wspd_front_gate.stdout.bin",
+      "sha256": "2bc9a79c0177fd57a9121756821bbf4aa7ff5769b6119dee1f93ee316d855531",
+      "bytes": 430
+    },
+    "stderr": {
+      "path": "morsehgp3D_v8/receipts/q2_sibling_20260914/qualification/sanitize_8ifrldn7/mhgp8_wspd_front_gate.stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  }
+}

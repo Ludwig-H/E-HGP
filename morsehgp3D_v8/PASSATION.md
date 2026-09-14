@@ -1,10 +1,42 @@
-# Passation v8 — raccord q2 global, partage entre ancres à traiter
+# Passation v8 — certificat frère q2, coût global à réduire
 
 14 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`. Aucun contrat de tour n'est encore acquis.
 
 ## À reprendre maintenant
+
+L'option [certificat autonome du frère](docs/P0_CERTIFICAT_FRERE_Q2.md)
+est implémentée dans le seul raccord WSPD q2. Elle n'additionne aucun
+crédit et n'avance jamais Z ; le défaut reste Disabled. Les builds
+`build/v8_sibling_r2_20260914` et `build/v8_sibling_sanitize_r2_20260914`
+sont maintenant épinglés : **44 CTests Release/Clang ASan/UBSan passent**,
+lecteurs normal/−O et [32 mesures](receipts/q2_sibling_20260914/README.md) clos.
+Les premiers essais de qualification sont conservés en échec : course
+de collecte du runner à l'interruption et LeakSanitizer bloqué dans le
+sandbox. Le runner corrigé passe six contre-tests déterministes de
+lancement/interruption/session en plus des 41 contrôles historiques.
+
+Le gain est réel sur les rangées : 0,241/0,481/0,969 s à n8k/16k/32k,
+s8/K10, et croissance des visites+tests frère ×2,20 puis ×2,13. Le
+temps de référence apparié 8k est 1,494 s. Les amas restent presque
+quadratiques : évaluations ×4,29 puis ×4,22, 214,90 s à 32k. Pas de
+gain universel ni de borne globale ; ne pas activer ce mode par défaut.
+Les comparaisons s10/12 nouvelles sont limitées à 8k, la croissance à s8.
+
+**Prochaine expérience prioritaire : ordre complément/B original et
+exclusion de l'ancre du comptage seulement**, selon la dernière section
+du contrat. État compact phase/curseur/compte, contexte original commun
+aux enfants ; raffinement structurel des ancêtres du groupe différé et
+de l'ancre avant toute consommation. Tester la fixture 3D B cube4³,
+a=(1000,1000,1000), douze W proches de a, puis les quatre régimes et
+les données LiDAR. Ne pas remettre une liste de frontières avant cette
+variante minimale. Le partage A×B×Z, les reprises distribuables et les
+workers CPU/GPU restent distincts ; les contrats FULL/G4 ne sont pas acquis.
+L'auditeur A a publié la preuve K−c et les limites LiDAR à 5c32ab95 ;
+pas de port de cette micro-variante sans gain net justifié. GCP non utilisé.
+
+## Huitième tranche publiée à f7edd646 — historique
 
 Le [raccord q2 global](docs/P0_FRONT_ET_CENSUS_Q2.md) traite directement
 les nœuds WSPD du même index, sans factory, copie B ou arbre local.
@@ -14,10 +46,10 @@ compte et du curseur DFS à chaque subdivision. Le front demande q2 seul,
 pas les trois voies de la capture historique. Les temps englobent front,
 census, collecte/callback et destructions : ne pas les appeler census isolé.
 
-Le [reçu courant](receipts/wspd_q2_census_20260914/README.md) conserve les
+Le [reçu de cette tranche](receipts/wspd_q2_census_20260914/README.md) conserve les
 tests et mesures de cette tranche. Le gate indépendant confronte 1 255
 appels et 46 762 supports complets, avec 60 subdivisions après crédit.
-43 CTests Release et Clang ASan/UBSan passent sur les sources courantes.
+43 CTests Release et Clang ASan/UBSan passent sur ces sources historiques.
 Les builds `v8_front_census_20260914` et
 `v8_front_census_sanitize_20260914` sont désormais épinglés. Les 53
 mesures et lecteurs normal/−O sont clos ; repartir dans un build neuf.

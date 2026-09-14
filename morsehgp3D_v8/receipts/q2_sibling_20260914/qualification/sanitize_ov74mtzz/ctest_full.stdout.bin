@@ -1,0 +1,448 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v8_sibling_sanitize_20260914
+Test project /workspaces/E-HGP/build/v8_sibling_sanitize_20260914
+      Start  1: mhgp8_q2_sibling_gate
+ 1/44 Test  #1: mhgp8_q2_sibling_gate .........................***Failed    2.48 sec
+==103==LeakSanitizer has encountered a fatal error.
+==103==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==103==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+      Start  2: mhgp8_wspd_q2_census_gate
+ 2/44 Test  #2: mhgp8_wspd_q2_census_gate .....................***Failed    1.98 sec
+==105==LeakSanitizer has encountered a fatal error.
+==105==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==105==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+      Start  3: mhgp8_wspd_front_gate
+ 3/44 Test  #3: mhgp8_wspd_front_gate .........................***Failed    3.36 sec
+==107==LeakSanitizer has encountered a fatal error.
+==107==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==107==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+      Start  4: mhgp8_cloud_owner_gate
+ 4/44 Test  #4: mhgp8_cloud_owner_gate ........................***Failed    0.03 sec
+==109==LeakSanitizer has encountered a fatal error.
+==109==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==109==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+      Start  5: mhgp8_p0_gate
+ 5/44 Test  #5: mhgp8_p0_gate .................................***Failed   18.81 sec
+==111==LeakSanitizer has encountered a fatal error.
+==111==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==111==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+      Start  6: mhgp8_tube_gate
+ 6/44 Test  #6: mhgp8_tube_gate ...............................***Failed    9.29 sec
+==113==LeakSanitizer has encountered a fatal error.
+==113==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==113==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+      Start  7: mhgp8_batch_gate
+ 7/44 Test  #7: mhgp8_batch_gate ..............................***Failed    0.25 sec
+==115==LeakSanitizer has encountered a fatal error.
+==115==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==115==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+      Start  8: mhgp8_axis_q2_gate
+ 8/44 Test  #8: mhgp8_axis_q2_gate ............................***Failed   15.30 sec
+==117==LeakSanitizer has encountered a fatal error.
+==117==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==117==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+      Start  9: mhgp8_axis_additive_gate
+ 9/44 Test  #9: mhgp8_axis_additive_gate ......................***Failed   23.17 sec
+==119==LeakSanitizer has encountered a fatal error.
+==119==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==119==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+      Start 10: mhgp8_plan_assignment_gate
+10/44 Test #10: mhgp8_plan_assignment_gate ....................***Failed    0.02 sec
+==121==LeakSanitizer has encountered a fatal error.
+==121==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==121==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+      Start 11: mhgp8_q2_census_gate
+11/44 Test #11: mhgp8_q2_census_gate ..........................***Failed    1.43 sec
+==123==LeakSanitizer has encountered a fatal error.
+==123==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==123==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+      Start 12: mhgp8_q2_prepared_bounds_gate
+12/44 Test #12: mhgp8_q2_prepared_bounds_gate .................***Failed    1.52 sec
+==125==LeakSanitizer has encountered a fatal error.
+==125==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==125==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+      Start 13: mhgp8_wspd_q2_receipts_gate
+13/44 Test #13: mhgp8_wspd_q2_receipts_gate ...................***Failed    0.80 sec
+WSPD q2 receipt gate failed: genuine capture failed: b'' b'{"starting": ["16", "uniform", "1", "8", "3", "pure", "pairwise"], "repeat": 0}\n{"status": "failed", "runs": 0, "attempts": 1, "error": "probe exited 1"}\n'
+
+      Start 14: mhgp8_wspd_q2_receipts_gate_optimized
+14/44 Test #14: mhgp8_wspd_q2_receipts_gate_optimized .........***Failed    0.87 sec
+WSPD q2 receipt gate failed: genuine capture failed: b'' b'{"starting": ["16", "uniform", "1", "8", "3", "pure", "pairwise"], "repeat": 0}\n{"status": "failed", "runs": 0, "attempts": 1, "error": "probe exited 1"}\n'
+
+      Start 15: mhgp8_wspd_front_receipts_gate
+15/44 Test #15: mhgp8_wspd_front_receipts_gate ................***Failed    0.76 sec
+WSPD front receipt gate failed: genuine capture failed: b'' b'{"starting": ["16", "uniform", "1", "8", "3", "pure"], "repeat": 0}\n{"status": "failed", "runs": 0, "attempts": 1, "error": "probe exited 1"}\n'
+
+      Start 16: mhgp8_wspd_front_receipts_gate_optimized
+16/44 Test #16: mhgp8_wspd_front_receipts_gate_optimized ......***Failed    0.85 sec
+WSPD front receipt gate failed: genuine capture failed: b'' b'{"starting": ["16", "uniform", "1", "8", "3", "pure"], "repeat": 0}\n{"status": "failed", "runs": 0, "attempts": 1, "error": "probe exited 1"}\n'
+
+      Start 17: mhgp8_cloud_reuse_receipts_gate
+17/44 Test #17: mhgp8_cloud_reuse_receipts_gate ...............***Failed    0.80 sec
+cloud reuse receipt gate failed: genuine capture failed: b'' b'{"starting": ["16", "grid", "5", "8", "2", "fresh-first"], "repeat": 0}\n{"status": "failed", "runs": 0, "attempts": 1, "error": "probe exited 1"}\n'
+
+      Start 18: mhgp8_cloud_reuse_receipts_gate_optimized
+18/44 Test #18: mhgp8_cloud_reuse_receipts_gate_optimized .....***Failed    0.83 sec
+cloud reuse receipt gate failed: genuine capture failed: b'' b'{"starting": ["16", "grid", "5", "8", "2", "fresh-first"], "repeat": 0}\n{"status": "failed", "runs": 0, "attempts": 1, "error": "probe exited 1"}\n'
+
+      Start 19: mhgp8_q2_revision_comparison_gate
+19/44 Test #19: mhgp8_q2_revision_comparison_gate .............***Failed    0.18 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_revision_comparison_gate.py", line 320, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_revision_comparison_gate.py", line 124, in main
+    current_rows = probe_rows(probe, stats)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_revision_comparison_gate.py", line 103, in probe_rows
+    require(process.returncode == 0 and not process.stderr, f"small probe failed: {process.stderr!r}")
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_revision_comparison_gate.py", line 32, in require
+    raise RuntimeError(message)
+RuntimeError: small probe failed: b'==315==LeakSanitizer has encountered a fatal error.\n==315==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1\n==315==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)\n'
+
+      Start 20: mhgp8_q2_revision_comparison_gate_optimized
+20/44 Test #20: mhgp8_q2_revision_comparison_gate_optimized ...***Failed    0.19 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_revision_comparison_gate.py", line 320, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_revision_comparison_gate.py", line 124, in main
+    current_rows = probe_rows(probe, stats)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_revision_comparison_gate.py", line 103, in probe_rows
+    require(process.returncode == 0 and not process.stderr, f"small probe failed: {process.stderr!r}")
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_revision_comparison_gate.py", line 32, in require
+    raise RuntimeError(message)
+RuntimeError: small probe failed: b'==337==LeakSanitizer has encountered a fatal error.\n==337==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1\n==337==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)\n'
+
+      Start 21: mhgp8_q2_census_probe_gate
+21/44 Test #21: mhgp8_q2_census_probe_gate ....................***Failed    0.10 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_census_probe_gate.py", line 139, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_census_probe_gate.py", line 102, in main
+    require(process.returncode == 2 and not process.stdout and bool(process.stderr),
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_census_probe_gate.py", line 22, in require
+    raise RuntimeError(message)
+RuntimeError: bad CLI rejection/partial output: []
+
+      Start 22: mhgp8_q2_census_probe_gate_optimized
+22/44 Test #22: mhgp8_q2_census_probe_gate_optimized ..........***Failed    0.11 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_census_probe_gate.py", line 139, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_census_probe_gate.py", line 102, in main
+    require(process.returncode == 2 and not process.stdout and bool(process.stderr),
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_census_probe_gate.py", line 22, in require
+    raise RuntimeError(message)
+RuntimeError: bad CLI rejection/partial output: []
+
+      Start 23: mhgp8_q2_census_campaign_gate
+23/44 Test #23: mhgp8_q2_census_campaign_gate .................***Failed    0.82 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_census_campaign_gate.py", line 322, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_census_campaign_gate.py", line 92, in main
+    require(process.returncode == 0 and not process.stderr and completion["status"] == "completed" and
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_census_campaign_gate.py", line 28, in require
+    raise RuntimeError(message)
+RuntimeError: genuine capture failed: b''
+
+      Start 24: mhgp8_q2_census_campaign_gate_optimized
+24/44 Test #24: mhgp8_q2_census_campaign_gate_optimized .......***Failed    0.82 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_census_campaign_gate.py", line 322, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_census_campaign_gate.py", line 92, in main
+    require(process.returncode == 0 and not process.stderr and completion["status"] == "completed" and
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_census_campaign_gate.py", line 28, in require
+    raise RuntimeError(message)
+RuntimeError: genuine capture failed: b''
+
+      Start 25: mhgp8_docs_scope
+25/44 Test #25: mhgp8_docs_scope ..............................   Passed    0.39 sec
+      Start 26: mhgp8_docs_scope_optimized
+26/44 Test #26: mhgp8_docs_scope_optimized ....................   Passed    0.41 sec
+      Start 27: mhgp8_probe_cli
+27/44 Test #27: mhgp8_probe_cli ...............................***Failed    0.06 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/probe_cli_gate.py", line 75, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/probe_cli_gate.py", line 35, in main
+    require(result.returncode == 2, f"bad-argument exit code: {arguments}: {result}")
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/probe_cli_gate.py", line 14, in require
+    raise RuntimeError(message)
+RuntimeError: bad-argument exit code: []: CompletedProcess(args=['/workspaces/E-HGP/build/v8_sibling_sanitize_20260914/mhgp8_p0_probe'], returncode=1, stdout='', stderr='mhgp8_p0_probe: usage: mhgp8_p0_probe n pool|dual|tubes 2|3|4 grid|sheet|skew|tube|rails kmax s\n==404==LeakSanitizer has encountered a fatal error.\n==404==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1\n==404==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)\n')
+
+      Start 28: mhgp8_probe_cli_optimized
+28/44 Test #28: mhgp8_probe_cli_optimized .....................***Failed    0.06 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/probe_cli_gate.py", line 75, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/probe_cli_gate.py", line 35, in main
+    require(result.returncode == 2, f"bad-argument exit code: {arguments}: {result}")
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/probe_cli_gate.py", line 14, in require
+    raise RuntimeError(message)
+RuntimeError: bad-argument exit code: []: CompletedProcess(args=['/workspaces/E-HGP/build/v8_sibling_sanitize_20260914/mhgp8_p0_probe'], returncode=1, stdout='', stderr='mhgp8_p0_probe: usage: mhgp8_p0_probe n pool|dual|tubes 2|3|4 grid|sheet|skew|tube|rails kmax s\n==407==LeakSanitizer has encountered a fatal error.\n==407==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1\n==407==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)\n')
+
+      Start 29: mhgp8_campaign_gate
+29/44 Test #29: mhgp8_campaign_gate ...........................***Failed    0.09 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/campaign_gate.py", line 229, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/campaign_gate.py", line 67, in main
+    captured = subprocess.run([str(actual), "8", "pool", "2", "grid", "10", "8"],
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/tmp/mhgp8_campaign_gate_hew6t2xy/actual_probe', '8', 'pool', '2', 'grid', '10', '8']' returned non-zero exit status 1.
+
+      Start 30: mhgp8_campaign_gate_optimized
+30/44 Test #30: mhgp8_campaign_gate_optimized .................***Failed    0.08 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/campaign_gate.py", line 229, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/campaign_gate.py", line 67, in main
+    captured = subprocess.run([str(actual), "8", "pool", "2", "grid", "10", "8"],
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/tmp/mhgp8_campaign_gate_m9nk4oj5/actual_probe', '8', 'pool', '2', 'grid', '10', '8']' returned non-zero exit status 1.
+
+      Start 31: mhgp8_batch_probe_cli
+31/44 Test #31: mhgp8_batch_probe_cli .........................***Failed    0.06 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/batch_probe_cli_gate.py", line 243, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/batch_probe_cli_gate.py", line 174, in main
+    require(result.returncode == 2 and not result.stdout and bool(result.stderr),
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/batch_probe_cli_gate.py", line 24, in require
+    raise RuntimeError(message)
+RuntimeError: bad refusal code or success output: []
+
+      Start 32: mhgp8_batch_probe_cli_optimized
+32/44 Test #32: mhgp8_batch_probe_cli_optimized ...............***Failed    0.07 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/batch_probe_cli_gate.py", line 243, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/batch_probe_cli_gate.py", line 174, in main
+    require(result.returncode == 2 and not result.stdout and bool(result.stderr),
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/batch_probe_cli_gate.py", line 24, in require
+    raise RuntimeError(message)
+RuntimeError: bad refusal code or success output: []
+
+      Start 33: mhgp8_axis_probe_cli
+33/44 Test #33: mhgp8_axis_probe_cli ..........................***Failed    0.07 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/axis_probe_cli_gate.py", line 199, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/axis_probe_cli_gate.py", line 123, in main
+    require(result.returncode == 2 and not result.stdout and bool(result.stderr),
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/axis_probe_cli_gate.py", line 23, in require
+    raise RuntimeError(message)
+RuntimeError: bad axis refusal or partial success: []
+
+      Start 34: mhgp8_axis_probe_cli_optimized
+34/44 Test #34: mhgp8_axis_probe_cli_optimized ................***Failed    0.09 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/axis_probe_cli_gate.py", line 199, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/axis_probe_cli_gate.py", line 123, in main
+    require(result.returncode == 2 and not result.stdout and bool(result.stderr),
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/axis_probe_cli_gate.py", line 23, in require
+    raise RuntimeError(message)
+RuntimeError: bad axis refusal or partial success: []
+
+      Start 35: mhgp8_additive_probe_cli
+35/44 Test #35: mhgp8_additive_probe_cli ......................***Failed    0.07 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/additive_probe_cli_gate.py", line 222, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/additive_probe_cli_gate.py", line 89, in main
+    require(result.returncode == 2 and not result.stdout and bool(result.stderr),
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/additive_probe_cli_gate.py", line 26, in require
+    raise RuntimeError(message)
+RuntimeError: bad additive refusal or partial success: []
+
+      Start 36: mhgp8_additive_probe_cli_optimized
+36/44 Test #36: mhgp8_additive_probe_cli_optimized ............***Failed    0.08 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/additive_probe_cli_gate.py", line 222, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/additive_probe_cli_gate.py", line 89, in main
+    require(result.returncode == 2 and not result.stdout and bool(result.stderr),
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/additive_probe_cli_gate.py", line 26, in require
+    raise RuntimeError(message)
+RuntimeError: bad additive refusal or partial success: []
+
+      Start 37: mhgp8_additive_campaign_gate
+37/44 Test #37: mhgp8_additive_campaign_gate ..................***Failed    0.74 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/additive_campaign_gate.py", line 279, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/additive_campaign_gate.py", line 90, in main
+    require(result.returncode == 0 and not result.stderr and
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/additive_campaign_gate.py", line 32, in require
+    raise RuntimeError(message)
+RuntimeError: genuine additive matrix failed: {'status': 'failed', 'runs': 0, 'attempts': 1, 'finished_utc': '2026-09-14T09:54:01.699862+00:00', 'source_hashes_unchanged': True, 'probe_hash_unchanged': True, 'source_sha256_closing': {'morsehgp3D_v8/CMakeLists.txt': '37c1301b95ff716298c5a2d69dc4ee01fd0b394cbc95bd2e300fa80ae9e955eb', 'morsehgp3D_v8/src/core/types.hpp': 'f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b', 'morsehgp3D_v8/src/pipeline/axis_q2.hpp': '5d0022c7776b1c382f65e5bff9fe9e125c81c701c08a0d8db8e4e40672c4cac4', 'morsehgp3D_v8/src/pipeline/local_credits.hpp': 'a68fed7a40041ddc76b2a401d35cdafeaa66711ab3cd1d79ff41f3666b29a3d9', 'morsehgp3D_v8/src/pipeline/prepared_cloud.hpp': '2808e4e4609cbc11800894cf43824c1a6a7df1f2ca6e27931561848b9cde8352', 'morsehgp3D_v8/src/pipeline/q2_census.hpp': '4b8bd8c0680fb10d41e6fc5ea38ff8e9215b006714f5013f2d4a02596b64fe03', 'morsehgp3D_v8/src/pipeline/tube_credits.hpp': '8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c', 'morsehgp3D_v8/src/pipeline/wspd_q2_census.hpp': '9471f42cd9f4b358038635a0e3794900711d05be1b38bf8f7e591c20cba9a9af', 'morsehgp3D_v8/src/spindle/predicates.hpp': '38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845', 'morsehgp3D_v8/src/spindle/q2_prepared_bounds.hpp': '7bb46b4b7af3beede9bc2fc8926bafda9c900eb573671583206a6d94ffac5d21', 'morsehgp3D_v8/src/wspd/front.hpp': '276491bc9ec994e530785411bbbf0491a5d35ad42991c25d105f55a34d6b4e46', 'morsehgp3D_v8/src/pipeline/axis_q2.cpp': '8c91d5c9ca4427cf20e0909a5f35616ab76c9dc387268e7a6e28511de9e3e61a', 'morsehgp3D_v8/src/pipeline/local_credits.cpp': '0d069aca65dcffc96bb26d55874fdb34b2748eb5f0b956a991d584d928ab1392', 'morsehgp3D_v8/src/pipeline/prepared_cloud.cpp': 'accd0ec990e81e0352d37272ac5099d50fa97065edbb68864c1dcf8b5631afb7', 'morsehgp3D_v8/src/pipeline/q2_census.cpp': 'f249e3f1d54459d00921d02ffeba81cfc4522d8c3e1b180a7dbb68b56954a94d', 'morsehgp3D_v8/src/wspd/front.cpp': '1af797b322e28f0b3e5bf1dc5014c2397ea2acfbe486a5d273a30aa716985f89', 'morsehgp3D_v8/bench/front_fixtures.hpp': 'a2d3ddbbff837de1609a2e1104c8797682cd7a435d4fa417d31388eb1f402b3b', 'morsehgp3D_v8/bench/p0_fixtures.hpp': '3c3a7bde624fde5c513ac4946fdceddaf6a392b61643d9f9a847c1b4f470520a', 'morsehgp3D_v8/bench/probe_emit.hpp': '236331337c44bf25229899a798003e9ce7605ad5df98d90957c0d1ca2dc476d2', 'morsehgp3D_v8/bench/sheet_full_fixture.hpp': 'ccde4f4649e7e6cd3c2bb5adab4a5dc574df9b360b6f11705d323b39a01f6d49', 'morsehgp3D_v8/bench/p0_probe.cpp': 'a95bb5cdce20ecec07c544fc596b684f39a9b573b3a4c6afdbb64c97ae3be552', 'morsehgp3D_v8/bench/run_p0_matrix.py': '0e66c1e3a6ebee31640e8041fe83f2c458a15cb4169ffb93015334e010d20690', 'morsehgp3D_v8/bench/additive_probe.cpp': '408078cc93ebea2002a425174d912f38f652ea55e5487a13375902fdb2fe7c4f', 'morsehgp3D_v8/bench/paired_receipts.py': '7fbf345f2a217691a737cb78f8db194397aaf87e4271de4835c89aea860a0120'}, 'probe_sha256_closing': '6f9f836365db28aed1371c8446c71067f3782be5786c3a773ffff7605cc064e0', 'error': 'probe exited with code 1'}: b'P0 campaign failed: probe exited with code 1\n'
+
+      Start 38: mhgp8_additive_campaign_gate_optimized
+38/44 Test #38: mhgp8_additive_campaign_gate_optimized ........***Failed    0.73 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/additive_campaign_gate.py", line 279, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/additive_campaign_gate.py", line 90, in main
+    require(result.returncode == 0 and not result.stderr and
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/additive_campaign_gate.py", line 32, in require
+    raise RuntimeError(message)
+RuntimeError: genuine additive matrix failed: {'status': 'failed', 'runs': 0, 'attempts': 1, 'finished_utc': '2026-09-14T09:54:02.428677+00:00', 'source_hashes_unchanged': True, 'probe_hash_unchanged': True, 'source_sha256_closing': {'morsehgp3D_v8/CMakeLists.txt': '37c1301b95ff716298c5a2d69dc4ee01fd0b394cbc95bd2e300fa80ae9e955eb', 'morsehgp3D_v8/src/core/types.hpp': 'f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b', 'morsehgp3D_v8/src/pipeline/axis_q2.hpp': '5d0022c7776b1c382f65e5bff9fe9e125c81c701c08a0d8db8e4e40672c4cac4', 'morsehgp3D_v8/src/pipeline/local_credits.hpp': 'a68fed7a40041ddc76b2a401d35cdafeaa66711ab3cd1d79ff41f3666b29a3d9', 'morsehgp3D_v8/src/pipeline/prepared_cloud.hpp': '2808e4e4609cbc11800894cf43824c1a6a7df1f2ca6e27931561848b9cde8352', 'morsehgp3D_v8/src/pipeline/q2_census.hpp': '4b8bd8c0680fb10d41e6fc5ea38ff8e9215b006714f5013f2d4a02596b64fe03', 'morsehgp3D_v8/src/pipeline/tube_credits.hpp': '8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c', 'morsehgp3D_v8/src/pipeline/wspd_q2_census.hpp': '9471f42cd9f4b358038635a0e3794900711d05be1b38bf8f7e591c20cba9a9af', 'morsehgp3D_v8/src/spindle/predicates.hpp': '38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845', 'morsehgp3D_v8/src/spindle/q2_prepared_bounds.hpp': '7bb46b4b7af3beede9bc2fc8926bafda9c900eb573671583206a6d94ffac5d21', 'morsehgp3D_v8/src/wspd/front.hpp': '276491bc9ec994e530785411bbbf0491a5d35ad42991c25d105f55a34d6b4e46', 'morsehgp3D_v8/src/pipeline/axis_q2.cpp': '8c91d5c9ca4427cf20e0909a5f35616ab76c9dc387268e7a6e28511de9e3e61a', 'morsehgp3D_v8/src/pipeline/local_credits.cpp': '0d069aca65dcffc96bb26d55874fdb34b2748eb5f0b956a991d584d928ab1392', 'morsehgp3D_v8/src/pipeline/prepared_cloud.cpp': 'accd0ec990e81e0352d37272ac5099d50fa97065edbb68864c1dcf8b5631afb7', 'morsehgp3D_v8/src/pipeline/q2_census.cpp': 'f249e3f1d54459d00921d02ffeba81cfc4522d8c3e1b180a7dbb68b56954a94d', 'morsehgp3D_v8/src/wspd/front.cpp': '1af797b322e28f0b3e5bf1dc5014c2397ea2acfbe486a5d273a30aa716985f89', 'morsehgp3D_v8/bench/front_fixtures.hpp': 'a2d3ddbbff837de1609a2e1104c8797682cd7a435d4fa417d31388eb1f402b3b', 'morsehgp3D_v8/bench/p0_fixtures.hpp': '3c3a7bde624fde5c513ac4946fdceddaf6a392b61643d9f9a847c1b4f470520a', 'morsehgp3D_v8/bench/probe_emit.hpp': '236331337c44bf25229899a798003e9ce7605ad5df98d90957c0d1ca2dc476d2', 'morsehgp3D_v8/bench/sheet_full_fixture.hpp': 'ccde4f4649e7e6cd3c2bb5adab4a5dc574df9b360b6f11705d323b39a01f6d49', 'morsehgp3D_v8/bench/p0_probe.cpp': 'a95bb5cdce20ecec07c544fc596b684f39a9b573b3a4c6afdbb64c97ae3be552', 'morsehgp3D_v8/bench/run_p0_matrix.py': '0e66c1e3a6ebee31640e8041fe83f2c458a15cb4169ffb93015334e010d20690', 'morsehgp3D_v8/bench/additive_probe.cpp': '408078cc93ebea2002a425174d912f38f652ea55e5487a13375902fdb2fe7c4f', 'morsehgp3D_v8/bench/paired_receipts.py': '7fbf345f2a217691a737cb78f8db194397aaf87e4271de4835c89aea860a0120'}, 'probe_sha256_closing': '6f9f836365db28aed1371c8446c71067f3782be5786c3a773ffff7605cc064e0', 'error': 'probe exited with code 1'}: b'P0 campaign failed: probe exited with code 1\n'
+
+      Start 39: mhgp8_paired_campaign_gate
+39/44 Test #39: mhgp8_paired_campaign_gate ....................***Failed    0.10 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/paired_campaign_gate.py", line 316, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/paired_campaign_gate.py", line 236, in main
+    require(result.returncode == 0 and not result.stderr,
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/paired_campaign_gate.py", line 39, in require
+    raise RuntimeError(message)
+RuntimeError: real batch probe failed: b'==490==LeakSanitizer has encountered a fatal error.\n==490==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1\n==490==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)\n'
+
+      Start 40: mhgp8_paired_campaign_gate_optimized
+40/44 Test #40: mhgp8_paired_campaign_gate_optimized ..........***Failed    0.11 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/paired_campaign_gate.py", line 316, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/paired_campaign_gate.py", line 236, in main
+    require(result.returncode == 0 and not result.stderr,
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/paired_campaign_gate.py", line 39, in require
+    raise RuntimeError(message)
+RuntimeError: real batch probe failed: b'==493==LeakSanitizer has encountered a fatal error.\n==493==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1\n==493==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)\n'
+
+      Start 41: mhgp8_campaign_reader_gate
+41/44 Test #41: mhgp8_campaign_reader_gate ....................***Failed    0.68 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/campaign_reader_gate.py", line 109, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/campaign_reader_gate.py", line 45, in main
+    require(capture.returncode == 0, f"genuine sheet matrix failed: {capture.stderr}")
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/campaign_reader_gate.py", line 24, in require
+    raise RuntimeError(message)
+RuntimeError: genuine sheet matrix failed: P0 campaign failed: probe exited with code 1
+
+
+      Start 42: mhgp8_campaign_reader_gate_optimized
+42/44 Test #42: mhgp8_campaign_reader_gate_optimized ..........***Failed    0.73 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/campaign_reader_gate.py", line 109, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/campaign_reader_gate.py", line 45, in main
+    require(capture.returncode == 0, f"genuine sheet matrix failed: {capture.stderr}")
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/campaign_reader_gate.py", line 24, in require
+    raise RuntimeError(message)
+RuntimeError: genuine sheet matrix failed: P0 campaign failed: probe exited with code 1
+
+
+      Start 43: mhgp8_paired_reader_gate
+43/44 Test #43: mhgp8_paired_reader_gate ......................***Failed    0.70 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/paired_reader_gate.py", line 308, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/paired_reader_gate.py", line 179, in main
+    require(result.returncode == 0 and not result.stderr,
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/paired_reader_gate.py", line 31, in require
+    raise RuntimeError(message)
+RuntimeError: positive reader campaign failed: batch_tubes: b'P0 campaign failed: probe exited with code 1\n'
+
+      Start 44: mhgp8_paired_reader_gate_optimized
+44/44 Test #44: mhgp8_paired_reader_gate_optimized ............***Failed    0.75 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/paired_reader_gate.py", line 308, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/paired_reader_gate.py", line 179, in main
+    require(result.returncode == 0 and not result.stderr,
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/paired_reader_gate.py", line 31, in require
+    raise RuntimeError(message)
+RuntimeError: positive reader campaign failed: batch_tubes: b'P0 campaign failed: probe exited with code 1\n'
+
+
+5% tests passed, 42 tests failed out of 44
+
+Total Test time (real) =  90.90 sec
+
+The following tests FAILED:
+	  1 - mhgp8_q2_sibling_gate (Failed)
+	  2 - mhgp8_wspd_q2_census_gate (Failed)
+	  3 - mhgp8_wspd_front_gate (Failed)
+	  4 - mhgp8_cloud_owner_gate (Failed)
+	  5 - mhgp8_p0_gate (Failed)
+	  6 - mhgp8_tube_gate (Failed)
+	  7 - mhgp8_batch_gate (Failed)
+	  8 - mhgp8_axis_q2_gate (Failed)
+	  9 - mhgp8_axis_additive_gate (Failed)
+	 10 - mhgp8_plan_assignment_gate (Failed)
+	 11 - mhgp8_q2_census_gate (Failed)
+	 12 - mhgp8_q2_prepared_bounds_gate (Failed)
+	 13 - mhgp8_wspd_q2_receipts_gate (Failed)
+	 14 - mhgp8_wspd_q2_receipts_gate_optimized (Failed)
+	 15 - mhgp8_wspd_front_receipts_gate (Failed)
+	 16 - mhgp8_wspd_front_receipts_gate_optimized (Failed)
+	 17 - mhgp8_cloud_reuse_receipts_gate (Failed)
+	 18 - mhgp8_cloud_reuse_receipts_gate_optimized (Failed)
+	 19 - mhgp8_q2_revision_comparison_gate (Failed)
+	 20 - mhgp8_q2_revision_comparison_gate_optimized (Failed)
+	 21 - mhgp8_q2_census_probe_gate (Failed)
+	 22 - mhgp8_q2_census_probe_gate_optimized (Failed)
+	 23 - mhgp8_q2_census_campaign_gate (Failed)
+	 24 - mhgp8_q2_census_campaign_gate_optimized (Failed)
+	 27 - mhgp8_probe_cli (Failed)
+	 28 - mhgp8_probe_cli_optimized (Failed)
+	 29 - mhgp8_campaign_gate (Failed)
+	 30 - mhgp8_campaign_gate_optimized (Failed)
+	 31 - mhgp8_batch_probe_cli (Failed)
+	 32 - mhgp8_batch_probe_cli_optimized (Failed)
+	 33 - mhgp8_axis_probe_cli (Failed)
+	 34 - mhgp8_axis_probe_cli_optimized (Failed)
+	 35 - mhgp8_additive_probe_cli (Failed)
+	 36 - mhgp8_additive_probe_cli_optimized (Failed)
+	 37 - mhgp8_additive_campaign_gate (Failed)
+	 38 - mhgp8_additive_campaign_gate_optimized (Failed)
+	 39 - mhgp8_paired_campaign_gate (Failed)
+	 40 - mhgp8_paired_campaign_gate_optimized (Failed)
+	 41 - mhgp8_campaign_reader_gate (Failed)
+	 42 - mhgp8_campaign_reader_gate_optimized (Failed)
+	 43 - mhgp8_paired_reader_gate (Failed)
+	 44 - mhgp8_paired_reader_gate_optimized (Failed)

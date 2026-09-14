@@ -3,7 +3,26 @@
 14 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
-État constructeur courant, huitième tranche P0 :
+État constructeur courant, neuvième tranche P0 :
+[certificat autonome du frère q2](../docs/P0_CERTIFICAT_FRERE_Q2.md),
+option intégré SharedBlocks seulement. Le frère doit certifier K sites
+stricts à lui seul ; jamais d'ajout au compte ou de modification du
+curseur Z. Le défaut est inchangé. Les
+[32 mesures et qualifications propres](../receipts/q2_sibling_20260914/README.md)
+sont closes, 44 CTests Release/Clang ASan/UBSan passent et lecteurs
+normal/−O identiques. Les essais initiaux en échec sont conservés ;
+le runner corrige une course d'interruption pendant Popen sans perte
+de ses sorties, six nouvelles contre-fixtures déterministes passent.
+Rangées8k : 1,494→0,241 s ; sibling8k/16k/32k :
+0,241/0,481/0,969 s et évaluations ×2,20/×2,13. Amas :
+×4,29/×4,22, donc échec persistant de croissance malgré les rejets
+supplémentaires. s8/10/12 comparés à 8k seulement dans cette tranche.
+L'ordre compact complément/B original et l'exclusion de a du seul
+comptage sont une proposition contre-vérifiée, pas encore un produit.
+P0, FULL et GPU restent ouverts. GCP non utilisé.
+
+## Historique : huitième tranche P0 publiée à f7edd646
+
 [front et census q2 raccordés](../docs/P0_FRONT_ET_CENSUS_Q2.md),
 `cpu_reference`, `quantized_u16_input_only`, `implementation_v8_p0`,
 `not_claimed`. Un seul nuage/index, pas de préparation B par rectangle,
@@ -17,7 +36,7 @@ ne sont pas celles du front historique à trois voies. Les 53 mesures
 closes couvrent quatre familles, n8k/16k/32k et s8/10/12. Sur amas/s8,
 visites 0,973→4,199→17,665 milliards, soit ×4,315 puis ×4,207 malgré
 des supports proches du linéaire : la croissance demandée échoue dans
-ce régime. Le certificat autonome du bloc frère est une proposition
+ce régime. Le certificat autonome du bloc frère était alors une proposition
 contre-vérifiée, non intégrée, pour éviter le raffinement prématuré.
 Le coût des
 ancres et des visites Z, la canonisation globale des boules, q3/q4,

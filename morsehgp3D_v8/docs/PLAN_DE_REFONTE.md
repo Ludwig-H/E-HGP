@@ -14,6 +14,13 @@ distribuables et un consommateur q3/q4 canonique. Aucune garantie globale
 sous-quadratique ou de tour ne découle de ce raccord. Les mesures portent
 sur les supports avec collecte, pas seulement sur les produits compacts.
 
+Neuvième tranche : [certificat autonome du frère](P0_CERTIFICAT_FRERE_Q2.md),
+un test constant après chaque division B, sans nouvelle recherche ni
+crédit partiel. Le point décisif reste la croissance de toutes les
+visites, propositions et tâches, pas seulement le nombre de paires
+éliminées par ce certificat. Le partage entre ancres et le choix des
+blocs témoins restent à traiter si cette option ne réduit qu'une constante.
+
 ## Priorité P0 — supprimer la préparation quadratique des témoins locaux
 
 **Décision explicite de l'utilisateur, 13 septembre 2026 : ce changement

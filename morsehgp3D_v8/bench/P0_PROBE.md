@@ -1,5 +1,15 @@
 # Sonde P0 : un rectangle séparé, pas une tour HGP
 
+Complément du 14 septembre, raccord WSPD q2 :
+`mhgp8_wspd_q2_census_probe n famille Kmax s seed pure|samples pairwise|shared [none|sibling]`.
+Sans dernier argument, le schéma historique v1 est conservé. L'option
+explicite produit v2 et six compteurs séparés du certificat frère ;
+`sibling` exige `shared`. Le runner `run_wspd_q2_matrix.py` accepte
+`--sibling-modes none sibling` ; sans cette option, il garde les campagnes
+v1. Les lecteurs contrôlent l'identité du front, des candidates et des
+supports entre variantes, mais autorisent un travail census différent.
+Voir le [contrat du certificat](../docs/P0_CERTIFICAT_FRERE_Q2.md).
+
 13 septembre 2026. Cadre `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `profile=quantized_u16_input_only`,
 `mode=implementation_v8_p0`, `public_status=not_claimed`.

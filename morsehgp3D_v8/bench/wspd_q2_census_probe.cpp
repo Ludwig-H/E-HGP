@@ -57,18 +57,22 @@ struct Options {
   u64 seed;
   std::string_view front_mode;
   std::string_view census_mode;
+  std::string_view sibling_mode;  // Empty preserves the historical v1 CLI/schema.
 };
 
 Options options(int argc, char** argv) {
-  if (argc != 8)
+  if (argc != 8 && argc != 9)
     throw std::invalid_argument("usage: mhgp8_wspd_q2_census_probe n uniform|terrain|clusters|rows "
-                                "Kmax s seed pure|samples pairwise|shared");
+                                "Kmax s seed pure|samples pairwise|shared [none|sibling]");
   const Options result{integer<std::size_t>(argv[1]), argv[2], integer<unsigned>(argv[3]),
-                       integer<unsigned>(argv[4]), integer<u64>(argv[5]), argv[6], argv[7]};
+                       integer<unsigned>(argv[4]), integer<u64>(argv[5]), argv[6], argv[7],
+                       argc == 9 ? std::string_view(argv[8]) : std::string_view{}};
   mhgp8::bench::validate_front_fixture_size(result.n, result.family);
   if (result.kmax == 0 || result.kmax > 10 || result.separation == 0 ||
       (result.front_mode != "pure" && result.front_mode != "samples") ||
-      (result.census_mode != "pairwise" && result.census_mode != "shared"))
+      (result.census_mode != "pairwise" && result.census_mode != "shared") ||
+      (argc == 9 && result.sibling_mode != "none" && result.sibling_mode != "sibling") ||
+      (result.sibling_mode == "sibling" && result.census_mode != "shared"))
     throw std::invalid_argument("WSPD census requires Kmax 1..10, positive s, valid front/census modes");
   return result;
 }
@@ -257,6 +261,11 @@ const std::array callback_fields{
   MHGP8_FIELD(CallbackWork, sort_comparisons), MHGP8_FIELD(CallbackWork, validation_ids),
   MHGP8_FIELD(CallbackWork, adjacent_tests), MHGP8_FIELD(CallbackWork, cross_set_comparisons),
   MHGP8_FIELD(CallbackWork, support_key_axis_checks), MHGP8_FIELD(CallbackWork, hash_words)};
+using SiblingWork = decltype(mhgp8::WspdQ2CensusResult{}.sibling_work);
+const std::array sibling_fields{
+  MHGP8_FIELD(SiblingWork, proposals), MHGP8_FIELD(SiblingWork, cardinality_skips),
+  MHGP8_FIELD(SiblingWork, bound_tests), MHGP8_FIELD(SiblingWork, rejected_tasks),
+  MHGP8_FIELD(SiblingWork, rejected_pairs), MHGP8_FIELD(SiblingWork, rejected_after_credit)};
 #undef MHGP8_FIELD
 
 template <class T, std::size_t N>
@@ -319,6 +328,21 @@ void validate(const mhgp8::WspdQ2CensusResult& result, const OutputDigest& diges
           c.count_ms >= 0 && c.payload_ms >= 0 &&
           c.total_ms + 1e-6 >= c.count_ms + c.payload_ms,
           "pipeline clocks disagree with their enclosing time contract");
+  const auto& sibling = result.sibling_work;
+  if (o.sibling_mode == "sibling") {
+    require(sibling.proposals == product(2, c.work.query_splits) &&
+            sibling.bound_tests <= sibling.proposals &&
+            sibling.cardinality_skips == sibling.proposals - sibling.bound_tests &&
+            sibling.rejected_tasks <= sibling.bound_tests &&
+            sibling.rejected_tasks <= sibling.rejected_pairs &&
+            (sibling.rejected_tasks == 0) == (sibling.rejected_pairs == 0) &&
+            sibling.rejected_after_credit <= sibling.rejected_tasks &&
+            sibling.rejected_pairs <= c.rejected_pairs,
+            "sibling certificate work accounting mismatch");
+  } else {
+    for (const auto& field : sibling_fields)
+      require(sibling.*(field.member) == 0, "disabled sibling filter performed work");
+  }
 }
 
 int run(const Options& o) {
@@ -333,7 +357,8 @@ int run(const Options& o) {
   const auto result = mhgp8::run_wspd_q2_census(*index, o.kmax, o.separation,
       o.front_mode == "pure" ? mhgp8::WspdFrontMode::Pure : mhgp8::WspdFrontMode::MidpointSamples,
       o.census_mode == "pairwise" ? mhgp8::Q2CensusMode::Pairwise : mhgp8::Q2CensusMode::SharedBlocks,
-      [&](const mhgp8::Q2Support& support) { digest.consume(support, cloud->points(), o.kmax); });
+      [&](const mhgp8::Q2Support& support) { digest.consume(support, cloud->points(), o.kmax); },
+      o.sibling_mode == "sibling" ? mhgp8::Q2SiblingMode::Saturating : mhgp8::Q2SiblingMode::Disabled);
   const auto processed = Clock::now();
   validate(result, digest, o);
   require(&index->cloud() == cloud.get(), "WSPD census index lost immutable cloud identity");
@@ -359,7 +384,8 @@ int run(const Options& o) {
 
   std::cout.imbue(std::locale::classic());
   std::cout << std::setprecision(17)
-            << "{\"schema\":\"mhgp8_wspd_q2_census_probe_v1\",\"status\":\"completed\""
+            << "{\"schema\":\"mhgp8_wspd_q2_census_probe_" << (o.sibling_mode.empty() ? "v1" : "v2")
+            << "\",\"status\":\"completed\""
             << ",\"phase\":\"exploration_v8_hors_registre\",\"backend\":\"cpu_reference\""
             << ",\"profile\":\"quantized_u16_input_only\",\"mode\":\"implementation_v8_p0\""
             << ",\"public_status\":\"not_claimed\",\"scope\":\"q2_all_cloud_supports_not_full\""
@@ -397,6 +423,10 @@ int run(const Options& o) {
   print_array(result.front.work.lane_rectangles);
   std::cout << "},\"census_work\":{";
   print_fields(result.census.work, census_fields);
+  if (!o.sibling_mode.empty()) {
+    std::cout << "},\"sibling_mode\":\"" << o.sibling_mode << "\",\"sibling_work\":{";
+    print_fields(result.sibling_work, sibling_fields);
+  }
   std::cout << "},\"callback_work\":{";
   print_fields(digest.work, callback_fields);
   std::cout << "},\"digest\":{\"encoding\":\"canonical_q2_support_v2\",\"supports\":" << digest.supports

@@ -61,6 +61,14 @@ def capture(probe: Path, output: Path) -> subprocess.CompletedProcess:
         capture_output=True, cwd=ROOT)
 
 
+def capture_sibling(probe: Path, output: Path) -> subprocess.CompletedProcess:
+    return subprocess.run(command("run", "--probe", str(probe), "--output", str(output),
+        "--sizes", "16", "32", "--families", "uniform", "rows", "--kmax", "1", "5",
+        "--s", "8", "--seeds", "3", "--modes", "pure", "samples",
+        "--census-modes", "shared", "--sibling-modes", "none", "sibling", "--repeats", "1"),
+        capture_output=True, cwd=ROOT)
+
+
 def checked(root: Path) -> subprocess.CompletedProcess:
     return subprocess.run(command("check", str(root), "--summary"), capture_output=True, cwd=ROOT)
 
@@ -129,9 +137,9 @@ def main() -> int:
         stats["positive_reads"] += 1
 
         # Mutations below affect disposable evidence, never the producer.
-        def mutant(label: str, change: Callable[[Path], None]) -> None:
+        def mutant(label: str, change: Callable[[Path], None], fixture: Path = genuine) -> None:
             destination = temporary / label
-            shutil.copytree(genuine, destination)
+            shutil.copytree(fixture, destination)
             change(destination)
             result = checked(destination)
             require(result.returncode == 1,
@@ -247,9 +255,108 @@ def main() -> int:
         require(result.returncode == 1 and read(initial_failure / "COMPLETION.json")["attempts"] == 0 and
                 checked(initial_failure).returncode == 1, "startup failure was hidden")
         stats["failed_captures"] += 1
+
+        # Explicit v2 captures supplement, rather than replace, the v1 gates.
+        # Their sibling mode is not a new geometric family or an HGP level.
+        versioned = temporary / "versioned"
+        versioned.mkdir()
+        shutil.copytree(genuine, versioned / "legacy")
+        for name in ("first", "second"):
+            destination = versioned / name
+            result = capture_sibling(binary, destination)
+            require(result.returncode == 0 and not result.stderr,
+                    f"genuine sibling capture failed: {result.stdout!r} {result.stderr!r}")
+            rows = records(destination)
+            manifest, completion = read(destination / "MANIFEST.json"), read(destination / "COMPLETION.json")
+            require(manifest["schema"] == "mhgp8_wspd_q2_campaign_v2" and
+                    manifest["sibling_modes"] == ["none", "sibling"] and
+                    completion["status"] == "completed" and completion["runs"] == completion["attempts"] == len(rows) == 32,
+                    "v2 capture lost version, modes or tuples")
+            require(all(row["result"]["schema"] == "mhgp8_wspd_q2_census_probe_v2" and
+                        row["result"]["digest"]["supports"] > 0 for row in rows),
+                    "v2 support fixture is vacuous or mislabeled")
+            enabled = [row["result"]["sibling_work"] for row in rows
+                       if row["result"]["sibling_mode"] == "sibling"]
+            require(any(work["proposals"] > 0 for work in enabled) and
+                    any(work["bound_tests"] > 0 for work in enabled) and
+                    any(work["rejected_tasks"] > 0 for work in enabled),
+                    "v2 certificate fixture never proposes, tests or rejects")
+            stats["sibling_rows"] += len(rows)
+        result = checked(versioned)
+        require(result.returncode == 0 and not result.stderr,
+                f"mixed v1/v2 reader failed: {result.stdout!r} {result.stderr!r}")
+        summary = parse_result(result.stdout)
+        require(summary["measurements"] == 192 and len(summary["summary"]) == 96 and
+                sum("sibling_mode" in row for row in summary["summary"]) == 32 and
+                summary.get("sibling_comparison") == "same_front_candidates_and_canonical_digest_not_equal_census_work",
+                "mixed-version summary lost historical or explicit mode keys")
+        stats["sibling_positive_reads"] += 1
+
+        def sibling_change(root: Path, update: Callable[[dict], None], enabled: bool = True) -> None:
+            directory = root / "first"
+            rows = records(directory)
+            chosen = next(row for row in rows if
+                          (row["result"]["sibling_mode"] == "sibling") == enabled)
+            update(chosen)
+            refresh(chosen)
+            write_records(directory, rows)
+
+        def sibling_work(root: Path, field: str, change: Callable[[dict], Any], enabled: bool = True) -> None:
+            sibling_change(root, lambda row: row["result"]["sibling_work"].update({field: change(row["result"])}), enabled)
+
+        mutant("sibling_unknown_mode", lambda root: manifest_change(root, lambda m: m.update(sibling_modes=["wrong"])), versioned)
+        mutant("sibling_duplicate_mode", lambda root: manifest_change(root, lambda m: m.update(sibling_modes=["none", "none"])), versioned)
+        mutant("sibling_pairwise_matrix", lambda root: manifest_change(root, lambda m: m.update(census_modes=["pairwise", "shared"])), versioned)
+        mutant("sibling_unversioned_manifest", lambda root: manifest_change(root, lambda m: m.update(schema="mhgp8_wspd_q2_campaign_v1")), versioned)
+        mutant("sibling_unversioned_result", lambda root: sibling_change(root, lambda r: r["result"].update(schema="mhgp8_wspd_q2_census_probe_v1")), versioned)
+        mutant("sibling_wrong_command", lambda root: sibling_change(root, lambda r: r["command"].__setitem__(8, "none")), versioned)
+        mutant("sibling_missing_field", lambda root: sibling_change(root, lambda r: r["result"]["sibling_work"].pop("proposals")), versioned)
+        mutant("sibling_boolean_count", lambda root: sibling_work(root, "proposals", lambda _r: True), versioned)
+        mutant("sibling_hidden_proposal", lambda root: sibling_work(root, "proposals", lambda r: r["sibling_work"]["proposals"] + 1), versioned)
+        mutant("sibling_hidden_bound", lambda root: sibling_work(root, "bound_tests", lambda r: r["sibling_work"]["bound_tests"] + 1), versioned)
+        mutant("sibling_hidden_skip", lambda root: sibling_work(root, "cardinality_skips", lambda r: r["sibling_work"]["cardinality_skips"] + 1), versioned)
+        mutant("sibling_excess_reject", lambda root: sibling_work(root, "rejected_tasks", lambda r: r["sibling_work"]["bound_tests"] + 1), versioned)
+        mutant("sibling_excess_credit", lambda root: sibling_work(root, "rejected_after_credit", lambda r: r["sibling_work"]["rejected_tasks"] + 1), versioned)
+        mutant("sibling_excess_pairs", lambda root: sibling_work(root, "rejected_pairs", lambda r: r["rejected_pairs"] + 1), versioned)
+        def sibling_pairs_without_tasks(root: Path) -> None:
+            directory = root / "first"
+            rows = records(directory)
+            chosen = next(row for row in rows if row["result"]["sibling_mode"] == "sibling" and
+                          row["result"]["sibling_work"]["rejected_tasks"] == 0 and
+                          row["result"]["rejected_pairs"] > 0)
+            chosen["result"]["sibling_work"]["rejected_pairs"] = 1
+            refresh(chosen)
+            write_records(directory, rows)
+        mutant("sibling_pairs_without_tasks", sibling_pairs_without_tasks, versioned)
+
+        def lost_sibling_pairs(root: Path) -> None:
+            directory = root / "first"
+            rows = records(directory)
+            chosen = next(row for row in rows if row["result"]["sibling_work"]["rejected_tasks"] > 0)
+            work = chosen["result"]["sibling_work"]
+            work["rejected_pairs"] = work["rejected_tasks"] - 1
+            refresh(chosen)
+            write_records(directory, rows)
+        mutant("sibling_fewer_pairs_than_tasks", lost_sibling_pairs, versioned)
+        mutant("sibling_disabled_work", lambda root: sibling_work(root, "bound_tests", lambda _r: 1, False), versioned)
+        mutant("sibling_changed_front", lambda root: sibling_change(root, lambda r:
+            r["result"]["front_work"].update(max_factor_size=r["result"]["front_work"]["max_factor_size"] + 1)), versioned)
+        mutant("sibling_changed_digest", lambda root: sibling_change(root, lambda r: r["result"]["digest"].update(sum="0")), versioned)
+
+        # Exercise the public CLI rejection, not just receipt metadata.
+        invalid_cli = [str(original), "16", "rows", "5", "8", "3", "pure", "pairwise", "sibling"]
+        require(subprocess.run(invalid_cli, cwd=ROOT, capture_output=True).returncode == 2,
+                "probe accepted pairwise+sibling")
+        invalid_cli[7], invalid_cli[8] = "shared", "unknown"
+        require(subprocess.run(invalid_cli, cwd=ROOT, capture_output=True).returncode == 2,
+                "probe accepted an unknown sibling mode")
+        stats["sibling_cli_rejects"] += 2
     require(stats["genuine_rows"] == 128 and stats["mutants"] >= 48 and stats["failed_captures"] == 2 and
             stats["positive_reads"] == 1 and stats["domain_checks"] == 2,
             "receipt gate lost its non-vacuity floor")
+    require(stats["sibling_rows"] == 64 and stats["sibling_positive_reads"] == 1 and
+            stats["sibling_cli_rejects"] == 2 and stats["mutants"] >= 67,
+            "sibling extension lost its non-vacuity floor")
     require(sources() == pins and digest(original) == binary_pin, "gate modified sources or actual probe")
     print(json.dumps(dict(status="passed", **stats), sort_keys=True))
     return 0
@@ -261,4 +368,3 @@ if __name__ == "__main__":
     except (ValueError, RuntimeError, OSError, KeyError, TypeError) as error:
         print(f"WSPD q2 receipt gate failed: {error}", file=sys.stderr)
         raise SystemExit(1) from error
-

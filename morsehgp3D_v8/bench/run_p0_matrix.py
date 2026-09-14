@@ -204,29 +204,70 @@ def on_signal(signum: int, _frame: Any) -> None:
 
 
 def invoke(command: list[str], environment: dict[str, str], root: Path,
-           record: dict[str, Any]) -> None:
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                               env=environment, cwd=root)
+           record: dict[str, Any], *, new_session: bool = False) -> None:
+    # A fast child may flush and signal its parent before Popen returns. Do
+    # not let the campaign's raising handler escape before we own the child
+    # object and can drain its pipes. Deferring Python callbacks changes no
+    # OS signal mask and therefore passes no blocked mask to the child.
+    handlers = {signum: signal.getsignal(signum) for signum in (signal.SIGINT, signal.SIGTERM)}
+    pending: list[tuple[int, Any]] = []
+
+    def defer(signum: int, frame: Any) -> None:
+        pending.append((signum, frame))
+
+    def restore() -> None:
+        for signum, handler in handlers.items():
+            signal.signal(signum, handler)
+
     interrupted: KeyboardInterrupt | None = None
     try:
-        stdout, stderr = process.communicate()
-    except KeyboardInterrupt as error:
-        interrupted = error
-        if process.poll() is None:
-            process.terminate()
+        for signum, handler in handlers.items():
+            # Preserve SIG_IGN/SIG_DFL semantics; all campaign callers install
+            # on_signal. Other callable handlers are replayed, not replaced.
+            if callable(handler):
+                signal.signal(signum, defer)
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                   env=environment, cwd=root, start_new_session=new_session)
         try:
-            # Bound cancellation cleanup, not the duration of a benchmark.
-            stdout, stderr = process.communicate(timeout=2)
-        except subprocess.TimeoutExpired:
-            process.kill()
+            # Restoring/replaying is itself inside the collection handler;
+            # the process is now installed even if replay raises immediately.
+            restore()
+            for signum, frame in pending:
+                handlers[signum](signum, frame)
             stdout, stderr = process.communicate()
-    record.update(exit_code=process.returncode,
-                  stdout=stdout.decode("utf-8", errors="replace"),
-                  stderr=stderr.decode("utf-8", errors="replace"),
-                  stdout_base64=base64.b64encode(stdout).decode("ascii"),
-                  stderr_base64=base64.b64encode(stderr).decode("ascii"))
-    if interrupted is not None:
-        raise interrupted
+        except KeyboardInterrupt as error:
+            interrupted = error
+            if new_session:
+                # This process was made leader of its own session/group.
+                # Cancel descendants even if the group leader already exited.
+                try:
+                    os.killpg(process.pid, signal.SIGTERM)
+                except ProcessLookupError:
+                    pass
+            elif process.poll() is None:
+                process.terminate()
+            try:
+                # Bound cancellation cleanup, not the duration of a benchmark.
+                stdout, stderr = process.communicate(timeout=2)
+            except subprocess.TimeoutExpired:
+                if new_session:
+                    try:
+                        os.killpg(process.pid, signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
+                else:
+                    process.kill()
+                stdout, stderr = process.communicate()
+        record.update(exit_code=process.returncode,
+                      stdout=stdout.decode("utf-8", errors="replace"),
+                      stderr=stderr.decode("utf-8", errors="replace"),
+                      stdout_base64=base64.b64encode(stdout).decode("ascii"),
+                      stderr_base64=base64.b64encode(stderr).decode("ascii"))
+        if interrupted is not None:
+            raise interrupted
+    finally:
+        # Also restore when Popen fails before returning a process object.
+        restore()
 
 
 def main() -> int:

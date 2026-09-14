@@ -1,0 +1,107 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v8_sibling_20260914
+Test project /workspaces/E-HGP/build/v8_sibling_20260914
+      Start  1: mhgp8_q2_sibling_gate
+ 1/44 Test  #1: mhgp8_q2_sibling_gate .........................   Passed    0.07 sec
+      Start  2: mhgp8_wspd_q2_census_gate
+ 2/44 Test  #2: mhgp8_wspd_q2_census_gate .....................   Passed    0.05 sec
+      Start  3: mhgp8_wspd_front_gate
+ 3/44 Test  #3: mhgp8_wspd_front_gate .........................   Passed    0.12 sec
+      Start  4: mhgp8_cloud_owner_gate
+ 4/44 Test  #4: mhgp8_cloud_owner_gate ........................   Passed    0.00 sec
+      Start  5: mhgp8_p0_gate
+ 5/44 Test  #5: mhgp8_p0_gate .................................   Passed    0.69 sec
+      Start  6: mhgp8_tube_gate
+ 6/44 Test  #6: mhgp8_tube_gate ...............................   Passed    0.34 sec
+      Start  7: mhgp8_batch_gate
+ 7/44 Test  #7: mhgp8_batch_gate ..............................   Passed    0.01 sec
+      Start  8: mhgp8_axis_q2_gate
+ 8/44 Test  #8: mhgp8_axis_q2_gate ............................   Passed    0.52 sec
+      Start  9: mhgp8_axis_additive_gate
+ 9/44 Test  #9: mhgp8_axis_additive_gate ......................   Passed    0.79 sec
+      Start 10: mhgp8_plan_assignment_gate
+10/44 Test #10: mhgp8_plan_assignment_gate ....................   Passed    0.00 sec
+      Start 11: mhgp8_q2_census_gate
+11/44 Test #11: mhgp8_q2_census_gate ..........................   Passed    0.05 sec
+      Start 12: mhgp8_q2_prepared_bounds_gate
+12/44 Test #12: mhgp8_q2_prepared_bounds_gate .................   Passed    0.05 sec
+      Start 13: mhgp8_wspd_q2_receipts_gate
+13/44 Test #13: mhgp8_wspd_q2_receipts_gate ...................   Passed   12.18 sec
+      Start 14: mhgp8_wspd_q2_receipts_gate_optimized
+14/44 Test #14: mhgp8_wspd_q2_receipts_gate_optimized .........   Passed   13.34 sec
+      Start 15: mhgp8_wspd_front_receipts_gate
+15/44 Test #15: mhgp8_wspd_front_receipts_gate ................   Passed    5.62 sec
+      Start 16: mhgp8_wspd_front_receipts_gate_optimized
+16/44 Test #16: mhgp8_wspd_front_receipts_gate_optimized ......   Passed    6.51 sec
+      Start 17: mhgp8_cloud_reuse_receipts_gate
+17/44 Test #17: mhgp8_cloud_reuse_receipts_gate ...............   Passed    5.18 sec
+      Start 18: mhgp8_cloud_reuse_receipts_gate_optimized
+18/44 Test #18: mhgp8_cloud_reuse_receipts_gate_optimized .....   Passed    5.74 sec
+      Start 19: mhgp8_q2_revision_comparison_gate
+19/44 Test #19: mhgp8_q2_revision_comparison_gate .............   Passed    4.16 sec
+      Start 20: mhgp8_q2_revision_comparison_gate_optimized
+20/44 Test #20: mhgp8_q2_revision_comparison_gate_optimized ...   Passed    4.59 sec
+      Start 21: mhgp8_q2_census_probe_gate
+21/44 Test #21: mhgp8_q2_census_probe_gate ....................   Passed    3.11 sec
+      Start 22: mhgp8_q2_census_probe_gate_optimized
+22/44 Test #22: mhgp8_q2_census_probe_gate_optimized ..........   Passed    3.20 sec
+      Start 23: mhgp8_q2_census_campaign_gate
+23/44 Test #23: mhgp8_q2_census_campaign_gate .................   Passed   12.84 sec
+      Start 24: mhgp8_q2_census_campaign_gate_optimized
+24/44 Test #24: mhgp8_q2_census_campaign_gate_optimized .......   Passed   13.65 sec
+      Start 25: mhgp8_docs_scope
+25/44 Test #25: mhgp8_docs_scope ..............................   Passed    0.37 sec
+      Start 26: mhgp8_docs_scope_optimized
+26/44 Test #26: mhgp8_docs_scope_optimized ....................   Passed    0.40 sec
+      Start 27: mhgp8_probe_cli
+27/44 Test #27: mhgp8_probe_cli ...............................   Passed    0.27 sec
+      Start 28: mhgp8_probe_cli_optimized
+28/44 Test #28: mhgp8_probe_cli_optimized .....................   Passed    0.26 sec
+      Start 29: mhgp8_campaign_gate
+29/44 Test #29: mhgp8_campaign_gate ...........................***Failed   26.57 sec
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/campaign_gate.py", line 229, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/campaign_gate.py", line 208, in main
+    require(rows[-1]["status"] == status and bool(rows[-1]["stdout_base64"]),
+  File "/workspaces/E-HGP/morsehgp3D_v8/tests/campaign_gate.py", line 24, in require
+    raise RuntimeError(message)
+RuntimeError: failed attempt stdout lost: terminated
+
+      Start 30: mhgp8_campaign_gate_optimized
+30/44 Test #30: mhgp8_campaign_gate_optimized .................   Passed   26.87 sec
+      Start 31: mhgp8_batch_probe_cli
+31/44 Test #31: mhgp8_batch_probe_cli .........................   Passed    0.92 sec
+      Start 32: mhgp8_batch_probe_cli_optimized
+32/44 Test #32: mhgp8_batch_probe_cli_optimized ...............   Passed    0.92 sec
+      Start 33: mhgp8_axis_probe_cli
+33/44 Test #33: mhgp8_axis_probe_cli ..........................   Passed    1.18 sec
+      Start 34: mhgp8_axis_probe_cli_optimized
+34/44 Test #34: mhgp8_axis_probe_cli_optimized ................   Passed    1.19 sec
+      Start 35: mhgp8_additive_probe_cli
+35/44 Test #35: mhgp8_additive_probe_cli ......................   Passed    2.36 sec
+      Start 36: mhgp8_additive_probe_cli_optimized
+36/44 Test #36: mhgp8_additive_probe_cli_optimized ............   Passed    2.32 sec
+      Start 37: mhgp8_additive_campaign_gate
+37/44 Test #37: mhgp8_additive_campaign_gate ..................   Passed    6.94 sec
+      Start 38: mhgp8_additive_campaign_gate_optimized
+38/44 Test #38: mhgp8_additive_campaign_gate_optimized ........   Passed    7.37 sec
+      Start 39: mhgp8_paired_campaign_gate
+39/44 Test #39: mhgp8_paired_campaign_gate ....................   Passed    2.43 sec
+      Start 40: mhgp8_paired_campaign_gate_optimized
+40/44 Test #40: mhgp8_paired_campaign_gate_optimized ..........   Passed    2.54 sec
+      Start 41: mhgp8_campaign_reader_gate
+41/44 Test #41: mhgp8_campaign_reader_gate ....................   Passed    0.88 sec
+      Start 42: mhgp8_campaign_reader_gate_optimized
+42/44 Test #42: mhgp8_campaign_reader_gate_optimized ..........   Passed    0.88 sec
+      Start 43: mhgp8_paired_reader_gate
+43/44 Test #43: mhgp8_paired_reader_gate ......................   Passed    7.51 sec
+      Start 44: mhgp8_paired_reader_gate_optimized
+44/44 Test #44: mhgp8_paired_reader_gate_optimized ............   Passed    8.22 sec
+
+98% tests passed, 1 tests failed out of 44
+
+Total Test time (real) = 193.20 sec
+
+The following tests FAILED:
+	 29 - mhgp8_campaign_gate (Failed)

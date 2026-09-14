@@ -7,7 +7,9 @@ import argparse
 import base64
 import hashlib
 import json
+import os
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -17,6 +19,8 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 RUNNER = ROOT / "morsehgp3D_v8/bench/run_p0_matrix.py"
+sys.path.insert(0, str(RUNNER.parent))
+import run_p0_matrix as runner_module  # noqa: E402
 
 
 def require(condition: bool, message: str) -> None:
@@ -50,6 +54,115 @@ def invoke(probe: Path, output: Path, extra: list[str]) -> tuple[Any, Any, list[
     return result, completion, rows
 
 
+def spawn_signal_checks() -> int:
+    """Force the child signal before Popen returns, without timing assumptions."""
+    real_popen = subprocess.Popen
+    previous = {signum: signal.signal(signum, runner_module.on_signal)
+                for signum in (signal.SIGINT, signal.SIGTERM)}
+    children: list[Any] = []
+    checks = 0
+    try:
+        for new_session, signum in ((False, signal.SIGINT), (False, signal.SIGTERM),
+                                    (True, signal.SIGINT), (True, signal.SIGTERM)):
+            def delayed_popen(*args: Any, **kwargs: Any) -> Any:
+                child = real_popen(*args, **kwargs)
+                children.append(child)
+                require(os.getpgid(child.pid) == (child.pid if new_session else os.getpgrp()),
+                        "invoke did not preserve the requested process-group contract")
+                # Waiting for this terminating child forces its already-flushed
+                # signal into invoke's Popen window. It does not read its pipes.
+                child.wait()
+                return child
+
+            subprocess.Popen = delayed_popen
+            body = ("import os,signal,sys; "
+                    "print('spawn stdout',flush=True); "
+                    "print('spawn stderr',file=sys.stderr,flush=True); "
+                    f"os.kill(os.getppid(),{int(signum)})")
+            record: dict[str, Any] = {}
+            try:
+                runner_module.invoke([sys.executable, "-B", "-c", body], dict(os.environ), ROOT, record,
+                                     new_session=new_session)
+            except runner_module.CampaignInterrupted as error:
+                require(error.signum == signum, "deferred spawn signal changed identity")
+            else:
+                raise RuntimeError("deferred spawn signal was not replayed")
+            require(record.get("exit_code") == 0 and record.get("stdout") == "spawn stdout\n" and
+                    record.get("stderr") == "spawn stderr\n" and
+                    base64.b64decode(record.get("stdout_base64", "")) == b"spawn stdout\n" and
+                    base64.b64decode(record.get("stderr_base64", "")) == b"spawn stderr\n",
+                    "signal during Popen lost flushed child output")
+            require(all(signal.getsignal(value) is runner_module.on_signal for value in previous),
+                    "successful spawn interruption leaked deferred handlers")
+            checks += 1
+
+        # A separate exact-session child ignores TERM. Verify both group
+        # cancellation signals, their exact target, and the final KILL status.
+        def tracked_popen(*args: Any, **kwargs: Any) -> Any:
+            child = real_popen(*args, **kwargs)
+            children.append(child)
+            return child
+
+        subprocess.Popen = tracked_popen
+        real_killpg = os.killpg
+        group_signals: list[int] = []
+
+        def checked_killpg(group: int, value: int) -> None:
+            require(group == children[-1].pid and group != os.getpgrp(),
+                    "group cancellation escaped its exact owned session")
+            group_signals.append(value)
+            real_killpg(group, value)
+
+        os.killpg = checked_killpg
+        try:
+            body = ("import os,signal,sys\n"
+                    "signal.signal(signal.SIGTERM,signal.SIG_IGN)\n"
+                    "print('group stdout',flush=True)\n"
+                    "print('group stderr',file=sys.stderr,flush=True)\n"
+                    "os.kill(os.getppid(),signal.SIGINT)\n"
+                    "while True: signal.pause()\n")
+            record = {}
+            try:
+                runner_module.invoke([sys.executable, "-B", "-c", body], dict(os.environ), ROOT, record,
+                                     new_session=True)
+            except runner_module.CampaignInterrupted as error:
+                require(error.signum == signal.SIGINT, "group cancellation changed the original signal")
+            else:
+                raise RuntimeError("group cancellation signal was swallowed")
+            require(group_signals == [signal.SIGTERM, signal.SIGKILL] and
+                    record.get("exit_code") == -signal.SIGKILL and
+                    record.get("stdout") == "group stdout\n" and record.get("stderr") == "group stderr\n",
+                    "group cancellation lost its escalation, return code or output")
+            checks += 1
+        finally:
+            os.killpg = real_killpg
+
+        def failing_popen(*_args: Any, **_kwargs: Any) -> Any:
+            raise FileNotFoundError("forced Popen failure before a process is returned")
+
+        subprocess.Popen = failing_popen
+        try:
+            runner_module.invoke(["nonexistent-fixture"], dict(os.environ), ROOT, {})
+        except FileNotFoundError:
+            pass
+        else:
+            raise RuntimeError("forced Popen failure was swallowed")
+        require(all(signal.getsignal(value) is runner_module.on_signal for value in previous),
+                "Popen failure leaked deferred handlers")
+        checks += 1
+    finally:
+        subprocess.Popen = real_popen
+        for signum, handler in previous.items():
+            signal.signal(signum, handler)
+        # Exact owned handles only; cleanup also works against the unfixed
+        # implementation, so this regression test cannot orphan a fake child.
+        for child in children:
+            if child.poll() is None:
+                child.kill()
+            child.communicate()
+    return checks
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--probe", required=True, type=Path)
@@ -59,6 +172,8 @@ def main() -> int:
     original_hash = digest(source_probe)
     runner_hash = digest(RUNNER)
     checks = 0
+    spawn_checks = spawn_signal_checks()
+    require(spawn_checks == 6, "spawn-signal regression floor")
     with tempfile.TemporaryDirectory(prefix="mhgp8_campaign_gate_") as temporary_name:
         temporary = Path(temporary_name)
         actual = temporary / "actual_probe"
@@ -220,6 +335,7 @@ def main() -> int:
         require(digest(actual) == digest(source_probe) == original_hash and
                 digest(RUNNER) == runner_hash, "gate changed its genuine inputs")
     print(json.dumps({"status": "passed", "checks": checks,
+                      "spawn_signal_checks": spawn_checks,
                       "python_optimized": bool(sys.flags.optimize),
                       "scope": "p0_campaign_receipt_ingestion_not_geometry"}))
     return 0

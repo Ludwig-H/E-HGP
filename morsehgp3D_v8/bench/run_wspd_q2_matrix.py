@@ -29,6 +29,10 @@ ROOT = Path(__file__).resolve().parents[2]
 RUNNER_SOURCE = "morsehgp3D_v8/bench/run_wspd_q2_matrix.py"
 SCOPE = "q2_all_cloud_supports_not_full"
 SCHEMA = "mhgp8_wspd_q2_campaign_v1"
+SIBLING_SCHEMA = "mhgp8_wspd_q2_campaign_v2"
+SIBLING_MODES = ("none", "sibling")
+SIBLING_FIELDS = ("proposals", "cardinality_skips", "bound_tests", "rejected_tasks",
+                  "rejected_pairs", "rejected_after_credit")
 FAMILIES = ("uniform", "terrain", "clusters", "rows")
 MODES = ("pure", "samples")
 CENSUS_MODES = ("pairwise", "shared")
@@ -94,11 +98,47 @@ def array(value: Any, length: int, name: str) -> None:
 
 
 def command_for(probe: str, key: tuple[Any, ...]) -> list[str]:
-    family, n, kmax, separation, seed, mode, census_mode = key
-    return [probe, str(n), family, str(kmax), str(separation), str(seed), mode, census_mode]
+    require(len(key) in (7, 8), "wrong command tuple length")
+    family, n, kmax, separation, seed, mode, census_mode = key[:7]
+    return [probe, str(n), family, str(kmax), str(separation), str(seed), mode, census_mode, *key[7:]]
+
+
+def row_keys(row: dict[str, Any]) -> tuple[str, ...]:
+    return KEYS + (("sibling_mode",) if row.get("schema") == "mhgp8_wspd_q2_census_probe_v2" else ())
+
+
+def discrete_fields(row: dict[str, Any]) -> tuple[str, ...]:
+    return DISCRETE_FIELDS + (("sibling_work",) if len(row_keys(row)) == 8 else ())
 
 
 def validate_result(row: dict[str, Any], command: list[str]) -> None:
+    if row.get("schema") == "mhgp8_wspd_q2_census_probe_v2":
+        require(len(command) == 9 and row.get("sibling_mode") in SIBLING_MODES and
+                command[8] == row["sibling_mode"], "wrong sibling command or mode")
+        enabled = row["sibling_mode"] == "sibling"
+        require(not enabled or row.get("census_mode") == "shared", "pairwise sibling mode is invalid")
+        projected = {key: value for key, value in row.items() if key not in ("sibling_mode", "sibling_work")}
+        projected["schema"] = "mhgp8_wspd_q2_census_probe_v1"
+        validate_v1_result(projected, command[:8])
+        sibling = row.get("sibling_work")
+        counters(sibling, SIBLING_FIELDS, "sibling_work")
+        if enabled:
+            require(sibling["proposals"] == 2 * row["census_work"]["query_splits"] and
+                    sibling["bound_tests"] + sibling["cardinality_skips"] == sibling["proposals"] and
+                    sibling["rejected_tasks"] <= sibling["bound_tests"] and
+                    sibling["rejected_tasks"] <= sibling["rejected_pairs"] and
+                    (sibling["rejected_tasks"] == 0) == (sibling["rejected_pairs"] == 0) and
+                    sibling["rejected_after_credit"] <= sibling["rejected_tasks"] and
+                    sibling["rejected_pairs"] <= row["rejected_pairs"],
+                    "sibling proposal/certification/rejection accounting mismatch")
+        else:
+            require(all(value == 0 for value in sibling.values()), "disabled sibling mode performed work")
+    else:
+        require("sibling_mode" not in row and "sibling_work" not in row, "v1 contains unversioned sibling fields")
+        validate_v1_result(row, command)
+
+
+def validate_v1_result(row: dict[str, Any], command: list[str]) -> None:
     fixed = dict(schema="mhgp8_wspd_q2_census_probe_v1", status="completed", scope=SCOPE,
         phase="exploration_v8_hors_registre", backend="cpu_reference", profile="quantized_u16_input_only",
         mode="implementation_v8_p0", public_status="not_claimed", separation_convention="box_gap_diameter_v1")
@@ -262,12 +302,14 @@ def validate_result(row: dict[str, Any], command: list[str]) -> None:
 
 def matrix(manifest: dict[str, Any]) -> list[tuple[Any, ...]]:
     require(uint(manifest.get("repeats"), "repeats") >= 1, "empty repetitions")
-    for name in MATRIX_KEYS:
+    keys = MATRIX_KEYS + (("sibling_modes",) if "sibling_modes" in manifest else ())
+    for name in keys:
         values = manifest.get(name)
         require(type(values) is list and bool(values), f"{name}: empty matrix")
         for value in values:
-            if name in ("families", "modes", "census_modes"):
-                choices = dict(families=FAMILIES, modes=MODES, census_modes=CENSUS_MODES)
+            if name in ("families", "modes", "census_modes", "sibling_modes"):
+                choices = dict(families=FAMILIES, modes=MODES, census_modes=CENSUS_MODES,
+                               sibling_modes=SIBLING_MODES)
                 require(type(value) is str and value in choices[name], f"{name}: invalid value")
             else:
                 uint(value, name)
@@ -275,7 +317,10 @@ def matrix(manifest: dict[str, Any]) -> list[tuple[Any, ...]]:
                         (name != "kmax" or value <= 10) and (name != "separations" or value < 1 << 32),
                         f"{name}: invalid value")
         require(len(set(values)) == len(values), f"{name}: duplicate value")
-    cases = list(itertools.product(*(manifest[name] for name in MATRIX_KEYS), range(manifest["repeats"])))
+    if "sibling_modes" in manifest:
+        require("sibling" not in manifest["sibling_modes"] or "pairwise" not in manifest["census_modes"],
+                "pairwise+sibling is invalid; explicitly select --census-modes shared")
+    cases = list(itertools.product(*(manifest[name] for name in keys), range(manifest["repeats"])))
     for family, n, *_ in cases:
         limits = dict(uniform=1 << 48, terrain=1 << 40, clusters=1 << 33, rows=131072)
         require(n <= limits[family] and (family != "rows" or n % 2 == 0), "fixture outside its finite domain")
@@ -295,8 +340,13 @@ def cross_check(row: dict[str, Any], identities: dict, signatures: dict) -> None
     require(output_key not in identities or identities[output_key] == row["digest"],
             "canonical q2 support digest changed across front, census, s or repetition")
     identities[output_key] = row["digest"]
-    key = tuple(row[name] for name in KEYS)
-    signature = {name: row[name] for name in DISCRETE_FIELDS}
+    front_key = ("front", *identity, row["kmax"], row["s"], row["front_mode"])
+    front = {name: row[name] for name in ("front_work", "candidate_pairs", "input_rectangles", "anchor_queries")}
+    require(front_key not in identities or identities[front_key] == front,
+            "sibling/census mode changed the front or its candidate population")
+    identities[front_key] = front
+    key = tuple(row[name] for name in row_keys(row))
+    signature = {name: row[name] for name in discrete_fields(row)}
     require(key not in signatures or signatures[key] == signature, "discrete work changed across identical repetitions")
     signatures[key] = signature
 
@@ -314,6 +364,8 @@ def campaign_directories(root: Path) -> list[Path]:
 def capture(args: argparse.Namespace) -> int:
     parameters = dict(families=args.families, sizes=args.sizes, kmax=args.kmax, separations=args.s,
                       seeds=args.seeds, modes=args.modes, census_modes=args.census_modes, repeats=args.repeats)
+    if args.sibling_modes is not None:
+        parameters["sibling_modes"] = args.sibling_modes
     cases = matrix(parameters)
     args.output.mkdir(parents=True, exist_ok=False)
     binary = args.probe.resolve()
@@ -326,7 +378,8 @@ def capture(args: argparse.Namespace) -> int:
         cache = (binary.parent / "CMakeCache.txt").read_text()
         compilers = [line.split("=", 1)[1] for line in cache.splitlines() if line.startswith("CMAKE_CXX_COMPILER:") and "=" in line]
         require(len(compilers) == 1 and bool(compilers[0]), "missing compiler provenance")
-        manifest = {**parameters, "schema": SCHEMA, "scope": SCOPE, "public_status": "not_claimed",
+        manifest = {**parameters, "schema": SIBLING_SCHEMA if "sibling_modes" in parameters else SCHEMA,
+            "scope": SCOPE, "public_status": "not_claimed",
             "separation_convention": "box_gap_diameter_v1", "started_utc": utc_stamp(),
             "threads": 1, "gcp_used": False, "processes_sequential": True, "warmup_runs": 0,
             "probe": str(binary), "probe_sha256": binary_pin, "source_sha256": pins, "cmake_cache": cache,
@@ -407,7 +460,8 @@ def check(args: argparse.Namespace) -> int:
     for directory in directories:
         manifest = parse_result((directory / "MANIFEST.json").read_bytes())
         completion = parse_result((directory / "COMPLETION.json").read_bytes())
-        require(manifest.get("schema") == SCHEMA and manifest.get("scope") == SCOPE and
+        version2 = "sibling_modes" in manifest
+        require(manifest.get("schema") == (SIBLING_SCHEMA if version2 else SCHEMA) and manifest.get("scope") == SCOPE and
                 manifest.get("public_status") == "not_claimed" and manifest.get("gcp_used") is False and
                 manifest.get("separation_convention") == "box_gap_diameter_v1" and
                 uint(manifest.get("threads"), "threads") == 1 and manifest.get("processes_sequential") is True and
@@ -441,7 +495,9 @@ def check(args: argparse.Namespace) -> int:
                     "invalid invocation or binary pin")
             raw = base64.b64decode(record["stdout_base64"], validate=True)
             row = parse_result(raw)
-            key = tuple(row[name] for name in KEYS)
+            require(row.get("schema") == ("mhgp8_wspd_q2_census_probe_v2" if version2 else
+                    "mhgp8_wspd_q2_census_probe_v1"), "campaign/probe schema mismatch")
+            key = tuple(row[name] for name in row_keys(row))
             command = command_for(manifest["probe"], key)
             require(raw.decode() == record.get("stdout") and row == record.get("result") and
                     record.get("command") == command, "raw/parsed/command mismatch")
@@ -459,10 +515,13 @@ def check(args: argparse.Namespace) -> int:
                   gcp_used=False, provenance_policy=PROVENANCE_POLICY, provenance=published,
                   current_reader_sha256=pins[RUNNER_SOURCE], source_check="current_content_and_closing_pins_not_a_rebuild",
                   mode_comparison="same_canonical_q2_support_digest_not_equal_front_or_census_work")
+    if any(len(key) == 8 for key in groups):
+        result["sibling_comparison"] = "same_front_candidates_and_canonical_digest_not_equal_census_work"
     if args.summary:
         result["summary"] = []
         for key, rows in sorted(groups.items()):
-            item = dict(zip(KEYS, key), repeats=len(rows), **{name: rows[0][name] for name in DISCRETE_FIELDS})
+            item = dict(zip(row_keys(rows[0]), key), repeats=len(rows),
+                        **{name: rows[0][name] for name in discrete_fields(rows[0])})
             item["median_timings"] = {field: statistics.median(row["timings"][field] for row in rows) for field in TIMES}
             result["summary"].append(item)
     print(json.dumps(result, indent=2, allow_nan=False))
@@ -482,6 +541,8 @@ def main() -> int:
     run.add_argument("--seeds", nargs="+", type=int, default=[3])
     run.add_argument("--modes", nargs="+", choices=MODES, default=list(MODES))
     run.add_argument("--census-modes", nargs="+", choices=CENSUS_MODES, default=list(CENSUS_MODES))
+    run.add_argument("--sibling-modes", nargs="+", choices=SIBLING_MODES,
+                     help="Explicit option selects v2; sibling requires --census-modes shared")
     run.add_argument("--repeats", type=int, default=1)
     reader = sub.add_parser("check")
     reader.add_argument("receipt", type=Path)
@@ -498,4 +559,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

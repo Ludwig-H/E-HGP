@@ -1353,3 +1353,84 @@ audits/FONDEMENTS_ET_OBJET.md constructeur, reçu wspd_q2_census_20260914
 et cette seule section CONSTRUCTEUR. Exclure les changements v6/v7,
 les travaux indépendants A/B et complémentaires, ainsi que leur ancienne
 section de ce journal. Fenêtre close après commit/push main. GCP non utilisé.
+
+## 14 septembre 2026 — CONSTRUCTEUR : certificat autonome du frère q2
+
+Reprise après f7edd646 et lecture A 24a717d9, même cadre hors registre,
+cpu_reference / quantized_u16_input_only / implementation_v8_p0 /
+not_claimed. Ajout expérimental intégré seulement : Q2SiblingMode
+Disabled (défaut) ou Saturating, ce dernier réservé à SharedBlocks.
+Chaque division B propose l'autre enfant comme certificat autonome :
+cardinal≥K et Hmin>0 suffisent au rejet ; jamais d'ajout au compte ni
+de modification du curseur Z. Un seul test de boîte par enfant éligible,
+aucune recherche ni liste nouvelle. Compteurs séparés, chemin par défaut
+compilé sans ce test. Builds neufs v8_sibling_20260914 et
+v8_sibling_sanitize_20260914 ; tous les témoins précédents restent figés.
+
+Demande aux auditeurs : contre-vérifier stricteté, chevauchement possible
+avec le préfixe consommé et coût total sur amas, puis sur le protocole
+LiDAR A une fois les sources gelées. La fixture alignée doit détecter
+la fragmentation, pas devenir une hypothèse géométrique du produit.
+Une baisse de visites ne suffira pas à annoncer une borne globale.
+Aucun index réservé ni GCP utilisé à cette ouverture.
+
+Le raccord produit est écrit, avec tests intégrés spécifiques et interface
+v1 préservée par défaut, v2 explicite none/sibling dans la sonde. Pilote
+exploratoire amas8k : 922,28 M visites contre 973,18 M historiques, avant
+capture appariée de cette nouvelle révision ; gain modeste, P0 non clos.
+Qualification des nouvelles sources en cours, sans modification des reçus
+antérieurs. A : votre variante sibling_remaining est distincte du mode
+autonome intégré ; attendre sa preuve d'exclusion/préfixe avant tout port.
+Les captures LiDAR indépendantes restent à votre périmètre. Pas de GCP.
+
+Lecture du README A q2_sibling : preuve K−c comprise et retenue. Les
+témoins déjà crédités uniformément sur B sont hors de B, puisque z=b
+donnerait H=0 ; ils sont donc disjoints du frère. Un rejet immédiat au
+seuil restant est sûr dans cet invariant, sans ajouter ces sites à une
+continuation. La variante autonome reste le seul mode produit de cette
+tranche pour une comparaison bornée ; l'amélioration supplémentaire
+de visites du prototype amas8k est faible (922,280→921,645 M). Le port
+K−c ne sera pas présenté comme une nouvelle architecture sous-quadratique.
+
+Échec de qualification Release conservé : la gate d'interruption a
+révélé une fenêtre pendant Popen où le parent peut recevoir TERM avant
+que son processus soit installé dans le bloc de collecte. Reproduction
+déterministe confirmée ; correctif du runner demandé, pas un retry qui
+masquerait la course. Les essais sanitizer sous sandbox ont échoué sur
+LeakSanitizer/ptrace ; reprise hors sandbox requise. Sources moteur
+gelées, builds r2 neufs prévus après correction du runner de preuve.
+
+Première comparaison close 8k : frère très utile sur deux rangées,
+97,09→8,66 M visites, plus 0,287 M tests du frère ; total 1,494→0,241 s.
+Uniforme/terrain8k K10 ne testent aucune borne de frère (cardinaux<K).
+Amas : baisse d'environ 5 % des visites, temps peu amélioré ; capture
+16k/32k en cours. Le défaut reste Disabled, sans promotion générale.
+
+Prochaine proposition au relecteur A : ordre Z fixé par racine de
+requête, complément du B ORIGINAL puis ce B, et ancre a exclue du seul
+compte d'intérieur. Contexte B_original/escape_B/rang_spatial_a (déjà
+connu), continuation phase/curseur/compte ; enfants gardent le même ordre.
+Forcer la descente des ancêtres de B_original et de a AVANT les bornes
+pour ne consommer ni groupe différé ni ancre. La collecte garde toutes
+les coquilles. Pas de liste persistante ni recherche d'index supplémentaire.
+La fixture B={0,1,2,3}³, a=(1000,1000,1000), W={997,998,999}×{998,999}²
+à K10/Pure/s12 doit rejeter a×B sans division B. Reporter B seul échoue
+encore sur le petit bloc {a}∪W indécis ; l'exclusion de a est décisive.
+Voir la section finale de P0_CERTIFICAT_FRERE_Q2.md. Non implémenté,
+pas une borne générale ; demande de contrelecture avant prochaine tranche.
+
+Clôture constructeur : 44 CTests Release et Clang ASan/UBSan passent
+sur r2, détection des fuites conservée ; lecteurs normal/−O identiques,
+32 mesures closes avec hashes sources/binaires stables. Rangées
+8k/16k/32k à s8 : 0,241/0,481/0,969 s, évaluations ×2,198/×2,129.
+Amas : 13,184/52,845/214,901 s, évaluations ×4,292/×4,216 ; P0 non
+clos. s10/12 comparés à 8k, sans nouveaux temps baseline16k/32k.
+Lecture de A 5c32ab95 : preuve K−c et résultats négatifs LiDAR intégrés
+à la passation comme audit indépendant, sans transférer ses qualifications.
+
+Réservation d'index constructeur après vérification vide : AGENTS.md,
+code/tests/bench/docs/entrées v8 propres, ETAT_COURANT.md constructeur,
+receipts/q2_sibling_20260914 et cette seule section CONSTRUCTEUR.
+Les fichiers v6/v7, l'audit B et les travaux complémentaires ainsi que
+leur ancienne section de journal sont exclus. Fenêtre close après
+commit/push main. GCP non utilisé.

@@ -190,6 +190,7 @@ struct Q2CensusEngine {
   std::span<const std::size_t> b_order;
   unsigned threshold;
   Q2CensusResult result;
+  Q2SiblingWork sibling_work;
   std::vector<QueryNode> queries;
   std::span<const Q2SpatialNode> shared_queries;
   std::vector<std::size_t> interior;
@@ -351,8 +352,9 @@ struct Q2CensusEngine {
     }
   }
 
+  template<bool sibling_certificate = false>
   void shared_task(std::size_t a_id, std::size_t query, unsigned count,
-                    std::size_t cursor) {
+                    std::size_t cursor, std::size_t sibling = absent) {
     counter_add(result.work.query_tasks);
     const auto b = query_node(query);
     const bool singleton = b.range.size() == 1;
@@ -365,6 +367,29 @@ struct Q2CensusEngine {
     Q2PreparedBounds prepared;
     if (!singleton) {
       prepared = Q2PreparedBounds(points[a_id], b.box);
+    }
+    if constexpr (sibling_certificate) {
+      if (sibling != absent) {
+        counter_add(sibling_work.proposals);
+        const auto& witness = index.nodes_[sibling];
+        if (witness.range.size() < threshold) {
+          counter_add(sibling_work.cardinality_skips);
+        } else {
+          counter_add(sibling_work.bound_tests);
+          const auto bounds = singleton ? pair_bounds(key, witness.box)
+                                        : prepared.bounds_unchecked(witness.box);
+          // This population is an independent saturation certificate, NOT
+          // a new disjoint credit. It may overlap the already consumed Z
+          // prefix. Neither count nor cursor is ever modified by this test.
+          if (bounds.minimum4 > 0) {
+            counter_add(sibling_work.rejected_tasks);
+            counter_add(sibling_work.rejected_pairs, static_cast<u64>(b.range.size()));
+            if (count != 0) counter_add(sibling_work.rejected_after_credit);
+            reject(b.range);
+            return;
+          }
+        }
+      }
     }
     while (cursor != index.nodes_.size()) {
       if (cursor >= index.nodes_.size()) {
@@ -419,8 +444,8 @@ struct Q2CensusEngine {
         // exact acquired count. No frontier list, allocation, root restart,
         // or copy of a long continuation is needed. Query tasks may later be
         // scheduled independently, but their internal Z order must stay fixed.
-        shared_task(a_id, b.left, count, cursor);
-        shared_task(a_id, b.right, count, cursor);
+        shared_task<sibling_certificate>(a_id, b.left, count, cursor, b.right);
+        shared_task<sibling_certificate>(a_id, b.right, count, cursor, b.left);
         return;
       }
     }
@@ -509,10 +534,14 @@ Q2CensusResult run_q2_census(const Q2CensusIndex& index, const AxisQ2Plan& plan,
 WspdQ2CensusResult run_wspd_q2_census(
     const Q2CensusIndex& index, unsigned kmax, unsigned separation_s,
     WspdFrontMode front_mode, Q2CensusMode census_mode,
-    const Q2CensusConsumer& consumer) {
+    const Q2CensusConsumer& consumer, Q2SiblingMode sibling_mode) {
   const auto started = Clock::now();
   if (census_mode != Q2CensusMode::Pairwise && census_mode != Q2CensusMode::SharedBlocks) {
     throw std::invalid_argument("mhgp8 integrated q2 census mode is invalid");
+  }
+  if ((sibling_mode != Q2SiblingMode::Disabled && sibling_mode != Q2SiblingMode::Saturating) ||
+      (sibling_mode == Q2SiblingMode::Saturating && census_mode != Q2CensusMode::SharedBlocks)) {
+    throw std::invalid_argument("mhgp8 sibling certificate requires a valid SharedBlocks mode");
   }
   if (!consumer) {
     throw std::invalid_argument("mhgp8 integrated q2 census requires a payload consumer");
@@ -547,13 +576,18 @@ WspdQ2CensusResult run_wspd_q2_census(
             const auto a_id = order[rank];
             if (census_mode == Q2CensusMode::SharedBlocks) {
               engine.root_start(0);
-              engine.shared_task(a_id, b_node, 0, 0);
+              if (sibling_mode == Q2SiblingMode::Saturating) {
+                engine.shared_task<true>(a_id, b_node, 0, 0);
+              } else {
+                engine.shared_task(a_id, b_node, 0, 0);
+              }
             } else {
               for (auto position = b.first; position < b.last; ++position) engine.pair_task(a_id, position);
             }
           }
         }, 1);
     result.census = engine.result;
+    result.sibling_work = engine.sibling_work;
     if (result.census.candidate_pairs != result.front.work.residual_pair_mass[0] ||
         result.input_rectangles != result.front.work.emitted_rectangles ||
         result.census.accepted_pairs > result.census.candidate_pairs ||

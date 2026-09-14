@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — front et census q2 raccordés
+# Morse HGP 3D v8 — réduire la fragmentation du census q2
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -35,6 +35,26 @@ catalogue q3/q4 ni une tour FULL.
 Les mesures historiques citées restent v7.
 
 ## État exécutable
+
+La neuvième tranche ajoute un [certificat autonome du bloc frère](docs/P0_CERTIFICAT_FRERE_Q2.md)
+au raccord q2, en option. À chaque division d'un groupe B, l'autre
+enfant peut certifier à lui seul K intérieurs et permettre un rejet
+immédiat. Aucun crédit n'est ajouté au compte hérité ; aucun curseur
+Z n'est modifié. Le défaut Disabled et le chemin Pairwise sont conservés.
+Les [32 mesures et leurs qualifications](receipts/q2_sibling_20260914/README.md)
+sont closes : **44 CTests Release et Clang ASan/UBSan passent**.
+Sur les rangées, le total 8k passe de 1,494 à 0,241 s ; avec le frère,
+8k/16k/32k prennent 0,241/0,481/0,969 s et les évaluations géométriques
+font ×2,20 puis ×2,13. Mais les amas font encore ×4,29 puis ×4,22 :
+la chaîne n'est pas globalement sous-quadratique. Uniforme/terrain8k
+ne gagnent aucun rejet. Les nouvelles comparaisons s8/10/12 portent sur
+8k ; la montée à 16k/32k est à s8. Le mode reste expérimental.
+Une course du runner à l'interruption est aussi corrigée et testée.
+Prochaine piste compacte : reporter le B original dans l'ordre Z et
+exclure a du seul comptage, sans retirer aucun point de la coquille.
+Aucun résultat FULL, multi-CPU ou GPU n'en découle. Contrats G4 ouverts.
+
+## Huitième tranche publiée à f7edd646 — historique
 
 La huitième tranche [raccorde le front au census q2 global](docs/P0_FRONT_ET_CENSUS_Q2.md).
 Elle ne reconstruit aucun plan local, tableau B ni arbre B par rectangle.

@@ -59,6 +59,13 @@ une tâche (A,B,Z) est une piste suivante, pas une borne acquise. Le
 proposeur WSPD et le premier groupe census repartent encore de la racine ;
 B1 reste ouvert malgré l'absence de redémarrage des enfants B.
 
+La [neuvième tranche](P0_CERTIFICAT_FRERE_Q2.md) teste un seul bloc frère
+après chaque division, avant le raffinement suivant. Sa population
+suffisante certifie un rejet autonome, jamais un crédit à additionner.
+O(1) par tâche n'est pas O(1) par rectangle : tant que le nombre de
+tâches croît comme n², cette option ne clôt pas B1/P0. Le gain doit
+inclure ses propositions et évaluations de bornes supplémentaires.
+
 ## 1. Ordre des travaux et sens de « rédhibitoire »
 
 **P0 reste la suppression du calcul systématique O(|A|²+|B|²) des
