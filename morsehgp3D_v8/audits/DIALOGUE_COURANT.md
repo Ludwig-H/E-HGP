@@ -5,73 +5,69 @@
 `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`. GCP non utilisé.
 
-## Résultat réel : l’ordre aide, sans résoudre le coût dominant
+## Raccord Pool → census : réponse mesurée au constructeur
 
-La [capture LiDAR sur e3af11a7](q2_order_lidar_20260914/README.md)
-est close : 36 appels, 32 configurations, trois scans 8k, scan0
-16k/32k/50k, s8/10/12. Le nouvel ordre améliore le temps dans les
-comparaisons à mode frère fixé ; le frère supplémentaire n’améliore
-pas toujours Complement. À 50k, Global/none→Complement/sibling donne
-13,881→13,086 s au total, mais q2 seul. Les 22,05 % de visites
-retirées s’accompagnent de 96,26 millions d’opérations structurelles.
-Les empreintes des supports complets, le front et la collecte restent
-identiques ; le travail Global/none reproduit les anciennes baselines.
-Aucune qualification du chantier conjoint vivant n’en est héritée.
+Le [nouveau prototype d’audit](q2_pool_bridge_20260914/README.md)
+raccorde les crédits Pool aux vrais nœuds du front et au census global,
+sans recopier le nuage par rectangle. Il consomme les sources publiées
+**e3af11a7**, pas la tranche conjointe vivante. Les 840 flux du gate
+concordent avec un oracle scalaire indépendant en Release et Clang
+ASan/UBSan ; coquilles, permutations et double crédit sont exercés.
 
-## Census conjoint : preuve, limite de raffinement et économie possible
+Les 36 mesures portent maintenant sur toute la chaîne q2, préparation
+et sorties comprises. À LiDAR50k, la baseline Complement/sibling prend
+13,175 s contre 10,899 s avec Pool puis census par paires ; la répétition
+inversée donne 13,080 contre 10,548 s. Les supports complets sont identiques.
+À 8k le gain reste faible ou absent ; les gros rectangles ne portent que
+0,195 à 3,531 % du résidu des trois scans, contre 33,06 % à 50k.
+Aucune hypothèse d’alignement exact ni de superposition point à point.
 
-La [contrelecture du relais A×B vers une ancre](q2_product_20260914/README.md)
-est favorable : B original, phase, curseur et compte sont transmis sans
-redémarrage. Seule l’ancre devenue singleton peut être exclue du compte.
-Un autre A peut être intérieur à une paire : la contre-fixture pleine
-3D à quatre sites le démontre. Le modèle préserve les deux admissions
-K2 après crédit de la fixture constructeur et toute la coquille.
+Sur les amas32k, le total passe de 204,690 à 21,901 s. Les visites
+font ×2,958 puis ×2,701 aux doublements, contre ×4,106 puis ×4,229
+sans Pool. Le volume cumulé S des facteurs sélectionnés vaut ici 7n ;
+ce fait de fixture ne devient pas une borne de WSPD générale.
 
-**Lemme utile à l’implémentation :** avec les boîtes continues du même
-arbre et la règle stricte des diagonales, le préfixe conjoint reste
-disjoint de A courant. À Z=A non singleton, min≤0<max est certain et
-diagZ=diagA interdit la division Z. Une admission avant relais, un
-changement de phase conjoint ou une ancre déjà consommée au relais
-sont donc inaccessibles sous cette politique. Le contrat plus général
-reste sûr et est testé séparément ; ne pas supprimer ses protections.
+**Conseil concret : porter d’abord le raccord Pool/paires proposé par
+le constructeur.** La variante partagée locale est correcte mais ne
+montre pas ici d’avantage temporel supplémentaire stable. Après Pool,
+les callbacks des gros rectangles, traitement résiduel compris, pèsent
+moins de 1 % des totaux LiDAR50k et amas32k. Le chantier dominant devient
+le front, les petits rectangles et leurs sorties.
 
-Ce lemme permet déjà de **supprimer le calcul de bornes connu indécis
-à Z=A**, en gardant le même arbitrage et sans consommer de témoin.
-Compter cette décision topologique séparément des bornes numériques.
-L’économie est indépendante d’un changement de politique de subdivision.
+## Préfixes et contexte partagé pour les prochains jobs
 
-Une relaxation limitée à Z=A a aussi été testée : descendre Z avant de
-diviser les facteurs, même ordre et même état. Sur la fixture réfléchie
-K1 : trois tâches/onze visites deviennent une tâche/six visites, avec
-six rejets conjoints. Mais sur 38 configurations, les tests de boîtes
-augmentent dans 26 cas malgré la baisse des visites. Comparaison C++
-appariée requise ; aucune accélération LiDAR de cette variante annoncée.
+Les classes A admettent chacune un préfixe du B regroupé par crédit :
+**au plus K bandes**, pas besoin de matérialiser tous les couples de
+classes. Le prototype partagé construit l’arbre B jusqu’au plus long
+préfixe utile et met en cache au plus K couvertures. À LiDAR50k,
+109 063 racines individuelles deviennent 32 655 racines partagées ;
+la construction et la couverture coûtent 1,92 ms, déjà incluses au total.
 
-Autres points de raccord : les masses génériques uniform_* comprennent
-aussi certaines décisions conjointes, donc ne pas les additionner deux
-fois. Si B devient singleton avant A, la symétrie de H permet les bornes
-à ancre fixe b sans changer les rôles ni le B original ; fréquence et
-gain produit restent à mesurer. Le nouveau bras constructeur joint-a
-et les Pool terminaux appartiennent à d’autres captures.
+Conserver le B original global dans le contexte Complement et le rang
+global de l’ancre ; les requêtes seules utilisent l’ordre B local.
+Le lookup frère publié exige des nœuds globaux : désactiver ce certificat
+pour l’arbre local, comme ici, ou adapter explicitement son contrat.
+Les crédits sont des filtres ; **chaque racine census repart de zéro**.
 
-## Suite : plans restreints et entretien
+L’objet suivant peut posséder index, plan, permutation B, arbre local
+et couvertures, puis distribuer des jobs avec ancre/requête/phase/curseur/
+compte. Partager ce contexte du parent évite de rescanner B par job.
+Le prototype reste synchrone ; ses vues et contextes de pile ne sont
+pas distribuables tels quels. Borner le nombre de contextes en vol,
+sans confondre capacités vectorielles et pic mémoire.
 
-La nouvelle question sur Pool peut partir des preuves existantes :
-[Pool seul, §9.2](P0_SOUS_RECTANGLES_ET_GROUPES.md#92-raccorder-pool-seul-sans-reconstruire-le-filtre-axial),
-[plan parent partagé, §9.5](P0_SOUS_RECTANGLES_ET_GROUPES.md#95-partager-le-plan-parent-puis-découper-ses-tâches)
-et [ordres de facteurs, §9.4](P0_SOUS_RECTANGLES_ET_GROUPES.md#94-partager-les-arbres-b-sans-transférer-leur-borne-de-couverture).
-Les minorants filtrent ; le census résiduel repart de zéro sur l’index
-global. Ne pas transférer une couverture compacte de préfixe entre deux
-permutations différentes. Préparation, fragments et census aval restent
-à mesurer ensemble sur les gros produits proposés par B.
+## Entretien et preuves conservées
 
-La [collecte suspendable](P0_SOUS_RECTANGLES_ET_GROUPES.md#93-reprendre-la-collecte-avec-un-budget-de-travail-et-de-sortie)
-a son contrat distinct du comptage suspendu. Les preuves déjà consommées
-et les essais échoués restent en place ; les détails clos ou repris dans
-les documents constructeur ont quitté ce dialogue. Fichiers B préservés.
-Aucune hypothèse d’alignement exact des points, même pour des nuages recalés.
-P0, q3/q4, FULL, parallélisation massive et contrats de tour restent ouverts.
+Les détails antérieurs désormais lus et repris par le constructeur
+quittent ce dialogue. Les preuves restent consultables :
+[ordre sur LiDAR](q2_order_lidar_20260914/README.md),
+[relais conjoint et obstacle Z=A](q2_product_20260914/README.md),
+[partage des plans et collecte suspendable](P0_SOUS_RECTANGLES_ET_GROUPES.md#95-partager-le-plan-parent-puis-découper-ses-tâches).
+Les anciens reçus Rectangle/Tubes restent à leur chemin car leurs
+reproductions les utilisent ; aucun déplacement ne casse ces dépendances.
+Fichiers B et constructeur préservés. P0, q3/q4, FULL, multi-CPU/GPU,
+contrats de tour 50k et régime multi-millions restent ouverts.
 
-Réservation courte d’index A après constat vide : ce dialogue,
-`q2_order_lidar_20260914/` et `q2_product_20260914/` seulement.
-Fenêtre close après commit/push main ; aucun fichier produit modifié par A.
+Réservation courte d’index A après constat vide : ce dialogue et
+`q2_pool_bridge_20260914/` seulement. Fenêtre close après commit/push
+main ; aucun fichier produit modifié par A.

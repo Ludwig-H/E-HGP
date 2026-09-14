@@ -1,0 +1,83 @@
+{
+  "allowed_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "binary": "morsehgp3D_v8/audits/q2_pool_bridge_20260914/.build/r2/probe",
+  "build_receipt": "morsehgp3D_v8/audits/q2_pool_bridge_20260914/r2_BUILD.json",
+  "command": [
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/measure.py",
+    "--plan",
+    "separation",
+    "--build-receipt",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/r2_BUILD.json"
+  ],
+  "gcp_used": false,
+  "matrix": [
+    [
+      "single_000000",
+      8000,
+      10,
+      "baseline"
+    ],
+    [
+      "single_000000",
+      8000,
+      10,
+      "pool-pair"
+    ],
+    [
+      "single_000000",
+      8000,
+      10,
+      "pool-shared"
+    ],
+    [
+      "single_000000",
+      8000,
+      12,
+      "baseline"
+    ],
+    [
+      "single_000000",
+      8000,
+      12,
+      "pool-pair"
+    ],
+    [
+      "single_000000",
+      8000,
+      12,
+      "pool-shared"
+    ]
+  ],
+  "pins": {
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n8000.u16le": "ed5aa97941551e027a76d7c4eb4a03c739cdf0a83cbaf53035c1536bed0b5194",
+    "morsehgp3D_v8/audits/q2_order_lidar_20260914/lidar_order_probe.cpp": "a5607a70b1597b758d552d1e4169fcc5c6774b98508da63eaa9dff49bcf0b39c",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/.build/r2/probe": "fd1f4bb1f750763573c5089c2be2d90859e00a1fe0fb8bfe9640a8e26a45d2e5",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/bridge.hpp": "88a5cbef024e4a27d1d8ff6c6fe015c5f1023ddcd22dbe5ce855d82d097fdebd",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/build.py": "e484a65e28f97d826069c1d31f58b7c14828543ec6ae623410fc8411e3516f9c",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/gate.cpp": "3d3a48926e66d0aafacc765a47d2a445fadc6748c26af0d8cad3edc5c9cb1a01",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/node_pool.hpp": "9af39ca23bb70301d43a5671e245268adb744da8c9a0f30f1ccc764c98ebaa9a",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/probe.cpp": "027e90cace942f31195056d0e8694e6acb6b092ffa64e38111581fab3b2cf021",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/r2_BUILD.json": "b391b0aaaaf9e166c02a481ae1122e306d63c3da32e2f27ce358201f30e8b3bc",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/r2_sources.zip": "12029f3b02dbba2d8f7f6e92187fbe9ef20ba50e1734e7d360f20b4dcec2e15c",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/support_io.hpp": "2bfcf29394e321c2bea9c409545aab3df94b6093c7e6bfcb76109d7554e4387f"
+  },
+  "plan": "separation",
+  "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+  "public_status": "not_claimed",
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "runner_sha256": "3e97507f7f42ec3161f7175c05add82ea5036956860f82e0ec0f50b2019a98e8",
+  "schema": "mhgp8_audit_pool_bridge_campaign_v1",
+  "selected_cpu": 7,
+  "started_utc": "2026-09-14T13:13:27.486585+00:00",
+  "timeout_policy": "failed_no_partial_result",
+  "timeout_seconds": 300
+}
