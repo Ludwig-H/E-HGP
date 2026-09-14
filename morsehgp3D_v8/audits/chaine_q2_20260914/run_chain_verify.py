@@ -61,13 +61,19 @@ def main() -> int:
     parser.add_argument("--quick", action="store_true", help="familles adversariales seulement")
     parser.add_argument("--joint", action="store_true",
                         help="onzième tranche : ajoute les dix combinaisons Q2AnchorMode (SharedProduct/SharedAnchors)")
+    parser.add_argument("--pool", action="store_true",
+                        help="raccord Pool terminal : ajoute sept combinaisons pool_min_factor (1, 2, 64) ; implique --joint")
     args = parser.parse_args()
+    if args.pool:
+        args.joint = True
     lib = Path(args.lib).resolve(); src = Path(args.src_root).resolve(); build = Path(args.build_dir).resolve()
     build.mkdir(parents=True, exist_ok=True)
     pinned = [src / "src/pipeline/wspd_q2_census.hpp", src / "src/pipeline/q2_census.cpp", src / "src/pipeline/q2_census.hpp",
               src / "src/wspd/front.cpp", src / "bench/front_fixtures.hpp", HERE / "chain_verify.cpp", lib]
     if args.joint:
         pinned.insert(3, src / "src/pipeline/q2_joint_bounds.hpp")
+    if args.pool:
+        pinned.insert(4, src / "src/pipeline/q2_node_pool.hpp")
     for p in pinned:
         if not p.is_file():
             return fail(f"fichier absent : {p}")
@@ -76,6 +82,8 @@ def main() -> int:
     compile_cmd = ["g++", "-std=c++20", "-O2", "-Wall", "-Wextra", f"-I{src / 'src'}", f"-I{src / 'bench'}"]
     if args.joint:
         compile_cmd.append("-DMHGP8_AUDIT_JOINT")
+    if args.pool:
+        compile_cmd.append("-DMHGP8_AUDIT_POOL")
     compile_cmd += [str(HERE / "chain_verify.cpp"), str(lib), "-o", str(binary)]
     done = run(compile_cmd, HERE)
     if done.returncode != 0:
@@ -113,10 +121,15 @@ def main() -> int:
     if args.joint:
         for key in ("joint_rejected", "joint_accepted", "joint_handoffs", "joint_handoffs_after_credit"):
             totals[key] = sum(r["summary"].get(key, 0) for r in runs)
+    if args.pool:
+        for key in ("pool_filtered", "pool_selected_rects", "pool_passthrough_rects", "pool_pair_roots"):
+            totals[key] = sum(r["summary"].get(key, 0) for r in runs)
     receipt = {
-        "title": ("Chaîne front + census q2 conjoint (onzième tranche, Q2AnchorMode) : force brute exacte sur dix-huit combinaisons"
+        "title": ("Chaîne front + census q2 avec filtre Pool terminal (pool_min_factor) : force brute exacte sur vingt-cinq combinaisons"
+                  if args.pool else
+                  "Chaîne front + census q2 conjoint (onzième tranche, Q2AnchorMode) : force brute exacte sur dix-huit combinaisons"
                   if args.joint else "Chaîne front + census q2 (e3af11a7) : force brute exacte sur toutes les combinaisons de modes"),
-        "joint_modes": bool(args.joint),
+        "joint_modes": bool(args.joint), "pool_modes": bool(args.pool),
         "date": "2026-09-14", "author_role": "auditeur indépendant B",
         "git_head": run(["git", "rev-parse", "HEAD"], ROOT).stdout.strip(), "src_root": str(src),
         "compile_command": " ".join(compile_cmd), "pins_sha256": pins, "totals": totals, "runs": runs,

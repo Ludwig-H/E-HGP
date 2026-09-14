@@ -2,6 +2,8 @@
 // (run_wspd_q2_census, sources e3af11a7), toutes combinaisons de modes, contre force brute.
 // Avec -DMHGP8_AUDIT_JOINT (onzième tranche, Q2AnchorMode), dix combinaisons conjointes
 // SharedProduct/SharedAnchors s'ajoutent aux huit combinaisons à ancre individuelle.
+// Avec -DMHGP8_AUDIT_POOL (raccord Pool terminal, pool_min_factor), sept combinaisons filtrées
+// (seuils 1, 2 et 64, avec ou sans modes conjoints) s'ajoutent encore.
 // Auditeur B : vérification exécutée de la chaîne front + census q2 (run_wspd_q2_census, e3af11a7)
 // pour toutes les combinaisons de modes, contre une force brute exacte sur tous les sites :
 // chaque paire non ordonnée avec p<Kmax intérieurs stricts doit être émise exactement une fois,
@@ -51,12 +53,13 @@ int main(int argc, char** argv) {
   };
   u64 total_mismatch = 0, total_checked = 0, total_emitted = 0, total_alive = 0;
   u64 joint_accepted_total = 0, joint_rejected_total = 0, joint_handoffs_total = 0, joint_handoffs_after_credit_total = 0;
+  u64 pool_filtered_total = 0, pool_selected_rects_total = 0, pool_passthrough_rects_total = 0, pool_pair_roots_total = 0;
 #ifdef MHGP8_AUDIT_JOINT
   using AnchorMode = Q2AnchorMode;
 #else
   enum class AnchorMode { Individual };
 #endif
-  struct Combo { WspdFrontMode f; Q2CensusMode c; Q2SiblingMode sb; Q2WitnessOrder o; const char* name; AnchorMode am = AnchorMode::Individual; };
+  struct Combo { WspdFrontMode f; Q2CensusMode c; Q2SiblingMode sb; Q2WitnessOrder o; const char* name; AnchorMode am = AnchorMode::Individual; std::size_t pool = 0; };
   const std::vector<Combo> combos = {
     {WspdFrontMode::Pure, Q2CensusMode::Pairwise, Q2SiblingMode::Disabled, Q2WitnessOrder::GlobalDfs, "pure/pairwise"},
     {WspdFrontMode::Pure, Q2CensusMode::SharedBlocks, Q2SiblingMode::Disabled, Q2WitnessOrder::GlobalDfs, "pure/shared"},
@@ -78,6 +81,15 @@ int main(int argc, char** argv) {
     {WspdFrontMode::Pure, Q2CensusMode::SharedBlocks, Q2SiblingMode::Saturating, Q2WitnessOrder::ComplementFirst, "pure/joint-product/sib+compl", Q2AnchorMode::SharedProduct},
     {WspdFrontMode::Pure, Q2CensusMode::SharedBlocks, Q2SiblingMode::Saturating, Q2WitnessOrder::ComplementFirst, "pure/joint-anchors/sib+compl", Q2AnchorMode::SharedAnchors},
 #endif
+#ifdef MHGP8_AUDIT_POOL
+    {WspdFrontMode::MidpointSamples, Q2CensusMode::Pairwise, Q2SiblingMode::Disabled, Q2WitnessOrder::GlobalDfs, "samples/pairwise/pool1", Q2AnchorMode::Individual, 1},
+    {WspdFrontMode::MidpointSamples, Q2CensusMode::SharedBlocks, Q2SiblingMode::Saturating, Q2WitnessOrder::ComplementFirst, "samples/shared/sib+compl/pool1", Q2AnchorMode::Individual, 1},
+    {WspdFrontMode::MidpointSamples, Q2CensusMode::SharedBlocks, Q2SiblingMode::Saturating, Q2WitnessOrder::ComplementFirst, "samples/shared/sib+compl/pool2", Q2AnchorMode::Individual, 2},
+    {WspdFrontMode::MidpointSamples, Q2CensusMode::SharedBlocks, Q2SiblingMode::Saturating, Q2WitnessOrder::ComplementFirst, "samples/shared/sib+compl/pool64", Q2AnchorMode::Individual, 64},
+    {WspdFrontMode::Pure, Q2CensusMode::SharedBlocks, Q2SiblingMode::Saturating, Q2WitnessOrder::ComplementFirst, "pure/shared/sib+compl/pool2", Q2AnchorMode::Individual, 2},
+    {WspdFrontMode::MidpointSamples, Q2CensusMode::SharedBlocks, Q2SiblingMode::Saturating, Q2WitnessOrder::ComplementFirst, "samples/joint-anchors/sib+compl/pool2", Q2AnchorMode::SharedAnchors, 2},
+    {WspdFrontMode::MidpointSamples, Q2CensusMode::SharedBlocks, Q2SiblingMode::Disabled, Q2WitnessOrder::GlobalDfs, "samples/joint-product/pool2", Q2AnchorMode::SharedProduct, 2},
+#endif
   };
   for (const auto& cb : combos) {
     std::map<std::pair<std::size_t,std::size_t>, Emitted> emitted; u64 dup = 0;
@@ -88,7 +100,9 @@ int main(int argc, char** argv) {
       std::sort(e.interior.begin(), e.interior.end()); std::sort(e.shell.begin(), e.shell.end());
       emitted[key] = e;
     };
-#ifdef MHGP8_AUDIT_JOINT
+#if defined(MHGP8_AUDIT_POOL)
+    auto res = run_wspd_q2_census(*index, kmax, s, cb.f, cb.c, consumer, cb.sb, cb.o, cb.am, cb.pool);
+#elif defined(MHGP8_AUDIT_JOINT)
     auto res = run_wspd_q2_census(*index, kmax, s, cb.f, cb.c, consumer, cb.sb, cb.o, cb.am);
 #else
     auto res = run_wspd_q2_census(*index, kmax, s, cb.f, cb.c, consumer, cb.sb, cb.o);
@@ -119,16 +133,36 @@ int main(int argc, char** argv) {
       const auto& jw = res.joint_work;
       // Invariants annoncés par le constructeur : partition des candidates en rejetées/admises/transmises,
       // count_root_starts == root_products == rectangles d'entrée en mode conjoint.
-      const bool partition_ok = jw.rejected_pairs + jw.accepted_pairs + jw.handoff_pair_mass == res.census.candidate_pairs;
-      const bool roots_ok = res.census.work.count_root_starts == jw.root_products && jw.root_products == res.input_rectangles;
+      // Sous filtre Pool (MHGP8_AUDIT_POOL), les racines de paires et les rectangles filtrés sortent du périmètre conjoint,
+      // comme dans le contrôle du constructeur (candidates - pair_roots).
+      u64 pool_roots = 0, pool_filtered_rects = 0;
+#ifdef MHGP8_AUDIT_POOL
+      pool_roots = res.pool_work.pair_roots; pool_filtered_rects = res.pool_work.selected_rectangles - res.pool_work.passthrough_rectangles;
+#endif
+      const bool partition_ok = jw.rejected_pairs + jw.accepted_pairs + jw.handoff_pair_mass == res.census.candidate_pairs - pool_roots;
+      const bool roots_ok = res.census.work.count_root_starts == jw.root_products + pool_roots && jw.root_products == res.input_rectangles - pool_filtered_rects;
       std::printf("  joint: roots=%llu tasks=%llu splits_a=%llu splits_b=%llu witness_splits=%llu bound_tests=%llu credit_events=%llu handoffs=%llu handoffs_after_credit=%llu joint_rejected=%llu joint_accepted=%llu handoff_mass=%llu candidates=%llu max_depth=%llu phase_switches=%llu partition=%s roots_eq=%s\n",
         (unsigned long long)jw.root_products, (unsigned long long)jw.tasks, (unsigned long long)jw.splits_a, (unsigned long long)jw.splits_b, (unsigned long long)jw.witness_splits, (unsigned long long)jw.bound_tests, (unsigned long long)jw.credit_events, (unsigned long long)jw.singleton_handoffs, (unsigned long long)jw.handoffs_after_credit, (unsigned long long)jw.rejected_pairs, (unsigned long long)jw.accepted_pairs, (unsigned long long)jw.handoff_pair_mass, (unsigned long long)res.census.candidate_pairs, (unsigned long long)jw.max_depth, (unsigned long long)jw.phase_switches, partition_ok ? "ok" : "BROKEN", roots_ok ? "ok" : "BROKEN");
       if (!partition_ok || !roots_ok) ++total_mismatch;
       joint_accepted_total += jw.accepted_pairs; joint_rejected_total += jw.rejected_pairs; joint_handoffs_total += jw.singleton_handoffs; joint_handoffs_after_credit_total += jw.handoffs_after_credit;
     }
 #endif
+#ifdef MHGP8_AUDIT_POOL
+    if (cb.pool != 0) {
+      const auto& pw = res.pool_work;
+      // Invariants annoncés par le constructeur : partition sélectionnée = résiduelle + filtrée,
+      // racines de paires = résiduelle - passthrough, masse du front = candidates du census + filtrée.
+      const bool part_ok = pw.selected_pairs == pw.residual_pairs + pw.filtered_pairs && pw.pair_roots == pw.residual_pairs - pw.passthrough_pairs;
+      const bool mass_ok = res.front.work.residual_pair_mass[0] == res.census.candidate_pairs + pw.filtered_pairs;
+      std::printf("  pool: min_factor=%zu selected_rects=%llu selected_pairs=%llu residual=%llu filtered=%llu passthrough_rects=%llu passthrough_pairs=%llu bands=%llu pair_roots=%llu factor_sites=%llu partition=%s mass=%s\n",
+        cb.pool, (unsigned long long)pw.selected_rectangles, (unsigned long long)pw.selected_pairs, (unsigned long long)pw.residual_pairs, (unsigned long long)pw.filtered_pairs, (unsigned long long)pw.passthrough_rectangles, (unsigned long long)pw.passthrough_pairs, (unsigned long long)pw.bands, (unsigned long long)pw.pair_roots, (unsigned long long)pw.factor_sites, part_ok ? "ok" : "BROKEN", mass_ok ? "ok" : "BROKEN");
+      if (!part_ok || !mass_ok) ++total_mismatch;
+      pool_filtered_total += pw.filtered_pairs; pool_selected_rects_total += pw.selected_rectangles; pool_passthrough_rects_total += pw.passthrough_rectangles; pool_pair_roots_total += pw.pair_roots;
+    }
+#endif
   }
-  std::printf("SUMMARY family=%s n=%zu kmax=%u s=%u combos=%zu checked=%llu alive=%llu emitted=%llu mismatch=%llu joint_rejected=%llu joint_accepted=%llu joint_handoffs=%llu joint_handoffs_after_credit=%llu\n", fam.c_str(), N, kmax, s, combos.size(), (unsigned long long)total_checked, (unsigned long long)total_alive, (unsigned long long)total_emitted, (unsigned long long)total_mismatch,
-    (unsigned long long)joint_rejected_total, (unsigned long long)joint_accepted_total, (unsigned long long)joint_handoffs_total, (unsigned long long)joint_handoffs_after_credit_total);
+  std::printf("SUMMARY family=%s n=%zu kmax=%u s=%u combos=%zu checked=%llu alive=%llu emitted=%llu mismatch=%llu joint_rejected=%llu joint_accepted=%llu joint_handoffs=%llu joint_handoffs_after_credit=%llu pool_filtered=%llu pool_selected_rects=%llu pool_passthrough_rects=%llu pool_pair_roots=%llu\n", fam.c_str(), N, kmax, s, combos.size(), (unsigned long long)total_checked, (unsigned long long)total_alive, (unsigned long long)total_emitted, (unsigned long long)total_mismatch,
+    (unsigned long long)joint_rejected_total, (unsigned long long)joint_accepted_total, (unsigned long long)joint_handoffs_total, (unsigned long long)joint_handoffs_after_credit_total,
+    (unsigned long long)pool_filtered_total, (unsigned long long)pool_selected_rects_total, (unsigned long long)pool_passthrough_rects_total, (unsigned long long)pool_pair_roots_total);
   return total_mismatch == 0 ? 0 : 1;
 }

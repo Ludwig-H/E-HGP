@@ -137,6 +137,76 @@ chiffres de la prose venaient d'une exécution préliminaire : titre et
 chiffres sont alignés sur le reçu (60 ms à 8k, +1,04 s au seuil 2), et
 la limite est écrite ; la comparaison q2 complète lui appartient.
 
+## Contrelecture du port Pool terminal (ba11e3ab) : exact de bout en bout, seuil 64 justifié
+
+Réponse à la demande A/B du journal (IDs/rangs, couverture des préfixes,
+compte nul, coût cumulé des facteurs), sur les sources gelées du worktree
+instantanées à 14 h 11 UTC avec manifeste SHA-256 ; ces sources sont,
+fichier par fichier, les blobs publiés à ba11e3ab (`q2_node_pool.hpp`,
+`q2_census.cpp` et `wspd_q2_census.hpp` étendus, paramètre
+`pool_min_factor`).
+
+- **IDs et rangs.** Les crédits sont indexés par rang spatial moins le
+  premier rang du facteur ; `a_ranks()` porte des rangs globaux et
+  l'ancre est résolue par `order_[rang]`, `b_order()` porte des IDs
+  originaux et `pair_task(a_id, j)` lit `b_order[j]` pendant que la vue
+  B est temporairement remplacée, puis restaurée même sur exception.
+  L'échange qui fait de B le plus grand facteur précède le test
+  `|B| ≥ pool_min_factor`, donc le seuil porte bien sur max(|A|, |B|).
+  Rien ne fait passer une plage de rangs pour une plage d'IDs.
+- **Couverture des préfixes.** Tri par comptage stable par crédit ;
+  pour la classe A_i, préfixe = fin de la classe B_{K−i−1}, nul pour
+  i = K ; candidates = Σ_i |A_i|·préfixe(i). Les classes A partitionnent
+  A, donc aucune paire n'est dupliquée, et aucune boucle ne visite les
+  paires rejetées. La paire croisée de distance minimale n'a jamais de
+  crédit (un témoin strict dans A ou B donnerait une paire croisée plus
+  courte) : un plan ne vide donc jamais un rectangle, et le repli
+  « aucune réduction » est l'autre extrême, atteint très souvent sur les
+  petits rectangles.
+- **Compte nul.** `pair_task` fait `root_start(0)`, compte 0, clé de la
+  paire, `count_pair` depuis la racine de Z global ; les crédits ne sont
+  jamais préchargés, la coquille garde les extrémités. Les invariants de
+  masse annoncés (S = R + R_Pool, C = P − R_Pool, racines = résiduelle −
+  passthrough, partition conjointe sur C − pair_roots) sont recontrôlés
+  par mon vérificateur à chaque exécution.
+- **Coût cumulé.** Deux passes par facteur (sélection à tampon fixe de
+  K+1 propositions, certification à au plus K+1 témoins par site) :
+  `factor_read_visits = 2F`, `grouping_visits = 2F`, préfixes en K+1
+  visites par plan. C'est bien O(KF) par plan ; F lui-même n'est borné
+  que par la famille (7n sur les amas), pas par la WSPD.
+
+**Campagne de force brute.** Mon vérificateur de chaîne porte sept
+combinaisons filtrées de plus (`-DMHGP8_AUDIT_POOL`, option `--pool`) :
+seuils 1, 2 et 64, fronts Pure et MidpointSamples, Pairwise ou
+SharedBlocks avec frère et Complement, avec ou sans modes conjoints.
+Reçu : [CHAINE_Q2_POOL_CHECKS.json](chaine_q2_20260914/CHAINE_Q2_POOL_CHECKS.json)
+(86 exécutions × 25 combinaisons, 327 303 000 paires contrôlées,
+10 498 825 supports attendus et émis, **0 désaccord**, invariants de
+masse tenus partout, rejoué en `python3 -O`). Les hachés des cinq
+fichiers produit consommés sont ceux de ba11e3ab.
+
+Deux faits structurels pour la politique de seuil (sommes sur les 86
+exécutions, front MidpointSamples) :
+
+| Seuil | Rectangles sélectionnés | dont sans réduction | Paires filtrées | Racines de paires | F = Σ(|A|+|B|) |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 1 425 383 | 1 424 123 | 3 697 970 | 13 626 | 3 354 407 |
+| 2 | 341 275 | 340 015 | 3 697 970 | 13 626 | 1 186 191 |
+| 64 | 231 | 7 | 3 695 603 | 10 681 | 58 800 |
+
+Le seuil 64 capture 99,94 % de la masse filtrable pour 57 fois moins
+de sites de facteurs relus : sur ces nuages, le filtre ne retire rien
+sur 99,9 % des rectangles sélectionnés aux seuils 1 et 2, et le repli
+sans réduction y est la règle. Avec le front **Pure** au seuil 2, la
+situation change : 1 492 975 rectangles sélectionnés dont 1 163 187
+sans réduction, 425 850 bandes et 785 944 racines de paires, contre
+13 626 en MidpointSamples. Les rectangles partiellement réduits y sont
+nombreux, et c'est précisément le cas où une expansion paire par paire
+peut coûter plus que la route partagée : le « cas partiellement
+sélectif » que le constructeur annonce mesurer devrait l'être avec les
+compteurs passthrough sur ce front-là, pas seulement sur Samples.
+
+
 ## Onzième tranche (b2106c3c) : les modes conjoints sont exacts de bout en bout
 
 Les sources de la onzième tranche (`Q2AnchorMode::SharedProduct` /
