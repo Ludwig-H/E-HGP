@@ -1,0 +1,109 @@
+{
+  "schema": "mhgp8_q2_revision_comparison_v1",
+  "status": "passed",
+  "scope": "materialized_q2_component_revision_comparison",
+  "full_contract_qualified": false,
+  "gcp_used_by_comparator": false,
+  "baseline_revision": "f4815cd42d572db6aef27ec73d100f52303fff26",
+  "matching_work_and_outputs": true,
+  "configurations_including_order": 54,
+  "measurements_per_revision": 62,
+  "ratio_kind": "candidate_over_baseline_lower_is_faster_null_if_zero_denominator",
+  "comparison_reader_sha256": {
+    "morsehgp3D_v8/bench/compare_q2_revisions.py": "1d0bd7c0800e0f4276358663b5b28358bb974b47e1ea6f61f0ea16a8b9087d33",
+    "morsehgp3D_v8/bench/run_q2_census_matrix.py": "892bd3ae84b45748e8c99e65265f948382a1affce7c2d0c44abd57772be9c36e"
+  },
+  "binary_verification": "recorded_before_after_and_closing_pins_not_a_rebuild",
+  "sampling": "separate_order_medians_no_confidence_interval_or_worst_case_claim",
+  "baseline": {
+    "provenance": {
+      "build_id": "142ad22103c52368d08584632979c4d9fc5ac42bf75b4643aa92560c639ad136",
+      "machine_id": "8615d784279c2c9fc7d2dc6c854d5f8e6bc49045c4497780fcb6813eedcae738",
+      "probe_sha256": "243387ac6df40e3f0f0c38a1d7d7a86735ed260ba11d904bf032bc4eb1c6e432",
+      "compiler_version": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+      "cmake_cache_sha256": "42e9522b1672daa7311f8d7d198efe7c56ec564236d7065797ad6ba0945d18b5",
+      "cpuinfo_normalized_sha256": "a859b90165aacac8dba64ae83bd629c755518e04c7ec334f4d0babbc3fa829c1",
+      "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+      "logical_cpu_count": 8,
+      "threads": 1
+    },
+    "campaigns": 2,
+    "source_sha256": {
+      "morsehgp3D_v8/CMakeLists.txt": "e11f2e744073e5955f55d21a9605bb5e8931bc58e2eb0d23d0e6ad33ededbac5",
+      "morsehgp3D_v8/bench/check_paired_campaign.py": "f93f291e3cc2090f6b3a7352a883e869203cdbf132c829b1110b29a4254152e0",
+      "morsehgp3D_v8/bench/p0_fixtures.hpp": "3c3a7bde624fde5c513ac4946fdceddaf6a392b61643d9f9a847c1b4f470520a",
+      "morsehgp3D_v8/bench/paired_receipts.py": "7fbf345f2a217691a737cb78f8db194397aaf87e4271de4835c89aea860a0120",
+      "morsehgp3D_v8/bench/probe_emit.hpp": "236331337c44bf25229899a798003e9ce7605ad5df98d90957c0d1ca2dc476d2",
+      "morsehgp3D_v8/bench/q2_census_probe.cpp": "6367a01b1aabccb1bf648e6aca83651f285047da385875a547b4f014a3899c14",
+      "morsehgp3D_v8/bench/run_p0_matrix.py": "0e66c1e3a6ebee31640e8041fe83f2c458a15cb4169ffb93015334e010d20690",
+      "morsehgp3D_v8/bench/run_q2_census_matrix.py": "892bd3ae84b45748e8c99e65265f948382a1affce7c2d0c44abd57772be9c36e",
+      "morsehgp3D_v8/bench/sheet_full_fixture.hpp": "ccde4f4649e7e6cd3c2bb5adab4a5dc574df9b360b6f11705d323b39a01f6d49",
+      "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+      "morsehgp3D_v8/src/pipeline/axis_q2.cpp": "8c91d5c9ca4427cf20e0909a5f35616ab76c9dc387268e7a6e28511de9e3e61a",
+      "morsehgp3D_v8/src/pipeline/axis_q2.hpp": "5d0022c7776b1c382f65e5bff9fe9e125c81c701c08a0d8db8e4e40672c4cac4",
+      "morsehgp3D_v8/src/pipeline/local_credits.cpp": "522009add5e85501215c562ab6a56548535ea09bd6deff0ebe41df0ae1a52255",
+      "morsehgp3D_v8/src/pipeline/local_credits.hpp": "7d96b38571bacf504d79b4139aaead8042bf1dca26396abd08bd8811799496db",
+      "morsehgp3D_v8/src/pipeline/q2_census.cpp": "3c513cc474c3d3a249779032f5cd03dac47198cf4b25d7698855bd118e0e593a",
+      "morsehgp3D_v8/src/pipeline/q2_census.hpp": "2116ac4ba0fcc896e4daa89583ecff6b32f307fcfa579121403b77b52d6b7a9e",
+      "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+      "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845"
+    },
+    "capture_runner_sha256": [
+      "892bd3ae84b45748e8c99e65265f948382a1affce7c2d0c44abd57772be9c36e"
+    ],
+    "evidence_sha256": {
+      "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/baseline/focus_32k/MANIFEST.json": "5d29d8dc71d8f7e94a79772aa0e4e7f322c7cb6ce591d2156a0172b7b1c1acfb",
+      "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/baseline/focus_32k/COMPLETION.json": "50309e463be1c2823204bda000673d9f1019a14c7e2aaacc14c86b1c7d80478b",
+      "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/baseline/focus_32k/MEASURES.jsonl": "0fe2535cbab2fd31184fecff73ea4cd2fa1cf1a050f4fc996e16c1e168edd9db",
+      "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/baseline/main_matrix/MANIFEST.json": "86cbf43edc85bd2bd5302268415a417a982f0223e30bef88647a0d5bcd5536f8",
+      "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/baseline/main_matrix/COMPLETION.json": "13d3010672396b4d23d90f5d1afe8c27d0d73f5c02f7c049b4cf8dbecee3a449",
+      "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/baseline/main_matrix/MEASURES.jsonl": "d2ae281d01e7d61337bd693a563569388e2658c9cdf203c17e236b94ebe8a180"
+    }
+  },
+  "candidate": {
+    "provenance": {
+      "build_id": "267542a2f703ea2e1044afb100a2ae8d070e96aec4328a20aac94c5429f40ed6",
+      "machine_id": "8615d784279c2c9fc7d2dc6c854d5f8e6bc49045c4497780fcb6813eedcae738",
+      "probe_sha256": "b76591c05ffd2be8d77979366a1ee3c4526e5913e37cdac24a43b60277b27079",
+      "compiler_version": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+      "cmake_cache_sha256": "aaf1e1693a32c9811db6e3b8c50bccaa2c8a17fe29fb6f27edefc4a5a645d507",
+      "cpuinfo_normalized_sha256": "a859b90165aacac8dba64ae83bd629c755518e04c7ec334f4d0babbc3fa829c1",
+      "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+      "logical_cpu_count": 8,
+      "threads": 1
+    },
+    "campaigns": 2,
+    "source_sha256": {
+      "morsehgp3D_v8/CMakeLists.txt": "11d544955e4a11fbbf8413f1e1ba6c0447f4ed7211bc858368b1920149cdfc2d",
+      "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+      "morsehgp3D_v8/src/pipeline/axis_q2.hpp": "5d0022c7776b1c382f65e5bff9fe9e125c81c701c08a0d8db8e4e40672c4cac4",
+      "morsehgp3D_v8/src/pipeline/local_credits.hpp": "7d96b38571bacf504d79b4139aaead8042bf1dca26396abd08bd8811799496db",
+      "morsehgp3D_v8/src/pipeline/q2_census.hpp": "2116ac4ba0fcc896e4daa89583ecff6b32f307fcfa579121403b77b52d6b7a9e",
+      "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+      "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+      "morsehgp3D_v8/src/spindle/q2_prepared_bounds.hpp": "7bb46b4b7af3beede9bc2fc8926bafda9c900eb573671583206a6d94ffac5d21",
+      "morsehgp3D_v8/src/pipeline/axis_q2.cpp": "8c91d5c9ca4427cf20e0909a5f35616ab76c9dc387268e7a6e28511de9e3e61a",
+      "morsehgp3D_v8/src/pipeline/local_credits.cpp": "522009add5e85501215c562ab6a56548535ea09bd6deff0ebe41df0ae1a52255",
+      "morsehgp3D_v8/src/pipeline/q2_census.cpp": "b1ca5edd575f39bc7995bcf09dca0ccc9bb6838469fe3761f9bf1a2191187c74",
+      "morsehgp3D_v8/bench/p0_fixtures.hpp": "3c3a7bde624fde5c513ac4946fdceddaf6a392b61643d9f9a847c1b4f470520a",
+      "morsehgp3D_v8/bench/probe_emit.hpp": "236331337c44bf25229899a798003e9ce7605ad5df98d90957c0d1ca2dc476d2",
+      "morsehgp3D_v8/bench/sheet_full_fixture.hpp": "ccde4f4649e7e6cd3c2bb5adab4a5dc574df9b360b6f11705d323b39a01f6d49",
+      "morsehgp3D_v8/bench/q2_census_probe.cpp": "6367a01b1aabccb1bf648e6aca83651f285047da385875a547b4f014a3899c14",
+      "morsehgp3D_v8/bench/run_q2_census_matrix.py": "892bd3ae84b45748e8c99e65265f948382a1affce7c2d0c44abd57772be9c36e",
+      "morsehgp3D_v8/bench/run_p0_matrix.py": "0e66c1e3a6ebee31640e8041fe83f2c458a15cb4169ffb93015334e010d20690",
+      "morsehgp3D_v8/bench/paired_receipts.py": "7fbf345f2a217691a737cb78f8db194397aaf87e4271de4835c89aea860a0120",
+      "morsehgp3D_v8/bench/check_paired_campaign.py": "f93f291e3cc2090f6b3a7352a883e869203cdbf132c829b1110b29a4254152e0"
+    },
+    "capture_runner_sha256": [
+      "892bd3ae84b45748e8c99e65265f948382a1affce7c2d0c44abd57772be9c36e"
+    ],
+    "evidence_sha256": {
+      "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/candidate/focus_32k/MANIFEST.json": "e097e84f35189a022de813ab2dd611248f19307d582d3bafc02ff3616de1f54e",
+      "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/candidate/focus_32k/COMPLETION.json": "3fc90e699e0c1b75d241d95495a92f5d26f1fef2a093201707c2fe3c5d2c106d",
+      "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/candidate/focus_32k/MEASURES.jsonl": "f3b22911a54850c4a7af466b4d351f0207f886d1ca84999597fc01e93fb36da3",
+      "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/candidate/main_matrix/MANIFEST.json": "934bfe5621badd835bf40e8285da65ddf2875da7d5ce90ddcfb5a9be5a6cba68",
+      "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/candidate/main_matrix/COMPLETION.json": "c361018cf97005e4f9f83fd51b2df57d7ed2595afcd245a9d38d7bc7df6adc7a",
+      "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/candidate/main_matrix/MEASURES.jsonl": "7c8e924031bbee2c052f882eb105086e14cdecd7471b5423e42a3b4eb7b7ac90"
+    }
+  }
+}

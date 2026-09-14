@@ -114,11 +114,20 @@ comparé à la recherche par paire sur les mêmes plages résiduelles. Son
 liste de continuation. Les mesures paient l'index de tous les sites, les
 subdivisions et la collecte des IDs d'intérieur/coquille. Après intersection,
 moins de visites ne suffit pas à compenser le prix des tests de groupes.
-Prochaine économie bornée : préparer leurs constantes par tâche, puis
-comparer à coût complet, avec la référence individuelle conservée.
+Cinquième tranche : les [constantes sont préparées par tâche](P0_BORNES_PREPAREES_ET_PARALLELISATION.md),
+comparées à coût complet, avec la référence individuelle conservée.
+La baisse locale mesurée est modeste et ne change aucune visite.
 Le flux conserve les supports et les clés exactes ; la comparaison à Pool
 seul, la déduplication globale, la vraie WSPD et la tranche FULL minimale
 restent les raccords suivants, sans nouvelle préparation quadratique.
+
+Priorité suivante : nuage/index global partagé, puis vues de rectangles
+et résidus sans validation ni copie de n sites par rectangle. Le contexte
+rectangle/seuil, la permutation B et l'identité de l'index Z restent
+distincts de la seule appartenance au nuage. Le raccord Pool par préfixes
+et la suspension du parcours doivent partir de ces objets communs.
+Tester mono les reprises, puis plusieurs CPU, puis G4 : ne pas porter
+en parallèle les copies globales répétées de l'API de composant actuelle.
 
 Les [consignes au futur développeur](VERROUS_ARCHITECTURE.md) détaillent
 les cinq verrous suivants : recherches de témoins répétées, interactions

@@ -1,0 +1,77 @@
+{
+  "schema": "mhgp8_prepared_bounds_publication_v1",
+  "status": "passed",
+  "scope": "publication_checks_not_full_hgp",
+  "public_status": "not_claimed",
+  "branch": "main",
+  "gcp_used": false,
+  "staged_tree_before_this_receipt": "69f85a4c2bb97235868600472db3198704a92f2a",
+  "staged_paths_before_this_receipt": [
+    "AGENTS.md",
+    "audits/COORDINATION_MORSEHGP3D_V8.md",
+    "morsehgp3D_v8/CMakeLists.txt",
+    "morsehgp3D_v8/PASSATION.md",
+    "morsehgp3D_v8/README.md",
+    "morsehgp3D_v8/audits/ETAT_COURANT.md",
+    "morsehgp3D_v8/bench/P0_PROBE.md",
+    "morsehgp3D_v8/bench/compare_q2_revisions.py",
+    "morsehgp3D_v8/docs/FAUSSES_PISTES.md",
+    "morsehgp3D_v8/docs/P0_BORNES_PREPAREES_ET_PARALLELISATION.md",
+    "morsehgp3D_v8/docs/PLAN_DE_REFONTE.md",
+    "morsehgp3D_v8/docs/VERROUS_ARCHITECTURE.md",
+    "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/BEFORE_LINKER_PROFILE_CHECK.json",
+    "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/QUALIFICATION.json",
+    "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/README.md",
+    "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/SUMMARY.json",
+    "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/VALIDATION.json",
+    "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/baseline/focus_32k/COMPLETION.json",
+    "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/baseline/focus_32k/MANIFEST.json",
+    "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/baseline/focus_32k/MEASURES.jsonl",
+    "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/baseline/main_matrix/COMPLETION.json",
+    "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/baseline/main_matrix/MANIFEST.json",
+    "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/baseline/main_matrix/MEASURES.jsonl",
+    "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/candidate/focus_32k/COMPLETION.json",
+    "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/candidate/focus_32k/MANIFEST.json",
+    "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/candidate/focus_32k/MEASURES.jsonl",
+    "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/candidate/main_matrix/COMPLETION.json",
+    "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/candidate/main_matrix/MANIFEST.json",
+    "morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/candidate/main_matrix/MEASURES.jsonl",
+    "morsehgp3D_v8/src/pipeline/q2_census.cpp",
+    "morsehgp3D_v8/src/spindle/q2_prepared_bounds.hpp",
+    "morsehgp3D_v8/tests/q2_prepared_bounds_gate.cpp",
+    "morsehgp3D_v8/tests/q2_revision_comparison_gate.py"
+  ],
+  "private_export": "/workspaces/E-HGP/build/v8_index_prepared_bounds_20260913.qBZj6V",
+  "final_executable_and_judge_pins_match": 50,
+  "export_probe_equals_capture_binary": true,
+  "export_probe_sha256": "b76591c05ffd2be8d77979366a1ee3c4526e5913e37cdac24a43b60277b27079",
+  "final_complete_export_tests": 34,
+  "final_complete_export_ctest_exit_code": 0,
+  "final_complete_export_ctest_seconds": 86.81,
+  "release_and_sanitizer_coverage": "32 unchanged core tests plus 2 final comparison tests in each build; original full export and comparison gates archived before linker/IPO-reader correction",
+  "readers": {
+    "normal": "passed",
+    "optimized": "passed",
+    "measurements_per_revision": 62,
+    "work_and_outputs_identical": true
+  },
+  "checks": {
+    "docs": {
+      "exit_code": 0,
+      "stdout": "Validated 538 active Markdown files.\n"
+    },
+    "implementation_status": {
+      "exit_code": 0,
+      "stdout": "Validated 20 implementation phases and their gates.\n"
+    },
+    "staged_diff_check": {
+      "exit_code": 0
+    },
+    "private_export_diff_check": {
+      "exit_code": 0
+    },
+    "ownership_whitelist": "passed"
+  },
+  "preserved": "All independent auditor drafts/sections and unrelated v6/v7 changes excluded; only the constructor journal section staged.",
+  "post_final_test_changes": "Only documentation, validation/qualification/publication receipts and constructor journal closure; no engine, probe, test or reader edits after the final export suite."
+}

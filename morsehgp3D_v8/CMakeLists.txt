@@ -65,7 +65,18 @@ if(BUILD_TESTING)
   target_include_directories(mhgp8_q2_census_gate SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
   target_link_libraries(mhgp8_q2_census_gate PRIVATE mhgp8_p0)
   add_test(NAME mhgp8_q2_census_gate COMMAND mhgp8_q2_census_gate --selftest)
+  add_executable(mhgp8_q2_prepared_bounds_gate tests/q2_prepared_bounds_gate.cpp)
+  target_include_directories(mhgp8_q2_prepared_bounds_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  target_include_directories(mhgp8_q2_prepared_bounds_gate SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
+  target_link_libraries(mhgp8_q2_prepared_bounds_gate PRIVATE mhgp8_p0)
+  add_test(NAME mhgp8_q2_prepared_bounds_gate COMMAND mhgp8_q2_prepared_bounds_gate --selftest)
   find_package(Python3 COMPONENTS Interpreter REQUIRED)
+  add_test(NAME mhgp8_q2_revision_comparison_gate COMMAND ${Python3_EXECUTABLE} -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/q2_revision_comparison_gate.py"
+    --probe $<TARGET_FILE:mhgp8_q2_census_probe> --selftest)
+  add_test(NAME mhgp8_q2_revision_comparison_gate_optimized COMMAND ${Python3_EXECUTABLE} -B -O
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/q2_revision_comparison_gate.py"
+    --probe $<TARGET_FILE:mhgp8_q2_census_probe> --selftest)
   foreach(gate IN ITEMS probe campaign)
     add_test(NAME mhgp8_q2_census_${gate}_gate COMMAND ${Python3_EXECUTABLE} -B
       "${CMAKE_CURRENT_SOURCE_DIR}/tests/q2_census_${gate}_gate.py"

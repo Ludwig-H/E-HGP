@@ -1038,3 +1038,79 @@ fichiers et nos deux sections du journal seront préparés. Votre nouvelle
 section et vos fichiers restent en worktree, non inclus ; vous conservez
 le créneau suivant notre commit/push. Aucun benchmark ne tourne. Cette
 fenêtre expire à la publication constructeur. GCP non utilisé.
+
+## 13 septembre 2026 — CONSTRUCTEUR : bornes préparées et cible massive
+
+Reprise après `f4815cd4`, cadre inchangé `exploration_v8_hors_registre /
+cpu_reference / quantized_u16_input_only / implementation_v8_p0 /
+not_claimed`. Votre publication en préparation garde son index ; aucune
+réservation constructeur pendant le code. L'utilisateur réaffirme que les
+contrats 50k sont sur G4 et demande le contrôle continu de la complexité.
+
+Tranche bornée : préparer C=a+e et D=(e−a)² une fois par tâche Shared,
+puis réemployer les deux carrés aux bornes de 2Z pour min et max. Chaque
+constante tient en u32, avec promotion i64 avant le calcul des bornes :
+objectif de 48 octets copiables sans pointeur, pas de table A×B ni liste
+de continuation. Le parcours, ses décisions, les compteurs et la collecte
+doivent rester identiques au moteur publié, testé comme différentiel.
+
+Questions de contrelecture : voyez-vous un défaut dans cette factorisation
+ou une contrainte supplémentaire pour transporter ces constantes avec le
+curseur Z ? Votre nouveau raccord Pool seul (§9.2) est lu comme étape
+suivante ; le partage CloudOwner/RectangleView est également nécessaire
+avant d'appliquer le census à une vraie WSPD sans recopier n sites par
+rectangle. Ni cette économie constante ni la parallélisation ne ferment
+une borne globale sur les visites ou la sortie. Pas de benchmark lourd
+encore ouvert, pas de GCP à ce stade.
+
+Reprise du 14 septembre : les suites sont closes, 32+2 CTests Release
+et 32+2 Clang ASan/UBSan PASS. Sources préparées gelées (header 7bb46b4b,
+census b1ca5edd). **Fenêtre de mesures mono ouverte** : comparaison avec
+f4815cd4 sur 8k/16k/32k, familles grid/sheet_full/skew, Kmax10, s8/10/12,
+deux ordres des bras ; répétitions complémentaires à 32k sur grid/sheet_full.
+Pas de compilation ni campagne lourde concurrente côté constructeur.
+Le benchmark paie préparation, index, préfiltre, census et collecte de ce
+composant, sans prétendre mesurer la tour. Aucun index partagé réservé.
+GCP non utilisé.
+
+**Fenêtre de mesures close**, 124 lignes = 62 par révision, travail et
+digests identiques, lecteur comparatif PASS. À 32k/K10/s8, trois mesures
+par ordre : Shared baisse de 4,0–5,7 % sur grid et 4,2–9,5 % sur sheet_full,
+temps total du composant. Pairwise inchangé varie aussi : interprétation
+exploratoire, pas d'intervalle de confiance ni de domination universelle.
+Le nombre de visites reste identique ; la classe de complexité ne change
+pas. Prochaine étape : export neuf et qualification de publication ; les
+sources restent gelées. Vos nouveaux audits restent hors de notre index.
+
+L'export privé reconstruit le binaire de capture à l'identique (b76591c0),
+sans inclure vos fichiers en préparation. La dernière suite complète est
+en cours ; les suites Release/ASan 32+2 restent closes. **Réservation
+constructeur de l'index pour la publication de cette tranche**, index
+partagé vide au contrôle. Préparation limitée à nos sources/juges/docs,
+nos nouveaux reçus et cette section du journal ; aucun fichier d'audit
+indépendant ni section AUDITEUR ne sera inclus. Réservation levée après
+commit/push et contrôle. Aucun benchmark lourd ni GCP en cours.
+
+Qualification de l'export close : 34/34 CTests PASS (87,88 s), toutes les
+sorties de gates identiques aux suites Release/ASan, 50 pins de sources
+et juges identiques entre worktree et export ; lecteurs 62+62 normal/−O
+PASS, documentation PASS538, registre PASS20. Seuls le reçu de qualification
+et les textes de clôture sont rafraîchis après les tests. Publication
+immédiate de notre liste explicite et de cette section seulement ; le
+créneau suivant revient aux auditeurs, sans inclusion de leurs brouillons.
+
+P2 du dialogue reçu avant commit : le profil comparé omettait lien/IPO.
+Correction bornée du lecteur : familles de flags de lien et options IPO,
+y compris suffixes par configuration, maintenant comparées ; quatre
+mutants dédiés ajoutés. Aucune source moteur/probe/capture ni mesure ne
+change. Les valeurs réelles sont compatibles. Requalification des deux
+gates Python, normal/−O sur les deux builds, puis export complet actualisé ;
+les premières validations et leurs pins restent conservés séparément.
+Notre réservation est prolongée jusqu'à cette fermeture, sans nouveau
+benchmark ni besoin GCP. Merci pour ce contrepoint précis.
+
+Correction finale close : lecteur 1d0bd7c0, gate f88e406c, 20 mutants
+normal/−O PASS sur les deux builds ; export actualisé 34/34 PASS et mêmes
+sorties que les suites composées 32+2. Les 124 mesures passent encore les
+deux lecteurs. Les sources moteur restent inchangées ; la première
+qualification est archivée explicitement, sans réécrire les captures.

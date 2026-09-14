@@ -219,3 +219,35 @@ refuse aussi les frères échoués avant création de MANIFEST. Il relit les
 bruts sans les modifier, distingue les hashes capture/lecteur et exige
 l'égalité de toutes les autres sources. Voir le
 [détail des corrections et des mutants](../receipts/q2_census_20260913/README.md).
+
+## Comparer deux révisions du census
+
+Le comparateur `compare_q2_revisions.py` relit une référence explicitement
+épinglée à `f4815cd42d572db6aef27ec73d100f52303fff26` et la version courante.
+Il ne capture rien et ne remplace aucun hash dans les bruts historiques.
+Chaque côté doit passer le lecteur complet avec son propre périmètre de
+sources ; même l'exception historique de runner ci-dessus est désactivée
+pour cette comparaison. La baseline se capture avec son runner et son
+binaire épinglés, la candidate avec ses propres sources et son binaire.
+
+```bash
+python3 -B morsehgp3D_v8/bench/compare_q2_revisions.py morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/baseline morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/candidate --summary
+python3 -B -O morsehgp3D_v8/bench/compare_q2_revisions.py morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/baseline morsehgp3D_v8/receipts/q2_prepared_bounds_20260914/candidate
+```
+
+Les matrices, nombres de répétitions, identités d'entrée, tous les
+compteurs discrets et les digests de sortie doivent coïncider. Machine,
+compilateur et options C++, de lien et IPO (y compris par configuration)
+doivent être compatibles ; le comparateur vérifie
+la provenance déclarée et les pins de fermeture, pas une reconstruction
+du binaire. Les médianes restent séparées par ordre des bras. Un ratio
+candidate/référence inférieur à 1 signifie plus rapide, un dénominateur
+nul donne `null`. Les doublements n→2n conservent famille, K, s et filtre.
+Ni intervalle de confiance ni borne de pire cas n'est déduit des médianes.
+
+Les gates normal/−O emploient de petites captures effectives et des
+mutations temporaires explicitement synthétiques, notamment pour vérifier
+les médianes de trois répétitions ; ce ne sont pas des mesures de vitesse.
+L'option de gate `--baseline-probe` permet aussi le différentiel réel avec
+l'ancien binaire. Les futures modifications du moteur demanderont une
+nouvelle filiation explicite, pas la réécriture de ces captures.

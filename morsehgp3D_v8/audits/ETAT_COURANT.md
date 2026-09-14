@@ -1,9 +1,24 @@
 # État de l'audit v8
 
-13 septembre 2026. Audit constructeur, avec contrelectures parallèles.
+14 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
-État constructeur courant, quatrième tranche P0 : census q2 individuel
+État constructeur courant, cinquième tranche P0 :
+[bornes préparées](../docs/P0_BORNES_PREPAREES_ET_PARALLELISATION.md),
+`cpu_reference`, `quantized_u16_input_only`, `implementation_v8_p0`,
+`not_claimed`. Les 34 CTests Release et Clang ASan/UBSan passent ;
+1 424 cas pour la nouvelle primitive, les gates census restent inchangées.
+Les [124 mesures](../receipts/q2_prepared_bounds_20260914/README.md)
+comparent f481 et le nouveau moteur, mêmes compteurs et digests.
+Sur grille/nappe32k/K10/s8, baisse du temps total Shared de 4–10 % dans
+les médianes répétées ; pas de domination universelle ni changement
+de complexité. Les doublements observés restent inférieurs à ×4,
+sans prouver la borne globale. Propriétaire/index global sur WSPD,
+continuations parallèles, q3/q4 et FULL restent ouverts. GCP non utilisé.
+
+## Historique : quatrième tranche P0 publiée à f4815cd4
+
+Census q2 individuel
 et partagé, index global immuable et curseur de continuation DFS ; collecte
 séparée des IDs intérieurs/coquille. `cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`. Le nouveau gate géométrique passe

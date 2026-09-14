@@ -1,10 +1,39 @@
-# Passation v8 — census q2 partagé
+# Passation v8 — bornes préparées et prochain raccord massif
 
-13 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
+14 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`. Aucun contrat de tour n'est encore acquis.
 
 ## À reprendre maintenant
+
+La cinquième tranche est qualifiée : [bornes préparées](docs/P0_BORNES_PREPAREES_ET_PARALLELISATION.md)
+de 48 octets, 34 CTests Release/Clang ASan/UBSan, oracle de 1 424 cas et
+comparaison des révisions sur [124 mesures](receipts/q2_prepared_bounds_20260914/README.md).
+Compteurs et sorties inchangés ; baisse exploratoire du total Shared
+de 4–10 % sur les médianes répétées grille/nappe32k/K10/s8. Les temps
+doublent par 1,58–2,41 sur ces familles, sans borne générale ni gain
+garanti sur tout nuage. Les deux builds `v8_prepared_bounds_20260913`
+et `v8_prepared_bounds_sanitize_20260913` sont épinglés.
+
+**Prochain chantier : séparer nuage/index global et contexte de rectangle.**
+Ne pas recopier et revalider n sites pour chaque rectangle WSPD. Préserver
+les trois compatibilités : même nuage pour index/requête, même contexte
+rectangle/seuil pour crédits, même permutation B et index Z précis pour
+plages/continuations. Porter les contre-fixtures de l'auditeur avant de
+relâcher les contrôles de propriétaires actuels. Raccorder Pool seul par
+les préfixes de classes (§9.2 de son audit), sans forcer le filtre axial.
+Puis expliciter les transitions du curseur pour suspension mono testée,
+workers CPU et enfin GPU ; des files pleines suspendent, jamais ne tronquent.
+Partager l'index ne borne pas la somme des tailles de facteurs ni les sorties.
+
+La déduplication des boules doit précéder les collectes répétées tout en
+conservant les incidences des supports. q3/q4 et la tranche FULL minimale
+restent prioritaires : ne pas repartir dans une série de micro-variantes
+de la seule borne q2. Les contrats 50k portent sur la tour entière sur
+G4 ; mono local, G4 et massif sont des qualifications distinctes.
+GCP non utilisé.
+
+## Quatrième tranche publiée à f4815cd4 — historique
 
 La quatrième tranche implémente le [census q2](docs/P0_CENSUS_Q2_PARTAGE.md)
 sur les résidus compacts. Le parcours partagé emploie les échappements

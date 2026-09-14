@@ -1,4 +1,5 @@
 #include "q2_census.hpp"
+#include "../spindle/q2_prepared_bounds.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -55,10 +56,7 @@ constexpr std::size_t absent = std::numeric_limits<std::size_t>::max();
   return value;
 }
 
-struct PowerBounds {
-  i64 minimum4{};
-  i64 maximum4{};
-};
+using PowerBounds = Q2Bounds;
 
 // The inexpensive singleton-pair path: exact min/max distances from the
 // doubled center to the doubled Z box. Pairwise never pays the product-box
@@ -78,34 +76,6 @@ struct PowerBounds {
   }
   const auto radius4 = static_cast<i64>(key.diameter_squared);
   return {radius4 - farthest_squared, radius4 - nearest_squared};
-}
-
-// a is fixed. Per coordinate the minimum H needs four (b,z) endpoint
-// pairs, but the maximum needs just two b endpoints and the clipped
-// parabola summit in Z. Merely testing Z's corners for its maximum would
-// incorrectly discard interior witnesses (audit section 9 counterexample).
-[[nodiscard]] PowerBounds shared_bounds(const Point3& a, const Box3& b,
-                                        const Box3& z) {
-  PowerBounds bounds;
-  for (std::size_t axis = 0; axis < 3; ++axis) {
-    const i64 av = a[axis];
-    const std::array<i64, 2> bv{b.low[axis], b.high[axis]};
-    const i64 zl = z.low[axis];
-    const i64 zh = z.high[axis];
-    i64 minimum = std::numeric_limits<i64>::max();
-    i64 maximum4 = std::numeric_limits<i64>::min();
-    for (const i64 value : bv) {
-      minimum = std::min(minimum, (zl - av) * (value - zl));
-      minimum = std::min(minimum, (zh - av) * (value - zh));
-      const i64 summit2 = std::clamp(av + value, 2 * zl, 2 * zh);
-      const i64 residual = summit2 - av - value;
-      const i64 difference = value - av;
-      maximum4 = std::max(maximum4, difference * difference - residual * residual);
-    }
-    bounds.minimum4 += 4 * minimum;
-    bounds.maximum4 += maximum4;
-  }
-  return bounds;
 }
 
 }  // namespace
@@ -353,6 +323,13 @@ struct Q2CensusEngine {
     const auto key = singleton ? ball_key(points[a_id], points[b_order[b.range.first]])
                                : Q2BallKey{};
     const auto b_diagonal = singleton ? 0 : squared_diagonal(b.box);
+    // Prepare six endpoint constants once for this query task, not once for
+    // every Z box. The 48-byte value has no heap storage or point views; the
+    // existing singleton-pair path does not compute these constants.
+    Q2PreparedBounds prepared;
+    if (!singleton) {
+      prepared = Q2PreparedBounds(points[a_id], b.box);
+    }
     while (cursor != index.nodes_.size()) {
       if (cursor >= index.nodes_.size()) {
         throw std::logic_error("mhgp8 q2 witness cursor exceeds the immutable index");
@@ -366,7 +343,7 @@ struct Q2CensusEngine {
         bounds = {value, value};
       } else {
         counter_add(result.work.count_bound_tests);
-        bounds = singleton ? pair_bounds(key, z.box) : shared_bounds(points[a_id], b.box, z.box);
+        bounds = singleton ? pair_bounds(key, z.box) : prepared.bounds_unchecked(z.box);
       }
       if (bounds.minimum4 > 0) {
         consume_witnesses(z.range.size());

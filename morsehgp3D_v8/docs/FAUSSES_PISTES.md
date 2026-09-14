@@ -76,12 +76,33 @@ Shared reste utile sur certaines grilles moins filtrées ; il n'est pas un
 mode gagnant universel. Le coût complet, et non la seule taille du résidu
 ou le nombre de visites, gouverne le choix.
 
+La cinquième tranche factorise les bornes dans 48 octets par tâche.
+Les visites restent identiques : moins de produits ne signifie ni nouvelle
+classe de complexité ni accélération massive. Les médianes Shared gagnent
+localement 4–10 % sur grille/nappe32k, sans dominer systématiquement
+l'individuel. Le compilateur optimisait déjà une partie des expressions.
+Conserver cette économie mesurée, mais ne pas multiplier ses variantes
+au détriment du partage global, des continuations et de FULL.
+
+Deux raccourcis de cache sont refusés pour le prochain partage global :
+des crédits ne se transfèrent pas entre rectangles du même nuage ; une
+boîte B indexée par rang ne se transfère pas à une autre permutation du
+même ensemble. L'auditeur les réfute respectivement sur quatre et cinq
+sites. De même, après subdivision B, les constantes de son parent restent
+sûres mais peuvent augmenter le travail : les reconstruire pour conserver
+les mêmes décisions que le moteur qualifié.
+
 Une fermeture échouée sans manifeste doit rester visible dans la lecture
 d'un dossier de campagnes : ne découvrir que les manifestes masquait un
 frère arrêté avant sa première mesure. Le lecteur q2 découvre désormais
 aussi fermetures et mesures, puis rejette les triplets incomplets. Une
 correction de lecteur ne doit pas réécrire les pins historiques : conserver
 le snapshot de capture et qualifier séparément le contrôle renforcé.
+Lors de la comparaison de révisions, les seules options C++ ne suffisent
+pas : les flags de lien et l'optimisation interprocédurale peuvent changer
+le binaire. Cette omission signalée par l'auditeur est corrigée avec
+quatre mutants ; les valeurs réelles des présentes captures étaient
+compatibles et leurs chronométrages sont conservés sans réécriture.
 
 Troisième tranche : additionner les colonnes exactes est sûr, parce que
 leurs témoins sont disjoints hors de l'ancre. Additionner ensuite ces

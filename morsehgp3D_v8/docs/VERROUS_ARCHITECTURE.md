@@ -20,6 +20,16 @@ comparaison ne clôt ni B1 pour toute la WSPD ni les verrous suivants.
 Les résultats v8 sont séparés dans leurs [reçus](../receipts/q2_census_20260913/README.md).
 GCP non utilisé.
 
+Suivi du 14 septembre : les [bornes préparées](P0_BORNES_PREPAREES_ET_PARALLELISATION.md)
+factorisent une constante de coût, sans changer les visites ni clore B1.
+Avant la vraie WSPD, séparer le stockage/index global et les contextes de
+rectangles : l'API actuelle recopie/valide n sites par propriétaire et
+ne doit pas être appelée ainsi sur chaque rectangle. Les restrictions
+de crédits exigent le même rectangle/seuil ; les plages B exigent leur
+permutation et les continuations leur index Z précis. Un même nuage
+ne suffit pas à autoriser ces réemplois. Le contrat de reprise doit aussi
+remplacer l'emprunt synchrone des buffers si l'émission devient asynchrone.
+
 ## 1. Ordre des travaux et sens de « rédhibitoire »
 
 **P0 reste la suppression du calcul systématique O(|A|²+|B|²) des

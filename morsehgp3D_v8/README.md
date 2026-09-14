@@ -13,8 +13,9 @@ public_status=not_claimed
 L'audit d'ouverture est suivi, sur demande explicite du 13 septembre,
 de l'implémentation P0 mono-thread. Aucun code moteur ni résultat de
 performance n'est repris automatiquement. La cible reste toute la tour
-HGP FULL K=1..10 à 50 000 points sous une seconde, repli sur toute la tour
-1..5, puis 100 ms ; la grande échelle G4 est un contrat distinct.
+HGP FULL K=1..10 à 50 000 points sous une seconde **sur G4**, repli sur
+toute la tour 1..5, puis 100 ms sur cette cible. Les tests locaux mono
+sont des étapes d'optimisation ; la grande échelle G4 est un contrat distinct.
 
 La structure v7 est conservée pour organiser la refonte : `src/`, `cli/`,
 `oracle/`, `tests/`, `bench/`, `cmake/`, `docs/`, `audits/`, `receipts/`.
@@ -32,7 +33,24 @@ Les mesures historiques citées restent v7.
 
 ## État exécutable
 
-La quatrième tranche implémente le [census q2 partagé](docs/P0_CENSUS_Q2_PARTAGE.md).
+La cinquième tranche prépare les [bornes q2 par tâche](docs/P0_BORNES_PREPAREES_ET_PARALLELISATION.md)
+dans 48 octets, sans changer parcours, compteurs ni sorties. Les **34 CTests
+passent en Release et sous Clang ASan/UBSan**. Les
+[124 mesures de comparaison](receipts/q2_prepared_bounds_20260914/README.md)
+retrouvent le même travail sur 8k/16k/32k, s8/10/12. À 32k/K10/s8,
+trois mesures par ordre indiquent une baisse du temps total Shared de
+4,0–5,7 % sur grilles et 4,2–9,5 % sur nappes. Ce gain local exploratoire
+ne modifie pas la complexité et ne rend pas Shared universellement gagnant.
+Les doublements du temps total sont entre 1,58 et 2,41 dans ces familles,
+pas une preuve globale sous-quadratique. Prochaine priorité : partager
+nuage/index sur les rectangles et rendre les continuations distribuables,
+sans confondre identités de nuage, rectangle, permutation et index.
+Ni tour FULL ni GPU implémentés ; les contrats G4 restent ouverts.
+
+Les paragraphes suivants sont l'historique des quatre tranches précédentes,
+avec leurs versions et mesures propres, non transférées au moteur courant.
+
+La quatrième tranche, publiée à f4815cd4, implémente le [census q2 partagé](docs/P0_CENSUS_Q2_PARTAGE.md).
 L'état de recherche tient dans un groupe B, un compte et un curseur de
 l'index global ; aucune liste de continuation n'est recopiée ou allouée
 par requête. Le premier gate géométrique passe 277 cas et 557 exécutions,
@@ -120,6 +138,9 @@ La troisième utilise `build/v8_additive_20260913/` et
 `build/v8_additive_sanitize_20260913/`, également épinglés.
 La quatrième utilise `build/v8_census_20260913/` et
 `build/v8_census_sanitize_20260913/`, désormais épinglés.
+La cinquième utilise `build/v8_prepared_bounds_20260913/` et
+`build/v8_prepared_bounds_sanitize_20260913/`, désormais épinglés ;
+les suites datent du 13 et les nouvelles mesures du 14 septembre.
 
 ## Commencer ici
 
@@ -148,4 +169,4 @@ multi-millions. Les optimisations privées ultérieures n'ont pas leur
 nouvelle mesure 50k. La v8 démarre sur ces constats, sans statut hérité.
 
 Entrées de suivi : [passation](PASSATION.md), [état de l'audit](audits/ETAT_COURANT.md).
-GCP non utilisé pour l'audit d'ouverture et ces quatre tranches mono.
+GCP non utilisé pour l'audit d'ouverture et ces cinq tranches mono.
