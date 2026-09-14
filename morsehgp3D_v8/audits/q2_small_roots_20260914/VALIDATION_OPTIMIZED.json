@@ -1,0 +1,195 @@
+{
+  "builds": {
+    "r1": {
+      "archive_sha256": "dabcfe52178efc6495868e3648d6e2345997e2ab7fc109bc8bac164d3de4cfe0",
+      "receipt_sha256": "4366e4a0ac295728346cf4cd7aad046a20d6c062a54221b63fbb3037076fc15c",
+      "sanitizer": false,
+      "status": "passed"
+    },
+    "san_r1": {
+      "archive_sha256": "0d63370f7fb718b59dda03f4759a37192b85f20b500867c3b375bd0487ae623c",
+      "receipt_sha256": "31a5105ea8cf6d69a05851d8a12b749ae3f27004b3ebfdfac14713b4654541bc",
+      "sanitizer": true,
+      "status": "failed"
+    },
+    "san_r2": {
+      "archive_sha256": "310f3ba371e9495d7a0440466fb9bbe2a456481613b760c2b3373f0d2e904edf",
+      "receipt_sha256": "2be459917c2ba9694ea2d1e83beb839e80ecb4ce9e62f231c091dcb0690e1483",
+      "sanitizer": true,
+      "status": "passed"
+    }
+  },
+  "campaigns": [
+    {
+      "paired_inputs": 1,
+      "plan": "check50k",
+      "rows": 3,
+      "status": "passed"
+    },
+    {
+      "paired_inputs": 1,
+      "plan": "clusters",
+      "rows": 3,
+      "status": "passed"
+    },
+    {
+      "paired_inputs": 2,
+      "plan": "growth",
+      "rows": 6,
+      "status": "passed"
+    },
+    {
+      "paired_inputs": 3,
+      "plan": "pilot",
+      "rows": 9,
+      "status": "passed"
+    },
+    {
+      "paired_inputs": 1,
+      "plan": "repeat50k",
+      "rows": 3,
+      "status": "passed"
+    },
+    {
+      "paired_inputs": 2,
+      "plan": "separation",
+      "rows": 6,
+      "status": "passed"
+    }
+  ],
+  "configurations": 27,
+  "gate": {
+    "configurations": 120,
+    "extra_shell_supports": 3240,
+    "filtered_pairs": 17424,
+    "fixtures": 10,
+    "global_work_comparisons": 120,
+    "oracle_rejections": 154989,
+    "pipeline_runs": 360,
+    "scalar_site_tests": 337403,
+    "scope": "bounded_audit_singleton_roots",
+    "selected_rectangles": 72,
+    "singleton_roots": 33456,
+    "status": "passed",
+    "supports": 32643,
+    "two_site_policy_checks": 12
+  },
+  "gcp_used": false,
+  "parent_matches": 10,
+  "pins": {
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n16000.u16le": "fbd31be0f4de345b1b7f027a6a9536e6f0e776c46f6caf6a4f3b82f91d4e8595",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n32000.u16le": "ac03426026406e79c154a557b91f054f815237cbd69a61c9a1d4c0e9e0993550",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n50000.u16le": "2a0c79ef95d7f34f1447f47c3bcf6cbff43156e7aa2d2f8c2eb1795109617426",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n8000.u16le": "ed5aa97941551e027a76d7c4eb4a03c739cdf0a83cbaf53035c1536bed0b5194",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n8000.u16le": "813d595e799ff00d93fb94980d2e406c3775217b93aa4efbea0a675aaab3b402",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n8000.u16le": "edc1a7980b366034984d0c3b020f5fa94777277b1618db7c16116c5ccfea4446",
+    "morsehgp3D_v8/audits/q2_order_lidar_20260914/lidar_order_probe.cpp": "a5607a70b1597b758d552d1e4169fcc5c6774b98508da63eaa9dff49bcf0b39c",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/bridge.hpp": "88a5cbef024e4a27d1d8ff6c6fe015c5f1023ddcd22dbe5ce855d82d097fdebd",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/campaign_check50k/COMPLETION.json": "cb53d7ba45f36918d906633ec64888344eb866e74ab339d6523cd77b423cf7c4",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/campaign_check50k/MANIFEST.json": "a870814e6ef36322d2435f6a31dc139bbd190e0787307f75bb5c44b6de3fc4d5",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/campaign_check50k/MEASURES.jsonl": "9416df0b6a331c6c496f8432d40ea3db818ac1d2555bfbcb94d10725323107a2",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/campaign_clusters/COMPLETION.json": "97c24ba57a3eeb26d1041fbefa07436b0782da7285e0fb43e46b81c58ec12f36",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/campaign_clusters/MANIFEST.json": "1410ad5d2b5dbe99738d3bc113667b119d33788232708215d5c5671203847654",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/campaign_clusters/MEASURES.jsonl": "c9fe2f312088870e982ced87c756af376397b5086f3836f5685c02347d9d753e",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/campaign_growth/COMPLETION.json": "7157233e5d349fecc350040a777027eec757385cc4b222012dc03dd09398981b",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/campaign_growth/MANIFEST.json": "b1a13cd7e212c878051347887f0d077fed7e314f99ebe7e6d4bd0cd4bf9d4301",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/campaign_growth/MEASURES.jsonl": "1d2083d480981802a10853d01a8f46981f37dbddade2edc163fc93e21ca5e70c",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/campaign_pilot/COMPLETION.json": "2418f196154fb50c7bc3f9ad3c0b1a752640dd0e874b2912b4d2227468fe5b45",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/campaign_pilot/MANIFEST.json": "9c35a345ab3766a4f569b4cbf8b18c52fa6f9854b2fa09abe6276e49227b68a2",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/campaign_pilot/MEASURES.jsonl": "b9241e60a84e6b4df04854c9662de47874333838cc23241df1db4d378569aac3",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/campaign_repeat50k/COMPLETION.json": "1118ed0e557ec5c125374d204a2edb4080175155cac01cf482587d9340ef3708",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/campaign_repeat50k/MANIFEST.json": "eaa379ba67918ce3747a1c3a3c50e1e8946b0e12537a09ad5979e59e6e116749",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/campaign_repeat50k/MEASURES.jsonl": "ea3a34c489b6edcfc7716fe99b4d45580efba6052a24876953752a78983e7f95",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/campaign_separation/COMPLETION.json": "76a8899b7471037f5d2e0103c531426117a7e8f68ea73ff5133d8e5fb2afa161",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/campaign_separation/MANIFEST.json": "fb7d8b118352092deae27e600d3a05e25e8bd69291bed8b76c3ee0f5e4452187",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/campaign_separation/MEASURES.jsonl": "c38d8cce3cb9526a65a124a499d7ba0d6b838a6f7c0cc10fe861b2f6b59965b7",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/gate.cpp": "3d3a48926e66d0aafacc765a47d2a445fadc6748c26af0d8cad3edc5c9cb1a01",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/measure.py": "3e97507f7f42ec3161f7175c05add82ea5036956860f82e0ec0f50b2019a98e8",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/node_pool.hpp": "9af39ca23bb70301d43a5671e245268adb744da8c9a0f30f1ccc764c98ebaa9a",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/probe.cpp": "027e90cace942f31195056d0e8694e6acb6b092ffa64e38111581fab3b2cf021",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/r1_VALIDATION.json": "6bedfd9d4dc5cf91b4a53e0e1379ea1d05d86ec6816eeda6cc591891364c36d0",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/r2_BUILD.json": "b391b0aaaaf9e166c02a481ae1122e306d63c3da32e2f27ce358201f30e8b3bc",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/support_io.hpp": "2bfcf29394e321c2bea9c409545aab3df94b6093c7e6bfcb76109d7554e4387f",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/.build/r1/gate": "d430be4bfe0e905868e58484e02eb0b557b2a7827cf61948d74a1e91176baaaf",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/.build/r1/probe": "8a18dc9206649139445309860999df35216b713749eea1cc679fe21b1642e4ea",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/.build/san_r2/gate": "bacad342ce8fa6ab829cd65cd1da93821f219a0e7c38f9e09ecd27cfb182cd1c",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/build.py": "5d6e128550d094fb5174c00640f8c47597934f649244a4338627301a161deb7e",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/campaign_check50k/COMPLETION.json": "a1869bb44c34675a6ede5e642e3beef77dfc73a56a01c1b7299bca9a5d39f2c8",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/campaign_check50k/MANIFEST.json": "566ccb04c3cf9b8700c9938c16466582e28ad05c554474a2589e1c1bcb8148de",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/campaign_check50k/MEASURES.jsonl": "745110545f1adc06f90f79bd26e0445d54cdbc8f6d787cdef50e285eef2ddd4d",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/campaign_clusters/COMPLETION.json": "d7660081da8f841b2aa2ff6ba816d1d1796e9de49691ed46d11543cb61565396",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/campaign_clusters/MANIFEST.json": "79abad432512913b9670dac4bd593fe731a1d0fd19dbb019f7bb1caf2a8c9dfe",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/campaign_clusters/MEASURES.jsonl": "41eeb47efac0d1ad7a7a7c6b924908b818721970ca41649c9eb0968a774c2d10",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/campaign_growth/COMPLETION.json": "0a392e75e2eb50e71890197ff78463b4fdeec218541732c4528a0e24e61a7133",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/campaign_growth/MANIFEST.json": "4cd5dbaa24b7673f4f9dbfec392616255d47e9e2e808a03a393fe730132ca190",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/campaign_growth/MEASURES.jsonl": "21c8d684a1653365a15e3f7ed101a815eb8d80e8ed44b7e58efa7b4c8dbe33d7",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/campaign_pilot/COMPLETION.json": "8b585cdd70a4e74b4f9d79cc948a782b5d46ebcb4cf2911448e53bfd16dc1a6d",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/campaign_pilot/MANIFEST.json": "4d8e815de59315a848607fd99a8ba2fd8f453ebda7ebd41f7bdeac41f5c14109",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/campaign_pilot/MEASURES.jsonl": "7261dbf2b58bd47b9c280548b7331c70d1d869a872bbb84123d26f7d1f543ab4",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/campaign_repeat50k/COMPLETION.json": "d38084b60800f3799946966e2254e5e345550396332b35d9eba20ad1c276f5d2",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/campaign_repeat50k/MANIFEST.json": "96f2486aaf24a40c8eff2fa0e78a127a35fbbbfce0dc37259e63cee585d446db",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/campaign_repeat50k/MEASURES.jsonl": "5f220a157b02fa698d150a11b3f7ebbff04f1e37b94e5bb954743b93098ea06c",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/campaign_separation/COMPLETION.json": "ade7631d48fa6d073b1c1718d0968d0fed97f9d93359e4ad0317e12a17fe2db7",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/campaign_separation/MANIFEST.json": "39ab2e665d3d9d021a56c84d21f4c47b4685b44d8fa9e57aeebce5fab4d32318",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/campaign_separation/MEASURES.jsonl": "674595b2999b24bbdd1706f1aaf1c9f7644ad5ee9aa74a6956bbe4557c50a54b",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/gate.cpp": "22556dbcd260d3def8b1aa9802e7dd1175889eeef227d3a3371a7766811fcf71",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/measure.py": "b3f9e39592004d12ff37d25edd2ca4a5f136f250fb6cb271cdb65c5e7a996eb7",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/probe.cpp": "39968b0cf5f72e2c3de5a7251dcd96674cecd42e43588202d12162df3a8442d1",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/r1_BUILD.json": "4366e4a0ac295728346cf4cd7aad046a20d6c062a54221b63fbb3037076fc15c",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/r1_sources.zip": "dabcfe52178efc6495868e3648d6e2345997e2ab7fc109bc8bac164d3de4cfe0",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/san_r1_BUILD.json": "31a5105ea8cf6d69a05851d8a12b749ae3f27004b3ebfdfac14713b4654541bc",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/san_r1_sources.zip": "0d63370f7fb718b59dda03f4759a37192b85f20b500867c3b375bd0487ae623c",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/san_r2_BUILD.json": "2be459917c2ba9694ea2d1e83beb839e80ecb4ce9e62f231c091dcb0690e1483",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/san_r2_sources.zip": "310f3ba371e9495d7a0440466fb9bbe2a456481613b760c2b3373f0d2e904edf",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/small_bridge.hpp": "0c24abdaeb309a0cd5eaa0a76f069719281de3ca7245c208d95565241c9bc77e",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/verify.py": "19ebe2004b4991fd6ac5bb9e3e19af1708304b07167e817372299d2147be65c5"
+  },
+  "public_status": "not_claimed",
+  "receipt_mutants": [
+    {
+      "name": "wrong_policy",
+      "rejected_by": "wrong root policy"
+    },
+    {
+      "name": "wrong_root_population",
+      "rejected_by": "initial singleton roots not exercised"
+    },
+    {
+      "name": "nested_nan",
+      "rejected_by": "Out of range float values are not JSON compliant: nan"
+    },
+    {
+      "name": "wrong_count",
+      "rejected_by": "geometry/query tree mismatch"
+    },
+    {
+      "name": "lost_front_pair",
+      "rejected_by": "front lane/mass mismatch"
+    },
+    {
+      "name": "lost_shell",
+      "rejected_by": "physical payload mismatch"
+    },
+    {
+      "name": "timed_out_promoted",
+      "rejected_by": "interrupted or timed-out receipt cannot be promoted"
+    },
+    {
+      "name": "signal_promoted",
+      "rejected_by": "interrupted or timed-out receipt cannot be promoted"
+    },
+    {
+      "name": "failed_status",
+      "rejected_by": "incomplete measure"
+    },
+    {
+      "name": "paired_shell_digest",
+      "rejected_by": "paired work/output changed: digest"
+    }
+  ],
+  "repeat50k_policies": 3,
+  "rows": 30,
+  "schema": "mhgp8_audit_small_roots_validation_v1",
+  "scope": "bounded_oracle_and_paired_q2_receipts_not_full",
+  "status": "passed"
+}

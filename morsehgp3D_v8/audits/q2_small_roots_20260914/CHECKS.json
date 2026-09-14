@@ -1,0 +1,65 @@
+{
+  "finished_utc": "2026-09-14T14:13:30.644668+00:00",
+  "gcp_used": false,
+  "own_markdown": {
+    "errors": [],
+    "paths": {
+      "morsehgp3D_v8/audits/DIALOGUE_COURANT.md": "be3bcae34d4211875ebbd47c67b3ba962cb9e4e028e375b7e344f893216c78ca",
+      "morsehgp3D_v8/audits/q2_small_roots_20260914/README.md": "f7e54f8c02e630c2cd757b631e93e4a02f3ec71cbe293e33f42cabac6985af79"
+    },
+    "validator_sha256": "9b25c5ad241fc57efbd7057bfe61f7f389249f61b62e3bc31926bb1d4c4281cd"
+  },
+  "public_status": "not_claimed",
+  "schema": "mhgp8_small_roots_delivery_checks_v1",
+  "started_utc": "2026-09-14T14:13:28.632459+00:00",
+  "status": "passed",
+  "steps": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_small_roots_20260914/tangent_shell_gate.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"checks\": {\"boxes\": 560, \"half_grid_evaluations\": 9136, \"half_integral_maxima\": 127, \"zero_max_boxes\": 85}, \"countermodels\": [\"zero_max_implies_site_exists\", \"zero_max_means_no_shell\", \"rounded_center_is_exact\", \"capacity8_certifies_full_shell30\", \"shell_prefix_certifies_final_admission\"], \"limitation\": \"capacity C bounds retained shell IDs, not searches for absent maximizers; measure lookup work and copied IDs on accepted AND rejected supports\", \"public_status\": \"not_claimed\", \"schema\": \"mhgp8_tangent_shell_math_v1\", \"scope\": \"bounded_integer_geometry_only_not_census_not_collection_not_benchmark\", \"shell_prefix\": {\"admitted_without_extra\": true, \"complete_depth_with_extra\": 1, \"extra_interior\": [12, 8, 8], \"first_dfs_block_shell_sites\": 21, \"first_dfs_block_strict_sites\": 0, \"kmax\": 1, \"reject_with_extra\": true, \"scalar_prefix_requires_fallback\": true, \"scope\": \"first DFS block proof; no collector or bounded-buffer machine executed\", \"shell_capacity\": 8, \"sphere_sites\": 30}, \"source_sha256\": \"b32268b62bbfd0350736fbdc15ab390821453434fcbf53eecf3aa5e25296081e\", \"status\": \"passed\", \"tangent_absent\": {\"box\": [[8, 4, 0], [9, 5, 0]], \"global_subtree_certified_by_two_splits\": true, \"maximizer_twice\": [16, 8, 0], \"maximum4\": 0, \"points\": [[0, 0, 0], [10, 0, 0], [8, 5, 0], [9, 4, 0]], \"shell_ids\": [], \"site_powers4\": [-36, -28], \"witness_ids\": [2, 3]}, \"tangent_present\": {\"box\": [[8, 4, 0], [9, 4, 0]], \"global_subtree_certified_by_two_splits\": true, \"maximizer_twice\": [16, 8, 0], \"maximum4\": 0, \"points\": [[0, 0, 0], [10, 0, 0], [8, 4, 0], [9, 4, 0]], \"shell_ids\": [2], \"site_powers4\": [0, -28], \"witness_ids\": [2, 3]}}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_small_roots_20260914/tangent_shell_gate.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"checks\": {\"boxes\": 560, \"half_grid_evaluations\": 9136, \"half_integral_maxima\": 127, \"zero_max_boxes\": 85}, \"countermodels\": [\"zero_max_implies_site_exists\", \"zero_max_means_no_shell\", \"rounded_center_is_exact\", \"capacity8_certifies_full_shell30\", \"shell_prefix_certifies_final_admission\"], \"limitation\": \"capacity C bounds retained shell IDs, not searches for absent maximizers; measure lookup work and copied IDs on accepted AND rejected supports\", \"public_status\": \"not_claimed\", \"schema\": \"mhgp8_tangent_shell_math_v1\", \"scope\": \"bounded_integer_geometry_only_not_census_not_collection_not_benchmark\", \"shell_prefix\": {\"admitted_without_extra\": true, \"complete_depth_with_extra\": 1, \"extra_interior\": [12, 8, 8], \"first_dfs_block_shell_sites\": 21, \"first_dfs_block_strict_sites\": 0, \"kmax\": 1, \"reject_with_extra\": true, \"scalar_prefix_requires_fallback\": true, \"scope\": \"first DFS block proof; no collector or bounded-buffer machine executed\", \"shell_capacity\": 8, \"sphere_sites\": 30}, \"source_sha256\": \"b32268b62bbfd0350736fbdc15ab390821453434fcbf53eecf3aa5e25296081e\", \"status\": \"passed\", \"tangent_absent\": {\"box\": [[8, 4, 0], [9, 5, 0]], \"global_subtree_certified_by_two_splits\": true, \"maximizer_twice\": [16, 8, 0], \"maximum4\": 0, \"points\": [[0, 0, 0], [10, 0, 0], [8, 5, 0], [9, 4, 0]], \"shell_ids\": [], \"site_powers4\": [-36, -28], \"witness_ids\": [2, 3]}, \"tangent_present\": {\"box\": [[8, 4, 0], [9, 4, 0]], \"global_subtree_certified_by_two_splits\": true, \"maximizer_twice\": [16, 8, 0], \"maximum4\": 0, \"points\": [[0, 0, 0], [10, 0, 0], [8, 4, 0], [9, 4, 0]], \"shell_ids\": [2], \"site_powers4\": [0, -28], \"witness_ids\": [2, 3]}}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "tools/check_docs.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Validated 557 active Markdown files.\n"
+    },
+    {
+      "command": [
+        "python3",
+        "tools/check_implementation_status.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Validated 20 implementation phases and their gates.\n"
+    }
+  ],
+  "tangent_normal_and_optimized_identical": true,
+  "validation": {
+    "identical": true,
+    "normal_sha256": "1284690eb5a56b65b0862f0787bd893c346518edc59edad6c83d91199213b610",
+    "optimized_sha256": "1284690eb5a56b65b0862f0787bd893c346518edc59edad6c83d91199213b610",
+    "receipt_mutants": 10,
+    "rows": 30
+  }
+}

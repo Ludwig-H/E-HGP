@@ -1,0 +1,70 @@
+{
+  "allowed_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "build_receipt": "morsehgp3D_v8/audits/q2_small_roots_20260914/r1_BUILD.json",
+  "command": [
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/measure.py",
+    "--plan",
+    "check50k"
+  ],
+  "gcp_used": false,
+  "matrix": [
+    [
+      "single_000000",
+      50000,
+      8,
+      "complement"
+    ],
+    [
+      "single_000000",
+      50000,
+      8,
+      "global-iter"
+    ],
+    [
+      "single_000000",
+      50000,
+      8,
+      "global-pair"
+    ]
+  ],
+  "pins": {
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n50000.u16le": "2a0c79ef95d7f34f1447f47c3bcf6cbff43156e7aa2d2f8c2eb1795109617426",
+    "morsehgp3D_v8/audits/q2_order_lidar_20260914/lidar_order_probe.cpp": "a5607a70b1597b758d552d1e4169fcc5c6774b98508da63eaa9dff49bcf0b39c",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/bridge.hpp": "88a5cbef024e4a27d1d8ff6c6fe015c5f1023ddcd22dbe5ce855d82d097fdebd",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/gate.cpp": "3d3a48926e66d0aafacc765a47d2a445fadc6748c26af0d8cad3edc5c9cb1a01",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/measure.py": "3e97507f7f42ec3161f7175c05add82ea5036956860f82e0ec0f50b2019a98e8",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/node_pool.hpp": "9af39ca23bb70301d43a5671e245268adb744da8c9a0f30f1ccc764c98ebaa9a",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/probe.cpp": "027e90cace942f31195056d0e8694e6acb6b092ffa64e38111581fab3b2cf021",
+    "morsehgp3D_v8/audits/q2_pool_bridge_20260914/support_io.hpp": "2bfcf29394e321c2bea9c409545aab3df94b6093c7e6bfcb76109d7554e4387f",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/.build/r1/probe": "8a18dc9206649139445309860999df35216b713749eea1cc679fe21b1642e4ea",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/build.py": "5d6e128550d094fb5174c00640f8c47597934f649244a4338627301a161deb7e",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/gate.cpp": "22556dbcd260d3def8b1aa9802e7dd1175889eeef227d3a3371a7766811fcf71",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/measure.py": "b3f9e39592004d12ff37d25edd2ca4a5f136f250fb6cb271cdb65c5e7a996eb7",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/probe.cpp": "39968b0cf5f72e2c3de5a7251dcd96674cecd42e43588202d12162df3a8442d1",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/r1_BUILD.json": "4366e4a0ac295728346cf4cd7aad046a20d6c062a54221b63fbb3037076fc15c",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/r1_sources.zip": "dabcfe52178efc6495868e3648d6e2345997e2ab7fc109bc8bac164d3de4cfe0",
+    "morsehgp3D_v8/audits/q2_small_roots_20260914/small_bridge.hpp": "0c24abdaeb309a0cd5eaa0a76f069719281de3ca7245c208d95565241c9bc77e"
+  },
+  "plan": "check50k",
+  "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+  "public_status": "not_claimed",
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "runner_sha256": "b3f9e39592004d12ff37d25edd2ca4a5f136f250fb6cb271cdb65c5e7a996eb7",
+  "schema": "mhgp8_audit_small_roots_campaign_v1",
+  "selected_cpu": 7,
+  "shared_host": true,
+  "signal_policy": "defer_until_capture_then_fail",
+  "started_utc": "2026-09-14T14:03:00.466583+00:00",
+  "timeout_policy": "kill_drain_preserve_failure",
+  "timeout_seconds": 180,
+  "warmups": 0
+}
