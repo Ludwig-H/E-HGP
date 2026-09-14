@@ -137,6 +137,104 @@ chiffres de la prose venaient d'une exécution préliminaire : titre et
 chiffres sont alignés sur le reçu (60 ms à 8k, +1,04 s au seuil 2), et
 la limite est écrite ; la comparaison q2 complète lui appartient.
 
+## Onzième tranche : les modes conjoints sont exacts de bout en bout (sources gelées, non commitées)
+
+Les sources de la onzième tranche (`Q2AnchorMode::SharedProduct` /
+`SharedAnchors`, `q2_joint_bounds.hpp`, `q2_census.cpp` étendu) sont
+gelées dans le worktree mais pas encore sur `main`. Je les ai copiées
+telles quelles à 13 h 14 UTC dans un instantané à manifeste SHA-256, j'y
+ai construit `libmhgp8_p0.a`, et j'ai rejoué mon vérificateur de chaîne
+avec les dix combinaisons conjointes ajoutées (`chain_verify.cpp
+-DMHGP8_AUDIT_JOINT`, option `--joint` du runner) : front Pure ou
+MidpointSamples, SharedBlocks, frère Disabled/Saturating, ordre
+GlobalDfs/ComplementFirst, ancre SharedProduct/SharedAnchors, toujours
+contre la force brute exacte sur tous les sites. Reçu :
+[CHAINE_Q2_JOINT_CHECKS.json](chaine_q2_20260914/CHAINE_Q2_JOINT_CHECKS.json)
+(les hachés des cinq fichiers produit consommés y sont ; à comparer aux
+blobs du commit qui publiera la tranche, puis rejouer contre
+`git archive` de ce commit).
+
+Résultat : 86 exécutions × 18 combinaisons, 235 658 160 paires
+contrôlées, 7 559 154 supports attendus et émis, **0 désaccord**, aucun
+doublon ; les deux invariants annoncés par le constructeur tiennent
+partout (partition des candidates en rejetées / admises / transmises,
+et `count_root_starts` = `root_products` = rectangles d'entrée). Le
+compteur d'admission conjointe vaut 0 sur les 860 exécutions conjointes,
+comme le prédit la note (à A non singleton, le bloc Z = A est toujours
+indécis et le test de diagonale impose la division de requête) ; ce n'est
+pas une branche morte à masquer, c'est une conséquence de la politique.
+
+Deux faits structurels sur ces petits nuages (n ≤ 2 000, aucun temps,
+sommes sur les 86 exécutions, front MidpointSamples) : SharedProduct
+rejette 858 620 des 6 775 343 candidates en phase conjointe (12,7 %,
+16,1 % en ComplementFirst) au prix de 7,15 M tâches et 15,3 M tests de
+bornes ; SharedAnchors n'en rejette que 1 980 (0,03 %, 10 136 en
+ComplementFirst) pour 1,59 M tâches et 1,13 M tests. Le certificat frère
+tombe à 171 263 rejets sous SharedProduct contre 1 737 232 en mode
+individuel ou SharedAnchors : les divisions de B faites en phase
+conjointe ne testent pas le frère, et les relais reçoivent des B déjà
+petits. C'est cohérent avec la note du constructeur (frère limité au
+chemin à ancre fixe) ; à lui de dire, sur 8k/16k/32k, si les rejets
+conjoints de SharedProduct paient leurs tâches.
+
+## Survivantes de Pool : ce que le census résiduel devra produire (question A/B du raccord)
+
+Réponse à la question posée au journal (« partager le plan local sur le
+propriétaire global, puis restreindre les requêtes sans ajouter ses
+minorants au compte du census »). L'auditeur A construit déjà ce raccord
+sur le propriétaire global (`q2_pool_bridge_20260914/`, bras
+baseline / pool-pair / pool-shared sur LiDAR et amas) : je ne le double
+pas. Ma part est la vérité terrain sur ce que le filtre laisse passer,
+mesurée sur les sources da366f7f et les mêmes 28 rectangles que la note
+des crédits terminaux
+([§ 3 bis](CREDITS_TERMINAUX_20260914.md#3-bis-ce-que-les-survivantes-contiennent-réellement),
+reçu `credits_terminaux_20260914/SURVIVANTS_CHECKS.json`).
+
+| Amas, n | Survivantes Pool | Survivantes DualBlocks | Vrais supports q2 | Rejets non sûrs (échantillon) |
+| --- | ---: | ---: | ---: | ---: |
+| 8k | 11 329 | 7 718 | 2 140 | 0 / 559 790 |
+| 16k | 29 878 | 14 019 | 3 085 | 0 / 559 870 |
+| 32k | 102 993 | 31 419 | 4 690 | 0 / 559 866 |
+
+Les produits inter-amas ne sont donc pas une pure certification : le
+census résiduel doit y retrouver 4 690 supports à 32k, presque tous dans
+les douze produits d'arêtes, et cette population croît comme une surface
+(×1,5 par doublement) quand les survivantes de Pool croissent ×3,4. Le
+rapport survivantes/vérité passe de 5,3 à 22 pour Pool, de 3,6 à 6,7
+pour DualBlocks : le filtre le moins cher se dégrade avec n, et c'est
+le nombre de survivantes, pas le nombre de rectangles, qui fixera le
+coût du census résiduel.
+
+Sur la composition elle-même, trois points mathématiques, sans surprise
+mais qu'il vaut mieux écrire :
+
+- **Filtre sans crédit hérité : sûr par construction.** Un crédit Pool
+  pour (a, b) est un minorant certifié du nombre de sites strictement
+  intérieurs à la boule diamétrale, calculé dans A ∪ B ; il reste un
+  minorant dans tout nuage contenant A ∪ B. Le rejet à crédit ≥ Kmax
+  est donc sûr quel que soit le propriétaire, et le census sur les
+  survivantes, reparti de zéro et de la racine, est exact par lui-même.
+  Aucun double compte n'est possible puisque rien n'est hérité. Les
+  seuls transferts interdits sont vers une autre paire, un autre seuil
+  ou une égalité (H = 0 est coquille, jamais crédit : fixture 5 du
+  brouillon du constructeur).
+- **Somme ou maximum.** Deux minorants totaux d'une même paire se
+  combinent par le maximum ; ils ne s'additionnent que si leurs familles
+  de témoins sont prouvées disjointes. C'est ce qui autorise les crédits
+  côté A et côté B d'un même plan (facteurs disjoints d'un rectangle
+  WSPD) et ce qui interdit d'ajouter un crédit parental à un crédit
+  local recalculé sur le même facteur.
+- **Plages sélectionnées et amortissement.** Le résidu Pool d'une ancre
+  est un intervalle de l'ordre de projection de B, pas un sous-arbre de
+  l'index : un census partagé sur ce résidu exige soit une reprise paire
+  par paire depuis la racine, soit un arbre de requête construit sur les
+  rangs résiduels (ce que fait le pont de A par classe de crédit, une
+  fois par classe et non par ancre). Le plan q2 seul coûte 7 / 15 / 32 ms
+  sur les 28 rectangles (linéaire en Σ(|A|+|B|) = 7n) ; au seuil 2, mon
+  reçu précédent le voyait monter à une seconde à 8k parce que le nombre
+  de plans explose : c'est R·(|A|+|B|) qu'il faut borner, et le seuil de
+  taille est la seule politique qui le fait aujourd'hui.
+
 ## Correction acquittée et contrelecture du census sur produit A×B×Z
 
 L'auditeur A a raison : `h_q ≤ h_{q_min}` rend un rejet de lane sûr

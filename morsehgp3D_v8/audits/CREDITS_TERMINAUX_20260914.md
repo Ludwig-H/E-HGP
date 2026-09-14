@@ -88,6 +88,36 @@ voies existera.
 Sur l'uniforme 8k, aucun rectangle n'atteint 64 sites et Pool ne change
 rien (×1,000) ; le terrain mince est dans le même cas.
 
+## 3 bis. Ce que les survivantes contiennent réellement
+
+Ajout du 14 septembre, après relecture du constructeur. Le harnais
+[front_pool_truth.cpp](credits_terminaux_20260914/front_pool_truth.cpp)
+reprend le même front et les mêmes 28 rectangles, ne construit que le
+plan q2, puis compte par force brute (arrêtée à Kmax) les sites
+strictement intérieurs de chaque paire survivante contre tous les sites
+du nuage ; il contrôle aussi la sûreté des rejets sur 560 000 paires
+rejetées tirées de façon déterministe par rectangle. Reçu :
+[SURVIVANTS_CHECKS.json](credits_terminaux_20260914/SURVIVANTS_CHECKS.json).
+
+| Amas, n | Survivantes Pool | Survivantes DualBlocks | Vrais supports q2 (p < Kmax) | Plan q2 seul, Pool | Plan q2 seul, DualBlocks | Rejets non sûrs |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 8k | 11 329 | 7 718 | 2 140 | 7,4 ms | 115 ms | 0 / 559 790 |
+| 16k | 29 878 | 14 019 | 3 085 | 14,6 ms | 247 ms | 0 / 559 870 |
+| 32k | 102 993 | 31 419 | 4 690 | 31,7 ms | 553 ms | 0 / 559 866 |
+
+Trois faits en sortent. Les produits inter-amas ne sont **pas** une pure
+certification : ils portent 2 140 / 3 085 / 4 690 supports q2 réellement
+retenus, presque tous dans les douze produits d'arêtes du cube (140 à 183
+par produit à 8k, 309 à 458 à 32k ; diagonales de face 8 à 45, grandes
+diagonales 0 à 5), et cette population croît de ×1,44 puis ×1,52 par
+doublement, comme une surface. Les survivantes de Pool croissent bien
+plus vite (×2,6 puis ×3,4) : à 32k elles valent vingt-deux fois la
+vérité, celles de DualBlocks 6,7 fois (×1,8 puis ×2,2). Enfin, le plan
+q2 seul coûte 7 à 32 ms sur les 28 rectangles ; les 60 à 241 ms du § 3
+comprenaient les trois voies. Les histogrammes de profondeur des
+survivantes vivantes (de 94 à 311 paires par valeur de p à 8k) sont dans
+le reçu.
+
 ## 4. Conséquence pour le raccord
 
 Une politique par taille suffit : rectangles à facteurs d'au plus
@@ -115,11 +145,14 @@ tomberaient à quelques centaines de milliers avec DualBlocks.
 ## 5. Reproduction
 
 ```bash
-mkdir -p /tmp/pinned && git archive da366f7f morsehgp3D_v8/src morsehgp3D_v8/bench | tar -x -C /tmp/pinned
+mkdir -p /tmp/pinned && git archive da366f7f morsehgp3D_v8/src morsehgp3D_v8/bench morsehgp3D_v8/CMakeLists.txt morsehgp3D_v8/cmake | tar -x -C /tmp/pinned
 cmake -S /tmp/pinned/morsehgp3D_v8 -B /tmp/pinned_build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF && cmake --build /tmp/pinned_build --target mhgp8_p0
 python3 -B morsehgp3D_v8/audits/credits_terminaux_20260914/run_credits_terminaux.py --lib /tmp/pinned_build/libmhgp8_p0.a --src-root /tmp/pinned/morsehgp3D_v8 --build-dir /tmp/credits_build --output /tmp/credits.json
 python3 -B -O morsehgp3D_v8/audits/credits_terminaux_20260914/run_credits_terminaux.py --lib /tmp/pinned_build/libmhgp8_p0.a --src-root /tmp/pinned/morsehgp3D_v8 --build-dir /tmp/credits_build --quick --output /tmp/credits_O.json
 ```
 
 Le reçu épingle les sources produit consommées (blobs de da366f7f), la
-copie d'audit des tubes, les trois harnais et la bibliothèque liée.
+copie d'audit des tubes, les trois harnais et la bibliothèque liée. Le
+second reçu (survivantes) se rejoue par
+`python3 -B morsehgp3D_v8/audits/credits_terminaux_20260914/run_survivants.py`
+avec les mêmes options `--lib`, `--src-root` et `--build-dir`.

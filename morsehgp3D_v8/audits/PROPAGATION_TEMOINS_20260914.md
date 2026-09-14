@@ -153,7 +153,7 @@ census, qui doit trancher.
 ## 4. Reproduction
 
 ```bash
-mkdir -p /tmp/pinned && git archive da366f7f morsehgp3D_v8/src morsehgp3D_v8/bench | tar -x -C /tmp/pinned
+mkdir -p /tmp/pinned && git archive da366f7f morsehgp3D_v8/src morsehgp3D_v8/bench morsehgp3D_v8/CMakeLists.txt morsehgp3D_v8/cmake | tar -x -C /tmp/pinned
 cmake -S /tmp/pinned/morsehgp3D_v8 -B /tmp/pinned_build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF && cmake --build /tmp/pinned_build --target mhgp8_p0
 python3 -B morsehgp3D_v8/audits/propagation_temoins_20260914/run_propagation.py --lib /tmp/pinned_build/libmhgp8_p0.a --src-root /tmp/pinned/morsehgp3D_v8 --build-dir /tmp/propagation_build --output /tmp/propagation.json
 python3 -B -O morsehgp3D_v8/audits/propagation_temoins_20260914/run_propagation.py --lib /tmp/pinned_build/libmhgp8_p0.a --src-root /tmp/pinned/morsehgp3D_v8 --build-dir /tmp/propagation_build --sizes 8000 --output /tmp/propagation_O.json

@@ -1,5 +1,7 @@
 // Auditeur B (14 sept. 2026) — verificateur bout-en-bout de la chaine front + census q2
 // (run_wspd_q2_census, sources e3af11a7), toutes combinaisons de modes, contre force brute.
+// Avec -DMHGP8_AUDIT_JOINT (onzième tranche, Q2AnchorMode), dix combinaisons conjointes
+// SharedProduct/SharedAnchors s'ajoutent aux huit combinaisons à ancre individuelle.
 // Auditeur B : vérification exécutée de la chaîne front + census q2 (run_wspd_q2_census, e3af11a7)
 // pour toutes les combinaisons de modes, contre une force brute exacte sur tous les sites :
 // chaque paire non ordonnée avec p<Kmax intérieurs stricts doit être émise exactement une fois,
@@ -48,8 +50,14 @@ int main(int argc, char** argv) {
     }
   };
   u64 total_mismatch = 0, total_checked = 0, total_emitted = 0, total_alive = 0;
-  struct Combo { WspdFrontMode f; Q2CensusMode c; Q2SiblingMode sb; Q2WitnessOrder o; const char* name; };
-  const Combo combos[] = {
+  u64 joint_accepted_total = 0, joint_rejected_total = 0, joint_handoffs_total = 0, joint_handoffs_after_credit_total = 0;
+#ifdef MHGP8_AUDIT_JOINT
+  using AnchorMode = Q2AnchorMode;
+#else
+  enum class AnchorMode { Individual };
+#endif
+  struct Combo { WspdFrontMode f; Q2CensusMode c; Q2SiblingMode sb; Q2WitnessOrder o; const char* name; AnchorMode am = AnchorMode::Individual; };
+  const std::vector<Combo> combos = {
     {WspdFrontMode::Pure, Q2CensusMode::Pairwise, Q2SiblingMode::Disabled, Q2WitnessOrder::GlobalDfs, "pure/pairwise"},
     {WspdFrontMode::Pure, Q2CensusMode::SharedBlocks, Q2SiblingMode::Disabled, Q2WitnessOrder::GlobalDfs, "pure/shared"},
     {WspdFrontMode::MidpointSamples, Q2CensusMode::Pairwise, Q2SiblingMode::Disabled, Q2WitnessOrder::GlobalDfs, "samples/pairwise"},
@@ -58,6 +66,18 @@ int main(int argc, char** argv) {
     {WspdFrontMode::MidpointSamples, Q2CensusMode::SharedBlocks, Q2SiblingMode::Disabled, Q2WitnessOrder::ComplementFirst, "samples/shared/complement"},
     {WspdFrontMode::MidpointSamples, Q2CensusMode::SharedBlocks, Q2SiblingMode::Saturating, Q2WitnessOrder::ComplementFirst, "samples/shared/sibling+complement"},
     {WspdFrontMode::Pure, Q2CensusMode::SharedBlocks, Q2SiblingMode::Saturating, Q2WitnessOrder::ComplementFirst, "pure/shared/sibling+complement"},
+#ifdef MHGP8_AUDIT_JOINT
+    {WspdFrontMode::MidpointSamples, Q2CensusMode::SharedBlocks, Q2SiblingMode::Disabled, Q2WitnessOrder::GlobalDfs, "samples/joint-product", Q2AnchorMode::SharedProduct},
+    {WspdFrontMode::MidpointSamples, Q2CensusMode::SharedBlocks, Q2SiblingMode::Saturating, Q2WitnessOrder::GlobalDfs, "samples/joint-product/sibling", Q2AnchorMode::SharedProduct},
+    {WspdFrontMode::MidpointSamples, Q2CensusMode::SharedBlocks, Q2SiblingMode::Disabled, Q2WitnessOrder::ComplementFirst, "samples/joint-product/complement", Q2AnchorMode::SharedProduct},
+    {WspdFrontMode::MidpointSamples, Q2CensusMode::SharedBlocks, Q2SiblingMode::Saturating, Q2WitnessOrder::ComplementFirst, "samples/joint-product/sib+compl", Q2AnchorMode::SharedProduct},
+    {WspdFrontMode::MidpointSamples, Q2CensusMode::SharedBlocks, Q2SiblingMode::Disabled, Q2WitnessOrder::GlobalDfs, "samples/joint-anchors", Q2AnchorMode::SharedAnchors},
+    {WspdFrontMode::MidpointSamples, Q2CensusMode::SharedBlocks, Q2SiblingMode::Saturating, Q2WitnessOrder::GlobalDfs, "samples/joint-anchors/sibling", Q2AnchorMode::SharedAnchors},
+    {WspdFrontMode::MidpointSamples, Q2CensusMode::SharedBlocks, Q2SiblingMode::Disabled, Q2WitnessOrder::ComplementFirst, "samples/joint-anchors/complement", Q2AnchorMode::SharedAnchors},
+    {WspdFrontMode::MidpointSamples, Q2CensusMode::SharedBlocks, Q2SiblingMode::Saturating, Q2WitnessOrder::ComplementFirst, "samples/joint-anchors/sib+compl", Q2AnchorMode::SharedAnchors},
+    {WspdFrontMode::Pure, Q2CensusMode::SharedBlocks, Q2SiblingMode::Saturating, Q2WitnessOrder::ComplementFirst, "pure/joint-product/sib+compl", Q2AnchorMode::SharedProduct},
+    {WspdFrontMode::Pure, Q2CensusMode::SharedBlocks, Q2SiblingMode::Saturating, Q2WitnessOrder::ComplementFirst, "pure/joint-anchors/sib+compl", Q2AnchorMode::SharedAnchors},
+#endif
   };
   for (const auto& cb : combos) {
     std::map<std::pair<std::size_t,std::size_t>, Emitted> emitted; u64 dup = 0;
@@ -68,7 +88,11 @@ int main(int argc, char** argv) {
       std::sort(e.interior.begin(), e.interior.end()); std::sort(e.shell.begin(), e.shell.end());
       emitted[key] = e;
     };
+#ifdef MHGP8_AUDIT_JOINT
+    auto res = run_wspd_q2_census(*index, kmax, s, cb.f, cb.c, consumer, cb.sb, cb.o, cb.am);
+#else
     auto res = run_wspd_q2_census(*index, kmax, s, cb.f, cb.c, consumer, cb.sb, cb.o);
+#endif
     u64 mism = 0, alive = 0, checked = 0; std::vector<std::size_t> in, sh; std::string first;
     for (std::size_t i = 0; i < N; ++i) for (std::size_t j = i + 1; j < N; ++j) {
       ++checked; truth_of(i, j, in, sh);
@@ -90,7 +114,21 @@ int main(int argc, char** argv) {
     total_mismatch += mism; total_checked += checked; total_emitted += emitted.size(); total_alive += alive;
     std::printf("%-36s n=%zu kmax=%u s=%u emitted=%zu alive=%llu dup=%llu mismatch=%llu accepted=%llu rejected=%llu sibling_rejected=%llu order_switches=%llu %s\n", cb.name, N, kmax, s, emitted.size(), (unsigned long long)alive, (unsigned long long)dup, (unsigned long long)mism,
       (unsigned long long)res.census.accepted_pairs, (unsigned long long)res.census.rejected_pairs, (unsigned long long)res.sibling_work.rejected_pairs, (unsigned long long)res.order_work.phase_switches, first.c_str());
+#ifdef MHGP8_AUDIT_JOINT
+    if (cb.am != Q2AnchorMode::Individual) {
+      const auto& jw = res.joint_work;
+      // Invariants annoncés par le constructeur : partition des candidates en rejetées/admises/transmises,
+      // count_root_starts == root_products == rectangles d'entrée en mode conjoint.
+      const bool partition_ok = jw.rejected_pairs + jw.accepted_pairs + jw.handoff_pair_mass == res.census.candidate_pairs;
+      const bool roots_ok = res.census.work.count_root_starts == jw.root_products && jw.root_products == res.input_rectangles;
+      std::printf("  joint: roots=%llu tasks=%llu splits_a=%llu splits_b=%llu witness_splits=%llu bound_tests=%llu credit_events=%llu handoffs=%llu handoffs_after_credit=%llu joint_rejected=%llu joint_accepted=%llu handoff_mass=%llu candidates=%llu max_depth=%llu phase_switches=%llu partition=%s roots_eq=%s\n",
+        (unsigned long long)jw.root_products, (unsigned long long)jw.tasks, (unsigned long long)jw.splits_a, (unsigned long long)jw.splits_b, (unsigned long long)jw.witness_splits, (unsigned long long)jw.bound_tests, (unsigned long long)jw.credit_events, (unsigned long long)jw.singleton_handoffs, (unsigned long long)jw.handoffs_after_credit, (unsigned long long)jw.rejected_pairs, (unsigned long long)jw.accepted_pairs, (unsigned long long)jw.handoff_pair_mass, (unsigned long long)res.census.candidate_pairs, (unsigned long long)jw.max_depth, (unsigned long long)jw.phase_switches, partition_ok ? "ok" : "BROKEN", roots_ok ? "ok" : "BROKEN");
+      if (!partition_ok || !roots_ok) ++total_mismatch;
+      joint_accepted_total += jw.accepted_pairs; joint_rejected_total += jw.rejected_pairs; joint_handoffs_total += jw.singleton_handoffs; joint_handoffs_after_credit_total += jw.handoffs_after_credit;
+    }
+#endif
   }
-  std::printf("SUMMARY family=%s n=%zu kmax=%u s=%u checked=%llu alive=%llu emitted=%llu mismatch=%llu\n", fam.c_str(), N, kmax, s, (unsigned long long)total_checked, (unsigned long long)total_alive, (unsigned long long)total_emitted, (unsigned long long)total_mismatch);
+  std::printf("SUMMARY family=%s n=%zu kmax=%u s=%u combos=%zu checked=%llu alive=%llu emitted=%llu mismatch=%llu joint_rejected=%llu joint_accepted=%llu joint_handoffs=%llu joint_handoffs_after_credit=%llu\n", fam.c_str(), N, kmax, s, combos.size(), (unsigned long long)total_checked, (unsigned long long)total_alive, (unsigned long long)total_emitted, (unsigned long long)total_mismatch,
+    (unsigned long long)joint_rejected_total, (unsigned long long)joint_accepted_total, (unsigned long long)joint_handoffs_total, (unsigned long long)joint_handoffs_after_credit_total);
   return total_mismatch == 0 ? 0 : 1;
 }

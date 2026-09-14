@@ -57,18 +57,24 @@ def main() -> int:
     parser.add_argument("--build-dir", required=True)
     parser.add_argument("--output", default=str(HERE / "CHAINE_Q2_CHECKS.json"))
     parser.add_argument("--quick", action="store_true", help="familles adversariales seulement")
+    parser.add_argument("--joint", action="store_true",
+                        help="onzième tranche : ajoute les dix combinaisons Q2AnchorMode (SharedProduct/SharedAnchors)")
     args = parser.parse_args()
     lib = Path(args.lib).resolve(); src = Path(args.src_root).resolve(); build = Path(args.build_dir).resolve()
     build.mkdir(parents=True, exist_ok=True)
     pinned = [src / "src/pipeline/wspd_q2_census.hpp", src / "src/pipeline/q2_census.cpp", src / "src/pipeline/q2_census.hpp",
               src / "src/wspd/front.cpp", src / "bench/front_fixtures.hpp", HERE / "chain_verify.cpp", lib]
+    if args.joint:
+        pinned.insert(3, src / "src/pipeline/q2_joint_bounds.hpp")
     for p in pinned:
         if not p.is_file():
             return fail(f"fichier absent : {p}")
     pins = {str(p.relative_to(ROOT)) if str(p).startswith(str(ROOT)) else str(p): sha256(p) for p in pinned}
     binary = build / "chain_verify"
-    compile_cmd = ["g++", "-std=c++20", "-O2", "-Wall", "-Wextra", f"-I{src / 'src'}", f"-I{src / 'bench'}",
-                   str(HERE / "chain_verify.cpp"), str(lib), "-o", str(binary)]
+    compile_cmd = ["g++", "-std=c++20", "-O2", "-Wall", "-Wextra", f"-I{src / 'src'}", f"-I{src / 'bench'}"]
+    if args.joint:
+        compile_cmd.append("-DMHGP8_AUDIT_JOINT")
+    compile_cmd += [str(HERE / "chain_verify.cpp"), str(lib), "-o", str(binary)]
     done = run(compile_cmd, HERE)
     if done.returncode != 0:
         return fail("compilation refusée :\n" + done.stderr)
@@ -97,11 +103,18 @@ def main() -> int:
         if summary.get("mismatch") != 0:
             return fail(f"désaccord détecté : {' '.join(cmd)}\n{done.stdout}")
         runs.append({"command": " ".join(cmd), "wall_seconds": round(elapsed, 3), "summary": summary, "raw_stdout": done.stdout})
-    totals = {"runs": len(runs), "combos_per_run": 8, "pairs_checked": sum(r["summary"]["checked"] for r in runs),
+    combos_per_run = sorted({r["summary"].get("combos", 8) for r in runs})
+    totals = {"runs": len(runs), "combos_per_run": combos_per_run[0] if len(combos_per_run) == 1 else combos_per_run,
+              "pairs_checked": sum(r["summary"]["checked"] for r in runs),
               "alive_pairs": sum(r["summary"]["alive"] for r in runs), "emitted": sum(r["summary"]["emitted"] for r in runs),
               "mismatch": sum(r["summary"]["mismatch"] for r in runs)}
+    if args.joint:
+        for key in ("joint_rejected", "joint_accepted", "joint_handoffs", "joint_handoffs_after_credit"):
+            totals[key] = sum(r["summary"].get(key, 0) for r in runs)
     receipt = {
-        "title": "Chaîne front + census q2 (e3af11a7) : force brute exacte sur toutes les combinaisons de modes",
+        "title": ("Chaîne front + census q2 conjoint (onzième tranche, Q2AnchorMode) : force brute exacte sur dix-huit combinaisons"
+                  if args.joint else "Chaîne front + census q2 (e3af11a7) : force brute exacte sur toutes les combinaisons de modes"),
+        "joint_modes": bool(args.joint),
         "date": "2026-09-14", "author_role": "auditeur indépendant B",
         "git_head": run(["git", "rev-parse", "HEAD"], ROOT).stdout.strip(), "src_root": str(src),
         "compile_command": " ".join(compile_cmd), "pins_sha256": pins, "totals": totals, "runs": runs,
@@ -109,7 +122,7 @@ def main() -> int:
         "scope": "Vérification d'exactitude et de complétude du flux de supports q2 sur petits nuages ; aucun temps produit, aucune tour FULL.",
     }
     Path(args.output).write_text(json.dumps(receipt, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"OK : {len(runs)} exécutions × 8 combinaisons, {totals['pairs_checked']} paires contrôlées, mismatch {totals['mismatch']}, reçu {args.output}")
+    print(f"OK : {len(runs)} exécutions × {totals['combos_per_run']} combinaisons, {totals['pairs_checked']} paires contrôlées, mismatch {totals['mismatch']}, reçu {args.output}")
     return 0
 
 
