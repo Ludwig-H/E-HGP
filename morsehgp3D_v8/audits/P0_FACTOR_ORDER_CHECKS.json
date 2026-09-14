@@ -1,0 +1,253 @@
+{
+  "backend": "cpu_reference",
+  "base_head": "1bf806f0675f276ee7fdab113ef255c15e148b98",
+  "date_utc": "2026-09-14",
+  "limitations": [
+    "Geometrically safe conservative credits, not outputs of the current C++ credit strategies.",
+    "Root budget bounds provisional descriptors only; O(m) membership preparation and traversal are separate.",
+    "No WSPD construction, product integration, timing, process-memory or G4 qualification."
+  ],
+  "mode": "audit_independant_math_and_architecture",
+  "phase": "exploration_v8_hors_registre",
+  "profile": "quantized_u16_input_only",
+  "public_status": "not_claimed",
+  "python_version": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "runs": [
+    {
+      "checks": {
+        "alternating_family": [
+          {
+            "global_roots": 2,
+            "global_visits": 7,
+            "max_coordinate": 40,
+            "own_roots": 1,
+            "own_visits": 3,
+            "size": 4,
+            "strict_credit_witnesses": 2
+          },
+          {
+            "global_roots": 4,
+            "global_visits": 15,
+            "max_coordinate": 92,
+            "own_roots": 1,
+            "own_visits": 3,
+            "size": 8,
+            "strict_credit_witnesses": 4
+          },
+          {
+            "global_roots": 8,
+            "global_visits": 31,
+            "max_coordinate": 196,
+            "own_roots": 1,
+            "own_visits": 3,
+            "size": 16,
+            "strict_credit_witnesses": 8
+          },
+          {
+            "global_roots": 16,
+            "global_visits": 63,
+            "max_coordinate": 404,
+            "own_roots": 1,
+            "own_visits": 3,
+            "size": 32,
+            "strict_credit_witnesses": 16
+          },
+          {
+            "global_roots": 32,
+            "global_visits": 127,
+            "max_coordinate": 820,
+            "own_roots": 1,
+            "own_visits": 3,
+            "size": 64,
+            "strict_credit_witnesses": 32
+          },
+          {
+            "global_roots": 64,
+            "global_visits": 255,
+            "max_coordinate": 1652,
+            "own_roots": 1,
+            "own_visits": 3,
+            "size": 128,
+            "strict_credit_witnesses": 64
+          },
+          {
+            "global_roots": 128,
+            "global_visits": 511,
+            "max_coordinate": 3316,
+            "own_roots": 1,
+            "own_visits": 3,
+            "size": 256,
+            "strict_credit_witnesses": 128
+          }
+        ],
+        "exhaustive": {
+          "bounded_runs": 23640,
+          "committed_covers": 14129,
+          "fallbacks": 9511,
+          "permutation_prefixes": 5912
+        },
+        "limits": [
+          "membership counts require an explicit O(m) preparation",
+          "root budget does not bound traversal work",
+          "no current C++ strategy or hardware performance claim"
+        ],
+        "mutants_rejected": [
+          "treat_plan_rank_as_global_rank",
+          "emit_enclosing_node"
+        ],
+        "scope": "independent_permutation_cover_model",
+        "status": "passed"
+      },
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/audits/p0_factor_order_probe.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"alternating_family\": [{\"global_roots\": 2, \"global_visits\": 7, \"max_coordinate\": 40, \"own_roots\": 1, \"own_visits\": 3, \"size\": 4, \"strict_credit_witnesses\": 2}, {\"global_roots\": 4, \"global_visits\": 15, \"max_coordinate\": 92, \"own_roots\": 1, \"own_visits\": 3, \"size\": 8, \"strict_credit_witnesses\": 4}, {\"global_roots\": 8, \"global_visits\": 31, \"max_coordinate\": 196, \"own_roots\": 1, \"own_visits\": 3, \"size\": 16, \"strict_credit_witnesses\": 8}, {\"global_roots\": 16, \"global_visits\": 63, \"max_coordinate\": 404, \"own_roots\": 1, \"own_visits\": 3, \"size\": 32, \"strict_credit_witnesses\": 16}, {\"global_roots\": 32, \"global_visits\": 127, \"max_coordinate\": 820, \"own_roots\": 1, \"own_visits\": 3, \"size\": 64, \"strict_credit_witnesses\": 32}, {\"global_roots\": 64, \"global_visits\": 255, \"max_coordinate\": 1652, \"own_roots\": 1, \"own_visits\": 3, \"size\": 128, \"strict_credit_witnesses\": 64}, {\"global_roots\": 128, \"global_visits\": 511, \"max_coordinate\": 3316, \"own_roots\": 1, \"own_visits\": 3, \"size\": 256, \"strict_credit_witnesses\": 128}], \"exhaustive\": {\"bounded_runs\": 23640, \"committed_covers\": 14129, \"fallbacks\": 9511, \"permutation_prefixes\": 5912}, \"limits\": [\"membership counts require an explicit O(m) preparation\", \"root budget does not bound traversal work\", \"no current C++ strategy or hardware performance claim\"], \"mutants_rejected\": [\"treat_plan_rank_as_global_rank\", \"emit_enclosing_node\"], \"scope\": \"independent_permutation_cover_model\", \"status\": \"passed\"}\n"
+    },
+    {
+      "checks": {
+        "alternating_family": [
+          {
+            "global_roots": 2,
+            "global_visits": 7,
+            "max_coordinate": 40,
+            "own_roots": 1,
+            "own_visits": 3,
+            "size": 4,
+            "strict_credit_witnesses": 2
+          },
+          {
+            "global_roots": 4,
+            "global_visits": 15,
+            "max_coordinate": 92,
+            "own_roots": 1,
+            "own_visits": 3,
+            "size": 8,
+            "strict_credit_witnesses": 4
+          },
+          {
+            "global_roots": 8,
+            "global_visits": 31,
+            "max_coordinate": 196,
+            "own_roots": 1,
+            "own_visits": 3,
+            "size": 16,
+            "strict_credit_witnesses": 8
+          },
+          {
+            "global_roots": 16,
+            "global_visits": 63,
+            "max_coordinate": 404,
+            "own_roots": 1,
+            "own_visits": 3,
+            "size": 32,
+            "strict_credit_witnesses": 16
+          },
+          {
+            "global_roots": 32,
+            "global_visits": 127,
+            "max_coordinate": 820,
+            "own_roots": 1,
+            "own_visits": 3,
+            "size": 64,
+            "strict_credit_witnesses": 32
+          },
+          {
+            "global_roots": 64,
+            "global_visits": 255,
+            "max_coordinate": 1652,
+            "own_roots": 1,
+            "own_visits": 3,
+            "size": 128,
+            "strict_credit_witnesses": 64
+          },
+          {
+            "global_roots": 128,
+            "global_visits": 511,
+            "max_coordinate": 3316,
+            "own_roots": 1,
+            "own_visits": 3,
+            "size": 256,
+            "strict_credit_witnesses": 128
+          }
+        ],
+        "exhaustive": {
+          "bounded_runs": 23640,
+          "committed_covers": 14129,
+          "fallbacks": 9511,
+          "permutation_prefixes": 5912
+        },
+        "limits": [
+          "membership counts require an explicit O(m) preparation",
+          "root budget does not bound traversal work",
+          "no current C++ strategy or hardware performance claim"
+        ],
+        "mutants_rejected": [
+          "treat_plan_rank_as_global_rank",
+          "emit_enclosing_node"
+        ],
+        "scope": "independent_permutation_cover_model",
+        "status": "passed"
+      },
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/audits/p0_factor_order_probe.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"alternating_family\": [{\"global_roots\": 2, \"global_visits\": 7, \"max_coordinate\": 40, \"own_roots\": 1, \"own_visits\": 3, \"size\": 4, \"strict_credit_witnesses\": 2}, {\"global_roots\": 4, \"global_visits\": 15, \"max_coordinate\": 92, \"own_roots\": 1, \"own_visits\": 3, \"size\": 8, \"strict_credit_witnesses\": 4}, {\"global_roots\": 8, \"global_visits\": 31, \"max_coordinate\": 196, \"own_roots\": 1, \"own_visits\": 3, \"size\": 16, \"strict_credit_witnesses\": 8}, {\"global_roots\": 16, \"global_visits\": 63, \"max_coordinate\": 404, \"own_roots\": 1, \"own_visits\": 3, \"size\": 32, \"strict_credit_witnesses\": 16}, {\"global_roots\": 32, \"global_visits\": 127, \"max_coordinate\": 820, \"own_roots\": 1, \"own_visits\": 3, \"size\": 64, \"strict_credit_witnesses\": 32}, {\"global_roots\": 64, \"global_visits\": 255, \"max_coordinate\": 1652, \"own_roots\": 1, \"own_visits\": 3, \"size\": 128, \"strict_credit_witnesses\": 64}, {\"global_roots\": 128, \"global_visits\": 511, \"max_coordinate\": 3316, \"own_roots\": 1, \"own_visits\": 3, \"size\": 256, \"strict_credit_witnesses\": 128}], \"exhaustive\": {\"bounded_runs\": 23640, \"committed_covers\": 14129, \"fallbacks\": 9511, \"permutation_prefixes\": 5912}, \"limits\": [\"membership counts require an explicit O(m) preparation\", \"root budget does not bound traversal work\", \"no current C++ strategy or hardware performance claim\"], \"mutants_rejected\": [\"treat_plan_rank_as_global_rank\", \"emit_enclosing_node\"], \"scope\": \"independent_permutation_cover_model\", \"status\": \"passed\"}\n"
+    }
+  ],
+  "schema": "mhgp8_independent_factor_order_v1",
+  "scope": "independent_model_of_plan_prefixes_and_physical_tree_covers",
+  "source_sha256": {
+    "morsehgp3D_v8/audits/p0_factor_order_probe.py": "041646d11e4fb28c6f20d1651f96ed4c3724293ce2a2865919659ad99a8ab1a5"
+  },
+  "worktree_status": [
+    " M audits/COORDINATION_MORSEHGP3D_V7.md",
+    " M audits/COORDINATION_MORSEHGP3D_V8.md",
+    " M morsehgp3D_v6/src/gpu/lot_ring.hpp",
+    " M morsehgp3D_v6/src/parallel/sort.hpp",
+    " M morsehgp3D_v6/src/pipeline/census.hpp",
+    " M morsehgp3D_v6/src/pipeline/expand.hpp",
+    " M morsehgp3D_v7/PASSATION.md",
+    " M morsehgp3D_v7/README.md",
+    " M morsehgp3D_v7/docs/FAUSSES_PISTES.md",
+    " M morsehgp3D_v7/docs/OBJETS_PARALLELES_TOUR_20260911.md",
+    " M morsehgp3D_v8/CMakeLists.txt",
+    " M morsehgp3D_v8/audits/DIALOGUE_COURANT.md",
+    " M morsehgp3D_v8/bench/q2_census_probe.cpp",
+    " M morsehgp3D_v8/src/pipeline/local_credits.cpp",
+    " M morsehgp3D_v8/src/pipeline/local_credits.hpp",
+    " M morsehgp3D_v8/src/pipeline/q2_census.cpp",
+    " M morsehgp3D_v8/src/pipeline/q2_census.hpp",
+    " M morsehgp3D_v8/tests/q2_census_gate.cpp",
+    "?? audits/morsehgp3D_v8_complementaire/P0_CONSTANTES_CENSUS_Q2.md",
+    "?? audits/morsehgp3D_v8_complementaire/P0_IDENTITES_NUAGE_ET_RECTANGLES.md",
+    "?? audits/morsehgp3D_v8_complementaire/Q2_PREPARED_BOUNDS_CHECKS.json",
+    "?? audits/morsehgp3D_v8_complementaire/Q2_PREPARED_CENSUS_CHECKS.json",
+    "?? audits/morsehgp3D_v8_complementaire/archive/",
+    "?? audits/morsehgp3D_v8_complementaire/cloud_rectangle_identity_checks.py",
+    "?? audits/morsehgp3D_v8_complementaire/cloud_rectangle_identity_probe.cpp",
+    "?? audits/morsehgp3D_v8_complementaire/q2_prepared_bounds_checks.py",
+    "?? audits/morsehgp3D_v8_complementaire/q2_prepared_bounds_probe.cpp",
+    "?? audits/morsehgp3D_v8_complementaire/q2_prepared_census_checks.py",
+    "?? audits/morsehgp3D_v8_complementaire/q2_revision_protocol_checks.py",
+    "?? morsehgp3D_v6/src/gpu/route_c6.hpp",
+    "?? morsehgp3D_v6/tests/perm_sort_gate.cpp",
+    "?? morsehgp3D_v6/tests/route_c6_gate.cpp",
+    "?? morsehgp3D_v7/docs/MARQUES_PREMIER_PARCOURS_20260911.md",
+    "?? morsehgp3D_v7/receipts/fused_history_streaming_20260911/",
+    "?? morsehgp3D_v8/audits/REGIME_WSPD_20260914.md",
+    "?? morsehgp3D_v8/audits/p0_factor_order_probe.py",
+    "?? morsehgp3D_v8/audits/wspd_regime_20260914/",
+    "?? morsehgp3D_v8/src/pipeline/prepared_cloud.cpp",
+    "?? morsehgp3D_v8/src/pipeline/prepared_cloud.hpp",
+    "?? morsehgp3D_v8/tests/cloud_owner_gate.cpp"
+  ]
+}

@@ -718,3 +718,72 @@ Ce protocole fournit une transition bornée à transposer et tester dans
 le moteur avant les files parallèles. Il ne réduit pas le nombre de
 visites ni le volume des coquilles, et ne qualifie ni le parallélisme,
 ni le GPU, ni la tour FULL ou les contrats de temps sur G4.
+
+### 9.4. Partager les arbres B sans transférer leur borne de couverture
+
+14 septembre, après 1bf806f0. Le raccord massif peut partager l'index Z
+entre rectangles. Pour l'arbre de requêtes B, la borne de §9.2 dépend
+aussi de l'ordre : `build_queries` à 3c29ea1e construit un arbre équilibré
+sur **la permutation du plan**, sans la réordonner. Il paie m=|B| lectures
+de points et 2m−1 nœuds, une fois par appel Shared non vide. Un préfixe
+dans cet ordre se couvre en O(1+log m). Cette borne ne se transfère pas
+à un arbre géométrique global dont les feuilles suivent un autre ordre.
+
+**Contre-fixture certifiée.** Prendre m puissance de deux, un arbre B
+équilibré de feuilles b0,b1,…,b(m−1), et l'ordre du plan
+b0,b2,…,b(m−2),b1,b3,…,b(m−1). Son préfixe de longueur m/2 contient
+les seuls labels pairs. Chaque paire de feuilles sœurs mélange un site
+retenu et un site exclu : aucun nœud interne n'est entièrement retenu.
+La couverture exacte demande donc **m/2 racines singleton**, contre une
+seule racine dans l'arbre de l'ordre du plan.
+
+Ce motif peut porter des crédits sûrs, pas seulement une permutation
+abstraite. L'ancre a a pour coordonnées (0,0,0) ; les labels locaux j
+de B désignent les points b_j=(L+j,0,0), avec L=12(m−1)+1.
+Prendre Kmax=1, cœur nul, crédit de a nul, crédits B pairs nuls et
+impairs égaux à un. Pour j impair, b_(j−1) est un témoin strict entre
+a et b_j. La séparation v8 passe pour s=8/10/12. Les crédits nuls sont
+volontairement conservateurs ; ce n'est pas une sortie annoncée de
+Pool, DualBlocks ou Tubes. Le contrat de sûreté des crédits, à lui seul,
+n'interdit donc pas cette fragmentation. Le juge vérifie m=4 à 256
+sous u16 ; le motif combinatoire vaut pour toute puissance de deux.
+
+Deux raccords restent exacts et comparables :
+
+- **Conserver l'ordre du plan.** Préparer son arbre B une fois dans un
+  objet immuable possédant permutation et boîtes, partagé par les tâches
+  de ce plan. Pour Pool seul, compiler les au plus h préfixes distincts
+  une fois garde O(h(1+log m)) pour leurs couvertures. Le réemploi exige
+  le même nuage, la même permutation et la même construction d'arbre ;
+  l'identité du seul ensemble B ne suffit pas. O(m) par ordre distinct
+  et la résidence de ces arbres restent payés. Limiter les contextes
+  actifs évite un cache qui conserve indéfiniment tous les ordres.
+- **Conserver l'arbre géométrique.** Préparer les minima/maxima des crédits
+  aux nœuds du facteur B, en O(m). Pour t=h−c_a, minimum≥t élimine un
+  nœud, maximum<t le retient entièrement ; sinon il faut descendre.
+  Ces agrégats appartiennent au contexte des crédits, qui dépend aussi
+  de A. Partager la couverture entre ancres de même crédit paie chaque
+  seuil une fois, mais son nombre F_t de racines peut atteindre m/2.
+  Le partage des boîtes géométriques ne prouve pas F_t=O(log m).
+
+Une limite C sur les racines préparées fournit un repli simple : compiler
+la couverture sans lancer de census ; si une racine supplémentaire
+dépasserait C, abandonner toute cette préparation provisoire et consommer
+le descripteur original une fois par paires. Sinon engager sa couverture.
+Cela conserve exactement le résidu et évite de payer deux fois son
+préfixe. C borne le stockage provisoire des racines, pas la préparation
+d'appartenance, les visites ou le census aval. Les cas vide, singleton
+ou facteur B entièrement retenu permettent leurs chemins directs ;
+aucun arbre supplémentaire n'est nécessaire pour nommer un nœud B déjà
+certifié. Le choix entre ces chemins doit être mesuré sur les vrais facteurs.
+
+Le [modèle indépendant](p0_factor_order_probe.py) prépare explicitement
+des comptes d'appartenance en O(m), puis contrôle les couvertures par
+identités et multiplicités. Son [reçu](P0_FACTOR_ORDER_CHECKS.json) conserve
+les commandes normal/−O et le hash du script : 5 912 permutations/préfixes,
+23 640 essais de budgets, 9 511 replis et 14 129 couvertures engagées.
+Deux mutants confondant les rangs ou retenant un nœud trop large sont
+rejetés. Sur le motif alterné, la couverture globale visite 2m−1 nœuds,
+contre trois dans l'ordre du plan. Les émissions pendant la préparation
+sont absentes par construction de ce modèle, pas testées sur une API
+produit. Aucun gain de temps, de mémoire globale ou de tour n'est qualifié.
