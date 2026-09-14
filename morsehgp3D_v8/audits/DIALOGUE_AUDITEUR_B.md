@@ -137,6 +137,125 @@ chiffres de la prose venaient d'une exécution préliminaire : titre et
 chiffres sont alignés sur le reçu (60 ms à 8k, +1,04 s au seuil 2), et
 la limite est écrite ; la comparaison q2 complète lui appartient.
 
+## Continuations de census et ouverture q3/q4 : réponses aux questions du journal
+
+Réponse à la section « continuations census et ouverture q3/q4 » du
+constructeur (sources en chantier, non gelées : `q2_census_resume.hpp`
+ne compile pas encore avec `q2_census.cpp` du worktree, accès privés de
+`Q2PreparedBounds`). Les mathématiques ci-dessous ne dépendent pas des
+sources ; le harnais de continuations est écrit et sera exécuté au gel.
+
+**Invariants pour transférer une continuation entre workers.** L'état
+listé dans l'en-tête (index possédé, B original, compte acquis, curseur
+et phase Z, frère, état d'entrée, bornes préparées, plage admise avec sa
+position d'émission, pile des requêtes sœurs pendantes) est complet à
+une condition près qui n'y figure pas explicitement : chaque entrée de la
+pile des sœurs pendantes doit porter **son propre** triplet (compte,
+curseur, phase) figé à l'instant de la division de B, et non le triplet
+courant, puisque les deux enfants héritent du même préfixe résolu et que
+le premier enfant avance le curseur avant que le second ne commence.
+Sans cela, le second enfant recompterait des témoins déjà crédités ou en
+perdrait. Trois invariants de transfert valent en plus : (i) l'adoption
+n'est licite que pour le même objet index et les mêmes options (K,
+ordre, frère), ce que la fabrique valide ; (ii) tout ce qui est
+thread-local (tampons d'intérieurs et de coquille, bornes préparées)
+doit appartenir à la continuation ou être reconstruit à l'identique
+depuis (ancre, B courant), jamais emprunté au worker précédent ; (iii)
+la seule synchronisation requise est un « arrive-avant » entre la fin
+d'un `advance` et le début du suivant, ce que dit l'en-tête. Le fait
+que la collecte d'un support reste atomique et que la masse admise
+soit incrémentée avant les émissions paire par paire impose de comparer
+les compteurs discrets **à la complétion seulement**, comme l'en-tête
+le prévient.
+
+**Cas positifs de suspension à exiger.** Après un crédit (compte > 0 et
+curseur avancé, reprise sans recompte) ; exactement au changement de
+phase (curseur en fin de préordre, passage à B différé) ; juste après la
+division de B (sœur empilée, reprise de la sœur avec le triplet hérité) ;
+après un certificat frère qui rejette un enfant sans émission ; au début
+d'une plage admise (masse incrémentée, aucune paire émise) et entre deux
+paires d'une plage ; enfin budget 1 partout sur tout un corpus, comparé
+à la référence non reprenable et à la force brute, et budget 3 avec
+chaque pas exécuté dans un fil neuf joint avant le suivant. C'est ce que
+fait `chaine_q2_20260914/chain_verify_resume.cpp` (couples ancre × nœud
+B tirés de l'index, trois réglages d'options, budgets 1, 3, 1000,
+transfert de fil au budget 3, pas supplémentaire après Done, compteurs
+finaux, pauses classées) ; il tournera dès que les sources compileront.
+
+**q3/q4, point (1) : l'arête rejetée à q2 peut posséder un simplexe de
+profondeur nulle.** C'est exact, et l'argument est géométrique : pour un
+triangle aigu d'arête maximale ab (rayon r = |ab|/2, hauteur du
+circumcentre y0 au-dessus du milieu m, rayon R = (r² + y0²)^(1/2)), la
+boule diamétrale B(m, r) n'est contenue dans la circumboule que si
+|c0 − m| + r ≤ R, soit y0 + r ≤ R, soit R ≤ r : jamais pour un triangle
+strictement aigu. La lunule B(m, r) ∖ circumboule est non vide du côté
+opposé au troisième sommet, à distance de m supérieure à R − y0 ; K
+sites qui y sont placés tuent l'arête à q2 et laissent la circumboule
+vide. La fixture de la porte (a = (900,1000,1000), b = (1100,1000,1000),
+c = (1000,1120,1000), témoins en y = 910) est précisément dans cette
+lunule : y0 = 55/3, R − y0 ≈ 83,3 < 90. Les voies doivent donc être
+séparées, avec le seuil h_q = Kmax + 2 − q propre à chaque voie et son
+propre lieu de témoins universels : pour q3, le fuseau
+W3 = {z : 3H² > Ξ} est l'intersection des circumboules de tous les
+triangles aigus d'arête maximale ab (vérifié sur la bissectrice : rayon
+r/√3 = celui de la boule équilatérale la plus serrée), ce qui rend le
+crédit « ≥ h_3 témoins universels ⇒ toutes les complétions mortes » sûr.
+L'objet « arête × groupe de complétions » est le bon : les circumcentres
+des triangles (a, b, z) balaient une famille à **deux** paramètres dans
+le plan bissecteur de ab, il n'y a donc pas d'ordre total des complétions
+comme pour q4, seulement des certificats par blocs. Deux limites déjà
+mesurées s'y transposent : un certificat uniforme sur trois boîtes
+A × B × Z ne porte les témoins intra-facteur qu'après découpage le long
+de l'axe (mon analyse du census conjoint q2), et un certificat à ancre
+fixe (Pool) reste préférable là où il existe.
+
+**Point (2) : événements groupés sur l'axe d'une graine q3.** Pour une
+graine (a, b, c) de circumcentre c0, de rayon R0 et de normale n, les
+sphères contenant le triangle sont S(t) de centre c0 + t·n et de rayon²
+R0² + t². Avec s(z) = (z − c0)·n et w(z) = |z − c0|² − R0², z est
+strictement intérieur à S(t) si et seulement si 2t·s(z) > w(z) : pour
+s(z) > 0 c'est t > w/(2s) =: t(z), pour s(z) < 0 c'est t < t(z), et pour
+s(z) = 0 c'est w(z) < 0 indépendamment de t (point coplanaire, intérieur
+au circumcercle ou non). Le compte intérieur de la sphère passant par d
+vaut donc #{z au-dessus : t(z) < t(d)} + #{z au-dessous : t(z) > t(d)} +
+#{z coplanaires : w(z) < 0}, calculable pour toutes les complétions d en
+un tri des événements t(z) de chaque côté ; les plateaux sont les
+égalités t(z) = t(d), c'est-à-dire les cosphéricités. L'ordre exact ne
+demande ni centre rationnel ni quotient : t(z1) < t(z2) équivaut, selon
+les côtés, au signe du déterminant InSphere de (a, b, c, z1 ; z2), dont
+les entrées réduites valent au plus 2^16 (différences) et 2^34
+(relèvements) et le déterminant 4 × 4 au plus 2^87 : i128 suffit, et le
+plateau est le déterminant nul. Pour q3 de même, « z strictement
+intérieur à la circumboule de (a, b, c) » se décide par le signe de
+2D·|z − a|² − 2 (z − a)·W avec D = |u × v|², u = b − a, v = c − a et
+W = |v|²(u·u − u·v)·u + |u|²(v·v − u·v)·v, entier, borné par 2^104 :
+i128 suffit encore, sans U192/U320.
+
+**Point (3) : les m² arêtes entre deux rangées.** Sur deux rangées de m
+sites à distance D et pas δ, une arête croisée (a, b') décalée de u le
+long des rangées n'est arête maximale d'un triangle (a, b', z), z dans
+la rangée de a à l'abscisse t, que si |u − t| ≤ |u|, soit t ∈ [0, 2u], et
+ce triangle est aigu pour t ∈ (u, 2u] : Θ(u/δ) complétions par arête,
+donc Θ(m²) par ancre et **Θ(m³) triangles candidats** au total, tous
+aigus, presque tous morts (leur circumboule, de rayon ≥ D/2 et tangente
+aux deux rangées, contient de l'ordre de D/δ sites). Deux faits fixent
+le verrou. D'abord, aucune de ces arêtes n'a de témoin universel : pour
+une arête perpendiculaire, un site de rangée à distance t de a donne
+H = −t² < 0, donc n'est pas dans W3 ; les crédits par arête sont nuls,
+comme les crédits Pool q2 l'étaient sur cette famille. Ensuite, la
+séparation s ne change rien à cette masse : elle règle la granularité
+des produits A × B, pas l'ensemble des complétions d'une arête (ma
+note de séparation le montre déjà pour q2). Éviter de matérialiser les
+m² arêtes est donc possible dans la forme (un produit A × B × Z de
+blocs, propriétaire canonique = arête maximale déterminée par la
+géométrie, pas par une liste), mais ne réduit la masse que si un
+certificat par blocs sait rejeter d'un coup les triangles morts : la
+circumboule d'un triangle plat entre deux rangées contient un segment
+entier de chaque rangée, ce qui est un témoin **en bloc** (un sous-arbre
+de la rangée uniformément intérieur), l'analogue exact du crédit de bloc
+Z du census conjoint, et c'est là que porte l'effort, pas sur s ni sur
+la liste des arêtes.
+
 ## Redistribution dynamique des produits DFS (4e878754) : contrelecture et campagne
 
 Réponse à la demande A/B du journal (terminaison sans perte de réveil,
