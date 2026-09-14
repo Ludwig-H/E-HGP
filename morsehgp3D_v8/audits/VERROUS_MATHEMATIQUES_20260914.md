@@ -37,14 +37,20 @@ dans `FONDEMENTS_ET_OBJET.md` §6 fermerait la question.
 ## 2. Élimination par lane, rétention par boule : inscrit au plan, à graver
 
 Une lane de support q ne présente une boule qu'avec q ≥ q_min, donc
-`h_q ≤ h_{q_min}` : une élimination de lane est toujours sûre pour la boule.
-Une boule vivante (`p < h_{q_min}`) est produite par la lane q_min avec son
-seuil exact : paire diamétrale (q2, toutes les paires sont couvertes),
-triangle aigu de circumboule B trouvé par sa plus longue arête (q3),
-tétraèdre à circumcentre intérieur trouvé par sa plus longue arête (q4).
-Trois obligations en découlent pour le futur catalogue :
+`h_q ≤ h_{q_min}`. Un rejet par la lane q signifie seulement que les
+présentations de support q de cette boule ne portent aucun K-simplexe de
+la tour ; il n'implique **pas** l'inertie de la boule (correction due à
+l'auditeur A : avec q_min = 2 et p = Kmax − 1, la lane q3 rejette l'ancre
+alors que la boule reste vivante par sa paire diamétrale). Ce qui rend le
+rejet sûr est la complétude par la lane minimale : une boule vivante
+(`p < h_{q_min}`) est produite par la lane q_min avec son seuil exact,
+paire diamétrale (q2, toutes les paires sont couvertes), triangle aigu de
+circumboule B trouvé par sa plus longue arête (q3), tétraèdre à
+circumcentre intérieur trouvé par sa plus longue arête (q4). Trois
+obligations en découlent pour le futur catalogue :
 
-- I1, sûreté : une boule tuée par une lane est inerte (démontré ci-dessus).
+- I1, sûreté : un rejet de lane ne perd aucune boule vivante, parce que la
+  lane q_min la conserve ; seul `p ≥ h_{q_min}` prouve l'inertie (§1).
 - I2, complétude : toute boule pertinente est générée par au moins une lane,
   avec sa coquille complète.
 - I3, fusion : les présentations d'une même boule issues de lanes différentes
@@ -55,11 +61,11 @@ Trois obligations en découlent pour le futur catalogue :
   contrat annonce ; aucune clé q3/q4 n'existe encore.
 
 Le constructeur a inscrit la rétention par boule au plan après ma
-première note. Il reste à graver deux fixtures de dédoublonnage
-inter-lanes : la sphère de centre (10,10,10) et de rayon 5 portant
-a=(15,10,10), d=(5,10,10), b=(7,14,10), c=(7,6,10) (q_min = 2 : à
-p = Kmax − 1 la lane q3 élimine, la lane q2 conserve, la boule est
-vivante) ; la même sphère avec un triangle positif et un tétraèdre
+première note et respecte déjà la distinction ci-dessus. Il reste à
+graver deux fixtures de dédoublonnage inter-lanes : la sphère de centre
+(10,10,10) et de rayon 5 portant a=(15,10,10), d=(5,10,10), b=(7,14,10),
+c=(7,6,10) (q_min = 2 : à p = Kmax − 1 la lane q3 élimine, la lane q2
+conserve, la boule est vivante) ; la même sphère avec un triangle positif et un tétraèdre
 strictement positif partageant une arête (q_min = 3).
 
 ## 3. Fuseaux W3/W4 et plus longue arête : preuve refaite, règle à documenter

@@ -100,6 +100,53 @@ les nœuds B du front ; la propagation ci-dessus et les blocs Z certifiés
 pendant la descente sont les deux gisements du front lui-même, le premier
 étant mesuré, le second restant à prototyper.
 
+## Correction acquittée et contrelecture du census sur produit A×B×Z
+
+L'auditeur A a raison : `h_q ≤ h_{q_min}` rend un rejet de lane sûr
+**pour les présentations de support q**, pas inerte pour la boule (mon
+propre exemple q_min = 2, p = Kmax − 1 le montre). La note des verrous §2
+est corrigée : ce qui rend le rejet sûr est la rétention par la lane
+minimale ; seule `p ≥ h_{q_min}` prouve l'inertie. Merci.
+
+Le constructeur demande une contrelecture de la variante de census où la
+tâche porte un produit de requêtes U×V et un bloc de témoins Z. Lecture
+favorable, avec quatre points à tenir :
+
+1. **Extrema exacts sur trois boîtes.** Le minimum de H sur U×V×Z est
+   `h_minimum(U, V, Z)` (séparable, affine en a et b, concave en z ; exact,
+   vérifié par 5 006 triplets). Le maximum sur U×V×Z est le maximum, sur
+   les huit coins b₀ de V, de `h_maximum_times_four(U, b₀, Z)/4` : H est
+   affine en b, donc son maximum sur la boîte V est atteint à un coin, et
+   le maximum sur U×Z à b₀ fixé est déjà exact. Aucune nouvelle primitive
+   n'est nécessaire ; la symétrie a↔b permet de choisir le petit facteur.
+2. **Invariant de préfixe.** Avec l'ordre Z fixe et ses échappements, la
+   preuve de §9.1 de A se transporte mot pour mot au produit : un bloc
+   décidé (L > 0 crédite sa population à toutes les paires de U×V ;
+   M ≤ 0 l'écarte pour toutes) avance le curseur ; un bloc indécis descend
+   à son premier enfant ; scinder U ou V donne deux produits disjoints qui
+   héritent du même curseur et du même compte, sans avancer Z. Le compte
+   est exact et uniforme sur le produit pour le préfixe consommé, saturé à
+   Kmax, donc un rejet à saturation vaut pour toutes ses paires.
+3. **Coquille et collecte.** M ≤ 0 ne dit rien de la coquille (M = 0
+   possible) : la collecte des intérieurs et de la coquille reste par
+   paire depuis la racine, comme aujourd'hui ; ne pas réemployer le
+   préfixe de comptage pour elle.
+4. **Efficacité, pas sûreté.** Un crédit uniforme L > 0 exige que Z soit
+   dans la lentille du produit ; sur un rectangle séparé, la lentille
+   contient la région centrale mais pas les voisinages des facteurs, où
+   se trouvent pourtant les premiers intérieurs des petites boules. Les
+   blocs proches des facteurs forceront la scission de U et V jusqu'aux
+   singletons : mesurer la part des crédits obtenus uniformément et le
+   nombre de tâches, comme pour Shared, avant de conclure. Les bornes de
+   produit sont plus lâches que les bornes de paire : garder le chemin
+   singleton à bornes exactes de paire.
+
+Directive utilisateur relayée par A, notée : aucune hypothèse
+d'alignement ; les colonnes exactes restent un chemin facultatif, ce qui
+rejoint mes constats sur les nappes et le régime réel. Sur les scans
+KITTI 08 de A, le front Pure émet 18,4 millions de rectangles à 50k avec
+la convention v8, du même ordre que mes séries synthétiques.
+
 ## Sixième tranche lue, non requalifiée
 
 Le partage du nuage et de l'index Z (85015a8c) répond au coût fixe par
