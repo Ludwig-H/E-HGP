@@ -1,0 +1,30 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_product_20260914/self_node.py"
+  ],
+  "finished_utc": "2026-09-14T12:40:15.878373+00:00",
+  "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "result_sha256": "5e20f7724187fd569eff99f4f20e15211b346e29b79e4e543b6524357dc654fe",
+  "returncode": 0,
+  "schema": "mhgp8_q2_self_node_run_v1",
+  "source_archive": "morsehgp3D_v8/audits/q2_product_20260914/self_node_r1_sources.zip",
+  "source_archive_sha256": "c8eb5964f59af616cd5e03bcdf758b161adbe9c66f477c0c0b304653aebb6058",
+  "sources": {
+    "morsehgp3D_v8/audits/p0_q2_census_bounds_probe.py": "c33510de452250b83a67f3eddb9e6fe1ba9319e3e5510cd6f338c3f046de6ceb",
+    "morsehgp3D_v8/audits/q2_complement_20260914/model.py": "43c75559ab0966811a285240f4c31bcf3e60bb52684ffbd1b4686761f74e0443",
+    "morsehgp3D_v8/audits/q2_front_20260914/order_fixture.py": "a5971188669ccb821371e4f10c42e94027f50a3e429c4b167e44e0e2c380d7c3",
+    "morsehgp3D_v8/audits/q2_product_20260914/model.py": "da21c18271f0a0b49467ceddbe6ab0a7d01c4e3157cbd2c9310ca253b35e2347",
+    "morsehgp3D_v8/audits/q2_product_20260914/r2_RESULT.json": "fecefe5d2e1546b2dd399bb6bc8d965c8291830540b9ca80ec3f6c6a8ddf5088",
+    "morsehgp3D_v8/audits/q2_product_20260914/r2_RUN.json": "69a98611a003f4a64f28495e5304b23613ccc023887bc5c8726a4fbeb56bf44e",
+    "morsehgp3D_v8/audits/q2_product_20260914/record.py": "7f8df5e60c6b84adafdc1ccdda97167de97bfdfc4f37de52579038d78db340a7",
+    "morsehgp3D_v8/audits/q2_product_20260914/self_node.py": "b134eed5031a69f838b6a304f0a190ffe9cfcf5ca3dd5f629999d34fc463485d",
+    "morsehgp3D_v8/audits/q2_product_20260914/self_node_record.py": "b84b8104757952fc359f1cd6b1868569d946fe900da8c017610818546938cd9d"
+  },
+  "started_utc": "2026-09-14T12:40:15.345633+00:00",
+  "status": "passed",
+  "stderr": "",
+  "timeout_seconds": 55
+}

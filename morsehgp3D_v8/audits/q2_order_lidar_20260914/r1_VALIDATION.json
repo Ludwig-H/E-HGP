@@ -1,0 +1,1443 @@
+{
+  "canonical_docs": "Validated 552 active Markdown files.\n",
+  "checks": {
+    "campaigns": [
+      {
+        "paired_inputs": 1,
+        "plan": "check50k",
+        "rows": 4,
+        "status": "passed"
+      },
+      {
+        "paired_inputs": 2,
+        "plan": "growth",
+        "rows": 8,
+        "status": "passed"
+      },
+      {
+        "paired_inputs": 2,
+        "plan": "other_scans",
+        "rows": 8,
+        "status": "passed"
+      },
+      {
+        "paired_inputs": 1,
+        "plan": "pilot",
+        "rows": 4,
+        "status": "passed"
+      },
+      {
+        "paired_inputs": 1,
+        "plan": "repeat_pilot",
+        "rows": 4,
+        "status": "passed"
+      },
+      {
+        "paired_inputs": 2,
+        "plan": "separation",
+        "rows": 8,
+        "status": "passed"
+      }
+    ],
+    "configurations": 32,
+    "measures": [
+      {
+        "anchors": 3829093,
+        "count_bounds": 499208566,
+        "count_nodes": 579839306,
+        "count_points": 80630740,
+        "key": [
+          "single_000000",
+          50000,
+          8,
+          "samples",
+          "shared",
+          "none",
+          "global"
+        ],
+        "order_work": {
+          "anchor_skips": 0,
+          "deferred_skips": 0,
+          "phase_switches": 0,
+          "structural_splits": 0
+        },
+        "payload_nodes": 67157307,
+        "pipeline_ms": 13846.484224,
+        "rectangles": 2657844,
+        "sibling_work": {
+          "bound_tests": 0,
+          "cardinality_skips": 0,
+          "proposals": 0,
+          "rejected_after_credit": 0,
+          "rejected_pairs": 0,
+          "rejected_tasks": 0
+        },
+        "supports": 1040133,
+        "tasks": 29917359,
+        "total_ms": 13880.706113
+      },
+      {
+        "anchors": 3829093,
+        "count_bounds": 394408598,
+        "count_nodes": 466009332,
+        "count_points": 71600734,
+        "key": [
+          "single_000000",
+          50000,
+          8,
+          "samples",
+          "shared",
+          "none",
+          "complement"
+        ],
+        "order_work": {
+          "anchor_skips": 3105641,
+          "deferred_skips": 2658206,
+          "phase_switches": 968706,
+          "structural_splits": 89789053
+        },
+        "payload_nodes": 67157307,
+        "pipeline_ms": 13416.542299,
+        "rectangles": 2657844,
+        "sibling_work": {
+          "bound_tests": 0,
+          "cardinality_skips": 0,
+          "proposals": 0,
+          "rejected_after_credit": 0,
+          "rejected_pairs": 0,
+          "rejected_tasks": 0
+        },
+        "supports": 1040133,
+        "tasks": 28789427,
+        "total_ms": 13450.470754
+      },
+      {
+        "anchors": 3829093,
+        "count_bounds": 487046854,
+        "count_nodes": 565478836,
+        "count_points": 78431982,
+        "key": [
+          "single_000000",
+          50000,
+          8,
+          "samples",
+          "shared",
+          "sibling",
+          "global"
+        ],
+        "order_work": {
+          "anchor_skips": 0,
+          "deferred_skips": 0,
+          "phase_switches": 0,
+          "structural_splits": 0
+        },
+        "payload_nodes": 67157307,
+        "pipeline_ms": 13720.902505,
+        "rectangles": 2657844,
+        "sibling_work": {
+          "bound_tests": 1136053,
+          "cardinality_skips": 24054897,
+          "proposals": 25190950,
+          "rejected_after_credit": 434,
+          "rejected_pairs": 598924,
+          "rejected_tasks": 57372
+        },
+        "supports": 1040133,
+        "tasks": 29020043,
+        "total_ms": 13754.599226
+      },
+      {
+        "anchors": 3829093,
+        "count_bounds": 382559346,
+        "count_nodes": 451981906,
+        "count_points": 69422560,
+        "key": [
+          "single_000000",
+          50000,
+          8,
+          "samples",
+          "shared",
+          "sibling",
+          "complement"
+        ],
+        "order_work": {
+          "anchor_skips": 3099322,
+          "deferred_skips": 2648925,
+          "phase_switches": 968706,
+          "structural_splits": 89540265
+        },
+        "payload_nodes": 67157307,
+        "pipeline_ms": 13052.417061,
+        "rectangles": 2657844,
+        "sibling_work": {
+          "bound_tests": 1134116,
+          "cardinality_skips": 22934682,
+          "proposals": 24068798,
+          "rejected_after_credit": 787,
+          "rejected_pairs": 597816,
+          "rejected_tasks": 57229
+        },
+        "supports": 1040133,
+        "tasks": 27897891,
+        "total_ms": 13085.53974
+      },
+      {
+        "anchors": 1170559,
+        "count_bounds": 116953099,
+        "count_nodes": 135805996,
+        "count_points": 18852897,
+        "key": [
+          "single_000000",
+          16000,
+          8,
+          "samples",
+          "shared",
+          "none",
+          "global"
+        ],
+        "order_work": {
+          "anchor_skips": 0,
+          "deferred_skips": 0,
+          "phase_switches": 0,
+          "structural_splits": 0
+        },
+        "payload_nodes": 19808904,
+        "pipeline_ms": 3609.947345,
+        "rectangles": 876197,
+        "sibling_work": {
+          "bound_tests": 0,
+          "cardinality_skips": 0,
+          "proposals": 0,
+          "rejected_after_credit": 0,
+          "rejected_pairs": 0,
+          "rejected_tasks": 0
+        },
+        "supports": 326754,
+        "tasks": 6383361,
+        "total_ms": 3620.384347
+      },
+      {
+        "anchors": 1170559,
+        "count_bounds": 87987501,
+        "count_nodes": 103983119,
+        "count_points": 15995618,
+        "key": [
+          "single_000000",
+          16000,
+          8,
+          "samples",
+          "shared",
+          "none",
+          "complement"
+        ],
+        "order_work": {
+          "anchor_skips": 912741,
+          "deferred_skips": 804457,
+          "phase_switches": 298845,
+          "structural_splits": 24802066
+        },
+        "payload_nodes": 19808904,
+        "pipeline_ms": 3355.170311,
+        "rectangles": 876197,
+        "sibling_work": {
+          "bound_tests": 0,
+          "cardinality_skips": 0,
+          "proposals": 0,
+          "rejected_after_credit": 0,
+          "rejected_pairs": 0,
+          "rejected_tasks": 0
+        },
+        "supports": 326754,
+        "tasks": 6072547,
+        "total_ms": 3365.158127
+      },
+      {
+        "anchors": 1170559,
+        "count_bounds": 115805544,
+        "count_nodes": 134440612,
+        "count_points": 18635068,
+        "key": [
+          "single_000000",
+          16000,
+          8,
+          "samples",
+          "shared",
+          "sibling",
+          "global"
+        ],
+        "order_work": {
+          "anchor_skips": 0,
+          "deferred_skips": 0,
+          "phase_switches": 0,
+          "structural_splits": 0
+        },
+        "payload_nodes": 19808904,
+        "pipeline_ms": 3614.820449,
+        "rectangles": 876197,
+        "sibling_work": {
+          "bound_tests": 138465,
+          "cardinality_skips": 4992225,
+          "proposals": 5130690,
+          "rejected_after_credit": 239,
+          "rejected_pairs": 55662,
+          "rejected_tasks": 6651
+        },
+        "supports": 326754,
+        "tasks": 6301249,
+        "total_ms": 3625.52715
+      },
+      {
+        "anchors": 1170559,
+        "count_bounds": 86890329,
+        "count_nodes": 102671744,
+        "count_points": 15781415,
+        "key": [
+          "single_000000",
+          16000,
+          8,
+          "samples",
+          "shared",
+          "sibling",
+          "complement"
+        ],
+        "order_work": {
+          "anchor_skips": 911319,
+          "deferred_skips": 803041,
+          "phase_switches": 298845,
+          "structural_splits": 24755618
+        },
+        "payload_nodes": 19808904,
+        "pipeline_ms": 3416.073142,
+        "rectangles": 876197,
+        "sibling_work": {
+          "bound_tests": 138304,
+          "cardinality_skips": 4682110,
+          "proposals": 4820414,
+          "rejected_after_credit": 255,
+          "rejected_pairs": 55606,
+          "rejected_tasks": 6635
+        },
+        "supports": 326754,
+        "tasks": 5990973,
+        "total_ms": 3425.964354
+      },
+      {
+        "anchors": 2360364,
+        "count_bounds": 243562520,
+        "count_nodes": 280997181,
+        "count_points": 37434661,
+        "key": [
+          "single_000000",
+          32000,
+          8,
+          "samples",
+          "shared",
+          "none",
+          "global"
+        ],
+        "order_work": {
+          "anchor_skips": 0,
+          "deferred_skips": 0,
+          "phase_switches": 0,
+          "structural_splits": 0
+        },
+        "payload_nodes": 41640034,
+        "pipeline_ms": 7554.612237,
+        "rectangles": 1700300,
+        "sibling_work": {
+          "bound_tests": 0,
+          "cardinality_skips": 0,
+          "proposals": 0,
+          "rejected_after_credit": 0,
+          "rejected_pairs": 0,
+          "rejected_tasks": 0
+        },
+        "supports": 660726,
+        "tasks": 13458384,
+        "total_ms": 7580.110194
+      },
+      {
+        "anchors": 2360364,
+        "count_bounds": 182344394,
+        "count_nodes": 214354508,
+        "count_points": 32010114,
+        "key": [
+          "single_000000",
+          32000,
+          8,
+          "samples",
+          "shared",
+          "none",
+          "complement"
+        ],
+        "order_work": {
+          "anchor_skips": 1871301,
+          "deferred_skips": 1567907,
+          "phase_switches": 608854,
+          "structural_splits": 52927149
+        },
+        "payload_nodes": 41640034,
+        "pipeline_ms": 7031.436386,
+        "rectangles": 1700300,
+        "sibling_work": {
+          "bound_tests": 0,
+          "cardinality_skips": 0,
+          "proposals": 0,
+          "rejected_after_credit": 0,
+          "rejected_pairs": 0,
+          "rejected_tasks": 0
+        },
+        "supports": 660726,
+        "tasks": 12799888,
+        "total_ms": 7051.425377
+      },
+      {
+        "anchors": 2360364,
+        "count_bounds": 240360050,
+        "count_nodes": 277279878,
+        "count_points": 36919828,
+        "key": [
+          "single_000000",
+          32000,
+          8,
+          "samples",
+          "shared",
+          "sibling",
+          "global"
+        ],
+        "order_work": {
+          "anchor_skips": 0,
+          "deferred_skips": 0,
+          "phase_switches": 0,
+          "structural_splits": 0
+        },
+        "payload_nodes": 41640034,
+        "pipeline_ms": 7499.465269,
+        "rectangles": 1700300,
+        "sibling_work": {
+          "bound_tests": 331933,
+          "cardinality_skips": 10541561,
+          "proposals": 10873494,
+          "rejected_after_credit": 423,
+          "rejected_pairs": 163720,
+          "rejected_tasks": 17209
+        },
+        "supports": 660726,
+        "tasks": 13233858,
+        "total_ms": 7521.143534
+      },
+      {
+        "anchors": 2360364,
+        "count_bounds": 179310975,
+        "count_nodes": 210821520,
+        "count_points": 31510545,
+        "key": [
+          "single_000000",
+          32000,
+          8,
+          "samples",
+          "shared",
+          "sibling",
+          "complement"
+        ],
+        "order_work": {
+          "anchor_skips": 1868080,
+          "deferred_skips": 1566025,
+          "phase_switches": 608854,
+          "structural_splits": 52809637
+        },
+        "payload_nodes": 41640034,
+        "pipeline_ms": 7052.44609,
+        "rectangles": 1700300,
+        "sibling_work": {
+          "bound_tests": 330916,
+          "cardinality_skips": 9889662,
+          "proposals": 10220578,
+          "rejected_after_credit": 565,
+          "rejected_pairs": 163203,
+          "rejected_tasks": 17131
+        },
+        "supports": 660726,
+        "tasks": 12580942,
+        "total_ms": 7072.620315
+      },
+      {
+        "anchors": 525660,
+        "count_bounds": 40279266,
+        "count_nodes": 46737390,
+        "count_points": 6458124,
+        "key": [
+          "single_000100",
+          8000,
+          8,
+          "samples",
+          "shared",
+          "none",
+          "global"
+        ],
+        "order_work": {
+          "anchor_skips": 0,
+          "deferred_skips": 0,
+          "phase_switches": 0,
+          "structural_splits": 0
+        },
+        "payload_nodes": 8846096,
+        "pipeline_ms": 1438.449377,
+        "rectangles": 407531,
+        "sibling_work": {
+          "bound_tests": 0,
+          "cardinality_skips": 0,
+          "proposals": 0,
+          "rejected_after_credit": 0,
+          "rejected_pairs": 0,
+          "rejected_tasks": 0
+        },
+        "supports": 156422,
+        "tasks": 2299138,
+        "total_ms": 1444.294612
+      },
+      {
+        "anchors": 525660,
+        "count_bounds": 28718280,
+        "count_nodes": 34058480,
+        "count_points": 5340200,
+        "key": [
+          "single_000100",
+          8000,
+          8,
+          "samples",
+          "shared",
+          "none",
+          "complement"
+        ],
+        "order_work": {
+          "anchor_skips": 421912,
+          "deferred_skips": 326626,
+          "phase_switches": 143758,
+          "structural_splits": 10154401
+        },
+        "payload_nodes": 8846096,
+        "pipeline_ms": 1330.48934,
+        "rectangles": 407531,
+        "sibling_work": {
+          "bound_tests": 0,
+          "cardinality_skips": 0,
+          "proposals": 0,
+          "rejected_after_credit": 0,
+          "rejected_pairs": 0,
+          "rejected_tasks": 0
+        },
+        "supports": 156422,
+        "tasks": 2175270,
+        "total_ms": 1335.633706
+      },
+      {
+        "anchors": 525660,
+        "count_bounds": 40020149,
+        "count_nodes": 46422367,
+        "count_points": 6402218,
+        "key": [
+          "single_000100",
+          8000,
+          8,
+          "samples",
+          "shared",
+          "sibling",
+          "global"
+        ],
+        "order_work": {
+          "anchor_skips": 0,
+          "deferred_skips": 0,
+          "phase_switches": 0,
+          "structural_splits": 0
+        },
+        "payload_nodes": 8846096,
+        "pipeline_ms": 1433.187177,
+        "rectangles": 407531,
+        "sibling_work": {
+          "bound_tests": 25418,
+          "cardinality_skips": 1727388,
+          "proposals": 1752806,
+          "rejected_after_credit": 17,
+          "rejected_pairs": 14919,
+          "rejected_tasks": 2185
+        },
+        "supports": 156422,
+        "tasks": 2278466,
+        "total_ms": 1438.172477
+      },
+      {
+        "anchors": 525660,
+        "count_bounds": 28470884,
+        "count_nodes": 33756146,
+        "count_points": 5285262,
+        "key": [
+          "single_000100",
+          8000,
+          8,
+          "samples",
+          "shared",
+          "sibling",
+          "complement"
+        ],
+        "order_work": {
+          "anchor_skips": 421496,
+          "deferred_skips": 326518,
+          "phase_switches": 143758,
+          "structural_splits": 10144485
+        },
+        "payload_nodes": 8846096,
+        "pipeline_ms": 1300.19967,
+        "rectangles": 407531,
+        "sibling_work": {
+          "bound_tests": 25283,
+          "cardinality_skips": 1603789,
+          "proposals": 1629072,
+          "rejected_after_credit": 18,
+          "rejected_pairs": 14845,
+          "rejected_tasks": 2172
+        },
+        "supports": 156422,
+        "tasks": 2154732,
+        "total_ms": 1304.948269
+      },
+      {
+        "anchors": 543536,
+        "count_bounds": 47351872,
+        "count_nodes": 55662731,
+        "count_points": 8310859,
+        "key": [
+          "single_000200",
+          8000,
+          8,
+          "samples",
+          "shared",
+          "none",
+          "global"
+        ],
+        "order_work": {
+          "anchor_skips": 0,
+          "deferred_skips": 0,
+          "phase_switches": 0,
+          "structural_splits": 0
+        },
+        "payload_nodes": 8478746,
+        "pipeline_ms": 1509.827476,
+        "rectangles": 404172,
+        "sibling_work": {
+          "bound_tests": 0,
+          "cardinality_skips": 0,
+          "proposals": 0,
+          "rejected_after_credit": 0,
+          "rejected_pairs": 0,
+          "rejected_tasks": 0
+        },
+        "supports": 153796,
+        "tasks": 2804566,
+        "total_ms": 1514.97675
+      },
+      {
+        "anchors": 543536,
+        "count_bounds": 35249490,
+        "count_nodes": 42284337,
+        "count_points": 7034847,
+        "key": [
+          "single_000200",
+          8000,
+          8,
+          "samples",
+          "shared",
+          "none",
+          "complement"
+        ],
+        "order_work": {
+          "anchor_skips": 445790,
+          "deferred_skips": 378499,
+          "phase_switches": 143575,
+          "structural_splits": 10647346
+        },
+        "payload_nodes": 8478746,
+        "pipeline_ms": 1432.895294,
+        "rectangles": 404172,
+        "sibling_work": {
+          "bound_tests": 0,
+          "cardinality_skips": 0,
+          "proposals": 0,
+          "rejected_after_credit": 0,
+          "rejected_pairs": 0,
+          "rejected_tasks": 0
+        },
+        "supports": 153796,
+        "tasks": 2681870,
+        "total_ms": 1437.605026
+      },
+      {
+        "anchors": 543536,
+        "count_bounds": 47016155,
+        "count_nodes": 55255630,
+        "count_points": 8239475,
+        "key": [
+          "single_000200",
+          8000,
+          8,
+          "samples",
+          "shared",
+          "sibling",
+          "global"
+        ],
+        "order_work": {
+          "anchor_skips": 0,
+          "deferred_skips": 0,
+          "phase_switches": 0,
+          "structural_splits": 0
+        },
+        "payload_nodes": 8478746,
+        "pipeline_ms": 1567.157811,
+        "rectangles": 404172,
+        "sibling_work": {
+          "bound_tests": 37042,
+          "cardinality_skips": 2198780,
+          "proposals": 2235822,
+          "rejected_after_credit": 95,
+          "rejected_pairs": 18132,
+          "rejected_tasks": 2790
+        },
+        "supports": 153796,
+        "tasks": 2779358,
+        "total_ms": 1571.955002
+      },
+      {
+        "anchors": 543536,
+        "count_bounds": 34918735,
+        "count_nodes": 41882513,
+        "count_points": 6963778,
+        "key": [
+          "single_000200",
+          8000,
+          8,
+          "samples",
+          "shared",
+          "sibling",
+          "complement"
+        ],
+        "order_work": {
+          "anchor_skips": 445573,
+          "deferred_skips": 378419,
+          "phase_switches": 143575,
+          "structural_splits": 10640792
+        },
+        "payload_nodes": 8478746,
+        "pipeline_ms": 1455.669234,
+        "rectangles": 404172,
+        "sibling_work": {
+          "bound_tests": 36792,
+          "cardinality_skips": 2076390,
+          "proposals": 2113182,
+          "rejected_after_credit": 94,
+          "rejected_pairs": 18092,
+          "rejected_tasks": 2786
+        },
+        "supports": 153796,
+        "tasks": 2656718,
+        "total_ms": 1460.947167
+      },
+      {
+        "anchors": 575505,
+        "count_bounds": 50677468,
+        "count_nodes": 59226897,
+        "count_points": 8549429,
+        "key": [
+          "single_000000",
+          8000,
+          8,
+          "samples",
+          "shared",
+          "none",
+          "global"
+        ],
+        "order_work": {
+          "anchor_skips": 0,
+          "deferred_skips": 0,
+          "phase_switches": 0,
+          "structural_splits": 0
+        },
+        "payload_nodes": 9256963,
+        "pipeline_ms": 1686.614601,
+        "rectangles": 437610,
+        "sibling_work": {
+          "bound_tests": 0,
+          "cardinality_skips": 0,
+          "proposals": 0,
+          "rejected_after_credit": 0,
+          "rejected_pairs": 0,
+          "rejected_tasks": 0
+        },
+        "supports": 160237,
+        "tasks": 2834581,
+        "total_ms": 1691.613211
+      },
+      {
+        "anchors": 575505,
+        "count_bounds": 37546535,
+        "count_nodes": 44780432,
+        "count_points": 7233897,
+        "key": [
+          "single_000000",
+          8000,
+          8,
+          "samples",
+          "shared",
+          "none",
+          "complement"
+        ],
+        "order_work": {
+          "anchor_skips": 451392,
+          "deferred_skips": 376704,
+          "phase_switches": 147117,
+          "structural_splits": 11483209
+        },
+        "payload_nodes": 9256963,
+        "pipeline_ms": 1569.699269,
+        "rectangles": 437610,
+        "sibling_work": {
+          "bound_tests": 0,
+          "cardinality_skips": 0,
+          "proposals": 0,
+          "rejected_after_credit": 0,
+          "rejected_pairs": 0,
+          "rejected_tasks": 0
+        },
+        "supports": 160237,
+        "tasks": 2701573,
+        "total_ms": 1574.529729
+      },
+      {
+        "anchors": 575505,
+        "count_bounds": 50484509,
+        "count_nodes": 58993415,
+        "count_points": 8508906,
+        "key": [
+          "single_000000",
+          8000,
+          8,
+          "samples",
+          "shared",
+          "sibling",
+          "global"
+        ],
+        "order_work": {
+          "anchor_skips": 0,
+          "deferred_skips": 0,
+          "phase_switches": 0,
+          "structural_splits": 0
+        },
+        "payload_nodes": 9256963,
+        "pipeline_ms": 1660.870599,
+        "rectangles": 437610,
+        "sibling_work": {
+          "bound_tests": 32911,
+          "cardinality_skips": 2211039,
+          "proposals": 2243950,
+          "rejected_after_credit": 31,
+          "rejected_pairs": 10522,
+          "rejected_tasks": 1529
+        },
+        "supports": 160237,
+        "tasks": 2819455,
+        "total_ms": 1666.448197
+      },
+      {
+        "anchors": 575505,
+        "count_bounds": 37361361,
+        "count_nodes": 44554779,
+        "count_points": 7193418,
+        "key": [
+          "single_000000",
+          8000,
+          8,
+          "samples",
+          "shared",
+          "sibling",
+          "complement"
+        ],
+        "order_work": {
+          "anchor_skips": 451063,
+          "deferred_skips": 376511,
+          "phase_switches": 147117,
+          "structural_splits": 11474155
+        },
+        "payload_nodes": 9256963,
+        "pipeline_ms": 1549.87382,
+        "rectangles": 437610,
+        "sibling_work": {
+          "bound_tests": 32868,
+          "cardinality_skips": 2078212,
+          "proposals": 2111080,
+          "rejected_after_credit": 35,
+          "rejected_pairs": 10512,
+          "rejected_tasks": 1527
+        },
+        "supports": 160237,
+        "tasks": 2686585,
+        "total_ms": 1554.622369
+      },
+      {
+        "anchors": 575505,
+        "count_bounds": 37361361,
+        "count_nodes": 44554779,
+        "count_points": 7193418,
+        "key": [
+          "single_000000",
+          8000,
+          8,
+          "samples",
+          "shared",
+          "sibling",
+          "complement"
+        ],
+        "order_work": {
+          "anchor_skips": 451063,
+          "deferred_skips": 376511,
+          "phase_switches": 147117,
+          "structural_splits": 11474155
+        },
+        "payload_nodes": 9256963,
+        "pipeline_ms": 1553.931485,
+        "rectangles": 437610,
+        "sibling_work": {
+          "bound_tests": 32868,
+          "cardinality_skips": 2078212,
+          "proposals": 2111080,
+          "rejected_after_credit": 35,
+          "rejected_pairs": 10512,
+          "rejected_tasks": 1527
+        },
+        "supports": 160237,
+        "tasks": 2686585,
+        "total_ms": 1559.40599
+      },
+      {
+        "anchors": 575505,
+        "count_bounds": 50484509,
+        "count_nodes": 58993415,
+        "count_points": 8508906,
+        "key": [
+          "single_000000",
+          8000,
+          8,
+          "samples",
+          "shared",
+          "sibling",
+          "global"
+        ],
+        "order_work": {
+          "anchor_skips": 0,
+          "deferred_skips": 0,
+          "phase_switches": 0,
+          "structural_splits": 0
+        },
+        "payload_nodes": 9256963,
+        "pipeline_ms": 1635.222128,
+        "rectangles": 437610,
+        "sibling_work": {
+          "bound_tests": 32911,
+          "cardinality_skips": 2211039,
+          "proposals": 2243950,
+          "rejected_after_credit": 31,
+          "rejected_pairs": 10522,
+          "rejected_tasks": 1529
+        },
+        "supports": 160237,
+        "tasks": 2819455,
+        "total_ms": 1639.956206
+      },
+      {
+        "anchors": 575505,
+        "count_bounds": 37546535,
+        "count_nodes": 44780432,
+        "count_points": 7233897,
+        "key": [
+          "single_000000",
+          8000,
+          8,
+          "samples",
+          "shared",
+          "none",
+          "complement"
+        ],
+        "order_work": {
+          "anchor_skips": 451392,
+          "deferred_skips": 376704,
+          "phase_switches": 147117,
+          "structural_splits": 11483209
+        },
+        "payload_nodes": 9256963,
+        "pipeline_ms": 1523.920247,
+        "rectangles": 437610,
+        "sibling_work": {
+          "bound_tests": 0,
+          "cardinality_skips": 0,
+          "proposals": 0,
+          "rejected_after_credit": 0,
+          "rejected_pairs": 0,
+          "rejected_tasks": 0
+        },
+        "supports": 160237,
+        "tasks": 2701573,
+        "total_ms": 1528.62427
+      },
+      {
+        "anchors": 575505,
+        "count_bounds": 50677468,
+        "count_nodes": 59226897,
+        "count_points": 8549429,
+        "key": [
+          "single_000000",
+          8000,
+          8,
+          "samples",
+          "shared",
+          "none",
+          "global"
+        ],
+        "order_work": {
+          "anchor_skips": 0,
+          "deferred_skips": 0,
+          "phase_switches": 0,
+          "structural_splits": 0
+        },
+        "payload_nodes": 9256963,
+        "pipeline_ms": 1633.791277,
+        "rectangles": 437610,
+        "sibling_work": {
+          "bound_tests": 0,
+          "cardinality_skips": 0,
+          "proposals": 0,
+          "rejected_after_credit": 0,
+          "rejected_pairs": 0,
+          "rejected_tasks": 0
+        },
+        "supports": 160237,
+        "tasks": 2834581,
+        "total_ms": 1638.591322
+      },
+      {
+        "anchors": 644844,
+        "count_bounds": 50875237,
+        "count_nodes": 59172859,
+        "count_points": 8297622,
+        "key": [
+          "single_000000",
+          8000,
+          10,
+          "samples",
+          "shared",
+          "none",
+          "global"
+        ],
+        "order_work": {
+          "anchor_skips": 0,
+          "deferred_skips": 0,
+          "phase_switches": 0,
+          "structural_splits": 0
+        },
+        "payload_nodes": 9256963,
+        "pipeline_ms": 1680.00316,
+        "rectangles": 513842,
+        "sibling_work": {
+          "bound_tests": 0,
+          "cardinality_skips": 0,
+          "proposals": 0,
+          "rejected_after_credit": 0,
+          "rejected_pairs": 0,
+          "rejected_tasks": 0
+        },
+        "supports": 160237,
+        "tasks": 2645578,
+        "total_ms": 1685.376265
+      },
+      {
+        "anchors": 644844,
+        "count_bounds": 37151101,
+        "count_nodes": 44207143,
+        "count_points": 7056042,
+        "key": [
+          "single_000000",
+          8000,
+          10,
+          "samples",
+          "shared",
+          "none",
+          "complement"
+        ],
+        "order_work": {
+          "anchor_skips": 470904,
+          "deferred_skips": 363512,
+          "phase_switches": 148440,
+          "structural_splits": 12264119
+        },
+        "payload_nodes": 9256963,
+        "pipeline_ms": 1602.594852,
+        "rectangles": 513842,
+        "sibling_work": {
+          "bound_tests": 0,
+          "cardinality_skips": 0,
+          "proposals": 0,
+          "rejected_after_credit": 0,
+          "rejected_pairs": 0,
+          "rejected_tasks": 0
+        },
+        "supports": 160237,
+        "tasks": 2518076,
+        "total_ms": 1607.373585
+      },
+      {
+        "anchors": 644844,
+        "count_bounds": 50807047,
+        "count_nodes": 59090188,
+        "count_points": 8283141,
+        "key": [
+          "single_000000",
+          8000,
+          10,
+          "samples",
+          "shared",
+          "sibling",
+          "global"
+        ],
+        "order_work": {
+          "anchor_skips": 0,
+          "deferred_skips": 0,
+          "phase_switches": 0,
+          "structural_splits": 0
+        },
+        "payload_nodes": 9256963,
+        "pipeline_ms": 1693.886491,
+        "rectangles": 513842,
+        "sibling_work": {
+          "bound_tests": 15241,
+          "cardinality_skips": 1980225,
+          "proposals": 1995466,
+          "rejected_after_credit": 21,
+          "rejected_pairs": 3948,
+          "rejected_tasks": 698
+        },
+        "supports": 160237,
+        "tasks": 2640310,
+        "total_ms": 1698.720736
+      },
+      {
+        "anchors": 644844,
+        "count_bounds": 37085564,
+        "count_nodes": 44127320,
+        "count_points": 7041756,
+        "key": [
+          "single_000000",
+          8000,
+          10,
+          "samples",
+          "shared",
+          "sibling",
+          "complement"
+        ],
+        "order_work": {
+          "anchor_skips": 470704,
+          "deferred_skips": 363487,
+          "phase_switches": 148440,
+          "structural_splits": 12261613
+        },
+        "payload_nodes": 9256963,
+        "pipeline_ms": 1546.27833,
+        "rectangles": 513842,
+        "sibling_work": {
+          "bound_tests": 15225,
+          "cardinality_skips": 1852773,
+          "proposals": 1867998,
+          "rejected_after_credit": 23,
+          "rejected_pairs": 3947,
+          "rejected_tasks": 697
+        },
+        "supports": 160237,
+        "tasks": 2512842,
+        "total_ms": 1551.07481
+      },
+      {
+        "anchors": 704584,
+        "count_bounds": 51459533,
+        "count_nodes": 59635113,
+        "count_points": 8175580,
+        "key": [
+          "single_000000",
+          8000,
+          12,
+          "samples",
+          "shared",
+          "none",
+          "global"
+        ],
+        "order_work": {
+          "anchor_skips": 0,
+          "deferred_skips": 0,
+          "phase_switches": 0,
+          "structural_splits": 0
+        },
+        "payload_nodes": 9256963,
+        "pipeline_ms": 1749.545397,
+        "rectangles": 579042,
+        "sibling_work": {
+          "bound_tests": 0,
+          "cardinality_skips": 0,
+          "proposals": 0,
+          "rejected_after_credit": 0,
+          "rejected_pairs": 0,
+          "rejected_tasks": 0
+        },
+        "supports": 160237,
+        "tasks": 2515220,
+        "total_ms": 1754.482516
+      },
+      {
+        "anchors": 704584,
+        "count_bounds": 37189669,
+        "count_nodes": 44180989,
+        "count_points": 6991320,
+        "key": [
+          "single_000000",
+          8000,
+          12,
+          "samples",
+          "shared",
+          "none",
+          "complement"
+        ],
+        "order_work": {
+          "anchor_skips": 488939,
+          "deferred_skips": 356451,
+          "phase_switches": 149664,
+          "structural_splits": 12954433
+        },
+        "payload_nodes": 9256963,
+        "pipeline_ms": 1629.147393,
+        "rectangles": 579042,
+        "sibling_work": {
+          "bound_tests": 0,
+          "cardinality_skips": 0,
+          "proposals": 0,
+          "rejected_after_credit": 0,
+          "rejected_pairs": 0,
+          "rejected_tasks": 0
+        },
+        "supports": 160237,
+        "tasks": 2394028,
+        "total_ms": 1633.886658
+      },
+      {
+        "anchors": 704584,
+        "count_bounds": 51448969,
+        "count_nodes": 59622323,
+        "count_points": 8173354,
+        "key": [
+          "single_000000",
+          8000,
+          12,
+          "samples",
+          "shared",
+          "sibling",
+          "global"
+        ],
+        "order_work": {
+          "anchor_skips": 0,
+          "deferred_skips": 0,
+          "phase_switches": 0,
+          "structural_splits": 0
+        },
+        "payload_nodes": 9256963,
+        "pipeline_ms": 1763.366836,
+        "rectangles": 579042,
+        "sibling_work": {
+          "bound_tests": 6523,
+          "cardinality_skips": 1803299,
+          "proposals": 1809822,
+          "rejected_after_credit": 15,
+          "rejected_pairs": 663,
+          "rejected_tasks": 127
+        },
+        "supports": 160237,
+        "tasks": 2514406,
+        "total_ms": 1768.113562
+      },
+      {
+        "anchors": 704584,
+        "count_bounds": 37179392,
+        "count_nodes": 44168491,
+        "count_points": 6989099,
+        "key": [
+          "single_000000",
+          8000,
+          12,
+          "samples",
+          "shared",
+          "sibling",
+          "complement"
+        ],
+        "order_work": {
+          "anchor_skips": 488901,
+          "deferred_skips": 356432,
+          "phase_switches": 149664,
+          "structural_splits": 12954019
+        },
+        "payload_nodes": 9256963,
+        "pipeline_ms": 1662.793459,
+        "rectangles": 579042,
+        "sibling_work": {
+          "bound_tests": 6519,
+          "cardinality_skips": 1682111,
+          "proposals": 1688630,
+          "rejected_after_credit": 14,
+          "rejected_pairs": 662,
+          "rejected_tasks": 126
+        },
+        "supports": 160237,
+        "tasks": 2393214,
+        "total_ms": 1667.568748
+      }
+    ],
+    "old_baseline_matches": 9,
+    "pins": {
+      "morsehgp3D_v8/audits/q2_front_20260914/campaign_separation/COMPLETION.json": "f6960e2079375b346e3f90c46d26e3d136bc1b569b967d18198681bcd285e2b3",
+      "morsehgp3D_v8/audits/q2_front_20260914/campaign_separation/MEASURES.jsonl": "e59e1a7a46d0d3510bc06ff2efd0db651d8cd05b89a2a7d9a6e94806f47e61b2",
+      "morsehgp3D_v8/audits/q2_order_lidar_20260914/campaign_check50k/COMPLETION.json": "6a3b950e620127365e9a89e1fd6795ed6fad9676f2eeb4d5248cdc3793dd1e10",
+      "morsehgp3D_v8/audits/q2_order_lidar_20260914/campaign_check50k/MANIFEST.json": "d4875a1433334f9a1f42afbc11a3c3e72f81bb5764b3196f8eb67b7fc8623304",
+      "morsehgp3D_v8/audits/q2_order_lidar_20260914/campaign_check50k/MEASURES.jsonl": "b853944fd0cfd387ccd173f0319d01e3f9feaf213fa445f7008d049c751a5cb1",
+      "morsehgp3D_v8/audits/q2_order_lidar_20260914/campaign_growth/COMPLETION.json": "c505d5afa9c6464ae561204cf9a566fdd91f58b56d7c853b296ef8bdc2dcf634",
+      "morsehgp3D_v8/audits/q2_order_lidar_20260914/campaign_growth/MANIFEST.json": "61dc3b6c9d0ff7f436fe63f274a58dbeb564344915eb79b0b9e7d244d1d9f10b",
+      "morsehgp3D_v8/audits/q2_order_lidar_20260914/campaign_growth/MEASURES.jsonl": "9464a253dd3dc2b7429e2e3987cc56587b45c4de9ebe235c0c1285e028d51ee4",
+      "morsehgp3D_v8/audits/q2_order_lidar_20260914/campaign_other_scans/COMPLETION.json": "22c3b438495a1963235c70858d4863c8d233f08c7620624429c5db8f41c111cd",
+      "morsehgp3D_v8/audits/q2_order_lidar_20260914/campaign_other_scans/MANIFEST.json": "ecf238b393cc18d221e8333319e137586669e29112fbe8bca24b7bff95f6436c",
+      "morsehgp3D_v8/audits/q2_order_lidar_20260914/campaign_other_scans/MEASURES.jsonl": "12ee19037e5f1f37ff5457637bb8211d5c459734be599ba669f75bb8adb71374",
+      "morsehgp3D_v8/audits/q2_order_lidar_20260914/campaign_pilot/COMPLETION.json": "f7f123f36b07b5521457f0e6f4fa2d84c999bfa1caa005322a305b734e5b4b78",
+      "morsehgp3D_v8/audits/q2_order_lidar_20260914/campaign_pilot/MANIFEST.json": "bd37cbe288e89c5b2e44590382771eebd463f4aa56438a2d07bc47438f4510ba",
+      "morsehgp3D_v8/audits/q2_order_lidar_20260914/campaign_pilot/MEASURES.jsonl": "098ad344789fdb43fa1c920ad5fc0c5de216e7b2cc2f5e2a1df300467b4bf73d",
+      "morsehgp3D_v8/audits/q2_order_lidar_20260914/campaign_repeat_pilot/COMPLETION.json": "65f2d97891db2405d5964c7b9f3808c9a661d710f1512ece7e8f388210c5f7d8",
+      "morsehgp3D_v8/audits/q2_order_lidar_20260914/campaign_repeat_pilot/MANIFEST.json": "84eef1254a1f71cad09014823482c5c717bcd76b9ab5100ab76ce22c04bd5380",
+      "morsehgp3D_v8/audits/q2_order_lidar_20260914/campaign_repeat_pilot/MEASURES.jsonl": "f114e7a7241749fced30bb4978a5476f6f10a3c5d8435a11bbf959608c3ddadd",
+      "morsehgp3D_v8/audits/q2_order_lidar_20260914/campaign_separation/COMPLETION.json": "93201b57bb155034cc881f2657893979d00dde4eb09f69d42f64bd7a5f1abb9d",
+      "morsehgp3D_v8/audits/q2_order_lidar_20260914/campaign_separation/MANIFEST.json": "c11e97dba2079325b69d0e8030edefc1c969254e17e0089bfb443aaabfc3dc62",
+      "morsehgp3D_v8/audits/q2_order_lidar_20260914/campaign_separation/MEASURES.jsonl": "caf84401bf98a45e5cb6191f1c1013c9b8ecfe9d503acdb4548cd7fc6323df5e",
+      "morsehgp3D_v8/audits/q2_order_lidar_20260914/r1_BUILD.json": "26d8ffedd293c06a4477b230d0659ba37c1acf7ad16c1f9098a7cf2c725bcc02",
+      "morsehgp3D_v8/audits/q2_order_lidar_20260914/r1_sources.zip": "ab184fa236e0379e396cd21de893df781373cbaa242365ddc2f1ea8f3c7d6bd8",
+      "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_check50k/COMPLETION.json": "cc0f2f2d40def3343a096042c9e7a9f16bb2856ab89b7e280164d40e8588e19c",
+      "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_check50k/MEASURES.jsonl": "ba510a7fe838c4cd5711dab5e98f557bd1f2753279ad2a7105bf7839aa49c284",
+      "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_clusters16k/COMPLETION.json": "6d07fb6c1a8223251c60f43501a89f195220d2c3a40e5de5dcfdde0b7ef24a1d",
+      "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_clusters16k/MEASURES.jsonl": "57f3e932b715c95bba0885942aab6a95dea1bb9f7404e3362af63d3eb21b25a6",
+      "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_clusters8k/COMPLETION.json": "36d2c7537b5ac38d6eab9ba150a430132e262585ba44ee340dea9b9ad52e4596",
+      "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_clusters8k/MEASURES.jsonl": "c9fe3dda5212bcbb1a776bb1523ffd1381aa81afafebcbc962a5dc89f2a7b4b3",
+      "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_growth/COMPLETION.json": "6c1a199fe450cbe57fcd398a3485de4a07c51f37e22e31fdf9d9ef8a3be1b710",
+      "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_growth/MEASURES.jsonl": "61e0f90b6068fd04ec69bd1dec7472f5323d69c0c61f7d6a1a5460fe4166eea3",
+      "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_other_scans/COMPLETION.json": "6000db3dae7625746206b55eee85a5192b1366017946b55babe4d23af1ff9f1e",
+      "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_other_scans/MEASURES.jsonl": "5d4eaa6eeace84ea9888c8a954c7f683c6604c04f6a69bcb526ea73f81250893",
+      "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_pilot/COMPLETION.json": "2d7ec43e75d84548aad4e00d184503579cba56c7e9121b241255214dd4150d7d",
+      "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_pilot/MEASURES.jsonl": "d688f714886a8fef94109b3ea4ae6b0850b7529362bea1b15d6b68a26319fd81",
+      "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_repeat_clusters8k/COMPLETION.json": "4290f7c133d3816635e95d5a26d9c709a942763ebc96d856eb420e3df895862f",
+      "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_repeat_clusters8k/MEASURES.jsonl": "aa0bef0d5f12c34727c5095e2e8e9c170fec92eef3ec1988ef70b2257e196057",
+      "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_repeat_pilot/COMPLETION.json": "c36bb8aabf5904b5499a467635c409545bd4ef471b7cc77fd4cf8984930f3d8e",
+      "morsehgp3D_v8/audits/q2_sibling_20260914/campaign_repeat_pilot/MEASURES.jsonl": "dafd96b0b21a6c0d910e1735661580610ea2f785292256ba99d38225452dec61"
+    },
+    "receipt_mutants": [
+      {
+        "detected_by": "wrong selected mode",
+        "name": "wrong_mode"
+      },
+      {
+        "detected_by": "geometric/structural cursor ledger mismatch",
+        "name": "missing_structure"
+      },
+      {
+        "detected_by": "geometric/structural cursor ledger mismatch",
+        "name": "false_cursor"
+      },
+      {
+        "detected_by": "task ledger mismatch",
+        "name": "bad_task_mass"
+      },
+      {
+        "detected_by": "wrong sibling fields",
+        "name": "missing_sibling_field"
+      },
+      {
+        "detected_by": "physical output ledger mismatch",
+        "name": "lost_support"
+      },
+      {
+        "detected_by": "invalid duration",
+        "name": "not_finite"
+      },
+      {
+        "detected_by": "row is not completed",
+        "name": "failed_row"
+      }
+    ],
+    "rows": 36,
+    "status": "passed"
+  },
+  "commands": [
+    {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_order_lidar_20260914/verify.py",
+        "--check"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout_sha256": "16bebda427292e5f99378cb9c339c42944277ef4600934942cebf3f67746c357"
+    },
+    {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_order_lidar_20260914/verify.py",
+        "--check"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout_sha256": "16bebda427292e5f99378cb9c339c42944277ef4600934942cebf3f67746c357"
+    },
+    {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "tools/check_docs.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout_sha256": "ce6faad969a9dd52ada7fdda394d31218f6f84b91da9ecfdb60d3d6f4ac4ce32"
+    },
+    {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "tools/check_implementation_status.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout_sha256": "b0c51ba87451f1201a92c416bcf2aa8d2efc1a3defdec28a60af3662929bdba7"
+    }
+  ],
+  "documents": {
+    "morsehgp3D_v8/audits/DIALOGUE_COURANT.md": "e6c839df8031738dd82a92c00b5187432f9083a20e61640e36d6bdaec310ac68",
+    "morsehgp3D_v8/audits/q2_order_lidar_20260914/README.md": "f0d85e17735196459c9a2800365b682a39c3dc68e6f72906fbab6ff35de9bafa",
+    "morsehgp3D_v8/audits/q2_product_20260914/README.md": "6537adeee299c101f52e07065922bfed878311ad23a40da291ade082e44c5aee"
+  },
+  "finished_utc": "2026-09-14T12:52:20.443748+00:00",
+  "gcp_used": false,
+  "normal_and_optimized_identical": true,
+  "public_status": "not_claimed",
+  "reader_preflight": "Initial manual check stopped at missing old baseline: s10/s12 were in q2_front/campaign_separation, not the sibling campaigns. Both closed sources are now checked explicitly; no measured row changed.",
+  "registry": "Validated 20 implementation phases and their gates.\n",
+  "schema": "mhgp8_q2_order_lidar_validation_v1",
+  "started_utc": "2026-09-14T12:52:18.420746+00:00",
+  "status": "passed",
+  "verifier_sha256": "2ba61ac68dc49478fb5438355e6873c9e76f3bbf001e3d2a5b8a8ea027756006"
+}

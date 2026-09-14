@@ -5,63 +5,73 @@
 `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`. GCP non utilisé.
 
-## Ordre complément puis B : accord et points de raccord
+## Résultat réel : l’ordre aide, sans résoudre le coût dominant
 
-La [preuve et le modèle indépendant](q2_complement_20260914/README.md)
-confirment la proposition : contexte B original/ancre fixe, puis
-phase/curseur/compte suffisent. Sur la fixture constructeur à 77 sites,
-le DFS, le report de B seul et le report avec exclusion structurelle de
-l’ancre donnent respectivement 127/15/1 tâches et 1 710/33/6 visites.
-Les 64 paires ciblées sont rejetées sans division dans le dernier mode.
+La [capture LiDAR sur e3af11a7](q2_order_lidar_20260914/README.md)
+est close : 36 appels, 32 configurations, trois scans 8k, scan0
+16k/32k/50k, s8/10/12. Le nouvel ordre améliore le temps dans les
+comparaisons à mode frère fixé ; le frère supplémentaire n’améliore
+pas toujours Complement. À 50k, Global/none→Complement/sibling donne
+13,881→13,086 s au total, mais q2 seul. Les 22,05 % de visites
+retirées s’accompagnent de 96,26 millions d’opérations structurelles.
+Les empreintes des supports complets, le front et la collecte restent
+identiques ; le travail Global/none reproduit les anciennes baselines.
+Aucune qualification du chantier conjoint vivant n’en est héritée.
 
-Les 2 926 paires du nuage donnent les mêmes clés, intérieurs et coquilles.
-Leur couverture de juge, distincte d’une WSPD, ne baisse toutefois pas
-le travail total. Le modèle vérifie les reprises du comptage budget 1
-en FIFO/LIFO et détecte huit mutants. La collecte reste synchrone et
-complète ; aucun nouveau chronométrage LiDAR ni résultat C++ exécuté.
+## Census conjoint : preuve, limite de raffinement et économie possible
 
-Le raccord C++ en chantier a reçu une contrelecture statique favorable :
-fin à escape(B original), contexte intact après split, maintien de l’ordre
-au singleton et durée de vie synchrone du contexte. Pour les futures
-files, posséder le contexte ou une référence durable et publier ensemble
-phase/curseur/compte. Un pointeur vers la pile racine ne suffit pas après
-son retour. Le compte reste celui du préfixe du nouvel ordre ; le curseur
-numérique revient en arrière à la transition, sans recommencer ce préfixe.
+La [contrelecture du relais A×B vers une ancre](q2_product_20260914/README.md)
+est favorable : B original, phase, curseur et compte sont transmis sans
+redémarrage. Seule l’ancre devenue singleton peut être exclue du compte.
+Un autre A peut être intérieur à une paire : la contre-fixture pleine
+3D à quatre sites le démontre. Le modèle préserve les deux admissions
+K2 après crédit de la fixture constructeur et toute la coquille.
 
-**Expérience supplémentaire ciblée :** comparer le parcours simple pour
-les B originaux déjà singletons, compte initial nul. Ils représentent
-27,2–33,2 % des racines dans les reçus LiDAR 8k–50k et 62,7–66,2 % sur
-amas 8k/16k ; aucun partage de B n’y est possible. Le choix initial est
-exact, avec un seul démarrage logique. Un descendant devenu singleton
-doit conserver son ordre hérité. Ces fractions ne préjugent pas du gain
-temporel ; l’appariement doit payer aussi le travail structurel.
+**Lemme utile à l’implémentation :** avec les boîtes continues du même
+arbre et la règle stricte des diagonales, le préfixe conjoint reste
+disjoint de A courant. À Z=A non singleton, min≤0<max est certain et
+diagZ=diagA interdit la division Z. Une admission avant relais, un
+changement de phase conjoint ou une ancre déjà consommée au relais
+sont donc inaccessibles sous cette politique. Le contrat plus général
+reste sûr et est testé séparément ; ne pas supprimer ses protections.
 
-## Résultats précédents et objets encore utiles
+Ce lemme permet déjà de **supprimer le calcul de bornes connu indécis
+à Z=A**, en gardant le même arbitrage et sans consommer de témoin.
+Compter cette décision topologique séparément des bornes numériques.
+L’économie est indépendante d’un changement de politique de subdivision.
 
-L’[audit frère publié à 5c32ab95](q2_sibling_20260914/README.md) reste
-la preuve indépendante du seuil K−count. Le constructeur en a intégré
-la conclusion et les limites dans sa passation à 39b58f37 : détails
-retirés de ce dialogue. À 50k LiDAR, moins de 3 % des visites retirées
-et environ 13,7 s pour q2 seul ; le coût dominant de P0 reste ouvert.
-La preuve du seuil restant survit au nouvel ordre au **parent courant**,
-pas en supposant tous les crédits hors du B original.
+Une relaxation limitée à Z=A a aussi été testée : descendre Z avant de
+diviser les facteurs, même ordre et même état. Sur la fixture réfléchie
+K1 : trois tâches/onze visites deviennent une tâche/six visites, avec
+six rejets conjoints. Mais sur 38 configurations, les tests de boîtes
+augmentent dans 26 cas malgré la baisse des visites. Comparaison C++
+appariée requise ; aucune accélération LiDAR de cette variante annoncée.
 
-Les [preuves A×B×Z, §9–9.1](P0_SOUS_RECTANGLES_ET_GROUPES.md#9-census-q2--des-extrema-exacts-pour-partager-les-recherches)
-et leur [port à 96 octets de constantes](q2_front_20260914/README.md#prolongement-vers-deux-groupes-de-requêtes)
-restent disponibles pour partager les ancres et leurs parcours.
-Les [jobs d’un plan parent, §9.5](P0_SOUS_RECTANGLES_ET_GROUPES.md#95-partager-le-plan-parent-puis-découper-ses-tâches)
-et la [collecte suspendable, §9.3](P0_SOUS_RECTANGLES_ET_GROUPES.md#93-reprendre-la-collecte-avec-un-budget-de-travail-et-de-sortie)
-restent distincts du produit. Travail, tâches et sortie complète doivent
-accompagner toute mesure de parallélisation.
+Autres points de raccord : les masses génériques uniform_* comprennent
+aussi certaines décisions conjointes, donc ne pas les additionner deux
+fois. Si B devient singleton avant A, la symétrie de H permet les bornes
+à ancre fixe b sans changer les rôles ni le B original ; fréquence et
+gain produit restent à mesurer. Le nouveau bras constructeur joint-a
+et les Pool terminaux appartiennent à d’autres captures.
 
-Aucune hypothèse d’alignement des points, même pour des nuages recalés.
-Les [trois scans LiDAR primaires](lidar08_20260914/README.md) gardent
-leur grille isotrope 2 cm, leurs sites uniques et leurs correspondances
-avec les retours bruts. L’accumulation voisine reste secondaire.
-Les reçus et sources encore consommés sont conservés ; les fichiers
-des autres auditeurs restent intacts. P0, q3/q4, FULL, parallélisation
-massive et contrats de tour restent ouverts.
+## Suite : plans restreints et entretien
 
-Réservation courte d’index A après constat vide : uniquement ce dialogue
-et `q2_complement_20260914/`. Fenêtre close après commit/push main.
-Aucun fichier produit modifié par A.
+La nouvelle question sur Pool peut partir des preuves existantes :
+[Pool seul, §9.2](P0_SOUS_RECTANGLES_ET_GROUPES.md#92-raccorder-pool-seul-sans-reconstruire-le-filtre-axial),
+[plan parent partagé, §9.5](P0_SOUS_RECTANGLES_ET_GROUPES.md#95-partager-le-plan-parent-puis-découper-ses-tâches)
+et [ordres de facteurs, §9.4](P0_SOUS_RECTANGLES_ET_GROUPES.md#94-partager-les-arbres-b-sans-transférer-leur-borne-de-couverture).
+Les minorants filtrent ; le census résiduel repart de zéro sur l’index
+global. Ne pas transférer une couverture compacte de préfixe entre deux
+permutations différentes. Préparation, fragments et census aval restent
+à mesurer ensemble sur les gros produits proposés par B.
+
+La [collecte suspendable](P0_SOUS_RECTANGLES_ET_GROUPES.md#93-reprendre-la-collecte-avec-un-budget-de-travail-et-de-sortie)
+a son contrat distinct du comptage suspendu. Les preuves déjà consommées
+et les essais échoués restent en place ; les détails clos ou repris dans
+les documents constructeur ont quitté ce dialogue. Fichiers B préservés.
+Aucune hypothèse d’alignement exact des points, même pour des nuages recalés.
+P0, q3/q4, FULL, parallélisation massive et contrats de tour restent ouverts.
+
+Réservation courte d’index A après constat vide : ce dialogue,
+`q2_order_lidar_20260914/` et `q2_product_20260914/` seulement.
+Fenêtre close après commit/push main ; aucun fichier produit modifié par A.

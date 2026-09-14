@@ -1,0 +1,23 @@
+{
+  "archive": "morsehgp3D_v8/audits/q2_product_20260914/static_review_sources.zip",
+  "archive_sha256": "7ff5b01f4e7313647ff76a86f8e31b4c9dc2501374c13d67f6aa8ee1e5e370ad",
+  "captured_utc": "2026-09-14T12:26:03.674047+00:00",
+  "findings": [
+    "Singleton handoff preserves B0/phase/cursor/count and does not restart the root. Removing only the anchor changes no resolved or unresolved depth.",
+    "Product splits partition pair mass; joint rejected/accepted/handoff masses partition candidates.",
+    "Generic geometric counters cover the anchor phase; generic uniform mass counters ALSO include some joint decisions and must not be added twice.",
+    "joint.cursor_advances = joint.bound_tests - joint.splits_a - joint.splits_b + joint.structural_splits + joint.deferred_skips + joint.phase_switches",
+    "Joint extrema use four endpoint pairs per axis; half-integral peaks preserved, u32 storage and i64 arithmetic safe within u16 profile."
+  ],
+  "gcp_used": false,
+  "head_at_read": "93c24ddab4ab3a4ce5cd4df12421c502495eef2f",
+  "public_status": "not_claimed",
+  "schema": "mhgp8_joint_static_review_v1",
+  "scope": "static worktree review, four files only; no C++ execution",
+  "sources": {
+    "morsehgp3D_v8/docs/P0_CENSUS_CONJOINT_Q2.md": "16a5259714dd4116009f5dadbba2b387e8736f9b11128193c0d718e0fd62c6c3",
+    "morsehgp3D_v8/src/pipeline/q2_census.cpp": "cc8ab5a6690f8f92bbca3a085c3c533a5bf936ac79e593cf663fcf8fa3e88243",
+    "morsehgp3D_v8/src/pipeline/q2_joint_bounds.hpp": "6def11fe31de949896d39441095957579392d79c3612b7084ef1e7f7a6a69d03",
+    "morsehgp3D_v8/src/pipeline/wspd_q2_census.hpp": "7e704d8070c0f5d7e9e21c650d65882aae2892c604c706e54eb2a86264c31155"
+  }
+}

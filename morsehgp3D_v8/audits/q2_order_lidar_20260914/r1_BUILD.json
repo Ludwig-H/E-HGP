@@ -1,0 +1,121 @@
+{
+  "archive": "morsehgp3D_v8/audits/q2_order_lidar_20260914/r1_sources.zip",
+  "archive_sha256": "ab184fa236e0379e396cd21de893df781373cbaa242365ddc2f1ea8f3c7d6bd8",
+  "audit_inputs": {
+    "morsehgp3D_v8/audits/q2_front_20260914/lidar_q2_probe.cpp": "217b2bca2956e75df52a4ad1877959a5bd3e2078384b4c06faabf7c0123e8f99",
+    "morsehgp3D_v8/audits/q2_front_20260914/measure.py": "8add7d2849eee2c7cf67ed2461c73cd0ad1c4105e26fbceb68774dd176079509",
+    "morsehgp3D_v8/audits/q2_order_lidar_20260914/build_snapshot.py": "582af540a8c98307fa3bf2b4181e04a7126bab94a74cc8f362d08d53ddbaa593",
+    "morsehgp3D_v8/audits/q2_order_lidar_20260914/lidar_order_probe.cpp": "a5607a70b1597b758d552d1e4169fcc5c6774b98508da63eaa9dff49bcf0b39c",
+    "morsehgp3D_v8/audits/q2_order_lidar_20260914/measure.py": "6e5f48b368f976d79070a37d010a365d57c6638dbb834e62da2467bed3104e17",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/measure.py": "c4afe69a3b702501f9417ba002d2500bd31a0243aa31878fd771d50f472de6aa"
+  },
+  "binary": "morsehgp3D_v8/audits/q2_order_lidar_20260914/.build/r1/lidar_order_probe",
+  "binary_sha256": "04c8927f1f2773d2d8341c406b104a990301bd397a28b687f645dffba80a0076",
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+  "finished_utc": "2026-09-14T12:23:35.860983+00:00",
+  "gate_sha256": "99c92e5554779d05441a37da081b6a154e2364cdeb43f0ea49fda4a74a10ef01",
+  "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+  "public_status": "not_claimed",
+  "schema": "mhgp8_q2_order_lidar_build_v1",
+  "source_commit": "e3af11a7b2ecba4a71929c7112610ff2618f813e",
+  "source_sha256": {
+    "morsehgp3D_v8/audits/q2_front_20260914/lidar_q2_probe.cpp": "217b2bca2956e75df52a4ad1877959a5bd3e2078384b4c06faabf7c0123e8f99",
+    "morsehgp3D_v8/audits/q2_front_20260914/measure.py": "8add7d2849eee2c7cf67ed2461c73cd0ad1c4105e26fbceb68774dd176079509",
+    "morsehgp3D_v8/audits/q2_order_lidar_20260914/build_snapshot.py": "582af540a8c98307fa3bf2b4181e04a7126bab94a74cc8f362d08d53ddbaa593",
+    "morsehgp3D_v8/audits/q2_order_lidar_20260914/lidar_order_probe.cpp": "a5607a70b1597b758d552d1e4169fcc5c6774b98508da63eaa9dff49bcf0b39c",
+    "morsehgp3D_v8/audits/q2_order_lidar_20260914/measure.py": "6e5f48b368f976d79070a37d010a365d57c6638dbb834e62da2467bed3104e17",
+    "morsehgp3D_v8/audits/q2_sibling_20260914/measure.py": "c4afe69a3b702501f9417ba002d2500bd31a0243aa31878fd771d50f472de6aa",
+    "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+    "morsehgp3D_v8/src/pipeline/axis_q2.cpp": "8c91d5c9ca4427cf20e0909a5f35616ab76c9dc387268e7a6e28511de9e3e61a",
+    "morsehgp3D_v8/src/pipeline/axis_q2.hpp": "5d0022c7776b1c382f65e5bff9fe9e125c81c701c08a0d8db8e4e40672c4cac4",
+    "morsehgp3D_v8/src/pipeline/local_credits.cpp": "0d069aca65dcffc96bb26d55874fdb34b2748eb5f0b956a991d584d928ab1392",
+    "morsehgp3D_v8/src/pipeline/local_credits.hpp": "a68fed7a40041ddc76b2a401d35cdafeaa66711ab3cd1d79ff41f3666b29a3d9",
+    "morsehgp3D_v8/src/pipeline/prepared_cloud.cpp": "accd0ec990e81e0352d37272ac5099d50fa97065edbb68864c1dcf8b5631afb7",
+    "morsehgp3D_v8/src/pipeline/prepared_cloud.hpp": "2808e4e4609cbc11800894cf43824c1a6a7df1f2ca6e27931561848b9cde8352",
+    "morsehgp3D_v8/src/pipeline/q2_census.cpp": "ab40ac7e4c679ab94ab743fb7c43db2dad5f80ba3d2665f1d9c1a4a41a60825a",
+    "morsehgp3D_v8/src/pipeline/q2_census.hpp": "4b8bd8c0680fb10d41e6fc5ea38ff8e9215b006714f5013f2d4a02596b64fe03",
+    "morsehgp3D_v8/src/pipeline/tube_credits.hpp": "8485c7a5c59ae8784bb9085e9e06862435623747ce4df33d3d6059d3bd65c98c",
+    "morsehgp3D_v8/src/pipeline/wspd_q2_census.hpp": "22b643a30b67192899038ed0281fb9416092f2107ca44bae5c88cd74044c0e76",
+    "morsehgp3D_v8/src/spindle/predicates.hpp": "38cb2dbc1bf1ad5dd9219d2c3ba3ae68e90003fea92c2371c9a9e853eb973845",
+    "morsehgp3D_v8/src/spindle/q2_prepared_bounds.hpp": "7bb46b4b7af3beede9bc2fc8926bafda9c900eb573671583206a6d94ffac5d21",
+    "morsehgp3D_v8/src/wspd/front.cpp": "1af797b322e28f0b3e5bf1dc5014c2397ea2acfbe486a5d273a30aa716985f89",
+    "morsehgp3D_v8/src/wspd/front.hpp": "276491bc9ec994e530785411bbbf0491a5d35ad42991c25d105f55a34d6b4e46",
+    "morsehgp3D_v8/tests/q2_witness_order_gate.cpp": "7593dba0430ed4b6c7921880ce3ef137a1ddd0dacacd28c41c5f076d4be71dfe"
+  },
+  "started_utc": "2026-09-14T12:23:15.320676+00:00",
+  "status": "passed",
+  "steps": [
+    {
+      "command": [
+        "g++",
+        "-std=c++20",
+        "-O2",
+        "-DNDEBUG",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_order_lidar_20260914/.snapshot/r1/morsehgp3D_v8/src",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_order_lidar_20260914/.snapshot/r1/morsehgp3D_v8/tests/q2_witness_order_gate.cpp",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_order_lidar_20260914/.snapshot/r1/morsehgp3D_v8/src/pipeline/axis_q2.cpp",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_order_lidar_20260914/.snapshot/r1/morsehgp3D_v8/src/pipeline/local_credits.cpp",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_order_lidar_20260914/.snapshot/r1/morsehgp3D_v8/src/pipeline/prepared_cloud.cpp",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_order_lidar_20260914/.snapshot/r1/morsehgp3D_v8/src/pipeline/q2_census.cpp",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_order_lidar_20260914/.snapshot/r1/morsehgp3D_v8/src/wspd/front.cpp",
+        "-o",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_order_lidar_20260914/.build/r1/q2_witness_order_gate"
+      ],
+      "expected_returncode": 0,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_order_lidar_20260914/.build/r1/q2_witness_order_gate",
+        "--selftest"
+      ],
+      "expected_returncode": 0,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "mhgp8_q2_witness_order_gate passed checks=436117 clouds=16 oracle_pairs=3612 oracle_sites=235572 runs=1798 supports=48922 shell_sites=138352 structural_splits=186274 deferred_skips=22258 anchor_skips=29722 phase_switches=22078 default_comparisons=256 transformed_clouds=8 invalid_inputs=3 callback_failures=2 model_mutants=5 fixture_global_splits=1638 fixture_complement_splits=1384 fixture_universal_witnesses=12\n"
+    },
+    {
+      "command": [
+        "g++",
+        "-std=c++20",
+        "-O2",
+        "-DNDEBUG",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_order_lidar_20260914/.snapshot/r1/morsehgp3D_v8/src",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_order_lidar_20260914/.snapshot/r1/morsehgp3D_v8/audits/q2_order_lidar_20260914/lidar_order_probe.cpp",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_order_lidar_20260914/.snapshot/r1/morsehgp3D_v8/src/pipeline/axis_q2.cpp",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_order_lidar_20260914/.snapshot/r1/morsehgp3D_v8/src/pipeline/local_credits.cpp",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_order_lidar_20260914/.snapshot/r1/morsehgp3D_v8/src/pipeline/prepared_cloud.cpp",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_order_lidar_20260914/.snapshot/r1/morsehgp3D_v8/src/pipeline/q2_census.cpp",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_order_lidar_20260914/.snapshot/r1/morsehgp3D_v8/src/wspd/front.cpp",
+        "-o",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_order_lidar_20260914/.build/r1/lidar_order_probe"
+      ],
+      "expected_returncode": 0,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_order_lidar_20260914/.build/r1/lidar_order_probe"
+      ],
+      "expected_returncode": 1,
+      "returncode": 1,
+      "stderr": "LiDAR q2 audit failed: usage: lidar_order_probe input.u16le Kmax s pure|samples shared none|sibling global|complement\n",
+      "stdout": ""
+    }
+  ],
+  "worktree": " M audits/COORDINATION_MORSEHGP3D_V7.md\n M audits/COORDINATION_MORSEHGP3D_V8.md\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/PASSATION.md\n M morsehgp3D_v7/README.md\n M morsehgp3D_v7/docs/FAUSSES_PISTES.md\n M morsehgp3D_v7/docs/OBJETS_PARALLELES_TOUR_20260911.md\n M morsehgp3D_v8/bench/run_wspd_q2_matrix.py\n M morsehgp3D_v8/bench/wspd_q2_census_probe.cpp\n M morsehgp3D_v8/src/pipeline/q2_census.cpp\n M morsehgp3D_v8/src/pipeline/wspd_q2_census.hpp\n?? audits/morsehgp3D_v8_complementaire/P0_CONSTANTES_CENSUS_Q2.md\n?? audits/morsehgp3D_v8_complementaire/P0_IDENTITES_NUAGE_ET_RECTANGLES.md\n?? audits/morsehgp3D_v8_complementaire/Q2_PREPARED_BOUNDS_CHECKS.json\n?? audits/morsehgp3D_v8_complementaire/Q2_PREPARED_CENSUS_CHECKS.json\n?? audits/morsehgp3D_v8_complementaire/archive/\n?? audits/morsehgp3D_v8_complementaire/cloud_rectangle_identity_checks.py\n?? audits/morsehgp3D_v8_complementaire/cloud_rectangle_identity_probe.cpp\n?? audits/morsehgp3D_v8_complementaire/q2_prepared_bounds_checks.py\n?? audits/morsehgp3D_v8_complementaire/q2_prepared_bounds_probe.cpp\n?? audits/morsehgp3D_v8_complementaire/q2_prepared_census_checks.py\n?? audits/morsehgp3D_v8_complementaire/q2_revision_protocol_checks.py\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/docs/MARQUES_PREMIER_PARCOURS_20260911.md\n?? morsehgp3D_v7/receipts/fused_history_streaming_20260911/\n?? morsehgp3D_v8/audits/q2_order_lidar_20260914/\n?? morsehgp3D_v8/docs/P0_CENSUS_CONJOINT_Q2.md\n?? morsehgp3D_v8/src/pipeline/q2_joint_bounds.hpp\n"
+}

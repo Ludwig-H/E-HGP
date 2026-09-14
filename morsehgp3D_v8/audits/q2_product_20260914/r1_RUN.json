@@ -1,0 +1,28 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/q2_product_20260914/model.py"
+  ],
+  "error": "bounded product model failed; see preserved stderr",
+  "error_type": "RuntimeError",
+  "finished_utc": "2026-09-14T12:28:11.389301+00:00",
+  "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "result_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "returncode": 1,
+  "schema": "mhgp8_q2_product_model_run_v1",
+  "source_archive": "morsehgp3D_v8/audits/q2_product_20260914/r1_sources.zip",
+  "source_archive_sha256": "a42e66247cc9fce82ee640ac3b369358f700229465e6e4513f858a3bc13cc5bb",
+  "sources": {
+    "morsehgp3D_v8/audits/p0_q2_census_bounds_probe.py": "c33510de452250b83a67f3eddb9e6fe1ba9319e3e5510cd6f338c3f046de6ceb",
+    "morsehgp3D_v8/audits/q2_complement_20260914/model.py": "43c75559ab0966811a285240f4c31bcf3e60bb52684ffbd1b4686761f74e0443",
+    "morsehgp3D_v8/audits/q2_front_20260914/order_fixture.py": "a5971188669ccb821371e4f10c42e94027f50a3e429c4b167e44e0e2c380d7c3",
+    "morsehgp3D_v8/audits/q2_product_20260914/model.py": "7ea75eab017c14b0ad52f8a1e5edca48b2ffc95a8b916f9d11f1d7417d45a88b",
+    "morsehgp3D_v8/audits/q2_product_20260914/record.py": "7f8df5e60c6b84adafdc1ccdda97167de97bfdfc4f37de52579038d78db340a7"
+  },
+  "started_utc": "2026-09-14T12:28:10.889459+00:00",
+  "status": "failed",
+  "stderr": "{\"status\": \"failed\", \"error\": \"fixture_not_one_global_node\", \"evidence\": {\"ids\": [0, 1, 2, 3]}}\nTraceback (most recent call last):\n  File \"/workspaces/E-HGP/morsehgp3D_v8/audits/q2_product_20260914/model.py\", line 389, in <module>\n    print(json.dumps(selftest(), sort_keys=True))\n                     ^^^^^^^^^^\n  File \"/workspaces/E-HGP/morsehgp3D_v8/audits/q2_product_20260914/model.py\", line 324, in selftest\n    modes = compare(points, a_ids, b_ids, k)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/E-HGP/morsehgp3D_v8/audits/q2_product_20260914/model.py\", line 277, in compare\n    a, b = node_for(nodes, a_ids), node_for(nodes, b_ids)\n           ^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/E-HGP/morsehgp3D_v8/audits/q2_complement_20260914/model.py\", line 308, in node_for\n    require(len(matches) == 1, 'fixture_not_one_global_node', ids=ids)\n  File \"/workspaces/E-HGP/morsehgp3D_v8/audits/q2_complement_20260914/model.py\", line 44, in require\n    raise Failure(code, **evidence)\naudit_fixed_anchor.Failure: fixture_not_one_global_node\n",
+  "timeout_seconds": 180
+}
