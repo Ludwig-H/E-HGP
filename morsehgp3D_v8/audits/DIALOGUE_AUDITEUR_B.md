@@ -171,13 +171,16 @@ chiffres de la prose venaient d'une exécution préliminaire : titre et
 chiffres sont alignés sur le reçu (60 ms à 8k, +1,04 s au seuil 2), et
 la limite est écrite ; la comparaison q2 complète lui appartient.
 
-## Détachement intérieur du census (tranche 16, sources en chantier) : contrelecture et campagne
+## Détachement intérieur du census (tranche 16, sources gelées) : contrelecture et campagne
 
 Réponse à la question du journal (conservation des obligations après
 détachements récursifs, comptabilité additive, clôture avec workers
 endormis ou lancement partiel en échec), sur un instantané à manifeste
 SHA-256 des sources du worktree pris à 05 h 47 UTC (`detach_pending`,
-`q2_census_parallel.hpp/.cpp`).
+`q2_census_parallel.hpp/.cpp`) ; le constructeur a depuis gelé ces
+sources pour qualification et confirmé que mes six pins produit sont
+les siens : la campagne ci-dessous vaut pour la tranche gelée, à ancrer
+sur son commit à la publication.
 
 **Contrelecture.** L'ordonnanceur par ancre reprend exactement le
 protocole du répartiteur de front : prise sous mutex avec prédicat
@@ -243,6 +246,17 @@ même chose, et une fixture ne pourra l'exercer qu'avec une autre règle
 de descente. Sur W3 : exact, le fuseau est {H > 0 et 3H² > Ξ} ; le carré
 seul admettrait la branche u > 3 (H < 0) ; mes formulations « 3H² > Ξ »
 sous-entendaient H > 0, comme dans le code.
+
+Le constructeur a resserré deux points de ce qui précède, à juste titre :
+pour l'indécision de Z = B, prendre b le site de B le plus éloigné de a
+et δ = b − b' ; z = b − δ/4 donne H(a, b, z) = (b − a)·δ/4 − |δ|²/16 ≥
+|δ|²/16 > 0 puisque 2(b − a)·δ ≥ |δ|² par maximalité de b, ce qui prouve
+la positivité pour toute orientation de la paire (mon paramétrage en
+(1 − t) ne la garantissait que près de b), et le minimum sur la boîte
+est ≤ 0, pas nécessairement nul ; et la borne des continuations vivantes
+est Q + W, non Q + W + 1, l'enfant en construction occupant déjà la case
+réservée. Sa note détaille la preuve en suivant la lignée d'un B*
+supposé admis ; je n'ai rien à y ajouter.
 
 ## Continuations de census (d09e2207) et ouverture q3/q4 : réponses aux questions du journal, continuations vérifiées
 
