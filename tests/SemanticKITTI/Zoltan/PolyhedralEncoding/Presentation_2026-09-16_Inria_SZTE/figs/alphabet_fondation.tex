@@ -1,33 +1,26 @@
-% Reprise de Soutenance/soutenance/figs/alphabet_fondation.tex.
-\begin{tikzpicture}[xscale=1.0,yscale=1.0]
-\useasboundingbox(-0.35,-2.05)rectangle(13.35,3.35);
-\tikzset{jeton/.style={draw=inria-2024-bleu-canard,line width=0.7pt,rounded corners=1.5pt,fill=inria-2024-bleu-canard!12,inner sep=2pt,font=\scriptsize,minimum height=4.2mm},modele/.style={draw=gris_fonce_inria,line width=1pt,rounded corners=3pt,fill=gray!8,inner sep=4pt,font=\small\bfseries,minimum width=1.55cm,minimum height=6.5mm},modeleouvert/.style={modele,draw=inria-rouge,fill=inria-rouge!6,text=inria-rouge},fl/.style={-{Latex[length=2.2mm]},line width=0.9pt,color=gray!55},dom/.style={font=\small,anchor=east,text=gris_fonce_inria}}
-\node[dom]at(1.35,2.75){\textbf{langage}};
-\node[jeton,anchor=west](t1)at(1.75,2.75){Les};
-\node[jeton,anchor=west](t2)at($(t1.east)+(0.09,0)$){graph};
-\node[jeton,anchor=west](t3)at($(t2.east)+(0.09,0)$){es};
-\node[jeton,anchor=west](t4)at($(t3.east)+(0.09,0)$){sont};
-\node[jeton,anchor=west](t5)at($(t4.east)+(0.09,0)$){partout};
-\node[font=\scriptsize,text=inria-2024-bleu-canard,anchor=west]at($(t5.east)+(0.25,0)$){sous-mots};
-\node[modele,anchor=west](m1)at(9.85,2.75){GPT};
-\node[anchor=west]at($(m1.east)+(0.14,0)$){\citb{brown20}};
-\draw[fl](8.55,2.75)--(m1.west);
-\node[dom]at(1.35,1.45){\textbf{image}};
-\begin{scope}[shift={(1.80,0.80)}]
-\foreach\i in{0,...,4}{\foreach\j in{0,...,2}{\draw[inria-2024-bleu-canard,line width=0.6pt,fill=inria-2024-bleu-canard!12](\i*0.44,\j*0.44)rectangle++(0.40,0.40);}}
+% Schéma introductif de la soutenance, allégé pour la version courte.
+\begin{tikzpicture}
+\useasboundingbox(-.1,-.55)rectangle(12.8,4.8);
+\tikzset{jeton/.style={draw=inria-2024-bleu-canard,fill=inria-2024-bleu-canard!10,rounded corners=1.5pt,inner sep=3pt,font=\small},modele/.style={draw=gris_fonce_inria,rounded corners=2pt,inner sep=7pt,font=\normalsize,minimum width=1.5cm},fleche/.style={-{Latex[length=2.4mm]},gray!65,thick}}
+\node[anchor=east]at(1.9,4.0){langage};
+\node[jeton,anchor=west](a)at(2.3,4.0){Les};
+\node[jeton,anchor=west](b)at($(a.east)+(.12,0)$){graph};
+\node[jeton,anchor=west](c)at($(b.east)+(.12,0)$){es};
+\node[font=\small,anchor=west,text=inria-2024-bleu-canard]at(5.5,4.0){sous-mots};
+\draw[fleche](8.1,4)--(10.05,4);
+\node[modele,anchor=west]at(10.2,4){GPT};
+\node[anchor=east]at(1.9,2.25){image};
+\begin{scope}[shift={(2.3,1.58)}]
+\foreach\i in{0,...,4}{\foreach\j in{0,...,2}{\draw[inria-2024-bleu-canard,fill=inria-2024-bleu-canard!10](\i*.44,\j*.44)rectangle++(.40,.40);}}
 \end{scope}
-\node[font=\scriptsize,text=inria-2024-bleu-canard,anchor=west]at(4.25,1.45){imagettes};
-\node[modele,anchor=west](m2)at(9.85,1.45){SAM};
-\node[anchor=west]at($(m2.east)+(0.14,0)$){\citb{kirillov23}};
-\draw[fl](8.55,1.45)--(m2.west);
-\node[dom]at(1.35,0.05){\textbf{monde 3D}};
-\begin{scope}[shift={(1.80,-0.55)}]
-\foreach\x/\y in{0.05/0.10,0.22/0.52,0.38/0.86,0.55/0.30,0.74/0.68,0.92/1.02,1.10/0.16,1.28/0.60,1.44/0.94,1.62/0.38,1.80/0.76,1.98/0.22,0.15/0.72,0.66/0.98,1.20/0.92,1.72/1.04,0.44/0.44,0.98/0.48}{\fill[inria-2024-bleu-canard](\x,\y)circle(1.6pt);}
+\node[font=\small,anchor=west,text=inria-2024-bleu-canard]at(5.5,2.25){imagettes};
+\draw[fleche](8.1,2.25)--(10.05,2.25);
+\node[modele,anchor=west]at(10.2,2.25){SAM};
+\node[anchor=east]at(1.9,.45){LiDAR 3D};
+\begin{scope}[shift={(2.3,-.12)}]
+\foreach\x/\y in{.05/.1,.22/.52,.38/.86,.55/.30,.74/.68,.92/1.02,1.10/.16,1.28/.60,1.44/.94,1.62/.38,1.80/.76,1.98/.22,.15/.72,.66/.98,1.20/.92,1.72/1.04,.44/.44,.98/.48}{\fill[inria-2024-bleu-canard](\x,\y)circle(1.9pt);}
 \end{scope}
-\node[font=\scriptsize,text=inria-2024-bleu-canard,anchor=west]at(4.25,0.05){points du capteur};
-\node[modeleouvert,anchor=west](m3)at(9.85,0.05){?};
-\node[font=\scriptsize,text=gris_fonce_inria,anchor=north,align=center]at(10.62,-0.30){Sonata, Concerto,\\Utonia\ldots};
-\draw[fl,color=inria-rouge!55,densely dashed](8.55,0.05)--(m3.west);
-\draw[gray!35,line width=0.6pt](0.55,0.62)--(11.9,0.62);
-\node[font=\scriptsize,align=center,text=inria-rouge,anchor=north]at(5.4,-1.05){en 3D, l'unité de calcul reste celle de l'\textbf{échantillonnage} :\\point du capteur ou case de grille};
+\node[font=\small,anchor=west,text=inria-2024-bleu-canard]at(5.5,.45){points / régions ?};
+\draw[fleche](8.1,.45)--(10.05,.45);
+\node[modele,anchor=west,text=inria-rouge,draw=inria-rouge]at(10.2,.45){?};
 \end{tikzpicture}

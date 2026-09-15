@@ -1,7 +1,11 @@
-# Représentation polyédrique et guidage HGP du LiDAR 3D
+# Encodage polyédrique HGP
 
-Première présentation : [réunion Inria / Szegedi Tudományegyetem du 16 septembre 2026](Presentation_2026-09-16_Inria_SZTE/).
+Présentation des premières idées d'encodage du LiDAR 3D et de leur évaluation.
 
-Le dossier sépare la définition de la réalisation géométrique, son encodage par distances non signées et l'utilisation de la hiérarchie. Les expériences présentées sont des propositions de protocole, pas des résultats acquis.
+## Réunion du 16 septembre 2026
 
-Aucun moteur Morse HGP, contrat d'exactitude, test C++ ou registre de qualification n'est modifié par cette présentation.
+**Inria / Szegedi Tudományegyetem**, avec Zoltán Kató et Josiane Zerubia.
+
+[PDF, version courte de 10 diapositives](Presentation_2026-09-16_Inria_SZTE/HGP_LiDAR_Inria_SZTE_2026-09-16.pdf) · [Sources et provenance](Presentation_2026-09-16_Inria_SZTE/)
+
+Support, support quadratique, grille de distances 8³ ; oracle d'instances et petit test supervisé. Sans annexes ni architecture de modèle de fondation. Les expériences sont proposées, non exécutées.

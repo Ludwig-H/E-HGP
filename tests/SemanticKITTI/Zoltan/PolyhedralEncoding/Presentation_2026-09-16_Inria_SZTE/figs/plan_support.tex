@@ -1,16 +1,16 @@
+% Coupe 2D d'un plan d'appui : normale u et hauteur signée h_P(u).
 \begin{tikzpicture}[scale=.85]
-\useasboundingbox(-.9,-.55)rectangle(4.7,3.65);
+\useasboundingbox(-1.4,-.4)rectangle(4.35,3.5);
 \fill[geom](1,.35)--(3,.35)--(3.65,1.2)--(2.3,2.2)--(1.1,1.7)--cycle;
 \node at(2.25,1.1){$P$};
-\draw[gray!60,->](0,-.15)--(0,3.3);
+\draw[gray!60,->](0,0)--(0,3.3);
 \draw[gray!60](0,0)--(3.8,0);
-\node[below left]at(0,0){$O$};
+\node[below left,font=\small]at(0,0){$O$};
 \draw[inria-2024-bleu-canard,very thick,-{Latex}](0,0)--(0,1)node[left]{$u$};
-\draw[gray!65,dashed](.3,3.1)--(4.0,3.1)node[right,font=\scriptsize]{$\Pi_t$};
+\draw[gray!65,dashed](.3,3.1)--(4,3.1)node[above,font=\scriptsize]{$\Pi_t$};
 \draw[arr,inria-rouge](3.45,3.0)--(3.45,2.35);
 \draw[inria-rouge,thick](0,2.2)--(4,2.2);
 \fill[inria-rouge](2.3,2.2)circle(2.2pt);
-\draw[<->,inria-rouge](-.5,0)--(-.5,2.2)node[midway,left,font=\small]{$h_P(u)$};
-\node[font=\scriptsize,anchor=north west,text=inria-rouge]at(.85,2.05){plan au premier contact};
-\node[lab,anchor=north]at(2.05,-.27){tout $P$ est dans $\ip{u}{x}\le h_P(u)$};
+\draw[<->,inria-rouge](-.55,0)--(-.55,2.2)node[midway,left,font=\small]{$h_P(u)$};
+\node[font=\small,anchor=south west,text=inria-rouge]at(.45,2.3){$t=h_P(u)$};
 \end{tikzpicture}
