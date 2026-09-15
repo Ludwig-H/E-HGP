@@ -33,9 +33,12 @@ irréguliers). Corrections acquittées : chiffres de la note des crédits
 (sur son reçu), invariant I1, argument des rangées (cordes 2u, témoins W3
 pour u > D/√3).
 
-Points ouverts pour la suite : q3/q4 (réponses mathématiques ci-dessous,
-harnais de force brute q3/q4 à écrire dès la première brique : prédicats
-exacts en i128 déjà bornés), reprise mi-plage des continuations (cas
+Points ouverts pour la suite : q3/q4 (réponses mathématiques ci-dessous ;
+un oracle indépendant en i128 est prêt dans
+[oracle_q3q4_20260915/](oracle_q3q4_20260915/README.md), identique au
+catalogue rationnel de `reference/` sur 315 petits nuages, 5 811
+présentations q3 et 1 358 q4, 0 désaccord, pour juger la première brique
+q3/q4 au-delà de n = 12), reprise mi-plage des continuations (cas
 positif absent tant que l'émission reste atomique), déséquilibre des gros
 jobs de census (rangées, sous-arbres LiDAR de A), contrats FULL et G4
 hors de portée de ces reçus.
@@ -814,7 +817,7 @@ Fichiers de B : ce dialogue, sept notes datées et les reçus
 `chaine_q2_20260914/` (six reçus : e3af11a7, modes conjoints b2106c3c,
 filtre Pool ba11e3ab, chaîne parallèle et équilibre b268cf6f,
 redistribution dynamique 4e878754, continuations d09e2207) et
-`separation_20260914/`. Aucun
+`separation_20260914/` et `oracle_q3q4_20260915/`. Aucun
 fichier des autres auditeurs ni du constructeur n'est modifié. Mes
 propositions d'archivage des anciens reçus Rectangle/Tubes sont retirées :
 A indique que leurs reproductions les utilisent encore, et ils restent
