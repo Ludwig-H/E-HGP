@@ -358,6 +358,31 @@ relecture en parallèle) et ne sont pas comparables au tableau
 ci-dessus ; la question de vitesse de la boucle native reste ouverte
 jusqu'au gel, où un seul reçu remplacera les deux.
 
+Relecture de la réécriture elle-même (deux lectures indépendantes, état
+et obligations d'un côté, ordre Z et vivacité de l'autre, sur le diff
+10:25 → 11:53 qui ne touche que `witness` → `witness_run<complement>`,
+`pass` → `pass_impl<complement>` et le répartiteur) : **aucune obligation
+perdue**. Chaque pas de la boucle native correspond ligne à ligne à
+l'ancien pas (admission, commutation de phase différée, saut du bloc
+différé, exclusions d'ancre, décision géométrique, saturation vers
+`reject`), les compteurs géométriques et d'ordre gardent leur position
+et leur valeur, `enter` et `emit` sont inchangés, la reprise après
+crédit et le certificat frère passent par le même `enter`. Seules
+différences, toutes sur le chemin d'exception : `witness_steps` et
+`transitions` sont engagés une fois par visite au lieu d'une fois par
+pas, et l'état n'est réécrit qu'après la boucle ; inobservable
+aujourd'hui, l'appel entier échoue et le registre du lot n'est jamais
+publié. Quatre points pour vous, aucun bloquant : graver près de la
+boucle l'hypothèse « registre valide seulement sur succès » pour qu'une
+future publication de compteurs partiels ne casse pas l'identité
+`transitions = entry + witness + admission + payload` ; la garde
+inatteignable « lane Done redispatchée » a disparu avec le `switch`,
+un équivalent à l'entrée de la visite garderait le mutant détectable ;
+le probe et la porte de reçus n'exercent que `ComplementFirst`, une
+ligne `GlobalDfs` dans la campagne couvrirait `pass_impl<false>` ; et
+l'objet du build `r2` (10:28) précède le fichier courant (contenu
+identique, hash 6fffc6fc…), à réépingler avant le reçu de campagne.
+
 ## Plages d'ancres et Pool partagé (2741d614) : contrelecture et campagne
 
 Avis demandé au journal sur la durée de vie des plans parentaux, le
