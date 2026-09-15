@@ -204,31 +204,30 @@ continuations complètes (6 272 octets de pile chacune), ce qui borne les
 objets vivants à `queue_capacity + workers + 1` mais pas la mémoire
 totale des tampons de collecte.
 
-**Campagne (harnais `chain_verify_detach.cpp`  runner
-`run_chain_verify_detach.py`  reçu
+**Campagne (harnais `chain_verify_detach.cpp`, runner
+`run_chain_verify_detach.py`, reçu
 [CHAINE_Q2_DETACH_CHECKS.json](chaine_q2_20260914/CHAINE_Q2_DETACH_CHECKS.json)).**
-Sur 74 nuages et 10 520 couples (ancre  nœud B à au moins deux
-sites)  trois réglages d'options :
+Sur 74 nuages et 10 520 couples (ancre, nœud B à au moins deux
+sites), trois réglages d'options :
 
-- *Lignées par détachement récursif* (mono-fil  budgets 1 et 5  à chaque
-  pause on détache si possible  chaque enfant est traité de même) :
-  63 120 lignées  262 538 détachements ; réunion des
+- *Lignées par détachement récursif* (mono-fil, budgets 1 et 5 ; à chaque
+  pause on détache si possible et chaque enfant est traité de même) :
+  63 120 lignées, 262 538 détachements ; réunion des
   émissions égale à la référence série et à la force brute
-  (20 634 supports)  **0 désaccord** ; onze compteurs géométriques
+  (20 634 supports), **0 désaccord** ; onze compteurs géométriques
   et masses sommés sur la lignée égaux à la référence à chaque fois ;
   identités de détachement vérifiées à chaque détachement (candidates de
-  l'enfant = décrément du donneur  `max_pending_tasks` de l'enfant = 1 
+  l'enfant = décrément du donneur, `max_pending_tasks` de l'enfant = 1,
   `detached_frames` et `transferred_pairs` du donneur incrémentés
-  d'autant  détachés = importés sur la lignée).
-- *`run_q2_anchor_parallel`* pour W ∈ {1  2  4  8} × quantum ∈ {1  256}
-  × file ∈ {1  8} : 504 960 appels  réunion des slots égale à la
-  référence  somme égale à la référence sur les mêmes compteurs 
+  d'autant, détachés = importés sur la lignée).
+- *`run_q2_anchor_parallel`* pour W ∈ {1, 2, 4, 8} × quantum ∈ {1, 256}
+  × file ∈ {1, 8} : 504 960 appels, réunion des slots égale à la
+  référence, somme égale à la référence sur les mêmes compteurs,
   0 doublon entre slots.
-- *Vivacité* : tout slot lève à son premier support (W = 8  quantum 1 
+- *Vivacité* : tout slot lève à son premier support (W = 8, quantum 1,
   file 1) : 20 319 exceptions propagées sur
-  20 319 appels  aucun blocage (chien de garde silencieux).
+  20 319 appels, aucun blocage (chien de garde silencieux).
   Rejeu `-O` conforme.
-
 
 **Deux remarques du constructeur, acquittées.** Sur la plage multiple
 admise : le cas est structurellement inatteignable avec la règle des
