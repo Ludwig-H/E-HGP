@@ -1,0 +1,68 @@
+name: HGP Inria-Szeged presentation
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tests/SemanticKITTI/Zoltan/PolyhedralEncoding/**'
+permissions:
+  contents: write
+concurrency:
+  group: hgp-szeged-presentation
+  cancel-in-progress: false
+jobs:
+  beamer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      ROOT: tests/SemanticKITTI/Zoltan/PolyhedralEncoding
+      DECK: tests/SemanticKITTI/Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          sparse-checkout: tests/SemanticKITTI/Zoltan/PolyhedralEncoding
+      - name: Unpack the checked source transfer, when present
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, io, os, tarfile
+          from pathlib import Path
+          root = Path(os.environ['ROOT'])
+          parts = sorted(root.glob('source-transfer-*.b64'))
+          if parts:
+              payload = base64.b64decode(''.join(p.read_text().strip() for p in parts), validate=True)
+              expected = '29209c5d8a3c4adbdf923539bf50c23d58dedac3e5310e7b77c310a315227e72'
+              if hashlib.sha256(payload).hexdigest() != expected:
+                  raise SystemExit('Source transfer checksum mismatch')
+              with tarfile.open(fileobj=io.BytesIO(payload), mode='r:xz') as archive:
+                  for member in archive.getmembers():
+                      destination = (root / member.name).resolve()
+                      if not member.isfile() or not destination.is_relative_to(root.resolve()):
+                          raise SystemExit('Unexpected archive entry')
+                      destination.parent.mkdir(parents=True, exist_ok=True)
+                      destination.write_bytes(archive.extractfile(member).read())
+              for part in parts:
+                  part.unlink()
+          PY
+      - name: Install document-only dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends latexmk texlive-luatex texlive-latex-extra texlive-fonts-recommended texlive-lang-french python3-cairosvg
+      - name: Compile and check the Beamer
+        run: |
+          make -C "$DECK"
+          if grep -E 'Overfull|Missing character' "$DECK/HGP_LiDAR_Inria_SZTE_2026-09-16.log"; then
+            echo 'Layout or glyph warning: refusing automatic publication.' >&2
+            exit 1
+          fi
+          make -C "$DECK" clean
+      - name: Publish only this presentation on main
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add --force -- "$ROOT"
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'docs: publish compiled HGP Inria-Szeged presentation [skip ci]'
+          git pull --rebase origin main
+          git push origin HEAD:main
