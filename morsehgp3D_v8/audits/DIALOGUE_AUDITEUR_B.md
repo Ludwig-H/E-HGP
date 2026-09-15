@@ -24,6 +24,7 @@ dans `chaine_q2_20260914/`, rejouables par `git archive <commit>`.
 | Workers du front et du census | b268cf6f | `CHAINE_Q2_PARALLEL_CHECKS.json`, `…_BALANCE_…` | 4 348 appels, W ∈ {1,2,3,4,8}, condensé et 22 compteurs identiques ; ×4,1 à ×4,9 à W = 8 ; rangées déséquilibrées |
 | Redistribution dynamique (Donate) | 4e878754 | `CHAINE_Q2_DONATE_CHECKS.json` | 13 044 appels, 1,95 M dons tous repris, 5 160 appels de vivacité sans blocage ; neutre sur familles équilibrées |
 | Continuations de census à ancre unique | d09e2207 | `CHAINE_Q2_RESUME_CHECKS.json` | 258 624 continuations (budgets 1/3/1000, transfert de fil), 0 désaccord, pauses des trois types exercées |
+| Détachement intérieur et ordonnanceur par ancre | 897085f8 | `CHAINE_Q2_DETACH_CHECKS.json` | 63 120 lignées (262 538 détachements) et 504 960 appels parallèles, 0 désaccord, sommes et identités tenues, 20 319 exceptions propagées sans blocage |
 
 Mesures publiées à côté : survivantes de Pool sur les amas (2 140 /
 3 085 / 4 690 vrais supports q2 à 8k/16k/32k ; résidu Pool non
@@ -171,16 +172,15 @@ chiffres de la prose venaient d'une exécution préliminaire : titre et
 chiffres sont alignés sur le reçu (60 ms à 8k, +1,04 s au seuil 2), et
 la limite est écrite ; la comparaison q2 complète lui appartient.
 
-## Détachement intérieur du census (tranche 16, sources gelées) : contrelecture et campagne
+## Détachement intérieur du census (897085f8) : contrelecture et campagne
 
 Réponse à la question du journal (conservation des obligations après
 détachements récursifs, comptabilité additive, clôture avec workers
 endormis ou lancement partiel en échec), sur un instantané à manifeste
 SHA-256 des sources du worktree pris à 05 h 47 UTC (`detach_pending`,
-`q2_census_parallel.hpp/.cpp`) ; le constructeur a depuis gelé ces
-sources pour qualification et confirmé que mes six pins produit sont
-les siens : la campagne ci-dessous vaut pour la tranche gelée, à ancrer
-sur son commit à la publication.
+`q2_census_parallel.hpp/.cpp`) ; les 28 fichiers de `src/` de cet
+instantané sont, octet pour octet, les blobs du commit 897085f8 publié
+ensuite, ce qui ancre la contrelecture et le reçu sur ce commit.
 
 **Contrelecture.** L'ordonnanceur par ancre reprend exactement le
 protocole du répartiteur de front : prise sous mutex avec prédicat
@@ -903,7 +903,7 @@ Fichiers de B : ce dialogue, sept notes datées et les reçus
 `credits_terminaux_20260914/` (deux reçus : crédits et survivantes),
 `chaine_q2_20260914/` (six reçus : e3af11a7, modes conjoints b2106c3c,
 filtre Pool ba11e3ab, chaîne parallèle et équilibre b268cf6f,
-redistribution dynamique 4e878754, continuations d09e2207, détachement sur sources en chantier) et
+redistribution dynamique 4e878754, continuations d09e2207, détachement 897085f8) et
 `separation_20260914/` et `oracle_q3q4_20260915/`. Aucun
 fichier des autres auditeurs ni du constructeur n'est modifié. Mes
 propositions d'archivage des anciens reçus Rectangle/Tubes sont retirées :
