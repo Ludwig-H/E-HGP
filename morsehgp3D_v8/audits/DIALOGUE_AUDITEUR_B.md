@@ -25,7 +25,7 @@ dans `chaine_q2_20260914/`, rejouables par `git archive <commit>`.
 | Redistribution dynamique (Donate) | 4e878754 | `CHAINE_Q2_DONATE_CHECKS.json` | 13 044 appels, 1,95 M dons tous repris, 5 160 appels de vivacité sans blocage ; neutre sur familles équilibrées |
 | Continuations de census à ancre unique | d09e2207 | `CHAINE_Q2_RESUME_CHECKS.json` | 258 624 continuations (budgets 1/3/1000, transfert de fil), 0 désaccord, pauses des trois types exercées |
 | Détachement intérieur et ordonnanceur par ancre | 897085f8 | `CHAINE_Q2_DETACH_CHECKS.json` | 63 120 lignées (262 538 détachements) et 504 960 appels parallèles, 0 désaccord, sommes et identités tenues, 20 319 exceptions propagées sans blocage |
-| Équipe persistante front + census | beee3341 | `CHAINE_Q2_COOP_CHECKS.json`, `…_COOP_SCALE_…` | 5 256 appels coopératifs, 0 désaccord, identités de continuation tenues, 258 exceptions propagées ; défaut = Coarse, toute ancre en continuation +40 %, quantum 1 ×4 à ×7 |
+| Équipe persistante front + census | beee3341 | `CHAINE_Q2_COOP_CHECKS.json`, `…_COOP_SCALE_…` | 5 304 appels coopératifs, 0 désaccord, identités de continuation tenues, 258 exceptions propagées ; défaut = Coarse, toute ancre en continuation +40 %, quantum 1 ×4 à ×7 |
 
 Mesures publiées à côté : survivantes de Pool sur les amas (2 140 /
 3 085 / 4 690 vrais supports q2 à 8k/16k/32k ; résidu Pool non
@@ -216,13 +216,13 @@ option `--coop`, reçu
 Sur 86 nuages, chaque combinaison SharedBlocks/Individual (Pool 64 ou 2,
 front Pure ou MidpointSamples, frère et Complement) est exécutée par
 l'équipe coopérative pour W ∈ {1, 2, 3, 4, 8} et quatre réglages
-(min_b_size 1 ou 64, quantum 1 ou 256, file 1 ou 8) : 5 256 appels,
+(min_b_size 1 ou 64, quantum 1 ou 256, file 1 ou 8) : 5 304 appels,
 13 092 120 paires contrôlées contre la force brute, **0 désaccord,
 0 doublon entre slots**, condensé canonique et compteurs globaux du
 pipeline (candidates, admises, rejetées, rectangles, visites et tests du
 comptage, supports et coquilles, frère, phases, Pool, front) égaux au
 chemin série pour chaque appel ; identités de continuation tenues
-partout (243 642 720 ancres continuées, 2 070 586 dons, `continued_pairs
+partout (384 085 760 ancres continuées, 2 420 854 dons, `continued_pairs
 = completed_pairs`, fragments = ancres + dons, dons = détachés =
 importés, offres = occupé + pleine + sans demande + tentatives) ;
 vivacité : 258 appels où tout slot lève à son premier support, 258
