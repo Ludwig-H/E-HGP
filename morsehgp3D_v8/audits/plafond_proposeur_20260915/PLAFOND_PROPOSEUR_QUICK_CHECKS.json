@@ -1,18 +1,18 @@
 {
  "title": "Plafond de tout proposeur de témoins du front q2 (rectangles émis, prédicat de boîte du front)",
  "auditor": "B",
- "date": "2026-09-15T11:44:38Z",
+ "date": "2026-09-15T12:10:51Z",
  "engine_commit": "2741d614",
  "harness": "witness_ceiling.cpp",
- "harness_sha256": "acce4c384f902b394fa3b72d247da6df61e5ad6fb2a69907ae2db78eed0e443b",
- "runner_sha256": "d81ebbf2cc1f52ab2046cc94228c28d8c1fb89831251ae12562c30b4813de70d",
+ "harness_sha256": "343c855d6036b54cde953891b978d58739d8dababe39092701646122a3b2a323",
+ "runner_sha256": "de2649f3516c9c5a6c50f8f8af8a38e435ec6ca686c009fb40ea7e568751c031",
  "seed": 3,
  "quick": true,
  "definitions": {
   "ceil": "rectangles émis (lane q2) ayant au moins K sites z avec H_min(A.box, B.box, {z}) > 0 ; aucun proposeur de témoins ponctuels de boîte ne peut rejeter les autres, ni au produit ni à un ancêtre",
   "block": "plus haut nœud du chemin de descente du front (vers le milieu du produit) dont la borne conjointe A.box x B.box x Z.box est strictement positive et dont la taille atteint K",
   "win2k/win4k": "fenêtre de L = 2K / 4K rangs autour du pivot du front (formule du front, rangs de A/B sautés) cumulant K crédits stricts ; wink (L = K) doit valoir 0 sur les rectangles émis",
-  "mass": "somme de |A| x |B| sur les rectangles de la classe (candidats du census)"
+  "mass": "somme de |A| x |B| sur les rectangles de la classe : masse résiduelle q2 du front, candidats du census avant filtrage Pool (égaux quand pool.filtered_pairs = 0)"
  },
  "status": "pass",
  "entries": [
@@ -24,8 +24,10 @@
    "front": "samples",
    "rects": 402864,
    "mass": 609072,
-   "front_emitted": 657008,
-   "front_rejected_products": 142626,
+   "front_emitted": 402864,
+   "front_lane_q2_rectangles": 402864,
+   "front_residual_mass": 609072,
+   "front_rejected_products": 111132,
    "ceil_rects": 340383,
    "ceil_mass": 542463,
    "ceil_rect_share": 0.8449,
@@ -46,7 +48,7 @@
    "node_visits": 28668408,
    "path_steps": 4436973,
    "window_tests": 20882208,
-   "ms": 2813.5,
+   "ms": 2316.9,
    "rect_hist": {
     "0": 7132,
     "1": 6779,
@@ -82,7 +84,7 @@
     "16-31": 16385,
     "32+": 6527
    },
-   "wall_seconds": 2.8,
+   "wall_seconds": 2.3,
    "failures": [],
    "status": "pass"
   },
@@ -94,8 +96,10 @@
    "front": "samples",
    "rects": 57225,
    "mass": 93834,
-   "front_emitted": 71441,
-   "front_rejected_products": 39182,
+   "front_emitted": 57225,
+   "front_lane_q2_rectangles": 57225,
+   "front_residual_mass": 93834,
+   "front_rejected_products": 17982,
    "ceil_rects": 39292,
    "ceil_mass": 73297,
    "ceil_rect_share": 0.6866,
@@ -116,7 +120,7 @@
    "node_visits": 1969313,
    "path_steps": 625399,
    "window_tests": 1528581,
-   "ms": 235.0,
+   "ms": 217.5,
    "rect_hist": {
     "0": 3939,
     "1": 3738,

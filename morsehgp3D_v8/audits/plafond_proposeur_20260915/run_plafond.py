@@ -6,7 +6,8 @@ tailles d'intérêt, analyse ses lignes et grave PLAFOND_PROPOSEUR_CHECKS.json a
 contrôles de cohérence : la fenêtre historique L = K ne rejette aucun rectangle émis,
 bloc <= fenêtre 4K <= plafond n'est PAS exigé (le bloc et les fenêtres sont des
 proposeurs distincts) mais chaque proposeur est borné par le plafond, et les
-histogrammes totalisent les rectangles et la masse. Tient sous ``python3 -O``.
+histogrammes totalisent les rectangles et la masse, et le front lancé avec le masque 1
+(voie q2 seule) émet exactement les rectangles et la masse vus. Tient sous ``python3 -O``.
 """
 import argparse
 import hashlib
@@ -78,6 +79,10 @@ def check_entry(entry):
         failures.append("block_hist does not total the rectangles")
     if entry["ceil_rects"] != entry["rect_hist"][str(entry["kmax"])]:
         failures.append("ceil_rects differs from the last histogram bin")
+    if entry["front_emitted"] != rects or entry["front_lane_q2_rectangles"] != rects:
+        failures.append("front emitted rectangles (mask 1) differ from the rectangles seen")
+    if entry["front_residual_mass"] != mass:
+        failures.append("front residual q2 pair mass differs from the mass seen")
     return failures
 
 
@@ -131,7 +136,8 @@ def main():
                      "A.box x B.box x Z.box est strictement positive et dont la taille atteint K",
             "win2k/win4k": "fenêtre de L = 2K / 4K rangs autour du pivot du front (formule du front, rangs de A/B sautés) "
                            "cumulant K crédits stricts ; wink (L = K) doit valoir 0 sur les rectangles émis",
-            "mass": "somme de |A| x |B| sur les rectangles de la classe (candidats du census)",
+            "mass": "somme de |A| x |B| sur les rectangles de la classe : masse résiduelle q2 du front, "
+                    "candidats du census avant filtrage Pool (égaux quand pool.filtered_pairs = 0)",
         },
         "status": status,
         "entries": entries,

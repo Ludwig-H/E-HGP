@@ -29,7 +29,7 @@ dans `chaine_q2_20260914/`, rejouables par `git archive <commit>`.
 | Plages d'ancres et Pool partagé | 2741d614 | `CHAINE_Q2_RANGES_CHECKS.json` | 5 256 appels à plages, 0 désaccord, identités de plages tenues, 258 exceptions propagées ; coût égal à Coarse, gain sur les rangées à huit fils |
 
 Mesures publiées à côté : plafond de tout proposeur de témoins du front
-(86 à 89 % des rectangles émis à uniform, fenêtre 4K à 80 à 85 % du
+(86 à 89 % des rectangles émis à uniform, fenêtre 4K à 80 à 86 % du
 plafond, rangées 0 à 2 %), survivantes de Pool sur les amas (2 140 /
 3 085 / 4 690 vrais supports q2 à 8k/16k/32k ; résidu Pool non
 canonique), séparation s ∈ {8, 10, 12} (même objet, coûts voisins,
@@ -195,8 +195,8 @@ Faits (parts de rectangles émis de la voie q2, puis de leur masse de
 candidats) :
 
 - **Plafond** : uniform 86 à 89 % des rectangles (8k à 32k, montant
-  avec n) et 90 à 93 % de la masse ; terrain 68 à 69 % et 79 à 82 % ;
-  amas 81 à 86 % des rectangles mais 1 à 5 % de la masse ; rangées 0 à
+  avec n) et 89,6 à 92,9 % de la masse ; terrain 68 à 69 % et 79 à 82 % ;
+  amas 80 à 86 % des rectangles mais 1 à 5 % de la masse ; rangées 0 à
   2 % et 0 % de la masse. À uniform 8k K = 10, la masse émise vaut
   3 194 249, exactement les candidats du reçu constructeur cité par la
   note, et la masse plafonnée (2 904 816) recouvre 99,7 % des 2 914 705
@@ -204,15 +204,17 @@ candidats) :
   passer presque tout ce que le census rejette, parce que ses K
   propositions doivent toutes réussir.
 - **Fenêtres** : la fenêtre K rejouée rejette zéro rectangle émis
-  (contrôle de cohérence) ; la fenêtre 2K en rejette 55 à 67 %, la
-  fenêtre 4K 65 à 75 % (uniform 72 à 75 %, terrain 55 à 57 %), soit 80
-  à 85 % du plafond ; le pas 2K → 4K vaut encore 9 à 13 points.
+  (contrôle de cohérence) ; la fenêtre 2K en rejette 59 à 67 % à
+  uniform, 54 à 59 % sur les amas et 45 à 47 % à terrain ; la fenêtre
+  4K 71 à 75 %, 65 à 72 % et 55 à 57 %, soit 80 à 86 % du plafond hors
+  rangées ; le pas 2K → 4K vaut encore 8 à 14 points.
 - **Certificat de bloc** sur le chemin du front vers le milieu : 14 à
   30 % ; le plus haut nœud du chemin à borne conjointe positive a le
   plus souvent 2 à 9 sites.
 - **Descente exacte plafonnée à K** (bornes conjointes, comptage sans
-  paire) : atteint le plafond entier pour 48 à 91 bornes par rectangle,
-  82 à uniform 8k K = 10 et 91 à 32k.
+  paire) : atteint le plafond entier pour 38 à 91 bornes par rectangle
+  hors rangées (28 à 30 sur les rangées), 82 à uniform 8k K = 10 et 91 à
+  uniform 32k K = 10.
 
 Réponses aux trois questions de la note :
 
@@ -227,17 +229,19 @@ Réponses aux trois questions de la note :
 2. **Fixture discriminante.** Uniform contre rangées sur le même
    harnais : à uniform 8k K = 10 la fenêtre 2K rejette 1 238 k
    rectangles de plus que la fenêtre K ; sur les rangées elle n'en
-   rejette aucun de plus et le plafond y est 2 %, chaque proposition
-   supplémentaire y est un surcoût pur. Pour une fixture gravée, prendre
-   un rectangle à U ≥ K dont la fenêtre K contient un rang de A ou B ou
-   un site tangent (le harnais les identifie ; n = 2 000 en fournit
-   234 431). Sur les amas, le gain est en nombre d'appels, pas en
-   masse : 95 à 99 % des candidats sont dans les rectangles amas × amas
-   sans aucun témoin universel, qui restent au Pool et au census.
-3. **Certificat de bloc.** Plus faible que la fenêtre (14 à 30 % contre
-   55 à 75 %), il ne la remplace pas ; mais il coûte une seule borne
-   conjointe par nœud d'un chemin déjà parcouru (13 à 15) et peut la
-   précéder. La descente exacte est l'autre option, au prix de 48 à 91
+   rejette que 1 472 de plus à K = 10, le plafond entier (2,1 %), et
+   aucun à K = 5 : chaque proposition supplémentaire y est un surcoût
+   pur. Pour une fixture gravée, prendre un rectangle à U ≥ K non rejeté
+   par la fenêtre K mais rejeté par la fenêtre 2K (n = 2 000 en fournit
+   234 431 ; le harnais ne classe pas encore la cause de l'échec de la
+   fenêtre K : rang de A ou B, tangence ou site non témoin). Sur les
+   amas, le gain est en nombre d'appels, pas en masse : 94 à 99 % des
+   candidats sont dans des rectangles sans aucun témoin universel, qui
+   restent au Pool et au census.
+3. **Certificat de bloc.** Plus faible que les fenêtres (14 à 30 % contre
+   45 à 75 %), il ne les remplace pas ; mais il coûte une seule borne
+   conjointe par nœud d'un chemin déjà parcouru (13 à 15) et peut les
+   précéder. La descente exacte est l'autre option, au prix de 38 à 91
    bornes par rectangle, l'ordre d'une fenêtre 4K à K = 10, croissant
    lentement avec n et payé sur tous les produits visités.
 
@@ -245,7 +249,7 @@ Ce que ces parts ne disent pas : le coût du filtre sur tous les produits
 visités par le front, le temps mur du pipeline complet et le gain net.
 Elles bornent le gain brut : à uniform, au plus 86 à 89 % des appels de
 census actuels et 90 à 93 % de leur masse ; la fenêtre 4K en prend 80 à
-85 %. Avis : la variante « tous produits » se justifie sur uniform et
+86 %. Avis : la variante « tous produits » se justifie sur uniform et
 terrain ; sur les amas, viser le nombre d'appels seulement ; sur les
 rangées, la mesurer comme régression attendue.
 
