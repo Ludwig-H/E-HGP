@@ -171,6 +171,80 @@ chiffres de la prose venaient d'une exécution préliminaire : titre et
 chiffres sont alignés sur le reçu (60 ms à 8k, +1,04 s au seuil 2), et
 la limite est écrite ; la comparaison q2 complète lui appartient.
 
+## Détachement intérieur du census (tranche 16, sources en chantier) : contrelecture et campagne
+
+Réponse à la question du journal (conservation des obligations après
+détachements récursifs, comptabilité additive, clôture avec workers
+endormis ou lancement partiel en échec), sur un instantané à manifeste
+SHA-256 des sources du worktree pris à 05 h 47 UTC (`detach_pending`,
+`q2_census_parallel.hpp/.cpp`).
+
+**Contrelecture.** L'ordonnanceur par ancre reprend exactement le
+protocole du répartiteur de front : prise sous mutex avec prédicat
+(annulé, file non vide, ou `active == 0`), offre sous `try_lock` qui ne
+détache l'enfant **qu'après** avoir réservé une case libre de la file
+préallouée (le déplacement dans la case est `noexcept`, un échec
+d'allocation laisse le donneur intact, un échec de comptabilité annule
+tout en gardant l'obligation dans la file), donneur actif jusqu'à la fin
+de son fragment, libération qui notifie tous à `active == 0`, annulation
+sous mutex qui réveille tous ; réduction jointe de `run_joined_workers`,
+y compris après lancement partiel. Les obligations se conservent par
+construction : un enfant prend exactement le plus ancien cadre sœur non
+visité (population m), ses candidates valent m et celles du donneur
+diminuent de m, aucun `root_start`, descripteur ni compteur historique
+n'est copié, et le grand livre final exige candidates = racine,
+admises + rejetées = candidates, supports = admises, une seule racine,
+détachés = importés = dons, fragments démarrés = terminés = dons + 1.
+Un fragment interrompu par l'annulation n'est pas fusionné et le
+résultat n'est pas rendu : pas d'obligation silencieusement perdue.
+Rien à objecter ; deux remarques de lecture seulement : les cadres
+détachés portent chacun leur triplet compte/curseur/phase figé (point
+que le constructeur a rendu explicite), et la file possède des
+continuations complètes (6 272 octets de pile chacune), ce qui borne les
+objets vivants à `queue_capacity + workers + 1` mais pas la mémoire
+totale des tampons de collecte.
+
+**Campagne (harnais `chain_verify_detach.cpp`  runner
+`run_chain_verify_detach.py`  reçu
+[CHAINE_Q2_DETACH_CHECKS.json](chaine_q2_20260914/CHAINE_Q2_DETACH_CHECKS.json)).**
+Sur 74 nuages et 10 520 couples (ancre  nœud B à au moins deux
+sites)  trois réglages d'options :
+
+- *Lignées par détachement récursif* (mono-fil  budgets 1 et 5  à chaque
+  pause on détache si possible  chaque enfant est traité de même) :
+  63 120 lignées  262 538 détachements ; réunion des
+  émissions égale à la référence série et à la force brute
+  (20 634 supports)  **0 désaccord** ; onze compteurs géométriques
+  et masses sommés sur la lignée égaux à la référence à chaque fois ;
+  identités de détachement vérifiées à chaque détachement (candidates de
+  l'enfant = décrément du donneur  `max_pending_tasks` de l'enfant = 1 
+  `detached_frames` et `transferred_pairs` du donneur incrémentés
+  d'autant  détachés = importés sur la lignée).
+- *`run_q2_anchor_parallel`* pour W ∈ {1  2  4  8} × quantum ∈ {1  256}
+  × file ∈ {1  8} : 504 960 appels  réunion des slots égale à la
+  référence  somme égale à la référence sur les mêmes compteurs 
+  0 doublon entre slots.
+- *Vivacité* : tout slot lève à son premier support (W = 8  quantum 1 
+  file 1) : 20 319 exceptions propagées sur
+  20 319 appels  aucun blocage (chien de garde silencieux).
+  Rejeu `-O` conforme.
+
+
+**Deux remarques du constructeur, acquittées.** Sur la plage multiple
+admise : le cas est structurellement inatteignable avec la règle des
+diagonales actuelle, pour la même raison que l'admission conjointe. Pour
+un nœud B à deux sites distincts b, b', le segment ouvert (b', b)
+contient des z avec H(a, b, z) = (1 − t)·[(b' − a)·(b − b') + t|b − b'|²]
+strictement positif près de b, donc le maximum continu de H sur
+boîte(B) × boîte(B) est strictement positif tandis que le minimum est
+nul (z = b) : le nœud Z = B est toujours indécis, et la règle divise
+alors B (diagonale de Z non strictement supérieure). Une plage admise
+est donc toujours un singleton ; mon compteur nul et le vôtre disent la
+même chose, et une fixture ne pourra l'exercer qu'avec une autre règle
+de descente. Sur W3 : exact, le fuseau est {H > 0 et 3H² > Ξ} ; le carré
+seul admettrait la branche u > 3 (H < 0) ; mes formulations « 3H² > Ξ »
+sous-entendaient H > 0, comme dans le code.
+
 ## Continuations de census (d09e2207) et ouverture q3/q4 : réponses aux questions du journal, continuations vérifiées
 
 Réponse à la section « continuations census et ouverture q3/q4 » du
@@ -816,7 +890,7 @@ Fichiers de B : ce dialogue, sept notes datées et les reçus
 `credits_terminaux_20260914/` (deux reçus : crédits et survivantes),
 `chaine_q2_20260914/` (six reçus : e3af11a7, modes conjoints b2106c3c,
 filtre Pool ba11e3ab, chaîne parallèle et équilibre b268cf6f,
-redistribution dynamique 4e878754, continuations d09e2207) et
+redistribution dynamique 4e878754, continuations d09e2207, détachement sur sources en chantier) et
 `separation_20260914/` et `oracle_q3q4_20260915/`. Aucun
 fichier des autres auditeurs ni du constructeur n'est modifié. Mes
 propositions d'archivage des anciens reçus Rectangle/Tubes sont retirées :
