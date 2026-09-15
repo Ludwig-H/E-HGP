@@ -28,8 +28,11 @@ dans `chaine_q2_20260914/`, rejouables par `git archive <commit>`.
 | Équipe persistante front + census | beee3341 | `CHAINE_Q2_COOP_CHECKS.json`, `…_COOP_SCALE_…` | 5 304 appels coopératifs, 0 désaccord, identités de continuation tenues, 258 exceptions propagées ; défaut = Coarse, toute ancre en continuation +40 %, quantum 1 ×4 à ×7 |
 | Plages d'ancres et Pool partagé | 2741d614 | `CHAINE_Q2_RANGES_CHECKS.json` | 5 256 appels à plages, 0 désaccord, identités de plages tenues, 258 exceptions propagées ; coût égal à Coarse, gain sur les rangées à huit fils |
 
-Mesures publiées à côté : plafond de tout proposeur de témoins du front
-(86 à 89 % des rectangles émis à uniform, fenêtre 4K à 80 à 86 % du
+Mesures publiées à côté : bilan net de la surproposition sur copie
+patchée (fenêtre 2K petits facteurs : temps q2 complet à 42 à 53 % de la
+référence sur uniform, 49 à 62 % amas, 61 à 68 % terrain, 103 à 107 %
+rangées, 0 désaccord force brute), plafond de tout proposeur de témoins du
+front (86 à 89 % des rectangles émis à uniform, fenêtre 4K à 80 à 86 % du
 plafond, rangées 0 à 2 %), survivantes de Pool sur les amas (2 140 /
 3 085 / 4 690 vrais supports q2 à 8k/16k/32k ; résidu Pool non
 canonique), séparation s ∈ {8, 10, 12} (même objet, coûts voisins,
@@ -175,6 +178,65 @@ le harnais additionne des candidates sans exécuter le census et que deux
 chiffres de la prose venaient d'une exécution préliminaire : titre et
 chiffres sont alignés sur le reçu (60 ms à 8k, +1,04 s au seuil 2), et
 la limite est écrite ; la comparaison q2 complète lui appartient.
+
+## Bilan net de la surproposition mesuré sur une copie patchée (15 septembre, après-midi)
+
+Le plafond disait ce qu'un proposeur peut retirer ; restait le bilan net
+de la note, propositions payées sur tous les produits visités contre
+census évité, en temps mur complet. Je l'ai mesuré sans attendre, sur
+une **copie d'audit** du moteur 2741d614 dont `Front::filter` est étendu
+exactement comme la note le décrit (fenêtre historique intacte, deux
+intervalles disjoints de la fenêtre L autour du même pivot, crédits
+conservés, politiques B0 = 16 et tous produits ; patch, script
+d'application, probe, lanceur et reçus dans
+[surproposition_20260915/](surproposition_20260915/README.md)). Ce
+patch n'entre pas dans votre arbre : il mesure la note, il ne la
+remplace pas. La référence est mesurée sur le moteur 2741d614 non
+patché (même probe, bibliothèque telle quelle) : mêmes compteurs de
+front, de census et de flux que la variante L = K sur les seize
+configurations, et votre reçu à l'unité à uniform 8k K = 10 (3 194 249
+candidats, 2 914 705 rejets, 171 895 354 visites Z, 279 544 supports).
+Trois relecteurs indépendants ont confronté le patch à la note
+(neuf propriétés tenues : fenêtre historique intacte, intervalles
+disjoints contenant la fenêtre, crédits conservés, max des tailles,
+sites stricts hors A ∪ B, masque hérité) et exigé les contrôles qui
+suivent : plancher de non-vacuité de l'extension, égalité du front seul
+au front du pipeline, identités de propositions, temps minimum de trois
+répétitions sur machine calme.
+
+- **Exactitude** : harnais série contre la force brute, 56 nuages
+  adversariaux × 8 combinaisons, 1 162 560 paires, 0 désaccord pour
+  chacune des quatre variantes (2K et 4K, B0 = 16 et 0) ; même condensé
+  de supports et mêmes totaux intérieurs/coquilles que la référence sur
+  les seize configurations d'échelle (8k, 16k, 32k ; K = 5 et 10).
+- **Temps mur du pipeline complet**, en part de la référence, fenêtre
+  2K : uniform 42 à 53 %, amas 49 à 62 %, terrain 61 à 68 %, rangées
+  103 à 107 % ; fenêtre 4K : 39 à 48 %, 46 à 61 %, 64 à 70 %, 110 à
+  120 %. Le gain croît avec n sur uniform et amas.
+- **Candidats du census** à 2K : 26 à 33 % (uniform), 31 à 39 % (amas),
+  34 à 40 % (terrain) ; à 4K : 17 à 22 %, 21 à 28 %, 25 à 32 % ; les
+  visites Z suivent. Rangées : inchangés.
+- **Le front coûte moins, pas plus, à 2K** : rejeter plus haut élague
+  les descendants, les propositions totales restent à 86 à 97 % de la
+  référence sur uniform (96 à 109 % amas, 114 à 119 % terrain) et le
+  front seul passe de 9,17 s à 5,78 s à uniform 32k. À 4K, 125 à 199 %
+  de propositions selon la famille.
+- **Petits facteurs suffit** : B0 = 16 et tous produits donnent les
+  mêmes candidats à 0,2 point près et des temps égaux au bruit près ;
+  les gros produits que la fenêtre historique laisse passer ne sont pas
+  rattrapés par l'extension.
+- **2K contre 4K** : 4K retire encore 6 à 12 points de candidats pour
+  40 à 75 % de propositions en plus ; il gagne 3 à 5 points de temps sur
+  uniform et amas à 16k, 32k et K = 5, rien à 8k K = 10, en perd 0 à 5
+  sur terrain, et porte la régression des rangées à 10 à 20 %.
+
+Avis : la variante minimale de la note, L = 2K et B0 = 16, est le point
+robuste ; elle divise le temps q2 par 1,9 à 2,4 sur uniform, 1,6 à 2,0
+sur les amas, 1,5 à 1,6 sur terrain, pour une régression de 3 à 7 % sur
+les rangées. Vos petits juges de bord (n < L, propositions dans A/B,
+tangences, épuisement sans K succès, K-ième témoin trouvé par la seule
+extension) restent à écrire ; les reçus ci-dessus sont des mesures
+d'audit, pas une qualification constructeur.
 
 ## Plafond de tout proposeur de témoins (note « surproposition », 15 septembre)
 

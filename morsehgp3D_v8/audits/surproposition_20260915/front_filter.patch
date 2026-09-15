@@ -1,0 +1,119 @@
+--- a/src/wspd/front.hpp	2026-09-15 10:04:50.000000000 +0000
++++ b/src/wspd/front.hpp	2026-09-15 15:06:58.215204607 +0000
+@@ -49,6 +49,10 @@
+   std::array<u64, 3> rejected_pair_mass{};
+   std::array<u64, 3> residual_pair_mass{};
+   std::array<u64, 3> lane_rectangles{};
++  // AUDIT B : extension de fenêtre (produits étendus, propositions supplémentaires, rejets obtenus par l'extension).
++  u64 extended_products{};
++  u64 extended_proposals{};
++  u64 extended_rejections{};
+   bool operator==(const WspdFrontWork&) const = default;
+ };
+ 
+--- a/src/wspd/front.cpp	2026-09-15 10:04:50.000000000 +0000
++++ b/src/wspd/front.cpp	2026-09-15 15:19:30.611260745 +0000
+@@ -4,6 +4,8 @@
+ 
+ #include <algorithm>
+ #include <array>
++#include <cstdlib>
++#include <string>
+ #include <condition_variable>
+ #include <deque>
+ #include <limits>
+@@ -64,6 +66,17 @@
+       : nodes_(index.spatial_nodes()), order_(index.spatial_order()),
+         points_(index.cloud().points()), kmax_(kmax), separation_(separation),
+         mode_(mode), consumer_(consumer) {
++    // AUDIT B : seules les valeurs mesurées sont acceptées ; toute autre valeur est refusée.
++    if (const char* f = std::getenv("MHGP8_AUDIT_L_FACTOR")) {
++      const std::string value(f);
++      if (value != "1" && value != "2" && value != "4") throw std::invalid_argument("audit: MHGP8_AUDIT_L_FACTOR must be 1, 2 or 4");
++      audit_l_factor_ = static_cast<unsigned>(value[0] - '0');
++    }
++    if (const char* b0 = std::getenv("MHGP8_AUDIT_B0")) {
++      const std::string value(b0);
++      if (value != "0" && value != "16") throw std::invalid_argument("audit: MHGP8_AUDIT_B0 must be 0 or 16");
++      audit_b0_ = value == "0" ? 0 : 16;
++    }
+     const auto n = points_.size();
+     // Divide before multiplying, so even a representable choose(n,2)
+     // does not require the larger ordered-pair count to fit u64.
+@@ -183,6 +196,12 @@
+     return result;  // 16 times squared distance; <=48*65535^2 fits i64.
+   }
+ 
++  // AUDIT B (15 sept. 2026) : extension « surproposition » de la note P0_SURPROPOSITION_TEMOINS_Q2.
++  // Fenêtre historique de K propositions inchangée (même ordre, mêmes sauts) ; si le masque survit et que le
++  // produit est éligible (B0 = 0 : tous produits ; sinon max(|A|,|B|) <= B0), on poursuit dans les deux
++  // intervalles disjoints [firstL, first) et [last, lastL) de la fenêtre L = factor·K autour du même pivot,
++  // en gardant les crédits acquis, jusqu'à K succès. Paramètres lus une fois : MHGP8_AUDIT_L_FACTOR (1, 2, 4),
++  // MHGP8_AUDIT_B0 (0 ou 16). factor = 1 reproduit exactement le front de 2741d614.
+   std::uint8_t filter(const Q2SpatialNode& a, const Q2SpatialNode& b, std::uint8_t mask) {
+     unsigned needed = kmax_;
+     for (unsigned lane = 0; lane < 3; ++lane) {
+@@ -214,16 +233,16 @@
+                                 order_.size() - count);
+     const auto last = first + count;
+     std::array<unsigned, 3> credits{};
+-    for (auto rank = first; rank < last && mask != 0; ++rank) {
++    auto propose = [&](std::size_t rank) {
+       counter_add(result_.work.proposed_sites);
+       if (contains(a.range, rank) || contains(b.range, rank)) {
+         counter_add(result_.work.proposals_in_factors);
+-        continue;
++        return;
+       }
+       const auto z = singleton_box(points_[order_[rank]]);
+       counter_add(result_.work.h_bound_tests);
+       const auto h = spindle_detail::h_minimum(a.box, b.box, z);
+-      if (h <= 0) continue;
++      if (h <= 0) return;
+       i128 xi = 0;
+       if ((mask & 6U) != 0) {
+         counter_add(result_.work.xi_bound_tests);
+@@ -237,6 +256,21 @@
+           if (++credits[lane] == thresholds_[lane]) mask &= static_cast<std::uint8_t>(~bit);
+         }
+       }
++    };
++    for (auto rank = first; rank < last && mask != 0; ++rank) propose(rank);
++    if (mask != 0 && audit_l_factor_ > 1 &&
++        (audit_b0_ == 0 || std::max(a.range.size(), b.range.size()) <= audit_b0_)) {
++      const auto count_l = std::min<std::size_t>(static_cast<std::size_t>(kmax_) * audit_l_factor_, order_.size());
++      const auto first_l = std::min(pivot > count_l / 2 ? pivot - count_l / 2 : 0,
++                                    order_.size() - count_l);
++      const auto last_l = first_l + count_l;
++      if (first_l > first || last_l < last) throw std::logic_error("audit: extended window must contain the historical window");
++      // extended_products : produits ayant reçu au moins une proposition supplémentaire (intervalles non vides).
++      if (first_l < first || last < last_l) counter_add(result_.work.extended_products);
++      for (auto rank = first_l; rank < first && mask != 0; ++rank) { counter_add(result_.work.extended_proposals); propose(rank); }
++      for (auto rank = last; rank < last_l && mask != 0; ++rank) { counter_add(result_.work.extended_proposals); propose(rank); }
++      // extended_rejections : effacements complets du masque obtenus par l'extension (= rejets q2 sous le masque 1 du census).
++      if (mask == 0) counter_add(result_.work.extended_rejections);
+     }
+     return mask;
+   }
+@@ -271,6 +305,8 @@
+   WspdFrontMode mode_;
+   const WspdRectangleConsumer& consumer_;
+   std::array<unsigned, 3> thresholds_{};
++  unsigned audit_l_factor_{1};
++  std::size_t audit_b0_{0};
+   WspdFrontResult result_;
+ };
+ 
+--- a/src/parallel/work_reduction.hpp	2026-09-15 10:04:50.000000000 +0000
++++ b/src/parallel/work_reduction.hpp	2026-09-15 15:20:03.206263177 +0000
+@@ -41,6 +41,10 @@
+   counter_add(out.xi_bound_tests, value.xi_bound_tests);
+   counter_add(out.witness_lane_credits, value.witness_lane_credits);
+   counter_add(out.fully_rejected_products, value.fully_rejected_products);
++  // AUDIT B : compteurs de l'extension de fenêtre, fusionnés comme les autres.
++  counter_add(out.extended_products, value.extended_products);
++  counter_add(out.extended_proposals, value.extended_proposals);
++  counter_add(out.extended_rejections, value.extended_rejections);
+   counter_add(out.emitted_rectangles, value.emitted_rectangles);
+   counter_add(out.emitted_factor_sites, value.emitted_factor_sites);
+   out.max_factor_size = std::max(out.max_factor_size, value.max_factor_size);
