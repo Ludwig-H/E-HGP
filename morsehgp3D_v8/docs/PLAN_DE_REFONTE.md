@@ -47,6 +47,14 @@ héritée du harnais d'audit ; le raccord et l'oracle restent à construire.
 
 ## Priorité P0 — supprimer la préparation quadratique des témoins locaux
 
+Seizième tranche : [frères B détachables et répartiteur intérieur](P0_DETACHEMENT_CENSUS_Q2.md)
+implémentés pour une ancre. Les branches partagent le contexte original,
+pas l'historique déjà payé ; leur somme garde le travail mono. Raccorder
+ensuite aux workers persistants du front et aux plans Pool parentaux
+possédés : ne pas créer une équipe par ancre, ni convertir les bandes
+de permutation Pool en nœuds B globaux. Aucun changement du chemin
+q2 complet ni réduction de complexité générale par ce seul détachement.
+
 Quinzième tranche : [census d'une ancre reprenable](P0_CENSUS_REPRENABLE_Q2.md)
 qualifié, sans modification du pipeline existant. Extraire ensuite les
 frères B en attente pour les exécuter indépendamment ; leur simple migration

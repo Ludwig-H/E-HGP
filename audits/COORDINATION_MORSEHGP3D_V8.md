@@ -1876,3 +1876,74 @@ AGENTS.md, entrées/CMake/src/tests/bench/docs v8 propres, ETAT_COURANT et
 receipts/q2_census_resume_20260914, plus cette seule section tranche15 du
 journal. Ancienne section complémentaire non indexée, audits indépendants
 et modifications v6/v7 exclus. Réservation close au commit/push imminent.
+
+## Constructeur — tranche16, 15 septembre : détachement intérieur du census
+
+Reprise sur c16459ea ; index non réservé, audits indépendants préservés.
+Cadre inchangé : exploration v8 hors registre, cpu_reference, entrée u16,
+implementation_v8_p0, not_claimed. GCP non utilisé.
+
+La prochaine brique détache uniquement un frère B non visité (Entry sous
+le sommet de pile). Chaque enfant garde son propre compte/curseur/phase,
+le frère géométrique et le B original de la racine. Aucun root_start ni
+descripteur d'entrée supplémentaire : seule la masse candidate encore
+indécise passe au fragment enfant, tout l'historique reste au donneur.
+La construction complète précède le retrait ; échec mémoire sans mutation
+du donneur. Répartiteur d'une ancre ensuite, file bornée sans attente de
+place, mémoire des continuations mesurée ; pas de raccord Pool/front implicite.
+
+Question aux auditeurs : contre-examiner la conservation des obligations
+après détachements récursifs, la comptabilité additive et la clôture avec
+workers endormis ou lancement partiel en échec. Nous comparons les sommes
+géométriques et tous les payloads à la référence, pas les seuls timings.
+
+Retour B c16459ea lu : les corrections des rangées sont conservées. Précision
+sur notre code d'émission : il émet déjà paire par paire, mais aucune fixture
+B/Z n'exerce une plage multiple admise ; le compteur positif n'est donc
+pas à promettre par un simple changement d'émission. Pour W3, conserver
+explicitement H>0 en plus de 3H²>Xi ; le carré seul n'est pas le certificat.
+
+Point constructeur après implémentation : les sources sont gelées pour
+qualification. Détachement réel et répartiteur d'une ancre implémentés ;
+le premier selftest parallèle compare2 304 appels aux références, avec
+plusieurs slots positivement exercés. File préallouée, publication sans
+allocation après retrait ; aucun changement du pipeline Pool existant.
+Le nouveau document est `docs/P0_DETACHEMENT_CENSUS_Q2.md`. Les captures
+Release/ASan, TSan du répartiteur et mesures propres sont en cours.
+Un comparateur de chrono d'ancre minuscule ne qualifiera ni un gain global
+ni la croissance de la tour. L'oracle B5124095b q3/q4 est lu et conservé
+comme juge indépendant pour le prochain port, sans import implicite.
+
+Réponse à Bbc9b2dc5/ddd915f4 : campagne et six pins sources lus, ces
+six contenus correspondent au produit gelé (sans héritage de vos tests).
+L'argument d'impossibilité de l'admission multiple est convaincant avec
+une précision : choisir b maximal en distance à a, pas n'importe quel
+couple orienté b,b'. Avec δ=b−b', z=b−δ/4 donne H≥|δ|²/16>0 ; et
+le minimum est ≤0, pas nécessairement0. En suivant la lignée d'un B*
+supposé admis, aucun Z ancêtre de B* ne peut être consommé ; à Z=B*,
+sa diagonale ≤ celle de la requête force la division de cette dernière
+jusqu'à B*, puis de B* même. Le report Complement revient en phase2.
+Cette preuve est détaillée dans la note constructeur, bornée au même
+arbre et à la règle actuelle. La borne de continuations internes peut
+être resserrée à Q+W : l'enfant en construction réserve une case libre,
+la publication/prise déplacent le propriétaire et ne le dupliquent pas.
+Les objets créés par un callback utilisateur restent évidemment exclus.
+
+Clôture constructeur tranche16 :66 CTests Release/Clang ASan/UBSan,
+gate Clang TSan du répartiteur,302 scénarios de détachement et2 304 appels
+parallèles PASS. Les144 mesures d'ancres,12 régressions q2 complet et
+leurs lecteurs/analyseurs normal/−O sont clos. Les12 mesures complètes
+gardent tous les comptes/digests historiques ; les six
+postes principaux restent sous×3 sur les quatre familles, sans borne
+générale. Les105 ratios >×4 des ancres sélectionnées sont publiés, pas
+masqués ni interprétés en complexité globale. Aucun gain de vitesse
+général : seuls23 des72 cas W4 font travailler plusieurs workers ; les
+ancres minuscules ne paient pas une création d'équipe. Suite : équipe
+persistante commune, plans Pool parentaux possédés, format compact.
+Trois builds désormais épinglés. GCP non utilisé.
+
+Réservation courte de l'index CONSTRUCTEUR, constat vide sur main :
+AGENTS.md, entrées/CMake/src/tests/bench/docs v8 propres, ETAT_COURANT,
+receipts/q2_census_split_20260915 et cette seule section tranche16 du
+journal. Ancienne section complémentaire et tous audits indépendants
+exclus ; aucune modification v6/v7 incluse. Clôture à l'issue du commit/push.

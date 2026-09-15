@@ -1,10 +1,49 @@
-# Passation v8 — census reprenable et architecture q3/q4
+# Passation v8 — détachement intérieur q2 et architecture q3/q4
 
-14 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
+15 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`. Aucun contrat de tour n'est encore acquis.
 
 ## À reprendre maintenant
+
+Le [détachement intérieur q2](docs/P0_DETACHEMENT_CENSUS_Q2.md) est implémenté
+et qualifié :66 CTests Release/Clang ASan/UBSan, gate Clang TSan du répartiteur,
+302 scénarios de détachement et2 304 appels parallèles. Les
+[preuves propres](receipts/q2_census_split_20260915/README.md) comprennent144
+mesures d'ancres et12 régressions q2 complet. Builds désormais épinglés :
+`build/v8_census_split_20260915`, `build/v8_census_split_sanitize_20260915`,
+`build/v8_census_split_tsan_clang_20260915`. Le préflight et les échecs de
+compilation/lien/collecteur sont explicitement conservés ; ne pas les effacer.
+
+Suite prioritaire : **une seule équipe persistante front+census**, pas une
+équipe par ancre. Les144 mesures montrent pourquoi : seuls23 cas W4 ont
+plusieurs workers actifs, et8 des72 comparaisons W1/W4 montrent un gain
+ponctuel sous charge, sans qualification de vitesse. Les36 compteurs et
+les quatre étapes restent identiques ; le q2 complet garde sa croissance
+mesurée sous×3 sur les quatre familles. Les sauts de l'ancre sélectionnée
+sont publiés et ne constituent pas une étude de croissance globale.
+
+Quatre obligations à raccorder : produit du front, curseur de rectangle,
+continuation Shared et curseur de bande Pool. Conserver le même index,
+B original, compte/curseur/phase ; ne copier aucun historique ni créer
+de root_start sur un fragment. Préparer Pool une fois par parent possédé.
+Une bande Pool n'est pas un nœud B spatial : garder sa voie Pairwise,
+et le repli Shared si aucune paire n'est retirée. Les petits jobs restent
+locaux ; la fermeture/annulation doit couvrir toutes les obligations.
+
+La file actuelle possède des continuations complètes à6 272 octets de
+pile chacune ; Q+W borne les objets internes, pas le RSS ni les objets
+créés par l'utilisateur. Le prochain format pourra ne garder que la
+branche Entry et son contexte parental ; ce format compact n'existe pas
+encore. Collecte atomique par support, pas de délai garanti par quantum.
+Admission multiple impossible pour même arbre B/Z et règle actuelle :
+preuve dans la note, ne plus chercher une fixture de ce cas ici.
+
+Réponse Bbc9b2dc5 lue, six pins sources concordants ; ses504 960 appels
+parallèles restent indépendants de nos preuves. Oracle entier B5124095b
+disponible pour le prochain port q3/q4. FULL, GPU/G4 et massif restent ouverts.
+
+## Quinze premières tranches — historique
 
 La [continuation possédée d'une ancre q2](docs/P0_CENSUS_REPRENABLE_Q2.md)
 est qualifiée :62 CTests Release/Clang ASan/UBSan, gate Clang TSan,

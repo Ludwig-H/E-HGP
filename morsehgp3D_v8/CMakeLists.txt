@@ -10,7 +10,8 @@ find_package(Threads REQUIRED)
 option(MHGP8_SANITIZE "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 
 add_library(mhgp8_p0 STATIC src/pipeline/local_credits.cpp src/pipeline/axis_q2.cpp
-  src/pipeline/q2_census.cpp src/pipeline/prepared_cloud.cpp src/wspd/front.cpp)
+  src/pipeline/q2_census.cpp src/pipeline/q2_census_parallel.cpp
+  src/pipeline/prepared_cloud.cpp src/wspd/front.cpp)
 target_include_directories(mhgp8_p0 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_features(mhgp8_p0 PUBLIC cxx_std_20)
 set_target_properties(mhgp8_p0 PROPERTIES CXX_EXTENSIONS OFF)
@@ -43,12 +44,14 @@ add_executable(mhgp8_wspd_q2_dynamic_probe bench/wspd_q2_dynamic_probe.cpp)
 target_link_libraries(mhgp8_wspd_q2_dynamic_probe PRIVATE mhgp8_p0)
 add_executable(mhgp8_q2_census_resume_probe bench/q2_census_resume_probe.cpp)
 target_link_libraries(mhgp8_q2_census_resume_probe PRIVATE mhgp8_p0)
+add_executable(mhgp8_q2_census_split_probe bench/q2_census_split_probe.cpp)
+target_link_libraries(mhgp8_q2_census_split_probe PRIVATE mhgp8_p0)
 
 if(BUILD_TESTING)
   # Boost arbitrary precision is used only by the bounded independent judge.
   find_package(Boost REQUIRED)
   foreach(gate IN ITEMS q2_node_pool q2_terminal_pool wspd_front_jobs wspd_q2_parallel
-      wspd_front_dispatch wspd_q2_dynamic q2_census_resume)
+      wspd_front_dispatch wspd_q2_dynamic q2_census_resume q2_census_detach q2_census_parallel)
     add_executable(mhgp8_${gate}_gate tests/${gate}_gate.cpp)
     target_include_directories(mhgp8_${gate}_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     target_include_directories(mhgp8_${gate}_gate SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
@@ -126,6 +129,12 @@ if(BUILD_TESTING)
   target_link_libraries(mhgp8_q2_prepared_bounds_gate PRIVATE mhgp8_p0)
   add_test(NAME mhgp8_q2_prepared_bounds_gate COMMAND mhgp8_q2_prepared_bounds_gate --selftest)
   find_package(Python3 COMPONENTS Interpreter REQUIRED)
+  add_test(NAME mhgp8_q2_split_receipts_gate COMMAND ${Python3_EXECUTABLE} -B
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/q2_split_receipts_gate.py"
+    --probe $<TARGET_FILE:mhgp8_q2_census_split_probe> --selftest)
+  add_test(NAME mhgp8_q2_split_receipts_gate_optimized COMMAND ${Python3_EXECUTABLE} -B -O
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/q2_split_receipts_gate.py"
+    --probe $<TARGET_FILE:mhgp8_q2_census_split_probe> --selftest)
   add_test(NAME mhgp8_q2_resume_receipts_gate COMMAND ${Python3_EXECUTABLE} -B
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/q2_resume_receipts_gate.py"
     --probe $<TARGET_FILE:mhgp8_q2_census_resume_probe> --selftest)

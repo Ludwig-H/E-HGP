@@ -95,6 +95,14 @@ inclure ses propositions et évaluations de bornes supplémentaires.
 
 ## 1. Ordre des travaux et sens de « rédhibitoire »
 
+La [seizième tranche](P0_DETACHEMENT_CENSUS_Q2.md) rend les frères q2
+indépendants, puis les exécute dans un répartiteur d'ancre. Leur somme
+conserve le travail géométrique ; les recherches ne sont pas recréées.
+Le verrou suivant est le raccord à une équipe persistante commune au
+front, aux continuations et aux bandes Pool, avec plans parentaux possédés.
+Ne pas généraliser une création d'équipe par ancre ni masquer les6 272
+octets de pile réservée derrière le nombre de pointeurs de la file.
+
 La [quatorzième tranche](P0_REDISTRIBUTION_FRONT_Q2.md) ajoute une file de
 produits non visités, sans refaire les parents. Les57 CTests et Clang TSan
 passent ;192 mesures ne montrent pas de gain général, Coarse reste le défaut.

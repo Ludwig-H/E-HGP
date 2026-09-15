@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — census q2 reprenable et préparation q3/q4
+# Morse HGP 3D v8 — branches q2 distribuables et préparation q3/q4
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -35,6 +35,31 @@ catalogue q3/q4 ni une tour FULL.
 Les mesures historiques citées restent v7.
 
 ## État exécutable
+
+La seizième tranche ajoute le [détachement des frères B et un répartiteur
+intérieur](docs/P0_DETACHEMENT_CENSUS_Q2.md). Une même ancre peut maintenant
+être traitée simultanément par plusieurs workers, sans refaire ses préfixes
+ni perdre son compte acquis. **66 CTests Release et Clang ASan/UBSan passent**,
+ainsi que la gate Clang TSan du répartiteur. Les
+[preuves propres](receipts/q2_census_split_20260915/README.md) comprennent
+302 scénarios de détachement,2 304 appels parallèles,144 mesures à8k/16k/32k,
+K5/10, s8/10/12 et12 mesures du chemin q2 complet inchangé.
+
+Les sorties et les36 compteurs géométriques restent identiques au mono.
+Les principaux comptes du q2 complet restent sous×3 aux doublements sur
+les quatre familles mesurées, sans borne générale. **Aucun gain de vitesse
+général** : la plupart des ancres sélectionnées sont trop petites pour payer
+une création d'équipe. La prochaine intégration réutilisera les workers
+persistants du front et des plans Pool parentaux possédés ; elle reste à faire.
+Les trois builds de qualification sont épinglés. FULL, GPU et contrats G4
+restent ouverts ; GCP non utilisé.
+
+La contrelecture B a aussi permis de préciser pourquoi une plage multiple
+ne peut pas être admise dans ce raccord B/Z : la règle des diagonales force
+sa division. Pour q3/q4, un nouvel oracle indépendant B5124095b est disponible ;
+les moteurs produit ne sont pas encore implémentés.
+
+## Quinzième tranche publiée à d09e2207 — historique
 
 La quinzième tranche ajoute un [census q2 reprenable](docs/P0_CENSUS_REPRENABLE_Q2.md)
 possédant son index et son état de parcours. Les 62 CTests Release et

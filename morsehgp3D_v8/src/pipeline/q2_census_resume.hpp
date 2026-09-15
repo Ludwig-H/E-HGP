@@ -31,12 +31,24 @@ struct Q2CensusResumeWork {
   bool operator==(const Q2CensusResumeWork&) const = default;
 };
 
+struct Q2CensusDetachWork {
+  // Successfully completed Ready calls, including those without a sibling;
+  // failed allocations/checks and Done no-ops do not increase this field.
+  u64 attempts{};
+  u64 detached_frames{};
+  u64 imported_frames{};
+  u64 transferred_pairs{};
+  u64 moved_frames{};
+  bool operator==(const Q2CensusDetachWork&) const = default;
+};
+
 struct Q2CensusResumeSnapshot {
   Q2CensusResult census;
   Q2SiblingWork sibling_work;
   Q2OrderWork order_work;
   Q2CensusResumeWork resume_work;
   Q2CensusContinuationStatus status = Q2CensusContinuationStatus::Ready;
+  Q2CensusDetachWork detach_work;
 };
 
 // Read-only description, not an adoptable continuation or a certificate
@@ -88,7 +100,7 @@ class Q2CensusContinuation;
 // range and pending query siblings all survive pauses. No user callback
 // or support view is retained between advances. It can be passed to another
 // thread after the previous call ends under the caller's synchronization.
-// advance/snapshot/pending/memory require exclusive ownership; overlapping
+// advance/detach_pending/snapshot/pending/memory require exclusive ownership; overlapping
 // calls and synchronous reentrance are detected and rejected with logic_error.
 // These observers are intended BETWEEN advances, not from a running callback.
 // index() is the exception: its immutable view is safe during an advance.
@@ -104,7 +116,9 @@ class Q2CensusContinuation;
 // An accepted range increments its accepted/uniform masses once, before
 // its per-pair emissions. Intermediate snapshots may therefore count more
 // accepted pairs than payload_supports; they are not completed outputs.
-// The geometric discrete counters equal the reference only at completion.
+// Without detachment the geometric discrete counters equal the reference
+// only at completion. With detachment, sum the complete lineage's geometric
+// histories and masses: an individual fragment is not a fresh root census.
 // Resume counters are separate; transitions is the sum of its four step
 // kinds. Pauses are counted when an advance exhausts its budget unfinished.
 //
@@ -119,7 +133,7 @@ class Q2CensusContinuation;
 // census.total_ms sums ACTIVE advance intervals, excluding time between
 // pauses; payload_ms sums atomic collection/callback intervals. count_ms
 // is their difference, not the historical enclosing wall-clock semantics.
-// Factory, observer and destruction costs are not included in these clocks.
+// Factory, detachment, observer and destruction costs are not included in these clocks.
 // query_index_ms remains zero. Memory reports vector capacities only,
 // excluding shared index/cloud, object metadata, temporaries and thread stack.
 class Q2CensusContinuation final {
@@ -130,6 +144,30 @@ class Q2CensusContinuation final {
   Q2CensusContinuation(Q2CensusContinuation&&) = delete;
   Q2CensusContinuation& operator=(Q2CensusContinuation&&) = delete;
   [[nodiscard]] bool advance(std::size_t budget, const Q2CensusConsumer& consumer);
+  // Detach the OLDEST unvisited sibling (stack.front), never the current
+  // frame (stack.back), and only when at least two frames remain. The child
+  // owns its index, engine, sentinel and buffers; original B/escape, anchor,
+  // count/cursor/phase/sibling stay unchanged. No root_start, descriptor or
+  // historical geometric counter is copied or replayed. Its candidates are
+  // exactly the detached B population m; the donor's candidates decrease
+  // by m while every already paid history remains in the donor.
+  //
+  // A Ready call without a sibling returns nullptr and increments attempts.
+  // Done returns nullptr as an exact no-op; Failed/overlapping calls throw
+  // logic_error. All fallible construction (including the public child)
+  // and counter/ledger checks precede the nonthrowing transfer commit. An
+  // allocation failure leaves the donor EXACTLY unchanged, attempts included,
+  // and does not poison it. The returned fragment is independently resumable.
+  //
+  // Donor stats: attempts+1; on success detached_frames+1, transferred_pairs
+  // +=m, moved_frames+=old_stack_size-1 (value shifts from erasing the first
+  // frame). Child stats: imported_frames=1, everything else zero. Its resume
+  // history is zero except max_pending_tasks=1, describing its initial stack.
+  // Each child currently reserves 49 frames and starts with empty payload
+  // buffers; detachment is not a promise of a constant total memory footprint.
+  // Across all descendants detached_frames=imported_frames; transferred_pairs
+  // is cumulative traffic and may exceed the initial mass after repeat moves.
+  [[nodiscard]] std::unique_ptr<Q2CensusContinuation> detach_pending();
   [[nodiscard]] Q2CensusResumeSnapshot snapshot() const;
   [[nodiscard]] Q2CensusResumePending pending() const;
   [[nodiscard]] Q2CensusResumeMemory memory() const;

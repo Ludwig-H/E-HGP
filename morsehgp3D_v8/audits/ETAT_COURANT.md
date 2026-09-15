@@ -1,9 +1,25 @@
 # État de l'audit v8
 
-14 septembre 2026. Audit constructeur, avec contrelectures parallèles.
+15 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
-État constructeur courant : quinzième tranche P0,
+État constructeur courant : seizième tranche P0,
+[détachement des frères q2 et répartiteur d'ancre](../docs/P0_DETACHEMENT_CENSUS_Q2.md).
+66 CTests Release/Clang ASan/UBSan et la gate Clang TSan du répartiteur PASS.
+Les [preuves propres](../receipts/q2_census_split_20260915/README.md) couvrent
+302 scénarios de détachement,2 304 appels parallèles,144 mesures d'ancres
+et12 régressions q2 complet. Les trois builds de qualification sont épinglés.
+Travail géométrique et payloads identiques au mono, pas de gain de vitesse
+général. Le raccord à l'équipe persistante du front et aux plans Pool
+parentaux reste ouvert ; le pipeline q2 complet n'est pas modifié.
+Sa croissance mesurée reste sous×3 sur les quatre familles, sans borne générale.
+La preuve de l'impossibilité d'admission multiple est maintenant précisée.
+L'oracle B5124095b q3/q4 et la campagne Bbc9b2dc5 restent indépendants.
+Aucun contrat FULL/G4 ni GPU acquis. GCP non utilisé.
+
+## Historique : quinzième tranche publiée à d09e2207
+
+Quinzième tranche P0,
 [continuations possédées d'une ancre q2](../docs/P0_CENSUS_REPRENABLE_Q2.md).
 62 CTests Release/Clang ASan/UBSan et la gate Clang TSan passent.
 Les [preuves propres](../receipts/q2_census_resume_20260914/README.md)

@@ -1,0 +1,17 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_q2_split_checks.py",
+    "read",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/q2_census_split_20260915/qualification_ulbtho0b"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-15T06:04:56.748241+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"full_contract_qualified\": false, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q2_census_split_20260915/qualification_ulbtho0b\", \"records\": 3, \"selected_anchor_measures\": 0, \"status\": \"passed\"}\n",
+  "stderr": "",
+  "stdout_base64": "eyJmdWxsX2NvbnRyYWN0X3F1YWxpZmllZCI6IGZhbHNlLCAicGF0aCI6ICIvd29ya3NwYWNlcy9FLUhHUC9tb3JzZWhncDNEX3Y4L3JlY2VpcHRzL3EyX2NlbnN1c19zcGxpdF8yMDI2MDkxNS9xdWFsaWZpY2F0aW9uX3VsYnRobzBiIiwgInJlY29yZHMiOiAzLCAic2VsZWN0ZWRfYW5jaG9yX21lYXN1cmVzIjogMCwgInN0YXR1cyI6ICJwYXNzZWQifQo=",
+  "stderr_base64": ""
+}

@@ -1,0 +1,16 @@
+{
+  "kind": "parallel",
+  "command": [
+    "/workspaces/E-HGP/build/v8_census_split_20260915/mhgp8_q2_census_parallel_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-15T05:57:11.168100+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"status\":\"passed\",\"scope\":\"small_q2_anchor_parallel_not_full\",\"checks\":82100,\"fixtures\":8,\"references\":128,\"resumptions\":128,\"parallel_calls\":2304,\"supports\":3456,\"donations\":3880,\"multi_slot_outputs\":41,\"multi_active_runs\":134,\"max_shell\":30,\"callback_failures\":4,\"invalid_inputs\":14,\"partial_launch_failure_injected\":false}\n",
+  "stderr": "",
+  "stdout_base64": "eyJzdGF0dXMiOiJwYXNzZWQiLCJzY29wZSI6InNtYWxsX3EyX2FuY2hvcl9wYXJhbGxlbF9ub3RfZnVsbCIsImNoZWNrcyI6ODIxMDAsImZpeHR1cmVzIjo4LCJyZWZlcmVuY2VzIjoxMjgsInJlc3VtcHRpb25zIjoxMjgsInBhcmFsbGVsX2NhbGxzIjoyMzA0LCJzdXBwb3J0cyI6MzQ1NiwiZG9uYXRpb25zIjozODgwLCJtdWx0aV9zbG90X291dHB1dHMiOjQxLCJtdWx0aV9hY3RpdmVfcnVucyI6MTM0LCJtYXhfc2hlbGwiOjMwLCJjYWxsYmFja19mYWlsdXJlcyI6NCwiaW52YWxpZF9pbnB1dHMiOjE0LCJwYXJ0aWFsX2xhdW5jaF9mYWlsdXJlX2luamVjdGVkIjpmYWxzZX0K",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-15T05:57:11.359205+00:00"
+}

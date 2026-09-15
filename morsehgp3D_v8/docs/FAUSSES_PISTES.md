@@ -3,6 +3,22 @@
 13 septembre 2026. Mémoire courte de l'audit et de la première tranche P0.
 Les sources et contre-fixtures complètes sont dans les rapports liés.
 
+## Détachement intérieur q2 — 15 septembre
+
+- Réinitialiser une racine pour une branche transférée perdrait son compte
+  acquis ou répéterait son préfixe. Transférer compte/curseur/phase et B
+  original ensemble, mais pas les compteurs historiques déjà payés.
+- Créer une équipe de threads par petite ancre est une sonde d'architecture,
+  pas une politique à généraliser. Le raccord doit réutiliser les workers
+  persistants et les plans parentaux ; jamais préparer Pool par tranche.
+- Chercher une fixture de plage multiple admise dans le raccord actuel
+  ne peut pas aboutir : même arbre B/Z et règle des diagonales imposent
+  une subdivision préalable. La [preuve](P0_DETACHEMENT_CENSUS_Q2.md)
+  précise les hypothèses ; elle n'autorise pas à ignorer les coquilles.
+- Q cases de file ne signifient pas Q petits descripteurs : chaque case
+  possède ici une continuation complète. Mesurer les capacités réelles,
+  puis concevoir un format compact avant de multiplier les tâches GPU.
+
 ## Reprise q2 et ouverture q3/q4 — 14 septembre
 
 - Rappeler le parcours partagé avec un curseur sauvegardé ne suffit pas :

@@ -13,6 +13,7 @@
 #include <chrono>
 #include <numeric>
 #include <stdexcept>
+#include <type_traits>
 #include <utility>
 
 namespace mhgp8 {
@@ -1195,6 +1196,10 @@ struct Q2CensusContinuation::Impl {
         : query(input_query), cursor(input_cursor), sibling(input_sibling),
           count(input_count), inside_deferred(input_phase) {}
   };
+  static_assert(std::is_nothrow_copy_constructible_v<Frame>);
+  static_assert(std::is_nothrow_move_assignable_v<Frame>);
+  static_assert(std::is_nothrow_destructible_v<Frame>);
+  struct ImportedFragment {};
 
   Q2CensusIndexPtr owner;
   const std::size_t anchor_rank;
@@ -1211,6 +1216,7 @@ struct Q2CensusContinuation::Impl {
   Q2CensusEngine engine;
   std::vector<Frame> stack;
   Q2CensusResumeWork resume_work;
+  Q2CensusDetachWork detach_work;
   Q2CensusContinuationStatus status = Q2CensusContinuationStatus::Ready;
   mutable std::atomic_flag busy = ATOMIC_FLAG_INIT;
 
@@ -1225,6 +1231,21 @@ struct Q2CensusContinuation::Impl {
     stack.reserve(49);
     stack.emplace_back(original_b, 0, absent, 0, false);
     resume_work.max_pending_tasks = 1;
+  }
+
+  // Only detach_pending can reach this constructor. The inherited frame is
+  // already certified by this exact owner; do not revalidate/copy the cloud,
+  // initialize a new root, or copy the source engine's history/borrowed state.
+  Impl(const Impl& source, const Frame& unvisited, u64 mass, ImportedFragment)
+      : owner(source.owner), anchor_rank(source.anchor_rank), anchor_id(source.anchor_id),
+        original_b(source.original_b), original_escape(source.original_escape),
+        sibling_mode(source.sibling_mode), witness_order(source.witness_order),
+        engine(*owner, source.engine.threshold, unused_consumer) {
+    engine.result.candidate_pairs = mass;
+    stack.reserve(49);
+    stack.push_back(unvisited);
+    resume_work.max_pending_tasks = 1;
+    detach_work.imported_frames = 1;
   }
 
   void enter() {
@@ -1460,11 +1481,52 @@ bool Q2CensusContinuation::advance(std::size_t budget, const Q2CensusConsumer& c
   return implementation_->advance(budget, consumer);
 }
 
+std::unique_ptr<Q2CensusContinuation> Q2CensusContinuation::detach_pending() {
+  auto& state = *implementation_;
+  const ExclusiveResumeCall lock(state.busy);
+  if (state.status == Q2CensusContinuationStatus::Failed)
+    throw std::logic_error("mhgp8 q2 failed continuation cannot detach work");
+  if (state.status == Q2CensusContinuationStatus::Done) return nullptr;
+
+  // Stage all accounting before touching the donor, including attempts.
+  // Even a counter overflow or failed allocation leaves this Ready object
+  // and every observable memory/counter field exactly as it was.
+  auto transferred = state.detach_work;
+  counter_add(transferred.attempts);
+  if (state.stack.size() <= 1) {
+    state.detach_work = transferred;
+    return nullptr;
+  }
+  const auto& frame = state.stack.front();
+  if (frame.stage != Q2CensusResumeStage::Entry)
+    throw std::logic_error("mhgp8 q2 detached sibling must be an unvisited entry");
+  const auto mass = static_cast<u64>(state.owner->spatial_nodes()[frame.query].range.size());
+  const auto& census = state.engine.result;
+  if (mass == 0 || census.accepted_pairs > census.candidate_pairs ||
+      census.rejected_pairs > census.candidate_pairs - census.accepted_pairs ||
+      mass > census.candidate_pairs - census.accepted_pairs - census.rejected_pairs) {
+    throw std::logic_error("mhgp8 q2 detached population exceeds unclassified candidates");
+  }
+  counter_add(transferred.detached_frames);
+  counter_add(transferred.transferred_pairs, mass);
+  counter_add(transferred.moved_frames, static_cast<u64>(state.stack.size() - 1));
+
+  auto child_impl = std::make_unique<Impl>(state, frame, mass, Impl::ImportedFragment{});
+  auto child = std::unique_ptr<Q2CensusContinuation>(new Q2CensusContinuation(std::move(child_impl)));
+  // Both allocations and the child's stack reservation have succeeded.
+  // erase allocates nothing and moves/destructs only the statically verified
+  // nonthrowing Frame values. No user callback runs in this commit region.
+  state.stack.erase(state.stack.begin());
+  state.engine.result.candidate_pairs -= mass;
+  state.detach_work = transferred;
+  return child;
+}
+
 Q2CensusResumeSnapshot Q2CensusContinuation::snapshot() const {
   const auto& state = *implementation_;
   const ExclusiveResumeCall lock(state.busy);
   return {state.engine.result, state.engine.sibling_work, state.engine.order_work,
-          state.resume_work, state.status};
+          state.resume_work, state.status, state.detach_work};
 }
 
 Q2CensusResumePending Q2CensusContinuation::pending() const {
