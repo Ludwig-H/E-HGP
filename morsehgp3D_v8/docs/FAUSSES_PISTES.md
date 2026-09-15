@@ -3,6 +3,18 @@
 13 septembre 2026. Mémoire courte de l'audit et de la première tranche P0.
 Les sources et contre-fixtures complètes sont dans les rapports liés.
 
+## Équipe persistante q2 — 15 septembre
+
+- Empiler le dispatcher Donate et une autre file census laisserait deux
+  critères de fin indépendants. La tranche17 utilise une fermeture commune
+  pour seeds Coarse et branches census ; Donate et Pool restent distincts.
+- Attribuer un gain aux continuations lorsqu'aucune n'a été créée serait
+  trompeur. Les seuils Pool et de continuation peuvent rendre cette voie
+  inactive ; publier racines, dons et travail réel, pas seulement un temps.
+- Partager les gros appels ne traite pas les millions de petits rectangles.
+  Leur regroupement compact est un chantier séparé. Ne pas instancier une
+  pile de49 cadres par paire singleton en vue d'un GPU massif.
+
 ## Détachement intérieur q2 — 15 septembre
 
 - Réinitialiser une racine pour une branche transférée perdrait son compte

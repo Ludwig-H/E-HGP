@@ -1,5 +1,6 @@
 #include "q2_census.hpp"
 #include "q2_census_resume.hpp"
+#include "wspd_q2_cooperative.hpp"
 #include "wspd_q2_census.hpp"
 #include "wspd_q2_parallel.hpp"
 #include "q2_joint_bounds.hpp"
@@ -11,6 +12,8 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <condition_variable>
+#include <mutex>
 #include <numeric>
 #include <stdexcept>
 #include <type_traits>
@@ -780,11 +783,14 @@ Q2CensusResult run_q2_census(const Q2CensusIndex& index, const AxisQ2Plan& plan,
 
 namespace {
 
+using CensusAnchorHook = std::function<bool(std::size_t, std::size_t)>;
+
 void consume_wspd_rectangle(Q2CensusEngine& engine, WspdQ2CensusResult& result,
     std::span<const Q2SpatialNode> nodes, std::span<const std::size_t> order,
     const WspdRectangle& rectangle, Q2CensusMode census_mode,
     Q2SiblingMode sibling_mode, Q2WitnessOrder witness_order,
-    Q2AnchorMode anchor_mode, std::size_t pool_min_factor) {
+    Q2AnchorMode anchor_mode, std::size_t pool_min_factor,
+    const CensusAnchorHook* anchor_hook = nullptr) {
   if (rectangle.lane_mask != 1) {
     throw std::logic_error("mhgp8 integrated census received a non-q2 lane");
   }
@@ -800,7 +806,7 @@ void consume_wspd_rectangle(Q2CensusEngine& engine, WspdQ2CensusResult& result,
   if (mass > std::numeric_limits<u64>::max()) {
     throw std::overflow_error("mhgp8 integrated q2 pair mass exceeds u64");
   }
-  const auto consume_unfiltered = [&] {
+  const auto consume_unfiltered = [&](bool allow_hook) {
     counter_add(engine.result.candidate_pairs, static_cast<u64>(mass));
     if (anchor_mode != Q2AnchorMode::Individual) {
       counter_add(engine.joint_work.root_products);
@@ -821,6 +827,9 @@ void consume_wspd_rectangle(Q2CensusEngine& engine, WspdQ2CensusResult& result,
     for (auto rank = a.first; rank < a.last; ++rank) {
       const auto a_id = order[rank];
       if (census_mode == Q2CensusMode::SharedBlocks) {
+        // The hook owns its root_start and keeps rectangle candidate mass
+        // and descriptor accounting here. Ordinary callers never take it.
+        if (allow_hook && anchor_hook && (*anchor_hook)(rank, b_node)) continue;
         engine.root_start(0);
         if (witness_order == Q2WitnessOrder::ComplementFirst) {
           const Q2CensusEngine::OrderContext context{b_node, nodes[b_node].escape, rank};
@@ -841,10 +850,10 @@ void consume_wspd_rectangle(Q2CensusEngine& engine, WspdQ2CensusResult& result,
   };
   if (pool_min_factor != 0 && b.size() >= pool_min_factor) {
     const auto pool_started = Clock::now();
-    if (!engine.terminal_pool(a_node, b_node, result.pool_work)) consume_unfiltered();
+    if (!engine.terminal_pool(a_node, b_node, result.pool_work)) consume_unfiltered(false);
     result.pool_work.selected_total_ms += milliseconds(pool_started, Clock::now());
   } else {
-    consume_unfiltered();
+    consume_unfiltered(true);
   }
 }
 
@@ -1566,5 +1575,329 @@ Q2CensusResumeMemory Q2CensusContinuation::memory() const {
 }
 
 const Q2CensusIndex& Q2CensusContinuation::index() const noexcept { return *implementation_->owner; }
+
+namespace {
+
+void merge_cooperative_resume(Q2CooperativeWork& out, const Q2CensusResumeWork& resume,
+                              const Q2CensusDetachWork& detach) {
+#define MHGP8_COOP_RESUME(field) counter_add(out.resume_work.field, resume.field)
+  MHGP8_COOP_RESUME(advance_calls); MHGP8_COOP_RESUME(transitions);
+  MHGP8_COOP_RESUME(entry_steps); MHGP8_COOP_RESUME(witness_steps);
+  MHGP8_COOP_RESUME(admission_steps); MHGP8_COOP_RESUME(payload_steps);
+  MHGP8_COOP_RESUME(pauses); MHGP8_COOP_RESUME(pauses_after_credit);
+  MHGP8_COOP_RESUME(pauses_inside_deferred); MHGP8_COOP_RESUME(pauses_during_emission);
+#undef MHGP8_COOP_RESUME
+  out.resume_work.max_pending_tasks = std::max(out.resume_work.max_pending_tasks, resume.max_pending_tasks);
+#define MHGP8_COOP_DETACH(field) counter_add(out.detach_work.field, detach.field)
+  MHGP8_COOP_DETACH(attempts); MHGP8_COOP_DETACH(detached_frames);
+  MHGP8_COOP_DETACH(imported_frames); MHGP8_COOP_DETACH(transferred_pairs);
+  MHGP8_COOP_DETACH(moved_frames);
+#undef MHGP8_COOP_DETACH
+}
+
+void merge_cooperative_work(Q2CooperativeWork& out, const Q2CooperativeWork& value) {
+#define MHGP8_COOP_SUM(field) counter_add(out.field, value.field)
+  MHGP8_COOP_SUM(continued_anchors); MHGP8_COOP_SUM(continued_pairs);
+  MHGP8_COOP_SUM(completed_pairs); MHGP8_COOP_SUM(fragments_started);
+  MHGP8_COOP_SUM(completed_fragments); MHGP8_COOP_SUM(donations);
+  MHGP8_COOP_SUM(donations_after_seeds_exhausted);
+  MHGP8_COOP_SUM(offer_checks); MHGP8_COOP_SUM(offer_busy); MHGP8_COOP_SUM(offer_full);
+  MHGP8_COOP_SUM(offer_no_waiter); MHGP8_COOP_SUM(offer_no_sibling);
+  MHGP8_COOP_SUM(waits); MHGP8_COOP_SUM(wakes);
+#undef MHGP8_COOP_SUM
+  out.max_queue_size = std::max(out.max_queue_size, value.max_queue_size);
+  out.max_active_tasks = std::max(out.max_active_tasks, value.max_active_tasks);
+  out.max_fragment_bytes = std::max(out.max_fragment_bytes, value.max_fragment_bytes);
+  merge_cooperative_resume(out, value.resume_work, value.detach_work);
+}
+
+void merge_completed_fragment(Q2CensusEngine& engine, Q2CooperativeWork& work,
+                               const Q2CensusResumeSnapshot& snapshot) {
+  if (snapshot.status != Q2CensusContinuationStatus::Done)
+    throw std::logic_error("mhgp8 cooperative merge requires a completed census fragment");
+  counter_add(work.completed_pairs, snapshot.census.candidate_pairs);
+  counter_add(work.completed_fragments);
+  merge_cooperative_resume(work, snapshot.resume_work, snapshot.detach_work);
+  counter_add(engine.result.accepted_pairs, snapshot.census.accepted_pairs);
+  counter_add(engine.result.rejected_pairs, snapshot.census.rejected_pairs);
+  auto geometry = snapshot.census.work;
+  // The original rectangle charged its descriptor and Cartesian mass once.
+  // A root factory's descriptor is bookkeeping of its standalone API, NOT
+  // another rectangle; root_start and every actual geometric visit survive.
+  geometry.input_descriptors = 0;
+  parallel_detail::merge_work(engine.result.work, geometry);
+  parallel_detail::merge_work(engine.sibling_work, snapshot.sibling_work);
+  parallel_detail::merge_work(engine.order_work, snapshot.order_work);
+  engine.result.payload_ms += snapshot.census.payload_ms;
+}
+
+class CooperativeCensusDispatcher {
+ public:
+  struct Item {
+    std::size_t seed{absent};
+    std::unique_ptr<Q2CensusContinuation> fragment;
+    [[nodiscard]] bool present() const noexcept { return seed != absent || fragment != nullptr; }
+  };
+
+  CooperativeCensusDispatcher(std::size_t seeds, std::size_t capacity, std::size_t workers)
+      : queue_(capacity), seed_count_(seeds), worker_count_(workers) {}
+
+  Item take(Q2CooperativeWork& work) {
+    std::unique_lock lock(mutex_);
+    for (;;) {
+      if (cancelled_) return {};
+      // Drain census obligations before claiming another front seed. The
+      // owning seed itself remains active until its run_job call returns.
+      if (size_ != 0) {
+        counter_add(work.fragments_started);
+        ++active_;
+        work.max_active_tasks = std::max<u64>(work.max_active_tasks, active_);
+        return {absent, std::move(queue_[--size_])};
+      }
+      if (next_seed_ != seed_count_) {
+        const auto seed = next_seed_++;
+        ++active_;
+        work.max_active_tasks = std::max<u64>(work.max_active_tasks, active_);
+        return {seed, {}};
+      }
+      if (active_ == 0) return {};
+      counter_add(work.waits);
+      changed_.wait(lock, [&] {
+        return cancelled_ || size_ != 0 || next_seed_ != seed_count_ || active_ == 0;
+      });
+      counter_add(work.wakes);
+    }
+  }
+
+  void offer(Q2CensusContinuation& donor, Q2CooperativeWork& work) {
+    counter_add(work.offer_checks);
+    std::unique_lock lock(mutex_, std::try_to_lock);
+    if (!lock.owns_lock()) { counter_add(work.offer_busy); return; }
+    if (cancelled_) return;  // No successful result is produced after cancellation.
+    if (size_ == queue_.size()) { counter_add(work.offer_full); return; }
+    if (active_ == worker_count_) { counter_add(work.offer_no_waiter); return; }
+    // Demand is worker_count-active, including not-yet-started slots. The
+    // free queue slot stays locked through the child's strong-guarantee
+    // construction; producer never waits for either lock or queue space.
+    auto child = donor.detach_pending();
+    if (!child) { counter_add(work.offer_no_sibling); return; }
+    queue_[size_++] = std::move(child);  // Owned before any fallible accounting.
+    changed_.notify_one();
+    counter_add(work.donations);
+    if (next_seed_ == seed_count_) counter_add(work.donations_after_seeds_exhausted);
+    work.max_queue_size = std::max<u64>(work.max_queue_size, size_);
+  }
+
+  void release() {
+    std::lock_guard lock(mutex_);
+    --active_;
+    if (active_ == 0) changed_.notify_all();
+  }
+
+  void cancel() noexcept {
+    std::lock_guard lock(mutex_);
+    cancelled_ = true;
+    changed_.notify_all();
+  }
+
+  [[nodiscard]] u64 storage_bytes() const {
+    return static_cast<u64>(resume_bytes(queue_.capacity(), sizeof(queue_[0])));
+  }
+
+  [[nodiscard]] bool completed() {
+    std::lock_guard lock(mutex_);
+    return !cancelled_ && next_seed_ == seed_count_ && size_ == 0 && active_ == 0;
+  }
+
+ private:
+  std::vector<std::unique_ptr<Q2CensusContinuation>> queue_;
+  const std::size_t seed_count_, worker_count_;
+  std::size_t next_seed_{}, size_{}, active_{};
+  bool cancelled_{};
+  std::mutex mutex_;
+  std::condition_variable changed_;
+};
+
+}  // namespace
+
+WspdQ2CooperativeResult run_wspd_q2_census_cooperative(
+    Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s,
+    WspdFrontMode front_mode, std::span<const Q2CensusConsumer> consumers,
+    WspdQ2CooperativeOptions options, Q2SiblingMode sibling_mode,
+    Q2WitnessOrder witness_order, std::size_t pool_min_factor) {
+  const auto started = Clock::now();
+  if (!index || consumers.empty() || options.jobs_per_worker == 0 ||
+      options.queue_capacity == 0 || options.quantum == 0 || options.min_b_size == 0)
+    throw std::invalid_argument("mhgp8 cooperative q2 requires index, consumers and positive options");
+  if (consumers.size() > std::numeric_limits<std::size_t>::max() / options.jobs_per_worker)
+    throw std::overflow_error("mhgp8 cooperative q2 target job count overflow");
+  static_cast<void>(resume_bytes(options.queue_capacity, sizeof(std::unique_ptr<Q2CensusContinuation>)));
+  for (const auto& consumer : consumers)
+    validate_integrated_modes(Q2CensusMode::SharedBlocks, consumer, sibling_mode,
+                              witness_order, Q2AnchorMode::Individual);
+
+  WspdQ2CooperativeResult result;
+  auto& pipeline = result.pipeline;
+  pipeline.requested_workers = static_cast<u64>(consumers.size());
+  pipeline.target_jobs = static_cast<u64>(consumers.size() * options.jobs_per_worker);
+  {
+    const std::vector<Q2CensusConsumer> callbacks(consumers.begin(), consumers.end());
+    const auto partition_started = Clock::now();
+    const auto plan = make_wspd_front_jobs(index, kmax, separation_s, front_mode,
+                                          static_cast<std::size_t>(pipeline.target_jobs), 1);
+    pipeline.partition_ms = milliseconds(partition_started, Clock::now());
+    pipeline.front = plan->prefix_result();
+    pipeline.prefix_product_visits = pipeline.front.work.product_visits;
+    pipeline.jobs = static_cast<u64>(plan->job_count());
+    pipeline.terminal_jobs = static_cast<u64>(plan->terminal_job_count());
+    pipeline.job_storage_bytes = static_cast<u64>(plan->retained_bytes());
+    const auto worker_count = plan->job_count() == 0 ? std::size_t{0} : callbacks.size();
+    pipeline.started_workers = static_cast<u64>(worker_count);
+    const auto dispatcher = worker_count == 0 ? nullptr
+        : std::make_unique<CooperativeCensusDispatcher>(plan->job_count(), options.queue_capacity, worker_count);
+    if (dispatcher) pipeline.queue_storage_bytes = dispatcher->storage_bytes();
+    struct alignas(64) WorkerState {
+      WspdQ2CensusResult result;
+      Q2ParallelWorkerStats stats;
+      Q2CooperativeWork cooperative;
+    };
+    std::vector<WorkerState> states(worker_count);
+    const auto nodes = index->spatial_nodes();
+    const auto order = index->spatial_order();
+
+    parallel_detail::run_joined_workers(worker_count,
+        [&](std::size_t worker, const std::atomic<bool>& cancel) {
+          const auto worker_started = Clock::now();
+          auto& state = states[worker];
+          auto& work = state.cooperative;
+          {
+            Q2CensusEngine engine(*index, kmax, callbacks[worker]);
+            const auto run_fragment = [&](std::unique_ptr<Q2CensusContinuation> fragment) {
+              const auto record_memory = [&] {
+                work.max_fragment_bytes = std::max<u64>(work.max_fragment_bytes, fragment->memory().retained_bytes);
+              };
+              record_memory();
+              while (!cancel.load(std::memory_order_relaxed)) {
+                const auto done = fragment->advance(options.quantum, callbacks[worker]);
+                record_memory();
+                if (done) {
+                  merge_completed_fragment(engine, work, fragment->snapshot());
+                  return;
+                }
+                if (worker_count > 1 && !cancel.load(std::memory_order_relaxed))
+                  dispatcher->offer(*fragment, work);
+              }
+              // A sibling failure cancels this invocation; do not claim or
+              // merge a partially completed fragment, and do not mask the
+              // original exception with an artificial cancellation error.
+            };
+            const CensusAnchorHook anchor_hook = [&](std::size_t rank, std::size_t b_node) {
+              if (cancel.load(std::memory_order_relaxed)) return true;
+              const auto b_size = nodes[b_node].range.size();
+              if (b_size < options.min_b_size) return false;
+              auto root = make_q2_census_continuation(index, rank, b_node, kmax, sibling_mode, witness_order);
+              counter_add(work.continued_anchors);
+              counter_add(work.continued_pairs, static_cast<u64>(b_size));
+              counter_add(work.fragments_started);
+              run_fragment(std::move(root));
+              return true;
+            };
+            const WspdRectangleConsumer receiver = [&](const WspdRectangle& rectangle) {
+              if (cancel.load(std::memory_order_relaxed)) return;
+              consume_wspd_rectangle(engine, state.result, nodes, order, rectangle,
+                  Q2CensusMode::SharedBlocks, sibling_mode, witness_order,
+                  Q2AnchorMode::Individual, pool_min_factor, &anchor_hook);
+            };
+            while (!cancel.load(std::memory_order_relaxed)) {
+              auto item = dispatcher->take(work);
+              if (!item.present()) break;
+              try {
+                if (item.fragment) {
+                  run_fragment(std::move(item.fragment));
+                } else {
+                  const auto part = plan->run_job(item.seed, receiver);
+                  parallel_detail::merge_work(state.result.front.work, part.work);
+                  counter_add(state.stats.jobs);
+                }
+              } catch (...) {
+                dispatcher->cancel();
+                dispatcher->release();
+                throw;
+              }
+              dispatcher->release();
+            }
+            state.result.census = engine.result;
+            state.result.sibling_work = engine.sibling_work;
+            state.result.order_work = engine.order_work;
+            state.result.joint_work = engine.joint_work;
+          }  // Private engine and payload buffers destroyed before timing.
+          state.stats.front_products = state.result.front.work.product_visits;
+          state.stats.input_rectangles = state.result.input_rectangles;
+          state.stats.count_node_visits = state.result.census.work.count_node_visits;
+          state.stats.supports = state.result.census.accepted_pairs;
+          state.stats.pool_peak_bytes = state.result.pool_work.plan_peak_bytes;
+          state.stats.payload_ms = state.result.census.payload_ms;
+          state.stats.elapsed_ms = milliseconds(worker_started, Clock::now());
+        }, parallel_detail::ThreadLauncher{}, [&]() noexcept {
+          if (dispatcher) dispatcher->cancel();
+        });
+    if (dispatcher && !dispatcher->completed())
+      throw std::logic_error("mhgp8 cooperative queue did not complete its obligations");
+
+    pipeline.workers.reserve(states.size());
+    result.workers.reserve(states.size());
+    for (const auto& state : states) {
+      parallel_detail::merge_work(pipeline.front.work, state.result.front.work);
+      parallel_detail::merge_work(pipeline.census_work, state.result.census.work);
+      parallel_detail::merge_work(pipeline.sibling_work, state.result.sibling_work);
+      parallel_detail::merge_work(pipeline.order_work, state.result.order_work);
+      parallel_detail::merge_work(pipeline.joint_work, state.result.joint_work);
+      parallel_detail::merge_work(pipeline.pool_work, state.result.pool_work);
+      counter_add(pipeline.input_rectangles, state.result.input_rectangles);
+      counter_add(pipeline.anchor_queries, state.result.anchor_queries);
+      counter_add(pipeline.candidate_pairs, state.result.census.candidate_pairs);
+      counter_add(pipeline.accepted_pairs, state.result.census.accepted_pairs);
+      counter_add(pipeline.rejected_pairs, state.result.census.rejected_pairs);
+      counter_add(pipeline.completed_jobs, state.stats.jobs);
+      counter_add(pipeline.pool_peak_bytes_sum, state.stats.pool_peak_bytes);
+      pipeline.worker_ms_sum += state.stats.elapsed_ms;
+      pipeline.payload_ms_sum += state.stats.payload_ms;
+      pipeline.workers.push_back(state.stats);
+      merge_cooperative_work(result.work, state.cooperative);
+      result.workers.push_back({state.cooperative});
+    }
+  }  // All queued objects, seeds, callback copies and private states destroyed.
+
+  const auto front_mass = pipeline.front.work.residual_pair_mass[0];
+  const auto& pool = pipeline.pool_work;
+  if (pipeline.completed_jobs != pipeline.jobs || pipeline.front.active_lane_mask != 1 ||
+      pipeline.front.work.rejected_pair_mass[0] > pipeline.front.total_unordered_pairs ||
+      front_mass != pipeline.front.total_unordered_pairs - pipeline.front.work.rejected_pair_mass[0] ||
+      pool.selected_pairs > front_mass || pool.filtered_pairs > pool.selected_pairs ||
+      pool.residual_pairs != pool.selected_pairs - pool.filtered_pairs ||
+      pool.passthrough_pairs > pool.residual_pairs ||
+      pool.pair_roots != pool.residual_pairs - pool.passthrough_pairs ||
+      pool.pair_roots > pipeline.candidate_pairs ||
+      pipeline.candidate_pairs != front_mass - pool.filtered_pairs ||
+      pipeline.input_rectangles != pipeline.front.work.emitted_rectangles ||
+      pipeline.census_work.input_descriptors != pipeline.input_rectangles ||
+      pipeline.accepted_pairs > pipeline.candidate_pairs ||
+      pipeline.rejected_pairs != pipeline.candidate_pairs - pipeline.accepted_pairs ||
+      pipeline.census_work.payload_supports != pipeline.accepted_pairs)
+    throw std::logic_error("mhgp8 cooperative q2 lost its front/census partition");
+  const auto& work = result.work;
+  const auto& detach = work.detach_work;
+  if (work.continued_pairs != work.completed_pairs ||
+      work.continued_anchors > pipeline.anchor_queries ||
+      work.continued_pairs > pipeline.candidate_pairs ||
+      work.fragments_started != work.completed_fragments ||
+      work.completed_fragments < work.continued_anchors ||
+      work.completed_fragments - work.continued_anchors != work.donations ||
+      work.donations != detach.detached_frames || work.donations != detach.imported_frames ||
+      work.waits != work.wakes)
+    throw std::logic_error("mhgp8 cooperative q2 lost its continuation lineage");
+  pipeline.total_ms = milliseconds(started, Clock::now());
+  return result;
+}
 
 }  // namespace mhgp8

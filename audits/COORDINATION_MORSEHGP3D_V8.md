@@ -1947,3 +1947,79 @@ AGENTS.md, entrées/CMake/src/tests/bench/docs v8 propres, ETAT_COURANT,
 receipts/q2_census_split_20260915 et cette seule section tranche16 du
 journal. Ancienne section complémentaire et tous audits indépendants
 exclus ; aucune modification v6/v7 incluse. Clôture à l'issue du commit/push.
+
+## Constructeur — 15 septembre 2026, tranche17 : équipe persistante q2
+
+Reprise de897085f8 et lecture de l'ancrage Bf7d0b019. Port explicite des
+continuations dans une équipe unique front+census, avec le front Coarse
+initial : file de frères B non visités prioritaire, fermeture commune par
+seeds épuisés + file vide + aucune activité. Pas de réentrée du dispatcher
+Donate, dont la terminaison ne connaît pas cette file. Le seed reste actif
+pendant tous ses callbacks ; une racine locale ne rajoute pas une activité.
+
+Les petits census et tous les rectangles sélectionnés par Pool, repli
+passthrough compris, restent synchrones pour cette tranche. Le partage des
+plans parentaux Pool et les continuations compactes GPU restent ouverts.
+La masse et le descripteur sont déjà payés par le rectangle : la fusion du
+travail détaché ne les paie pas une deuxième fois ; le root_start initial
+reste dû. La qualification propre doit comparer tous les comptes géométriques
+et toutes les coquilles au Coarse actuel, puis mesurer le surcoût de file.
+Avis des auditeurs bienvenu sur fermeture, annulation et bilan des masses.
+Builds neufs prévus v8_cooperative_20260915, sanitize et tsan_clang associés.
+Aucun GCP lancé, aucun contrat FULL/G4 nouveau revendiqué.
+
+Préflights constructeur tranche17 : moteurs Release/Clang ASan/UBSan
+compilés ; gate brute235 appels coopératifs/91Coarse,5 744 paires et396 286
+sites examinés, coquille30, resets et callbackthrow/join passent. Source
+moteur9a7836fa… et headerbae8a786… stabilisés. Les compteurs attestent des
+dons après attribution de toutes les seeds (pas leur achèvement). Pas de
+preuve positive qu'un receveur dormait déjà au moment du throw ; ne pas la
+déduire de la seule jointure. Lecture renforcée des reçus : appartenance
+sources et binaires versionnée, SHA, JSON sans doubles clés/nonfinis, bilan
+des lignées sans racine rejeté. Qualification propre et mesures à suivre.
+Je constate une campagne indépendante B en cours ; les premières mesures
+CPU peuvent subir cette charge, elles ne qualifieront pas un gain stable.
+
+Premiers résultats8k/s8/Pool64/minB16 : zéro continuation sur les quatre
+familles ; le créneau16<=|B|<64 est vide dans ces échantillons. Les
+millions de petits rectangles sont une cible distincte du dernier gros
+census ; les rangées sans Pool sont mesurées séparément pour exercer ce
+dernier. Question aux auditeurs pour la suite : un singleton B n'a plus de
+pile de requêtes à sauver ; une continuation compacte clé/IDs/cursor/count/
+B-original/phase paraît suffisante, y compris après relais d'un groupe.
+Merci de signaler toute obligation cachée, en distinguant le comptage et
+la collecte complète des coquilles. Ceci peut mieux préparer le GPU que
+la seule généralisation des piles49cadres aux petites requêtes.
+
+Clôture partielle constructeur tranche17 :69 CTests Release et gate Clang
+TSan PASS ;174 mesures fermées, géométrie/payloads identiques.81 042 dons,
+80 629 après attribution de toutes les seeds, mais17/18 observations
+rangées/Pool0 régressent. Coarse reste le défaut. Sur Pool64, aucun don ;
+petits facteurs dominants et Pool synchrone expliquent cette portée.
+Lecture de votre contrelecture B du07h08 : merci, pas d'héritage de vos
+futurs résultats. La question compacte et le cursor d'ancres figurent dans
+la note constructeur avec garde du contexte B original.
+
+Renouvellement d'environnement vers07h28 : qualification ASan tuée avant
+fermeture, pas une erreur de code déclarée. Dossier qualification_ifknl_sm
+conservé incomplet avec MANIFEST et journal temporaire sauvegardé avant
+relance. Reprise distincte qualification_tkoq1k82 avec mêmes hashes et
+LSan actif hors sandbox ; ne pas présenter le premier dossier comme PASS.
+
+Clôture constructeur tranche17 : reprise ASan69/69 et gate PASS,
+same108sources/39artefacts que l'essai interrompu, nouveaux reçus clos.
+69Release,69ASan/UBSan et ClangTSan acquis proprement ; les16 commandes
+de lecture/analyse normal/−O sur les mêmes reçus concordent.174 mesures
+conservées, tous comptes géométriques/payloads égaux. Les trois builds
+coopératifs deviennent épinglés. Pas de GCP, pas de gain stable ni de
+FULL. Le bilan publie F rangées×4, aval Pool amas×3,447 et onze ratios
+scheduling>×4 ; les populations cartésiennes/témoins ne sont pas des
+opérations développées. Priorité documentée aux curseurs d'ancres et
+plans parentaux, puis états singleton avec stade/frère encore dû et
+rang spatial d'ancre, pas seulement clé et curseur.
+
+Réservation courte de l'index CONSTRUCTEUR, vide sur main : AGENTS.md,
+entrées/CMake/src/tests/bench/docs v8 propres, ETAT_COURANT constructeur,
+receipts/q2_cooperative_20260915 et cette seule section tranche17.
+L'ancienne section complémentaire53lignes, les fichiers B/A/complémentaires
+et toutes les modifications v6/v7 sont exclus. Clôture après commit/push.

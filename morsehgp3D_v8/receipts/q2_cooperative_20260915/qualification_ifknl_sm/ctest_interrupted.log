@@ -1,0 +1,865 @@
+Start testing: Sep 15 07:16 UTC
+----------------------------------------------------------
+1/69 Testing: mhgp8_q2_node_pool_gate
+1/69 Test: mhgp8_q2_node_pool_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_q2_node_pool_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q2_node_pool_gate" start time: Sep 15 07:16 UTC
+Output:
+----------------------------------------------------------
+mhgp8_q2_node_pool_gate passed checks=55984 plans=2059 pairs=8190 oracle_corners=81160 rejected=3521 candidates=4669 empty_plans=0 saturated=2045 jobs=6177 jobs_pairs=4669 factor_sites=8166 fixed_rescans=236 growing_rescans=1400 model_mutants=3 invalid_inputs=7
+<end of output>
+Test time =   0.18 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q2_node_pool_gate" end time: Sep 15 07:16 UTC
+"mhgp8_q2_node_pool_gate" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/69 Testing: mhgp8_q2_terminal_pool_gate
+2/69 Test: mhgp8_q2_terminal_pool_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_q2_terminal_pool_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q2_terminal_pool_gate" start time: Sep 15 07:16 UTC
+Output:
+----------------------------------------------------------
+mhgp8_q2_terminal_pool_gate passed checks=1932787 clouds=22 runs=3088 oracle_pairs=5847 oracle_sites=352725 supports=183584 extra_shells=21796 max_shell=30 selected_rectangles=71489 filtered_pairs=71390 residual_pairs=126237 factor_sites=200732 bands=15441 selected64=56 default_comparisons=88 passthrough_rectangles=62253 unchanged_census=1856 reentrant_calls=1 joint_runs=354 pairwise_runs=4 invalid_inputs=6 callback_failures=3 model_mutants=5
+<end of output>
+Test time =  10.55 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q2_terminal_pool_gate" end time: Sep 15 07:16 UTC
+"mhgp8_q2_terminal_pool_gate" time elapsed: 00:00:10
+----------------------------------------------------------
+
+3/69 Testing: mhgp8_wspd_front_jobs_gate
+3/69 Test: mhgp8_wspd_front_jobs_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_wspd_front_jobs_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_wspd_front_jobs_gate" start time: Sep 15 07:16 UTC
+Output:
+----------------------------------------------------------
+mhgp8_wspd_front_jobs_gate passed checks=533873 clouds=11 oracle_point_tests=16209 mono_runs=1321 plans=9241 ordered_replays=27723 job_runs=239199 zero_job_plans=720 all_terminal_plans=3241 terminal_jobs=142053 pending_jobs=97146 sparse_masks=792 filtered_cuts=36 mixed_lane_cuts=9 rejected_lane_pairs=8860 residual_lane_pairs=67754 partial_lane_rectangles=717 nonsingleton_rectangles=1116 reentrant_runs=2 callback_failures=2 invalid_inputs=16 model_mutants=45
+<end of output>
+Test time =  13.94 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_wspd_front_jobs_gate" end time: Sep 15 07:16 UTC
+"mhgp8_wspd_front_jobs_gate" time elapsed: 00:00:13
+----------------------------------------------------------
+
+4/69 Testing: mhgp8_wspd_q2_parallel_gate
+4/69 Test: mhgp8_wspd_q2_parallel_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_wspd_q2_parallel_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_wspd_q2_parallel_gate" start time: Sep 15 07:16 UTC
+Output:
+----------------------------------------------------------
+{"schema":"mhgp8_wspd_q2_parallel_gate_v1","status":"passed","scope":"bounded_cpu_q2_jobs_not_full","public_status":"not_claimed","checks":184537,"clouds":8,"oracle_pairs":9080,"oracle_sites":1106458,"mono_runs":152,"parallel_runs":438,"supports":45161,"max_shell":30,"empty_job_runs":36,"excess_worker_runs":100,"multi_worker_runs":232,"pool_selected":67,"pool_filtered":50415,"pool_passthrough":38,"selected64":12,"filtered64":50364,"joint_runs":24,"pairwise_runs":12,"sibling_tests":1062,"structural_steps":229661,"callback_failures":1,"reentrant_runs":1,"ownership_resets":1,"joined_checks":5,"launch_failures":1,"invalid_inputs":24,"mutants":6}
+<end of output>
+Test time =   2.50 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_wspd_q2_parallel_gate" end time: Sep 15 07:17 UTC
+"mhgp8_wspd_q2_parallel_gate" time elapsed: 00:00:02
+----------------------------------------------------------
+
+5/69 Testing: mhgp8_wspd_front_dispatch_gate
+5/69 Test: mhgp8_wspd_front_dispatch_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_wspd_front_dispatch_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_wspd_front_dispatch_gate" start time: Sep 15 07:17 UTC
+Output:
+----------------------------------------------------------
+{"schema":"mhgp8_wspd_front_dispatch_gate_v1","status":"passed","public_status":"not_claimed","checks":31280,"oracle_sites":15459,"reference_runs":152,"dispatch_runs":150,"donations":257,"full_refusals":701,"reduced_rectangles":165,"masked_cases":5,"zero_seed_cases":16,"ownership_cases":1,"waits":216,"cross_worker_transfers":1,"callback_failures":1,"launch_failures":1,"invalid_inputs":4}
+<end of output>
+Test time =   0.43 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_wspd_front_dispatch_gate" end time: Sep 15 07:17 UTC
+"mhgp8_wspd_front_dispatch_gate" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/69 Testing: mhgp8_wspd_q2_dynamic_gate
+6/69 Test: mhgp8_wspd_q2_dynamic_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_wspd_q2_dynamic_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_wspd_q2_dynamic_gate" start time: Sep 15 07:17 UTC
+Output:
+----------------------------------------------------------
+{"schema":"mhgp8_wspd_q2_dynamic_gate_v1","status":"passed","public_status":"not_claimed","checks":3270,"clouds":8,"oracle_pairs":9073,"oracle_sites":1106432,"mono_runs":68,"coarse_runs":74,"donate_runs":142,"default_runs":8,"supports":24337,"max_shell":30,"donations":813,"full_refusals":580,"empty_runs":27,"selected64":11,"filtered64":46260,"passthrough":15,"joint_runs":45,"pairwise_runs":21,"callback_failures":1,"reentrant_runs":1,"index_resets":1,"invalid_inputs":8,"mutants":4}
+<end of output>
+Test time =   1.42 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_wspd_q2_dynamic_gate" end time: Sep 15 07:17 UTC
+"mhgp8_wspd_q2_dynamic_gate" time elapsed: 00:00:01
+----------------------------------------------------------
+
+7/69 Testing: mhgp8_q2_census_resume_gate
+7/69 Test: mhgp8_q2_census_resume_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_q2_census_resume_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q2_census_resume_gate" start time: Sep 15 07:17 UTC
+Output:
+----------------------------------------------------------
+{"schema":"mhgp8_q2_census_resume_gate_v1","status":"pass","scope":"shared_anchor_continuations_not_full","checks":254668,"fixtures":12,"roots":12,"oracle_pairs":590,"oracle_sites":37188,"references":195,"resumptions":768,"advances":24644,"supports":1470,"max_shell":30,"credit_pauses":11049,"split_credit_pauses":2184,"phase_pauses":76,"emission_pauses":452,"deferred_child_pauses":1694,"partial_range_pauses":0,"two_engines":1,"thread_transfers":1,"owner_resets":1,"callback_failures":1,"reentrant_calls":2,"overlap_rejections":1,"invalid_inputs":26,"mutants":3}
+<end of output>
+Test time =   0.19 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q2_census_resume_gate" end time: Sep 15 07:17 UTC
+"mhgp8_q2_census_resume_gate" time elapsed: 00:00:00
+----------------------------------------------------------
+
+8/69 Testing: mhgp8_q2_census_detach_gate
+8/69 Test: mhgp8_q2_census_detach_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_q2_census_detach_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q2_census_detach_gate" start time: Sep 15 07:17 UTC
+Output:
+----------------------------------------------------------
+{"schema":"mhgp8_q2_census_detach_gate_v1","status":"pass","scope":"owned_shared_anchor_detach_not_full","checks":68508,"fixtures":6,"runs":302,"oracle_pairs":1458,"oracle_sites":85416,"supports":732,"max_shell":30,"detaches":1679,"imported_credit":149,"imported_phase":150,"emit_donors":139,"recursive_detaches":1148,"no_child":2245,"destroyed_parents":861,"owner_resets":1,"parallel_pairs":1,"distinct_threads":2,"allocation_failures":9,"allocation_successes":3,"injected_allocations":9,"callback_failures":1,"reentrant_rejections":8,"invalid_inputs":12,"mutants":3}
+<end of output>
+Test time =   0.32 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q2_census_detach_gate" end time: Sep 15 07:17 UTC
+"mhgp8_q2_census_detach_gate" time elapsed: 00:00:00
+----------------------------------------------------------
+
+9/69 Testing: mhgp8_q2_census_parallel_gate
+9/69 Test: mhgp8_q2_census_parallel_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_q2_census_parallel_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q2_census_parallel_gate" start time: Sep 15 07:17 UTC
+Output:
+----------------------------------------------------------
+{"status":"passed","scope":"small_q2_anchor_parallel_not_full","checks":82100,"fixtures":8,"references":128,"resumptions":128,"parallel_calls":2304,"supports":3456,"donations":3902,"multi_slot_outputs":292,"multi_active_runs":524,"max_shell":30,"callback_failures":4,"invalid_inputs":14,"partial_launch_failure_injected":false}
+<end of output>
+Test time =   2.10 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q2_census_parallel_gate" end time: Sep 15 07:17 UTC
+"mhgp8_q2_census_parallel_gate" time elapsed: 00:00:02
+----------------------------------------------------------
+
+10/69 Testing: mhgp8_wspd_q2_cooperative_gate
+10/69 Test: mhgp8_wspd_q2_cooperative_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_wspd_q2_cooperative_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_wspd_q2_cooperative_gate" start time: Sep 15 07:17 UTC
+Output:
+----------------------------------------------------------
+{"schema":"mhgp8_wspd_q2_cooperative_gate_v1","status":"passed","public_status":"not_claimed","checks":54983,"clouds":8,"oracle_pairs":5744,"oracle_sites":396286,"coarse_runs":91,"cooperative_runs":235,"default_runs":8,"supports":50438,"max_shell":30,"continued_anchors":35147,"donations":1628,"donations_after_seeds_claimed":1620,"credit_pauses":277644,"phase_pauses":60652,"empty_runs":20,"small_only_runs":96,"pool_blocks_continuations":48,"selected64":9,"filtered64":4980,"passthrough":1278,"multiple_callback_threads":4,"callback_threads_joined":3,"callback_failures":1,"reentrant_runs":1,"index_resets":1,"invalid_inputs":14,"mutants":5}
+<end of output>
+Test time =   4.37 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_wspd_q2_cooperative_gate" end time: Sep 15 07:17 UTC
+"mhgp8_wspd_q2_cooperative_gate" time elapsed: 00:00:04
+----------------------------------------------------------
+
+11/69 Testing: mhgp8_q2_joint_gate
+11/69 Test: mhgp8_q2_joint_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_q2_joint_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q2_joint_gate" start time: Sep 15 07:17 UTC
+Output:
+----------------------------------------------------------
+mhgp8_q2_joint_gate passed checks=1026250 clouds=18 oracle_pairs=725 oracle_sites=10372 runs=5336 supports=124698 shell_sites=285376 root_products=108008 joint_tasks=111740 splits_a=1674 splits_b=192 joint_tests=3436 joint_credits=90 joint_rejected_pairs=84 joint_accepted_pairs=0 handoffs=109860 handoffs_after_credit=152 handoff_pair_mass=116836 structural_splits=840 phase_switches=0 shared_anchor_runs=1732 default_comparisons=144 invalid_inputs=4 callback_failures=4 model_mutants=5
+<end of output>
+Test time =   3.84 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q2_joint_gate" end time: Sep 15 07:17 UTC
+"mhgp8_q2_joint_gate" time elapsed: 00:00:03
+----------------------------------------------------------
+
+12/69 Testing: mhgp8_q2_joint_bounds_gate
+12/69 Test: mhgp8_q2_joint_bounds_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_q2_joint_bounds_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q2_joint_bounds_gate" start time: Sep 15 07:17 UTC
+Output:
+----------------------------------------------------------
+mhgp8_q2_joint_bounds_gate passed checks=12058 cases=3190 oracle_values=211108 dense_values=120366 interior=45 exterior=348 shell=229 mixed=2568 swaps=3190 singleton_reductions=2413 symmetries=48 model_mutants=9 invalid_inputs=9 copies=3 prepared_bytes=96
+<end of output>
+Test time =   1.47 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q2_joint_bounds_gate" end time: Sep 15 07:17 UTC
+"mhgp8_q2_joint_bounds_gate" time elapsed: 00:00:01
+----------------------------------------------------------
+
+13/69 Testing: mhgp8_q2_witness_order_gate
+13/69 Test: mhgp8_q2_witness_order_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_q2_witness_order_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q2_witness_order_gate" start time: Sep 15 07:17 UTC
+Output:
+----------------------------------------------------------
+mhgp8_q2_witness_order_gate passed checks=436117 clouds=16 oracle_pairs=3612 oracle_sites=235572 runs=1798 supports=48922 shell_sites=138352 structural_splits=186274 deferred_skips=22258 anchor_skips=29722 phase_switches=22078 default_comparisons=256 transformed_clouds=8 invalid_inputs=3 callback_failures=2 model_mutants=5 fixture_global_splits=1638 fixture_complement_splits=1384 fixture_universal_witnesses=12
+<end of output>
+Test time =   2.57 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q2_witness_order_gate" end time: Sep 15 07:17 UTC
+"mhgp8_q2_witness_order_gate" time elapsed: 00:00:02
+----------------------------------------------------------
+
+14/69 Testing: mhgp8_q2_sibling_gate
+14/69 Test: mhgp8_q2_sibling_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_q2_sibling_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q2_sibling_gate" start time: Sep 15 07:17 UTC
+Output:
+----------------------------------------------------------
+mhgp8_q2_sibling_gate passed checks=485775 clouds=24 oracle_pairs=7442 oracle_sites=429028 runs=1449 supports=64725 proposals=23924 cardinality_skips=17088 bound_tests=6836 rejected_tasks=3417 rejected_pairs=7466 rejected_after_credit=10 transformed_clouds=16 permutations=16 default_comparisons=192 invalid_inputs=3 callback_failures=2 model_mutants=5 fragmentation_bound=2633 fragmentation_disabled_tasks=2261 fragmentation_enabled_tasks=1967
+<end of output>
+Test time =   2.85 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q2_sibling_gate" end time: Sep 15 07:17 UTC
+"mhgp8_q2_sibling_gate" time elapsed: 00:00:02
+----------------------------------------------------------
+
+15/69 Testing: mhgp8_wspd_q2_census_gate
+15/69 Test: mhgp8_wspd_q2_census_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_wspd_q2_census_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_wspd_q2_census_gate" start time: Sep 15 07:17 UTC
+Output:
+----------------------------------------------------------
+mhgp8_wspd_q2_census_gate passed checks=467858 clouds=26 oracle_pairs=1749 oracle_sites=28869 front_reference_runs=631 integrated_runs=1255 supports=46762 interior_sites=72204 shell_sites=125060 front_rejected_pairs=12628 census_rejected_pairs=22562 empty_runs=96 permutations=13 nonidentity_orders=20 query_splits=3178 split_after_credit=60 uniform_credit=1236 uniform_reject=512 root_savings=3434 invalid_inputs=11 callback_exceptions=4 model_mutants=8
+<end of output>
+Test time =   2.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_wspd_q2_census_gate" end time: Sep 15 07:17 UTC
+"mhgp8_wspd_q2_census_gate" time elapsed: 00:00:02
+----------------------------------------------------------
+
+16/69 Testing: mhgp8_wspd_front_gate
+16/69 Test: mhgp8_wspd_front_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_wspd_front_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_wspd_front_gate" start time: Sep 15 07:17 UTC
+Output:
+----------------------------------------------------------
+mhgp8_wspd_front_gate passed checks=498148 clouds=30 spatial_nodes=1476 nonidentity_orders=52 oracle_point_tests=235134 front_runs=727 rectangles=65585 nonsingleton_rectangles=1214 partial_lane_rectangles=3917 absent_lane_pairs=20515 residual_lane_pairs=172634 q2_support_checks=47904 permutations=15 invalid_inputs=9 model_mutants=7 callback_exceptions=1 witness_searches=58330 witness_descent_steps=280556 proposed_sites=295418
+<end of output>
+Test time =   4.87 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_wspd_front_gate" end time: Sep 15 07:17 UTC
+"mhgp8_wspd_front_gate" time elapsed: 00:00:04
+----------------------------------------------------------
+
+17/69 Testing: mhgp8_cloud_owner_gate
+17/69 Test: mhgp8_cloud_owner_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_cloud_owner_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_cloud_owner_gate" start time: Sep 15 07:17 UTC
+Output:
+----------------------------------------------------------
+mhgp8_cloud_owner_gate passed checks=7780 clouds=19 range_queries=2404 multi_node_queries=2042 max_range_visits=8 max_range_steps=6 oracle_sites=299 census_runs=24 supports=38 invalid_inputs=89 model_mutants=17 lifetime_checks=2
+<end of output>
+Test time =   0.05 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_cloud_owner_gate" end time: Sep 15 07:17 UTC
+"mhgp8_cloud_owner_gate" time elapsed: 00:00:00
+----------------------------------------------------------
+
+18/69 Testing: mhgp8_p0_gate
+18/69 Test: mhgp8_p0_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_p0_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_p0_gate" start time: Sep 15 07:17 UTC
+Output:
+----------------------------------------------------------
+mhgp8_p0_gate passed checks=148587 plans=390 rejections=32 strict_mutants=3 killed_pairs=40763 retained_pairs=9592 credited_blocks=605 noncredit_blocks=1628 leaf_pairs=2750 saturated_tasks=220
+<end of output>
+Test time =  24.15 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_p0_gate" end time: Sep 15 07:17 UTC
+"mhgp8_p0_gate" time elapsed: 00:00:24
+----------------------------------------------------------
+
+19/69 Testing: mhgp8_tube_gate
+19/69 Test: mhgp8_tube_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_tube_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_tube_gate" start time: Sep 15 07:17 UTC
+Output:
+----------------------------------------------------------
+mhgp8_tube_gate passed checks=108730 small_plans=295 permutations=135 geometric_rejections=28995 retained_pairs=8073 missed_credits=10 mutants=5 fallback_cases=3 large_rails_residual=2916
+<end of output>
+Test time =  12.44 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_tube_gate" end time: Sep 15 07:18 UTC
+"mhgp8_tube_gate" time elapsed: 00:00:12
+----------------------------------------------------------
+
+20/69 Testing: mhgp8_batch_gate
+20/69 Test: mhgp8_batch_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_batch_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_batch_gate" start time: Sep 15 07:18 UTC
+Output:
+----------------------------------------------------------
+mhgp8_batch_gate passed checks=10872 batches=195 lane_comparisons=585 shared_preparations=27 saturated_batches=81 fallback_batches=5 rejections=3
+<end of output>
+Test time =   0.36 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_batch_gate" end time: Sep 15 07:18 UTC
+"mhgp8_batch_gate" time elapsed: 00:00:00
+----------------------------------------------------------
+
+21/69 Testing: mhgp8_axis_q2_gate
+21/69 Test: mhgp8_axis_q2_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_axis_q2_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_axis_q2_gate" start time: Sep 15 07:18 UTC
+Output:
+----------------------------------------------------------
+mhgp8_axis_q2_gate passed checks=1495478 small_plans=158 exact_census_pairs=58556 rejected_pairs=14752 retained_pairs=43804 permutations=72 model_mutants=5 conservative_cases=1 invalid_inputs=5 moved_rejections=3 large_grid_points=56000 large_grid_candidates=11067600
+<end of output>
+Test time =  19.62 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_axis_q2_gate" end time: Sep 15 07:18 UTC
+"mhgp8_axis_q2_gate" time elapsed: 00:00:19
+----------------------------------------------------------
+
+22/69 Testing: mhgp8_axis_additive_gate
+22/69 Test: mhgp8_axis_additive_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_axis_additive_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_axis_additive_gate" start time: Sep 15 07:18 UTC
+Output:
+----------------------------------------------------------
+mhgp8_axis_additive_gate passed checks=2947081 small_cases=81 checked_plans=650 census_pairs=29946 additive_prunes=572 intersection_prunes=1894 axis_queries=5569431 restriction_queries=55856 restriction_copies=15916 rejected_pairs=81918 retained_pairs=157988 core_partial=3 core_saturated=5 model_mutants=7 rejections=15 ownership_cases=2 large_points=56000 large_candidates=6759210
+<end of output>
+Test time =  30.95 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_axis_additive_gate" end time: Sep 15 07:18 UTC
+"mhgp8_axis_additive_gate" time elapsed: 00:00:30
+----------------------------------------------------------
+
+23/69 Testing: mhgp8_plan_assignment_gate
+23/69 Test: mhgp8_plan_assignment_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_plan_assignment_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_plan_assignment_gate" start time: Sep 15 07:18 UTC
+Output:
+----------------------------------------------------------
+mhgp8_plan_assignment_gate passed checks=1110 plan_allocation_failures=5 batch_allocation_failures=15 physical_comparisons=70 successful_assignments=2 self_operations=4 move_operations=4 moved_rejections=24
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_plan_assignment_gate" end time: Sep 15 07:18 UTC
+"mhgp8_plan_assignment_gate" time elapsed: 00:00:00
+----------------------------------------------------------
+
+24/69 Testing: mhgp8_q2_census_gate
+24/69 Test: mhgp8_q2_census_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_q2_census_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q2_census_gate" start time: Sep 15 07:18 UTC
+Output:
+----------------------------------------------------------
+mhgp8_q2_census_gate passed checks=186162 cases=277 runs=557 oracle_pairs=8376 oracle_sites=259780 prefilter_rejections=1501 census_rejections=4970 accepted=8828 shell_sites=51896 interior_sites=15248 uniform_credit=276 uniform_accept=144 uniform_reject=76 query_splits=5472 witness_splits=116536 split_after_credit=130 cursor_reuses=10944 cursor_advances=113941 deep_indices=3 root_savings=75 permutations=72 model_mutants=10 rejections=10
+<end of output>
+Test time =   1.46 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q2_census_gate" end time: Sep 15 07:18 UTC
+"mhgp8_q2_census_gate" time elapsed: 00:00:01
+----------------------------------------------------------
+
+25/69 Testing: mhgp8_q2_prepared_bounds_gate
+25/69 Test: mhgp8_q2_prepared_bounds_gate
+Command: "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_q2_prepared_bounds_gate" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q2_prepared_bounds_gate" start time: Sep 15 07:18 UTC
+Output:
+----------------------------------------------------------
+mhgp8_q2_prepared_bounds_gate passed checks=61803 cases=1424 oracle_values=243167 dense_values=57675 interior=39 exterior=226 shell=158 mixed=1001 symmetries=48 model_mutants=8 invalid_inputs=6 copies=3 prepared_bytes=48
+<end of output>
+Test time =   1.59 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q2_prepared_bounds_gate" end time: Sep 15 07:18 UTC
+"mhgp8_q2_prepared_bounds_gate" time elapsed: 00:00:01
+----------------------------------------------------------
+
+26/69 Testing: mhgp8_wspd_q2_cooperative_receipts_normal_gate
+26/69 Test: mhgp8_wspd_q2_cooperative_receipts_normal_gate
+Command: "/home/codespace/.python/current/bin/python3" "-B" "/workspaces/E-HGP/morsehgp3D_v8/tests/wspd_q2_cooperative_receipts_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_wspd_q2_cooperative_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_wspd_q2_cooperative_receipts_normal_gate" start time: Sep 15 07:18 UTC
+Output:
+----------------------------------------------------------
+{"continued_captures": 12, "full_contract_qualified": false, "invalid_cli": 26, "max_as_sum_models": 26, "paired_workers": 12, "pool_selection_models": 8, "real_captures": 24, "rejected_mutants": 4153, "status": "passed", "unit_contract_mutants": 12}
+<end of output>
+Test time =   5.48 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_wspd_q2_cooperative_receipts_normal_gate" end time: Sep 15 07:19 UTC
+"mhgp8_wspd_q2_cooperative_receipts_normal_gate" time elapsed: 00:00:05
+----------------------------------------------------------
+
+27/69 Testing: mhgp8_wspd_q2_cooperative_receipts_optimized_gate
+27/69 Test: mhgp8_wspd_q2_cooperative_receipts_optimized_gate
+Command: "/home/codespace/.python/current/bin/python3" "-B" "-O" "/workspaces/E-HGP/morsehgp3D_v8/tests/wspd_q2_cooperative_receipts_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_wspd_q2_cooperative_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_wspd_q2_cooperative_receipts_optimized_gate" start time: Sep 15 07:19 UTC
+Output:
+----------------------------------------------------------
+{"continued_captures": 12, "full_contract_qualified": false, "invalid_cli": 26, "max_as_sum_models": 26, "paired_workers": 12, "pool_selection_models": 8, "real_captures": 24, "rejected_mutants": 4153, "status": "passed", "unit_contract_mutants": 12}
+<end of output>
+Test time =   6.84 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_wspd_q2_cooperative_receipts_optimized_gate" end time: Sep 15 07:19 UTC
+"mhgp8_wspd_q2_cooperative_receipts_optimized_gate" time elapsed: 00:00:06
+----------------------------------------------------------
+
+28/69 Testing: mhgp8_q2_split_receipts_gate
+28/69 Test: mhgp8_q2_split_receipts_gate
+Command: "/home/codespace/.python/current/bin/python3" "-B" "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_split_receipts_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_q2_census_split_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q2_split_receipts_gate" start time: Sep 15 07:19 UTC
+Output:
+----------------------------------------------------------
+{"full_contract_qualified": false, "invalid_cli": 21, "paired_workers": 12, "real_captures": 24, "rejected_mutants": 1993, "status": "passed"}
+<end of output>
+Test time =   1.76 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q2_split_receipts_gate" end time: Sep 15 07:19 UTC
+"mhgp8_q2_split_receipts_gate" time elapsed: 00:00:01
+----------------------------------------------------------
+
+29/69 Testing: mhgp8_q2_split_receipts_gate_optimized
+29/69 Test: mhgp8_q2_split_receipts_gate_optimized
+Command: "/home/codespace/.python/current/bin/python3" "-B" "-O" "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_split_receipts_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_q2_census_split_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q2_split_receipts_gate_optimized" start time: Sep 15 07:19 UTC
+Output:
+----------------------------------------------------------
+{"full_contract_qualified": false, "invalid_cli": 21, "paired_workers": 12, "real_captures": 24, "rejected_mutants": 1993, "status": "passed"}
+<end of output>
+Test time =   1.72 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q2_split_receipts_gate_optimized" end time: Sep 15 07:19 UTC
+"mhgp8_q2_split_receipts_gate_optimized" time elapsed: 00:00:01
+----------------------------------------------------------
+
+30/69 Testing: mhgp8_q2_resume_receipts_gate
+30/69 Test: mhgp8_q2_resume_receipts_gate
+Command: "/home/codespace/.python/current/bin/python3" "-B" "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_resume_receipts_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_q2_census_resume_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q2_resume_receipts_gate" start time: Sep 15 07:19 UTC
+Output:
+----------------------------------------------------------
+{"invalid_cli": 7, "real_captures": 24, "rejected_mutants": 552, "status": "passed"}
+<end of output>
+Test time =   1.17 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q2_resume_receipts_gate" end time: Sep 15 07:19 UTC
+"mhgp8_q2_resume_receipts_gate" time elapsed: 00:00:01
+----------------------------------------------------------
+
+31/69 Testing: mhgp8_q2_resume_receipts_gate_optimized
+31/69 Test: mhgp8_q2_resume_receipts_gate_optimized
+Command: "/home/codespace/.python/current/bin/python3" "-B" "-O" "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_resume_receipts_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_q2_census_resume_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q2_resume_receipts_gate_optimized" start time: Sep 15 07:19 UTC
+Output:
+----------------------------------------------------------
+{"invalid_cli": 7, "real_captures": 24, "rejected_mutants": 552, "status": "passed"}
+<end of output>
+Test time =   1.14 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q2_resume_receipts_gate_optimized" end time: Sep 15 07:19 UTC
+"mhgp8_q2_resume_receipts_gate_optimized" time elapsed: 00:00:01
+----------------------------------------------------------
+
+32/69 Testing: mhgp8_q3_q4_owner_independence_gate
+32/69 Test: mhgp8_q3_q4_owner_independence_gate
+Command: "/home/codespace/.python/current/bin/python3" "-B" "/workspaces/E-HGP/morsehgp3D_v8/tests/q3_q4_owner_independence_gate.py" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q3_q4_owner_independence_gate" start time: Sep 15 07:19 UTC
+Output:
+----------------------------------------------------------
+{"claim": "q2_survival_is_not_a_q3_q4_owner_filter", "deep_seed_fixtures": [{"kmax": 5, "q3_seed_depth": 4, "q4_depth": 0, "q4_power_distance_minus_radius": ["425", "426", "429", "434"], "seed_ids": [0, 1, 2], "seed_power_distance_minus_radius": ["-1050", "-1049", "-1046", "-1041"]}, {"kmax": 10, "q3_seed_depth": 9, "q4_depth": 0, "q4_power_distance_minus_radius": ["425", "426", "429", "434", "441", "450", "461", "474", "489"], "seed_ids": [0, 1, 2], "seed_power_distance_minus_radius": ["-1050", "-1049", "-1046", "-1041", "-1034", "-1025", "-1014", "-1001", "-986"]}], "fixtures": [{"center": ["1000", "3055/3", "1000"], "kmax": 5, "lane_rejection_threshold": 4, "q": 3, "q2_depth_at_least": 5, "radius_squared": "93025/9", "shell": [0, 1, 2], "sites": 8, "support_depth": 0, "unique_maximal_edge": [0, 1], "witness_powers": ["-1400", "-1401", "-1404", "-1409", "-1416"]}, {"center": ["1000", "1025", "1000"], "kmax": 5, "lane_rejection_threshold": 3, "q": 4, "q2_depth_at_least": 5, "radius_squared": "10625", "shell": [0, 1, 2, 3], "sites": 9, "support_depth": 0, "unique_maximal_edge": [0, 1], "witness_powers": ["-2600", "-2601", "-2604", "-2609", "-2616"]}, {"center": ["1000", "3055/3", "1000"], "kmax": 10, "lane_rejection_threshold": 9, "q": 3, "q2_depth_at_least": 10, "radius_squared": "93025/9", "shell": [0, 1, 2], "sites": 13, "support_depth": 0, "unique_maximal_edge": [0, 1], "witness_powers": ["-1400", "-1401", "-1404", "-1409", "-1416", "-1425", "-1436", "-1449", "-1464", "-1481"]}, {"center": ["1000", "1025", "1000"], "kmax": 10, "lane_rejection_threshold": 8, "q": 4, "q2_depth_at_least": 10, "radius_squared": "10625", "shell": [0, 1, 2, 3], "sites": 14, "support_depth": 0, "unique_maximal_edge": [0, 1], "witness_powers": ["-2600", "-2601", "-2604", "-2609", "-2616", "-2625", "-2636", "-2649", "-2664", "-2681"]}], "full_contract_qualified": false, "status": "passed"}
+<end of output>
+Test time =   0.05 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q3_q4_owner_independence_gate" end time: Sep 15 07:19 UTC
+"mhgp8_q3_q4_owner_independence_gate" time elapsed: 00:00:00
+----------------------------------------------------------
+
+33/69 Testing: mhgp8_q3_q4_owner_independence_gate_optimized
+33/69 Test: mhgp8_q3_q4_owner_independence_gate_optimized
+Command: "/home/codespace/.python/current/bin/python3" "-B" "-O" "/workspaces/E-HGP/morsehgp3D_v8/tests/q3_q4_owner_independence_gate.py" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q3_q4_owner_independence_gate_optimized" start time: Sep 15 07:19 UTC
+Output:
+----------------------------------------------------------
+{"claim": "q2_survival_is_not_a_q3_q4_owner_filter", "deep_seed_fixtures": [{"kmax": 5, "q3_seed_depth": 4, "q4_depth": 0, "q4_power_distance_minus_radius": ["425", "426", "429", "434"], "seed_ids": [0, 1, 2], "seed_power_distance_minus_radius": ["-1050", "-1049", "-1046", "-1041"]}, {"kmax": 10, "q3_seed_depth": 9, "q4_depth": 0, "q4_power_distance_minus_radius": ["425", "426", "429", "434", "441", "450", "461", "474", "489"], "seed_ids": [0, 1, 2], "seed_power_distance_minus_radius": ["-1050", "-1049", "-1046", "-1041", "-1034", "-1025", "-1014", "-1001", "-986"]}], "fixtures": [{"center": ["1000", "3055/3", "1000"], "kmax": 5, "lane_rejection_threshold": 4, "q": 3, "q2_depth_at_least": 5, "radius_squared": "93025/9", "shell": [0, 1, 2], "sites": 8, "support_depth": 0, "unique_maximal_edge": [0, 1], "witness_powers": ["-1400", "-1401", "-1404", "-1409", "-1416"]}, {"center": ["1000", "1025", "1000"], "kmax": 5, "lane_rejection_threshold": 3, "q": 4, "q2_depth_at_least": 5, "radius_squared": "10625", "shell": [0, 1, 2, 3], "sites": 9, "support_depth": 0, "unique_maximal_edge": [0, 1], "witness_powers": ["-2600", "-2601", "-2604", "-2609", "-2616"]}, {"center": ["1000", "3055/3", "1000"], "kmax": 10, "lane_rejection_threshold": 9, "q": 3, "q2_depth_at_least": 10, "radius_squared": "93025/9", "shell": [0, 1, 2], "sites": 13, "support_depth": 0, "unique_maximal_edge": [0, 1], "witness_powers": ["-1400", "-1401", "-1404", "-1409", "-1416", "-1425", "-1436", "-1449", "-1464", "-1481"]}, {"center": ["1000", "1025", "1000"], "kmax": 10, "lane_rejection_threshold": 8, "q": 4, "q2_depth_at_least": 10, "radius_squared": "10625", "shell": [0, 1, 2, 3], "sites": 14, "support_depth": 0, "unique_maximal_edge": [0, 1], "witness_powers": ["-2600", "-2601", "-2604", "-2609", "-2616", "-2625", "-2636", "-2649", "-2664", "-2681"]}], "full_contract_qualified": false, "status": "passed"}
+<end of output>
+Test time =   0.05 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q3_q4_owner_independence_gate_optimized" end time: Sep 15 07:19 UTC
+"mhgp8_q3_q4_owner_independence_gate_optimized" time elapsed: 00:00:00
+----------------------------------------------------------
+
+34/69 Testing: mhgp8_wspd_q2_dynamic_receipts_gate
+34/69 Test: mhgp8_wspd_q2_dynamic_receipts_gate
+Command: "/home/codespace/.python/current/bin/python3" "-B" "/workspaces/E-HGP/morsehgp3D_v8/tests/wspd_q2_dynamic_receipts_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_wspd_q2_dynamic_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_wspd_q2_dynamic_receipts_gate" start time: Sep 15 07:19 UTC
+Output:
+----------------------------------------------------------
+{"domain_checks": 12, "failed_captures": 3, "genuine_rows": 108, "invalid_options": 13, "mutants": 60, "positive_reads": 1, "status": "passed"}
+<end of output>
+Test time =  19.17 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_wspd_q2_dynamic_receipts_gate" end time: Sep 15 07:19 UTC
+"mhgp8_wspd_q2_dynamic_receipts_gate" time elapsed: 00:00:19
+----------------------------------------------------------
+
+35/69 Testing: mhgp8_wspd_q2_dynamic_receipts_gate_optimized
+35/69 Test: mhgp8_wspd_q2_dynamic_receipts_gate_optimized
+Command: "/home/codespace/.python/current/bin/python3" "-B" "-O" "/workspaces/E-HGP/morsehgp3D_v8/tests/wspd_q2_dynamic_receipts_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_wspd_q2_dynamic_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_wspd_q2_dynamic_receipts_gate_optimized" start time: Sep 15 07:19 UTC
+Output:
+----------------------------------------------------------
+{"domain_checks": 12, "failed_captures": 3, "genuine_rows": 108, "invalid_options": 13, "mutants": 60, "positive_reads": 1, "status": "passed"}
+<end of output>
+Test time =  16.05 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_wspd_q2_dynamic_receipts_gate_optimized" end time: Sep 15 07:19 UTC
+"mhgp8_wspd_q2_dynamic_receipts_gate_optimized" time elapsed: 00:00:16
+----------------------------------------------------------
+
+36/69 Testing: mhgp8_wspd_q2_receipts_gate
+36/69 Test: mhgp8_wspd_q2_receipts_gate
+Command: "/home/codespace/.python/current/bin/python3" "-B" "/workspaces/E-HGP/morsehgp3D_v8/tests/wspd_q2_receipts_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_wspd_q2_census_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_wspd_q2_receipts_gate" start time: Sep 15 07:19 UTC
+Output:
+----------------------------------------------------------
+{"domain_checks": 2, "failed_captures": 2, "genuine_rows": 128, "joint_cli_rejects": 4, "joint_positive_reads": 2, "joint_rows": 96, "mutants": 152, "order_cli_rejects": 3, "order_positive_reads": 1, "order_rows": 64, "pool_cli_rejects": 7, "pool_positive_reads": 3, "pool_rows": 128, "positive_reads": 1, "sibling_cli_rejects": 2, "sibling_positive_reads": 1, "sibling_rows": 64, "status": "passed"}
+<end of output>
+Test time =  55.43 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_wspd_q2_receipts_gate" end time: Sep 15 07:20 UTC
+"mhgp8_wspd_q2_receipts_gate" time elapsed: 00:00:55
+----------------------------------------------------------
+
+37/69 Testing: mhgp8_wspd_q2_receipts_gate_optimized
+37/69 Test: mhgp8_wspd_q2_receipts_gate_optimized
+Command: "/home/codespace/.python/current/bin/python3" "-B" "-O" "/workspaces/E-HGP/morsehgp3D_v8/tests/wspd_q2_receipts_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_wspd_q2_census_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_wspd_q2_receipts_gate_optimized" start time: Sep 15 07:20 UTC
+Output:
+----------------------------------------------------------
+{"domain_checks": 2, "failed_captures": 2, "genuine_rows": 128, "joint_cli_rejects": 4, "joint_positive_reads": 2, "joint_rows": 96, "mutants": 152, "order_cli_rejects": 3, "order_positive_reads": 1, "order_rows": 64, "pool_cli_rejects": 7, "pool_positive_reads": 3, "pool_rows": 128, "positive_reads": 1, "sibling_cli_rejects": 2, "sibling_positive_reads": 1, "sibling_rows": 64, "status": "passed"}
+<end of output>
+Test time =  50.34 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_wspd_q2_receipts_gate_optimized" end time: Sep 15 07:21 UTC
+"mhgp8_wspd_q2_receipts_gate_optimized" time elapsed: 00:00:50
+----------------------------------------------------------
+
+38/69 Testing: mhgp8_wspd_front_receipts_gate
+38/69 Test: mhgp8_wspd_front_receipts_gate
+Command: "/home/codespace/.python/current/bin/python3" "-B" "/workspaces/E-HGP/morsehgp3D_v8/tests/wspd_front_receipts_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_wspd_front_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_wspd_front_receipts_gate" start time: Sep 15 07:21 UTC
+Output:
+----------------------------------------------------------
+{"domain_checks": 2, "failed_captures": 2, "genuine_rows": 48, "mutants": 40, "positive_reads": 1, "status": "passed"}
+<end of output>
+Test time =   6.78 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_wspd_front_receipts_gate" end time: Sep 15 07:21 UTC
+"mhgp8_wspd_front_receipts_gate" time elapsed: 00:00:06
+----------------------------------------------------------
+
+39/69 Testing: mhgp8_wspd_front_receipts_gate_optimized
+39/69 Test: mhgp8_wspd_front_receipts_gate_optimized
+Command: "/home/codespace/.python/current/bin/python3" "-B" "-O" "/workspaces/E-HGP/morsehgp3D_v8/tests/wspd_front_receipts_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_wspd_front_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_wspd_front_receipts_gate_optimized" start time: Sep 15 07:21 UTC
+Output:
+----------------------------------------------------------
+{"domain_checks": 2, "failed_captures": 2, "genuine_rows": 48, "mutants": 40, "positive_reads": 1, "status": "passed"}
+<end of output>
+Test time =   6.69 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_wspd_front_receipts_gate_optimized" end time: Sep 15 07:21 UTC
+"mhgp8_wspd_front_receipts_gate_optimized" time elapsed: 00:00:06
+----------------------------------------------------------
+
+40/69 Testing: mhgp8_cloud_reuse_receipts_gate
+40/69 Test: mhgp8_cloud_reuse_receipts_gate
+Command: "/home/codespace/.python/current/bin/python3" "-B" "/workspaces/E-HGP/morsehgp3D_v8/tests/cloud_reuse_receipts_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_cloud_reuse_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_cloud_reuse_receipts_gate" start time: Sep 15 07:21 UTC
+Output:
+----------------------------------------------------------
+{"failed_captures": 2, "genuine_rows": 12, "mutants": 31, "positive_reads": 1, "status": "passed"}
+<end of output>
+Test time =   4.73 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_cloud_reuse_receipts_gate" end time: Sep 15 07:21 UTC
+"mhgp8_cloud_reuse_receipts_gate" time elapsed: 00:00:04
+----------------------------------------------------------
+
+41/69 Testing: mhgp8_cloud_reuse_receipts_gate_optimized
+41/69 Test: mhgp8_cloud_reuse_receipts_gate_optimized
+Command: "/home/codespace/.python/current/bin/python3" "-B" "-O" "/workspaces/E-HGP/morsehgp3D_v8/tests/cloud_reuse_receipts_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_cloud_reuse_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_cloud_reuse_receipts_gate_optimized" start time: Sep 15 07:21 UTC
+Output:
+----------------------------------------------------------
+{"failed_captures": 2, "genuine_rows": 12, "mutants": 31, "positive_reads": 1, "status": "passed"}
+<end of output>
+Test time =   4.99 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_cloud_reuse_receipts_gate_optimized" end time: Sep 15 07:21 UTC
+"mhgp8_cloud_reuse_receipts_gate_optimized" time elapsed: 00:00:04
+----------------------------------------------------------
+
+42/69 Testing: mhgp8_q2_revision_comparison_gate
+42/69 Test: mhgp8_q2_revision_comparison_gate
+Command: "/home/codespace/.python/current/bin/python3" "-B" "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_revision_comparison_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_q2_census_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q2_revision_comparison_gate" start time: Sep 15 07:21 UTC
+Output:
+----------------------------------------------------------
+{"status": "passed", "genuine_probe_rows": 6, "positive_comparisons": 2, "mutants": 20, "python_optimized": false, "scope": "synthetic_revision_reader_fixtures_not_performance_qualification"}
+<end of output>
+Test time =   4.19 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q2_revision_comparison_gate" end time: Sep 15 07:22 UTC
+"mhgp8_q2_revision_comparison_gate" time elapsed: 00:00:04
+----------------------------------------------------------
+
+43/69 Testing: mhgp8_q2_revision_comparison_gate_optimized
+43/69 Test: mhgp8_q2_revision_comparison_gate_optimized
+Command: "/home/codespace/.python/current/bin/python3" "-B" "-O" "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_revision_comparison_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_q2_census_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q2_revision_comparison_gate_optimized" start time: Sep 15 07:22 UTC
+Output:
+----------------------------------------------------------
+{"status": "passed", "genuine_probe_rows": 6, "positive_comparisons": 2, "mutants": 20, "python_optimized": true, "scope": "synthetic_revision_reader_fixtures_not_performance_qualification"}
+<end of output>
+Test time =   4.37 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q2_revision_comparison_gate_optimized" end time: Sep 15 07:22 UTC
+"mhgp8_q2_revision_comparison_gate_optimized" time elapsed: 00:00:04
+----------------------------------------------------------
+
+44/69 Testing: mhgp8_q2_census_probe_gate
+44/69 Test: mhgp8_q2_census_probe_gate
+Command: "/home/codespace/.python/current/bin/python3" "-B" "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_census_probe_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_q2_census_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q2_census_probe_gate" start time: Sep 15 07:22 UTC
+Output:
+----------------------------------------------------------
+{"status": "passed", "invalid_cli": 17, "oracle_cases": 47, "probe_rows": 846, "python_optimized": false, "scope": "tiny_q2_payload_digest_oracle_not_full_hgp"}
+<end of output>
+Test time =  21.13 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q2_census_probe_gate" end time: Sep 15 07:22 UTC
+"mhgp8_q2_census_probe_gate" time elapsed: 00:00:21
+----------------------------------------------------------
+
+45/69 Testing: mhgp8_q2_census_probe_gate_optimized
+45/69 Test: mhgp8_q2_census_probe_gate_optimized
+Command: "/home/codespace/.python/current/bin/python3" "-B" "-O" "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_census_probe_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_q2_census_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q2_census_probe_gate_optimized" start time: Sep 15 07:22 UTC
+Output:
+----------------------------------------------------------
+{"status": "passed", "invalid_cli": 17, "oracle_cases": 47, "probe_rows": 846, "python_optimized": true, "scope": "tiny_q2_payload_digest_oracle_not_full_hgp"}
+<end of output>
+Test time =  21.17 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q2_census_probe_gate_optimized" end time: Sep 15 07:22 UTC
+"mhgp8_q2_census_probe_gate_optimized" time elapsed: 00:00:21
+----------------------------------------------------------
+
+46/69 Testing: mhgp8_q2_census_campaign_gate
+46/69 Test: mhgp8_q2_census_campaign_gate
+Command: "/home/codespace/.python/current/bin/python3" "-B" "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_census_campaign_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_q2_census_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q2_census_campaign_gate" start time: Sep 15 07:22 UTC
+Output:
+----------------------------------------------------------
+{"status": "passed", "genuine_rows": 12, "positive_reads": 2, "index_scan_boundary_controls": 1, "runner_mutants": 15, "initial_failure_group_controls": 1, "reader_mutants": 17, "archive_mutants": 4, "python_optimized": false, "scope": "q2_materialized_receipts_not_geometry_or_full"}
+<end of output>
+Test time =   7.56 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q2_census_campaign_gate" end time: Sep 15 07:22 UTC
+"mhgp8_q2_census_campaign_gate" time elapsed: 00:00:07
+----------------------------------------------------------
+
+47/69 Testing: mhgp8_q2_census_campaign_gate_optimized
+47/69 Test: mhgp8_q2_census_campaign_gate_optimized
+Command: "/home/codespace/.python/current/bin/python3" "-B" "-O" "/workspaces/E-HGP/morsehgp3D_v8/tests/q2_census_campaign_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_q2_census_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_q2_census_campaign_gate_optimized" start time: Sep 15 07:22 UTC
+Output:
+----------------------------------------------------------
+{"status": "passed", "genuine_rows": 12, "positive_reads": 2, "index_scan_boundary_controls": 1, "runner_mutants": 15, "initial_failure_group_controls": 1, "reader_mutants": 17, "archive_mutants": 4, "python_optimized": true, "scope": "q2_materialized_receipts_not_geometry_or_full"}
+<end of output>
+Test time =   7.93 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_q2_census_campaign_gate_optimized" end time: Sep 15 07:23 UTC
+"mhgp8_q2_census_campaign_gate_optimized" time elapsed: 00:00:07
+----------------------------------------------------------
+
+48/69 Testing: mhgp8_wspd_q2_parallel_receipts_gate
+48/69 Test: mhgp8_wspd_q2_parallel_receipts_gate
+Command: "/home/codespace/.python/current/bin/python3" "-B" "/workspaces/E-HGP/morsehgp3D_v8/tests/wspd_q2_parallel_receipts_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_wspd_q2_parallel_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_wspd_q2_parallel_receipts_gate" start time: Sep 15 07:23 UTC
+Output:
+----------------------------------------------------------
+{"domain_checks": 8, "failed_captures": 2, "genuine_rows": 50, "invalid_options": 6, "mutants": 42, "positive_reads": 1, "status": "passed"}
+<end of output>
+Test time =   8.78 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_wspd_q2_parallel_receipts_gate" end time: Sep 15 07:23 UTC
+"mhgp8_wspd_q2_parallel_receipts_gate" time elapsed: 00:00:08
+----------------------------------------------------------
+
+49/69 Testing: mhgp8_wspd_q2_parallel_receipts_gate_optimized
+49/69 Test: mhgp8_wspd_q2_parallel_receipts_gate_optimized
+Command: "/home/codespace/.python/current/bin/python3" "-B" "-O" "/workspaces/E-HGP/morsehgp3D_v8/tests/wspd_q2_parallel_receipts_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_wspd_q2_parallel_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_wspd_q2_parallel_receipts_gate_optimized" start time: Sep 15 07:23 UTC
+Output:
+----------------------------------------------------------
+{"domain_checks": 8, "failed_captures": 2, "genuine_rows": 50, "invalid_options": 6, "mutants": 42, "positive_reads": 1, "status": "passed"}
+<end of output>
+Test time =   9.22 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_wspd_q2_parallel_receipts_gate_optimized" end time: Sep 15 07:23 UTC
+"mhgp8_wspd_q2_parallel_receipts_gate_optimized" time elapsed: 00:00:09
+----------------------------------------------------------
+
+50/69 Testing: mhgp8_docs_scope
+50/69 Test: mhgp8_docs_scope
+Command: "/home/codespace/.python/current/bin/python3" "-B" "/workspaces/E-HGP/morsehgp3D_v8/tests/docs_scope_gate.py" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_docs_scope" start time: Sep 15 07:23 UTC
+Output:
+----------------------------------------------------------
+{"checks": 27, "independent_audits_excluded": true, "missing_link_mutants_refuted": 1, "positive_validations": 1, "recursive_directories": 3, "required_entries": 8, "scope": "documentation_only_not_an_engine_test", "status": "passed", "writes": 0}
+<end of output>
+Test time =   0.38 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_docs_scope" end time: Sep 15 07:23 UTC
+"mhgp8_docs_scope" time elapsed: 00:00:00
+----------------------------------------------------------
+
+51/69 Testing: mhgp8_docs_scope_optimized
+51/69 Test: mhgp8_docs_scope_optimized
+Command: "/home/codespace/.python/current/bin/python3" "-B" "-O" "/workspaces/E-HGP/morsehgp3D_v8/tests/docs_scope_gate.py" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_docs_scope_optimized" start time: Sep 15 07:23 UTC
+Output:
+----------------------------------------------------------
+{"checks": 27, "independent_audits_excluded": true, "missing_link_mutants_refuted": 1, "positive_validations": 1, "recursive_directories": 3, "required_entries": 8, "scope": "documentation_only_not_an_engine_test", "status": "passed", "writes": 0}
+<end of output>
+Test time =   0.38 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_docs_scope_optimized" end time: Sep 15 07:23 UTC
+"mhgp8_docs_scope_optimized" time elapsed: 00:00:00
+----------------------------------------------------------
+
+52/69 Testing: mhgp8_probe_cli
+52/69 Test: mhgp8_probe_cli
+Command: "/home/codespace/.python/current/bin/python3" "-B" "/workspaces/E-HGP/morsehgp3D_v8/tests/probe_cli_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_p0_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_probe_cli" start time: Sep 15 07:23 UTC
+Output:
+----------------------------------------------------------
+{"status": "passed", "checks": 118, "scope": "p0_probe_cli"}
+<end of output>
+Test time =   3.06 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_probe_cli" end time: Sep 15 07:23 UTC
+"mhgp8_probe_cli" time elapsed: 00:00:03
+----------------------------------------------------------
+
+53/69 Testing: mhgp8_probe_cli_optimized
+53/69 Test: mhgp8_probe_cli_optimized
+Command: "/home/codespace/.python/current/bin/python3" "-B" "-O" "/workspaces/E-HGP/morsehgp3D_v8/tests/probe_cli_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_p0_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_probe_cli_optimized" start time: Sep 15 07:23 UTC
+Output:
+----------------------------------------------------------
+{"status": "passed", "checks": 118, "scope": "p0_probe_cli"}
+<end of output>
+Test time =   3.06 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_probe_cli_optimized" end time: Sep 15 07:23 UTC
+"mhgp8_probe_cli_optimized" time elapsed: 00:00:03
+----------------------------------------------------------
+
+54/69 Testing: mhgp8_campaign_gate
+54/69 Test: mhgp8_campaign_gate
+Command: "/home/codespace/.python/current/bin/python3" "-B" "/workspaces/E-HGP/morsehgp3D_v8/tests/campaign_gate.py" "--probe" "/workspaces/E-HGP/build/v8_cooperative_sanitize_20260915/mhgp8_p0_probe" "--selftest"
+Directory: /workspaces/E-HGP/build/v8_cooperative_sanitize_20260915
+"mhgp8_campaign_gate" start time: Sep 15 07:23 UTC
+Output:
+----------------------------------------------------------
+{"status": "passed", "checks": 41, "spawn_signal_checks": 6, "read_signal_checks": 6, "python_optimized": false, "scope": "p0_campaign_receipt_ingestion_not_geometry"}
+<end of output>
+Test time =  34.46 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp8_campaign_gate" end time: Sep 15 07:24 UTC
+"mhgp8_campaign_gate" time elapsed: 00:00:34
+----------------------------------------------------------

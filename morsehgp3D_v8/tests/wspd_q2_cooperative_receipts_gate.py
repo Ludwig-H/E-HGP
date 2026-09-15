@@ -1,0 +1,298 @@
+#!/usr/bin/env python3
+"""Bounded real cooperative captures and hostile receipt mutations.
+
+Explicit port of the split-receipts gate pattern. The new row reader alone
+is imported; geometric independence is supplied by the separate C++ gate,
+not by a historical receipt or by the checks in this Python file.
+"""
+
+import argparse
+from copy import deepcopy
+import json
+from pathlib import Path
+import subprocess
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "bench"))
+from run_wspd_q2_cooperative_checks import (  # noqa: E402
+    ARTIFACT_NAMES, SOURCE_PATHS, strict_json, validate_pins, validate_row)
+
+
+def require(value, message):
+    if not value:
+        raise RuntimeError(message)
+
+
+def at(value, path):
+    for key in path:
+        value = value[key]
+    return value
+
+
+def reject(row, command, label):
+    try:
+        validate_row(row, command)
+    except (RuntimeError, ValueError, KeyError, TypeError, OverflowError):
+        return 1
+    raise RuntimeError(f"cooperative reader accepted mutant: {label}")
+
+
+def replace(row, command, path, value):
+    mutant = deepcopy(row)
+    at(mutant, path[:-1])[path[-1]] = value
+    return reject(mutant, command, repr(path))
+
+
+def dictionaries(value, path=()):
+    if type(value) is dict:
+        yield path, value
+        for key, child in value.items():
+            yield from dictionaries(child, (*path, key))
+    elif type(value) is list:
+        for key, child in enumerate(value):
+            yield from dictionaries(child, (*path, key))
+
+
+def check_unit_contracts():
+    """Pure unit models: no claimed capture, executable, or qualification."""
+    def rejected_call(call, label):
+        try:
+            call()
+        except (RuntimeError, ValueError, KeyError, TypeError, OverflowError):
+            return 1
+        raise RuntimeError(f"reader accepted unit-contract mutant: {label}")
+
+    require(strict_json('{"x":1,"nested":{"x":2},"values":[null,true]}') ==
+            {"x": 1, "nested": {"x": 2}, "values": [None, True]}, "valid strict JSON rejected")
+    count = 0
+    for text in ('{"x":1,"x":2}', '{"outer":{"x":1,"x":2}}',
+                 '{"x":NaN}', '{"x":Infinity}', '{"x":1e999}'):
+        count += rejected_call(lambda: strict_json(text), "duplicate/nonfinite JSON")
+
+    # This nonexistent model build tests pin membership/path rules only. Hash
+    # values are deliberately synthetic, not measurements of repository files.
+    root = Path(__file__).resolve().parents[2]
+    build = root / "build" / "cooperative_receipts_gate_model"
+    relative = build.relative_to(root)
+    cache = str(relative / "CMakeCache.txt")
+    executable = build / "mhgp8_wspd_q2_cooperative_probe"
+    manifest = dict(source_sha256={name: "0" * 64 for name in SOURCE_PATHS},
+                    artifact_sha256={str(relative / name): "1" * 64 for name in
+                                     {*ARTIFACT_NAMES, "CMakeCache.txt"}},
+                    campaign="smoke", build=str(build), planned_commands=[["measure", [str(executable)]]])
+    validate_pins(manifest)
+    source = sorted(SOURCE_PATHS)[0]
+    mutants = []
+    missing_source = deepcopy(manifest)
+    del missing_source["source_sha256"][source]
+    mutants.append((missing_source, "missing source pin"))
+    extra_source = deepcopy(manifest)
+    extra_source["source_sha256"]["morsehgp3D_v8/src/unknown_source.cpp"] = "0" * 64
+    mutants.append((extra_source, "unknown source pin"))
+    wrong_hash = deepcopy(manifest)
+    wrong_hash["source_sha256"][source] = "A" * 64
+    mutants.append((wrong_hash, "noncanonical source hash"))
+    missing_cache = deepcopy(manifest)
+    del missing_cache["artifact_sha256"][cache]
+    mutants.append((missing_cache, "missing cache pin"))
+    missing_indirect_executable = deepcopy(manifest)
+    del missing_indirect_executable["artifact_sha256"][str(relative / "mhgp8_axis_q2_gate")]
+    mutants.append((missing_indirect_executable, "missing indirectly executed CTest binary"))
+    escaped_artifact = deepcopy(manifest)
+    escaped_artifact["artifact_sha256"]["build/elsewhere/mhgp8_probe"] = "3" * 64
+    mutants.append((escaped_artifact, "artifact outside model build"))
+    unpinned_command = deepcopy(manifest)
+    unpinned_command["planned_commands"][0][1][0] = str(build / "mhgp8_unpinned_probe")
+    mutants.append((unpinned_command, "unpinned command executable"))
+    for mutant, label in mutants:
+        count += rejected_call(lambda: validate_pins(mutant), label)
+    require(count == 12, "unit mutation inventory changed")
+    return count
+
+
+def check_mutants(row, command, exhaustive):
+    count = 0
+    edits = [
+        (("schema",), "mhgp8_wspd_q2_parallel_probe_v1"),
+        (("scope",), "full"), (("public_status",), "qualified"),
+        (("full_contract_qualified",), True), (("gcp_used",), True),
+        (("execution",), "parallel_front"), (("worker_clock_scope",), "active_without_waits"),
+        (("candidate_pairs",), row["candidate_pairs"] + 1),
+        (("census_work", "input_descriptors"), row["input_rectangles"] + 1),
+        (("census_work", "query_cover_visits"), 1),
+        (("census_work", "frontier_restarts"), 1),
+        (("census_work", "count_root_starts"), row["census_work"]["count_root_starts"] + 1),
+        (("parallel_work", "queue_storage_bytes"), 0),
+        (("parallel_work", "completed_jobs"), row["parallel_work"]["jobs"] + 1),
+        (("parallel_work", "started_workers"), row["threads"] + 1),
+        (("workers",), []), (("workers",), tuple(row["workers"])),
+        (("workers", 0, "jobs"), row["workers"][0]["jobs"] + 1),
+        (("workers", 0, "front_products"), row["workers"][0]["front_products"] + 1),
+        (("workers", 0, "count_node_visits"), row["workers"][0]["count_node_visits"] + 1),
+        (("timings", "pipeline_wall_ms"), row["timings"]["total_ms"] + 1),
+    ]
+    for path in (("timings", "total_ms"), ("workers", 0, "elapsed_ms"),
+                 ("pool_work", "preparation_ms_sum")):
+        for value in (-1, float("nan"), float("inf"), True, "0"):
+            edits.append((path, value))
+    count += sum(replace(row, command, path, value) for path, value in edits)
+
+    # Alter the global reduction and, independently, one worker contribution.
+    # Raise worker maxima ABOVE the global maximum, even if worker0 was not
+    # the maximizing slot. Every scalar is covered, including transfer traffic
+    # that has no useful bound by the original Cartesian population.
+    total = row["cooperative_work"]
+    for group in (None, "resume_work", "detach_work"):
+        fields = total if group is None else total[group]
+        for name, value in fields.items():
+            if type(value) is not int:
+                continue
+            suffix = (name,) if group is None else (group, name)
+            count += replace(row, command, ("cooperative_work", *suffix), value + 1)
+            worker_path = ("workers", 0, "cooperative_work", *suffix)
+            count += replace(row, command, worker_path, max(value, at(row, worker_path)) + 1)
+
+    # Corrupt a sum while preserving the wait/wake identity, so a validator
+    # checking only the local scheduler equations cannot accept it.
+    mutant = deepcopy(row)
+    mutant["cooperative_work"]["waits"] += 1
+    mutant["cooperative_work"]["wakes"] += 1
+    count += reject(mutant, command, "global wait/wake sum without worker contributions")
+
+    # Counterfactual max-as-sum model, only where its numerical value differs.
+    max_models = 0
+    for suffix in (("max_queue_size",), ("max_active_tasks",), ("max_fragment_bytes",),
+                   ("resume_work", "max_pending_tasks")):
+        summed = sum(at(worker["cooperative_work"], suffix) for worker in row["workers"])
+        if summed != at(total, suffix):
+            count += replace(row, command, ("cooperative_work", *suffix), summed)
+            max_models += 1
+
+    for position, value in enumerate(command):
+        wrong = command.copy()
+        wrong[position] = ("terrain" if value != "terrain" else "uniform") if position == 1 else str(int(value) + 1)
+        count += reject(deepcopy(row), wrong, f"command[{position}]")
+    for wrong in (command[:-1], command + ["extra"]):
+        count += reject(deepcopy(row), wrong, "command arity")
+
+    if exhaustive:
+        for path, obj in dictionaries(row):
+            for name, value in obj.items():
+                mutant = deepcopy(row)
+                del at(mutant, path)[name]
+                count += reject(mutant, command, f"missing {(*path, name)}")
+                if type(value) is int:
+                    for wrong in (True, -1, 2**64, str(value)):
+                        count += replace(row, command, (*path, name), wrong)
+            mutant = deepcopy(row)
+            at(mutant, path)["unexpected"] = 0
+            count += reject(mutant, command, f"unknown field in {path}")
+    return count, max_models
+
+
+def reject_pool_model(row, command):
+    """An internally balanced fake root must not bypass synchronous Pool.
+
+    This is a MODEL receipt mutation, not a claim that an Entry-only root is
+    a real census. Its worker sums and simple transition/lineage equations
+    are coherent, leaving the positive Pool/minB selection rule observable.
+    """
+    if not (0 < row["pool_min_factor"] <= row["min_b_size"] <= row["candidate_pairs"]):
+        return 0
+    require(row["cooperative_work"]["continued_anchors"] == 0, "covered Pool continued a real root")
+    mutant = deepcopy(row)
+    for work in (mutant["cooperative_work"], mutant["workers"][0]["cooperative_work"]):
+        work["continued_anchors"] = work["fragments_started"] = work["completed_fragments"] = 1
+        work["continued_pairs"] = work["completed_pairs"] = row["min_b_size"]
+        work["max_fragment_bytes"] = 6272
+        resume = work["resume_work"]
+        resume["advance_calls"] = resume["transitions"] = resume["entry_steps"] = 1
+        resume["max_pending_tasks"] = 1
+    return reject(mutant, command, "model root illegally escaping selected synchronous Pool")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--probe", required=True)
+    parser.add_argument("--selftest", required=True, action="store_true")
+    args = parser.parse_args()
+    calls, paired, mutants, invalid, max_models, pool_models = 0, 0, 0, 0, 0, 0
+    unit_mutants = check_unit_contracts()
+    mutants += unit_mutants
+    covered_sizes, covered_min_b, covered_pool = set(), set(), set()
+    continued_rows = 0
+    for family_number, family in enumerate(("uniform", "terrain", "clusters", "rows")):
+        for separation_number, separation in enumerate((8, 10, 12)):
+            n = (32, 64, 128)[separation_number]
+            k = (1, 5, 10)[(family_number + separation_number) % 3]
+            min_b = (1, 16, 64)[(family_number + separation_number) % 3]
+            pool = (0, 16, 64)[(family_number + 2 * separation_number) % 3]
+            quantum = (1, 256)[(family_number + separation_number) % 2]
+            queue = (1, 8)[(family_number + separation_number) % 2]
+            reference = None
+            for workers in (1, 4):
+                command = [str(n), family, str(k), str(separation), "3", str(workers), "1",
+                           str(quantum), str(queue), str(min_b), str(pool)]
+                capture = subprocess.run([args.probe, *command], capture_output=True, text=True, timeout=30)
+                require(capture.returncode == 0 and not capture.stderr,
+                        f"cooperative probe failed: {capture.stdout}\n{capture.stderr}")
+                row = strict_json(capture.stdout)
+                validate_row(row, command)
+                checked, maximum = check_mutants(row, command, calls == 0)
+                mutants += checked
+                max_models += maximum
+                checked_pool = reject_pool_model(row, command)
+                pool_models += checked_pool
+                mutants += checked_pool
+                calls += 1
+                continued_rows += row["cooperative_work"]["continued_anchors"] > 0
+                covered_sizes.add(n)
+                covered_min_b.add(min_b)
+                covered_pool.add(pool)
+                if pool and pool <= min_b:
+                    require(row["cooperative_work"]["continued_anchors"] == 0,
+                            "Pool/minB method intersection was ignored")
+                if reference is None:
+                    reference = row
+                else:
+                    for key in ("input_hash", "total_unordered_pairs", "active_lane_mask", "generation_work",
+                                "cloud_work", "index_work", "front_work", "census_work", "sibling_work",
+                                "order_work", "joint_work", "callback_work", "digest", "input_rectangles",
+                                "anchor_queries", "candidate_pairs", "accepted_pairs", "rejected_pairs"):
+                        require(row[key] == reference[key], f"worker count changed discrete {key}")
+                    for key, value in row["pool_work"].items():
+                        if type(value) is int:
+                            require(value == reference["pool_work"][key], f"worker count changed Pool {key}")
+                    paired += 1
+    require(calls == 24 and paired == 12 and covered_sizes == {32, 64, 128} and
+            covered_min_b == {1, 16, 64} and covered_pool == {0, 16, 64} and
+            continued_rows > 0 and pool_models > 0, "tiny method matrix is incomplete or vacuous")
+
+    valid = ["32", "uniform", "5", "8", "3", "4", "1", "1", "1", "1", "0"]
+    invalid_commands = [[], valid[:-1], valid + ["extra"]]
+    for position in (0, 2, 3, 5, 6, 7, 8, 9):
+        for value in ("0", "-1"):
+            command = valid.copy()
+            command[position] = value
+            invalid_commands.append(command)
+    for position, value in ((0, "1"), (1, "wrong"), (2, "11"),
+                            (4, "-1"), (4, "18446744073709551616"), (10, "-1")):
+        command = valid.copy()
+        command[position] = value
+        invalid_commands.append(command)
+    invalid_commands.append(["33", "rows", *valid[2:]])
+    for command in invalid_commands:
+        capture = subprocess.run([args.probe, *command], capture_output=True, text=True, timeout=30)
+        require(capture.returncode == 2 and not capture.stdout and capture.stderr,
+                f"invalid cooperative CLI accepted: {command}")
+        invalid += 1
+    print(json.dumps(dict(status="passed", real_captures=calls, paired_workers=paired,
+                          rejected_mutants=mutants, max_as_sum_models=max_models,
+                          pool_selection_models=pool_models, continued_captures=continued_rows,
+                          unit_contract_mutants=unit_mutants, invalid_cli=invalid,
+                          full_contract_qualified=False), sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

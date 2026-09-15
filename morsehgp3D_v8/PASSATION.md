@@ -1,10 +1,48 @@
-# Passation v8 — détachement intérieur q2 et architecture q3/q4
+# Passation v8 — équipe persistante q2 et granularité des tâches
 
 15 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`. Aucun contrat de tour n'est encore acquis.
 
 ## À reprendre maintenant
+
+Le [raccord à une équipe persistante](docs/P0_EQUIPE_PERSISTANTE_Q2.md)
+est implémenté : une seule équipe pour seeds Coarse et branches q2 hors
+Pool, même index possédé, compte/curseur/phase/B original conservés.
+Descripteur et masse restent chargés une fois par rectangle, pas par
+fragment. Pool et ses replis restent synchrones ; la nouvelle API est
+explicite et ne remplace pas le défaut.
+
+Les [174 mesures closes](receipts/q2_cooperative_20260915/README.md) gardent
+exactement géométrie et supports.69 CTests Release et Clang ASan/UBSan,
+ainsi que la gate Clang TSan, PASS. La reprise ASan/UBSan est close après
+redémarrage, sans effacer l'essai incomplet. La gate compare235 appels
+coopératifs,91 Coarse et5 744 paires
+de l'oracle exhaustif. Aucun gain de vitesse stable ; les rangées sans
+Pool régressent dans17 des18 observations malgré81 042 dons au total.
+
+**Prochaine priorité : la granularité, pas une autre micro-variante de file.**
+Partager des plages d'ancres non commencées permet de réutiliser le moteur
+privé du receveur sans allouer une pile complète par ancre. Le parent paie
+une seule fois sa préparation, notamment Pool ; les bandes gardent leur
+permutation, pas les nœuds B. Garder aussi le repli Shared sans rejet.
+Pour les petits rectangles, un singleton ne nécessite plus de pile B :
+préparer un état compact avec contexte original, et payer toute la coquille.
+Ces deux nouveaux formats ne sont pas implémentés par la tranche17.
+
+Uniforme32k :11,084M racines,1,001Md visites census, facteur maximal10 ;
+aucune continuation au seuil16. Rangées8k/Pool64 :78,8% des visites dans
+un worker à cause du repli synchrone. Six postes sous×3 dans la campagne
+Pool64 ne veut pas dire tous les coûts : F rangées×4, résidu Pool amas
+jusqu'à×3,447, populations de témoins distinctes des opérations. Lire
+les tableaux et la portée avant toute affirmation sous-quadratique.
+
+Builds de cette tranche : `build/v8_cooperative_20260915`,
+`build/v8_cooperative_sanitize_20260915`,
+`build/v8_cooperative_tsan_clang_20260915`. Tous trois désormais épinglés,
+ne pas les écraser. FULL, q3/q4 produit, GPU/G4 et massif restent ouverts.
+
+## Seizième tranche publiée à897085f8 — historique
 
 Le [détachement intérieur q2](docs/P0_DETACHEMENT_CENSUS_Q2.md) est implémenté
 et qualifié :66 CTests Release/Clang ASan/UBSan, gate Clang TSan du répartiteur,

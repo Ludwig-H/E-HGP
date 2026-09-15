@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — branches q2 distribuables et préparation q3/q4
+# Morse HGP 3D v8 — équipe persistante q2 et préparation q3/q4
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -35,6 +35,30 @@ catalogue q3/q4 ni une tour FULL.
 Les mesures historiques citées restent v7.
 
 ## État exécutable
+
+La dix-septième tranche raccorde les [branches q2 à une équipe persistante
+commune au front](docs/P0_EQUIPE_PERSISTANTE_Q2.md). Plus de création
+d'équipe par ancre dans cette entrée : les workers peuvent reprendre
+des frères B non visités sans refaire leurs préfixes. Les petits census
+et les rectangles Pool restent synchrones ; Coarse reste le défaut existant.
+
+Les [preuves propres](receipts/q2_cooperative_20260915/README.md) comprennent
+69 CTests Release et Clang ASan/UBSan, la gate Clang TSan,235 appels coopératifs contre91
+références et un oracle indépendant, et174 mesures closes à1/4workers,
+n8k/16k/32k, K5/10, s8/10/12. La reprise ASan/UBSan est close après
+interruption de sa première capture par redémarrage ; celle-ci reste incomplète
+et conservée. Les trois builds de qualification sont désormais épinglés.
+
+**Pas de gain de vitesse établi.** Les dons sont réellement exercés sur
+les rangées sans Pool, mais les continuations restent trop coûteuses dans
+ces observations. Les six postes principaux sont sous×3 aux doublements
+sur les quatre séries Pool64 ; F des rangées fait néanmoins×4 et le résidu
+Pairwise des amas jusqu'à×3,447. Aucune borne générale sous-quadratique.
+La suite vise les plages d'ancres et plans Pool possédés, puis les millions
+de petites requêtes en lots compacts. FULL, q3/q4 produit, GPU et contrats
+G4 restent ouverts ; GCP non utilisé.
+
+## Seizième tranche publiée à897085f8 — historique
 
 La seizième tranche ajoute le [détachement des frères B et un répartiteur
 intérieur](docs/P0_DETACHEMENT_CENSUS_Q2.md). Une même ancre peut maintenant

@@ -3,7 +3,26 @@
 15 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
-État constructeur courant : seizième tranche P0,
+État constructeur courant : dix-septième tranche P0,
+[équipe persistante front+census q2](../docs/P0_EQUIPE_PERSISTANTE_Q2.md).
+69 CTests Release et Clang ASan/UBSan, ainsi que la gate Clang TSan, PASS ;
+reprise après redémarrage close, première capture conservée comme incomplète.
+Les trois builds sont épinglés.235 appels
+coopératifs,91 Coarse, oracle scalaire indépendant ;174 mesures closes,
+tous comptes géométriques et supports égaux. Pas de gain stable : le
+chemin Coarse existant reste le défaut. Les dons sont réels sur rangées
+sans Pool, mais leur surcoût n'est pas amorti dans17/18 observations.
+Les gros Pool/replis synchrones et millions de petites racines restent
+ouverts : curseurs de plages d'ancres et plans parentaux possédés, puis
+lots compacts singleton, sont proposés dans la note, pas implémentés.
+Six postes sous×3 sur la campagne Pool64 ne prouvent pas une borne générale ;
+F des rangées fait×4 et l'aval Pool des amas jusqu'à×3,447.
+Les [preuves propres](../receipts/q2_cooperative_20260915/README.md)
+ne sont pas celles de l'auditeur B. Aucun FULL/G4/GPU acquis ; GCP non utilisé.
+
+## Historique : seizième tranche publiée à897085f8
+
+Seizième tranche P0,
 [détachement des frères q2 et répartiteur d'ancre](../docs/P0_DETACHEMENT_CENSUS_Q2.md).
 66 CTests Release/Clang ASan/UBSan et la gate Clang TSan du répartiteur PASS.
 Les [preuves propres](../receipts/q2_census_split_20260915/README.md) couvrent

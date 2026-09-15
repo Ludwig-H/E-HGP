@@ -95,6 +95,14 @@ inclure ses propositions et évaluations de bornes supplémentaires.
 
 ## 1. Ordre des travaux et sens de « rédhibitoire »
 
+Évolution tranche17 : une [équipe unique front+census](P0_EQUIPE_PERSISTANTE_Q2.md)
+existe désormais pour le front Coarse et les racines hors Pool sélectionnées
+par taille. Le verrou de création d'équipe par ancre est levé dans cette
+entrée, pas celui des plans parentaux Pool ni celui du front Donate commun.
+La pile de6 272 octets par continuation et les allocations par racine restent
+payées : elles peuvent annuler le gain de répartition. Ne pas confondre cette
+avancée d'ordonnancement et une réduction du travail géométrique.
+
 La [seizième tranche](P0_DETACHEMENT_CENSUS_Q2.md) rend les frères q2
 indépendants, puis les exécute dans un répartiteur d'ancre. Leur somme
 conserve le travail géométrique ; les recherches ne sont pas recréées.

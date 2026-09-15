@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_wspd_q2_cooperative_checks.py",
+    "read",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/q2_cooperative_20260915/separations_3yoggku9"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-15T07:52:12.948077+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"full_contract_qualified\": false, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q2_cooperative_20260915/separations_3yoggku9\", \"q2_measures\": 72, \"records\": 72, \"status\": \"passed\"}\n",
+  "stderr": "",
+  "stdout_base64": "eyJmdWxsX2NvbnRyYWN0X3F1YWxpZmllZCI6IGZhbHNlLCAicGF0aCI6ICIvd29ya3NwYWNlcy9FLUhHUC9tb3JzZWhncDNEX3Y4L3JlY2VpcHRzL3EyX2Nvb3BlcmF0aXZlXzIwMjYwOTE1L3NlcGFyYXRpb25zXzN5b2dna3U5IiwgInEyX21lYXN1cmVzIjogNzIsICJyZWNvcmRzIjogNzIsICJzdGF0dXMiOiAicGFzc2VkIn0K",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-15T07:52:13.172214+00:00"
+}

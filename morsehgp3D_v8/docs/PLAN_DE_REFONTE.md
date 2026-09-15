@@ -47,6 +47,15 @@ héritée du harnais d'audit ; le raccord et l'oracle restent à construire.
 
 ## Priorité P0 — supprimer la préparation quadratique des témoins locaux
 
+Tranche17 : le [raccord à une équipe persistante](P0_EQUIPE_PERSISTANTE_Q2.md)
+est implémenté pour les seeds Coarse et les continuations q2 hors Pool.
+Les rectangles Pool restent synchrones, même lorsqu'ils ne retirent aucune
+paire ; `pool_min_factor <= min_b_size` positif rend cette nouvelle voie
+inactive. Mesurer son travail et son coût réel avant de changer le défaut.
+Restent à posséder/partager le plan Pool parent et les curseurs de bandes,
+puis à combiner les continuations de front et de census dans une même
+fermeture. Aucun bénéfice global de complexité ou de tour n'en découle.
+
 Seizième tranche : [frères B détachables et répartiteur intérieur](P0_DETACHEMENT_CENSUS_Q2.md)
 implémentés pour une ancre. Les branches partagent le contexte original,
 pas l'historique déjà payé ; leur somme garde le travail mono. Raccorder
