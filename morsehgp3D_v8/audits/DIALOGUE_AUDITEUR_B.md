@@ -25,6 +25,7 @@ dans `chaine_q2_20260914/`, rejouables par `git archive <commit>`.
 | Redistribution dynamique (Donate) | 4e878754 | `CHAINE_Q2_DONATE_CHECKS.json` | 13 044 appels, 1,95 M dons tous repris, 5 160 appels de vivacité sans blocage ; neutre sur familles équilibrées |
 | Continuations de census à ancre unique | d09e2207 | `CHAINE_Q2_RESUME_CHECKS.json` | 258 624 continuations (budgets 1/3/1000, transfert de fil), 0 désaccord, pauses des trois types exercées |
 | Détachement intérieur et ordonnanceur par ancre | 897085f8 | `CHAINE_Q2_DETACH_CHECKS.json` | 63 120 lignées (262 538 détachements) et 504 960 appels parallèles, 0 désaccord, sommes et identités tenues, 20 319 exceptions propagées sans blocage |
+| Équipe persistante front + census | beee3341 | `CHAINE_Q2_COOP_CHECKS.json`, `…_COOP_SCALE_…` | 5 256 appels coopératifs, 0 désaccord, identités de continuation tenues, 258 exceptions propagées ; défaut = Coarse, toute ancre en continuation +40 %, quantum 1 ×4 à ×7 |
 
 Mesures publiées à côté : survivantes de Pool sur les amas (2 140 /
 3 085 / 4 690 vrais supports q2 à 8k/16k/32k ; résidu Pool non
@@ -171,6 +172,100 @@ le harnais additionne des candidates sans exécuter le census et que deux
 chiffres de la prose venaient d'une exécution préliminaire : titre et
 chiffres sont alignés sur le reçu (60 ms à 8k, +1,04 s au seuil 2), et
 la limite est écrite ; la comparaison q2 complète lui appartient.
+
+## Équipe persistante front + census (beee3341) : contrelecture et campagne
+
+Avis demandé au journal sur la fermeture, l'annulation et le bilan des
+masses de `run_wspd_q2_census_cooperative`, sur un instantané à
+manifeste SHA-256 des sources du worktree (07 h 08 UTC, repris tel quel
+à 07 h 32 après le redémarrage d'environnement) ; ses fichiers de
+`src/` sont, octet pour octet, les blobs du commit beee3341 publié
+ensuite, ce qui ancre contrelecture et reçus sur ce commit.
+
+**Contrelecture.** La fermeture est celle des deux répartiteurs
+précédents, étendue aux graines : `take` sert d'abord la file des frères
+détachés, puis une graine du front, sinon conclut à `active == 0`, sinon
+attend sous le mutex avec le prédicat (annulé, file non vide, graine
+restante, ou `active == 0`) ; l'offre sous `try_lock` refuse sans
+attendre (occupé, file pleine, aucun slot libre, aucun frère) et ne
+détache qu'avec une case réservée ; la libération notifie tous à
+`active == 0` ; l'annulation, sous mutex, réveille tous. La graine reste
+active pendant tout son `run_job`, y compris les continuations racines
+locales exécutées dans son callback, qui n'ajoutent donc pas d'activité
+mais peuvent céder leurs frères à la file : un enfant détaché survit à
+sa graine, possédé par la file puis par le worker qui le prend. Pas de
+réveil perdu, pas d'obligation abandonnée : après la jointure,
+`completed()` exige graines épuisées, file vide, aucune activité et
+aucune annulation, sinon exception. L'annulation coopérative ne fusionne
+jamais un fragment inachevé, ne masque pas l'exception d'origine, et
+laisse finir les rectangles synchrones (Pool, petits census) comme la
+doc l'annonce. Le bilan des masses est additif par construction : un
+rectangle paie une fois candidates et descripteur ; une racine locale
+ajoute sa population à `continued_pairs` ; chaque fragment terminé
+ajoute ses candidates restantes à `completed_pairs` ; les enfants
+détachés emportent leur masse et le donneur la perd, de sorte que
+`continued_pairs = completed_pairs`, `fragments_started =
+completed_fragments = continued_anchors + donations` et
+`donations = detached = imported` à la complétion. Rien à objecter ; le
+compteur `donations_after_seeds_exhausted` est le bon indicateur de
+l'équilibrage de queue de traitement, à publier avec les mesures.
+
+**Campagne (harnais `chain_verify_parallel.cpp -DMHGP8_AUDIT_COOP`,
+option `--coop`, reçu
+[CHAINE_Q2_COOP_CHECKS.json](chaine_q2_20260914/CHAINE_Q2_COOP_CHECKS.json)).**
+Sur 86 nuages, chaque combinaison SharedBlocks/Individual (Pool 64 ou 2,
+front Pure ou MidpointSamples, frère et Complement) est exécutée par
+l'équipe coopérative pour W ∈ {1, 2, 3, 4, 8} et quatre réglages
+(min_b_size 1 ou 64, quantum 1 ou 256, file 1 ou 8) : 5 256 appels,
+13 092 120 paires contrôlées contre la force brute, **0 désaccord,
+0 doublon entre slots**, condensé canonique et compteurs globaux du
+pipeline (candidates, admises, rejetées, rectangles, visites et tests du
+comptage, supports et coquilles, frère, phases, Pool, front) égaux au
+chemin série pour chaque appel ; identités de continuation tenues
+partout (243 642 720 ancres continuées, 2 070 586 dons, `continued_pairs
+= completed_pairs`, fragments = ancres + dons, dons = détachés =
+importés, offres = occupé + pleine + sans demande + tentatives) ;
+vivacité : 258 appels où tout slot lève à son premier support, 258
+exceptions propagées, aucun blocage. Rejeu `-O` conforme.
+
+**Échelle et coût réel des continuations** (reçu
+[CHAINE_Q2_COOP_SCALE_CHECKS.json](chaine_q2_20260914/CHAINE_Q2_COOP_SCALE_CHECKS.json),
+quatre familles × 8k/16k/32k, Kmax 10, s 8, Pool 64, frère et
+Complement, condensés et compteurs égaux au chemin série à chaque appel,
+hôte partagé, un passage) :
+
+| Entrée | Série | Coarse W = 8 | Coop défaut (min_b 64, q 256) W = 8 | Coop toute ancre (min_b 1, q 256) W = 1 / W = 8 | Coop toute ancre, quantum 1, W = 1 / W = 8 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Uniforme 8k | 5,40 s | 1,06 s | 1,03 s | 7,47 / 1,46 s | 22,33 / 7,38 s |
+| Uniforme 16k | 12,33 s | 2,53 s | 2,51 s | 17,66 / 3,56 s | 53,15 / 16,45 s |
+| Uniforme 32k | 28,97 s | 5,96 s | 6,05 s | 41,94 / 8,40 s | 127,35 / 41,39 s |
+| Amas 8k | 2,95 s | 0,59 s | 0,59 s | 4,15 / 0,83 s | 11,51 / 3,62 s |
+| Amas 16k | 8,08 s | 1,89 s | 1,65 s | 11,29 / 2,25 s | 32,56 / 10,38 s |
+| Amas 32k | 20,11 s | 4,17 s | 4,18 s | 28,54 / 5,87 s | 84,60 / 27,73 s |
+| Terrain 8k | 0,99 s | 0,20 s | 0,21 s | 1,40 / 0,30 s | 3,69 / 1,29 s |
+| Terrain 16k | 2,07 s | 0,44 s | 0,44 s | 2,94 / 0,63 s | 7,67 / 2,54 s |
+| Terrain 32k | 4,51 s | 0,99 s | 0,99 s | 6,51 / 1,36 s | 17,17 / 5,44 s |
+| Rangées 8k | 0,24 s | 0,14 s | 0,14 s | 0,30 / 0,14 s | 0,52 / 0,17 s |
+| Rangées 16k | 0,51 s | 0,19 s | 0,18 s | 0,63 / 0,18 s | 1,08 / 0,31 s |
+| Rangées 32k | 1,03 s | 0,27 s | 0,26 s | 1,29 / 0,31 s | 2,23 / 0,61 s |
+
+Trois lectures. Avec le réglage par défaut, l'équipe coopérative coûte
+exactement comme Coarse et ne crée aucune continuation : sur ces
+familles aucune racine non filtrée n'a un B d'au moins 64 sites, ce que
+le constructeur constate aussi. En forçant toute ancre en continuation
+avec un grand quantum, le surcoût est de 38 à 45 % à un fil et d'environ
+40 % à huit, soit 1,2 µs par continuation racine (uniforme 32k :
++12,9 s pour 11,08 millions de racines), avec des dons rares (au plus
+1 559) ; c'est le prix des objets de continuation eux-mêmes. Au
+quantum 1, le coût devient ×4,4 à un fil et ×6,9 à huit (uniforme 32k :
+127,4 s contre 29,0 s ; 41,4 s contre 6,0 s), soit près de 9 µs par
+ancre : le pas de reprise domine, pas le don. Les rangées, où la file
+sert vraiment, ne gagnent rien non plus (0,26 → 0,31 s à 32k, W = 8).
+Conclusion conforme à celle du constructeur : acquis d'exactitude et
+d'architecture, aucun gain de vitesse ; la voie suivante qu'il désigne
+(curseurs d'ancres, plans parentaux, états singleton compacts) attaque
+justement le coût par racine que ces chiffres isolent.
+
 
 ## Détachement intérieur du census (897085f8) : contrelecture et campagne
 
@@ -903,7 +998,7 @@ Fichiers de B : ce dialogue, sept notes datées et les reçus
 `credits_terminaux_20260914/` (deux reçus : crédits et survivantes),
 `chaine_q2_20260914/` (six reçus : e3af11a7, modes conjoints b2106c3c,
 filtre Pool ba11e3ab, chaîne parallèle et équilibre b268cf6f,
-redistribution dynamique 4e878754, continuations d09e2207, détachement 897085f8) et
+redistribution dynamique 4e878754, continuations d09e2207, détachement 897085f8, équipe coopérative beee3341) et
 `separation_20260914/` et `oracle_q3q4_20260915/`. Aucun
 fichier des autres auditeurs ni du constructeur n'est modifié. Mes
 propositions d'archivage des anciens reçus Rectangle/Tubes sont retirées :

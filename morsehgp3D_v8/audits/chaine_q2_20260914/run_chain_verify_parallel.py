@@ -79,10 +79,12 @@ def main() -> int:
     parser.add_argument("--no-scale", action="store_true", help="pas de mesures 8k/16k/32k")
     parser.add_argument("--scale-only", action="store_true", help="seulement les mesures 8k/16k/32k (quatre familles, dont rangées)")
     parser.add_argument("--donate", action="store_true", help="redistribution dynamique : répète chaque appel pour Coarse, Donate{64,64} et Donate{1,1}")
+    parser.add_argument("--coop", action="store_true", help="équipe coopérative front + census (tranche 17) : ajoute run_wspd_q2_census_cooperative pour W ∈ {1,2,3,4,8} × quatre réglages")
     args = parser.parse_args()
     lib = Path(args.lib).resolve(); src = Path(args.src_root).resolve(); build = Path(args.build_dir).resolve()
     build.mkdir(parents=True, exist_ok=True)
-    pinned = [src / "src/pipeline/wspd_q2_parallel.hpp", src / "src/pipeline/wspd_q2_census.hpp", src / "src/pipeline/q2_census.cpp",
+    pinned = ([src / "src/pipeline/wspd_q2_cooperative.hpp", src / "src/pipeline/q2_census_resume.hpp", src / "src/pipeline/q2_census_parallel.hpp"] if args.coop else []) + \
+             [src / "src/pipeline/wspd_q2_parallel.hpp", src / "src/pipeline/wspd_q2_census.hpp", src / "src/pipeline/q2_census.cpp",
               src / "src/pipeline/q2_node_pool.hpp", src / "src/parallel/joined_workers.hpp", src / "src/parallel/work_reduction.hpp",
               src / "src/wspd/front.cpp", src / "bench/front_fixtures.hpp", HERE / "chain_verify_parallel.cpp", lib]
     for p in pinned:
@@ -93,6 +95,8 @@ def main() -> int:
     compile_cmd = ["g++", "-std=c++20", "-O2", "-Wall", "-Wextra", f"-I{src / 'src'}", f"-I{src / 'bench'}"]
     if args.donate:
         compile_cmd.append("-DMHGP8_AUDIT_DONATE")
+    if args.coop:
+        compile_cmd.append("-DMHGP8_AUDIT_COOP")
     compile_cmd += [str(HERE / "chain_verify_parallel.cpp"), str(lib), "-pthread", "-o", str(binary)]
     done = run(compile_cmd, HERE)
     if done.returncode != 0:
@@ -127,9 +131,11 @@ def main() -> int:
         summary = parse_summary(done.stdout)
         if summary is None or done.returncode != 0:
             return fail(f"échec {' '.join(cmd)} (code {done.returncode}) :\n{done.stdout[-3000:]}\n{done.stderr[-2000:]}")
-        for key in ("mismatch", "cross_slot_dups", "digest_breaks", "counter_breaks"):
-            if summary.get(key) != 0:
+        for key in ("mismatch", "cross_slot_dups", "digest_breaks", "counter_breaks", "coop_mismatch", "coop_digest_breaks", "coop_counter_breaks", "coop_ident_breaks"):
+            if summary.get(key, 0) != 0:
                 return fail(f"désaccord {key} : {' '.join(cmd)}\n{done.stdout}")
+        if args.coop and summary.get("coop_liveness_runs", 0) != summary.get("coop_liveness_exceptions", 0):
+            return fail(f"vivacité coopérative : exception non propagée : {' '.join(cmd)}\n{done.stdout}")
         entry = {"command": " ".join(cmd), "wall_seconds": round(elapsed, 3), "summary": summary, "raw_stdout": done.stdout}
         if scale:
             entry["scale_rows"] = parse_scale(done.stdout)
@@ -146,11 +152,13 @@ def main() -> int:
               "counter_breaks": sum(r["summary"]["counter_breaks"] for r in runs),
               "donations": sum(r["summary"].get("donations", 0) for r in runs),
               "stolen": sum(r["summary"].get("stolen", 0) for r in runs)}
+    for key in ("coop_runs", "coop_mismatch", "coop_digest_breaks", "coop_counter_breaks", "coop_ident_breaks", "coop_continued", "coop_donations", "coop_liveness_runs", "coop_liveness_exceptions"):
+        totals[key] = sum(r["summary"].get(key, 0) for r in runs)
     receipt = {
         "title": "Chaîne parallèle front + census q2 : force brute, identité des condensés et des compteurs selon le nombre de fils",
         "date": "2026-09-14", "author_role": "auditeur indépendant B",
         "git_head": run(["git", "rev-parse", "HEAD"], ROOT).stdout.strip(), "src_root": str(src),
-        "compile_command": " ".join(compile_cmd), "pins_sha256": pins, "totals": totals, "runs": runs, "donate_schedules": bool(args.donate),
+        "compile_command": " ".join(compile_cmd), "pins_sha256": pins, "totals": totals, "runs": runs, "donate_schedules": bool(args.donate), "cooperative": bool(args.coop),
         "stable_digest_without_times": hashlib.sha256(json.dumps([r["summary"] for r in runs], sort_keys=True).encode()).hexdigest(),
         "scope": "Exactitude, absence de doublon entre slots, identité bit à bit des supports et des compteurs discrets selon W ; les temps d'échelle sont indicatifs (hôte partagé), jamais un contrat ; aucune tour FULL.",
     }
