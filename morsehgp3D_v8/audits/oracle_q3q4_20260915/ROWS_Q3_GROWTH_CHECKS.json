@@ -1,0 +1,132 @@
+{
+  "title": "Croissance q3 sur deux rangées parallèles (oracle i128) : candidats, supports vivants, coquilles excédentaires",
+  "date": "2026-09-15",
+  "author_role": "auditeur indépendant B",
+  "git_head": "cd40296bb55bc51a7f0d359eba0da3afac03d5d6",
+  "pins_sha256": {
+    "oracle_q3q4.cpp": "f37b0f09472b3f4274eea6fc1c581ad0d4dae9f8582cd83de62928f76661c7db"
+  },
+  "runs": [
+    {
+      "m": 25,
+      "D": 40,
+      "D_over_delta": 10,
+      "kmax": 5,
+      "acute_triangles": 4414,
+      "alive_q3": 176,
+      "alive_cross_longest_edge": 176,
+      "extra_shell": 4144
+    },
+    {
+      "m": 25,
+      "D": 40,
+      "D_over_delta": 10,
+      "kmax": 10,
+      "acute_triangles": 4414,
+      "alive_q3": 920,
+      "alive_cross_longest_edge": 920,
+      "extra_shell": 4144
+    },
+    {
+      "m": 25,
+      "D": 200,
+      "D_over_delta": 50,
+      "kmax": 5,
+      "acute_triangles": 4600,
+      "alive_q3": 176,
+      "alive_cross_longest_edge": 176,
+      "extra_shell": 4312
+    },
+    {
+      "m": 25,
+      "D": 200,
+      "D_over_delta": 50,
+      "kmax": 10,
+      "acute_triangles": 4600,
+      "alive_q3": 920,
+      "alive_cross_longest_edge": 920,
+      "extra_shell": 4312
+    },
+    {
+      "m": 50,
+      "D": 40,
+      "D_over_delta": 10,
+      "kmax": 5,
+      "acute_triangles": 20076,
+      "alive_q3": 376,
+      "alive_cross_longest_edge": 376,
+      "extra_shell": 19356
+    },
+    {
+      "m": 50,
+      "D": 40,
+      "D_over_delta": 10,
+      "kmax": 10,
+      "acute_triangles": 20076,
+      "alive_q3": 2120,
+      "alive_cross_longest_edge": 2120,
+      "extra_shell": 19356
+    },
+    {
+      "m": 50,
+      "D": 200,
+      "D_over_delta": 50,
+      "kmax": 5,
+      "acute_triangles": 39200,
+      "alive_q3": 376,
+      "alive_cross_longest_edge": 376,
+      "extra_shell": 38000
+    },
+    {
+      "m": 50,
+      "D": 200,
+      "D_over_delta": 50,
+      "kmax": 10,
+      "acute_triangles": 39200,
+      "alive_q3": 2120,
+      "alive_cross_longest_edge": 2120,
+      "extra_shell": 38000
+    },
+    {
+      "m": 100,
+      "D": 40,
+      "D_over_delta": 10,
+      "kmax": 5,
+      "acute_triangles": 62272,
+      "alive_q3": 776,
+      "alive_cross_longest_edge": 776,
+      "extra_shell": 60652
+    },
+    {
+      "m": 100,
+      "D": 40,
+      "D_over_delta": 10,
+      "kmax": 10,
+      "acute_triangles": 62272,
+      "alive_q3": 4520,
+      "alive_cross_longest_edge": 4520,
+      "extra_shell": 60652
+    },
+    {
+      "m": 100,
+      "D": 200,
+      "D_over_delta": 50,
+      "kmax": 5,
+      "acute_triangles": 323400,
+      "alive_q3": 776,
+      "alive_cross_longest_edge": 776,
+      "extra_shell": 318500
+    },
+    {
+      "m": 100,
+      "D": 200,
+      "D_over_delta": 50,
+      "kmax": 10,
+      "acute_triangles": 323400,
+      "alive_q3": 4520,
+      "alive_cross_longest_edge": 4520,
+      "extra_shell": 318500
+    }
+  ],
+  "scope": "Mesure d'audit bornée (n ≤ 200) ; aucun statut public ; les rangées sont hors domaine générique pour q3."
+}

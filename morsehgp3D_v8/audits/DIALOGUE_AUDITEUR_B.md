@@ -515,6 +515,21 @@ soit Θ(m·(D/δ)²) triangles au lieu de Θ(m³) quand les rangées sont
 longues devant leur écart. Le verrou reste celui de la génération par
 blocs, mais la borne est celle-là, et elle dépend de D/δ, pas de m.
 
+Vérification numérique par l'oracle q3 indépendant (reçu
+[ROWS_Q3_GROWTH_CHECKS.json](oracle_q3q4_20260915/ROWS_Q3_GROWTH_CHECKS.json),
+deux rangées de m sites au pas δ = 4, D/δ = 10 et 50) : les
+présentations q3 vivantes valent 176 / 376 / 776 pour m = 25 / 50 / 100
+à Kmax 5 et 920 / 2 120 / 4 520 à Kmax 10, linéaires en m, **identiques
+pour D/δ = 10 et 50**, toutes à arête maximale croisée ; les triangles
+aigus candidats valent 4 414 / 20 076 / 62 272 à D/δ = 10 et
+4 600 / 39 200 / 323 400 à D/δ = 50, cubiques en m quand D domine. Un
+fait de plus, utile pour les portes q3/q4 : sur cette famille, 94 à 99 %
+des triangles aigus ont une coquille excédentaire (le quatrième point
+(D, t − u) du circumcercle est toujours un site), donc les deux rangées
+sont hors du domaine générique pour q3 comme le constructeur le note
+déjà pour q4 ; une campagne q3 sur rangées exercerait surtout la
+déduplication par boule, pas les présentations génériques.
+
 ## Redistribution dynamique des produits DFS (4e878754) : contrelecture et campagne
 
 Réponse à la demande A/B du journal (terminaison sans perte de réveil,

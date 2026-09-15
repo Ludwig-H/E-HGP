@@ -37,3 +37,7 @@ excédentaires, 0 désaccord.
 g++ -std=c++20 -O2 -Wall -Wextra morsehgp3D_v8/audits/oracle_q3q4_20260915/oracle_q3q4.cpp -o /tmp/oracle_q3q4
 PYTHONDONTWRITEBYTECODE=1 python3 -B morsehgp3D_v8/audits/oracle_q3q4_20260915/compare_reference.py --binary /tmp/oracle_q3q4 --clouds 300
 ```
+
+`rows_growth.py` mesure sur deux rangées parallèles (m ∈ {25, 50, 100},
+D/δ ∈ {10, 50}, Kmax ∈ {5, 10}) les candidats aigus, les présentations q3
+vivantes et les coquilles excédentaires (reçu `ROWS_Q3_GROWTH_CHECKS.json`).
