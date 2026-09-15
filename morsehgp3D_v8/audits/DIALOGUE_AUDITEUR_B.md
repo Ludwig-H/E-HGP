@@ -9,6 +9,37 @@ limitées à ce dossier. `phase=exploration_v8_hors_registre`,
 `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 GCP non utilisé.
 
+## État de l'audit B au 15 septembre 2026
+
+Chaque tranche publiée du chantier v8 a été confrontée à la force brute
+exacte (paires q2 : intérieurs stricts, coquille complète, clé) sur des
+sources identiques, haché par haché, aux blobs du commit indiqué ; reçus
+dans `chaine_q2_20260914/`, rejouables par `git archive <commit>`.
+
+| Tranche | Commit | Reçu | Résultat |
+| --- | --- | --- | --- |
+| Front + census q2, frère, ordre Complement | e3af11a7 | `CHAINE_Q2_CHECKS.json` | 86 × 8 combinaisons, 104,7 M paires, 0 désaccord |
+| Census conjoint A × B (SharedProduct / SharedAnchors) | b2106c3c | `CHAINE_Q2_JOINT_CHECKS.json` | 86 × 18, 235,7 M paires, 0 désaccord, admission conjointe nulle comme prédit |
+| Filtre Pool terminal (`pool_min_factor`) | ba11e3ab | `CHAINE_Q2_POOL_CHECKS.json` | 86 × 25, 327,3 M paires, 0 désaccord ; seuil 64 = 99,94 % de la masse filtrable pour F/57 |
+| Workers du front et du census | b268cf6f | `CHAINE_Q2_PARALLEL_CHECKS.json`, `…_BALANCE_…` | 4 348 appels, W ∈ {1,2,3,4,8}, condensé et 22 compteurs identiques ; ×4,1 à ×4,9 à W = 8 ; rangées déséquilibrées |
+| Redistribution dynamique (Donate) | 4e878754 | `CHAINE_Q2_DONATE_CHECKS.json` | 13 044 appels, 1,95 M dons tous repris, 5 160 appels de vivacité sans blocage ; neutre sur familles équilibrées |
+| Continuations de census à ancre unique | d09e2207 | `CHAINE_Q2_RESUME_CHECKS.json` | 258 624 continuations (budgets 1/3/1000, transfert de fil), 0 désaccord, pauses des trois types exercées |
+
+Mesures publiées à côté : survivantes de Pool sur les amas (2 140 /
+3 085 / 4 690 vrais supports q2 à 8k/16k/32k ; résidu Pool non
+canonique), séparation s ∈ {8, 10, 12} (même objet, coûts voisins,
+s = 8 confirmé), crédits terminaux et tubes (nuls sur nuages
+irréguliers). Corrections acquittées : chiffres de la note des crédits
+(sur son reçu), invariant I1, argument des rangées (cordes 2u, témoins W3
+pour u > D/√3).
+
+Points ouverts pour la suite : q3/q4 (réponses mathématiques ci-dessous,
+harnais de force brute q3/q4 à écrire dès la première brique : prédicats
+exacts en i128 déjà bornés), reprise mi-plage des continuations (cas
+positif absent tant que l'émission reste atomique), déséquilibre des gros
+jobs de census (rangées, sous-arbres LiDAR de A), contrats FULL et G4
+hors de portée de ces reçus.
+
 ## Verdict de la campagne adversariale : aucun défaut du produit
 
 Huit dimensions ont été attaquées par des agents indépendants sur
