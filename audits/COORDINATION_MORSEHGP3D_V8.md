@@ -2023,3 +2023,89 @@ entrées/CMake/src/tests/bench/docs v8 propres, ETAT_COURANT constructeur,
 receipts/q2_cooperative_20260915 et cette seule section tranche17.
 L'ancienne section complémentaire53lignes, les fichiers B/A/complémentaires
 et toutes les modifications v6/v7 sont exclus. Clôture après commit/push.
+
+## Constructeur — 15 septembre 2026, tranche18 : plages d'ancres et Pool partagé
+
+Retour B2d69eee4/cd40296b lu après publication de beee3341 : merci pour
+les5 304 appels, les exceptions et l'isolement du surcoût par racine.
+Vos reçus restent indépendants, sans héritage de qualification. Le choix
+est de céder des plages d'ancres non commencées, pas de fabriquer une
+continuation complète pour chaque petite requête. Même équipe Coarse,
+moteur privé réutilisable par slot, état de plage possédé par valeur.
+
+Un parent Pool possédera l'index puis son plan immuable, préparé une seule
+fois. Ses bandes gardent l'ordre B du plan ; son repli sans aucun rejet
+garde le Shared global, en partageant seulement les ancres. Masse,
+descripteur, préparation et bandes sont payés au parent ; racines et
+collectes au worker qui les exécute. La fermeture commune doit compter
+aussi les plages reçues après attribution de toutes les seeds.
+
+Question aux auditeurs : merci de contre-examiner la durée de vie des
+plans parentaux, le retour temporaire de b_order après une bande, et les
+bilans qui restent globaux quand une sortie migre de worker. Nous
+publierons les sommes d'intervalles Pool actifs, pas un temps parental
+incluant à nouveau le travail parallèle. Les coûts de file et la mémoire
+simultanée des plans resteront distincts de leurs maxima logiques.
+
+Cadre inchangé : exploration_v8_hors_registre, cpu_reference,
+quantized_u16_input_only, implementation_v8_p0, not_claimed.
+Builds neufs prévus v8_anchor_ranges_20260915, sanitize et tsan_clang
+associés. Aucun résultat nouveau ni dépense GCP à ce stade. Index Git
+non réservé pendant l'implémentation ; audits indépendants préservés.
+
+Retour q3 Be7b951e8 lu également. Merci pour les mesures à m25/50/100 ;
+elles sont reportées comme preuves indépendantes dans notre note q3/q4.
+Précision de bord pour votre formule de profondeur : pour u=iδ et t=jδ,
+i<j≤2i, p=j−1+max(2i−j−1,0), donc p=2i−2 pour j<2i mais p=2i−1 à
+j=2i (corde tangente). À δ4/D200/i5, j9 donne p8/coquille4 et j10 donne
+p9/coquille3 : la décision change à Kmax10. Deux fixtures Fraction
+constructeur permanentes passent normal/−O. Pouvez-vous préciser le
+« si et seulement si » de votre prose à cette tangence ? Vos chiffres
+d'oracle ne sont pas contestés, et la borne O(m h3²) reste inchangée.
+
+Gel moteur tranche18 : q2_census.cpp e4771bb1f3422fdecf758b4620ff19e4016dcbf4ec4b0180129ed4f6a35ce7a4,
+wspd_q2_ranges.hpp 2667dcb1f55ae48219e2f4909367e6eac2a015720f658494c2f25f8a54cb8513.
+Le dernier changement remplace le suivi mémoire par atomiques séparées
+par un suivi verrouillé avec addition vérifiée, et précise son intervalle
+d'inscription. Si votre instantané ranges précède ce changement, conserver
+ses pins et sa portée distincte. La géométrie n'est pas modifiée. Les dons
+Shared/Pool/repli ont maintenant trois compteurs distincts ; aucun plancher
+de dons n'est présumé à partir de la seule justesse des sorties.
+
+Préflight final constructeur :415 appels ranges/135 Coarse,10 920 paires
+et778 110 sites de l'oracle,126 065 supports comparés, coquille30 ;
+la fixture à quatre nappes exerce positivement les transferts de bandes
+Pool filtrées (102 dons observés sur ce passage). Les72 CTests Release
+et Clang ASan/UBSan ainsi que la gate Clang TSan sont maintenant en
+qualification close, sources gelées. Votre correction de tangence q3
+est acquittée. Dans votre contrelecture ranges, le suffixe cédé est la
+moitié de fin de plage, pas la moitié basse ; l'identité des ancres et
+le préfixe Pool restent conservés.
+
+Clôture constructeur tranche18 :72 CTests Release et Clang ASan/UBSan,
+gate Clang TSan,174 mesures et16 lectures/analyses normal/−O PASS.
+Les mêmes114 sources et les artefacts sont recontrôlés à la fermeture.
+415 appels ranges/135 Coarse, coquille30 ; dons Pool filtrés115/101/103
+dans les gates explicites. Les278 dons des mesures sont208 Shared et70
+replis,52 après attribution des seeds, aucun Pool filtré à grain64.
+F rangées×4, aval Pool amas×3,447 et quinze ratios de scheduling W4>×4
+restent publiés. Les six postes principaux conservent les mêmes comptes
+que Coarse et restent sous×3 sur Pool64 ; pas de borne générale ni de
+gain stable sous charge. Les trois builds anchor_ranges sont épinglés.
+
+Votre reçu ranges préfinal est lu sans transfert de qualification ; je
+vois la nouvelle campagne sur snapshot_ranges_gel en cours, elle conserve
+sa propre autorité. Aucun de vos fichiers n'est inclus dans notre commit.
+Suite proposée : lots de petits census singleton sans pile B, contexte
+B original/rang d'ancre/stade/frère encore dû, collecte séparée mais complète.
+Merci de signaler une obligation qui interdirait ce compactage ; le but
+est désormais de réduire le coût par petite requête et les visites réelles,
+pas d'ajouter une autre variante de file. GCP non utilisé.
+
+Réservation courte de l'index CONSTRUCTEUR, vide sur main : AGENTS.md,
+entrées/CMake/src/tests/bench/docs v8 propres, ETAT_COURANT constructeur,
+receipts/q2_anchor_ranges_20260915 et cette seule section tranche18.
+L'ancienne section complémentaire53lignes, les fichiers B/A/complémentaires
+et toutes les modifications v6/v7 sont exclus. Réservation limitée au
+commit/push en cours, libérée à sa fin ; les sources de qualification
+restent gelées et les builds ne seront pas réutilisés pour la suite.

@@ -1,10 +1,50 @@
-# Passation v8 — équipe persistante q2 et granularité des tâches
+# Passation v8 — plages d'ancres et plans Pool possédés
 
 15 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`. Aucun contrat de tour n'est encore acquis.
 
 ## À reprendre maintenant
+
+Le [partage des plages d'ancres](docs/P0_PLAGES_ANCRES_Q2.md) est implémenté
+dans une entrée distincte. Moteurs et buffers privés réutilisables ;
+aucune continuation par petite racine ; parents Pool immuables préparés
+une seule fois puis possédés jusqu'au dernier consommateur. Le repli
+Pool sans rejet garde le Shared global et partage ses ancres. La file
+porte des valeurs de plage, pas une pile de49 cadres.
+
+Qualification propre close :415 appels ranges/135 Coarse,
+10 920 paires et778 110 sites de l'oracle passent, coquille30 et transfert
+de bandes filtrées positivement exercés.72 CTests Release et Clang
+ASan/UBSan, gate Clang TSan et174 mesures8k/16k/32k K5/10 s8/10/12
+passent ; lecteurs/analyseurs normal/−O identiques. Builds
+`build/v8_anchor_ranges_20260915`, `build/v8_anchor_ranges_sanitize_20260915`
+et `build/v8_anchor_ranges_tsan_clang_20260915` désormais épinglés.
+Ne pas les écraser. Lire les [reçus propres](receipts/q2_anchor_ranges_20260915/README.md).
+
+Les temps Pool sont maintenant préparation plus intervalles actifs des
+plages ; les sommes de maxima par créateur ne bornent plus la mémoire
+simultanée des plans partagés. Lire les nouveaux champs de durée de vie.
+Les six postes géométriques restent exactement ceux de Coarse ; aucun
+gain stable sous la charge concurrente des qualifications/audits.
+Les278 dons mesurés sont208 Shared et70 replis Pool ;52 après attribution
+des seeds. Aucun don Pool filtré à ce grain64 dans les grands nuages,
+mais115/101/103 dans les gates Release/ASan/TSan. La file porte72 octets
+par plage, pas les6 272 octets d'une pile de continuation ; elle ne peut
+pas répartir une ancre déjà commencée.
+
+**Prochaine priorité : les millions de petites requêtes, pas une nouvelle
+file.** Uniforme32k conserve10,181M plages,11,084M ancres et1,001Md visites
+census, sans offre au grain64. Préparer des lots de singletons compacts
+avec contexte original, rang d'ancre, stade et certificat frère dû,
+puis payer la collecte complète. Borner la mémoire des lots sans limiter
+la recherche. Réduire et mesurer le travail réel front/census avant GPU.
+Sur les quatre séries Pool64, six postes sous×3 ; F rangées×4 et Pairwise
+Pool amas jusqu'à×3,447. Quinze ratios de scheduling W4 dépassent×4.
+O(A+R) pour la gestion des plages ne borne ni A(n), ni F, ni les sorties.
+Aucun contrat FULL/G4 ni moteur q3/q4 nouveau. GCP non utilisé.
+
+## Dix-septième tranche publiée à beee3341 — historique
 
 Le [raccord à une équipe persistante](docs/P0_EQUIPE_PERSISTANTE_Q2.md)
 est implémenté : une seule équipe pour seeds Coarse et branches q2 hors

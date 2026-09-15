@@ -3,6 +3,7 @@
 #include "wspd_q2_cooperative.hpp"
 #include "wspd_q2_census.hpp"
 #include "wspd_q2_parallel.hpp"
+#include "wspd_q2_ranges.hpp"
 #include "q2_joint_bounds.hpp"
 #include "q2_node_pool.hpp"
 #include "../spindle/q2_prepared_bounds.hpp"
@@ -1896,6 +1897,465 @@ WspdQ2CooperativeResult run_wspd_q2_census_cooperative(
       work.donations != detach.detached_frames || work.donations != detach.imported_frames ||
       work.waits != work.wakes)
     throw std::logic_error("mhgp8 cooperative q2 lost its continuation lineage");
+  pipeline.total_ms = milliseconds(started, Clock::now());
+  return result;
+}
+
+namespace {
+
+struct RangePoolLifetime {
+  std::mutex mutex;
+  u64 live{}, bytes{}, peak_live{}, peak_bytes{};
+  void acquire(u64 size) {
+    std::lock_guard lock(mutex);
+    if (live == std::numeric_limits<u64>::max() || size > std::numeric_limits<u64>::max() - bytes)
+      throw std::overflow_error("mhgp8 registered Pool parent lifetime size overflow");
+    ++live;
+    bytes += size;
+    peak_live = std::max(peak_live, live);
+    peak_bytes = std::max(peak_bytes, bytes);
+  }
+  void release(u64 size) noexcept {
+    std::lock_guard lock(mutex);
+    bytes -= size;
+    --live;
+  }
+};
+
+// Declaration order is the lifetime proof: the borrowed plan dies BEFORE
+// its retained owner. The tracker outlives the dispatcher and all workers.
+struct RangePoolParent final {
+  const Q2CensusIndexPtr owner;
+  const detail::Q2NodePoolPlan plan;
+  RangePoolLifetime& lifetime;
+  const u64 bytes;
+  RangePoolParent(Q2CensusIndexPtr index, std::size_t a_node, std::size_t b_node,
+                  unsigned threshold, RangePoolLifetime& tracker)
+      : owner(std::move(index)), plan(*owner, a_node, b_node, threshold), lifetime(tracker),
+        bytes(static_cast<u64>(resume_byte_sum(sizeof(RangePoolParent), plan.retained_bytes()))) {
+    lifetime.acquire(bytes);
+  }
+  ~RangePoolParent() { lifetime.release(bytes); }
+  RangePoolParent(const RangePoolParent&) = delete;
+  RangePoolParent& operator=(const RangePoolParent&) = delete;
+  RangePoolParent(RangePoolParent&&) = delete;
+  RangePoolParent& operator=(RangePoolParent&&) = delete;
+};
+
+struct Q2AnchorRangeTask {
+  Q2CensusIndexPtr index;
+  std::shared_ptr<const RangePoolParent> parent;
+  Range anchors{};  // Spatial ranks, or positions in parent.plan.a_ranks().
+  std::size_t b_node{}, pair_width{};
+  bool pool_selected{};  // Includes Shared passthroughs with parent==nullptr.
+};
+
+static_assert(std::is_nothrow_copy_constructible_v<Q2AnchorRangeTask>);
+static_assert(std::is_nothrow_move_assignable_v<Q2AnchorRangeTask>);
+
+[[nodiscard]] u64 anchor_range_mass(std::size_t anchors, std::size_t width) {
+  const auto mass = static_cast<i128>(anchors) * width;
+  if (mass > std::numeric_limits<u64>::max())
+    throw std::overflow_error("mhgp8 anchor range pair mass exceeds u64");
+  return static_cast<u64>(mass);
+}
+
+void merge_range_work(Q2RangeWork& out, const Q2RangeWork& value) {
+#define MHGP8_RANGE_SUM(field) counter_add(out.field, value.field)
+  MHGP8_RANGE_SUM(initial_ranges); MHGP8_RANGE_SUM(completed_ranges);
+  MHGP8_RANGE_SUM(received_ranges); MHGP8_RANGE_SUM(initial_anchors);
+  MHGP8_RANGE_SUM(completed_anchors); MHGP8_RANGE_SUM(initial_pairs);
+  MHGP8_RANGE_SUM(completed_pairs); MHGP8_RANGE_SUM(initial_shared_ranges);
+  MHGP8_RANGE_SUM(initial_pool_ranges); MHGP8_RANGE_SUM(initial_passthrough_ranges);
+  MHGP8_RANGE_SUM(donations); MHGP8_RANGE_SUM(donated_anchors);
+  MHGP8_RANGE_SUM(donated_pairs); MHGP8_RANGE_SUM(donations_after_seeds_exhausted);
+  MHGP8_RANGE_SUM(shared_donations); MHGP8_RANGE_SUM(pool_donations);
+  MHGP8_RANGE_SUM(passthrough_donations);
+  MHGP8_RANGE_SUM(offer_checks); MHGP8_RANGE_SUM(offer_busy);
+  MHGP8_RANGE_SUM(offer_full); MHGP8_RANGE_SUM(offer_no_waiter);
+  MHGP8_RANGE_SUM(waits); MHGP8_RANGE_SUM(wakes);
+#undef MHGP8_RANGE_SUM
+  out.max_queue_size = std::max(out.max_queue_size, value.max_queue_size);
+  out.max_active_tasks = std::max(out.max_active_tasks, value.max_active_tasks);
+}
+
+class AnchorRangeDispatcher {
+ public:
+  struct Item {
+    std::size_t seed{absent};
+    Q2AnchorRangeTask range;
+    [[nodiscard]] bool present() const noexcept { return seed != absent || range.index != nullptr; }
+  };
+
+  AnchorRangeDispatcher(std::size_t seeds, std::size_t capacity, std::size_t workers)
+      : queue_(capacity), seed_count_(seeds), worker_count_(workers) {}
+
+  [[nodiscard]] Item take(Q2RangeWork& work) {
+    std::unique_lock lock(mutex_);
+    for (;;) {
+      if (cancelled_) return {};
+      if (size_ != 0) {
+        counter_add(work.received_ranges);
+        ++active_;
+        work.max_active_tasks = std::max<u64>(work.max_active_tasks, active_);
+        return {absent, std::move(queue_[--size_])};
+      }
+      if (next_seed_ != seed_count_) {
+        const auto seed = next_seed_++;
+        ++active_;
+        work.max_active_tasks = std::max<u64>(work.max_active_tasks, active_);
+        return {seed, {}};
+      }
+      if (active_ == 0) return {};
+      counter_add(work.waits);
+      changed_.wait(lock, [&] {
+        return cancelled_ || size_ != 0 || next_seed_ != seed_count_ || active_ == 0;
+      });
+      counter_add(work.wakes);
+    }
+  }
+
+  void offer(Q2AnchorRangeTask& donor, Q2RangeWork& work) {
+    counter_add(work.offer_checks);
+    std::unique_lock lock(mutex_, std::try_to_lock);
+    if (!lock.owns_lock()) { counter_add(work.offer_busy); return; }
+    if (cancelled_) return;
+    if (size_ == queue_.size()) { counter_add(work.offer_full); return; }
+    if (active_ == worker_count_) { counter_add(work.offer_no_waiter); return; }
+    const auto count = donor.anchors.size() / 2;
+    if (count == 0) throw std::logic_error("mhgp8 range donor has no suffix");
+    const auto mass = anchor_range_mass(count, donor.pair_width);
+    auto child = donor;  // Value copy of shared immutable ownership: no allocation.
+    child.anchors.first = donor.anchors.last - count;
+    // Complete the child first. The following ownership transfer and donor
+    // narrowing are nonthrowing while the queue lock excludes all receivers.
+    queue_[size_] = std::move(child);
+    donor.anchors.last -= count;
+    ++size_;
+    changed_.notify_one();
+    counter_add(work.donations);
+    counter_add(work.donated_anchors, static_cast<u64>(count));
+    counter_add(work.donated_pairs, mass);
+    if (donor.parent) counter_add(work.pool_donations);
+    else if (donor.pool_selected) counter_add(work.passthrough_donations);
+    else counter_add(work.shared_donations);
+    if (next_seed_ == seed_count_) counter_add(work.donations_after_seeds_exhausted);
+    work.max_queue_size = std::max<u64>(work.max_queue_size, size_);
+  }
+
+  void release() {
+    std::lock_guard lock(mutex_);
+    --active_;
+    if (active_ == 0) changed_.notify_all();
+  }
+
+  void cancel() noexcept {
+    std::lock_guard lock(mutex_);
+    cancelled_ = true;
+    changed_.notify_all();
+  }
+
+  [[nodiscard]] u64 storage_bytes() const {
+    return static_cast<u64>(resume_bytes(queue_.capacity(), sizeof(Q2AnchorRangeTask)));
+  }
+
+  [[nodiscard]] bool completed() {
+    std::lock_guard lock(mutex_);
+    return !cancelled_ && next_seed_ == seed_count_ && size_ == 0 && active_ == 0;
+  }
+
+ private:
+  std::vector<Q2AnchorRangeTask> queue_;
+  const std::size_t seed_count_, worker_count_;
+  std::size_t next_seed_{}, size_{}, active_{};
+  bool cancelled_{};
+  std::mutex mutex_;
+  std::condition_variable changed_;
+};
+
+// Same integer Pool preparation accounting as terminal_pool. Only the new
+// route's ownership and interval boundaries change; the old route is intact.
+void record_range_pool_plan(const detail::Q2NodePoolPlan& plan, Q2PoolWork& work) {
+  counter_add(work.selected_rectangles);
+  counter_add(work.original_selected_anchors, static_cast<u64>(plan.a_range().size()));
+  counter_add(work.factor_sites, static_cast<u64>(plan.a_range().size()));
+  counter_add(work.factor_sites, static_cast<u64>(plan.b_range().size()));
+  counter_add(work.selected_pairs, plan.total_pairs());
+  counter_add(work.residual_pairs, plan.candidate_pairs());
+  counter_add(work.filtered_pairs, plan.total_pairs() - plan.candidate_pairs());
+  const auto& pw = plan.work();
+  counter_add(work.selection_tests, pw.selection_tests);
+  counter_add(work.witness_attempts, pw.witness_attempts);
+  counter_add(work.universal_queries, pw.predicates.universal_queries);
+  counter_add(work.q2_axis_terms, pw.predicates.q2_axis_terms);
+  counter_add(work.pool_selected, pw.pool_selected);
+  counter_add(work.pool_insertions, pw.pool_insertions);
+  counter_add(work.pool_shifted_entries, pw.pool_shifted_entries);
+  counter_add(work.prefix_class_visits, pw.prefix_class_visits);
+  counter_add(work.factor_read_visits, pw.selection_point_visits);
+  counter_add(work.factor_read_visits, pw.certification_anchor_visits);
+  counter_add(work.grouping_visits, pw.group_credit_visits);
+  counter_add(work.grouping_visits, pw.group_scatter_visits);
+  work.plan_peak_bytes = std::max(work.plan_peak_bytes, static_cast<u64>(plan.retained_bytes()));
+}
+
+}  // namespace
+
+WspdQ2RangeResult run_wspd_q2_census_ranges(
+    Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s,
+    WspdFrontMode front_mode, std::span<const Q2CensusConsumer> consumers,
+    WspdQ2RangeOptions options, Q2SiblingMode sibling_mode,
+    Q2WitnessOrder witness_order, std::size_t pool_min_factor) {
+  const auto started = Clock::now();
+  if (!index || consumers.empty() || options.jobs_per_worker == 0 ||
+      options.queue_capacity == 0 || options.anchor_grain == 0)
+    throw std::invalid_argument("mhgp8 anchor ranges require index, consumers and positive options");
+  if (consumers.size() > std::numeric_limits<std::size_t>::max() / options.jobs_per_worker)
+    throw std::overflow_error("mhgp8 anchor range target job count overflow");
+  static_cast<void>(resume_bytes(options.queue_capacity, sizeof(Q2AnchorRangeTask)));
+  if (options.queue_capacity > std::numeric_limits<std::size_t>::max() - consumers.size())
+    throw std::overflow_error("mhgp8 anchor range live parent bound overflow");
+  for (const auto& consumer : consumers)
+    validate_integrated_modes(Q2CensusMode::SharedBlocks, consumer, sibling_mode,
+                              witness_order, Q2AnchorMode::Individual);
+
+  WspdQ2RangeResult result;
+  result.range_task_bytes = sizeof(Q2AnchorRangeTask);
+  auto& pipeline = result.pipeline;
+  pipeline.requested_workers = static_cast<u64>(consumers.size());
+  pipeline.target_jobs = static_cast<u64>(consumers.size() * options.jobs_per_worker);
+  {
+    const std::vector<Q2CensusConsumer> callbacks(consumers.begin(), consumers.end());
+    const auto partition_started = Clock::now();
+    const auto plan = make_wspd_front_jobs(index, kmax, separation_s, front_mode,
+                                          static_cast<std::size_t>(pipeline.target_jobs), 1);
+    pipeline.partition_ms = milliseconds(partition_started, Clock::now());
+    pipeline.front = plan->prefix_result();
+    pipeline.prefix_product_visits = pipeline.front.work.product_visits;
+    pipeline.jobs = static_cast<u64>(plan->job_count());
+    pipeline.terminal_jobs = static_cast<u64>(plan->terminal_job_count());
+    pipeline.job_storage_bytes = static_cast<u64>(plan->retained_bytes());
+    const auto worker_count = plan->job_count() == 0 ? std::size_t{0} : callbacks.size();
+    pipeline.started_workers = static_cast<u64>(worker_count);
+    RangePoolLifetime pool_lifetime;
+    const auto dispatcher = worker_count == 0 ? nullptr
+        : std::make_unique<AnchorRangeDispatcher>(plan->job_count(), options.queue_capacity, worker_count);
+    if (dispatcher) pipeline.queue_storage_bytes = dispatcher->storage_bytes();
+    struct alignas(64) WorkerState {
+      WspdQ2CensusResult result;
+      Q2ParallelWorkerStats stats;
+      Q2RangeWork ranges;
+    };
+    std::vector<WorkerState> states(worker_count);
+    const auto nodes = index->spatial_nodes();
+    const auto order = index->spatial_order();
+
+    parallel_detail::run_joined_workers(worker_count,
+        [&](std::size_t worker, const std::atomic<bool>& cancel) {
+          const auto worker_started = Clock::now();
+          auto& state = states[worker];
+          auto& work = state.ranges;
+          {
+            Q2CensusEngine engine(*index, kmax, callbacks[worker]);
+            const auto run_range = [&](Q2AnchorRangeTask task) {
+              const auto active_started = task.pool_selected ? Clock::now() : Clock::time_point{};
+              const auto saved_order = engine.b_order;
+              if (task.parent) engine.b_order = task.parent->plan.b_order();
+              const auto offer = [&] {
+                if (worker_count > 1 && task.anchors.size() > options.anchor_grain &&
+                    !cancel.load(std::memory_order_relaxed)) dispatcher->offer(task, work);
+              };
+              try {
+                offer();
+                std::size_t since_offer = 0;
+                while (task.anchors.first != task.anchors.last &&
+                       !cancel.load(std::memory_order_relaxed)) {
+                  const auto position = task.anchors.first;
+                  const auto rank = task.parent ? task.parent->plan.a_ranks()[position] : position;
+                  const auto a_id = order[rank];
+                  if (task.parent) {
+                    counter_add(state.result.pool_work.selected_anchors);
+                    for (std::size_t j = 0; j < task.pair_width; ++j) {
+                      counter_add(state.result.pool_work.pair_roots);
+                      engine.pair_task(a_id, j);
+                    }
+                  } else {
+                    engine.root_start(0);
+                    if (witness_order == Q2WitnessOrder::ComplementFirst) {
+                      const Q2CensusEngine::OrderContext context{task.b_node, nodes[task.b_node].escape, rank};
+                      if (sibling_mode == Q2SiblingMode::Saturating)
+                        engine.shared_task<true, true>(a_id, task.b_node, 0, 0, absent, &context);
+                      else
+                        engine.shared_task<false, true>(a_id, task.b_node, 0, 0, absent, &context);
+                    } else if (sibling_mode == Q2SiblingMode::Saturating) {
+                      engine.shared_task<true>(a_id, task.b_node, 0, 0);
+                    } else {
+                      engine.shared_task(a_id, task.b_node, 0, 0);
+                    }
+                  }
+                  ++task.anchors.first;
+                  counter_add(work.completed_anchors);
+                  counter_add(work.completed_pairs, static_cast<u64>(task.pair_width));
+                  if (++since_offer == options.anchor_grain) {
+                    since_offer = 0;
+                    offer();
+                  }
+                }
+              } catch (...) {
+                engine.b_order = saved_order;
+                throw;
+              }
+              engine.b_order = saved_order;
+              if (task.anchors.first == task.anchors.last) counter_add(work.completed_ranges);
+              if (task.pool_selected)
+                state.result.pool_work.selected_total_ms += milliseconds(active_started, Clock::now());
+            };
+            const auto start_range = [&](Q2AnchorRangeTask task) {
+              counter_add(work.initial_ranges);
+              counter_add(work.initial_anchors, static_cast<u64>(task.anchors.size()));
+              counter_add(work.initial_pairs, anchor_range_mass(task.anchors.size(), task.pair_width));
+              if (task.parent) counter_add(work.initial_pool_ranges);
+              else if (task.pool_selected) counter_add(work.initial_passthrough_ranges);
+              else counter_add(work.initial_shared_ranges);
+              run_range(std::move(task));
+            };
+            const WspdRectangleConsumer receiver = [&](const WspdRectangle& rectangle) {
+              if (cancel.load(std::memory_order_relaxed)) return;
+              if (rectangle.lane_mask != 1)
+                throw std::logic_error("mhgp8 anchor range received a non-q2 rectangle");
+              auto a_node = rectangle.a_node;
+              auto b_node = rectangle.b_node;
+              if (nodes[a_node].range.size() > nodes[b_node].range.size()) std::swap(a_node, b_node);
+              const auto a = nodes[a_node].range;
+              const auto b = nodes[b_node].range;
+              counter_add(state.result.input_rectangles);
+              counter_add(state.result.anchor_queries, static_cast<u64>(a.size()));
+              counter_add(engine.result.work.input_descriptors);
+              const bool pool_selected = pool_min_factor != 0 && b.size() >= pool_min_factor;
+              if (!pool_selected) {
+                counter_add(engine.result.candidate_pairs, anchor_range_mass(a.size(), b.size()));
+                start_range({index, {}, a, b_node, b.size(), false});
+                return;
+              }
+              const auto preparation_started = Clock::now();
+              auto parent = std::make_shared<const RangePoolParent>(index, a_node, b_node, kmax, pool_lifetime);
+              auto& pool_work = state.result.pool_work;
+              record_range_pool_plan(parent->plan, pool_work);
+              const auto preparation_ms = milliseconds(preparation_started, Clock::now());
+              pool_work.preparation_ms += preparation_ms;
+              pool_work.selected_total_ms += preparation_ms;
+              counter_add(engine.result.candidate_pairs, parent->plan.candidate_pairs());
+              if (parent->plan.candidate_pairs() == parent->plan.total_pairs()) {
+                counter_add(pool_work.passthrough_rectangles);
+                counter_add(pool_work.passthrough_pairs, parent->plan.total_pairs());
+                counter_add(pool_work.passthrough_anchors, static_cast<u64>(a.size()));
+                parent.reset();  // No order borrowed by this Shared passthrough.
+                start_range({index, {}, a, b_node, b.size(), true});
+                return;
+              }
+              for (unsigned credit = 0; credit < kmax; ++credit) {
+                if (cancel.load(std::memory_order_relaxed)) return;
+                const auto group = parent->plan.a_groups()[credit];
+                const auto prefix = parent->plan.prefix_for_credit(credit);
+                if (group.size() == 0 || prefix == 0) continue;
+                counter_add(pool_work.bands);  // Once by the parent, not each donated chunk.
+                start_range({index, parent, group, b_node, prefix, true});
+              }
+            };
+            while (!cancel.load(std::memory_order_relaxed)) {
+              auto item = dispatcher->take(work);
+              if (!item.present()) break;
+              try {
+                if (item.range.index) {
+                  run_range(std::move(item.range));
+                } else {
+                  const auto part = plan->run_job(item.seed, receiver);
+                  parallel_detail::merge_work(state.result.front.work, part.work);
+                  counter_add(state.stats.jobs);
+                }
+              } catch (...) {
+                dispatcher->cancel();
+                dispatcher->release();
+                throw;
+              }
+              dispatcher->release();
+            }
+            state.result.census = engine.result;
+            state.result.sibling_work = engine.sibling_work;
+            state.result.order_work = engine.order_work;
+            state.result.joint_work = engine.joint_work;
+          }
+          state.stats.front_products = state.result.front.work.product_visits;
+          state.stats.input_rectangles = state.result.input_rectangles;
+          state.stats.count_node_visits = state.result.census.work.count_node_visits;
+          state.stats.supports = state.result.census.accepted_pairs;
+          state.stats.pool_peak_bytes = state.result.pool_work.plan_peak_bytes;
+          state.stats.payload_ms = state.result.census.payload_ms;
+          state.stats.elapsed_ms = milliseconds(worker_started, Clock::now());
+        }, parallel_detail::ThreadLauncher{}, [&]() noexcept {
+          if (dispatcher) dispatcher->cancel();
+        });
+    if (dispatcher && !dispatcher->completed())
+      throw std::logic_error("mhgp8 anchor range queue did not complete its obligations");
+    // Every thread has joined and the successful queue is empty: no tracker
+    // writer remains. Registered intervals end before member destruction.
+    if (pool_lifetime.live != 0 || pool_lifetime.bytes != 0)
+      throw std::logic_error("mhgp8 anchor range retained a Pool parent after completion");
+    result.max_live_pool_parents = pool_lifetime.peak_live;
+    result.max_live_pool_bytes = pool_lifetime.peak_bytes;
+
+    pipeline.workers.reserve(states.size());
+    result.workers.reserve(states.size());
+    for (const auto& state : states) {
+      parallel_detail::merge_work(pipeline.front.work, state.result.front.work);
+      parallel_detail::merge_work(pipeline.census_work, state.result.census.work);
+      parallel_detail::merge_work(pipeline.sibling_work, state.result.sibling_work);
+      parallel_detail::merge_work(pipeline.order_work, state.result.order_work);
+      parallel_detail::merge_work(pipeline.joint_work, state.result.joint_work);
+      parallel_detail::merge_work(pipeline.pool_work, state.result.pool_work);
+      counter_add(pipeline.input_rectangles, state.result.input_rectangles);
+      counter_add(pipeline.anchor_queries, state.result.anchor_queries);
+      counter_add(pipeline.candidate_pairs, state.result.census.candidate_pairs);
+      counter_add(pipeline.accepted_pairs, state.result.census.accepted_pairs);
+      counter_add(pipeline.rejected_pairs, state.result.census.rejected_pairs);
+      counter_add(pipeline.completed_jobs, state.stats.jobs);
+      counter_add(pipeline.pool_peak_bytes_sum, state.stats.pool_peak_bytes);
+      pipeline.worker_ms_sum += state.stats.elapsed_ms;
+      pipeline.payload_ms_sum += state.stats.payload_ms;
+      pipeline.workers.push_back(state.stats);
+      merge_range_work(result.work, state.ranges);
+      result.workers.push_back({state.ranges});
+    }
+  }
+
+  const auto front_mass = pipeline.front.work.residual_pair_mass[0];
+  const auto& pool = pipeline.pool_work;
+  if (pipeline.completed_jobs != pipeline.jobs || pipeline.front.active_lane_mask != 1 ||
+      pipeline.front.work.rejected_pair_mass[0] > pipeline.front.total_unordered_pairs ||
+      front_mass != pipeline.front.total_unordered_pairs - pipeline.front.work.rejected_pair_mass[0] ||
+      pool.selected_pairs > front_mass || pool.filtered_pairs > pool.selected_pairs ||
+      pool.residual_pairs != pool.selected_pairs - pool.filtered_pairs ||
+      pool.passthrough_pairs > pool.residual_pairs ||
+      pool.pair_roots != pool.residual_pairs - pool.passthrough_pairs ||
+      pool.pair_roots > pipeline.candidate_pairs ||
+      pipeline.candidate_pairs != front_mass - pool.filtered_pairs ||
+      pipeline.input_rectangles != pipeline.front.work.emitted_rectangles ||
+      pipeline.census_work.input_descriptors != pipeline.input_rectangles ||
+      pipeline.accepted_pairs > pipeline.candidate_pairs ||
+      pipeline.rejected_pairs != pipeline.candidate_pairs - pipeline.accepted_pairs ||
+      pipeline.census_work.payload_supports != pipeline.accepted_pairs)
+    throw std::logic_error("mhgp8 anchor ranges lost their front/census partition");
+  const auto& work = result.work;
+  if (work.initial_ranges != work.initial_shared_ranges + work.initial_pool_ranges + work.initial_passthrough_ranges ||
+      work.completed_ranges != work.initial_ranges + work.donations ||
+      work.received_ranges != work.donations || work.initial_anchors != work.completed_anchors ||
+      work.donations != work.shared_donations + work.pool_donations + work.passthrough_donations ||
+      work.initial_pairs != work.completed_pairs || work.initial_pairs != pipeline.candidate_pairs ||
+      work.initial_anchors > pipeline.anchor_queries ||
+      work.offer_checks != work.offer_busy + work.offer_full + work.offer_no_waiter + work.donations ||
+      work.waits != work.wakes ||
+      result.max_live_pool_parents > options.queue_capacity + pipeline.started_workers)
+    throw std::logic_error("mhgp8 anchor ranges lost their lineage or memory bound");
   pipeline.total_ms = milliseconds(started, Clock::now());
   return result;
 }

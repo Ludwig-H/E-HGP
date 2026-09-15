@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — équipe persistante q2 et préparation q3/q4
+# Morse HGP 3D v8 — plages d'ancres q2 et plans Pool partagés
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -35,6 +35,34 @@ catalogue q3/q4 ni une tour FULL.
 Les mesures historiques citées restent v7.
 
 ## État exécutable
+
+La dix-huitième tranche ajoute le [partage de plages d'ancres](docs/P0_PLAGES_ANCRES_Q2.md)
+non commencées. Le receveur réutilise son moteur privé, sans allocation
+de continuation par ancre. Pool est préparé une fois par rectangle,
+possédé avec son index et partagé entre les bandes. Son repli sans
+filtrage reste Shared ; il peut maintenant partager ses ancres.
+
+Le nouveau point d'entrée est explicite, sans changer le défaut Coarse.
+Les [preuves propres](receipts/q2_anchor_ranges_20260915/README.md) sont
+closes :72 CTests Release et Clang ASan/UBSan, gate Clang ThreadSanitizer,
+415 appels ranges/135 Coarse contre l'oracle et tous les comptes
+géométriques ; coquille30 et dons de bandes Pool filtrées exercés.
+174 mesures n8k/16k/32k, K5/10, s8/10/12, lecteurs/analyseurs normal/−O
+concordants. Les trois builds sont désormais épinglés.
+
+La file porte des plages de72 octets, sans pile réservée par ancre.
+Les mesures observent278 dons Shared/repli, dont52 après attribution des
+seeds ; le partage Pool filtré est exercé par les gates, pas par ces grands
+nuages au grain64. Aucun gain stable établi sous charge concurrente.
+Les six postes principaux restent sous×3 aux doublements sur Pool64,
+mais F des rangées fait×4 et certains ratios de scheduling dépassent×4.
+Aucune borne générale sous-quadratique. La suite vise les millions de
+petits census en lots compacts et leur travail réel ; FULL, q3/q4 produit,
+GPU et contrats G4 restent ouverts. GCP non utilisé.
+Les [deux fixtures de tangence q3](docs/Q3_Q4_OBJETS_ET_STRATEGIE_20260914.md)
+précisent le compte strict sur les rangées après dialogue avec B.
+
+## Dix-septième tranche publiée à beee3341 — historique
 
 La dix-septième tranche raccorde les [branches q2 à une équipe persistante
 commune au front](docs/P0_EQUIPE_PERSISTANTE_Q2.md). Plus de création

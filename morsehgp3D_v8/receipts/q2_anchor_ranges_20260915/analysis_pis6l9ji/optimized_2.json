@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_wspd_q2_ranges_checks.py",
+    "read",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/q2_anchor_ranges_20260915/tsan_hxa_vd48"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-15T09:58:34.548127+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"full_contract_qualified\": false, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q2_anchor_ranges_20260915/tsan_hxa_vd48\", \"q2_measures\": 0, \"records\": 1, \"status\": \"passed\"}\n",
+  "stderr": "",
+  "stdout_base64": "eyJmdWxsX2NvbnRyYWN0X3F1YWxpZmllZCI6IGZhbHNlLCAicGF0aCI6ICIvd29ya3NwYWNlcy9FLUhHUC9tb3JzZWhncDNEX3Y4L3JlY2VpcHRzL3EyX2FuY2hvcl9yYW5nZXNfMjAyNjA5MTUvdHNhbl9oeGFfdmQ0OCIsICJxMl9tZWFzdXJlcyI6IDAsICJyZWNvcmRzIjogMSwgInN0YXR1cyI6ICJwYXNzZWQifQo=",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-15T09:58:34.680915+00:00"
+}

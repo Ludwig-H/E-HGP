@@ -1,0 +1,16 @@
+{
+  "kind": "gate",
+  "command": [
+    "/workspaces/E-HGP/build/v8_anchor_ranges_tsan_clang_20260915/mhgp8_wspd_q2_ranges_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-15T09:49:11.278704+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"schema\":\"mhgp8_wspd_q2_ranges_gate_v1\",\"status\":\"passed\",\"public_status\":\"not_claimed\",\"checks\":138582,\"clouds\":10,\"oracle_pairs\":10920,\"oracle_sites\":778110,\"coarse_runs\":135,\"range_runs\":415,\"default_runs\":10,\"supports\":126065,\"max_shell\":30,\"donations\":2081,\"donations_after_seeds_claimed\":1676,\"pool_donations\":103,\"passthrough_donations\":699,\"wide_pool_cases\":12,\"empty_runs\":31,\"surplus_workers\":40,\"selected64\":26,\"filtered64\":14328,\"passthrough\":4362,\"multiple_callback_threads\":2,\"callback_threads_joined\":2,\"callback_failures\":1,\"reentrant_runs\":1,\"index_resets\":1,\"invalid_inputs\":14,\"mutants\":7}\n",
+  "stderr": "",
+  "stdout_base64": "eyJzY2hlbWEiOiJtaGdwOF93c3BkX3EyX3Jhbmdlc19nYXRlX3YxIiwic3RhdHVzIjoicGFzc2VkIiwicHVibGljX3N0YXR1cyI6Im5vdF9jbGFpbWVkIiwiY2hlY2tzIjoxMzg1ODIsImNsb3VkcyI6MTAsIm9yYWNsZV9wYWlycyI6MTA5MjAsIm9yYWNsZV9zaXRlcyI6Nzc4MTEwLCJjb2Fyc2VfcnVucyI6MTM1LCJyYW5nZV9ydW5zIjo0MTUsImRlZmF1bHRfcnVucyI6MTAsInN1cHBvcnRzIjoxMjYwNjUsIm1heF9zaGVsbCI6MzAsImRvbmF0aW9ucyI6MjA4MSwiZG9uYXRpb25zX2FmdGVyX3NlZWRzX2NsYWltZWQiOjE2NzYsInBvb2xfZG9uYXRpb25zIjoxMDMsInBhc3N0aHJvdWdoX2RvbmF0aW9ucyI6Njk5LCJ3aWRlX3Bvb2xfY2FzZXMiOjEyLCJlbXB0eV9ydW5zIjozMSwic3VycGx1c193b3JrZXJzIjo0MCwic2VsZWN0ZWQ2NCI6MjYsImZpbHRlcmVkNjQiOjE0MzI4LCJwYXNzdGhyb3VnaCI6NDM2MiwibXVsdGlwbGVfY2FsbGJhY2tfdGhyZWFkcyI6MiwiY2FsbGJhY2tfdGhyZWFkc19qb2luZWQiOjIsImNhbGxiYWNrX2ZhaWx1cmVzIjoxLCJyZWVudHJhbnRfcnVucyI6MSwiaW5kZXhfcmVzZXRzIjoxLCJpbnZhbGlkX2lucHV0cyI6MTQsIm11dGFudHMiOjd9Cg==",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-15T09:49:22.651526+00:00"
+}

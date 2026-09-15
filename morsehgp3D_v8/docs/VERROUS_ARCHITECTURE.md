@@ -95,6 +95,16 @@ inclure ses propositions et évaluations de bornes supplémentaires.
 
 ## 1. Ordre des travaux et sens de « rédhibitoire »
 
+Évolution tranche18 : des [plages d'ancres possédées](P0_PLAGES_ANCRES_Q2.md)
+partagent maintenant le même plan Pool sans le reconstruire. Une bande
+garde ses positions propres et son préfixe B ; le repli sans rejet reste
+Shared. Le grain de partage n'introduit ni recherche limitée ni boucle
+sur les paires filtrées. Qualification propre close (72 CTests Release/
+Clang ASan/UBSan, TSan et174 mesures), sans gain stable établi. La
+répartition ne supprime pas les visites géométriques ni les coûts de
+préparation F. Prochain verrou : lots compacts des petites requêtes ;
+ne pas confondre O(A+R) de gestion avec une borne sous-quadratique en n.
+
 Évolution tranche17 : une [équipe unique front+census](P0_EQUIPE_PERSISTANTE_Q2.md)
 existe désormais pour le front Coarse et les racines hors Pool sélectionnées
 par taille. Le verrou de création d'équipe par ancre est levé dans cette

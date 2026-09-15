@@ -3,7 +3,26 @@
 15 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
-État constructeur courant : dix-septième tranche P0,
+État constructeur courant : dix-huitième tranche P0,
+[plages d'ancres et plans Pool possédés](../docs/P0_PLAGES_ANCRES_Q2.md).
+Qualification propre close :415 appels ranges/135 Coarse, oracle
+indépendant et tous les comptes historiques ; coquille30 et dons de
+bandes Pool filtrées exercés. Gate Clang TSan,72 CTests Release et Clang
+ASan/UBSan,174 mesures8k/16k/32k K5/10 s8/10/12 PASS. Les
+[lecteurs/analyseurs normal/−O](../receipts/q2_anchor_ranges_20260915/README.md)
+concordent. Les trois builds anchor_ranges sont désormais épinglés.
+Parents préparés une fois, moteurs privés réutilisés, ancien défaut
+Coarse conservé. Aucun contrat FULL/G4 ni gain de temps acquis ici.
+Les278 dons mesurés sont Shared/repli, sans bande filtrée à grain64 ;
+ces dernières sont exercées dans les gates. Six postes sous×3 sur les
+séries Pool64, mais F rangées×4 et quinze ratios de scheduling>×4 : pas
+de borne générale. Les petits census en lots compacts restent la suite.
+La campagne B sur instantané antérieur reste indépendante ; la correction
+de tangence q3 est acquittée et couverte par deux fixtures constructeur.
+
+## Historique : dix-septième tranche publiée à beee3341
+
+Dix-septième tranche P0,
 [équipe persistante front+census q2](../docs/P0_EQUIPE_PERSISTANTE_Q2.md).
 69 CTests Release et Clang ASan/UBSan, ainsi que la gate Clang TSan, PASS ;
 reprise après redémarrage close, première capture conservée comme incomplète.

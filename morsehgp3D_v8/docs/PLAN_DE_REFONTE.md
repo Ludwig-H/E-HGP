@@ -475,6 +475,16 @@ ouverte ; arrêter la cible exacte dès le résultat utile acquis.
 
 ## 10. Premier chantier après cet audit
 
+Suivi tranche18 : le [partage d'ancres et de plans Pool possédés](P0_PLAGES_ANCRES_Q2.md)
+est implémenté et qualifié :72 CTests Release/Clang ASan/UBSan, gate
+TSan et174 mesures closes, lecteurs normal/−O concordants. Il évite l'allocation de pile
+par petite racine et conserve le Shared des replis sans rejet ; il ne
+réduit pas le nombre de tests géométriques. Mesurer la gestion par plage,
+la durée de vie simultanée des parents, F, le résidu et les sorties avant
+de choisir cette entrée. Aucun gain stable sous charge, Coarse reste le
+défaut. Priorité suivante aux millions de petits census en lots compacts
+et à la réduction de leur travail, pas à une autre file. FULL/G4 reste ouvert.
+
 Commencer par P0 : comparer les architectures de rejet qui évitent les
 histogrammes quadratiques systématiques, d'abord en mono avec petits
 juges indépendants. Préparer en soutien le contrat et la tranche FULL

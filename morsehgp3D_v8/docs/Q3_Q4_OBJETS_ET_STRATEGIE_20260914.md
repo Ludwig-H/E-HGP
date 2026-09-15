@@ -180,6 +180,35 @@ Enfin, la sortie explicite FULL peut elle-même être quadratique dans certaines
 
 ## 9. Prochaine tranche : expériences bornées et portes de réfutation
 
+### Complément du 15 septembre : croissance sur les rangées et tangence
+
+L'[oracle indépendant B à e7b951e8](../audits/oracle_q3q4_20260915/ROWS_Q3_GROWTH_CHECKS.json)
+mesure, pour deux rangées de m=25/50/100 sites,176/376/776 présentations
+vivantes à Kmax5 et920/2120/4520 à Kmax10, identiques pour les deux écarts
+testés D/δ=10 et50. Les candidats aigus croissent beaucoup plus vite :
+4600/39200/323400 pour D/δ=50. Ce sont des mesures indépendantes à n≤200,
+pas une qualification du futur générateur ni une preuve pour tout D.
+Elles renforcent la priorité au rejet des familles avant développement.
+
+Une précision exacte est nécessaire avant de transformer l'argument des
+cordes en filtre. Avec a=(0,0), b=(D,iδ), x=(0,jδ), i<j≤2i, et des rangées
+complètes sur les deux cordes, le compte strict vaut
+$p=j-1+\max(2i-j-1,0)$.
+Il vaut2i−2 lorsque j<2i, mais2i−1 lorsque j=2i : la seconde corde est
+alors tangente et ne contient aucun intérieur. Le quatrième site de
+coquille coïncide avec b ; cette branche a trois sites de coquille et non
+quatre. La comparaison exacte au seuil doit conserver cette différence.
+
+Deux [fixtures rationnelles permanentes](../tests/q3_q4_owner_independence_gate.py)
+prennent δ=4, D=200, i=5 et j=9/10, sur22 sites. Les triangles sont
+positifs, l'arête ab est maximale ; les profondeurs8/9 et coquilles4/3
+font respectivement accepter/rejeter à h3=9 (Kmax10). Normal et−O
+concordent. Il s'agit d'un juge mathématique, pas d'une implémentation q3.
+L'observation B de94 à99% de coquilles excédentaires sur les candidats
+ne dispense donc ni des plateaux ni de cette sous-famille tangente.
+
+### Ordre d'implémentation proposé
+
 Ordre proposé, sans ouvrir simultanément tous les moteurs :
 
 1. Formes q3/q4 et ownership exacts, jugés par un oracle rationnel indépendant sur de petits nuages ; interface distincte pour présentations et catalogue.

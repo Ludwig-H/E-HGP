@@ -97,6 +97,39 @@ def check_deep_seed(k):
             "q4_power_distance_minus_radius": [str(x) for x in tetra_powers]}
 
 
+def check_row_tangency():
+    """Exact boundary of the two-row argument, not a product q3 test.
+
+    On the second row, t=2u makes the two circle intersections coincide.
+    There are then zero strict interiors there, not minus one. This one
+    point difference changes acceptance exactly at h3=9 (Kmax10).
+    """
+    delta, d, i, h3 = 4, 200, 5, 9
+    cloud = [(x, delta * j, 0) for x in (0, d) for j in range(11)]
+    rows = []
+    for j in (9, 10):
+        u, t = delta * i, delta * j
+        a, b, x = (0, 0, 0), (d, u, 0), (0, t, 0)
+        center = (F(d*d + u*u - u*t, 2*d), F(t, 2), F(0))
+        r2 = distance2(a, center)
+        wb = center[0] / d
+        wx = (center[1] - u * wb) / t
+        require(wb > 0 and wx > 0 and 1 - wb - wx > 0, "row triangle not positive")
+        require(all(distance2(v, center) == r2 for v in (a, b, x)), "row sphere mismatch")
+        require(distance2(a, b) >= max(distance2(a, x), distance2(b, x)), "row owner not maximal")
+        inside = [p for p in cloud if distance2(p, center) < r2]
+        shell = [p for p in cloud if distance2(p, center) == r2]
+        depth = j - 1 + max(2*i - j - 1, 0)
+        require(len(inside) == depth, "row strict chord count mismatch")
+        require(len(shell) == (4 if j < 2*i else 3), "row tangent shell mismatch")
+        require((depth < h3) == (j == 9), "tangency did not change threshold decision")
+        rows.append({"i": i, "j": j, "delta": delta, "D": d,
+                     "strict_depth": depth, "shell_size": len(shell),
+                     "kmax": 10, "h3": h3, "alive": depth < h3})
+    require(rows[1]["strict_depth"] != 2*i - 2, "tangent-as-open-chord mutant survived")
+    return rows
+
+
 def main():
     if sys.argv[1:] != ["--selftest"]:
         print("usage: q3_q4_owner_independence_gate.py --selftest", file=sys.stderr)
@@ -104,6 +137,7 @@ def main():
     rows = [check_fixture(k, q) for k in (5, 10) for q in (3, 4)]
     print(json.dumps({"status": "passed", "fixtures": rows,
                       "deep_seed_fixtures": [check_deep_seed(k) for k in (5, 10)],
+                      "row_tangency_fixtures": check_row_tangency(),
                       "claim": "q2_survival_is_not_a_q3_q4_owner_filter",
                       "full_contract_qualified": False}, sort_keys=True))
     return 0
