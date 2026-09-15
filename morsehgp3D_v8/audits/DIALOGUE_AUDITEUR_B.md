@@ -26,6 +26,7 @@ dans `chaine_q2_20260914/`, rejouables par `git archive <commit>`.
 | Continuations de census à ancre unique | d09e2207 | `CHAINE_Q2_RESUME_CHECKS.json` | 258 624 continuations (budgets 1/3/1000, transfert de fil), 0 désaccord, pauses des trois types exercées |
 | Détachement intérieur et ordonnanceur par ancre | 897085f8 | `CHAINE_Q2_DETACH_CHECKS.json` | 63 120 lignées (262 538 détachements) et 504 960 appels parallèles, 0 désaccord, sommes et identités tenues, 20 319 exceptions propagées sans blocage |
 | Équipe persistante front + census | beee3341 | `CHAINE_Q2_COOP_CHECKS.json`, `…_COOP_SCALE_…` | 5 304 appels coopératifs, 0 désaccord, identités de continuation tenues, 258 exceptions propagées ; défaut = Coarse, toute ancre en continuation +40 %, quantum 1 ×4 à ×7 |
+| Plages d'ancres et Pool partagé | 2741d614 | `CHAINE_Q2_RANGES_CHECKS.json` | 5 256 appels à plages, 0 désaccord, identités de plages tenues, 258 exceptions propagées ; coût égal à Coarse, gain sur les rangées à huit fils |
 
 Mesures publiées à côté : survivantes de Pool sur les amas (2 140 /
 3 085 / 4 690 vrais supports q2 à 8k/16k/32k ; résidu Pool non
@@ -172,6 +173,108 @@ le harnais additionne des candidates sans exécuter le census et que deux
 chiffres de la prose venaient d'une exécution préliminaire : titre et
 chiffres sont alignés sur le reçu (60 ms à 8k, +1,04 s au seuil 2), et
 la limite est écrite ; la comparaison q2 complète lui appartient.
+
+## Plages d'ancres et Pool partagé (2741d614) : contrelecture et campagne
+
+Avis demandé au journal sur la durée de vie des plans parentaux, le
+retour temporaire de `b_order` après une bande et les bilans globaux
+quand une sortie migre de worker. Contrelecture faite sur un instantané
+de 09 h 31 UTC ; le gel du moteur annoncé ensuite par le constructeur ne
+change que le traqueur de mémoire des parents (verrou et addition
+vérifiée à la place d'atomiques), pas la géométrie, et j'ai repris un
+instantané des sources gelées, dont les fichiers de `src/` sont, octet
+pour octet, les blobs du commit 2741d614 : la campagne ci-dessous est
+exécutée sur ce second instantané et ancrée sur ce commit.
+
+**Contrelecture.** La durée de vie est portée par le type : un parent
+Pool (`RangePoolParent`) déclare son `Q2CensusIndexPtr` avant le plan
+qui l'emprunte, donc le plan meurt avant l'index qu'il référence ; il
+n'est ni copiable ni déplaçable et n'est construit qu'une fois par
+rectangle sélectionné ; chaque tâche de plage tient un `shared_ptr`
+constant vers lui, si bien qu'un parent vit tant qu'une plage le cite,
+en file ou en cours, quel que soit le worker, et meurt à la dernière
+référence, comptabilisé par un traqueur atomique de parents et d'octets
+vivants dont le pic est publié tel quel. Le `b_order` du moteur privé
+est sauvegardé à l'entrée d'une plage, remplacé par l'ordre B du parent
+pour une plage filtrée seulement, et restauré à la sortie normale comme
+sur exception ; une plage partagée garde l'ordre global et le nœud B
+original. Une donation transfère le suffixe de la plage, soit la
+seconde moitié (⌊m/2⌋ dernières) des m ancres restantes, avec le même
+parent et la même largeur de préfixe, sans allocation ni
+lancée d'exception, après construction du reçu et avant rétrécissement
+du donneur ; le receveur installe l'ordre du parent dans son propre
+moteur. Les bilans restent globaux par construction : masse et
+descripteur du rectangle, préparation et bandes du plan sont payés une
+fois par le créateur ; racines, géométrie, ancres Pool sélectionnées,
+paires et collectes sont payées par l'exécutant, et les identités
+`initial_anchors = completed_anchors`, `initial_pairs = completed_pairs
+= candidates`, `completed_ranges = initial_ranges + donations`,
+`received = donations`, offres = occupé + pleine + sans demande + dons
+et attentes = réveils tiennent à la complétion ; la fermeture est celle
+de l'équipe persistante (graines réclamées, file vide, aucune activité).
+Rien à objecter ; une remarque : la masse donnée compte des transferts
+répétés d'un même travail futur et n'est donc pas une mesure de charge
+déplacée, ce que l'en-tête dit déjà et qu'il faudra rappeler dans les
+lectures de reçus.
+
+**Campagne (harnais `chain_verify_parallel.cpp -DMHGP8_AUDIT_RANGES`,
+option `--ranges`, reçu
+[CHAINE_Q2_RANGES_CHECKS.json](chaine_q2_20260914/CHAINE_Q2_RANGES_CHECKS.json),
+exécutée sur les sources gelées).** Sur 86 nuages, chaque combinaison
+SharedBlocks/Individual (Pool 64 ou 2, front Pure ou MidpointSamples,
+frère et Complement) est exécutée par l'entrée à plages d'ancres pour
+W ∈ {1, 2, 3, 4, 8} et quatre réglages (grain 1, 4 ou 64, file 1 ou 8) :
+5 256 appels, 13 092 120 paires contrôlées contre la force
+brute, **0 désaccord, 0 doublon entre slots**, condensé canonique et
+compteurs globaux du pipeline égaux au chemin série à chaque appel,
+identités de plages tenues partout (211 867 dons :
+plages terminées = initiales + dons, ancres et paires initiales =
+terminées = candidates, offres = occupé + pleine + sans demande + dons,
+attentes = réveils) ; vivacité : 258
+exceptions propagées sur 258 appels, aucun
+blocage. Rejeu `-O` conforme.
+
+**Échelle** (quatre familles × 8k/16k/32k, Kmax 10, s 8, Pool 64, un
+passage, hôte partagé) :
+
+| Entrée | Série | Coarse W = 8 | Plages (grain 64, file 8) W = 1 / W = 8 | Plages (grain 1, file 8) W = 1 / W = 8 | Dons à W = 8 (grain 1) | Parents Pool vivants max |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Uniforme 8k | 5,43 s | 1,08 s | 5,42 / 1,12 s | 5,97 / 1,11 s | 1 445 | 0 |
+| Uniforme 16k | 12,89 s | 2,63 s | 12,93 / 2,69 s | 12,99 / 2,76 s | 3 207 | 0 |
+| Uniforme 32k | 30,23 s | 6,26 s | 30,17 / 6,32 s | 30,59 / 6,47 s | 9 214 | 0 |
+| Amas 8k | 2,99 s | 0,60 s | 2,94 / 0,63 s | 3,01 / 0,63 s | 632 | 6 |
+| Amas 16k | 8,20 s | 1,68 s | 8,24 / 1,71 s | 8,37 / 1,68 s | 2 763 | 5 |
+| Amas 32k | 20,42 s | 4,25 s | 20,17 / 4,46 s | 20,60 / 4,64 s | 3 652 | 5 |
+| Terrain 8k | 1,00 s | 0,21 s | 1,04 / 0,23 s | 1,05 / 0,23 s | 1 027 | 0 |
+| Terrain 16k | 2,12 s | 0,48 s | 2,23 / 0,48 s | 2,27 / 0,48 s | 2 004 | 0 |
+| Terrain 32k | 4,80 s | 1,03 s | 4,64 / 1,09 s | 4,93 / 1,05 s | 3 553 | 0 |
+| Rangées 8k | 0,25 s | 0,15 s | 0,26 / 0,06 s | 0,29 / 0,07 s | 179 | 1 |
+| Rangées 16k | 0,55 s | 0,20 s | 0,52 / 0,14 s | 0,57 / 0,14 s | 170 | 2 |
+| Rangées 32k | 1,08 s | 0,34 s | 1,03 / 0,28 s | 1,16 / 0,29 s | 171 | 1 |
+
+Lecture : l'entrée à plages coûte comme Coarse sur l'uniforme, les amas
+et le terrain (écarts dans le bruit, dons rares au grain 64 et de
+quelques milliers au grain 1, au plus cinq parents Pool vivants à la
+fois), et elle est la première variante qui **gagne sur les rangées** à huit fils : 0,06 s contre 0,15 s à 8k ; 0,14 s contre 0,20 s à 16k ; 0,28 s contre 0,34 s à 32k, parce que les ancres du gros rectangle sont enfin réparties entre workers au lieu de rester dans un seul job ; le déséquilibre relevé depuis la tranche des workers se résorbe, sans surcoût ailleurs.
+**Sur le compactage proposé des petits census singleton** (lots sans
+pile B, contexte = B original, rang d'ancre, stade et frère encore dû,
+collecte séparée mais complète). Aucune obligation ne l'interdit, à
+condition que l'état compact conserve exactement ce dont la reprise
+d'une ancre singleton a besoin, et rien de ce qu'elle recalcule : le
+compte acquis, le curseur Z et la phase (le préfixe consommé est
+uniforme pour la seule paire (a, b), donc un compte scalaire suffit),
+le B original et son échappement pour la phase Complement, le rang
+spatial de l'ancre (pour l'exclusion de l'ancre connue nulle en
+Complement, qui se fait par rang), l'indicateur « frère encore dû » et
+le stade ; les bornes préparées se recalculent depuis (a, b) et n'ont
+pas à voyager. Deux obligations à garder explicites : la collecte,
+même séparée, doit parcourir tout l'index et rendre la coquille
+complète (l'admission à budget vaut avant collecte, comme dans la
+continuation), et le compte ne doit jamais être préchargé par un crédit
+Pool ou un témoin de l'amont. Un lot de singletons peut alors être
+transféré comme valeur ; mon harnais de continuations (budgets 1/3/1000,
+transfert de fil, compteurs finaux) se rejoue tel quel sur cette forme
+dès qu'elle expose `advance` et `pending`.
 
 ## Équipe persistante front + census (beee3341) : contrelecture et campagne
 
@@ -529,6 +632,17 @@ des triangles aigus ont une coquille excédentaire (le quatrième point
 sont hors du domaine générique pour q3 comme le constructeur le note
 déjà pour q4 ; une campagne q3 sur rangées exercerait surtout la
 déduplication par boule, pas les présentations génériques.
+
+Précision de bord demandée par le constructeur, vérifiée en fractions et
+par l'oracle : pour u = iδ et t = jδ avec i < j ≤ 2i, le compte
+strictement intérieur vaut p = (j − 1) + max(2i − j − 1, 0), soit
+2i − 2 pour j < 2i mais 2i − 1 à la tangence j = 2i, où la corde de la
+rangée de b se réduit au seul sommet b. Le « si et seulement si » de ma
+prose vaut donc pour les complétions non tangentes : vivant ⟺
+i < h_3/2 + 1 ; à la tangence il devient i < (h_3 + 1)/2, un cran plus
+tôt. Exemple à δ = 4, D = 200, Kmax = 10 (h_3 = 9) : i = 5, j = 9 donne
+p = 8, coquille de 4, vivant ; i = 5, j = 10 donne p = 9, coquille de 3,
+mort. La borne O(m·h_3²) et les comptes publiés ne changent pas.
 
 ## Redistribution dynamique des produits DFS (4e878754) : contrelecture et campagne
 
@@ -1013,7 +1127,7 @@ Fichiers de B : ce dialogue, sept notes datées et les reçus
 `credits_terminaux_20260914/` (deux reçus : crédits et survivantes),
 `chaine_q2_20260914/` (six reçus : e3af11a7, modes conjoints b2106c3c,
 filtre Pool ba11e3ab, chaîne parallèle et équilibre b268cf6f,
-redistribution dynamique 4e878754, continuations d09e2207, détachement 897085f8, équipe coopérative beee3341) et
+redistribution dynamique 4e878754, continuations d09e2207, détachement 897085f8, équipe coopérative beee3341, plages d'ancres 2741d614) et
 `separation_20260914/` et `oracle_q3q4_20260915/`. Aucun
 fichier des autres auditeurs ni du constructeur n'est modifié. Mes
 propositions d'archivage des anciens reçus Rectangle/Tubes sont retirées :
