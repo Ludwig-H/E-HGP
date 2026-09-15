@@ -1,0 +1,44 @@
+% Theme Inria 2024 : mêmes marges, angle, filet et pied de page que la soutenance.
+% Copie fonctionnelle allégée ; page de titre personnalisée dans main.tex.
+\mode<presentation>
+\RequirePackage{tikz}
+\RequirePackage{fmtcount}
+\RequirePackage{calc}
+\RequirePackage[absolute,overlay]{textpos}
+\textblockorigin{0mm}{0mm}
+\setlength{\TPHorizModule}{\paperwidth}
+\setlength{\TPVertModule}{\paperheight}
+\newcommand{\logopremiere}{theme/imgs/Inria-logo-rouge.png}
+\newcommand{\logobaspage}{theme/imgs/Inria-logo-rouge.png}
+\newcommand{\pngangle}{theme/imgs/angle.png}
+\newcommand{\pngbarre}{theme/imgs/Filet-7pt.png}
+\newlength\titlelogowidth
+\setlength\titlelogowidth{.3\textwidth}
+\pgfdeclareimage[width=\titlelogowidth]{InriaTitle}{\logopremiere}
+\newcommand{\titlelogo}{\pgfuseimage{InriaTitle}}
+\pgfdeclareimage[height=2ex]{Angle}{\pngangle}
+\newcommand{\anglepng}{\pgfuseimage{Angle}}
+\newlength{\angleheight}\settoheight{\angleheight}{\pgfuseimage{Angle}}
+\newlength{\anglewidth}\settowidth{\anglewidth}{\pgfuseimage{Angle}}
+\pgfdeclareimage[width=6em]{Barre}{\pngbarre}
+\newcommand{\barrecouleur}{\pgfuseimage{Barre}}
+\newlength\vmargin\setlength\vmargin{.07\paperheight}
+\newlength\fullpageinnervmargin\setlength\fullpageinnervmargin{\vmargin}
+\newlength\hmargin\setlength\hmargin{.05\paperwidth}
+\newlength\fullpageinnerhmargin
+\setlength\fullpageinnerhmargin{\dimexpr\hmargin+2\anglewidth}
+\setbeamersize{text margin left=\fullpageinnerhmargin,text margin right=\fullpageinnerhmargin}
+\newlength\footerheight\setlength\footerheight{\fullpageinnervmargin}
+\pgfdeclareimage[height=0.4\footerheight]{InriaFooter}{\logobaspage}
+\newcommand{\footerlogo}{\pgfuseimage{InriaFooter}}
+\newlength\posfooterline\setlength\posfooterline{\fullpageinnervmargin}
+\setbeamertemplate{navigation symbols}{}
+\setbeamercolor{block title}{fg=inria-noir}
+\setbeamerfont{block title}{series=\bfseries}
+\newcommand{\itemlevelone}{\tikz{\draw[fill=inria-rouge,color=inria-rouge,line width=0pt](0,0.5ex)--(0.7em,0)--(0,-0.5ex);}}
+\setlength{\leftmargini}{1.5em}
+\setbeamertemplate{itemize items}{\itemlevelone}
+\setbeamerfont{footline}{size=\tiny,series={}}
+\setbeamerfont{alerted text}{series=\bfseries}
+\usecolortheme{inria}\useoutertheme{inria}\useinnertheme{inria}
+\mode<all>

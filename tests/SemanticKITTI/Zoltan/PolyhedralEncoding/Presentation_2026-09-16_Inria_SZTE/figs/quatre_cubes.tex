@@ -1,0 +1,26 @@
+\begin{tikzpicture}[scale=.82]
+\foreach\idx/\titre in{0/sommets,1/arêtes,2/surface,3/plein}{
+\begin{scope}[shift={(3.45*\idx,0)}]
+\coordinate(A)at(0,0);\coordinate(B)at(1.6,0);\coordinate(C)at(1.6,1.6);\coordinate(D)at(0,1.6);
+\coordinate(E)at(.55,.55);\coordinate(F)at(2.15,.55);\coordinate(G)at(2.15,2.15);\coordinate(H)at(.55,2.15);
+\ifnum\idx>1
+\fill[inria-2024-bleu-canard!15](A)--(B)--(C)--(D)--cycle;
+\fill[inria-2024-bleu-canard!25](B)--(F)--(G)--(C)--cycle;
+\fill[inria-2024-bleu-canard!10](D)--(C)--(G)--(H)--cycle;
+\fi
+\ifnum\idx=3
+\fill[inria-2024-bleu-canard!30](A)--(B)--(F)--(G)--(H)--(D)--cycle;
+\node[font=\scriptsize]at(1.0,.85){volume};
+\fi
+\ifnum\idx>0
+\draw[inria-2024-bleu-canard,thick](A)--(B)--(C)--(D)--cycle;
+\draw[inria-2024-bleu-canard,thick](B)--(F)--(G)--(H)--(D);
+\draw[inria-2024-bleu-canard,thick](C)--(G);
+\draw[inria-2024-bleu-canard!60,dashed](A)--(E)--(F);\draw[inria-2024-bleu-canard!60,dashed](E)--(H);
+\fi
+\ifnum\idx=0
+\foreach\v in{A,B,C,D,E,F,G,H}{\fill[inria-2024-bleu-canard](\v)circle(2pt);}
+\fi
+\node[font=\small,anchor=north]at(1.05,-.3){\titre};
+\end{scope}}
+\end{tikzpicture}

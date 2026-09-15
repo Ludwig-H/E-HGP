@@ -1,0 +1,10 @@
+\begin{tikzpicture}[x={(.27cm,0cm)},y={(.105cm,.105cm)},z={(0cm,.27cm)}]
+\foreach\j in{7,...,0}{\foreach\k in{0,...,7}{\foreach\i in{0,...,7}{\fill[inria-2024-bleu-canard!55]({\i+.5},{\j+.5},{\k+.5})circle(.5pt);}}}
+\draw[gray](0,0,0)--(8,0,0)--(8,0,8)--(0,0,8)--cycle;
+\draw[gray](8,0,0)--(8,8,0)--(8,8,8)--(0,8,8)--(0,0,8);\draw[gray](8,0,8)--(8,8,8);
+\draw[gray,dashed](0,0,0)--(0,8,0)--(8,8,0);\draw[gray,dashed](0,8,0)--(0,8,8);
+\draw[inria-rouge,line width=1.5pt](4,4,1)--(4,4,7);
+\draw[->](0,0,0)--(10,0,0)node[right,font=\scriptsize]{$x$};
+\draw[->](0,0,0)--(0,0,10)node[above,font=\scriptsize]{$z$};
+\node[font=\scriptsize,align=center]at(4,4,-2.3){512 positions fixes\\dans les axes de la scène};
+\end{tikzpicture}

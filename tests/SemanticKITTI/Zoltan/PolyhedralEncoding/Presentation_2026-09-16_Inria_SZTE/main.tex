@@ -1,0 +1,698 @@
+% !TEX program = lualatex
+% Réunion du 16 septembre 2026. Sources, provenance et limites : README.md.
+\documentclass[svgnames,9pt,aspectratio=169]{beamer}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb,mathrsfs,mathtools,bm,graphicx,booktabs,array,tikz}
+\usetikzlibrary{positioning,shapes,arrows.meta,calc,decorations.pathreplacing,fit,backgrounds,babel}
+\makeatletter\def\input@path{{theme/}}\makeatother
+\usetheme{inria}
+\colorlet{inria-bleu}{inria-2024-bleu-azur}
+\newcommand{\R}{\mathbb R}
+\newcommand{\Sph}{\mathbb S^2}
+\newcommand{\conv}{\operatorname{conv}}
+\newcommand{\IoU}{\operatorname{IoU}}
+\newcommand{\dist}{\operatorname{dist}}
+\newcommand{\dd}{\mathrm d}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\ip}[2]{\left\langle#1,#2\right\rangle}
+\newcommand{\takeaway}[1]{\par\vspace{.18cm}\begin{beamercolorbox}[sep=6pt,rounded=true]{block body}\centering\small\bfseries #1\end{beamercolorbox}}
+\setbeamercolor{block body}{bg=inria-2024-bleu-canard!7,fg=inria-noir}
+\setbeamercolor{alerted text}{fg=inria-rouge}
+\newcommand{\source}[1]{\begin{textblock}{.9}[0,1](.05,.919)\tiny\color{gris_fonce_inria}\raggedright #1\par\end{textblock}}
+\newcommand{\citb}[1]{\ifcsname ref@#1\endcsname{\footnotesize\bfseries[\csname ref@#1\endcsname]}\fi}
+\expandafter\def\csname ref@brown20\endcsname{Brown 20}
+\expandafter\def\csname ref@kirillov23\endcsname{SAM 23}
+\newcommand{\reffoot}[1]{\source{T. Brown \emph{et al.}, \emph{Language Models are Few-Shot Learners}, NeurIPS 2020.\quad A. Kirillov \emph{et al.}, \emph{Segment Anything}, ICCV 2023.}}
+\tikzset{box/.style={draw=inria-2024-bleu-canard,fill=inria-2024-bleu-canard!7,rounded corners=2pt,align=center,inner sep=6pt,font=\small},arr/.style={-{Latex[length=2mm]},thick,gris_fonce_inria},lab/.style={font=\scriptsize,align=center},geom/.style={draw=inria-2024-bleu-canard,fill=inria-2024-bleu-canard!15,thick}}
+\title[HGP et représentation du LiDAR 3D]{Vers un modèle de fondation\\pour le LiDAR 3D guidé par HGP}
+\subtitle{Représenter les polyèdres, puis mesurer les gains}
+\author{Louis \textsc{Hauseux}}
+\institute{Inria \& Szegedi Tudományegyetem}
+\date[16 septembre 2026]{16 septembre 2026}
+\hypersetup{pdfauthor={Louis Hauseux},pdftitle={HGP : représentation polyédrique et premiers tests pour le LiDAR 3D},pdfsubject={Réunion Inria / Szegedi Tudományegyetem, 16 septembre 2026},colorlinks=true,allcolors=inria-2024-bleu-canard}
+\setbeamertemplate{title page}{%
+\begin{tikzpicture}[remember picture,overlay]
+\node[anchor=north west,inner sep=0]at([xshift=.8cm,yshift=-.65cm]current page.north west){\includegraphics[width=2.7cm]{theme/imgs/Inria-logo-rouge.png}};
+\node[anchor=north east,inner sep=0]at([xshift=-.8cm,yshift=-.52cm]current page.north east){\IfFileExists{assets/szte.png}{\includegraphics[width=2.4cm,height=1.3cm,keepaspectratio]{assets/szte.png}}{\parbox{3cm}{\raggedleft\Large SZTE\\\scriptsize Szegedi Tudományegyetem}}};
+\node[anchor=north west,align=left,text width=13.5cm,inner sep=0]at([xshift=1.15cm,yshift=-2.1cm]current page.north west){%
+{\LARGE\bfseries\inserttitle}\\[.2cm]\barrecouleur\\[.3cm]
+{\large\insertsubtitle}\\[.48cm]
+{\large\insertauthor}\\[.28cm]
+{\small Réunion avec \href{https://www.inf.u-szeged.hu/users/kato-zoltan}{Zoltán \textsc{Kató}} et \href{https://www-sop.inria.fr/members/Josiane.Zerubia/}{Josiane \textsc{Zerubia}}}\\[.18cm]
+{\small Inria \enspace\textcolor{gray}{/}\enspace Szegedi Tudományegyetem}\\[.27cm]
+{\small\insertdate}};
+\end{tikzpicture}}
+\begin{document}
+\begin{frame}[plain]\titlepage\end{frame}
+
+% Les deux introductions reprennent les sources de la soutenance.
+\begin{frame}{Vers un modèle de fondation pour la 3D ?}
+\vfill\begin{center}\resizebox{.95\textwidth}{!}{\input{figs/alphabet_fondation}}\end{center}\vfill
+\reffoot{brown20,kirillov23}
+\end{frame}
+\begin{frame}{Remplacer les points par une hiérarchie de \textcolor{inria-rouge}{polyèdres} ?}
+\vspace{-.10cm}\begin{center}\resizebox{.54\textwidth}{!}{\input{figs/hierarchie_surfaces}}\end{center}
+\vspace{.26cm}\small\begin{itemize}\item Même recette que pour le texte : le \textbf{polyèdre} est l'\textbf{alphabet} (l'unité, fixée une fois pour toutes) et la \textbf{hiérarchie} en est la \textbf{grammaire}\end{itemize}
+\end{frame}
+
+\section{De la hiérarchie à la réalisation géométrique}
+\begin{frame}[t]{Deux objets à distinguer}
+\vspace{.1cm}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.48\textwidth}
+\textbf{Ce que définit HGP}
+\[
+L_K(r)=\{y:\#(X\cap\overline B(y,r))\ge K\}.
+\]
+Composantes de $L_K(r)$, puis couvertures discrètes.\par\medskip
+\textbf{Qui est regroupé, à quel niveau ?}\par\medskip
+Les couvertures des points peuvent se recouvrir sans fusion.
+\end{column}
+\begin{column}{.48\textwidth}
+\textbf{Ce que l'on doit encoder}
+\[
+P_v=\bigcup_{\sigma\in\mathcal F_v}\sigma\subset\R^3.
+\]
+Une réalisation explicite : points, segments, faces, éventuellement cellules pleines.\par\medskip
+\textbf{Quelle géométrie entre les points ?}\par\medskip
+Ni convexité ni fermeture imposées.
+\end{column}
+\end{columns}
+\takeaway{L'exactitude de la hiérarchie ne démontre ni une reconstruction de surface, ni une segmentation sémantique.}
+\source{L. Hauseux, manuscrit de thèse, parties I--II : niveaux $K$-NN, régions témoins et $K$-polyèdres. Réalisation géométrique : choix distinct du prototype.}
+\end{frame}
+
+\begin{frame}[t]{Une première réalisation sans ambiguïté : $K=2$}
+\begin{columns}[c,onlytextwidth]
+\begin{column}{.56\textwidth}
+Pour une composante $\mathscr C_v(r)$ d'arêtes actives :
+\[
+\boxed{P_v(r)=\bigcup_{\{i,j\}\in\mathscr C_v(r)}[x_i,x_j].}
+\]
+On représente les \textbf{segments entiers}.\par\medskip
+On ne remplit \textbf{aucun triangle} par défaut.\par\medskip
+Les Q2/Q3/Q4 sont des \textbf{certificats de boule}, pas automatiquement les primitives de $P_v$.
+\end{column}
+\begin{column}{.4\textwidth}\centering
+\begin{tikzpicture}[scale=.85]
+\coordinate(A)at(0,0);\coordinate(B)at(1.8,0);\coordinate(C)at(.9,1.56);
+\draw[inria-2024-bleu-canard,very thick](A)--(B)--(C)--cycle;
+\foreach\p in{A,B,C}{\fill[inria-rouge](\p)circle(2pt);}
+\node[lab]at(.9,-.5){réalisation filaire};
+\node[lab,text=inria-rouge]at(.9,.62){intérieur\\non rempli};
+\end{tikzpicture}
+\end{column}
+\end{columns}
+\takeaway{Convention du pilote, à tester : ces segments peuvent encore traverser un vide réel.}
+\source{Thèse : composantes de facettes de cardinal $K$. Réalisation filaire proposée pour le pilote. L'appartenance des arêtes doit être exportée, pas déduite de la seule couverture.}
+\end{frame}
+
+\section{Des plans d'appui aux sondes de distance}
+\begin{frame}[t]{Fonction support : faire descendre un plan}
+\begin{columns}[c,onlytextwidth]
+\begin{column}{.46\textwidth}
+Pour $P$ compact non vide et $u\in\Sph$ :
+\[
+\boxed{h_P(u)=\max_{x\in P}\ip{u}{x}.}
+\]
+Le plan $\Pi_t=\{x:\ip{u}{x}=t\}$ avance \textbf{depuis le côté $+u$}.\par\medskip
+Premier contact à la hauteur signée\[
+ t=h_P(u).
+\]
+$u$ est une \textbf{normale au plan}, pas un rayon vers l'objet.
+\end{column}
+\begin{column}{.5\textwidth}\centering
+\input{figs/plan_support}
+\end{column}
+\end{columns}
+\source{Définition de la fonction support d'un compact. Dessin : coupe 2D d'un plan d'appui en dimension 3.}
+\end{frame}
+
+\begin{frame}[t]{Si $P$ est convexe : tous les appuis le reconstruisent}
+\begin{columns}[c,onlytextwidth]
+\begin{column}{.6\textwidth}
+\[
+\boxed{P=\bigcap_{u\in\Sph}\{x:\ip{u}{x}\le h_P(u)\}.}
+\]
+Tout point extérieur est exclu par \textbf{au moins un plan séparateur}.\par\medskip
+Cela vaut aussi pour un segment ou un triangle dans $\R^3$ : \textbf{pas besoin d'un volume positif}.
+\end{column}
+\begin{column}{.36\textwidth}\centering
+\begin{tikzpicture}[scale=.8]
+\fill[geom](-1.2,-.6)--(.6,-.9)--(1.3,.2)--(.2,1)--(-1, .6)--cycle;
+\foreach\a/\b/\c/\d in{-1.5/-1/.8/-1,-1.5/-.8/-1.5/.9,-1.2/1.2/1/1.2,1.6/-.8/1.6/1}{\draw[gray,dashed](\a,\b)--(\c,\d);}
+\draw[inria-rouge,thick](.6,-.9)--(1.65,.75);
+\fill[inria-rouge](1.95,-.25)circle(2pt)node[right]{$y\notin P$};
+\draw[arr,inria-rouge](1.05,-.1)--(1.65,-.48);
+\node at(-.25,.05){$P$};
+\end{tikzpicture}
+\end{column}
+\end{columns}
+\takeaway{Un polytope convexe : $h_P(u)=\max_i\ip{u}{v_i}$. Des produits scalaires et un maximum.}
+\source{Propriété de séparation des compacts convexes ; argument par projection rappelé en annexe.}
+\end{frame}
+
+\begin{frame}[t]{Le support : des règles de calcul et une stabilité exacte}
+\vspace{.12cm}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.48\textwidth}
+\textbf{Transformations}\par\smallskip
+\begin{align*}
+h_{P+a}(u)&=h_P(u)+\ip{u}{a},\\
+h_{sP}(u)&=s\,h_P(u)\quad(s\ge0),\\
+h_{P\cup Q}(u)&=\max(h_P(u),h_Q(u)).
+\end{align*}
+\textbf{Sous-linéarité} sur $\R^3$ :
+\[
+h_P(tu)=t h_P(u),\quad t\ge0,
+\]
+\[
+h_P(u+w)\le h_P(u)+h_P(w).
+\]
+\end{column}
+\begin{column}{.48\textwidth}
+\textbf{Pour deux compacts convexes}
+\[
+\boxed{d_H(P,Q)=\sup_{u\in\Sph}|h_P(u)-h_Q(u)|.}
+\]
+Comparer uniformément les appuis revient à comparer les géométries.\par\medskip
+\textbf{Vectoriser :}
+\[
+(h_P(u_1),\ldots,h_P(u_M)).
+\]
+Un nombre fini de directions donne une \textbf{approximation}, pas une injectivité universelle.
+\end{column}
+\end{columns}
+\source{Identités déduites de la définition du support. $h_{P\oplus Q}=h_P+h_Q$ concerne une somme de Minkowski, non une fusion par union.}
+\end{frame}
+
+\begin{frame}[t]{Hors convexité : quatre géométries, un même support}
+\vspace{.15cm}\begin{center}\input{figs/quatre_cubes}\end{center}
+\[
+\boxed{h_P=h_{\conv(P)}\qquad\text{et ici}\qquad h_P(u)=|u_1|+|u_2|+|u_3|.}
+\]
+\takeaway{Même avec toutes les directions, le support ne distingue ni les arêtes, ni les faces, ni l'intérieur.}
+\source{Exemple calculé sur le cube $[-1,1]^3$. La surface d'un solide convexe n'est pas elle-même un ensemble convexe.}
+\end{frame}
+
+\begin{frame}[t]{Fonction distance : faire grandir une boule}
+\begin{columns}[c,onlytextwidth]
+\begin{column}{.47\textwidth}
+La sonde $b$ est maintenant un \textbf{point de l'espace} :
+\[
+\boxed{d_P(b)=\min_{x\in P}\norm{b-x}.}
+\]
+La boule centrée en $b$ touche $P$ au rayon $d_P(b)$.\par\medskip
+\textbf{Distance non signée :} ni intérieur, ni normale extérieure nécessaires.
+\end{column}
+\begin{column}{.48\textwidth}\centering
+\begin{tikzpicture}[scale=.78]
+\draw[inria-2024-bleu-canard,line width=2pt](-1.6,-1.5)--(-1.6,1.5)--(1.5,1.5);
+\coordinate(b)at(.35,-.35);\coordinate(p)at(.35,1.5);
+\foreach\r in{.6,1.15}{\draw[gray!55,dashed](b)circle(\r);}
+\draw[inria-rouge,thick](b)circle(1.85);
+\draw[arr,inria-rouge](b)--(p)node[midway,right]{$d_P(b)$};
+\fill[inria-rouge](b)circle(2pt)node[below right]{$b$};
+\fill[inria-rouge](p)circle(2pt);
+\node[lab,text=inria-2024-bleu-canard]at(-1.9,1.9){$P$ non convexe};
+\end{tikzpicture}
+\end{column}
+\end{columns}
+\source{Choix de représentation : distance non signée à la réalisation géométrique. Pas d'ajustement d'un champ neuronal par polyèdre.}
+\end{frame}
+
+\begin{frame}[t]{Le support quadratique : la même information que $d_P$}
+\vspace{.12cm}
+On fixe la convention de notre échange :
+\[
+\boxed{H_P(b)=\max_{x\in P}\bigl(2\ip{b}{x}-\norm{x}^2\bigr).}
+\]
+Développer $\norm{b-x}^2$ donne exactement
+\[
+\boxed{H_P(b)=\norm{b}^2-d_P(b)^2.}
+\]
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.48\textwidth}\textbf{$H_P$ est convexe en $b$}\par\smallskip
+C'est un maximum de fonctions affines, même lorsque $P$ n'est pas convexe.
+\end{column}
+\begin{column}{.48\textwidth}\textbf{Le compact est reconstructible}\[
+P=\{b:H_P(b)=\norm{b}^2\}.
+\]
+\end{column}
+\end{columns}
+\takeaway{En pratique, calculer directement $d_P$. Donner aussi $H_P$ n'ajoute pas d'information.}
+\source{« Support quadratique » : nom employé ici pour cette formule ; aucune nouveauté de la transformation n'est revendiquée.}
+\end{frame}
+
+\begin{frame}[t]{Pourquoi le relèvement quadratique préserve les creux}
+\begin{columns}[c,onlytextwidth]
+\begin{column}{.53\textwidth}
+Relever \textbf{tous les points} de la réalisation :
+\[
+x\longmapsto(x,\norm{x}^2)\in\R^4,
+\]
+\[
+C_P=\conv\{(x,\norm{x}^2):x\in P\}.
+\]
+Alors
+\[
+\boxed{H_P(b)=h_{C_P}(2b,-1).}
+\]
+Chaque point relevé possède un appui qui le distingue :
+\[
+\ip{(2x,-1)}{(y,\norm{y}^2)}
+=\norm{x}^2-\norm{x-y}^2.
+\]
+\end{column}
+\begin{column}{.43\textwidth}\centering
+\input{figs/relevement}
+\end{column}
+\end{columns}
+\source{Identité algébrique par développement du carré ; schéma en dimension $1\to2$. Aucun convexe en dimension quatre n'est construit dans le prototype.}
+\end{frame}
+
+\begin{frame}[t]{Les garanties, sans convexité et sans surface fermée}
+\vspace{.15cm}
+\begin{align*}
+\text{Reconstruction :}\qquad &P=\{b:d_P(b)=0\}.\\[9pt]
+\text{Régularité spatiale :}\qquad &|d_P(b)-d_P(b')|\le\norm{b-b'}.\\[9pt]
+\text{Stabilité de la forme :}\qquad &\boxed{\sup_{b\in\R^3}|d_P(b)-d_Q(b)|=d_H(P,Q).}
+\end{align*}
+\medskip
+Valable pour \textbf{tous compacts non vides} : fils, faces ouvertes, unions mixtes, solides.\par\medskip
+Au centre du cube précédent : \quad sommets $\sqrt3$ ; arêtes $\sqrt2$ ; surface $1$ ; plein $0$.
+\takeaway{La fonction complète est fidèle et stable. Son échantillonnage doit encore être évalué.}
+\source{Propriétés démontrables directement par l'inégalité triangulaire ; preuves courtes en annexe.}
+\end{frame}
+
+\begin{frame}[t]{Recollement : les unions deviennent des minima}
+\begin{center}
+\begin{tikzpicture}
+\node[box](a)at(0,0){$P_1$\\$d_{P_1}(b)$};\node[box](b)at(3.1,0){$P_2$\\$d_{P_2}(b)$};
+\node[box](p)at(1.55,1.5){$P_1\cup P_2$\\$\min(d_{P_1}(b),d_{P_2}(b))$};
+\draw[arr](a)--(p);\draw[arr](b)--(p);
+\end{tikzpicture}
+\end{center}
+\[
+ d_{\cup_i P_i}=\min_i d_{P_i},\qquad H_{\cup_iP_i}=\max_i H_{P_i}.
+\]
+\textbf{Associatif, commutatif, idempotent :} pas de double comptage du support géométrique.\par\medskip
+\alert{Deux conditions :} union réelle des primitives ; sondes aux \textbf{mêmes positions physiques}.\par\smallskip
+Une nouvelle enveloppe ou des codes enfant renormalisés changent le problème.
+\source{Composition exacte au niveau des fonctions ; pas de mise à jour exacte en $O(M)$ promise pour les grilles locales renormalisées.}
+\end{frame}
+
+\begin{frame}[t]{Calcul direct sur les primitives, pas seulement leurs sommets}
+\begin{columns}[c,onlytextwidth]
+\begin{column}{.59\textwidth}
+Pour un segment $[a,c]$, $a\ne c$ :
+\[
+ t=\operatorname{clip}_{[0,1]}
+ \frac{\ip{b-a}{c-a}}{\norm{c-a}^2},
+\]
+\[d(b,[a,c])=\norm{b-a-t(c-a)}.
+\]
+Pour une union :
+\[
+\boxed{d(b,P_v)=\min_{\sigma\in\mathcal F_v}d(b,\sigma).}
+\]
+Même principe pour les triangles et tétraèdres pleins.\par\medskip
+Les primitives sont partagées ; un index spatial peut accélérer les requêtes.
+\end{column}
+\begin{column}{.36\textwidth}\centering
+\begin{tikzpicture}[scale=.9]
+\coordinate(a)at(-1.4,0);\coordinate(c)at(1.4,0);\coordinate(b)at(.2,1.5);\coordinate(p)at(.2,0);
+\draw[inria-2024-bleu-canard,line width=2pt](a)--(c);
+\foreach\pt in{a,c}{\fill[inria-2024-bleu-canard](\pt)circle(2pt);}
+\draw[gray,dashed](a)--(b)--(c);
+\draw[inria-rouge,thick](b)--(p);
+\draw(.2,.15)--(.35,.15)--(.35,0);
+\fill[inria-rouge](b)circle(2pt)node[above]{$b$};
+\node[below]at(a){$a$};\node[below]at(c){$c$};\node[below]at(p){$p$};
+\node[lab]at(0,-.8){La projection peut tomber\\à l'intérieur du segment.};
+\end{tikzpicture}
+\end{column}
+\end{columns}
+\takeaway{Une subdivision qui ne change pas la réalisation ne change pas son champ de distance.}
+\source{Projection euclidienne sur un segment. Pour un segment dégénéré $a=c$, utiliser simplement $\norm{b-a}$.}
+\end{frame}
+
+\section{Un code orienté dans un cube commun}
+\begin{frame}[t]{Centrer et normaliser, sans aucune rotation locale}
+\begin{columns}[c,onlytextwidth]
+\begin{column}{.59\textwidth}
+Dans les \textbf{axes communs de la scène}, poser
+\[
+ a_j=\min_{x\in P_v}x_j,\quad b_j=\max_{x\in P_v}x_j,
+\]
+\[
+ c_v=\frac{a+b}{2},\qquad
+ s_v=\max\left(\tfrac12\max_j(b_j-a_j),s_{\min}\right).
+\]
+\[
+\boxed{\widehat P_v=\frac{P_v-c_v}{s_v}\subset[-1,1]^3.}
+\]
+\textbf{Un seul facteur} pour les trois axes : proportions et orientation conservées.
+\end{column}
+\begin{column}{.36\textwidth}\centering\resizebox{!}{4.6cm}{\input{figs/normalisation}}\end{column}
+\end{columns}
+\takeaway{Avec $c_v$ et $s_v$, le changement de coordonnées est réversible : $P_v=c_v+s_v\widehat P_v$.}
+\source{Prototype : centre de boîte, demi-plus-grand-côté, repère commun de scène. Le plancher est signalé ; il évite d'amplifier arbitrairement le bruit.}
+\end{frame}
+
+\begin{frame}[t]{512 sondes : une grille $8\times8\times8$ dans le volume}
+\begin{columns}[c,onlytextwidth]
+\begin{column}{.58\textwidth}
+\textbf{Convention explicite : centres des cellules}
+\[
+ \beta_i=-1+\frac{2i+1}{8},\qquad b_{ijk}=(\beta_i,\beta_j,\beta_k),
+\]
+\hfill $i,j,k\in\{0,\ldots,7\}$.
+\[
+\boxed{D_v[i,j,k]=\frac{d(c_v+s_vb_{ijk},P_v)}{s_v}.}
+\]
+Un tableau \textbf{ordonné}, pas un histogramme.\par\medskip
+Des sondes intérieures voient les structures qu'une coquille extérieure peut masquer.
+\end{column}
+\begin{column}{.38\textwidth}\centering\input{figs/grille}\end{column}
+\end{columns}
+\takeaway{Pour la sémantique, un plan horizontal et un plan vertical doivent produire des codes différents.}
+\source{Prototype : grille cartésienne fixe $8^3$, aux centres des cellules. Antécédent : Prokudin, Lassner, Romero, Basis Point Sets, ICCV 2019.}
+\end{frame}
+
+\begin{frame}[t]{Un code fini : quelle résolution peut-on garantir ?}
+\vspace{.1cm}
+Si les sondes forment un $\delta$-réseau d'un domaine contenant $P$ et $Q$ :
+\[
+\boxed{\norm{D_P-D_Q}_\infty\le d_H(P,Q)
+\le\norm{D_P-D_Q}_\infty+2\delta.}
+\]
+Pour les centres des $8^3$ cellules de $[-1,1]^3$ :
+\[
+\delta=\frac{\sqrt3}{8},\qquad 2\delta=\frac{\sqrt3}{4}\simeq0{,}433.
+\]
+\textbf{Borne uniforme, volontairement pessimiste :} elle n'assure pas la conservation des fils fins, trous ou couches proches.\par\medskip
+Comparer $4^3$, $8^3$, puis $16^3$ \textbf{à coût mesuré}. Garder les petits détails dans les enfants.
+\takeaway{Fonction complète injective $\ne$ vecteur de 512 valeurs universellement injectif.}
+\source{Borne issue du caractère $1$-lipschitzien des distances ; constante de couverture calculée pour cette grille. Comparaison dans un même repère, avant toute interprétation en mètres.}
+\end{frame}
+
+\begin{frame}[t]{Le vecteur du polyèdre ne doit pas effacer la physique}
+\vspace{.12cm}
+\renewcommand{\arraystretch}{1.6}
+\begin{tabular}{@{}p{.19\textwidth}p{.74\textwidth}@{}}
+\toprule
+\textbf{Bloc} & \textbf{Entrées du premier prototype}\\\midrule
+Forme orientée & $D_v\in\R^{512}$ ; dimensions relatives de la boîte.\\
+Géométrie métrique & $c_v$ (m), $s_v$ (m) ; déplacements vectoriels entre centres.\\
+État HGP & $K$, $r_v/s_v$, naissance, prochain événement ; masques pour valeurs absentes.\\
+Observation & Nombre de retours distincts, rémission disponible, résolution relative ; indicateurs de validité.\\\bottomrule
+\end{tabular}
+\medskip
+Le rayon HGP $r_v$ \textbf{n'est pas} la taille $s_v$.\quad Inconnu ou occulté \textbf{n'est pas} libre.
+\takeaway{Les identités, incidences et appartenances multiples restent dans la structure, pas dans le seul code de forme.}
+\source{Choix du prototype. Aire et volume ne sont ajoutés que si la réalisation leur donne un sens ; aucune information de visibilité de référence utilisée en entrée.}
+\end{frame}
+
+\begin{frame}[t]{Encoder la hiérarchie : états, relations, appartenances}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.55\textwidth}
+Un état $v$ : identité, coupe $r_v$, code $D_v$, couverture $S_v$.\par\medskip
+Les parents viennent de l'histoire HGP, \textbf{pas de l'intersection des couvertures}.\par\medskip
+Incidence creuse :
+\[
+ A_{iv}=\mathbf1[x_i\in S_v].
+\]
+Une ligne peut contenir plusieurs $1$.\par\medskip
+La géométrie est lue à la bonne date : croissance sans fusion comprise.
+\end{column}
+\begin{column}{.41\textwidth}\centering
+\begin{tikzpicture}[scale=.92]
+\node[box](p)at(0,2.1){parent};\node[box](a)at(-1.1,.8){état $v_1$};\node[box](b)at(1.1,.8){état $v_2$};
+\draw[arr](a)--(p);\draw[arr](b)--(p);
+\node[circle,fill=inria-rouge,inner sep=2pt,label=below:{$x_i$}](i)at(0,-.6){};
+\draw[dashed,inria-rouge](i)--(a);\draw[dashed,inria-rouge](i)--(b);
+\node[lab]at(0,-1.35){deux appartenances\\ne créent pas une fusion};
+\end{tikzpicture}
+\end{column}
+\end{columns}
+\takeaway{Partager les primitives ; sélectionner les états utiles ; conserver une voie fine vers tous les points.}
+\source{Thèse : recouvrements et hiérarchies. Contrat d'entrée du prototype. Ici, on suppose la hiérarchie disponible rapidement : pas de résultat de performance annoncé.}
+\end{frame}
+
+\section{Tester avant de préentraîner}
+\begin{frame}[t]{Test 1 : une bonne instance existe-t-elle dans l'arbre ?}
+\vspace{.12cm}
+Pour une instance annotée $G$ (identifiant valide) et la couverture $S_v$ :
+\[
+\IoU(S_v,G)=\frac{|S_v\cap G|}{|S_v|+|G|-|S_v\cap G|},
+\qquad \boxed{q(G)=\max_{v\in\mathcal V_B}\IoU(S_v,G).}
+\]
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.49\textwidth}
+\textbf{Rapporter}\par\smallskip
+Moyenne par instance ; rappel à $0{,}5$ et $0{,}75$ ; classes, tailles, portées.\par\medskip
+Pureté, fragmentation et points non couverts en complément.
+\end{column}
+\begin{column}{.47\textwidth}
+\textbf{Comparer}\par\smallskip
+HGP $K=2$ ; single-linkage $K=1$ ; grilles spatiales imbriquées.\par\medskip
+Même budget $B$ de propositions ; tailles et incidences comptabilisées.
+\end{column}
+\end{columns}
+\takeaway{Une IoU sur les indices des retours, pas une IoU volumique inventée à partir de surfaces ouvertes.}
+\source{Protocole proposé. Annotations : Behley \emph{et al.}, SemanticKITTI, ICCV 2019 ; semantic-kitti.org/dataset.html.}
+\end{frame}
+
+\begin{frame}[t]{Ce que l'oracle prouve, et ce qu'il ne prouve pas}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.48\textwidth}
+\textbf{Une capacité de proposition}\par\medskip
+Existe-t-il une région bien alignée avec chaque instance ?\par\medskip
+Tracer le score \textbf{en fonction du budget}. La sélection des candidats n'utilise pas les annotations.
+\end{column}
+\begin{column}{.48\textwidth}
+\textbf{Pas encore une segmentation}\par\medskip
+Le meilleur nœud de chaque instance peut être incompatible avec les autres choix.\par\medskip
+Ajouter un appariement un-à-un pour quantifier les doublons et la concurrence entre propositions.
+\end{column}
+\end{columns}
+\medskip
+Une coupe unique contre plusieurs coupes teste l'intérêt du \textbf{multi-échelle}.\par\medskip
+HGP contre $K=1$ et les grilles teste la \textbf{construction des régions}.\par\medskip
+L'utilisation des \textbf{liens parent--enfant} demande ensuite un test séparé.
+\source{Clarifications de protocole : les labels servent à l'évaluation de l'oracle, jamais à la construction HGP ou au choix d'une réalisation géométrique.}
+\end{frame}
+
+\begin{frame}[t]{Test 2 : ne pas confondre deux erreurs géométriques}
+\begin{center}\begin{tikzpicture}
+\node[box](x)at(0,0){retours\,$X_v$};\node[box](p)at(4.2,0){réalisation\,$P_v$};\node[box](d)at(8.4,0){code\,$D_v$};
+\draw[arr](x)--node[above,font=\scriptsize]{A : interpolation}(p);
+\draw[arr](p)--node[above,font=\scriptsize]{B : échantillonnage}(d);
+\end{tikzpicture}\end{center}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.48\textwidth}
+\textbf{A. Les primitives sont-elles pertinentes ?}\par\medskip
+Scènes synthétiques connues ; géométrie manquante et segments traversant les vides.\par\medskip
+Évaluer sur la référence ou des retours mis de côté, \textbf{pas seulement les sommets d'entrée}.
+\end{column}
+\begin{column}{.48\textwidth}
+\textbf{B. Le code décrit-il bien $P_v$ ?}\par\medskip
+Comparer la grille interpolée aux distances exactes sur des sondes \textbf{non utilisées}.\par\medskip
+Erreur médiane, quantile 95\,\%, erreur maximale ; fils, trous, couches proches.
+\end{column}
+\end{columns}
+\takeaway{Une petite erreur moyenne ne suffit pas si les objets fins disparaissent.}
+\source{Deux erreurs distinctes : réalisation géométrique et codage fini. Interpolation évaluée dans le domaine couvert par la grille, hors extrapolation.}
+\end{frame}
+
+\begin{frame}[t]{Test 3 : stabilité à l'observation, sans code constant}
+\vspace{.12cm}
+Trois observations : \quad $100\,\%$, $50\,\%$, $25\,\%$ des retours.\par\medskip
+\textbf{Recalculer toute la chaîne} : HGP, réalisations, centres, tailles et distances.
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.49\textwidth}
+\medskip\textbf{Mesurer ce qui change}\par\smallskip
+Régions appariées sur les identifiants communs ; taux de disparition ; géométrie et codes.\par\medskip
+D'abord une zone physique fixe, puis les régions effectivement choisies par HGP.
+\end{column}
+\begin{column}{.47\textwidth}
+\medskip\textbf{Mesurer ce qui reste discriminant}\par\smallskip
+Retrouver le même morceau parmi des concurrents de taille comparable.\par\medskip
+Appariement indépendant du code ; échecs et régions non appariées inclus.
+\end{column}
+\end{columns}
+\takeaway{Le sous-échantillonnage teste une perturbation contrôlée, pas à lui seul un autre capteur ou une occultation.}
+\source{Protocole proposé, sans hypothèse d'invariance de la hiérarchie au sous-échantillonnage. Une meilleure stabilité doit être accompagnée de fidélité ou de pouvoir discriminant.}
+\end{frame}
+
+\begin{frame}[t]{Un petit réseau suffit comme sonde d'utilité}
+\vspace{.1cm}
+\textbf{Depuis zéro, sans modèle de fondation :} même encodeur local et même tête dans chaque essai.
+\begin{center}\input{figs/petit_reseau}\end{center}
+\small
+Pour chaque coupe $\ell$ : moyenne des codes des régions contenant le point, plus un masque si aucune.\par\medskip
+Concaténer les cinq résumés aux coordonnées et attributs du point ; tête MLP $128\to128\to19$.\par\medskip
+\textbf{Voie directe conservée :} aucun point supprimé ; un polyèdre peut recevoir plusieurs classes.
+\takeaway{Séparer sélection des régions, encodage des primitives et usage des relations.}
+\source{MLP partagé et agrégation par coupe : prototype proposé. Dimensions et nombre de coupes sont des choix de pilote, pas des paramètres validés.}
+\end{frame}
+
+\begin{frame}[t]{Les ablations qui attribuent vraiment le gain}
+\vspace{.12cm}
+\textbf{1. Choix des régions :} comparer HGP, $K=1$ et voisinages multi-échelles, avec distances aux points.\par\medskip
+\textbf{2. Sur les mêmes états HGP :} faire varier deux facteurs.
+\renewcommand{\arraystretch}{1.8}
+\begin{center}\begin{tabular}{@{}lcc@{}}\toprule
+& \textbf{Sans échange dans l'arbre} & \textbf{Avec parents--enfants}\\\midrule
+Distance aux points $X_v$ & A & C\\
+Distance aux primitives $P_v$ & B & D\\\bottomrule
+\end{tabular}\end{center}
+\[
+\Delta_{\mathrm{polyèdre}}=B-A\ \text{ou}\ D-C,
+\qquad
+\Delta_{\mathrm{relations}}=C-A\ \text{ou}\ D-B.
+\]
+\small
+Même MLP de messages : sur soi pour A/B, sur liens HGP pour C/D ; mêmes nœuds, sondes, métadonnées et tête. Contrôle spatial à degré comparable en complément.
+\takeaway{Le tableau isole la géométrie et l'usage de l'arbre ; il ne compare pas, à lui seul, toutes les constructions de régions.}
+\source{Plan factoriel proposé pour séparer représentation des primitives et utilisation des relations. Aucun résultat expérimental encore produit.}
+\end{frame}
+
+\begin{frame}[t]{Un pilote reproductible, avant tout passage à l'échelle}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.49\textwidth}
+\textbf{Données}\par\medskip
+SemanticKITTI, un scan à la fois, LiDAR seul ; sol conservé.\par\smallskip
+Apprentissage : $00$--$06,09,10$.\par\smallskip
+Réglage : $07$ ; évaluation finale : $08$.\par\smallskip
+Même sous-échantillonnage de scans pour tous les essais ; pas de mélange aléatoire des points entre ensembles.
+\end{column}
+\begin{column}{.47\textwidth}
+\textbf{Configuration proposée}\par\medskip
+$K=2$ ; rayons initiaux en mètres :\[
+0{,}1;\ 0{,}2;\ 0{,}4;\ 0{,}8;\ 1{,}6.
+\]
+$4^3$ contre $8^3$ sondes ; trois graines.\par\smallskip
+Même budget d'états, d'incidences et d'entraînement ; réglages figés avant $08$.
+\end{column}
+\end{columns}
+\medskip
+\textbf{Rapport minimal :} IoU d'instances, mIoU par classe et portée, robustesse, octets et temps total.\par\medskip
+\alert{512 valeurs en 16 bits = 1\,024 octets par état}, avant métadonnées. Ne pas encoder chaque petite feuille à ce coût.
+\source{SemanticKITTI : séquences annotées 00--10, test officiel 11--21. Le partage interne 07/08 et les budgets ci-dessus sont notre protocole proposé.}
+\end{frame}
+
+\begin{frame}[t]{Décider ce qui mérite un modèle de fondation}
+\vspace{.1cm}
+\renewcommand{\arraystretch}{1.7}
+\begin{tabular}{@{}p{.44\textwidth}p{.49\textwidth}@{}}\toprule
+\textbf{Observation} & \textbf{Décision scientifique}\\\midrule
+HGP aide ; les primitives n'aident pas & Garder la hiérarchie et les points.\\
+Les primitives aident ; HGP n'aide pas & Travailler sur la représentation, sans attribuer le gain à HGP.\\
+Les deux aident à coût comparable & Tester un encodeur guidé par HGP, puis le préentraînement transférable.\\
+Aucun gain reproductible & Revoir les régions ou la réalisation avant d'agrandir le réseau.\\\bottomrule
+\end{tabular}
+\takeaway{Le premier livrable scientifique : un banc d'essai de représentation. L'ambition de fondation reste l'objectif, pas le résultat supposé.}
+\source{Critères de décision du banc d'essai proposé. Présentation de propositions et de garanties mathématiques ; aucun benchmark nouveau n'est revendiqué.}
+\end{frame}
+
+\appendix
+\section{Annexes : démonstrations et points de vigilance}
+\begin{frame}[t]{Annexe : reconstruction du convexe par ses appuis}
+Soit $P$ compact convexe, $y\notin P$, $p$ sa projection sur $P$ et $u=(y-p)/\norm{y-p}$.
+\[
+\ip{y-p}{x-p}\le0\qquad\forall x\in P.
+\]
+Donc $h_P(u)=\ip{u}{p}<\ip{u}{y}$ : le demi-espace d'appui exclut $y$.\par\medskip
+Pour $\varepsilon\ge0$, la même séparation donne
+\[
+P\subset Q+\varepsilon\overline B
+\quad\Longleftrightarrow\quad
+h_P(u)\le h_Q(u)+\varepsilon\quad\forall u\in\Sph.
+\]
+En échangeant $P,Q$, on obtient
+\[
+d_H(P,Q)=\sup_{u\in\Sph}|h_P(u)-h_Q(u)|.
+\]
+\source{Démonstration élémentaire des propriétés utilisées. $+$ désigne ici la somme de Minkowski avec une boule.}
+\end{frame}
+
+\begin{frame}[t]{Annexe : stabilité et erreur d'échantillonnage}
+Posons $\varepsilon=d_H(P,Q)$. L'inégalité triangulaire donne, pour toute sonde $b$,
+\[
+d_Q(b)\le d_P(b)+\varepsilon,\qquad d_P(b)\le d_Q(b)+\varepsilon.
+\]
+Évaluer sur $P$ ou $Q$ atteint l'écart maximal : $\norm{d_P-d_Q}_\infty=\varepsilon$.\par\medskip
+Si $g$ est une sonde à distance au plus $\delta$ d'un point $x$ réalisant l'une des distances dirigées :
+\[
+|d_P(x)-d_Q(x)|\le |d_P(g)-d_Q(g)|+2\delta.
+\]
+D'où la borne annoncée. Pour une grille de centres à pas $2/n$ dans le cube :
+\[
+\delta=\frac{\sqrt3}{n},\qquad
+ d_H(P,Q)\le\norm{D_P-D_Q}_\infty+\frac{2\sqrt3}{n}.
+\]
+\source{Domaines contenant les deux compacts, même repère et même unité. Sur les grilles localement normalisées, la comparaison porte d'abord sur les formes normalisées.}
+\end{frame}
+
+\begin{frame}[t]{Annexe : une normalisation stable, mais pas sans coût}
+Dans un même repère, si $d_H(P,Q)\le\varepsilon$ :
+\[
+\norm{c_P-c_Q}\le\sqrt3\varepsilon,\qquad |s_P-s_Q|\le\varepsilon,
+\]
+avec le même plancher positif $s_{\min}$. Puisque $\norm{x-c_P}\le\sqrt3 s_P$,
+\[
+\boxed{d_H(\widehat P,\widehat Q)
+\le (1+2\sqrt3)\,\frac{\varepsilon}{\min(s_P,s_Q)}.}
+\]
+\textbf{Conséquence :} la normalisation peut amplifier une erreur absolue sur les petits morceaux.\par\medskip
+Conserver la résolution relative et le masque de plancher.\par\medskip
+Le centre de boîte ne dépend pas du remeshing de la même réalisation ; il reste sensible aux aberrants et aux occultations.
+\source{Borne dérivée ici pour la demi-longueur du plus grand côté, conformément au choix final. Elle ne prouve aucune invariance au changement de capteur.}
+\end{frame}
+
+\begin{frame}[t]{Annexe : transporter les champs entre repères locaux}
+Sans rotation locale, poser $f_v(y)=d_{P_v}(c_v+s_vy)/s_v$.\par\medskip
+Si $P_v=\bigcup_u P_u\cup A_v$, alors
+\[
+\boxed{f_v(y)=\min\left\{\min_u\frac{s_u}{s_v}
+ f_u\!\left(\frac{c_v-c_u+s_vy}{s_u}\right),
+ \frac{d_{A_v}(c_v+s_vy)}{s_v}\right\}.}
+\]
+$A_v$ contient les primitives nouvellement ajoutées ; terme absent si $A_v=\varnothing$.\par\medskip
+\textbf{Exact pour les fonctions}, pas pour un simple minimum des vecteurs normalisés.\par\medskip
+Réévaluer les distances sur la géométrie partagée, ou contrôler l'interpolation.\par\medskip
+Si l'on remplace une union par la frontière extérieure de son volume, cette formule ne décrit plus l'opération.
+\source{Transport exact des fonctions de distance normalisées, sans rotation locale.}
+\end{frame}
+
+\begin{frame}[t]{Annexe : un certificat Q2 n'impose pas une forme filaire}
+Prendre $0<h<1$ et
+\[
+a=(-1,0,0),\ b=(1,0,0),\ c=(0,h,0),\ d=(0,0,h).
+\]
+La boule unité est minimale : elle contient les quatre points et $\norm{a-b}=2$.\par\medskip
+Son support est $Q=\{a,b\}$, mais
+\[
+\operatorname{Vol}\bigl(\conv\{a,b,c,d\}\bigr)=\frac{h^2}{3}>0.
+\]
+\takeaway{Ordre $K$, cardinal du support et dimension de la réalisation sont trois informations distinctes.}
+\medskip
+La réalisation filaire à $K=2$ est un \textbf{choix explicite sur les facettes actives}, pas une déduction « Q2 donc segment ».
+\source{Contre-exemple explicite. Thèse : boules minimales et simplexes séparants.}
+\end{frame}
+
+\begin{frame}[t]{Références et provenance}
+\small
+\textbf{Fondements et introduction}\par\smallskip
+L. \textsc{Hauseux}, manuscrit de thèse, parties I--II : Single-Linkage, Hartigan, HGP, percolation, Gabriel et Delaunay d'ordre supérieur.\par\smallskip
+Soutenance du 8 septembre 2026 : deux diapositives de perspective 3D, figures TikZ et thème Inria 2024.\par\medskip
+\textbf{Décisions de représentation}\par\smallskip
+Notes préparatoires, septembre 2026 : support quadratique $H_P$, distances à la réalisation, absence de rotation locale, centre de boîte, normalisation isotrope, grille $8^3$, premiers tests sans modèle de fondation.\par\medskip
+\textbf{Antécédent de vectorisation}\par\smallskip
+S. \textsc{Prokudin}, C. \textsc{Lassner}, J. \textsc{Romero}, \href{https://arxiv.org/abs/1908.09186}{\emph{Efficient Learning on Point Clouds with Basis Point Sets}}, ICCV 2019.\par\medskip
+\textbf{Jeu d'évaluation}\par\smallskip
+J. \textsc{Behley} \emph{et al.}, \href{https://semantic-kitti.org/dataset.html}{\emph{SemanticKITTI: A Dataset for Semantic Scene Understanding of LiDAR Sequences}}, ICCV 2019.
+\end{frame}
+\end{document}

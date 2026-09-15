@@ -1,0 +1,14 @@
+% Theme Inria 2024, canevas et titre de la soutenance.
+\mode<presentation>
+\newlength{\canvastop}\setlength{\canvastop}{\dimexpr\paperheight-\vmargin+1pt}
+\defbeamertemplate*{background canvas}{inria}{%
+\begin{tikzpicture}\useasboundingbox(0,0)rectangle(\paperwidth,\paperheight);
+\draw[inria-noir](\hmargin,\posfooterline)--(\paperwidth-\hmargin,\posfooterline);
+\end{tikzpicture}}
+\newlength{\titleH}
+\defbeamertemplate*{frametitle}{inria}{%
+\begin{textblock*}{\anglewidth}(\hmargin,\vmargin)\anglepng\end{textblock*}
+\begin{textblock*}{\textwidth}(\hmargin+\anglewidth,\vmargin+\angleheight)
+\textbf{\LARGE\insertframetitle}\end{textblock*}
+\settoheight{\titleH}{\insertframetitle}\addtolength{\titleH}{\angleheight}\vspace*{2\titleH}}
+\mode<all>

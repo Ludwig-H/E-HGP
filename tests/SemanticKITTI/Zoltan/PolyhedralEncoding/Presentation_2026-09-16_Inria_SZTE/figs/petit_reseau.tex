@@ -1,0 +1,8 @@
+\begin{tikzpicture}[scale=.94,transform shape]
+\node[box,text width=2.05cm](a)at(0,0){$D_v$ + métadonnées\\\footnotesize même entrée par état};
+\node[box,text width=2.05cm](b)at(2.9,0){MLP partagé\\\footnotesize $128\to64$};
+\node[box,text width=2.35cm](c)at(6,0){résumé par coupe\\\footnotesize régions contenant $x_i$};
+\node[box,text width=2.05cm](d)at(9.1,0){tête par point\\\footnotesize 19 scores};
+\draw[arr](a)--(b);\draw[arr](b)--(c);\draw[arr](c)--(d);
+\node[lab]at(6,-1){cinq coupes ; moyennes séparées\\si recouvrements multiples};
+\end{tikzpicture}
