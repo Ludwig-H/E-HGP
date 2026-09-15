@@ -1,16 +1,17 @@
 {
  "title": "Plafond de tout proposeur de témoins du front q2 (rectangles émis, prédicat de boîte du front)",
  "auditor": "B",
- "date": "2026-09-15T12:14:52Z",
+ "date": "2026-09-15T12:21:28Z",
  "engine_commit": "2741d614",
  "harness": "witness_ceiling.cpp",
- "harness_sha256": "343c855d6036b54cde953891b978d58739d8dababe39092701646122a3b2a323",
- "runner_sha256": "de2649f3516c9c5a6c50f8f8af8a38e435ec6ca686c009fb40ea7e568751c031",
+ "harness_sha256": "7a5bc0a330c9256feabf1dc5d280e9020c77ce86019d8f8026d4c71612a67ba1",
+ "runner_sha256": "8334d6a8b669dd4152e2567b669b3109ed079ef07311a06397a96683abf93086",
  "seed": 3,
  "quick": false,
  "definitions": {
   "ceil": "rectangles émis (lane q2) ayant au moins K sites z avec H_min(A.box, B.box, {z}) > 0 ; aucun proposeur de témoins ponctuels de boîte ne peut rejeter les autres, ni au produit ni à un ancêtre",
   "block": "plus haut nœud du chemin de descente du front (vers le milieu du produit) dont la borne conjointe A.box x B.box x Z.box est strictement positive et dont la taille atteint K",
+  "chain": "bloc >= K => fenêtre 2K rejette => fenêtre 4K rejette => U >= K ; les trois compteurs de violation doivent valoir zéro ; unsearchable = rectangles à moins de K sites hors A et B, sans fenêtre",
   "win2k/win4k": "fenêtre de L = 2K / 4K rangs autour du pivot du front (formule du front, rangs de A/B sautés) cumulant K crédits stricts ; wink (L = K) doit valoir 0 sur les rectangles émis",
   "mass": "somme de |A| x |B| sur les rectangles de la classe : masse résiduelle q2 du front, candidats du census avant filtrage Pool (égaux quand pool.filtered_pairs = 0)"
  },
@@ -48,7 +49,11 @@
    "node_visits": 161091938,
    "path_steps": 25507989,
    "window_tests": 101245277,
-   "ms": 12475.8,
+   "unsearchable": 0,
+   "viol_block_not_win2k": 0,
+   "viol_win2k_not_win4k": 0,
+   "viol_win4k_not_ceil": 0,
+   "ms": 12187.4,
    "rect_hist": {
     "0": 29825,
     "1": 29018,
@@ -84,7 +89,7 @@
     "16-31": 164525,
     "32+": 14314
    },
-   "wall_seconds": 12.5,
+   "wall_seconds": 12.2,
    "failures": [],
    "status": "pass"
   },
@@ -120,7 +125,11 @@
    "node_visits": 59988326,
    "path_steps": 13404352,
    "window_tests": 26564811,
-   "ms": 4620.8,
+   "unsearchable": 0,
+   "viol_block_not_win2k": 0,
+   "viol_win2k_not_win4k": 0,
+   "viol_win4k_not_ceil": 0,
+   "ms": 4561.7,
    "rect_hist": {
     "0": 29825,
     "1": 29018,
@@ -182,7 +191,11 @@
    "node_visits": 84563662,
    "path_steps": 15778195,
    "window_tests": 64851497,
-   "ms": 7134.8,
+   "unsearchable": 0,
+   "viol_block_not_win2k": 0,
+   "viol_win2k_not_win4k": 0,
+   "viol_win4k_not_ceil": 0,
+   "ms": 7015.2,
    "rect_hist": {
     "0": 27789,
     "1": 26190,
@@ -218,7 +231,7 @@
     "16-31": 55272,
     "32+": 2724
    },
-   "wall_seconds": 7.1,
+   "wall_seconds": 7.0,
    "failures": [],
    "status": "pass"
   },
@@ -254,7 +267,11 @@
    "node_visits": 37892581,
    "path_steps": 9510091,
    "window_tests": 19121588,
-   "ms": 3055.0,
+   "unsearchable": 0,
+   "viol_block_not_win2k": 0,
+   "viol_win2k_not_win4k": 0,
+   "viol_win4k_not_ceil": 0,
+   "ms": 2988.6,
    "rect_hist": {
     "0": 27789,
     "1": 26190,
@@ -280,7 +297,7 @@
     "16-31": 9789,
     "32+": 353
    },
-   "wall_seconds": 3.1,
+   "wall_seconds": 3.0,
    "failures": [],
    "status": "pass"
   },
@@ -316,7 +333,11 @@
    "node_visits": 20865123,
    "path_steps": 5614019,
    "window_tests": 23788628,
-   "ms": 2286.3,
+   "unsearchable": 0,
+   "viol_block_not_win2k": 0,
+   "viol_win2k_not_win4k": 0,
+   "viol_win4k_not_ceil": 0,
+   "ms": 2258.0,
    "rect_hist": {
     "0": 16273,
     "1": 15457,
@@ -388,7 +409,11 @@
    "node_visits": 9378256,
    "path_steps": 3157293,
    "window_tests": 6524221,
-   "ms": 942.2,
+   "unsearchable": 0,
+   "viol_block_not_win2k": 0,
+   "viol_win2k_not_win4k": 0,
+   "viol_win4k_not_ceil": 0,
+   "ms": 895.8,
    "rect_hist": {
     "0": 16273,
     "1": 15457,
@@ -448,9 +473,13 @@
    "win4k_rect_share": 0.0211,
    "win4k_mass_share": 0.0003,
    "node_visits": 2057931,
-   "path_steps": 904078,
+   "path_steps": 904090,
    "window_tests": 4408782,
-   "ms": 309.3,
+   "unsearchable": 1,
+   "viol_block_not_win2k": 0,
+   "viol_win2k_not_win4k": 0,
+   "viol_win4k_not_ceil": 0,
+   "ms": 321.2,
    "rect_hist": {
     "0": 7999,
     "1": 7996,
@@ -520,9 +549,13 @@
    "win4k_rect_share": 0.0,
    "win4k_mass_share": 0.0,
    "node_visits": 1121349,
-   "path_steps": 518660,
+   "path_steps": 518672,
    "window_tests": 1167120,
-   "ms": 128.1,
+   "unsearchable": 1,
+   "viol_block_not_win2k": 0,
+   "viol_win2k_not_win4k": 0,
+   "viol_win4k_not_ceil": 0,
+   "ms": 129.7,
    "rect_hist": {
     "0": 7999,
     "1": 7996,
@@ -584,7 +617,11 @@
    "node_visits": 177353916,
    "path_steps": 30535967,
    "window_tests": 118723690,
-   "ms": 14083.7,
+   "unsearchable": 0,
+   "viol_block_not_win2k": 0,
+   "viol_win2k_not_win4k": 0,
+   "viol_win4k_not_ceil": 0,
+   "ms": 13841.1,
    "rect_hist": {
     "0": 29798,
     "1": 29157,
@@ -620,7 +657,7 @@
     "16-31": 243635,
     "32+": 26916
    },
-   "wall_seconds": 14.1,
+   "wall_seconds": 13.8,
    "failures": [],
    "status": "pass"
   },
@@ -656,7 +693,11 @@
    "node_visits": 389954423,
    "path_steps": 63364439,
    "window_tests": 229606462,
-   "ms": 31748.0,
+   "unsearchable": 0,
+   "viol_block_not_win2k": 0,
+   "viol_win2k_not_win4k": 0,
+   "viol_win4k_not_ceil": 0,
+   "ms": 29169.6,
    "rect_hist": {
     "0": 60578,
     "1": 59147,
@@ -692,7 +733,7 @@
     "16-31": 275463,
     "32+": 97394
    },
-   "wall_seconds": 31.8,
+   "wall_seconds": 29.2,
    "failures": [],
    "status": "pass"
   },
@@ -728,7 +769,11 @@
    "node_visits": 922424502,
    "path_steps": 152587087,
    "window_tests": 511901850,
-   "ms": 67600.3,
+   "unsearchable": 0,
+   "viol_block_not_win2k": 0,
+   "viol_win2k_not_win4k": 0,
+   "viol_win4k_not_ceil": 0,
+   "ms": 69068.1,
    "rect_hist": {
     "0": 122605,
     "1": 120070,
@@ -764,7 +809,7 @@
     "16-31": 566300,
     "32+": 182052
    },
-   "wall_seconds": 67.6,
+   "wall_seconds": 69.1,
    "failures": [],
    "status": "pass"
   },
@@ -800,7 +845,11 @@
    "node_visits": 294090764,
    "path_steps": 68776909,
    "window_tests": 118113304,
-   "ms": 22150.5,
+   "unsearchable": 0,
+   "viol_block_not_win2k": 0,
+   "viol_win2k_not_win4k": 0,
+   "viol_win4k_not_ceil": 0,
+   "ms": 21746.1,
    "rect_hist": {
     "0": 122605,
     "1": 120070,
@@ -826,7 +875,7 @@
     "16-31": 70086,
     "32+": 14208
    },
-   "wall_seconds": 22.2,
+   "wall_seconds": 21.8,
    "failures": [],
    "status": "pass"
   },
@@ -862,7 +911,11 @@
    "node_visits": 622009496,
    "path_steps": 113704998,
    "window_tests": 388718618,
-   "ms": 56515.0,
+   "unsearchable": 0,
+   "viol_block_not_win2k": 0,
+   "viol_win2k_not_win4k": 0,
+   "viol_win4k_not_ceil": 0,
+   "ms": 48511.7,
    "rect_hist": {
     "0": 117570,
     "1": 112996,
@@ -898,7 +951,7 @@
     "16-31": 324003,
     "32+": 69345
    },
-   "wall_seconds": 56.5,
+   "wall_seconds": 48.5,
    "failures": [],
    "status": "pass"
   },
@@ -934,7 +987,11 @@
    "node_visits": 222730591,
    "path_steps": 55967244,
    "window_tests": 97051449,
-   "ms": 17713.7,
+   "unsearchable": 0,
+   "viol_block_not_win2k": 0,
+   "viol_win2k_not_win4k": 0,
+   "viol_win4k_not_ceil": 0,
+   "ms": 17113.4,
    "rect_hist": {
     "0": 117570,
     "1": 112996,
@@ -960,7 +1017,7 @@
     "16-31": 42479,
     "32+": 5894
    },
-   "wall_seconds": 17.7,
+   "wall_seconds": 17.1,
    "failures": [],
    "status": "pass"
   }

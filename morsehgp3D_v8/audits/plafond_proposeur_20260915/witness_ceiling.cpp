@@ -7,7 +7,10 @@
 //     taille du plus haut nœud dont la borne conjointe est strictement positive (0 si aucun) ; certificat si taille ≥ K ;
 //  3. fenêtres L = K, 2K, 4K autour du pivot du front (même formule de fenêtre, mêmes sauts des rangs de A/B) : crédits
 //     stricts ; rejet si ≥ K crédits. L = K doit rejeter zéro rectangle émis (contrôle de cohérence avec le front) ;
-//  4. masse de paires |A|·|B| portée par chaque classe (masse résiduelle q2 du front = candidats du census avant filtrage Pool).
+//  4. masse de paires |A|·|B| portée par chaque classe (masse résiduelle q2 du front = candidats du census avant filtrage Pool) ;
+//  5. chaîne d'inclusions démontrée rectangle par rectangle et comptée ici en violations (doivent valoir zéro) :
+//     bloc ≥ K ⇒ fenêtre 2K rejette (le nœud est un intervalle de rangs contenant le pivot, d'au moins K rangs hors A ∪ B, dont
+//     au moins K dans la fenêtre centrée de 2K) ⇒ fenêtre 4K rejette (fenêtre contenue) ⇒ U ≥ K (chaque crédit est un site universel).
 // Le front est lancé avec le masque 1 (voie q2 seule), comme par le census intégré.
 #include <algorithm>
 #include <array>
@@ -47,6 +50,7 @@ int main(int argc, char** argv) {
   const std::array<unsigned, 3> windows{kmax, 2 * kmax, 4 * kmax};
   std::array<u64, 3> win_rects{}, win_mass{};
   u64 rects = 0, node_visits = 0, mass_total = 0, block_rects = 0, block_mass = 0, path_steps = 0, window_tests = 0;
+  u64 unsearchable = 0, viol_block_not_win2k = 0, viol_win2k_not_win4k = 0, viol_win4k_not_ceil = 0;
   const auto t0 = std::chrono::steady_clock::now();
   auto consumer = [&](const WspdRectangle& r) {
     if (!(r.lane_mask & 1U)) return;
@@ -66,10 +70,8 @@ int main(int argc, char** argv) {
       else { cursor = z.left; }
     }
     rect_hist[count] += 1; mass_hist[count] += mass;
-    // 2. chemin du front vers le milieu (parcouru par le front seulement si assez de sites extérieurs : même condition ici),
-    //    certificat de bloc = plus haut nœud du chemin à borne conjointe > 0.
-    const bool searchable = points.size() - A.range.size() - B.range.size() >= kmax;
-    if (!searchable) { block_hist[0] += 1; return; }
+    // 2. chemin du front vers le milieu, certificat de bloc = plus haut nœud du chemin à borne conjointe > 0 (calculé pour tout
+    //    rectangle ; un bloc ≥ K exige K sites hors A ∪ B, donc il est toujours « searchable »).
     std::array<i64, 3> center4{};
     for (std::size_t axis = 0; axis < 3; ++axis) center4[axis] = (i64)A.box.low[axis] + A.box.high[axis] + B.box.low[axis] + B.box.high[axis];
     std::size_t node = 0; u64 block = 0;
@@ -82,9 +84,13 @@ int main(int argc, char** argv) {
     }
     block_hist[block_bin(block)] += 1;
     if (block >= kmax) { ++block_rects; block_mass += mass; }
-    // 3. fenêtres L autour du pivot (formule du front), sauts des rangs de A/B, arrêt à K crédits.
+    // 3. fenêtres L autour du pivot (formule du front), sauts des rangs de A/B, arrêt à K crédits ; le front ne cherche que
+    //    si au moins K sites sont hors A ∪ B (même garde ici : sinon aucune fenêtre n'est comptée).
+    const bool searchable = points.size() - A.range.size() - B.range.size() >= kmax;
+    if (!searchable) ++unsearchable;
     const auto pivot = nodes[node].range.first;
-    for (std::size_t w = 0; w < windows.size(); ++w) {
+    std::array<bool, 3> rejected{};
+    for (std::size_t w = 0; w < windows.size() && searchable; ++w) {
       const auto L = std::min<std::size_t>(windows[w], order.size());
       const auto first = std::min(pivot > L / 2 ? pivot - L / 2 : 0, order.size() - L);
       unsigned credits = 0;
@@ -93,8 +99,12 @@ int main(int argc, char** argv) {
         ++window_tests;
         if (prepared.bounds(singleton_box(points[order[rank]])).minimum4 > 0) ++credits;
       }
-      if (credits >= kmax) { win_rects[w] += 1; win_mass[w] += mass; }
+      if (credits >= kmax) { win_rects[w] += 1; win_mass[w] += mass; rejected[w] = true; }
     }
+    // 5. violations de la chaîne bloc ⇒ 2K ⇒ 4K ⇒ plafond (attendues nulles).
+    if (block >= kmax && !rejected[1]) ++viol_block_not_win2k;
+    if (rejected[1] && !rejected[2]) ++viol_win2k_not_win4k;
+    if (rejected[2] && count < kmax) ++viol_win4k_not_ceil;
   };
   // Masque 1 = voie q2 seule, comme le census intégré : front_emitted et front_residual_mass deviennent comparables à rects/mass.
   auto res = run_wspd_front(*index, kmax, s, fmode == "pure" ? WspdFrontMode::Pure : WspdFrontMode::MidpointSamples, consumer, 1);
@@ -106,7 +116,8 @@ int main(int argc, char** argv) {
               " block_rects=%llu block_mass=%llu block_rect_share=%.4f block_mass_share=%.4f"
               " wink_rects=%llu win2k_rects=%llu win2k_mass=%llu win2k_rect_share=%.4f win2k_mass_share=%.4f"
               " win4k_rects=%llu win4k_mass=%llu win4k_rect_share=%.4f win4k_mass_share=%.4f"
-              " node_visits=%llu path_steps=%llu window_tests=%llu ms=%.1f\n",
+              " node_visits=%llu path_steps=%llu window_tests=%llu unsearchable=%llu"
+              " viol_block_not_win2k=%llu viol_win2k_not_win4k=%llu viol_win4k_not_ceil=%llu ms=%.1f\n",
     fam.c_str(), n, kmax, s, fmode.c_str(), (unsigned long long)rects, (unsigned long long)mass_total,
     (unsigned long long)res.work.emitted_rectangles, (unsigned long long)res.work.lane_rectangles[0],
     (unsigned long long)res.work.residual_pair_mass[0], (unsigned long long)res.work.fully_rejected_products,
@@ -114,7 +125,8 @@ int main(int argc, char** argv) {
     (unsigned long long)block_rects, (unsigned long long)block_mass, pct(block_rects, rects), pct(block_mass, mass_total),
     (unsigned long long)win_rects[0], (unsigned long long)win_rects[1], (unsigned long long)win_mass[1], pct(win_rects[1], rects), pct(win_mass[1], mass_total),
     (unsigned long long)win_rects[2], (unsigned long long)win_mass[2], pct(win_rects[2], rects), pct(win_mass[2], mass_total),
-    (unsigned long long)node_visits, (unsigned long long)path_steps, (unsigned long long)window_tests, ms);
+    (unsigned long long)node_visits, (unsigned long long)path_steps, (unsigned long long)window_tests, (unsigned long long)unsearchable,
+    (unsigned long long)viol_block_not_win2k, (unsigned long long)viol_win2k_not_win4k, (unsigned long long)viol_win4k_not_ceil, ms);
   std::printf("  rect_hist:"); for (unsigned c = 0; c <= kmax; ++c) std::printf(" %u:%llu", c, (unsigned long long)rect_hist[c]); std::printf("\n");
   std::printf("  mass_hist:"); for (unsigned c = 0; c <= kmax; ++c) std::printf(" %u:%llu", c, (unsigned long long)mass_hist[c]); std::printf("\n");
   static const char* bins[7] = {"0", "1", "2-4", "5-9", "10-15", "16-31", "32+"};

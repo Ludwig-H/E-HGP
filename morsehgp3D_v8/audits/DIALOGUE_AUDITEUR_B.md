@@ -189,7 +189,13 @@ rejetés par la fenêtre historique), avec le prédicat du front lui-même
 configurations 8k, 16k, 32k, K = 5 et 10, s = 8 et 12). Un rectangle
 sans K sites universels de boîte n'est rejetable ni à son produit ni à
 un ancêtre, dont les boîtes sont plus grandes : la part mesurée borne
-toute extension du filtre, quelle que soit la fenêtre.
+toute extension du filtre qui conserve le prédicat de boîte du front
+(sites ponctuels testés contre A.box × B.box), quelle que soit la
+fenêtre. Un prédicat plus fin (boîtes des enfants, ou chaque site réel
+d'un facteur contre la boîte de l'autre, comme `universal_witness`)
+peut dépasser ce plafond : un site intérieur à toutes les boules des
+paires réelles sans l'être pour un coin de A.box n'est pas compté ici ;
+son coût reste à mesurer.
 
 Faits (parts de rectangles émis de la voie q2, puis de leur masse de
 candidats) :
@@ -239,9 +245,16 @@ Réponses aux trois questions de la note :
    candidats sont dans des rectangles sans aucun témoin universel, qui
    restent au Pool et au census.
 3. **Certificat de bloc.** Plus faible que les fenêtres (14 à 30 % contre
-   45 à 75 %), il ne les remplace pas ; mais il coûte une seule borne
-   conjointe par nœud d'un chemin déjà parcouru (13 à 15) et peut les
-   précéder. La descente exacte est l'autre option, au prix de 38 à 91
+   45 à 75 %), et dominé par la fenêtre 2K : un nœud du chemin est un
+   intervalle de rangs contenant le pivot, d'au moins K rangs tous hors
+   A ∪ B, dont au moins K tombent dans la fenêtre centrée de 2K ; tout
+   rectangle rejeté par le bloc l'est donc par la fenêtre 2K (chaîne
+   bloc ⇒ 2K ⇒ 4K ⇒ plafond, zéro violation comptée rectangle par
+   rectangle dans le reçu). Aucune inclusion avec la fenêtre K : 443 406
+   rectangles émis à uniform 8k K = 10 portent un bloc ≥ K. Son seul
+   mérite est le coût : une borne conjointe par nœud d'un chemin déjà
+   parcouru (13 à 15), à placer avant la fenêtre pour lui épargner ses
+   tests. La descente exacte est l'autre option, au prix de 38 à 91
    bornes par rectangle, l'ordre d'une fenêtre 4K à K = 10, croissant
    lentement avec n et payé sur tous les produits visités.
 
@@ -331,6 +344,19 @@ singleton n'alloue déjà rien) et laisse la spécialisation du contrôle
 comme seul levier de cette voie. Les sources ont bougé depuis
 l'instantané (boucle de témoins réécrite avec état local) : je
 rejouerai au gel ou à la publication.
+
+Rejoué le 15 septembre à 11 h 53 sur l'instantané suivant du
+worktree (`q2_census.cpp` 6fffc6fc…, `witness_run` en boucle native
+à état local, `wspd_q2_batched.hpp` inchangé 9478f2f1…) : reçu
+intermédiaire `CHAINE_Q2_BATCHED_WITNESS_RUN_CHECKS.json`, 98
+exécutions, 5 256 appels à lots, 13 092 120 paires, 0 désaccord, les
+37 totaux du reçu (compteurs, identités, 258 exceptions de vivacité,
+618 159 656 entrées de lot) identiques au reçu 10:25 : la réécriture
+ne change ni les sorties ni les comptes géométriques. Ses temps ont
+été pris sous charge concurrente (campagne plafond et agents de
+relecture en parallèle) et ne sont pas comparables au tableau
+ci-dessus ; la question de vitesse de la boucle native reste ouverte
+jusqu'au gel, où un seul reçu remplacera les deux.
 
 ## Plages d'ancres et Pool partagé (2741d614) : contrelecture et campagne
 

@@ -30,6 +30,14 @@ Avant toute campagne, l'audit répond à trois questions mesurables :
    L = 2K, puis L = 4K, avec la formule de fenêtre du front, les sauts des rangs
    de A et B et l'arrêt à K crédits stricts ? La fenêtre L = K rejouée doit
    rejeter zéro rectangle émis : c'est le contrôle de cohérence avec le front.
+4. **Chaîne d'inclusions.** Bloc ≥ K ⇒ fenêtre 2K rejette ⇒ fenêtre 4K rejette
+   ⇒ U ≥ K, rectangle par rectangle. Preuve : un nœud positif du chemin est un
+   intervalle de rangs contenant le pivot, d'au moins K rangs tous hors A ∪ B
+   (un site de A ou B annule H), dont au moins K tombent dans la fenêtre
+   centrée de 2K, bords compris ; la fenêtre 4K contient la fenêtre 2K ; chaque
+   crédit est un site universel. Le harnais compte les violations, le reçu
+   exige zéro. Aucune inclusion avec la fenêtre K : un bloc de K rangs
+   contenant le pivot n'est dans la fenêtre centrée de K que s'il y commence.
 
 ## Méthode
 
@@ -45,7 +53,10 @@ voie q2, calcule :
 - la taille du plus haut nœud du chemin du front à borne conjointe strictement
   positive (0 si aucun) ;
 - les crédits stricts des fenêtres L = K, 2K, 4K (chaque site z est testé par
-  la même borne conjointe, réduite au singleton, signe identique à `h_minimum`).
+  la même borne conjointe, réduite au singleton, signe identique à `h_minimum`),
+  comptées seulement si au moins K sites sont hors A ∪ B, comme le front ;
+- les violations de la chaîne bloc ⇒ 2K ⇒ 4K ⇒ plafond, attendues nulles, et
+  les rectangles sans fenêtre (`unsearchable`).
 
 Le front est lancé avec le masque 1 (voie q2 seule), comme par le census
 intégré, et le reçu vérifie qu'il émet exactement les rectangles et la masse
@@ -74,6 +85,11 @@ python3 -O run_plafond.py --binary ./witness_ceiling --engine-commit 2741d614
 - Le prédicat est celui du front (boîtes de A et B) ; un site intérieur à
   toutes les boules des paires réelles mais non certifié par les boîtes n'est
   pas compté. Le plafond est donc celui des proposeurs qui gardent ce prédicat.
+  Un prédicat plus fin peut le dépasser : avec A = {(0,0,0), (4,4,0)},
+  b = (2,10,0) et z = (5,8,0), `h_minimum` vaut −7 au coin (0,4,0) de A.box,
+  qui n'est pas un site, alors que H vaut 1 et 5 sur les deux sites réels ;
+  un proposeur testant chaque site réel de A contre B.box (`universal_witness`)
+  compterait z. Son coût n'est pas mesuré ici.
 - Le pivot rejoué suit le chemin `MidpointSamples` du front à `2741d614` ; une
   autre règle de pivot déplace les fenêtres, pas le plafond ni le bloc.
 
@@ -126,11 +142,12 @@ Lecture :
 - **Sur les rangées, tout proposeur est un pur surcoût** : plafond 0 à 2 %,
   masse 0 %. C'est la contre-fixture de la note (« extension efficace contre
   simple surcoût ») : uniform et rows sur le même harnais.
-- **Le certificat de bloc du chemin du milieu est faible** : 14 à 30 % des
-  rectangles ; le plus haut nœud positif du chemin a le plus souvent 2 à 9
-  sites (histogrammes `block_hist` du reçu). Il ne remplace pas la fenêtre,
-  mais il ne coûte qu'une borne par nœud du chemin déjà parcouru et peut la
-  précéder.
+- **Le certificat de bloc du chemin du milieu est faible et dominé** : 14 à
+  30 % des rectangles ; le plus haut nœud positif du chemin a le plus souvent
+  2 à 9 sites (histogrammes `block_hist` du reçu). Tout rectangle qu'il
+  rejette est rejeté par la fenêtre 2K (chaîne du point 4, zéro violation).
+  Son seul mérite est le coût : une borne par nœud du chemin déjà parcouru,
+  à placer avant la fenêtre pour lui épargner ses tests.
 - **La descente exacte plafonnée à K atteint le plafond entier** pour 38 à 91
   bornes par rectangle hors rangées, l'ordre d'une fenêtre 4K à K = 10 ; elle n'a pas
   de rang à sauter et ne dépend pas d'un pivot. C'est une option mesurée, pas

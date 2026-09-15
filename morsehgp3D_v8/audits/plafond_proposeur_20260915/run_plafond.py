@@ -4,8 +4,8 @@
 Lance ``witness_ceiling`` (compilé contre les sources épinglées) sur les familles et
 tailles d'intérêt, analyse ses lignes et grave PLAFOND_PROPOSEUR_CHECKS.json avec les
 contrôles de cohérence : la fenêtre historique L = K ne rejette aucun rectangle émis,
-bloc <= fenêtre 4K <= plafond n'est PAS exigé (le bloc et les fenêtres sont des
-proposeurs distincts) mais chaque proposeur est borné par le plafond, et les
+la chaîne démontrée bloc => fenêtre 2K => fenêtre 4K => plafond ne souffre aucune
+violation rectangle par rectangle (compteurs du harnais à zéro), et les
 histogrammes totalisent les rectangles et la masse, et le front lancé avec le masque 1
 (voie q2 seule) émet exactement les rectangles et la masse vus. Tient sous ``python3 -O``.
 """
@@ -71,6 +71,9 @@ def check_entry(entry):
             failures.append(key + " exceeds the ceiling")
     if entry["win2k_rects"] > entry["win4k_rects"]:
         failures.append("window 2K rejects more than window 4K")
+    for key in ("viol_block_not_win2k", "viol_win2k_not_win4k", "viol_win4k_not_ceil"):
+        if entry[key] != 0:
+            failures.append(key + " is not zero: the inclusion chain is violated")
     if sum(entry["rect_hist"].values()) != rects:
         failures.append("rect_hist does not total the rectangles")
     if sum(entry["mass_hist"].values()) != mass:
@@ -134,6 +137,8 @@ def main():
                     "aucun proposeur de témoins ponctuels de boîte ne peut rejeter les autres, ni au produit ni à un ancêtre",
             "block": "plus haut nœud du chemin de descente du front (vers le milieu du produit) dont la borne conjointe "
                      "A.box x B.box x Z.box est strictement positive et dont la taille atteint K",
+            "chain": "bloc >= K => fenêtre 2K rejette => fenêtre 4K rejette => U >= K ; les trois compteurs de "
+                     "violation doivent valoir zéro ; unsearchable = rectangles à moins de K sites hors A et B, sans fenêtre",
             "win2k/win4k": "fenêtre de L = 2K / 4K rangs autour du pivot du front (formule du front, rangs de A/B sautés) "
                            "cumulant K crédits stricts ; wink (L = K) doit valoir 0 sur les rectangles émis",
             "mass": "somme de |A| x |B| sur les rectangles de la classe : masse résiduelle q2 du front, "
