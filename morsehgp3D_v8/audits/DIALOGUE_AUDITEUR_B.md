@@ -174,6 +174,85 @@ chiffres de la prose venaient d'une exécution préliminaire : titre et
 chiffres sont alignés sur le reçu (60 ms à 8k, +1,04 s au seuil 2), et
 la limite est écrite ; la comparaison q2 complète lui appartient.
 
+## Petits census entrelacés (tranche 19, sources en chantier) : obligations des feuilles B compactées
+
+Question du journal : le compactage des seules feuilles B (état
+singleton copié : clé de paire, rang d'ancre, B original, curseur,
+compte, phase, frère dû, stade Entry/Witness/Emit, lots entrelacés par
+worker) perd-il une obligation aux reprises après crédit, à l'entrée de
+la phase différée ou au certificat frère encore dû ? Contrelecture sur
+un instantané à manifeste SHA-256 des sources du worktree pris à
+10 h 25 UTC (`wspd_q2_batched.hpp`, `q2_census.cpp` étendu).
+
+**Réponse : aucune obligation perdue, pour les raisons suivantes.** Une
+feuille B est une requête (a, b) dont le préfixe Z consommé est résolu
+uniformément pour cette seule paire : le compte acquis est donc un
+scalaire exact, et la reprise après crédit n'a besoin que de (compte,
+curseur, phase) copiés à la soumission, ce que l'état porte ; aucun
+recompte n'est possible puisque le curseur désigne le premier sous-arbre
+non consommé du même ordre DFS. L'entrée en phase différée ne dépend
+que du B original et de son échappement (report du B original, pas du B
+courant) et du rang de l'ancre (exclusion de la contribution connue
+nulle par rang) : les trois sont dans l'état. Le certificat frère dû
+est payé une fois, à l'entrée, sur le nœud frère mémorisé, et son crédit
+n'est jamais ajouté au compte hérité : c'est le contrat du certificat
+autonome, inchangé. Ce que la spécialisation ne doit pas altérer, et que
+l'en-tête promet, c'est la clé calculée une fois et jamais reconstruite,
+la collecte complète de toute la coquille à l'émission, et l'interdiction
+d'un crédit importé par l'API publique. Le flush avant tout rectangle
+Pool et en fin de graine garde le Pairwise synchrone et sa permutation
+hors du lot, donc aucun `b_order` étranger n'entre dans un état.
+
+**Campagne (harnais `chain_verify_parallel.cpp -DMHGP8_AUDIT_BATCHED`,
+option `--batched`, reçu
+[CHAINE_Q2_BATCHED_CHECKS.json](chaine_q2_20260914/CHAINE_Q2_BATCHED_CHECKS.json),
+instantané de 10 h 25 UTC, sources encore en chantier).** Sur 86
+nuages, chaque combinaison SharedBlocks/Individual est exécutée par
+l'entrée à lots pour W ∈ {1, 2, 3, 4, 8} et quatre réglages (lots 1, 4,
+16, 64 ; quantum 1 ou 8) : 5 256 appels, 13 092 120 paires
+contrôlées contre la force brute, **0 désaccord, 0 doublon entre
+slots**, condensé canonique et compteurs globaux du pipeline (dont
+`query_tasks`, frère et phases) égaux au chemin série à chaque appel ;
+identités de lot tenues partout (618 159 656 états soumis :
+soumis = terminés = admis + rejetés = entrées, transitions = entrées +
+témoins + admissions + collectes, clés préparées = soumis) ; les trois
+cas de la question sont exercés positivement par les compteurs du
+constructeur (entrées après crédit, entrées en phase différée, frères
+dus : par exemple 76 485, 3 186 et 169 090 sur les amas à 800 sites en
+front Pure) ; vivacité : 258 exceptions
+propagées sur 258 appels, aucun blocage. Rejeu
+`-O` conforme.
+
+**Échelle** (quatre familles × 8k/16k/32k, Kmax 10, s 8, Pool 64, un
+passage, hôte partagé) :
+
+| Entrée | Série | Coarse W = 1 / W = 8 | Lots 16, quantum 1, W = 1 / W = 8 | Lot 1, quantum 1, W = 1 / W = 8 |
+| --- | ---: | ---: | ---: | ---: |
+| Uniforme 8k | 5,19 s | 5,19 / 1,05 s | 8,60 / 1,69 s | 7,36 / 1,52 s |
+| Uniforme 16k | 12,34 s | 12,40 / 2,72 s | 20,55 / 3,89 s | 17,75 / 3,57 s |
+| Uniforme 32k | 28,09 s | 28,21 / 5,89 s | 47,48 / 9,20 s | 40,64 / 8,53 s |
+| Amas 8k | 2,77 s | 2,79 / 0,57 s | 4,49 / 0,93 s | 3,89 / 0,78 s |
+| Amas 16k | 7,63 s | 7,59 / 1,57 s | 12,51 / 2,47 s | 10,86 / 2,26 s |
+| Amas 32k | 19,37 s | 19,59 / 4,09 s | 32,31 / 6,33 s | 27,73 / 5,81 s |
+| Terrain 8k | 0,97 s | 0,97 / 0,20 s | 1,36 / 0,27 s | 1,26 / 0,26 s |
+| Terrain 16k | 2,03 s | 2,07 / 0,44 s | 2,91 / 0,61 s | 2,63 / 0,57 s |
+| Terrain 32k | 4,48 s | 4,47 / 1,00 s | 6,37 / 1,34 s | 5,85 / 1,23 s |
+| Rangées 8k | 0,25 s | 0,25 / 0,14 s | 0,27 / 0,15 s | 0,29 / 0,14 s |
+| Rangées 16k | 0,53 s | 0,51 / 0,19 s | 0,62 / 0,18 s | 0,61 / 0,18 s |
+| Rangées 32k | 1,03 s | 1,10 / 0,33 s | 1,18 / 0,32 s | 1,24 / 0,30 s |
+
+Lecture : sur cet instantané, le format à lots coûte plus cher que le
+chemin Shared synchrone, et l'entrelacement n'aide pas : un seul lot
+(changement de format seul) vaut +40 à +45 % à un fil sur l'uniforme et
+les amas, seize lots entrelacés +65 à +70 % ; à huit fils, +45 à +55 %.
+Les rangées sont neutres (peu de singletons). Aucune géométrie ne
+change, le surcoût est celui de la copie d'état et du parcours par
+passes ; c'est cohérent avec le diagnostic du constructeur (le Shared
+singleton n'alloue déjà rien) et laisse la spécialisation du contrôle
+comme seul levier de cette voie. Les sources ont bougé depuis
+l'instantané (boucle de témoins réécrite avec état local) : je
+rejouerai au gel ou à la publication.
+
 ## Plages d'ancres et Pool partagé (2741d614) : contrelecture et campagne
 
 Avis demandé au journal sur la durée de vie des plans parentaux, le
@@ -1127,7 +1206,7 @@ Fichiers de B : ce dialogue, sept notes datées et les reçus
 `credits_terminaux_20260914/` (deux reçus : crédits et survivantes),
 `chaine_q2_20260914/` (six reçus : e3af11a7, modes conjoints b2106c3c,
 filtre Pool ba11e3ab, chaîne parallèle et équilibre b268cf6f,
-redistribution dynamique 4e878754, continuations d09e2207, détachement 897085f8, équipe coopérative beee3341, plages d'ancres 2741d614) et
+redistribution dynamique 4e878754, continuations d09e2207, détachement 897085f8, équipe coopérative beee3341, plages d'ancres 2741d614, lots singleton sur sources en chantier) et
 `separation_20260914/` et `oracle_q3q4_20260915/`. Aucun
 fichier des autres auditeurs ni du constructeur n'est modifié. Mes
 propositions d'archivage des anciens reçus Rectangle/Tubes sont retirées :

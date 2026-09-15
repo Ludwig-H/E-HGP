@@ -81,10 +81,12 @@ def main() -> int:
     parser.add_argument("--donate", action="store_true", help="redistribution dynamique : répète chaque appel pour Coarse, Donate{64,64} et Donate{1,1}")
     parser.add_argument("--coop", action="store_true", help="équipe coopérative front + census (tranche 17) : ajoute run_wspd_q2_census_cooperative pour W ∈ {1,2,3,4,8} × quatre réglages")
     parser.add_argument("--ranges", action="store_true", help="plages d'ancres et Pool partagé (tranche 18) : ajoute run_wspd_q2_census_ranges pour W ∈ {1,2,3,4,8} × quatre réglages")
+    parser.add_argument("--batched", action="store_true", help="petits census entrelacés (tranche 19) : ajoute run_wspd_q2_census_batched pour W ∈ {1,2,3,4,8} × quatre réglages")
     args = parser.parse_args()
     lib = Path(args.lib).resolve(); src = Path(args.src_root).resolve(); build = Path(args.build_dir).resolve()
     build.mkdir(parents=True, exist_ok=True)
-    pinned = ([src / "src/pipeline/wspd_q2_ranges.hpp", src / "src/pipeline/q2_node_pool.hpp"] if args.ranges else []) + \
+    pinned = ([src / "src/pipeline/wspd_q2_batched.hpp"] if args.batched else []) + \
+             ([src / "src/pipeline/wspd_q2_ranges.hpp", src / "src/pipeline/q2_node_pool.hpp"] if args.ranges else []) + \
              ([src / "src/pipeline/wspd_q2_cooperative.hpp", src / "src/pipeline/q2_census_resume.hpp", src / "src/pipeline/q2_census_parallel.hpp"] if args.coop else []) + \
              [src / "src/pipeline/wspd_q2_parallel.hpp", src / "src/pipeline/wspd_q2_census.hpp", src / "src/pipeline/q2_census.cpp",
               src / "src/pipeline/q2_node_pool.hpp", src / "src/parallel/joined_workers.hpp", src / "src/parallel/work_reduction.hpp",
@@ -101,6 +103,8 @@ def main() -> int:
         compile_cmd.append("-DMHGP8_AUDIT_COOP")
     if args.ranges:
         compile_cmd.append("-DMHGP8_AUDIT_RANGES")
+    if args.batched:
+        compile_cmd.append("-DMHGP8_AUDIT_BATCHED")
     compile_cmd += [str(HERE / "chain_verify_parallel.cpp"), str(lib), "-pthread", "-o", str(binary)]
     done = run(compile_cmd, HERE)
     if done.returncode != 0:
@@ -135,9 +139,11 @@ def main() -> int:
         summary = parse_summary(done.stdout)
         if summary is None or done.returncode != 0:
             return fail(f"échec {' '.join(cmd)} (code {done.returncode}) :\n{done.stdout[-3000:]}\n{done.stderr[-2000:]}")
-        for key in ("mismatch", "cross_slot_dups", "digest_breaks", "counter_breaks", "coop_mismatch", "coop_digest_breaks", "coop_counter_breaks", "coop_ident_breaks", "rng_mismatch", "rng_digest_breaks", "rng_counter_breaks", "rng_ident_breaks"):
+        for key in ("mismatch", "cross_slot_dups", "digest_breaks", "counter_breaks", "coop_mismatch", "coop_digest_breaks", "coop_counter_breaks", "coop_ident_breaks", "rng_mismatch", "rng_digest_breaks", "rng_counter_breaks", "rng_ident_breaks", "bat_mismatch", "bat_digest_breaks", "bat_counter_breaks", "bat_ident_breaks"):
             if summary.get(key, 0) != 0:
                 return fail(f"désaccord {key} : {' '.join(cmd)}\n{done.stdout}")
+        if args.batched and summary.get("bat_liveness_runs", 0) != summary.get("bat_liveness_exceptions", 0):
+            return fail(f"vivacité lots : exception non propagée : {' '.join(cmd)}\n{done.stdout}")
         if args.ranges and summary.get("rng_liveness_runs", 0) != summary.get("rng_liveness_exceptions", 0):
             return fail(f"vivacité plages : exception non propagée : {' '.join(cmd)}\n{done.stdout}")
         if args.coop and summary.get("coop_liveness_runs", 0) != summary.get("coop_liveness_exceptions", 0):
@@ -158,13 +164,13 @@ def main() -> int:
               "counter_breaks": sum(r["summary"]["counter_breaks"] for r in runs),
               "donations": sum(r["summary"].get("donations", 0) for r in runs),
               "stolen": sum(r["summary"].get("stolen", 0) for r in runs)}
-    for key in ("coop_runs", "coop_mismatch", "coop_digest_breaks", "coop_counter_breaks", "coop_ident_breaks", "coop_continued", "coop_donations", "coop_liveness_runs", "coop_liveness_exceptions", "rng_runs", "rng_mismatch", "rng_digest_breaks", "rng_counter_breaks", "rng_ident_breaks", "rng_donations", "rng_liveness_runs", "rng_liveness_exceptions"):
+    for key in ("coop_runs", "coop_mismatch", "coop_digest_breaks", "coop_counter_breaks", "coop_ident_breaks", "coop_continued", "coop_donations", "coop_liveness_runs", "coop_liveness_exceptions", "rng_runs", "rng_mismatch", "rng_digest_breaks", "rng_counter_breaks", "rng_ident_breaks", "rng_donations", "rng_liveness_runs", "rng_liveness_exceptions", "bat_runs", "bat_mismatch", "bat_digest_breaks", "bat_counter_breaks", "bat_ident_breaks", "bat_enqueued", "bat_liveness_runs", "bat_liveness_exceptions"):
         totals[key] = sum(r["summary"].get(key, 0) for r in runs)
     receipt = {
         "title": "Chaîne parallèle front + census q2 : force brute, identité des condensés et des compteurs selon le nombre de fils",
         "date": "2026-09-14", "author_role": "auditeur indépendant B",
         "git_head": run(["git", "rev-parse", "HEAD"], ROOT).stdout.strip(), "src_root": str(src),
-        "compile_command": " ".join(compile_cmd), "pins_sha256": pins, "totals": totals, "runs": runs, "donate_schedules": bool(args.donate), "cooperative": bool(args.coop), "anchor_ranges": bool(args.ranges),
+        "compile_command": " ".join(compile_cmd), "pins_sha256": pins, "totals": totals, "runs": runs, "donate_schedules": bool(args.donate), "cooperative": bool(args.coop), "anchor_ranges": bool(args.ranges), "batched": bool(args.batched),
         "stable_digest_without_times": hashlib.sha256(json.dumps([r["summary"] for r in runs], sort_keys=True).encode()).hexdigest(),
         "scope": "Exactitude, absence de doublon entre slots, identité bit à bit des supports et des compteurs discrets selon W ; les temps d'échelle sont indicatifs (hôte partagé), jamais un contrat ; aucune tour FULL.",
     }

@@ -14,6 +14,9 @@
 // Avec -DMHGP8_AUDIT_RANGES (tranche 18, plages d'ancres et Pool partagé), chaque combinaison SharedBlocks/Individual
 // est aussi exécutée par run_wspd_q2_census_ranges pour W ∈ {1,2,3,4,8} et quatre réglages (grain 1 ou 64, file 1 ou 8) :
 // force brute, condensé, compteurs globaux égaux au chemin série, identités de plages et de dons, vivacité.
+// Avec -DMHGP8_AUDIT_BATCHED (tranche 19, petits census entrelacés), chaque combinaison SharedBlocks/Individual est
+// aussi exécutée par run_wspd_q2_census_batched pour W ∈ {1,2,3,4,8} et quatre réglages (lots 1, 4, 16, 64 ; quantum
+// 1 ou 8) : force brute, condensé, compteurs globaux égaux au chemin série, identités de lot, vivacité.
 // un chien de garde signale tout appel dépassant 600 s (perte de réveil = blocage), et un scénario de
 // vivacité lève une exception depuis un slot pendant que d'autres workers peuvent dormir sur la file :
 // l'appel doit rendre la main en propageant l'exception (jamais de blocage, jamais de worker détaché).
@@ -35,6 +38,9 @@
 #endif
 #ifdef MHGP8_AUDIT_RANGES
 #include "pipeline/wspd_q2_ranges.hpp"
+#endif
+#ifdef MHGP8_AUDIT_BATCHED
+#include "pipeline/wspd_q2_batched.hpp"
 #endif
 #include "front_fixtures.hpp"
 using namespace mhgp8;
@@ -104,6 +110,7 @@ int main(int argc, char** argv) {
 #endif
   u64 total_mismatch = 0, total_checked = 0, total_alive = 0, total_runs = 0, cross_slot_dups = 0, digest_breaks = 0, counter_breaks = 0;
   u64 donations_total = 0, stolen_total = 0;
+  u64 bat_runs = 0, bat_mismatch = 0, bat_digest_breaks = 0, bat_counter_breaks = 0, bat_ident_breaks = 0, bat_enqueued = 0, bat_live_runs = 0, bat_live_exc = 0;
   u64 rng_runs = 0, rng_mismatch = 0, rng_digest_breaks = 0, rng_counter_breaks = 0, rng_ident_breaks = 0, rng_donations = 0, rng_live_runs = 0, rng_live_exc = 0;
   u64 coop_runs = 0, coop_mismatch = 0, coop_digest_breaks = 0, coop_counter_breaks = 0, coop_ident_breaks = 0, coop_continued = 0, coop_donations = 0, coop_live_runs = 0, coop_live_exc = 0;
   // vérité (une fois)
@@ -171,6 +178,51 @@ int main(int argc, char** argv) {
 #endif
       std::printf("  W=%zu J=%-2zu started=%llu jobs=%llu completed=%llu terminal=%llu emitted=%zu dups=%llu ok=%s digest_eq=%s counters_eq=%s cand=%llu acc=%llu rej=%llu total_ms=%.1f worker_max_ms=%.1f worker_mean_ms=%.1f imbalance=%.2f max_visit_share=%.3f max_jobs=%llu\n", W, J, (unsigned long long)pres.started_workers, (unsigned long long)pres.jobs, (unsigned long long)pres.completed_jobs, (unsigned long long)pres.terminal_jobs, merged.size(), (unsigned long long)dups, ok ? "yes" : "NO", digest_ok ? "yes" : "NO", counters_ok ? "yes" : first_bad.c_str(), (unsigned long long)pres.candidate_pairs, (unsigned long long)pres.accepted_pairs, (unsigned long long)pres.rejected_pairs, pres.total_ms, max_ms, mean_ms, mean_ms > 0 ? max_ms / mean_ms : 0.0, sum_visits ? (double)max_visits / sum_visits : 0.0, (unsigned long long)max_jobs);
     }
+#ifdef MHGP8_AUDIT_BATCHED
+    // ---- petits census entrelacés (SharedBlocks / Individual seulement)
+    if (cb.c == Q2CensusMode::SharedBlocks && cb.am == Q2AnchorMode::Individual) {
+      struct BatOpt { std::size_t lanes, quantum; const char* name; };
+      const std::vector<BatOpt> bat_opts = scale ? std::vector<BatOpt>{{16, 1, "l16/q1"}, {1, 1, "l1/q1"}} : std::vector<BatOpt>{{16, 1, "l16/q1"}, {1, 1, "l1/q1"}, {64, 8, "l64/q8"}, {4, 1, "l4/q1"}};
+      for (auto W : workers_list) for (const auto& bo : bat_opts) {
+        ++bat_runs;
+        std::vector<std::map<Key, Emitted>> slots(W); std::vector<Q2CensusConsumer> consumers;
+        for (std::size_t w = 0; w < W; ++w) consumers.push_back([&slots, w](const Q2Support& sp) { Key k{std::min(sp.a_id, sp.b_id), std::max(sp.a_id, sp.b_id)}; Emitted e; e.interior.assign(sp.interior.begin(), sp.interior.end()); e.shell.assign(sp.shell.begin(), sp.shell.end()); e.key = sp.key; std::sort(e.interior.begin(), e.interior.end()); std::sort(e.shell.begin(), e.shell.end()); auto& m = slots[w]; if (m.count(k)) e.interior.push_back(~std::size_t{0}); m[k] = e; });
+        WspdQ2BatchOptions o; o.jobs_per_worker = 16; o.lanes = bo.lanes; o.quantum = bo.quantum;
+        WspdQ2BatchResult bres; { CallGuard guard; bres = run_wspd_q2_census_batched(index, kmax, s, cb.f, consumers, o, cb.sb, cb.o, cb.pool); }
+        const auto& pres = bres.pipeline;
+        std::map<Key, Emitted> merged; u64 dups = 0; for (auto& m : slots) for (auto& [k, e] : m) { if (merged.count(k)) ++dups; merged[k] = e; }
+        const std::string pdigest = canon(merged);
+        const bool ok = (merged == truth) && dups == 0; const bool digest_ok = pdigest == sdigest;
+        std::string first_bad;
+        auto same = [&](const char* name, u64 a, u64 b) { if (a != b && first_bad.empty()) first_bad = std::string(name) + "(" + std::to_string(a) + "!=" + std::to_string(b) + ")"; };
+        same("candidate_pairs", pres.candidate_pairs, sres.census.candidate_pairs); same("accepted_pairs", pres.accepted_pairs, sres.census.accepted_pairs);
+        same("rejected_pairs", pres.rejected_pairs, sres.census.rejected_pairs); same("input_rectangles", pres.input_rectangles, sres.input_rectangles);
+        const auto& pw = pres.census_work; const auto& sw = sres.census.work;
+        same("count_node_visits", pw.count_node_visits, sw.count_node_visits); same("count_bound_tests", pw.count_bound_tests, sw.count_bound_tests);
+        same("count_point_tests", pw.count_point_tests, sw.count_point_tests); same("uniform_rejected_pairs", pw.uniform_rejected_pairs, sw.uniform_rejected_pairs);
+        same("query_tasks", pw.query_tasks, sw.query_tasks);
+        same("payload_supports", pw.payload_supports, sw.payload_supports); same("payload_shell_sites", pw.payload_shell_sites, sw.payload_shell_sites);
+        same("sibling_rejected", pres.sibling_work.rejected_pairs, sres.sibling_work.rejected_pairs); same("order_phase_switches", pres.order_work.phase_switches, sres.order_work.phase_switches);
+        same("pool_filtered_pairs", pres.pool_work.filtered_pairs, sres.pool_work.filtered_pairs); same("pool_pair_roots", pres.pool_work.pair_roots, sres.pool_work.pair_roots);
+        same("front_emitted_rectangles", pres.front.work.emitted_rectangles, sres.front.work.emitted_rectangles); same("front_residual_q2", pres.front.work.residual_pair_mass[0], sres.front.work.residual_pair_mass[0]);
+        const bool counters_ok = first_bad.empty();
+        const auto& bw = bres.work;
+        const bool ident_ok = bw.enqueued == bw.completed && bw.completed == bw.completed_accepted + bw.completed_rejected && bw.completed == bw.entry_steps
+          && bw.payload_steps == bw.completed_accepted && bw.admission_steps == bw.completed_accepted
+          && bw.transitions == bw.entry_steps + bw.witness_steps + bw.admission_steps + bw.payload_steps && bw.key_preparations == bw.enqueued;
+        if (!ok) ++bat_mismatch;
+        if (!digest_ok) ++bat_digest_breaks;
+        if (!counters_ok) ++bat_counter_breaks;
+        if (!ident_ok) ++bat_ident_breaks;
+        bat_enqueued += bw.enqueued;
+        std::printf("  batched W=%zu %s: emitted=%zu dups=%llu ok=%s digest_eq=%s counters_eq=%s ident=%s enqueued=%llu passes=%llu entry_after_credit=%llu entry_inside_deferred=%llu sibling_due=%llu total_ms=%.1f\n", W, bo.name, merged.size(), (unsigned long long)dups, ok ? "yes" : "NO", digest_ok ? "yes" : "NO", counters_ok ? "yes" : first_bad.c_str(), ident_ok ? "yes" : "NO", (unsigned long long)bw.enqueued, (unsigned long long)bw.batch_passes, (unsigned long long)bw.entry_after_credit, (unsigned long long)bw.entry_inside_deferred, (unsigned long long)bw.sibling_due, pres.total_ms);
+      }
+      if (!serial.empty() && !scale) { ++bat_live_runs; const std::size_t W = 8; std::vector<Q2CensusConsumer> consumers;
+        for (std::size_t w = 0; w < W; ++w) consumers.push_back([](const Q2Support&) { throw std::runtime_error("audit: slot failure"); });
+        WspdQ2BatchOptions o; o.lanes = 1; o.quantum = 1; CallGuard guard;
+        try { auto r = run_wspd_q2_census_batched(index, kmax, s, cb.f, consumers, o, cb.sb, cb.o, cb.pool); static_cast<void>(r); std::printf("  BATCHED LIVENESS: no exception\n"); } catch (const std::runtime_error&) { ++bat_live_exc; } }
+    }
+#endif
 #ifdef MHGP8_AUDIT_RANGES
     // ---- plages d'ancres et Pool partagé (SharedBlocks / Individual seulement)
     if (cb.c == Q2CensusMode::SharedBlocks && cb.am == Q2AnchorMode::Individual) {
@@ -281,8 +333,9 @@ int main(int argc, char** argv) {
   }
   std::printf("  liveness: runs=%llu exceptions=%llu no_throw=%llu (no hang: watchdog silent)\n", (unsigned long long)liveness_runs, (unsigned long long)liveness_exceptions, (unsigned long long)liveness_no_throw);
 #endif
-  std::printf("SUMMARY family=%s n=%zu kmax=%u s=%u combos=%zu parallel_runs=%llu checked=%llu alive=%llu mismatch=%llu cross_slot_dups=%llu digest_breaks=%llu counter_breaks=%llu donations=%llu stolen=%llu coop_runs=%llu coop_mismatch=%llu coop_digest_breaks=%llu coop_counter_breaks=%llu coop_ident_breaks=%llu coop_continued=%llu coop_donations=%llu coop_liveness_runs=%llu coop_liveness_exceptions=%llu rng_runs=%llu rng_mismatch=%llu rng_digest_breaks=%llu rng_counter_breaks=%llu rng_ident_breaks=%llu rng_donations=%llu rng_liveness_runs=%llu rng_liveness_exceptions=%llu\n", fam.c_str(), N, kmax, s, combos.size(), (unsigned long long)total_runs, (unsigned long long)total_checked, (unsigned long long)total_alive, (unsigned long long)total_mismatch, (unsigned long long)cross_slot_dups, (unsigned long long)digest_breaks, (unsigned long long)counter_breaks, (unsigned long long)donations_total, (unsigned long long)stolen_total,
+  std::printf("SUMMARY family=%s n=%zu kmax=%u s=%u combos=%zu parallel_runs=%llu checked=%llu alive=%llu mismatch=%llu cross_slot_dups=%llu digest_breaks=%llu counter_breaks=%llu donations=%llu stolen=%llu coop_runs=%llu coop_mismatch=%llu coop_digest_breaks=%llu coop_counter_breaks=%llu coop_ident_breaks=%llu coop_continued=%llu coop_donations=%llu coop_liveness_runs=%llu coop_liveness_exceptions=%llu rng_runs=%llu rng_mismatch=%llu rng_digest_breaks=%llu rng_counter_breaks=%llu rng_ident_breaks=%llu rng_donations=%llu rng_liveness_runs=%llu rng_liveness_exceptions=%llu bat_runs=%llu bat_mismatch=%llu bat_digest_breaks=%llu bat_counter_breaks=%llu bat_ident_breaks=%llu bat_enqueued=%llu bat_liveness_runs=%llu bat_liveness_exceptions=%llu\n", fam.c_str(), N, kmax, s, combos.size(), (unsigned long long)total_runs, (unsigned long long)total_checked, (unsigned long long)total_alive, (unsigned long long)total_mismatch, (unsigned long long)cross_slot_dups, (unsigned long long)digest_breaks, (unsigned long long)counter_breaks, (unsigned long long)donations_total, (unsigned long long)stolen_total,
     (unsigned long long)coop_runs, (unsigned long long)coop_mismatch, (unsigned long long)coop_digest_breaks, (unsigned long long)coop_counter_breaks, (unsigned long long)coop_ident_breaks, (unsigned long long)coop_continued, (unsigned long long)coop_donations, (unsigned long long)coop_live_runs, (unsigned long long)coop_live_exc,
-    (unsigned long long)rng_runs, (unsigned long long)rng_mismatch, (unsigned long long)rng_digest_breaks, (unsigned long long)rng_counter_breaks, (unsigned long long)rng_ident_breaks, (unsigned long long)rng_donations, (unsigned long long)rng_live_runs, (unsigned long long)rng_live_exc);
-  return (total_mismatch == 0 && cross_slot_dups == 0 && digest_breaks == 0 && counter_breaks == 0 && coop_mismatch == 0 && coop_digest_breaks == 0 && coop_counter_breaks == 0 && coop_ident_breaks == 0 && coop_live_runs == coop_live_exc && rng_mismatch == 0 && rng_digest_breaks == 0 && rng_counter_breaks == 0 && rng_ident_breaks == 0 && rng_live_runs == rng_live_exc) ? 0 : 1;
+    (unsigned long long)rng_runs, (unsigned long long)rng_mismatch, (unsigned long long)rng_digest_breaks, (unsigned long long)rng_counter_breaks, (unsigned long long)rng_ident_breaks, (unsigned long long)rng_donations, (unsigned long long)rng_live_runs, (unsigned long long)rng_live_exc,
+    (unsigned long long)bat_runs, (unsigned long long)bat_mismatch, (unsigned long long)bat_digest_breaks, (unsigned long long)bat_counter_breaks, (unsigned long long)bat_ident_breaks, (unsigned long long)bat_enqueued, (unsigned long long)bat_live_runs, (unsigned long long)bat_live_exc);
+  return (total_mismatch == 0 && cross_slot_dups == 0 && digest_breaks == 0 && counter_breaks == 0 && coop_mismatch == 0 && coop_digest_breaks == 0 && coop_counter_breaks == 0 && coop_ident_breaks == 0 && coop_live_runs == coop_live_exc && rng_mismatch == 0 && rng_digest_breaks == 0 && rng_counter_breaks == 0 && rng_ident_breaks == 0 && rng_live_runs == rng_live_exc && bat_mismatch == 0 && bat_digest_breaks == 0 && bat_counter_breaks == 0 && bat_ident_breaks == 0 && bat_live_runs == bat_live_exc) ? 0 : 1;
 }
