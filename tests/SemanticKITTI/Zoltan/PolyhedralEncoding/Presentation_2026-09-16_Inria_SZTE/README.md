@@ -7,7 +7,7 @@
 
 ## Plan
 
-**19 pages : 1 garde, 4 transitions, 12 pages de contenu et 2 pages de bibliographie. Sans annexes.**
+**18 pages : 1 garde, 4 transitions, 11 pages de contenu et 2 pages de bibliographie. Sans annexes.**
 
 | Partie | Transition | Contenu |
 |---|---|---|
@@ -15,8 +15,8 @@
 | Introduction | Page 2 | Pages 3–5 : modèles 3D, hypothèse capteur, hiérarchie |
 | Questions | Page 6 | Page 7 : les cinq questions |
 | Quelques bons points | Page 8 | Page 9 : tableau récapitulatif |
-| Éléments de réponse | Page 10 | Pages 11–16 : géométrie et encodage ; page 17 : oracle d’instances |
-| Bibliographie | — | Pages 18–19 |
+| Éléments de réponse | Page 10 | Pages 11–15 : géométrie et encodage ; page 16 : oracle d’instances |
+| Bibliographie | — | Pages 17–18 |
 
 ## Révision : exemples de Gabriel et allègement
 
@@ -36,6 +36,8 @@ Ce dessin suit le choix explicite de l’auteur : colorer les supports, pas l’
 
 Les phrases indiquées par l’auteur ont été retirées des slides. Les pages « Mesurer un apport avec un petit modèle » et « Encoder un polyèdre : pseudo-code » sont supprimées, ainsi que le fichier du pseudo-code. L’introduction, les quatre transitions, les questions, le tableau et la bibliographie sont conservés.
 
+La fonction support est suivie directement de la distance aux primitives. La citation `[BPS 19]` reste attachée à la diapositive de normalisation, avec sa notice en pied de page et son entrée bibliographique.
+
 ## Conventions conservées hors des slides
 
 Les fonctions de distance s’appliquent à la réalisation P déclarée : points, segments, triangles remplis, tétraèdres pleins ou unions de ces objets. La surface d’un tétraèdre et son volume sont deux réalisations différentes. La géométrie reste conservée explicitement ; le vecteur de distances est un résumé pour le réseau.
@@ -43,12 +45,6 @@ Les fonctions de distance s’appliquent à la réalisation P déclarée : point
 Le centre est celui de la boîte englobante de P ; l’échelle est la moitié de son plus grand côté. Pour une taille positive, les trois coordonnées sont divisées par le même scalaire, sans rotation. Les 512 sondes sont les centres des cellules du cube [-1,1]³, dans l’ordre `(i,j,k)`, avec `k` variant le plus vite : `b_ijk = (-1+(2i+1)/8, -1+(2j+1)/8, -1+(2k+1)/8)`, pour `i,j,k = 0,…,7`. Leurs distances ne sont pas triées.
 
 Le cas ponctuel de taille nulle doit être traité séparément : géométrie normalisée {0}, distances `D[j] = norme(b_j)`, centre physique c et taille 0. Les identités sur les champs complets concernent des compacts non vides dans un même repère. Un minimum entre tableaux centrés et normalisés indépendamment n’est pas une mise à jour exacte. Le code fini reste une approximation ; attributs, relations HGP et niveaux fins sont conservés séparément.
-
-Le support quadratique est celui de la discussion préparatoire :
-
-$$H_P(b)=\max_{x\in P}(2\langle b,x\rangle-\lVert x\rVert^2)=\lVert b\rVert^2-d_P(b)^2.$$
-
-Le relèvement concerne tous les points de P, pas seulement les sommets. Les sondes correspondent à des directions du support relevé dans l’hémisphère inférieur de S³ ; une grille du cube n’est pas un échantillonnage uniforme de toute cette sphère. Le calcul des distances aux primitives ne nécessite pas la construction du convexe relevé.
 
 L’IoU porte sur les indices de points annotés, non des volumes. Les labels ignorés et les instances invalides sont exclus. Le meilleur nœud par instance est un oracle, pas une segmentation simultanément réalisable ni un gain appris. Le budget de régions doit être contrôlé dans toute expérience comparative.
 
@@ -58,7 +54,7 @@ L’IoU porte sur les indices de points annotés, non des volumes. Les labels ig
 
 Le tableau de `points_encourageants.tex` conserve les précédents vérifiés lors des révisions antérieures : Superpoint Transformer (superpoints et hiérarchie), BPS (distances) et PolyhedronNet (attributs). L’ablation à un seul niveau de Superpoint Transformer perd 5,1 points de mIoU sur KITTI-360 validation ; elle ne prédit aucun gain HGP. BPS est évalué notamment sur des objets ModelNet40 ; PolyhedronNet utilise des polyèdres déjà construits. Ces résultats ne sont pas assimilés à des expériences sur notre représentation.
 
-Base de cette révision : `1c5ba5cb28f4bd42418994bc08d1e89daa4b2bee`, source `main.tex` au blob `1b7f4b3f64d01d39b401fac4d8b179ac00bdaae6`, identique à l’archive locale fournie. Les figures introductives et les conventions de citations viennent de `Ludwig-H/Manuscrit-de-th-se/Soutenance/soutenance/` ; le schéma de portée conserve le blob `9cca660433532a16af3cf736cf9383184d3ba9e6`. Le manuscrit, parties I–II, est la référence pour la hiérarchie, non pour une validation de notre futur modèle de fondation.
+Base de cette révision : `ff7191355aa555e251854362d9d671088c3c5c69`, source `main.tex` au blob `d6d0c8db4b6d83db2a12648a8d04d76e196f829f`, identique à l’archive locale fournie. Les figures introductives et les conventions de citations viennent de `Ludwig-H/Manuscrit-de-th-se/Soutenance/soutenance/` ; le schéma de portée conserve le blob `9cca660433532a16af3cf736cf9383184d3ba9e6`. Le manuscrit, parties I–II, est la référence pour la hiérarchie, non pour une validation de notre futur modèle de fondation.
 
 `theme/` conserve l’adaptation du thème Inria 2024. Aucun fichier de police n’est distribué. Logos : Inria, SVG de la soutenance ; SZTE, `moraszk/moraweb/static/icon/szte.png`, blob `0c27d77127a186ef3ac3b6d0d30932c50bb5c513`, marges transparentes retirées. Les droits restent à leurs institutions.
 
@@ -73,6 +69,6 @@ make clean
 
 `make clean` conserve le PDF. Sur Overleaf : importer le dossier complet, choisir LuaLaTeX et compiler `main.tex`. `prepare_assets.py` ne fait aucun appel réseau. Les figures restent éditables en TikZ.
 
-Contrôles : 19 pages rendues, absence de débordements `Overfull` et de glyphes `Missing character`, quatre transitions, douze références bibliographiques, comptage et géométrie des nouveaux dessins. Le workflow existant recompile et publie le PDF sur `main`.
+Contrôles : 18 pages rendues, absence de débordements `Overfull` et de glyphes `Missing character`, quatre transitions, douze références bibliographiques, dessins de Gabriel conservés. Le workflow existant recompile et publie le PDF sur `main`.
 
 Aucune nouvelle expérience SemanticKITTI ni aucun gain HGP mesuré. Aucun moteur, registre de qualification ou workflow n’est modifié. GCP non utilisé.

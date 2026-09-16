@@ -27,41 +27,9 @@ Si $P$ est \textbf{convexe}, tous ses plans d'appui déterminent $P$.
 \reffoot[$P$ compact non vide ; dessin en coupe 2D.]{schneider}
 \end{frame}
 
-\begin{frame}{Support quadratique et distance}
-\[
-H_P(b)=\max_{x\in P}\bigl(2\ip{b}{x}-\norm{x}^2\bigr)
-      =\norm{b}^2-d_P(b)^2.
-\]
-\vspace{.08cm}
-\begin{columns}[c,onlytextwidth]
-\begin{column}{.43\textwidth}\centering
-\begin{tikzpicture}[scale=.83]
-\useasboundingbox(-.45,-.3)rectangle(4.0,3.3);
-\draw[inria-2024-bleu-canard,line width=1.8pt](.1,.15)--(.9,.45)--(1.3,1.4)--(1.3,2.7)--(.6,3.05);
-\node[text=inria-2024-bleu-canard]at(.35,1.65){$P$};
-\draw[inria-rouge!65,dashed](2.5,1.6)circle(1.2);
-\fill[inria-rouge](2.5,1.6)circle(2.3pt)node[right=3pt]{$b$};
-\fill[inria-rouge](1.3,1.6)circle(2.3pt);
-\draw[inria-rouge,thick](1.3,1.6)--(2.5,1.6)node[midway,above=3pt]{$d_P(b)$};
-\end{tikzpicture}
-\end{column}
-\begin{column}{.53\textwidth}
-\[
-d_P(b)=\min_{x\in P}\norm{b-x}.
-\]
-
-\end{column}
-\end{columns}
-\vspace{.13cm}
-\small
-Relèvement : $C_P=\conv\{(x,\norm{x}^2):x\in P\}$,
-\quad $H_P(b)=h_{C_P}(2b,-1)$.
-\source{$H_P$ est convexe, même si $P$ ne l'est pas.}
-\end{frame}
-
 \begin{frame}[t]{Distances, primitives et fusions}
 \[
-\boxed{d_P(b)=\min_{\sigma\in\mathcal F}d(b,\sigma).}
+\boxed{d_P(b)=\min_{x\in P}\norm{b-x}=\min_{\sigma\in\mathcal F}d(b,\sigma).}
 \]
 {\small Distance aux primitives \textbf{entières}, pas seulement aux sommets.\par}
 \vspace{.14cm}
@@ -73,7 +41,7 @@ Relèvement : $C_P=\conv\{(x,\norm{x}^2):x\in P\}$,
 
 \end{frame}
 
-\begin{frame}{Centrer, normaliser, échantillonner}
+\begin{frame}{Centrer, normaliser, échantillonner \citb{bps19}}
 \begin{columns}[c,onlytextwidth]
 \begin{column}{.34\textwidth}\centering
 \resizebox{!}{2.75cm}{\input{figs/grille}}\par
@@ -93,9 +61,6 @@ $s$ : moitié du plus grand côté.
 \boxed{D_P[j]=d_{\widehat P}(b_j)
 =\frac{d(c+s b_j,P)}{s}.}
 \]
-\begin{center}\small
-Sondes dans le \textbf{volume}, avec un \textbf{ordre fixé}. \citb{bps19}
-\end{center}
 \reffoot{bps19}
 \end{frame}
 
