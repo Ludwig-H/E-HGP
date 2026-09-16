@@ -1,0 +1,73 @@
+% Ensembles de Gabriel : chaque boule contient exactement cinq sites.
+% Q est le support de la boule minimale ; seules conv(Q) et leurs unions sont bleues.
+% Les trois boules sont tangentes dans un meme nuage de 13 points.
+\begin{tikzpicture}[x=1cm,y=1cm,line cap=round,line join=round]
+\useasboundingbox(-.2,-2.45)rectangle(13.95,2.25);
+\tikzset{gball/.style={draw=gray!55,line width=.65pt},
+  gequator/.style={draw=gray!42,line width=.5pt,densely dashed},
+  gedge/.style={draw=inria-2024-bleu-canard,line width=1.25pt},
+  gback/.style={draw=inria-2024-bleu-canard,line width=.85pt,densely dashed}}
+% Q2 : support local [[-1.0, 0.0, 0.0], [1.0, 0.0, 0.0]]
+% points interieurs [[-0.28, 0.42, 0.1], [0.3, -0.4, -0.1], [-0.4, -0.32, 0.1]]
+% centre global [-2.0, 0.0, 0.0]
+\draw[gball](1.15,.1)circle(1.22);
+\draw[gequator](1.15,.1)ellipse[x radius=1.22,y radius=0.751107];
+\draw[gedge](-0.070000,0.100000)--(2.370000,0.100000);
+\fill[gray!75](0.808400,0.511602)circle(2.15pt);
+\fill[gray!75](1.516000,-0.296580)circle(2.15pt);
+\fill[gray!75](0.662000,-0.044217)circle(2.15pt);
+\fill[inria-2024-bleu-canard](-0.070000,0.100000)circle(2.35pt);
+\fill[inria-2024-bleu-canard](2.370000,0.100000)circle(2.35pt);
+\node[font=\small,align=center]at(1.15,-1.60){\textbf{Support : 2 points}\\[3pt]arête diamétrale};
+% Q3 : support local [[-1.0, 0.0, 0.0], [0.5, 0.8660254037844386, 0.0], [0.5, -0.8660254037844386, 0.0]]
+% points interieurs [[-0.3, -0.2, 0.6], [0.35, 0.1, -0.4]]
+% centre global [0.0, 0.0, 0.0]
+\draw[gball](4.35,.1)circle(1.22);
+\draw[gequator](4.35,.1)ellipse[x radius=1.22,y radius=0.751107];
+\fill[inria-2024-bleu-canard!14](3.130000,0.100000)--(4.960000,0.750478)--(4.960000,-0.550478)--cycle;
+\draw[gedge](3.130000,0.100000)--(4.960000,0.750478)--(4.960000,-0.550478)--cycle;
+\fill[gray!75](3.984000,0.526602)circle(2.15pt);
+\fill[gray!75](4.777000,-0.209439)circle(2.15pt);
+\fill[inria-2024-bleu-canard](3.130000,0.100000)circle(2.35pt);
+\fill[inria-2024-bleu-canard](4.960000,0.750478)circle(2.35pt);
+\fill[inria-2024-bleu-canard](4.960000,-0.550478)circle(2.35pt);
+\node[font=\small,align=center]at(4.35,-1.60){\textbf{Support : 3 points}\\[3pt]triangle aigu};
+% Q4 : support local [[-0.5, -0.8660254037844386, -0.0], [0.933922478661375, -0.15430021499763696, 0.32245968353063365], [-0.4588060019786627, 0.6497919482079474, 0.6060259702293918], [0.024883523317287742, 0.3705336705741281, -0.9284856537600252]]
+% points interieurs [[0.0, 0.0, 0.56]]
+% centre global [1.0, 1.7320508075688772, 0.0]
+\draw[gball](7.55,.1)circle(1.22);
+\draw[gequator](7.55,.1)ellipse[x radius=1.22,y radius=0.751107];
+\fill[inria-2024-bleu-canard!23](6.940000,-0.550478)--(8.689385,0.294108)--(7.580358,-0.514311)--cycle;
+\fill[inria-2024-bleu-canard!23](6.940000,-0.550478)--(8.689385,0.294108)--(6.990257,1.170680)--cycle;
+\draw[gedge](6.940000,-0.550478)--(8.689385,0.294108);
+\draw[gedge](6.940000,-0.550478)--(6.990257,1.170680);
+\draw[gedge](6.940000,-0.550478)--(7.580358,-0.514311);
+\draw[gedge](8.689385,0.294108)--(6.990257,1.170680);
+\draw[gedge](8.689385,0.294108)--(7.580358,-0.514311);
+\draw[gback](6.990257,1.170680)--(7.580358,-0.514311);
+\fill[gray!75](7.550000,0.638369)circle(2.15pt);
+\fill[inria-2024-bleu-canard](6.940000,-0.550478)circle(2.35pt);
+\fill[inria-2024-bleu-canard](8.689385,0.294108)circle(2.35pt);
+\fill[inria-2024-bleu-canard](6.990257,1.170680)circle(2.35pt);
+\fill[inria-2024-bleu-canard](7.580358,-0.514311)circle(2.35pt);
+\node[font=\small,align=center]at(7.55,-1.60){\textbf{Support : 4 points}\\[3pt]tétraèdre};
+\fill[inria-2024-bleu-canard!12](11.921475,0.008061)--(12.853525,0.458045)--(12.262649,0.027330)--cycle;
+\fill[inria-2024-bleu-canard!12](11.921475,0.008061)--(12.853525,0.458045)--(11.948251,0.925071)--cycle;
+\draw[gedge](11.921475,0.008061)--(12.853525,0.458045);
+\draw[gedge](11.921475,0.008061)--(11.948251,0.925071);
+\draw[gedge](11.921475,0.008061)--(12.262649,0.027330);
+\draw[gedge](12.853525,0.458045)--(11.948251,0.925071);
+\draw[gedge](12.853525,0.458045)--(12.262649,0.027330);
+\draw[gback](11.948251,0.925071)--(12.262649,0.027330);
+\fill[inria-2024-bleu-canard!14](10.946475,-0.338505)--(11.921475,0.008061)--(11.921475,-0.685071)--cycle;
+\draw[gedge](10.946475,-0.338505)--(11.921475,0.008061)--(11.921475,-0.685071)--cycle;
+\draw[gedge](9.646475,-0.338505)--(10.946475,-0.338505);
+\fill[inria-2024-bleu-canard](9.646475,-0.338505)circle(1.85pt);
+\fill[inria-2024-bleu-canard](10.946475,-0.338505)circle(1.85pt);
+\fill[inria-2024-bleu-canard](11.921475,0.008061)circle(1.85pt);
+\fill[inria-2024-bleu-canard](11.921475,-0.685071)circle(1.85pt);
+\fill[inria-2024-bleu-canard](12.853525,0.458045)circle(1.85pt);
+\fill[inria-2024-bleu-canard](11.948251,0.925071)circle(1.85pt);
+\fill[inria-2024-bleu-canard](12.262649,0.027330)circle(1.85pt);
+\node[font=\small,align=center]at(11.25,-1.60){\textbf{Union}\\[3pt]$P=\bigcup_i\conv(Q_i)$};
+\end{tikzpicture}

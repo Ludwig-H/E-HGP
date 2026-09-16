@@ -1,5 +1,5 @@
 % !TEX program = lualatex
-% Version en quatre parties : 21 diapositives, dont 4 transitions et 2 de bibliographie.
+% Version en quatre parties : 19 diapositives, dont 4 transitions et 2 de bibliographie.
 % Réunion du 16 septembre 2026. Provenance et réserves : README.md.
 \documentclass[svgnames,11pt,aspectratio=169]{beamer}
 \usepackage[french]{babel}
@@ -146,44 +146,9 @@ Conserver les \textbf{parents, enfants et niveaux} $r$.\par\medskip
 \end{center}
 \vspace{.15cm}
 \normalsize
-Comparer HGP, $K=1$ et grilles imbriquées, à budget de régions comparable.\par\medskip
-Rapporter le rappel des instances selon le seuil d'IoU.
+
 \reffoot[Oracle sur les masques de points, non segmentation prédite. Exemple dessiné, non résultat expérimental.]{semantickitti19}
 \end{frame}
-
-\begin{frame}[t]{Mesurer un apport avec un petit modèle}
-Même petit réseau supervisé, mêmes données et budgets.
-\vspace{.18cm}
-\begin{center}
-\small\renewcommand{\arraystretch}{1.35}
-\begin{tabular}{@{}cll@{}}
-\toprule
- & \textbf{Régions} & \textbf{Distances aux sondes} \\
-\midrule
-A & Voisinages spatiaux & Aux points \\
-B & Régions HGP & Aux points \\
-C & Mêmes régions HGP & Aux arêtes ou faces \\
-\bottomrule
-\end{tabular}
-\end{center}
-\vspace{.12cm}
-\begin{columns}[T,onlytextwidth]
-\begin{column}{.48\textwidth}\small
-\textbf{B contre A} : choix des régions.
-\end{column}
-\begin{column}{.48\textwidth}\small
-\textbf{C contre B} : réalisation géométrique.
-\end{column}
-\end{columns}
-\vspace{.3cm}
-\small
-Mesurer la mIoU par classe et par portée, ainsi que le coût.\par
-\footnotesize\textbf{Liens hiérarchiques} : mêmes codes, avec / sans échanges parent--enfant.
-\source{Protocole proposé ; réseau et budgets appariés. Contrôle de robustesse : 50\,\% puis 25\,\% des retours, HGP et codes recalculés.}
-\end{frame}
-
-% Dernière page de contenu : méthode de calcul.
-\input{encodage_pseudocode}
 
 \section*{Bibliographie}\gdef\partlabel{Références}
 
