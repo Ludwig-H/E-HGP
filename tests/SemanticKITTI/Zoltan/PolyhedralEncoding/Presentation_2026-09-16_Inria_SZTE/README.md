@@ -7,15 +7,16 @@
 
 ## Plan
 
-**14 diapositives, couverture comprise, dont deux de bibliographie. Sans annexes.** Les trois parties sont des sections Beamer et des signets PDF ; leur nom est affiché en haut de chaque diapositive. Il n'y a pas de pages intercalaires supplémentaires.
+**19 diapositives : 1 garde, 4 transitions, 12 pages de contenu (dont le tableau), 2 pages de bibliographie. Sans annexes.** Chaque partie commence par une véritable diapositive de transition, avec numéro, titre et filet Inria. Son nom reste indiqué sur les pages de contenu.
 
-| Partie | Pages | Contenu |
+| Partie | Transition | Contenu |
 |---|---|---|
-| Garde | 1 | Trois noms à égalité ; logos Inria et SZTE |
-| I. Introduction | 2–4 | Modèles de fondation 3D ; hypothèse capteur/portée ; hiérarchie de polyèdres |
-| II. Questions | 5 | Les cinq questions de la réunion, conservées comme questions |
-| III. Quelques débuts de réponse | 6–12 | Support, relèvement quadratique, distance, codage dans le cube, comparaison des échantillonnages, premiers tests |
-| Bibliographie | 13–14 | Références complètes, avec liens |
+| Garde | — | Page 1 : trois noms à égalité ; logos Inria et SZTE |
+| I. Introduction | Page 2 | Pages 3–5 : modèles 3D, hypothèse capteur/portée, hiérarchie de polyèdres |
+| II. Questions | Page 6 | Page 7 : les cinq questions de la réunion |
+| III. Quelques bons points | Page 8 | Page 9 : un seul tableau récapitulatif |
+| IV. Éléments de réponse | Page 10 | Pages 11–17 : support, distance, encodage et premiers tests |
+| Bibliographie | — | Pages 18–19 : références complètes avec liens |
 
 Les anciennes pages 2 et 3 ont été inversées. Les titres demandés sont « Vers un modèle de fondation pour la 3D ? » et « Hypothèse : le nuage est un artefact du capteur ». La figure de portée de la soutenance est conservée. La page séparée sur les quatre cubes a été retirée ; l'identité du support avec celui de l'enveloppe convexe figure sur la page de définition du support.
 
@@ -24,6 +25,19 @@ Les anciennes pages 2 et 3 ont été inversées. Les titres demandés sont « Ve
 `references.tex` reprend les conventions de la soutenance : `DeclareRef`, `DeclareMyRef`, `citb`, `reffoot` et `bibligne`. Les références apparaissent entre crochets, leur notice complète est donnée en pied de page lors de la première citation, puis dans la bibliographie finale. Les citations du corps renvoient à la bibliographie ; les titres des références pointent vers leur source. La thèse est distinguée en rouge, comme les travaux de l'auteur dans la soutenance.
 
 Les tentatives 3D citées dans l'introduction sont Sonata, Utonia et Vernata. Leur présence ne signifie ni que leurs représentations sont des polyèdres HGP, ni que leur supériorité dans notre protocole a été établie.
+
+## Quelques bons points : base et portée du tableau
+
+Le tableau de `points_encourageants.tex` reprend quatre thèmes de la conversation jointe par l'auteur : Superpoint Transformer (superpoints et contexte multi-échelle), Basis Point Sets (codage par distances utilisable par un petit réseau), et PolyhedronNet (géométrie et attributs). Le texte intégral de la conversation n'est pas publié.
+
+La colonne « Résultat publié » rapporte ces précédents ; la colonne « Pour notre projet » indique des pistes à tester, non des gains HGP démontrés. Les références primaires ont été contrôlées le 16 septembre 2026 :
+
+- **Superpoints.** Robert, Raguet et Landrieu, *Efficient 3D Semantic Segmentation with Superpoint Transformer*, ICCV 2023, sections 4.1–4.2 : segmentation supervisée sur KITTI-360 et DALES. Ce n'est ni un modèle de fondation ni une hiérarchie K-NN HGP.
+- **Hiérarchie.** La discussion mentionne le bénéfice des régions multi-échelles. La vérification du **tableau 4** précise le chiffre ajouté à la slide : ne garder qu'un niveau de partition donne **−5,1 points de mIoU sur KITTI-360 validation**, par rapport à leur meilleur modèle (63,5). Il s'agit de leur ablation, pas d'une borne ni d'une prévision de gain pour HGP. Les auteurs n'observent pas de bénéfice supplémentaire avec trois niveaux ou davantage. Source : https://arxiv.org/html/2306.08045v1#S4.T4
+- **Distances.** Prokudin, Lassner et Romero, *Efficient Learning on Point Clouds with Basis Point Sets*, ICCV 2019, résumé et section 4.3 : un réseau entièrement connecté sur les distances atteint une précision comparable à PointNet en classification ModelNet40. Les données sont des objets, pas des scènes LiDAR extérieures. Le passage des points aux arêtes/faces HGP reste notre proposition. Source : https://arxiv.org/html/1908.09186v1
+- **Attributs.** Yu, Zhang et Zhao, *PolyhedronNet*, ICLR 2025, section 5.5, tableau 3 : l'exactitude sur ShapeNet-P est de 0,627 avec attributs de faces, contre 0,578 lorsqu'ils sont masqués. Le tableau de la présentation conserve seulement l'observation qualitative déjà présente dans l'échange. Ce résultat concerne des polyèdres d'objets déjà construits ; il ne valide ni notre reconstruction ni une invariance par rotation pour le LiDAR. Source : https://arxiv.org/html/2502.01814v1#S5.T3
+
+Le tableau ne reprend aucun chiffre d'oracle comme preuve d'un gain appris et ne compare pas entre eux des scores de jeux ou de tâches différents.
 
 ## Relèvement et sondes : précision mathématique
 
@@ -61,7 +75,7 @@ Les attributs physiques, une adaptation légère de type LoRA et l'architecture 
 
 ## Sources et provenance
 
-Source de la présentation avant révision : `main.tex`, blob `cc05a8a5e3311a86ac18b6c793a5771d803a5ed2`, identique à l'archive locale fournie. Le schéma de portée conserve le blob `9cca660433532a16af3cf736cf9383184d3ba9e6` de `Ludwig-H/Manuscrit-de-th-se/Soutenance/soutenance/figs/verrou_portee.tex`. La figure introductive est adaptée pour ajouter les trois références 3D.
+Source de cette révision : `main.tex`, blob `548d409b8eeecfe8641c161173cfa802e55602fc`, et `references.tex`, blob `11a50890da5e09c935dda4ab8f8b6fa27f696f6a`, identiques à l'archive locale fournie. Les transitions reprennent le principe de la page de section du thème de soutenance (numéro, titre centré et filet). Le schéma de portée conserve le blob `9cca660433532a16af3cf736cf9383184d3ba9e6` de `Ludwig-H/Manuscrit-de-th-se/Soutenance/soutenance/figs/verrou_portee.tex`. La figure introductive est adaptée pour ajouter les trois références 3D.
 
 Système de citations et titre de la thèse : `Ludwig-H/Manuscrit-de-th-se/Soutenance/soutenance/main.tex`, blob `bb66a9230aa6c3f8fefb8661909421020953a9d6`. Les parties I–II du manuscrit définissent la hiérarchie ; le support quadratique vient de la discussion préparatoire, et non d'un théorème attribué au manuscrit.
 
@@ -88,4 +102,4 @@ make clean
 
 `make clean` conserve le PDF. Sur Overleaf : importer le dossier complet avec ses images préparées, choisir LuaLaTeX et compiler `main.tex`. `prepare_assets.py` ne fait aucun appel réseau. Les figures restent éditables en TikZ.
 
-Contrôles de cette révision : compilation, 14 pages rendues et inspectées, absence de débordements `Overfull` et de glyphes `Missing character`, vérification des trois sections et des renvois bibliographiques. Le workflow existant recompile ensuite le PDF sur `main`. La vérification du document ne valide pas les expériences proposées.
+Contrôles de cette révision : compilation, 19 pages rendues et inspectées, absence de débordements `Overfull` et de glyphes `Missing character`, vérification des quatre transitions (pages 2, 6, 8 et 10), du tableau unique et des douze références bibliographiques. Le workflow existant recompile ensuite le PDF sur `main`. La vérification du document ne valide pas les expériences proposées.

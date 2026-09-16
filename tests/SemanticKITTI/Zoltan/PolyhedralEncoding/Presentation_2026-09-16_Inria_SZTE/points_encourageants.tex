@@ -1,0 +1,32 @@
+% Une seule diapositive de synthèse ; les méthodes citées ne sont pas HGP.
+\begin{frame}[t]{Quelques résultats encourageants}
+\small
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.08}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{.16\textwidth}
+                  >{\raggedright\arraybackslash}p{.50\textwidth}
+                  >{\raggedright\arraybackslash}p{.27\textwidth}@{}}
+\toprule
+\textbf{Idée} & \textbf{Résultat publié} & \textbf{Pour notre projet} \\
+\midrule
+\textbf{Superpoints} &
+SPT : segmentation sur KITTI-360 et DALES à partir de régions. \citb{spt23} &
+Apprendre sur des régions. \\
+\addlinespace[.18cm]
+\textbf{Hiérarchie} &
+SPT : \textbf{$-5{,}1$ points de mIoU} avec un seul niveau (KITTI-360, validation). \citb{spt23} &
+Conserver plusieurs échelles. \\
+\addlinespace[.18cm]
+\textbf{Distances} &
+BPS + petit réseau : précision comparable à PointNet sur ModelNet40. \citb{bps19} &
+Tester le code sans grand modèle. \\
+\addlinespace[.18cm]
+\textbf{Attributs} &
+PolyhedronNet : gain avec les attributs de faces (ShapeNet-P). \citb{poly25} &
+Géométrie et propriétés physiques. \\
+\bottomrule
+\end{tabular}
+\par\vspace{.22cm}
+{\footnotesize L'apport propre d'Hypergraph-Percol reste à mesurer.}
+\reffoot{spt23,bps19,poly25}
+\end{frame}

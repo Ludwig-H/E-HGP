@@ -1,5 +1,5 @@
 % !TEX program = lualatex
-% Version en trois parties : 14 diapositives, dont 2 de bibliographie, sans annexes.
+% Version en quatre parties : 19 diapositives, dont 4 transitions et 2 de bibliographie.
 % Réunion du 16 septembre 2026. Provenance et réserves : README.md.
 \documentclass[svgnames,11pt,aspectratio=169]{beamer}
 \usepackage[french]{babel}
@@ -17,9 +17,21 @@
 \newcommand{\ip}[2]{\left\langle#1,#2\right\rangle}
 % Citations et références : même convention que la soutenance.
 \input{references}
-% Parties visibles, sans ajouter de diapositives intercalaires.
+% Transitions explicites : numéro, titre et filet du thème Inria 2024.
 \newcommand{\partlabel}{}
-\newcommand{\presentationpart}[1]{\section{#1}\gdef\partlabel{\Roman{section}.~#1}}
+\newcommand{\parttitle}{}
+\setbeamertemplate{section page}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=center,align=center,text=inria-noir,
+          text width=.85\paperwidth,inner sep=0pt]
+      at ([yshift=.10cm]current page.center) {%
+        {\Huge\bfseries\padzeroes[2]{\decimal{section}}}\\[.28cm]
+        {\Huge\bfseries\parttitle}\\[.35cm]
+        \barrecouleur};
+  \end{tikzpicture}}
+\newcommand{\presentationpart}[1]{%
+  \section{#1}\gdef\partlabel{\Roman{section}.~#1}\gdef\parttitle{#1}%
+  \begin{frame}\sectionpage\end{frame}}
 \addtobeamertemplate{frametitle}{%
   \begin{textblock}{.9}(.05,.012)
     {\fontsize{7.2}{8}\selectfont\color{gris_fonce_inria}\partlabel}
@@ -107,7 +119,11 @@ Conserver les \textbf{parents, enfants et niveaux} $r$.\par\medskip
 \reffoot{hu22}
 \end{frame}
 
-\presentationpart{Quelques débuts de réponse}
+\presentationpart{Quelques bons points}
+
+\input{points_encourageants}
+
+\presentationpart{Éléments de réponse}
 
 \begin{frame}{La fonction support \citb{schneider}}
 \begin{columns}[c,onlytextwidth]
@@ -284,23 +300,25 @@ Mesurer la mIoU par classe et par portée, ainsi que le coût.\par
 \section*{Bibliographie}\gdef\partlabel{Références}
 
 \begin{frame}{Bibliographie (1/2)}
-\small
+\fontsize{9}{11}\selectfont\setlength{\parskip}{0pt}
 \begin{itemize}
-\setlength{\itemsep}{.30cm}
+\setlength{\itemsep}{.22cm}
 \bibligne{brown20}
 \bibligne{kirillov23}
 \bibligne{sonata25}
 \bibligne{utonia26}
 \bibligne{vernata26}
+\bibligne{hu22}
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Bibliographie (2/2)}
-\small
+\fontsize{9}{11}\selectfont\setlength{\parskip}{0pt}
 \begin{itemize}
-\setlength{\itemsep}{.27cm}
+\setlength{\itemsep}{.20cm}
 \bibligne{these26}
-\bibligne{hu22}
+\bibligne{spt23}
+\bibligne{poly25}
 \bibligne{schneider}
 \bibligne{bps19}
 \bibligne{semantickitti19}
