@@ -1,0 +1,45 @@
+[build-system]
+requires = ["scikit-build-core>=0.10", "pybind11>=2.12", "cython>=3.0", "numpy>=2.0"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "hgp-clusterer"
+version = "1.0"
+description = "Hypergraph percolation (HGP) clustering of 3D point clouds"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [
+  { name = "Louis Hauseux", email = "louis.hauseux@inria.fr" },
+  { name = "Louis Hauseux", email = "louis.hauseux@gmail.com" },
+  { name = "Josiane Zerubia", email = "josiane.zerubia@inria.fr" },
+  { name = "Konstantin Avrachenkov", email = "konstantin.avratchenkov@inria.fr" },
+]
+keywords = ["Statistical modeling", "Clustering", "HDBSCAN"]
+classifiers = [
+  "License :: Other/Proprietary License",
+  "Programming Language :: C++",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering",
+]
+dependencies = ["numpy>=1.23", "scipy>=1.9", "scikit-learn>=1.2"]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.urls]
+Homepage = "https://team.inria.fr/ayana/"
+Publication = "https://inria.hal.science/hal-05369659"
+
+[tool.scikit-build]
+minimum-version = "0.10"
+build-dir = "build/{wheel_tag}"
+wheel.packages = ["src/hgp_clusterer"]
+wheel.exclude = ["**.pyx", "**.cpp", "**.hpp"]
+sdist.exclude = ["build", ".venv", "venv"]
+
+[tool.scikit-build.cmake]
+build-type = "Release"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
