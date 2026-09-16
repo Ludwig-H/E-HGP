@@ -1,26 +1,31 @@
-% Schéma introductif de la soutenance, allégé pour la version courte.
+% Schéma de soutenance, avec références aux encodeurs 3D existants.
 \begin{tikzpicture}
-\useasboundingbox(-.1,-.55)rectangle(12.8,4.8);
-\tikzset{jeton/.style={draw=inria-2024-bleu-canard,fill=inria-2024-bleu-canard!10,rounded corners=1.5pt,inner sep=3pt,font=\small},modele/.style={draw=gris_fonce_inria,rounded corners=2pt,inner sep=7pt,font=\normalsize,minimum width=1.5cm},fleche/.style={-{Latex[length=2.4mm]},gray!65,thick}}
-\node[anchor=east]at(1.9,4.0){langage};
-\node[jeton,anchor=west](a)at(2.3,4.0){Les};
+\useasboundingbox(0,-.85)rectangle(13.1,3.9);
+\tikzset{jeton/.style={draw=inria-2024-bleu-canard,fill=inria-2024-bleu-canard!10,rounded corners=1.5pt,inner sep=3pt,font=\small},modele/.style={draw=gris_fonce_inria,rounded corners=2pt,inner sep=5pt,font=\normalsize,minimum width=1.3cm},fleche/.style={-{Latex[length=2.4mm]},gray!65,thick}}
+\node[anchor=east]at(1.8,3.15){langage};
+\node[jeton,anchor=west](a)at(2.2,3.15){Les};
 \node[jeton,anchor=west](b)at($(a.east)+(.12,0)$){graph};
 \node[jeton,anchor=west](c)at($(b.east)+(.12,0)$){es};
-\node[font=\small,anchor=west,text=inria-2024-bleu-canard]at(5.5,4.0){sous-mots};
-\draw[fleche](8.1,4)--(10.05,4);
-\node[modele,anchor=west]at(10.2,4){GPT};
-\node[anchor=east]at(1.9,2.25){image};
-\begin{scope}[shift={(2.3,1.58)}]
-\foreach\i in{0,...,4}{\foreach\j in{0,...,2}{\draw[inria-2024-bleu-canard,fill=inria-2024-bleu-canard!10](\i*.44,\j*.44)rectangle++(.40,.40);}}
+\node[font=\small,anchor=west,text=inria-2024-bleu-canard]at(5.3,3.15){sous-mots};
+\draw[fleche](7.8,3.15)--(9.15,3.15);
+\node[modele,anchor=west](gpt)at(9.3,3.15){GPT};
+\node[anchor=west]at($(gpt.east)+(.12,0)$){\citb{brown20}};
+\node[anchor=east]at(1.8,1.65){image};
+\begin{scope}[shift={(2.2,1.18)}]
+\foreach\i in{0,...,4}{\foreach\j in{0,...,2}{\draw[inria-2024-bleu-canard,fill=inria-2024-bleu-canard!10](\i*.33,\j*.33)rectangle++(.29,.29);}}
 \end{scope}
-\node[font=\small,anchor=west,text=inria-2024-bleu-canard]at(5.5,2.25){imagettes};
-\draw[fleche](8.1,2.25)--(10.05,2.25);
-\node[modele,anchor=west]at(10.2,2.25){SAM};
-\node[anchor=east]at(1.9,.45){LiDAR 3D};
-\begin{scope}[shift={(2.3,-.12)}]
+\node[font=\small,anchor=west,text=inria-2024-bleu-canard]at(5.3,1.65){imagettes};
+\draw[fleche](7.8,1.65)--(9.15,1.65);
+\node[modele,anchor=west](sam)at(9.3,1.65){SAM};
+\node[anchor=west]at($(sam.east)+(.12,0)$){\citb{kirillov23}};
+\node[anchor=east]at(1.8,0){LiDAR 3D};
+\begin{scope}[shift={(2.2,-.55)}]
 \foreach\x/\y in{.05/.1,.22/.52,.38/.86,.55/.30,.74/.68,.92/1.02,1.10/.16,1.28/.60,1.44/.94,1.62/.38,1.80/.76,1.98/.22,.15/.72,.66/.98,1.20/.92,1.72/1.04,.44/.44,.98/.48}{\fill[inria-2024-bleu-canard](\x,\y)circle(1.9pt);}
 \end{scope}
-\node[font=\small,anchor=west,text=inria-2024-bleu-canard]at(5.5,.45){points / régions ?};
-\draw[fleche](8.1,.45)--(10.05,.45);
-\node[modele,anchor=west,text=inria-rouge,draw=inria-rouge]at(10.2,.45){?};
+\node[font=\small,anchor=west,text=inria-2024-bleu-canard]at(5.3,0){points / régions ?};
+\draw[fleche](7.8,0)--(9.15,0);
+\node[anchor=west,align=left,font=\small,inner sep=0pt]at(9.3,0){%
+Sonata \citb{sonata25}\\[3pt]
+Utonia \citb{utonia26}\\[3pt]
+Vernata \citb{vernata26}};
 \end{tikzpicture}

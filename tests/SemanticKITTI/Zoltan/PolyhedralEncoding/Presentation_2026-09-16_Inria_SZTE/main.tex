@@ -1,5 +1,5 @@
 % !TEX program = lualatex
-% Version courte : 11 diapositives, couverture comprise, sans annexes.
+% Version en trois parties : 14 diapositives, dont 2 de bibliographie, sans annexes.
 % Réunion du 16 septembre 2026. Provenance et réserves : README.md.
 \documentclass[svgnames,11pt,aspectratio=169]{beamer}
 \usepackage[french]{babel}
@@ -15,7 +15,16 @@
 \newcommand{\IoU}{\mathrm{IoU}}
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
 \newcommand{\ip}[2]{\left\langle#1,#2\right\rangle}
-\newcommand{\source}[1]{\begin{textblock}{.9}[0,1](.05,.915)\tiny\color{gris_fonce_inria}\raggedright #1\par\end{textblock}}
+% Citations et références : même convention que la soutenance.
+\input{references}
+% Parties visibles, sans ajouter de diapositives intercalaires.
+\newcommand{\partlabel}{}
+\newcommand{\presentationpart}[1]{\section{#1}\gdef\partlabel{\Roman{section}.~#1}}
+\addtobeamertemplate{frametitle}{%
+  \begin{textblock}{.9}(.05,.012)
+    {\fontsize{7.2}{8}\selectfont\color{gris_fonce_inria}\partlabel}
+  \end{textblock}}{}
+\newcommand{\source}[1]{\begin{textblock}{.9}[0,1](.05,.915)\fontsize{6}{7}\selectfont\color{gris_fonce_inria}\raggedright #1\par\end{textblock}}
 \tikzset{arr/.style={-{Latex[length=2mm]},thick,gris_fonce_inria},lab/.style={font=\scriptsize,align=center},geom/.style={draw=inria-2024-bleu-canard,fill=inria-2024-bleu-canard!15,thick}}
 \title{Représenter le LiDAR 3D\\par une hiérarchie Hypergraph-Percol}
 \subtitle{Encodage géométrique et premiers tests}
@@ -36,11 +45,18 @@
 \end{tikzpicture}}
 \begin{document}
 
-% 1. Couverture.
 \begin{frame}[plain]\titlepage\end{frame}
 
-% 2. Diapositive de la soutenance : densité, portée et occultations.
-\begin{frame}{\fontsize{14}{17}\selectfont La raison de fond : le nuage est un \emph{artefact du capteur}}
+\presentationpart{Introduction}
+
+\begin{frame}[t]{Vers un modèle de fondation pour la 3D ?}
+\begin{center}
+\resizebox{.94\textwidth}{!}{\input{figs/alphabet_fondation}}
+\end{center}
+\reffoot{brown20,kirillov23,sonata25,utonia26,vernata26}
+\end{frame}
+
+\begin{frame}{\fontsize{14}{17}\selectfont Hypothèse : le nuage est un \emph{artefact du capteur}}
     \setlength{\parskip}{0pt}
     \begin{center}
         \resizebox{0.72\textwidth}{!}{\input{figs/verrou_portee}}
@@ -58,20 +74,10 @@
     \end{itemize}
 \end{frame}
 
-
-% 3. Première figure de la soutenance, texte allégé.
-\begin{frame}{Quelle unité de représentation pour la 3D ?}
-\begin{center}
-\resizebox{.96\textwidth}{!}{\input{figs/alphabet_fondation}}
-\end{center}
-\source{Figure adaptée de la soutenance : T. Brown \emph{et al.}, NeurIPS 2020 ; A. Kirillov \emph{et al.}, ICCV 2023.}
-\end{frame}
-
-% 4. Deuxième figure de la soutenance. Sans métaphore alphabet/grammaire.
-\begin{frame}{Une hiérarchie de polyèdres}
+\begin{frame}{Une hiérarchie de polyèdres \citb{these26}}
 \begin{columns}[c,onlytextwidth]
 \begin{column}{.53\textwidth}\centering
-\resizebox{\linewidth}{!}{\input{figs/hierarchie_surfaces}}
+\resizebox{.94\linewidth}{!}{\input{figs/hierarchie_surfaces}}
 \end{column}
 \begin{column}{.43\textwidth}
 À chaque nœud $v$, une géométrie
@@ -83,52 +89,56 @@ Conserver les \textbf{parents, enfants et niveaux} $r$.\par\medskip
 {\small Les appartenances des points peuvent se recouvrir.}
 \end{column}
 \end{columns}
-\source{Réalisation à définir explicitement. Premier essai à $K=2$ : union des arêtes de la composante, sans remplir les triangles.}
+\reffoot[La hiérarchie est définie dans la thèse (parties I--II) ; la réalisation géométrique $P_v$ reste à choisir.]{these26}
 \end{frame}
 
-% 5. Intuition du contact et propriété convexe, sans démonstration.
-\begin{frame}{La fonction support}
+\presentationpart{Questions}
+
+\begin{frame}{Questions}
+\begin{enumerate}
+\setlength{\itemsep}{.35cm}
+\item Qu'est-ce qu'un polyèdre ? Comment le représenter vectoriellement ?
+\item La question des attributs : couleur, autres caractéristiques physiques, \emph{etc.}
+\item Comment mesurer la pertinence de cette représentation ?\\
+      Polyèdres \textbf{et} hiérarchie.
+\item Première intégration légère avec une I.A. : LoRA ? \citb{hu22}
+\item L'architecture complète.
+\end{enumerate}
+\reffoot{hu22}
+\end{frame}
+
+\presentationpart{Quelques débuts de réponse}
+
+\begin{frame}{La fonction support \citb{schneider}}
 \begin{columns}[c,onlytextwidth]
 \begin{column}{.49\textwidth}
 Pour une direction unitaire $u$ :
 \[
 \boxed{h_P(u)=\max_{x\in P}\ip{u}{x}.}
 \]
-Hauteur du premier contact avec un plan de normale $u$.\par\bigskip
+Hauteur du premier contact avec un plan de normale $u$.\par\medskip
 Si $P$ est \textbf{convexe}, tous ses plans d'appui déterminent $P$.
+\[h_P=h_{\conv(P)}.\]
 \end{column}
 \begin{column}{.48\textwidth}\centering
 \resizebox{\linewidth}{!}{\input{figs/plan_support}}
 \end{column}
 \end{columns}
-\source{$P$ compact non vide. Figure : coupe 2D du déplacement d'un plan en dimension 3.}
+\reffoot[$P$ compact non vide ; dessin en coupe 2D.]{schneider}
 \end{frame}
 
-% 6. Contre-exemple visuel tiré de la discussion.
-\begin{frame}{Ce que le support ne distingue pas}
-\[
-h_P=h_{\conv(P)}.
-\]
-\begin{center}
-\resizebox{.94\linewidth}{!}{\input{figs/quatre_cubes}}
-\end{center}
-\vspace{.12cm}
-\begin{center}
-Même support : $h_P(u)=|u_1|+|u_2|+|u_3|$.
-\end{center}
-\source{Quatre réalisations du cube $[-1,1]^3$.}
-\end{frame}
-
-% 7. Même convention H_P que dans la conversation préparatoire.
 \begin{frame}{Support quadratique et distance}
 \[
-\underbrace{\max_{x\in P}\bigl(2\ip{b}{x}-\norm{x}^2\bigr)}_{H_P(b)}
+C_P=\conv\bigl\{(x,\norm{x}^2):x\in P\bigr\}\subset\R^4.
+\]
+\[
+\underbrace{h_{C_P}(2b,-1)}_{H_P(b)}
 =\norm{b}^2-d_P(b)^2.
 \]
 \vspace{.1cm}
 \begin{columns}[c,onlytextwidth]
 \begin{column}{.45\textwidth}\centering
-\begin{tikzpicture}[scale=.87]
+\begin{tikzpicture}[scale=.80]
 \useasboundingbox(-.45,-.3)rectangle(4.0,3.3);
 \draw[inria-2024-bleu-canard,line width=1.8pt](.1,.15)--(.9,.45)--(1.3,1.4)--(1.3,2.7)--(.6,3.05);
 \node[text=inria-2024-bleu-canard]at(.35,1.65){$P$};
@@ -143,13 +153,13 @@ $b$ est une \textbf{sonde dans l'espace}.
 \[
 d_P(b)=\min_{x\in P}\norm{b-x}.
 \]
-Distance aux primitives entières, pas seulement aux sommets.\par\medskip
+Distance aux arêtes et faces entières.\par\medskip
 {\small $H_P$ est convexe, même si $P$ ne l'est pas.}
 \end{column}
 \end{columns}
+\source{$H_P(b)=\max_{x\in P}(2\ip{b}{x}-\norm{x}^2)$. Relèvement de toute la réalisation $P$, pas seulement des sommets.}
 \end{frame}
 
-% 8. Trois propriétés utiles, sans preuve ni borne de discrétisation.
 \begin{frame}{Les propriétés utiles, sans convexité}
 \vspace{.1cm}
 \begin{tabular}{@{}p{.22\textwidth}p{.73\textwidth}@{}}
@@ -163,7 +173,6 @@ Pour des compacts non vides : arêtes, surfaces ouvertes ou unions de morceaux.
 \source{$d_H$ : distance de Hausdorff. Les fonctions sont comparées aux mêmes positions, dans un repère commun.}
 \end{frame}
 
-% 9. Choix final de normalisation : demi-plus-grand-côté ; aucune rotation locale.
 \begin{frame}{Un vecteur par polyèdre}\vspace{.2cm}
 \begin{columns}[c,onlytextwidth]
 \begin{column}{.33\textwidth}\centering
@@ -181,14 +190,45 @@ $\widehat P_v=(P_v-c_v)/s_v\subset[-1,1]^3$.\par\medskip
 \boxed{D_v[j]=\frac{d(c_v+s_vb_j,P_v)}{s_v},\quad j=1,\ldots,512.}
 \]
 \begin{center}\small
-Conserver aussi : centre, taille, niveau HGP, attributs LiDAR.
+Conserver aussi : centre, taille, niveau HGP, attributs LiDAR. \citb{bps19}
 \end{center}
-\source{Grille $8^3$ aux centres des cellules. Code approché ; cas ponctuels traités séparément. Antécédent : Prokudin \emph{et al.}, Basis Point Sets, ICCV 2019.}
+\reffoot[Adaptation : distances à la réalisation $P_v$, non aux seuls retours. Code fini approché ; cas ponctuels traités séparément.]{bps19}
 \end{frame}
 
-% 10. Diagnostic de régions uniquement, sans apprentissage.
+\begin{frame}{Sphère en 4D ou cube en 3D ?}
+\small Dans les deux cas : $\widehat P=(P-c)/s$, puis $C_{\widehat P}$.
+\vspace{.22cm}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.48\textwidth}
+\textbf{Directions du support relevé}
+\[
+u_j\in S^3\subset\R^4,\qquad h_{C_{\widehat P}}(u_j).
+\]
+Échantillonner des normales d'appui en dimension 4.
+\end{column}
+\begin{column}{.48\textwidth}
+\textbf{Sondes de distance dans le cube}
+\[
+b_j\in[-1,1]^3,\qquad d_{\widehat P}(b_j).
+\]
+Échantillonner des positions dans le volume normalisé.
+\end{column}
+\end{columns}
+\vspace{.32cm}
+\[
+u(b)=\frac{(2b,-1)}{\sqrt{1+4\norm{b}^2}},\qquad
+h_{C_{\widehat P}}\bigl(u(b)\bigr)
+ =\frac{\norm{b}^2-d_{\widehat P}(b)^2}{\sqrt{1+4\norm{b}^2}}.
+\]
+\vspace{.14cm}
+\small
+La grille correspond à des directions précises avec $u_4<0$,\\
+\textbf{pas à un échantillonnage uniforme de toute $S^3$}.
+\source{Même information aux sondes correspondantes, à un facteur connu près. Aucun convexe 4D à construire pour calculer les distances.}
+\end{frame}
+
 \begin{frame}{La hiérarchie retrouve-t-elle les instances ?}
-\small $S_v$ : points couverts par le nœud $v$ ; $G$ : instance annotée.
+\small $S_v$ : points couverts ; $G$ : instance annotée \citb{semantickitti19}.
 \[
 \max_v\IoU(S_v,G)=\max_v\frac{|S_v\cap G|}{|S_v\cup G|}.
 \]
@@ -207,15 +247,14 @@ Conserver aussi : centre, taille, niveau HGP, attributs LiDAR.
 \normalsize
 Comparer HGP, $K=1$ et grilles imbriquées, à budget de régions comparable.\par\medskip
 Rapporter le rappel des instances selon le seuil d'IoU.
-\source{Oracle sur les masques de points, non segmentation prédite. SemanticKITTI, Behley \emph{et al.}, ICCV 2019. Exemple dessiné, non résultat expérimental.}
+\reffoot[Oracle sur les masques de points, non segmentation prédite. Exemple dessiné, non résultat expérimental.]{semantickitti19}
 \end{frame}
 
-% 11. Test appris minimal de la sélection des régions et de leur réalisation.
-\begin{frame}{Mesurer un apport avec un petit modèle}
+\begin{frame}[t]{Mesurer un apport avec un petit modèle}
 Même petit réseau supervisé, mêmes données et budgets.
 \vspace{.18cm}
 \begin{center}
-\small\renewcommand{\arraystretch}{1.5}
+\small\renewcommand{\arraystretch}{1.35}
 \begin{tabular}{@{}cll@{}}
 \toprule
  & \textbf{Régions} & \textbf{Distances aux sondes} \\
@@ -238,7 +277,33 @@ C & Mêmes régions HGP & Aux arêtes ou faces \\
 \vspace{.3cm}
 \small
 Mesurer la mIoU par classe et par portée, ainsi que le coût.\par
-Répéter avec 50\,\% puis 25\,\% des retours, en recalculant HGP et les codes.
-\source{Protocole proposé, sans modèle préentraîné. Aucun gain mesuré à ce stade.}
+\footnotesize\textbf{Liens hiérarchiques} : mêmes codes, avec / sans échanges parent--enfant.
+\source{Protocole proposé ; réseau et budgets appariés. Contrôle de robustesse : 50\,\% puis 25\,\% des retours, HGP et codes recalculés.}
+\end{frame}
+
+\section*{Bibliographie}\gdef\partlabel{Références}
+
+\begin{frame}{Bibliographie (1/2)}
+\small
+\begin{itemize}
+\setlength{\itemsep}{.30cm}
+\bibligne{brown20}
+\bibligne{kirillov23}
+\bibligne{sonata25}
+\bibligne{utonia26}
+\bibligne{vernata26}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Bibliographie (2/2)}
+\small
+\begin{itemize}
+\setlength{\itemsep}{.27cm}
+\bibligne{these26}
+\bibligne{hu22}
+\bibligne{schneider}
+\bibligne{bps19}
+\bibligne{semantickitti19}
+\end{itemize}
 \end{frame}
 \end{document}

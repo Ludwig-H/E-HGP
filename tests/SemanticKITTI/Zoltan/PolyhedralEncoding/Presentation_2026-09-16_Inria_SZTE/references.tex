@@ -1,0 +1,41 @@
+% Citations adaptées du système de la soutenance de Louis Hauseux.
+% Une déclaration unique alimente le texte, les pieds et la bibliographie.
+\makeatletter
+\newcommand{\DeclareRef}[3]{%
+  \expandafter\gdef\csname ref@lab@#1\endcsname{#2}%
+  \expandafter\gdef\csname ref@full@#1\endcsname{#3}}
+\newcommand{\DeclareMyRef}[3]{\DeclareRef{#1}{#2}{#3}%
+  \expandafter\gdef\csname ref@mine@#1\endcsname{}}
+\newcommand{\refbracket}[1]{%
+  \ifcsname ref@mine@#1\endcsname
+    \textcolor{inria-rouge}{[\csname ref@lab@#1\endcsname]}%
+  \else
+    \textcolor{gris_fonce_inria}{[\csname ref@lab@#1\endcsname]}%
+  \fi}
+\newcommand{\citb}[1]{\mbox{{\footnotesize\bfseries\hyperlink{bib:#1}{\refbracket{#1}}}}}
+\newcommand{\bibligne}[1]{\item\hypertarget{bib:#1}{}%
+  {\bfseries\refbracket{#1}}\ \csname ref@full@#1\endcsname}
+\newcommand{\reffoot}[2][]{%
+  \begin{textblock}{.90}[0,1](.05,.915)
+    \begingroup
+    \fontsize{5.8}{6.7}\selectfont\raggedright\color{gris_fonce_inria}%
+    \setlength{\parindent}{0pt}\setlength{\parskip}{0pt}%
+    \edef\rf@list{\zap@space#2 \@empty}%
+    \@for\rf@key:=\rf@list\do{%
+      \noindent{\bfseries\expandafter\refbracket\expandafter{\rf@key}}%
+      \space\csname ref@full@\rf@key\endcsname\par}%
+    \if\relax\detokenize{#1}\relax\else\vspace{2pt}\noindent#1\par\fi
+    \endgroup
+  \end{textblock}}
+\makeatother
+
+\DeclareRef{brown20}{Brown 20}{T.~Brown \emph{et al.}, \href{https://arxiv.org/abs/2005.14165}{\emph{Language Models are Few-Shot Learners}}, NeurIPS, 2020.}
+\DeclareRef{kirillov23}{SAM 23}{A.~Kirillov \emph{et al.}, \href{https://arxiv.org/abs/2304.02643}{\emph{Segment Anything}}, ICCV, 2023.}
+\DeclareRef{sonata25}{Sonata 25}{X.~Wu \emph{et al.}, \href{https://arxiv.org/abs/2503.16429}{\emph{Sonata: Self-Supervised Learning of Reliable Point Representations}}, CVPR, 2025.}
+\DeclareRef{utonia26}{Utonia 26}{Y.~Zhang \emph{et al.}, \href{https://arxiv.org/abs/2603.03283v2}{\emph{Utonia: Toward One Encoder for All Point Clouds}}, ICML, 2026.}
+\DeclareRef{vernata26}{Vernata 26}{O.~Lemke, A.~Liniger, A.~Gawel, M.~Hutter, \href{https://arxiv.org/abs/2608.06919v1}{\emph{Vernata: Self-Supervised Learning of LiDAR Point Representations}}, arXiv:2608.06919, 2026 (annoncé IROS 2026).}
+\DeclareMyRef{these26}{Thèse 26}{L.~Hauseux, \href{https://github.com/Ludwig-H/Manuscrit-de-th-se/tree/main/Manuscrit_de_these}{\emph{Utilisation de graphes pour la classification et l'extraction de structures. Généralisation à des interactions d'ordre supérieur}}, thèse de doctorat, Université Côte d'Azur, 2026, parties I--II.}
+\DeclareRef{hu22}{LoRA 22}{E.~J.~Hu \emph{et al.}, \href{https://arxiv.org/abs/2106.09685}{\emph{LoRA: Low-Rank Adaptation of Large Language Models}}, ICLR, 2022.}
+\DeclareRef{schneider}{Schneider 13}{R.~Schneider, \href{https://doi.org/10.1017/CBO9781139003858}{\emph{Convex Bodies: The Brunn--Minkowski Theory}}, 2\up{e} éd., Cambridge University Press, 2013.}
+\DeclareRef{bps19}{BPS 19}{S.~Prokudin, C.~Lassner, J.~Romero, \href{https://arxiv.org/abs/1908.09186}{\emph{Efficient Learning on Point Clouds with Basis Point Sets}}, ICCV, 2019, p.~4332--4341.}
+\DeclareRef{semantickitti19}{SemanticKITTI 19}{J.~Behley \emph{et al.}, \href{https://semantic-kitti.org/dataset.html}{\emph{SemanticKITTI: A Dataset for Semantic Scene Understanding of LiDAR Sequences}}, ICCV, 2019.}
