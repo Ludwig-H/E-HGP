@@ -1,5 +1,5 @@
 % !TEX program = lualatex
-% Version courte : 10 diapositives, couverture comprise, sans annexes.
+% Version courte : 11 diapositives, couverture comprise, sans annexes.
 % Réunion du 16 septembre 2026. Provenance et réserves : README.md.
 \documentclass[svgnames,11pt,aspectratio=169]{beamer}
 \usepackage[french]{babel}
@@ -17,12 +17,12 @@
 \newcommand{\ip}[2]{\left\langle#1,#2\right\rangle}
 \newcommand{\source}[1]{\begin{textblock}{.9}[0,1](.05,.915)\tiny\color{gris_fonce_inria}\raggedright #1\par\end{textblock}}
 \tikzset{arr/.style={-{Latex[length=2mm]},thick,gris_fonce_inria},lab/.style={font=\scriptsize,align=center},geom/.style={draw=inria-2024-bleu-canard,fill=inria-2024-bleu-canard!15,thick}}
-\title{Représenter le LiDAR 3D\\par une hiérarchie HGP}
+\title{Représenter le LiDAR 3D\\par une hiérarchie Hypergraph-Percol}
 \subtitle{Encodage géométrique et premiers tests}
-\author{Louis \textsc{Hauseux}}
+\author{\texorpdfstring{Louis \textsc{Hauseux}\quad Zoltán \textsc{Kató}\quad Josiane \textsc{Zerubia}}{Louis Hauseux, Zoltán Kató, Josiane Zerubia}}
 \institute{Inria \& Szegedi Tudományegyetem}
 \date[16 septembre 2026]{16 septembre 2026}
-\hypersetup{pdfauthor={Louis Hauseux},pdftitle={Représenter le LiDAR 3D par une hiérarchie HGP},pdfsubject={Réunion Inria / Szegedi Tudományegyetem, 16 septembre 2026, version courte},colorlinks=true,allcolors=inria-2024-bleu-canard}
+\hypersetup{pdfauthor={Louis Hauseux, Zoltán Kató, Josiane Zerubia},pdftitle={Représenter le LiDAR 3D par une hiérarchie Hypergraph-Percol},pdfsubject={Réunion Inria / Szegedi Tudományegyetem, 16 septembre 2026, version courte},colorlinks=true,allcolors=inria-2024-bleu-canard}
 \setbeamertemplate{title page}{%
 \begin{tikzpicture}[remember picture,overlay]
 \node[anchor=north west,inner sep=0]at([xshift=.8cm,yshift=-.65cm]current page.north west){\includegraphics[width=2.7cm]{theme/imgs/Inria-logo-rouge.png}};
@@ -30,8 +30,7 @@
 \node[anchor=north west,align=left,text width=13.5cm,inner sep=0]at([xshift=1.15cm,yshift=-2.25cm]current page.north west){%
 {\LARGE\bfseries\inserttitle}\\[.20cm]\barrecouleur\\[.27cm]
 {\large\insertsubtitle}\\[.55cm]
-{\large\insertauthor}\\[.30cm]
-{\small Réunion avec \href{https://www.inf.u-szeged.hu/users/kato-zoltan}{Zoltán \textsc{Kató}} et \href{https://www-sop.inria.fr/members/Josiane.Zerubia/}{Josiane \textsc{Zerubia}}}\\[.20cm]
+{\large\insertauthor}\\[.35cm]
 {\small Inria \enspace/\enspace Szegedi Tudományegyetem}\\[.25cm]
 {\small\insertdate}};
 \end{tikzpicture}}
@@ -40,7 +39,27 @@
 % 1. Couverture.
 \begin{frame}[plain]\titlepage\end{frame}
 
-% 2. Première figure de la soutenance, texte allégé.
+% 2. Diapositive de la soutenance : densité, portée et occultations.
+\begin{frame}{\fontsize{14}{17}\selectfont La raison de fond : le nuage est un \emph{artefact du capteur}}
+    \setlength{\parskip}{0pt}
+    \begin{center}
+        \resizebox{0.72\textwidth}{!}{\input{figs/verrou_portee}}
+    \end{center}
+
+    \vspace{-0.12cm}
+    \small
+    \begin{itemize}
+        \setlength{\itemsep}{5pt}
+        \item La \textbf{densité} décroît avec la portée ; s'y ajoutent les nappes de balayage
+        et les \textbf{occultations}
+        \item Un modèle point par point apprend donc \emph{en même temps} la géométrie, le capteur,
+        la densité, l'occultation \textbf{et} la sémantique
+        \item Hypothèse : c'est \emph{une} raison centrale de la difficulté
+    \end{itemize}
+\end{frame}
+
+
+% 3. Première figure de la soutenance, texte allégé.
 \begin{frame}{Quelle unité de représentation pour la 3D ?}
 \begin{center}
 \resizebox{.96\textwidth}{!}{\input{figs/alphabet_fondation}}
@@ -48,7 +67,7 @@
 \source{Figure adaptée de la soutenance : T. Brown \emph{et al.}, NeurIPS 2020 ; A. Kirillov \emph{et al.}, ICCV 2023.}
 \end{frame}
 
-% 3. Deuxième figure de la soutenance. Sans métaphore alphabet/grammaire.
+% 4. Deuxième figure de la soutenance. Sans métaphore alphabet/grammaire.
 \begin{frame}{Une hiérarchie de polyèdres}
 \begin{columns}[c,onlytextwidth]
 \begin{column}{.53\textwidth}\centering
@@ -67,7 +86,7 @@ Conserver les \textbf{parents, enfants et niveaux} $r$.\par\medskip
 \source{Réalisation à définir explicitement. Premier essai à $K=2$ : union des arêtes de la composante, sans remplir les triangles.}
 \end{frame}
 
-% 4. Intuition du contact et propriété convexe, sans démonstration.
+% 5. Intuition du contact et propriété convexe, sans démonstration.
 \begin{frame}{La fonction support}
 \begin{columns}[c,onlytextwidth]
 \begin{column}{.49\textwidth}
@@ -85,7 +104,7 @@ Si $P$ est \textbf{convexe}, tous ses plans d'appui déterminent $P$.
 \source{$P$ compact non vide. Figure : coupe 2D du déplacement d'un plan en dimension 3.}
 \end{frame}
 
-% 5. Contre-exemple visuel tiré de la discussion.
+% 6. Contre-exemple visuel tiré de la discussion.
 \begin{frame}{Ce que le support ne distingue pas}
 \[
 h_P=h_{\conv(P)}.
@@ -100,7 +119,7 @@ Même support : $h_P(u)=|u_1|+|u_2|+|u_3|$.
 \source{Quatre réalisations du cube $[-1,1]^3$.}
 \end{frame}
 
-% 6. Même convention H_P que dans la conversation préparatoire.
+% 7. Même convention H_P que dans la conversation préparatoire.
 \begin{frame}{Support quadratique et distance}
 \[
 \underbrace{\max_{x\in P}\bigl(2\ip{b}{x}-\norm{x}^2\bigr)}_{H_P(b)}
@@ -130,7 +149,7 @@ Distance aux primitives entières, pas seulement aux sommets.\par\medskip
 \end{columns}
 \end{frame}
 
-% 7. Trois propriétés utiles, sans preuve ni borne de discrétisation.
+% 8. Trois propriétés utiles, sans preuve ni borne de discrétisation.
 \begin{frame}{Les propriétés utiles, sans convexité}
 \vspace{.1cm}
 \begin{tabular}{@{}p{.22\textwidth}p{.73\textwidth}@{}}
@@ -144,7 +163,7 @@ Pour des compacts non vides : arêtes, surfaces ouvertes ou unions de morceaux.
 \source{$d_H$ : distance de Hausdorff. Les fonctions sont comparées aux mêmes positions, dans un repère commun.}
 \end{frame}
 
-% 8. Choix final de normalisation : demi-plus-grand-côté ; aucune rotation locale.
+% 9. Choix final de normalisation : demi-plus-grand-côté ; aucune rotation locale.
 \begin{frame}{Un vecteur par polyèdre}\vspace{.2cm}
 \begin{columns}[c,onlytextwidth]
 \begin{column}{.33\textwidth}\centering
@@ -167,7 +186,7 @@ Conserver aussi : centre, taille, niveau HGP, attributs LiDAR.
 \source{Grille $8^3$ aux centres des cellules. Code approché ; cas ponctuels traités séparément. Antécédent : Prokudin \emph{et al.}, Basis Point Sets, ICCV 2019.}
 \end{frame}
 
-% 9. Diagnostic de régions uniquement, sans apprentissage.
+% 10. Diagnostic de régions uniquement, sans apprentissage.
 \begin{frame}{La hiérarchie retrouve-t-elle les instances ?}
 \small $S_v$ : points couverts par le nœud $v$ ; $G$ : instance annotée.
 \[
@@ -191,7 +210,7 @@ Rapporter le rappel des instances selon le seuil d'IoU.
 \source{Oracle sur les masques de points, non segmentation prédite. SemanticKITTI, Behley \emph{et al.}, ICCV 2019. Exemple dessiné, non résultat expérimental.}
 \end{frame}
 
-% 10. Test appris minimal de la sélection des régions et de leur réalisation.
+% 11. Test appris minimal de la sélection des régions et de leur réalisation.
 \begin{frame}{Mesurer un apport avec un petit modèle}
 Même petit réseau supervisé, mêmes données et budgets.
 \vspace{.18cm}

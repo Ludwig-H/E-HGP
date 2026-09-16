@@ -1,9 +1,9 @@
-# Représenter le LiDAR 3D par une hiérarchie HGP
+# Représenter le LiDAR 3D par une hiérarchie Hypergraph-Percol
 
-**Version courte : 10 diapositives, couverture comprise, sans annexes.**
+**Version courte : 11 diapositives, couverture comprise, sans annexes.**
 
-Louis Hauseux · 16 septembre 2026  
-Réunion avec **Zoltán Kató** et **Josiane Zerubia**.  
+**Louis Hauseux · Zoltán Kató · Josiane Zerubia**  
+16 septembre 2026  
 **Inria / Szegedi Tudományegyetem**.
 
 [PDF](HGP_LiDAR_Inria_SZTE_2026-09-16.pdf) · [Source LaTeX](main.tex)
@@ -12,13 +12,15 @@ Réunion avec **Zoltán Kató** et **Josiane Zerubia**.
 
 | Pages | Sujet |
 |---|---|
-| 1–3 | Couverture et deux figures introductives de la soutenance, allégées |
-| 4–5 | Plan d'appui et limite du support pour les géométries non convexes |
-| 6–7 | Support quadratique, distance et propriétés utiles |
-| 8 | Centre de boîte, normalisation isotrope, grille 8³ et métadonnées |
-| 9–10 | Oracle d'IoU d'instances, puis comparaison avec un petit réseau |
+| 1 | Couverture : les trois noms au même niveau |
+| 2 | Diapositive de soutenance : portée, densité et occultations des nuages LiDAR |
+| 3–4 | Deux figures introductives de la soutenance, allégées |
+| 5–6 | Plan d'appui et limite du support pour les géométries non convexes |
+| 7–8 | Support quadratique, distance et propriétés utiles |
+| 9 | Centre de boîte, normalisation isotrope, grille 8³ et métadonnées |
+| 10–11 | Oracle d'IoU d'instances, puis comparaison avec un petit réseau |
 
-Cette version remplace les 34 pages précédentes. Les preuves, annexes, détails d'architecture et d'entraînement, ainsi que la métaphore alphabet/grammaire ont été retirés. L'ancienne version reste dans l'historique Git, sans présentation parallèle.
+Cette version conserve les dix pages de la version courte et ajoute une seule diapositive de soutenance en ouverture. Elle remplace la version initiale de 34 pages. Les preuves, annexes, détails d'architecture et d'entraînement, ainsi que la métaphore alphabet/grammaire ont été retirés. L'ancienne version reste dans l'historique Git, sans présentation parallèle.
 
 ## Précisions conservées hors des slides
 
@@ -36,7 +38,7 @@ La base de cette révision est la conversation préparatoire fournie par l'auteu
 
 ## Provenance
 
-Les deux figures introductives et le thème proviennent de `Ludwig-H/Manuscrit-de-th-se/Soutenance/soutenance/`, source `main.tex` au blob `bb66a9230aa6c3f8fefb8661909421020953a9d6`. Leur texte a été allégé. La définition HGP vient des parties I–II du manuscrit ; la réalisation géométrique reste un choix du prototype.
+Les trois figures introductives et le thème proviennent de `Ludwig-H/Manuscrit-de-th-se/Soutenance/soutenance/`, source `main.tex` au blob `bb66a9230aa6c3f8fefb8661909421020953a9d6`. Les deux figures déjà présentes restent allégées. La diapositive ajoutée « La raison de fond : le nuage est un artefact du capteur » reprend le texte de la soutenance et le schéma `figs/verrou_portee.tex` (blob `9cca660433532a16af3cf736cf9383184d3ba9e6`), placé juste après la couverture. La définition HGP vient des parties I–II du manuscrit ; la réalisation géométrique reste un choix du prototype.
 
 Le dossier `theme/` conserve l'adaptation autonome du thème Inria 2024 déjà employée dans cette présentation. Aucun fichier de police n'est distribué.
 
@@ -59,4 +61,4 @@ make clean
 
 `make clean` conserve le PDF. Sur Overleaf : importer le dossier complet, choisir LuaLaTeX et compiler `main.tex`. Les figures sont éditables en TikZ. `prepare_assets.py` prépare les PNG localement, sans réseau.
 
-Le workflow existant `hgp-szeged-presentation.yml` recompile et publie le PDF sur `main`. Vérification locale : 10 pages rendues, aucun avertissement `Overfull` ou `Missing character`. Ce contrôle du document ne valide pas les expériences proposées.
+Le workflow existant `hgp-szeged-presentation.yml` recompile et publie le PDF sur `main`. Vérification locale : 11 pages rendues, aucun avertissement `Overfull` ou `Missing character`. Ce contrôle du document ne valide pas les expériences proposées.
