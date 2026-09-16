@@ -1,5 +1,5 @@
 % !TEX program = lualatex
-% Version en quatre parties : 19 diapositives, dont 4 transitions et 2 de bibliographie.
+% Version en quatre parties : 21 diapositives, dont 4 transitions et 2 de bibliographie.
 % Réunion du 16 septembre 2026. Provenance et réserves : README.md.
 \documentclass[svgnames,11pt,aspectratio=169]{beamer}
 \usepackage[french]{babel}
@@ -125,123 +125,8 @@ Conserver les \textbf{parents, enfants et niveaux} $r$.\par\medskip
 
 \presentationpart{Éléments de réponse}
 
-\begin{frame}{La fonction support \citb{schneider}}
-\begin{columns}[c,onlytextwidth]
-\begin{column}{.49\textwidth}
-Pour une direction unitaire $u$ :
-\[
-\boxed{h_P(u)=\max_{x\in P}\ip{u}{x}.}
-\]
-Hauteur du premier contact avec un plan de normale $u$.\par\medskip
-Si $P$ est \textbf{convexe}, tous ses plans d'appui déterminent $P$.
-\[h_P=h_{\conv(P)}.\]
-\end{column}
-\begin{column}{.48\textwidth}\centering
-\resizebox{\linewidth}{!}{\input{figs/plan_support}}
-\end{column}
-\end{columns}
-\reffoot[$P$ compact non vide ; dessin en coupe 2D.]{schneider}
-\end{frame}
-
-\begin{frame}{Support quadratique et distance}
-\[
-C_P=\conv\bigl\{(x,\norm{x}^2):x\in P\bigr\}\subset\R^4.
-\]
-\[
-\underbrace{h_{C_P}(2b,-1)}_{H_P(b)}
-=\norm{b}^2-d_P(b)^2.
-\]
-\vspace{.1cm}
-\begin{columns}[c,onlytextwidth]
-\begin{column}{.45\textwidth}\centering
-\begin{tikzpicture}[scale=.80]
-\useasboundingbox(-.45,-.3)rectangle(4.0,3.3);
-\draw[inria-2024-bleu-canard,line width=1.8pt](.1,.15)--(.9,.45)--(1.3,1.4)--(1.3,2.7)--(.6,3.05);
-\node[text=inria-2024-bleu-canard]at(.35,1.65){$P$};
-\draw[inria-rouge!65,dashed](2.5,1.6)circle(1.2);
-\fill[inria-rouge](2.5,1.6)circle(2.3pt)node[right=3pt]{$b$};
-\fill[inria-rouge](1.3,1.6)circle(2.3pt);
-\draw[inria-rouge,thick](1.3,1.6)--(2.5,1.6)node[midway,above=3pt]{$d_P(b)$};
-\end{tikzpicture}
-\end{column}
-\begin{column}{.51\textwidth}
-$b$ est une \textbf{sonde dans l'espace}.
-\[
-d_P(b)=\min_{x\in P}\norm{b-x}.
-\]
-Distance aux arêtes et faces entières.\par\medskip
-{\small $H_P$ est convexe, même si $P$ ne l'est pas.}
-\end{column}
-\end{columns}
-\source{$H_P(b)=\max_{x\in P}(2\ip{b}{x}-\norm{x}^2)$. Relèvement de toute la réalisation $P$, pas seulement des sommets.}
-\end{frame}
-
-\begin{frame}{Les propriétés utiles, sans convexité}
-\vspace{.1cm}
-\begin{tabular}{@{}p{.22\textwidth}p{.73\textwidth}@{}}
-\textbf{Géométrie} & $\displaystyle P=\{b:d_P(b)=0\}$ \\[.65cm]
-\textbf{Stabilité} & $\displaystyle \|d_P-d_Q\|_\infty=d_H(P,Q)$ \\[.65cm]
-\textbf{Union} & $\displaystyle d_{P\cup Q}=\min(d_P,d_Q)$
-\end{tabular}
-\vspace{.6cm}
-\par\small
-Pour des compacts non vides : arêtes, surfaces ouvertes ou unions de morceaux.
-\source{$d_H$ : distance de Hausdorff. Les fonctions sont comparées aux mêmes positions, dans un repère commun.}
-\end{frame}
-
-\begin{frame}{Un vecteur par polyèdre}\vspace{.2cm}
-\begin{columns}[c,onlytextwidth]
-\begin{column}{.33\textwidth}\centering
-\resizebox{!}{2.65cm}{\input{figs/grille}}\par{\small $8^3=512$ sondes}
-\end{column}
-\begin{column}{.63\textwidth}
-$c_v$ : centre de la boîte englobante.\par\medskip
-$s_v$ : moitié du plus grand côté.\par\medskip
-$\widehat P_v=(P_v-c_v)/s_v\subset[-1,1]^3$.\par\medskip
-\textbf{Aucune rotation locale.}
-\end{column}
-\end{columns}
-\vspace{.2cm}
-\[
-\boxed{D_v[j]=\frac{d(c_v+s_vb_j,P_v)}{s_v},\quad j=1,\ldots,512.}
-\]
-\begin{center}\small
-Conserver aussi : centre, taille, niveau HGP, attributs LiDAR. \citb{bps19}
-\end{center}
-\reffoot[Adaptation : distances à la réalisation $P_v$, non aux seuls retours. Code fini approché ; cas ponctuels traités séparément.]{bps19}
-\end{frame}
-
-\begin{frame}{Sphère en 4D ou cube en 3D ?}
-\small Dans les deux cas : $\widehat P=(P-c)/s$, puis $C_{\widehat P}$.
-\vspace{.22cm}
-\begin{columns}[T,onlytextwidth]
-\begin{column}{.48\textwidth}
-\textbf{Directions du support relevé}
-\[
-u_j\in S^3\subset\R^4,\qquad h_{C_{\widehat P}}(u_j).
-\]
-Échantillonner des normales d'appui en dimension 4.
-\end{column}
-\begin{column}{.48\textwidth}
-\textbf{Sondes de distance dans le cube}
-\[
-b_j\in[-1,1]^3,\qquad d_{\widehat P}(b_j).
-\]
-Échantillonner des positions dans le volume normalisé.
-\end{column}
-\end{columns}
-\vspace{.32cm}
-\[
-u(b)=\frac{(2b,-1)}{\sqrt{1+4\norm{b}^2}},\qquad
-h_{C_{\widehat P}}\bigl(u(b)\bigr)
- =\frac{\norm{b}^2-d_{\widehat P}(b)^2}{\sqrt{1+4\norm{b}^2}}.
-\]
-\vspace{.14cm}
-\small
-La grille correspond à des directions précises avec $u_4<0$,\\
-\textbf{pas à un échantillonnage uniforme de toute $S^3$}.
-\source{Même information aux sondes correspondantes, à un facteur connu près. Aucun convexe 4D à construire pour calculer les distances.}
-\end{frame}
+% Représentation : primitives explicites, distances et limites.
+\input{encodage_polyedres}
 
 \begin{frame}{La hiérarchie retrouve-t-elle les instances ?}
 \small $S_v$ : points couverts ; $G$ : instance annotée \citb{semantickitti19}.
@@ -296,6 +181,9 @@ Mesurer la mIoU par classe et par portée, ainsi que le coût.\par
 \footnotesize\textbf{Liens hiérarchiques} : mêmes codes, avec / sans échanges parent--enfant.
 \source{Protocole proposé ; réseau et budgets appariés. Contrôle de robustesse : 50\,\% puis 25\,\% des retours, HGP et codes recalculés.}
 \end{frame}
+
+% Dernière page de contenu : méthode de calcul.
+\input{encodage_pseudocode}
 
 \section*{Bibliographie}\gdef\partlabel{Références}
 

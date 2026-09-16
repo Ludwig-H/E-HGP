@@ -7,7 +7,7 @@
 
 ## Plan
 
-**19 diapositives : 1 garde, 4 transitions, 12 pages de contenu (dont le tableau), 2 pages de bibliographie. Sans annexes.** Chaque partie commence par une véritable diapositive de transition, avec numéro, titre et filet Inria. Son nom reste indiqué sur les pages de contenu.
+**21 diapositives : 1 garde, 4 transitions, 14 pages de contenu (dont le tableau et le pseudo-code), 2 pages de bibliographie. Sans annexes.** Chaque partie commence par une véritable diapositive de transition, avec numéro, titre et filet Inria. Son nom reste indiqué sur les pages de contenu.
 
 | Partie | Transition | Contenu |
 |---|---|---|
@@ -15,8 +15,8 @@
 | I. Introduction | Page 2 | Pages 3–5 : modèles 3D, hypothèse capteur/portée, hiérarchie de polyèdres |
 | II. Questions | Page 6 | Page 7 : les cinq questions de la réunion |
 | III. Quelques bons points | Page 8 | Page 9 : un seul tableau récapitulatif |
-| IV. Éléments de réponse | Page 10 | Pages 11–17 : support, distance, encodage et premiers tests |
-| Bibliographie | — | Pages 18–19 : références complètes avec liens |
+| IV. Éléments de réponse | Page 10 | Pages 11–19 : primitives, support, distance, encodage, premiers tests et pseudo-code |
+| Bibliographie | — | Pages 20–21 : références complètes avec liens |
 
 Les anciennes pages 2 et 3 ont été inversées. Les titres demandés sont « Vers un modèle de fondation pour la 3D ? » et « Hypothèse : le nuage est un artefact du capteur ». La figure de portée de la soutenance est conservée. La page séparée sur les quatre cubes a été retirée ; l'identité du support avec celui de l'enveloppe convexe figure sur la page de définition du support.
 
@@ -39,6 +39,28 @@ La colonne « Résultat publié » rapporte ces précédents ; la colonne « Pou
 
 Le tableau ne reprend aucun chiffre d'oracle comme preuve d'un gain appris et ne compare pas entre eux des scores de jeux ou de tâches différents.
 
+## Encodage proposé et pseudo-code final
+
+`encodage_polyedres.tex` contient six pages simples : objet géométrique, fonction support, support quadratique, distances et fusions, normalisation et grille, limites du code. `encodage_pseudocode.tex` fournit la dernière page de contenu, avant la bibliographie. Les transitions, l’introduction, les questions, le tableau des résultats encourageants et les deux tests sont conservés.
+
+La distinction est celle retenue dans la discussion : les primitives restent la référence géométrique explicite ; un code de taille fixe est calculé pour les nœuds que le réseau utilise. Une primitive ne doit pas être remplacée dans le stockage par 512 valeurs. Les primitives partagent leurs sommets et sont distinguées par leur type et leurs indices. Le pseudo-code ne construit pas cette réalisation depuis les sorties de Morse HGP : il la reçoit en entrée.
+
+### Convention de la méthode
+
+Entrée : une famille finie non vide de points, segments, triangles remplis et/ou tétraèdres pleins, à coordonnées finies. Une surface de tétraèdre doit être fournie comme quatre triangles, pas comme un tétraèdre plein. Les primitives dégénérées représentent leur enveloppe convexe de dimension inférieure ; la fonction de distance doit traiter ce cas.
+
+Les 512 sondes sont les centres des cellules du cube, rangées dans l’ordre des triplets `(i,j,k)` avec `k` variant le plus vite : `b_ijk = (-1+(2i+1)/8, -1+(2j+1)/8, -1+(2k+1)/8)`, pour `i,j,k = 0,…,7`. La même base est utilisée pour tous les morceaux. Les distances ne sont jamais triées.
+
+Le centre est celui de la boîte englobante des sommets des primitives et la taille est la moitié de son plus grand côté. Pour `s > 0`, les trois coordonnées sont divisées par le même scalaire, sans rotation. La distance est évaluée dans ces coordonnées locales, directement aux primitives entières ; il n’y a ni relèvement explicite à calculer ni soustraction de grands carrés en coordonnées physiques.
+
+Pour `s = 0`, la réalisation est un singleton : la convention est `P_normalisé = {0}`, `D[j] = norme(b_j)`, centre `c`, taille physique `0`. Elle donne un vecteur de même dimension sans division par zéro. Les morceaux presque ponctuels restent un cas de précision à calibrer avant une implémentation de production ; aucun seuil implicite ne leur est appliqué dans ce pseudo-code.
+
+La sortie brute est `(D,c,s)` : 512 distances, 3 coordonnées et 1 taille, soit 516 scalaires hors attributs. Ce n’est pas une compression garantie, ni un code universellement injectif. Les attributs gardent leur localisation et leurs masques de validité ; les relations HGP sont une structure séparée, pas des nombres arbitraires concaténés au code.
+
+Pour une union, on prend le minimum des distances aux primitives. Lorsqu’un parent possède son propre centre et sa propre taille, ses sondes ne sont pas celles des enfants : le pseudo-code est réappliqué à sa réalisation, plutôt que de prendre le minimum de leurs tableaux. Un index spatial peut accélérer les requêtes, mais aucun coût accéléré ni résultat de performance n’est revendiqué ici.
+
+Le choix de grille 8³ reste une référence d’essai. Les résolutions 4³ et 16³ servent à vérifier le compromis précision–mémoire–temps. Une petite cavité ou structure peut être manquée par les sondes d’un grand parent ; ses primitives et les niveaux fins sont conservés.
+
 ## Relèvement et sondes : précision mathématique
 
 La discussion préparatoire fournie par l'auteur définissait le support quadratique et retenait finalement le centre de boîte, la normalisation isotrope et une grille cartésienne volumique. Le texte de cette conversation n'est pas publié ici. La relation avec les directions unitaires de dimension quatre ci-dessous est une explicitation algébrique de cette définition, non une nouvelle méthode attribuée à BPS.
@@ -55,7 +77,7 @@ La positive homogénéité du support donne, exactement :
 
 $$u(b)=\frac{(2b,-1)}{\sqrt{1+4\lVert b\rVert^2}},\qquad h_{C_P}(u(b))=\frac{\lVert b\rVert^2-d_P(b)^2}{\sqrt{1+4\lVert b\rVert^2}}.$$
 
-Ainsi, aux positions et directions correspondantes, les deux tableaux contiennent la même information à une transformation connue près. **Une grille uniforme du cube n'est pas une distribution uniforme sur S³.** Le cube ne couvre qu'une portion de l'hémisphère inférieur. Plus généralement, tout u=(a,t) de S³ avec t<0 correspond à b=a/(-2t). Le bord t=0 correspond à des sondes qui s'éloignent vers l'infini ; l'autre hémisphère interroge d'autres maxima quadratiques.
+Ainsi, aux positions et directions correspondantes, les deux tableaux contiennent la même information à une transformation connue près. **Une grille uniforme du cube n'est pas une distribution uniforme sur S³.** Le cube ne couvre qu'une portion de l'hémisphère inférieur. Plus généralement, tout u=(a,t) de S³ avec t<0 correspond à b=a/(-2t). Le bord t=0 correspond à des sondes qui s’éloignent vers l’infini. Pour t≥0, la fonction maximisée `x ↦ <a,x> + t ||x||²` est convexe ; son maximum sur P est donc le même que sur son enveloppe convexe 3D. Cet hémisphère ne distingue pas les géométries qui partagent cette enveloppe. Cette observation algébrique motive le choix pratique des sondes de distance, sans affirmer qu’un placement fini soit optimal.
 
 Il n'est pas nécessaire de connaître toute S³ pour identifier P : le champ complet sur un domaine contenant P le détermine par son ensemble de zéros. En particulier, les directions associées à tous les points du cube suffisent pour un P contenu dans ce cube. En revanche, **aucun tableau fini n'est déclaré injectif sur tous les compacts**.
 
@@ -75,7 +97,7 @@ Les attributs physiques, une adaptation légère de type LoRA et l'architecture 
 
 ## Sources et provenance
 
-Source de cette révision : `main.tex`, blob `548d409b8eeecfe8641c161173cfa802e55602fc`, et `references.tex`, blob `11a50890da5e09c935dda4ab8f8b6fa27f696f6a`, identiques à l'archive locale fournie. Les transitions reprennent le principe de la page de section du thème de soutenance (numéro, titre centré et filet). Le schéma de portée conserve le blob `9cca660433532a16af3cf736cf9383184d3ba9e6` de `Ludwig-H/Manuscrit-de-th-se/Soutenance/soutenance/figs/verrou_portee.tex`. La figure introductive est adaptée pour ajouter les trois références 3D.
+Base de cette révision : dépôt au commit `6429235149dc3179d2c260b579748689b8d0d2f8`, `main.tex` au blob `2e1ea13959bbe98622a899ddd16fe2aaf497f097`, identique à l’archive locale fournie. La partie encodage transpose la recommandation acceptée dans l’échange suivant : primitives conservées, code de distances calculé pour le réseau. Le reste de la présentation et les références ne font pas l’objet d’une nouvelle revue de littérature. Les transitions reprennent le principe de la page de section du thème de soutenance (numéro, titre centré et filet). Le schéma de portée conserve le blob `9cca660433532a16af3cf736cf9383184d3ba9e6` de `Ludwig-H/Manuscrit-de-th-se/Soutenance/soutenance/figs/verrou_portee.tex`. La figure introductive est adaptée pour ajouter les trois références 3D.
 
 Système de citations et titre de la thèse : `Ludwig-H/Manuscrit-de-th-se/Soutenance/soutenance/main.tex`, blob `bb66a9230aa6c3f8fefb8661909421020953a9d6`. Les parties I–II du manuscrit définissent la hiérarchie ; le support quadratique vient de la discussion préparatoire, et non d'un théorème attribué au manuscrit.
 
@@ -102,4 +124,4 @@ make clean
 
 `make clean` conserve le PDF. Sur Overleaf : importer le dossier complet avec ses images préparées, choisir LuaLaTeX et compiler `main.tex`. `prepare_assets.py` ne fait aucun appel réseau. Les figures restent éditables en TikZ.
 
-Contrôles de cette révision : compilation, 19 pages rendues et inspectées, absence de débordements `Overfull` et de glyphes `Missing character`, vérification des quatre transitions (pages 2, 6, 8 et 10), du tableau unique et des douze références bibliographiques. Le workflow existant recompile ensuite le PDF sur `main`. La vérification du document ne valide pas les expériences proposées.
+Contrôles de cette révision : compilation, 21 pages rendues et inspectées, absence de débordements `Overfull` et de glyphes `Missing character`, vérification des quatre transitions (pages 2, 6, 8 et 10), du tableau unique et des douze références bibliographiques. Le workflow existant recompile ensuite le PDF sur `main`. La vérification du document ne valide pas les expériences proposées.

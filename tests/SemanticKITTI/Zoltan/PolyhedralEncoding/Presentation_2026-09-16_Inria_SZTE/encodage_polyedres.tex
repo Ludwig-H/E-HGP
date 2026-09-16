@@ -1,0 +1,150 @@
+% Réalisation et code : propositions de la discussion préparatoire.
+% Les primitives sont conservées ; le code de distances est une approximation.
+\begin{frame}[t]{Quel objet encoder ?}
+\[
+P=\bigcup_{\sigma\in\mathcal F}\sigma.
+\]
+\begin{center}
+\begin{tikzpicture}[x=.90cm,y=.70cm]
+\useasboundingbox(-.3,-.55)rectangle(13.2,2.1);
+\begin{scope}[xshift=.25cm]
+\draw[inria-2024-bleu-canard,very thick](0,.35)--(1.55,1.45);
+\foreach\p in{(0,.35),(1.55,1.45)}{\fill[inria-2024-bleu-canard]\p circle(2pt);}
+\node[font=\small,align=center]at(.8,-.22){segment};
+\end{scope}
+\begin{scope}[xshift=3.0cm]
+\filldraw[geom](0,.25)--(1.7,.4)--(.65,1.65)--cycle;
+\node[font=\small,align=center]at(.85,-.22){triangle rempli};
+\end{scope}
+\begin{scope}[xshift=6.2cm]
+\coordinate(A)at(0,.35);\coordinate(B)at(1.5,.2);\coordinate(C)at(1.05,1);\coordinate(D)at(.6,1.9);
+\filldraw[geom](A)--(B)--(D)--cycle;
+\filldraw[draw=inria-2024-bleu-canard,fill=inria-2024-bleu-canard!30,thick](B)--(C)--(D)--cycle;
+\draw[inria-2024-bleu-canard,dashed](A)--(C);
+\node[font=\small,align=center]at(.8,-.22){tétraèdre plein};
+\end{scope}
+\begin{scope}[xshift=9.5cm]
+\filldraw[geom](0,.25)--(1.4,.25)--(.45,1.25)--cycle;
+\filldraw[draw=inria-2024-bleu-canard,fill=inria-2024-bleu-canard!25,thick](.45,1.25)--(1.4,.25)--(2.1,1.45)--cycle;
+\draw[inria-2024-bleu-canard,very thick](2.1,1.45)--(2.7,.8)--(3.25,1.6);
+\node[font=\small,align=center]at(1.5,-.22){union de morceaux};
+\end{scope}
+\end{tikzpicture}
+\end{center}
+\vspace{.08cm}
+\begin{tabular}{@{}p{.22\textwidth}p{.74\textwidth}@{}}
+\textbf{Stockage} & Sommets partagés, type et indices des primitives.\\[.25cm]
+\textbf{Pour le réseau} & Un vecteur de distances pour chaque nœud utilisé.
+\end{tabular}
+\source{La réalisation est donnée en entrée. Une surface et un solide rempli sont deux objets différents.}
+\end{frame}
+
+\begin{frame}{La fonction support \citb{schneider}}
+\begin{columns}[c,onlytextwidth]
+\begin{column}{.49\textwidth}
+Pour une direction unitaire $u$ :
+\[
+\boxed{h_P(u)=\max_{x\in P}\ip{u}{x}.}
+\]
+Hauteur du premier contact avec un plan de normale $u$.\par\medskip
+Si $P$ est \textbf{convexe}, tous ses plans d'appui déterminent $P$.
+\[h_P=h_{\conv(P)}.\]
+\end{column}
+\begin{column}{.48\textwidth}\centering
+\resizebox{\linewidth}{!}{\input{figs/plan_support}}
+\end{column}
+\end{columns}
+\reffoot[$P$ compact non vide ; dessin en coupe 2D.]{schneider}
+\end{frame}
+
+\begin{frame}{Support quadratique et distance}
+\[
+H_P(b)=\max_{x\in P}\bigl(2\ip{b}{x}-\norm{x}^2\bigr)
+      =\norm{b}^2-d_P(b)^2.
+\]
+\vspace{.08cm}
+\begin{columns}[c,onlytextwidth]
+\begin{column}{.43\textwidth}\centering
+\begin{tikzpicture}[scale=.83]
+\useasboundingbox(-.45,-.3)rectangle(4.0,3.3);
+\draw[inria-2024-bleu-canard,line width=1.8pt](.1,.15)--(.9,.45)--(1.3,1.4)--(1.3,2.7)--(.6,3.05);
+\node[text=inria-2024-bleu-canard]at(.35,1.65){$P$};
+\draw[inria-rouge!65,dashed](2.5,1.6)circle(1.2);
+\fill[inria-rouge](2.5,1.6)circle(2.3pt)node[right=3pt]{$b$};
+\fill[inria-rouge](1.3,1.6)circle(2.3pt);
+\draw[inria-rouge,thick](1.3,1.6)--(2.5,1.6)node[midway,above=3pt]{$d_P(b)$};
+\end{tikzpicture}
+\end{column}
+\begin{column}{.53\textwidth}
+\[
+d_P(b)=\min_{x\in P}\norm{b-x}.
+\]
+\textbf{Calculer directement la distance en 3D.}\par\medskip
+Ni signe intérieur/extérieur,\\
+ni convexe 4D à construire.
+\end{column}
+\end{columns}
+\vspace{.13cm}
+\small
+Relèvement : $C_P=\conv\{(x,\norm{x}^2):x\in P\}$,
+\quad $H_P(b)=h_{C_P}(2b,-1)$.
+\source{Les sondes $b$ choisissent des directions du support relevé, pas toute la sphère $S^3$. Relèvement de tout $P$ ; $H_P$ est convexe même si $P$ ne l'est pas.}
+\end{frame}
+
+\begin{frame}[t]{Distances, primitives et fusions}
+\[
+\boxed{d_P(b)=\min_{\sigma\in\mathcal F}d(b,\sigma).}
+\]
+{\small Distance aux primitives \textbf{entières}, pas seulement aux sommets.\par}
+\vspace{.14cm}
+\begin{tabular}{@{}p{.24\textwidth}p{.72\textwidth}@{}}
+\textbf{Géométrie} & $P=\{b:d_P(b)=0\}$\\[.25cm]
+\textbf{Stabilité} & $\|d_P-d_Q\|_\infty=d_H(P,Q)$\\[.25cm]
+\textbf{Union} & $d_{P\cup Q}=\min(d_P,d_Q)$
+\end{tabular}\par
+\vspace{.27cm}
+\small
+Après une fusion : \textbf{réévaluer aux sondes du parent}.\\
+Ne pas prendre le minimum des tableaux enfants.
+\source{Identités pour des compacts non vides, dans un même repère. $d_H$ : distance de Hausdorff. La stabilité concerne la géométrie donnée, pas toutes les occultations.}
+\end{frame}
+
+\begin{frame}{Centrer, normaliser, échantillonner}
+\begin{columns}[c,onlytextwidth]
+\begin{column}{.34\textwidth}\centering
+\resizebox{!}{2.75cm}{\input{figs/grille}}\par
+{\small $8^3=512$ sondes fixes}
+\end{column}
+\begin{column}{.62\textwidth}
+$c$ : centre de la boîte englobante.\par\medskip
+$s$ : moitié du plus grand côté.
+\[
+\widehat P=(P-c)/s\subset[-1,1]^3.
+\]
+\textbf{Un seul facteur ; aucune rotation.}
+\end{column}
+\end{columns}
+\vspace{.30cm}
+\[
+\boxed{D_P[j]=d_{\widehat P}(b_j)
+=\frac{d(c+s b_j,P)}{s}.}
+\]
+\begin{center}\small
+Sondes dans le \textbf{volume}, avec un \textbf{ordre fixé}. \citb{bps19}
+\end{center}
+\reffoot[Adaptation aux primitives entières. Centre et taille physiques conservés ; le cas $s=0$ est traité dans le pseudo-code.]{bps19}
+\end{frame}
+
+\begin{frame}{Ce que le code ne remplace pas}
+\vspace{.16cm}
+\begin{tabular}{@{}p{.22\textwidth}p{.73\textwidth}@{}}
+\textbf{Attributs} & Couleur, rémission, matériau : garder leur localisation et leur validité.\\[.55cm]
+\textbf{Hiérarchie} & Garder parents, enfants, niveaux et appartenances.\\[.55cm]
+\textbf{Détails fins} & Une grille peut manquer un petit élément. Garder les primitives et les niveaux fins.
+\end{tabular}
+\vspace{.5cm}
+\begin{center}
+Comparer $4^3$, $8^3$ et $16^3$ : précision, mémoire et temps.
+\end{center}
+\source{Le vecteur est un résumé approché de la géométrie ; il ne décrit ni les attributs ni les identités de composantes.}
+\end{frame}
