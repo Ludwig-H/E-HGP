@@ -6,7 +6,7 @@ Cette page décrit le calcul effectué par `HGPClusterer.fit`, étape par étape
 
 Le nuage $X \subset \mathbb{R}^{3}$ de $n$ points est centré sur sa médiane, puis divisé par son plus grand écart interquartile (ou, pour une distribution dégénérée, par la plus grande étendue entre ses quantiles à 1 % et 99 %, puis de sa boîte englobante). Des points aberrants ne dégradent donc pas la précision numérique du reste du nuage. Un nuage dont un point s'écarte de la médiane de plus de $10^{8}$ fois cette échelle est refusé.
 
-Chaque point reçoit ensuite une perturbation gaussienne déterministe (graine fixe), d'amplitude relative $10^{-8}$. Elle lève les dégénérescences exactes (points dupliqués, grilles régulières, points cosphériques) : les ex æquo y sont départagés de façon arbitraire mais reproductible, et le calcul porte exactement sur les points perturbés. Le résultat est invariant par translation et par changement d'échelle du nuage.
+Chaque point reçoit ensuite une perturbation gaussienne déterministe (graine fixe), d'amplitude relative $10^{-8}$. Elle lève les dégénérescences exactes (points dupliqués, grilles régulières, points cosphériques) : les ex æquo y sont départagés de façon arbitraire mais reproductible. Le résultat est invariant par translation et par changement d'échelle du nuage.
 
 ## 2. Simplexes de Delaunay d'ordre $k$
 
@@ -27,7 +27,7 @@ Le calcul est itératif :
 
 Les triangulations sont calculées par Geogram (`PDEL`, parallèle). Le mode pondéré relève chaque barycentre en quatrième coordonnée $\sqrt{W - w_S}$, avec $W = \max_S w_S$.
 
-Des barycentres peuvent être exactement coplanaires, par exemple les milieux des côtés d'un quadrilatère, qui forment un parallélogramme. La triangulation régulière ne traite pas ces configurations. Chaque barycentre reçoit donc une perturbation déterministe, fonction des indices de son ensemble, d'amplitude relative $10^{-12}$. Elle est $10^{4}$ fois plus faible que celle des points : sur des nuages en position générale, elle ne modifie pas les ensembles obtenus. Sur des entrées exactement dégénérées (doublons, grilles, points coplanaires ou cosphériques), une petite fraction des ensembles, de l'ordre de $10^{-4}$, peut dépendre de la numérotation des points ; les étiquettes n'en sont pas affectées en pratique.
+Des barycentres peuvent être exactement coplanaires, par exemple les milieux des côtés d'un quadrilatère, qui forment un parallélogramme. La triangulation régulière ne traite pas ces configurations. Chaque barycentre reçoit donc une perturbation déterministe, fonction des indices de son ensemble, d'amplitude relative $10^{-12}$. Elle est $10^{4}$ fois plus faible que celle des points et ne modifie pas les ensembles obtenus sur des nuages ordinaires. Elle peut en revanche trancher autrement quelques configurations presque dégénérées : sur des entrées exactement dégénérées (doublons, grilles, points coplanaires ou cosphériques), jusqu'à environ $2 \cdot 10^{-3}$ des ensembles pour $K \le 5$ peuvent dépendre de la numérotation des points, et un ensemble isolé contenant un point très éloigné du nuage peut être retenu à tort. Les étiquettes n'en sont pas affectées en pratique.
 
 Au terme de $K-1$ itérations, on obtient les $K$-simplexes : les ensembles $\sigma$ de $K+1$ points tels que $V_{K+1}(\sigma) \neq \emptyset$. Ce sont des paires pour $K=1$, des triangles pour $K=2$ et des tétraèdres pour $K=3$.
 
