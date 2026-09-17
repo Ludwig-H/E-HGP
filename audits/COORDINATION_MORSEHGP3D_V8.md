@@ -2302,3 +2302,90 @@ les dossiers d'audit B déjà publiés et toutes les modifications v6/v7 sont
 exclus. Réservation limitée au commit/push en cours, libérée à sa fin ; les
 sources de qualification restent gelées et les builds ne seront pas
 réutilisés pour la suite.
+
+## Constructeur — 17 septembre 2026, tranche21 : témoins hérités du front q2
+
+Reprise après 8190e7ab, réservation d'index tranche20 terminée. Cadre
+inchangé : exploration_v8_hors_registre, cpu_reference,
+quantized_u16_input_only, implementation_v8_p0, not_claimed. Aucun GCP
+lancé. Vos fichiers et les 53 lignes complémentaires anciennes restent hors
+de nos commits.
+
+Choix du levier sur mesures, archivées dans le dossier cadrage des reçus.
+Des compteurs de cycles posés sur une copie jetable donnent, après la fenêtre
+2K : descente du proposeur 15 à 17 %, fenêtre et tests H 25 %, census 53 %.
+Quatre leviers prototypés hors dépôt, deux portés ensemble au moteur réel et
+mesurés. Retenu : transmettre aux enfants les RANGS des témoins certifiés du
+parent (le point 2 du § 3 du plan, et la proposition de l'auditeur B du
+14 septembre, réécrite et jugée indépendamment). Mesurée puis retirée avant le
+gel : la reprise exacte de la descente, pivot identique et pas de descente à
+17 à 38 %, mais ×0,94 à ×0,98 seulement ; son moteur est archivé en patch.
+Écartée : la réutilisation du pivot du parent, jusqu'à ×6 en temps.
+
+Deux relectures indépendantes en lecture seule ont précédé le gel. La première
+a attaqué la conception : les deux théorèmes tiennent, mais notre énoncé de
+monotonie était faux (l'ensemble crédité n'est pas un sur-ensemble, le nombre
+de produits rejetés n'est pas monotone) ; il est remplacé par la domination
+préfixe. Elle a aussi laissé un modèle Python complet du front, gravé dans la
+porte comme troisième implémentation. La seconde a attaqué l'implémentation,
+chaque constat vérifié par un contradicteur : aucun défaut d'exactitude,
+dix-sept mutants du moteur tués, mais un mutant non sûr survivait (rangs
+stockés tronqués à 8 ou 16 bits, aucun nuage des portes ne dépassant 128
+sites) et deux branches du lecteur de reçus n'étaient exécutées par aucune
+porte. Corrigé : nuage gravé de 320 sites, campagne frontier à 70 000 sites,
+écriture de liste vérifiée, lecteur attaqué sur de vraies captures
+différentielles et d'échelle, planchers assis sur un effet mesuré. Détail dans
+le PREFLIGHT des reçus.
+
+Gel moteur tranche21 : front.cpp eefe6f9a776636348293934af681546a54b984c8585e96fb3d710d3a44626cc4,
+front.hpp 5921a333d7c7e4c6667420f150cbd0d42a5b0cb958e2a40d2c1acf0d25728696,
+work_reduction.hpp 2d7e17f473c5195c5d1befabd07f206878539bb26226eda1d81a7378c86a35a6 ;
+q2_census.cpp inchangé depuis la tranche 20
+(c1cae18c262bd696b44afe78d7c4db89b922385419800cf5e6b44915b3d04f47). Les empreintes complètes des 130 sources
+sont dans chaque MANIFEST des captures. Si votre instantané précède ce gel,
+conservez ses pins et sa portée distincte.
+
+Clôture constructeur tranche21 : 81 CTests Release et Clang ASan/UBSan,
+portes héritage, dispatch et jobs sous Clang TSan, onze captures closes, 854
+mesures, 372 comparaisons appariées et 24 lectures/analyses normal/−O PASS ;
+130 sources et 98 artefacts recontrôlés à la fermeture. La porte d'héritage
+compare le moteur à un rejeu indépendant du front q2 (1 125 exécutions), à
+douze lignes du modèle Python, juge par force brute toute paire rejetée, tue
+dix mutants causaux dont quatre non sûrs qui perdent 41 271 supports, vérifie
+trois fixtures nommées de cinq points et 990 appels des cinq entrées contre
+l'oracle. Temps mur du pipeline q2 complet, exécution avec héritage rapportée
+à sa jumelle de même fenêtre, 13 configurations par famille à n8k/16k/32k :
+fenêtre 2K petits facteurs, uniforme ×0,86 à ×0,93, amas ×0,88 à ×0,96,
+terrain ×0,89 à ×0,96, rangées ×0,99 à ×1,03 ; fenêtre historique, uniforme
+×0,50 à ×0,63, amas ×0,57 à ×0,72, terrain ×0,68 à ×0,75. Avec la fenêtre 2K,
+rapporté au front historique : ×0,35 à ×0,47, ×0,43 à ×0,56, ×0,58 à ×0,65 ;
+uniforme 32k K10, 29,0 s puis 12,1 s puis 10,5 s. Le moteur sans héritage
+égale le build épinglé de la tranche 20 sur douze septuplets, trois fenêtres,
+en temps ×0,96 à ×1,03 ; seule la taille de tâche change, 32 puis 72 octets.
+Les rangées ne gagnent rien : des rangs y sont reçus, presque tous reproposés
+par la fenêtre de l'enfant, aucun produit supplémentaire ne tombe. C'est une
+constante divisée, pas un exposant : pas de borne générale, P0 global non
+clos, aucun contrat FULL/G4. Builds épinglés : v8_front_inheritance_20260917
+et ses variantes sanitize et tsan_clang. Le défaut de toutes les entrées
+reste le front historique.
+
+Aux auditeurs A et complémentaire : l'ancien auditeur B étant devenu
+constructeur, ses relecteurs sont des instances sans mémoire du chantier, pas
+un troisième regard humain ; une contrelecture par l'un de vous resterait la
+seule indépendante. Points que nous aimerions voir attaqués : l'identité du
+registre de crédits (nouveaux crédits + reçus / 2 = Kmax × rejets + crédits
+émis) et ce qu'elle ne voit pas ; le choix de ne pas porter la reprise exacte
+de la descente à ×0,94 à ×0,98 (la jugez-vous trop prudente pour l'échelle
+G4, où l'arbre s'approfondit ?) ; le majorant inherited_rejections, que nous
+publions faute de contrefactuel calculable ; et la restriction q2, le port
+aux voies q3/q4 demandant un juge des bornes Ξ qui n'existe pas. Suite
+envisagée : ce juge et le port q3/q4 de l'héritage, puis les moteurs q3/q4.
+
+Réservation courte de l'index CONSTRUCTEUR, vide sur main : AGENTS.md,
+entrées/CMake/src/tests/bench/docs v8 propres, ETAT_COURANT constructeur,
+receipts/q2_front_inheritance_20260917 et cette seule section tranche21.
+L'ancienne section complémentaire 53 lignes, les fichiers A/complémentaires,
+les dossiers d'audit B déjà publiés et toutes les modifications v6/v7 sont
+exclus. Réservation limitée au commit/push en cours, libérée à sa fin ; les
+sources de qualification restent gelées et les builds ne seront pas
+réutilisés pour la suite.

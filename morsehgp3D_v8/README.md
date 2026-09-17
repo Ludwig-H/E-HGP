@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — fenêtre de propositions élargie du front q2
+# Morse HGP 3D v8 — témoins hérités du front q2
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -35,6 +35,36 @@ catalogue q3/q4 ni une tour FULL.
 Les mesures historiques citées restent v7.
 
 ## État exécutable
+
+La vingt-et-unième tranche transmet aux enfants les
+[témoins certifiés du front](docs/P0_TEMOINS_HERITES_Q2.md) : un produit non
+rejeté passe à ses deux enfants les **rangs** de ses témoins certifiés (au
+plus Kmax − 1, portés par valeur dans la tâche) ; l'enfant part de ce compte,
+saute sans test tout rang déjà reçu et reste rejeté par Kmax rangs distincts.
+Option explicite `WspdFrontProposals::inherit_witnesses`, voie q2 seule,
+transmise au front mono, aux jobs, au dispatch et aux cinq entrées q2 ; **le
+moteur sans héritage reproduit la tranche 20 compteur pour compteur**, pour
+les trois fenêtres (capture différentielle contre son build épinglé).
+
+Qualification propre close le 17 septembre 2026 : 81 CTests Release et
+Clang ASan/UBSan, portes héritage, dispatch et jobs sous Clang TSan, rejeu
+indépendant du front q2 (1 125 exécutions), modèle Python indépendant, oracle
+de sûreté par force brute, dix mutants causaux tués dont quatre non sûrs,
+990 appels des cinq entrées contre l'oracle, 854 mesures et lectures
+normal/−O identiques. Temps mur du pipeline q2 complet, exécution avec
+héritage rapportée à sa jumelle de même fenêtre, n8k/16k/32k, K5/10,
+s8/10/12, un et quatre workers : fenêtre 2K petits facteurs, uniforme ×0,86
+à ×0,93, amas ×0,88 à ×0,96, terrain ×0,89 à ×0,96, **rangées ×0,99 à ×1,03,
+aucun gain** ; fenêtre historique, uniforme ×0,50 à ×0,63, amas ×0,57 à
+×0,72, terrain ×0,68 à ×0,75. Avec la fenêtre 2K, le temps q2 rapporté au
+front historique devient ×0,35 à ×0,47 (uniforme), ×0,43 à ×0,56 (amas),
+×0,58 à ×0,65 (terrain). Supports identiques. Une reprise exacte de la
+descente du proposeur a été mesurée (×0,94 à ×0,98) et non portée. Lire les
+[reçus](receipts/q2_front_inheritance_20260917/README.md). La croissance du
+travail restant est inchangée : ni borne sous-quadratique, ni P0 global, ni
+contrat FULL/G4. GCP non utilisé.
+
+## Vingtième tranche publiée à 8190e7ab — historique
 
 La vingtième tranche porte au front la [surproposition de témoins](docs/P0_SURPROPOSITION_TEMOINS_Q2.md) :
 le seuil de rejet reste Kmax, mais un produit que la fenêtre historique de

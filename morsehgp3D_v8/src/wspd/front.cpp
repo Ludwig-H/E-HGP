@@ -9,6 +9,7 @@
 #include <limits>
 #include <mutex>
 #include <stdexcept>
+#include <type_traits>
 #include <vector>
 
 namespace mhgp8 {
@@ -45,6 +46,17 @@ bool contains(Range range, std::size_t rank) {
   return range.first <= rank && rank < range.last;
 }
 
+// What a search leaves to the two children of its product. Carried BY VALUE in
+// the task and never in the front object: the work of a product depends on its
+// task alone, whatever the traversal order, the job plan or the worker.
+struct WitnessList {
+  // Ranks of the certified q2 witnesses: at most Kmax-1 <= 9, all distinct.
+  std::array<std::uint32_t, 9> ranks{};
+  std::uint8_t count{};
+};
+// wspd_proposals_fit admits at most 2^32 sites: a stored rank is an exact 32-bit copy.
+static_assert(std::is_same_v<decltype(WitnessList::ranks)::value_type, std::uint32_t>);
+
 struct Task {
   std::size_t a{};
   std::size_t b{};
@@ -55,6 +67,9 @@ struct Task {
   std::uint32_t dfs_pending{};
   std::uint8_t mask{};
   bool terminal{};
+  // Last field: the six-value initializers above it keep their meaning, and a
+  // task built without a list has an empty list, never a shifted field.
+  WitnessList witnesses{};
 };
 
 class Front {
@@ -66,6 +81,8 @@ class Front {
         points_(index.cloud().points()), kmax_(kmax), separation_(separation),
         mode_(mode), consumer_(consumer), proposals_(proposals) {
     const auto n = points_.size();
+    if (!wspd_proposals_fit(proposals_, order_.size()))
+      throw std::length_error("mhgp8 WSPD inherited witness ranks are stored on 32 bits");
     // Divide before multiplying, so even a representable choose(n,2)
     // does not require the larger ordered-pair count to fit u64.
     result_.total_unordered_pairs = n % 2 == 0 ? product(n / 2, n - 1)
@@ -94,6 +111,8 @@ class Front {
     const auto& a = nodes_[task.a];
     const auto& b = nodes_[task.b];
     if (task.a == task.b) {
+      // Every ancestor of a diagonal product is diagonal and searched nothing.
+      if (task.witnesses.count != 0) throw std::logic_error("mhgp8 WSPD diagonal product received witnesses");
       if (a.left == Q2SpatialNode::absent) {
         counter_add(result_.work.diagonal_leaves);
         return;
@@ -109,7 +128,10 @@ class Front {
       return;
     }
     auto mask = task.mask;
-    if (mode_ == WspdFrontMode::MidpointSamples) mask = filter(a, b, mask);
+    // A private copy: the search reads the received list and writes the list
+    // of THIS product into it. No member of the front ever holds a list.
+    WitnessList witnesses = task.witnesses;
+    if (mode_ == WspdFrontMode::MidpointSamples) mask = filter(a, b, mask, witnesses);
     const auto mass = product(a.range.size(), b.range.size());
     for (unsigned lane = 0; lane < 3; ++lane) {
       const auto bit = static_cast<std::uint8_t>(1U << lane);
@@ -126,6 +148,10 @@ class Front {
     if (static_cast<i128>(gap2(a.box, b.box)) >=
         static_cast<i128>(separation_) * separation_ * std::max(da, db)) {
       account_emit(task.a, task.b, mask, mass);
+      // Final q2 credits, received and new, of a searched product that is
+      // emitted. With the rejections and the splits they close the credit
+      // ledger of the inheritance; the list is empty unless inherit_witnesses.
+      if (witnesses.count != 0) counter_add(result_.work.emitted_witness_credits, witnesses.count);
       emit(Task{task.a, task.b, task.depth, task.dfs_pending, mask, true});
       return;
     }
@@ -136,10 +162,11 @@ class Front {
     if (split.left == Q2SpatialNode::absent)
       throw std::logic_error("mhgp8 WSPD distinct singleton boxes must be separated");
     result_.work.max_stack_size = std::max(result_.work.max_stack_size, static_cast<u64>(task.dfs_pending) + 2);
+    // Both children receive the same list, by value.
     push(Task{split_a ? split.right : task.a, split_a ? task.b : split.right,
-              task.depth + 1, task.dfs_pending, mask, false});
+              task.depth + 1, task.dfs_pending, mask, false, witnesses});
     push(Task{split_a ? split.left : task.a, split_a ? task.b : split.left,
-              task.depth + 1, task.dfs_pending + 1, mask, false});
+              task.depth + 1, task.dfs_pending + 1, mask, false, witnesses});
   }
 
   [[nodiscard]] WspdFrontResult run(Task initial) {
@@ -184,14 +211,20 @@ class Front {
     return result;  // 16 times squared distance; <=48*65535^2 fits i64.
   }
 
-  std::uint8_t filter(const Q2SpatialNode& a, const Q2SpatialNode& b, std::uint8_t mask) {
+  std::uint8_t filter(const Q2SpatialNode& a, const Q2SpatialNode& b, std::uint8_t mask, WitnessList& witnesses) {
     unsigned needed = kmax_;
     for (unsigned lane = 0; lane < 3; ++lane) {
       if ((mask & (1U << lane)) != 0) needed = std::min(needed, thresholds_[lane]);
     }
     // A strict universal witness cannot belong to A or B: choose that
     // endpoint and H is zero. If too few exterior sites exist, skip search.
-    if (points_.size() - a.range.size() - b.range.size() < needed) return mask;
+    if (points_.size() - a.range.size() - b.range.size() < needed) {
+      // Inheritance runs the q2 lane alone: `needed` is Kmax for every product
+      // and the exterior population grows strictly towards the children. A
+      // skipped search therefore has only skipped or diagonal ancestors.
+      if (witnesses.count != 0) throw std::logic_error("mhgp8 WSPD skipped search received witnesses");
+      return mask;
+    }
     counter_add(result_.work.witness_searches);
     std::array<i64, 3> center4{};
     for (std::size_t axis = 0; axis < 3; ++axis) {
@@ -213,10 +246,23 @@ class Front {
     const auto pivot = nodes_[node].range.first;
     const auto window = wspd_proposal_window(pivot, count, order_.size());
     std::array<unsigned, 3> credits{};
+    // The received ranks are strict universal witnesses of this product too,
+    // outside A and B (h_minimum is an exact minimum and the boxes shrink).
+    // They count once each and are not credits of this run. validate_front
+    // guarantees the q2 lane alone.
+    const unsigned inherited = proposals_.inherit_witnesses ? witnesses.count : 0U;
+    if (inherited != 0) {
+      if (inherited >= thresholds_[0]) throw std::logic_error("mhgp8 WSPD rejected product passed its witnesses on");
+      credits[0] = inherited;
+      counter_add(result_.work.inherited_credits, inherited);
+    }
+    unsigned duplicates = 0;  // Received ranks proposed again by this search.
     // ONE inlined loop body serves three rank intervals: the historical window,
     // then, for an eligible surviving product, the left and the right complement
     // of the wider window around the same pivot. The inner loop is the historical
-    // loop itself, so the default path pays nothing for the option; credits persist.
+    // loop itself: the widened window costs the default path nothing; credits persist.
+    // The received list does cost it something, whatever the option: a task is 72
+    // bytes instead of 32 and is copied on every push and pop.
     bool extension = false;
     WspdProposalWindow wider{};
     for (unsigned phase = 0; phase < 3 && mask != 0; ++phase) {
@@ -251,6 +297,19 @@ class Front {
           if (extension) counter_add(result_.work.extended_proposals_in_factors);
           continue;
         }
+        if (inherited != 0) {
+          // The three rank intervals of one search are disjoint: only a
+          // RECEIVED rank can come back. It is proposed, never tested again.
+          bool duplicate = false;
+          for (unsigned index = 0; index < inherited; ++index)
+            duplicate = duplicate || witnesses.ranks[index] == rank;
+          if (duplicate) {
+            ++duplicates;
+            counter_add(result_.work.inherited_duplicates);
+            if (extension) counter_add(result_.work.extended_inherited_duplicates);
+            continue;
+          }
+        }
         const auto z = singleton_box(points_[order_[rank]]);
         counter_add(result_.work.h_bound_tests);
         const auto h = spindle_detail::h_minimum(a.box, b.box, z);
@@ -266,7 +325,15 @@ class Front {
           if ((mask & bit) != 0 && (lane == 0 || (lane == 1 ? 3 : 2) * h2 > xi)) {
             counter_add(result_.work.witness_lane_credits);
             if (extension) counter_add(result_.work.extended_credits);
-            if (++credits[lane] == thresholds_[lane]) mask &= static_cast<std::uint8_t>(~bit);
+            if (++credits[lane] == thresholds_[lane]) {
+              mask &= static_cast<std::uint8_t>(~bit);
+            } else if (proposals_.inherit_witnesses && lane == 0) {
+              // q2 lane alone, credits[0] < Kmax <= 10: index <= 8. Checked, not assumed: an
+              // intra-object overflow is invisible to every sanitizer build.
+              if (credits[0] - 1 >= witnesses.ranks.size())
+                throw std::logic_error("mhgp8 WSPD witness list overflow");
+              witnesses.ranks[credits[0] - 1] = static_cast<std::uint32_t>(rank);
+            }
           }
         }
       }
@@ -276,6 +343,16 @@ class Front {
     // validate_front guarantees the q2 lane alone for a widened window: an empty
     // mask after an extension means that the Kmax-th q2 credit came from an extra rank.
     if (extension && mask == 0) counter_add(result_.work.extended_rejections);
+    if (proposals_.inherit_witnesses) {
+      if (mask == 0) {
+        // The ranks that this search saw and that are certified for this
+        // product: its new credits and the received ranks it proposed again. The
+        // same window alone reaches Kmax credits whenever they already do.
+        if (credits[0] - inherited + duplicates < thresholds_[0]) counter_add(result_.work.inherited_rejections);
+      } else {
+        witnesses.count = static_cast<std::uint8_t>(credits[0]);
+      }
+    }
     return mask;
   }
 
@@ -328,6 +405,12 @@ void validate_front(unsigned kmax, unsigned separation_s, WspdFrontMode mode, st
     throw std::invalid_argument("mhgp8 WSPD Pure front proposes no witness: window factor must be 1");
   if (proposals.window_factor != 1 && (requested_lane_mask & available) != 1)
     throw std::invalid_argument("mhgp8 WSPD widened proposals are qualified for the q2 lane alone: mask must be 1");
+  if (proposals.inherit_witnesses) {
+    if (mode == WspdFrontMode::Pure)
+      throw std::invalid_argument("mhgp8 WSPD Pure front searches no witness: inheritance must be off");
+    if ((requested_lane_mask & available) != 1)
+      throw std::invalid_argument("mhgp8 WSPD inherited witnesses are qualified for the q2 lane alone: mask must be 1");
+  }
 }
 
 }  // namespace
@@ -435,6 +518,7 @@ struct WspdFrontDispatch::Impl {
   // only a donation heuristic; a stale read cannot remove a product.
   std::atomic<std::size_t> demand;
   std::atomic<std::size_t> waiting{0};
+  std::atomic<u64> donated_ranks{0};  // Observation only; see donated_witness_ranks().
 
   Impl(std::shared_ptr<const WspdFrontJobs::Impl> owner, std::size_t capacity,
        std::size_t donation_interval, std::size_t worker_count)
@@ -557,6 +641,7 @@ struct WspdFrontDispatch::Impl {
     // capacity. Task assignment cannot throw or transfer a borrowed view.
     const auto tail = queued >= queue.size() - head ? queued - (queue.size() - head) : head + queued;
     queue[tail] = task;
+    donated_ranks.fetch_add(task.witnesses.count, std::memory_order_relaxed);
     ++queued;
     work.max_queue_size = std::max(work.max_queue_size, static_cast<u64>(queued));
     lock.unlock();
@@ -652,6 +737,9 @@ std::size_t WspdFrontDispatch::queue_capacity() const noexcept { return implemen
 std::size_t WspdFrontDispatch::worker_count() const noexcept { return implementation_->workers; }
 std::size_t WspdFrontDispatch::waiting_workers() const noexcept {
   return implementation_->waiting.load(std::memory_order_relaxed);
+}
+u64 WspdFrontDispatch::donated_witness_ranks() const noexcept {
+  return implementation_->donated_ranks.load(std::memory_order_relaxed);
 }
 
 std::size_t WspdFrontDispatch::retained_bytes() const {

@@ -1,0 +1,45 @@
+--------------------------------------------------------------------------------
+Profile data file '/workspaces/E-HGP/build/v8_profile_dev_20260917/cg_uniform.out' (creator: callgrind-3.22.0)
+--------------------------------------------------------------------------------
+I1 cache: 
+D1 cache: 
+LL cache: 
+Timerange: Basic block 0 - 2778132127
+Trigger: Program termination
+Profiled target:  ./mhgp8_wspd_q2_proposals_probe 8000 uniform 10 8 3 1 16 64 2 16 (PID 482940, part 1)
+Events recorded:  Ir
+Events shown:     Ir
+Event sort order: Ir
+Thresholds:       99
+Include dirs:     
+User annotated:   
+Auto-annotation:  on
+
+--------------------------------------------------------------------------------
+Ir                      
+--------------------------------------------------------------------------------
+20,379,391,142 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                       file:function
+--------------------------------------------------------------------------------
+20,379,391,142 (100.0%)  ???:0x000000000001f540 [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+20,377,410,630 (99.99%)  ???:(below main)
+20,377,410,618 (99.99%)  ./csu/../csu/libc-start.c:__libc_start_main@@GLIBC_2.34 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+20,377,410,444 (99.99%)  ./csu/../sysdeps/nptl/libc_start_call_main.h:(below main) [/usr/lib/x86_64-linux-gnu/libc.so.6]
+20,377,399,480 (99.99%)  /workspaces/E-HGP/morsehgp3D_v8/bench/wspd_q2_proposals_probe.cpp:main
+20,377,398,775 (99.99%)  /workspaces/E-HGP/morsehgp3D_v8/bench/wspd_q2_proposals_probe.cpp:(anonymous namespace)::run((anonymous namespace)::Options const&)
+20,356,019,475 (99.89%)  /workspaces/E-HGP/morsehgp3D_v8/bench/wspd_q2_proposals_probe.cpp:(anonymous namespace)::run_pipeline((anonymous namespace)::Options const&, std::shared_ptr<mhgp8::Q2CensusIndex const> const&, std::span<std::function<void (mhgp8::Q2Sup
+20,356,019,379 (99.89%)  /workspaces/E-HGP/morsehgp3D_v8/src/pipeline/q2_census.cpp:mhgp8::run_wspd_q2_census_parallel(std::shared_ptr<mhgp8::Q2CensusIndex const>, unsigned int, unsigned int, mhgp8::WspdFrontMode, mhgp8::Q2CensusMode, std::span<std::function<v
+20,356,003,276 (99.89%)  /workspaces/E-HGP/morsehgp3D_v8/src/pipeline/../parallel/joined_workers.hpp:mhgp8::run_wspd_q2_census_parallel(std::shared_ptr<mhgp8::Q2CensusIndex const>, unsigned int, unsigned int, mhgp8::WspdFrontMode, mhgp8::Q2CensusMode, std::spa
+20,356,003,123 (99.89%)  /workspaces/E-HGP/morsehgp3D_v8/src/pipeline/q2_census.cpp:mhgp8::run_wspd_q2_census_parallel(std::shared_ptr<mhgp8::Q2CensusIndex const>, unsigned int, unsigned int, mhgp8::WspdFrontMode, mhgp8::Q2CensusMode, std::span<std::function<v
+20,355,996,228 (99.89%)  /workspaces/E-HGP/morsehgp3D_v8/src/wspd/front.cpp:mhgp8::WspdFrontJobs::run_job(unsigned long, std::function<void (mhgp8::WspdRectangle const&)> const&) const
+20,314,148,798 (99.68%)  /workspaces/E-HGP/morsehgp3D_v8/src/wspd/front.cpp:void mhgp8::(anonymous namespace)::Front::expand<mhgp8::(anonymous namespace)::Front::run(mhgp8::(anonymous namespace)::Task)::{lambda(mhgp8::(anonymous namespace)::Task const&)#1}, mh
+10,391,491,933 (50.99%)  /workspaces/E-HGP/morsehgp3D_v8/src/wspd/front.cpp:mhgp8::(anonymous namespace)::Front::filter(mhgp8::Q2SpatialNode const&, mhgp8::Q2SpatialNode const&, unsigned char)
+ 9,353,361,977 (45.90%)  /workspaces/E-HGP/morsehgp3D_v8/src/pipeline/q2_census.cpp:mhgp8::Q2CensusEngine::collect(unsigned long, mhgp8::Q2BallKey const&)'2
+ 9,334,754,151 (45.80%)  /usr/include/c++/13/bits/std_function.h:void mhgp8::(anonymous namespace)::Front::expand<mhgp8::(anonymous namespace)::Front::run(mhgp8::(anonymous namespace)::Task)::{lambda(mhgp8::(anonymous namespace)::Task const&)#1}, mhgp8::(anony
+ 9,331,231,856 (45.79%)  /usr/include/c++/13/bits/std_function.h:std::_Function_handler<void (mhgp8::WspdRectangle const&), mhgp8::run_wspd_q2_census_parallel(std::shared_ptr<mhgp8::Q2CensusIndex const>, unsigned int, unsigned int, mhgp8::WspdFrontMode, mhgp8:
+ 9,327,005,102 (45.77%)  /workspaces/E-HGP/morsehgp3D_v8/src/pipeline/q2_census.cpp:std::_Function_handler<void (mhgp8::WspdRectangle const&), mhgp8::run_wspd_q2_census_parallel(std::shared_ptr<mhgp8::Q2CensusIndex const>, unsigned int, unsigned int, mhgp8::Ws
+ 9,309,393,627 (45.68%)  /workspaces/E-HGP/morsehgp3D_v8/src/pipeline/q2_census.cpp:mhgp8::(anonymous namespace)::consume_wspd_rectangle(mhgp8::Q2CensusEngine&, mhgp8::WspdQ2CensusResult&, std::span<mhgp8::Q2SpatialNode const, 18446744073709551615ul>, std::spa
+ 9,226,699,034 (45.27%)  /workspaces/E-HGP/morsehgp3D_v8/src/pipeline/q2_census.cpp:mhgp8::(anonymous namespace)::consume_wspd_rectangle(mhgp8::Q2CensusEngine&, mhgp8::WspdQ2CensusResult&, std::span<mhgp8::Q2SpatialNode const, 18446744073709551615ul>, std::spa
+ 9,157,166,038 (44.93%)  /workspaces/E-HGP/morsehgp3D_v8/src/pipeline/q2_census.cpp:void mhgp8::Q2CensusEngine::shared_task<true, true, false>(unsigned long, unsigned long, unsigned int, unsigned long, unsigned long, mhgp8::Q2CensusEngine::OrderContext const*,

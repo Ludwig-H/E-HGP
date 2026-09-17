@@ -41,7 +41,7 @@ static_assert(std::is_same_v<decltype(std::declval<const WspdFrontJobs&>().index
 static_assert(std::is_same_v<decltype(std::declval<const WspdFrontJobs&>().prefix_result()),
                              const WspdFrontResult&>);
 
-constexpr std::array<u64 WspdFrontWork::*, 22> additive_fields{
+constexpr std::array<u64 WspdFrontWork::*, 27> additive_fields{
     &WspdFrontWork::product_visits, &WspdFrontWork::diagonal_splits,
     &WspdFrontWork::diagonal_leaves, &WspdFrontWork::disjoint_splits,
     &WspdFrontWork::separation_tests, &WspdFrontWork::witness_searches,
@@ -52,7 +52,14 @@ constexpr std::array<u64 WspdFrontWork::*, 22> additive_fields{
     &WspdFrontWork::emitted_rectangles, &WspdFrontWork::emitted_factor_sites,
     &WspdFrontWork::leaf_pair_rectangles, &WspdFrontWork::extended_products,
     &WspdFrontWork::extended_proposals, &WspdFrontWork::extended_proposals_in_factors,
-    &WspdFrontWork::extended_credits, &WspdFrontWork::extended_rejections};
+    &WspdFrontWork::extended_credits, &WspdFrontWork::extended_rejections,
+    &WspdFrontWork::inherited_credits, &WspdFrontWork::inherited_duplicates,
+    &WspdFrontWork::extended_inherited_duplicates, &WspdFrontWork::inherited_rejections,
+    &WspdFrontWork::emitted_witness_credits};
+// A std::array with fewer initializers than its size compiles and holds null
+// member pointers: every entry must be a real field.
+static_assert(std::none_of(additive_fields.begin(), additive_fields.end(),
+                           [](u64 WspdFrontWork::* field) { return field == nullptr; }));
 constexpr std::array<u64 WspdFrontWork::*, 3> maximum_fields{
     &WspdFrontWork::max_factor_size, &WspdFrontWork::max_stack_size,
     &WspdFrontWork::max_product_depth};
@@ -63,7 +70,7 @@ constexpr std::array<std::array<u64, 3> WspdFrontWork::*, 3> lane_fields{
     &WspdFrontWork::lane_rectangles};
 // The manual tables above drive both the independent sum and the mutants;
 // a field added to the structure but not to a table must fail to compile.
-static_assert(sizeof(WspdFrontWork) == (22 + 3 + 2 * 5 + 3 * 3) * sizeof(u64));
+static_assert(sizeof(WspdFrontWork) == (27 + 3 + 2 * 5 + 3 * 3) * sizeof(u64));
 
 bool same_work(const WspdFrontWork& a, const WspdFrontWork& b) {
   for (const auto field : additive_fields) if (a.*field != b.*field) return false;
@@ -115,6 +122,10 @@ struct Gate {
   u64 widened_plans{};
   u64 extended_products{};
   u64 limit_bites{};
+  // Inherited witnesses through preparation, run_job and the sum.
+  u64 inheriting_plans{};
+  WspdFrontWork inheriting_work{};  // Sum over the mono runs with inherit_witnesses.
+  u64 witness_carrying_jobs{};      // Jobs whose ROOT task received at least one rank.
 
   void require(bool condition, const char* message) {
     ++checks;
@@ -214,6 +225,7 @@ Capture mono(Gate& gate, const Q2CensusIndex& index, const Oracle& oracle,
   Capture capture;
   capture.result = mhgp8::run_wspd_front(index, kmax, s, mode, collector(capture), requested, proposals);
   gate.extended_products += capture.result.work.extended_products;
+  if (proposals.inherit_witnesses) add_work(gate.inheriting_work, capture.result.work);
   const auto active = active_mask(kmax, requested);
   gate.require(capture.result.total_unordered_pairs == oracle.n * (oracle.n - 1) / 2 &&
                    capture.result.active_lane_mask == active,
@@ -234,8 +246,9 @@ Capture mono(Gate& gate, const Q2CensusIndex& index, const Oracle& oracle,
   return capture;
 }
 
+// `inheriting_kmax` is Kmax when the plan runs inherit_witnesses, else zero.
 void compare_jobs(Gate& gate, const WspdFrontJobs& plan, const Capture& reference,
-                  std::size_t target) {
+                  std::size_t target, unsigned inheriting_kmax = 0) {
   const auto prefix = plan.prefix_result();
   const auto bytes = plan.retained_bytes();
   const auto job_count = plan.job_count();
@@ -296,6 +309,20 @@ void compare_jobs(Gate& gate, const WspdFrontJobs& plan, const Capture& referenc
         ++gate.terminal_jobs;
       } else {
         ++gate.pending_jobs;
+        if (inheriting_kmax != 0) {
+          // Credit ledger of ONE job. Every searched product ends rejected with
+          // Kmax credits, emitted with its final credits, or split, its final
+          // credits being received once by each child INSIDE the job. With W the
+          // new credits, I the received ones, R the rejections and E the emitted
+          // credits: W + I = Kmax*R + E + (I - I_root)/2, where I_root is what
+          // the ROOT task of the job received from the preparation prefix.
+          const auto& w = part.work;
+          const u64 closed = 2 * (u64{inheriting_kmax} * w.fully_rejected_products + w.emitted_witness_credits);
+          const u64 opened = 2 * w.witness_lane_credits + w.inherited_credits;
+          gate.require(closed >= opened && closed - opened < inheriting_kmax,
+                       "job credit ledger does not leave a received list of at most Kmax-1 ranks");
+          gate.witness_carrying_jobs += static_cast<u64>(closed != opened);
+        }
       }
       add_work(capture.result.work, part.work);
       ++gate.job_runs;
@@ -359,6 +386,29 @@ std::vector<std::vector<Point3>> fixtures() {
     }
     result.push_back(random);
   }
+  // Bridged cubes: two cubes of side 6000 whose product is NOT separated at
+  // s<=12 (diagonal 10392, gap 48000), three strict universal witnesses of that
+  // product halfway, and eight far sites that make the search possible at
+  // Kmax=10 without ever being creditable. At Kmax 5 and 10 the product
+  // survives with three credits and is split: the root tasks of the jobs cut
+  // inside its subtree carry a non-empty received list.
+  std::vector<Point3> bridged;
+  for (unsigned corner = 0; corner < 8; ++corner) {
+    const auto x = static_cast<std::uint16_t>((corner & 1U) * 6000U);
+    const auto y = static_cast<std::uint16_t>(((corner >> 1U) & 1U) * 6000U);
+    const auto z = static_cast<std::uint16_t>(((corner >> 2U) & 1U) * 6000U);
+    bridged.push_back({x, y, z});
+    bridged.push_back({static_cast<std::uint16_t>(x + 54000U), y, z});
+  }
+  // x > 30000: the index puts the three witnesses with the second cube, then
+  // splits them from it; they are never inside a factor of the cube product.
+  bridged.push_back({30100, 3000, 3000});
+  bridged.push_back({30110, 3010, 2990});
+  bridged.push_back({30120, 2990, 3010});
+  for (unsigned i = 0; i < 8; ++i) {
+    bridged.push_back({static_cast<std::uint16_t>(7000U * i + 500U), 65000, static_cast<std::uint16_t>(100U * i)});
+  }
+  result.push_back(bridged);
   return result;
 }
 
@@ -401,6 +451,28 @@ void corpus(Gate& gate) {
                 const auto plan = mhgp8::make_wspd_front_jobs(index, kmax, s, mode, target, mask, proposals);
                 compare_jobs(gate, *plan, widened, target);
                 ++gate.widened_plans;
+              }
+            }
+            // Inherited witnesses: the list travels in the task, through the
+            // FIFO preparation, the stored jobs, run_job and the sum, for every
+            // cut and every replay order. Rectangles are judged by the oracle in
+            // mono(): a rank counted twice would reject a pair below its depth.
+            const auto max_limit = std::numeric_limits<std::size_t>::max();
+            for (const auto proposals : {mhgp8::WspdFrontProposals{1, max_limit, true},
+                                         mhgp8::WspdFrontProposals{2, max_limit, true},
+                                         mhgp8::WspdFrontProposals{4, 2, true}}) {
+              const auto stateful = mono(gate, *index, oracle, kmax, s, mode, mask, proposals);
+              // The residual cover with inheritance is included in the reference one.
+              gate.require(std::includes(reference.rectangles.begin(), reference.rectangles.end(),
+                                         stateful.rectangles.begin(), stateful.rectangles.end()),
+                           "inherited witnesses emitted a rectangle that the reference front rejects");
+              // Cuts at 31 and 63 jobs fall inside the searched subtrees of the
+              // bridged cubes: the root tasks of those jobs carry received ranks.
+              for (const auto target : {std::size_t{1}, std::size_t{3}, std::size_t{13}, std::size_t{31},
+                                        std::size_t{63}, std::size_t{4096}}) {
+                const auto plan = mhgp8::make_wspd_front_jobs(index, kmax, s, mode, target, mask, proposals);
+                compare_jobs(gate, *plan, stateful, target, kmax);
+                ++gate.inheriting_plans;
               }
             }
           }
@@ -560,7 +632,8 @@ int main(int argc, char** argv) {
     corpus(gate);
     ownership_and_callbacks(gate);
     rejects_and_models(gate);
-    gate.require(gate.clouds == 11 && gate.mono_runs > 1000 && gate.plans > 5000 &&
+    const auto& inheriting = gate.inheriting_work;
+    const bool floors = gate.clouds == 12 && gate.mono_runs > 1000 && gate.plans > 5000 &&
                      gate.ordered_replays == 3 * gate.plans && gate.job_runs > 10000 &&
                      gate.oracle_point_tests > 10000 && gate.zero_job_plans > 0 &&
                      gate.all_terminal_plans > 0 && gate.terminal_jobs > 0 && gate.pending_jobs > 0 &&
@@ -568,9 +641,23 @@ int main(int argc, char** argv) {
                      gate.sparse_masks > 0 && gate.rejected_lane_pairs > 0 && gate.residual_lane_pairs > 0 &&
                      gate.partial_lane_rectangles > 0 && gate.nonsingleton_rectangles > 0 &&
                      gate.reentrant_runs == 2 && gate.callback_failures == 2 && gate.invalid_inputs >= 16 &&
-                     gate.model_mutants == 50 && gate.widened_plans > 500 && gate.extended_products > 0 &&
-                     gate.limit_bites > 0,
-                 "front-job gate lost a declared non-vacuity floor");
+                     gate.model_mutants == 55 && gate.widened_plans > 500 && gate.extended_products > 0 &&
+                     gate.limit_bites > 0 && gate.inheriting_plans > 1000 && inheriting.inherited_credits > 0 &&
+                     inheriting.inherited_duplicates > 0 && inheriting.extended_inherited_duplicates > 0 &&
+                     inheriting.inherited_rejections > 0 && inheriting.emitted_witness_credits > 0 &&
+                     gate.witness_carrying_jobs > 0;
+    // A lost floor names its counters: the message alone would not say which.
+    if (!floors) {
+      std::cerr << "mhgp8_wspd_front_jobs_gate floors: inheriting_plans=" << gate.inheriting_plans
+                << " inherited=" << inheriting.inherited_credits
+                << " duplicates=" << inheriting.inherited_duplicates
+                << " extended_duplicates=" << inheriting.extended_inherited_duplicates
+                << " inherited_rejections=" << inheriting.inherited_rejections
+                << " emitted_credits=" << inheriting.emitted_witness_credits
+                << " witness_jobs=" << gate.witness_carrying_jobs
+                << " model_mutants=" << gate.model_mutants << " widened_plans=" << gate.widened_plans << '\n';
+    }
+    gate.require(floors, "front-job gate lost a declared non-vacuity floor");
     std::cout << "mhgp8_wspd_front_jobs_gate passed checks=" << gate.checks << " clouds=" << gate.clouds
               << " oracle_point_tests=" << gate.oracle_point_tests << " mono_runs=" << gate.mono_runs
               << " plans=" << gate.plans << " ordered_replays=" << gate.ordered_replays
@@ -584,7 +671,10 @@ int main(int argc, char** argv) {
               << " reentrant_runs=" << gate.reentrant_runs << " callback_failures=" << gate.callback_failures
               << " invalid_inputs=" << gate.invalid_inputs << " model_mutants=" << gate.model_mutants
               << " widened_plans=" << gate.widened_plans << " extended_products=" << gate.extended_products
-              << " limit_bites=" << gate.limit_bites << '\n';
+              << " limit_bites=" << gate.limit_bites << " inheriting_plans=" << gate.inheriting_plans
+              << " inherited_credits=" << inheriting.inherited_credits
+              << " inherited_rejections=" << inheriting.inherited_rejections
+              << " witness_carrying_jobs=" << gate.witness_carrying_jobs << '\n';
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "mhgp8_wspd_front_jobs_gate failed: " << error.what() << '\n';

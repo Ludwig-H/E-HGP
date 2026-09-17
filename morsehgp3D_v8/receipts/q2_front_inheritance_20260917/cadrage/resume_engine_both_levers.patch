@@ -1,0 +1,802 @@
+--- a/morsehgp3D_v8/src/wspd/front.cpp
++++ b/morsehgp3D_v8/src/wspd/front.cpp
+@@ -45,6 +45,19 @@
+   return range.first <= rank && rank < range.last;
+ }
+ 
++// What a search leaves to the two children of its product. Carried BY VALUE in
++// the task and never in the front object: the work of a product depends on its
++// task alone, whatever the traversal order, the job plan or the worker.
++struct WitnessState {
++  static constexpr std::uint32_t no_leaf = std::numeric_limits<std::uint32_t>::max();
++  // Ranks of the certified q2 witnesses: at most Kmax-1 <= 9, all distinct.
++  std::array<std::uint32_t, 9> ranks{};
++  std::uint32_t leaf{no_leaf};  // Pivot leaf of the parent's search.
++  std::uint8_t leaf_depth{};    // Its index depth, at most 48: no depth table is needed.
++  std::uint8_t count{};
++  [[nodiscard]] bool empty() const noexcept { return count == 0 && leaf == no_leaf; }
++};
++
+ struct Task {
+   std::size_t a{};
+   std::size_t b{};
+@@ -55,6 +68,9 @@
+   std::uint32_t dfs_pending{};
+   std::uint8_t mask{};
+   bool terminal{};
++  // Last field: the six-value initializers above it keep their meaning, and a
++  // task built without a state is an empty state, never a shifted field.
++  WitnessState witness{};
+ };
+ 
+ class Front {
+@@ -66,6 +82,8 @@
+         points_(index.cloud().points()), kmax_(kmax), separation_(separation),
+         mode_(mode), consumer_(consumer), proposals_(proposals) {
+     const auto n = points_.size();
++    if (!wspd_proposals_fit(proposals_, order_.size(), nodes_.size()))
++      throw std::length_error("mhgp8 WSPD witness state stores ranks and node IDs on 32 bits");
+     // Divide before multiplying, so even a representable choose(n,2)
+     // does not require the larger ordered-pair count to fit u64.
+     result_.total_unordered_pairs = n % 2 == 0 ? product(n / 2, n - 1)
+@@ -94,6 +112,8 @@
+     const auto& a = nodes_[task.a];
+     const auto& b = nodes_[task.b];
+     if (task.a == task.b) {
++      // Every ancestor of a diagonal product is diagonal and searched nothing.
++      if (!task.witness.empty()) throw std::logic_error("mhgp8 WSPD diagonal product received a witness state");
+       if (a.left == Q2SpatialNode::absent) {
+         counter_add(result_.work.diagonal_leaves);
+         return;
+@@ -109,7 +129,10 @@
+       return;
+     }
+     auto mask = task.mask;
+-    if (mode_ == WspdFrontMode::MidpointSamples) mask = filter(a, b, mask);
++    // A private copy: the search reads the received state and writes the state
++    // of THIS product into it. No member of the front ever holds a state.
++    WitnessState witness = task.witness;
++    if (mode_ == WspdFrontMode::MidpointSamples) mask = filter(a, b, mask, witness);
+     const auto mass = product(a.range.size(), b.range.size());
+     for (unsigned lane = 0; lane < 3; ++lane) {
+       const auto bit = static_cast<std::uint8_t>(1U << lane);
+@@ -126,6 +149,10 @@
+     if (static_cast<i128>(gap2(a.box, b.box)) >=
+         static_cast<i128>(separation_) * separation_ * std::max(da, db)) {
+       account_emit(task.a, task.b, mask, mass);
++      // Final q2 credits, received and new, of a searched product that is
++      // emitted. With the rejections and the splits they close the credit
++      // ledger of the inheritance; zero unless inherit_witnesses.
++      if (witness.count != 0) counter_add(result_.work.emitted_witness_credits, witness.count);
+       emit(Task{task.a, task.b, task.depth, task.dfs_pending, mask, true});
+       return;
+     }
+@@ -136,10 +163,11 @@
+     if (split.left == Q2SpatialNode::absent)
+       throw std::logic_error("mhgp8 WSPD distinct singleton boxes must be separated");
+     result_.work.max_stack_size = std::max(result_.work.max_stack_size, static_cast<u64>(task.dfs_pending) + 2);
++    // Both children receive the same state, by value.
+     push(Task{split_a ? split.right : task.a, split_a ? task.b : split.right,
+-              task.depth + 1, task.dfs_pending, mask, false});
++              task.depth + 1, task.dfs_pending, mask, false, witness});
+     push(Task{split_a ? split.left : task.a, split_a ? task.b : split.left,
+-              task.depth + 1, task.dfs_pending + 1, mask, false});
++              task.depth + 1, task.dfs_pending + 1, mask, false, witness});
+   }
+ 
+   [[nodiscard]] WspdFrontResult run(Task initial) {
+@@ -184,14 +212,36 @@
+     return result;  // 16 times squared distance; <=48*65535^2 fits i64.
+   }
+ 
+-  std::uint8_t filter(const Q2SpatialNode& a, const Q2SpatialNode& b, std::uint8_t mask) {
++  // Closed containment of the midpoint (quarter units) in a box: six
++  // comparisons, no square. NEVER a box distance test: that counter stays
++  // exactly two per descent step. |4*coordinate| <= 4*65535 and |center4| <=
++  // 4*65535: no overflow.
++  [[nodiscard]] static bool contains_midpoint(const Box3& box, const std::array<i64, 3>& center4) {
++    // Bitwise, not short-circuit: the six outcomes are data, and the only
++    // branch of the climb is its exit.
++    bool inside = true;
++    for (std::size_t axis = 0; axis < 3; ++axis) {
++      inside = inside & (center4[axis] >= 4 * static_cast<i64>(box.low[axis])) &
++               (center4[axis] <= 4 * static_cast<i64>(box.high[axis]));
++    }
++    return inside;
++  }
++
++  std::uint8_t filter(const Q2SpatialNode& a, const Q2SpatialNode& b, std::uint8_t mask, WitnessState& witness) {
+     unsigned needed = kmax_;
+     for (unsigned lane = 0; lane < 3; ++lane) {
+       if ((mask & (1U << lane)) != 0) needed = std::min(needed, thresholds_[lane]);
+     }
+     // A strict universal witness cannot belong to A or B: choose that
+     // endpoint and H is zero. If too few exterior sites exist, skip search.
+-    if (points_.size() - a.range.size() - b.range.size() < needed) return mask;
++    if (points_.size() - a.range.size() - b.range.size() < needed) {
++      // A non-default option runs the q2 lane alone: `needed` is Kmax for every
++      // product and the exterior population grows strictly towards the
++      // children. A skipped search therefore has only skipped or diagonal
++      // ancestors, and nothing to pass on.
++      if (!witness.empty()) throw std::logic_error("mhgp8 WSPD skipped search received a witness state");
++      return mask;
++    }
+     counter_add(result_.work.witness_searches);
+     std::array<i64, 3> center4{};
+     for (std::size_t axis = 0; axis < 3; ++axis) {
+@@ -199,7 +249,36 @@
+                      b.box.low[axis] + b.box.high[axis];
+     }
+     std::size_t node = 0;
++    unsigned resume_depth = 0;
++    if (proposals_.resume_descent && witness.leaf != WitnessState::no_leaf) {
++      // Theorem R: any node whose closed box contains the midpoint lies on the
++      // greedy root path, because sibling boxes are disjoint. Climb from the
++      // parent's pivot leaf to the first such node. The root always contains
++      // the midpoint of two boxes it contains: it is accepted untested, which
++      // also bounds the climb.
++      counter_add(result_.work.resumed_searches);
++      node = witness.leaf;
++      // The root is the only node at depth zero and every other node of an
++      // index of at most 2^32-1 nodes has a parent link: the climb is bounded by
++      // the leaf depth. One containment test per visited node, the root excepted.
++      unsigned climbed = 0;
++      while (node != 0 && !contains_midpoint(nodes_[node].box, center4)) {
++        const auto parent = nodes_[node].parent;
++        if (parent == Q2SpatialNode::no_parent) throw std::logic_error("mhgp8 WSPD resume met a missing parent link");
++        node = parent;
++        ++climbed;
++      }
++      if (climbed > witness.leaf_depth || (node == 0) != (climbed == witness.leaf_depth))
++        throw std::logic_error("mhgp8 WSPD resume climb disagrees with the leaf depth");
++      resume_depth = witness.leaf_depth - climbed;
++      counter_add(result_.work.resume_containment_tests, static_cast<u64>(climbed) + (node == 0 ? 0U : 1U));
++      if (node == 0) counter_add(result_.work.resume_root_restarts);
++      // The root descent pays exactly resume_depth more steps than this search.
++      counter_add(result_.work.resume_depth_sum, resume_depth);
++    }
++    unsigned steps = 0;
+     while (nodes_[node].left != Q2SpatialNode::absent) {
++      ++steps;
+       counter_add(result_.work.witness_descent_steps);
+       const auto left = nodes_[node].left;
+       const auto right = nodes_[node].right;
+@@ -209,10 +288,23 @@
+       const auto right_distance = midpoint_distance4(center4, nodes_[right].box);
+       node = left_distance <= right_distance ? left : right;
+     }
++    if (proposals_.resume_descent) {
++      witness.leaf = static_cast<std::uint32_t>(node);
++      witness.leaf_depth = static_cast<std::uint8_t>(resume_depth + steps);  // <= 48.
++    }
+     const auto count = std::min<std::size_t>(kmax_, order_.size());
+     const auto pivot = nodes_[node].range.first;
+     const auto window = wspd_proposal_window(pivot, count, order_.size());
+     std::array<unsigned, 3> credits{};
++    // Theorem H: the received ranks are strict universal witnesses of this
++    // product too, outside A and B. They count once each; they are not credits
++    // of this run. validate_front guarantees the q2 lane alone.
++    const unsigned inherited = proposals_.inherit_witnesses ? witness.count : 0U;
++    if (inherited != 0) {
++      if (inherited >= thresholds_[0]) throw std::logic_error("mhgp8 WSPD rejected product passed its witnesses on");
++      credits[0] = inherited;
++      counter_add(result_.work.inherited_credits, inherited);
++    }
+     // ONE inlined loop body serves three rank intervals: the historical window,
+     // then, for an eligible surviving product, the left and the right complement
+     // of the wider window around the same pivot. The inner loop is the historical
+@@ -251,6 +343,17 @@
+           if (extension) counter_add(result_.work.extended_proposals_in_factors);
+           continue;
+         }
++        if (inherited != 0) {
++          // The three rank intervals of one search are disjoint: only a
++          // RECEIVED rank can come back. It is proposed, never tested again.
++          bool duplicate = false;
++          for (unsigned index = 0; index < inherited; ++index) duplicate = duplicate || witness.ranks[index] == rank;
++          if (duplicate) {
++            counter_add(result_.work.inherited_duplicates);
++            if (extension) counter_add(result_.work.extended_inherited_duplicates);
++            continue;
++          }
++        }
+         const auto z = singleton_box(points_[order_[rank]]);
+         counter_add(result_.work.h_bound_tests);
+         const auto h = spindle_detail::h_minimum(a.box, b.box, z);
+@@ -266,7 +369,12 @@
+           if ((mask & bit) != 0 && (lane == 0 || (lane == 1 ? 3 : 2) * h2 > xi)) {
+             counter_add(result_.work.witness_lane_credits);
+             if (extension) counter_add(result_.work.extended_credits);
+-            if (++credits[lane] == thresholds_[lane]) mask &= static_cast<std::uint8_t>(~bit);
++            if (++credits[lane] == thresholds_[lane]) {
++              mask &= static_cast<std::uint8_t>(~bit);
++            } else if (proposals_.inherit_witnesses && lane == 0) {
++              // q2 lane alone, credits[0] < Kmax <= 10: index <= 8.
++              witness.ranks[credits[0] - 1] = static_cast<std::uint32_t>(rank);
++            }
+           }
+         }
+       }
+@@ -276,6 +384,13 @@
+     // validate_front guarantees the q2 lane alone for a widened window: an empty
+     // mask after an extension means that the Kmax-th q2 credit came from an extra rank.
+     if (extension && mask == 0) counter_add(result_.work.extended_rejections);
++    if (proposals_.inherit_witnesses) {
++      if (mask == 0) {
++        if (inherited != 0) counter_add(result_.work.inherited_rejections);
++      } else {
++        witness.count = static_cast<std::uint8_t>(credits[0]);
++      }
++    }
+     return mask;
+   }
+ 
+@@ -328,6 +443,12 @@
+     throw std::invalid_argument("mhgp8 WSPD Pure front proposes no witness: window factor must be 1");
+   if (proposals.window_factor != 1 && (requested_lane_mask & available) != 1)
+     throw std::invalid_argument("mhgp8 WSPD widened proposals are qualified for the q2 lane alone: mask must be 1");
++  if (proposals.resume_descent || proposals.inherit_witnesses) {
++    if (mode == WspdFrontMode::Pure)
++      throw std::invalid_argument("mhgp8 WSPD Pure front searches no witness: resume and inheritance must be off");
++    if ((requested_lane_mask & available) != 1)
++      throw std::invalid_argument("mhgp8 WSPD resume and inheritance are qualified for the q2 lane alone: mask must be 1");
++  }
+ }
+ 
+ }  // namespace
+--- a/morsehgp3D_v8/src/wspd/front.hpp
++++ b/morsehgp3D_v8/src/wspd/front.hpp
+@@ -15,11 +15,12 @@
+ 
+ enum class WspdFrontMode { Pure, MidpointSamples };
+ 
+-// Optional widening of the MidpointSamples proposal window of the q2 lane.
+-// The rejection threshold never changes: only the number of proposed ranks
+-// does. The default reproduces the historical front exactly, counter for
+-// counter. A factor other than 1 requires the active lane mask to be q2
+-// alone: no judge covers a widened q3/q4 window, so it is refused.
++// Options of the MidpointSamples proposer of the q2 lane. The rejection
++// threshold and the predicate never change: only which ranks are proposed,
++// where the descent starts and which already certified identifiers a product
++// receives. The default reproduces the historical front exactly, counter for
++// counter. Any non-default option requires the active lane mask to be q2
++// alone: no independent judge covers these options on q3/q4, so it is refused.
+ struct WspdFrontProposals {
+   // L = window_factor*Kmax ranks around the SAME pivot, truncated to n.
+   // Accepted values: 1 (historical window only), 2 and 4.
+@@ -27,9 +28,36 @@
+   // The extra ranks are proposed only when max(|A|,|B|) <= this limit.
+   // The default admits every product; it never removes or caps any pair.
+   std::size_t small_factor_limit{std::numeric_limits<std::size_t>::max()};
++  // Exact resume of the proposer descent. A child search starts from the
++  // pivot LEAF of its parent's search, climbs the parent links to the first
++  // node whose closed box contains its own midpoint (the root is accepted
++  // untested), then descends as usual. Sibling boxes of the midpoint-split
++  // index are disjoint, so the greedy root descent passes through every node
++  // containing the midpoint: same leaf, pivot, window, credits and rectangles.
++  // Only witness_descent_steps and witness_box_distance_tests decrease; a
++  // resumed search pays its containment tests, at most depth(leaf) of them.
++  bool resume_descent{false};
++  // Certified witness IDENTIFIERS (ranks), never bare counts, passed by a
++  // surviving product to both children: at most Kmax-1 ranks. h_minimum is an
++  // exact minimum over the boxes and child boxes are included in parent boxes,
++  // so an inherited rank stays a strict universal witness, outside A' and B'.
++  // The child starts from that count, skips without a test any proposed rank
++  // already in its list, and appends its new credits. A rejection is still
++  // certified by Kmax DISTINCT ranks, all universal for the product's boxes.
++  bool inherit_witnesses{false};
+   bool operator==(const WspdFrontProposals&) const = default;
+ };
+ 
++// The witness state of a task stores ranks and one node ID on 32 bits. An
++// option is usable only when every such value fits: n <= 2^32 sites for the
++// inherited ranks, at most 2^32-1 index nodes for the resume leaf and the
++// parent links (Q2SpatialNode::no_parent is reserved). Refused otherwise.
++[[nodiscard]] constexpr bool wspd_proposals_fit(const WspdFrontProposals& proposals, std::uint64_t sites,
++                                                std::uint64_t nodes) noexcept {
++  constexpr std::uint64_t limit = std::uint64_t{1} << 32;
++  return (!proposals.inherit_witnesses || sites <= limit) && (!proposals.resume_descent || nodes < limit);
++}
++
+ // The centered, clamped rank window of MidpointSamples: `count` adjacent
+ // ranks (count <= n required) around `pivot` (< n). Exposed so that a gate
+ // can judge the window arithmetic exhaustively. For count <= wider <= n the
+@@ -90,6 +118,36 @@
+   u64 extended_proposals_in_factors{};  // Extra ranks skipped because they belong to A or B.
+   u64 extended_credits{};    // q2 credits granted by extra ranks.
+   u64 extended_rejections{};  // Products whose Kmax-th q2 credit came from an extra rank.
++  // Exact resume of the descent. All zero unless resume_descent. The closed-box
++  // tests of the climb are NOT box distance tests: distances stay 2 per step.
++  u64 resumed_searches{};          // Searches started from the parent's pivot leaf.
++  u64 resume_containment_tests{};  // Nodes tested while climbing; the root is never tested.
++  u64 resume_root_restarts{};      // Resumed searches whose climb reached the root.
++  // Sum over resumed searches of the index depth of the resume node. The root
++  // descent of the same search pays exactly that many more steps: for the same
++  // input, steps(default) = steps(resume) + resume_depth_sum.
++  u64 resume_depth_sum{};
++  // Inherited witnesses. All zero unless inherit_witnesses. Inherited credits are
++  // NOT in witness_lane_credits, which counts the credits granted by tests of
++  // this run. A duplicate is a proposed rank already in the received list: it
++  // is counted in proposed_sites (and in extended_proposals inside an extension
++  // interval), then skipped without a test. Hence, for every option,
++  // proposed_sites = proposals_in_factors + h_bound_tests + inherited_duplicates,
++  // and the same identity holds on the extension part alone.
++  u64 inherited_credits{};              // Sum over searches of the received list length: even.
++  u64 inherited_duplicates{};           // Proposed ranks skipped because already received.
++  u64 extended_inherited_duplicates{};  // Those of the extension intervals, INCLUDED above.
++  // Rejections pronounced with a non-empty received list, i.e. with fewer than
++  // Kmax credits from this search. An UPPER bound of the rejections that the
++  // same product would not have obtained alone: the true count needs the tests
++  // that inheritance saves, and belongs to an independent replay.
++  u64 inherited_rejections{};
++  // Final q2 credits (received and new) of the searched products that were
++  // emitted. Credit ledger of the inheritance, every searched product being
++  // rejected with Kmax credits, split (its credits are received twice) or
++  // emitted: witness_lane_credits + inherited_credits/2 =
++  // Kmax*fully_rejected_products + emitted_witness_credits.
++  u64 emitted_witness_credits{};
+   bool operator==(const WspdFrontWork&) const = default;
+ };
+ 
+@@ -119,8 +177,15 @@
+ // acquired by the historical window remain valid during this one filter
+ // call and the threshold stays Kmax. Ranks of A or B are counted as
+ // proposed, then skipped without a test or a credit; H=0 never credits.
+-// Partial counts are never inherited by descendants or by any census.
+-// Pure proposes nothing and requires window_factor 1. It is a rejection
++// A bare partial COUNT is never inherited by descendants or by any census:
++// it could count one site twice. With proposals.inherit_witnesses (q2 lane
++// alone) a surviving product passes the RANKS of its certified witnesses to
++// its children, which count each rank once; the census still starts from
++// zero. With proposals.resume_descent (q2 lane alone) the descent of a child
++// search resumes from its parent's pivot leaf and reaches the same pivot.
++// The work of a product depends on its task alone: counters are identical
++// for the mono front, any job plan and any dispatch, with any worker count.
++// Pure proposes nothing and requires default proposals. It is a rejection
+ // heuristic only: missing witnesses never remove any pair.
+ // Neither this front nor a bounded ledger certifies a complete HGP tower.
+ // Index/consumer must remain alive and valid throughout this synchronous
+--- a/morsehgp3D_v8/src/pipeline/q2_census.hpp
++++ b/morsehgp3D_v8/src/pipeline/q2_census.hpp
+@@ -94,8 +94,15 @@
+ // their boxes are immutable certificates built with this particular index.
+ struct Q2SpatialNode {
+   static constexpr std::size_t absent = std::numeric_limits<std::size_t>::max();
++  static constexpr std::uint32_t no_parent = std::numeric_limits<std::uint32_t>::max();
+   Range range;
+   Box3 box;
++  // Parent node ID, written when the children are linked. It occupies the four
++  // padding bytes that follow the 12-byte box: node size, index bytes and the
++  // layout of every other field are unchanged. The root, and any node whose
++  // parent ID does not fit 32 bits, keep no_parent; a reader that climbs must
++  // first refuse an index with more than 2^32-1 nodes.
++  std::uint32_t parent{no_parent};
+   std::size_t left{absent};
+   std::size_t right{absent};
+   std::size_t escape{absent};
+@@ -104,6 +111,8 @@
+ // An immutable index over EVERY point of this owner, not just A union B.
+ // The owner is already validated; its coordinates are neither copied nor
+ // revalidated. Noncopyability prevents mutation through an aliased copy.
++static_assert(sizeof(Q2SpatialNode) == 56, "the parent link must stay inside the former padding");
++
+ class Q2CensusIndex final {
+  public:
+   Q2CensusIndex(const Q2CensusIndex&) = delete;
+--- a/morsehgp3D_v8/src/pipeline/q2_census.cpp
++++ b/morsehgp3D_v8/src/pipeline/q2_census.cpp
+@@ -150,6 +150,11 @@
+   nodes_[node_id].right = right;
+   nodes_[node_id].escape = nodes_.size();
+   counter_add(work_.escape_links);
++  // Two stores per split, no traversal: the climb of a resumed front descent.
++  if (node_id < Node::no_parent) {
++    nodes_[left].parent = static_cast<std::uint32_t>(node_id);
++    nodes_[right].parent = static_cast<std::uint32_t>(node_id);
++  }
+   // Validate the DFS continuation when linking children, without another
+   // point traversal: left follows parent, its escape is right, and the two
+   // child populations partition the parent. The right escape leaves parent.
+--- a/morsehgp3D_v8/src/parallel/work_reduction.hpp
++++ b/morsehgp3D_v8/src/parallel/work_reduction.hpp
+@@ -57,9 +57,18 @@
+   counter_add(out.extended_proposals_in_factors, value.extended_proposals_in_factors);
+   counter_add(out.extended_credits, value.extended_credits);
+   counter_add(out.extended_rejections, value.extended_rejections);
+-  // 25 scalars, two arrays of five and three arrays of three: a new field
++  counter_add(out.resumed_searches, value.resumed_searches);
++  counter_add(out.resume_containment_tests, value.resume_containment_tests);
++  counter_add(out.resume_root_restarts, value.resume_root_restarts);
++  counter_add(out.resume_depth_sum, value.resume_depth_sum);
++  counter_add(out.inherited_credits, value.inherited_credits);
++  counter_add(out.inherited_duplicates, value.inherited_duplicates);
++  counter_add(out.extended_inherited_duplicates, value.extended_inherited_duplicates);
++  counter_add(out.inherited_rejections, value.inherited_rejections);
++  counter_add(out.emitted_witness_credits, value.emitted_witness_credits);
++  // 34 scalars, two arrays of five and three arrays of three: a new field
+   // that is not merged above must fail to compile here, not pass by vacuity.
+-  static_assert(sizeof(WspdFrontWork) == (25 + 2 * 5 + 3 * 3) * sizeof(u64),
++  static_assert(sizeof(WspdFrontWork) == (34 + 2 * 5 + 3 * 3) * sizeof(u64),
+                 "merge_work(WspdFrontWork) must be updated with the structure");
+ }
+ 
+--- /dev/null
++++ b/morsehgp3D_v8/bench/wspd_q2_inheritance_probe.cpp
+@@ -0,0 +1,377 @@
++#include "parallel_probe_common.hpp"
++
++#include <limits>
++
++// Explicit port of the proposals probe for the two witness-state options of
++// the front (WspdFrontProposals): exact resume of the proposer descent and
++// inherited witness identifiers. front_work keeps the historical key set; the
++// extension, resume and inheritance counters are reported apart, each with
++// its ledger theorems restated for every combination of options.
++namespace {
++
++struct Options {
++  std::size_t n;
++  std::string_view family;
++  unsigned kmax;
++  unsigned separation;
++  u64 seed;
++  std::size_t threads;
++  std::size_t jobs_per_worker;
++  std::size_t pool_min_factor;
++  mhgp8::WspdFrontProposals proposals;
++};
++
++Options options(int argc, char** argv) {
++  if (argc != 13)
++    throw std::invalid_argument("usage: mhgp8_wspd_q2_inheritance_probe n family K s seed "
++                                "threads jobs_per_worker pool_min_factor window_factor small_factor_limit|all "
++                                "resume_descent(0|1) inherit_witnesses(0|1)");
++  const std::string_view limit(argv[10]);
++  const auto flag = [](std::string_view text) {
++    if (text != "0" && text != "1") throw std::invalid_argument("inheritance probe flags are exactly 0 or 1");
++    return text == "1";
++  };
++  const mhgp8::WspdFrontProposals proposals{integer<unsigned>(argv[9]),
++      limit == "all" ? std::numeric_limits<std::size_t>::max() : integer<std::size_t>(argv[10]),
++      flag(argv[11]), flag(argv[12])};
++  if ((proposals.window_factor != 1 && proposals.window_factor != 2 && proposals.window_factor != 4) ||
++      proposals.small_factor_limit == 0 ||
++      (limit != "all" && proposals.small_factor_limit == std::numeric_limits<std::size_t>::max()))
++    throw std::invalid_argument("inheritance probe requires window_factor 1, 2 or 4 and a positive limit or all");
++  const Options o{integer<std::size_t>(argv[1]), argv[2], integer<unsigned>(argv[3]),
++                  integer<unsigned>(argv[4]), integer<u64>(argv[5]),
++                  integer<std::size_t>(argv[6]), integer<std::size_t>(argv[7]),
++                  integer<std::size_t>(argv[8]), proposals};
++  mhgp8::bench::validate_front_fixture_size(o.n, o.family);
++  if (o.kmax == 0 || o.kmax > 10 || o.separation == 0 || o.jobs_per_worker == 0)
++    throw std::invalid_argument("inheritance probe requires K1..10, positive s and jobs_per_worker");
++  static_cast<void>(product(size_counter(o.threads), size_counter(o.jobs_per_worker)));
++  return o;
++}
++
++void merge_digest(OutputDigest& total, const OutputDigest& part) {
++  mhgp8::counter_add(total.supports, part.supports);
++  mhgp8::counter_add(total.interior_ids, part.interior_ids);
++  mhgp8::counter_add(total.shell_ids, part.shell_ids);
++  total.sum += part.sum;
++  total.xor_value ^= part.xor_value;
++  for (const auto& field : callback_fields)
++    mhgp8::counter_add(total.work.*(field.member), part.work.*(field.member));
++}
++
++void print_digest(const OutputDigest& d) {
++  std::cout << "{\"encoding\":\"canonical_q2_support_v2\",\"supports\":" << d.supports
++            << ",\"interior_ids\":" << d.interior_ids << ",\"shell_ids\":" << d.shell_ids
++            << ",\"sum\":\"" << std::hex << d.sum << "\",\"xor\":\"" << d.xor_value
++            << std::dec << "\"}";
++}
++
++mhgp8::WspdQ2ParallelResult run_pipeline(
++    const Options& o, const mhgp8::Q2CensusIndexPtr& index,
++    std::span<const mhgp8::Q2CensusConsumer> consumers) {
++  if (o.threads != 0)
++    return mhgp8::run_wspd_q2_census_parallel(index, o.kmax, o.separation,
++        mhgp8::WspdFrontMode::MidpointSamples, mhgp8::Q2CensusMode::SharedBlocks,
++        consumers, o.jobs_per_worker, mhgp8::Q2SiblingMode::Saturating,
++        mhgp8::Q2WitnessOrder::ComplementFirst, mhgp8::Q2AnchorMode::Individual,
++        o.pool_min_factor, {}, o.proposals);
++  const auto mono = mhgp8::run_wspd_q2_census(*index, o.kmax, o.separation,
++      mhgp8::WspdFrontMode::MidpointSamples, mhgp8::Q2CensusMode::SharedBlocks,
++      consumers.front(), mhgp8::Q2SiblingMode::Saturating,
++      mhgp8::Q2WitnessOrder::ComplementFirst, mhgp8::Q2AnchorMode::Individual,
++      o.pool_min_factor, o.proposals);
++  mhgp8::WspdQ2ParallelResult r;
++  r.front = mono.front;
++  r.census_work = mono.census.work;
++  r.sibling_work = mono.sibling_work;
++  r.order_work = mono.order_work;
++  r.joint_work = mono.joint_work;
++  r.pool_work = mono.pool_work;
++  r.input_rectangles = mono.input_rectangles;
++  r.anchor_queries = mono.anchor_queries;
++  r.candidate_pairs = mono.census.candidate_pairs;
++  r.accepted_pairs = mono.census.accepted_pairs;
++  r.rejected_pairs = mono.census.rejected_pairs;
++  // One logical execution slot, no parallel scheduler or launched thread.
++  r.started_workers = 1;
++  r.pool_peak_bytes_sum = mono.pool_work.plan_peak_bytes;
++  r.worker_ms_sum = mono.total_ms;
++  r.payload_ms_sum = mono.census.payload_ms;
++  r.total_ms = mono.total_ms;
++  r.workers.push_back({0, mono.front.work.product_visits, mono.input_rectangles,
++      mono.census.work.count_node_visits, mono.census.accepted_pairs,
++      mono.pool_work.plan_peak_bytes, mono.total_ms, mono.census.payload_ms});
++  return r;
++}
++
++void validate(const mhgp8::WspdQ2ParallelResult& r, const OutputDigest& d,
++              const Options& o, std::span<const OutputDigest> digests) {
++  const auto& c = r.census_work;
++  const auto& p = r.pool_work;
++  const auto total = product(size_counter(o.n), size_counter(o.n - 1)) / 2;
++  require(r.front.total_unordered_pairs == total && r.front.active_lane_mask == 1 &&
++          r.front.work.rejected_pair_mass[0] <= total &&
++          r.front.work.residual_pair_mass[0] == total - r.front.work.rejected_pair_mass[0],
++          "front pair partition mismatch");
++  require(p.filtered_pairs <= r.front.work.residual_pair_mass[0] &&
++          r.candidate_pairs == r.front.work.residual_pair_mass[0] - p.filtered_pairs &&
++          r.accepted_pairs <= r.candidate_pairs && r.rejected_pairs == r.candidate_pairs - r.accepted_pairs &&
++          p.passthrough_pairs <= p.residual_pairs && p.pair_roots == p.residual_pairs - p.passthrough_pairs,
++          "Pool/census pair partition mismatch");
++  require(d.supports == r.accepted_pairs && c.payload_supports == d.supports &&
++          c.payload_interior_sites == d.interior_ids && c.payload_shell_sites == d.shell_ids &&
++          c.input_descriptors == r.input_rectangles && c.query_cover_visits == 0 &&
++          c.query_build_nodes == 0 && c.frontier_restarts == 0, "payload/descriptor mismatch");
++  require(r.workers.size() == r.started_workers && r.workers.size() <= digests.size(),
++          "worker slots mismatch");
++  u64 jobs = 0, products = r.prefix_product_visits, rectangles = 0, visits = 0, supports = 0, pool_bytes = 0;
++  double elapsed = 0, payload = 0;
++  for (std::size_t i = 0; i < r.workers.size(); ++i) {
++    const auto& w = r.workers[i];
++    mhgp8::counter_add(jobs, w.jobs);
++    mhgp8::counter_add(products, w.front_products);
++    mhgp8::counter_add(rectangles, w.input_rectangles);
++    mhgp8::counter_add(visits, w.count_node_visits);
++    mhgp8::counter_add(supports, w.supports);
++    mhgp8::counter_add(pool_bytes, w.pool_peak_bytes);
++    require(w.supports == digests[i].supports && std::isfinite(w.elapsed_ms) &&
++            std::isfinite(w.payload_ms) && w.payload_ms >= 0 && w.elapsed_ms + 1e-6 >= w.payload_ms,
++            "worker payload or clock mismatch");
++    elapsed += w.elapsed_ms;
++    payload += w.payload_ms;
++  }
++  require(jobs == r.jobs && jobs == r.completed_jobs && products == r.front.work.product_visits &&
++          rectangles == r.input_rectangles && visits == c.count_node_visits && supports == d.supports &&
++          pool_bytes == r.pool_peak_bytes_sum, "parallel reduction lost work or jobs");
++  require(std::abs(elapsed - r.worker_ms_sum) <= 1e-6 * std::max(1.0, elapsed) &&
++          std::abs(payload - r.payload_ms_sum) <= 1e-6 * std::max(1.0, payload) &&
++          std::isfinite(r.total_ms) && r.total_ms >= r.partition_ms && r.partition_ms >= 0,
++          "parallel sum/wall clocks mismatch");
++  for (std::size_t i = r.workers.size(); i < digests.size(); ++i)
++    require(digests[i].supports == 0, "inactive worker emitted a support");
++  // Extension ledger of the q2 lane. Bounded by the widened window, zero for
++  // factor 1, and its removal leaves a historical-window work within the
++  // historical bounds. An extended product ran its whole historical window
++  // and then proposed at least one extra rank; a product rejected by the
++  // extension received at least one extra credit; a searched product that is
++  // not extended was rejected by its historical window or is not eligible.
++  const auto& f = r.front.work;
++  const auto historical = std::min<u64>(o.kmax, size_counter(o.n));
++  const auto wider = std::min<u64>(u64{o.kmax} * o.proposals.window_factor, size_counter(o.n));
++  require(f.extended_products <= f.witness_searches && f.extended_products <= f.extended_proposals &&
++          f.extended_proposals <= product(wider - historical, f.extended_products) &&
++          f.extended_proposals <= f.proposed_sites &&
++          f.extended_proposals_in_factors <= f.extended_proposals &&
++          f.extended_proposals_in_factors <= f.proposals_in_factors &&
++          f.extended_inherited_duplicates <= f.inherited_duplicates &&
++          f.extended_inherited_duplicates <= f.extended_proposals - f.extended_proposals_in_factors &&
++          f.extended_credits <= f.witness_lane_credits &&
++          f.extended_credits <= f.extended_proposals - f.extended_proposals_in_factors -
++                                    f.extended_inherited_duplicates &&
++          f.extended_rejections <= f.extended_credits && f.extended_rejections <= f.extended_products &&
++          f.extended_rejections <= f.fully_rejected_products,
++          "front proposal extension ledger mismatch");
++  const auto unextended = f.witness_searches - f.extended_products;
++  const auto historical_proposals = f.proposed_sites - f.extended_proposals;
++  require(historical_proposals <= product(historical, f.witness_searches) &&
++          historical_proposals >= product(historical, f.extended_products) + unextended &&
++          unextended >= f.fully_rejected_products - f.extended_rejections,
++          "historical-window part of the proposal ledger mismatch");
++  const bool unlimited = o.proposals.small_factor_limit == std::numeric_limits<std::size_t>::max();
++  if (o.proposals.window_factor != 1 && unlimited)
++    require(unextended == f.fully_rejected_products - f.extended_rejections,
++            "an unlimited widened window left a surviving product without extension");
++  if (o.proposals.window_factor == 1)
++    require(f.extended_products == 0 && f.extended_proposals == 0 && f.extended_proposals_in_factors == 0 &&
++            f.extended_credits == 0 && f.extended_rejections == 0 && f.extended_inherited_duplicates == 0,
++            "historical window reported extension work");
++  // Every proposed rank is in a factor, already received, or tested: once.
++  require(f.proposed_sites == f.proposals_in_factors + f.inherited_duplicates + f.h_bound_tests &&
++          f.witness_lane_credits <= f.h_bound_tests, "proposed-rank partition mismatch");
++  // Descent ledger. Containment tests are not box distances: two per step, for
++  // every option. A search that is not resumed pays at least one step; of two
++  // sibling searches resumed from the same leaf, at most one pays none.
++  require(f.witness_box_distance_tests == 2 * f.witness_descent_steps &&
++          f.witness_descent_steps <= product(48, f.witness_searches) &&
++          f.resumed_searches <= f.witness_searches &&
++          2 * f.witness_descent_steps >= 2 * f.witness_searches - f.resumed_searches,
++          "descent ledger mismatch");
++  if (o.proposals.resume_descent) {
++    // q2 lane alone: a searched product has searched children only, so the
++    // resumed searches are exactly the two children of every searched product
++    // that is split. Skipped products are the non-diagonal ones without search.
++    const auto skipped = f.product_visits - f.diagonal_splits - f.diagonal_leaves - f.witness_searches;
++    require(f.resumed_searches <= f.resume_containment_tests &&
++            f.resume_containment_tests <= product(48, f.resumed_searches) &&
++            f.resume_root_restarts <= f.resumed_searches &&
++            f.resume_depth_sum <= product(48, f.resumed_searches - f.resume_root_restarts) &&
++            f.resumed_searches <= 2 * f.disjoint_splits &&
++            2 * f.disjoint_splits <= f.resumed_searches + 2 * skipped,
++            "resume ledger mismatch");
++  } else {
++    require(f.resumed_searches == 0 && f.resume_containment_tests == 0 && f.resume_root_restarts == 0 &&
++            f.resume_depth_sum == 0, "default descent reported resume work");
++  }
++  if (o.proposals.inherit_witnesses) {
++    // Credit ledger: every searched product ends rejected with Kmax credits,
++    // emitted with its final credits, or split, its final credits being
++    // received once by each of its two (searched) children.
++    require(f.inherited_duplicates <= f.inherited_credits &&
++            f.inherited_credits <= product(o.kmax - 1, f.witness_searches) && f.inherited_credits % 2 == 0 &&
++            f.inherited_rejections <= f.fully_rejected_products &&
++            f.emitted_witness_credits <= product(o.kmax - 1, f.emitted_rectangles) &&
++            f.witness_lane_credits + f.inherited_credits / 2 ==
++                product(o.kmax, f.fully_rejected_products) + f.emitted_witness_credits,
++            "inheritance ledger mismatch");
++  } else {
++    require(f.inherited_credits == 0 && f.inherited_duplicates == 0 && f.extended_inherited_duplicates == 0 &&
++            f.inherited_rejections == 0 && f.emitted_witness_credits == 0,
++            "default front reported inheritance work");
++  }
++}
++
++int run(const Options& o) {
++  const auto started = Clock::now();
++  std::optional<mhgp8::bench::FrontFixture> input(mhgp8::bench::make_front_fixture(o.n, o.family, o.seed));
++  const auto generated = Clock::now();
++  auto cloud = mhgp8::prepare_cloud(input->points);
++  const auto prepared = Clock::now();
++  auto index = mhgp8::make_q2_cloud_index(cloud);
++  const auto indexed = Clock::now();
++  std::vector<OutputDigest> digests(std::max<std::size_t>(1, o.threads));
++  std::vector<mhgp8::Q2CensusConsumer> consumers;
++  consumers.reserve(digests.size());
++  for (std::size_t i = 0; i < digests.size(); ++i)
++    consumers.emplace_back([&, i](const mhgp8::Q2Support& support) {
++      digests[i].consume(support, cloud->points(), o.kmax);
++    });
++  const auto result = run_pipeline(o, index, consumers);
++  OutputDigest digest;
++  for (const auto& part : digests) merge_digest(digest, part);
++  const auto processed = Clock::now();
++  validate(result, digest, o, digests);
++  require(&index->cloud() == cloud.get(), "parallel index lost its cloud identity");
++  const auto input_hash = input->input_hash;
++  const auto generation_work = input->work;
++  const auto cloud_work = cloud->work();
++  const auto index_work = index->work();
++  const auto input_bytes = product(size_counter(input->points.capacity()), sizeof(mhgp8::Point3));
++  const auto cloud_bytes = cloud->retained_bytes();
++  const auto index_bytes = index->retained_bytes();
++  u64 callback_bytes = 0;
++  std::vector<u64> worker_callback_bytes;
++  for (const auto& part : digests) {
++    worker_callback_bytes.push_back(part.buffers_capacity_bytes());
++    mhgp8::counter_add(callback_bytes, worker_callback_bytes.back());
++  }
++  const auto callback_state_bytes = product(size_counter(digests.capacity()), sizeof(OutputDigest));
++  const auto validated = Clock::now();
++  for (auto& part : digests) {
++    auto interior = std::move(part.interior);
++    auto shell = std::move(part.shell);
++  }
++  consumers.clear();
++  index.reset();
++  cloud.reset();
++  input.reset();
++  const auto finished = Clock::now();
++  std::cout.imbue(std::locale::classic());
++  std::cout << std::setprecision(17)
++      << "{\"schema\":\"mhgp8_wspd_q2_inheritance_probe_v1\",\"status\":\"completed\""
++      << ",\"phase\":\"exploration_v8_hors_registre\",\"backend\":\"cpu_reference\""
++      << ",\"profile\":\"quantized_u16_input_only\",\"mode\":\"implementation_v8_p0\""
++      << ",\"public_status\":\"not_claimed\",\"scope\":\"q2_all_cloud_supports_not_full\""
++      << ",\"separation_convention\":\"box_gap_diameter_v1\",\"gcp_used\":false"
++      << ",\"execution\":\"" << (o.threads == 0 ? "mono_reference" : "parallel_front") << '"'
++      << ",\"front_mode\":\"samples\",\"census_mode\":\"shared\",\"sibling_mode\":\"sibling\""
++      << ",\"witness_order\":\"complement\",\"anchor_mode\":\"anchors\""
++      << ",\"clock_contract\":\"wall_and_worker_sums_no_subtraction_v1\""
++      << ",\"n\":" << o.n << ",\"family\":\"" << o.family << "\",\"kmax\":" << o.kmax
++      << ",\"s\":" << o.separation << ",\"seed\":" << o.seed << ",\"threads\":" << o.threads
++      << ",\"jobs_per_worker\":" << o.jobs_per_worker << ",\"pool_min_factor\":" << o.pool_min_factor
++      << ",\"window_factor\":" << o.proposals.window_factor << ",\"small_factor_limit\":";
++  if (o.proposals.small_factor_limit == std::numeric_limits<std::size_t>::max()) std::cout << "null";
++  else std::cout << o.proposals.small_factor_limit;
++  std::cout << ",\"resume_descent\":" << (o.proposals.resume_descent ? "true" : "false")
++            << ",\"inherit_witnesses\":" << (o.proposals.inherit_witnesses ? "true" : "false");
++  std::cout
++      << ",\"recipe\":\"" << mhgp8::bench::front_recipe(o.family) << "\",\"seed_affects_input\":"
++      << (o.family == "rows" ? "false" : "true") << ",\"input_hash\":\"" << std::hex << input_hash << std::dec << '"'
++      << ",\"total_unordered_pairs\":" << result.front.total_unordered_pairs
++      << ",\"active_lane_mask\":" << static_cast<unsigned>(result.front.active_lane_mask)
++      << ",\"input_rectangles\":" << result.input_rectangles << ",\"anchor_queries\":" << result.anchor_queries
++      << ",\"candidate_pairs\":" << result.candidate_pairs << ",\"accepted_pairs\":" << result.accepted_pairs
++      << ",\"rejected_pairs\":" << result.rejected_pairs << ",\"generation_work\":{";
++  print_fields(generation_work, generation_fields);
++  std::cout << "},\"cloud_work\":{"; print_fields(cloud_work, cloud_fields);
++  std::cout << "},\"index_work\":{"; print_fields(index_work, index_fields);
++  std::cout << "},\"front_work\":{"; print_fields(result.front.work, front_fields);
++  std::cout << ",\"size_class_rectangles\":"; print_array(result.front.work.size_class_rectangles);
++  std::cout << ",\"size_class_pair_mass\":"; print_array(result.front.work.size_class_pair_mass);
++  std::cout << ",\"rejected_pair_mass\":"; print_array(result.front.work.rejected_pair_mass);
++  std::cout << ",\"residual_pair_mass\":"; print_array(result.front.work.residual_pair_mass);
++  std::cout << ",\"lane_rectangles\":"; print_array(result.front.work.lane_rectangles);
++  std::cout << "},\"extension_work\":{\"extended_products\":" << result.front.work.extended_products
++            << ",\"extended_proposals\":" << result.front.work.extended_proposals
++            << ",\"extended_proposals_in_factors\":" << result.front.work.extended_proposals_in_factors
++            << ",\"extended_credits\":" << result.front.work.extended_credits
++            << ",\"extended_rejections\":" << result.front.work.extended_rejections;
++  std::cout << "},\"resume_work\":{\"resumed_searches\":" << result.front.work.resumed_searches
++            << ",\"resume_containment_tests\":" << result.front.work.resume_containment_tests
++            << ",\"resume_root_restarts\":" << result.front.work.resume_root_restarts
++            << ",\"resume_depth_sum\":" << result.front.work.resume_depth_sum;
++  std::cout << "},\"inheritance_work\":{\"inherited_credits\":" << result.front.work.inherited_credits
++            << ",\"inherited_duplicates\":" << result.front.work.inherited_duplicates
++            << ",\"extended_inherited_duplicates\":" << result.front.work.extended_inherited_duplicates
++            << ",\"inherited_rejections\":" << result.front.work.inherited_rejections
++            << ",\"emitted_witness_credits\":" << result.front.work.emitted_witness_credits;
++  std::cout << "},\"census_work\":{"; print_fields(result.census_work, census_fields);
++  std::cout << "},\"sibling_work\":{"; print_fields(result.sibling_work, sibling_fields);
++  std::cout << "},\"order_work\":{"; print_fields(result.order_work, order_fields);
++  std::cout << "},\"joint_work\":{"; print_fields(result.joint_work, joint_fields);
++  std::cout << "},\"pool_work\":{"; print_fields(result.pool_work, pool_fields);
++  std::cout << ",\"preparation_ms_sum\":" << result.pool_work.preparation_ms
++            << ",\"selected_total_ms_sum\":" << result.pool_work.selected_total_ms;
++  std::cout << "},\"callback_work\":{"; print_fields(digest.work, callback_fields);
++  std::cout << "},\"digest\":"; print_digest(digest);
++  std::cout << ",\"parallel_work\":{\"requested_workers\":" << result.requested_workers
++      << ",\"started_workers\":" << result.started_workers << ",\"target_jobs\":" << result.target_jobs
++      << ",\"jobs\":" << result.jobs << ",\"completed_jobs\":" << result.completed_jobs
++      << ",\"terminal_jobs\":" << result.terminal_jobs << ",\"prefix_product_visits\":" << result.prefix_product_visits
++      << ",\"job_storage_bytes\":" << result.job_storage_bytes << ",\"pool_peak_bytes_sum\":" << result.pool_peak_bytes_sum
++      << "},\"workers\":[";
++  for (std::size_t i = 0; i < result.workers.size(); ++i) {
++    if (i != 0) std::cout << ',';
++    const auto& w = result.workers[i];
++    std::cout << "{\"slot\":" << i << ",\"jobs\":" << w.jobs << ",\"front_products\":" << w.front_products
++        << ",\"input_rectangles\":" << w.input_rectangles << ",\"count_node_visits\":" << w.count_node_visits
++        << ",\"supports\":" << w.supports << ",\"pool_peak_bytes\":" << w.pool_peak_bytes
++        << ",\"elapsed_ms\":" << w.elapsed_ms << ",\"payload_ms\":" << w.payload_ms
++        << ",\"callback_buffers_capacity_bytes\":" << worker_callback_bytes[i] << ",\"callback_work\":{";
++    print_fields(digests[i].work, callback_fields);
++    std::cout << "},\"digest\":"; print_digest(digests[i]);
++    std::cout << '}';
++  }
++  std::cout << "],\"memory\":{\"input_capacity_bytes\":" << input_bytes << ",\"cloud_retained_bytes\":" << cloud_bytes
++      << ",\"index_retained_bytes\":" << index_bytes << ",\"callback_buffers_capacity_bytes\":" << callback_bytes
++      << ",\"callback_state_bytes\":" << callback_state_bytes << ",\"callback_slots\":" << digests.size()
++      << "},\"timings\":{\"generation_ms\":" << milliseconds(started, generated)
++      << ",\"cloud_ms\":" << milliseconds(generated, prepared) << ",\"index_ms\":" << milliseconds(prepared, indexed)
++      << ",\"pipeline_and_callback_ms\":" << milliseconds(indexed, processed)
++      << ",\"validation_ms\":" << milliseconds(processed, validated)
++      << ",\"destruction_ms\":" << milliseconds(validated, finished) << ",\"total_ms\":" << milliseconds(started, finished)
++      << ",\"pipeline_wall_ms\":" << result.total_ms << ",\"partition_ms\":" << result.partition_ms
++      << ",\"worker_ms_sum\":" << result.worker_ms_sum << ",\"payload_ms_sum\":" << result.payload_ms_sum << "}}\n";
++  return 0;
++}
++
++}  // namespace
++
++int main(int argc, char** argv) {
++  try {
++    return run(options(argc, argv));
++  } catch (const std::exception& error) {
++    std::cerr << "mhgp8 inheritance probe: " << error.what() << '\n';
++    return 2;
++  }
++}

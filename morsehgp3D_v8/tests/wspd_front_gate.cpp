@@ -63,6 +63,11 @@ struct Gate {
   u64 extended_rejections{};
   u64 extension_only_pairs{};  // q2 pairs covered by the historical window, rejected only by the extension.
   u64 limit_bites{};           // Runs whose finite small-factor limit changed the work.
+  // Inherited witness identifiers (WspdFrontProposals::inherit_witnesses).
+  u64 inheriting_runs{};
+  u64 inherited_credits{};
+  u64 inherited_duplicates{};
+  u64 inheritance_only_pairs{};  // q2 pairs kept by window 4K alone, rejected with inherited witnesses.
   u64 historical_constant_checks{};
 
   void require(bool condition, const char* message) {
@@ -330,18 +335,35 @@ Capture checked_front(Gate& gate, const Q2CensusIndex& index, const PairOracle& 
                    work.extended_proposals_in_factors <= work.extended_proposals &&
                    work.extended_proposals_in_factors <= work.proposals_in_factors &&
                    work.extended_credits <= work.witness_lane_credits &&
-                   work.extended_credits <= work.extended_proposals - work.extended_proposals_in_factors &&
+                   work.extended_inherited_duplicates <= work.inherited_duplicates &&
+                   work.extended_credits + work.extended_inherited_duplicates <=
+                       work.extended_proposals - work.extended_proposals_in_factors &&
                    work.extended_rejections <= work.extended_credits &&
                    work.extended_rejections <= work.extended_products &&
                    work.extended_rejections <= work.fully_rejected_products &&
-                   work.h_bound_tests + work.proposals_in_factors == work.proposed_sites &&
+                   work.h_bound_tests + work.proposals_in_factors + work.inherited_duplicates == work.proposed_sites &&
                    work.witness_lane_credits <= 3 * work.proposed_sites,
                "midpoint sampling exceeded its bounded one-path proposal envelope");
   if (proposals.window_factor == 1 || mode == WspdFrontMode::Pure) {
     gate.require(work.extended_products == 0 && work.extended_proposals == 0 &&
                      work.extended_proposals_in_factors == 0 && work.extended_credits == 0 &&
-                     work.extended_rejections == 0,
+                     work.extended_rejections == 0 && work.extended_inherited_duplicates == 0,
                  "historical window reported extension work");
+  }
+  if (proposals.inherit_witnesses) {
+    // q2 lane alone. Every searched product is rejected with Kmax credits, emitted with its
+    // final credits, or split, its credits being received once by each of its two children.
+    gate.require(work.inherited_duplicates <= work.inherited_credits && work.inherited_credits % 2 == 0 &&
+                     work.inherited_credits <= (kmax - 1) * work.witness_searches &&
+                     work.inherited_rejections <= work.fully_rejected_products &&
+                     work.witness_lane_credits + work.inherited_credits / 2 ==
+                         kmax * work.fully_rejected_products + work.emitted_witness_credits,
+                 "inherited witness ledger does not close");
+  } else {
+    gate.require(work.inherited_credits == 0 && work.inherited_duplicates == 0 &&
+                     work.extended_inherited_duplicates == 0 && work.inherited_rejections == 0 &&
+                     work.emitted_witness_credits == 0,
+                 "front without inheritance reported inherited witnesses");
   }
   if (mode == WspdFrontMode::Pure) {
     gate.require(work.witness_searches == 0 && work.witness_descent_steps == 0 &&
@@ -487,7 +509,9 @@ void corpus(Gate& gate) {
           // only reject MORE pairs: the q2 lane falls iff the creditable ranks of
           // the whole window reach Kmax, which is monotone in the window and in
           // the small-factor limit.
-          static_assert(mhgp8::WspdFrontProposals{}.window_factor == 1);
+          static_assert(mhgp8::WspdFrontProposals{}.window_factor == 1 &&
+                        mhgp8::WspdFrontProposals{}.small_factor_limit == std::numeric_limits<std::size_t>::max() &&
+                        !mhgp8::WspdFrontProposals{}.inherit_witnesses);
           const auto unlimited = std::numeric_limits<std::size_t>::max();
           const auto q2_only = checked_front(gate, *index, oracle, kmax, separation_s,
                                              WspdFrontMode::MidpointSamples, {}, 1);
@@ -524,6 +548,32 @@ void corpus(Gate& gate) {
                               static_cast<u64>(!(wide4_leaf.result.work == wide4.result.work));
           for (std::size_t offset = 0; offset < q2_only.cover[0].size(); ++offset)
             gate.extension_only_pairs += static_cast<u64>(q2_only.cover[0][offset] == 1 && wide4.cover[0][offset] == 0);
+          // Inherited witness identifiers (q2 lane alone). The same independent pair
+          // oracle judges every rejection (checked_front): a received rank counted twice
+          // would reject a pair below Kmax. A search with a received list never stops
+          // later than the same window alone: supports are unchanged, and the pairs
+          // rejected can only grow, in the window as in the limit.
+          const auto inherit = [&](mhgp8::WspdFrontProposals proposals) {
+            ++gate.inheriting_runs;
+            auto capture = checked_front(gate, *index, oracle, kmax, separation_s, WspdFrontMode::MidpointSamples, proposals, 1);
+            gate.inherited_credits += capture.result.work.inherited_credits;
+            gate.inherited_duplicates += capture.result.work.inherited_duplicates;
+            return capture;
+          };
+          const auto inherit1 = inherit({1, unlimited, true}), inherit2 = inherit({2, unlimited, true});
+          const auto inherit4 = inherit({4, unlimited, true}), inherit4_leaf = inherit({4, 1, true});
+          for (const auto* capture : {&inherit1, &inherit2, &inherit4, &inherit4_leaf})
+            gate.require(pure_supports == q2_supports(gate, capture->cover, oracle, kmax, original_ids),
+                         "inherited witnesses changed direct-census q2 supports");
+          subset(inherit1, q2_only, "inherited witnesses rejected fewer pairs than the historical window");
+          subset(inherit2, wide2, "inherited witnesses rejected fewer pairs than window 2K alone");
+          subset(inherit4, wide4, "inherited witnesses rejected fewer pairs than window 4K alone");
+          subset(inherit4_leaf, wide4_leaf, "inherited witnesses rejected fewer pairs than leaf-only window 4K alone");
+          subset(inherit2, inherit1, "window 2K with inherited witnesses rejected fewer pairs than the historical one");
+          subset(inherit4, inherit2, "window 4K with inherited witnesses rejected fewer pairs than window 2K");
+          subset(inherit4, inherit4_leaf, "unlimited window 4K with inherited witnesses rejected fewer pairs than leaf-only");
+          for (std::size_t offset = 0; offset < wide4.cover[0].size(); ++offset)
+            gate.inheritance_only_pairs += static_cast<u64>(wide4.cover[0][offset] == 1 && inherit4.cover[0][offset] == 0);
         }
         ++k_slot;
       }
@@ -568,6 +618,17 @@ void rejection_and_models(Gate& gate) {
   gate.rejects([&] { static_cast<void>(mhgp8::make_wspd_front_jobs(index, 5, 8, WspdFrontMode::MidpointSamples, 4, 7,
                                                             mhgp8::WspdFrontProposals{4, 16})); },
                "front jobs widened the proposal window of a q3/q4 lane");
+  const mhgp8::WspdFrontProposals inheriting{1, std::numeric_limits<std::size_t>::max(), true};
+  gate.rejects([&] { static_cast<void>(mhgp8::run_wspd_front(*index, 2, 8, WspdFrontMode::Pure, consumer, 1, inheriting)); },
+               "Pure front accepted inherited witnesses");
+  for (const std::uint8_t mask : {std::uint8_t{7}, std::uint8_t{3}, std::uint8_t{2}}) {
+    gate.rejects([&] { static_cast<void>(mhgp8::run_wspd_front(*index, 2, 8, WspdFrontMode::MidpointSamples, consumer, mask,
+                                                        inheriting)); },
+                 "front inherited witnesses with a q3/q4 lane");
+  }
+  gate.rejects([&] { static_cast<void>(mhgp8::make_wspd_front_jobs(index, 5, 8, WspdFrontMode::MidpointSamples, 4, 7,
+                                                            inheriting)); },
+               "front jobs inherited witnesses with a q3/q4 lane");
   for (const unsigned s : {0U}) {
     gate.rejects([&] { static_cast<void>(mhgp8::run_wspd_front(*index, 2, s, WspdFrontMode::Pure, consumer)); },
                  "front accepted a zero separation");
@@ -702,10 +763,12 @@ int main(int argc, char** argv) {
                      gate.nonsingleton_rectangles > 0 && gate.partial_lane_rectangles > 0 &&
                      gate.absent_lane_pairs > 0 && gate.residual_lane_pairs > 0 &&
                      gate.q2_support_checks > 1000 && gate.permutations == 15 &&
-                     gate.invalid_inputs >= 20 && gate.model_mutants >= 7 && gate.callback_exceptions == 1 &&
+                     gate.invalid_inputs >= 25 && gate.model_mutants >= 7 && gate.callback_exceptions == 1 &&
                      gate.witness_searches > 0 && gate.witness_descent_steps > 0 && gate.proposed_sites > 0 &&
                      gate.widened_runs >= 1440 && gate.extended_products > 0 && gate.extended_proposals > 0 &&
                      gate.extended_rejections > 0 && gate.extension_only_pairs > 0 && gate.limit_bites > 0 &&
+                     gate.inheriting_runs >= 1440 && gate.inherited_credits > 0 && gate.inherited_duplicates > 0 &&
+                     gate.inheritance_only_pairs > 0 &&
                      gate.historical_constant_checks == 2,
                  "WSPD front qualification lost a non-vacuity floor");
     std::cout << "mhgp8_wspd_front_gate passed checks=" << gate.checks << " clouds=" << gate.clouds
@@ -721,7 +784,10 @@ int main(int argc, char** argv) {
               << " widened_runs=" << gate.widened_runs << " extended_products=" << gate.extended_products
               << " extended_proposals=" << gate.extended_proposals
               << " extended_rejections=" << gate.extended_rejections
-              << " extension_only_pairs=" << gate.extension_only_pairs << " limit_bites=" << gate.limit_bites << '\n';
+              << " extension_only_pairs=" << gate.extension_only_pairs << " limit_bites=" << gate.limit_bites
+              << " inheriting_runs=" << gate.inheriting_runs << " inherited_credits=" << gate.inherited_credits
+              << " inherited_duplicates=" << gate.inherited_duplicates
+              << " inheritance_only_pairs=" << gate.inheritance_only_pairs << '\n';
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "mhgp8_wspd_front_gate failed: " << error.what() << '\n';

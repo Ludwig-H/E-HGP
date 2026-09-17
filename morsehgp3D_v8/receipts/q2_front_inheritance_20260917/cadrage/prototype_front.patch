@@ -1,0 +1,228 @@
+--- a/morsehgp3D_v8/src/wspd/front.cpp
++++ b/morsehgp3D_v8/src/wspd/front.cpp
+@@ -3,6 +3,9 @@
+ #include "spindle/predicates.hpp"
+ 
+ #include <algorithm>
++#include <cstdlib>
++#include <cstdio>
++#include <atomic>
+ #include <array>
+ #include <condition_variable>
+ #include <deque>
+@@ -45,6 +48,11 @@
+   return range.first <= rank && rank < range.last;
+ }
+ 
++struct ProtoHist { std::atomic<unsigned long long> searches[8]{}, rejected[8]{}, zero_credit[8]{}, tests[8]{}; 
++  std::atomic<unsigned long long> climb_tests{};
++  ~ProtoHist() { if (std::getenv("PROTO_CLIMB_REPORT")) std::fprintf(stderr, "CLIMB tests %llu\n", climb_tests.load()); if (!std::getenv("PROTO_HIST")) return; static const char* names[8] = {"r<1/4","r<1","r<4","r<16","r<64","r>=64","single","-"};
++    for (int i = 0; i < 7; ++i) std::fprintf(stderr, "HIST %s searches %llu rejected %llu zero_credit %llu tests %llu\n", names[i], searches[i].load(), rejected[i].load(), zero_credit[i].load(), tests[i].load()); } };
++static ProtoHist proto_hist;
+ struct Task {
+   std::size_t a{};
+   std::size_t b{};
+@@ -55,6 +63,12 @@
+   std::uint32_t dfs_pending{};
+   std::uint8_t mask{};
+   bool terminal{};
++  std::array<std::uint32_t, 9> inherited{};
++  std::uint8_t inherited_count{};
++  std::uint8_t pivot_credits{};
++  bool has_pivot{};
++  std::uint32_t pivot{};
++  std::size_t hint{static_cast<std::size_t>(-1)};
+ };
+ 
+ class Front {
+@@ -66,6 +80,17 @@
+         points_(index.cloud().points()), kmax_(kmax), separation_(separation),
+         mode_(mode), consumer_(consumer), proposals_(proposals) {
+     const auto n = points_.size();
++    if (const char* e = std::getenv("PROTO_INHERIT")) proto_inherit_ = std::atoi(e) != 0;
++    if (const char* e = std::getenv("PROTO_MINMASS")) proto_minmass_ = static_cast<u64>(std::atoll(e));
++    if (const char* e = std::getenv("PROTO_RESTART")) { proto_restart_ = std::atoi(e) == 1; proto_climb_ = std::atoi(e) == 2; }
++    if (proto_climb_) {
++      parent_.assign(nodes_.size(), static_cast<std::size_t>(-1));
++      for (std::size_t i = 0; i < nodes_.size(); ++i) {
++        if (nodes_[i].left != Q2SpatialNode::absent) { parent_[nodes_[i].left] = i; parent_[nodes_[i].right] = i; }
++      }
++    }
++    if (const char* e = std::getenv("PROTO_SKIP")) proto_skip_ = std::atoi(e);
++    if (const char* e = std::getenv("PROTO_PIVOT")) proto_pivot_ = std::atoi(e);
+     // Divide before multiplying, so even a representable choose(n,2)
+     // does not require the larger ordered-pair count to fit u64.
+     result_.total_unordered_pairs = n % 2 == 0 ? product(n / 2, n - 1)
+@@ -109,7 +134,8 @@
+       return;
+     }
+     auto mask = task.mask;
+-    if (mode_ == WspdFrontMode::MidpointSamples) mask = filter(a, b, mask);
++    Task state = task;
++    if (mode_ == WspdFrontMode::MidpointSamples) mask = filter(a, b, mask, state);
+     const auto mass = product(a.range.size(), b.range.size());
+     for (unsigned lane = 0; lane < 3; ++lane) {
+       const auto bit = static_cast<std::uint8_t>(1U << lane);
+@@ -136,10 +162,17 @@
+     if (split.left == Q2SpatialNode::absent)
+       throw std::logic_error("mhgp8 WSPD distinct singleton boxes must be separated");
+     result_.work.max_stack_size = std::max(result_.work.max_stack_size, static_cast<u64>(task.dfs_pending) + 2);
+-    push(Task{split_a ? split.right : task.a, split_a ? task.b : split.right,
+-              task.depth + 1, task.dfs_pending, mask, false});
+-    push(Task{split_a ? split.left : task.a, split_a ? task.b : split.left,
+-              task.depth + 1, task.dfs_pending + 1, mask, false});
++    Task right_child{split_a ? split.right : task.a, split_a ? task.b : split.right,
++              task.depth + 1, task.dfs_pending, mask, false};
++    Task left_child{split_a ? split.left : task.a, split_a ? task.b : split.left,
++              task.depth + 1, task.dfs_pending + 1, mask, false};
++    for (Task* child : {&right_child, &left_child}) {
++      child->inherited = state.inherited; child->inherited_count = state.inherited_count;
++      child->hint = state.hint;
++      child->pivot_credits = state.pivot_credits; child->has_pivot = state.has_pivot; child->pivot = state.pivot;
++    }
++    push(right_child);
++    push(left_child);
+   }
+ 
+   [[nodiscard]] WspdFrontResult run(Task initial) {
+@@ -177,14 +210,19 @@
+     counter_add(result_.work.witness_box_distance_tests);
+     i64 result = 0;
+     for (std::size_t axis = 0; axis < 3; ++axis) {
++#ifdef PROTO_FASTMAX
++      const auto delta = std::max<i64>(0, std::max<i64>(4 * static_cast<i64>(box.low[axis]) - center4[axis],
++                                         center4[axis] - 4 * static_cast<i64>(box.high[axis])));
++#else
+       const auto delta = std::max<i64>({0, 4 * static_cast<i64>(box.low[axis]) - center4[axis],
+                                          center4[axis] - 4 * static_cast<i64>(box.high[axis])});
++#endif
+       result += delta * delta;
+     }
+     return result;  // 16 times squared distance; <=48*65535^2 fits i64.
+   }
+ 
+-  std::uint8_t filter(const Q2SpatialNode& a, const Q2SpatialNode& b, std::uint8_t mask) {
++  std::uint8_t filter(const Q2SpatialNode& a, const Q2SpatialNode& b, std::uint8_t mask, Task& state) {
+     unsigned needed = kmax_;
+     for (unsigned lane = 0; lane < 3; ++lane) {
+       if ((mask & (1U << lane)) != 0) needed = std::min(needed, thresholds_[lane]);
+@@ -198,8 +236,50 @@
+       center4[axis] = static_cast<i64>(a.box.low[axis]) + a.box.high[axis] +
+                      b.box.low[axis] + b.box.high[axis];
+     }
++    int bucket = 6;
++    {
++      const auto dmax = std::max(diagonal2(a.box), diagonal2(b.box));
++      const auto g = gap2(a.box, b.box);
++      if (dmax != 0) bucket = 4 * g < dmax ? 0 : g < dmax ? 1 : g < 4 * dmax ? 2 : g < 16 * dmax ? 3 : g < 64 * dmax ? 4 : 5;
++    }
++    if (proto_skip_ >= 0 && bucket <= proto_skip_) return mask;
++    if (product(a.range.size(), b.range.size()) < proto_minmass_) return mask;
++    proto_hist.searches[bucket]++;
++    const auto tests_before = result_.work.h_bound_tests;
++    const bool proto = (proto_inherit_ || proto_pivot_ != 0);
++    if (proto && mask != 1) throw std::logic_error("proto q2 only");
++    const bool reuse = state.has_pivot && (proto_pivot_ == 1 || (proto_pivot_ == 2 && state.pivot_credits >= 1) ||
++                                           (proto_pivot_ == 3 && 2U * state.pivot_credits >= kmax_));
+     std::size_t node = 0;
+-    while (nodes_[node].left != Q2SpatialNode::absent) {
++    unsigned path_len = 1;
++    if (proto_restart_ && !reuse && path_len_ > 1) {
++      unsigned lo = 0, hi = path_len_ - 1;
++      while (lo < hi) {
++        const unsigned mid = (lo + hi + 1) / 2;
++        const auto& box = nodes_[path_[mid]].box;
++        bool inside = true;
++        for (std::size_t axis = 0; axis < 3; ++axis)
++          inside = inside && 4 * static_cast<i64>(box.low[axis]) <= center4[axis] && center4[axis] <= 4 * static_cast<i64>(box.high[axis]);
++        proto_restart_tests_++;
++        if (inside) lo = mid; else hi = mid - 1;
++      }
++      node = path_[lo];
++      path_len = lo + 1;
++    }
++    path_[0] = 0;
++    if (proto_climb_ && state.hint != static_cast<std::size_t>(-1)) {
++      node = state.hint;
++      for (;;) {
++        const auto& box = nodes_[node].box;
++        bool inside = true;
++        for (std::size_t axis = 0; axis < 3; ++axis)
++          inside = inside && 4 * static_cast<i64>(box.low[axis]) <= center4[axis] && center4[axis] <= 4 * static_cast<i64>(box.high[axis]);
++        proto_restart_tests_++;
++        if (inside || node == 0) break;
++        node = parent_[node];
++      }
++    }
++    while (!reuse && nodes_[node].left != Q2SpatialNode::absent) {
+       counter_add(result_.work.witness_descent_steps);
+       const auto left = nodes_[node].left;
+       const auto right = nodes_[node].right;
+@@ -208,11 +288,17 @@
+       const auto left_distance = midpoint_distance4(center4, nodes_[left].box);
+       const auto right_distance = midpoint_distance4(center4, nodes_[right].box);
+       node = left_distance <= right_distance ? left : right;
++      path_[path_len++] = node;
+     }
+     const auto count = std::min<std::size_t>(kmax_, order_.size());
+-    const auto pivot = nodes_[node].range.first;
++    if (!reuse) path_len_ = path_len;
++    if (proto_climb_) state.hint = node;
++    const auto pivot = reuse ? static_cast<std::size_t>(state.pivot) : nodes_[node].range.first;
+     const auto window = wspd_proposal_window(pivot, count, order_.size());
+     std::array<unsigned, 3> credits{};
++    if (proto_inherit_) credits[0] = state.inherited_count;
++    const auto in_count = proto_inherit_ ? state.inherited_count : std::uint8_t{0};
++    const auto in_list = state.inherited;
+     // ONE inlined loop body serves three rank intervals: the historical window,
+     // then, for an eligible surviving product, the left and the right complement
+     // of the wider window around the same pivot. The inner loop is the historical
+@@ -251,6 +337,11 @@
+           if (extension) counter_add(result_.work.extended_proposals_in_factors);
+           continue;
+         }
++        if (in_count != 0) {
++          bool duplicate = false;
++          for (unsigned i = 0; i < in_count; ++i) duplicate = duplicate || in_list[i] == rank;
++          if (duplicate) continue;
++        }
+         const auto z = singleton_box(points_[order_[rank]]);
+         counter_add(result_.work.h_bound_tests);
+         const auto h = spindle_detail::h_minimum(a.box, b.box, z);
+@@ -266,6 +357,7 @@
+           if ((mask & bit) != 0 && (lane == 0 || (lane == 1 ? 3 : 2) * h2 > xi)) {
+             counter_add(result_.work.witness_lane_credits);
+             if (extension) counter_add(result_.work.extended_credits);
++            if (proto_inherit_ && lane == 0 && state.inherited_count < 9) state.inherited[state.inherited_count++] = static_cast<std::uint32_t>(rank);
+             if (++credits[lane] == thresholds_[lane]) mask &= static_cast<std::uint8_t>(~bit);
+           }
+         }
+@@ -276,6 +368,11 @@
+     // validate_front guarantees the q2 lane alone for a widened window: an empty
+     // mask after an extension means that the Kmax-th q2 credit came from an extra rank.
+     if (extension && mask == 0) counter_add(result_.work.extended_rejections);
++    if (mask == 0) proto_hist.rejected[bucket]++;
++    if (credits[0] == (proto_inherit_ ? in_count : 0)) proto_hist.zero_credit[bucket]++;
++    proto_hist.tests[bucket] += result_.work.h_bound_tests - tests_before;
++    proto_hist.climb_tests += proto_restart_tests_; proto_restart_tests_ = 0;
++    state.has_pivot = true; state.pivot = static_cast<std::uint32_t>(pivot); state.pivot_credits = static_cast<std::uint8_t>(std::min<unsigned>(credits[0], 255));
+     return mask;
+   }
+ 
+@@ -309,6 +406,16 @@
+   WspdFrontMode mode_;
+   const WspdRectangleConsumer& consumer_;
+   WspdFrontProposals proposals_;
++  bool proto_inherit_{};
++  int proto_skip_{-1};
++  bool proto_restart_{};
++  bool proto_climb_{};
++  std::vector<std::size_t> parent_;
++  std::array<std::size_t, 128> path_{};
++  unsigned path_len_{0};
++  u64 proto_restart_tests_{0};
++  u64 proto_minmass_{0};
++  int proto_pivot_{};
+   std::array<unsigned, 3> thresholds_{};
+   WspdFrontResult result_;
+ };

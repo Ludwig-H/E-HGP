@@ -1,0 +1,16 @@
+{
+  "kind": "gate",
+  "command": [
+    "/workspaces/E-HGP/build/v8_front_inheritance_tsan_clang_20260917/mhgp8_wspd_front_dispatch_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-17T18:38:37.472058+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"schema\":\"mhgp8_wspd_front_dispatch_gate_v1\",\"status\":\"passed\",\"public_status\":\"not_claimed\",\"checks\":60146,\"oracle_sites\":43890,\"reference_runs\":298,\"dispatch_runs\":296,\"donations\":701,\"full_refusals\":950,\"reduced_rectangles\":165,\"masked_cases\":5,\"zero_seed_cases\":32,\"ownership_cases\":1,\"waits\":372,\"cross_worker_transfers\":1,\"callback_failures\":1,\"launch_failures\":1,\"invalid_inputs\":4,\"widened_cases\":72,\"extended_products\":4379,\"inheriting_cases\":72,\"inherited_credits\":1586,\"seed_witness_ranks\":94,\"donated_witness_ranks\":96,\"inherited_transfers\":1}\n",
+  "stderr": "",
+  "stdout_base64": "eyJzY2hlbWEiOiJtaGdwOF93c3BkX2Zyb250X2Rpc3BhdGNoX2dhdGVfdjEiLCJzdGF0dXMiOiJwYXNzZWQiLCJwdWJsaWNfc3RhdHVzIjoibm90X2NsYWltZWQiLCJjaGVja3MiOjYwMTQ2LCJvcmFjbGVfc2l0ZXMiOjQzODkwLCJyZWZlcmVuY2VfcnVucyI6Mjk4LCJkaXNwYXRjaF9ydW5zIjoyOTYsImRvbmF0aW9ucyI6NzAxLCJmdWxsX3JlZnVzYWxzIjo5NTAsInJlZHVjZWRfcmVjdGFuZ2xlcyI6MTY1LCJtYXNrZWRfY2FzZXMiOjUsInplcm9fc2VlZF9jYXNlcyI6MzIsIm93bmVyc2hpcF9jYXNlcyI6MSwid2FpdHMiOjM3MiwiY3Jvc3Nfd29ya2VyX3RyYW5zZmVycyI6MSwiY2FsbGJhY2tfZmFpbHVyZXMiOjEsImxhdW5jaF9mYWlsdXJlcyI6MSwiaW52YWxpZF9pbnB1dHMiOjQsIndpZGVuZWRfY2FzZXMiOjcyLCJleHRlbmRlZF9wcm9kdWN0cyI6NDM3OSwiaW5oZXJpdGluZ19jYXNlcyI6NzIsImluaGVyaXRlZF9jcmVkaXRzIjoxNTg2LCJzZWVkX3dpdG5lc3NfcmFua3MiOjk0LCJkb25hdGVkX3dpdG5lc3NfcmFua3MiOjk2LCJpbmhlcml0ZWRfdHJhbnNmZXJzIjoxfQo=",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-17T18:38:38.324687+00:00"
+}

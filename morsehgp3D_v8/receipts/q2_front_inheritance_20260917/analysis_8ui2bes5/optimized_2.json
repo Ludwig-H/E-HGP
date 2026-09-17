@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_wspd_q2_inheritance_checks.py",
+    "read",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/q2_front_inheritance_20260917/parallel_3pq0wb_6"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-17T19:24:45.785735+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"full_contract_qualified\": false, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q2_front_inheritance_20260917/parallel_3pq0wb_6\", \"q2_measures\": 56, \"records\": 56, \"status\": \"passed\"}\n",
+  "stderr": "",
+  "stdout_base64": "eyJmdWxsX2NvbnRyYWN0X3F1YWxpZmllZCI6IGZhbHNlLCAicGF0aCI6ICIvd29ya3NwYWNlcy9FLUhHUC9tb3JzZWhncDNEX3Y4L3JlY2VpcHRzL3EyX2Zyb250X2luaGVyaXRhbmNlXzIwMjYwOTE3L3BhcmFsbGVsXzNwcTB3Yl82IiwgInEyX21lYXN1cmVzIjogNTYsICJyZWNvcmRzIjogNTYsICJzdGF0dXMiOiAicGFzc2VkIn0K",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-17T19:24:45.922627+00:00"
+}

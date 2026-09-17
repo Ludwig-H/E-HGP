@@ -1,0 +1,57 @@
+clusters  n=8000   K=10  ref 2K/16        ms     1824 x1.000 cand x1.000 prod x1.000 desc x1.000 h x1.000 cnv x1.000 =
+clusters  n=8000   K=10  restart          ms     1640 x0.899 cand x1.000 prod x1.000 desc x0.363 h x1.000 cnv x1.000 =
+clusters  n=8000   K=10  inherit          ms     1695 x0.930 cand x0.838 prod x0.886 desc x0.886 h x0.696 cnv x0.850 =
+clusters 8000 10 minmass2 FAILED mhgp8 proposals probe: historical-window part of the proposal ledger mismatch
+
+clusters  n=8000   K=10  restart+inherit  ms     1536 x0.842 cand x0.838 prod x0.886 desc x0.314 h x0.696 cnv x0.850 =
+clusters  n=8000   K=10  all three        ms     1438 x0.788 cand x0.983 prod x0.886 desc x0.223 h x0.470 cnv x0.996 =
+terrain   n=8000   K=10  ref 2K/16        ms      656 x1.000 cand x1.000 prod x1.000 desc x1.000 h x1.000 cnv x1.000 =
+terrain   n=8000   K=10  restart          ms      600 x0.915 cand x1.000 prod x1.000 desc x0.323 h x1.000 cnv x1.000 =
+terrain   n=8000   K=10  inherit          ms      619 x0.943 cand x0.839 prod x0.886 desc x0.884 h x0.689 cnv x0.866 =
+terrain   n=8000   K=10  minmass2         ms      587 x0.895 cand x1.046 prod x1.000 desc x0.727 h x0.707 cnv x1.048 =
+terrain   n=8000   K=10  restart+inherit  ms      567 x0.865 cand x0.839 prod x0.886 desc x0.276 h x0.689 cnv x0.866 =
+terrain   n=8000   K=10  all three        ms      510 x0.778 cand x0.885 prod x0.886 desc x0.204 h x0.469 cnv x0.914 =
+rows      n=8000   K=10  ref 2K/16        ms      243 x1.000 cand x1.000 prod x1.000 desc x1.000 h x1.000 cnv x1.000 =
+rows      n=8000   K=10  restart          ms      217 x0.891 cand x1.000 prod x1.000 desc x0.150 h x1.000 cnv x1.000 =
+rows      n=8000   K=10  inherit          ms      234 x0.964 cand x1.000 prod x1.000 desc x1.000 h x0.806 cnv x1.000 =
+rows      n=8000   K=10  minmass2         ms      213 x0.875 cand x1.000 prod x1.000 desc x0.580 h x0.526 cnv x1.000 =
+rows      n=8000   K=10  restart+inherit  ms      220 x0.904 cand x1.000 prod x1.000 desc x0.150 h x0.806 cnv x1.000 =
+rows 8000 10 all three FAILED mhgp8 proposals probe: historical-window part of the proposal ledger mismatch
+
+uniform   n=8000   K=5   ref 2K/16        ms     1191 x1.000 cand x1.000 prod x1.000 desc x1.000 h x1.000 cnv x1.000 =
+uniform   n=8000   K=5   restart          ms     1047 x0.880 cand x1.000 prod x1.000 desc x0.400 h x1.000 cnv x1.000 =
+uniform   n=8000   K=5   inherit          ms     1041 x0.874 cand x0.816 prod x0.855 desc x0.855 h x0.671 cnv x0.832 =
+uniform   n=8000   K=5   minmass2         ms     1093 x0.917 cand x1.240 prod x1.000 desc x0.728 h x0.711 cnv x1.242 =
+uniform   n=8000   K=5   restart+inherit  ms      905 x0.760 cand x0.816 prod x0.855 desc x0.333 h x0.671 cnv x0.832 =
+uniform   n=8000   K=5   all three        ms      873 x0.733 cand x1.031 prod x0.855 desc x0.253 h x0.480 cnv x1.046 =
+uniform   n=32000  K=10  ref 2K/16        ms    13579 x1.000 cand x1.000 prod x1.000 desc x1.000 h x1.000 cnv x1.000 =
+uniform   n=32000  K=10  restart          ms    12141 x0.894 cand x1.000 prod x1.000 desc x0.356 h x1.000 cnv x1.000 =
+uniform   n=32000  K=10  inherit          ms    11555 x0.851 cand x0.759 prod x0.798 desc x0.798 h x0.610 cnv x0.775 =
+uniform   n=32000  K=10  minmass2         ms    12534 x0.923 cand x1.148 prod x1.000 desc x0.734 h x0.718 cnv x1.159 =
+uniform   n=32000  K=10  restart+inherit  ms    10354 x0.763 cand x0.759 prod x0.798 desc x0.272 h x0.610 cnv x0.775 =
+uniform   n=32000  K=10  all three        ms     9833 x0.724 cand x0.891 prod x0.798 desc x0.204 h x0.432 cnv x0.914 =
+uniform   n=32000  K=5   ref 2K/16        ms     5478 x1.000 cand x1.000 prod x1.000 desc x1.000 h x1.000 cnv x1.000 =
+uniform   n=32000  K=5   restart          ms     4642 x0.847 cand x1.000 prod x1.000 desc x0.360 h x1.000 cnv x1.000 =
+uniform   n=32000  K=5   inherit          ms     4800 x0.876 cand x0.818 prod x0.849 desc x0.849 h x0.665 cnv x0.834 =
+uniform   n=32000  K=5   minmass2         ms     5109 x0.933 cand x1.253 prod x1.000 desc x0.742 h x0.723 cnv x1.256 =
+uniform   n=32000  K=5   restart+inherit  ms     4102 x0.749 cand x0.818 prod x0.849 desc x0.298 h x0.665 cnv x0.834 =
+uniform   n=32000  K=5   all three        ms     3958 x0.722 cand x1.046 prod x0.849 desc x0.230 h x0.483 cnv x1.062 =
+clusters  n=32000  K=10  ref 2K/16        ms    10871 x1.000 cand x1.000 prod x1.000 desc x1.000 h x1.000 cnv x1.000 =
+clusters  n=32000  K=10  restart          ms     9673 x0.890 cand x1.000 prod x1.000 desc x0.334 h x1.000 cnv x1.000 =
+clusters  n=32000  K=10  inherit          ms     9612 x0.884 cand x0.787 prod x0.830 desc x0.830 h x0.638 cnv x0.807 =
+clusters  n=32000  K=10  minmass2         ms     9936 x0.914 cand x1.141 prod x1.000 desc x0.711 h x0.698 cnv x1.144 =
+clusters  n=32000  K=10  restart+inherit  ms     8580 x0.789 cand x0.787 prod x0.830 desc x0.267 h x0.638 cnv x0.807 =
+clusters  n=32000  K=10  all three        ms     8059 x0.741 cand x0.915 prod x0.830 desc x0.196 h x0.442 cnv x0.936 =
+terrain   n=32000  K=10  ref 2K/16        ms     3012 x1.000 cand x1.000 prod x1.000 desc x1.000 h x1.000 cnv x1.000 =
+terrain   n=32000  K=10  restart          ms     2646 x0.879 cand x1.000 prod x1.000 desc x0.284 h x1.000 cnv x1.000 =
+terrain   n=32000  K=10  inherit          ms     2828 x0.939 cand x0.838 prod x0.883 desc x0.881 h x0.684 cnv x0.867 =
+terrain   n=32000  K=10  minmass2         ms     2672 x0.887 cand x1.054 prod x1.000 desc x0.709 h x0.688 cnv x1.055 =
+terrain   n=32000  K=10  restart+inherit  ms     2483 x0.825 cand x0.838 prod x0.883 desc x0.242 h x0.684 cnv x0.867 =
+terrain   n=32000  K=10  all three        ms     2211 x0.734 cand x0.892 prod x0.883 desc x0.174 h x0.454 cnv x0.923 =
+rows      n=32000  K=10  ref 2K/16        ms     1016 x1.000 cand x1.000 prod x1.000 desc x1.000 h x1.000 cnv x1.000 =
+rows      n=32000  K=10  restart          ms      920 x0.906 cand x1.000 prod x1.000 desc x0.130 h x1.000 cnv x1.000 =
+rows      n=32000  K=10  inherit          ms     1026 x1.009 cand x1.000 prod x1.000 desc x1.000 h x0.806 cnv x1.000 =
+rows      n=32000  K=10  minmass2         ms      940 x0.925 cand x1.000 prod x1.000 desc x0.580 h x0.526 cnv x1.000 =
+rows      n=32000  K=10  restart+inherit  ms      918 x0.904 cand x1.000 prod x1.000 desc x0.130 h x0.806 cnv x1.000 =
+rows 32000 10 all three FAILED mhgp8 proposals probe: historical-window part of the proposal ledger mismatch
+

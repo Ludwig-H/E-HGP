@@ -46,9 +46,11 @@ Le proposeur ponctuel recommence encore une descente unique depuis la
 racine : son coût O(D+K) est payé et compté par produit. B1 n'est donc
 pas clos. La [fenêtre élargie](P0_SURPROPOSITION_TEMOINS_Q2.md) de la
 vingtième tranche réutilise ce pivot sans seconde descente et réduit le
-nombre de produits visités ; elle ne supprime pas la descente par produit. Le test préalable de lentille et la transmission sans double
-crédit proposés par l'auditeur B sont à comparer au coût total du raccord
-census, pas à introduire comme nouvelles variantes sans consommateur.
+nombre de produits visités ; elle ne supprime pas la descente par produit. La
+transmission sans double crédit proposée par l'auditeur B est portée pour la
+voie q2 par la vingt-et-unième tranche ([témoins hérités](P0_TEMOINS_HERITES_Q2.md)),
+mesurée sur le raccord census complet ; le test préalable de lentille a été
+réfuté par la mesure. Les voies q3/q4 n'en héritent pas encore, faute de juge.
 Sur deux rangées parallèles, les seuls témoins ponctuels W3/W4 laissent
 un résidu quadratique même s'ils sont tous examinés. Des objets collectifs
 et une génération canonique sont requis pour éviter de développer ce résidu.
@@ -114,6 +116,15 @@ aucune attente, le chemin Shared singleton étant déjà sans allocation ni
 pile Z. Verrou B1 inchangé : ce sont les recherches de témoins
 recommencées et le nombre de petites requêtes qu'il faut réduire, d'abord
 au front ([surproposition](P0_SURPROPOSITION_TEMOINS_Q2.md)), pas leur format.
+
+Évolution tranche21 : les [témoins hérités](P0_TEMOINS_HERITES_Q2.md) (option
+explicite, voie q2 seule, défaut inchangé) transmettent aux enfants les rangs
+certifiés du parent, comptés une fois : face à la même fenêtre, le temps q2
+complet vaut ×0,86 à ×0,96 hors rangées à 2K et ×0,50 à ×0,75 à la fenêtre
+historique, supports identiques. B1 reste ouvert : une descente est toujours
+payée par produit visité (sa reprise exacte ne rend que ×0,94 à ×0,98), les
+rangées ne gagnent rien, la croissance du travail restant est inchangée, et
+les voies q3/q4 n'ont pas encore de juge pour en hériter.
 
 Évolution tranche20 : la fenêtre de propositions élargie (option explicite,
 voie q2 seule, défaut inchangé) rejette plus haut dans le front : à 2K, les

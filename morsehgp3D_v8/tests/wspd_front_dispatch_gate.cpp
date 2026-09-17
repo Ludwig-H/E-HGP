@@ -39,6 +39,7 @@ struct Gate {
   u64 reduced_rectangles{}, masked_cases{}, zero_seed_cases{}, ownership_cases{}, waits{};
   u64 cross_worker_transfers{}, callback_failures{}, launch_failures{}, invalid_inputs{};
   u64 widened_cases{}, extended_products{};
+  u64 inheriting_cases{}, inherited_credits{}, seed_witness_ranks{}, donated_witness_ranks{}, inherited_transfers{};
   void require(bool condition, const char* message) {
     ++checks;
     if (!condition) throw std::runtime_error(message);
@@ -133,6 +134,7 @@ DispatchWork run_case(Gate& gate, const mhgp8::Q2CensusIndexPtr& index, const Or
                       mhgp8::WspdFrontProposals proposals = {}) {
   const auto baseline = reference(gate, *index, k, s, mode, mask, proposals);
   gate.extended_products += baseline.result.work.extended_products;
+  gate.inherited_credits += baseline.result.work.inherited_credits;
   const auto plan = mhgp8::make_wspd_front_jobs(index, k, s, mode, target, mask, proposals);
   auto total = plan->prefix_result();
   const auto dispatch = plan->make_dispatch(capacity, interval, declared_workers);
@@ -154,6 +156,24 @@ DispatchWork run_case(Gate& gate, const mhgp8::Q2CensusIndexPtr& index, const Or
     mhgp8::parallel_detail::merge_work(total.work, results[slot].front.work);
     merge(work, results[slot].work);
     rectangles.insert(rectangles.end(), slots[slot].begin(), slots[slot].end());
+  }
+  if (proposals.inherit_witnesses) {
+    // Credit ledger of the workers together. Inside the fragments every searched product is
+    // rejected with Kmax credits, emitted with its final credits, or split, its credits being
+    // received once by each child; donations between workers cancel in the sum. What is left
+    // is exactly the received ranks of the SEED tasks, which crossed the plan and take().
+    u64 closed = 0, opened = 0;
+    for (std::size_t slot = 0; slot < actual_workers; ++slot) {
+      const auto& w = results[slot].front.work;
+      closed += 2 * (u64{k} * w.fully_rejected_products + w.emitted_witness_credits);
+      opened += 2 * w.witness_lane_credits + w.inherited_credits;
+    }
+    gate.require(closed >= opened && (closed - opened) <= u64{k - 1} * plan->job_count(),
+                 "worker credit ledger does not leave at most Kmax-1 received ranks per seed");
+    gate.seed_witness_ranks += closed - opened;
+    gate.donated_witness_ranks += dispatch->donated_witness_ranks();
+  } else {
+    gate.require(dispatch->donated_witness_ranks() == 0, "a front without inheritance donated witness ranks");
   }
   std::sort(rectangles.begin(), rectangles.end());
   gate.require(rectangles == baseline.rectangles && total.work == baseline.result.work &&
@@ -211,6 +231,15 @@ void corpus(Gate& gate) {
           static_cast<void>(run_case(gate, index, expected, k, s, mode, 1, sample % 3 == 0 ? 1 : 13,
                                      sample % 2 == 0 ? 1 : 7, sample % 2 == 0 ? 1 : 4, 2, 2, widened));
           ++gate.widened_cases;
+          // Inherited witnesses (q2 lane alone): the received list travels in the task,
+          // through the seeds, the donation queue and merge_work.
+          const auto max_limit = std::numeric_limits<std::size_t>::max();
+          const mhgp8::WspdFrontProposals inheriting = sample % 3 == 0 ? mhgp8::WspdFrontProposals{1, max_limit, true}
+              : sample % 3 == 1 ? mhgp8::WspdFrontProposals{2, max_limit, true}
+                                : mhgp8::WspdFrontProposals{4, 2, true};
+          static_cast<void>(run_case(gate, index, expected, k, s, mode, 1, sample % 3 == 0 ? 1 : 13,
+                                     sample % 2 == 0 ? 1 : 7, sample % 2 == 0 ? 1 : 4, 2, 2, inheriting));
+          ++gate.inheriting_cases;
         }
         ++sample;
       }
@@ -230,6 +259,43 @@ void corpus(Gate& gate) {
                                WspdFrontMode::MidpointSamples, mask, 1, 1, 1, 2, 1));
     ++gate.masked_cases;
   }
+}
+
+// Received witness lists through BOTH task channels of the dispatcher, deterministically.
+// Bridged cubes (see the front-job gate): at Kmax 5 the product of the two cubes survives its
+// search with three credits and is split, so its descendants carry a non-empty received list.
+void inherited_transfers(Gate& gate) {
+  Points bridged;
+  for (unsigned corner = 0; corner < 8; ++corner) {
+    const auto x = static_cast<std::uint16_t>((corner & 1U) * 6000U);
+    const auto y = static_cast<std::uint16_t>(((corner >> 1U) & 1U) * 6000U);
+    const auto z = static_cast<std::uint16_t>(((corner >> 2U) & 1U) * 6000U);
+    bridged.push_back({x, y, z});
+    bridged.push_back({static_cast<std::uint16_t>(x + 54000U), y, z});
+  }
+  bridged.push_back({30100, 3000, 3000});
+  bridged.push_back({30110, 3010, 2990});
+  bridged.push_back({30120, 2990, 3010});
+  for (unsigned i = 0; i < 8; ++i)
+    bridged.push_back({static_cast<std::uint16_t>(7000U * i + 500U), 65000, static_cast<std::uint16_t>(100U * i)});
+  const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(bridged));
+  const auto expected = oracle(gate, bridged);
+  const mhgp8::WspdFrontProposals inheriting{1, std::numeric_limits<std::size_t>::max(), true};
+  // 1. Seeds: a plan of 63 jobs cuts inside the searched subtree. Whatever the scheduling of
+  //    the two workers, the sum of their credit ledgers is the received ranks of the seeds.
+  auto before = gate.seed_witness_ranks;
+  static_cast<void>(run_case(gate, index, expected, 5, 8, WspdFrontMode::MidpointSamples, 1, 63, 7, 4, 2, 2, inheriting));
+  gate.require(gate.seed_witness_ranks > before, "no seed task of the dispatcher carried a received witness list");
+  // 2. Donation queue: ONE running worker with a declared demand of two donates at every
+  //    expansion and takes its own donations back once its seeds are done. No thread timing:
+  //    the donated tasks are a function of the traversal alone. The seeds of the 63-job plan
+  //    start inside the searched subtree, so the first children they donate carry a list.
+  before = gate.donated_witness_ranks;
+  const auto work = run_case(gate, index, expected, 5, 8, WspdFrontMode::MidpointSamples, 1, 63, 64, 1, 2, 1, inheriting);
+  gate.require(work.donations > 0 && work.stolen_completed == work.donations &&
+                   gate.donated_witness_ranks > before,
+               "no donated task of the dispatcher carried a received witness list");
+  ++gate.inherited_transfers;
 }
 
 // Test-only deadline bounds synchronization bugs. No timing-based claim of
@@ -388,12 +454,14 @@ int main(int argc, char** argv) {
   }
   try {
     Gate gate;
-    corpus(gate); forced_transfer(gate); cancellation(gate);
+    corpus(gate); inherited_transfers(gate); forced_transfer(gate); cancellation(gate);
     gate.require(gate.dispatch_runs >= 150 && gate.oracle_sites > 10000 && gate.donations > 0 &&
                      gate.full_refusals > 0 && gate.reduced_rectangles > 0 && gate.masked_cases == 5 &&
                      gate.zero_seed_cases > 0 && gate.ownership_cases == 1 && gate.callback_failures == 1 &&
                      gate.cross_worker_transfers == 1 && gate.launch_failures == 1 && gate.invalid_inputs == 4 &&
-                     gate.widened_cases >= 60 && gate.extended_products > 0,
+                     gate.widened_cases >= 60 && gate.extended_products > 0 && gate.inheriting_cases >= 60 &&
+                     gate.inherited_credits > 0 && gate.seed_witness_ranks > 0 && gate.donated_witness_ranks > 0 &&
+                     gate.inherited_transfers == 1,
                  "front dispatch gate lost a declared non-vacuity floor");
     std::cout << "{\"schema\":\"mhgp8_wspd_front_dispatch_gate_v1\",\"status\":\"passed\","
               << "\"public_status\":\"not_claimed\",\"checks\":" << gate.checks
@@ -405,7 +473,11 @@ int main(int argc, char** argv) {
               << ",\"cross_worker_transfers\":" << gate.cross_worker_transfers
               << ",\"callback_failures\":" << gate.callback_failures << ",\"launch_failures\":" << gate.launch_failures
               << ",\"invalid_inputs\":" << gate.invalid_inputs
-              << ",\"widened_cases\":" << gate.widened_cases << ",\"extended_products\":" << gate.extended_products << "}\n";
+              << ",\"widened_cases\":" << gate.widened_cases << ",\"extended_products\":" << gate.extended_products
+              << ",\"inheriting_cases\":" << gate.inheriting_cases << ",\"inherited_credits\":" << gate.inherited_credits
+              << ",\"seed_witness_ranks\":" << gate.seed_witness_ranks
+              << ",\"donated_witness_ranks\":" << gate.donated_witness_ranks
+              << ",\"inherited_transfers\":" << gate.inherited_transfers << "}\n";
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "mhgp8_wspd_front_dispatch_gate failed: " << error.what() << '\n';

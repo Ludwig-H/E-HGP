@@ -1,0 +1,16 @@
+{
+  "kind": "gate",
+  "command": [
+    "/workspaces/E-HGP/build/v8_front_inheritance_20260917/mhgp8_wspd_front_inheritance_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-17T18:10:00.594987+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"schema\":\"mhgp8_wspd_front_inheritance_gate_v1\",\"status\":\"passed\",\"public_status\":\"not_claimed\",\"checks\":9008,\"clouds\":15,\"replay_runs\":1125,\"replay_products\":1010472,\"replay_rectangles\":334528,\"nonempty_lists\":398900,\"full_lists\":127175,\"duplicates\":830274,\"extension_duplicates\":111173,\"inherited_rejections\":64952,\"true_inherited_rejections\":16809,\"overcounted_rejections\":48143,\"gained_rejected_mass\":21010,\"fewer_rejected_products\":111,\"safety_runs\":1125,\"safety_pairs\":986250,\"rejected_pairs_judged\":711237,\"named_fixture_checks\":13,\"model_constant_checks\":12,\"historical_constant_checks\":6,\"mutants\":10,\"unsafe_mutants\":4,\"mutant_disagreements\":1334,\"mutant_lost_supports\":41271,\"disagreements_by_mutant\":[165,75,165,40,165,165,164,75,165,155],\"lost_supports_by_unsafe_mutant\":[14768,2348,23911,244],\"oracle_pairs\":39450,\"oracle_sites\":2738760,\"entry_runs\":990,\"entry_inherited_credits\":1347192,\"supports\":293788,\"max_shell\":24,\"invalid_inputs\":19,\"fit_checks\":6,\"wide_rank_runs\":4,\"max_duplicate_rank\":319}\n",
+  "stderr": "",
+  "stdout_base64": "eyJzY2hlbWEiOiJtaGdwOF93c3BkX2Zyb250X2luaGVyaXRhbmNlX2dhdGVfdjEiLCJzdGF0dXMiOiJwYXNzZWQiLCJwdWJsaWNfc3RhdHVzIjoibm90X2NsYWltZWQiLCJjaGVja3MiOjkwMDgsImNsb3VkcyI6MTUsInJlcGxheV9ydW5zIjoxMTI1LCJyZXBsYXlfcHJvZHVjdHMiOjEwMTA0NzIsInJlcGxheV9yZWN0YW5nbGVzIjozMzQ1MjgsIm5vbmVtcHR5X2xpc3RzIjozOTg5MDAsImZ1bGxfbGlzdHMiOjEyNzE3NSwiZHVwbGljYXRlcyI6ODMwMjc0LCJleHRlbnNpb25fZHVwbGljYXRlcyI6MTExMTczLCJpbmhlcml0ZWRfcmVqZWN0aW9ucyI6NjQ5NTIsInRydWVfaW5oZXJpdGVkX3JlamVjdGlvbnMiOjE2ODA5LCJvdmVyY291bnRlZF9yZWplY3Rpb25zIjo0ODE0MywiZ2FpbmVkX3JlamVjdGVkX21hc3MiOjIxMDEwLCJmZXdlcl9yZWplY3RlZF9wcm9kdWN0cyI6MTExLCJzYWZldHlfcnVucyI6MTEyNSwic2FmZXR5X3BhaXJzIjo5ODYyNTAsInJlamVjdGVkX3BhaXJzX2p1ZGdlZCI6NzExMjM3LCJuYW1lZF9maXh0dXJlX2NoZWNrcyI6MTMsIm1vZGVsX2NvbnN0YW50X2NoZWNrcyI6MTIsImhpc3RvcmljYWxfY29uc3RhbnRfY2hlY2tzIjo2LCJtdXRhbnRzIjoxMCwidW5zYWZlX211dGFudHMiOjQsIm11dGFudF9kaXNhZ3JlZW1lbnRzIjoxMzM0LCJtdXRhbnRfbG9zdF9zdXBwb3J0cyI6NDEyNzEsImRpc2FncmVlbWVudHNfYnlfbXV0YW50IjpbMTY1LDc1LDE2NSw0MCwxNjUsMTY1LDE2NCw3NSwxNjUsMTU1XSwibG9zdF9zdXBwb3J0c19ieV91bnNhZmVfbXV0YW50IjpbMTQ3NjgsMjM0OCwyMzkxMSwyNDRdLCJvcmFjbGVfcGFpcnMiOjM5NDUwLCJvcmFjbGVfc2l0ZXMiOjI3Mzg3NjAsImVudHJ5X3J1bnMiOjk5MCwiZW50cnlfaW5oZXJpdGVkX2NyZWRpdHMiOjEzNDcxOTIsInN1cHBvcnRzIjoyOTM3ODgsIm1heF9zaGVsbCI6MjQsImludmFsaWRfaW5wdXRzIjoxOSwiZml0X2NoZWNrcyI6Niwid2lkZV9yYW5rX3J1bnMiOjQsIm1heF9kdXBsaWNhdGVfcmFuayI6MzE5fQo=",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-17T18:10:05.623830+00:00"
+}

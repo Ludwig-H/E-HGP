@@ -15,11 +15,13 @@ namespace mhgp8 {
 
 enum class WspdFrontMode { Pure, MidpointSamples };
 
-// Optional widening of the MidpointSamples proposal window of the q2 lane.
-// The rejection threshold never changes: only the number of proposed ranks
-// does. The default reproduces the historical front exactly, counter for
-// counter. A factor other than 1 requires the active lane mask to be q2
-// alone: no judge covers a widened q3/q4 window, so it is refused.
+// Options of the MidpointSamples proposer of the q2 lane. The rejection
+// threshold and the predicate never change: only which ranks are proposed and
+// which already certified identifiers a product receives. The default
+// reproduces the historical front exactly, counter for counter. A window
+// factor other than 1, or inherited witnesses, require the active lane mask to
+// be q2 alone and the MidpointSamples mode: no independent judge covers them
+// on q3/q4, so they are refused. A finite small_factor_limit alone is inert.
 struct WspdFrontProposals {
   // L = window_factor*Kmax ranks around the SAME pivot, truncated to n.
   // Accepted values: 1 (historical window only), 2 and 4.
@@ -27,8 +29,22 @@ struct WspdFrontProposals {
   // The extra ranks are proposed only when max(|A|,|B|) <= this limit.
   // The default admits every product; it never removes or caps any pair.
   std::size_t small_factor_limit{std::numeric_limits<std::size_t>::max()};
+  // Certified witness IDENTIFIERS (ranks), never bare counts, passed by a
+  // surviving product to both children: at most Kmax-1 ranks. h_minimum is an
+  // exact minimum over the boxes and child boxes are included in parent boxes,
+  // so an inherited rank stays a strict universal witness, outside A' and B'.
+  // The child starts from that count, skips without a test any proposed rank
+  // already in its list, and appends its new credits. A rejection is still
+  // certified by Kmax DISTINCT ranks, all universal for the product's boxes.
+  bool inherit_witnesses{false};
   bool operator==(const WspdFrontProposals&) const = default;
 };
+
+// A task stores its received ranks on 32 bits: the option is usable only when
+// every rank fits, i.e. for at most 2^32 sites. Refused otherwise.
+[[nodiscard]] constexpr bool wspd_proposals_fit(const WspdFrontProposals& proposals, std::uint64_t sites) noexcept {
+  return !proposals.inherit_witnesses || sites <= (std::uint64_t{1} << 32);
+}
 
 // The centered, clamped rank window of MidpointSamples: `count` adjacent
 // ranks (count <= n required) around `pivot` (< n). Exposed so that a gate
@@ -90,6 +106,31 @@ struct WspdFrontWork {
   u64 extended_proposals_in_factors{};  // Extra ranks skipped because they belong to A or B.
   u64 extended_credits{};    // q2 credits granted by extra ranks.
   u64 extended_rejections{};  // Products whose Kmax-th q2 credit came from an extra rank.
+  // Inherited witnesses. All zero unless inherit_witnesses. Inherited credits are
+  // NOT in witness_lane_credits, which counts the credits granted by tests of
+  // this run. A duplicate is a proposed rank already in the received list: it
+  // is counted in proposed_sites (and in extended_proposals inside an extension
+  // interval), then skipped without a test. Hence, for every option,
+  // proposed_sites = proposals_in_factors + h_bound_tests + inherited_duplicates.
+  // The extension part has no H-test counter of its own: on a receipt only
+  // extended_credits + extended_inherited_duplicates <=
+  // extended_proposals - extended_proposals_in_factors is observable.
+  u64 inherited_credits{};              // Sum over searches of the received list length: even.
+  u64 inherited_duplicates{};           // Proposed ranks skipped because already received.
+  u64 extended_inherited_duplicates{};  // Those of the extension intervals, INCLUDED above.
+  // Rejections pronounced while the new credits of the search plus the
+  // received ranks it proposed again stay below Kmax: the ranks seen by this
+  // search did not suffice. An UPPER bound of the rejections that the same
+  // product would not have obtained alone, since the rest of its window was
+  // not scanned: the true count needs the tests that inheritance saves, and
+  // belongs to an independent replay.
+  u64 inherited_rejections{};
+  // Final q2 credits (received and new) of the searched products that were
+  // emitted. Credit ledger of the inheritance, every searched product being
+  // rejected with Kmax credits, split (its credits are received twice) or
+  // emitted: witness_lane_credits + inherited_credits/2 =
+  // Kmax*fully_rejected_products + emitted_witness_credits.
+  u64 emitted_witness_credits{};
   bool operator==(const WspdFrontWork&) const = default;
 };
 
@@ -119,9 +160,15 @@ using WspdRectangleConsumer = std::function<void(const WspdRectangle&)>;
 // acquired by the historical window remain valid during this one filter
 // call and the threshold stays Kmax. Ranks of A or B are counted as
 // proposed, then skipped without a test or a credit; H=0 never credits.
-// Partial counts are never inherited by descendants or by any census.
-// Pure proposes nothing and requires window_factor 1. It is a rejection
-// heuristic only: missing witnesses never remove any pair.
+// A bare partial COUNT is never inherited by descendants or by any census:
+// it could count one site twice. With proposals.inherit_witnesses (q2 lane
+// alone) a surviving product passes the RANKS of its certified witnesses to
+// its children, which count each rank once; the census still starts from
+// zero. The received list travels in the task: the work of a product depends
+// on its task alone, and counters are identical for the mono front, any job
+// plan and any dispatch, with any worker count.
+// Pure proposes nothing: it requires window_factor 1 and no inheritance. The
+// front is a rejection heuristic only: missing witnesses never remove any pair.
 // Neither this front nor a bounded ledger certifies a complete HGP tower.
 // Index/consumer must remain alive and valid throughout this synchronous
 // call. A callback exception propagates; prior emissions are not undone.
@@ -257,6 +304,10 @@ class WspdFrontDispatch final {
   // Read-only observation, including the interval immediately before a
   // receiver enters its condition wait. Not a completion certificate.
   [[nodiscard]] std::size_t waiting_workers() const noexcept;
+  // Read-only observation for gates: total number of received witness ranks
+  // carried by the tasks published to the donation queue so far. Zero unless
+  // proposals.inherit_witnesses. Not a work counter and not a ledger term.
+  [[nodiscard]] u64 donated_witness_ranks() const noexcept;
   // Queue-vector capacity only. Excludes shared initial jobs/index, local
   // stacks, callbacks, object metadata and allocations made by consumers.
   [[nodiscard]] std::size_t retained_bytes() const;

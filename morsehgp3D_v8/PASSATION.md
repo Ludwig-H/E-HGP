@@ -1,4 +1,4 @@
-# Passation v8 — fenêtre de propositions élargie qualifiée
+# Passation v8 — témoins hérités du front q2 qualifiés
 
 17 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
@@ -9,29 +9,75 @@ d'audit ne valent pas qualification de son propre code.
 
 ## À reprendre maintenant
 
-La [fenêtre élargie](docs/P0_SURPROPOSITION_TEMOINS_Q2.md) est livrée comme
-option ; **le défaut de toutes les entrées reste la fenêtre historique**.
+Les [témoins hérités](docs/P0_TEMOINS_HERITES_Q2.md) et la
+[fenêtre élargie](docs/P0_SURPROPOSITION_TEMOINS_Q2.md) sont livrés comme
+options ; **le défaut de toutes les entrées reste le front historique**.
 Décisions et mesures à prendre, dans cet ordre :
 
 1. Décider si les sondes et campagnes des tranches suivantes passent
-   explicitement `WspdFrontProposals{2, 16}` (jamais un changement du défaut
-   de l'API : les reçus antérieurs cesseraient d'être comparables).
-2. Mesurer ce qui reste après 2K : à uniforme 32k K10, 28,0 s deviennent
-   12,0 s, et les candidats restants sont encore rejetés au census pour
-   l'essentiel. Deux pistes mesurées en audit, à requalifier avant tout
-   port : la descente exacte plafonnée à K (plafond du proposeur : 86 à 89 %
-   des rectangles émis rejetables, la fenêtre 4K en prend 80 à 86 %) et la
-   transmission aux enfants des témoins certifiés du parent, avec IDs
-   distincts. Le certificat de bloc est dominé par la fenêtre 2K.
-3. Rangées : la fenêtre élargie y est un surcoût pur (×1,01 à ×1,18) ; seuls
-   des certificats collectifs traitent ce régime, en q2 comme en q3/q4.
-4. Alléger la porte `mhgp8_wspd_q2_proposals_gate` sous sanitizers (12 min
-   sous ASan/UBSan, autant sous TSan) sans perdre ses dix mutants.
-5. Moteurs q3/q4 produit, catalogue canonique de boules et tranche FULL
+   explicitement `WspdFrontProposals{2, 16, true}` (jamais un changement du
+   défaut de l'API : les reçus antérieurs cesseraient d'être comparables).
+2. Le front q2 n'a plus de levier de constante mesuré au-dessus de 10 % : à
+   uniforme 32k K10, 29,0 s sont devenus 12,1 s puis 10,5 s ; les cycles se
+   partagent entre la fenêtre et ses tests H (un quart), la descente (un
+   sixième) et le census (la moitié). Pistes instruites et fermées par la
+   mesure : reprise exacte de la descente (×0,94 à ×0,98), réutilisation du
+   pivot du parent (jusqu'à ×6), descente exacte plafonnée à K, certificat de
+   bloc. Piste non instruite : sauter la recherche des produits de masse 1
+   (arbitrage front contre census, ×0,88 à ×0,93 au prototype). Le levier
+   suivant du census serait de lui transmettre les témoins certifiés du
+   rectangle émis, comptés une fois : non conçu, non mesuré.
+3. Rangées : ni la fenêtre élargie ni l'héritage n'y retirent un produit ;
+   les candidates qui restent sont les paires entre rangées, sans aucun
+   témoin universel. Seuls des certificats collectifs traitent ce régime, en
+   q2 comme en q3/q4.
+4. Porter l'héritage aux voies q3/q4 demande un juge indépendant des bornes Ξ
+   et un niveau par rang (crédits emboîtés q4 ⊂ q3 ⊂ q2) ; l'audit du
+   14 septembre y mesurait un résidu ×0,53 et ×0,60 sur un front plus ancien.
+5. Alléger `mhgp8_wspd_q2_proposals_gate` sous sanitizers (12 min) ; la
+   porte d'héritage en prend cinq.
+6. Moteurs q3/q4 produit, catalogue canonique de boules et tranche FULL
    minimale restent ouverts ; un oracle entier q3/q4 indépendant existe dans
    `audits/oracle_q3q4_20260915/`.
 
-## Vingtième tranche close le 17 septembre — fenêtre de propositions élargie
+## Vingt-et-unième tranche close le 17 septembre — témoins hérités
+
+`WspdFrontProposals{window_factor, small_factor_limit, inherit_witnesses}` :
+un produit non rejeté transmet à ses deux enfants la liste des rangs de ses
+témoins certifiés, au plus Kmax − 1, portée par valeur dans la tâche (72
+octets au lieu de 32, pour toute option) et jamais dans l'objet front ;
+l'enfant part de ce compte, saute sans test un rang déjà reçu, ajoute ses
+nouveaux crédits. `h_minimum` étant un minimum exact et les boîtes des
+descendants incluses dans celles des ancêtres, un rang reçu reste un témoin
+universel strict hors des facteurs : le rejet reste certifié par Kmax rangs
+distincts. Voie q2 seule (refus sinon et en mode `Pure`), refus au-delà de
+2^32 sites. Cinq compteurs fusionnés par `merge_work`, et une identité exacte
+qui ferme le registre : nouveaux crédits + crédits reçus / 2 = Kmax × produits
+rejetés + crédits des rectangles émis. Le compteur de rejets du moteur est un
+**majorant** du contrefactuel, que seul le rejeu indépendant calcule ; le
+nombre de produits rejetés n'est **pas** monotone, seule la masse rejetée
+l'est. Qualification propre close : 81 CTests Release et Clang ASan/UBSan,
+portes héritage, dispatch et jobs sous Clang TSan, 1 125 rejeux indépendants,
+douze lignes d'un modèle Python indépendant, oracle de sûreté par force
+brute, dix mutants causaux tués dont quatre non sûrs, trois fixtures nommées
+de cinq points, nuage de 320 sites et campagne à 70 000 sites pour la largeur
+des rangs stockés, 990 appels des cinq entrées contre l'oracle, 854 mesures
+et 24 lectures/analyses normal/−O identiques. Exécution avec héritage
+rapportée à sa jumelle, n8k/16k/32k : fenêtre 2K petits facteurs, uniforme
+×0,86 à ×0,93, amas ×0,88 à ×0,96, terrain ×0,89 à ×0,96, rangées ×0,99 à
+×1,03 ; fenêtre historique, uniforme ×0,50 à ×0,63, amas ×0,57 à ×0,72,
+terrain ×0,68 à ×0,75. Le moteur sans héritage égale le build épinglé de la
+tranche 20 sur douze septuplets différentiels, en temps ×0,96 à ×1,03.
+Builds épinglés : `build/v8_front_inheritance_20260917`,
+`build/v8_front_inheritance_sanitize_20260917`,
+`build/v8_front_inheritance_tsan_clang_20260917`. Lire les
+[reçus](receipts/q2_front_inheritance_20260917/README.md) ; le dossier
+`cadrage/` archive les mesures qui ont choisi ce levier et le moteur à deux
+leviers, reprise exacte de la descente comprise, en patch. Deux relectures
+indépendantes ont précédé le gel, de la conception puis de l'implémentation ;
+leurs constats sont consignés dans le PREFLIGHT des reçus.
+
+## Vingtième tranche publiée à 8190e7ab — fenêtre de propositions élargie, historique
 
 `WspdFrontProposals{window_factor ∈ {1, 2, 4}, small_factor_limit}` :
 fenêtre historique de min(Kmax, n) rangs d'abord, puis intervalles gauche et

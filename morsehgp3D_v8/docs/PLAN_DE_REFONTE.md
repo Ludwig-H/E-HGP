@@ -507,6 +507,20 @@ celle de la référence. P0 global et borne sous-quadratique restent ouverts ;
 suite à mesurer avant tout port : descente exacte plafonnée à K ou
 transmission des témoins certifiés aux enfants, puis q3/q4 et FULL.
 
+Suivi tranche21 : les [témoins certifiés hérités](P0_TEMOINS_HERITES_Q2.md)
+du § 3, point 2, sont portés comme option explicite de la voie q2 et
+qualifiés : 81 CTests Release/Clang ASan/UBSan, portes TSan, rejeu indépendant
+et modèle Python indépendant du front q2, oracle de sûreté, dix mutants causaux
+dont quatre non sûrs, 854 mesures closes. Face à la même fenêtre, n8k/16k/32k :
+×0,86 à ×0,93 (uniforme), ×0,88 à ×0,96 (amas), ×0,89 à ×0,96 (terrain) à 2K,
+×0,99 à ×1,03 sur les rangées. Le transport contre-audité est celui des
+identifiants : le compte seul perd un support sur une fixture de cinq points.
+« Redémarrer tous les parcours » (§ 2) a été instruit pour la descente du
+proposeur : sa reprise exacte ne rend que ×0,94 à ×0,98 et n'est pas portée.
+C'est encore une constante. Le front q2 n'a plus de levier mesuré au-dessus
+de 10 % ; la suite est le port aux voies q3/q4 avec leur juge, les
+certificats collectifs des rangées, puis q3/q4 et FULL.
+
 Commencer par P0 : comparer les architectures de rejet qui évitent les
 histogrammes quadratiques systématiques, d'abord en mono avec petits
 juges indépendants. Préparer en soutien le contrat et la tranche FULL

@@ -1,0 +1,58 @@
+--- a/morsehgp3D_v8/src/wspd/front.cpp
++++ b/morsehgp3D_v8/src/wspd/front.cpp
+@@ -3,6 +3,9 @@
+ #include "spindle/predicates.hpp"
+ 
+ #include <algorithm>
++#include <x86intrin.h>
++#include <cstdio>
++#include <atomic>
+ #include <array>
+ #include <condition_variable>
+ #include <deque>
+@@ -48,6 +51,9 @@
+ // What a search leaves to the two children of its product. Carried BY VALUE in
+ // the task and never in the front object: the work of a product depends on its
+ // task alone, whatever the traversal order, the job plan or the worker.
++struct TscReport { std::atomic<unsigned long long> descent{0}, window{0}, filter{0}, expand{0}, emit{0};
++  ~TscReport() { std::fprintf(stderr, "TSC descent %llu window %llu filter %llu expand_total %llu emit(consumer) %llu\n", descent.load(), window.load(), filter.load(), expand.load(), emit.load()); } };
++static TscReport tsc_report;
+ struct WitnessState {
+   static constexpr std::uint32_t no_leaf = std::numeric_limits<std::uint32_t>::max();
+   // Ranks of the certified q2 witnesses: at most Kmax-1 <= 9, all distinct.
+@@ -182,8 +188,10 @@
+     while (!stack.empty()) {
+       const auto task = stack.back();
+       stack.pop_back();
++      const auto e0 = __rdtsc(); unsigned long long inside = 0;
+       expand(task, [&](const Task& child) { stack.push_back(child); },
+-             [&](const Task& terminal) { consumer_(WspdRectangle{terminal.a, terminal.b, terminal.mask}); });
++             [&](const Task& terminal) { const auto c0 = __rdtsc(); consumer_(WspdRectangle{terminal.a, terminal.b, terminal.mask}); inside = __rdtsc() - c0; });
++      tsc_report.expand += __rdtsc() - e0 - inside; tsc_report.emit += inside;
+     }
+     return result_;
+   }
+@@ -243,6 +251,7 @@
+       return mask;
+     }
+     counter_add(result_.work.witness_searches);
++    const auto tsc0 = __rdtsc();
+     std::array<i64, 3> center4{};
+     for (std::size_t axis = 0; axis < 3; ++axis) {
+       center4[axis] = static_cast<i64>(a.box.low[axis]) + a.box.high[axis] +
+@@ -292,6 +301,7 @@
+       witness.leaf = static_cast<std::uint32_t>(node);
+       witness.leaf_depth = static_cast<std::uint8_t>(resume_depth + steps);  // <= 48.
+     }
++    const auto tsc1 = __rdtsc();
+     const auto count = std::min<std::size_t>(kmax_, order_.size());
+     const auto pivot = nodes_[node].range.first;
+     const auto window = wspd_proposal_window(pivot, count, order_.size());
+@@ -384,6 +394,7 @@
+     // validate_front guarantees the q2 lane alone for a widened window: an empty
+     // mask after an extension means that the Kmax-th q2 credit came from an extra rank.
+     if (extension && mask == 0) counter_add(result_.work.extended_rejections);
++    { const auto tsc2 = __rdtsc(); tsc_report.descent += tsc1 - tsc0; tsc_report.window += tsc2 - tsc1; }
+     if (proposals_.inherit_witnesses) {
+       if (mask == 0) {
+         if (inherited != 0) counter_add(result_.work.inherited_rejections);

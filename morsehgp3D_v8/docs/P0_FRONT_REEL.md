@@ -80,7 +80,11 @@ K témoins admissibles. Depuis la vingtième tranche, une option explicite
 (`WspdFrontProposals`, voie q2 seule, défaut inchangé) peut faire suivre
 cette fenêtre historique de deux intervalles disjoints complétant une
 fenêtre de 2·Kmax ou 4·Kmax rangs autour du même pivot, sans nouvelle
-descente : lire la [surproposition de témoins](P0_SURPROPOSITION_TEMOINS_Q2.md). Un site de A ou de B ne pourrait de toute façon
+descente : lire la [surproposition de témoins](P0_SURPROPOSITION_TEMOINS_Q2.md). Depuis la
+vingt-et-unième tranche, une seconde option de la même voie transmet aux
+deux enfants d'un produit non rejeté les rangs de ses témoins certifiés,
+comptés une fois et jamais retestés : lire les
+[témoins hérités](P0_TEMOINS_HERITES_Q2.md). Un site de A ou de B ne pourrait de toute façon
 pas être un témoin strict universel : en le choisissant comme extrémité,
 le produit scalaire H vaut zéro.
 

@@ -57,9 +57,14 @@ inline void merge_work(WspdFrontWork& out, const WspdFrontWork& value) {
   counter_add(out.extended_proposals_in_factors, value.extended_proposals_in_factors);
   counter_add(out.extended_credits, value.extended_credits);
   counter_add(out.extended_rejections, value.extended_rejections);
-  // 25 scalars, two arrays of five and three arrays of three: a new field
+  counter_add(out.inherited_credits, value.inherited_credits);
+  counter_add(out.inherited_duplicates, value.inherited_duplicates);
+  counter_add(out.extended_inherited_duplicates, value.extended_inherited_duplicates);
+  counter_add(out.inherited_rejections, value.inherited_rejections);
+  counter_add(out.emitted_witness_credits, value.emitted_witness_credits);
+  // 30 scalars, two arrays of five and three arrays of three: a new field
   // that is not merged above must fail to compile here, not pass by vacuity.
-  static_assert(sizeof(WspdFrontWork) == (25 + 2 * 5 + 3 * 3) * sizeof(u64),
+  static_assert(sizeof(WspdFrontWork) == (30 + 2 * 5 + 3 * 3) * sizeof(u64),
                 "merge_work(WspdFrontWork) must be updated with the structure");
 }
 

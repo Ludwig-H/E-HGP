@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_wspd_q2_inheritance_checks.py",
+    "read",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/q2_front_inheritance_20260917/differential_8i6a6azx"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-17T19:24:42.632437+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"full_contract_qualified\": false, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q2_front_inheritance_20260917/differential_8i6a6azx\", \"q2_measures\": 84, \"records\": 84, \"status\": \"passed\"}\n",
+  "stderr": "",
+  "stdout_base64": "eyJmdWxsX2NvbnRyYWN0X3F1YWxpZmllZCI6IGZhbHNlLCAicGF0aCI6ICIvd29ya3NwYWNlcy9FLUhHUC9tb3JzZWhncDNEX3Y4L3JlY2VpcHRzL3EyX2Zyb250X2luaGVyaXRhbmNlXzIwMjYwOTE3L2RpZmZlcmVudGlhbF84aTZhNmF6eCIsICJxMl9tZWFzdXJlcyI6IDg0LCAicmVjb3JkcyI6IDg0LCAic3RhdHVzIjogInBhc3NlZCJ9Cg==",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-17T19:24:42.795699+00:00"
+}

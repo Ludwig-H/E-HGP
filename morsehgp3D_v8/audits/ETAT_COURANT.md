@@ -3,7 +3,28 @@
 17 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
-État constructeur courant : vingtième tranche P0 close,
+État constructeur courant : vingt-et-unième tranche P0 close,
+[témoins hérités du front q2](../docs/P0_TEMOINS_HERITES_Q2.md). Option
+explicite `WspdFrontProposals::inherit_witnesses`, voie q2 seule : un produit
+non rejeté transmet à ses enfants les rangs de ses témoins certifiés, comptés
+une fois ; le moteur sans héritage égale la tranche 20 compteur pour compteur
+(capture différentielle contre son build épinglé, trois fenêtres). 81 CTests
+Release et Clang ASan/UBSan, portes héritage, dispatch et jobs sous Clang
+TSan, rejeu indépendant du front q2, modèle Python indépendant, oracle de
+sûreté par force brute, dix mutants causaux tués dont quatre non sûrs, 854
+mesures, lectures normal/−O concordantes. Exécution avec héritage rapportée à
+sa jumelle à n8k/16k/32k, fenêtre 2K petits facteurs : ×0,86 à ×0,93
+(uniforme), ×0,88 à ×0,96 (amas), ×0,89 à ×0,96 (terrain), ×0,99 à ×1,03
+(rangées, aucun gain) ; supports identiques, candidates à 76 à 88 % de la
+jumelle hors rangées. Reprise exacte de la descente mesurée à ×0,94 à ×0,98
+et non portée. [Reçus](../receipts/q2_front_inheritance_20260917/README.md).
+Deux relectures indépendantes avant gel, conception puis implémentation.
+Pas de borne sous-quadratique, P0 global non clos, FULL/G4 ouverts. GCP non
+utilisé.
+
+## Historique : vingtième tranche publiée à 8190e7ab
+
+Vingtième tranche P0 close,
 [fenêtre de propositions élargie du front q2](../docs/P0_SURPROPOSITION_TEMOINS_Q2.md).
 Option explicite `WspdFrontProposals` (facteur 1, 2 ou 4, limite petits
 facteurs), voie q2 seule, défaut identique au moteur précédent (capture
