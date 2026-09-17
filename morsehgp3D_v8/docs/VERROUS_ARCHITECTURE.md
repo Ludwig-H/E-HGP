@@ -102,8 +102,16 @@ Shared. Le grain de partage n'introduit ni recherche limitée ni boucle
 sur les paires filtrées. Qualification propre close (72 CTests Release/
 Clang ASan/UBSan, TSan et174 mesures), sans gain stable établi. La
 répartition ne supprime pas les visites géométriques ni les coûts de
-préparation F. Prochain verrou : lots compacts des petites requêtes ;
+préparation F. Verrou alors annoncé : lots compacts des petites requêtes ;
 ne pas confondre O(A+R) de gestion avec une borne sous-quadratique en n.
+
+Évolution tranche19 : les [lots compacts de singletons](P0_LOTS_SINGLETON_Q2.md)
+sont exacts et qualifiés mais plus lents que Coarse dans les 54
+comparaisons n8k/16k/32k (×1,005 à ×1,225) ; l'entrelacement ne masque
+aucune attente, le chemin Shared singleton étant déjà sans allocation ni
+pile Z. Verrou B1 inchangé : ce sont les recherches de témoins
+recommencées et le nombre de petites requêtes qu'il faut réduire, d'abord
+au front ([surproposition](P0_SURPROPOSITION_TEMOINS_Q2.md)), pas leur format.
 
 Évolution tranche17 : une [équipe unique front+census](P0_EQUIPE_PERSISTANTE_Q2.md)
 existe désormais pour le front Coarse et les racines hors Pool sélectionnées

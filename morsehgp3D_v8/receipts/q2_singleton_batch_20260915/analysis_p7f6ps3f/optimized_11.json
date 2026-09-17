@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/q2_singleton_batch_20260915/record_quantums.py",
+    "read",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/q2_singleton_batch_20260915/quantums_5c5xaxk6"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-17T12:34:30.506228+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"full_contract_qualified\": false, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q2_singleton_batch_20260915/quantums_5c5xaxk6\", \"q2_measures\": 14, \"records\": 14, \"status\": \"passed\"}\n",
+  "stderr": "",
+  "stdout_base64": "eyJmdWxsX2NvbnRyYWN0X3F1YWxpZmllZCI6IGZhbHNlLCAicGF0aCI6ICIvd29ya3NwYWNlcy9FLUhHUC9tb3JzZWhncDNEX3Y4L3JlY2VpcHRzL3EyX3NpbmdsZXRvbl9iYXRjaF8yMDI2MDkxNS9xdWFudHVtc181YzV4YXhrNiIsICJxMl9tZWFzdXJlcyI6IDE0LCAicmVjb3JkcyI6IDE0LCAic3RhdHVzIjogInBhc3NlZCJ9Cg==",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-17T12:34:30.655583+00:00"
+}

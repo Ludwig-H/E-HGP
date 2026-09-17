@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — plages d'ancres q2 et plans Pool partagés
+# Morse HGP 3D v8 — lots singleton clos, surproposition de témoins à porter
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -36,6 +36,27 @@ Les mesures historiques citées restent v7.
 
 ## État exécutable
 
+La dix-neuvième tranche a testé les [lots de singletons q2](docs/P0_LOTS_SINGLETON_Q2.md) :
+des recherches indépendantes partagent un moteur par worker et avancent en
+alternance, sans changer leur ordre de témoins. **Résultat négatif qualifié
+le 17 septembre 2026.** Le format est exact (75 CTests Release et Clang
+ASan/UBSan, porte Clang TSan, 595 appels à lots contre oracle, tous les
+comptes géométriques égaux à Coarse), mais il est plus lent que Coarse dans
+les 54 comparaisons closes à n8k/16k/32k : rapport lots / Coarse de 1,005 à
+1,225, médiane 1,112, et seize voies entrelacées ne font pas mieux qu'une.
+L'entrée `run_wspd_q2_census_batched` reste explicite et hors défaut ;
+Coarse reste le défaut. Lire les [reçus de clôture](receipts/q2_singleton_batch_20260915/README.md).
+La piste « lots compacts » est inscrite aux [fausses pistes](docs/FAUSSES_PISTES.md).
+
+La suite ne change ni format ni ordonnancement : elle réduit le nombre de
+petites requêtes en rejetant davantage de produits au front, par la
+[surproposition de témoins](docs/P0_SURPROPOSITION_TEMOINS_Q2.md) (seuil K
+inchangé, fenêtre de propositions élargie). Rien n'en est encore porté dans
+le moteur ; les mesures d'audit existantes ne sont pas une qualification.
+Aucun contrat FULL/G4 n'est acquis. GCP non utilisé.
+
+## Dix-huitième tranche publiée à2741d614 — historique
+
 La dix-huitième tranche ajoute le [partage de plages d'ancres](docs/P0_PLAGES_ANCRES_Q2.md)
 non commencées. Le receveur réutilise son moteur privé, sans allocation
 de continuation par ancre. Pool est préparé une fois par rectangle,
@@ -56,9 +77,10 @@ seeds ; le partage Pool filtré est exercé par les gates, pas par ces grands
 nuages au grain64. Aucun gain stable établi sous charge concurrente.
 Les six postes principaux restent sous×3 aux doublements sur Pool64,
 mais F des rangées fait×4 et certains ratios de scheduling dépassent×4.
-Aucune borne générale sous-quadratique. La suite vise les millions de
-petits census en lots compacts et leur travail réel ; FULL, q3/q4 produit,
-GPU et contrats G4 restent ouverts. GCP non utilisé.
+Aucune borne générale sous-quadratique. La suite visait alors les millions
+de petits census en lots compacts ; cette piste a depuis été mesurée et
+fermée par la dix-neuvième tranche. FULL, q3/q4 produit, GPU et contrats G4
+restent ouverts. GCP non utilisé.
 Les [deux fixtures de tangence q3](docs/Q3_Q4_OBJETS_ET_STRATEGIE_20260914.md)
 précisent le compte strict sur les rangées après dialogue avec B.
 

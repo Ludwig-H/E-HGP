@@ -1,10 +1,51 @@
-# Passation v8 — plages d'ancres et plans Pool possédés
+# Passation v8 — lots singleton clos, surproposition de témoins à porter
 
-15 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
+17 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`. Aucun contrat de tour n'est encore acquis.
+Le constructeur a changé le 17 septembre : l'ancien auditeur B reprend le
+chantier ; son canal `audits/DIALOGUE_AUDITEUR_B.md` est clos et ses reçus
+d'audit ne valent pas qualification de son propre code.
 
 ## À reprendre maintenant
+
+Porter la [surproposition de témoins](docs/P0_SURPROPOSITION_TEMOINS_Q2.md)
+dans `Front::filter` : seuil K inchangé, fenêtre historique de K rangs
+intacte et en premier, puis deux intervalles disjoints de la fenêtre
+L = 2K ou 4K autour du même pivot, crédits conservés dans ce seul appel,
+politique « petits facteurs » `max(|A|, |B|) <= B0`. Option explicite dont le
+défaut reproduit l'historique à l'unité ; le census repart toujours de zéro
+et seuls les rejets complets sont hérités. À écrire : paramètre threadé dans
+le front mono, les jobs, le dispatch et les cinq entrées q2 ; compteurs de
+l'extension fusionnés ; petits juges de bord (n < L, deux bords de la
+permutation, rangs de A/B, tangence H = 0, épuisement sans K succès, K-ième
+témoin trouvé par la seule extension) ; mutants ; campagnes 8k/16k/32k,
+K5/10, s8/10/12, temps mur du pipeline q2 complet, régression attendue des
+rangées conservée. Les mesures d'audit de `audits/surproposition_20260915/`
+(copie patchée, temps q2 divisé par 1,9 à 2,4 sur uniforme) ne sont pas une
+qualification constructeur. GCP non utilisé, statut not_claimed.
+
+## Dix-neuvième tranche close le 17 septembre — résultat négatif
+
+Les [lots de singletons](docs/P0_LOTS_SINGLETON_Q2.md) sont implémentés dans
+une entrée Coarse distincte (`run_wspd_q2_census_batched`) : feuilles
+Shared/Individual seulement, contexte original et préfixe acquis copiés
+dans un état privé de 72 octets, étapes Entry/Witness/Emit, lot vidé en fin
+de seed et avant Pool, Pool et replis synchrones. Qualification propre
+close : 75 CTests Release et Clang ASan/UBSan, porte Clang TSan, 595 appels
+à lots et 178 Coarse contre oracle (10 958 paires, coquille 30), 172 mesures
+et 26 lectures/analyses normal/−O identiques. **Le format régresse dans les
+54 comparaisons à n8k/16k/32k** (lots / Coarse 1,005 à 1,225, médiane
+1,112, quantum 64 ; ×1,29 à ×1,76 au quantum 1 en r0) et l'entrelacement ne
+gagne rien sur une voie. Tous les comptes géométriques égalent Coarse.
+Builds épinglés : `build/v8_singleton_batch_r3_20260917`,
+`build/v8_singleton_batch_sanitize_r3_20260917`,
+`build/v8_singleton_batch_tsan_clang_r3_20260917`, plus les builds r0 et r2
+de leurs captures historiques. Lire les [reçus](receipts/q2_singleton_batch_20260915/README.md).
+Ne pas rouvrir les lots compacts sans hypothèse nouvelle : le Shared
+singleton était déjà une boucle sans allocation ni pile Z.
+
+## Dix-huitième tranche publiée à2741d614 — historique
 
 Le [partage des plages d'ancres](docs/P0_PLAGES_ANCRES_Q2.md) est implémenté
 dans une entrée distincte. Moteurs et buffers privés réutilisables ;
@@ -33,7 +74,8 @@ mais115/101/103 dans les gates Release/ASan/TSan. La file porte72 octets
 par plage, pas les6 272 octets d'une pile de continuation ; elle ne peut
 pas répartir une ancre déjà commencée.
 
-**Prochaine priorité : les millions de petites requêtes, pas une nouvelle
+**Priorité énoncée à la clôture de cette tranche (depuis mesurée et fermée
+par la tranche 19) : les millions de petites requêtes, pas une nouvelle
 file.** Uniforme32k conserve10,181M plages,11,084M ancres et1,001Md visites
 census, sans offre au grain64. Préparer des lots de singletons compacts
 avec contexte original, rang d'ancre, stade et certificat frère dû,

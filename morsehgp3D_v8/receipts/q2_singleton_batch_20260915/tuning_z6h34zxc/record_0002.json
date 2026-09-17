@@ -1,0 +1,25 @@
+{
+  "kind": "measure",
+  "command": [
+    "/workspaces/E-HGP/build/v8_singleton_batch_20260915/mhgp8_wspd_q2_batched_probe",
+    "8000",
+    "uniform",
+    "10",
+    "8",
+    "3",
+    "1",
+    "16",
+    "8",
+    "1",
+    "64"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-15T10:18:34.477691+00:00",
+  "status": "failed",
+  "exit_code": -15,
+  "stdout": "",
+  "stderr": "",
+  "stdout_base64": "",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-15T10:18:37.445876+00:00"
+}

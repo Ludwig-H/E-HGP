@@ -124,6 +124,8 @@ pas de B dans la fenêtre choisie. Beaucoup de travail est dans des millions
 de rectangles minuscules. Le don d'une branche d'un gros census ne peut
 pas accélérer ces appels. Il faut donc comparer deux chantiers distincts :
 les gros parents Pool/bandes, et des lots compacts de requêtes singleton.
+Note du 17 septembre : les lots compacts ont été implémentés, mesurés et
+fermés comme [résultat négatif](P0_LOTS_SINGLETON_Q2.md) par la tranche 19.
 
 Pour une requête B singleton, aucune division de B n'est possible : une
 pile de49 cadres n'est pas nécessaire pour conserver sa position Z. Une

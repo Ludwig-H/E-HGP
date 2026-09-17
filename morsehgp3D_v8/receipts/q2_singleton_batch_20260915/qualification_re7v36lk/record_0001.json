@@ -1,0 +1,16 @@
+{
+  "kind": "gate",
+  "command": [
+    "/workspaces/E-HGP/build/v8_singleton_batch_sanitize_r3_20260917/mhgp8_wspd_q2_batched_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-17T12:25:34.978768+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"schema\":\"mhgp8_wspd_q2_batched_gate_v1\",\"status\":\"passed\",\"public_status\":\"not_claimed\",\"checks\":145410,\"clouds\":13,\"oracle_pairs\":10958,\"oracle_sites\":778276,\"coarse_runs\":178,\"batch_runs\":595,\"default_runs\":13,\"supports\":124145,\"max_shell\":30,\"compact_tasks\":177945,\"inherited_credit\":9830,\"phase2_tasks\":4482,\"siblings_due\":40054,\"empty_runs\":31,\"surplus_requests\":59,\"selected64\":26,\"filtered64\":14328,\"passthrough\":4267,\"multiple_callback_threads\":3,\"callback_threads_joined\":3,\"callback_failures\":1,\"reentrant_runs\":1,\"index_resets\":1,\"invalid_inputs\":14,\"mutants\":7}\n",
+  "stderr": "",
+  "stdout_base64": "eyJzY2hlbWEiOiJtaGdwOF93c3BkX3EyX2JhdGNoZWRfZ2F0ZV92MSIsInN0YXR1cyI6InBhc3NlZCIsInB1YmxpY19zdGF0dXMiOiJub3RfY2xhaW1lZCIsImNoZWNrcyI6MTQ1NDEwLCJjbG91ZHMiOjEzLCJvcmFjbGVfcGFpcnMiOjEwOTU4LCJvcmFjbGVfc2l0ZXMiOjc3ODI3NiwiY29hcnNlX3J1bnMiOjE3OCwiYmF0Y2hfcnVucyI6NTk1LCJkZWZhdWx0X3J1bnMiOjEzLCJzdXBwb3J0cyI6MTI0MTQ1LCJtYXhfc2hlbGwiOjMwLCJjb21wYWN0X3Rhc2tzIjoxNzc5NDUsImluaGVyaXRlZF9jcmVkaXQiOjk4MzAsInBoYXNlMl90YXNrcyI6NDQ4Miwic2libGluZ3NfZHVlIjo0MDA1NCwiZW1wdHlfcnVucyI6MzEsInN1cnBsdXNfcmVxdWVzdHMiOjU5LCJzZWxlY3RlZDY0IjoyNiwiZmlsdGVyZWQ2NCI6MTQzMjgsInBhc3N0aHJvdWdoIjo0MjY3LCJtdWx0aXBsZV9jYWxsYmFja190aHJlYWRzIjozLCJjYWxsYmFja190aHJlYWRzX2pvaW5lZCI6MywiY2FsbGJhY2tfZmFpbHVyZXMiOjEsInJlZW50cmFudF9ydW5zIjoxLCJpbmRleF9yZXNldHMiOjEsImludmFsaWRfaW5wdXRzIjoxNCwibXV0YW50cyI6N30K",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-17T12:25:39.962960+00:00"
+}

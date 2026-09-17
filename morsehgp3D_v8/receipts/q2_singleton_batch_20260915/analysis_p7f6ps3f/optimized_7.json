@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_wspd_q2_batched_checks.py",
+    "read",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/q2_singleton_batch_20260915/separations_sryfuunq"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-17T12:34:29.902540+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"full_contract_qualified\": false, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q2_singleton_batch_20260915/separations_sryfuunq\", \"q2_measures\": 40, \"records\": 40, \"status\": \"passed\"}\n",
+  "stderr": "",
+  "stdout_base64": "eyJmdWxsX2NvbnRyYWN0X3F1YWxpZmllZCI6IGZhbHNlLCAicGF0aCI6ICIvd29ya3NwYWNlcy9FLUhHUC9tb3JzZWhncDNEX3Y4L3JlY2VpcHRzL3EyX3NpbmdsZXRvbl9iYXRjaF8yMDI2MDkxNS9zZXBhcmF0aW9uc19zcnlmdXVucSIsICJxMl9tZWFzdXJlcyI6IDQwLCAicmVjb3JkcyI6IDQwLCAic3RhdHVzIjogInBhc3NlZCJ9Cg==",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-17T12:34:30.068375+00:00"
+}

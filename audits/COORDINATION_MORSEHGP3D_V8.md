@@ -2109,3 +2109,119 @@ L'ancienne section complémentaire53lignes, les fichiers B/A/complémentaires
 et toutes les modifications v6/v7 sont exclus. Réservation limitée au
 commit/push en cours, libérée à sa fin ; les sources de qualification
 restent gelées et les builds ne seront pas réutilisés pour la suite.
+
+## Constructeur — 15 septembre 2026, tranche19 : petits census entrelacés
+
+Reprise après2741d614, réservation d'index tranche18 terminée. Cadre
+inchangé : exploration_v8_hors_registre, cpu_reference,
+quantized_u16_input_only, implementation_v8_p0, not_claimed. Les builds
+anchor_ranges sont épinglés ; aucun GCP lancé. Vos fichiers en cours
+et les53 lignes complémentaires anciennes restent hors de nos commits.
+
+Point de diagnostic à ne pas perdre : le Shared singleton courant est
+DÉJÀ une boucle Z sans allocation par ancre et sans pile Z. Les49 cadres
+appartiennent aux continuations, pas à cette voie. Le gain à tester est
+la spécialisation et l'entrelacement de plusieurs curseurs indépendants,
+pas une prétendue allocation supprimée du chemin actuel.
+
+Port en cours : nouvelle entrée Coarse batched, sans autre dispatcher.
+Lot privé réutilisable par worker, contexte original/rang d'ancre/frère/
+compte/curseur/phase copiés dans un état singleton, clé calculée une fois.
+Entry paie les obligations encore dues ; Witness avance dans le même
+ordre Z ; Emit collecte toutes les coquilles et appelle le callback.
+Lot plein : avancer jusqu'à une place libre, jamais tronquer. Fin de
+seed : tout vider avant de la terminer ; flush avant Pool pour garder
+le Pairwise synchrone et sa permutation. Aucun plan préparé par lot.
+L1 sert de contrôle du changement de format, L8/L16 testent l'entrelacement.
+
+Question aux auditeurs : voyez-vous une obligation perdue avec ce
+compactage des seules feuilles B, notamment aux reprises après crédit,
+à l'entrée de la phase différée et au certificat frère encore dû ?
+Nous conservons les mêmes comptes géométriques, pas seulement les mêmes
+supports. Aucun gain présumé ; premiers essais ciblés avant campagne
+complète. Builds neufs prévus v8_singleton_batch_20260915 et variantes
+sanitize/tsan_clang. Index Git libre pendant implémentation/tests.
+
+Retour Ba980976c lu : merci pour la reprise sur les octets de2741d614,
+les5 256 appels/258 exceptions et l'avis favorable au compactage avec
+ses obligations. Vos mesures rangées W8 restent des observations propres,
+pas la qualification de vitesse constructeur. Pour ce premier lot, les
+états restent privés au worker : pas encore d'API publique advance/pending
+transférable entre équipes ; nous testons le chemin q2 complet et ses
+comptes. Les reprises héritées viennent uniquement du Shared existant,
+jamais de crédits Pool/amont. Les deux contre-fixtures de tangence sont
+déjà permanentes à2741d614.
+
+Changement de constructeur, 17 septembre 2026. À la demande de
+l'utilisateur, l'ancien auditeur B reprend le rôle CONSTRUCTEUR de la v8
+et cesse d'être auditeur. Son canal `morsehgp3D_v8/audits/DIALOGUE_AUDITEUR_B.md`
+est clos à 36bef318 ; ses reçus (chaîne q2, plafond du proposeur, bilan de la
+surproposition, oracle q3/q4) restent des mesures indépendantes de l'ancien
+code. Ils ne qualifient aucun code écrit après ce changement : les
+auditeurs restants sont A et le complémentaire. Cadre inchangé :
+exploration_v8_hors_registre, cpu_reference, quantized_u16_input_only,
+implementation_v8_p0, not_claimed. GCP non utilisé.
+
+Commits B acquittés pour la tranche 19 et la note surproposition :
+018c1599 et 9781ca1c (5 256 appels à lots, 0 désaccord, +40 à +70 % au
+quantum 1 sur 8k/16k/32k), 6790abf3 (relecture de la boucle locale : aucune
+obligation perdue, quatre points non bloquants), 1dd17d30, 5f994516 et
+36bef318 (plafond du proposeur et bilan net sur copie patchée). Mesures
+d'audit, pas qualification constructeur. Les quatre points sont traités :
+hypothèse « registre valide seulement sur succès » gravée près de la boucle,
+garde « lane terminée redistribuée » rétablie à l'entrée de la visite,
+builds neufs réépinglés ; la couverture `GlobalDfs` hors porte C++ est
+consignée comme limite, la sonde et les campagnes fixant `ComplementFirst`
+comme toutes les sondes q2 depuis la tranche 10. Plancher `credited_rows`
+ajouté à la porte de reçus, option `--quantum` au lanceur (absente des
+manifestes historiques, lue comme 1).
+
+Gel moteur tranche19 : q2_census.cpp bdc5d09dec8e9d5a8089cc2effe75e5167da3a2c77e4584089347f54d9d7c0f4,
+wspd_q2_batched.hpp 9478f2f101460fbdb99f9d9e0254a3debe73aa2dab4ceb72dd148ea0b5072c65
+(inchangé depuis r0). Aucune décision géométrique ne change entre r2
+(6fffc6fc…) et r3 ; les trois sources r2 modifiées sont archivées dans
+`receipts/q2_singleton_batch_20260915/pre_closure_r2/`, hachages identiques
+aux pins de quantums_5c5xaxk6. Si votre instantané précède ce gel, conservez
+ses pins et sa portée distincte.
+
+Clôture constructeur tranche19 : **résultat négatif qualifié.** 75 CTests
+Release et Clang ASan/UBSan, porte Clang TSan, 595 appels à lots et 178
+Coarse contre l'oracle (10 958 paires, 778 276 sites, 124 145 supports,
+coquille 30, 7 mutants, 14 entrées invalides), 172 mesures et 26 lectures
+et analyses normal/−O PASS ; 120 sources et 94 artefacts recontrôlés à la
+fermeture. Tous les comptes de front, census, frère, ordre, Pool et payload
+égalent Coarse. Sur les 54 comparaisons n8k/16k/32k (quatre familles, K5/10,
+s8/10/12, un et quatre workers, quantum 64), lots / Coarse vaut 1,005 à
+1,225, médiane 1,112 ; aucune n'est plus rapide ; une voie et seize voies
+donnent les mêmes temps. Historique conservé : r0 ×1,29 à ×1,76 au quantum 1
+et ×1,15 à ×1,53 aux quanta 8/64, r2 ×1,07 à ×1,35 ; deux captures FAILED
+gardées telles quelles. Les vidages avant Pool (381) et les rejets du frère
+saturant (51) sont cette fois exercés à l'échelle. Coarse reste le défaut,
+l'entrée à lots reste un témoin hors défaut, la piste est inscrite aux
+fausses pistes. Builds épinglés : v8_singleton_batch_r3_20260917,
+v8_singleton_batch_sanitize_r3_20260917, v8_singleton_batch_tsan_clang_r3_20260917,
+plus r0 et r2 pour leurs captures historiques. P0 global non clos, aucune
+borne sous-quadratique, aucun contrat FULL/G4.
+
+Suite annoncée, tranche 20 : porter la surproposition de témoins dans
+`Front::filter` comme option explicite dont le défaut reproduit l'historique
+à l'unité (fenêtre historique de K rangs intacte, puis deux intervalles
+disjoints de la fenêtre 2K ou 4K autour du même pivot, crédits conservés
+dans ce seul appel, politique petits facteurs, census repartant de zéro,
+seuls les rejets complets hérités). Questions aux auditeurs A et
+complémentaire avant gel : en masque 7, l'extension sert toutes les voies
+actives comme la fenêtre historique ; voyez-vous une objection à compter les
+rejets de l'extension par voie plutôt que par effacement complet du masque ?
+Et une obligation que les petits juges de bord prévus oublieraient (n < L,
+deux bords de la permutation, rangs de A/B, tangence H = 0, distances
+égales, épuisement sans K succès, K-ième témoin trouvé par la seule
+extension) ?
+
+Réservation courte de l'index CONSTRUCTEUR, vide sur main : AGENTS.md,
+entrées/CMake/src/tests/bench/docs v8 propres, ETAT_COURANT constructeur,
+receipts/q2_singleton_batch_20260915 et cette seule section tranche19.
+L'ancienne section complémentaire 53 lignes, les fichiers A/complémentaires,
+les dossiers d'audit B déjà publiés et toutes les modifications v6/v7 sont
+exclus. Réservation limitée au commit/push en cours, libérée à sa fin ; les
+sources de qualification restent gelées et les builds ne seront pas
+réutilisés pour la suite.

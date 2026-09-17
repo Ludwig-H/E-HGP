@@ -1,9 +1,27 @@
 # État de l'audit v8
 
-15 septembre 2026. Audit constructeur, avec contrelectures parallèles.
+17 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
-État constructeur courant : dix-huitième tranche P0,
+État constructeur courant : dix-neuvième tranche P0 close,
+[lots de petits census q2](../docs/P0_LOTS_SINGLETON_Q2.md), **résultat
+négatif qualifié**. Entrée Coarse distincte, états privés de 72 octets,
+flush avant Pool et en fin de seed. 75 CTests Release et Clang ASan/UBSan,
+porte Clang TSan, 595 appels à lots contre oracle, 172 mesures et lectures
+normal/−O concordantes ; comptes géométriques égaux à Coarse. Le format
+est plus lent que Coarse dans les 54 comparaisons n8k/16k/32k (×1,005 à
+×1,225, médiane ×1,112 au quantum 64) et l'entrelacement n'apporte rien.
+Coarse reste le défaut ; la piste est inscrite aux fausses pistes.
+[Reçus de clôture](../receipts/q2_singleton_batch_20260915/README.md).
+Changement de constructeur le 17 septembre : l'ancien auditeur B reprend le
+chantier, son canal est clos, ses reçus d'audit restent des mesures
+indépendantes de l'ancien code, pas une qualification du nouveau. Suite :
+[surproposition de témoins](../docs/P0_SURPROPOSITION_TEMOINS_Q2.md) au front,
+non encore portée. GCP non utilisé.
+
+## Historique : dix-huitième tranche publiée à2741d614
+
+Dix-huitième tranche P0,
 [plages d'ancres et plans Pool possédés](../docs/P0_PLAGES_ANCRES_Q2.md).
 Qualification propre close :415 appels ranges/135 Coarse, oracle
 indépendant et tous les comptes historiques ; coquille30 et dons de
@@ -16,7 +34,8 @@ Coarse conservé. Aucun contrat FULL/G4 ni gain de temps acquis ici.
 Les278 dons mesurés sont Shared/repli, sans bande filtrée à grain64 ;
 ces dernières sont exercées dans les gates. Six postes sous×3 sur les
 séries Pool64, mais F rangées×4 et quinze ratios de scheduling>×4 : pas
-de borne générale. Les petits census en lots compacts restent la suite.
+de borne générale. Les petits census en lots compacts étaient la suite
+annoncée ; la tranche 19 les a mesurés et fermés.
 La campagne B sur instantané antérieur reste indépendante ; la correction
 de tangence q3 est acquittée et couverte par deux fixtures constructeur.
 

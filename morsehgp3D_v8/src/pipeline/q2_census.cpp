@@ -4,6 +4,7 @@
 #include "wspd_q2_census.hpp"
 #include "wspd_q2_parallel.hpp"
 #include "wspd_q2_ranges.hpp"
+#include "wspd_q2_batched.hpp"
 #include "q2_joint_bounds.hpp"
 #include "q2_node_pool.hpp"
 #include "../spindle/q2_prepared_bounds.hpp"
@@ -189,6 +190,8 @@ std::size_t Q2CensusIndex::retained_bytes() const {
   return orders + nodes;
 }
 
+struct Q2SingletonBatch;
+
 struct Q2CensusEngine {
   struct QueryNode {
     Range range;
@@ -214,6 +217,11 @@ struct Q2CensusEngine {
   std::span<const Q2SpatialNode> shared_queries;
   std::vector<std::size_t> interior;
   std::vector<std::size_t> shell;
+  Q2SingletonBatch* singleton_batch{};
+
+  void enqueue_singleton(std::size_t a_id, std::size_t query, unsigned count,
+      std::size_t cursor, std::size_t sibling, const OrderContext* context,
+      bool inside_deferred);
 
   Q2CensusEngine(const Q2CensusIndex& input_index, const AxisQ2Plan& input_plan,
                  const Q2CensusConsumer& input_consumer)
@@ -378,10 +386,16 @@ struct Q2CensusEngine {
     }
   }
 
-  template<bool sibling_certificate = false, bool complement_first = false>
+  template<bool sibling_certificate = false, bool complement_first = false, bool batched = false>
   void shared_task(std::size_t a_id, std::size_t query, unsigned count,
                     std::size_t cursor, std::size_t sibling = absent,
                     const OrderContext* context = nullptr, bool inside_deferred = false) {
+    if constexpr (batched) {
+      if (query_node(query).range.size() == 1) {
+        enqueue_singleton(a_id, query, count, cursor, sibling, context, inside_deferred);
+        return;
+      }
+    }
     counter_add(result.work.query_tasks);
     const auto b = query_node(query);
     const bool singleton = b.range.size() == 1;
@@ -514,9 +528,9 @@ struct Q2CensusEngine {
         // exact acquired count. No frontier list, allocation, root restart,
         // or copy of a long continuation is needed. Query tasks may later be
         // scheduled independently, but their internal Z order must stay fixed.
-        shared_task<sibling_certificate, complement_first>(a_id, b.left, count, cursor,
+        shared_task<sibling_certificate, complement_first, batched>(a_id, b.left, count, cursor,
                                                           b.right, context, inside_deferred);
-        shared_task<sibling_certificate, complement_first>(a_id, b.right, count, cursor,
+        shared_task<sibling_certificate, complement_first, batched>(a_id, b.right, count, cursor,
                                                           b.left, context, inside_deferred);
         return;
       }
@@ -752,6 +766,268 @@ struct Q2CensusEngine {
     }
   }
 };
+
+// Private batching authority: only shared_task may supply inherited prefixes.
+// No caller can submit a count/cursor certificate through the public API.
+struct Q2SingletonBatch {
+  enum class Stage : std::uint8_t { Entry, Witness, Emit, Done };
+  struct State {
+    Q2BallKey key;
+    std::size_t anchor_rank{}, b_id{}, original_b{}, cursor{}, sibling{absent};
+    std::uint8_t count{};
+    Stage stage = Stage::Entry;
+    bool inside_deferred{};
+  };
+  static_assert(std::is_nothrow_move_assignable_v<State>);
+  static_assert(std::is_nothrow_copy_constructible_v<State>);
+
+  const Q2CensusIndexPtr owner;
+  Q2CensusEngine& engine;
+  const std::size_t lanes, quantum;
+  const bool sibling_certificate, complement_first;
+  std::vector<State> states;
+  Q2BatchWork work;
+
+  Q2SingletonBatch(Q2CensusIndexPtr index, Q2CensusEngine& input_engine,
+      std::size_t lane_count, std::size_t step_quantum,
+      Q2SiblingMode sibling_mode, Q2WitnessOrder order)
+      : owner(std::move(index)), engine(input_engine), lanes(lane_count), quantum(step_quantum),
+        sibling_certificate(sibling_mode == Q2SiblingMode::Saturating),
+        complement_first(order == Q2WitnessOrder::ComplementFirst) {
+    if (lanes > std::numeric_limits<std::size_t>::max() / sizeof(State))
+      throw std::overflow_error("mhgp8 singleton lane storage exceeds size_t");
+    states.reserve(lanes);  // One allocation for this worker, never per query.
+  }
+
+  void reject(State& state) {
+    counter_add(engine.result.rejected_pairs);
+    counter_add(work.completed_rejected);
+    state.stage = Stage::Done;
+  }
+
+  void enter(State& state) {
+    counter_add(work.entry_steps);
+    counter_add(engine.result.work.query_tasks);
+    if (state.count != 0) counter_add(work.entry_after_credit);
+    if (state.inside_deferred) counter_add(work.entry_inside_deferred);
+    state.stage = Stage::Witness;
+    if (sibling_certificate && state.sibling != absent) {
+      counter_add(work.sibling_due);
+      auto& sw = engine.sibling_work;
+      counter_add(sw.proposals);
+      const auto& witness = owner->spatial_nodes()[state.sibling];
+      if (witness.range.size() < engine.threshold) {
+        counter_add(sw.cardinality_skips);
+      } else {
+        counter_add(sw.bound_tests);
+        counter_add(work.sibling_bound_tests);
+        if (pair_bounds(state.key, witness.box).minimum4 > 0) {
+          counter_add(sw.rejected_tasks);
+          counter_add(sw.rejected_pairs);
+          counter_add(work.sibling_rejected);
+          if (state.count != 0) {
+            counter_add(sw.rejected_after_credit);
+            counter_add(work.sibling_rejected_after_credit);
+          }
+          reject(state);
+        }
+      }
+    }
+  }
+
+  template<bool complement>
+  void witness_run(State& state, std::size_t& remaining) {
+    const auto nodes = owner->spatial_nodes();
+    const auto order = owner->spatial_order();
+    const auto points = engine.points;
+    const auto key = state.key;
+    const auto anchor_rank = state.anchor_rank;
+    const auto original_b = state.original_b;
+    const auto original_escape = nodes[state.original_b].escape;
+    auto cursor = state.cursor;
+    unsigned count = state.count;
+    bool inside_deferred = state.inside_deferred;
+    std::size_t witness_steps = 0;
+    auto& geometry = engine.result.work;
+    auto& ordering = engine.order_work;
+    // One native loop per lane visit, not one interpreted function call per
+    // witness. Only scheduling counts are aggregated; geometric accounting
+    // and decisions below remain at their original per-action positions.
+    while (remaining != 0) {
+      --remaining;
+      bool at_end;
+      if constexpr (complement) at_end = inside_deferred && cursor == original_escape;
+      else at_end = cursor == nodes.size();
+      if (at_end) {
+        counter_add(work.admission_steps);
+        if (count >= engine.threshold)
+          throw std::logic_error("mhgp8 singleton batch admitted a saturated query");
+        counter_add(engine.result.accepted_pairs);
+        state.stage = Stage::Emit;
+        break;  // Admission is a transition, not a witness step.
+      }
+      ++witness_steps;  // Bounded by the positive quantum, including SIZE_MAX.
+      if constexpr (complement) {
+        if (!inside_deferred && cursor == nodes.size()) {
+          inside_deferred = true;
+          cursor = original_b;
+          counter_add(ordering.phase_switches);
+          counter_add(geometry.cursor_advances);
+          continue;
+        }
+      }
+      if (cursor >= nodes.size())
+        throw std::logic_error("mhgp8 singleton batch cursor exceeds its immutable index");
+      const auto& z = nodes[cursor];
+      if constexpr (complement) {
+        if (!inside_deferred && cursor == original_b) {
+          cursor = original_escape;
+          counter_add(ordering.deferred_skips);
+          counter_add(geometry.cursor_advances);
+          continue;
+        }
+        const bool contains_anchor = z.range.first <= anchor_rank && anchor_rank < z.range.last;
+        const bool contains_deferred = !inside_deferred && cursor < original_b && original_b < z.escape;
+        if (contains_anchor || contains_deferred) {
+          if (z.left == absent) {
+            cursor = z.escape;
+            engine.consume_witnesses(1);
+            counter_add(ordering.anchor_skips);
+          } else {
+            cursor = z.left;
+            counter_add(ordering.structural_splits);
+          }
+          counter_add(geometry.cursor_advances);
+          continue;
+        }
+      }
+      counter_add(geometry.count_node_visits);
+      PowerBounds bounds;
+      if (z.left == absent) {
+        counter_add(geometry.count_point_tests);
+        const auto value = point_power4(key, points[order[z.range.first]]);
+        bounds = {value, value};
+      } else {
+        counter_add(geometry.count_bound_tests);
+        bounds = pair_bounds(key, z.box);
+      }
+      if (bounds.minimum4 > 0) {
+        engine.consume_witnesses(z.range.size());
+        engine.add_count(count, z.range.size());
+        cursor = z.escape;
+        counter_add(geometry.cursor_advances);
+        if (count == engine.threshold) {
+          reject(state);
+          break;
+        }
+      } else if (bounds.maximum4 <= 0) {
+        engine.consume_witnesses(z.range.size());
+        cursor = z.escape;
+        counter_add(geometry.cursor_advances);
+      } else {
+        if (z.left == absent)
+          throw std::logic_error("mhgp8 singleton batch leaf power cannot be uncertain");
+        counter_add(geometry.witness_splits);
+        cursor = z.left;
+        counter_add(geometry.cursor_advances);
+      }
+    }
+    // No callback or external observation occurs inside the local loop.
+    // Save the exact pause/terminal prefix before a possible atomic Emit.
+    // The batch ledger is valid on SUCCESS of the whole call only: witness_steps
+    // and transitions are committed once per lane visit, and a throwing guard
+    // leaves state and ledger at their values before this visit. A failed call
+    // publishes no ledger; any future partial publication must count per step.
+    state.cursor = cursor;
+    state.count = static_cast<std::uint8_t>(count);
+    state.inside_deferred = inside_deferred;
+    counter_add(work.witness_steps, static_cast<u64>(witness_steps));
+  }
+
+  void emit(State& state) {
+    counter_add(work.payload_steps);
+    const auto started = Clock::now();
+    engine.interior.clear();
+    engine.shell.clear();
+    engine.collect(0, state.key);
+    if (engine.interior.size() != state.count)
+      throw std::logic_error("mhgp8 singleton batch count and global interior IDs disagree");
+    auto& geometry = engine.result.work;
+    counter_add(geometry.payload_interior_sites, static_cast<u64>(engine.interior.size()));
+    counter_add(geometry.payload_shell_sites, static_cast<u64>(engine.shell.size()));
+    counter_add(geometry.payload_supports);
+    engine.consumer(Q2Support{owner->spatial_order()[state.anchor_rank], state.b_id,
+                             state.key, engine.interior, engine.shell});
+    engine.result.payload_ms += milliseconds(started, Clock::now());
+    counter_add(work.completed_accepted);
+    state.stage = Stage::Done;
+  }
+
+  template<bool complement>
+  void pass_impl() {
+    counter_add(work.batch_passes);
+    std::size_t position = 0;
+    while (position < states.size()) {
+      auto& state = states[position];
+      // A completed lane is compacted in the visit that completes it; seeing
+      // one here means a singleton would be dispatched twice.
+      if (state.stage == Stage::Done)
+        throw std::logic_error("mhgp8 batch dispatched a completed singleton");
+      counter_add(work.lane_visits);
+      auto remaining = quantum;
+      if (state.stage == Stage::Entry) {
+        enter(state);
+        --remaining;
+      }
+      if (remaining != 0 && state.stage == Stage::Witness) witness_run<complement>(state, remaining);
+      if (remaining != 0 && state.stage == Stage::Emit) {
+        emit(state);
+        --remaining;
+      }
+      counter_add(work.transitions, static_cast<u64>(quantum - remaining));
+      if (state.stage == Stage::Done) {
+        counter_add(work.completed);
+        if (position + 1 != states.size()) state = states.back();
+        states.pop_back();
+        // The moved last lane has not been visited during this pass yet.
+      } else {
+        ++position;
+      }
+    }
+  }
+
+  void pass() {
+    if (complement_first) pass_impl<true>();
+    else pass_impl<false>();
+  }
+
+  void submit(State state) {
+    if (states.size() == lanes) {
+      counter_add(work.full_drains);
+      do { pass(); } while (states.size() == lanes);
+    }
+    states.push_back(state);
+    counter_add(work.enqueued);
+    work.max_active = std::max(work.max_active, static_cast<u64>(states.size()));
+  }
+
+  void flush(bool before_pool) {
+    if (before_pool) counter_add(work.pool_flushes);
+    else counter_add(work.seed_flushes);
+    while (!states.empty()) pass();
+  }
+};
+
+void Q2CensusEngine::enqueue_singleton(std::size_t a_id, std::size_t query, unsigned count,
+    std::size_t cursor, std::size_t sibling, const OrderContext* context, bool inside_deferred) {
+  if (!singleton_batch || !context || count >= threshold)
+    throw std::logic_error("mhgp8 batched singleton lacks its trusted original context");
+  const auto b_id = b_order[query_node(query).range.first];
+  counter_add(singleton_batch->work.key_preparations);
+  singleton_batch->submit({ball_key(points[a_id], points[b_id]), context->anchor_rank,
+      b_id, context->deferred, cursor, sibling, static_cast<std::uint8_t>(count),
+      Q2SingletonBatch::Stage::Entry, inside_deferred});
+}
 
 Q2CensusResult run_q2_census(const Q2CensusIndex& index, const AxisQ2Plan& plan,
                             Q2CensusMode mode, const Q2CensusConsumer& consumer) {
@@ -2356,6 +2632,210 @@ WspdQ2RangeResult run_wspd_q2_census_ranges(
       work.waits != work.wakes ||
       result.max_live_pool_parents > options.queue_capacity + pipeline.started_workers)
     throw std::logic_error("mhgp8 anchor ranges lost their lineage or memory bound");
+  pipeline.total_ms = milliseconds(started, Clock::now());
+  return result;
+}
+
+namespace {
+
+void merge_batch_work(Q2BatchWork& out, const Q2BatchWork& value) {
+#define MHGP8_BATCH_SUM(field) counter_add(out.field, value.field)
+  MHGP8_BATCH_SUM(enqueued); MHGP8_BATCH_SUM(completed);
+  MHGP8_BATCH_SUM(completed_accepted); MHGP8_BATCH_SUM(completed_rejected);
+  MHGP8_BATCH_SUM(batch_passes); MHGP8_BATCH_SUM(lane_visits); MHGP8_BATCH_SUM(transitions);
+  MHGP8_BATCH_SUM(entry_steps); MHGP8_BATCH_SUM(witness_steps);
+  MHGP8_BATCH_SUM(admission_steps); MHGP8_BATCH_SUM(payload_steps);
+  MHGP8_BATCH_SUM(sibling_due); MHGP8_BATCH_SUM(entry_after_credit);
+  MHGP8_BATCH_SUM(entry_inside_deferred); MHGP8_BATCH_SUM(key_preparations);
+  MHGP8_BATCH_SUM(sibling_bound_tests); MHGP8_BATCH_SUM(sibling_rejected);
+  MHGP8_BATCH_SUM(sibling_rejected_after_credit); MHGP8_BATCH_SUM(full_drains);
+  MHGP8_BATCH_SUM(seed_flushes); MHGP8_BATCH_SUM(pool_flushes);
+#undef MHGP8_BATCH_SUM
+  out.max_active = std::max(out.max_active, value.max_active);
+}
+
+void consume_batched_rectangle(Q2CensusEngine& engine, Q2SingletonBatch& batch,
+    WspdQ2CensusResult& result, std::span<const Q2SpatialNode> nodes,
+    std::span<const std::size_t> order, const WspdRectangle& rectangle,
+    Q2SiblingMode sibling_mode, Q2WitnessOrder witness_order, std::size_t pool_min_factor) {
+  if (rectangle.lane_mask != 1)
+    throw std::logic_error("mhgp8 singleton batch received a non-q2 rectangle");
+  auto a_node = rectangle.a_node;
+  auto b_node = rectangle.b_node;
+  if (nodes[a_node].range.size() > nodes[b_node].range.size()) std::swap(a_node, b_node);
+  const auto a = nodes[a_node].range;
+  const auto b = nodes[b_node].range;
+  if (pool_min_factor != 0 && b.size() >= pool_min_factor) {
+    batch.flush(true);  // No batched payload clock enters the Pool interval.
+    consume_wspd_rectangle(engine, result, nodes, order, rectangle,
+        Q2CensusMode::SharedBlocks, sibling_mode, witness_order, Q2AnchorMode::Individual,
+        pool_min_factor);  // Existing synchronous Pool AND Shared passthrough.
+    return;
+  }
+  counter_add(result.input_rectangles);
+  counter_add(result.anchor_queries, static_cast<u64>(a.size()));
+  counter_add(engine.result.work.input_descriptors);
+  counter_add(engine.result.candidate_pairs, anchor_range_mass(a.size(), b.size()));
+  for (auto rank = a.first; rank < a.last; ++rank) {
+    engine.root_start(0);
+    // Even Global keeps a trusted rank/context for deferred singleton entry;
+    // its geometry still performs no Complement topological operations.
+    const Q2CensusEngine::OrderContext context{b_node, nodes[b_node].escape, rank};
+    const auto a_id = order[rank];
+    if (witness_order == Q2WitnessOrder::ComplementFirst) {
+      if (sibling_mode == Q2SiblingMode::Saturating)
+        engine.shared_task<true, true, true>(a_id, b_node, 0, 0, absent, &context);
+      else
+        engine.shared_task<false, true, true>(a_id, b_node, 0, 0, absent, &context);
+    } else if (sibling_mode == Q2SiblingMode::Saturating) {
+      engine.shared_task<true, false, true>(a_id, b_node, 0, 0, absent, &context);
+    } else {
+      engine.shared_task<false, false, true>(a_id, b_node, 0, 0, absent, &context);
+    }
+  }
+}
+
+}  // namespace
+
+// Explicit adaptation of the existing Coarse seed/worker path. There is no
+// donation or borrowed range continuation; only a worker-local singleton lot.
+WspdQ2BatchResult run_wspd_q2_census_batched(
+    Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s,
+    WspdFrontMode front_mode, std::span<const Q2CensusConsumer> consumers,
+    WspdQ2BatchOptions options, Q2SiblingMode sibling_mode,
+    Q2WitnessOrder witness_order, std::size_t pool_min_factor) {
+  const auto started = Clock::now();
+  if (!index || consumers.empty() || options.jobs_per_worker == 0 ||
+      options.lanes == 0 || options.quantum == 0)
+    throw std::invalid_argument("mhgp8 batched q2 requires index, callbacks and positive options");
+  if (consumers.size() > std::numeric_limits<std::size_t>::max() / options.jobs_per_worker)
+    throw std::overflow_error("mhgp8 batched q2 target job count overflow");
+  static_cast<void>(resume_bytes(options.lanes, sizeof(Q2SingletonBatch::State)));
+  for (const auto& consumer : consumers)
+    validate_integrated_modes(Q2CensusMode::SharedBlocks, consumer, sibling_mode,
+                              witness_order, Q2AnchorMode::Individual);
+  WspdQ2BatchResult result;
+  result.state_bytes = sizeof(Q2SingletonBatch::State);
+  auto& pipeline = result.pipeline;
+  pipeline.requested_workers = static_cast<u64>(consumers.size());
+  pipeline.target_jobs = static_cast<u64>(consumers.size() * options.jobs_per_worker);
+  {
+    const std::vector<Q2CensusConsumer> callbacks(consumers.begin(), consumers.end());
+    const auto partition_started = Clock::now();
+    const auto plan = make_wspd_front_jobs(index, kmax, separation_s, front_mode,
+                                          static_cast<std::size_t>(pipeline.target_jobs), 1);
+    pipeline.partition_ms = milliseconds(partition_started, Clock::now());
+    pipeline.front = plan->prefix_result();
+    pipeline.prefix_product_visits = pipeline.front.work.product_visits;
+    pipeline.jobs = static_cast<u64>(plan->job_count());
+    pipeline.terminal_jobs = static_cast<u64>(plan->terminal_job_count());
+    pipeline.job_storage_bytes = static_cast<u64>(plan->retained_bytes());
+    const auto worker_count = std::min(callbacks.size(), plan->job_count());
+    pipeline.started_workers = static_cast<u64>(worker_count);
+    struct alignas(64) WorkerState {
+      WspdQ2CensusResult result;
+      Q2ParallelWorkerStats stats;
+      Q2BatchWorkerWork batch;
+    };
+    std::vector<WorkerState> states(worker_count);
+    std::atomic<std::size_t> next{0};
+    const auto nodes = index->spatial_nodes();
+    const auto order = index->spatial_order();
+    parallel_detail::run_joined_workers(worker_count,
+        [&](std::size_t worker, const std::atomic<bool>& cancel) {
+          const auto worker_started = Clock::now();
+          auto& state = states[worker];
+          {
+            Q2CensusEngine engine(*index, kmax, callbacks[worker]);
+            Q2SingletonBatch batch(index, engine, options.lanes, options.quantum, sibling_mode, witness_order);
+            engine.singleton_batch = &batch;
+            state.batch.state_capacity = static_cast<u64>(batch.states.capacity());
+            state.batch.state_storage_bytes = static_cast<u64>(resume_bytes(batch.states.capacity(), sizeof(Q2SingletonBatch::State)));
+            const WspdRectangleConsumer receiver = [&](const WspdRectangle& rectangle) {
+              consume_batched_rectangle(engine, batch, state.result, nodes, order,
+                  rectangle, sibling_mode, witness_order, pool_min_factor);
+            };
+            while (!cancel.load(std::memory_order_relaxed)) {
+              auto job = next.load(std::memory_order_relaxed);
+              while (job < plan->job_count() &&
+                     !next.compare_exchange_weak(job, job + 1, std::memory_order_relaxed)) {}
+              if (job == plan->job_count()) break;
+              const auto part = plan->run_job(job, receiver);
+              batch.flush(false);  // Includes every delayed callback before seed completion.
+              parallel_detail::merge_work(state.result.front.work, part.work);
+              counter_add(state.stats.jobs);
+            }
+            if (!batch.states.empty())
+              throw std::logic_error("mhgp8 singleton batch outlived its last completed seed");
+            engine.singleton_batch = nullptr;
+            state.batch.work = batch.work;
+            state.result.census = engine.result;
+            state.result.sibling_work = engine.sibling_work;
+            state.result.order_work = engine.order_work;
+            state.result.joint_work = engine.joint_work;
+          }
+          state.stats.front_products = state.result.front.work.product_visits;
+          state.stats.input_rectangles = state.result.input_rectangles;
+          state.stats.count_node_visits = state.result.census.work.count_node_visits;
+          state.stats.supports = state.result.census.accepted_pairs;
+          state.stats.pool_peak_bytes = state.result.pool_work.plan_peak_bytes;
+          state.stats.payload_ms = state.result.census.payload_ms;
+          state.stats.elapsed_ms = milliseconds(worker_started, Clock::now());
+        });
+    pipeline.workers.reserve(states.size());
+    result.workers.reserve(states.size());
+    for (const auto& state : states) {
+      parallel_detail::merge_work(pipeline.front.work, state.result.front.work);
+      parallel_detail::merge_work(pipeline.census_work, state.result.census.work);
+      parallel_detail::merge_work(pipeline.sibling_work, state.result.sibling_work);
+      parallel_detail::merge_work(pipeline.order_work, state.result.order_work);
+      parallel_detail::merge_work(pipeline.joint_work, state.result.joint_work);
+      parallel_detail::merge_work(pipeline.pool_work, state.result.pool_work);
+      counter_add(pipeline.input_rectangles, state.result.input_rectangles);
+      counter_add(pipeline.anchor_queries, state.result.anchor_queries);
+      counter_add(pipeline.candidate_pairs, state.result.census.candidate_pairs);
+      counter_add(pipeline.accepted_pairs, state.result.census.accepted_pairs);
+      counter_add(pipeline.rejected_pairs, state.result.census.rejected_pairs);
+      counter_add(pipeline.completed_jobs, state.stats.jobs);
+      counter_add(pipeline.pool_peak_bytes_sum, state.stats.pool_peak_bytes);
+      pipeline.worker_ms_sum += state.stats.elapsed_ms;
+      pipeline.payload_ms_sum += state.stats.payload_ms;
+      pipeline.workers.push_back(state.stats);
+      merge_batch_work(result.work, state.batch.work);
+      counter_add(result.state_capacity_sum, state.batch.state_capacity);
+      counter_add(result.state_storage_bytes_sum, state.batch.state_storage_bytes);
+      result.workers.push_back(state.batch);
+    }
+  }
+  const auto front_mass = pipeline.front.work.residual_pair_mass[0];
+  const auto& pool = pipeline.pool_work;
+  if (pipeline.completed_jobs != pipeline.jobs || pipeline.front.active_lane_mask != 1 ||
+      pipeline.front.work.rejected_pair_mass[0] > pipeline.front.total_unordered_pairs ||
+      front_mass != pipeline.front.total_unordered_pairs - pipeline.front.work.rejected_pair_mass[0] ||
+      pool.selected_pairs > front_mass || pool.filtered_pairs > pool.selected_pairs ||
+      pool.residual_pairs != pool.selected_pairs - pool.filtered_pairs ||
+      pool.passthrough_pairs > pool.residual_pairs ||
+      pool.pair_roots != pool.residual_pairs - pool.passthrough_pairs ||
+      pool.pair_roots > pipeline.candidate_pairs ||
+      pipeline.candidate_pairs != front_mass - pool.filtered_pairs ||
+      pipeline.input_rectangles != pipeline.front.work.emitted_rectangles ||
+      pipeline.census_work.input_descriptors != pipeline.input_rectangles ||
+      pipeline.accepted_pairs > pipeline.candidate_pairs ||
+      pipeline.rejected_pairs != pipeline.candidate_pairs - pipeline.accepted_pairs ||
+      pipeline.census_work.payload_supports != pipeline.accepted_pairs)
+    throw std::logic_error("mhgp8 batched q2 lost its front/census partition");
+  const auto& work = result.work;
+  if (work.enqueued != work.completed || work.enqueued != work.entry_steps ||
+      work.completed != work.completed_accepted + work.completed_rejected ||
+      work.payload_steps != work.completed_accepted || work.admission_steps != work.completed_accepted ||
+      work.transitions != work.entry_steps + work.witness_steps + work.admission_steps + work.payload_steps ||
+      work.key_preparations != work.enqueued || work.seed_flushes != pipeline.completed_jobs ||
+      work.pool_flushes != pool.selected_rectangles || work.max_active > options.lanes ||
+      work.completed_accepted > pipeline.accepted_pairs || work.completed_rejected > pipeline.rejected_pairs ||
+      work.sibling_rejected_after_credit > work.sibling_rejected ||
+      work.sibling_rejected > work.sibling_bound_tests || work.sibling_bound_tests > work.sibling_due ||
+      work.sibling_due > work.enqueued)
+    throw std::logic_error("mhgp8 batched q2 lost its singleton obligation ledger");
   pipeline.total_ms = milliseconds(started, Clock::now());
   return result;
 }

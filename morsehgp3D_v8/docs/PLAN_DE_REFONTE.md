@@ -482,8 +482,18 @@ par petite racine et conserve le Shared des replis sans rejet ; il ne
 réduit pas le nombre de tests géométriques. Mesurer la gestion par plage,
 la durée de vie simultanée des parents, F, le résidu et les sorties avant
 de choisir cette entrée. Aucun gain stable sous charge, Coarse reste le
-défaut. Priorité suivante aux millions de petits census en lots compacts
-et à la réduction de leur travail, pas à une autre file. FULL/G4 reste ouvert.
+défaut. Priorité alors annoncée : les millions de petits census en lots
+compacts et la réduction de leur travail, pas une autre file. FULL/G4 reste ouvert.
+
+Suivi tranche19 : les [lots de singletons entrelacés](P0_LOTS_SINGLETON_Q2.md)
+sont implémentés, qualifiés (75 CTests Release/Clang ASan/UBSan, porte
+TSan, 172 mesures closes, lecteurs normal/−O concordants) et **fermés comme
+résultat négatif** : lots / Coarse ×1,005 à ×1,225 sur 54 comparaisons
+n8k/16k/32k, entrelacement sans effet, comptes géométriques inchangés.
+Coarse reste le défaut. Le format des petites requêtes n'est pas le
+levier ; la priorité passe à leur nombre : rejeter plus de produits au
+front par la [surproposition de témoins](P0_SURPROPOSITION_TEMOINS_Q2.md),
+non encore portée. FULL/G4 reste ouvert.
 
 Commencer par P0 : comparer les architectures de rejet qui évitent les
 histogrammes quadratiques systématiques, d'abord en mono avec petits
