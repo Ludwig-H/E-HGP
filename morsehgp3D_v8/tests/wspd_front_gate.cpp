@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
+#include <limits>
 #include <numeric>
 #include <span>
 #include <stdexcept>
@@ -11,6 +12,7 @@
 #include <utility>
 #include <vector>
 
+#include "bench/front_fixtures.hpp"
 #include "oracle/p0_oracle.hpp"
 #include "wspd/front.hpp"
 
@@ -54,6 +56,14 @@ struct Gate {
   u64 witness_searches{};
   u64 witness_descent_steps{};
   u64 proposed_sites{};
+  // Widened proposal windows (WspdFrontProposals).
+  u64 widened_runs{};
+  u64 extended_products{};
+  u64 extended_proposals{};
+  u64 extended_rejections{};
+  u64 extension_only_pairs{};  // q2 pairs covered by the historical window, rejected only by the extension.
+  u64 limit_bites{};           // Runs whose finite small-factor limit changed the work.
+  u64 historical_constant_checks{};
 
   void require(bool condition, const char* message) {
     ++checks;
@@ -189,9 +199,10 @@ PairOracle make_oracle(Gate& gate, std::span<const Point3> points) {
   return result;
 }
 
-bool valid_cover(const Covers& covers, const PairOracle& oracle, unsigned kmax, bool pure) {
+bool valid_cover(const Covers& covers, const PairOracle& oracle, unsigned kmax, bool pure,
+                 std::uint8_t requested = 7) {
   for (unsigned lane = 0; lane < 3; ++lane) {
-    const bool active = lane + 2 <= kmax + 1;
+    const bool active = lane + 2 <= kmax + 1 && (requested & (1U << lane)) != 0;
     const unsigned h = active ? kmax - lane : 0;
     for (std::size_t a = 0; a < oracle.n; ++a) {
       for (std::size_t b = a + 1; b < oracle.n; ++b) {
@@ -221,12 +232,13 @@ struct Capture {
 };
 
 Capture checked_front(Gate& gate, const Q2CensusIndex& index, const PairOracle& oracle,
-                      unsigned kmax, unsigned separation_s, WspdFrontMode mode) {
+                      unsigned kmax, unsigned separation_s, WspdFrontMode mode,
+                      mhgp8::WspdFrontProposals proposals = {}, std::uint8_t requested = 7) {
   Capture capture;
   for (auto& lane : capture.cover) lane.resize(oracle.n * oracle.n);
   const auto nodes = index.spatial_nodes();
   const auto order = index.spatial_order();
-  const auto active = active_mask(kmax);
+  const auto active = static_cast<std::uint8_t>(active_mask(kmax) & requested);
   std::array<u64, 3> pair_mass{};
   std::array<u64, 3> lane_rectangles{};
   std::array<u64, 5> class_rectangles{};
@@ -270,10 +282,12 @@ Capture checked_front(Gate& gate, const Q2CensusIndex& index, const PairOracle& 
     }
     capture.rectangles.push_back(rectangle);
     ++gate.rectangles;
-  });
+  }, requested, proposals);
   const auto& result = capture.result;
   const auto& work = result.work;
   const u64 total = static_cast<u64>(oracle.n) * (oracle.n - 1) / 2;
+  const u64 historical_window = std::min<u64>(kmax, oracle.n);
+  const u64 wider_window = std::min<u64>(u64{kmax} * proposals.window_factor, oracle.n);
   gate.require(result.total_unordered_pairs == total && result.active_lane_mask == active,
                "front changed the unordered-pair or active-lane domain");
   gate.require(work.emitted_rectangles == capture.rectangles.size() &&
@@ -282,7 +296,7 @@ Capture checked_front(Gate& gate, const Q2CensusIndex& index, const PairOracle& 
                    work.size_class_pair_mass == class_pairs && work.residual_pair_mass == pair_mass &&
                    work.lane_rectangles == lane_rectangles,
                "front factor, size-class or residual ledger differs from independently expanded output");
-  gate.require(valid_cover(capture.cover, oracle, kmax, mode == WspdFrontMode::Pure),
+  gate.require(valid_cover(capture.cover, oracle, kmax, mode == WspdFrontMode::Pure, requested),
                "front lost, duplicated, or unsafely rejected an independently judged lane pair");
   for (unsigned lane = 0; lane < 3; ++lane) {
     const bool lane_active = (active & (1U << lane)) != 0;
@@ -308,10 +322,27 @@ Capture checked_front(Gate& gate, const Q2CensusIndex& index, const PairOracle& 
   gate.require(work.witness_searches <= work.product_visits &&
                    work.witness_descent_steps <= 48 * work.witness_searches &&
                    work.witness_box_distance_tests <= 2 * work.witness_descent_steps &&
-                   work.proposed_sites <= kmax * work.witness_searches &&
-                   work.proposals_in_factors <= work.proposed_sites &&
+                   work.extended_proposals <= work.proposed_sites &&
+                   work.proposed_sites - work.extended_proposals <= historical_window * work.witness_searches &&
+                   work.extended_proposals <= (wider_window - historical_window) * work.extended_products &&
+                   work.extended_products <= work.witness_searches &&
+                   work.extended_products <= work.extended_proposals &&
+                   work.extended_proposals_in_factors <= work.extended_proposals &&
+                   work.extended_proposals_in_factors <= work.proposals_in_factors &&
+                   work.extended_credits <= work.witness_lane_credits &&
+                   work.extended_credits <= work.extended_proposals - work.extended_proposals_in_factors &&
+                   work.extended_rejections <= work.extended_credits &&
+                   work.extended_rejections <= work.extended_products &&
+                   work.extended_rejections <= work.fully_rejected_products &&
+                   work.h_bound_tests + work.proposals_in_factors == work.proposed_sites &&
                    work.witness_lane_credits <= 3 * work.proposed_sites,
                "midpoint sampling exceeded its bounded one-path proposal envelope");
+  if (proposals.window_factor == 1 || mode == WspdFrontMode::Pure) {
+    gate.require(work.extended_products == 0 && work.extended_proposals == 0 &&
+                     work.extended_proposals_in_factors == 0 && work.extended_credits == 0 &&
+                     work.extended_rejections == 0,
+                 "historical window reported extension work");
+  }
   if (mode == WspdFrontMode::Pure) {
     gate.require(work.witness_searches == 0 && work.witness_descent_steps == 0 &&
                      work.witness_box_distance_tests == 0 && work.proposed_sites == 0 &&
@@ -322,6 +353,9 @@ Capture checked_front(Gate& gate, const Q2CensusIndex& index, const PairOracle& 
   gate.witness_searches += work.witness_searches;
   gate.witness_descent_steps += work.witness_descent_steps;
   gate.proposed_sites += work.proposed_sites;
+  gate.extended_products += work.extended_products;
+  gate.extended_proposals += work.extended_proposals;
+  gate.extended_rejections += work.extended_rejections;
   ++gate.front_runs;
   return capture;
 }
@@ -446,6 +480,50 @@ void corpus(Gate& gate) {
           if (permutation == 0 && separation_s == 8) reference_supports[k_slot] = pure_supports;
           gate.require(pure_supports == reference_supports[k_slot],
                        "input permutation or separation changed independently accepted q2 supports");
+          // Widened windows, qualified for the q2 lane alone (requested mask 1). The
+          // explicit factor-1 options, with or without a finite limit, are the
+          // historical front; every wider window stays sound against the same
+          // independent pair oracle (checked_front), keeps the q2 supports, and can
+          // only reject MORE pairs: the q2 lane falls iff the creditable ranks of
+          // the whole window reach Kmax, which is monotone in the window and in
+          // the small-factor limit.
+          static_assert(mhgp8::WspdFrontProposals{}.window_factor == 1);
+          const auto unlimited = std::numeric_limits<std::size_t>::max();
+          const auto q2_only = checked_front(gate, *index, oracle, kmax, separation_s,
+                                             WspdFrontMode::MidpointSamples, {}, 1);
+          for (const auto inert : {mhgp8::WspdFrontProposals{1, unlimited}, mhgp8::WspdFrontProposals{1, 1}}) {
+            const auto same = checked_front(gate, *index, oracle, kmax, separation_s,
+                                            WspdFrontMode::MidpointSamples, inert, 1);
+            gate.require(same.result.work == q2_only.result.work && same.rectangles.size() == q2_only.rectangles.size() &&
+                             std::equal(q2_only.rectangles.begin(), q2_only.rectangles.end(), same.rectangles.begin(),
+                                        [](const auto& x, const auto& y) {
+                                          return x.a_node == y.a_node && x.b_node == y.b_node && x.lane_mask == y.lane_mask; }),
+                         "factor-1 proposals differ from the historical q2 front");
+          }
+          const auto subset = [&](const Capture& smaller, const Capture& larger, const char* message) {
+            gate.require(smaller.result.work.rejected_pair_mass[0] >= larger.result.work.rejected_pair_mass[0], message);
+            for (std::size_t offset = 0; offset < larger.cover[0].size(); ++offset)
+              gate.require(smaller.cover[0][offset] <= larger.cover[0][offset], message);
+          };
+          const auto wide = [&](mhgp8::WspdFrontProposals proposals) {
+            ++gate.widened_runs;
+            return checked_front(gate, *index, oracle, kmax, separation_s, WspdFrontMode::MidpointSamples, proposals, 1);
+          };
+          const auto wide2 = wide({2, unlimited}), wide2_small = wide({2, 2});
+          const auto wide4 = wide({4, unlimited}), wide4_leaf = wide({4, 1});
+          for (const auto* capture : {&wide2, &wide2_small, &wide4, &wide4_leaf})
+            gate.require(pure_supports == q2_supports(gate, capture->cover, oracle, kmax, original_ids),
+                         "widened proposals changed direct-census q2 supports");
+          subset(wide2, q2_only, "window 2K rejected fewer pairs than the historical window");
+          subset(wide2_small, q2_only, "limited window 2K rejected fewer pairs than the historical window");
+          subset(wide2, wide2_small, "unlimited window 2K rejected fewer pairs than its limited variant");
+          subset(wide4, wide2, "window 4K rejected fewer pairs than window 2K");
+          subset(wide4, wide4_leaf, "unlimited window 4K rejected fewer pairs than its leaf-only variant");
+          subset(wide4_leaf, q2_only, "leaf-only window 4K rejected fewer pairs than the historical window");
+          gate.limit_bites += static_cast<u64>(!(wide2_small.result.work == wide2.result.work)) +
+                              static_cast<u64>(!(wide4_leaf.result.work == wide4.result.work));
+          for (std::size_t offset = 0; offset < q2_only.cover[0].size(); ++offset)
+            gate.extension_only_pairs += static_cast<u64>(q2_only.cover[0][offset] == 1 && wide4.cover[0][offset] == 0);
         }
         ++k_slot;
       }
@@ -468,6 +546,28 @@ void rejection_and_models(Gate& gate) {
     gate.rejects([&] { static_cast<void>(mhgp8::run_wspd_front(*index, kmax, 8, WspdFrontMode::Pure, consumer)); },
                  "front accepted an invalid Kmax");
   }
+  for (const unsigned factor : {0U, 3U, 5U, 8U}) {
+    gate.rejects([&] { static_cast<void>(mhgp8::run_wspd_front(*index, 2, 8, WspdFrontMode::MidpointSamples, consumer, 1,
+                                                        mhgp8::WspdFrontProposals{factor, 16})); },
+                 "front accepted an invalid proposal window factor");
+  }
+  gate.rejects([&] { static_cast<void>(mhgp8::run_wspd_front(*index, 2, 8, WspdFrontMode::MidpointSamples, consumer, 1,
+                                                      mhgp8::WspdFrontProposals{2, 0})); },
+               "front accepted a zero small-factor limit");
+  gate.rejects([&] { static_cast<void>(mhgp8::run_wspd_front(*index, 2, 8, WspdFrontMode::Pure, consumer, 1,
+                                                      mhgp8::WspdFrontProposals{2, 16})); },
+               "Pure front accepted a widened proposal window");
+  gate.rejects([&] { static_cast<void>(mhgp8::make_wspd_front_jobs(index, 2, 8, WspdFrontMode::MidpointSamples, 4, 1,
+                                                            mhgp8::WspdFrontProposals{3, 16})); },
+               "front jobs accepted an invalid proposal window factor");
+  for (const std::uint8_t mask : {std::uint8_t{7}, std::uint8_t{3}, std::uint8_t{2}}) {
+    gate.rejects([&] { static_cast<void>(mhgp8::run_wspd_front(*index, 2, 8, WspdFrontMode::MidpointSamples, consumer, mask,
+                                                        mhgp8::WspdFrontProposals{2, 16})); },
+                 "front widened the proposal window of a q3/q4 lane");
+  }
+  gate.rejects([&] { static_cast<void>(mhgp8::make_wspd_front_jobs(index, 5, 8, WspdFrontMode::MidpointSamples, 4, 7,
+                                                            mhgp8::WspdFrontProposals{4, 16})); },
+               "front jobs widened the proposal window of a q3/q4 lane");
   for (const unsigned s : {0U}) {
     gate.rejects([&] { static_cast<void>(mhgp8::run_wspd_front(*index, 2, s, WspdFrontMode::Pure, consumer)); },
                  "front accepted a zero separation");
@@ -560,6 +660,31 @@ void rejection_and_models(Gate& gate) {
   ++gate.callback_exceptions;
 }
 
+// Counters of the DEFAULT three-lane front before the widened-window tranche (commit
+// 8d615cfd, pinned tranche-19 library), n = 2000, Kmax 10, s 8, seed 3: the historical
+// path, Xi tests and q3/q4 credits included, must not drift when the option exists.
+void historical_constants(Gate& gate) {
+  struct Constants { const char* family; u64 visits, searches, proposed, in_factors, h_tests, xi_tests, credits,
+                         rejected_products, emitted; std::array<u64, 3> rejected, residual; };
+  for (const auto& c : {Constants{"uniform", 1601268, 1597268, 15879672, 343169, 15536503, 11535369, 18576701,
+                                  142626, 657008, {1389928, 799768, 861465}, {609072, 1199232, 1137535}},
+                        Constants{"clusters", 381576, 377576, 3774689, 236437, 3538252, 1845108, 3263268,
+                                  2733, 187055, {35432, 6271, 8176}, {1963568, 1992729, 1990824}}}) {
+    const auto fixture = mhgp8::bench::make_front_fixture(2000, c.family, 3);
+    const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(fixture.points));
+    const auto w = mhgp8::run_wspd_front(*index, 10, 8, WspdFrontMode::MidpointSamples,
+                                         [](const WspdRectangle&) {}).work;
+    gate.require(w.product_visits == c.visits && w.witness_searches == c.searches && w.proposed_sites == c.proposed &&
+                     w.proposals_in_factors == c.in_factors && w.h_bound_tests == c.h_tests &&
+                     w.xi_bound_tests == c.xi_tests && w.witness_lane_credits == c.credits &&
+                     w.fully_rejected_products == c.rejected_products && w.emitted_rectangles == c.emitted &&
+                     w.rejected_pair_mass == c.rejected && w.residual_pair_mass == c.residual &&
+                     w.extended_products == 0 && w.extended_proposals == 0 && w.extended_rejections == 0,
+                 "default three-lane front drifted from its engraved pre-tranche counters");
+    ++gate.historical_constant_checks;
+  }
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -571,13 +696,17 @@ int main(int argc, char** argv) {
     Gate gate;
     corpus(gate);
     rejection_and_models(gate);
+    historical_constants(gate);
     gate.require(gate.clouds >= 30 && gate.front_runs >= 720 && gate.spatial_nodes > 1000 &&
                      gate.nonidentity_orders >= 10 && gate.oracle_point_tests > 200000 &&
                      gate.nonsingleton_rectangles > 0 && gate.partial_lane_rectangles > 0 &&
                      gate.absent_lane_pairs > 0 && gate.residual_lane_pairs > 0 &&
                      gate.q2_support_checks > 1000 && gate.permutations == 15 &&
-                     gate.invalid_inputs >= 9 && gate.model_mutants >= 7 && gate.callback_exceptions == 1 &&
-                     gate.witness_searches > 0 && gate.witness_descent_steps > 0 && gate.proposed_sites > 0,
+                     gate.invalid_inputs >= 20 && gate.model_mutants >= 7 && gate.callback_exceptions == 1 &&
+                     gate.witness_searches > 0 && gate.witness_descent_steps > 0 && gate.proposed_sites > 0 &&
+                     gate.widened_runs >= 1440 && gate.extended_products > 0 && gate.extended_proposals > 0 &&
+                     gate.extended_rejections > 0 && gate.extension_only_pairs > 0 && gate.limit_bites > 0 &&
+                     gate.historical_constant_checks == 2,
                  "WSPD front qualification lost a non-vacuity floor");
     std::cout << "mhgp8_wspd_front_gate passed checks=" << gate.checks << " clouds=" << gate.clouds
               << " spatial_nodes=" << gate.spatial_nodes << " nonidentity_orders=" << gate.nonidentity_orders
@@ -588,7 +717,11 @@ int main(int argc, char** argv) {
               << " q2_support_checks=" << gate.q2_support_checks << " permutations=" << gate.permutations
               << " invalid_inputs=" << gate.invalid_inputs << " model_mutants=" << gate.model_mutants
               << " callback_exceptions=" << gate.callback_exceptions << " witness_searches=" << gate.witness_searches
-              << " witness_descent_steps=" << gate.witness_descent_steps << " proposed_sites=" << gate.proposed_sites << '\n';
+              << " witness_descent_steps=" << gate.witness_descent_steps << " proposed_sites=" << gate.proposed_sites
+              << " widened_runs=" << gate.widened_runs << " extended_products=" << gate.extended_products
+              << " extended_proposals=" << gate.extended_proposals
+              << " extended_rejections=" << gate.extended_rejections
+              << " extension_only_pairs=" << gate.extension_only_pairs << " limit_bites=" << gate.limit_bites << '\n';
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "mhgp8_wspd_front_gate failed: " << error.what() << '\n';

@@ -1,0 +1,16 @@
+{
+  "kind": "gate",
+  "command": [
+    "/workspaces/E-HGP/build/v8_front_proposals_tsan_clang_20260917/mhgp8_wspd_front_dispatch_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-17T14:51:55.517413+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"schema\":\"mhgp8_wspd_front_dispatch_gate_v1\",\"status\":\"passed\",\"public_status\":\"not_claimed\",\"checks\":43846,\"oracle_sites\":15459,\"reference_runs\":224,\"dispatch_runs\":222,\"donations\":467,\"full_refusals\":1025,\"reduced_rectangles\":165,\"masked_cases\":5,\"zero_seed_cases\":24,\"ownership_cases\":1,\"waits\":272,\"cross_worker_transfers\":1,\"callback_failures\":1,\"launch_failures\":1,\"invalid_inputs\":4,\"widened_cases\":72,\"extended_products\":2643}\n",
+  "stderr": "",
+  "stdout_base64": "eyJzY2hlbWEiOiJtaGdwOF93c3BkX2Zyb250X2Rpc3BhdGNoX2dhdGVfdjEiLCJzdGF0dXMiOiJwYXNzZWQiLCJwdWJsaWNfc3RhdHVzIjoibm90X2NsYWltZWQiLCJjaGVja3MiOjQzODQ2LCJvcmFjbGVfc2l0ZXMiOjE1NDU5LCJyZWZlcmVuY2VfcnVucyI6MjI0LCJkaXNwYXRjaF9ydW5zIjoyMjIsImRvbmF0aW9ucyI6NDY3LCJmdWxsX3JlZnVzYWxzIjoxMDI1LCJyZWR1Y2VkX3JlY3RhbmdsZXMiOjE2NSwibWFza2VkX2Nhc2VzIjo1LCJ6ZXJvX3NlZWRfY2FzZXMiOjI0LCJvd25lcnNoaXBfY2FzZXMiOjEsIndhaXRzIjoyNzIsImNyb3NzX3dvcmtlcl90cmFuc2ZlcnMiOjEsImNhbGxiYWNrX2ZhaWx1cmVzIjoxLCJsYXVuY2hfZmFpbHVyZXMiOjEsImludmFsaWRfaW5wdXRzIjo0LCJ3aWRlbmVkX2Nhc2VzIjo3MiwiZXh0ZW5kZWRfcHJvZHVjdHMiOjI2NDN9Cg==",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-17T14:51:55.972854+00:00"
+}

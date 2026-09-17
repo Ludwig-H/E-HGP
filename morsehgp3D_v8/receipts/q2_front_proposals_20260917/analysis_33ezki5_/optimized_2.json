@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_wspd_q2_proposals_checks.py",
+    "read",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/q2_front_proposals_20260917/tsan_jgzwyjuf"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-17T15:26:07.150194+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"full_contract_qualified\": false, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q2_front_proposals_20260917/tsan_jgzwyjuf\", \"q2_measures\": 0, \"records\": 2, \"status\": \"passed\"}\n",
+  "stderr": "",
+  "stdout_base64": "eyJmdWxsX2NvbnRyYWN0X3F1YWxpZmllZCI6IGZhbHNlLCAicGF0aCI6ICIvd29ya3NwYWNlcy9FLUhHUC9tb3JzZWhncDNEX3Y4L3JlY2VpcHRzL3EyX2Zyb250X3Byb3Bvc2Fsc18yMDI2MDkxNy90c2FuX2pnend5anVmIiwgInEyX21lYXN1cmVzIjogMCwgInJlY29yZHMiOiAyLCAic3RhdHVzIjogInBhc3NlZCJ9Cg==",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-17T15:26:07.288663+00:00"
+}

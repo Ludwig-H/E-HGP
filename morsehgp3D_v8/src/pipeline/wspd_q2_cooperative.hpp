@@ -99,12 +99,14 @@ struct WspdQ2CooperativeResult {
 // Worker elapsed intervals INCLUDE their waits; their sum and payload_ms_sum
 // are not subtractable from wall time. Pool clocks remain synchronous sums.
 // No new clock here isolates continuation allocation or detachment cost.
+// front_proposals only widens the front's rejection heuristic
+// (WspdFrontProposals); the census still starts every count from zero.
 [[nodiscard]] WspdQ2CooperativeResult run_wspd_q2_census_cooperative(
     Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s,
     WspdFrontMode front_mode, std::span<const Q2CensusConsumer> consumers,
     WspdQ2CooperativeOptions options = {},
     Q2SiblingMode sibling_mode = Q2SiblingMode::Disabled,
     Q2WitnessOrder witness_order = Q2WitnessOrder::GlobalDfs,
-    std::size_t pool_min_factor = 0);
+    std::size_t pool_min_factor = 0, WspdFrontProposals front_proposals = {});
 
 }  // namespace mhgp8

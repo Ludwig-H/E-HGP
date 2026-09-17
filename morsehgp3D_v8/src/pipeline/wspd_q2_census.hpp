@@ -130,6 +130,8 @@ struct WspdQ2CensusResult {
 // preparation_ms and payload_ms overlap it and must not be added to it.
 // plan_peak_bytes measures retained vector capacities, not peak RSS. This is a
 // stream of q2 supports, not a canonical ball catalogue or an HGP FULL tower.
+// front_proposals only widens the front's rejection heuristic
+// (WspdFrontProposals); the census still starts every count from zero.
 [[nodiscard]] WspdQ2CensusResult run_wspd_q2_census(
     const Q2CensusIndex& index, unsigned kmax, unsigned separation_s,
     WspdFrontMode front_mode, Q2CensusMode census_mode,
@@ -137,6 +139,6 @@ struct WspdQ2CensusResult {
     Q2SiblingMode sibling_mode = Q2SiblingMode::Disabled,
     Q2WitnessOrder witness_order = Q2WitnessOrder::GlobalDfs,
     Q2AnchorMode anchor_mode = Q2AnchorMode::Individual,
-    std::size_t pool_min_factor = 0);
+    std::size_t pool_min_factor = 0, WspdFrontProposals front_proposals = {});
 
 }  // namespace mhgp8

@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — lots singleton clos, surproposition de témoins à porter
+# Morse HGP 3D v8 — fenêtre de propositions élargie du front q2
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -36,6 +36,30 @@ Les mesures historiques citées restent v7.
 
 ## État exécutable
 
+La vingtième tranche porte au front la [surproposition de témoins](docs/P0_SURPROPOSITION_TEMOINS_Q2.md) :
+le seuil de rejet reste Kmax, mais un produit que la fenêtre historique de
+Kmax rangs ne rejette pas peut proposer les deux intervalles qui complètent
+une fenêtre de 2·Kmax ou 4·Kmax rangs autour du même pivot, crédits
+conservés, sans nouvelle descente. Option explicite `WspdFrontProposals`,
+réservée à la voie q2, transmise au front mono, aux jobs, au dispatch et aux
+cinq entrées q2 ; **le défaut reproduit le moteur précédent à l'unité**
+(capture différentielle contre le build épinglé de la tranche 19).
+
+Qualification propre close le 17 septembre 2026 : 78 CTests Release et
+Clang ASan/UBSan, portes proposals et dispatch sous Clang TSan, rejeu
+indépendant du front q2 (1 575 exécutions, dix mutants causaux tués), oracle
+force brute sur les cinq entrées (990 appels), 684 mesures et lectures
+normal/−O identiques. Fenêtre 2K « petits facteurs », temps mur du pipeline
+q2 complet rapporté à la fenêtre historique, n8k/16k/32k, K5/10, s8/10/12,
+un et quatre workers : uniforme ×0,42 à ×0,54, amas ×0,51 à ×0,62, terrain
+×0,64 à ×0,71 ; **rangées ×1,01 à ×1,18, régression conservée** (presque
+aucun témoin universel). Candidats du census à 26 à 40 % de la référence
+hors rangées, supports identiques. Lire les [reçus](receipts/q2_front_proposals_20260917/README.md).
+La croissance du travail restant est inchangée : ni borne sous-quadratique,
+ni P0 global, ni contrat FULL/G4. GCP non utilisé.
+
+## Dix-neuvième tranche publiée à 8d615cfd — historique
+
 La dix-neuvième tranche a testé les [lots de singletons q2](docs/P0_LOTS_SINGLETON_Q2.md) :
 des recherches indépendantes partagent un moteur par worker et avancent en
 alternance, sans changer leur ordre de témoins. **Résultat négatif qualifié
@@ -47,13 +71,6 @@ les 54 comparaisons closes à n8k/16k/32k : rapport lots / Coarse de 1,005 à
 L'entrée `run_wspd_q2_census_batched` reste explicite et hors défaut ;
 Coarse reste le défaut. Lire les [reçus de clôture](receipts/q2_singleton_batch_20260915/README.md).
 La piste « lots compacts » est inscrite aux [fausses pistes](docs/FAUSSES_PISTES.md).
-
-La suite ne change ni format ni ordonnancement : elle réduit le nombre de
-petites requêtes en rejetant davantage de produits au front, par la
-[surproposition de témoins](docs/P0_SURPROPOSITION_TEMOINS_Q2.md) (seuil K
-inchangé, fenêtre de propositions élargie). Rien n'en est encore porté dans
-le moteur ; les mesures d'audit existantes ne sont pas une qualification.
-Aucun contrat FULL/G4 n'est acquis. GCP non utilisé.
 
 ## Dix-huitième tranche publiée à2741d614 — historique
 

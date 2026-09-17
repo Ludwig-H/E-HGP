@@ -52,13 +52,15 @@ add_executable(mhgp8_wspd_q2_ranges_probe bench/wspd_q2_ranges_probe.cpp)
 target_link_libraries(mhgp8_wspd_q2_ranges_probe PRIVATE mhgp8_p0)
 add_executable(mhgp8_wspd_q2_batched_probe bench/wspd_q2_batched_probe.cpp)
 target_link_libraries(mhgp8_wspd_q2_batched_probe PRIVATE mhgp8_p0)
+add_executable(mhgp8_wspd_q2_proposals_probe bench/wspd_q2_proposals_probe.cpp)
+target_link_libraries(mhgp8_wspd_q2_proposals_probe PRIVATE mhgp8_p0)
 
 if(BUILD_TESTING)
   # Boost arbitrary precision is used only by the bounded independent judge.
   find_package(Boost REQUIRED)
   foreach(gate IN ITEMS q2_node_pool q2_terminal_pool wspd_front_jobs wspd_q2_parallel
       wspd_front_dispatch wspd_q2_dynamic q2_census_resume q2_census_detach q2_census_parallel
-      wspd_q2_cooperative wspd_q2_ranges wspd_q2_batched)
+      wspd_q2_cooperative wspd_q2_ranges wspd_q2_batched wspd_q2_proposals)
     add_executable(mhgp8_${gate}_gate tests/${gate}_gate.cpp)
     target_include_directories(mhgp8_${gate}_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     target_include_directories(mhgp8_${gate}_gate SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
@@ -145,6 +147,17 @@ if(BUILD_TESTING)
       COMMAND ${Python3_EXECUTABLE} ${batched_python_flags}
       "${CMAKE_CURRENT_SOURCE_DIR}/tests/wspd_q2_batched_receipts_gate.py"
       --probe $<TARGET_FILE:mhgp8_wspd_q2_batched_probe> --selftest)
+  endforeach()
+  foreach(opt IN ITEMS normal optimized)
+    set(proposals_python_flags -B)
+    if(opt STREQUAL "optimized")
+      list(APPEND proposals_python_flags -O)
+    endif()
+    add_test(NAME mhgp8_wspd_q2_proposals_receipts_${opt}_gate
+      COMMAND ${Python3_EXECUTABLE} ${proposals_python_flags}
+      "${CMAKE_CURRENT_SOURCE_DIR}/tests/wspd_q2_proposals_receipts_gate.py"
+      --probe $<TARGET_FILE:mhgp8_wspd_q2_proposals_probe>
+      --reference $<TARGET_FILE:mhgp8_wspd_q2_parallel_probe> --selftest)
   endforeach()
   foreach(opt IN ITEMS normal optimized)
     set(ranges_python_flags -B)

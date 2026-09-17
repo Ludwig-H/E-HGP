@@ -41,7 +41,7 @@ static_assert(std::is_same_v<decltype(std::declval<const WspdFrontJobs&>().index
 static_assert(std::is_same_v<decltype(std::declval<const WspdFrontJobs&>().prefix_result()),
                              const WspdFrontResult&>);
 
-constexpr std::array<u64 WspdFrontWork::*, 17> additive_fields{
+constexpr std::array<u64 WspdFrontWork::*, 22> additive_fields{
     &WspdFrontWork::product_visits, &WspdFrontWork::diagonal_splits,
     &WspdFrontWork::diagonal_leaves, &WspdFrontWork::disjoint_splits,
     &WspdFrontWork::separation_tests, &WspdFrontWork::witness_searches,
@@ -50,7 +50,9 @@ constexpr std::array<u64 WspdFrontWork::*, 17> additive_fields{
     &WspdFrontWork::h_bound_tests, &WspdFrontWork::xi_bound_tests,
     &WspdFrontWork::witness_lane_credits, &WspdFrontWork::fully_rejected_products,
     &WspdFrontWork::emitted_rectangles, &WspdFrontWork::emitted_factor_sites,
-    &WspdFrontWork::leaf_pair_rectangles};
+    &WspdFrontWork::leaf_pair_rectangles, &WspdFrontWork::extended_products,
+    &WspdFrontWork::extended_proposals, &WspdFrontWork::extended_proposals_in_factors,
+    &WspdFrontWork::extended_credits, &WspdFrontWork::extended_rejections};
 constexpr std::array<u64 WspdFrontWork::*, 3> maximum_fields{
     &WspdFrontWork::max_factor_size, &WspdFrontWork::max_stack_size,
     &WspdFrontWork::max_product_depth};
@@ -59,6 +61,9 @@ constexpr std::array<std::array<u64, 5> WspdFrontWork::*, 2> class_fields{
 constexpr std::array<std::array<u64, 3> WspdFrontWork::*, 3> lane_fields{
     &WspdFrontWork::rejected_pair_mass, &WspdFrontWork::residual_pair_mass,
     &WspdFrontWork::lane_rectangles};
+// The manual tables above drive both the independent sum and the mutants;
+// a field added to the structure but not to a table must fail to compile.
+static_assert(sizeof(WspdFrontWork) == (22 + 3 + 2 * 5 + 3 * 3) * sizeof(u64));
 
 bool same_work(const WspdFrontWork& a, const WspdFrontWork& b) {
   for (const auto field : additive_fields) if (a.*field != b.*field) return false;
@@ -107,6 +112,9 @@ struct Gate {
   u64 callback_failures{};
   u64 invalid_inputs{};
   u64 model_mutants{};
+  u64 widened_plans{};
+  u64 extended_products{};
+  u64 limit_bites{};
 
   void require(bool condition, const char* message) {
     ++checks;
@@ -201,9 +209,11 @@ auto collector(Capture& capture) {
 }
 
 Capture mono(Gate& gate, const Q2CensusIndex& index, const Oracle& oracle,
-             unsigned kmax, unsigned s, WspdFrontMode mode, std::uint8_t requested) {
+             unsigned kmax, unsigned s, WspdFrontMode mode, std::uint8_t requested,
+             mhgp8::WspdFrontProposals proposals = {}) {
   Capture capture;
-  capture.result = mhgp8::run_wspd_front(index, kmax, s, mode, collector(capture), requested);
+  capture.result = mhgp8::run_wspd_front(index, kmax, s, mode, collector(capture), requested, proposals);
+  gate.extended_products += capture.result.work.extended_products;
   const auto active = active_mask(kmax, requested);
   gate.require(capture.result.total_unordered_pairs == oracle.n * (oracle.n - 1) / 2 &&
                    capture.result.active_lane_mask == active,
@@ -375,6 +385,24 @@ void corpus(Gate& gate) {
               gate.require(&plan->index() == index.get(), "job factory replaced the shared census index");
               compare_jobs(gate, *plan, reference, target);
             }
+            // Widened windows are qualified for the q2 lane alone (active mask 1).
+            if (mode != WspdFrontMode::MidpointSamples || active_mask(kmax, mask) != 1) continue;
+            // Through preparation, run_job and the sum: BOTH option fields must
+            // reach all three, with nonzero extension counters. The limit 2 bites
+            // on these small clouds, which a limit of 16 never would.
+            const auto unlimited = mono(gate, *index, oracle, kmax, s, mode, mask,
+                                        mhgp8::WspdFrontProposals{4, std::numeric_limits<std::size_t>::max()});
+            for (const auto proposals : {mhgp8::WspdFrontProposals{2, std::numeric_limits<std::size_t>::max()},
+                                         mhgp8::WspdFrontProposals{4, 2}}) {
+              const auto widened = mono(gate, *index, oracle, kmax, s, mode, mask, proposals);
+              gate.limit_bites += static_cast<u64>(proposals.small_factor_limit == 2 &&
+                                                   !same_work(widened.result.work, unlimited.result.work));
+              for (const auto target : {std::size_t{1}, std::size_t{3}, std::size_t{13}, std::size_t{4096}}) {
+                const auto plan = mhgp8::make_wspd_front_jobs(index, kmax, s, mode, target, mask, proposals);
+                compare_jobs(gate, *plan, widened, target);
+                ++gate.widened_plans;
+              }
+            }
           }
         }
       }
@@ -540,7 +568,8 @@ int main(int argc, char** argv) {
                      gate.sparse_masks > 0 && gate.rejected_lane_pairs > 0 && gate.residual_lane_pairs > 0 &&
                      gate.partial_lane_rectangles > 0 && gate.nonsingleton_rectangles > 0 &&
                      gate.reentrant_runs == 2 && gate.callback_failures == 2 && gate.invalid_inputs >= 16 &&
-                     gate.model_mutants == 45,
+                     gate.model_mutants == 50 && gate.widened_plans > 500 && gate.extended_products > 0 &&
+                     gate.limit_bites > 0,
                  "front-job gate lost a declared non-vacuity floor");
     std::cout << "mhgp8_wspd_front_jobs_gate passed checks=" << gate.checks << " clouds=" << gate.clouds
               << " oracle_point_tests=" << gate.oracle_point_tests << " mono_runs=" << gate.mono_runs
@@ -553,7 +582,9 @@ int main(int argc, char** argv) {
               << " partial_lane_rectangles=" << gate.partial_lane_rectangles
               << " nonsingleton_rectangles=" << gate.nonsingleton_rectangles
               << " reentrant_runs=" << gate.reentrant_runs << " callback_failures=" << gate.callback_failures
-              << " invalid_inputs=" << gate.invalid_inputs << " model_mutants=" << gate.model_mutants << '\n';
+              << " invalid_inputs=" << gate.invalid_inputs << " model_mutants=" << gate.model_mutants
+              << " widened_plans=" << gate.widened_plans << " extended_products=" << gate.extended_products
+              << " limit_bites=" << gate.limit_bites << '\n';
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "mhgp8_wspd_front_jobs_gate failed: " << error.what() << '\n';

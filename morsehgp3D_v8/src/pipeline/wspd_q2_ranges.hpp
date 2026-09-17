@@ -98,12 +98,14 @@ struct WspdQ2RangeResult {
 // offers/callbacks, NOT an enclosing asynchronous parent wall interval.
 // These sums cannot be subtracted from total wall time. All old APIs retain
 // their previous clock semantics and defaults.
+// front_proposals only widens the front's rejection heuristic
+// (WspdFrontProposals); the census still starts every count from zero.
 [[nodiscard]] WspdQ2RangeResult run_wspd_q2_census_ranges(
     Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s,
     WspdFrontMode front_mode, std::span<const Q2CensusConsumer> consumers,
     WspdQ2RangeOptions options = {},
     Q2SiblingMode sibling_mode = Q2SiblingMode::Disabled,
     Q2WitnessOrder witness_order = Q2WitnessOrder::GlobalDfs,
-    std::size_t pool_min_factor = 0);
+    std::size_t pool_min_factor = 0, WspdFrontProposals front_proposals = {});
 
 }  // namespace mhgp8

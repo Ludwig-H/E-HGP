@@ -44,7 +44,9 @@ partagés et masques q2/q3/q4, sans plan ni scan de facteur par produit.
 Elle retire ce poste du front, pas de tous les anciens adaptateurs.
 Le proposeur ponctuel recommence encore une descente unique depuis la
 racine : son coût O(D+K) est payé et compté par produit. B1 n'est donc
-pas clos. Le test préalable de lentille et la transmission sans double
+pas clos. La [fenêtre élargie](P0_SURPROPOSITION_TEMOINS_Q2.md) de la
+vingtième tranche réutilise ce pivot sans seconde descente et réduit le
+nombre de produits visités ; elle ne supprime pas la descente par produit. Le test préalable de lentille et la transmission sans double
 crédit proposés par l'auditeur B sont à comparer au coût total du raccord
 census, pas à introduire comme nouvelles variantes sans consommateur.
 Sur deux rangées parallèles, les seuls témoins ponctuels W3/W4 laissent
@@ -112,6 +114,13 @@ aucune attente, le chemin Shared singleton étant déjà sans allocation ni
 pile Z. Verrou B1 inchangé : ce sont les recherches de témoins
 recommencées et le nombre de petites requêtes qu'il faut réduire, d'abord
 au front ([surproposition](P0_SURPROPOSITION_TEMOINS_Q2.md)), pas leur format.
+
+Évolution tranche20 : la fenêtre de propositions élargie (option explicite,
+voie q2 seule, défaut inchangé) rejette plus haut dans le front : à 2K, les
+candidats du census tombent à 26 à 40 % hors rangées et le temps q2 complet
+à ×0,42 à ×0,71 selon la famille, supports identiques. B1 reste ouvert : une
+descente est toujours payée par produit visité, les rangées ne gagnent rien
+et la croissance du travail restant est inchangée.
 
 Évolution tranche17 : une [équipe unique front+census](P0_EQUIPE_PERSISTANTE_Q2.md)
 existe désormais pour le front Coarse et les racines hors Pool sélectionnées

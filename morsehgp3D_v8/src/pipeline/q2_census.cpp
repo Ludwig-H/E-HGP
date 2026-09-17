@@ -1167,7 +1167,8 @@ WspdQ2CensusResult run_wspd_q2_census(
     const Q2CensusIndex& index, unsigned kmax, unsigned separation_s,
     WspdFrontMode front_mode, Q2CensusMode census_mode,
     const Q2CensusConsumer& consumer, Q2SiblingMode sibling_mode,
-    Q2WitnessOrder witness_order, Q2AnchorMode anchor_mode, std::size_t pool_min_factor) {
+    Q2WitnessOrder witness_order, Q2AnchorMode anchor_mode, std::size_t pool_min_factor,
+    WspdFrontProposals front_proposals) {
   const auto started = Clock::now();
   validate_integrated_modes(census_mode, consumer, sibling_mode, witness_order, anchor_mode);
   WspdQ2CensusResult result;
@@ -1182,7 +1183,7 @@ WspdQ2CensusResult run_wspd_q2_census(
         [&](const WspdRectangle& rectangle) {
           consume_wspd_rectangle(engine, result, nodes, order, rectangle, census_mode,
                                  sibling_mode, witness_order, anchor_mode, pool_min_factor);
-        }, 1);
+        }, 1, front_proposals);
     result.census = engine.result;
     result.sibling_work = engine.sibling_work;
     result.order_work = engine.order_work;
@@ -1221,7 +1222,8 @@ WspdQ2ParallelResult run_wspd_q2_census_parallel(
     WspdFrontMode front_mode, Q2CensusMode census_mode,
     std::span<const Q2CensusConsumer> consumers, std::size_t jobs_per_worker,
     Q2SiblingMode sibling_mode, Q2WitnessOrder witness_order,
-    Q2AnchorMode anchor_mode, std::size_t pool_min_factor, WspdQ2Schedule schedule) {
+    Q2AnchorMode anchor_mode, std::size_t pool_min_factor, WspdQ2Schedule schedule,
+    WspdFrontProposals front_proposals) {
   const auto started = Clock::now();
   if (!index || consumers.empty() || jobs_per_worker == 0) {
     throw std::invalid_argument("mhgp8 parallel q2 requires index, workers and positive job granularity");
@@ -1246,7 +1248,8 @@ WspdQ2ParallelResult run_wspd_q2_census_parallel(
     const std::vector<Q2CensusConsumer> callbacks(consumers.begin(), consumers.end());
     const auto partition_started = Clock::now();
     const auto plan = make_wspd_front_jobs(index, kmax, separation_s, front_mode,
-                                         static_cast<std::size_t>(result.target_jobs), 1);
+                                         static_cast<std::size_t>(result.target_jobs), 1,
+                                         front_proposals);
     result.partition_ms = milliseconds(partition_started, Clock::now());
     result.front = plan->prefix_result();
     result.prefix_product_visits = result.front.work.product_visits;
@@ -2001,7 +2004,8 @@ WspdQ2CooperativeResult run_wspd_q2_census_cooperative(
     Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s,
     WspdFrontMode front_mode, std::span<const Q2CensusConsumer> consumers,
     WspdQ2CooperativeOptions options, Q2SiblingMode sibling_mode,
-    Q2WitnessOrder witness_order, std::size_t pool_min_factor) {
+    Q2WitnessOrder witness_order, std::size_t pool_min_factor,
+    WspdFrontProposals front_proposals) {
   const auto started = Clock::now();
   if (!index || consumers.empty() || options.jobs_per_worker == 0 ||
       options.queue_capacity == 0 || options.quantum == 0 || options.min_b_size == 0)
@@ -2021,7 +2025,7 @@ WspdQ2CooperativeResult run_wspd_q2_census_cooperative(
     const std::vector<Q2CensusConsumer> callbacks(consumers.begin(), consumers.end());
     const auto partition_started = Clock::now();
     const auto plan = make_wspd_front_jobs(index, kmax, separation_s, front_mode,
-                                          static_cast<std::size_t>(pipeline.target_jobs), 1);
+                                          static_cast<std::size_t>(pipeline.target_jobs), 1, front_proposals);
     pipeline.partition_ms = milliseconds(partition_started, Clock::now());
     pipeline.front = plan->prefix_result();
     pipeline.prefix_product_visits = pipeline.front.work.product_visits;
@@ -2381,7 +2385,8 @@ WspdQ2RangeResult run_wspd_q2_census_ranges(
     Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s,
     WspdFrontMode front_mode, std::span<const Q2CensusConsumer> consumers,
     WspdQ2RangeOptions options, Q2SiblingMode sibling_mode,
-    Q2WitnessOrder witness_order, std::size_t pool_min_factor) {
+    Q2WitnessOrder witness_order, std::size_t pool_min_factor,
+    WspdFrontProposals front_proposals) {
   const auto started = Clock::now();
   if (!index || consumers.empty() || options.jobs_per_worker == 0 ||
       options.queue_capacity == 0 || options.anchor_grain == 0)
@@ -2404,7 +2409,7 @@ WspdQ2RangeResult run_wspd_q2_census_ranges(
     const std::vector<Q2CensusConsumer> callbacks(consumers.begin(), consumers.end());
     const auto partition_started = Clock::now();
     const auto plan = make_wspd_front_jobs(index, kmax, separation_s, front_mode,
-                                          static_cast<std::size_t>(pipeline.target_jobs), 1);
+                                          static_cast<std::size_t>(pipeline.target_jobs), 1, front_proposals);
     pipeline.partition_ms = milliseconds(partition_started, Clock::now());
     pipeline.front = plan->prefix_result();
     pipeline.prefix_product_visits = pipeline.front.work.product_visits;
@@ -2703,7 +2708,8 @@ WspdQ2BatchResult run_wspd_q2_census_batched(
     Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s,
     WspdFrontMode front_mode, std::span<const Q2CensusConsumer> consumers,
     WspdQ2BatchOptions options, Q2SiblingMode sibling_mode,
-    Q2WitnessOrder witness_order, std::size_t pool_min_factor) {
+    Q2WitnessOrder witness_order, std::size_t pool_min_factor,
+    WspdFrontProposals front_proposals) {
   const auto started = Clock::now();
   if (!index || consumers.empty() || options.jobs_per_worker == 0 ||
       options.lanes == 0 || options.quantum == 0)
@@ -2723,7 +2729,7 @@ WspdQ2BatchResult run_wspd_q2_census_batched(
     const std::vector<Q2CensusConsumer> callbacks(consumers.begin(), consumers.end());
     const auto partition_started = Clock::now();
     const auto plan = make_wspd_front_jobs(index, kmax, separation_s, front_mode,
-                                          static_cast<std::size_t>(pipeline.target_jobs), 1);
+                                          static_cast<std::size_t>(pipeline.target_jobs), 1, front_proposals);
     pipeline.partition_ms = milliseconds(partition_started, Clock::now());
     pipeline.front = plan->prefix_result();
     pipeline.prefix_product_visits = pipeline.front.work.product_visits;

@@ -1,4 +1,4 @@
-# Passation v8 — lots singleton clos, surproposition de témoins à porter
+# Passation v8 — fenêtre de propositions élargie qualifiée
 
 17 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
@@ -9,23 +9,56 @@ d'audit ne valent pas qualification de son propre code.
 
 ## À reprendre maintenant
 
-Porter la [surproposition de témoins](docs/P0_SURPROPOSITION_TEMOINS_Q2.md)
-dans `Front::filter` : seuil K inchangé, fenêtre historique de K rangs
-intacte et en premier, puis deux intervalles disjoints de la fenêtre
-L = 2K ou 4K autour du même pivot, crédits conservés dans ce seul appel,
-politique « petits facteurs » `max(|A|, |B|) <= B0`. Option explicite dont le
-défaut reproduit l'historique à l'unité ; le census repart toujours de zéro
-et seuls les rejets complets sont hérités. À écrire : paramètre threadé dans
-le front mono, les jobs, le dispatch et les cinq entrées q2 ; compteurs de
-l'extension fusionnés ; petits juges de bord (n < L, deux bords de la
-permutation, rangs de A/B, tangence H = 0, épuisement sans K succès, K-ième
-témoin trouvé par la seule extension) ; mutants ; campagnes 8k/16k/32k,
-K5/10, s8/10/12, temps mur du pipeline q2 complet, régression attendue des
-rangées conservée. Les mesures d'audit de `audits/surproposition_20260915/`
-(copie patchée, temps q2 divisé par 1,9 à 2,4 sur uniforme) ne sont pas une
-qualification constructeur. GCP non utilisé, statut not_claimed.
+La [fenêtre élargie](docs/P0_SURPROPOSITION_TEMOINS_Q2.md) est livrée comme
+option ; **le défaut de toutes les entrées reste la fenêtre historique**.
+Décisions et mesures à prendre, dans cet ordre :
 
-## Dix-neuvième tranche close le 17 septembre — résultat négatif
+1. Décider si les sondes et campagnes des tranches suivantes passent
+   explicitement `WspdFrontProposals{2, 16}` (jamais un changement du défaut
+   de l'API : les reçus antérieurs cesseraient d'être comparables).
+2. Mesurer ce qui reste après 2K : à uniforme 32k K10, 28,0 s deviennent
+   12,0 s, et les candidats restants sont encore rejetés au census pour
+   l'essentiel. Deux pistes mesurées en audit, à requalifier avant tout
+   port : la descente exacte plafonnée à K (plafond du proposeur : 86 à 89 %
+   des rectangles émis rejetables, la fenêtre 4K en prend 80 à 86 %) et la
+   transmission aux enfants des témoins certifiés du parent, avec IDs
+   distincts. Le certificat de bloc est dominé par la fenêtre 2K.
+3. Rangées : la fenêtre élargie y est un surcoût pur (×1,01 à ×1,18) ; seuls
+   des certificats collectifs traitent ce régime, en q2 comme en q3/q4.
+4. Alléger la porte `mhgp8_wspd_q2_proposals_gate` sous sanitizers (12 min
+   sous ASan/UBSan, autant sous TSan) sans perdre ses dix mutants.
+5. Moteurs q3/q4 produit, catalogue canonique de boules et tranche FULL
+   minimale restent ouverts ; un oracle entier q3/q4 indépendant existe dans
+   `audits/oracle_q3q4_20260915/`.
+
+## Vingtième tranche close le 17 septembre — fenêtre de propositions élargie
+
+`WspdFrontProposals{window_factor ∈ {1, 2, 4}, small_factor_limit}` :
+fenêtre historique de min(Kmax, n) rangs d'abord, puis intervalles gauche et
+droit complétant la fenêtre élargie autour du même pivot, crédits conservés
+dans ce seul appel, rangs de A/B comptés puis sautés, H = 0 jamais crédité,
+voie q2 seule (refus si une voie q3/q4 est active ou en mode `Pure`). Cinq
+compteurs d'extension inclus dans les totaux historiques et fusionnés par
+`merge_work` (garde statique sur la taille de la structure). Un seul corps de
+boucle autour de la boucle historique : le défaut vaut ×0,98 à ×1,03 du build
+épinglé de la tranche 19 en temps, et lui est identique en compteurs sur les
+douze triplets différentiels. Qualification propre close : 78 CTests Release
+et Clang ASan/UBSan, portes proposals et dispatch sous Clang TSan, 1 575
+rejeux indépendants du front q2, dix mutants causaux tués, deux fixtures
+minimales nommées, constantes du moteur d'avant la tranche gravées, 990
+appels des cinq entrées contre l'oracle force brute, 684 mesures et 22
+lectures/analyses normal/−O identiques. Fenêtre 2K petits facteurs, n ≥ 8 000 :
+uniforme ×0,42 à ×0,54, amas ×0,51 à ×0,62, terrain ×0,64 à ×0,71, rangées
+×1,01 à ×1,18 ; limite 16 et tous produits indiscernables ; 4K utile
+seulement sur uniforme et amas aux grandes tailles. Builds épinglés :
+`build/v8_front_proposals_20260917`, `build/v8_front_proposals_sanitize_20260917`,
+`build/v8_front_proposals_tsan_clang_20260917`. Lire les
+[reçus](receipts/q2_front_proposals_20260917/README.md). Quatre relecteurs
+indépendants ont précédé le gel ; leurs constats (périmètre q2 seul,
+régression du défaut corrigée, mutants et fixtures manquants, théorèmes du
+registre, différentiel épinglé) sont consignés dans le PREFLIGHT des reçus.
+
+## Dix-neuvième tranche publiée à 8d615cfd — résultat négatif, historique
 
 Les [lots de singletons](docs/P0_LOTS_SINGLETON_Q2.md) sont implémentés dans
 une entrée Coarse distincte (`run_wspd_q2_census_batched`) : feuilles

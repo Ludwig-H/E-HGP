@@ -76,7 +76,11 @@ voisins exacte**.
 À la feuille atteinte, une fenêtre d'au plus Kmax rangs distincts est
 examinée. Les rangs appartenant à A ou B sont ignorés ; la fenêtre n'est
 pas prolongée pour les remplacer. Aucun scan caché ne cherche à tout prix
-K témoins admissibles. Un site de A ou de B ne pourrait de toute façon
+K témoins admissibles. Depuis la vingtième tranche, une option explicite
+(`WspdFrontProposals`, voie q2 seule, défaut inchangé) peut faire suivre
+cette fenêtre historique de deux intervalles disjoints complétant une
+fenêtre de 2·Kmax ou 4·Kmax rangs autour du même pivot, sans nouvelle
+descente : lire la [surproposition de témoins](P0_SURPROPOSITION_TEMOINS_Q2.md). Un site de A ou de B ne pourrait de toute façon
 pas être un témoin strict universel : en le choisissant comme extrémité,
 le produit scalaire H vaut zéro.
 
@@ -104,7 +108,9 @@ ne s'ajoute pas aux échantillons qu'il contient.
 ## Travail supprimé, travail encore non borné globalement
 
 Avec T produits visités et R produits émis, le coût du front échantillonné
-est O(T(D+Kmax)+R), où D≤48 pour cet index u16. Les compteurs publient les
+est O(T(D+Kmax)+R), où D≤48 pour cet index u16 ; avec une fenêtre élargie
+de w·Kmax rangs (w = 2 ou 4), il devient O(T(D+w·Kmax)+R), et T lui-même
+baisse quand des produits sont rejetés plus haut. Les compteurs publient les
 descentes, distances de boîtes, propositions, tests H/Xi et rejets par voie.
 Aucun terme de préparation par produit en |A|, |B| ou n n'est caché dans
 ce proposeur. Le coût de construction de l'index global et la validation

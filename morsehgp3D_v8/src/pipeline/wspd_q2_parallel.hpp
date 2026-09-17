@@ -71,6 +71,8 @@ struct WspdQ2ParallelResult {
 // queue. A full/busy queue never blocks its producer: traversal continues
 // locally. It does not divide an already running census callback. Queue
 // capacity and donation interval must be positive, also in Coarse mode.
+// front_proposals only widens the front's rejection heuristic
+// (WspdFrontProposals); the census still starts every count from zero.
 [[nodiscard]] WspdQ2ParallelResult run_wspd_q2_census_parallel(
     Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s,
     WspdFrontMode front_mode, Q2CensusMode census_mode,
@@ -78,6 +80,7 @@ struct WspdQ2ParallelResult {
     Q2SiblingMode sibling_mode = Q2SiblingMode::Disabled,
     Q2WitnessOrder witness_order = Q2WitnessOrder::GlobalDfs,
     Q2AnchorMode anchor_mode = Q2AnchorMode::Individual,
-    std::size_t pool_min_factor = 0, WspdQ2Schedule schedule = {});
+    std::size_t pool_min_factor = 0, WspdQ2Schedule schedule = {},
+    WspdFrontProposals front_proposals = {});
 
 }  // namespace mhgp8

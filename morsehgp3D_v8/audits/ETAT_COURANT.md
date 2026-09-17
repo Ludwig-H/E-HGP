@@ -3,7 +3,26 @@
 17 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
-État constructeur courant : dix-neuvième tranche P0 close,
+État constructeur courant : vingtième tranche P0 close,
+[fenêtre de propositions élargie du front q2](../docs/P0_SURPROPOSITION_TEMOINS_Q2.md).
+Option explicite `WspdFrontProposals` (facteur 1, 2 ou 4, limite petits
+facteurs), voie q2 seule, défaut identique au moteur précédent (capture
+différentielle contre le build épinglé de la tranche 19). 78 CTests Release
+et Clang ASan/UBSan, portes proposals et dispatch sous Clang TSan, rejeu
+indépendant du front q2 avec dix mutants causaux tués, oracle force brute
+sur les cinq entrées, 684 mesures, lectures normal/−O concordantes. Fenêtre
+2K petits facteurs à n8k/16k/32k : temps q2 complet ×0,42 à ×0,54
+(uniforme), ×0,51 à ×0,62 (amas), ×0,64 à ×0,71 (terrain), ×1,01 à ×1,18
+(rangées, régression conservée) ; supports identiques, candidats à 26 à 40 %
+hors rangées. [Reçus](../receipts/q2_front_proposals_20260917/README.md).
+Pas de borne sous-quadratique, P0 global non clos, FULL/G4 ouverts.
+Changement de constructeur le 17 septembre : l'ancien auditeur B reprend le
+chantier, son canal est clos, ses reçus d'audit restent des mesures
+indépendantes de l'ancien code. GCP non utilisé.
+
+## Historique : dix-neuvième tranche publiée à 8d615cfd
+
+Dix-neuvième tranche P0 close,
 [lots de petits census q2](../docs/P0_LOTS_SINGLETON_Q2.md), **résultat
 négatif qualifié**. Entrée Coarse distincte, états privés de 72 octets,
 flush avant Pool et en fin de seed. 75 CTests Release et Clang ASan/UBSan,
@@ -15,9 +34,9 @@ Coarse reste le défaut ; la piste est inscrite aux fausses pistes.
 [Reçus de clôture](../receipts/q2_singleton_batch_20260915/README.md).
 Changement de constructeur le 17 septembre : l'ancien auditeur B reprend le
 chantier, son canal est clos, ses reçus d'audit restent des mesures
-indépendantes de l'ancien code, pas une qualification du nouveau. Suite :
-[surproposition de témoins](../docs/P0_SURPROPOSITION_TEMOINS_Q2.md) au front,
-non encore portée. GCP non utilisé.
+indépendantes de l'ancien code, pas une qualification du nouveau. La suite
+annoncée, la surproposition de témoins au front, est la vingtième tranche.
+GCP non utilisé.
 
 ## Historique : dix-huitième tranche publiée à2741d614
 

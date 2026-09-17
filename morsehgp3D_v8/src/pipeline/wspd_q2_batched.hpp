@@ -95,12 +95,14 @@ struct WspdQ2BatchResult {
 // are active Coarse intervals, not waits in a shared queue. Payload and Pool
 // sums cannot be subtracted from wall time. No speed/complexity claim follows
 // from an unchanged geometry count or a bounded per-worker lane buffer.
+// front_proposals only widens the front's rejection heuristic
+// (WspdFrontProposals); the census still starts every count from zero.
 [[nodiscard]] WspdQ2BatchResult run_wspd_q2_census_batched(
     Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s,
     WspdFrontMode front_mode, std::span<const Q2CensusConsumer> consumers,
     WspdQ2BatchOptions options = {},
     Q2SiblingMode sibling_mode = Q2SiblingMode::Disabled,
     Q2WitnessOrder witness_order = Q2WitnessOrder::GlobalDfs,
-    std::size_t pool_min_factor = 0);
+    std::size_t pool_min_factor = 0, WspdFrontProposals front_proposals = {});
 
 }  // namespace mhgp8

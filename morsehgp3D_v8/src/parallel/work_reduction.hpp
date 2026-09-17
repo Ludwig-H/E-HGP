@@ -52,6 +52,15 @@ inline void merge_work(WspdFrontWork& out, const WspdFrontWork& value) {
   for (std::size_t i = 0; i < 3; ++i) counter_add(out.rejected_pair_mass[i], value.rejected_pair_mass[i]);
   for (std::size_t i = 0; i < 3; ++i) counter_add(out.residual_pair_mass[i], value.residual_pair_mass[i]);
   for (std::size_t i = 0; i < 3; ++i) counter_add(out.lane_rectangles[i], value.lane_rectangles[i]);
+  counter_add(out.extended_products, value.extended_products);
+  counter_add(out.extended_proposals, value.extended_proposals);
+  counter_add(out.extended_proposals_in_factors, value.extended_proposals_in_factors);
+  counter_add(out.extended_credits, value.extended_credits);
+  counter_add(out.extended_rejections, value.extended_rejections);
+  // 25 scalars, two arrays of five and three arrays of three: a new field
+  // that is not merged above must fail to compile here, not pass by vacuity.
+  static_assert(sizeof(WspdFrontWork) == (25 + 2 * 5 + 3 * 3) * sizeof(u64),
+                "merge_work(WspdFrontWork) must be updated with the structure");
 }
 
 inline void merge_work(Q2CensusWork& out, const Q2CensusWork& value) {

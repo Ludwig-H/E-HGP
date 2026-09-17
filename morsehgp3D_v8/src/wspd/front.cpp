@@ -60,10 +60,11 @@ struct Task {
 class Front {
  public:
   Front(const Q2CensusIndex& index, unsigned kmax, unsigned separation,
-        WspdFrontMode mode, const WspdRectangleConsumer& consumer, std::uint8_t requested_mask)
+        WspdFrontMode mode, const WspdRectangleConsumer& consumer, std::uint8_t requested_mask,
+        WspdFrontProposals proposals)
       : nodes_(index.spatial_nodes()), order_(index.spatial_order()),
         points_(index.cloud().points()), kmax_(kmax), separation_(separation),
-        mode_(mode), consumer_(consumer) {
+        mode_(mode), consumer_(consumer), proposals_(proposals) {
     const auto n = points_.size();
     // Divide before multiplying, so even a representable choose(n,2)
     // does not require the larger ordered-pair count to fit u64.
@@ -210,34 +211,71 @@ class Front {
     }
     const auto count = std::min<std::size_t>(kmax_, order_.size());
     const auto pivot = nodes_[node].range.first;
-    const auto first = std::min(pivot > count / 2 ? pivot - count / 2 : 0,
-                                order_.size() - count);
-    const auto last = first + count;
+    const auto window = wspd_proposal_window(pivot, count, order_.size());
     std::array<unsigned, 3> credits{};
-    for (auto rank = first; rank < last && mask != 0; ++rank) {
-      counter_add(result_.work.proposed_sites);
-      if (contains(a.range, rank) || contains(b.range, rank)) {
-        counter_add(result_.work.proposals_in_factors);
-        continue;
+    // ONE inlined loop body serves three rank intervals: the historical window,
+    // then, for an eligible surviving product, the left and the right complement
+    // of the wider window around the same pivot. The inner loop is the historical
+    // loop itself, so the default path pays nothing for the option; credits persist.
+    bool extension = false;
+    WspdProposalWindow wider{};
+    for (unsigned phase = 0; phase < 3 && mask != 0; ++phase) {
+      std::size_t rank = window.first;
+      std::size_t last = window.last;
+      if (phase == 1) {
+        if (proposals_.window_factor == 1 ||
+            std::max(a.range.size(), b.range.size()) > proposals_.small_factor_limit)
+          break;
+        // Same pivot, no second descent. kmax_<=10 and window_factor<=4.
+        const auto wider_count = std::min<std::size_t>(
+            static_cast<std::size_t>(kmax_) * proposals_.window_factor, order_.size());
+        wider = wspd_proposal_window(pivot, wider_count, order_.size());
+        if (wider.first > window.first || wider.last < window.last)
+          throw std::logic_error("mhgp8 WSPD widened proposal window lost the historical window");
+        // A search needs Kmax exterior sites, hence n >= Kmax+2 and a strictly
+        // wider window: every extended product proposes at least one extra rank.
+        if (wider == window) throw std::logic_error("mhgp8 WSPD widened proposal window added no rank");
+        counter_add(result_.work.extended_products);
+        extension = true;
+        rank = wider.first;
+        last = window.first;
+      } else if (phase == 2) {
+        rank = window.last;
+        last = wider.last;
       }
-      const auto z = singleton_box(points_[order_[rank]]);
-      counter_add(result_.work.h_bound_tests);
-      const auto h = spindle_detail::h_minimum(a.box, b.box, z);
-      if (h <= 0) continue;
-      i128 xi = 0;
-      if ((mask & 6U) != 0) {
-        counter_add(result_.work.xi_bound_tests);
-        xi = spindle_detail::xi_bounds(a.box, b.box, z).high;
-      }
-      const auto h2 = spindle_detail::square(h);
-      for (unsigned lane = 0; lane < 3; ++lane) {
-        const auto bit = static_cast<std::uint8_t>(1U << lane);
-        if ((mask & bit) != 0 && (lane == 0 || (lane == 1 ? 3 : 2) * h2 > xi)) {
-          counter_add(result_.work.witness_lane_credits);
-          if (++credits[lane] == thresholds_[lane]) mask &= static_cast<std::uint8_t>(~bit);
+      const auto begin = rank;
+      for (; rank < last && mask != 0; ++rank) {
+        counter_add(result_.work.proposed_sites);
+        if (contains(a.range, rank) || contains(b.range, rank)) {
+          counter_add(result_.work.proposals_in_factors);
+          if (extension) counter_add(result_.work.extended_proposals_in_factors);
+          continue;
+        }
+        const auto z = singleton_box(points_[order_[rank]]);
+        counter_add(result_.work.h_bound_tests);
+        const auto h = spindle_detail::h_minimum(a.box, b.box, z);
+        if (h <= 0) continue;
+        i128 xi = 0;
+        if ((mask & 6U) != 0) {
+          counter_add(result_.work.xi_bound_tests);
+          xi = spindle_detail::xi_bounds(a.box, b.box, z).high;
+        }
+        const auto h2 = spindle_detail::square(h);
+        for (unsigned lane = 0; lane < 3; ++lane) {
+          const auto bit = static_cast<std::uint8_t>(1U << lane);
+          if ((mask & bit) != 0 && (lane == 0 || (lane == 1 ? 3 : 2) * h2 > xi)) {
+            counter_add(result_.work.witness_lane_credits);
+            if (extension) counter_add(result_.work.extended_credits);
+            if (++credits[lane] == thresholds_[lane]) mask &= static_cast<std::uint8_t>(~bit);
+          }
         }
       }
+      // Every iteration proposed exactly one rank, the last one included.
+      if (extension) counter_add(result_.work.extended_proposals, static_cast<u64>(rank - begin));
     }
+    // validate_front guarantees the q2 lane alone for a widened window: an empty
+    // mask after an extension means that the Kmax-th q2 credit came from an extra rank.
+    if (extension && mask == 0) counter_add(result_.work.extended_rejections);
     return mask;
   }
 
@@ -270,27 +308,37 @@ class Front {
   unsigned separation_;
   WspdFrontMode mode_;
   const WspdRectangleConsumer& consumer_;
+  WspdFrontProposals proposals_;
   std::array<unsigned, 3> thresholds_{};
   WspdFrontResult result_;
 };
 
-void validate_front(unsigned kmax, unsigned separation_s, WspdFrontMode mode, std::uint8_t requested_lane_mask) {
+void validate_front(unsigned kmax, unsigned separation_s, WspdFrontMode mode, std::uint8_t requested_lane_mask,
+                    WspdFrontProposals proposals) {
   if (kmax == 0 || kmax > 10 || separation_s == 0 ||
       (mode != WspdFrontMode::Pure && mode != WspdFrontMode::MidpointSamples))
     throw std::invalid_argument("mhgp8 WSPD requires Kmax1..10, positive s and a valid mode");
   const unsigned available = (1U << std::min(kmax, 3U)) - 1;
   if (requested_lane_mask == 0 || requested_lane_mask > 7 || (requested_lane_mask & available) == 0)
     throw std::invalid_argument("mhgp8 WSPD requires a mask in 1..7 intersecting available lanes");
+  if ((proposals.window_factor != 1 && proposals.window_factor != 2 && proposals.window_factor != 4) ||
+      proposals.small_factor_limit == 0)
+    throw std::invalid_argument("mhgp8 WSPD proposals require window factor 1, 2 or 4 and a positive factor limit");
+  if (mode == WspdFrontMode::Pure && proposals.window_factor != 1)
+    throw std::invalid_argument("mhgp8 WSPD Pure front proposes no witness: window factor must be 1");
+  if (proposals.window_factor != 1 && (requested_lane_mask & available) != 1)
+    throw std::invalid_argument("mhgp8 WSPD widened proposals are qualified for the q2 lane alone: mask must be 1");
 }
 
 }  // namespace
 
 WspdFrontResult run_wspd_front(const Q2CensusIndex& index, unsigned kmax,
                                unsigned separation_s, WspdFrontMode mode,
-                               const WspdRectangleConsumer& consumer, std::uint8_t requested_lane_mask) {
+                               const WspdRectangleConsumer& consumer, std::uint8_t requested_lane_mask,
+                               WspdFrontProposals proposals) {
   if (!consumer) throw std::invalid_argument("mhgp8 WSPD requires a valid consumer");
-  validate_front(kmax, separation_s, mode, requested_lane_mask);
-  return Front(index, kmax, separation_s, mode, consumer, requested_lane_mask).run();
+  validate_front(kmax, separation_s, mode, requested_lane_mask, proposals);
+  return Front(index, kmax, separation_s, mode, consumer, requested_lane_mask, proposals).run();
 }
 
 struct WspdFrontJobs::Impl {
@@ -299,15 +347,17 @@ struct WspdFrontJobs::Impl {
   unsigned separation;
   WspdFrontMode mode;
   std::uint8_t requested_mask;
+  WspdFrontProposals proposals;
   WspdFrontResult prefix;
   std::vector<Task> jobs;
   std::size_t terminals{};
 
   Impl(Q2CensusIndexPtr owner, unsigned k, unsigned s, WspdFrontMode strategy,
-       std::size_t target, std::uint8_t mask)
-      : index(std::move(owner)), kmax(k), separation(s), mode(strategy), requested_mask(mask) {
+       std::size_t target, std::uint8_t mask, WspdFrontProposals proposal_options)
+      : index(std::move(owner)), kmax(k), separation(s), mode(strategy), requested_mask(mask),
+        proposals(proposal_options) {
     const WspdRectangleConsumer unused = [](const WspdRectangle&) {};
-    Front preparation(*index, kmax, separation, mode, unused, requested_mask);
+    Front preparation(*index, kmax, separation, mode, unused, requested_mask, proposals);
     std::deque<Task> pending;
     pending.push_back(preparation.root_task());
     // A true FIFO of unvisited products, not a DFS stack whose small size
@@ -351,17 +401,18 @@ WspdFrontResult WspdFrontJobs::run_job(std::size_t id, const WspdRectangleConsum
   const auto& plan = *implementation_;
   if (id >= plan.jobs.size() || !consumer)
     throw std::invalid_argument("mhgp8 WSPD requires an existing job and valid consumer");
-  return Front(*plan.index, plan.kmax, plan.separation, plan.mode, consumer, plan.requested_mask).run(plan.jobs[id]);
+  return Front(*plan.index, plan.kmax, plan.separation, plan.mode, consumer, plan.requested_mask,
+               plan.proposals).run(plan.jobs[id]);
 }
 
 std::unique_ptr<WspdFrontJobs> make_wspd_front_jobs(
     Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s, WspdFrontMode mode,
-    std::size_t target_jobs, std::uint8_t requested_lane_mask) {
+    std::size_t target_jobs, std::uint8_t requested_lane_mask, WspdFrontProposals proposals) {
   if (!index || target_jobs == 0)
     throw std::invalid_argument("mhgp8 WSPD jobs require an owning index and positive target");
-  validate_front(kmax, separation_s, mode, requested_lane_mask);
+  validate_front(kmax, separation_s, mode, requested_lane_mask, proposals);
   auto implementation = std::make_shared<WspdFrontJobs::Impl>(
-      std::move(index), kmax, separation_s, mode, target_jobs, requested_lane_mask);
+      std::move(index), kmax, separation_s, mode, target_jobs, requested_lane_mask, proposals);
   return std::unique_ptr<WspdFrontJobs>(new WspdFrontJobs(std::move(implementation)));
 }
 
@@ -519,7 +570,8 @@ struct WspdFrontDispatch::Impl {
     if (!consumer)
       throw std::invalid_argument("mhgp8 WSPD dispatcher requires a valid consumer");
     register_worker();
-    Front front(*plan->index, plan->kmax, plan->separation, plan->mode, consumer, plan->requested_mask);
+    Front front(*plan->index, plan->kmax, plan->separation, plan->mode, consumer, plan->requested_mask,
+                plan->proposals);
     WspdFrontDispatchWork work;
     std::vector<Task> stack;
     bool owns_fragment = false;

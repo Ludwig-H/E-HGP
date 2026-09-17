@@ -492,8 +492,20 @@ résultat négatif** : lots / Coarse ×1,005 à ×1,225 sur 54 comparaisons
 n8k/16k/32k, entrelacement sans effet, comptes géométriques inchangés.
 Coarse reste le défaut. Le format des petites requêtes n'est pas le
 levier ; la priorité passe à leur nombre : rejeter plus de produits au
-front par la [surproposition de témoins](P0_SURPROPOSITION_TEMOINS_Q2.md),
-non encore portée. FULL/G4 reste ouvert.
+front par la [surproposition de témoins](P0_SURPROPOSITION_TEMOINS_Q2.md).
+FULL/G4 reste ouvert.
+
+Suivi tranche20 : la [fenêtre de propositions élargie](P0_SURPROPOSITION_TEMOINS_Q2.md)
+est portée comme option explicite de la voie q2, défaut identique au moteur
+précédent (différentiel contre un build épinglé), et qualifiée : 78 CTests
+Release/Clang ASan/UBSan, portes TSan, rejeu indépendant du front q2 avec dix
+mutants causaux, 684 mesures closes. Fenêtre 2K petits facteurs à n8k/16k/32k :
+temps q2 complet ×0,42 à ×0,54 (uniforme), ×0,51 à ×0,62 (amas), ×0,64 à
+×0,71 (terrain), ×1,01 à ×1,18 (rangées, régression publiée). C'est une
+constante divisée, pas un exposant : la croissance du travail restant est
+celle de la référence. P0 global et borne sous-quadratique restent ouverts ;
+suite à mesurer avant tout port : descente exacte plafonnée à K ou
+transmission des témoins certifiés aux enfants, puis q3/q4 et FULL.
 
 Commencer par P0 : comparer les architectures de rejet qui évitent les
 histogrammes quadratiques systématiques, d'abord en mono avec petits

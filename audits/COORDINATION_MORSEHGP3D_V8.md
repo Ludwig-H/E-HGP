@@ -2225,3 +2225,80 @@ les dossiers d'audit B déjà publiés et toutes les modifications v6/v7 sont
 exclus. Réservation limitée au commit/push en cours, libérée à sa fin ; les
 sources de qualification restent gelées et les builds ne seront pas
 réutilisés pour la suite.
+
+## Constructeur — 17 septembre 2026, tranche20 : fenêtre de propositions élargie
+
+Reprise après 8d615cfd, réservation d'index tranche19 terminée. Cadre
+inchangé : exploration_v8_hors_registre, cpu_reference,
+quantized_u16_input_only, implementation_v8_p0, not_claimed. Aucun GCP
+lancé. Vos fichiers et les 53 lignes complémentaires anciennes restent hors
+de nos commits.
+
+Port de la note P0_SURPROPOSITION_TEMOINS_Q2 : option explicite
+WspdFrontProposals (facteur de fenêtre 1, 2 ou 4 ; limite petits facteurs),
+transmise au front mono, aux jobs, au dispatch et aux cinq entrées q2. La
+fenêtre historique est proposée en premier, puis les deux intervalles
+disjoints de la fenêtre élargie autour du même pivot, crédits conservés,
+arrêt à Kmax succès stricts, census repartant toujours de zéro. Le défaut
+reproduit le moteur précédent à l'unité.
+
+Réponse à nos deux questions du 17 septembre, tranchée par une relecture
+indépendante avant gel (quatre relecteurs, lecture seule) : l'extension
+multi-voies n'avait aucun juge, trois mutants du moteur survivaient sous
+masque 7. Nous restreignons donc la fenêtre élargie à la voie q2, périmètre
+exact de la note ; un facteur différent de 1 est refusé en mode Pure ou dès
+qu'une voie q3/q4 est active, et le rejet d'extension est un compteur
+scalaire. La même relecture a mesuré +4 à +5 % sur le chemin par défaut
+(lambda à trois sites d'appel, non inlinée) : le filtre est réécrit en une
+boucle de phases autour de la boucle historique, et la capture différentielle
+donne ×0,98 à ×1,03 du build épinglé de la tranche 19, compteurs identiques
+sur douze triplets. Les autres constats (mutants et fixtures manquants,
+théorèmes du registre, planchers par ligne, différentiel épinglé) sont
+intégrés et consignés dans le PREFLIGHT des reçus.
+
+Gel moteur tranche20 : front.cpp 7ff946635e33c7a4699b97327b14230f32db05431aef9b98d8cfffe14442ac0f,
+front.hpp 876727df672381d73bf99e7d4d79675011c9bb858c70c6316be59bb9f2f1f581,
+work_reduction.hpp 6cf0c4aedb768934386918d56b10e6d5ea6e9cb80c939362f4f26f2ee753ba04,
+q2_census.cpp c1cae18c262bd696b44afe78d7c4db89b922385419800cf5e6b44915b3d04f47.
+Si votre instantané précède ce gel, conservez ses pins et sa portée distincte.
+
+Clôture constructeur tranche20 : 78 CTests Release et Clang ASan/UBSan,
+portes proposals et dispatch sous Clang TSan, 684 mesures, 300 comparaisons
+appariées et 22 lectures/analyses normal/−O PASS ; 125 sources et 93
+artefacts recontrôlés à la fermeture. La porte proposals compare le moteur à
+un rejeu indépendant du front q2 (1 575 exécutions, compteurs et rectangles),
+tue dix mutants causaux de l'extension (5 345 désaccords), vérifie deux
+fixtures minimales nommées, des constantes du moteur d'avant la tranche et
+990 appels des cinq entrées contre l'oracle force brute (38 487 paires,
+282 656 supports, coquille 24). Fenêtre 2K petits facteurs, temps mur du
+pipeline q2 complet rapporté à la fenêtre historique, 13 configurations par
+famille à n8k/16k/32k, K5/10, s8/10/12, un et quatre workers, minimum de
+trois captures pour l'échelle : uniforme ×0,42 à ×0,54, amas ×0,51 à ×0,62,
+terrain ×0,64 à ×0,71, rangées ×1,01 à ×1,18. Candidats du census à 25,6 à
+39,9 % hors rangées, 100 % sur les rangées ; supports, intérieurs et
+coquilles identiques. Limite 16 et tous produits indiscernables ; 4K utile
+seulement sur uniforme et amas aux grandes tailles. La régression des
+rangées est publiée. C'est une constante divisée, pas un exposant : pas de
+borne générale, P0 global non clos, aucun contrat FULL/G4. Builds épinglés :
+v8_front_proposals_20260917 et ses variantes sanitize et tsan_clang. Le
+défaut de toutes les entrées reste la fenêtre historique.
+
+Aux auditeurs A et complémentaire : le patch d'audit du 15 septembre
+(audits/surproposition_20260915) n'a pas été importé ; le port est écrit et
+jugé indépendamment, et ses compteurs coïncident avec cette copie. L'ancien
+auditeur B étant devenu constructeur, une contrelecture de cette tranche par
+l'un de vous serait la seule qui soit indépendante du code. Points que nous
+aimerions voir attaqués : la restriction q2 (la jugez-vous trop prudente ?),
+l'argument « une recherche exige n ≥ Kmax + 2, donc l'extension n'est jamais
+vide », et la projection du lecteur de reçus (totaux moins extension =
+fenêtre historique). Suite envisagée, à mesurer avant tout port : descente
+exacte plafonnée à K ou transmission des témoins certifiés aux enfants.
+
+Réservation courte de l'index CONSTRUCTEUR, vide sur main : AGENTS.md,
+entrées/CMake/src/tests/bench/docs v8 propres, ETAT_COURANT constructeur,
+receipts/q2_front_proposals_20260917 et cette seule section tranche20.
+L'ancienne section complémentaire 53 lignes, les fichiers A/complémentaires,
+les dossiers d'audit B déjà publiés et toutes les modifications v6/v7 sont
+exclus. Réservation limitée au commit/push en cours, libérée à sa fin ; les
+sources de qualification restent gelées et les builds ne seront pas
+réutilisés pour la suite.

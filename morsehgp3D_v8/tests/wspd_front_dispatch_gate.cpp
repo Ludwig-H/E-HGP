@@ -38,6 +38,7 @@ struct Gate {
   u64 checks{}, oracle_sites{}, reference_runs{}, dispatch_runs{}, donations{}, full_refusals{};
   u64 reduced_rectangles{}, masked_cases{}, zero_seed_cases{}, ownership_cases{}, waits{};
   u64 cross_worker_transfers{}, callback_failures{}, launch_failures{}, invalid_inputs{};
+  u64 widened_cases{}, extended_products{};
   void require(bool condition, const char* message) {
     ++checks;
     if (!condition) throw std::runtime_error(message);
@@ -115,11 +116,11 @@ void check_cover(Gate& gate, const Rectangles& rectangles, const mhgp8::Q2Census
 struct Reference { mhgp8::WspdFrontResult result; Rectangles rectangles; };
 
 Reference reference(Gate& gate, const mhgp8::Q2CensusIndex& index, unsigned k, unsigned s,
-                    WspdFrontMode mode, std::uint8_t mask) {
+                    WspdFrontMode mode, std::uint8_t mask, mhgp8::WspdFrontProposals proposals = {}) {
   Reference result;
   result.result = mhgp8::run_wspd_front(index, k, s, mode, [&](const WspdRectangle& rectangle) {
     result.rectangles.emplace_back(rectangle.a_node, rectangle.b_node, rectangle.lane_mask);
-  }, mask);
+  }, mask, proposals);
   std::sort(result.rectangles.begin(), result.rectangles.end());
   ++gate.reference_runs;
   return result;
@@ -128,9 +129,11 @@ Reference reference(Gate& gate, const mhgp8::Q2CensusIndex& index, unsigned k, u
 DispatchWork run_case(Gate& gate, const mhgp8::Q2CensusIndexPtr& index, const Oracle& expected,
                       unsigned k, unsigned s, WspdFrontMode mode, std::uint8_t mask,
                       std::size_t target, std::size_t capacity, std::size_t interval,
-                      std::size_t declared_workers, std::size_t actual_workers) {
-  const auto baseline = reference(gate, *index, k, s, mode, mask);
-  const auto plan = mhgp8::make_wspd_front_jobs(index, k, s, mode, target, mask);
+                      std::size_t declared_workers, std::size_t actual_workers,
+                      mhgp8::WspdFrontProposals proposals = {}) {
+  const auto baseline = reference(gate, *index, k, s, mode, mask, proposals);
+  gate.extended_products += baseline.result.work.extended_products;
+  const auto plan = mhgp8::make_wspd_front_jobs(index, k, s, mode, target, mask, proposals);
   auto total = plan->prefix_result();
   const auto dispatch = plan->make_dispatch(capacity, interval, declared_workers);
   const auto retained = dispatch->retained_bytes();
@@ -198,6 +201,17 @@ void corpus(Gate& gate) {
         const auto mask = static_cast<std::uint8_t>(sample % 2 == 0 ? 1 : 7);
         static_cast<void>(run_case(gate, index, expected, k, s, mode, mask, sample % 3 == 0 ? 1 : 13,
                                    sample % 2 == 0 ? 1 : 7, sample % 2 == 0 ? 1 : 4, 2, 2));
+        if (mode == WspdFrontMode::MidpointSamples) {
+          // The dispatcher's private fronts and merge_work must carry the widened
+          // window (q2 lane alone, mask 1): total.work == mono baseline with nonzero
+          // extension counters and a small-factor limit that bites on these clouds.
+          const mhgp8::WspdFrontProposals widened = sample % 4 == 1
+              ? mhgp8::WspdFrontProposals{2, std::numeric_limits<std::size_t>::max()}
+              : mhgp8::WspdFrontProposals{4, 2};
+          static_cast<void>(run_case(gate, index, expected, k, s, mode, 1, sample % 3 == 0 ? 1 : 13,
+                                     sample % 2 == 0 ? 1 : 7, sample % 2 == 0 ? 1 : 4, 2, 2, widened));
+          ++gate.widened_cases;
+        }
         ++sample;
       }
   }
@@ -378,7 +392,8 @@ int main(int argc, char** argv) {
     gate.require(gate.dispatch_runs >= 150 && gate.oracle_sites > 10000 && gate.donations > 0 &&
                      gate.full_refusals > 0 && gate.reduced_rectangles > 0 && gate.masked_cases == 5 &&
                      gate.zero_seed_cases > 0 && gate.ownership_cases == 1 && gate.callback_failures == 1 &&
-                     gate.cross_worker_transfers == 1 && gate.launch_failures == 1 && gate.invalid_inputs == 4,
+                     gate.cross_worker_transfers == 1 && gate.launch_failures == 1 && gate.invalid_inputs == 4 &&
+                     gate.widened_cases >= 60 && gate.extended_products > 0,
                  "front dispatch gate lost a declared non-vacuity floor");
     std::cout << "{\"schema\":\"mhgp8_wspd_front_dispatch_gate_v1\",\"status\":\"passed\","
               << "\"public_status\":\"not_claimed\",\"checks\":" << gate.checks
@@ -389,7 +404,8 @@ int main(int argc, char** argv) {
               << ",\"ownership_cases\":" << gate.ownership_cases << ",\"waits\":" << gate.waits
               << ",\"cross_worker_transfers\":" << gate.cross_worker_transfers
               << ",\"callback_failures\":" << gate.callback_failures << ",\"launch_failures\":" << gate.launch_failures
-              << ",\"invalid_inputs\":" << gate.invalid_inputs << "}\n";
+              << ",\"invalid_inputs\":" << gate.invalid_inputs
+              << ",\"widened_cases\":" << gate.widened_cases << ",\"extended_products\":" << gate.extended_products << "}\n";
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "mhgp8_wspd_front_dispatch_gate failed: " << error.what() << '\n';
