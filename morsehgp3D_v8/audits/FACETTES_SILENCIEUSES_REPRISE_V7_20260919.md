@@ -31,7 +31,7 @@ les parents.** La réduction Gabriel brute est fausse : l'égalité des unions d
 points ne détermine pas les appartenances des facettes.
 
 Pour une facette F de cardinal K, un intrus strict z de sa miniball et un site s
-appartenant à un support positif, poser F'=(F\{s})∪{z}. Avec β=rayon² :
+appartenant à un support positif, poser F'=(F∖{s})∪{z}. Avec β=rayon² :
 
 - **Chemin certifié :** β(F∪F')=β(F). L'échange est une vraie connexion de Γ_K.
 - **Progrès :** β(F')≤β(F). À égalité, la boule doit rester identique et le
@@ -85,7 +85,7 @@ n'est établi par cette substitution dans le modèle indépendant.
 ## 3. Contrat de portage et limites à ne pas masquer
 
 **Géométrie d'abord, histoire ensuite.** Dédoublonner les requêtes par
-`(nuage immuable, K, IDs de la facette)` et respecter le consommateur le plus
+`(nuage et catalogue immuables, K, IDs de la facette)` et respecter le consommateur le plus
 précoce. Retourner un `BallId` stable, puis normaliser son ancre à chaque coupe
 consommatrice. Un cache de jetons temporels doit rester limité à un ordre et
 normaliser ses hits ; collision, éviction ou allocation impossible ne suppriment
@@ -103,7 +103,7 @@ Les voies q3/q4 restent indépendantes de l'acceptation q2.
 Pour convertir une clé q2 v8 `(c2=a+b, d2=|a-b|²)` au format polynomial v7,
 utiliser la forme entière `4|x|²-4c2·x+|c2|²-d2`, puis PGCD et coefficient
 quadratique positif. Sa puissance est **négative à l'intérieur**, contrairement
-au compteur q2 v8. Le niveau est d2/4, sans flottants. Même rayon ne signifie
+à la puissance utilisée par q2 v8. Le niveau est d2/4, sans flottants. Même rayon ne signifie
 jamais même boule ([clés v7](../../morsehgp3D_v7/src/lanes/keys.hpp),
 [flux v8](../src/pipeline/q2_census.hpp)).
 
