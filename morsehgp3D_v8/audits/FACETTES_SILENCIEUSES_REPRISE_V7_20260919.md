@@ -1,11 +1,12 @@
 # Facettes silencieuses : ce que la v8 doit reprendre de la v7
 
 19 septembre 2026. Audit ciblé de clôture, base `3e94c868abbb0fafac2b9062e72433f0793545cc`.
-Complément coûts/raccourcis relu sur `0d965fae7e8a30f68723245c217c777cefd3a942`.
+Compléments du 20 septembre 2026, relus sur `19cee4ac4920419f2906cc8a930b5145de300007`.
 Référence moteur inchangée : `morsehgp3D_v7/src/forest/full_ball_tower.hpp`, blob Git
 `5d8e9d91124d2a4cf073e67b8cc479f4e9dea897`. Aucun moteur modifié.
-Lecture des sources et contrôles rationnels indépendants ; aucun CTest natif,
-benchmark ou calcul GPU exécuté ici. `public_status=not_claimed`.
+Lecture des sources, modèles rationnels et micro-test C++ autonome du comparateur
+(§5.5) ; aucun moteur HGP, CTest HGP, benchmark ni GPU exécuté lors de ces audits.
+Les résultats natifs historiques restent distincts. `public_status=not_claimed`.
 
 ## Décision
 
@@ -14,6 +15,9 @@ benchmark ou calcul GPU exécuté ici. `public_status=not_claimed`.
 stockage global ni revenir à « graphe Gabriel brut + Kruskal ».** Aucun défaut
 nominal de rattachement n'a été identifié dans les chemins examinés ; cette
 conclusion ne certifie ni le générateur, ni un futur backend, ni toute la v8.
+**Pour réduire les MEB : semis exacts d’abord, puis propositions d’ancres bornées
+et certifiées. Les §§5.1–5.3 excluent deux sélections apparemment naturelles ;
+le §5.4 ne qualifie aucun gain de temps à grande taille.**
 
 | Chemin v7 | Utilité pour la v8 |
 |---|---|
@@ -175,56 +179,157 @@ Ne pas attribuer à ces variantes les temps 50k ci-dessus. Préférer des lots
 bornés et mesurer le compromis réemploi/mémoire. Les [recettes v8][families]
 restent distinctes des entrées historiques v7.
 
-## 5. Piste supplémentaire : une ancre contenante peut éviter la MEB
+## 5. Certificats sans MEB : portée, sélection et calcul exact
 
-**Proposition à expérimenter, non implémentée ni chronométrée dans cet audit.**
-Le résolveur doit identifier une composante avant a, pas nécessairement calculer
-la MEB de F. Une boule B déjà certifiée peut répondre directement si :
+**Statut au 20 septembre : propositions démontrées et contrôlées sur modèles
+bornés ; aucune intégration ni accélération du moteur HGP revendiquée.**
+Le premier travail à éviter est la MEB initiale. Cela ne justifie pas une
+recherche exhaustive dans les millions de boules du catalogue.
 
-1. même nuage/catalogue et ordre K, avec une ancre valide du bloc fermé de B ;
-2. **F ⊆ C_B = I_B∪U_B**, vérifié pour tous les sites, par IDs ou puissances exactes
-   `P_B(x) ≤ 0` ; une intersection partielle ne suffit pas ;
-3. **β(B)<a**, et K appartient au domaine d'ancrage du §1.
+### 5.1 Une limite des ancres contenantes sur les premières demandes
 
-**Justification.** Tous les K-sous-ensembles de C_B se relient par échanges d'un
-site ; chaque coface de K+1 sites ainsi traversée reste dans B, donc naît au plus
-tard à β(B). Leur composante fermée est celle représentée par l'ancre de B.
-F appartient donc à cette composante avant a. Normaliser l'ancre à la coupe
-consommatrice donne le parent exact. Il n'est pas nécessaire que B=MEB(F).
+Une ancre valide à l'ordre K d'une boule B contenant F, avec β(B)<a, fournit le
+parent de F avant a : tous les K-sous-ensembles de I_B∪U_B sont connectés à β(B).
+Ce certificat est correct même si B≠MEB(F). **Il est toutefois moins utile sur
+la première demande régulière que sur une occurrence tardive.**
 
-C'est un **certificat de composante**, pas un raccourci affirmant une égalité de
-MEB. Il n'autorise pas à traiter une population partielle comme le semis MEB
-`I∪U` du §3. Il n'utilise ni la seule couverture ponctuelle d'une composante ni
-la boule du lot courant : β(B)=a ne suffit pas pour identifier les parents stricts.
+Soit a*(F) sa première demande comme facette stricte d'une coface Gabriel.
+Dans le catalogue régulier directement programmé, |I_B∪U_B| vaut K ou K+1.
+Si F⊆I_B∪U_B et β(B)<a*(F), alors B=MEB(F). Preuve : au cardinal K, les
+populations sont égales ; au cardinal K+1, β(F)<β(B) ferait de F une facette
+stricte demandée par cette coface Gabriel dès β(B), contradiction. L'égalité
+des rayons implique l'égalité des boules par unicité de la MEB.
 
-Point de vigilance nouveau : une telle boule peut avoir β(B)>β(F). Un résultat
-trouvé pour une demande tardive n'est donc pas réutilisable à une demande plus
-précoce sans retester **β(B)<a**. Pour des requêtes dédoublonnées, tester le plus
-petit a ; pour un cache, conserver le niveau d'admissibilité. Ne pas assimiler
-cette cible à un terminal obtenu par descente dont le niveau est ≤β(F).
+Avec J=nombre d'intrus stricts étrangers à F dans MEB(F), cela distingue :
 
-Une petite liste de boules déjà disponibles peut servir de **proposeur**. Avec
-c propositions, les tests de confinement coûtent O(cK) puissances exactes, hors
-sélection, lecture d'ancre et normalisation. Ne jamais chercher dans toutes les
-boules ou développer leurs K-sous-ensembles pour obtenir cette liste. Un échec
-ou un budget de propositions épuisé déclenche le résolveur exact, pas un refus
-de facette. Le taux de succès et le bilan du travail ajouté/évité restent inconnus.
+| Première demande régulière | Opportunité exacte |
+|---|---|
+| J=0 | Population complète connue : semis déjà exploité en v7. |
+| J=1 | Population complète privée d'un point **intérieur** : une jointure exacte avec les facettes réellement demandées peut éviter la MEB. |
+| J≥2 | Aucune ancre contenante antérieure de ce catalogue ; une autre preuve de connexion ou la descente est nécessaire. |
 
-Le callback actuel contrôle des identités de compteurs supposant les anciennes
-routes de résolution. Introduire des compteurs séparés de propositions,
-`containing_anchor_hits`, rejets de date et MEB réellement évitées ; versionner
-les identités de travail, sans inventer des appels MEB ou des hits historiques.
-Le backend doit rester transactionnel et le juge comparer les parents, pas les
-seuls BallId, qui peuvent légitimement changer.
+Ce résultat ne couvre ni les extra-shells ni un catalogue enrichi d'ancres.
+Pour J=1, ne pas matérialiser toutes les suppressions gratuitement : le modèle
+ci-dessous génère 2 688 lignes d'index pour seulement 312 demandes J=1. Une
+empreinte propose ; seule l'égalité complète des IDs autorise un hit.
 
-**Contrôles exécutés dans le modèle rationnel externe :** 18 petits nuages,
-2 359 couples facette/ancre contenus, dont 1 077 à boule strictement plus grande
-que MEB(F), et 4 718 comparaisons de composantes sans désaccord. Contre-tests :
-intersection partielle, ancre du même lot, réemploi tardif→précoce et support
-parental devenu invalide. Les MEB directes K2/K3 concordent aussi sur 970 cas,
-égalités et extrêmes u16 compris. Python normal et `-O` identiques. L'énumération
-exhaustive des candidats est celle du juge borné, **pas une politique de
-proposition ni un taux de succès attendu à grande taille**. Aucun test C++ natif.
+### 5.2 Dilater une ancre, sans créer de nouvelle boule de catalogue
+
+B a un centre c_B, un rayon carré b et une ancre admissible à K (§1).
+Pour une facette **déjà certifiée stricte**, β(F)<a, poser
+
+`theta(F,B) = max(b, max(x dans F) ||x-c_B||²)`.
+
+**Certificat : b<a et theta(F,B)≤a suffisent pour retrouver le parent de F
+avant a**, en normalisant l'ancre de B à cette coupe. Le test theta<a constitue
+une première variante plus simple, sans exploiter le cas d'égalité.
+
+Preuve : choisir un K-sous-ensemble G de I_B∪U_B. La boule dilatée contient
+F∪G ; les échanges entre F et G restent donc sous son rayon. Si theta<a, tous
+les liens sont strictement antérieurs. Si theta=a, G reste strictement intérieur
+car b<a. Une MEB(F∪G) de rayon carré a aurait ses supports parmi F, ce qui
+contredirait β(F)<a. Donc β(F∪G)<a également. Cette preuve ne requiert pas de
+position générale. Elle suppose l'ancre valide, pas la seule présence d'une clé.
+
+**theta est un majorant de connexion, jamais une date exacte de fusion.**
+Ne créer ni nœud ni arête de dendrogramme à theta. Le cache doit conserver ce
+seuil et la convention de coupe ; une réponse tardive n'est pas automatiquement
+valable plus tôt. Pour les clés dédoublonnées, certifier le premier consommateur.
+Ne pas assimiler ce certificat à un terminal de descente de niveau ≤β(F).
+
+Sur le contre-exemple du §2, B=MEB(DE) a c_B=(2,0,0), b=1 ; pour F=AC,
+theta=5<25/4. L'ancre de DE retrouve le bon parent sans MEB(AC), alors que
+MEB(AC) est absente du catalogue à Kmax=2. Le repli exact reste indispensable :
+ce certificat ne couvre pas toutes les facettes, même avec toutes les ancres.
+
+### 5.3 Une fausse bonne sélection : l'ancre facile d'une autre facette du lot
+
+Soient deux facettes strictes F,G d'une même coface Q, avec F∪G=Q et β(Q)=a.
+**Si une ancienne boule B contient G, sa dilatation ne peut pas certifier F :
+theta(F,B)>a.** Sinon le certificat précédent donnerait β(F∪G)<a, contradiction.
+Cela reste vrai lorsque F et G sont déjà reliées globalement par d'autres sites.
+
+Donc essayer systématiquement MEB(G), ou une ancre contenant G, pour résoudre
+F est inutile. Une ancre obtenue après une descente de G et ne contenant plus G
+n'est pas exclue par cet argument. Le modèle vérifie 6 861 cas d'ancres faciles
+de facettes sœurs : zéro succès, dont **1 999 cas avec le même vrai parent**.
+Cette obstruction est géométrique, pas un problème de choix des IDs.
+
+### 5.4 Un proposeur réellement borné, mais pas encore un gain de temps
+
+Modèle Python indépendant sur le même corpus de 34 petits nuages réguliers,
+5 à 10 points, Kmax≤7 : 2 035 premières demandes distinctes après déduplication,
+dont 1 682 J=0, 312 J=1 et 41 J≥2. Les catégories J servent au juge, **pas** à
+une sélection qui calculerait d'abord la MEB qu'elle prétend éviter.
+
+Une seule arborescence de boîtes de centres est construite sur les boules du
+catalogue, partagée entre ordres ; chaque nœud porte un masque d'ordres et le
+plus petit niveau du sous-arbre. Proximité du barycentre de F pour ordonner les
+propositions, au plus **32 nœuds retirés de la file**, feuilles de **4 boules**,
+puis au plus c candidates. Toute candidate passe le test exact du §5.2 ; budget
+épuisé ou échec = retour au résolveur, jamais suppression de F. Les comparaisons
+Gamma et les recherches exhaustives de référence sont exclusivement dans le juge.
+
+Résultats après les seuls semis J=0, donc sur 353 demandes :
+
+| c candidates au plus | Demandes certifiées / 353 | Dont J≥2 / 41 | Nœuds retirés, total | Boules lues en feuilles | Tests exacts de puissance |
+|---|---:|---:|---:|---:|---:|
+| 1 | 236 | 12 | 3 667 | 2 529 | 1 149 |
+| 2 | 294 | 19 | 4 766 | 3 936 | 1 581 |
+| 4 | 324 | 25 | 6 433 | 6 212 | 1 947 |
+
+Le plafond exhaustif du certificat sur ces 41 demandes J≥2 est 27 succès :
+25 sont retrouvés avec cette sélection bornée. Aucun mauvais parent accepté.
+À c=4 : 569 préparations exactes de seuil, 2 722 distances centre/barycentre,
+7 711 distances aux boîtes ; le plafond de 32 nœuds est atteint 8 fois.
+**Les coûts ajoutés ne sont donc pas réduits aux 1 947 puissances.**
+
+Préparation, séparée : 1 853 enregistrements d'ancres et 1 152 nœuds sur
+l'ensemble des 34 nuages ; 9 733 visites pour les boîtes et 7 880 enregistrements
+passés aux tris. Le prototype trie à chaque subdivision : O(B log² B) travail
+et O(B) résidence pour B boules, sans borne B=O(n) acquise. À 50k, l'historique
+v7 a déjà 21,5 millions de boules : **ne pas ajouter cet index global au produit
+sur la foi de ce petit corpus**. Mesurer construction, mémoire et amortissement,
+ou proposer depuis des structures déjà disponibles. Le budget de requête ne
+borne pas le coût de préparer le catalogue. Aucun taux de succès LiDAR déduit.
+
+### 5.5 Certificat entier : un seuil partagé, pas des carrés de centres flottants
+
+Pour la clé certifiée `P_B(x)=A||x||²+v·x+C=A(||x-c_B||²-b)`, écrire
+`a=n_a/d_a`, `b=n_b/d_b`, dénominateurs positifs. Préparer une fois par couple
+(ancre, niveau consommateur) :
+
+```
+D = n_a*d_b - n_b*d_a       # exiger D>0 : ancre strictement antérieure
+R = A*D
+S = d_a*d_b
+T = floor(R/S)
+accepter si P_B(x) <= T pour TOUS les x de F
+```
+
+Avec β(F)<a établi par le constructeur, cela équivaut au certificat theta≤a.
+La variante theta<a utilise `T=floor((R-1)/S)`. Pas de racine ni de centre
+arrondi ; après préparation, chaque point ne paie qu'une puissance et une
+comparaison entière. Un seuil peut être partagé entre représentants au même
+niveau, sans déduire qu'ils ont le même parent.
+
+**La préparation ne tient pas automatiquement en i128.** Les [niveaux v7][levels]
+acceptent un numérateur 192 bits et un dénominateur signé 128 bits non réduit ;
+avec A<2^68, R peut nécessiter jusqu'à 388 bits sous ces bornes conservatrices.
+Utiliser une largeur démontrée, des réductions prouvées ou des entiers multiprécision,
+pas réutiliser aveuglément le comparateur U320. Les puissances v7 restent i128
+sur leur domaine validé. Avant tout rétrécissement de T, le borner par une borne
+supérieure certifiée des puissances ou traiter le cas saturé séparément.
+
+Contrôles nouveaux : 27 586 comparaisons polynomiales contre les distances
+rationnelles directes, 2 600 paires acceptées contrôlées contre Gamma, Python
+normal/`-O` identiques. Un **micro-exécutable C++ autonome**, sans moteur HGP,
+compare la préparation en entiers 512 bits vérifiés au juge multiprécision :
+82 761 cas (27 586×3 représentations et 3 stress de bornes arithmétiques),
+496 566 contrôles, PASS. Les stress de format atteignent 384 bits ; ils ne sont
+pas de nouveaux nuages géométriques. Aucun CTest HGP, sanitizer ou benchmark.
+Une première génération de données de test dépassait le domaine du dénominateur ;
+l'exposant de remise à l'échelle a été corrigé avant cette exécution, trace conservée.
 
 [run5]: ../../morsehgp3D_v7/receipts/full_ball_scale_gpu_20260910/gcp/optimized/output/cpu_n50000_k5_s8.stdout
 [run10]: ../../morsehgp3D_v7/receipts/full_ball_scale_gpu_20260910/gcp/optimized/output/cpu_n50000_k10_s8.stdout
@@ -232,6 +337,7 @@ proposition ni un taux de succès attendu à grande taille**. Aucun test C++ nat
 [static]: ../../morsehgp3D_v7/docs/RESOLUTION_STATIQUE_CPU_20260911.md
 [post]: ../../morsehgp3D_v7/receipts/post_exchange_scale_20260911/README.md
 [families]: ../bench/front_fixtures.hpp
+[levels]: ../../morsehgp3D_v7/src/lanes/level.hpp
 
 ## 6. Critère de livraison et prochaine expérience
 
@@ -245,8 +351,11 @@ fusion, ancres inertes dans lots simples et groupés, descente à rayon constant
 boule présente au mauvais rang, K1 et K=n, IDs réordonnés/clairsemés, cache nul,
 CPU1/4, panne après travail partiel. Réfuter explicitement l'omission d'une
 attache, l'activation d'une ancre future et la substitution de cible ci-dessus.
-Pour la piste du §5, ajouter inclusion incomplète, égalité β(B)=a et cache
-accepté trop tôt ; ne pas exiger les mêmes cibles géométriques entre backends.
+Pour le §5, distinguer ancre du lot courant (interdite) et majorant theta=a
+(admissible seulement avec les deux prémisses strictes). Ajouter facette non
+stricte, inclusion incomplète, cache trop précoce, budget du proposeur nul/épuisé,
+fractions équivalentes et débordements. Ne pas exiger les mêmes BallId entre
+backends : comparer les parents à chaque coupe, pas les seules images inférieures.
 
 Références à réutiliser :
 [`full_ball_tower_gate.cpp`](../../morsehgp3D_v7/tests/full_ball_tower_gate.cpp),
@@ -256,14 +365,16 @@ Les reçus natifs sont historiques, non rejoués par cet audit. Le contrôle
 rationnel externe a été rejoué en Python normal et `-O` : 22 nuages,
 2 343 facettes, 4 622 échanges dont 6 à rayon constant, 6 696 comparaisons
 terminales sans désaccord ; les contre-tests d'intégration ci-dessus et
-224 contrôles de conversion q2 passent également. Cela ne vaut ni exécution
-C++ ni qualification du callback ou de la tour v8.
+224 contrôles de conversion q2 passent également. Ces vérifications antérieures ne
+qualifient ni le callback ni la tour v8 ; le nouveau micro-test C++ du §5.5
+concerne seulement la préparation arithmétique du certificat.
 
 **Ordre de travail :** (1) raccord CPU exact sur petits nuages ; (2) profil par
 K et par famille aux tailles 8k/16k/32k, avec demandes/cache, MEB initiales versus
 échanges, supports/puissances, visites d'intrus et histogramme des longueurs ;
-(3) comparer une seule optimisation à la fois : MEB de facettes K=2/3, réemploi
-certifié ou ancre contenante ; (4) paralléliser le travail restant. Séparer les
+(3) comparer semis, MEB spécialisées et ancre dilatée séparément ; ne pas ajouter
+d’office un index global d’ancres ni les essais entre facettes sœurs du §5.3 ;
+(4) paralléliser le travail restant. Séparer les
 temps de proposition, résolution, histoire et sortie ; mesurer RSS et taille du
 résultat. Ni 0,312 échange moyen ni un hit du juge ne prouvent un gain de temps.
 Il faut retrouver les parents, pas réintroduire toutes les facettes silencieuses.
