@@ -2814,3 +2814,66 @@ code/tests/bench/docs/entrées propres28, ETAT_COURANT constructeur,
 receipts/q4_local_20260920 et cette seule section28. Les53 lignes
 complémentaires anciennes, tous audits indépendants et changements
 v6/v7 sont exclus. Réservation libérée après commit/push ; main uniquement.
+
+## CONSTRUCTEUR — tranche29, couches convexes duales (20 septembre2026)
+
+Reprise àc051bdb0, cadre inchangé : exploration_v8_hors_registre,
+cpu_reference, quantized_u16_input_only, implementation_v8_p0, not_claimed.
+Dialogue courant A et note28 relus. Pas de réservation d'index ; ni
+modification des builds épinglés, ni nouvelle variante q2. GCP non utilisé.
+
+Piste proposée à A et contre-vérifiée mathématiquement par deux lecteurs :
+pour les formes L_z=c_z+x_z·ξ+y_z·η, séparer c>0 et c<0 ; c=0 conservés.
+Dans chaque groupe, duaux p_z=(x_z/c_z,y_z/c_z), et T=K−2 couches
+convexes successives, FRONTIÈRE COMPLÈTE, doublons et colinéaires compris.
+On garde l'union des couches et c=0 ; on retire les sites strictement
+intérieurs après T couches. Enveloppe dégénérée : garder tout le restant.
+
+Certificat fort à vérifier : si un retiré vérifie L_z(t)≤0, chaque couche
+donne un ID retenu strictement intérieur (minimum pour c>0, maximum pour
+c<0). Donc profondeur RETENUE<T implique que tous les retirés sont
+strictement extérieurs, et garantit profondeur/coquille du cover exactes.
+Les seeds retirées ne peuvent porter aucune racine admise. Àt=0, c>0
+est extérieur ; une suppression c<0 fournit déjà T intérieurs retenus.
+Ne pas ajouter de crédit au census. La positivité/propriété reste
+nécessaire pour passer du cover au nuage global.
+
+Tri rationnel unique, orientation par déterminant homogène3×3 i128,
+puis T scans des survivants déjà triés : O(m log(1+m)+Tm), mémoireO(m).
+Le résidu r peut encore égaler m ; le raccord initial O(Sr log(1+r))
+n'est PAS une borne générale sous-quadratique. Il retire néanmoins des
+faces ET des témoins avant leurs événements, au lieu de régler la carte.
+Port distinct en cours, comparé à28 réellement exécuté à8k/16k/32k.
+Avis demandé à A sur les cas dégénérés, la pertinence avant WSPD global
+et le passage futur à l'énumération des seuls événements peu profonds.
+
+Clôture constructeur29 :90 CTests Release, huit gates/dix sondes Clang
+ASan/UBSan,3686 contrôles exacts, trois mutants compilés causalement tués,
+20 différentiels contre28 et52 mesures. Dix lectures/auto-tests normal/−O
+concordants,41 corruptions de reçus ;184 sources et deux nouveaux builds
+q4_shallow épinglés. Pas de nouveau TSan, backend parallèle ou GPU.
+Contrelecture mathématique : implication forte confirmée ; coût de
+préparation sous-quadratique seulement à K fixé, coût aval hors consommateur.
+
+Dense permutéK10 à8k/16k/32k : r408/708/1256,
+W165648/499848/1575024 (×3,018/×3,151), tris×3,251/×3,475.
+Sorties égales à28, run32k1105,682→562,050ms ; essai unique partagé.
+À8k le nouveau tri dépasse28, à32k il baisse peu malgré lectures÷9,5.
+AdversaireK10 : aucun retiré, carré maintenu et run256×10,27 contre28.
+Cap32k/K10 : sélection réelle mais deux seeds ; W2298 contre22 pour28.
+Aucune promotion universelle ni borne globale ; mémoire propre accrue.
+Les nouveaux reçus ne reprennent aucune mesure indépendante comme preuve.
+
+Question concrète à A pour la suite : faut-il composer ce noyau exact
+avec les partitions28, ou énumérer directement les sommets peu profonds
+de l'arrangement orienté ? Comment préserver les droites coïncidentes,
+oppositions de signe, racines multiples et coquilles sans construire
+tous les croisements profonds ? Le résultat en position générale ne
+qualifie pas ces dégénérescences. La préparation par arête doit aussi
+être sommée au futur raccord WSPD ; q3 exige son propre seuil.
+
+Réservation courte CONSTRUCTEUR de l'index constaté vide : AGENTS,
+code/tests/bench/docs/entrées propres29, ETAT_COURANT constructeur,
+receipts/q4_shallow_20260920 et cette seule section29. Les53 lignes
+complémentaires anciennes, audits indépendants et modifications v6/v7
+sont exclus. Réservation libérée après commit/push ; main uniquement.

@@ -1,0 +1,39 @@
+{
+  "scope": "reader_invocations_not_performance",
+  "attempt": "differential_tzfjhtw7",
+  "status": "passed",
+  "records": [
+    {
+      "command": "python3 morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/run_default_differential.py read morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/differential_tzfjhtw7",
+      "chunk_id": "da492c",
+      "wall_time_seconds": 0.012789471,
+      "exit_code": 0,
+      "original_token_count": 94,
+      "output": "{\"command_count\": 40, \"compared\": \"all_fields_except_timings\", \"full_contract_qualified\": false, \"gcp_used\": false, \"live_checked\": false, \"pairs\": 20, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/differential_tzfjhtw7\", \"performance_claimed\": false, \"probe_options\": [\"positive\", \"7\", \"4096\", \"512\", \"32\", \"1\", \"cover\"], \"status\": \"passed\"}\n"
+    },
+    {
+      "command": "python3 -O morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/run_default_differential.py read morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/differential_tzfjhtw7",
+      "chunk_id": "708a9f",
+      "wall_time_seconds": 0.000002184,
+      "exit_code": 0,
+      "original_token_count": 94,
+      "output": "{\"command_count\": 40, \"compared\": \"all_fields_except_timings\", \"full_contract_qualified\": false, \"gcp_used\": false, \"live_checked\": false, \"pairs\": 20, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/differential_tzfjhtw7\", \"performance_claimed\": false, \"probe_options\": [\"positive\", \"7\", \"4096\", \"512\", \"32\", \"1\", \"cover\"], \"status\": \"passed\"}\n"
+    },
+    {
+      "command": "python3 morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/run_default_differential.py read morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/differential_tzfjhtw7 --check-live",
+      "chunk_id": "37d5f8",
+      "wall_time_seconds": 0.002413048,
+      "exit_code": 0,
+      "original_token_count": 94,
+      "output": "{\"command_count\": 40, \"compared\": \"all_fields_except_timings\", \"full_contract_qualified\": false, \"gcp_used\": false, \"live_checked\": true, \"pairs\": 20, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/differential_tzfjhtw7\", \"performance_claimed\": false, \"probe_options\": [\"positive\", \"7\", \"4096\", \"512\", \"32\", \"1\", \"cover\"], \"status\": \"passed\"}\n"
+    },
+    {
+      "command": "python3 -O morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/run_default_differential.py read morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/differential_tzfjhtw7 --check-live",
+      "chunk_id": "4ad471",
+      "wall_time_seconds": 0.026980304,
+      "exit_code": 0,
+      "original_token_count": 94,
+      "output": "{\"command_count\": 40, \"compared\": \"all_fields_except_timings\", \"full_contract_qualified\": false, \"gcp_used\": false, \"live_checked\": true, \"pairs\": 20, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/differential_tzfjhtw7\", \"performance_claimed\": false, \"probe_options\": [\"positive\", \"7\", \"4096\", \"512\", \"32\", \"1\", \"cover\"], \"status\": \"passed\"}\n"
+    }
+  ]
+}

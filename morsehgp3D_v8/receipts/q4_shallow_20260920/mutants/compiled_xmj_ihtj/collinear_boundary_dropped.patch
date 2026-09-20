@@ -1,0 +1,18 @@
+--- morsehgp3D_v8/src/lanes/q4_shallow_set.cpp
++++ mutated/q4_shallow_set.cpp
+@@ -149,13 +149,13 @@
+       };
+       for (std::size_t i=0;i<groups.size();++i) {
+         // STRICT right-turn removal keeps every collinear boundary point.
+-        while (hull.size()>=2 && turn(hull[hull.size()-2],hull.back(),i)<0) hull.pop_back();
++        while (hull.size()>=2 && turn(hull[hull.size()-2],hull.back(),i)<=0) hull.pop_back();
+         push(i);
+       }
+       const auto lower=hull.size();
+       for (std::size_t i=groups.size()-1;i>0;--i) {
+         const auto next=i-1;
+-        while (hull.size()>lower && turn(hull[hull.size()-2],hull.back(),next)<0) hull.pop_back();
++        while (hull.size()>lower && turn(hull[hull.size()-2],hull.back(),next)<=0) hull.pop_back();
+         push(next);
+       }
+       hull.pop_back();  // Closing copy of the first coordinate group.

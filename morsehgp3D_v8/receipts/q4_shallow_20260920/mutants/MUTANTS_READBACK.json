@@ -1,0 +1,39 @@
+{
+  "scope": "reader_invocations_not_performance",
+  "attempt": "compiled_xmj_ihtj",
+  "status": "passed",
+  "records": [
+    {
+      "command": "python3 morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/run_mutants.py read morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/compiled_xmj_ihtj",
+      "chunk_id": "bdcd6c",
+      "wall_time_seconds": 0.000003727,
+      "exit_code": 0,
+      "original_token_count": 67,
+      "output": "{\"baseline_gates\": 1, \"command_count\": 10, \"compiled_product_mutants\": 3, \"full_contract_qualified\": false, \"gcp_used\": false, \"live_checked\": false, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/compiled_xmj_ihtj\", \"status\": \"passed\"}\n"
+    },
+    {
+      "command": "python3 -O morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/run_mutants.py read morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/compiled_xmj_ihtj",
+      "chunk_id": "05ddd6",
+      "wall_time_seconds": 0.000002285,
+      "exit_code": 0,
+      "original_token_count": 67,
+      "output": "{\"baseline_gates\": 1, \"command_count\": 10, \"compiled_product_mutants\": 3, \"full_contract_qualified\": false, \"gcp_used\": false, \"live_checked\": false, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/compiled_xmj_ihtj\", \"status\": \"passed\"}\n"
+    },
+    {
+      "command": "python3 morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/run_mutants.py read morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/compiled_xmj_ihtj --check-live",
+      "chunk_id": "dd0150",
+      "wall_time_seconds": 0.000001934,
+      "exit_code": 0,
+      "original_token_count": 67,
+      "output": "{\"baseline_gates\": 1, \"command_count\": 10, \"compiled_product_mutants\": 3, \"full_contract_qualified\": false, \"gcp_used\": false, \"live_checked\": true, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/compiled_xmj_ihtj\", \"status\": \"passed\"}\n"
+    },
+    {
+      "command": "python3 -O morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/run_mutants.py read morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/compiled_xmj_ihtj --check-live",
+      "chunk_id": "1a9d9d",
+      "wall_time_seconds": 0.000002545,
+      "exit_code": 0,
+      "original_token_count": 67,
+      "output": "{\"baseline_gates\": 1, \"command_count\": 10, \"compiled_product_mutants\": 3, \"full_contract_qualified\": false, \"gcp_used\": false, \"live_checked\": true, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q4_shallow_20260920/mutants/compiled_xmj_ihtj\", \"status\": \"passed\"}\n"
+    }
+  ]
+}

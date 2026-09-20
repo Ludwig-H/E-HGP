@@ -118,6 +118,17 @@ pas seulement entre témoins. Ce chemin q4 seul n'est ni q3 global, ni
 FULL ou un backend GPU ; défauts précédents inchangés, GCP non utilisé.
 Voir les [preuves, échec r1 conservé et résultats](receipts/q4_local_20260920/README.md).
 
+La tranche29 réduit ensemble les faces et les témoins q4 par des
+[couches convexes duales exactes](docs/Q4_COUCHES_DUALES_20260920.md).
+La sélection est commune à l'arête et conserve toute la coquille des
+boules acceptables. Sur le dense permuté32k/K10, les lectures passent
+de14,974M à1,575M, sorties identiques ; le run mono mesuré passe
+de1105,7 à562,0ms, sans qualification de gain stable ou de tour.
+La préparation coûte O(m log(1+m)+Km), mais le résidu peut encore être
+quadratique : l'adversaire256/K10 conserve tous ses sites et régresse.
+L'ancienne voie reste inchangée. Voir les
+[résultats et contre-régimes](receipts/q4_shallow_20260920/README.md).
+
 ## Vingt-et-unième tranche publiée à3e94c868 — historique
 
 La vingt-et-unième tranche transmet aux enfants les

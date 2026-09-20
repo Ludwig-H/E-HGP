@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q4_shallow_set.cpp
++++ mutated/q4_shallow_set.cpp
+@@ -126,7 +126,7 @@
+         observe_layer();
+       }
+     };
+-    for (std::size_t layer=0;layer<kmax_-2 && !groups.empty();++layer) {
++    for (std::size_t layer=0;layer<kmax_-3 && !groups.empty();++layer) {
+       counter_add(positive_sign?work_.positive_layers:work_.negative_layers);
+       counter_add(work_.layer_input_groups,static_cast<u64>(groups.size()));
+       for (const auto group:groups)

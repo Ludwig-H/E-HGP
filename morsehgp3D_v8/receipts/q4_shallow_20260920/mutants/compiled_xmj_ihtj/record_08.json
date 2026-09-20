@@ -1,0 +1,22 @@
+{
+  "kind": "zero_constant_sites_dropped_link",
+  "command": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "/workspaces/E-HGP/build/v8_q4_shallow_20260920/CMakeFiles/mhgp8_q4_shallow_gate.dir/tests/q4_shallow_gate.cpp.o",
+    "/tmp/mhgp8_q4_shallow_mutants_q810shg4/zero_constant_sites_dropped.o",
+    "/workspaces/E-HGP/build/v8_q4_shallow_20260920/libmhgp8_p0.a",
+    "-pthread",
+    "-o",
+    "/tmp/mhgp8_q4_shallow_mutants_q810shg4/zero_constant_sites_dropped"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T21:11:43.251605+00:00",
+  "expected_exit_code": 0,
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "stdout_base64": "",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-20T21:11:43.320635+00:00"
+}

@@ -10,6 +10,44 @@ qualification de son propre code.
 
 ## À reprendre maintenant
 
+La tranche29 ajoute les [couches convexes duales q4](docs/Q4_COUCHES_DUALES_20260920.md)
+dans `run_q4_shallow_edge_candidates`, entrée explicite sans changer28.
+Pour chaque signe de la constante, conserver K−2 frontières COMPLÈTES
+et tous les sites de constante nulle. Si le census retenu est<K−2,
+les sites écartés sont tous strictement extérieurs : profondeur et coquille
+exactes, suppression conjointe des témoins et des seeds impossibles.
+Les plans possèdent le même index, les buffers de balayage sont privés.
+
+Le dense permuté8k/16k/32k/K10 garde408/708/1256 sites : lectures
+165648/499848/1575024 (×3,018/×3,151), tris×3,251/×3,475.
+Les mêmes sorties que28 sont réellement produites. Ce progrès ne ferme
+pas le carré : l'adversaireK10 garde tous ses sites, ses lectures font
+×4,133/×4,065/×4,032 de32 à256, et son run256 régresse×10,27.
+Le coût O(m log(1+m)+Km) concerne la sélection, pas le moteur complet ;
+le producteur aval reste O(Sr log(1+r)), hors travail du consommateur.
+Lire les [preuves et mesures](receipts/q4_shallow_20260920/README.md).
+
+Qualification close :90 CTests Release, huit gates/dix sondes Clang
+ASan/UBSan (pas90),3686 contrôles nouveaux, trois mutants compilés,
+20 différentiels contre28 et52 mesures. Lecteurs normal/−O concordants,
+41 corruptions de reçus détectées ;184 sources et builds
+`v8_q4_shallow_20260920` / `v8_q4_shallow_sanitize_20260920` épinglés.
+Quatre appels concurrents testent le partage immuable, pas un ordonnanceur
+q4 ou un nouveau backend parallèle/GPU. Pas de nouvelle porte TSan.
+
+**Suite structurelle :** éviter d'énumérer et trier les événements profonds
+entre les survivants ; ne pas augmenter les budgets de couches/cartes.
+Comparer une extraction certifiée des seuls événements peu profonds et
+une composition mesurée avec les partitions28, sans perdre contacts,
+multiplicités, coquilles ni remettre S×m dans leur préparation.
+Le fond cap montre qu'une réduction coûteuse n'aide pas lorsque deux
+seeds suffisent et que28 sait déjà classer les autres témoins par blocs.
+Ne pas promouvoir29 comme remplacement universel de28.
+Raccorder q3 séparément, puis WSPD multivoie, catalogue/intérieurs et FULL ;
+aucun progrès local ne vaut contrat50k/G4. GCP non utilisé.
+
+### Tranche28 précédente close àc051bdb0
+
 La tranche28 livre les [fragments exacts et balayages q4 locaux](docs/Q4_FRAGMENTS_ET_BALAYAGES_LOCAUX_20260920.md)
 de `run_q4_local_edge_candidates`. Atlas immuable partagé, index global
 inchangé, partition disjointe intérieur uniforme/extérieur strict/actif.

@@ -97,6 +97,27 @@ sous-quadratique, de WSPD q3/q4 global, FULL ou backend GPU/G4 ; quatre
 appels concurrents ne qualifient pas un ordonnanceur massif. GCP non utilisé.
 Voir les [preuves propres et historique](../receipts/q4_local_20260920/README.md).
 
+Tranche29 aprèsc051bdb0 : [couches convexes duales](../docs/Q4_COUCHES_DUALES_20260920.md).
+Ensemble immuable commun à l'arête, deux signes séparés, frontières
+complètes K−2 et constantes nulles conservées. Faible profondeur retenue
+implique tous les retirés strictement extérieurs : census et coquille
+exacts ; les seeds retirées disparaissent aussi avant leurs événements.
+90 CTests Release, huit gates/dix sondes Clang ASan/UBSan,3686 contrôles,
+trois mutants compilés,20 différentiels contre28 et52 mesures passent.
+Lectures normal/−O,41 corruptions du lecteur ; sources184 et builds
+q4_shallow/q4_shallow_sanitize du20260920 épinglés. Pas de TSan nouveau.
+W dense permutéK10 fait165648/499848/1575024 à8k/16k/32k,
+ratios×3,018/×3,151, contre×3,922/×4,184 pour28 ; sorties identiques.
+Mais l'adversaireK10 garde tous les sites, dépasse×4 et régresse à256 ;
+cap n'a que deux seeds et29 y coûte plus que les blocs28. Préparation
+O(m log(1+m)+Km), pas le coût du producteur entier. Pas de remplacement
+universel de28 ni de borne générale sous-quadratique. Prochaine question
+à A : événements peu profonds et articulation avec les partitions28,
+en préservant dégénérescences/coquilles et sans déplacer le carré.
+Voir les [preuves et contre-régimes](../receipts/q4_shallow_20260920/README.md).
+q3 global, WSPD multivoie, catalogue/intérieurs, FULL/G4 et massif ouverts ;
+GCP non utilisé. Les preuves des auditeurs restent indépendantes.
+
 ## Historique : vingt-et-unième tranche publiée à3e94c868
 
 Vingt-et-unième tranche P0 close,

@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q4_shallow_set.cpp
++++ mutated/q4_shallow_set.cpp
+@@ -67,7 +67,7 @@
+       auto form=geometry_->form(id);
+       counter_add(work_.input_sites);counter_add(work_.form_tests);
+       if (form.constant==0) {
+-        retained_.push_back(id);counter_add(work_.zero_sites);
++        counter_add(work_.zero_sites);
+       } else {
+         const bool above=form.constant>0;
+         if (!above) {

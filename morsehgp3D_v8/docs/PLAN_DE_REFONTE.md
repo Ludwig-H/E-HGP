@@ -76,6 +76,19 @@ sont une base de distribution, pas encore une qualification parallèle.
 Conserver la référence locale exacte, puis raccorder q3 séparément et
 le générateur global ; ne pas confondre une arête fournie avec toute la tour.
 
+Aprèsc051bdb0, les [couches convexes duales29](Q4_COUCHES_DUALES_20260920.md)
+retirent simultanément des seeds et des témoins avant les événements.
+Leur certificat exact conserve profondeur faible et coquille complète,
+sans hypothèse de position générale ; préparation O(m log(1+m)+Km).
+Le dense permutéK10 n'a plus que165648/499848/1575024 lectures à8k/16k/32k,
+mais l'adversaireK10 reste quadratique et régresse contre28. Le tri des
+événements profonds entre survivants est maintenant explicite : prochaine
+question à l'auditeur, extraction des événements peu profonds et articulation
+avec les blocs28. Une sélection sous-quadratique à K fixé ne suffit pas,
+et son scan commun par arête peut dominer lorsque S est petit. Garder28
+comme référence, ne pas ajouter une autre variante de budget ; mesurer
+la somme sur toutes les arêtes au futur raccord WSPD q3/q4.
+
 Suivi du 14 septembre : le [raccord direct front → census q2](P0_FRONT_ET_CENSUS_Q2.md)
 est implémenté. Il retire factories, copies et arbres B par rectangle,
 sans filtre axial obligatoire. Il reste à réduire le coût du front et

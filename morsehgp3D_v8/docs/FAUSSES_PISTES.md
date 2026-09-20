@@ -328,6 +328,25 @@ Références : [audit WSPD](../audits/WSPD_Q2_Q3_Q4.md).
 
 Voir les [résultats et la suite](Q4_CARTE_CENTRES_PARTAGEE_20260920.md).
 
+## Couches duales29 : ce qu'elles ne permettent pas de conclure
+
+- Ne garder que les sommets convexes perd les points sur les arêtes,
+  donc des contacts et des IDs de coquille. Garder toute la frontière,
+  y compris les IDs de duaux coïncidents ; mutant causal détecté.
+- Mélanger les signes de la constante inverse certaines inégalités ;
+  les deux groupes et les constantes nulles ont des rôles distincts.
+- Prouver qu'un site est extérieur quand la profondeur globale est faible
+  ne suffit pas à calculer cette profondeur sur un sous-ensemble : il faut
+  l'implication réciproque utilisée29, faible profondeur RETENUE ⇒ exactitude.
+- O(m log m+Km) ne borne que la préparation. Tous les points duaux
+  peuvent rester sur les couches : l'adversaireK10 conserve le carré.
+- Réduire les témoins n'améliore pas forcément le coût total : cap32k/K10
+  n'a que deux seeds,28 paie22 lectures et29 en paie2298 plus sa sélection.
+  Le run passe ici de0,158 à17,468ms. Garder les blocs et mesurer l'aval,
+  ne pas remplacer automatiquement28 par29.
+
+Voir la [preuve, les mesures et la suite29](Q4_COUCHES_DUALES_20260920.md).
+
 Références : [implémentation](../audits/IMPLEMENTATION_PARALLELISATION.md)
 et [mesures](../audits/CONTRATS_ET_MESURES.md).
 

@@ -1,0 +1,17 @@
+{
+  "kind": "one_convex_layer_missing_oracle",
+  "command": [
+    "/tmp/mhgp8_q4_shallow_mutants_q810shg4/one_convex_layer_missing",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T21:11:41.614269+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "q4 shallow gate: shallow layers differ from independent rational supporting-line oracle\n",
+  "stdout_base64": "",
+  "stderr_base64": "cTQgc2hhbGxvdyBnYXRlOiBzaGFsbG93IGxheWVycyBkaWZmZXIgZnJvbSBpbmRlcGVuZGVudCByYXRpb25hbCBzdXBwb3J0aW5nLWxpbmUgb3JhY2xlCg==",
+  "finished_utc": "2026-09-20T21:11:41.618404+00:00"
+}
