@@ -1,0 +1,151 @@
+{
+  "designs": 12,
+  "rejections": 24,
+  "results": [
+    {
+      "mutant": "incomplete",
+      "optimized": false,
+      "reason": "RuntimeError: Incomplete capture",
+      "returncode": 1
+    },
+    {
+      "mutant": "incomplete",
+      "optimized": true,
+      "reason": "RuntimeError: Incomplete capture",
+      "returncode": 1
+    },
+    {
+      "mutant": "missing_record",
+      "optimized": false,
+      "reason": "RuntimeError: Missing or unexpected experiment",
+      "returncode": 1
+    },
+    {
+      "mutant": "missing_record",
+      "optimized": true,
+      "reason": "RuntimeError: Missing or unexpected experiment",
+      "returncode": 1
+    },
+    {
+      "mutant": "failed_child",
+      "optimized": false,
+      "reason": "RuntimeError: Failed child",
+      "returncode": 1
+    },
+    {
+      "mutant": "failed_child",
+      "optimized": true,
+      "reason": "RuntimeError: Failed child",
+      "returncode": 1
+    },
+    {
+      "mutant": "wrong_input",
+      "optimized": false,
+      "reason": "RuntimeError: Input digest mismatch",
+      "returncode": 1
+    },
+    {
+      "mutant": "wrong_input",
+      "optimized": true,
+      "reason": "RuntimeError: Input digest mismatch",
+      "returncode": 1
+    },
+    {
+      "mutant": "wrong_command",
+      "optimized": false,
+      "reason": "RuntimeError: Command mismatch",
+      "returncode": 1
+    },
+    {
+      "mutant": "wrong_command",
+      "optimized": true,
+      "reason": "RuntimeError: Command mismatch",
+      "returncode": 1
+    },
+    {
+      "mutant": "wrong_domain",
+      "optimized": false,
+      "reason": "RuntimeError: Option mismatch",
+      "returncode": 1
+    },
+    {
+      "mutant": "wrong_domain",
+      "optimized": true,
+      "reason": "RuntimeError: Option mismatch",
+      "returncode": 1
+    },
+    {
+      "mutant": "claimed_fallback",
+      "optimized": false,
+      "reason": "RuntimeError: Unexpected execution scope",
+      "returncode": 1
+    },
+    {
+      "mutant": "claimed_fallback",
+      "optimized": true,
+      "reason": "RuntimeError: Unexpected execution scope",
+      "returncode": 1
+    },
+    {
+      "mutant": "duplicate_rejection",
+      "optimized": false,
+      "reason": "RuntimeError: Rejected IDs mismatch",
+      "returncode": 1
+    },
+    {
+      "mutant": "duplicate_rejection",
+      "optimized": true,
+      "reason": "RuntimeError: Rejected IDs mismatch",
+      "returncode": 1
+    },
+    {
+      "mutant": "wrong_forecast",
+      "optimized": false,
+      "reason": "RuntimeError: Forecast mismatch",
+      "returncode": 1
+    },
+    {
+      "mutant": "wrong_forecast",
+      "optimized": true,
+      "reason": "RuntimeError: Forecast mismatch",
+      "returncode": 1
+    },
+    {
+      "mutant": "wrong_nodes",
+      "optimized": false,
+      "reason": "RuntimeError: Node budget mismatch",
+      "returncode": 1
+    },
+    {
+      "mutant": "wrong_nodes",
+      "optimized": true,
+      "reason": "RuntimeError: Node budget mismatch",
+      "returncode": 1
+    },
+    {
+      "mutant": "wrong_survivor_ledger",
+      "optimized": false,
+      "reason": "RuntimeError: Survivor ledger mismatch",
+      "returncode": 1
+    },
+    {
+      "mutant": "wrong_survivor_ledger",
+      "optimized": true,
+      "reason": "RuntimeError: Survivor ledger mismatch",
+      "returncode": 1
+    },
+    {
+      "mutant": "changed_source",
+      "optimized": false,
+      "reason": "RuntimeError: Source changed: center_blocks.cpp",
+      "returncode": 1
+    },
+    {
+      "mutant": "changed_source",
+      "optimized": true,
+      "reason": "RuntimeError: Source changed: center_blocks.cpp",
+      "returncode": 1
+    }
+  ],
+  "status": "passed"
+}

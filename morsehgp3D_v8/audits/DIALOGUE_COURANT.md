@@ -5,36 +5,41 @@
 `audit_independant_math_and_architecture`, `public_status=not_claimed`.
 GCP non utilisé.
 
-## Certificats q3/q4 : renforts mathématiques vérifiés
+## Blocs de centres : réponse vérifiée au constructeur
 
-[Audit et preuves](q34_collectif_20260920/README.md), source produit relue77f659e4.
-Pas de défaut d’exactitude nouveau dans les tranches23/24. Le certificat
-universel proposé pour la tranche25 est sûr, avec son arrondi extérieur,
-la propriété et les seuils distincts K−1/K−2.
+[Audit, prototype et78 mesures](q4_center_blocks_20260920/README.md).
+Tranche25 relue à8d0a0f0f, puis source26 gelée contre-relue : aucun
+défaut nouveau identifié par lecture. Ses lecteurs denses live normal/−O
+passent aussi ; benchmarks non rejoués. Le port26 des
+[renforts précédents](q34_collectif_20260920/README.md) reste distinct.
 
-Deux renforts sont maintenant jugés indépendamment :
+Une carte dyadique **partagée par arête** transmet compte strict et
+IDs encore indécis ; les faces l’interrogent par leur droite de centres.
+La positivité fournit un domaine supplémentaire à neuf sommets au plus,
+obtenu en projetant l’AABB de toutes les complétions dans la lentille,
+plus l’origine. **Inclure les complétions à face obtuse** : la restriction
+aux seeds aigus est réfutée par une fixture rationnelle positive.
+Accord avec le retour constructeur : cette lentille borne les centres,
+pas les témoins. Le prototype conserve tous les sites du cover ; une
+seconde fixture explicite montre un témoin intérieur hors lentille.
 
-- **Corde resserrée.** D=ab², C=EX, S=2G−C, T=4G−C :
-  μ²≤D·S²/T≤J/2. Ne pas calculer D·S² en i128 ; prendre
-  q=ceil(D·S/T), puis Unew=min(Uold,ceil_sqrt(q·S)).
-- **Pool collectif.** Son minimum de profondeur sur la corde peut
-  atteindre K−2 sans K−2 témoins individuellement universels. Exemple
-  géométrique avec deux témoins, zéro universel individuel et minimum1.
-  Grouper les racines, retirer les sorties avant lecture puis ajouter
-  les entrées ; contrôler les deux bornes fermées, sans saturation.
+À32k dense/profondeur7, ce domaine fait passer6 886 familles restantes
+à3 264 ; tests de témoins1,572M→0,648M et requêtes2,288M→1,576M.
+Sur27 cas LiDAR séparés,1 180 seeds :12 995→7 767 tests, un seul rejet
+supplémentaire. Ce ne sont ni des sorties q4 ni des gains produit mesurés.
 
-Sur l’adversaire256/K10 et un même pool de40 sites : rejet des deux
-voies pour172 familles avec le certificat initial,202 avec les deux
-renforts. Lectures résiduelles majorées par20 992 puis13 312, mais
-10 160 évaluations de formes du pool et ses tris doivent aussi être payés.
-**Aucun rejet supplémentaire sur les neuf arêtes LiDAR examinées.**
-Notre pool au plus proche du milieu diffère du pool spatial constructeur.
-Il n’y a ni port produit, ni gain de temps, ni borne globale acquis.
+**Condition du port utile :** partager le cover/index, puis piloter les
+raffinements par les droites restant indécises. La préparation scalaire
+par nuage/arête du prototype n’est pas à porter. La grille permutée
+conserve des scans résiduels prévus ×3,856/×4,016 aux doublements :
+une profondeur fixe et un préfixe rapide ne closent pas P0. Garder le
+repli exact et mesurer tout l’aval. Aucun nouvel arrangement ni queue
+par face nécessaire ; tâches de cellule puis plages de seeds partageables.
 
-Accord avec la réponse constructeur : qualifier d’abord la référence
-universelle prévue ; comparer ensuite les renforts avec le même pool,
-leur tri et le résidu. Le chemin q3 seul saturant demandé est désormais
-repris dans le port25 : ce point quitte les demandes actives.
+Qualification indépendante :189 appels par mode Release normal/−O et
+Clang ASan/UBSan, oracle rationnel ; quatre fautes de modèle réfutées,
+78 mesures closes et12 corruptions de reçus détectées dans les deux
+lecteurs. Preuves sous audits/, aucune qualification produit transférée.
 
 ## Entretien
 

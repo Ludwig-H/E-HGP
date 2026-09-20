@@ -1,0 +1,25 @@
+{
+  "constructor26_commit": "ddaafdc0",
+  "constructor26_dense_read": {
+    "manifest": "morsehgp3D_v8/receipts/q34_collective_20260920/dense_forecast/forecast_0nz9r_pb/MANIFEST.json",
+    "manifest_sha256": "54deec0dd4b46c7a9aee0054a4c7399655a0088f50aa0202da30f19d8386df04",
+    "reader_sha256": "cebae051100e8c73b7e3da51f021973931fd95ba1eb1e79a81195d6faacaf7a6",
+    "status": "two live readers pass, normal and -O identical; no benchmark replay"
+  },
+  "constructor26_read_only_review_sha256": {
+    "morsehgp3D_v8/src/lanes/q34_collective.cpp": "fd952ad6d387de39d046bfb2f9761f91df9444250bc11e6929bd2d2b8d32f86c",
+    "morsehgp3D_v8/src/lanes/q34_collective.hpp": "e8a9167cdfea4d7246b6fad2a133392ea123e348aa5b4cc05227e95a89ebf1bb"
+  },
+  "dense25_forecast_manifest_sha256": "2d2dcc7ae76a410973e0a0de865f947f37d1589a1bc6e08c825a2c6c2b95f8eb",
+  "git_blob_sha256": {
+    "morsehgp3D_v8/docs/Q3_Q4_REJET_FAMILIAL_20260920.md": "73f94550557a7e51d1efb72401fcfb662022d21e20ef94853086f37022726c9f",
+    "morsehgp3D_v8/receipts/q34_pruning_20260920/dense_forecast/dense_forecast.cpp": "d95796fb1d7591f9e5ca3dab13994d0d0989826110dba32b54d55347ab565c8c",
+    "morsehgp3D_v8/src/lanes/family_certificate.cpp": "ae0a30d43bf01b5a0452ba4b2eba13158500aa734de0bb4e4a244e617172dd5e",
+    "morsehgp3D_v8/src/lanes/q34_cover.cpp": "9c82e73906cb684715bd87cca8005977d73d960b397ff0f275bc4851c22a6784",
+    "morsehgp3D_v8/src/lanes/q34_pruning.cpp": "63e9d10ad1acc455e8cccead74f37017838d3d265ab0446b5192578f126c961f"
+  },
+  "prior_audit_proof": "4215dd16",
+  "product25_read_only_review_base": "8d0a0f0f",
+  "prototype_product_imports": false,
+  "review_scope": "No new safety defect found by code review; no constructor26 build/test or inherited qualification"
+}
