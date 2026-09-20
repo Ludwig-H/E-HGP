@@ -2,6 +2,7 @@
 #include "lanes/q34_pruning.hpp"
 #include "lanes/family_certificate.hpp"
 #include "lanes/q34_collective.hpp"
+#include "lanes/q4_center_map.hpp"
 
 #include <algorithm>
 #include <stdexcept>
@@ -154,6 +155,14 @@ struct PoolFilterContext {
   Q34PoolWork& work;
 };
 
+struct CenterFilterContext {
+  Q4CenterMapOptions options;
+  std::unique_ptr<Q4CenterMap>& map;
+  u64& q3_only;
+  u64& both_rejected;
+  u64 query_peak{};
+};
+
 void validate_pool_options(Q34PoolOptions options) {
   if ((options.chord != Q34ChordBound::Jung && options.chord != Q34ChordBound::Variance) ||
       (options.reduction != Q34PoolReduction::Universal && options.reduction != Q34PoolReduction::Collective))
@@ -163,7 +172,7 @@ void validate_pool_options(Q34PoolOptions options) {
 Q34CoverSeedWork run_seed(Q34EdgeCoverPtr cover, std::size_t x_id,
     std::size_t kmax, const Q34SeedConsumer& consumer,
     const Q34WitnessPool* pool, Q34FamilyPruningWork* pruning,
-    PoolFilterContext* filter = nullptr) {
+    PoolFilterContext* filter = nullptr, CenterFilterContext* center = nullptr) {
   if (!cover || !consumer || kmax == 0)
     throw std::invalid_argument("mhgp8 covered seed requires cover, callback and positive Kmax");
   const auto points = cover->index()->cloud().points();
@@ -184,7 +193,8 @@ Q34CoverSeedWork run_seed(Q34EdgeCoverPtr cover, std::size_t x_id,
 
   bool q3_active = true, q4_active = kmax >= 3;
   const bool collective_enabled = filter && !filter->pool->ids().empty();
-  const bool pruning_enabled = collective_enabled || (pool && !pool->ids().empty());
+  const bool pruning_enabled = collective_enabled || (pool && !pool->ids().empty()) ||
+      (center && center->options.node_budget != 0);
   if (collective_enabled) {
     const auto assessed = assess_q34_family_pool(filter->pool, x_id, kmax,
                                                filter->options, filter->workspace);
@@ -192,7 +202,7 @@ Q34CoverSeedWork run_seed(Q34EdgeCoverPtr cover, std::size_t x_id,
     q3_active = !assessed.q3_rejected;
     q4_active = kmax >= 3 && !assessed.q4_rejected;
     if (!q3_active && !q4_active) return result;
-  } else if (pruning_enabled) {
+  } else if (pool && !pool->ids().empty()) {
     counter_add(pruning->seed_queries);
     const auto certificate = Q34FamilyCertificate::make(a, b, x);
     if (!certificate) throw std::logic_error("mhgp8 owned acute seed lacks a family certificate");
@@ -225,6 +235,17 @@ Q34CoverSeedWork run_seed(Q34EdgeCoverPtr cover, std::size_t x_id,
     if (q3_active && q4_active) counter_add(pruning->both_survivors);
     else if (q3_active) counter_add(pruning->q3_only_survivors);
     else counter_add(pruning->q4_only_survivors);
+  }
+
+  if (q4_active && center && center->options.node_budget != 0) {
+    if (!center->map) center->map = Q4CenterMap::make(filter->pool, kmax, center->options);
+    const bool rejected = center->map->reject_seed(x_id);
+    center->query_peak = static_cast<u64>(center->map->last_query_peak_bytes());
+    if (rejected) {
+      q4_active = false;
+      if (q3_active) counter_add(center->q3_only);
+      else { counter_add(center->both_rejected); return result; }
+    }
   }
 
   std::vector<std::size_t> q3_shell, events, constant_shell;
@@ -491,6 +512,56 @@ Q34CollectiveEdgeWork run_q34_collective_edge_candidates(Q34WitnessPoolPtr pool,
     result.peak_live_buffer_bytes = std::max(result.peak_live_buffer_bytes, live);
     return covered;
   });
+  return result;
+}
+
+Q34MappedSeedWork run_q34_mapped_seed_candidates(Q34WitnessPoolPtr pool,
+    std::size_t x_id, std::size_t kmax, Q34PoolOptions options,
+    Q4CenterMapOptions map_options, const Q34SeedConsumer& consumer) {
+  if (!pool) throw std::invalid_argument("mhgp8 mapped seed requires immutable pool");
+  validate_pool_options(options);
+  validate_q4_center_map_options(map_options);
+  Q34MappedSeedWork result{};
+  Q34PoolWorkspace workspace;
+  std::unique_ptr<Q4CenterMap> map;
+  PoolFilterContext filter{pool, options, workspace, result.collective.filter};
+  CenterFilterContext center{map_options, map, result.q3_only_after_map, result.both_rejected_by_map};
+  result.collective.covered = run_seed(pool->cover(), x_id, kmax, consumer, nullptr, nullptr, &filter, &center);
+  u64 live = result.collective.covered.peak_buffer_bytes;
+  counter_add(live, static_cast<u64>(workspace.retained_bytes()));
+  result.collective.peak_live_buffer_bytes = live;
+  if (map) { result.map = map->work(); counter_add(live, static_cast<u64>(map->retained_bytes())); }
+  u64 refining = center.query_peak;
+  counter_add(refining, static_cast<u64>(workspace.retained_bytes()));
+  result.peak_live_buffer_bytes = std::max(live, refining);
+  return result;
+}
+
+Q34MappedEdgeWork run_q34_mapped_edge_candidates(Q34WitnessPoolPtr pool,
+    std::size_t kmax, Q34PoolOptions options, Q4CenterMapOptions map_options,
+    const Q34SeedConsumer& consumer) {
+  if (!pool) throw std::invalid_argument("mhgp8 mapped edge requires immutable pool");
+  validate_pool_options(options);
+  validate_q4_center_map_options(map_options);
+  Q34MappedEdgeWork result{};
+  Q34PoolWorkspace workspace;
+  std::unique_ptr<Q4CenterMap> map;
+  result.collective.edge = run_edge(pool->cover(), kmax, consumer, [&](std::size_t id) {
+    Q34PoolWork work{};
+    PoolFilterContext filter{pool, options, workspace, work};
+    CenterFilterContext center{map_options, map, result.q3_only_after_map, result.both_rejected_by_map};
+    const auto covered = run_seed(pool->cover(), id, kmax, consumer, nullptr, nullptr, &filter, &center);
+    merge(result.collective.filter, work);
+    u64 live = covered.peak_buffer_bytes;
+    counter_add(live, static_cast<u64>(workspace.retained_bytes()));
+    result.collective.peak_live_buffer_bytes = std::max(result.collective.peak_live_buffer_bytes, live);
+    if (map) counter_add(live, static_cast<u64>(map->retained_bytes()));
+    u64 refining = center.query_peak;
+    counter_add(refining, static_cast<u64>(workspace.retained_bytes()));
+    result.peak_live_buffer_bytes = std::max(result.peak_live_buffer_bytes, std::max(live, refining));
+    return covered;
+  });
+  if (map) result.map = map->work();
   return result;
 }
 

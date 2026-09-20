@@ -1,0 +1,22 @@
+{
+  "kind": "line_miss_cached_as_outside_link",
+  "command": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "/workspaces/E-HGP/build/v8_q4_center_map_20260920/CMakeFiles/mhgp8_q4_center_map_gate.dir/tests/q4_center_map_gate.cpp.o",
+    "/tmp/mhgp8_q4_center_map_mutants_pj5xfexk/line_miss_cached_as_outside.o",
+    "/workspaces/E-HGP/build/v8_q4_center_map_20260920/libmhgp8_p0.a",
+    "-pthread",
+    "-o",
+    "/tmp/mhgp8_q4_center_map_mutants_pj5xfexk/line_miss_cached_as_outside"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T19:20:44.099697+00:00",
+  "expected_exit_code": 0,
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "stdout_base64": "",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-20T19:20:44.169463+00:00"
+}

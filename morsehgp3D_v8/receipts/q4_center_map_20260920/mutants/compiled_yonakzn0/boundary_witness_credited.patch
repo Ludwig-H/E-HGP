@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q4_center_map.cpp
++++ mutated/q4_center_map.cpp
+@@ -227,7 +227,7 @@
+     for (const auto witness:node.pending) {
+       counter_add(work.witness_tests);
+       const auto [low,high]=bounds(forms[witness],node.cell);
+-      if (high<0) { ++node.credit; counter_add(work.inside_credits); }
++      if (high<=0) { ++node.credit; counter_add(work.inside_credits); }
+       else if (low>=0) counter_add(work.outside_witnesses);
+       else node.pending[retained++]=witness;
+       if (node.credit>=kmax-2) {

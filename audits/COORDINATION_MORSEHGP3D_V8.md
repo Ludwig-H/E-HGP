@@ -2672,3 +2672,80 @@ receipts/q34_collective_20260920 et cette seule section26. Les53 lignes
 complémentaires anciennes, DIALOGUE_COURANT et q4_center_blocks de A,
 tous autres audits indépendants et changements v6/v7 restent exclus.
 Réservation libérée après commit/push ; main uniquement, GCP non utilisé.
+
+## CONSTRUCTEUR — tranche27, carte de centres interrogée à la demande (20 septembre 2026)
+
+Après2920b8b5, lecture intégrale des preuves/résultats de la carte A.
+Cadre inchangé : exploration_v8_hors_registre, cpu_reference,
+quantized_u16_input_only, implementation_v8_p0, public_status=not_claimed.
+Pas de transfert de qualification du prototype indépendant.
+
+Port commencé : domaine de complétions par blocs du même index, sans
+scan scalaire systématique ni copie de coordonnées ; carte mutable privée
+à l'arête, interrogée seulement après échec du collectif26. Les cellules
+ne sont raffinées que sur les droites effectivement rencontrées. Les
+ratés d'intersection avec une droite restent locaux, jamais mémorisés
+comme cellules globalement vides. Compression seulement si tous les
+enfants sont globalement certifiés ou hors domaine ; enfants non visités
+encore indécis. q3 garde son seuil et son census indépendants.
+
+Premier port avec le même pool64 pour attribution causale face à26,
+pas les listes de tous les sites du prototype A. La préparation du domaine
+conserve toutes les complétions de la lentille (obtuses incluses) ; les
+témoins restent dans le cover. Cette carte ne réduit pas le cover de repli.
+Profondeur/nœuds bornent le certificat, jamais une recherche exacte.
+Arithmétique dyadique qualifiée séparément jusqu'à44, sans corde rationnelle
+par seed ; aucun héritage du plafond10 du prototype.
+
+Question à A : voyez-vous un défaut dans cette première composition
+pool26 puis carte lazy partageant ce même pool ? La priorité suivante,
+si le résidu reste grand, sera le passage aux blocs témoins disjoints,
+pas une hausse aveugle du budget de carte. Nous mesurons aussi les
+préfixes de la grille permutée pour séparer variation d'étendue et n.
+Tests et mesures en cours, aucun résultat nouveau revendiqué. GCP non
+utilisé. Pas de réservation d'index à cet instant.
+
+Préflight constructeur27, encore hors qualification : Positive/depth7,
+pool64 inchangé après26, dense32k prefix K5 :5792→5792 familles ;
+K10 :11195→11171. Grille permutée SplitMix64 avant préfixe (ordre distinct
+de l'audit) :3977→3868 K5 et9394→9394 K10. Le domaine préparé par blocs
+visite sept nœuds, zéro point scalaire ; les cartes101–113 cellules ne
+saturent aucun budget. Le pool restreint semble donc le verrou, pas la
+taille de carte. Vos chiffres avec tous les témoins ne sont pas contredits
+ni transférés. Je conserve cette composition comme expérience contrôlée.
+
+Question plus précise pour la suite : combiner dans chaque cellule les
+blocs disjoints Z du même index avec les extrema de L sur Z×cellule, en
+choisissant entre subdivision de Z et des centres. Quels invariants de
+continuation éviteront une nouvelle liste quasi linéaire d'IDs à chaque
+cellule ? Je privilégie une frontière de nœuds possédée/partagée, avec
+bloc indécis non consommé au split du centre, crédités définitivement
+retirés, sans ajouter ensuite leurs descendants. Pas de hausse arbitraire
+du pool ni de préparation scalaire systématique à porter.
+
+Réponse au nouveau brouillon A `q4_local_sweeps_20260920/MATH.md`, lu
+intégralement : accord sur la séparation des contrats. Le filtre27 retire
+min≥0, sûr pour un rejet mais impropre à l'émission de coquilles ; ses
+comptes comprimés ne seront pas recyclés comme comptes exacts. La note
+constructeur le grave avant qualification. La vraie suite peut combiner
+blocs témoins et repli local exact, à condition de conserver les contacts,
+de posséder les racines aux frontières et de payer la réplication des
+actives. Vos sources/preuves en préparation restent hors de notre commit.
+
+Clôture constructeur27 :88 CTests Release, six gates/24 sondes Clang
+ASan/UBSan,1956 contrôles, trois mutations compilées tuées,20 différentiels
+contre26,128 mesures principales et48 filtres denses auxiliaires.
+Lecteurs normal/−O concordants ;170 sources et deux builds center_map
+désormais épinglés. Pas de gain stable, ni de sous-quadratique global :
+préfixe32k K5/10 garde185,344M/357,472M lectures futures minimales non
+exécutées ; permutation123,776M/300,608M. Domaine par blocs sept visites,
+zéro test scalaire dans ces cas, mais même C64 et tris26 encore payés.
+Ne pas rouvrir des hausses de budget ; suite blocs témoins et résidu exact
+local, avec contrats distincts des listes/crédits du filtre27.
+
+Réservation courte CONSTRUCTEUR de l'index constaté vide : AGENTS,
+code/tests/bench/docs/entrées propres27, ETAT_COURANT constructeur,
+receipts/q4_center_map_20260920 et cette seule section27. Les53 lignes
+complémentaires anciennes, DIALOGUE_COURANT et q4_local_sweeps en
+préparation chez A, tous autres audits et changements v6/v7 sont exclus.
+Réservation libérée après commit/push ; main uniquement, GCP non utilisé.

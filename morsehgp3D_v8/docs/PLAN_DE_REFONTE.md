@@ -47,6 +47,20 @@ complétions inclut les faces obtuses et ne restreint pas les témoins du
 census. Mesurer préparation, fragmentation, UNKNOWN et coût aval total.
 Le modèle indépendant A reste une proposition, pas un moteur qualifié.
 
+Aprèsddaafdc0/A2920b8b5, la [carte partagée27](Q4_CARTE_CENTRES_PARTAGEE_20260920.md)
+est qualifiée, mais sa composition après26 avec le même C64 ajoute trop
+peu de rejets. Le domaine positif se prépare bien par blocs ; le scan
+du résidu, lui, n'est pas réduit assez fortement. Aucun gain stable,
+aucune borne sous-quadratique ; ne pas augmenter simplement profondeur
+ou pool. Prochaine priorité : combiner blocs témoins et balayages exacts
+locaux du résidu. Partition de tous les témoins en intérieurs certains,
+extérieurs stricts et actives, contacts conservés ; comptes exacts non
+saturés, IDs disjoints et frontières possédées. Les listes du filtre27
+retirant min≥0 et ses crédits comprimés ne satisfont pas ce contrat.
+Payer préparation, réplication des actives, requêtes, tri et coquilles,
+avec étude8k/16k/32k du total. Les propositions de A restent des objets
+d'audit jusqu'au port et à leurs propres preuves constructeur.
+
 Suivi du 14 septembre : le [raccord direct front → census q2](P0_FRONT_ET_CENSUS_Q2.md)
 est implémenté. Il retire factories, copies et arbres B par rectangle,
 sans filtre axial obligatoire. Il reste à réduire le coût du front et

@@ -1,0 +1,23 @@
+{
+  "scope": "tranche27_publication_checks_not_geometric_qualification",
+  "public_status": "not_claimed",
+  "gcp_used": false,
+  "checks": [
+    {
+      "command": ["python3", "tools/check_docs.py"],
+      "exit_code": 0,
+      "stdout": "Validated 615 active Markdown files.\n"
+    },
+    {
+      "command": ["python3", "tools/check_implementation_status.py"],
+      "exit_code": 0,
+      "stdout": "Validated 20 implementation phases and their gates.\n"
+    },
+    {
+      "command": ["git", "diff", "--cached", "--check"],
+      "exit_code": 2,
+      "stdout": "morsehgp3D_v8/receipts/q4_center_map_20260920/mutants/run_default_differential.py:210: new blank line at EOF.\n",
+      "disposition": "Preserved frozen auxiliary helper byte-for-byte; one trailing empty line, not a qualification failure."
+    }
+  ]
+}

@@ -10,6 +10,42 @@ qualification de son propre code.
 
 ## À reprendre maintenant
 
+La tranche27 livre une [carte q4 partagée à la demande](docs/Q4_CARTE_CENTRES_PARTAGEE_20260920.md)
+et un domaine positif construit par blocs du même index. L'entrée
+`run_q34_mapped_edge_candidates` garde le même pool que26 et ne crée la
+carte qu'après son premier échec q4. Requêtes de droites locales, états
+globaux profonds/hors domaine distincts ; q3 et repli exact indépendants.
+Le budget borne seulement le certificat, jamais les sorties.
+
+Qualification close :88 CTests Release, six gates/24 sondes Clang
+ASan/UBSan,1956 contrôles nouveaux, trois mutants compilés tués,
+20 différentiels contre26,128 mesures principales et48 filtres denses
+auxiliaires. Lectures normal/−O concordantes. Les170 sources et builds
+q4_center_map/q4_center_map_sanitize du20260920 sont désormais épinglés.
+Lire les [reçus propres](receipts/q4_center_map_20260920/README.md).
+
+**Le résidu reste le problème principal.** Positive7 ajoute peu de rejets
+avec C64 : dense32k préfixe185,344M/357,472M lectures minimales futures
+K5/10 ; grille permutée123,776M/300,608M. Repli dense non exécuté,
+pas de gain stable ni de borne sous-quadratique. Le domaine positif ne
+paie que sept visites de blocs et zéro test scalaire sur ces cas.
+L'audit A2920b8b5 utilisait tous les témoins, pas ce pool ; ses gains
+ne sont ni contredits ni hérités. Défaut historique inchangé.
+
+Suite : blocs témoins et balayages exacts locaux du résidu, en dialogue
+avec A. **Ne pas recycler les listes27** : min≥0 peut être retiré du
+filtre mais min=0 doit rester actif pour les coquilles ; un compte
+parent comprimé n'est pas exact. Il faut une partition disjointe exacte
+I(max<0)/E(min>0)/actives, des frontières de cellules possédées, et payer
+la duplication des actives, les tris et la collecte. Éviter un scan
+scalaire complet par cellule ou un arrangement exhaustif. Ne pas simplement
+augmenter les budgets ou re-paralléliser le carré. La carte actuelle est
+mutable exclusive ; sa distribution GPU reste à concevoir et qualifier.
+WSPD q3/q4 global, catalogue, intérieurs après regroupement, FULL et
+contrats G4 restent ouverts ; GCP non utilisé.
+
+### Tranche26 précédente close àddaafdc0
+
 La tranche26 porte le [minimum collectif du pool et une corde resserrée](docs/Q3_Q4_CERTIFICAT_COLLECTIF_20260920.md).
 Les quatre options sont comparées sur le même pool spatial ; le défaut
 historique25 reste intact. Le minimum strict traite sorties, groupe,

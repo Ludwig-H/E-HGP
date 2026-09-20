@@ -1,0 +1,17 @@
+{
+  "kind": "obtuse_completion_omitted_oracle",
+  "command": [
+    "/tmp/mhgp8_q4_center_map_mutants_pj5xfexk/obtuse_completion_omitted",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T19:20:47.104261+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "q4 center map gate: positive domain changed owner or closed-lens population\n",
+  "stdout_base64": "",
+  "stderr_base64": "cTQgY2VudGVyIG1hcCBnYXRlOiBwb3NpdGl2ZSBkb21haW4gY2hhbmdlZCBvd25lciBvciBjbG9zZWQtbGVucyBwb3B1bGF0aW9uCg==",
+  "finished_utc": "2026-09-20T19:20:47.106836+00:00"
+}

@@ -293,6 +293,23 @@ Références : [audit WSPD](../audits/WSPD_Q2_Q3_Q4.md).
 | Réutiliser des marques simplement bien formées | Elles peuvent désigner une autre histoire/composante vivante | Appartenance certifiée avant réemploi |
 | Supprimer les contrôles pour tenir le temps | Transforme un gain supposé en perte du contrat | Certifier une fois, réutiliser la preuve compacte |
 
+## Carte q4 partagée27 : résultat modeste et invariants à ne pas perdre
+
+- Réinterroger le même pool après son minimum collectif ne fournit pas
+  de nouveaux témoins. La carte Positive enlève des centres impossibles,
+  mais C64 laisse le grand résidu ; pas de gain stable à promouvoir.
+- Une cellule manquée par une droite n'est pas globalement hors domaine.
+  La mémoriser vide fait perdre les familles suivantes ; mutant causal tué.
+- Retirer min≥0 est sûr pour ce filtre, pas pour un census local exact :
+  les contacts min=0 peuvent appartenir à une coquille. Un parent comprimé
+  transmet un certificat de rejet, pas une population exacte réutilisable.
+- Des cellules jamais interrogées peuvent avoir des listes héritées
+  allouées. Compter copies et capacités, pas seulement tests de témoins.
+- Sept visites de blocs pour préparer un domaine32k ne bornent ni les
+  familles, ni leurs scans de repli, ni la somme sur toutes les arêtes.
+
+Voir les [résultats et la suite](Q4_CARTE_CENTRES_PARTAGEE_20260920.md).
+
 Références : [implémentation](../audits/IMPLEMENTATION_PARALLELISATION.md)
 et [mesures](../audits/CONTRATS_ET_MESURES.md).
 

@@ -59,6 +59,25 @@ P0 global. Prochaine priorité : carte commune entre familles, pas
 micro-variantes de pool ni généralisation prématurée au front WSPD.
 Pas de nouveau parallèle/GPU, de FULL ou de contrat G4.
 
+Tranche27 après2920b8b5 : [carte partagée de centres](../docs/Q4_CARTE_CENTRES_PARTAGEE_20260920.md)
+et domaine de complétions préparé par blocs. Contrelecture mathématique
+distincte du port : domaine incluant les obtus, témoins hors lentille
+conservés, ratés de droite locaux, héritage sans double compte par branche,
+UNKNOWN vers repli exact. Les mutations de ces trois premières propriétés
+sont tuées causalement ; la compression profonde et les pannes mémoire
+sont positivement exercées, pas la compression entièrement hors domaine.
+88 CTests Release, six gates/24 sondes Clang ASan/UBSan,1956 contrôles,
+20 différentiels contre26 et128 mesures passent. Les48 filtres denses
+auxiliaires conservent leurs preuves propres ; lecteurs normal/−O concordants.
+Sources170 et builds q4_center_map épinglés. Le résultat est modeste :
+le même C64 ajoute peu de rejets, aucun gain stable ni borne globale ;
+à32k préfixe,185,344M/357,472M lectures minimales futures K5/10, non
+exécutées. Priorité : témoins par blocs et résidu exact local, sans
+transformer les listes de filtre ou crédits comprimés en census exact.
+Les [preuves constructeur](../receipts/q4_center_map_20260920/README.md)
+restent distinctes de l'audit A2920b8b5 et de ses travaux en préparation.
+Pas de FULL, GPU/G4 ou GCP utilisé.
+
 ## Historique : vingt-et-unième tranche publiée à3e94c868
 
 Vingt-et-unième tranche P0 close,

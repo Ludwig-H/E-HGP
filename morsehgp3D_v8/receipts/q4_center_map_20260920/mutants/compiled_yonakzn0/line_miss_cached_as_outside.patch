@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q4_center_map.cpp
++++ mutated/q4_center_map.cpp
+@@ -270,7 +270,7 @@
+     if (nodes[id].state==State::Deep || nodes[id].state==State::Outside) return true;
+     counter_add(work.line_tests);
+     const auto [low,high]=bounds(line,nodes[id].cell);
+-    if (low>0 || high<0) { counter_add(work.line_skips); return true; }
++    if (low>0 || high<0) { counter_add(work.line_skips); nodes[id].state=State::Outside; return true; }
+     // A miss above is LOCAL. No global node state has been modified.
+     evaluate(id);
+     if (nodes[id].state==State::Deep || nodes[id].state==State::Outside) return true;

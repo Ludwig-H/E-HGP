@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q4_positive_domain.cpp
++++ mutated/q4_positive_domain.cpp
+@@ -102,7 +102,7 @@
+         const auto point = points[id];
+         const auto to_a = distance_squared(point, a_);
+         const auto to_b = distance_squared(point, b_);
+-        if (to_a <= diameter_squared_ && to_b <= diameter_squared_)
++        if (to_a <= diameter_squared_ && to_b <= diameter_squared_ && to_a+to_b>diameter_squared_)
+           admit(singleton_box(point), 1);
+         else
+           reject(1);

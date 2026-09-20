@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Linux-c++"
+	tests="88"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname="codespaces-0bcb78"
+	time="131"
+	timestamp="2026-09-20T19:20:05"
+	>
+	<testcase name="mhgp8_q2_node_pool_gate" classname="mhgp8_q2_node_pool_gate" time="0.0057391" status="run">
+		<properties/>
+		<system-out>mhgp8_q2_node_pool_gate passed checks=55984 plans=2059 pairs=8190 oracle_corners=81160 rejected=3521 candidates=4669 empty_plans=0 saturated=2045 jobs=6177 jobs_pairs=4669 factor_sites=8166 fixed_rescans=236 growing_rescans=1400 model_mutants=3 invalid_inputs=7
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_terminal_pool_gate" classname="mhgp8_q2_terminal_pool_gate" time="0.307809" status="run">
+		<properties/>
+		<system-out>mhgp8_q2_terminal_pool_gate passed checks=1932787 clouds=22 runs=3088 oracle_pairs=5847 oracle_sites=352725 supports=183584 extra_shells=21796 max_shell=30 selected_rectangles=71489 filtered_pairs=71390 residual_pairs=126237 factor_sites=200732 bands=15441 selected64=56 default_comparisons=88 passthrough_rectangles=62253 unchanged_census=1856 reentrant_calls=1 joint_runs=354 pairwise_runs=4 invalid_inputs=6 callback_failures=3 model_mutants=5
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_front_jobs_gate" classname="mhgp8_wspd_front_jobs_gate" time="0.67982" status="run">
+		<properties/>
+		<system-out>mhgp8_wspd_front_jobs_gate passed checks=1107985 clouds=12 oracle_point_tests=44640 mono_runs=2521 plans=14761 ordered_replays=44283 job_runs=498555 zero_job_plans=1035 all_terminal_plans=5266 terminal_jobs=321111 pending_jobs=177444 sparse_masks=864 filtered_cuts=171 mixed_lane_cuts=9 rejected_lane_pairs=44382 residual_lane_pairs=167124 partial_lane_rectangles=1285 nonsingleton_rectangles=10719 reentrant_runs=2 callback_failures=2 invalid_inputs=16 model_mutants=55 widened_plans=1440 extended_products=43863 limit_bites=75 inheriting_plans=3240 inherited_credits=20884 inherited_rejections=402 witness_carrying_jobs=4356
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_parallel_gate" classname="mhgp8_wspd_q2_parallel_gate" time="0.0935278" status="run">
+		<properties/>
+		<system-out>{"schema":"mhgp8_wspd_q2_parallel_gate_v1","status":"passed","scope":"bounded_cpu_q2_jobs_not_full","public_status":"not_claimed","checks":184537,"clouds":8,"oracle_pairs":9080,"oracle_sites":1106458,"mono_runs":152,"parallel_runs":438,"supports":45161,"max_shell":30,"empty_job_runs":36,"excess_worker_runs":100,"multi_worker_runs":232,"pool_selected":67,"pool_filtered":50415,"pool_passthrough":38,"selected64":12,"filtered64":50364,"joint_runs":24,"pairwise_runs":12,"sibling_tests":1062,"structural_steps":229661,"callback_failures":1,"reentrant_runs":1,"ownership_resets":1,"joined_checks":5,"launch_failures":1,"invalid_inputs":24,"mutants":6}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_front_dispatch_gate" classname="mhgp8_wspd_front_dispatch_gate" time="0.0488386" status="run">
+		<properties/>
+		<system-out>{"schema":"mhgp8_wspd_front_dispatch_gate_v1","status":"passed","public_status":"not_claimed","checks":60146,"oracle_sites":43890,"reference_runs":298,"dispatch_runs":296,"donations":1531,"full_refusals":3577,"reduced_rectangles":165,"masked_cases":5,"zero_seed_cases":32,"ownership_cases":1,"waits":54,"cross_worker_transfers":1,"callback_failures":1,"launch_failures":1,"invalid_inputs":4,"widened_cases":72,"extended_products":4379,"inheriting_cases":72,"inherited_credits":1586,"seed_witness_ranks":94,"donated_witness_ranks":197,"inherited_transfers":1}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_dynamic_gate" classname="mhgp8_wspd_q2_dynamic_gate" time="0.0559313" status="run">
+		<properties/>
+		<system-out>{"schema":"mhgp8_wspd_q2_dynamic_gate_v1","status":"passed","public_status":"not_claimed","checks":3270,"clouds":8,"oracle_pairs":9073,"oracle_sites":1106432,"mono_runs":68,"coarse_runs":74,"donate_runs":142,"default_runs":8,"supports":24337,"max_shell":30,"donations":1499,"full_refusals":3960,"empty_runs":27,"selected64":11,"filtered64":46260,"passthrough":15,"joint_runs":45,"pairwise_runs":21,"callback_failures":1,"reentrant_runs":1,"index_resets":1,"invalid_inputs":8,"mutants":4}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_census_resume_gate" classname="mhgp8_q2_census_resume_gate" time="0.00918684" status="run">
+		<properties/>
+		<system-out>{"schema":"mhgp8_q2_census_resume_gate_v1","status":"pass","scope":"shared_anchor_continuations_not_full","checks":254668,"fixtures":12,"roots":12,"oracle_pairs":590,"oracle_sites":37188,"references":195,"resumptions":768,"advances":24644,"supports":1470,"max_shell":30,"credit_pauses":11049,"split_credit_pauses":2184,"phase_pauses":76,"emission_pauses":452,"deferred_child_pauses":1694,"partial_range_pauses":0,"two_engines":1,"thread_transfers":1,"owner_resets":1,"callback_failures":1,"reentrant_calls":2,"overlap_rejections":1,"invalid_inputs":26,"mutants":3}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_census_detach_gate" classname="mhgp8_q2_census_detach_gate" time="0.0100024" status="run">
+		<properties/>
+		<system-out>{"schema":"mhgp8_q2_census_detach_gate_v1","status":"pass","scope":"owned_shared_anchor_detach_not_full","checks":68508,"fixtures":6,"runs":302,"oracle_pairs":1458,"oracle_sites":85416,"supports":732,"max_shell":30,"detaches":1679,"imported_credit":149,"imported_phase":150,"emit_donors":139,"recursive_detaches":1148,"no_child":2245,"destroyed_parents":861,"owner_resets":1,"parallel_pairs":1,"distinct_threads":2,"allocation_failures":9,"allocation_successes":3,"injected_allocations":9,"callback_failures":1,"reentrant_rejections":8,"invalid_inputs":12,"mutants":3}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_census_parallel_gate" classname="mhgp8_q2_census_parallel_gate" time="0.20918" status="run">
+		<properties/>
+		<system-out>{"status":"passed","scope":"small_q2_anchor_parallel_not_full","checks":82100,"fixtures":8,"references":128,"resumptions":128,"parallel_calls":2304,"supports":3456,"donations":3877,"multi_slot_outputs":48,"multi_active_runs":129,"max_shell":30,"callback_failures":4,"invalid_inputs":14,"partial_launch_failure_injected":false}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_cooperative_gate" classname="mhgp8_wspd_q2_cooperative_gate" time="0.204752" status="run">
+		<properties/>
+		<system-out>{"schema":"mhgp8_wspd_q2_cooperative_gate_v1","status":"passed","public_status":"not_claimed","checks":54983,"clouds":8,"oracle_pairs":5744,"oracle_sites":396286,"coarse_runs":91,"cooperative_runs":235,"default_runs":8,"supports":50438,"max_shell":30,"continued_anchors":35147,"donations":862,"donations_after_seeds_claimed":817,"credit_pauses":277687,"phase_pauses":60691,"empty_runs":20,"small_only_runs":96,"pool_blocks_continuations":48,"selected64":9,"filtered64":4980,"passthrough":1278,"multiple_callback_threads":2,"callback_threads_joined":2,"callback_failures":1,"reentrant_runs":1,"index_resets":1,"invalid_inputs":14,"mutants":5}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_ranges_gate" classname="mhgp8_wspd_q2_ranges_gate" time="0.262765" status="run">
+		<properties/>
+		<system-out>{"schema":"mhgp8_wspd_q2_ranges_gate_v1","status":"passed","public_status":"not_claimed","checks":138582,"clouds":10,"oracle_pairs":10920,"oracle_sites":778110,"coarse_runs":135,"range_runs":415,"default_runs":10,"supports":126065,"max_shell":30,"donations":1202,"donations_after_seeds_claimed":815,"pool_donations":104,"passthrough_donations":445,"wide_pool_cases":12,"empty_runs":31,"surplus_workers":40,"selected64":26,"filtered64":14328,"passthrough":4362,"multiple_callback_threads":2,"callback_threads_joined":2,"callback_failures":1,"reentrant_runs":1,"index_resets":1,"invalid_inputs":14,"mutants":7}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_batched_gate" classname="mhgp8_wspd_q2_batched_gate" time="0.274151" status="run">
+		<properties/>
+		<system-out>{"schema":"mhgp8_wspd_q2_batched_gate_v1","status":"passed","public_status":"not_claimed","checks":145410,"clouds":13,"oracle_pairs":10958,"oracle_sites":778276,"coarse_runs":178,"batch_runs":595,"default_runs":13,"supports":124145,"max_shell":30,"compact_tasks":177945,"inherited_credit":9830,"phase2_tasks":4482,"siblings_due":40054,"empty_runs":31,"surplus_requests":59,"selected64":26,"filtered64":14328,"passthrough":4267,"multiple_callback_threads":2,"callback_threads_joined":3,"callback_failures":1,"reentrant_runs":1,"index_resets":1,"invalid_inputs":14,"mutants":7}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_proposals_gate" classname="mhgp8_wspd_q2_proposals_gate" time="10.5292" status="run">
+		<properties/>
+		<system-out>{"schema":"mhgp8_wspd_q2_proposals_gate_v1","status":"passed","public_status":"not_claimed","checks":1253806,"windows":35280,"clamped_left":7110,"clamped_right":6080,"whole_permutation_windows":4235,"clouds":15,"replay_runs":1575,"replay_products":1469453,"replay_rectangles":494878,"extended_products":722628,"tangent_extension_sites":184832,"factor_ranks_in_extension":503727,"truncated_windows":9843,"exhausted_extensions":617949,"kth_witness_in_extension":104679,"equal_distance_ties":567188,"limit_skips":152457,"extension_clamped_left":89842,"extension_clamped_right":48352,"truncated_double_windows":1048,"rejections_with_historical_credit":103046,"singleton_tangent_extension_sites":120338,"singleton_kth_in_extension":69327,"named_fixture_checks":8,"historical_constant_checks":6,"mutants":10,"mutant_disagreements":5345,"disagreements_by_mutant":[279,824,509,487,387,633,387,524,570,745],"oracle_pairs":38487,"oracle_sites":2711256,"entry_runs":990,"entry_extended_products":863654,"supports":282656,"max_shell":24...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_front_inheritance_gate" classname="mhgp8_wspd_front_inheritance_gate" time="5.00644" status="run">
+		<properties/>
+		<system-out>{"schema":"mhgp8_wspd_front_inheritance_gate_v1","status":"passed","public_status":"not_claimed","checks":9008,"clouds":15,"replay_runs":1125,"replay_products":1010472,"replay_rectangles":334528,"nonempty_lists":398900,"full_lists":127175,"duplicates":830274,"extension_duplicates":111173,"inherited_rejections":64952,"true_inherited_rejections":16809,"overcounted_rejections":48143,"gained_rejected_mass":21010,"fewer_rejected_products":111,"safety_runs":1125,"safety_pairs":986250,"rejected_pairs_judged":711237,"named_fixture_checks":13,"model_constant_checks":12,"historical_constant_checks":6,"mutants":10,"unsafe_mutants":4,"mutant_disagreements":1334,"mutant_lost_supports":41271,"disagreements_by_mutant":[165,75,165,40,165,165,164,75,165,155],"lost_supports_by_unsafe_mutant":[14768,2348,23911,244],"oracle_pairs":39450,"oracle_sites":2738760,"entry_runs":990,"entry_inherited_credits":1347192,"supports":293788,"max_shell":24,"invalid_inputs":19,"fit_checks":6,"wide_rank_runs":4,"max_duplicate_rank":319}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q4_family_gate" classname="mhgp8_q4_family_gate" time="0.56586" status="run">
+		<properties/>
+		<system-out>{"schema":"mhgp8_q4_family_gate_v1","status":"passed","checks":67354,"clouds":57,"runs":206,"primitive_sites":3153,"root_comparisons":52507,"oracle_sites":55408,"groups":2210,"mixed_groups":49,"decreasing_steps":688,"max_depth":35,"max_shell":30,"max_cross_bits":145,"permutations":42,"invalid_inputs":12,"callback_failures":1,"reentrant_calls":1,"parallel_calls":4,"judge_mutants":5}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_exact_ball_gate" classname="mhgp8_exact_ball_gate" time="0.0547014" status="run">
+		<properties/>
+		<system-out>{"schema":"mhgp8_exact_ball_gate_v1","status":"passed","checks":34460,"cases":1807,"accepted_q2":453,"accepted_q3":232,"accepted_q4":192,"rejected":930,"rank_deficient":67,"boundary_centres":61,"exterior_centres":802,"permutations":496,"powers":12675,"strict_interiors":2082,"shell_sites":3871,"strict_exteriors":6722,"same_ball_across_arities":3,"max_coefficient_bits":95,"max_power_bits":95,"max_naive_radius_bits":160,"translated":9,"judge_mutants":3}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q34_seed_gate" classname="mhgp8_q34_seed_gate" time="0.216648" status="run">
+		<properties/>
+		<system-out>{"schema":"mhgp8_q34_seed_gate_v1","status":"passed","checks":24590,"calls":635,"oracle_completions":2451,"oracle_sites":24351,"candidates":488,"q3":405,"q4":83,"owner_refusals":5,"q3_rejected":150,"q4_without_q3":6,"late_valid":4,"max_shell":30,"canonical_refusals":26,"positive_refusals":569,"depth_refusals":869,"exhaustive_clouds":13,"exhaustive_balls":229,"invalid_inputs":6,"callback_failures":1,"parallel_calls":4,"judge_mutants":3,"unexamined":104,"depth_drop_runs":28,"larger_than_minimal":1}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q34_cover_gate" classname="mhgp8_q34_cover_gate" time="0.0541064" status="run">
+		<properties/>
+		<system-out>{"schema":"mhgp8_q34_cover_gate_v1","status":"passed","checks":11702,"clouds":12,"covers":186,"edge_calls":186,"seed_calls":184,"reference_calls":184,"oracle_completions":1414,"oracle_sites":3742,"candidates":198,"q3":152,"q4":46,"max_shell":30,"cover_boundary":10,"cover_excluded":289,"cover_admitted_nodes":362,"cover_rejected_nodes":227,"cover_split_nodes":403,"reused_covers":37,"q4_without_q3":8,"invalid_root_depth_changed":1,"exhaustive_edges":171,"permutations":3,"invalid_inputs":9,"callback_failures":1,"parallel_calls":4,"judge_mutants":3,"edge_seed_count":178,"edge_pruned_sites":363,"covered_site_reads":1859}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q34_family_pruning_gate" classname="mhgp8_q34_family_pruning_gate" time="0.0396774" status="run">
+		<properties/>
+		<system-out>{"schema":"mhgp8_q34_family_pruning_gate_v1","status":"passed","checks":5176,"primitive_calls":178,"refused":74,"certified_q3":190,"certified_q4":170,"positive_completions":92,"universal_inside_checks":162,"strict_boundary":12,"nonintegral_radius_bounds":32,"max_j_bits":98,"max_product_bits":97,"edge_calls":63,"seed_calls":129,"reference_calls":192,"oracle_completions":985,"oracle_sites":2201,"candidates":106,"q3":71,"q4":35,"max_shell":30,"q3_only_rejections":11,"q4_only_rejections":9,"both_rejections":5,"neither_rejections":92,"saved_site_reads":54,"pool_calls":64,"exhaustive_edges":20,"permutations":169,"invalid_inputs":9,"callback_failures":1,"parallel_calls":4}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q34_collective_gate" classname="mhgp8_q34_collective_gate" time="0.0611756" status="run">
+		<properties/>
+		<system-out>{"schema":"mhgp8_q34_collective_gate_v1","status":"passed","checks":8549,"assessments":349,"collective_queries":81,"universal_shortcuts":32,"collective_gains":2,"tighter_bounds":50,"variance_roundings":52,"wide_variance_numerators":4,"q3_only_rejections":40,"q4_only_rejections":45,"both_rejections":20,"neither_rejections":120,"lower_tangencies":11,"upper_tangencies":8,"equal_mixed_roots":23,"endpoint_dips":24,"initial_saturation_drops":38,"exact_minimum_checks":81,"workspace_reuses":108,"option_calls":348,"zero_budget_calls":92,"jung_universal_pairs":87,"foreign_owner_calls":4,"edge_calls":244,"seed_calls":348,"reference_calls":87,"oracle_completions":408,"oracle_sites":999,"candidates":240,"q3":192,"q4":48,"max_shell":30,"pool_calls":61,"exhaustive_edges":20,"permutations":1,"invalid_inputs":9,"callback_failures":1,"parallel_calls":4}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q4_center_map_gate" classname="mhgp8_q4_center_map_gate" time="0.031995" status="run">
+		<properties/>
+		<system-out>{"schema":"mhgp8_q4_center_map_gate_v1","status":"passed","checks":1956,"domains":14,"domain_sites":36,"empty_domains":1,"obtuse_completions":3,"lens_boundary":21,"outside_lens_inside":8,"admitted_domain_blocks":32,"rejected_domain_blocks":3,"maps":46,"queries":268,"rejected_queries":32,"unknown_queries":236,"requeries":134,"order_trials":16,"positive_presentations":128,"pool_depth_checks":256,"shallow_pool_roots":192,"disk_contacts":88,"line_skips":1697,"witness_tests":1445,"inside_credits":94,"outside_witnesses":302,"outside_cells":419,"deep_cells":94,"splits":516,"compressed_deep":2,"compressed_outside":0,"depth_stops":140,"budget_stops":40,"empty_stops":40,"max_depth":21,"rotations":2,"extreme_calls":4,"map_q3_only":6,"map_both_rejected":4,"bypass_calls":6,"deferred_calls":22,"edge_calls":51,"seed_calls":118,"reference_calls":118,"oracle_completions":684,"oracle_sites":1622,"candidates":126,"q3":88,"q4":38,"max_shell":30,"exhaustive_edges":15,"invalid_inputs":14,"callback_failures":1,"parallel_calls":4,"a...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_joint_gate" classname="mhgp8_q2_joint_gate" time="0.10165" status="run">
+		<properties/>
+		<system-out>mhgp8_q2_joint_gate passed checks=1026250 clouds=18 oracle_pairs=725 oracle_sites=10372 runs=5336 supports=124698 shell_sites=285376 root_products=108008 joint_tasks=111740 splits_a=1674 splits_b=192 joint_tests=3436 joint_credits=90 joint_rejected_pairs=84 joint_accepted_pairs=0 handoffs=109860 handoffs_after_credit=152 handoff_pair_mass=116836 structural_splits=840 phase_switches=0 shared_anchor_runs=1732 default_comparisons=144 invalid_inputs=4 callback_failures=4 model_mutants=5
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_joint_bounds_gate" classname="mhgp8_q2_joint_bounds_gate" time="0.0515443" status="run">
+		<properties/>
+		<system-out>mhgp8_q2_joint_bounds_gate passed checks=12058 cases=3190 oracle_values=211108 dense_values=120366 interior=45 exterior=348 shell=229 mixed=2568 swaps=3190 singleton_reductions=2413 symmetries=48 model_mutants=9 invalid_inputs=9 copies=3 prepared_bytes=96
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_witness_order_gate" classname="mhgp8_q2_witness_order_gate" time="0.0514445" status="run">
+		<properties/>
+		<system-out>mhgp8_q2_witness_order_gate passed checks=436117 clouds=16 oracle_pairs=3612 oracle_sites=235572 runs=1798 supports=48922 shell_sites=138352 structural_splits=186274 deferred_skips=22258 anchor_skips=29722 phase_switches=22078 default_comparisons=256 transformed_clouds=8 invalid_inputs=3 callback_failures=2 model_mutants=5 fixture_global_splits=1638 fixture_complement_splits=1384 fixture_universal_witnesses=12
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_sibling_gate" classname="mhgp8_q2_sibling_gate" time="0.0726905" status="run">
+		<properties/>
+		<system-out>mhgp8_q2_sibling_gate passed checks=485775 clouds=24 oracle_pairs=7442 oracle_sites=429028 runs=1449 supports=64725 proposals=23924 cardinality_skips=17088 bound_tests=6836 rejected_tasks=3417 rejected_pairs=7466 rejected_after_credit=10 transformed_clouds=16 permutations=16 default_comparisons=192 invalid_inputs=3 callback_failures=2 model_mutants=5 fragmentation_bound=2633 fragmentation_disabled_tasks=2261 fragmentation_enabled_tasks=1967
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_census_gate" classname="mhgp8_wspd_q2_census_gate" time="0.0511728" status="run">
+		<properties/>
+		<system-out>mhgp8_wspd_q2_census_gate passed checks=467858 clouds=26 oracle_pairs=1749 oracle_sites=28869 front_reference_runs=631 integrated_runs=1255 supports=46762 interior_sites=72204 shell_sites=125060 front_rejected_pairs=12628 census_rejected_pairs=22562 empty_runs=96 permutations=13 nonidentity_orders=20 query_splits=3178 split_after_credit=60 uniform_credit=1236 uniform_reject=512 root_savings=3434 invalid_inputs=11 callback_exceptions=4 model_mutants=8
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_front_gate" classname="mhgp8_wspd_front_gate" time="1.31165" status="run">
+		<properties/>
+		<system-out>mhgp8_wspd_front_gate passed checks=3325964 clouds=30 spatial_nodes=1476 nonidentity_orders=52 oracle_point_tests=235134 front_runs=4687 rectangles=339657 nonsingleton_rectangles=4798 partial_lane_rectangles=3917 absent_lane_pairs=179043 residual_lane_pairs=486138 q2_support_checks=239520 permutations=15 invalid_inputs=25 model_mutants=7 callback_exceptions=1 witness_searches=669998 witness_descent_steps=3231854 proposed_sites=5622774 widened_runs=1440 extended_products=295792 extended_proposals=2203804 extended_rejections=20876 extension_only_pairs=6352 limit_bites=414 inheriting_runs=1440 inherited_credits=171648 inherited_duplicates=155702 inheritance_only_pairs=72
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_cloud_owner_gate" classname="mhgp8_cloud_owner_gate" time="0.0033777" status="run">
+		<properties/>
+		<system-out>mhgp8_cloud_owner_gate passed checks=7780 clouds=19 range_queries=2404 multi_node_queries=2042 max_range_visits=8 max_range_steps=6 oracle_sites=299 census_runs=24 supports=38 invalid_inputs=89 model_mutants=17 lifetime_checks=2
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_p0_gate" classname="mhgp8_p0_gate" time="0.734463" status="run">
+		<properties/>
+		<system-out>mhgp8_p0_gate passed checks=148587 plans=390 rejections=32 strict_mutants=3 killed_pairs=40763 retained_pairs=9592 credited_blocks=605 noncredit_blocks=1628 leaf_pairs=2750 saturated_tasks=220
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_tube_gate" classname="mhgp8_tube_gate" time="0.426589" status="run">
+		<properties/>
+		<system-out>mhgp8_tube_gate passed checks=108730 small_plans=295 permutations=135 geometric_rejections=28995 retained_pairs=8073 missed_credits=10 mutants=5 fallback_cases=3 large_rails_residual=2916
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_batch_gate" classname="mhgp8_batch_gate" time="0.010118" status="run">
+		<properties/>
+		<system-out>mhgp8_batch_gate passed checks=10872 batches=195 lane_comparisons=585 shared_preparations=27 saturated_batches=81 fallback_batches=5 rejections=3
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_axis_q2_gate" classname="mhgp8_axis_q2_gate" time="0.714674" status="run">
+		<properties/>
+		<system-out>mhgp8_axis_q2_gate passed checks=1495478 small_plans=158 exact_census_pairs=58556 rejected_pairs=14752 retained_pairs=43804 permutations=72 model_mutants=5 conservative_cases=1 invalid_inputs=5 moved_rejections=3 large_grid_points=56000 large_grid_candidates=11067600
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_axis_additive_gate" classname="mhgp8_axis_additive_gate" time="1.05322" status="run">
+		<properties/>
+		<system-out>mhgp8_axis_additive_gate passed checks=2947081 small_cases=81 checked_plans=650 census_pairs=29946 additive_prunes=572 intersection_prunes=1894 axis_queries=5569431 restriction_queries=55856 restriction_copies=15916 rejected_pairs=81918 retained_pairs=157988 core_partial=3 core_saturated=5 model_mutants=7 rejections=15 ownership_cases=2 large_points=56000 large_candidates=6759210
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_plan_assignment_gate" classname="mhgp8_plan_assignment_gate" time="0.0030799" status="run">
+		<properties/>
+		<system-out>mhgp8_plan_assignment_gate passed checks=1110 plan_allocation_failures=5 batch_allocation_failures=15 physical_comparisons=70 successful_assignments=2 self_operations=4 move_operations=4 moved_rejections=24
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_census_gate" classname="mhgp8_q2_census_gate" time="0.0527385" status="run">
+		<properties/>
+		<system-out>mhgp8_q2_census_gate passed checks=186162 cases=277 runs=557 oracle_pairs=8376 oracle_sites=259780 prefilter_rejections=1501 census_rejections=4970 accepted=8828 shell_sites=51896 interior_sites=15248 uniform_credit=276 uniform_accept=144 uniform_reject=76 query_splits=5472 witness_splits=116536 split_after_credit=130 cursor_reuses=10944 cursor_advances=113941 deep_indices=3 root_savings=75 permutations=72 model_mutants=10 rejections=10
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_prepared_bounds_gate" classname="mhgp8_q2_prepared_bounds_gate" time="0.081329" status="run">
+		<properties/>
+		<system-out>mhgp8_q2_prepared_bounds_gate passed checks=61803 cases=1424 oracle_values=243167 dense_values=57675 interior=39 exterior=226 shell=158 mixed=1001 symmetries=48 model_mutants=8 invalid_inputs=6 copies=3 prepared_bytes=48
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_batched_receipts_normal_gate" classname="mhgp8_wspd_q2_batched_receipts_normal_gate" time="2.19963" status="run">
+		<properties/>
+		<system-out>{"completed_captures": 24, "credited_captures": 12, "full_contract_qualified": false, "invalid_cli": 24, "max_as_sum_models": 12, "paired_workers": 12, "pool_captures": 2, "real_captures": 24, "rejected_mutants": 3556, "status": "passed", "unit_contract_mutants": 12}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_batched_receipts_optimized_gate" classname="mhgp8_wspd_q2_batched_receipts_optimized_gate" time="2.16086" status="run">
+		<properties/>
+		<system-out>{"completed_captures": 24, "credited_captures": 12, "full_contract_qualified": false, "invalid_cli": 24, "max_as_sum_models": 12, "paired_workers": 12, "pool_captures": 2, "real_captures": 24, "rejected_mutants": 3556, "status": "passed", "unit_contract_mutants": 12}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_proposals_receipts_normal_gate" classname="mhgp8_wspd_q2_proposals_receipts_normal_gate" time="4.13548" status="run">
+		<properties/>
+		<system-out>{"comparison_groups": 24, "extended_captures": 96, "full_contract_qualified": false, "invalid_cli": 27, "pair_mutants": 10, "pool_captures": 10, "real_captures": 120, "rejected_mutants": 7607, "rejecting_captures": 72, "status": "passed", "unit_contract_mutants": 12}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_proposals_receipts_optimized_gate" classname="mhgp8_wspd_q2_proposals_receipts_optimized_gate" time="4.13717" status="run">
+		<properties/>
+		<system-out>{"comparison_groups": 24, "extended_captures": 96, "full_contract_qualified": false, "invalid_cli": 27, "pair_mutants": 10, "pool_captures": 10, "real_captures": 120, "rejected_mutants": 7607, "rejecting_captures": 72, "status": "passed", "unit_contract_mutants": 12}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_inheritance_receipts_normal_gate" classname="mhgp8_wspd_q2_inheritance_receipts_normal_gate" time="6.44508" status="run">
+		<properties/>
+		<system-out>{"comparison_groups": 24, "compensated_labels": 14, "differential_mutants": 10, "extended_captures": 96, "extension_duplicate_captures": 18, "full_contract_qualified": false, "gaining_twin_captures": 22, "generic_floor_mutants": 3, "invalid_cli": 31, "pair_mutants": 15, "pool_captures": 12, "real_captures": 144, "rejected_mutants": 11023, "rejecting_captures": 36, "status": "passed", "unit_contract_mutants": 12}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_inheritance_receipts_optimized_gate" classname="mhgp8_wspd_q2_inheritance_receipts_optimized_gate" time="6.49954" status="run">
+		<properties/>
+		<system-out>{"comparison_groups": 24, "compensated_labels": 14, "differential_mutants": 10, "extended_captures": 96, "extension_duplicate_captures": 18, "full_contract_qualified": false, "gaining_twin_captures": 22, "generic_floor_mutants": 3, "invalid_cli": 31, "pair_mutants": 15, "pool_captures": 12, "real_captures": 144, "rejected_mutants": 11023, "rejecting_captures": 36, "status": "passed", "unit_contract_mutants": 12}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_ranges_receipts_normal_gate" classname="mhgp8_wspd_q2_ranges_receipts_normal_gate" time="2.31327" status="run">
+		<properties/>
+		<system-out>{"full_contract_qualified": false, "invalid_cli": 24, "max_as_sum_models": 15, "paired_workers": 12, "passthrough_captures": 2, "pool_captures": 2, "real_captures": 24, "rejected_mutants": 3723, "shared_captures": 24, "status": "passed", "unit_contract_mutants": 12}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_ranges_receipts_optimized_gate" classname="mhgp8_wspd_q2_ranges_receipts_optimized_gate" time="2.30734" status="run">
+		<properties/>
+		<system-out>{"full_contract_qualified": false, "invalid_cli": 24, "max_as_sum_models": 15, "paired_workers": 12, "passthrough_captures": 2, "pool_captures": 2, "real_captures": 24, "rejected_mutants": 3723, "shared_captures": 24, "status": "passed", "unit_contract_mutants": 12}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_cooperative_receipts_normal_gate" classname="mhgp8_wspd_q2_cooperative_receipts_normal_gate" time="2.67997" status="run">
+		<properties/>
+		<system-out>{"continued_captures": 12, "full_contract_qualified": false, "invalid_cli": 26, "max_as_sum_models": 26, "paired_workers": 12, "pool_selection_models": 8, "real_captures": 24, "rejected_mutants": 4153, "status": "passed", "unit_contract_mutants": 12}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_cooperative_receipts_optimized_gate" classname="mhgp8_wspd_q2_cooperative_receipts_optimized_gate" time="2.68914" status="run">
+		<properties/>
+		<system-out>{"continued_captures": 12, "full_contract_qualified": false, "invalid_cli": 26, "max_as_sum_models": 26, "paired_workers": 12, "pool_selection_models": 8, "real_captures": 24, "rejected_mutants": 4153, "status": "passed", "unit_contract_mutants": 12}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_split_receipts_gate" classname="mhgp8_q2_split_receipts_gate" time="0.326086" status="run">
+		<properties/>
+		<system-out>{"full_contract_qualified": false, "invalid_cli": 21, "paired_workers": 12, "real_captures": 24, "rejected_mutants": 1993, "status": "passed"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_split_receipts_gate_optimized" classname="mhgp8_q2_split_receipts_gate_optimized" time="0.321441" status="run">
+		<properties/>
+		<system-out>{"full_contract_qualified": false, "invalid_cli": 21, "paired_workers": 12, "real_captures": 24, "rejected_mutants": 1993, "status": "passed"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_resume_receipts_gate" classname="mhgp8_q2_resume_receipts_gate" time="0.157304" status="run">
+		<properties/>
+		<system-out>{"invalid_cli": 7, "real_captures": 24, "rejected_mutants": 552, "status": "passed"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_resume_receipts_gate_optimized" classname="mhgp8_q2_resume_receipts_gate_optimized" time="0.159695" status="run">
+		<properties/>
+		<system-out>{"invalid_cli": 7, "real_captures": 24, "rejected_mutants": 552, "status": "passed"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q3_q4_owner_independence_gate" classname="mhgp8_q3_q4_owner_independence_gate" time="0.0349453" status="run">
+		<properties/>
+		<system-out>{"claim": "q2_survival_is_not_a_q3_q4_owner_filter", "deep_seed_fixtures": [{"kmax": 5, "q3_seed_depth": 4, "q4_depth": 0, "q4_power_distance_minus_radius": ["425", "426", "429", "434"], "seed_ids": [0, 1, 2], "seed_power_distance_minus_radius": ["-1050", "-1049", "-1046", "-1041"]}, {"kmax": 10, "q3_seed_depth": 9, "q4_depth": 0, "q4_power_distance_minus_radius": ["425", "426", "429", "434", "441", "450", "461", "474", "489"], "seed_ids": [0, 1, 2], "seed_power_distance_minus_radius": ["-1050", "-1049", "-1046", "-1041", "-1034", "-1025", "-1014", "-1001", "-986"]}], "fixtures": [{"center": ["1000", "3055/3", "1000"], "kmax": 5, "lane_rejection_threshold": 4, "q": 3, "q2_depth_at_least": 5, "radius_squared": "93025/9", "shell": [0, 1, 2], "sites": 8, "support_depth": 0, "unique_maximal_edge": [0, 1], "witness_powers": ["-1400", "-1401", "-1404", "-1409", "-1416"]}, {"center": ["1000", "1025", "1000"], "kmax": 5, "lane_rejection_threshold": 3, "q": 4, "q2_depth_at_least": 5, "radius_squared": "10625", "shell"...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q3_q4_owner_independence_gate_optimized" classname="mhgp8_q3_q4_owner_independence_gate_optimized" time="0.0352052" status="run">
+		<properties/>
+		<system-out>{"claim": "q2_survival_is_not_a_q3_q4_owner_filter", "deep_seed_fixtures": [{"kmax": 5, "q3_seed_depth": 4, "q4_depth": 0, "q4_power_distance_minus_radius": ["425", "426", "429", "434"], "seed_ids": [0, 1, 2], "seed_power_distance_minus_radius": ["-1050", "-1049", "-1046", "-1041"]}, {"kmax": 10, "q3_seed_depth": 9, "q4_depth": 0, "q4_power_distance_minus_radius": ["425", "426", "429", "434", "441", "450", "461", "474", "489"], "seed_ids": [0, 1, 2], "seed_power_distance_minus_radius": ["-1050", "-1049", "-1046", "-1041", "-1034", "-1025", "-1014", "-1001", "-986"]}], "fixtures": [{"center": ["1000", "3055/3", "1000"], "kmax": 5, "lane_rejection_threshold": 4, "q": 3, "q2_depth_at_least": 5, "radius_squared": "93025/9", "shell": [0, 1, 2], "sites": 8, "support_depth": 0, "unique_maximal_edge": [0, 1], "witness_powers": ["-1400", "-1401", "-1404", "-1409", "-1416"]}, {"center": ["1000", "1025", "1000"], "kmax": 5, "lane_rejection_threshold": 3, "q": 4, "q2_depth_at_least": 5, "radius_squared": "10625", "shell"...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_dynamic_receipts_gate" classname="mhgp8_wspd_q2_dynamic_receipts_gate" time="10.2764" status="run">
+		<properties/>
+		<system-out>{"domain_checks": 12, "failed_captures": 3, "genuine_rows": 108, "invalid_options": 13, "mutants": 60, "positive_reads": 1, "status": "passed"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_dynamic_receipts_gate_optimized" classname="mhgp8_wspd_q2_dynamic_receipts_gate_optimized" time="10.2252" status="run">
+		<properties/>
+		<system-out>{"domain_checks": 12, "failed_captures": 3, "genuine_rows": 108, "invalid_options": 13, "mutants": 60, "positive_reads": 1, "status": "passed"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_receipts_gate" classname="mhgp8_wspd_q2_receipts_gate" time="23.0118" status="run">
+		<properties/>
+		<system-out>{"domain_checks": 2, "failed_captures": 2, "genuine_rows": 128, "joint_cli_rejects": 4, "joint_positive_reads": 2, "joint_rows": 96, "mutants": 152, "order_cli_rejects": 3, "order_positive_reads": 1, "order_rows": 64, "pool_cli_rejects": 7, "pool_positive_reads": 3, "pool_rows": 128, "positive_reads": 1, "sibling_cli_rejects": 2, "sibling_positive_reads": 1, "sibling_rows": 64, "status": "passed"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_receipts_gate_optimized" classname="mhgp8_wspd_q2_receipts_gate_optimized" time="23.013" status="run">
+		<properties/>
+		<system-out>{"domain_checks": 2, "failed_captures": 2, "genuine_rows": 128, "joint_cli_rejects": 4, "joint_positive_reads": 2, "joint_rows": 96, "mutants": 152, "order_cli_rejects": 3, "order_positive_reads": 1, "order_rows": 64, "pool_cli_rejects": 7, "pool_positive_reads": 3, "pool_rows": 128, "positive_reads": 1, "sibling_cli_rejects": 2, "sibling_positive_reads": 1, "sibling_rows": 64, "status": "passed"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_front_receipts_gate" classname="mhgp8_wspd_front_receipts_gate" time="4.54211" status="run">
+		<properties/>
+		<system-out>{"domain_checks": 2, "failed_captures": 2, "genuine_rows": 48, "mutants": 40, "positive_reads": 1, "status": "passed"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_front_receipts_gate_optimized" classname="mhgp8_wspd_front_receipts_gate_optimized" time="4.5344" status="run">
+		<properties/>
+		<system-out>{"domain_checks": 2, "failed_captures": 2, "genuine_rows": 48, "mutants": 40, "positive_reads": 1, "status": "passed"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_cloud_reuse_receipts_gate" classname="mhgp8_cloud_reuse_receipts_gate" time="3.70383" status="run">
+		<properties/>
+		<system-out>{"failed_captures": 2, "genuine_rows": 12, "mutants": 31, "positive_reads": 1, "status": "passed"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_cloud_reuse_receipts_gate_optimized" classname="mhgp8_cloud_reuse_receipts_gate_optimized" time="3.70161" status="run">
+		<properties/>
+		<system-out>{"failed_captures": 2, "genuine_rows": 12, "mutants": 31, "positive_reads": 1, "status": "passed"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_revision_comparison_gate" classname="mhgp8_q2_revision_comparison_gate" time="3.63078" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "genuine_probe_rows": 6, "positive_comparisons": 2, "mutants": 20, "python_optimized": false, "scope": "synthetic_revision_reader_fixtures_not_performance_qualification"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_revision_comparison_gate_optimized" classname="mhgp8_q2_revision_comparison_gate_optimized" time="3.63101" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "genuine_probe_rows": 6, "positive_comparisons": 2, "mutants": 20, "python_optimized": true, "scope": "synthetic_revision_reader_fixtures_not_performance_qualification"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_census_probe_gate" classname="mhgp8_q2_census_probe_gate" time="3.02224" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "invalid_cli": 17, "oracle_cases": 47, "probe_rows": 846, "python_optimized": false, "scope": "tiny_q2_payload_digest_oracle_not_full_hgp"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_census_probe_gate_optimized" classname="mhgp8_q2_census_probe_gate_optimized" time="3.06651" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "invalid_cli": 17, "oracle_cases": 47, "probe_rows": 846, "python_optimized": true, "scope": "tiny_q2_payload_digest_oracle_not_full_hgp"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_census_campaign_gate" classname="mhgp8_q2_census_campaign_gate" time="6.32963" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "genuine_rows": 12, "positive_reads": 2, "index_scan_boundary_controls": 1, "runner_mutants": 15, "initial_failure_group_controls": 1, "reader_mutants": 17, "archive_mutants": 4, "python_optimized": false, "scope": "q2_materialized_receipts_not_geometry_or_full"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_census_campaign_gate_optimized" classname="mhgp8_q2_census_campaign_gate_optimized" time="6.29209" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "genuine_rows": 12, "positive_reads": 2, "index_scan_boundary_controls": 1, "runner_mutants": 15, "initial_failure_group_controls": 1, "reader_mutants": 17, "archive_mutants": 4, "python_optimized": true, "scope": "q2_materialized_receipts_not_geometry_or_full"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_parallel_receipts_gate" classname="mhgp8_wspd_q2_parallel_receipts_gate" time="5.8093" status="run">
+		<properties/>
+		<system-out>{"domain_checks": 8, "failed_captures": 2, "genuine_rows": 50, "invalid_options": 6, "mutants": 42, "positive_reads": 1, "status": "passed"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_parallel_receipts_gate_optimized" classname="mhgp8_wspd_q2_parallel_receipts_gate_optimized" time="5.81851" status="run">
+		<properties/>
+		<system-out>{"domain_checks": 8, "failed_captures": 2, "genuine_rows": 50, "invalid_options": 6, "mutants": 42, "positive_reads": 1, "status": "passed"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_docs_scope" classname="mhgp8_docs_scope" time="0.38369" status="run">
+		<properties/>
+		<system-out>{"checks": 27, "independent_audits_excluded": true, "missing_link_mutants_refuted": 1, "positive_validations": 1, "recursive_directories": 3, "required_entries": 8, "scope": "documentation_only_not_an_engine_test", "status": "passed", "writes": 0}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_docs_scope_optimized" classname="mhgp8_docs_scope_optimized" time="0.391582" status="run">
+		<properties/>
+		<system-out>{"checks": 27, "independent_audits_excluded": true, "missing_link_mutants_refuted": 1, "positive_validations": 1, "recursive_directories": 3, "required_entries": 8, "scope": "documentation_only_not_an_engine_test", "status": "passed", "writes": 0}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_probe_cli" classname="mhgp8_probe_cli" time="0.255571" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 118, "scope": "p0_probe_cli"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_probe_cli_optimized" classname="mhgp8_probe_cli_optimized" time="0.258267" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 118, "scope": "p0_probe_cli"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_campaign_gate" classname="mhgp8_campaign_gate" time="23.11" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 41, "spawn_signal_checks": 6, "read_signal_checks": 6, "python_optimized": false, "scope": "p0_campaign_receipt_ingestion_not_geometry"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_campaign_gate_optimized" classname="mhgp8_campaign_gate_optimized" time="23.0841" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 41, "spawn_signal_checks": 6, "read_signal_checks": 6, "python_optimized": true, "scope": "p0_campaign_receipt_ingestion_not_geometry"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_batch_probe_cli" classname="mhgp8_batch_probe_cli" time="0.897275" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 301, "literal_checksum_plans": 72, "historical_recipe_differentials": 12, "python_optimized": false, "scope": "paired_three_lane_probe_not_full_tower"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_batch_probe_cli_optimized" classname="mhgp8_batch_probe_cli_optimized" time="0.893128" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 301, "literal_checksum_plans": 72, "historical_recipe_differentials": 12, "python_optimized": true, "scope": "paired_three_lane_probe_not_full_tower"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_axis_probe_cli" classname="mhgp8_axis_probe_cli" time="1.15847" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 466, "literal_checksums": 144, "reduced_sheet_cases": 126, "single_q2_controls": 90, "python_optimized": false, "scope": "axis_probe_receipts_and_full_sheet_formula_not_full_hgp"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_axis_probe_cli_optimized" classname="mhgp8_axis_probe_cli_optimized" time="1.15961" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 466, "literal_checksums": 144, "reduced_sheet_cases": 126, "single_q2_controls": 90, "python_optimized": true, "scope": "axis_probe_receipts_and_full_sheet_formula_not_full_hgp"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_additive_probe_cli" classname="mhgp8_additive_probe_cli" time="2.20126" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 809, "literal_checksums": 396, "reduced_sheet_cases": 72, "intersection_improvements": 144, "independent_axis_controls": 198, "python_optimized": false, "scope": "additive_probe_receipts_and_sheet_formula_not_full_hgp"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_additive_probe_cli_optimized" classname="mhgp8_additive_probe_cli_optimized" time="2.20041" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 809, "literal_checksums": 396, "reduced_sheet_cases": 72, "intersection_improvements": 144, "independent_axis_controls": 198, "python_optimized": true, "scope": "additive_probe_receipts_and_sheet_formula_not_full_hgp"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_additive_campaign_gate" classname="mhgp8_additive_campaign_gate" time="3.86618" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "genuine_campaigns": 2, "genuine_measurements": 24, "positive_reads": 1, "runner_mutants": 7, "reader_mutants": 14, "python_optimized": false, "scope": "additive_component_receipts_not_geometry_or_full"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_additive_campaign_gate_optimized" classname="mhgp8_additive_campaign_gate_optimized" time="3.86158" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "genuine_campaigns": 2, "genuine_measurements": 24, "positive_reads": 1, "runner_mutants": 7, "reader_mutants": 14, "python_optimized": true, "scope": "additive_component_receipts_not_geometry_or_full"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_paired_campaign_gate" classname="mhgp8_paired_campaign_gate" time="1.0739" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "genuine_probe_rows": 4, "direct_rejections": 132, "tuple_rejections": 12, "parser_rejections": 8, "genuine_campaigns": 2, "genuine_campaign_rows": 4, "proxy_campaigns_rejected": 2, "python_optimized": false, "scope": "paired_component_receipt_ingestion_not_geometry_or_full"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_paired_campaign_gate_optimized" classname="mhgp8_paired_campaign_gate_optimized" time="1.06948" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "genuine_probe_rows": 4, "direct_rejections": 132, "tuple_rejections": 12, "parser_rejections": 8, "genuine_campaigns": 2, "genuine_campaign_rows": 4, "proxy_campaigns_rejected": 2, "python_optimized": true, "scope": "paired_component_receipt_ingestion_not_geometry_or_full"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_campaign_reader_gate" classname="mhgp8_campaign_reader_gate" time="0.558883" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 4, "genuine_measurements": 9, "active_sheet_mutants": 3, "inactive_q3_controls": 3, "python_optimized": false, "scope": "sheet_receipt_active_lane_invariant_not_full_hgp"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_campaign_reader_gate_optimized" classname="mhgp8_campaign_reader_gate_optimized" time="0.56148" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "checks": 4, "genuine_measurements": 9, "active_sheet_mutants": 3, "inactive_q3_controls": 3, "python_optimized": true, "scope": "sheet_receipt_active_lane_invariant_not_full_hgp"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_paired_reader_gate" classname="mhgp8_paired_reader_gate" time="7.35528" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "genuine_campaigns": 5, "genuine_measurements": 10, "positive_reads": 2, "cpu_frequency_policy_controls": 1, "mutants_rejected": 46, "empty_matrix_rejections": 8, "duplicate_matrix_rejections": 7, "source_coverage_rejections": 8, "cross_campaign_identity_rejections": 3, "heterogeneous_provenance_rejections": 6, "invalid_provenance_rejections": 5, "python_optimized": false, "scope": "paired_campaign_reader_not_geometry_or_full"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_paired_reader_gate_optimized" classname="mhgp8_paired_reader_gate_optimized" time="7.35122" status="run">
+		<properties/>
+		<system-out>{"status": "passed", "genuine_campaigns": 5, "genuine_measurements": 10, "positive_reads": 2, "cpu_frequency_policy_controls": 1, "mutants_rejected": 46, "empty_matrix_rejections": 8, "duplicate_matrix_rejections": 7, "source_coverage_rejections": 8, "cross_campaign_identity_rejections": 3, "heterogeneous_provenance_rejections": 6, "invalid_provenance_rejections": 5, "python_optimized": true, "scope": "paired_campaign_reader_not_geometry_or_full"}
+</system-out>
+	</testcase>
+</testsuite>

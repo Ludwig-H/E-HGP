@@ -1,0 +1,17 @@
+{
+  "kind": "boundary_witness_credited_oracle",
+  "command": [
+    "/tmp/mhgp8_q4_center_map_mutants_pj5xfexk/boundary_witness_credited",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T19:20:45.995921+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "q4 center map gate: map rejected a positive owner root with insufficient distinct pool depth\n",
+  "stdout_base64": "",
+  "stderr_base64": "cTQgY2VudGVyIG1hcCBnYXRlOiBtYXAgcmVqZWN0ZWQgYSBwb3NpdGl2ZSBvd25lciByb290IHdpdGggaW5zdWZmaWNpZW50IGRpc3RpbmN0IHBvb2wgZGVwdGgK",
+  "finished_utc": "2026-09-20T19:20:45.998605+00:00"
+}

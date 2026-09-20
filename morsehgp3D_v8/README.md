@@ -90,6 +90,19 @@ priorité : partager les certificats entre faces dans le plan des centres.
 Pas de sous-quadratique global, de FULL ou de contrat G4 acquis. Voir
 les [preuves et limites](receipts/q34_collective_20260920/README.md).
 
+La tranche27 ajoute une [carte q4 partagée entre faces](docs/Q4_CARTE_CENTRES_PARTAGEE_20260920.md),
+raffinée à la demande, et prépare le domaine positif par blocs du même
+index.88 CTests Release, six gates/24 sondes Clang ASan/UBSan, trois
+mutants compilés,20 différentiels contre26 et128 mesures principales
+passent ;48 filtres denses auxiliaires sont qualifiés séparément.
+**Résultat de performance modeste, aucun gain stable** : avec le même
+pool64 après26, le dense32k garde au moins185,344M/357,472M lectures
+futures à K5/10, non exécutées. La carte ne trouve pas de nouveaux témoins.
+Le défaut reste inchangé ; suite prioritaire, blocs témoins et traitement
+exact local du résidu, sans recycler les listes de filtre comme census.
+Pas de borne sous-quadratique globale, de FULL ou de contrat G4 acquis.
+Voir les [résultats, limites et preuves](receipts/q4_center_map_20260920/README.md).
+
 ## Vingt-et-unième tranche publiée à3e94c868 — historique
 
 La vingt-et-unième tranche transmet aux enfants les
