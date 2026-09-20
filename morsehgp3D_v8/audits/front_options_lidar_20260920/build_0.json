@@ -1,0 +1,14 @@
+{
+  "command": [
+    "cmake",
+    "--build",
+    "morsehgp3D_v8/audits/front_options_lidar_20260920/.build",
+    "--target",
+    "mhgp8_p0",
+    "--parallel",
+    "2"
+  ],
+  "returncode": 0,
+  "stdout": "[ 28%] Building CXX object CMakeFiles/mhgp8_p0.dir/src/pipeline/axis_q2.cpp.o\n[ 28%] Building CXX object CMakeFiles/mhgp8_p0.dir/src/pipeline/local_credits.cpp.o\n[ 42%] Building CXX object CMakeFiles/mhgp8_p0.dir/src/pipeline/q2_census.cpp.o\n[ 57%] Building CXX object CMakeFiles/mhgp8_p0.dir/src/pipeline/q2_census_parallel.cpp.o\n[ 71%] Building CXX object CMakeFiles/mhgp8_p0.dir/src/pipeline/prepared_cloud.cpp.o\n[ 85%] Building CXX object CMakeFiles/mhgp8_p0.dir/src/wspd/front.cpp.o\n[100%] Linking CXX static library libmhgp8_p0.a\n[100%] Built target mhgp8_p0\n",
+  "stderr": ""
+}

@@ -1,0 +1,11 @@
+{
+  "command": [
+    "build/v8_front_inheritance_20260917/mhgp8_wspd_front_inheritance_gate",
+    "--selftest"
+  ],
+  "returncode": 0,
+  "stdout": "{\"schema\":\"mhgp8_wspd_front_inheritance_gate_v1\",\"status\":\"passed\",\"public_status\":\"not_claimed\",\"checks\":9008,\"clouds\":15,\"replay_runs\":1125,\"replay_products\":1010472,\"replay_rectangles\":334528,\"nonempty_lists\":398900,\"full_lists\":127175,\"duplicates\":830274,\"extension_duplicates\":111173,\"inherited_rejections\":64952,\"true_inherited_rejections\":16809,\"overcounted_rejections\":48143,\"gained_rejected_mass\":21010,\"fewer_rejected_products\":111,\"safety_runs\":1125,\"safety_pairs\":986250,\"rejected_pairs_judged\":711237,\"named_fixture_checks\":13,\"model_constant_checks\":12,\"historical_constant_checks\":6,\"mutants\":10,\"unsafe_mutants\":4,\"mutant_disagreements\":1334,\"mutant_lost_supports\":41271,\"disagreements_by_mutant\":[165,75,165,40,165,165,164,75,165,155],\"lost_supports_by_unsafe_mutant\":[14768,2348,23911,244],\"oracle_pairs\":39450,\"oracle_sites\":2738760,\"entry_runs\":990,\"entry_inherited_credits\":1347192,\"supports\":293788,\"max_shell\":24,\"invalid_inputs\":19,\"fit_checks\":6,\"wide_rank_runs\":4,\"max_duplicate_rank\":319}\n",
+  "stderr": "",
+  "binary_sha256": "137f705e685bac029180a914f385b5317dc3b1b65115baa2b73674eab2538267",
+  "authority": "replay of pinned constructor gate; not independent oracle"
+}

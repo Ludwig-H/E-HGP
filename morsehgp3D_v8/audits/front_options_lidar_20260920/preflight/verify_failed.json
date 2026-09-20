@@ -1,0 +1,9 @@
+{
+  "command": [
+    "python3",
+    "morsehgp3D_v8/audits/front_options_lidar_20260920/verify.py"
+  ],
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "Traceback (most recent call last):\n  File \"/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/verify.py\", line 139, in <module>\n    main()\n  File \"/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/verify.py\", line 104, in main\n    require(values == repeats[key], \"repeated work differs\")\n  File \"/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/verify.py\", line 16, in require\n    raise ValueError(message)\nValueError: repeated work differs\n"
+}

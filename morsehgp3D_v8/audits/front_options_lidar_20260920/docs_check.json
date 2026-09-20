@@ -1,0 +1,10 @@
+{
+  "command": [
+    "python3",
+    "tools/check_docs.py"
+  ],
+  "returncode": 0,
+  "stdout": "Validated 590 active Markdown files.\n",
+  "stderr": "",
+  "scope": "whole worktree, including concurrent developer changes; not a math checker"
+}

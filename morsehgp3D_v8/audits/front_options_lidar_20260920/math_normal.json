@@ -1,0 +1,9 @@
+{
+  "command": [
+    "python3",
+    "morsehgp3D_v8/audits/front_options_lidar_20260920/math_gate.py"
+  ],
+  "returncode": 0,
+  "stdout": "{\"design_mutants_killed\": 3, \"empty_extension\": {\"K\": 4, \"factor\": 2, \"mask\": 4, \"n\": 4}, \"promotion_child\": {\"h_min\": 25, \"level\": 4, \"xi_high\": 400}, \"promotion_parent\": {\"h_min\": 9, \"level\": 2, \"xi_high\": 1600}, \"q2_window_arithmetic_cases\": 441426, \"reachable_fixtures\": 3, \"schema\": \"mhgp8_audit_front_inheritance_math_v1\", \"scope\": \"independent mathematical design; no product qualification\", \"skipped_received_search\": {\"K\": 3, \"exterior_child\": 2, \"mask_after_parent\": 1, \"mask_before_parent\": 5}, \"status\": \"PASS\"}\n",
+  "stderr": ""
+}

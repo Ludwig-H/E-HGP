@@ -1,0 +1,803 @@
+{
+  "affinity": [
+    0
+  ],
+  "available_affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "gcp_used": false,
+  "pins": {
+    "morsehgp3D_v8/audits/front_options_lidar_20260920/.build/libmhgp8_p0.a": "5c7dc9a0c9d531f083302009d7625e8e543d2f2a5bd07211982723723a8e8992",
+    "morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe": "d465384aa4d5e359d4cb71ee01a8c0de13374472cf170ceb434bc243f70d015c",
+    "morsehgp3D_v8/audits/front_options_lidar_20260920/SOURCE_PINS.json": "ae0d0387822eaa79564b9b3442ec5998a8eabc8414d1838585f93f2be25348d3",
+    "morsehgp3D_v8/audits/front_options_lidar_20260920/measure.py": "6b01de1de3919dd345501bf487839c6368ea7aadaaef654ea78311ffb1bb8823",
+    "morsehgp3D_v8/audits/front_options_lidar_20260920/probe.cpp": "e1a8b332e4e84fcd52f3d3f8fbdcbacc13503240944beed5c915a2eeebc19710",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/METADATA.json": "b8abd52c6ffa6ecada01988e4ee4a313a89c1a924725849f53df766b84e977de",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n16000.u16le": "fbd31be0f4de345b1b7f027a6a9536e6f0e776c46f6caf6a4f3b82f91d4e8595",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n32000.u16le": "ac03426026406e79c154a557b91f054f815237cbd69a61c9a1d4c0e9e0993550",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n50000.u16le": "2a0c79ef95d7f34f1447f47c3bcf6cbff43156e7aa2d2f8c2eb1795109617426",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n8000.u16le": "ed5aa97941551e027a76d7c4eb4a03c739cdf0a83cbaf53035c1536bed0b5194",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/METADATA.json": "844e1a7e94b20bba4c77715bf686b37e234d415ab554bd3b9d5ffe602c40cdd8",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n50000.u16le": "1d8c524e75b21f82e23a067047ff1d7fb90ce5b610a63a2be842b356ae831628",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n8000.u16le": "813d595e799ff00d93fb94980d2e406c3775217b93aa4efbea0a675aaab3b402",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/METADATA.json": "5fb677c91f1420b78ddc1c820ae341d8b8fcc2fd5b116070e1d39ca4b37fffa1",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n50000.u16le": "aadeaefbacbcee7072fbdc1a4799e9e89334e10098dc5912edd47992847658e0",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n8000.u16le": "edc1a7980b366034984d0c3b020f5fa94777277b1618db7c16116c5ccfea4446"
+  },
+  "planned": [
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "8000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n8000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "1",
+        "all",
+        "0"
+      ],
+      "group": 0,
+      "n": 8000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "8000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n8000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "2",
+        "16",
+        "0"
+      ],
+      "group": 0,
+      "n": 8000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "8000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n8000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "2",
+        "16",
+        "1"
+      ],
+      "group": 0,
+      "n": 8000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "8000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n8000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "4",
+        "all",
+        "1"
+      ],
+      "group": 0,
+      "n": 8000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "8000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n8000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "4",
+        "all",
+        "1"
+      ],
+      "group": 1,
+      "n": 8000,
+      "scan": 100
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "8000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n8000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "2",
+        "16",
+        "1"
+      ],
+      "group": 1,
+      "n": 8000,
+      "scan": 100
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "8000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n8000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "2",
+        "16",
+        "0"
+      ],
+      "group": 1,
+      "n": 8000,
+      "scan": 100
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "8000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n8000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "1",
+        "all",
+        "0"
+      ],
+      "group": 1,
+      "n": 8000,
+      "scan": 100
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "8000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n8000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "1",
+        "all",
+        "0"
+      ],
+      "group": 2,
+      "n": 8000,
+      "scan": 200
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "8000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n8000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "2",
+        "16",
+        "0"
+      ],
+      "group": 2,
+      "n": 8000,
+      "scan": 200
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "8000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n8000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "2",
+        "16",
+        "1"
+      ],
+      "group": 2,
+      "n": 8000,
+      "scan": 200
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "8000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n8000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "4",
+        "all",
+        "1"
+      ],
+      "group": 2,
+      "n": 8000,
+      "scan": 200
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "16000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n16000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "4",
+        "all",
+        "1"
+      ],
+      "group": 3,
+      "n": 16000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "16000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n16000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "2",
+        "16",
+        "1"
+      ],
+      "group": 3,
+      "n": 16000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "16000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n16000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "2",
+        "16",
+        "0"
+      ],
+      "group": 3,
+      "n": 16000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "16000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n16000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "1",
+        "all",
+        "0"
+      ],
+      "group": 3,
+      "n": 16000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "32000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n32000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "1",
+        "all",
+        "0"
+      ],
+      "group": 4,
+      "n": 32000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "32000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n32000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "2",
+        "16",
+        "0"
+      ],
+      "group": 4,
+      "n": 32000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "32000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n32000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "2",
+        "16",
+        "1"
+      ],
+      "group": 4,
+      "n": 32000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "32000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n32000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "4",
+        "all",
+        "1"
+      ],
+      "group": 4,
+      "n": 32000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "50000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n50000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "4",
+        "all",
+        "1"
+      ],
+      "group": 5,
+      "n": 50000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "50000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n50000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "2",
+        "16",
+        "1"
+      ],
+      "group": 5,
+      "n": 50000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "50000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n50000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "2",
+        "16",
+        "0"
+      ],
+      "group": 5,
+      "n": 50000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "50000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n50000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "1",
+        "all",
+        "0"
+      ],
+      "group": 5,
+      "n": 50000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "50000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n50000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "1",
+        "all",
+        "0"
+      ],
+      "group": 6,
+      "n": 50000,
+      "scan": 100
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "50000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n50000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "2",
+        "16",
+        "0"
+      ],
+      "group": 6,
+      "n": 50000,
+      "scan": 100
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "50000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n50000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "2",
+        "16",
+        "1"
+      ],
+      "group": 6,
+      "n": 50000,
+      "scan": 100
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "50000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n50000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "4",
+        "all",
+        "1"
+      ],
+      "group": 6,
+      "n": 50000,
+      "scan": 100
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "50000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n50000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "4",
+        "all",
+        "1"
+      ],
+      "group": 7,
+      "n": 50000,
+      "scan": 200
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "50000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n50000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "2",
+        "16",
+        "1"
+      ],
+      "group": 7,
+      "n": 50000,
+      "scan": 200
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "50000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n50000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "2",
+        "16",
+        "0"
+      ],
+      "group": 7,
+      "n": 50000,
+      "scan": 200
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "50000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n50000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "1",
+        "all",
+        "0"
+      ],
+      "group": 7,
+      "n": 50000,
+      "scan": 200
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "50000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n50000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "1",
+        "all",
+        "0"
+      ],
+      "group": 8,
+      "n": 50000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "50000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n50000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "2",
+        "16",
+        "0"
+      ],
+      "group": 8,
+      "n": 50000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "50000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n50000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "2",
+        "16",
+        "1"
+      ],
+      "group": 8,
+      "n": 50000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "50000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n50000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "4",
+        "all",
+        "1"
+      ],
+      "group": 8,
+      "n": 50000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "50000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n50000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "4",
+        "all",
+        "1"
+      ],
+      "group": 9,
+      "n": 50000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "50000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n50000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "2",
+        "16",
+        "1"
+      ],
+      "group": 9,
+      "n": 50000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "50000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n50000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "2",
+        "16",
+        "0"
+      ],
+      "group": 9,
+      "n": 50000,
+      "scan": 0
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+        "50000",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n50000.u16le",
+        "10",
+        "8",
+        "0",
+        "0",
+        "1",
+        "64",
+        "1",
+        "all",
+        "0"
+      ],
+      "group": 9,
+      "n": 50000,
+      "scan": 0
+    }
+  ],
+  "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+  "public_status": "not_claimed",
+  "schema": "audit_lidar_front_options_v1",
+  "source_commit": "3e94c868abbb0fafac2b9062e72433f0793545cc",
+  "started_unix": 1789913269.555799,
+  "status": "running",
+  "worktree": " M audits/COORDINATION_MORSEHGP3D_V7.md\n M audits/COORDINATION_MORSEHGP3D_V8.md\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/PASSATION.md\n M morsehgp3D_v7/README.md\n M morsehgp3D_v7/docs/FAUSSES_PISTES.md\n M morsehgp3D_v7/docs/OBJETS_PARALLELES_TOUR_20260911.md\n M morsehgp3D_v8/CMakeLists.txt\n M morsehgp3D_v8/PASSATION.md\n M morsehgp3D_v8/README.md\n M morsehgp3D_v8/audits/DIALOGUE_COURANT.md\n M morsehgp3D_v8/audits/ETAT_COURANT.md\n M morsehgp3D_v8/docs/PLAN_DE_REFONTE.md\n M morsehgp3D_v8/docs/VERROUS_ARCHITECTURE.md\n M morsehgp3D_v8/src/core/types.hpp\n?? audits/morsehgp3D_v8_complementaire/P0_CONSTANTES_CENSUS_Q2.md\n?? audits/morsehgp3D_v8_complementaire/P0_IDENTITES_NUAGE_ET_RECTANGLES.md\n?? audits/morsehgp3D_v8_complementaire/Q2_PREPARED_BOUNDS_CHECKS.json\n?? audits/morsehgp3D_v8_complementaire/Q2_PREPARED_CENSUS_CHECKS.json\n?? audits/morsehgp3D_v8_complementaire/archive/\n?? audits/morsehgp3D_v8_complementaire/cloud_rectangle_identity_checks.py\n?? audits/morsehgp3D_v8_complementaire/cloud_rectangle_identity_probe.cpp\n?? audits/morsehgp3D_v8_complementaire/q2_prepared_bounds_checks.py\n?? audits/morsehgp3D_v8_complementaire/q2_prepared_bounds_probe.cpp\n?? audits/morsehgp3D_v8_complementaire/q2_prepared_census_checks.py\n?? audits/morsehgp3D_v8_complementaire/q2_revision_protocol_checks.py\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/docs/MARQUES_PREMIER_PARCOURS_20260911.md\n?? morsehgp3D_v7/receipts/fused_history_streaming_20260911/\n?? morsehgp3D_v8/audits/front_options_lidar_20260920/\n?? morsehgp3D_v8/bench/q4_family_probe.cpp\n?? morsehgp3D_v8/docs/Q4_FAMILLE_ET_BALAYAGE_20260920.md\n?? morsehgp3D_v8/docs/REPRISE_DEVELOPPEMENT_20260920.md\n?? morsehgp3D_v8/receipts/reprise_20260920/\n?? morsehgp3D_v8/src/lanes/q4_family.cpp\n?? morsehgp3D_v8/src/lanes/q4_family.hpp\n?? morsehgp3D_v8/tests/q4_family_gate.cpp\n"
+}

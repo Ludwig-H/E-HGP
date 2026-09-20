@@ -1,0 +1,22 @@
+{
+  "command": [
+    "c++",
+    "-std=c++20",
+    "-O3",
+    "-DNDEBUG",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-Imorsehgp3D_v8/audits/front_options_lidar_20260920/.snapshot/src",
+    "-Imorsehgp3D_v8/audits/front_options_lidar_20260920/.snapshot/bench",
+    "morsehgp3D_v8/audits/front_options_lidar_20260920/probe.cpp",
+    "morsehgp3D_v8/audits/front_options_lidar_20260920/.build/libmhgp8_p0.a",
+    "-o",
+    "morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": ""
+}

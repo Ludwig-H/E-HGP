@@ -1,0 +1,25 @@
+{
+  "command": [
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/front_options_lidar_20260920/.build/lidar_probe",
+    "8000",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n8000.u16le",
+    "10",
+    "8",
+    "0",
+    "0",
+    "1",
+    "64",
+    "2",
+    "16",
+    "1"
+  ],
+  "finished_unix": 1789913275.040941,
+  "group": 1,
+  "n": 8000,
+  "returncode": 0,
+  "scan": 100,
+  "started_unix": 1789913274.2757885,
+  "status": "completed",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "23bf9800a6c2c4f66048b1c66bc4c1a4f86be4354b831e6050112340f3081593"
+}
