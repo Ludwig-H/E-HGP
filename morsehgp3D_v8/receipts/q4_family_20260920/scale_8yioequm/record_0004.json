@@ -1,0 +1,87 @@
+{
+  "kind": "measure",
+  "command": [
+    "/workspaces/E-HGP/build/v8_q4_family_20260920/mhgp8_q4_family_probe",
+    "8000",
+    "rows"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T14:13:26.861313+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"schema\":\"mhgp8_q4_family_probe_v1\",\"status\":\"completed\",\"scope\":\"one_q4_family_all_sites_not_q4_producer\",\"public_status\":\"not_claimed\",\"backend\":\"cpu_reference\",\"profile\":\"quantized_u16_input_only\",\"timing_scope\":\"generation_owner_family_callback_validation_release_excludes_json\",\"n\":8000,\"family\":\"rows\",\"seed\":3,\"seed_ids\":[0,1,2],\"threads\":1,\"input_hash\":301800754778342313,\"generation\":{\"proposals\":7997,\"duplicates\":0,\"random_calls\":0},\"work\":{\"sites\":8000,\"entries\":3998,\"exits\":3999,\"constant_inside\":0,\"constant_on\":3,\"constant_outside\":0,\"sort_comparisons\":133043,\"group_comparisons\":7996,\"groups\":7997,\"max_group\":1,\"callbacks\":7997,\"event_count\":7997,\"retained_capacity_bytes\":128000},\"digest\":{\"groups\":7997,\"root_ids\":7997,\"constant_shell\":3,\"depth_sum\":15984004,\"hash\":2618145637071750627,\"callback_root_ids_visited\":7997,\"callback_constant_ids_visited\":3},\"cloud_work\":{\"copies\":8000,\"validation_points\":8000,\"uniqueness_comparisons\":120083,\"range_tree_nodes\":15999},\"memory\":{\"input_capacity_bytes\":48000,\"cloud_retained_bytes\":240000,\"judge_capacity_bytes\":8032,\"event_id_bytes\":8,\"scope\":\"retained_capacities_not_RSS\"},\"timings\":{\"generation_ms\":0.99889399999999995,\"cloud_ms\":0.28916999999999998,\"oracle_prepare_ms\":0.0094970000000000002,\"family_with_validation_callback_ms\":3.8648709999999999,\"validation_ms\":0.0051289999999999999,\"release_ms\":0.00033100000000000002,\"total_ms\":5.1678920000000002}}\n",
+  "stderr": "",
+  "stdout_base64": "eyJzY2hlbWEiOiJtaGdwOF9xNF9mYW1pbHlfcHJvYmVfdjEiLCJzdGF0dXMiOiJjb21wbGV0ZWQiLCJzY29wZSI6Im9uZV9xNF9mYW1pbHlfYWxsX3NpdGVzX25vdF9xNF9wcm9kdWNlciIsInB1YmxpY19zdGF0dXMiOiJub3RfY2xhaW1lZCIsImJhY2tlbmQiOiJjcHVfcmVmZXJlbmNlIiwicHJvZmlsZSI6InF1YW50aXplZF91MTZfaW5wdXRfb25seSIsInRpbWluZ19zY29wZSI6ImdlbmVyYXRpb25fb3duZXJfZmFtaWx5X2NhbGxiYWNrX3ZhbGlkYXRpb25fcmVsZWFzZV9leGNsdWRlc19qc29uIiwibiI6ODAwMCwiZmFtaWx5Ijoicm93cyIsInNlZWQiOjMsInNlZWRfaWRzIjpbMCwxLDJdLCJ0aHJlYWRzIjoxLCJpbnB1dF9oYXNoIjozMDE4MDA3NTQ3NzgzNDIzMTMsImdlbmVyYXRpb24iOnsicHJvcG9zYWxzIjo3OTk3LCJkdXBsaWNhdGVzIjowLCJyYW5kb21fY2FsbHMiOjB9LCJ3b3JrIjp7InNpdGVzIjo4MDAwLCJlbnRyaWVzIjozOTk4LCJleGl0cyI6Mzk5OSwiY29uc3RhbnRfaW5zaWRlIjowLCJjb25zdGFudF9vbiI6MywiY29uc3RhbnRfb3V0c2lkZSI6MCwic29ydF9jb21wYXJpc29ucyI6MTMzMDQzLCJncm91cF9jb21wYXJpc29ucyI6Nzk5NiwiZ3JvdXBzIjo3OTk3LCJtYXhfZ3JvdXAiOjEsImNhbGxiYWNrcyI6Nzk5NywiZXZlbnRfY291bnQiOjc5OTcsInJldGFpbmVkX2NhcGFjaXR5X2J5dGVzIjoxMjgwMDB9LCJkaWdlc3QiOnsiZ3JvdXBzIjo3OTk3LCJyb290X2lkcyI6Nzk5NywiY29uc3RhbnRfc2hlbGwiOjMsImRlcHRoX3N1bSI6MTU5ODQwMDQsImhhc2giOjI2MTgxNDU2MzcwNzE3NTA2MjcsImNhbGxiYWNrX3Jvb3RfaWRzX3Zpc2l0ZWQiOjc5OTcsImNhbGxiYWNrX2NvbnN0YW50X2lkc192aXNpdGVkIjozfSwiY2xvdWRfd29yayI6eyJjb3BpZXMiOjgwMDAsInZhbGlkYXRpb25fcG9pbnRzIjo4MDAwLCJ1bmlxdWVuZXNzX2NvbXBhcmlzb25zIjoxMjAwODMsInJhbmdlX3RyZWVfbm9kZXMiOjE1OTk5fSwibWVtb3J5Ijp7ImlucHV0X2NhcGFjaXR5X2J5dGVzIjo0ODAwMCwiY2xvdWRfcmV0YWluZWRfYnl0ZXMiOjI0MDAwMCwianVkZ2VfY2FwYWNpdHlfYnl0ZXMiOjgwMzIsImV2ZW50X2lkX2J5dGVzIjo4LCJzY29wZSI6InJldGFpbmVkX2NhcGFjaXRpZXNfbm90X1JTUyJ9LCJ0aW1pbmdzIjp7ImdlbmVyYXRpb25fbXMiOjAuOTk4ODkzOTk5OTk5OTk5OTUsImNsb3VkX21zIjowLjI4OTE2OTk5OTk5OTk5OTk4LCJvcmFjbGVfcHJlcGFyZV9tcyI6MC4wMDk0OTcwMDAwMDAwMDAwMDAyLCJmYW1pbHlfd2l0aF92YWxpZGF0aW9uX2NhbGxiYWNrX21zIjozLjg2NDg3MDk5OTk5OTk5OTksInZhbGlkYXRpb25fbXMiOjAuMDA1MTI4OTk5OTk5OTk5OTk5OSwicmVsZWFzZV9tcyI6MC4wMDAzMzEwMDAwMDAwMDAwMDAwMiwidG90YWxfbXMiOjUuMTY3ODkyMDAwMDAwMDAwMn19Cg==",
+  "stderr_base64": "",
+  "row": {
+    "schema": "mhgp8_q4_family_probe_v1",
+    "status": "completed",
+    "scope": "one_q4_family_all_sites_not_q4_producer",
+    "public_status": "not_claimed",
+    "backend": "cpu_reference",
+    "profile": "quantized_u16_input_only",
+    "timing_scope": "generation_owner_family_callback_validation_release_excludes_json",
+    "n": 8000,
+    "family": "rows",
+    "seed": 3,
+    "seed_ids": [
+      0,
+      1,
+      2
+    ],
+    "threads": 1,
+    "input_hash": 301800754778342313,
+    "generation": {
+      "proposals": 7997,
+      "duplicates": 0,
+      "random_calls": 0
+    },
+    "work": {
+      "sites": 8000,
+      "entries": 3998,
+      "exits": 3999,
+      "constant_inside": 0,
+      "constant_on": 3,
+      "constant_outside": 0,
+      "sort_comparisons": 133043,
+      "group_comparisons": 7996,
+      "groups": 7997,
+      "max_group": 1,
+      "callbacks": 7997,
+      "event_count": 7997,
+      "retained_capacity_bytes": 128000
+    },
+    "digest": {
+      "groups": 7997,
+      "root_ids": 7997,
+      "constant_shell": 3,
+      "depth_sum": 15984004,
+      "hash": 2618145637071750627,
+      "callback_root_ids_visited": 7997,
+      "callback_constant_ids_visited": 3
+    },
+    "cloud_work": {
+      "copies": 8000,
+      "validation_points": 8000,
+      "uniqueness_comparisons": 120083,
+      "range_tree_nodes": 15999
+    },
+    "memory": {
+      "input_capacity_bytes": 48000,
+      "cloud_retained_bytes": 240000,
+      "judge_capacity_bytes": 8032,
+      "event_id_bytes": 8,
+      "scope": "retained_capacities_not_RSS"
+    },
+    "timings": {
+      "generation_ms": 0.998894,
+      "cloud_ms": 0.28917,
+      "oracle_prepare_ms": 0.009497,
+      "family_with_validation_callback_ms": 3.864871,
+      "validation_ms": 0.005129,
+      "release_ms": 0.000331,
+      "total_ms": 5.167892
+    }
+  },
+  "finished_utc": "2026-09-20T14:13:26.869517+00:00"
+}

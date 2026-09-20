@@ -6,6 +6,13 @@ maintenant implémentée et testée, pas la chaîne complète. Le
 les [mesures P0](../receipts/p0_local_credits_20260913/README.md) sont propres à la v8.
 L'ordre demandé reste mono-thread, multi-CPU local, puis GPU G4 SPOT.
 
+Priorité de reprise du20 septembre, après3e94c868 : les options q2
+fenêtre2K/héritage sont qualifiées et conservées. Cesser les micro-variantes
+de constante ; construire les pièces manquantes q3/q4, catalogue et FULL.
+Lire [l'audit de reprise](REPRISE_DEVELOPPEMENT_20260920.md) et la
+[famille q4 par événements](Q4_FAMILLE_ET_BALAYAGE_20260920.md).
+Le coût O(n log n) d'une famille ne borne ni les seeds ni le générateur.
+
 Suivi du 14 septembre : le [raccord direct front → census q2](P0_FRONT_ET_CENSUS_Q2.md)
 est implémenté. Il retire factories, copies et arbres B par rectangle,
 sans filtre axial obligatoire. Il reste à réduire le coût du front et

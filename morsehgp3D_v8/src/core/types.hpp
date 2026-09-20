@@ -10,8 +10,9 @@ namespace mhgp8 {
 using u64 = std::uint64_t;
 using i64 = std::int64_t;
 
-// The u16 geometry (including tube bounds) needs at most 75 signed bits. This first CPU
-// implementation requires the compiler's native integer extension; it does
+// The initial u16 local-credit geometry (including tube bounds) needs at most
+// 75 signed bits. Later lane primitives document their own wider bounds.
+// This CPU implementation requires the compiler's native integer extension; it does
 // not silently replace exact predicates with floating-point arithmetic.
 #if defined(__SIZEOF_INT128__)
 __extension__ typedef signed __int128 i128;

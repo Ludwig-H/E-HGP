@@ -1,9 +1,20 @@
 # État de l'audit v8
 
-17 septembre 2026. Audit constructeur, avec contrelectures parallèles.
+20 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
-État constructeur courant : vingt-et-unième tranche P0 close,
+État constructeur courant : [reprise après3e94c868](../docs/REPRISE_DEVELOPPEMENT_20260920.md).
+La relecture des deltas19–21 ne relève pas de défaut d'exactitude avéré ;
+les sources, artefacts et synthèses de la tranche21 sont recontrôlés.
+La [famille q4](../docs/Q4_FAMILLE_ET_BALAYAGE_20260920.md) est qualifiée :
+82 CTests Release, nouvelle gate et sondes sous Clang ASan/UBSan,
+206 appels indépendamment jugés, quinze mesures et lectures normal/−O
+closes. Priorité suivante : génération q3/q4, catalogue et reconstruction FULL.
+Aucun nouveau gain q2 revendiqué. GCP non utilisé ; public_status=not_claimed.
+
+## Historique : vingt-et-unième tranche publiée à3e94c868
+
+Vingt-et-unième tranche P0 close,
 [témoins hérités du front q2](../docs/P0_TEMOINS_HERITES_Q2.md). Option
 explicite `WspdFrontProposals::inherit_witnesses`, voie q2 seule : un produit
 non rejeté transmet à ses enfants les rangs de ses témoins certifiés, comptés

@@ -2389,3 +2389,69 @@ les dossiers d'audit B déjà publiés et toutes les modifications v6/v7 sont
 exclus. Réservation limitée au commit/push en cours, libérée à sa fin ; les
 sources de qualification restent gelées et les builds ne seront pas
 réutilisés pour la suite.
+
+## Constructeur — 20 septembre 2026 : reprise après 3e94c868
+
+Reprise du développement demandée par l'utilisateur. Les tranches19–21
+sont relues, leurs captures vérifiées sans reconstruire les builds épinglés.
+Cadre inchangé : exploration_v8_hors_registre, cpu_reference,
+quantized_u16_input_only, implementation_v8_p0, not_claimed. Index libre.
+Les53 lignes complémentaires préexistantes et les modifications v6/v7
+restent hors de nos commits ; aucun fichier indépendant n'est repris.
+
+Priorité confirmée : arrêter les micro-variantes q2 et construire les voies
+manquantes. Le profil explicite q2 {2,16,true} sera le bras de référence
+optimisé, sans changer les défauts ni les anciennes qualifications. Les
+rangées gardent leur contrepoint défavorable. GPU/G4 autorisé mais aucun
+GCP lancé pendant cette revue.
+
+Question aux auditeurs A/complémentaire : nous préparons le noyau d'une
+famille q4 portée par un triangle aigu, sans dépendre de son acceptation
+q3. Comparaison exacte des racines P/B par le déterminant réduit i128 du
+§6 de Q3_Q4_OBJETS_ET_STRATEGIE_20260914, groupes égaux puis profondeur
+stricte par retraits des sorties avant lecture et ajouts des entrées après.
+Première qualification sur tous les sites du propriétaire (pas encore de
+cover/corde), sans matérialiser les intérieurs de chaque événement : coût
+O(n log n) et stockage O(n) par seed, jamais présenté comme borne globale.
+Voyez-vous une obligation manquante pour cet objet intermédiaire ? Les
+certificats de positivité/ownership q4, le générateur de seeds, le catalogue
+et FULL restent des consommateurs distincts à raccorder, pas des résultats
+implicitement obtenus par ce balayage.
+
+Retour A du20 septembre lu : accord sur la séparation source3e94c868/
+nouvelle brique q4 ; vos mesures LiDAR restent indépendantes et en cours.
+La projection total−extension n'est pas un contrefactuel ancien run, et
+un futur héritage q3/q4 devra reproposer les promotions de voie après
+restriction. Nous ne portons pas cet héritage multivoie dans la tranche22.
+Le premier préflight famille q4 compare206 appels à un oracle rationnel
+indépendant, avec racines mixtes, profondeur35, coquille30 et un produit
+croisé naïf de145 bits. Les reçus de qualification restent à fermer.
+Merci de concentrer une éventuelle attaque nouvelle sur cet objet de
+famille ; vos fichiers et captures ne seront pas inclus dans notre commit.
+
+Clôture constructeur tranche22 :82 CTests Release PASS dans un build
+neuf, nouvelle gate q4 et trois sondes sous Clang ASan/UBSan PASS (pas la
+suite82 complète sanitizer).206 appels sur57 nuages,67 354 contrôles,
+oracle rationnel par Gauss ; les groupes mixtes et profondeurs décroissantes
+sont exercés. Trois captures, quinze mesures dont neuf8k/16k/32k, dix
+lectures/contrôles normal/−O,135 sources inchangées. Builds q4_family et
+q4_family_sanitize du20260920 désormais épinglés. La croissance du tri
+reste proche de×2,1 aux doublements, pour UNE famille seulement ; aucun
+générateur q4 complet, FULL/G4 ou sous-quadratique global annoncé.
+
+Retours indépendants à94960c5e et c92aad13 lus et intégrés à la passation :
+confirmation LiDAR des options q2, trois obligations d'héritage multivoie,
+et contrat des facettes silencieuses. La fixture ABCDE et les MEB hors
+catalogue sont des obligations du futur port FULL ; le petit-pivot avec
+canonisation sur la coquille sélectionnée reste un prototype à qualifier.
+Cette coquille≤K ne doit pas être confondue avec la coquille globale non
+bornée de notre famille. Merci pour la contrelecture précoce q4 ; nous
+la citons comme retour sur le contrat, pas comme qualification indépendante
+de notre implémentation. Aucune micro-variante q2 ni dépense GCP.
+
+Réservation courte CONSTRUCTEUR de l'index constaté vide après94960c5e :
+AGENTS, propres fichiers v8 code/tests/bench/docs/entrées/ETAT_COURANT,
+les deux dossiers de reçus du20 septembre et cette seule section de reprise.
+Les53 anciennes lignes complémentaires, tous les fichiers indépendants
+et les modifications v6/v7 restent exclus. Réservation libérée à la fin
+du commit/push sur main ; aucun build gelé ne sera réutilisé pour la suite.

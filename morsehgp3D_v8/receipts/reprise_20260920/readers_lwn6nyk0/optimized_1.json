@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_q4_family_checks.py",
+    "read",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/q4_family_20260920/smoke_zyzoosq9",
+    "--check-live"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T14:16:41.079936+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"campaign\": \"smoke\", \"full_contract_qualified\": false, \"general_subquadratic_bound\": false, \"growth\": {}, \"measurements\": 3, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q4_family_20260920/smoke_zyzoosq9\", \"records\": 4, \"scope\": \"one_family_not_q4_producer\", \"sources\": 135, \"status\": \"passed\"}\n",
+  "stderr": "",
+  "stdout_base64": "eyJjYW1wYWlnbiI6ICJzbW9rZSIsICJmdWxsX2NvbnRyYWN0X3F1YWxpZmllZCI6IGZhbHNlLCAiZ2VuZXJhbF9zdWJxdWFkcmF0aWNfYm91bmQiOiBmYWxzZSwgImdyb3d0aCI6IHt9LCAibWVhc3VyZW1lbnRzIjogMywgInBhdGgiOiAiL3dvcmtzcGFjZXMvRS1IR1AvbW9yc2VoZ3AzRF92OC9yZWNlaXB0cy9xNF9mYW1pbHlfMjAyNjA5MjAvc21va2Vfenl6b29zcTkiLCAicmVjb3JkcyI6IDQsICJzY29wZSI6ICJvbmVfZmFtaWx5X25vdF9xNF9wcm9kdWNlciIsICJzb3VyY2VzIjogMTM1LCAic3RhdHVzIjogInBhc3NlZCJ9Cg==",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-20T14:16:41.158113+00:00"
+}

@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/reprise_20260920/record_regression.py",
+    "read",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/reprise_20260920/regression_0rxnfnth",
+    "--check-live"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T14:16:41.295470+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"command_count\": 1, \"executables\": 48, \"full_contract_qualified\": false, \"gcp_used\": false, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/reprise_20260920/regression_0rxnfnth\", \"sources\": 135, \"status\": \"passed\", \"tests\": 82}\n",
+  "stderr": "",
+  "stdout_base64": "eyJjb21tYW5kX2NvdW50IjogMSwgImV4ZWN1dGFibGVzIjogNDgsICJmdWxsX2NvbnRyYWN0X3F1YWxpZmllZCI6IGZhbHNlLCAiZ2NwX3VzZWQiOiBmYWxzZSwgInBhdGgiOiAiL3dvcmtzcGFjZXMvRS1IR1AvbW9yc2VoZ3AzRF92OC9yZWNlaXB0cy9yZXByaXNlXzIwMjYwOTIwL3JlZ3Jlc3Npb25fMHJ4bmZudGgiLCAic291cmNlcyI6IDEzNSwgInN0YXR1cyI6ICJwYXNzZWQiLCAidGVzdHMiOiA4Mn0K",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-20T14:16:41.418502+00:00"
+}

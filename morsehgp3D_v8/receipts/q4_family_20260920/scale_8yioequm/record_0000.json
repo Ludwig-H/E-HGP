@@ -1,0 +1,38 @@
+{
+  "kind": "gate",
+  "command": [
+    "/workspaces/E-HGP/build/v8_q4_family_20260920/mhgp8_q4_family_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T14:13:26.243097+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"schema\":\"mhgp8_q4_family_gate_v1\",\"status\":\"passed\",\"checks\":67354,\"clouds\":57,\"runs\":206,\"primitive_sites\":3153,\"root_comparisons\":52507,\"oracle_sites\":55408,\"groups\":2210,\"mixed_groups\":49,\"decreasing_steps\":688,\"max_depth\":35,\"max_shell\":30,\"max_cross_bits\":145,\"permutations\":42,\"invalid_inputs\":12,\"callback_failures\":1,\"reentrant_calls\":1,\"parallel_calls\":4,\"judge_mutants\":5}\n",
+  "stderr": "",
+  "stdout_base64": "eyJzY2hlbWEiOiJtaGdwOF9xNF9mYW1pbHlfZ2F0ZV92MSIsInN0YXR1cyI6InBhc3NlZCIsImNoZWNrcyI6NjczNTQsImNsb3VkcyI6NTcsInJ1bnMiOjIwNiwicHJpbWl0aXZlX3NpdGVzIjozMTUzLCJyb290X2NvbXBhcmlzb25zIjo1MjUwNywib3JhY2xlX3NpdGVzIjo1NTQwOCwiZ3JvdXBzIjoyMjEwLCJtaXhlZF9ncm91cHMiOjQ5LCJkZWNyZWFzaW5nX3N0ZXBzIjo2ODgsIm1heF9kZXB0aCI6MzUsIm1heF9zaGVsbCI6MzAsIm1heF9jcm9zc19iaXRzIjoxNDUsInBlcm11dGF0aW9ucyI6NDIsImludmFsaWRfaW5wdXRzIjoxMiwiY2FsbGJhY2tfZmFpbHVyZXMiOjEsInJlZW50cmFudF9jYWxscyI6MSwicGFyYWxsZWxfY2FsbHMiOjQsImp1ZGdlX211dGFudHMiOjV9Cg==",
+  "stderr_base64": "",
+  "row": {
+    "schema": "mhgp8_q4_family_gate_v1",
+    "status": "passed",
+    "checks": 67354,
+    "clouds": 57,
+    "runs": 206,
+    "primitive_sites": 3153,
+    "root_comparisons": 52507,
+    "oracle_sites": 55408,
+    "groups": 2210,
+    "mixed_groups": 49,
+    "decreasing_steps": 688,
+    "max_depth": 35,
+    "max_shell": 30,
+    "max_cross_bits": 145,
+    "permutations": 42,
+    "invalid_inputs": 12,
+    "callback_failures": 1,
+    "reentrant_calls": 1,
+    "parallel_calls": 4,
+    "judge_mutants": 5
+  },
+  "finished_utc": "2026-09-20T14:13:26.804746+00:00"
+}

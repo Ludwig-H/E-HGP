@@ -1,13 +1,42 @@
-# Passation v8 — témoins hérités du front q2 qualifiés
+# Passation v8 — reprise q3/q4 du20 septembre
 
-17 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
+20 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`. Aucun contrat de tour n'est encore acquis.
-Le constructeur a changé le 17 septembre : l'ancien auditeur B reprend le
-chantier ; son canal `audits/DIALOGUE_AUDITEUR_B.md` est clos et ses reçus
-d'audit ne valent pas qualification de son propre code.
+Le constructeur a changé le17 septembre, puis de nouveau à cette reprise
+du20 septembre. L'ancien auditeur B a livré les tranches19–21 ; son canal
+`audits/DIALOGUE_AUDITEUR_B.md` est clos et ses reçus d'audit ne valent pas
+qualification de son propre code.
 
 ## À reprendre maintenant
+
+Le constructeur reprend après `3e94c868`. Lire d'abord
+[l'audit de reprise](docs/REPRISE_DEVELOPPEMENT_20260920.md).
+Les130 sources/98 artefacts et lectures normal/−O de la tranche21 ont été
+vérifiés ; il ne s'agit pas d'une nouvelle exécution historique des81 tests.
+Conformément à la priorité utilisateur, ne plus poursuivre les quelques
+pourcents q2. Le [balayage d'une famille q4](docs/Q4_FAMILLE_ET_BALAYAGE_20260920.md)
+est livré :82 CTests Release, nouvelle gate sous Clang ASan/UBSan,
+206 appels contre oracle indépendant, quinze mesures et lectures normal/−O
+closes. Coût O(n+e log(1+e)) et mémoire O(n) pour UNE seed aiguë seulement.
+La suite prioritaire est le générateur q3/q4 (accès complet, positivité,
+ownership), puis catalogue et FULL ; aucun oracle d'audit n'est importé
+comme qualification du nouveau moteur.
+Profil q2 explicite de comparaison `{2,16,true}`, défaut inchangé.
+Nouveaux builds désormais épinglés `build/v8_q4_family_20260920` et
+`build/v8_q4_family_sanitize_20260920`. GCP non utilisé.
+
+Lire aussi l'[audit des facettes silencieuses](audits/FACETTES_SILENCIEUSES_REPRISE_V7_20260919.md)
+à c92aad13 : fixture ABCDE obligatoire, MEB intermédiaires hors catalogue,
+clôture atomique des plateaux et ancres inertes à conserver. Le support
+canonique du MEB se choisit sur la coquille sélectionnée dans F, pas sur
+la coquille globale du census. Le petit-pivot proposé reste un prototype
+indépendant à porter/juger ; ne pas importer le plafond de coquille12 v7.
+Le [retour A](audits/DIALOGUE_COURANT.md) à94960c5e confirme les gains q2
+sur trois scans LiDAR séparés et précise trois pièges du futur héritage
+multivoie. Ses mesures restent indépendantes de cette tranche22.
+
+## Passation précédente du17 septembre — contexte conservé
 
 Les [témoins hérités](docs/P0_TEMOINS_HERITES_Q2.md) et la
 [fenêtre élargie](docs/P0_SURPROPOSITION_TEMOINS_Q2.md) sont livrés comme

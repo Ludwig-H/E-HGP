@@ -20,6 +20,15 @@ comparaison ne clôt ni B1 pour toute la WSPD ni les verrous suivants.
 Les résultats v8 sont séparés dans leurs [reçus](../receipts/q2_census_20260913/README.md).
 GCP non utilisé.
 
+Reprise du20 septembre : le socle q2 à3e94c868 est relu, gains et preuves
+conservés. La priorité est désormais aux voies et à l'aval manquants,
+pas à quelques pourcents du proposeur q2. Le
+[balayage d'une famille q4](Q4_FAMILLE_ET_BALAYAGE_20260920.md) supprime le
+census répété par complétion pour cet objet seulement ; les nombres de
+seeds, covers, boules et sorties restent des verrous de travail global.
+Le [rapport de reprise](REPRISE_DEVELOPPEMENT_20260920.md) sépare acquis,
+preuves relues, qualifications nouvelles et contrats encore ouverts.
+
 Suivi du 14 septembre : les [bornes préparées](P0_BORNES_PREPAREES_ET_PARALLELISATION.md)
 factorisent une constante de coût, sans changer les visites ni clore B1.
 La [sixième tranche](P0_NUAGE_ET_INDEX_PARTAGES.md) sépare maintenant

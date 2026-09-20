@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — témoins hérités du front q2
+# Morse HGP 3D v8 — reprise q3/q4 après audit du socle q2
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -32,9 +32,24 @@ Un front WSPD réel couvre maintenant les paires ou les rejette par voie,
 sans développer les produits. Son raccord q2 réutilise maintenant les
 nœuds du même index et collecte les supports complets ; ce n'est ni un
 catalogue q3/q4 ni une tour FULL.
-Les mesures historiques citées restent v7.
+Les mesures de l'audit d'ouverture restent v7 ; chaque tranche v8 porte
+ses propres sources, tests et reçus, sans transfert implicite.
 
 ## État exécutable
+
+Reprise du20 septembre : [audit du développement](docs/REPRISE_DEVELOPPEMENT_20260920.md)
+après `3e94c868`. Les preuves de la tranche21 sont relues et leurs empreintes
+vérifiées ; les gains q2 sont conservés sans nouvelle micro-variante.
+Le [balayage exact d'une famille q4](docs/Q4_FAMILLE_ET_BALAYAGE_20260920.md)
+est maintenant implémenté et qualifié : événements groupés et profondeur
+partagée.82 CTests Release passent, ainsi que la nouvelle gate q4 sous
+Clang ASan/UBSan ; mesures d'une famille à8k/16k/32k et lectures normal/−O
+closes. Ce n'est pas encore un générateur complet q3/q4, un catalogue ou
+une tour FULL. Le profil optimisé q2
+`{2,16,true}` reste explicite ; aucun défaut historique n'est changé.
+GCP non utilisé pendant cette reprise.
+
+## Vingt-et-unième tranche publiée à3e94c868 — historique
 
 La vingt-et-unième tranche transmet aux enfants les
 [témoins certifiés du front](docs/P0_TEMOINS_HERITES_Q2.md) : un produit non

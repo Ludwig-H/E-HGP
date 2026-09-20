@@ -1,0 +1,87 @@
+{
+  "kind": "measure",
+  "command": [
+    "/workspaces/E-HGP/build/v8_q4_family_20260920/mhgp8_q4_family_probe",
+    "16000",
+    "uniform"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T14:13:26.814670+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"schema\":\"mhgp8_q4_family_probe_v1\",\"status\":\"completed\",\"scope\":\"one_q4_family_all_sites_not_q4_producer\",\"public_status\":\"not_claimed\",\"backend\":\"cpu_reference\",\"profile\":\"quantized_u16_input_only\",\"timing_scope\":\"generation_owner_family_callback_validation_release_excludes_json\",\"n\":16000,\"family\":\"uniform\",\"seed\":3,\"seed_ids\":[0,1,2],\"threads\":1,\"input_hash\":15076553991751874399,\"generation\":{\"proposals\":15997,\"duplicates\":0,\"random_calls\":47991},\"work\":{\"sites\":16000,\"entries\":7954,\"exits\":8043,\"constant_inside\":0,\"constant_on\":3,\"constant_outside\":0,\"sort_comparisons\":265812,\"group_comparisons\":15996,\"groups\":15997,\"max_group\":1,\"callbacks\":15997,\"event_count\":15997,\"retained_capacity_bytes\":256000},\"digest\":{\"groups\":15997,\"root_ids\":15997,\"constant_shell\":3,\"depth_sum\":66245074,\"hash\":2964730584538543687,\"callback_root_ids_visited\":15997,\"callback_constant_ids_visited\":3},\"cloud_work\":{\"copies\":16000,\"validation_points\":16000,\"uniqueness_comparisons\":267073,\"range_tree_nodes\":31999},\"memory\":{\"input_capacity_bytes\":96000,\"cloud_retained_bytes\":480000,\"judge_capacity_bytes\":16032,\"event_id_bytes\":8,\"scope\":\"retained_capacities_not_RSS\"},\"timings\":{\"generation_ms\":2.9220920000000001,\"cloud_ms\":1.3631629999999999,\"oracle_prepare_ms\":0.080961000000000005,\"family_with_validation_callback_ms\":8.1534820000000003,\"validation_ms\":0.031799000000000001,\"release_ms\":0.039564000000000002,\"total_ms\":12.591061}}\n",
+  "stderr": "",
+  "stdout_base64": "eyJzY2hlbWEiOiJtaGdwOF9xNF9mYW1pbHlfcHJvYmVfdjEiLCJzdGF0dXMiOiJjb21wbGV0ZWQiLCJzY29wZSI6Im9uZV9xNF9mYW1pbHlfYWxsX3NpdGVzX25vdF9xNF9wcm9kdWNlciIsInB1YmxpY19zdGF0dXMiOiJub3RfY2xhaW1lZCIsImJhY2tlbmQiOiJjcHVfcmVmZXJlbmNlIiwicHJvZmlsZSI6InF1YW50aXplZF91MTZfaW5wdXRfb25seSIsInRpbWluZ19zY29wZSI6ImdlbmVyYXRpb25fb3duZXJfZmFtaWx5X2NhbGxiYWNrX3ZhbGlkYXRpb25fcmVsZWFzZV9leGNsdWRlc19qc29uIiwibiI6MTYwMDAsImZhbWlseSI6InVuaWZvcm0iLCJzZWVkIjozLCJzZWVkX2lkcyI6WzAsMSwyXSwidGhyZWFkcyI6MSwiaW5wdXRfaGFzaCI6MTUwNzY1NTM5OTE3NTE4NzQzOTksImdlbmVyYXRpb24iOnsicHJvcG9zYWxzIjoxNTk5NywiZHVwbGljYXRlcyI6MCwicmFuZG9tX2NhbGxzIjo0Nzk5MX0sIndvcmsiOnsic2l0ZXMiOjE2MDAwLCJlbnRyaWVzIjo3OTU0LCJleGl0cyI6ODA0MywiY29uc3RhbnRfaW5zaWRlIjowLCJjb25zdGFudF9vbiI6MywiY29uc3RhbnRfb3V0c2lkZSI6MCwic29ydF9jb21wYXJpc29ucyI6MjY1ODEyLCJncm91cF9jb21wYXJpc29ucyI6MTU5OTYsImdyb3VwcyI6MTU5OTcsIm1heF9ncm91cCI6MSwiY2FsbGJhY2tzIjoxNTk5NywiZXZlbnRfY291bnQiOjE1OTk3LCJyZXRhaW5lZF9jYXBhY2l0eV9ieXRlcyI6MjU2MDAwfSwiZGlnZXN0Ijp7Imdyb3VwcyI6MTU5OTcsInJvb3RfaWRzIjoxNTk5NywiY29uc3RhbnRfc2hlbGwiOjMsImRlcHRoX3N1bSI6NjYyNDUwNzQsImhhc2giOjI5NjQ3MzA1ODQ1Mzg1NDM2ODcsImNhbGxiYWNrX3Jvb3RfaWRzX3Zpc2l0ZWQiOjE1OTk3LCJjYWxsYmFja19jb25zdGFudF9pZHNfdmlzaXRlZCI6M30sImNsb3VkX3dvcmsiOnsiY29waWVzIjoxNjAwMCwidmFsaWRhdGlvbl9wb2ludHMiOjE2MDAwLCJ1bmlxdWVuZXNzX2NvbXBhcmlzb25zIjoyNjcwNzMsInJhbmdlX3RyZWVfbm9kZXMiOjMxOTk5fSwibWVtb3J5Ijp7ImlucHV0X2NhcGFjaXR5X2J5dGVzIjo5NjAwMCwiY2xvdWRfcmV0YWluZWRfYnl0ZXMiOjQ4MDAwMCwianVkZ2VfY2FwYWNpdHlfYnl0ZXMiOjE2MDMyLCJldmVudF9pZF9ieXRlcyI6OCwic2NvcGUiOiJyZXRhaW5lZF9jYXBhY2l0aWVzX25vdF9SU1MifSwidGltaW5ncyI6eyJnZW5lcmF0aW9uX21zIjoyLjkyMjA5MjAwMDAwMDAwMDEsImNsb3VkX21zIjoxLjM2MzE2Mjk5OTk5OTk5OTksIm9yYWNsZV9wcmVwYXJlX21zIjowLjA4MDk2MTAwMDAwMDAwMDAwNSwiZmFtaWx5X3dpdGhfdmFsaWRhdGlvbl9jYWxsYmFja19tcyI6OC4xNTM0ODIwMDAwMDAwMDAzLCJ2YWxpZGF0aW9uX21zIjowLjAzMTc5OTAwMDAwMDAwMDAwMSwicmVsZWFzZV9tcyI6MC4wMzk1NjQwMDAwMDAwMDAwMDIsInRvdGFsX21zIjoxMi41OTEwNjF9fQo=",
+  "stderr_base64": "",
+  "row": {
+    "schema": "mhgp8_q4_family_probe_v1",
+    "status": "completed",
+    "scope": "one_q4_family_all_sites_not_q4_producer",
+    "public_status": "not_claimed",
+    "backend": "cpu_reference",
+    "profile": "quantized_u16_input_only",
+    "timing_scope": "generation_owner_family_callback_validation_release_excludes_json",
+    "n": 16000,
+    "family": "uniform",
+    "seed": 3,
+    "seed_ids": [
+      0,
+      1,
+      2
+    ],
+    "threads": 1,
+    "input_hash": 15076553991751874399,
+    "generation": {
+      "proposals": 15997,
+      "duplicates": 0,
+      "random_calls": 47991
+    },
+    "work": {
+      "sites": 16000,
+      "entries": 7954,
+      "exits": 8043,
+      "constant_inside": 0,
+      "constant_on": 3,
+      "constant_outside": 0,
+      "sort_comparisons": 265812,
+      "group_comparisons": 15996,
+      "groups": 15997,
+      "max_group": 1,
+      "callbacks": 15997,
+      "event_count": 15997,
+      "retained_capacity_bytes": 256000
+    },
+    "digest": {
+      "groups": 15997,
+      "root_ids": 15997,
+      "constant_shell": 3,
+      "depth_sum": 66245074,
+      "hash": 2964730584538543687,
+      "callback_root_ids_visited": 15997,
+      "callback_constant_ids_visited": 3
+    },
+    "cloud_work": {
+      "copies": 16000,
+      "validation_points": 16000,
+      "uniqueness_comparisons": 267073,
+      "range_tree_nodes": 31999
+    },
+    "memory": {
+      "input_capacity_bytes": 96000,
+      "cloud_retained_bytes": 480000,
+      "judge_capacity_bytes": 16032,
+      "event_id_bytes": 8,
+      "scope": "retained_capacities_not_RSS"
+    },
+    "timings": {
+      "generation_ms": 2.922092,
+      "cloud_ms": 1.363163,
+      "oracle_prepare_ms": 0.080961,
+      "family_with_validation_callback_ms": 8.153482,
+      "validation_ms": 0.031799,
+      "release_ms": 0.039564,
+      "total_ms": 12.591061
+    }
+  },
+  "finished_utc": "2026-09-20T14:13:26.830377+00:00"
+}
