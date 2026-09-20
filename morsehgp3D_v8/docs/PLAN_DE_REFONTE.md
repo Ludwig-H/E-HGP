@@ -61,6 +61,21 @@ Payer préparation, réplication des actives, requêtes, tri et coquilles,
 avec étude8k/16k/32k du total. Les propositions de A restent des objets
 d'audit jusqu'au port et à leurs propres preuves constructeur.
 
+Après66b1551f/A5ff70645, les [fragments exacts et balayages locaux28](Q4_FRAGMENTS_ET_BALAYAGES_LOCAUX_20260920.md)
+remplacent les scans complets du cover par une partition de blocs partagée
+et un résidu local réellement exécuté jusqu'à32k. Finir chaque partition
+terminale une fois évite de repayer ses blocs inconnus à toutes les faces.
+Le clipping conserve les contributions constantes et les coquilles.
+Mais W dense permuté fait×3,922/×4,184 et le tri×4,564/×4,857 : le carré
+reste dans les feuilles, pas dans leur seul stockage. Suite structurelle :
+partager aussi le traitement des faces ou traiter les événements collectifs
+de faible profondeur, en payant les listes de conflits et leur duplication.
+Une hausse uniforme de profondeur/pool ou un simple port GPU du double
+parcours ne résoudrait pas ce verrou. L'atlas immuable et les buffers privés
+sont une base de distribution, pas encore une qualification parallèle.
+Conserver la référence locale exacte, puis raccorder q3 séparément et
+le générateur global ; ne pas confondre une arête fournie avec toute la tour.
+
 Suivi du 14 septembre : le [raccord direct front → census q2](P0_FRONT_ET_CENSUS_Q2.md)
 est implémenté. Il retire factories, copies et arbres B par rectangle,
 sans filtre axial obligatoire. Il reste à réduire le coût du front et

@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_q4_local_checks.py",
+    "read",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/q4_local_20260920/regression_gw_4e23g",
+    "--check-live"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T20:45:19.026659+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"campaign\": \"regression\", \"dense_large_quadratic_baseline_executed\": false, \"dense_sweeps_really_executed\": true, \"full_contract_qualified\": false, \"general_subquadratic_bound\": false, \"growth\": {}, \"measurements\": 0, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q4_local_20260920/regression_gw_4e23g\", \"pipeline_sums_are_not_independent_wall_measurements\": true, \"records\": 1, \"reference_runtime_includes_q3\": true, \"scope\": \"one_edge_q4_real_local_sweeps_not_global_producer\", \"sources\": 177, \"status\": \"passed\", \"validation_proves_emission_validity_not_dense_completeness\": true}\n",
+  "stderr": "",
+  "stdout_base64": "eyJjYW1wYWlnbiI6ICJyZWdyZXNzaW9uIiwgImRlbnNlX2xhcmdlX3F1YWRyYXRpY19iYXNlbGluZV9leGVjdXRlZCI6IGZhbHNlLCAiZGVuc2Vfc3dlZXBzX3JlYWxseV9leGVjdXRlZCI6IHRydWUsICJmdWxsX2NvbnRyYWN0X3F1YWxpZmllZCI6IGZhbHNlLCAiZ2VuZXJhbF9zdWJxdWFkcmF0aWNfYm91bmQiOiBmYWxzZSwgImdyb3d0aCI6IHt9LCAibWVhc3VyZW1lbnRzIjogMCwgInBhdGgiOiAiL3dvcmtzcGFjZXMvRS1IR1AvbW9yc2VoZ3AzRF92OC9yZWNlaXB0cy9xNF9sb2NhbF8yMDI2MDkyMC9yZWdyZXNzaW9uX2d3XzRlMjNnIiwgInBpcGVsaW5lX3N1bXNfYXJlX25vdF9pbmRlcGVuZGVudF93YWxsX21lYXN1cmVtZW50cyI6IHRydWUsICJyZWNvcmRzIjogMSwgInJlZmVyZW5jZV9ydW50aW1lX2luY2x1ZGVzX3EzIjogdHJ1ZSwgInNjb3BlIjogIm9uZV9lZGdlX3E0X3JlYWxfbG9jYWxfc3dlZXBzX25vdF9nbG9iYWxfcHJvZHVjZXIiLCAic291cmNlcyI6IDE3NywgInN0YXR1cyI6ICJwYXNzZWQiLCAidmFsaWRhdGlvbl9wcm92ZXNfZW1pc3Npb25fdmFsaWRpdHlfbm90X2RlbnNlX2NvbXBsZXRlbmVzcyI6IHRydWV9Cg==",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-20T20:45:19.160764+00:00"
+}

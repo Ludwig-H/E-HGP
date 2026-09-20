@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_q4_local_checks.py",
+    "selftest",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/q4_local_20260920/smoke_dcu5kp0z"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T20:45:19.871759+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"mutants\": 37, \"real_measurements\": 20, \"scope\": \"receipt_reader_not_geometry\", \"status\": \"passed\"}\n",
+  "stderr": "",
+  "stdout_base64": "eyJtdXRhbnRzIjogMzcsICJyZWFsX21lYXN1cmVtZW50cyI6IDIwLCAic2NvcGUiOiAicmVjZWlwdF9yZWFkZXJfbm90X2dlb21ldHJ5IiwgInN0YXR1cyI6ICJwYXNzZWQifQo=",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-20T20:45:19.978713+00:00"
+}

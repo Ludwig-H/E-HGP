@@ -1,0 +1,17 @@
+{
+  "kind": "tangent_active_site_removed_oracle",
+  "command": [
+    "/tmp/mhgp8_q4_local_mutants_xjr_vib3/tangent_active_site_removed",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T20:33:32.156607+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "q4 local gate: globally null edge endpoints disappeared from active shell\n",
+  "stdout_base64": "",
+  "stderr_base64": "cTQgbG9jYWwgZ2F0ZTogZ2xvYmFsbHkgbnVsbCBlZGdlIGVuZHBvaW50cyBkaXNhcHBlYXJlZCBmcm9tIGFjdGl2ZSBzaGVsbAo=",
+  "finished_utc": "2026-09-20T20:33:32.162831+00:00"
+}

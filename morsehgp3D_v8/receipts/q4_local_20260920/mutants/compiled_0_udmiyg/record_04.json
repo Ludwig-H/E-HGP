@@ -1,0 +1,28 @@
+{
+  "kind": "clipped_inside_contribution_lost_compile",
+  "command": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "-std=c++20",
+    "-O3",
+    "-DNDEBUG",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-I/workspaces/E-HGP/morsehgp3D_v8/src",
+    "-c",
+    "/tmp/mhgp8_q4_local_mutants_xjr_vib3/clipped_inside_contribution_lost.cpp",
+    "-o",
+    "/tmp/mhgp8_q4_local_mutants_xjr_vib3/clipped_inside_contribution_lost.o"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T20:33:32.165536+00:00",
+  "expected_exit_code": 0,
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "stdout_base64": "",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-20T20:33:34.199210+00:00"
+}

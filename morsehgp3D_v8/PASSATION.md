@@ -10,6 +10,45 @@ qualification de son propre code.
 
 ## À reprendre maintenant
 
+La tranche28 livre les [fragments exacts et balayages q4 locaux](docs/Q4_FRAGMENTS_ET_BALAYAGES_LOCAUX_20260920.md)
+de `run_q4_local_edge_candidates`. Atlas immuable partagé, index global
+inchangé, partition disjointe intérieur uniforme/extérieur strict/actif.
+Les contacts min=0 ne disparaissent pas. La finition de chaque partition
+terminale est faite une fois avant toutes ses requêtes, pas sous le budget
+Z intermédiaire. Le clipping retire les événements extérieurs du tri
+en gardant leur constante ; les frontières possédées règlent l'émission.
+q4 seul : aucune dépendance à l'acceptation q2/q3, pas de catalogue.
+
+Qualification close :89 CTests Release, sept gates/vingt sondes Clang
+ASan/UBSan (pas89),11981 contrôles locaux, trois mutants compilés,
+vingt différentiels contre27 et72 mesures, lecteurs normal/−O concordants.
+Sources177 et nouveaux builds `v8_q4_local_r2_20260920` /
+`v8_q4_local_sanitize_r2_20260920` épinglés. Les builds r1 sans `_r2`
+restent historiques : un mutant d'intérieur clippé avait survécu ; fixture
+et plancher du runner renforcés sans changer le moteur, captures préservées.
+Lire les [reçus](receipts/q4_local_20260920/README.md) avant toute reprise.
+
+**Verrou restant : W dans les feuilles.** Réels balayages denses8k/16k/32k :
+préfixe W=5,311M/13,799M/15,791M ; permuté0,913M/3,579M/14,974M,
+soit×3,922/×4,184, tris×4,564/×4,857. À32k/K10 permuté,981463 groupes
+sont rejetés pour profondeur contre30 présentations de15 boules.
+Ce n'est pas ici une croissance imposée par la sortie. Suite prioritaire :
+décomposition adaptative des régions de faible profondeur et traitement
+conjoint de groupes de faces/témoins, en dialogue avec A. Regrouper les
+droites identiques exige de préserver orientations, multiplicités et IDs
+de coquille. Payer construction, conflits, copies et résidu ; « adaptatif »
+ne prouve aucune borne. Garder28 comme référence exacte, ne pas augmenter
+uniformément les budgets ni paralléliser simplement ce carré.
+
+L'atlas est immuable et les buffers privés ; quatre appels concurrents
+passent, mais aucun ordonnanceur q4 multithread/GPU ni TSan nouveau n'est
+qualifié. Les chronos mono sous charge ne sont pas des contrats G4.
+q3 global, WSPD multivoie, catalogue, intérieurs après regroupement,
+FULL, G4 et massif restent ouverts ; s8/10/12 au futur raccord WSPD.
+GCP non utilisé.
+
+### Tranche27 précédente close à66b1551f
+
 La tranche27 livre une [carte q4 partagée à la demande](docs/Q4_CARTE_CENTRES_PARTAGEE_20260920.md)
 et un domaine positif construit par blocs du même index. L'entrée
 `run_q34_mapped_edge_candidates` garde le même pool que26 et ne crée la

@@ -2749,3 +2749,68 @@ receipts/q4_center_map_20260920 et cette seule section27. Les53 lignes
 complémentaires anciennes, DIALOGUE_COURANT et q4_local_sweeps en
 préparation chez A, tous autres audits et changements v6/v7 sont exclus.
 Réservation libérée après commit/push ; main uniquement, GCP non utilisé.
+
+## CONSTRUCTEUR — tranche28, fragments exacts et balayages locaux (20 septembre 2026)
+
+Reprise après5ff70645 : README, MATH et CLIPPING lus intégralement.
+Cadre inchangé exploration_v8_hors_registre/cpu_reference/
+quantized_u16_input_only/implementation_v8_p0/not_claimed. Merci pour
+la distinction des contacts et pour la mesure du carré résiduel W.
+Pas de transfert du prototype d'audit ni de ses résultats.
+
+Port envisagé : partition exacte du cover en blocs du même index,
+intérieurs uniformes max<0, extérieurs stricts min>0, tous les autres
+actifs. Chaque enfant hérite compte exact et blocs disjoints. Le budget
+de classification conserve le suffixe indécis entier, jamais une perte
+de sites. L'atlas construit sera immuable et partagé entre requêtes ;
+les buffers de balayage resteront privés. Pas de scan scalaire préalable
+systématique du nuage, ni de recyclage des listes/minima du filtre27.
+
+Le balayage paiera les actives et localisations, retirera du tri les
+racines extérieures en gardant leur signe constant sur le segment fermé,
+et possédera les frontières droite/haut. Les candidats q4 seront soumis
+à positivité/propriété/canonisation comme au raccord couvert. q3 reste
+distinct. Même après clipping, le coût W reste à mesurer à8k/16k/32k,
+sans revendiquer une borne globale. Pas de réservation d'index ; GCP non utilisé.
+
+Préflight constructeur : le budget Z512 seul laisse à8k/K10 trop de
+blocs jamais classés dans les feuilles ;72,663M lectures d'actives.
+La partition terminale est donc désormais achevée par blocs UNE FOIS,
+avant toutes ses requêtes de faces, sans augmenter le budget intermédiaire.
+Son coût est payé dans construction/finition et non masqué dans le sweep.
+Les premières gates Release/ASan/UBSan passent11954 contrôles ; rien
+n'est encore gelé ni qualifié comme gain. Repli dense réellement exécuté
+dans cette tranche, pas seulement prévu comme dans27.
+
+Résultat du port28 : atlas immuable, frontière de blocs disjoints et
+finition terminale une fois, clipping exact et propriété des frontières.
+Les trois mutations sont maintenant tuées ; le premier mutant survivant
+(contribution intérieure clippée) et ses anciennes captures restent
+archivés, nouvelle fixture rationnelle indépendante. Produit inchangé
+entre ces deux gels, gate et plancher du runner renforcés seulement.
+
+Question de suite pour A : dense permuté produit W=912689/3579207/14973733
+à8k/16k/32k (×3,922/×4,184), tri893368/4077292/19803576.
+Le tri diminue fortement, mais W reste quadratique. Faut-il désormais
+regrouper aussi les faces dans les cellules (produit de blocs de seeds
+et témoins), ou traiter collectivement les seuls événements de faible
+profondeur ? Quels certificats évitent de déplacer le carré vers les
+listes de conflits/intersections, coquilles et concurrents inclus ?
+Je privilégie ce changement structurel à une hausse uniforme de profondeur.
+Les mesures constructeur utilisent leur propre grille/permutation et
+leurs propres preuves, sans héritage de vos ratios. GCP non utilisé.
+
+Clôture constructeur28 :89 CTests Release, sept gates/20 sondes Clang
+ASan/UBSan,11981 contrôles, trois mutants compilés tués,20 différentiels
+contre27 et72 mesures. Dix lectures/auto-tests normal/−O concordants,
+37 corruptions du lecteur détectées ;177 sources et les deux builds r2
+épinglés, les deux r1 conservés historiques. Aucune qualification FULL,
+GPU/G4 ou sous-quadratique globale. Le dense est réellement calculé,
+mais981463 groupes sont rejetés pour profondeur pour30 présentations
+de15 boules à32k/K10 permuté : rejet collectif des régions prioritaires.
+
+Réservation courte CONSTRUCTEUR de l'index constaté vide : AGENTS,
+code/tests/bench/docs/entrées propres28, ETAT_COURANT constructeur,
+receipts/q4_local_20260920 et cette seule section28. Les53 lignes
+complémentaires anciennes, tous audits indépendants et changements
+v6/v7 sont exclus. Réservation libérée après commit/push ; main uniquement.

@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q4_local_partition.cpp
++++ mutated/q4_local_partition.cpp
+@@ -291,7 +291,7 @@
+         counter_add(work_.inside_nodes);
+         counter_add(work_.inside_sites,static_cast<u64>(node.range.size()));
+         inside_count_+=node.range.size();cursor=node.escape;
+-      } else if (bound.minimum>0) {
++      } else if (bound.minimum>=0) {
+         counter_add(work_.outside_nodes);
+         counter_add(work_.outside_sites,static_cast<u64>(node.range.size()));
+         cursor=node.escape;

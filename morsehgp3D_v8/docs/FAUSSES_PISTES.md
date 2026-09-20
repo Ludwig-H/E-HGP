@@ -3,6 +3,24 @@
 13 septembre 2026. Mémoire courte de l'audit et de la première tranche P0.
 Les sources et contre-fixtures complètes sont dans les rapports liés.
 
+## Balayages locaux q4 — tranche28, 20 septembre
+
+- Laisser le budget de classification Z expirer dans une feuille finale
+  fait repayer ses blocs non classés à chaque face. Le premier dense8k
+  relisait72,663M sites. Achever la partition terminale une fois réduit
+  ce total à5,311M ; cette finition reste intégralement mesurée.
+- Une racine hors de la cellule peut contribuer à l'intérieur **partout**
+  sur le segment de la face. Supprimer son événement sans ajouter cette
+  constante fausse le compte. Un mutant survivant de la première gate a
+  motivé une contre-fixture permanente ; anciennes captures conservées.
+- Le clipping supprime surtout du tri, pas les lectures W des actives.
+  Dense permuté : W×3,922 puis×4,184 ; comparaisons×4,564 puis×4,857.
+  Moins de sorties ou une profondeur fixe ne prouve pas le sous-quadratique.
+- Un atlas immuable et quatre appels concurrents valides ne constituent
+  ni un ordonnanceur q4 massivement parallèle, ni un backend GPU qualifié.
+
+Voir [objets, preuve et limites](Q4_FRAGMENTS_ET_BALAYAGES_LOCAUX_20260920.md).
+
 ## Témoins universels q3/q4 — 20 septembre
 
 - Exiger les mêmes témoins sur toute une famille est suffisant, mais non

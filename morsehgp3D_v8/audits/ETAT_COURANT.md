@@ -78,6 +78,25 @@ Les [preuves constructeur](../receipts/q4_center_map_20260920/README.md)
 restent distinctes de l'audit A2920b8b5 et de ses travaux en préparation.
 Pas de FULL, GPU/G4 ou GCP utilisé.
 
+Tranche28 après66b1551f/A5ff70645 : [fragments exacts et balayages locaux](../docs/Q4_FRAGMENTS_ET_BALAYAGES_LOCAUX_20260920.md).
+Comptes exacts non comprimés, blocs spatiaux disjoints, finition terminale
+une fois puis atlas immuable. Le clipping conserve les contributions
+constantes et les contacts ; frontières possédées avant canonisation.
+89 CTests Release, sept gates/vingt sondes Clang ASan/UBSan,11981 contrôles,
+trois mutants compilés,20 différentiels contre27 et72 mesures passent.
+Sources177 et builds q4_local_r2/q4_local_sanitize_r2 épinglés ; lecteurs
+normal/−O concordants. L'ancien mutant d'intérieur clippé survivant reste
+archivé : r2 renforce seulement gate/runner, pas le moteur.
+Les denses sont réellement balayés jusqu'à32k. La permutation donne
+W×3,922/×4,184 et tris×4,564/×4,857 : le carré persiste malgré la baisse
+absolue du travail. Les grands juges valident les boules publiées, pas
+seuls la complétude du générateur ; petits oracles et preuve distincts.
+Prochaine priorité : rejets collectifs entre faces dans les régions
+de faible profondeur, avec coûts des conflits/coquilles. Pas de claim
+sous-quadratique, de WSPD q3/q4 global, FULL ou backend GPU/G4 ; quatre
+appels concurrents ne qualifient pas un ordonnanceur massif. GCP non utilisé.
+Voir les [preuves propres et historique](../receipts/q4_local_20260920/README.md).
+
 ## Historique : vingt-et-unième tranche publiée à3e94c868
 
 Vingt-et-unième tranche P0 close,

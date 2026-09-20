@@ -1,0 +1,22 @@
+{
+  "kind": "closed_cell_emits_without_ownership_link",
+  "command": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "/workspaces/E-HGP/build/v8_q4_local_r2_20260920/CMakeFiles/mhgp8_q4_local_gate.dir/tests/q4_local_gate.cpp.o",
+    "/tmp/mhgp8_q4_local_mutants_tu_g4eql/closed_cell_emits_without_ownership.o",
+    "/workspaces/E-HGP/build/v8_q4_local_r2_20260920/libmhgp8_p0.a",
+    "-pthread",
+    "-o",
+    "/tmp/mhgp8_q4_local_mutants_tu_g4eql/closed_cell_emits_without_ownership"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T20:41:53.917652+00:00",
+  "expected_exit_code": 0,
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "stdout_base64": "",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-20T20:41:53.995851+00:00"
+}

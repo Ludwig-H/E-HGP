@@ -103,6 +103,21 @@ exact local du résidu, sans recycler les listes de filtre comme census.
 Pas de borne sous-quadratique globale, de FULL ou de contrat G4 acquis.
 Voir les [résultats, limites et preuves](receipts/q4_center_map_20260920/README.md).
 
+La tranche28 exécute les [balayages exacts locaux q4](docs/Q4_FRAGMENTS_ET_BALAYAGES_LOCAUX_20260920.md)
+après partition des témoins par blocs, partagée entre faces dans un atlas
+immuable. Les racines hors cellule quittent le tri mais gardent leur
+contribution constante ; contacts et coquilles restent complets.
+89 CTests Release, sept gates/20 sondes Clang ASan/UBSan,11981 contrôles,
+trois mutants compilés,20 différentiels et72 mesures passent.
+Le dense est cette fois réellement calculé à8k/16k/32k : préfixe
+5,311M/13,799M/15,791M lectures ; permutation0,913M/3,579M/14,974M.
+**Le carré demeure dans la permutation** (×3,922/×4,184 ; tris×4,564/×4,857).
+La finition terminale partagée évite beaucoup de travail, sans borne
+globale sous-quadratique. Suite : partager aussi les décisions entre faces,
+pas seulement entre témoins. Ce chemin q4 seul n'est ni q3 global, ni
+FULL ou un backend GPU ; défauts précédents inchangés, GCP non utilisé.
+Voir les [preuves, échec r1 conservé et résultats](receipts/q4_local_20260920/README.md).
+
 ## Vingt-et-unième tranche publiée à3e94c868 — historique
 
 La vingt-et-unième tranche transmet aux enfants les

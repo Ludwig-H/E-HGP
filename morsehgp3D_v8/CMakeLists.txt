@@ -16,7 +16,8 @@ add_library(mhgp8_p0 STATIC src/pipeline/local_credits.cpp src/pipeline/axis_q2.
   src/lanes/edge_cover.cpp src/lanes/q34_cover.cpp
   src/lanes/family_certificate.cpp src/lanes/q34_pruning.cpp
   src/lanes/q34_collective.cpp src/lanes/q4_positive_domain.cpp
-  src/lanes/q4_center_map.cpp)
+  src/lanes/q4_center_map.cpp src/lanes/q4_local_partition.cpp
+  src/lanes/q4_local.cpp)
 target_include_directories(mhgp8_p0 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_features(mhgp8_p0 PUBLIC cxx_std_20)
 set_target_properties(mhgp8_p0 PROPERTIES CXX_EXTENSIONS OFF)
@@ -73,6 +74,10 @@ add_executable(mhgp8_q34_collective_probe bench/q34_collective_probe.cpp)
 target_link_libraries(mhgp8_q34_collective_probe PRIVATE mhgp8_p0)
 add_executable(mhgp8_q4_center_map_probe bench/q4_center_map_probe.cpp)
 target_link_libraries(mhgp8_q4_center_map_probe PRIVATE mhgp8_p0)
+add_executable(mhgp8_q4_local_probe bench/q4_local_probe.cpp)
+target_link_libraries(mhgp8_q4_local_probe PRIVATE mhgp8_p0)
+find_package(Boost REQUIRED)
+target_include_directories(mhgp8_q4_local_probe SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
 
 if(BUILD_TESTING)
   # Boost arbitrary precision is used only by the bounded independent judge.
@@ -80,7 +85,7 @@ if(BUILD_TESTING)
   foreach(gate IN ITEMS q2_node_pool q2_terminal_pool wspd_front_jobs wspd_q2_parallel
       wspd_front_dispatch wspd_q2_dynamic q2_census_resume q2_census_detach q2_census_parallel
       wspd_q2_cooperative wspd_q2_ranges wspd_q2_batched wspd_q2_proposals wspd_front_inheritance
-      q4_family exact_ball q34_seed q34_cover q34_family_pruning q34_collective q4_center_map)
+      q4_family exact_ball q34_seed q34_cover q34_family_pruning q34_collective q4_center_map q4_local)
     add_executable(mhgp8_${gate}_gate tests/${gate}_gate.cpp)
     target_include_directories(mhgp8_${gate}_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     target_include_directories(mhgp8_${gate}_gate SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})

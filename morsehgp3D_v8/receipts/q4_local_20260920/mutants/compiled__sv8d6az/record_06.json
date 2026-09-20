@@ -1,0 +1,17 @@
+{
+  "kind": "clipped_inside_contribution_lost_oracle",
+  "command": [
+    "/tmp/mhgp8_q4_local_mutants_tu_g4eql/clipped_inside_contribution_lost",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T20:41:51.672814+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "q4 local gate: local sweep lost a rational ball, depth, canonical support or complete shell\n",
+  "stdout_base64": "",
+  "stderr_base64": "cTQgbG9jYWwgZ2F0ZTogbG9jYWwgc3dlZXAgbG9zdCBhIHJhdGlvbmFsIGJhbGwsIGRlcHRoLCBjYW5vbmljYWwgc3VwcG9ydCBvciBjb21wbGV0ZSBzaGVsbAo=",
+  "finished_utc": "2026-09-20T20:41:51.675641+00:00"
+}

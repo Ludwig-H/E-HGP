@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q4_local.cpp
++++ mutated/q4_local.cpp
+@@ -268,7 +268,7 @@
+       inside-=exits;counter_add(work.groups);
+       work.max_group=std::max(work.max_group,static_cast<u64>(last-first));
+       counter_add(work.root_locations);
+-      if(!contains(c,intersection(line,geometry.form(events[first])),true)) {
++      if(!contains(c,intersection(line,geometry.form(events[first])),false)) {
+         counter_add(work.boundary_skips);counter_add(work.boundary_skipped_ids,static_cast<u64>(last-first));
+       } else if(inside>=atlas->kmax()-2) {
+         counter_add(work.depth_rejections);counter_add(work.depth_skipped_ids,static_cast<u64>(last-first));

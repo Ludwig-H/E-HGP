@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q4_local.cpp
++++ mutated/q4_local.cpp
+@@ -237,7 +237,7 @@
+             counter_add(work.clipped_events);
+             const auto value=evaluate(f,origin);
+             if(value==0) throw std::logic_error("mhgp8 clipped event vanishes in closed cell");
+-            if(value<0) {++inside;++base;counter_add(work.clipped_inside);}
++            if(value<0) {counter_add(work.clipped_inside);}
+             continue;
+           }
+         }
