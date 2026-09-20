@@ -1,0 +1,17 @@
+{
+  "kind": "sqrt_bound_truncated_oracle",
+  "command": [
+    "/tmp/mhgp8_q34_pruning_mutants_ewuk08xf/sqrt_bound_truncated",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T15:57:48.238403+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "q34 family pruning gate: integer Jung bound differs from multiprecision ceil sqrt\n",
+  "stdout_base64": "",
+  "stderr_base64": "cTM0IGZhbWlseSBwcnVuaW5nIGdhdGU6IGludGVnZXIgSnVuZyBib3VuZCBkaWZmZXJzIGZyb20gbXVsdGlwcmVjaXNpb24gY2VpbCBzcXJ0Cg==",
+  "finished_utc": "2026-09-20T15:57:48.242656+00:00"
+}

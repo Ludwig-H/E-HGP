@@ -10,6 +10,31 @@ qualification de son propre code.
 
 ## À reprendre maintenant
 
+La tranche25 ajoute le [pool universel partagé](docs/Q3_Q4_REJET_FAMILIAL_20260920.md)
+et deux entrées explicites `run_q34_pruned_*`. Le défaut couvert historique
+reste inchangé. Les témoins sont proposés par positions spatiales
+floor(i*m/C), pas par premiers IDs ; C est un coût de proposition, pas
+une troncature. Deux seuils indépendants, aucun crédit ajouté au repli,
+q3 seul réellement saturant si q4 est rejeté. Le pool possède cover/index.
+
+Qualification :86 CTests Release, quatre portes/18 sondes sous Clang
+ASan/UBSan,96 mesures closes, lecteurs normal/−O. La baisse de lectures
+sur le petit adversaire ne borne pas les familles denses à8k/16k/32k.
+Lire les [reçus et limites](receipts/q34_pruning_20260920/README.md).
+Builds q34_pruning et q34_pruning_sanitize du20260920 à conserver épinglés.
+
+Suite prioritaire : comparer le minimum collectif du même pool et la
+corde resserrée proposés par l'[auditeur A à4215dd16](audits/q34_collectif_20260920/README.md),
+sur échec du certificat simple et en payant leurs tris. Ses résultats
+utilisent un autre pool ; aucun gain ni preuve produit n'est hérité.
+Si le grand résidu demeure, passer au traitement de blocs dans le plan
+des centres commun à l'arête, pas à de nouvelles constantes de pool.
+Ne pas construire l'arrangement complet des droites, potentiellement
+quadratique. Le générateur WSPD global, catalogue, intérieurs après
+regroupement, FULL et GPU/G4 restent à construire ; GCP non utilisé.
+
+### Tranche24 précédente close à77f659e4
+
 La tranche24 ajoute les [covers partagés par arête](docs/Q3_Q4_COVERS_PARTAGES_20260920.md)
 et la génération de toutes ses faces aiguës propriétaires. L'ancien raccord
 par seed reste une référence inchangée. Les émissions du raccord couvert

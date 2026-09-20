@@ -1,0 +1,22 @@
+{
+  "kind": "q4_rejection_kills_q3_link",
+  "command": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "/workspaces/E-HGP/build/v8_q34_pruning_20260920/CMakeFiles/mhgp8_q34_family_pruning_gate.dir/tests/q34_family_pruning_gate.cpp.o",
+    "/tmp/mhgp8_q34_pruning_mutants_ewuk08xf/q4_rejection_kills_q3.o",
+    "/workspaces/E-HGP/build/v8_q34_pruning_20260920/libmhgp8_p0.a",
+    "-pthread",
+    "-o",
+    "/tmp/mhgp8_q34_pruning_mutants_ewuk08xf/q4_rejection_kills_q3"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T15:57:50.255044+00:00",
+  "expected_exit_code": 0,
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "stdout_base64": "",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-20T15:57:50.323410+00:00"
+}

@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/family_certificate.cpp
++++ mutated/family_certificate.cpp
+@@ -86,7 +86,7 @@
+   // If |mu|<=U, P-mu*B<=P+U*|B|. Strict negativity certifies every
+   // positive q4 completion with maximal edge ab, including both mu signs.
+   const i128 maximum_power = power + static_cast<i128>(parameter_bound_) * absolute_side;
+-  return {power < 0, maximum_power < 0};
++  return {power < 0, maximum_power <= 0};
+ }
+ 
+ }  // namespace mhgp8

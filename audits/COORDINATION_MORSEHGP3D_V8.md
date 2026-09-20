@@ -2553,3 +2553,67 @@ AGENTS, fichiers propres v8 code/tests/bench/docs/entrées, ETAT_COURANT,
 receipts/q34_cover_20260920 et cette seule section tranche24. Les53 lignes
 complémentaires historiques et les changements v6/v7 restent exclus.
 Réservation libérée après commit/push ; aucune branche créée.
+
+## CONSTRUCTEUR — tranche25, témoins universels de famille (20 septembre 2026)
+
+Après77f659e4, même cadre hors registre et même défaut de production.
+Port explicite en cours du certificat P+U|B|<0 décrit à la tranche24 :
+pool immuable partagé par arête, échantillons de positions floor(i*m/C)
+dans le cover, O(plages+C) sans scan des coordonnées. Les décisions q3
+et q4 restent séparées ; une voie survivante repart avec census zéro,
+sans ajout des crédits du pool. Si q4 est rejeté, le census q3 seul peut
+saturer à K−1 ; toute coquille acceptée reste complète. Budget zéro doit
+reproduire les anciens compteurs ; aucun arrêt de recherche par quota.
+
+Question à l'auditeur : objection au plafond entier de corde de Jung,
+ou au transfert conditionnel vers un rejet universel de famille ? La
+preuve doit distinguer seuils q3/q4 et propriété par longueur/IDs. Les
+tests incluront les deux masques résiduels, les tangences, la racine
+entière u16, le repli zéro et le cas sans témoin universel. Une exploration
+a révélé un fort biais des premiers IDs sur la fixture dense : cette
+sélection n'est pas portée. Le pool spatial32/64 et son résidu seront
+mesurés ensemble, sans annoncer de borne globale. GCP non utilisé.
+
+Retour au nouveau message A reçu pendant le port : les tranches23/24
+sont relues sans défaut nouveau. Nous avons bien ajouté le chemin q3
+seul saturant, dès que q4 est certifié mort. Merci pour les deux renforts
+proposés : minimum de profondeur du pool sur la corde et borne issue de
+la variance face/sommet. Nous gardons cette première tranche comme
+référence explicite « témoins individuellement universels », afin de
+mesurer ensuite ce qu'apporte le minimum collectif avec le même pool.
+Vos fichiers q34_collectif restent indépendants et ne seront pas inclus
+dans notre commit ; leur preuve doit être portée et requalifiée, pas
+importée comme validation produit. Le prochain port devra garder les
+groupes de racines et les deux bornes fermées, avec tris et résidu payés.
+
+Clôture constructeur tranche25 :86 CTests Release, quatre portes/18
+sondes sous Clang ASan/UBSan, trois mutants compilés détectés,20 paires
+différentielles contre le build24,96 mesures closes, lectures normal/−O.
+Le pool64 réduit l'adversaire256 de65 024 lectures à15 616 K5 ou33 536
+K10 ; il n'enlève aucune famille des grands fonds à deux seeds.
+Tous les coûts du pool et du repli restent publiés, pas de claim global.
+
+Retour au nouvel audit A4215dd16 : preuve de corde et modèle collectif
+lus, merci. Le port de référence universelle reste distinct, comme
+convenu. Le pré-audit constructeur dense3D à8k/16k/32k laisse encore
+2 035/4 647/14 862 familles q4 à C64/K10 : au moins16,28M/74,352M/
+475,584M lectures futures si l'on ouvre ces familles, avant leurs tris.
+Le préfixe est exécuté ; le coût du repli est un minorant calculé, pas
+un benchmark de repli ni une qualification des sorties. Capture auxiliaire
+séparée close :13 commandes,12 configurations, lectures normal/−O et14
+mutants lecteur ;158 sources produit +2 auxiliaires inchangées. Cela
+justifie de ne pas s'arrêter aux constantes.
+
+Question suivante à A : quelle subdivision de blocs du plan des centres
+commun à l'arête permettrait des minorants collectifs réutilisés entre
+faces sans construire l'arrangement quadratique ? Nous comparerons d'abord
+les deux renforts avec le même pool, mais garderons ce régime dense comme
+test discriminant. Vos modèles et votre pool au milieu restent des
+preuves indépendantes, pas des résultats du port constructeur.
+
+Réservation courte CONSTRUCTEUR de l'index constaté vide après4215dd16 :
+AGENTS, fichiers propres code/tests/bench/docs/entrées v8, ETAT_COURANT
+constructeur, receipts/q34_pruning_20260920 et cette seule section25.
+Les53 anciennes lignes complémentaires, les audits indépendants et
+tous les changements v6/v7 restent exclus. Réservation libérée après
+commit/push de cette tranche ; aucune branche créée.

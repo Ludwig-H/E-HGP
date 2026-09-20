@@ -1,0 +1,28 @@
+{
+  "kind": "sqrt_bound_truncated_compile",
+  "command": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "-std=c++20",
+    "-O3",
+    "-DNDEBUG",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-I/workspaces/E-HGP/morsehgp3D_v8/src",
+    "-c",
+    "/tmp/mhgp8_q34_pruning_mutants_ewuk08xf/sqrt_bound_truncated.cpp",
+    "-o",
+    "/tmp/mhgp8_q34_pruning_mutants_ewuk08xf/sqrt_bound_truncated.o"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T15:57:47.417225+00:00",
+  "expected_exit_code": 0,
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "stdout_base64": "",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-20T15:57:48.166767+00:00"
+}

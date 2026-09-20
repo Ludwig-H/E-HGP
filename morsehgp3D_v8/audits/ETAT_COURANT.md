@@ -32,6 +32,19 @@ compilés et32 mesures. Sources151 et deux builds q34_cover épinglés,
 lectures normal/−O closes. La fixture adverse garde14/54 sorties K5/10
 mais n(n−2) lectures ; le partage du stockage ne clôt donc pas P0.
 
+Tranche25 après77f659e4 : [témoins universels de famille](../docs/Q3_Q4_REJET_FAMILIAL_20260920.md).
+Préfixe exact i128, pool spatial commun par arête, deux voies certifiées
+séparément. Le test q4 universel implique l'intérieur q3 d'un site, pas
+le rejet q3 de la face : seuils différents. Les oracles exercent les
+deux masques restants et le compte zéro du repli.86 CTests Release,
+quatre portes/18 sondes Clang ASan/UBSan et96 mesures clos ; lectures
+normal/−O identiques. Les158 sources et deux builds pruning sont épinglés.
+Le petit adversaire est réduit, pas supprimé ; les grands fonds ne
+gagnent aucun rejet. Pas de borne sous-quadratique globale, pas de FULL.
+Le [retour indépendant A à4215dd16](q34_collectif_20260920/README.md)
+confirme le certificat initial et propose minimum collectif et corde
+resserrée ; ces renforts ne sont pas portés dans cette tranche.
+
 ## Historique : vingt-et-unième tranche publiée à3e94c868
 
 Vingt-et-unième tranche P0 close,

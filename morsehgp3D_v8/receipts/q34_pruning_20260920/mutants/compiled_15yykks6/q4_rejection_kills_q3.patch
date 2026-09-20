@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q34_cover.cpp
++++ mutated/q34_cover.cpp
+@@ -152,7 +152,7 @@
+       if (q4_active && witness.q4) {
+         ++credit4;
+         counter_add(pruning->q4_credits);
+-        if (credit4 == kmax - 2) q4_active = false;
++        if (credit4 == kmax - 2) { q4_active = false; q3_active = false; }
+       }
+       if (!q3_active && !q4_active) break;
+     }

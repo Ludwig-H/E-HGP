@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/family_certificate.cpp
++++ mutated/family_certificate.cpp
+@@ -45,7 +45,7 @@
+   const i128 previous = static_cast<i128>(high) - 1;
+   if (static_cast<i128>(high) * high < target || previous * previous >= target)
+     throw std::logic_error("mhgp8 family square root enclosure failed");
+-  return {high, iterations};
++  return {static_cast<i128>(high) * high == target ? high : high - 1, iterations};
+ }
+ 
+ }  // namespace

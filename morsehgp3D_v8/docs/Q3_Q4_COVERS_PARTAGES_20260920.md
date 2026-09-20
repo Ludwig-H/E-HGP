@@ -136,7 +136,12 @@ arête fournie et devra être mesuré au raccord WSPD réel.
 Catalogue canonique, q minimal, collecte des intérieurs après regroupement,
 reconstruction FULL, GPU/G4 et contrats restent ouverts. GCP non utilisé.
 
-### Proposition mathématique pour la tranche suivante, non implémentée
+### Proposition mathématique initiale, portée depuis dans la tranche25
+
+La [tranche25](Q3_Q4_REJET_FAMILIAL_20260920.md) implémente désormais ce
+certificat avec ses propres sources, portes et reçus. Le texte ci-dessous
+conserve le raisonnement de la proposition initiale ; les mesures et
+qualifications de cette note tranche24 restent attachées à leurs151 sources.
 
 Une contrelecture propose un certificat universel d'une famille avant de
 construire ses événements. Ici D désigne **la distance au carré** ab²,

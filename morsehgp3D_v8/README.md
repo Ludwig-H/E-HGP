@@ -66,6 +66,18 @@ Qualification :85 CTests Release, trois portes/six sondes sous Clang
 ASan/UBSan, trois mutants compilés et32 mesures closes. Voir les
 [résultats et contre-régimes](receipts/q34_cover_20260920/README.md).
 
+La tranche25 ajoute le [rejet universel d'une famille entière](docs/Q3_Q4_REJET_FAMILIAL_20260920.md)
+avant ses événements : petit pool partagé par arête, décisions q3/q4
+indépendantes, repli exact à compte zéro.86 CTests Release, quatre
+portes et18 sondes Clang ASan/UBSan passent ;96 mesures et lectures
+normal/−O sont closes. Sur l'adversaire256, pool64, les lectures tombent
+de65 024 à15 616 (K5) ou33 536 (K10). Les fonds8k/16k/32k n'ont aucun
+rejet supplémentaire : le filtre n'est pas un gain universel. Le terme
+faces survivantes × taille du cover reste ouvert ; cette option ne
+qualifie ni un générateur sous-quadratique global ni la tour G4.
+Les [reçus](receipts/q34_pruning_20260920/README.md) comptent préparation,
+propositions, racines entières, scans, tris et sorties, avec contre-régimes.
+
 ## Vingt-et-unième tranche publiée à3e94c868 — historique
 
 La vingt-et-unième tranche transmet aux enfants les

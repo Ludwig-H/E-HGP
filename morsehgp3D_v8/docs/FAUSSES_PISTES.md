@@ -3,6 +3,30 @@
 13 septembre 2026. Mémoire courte de l'audit et de la première tranche P0.
 Les sources et contre-fixtures complètes sont dans les rapports liés.
 
+## Témoins universels q3/q4 — 20 septembre
+
+- Exiger les mêmes témoins sur toute une famille est suffisant, mais non
+  nécessaire. Un ensemble peut garantir une profondeur minimale alors
+  qu'aucun de ses points n'est intérieur partout. Le prochain certificat
+  collectif doit distinguer ces deux propriétés.
+- Un seuil de propositions32/64 n'est pas un plafond de recherche : en
+  cas d'échec du certificat, le parcours exact subsiste. Le budget peut
+  limiter le coût du préfixe sans limiter le nombre de résultats.
+- Même si un témoin q4 universel est aussi intérieur au q3 de la face,
+  les seuils K−2 et K−1 diffèrent. Tuer q3 parce que q4 a été rejeté perd
+  des résultats ; une fixture et un mutant compilé visent cette erreur.
+- Ne pas ajouter les crédits du pool au census de repli. Les témoins y
+  sont rencontrés à nouveau ; sans identités exclues, ils seraient comptés
+  deux fois. Cette tranche repart de zéro.
+- Les premiers IDs ont montré un fort biais dans une exploration avec
+  réindexation du nuage. Le pool produit échantillonne les rangs spatiaux,
+  sans prétendre que ce choix garantit des rejets ou un coût sous-quadratique.
+- Éviter P² en i128 pour vérifier la corde. Le test sûr utilise une racine
+  entière arrondie **vers le haut**, puis P+U|B|<0 ; la tangence n'est pas
+  un témoin strict. Les mutants vérifient ces décisions.
+
+Voir [preuve et limites du filtre](Q3_Q4_REJET_FAMILIAL_20260920.md).
+
 ## Covers q3/q4 — 20 septembre
 
 - Partager le stockage d'une région de témoins ne partage pas les scans

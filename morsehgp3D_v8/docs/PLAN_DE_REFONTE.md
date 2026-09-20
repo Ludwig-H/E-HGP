@@ -24,6 +24,17 @@ comptage **collectifs entre familles**, pas la parallélisation de ce carré,
 avant généralisation au front WSPD q3/q4. La campagne adverse conserve
 ce défaut visible ; ne pas déduire une borne globale du seul fond lointain.
 
+Après77f659e4, le [rejet universel de famille](Q3_Q4_REJET_FAMILIAL_20260920.md)
+ajoute un petit pool spatial partagé par arête. Il supprime réellement des
+familles avant leurs événements, avec masques q3/q4 indépendants et repli
+à compte zéro. C'est une référence utile, **pas la fermeture du carré**.
+Priorité suivante issue du dialogue A : calculer le minimum de profondeur
+du même pool sur la corde q4 fermée ; les témoins peuvent changer le long
+de cette corde. Compter tris, extrémités, groupes égaux et résidu aval.
+La borne resserrée de corde est une proposition mathématique distincte,
+dont l'arithmétique doit être prouvée avant port. Ne pas déplacer le carré
+vers un prétraitement exhaustif de témoins ni vers des milliers de copies.
+
 Suivi du 14 septembre : le [raccord direct front → census q2](P0_FRONT_ET_CENSUS_Q2.md)
 est implémenté. Il retire factories, copies et arbres B par rectangle,
 sans filtre axial obligatoire. Il reste à réduire le coût du front et

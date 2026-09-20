@@ -1,0 +1,17 @@
+{
+  "kind": "baseline_q34_family_pruning",
+  "command": [
+    "/workspaces/E-HGP/build/v8_q34_pruning_20260920/mhgp8_q34_family_pruning_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T15:57:46.645246+00:00",
+  "expected_exit_code": 0,
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"schema\":\"mhgp8_q34_family_pruning_gate_v1\",\"status\":\"passed\",\"checks\":5176,\"primitive_calls\":178,\"refused\":74,\"certified_q3\":190,\"certified_q4\":170,\"positive_completions\":92,\"universal_inside_checks\":162,\"strict_boundary\":12,\"nonintegral_radius_bounds\":32,\"max_j_bits\":98,\"max_product_bits\":97,\"edge_calls\":63,\"seed_calls\":129,\"reference_calls\":192,\"oracle_completions\":985,\"oracle_sites\":2201,\"candidates\":106,\"q3\":71,\"q4\":35,\"max_shell\":30,\"q3_only_rejections\":11,\"q4_only_rejections\":9,\"both_rejections\":5,\"neither_rejections\":92,\"saved_site_reads\":54,\"pool_calls\":64,\"exhaustive_edges\":20,\"permutations\":169,\"invalid_inputs\":9,\"callback_failures\":1,\"parallel_calls\":4}\n",
+  "stderr": "",
+  "stdout_base64": "eyJzY2hlbWEiOiJtaGdwOF9xMzRfZmFtaWx5X3BydW5pbmdfZ2F0ZV92MSIsInN0YXR1cyI6InBhc3NlZCIsImNoZWNrcyI6NTE3NiwicHJpbWl0aXZlX2NhbGxzIjoxNzgsInJlZnVzZWQiOjc0LCJjZXJ0aWZpZWRfcTMiOjE5MCwiY2VydGlmaWVkX3E0IjoxNzAsInBvc2l0aXZlX2NvbXBsZXRpb25zIjo5MiwidW5pdmVyc2FsX2luc2lkZV9jaGVja3MiOjE2Miwic3RyaWN0X2JvdW5kYXJ5IjoxMiwibm9uaW50ZWdyYWxfcmFkaXVzX2JvdW5kcyI6MzIsIm1heF9qX2JpdHMiOjk4LCJtYXhfcHJvZHVjdF9iaXRzIjo5NywiZWRnZV9jYWxscyI6NjMsInNlZWRfY2FsbHMiOjEyOSwicmVmZXJlbmNlX2NhbGxzIjoxOTIsIm9yYWNsZV9jb21wbGV0aW9ucyI6OTg1LCJvcmFjbGVfc2l0ZXMiOjIyMDEsImNhbmRpZGF0ZXMiOjEwNiwicTMiOjcxLCJxNCI6MzUsIm1heF9zaGVsbCI6MzAsInEzX29ubHlfcmVqZWN0aW9ucyI6MTEsInE0X29ubHlfcmVqZWN0aW9ucyI6OSwiYm90aF9yZWplY3Rpb25zIjo1LCJuZWl0aGVyX3JlamVjdGlvbnMiOjkyLCJzYXZlZF9zaXRlX3JlYWRzIjo1NCwicG9vbF9jYWxscyI6NjQsImV4aGF1c3RpdmVfZWRnZXMiOjIwLCJwZXJtdXRhdGlvbnMiOjE2OSwiaW52YWxpZF9pbnB1dHMiOjksImNhbGxiYWNrX2ZhaWx1cmVzIjoxLCJwYXJhbGxlbF9jYWxscyI6NH0K",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-20T15:57:46.684604+00:00"
+}

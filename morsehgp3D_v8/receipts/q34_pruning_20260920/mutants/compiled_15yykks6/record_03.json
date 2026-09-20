@@ -1,0 +1,17 @@
+{
+  "kind": "q4_tangency_credited_oracle",
+  "command": [
+    "/tmp/mhgp8_q34_pruning_mutants_ewuk08xf/q4_tangency_credited",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T15:57:47.412329+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "q34 family pruning gate: witness flags differ from rational strict certificate\n",
+  "stdout_base64": "",
+  "stderr_base64": "cTM0IGZhbWlseSBwcnVuaW5nIGdhdGU6IHdpdG5lc3MgZmxhZ3MgZGlmZmVyIGZyb20gcmF0aW9uYWwgc3RyaWN0IGNlcnRpZmljYXRlCg==",
+  "finished_utc": "2026-09-20T15:57:47.414921+00:00"
+}

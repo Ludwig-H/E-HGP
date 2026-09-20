@@ -1,0 +1,17 @@
+{
+  "kind": "q4_rejection_kills_q3_oracle",
+  "command": [
+    "/tmp/mhgp8_q34_pruning_mutants_ewuk08xf/q4_rejection_kills_q3",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T15:57:50.323795+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "q34 family pruning gate: pruned seed differs from rational complete census, depth or shell\n",
+  "stdout_base64": "",
+  "stderr_base64": "cTM0IGZhbWlseSBwcnVuaW5nIGdhdGU6IHBydW5lZCBzZWVkIGRpZmZlcnMgZnJvbSByYXRpb25hbCBjb21wbGV0ZSBjZW5zdXMsIGRlcHRoIG9yIHNoZWxsCg==",
+  "finished_utc": "2026-09-20T15:57:50.336846+00:00"
+}

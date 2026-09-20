@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_q34_pruning_checks.py",
+    "read",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/q34_pruning_20260920/smoke_n8zdc_in",
+    "--check-live"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T16:00:00.966683+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"baseline_and_pruned_share_preparation\": true, \"campaign\": \"smoke\", \"dense_large_seed_growth_not_executed\": true, \"full_contract_qualified\": false, \"general_subquadratic_bound\": false, \"growth\": {}, \"measurements\": 18, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q34_pruning_20260920/smoke_n8zdc_in\", \"pool_preparation_charged\": true, \"records\": 22, \"scope\": \"one_edge_family_pruning_not_global_q34_producer\", \"sources\": 158, \"status\": \"passed\"}\n",
+  "stderr": "",
+  "stdout_base64": "eyJiYXNlbGluZV9hbmRfcHJ1bmVkX3NoYXJlX3ByZXBhcmF0aW9uIjogdHJ1ZSwgImNhbXBhaWduIjogInNtb2tlIiwgImRlbnNlX2xhcmdlX3NlZWRfZ3Jvd3RoX25vdF9leGVjdXRlZCI6IHRydWUsICJmdWxsX2NvbnRyYWN0X3F1YWxpZmllZCI6IGZhbHNlLCAiZ2VuZXJhbF9zdWJxdWFkcmF0aWNfYm91bmQiOiBmYWxzZSwgImdyb3d0aCI6IHt9LCAibWVhc3VyZW1lbnRzIjogMTgsICJwYXRoIjogIi93b3Jrc3BhY2VzL0UtSEdQL21vcnNlaGdwM0RfdjgvcmVjZWlwdHMvcTM0X3BydW5pbmdfMjAyNjA5MjAvc21va2Vfbjh6ZGNfaW4iLCAicG9vbF9wcmVwYXJhdGlvbl9jaGFyZ2VkIjogdHJ1ZSwgInJlY29yZHMiOiAyMiwgInNjb3BlIjogIm9uZV9lZGdlX2ZhbWlseV9wcnVuaW5nX25vdF9nbG9iYWxfcTM0X3Byb2R1Y2VyIiwgInNvdXJjZXMiOiAxNTgsICJzdGF0dXMiOiAicGFzc2VkIn0K",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-20T16:00:01.070067+00:00"
+}
