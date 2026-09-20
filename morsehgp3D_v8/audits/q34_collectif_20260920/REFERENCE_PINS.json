@@ -1,0 +1,13 @@
+{
+  "commit": "77f659e4db6213c729eb648362f3cebbba67dcd7",
+  "scope": "reference sources read; not imported by mathematical models",
+  "sha256": {
+    "morsehgp3D_v8/bench/q34_cover_probe.cpp": "d1bd34308488ac880cc6ea7290df1ecf487f635582cc669b1a9435fbb629f792",
+    "morsehgp3D_v8/docs/Q3_Q4_COVERS_PARTAGES_20260920.md": "982a014c22dc02689f8f208efbfd7aa6887657b102c98d9ebeec419f23472f82",
+    "morsehgp3D_v8/docs/Q3_Q4_CANDIDATS_PAR_SEED_20260920.md": "0122fed7b7d0b6438561e6eeb7931a0f6b0a4fb68025310777e282d2a2f9aafe",
+    "morsehgp3D_v8/src/lanes/q34_cover.cpp": "b26421c6da7993a5d17284afda83e5c9a66e5c6f8072be8bfb437b5022de0a62",
+    "morsehgp3D_v8/src/lanes/q34_seed.cpp": "f297bb0bd01e8a2e4d976c028a54c0a5344aa3dab2a654e4f32046a154b40e8f",
+    "morsehgp3D_v8/src/lanes/exact_ball.cpp": "463410d67df32e83d32045b5b1c07df6db16588adc410acf568f24f6859f0022",
+    "morsehgp3D_v8/src/lanes/edge_cover.cpp": "a562527ad8f9fea78b663b75ff34d191a87d0c7dc112ceff703f3516678c9120"
+  }
+}

@@ -1,0 +1,726 @@
+{
+  "input_sha256": {
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n8000.u16le": "ed5aa97941551e027a76d7c4eb4a03c739cdf0a83cbaf53035c1536bed0b5194",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n8000.u16le": "813d595e799ff00d93fb94980d2e406c3775217b93aa4efbea0a675aaab3b402",
+    "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n8000.u16le": "edc1a7980b366034984d0c3b020f5fa94777277b1618db7c16116c5ccfea4446"
+  },
+  "results": [
+    {
+      "baseline_scan": 960,
+      "case": "constructor_adversarial",
+      "cost_not_measured": "heap comparisons, pool sorting, family sort/positivity/callback; no timing claim",
+      "cover_point_checks": 32,
+      "covered": 32,
+      "edge_ids": [
+        0,
+        1
+      ],
+      "kmax": 5,
+      "methods": {
+        "new_collective": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 960
+        },
+        "new_universal": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 960
+        },
+        "old_collective": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 960
+        },
+        "old_universal": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 960
+        }
+      },
+      "n": 32,
+      "pool_distance_keys": 30,
+      "pool_forms": 600,
+      "pool_size": 20,
+      "q3_rejected": 22,
+      "seed_point_checks": 30,
+      "seeds": 30,
+      "strictly_tighter_integer_bounds": 30
+    },
+    {
+      "baseline_scan": 960,
+      "case": "constructor_adversarial",
+      "cost_not_measured": "heap comparisons, pool sorting, family sort/positivity/callback; no timing claim",
+      "cover_point_checks": 32,
+      "covered": 32,
+      "edge_ids": [
+        0,
+        1
+      ],
+      "kmax": 10,
+      "methods": {
+        "new_collective": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 960
+        },
+        "new_universal": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 960
+        },
+        "old_collective": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 960
+        },
+        "old_universal": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 960
+        }
+      },
+      "n": 32,
+      "pool_distance_keys": 30,
+      "pool_forms": 900,
+      "pool_size": 30,
+      "q3_rejected": 12,
+      "seed_point_checks": 30,
+      "seeds": 30,
+      "strictly_tighter_integer_bounds": 30
+    },
+    {
+      "baseline_scan": 3968,
+      "case": "constructor_adversarial",
+      "cost_not_measured": "heap comparisons, pool sorting, family sort/positivity/callback; no timing claim",
+      "cover_point_checks": 64,
+      "covered": 64,
+      "edge_ids": [
+        0,
+        1
+      ],
+      "kmax": 5,
+      "methods": {
+        "new_collective": {
+          "both_rejected": 22,
+          "q4_rejected": 24,
+          "residual_scan_upper_bound": 2560
+        },
+        "new_universal": {
+          "both_rejected": 20,
+          "q4_rejected": 20,
+          "residual_scan_upper_bound": 2688
+        },
+        "old_collective": {
+          "both_rejected": 14,
+          "q4_rejected": 16,
+          "residual_scan_upper_bound": 3072
+        },
+        "old_universal": {
+          "both_rejected": 12,
+          "q4_rejected": 12,
+          "residual_scan_upper_bound": 3200
+        }
+      },
+      "n": 64,
+      "pool_distance_keys": 62,
+      "pool_forms": 1240,
+      "pool_size": 20,
+      "q3_rejected": 54,
+      "seed_point_checks": 62,
+      "seeds": 62,
+      "strictly_tighter_integer_bounds": 62
+    },
+    {
+      "baseline_scan": 3968,
+      "case": "constructor_adversarial",
+      "cost_not_measured": "heap comparisons, pool sorting, family sort/positivity/callback; no timing claim",
+      "cover_point_checks": 64,
+      "covered": 64,
+      "edge_ids": [
+        0,
+        1
+      ],
+      "kmax": 10,
+      "methods": {
+        "new_collective": {
+          "both_rejected": 18,
+          "q4_rejected": 18,
+          "residual_scan_upper_bound": 2816
+        },
+        "new_universal": {
+          "both_rejected": 8,
+          "q4_rejected": 8,
+          "residual_scan_upper_bound": 3456
+        },
+        "old_collective": {
+          "both_rejected": 10,
+          "q4_rejected": 10,
+          "residual_scan_upper_bound": 3328
+        },
+        "old_universal": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 3968
+        }
+      },
+      "n": 64,
+      "pool_distance_keys": 62,
+      "pool_forms": 2480,
+      "pool_size": 40,
+      "q3_rejected": 44,
+      "seed_point_checks": 62,
+      "seeds": 62,
+      "strictly_tighter_integer_bounds": 62
+    },
+    {
+      "baseline_scan": 16128,
+      "case": "constructor_adversarial",
+      "cost_not_measured": "heap comparisons, pool sorting, family sort/positivity/callback; no timing claim",
+      "cover_point_checks": 128,
+      "covered": 128,
+      "edge_ids": [
+        0,
+        1
+      ],
+      "kmax": 5,
+      "methods": {
+        "new_collective": {
+          "both_rejected": 84,
+          "q4_rejected": 86,
+          "residual_scan_upper_bound": 5376
+        },
+        "new_universal": {
+          "both_rejected": 82,
+          "q4_rejected": 82,
+          "residual_scan_upper_bound": 5632
+        },
+        "old_collective": {
+          "both_rejected": 72,
+          "q4_rejected": 74,
+          "residual_scan_upper_bound": 6912
+        },
+        "old_universal": {
+          "both_rejected": 70,
+          "q4_rejected": 70,
+          "residual_scan_upper_bound": 7168
+        }
+      },
+      "n": 128,
+      "pool_distance_keys": 126,
+      "pool_forms": 2520,
+      "pool_size": 20,
+      "q3_rejected": 118,
+      "seed_point_checks": 126,
+      "seeds": 126,
+      "strictly_tighter_integer_bounds": 126
+    },
+    {
+      "baseline_scan": 16128,
+      "case": "constructor_adversarial",
+      "cost_not_measured": "heap comparisons, pool sorting, family sort/positivity/callback; no timing claim",
+      "cover_point_checks": 128,
+      "covered": 128,
+      "edge_ids": [
+        0,
+        1
+      ],
+      "kmax": 10,
+      "methods": {
+        "new_collective": {
+          "both_rejected": 74,
+          "q4_rejected": 74,
+          "residual_scan_upper_bound": 6656
+        },
+        "new_universal": {
+          "both_rejected": 56,
+          "q4_rejected": 56,
+          "residual_scan_upper_bound": 8960
+        },
+        "old_collective": {
+          "both_rejected": 58,
+          "q4_rejected": 58,
+          "residual_scan_upper_bound": 8704
+        },
+        "old_universal": {
+          "both_rejected": 44,
+          "q4_rejected": 44,
+          "residual_scan_upper_bound": 10496
+        }
+      },
+      "n": 128,
+      "pool_distance_keys": 126,
+      "pool_forms": 5040,
+      "pool_size": 40,
+      "q3_rejected": 108,
+      "seed_point_checks": 126,
+      "seeds": 126,
+      "strictly_tighter_integer_bounds": 126
+    },
+    {
+      "baseline_scan": 65024,
+      "case": "constructor_adversarial",
+      "cost_not_measured": "heap comparisons, pool sorting, family sort/positivity/callback; no timing claim",
+      "cover_point_checks": 256,
+      "covered": 256,
+      "edge_ids": [
+        0,
+        1
+      ],
+      "kmax": 5,
+      "methods": {
+        "new_collective": {
+          "both_rejected": 212,
+          "q4_rejected": 214,
+          "residual_scan_upper_bound": 10752
+        },
+        "new_universal": {
+          "both_rejected": 210,
+          "q4_rejected": 210,
+          "residual_scan_upper_bound": 11264
+        },
+        "old_collective": {
+          "both_rejected": 200,
+          "q4_rejected": 202,
+          "residual_scan_upper_bound": 13824
+        },
+        "old_universal": {
+          "both_rejected": 198,
+          "q4_rejected": 198,
+          "residual_scan_upper_bound": 14336
+        }
+      },
+      "n": 256,
+      "pool_distance_keys": 254,
+      "pool_forms": 5080,
+      "pool_size": 20,
+      "q3_rejected": 246,
+      "seed_point_checks": 254,
+      "seeds": 254,
+      "strictly_tighter_integer_bounds": 254
+    },
+    {
+      "baseline_scan": 65024,
+      "case": "constructor_adversarial",
+      "cost_not_measured": "heap comparisons, pool sorting, family sort/positivity/callback; no timing claim",
+      "cover_point_checks": 256,
+      "covered": 256,
+      "edge_ids": [
+        0,
+        1
+      ],
+      "kmax": 10,
+      "methods": {
+        "new_collective": {
+          "both_rejected": 202,
+          "q4_rejected": 202,
+          "residual_scan_upper_bound": 13312
+        },
+        "new_universal": {
+          "both_rejected": 184,
+          "q4_rejected": 184,
+          "residual_scan_upper_bound": 17920
+        },
+        "old_collective": {
+          "both_rejected": 186,
+          "q4_rejected": 186,
+          "residual_scan_upper_bound": 17408
+        },
+        "old_universal": {
+          "both_rejected": 172,
+          "q4_rejected": 172,
+          "residual_scan_upper_bound": 20992
+        }
+      },
+      "n": 256,
+      "pool_distance_keys": 254,
+      "pool_forms": 10160,
+      "pool_size": 40,
+      "q3_rejected": 236,
+      "seed_point_checks": 254,
+      "seeds": 254,
+      "strictly_tighter_integer_bounds": 254
+    },
+    {
+      "baseline_scan": 9,
+      "case": "lidar000000_neighbor8",
+      "cost_not_measured": "heap comparisons, pool sorting, family sort/positivity/callback; no timing claim",
+      "cover_point_checks": 8000,
+      "covered": 9,
+      "edge_ids": [
+        0,
+        3201
+      ],
+      "kmax": 10,
+      "methods": {
+        "new_collective": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 9
+        },
+        "new_universal": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 9
+        },
+        "old_collective": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 9
+        },
+        "old_universal": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 9
+        }
+      },
+      "n": 8000,
+      "pool_distance_keys": 7,
+      "pool_forms": 7,
+      "pool_size": 7,
+      "q3_rejected": 0,
+      "seed_point_checks": 7998,
+      "seeds": 1,
+      "strictly_tighter_integer_bounds": 1
+    },
+    {
+      "baseline_scan": 228,
+      "case": "lidar000000_neighbor32",
+      "cost_not_measured": "heap comparisons, pool sorting, family sort/positivity/callback; no timing claim",
+      "cover_point_checks": 8000,
+      "covered": 38,
+      "edge_ids": [
+        0,
+        5603
+      ],
+      "kmax": 10,
+      "methods": {
+        "new_collective": {
+          "both_rejected": 6,
+          "q4_rejected": 6,
+          "residual_scan_upper_bound": 0
+        },
+        "new_universal": {
+          "both_rejected": 6,
+          "q4_rejected": 6,
+          "residual_scan_upper_bound": 0
+        },
+        "old_collective": {
+          "both_rejected": 6,
+          "q4_rejected": 6,
+          "residual_scan_upper_bound": 0
+        },
+        "old_universal": {
+          "both_rejected": 6,
+          "q4_rejected": 6,
+          "residual_scan_upper_bound": 0
+        }
+      },
+      "n": 8000,
+      "pool_distance_keys": 36,
+      "pool_forms": 216,
+      "pool_size": 36,
+      "q3_rejected": 6,
+      "seed_point_checks": 7998,
+      "seeds": 6,
+      "strictly_tighter_integer_bounds": 6
+    },
+    {
+      "baseline_scan": 1269,
+      "case": "lidar000000_neighbor128",
+      "cost_not_measured": "heap comparisons, pool sorting, family sort/positivity/callback; no timing claim",
+      "cover_point_checks": 8000,
+      "covered": 141,
+      "edge_ids": [
+        0,
+        5130
+      ],
+      "kmax": 10,
+      "methods": {
+        "new_collective": {
+          "both_rejected": 9,
+          "q4_rejected": 9,
+          "residual_scan_upper_bound": 0
+        },
+        "new_universal": {
+          "both_rejected": 9,
+          "q4_rejected": 9,
+          "residual_scan_upper_bound": 0
+        },
+        "old_collective": {
+          "both_rejected": 9,
+          "q4_rejected": 9,
+          "residual_scan_upper_bound": 0
+        },
+        "old_universal": {
+          "both_rejected": 9,
+          "q4_rejected": 9,
+          "residual_scan_upper_bound": 0
+        }
+      },
+      "n": 8000,
+      "pool_distance_keys": 139,
+      "pool_forms": 360,
+      "pool_size": 40,
+      "q3_rejected": 9,
+      "seed_point_checks": 7998,
+      "seeds": 9,
+      "strictly_tighter_integer_bounds": 9
+    },
+    {
+      "baseline_scan": 0,
+      "case": "lidar000100_neighbor8",
+      "cost_not_measured": "heap comparisons, pool sorting, family sort/positivity/callback; no timing claim",
+      "cover_point_checks": 8000,
+      "covered": 8,
+      "edge_ids": [
+        0,
+        4079
+      ],
+      "kmax": 10,
+      "methods": {
+        "new_collective": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 0
+        },
+        "new_universal": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 0
+        },
+        "old_collective": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 0
+        },
+        "old_universal": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 0
+        }
+      },
+      "n": 8000,
+      "pool_distance_keys": 6,
+      "pool_forms": 0,
+      "pool_size": 6,
+      "q3_rejected": 0,
+      "seed_point_checks": 7998,
+      "seeds": 0,
+      "strictly_tighter_integer_bounds": 0
+    },
+    {
+      "baseline_scan": 170,
+      "case": "lidar000100_neighbor32",
+      "cost_not_measured": "heap comparisons, pool sorting, family sort/positivity/callback; no timing claim",
+      "cover_point_checks": 8000,
+      "covered": 34,
+      "edge_ids": [
+        0,
+        327
+      ],
+      "kmax": 10,
+      "methods": {
+        "new_collective": {
+          "both_rejected": 5,
+          "q4_rejected": 5,
+          "residual_scan_upper_bound": 0
+        },
+        "new_universal": {
+          "both_rejected": 5,
+          "q4_rejected": 5,
+          "residual_scan_upper_bound": 0
+        },
+        "old_collective": {
+          "both_rejected": 5,
+          "q4_rejected": 5,
+          "residual_scan_upper_bound": 0
+        },
+        "old_universal": {
+          "both_rejected": 5,
+          "q4_rejected": 5,
+          "residual_scan_upper_bound": 0
+        }
+      },
+      "n": 8000,
+      "pool_distance_keys": 32,
+      "pool_forms": 160,
+      "pool_size": 32,
+      "q3_rejected": 5,
+      "seed_point_checks": 7998,
+      "seeds": 5,
+      "strictly_tighter_integer_bounds": 5
+    },
+    {
+      "baseline_scan": 1170,
+      "case": "lidar000100_neighbor128",
+      "cost_not_measured": "heap comparisons, pool sorting, family sort/positivity/callback; no timing claim",
+      "cover_point_checks": 8000,
+      "covered": 130,
+      "edge_ids": [
+        0,
+        3655
+      ],
+      "kmax": 10,
+      "methods": {
+        "new_collective": {
+          "both_rejected": 9,
+          "q4_rejected": 9,
+          "residual_scan_upper_bound": 0
+        },
+        "new_universal": {
+          "both_rejected": 9,
+          "q4_rejected": 9,
+          "residual_scan_upper_bound": 0
+        },
+        "old_collective": {
+          "both_rejected": 9,
+          "q4_rejected": 9,
+          "residual_scan_upper_bound": 0
+        },
+        "old_universal": {
+          "both_rejected": 9,
+          "q4_rejected": 9,
+          "residual_scan_upper_bound": 0
+        }
+      },
+      "n": 8000,
+      "pool_distance_keys": 128,
+      "pool_forms": 360,
+      "pool_size": 40,
+      "q3_rejected": 9,
+      "seed_point_checks": 7998,
+      "seeds": 9,
+      "strictly_tighter_integer_bounds": 9
+    },
+    {
+      "baseline_scan": 22,
+      "case": "lidar000200_neighbor8",
+      "cost_not_measured": "heap comparisons, pool sorting, family sort/positivity/callback; no timing claim",
+      "cover_point_checks": 8000,
+      "covered": 11,
+      "edge_ids": [
+        0,
+        4780
+      ],
+      "kmax": 10,
+      "methods": {
+        "new_collective": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 22
+        },
+        "new_universal": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 22
+        },
+        "old_collective": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 22
+        },
+        "old_universal": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 22
+        }
+      },
+      "n": 8000,
+      "pool_distance_keys": 9,
+      "pool_forms": 18,
+      "pool_size": 9,
+      "q3_rejected": 0,
+      "seed_point_checks": 7998,
+      "seeds": 2,
+      "strictly_tighter_integer_bounds": 2
+    },
+    {
+      "baseline_scan": 140,
+      "case": "lidar000200_neighbor32",
+      "cost_not_measured": "heap comparisons, pool sorting, family sort/positivity/callback; no timing claim",
+      "cover_point_checks": 8000,
+      "covered": 35,
+      "edge_ids": [
+        0,
+        2730
+      ],
+      "kmax": 10,
+      "methods": {
+        "new_collective": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 140
+        },
+        "new_universal": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 140
+        },
+        "old_collective": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 140
+        },
+        "old_universal": {
+          "both_rejected": 0,
+          "q4_rejected": 0,
+          "residual_scan_upper_bound": 140
+        }
+      },
+      "n": 8000,
+      "pool_distance_keys": 33,
+      "pool_forms": 132,
+      "pool_size": 33,
+      "q3_rejected": 0,
+      "seed_point_checks": 7998,
+      "seeds": 4,
+      "strictly_tighter_integer_bounds": 4
+    },
+    {
+      "baseline_scan": 2952,
+      "case": "lidar000200_neighbor128",
+      "cost_not_measured": "heap comparisons, pool sorting, family sort/positivity/callback; no timing claim",
+      "cover_point_checks": 8000,
+      "covered": 164,
+      "edge_ids": [
+        0,
+        2443
+      ],
+      "kmax": 10,
+      "methods": {
+        "new_collective": {
+          "both_rejected": 18,
+          "q4_rejected": 18,
+          "residual_scan_upper_bound": 0
+        },
+        "new_universal": {
+          "both_rejected": 18,
+          "q4_rejected": 18,
+          "residual_scan_upper_bound": 0
+        },
+        "old_collective": {
+          "both_rejected": 18,
+          "q4_rejected": 18,
+          "residual_scan_upper_bound": 0
+        },
+        "old_universal": {
+          "both_rejected": 18,
+          "q4_rejected": 18,
+          "residual_scan_upper_bound": 0
+        }
+      },
+      "n": 8000,
+      "pool_distance_keys": 162,
+      "pool_forms": 720,
+      "pool_size": 40,
+      "q3_rejected": 18,
+      "seed_point_checks": 7998,
+      "seeds": 18,
+      "strictly_tighter_integer_bounds": 18
+    }
+  ],
+  "scope": "bounded mathematical model, no product port",
+  "source_base": "77f659e4",
+  "status": "completed"
+}

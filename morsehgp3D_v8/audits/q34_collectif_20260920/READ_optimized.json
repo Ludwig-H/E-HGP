@@ -1,0 +1,11 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "-O",
+    "morsehgp3D_v8/audits/q34_collectif_20260920/read.py"
+  ],
+  "returncode": 0,
+  "stdout": "{\"additional_rejections_on_selected_lidar_edges\": 0, \"commands\": 6, \"lidar_edges\": 9, \"lidar_faces\": 54, \"models\": 3, \"normal_optimized_identical\": true, \"observations\": 17, \"scope\": \"independent mathematical models; no product qualification\", \"status\": \"pass\"}\n",
+  "stderr": ""
+}

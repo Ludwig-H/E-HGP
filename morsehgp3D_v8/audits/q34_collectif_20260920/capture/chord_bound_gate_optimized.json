@@ -1,0 +1,11 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "-O",
+    "morsehgp3D_v8/audits/q34_collectif_20260920/chord_bound_gate.py"
+  ],
+  "returncode": 0,
+  "stdout": "{\"collective_fixture\": {\"Unew\": 25, \"Uold\": 28, \"forms\": [[-96, -24], [-96, 24]], \"individual_universal_witnesses\": 0, \"minimum_pool_depth\": 1}, \"faces\": 108, \"gram_power_checks\": 756, \"invalid_faces_refused\": 5, \"max_i128_intermediate_bits\": 98, \"positive_owned_seed_presentations\": 487, \"positive_owned_tetrahedra\": 255, \"rounding_mutants_killed\": 3, \"schema\": \"mhgp8_audit_q34_chord_math_v1\", \"scope\": \"independent integer/rational mathematical gate; no product qualification\", \"status\": \"PASS\", \"strictly_smaller_integer_bounds\": 72}\n",
+  "stderr": ""
+}

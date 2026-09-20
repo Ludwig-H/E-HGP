@@ -1,0 +1,10 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "morsehgp3D_v8/audits/q34_collectif_20260920/collective_model.py"
+  ],
+  "returncode": 0,
+  "stdout": "{\"direct_oracle_cases\": 2975, \"geometric_fixture\": {\"Kmax\": 3, \"U\": 28, \"barycentric_weights\": [\"91/324\", \"91/324\", \"16/81\", \"13/54\"], \"coefficients\": {\"D\": 16, \"E\": 13, \"F\": 8, \"G\": 144, \"J\": 1504, \"X\": 13}, \"completion_root\": \"-52/3\", \"forms\": [[-96, 24], [-96, -24]], \"global_depth\": 1, \"global_shell\": [0, 1, 2, 5], \"individual_minima\": [0, 0], \"meaning\": \"q4 rejected collectively at Kmax-2=1 with zero individual universal witnesses\", \"minimum\": 1, \"points\": [[8, 10, 10], [12, 10, 10], [10, 13, 10], [10, 11, 12], [10, 11, 8], [10, 11, 7]], \"pool_ids\": [3, 4], \"positive_support\": [0, 1, 2, 5], \"seed_ids\": [0, 1, 2]}, \"invalid_inputs\": 4, \"killed_model_mutants\": [\"shell_counted_inside\", \"interior_root_group_omitted\", \"chord_endpoints_treated_open\", \"outside_root_contribution_not_transferred\", \"population_saturated_before_exits\", \"initial_depth_transferred_to_entire_chord\"], \"phase\": \"independent_mathematical_model\", \"product_qualification\": false, \"public_status\": \"not_claimed\", \"schema\": \"mhgp8_audit_collective_model_v1\", \"status\": \"passed\", \"subset_lower_bound_checks\": 512}\n",
+  "stderr": ""
+}

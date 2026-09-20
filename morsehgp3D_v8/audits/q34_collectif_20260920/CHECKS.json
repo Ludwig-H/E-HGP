@@ -1,0 +1,30 @@
+{
+  "files_sha256": {
+    ".gitignore": "32dae3052f331ee34d628ef535709b301259a45df7c7522c4d35dcf49873f00b",
+    "DOCS_CHECK.json": "d0eeeca057277e38506a049c08329449fe1217c501d1e3bace6e9ea17e0691d6",
+    "PREFLIGHT.md": "e89df7db1bfa709f3e0b0f46c8bed3928be637048b2993abfcfd646b75138635",
+    "README.md": "f5f5d920670853a322c30bd18194329c9608e0a47f1a1fe83a89bf93be08a02b",
+    "READ_normal.json": "398320da5985b8f11810aa9a82fc08e6775b8a2a18a7ee7341e3d3ae1c9b146c",
+    "READ_optimized.json": "dfacaa852c32ac5384d8f0458e983831157119ecc237be680ec649068a0a7890",
+    "REFERENCE_PINS.json": "0e64edb67cea08ba2d7e77cadc05f0defe6f725ea0bc81d8540ac25254caa22f",
+    "capture/COMPLETION.json": "654461253978ea6a5cc09a3a4060e5e610d89402a0601e1cf05e3ec80db9a234",
+    "capture/MANIFEST.json": "f2c76395d6005c12d10dfd816bf4b61814ec128fc86d4b64cfb30fd859248424",
+    "capture/chord_bound_gate_RESULT.json": "72785ebaa0294819f963e84f63d7c8295fc7f8bf1c5d376d449ea8d1801956f0",
+    "capture/chord_bound_gate_normal.json": "7760e139f4bde1510d2505e6379a1f327dab3a5b98b672b4d0dee792c2c6a6fa",
+    "capture/chord_bound_gate_optimized.json": "815ddacf8eb3241ae39034ab893525318501cc84da8274771a83812acedb2c21",
+    "capture/collective_model_RESULT.json": "da4056e5b4dbee8e14bc8c81b495ee7c96dbd9258e23c6e7edb8044317265206",
+    "capture/collective_model_normal.json": "98a1541b2bc1524078b22fbe76d2da2a74ac2b0db591f0a23b96a638b637ea33",
+    "capture/collective_model_optimized.json": "a3a38d8421846071aeabe2720711f4c2c6e1b05c7352d330daa18328d40acfe1",
+    "capture/experiment_RESULT.json": "d601f6dccf4eec179abc20ad79a5395667014cc0730615d2d27d9cd0af04597a",
+    "capture/experiment_normal.json": "e37599a4821c9db2ef580cef11fba3aa79c198ee4de1c1e2d2e3078d8a5c3e6e",
+    "capture/experiment_optimized.json": "ca3197237be326373b16b54a8bc122eba81deb1fe9d0d42ac75f4f3f75b72f14",
+    "chord_bound_gate.py": "2444d99bdefe4aca7e30622e5517f8d41635f372854e6cf33084e479ad42e03b",
+    "collective_model.py": "7a7b1509beaaa2528700b4af3259efde6a95b73695d588f2187500d7e6e91752",
+    "experiment.py": "db4c15dd6af122842ec80c47d74cb0925151513028e78bdae22f42a1064a9f6f",
+    "read.py": "71631a733f768d09f2cfa460766e2a6872ff2812bce5dceeaaf0c0bc9e8810eb"
+  },
+  "gcp_used": false,
+  "public_status": "not_claimed",
+  "scope": "independent mathematical audit, not product qualification",
+  "status": "pass"
+}

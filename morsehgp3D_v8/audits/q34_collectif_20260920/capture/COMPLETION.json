@@ -1,0 +1,16 @@
+{
+  "status": "pass",
+  "failures": [],
+  "sha256": {
+    "MANIFEST.json": "f2c76395d6005c12d10dfd816bf4b61814ec128fc86d4b64cfb30fd859248424",
+    "chord_bound_gate_RESULT.json": "72785ebaa0294819f963e84f63d7c8295fc7f8bf1c5d376d449ea8d1801956f0",
+    "chord_bound_gate_normal.json": "7760e139f4bde1510d2505e6379a1f327dab3a5b98b672b4d0dee792c2c6a6fa",
+    "chord_bound_gate_optimized.json": "815ddacf8eb3241ae39034ab893525318501cc84da8274771a83812acedb2c21",
+    "collective_model_RESULT.json": "da4056e5b4dbee8e14bc8c81b495ee7c96dbd9258e23c6e7edb8044317265206",
+    "collective_model_normal.json": "98a1541b2bc1524078b22fbe76d2da2a74ac2b0db591f0a23b96a638b637ea33",
+    "collective_model_optimized.json": "a3a38d8421846071aeabe2720711f4c2c6e1b05c7352d330daa18328d40acfe1",
+    "experiment_RESULT.json": "d601f6dccf4eec179abc20ad79a5395667014cc0730615d2d27d9cd0af04597a",
+    "experiment_normal.json": "e37599a4821c9db2ef580cef11fba3aa79c198ee4de1c1e2d2e3078d8a5c3e6e",
+    "experiment_optimized.json": "ca3197237be326373b16b54a8bc122eba81deb1fe9d0d42ac75f4f3f75b72f14"
+  }
+}
