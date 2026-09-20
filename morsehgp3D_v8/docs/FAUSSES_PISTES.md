@@ -265,6 +265,10 @@ Références : [fondements](../audits/FONDEMENTS_ET_OBJET.md).
 | Forcer les histogrammes par blocs même sur facteurs minuscules | Les mesures uniformes montrent un surcoût | Sélection adaptative explicitement mesurée |
 | Rétrécir le cover q4 au seul citron de complétion | Perd des points qui comptent dans la profondeur | Cover prouvé pour tous les rôles |
 | Arrêter q4 au premier intervalle trop profond | La profondeur peut ensuite redescendre | Balayage exact complet des segments utiles |
+| Les témoins doivent tous être intérieurs à toute une famille pour permettre son rejet | Des témoins différents peuvent se relayer ; le certificat universel laisse alors une famille inutile | Minimum strict du pool sur toute la corde fermée, groupes de racines compris ; option collective26 |
+| Le minimum collectif se lit aux deux bouts de la corde, ou se sature à K | Un groupe de sorties/entrées peut créer un creux ponctuel et une population initialement élevée peut redescendre | Sorties puis minimum puis entrées, compte non saturé, bornes fermées ; trois mutants compilés26 ciblent ces décisions et l'arrondi |
+| Former directement le numérateur DV² de la borne resserrée en i128 | Quatre cas de la gate dépassent127bits avant division | Quotient extérieur q=ceil(DV/T), puis racine extérieure de qV ; deux majorants certifiés, aucun flottant |
+| Le filtre collectif suffit à rendre les familles denses sous-quadratiques | À32k/C64, le repli courant demanderait encore au moins185,344M lectures K5 et358,240M K10 ; derniers ratios×9,694/×6,223, avant tris | Partager une carte de certificats entre faces ; payer construction, requêtes et résidu, sans arrangement exhaustif |
 
 Références : [audit WSPD](../audits/WSPD_Q2_Q3_Q4.md).
 

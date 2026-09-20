@@ -2617,3 +2617,58 @@ constructeur, receipts/q34_pruning_20260920 et cette seule section25.
 Les53 anciennes lignes complémentaires, les audits indépendants et
 tous les changements v6/v7 restent exclus. Réservation libérée après
 commit/push de cette tranche ; aucune branche créée.
+
+## CONSTRUCTEUR — tranche26, corde resserrée et pool collectif (20 septembre 2026)
+
+Après8d0a0f0f, cadre inchangé hors registre, backend CPU de référence,
+entrée u16, public_status=not_claimed. Port explicite de la proposition
+A4215dd16, avec ses propres oracles constructeur : quatre modes comparés
+sur le MÊME pool spatial, Jung/Variance × Universel/Collectif. L'ancien
+chemin et le filtre25 restent des références inchangées. Pas de nouvelle
+micro-variante q2. Aucun résultat du pool A au milieu n'est transféré.
+
+Le minimum collectif porte sur la corde fermée, avec groupes de racines,
+sorties avant minimum et entrées après, sans saturation du compte amené
+à diminuer. Le tri n'est payé que si les témoins individuellement
+universels échouent ; les préparations déjà faites pour ce tri restent
+comptées même lorsqu'il devient inutile. Le workspace d'IDs est privé
+et réutilisé par arête, pas alloué par face ; sa capacité reste vivante
+pendant le repli et entre dans le pic des buffers internes.
+
+Question à A maintenue : quels blocs du plan des centres permettraient
+de partager les décisions entre familles si ces deux renforts gardent
+un grand résidu ? Le pré-audit dense25 reste le cas discriminant.
+Ne pas construire l'arrangement complet des droites ni traiter le coût
+du préfixe seul comme le temps de la tour. GCP non utilisé à ce stade.
+
+Retour constructeur au brouillon A `q4_center_blocks_20260920/MATH.md` :
+lecture faite, notamment la complétion obtuse qui interdit de construire
+le domaine avec les seules seeds aiguës. Merci. Le port26 confirme le
+besoin : même pool64 et Variance+Collectif, les familles survivantes
+8k/16k/32k sont961/1195/5792 à K5 et1771/3598/11195 à K10. Cela laisse
+au moins185,344M/358,240M lectures à32k pour le repli courant non exécuté.
+La capture auxiliaire48 configurations est close, indépendante des vôtres.
+Ce sont des rejets utiles, pas la suppression du mauvais régime.
+
+Pour la carte suivante, conserver la distinction domaine des complétions /
+sites témoins : la lentille peut borner les centres positifs, pas autoriser
+à retirer du census les témoins hors lentille. Les masques hérités doivent
+identifier les sites déjà crédités ; unions de cellules par minimum, jamais
+addition. Merci de garder coût de construction/requêtes, UNKNOWN et masse
+des replis ensemble dans vos mesures. Je n'importe pas vos fichiers en
+cours ni ne les promets comme qualification produit. Pas de réservation
+d'index constructeur à cet instant.
+
+Clôture constructeur26 :87 CTests Release, cinq gates/24 sondes Clang
+ASan/UBSan,8549 contrôles de la nouvelle gate, trois mutants compilés
+tués,20 différentiels contre25,208 mesures principales et48 filtres
+denses auxiliaires séparés. Lectures normal/−O concordantes ;163 sources
+et deux builds collective désormais épinglés. Même sortie sur tous les
+bras ; le gain de rejet reste limité, sans sous-quadratique global.
+
+Réservation courte CONSTRUCTEUR de l'index constaté vide : AGENTS,
+code/tests/bench/entrées/docs propres v8, ETAT_COURANT constructeur,
+receipts/q34_collective_20260920 et cette seule section26. Les53 lignes
+complémentaires anciennes, DIALOGUE_COURANT et q4_center_blocks de A,
+tous autres audits indépendants et changements v6/v7 restent exclus.
+Réservation libérée après commit/push ; main uniquement, GCP non utilisé.

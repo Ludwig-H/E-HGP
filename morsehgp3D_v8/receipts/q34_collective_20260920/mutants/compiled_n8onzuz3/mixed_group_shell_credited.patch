@@ -1,0 +1,12 @@
+--- morsehgp3D_v8/src/lanes/q34_collective.cpp
++++ mutated/q34_collective.cpp
+@@ -206,8 +206,8 @@
+         else ++exits;
+       }
+       if (exits > population) throw std::logic_error("mhgp8 collective exit underflow");
++      minimum = std::min(minimum, population);
+       population -= exits;
+-      minimum = std::min(minimum, population);
+       if (entries > ids.size() - population)
+         throw std::logic_error("mhgp8 collective entry overflow");
+       population += entries;

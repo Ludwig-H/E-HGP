@@ -35,6 +35,18 @@ La borne resserrée de corde est une proposition mathématique distincte,
 dont l'arithmétique doit être prouvée avant port. Ne pas déplacer le carré
 vers un prétraitement exhaustif de témoins ni vers des milliers de copies.
 
+Après8d0a0f0f, la [corde resserrée et le minimum collectif](Q3_Q4_CERTIFICAT_COLLECTIF_20260920.md)
+sont portés avec quatre options appariées. Le gain de rejet est réel,
+mais le dense32k/C64 laisse185,344M/358,240M lectures minimales futures
+K5/10, avant tris : le terme faces survivantes × cover reste prioritaire.
+Prochaine tranche : carte de minorants partagée dans le plan des centres,
+pas d'arrangement complet, pas de nouveau réglage de constante du pool.
+Étudier domaine, cellules, témoins hérités distincts et requêtes de faces
+ensemble ; toute zone indécise garde le calcul exact. Le domaine des
+complétions inclut les faces obtuses et ne restreint pas les témoins du
+census. Mesurer préparation, fragmentation, UNKNOWN et coût aval total.
+Le modèle indépendant A reste une proposition, pas un moteur qualifié.
+
 Suivi du 14 septembre : le [raccord direct front → census q2](P0_FRONT_ET_CENSUS_Q2.md)
 est implémenté. Il retire factories, copies et arbres B par rectangle,
 sans filtre axial obligatoire. Il reste à réduire le coût du front et

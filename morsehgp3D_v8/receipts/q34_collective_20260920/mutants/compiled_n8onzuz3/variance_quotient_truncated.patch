@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q34_collective.cpp
++++ mutated/q34_collective.cpp
+@@ -119,7 +119,7 @@
+     // S<=18M^4, hence D*S and q*S<=54M^6<2^102. Quotient/remainder
+     // ceiling avoids an extra numerator+denominator intermediate.
+     const i128 numerator = static_cast<i128>(d) * s;
+-    const i128 quotient = numerator / t + (numerator % t != 0 ? 1 : 0);
++    const i128 quotient = numerator / t;
+     const auto bound = ceil_sqrt(quotient * s);
+     counter_add(work.variance_sqrt_iterations, bound.iterations);
+     result.parameter_bound = std::min(result.parameter_bound, bound.ceiling);

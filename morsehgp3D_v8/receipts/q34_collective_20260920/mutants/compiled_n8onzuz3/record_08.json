@@ -1,0 +1,22 @@
+{
+  "kind": "variance_quotient_truncated_link",
+  "command": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "/workspaces/E-HGP/build/v8_q34_collective_20260920/CMakeFiles/mhgp8_q34_collective_gate.dir/tests/q34_collective_gate.cpp.o",
+    "/tmp/mhgp8_q34_collective_mutants_ambvt2ib/variance_quotient_truncated.o",
+    "/workspaces/E-HGP/build/v8_q34_collective_20260920/libmhgp8_p0.a",
+    "-pthread",
+    "-o",
+    "/tmp/mhgp8_q34_collective_mutants_ambvt2ib/variance_quotient_truncated"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T17:56:15.168990+00:00",
+  "expected_exit_code": 0,
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "stdout_base64": "",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-20T17:56:15.279885+00:00"
+}

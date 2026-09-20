@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q34_collective.cpp
++++ mutated/q34_collective.cpp
+@@ -170,7 +170,7 @@
+           }
+         } else {
+           if (left <= 0) ++population;  // Exit root AT -U still active just before it.
+-          if (left <= 0 && right >= 0) {
++          if (left <= 0 && right > 0) {
+             workspace.events_.push_back(id);
+             counter_add(work.event_count);
+           }

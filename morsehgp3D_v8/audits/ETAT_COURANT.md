@@ -45,6 +45,20 @@ Le [retour indépendant A à4215dd16](q34_collectif_20260920/README.md)
 confirme le certificat initial et propose minimum collectif et corde
 resserrée ; ces renforts ne sont pas portés dans cette tranche.
 
+Tranche26 après8d0a0f0f : [corde resserrée et minimum collectif](../docs/Q3_Q4_CERTIFICAT_COLLECTIF_20260920.md)
+portés et jugés indépendamment du modèle A.87 CTests Release, cinq
+portes/24 sondes Clang ASan/UBSan,8549 contrôles, trois mutants compilés,
+20 différentiels contre25 et208 mesures passent. Le minimum rationnel
+exerce tangences, groupes mixtes, creux ponctuels et baisse du compte ;
+les fractions de la borne évitent les produits i128 trop larges.
+Les [reçus](../receipts/q34_collective_20260920/README.md) séparent
+96 mesures de grands fonds à deux faces et48 filtres denses auxiliaires.
+Ces derniers laissent à32k/C64 au moins185,344M/358,240M lectures futures
+K5/10, non exécutées. L'amélioration ne ferme pas le régime dense ni
+P0 global. Prochaine priorité : carte commune entre familles, pas
+micro-variantes de pool ni généralisation prématurée au front WSPD.
+Pas de nouveau parallèle/GPU, de FULL ou de contrat G4.
+
 ## Historique : vingt-et-unième tranche publiée à3e94c868
 
 Vingt-et-unième tranche P0 close,

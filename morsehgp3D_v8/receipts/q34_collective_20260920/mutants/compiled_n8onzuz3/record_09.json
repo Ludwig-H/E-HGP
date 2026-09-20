@@ -1,0 +1,17 @@
+{
+  "kind": "variance_quotient_truncated_oracle",
+  "command": [
+    "/tmp/mhgp8_q34_collective_mutants_ambvt2ib/variance_quotient_truncated",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T17:56:15.280247+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "q34 collective gate: collective bound differs from independent staged rational variance rounding\n",
+  "stdout_base64": "",
+  "stderr_base64": "cTM0IGNvbGxlY3RpdmUgZ2F0ZTogY29sbGVjdGl2ZSBib3VuZCBkaWZmZXJzIGZyb20gaW5kZXBlbmRlbnQgc3RhZ2VkIHJhdGlvbmFsIHZhcmlhbmNlIHJvdW5kaW5nCg==",
+  "finished_utc": "2026-09-20T17:56:15.289222+00:00"
+}

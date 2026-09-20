@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_q34_collective_checks.py",
+    "read",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/q34_collective_20260920/smoke_r9g1vw9j",
+    "--check-live"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T18:01:36.540644+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"baseline\": \"tranche25_Jung_Universal\", \"campaign\": \"smoke\", \"dense_large_seed_growth_not_executed\": true, \"full_contract_qualified\": false, \"general_subquadratic_bound\": false, \"growth\": {}, \"measurements\": 24, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q34_collective_20260920/smoke_r9g1vw9j\", \"pipeline_sums_are_not_independent_wall_measurements\": true, \"records\": 29, \"scope\": \"one_edge_collective_pool_not_global_q34_producer\", \"shared_preparation_charged_in_both_sums\": true, \"sources\": 163, \"status\": \"passed\"}\n",
+  "stderr": "",
+  "stdout_base64": "eyJiYXNlbGluZSI6ICJ0cmFuY2hlMjVfSnVuZ19Vbml2ZXJzYWwiLCAiY2FtcGFpZ24iOiAic21va2UiLCAiZGVuc2VfbGFyZ2Vfc2VlZF9ncm93dGhfbm90X2V4ZWN1dGVkIjogdHJ1ZSwgImZ1bGxfY29udHJhY3RfcXVhbGlmaWVkIjogZmFsc2UsICJnZW5lcmFsX3N1YnF1YWRyYXRpY19ib3VuZCI6IGZhbHNlLCAiZ3Jvd3RoIjoge30sICJtZWFzdXJlbWVudHMiOiAyNCwgInBhdGgiOiAiL3dvcmtzcGFjZXMvRS1IR1AvbW9yc2VoZ3AzRF92OC9yZWNlaXB0cy9xMzRfY29sbGVjdGl2ZV8yMDI2MDkyMC9zbW9rZV9yOWcxdnc5aiIsICJwaXBlbGluZV9zdW1zX2FyZV9ub3RfaW5kZXBlbmRlbnRfd2FsbF9tZWFzdXJlbWVudHMiOiB0cnVlLCAicmVjb3JkcyI6IDI5LCAic2NvcGUiOiAib25lX2VkZ2VfY29sbGVjdGl2ZV9wb29sX25vdF9nbG9iYWxfcTM0X3Byb2R1Y2VyIiwgInNoYXJlZF9wcmVwYXJhdGlvbl9jaGFyZ2VkX2luX2JvdGhfc3VtcyI6IHRydWUsICJzb3VyY2VzIjogMTYzLCAic3RhdHVzIjogInBhc3NlZCJ9Cg==",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-20T18:01:36.650790+00:00"
+}

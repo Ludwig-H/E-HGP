@@ -10,6 +10,35 @@ qualification de son propre code.
 
 ## À reprendre maintenant
 
+La tranche26 porte le [minimum collectif du pool et une corde resserrée](docs/Q3_Q4_CERTIFICAT_COLLECTIF_20260920.md).
+Les quatre options sont comparées sur le même pool spatial ; le défaut
+historique25 reste intact. Le minimum strict traite sorties, groupe,
+puis entrées aux deux bornes fermées, sans saturation. Workspace privé
+réutilisé par arête, comptes q3/q4 séparés, repli à zéro ; aucun crédit
+de filtre ajouté au census. Le pic mémoire couple réellement workspace
+et buffers simultanés du repli. Ne pas former DV² en i128.
+
+Qualification :87 CTests Release, cinq portes/24 sondes Clang ASan/UBSan,
+8549 contrôles de la nouvelle gate, trois mutants compilés tués,
+20 différentiels contre le build25,208 mesures principales et48 filtres
+denses auxiliaires. Lecteurs normal/−O concordants ; les163 sources
+et les deux builds q34_collective du20260920 sont désormais épinglés. Lire les
+[reçus](receipts/q34_collective_20260920/README.md).
+
+Le port apporte un gain de rejet mais ne résout pas le régime dense :
+à32k/C64, minimum futur du repli185,344M lectures K5 /358,240M K10,
+dernier doublement×9,694/×6,223. Pas de dense complet lancé ni de gain
+de tour inféré. Ne pas rouvrir des variantes de pool pour quelques % :
+suite prioritaire, carte commune de certificats dans le plan des centres
+par arête, actuellement étudiée par A dans son dialogue courant.
+Pas d'arrangement complet de droites ; domaine comprenant les
+complétions obtuses, témoins hors lentille conservés, UNKNOWN vers repli
+exact et construction/requêtes/résidu payés. Ses preuves resteront
+indépendantes jusqu'au port requalifié. WSPD q3/q4 global, catalogue,
+intérieurs après regroupement, FULL et GPU/G4 ouverts ; GCP non utilisé.
+
+### Tranche25 précédente close à8d0a0f0f
+
 La tranche25 ajoute le [pool universel partagé](docs/Q3_Q4_REJET_FAMILIAL_20260920.md)
 et deux entrées explicites `run_q34_pruned_*`. Le défaut couvert historique
 reste inchangé. Les témoins sont proposés par positions spatiales

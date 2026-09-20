@@ -78,6 +78,18 @@ qualifie ni un générateur sous-quadratique global ni la tour G4.
 Les [reçus](receipts/q34_pruning_20260920/README.md) comptent préparation,
 propositions, racines entières, scans, tris et sorties, avec contre-régimes.
 
+La tranche26 qualifie le [minimum collectif et la corde resserrée](docs/Q3_Q4_CERTIFICAT_COLLECTIF_20260920.md)
+sur le même pool, quatre options explicites.87 CTests Release, cinq
+portes/24 sondes Clang ASan/UBSan, trois mutants compilés et208 mesures
+passent. L'adversaire256/C64 passe de15 616 à10 667 lectures K5 et
+de33 536 à21 266 K10, sorties inchangées et tri du filtre payé.
+Cela ne règle pas le grand dense : à32k/C64, au moins185,344M/358,240M
+lectures de repli resteraient nécessaires pour K5/10. Ce repli n'a pas
+été exécuté ; les48 filtres auxiliaires l'ont quantifié. Prochaine
+priorité : partager les certificats entre faces dans le plan des centres.
+Pas de sous-quadratique global, de FULL ou de contrat G4 acquis. Voir
+les [preuves et limites](receipts/q34_collective_20260920/README.md).
+
 ## Vingt-et-unième tranche publiée à3e94c868 — historique
 
 La vingt-et-unième tranche transmet aux enfants les

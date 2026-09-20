@@ -1,0 +1,17 @@
+{
+  "kind": "closed_right_exit_dropped_oracle",
+  "command": [
+    "/tmp/mhgp8_q34_collective_mutants_ambvt2ib/closed_right_exit_dropped",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T17:56:11.587256+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "q34 collective gate: collective rejection differs from exact pool minimum and separate thresholds\n",
+  "stdout_base64": "",
+  "stderr_base64": "cTM0IGNvbGxlY3RpdmUgZ2F0ZTogY29sbGVjdGl2ZSByZWplY3Rpb24gZGlmZmVycyBmcm9tIGV4YWN0IHBvb2wgbWluaW11bSBhbmQgc2VwYXJhdGUgdGhyZXNob2xkcwo=",
+  "finished_utc": "2026-09-20T17:56:11.594815+00:00"
+}

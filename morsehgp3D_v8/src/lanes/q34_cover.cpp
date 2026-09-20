@@ -1,6 +1,7 @@
 #include "lanes/q34_cover.hpp"
 #include "lanes/q34_pruning.hpp"
 #include "lanes/family_certificate.hpp"
+#include "lanes/q34_collective.hpp"
 
 #include <algorithm>
 #include <stdexcept>
@@ -110,9 +111,59 @@ void merge(Q34FamilyPruningWork& dst, const Q34FamilyPruningWork& src) {
 #undef MHGP8_ADD_PRUNING
 }
 
+void merge(Q34PoolWork& dst, const Q34PoolWork& src) {
+  static_assert(sizeof(Q34PoolWork) == 30 * sizeof(u64));
+#define MHGP8_ADD_POOL(field) counter_add(dst.field, src.field)
+  MHGP8_ADD_POOL(seed_owner_tests);
+  MHGP8_ADD_POOL(seed_owner_rejections);
+  MHGP8_ADD_POOL(seed_queries);
+  MHGP8_ADD_POOL(certificate_builds);
+  MHGP8_ADD_POOL(sqrt_iterations);
+  MHGP8_ADD_POOL(variance_bounds);
+  MHGP8_ADD_POOL(variance_sqrt_iterations);
+  MHGP8_ADD_POOL(proposed_sites);
+  MHGP8_ADD_POOL(paired_predicate_tests);
+  MHGP8_ADD_POOL(q3_credits);
+  MHGP8_ADD_POOL(q4_universal_credits);
+  MHGP8_ADD_POOL(q3_rejected);
+  MHGP8_ADD_POOL(q4_universal_rejected);
+  MHGP8_ADD_POOL(collective_queries);
+  MHGP8_ADD_POOL(endpoint_tests);
+  MHGP8_ADD_POOL(constant_tests);
+  MHGP8_ADD_POOL(event_count);
+  MHGP8_ADD_POOL(sort_comparisons);
+  MHGP8_ADD_POOL(group_comparisons);
+  MHGP8_ADD_POOL(event_side_tests);
+  MHGP8_ADD_POOL(groups);
+  MHGP8_ADD_POOL(collective_minimum_sum);
+  MHGP8_ADD_POOL(collective_q4_rejected);
+  MHGP8_ADD_POOL(q4_rejected);
+  MHGP8_ADD_POOL(both_rejected);
+  MHGP8_ADD_POOL(q3_only_survivors);
+  MHGP8_ADD_POOL(q4_only_survivors);
+  MHGP8_ADD_POOL(both_survivors);
+#undef MHGP8_ADD_POOL
+  dst.max_group = std::max(dst.max_group, src.max_group);
+  dst.peak_event_bytes = std::max(dst.peak_event_bytes, src.peak_event_bytes);
+}
+
+struct PoolFilterContext {
+  Q34WitnessPoolPtr pool;
+  Q34PoolOptions options;
+  Q34PoolWorkspace& workspace;
+  Q34PoolWork& work;
+};
+
+void validate_pool_options(Q34PoolOptions options) {
+  if ((options.chord != Q34ChordBound::Jung && options.chord != Q34ChordBound::Variance) ||
+      (options.reduction != Q34PoolReduction::Universal && options.reduction != Q34PoolReduction::Collective))
+    throw std::invalid_argument("mhgp8 unsupported collective pool options");
+}
+
 Q34CoverSeedWork run_seed(Q34EdgeCoverPtr cover, std::size_t x_id,
     std::size_t kmax, const Q34SeedConsumer& consumer,
-    const Q34WitnessPool* pool, Q34FamilyPruningWork* pruning) {
+    const Q34WitnessPool* pool, Q34FamilyPruningWork* pruning,
+    PoolFilterContext* filter = nullptr) {
   if (!cover || !consumer || kmax == 0)
     throw std::invalid_argument("mhgp8 covered seed requires cover, callback and positive Kmax");
   const auto points = cover->index()->cloud().points();
@@ -132,8 +183,16 @@ Q34CoverSeedWork run_seed(Q34EdgeCoverPtr cover, std::size_t x_id,
   if (kmax < 2) return result;
 
   bool q3_active = true, q4_active = kmax >= 3;
-  const bool pruning_enabled = pool && !pool->ids().empty();
-  if (pruning_enabled) {
+  const bool collective_enabled = filter && !filter->pool->ids().empty();
+  const bool pruning_enabled = collective_enabled || (pool && !pool->ids().empty());
+  if (collective_enabled) {
+    const auto assessed = assess_q34_family_pool(filter->pool, x_id, kmax,
+                                               filter->options, filter->workspace);
+    filter->work = assessed.work;
+    q3_active = !assessed.q3_rejected;
+    q4_active = kmax >= 3 && !assessed.q4_rejected;
+    if (!q3_active && !q4_active) return result;
+  } else if (pruning_enabled) {
     counter_add(pruning->seed_queries);
     const auto certificate = Q34FamilyCertificate::make(a, b, x);
     if (!certificate) throw std::logic_error("mhgp8 owned acute seed lacks a family certificate");
@@ -396,6 +455,41 @@ Q34PrunedEdgeWork run_q34_pruned_edge_candidates(Q34WitnessPoolPtr pool,
     const auto seed = run_q34_pruned_seed_candidates(pool, id, kmax, consumer);
     merge(result.pruning, seed.pruning);
     return seed.covered;
+  });
+  return result;
+}
+
+Q34CollectiveSeedWork run_q34_collective_seed_candidates(Q34WitnessPoolPtr pool,
+    std::size_t x_id, std::size_t kmax, Q34PoolOptions options,
+    const Q34SeedConsumer& consumer) {
+  if (!pool) throw std::invalid_argument("mhgp8 collective seed requires an immutable witness pool");
+  validate_pool_options(options);
+  Q34CollectiveSeedWork result{};
+  Q34PoolWorkspace workspace;
+  PoolFilterContext filter{pool, options, workspace, result.filter};
+  result.covered = run_seed(pool->cover(), x_id, kmax, consumer, nullptr, nullptr, &filter);
+  // Scratch remains allocated throughout the fallback. Its capacity is fixed
+  // after assessment, so it really overlaps the covered path's buffer peak.
+  result.peak_live_buffer_bytes = result.covered.peak_buffer_bytes;
+  counter_add(result.peak_live_buffer_bytes, static_cast<u64>(workspace.retained_bytes()));
+  return result;
+}
+
+Q34CollectiveEdgeWork run_q34_collective_edge_candidates(Q34WitnessPoolPtr pool,
+    std::size_t kmax, Q34PoolOptions options, const Q34SeedConsumer& consumer) {
+  if (!pool) throw std::invalid_argument("mhgp8 collective edge requires an immutable witness pool");
+  validate_pool_options(options);
+  Q34CollectiveEdgeWork result{};
+  Q34PoolWorkspace workspace;  // Once per edge, not once per seed.
+  result.edge = run_edge(pool->cover(), kmax, consumer, [&](std::size_t id) {
+    Q34PoolWork work{};
+    PoolFilterContext filter{pool, options, workspace, work};
+    const auto covered = run_seed(pool->cover(), id, kmax, consumer, nullptr, nullptr, &filter);
+    merge(result.filter, work);
+    u64 live = covered.peak_buffer_bytes;
+    counter_add(live, static_cast<u64>(workspace.retained_bytes()));
+    result.peak_live_buffer_bytes = std::max(result.peak_live_buffer_bytes, live);
+    return covered;
   });
   return result;
 }
