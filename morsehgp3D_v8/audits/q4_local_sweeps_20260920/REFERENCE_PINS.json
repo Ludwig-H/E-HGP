@@ -1,0 +1,30 @@
+{
+  "base_commit": "66b1551fb2e3c25736e2be380102ab466f3655a2",
+  "constructor_final_review_commit": "66b1551fb2e3c25736e2be380102ab466f3655a2",
+  "constructor_initial_read_snapshot": {
+    "morsehgp3D_v8/src/lanes/q34_cover.cpp": "66cad4a53f60c4d101c1175464768c75733b73bffeab2cea6058b957c6e6138f",
+    "morsehgp3D_v8/src/lanes/q4_center_map.cpp": "776e5ac25651cde040d2b3c2b4415d90d73eb0d2a5c2ec21705883ea4b29155e",
+    "morsehgp3D_v8/src/lanes/q4_center_map.hpp": "3827fbe3b5fff4026096b5e978d53fb46d0b892cc7e38c87b3afdb1b8fdda3d4",
+    "morsehgp3D_v8/src/lanes/q4_positive_domain.cpp": "ee3457c62b66627ec4f5c9e587c449386010c3280f3d2d564d545bb6034e088d",
+    "morsehgp3D_v8/src/lanes/q4_positive_domain.hpp": "a414a31d3fce4cd91ea648369b9b43dd4dde0c1d54b9554f2e5d45a5b794057f"
+  },
+  "constructor_read_only_snapshot": {
+    "morsehgp3D_v8/src/lanes/q34_cover.cpp": "66cad4a53f60c4d101c1175464768c75733b73bffeab2cea6058b957c6e6138f",
+    "morsehgp3D_v8/src/lanes/q4_center_map.cpp": "eb0e59195255c8b811d39c9a15eb4a0ece42519afd5b594493de3fe4b671528f",
+    "morsehgp3D_v8/src/lanes/q4_center_map.hpp": "872db8a0a3396652edc8aa3c08e2cd8fcacb645e779a999c832c4a97ad38a8a6",
+    "morsehgp3D_v8/src/lanes/q4_positive_domain.cpp": "ee3457c62b66627ec4f5c9e587c449386010c3280f3d2d564d545bb6034e088d",
+    "morsehgp3D_v8/src/lanes/q4_positive_domain.hpp": "a414a31d3fce4cd91ea648369b9b43dd4dde0c1d54b9554f2e5d45a5b794057f"
+  },
+  "constructor_review_scope": "Final source read-only review at 66b1551f, not qualification. Memory/copy counters and acquired-exception failure state checked. Constructor tests not rerun; no product code linked by this audit.",
+  "date": "2026-09-20",
+  "explicit_reuse": {
+    "morsehgp3D_v8/audits/q4_center_blocks_20260920/center_blocks.cpp": "5c383924cb27dcac499383980640c1f55662afd94525705b172687ea0181a9cf",
+    "morsehgp3D_v8/audits/q4_center_blocks_20260920/fixtures.py": "adadb78ffac7b60581b56d4eefa340d7e3b30afe8a40f1d7e8cf30d65fa0836f",
+    "morsehgp3D_v8/audits/q4_center_blocks_20260920/oracle_gate.py": "b8d633cf3d35236db6bce0976fe842894ca2c40289f85d78c729cf544ca432e0"
+  },
+  "gcp_used": false,
+  "independence": "New local_sweeps.cpp includes the pinned independent center_blocks.cpp helpers with its main renamed; previous prototype unchanged. Fresh private builds only.",
+  "product_files_written": false,
+  "reused_audit_commit": "2920b8b5",
+  "schema": "mhgp8_audit_local_sweeps_reference_pins_v1"
+}

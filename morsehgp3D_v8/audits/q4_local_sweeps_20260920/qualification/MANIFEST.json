@@ -1,0 +1,162 @@
+{
+  "binaries": {
+    ".build/qualification/release": "0082db2ef6e8462c1addf4cbf120e3575ed26608169249a8a5b82b5873caab3e",
+    ".build/qualification/sanitize": "c0d1f45789ab331aff017cf6b9b114b4655c725f4605b0ab8c5bc71fe5e58067"
+  },
+  "commands": [
+    {
+      "command": [
+        "g++",
+        "--version"
+      ],
+      "process_wall_seconds": 0.0026597530013532378,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
+    },
+    {
+      "command": [
+        "clang++",
+        "--version"
+      ],
+      "process_wall_seconds": 0.02494113500142703,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Ubuntu clang version 18.1.3 (1ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/bin\n"
+    },
+    {
+      "command": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-Wconversion",
+        "-Wsign-conversion",
+        "-Wshadow",
+        "-O2",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q4_local_sweeps_20260920/local_sweeps.cpp",
+        "-o",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q4_local_sweeps_20260920/.build/qualification/release"
+      ],
+      "process_wall_seconds": 3.481906564000383,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "clang++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-Wconversion",
+        "-Wsign-conversion",
+        "-Wshadow",
+        "-O1",
+        "-g",
+        "-fno-omit-frame-pointer",
+        "-fsanitize=address,undefined",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q4_local_sweeps_20260920/local_sweeps.cpp",
+        "-o",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q4_local_sweeps_20260920/.build/qualification/sanitize"
+      ],
+      "process_wall_seconds": 7.540210146999016,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q4_local_sweeps_20260920/local_gate.py"
+      ],
+      "process_wall_seconds": 1.4633891689991287,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"child_minimum_not_exact\": true, \"child_partition_checks\": 892, \"comparator_checks\": 1640, \"comparator_mutants\": [\"ignore_b_sign\", \"ignore_denominator_signs\", \"split_equal_roots\", \"swap_seed_only\"], \"comparator_zero_equalities\": 237, \"local_root_checks\": 1383, \"max_naive_cross_bits\": 142, \"max_reduced_det_bits\": 103, \"other_mutants\": [\"drop_min_zero\", \"no_boundary_owner\", \"saturate_declining_count\"], \"real_u16_comparator_cases\": 1436, \"root_location_checks\": 9840, \"schema\": \"mhgp8_audit_q4_local_sweep_math_v1\", \"scope\": \"independent affine/integer model; real min-zero tetra fixture; no product qualification\", \"status\": \"PASS\"}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q4_local_sweeps_20260920/local_gate.py"
+      ],
+      "process_wall_seconds": 1.4900380580002093,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"child_minimum_not_exact\": true, \"child_partition_checks\": 892, \"comparator_checks\": 1640, \"comparator_mutants\": [\"ignore_b_sign\", \"ignore_denominator_signs\", \"split_equal_roots\", \"swap_seed_only\"], \"comparator_zero_equalities\": 237, \"local_root_checks\": 1383, \"max_naive_cross_bits\": 142, \"max_reduced_det_bits\": 103, \"other_mutants\": [\"drop_min_zero\", \"no_boundary_owner\", \"saturate_declining_count\"], \"real_u16_comparator_cases\": 1436, \"root_location_checks\": 9840, \"schema\": \"mhgp8_audit_q4_local_sweep_math_v1\", \"scope\": \"independent affine/integer model; real min-zero tetra fixture; no product qualification\", \"status\": \"PASS\"}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q4_local_sweeps_20260920/verify_local.py",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q4_local_sweeps_20260920/.build/qualification/release",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q4_local_sweeps_20260920/qualification/release.json.gz"
+      ],
+      "process_wall_seconds": 1.6062314170012542,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"binary_sha256\": \"0082db2ef6e8462c1addf4cbf120e3575ed26608169249a8a5b82b5873caab3e\", \"capture_sha256\": \"9661cd9eeaf4722e30db49fd80b36a3f425104a31a5cdaa3b43ff6d3ab81a5f9\", \"counts\": {\"calls\": 210, \"covered_point_tests\": 12457, \"emitted_roots\": 840, \"max_shell\": 30, \"mode_pairs\": 6, \"positive_owned_tetrahedra\": 78, \"required_positive_roots\": 123, \"tetra_presentations\": 5706}, \"scope\": \"audit-only local covered roots; not a product or FULL qualification\", \"status\": \"passed\"}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q4_local_sweeps_20260920/verify_local.py",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q4_local_sweeps_20260920/.build/qualification/release",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q4_local_sweeps_20260920/qualification/optimized.json.gz"
+      ],
+      "process_wall_seconds": 1.5406557730020722,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"binary_sha256\": \"0082db2ef6e8462c1addf4cbf120e3575ed26608169249a8a5b82b5873caab3e\", \"capture_sha256\": \"63ddf0c1f2a8010ac0f227072a1b4eaf4df2ac536841c0b7813ed191de2f9635\", \"counts\": {\"calls\": 210, \"covered_point_tests\": 12457, \"emitted_roots\": 840, \"max_shell\": 30, \"mode_pairs\": 6, \"positive_owned_tetrahedra\": 78, \"required_positive_roots\": 123, \"tetra_presentations\": 5706}, \"scope\": \"audit-only local covered roots; not a product or FULL qualification\", \"status\": \"passed\"}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q4_local_sweeps_20260920/verify_local.py",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q4_local_sweeps_20260920/.build/qualification/sanitize",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/q4_local_sweeps_20260920/qualification/sanitize.json.gz"
+      ],
+      "process_wall_seconds": 4.375225502000831,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"binary_sha256\": \"c0d1f45789ab331aff017cf6b9b114b4655c725f4605b0ab8c5bc71fe5e58067\", \"capture_sha256\": \"07327cd06888bab57ca14cdaf1c8c1f5e2d749030488e20375ea54affd8552f4\", \"counts\": {\"calls\": 210, \"covered_point_tests\": 12457, \"emitted_roots\": 840, \"max_shell\": 30, \"mode_pairs\": 6, \"positive_owned_tetrahedra\": 78, \"required_positive_roots\": 123, \"tetra_presentations\": 5706}, \"scope\": \"audit-only local covered roots; not a product or FULL qualification\", \"status\": \"passed\"}\n"
+    }
+  ],
+  "environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "oracle_captures": {
+    "optimized.json.gz": "63ddf0c1f2a8010ac0f227072a1b4eaf4df2ac536841c0b7813ed191de2f9635",
+    "release.json.gz": "9661cd9eeaf4722e30db49fd80b36a3f425104a31a5cdaa3b43ff6d3ab81a5f9",
+    "sanitize.json.gz": "07327cd06888bab57ca14cdaf1c8c1f5e2d749030488e20375ea54affd8552f4"
+  },
+  "schema": "audit_local_sweeps_qualification_v1",
+  "scope": "independent covered roots, depths and shells; product cascade not run",
+  "sources": {
+    "morsehgp3D_v8/audits/q4_center_blocks_20260920/center_blocks.cpp": "5c383924cb27dcac499383980640c1f55662afd94525705b172687ea0181a9cf",
+    "morsehgp3D_v8/audits/q4_center_blocks_20260920/fixtures.py": "adadb78ffac7b60581b56d4eefa340d7e3b30afe8a40f1d7e8cf30d65fa0836f",
+    "morsehgp3D_v8/audits/q4_center_blocks_20260920/oracle_gate.py": "b8d633cf3d35236db6bce0976fe842894ca2c40289f85d78c729cf544ca432e0",
+    "morsehgp3D_v8/audits/q4_local_sweeps_20260920/evidence.py": "12ee966cffbc2c73e9eab99cb051295bef63d9e7e8814a2b5177da0686be94dc",
+    "morsehgp3D_v8/audits/q4_local_sweeps_20260920/inputs.py": "dfa0019b75ef36cde0ff73db6918d23f5503205f413bb8aedd9ec5931903fc44",
+    "morsehgp3D_v8/audits/q4_local_sweeps_20260920/local_gate.py": "974fd3a869e4c0318ce42b1600069c282ac36455242206b916c32c4b37188f49",
+    "morsehgp3D_v8/audits/q4_local_sweeps_20260920/local_sweeps.cpp": "29ea23e699ba4df6206bc906a0f337bb24ee58511aa7cd1ba546ea555c8d3232",
+    "morsehgp3D_v8/audits/q4_local_sweeps_20260920/qualify.py": "d09de13c7989bb880407017dd20068d4a6fdb807bfec19912a118c1b20327913",
+    "morsehgp3D_v8/audits/q4_local_sweeps_20260920/read.py": "655db25addc0d6f2a8c95844b630a111f80a4ad13e257484d899240e38e536c8",
+    "morsehgp3D_v8/audits/q4_local_sweeps_20260920/run.py": "4439cb2c19352704c1b579fd74af4cb9d39c7a2fa007f2d8a77ce1c8d638f6b2",
+    "morsehgp3D_v8/audits/q4_local_sweeps_20260920/verify_local.py": "87b039b1367651d0a29331203e141785a6d16d613f22d9a7f45fa97fb916c7dd"
+  },
+  "status": "completed"
+}

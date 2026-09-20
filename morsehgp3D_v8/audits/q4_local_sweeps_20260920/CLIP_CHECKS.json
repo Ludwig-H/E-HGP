@@ -1,0 +1,23 @@
+[
+  {
+    "command": [
+      "python3",
+      "-B",
+      "morsehgp3D_v8/audits/q4_local_sweeps_20260920/clip_gate.py"
+    ],
+    "returncode": 0,
+    "stderr": "",
+    "stdout": "{\"cases\": 612, \"clipped_events\": 2243, \"full_events\": 7886, \"max_sample_evaluation_bits\": 83, \"mutant\": \"discard_outside_without_constant\", \"outside_groups_removed\": 5584, \"point_checks\": 7050, \"root_checks\": 2212, \"schema\": \"mhgp8_audit_local_clip_math_v1\", \"scope\": \"independent rational segment model; no C++ or product qualification\", \"side_samples\": 524, \"status\": \"PASS\"}\n"
+  },
+  {
+    "command": [
+      "python3",
+      "-B",
+      "-O",
+      "morsehgp3D_v8/audits/q4_local_sweeps_20260920/clip_gate.py"
+    ],
+    "returncode": 0,
+    "stderr": "",
+    "stdout": "{\"cases\": 612, \"clipped_events\": 2243, \"full_events\": 7886, \"max_sample_evaluation_bits\": 83, \"mutant\": \"discard_outside_without_constant\", \"outside_groups_removed\": 5584, \"point_checks\": 7050, \"root_checks\": 2212, \"schema\": \"mhgp8_audit_local_clip_math_v1\", \"scope\": \"independent rational segment model; no C++ or product qualification\", \"side_samples\": 524, \"status\": \"PASS\"}\n"
+  }
+]

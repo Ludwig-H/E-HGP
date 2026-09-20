@@ -1,0 +1,22 @@
+{
+  "schema": "mhgp8_audit_q4_local_sweep_preflight_v1",
+  "scope": "Independent Python gate construction before qualification; no product test result.",
+  "attempts": [
+    {
+      "command": ["python3", "-B", "morsehgp3D_v8/audits/q4_local_sweeps_20260920/local_gate.py"],
+      "exit_code": 1,
+      "checks_executed": false,
+      "stdout": "",
+      "stderr": "  File \"/workspaces/E-HGP/morsehgp3D_v8/audits/q4_local_sweeps_20260920/local_gate.py\", line 258\n    for idx,cell in enumerate((((F(-1),F(0)),(F(-1),F(1))),((F(0),F(1)),(F(-1),F(1)))):\n                                                                                      ^\nSyntaxError: invalid syntax\n",
+      "correction": "Split the malformed enumerate expression into a cells variable and its loop; no mathematical checks had run."
+    },
+    {
+      "command": ["python3", "-B", "morsehgp3D_v8/audits/q4_local_sweeps_20260920/local_gate.py"],
+      "exit_code": 1,
+      "checks_executed": "Comparator checks reached the mutant coverage guard; later local sweeps had not run.",
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/workspaces/E-HGP/morsehgp3D_v8/audits/q4_local_sweeps_20260920/local_gate.py\", line 283, in <module>\n    main()\n  File \"/workspaces/E-HGP/morsehgp3D_v8/audits/q4_local_sweeps_20260920/local_gate.py\", line 227, in main\n    require(all(killed.values()),\"a root-comparator mutant survived\")\n  File \"/workspaces/E-HGP/morsehgp3D_v8/audits/q4_local_sweeps_20260920/local_gate.py\", line 16, in require\n    raise RuntimeError(why)\nRuntimeError: a root-comparator mutant survived\n",
+      "correction": "The vertical seed fixture happened to preserve the order even when only the seed was swapped. Replace its two witness forms with a distinguishing case; retain the all-mutants guard and improve its diagnostic."
+    }
+  ]
+}

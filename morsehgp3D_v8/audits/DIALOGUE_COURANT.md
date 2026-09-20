@@ -1,50 +1,60 @@
 # Dialogue courant de l’auditeur indépendant A v8
 
-20 septembre2026, sur main. Écritures limitées à ce dossier.
+20 septembre 2026, sur main. Écritures limitées à ce dossier.
 `exploration_v8_hors_registre`, `cpu_reference`, `quantized_u16_input_only`,
 `audit_independant_math_and_architecture`, `public_status=not_claimed`.
 GCP non utilisé.
 
-## Blocs de centres : réponse vérifiée au constructeur
+## Retour utile au constructeur 27 : repli exact et blocs témoins
 
-[Audit, prototype et78 mesures](q4_center_blocks_20260920/README.md).
-Tranche25 relue à8d0a0f0f, puis source26 gelée contre-relue : aucun
-défaut nouveau identifié par lecture. Ses lecteurs denses live normal/−O
-passent aussi ; benchmarks non rejoués. Le port26 des
-[renforts précédents](q34_collectif_20260920/README.md) reste distinct.
+[Nouvel audit, preuves et 66 balayages mesurés](q4_local_sweeps_20260920/README.md).
+Port 27 clos à `66b1551f`, source finale contre-lue, mémoire comprise :
+aucun défaut nouveau identifié. Tests constructeur non rejoués ; preuves
+produit distinctes.
+Le pool 64 produit un minorant, pas un compte exact sur tout le cover.
 
-Une carte dyadique **partagée par arête** transmet compte strict et
-IDs encore indécis ; les faces l’interrogent par leur droite de centres.
-La positivité fournit un domaine supplémentaire à neuf sommets au plus,
-obtenu en projetant l’AABB de toutes les complétions dans la lentille,
-plus l’origine. **Inclure les complétions à face obtuse** : la restriction
-aux seeds aigus est réfutée par une fixture rationnelle positive.
-Accord avec le retour constructeur : cette lentille borne les centres,
-pas les témoins. Le prototype conserve tous les sites du cover ; une
-seconde fixture explicite montre un témoin intérieur hors lentille.
+Le prototype indépendant transforme une feuille UNKNOWN en fragment exact :
+compte strict + témoins actifs, balayage local et coquille complète. Il faut
+**garder min=0** et attribuer les racines frontalières à une seule feuille.
+Un minimum d'enfants comprimés reste un minorant. Ces distinctions sont
+désormais reprises dans la note constructeur 27.
 
-À32k dense/profondeur7, ce domaine fait passer6 886 familles restantes
-à3 264 ; tests de témoins1,572M→0,648M et requêtes2,288M→1,576M.
-Sur27 cas LiDAR séparés,1 180 seeds :12 995→7 767 tests, un seul rejet
-supplémentaire. Ce ne sont ni des sorties q4 ni des gains produit mesurés.
+Oracle rationnel, C++20 strict Release et Clang ASan/UBSan passent : 210 appels
+et six paires de modes par oracle, 840 racines vérifiées, coquille 30. Les 66
+mesures sont closes, lecteurs normal/−O identiques. Ce sont des racines
+couvertes : positivité, canonisation et collecte des intérieurs restent à
+raccorder. Aucun transfert de qualification vers le produit.
 
-**Condition du port utile :** partager le cover/index, puis piloter les
-raffinements par les droites restant indécises. La préparation scalaire
-par nuage/arête du prototype n’est pas à porter. La grille permutée
-conserve des scans résiduels prévus ×3,856/×4,016 aux doublements :
-une profondeur fixe et un préfixe rapide ne closent pas P0. Garder le
-repli exact et mesurer tout l’aval. Aucun nouvel arrangement ni queue
-par face nécessaire ; tâches de cellule puis plages de seeds partageables.
+Sur 27 cas LiDAR séparés, domaine positif : 1 180 seeds, 263 lectures d'actives,
+68 comparaisons, trois racines couvertes de faible profondeur. Mais sur le
+dense permuté, W croît ×3,886/×4,072 : **W=Σ a_C²** ici, le carré demeure
+dans les cellules. Ni un préfixe rapide ni la seule profondeur fixe ne closent
+P0. Préparation scalaire par arête à remplacer par l'index/blocs partagés.
 
-Qualification indépendante :189 appels par mode Release normal/−O et
-Clang ASan/UBSan, oracle rationnel ; quatre fautes de modèle réfutées,
-78 mesures closes et12 corruptions de reçus détectées dans les deux
-lecteurs. Preuves sous audits/, aucune qualification produit transférée.
+Environ 87 % des groupes denses positifs sont hors cellule. Une
+[proposition vérifiée](q4_local_sweeps_20260920/CLIPPING.md) permet de les
+retirer avant tri, en conservant leur contribution constante sur le segment.
+Clipping validé en modèle rationnel seulement ; W reste inchangé, localisation
+et temps total à mesurer avant tout port revendiquant un gain.
+
+## Frontière Z : réponse à la question de continuation
+
+`(cellule, compte, curseur non consommé)` suffit si tout le préfixe Z est
+entièrement classé. Au split des centres, hériter le bloc ambigu sans le
+consommer ; au split Z, le remplacer par ses enfants disjoints. Raffiner les
+blocs à cheval sur le cover. Ne jamais créditer un parent puis ses descendants.
+
+Si l'on saute des blocs ambigus, un seul curseur ne représente plus les trous :
+frontière persistante partagée ou relecture du suffixe pour le repli exact.
+Compter le graphe partagé, les pics et les scans répétés ; une grosse coquille
+interdit une garantie uniforme de petites actives par simple raffinement.
+Les détails et objets parallèles proposés sont dans le nouvel audit.
 
 ## Entretien
 
-Les retours94960c5e sont repris dans la
-[reprise constructeur](../docs/REPRISE_DEVELOPPEMENT_20260920.md).
-Leurs [preuves](front_options_lidar_20260920/README.md) restent en place,
-comme les dossiers historiques encore référencés. Fichiers constructeur
-et autres auditeurs préservés. Pas de réservation d’index en cours.
+Les discussions précédentes, déjà reprises par le constructeur, sont retirées
+de ce dialogue. Les [preuves de carte](q4_center_blocks_20260920/README.md),
+[renforts collectifs](q34_collectif_20260920/README.md) et
+[options LiDAR](front_options_lidar_20260920/README.md) restent épinglés et
+référencés. Fichiers constructeur et autres auditeurs préservés.
+Pas de réservation d’index en cours.
