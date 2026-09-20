@@ -1,60 +1,63 @@
 # Dialogue courant de l’auditeur indépendant A v8
 
-20 septembre 2026, sur main. Écritures limitées à ce dossier.
+20 septembre 2026, main ; écritures limitées à audits/.
 `exploration_v8_hors_registre`, `cpu_reference`, `quantized_u16_input_only`,
 `audit_independant_math_and_architecture`, `public_status=not_claimed`.
 GCP non utilisé.
 
-## Retour utile au constructeur 27 : repli exact et blocs témoins
+## Tranches 28/29 : coût réel et composition sûre
 
-[Nouvel audit, preuves et 66 balayages mesurés](q4_local_sweeps_20260920/README.md).
-Port 27 clos à `66b1551f`, source finale contre-lue, mémoire comprise :
-aucun défaut nouveau identifié. Tests constructeur non rejoués ; preuves
-produit distinctes.
-Le pool 64 produit un minorant, pas un compte exact sur tout le cover.
+[Audit et preuves](q4_kernel_composition_20260920/README.md), produit relu
+à `31b0243a` : pas de défaut identifié dans les contrats examinés.
+La sonde lie les vrais ports 28/29 : 192 appels Release/Clang ASan/UBSan
+sur petits oracles, puis **126 mesures LiDAR appariées**, scans séparés
+de SemanticKITTI08, sans correspondance ni fusion de points.
 
-Le prototype indépendant transforme une feuille UNKNOWN en fragment exact :
-compte strict + témoins actifs, balayage local et coquille complète. Il faut
-**garder min=0** et attribuer les racines frontalières à une seule feuille.
-Un minimum d'enfants comprimés reste un minorant. Ces distinctions sont
-désormais reprises dans la note constructeur 27.
+Les 90 premiers cas ne produisent que des rejets. Le complément de neuf
+arêtes productives vérifiées indépendamment donne 36 mesures à 8k/50k,
+**54 présentations identiques**, profondeur et coquille contrôlées par
+census global. Toutes les 20 occurrences de cible admissible sont retrouvées ;
+les 16 devenues trop profondes sont rejetées. Ce n’est pas un front complet.
 
-Oracle rationnel, C++20 strict Release et Clang ASan/UBSan passent : 210 appels
-et six paires de modes par oracle, 840 racines vérifiées, coquille 30. Les 66
-mesures sont closes, lecteurs normal/−O identiques. Ce sont des racines
-couvertes : positivité, canonisation et collecte des intérieurs restent à
-raccorder. Aucun transfert de qualification vers le produit.
+**Ne pas substituer systématiquement 29 à 28 :** sur le complément productif
+8k, leurs lectures de témoins sont proches ; à 50k/K10, 29 réduit 856 sites
+à 643 mais fait 14 219 lectures et 100 670 comparaisons de tri, contre
+5 628 et 4 725 pour 28. Les petits appels 29 peuvent être plus rapides ;
+les temps uniques sur hôte partagé ne qualifient pas un gain stable.
 
-Sur 27 cas LiDAR séparés, domaine positif : 1 180 seeds, 263 lectures d'actives,
-68 comparaisons, trois racines couvertes de faible profondeur. Mais sur le
-dense permuté, W croît ×3,886/×4,072 : **W=Σ a_C²** ici, le carré demeure
-dans les cellules. Ni un préfixe rapide ni la seule profondeur fixe ne closent
-P0. Préparation scalaire par arête à remplacer par l'index/blocs partagés.
+**Composition à comparer :** noyau global R, puis atlas sur R ; dans une
+feuille de compte exact c<T, réduire éventuellement ses actives au seuil T−c.
+Les certificats doivent être emboîtés. L’[intersection de noyaux indépendants
+est fausse](q4_kernel_composition_20260920/COMPOSITION.md), avec contre-fixture
+positive réelle. Le recentrage local conserve l’orientation originale par
+une identité exacte ; son déterminant traduit naïf peut dépasser i128.
+Aucun raccord ni gain de cette composition n’est encore mesuré.
 
-Environ 87 % des groupes denses positifs sont hors cellule. Une
-[proposition vérifiée](q4_local_sweeps_20260920/CLIPPING.md) permet de les
-retirer avant tri, en conservant leur contribution constante sur le segment.
-Clipping validé en modèle rationnel seulement ; W reste inchangé, localisation
-et temps total à mesurer avant tout port revendiquant un gain.
+## Réponse à la fenêtre 30 et au futur index
 
-## Frontière Z : réponse à la question de continuation
+[Certificat confirmé](q4_kernel_composition_20260920/WINDOW_INDEX.md) :
+avec H=T−c>0, conserver la fenêtre **fermée** de la H-ième sortie décroissante
+à la H-ième entrée croissante. L=U doit survivre ; le seuil compte les IDs
+avec leurs multiplicités. Au plus 2H−2 IDs ont leur racine strictement entre
+les bornes ; cette borne ne limite pas les coquilles aux extrémités.
+508 cas rationnels et deux mutants passent en normal/−O. Le port 30 en
+chantier n’est pas qualifié par cet audit des ports 28/29.
 
-`(cellule, compte, curseur non consommé)` suffit si tout le préfixe Z est
-entièrement classé. Au split des centres, hériter le bloc ambigu sans le
-consommer ; au split Z, le remplacer par ses enfants disjoints. Raffiner les
-blocs à cheval sur le cover. Ne jamais créditer un parent puis ses descendants.
+Pour l’index futur, conserver toutes les frontières cycliques, leurs poids
+et plateaux, puis les partager entre seeds. Tangences, pôle et point dual
+de la seed découpent les projections en chaînes monotones ; les seuls voisins
+de sa couche ne suffisent pas. Formules et cas c=0 sont explicités dans la
+note ; aucune complexité logarithmique acquise n’est annoncée.
 
-Si l'on saute des blocs ambigus, un seul curseur ne représente plus les trous :
-frontière persistante partagée ou relecture du suffixe pour le repli exact.
-Compter le graphe partagé, les pics et les scans répétés ; une grosse coquille
-interdit une garantie uniforme de petites actives par simple raffinement.
-Les détails et objets parallèles proposés sont dans le nouvel audit.
+La [fixture q4 isolée à huit sites](q4_kernel_composition_20260920/DEGENERACIES.md)
+est déjà prise en compte par le constructeur pour son port 30. Elle exige
+des intersections fermées de dimensions 0/1 et une coquille entière.
+Au budget local d’intérieurs nul, une seule intersection fermée suffit ;
+l’énumérateur général démontré reste potentiellement combinatoire.
 
 ## Entretien
 
-Les discussions précédentes, déjà reprises par le constructeur, sont retirées
-de ce dialogue. Les [preuves de carte](q4_center_blocks_20260920/README.md),
-[renforts collectifs](q34_collectif_20260920/README.md) et
-[options LiDAR](front_options_lidar_20260920/README.md) restent épinglés et
-référencés. Fichiers constructeur et autres auditeurs préservés.
-Pas de réservation d’index en cours.
+Les conseils désormais portés dans 28/29 sont retirés du dialogue.
+Les [preuves antérieures](q4_local_sweeps_20260920/README.md) restent épinglées
+car réutilisées ou référencées ; fichiers constructeur et autres auditeurs
+préservés. P0 global, tour FULL et contrats 50k/massif restent ouverts.

@@ -1,0 +1,98 @@
+{
+  "schema": "mhgp8_audit_q4_product_review_pins_v1",
+  "recorded_utc": "2026-09-20T21:37:43.738969+00:00",
+  "source_commit": "31b0243a7593a7eeb32903ce3270c4ef0535c24e",
+  "branch": "main",
+  "scope": {
+    "product_access": "read_only",
+    "review": "static_source_review_and_direct_receipt_file_checks",
+    "q4_local_review": "full_independent_source_read",
+    "q4_shallow_review": "independent_agent_review_relayed_by_root_with_live_source_pins",
+    "new_engine_tests": false,
+    "new_builds": false,
+    "requalification": false,
+    "all_capture_artifacts_revalidated": false
+  },
+  "source_sha256": {
+    "morsehgp3D_v8/src/lanes/q4_local_partition.cpp": "2253c1d1590e2dbd032f36121b70cd893431c9a0b51591ad37b92548afdcae9f",
+    "morsehgp3D_v8/src/lanes/q4_local_partition.hpp": "895cae0074b96578a051fff2bf78e7e5d712b47215d9d1ace0d5923dfb835af4",
+    "morsehgp3D_v8/src/lanes/q4_local.cpp": "0d52f1446b1a4d4ab102008abb4da8f6556681cf2973f6ad2435a87019ab0b45",
+    "morsehgp3D_v8/src/lanes/q4_local.hpp": "1fd724a41de6b5c801ce84800fd5668eb58f332612f002d79d29df658ca36441",
+    "morsehgp3D_v8/src/lanes/q4_shallow_set.cpp": "264f04ce8fd56d3dd907d340b4926a7fad08c9a4682b194077f5de1af726956e",
+    "morsehgp3D_v8/src/lanes/q4_shallow_set.hpp": "bc669ff04a801d64c16d1edad6d506837f293d01dbce28b13eecdfb3eb00afe9",
+    "morsehgp3D_v8/src/lanes/q4_shallow.cpp": "937d301ee26f47892ca3d676da67e9c95842471699b3def93cf388f487341003",
+    "morsehgp3D_v8/src/lanes/q4_shallow.hpp": "84dae0c614c642b36c9a8834fd31b97564390651e568c542e30454ee7973fae6"
+  },
+  "all_pinned_sources_equal_commit": true,
+  "document_sha256": {
+    "morsehgp3D_v8/receipts/q4_local_20260920/README.md": "28287aec50a9b662fc59bd65f94a691a0e542fd4305640f5b51a52e1858af710",
+    "morsehgp3D_v8/receipts/q4_shallow_20260920/README.md": "98fb52ed88f09b39ae96ae9f57a699b5c9e4d41b42a6b9e5c534c4746aa7671e",
+    "morsehgp3D_v8/docs/Q4_FRAGMENTS_ET_BALAYAGES_LOCAUX_20260920.md": "ac65b3a8a9798433d85bbab5f34fcd2dc541004b726c48d0d8c5ae7f8dbf06a2",
+    "morsehgp3D_v8/docs/Q4_COUCHES_DUALES_20260920.md": "fdaacd7c273491077cbc5c8ce4f0b8f64f7fe1ee646bd06fc784e23e1a6d2efa"
+  },
+  "captures": [
+    {
+      "path": "morsehgp3D_v8/receipts/q4_local_20260920/scale_ipjudaz2",
+      "manifest_sha256": "344953cb42a850a7fdf465191940350313da9bb3556bfa331466890ef01a9506",
+      "completion_sha256": "68ddeb58d8c6326aeb62421398e16f9b1bae1dbb33f062f52059937a7c023117",
+      "status": "passed",
+      "records": 39,
+      "measurements": 32,
+      "source_count": 177,
+      "source_hashes_before_after_equal": true,
+      "record_hashes_and_success_statuses_checked": true,
+      "manifest_closing_hash_checked": true,
+      "matching_reviewed_source_sha256": {
+        "morsehgp3D_v8/src/lanes/q4_local_partition.cpp": "2253c1d1590e2dbd032f36121b70cd893431c9a0b51591ad37b92548afdcae9f",
+        "morsehgp3D_v8/src/lanes/q4_local_partition.hpp": "895cae0074b96578a051fff2bf78e7e5d712b47215d9d1ace0d5923dfb835af4",
+        "morsehgp3D_v8/src/lanes/q4_local.cpp": "0d52f1446b1a4d4ab102008abb4da8f6556681cf2973f6ad2435a87019ab0b45",
+        "morsehgp3D_v8/src/lanes/q4_local.hpp": "1fd724a41de6b5c801ce84800fd5668eb58f332612f002d79d29df658ca36441"
+      },
+      "measurement_regimes": {
+        "far": 6,
+        "cap": 6,
+        "adversarial": 8,
+        "dense_prefix": 6,
+        "dense_permuted": 6
+      },
+      "lidar_measurements": 0
+    },
+    {
+      "path": "morsehgp3D_v8/receipts/q4_shallow_20260920/scale__b3aquyb",
+      "manifest_sha256": "736e17210c28e03b1b77565df44b5fded8180e31da793eb5eb54a28e7286b37c",
+      "completion_sha256": "bcac591c30d749434ad3a2f52d2d3dab78581a6de85deb776b6109672559514e",
+      "status": "passed",
+      "records": 40,
+      "measurements": 32,
+      "source_count": 184,
+      "source_hashes_before_after_equal": true,
+      "record_hashes_and_success_statuses_checked": true,
+      "manifest_closing_hash_checked": true,
+      "matching_reviewed_source_sha256": {
+        "morsehgp3D_v8/src/lanes/q4_local_partition.cpp": "2253c1d1590e2dbd032f36121b70cd893431c9a0b51591ad37b92548afdcae9f",
+        "morsehgp3D_v8/src/lanes/q4_local_partition.hpp": "895cae0074b96578a051fff2bf78e7e5d712b47215d9d1ace0d5923dfb835af4",
+        "morsehgp3D_v8/src/lanes/q4_local.cpp": "0d52f1446b1a4d4ab102008abb4da8f6556681cf2973f6ad2435a87019ab0b45",
+        "morsehgp3D_v8/src/lanes/q4_local.hpp": "1fd724a41de6b5c801ce84800fd5668eb58f332612f002d79d29df658ca36441",
+        "morsehgp3D_v8/src/lanes/q4_shallow_set.cpp": "264f04ce8fd56d3dd907d340b4926a7fad08c9a4682b194077f5de1af726956e",
+        "morsehgp3D_v8/src/lanes/q4_shallow_set.hpp": "bc669ff04a801d64c16d1edad6d506837f293d01dbce28b13eecdfb3eb00afe9",
+        "morsehgp3D_v8/src/lanes/q4_shallow.cpp": "937d301ee26f47892ca3d676da67e9c95842471699b3def93cf388f487341003",
+        "morsehgp3D_v8/src/lanes/q4_shallow.hpp": "84dae0c614c642b36c9a8834fd31b97564390651e568c542e30454ee7973fae6"
+      },
+      "measurement_regimes": {
+        "far": 6,
+        "cap": 6,
+        "adversarial": 8,
+        "dense_prefix": 6,
+        "dense_permuted": 6
+      },
+      "lidar_measurements": 0
+    }
+  ],
+  "limits": [
+    "No product LiDAR measurement in these two scale captures.",
+    "Historical prototype LiDAR results do not qualify these ports.",
+    "Large published-ball census alone does not prove output completeness.",
+    "Capacity accounting excludes fixed objects, allocator transients, consumers, shared cloud/index/cover and RSS.",
+    "No qualification of combined 28+29, global edge generation, FULL, GPU/G4 or global subquadratic work."
+  ]
+}

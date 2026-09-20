@@ -1,0 +1,26 @@
+{
+  "source_sha256": "f44be80888b988fc1806bc63e2d106ae776381a3f7783901f02a212516953e58",
+  "records": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/audits/q4_kernel_composition_20260920/window_gate.py"
+      ],
+      "returncode": 0,
+      "stdout": "{\"admitted_roots\": 346, \"cases\": 508, \"dual_formula_checks\": 283, \"mutants\": [\"open_window_loses_isolated_root\", \"unweighted_quantile_breaks_inner_id_bound\"], \"outside_checks\": 4561, \"root_checks\": 407, \"schema\": \"mhgp8_audit_window_index_math_v1\", \"scope\": \"independent rational events and dual formulas; no index implementation or product qualification\", \"status\": \"PASS\"}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/audits/q4_kernel_composition_20260920/window_gate.py"
+      ],
+      "returncode": 0,
+      "stdout": "{\"admitted_roots\": 346, \"cases\": 508, \"dual_formula_checks\": 283, \"mutants\": [\"open_window_loses_isolated_root\", \"unweighted_quantile_breaks_inner_id_bound\"], \"outside_checks\": 4561, \"root_checks\": 407, \"schema\": \"mhgp8_audit_window_index_math_v1\", \"scope\": \"independent rational events and dual formulas; no index implementation or product qualification\", \"status\": \"PASS\"}\n",
+      "stderr": ""
+    }
+  ]
+}
