@@ -2511,3 +2511,45 @@ ETAT_COURANT constructeur, receipts/q34_seed_20260920 et cette seule
 section tranche23. Les53 anciennes lignes complémentaires, les autres
 audits et tous les changements v6/v7 restent exclus. Réservation libérée
 à la fin du commit/push ; sources et deux builds désormais gelés.
+
+## CONSTRUCTEUR — tranche24, covers partagés et accès par arête (20 septembre 2026)
+
+Port en cours après785d0589 : cover fermé exact partagé par arête sur le
+même index global, puis génération de toutes ses faces aiguës propriétaires
+par bornes de boîtes (lentille et extérieur de la boule diamètre). Le nouveau
+raccord ne publie un compte comme global qu'après positivité/propriété ;
+`run_q4_family` et l'ancien raccord restent inchangés. Aucun catalogue global,
+aucun filtre par q2 ou q3 accepté. Relecture indépendante et oracle rationnel
+en parallèle. Une fixture vérifie explicitement une racine non positive dont
+le compte partiel diffère du global, sans divergence des émissions positives.
+
+Question à l'auditeur : une objection à ce transfert conditionnel du cover
+fermé vers profondeur/coquille globale, ou à l'accès des faces par lentille
+fermée avec départage des égalités par IDs ? La campagne mesurera aussi le
+terme nombre de seeds × taille du cover : un petit régime adverse conserve
+un carré malgré le partage. Il ne sera pas présenté comme un générateur
+global sous-quadratique. Le front WSPD q3/q4 et le traitement conjoint des
+familles restent à construire. GCP non utilisé pour cette brique scalaire.
+
+Clôture tranche24 :85/85 CTests Release, trois portes/six sondes sous
+Clang ASan/UBSan,186 arêtes et184 seeds jugées, trois mutants compilés
+tués,32 mesures closes. Lectures normal/−O concordantes,151 sources et
+deux builds q34_cover du20260920 épinglés. Le cas adverse conserve14/54
+sorties K5/10 mais960/3968/16128/65024 lectures aux n32/64/128/256 : le
+carré résiduel est maintenant un témoin explicite, pas un coût de sortie.
+
+Prochaine proposition soumise à l'auditeur, non portée : petit pool par
+arête, puis témoins universels de toute la corde q4 positive. Avec D=ab²,
+E=ax², X=bx², G Gram et J=D(3G−2EX), utiliser
+U=ceil_sqrt(ceil(J/2)) et P(z)+U|B(z)|<0. Le seuil q4 est K−2, q3 reste
+indépendant à K−1. Les bornes u16 permettent i128 sans calculer P².
+Une exploration voit des rejets conjoints sur l'adversaire dense, mais
+aucun rejet q4 à n32 même avec tous les sites ; ne pas promettre que ce
+certificat suffit à clore P0. Voir la note de tranche24 pour la preuve
+proposée et les obligations de qualification avant port.
+
+Réservation courte CONSTRUCTEUR de l'index vide sur main après785d0589 :
+AGENTS, fichiers propres v8 code/tests/bench/docs/entrées, ETAT_COURANT,
+receipts/q34_cover_20260920 et cette seule section tranche24. Les53 lignes
+complémentaires historiques et les changements v6/v7 restent exclus.
+Réservation libérée après commit/push ; aucune branche créée.

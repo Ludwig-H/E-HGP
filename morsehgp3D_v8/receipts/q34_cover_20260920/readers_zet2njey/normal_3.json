@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_q34_cover_checks.py",
+    "read",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/q34_cover_20260920/regression_qbnh7tdm",
+    "--check-live"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T15:26:52.106992+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"campaign\": \"regression\", \"dense_adversary_exposes_seed_count_times_cover_size\": true, \"full_contract_qualified\": false, \"general_subquadratic_bound\": false, \"growth\": {}, \"measurements\": 0, \"new_seed_discovery_included\": true, \"old_seed_discovery_included\": false, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q34_cover_20260920/regression_qbnh7tdm\", \"records\": 1, \"scope\": \"one_edge_not_global_q34_producer\", \"sources\": 151, \"status\": \"passed\"}\n",
+  "stderr": "",
+  "stdout_base64": "eyJjYW1wYWlnbiI6ICJyZWdyZXNzaW9uIiwgImRlbnNlX2FkdmVyc2FyeV9leHBvc2VzX3NlZWRfY291bnRfdGltZXNfY292ZXJfc2l6ZSI6IHRydWUsICJmdWxsX2NvbnRyYWN0X3F1YWxpZmllZCI6IGZhbHNlLCAiZ2VuZXJhbF9zdWJxdWFkcmF0aWNfYm91bmQiOiBmYWxzZSwgImdyb3d0aCI6IHt9LCAibWVhc3VyZW1lbnRzIjogMCwgIm5ld19zZWVkX2Rpc2NvdmVyeV9pbmNsdWRlZCI6IHRydWUsICJvbGRfc2VlZF9kaXNjb3ZlcnlfaW5jbHVkZWQiOiBmYWxzZSwgInBhdGgiOiAiL3dvcmtzcGFjZXMvRS1IR1AvbW9yc2VoZ3AzRF92OC9yZWNlaXB0cy9xMzRfY292ZXJfMjAyNjA5MjAvcmVncmVzc2lvbl9xYm5oN3RkbSIsICJyZWNvcmRzIjogMSwgInNjb3BlIjogIm9uZV9lZGdlX25vdF9nbG9iYWxfcTM0X3Byb2R1Y2VyIiwgInNvdXJjZXMiOiAxNTEsICJzdGF0dXMiOiAicGFzc2VkIn0K",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-20T15:26:52.229106+00:00"
+}

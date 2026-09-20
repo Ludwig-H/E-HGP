@@ -10,6 +10,26 @@ qualification de son propre code.
 
 ## À reprendre maintenant
 
+La tranche24 ajoute les [covers partagés par arête](docs/Q3_Q4_COVERS_PARTAGES_20260920.md)
+et la génération de toutes ses faces aiguës propriétaires. L'ancien raccord
+par seed reste une référence inchangée. Les émissions du raccord couvert
+ont une profondeur et une coquille globales, mais seulement **après**
+certification de positivité/propriété : ses racines arbitraires portent des
+comptes partiels. Aucun raccord q3/q4 à la WSPD globale n'est encore livré.
+Le terme nombre de faces × taille du cover reste à éliminer collectivement ;
+ne pas brancher cette entrée sur tous les produits comme si P0 était clos.
+
+Qualification close :85 CTests Release, trois portes et six sondes Clang
+ASan/UBSan, trois mutants compilés tués,32 mesures et lecteurs normal/−O.
+Builds q34_cover et q34_cover_sanitize du20260920 désormais épinglés.
+Les [reçus](receipts/q34_cover_20260920/README.md) publient le gain du fond
+lointain, la régression dense et le contre-régime à S=n−2,m=n :65 024
+lectures pour14 sorties K5 à n256. Ce dernier interdit toute prétention
+sous-quadratique générale. Le prochain gain doit retirer des familles
+entières ou partager leur census, pas seulement distribuer leurs scans.
+
+### Tranche23 précédente close à785d0589
+
 La tranche suivante après9ae4e28b est le
 [raccord des candidats q3/q4 par seed](docs/Q3_Q4_CANDIDATS_PAR_SEED_20260920.md),
 qualifié : `ExactBall` commun aux arités2/3/4 et

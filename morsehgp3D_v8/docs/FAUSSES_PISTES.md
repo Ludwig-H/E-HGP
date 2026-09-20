@@ -3,6 +3,24 @@
 13 septembre 2026. Mémoire courte de l'audit et de la première tranche P0.
 Les sources et contre-fixtures complètes sont dans les rapports liés.
 
+## Covers q3/q4 — 20 septembre
+
+- Partager le stockage d'une région de témoins ne partage pas les scans
+  de toutes les faces : S faces et m témoins conservent S·m lectures.
+  La tranche24 garde un régime adverse dédié ; aucune généralisation
+  sous-quadratique n'en découle.
+- Le compte sur cette région n'est pas global à une racine arbitraire.
+  Il faut certifier positivité et arête propriétaire avant publication.
+  Une fixture non positive expose explicitement la différence de compte.
+- Une coquille q3 n'est pas la coquille constante q4 : seuls les sites
+  également coplanaires sont constants dans la famille. Les deux buffers
+  restent distincts, avec tout leur chevauchement mémoire comptabilisé.
+- Un coût annoncé seulement en nombre d'événements omettrait les tris
+  des coquilles issues de l'ordre spatial. Même sans événement, ces
+  coquilles peuvent être grandes : borne sûre O(m log(1+m)) par face.
+
+Voir [objets, preuves et mesures](Q3_Q4_COVERS_PARTAGES_20260920.md).
+
 ## Équipe persistante q2 — 15 septembre
 
 - Empiler le dispatcher Donate et une autre file census laisserait deux

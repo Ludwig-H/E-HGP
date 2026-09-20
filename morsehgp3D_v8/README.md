@@ -57,6 +57,15 @@ entre arités ; le raccord applique profondeur, positivité, propriété et
 seed canonique, sans dépendre de l'acceptation q2/q3. La génération des
 seeds, la déduplication globale, les intérieurs et FULL restent à raccorder.
 
+La tranche24 introduit une [région de témoins partagée par arête](docs/Q3_Q4_COVERS_PARTAGES_20260920.md)
+et trouve ses faces admissibles par blocs de l'index. Le nuage entier n'est
+plus balayé par face lorsque cette région est petite. Le travail peut
+cependant rester quadratique lorsque les faces et les témoins conservés
+croissent ensemble ; ce n'est pas encore un générateur global sous-quadratique.
+Qualification :85 CTests Release, trois portes/six sondes sous Clang
+ASan/UBSan, trois mutants compilés et32 mesures closes. Voir les
+[résultats et contre-régimes](receipts/q34_cover_20260920/README.md).
+
 ## Vingt-et-unième tranche publiée à3e94c868 — historique
 
 La vingt-et-unième tranche transmet aux enfants les

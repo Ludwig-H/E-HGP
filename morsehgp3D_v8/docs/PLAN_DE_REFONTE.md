@@ -17,6 +17,13 @@ ajoute les clés communes et les décisions de support ; il ne déplace pas
 la priorité suivante : génération des seeds par blocs et covers payés,
 puis regroupement global avant collecte des intérieurs et reconstruction.
 
+Après785d0589, les [covers partagés et l'accès par arête](Q3_Q4_COVERS_PARTAGES_20260920.md)
+évitent une préparation par face. Ils gardent toutefois S·m lectures pour
+S faces dans un cover de m sites. La priorité devient le rejet et le
+comptage **collectifs entre familles**, pas la parallélisation de ce carré,
+avant généralisation au front WSPD q3/q4. La campagne adverse conserve
+ce défaut visible ; ne pas déduire une borne globale du seul fond lointain.
+
 Suivi du 14 septembre : le [raccord direct front → census q2](P0_FRONT_ET_CENSUS_Q2.md)
 est implémenté. Il retire factories, copies et arbres B par rectangle,
 sans filtre axial obligatoire. Il reste à réduire le coût du front et

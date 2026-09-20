@@ -1,6 +1,14 @@
 # q3/q4 : objets, preuves et stratégie proposée
 
-14 septembre 2026. Proposition d'architecture, non implémentée ni mesurée. Cadre : phase=exploration_v8_hors_registre, backend=cpu_reference, profile=quantized_u16_input_only, mode=implementation_v8_p0, public_status=not_claimed. Aucun résultat FULL, GPU ou contrat G4 ici.
+14 septembre 2026. Proposition d'architecture initiale. Cadre : phase=exploration_v8_hors_registre, backend=cpu_reference, profile=quantized_u16_input_only, mode=implementation_v8_p0, public_status=not_claimed. Aucun résultat FULL, GPU ou contrat G4 ici.
+
+Mise à jour du20 septembre : le [balayage familial](Q4_FAMILLE_ET_BALAYAGE_20260920.md),
+les [candidats positifs par face](Q3_Q4_CANDIDATS_PAR_SEED_20260920.md) et les
+[covers partagés par arête](Q3_Q4_COVERS_PARTAGES_20260920.md) ont maintenant
+leurs implémentations propres. Le regroupement des parcours entre faces,
+le raccord WSPD global, le catalogue et FULL restent des propositions,
+pas des fonctions acquises. Consulter les reçus de chaque tranche pour
+leur périmètre exact ; les limites ci-dessous ne valent pas qualification.
 
 ## 1. Décision proposée
 

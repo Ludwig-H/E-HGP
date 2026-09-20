@@ -19,6 +19,19 @@ trente mesures closes. Clé commune, vraie positivité, propriété et seed cano
 se raccordent au balayage ; la complétude visée reste locale à une seed
 fournie, pas au générateur global. Pas de nouvelle micro-variante q2.
 
+Tranche24 après785d0589 : [cover fermé partagé et accès par arête](../docs/Q3_Q4_COVERS_PARTAGES_20260920.md).
+La relecture ne relève pas de défaut géométrique ; elle a corrigé la borne
+de coût initiale qui omettait les tris des coquilles en IDs originaux.
+Le juge compare les sorties à un census rationnel sur tous les sites et
+vérifie expressément un compte intermédiaire non global. La limite
+structurelle S·m est conservée et mesurée, non transformée en claim
+sous-quadratique. Aucun changement du moteur q2 ou de ses défauts.
+Qualification close :85 CTests Release et trois portes/six sondes sous
+Clang ASan/UBSan ;186 arêtes/184 seeds contre oracle/global, trois mutants
+compilés et32 mesures. Sources151 et deux builds q34_cover épinglés,
+lectures normal/−O closes. La fixture adverse garde14/54 sorties K5/10
+mais n(n−2) lectures ; le partage du stockage ne clôt donc pas P0.
+
 ## Historique : vingt-et-unième tranche publiée à3e94c868
 
 Vingt-et-unième tranche P0 close,

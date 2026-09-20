@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q34_cover.cpp
++++ mutated/q34_cover.cpp
+@@ -155,7 +155,7 @@
+   counter_add(work.family.retained_capacity_bytes, bytes(constant_shell.capacity()));
+   result.peak_buffer_bytes = work.q3_shell_capacity_bytes;
+   counter_add(result.peak_buffer_bytes, work.family.retained_capacity_bytes);
+-  if (q3_depth >= kmax - 1) counter_add(work.q3_depth_rejections);
++  if (q3_depth >= kmax - 1) { counter_add(work.q3_depth_rejections); return result; }
+   else {
+     std::sort(q3_shell.begin(), q3_shell.end(), [&](auto left, auto right) {
+       counter_add(result.q3_shell_sort_comparisons);

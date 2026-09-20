@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q34_cover.cpp
++++ mutated/q34_cover.cpp
+@@ -290,7 +290,7 @@
+     }
+     // Each quantity <=6*65535^2<2^35. Necessary conditions: both distances
+     // <=D and their squared sum>D². Equal-length owner ties remain leaf tests.
+-    if (min_a > diameter || min_b > diameter || max_sum <= diameter) {
++    if (min_a > diameter || min_b > diameter || max_sum >= diameter) {
+       counter_add(work.rejected_nodes);
+       counter_add(work.rejected_sites, static_cast<u64>(node.range.size()));
+       cursor = node.escape;

@@ -1,0 +1,28 @@
+{
+  "kind": "q4_gated_by_q3_rejection_compile",
+  "command": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "-std=c++20",
+    "-O3",
+    "-DNDEBUG",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-I/workspaces/E-HGP/morsehgp3D_v8/src",
+    "-c",
+    "/tmp/mhgp8_q34_cover_mutants_948pp852/q4_gated_by_q3_rejection.cpp",
+    "-o",
+    "/tmp/mhgp8_q34_cover_mutants_948pp852/q4_gated_by_q3_rejection.o"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T15:23:36.435844+00:00",
+  "expected_exit_code": 0,
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "stdout_base64": "",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-20T15:23:38.262004+00:00"
+}

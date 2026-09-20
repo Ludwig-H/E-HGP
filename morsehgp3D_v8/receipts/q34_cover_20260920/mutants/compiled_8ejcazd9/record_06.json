@@ -1,0 +1,17 @@
+{
+  "kind": "seed_block_rejection_inverted_oracle",
+  "command": [
+    "/tmp/mhgp8_q34_cover_mutants_948pp852/seed_block_rejection_inverted",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T15:23:36.431200+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "q34 cover gate: edge generation differs from all canonical acute seeds\n",
+  "stdout_base64": "",
+  "stderr_base64": "cTM0IGNvdmVyIGdhdGU6IGVkZ2UgZ2VuZXJhdGlvbiBkaWZmZXJzIGZyb20gYWxsIGNhbm9uaWNhbCBhY3V0ZSBzZWVkcwo=",
+  "finished_utc": "2026-09-20T15:23:36.433671+00:00"
+}

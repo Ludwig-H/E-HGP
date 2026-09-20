@@ -1,0 +1,20 @@
+--- morsehgp3D_v8/src/lanes/edge_cover.cpp
++++ mutated/edge_cover.cpp
+@@ -41,7 +41,7 @@
+     const i64 delta = 2 * static_cast<i64>(point[axis]) - center_twice_[axis];
+     norm += delta * delta;
+   }
+-  return norm <= radius_fourfold_;
++  return norm < radius_fourfold_;  // MUTANT: discard boundary singleton
+ }
+ 
+ bool Q34EdgeCover::contains_id(std::size_t id) const {
+@@ -100,7 +100,7 @@
+     if (minimum > radius_fourfold_) {
+       reject(node.range);
+       cursor = node.escape;
+-    } else if (maximum <= radius_fourfold_) {
++    } else if (maximum < radius_fourfold_) {
+       admit(node.range);
+       cursor = node.escape;
+     } else {

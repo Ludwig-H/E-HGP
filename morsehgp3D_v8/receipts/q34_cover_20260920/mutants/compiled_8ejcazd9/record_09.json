@@ -1,0 +1,17 @@
+{
+  "kind": "q4_gated_by_q3_rejection_oracle",
+  "command": [
+    "/tmp/mhgp8_q34_cover_mutants_948pp852/q4_gated_by_q3_rejection",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T15:23:38.327989+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "q34 cover gate: covered seed lost a valid ball, depth, presentation or shell\n",
+  "stdout_base64": "",
+  "stderr_base64": "cTM0IGNvdmVyIGdhdGU6IGNvdmVyZWQgc2VlZCBsb3N0IGEgdmFsaWQgYmFsbCwgZGVwdGgsIHByZXNlbnRhdGlvbiBvciBzaGVsbAo=",
+  "finished_utc": "2026-09-20T15:23:38.332429+00:00"
+}
