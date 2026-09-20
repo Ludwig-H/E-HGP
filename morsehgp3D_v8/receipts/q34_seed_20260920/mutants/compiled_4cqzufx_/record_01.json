@@ -1,0 +1,17 @@
+{
+  "kind": "baseline_q34_seed",
+  "command": [
+    "/workspaces/E-HGP/build/v8_q34_candidates_20260920/mhgp8_q34_seed_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T14:50:33.982834+00:00",
+  "expected_exit_code": 0,
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"schema\":\"mhgp8_q34_seed_gate_v1\",\"status\":\"passed\",\"checks\":24590,\"calls\":635,\"oracle_completions\":2451,\"oracle_sites\":24351,\"candidates\":488,\"q3\":405,\"q4\":83,\"owner_refusals\":5,\"q3_rejected\":150,\"q4_without_q3\":6,\"late_valid\":4,\"max_shell\":30,\"canonical_refusals\":26,\"positive_refusals\":569,\"depth_refusals\":869,\"exhaustive_clouds\":13,\"exhaustive_balls\":229,\"invalid_inputs\":6,\"callback_failures\":1,\"parallel_calls\":4,\"judge_mutants\":3,\"unexamined\":104,\"depth_drop_runs\":28,\"larger_than_minimal\":1}\n",
+  "stderr": "",
+  "stdout_base64": "eyJzY2hlbWEiOiJtaGdwOF9xMzRfc2VlZF9nYXRlX3YxIiwic3RhdHVzIjoicGFzc2VkIiwiY2hlY2tzIjoyNDU5MCwiY2FsbHMiOjYzNSwib3JhY2xlX2NvbXBsZXRpb25zIjoyNDUxLCJvcmFjbGVfc2l0ZXMiOjI0MzUxLCJjYW5kaWRhdGVzIjo0ODgsInEzIjo0MDUsInE0Ijo4Mywib3duZXJfcmVmdXNhbHMiOjUsInEzX3JlamVjdGVkIjoxNTAsInE0X3dpdGhvdXRfcTMiOjYsImxhdGVfdmFsaWQiOjQsIm1heF9zaGVsbCI6MzAsImNhbm9uaWNhbF9yZWZ1c2FscyI6MjYsInBvc2l0aXZlX3JlZnVzYWxzIjo1NjksImRlcHRoX3JlZnVzYWxzIjo4NjksImV4aGF1c3RpdmVfY2xvdWRzIjoxMywiZXhoYXVzdGl2ZV9iYWxscyI6MjI5LCJpbnZhbGlkX2lucHV0cyI6NiwiY2FsbGJhY2tfZmFpbHVyZXMiOjEsInBhcmFsbGVsX2NhbGxzIjo0LCJqdWRnZV9tdXRhbnRzIjozLCJ1bmV4YW1pbmVkIjoxMDQsImRlcHRoX2Ryb3BfcnVucyI6MjgsImxhcmdlcl90aGFuX21pbmltYWwiOjF9Cg==",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-20T14:50:34.206835+00:00"
+}

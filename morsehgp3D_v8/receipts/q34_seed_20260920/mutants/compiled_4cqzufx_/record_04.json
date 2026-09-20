@@ -1,0 +1,17 @@
+{
+  "kind": "q4_wrong_orientation_oracle",
+  "command": [
+    "/tmp/mhgp8_q34_mutants_x2jq9kx8/q4_wrong_orientation",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T14:50:34.672525+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "exact ball gate: primitive key differs from independently rationalised centre/radius\n",
+  "stdout_base64": "",
+  "stderr_base64": "ZXhhY3QgYmFsbCBnYXRlOiBwcmltaXRpdmUga2V5IGRpZmZlcnMgZnJvbSBpbmRlcGVuZGVudGx5IHJhdGlvbmFsaXNlZCBjZW50cmUvcmFkaXVzCg==",
+  "finished_utc": "2026-09-20T14:50:34.677787+00:00"
+}

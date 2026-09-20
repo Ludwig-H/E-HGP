@@ -1,0 +1,28 @@
+{
+  "kind": "q4_boundary_origin_admitted_compile",
+  "command": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "-std=c++20",
+    "-O3",
+    "-DNDEBUG",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-I/workspaces/E-HGP/morsehgp3D_v8/src",
+    "-c",
+    "/tmp/mhgp8_q34_mutants_x2jq9kx8/q4_boundary_origin_admitted.cpp",
+    "-o",
+    "/tmp/mhgp8_q34_mutants_x2jq9kx8/q4_boundary_origin_admitted.o"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T14:50:34.679122+00:00",
+  "expected_exit_code": 0,
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "stdout_base64": "",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-20T14:50:35.082809+00:00"
+}

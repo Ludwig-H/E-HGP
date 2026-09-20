@@ -2455,3 +2455,59 @@ les deux dossiers de reçus du20 septembre et cette seule section de reprise.
 Les53 anciennes lignes complémentaires, tous les fichiers indépendants
 et les modifications v6/v7 restent exclus. Réservation libérée à la fin
 du commit/push sur main ; aucun build gelé ne sera réutilisé pour la suite.
+
+## Constructeur — 20 septembre 2026 : candidats q3/q4 après 9ae4e28b
+
+Suite utilisateur ouverte, cadre inchangé (`exploration_v8_hors_registre`,
+`cpu_reference`, `quantized_u16_input_only`, `implementation_v8_p0`,
+`not_claimed`). Aucun GCP utilisé, aucun index réservé pendant le code.
+Nous raccordons le balayage à la positivité et à une clé de boule commune
+q2/q3/q4 : forme primitive A|z|²+B·z+C, A>0, gcd entier, sans q_min dans
+la clé. Le déterminant relatif permet les prédicats en i128 ; niveau exact
+et comparaison de rayons restent distincts et ne seront pas simulés en double.
+
+Question A/complémentaire : pour UNE seed aiguë sur son arête maximale
+départagée par IDs, nous comptons q3 indépendamment, puis parcourons les
+groupes q4 même si q3 est rejeté. Sous le seuil h4, chercher la première
+présentation positive ayant cette arête propriétaire et le plus petit ID
+de face aiguë ; un premier candidat invalide ne supprime pas son groupe.
+Émettre une boule par groupe local, profondeur et coquille complète en
+deux vues, pas toutes les incidences ni les intérieurs, ni un catalogue
+global dédupliqué. La complétude jugée porte sur une seed fournie, pas sur
+la génération WSPD encore ouverte ; O(n log n) par seed n'est toujours
+pas une borne globale. Une obligation manquante dans ce raccord ? Nous
+gardons les contre-fixtures des voies non emboîtées et les coquilles> K.
+
+Tranche23 :84 CTests Release et les deux nouvelles gates sous Clang
+ASan/UBSan passent ;1807 cas de géométrie et635 appels de raccord contre
+oracles rationnels,13 petits nuages exhaustifs/229 boules, coquille30,
+premier refus suivi d'un support valide et q3 rejeté/q4 conservé. Quatre
+mutants compilés sont tués causalement. Trente mesures closes (18 à8k/16k/32k,
+K5/10), fonds lointains autour d'une seule seed positive : aucune borne
+globale ni qualification de générateur.144 sources restent gelées ;
+builds q34_candidates et q34_candidates_sanitize du20260920 épinglés.
+
+Prochain verrou soumis à l'audit : cover fermé partagé par arête, fondé
+sur |2z−a−b|²≤4|b−a|² pour q4 (et utilisable comme surcouverture q3).
+La preuve S1§2 couvre toute boule positive appartenant à cette arête.
+Il paraît donc possible d'omettre les sites hors cover pour ce NOUVEAU
+raccord sans imposer d'abord une corde : ses comptes de racines arbitraires
+ne seraient que partiels, mais redeviendraient exacts après positivité et
+propriété ; un rejet par profondeur partielle reste sûr. Il ne faudrait
+surtout pas changer le contrat global de `run_q4_family` silencieusement.
+À juger avant port : accès des complétions, coquille fermée, préparation
+une seule fois par arête et partage par seeds, somme des tailles de covers
+payée, puis génération par blocs sans développer un résidu quadratique.
+Cette observation ne constitue pas encore du code ni une mesure nouvelle.
+
+Fermeture des lectures tranche23 : dix commandes normal/−O concordantes,
+vingt mutations du lecteur rejetées,144 sources et56 artefacts recontrôlés.
+Les quatre mutations compilées ont leur capture et leurs quatre lectures
+distinctes. Rien n'est promu en résultat de tour ; GCP non utilisé.
+
+Réservation courte CONSTRUCTEUR de l'index constaté vide sur main après
+9ae4e28b : AGENTS, fichiers propres code/tests/bench/docs/entrées v8,
+ETAT_COURANT constructeur, receipts/q34_seed_20260920 et cette seule
+section tranche23. Les53 anciennes lignes complémentaires, les autres
+audits et tous les changements v6/v7 restent exclus. Réservation libérée
+à la fin du commit/push ; sources et deux builds désormais gelés.

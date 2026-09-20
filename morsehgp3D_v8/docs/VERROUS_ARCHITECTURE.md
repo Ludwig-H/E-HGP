@@ -29,6 +29,13 @@ seeds, covers, boules et sorties restent des verrous de travail global.
 Le [rapport de reprise](REPRISE_DEVELOPPEMENT_20260920.md) sépare acquis,
 preuves relues, qualifications nouvelles et contrats encore ouverts.
 
+Suite à9ae4e28b : les [candidats positifs par seed](Q3_Q4_CANDIDATS_PAR_SEED_20260920.md)
+et leur clé de boule commune sont implémentés. Une clé de boule n'est ni
+un niveau de fusion ni un support canonique pour le résolveur FULL.
+Restent l'accès WSPD aux seeds, les covers partagés, le regroupement global
+avant collecte et la reconstruction. Les scans d'une seule seed n'apportent
+aucune borne sur le nombre de seeds ni sur leur travail cumulé.
+
 Suivi du 14 septembre : les [bornes préparées](P0_BORNES_PREPAREES_ET_PARALLELISATION.md)
 factorisent une constante de coût, sans changer les visites ni clore B1.
 La [sixième tranche](P0_NUAGE_ET_INDEX_PARTAGES.md) sépare maintenant

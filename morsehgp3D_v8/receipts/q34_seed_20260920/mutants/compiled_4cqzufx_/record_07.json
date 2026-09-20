@@ -1,0 +1,17 @@
+{
+  "kind": "q4_boundary_origin_admitted_oracle",
+  "command": [
+    "/tmp/mhgp8_q34_mutants_x2jq9kx8/q4_boundary_origin_admitted",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T14:50:35.141880+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "exact ball gate: strict positivity/rank differs from rational Gram solve\n",
+  "stdout_base64": "",
+  "stderr_base64": "ZXhhY3QgYmFsbCBnYXRlOiBzdHJpY3QgcG9zaXRpdml0eS9yYW5rIGRpZmZlcnMgZnJvbSByYXRpb25hbCBHcmFtIHNvbHZlCg==",
+  "finished_utc": "2026-09-20T14:50:35.154392+00:00"
+}

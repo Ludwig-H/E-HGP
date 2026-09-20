@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/exact_ball.cpp
++++ mutated/exact_ball.cpp
+@@ -129,7 +129,7 @@
+     if (weight <= 0) return std::nullopt;
+     remaining -= weight;
+   }
+-  if (remaining <= 0) return std::nullopt;
++  if (remaining < 0) return std::nullopt;  // MUTANT: zero barycentric weight admitted
+ 
+   // |det|<=6*M^3, |numerator_i|<=18*M^4; each barycentric numerator is
+   // <=108*M^6 in magnitude, and all four-weight intermediates are <2^105.

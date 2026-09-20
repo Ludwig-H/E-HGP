@@ -1,0 +1,22 @@
+{
+  "kind": "q4_boundary_origin_admitted_link",
+  "command": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "/workspaces/E-HGP/build/v8_q34_candidates_20260920/CMakeFiles/mhgp8_exact_ball_gate.dir/tests/exact_ball_gate.cpp.o",
+    "/tmp/mhgp8_q34_mutants_x2jq9kx8/q4_boundary_origin_admitted.o",
+    "/workspaces/E-HGP/build/v8_q34_candidates_20260920/libmhgp8_p0.a",
+    "-pthread",
+    "-o",
+    "/tmp/mhgp8_q34_mutants_x2jq9kx8/q4_boundary_origin_admitted"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T14:50:35.083212+00:00",
+  "expected_exit_code": 0,
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "stdout_base64": "",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-20T14:50:35.141481+00:00"
+}

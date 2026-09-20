@@ -1,0 +1,2956 @@
+{
+  "status": "passed",
+  "results": [
+    {
+      "campaign": "smoke",
+      "full_contract_qualified": false,
+      "general_subquadratic_bound": false,
+      "growth": {},
+      "measurements": 6,
+      "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/q34_seed_20260920/smoke_c7kdqo3w",
+      "records": 8,
+      "scope": "one_seed_not_q34_producer",
+      "sources": 144,
+      "status": "passed"
+    },
+    {
+      "campaign": "scale",
+      "full_contract_qualified": false,
+      "general_subquadratic_bound": false,
+      "growth": {
+        "coplanar_K10": {
+          "family.callbacks": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "family.constant_inside": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "family.constant_on": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "family.constant_outside": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0007505629221916,
+              2.0003751406777543
+            ],
+            "values": [
+              7994,
+              15994,
+              31994
+            ]
+          },
+          "family.entries": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "family.event_count": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "family.exits": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "family.group_comparisons": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              2,
+              2,
+              2
+            ]
+          },
+          "family.groups": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "family.max_group": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "family.retained_capacity_bytes": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0,
+              2.0
+            ],
+            "values": [
+              128000,
+              256000,
+              512000
+            ]
+          },
+          "family.sites": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0,
+              2.0
+            ],
+            "values": [
+              8000,
+              16000,
+              32000
+            ]
+          },
+          "family.sort_comparisons": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              5,
+              5,
+              5
+            ]
+          },
+          "q3_depth_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "q3_emitted": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "q3_point_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0,
+              2.0
+            ],
+            "values": [
+              8000,
+              16000,
+              32000
+            ]
+          },
+          "q3_shell_capacity_bytes": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              32,
+              32,
+              32
+            ]
+          },
+          "q3_shell_ids": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "q4_depth_rejected_groups": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "q4_depth_skipped_ids": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "q4_emitted": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "q4_groups_without_support": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              2,
+              2,
+              2
+            ]
+          },
+          "q4_owner_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "q4_owner_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              15,
+              15,
+              15
+            ]
+          },
+          "q4_positive_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              2,
+              2,
+              2
+            ]
+          },
+          "q4_positive_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "q4_presentations": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "q4_seed_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "q4_seed_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "q4_unexamined_after_emit": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "seed_owner_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "seed_owner_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              2,
+              2,
+              2
+            ]
+          }
+        },
+        "coplanar_K5": {
+          "family.callbacks": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "family.constant_inside": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "family.constant_on": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "family.constant_outside": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0007505629221916,
+              2.0003751406777543
+            ],
+            "values": [
+              7994,
+              15994,
+              31994
+            ]
+          },
+          "family.entries": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "family.event_count": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "family.exits": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "family.group_comparisons": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              2,
+              2,
+              2
+            ]
+          },
+          "family.groups": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "family.max_group": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "family.retained_capacity_bytes": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0,
+              2.0
+            ],
+            "values": [
+              128000,
+              256000,
+              512000
+            ]
+          },
+          "family.sites": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0,
+              2.0
+            ],
+            "values": [
+              8000,
+              16000,
+              32000
+            ]
+          },
+          "family.sort_comparisons": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              5,
+              5,
+              5
+            ]
+          },
+          "q3_depth_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "q3_emitted": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "q3_point_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0,
+              2.0
+            ],
+            "values": [
+              8000,
+              16000,
+              32000
+            ]
+          },
+          "q3_shell_capacity_bytes": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              32,
+              32,
+              32
+            ]
+          },
+          "q3_shell_ids": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "q4_depth_rejected_groups": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "q4_depth_skipped_ids": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "q4_emitted": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "q4_groups_without_support": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              2,
+              2,
+              2
+            ]
+          },
+          "q4_owner_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "q4_owner_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              15,
+              15,
+              15
+            ]
+          },
+          "q4_positive_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              2,
+              2,
+              2
+            ]
+          },
+          "q4_positive_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "q4_presentations": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "q4_seed_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "q4_seed_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "q4_unexamined_after_emit": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "seed_owner_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "seed_owner_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              2,
+              2,
+              2
+            ]
+          }
+        },
+        "rows_K10": {
+          "family.callbacks": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0003751406777543,
+              2.000187535162843
+            ],
+            "values": [
+              7997,
+              15997,
+              31997
+            ]
+          },
+          "family.constant_inside": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "family.constant_on": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "family.constant_outside": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "family.entries": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0007505629221916,
+              2.0003751406777543
+            ],
+            "values": [
+              7994,
+              15994,
+              31994
+            ]
+          },
+          "family.event_count": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0003751406777543,
+              2.000187535162843
+            ],
+            "values": [
+              7997,
+              15997,
+              31997
+            ]
+          },
+          "family.exits": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "family.group_comparisons": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0005002501250626,
+              2.000250062515629
+            ],
+            "values": [
+              7996,
+              15996,
+              31996
+            ]
+          },
+          "family.groups": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0003751406777543,
+              2.000187535162843
+            ],
+            "values": [
+              7997,
+              15997,
+              31997
+            ]
+          },
+          "family.max_group": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "family.retained_capacity_bytes": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0,
+              2.0
+            ],
+            "values": [
+              128000,
+              256000,
+              512000
+            ]
+          },
+          "family.sites": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0,
+              2.0
+            ],
+            "values": [
+              8000,
+              16000,
+              32000
+            ]
+          },
+          "family.sort_comparisons": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0845093215950286,
+              2.1278473052497553
+            ],
+            "values": [
+              123584,
+              257612,
+              548159
+            ]
+          },
+          "q3_depth_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "q3_emitted": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "q3_point_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0,
+              2.0
+            ],
+            "values": [
+              8000,
+              16000,
+              32000
+            ]
+          },
+          "q3_shell_capacity_bytes": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              32,
+              32,
+              32
+            ]
+          },
+          "q3_shell_ids": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "q4_depth_rejected_groups": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0017530678687705,
+              2.0008757662955086
+            ],
+            "values": [
+              7986,
+              15986,
+              31986
+            ]
+          },
+          "q4_depth_skipped_ids": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0017530678687705,
+              2.0008757662955086
+            ],
+            "values": [
+              7986,
+              15986,
+              31986
+            ]
+          },
+          "q4_emitted": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "q4_groups_without_support": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              10,
+              10,
+              10
+            ]
+          },
+          "q4_owner_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              8,
+              8,
+              8
+            ]
+          },
+          "q4_owner_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              31,
+              31,
+              31
+            ]
+          },
+          "q4_positive_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              2,
+              2,
+              2
+            ]
+          },
+          "q4_positive_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "q4_presentations": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              11,
+              11,
+              11
+            ]
+          },
+          "q4_seed_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "q4_seed_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "q4_unexamined_after_emit": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "seed_owner_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "seed_owner_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              2,
+              2,
+              2
+            ]
+          }
+        },
+        "rows_K5": {
+          "family.callbacks": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0003751406777543,
+              2.000187535162843
+            ],
+            "values": [
+              7997,
+              15997,
+              31997
+            ]
+          },
+          "family.constant_inside": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "family.constant_on": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "family.constant_outside": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "family.entries": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0007505629221916,
+              2.0003751406777543
+            ],
+            "values": [
+              7994,
+              15994,
+              31994
+            ]
+          },
+          "family.event_count": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0003751406777543,
+              2.000187535162843
+            ],
+            "values": [
+              7997,
+              15997,
+              31997
+            ]
+          },
+          "family.exits": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "family.group_comparisons": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0005002501250626,
+              2.000250062515629
+            ],
+            "values": [
+              7996,
+              15996,
+              31996
+            ]
+          },
+          "family.groups": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0003751406777543,
+              2.000187535162843
+            ],
+            "values": [
+              7997,
+              15997,
+              31997
+            ]
+          },
+          "family.max_group": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "family.retained_capacity_bytes": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0,
+              2.0
+            ],
+            "values": [
+              128000,
+              256000,
+              512000
+            ]
+          },
+          "family.sites": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0,
+              2.0
+            ],
+            "values": [
+              8000,
+              16000,
+              32000
+            ]
+          },
+          "family.sort_comparisons": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0845093215950286,
+              2.1278473052497553
+            ],
+            "values": [
+              123584,
+              257612,
+              548159
+            ]
+          },
+          "q3_depth_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "q3_emitted": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "q3_point_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0,
+              2.0
+            ],
+            "values": [
+              8000,
+              16000,
+              32000
+            ]
+          },
+          "q3_shell_capacity_bytes": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              32,
+              32,
+              32
+            ]
+          },
+          "q3_shell_ids": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "q4_depth_rejected_groups": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0011262670504317,
+              2.0005628165843286
+            ],
+            "values": [
+              7991,
+              15991,
+              31991
+            ]
+          },
+          "q4_depth_skipped_ids": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0011262670504317,
+              2.0005628165843286
+            ],
+            "values": [
+              7991,
+              15991,
+              31991
+            ]
+          },
+          "q4_emitted": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "q4_groups_without_support": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              5,
+              5,
+              5
+            ]
+          },
+          "q4_owner_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "q4_owner_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              21,
+              21,
+              21
+            ]
+          },
+          "q4_positive_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              2,
+              2,
+              2
+            ]
+          },
+          "q4_positive_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "q4_presentations": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              6,
+              6,
+              6
+            ]
+          },
+          "q4_seed_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "q4_seed_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "q4_unexamined_after_emit": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "seed_owner_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "seed_owner_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              2,
+              2,
+              2
+            ]
+          }
+        },
+        "uniform_K10": {
+          "family.callbacks": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0003751406777543,
+              2.000187535162843
+            ],
+            "values": [
+              7997,
+              15997,
+              31997
+            ]
+          },
+          "family.constant_inside": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "family.constant_on": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "family.constant_outside": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "family.entries": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0007505629221916,
+              2.0003751406777543
+            ],
+            "values": [
+              7994,
+              15994,
+              31994
+            ]
+          },
+          "family.event_count": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0003751406777543,
+              2.000187535162843
+            ],
+            "values": [
+              7997,
+              15997,
+              31997
+            ]
+          },
+          "family.exits": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "family.group_comparisons": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0005002501250626,
+              2.000250062515629
+            ],
+            "values": [
+              7996,
+              15996,
+              31996
+            ]
+          },
+          "family.groups": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0003751406777543,
+              2.000187535162843
+            ],
+            "values": [
+              7997,
+              15997,
+              31997
+            ]
+          },
+          "family.max_group": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "family.retained_capacity_bytes": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0,
+              2.0
+            ],
+            "values": [
+              128000,
+              256000,
+              512000
+            ]
+          },
+          "family.sites": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0,
+              2.0
+            ],
+            "values": [
+              8000,
+              16000,
+              32000
+            ]
+          },
+          "family.sort_comparisons": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.167191075514874,
+              2.1282217676001087
+            ],
+            "values": [
+              125856,
+              272754,
+              580481
+            ]
+          },
+          "q3_depth_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "q3_emitted": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "q3_point_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0,
+              2.0
+            ],
+            "values": [
+              8000,
+              16000,
+              32000
+            ]
+          },
+          "q3_shell_capacity_bytes": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              32,
+              32,
+              32
+            ]
+          },
+          "q3_shell_ids": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "q4_depth_rejected_groups": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0017530678687705,
+              2.0008757662955086
+            ],
+            "values": [
+              7986,
+              15986,
+              31986
+            ]
+          },
+          "q4_depth_skipped_ids": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0017530678687705,
+              2.0008757662955086
+            ],
+            "values": [
+              7986,
+              15986,
+              31986
+            ]
+          },
+          "q4_emitted": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "q4_groups_without_support": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              10,
+              10,
+              10
+            ]
+          },
+          "q4_owner_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              8,
+              8,
+              8
+            ]
+          },
+          "q4_owner_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              31,
+              31,
+              31
+            ]
+          },
+          "q4_positive_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              2,
+              2,
+              2
+            ]
+          },
+          "q4_positive_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "q4_presentations": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              11,
+              11,
+              11
+            ]
+          },
+          "q4_seed_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "q4_seed_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "q4_unexamined_after_emit": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "seed_owner_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "seed_owner_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              2,
+              2,
+              2
+            ]
+          }
+        },
+        "uniform_K5": {
+          "family.callbacks": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0003751406777543,
+              2.000187535162843
+            ],
+            "values": [
+              7997,
+              15997,
+              31997
+            ]
+          },
+          "family.constant_inside": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "family.constant_on": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "family.constant_outside": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "family.entries": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0007505629221916,
+              2.0003751406777543
+            ],
+            "values": [
+              7994,
+              15994,
+              31994
+            ]
+          },
+          "family.event_count": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0003751406777543,
+              2.000187535162843
+            ],
+            "values": [
+              7997,
+              15997,
+              31997
+            ]
+          },
+          "family.exits": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "family.group_comparisons": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0005002501250626,
+              2.000250062515629
+            ],
+            "values": [
+              7996,
+              15996,
+              31996
+            ]
+          },
+          "family.groups": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0003751406777543,
+              2.000187535162843
+            ],
+            "values": [
+              7997,
+              15997,
+              31997
+            ]
+          },
+          "family.max_group": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "family.retained_capacity_bytes": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0,
+              2.0
+            ],
+            "values": [
+              128000,
+              256000,
+              512000
+            ]
+          },
+          "family.sites": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0,
+              2.0
+            ],
+            "values": [
+              8000,
+              16000,
+              32000
+            ]
+          },
+          "family.sort_comparisons": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.167191075514874,
+              2.1282217676001087
+            ],
+            "values": [
+              125856,
+              272754,
+              580481
+            ]
+          },
+          "q3_depth_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "q3_emitted": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "q3_point_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0,
+              2.0
+            ],
+            "values": [
+              8000,
+              16000,
+              32000
+            ]
+          },
+          "q3_shell_capacity_bytes": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              32,
+              32,
+              32
+            ]
+          },
+          "q3_shell_ids": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "q4_depth_rejected_groups": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0011262670504317,
+              2.0005628165843286
+            ],
+            "values": [
+              7991,
+              15991,
+              31991
+            ]
+          },
+          "q4_depth_skipped_ids": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              2.0011262670504317,
+              2.0005628165843286
+            ],
+            "values": [
+              7991,
+              15991,
+              31991
+            ]
+          },
+          "q4_emitted": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "q4_groups_without_support": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              5,
+              5,
+              5
+            ]
+          },
+          "q4_owner_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "q4_owner_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              21,
+              21,
+              21
+            ]
+          },
+          "q4_positive_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              2,
+              2,
+              2
+            ]
+          },
+          "q4_positive_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              3,
+              3,
+              3
+            ]
+          },
+          "q4_presentations": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              6,
+              6,
+              6
+            ]
+          },
+          "q4_seed_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "q4_seed_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              1,
+              1,
+              1
+            ]
+          },
+          "q4_unexamined_after_emit": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "seed_owner_rejections": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              null,
+              null
+            ],
+            "values": [
+              0,
+              0,
+              0
+            ]
+          },
+          "seed_owner_tests": {
+            "above_quadrupling": [
+              false,
+              false
+            ],
+            "ratios": [
+              1.0,
+              1.0
+            ],
+            "values": [
+              2,
+              2,
+              2
+            ]
+          }
+        }
+      },
+      "measurements": 18,
+      "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/q34_seed_20260920/scale_hu1pvc8o",
+      "records": 20,
+      "scope": "one_seed_not_q34_producer",
+      "sources": 144,
+      "status": "passed"
+    },
+    {
+      "campaign": "smoke",
+      "full_contract_qualified": false,
+      "general_subquadratic_bound": false,
+      "growth": {},
+      "measurements": 6,
+      "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/q34_seed_20260920/smoke_jy7_uv8w",
+      "records": 8,
+      "scope": "one_seed_not_q34_producer",
+      "sources": 144,
+      "status": "passed"
+    },
+    {
+      "campaign": "regression",
+      "full_contract_qualified": false,
+      "general_subquadratic_bound": false,
+      "growth": {},
+      "measurements": 0,
+      "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/q34_seed_20260920/regression_44jbb9h5",
+      "records": 1,
+      "scope": "one_seed_not_q34_producer",
+      "sources": 144,
+      "status": "passed"
+    },
+    {
+      "mutants": 20,
+      "real_measurements": 6,
+      "scope": "receipt_reader_not_geometry",
+      "status": "passed"
+    }
+  ],
+  "commands": 10,
+  "normal_optimized_identical": true,
+  "full_contract_qualified": false,
+  "gcp_used": false
+}

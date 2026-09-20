@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/exact_ball.cpp
++++ mutated/exact_ball.cpp
+@@ -136,7 +136,7 @@
+   // Normalize orientation only now: A=|det| and lin=sign(det)*numerator.
+   if (determinant < 0) {
+     determinant = -determinant;
+-    for (auto& coefficient : numerator) coefficient = -coefficient;
++    static_cast<void>(numerator);  // MUTANT: orientation not applied to linear term
+   }
+   // Relative power A*|z-a|^2-lin.(z-a). Global |B_i|<=30*M^4,
+   // |C|<=72*M^5; the global power is <=180*M^5<2^88 before gcd reduction.

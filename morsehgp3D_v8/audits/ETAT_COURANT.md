@@ -12,6 +12,13 @@ La [famille q4](../docs/Q4_FAMILLE_ET_BALAYAGE_20260920.md) est qualifiée :
 closes. Priorité suivante : génération q3/q4, catalogue et reconstruction FULL.
 Aucun nouveau gain q2 revendiqué. GCP non utilisé ; public_status=not_claimed.
 
+Suite après9ae4e28b : [candidats q3/q4](../docs/Q3_Q4_CANDIDATS_PAR_SEED_20260920.md)
+qualifiés :84 CTests Release, nouvelles gates Clang ASan/UBSan,
+1807 cas de géométrie,635 appels de raccord, quatre mutants compilés tués,
+trente mesures closes. Clé commune, vraie positivité, propriété et seed canonique
+se raccordent au balayage ; la complétude visée reste locale à une seed
+fournie, pas au générateur global. Pas de nouvelle micro-variante q2.
+
 ## Historique : vingt-et-unième tranche publiée à3e94c868
 
 Vingt-et-unième tranche P0 close,

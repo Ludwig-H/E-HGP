@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q34_seed.cpp
++++ mutated/q34_seed.cpp
+@@ -71,7 +71,7 @@
+     for (std::size_t id = 0; id < points.size(); ++id) {
+       counter_add(work.q3_point_tests);
+       const auto power = face->power(points[id]);
+-      if (power < 0) {
++      if (power <= 0) {  // MUTANT: shell credited as strict interior
+         ++depth;
+         if (depth == kmax - 1) break;
+       } else if (power == 0) {

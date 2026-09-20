@@ -49,6 +49,14 @@ une tour FULL. Le profil optimisé q2
 `{2,16,true}` reste explicite ; aucun défaut historique n'est changé.
 GCP non utilisé pendant cette reprise.
 
+Suite du20 septembre : [candidats positifs q3/q4 par seed](docs/Q3_Q4_CANDIDATS_PAR_SEED_20260920.md)
+qualifiés :84 CTests Release, deux nouvelles gates et six sondes sous
+Clang ASan/UBSan, trente mesures dont dix-huit8k/16k/32k à K5/10.
+Une clé primitive commune reconnaît la même boule
+entre arités ; le raccord applique profondeur, positivité, propriété et
+seed canonique, sans dépendre de l'acceptation q2/q3. La génération des
+seeds, la déduplication globale, les intérieurs et FULL restent à raccorder.
+
 ## Vingt-et-unième tranche publiée à3e94c868 — historique
 
 La vingt-et-unième tranche transmet aux enfants les

@@ -10,6 +10,25 @@ qualification de son propre code.
 
 ## À reprendre maintenant
 
+La tranche suivante après9ae4e28b est le
+[raccord des candidats q3/q4 par seed](docs/Q3_Q4_CANDIDATS_PAR_SEED_20260920.md),
+qualifié : `ExactBall` commun aux arités2/3/4 et
+`run_q34_seed_candidates`. Ce dernier ne promet ni toutes les incidences
+ni un catalogue dédupliqué ; il publie la profondeur et la coquille, pas
+les IDs intérieurs. Ne pas répéter ensuite un census pour chaque
+présentation avant d'avoir étudié le regroupement des clés. Le générateur
+WSPD de seeds et les covers demeurent le prochain verrou de travail global.
+84 CTests Release et les deux nouvelles gates sous Clang ASan/UBSan passent,
+avec635 appels de raccord et1807 cas de géométrie contre oracles rationnels.
+Quatre mutations compilées sont tuées ; trente mesures dont dix-huit
+8k/16k/32k sont closes. Coût O(n log n) par seed seulement ; ne pas
+multiplier ce scan global par toutes les seeds sans traiter les covers.
+Builds désormais épinglés `build/v8_q34_candidates_20260920` et
+`build/v8_q34_candidates_sanitize_20260920` ; les builds q4_family restent
+épinglés. Les changements de cette tranche ne modifient pas q2.
+
+### Reprise précédente close à9ae4e28b
+
 Le constructeur reprend après `3e94c868`. Lire d'abord
 [l'audit de reprise](docs/REPRISE_DEVELOPPEMENT_20260920.md).
 Les130 sources/98 artefacts et lectures normal/−O de la tranche21 ont été

@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q34_seed.cpp
++++ mutated/q34_seed.cpp
+@@ -107,7 +107,7 @@
+       std::array<std::size_t, 4> support{seed_ids[0], seed_ids[1], seed_ids[2], y_id};
+       if (!owned(points, support, work.q4_owner_tests)) {
+         counter_add(work.q4_owner_rejections);
+-        continue;
++        return;  // MUTANT: later root presentations lost
+       }
+       counter_add(work.q4_positive_tests);
+       const auto ball = ExactBall::make_q4({a, b, x, y});

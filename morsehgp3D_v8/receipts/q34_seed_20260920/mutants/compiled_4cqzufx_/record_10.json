@@ -1,0 +1,17 @@
+{
+  "kind": "q3_shell_counted_inside_oracle",
+  "command": [
+    "/tmp/mhgp8_q34_mutants_x2jq9kx8/q3_shell_counted_inside",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T14:50:36.165054+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "q34 seed gate: seed candidates differ from rational brute-force oracle\n",
+  "stdout_base64": "",
+  "stderr_base64": "cTM0IHNlZWQgZ2F0ZTogc2VlZCBjYW5kaWRhdGVzIGRpZmZlciBmcm9tIHJhdGlvbmFsIGJydXRlLWZvcmNlIG9yYWNsZQo=",
+  "finished_utc": "2026-09-20T14:50:36.167207+00:00"
+}

@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_q34_seed_checks.py",
+    "read",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/q34_seed_20260920/regression_44jbb9h5",
+    "--check-live"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T14:52:54.158659+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"campaign\": \"regression\", \"full_contract_qualified\": false, \"general_subquadratic_bound\": false, \"growth\": {}, \"measurements\": 0, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q34_seed_20260920/regression_44jbb9h5\", \"records\": 1, \"scope\": \"one_seed_not_q34_producer\", \"sources\": 144, \"status\": \"passed\"}\n",
+  "stderr": "",
+  "stdout_base64": "eyJjYW1wYWlnbiI6ICJyZWdyZXNzaW9uIiwgImZ1bGxfY29udHJhY3RfcXVhbGlmaWVkIjogZmFsc2UsICJnZW5lcmFsX3N1YnF1YWRyYXRpY19ib3VuZCI6IGZhbHNlLCAiZ3Jvd3RoIjoge30sICJtZWFzdXJlbWVudHMiOiAwLCAicGF0aCI6ICIvd29ya3NwYWNlcy9FLUhHUC9tb3JzZWhncDNEX3Y4L3JlY2VpcHRzL3EzNF9zZWVkXzIwMjYwOTIwL3JlZ3Jlc3Npb25fNDRqYmI5aDUiLCAicmVjb3JkcyI6IDEsICJzY29wZSI6ICJvbmVfc2VlZF9ub3RfcTM0X3Byb2R1Y2VyIiwgInNvdXJjZXMiOiAxNDQsICJzdGF0dXMiOiAicGFzc2VkIn0K",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-20T14:52:54.282994+00:00"
+}

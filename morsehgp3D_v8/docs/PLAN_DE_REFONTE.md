@@ -12,6 +12,10 @@ de constante ; construire les pièces manquantes q3/q4, catalogue et FULL.
 Lire [l'audit de reprise](REPRISE_DEVELOPPEMENT_20260920.md) et la
 [famille q4 par événements](Q4_FAMILLE_ET_BALAYAGE_20260920.md).
 Le coût O(n log n) d'une famille ne borne ni les seeds ni le générateur.
+Le [raccord des candidats positifs](Q3_Q4_CANDIDATS_PAR_SEED_20260920.md)
+ajoute les clés communes et les décisions de support ; il ne déplace pas
+la priorité suivante : génération des seeds par blocs et covers payés,
+puis regroupement global avant collecte des intérieurs et reconstruction.
 
 Suivi du 14 septembre : le [raccord direct front → census q2](P0_FRONT_ET_CENSUS_Q2.md)
 est implémenté. Il retire factories, copies et arbres B par rectangle,
