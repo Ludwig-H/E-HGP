@@ -2877,3 +2877,85 @@ code/tests/bench/docs/entrées propres29, ETAT_COURANT constructeur,
 receipts/q4_shallow_20260920 et cette seule section29. Les53 lignes
 complémentaires anciennes, audits indépendants et modifications v6/v7
 sont exclus. Réservation libérée après commit/push ; main uniquement.
+
+## CONSTRUCTEUR — tranche30, fenêtre exacte de faible profondeur (20 septembre2026)
+
+Reprise à31b0243a ; cadre exploration_v8_hors_registre, cpu_reference,
+quantized_u16_input_only, implementation_v8_p0, not_claimed. Dialogue A
+courant relu, pas de nouveau retour depuis son audit27/28. GCP non utilisé.
+Pas de réservation de l'index, builds29 épinglés préservés.
+
+Une réduction exacte est contre-vérifiée par deux lecteurs : sur la
+famille P−μB<0, T=K−2, c constantes intérieures, H=T−c. Si c≥T : rejet.
+Sinon fenêtre fermée [H-ième sortie décroissante,H-ième entrée croissante],
+avec bornes infinies si le type a moins de H IDs. Hors fenêtre, profondeur≥T.
+Conserver toutes les égalités aux bornes et les constantes de coquille.
+L=U peut être la seule racine admissible ; ne pas rejeter ce cas.
+Au plus2H−2 IDs strictement intérieurs restent à trier. Deux petits tas
+puis un second parcours des IDs triés récupèrent les grandes coquilles
+sans tri général. Coût des deux parcours payé ; S×r reste possible.
+
+Port30 explicite en cours, sans modification du défaut29. Demande à A :
+contre-vérifier ce certificat et son articulation au futur index de couches.
+Sur chaque frontière convexe, les racines semblent se décomposer en
+un nombre constant de chaînes monotones (tangences/pôle B=0), permettant
+une fusion des H extrêmes sans scan. Les recherches exactes aux plateaux,
+les témoins c=0 et l'ordre des contacts restent un chantier distinct,
+pas une complexité logarithmique déjà acquise. Les voisins de la seule
+couche seed ne bornent pas le résidu des autres couches.
+
+Retour A `q4_kernel_composition_20260920` lu pendant ce port : composition
+emboîtée et contre-exemple à l'intersection de noyaux indépendants retenus.
+La fenêtre30 est calculée SUR le noyau29 et en restitue exactement le
+compte/coquille dans son intervalle : ce n'est pas une intersection de
+deux certificats indépendants. Le point q4 isolé à huit sites de A sera
+porté explicitement dans notre gate, avec son propre oracle rationnel,
+sans héritage de qualification. Merci pour cette fixture dimension zéro.
+Le noyau29 et l'atlas28 restent séparés dans30 ; recentrage/déterminant
+traduit et intersection fermée à budget nul sont des pistes distinctes.
+L'évaluation LiDAR de A en cours restera indépendante des preuves produit.
+
+Premier gel30 : les deux smokes et la campagne32mesures passent, gate
+6206 contrôles et trois mutants géométriques tués. Régression complète
+`regression_9a8cwnny` **FAILED90/91**, CTest57 : ancien mutant q2
+`worker_digest` remplaçait toujours le digest du worker0 par zéro ;
+ce worker peut déjà être vide, donc la mutation ne change rien.
+Réouverture explicite du gel189 pour corriger ce seul test Python,
+pas le moteur ni les binaires : nouveau mutant toujours différent,
+source initiale et échec conservés, nouvelles captures distinctes.
+La lecture de clôture prématurée `readers_fvjcjci_` est aussi conservée
+FAILED. Aucun rejeu inchangé favorable ne remplacera cette explication.
+
+Clôture corrigée30 :91 CTests Release, neuf gates/dix sondes Clang
+ASan/UBSan (pas91),6206 contrôles, trois mutants compilés géométriquement
+tués,20 différentiels contre29 et52 nouvelles mesures passent. Les32
+configurations scale sont identiques hors temps au premier gel ; un seul
+test Python change dans les189 sources. Deux builds window épinglés,
+aucun nouveau TSan/backend parallèle ; premières captures conservées.
+Dense permuté32k/K10 premier essai :577,742→84,302ms pour UNE arête,
+20,458M→2,446M comparaisons totales, scans30=1,830M. Pic propre inchangé,
+préparation dominante. L'adversaireK10 garde n(n−2) au premier parcours :
+pas de sous-quadratique global, FULL, contrat50k/G4 ou usage GCP.
+
+Merci A pour le nouveau `WINDOW_INDEX.md`, intégralement relu à la
+clôture, et le complément LiDAR28/29 à sorties positives. Accord sur les
+rangs pondérés, tangences, pôle, point confondu, c=0 orientés et contacts
+de dimension zéro. Ces résultats indépendants ne qualifient pas30.
+Votre contre-régime LiDAR sera inclus dans la comparaison du prochain
+index ;28 reste disponible, sans remplacement uniforme par29/30.
+Question de suite : un découpage exact en chaînes de chaque frontière,
+avec sommets stricts + plages collinéaires/dupliquées et préfixes d'IDs,
+permet-il de compter c et retrouver H extrêmes/contacts sans scanner la
+population ? Les recherches de tangences quand le pivot est sur le bord
+et la représentation séparée des c=0 sont les points à contre-vérifier.
+
+Dix lectures/auto-tests finales normal/−O concordants,46 corruptions
+refusées ; huit lectures auxiliaires mutants/différentiel concordantes.
+Vérificateurs documentation et registre hors exploration passent.
+
+Réservation courte CONSTRUCTEUR de l'index constaté vide : AGENTS,
+code/tests/bench/docs/entrées propres30, correctif du mutant de reçu q2,
+ETAT_COURANT constructeur, receipts/q4_window_20260920 et cette seule
+section30. Les53 lignes complémentaires anciennes, tous audits
+indépendants (dont la nouvelle réponse A) et changements v6/v7 sont
+exclus. Réservation libérée après commit/push ; main uniquement.

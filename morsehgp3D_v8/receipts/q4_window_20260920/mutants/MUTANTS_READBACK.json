@@ -1,0 +1,37 @@
+{
+  "scope": "compiled_mutations_tranche30",
+  "readbacks": [
+    {
+      "command": "python3 morsehgp3D_v8/receipts/q4_window_20260920/mutants/run_mutants.py read morsehgp3D_v8/receipts/q4_window_20260920/mutants/compiled_jhdownuv",
+      "chunk_id": "28b0fb",
+      "wall_time_seconds": 0.000008185,
+      "exit_code": 0,
+      "original_token_count": 67,
+      "output": "{\"baseline_gates\": 1, \"command_count\": 10, \"compiled_product_mutants\": 3, \"full_contract_qualified\": false, \"gcp_used\": false, \"live_checked\": false, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q4_window_20260920/mutants/compiled_jhdownuv\", \"status\": \"passed\"}\n"
+    },
+    {
+      "command": "python3 morsehgp3D_v8/receipts/q4_window_20260920/mutants/run_mutants.py read morsehgp3D_v8/receipts/q4_window_20260920/mutants/compiled_jhdownuv --check-live",
+      "chunk_id": "3802fe",
+      "wall_time_seconds": 0.000003577,
+      "exit_code": 0,
+      "original_token_count": 67,
+      "output": "{\"baseline_gates\": 1, \"command_count\": 10, \"compiled_product_mutants\": 3, \"full_contract_qualified\": false, \"gcp_used\": false, \"live_checked\": true, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q4_window_20260920/mutants/compiled_jhdownuv\", \"status\": \"passed\"}\n"
+    },
+    {
+      "command": "python3 -O morsehgp3D_v8/receipts/q4_window_20260920/mutants/run_mutants.py read morsehgp3D_v8/receipts/q4_window_20260920/mutants/compiled_jhdownuv",
+      "chunk_id": "bebed3",
+      "wall_time_seconds": 0.000003717,
+      "exit_code": 0,
+      "original_token_count": 67,
+      "output": "{\"baseline_gates\": 1, \"command_count\": 10, \"compiled_product_mutants\": 3, \"full_contract_qualified\": false, \"gcp_used\": false, \"live_checked\": false, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q4_window_20260920/mutants/compiled_jhdownuv\", \"status\": \"passed\"}\n"
+    },
+    {
+      "command": "python3 -O morsehgp3D_v8/receipts/q4_window_20260920/mutants/run_mutants.py read morsehgp3D_v8/receipts/q4_window_20260920/mutants/compiled_jhdownuv --check-live",
+      "chunk_id": "b2c38a",
+      "wall_time_seconds": 0.000003587,
+      "exit_code": 0,
+      "original_token_count": 67,
+      "output": "{\"baseline_gates\": 1, \"command_count\": 10, \"compiled_product_mutants\": 3, \"full_contract_qualified\": false, \"gcp_used\": false, \"live_checked\": true, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q4_window_20260920/mutants/compiled_jhdownuv\", \"status\": \"passed\"}\n"
+    }
+  ]
+}

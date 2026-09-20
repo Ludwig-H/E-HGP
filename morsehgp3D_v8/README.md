@@ -129,6 +129,22 @@ quadratique : l'adversaire256/K10 conserve tous ses sites et régresse.
 L'ancienne voie reste inchangée. Voir les
 [résultats et contre-régimes](receipts/q4_shallow_20260920/README.md).
 
+La tranche30 ajoute une [fenêtre q4 exacte de faible profondeur](docs/Q4_FENETRE_DE_FAIBLE_PROFONDEUR_20260920.md).
+Après les couches29, deux rangs certifiés retirent les régions trop
+profondes avant leur tri. Les grandes coquilles et les creux ponctuels
+restent complets. Dans le premier essai dense permuté32k/K10, le run
+par arête passe de577,742 à84,302ms ; toutes les comparaisons de racines
+passent de20,458M à2,446M, tas et recherche de fenêtre compris.
+**Ce n'est pas la tour32k ou50k** : les scans faces × témoins persistent,
+avec un carré toujours mesuré sur l'adversaireK10. Prochaine priorité :
+indexer les couches pour accéder aux rangs et contacts sans ces scans.
+Les [preuves et mesures30](receipts/q4_window_20260920/README.md) conservent
+aussi la première régression90/91 en échec sur un mutant de reçu q2
+parfois inchangé. Après correction, la reprise distincte passe91 CTests
+Release, neuf gates/dix sondes Clang ASan/UBSan et52 mesures ;6206
+contrôles géométriques, trois mutants compilés et20 différentiels passent.
+Le moteur q2 et tous les chemins précédents sont inchangés. GCP non utilisé.
+
 ## Vingt-et-unième tranche publiée à3e94c868 — historique
 
 La vingt-et-unième tranche transmet aux enfants les

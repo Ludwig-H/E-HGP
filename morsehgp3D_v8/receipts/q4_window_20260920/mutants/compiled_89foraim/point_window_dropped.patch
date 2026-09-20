@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q4_window.cpp
++++ mutated/q4_window.cpp
+@@ -184,7 +184,7 @@
+     };
+     if (low && high) {
+       const auto order=compare(*low,*high);
+-      if (order>0) {
++      if (order>=0) {
+         counter_add(window.disjoint_rejected_seeds);
+         counter_add(window.rejected_event_ids,static_cast<u64>(event_count));return;
+       }

@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q4_window.cpp
++++ mutated/q4_window.cpp
+@@ -225,7 +225,7 @@
+       throw std::logic_error("mhgp8 window interior rank bound violated");
+     if (constants>retained.size() || fixed_inside>retained.size()-constants)
+       throw std::logic_error("mhgp8 window fixed population overflow");
+-    const auto base=constants+fixed_inside;
++    const auto base=constants;
+     if (base>=threshold) {
+       counter_add(window.fixed_depth_rejected_seeds);
+       counter_add(window.rejected_event_ids,

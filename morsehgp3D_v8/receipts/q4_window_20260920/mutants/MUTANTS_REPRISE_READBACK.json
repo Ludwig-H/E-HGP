@@ -1,0 +1,37 @@
+{
+  "scope": "compiled_mutations_tranche30_post_worker_digest_fix",
+  "readbacks": [
+    {
+      "command": "python3 morsehgp3D_v8/receipts/q4_window_20260920/mutants/run_mutants.py read morsehgp3D_v8/receipts/q4_window_20260920/mutants/compiled_89foraim",
+      "chunk_id": "6ad17c",
+      "wall_time_seconds": 0.000003016,
+      "exit_code": 0,
+      "original_token_count": 67,
+      "output": "{\"baseline_gates\": 1, \"command_count\": 10, \"compiled_product_mutants\": 3, \"full_contract_qualified\": false, \"gcp_used\": false, \"live_checked\": false, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q4_window_20260920/mutants/compiled_89foraim\", \"status\": \"passed\"}\n"
+    },
+    {
+      "command": "python3 morsehgp3D_v8/receipts/q4_window_20260920/mutants/run_mutants.py read morsehgp3D_v8/receipts/q4_window_20260920/mutants/compiled_89foraim --check-live",
+      "chunk_id": "50f4d0",
+      "wall_time_seconds": 0.000002315,
+      "exit_code": 0,
+      "original_token_count": 67,
+      "output": "{\"baseline_gates\": 1, \"command_count\": 10, \"compiled_product_mutants\": 3, \"full_contract_qualified\": false, \"gcp_used\": false, \"live_checked\": true, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q4_window_20260920/mutants/compiled_89foraim\", \"status\": \"passed\"}\n"
+    },
+    {
+      "command": "python3 -O morsehgp3D_v8/receipts/q4_window_20260920/mutants/run_mutants.py read morsehgp3D_v8/receipts/q4_window_20260920/mutants/compiled_89foraim",
+      "chunk_id": "3d0886",
+      "wall_time_seconds": 0.000002756,
+      "exit_code": 0,
+      "original_token_count": 67,
+      "output": "{\"baseline_gates\": 1, \"command_count\": 10, \"compiled_product_mutants\": 3, \"full_contract_qualified\": false, \"gcp_used\": false, \"live_checked\": false, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q4_window_20260920/mutants/compiled_89foraim\", \"status\": \"passed\"}\n"
+    },
+    {
+      "command": "python3 -O morsehgp3D_v8/receipts/q4_window_20260920/mutants/run_mutants.py read morsehgp3D_v8/receipts/q4_window_20260920/mutants/compiled_89foraim --check-live",
+      "chunk_id": "9773c2",
+      "wall_time_seconds": 0.000004959,
+      "exit_code": 0,
+      "original_token_count": 67,
+      "output": "{\"baseline_gates\": 1, \"command_count\": 10, \"compiled_product_mutants\": 3, \"full_contract_qualified\": false, \"gcp_used\": false, \"live_checked\": true, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q4_window_20260920/mutants/compiled_89foraim\", \"status\": \"passed\"}\n"
+    }
+  ]
+}

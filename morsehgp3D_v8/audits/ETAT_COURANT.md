@@ -118,6 +118,28 @@ Voir les [preuves et contre-régimes](../receipts/q4_shallow_20260920/README.md)
 q3 global, WSPD multivoie, catalogue/intérieurs, FULL/G4 et massif ouverts ;
 GCP non utilisé. Les preuves des auditeurs restent indépendantes.
 
+Tranche30 après31b0243a : [fenêtre fermée de faible profondeur](../docs/Q4_FENETRE_DE_FAIBLE_PROFONDEUR_20260920.md).
+Les rangs sont des multiplicités d'IDs, pas des groupes ; L=U, bornes
+infinies, constantes de profondeur et coquilles complètes sont jugés.
+6206 contrôles contre oracle rationnel, dont la fixture huit sites de A
+portée explicitement, passent en Release et Clang ASan/UBSan. Les trois
+mutants compilés échouent sur la géométrie avant les registres de travail.
+Le moteur ne trie plus les régions profondes, mais garde S×r au premier
+passage ; l'adversaireK10 dépasse encore×4 aux doublements. Pas de borne
+sous-quadratique générale ni de changement des défauts précédents.
+La première régression est **FAILED90/91** : le mutant de reçu q2
+`worker_digest` remplaçait par zéro un digest pouvant déjà être nul.
+Source et échec conservés, gel189 rouvert pour ce seul test Python.
+Reprise distincte close :91 CTests Release, neuf gates/dix sondes Clang
+ASan/UBSan (pas91),52 nouvelles mesures, trois mutants compilés et20
+différentiels contre29 passent. Les32 configurations scale sont identiques
+au premier gel hors temps ; binaires inchangés. Les52 mesures initiales
+restent historiques. Les deux builds window du20260920 sont épinglés.
+Suivi dans les [reçus30](../receipts/q4_window_20260920/README.md).
+Priorité suivante : accès indexé aux rangs/contacts des couches, puis
+q3 et générateur global, pas micro-réglages du petit tri. FULL et G4
+restent ouverts ; GCP non utilisé, audits indépendants non hérités.
+
 ## Historique : vingt-et-unième tranche publiée à3e94c868
 
 Vingt-et-unième tranche P0 close,

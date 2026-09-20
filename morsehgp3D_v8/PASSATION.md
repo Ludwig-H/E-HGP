@@ -10,6 +10,63 @@ qualification de son propre code.
 
 ## À reprendre maintenant
 
+La tranche30 ajoute `run_q4_window_edge_candidates` et son entrée par
+seed sur le noyau29 : [preuve et architecture](docs/Q4_FENETRE_DE_FAIBLE_PROFONDEUR_20260920.md).
+Poser T=K−2, c constantes intérieures, H=T−c. c≥T rejette ; sinon
+fenêtre fermée [H-ième sortie décroissante,H-ième entrée croissante],
+bornes infinies si nécessaire. L=U reste un événement admissible.
+Deux tas bornés puis deux scans complets conservent toute profondeur
+et coquille dans la fenêtre ; seuls2H−2 IDs strictement intérieurs
+au plus sont triés. Les constantes intérieures hors fenêtre sont payées,
+jamais oubliées ni confondues avec les témoins constamment extérieurs.
+
+Premier essai dense permuté32k/K10 : run29/30=577,742/84,302ms,
+comparaisons de racines20,458M/2,446M en incluant tas et fenêtre.
+Le pic global propre reste1 861 533octets, dominé par la préparation ;
+seuls les buffers de balayage passent de16 416 à320octets. Pas du RSS.
+Les deux passages font208488/596136/1829992 visites à8k/16k/32k
+(×2,859/×3,070). Mais l'adversaireK10 garde n(n−2) au premier passage :
+pas de sous-quadratique général. Ce sont des candidats q4 sur UNE arête,
+pas la tour ; les voies28/29 et les défauts restent disponibles et inchangés.
+
+Qualification30 close après correction d'un seul test Python historique :
+première régression90/91 FAILED, mutant `worker_digest` parfois égal à
+l'original lorsque sa valeur est déjà nulle. Les52 mesures initiales et
+toutes les preuves restent archivées ; reprise distincte du gel189,
+moteur/binaires inchangés :91 CTests Release, neuf gates/dix sondes Clang
+ASan/UBSan (pas91),6206 contrôles, trois mutants compilés,20 différentiels
+contre29 et52 nouvelles mesures passent. Les32 grandes configurations
+ont tous leurs champs hors temps identiques au premier gel.
+Dix lectures/auto-tests normal/−O concordent ;46 corruptions du lecteur
+sont refusées. Les lectures auxiliaires concordent aussi.
+Les builds `v8_q4_window_20260920` et `v8_q4_window_sanitize_20260920`
+sont désormais épinglés ; construire la suite dans de nouveaux dossiers.
+Voir les [reçus propres30](receipts/q4_window_20260920/README.md).
+
+**Suite structurelle :** conserver les frontières convexes comme index
+de chaînes de racines, avec multiplicités, bords plats et constantes
+nulles distinctes, pour enlever S×r. L'ordre projectif suggère O(1)
+chaînes par couche, mais tangences/recherches binaires exactes et grandes
+coquilles ne sont pas implémentées ni qualifiées. Ne pas annoncer O(log r)
+avant ce port ; les seuls voisins de la couche seed ne suffisent pas.
+La réponse A `WINDOW_INDEX.md`, arrivée à la clôture, confirme le
+certificat30 et précise chaînes, pôle et plateaux ; modèle indépendant
+508 cas, pas qualification du port. Ses126 mesures LiDAR28/29, dont
+36 sur neuf arêtes productives, avertissent aussi de garder les blocs28.
+Inclure ces cas réels dans la prochaine comparaison, sans héritage de preuve.
+Les avis A sur composition emboîtée et régions fermées de dimension zéro
+ont été lus ; sa fixture huit sites est explicitement requalifiée par
+l'oracle constructeur. Ne jamais intersecter deux noyaux indépendants.
+Raccorder ensuite q3, WSPD multivoie s8/10/12, catalogue/intérieurs et
+FULL. Aucun contrat50k/G4, backend GPU ou borne massive acquis.
+GCP non utilisé ; aucune nouvelle micro-optimisation du moteur q2.
+Le [journal du correctif de test](receipts/q4_window_20260920/preflight/WORKER_DIGEST_FIX.md)
+signale un risque analogue dans la gate de reçus parallèle, non observé
+dans cette suite et non modifié ici ; ne pas confondre sa réussite
+présente avec la preuve qu'un mutant forçant zéro change toujours la valeur.
+
+### Tranche29 précédente close à31b0243a
+
 La tranche29 ajoute les [couches convexes duales q4](docs/Q4_COUCHES_DUALES_20260920.md)
 dans `run_q4_shallow_edge_candidates`, entrée explicite sans changer28.
 Pour chaque signe de la constante, conserver K−2 frontières COMPLÈTES

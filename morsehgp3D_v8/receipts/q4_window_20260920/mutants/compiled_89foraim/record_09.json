@@ -1,0 +1,17 @@
+{
+  "kind": "constant_shell_dropped_oracle",
+  "command": [
+    "/tmp/mhgp8_q4_window_mutants_0622e7vo/constant_shell_dropped",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T22:03:31.177247+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "q4 window gate: window sweep differs from complete rational ball/depth/support/shell oracle\n",
+  "stdout_base64": "",
+  "stderr_base64": "cTQgd2luZG93IGdhdGU6IHdpbmRvdyBzd2VlcCBkaWZmZXJzIGZyb20gY29tcGxldGUgcmF0aW9uYWwgYmFsbC9kZXB0aC9zdXBwb3J0L3NoZWxsIG9yYWNsZQo=",
+  "finished_utc": "2026-09-20T22:03:31.180350+00:00"
+}

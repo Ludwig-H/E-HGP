@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q4_window.cpp
++++ mutated/q4_window.cpp
+@@ -156,7 +156,7 @@
+       } else {
+         const auto power=family->power(points[id]);
+         if (power<0) {++constants;counter_add(sweep.family.constant_inside);}
+-        else if (power==0) {shell.push_back(id);counter_add(sweep.family.constant_on);}
++        else if (power==0) {counter_add(sweep.family.constant_on);}
+         else counter_add(sweep.family.constant_outside);
+       }
+     }

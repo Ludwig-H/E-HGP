@@ -347,6 +347,28 @@ Voir les [résultats et la suite](Q4_CARTE_CENTRES_PARTAGEE_20260920.md).
 
 Voir la [preuve, les mesures et la suite29](Q4_COUCHES_DUALES_20260920.md).
 
+## Fenêtre q4 exacte30 : ce qui doit rester payé et conservé
+
+- Rejeter L≥U perd un événement admissible lorsque L=U. Le creux
+  ponctuel est réel, notamment sur huit sites cosphériques ; conserver
+  l'intervalle fermé et tous les IDs des groupes d'extrémité.
+- Garder seulement les H IDs choisis par les tas perd des ex æquo.
+  Un deuxième parcours récupère les coquilles complètes, sans quota.
+- Les événements hors fenêtre ne sont pas tous extérieurs : certains
+  sont constamment intérieurs et leur contribution fixe est nécessaire.
+- Au plus2H−2 événements intérieurs ne signifie pas O(K) par requête :
+  les scans, tas, rangs, contacts et construction des couches se paient.
+  L'adversaireK10 conserve n(n−2) lectures au premier passage ; enlever
+  son logarithme de tri n'établit pas une borne sous-quadratique.
+- Des buffers de balayage réduits ne réduisent pas automatiquement le
+  pic global : sur les grands denses, la préparation duale domine encore.
+- Un mutant de reçu qui remplace un digest par zéro peut ne rien changer
+  si ce worker est resté inactif. La première régression30 a ainsi échoué
+  à90/91 ; mutation déterministe d'un bit, essai initial conservé et
+  nouvelle qualification distincte, jamais simple rejeu favorable.
+
+Voir la [preuve et les limites30](Q4_FENETRE_DE_FAIBLE_PROFONDEUR_20260920.md).
+
 Références : [implémentation](../audits/IMPLEMENTATION_PARALLELISATION.md)
 et [mesures](../audits/CONTRATS_ET_MESURES.md).
 

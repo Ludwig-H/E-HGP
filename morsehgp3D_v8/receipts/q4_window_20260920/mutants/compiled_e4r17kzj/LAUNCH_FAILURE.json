@@ -1,0 +1,11 @@
+{
+  "status": "failed_before_manifest",
+  "recorded_after_observed_failure": true,
+  "command": ["python", "-B", "morsehgp3D_v8/receipts/q4_window_20260920/mutants/run_mutants.py", "run", "--build", "build/v8_q4_window_20260920", "--output", "morsehgp3D_v8/receipts/q4_window_20260920/mutants"],
+  "exit_code": 1,
+  "error": "FileNotFoundError: build/v8_q4_window_20260920/CMakeFiles/mhgp8_q4_window_gate.dir/tests/q4_shallow_gate.cpp.o",
+  "original_helper": "../../preflight/run_mutants_before_object_path_fix.py",
+  "compiled_mutants": 0,
+  "executed_mutants": 0,
+  "qualification": "none"
+}

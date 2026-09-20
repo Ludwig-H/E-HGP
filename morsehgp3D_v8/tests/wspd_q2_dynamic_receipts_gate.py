@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[2]
 BENCH = ROOT / "morsehgp3D_v8/bench"
 RUNNER = BENCH / "run_wspd_q2_dynamic_matrix.py"
 sys.path.insert(0, str(BENCH))
-from run_wspd_q2_dynamic_matrix import RUNNER_SOURCE, digest, matrix, parse_result, sources  # noqa: E402
+from run_wspd_q2_dynamic_matrix import RUNNER_SOURCE, digest, matrix, parse_result, sources, validate_result  # noqa: E402
 
 
 def require(condition: bool, message: str) -> None:
@@ -70,6 +70,38 @@ def capture(probe: Path, output: Path, edge: bool = False) -> subprocess.Complet
 
 def checked(root: Path) -> subprocess.CompletedProcess:
     return subprocess.run(command("check", str(root), "--summary"), capture_output=True, cwd=ROOT)
+
+
+def mutate_worker_digest(row: dict[str, Any]) -> None:
+    # Slot zero can be idle. Assigning zero can therefore leave the receipt
+    # unchanged; flip one bit instead, always within the valid u64 domain.
+    value = int(row["workers"][0]["digest"]["sum"], 16)
+    require(0 <= value < 1 << 64, "worker digest mutation requires a u64")
+    row["workers"][0]["digest"]["sum"] = format(value ^ 1, "x")
+
+
+def check_worker_digest_mutation(record: dict[str, Any]) -> None:
+    # Isolate the reduction contract from scheduling: make valid synthetic
+    # worker/total sums first, then require precisely that reduction to fail.
+    # These local checks do not add captured mutants or change the stats schema.
+    for value in (0, 1, (1 << 64) - 1):
+        row = copy.deepcopy(record["result"])
+        previous = int(row["workers"][0]["digest"]["sum"], 16)
+        total = (int(row["digest"]["sum"], 16) - previous + value) & ((1 << 64) - 1)
+        row["workers"][0]["digest"]["sum"] = format(value, "x")
+        row["digest"]["sum"] = format(total, "x")
+        validate_result(row, record["command"])
+        mutate_worker_digest(row)
+        changed = int(row["workers"][0]["digest"]["sum"], 16)
+        require(changed != value and 0 <= changed < 1 << 64,
+                "worker digest mutation was unchanged or outside u64")
+        try:
+            validate_result(row, record["command"])
+        except ValueError as error:
+            require(str(error) == "worker canonical digest reduction mismatch",
+                    "worker digest mutation failed for an unrelated reason")
+        else:
+            raise RuntimeError("worker digest reduction accepted a changed u64")
 
 
 def main() -> int:
@@ -120,6 +152,7 @@ def main() -> int:
                             "capture lost raw bytes")
             stats["genuine_rows"] += len(rows)
         rows = records(genuine / "first")
+        check_worker_digest_mutation(next(row for row in rows if row["result"]["threads"] == 2))
         require(any(row["result"]["pool_work"]["filtered_pairs"] > 0 for row in rows), "Pool filtering fixture vacuous")
         require(any(row["result"]["pool_work"]["passthrough_rectangles"] > 0 for row in rows), "Pool passthrough fixture vacuous")
         require(any(row["result"]["parallel_work"]["started_workers"] < row["result"]["threads"]
@@ -221,7 +254,7 @@ def main() -> int:
         mutant("duplicate_job", lambda root: mutate_row(root, lambda row: row["workers"][0].update(
                jobs=row["workers"][0]["jobs"] + 1), True))
         mutant("duplicate_worker", lambda root: mutate_row(root, lambda row: row["workers"].append(copy.deepcopy(row["workers"][0])), True))
-        mutant("worker_digest", lambda root: mutate_row(root, lambda row: row["workers"][0]["digest"].update(sum="0"), True))
+        mutant("worker_digest", lambda root: mutate_row(root, mutate_worker_digest, True))
         mutant("unpaid_callback", lambda root: mutate_row(root, lambda row: row["callback_work"].update(copied_ids=0)))
         mutant("bad_total_time", lambda root: mutate_row(root, lambda row: row["timings"].update(total_ms=0)))
         mutant("wall_minus_payload", lambda root: mutate_row(root, lambda row: row["timings"].update(

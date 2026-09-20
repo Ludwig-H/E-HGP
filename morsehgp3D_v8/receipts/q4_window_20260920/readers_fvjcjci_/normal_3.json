@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_q4_window_checks.py",
+    "read",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/q4_window_20260920/regression_9a8cwnny",
+    "--check-live"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T21:56:50.135699+00:00",
+  "status": "failed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "Traceback (most recent call last):\n  File \"/workspaces/E-HGP/morsehgp3D_v8/bench/run_q4_window_checks.py\", line 341, in <module>\n    if __name__==\"__main__\":main()\n                            ^^^^^^\n  File \"/workspaces/E-HGP/morsehgp3D_v8/bench/run_q4_window_checks.py\", line 339, in main\n    else:print(json.dumps(read(args.path,args.check_live) if args.operation==\"read\" else selftest(args.path),sort_keys=True,allow_nan=False))\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/E-HGP/morsehgp3D_v8/bench/run_q4_window_checks.py\", line 245, in read\n    install_adapters();summary=previous.BASE_READ(path,check_live)\n                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/E-HGP/morsehgp3D_v8/bench/run_q34_seed_checks.py\", line 296, in read\n    validate_closure(m, c)\n  File \"/workspaces/E-HGP/morsehgp3D_v8/bench/run_q4_family_checks.py\", line 142, in validate_closure\n    require(completion[\"status\"] == \"passed\" and completion[\"error\"] is None, \"capture incomplete\")\n  File \"/workspaces/E-HGP/morsehgp3D_v8/bench/run_p0_matrix.py\", line 51, in require\n    raise InvalidReceipt(message)\nrun_p0_matrix.InvalidReceipt: capture incomplete\n",
+  "stdout_base64": "",
+  "stderr_base64": "VHJhY2ViYWNrIChtb3N0IHJlY2VudCBjYWxsIGxhc3QpOgogIEZpbGUgIi93b3Jrc3BhY2VzL0UtSEdQL21vcnNlaGdwM0RfdjgvYmVuY2gvcnVuX3E0X3dpbmRvd19jaGVja3MucHkiLCBsaW5lIDM0MSwgaW4gPG1vZHVsZT4KICAgIGlmIF9fbmFtZV9fPT0iX19tYWluX18iOm1haW4oKQogICAgICAgICAgICAgICAgICAgICAgICAgICAgXl5eXl5eCiAgRmlsZSAiL3dvcmtzcGFjZXMvRS1IR1AvbW9yc2VoZ3AzRF92OC9iZW5jaC9ydW5fcTRfd2luZG93X2NoZWNrcy5weSIsIGxpbmUgMzM5LCBpbiBtYWluCiAgICBlbHNlOnByaW50KGpzb24uZHVtcHMocmVhZChhcmdzLnBhdGgsYXJncy5jaGVja19saXZlKSBpZiBhcmdzLm9wZXJhdGlvbj09InJlYWQiIGVsc2Ugc2VsZnRlc3QoYXJncy5wYXRoKSxzb3J0X2tleXM9VHJ1ZSxhbGxvd19uYW49RmFsc2UpKQogICAgICAgICAgICAgICAgICAgICAgICAgIF5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl4KICBGaWxlICIvd29ya3NwYWNlcy9FLUhHUC9tb3JzZWhncDNEX3Y4L2JlbmNoL3J1bl9xNF93aW5kb3dfY2hlY2tzLnB5IiwgbGluZSAyNDUsIGluIHJlYWQKICAgIGluc3RhbGxfYWRhcHRlcnMoKTtzdW1tYXJ5PXByZXZpb3VzLkJBU0VfUkVBRChwYXRoLGNoZWNrX2xpdmUpCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBeXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXgogIEZpbGUgIi93b3Jrc3BhY2VzL0UtSEdQL21vcnNlaGdwM0RfdjgvYmVuY2gvcnVuX3EzNF9zZWVkX2NoZWNrcy5weSIsIGxpbmUgMjk2LCBpbiByZWFkCiAgICB2YWxpZGF0ZV9jbG9zdXJlKG0sIGMpCiAgRmlsZSAiL3dvcmtzcGFjZXMvRS1IR1AvbW9yc2VoZ3AzRF92OC9iZW5jaC9ydW5fcTRfZmFtaWx5X2NoZWNrcy5weSIsIGxpbmUgMTQyLCBpbiB2YWxpZGF0ZV9jbG9zdXJlCiAgICByZXF1aXJlKGNvbXBsZXRpb25bInN0YXR1cyJdID09ICJwYXNzZWQiIGFuZCBjb21wbGV0aW9uWyJlcnJvciJdIGlzIE5vbmUsICJjYXB0dXJlIGluY29tcGxldGUiKQogIEZpbGUgIi93b3Jrc3BhY2VzL0UtSEdQL21vcnNlaGdwM0RfdjgvYmVuY2gvcnVuX3AwX21hdHJpeC5weSIsIGxpbmUgNTEsIGluIHJlcXVpcmUKICAgIHJhaXNlIEludmFsaWRSZWNlaXB0KG1lc3NhZ2UpCnJ1bl9wMF9tYXRyaXguSW52YWxpZFJlY2VpcHQ6IGNhcHR1cmUgaW5jb21wbGV0ZQo=",
+  "finished_utc": "2026-09-20T21:56:50.207476+00:00"
+}

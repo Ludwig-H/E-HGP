@@ -89,6 +89,24 @@ et son scan commun par arête peut dominer lorsque S est petit. Garder28
 comme référence, ne pas ajouter une autre variante de budget ; mesurer
 la somme sur toutes les arêtes au futur raccord WSPD q3/q4.
 
+Après31b0243a, la [fenêtre exacte30](Q4_FENETRE_DE_FAIBLE_PROFONDEUR_20260920.md)
+remplace le tri général des survivants29 par deux rangs certifiés :
+H-ième sortie décroissante et H-ième entrée croissante, H=K−2−c.
+L'intervalle est fermé, y compris lorsqu'il se réduit à un point ;
+les constantes et toutes les égalités de coquille restent exactes.
+Au plus2H−2 IDs strictement intérieurs sont triés, mais les deux scans
+des r témoins par face restent payés. Le premier garde un carré mesuré
+sur l'adversaireK10 : **prochaine priorité, supprimer S×r**, pas réduire
+encore les petits tris. Conserver les couches comme un index de chaînes
+convexes orientées, avec multiplicités et groupes plats, pour rechercher
+les rangs et contacts sans scan complet. Cette recherche exacte n'est
+pas implémentée ; constantes nulles, tangences, frontières de dimension
+zéro et restitution des IDs doivent être jugées indépendamment.
+La composition avec28 exige des populations emboîtées : l'intersection
+de deux noyaux certifiés indépendamment n'est pas un certificat.
+Ne pas oublier ensuite q3, WSPD multivoie, catalogue et FULL ; aucun
+temps par arête ne vaut contrat50k/G4 ni borne sur leur somme.
+
 Suivi du 14 septembre : le [raccord direct front → census q2](P0_FRONT_ET_CENSUS_Q2.md)
 est implémenté. Il retire factories, copies et arbres B par rectangle,
 sans filtre axial obligatoire. Il reste à réduire le coût du front et

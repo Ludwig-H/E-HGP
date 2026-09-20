@@ -1,0 +1,28 @@
+{
+  "kind": "point_window_dropped_compile",
+  "command": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "-std=c++20",
+    "-O3",
+    "-DNDEBUG",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-I/workspaces/E-HGP/morsehgp3D_v8/src",
+    "-c",
+    "/tmp/mhgp8_q4_window_mutants_0622e7vo/point_window_dropped.cpp",
+    "-o",
+    "/tmp/mhgp8_q4_window_mutants_0622e7vo/point_window_dropped.o"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-20T22:03:24.841460+00:00",
+  "expected_exit_code": 0,
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "stdout_base64": "",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-20T22:03:26.892069+00:00"
+}

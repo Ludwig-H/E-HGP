@@ -1,0 +1,99 @@
+{
+  "schema": "mhgp8_worker_digest_gate_fix_check_v1",
+  "status": "passed",
+  "source_artifact_sha256_before": {
+    "morsehgp3D_v8/tests/wspd_q2_dynamic_receipts_gate.py": "83b231df83432fed6bee6a11d7319ca5272bc6f7fa08b0094230501257116250",
+    "build/v8_q4_window_20260920/mhgp8_wspd_q2_dynamic_probe": "932cabac8157cea250030a1997e3349bd0508dafef15696e11e29f36ad78cf97",
+    "build/v8_q4_window_20260920/CMakeCache.txt": "54d5a5a65b70ba61634877951830d2d9d943c2f9a5242675b8fccca8a969f1dc",
+    "morsehgp3D_v8/receipts/q4_window_20260920/preflight/wspd_q2_dynamic_receipts_gate_before_worker_digest_fix.py": "a4b0428cbd66d03f70b316946498646f4e81fd40272526dd4b6fecc0ea9532fd"
+  },
+  "source_artifact_sha256_after": {
+    "morsehgp3D_v8/tests/wspd_q2_dynamic_receipts_gate.py": "83b231df83432fed6bee6a11d7319ca5272bc6f7fa08b0094230501257116250",
+    "build/v8_q4_window_20260920/mhgp8_wspd_q2_dynamic_probe": "932cabac8157cea250030a1997e3349bd0508dafef15696e11e29f36ad78cf97",
+    "build/v8_q4_window_20260920/CMakeCache.txt": "54d5a5a65b70ba61634877951830d2d9d943c2f9a5242675b8fccca8a969f1dc",
+    "morsehgp3D_v8/receipts/q4_window_20260920/preflight/wspd_q2_dynamic_receipts_gate_before_worker_digest_fix.py": "a4b0428cbd66d03f70b316946498646f4e81fd40272526dd4b6fecc0ea9532fd"
+  },
+  "records": [
+    {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v8/tests/wspd_q2_dynamic_receipts_gate.py",
+        "--probe",
+        "/workspaces/E-HGP/build/v8_q4_window_20260920/mhgp8_wspd_q2_dynamic_probe",
+        "--selftest"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "started_utc": "2026-09-20T22:01:00.078409+00:00",
+      "finished_utc": "2026-09-20T22:01:09.982282+00:00",
+      "exit_code": 0,
+      "stdout": "{\"domain_checks\": 12, \"failed_captures\": 3, \"genuine_rows\": 108, \"invalid_options\": 13, \"mutants\": 60, \"positive_reads\": 1, \"status\": \"passed\"}\n",
+      "stderr": "",
+      "stdout_base64": "eyJkb21haW5fY2hlY2tzIjogMTIsICJmYWlsZWRfY2FwdHVyZXMiOiAzLCAiZ2VudWluZV9yb3dzIjogMTA4LCAiaW52YWxpZF9vcHRpb25zIjogMTMsICJtdXRhbnRzIjogNjAsICJwb3NpdGl2ZV9yZWFkcyI6IDEsICJzdGF0dXMiOiAicGFzc2VkIn0K",
+      "stderr_base64": ""
+    },
+    {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v8/tests/wspd_q2_dynamic_receipts_gate.py",
+        "--probe",
+        "/workspaces/E-HGP/build/v8_q4_window_20260920/mhgp8_wspd_q2_dynamic_probe",
+        "--selftest"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "started_utc": "2026-09-20T22:01:09.982311+00:00",
+      "finished_utc": "2026-09-20T22:01:19.844239+00:00",
+      "exit_code": 0,
+      "stdout": "{\"domain_checks\": 12, \"failed_captures\": 3, \"genuine_rows\": 108, \"invalid_options\": 13, \"mutants\": 60, \"positive_reads\": 1, \"status\": \"passed\"}\n",
+      "stderr": "",
+      "stdout_base64": "eyJkb21haW5fY2hlY2tzIjogMTIsICJmYWlsZWRfY2FwdHVyZXMiOiAzLCAiZ2VudWluZV9yb3dzIjogMTA4LCAiaW52YWxpZF9vcHRpb25zIjogMTMsICJtdXRhbnRzIjogNjAsICJwb3NpdGl2ZV9yZWFkcyI6IDEsICJzdGF0dXMiOiAicGFzc2VkIn0K",
+      "stderr_base64": ""
+    }
+  ],
+  "original_failure_sha256": {
+    "morsehgp3D_v8/receipts/q4_window_20260920/regression_9a8cwnny/result.xml": "cf7a9ff1bac6e62ec44e68052d5db9bc72250c16316f9b22459da00cb2c170df",
+    "morsehgp3D_v8/receipts/q4_window_20260920/regression_9a8cwnny/record_0000.json": "516b41bde6c8f3d9572751285fba82f1d9d4dbaed83cbf61cdd3eff260f90567",
+    "morsehgp3D_v8/receipts/q4_window_20260920/regression_9a8cwnny/MANIFEST.json": "8d403022ef7fb13f398ec1e69c1eda976f3d06ec16e4c39ecebae604496b3d80",
+    "morsehgp3D_v8/receipts/q4_window_20260920/regression_9a8cwnny/COMPLETION.json": "1510f841cdedbcfcfc9f992cf96bd36cb1f0224ec14693d8735ea61fe7841ba0"
+  },
+  "original_tests": [
+    {
+      "attributes": {
+        "name": "mhgp8_wspd_q2_dynamic_receipts_gate",
+        "classname": "mhgp8_wspd_q2_dynamic_receipts_gate",
+        "time": "10.2518",
+        "status": "run"
+      },
+      "failure": false,
+      "output_prefix": "{\"domain_checks\": 12, \"failed_captures\": 3, \"genuine_rows\": 108, \"invalid_options\": 13, \"mutants\": 60, \"positive_reads\": 1, \"status\": \"passed\"}\n"
+    },
+    {
+      "attributes": {
+        "name": "mhgp8_wspd_q2_dynamic_receipts_gate_optimized",
+        "classname": "mhgp8_wspd_q2_dynamic_receipts_gate_optimized",
+        "time": "6.09469",
+        "status": "fail"
+      },
+      "failure": true,
+      "output_prefix": "parallel q2 receipt gate failed: mutant survived: worker_digest b'{\\n  \"status\": \"passed\",\\n  \"campaigns\": 4,\\n  \"measurements\": 108,\\n  \"configurations_including_threads_seed\": 60"
+    }
+  ],
+  "original_ctest_exit_code": 8,
+  "original_stdout_confirms_mutant_survived": true,
+  "direct_worker_value_captured": false,
+  "local_causal_values": [
+    "0",
+    "1",
+    "ffffffffffffffff"
+  ],
+  "stats_schema_changed": false,
+  "engine_changed": false,
+  "gcp_used": false,
+  "tool_result": {
+    "chunk_id": "d63eff",
+    "exit_code": 0,
+    "wall_time_seconds": 0.000002555
+  }
+}
