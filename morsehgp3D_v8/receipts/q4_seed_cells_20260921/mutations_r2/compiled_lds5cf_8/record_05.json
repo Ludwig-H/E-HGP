@@ -1,0 +1,22 @@
+{
+  "kind": "single_live_leaf_discarded_link",
+  "command": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "/workspaces/E-HGP/build/v8_q4_seed_cells_r2_20260921/CMakeFiles/mhgp8_q4_seed_cells_gate.dir/tests/q4_seed_cells_gate.cpp.o",
+    "/tmp/mhgp8_wspd_q34_mutants_l7gokryo/single_live_leaf_discarded.o",
+    "/workspaces/E-HGP/build/v8_q4_seed_cells_r2_20260921/libmhgp8_p0.a",
+    "-pthread",
+    "-o",
+    "/tmp/mhgp8_wspd_q34_mutants_l7gokryo/single_live_leaf_discarded"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-21T10:41:11.933494+00:00",
+  "expected_exit_code": 0,
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "stdout_base64": "",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-21T10:41:12.008876+00:00"
+}

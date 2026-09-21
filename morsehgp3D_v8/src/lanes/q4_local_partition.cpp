@@ -196,6 +196,13 @@ bool Q4LocalGeometry::outside(Q4LocalCell cell,Q4LocalGeometryQueryWork& work) c
 }
 
 Q4LocalBounds Q4LocalGeometry::node_bounds(std::size_t id,Q4LocalCell cell) const {
+  validate_cell(cell);
+  if(id>=cover_->index()->spatial_nodes().size())
+    throw std::out_of_range("mhgp8 local bound node outside index");
+  return node_bounds_unchecked(id,cell);
+}
+
+Q4LocalBounds Q4LocalGeometry::node_bounds_unchecked(std::size_t id,Q4LocalCell cell) const {
   const auto& box=cover_->index()->spatial_nodes()[id].box;
   Q4LocalBounds result{};
   for (unsigned corner=0;corner<4;++corner) {
@@ -285,7 +292,7 @@ Q4LocalFragment::Q4LocalFragment(Q4LocalGeometryPtr geometry,Q4LocalCell cell,st
         bound=geometry_->bounds(geometry_->form(index.spatial_order()[node.range.first]),cell_);
       } else {
         counter_add(work_.block_bound_tests);
-        bound=geometry_->node_bounds(cursor,cell_);
+        bound=geometry_->node_bounds_unchecked(cursor,cell_);
       }
       if (bound.maximum<0) {
         counter_add(work_.inside_nodes);

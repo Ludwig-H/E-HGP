@@ -394,6 +394,36 @@ du citron, seeds égaux, lemmes sans violation, même flux qu'en modes
 émis ; leur coût et leur croissance restent ceux que mesurent les reçus 33
 du constructeur, non jugés ici.
 
+### Relais sans état par bloc (demande du journal 34) : proposition mesurée
+
+Reçu [relais_temoins_20260921/](relais_temoins_20260921/README.md). Le relais
+proposé ne stocke rien par paire ni par bloc : pour un rectangle survivant à
+la recherche saturante, une recherche exhaustive sur l'index produit un
+**crédit commun** U (nœuds universels) et une **liste de candidats** C (feuilles
+ni universelles ni exclues) ; chaque paire du rectangle teste C en saturant,
+puis C est libérée. L'identité « compte du citron = U + citron sur C » tient
+par monotonie des bornes de boîte (les nœuds exclus pour le rectangle le sont
+pour chaque paire, les nœuds universels le sont aussi) ; elle est vérifiée
+sans saturation contre le balayage complet sur 2 000 paires par voie et par
+exécution, 0 désaccord sur 8 exécutions (scan 0 à 8k/16k/32k, K5 et K10,
+scans 100 et 200 à 8k/K5). Le même schéma vaut pour le relais bloc de seeds →
+seeds du census q3 (crédit commun, liste transitoire, saturation par seed,
+rien d'hérité qui ne soit un certificat), non mesuré ici.
+
+Mesure : 9,6 à 21,7 candidats par rectangle survivant en q3 (12,7 à 30,8 en
+q4), maximum 1 100 à 4 221, pour un surcoût de 74 à 120 visites par rectangle
+survivant. Par paire, les tests saturants sur C valent 0,30 à 0,66 fois les
+visites de la descente saturante depuis la racine (q3 ; 0,39 à 0,84 en q4),
+et en travail total le relais vaut 0,71 à 0,87 fois la référence en q3 et
+0,74 à 1,04 en q4 : gain réel mais modéré, parce que la descente par paire
+est déjà courte après le rejet par rectangle. Ce qui compte pour la
+croissance : les candidats par rectangle passent de 10 à 18 (q3, K5, 8k →
+32k) quand les visites par paire depuis la racine passent de 88 à 252 ; le
+relais absorbe donc la part super-linéaire observée par le constructeur
+(×5,4 des bornes par paire de 16k à 32k), sans réduire le nombre de paires
+à juger, qui reste le vrai poste. Unités hétérogènes (visite ≠ test), donc
+comptes et non temps ; à comparer au coût mesuré du port avant de choisir.
+
 ## Erreurs et points durs relevés (à 4dbe3024)
 
 1. **Session G4 R2 : diagnostic non établi.** La capture
@@ -461,7 +491,8 @@ vérifié en direct par B (pas de `gcloud` ici).
   `plafond_proposeur_20260915/`, `oracle_q3q4_20260915/`,
   `front_lanes_lidar_20260921/`, `q3_stream_crosscheck_20260921/`,
   `q4_stream_crosscheck_20260921/`, `q34_stream_crosscheck_t32_20260921/`,
-  `q34_stream_crosscheck_t32_8k_20260921/` et `q34_stream_crosscheck_t33_20260921/`.
+  `q34_stream_crosscheck_t32_8k_20260921/`, `q34_stream_crosscheck_t33_20260921/` et
+  `relais_temoins_20260921/`.
 - Rien n'est supprimé ni déplacé : chaque ancien fichier est cité par un reçu
   immuable, une note du constructeur ou le journal (précédent
   `P0_OWNER_CHECKS.json` à ne pas répéter). Les sections antérieures de ce

@@ -52,6 +52,7 @@ class Q4LocalAtlas final {
   explicit Q4LocalAtlas(std::unique_ptr<Impl> impl);
   std::unique_ptr<Impl> impl_;
   friend struct Q4LocalEngine;
+  friend struct Q4SeedCellEngine;
 };
 
 struct Q4LocalSweepWork {

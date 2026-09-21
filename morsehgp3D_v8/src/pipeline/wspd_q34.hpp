@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lanes/q4_local.hpp"
+#include "lanes/q4_seed_cells.hpp"
 #include "lanes/q4_window.hpp"
 #include "lanes/q34_witness_search.hpp"
 #include "lanes/q3_ball_census.hpp"
@@ -23,6 +24,7 @@ struct WspdQ34Options {
   WspdQ34WitnessMode witness_mode{WspdQ34WitnessMode::Disabled};
   WspdQ3CensusMode q3_census_mode{WspdQ3CensusMode::ScalarCover};
   Q34WitnessBoundsMode witness_bounds_mode{Q34WitnessBoundsMode::Legacy};
+  Q4SeedCellOptions q4_seed_cells{};
 };
 
 struct WspdQ34WitnessWork {
@@ -64,6 +66,7 @@ struct WspdQ34Work {
   Q4WindowEdgeWork window;
   WspdQ34WitnessWork witness;
   Q3BallCensusWork q3_blocks;
+  Q4SeedCellWork q4_seed_cells;
 };
 
 struct WspdQ34Result {
@@ -122,6 +125,12 @@ struct WspdQ34Result {
 // they never reject an edge/lane without its separate saturation proof.
 // Legacy preserves the previous traversal; the new bounds ledgers stay zero.
 // No witness-state inheritance between rectangles/pairs is introduced here.
+// Explicit Local28-only LiveOnly/Joined seed-cell traversals keep every live
+// incidence/contact and use private bounded caches, not accepted-q3 gates.
+// Their additional work is separate; Individual keeps the historical path.
+// Non-Individual + Window30, zero block_sites and invalid modes are rejected
+// before output, including inactive lanes. This does not split an edge across
+// workers: only the traversal within its synchronous call changes.
 [[nodiscard]] WspdQ34Result run_wspd_q34_candidates(
     Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s,
     WspdQ34Options options, const Q34SeedConsumer& consumer);

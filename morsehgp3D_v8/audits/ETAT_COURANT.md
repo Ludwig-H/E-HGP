@@ -3,6 +3,23 @@
 21 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
+Tranche34 close après qualification corrigée : LiveOnly et Joined, graines×cellules
+q4 avec bornes strictes, parents immuables, cache privé par bloc et relais
+direct aux fragments. Aucun changement de défaut, q3 ni backend GPU.
+Les96 CTests R1 passent mais un mutant de contact et une corruption de
+reçu survivent ; ces défauts du harnais sont conservés, puis corrigés en
+R2 sans modifier le moteur.96CTest Release, quatre portes/24sondes
+ASan/UBSan/LSan explicites, trois mutants causaux et145corruptions passent ;
+lectures normal/−O closes,216sources. Voir la [note34](../docs/Q4_GRAINES_ET_CELLULES_20260921.md)
+et les [reçus34](../receipts/q4_seed_cells_20260921/README.md).
+Trente grandes observations34 finies,6R1+24R2, trois tailles et trois scans.
+LiveOnly corrige le poste visites d'atlas sur les régimes mesurés ;
+Joined ajoute trop de bornes/cache pour qu'un gain supplémentaire soit
+établi. Construction d'atlas et censusq3 conservent des ratios>4 publiés.
+Quatre builds R1/R2 épinglés ; défaut inchangé, GCP non utilisé.
+
+## Historique33
+
 Tranche33 close : trois modes de bornes pour la recherche
 indexée, exclusion négative locale et préparation affine des paires,
 sans changement des défauts. Les registres distinguent nouveaux tests

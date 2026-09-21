@@ -60,6 +60,9 @@ struct GlobalGate : Gate {
   u64 bounds_mode_calls{},bounds_exclusion_calls{},bounds_affine_calls{},bounds_work_checks{},bounds_parallel_calls{};
   u64 bounds_invalid_inputs{},bounds_inactive_calls{},bounds_callback_failures{},bounds_allocation_failures{};
   u64 bounds_shared_calls{},bounds_owner_resets{};
+  u64 seed_cell_calls{},seed_cell_live_calls{},seed_cell_joined_calls{},seed_cell_work_checks{},seed_cell_parallel_calls{};
+  u64 seed_cell_inactive_calls{},seed_cell_invalid_inputs{},seed_cell_callback_failures{},seed_cell_allocation_failures{};
+  u64 seed_cell_shared_calls{},seed_cell_owner_resets{},seed_cell_parallel_failures{};
 };
 
 // Every component is a standard-layout aggregate containing only u64 fields
@@ -77,14 +80,14 @@ WORDS(Q4LocalAtlasWork,38);WORDS(Q4LocalSweepWork,41);WORDS(Q4LocalEdgeWork,117)
 WORDS(Q4ShallowSetWork,25);WORDS(Q4FamilyWork,13);WORDS(Q4ShallowSweepWork,32);
 WORDS(Q4WindowSelectionWork,25);WORDS(Q4WindowSweepWork,57);WORDS(Q4WindowEdgeWork,116);
 WORDS(Q34WitnessSearchWork,25);WORDS(Q34WitnessBoundsWork,12);WORDS(WspdQ34WitnessWork,82);
-WORDS(Q3BallCensusWork,26);WORDS(WspdQ34Work,387);
+WORDS(Q3BallCensusWork,26);WORDS(Q4SeedCellWork,37);WORDS(WspdQ34Work,424);
 #undef WORDS
-std::array<u64,387> logical_work(mhgp8::WspdQ34Work work) {
+std::array<u64,424> logical_work(mhgp8::WspdQ34Work work) {
   // These two capacity peaks depend on the private buffer's previous jobs;
   // they are paid separately, not erased from the published result.
   work.q3.peak_shell_bytes=0;
   work.peak_edge_buffer_bytes=0;
-  return std::bit_cast<std::array<u64,387>>(work);
+  return std::bit_cast<std::array<u64,424>>(work);
 }
 
 // Enumerate every small-cloud support once. An independent Gaussian rational
@@ -660,7 +663,7 @@ void indexed_fixtures(GlobalGate& gate) {
     "indexed global modes have no exercised rejection");
 }
 
-std::array<u64,387> without_filter_geometry(mhgp8::WspdQ34Work work) {
+std::array<u64,424> without_filter_geometry(mhgp8::WspdQ34Work work) {
   // Keep ALL rejection masses and all work downstream of filtering. Only the
   // four explicitly changed search/bounds ledgers are normalized away.
   work.witness.rectangles={};work.witness.pairs={};
@@ -774,6 +777,124 @@ void bounds_mode_global_fixtures(GlobalGate& gate) {
   }));
   normalize(out);gate.require(out==expected && !index && !cloud,"bounds callback owner reset lost payload");
 }
+
+std::array<u64,424> without_local_q4(mhgp8::WspdQ34Work work) {
+  // Only the selected q4 traversal is replaced. All q3, filtering, covers,
+  // lane masses and output counters remain subject to exact comparison.
+  work.local={};work.q4_seed_cells={};
+  return logical_work(work);
+}
+
+void seed_cell_global_fixtures(GlobalGate& gate) {
+  using Mode=mhgp8::Q4SeedCellMode;
+  const std::vector<Points> fixtures{
+    {{10,10,10},{16,16,10},{16,10,16},{10,16,16},{12,12,8},{14,14,8}},
+    {{30,30,30},{36,36,30},{30,36,24},{36,30,24},{30,36,30},{36,30,30},{30,30,24},{32,32,32}},
+    {{10,20,20},{30,20,20},{20,29,27},{20,11,22}},
+    {{900,1000,1000},{1100,1000,1000},{1000,1120,1040},{1000,1120,960},{1000,1020,1105},{1001,1020,1105}},
+    shell30()};
+  for (std::size_t f=0;f<fixtures.size();++f) {
+    auto points=fixtures[f];if (f%2) std::reverse(points.begin(),points.end());
+    const auto all=global_oracle(gate,points);const unsigned k=f==3?3U:5U;
+    const auto expected=eligible(all,k,6);
+    const auto index=mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
+    auto config=options(mhgp8::WspdFrontMode::MidpointSamples,mhgp8::WspdQ4Backend::Local28);
+    config.local.max_depth=3;config.local.node_budget=85;config.local.leaf_sites=0;config.local.z_test_budget=32;
+    config.local.domain=f%2?mhgp8::Q4CenterDomainMode::Disk:mhgp8::Q4CenterDomainMode::Positive;
+    config.witness_mode=mhgp8::WspdQ34WitnessMode::RectanglePair;
+    config.q3_census_mode=mhgp8::WspdQ3CensusMode::GlobalBoxes;
+    config.witness_bounds_mode=mhgp8::Q34WitnessBoundsMode::Affine;
+    Output baseline;
+    const auto old=mhgp8::run_wspd_q34_candidates(index,k,8,config,[&](const auto& value) {baseline.push_back(copy(value));});
+    normalize(baseline);
+    gate.require(baseline==expected && old.work.q4_seed_cells==mhgp8::Q4SeedCellWork{},
+      "Individual global baseline differs from rational oracle or used hidden live work");
+    for (const auto mode:{Mode::LiveOnly,Mode::Joined}) {
+      config.q4_seed_cells={mode,f%2?1U:2U};Output actual;
+      const auto result=mhgp8::run_wspd_q34_candidates(index,k,8,config,[&](const auto& value) {actual.push_back(copy(value));});
+      normalize(actual);
+      gate.require(actual==expected,"seed-cell global stream differs from independent rational support/depth/shell oracle");
+      gate.require(result.front.work==old.front.work && without_local_q4(result.work)==without_local_q4(old.work),
+        "seed-cell q4 traversal changed another lane, filter, cover or output work");
+      const auto& w=result.work.q4_seed_cells;
+      gate.require(w.queries==result.work.q4_edges && w.live_preparations+w.whole_atlas_skips==w.queries &&
+        w.live_node_visits<=result.work.local.atlas.cells_created,"pipeline lost private live-summary work");
+      if (mode==Mode::Joined) gate.require(w.terminal_pairs==w.family_preparations+w.family_cache_hits &&
+        w.terminal_pairs==result.work.local.sweep.leaf_queries && w.family_preparations==result.work.local.sweep.seed_queries,
+        "pipeline lost joined cache/family/terminal accounting");
+      ++gate.seed_cell_calls;++gate.seed_cell_work_checks;
+      if (mode==Mode::LiveOnly) ++gate.seed_cell_live_calls;else ++gate.seed_cell_joined_calls;
+      if (f<2) for (const std::size_t workers:{1U,2U,4U}) {
+        parallel_case(gate,points,all,k,config,workers,1);++gate.seed_cell_parallel_calls;
+      }
+    }
+  }
+  const auto points=fixtures[0];const auto all=global_oracle(gate,points),expected=eligible(all,5,6);
+  auto cloud=mhgp8::prepare_cloud(points);auto index=mhgp8::make_q2_cloud_index(cloud);
+  auto config=options(mhgp8::WspdFrontMode::MidpointSamples,mhgp8::WspdQ4Backend::Local28);
+  config.local.max_depth=3;config.local.node_budget=85;config.local.leaf_sites=0;config.local.z_test_budget=32;
+  config.witness_mode=mhgp8::WspdQ34WitnessMode::RectanglePair;
+  config.q3_census_mode=mhgp8::WspdQ3CensusMode::GlobalBoxes;config.witness_bounds_mode=mhgp8::Q34WitnessBoundsMode::Affine;
+  for (const auto mode:{Mode::LiveOnly,Mode::Joined}) {
+    config.q4_seed_cells={mode,2};
+    for (const auto k:{1U,2U}) {
+      auto inactive=config;inactive.requested_lane_mask=4;
+      const auto result=mhgp8::run_wspd_q34_parallel(index,k,8,inactive,4,
+        [](std::size_t,const auto&) {throw std::runtime_error("inactive seed-cell callback");},1);
+      gate.require(logical_work(result.pipeline.work)==logical_work(mhgp8::WspdQ34Work{}) && result.workers.empty(),
+        "inactive seed-cell pipeline prepared hidden live/cache state");++gate.seed_cell_inactive_calls;
+    }
+    auto q3only=config;q3only.requested_lane_mask=2;Output q3;
+    const auto result=mhgp8::run_wspd_q34_candidates(index,5,8,q3only,[&](const auto& value) {q3.push_back(copy(value));});
+    normalize(q3);gate.require(q3==eligible(all,5,2) && result.work.q4_seed_cells==mhgp8::Q4SeedCellWork{},
+      "q3-only stream depends on q4 live atlas");++gate.seed_cell_inactive_calls;
+    bool caught=false;
+    try {static_cast<void>(mhgp8::run_wspd_q34_candidates(index,5,8,config,[](const auto&) {
+      throw std::logic_error("global seed-cell callback marker");}));}
+    catch (const std::logic_error& e) {caught=std::string_view(e.what())=="global seed-cell callback marker";}
+    gate.require(caught,"seed-cell global callback failure was swallowed");++gate.seed_cell_callback_failures;
+  }
+  for (unsigned invalid=0;invalid<3;++invalid) for (const auto k:{1U,5U}) for (bool parallel:{false,true}) {
+    auto bad=config;
+    if (invalid==0) bad.q4_seed_cells.mode=static_cast<Mode>(99);
+    else if (invalid==1) bad.q4_seed_cells.block_sites=0;
+    else bad.q4_backend=mhgp8::WspdQ4Backend::Window30;
+    bool caught=false;
+    try {
+      if (parallel) static_cast<void>(mhgp8::run_wspd_q34_parallel(index,k,8,bad,2,[](std::size_t,const auto&) {},1));
+      else static_cast<void>(mhgp8::run_wspd_q34_candidates(index,k,8,bad,[](const auto&) {}));
+    } catch (const std::invalid_argument&) {caught=true;}
+    gate.require(caught,"invalid or incompatible seed-cell options escaped active/inactive validation");++gate.seed_cell_invalid_inputs;
+  }
+  config.q4_seed_cells={Mode::Joined,2};
+  for (std::size_t before=0;before<4;++before) {
+    global_q34_allocation::state={true,before};bool caught=false;
+    try {static_cast<void>(mhgp8::run_wspd_q34_candidates(index,5,8,config,[](const auto&) {}));}
+    catch (const std::bad_alloc&) {caught=true;}
+    global_q34_allocation::state.armed=false;
+    gate.require(caught,"seed-cell pipeline allocation failure did not propagate");++gate.seed_cell_allocation_failures;
+  }
+  std::array<std::future<Output>,4> calls;
+  for (std::size_t i=0;i<calls.size();++i) calls[i]=std::async(std::launch::async,[index,config,i] {
+    auto opts=config;if (i%2) opts.q4_seed_cells.mode=Mode::LiveOnly;
+    Output out;static_cast<void>(mhgp8::run_wspd_q34_candidates(index,5,8,opts,[&](const auto& v) {out.push_back(copy(v));}));
+    normalize(out);return out;
+  });
+  for (auto& call:calls) {gate.require(call.get()==expected,"concurrent shared-index seed-cell output changed");++gate.seed_cell_shared_calls;}
+  bool caught=false;std::atomic<u64> completed_callbacks{0};
+  try {static_cast<void>(mhgp8::run_wspd_q34_parallel(index,5,8,config,4,[&](std::size_t,const auto&) {
+    completed_callbacks.fetch_add(1,std::memory_order_relaxed);throw std::logic_error("parallel seed-cell marker");},1));}
+  catch (const std::logic_error& e) {caught=std::string_view(e.what())=="parallel seed-cell marker";}
+  const auto after_join=completed_callbacks.load(std::memory_order_relaxed);
+  gate.require(caught && after_join>0,"parallel seed-cell failure did not propagate after callback");
+  ++gate.seed_cell_parallel_failures;
+  Output out;
+  static_cast<void>(mhgp8::run_wspd_q34_candidates(index,5,8,config,[&](const auto& v) {
+    out.push_back(copy(v));if (index) {index.reset();cloud.reset();++gate.seed_cell_owner_resets;}
+  }));
+  normalize(out);gate.require(out==expected && !index && !cloud && completed_callbacks.load(std::memory_order_relaxed)==after_join,
+    "seed-cell callback owner reset lost output or failed parallel call left live workers");
+}
 }
 
 int main(int argc,char** argv) {
@@ -782,6 +903,7 @@ int main(int argc,char** argv) {
     GlobalGate gate;
     global_fixtures(gate);global_lifecycle(gate);parallel_fixtures(gate);parallel_lifecycle(gate);indexed_fixtures(gate);
     bounds_mode_global_fixtures(gate);
+    seed_cell_global_fixtures(gate);
     gate.require(gate.q3>0 && gate.q4>0 && gate.max_shell>=30 && gate.fat_rectangles>0 &&
       gate.q3_front_rejections>0 && gate.q4_front_rejections>0 && gate.xi_tests>0 &&
       gate.q3_depth_rejections>0 && gate.q3_unread_sites>0 && gate.both_edges>0 &&
@@ -807,6 +929,9 @@ int main(int argc,char** argv) {
     EMIT(bounds_mode_calls);EMIT(bounds_exclusion_calls);EMIT(bounds_affine_calls);EMIT(bounds_work_checks);EMIT(bounds_parallel_calls);
     EMIT(bounds_invalid_inputs);EMIT(bounds_inactive_calls);EMIT(bounds_callback_failures);EMIT(bounds_allocation_failures);
     EMIT(bounds_shared_calls);EMIT(bounds_owner_resets);
+    EMIT(seed_cell_calls);EMIT(seed_cell_live_calls);EMIT(seed_cell_joined_calls);EMIT(seed_cell_work_checks);EMIT(seed_cell_parallel_calls);
+    EMIT(seed_cell_inactive_calls);EMIT(seed_cell_invalid_inputs);EMIT(seed_cell_callback_failures);EMIT(seed_cell_allocation_failures);
+    EMIT(seed_cell_shared_calls);EMIT(seed_cell_owner_resets);EMIT(seed_cell_parallel_failures);
 #undef EMIT
     std::cout<<"}\n";
     return 0;

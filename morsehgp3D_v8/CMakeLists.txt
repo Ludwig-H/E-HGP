@@ -98,7 +98,7 @@ if(BUILD_TESTING)
   foreach(gate IN ITEMS q2_node_pool q2_terminal_pool wspd_front_jobs wspd_q2_parallel
       wspd_front_dispatch wspd_q2_dynamic q2_census_resume q2_census_detach q2_census_parallel
       wspd_q2_cooperative wspd_q2_ranges wspd_q2_batched wspd_q2_proposals wspd_front_inheritance
-      q4_family exact_ball q34_seed q34_cover q34_family_pruning q34_collective q4_center_map q4_local q4_shallow q4_window wspd_q34 q34_witness_search q3_ball_census q34_pair_bounds)
+      q4_family exact_ball q34_seed q34_cover q34_family_pruning q34_collective q4_center_map q4_local q4_shallow q4_window wspd_q34 q34_witness_search q3_ball_census q34_pair_bounds q4_seed_cells)
     add_executable(mhgp8_${gate}_gate tests/${gate}_gate.cpp)
     target_include_directories(mhgp8_${gate}_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     target_include_directories(mhgp8_${gate}_gate SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})

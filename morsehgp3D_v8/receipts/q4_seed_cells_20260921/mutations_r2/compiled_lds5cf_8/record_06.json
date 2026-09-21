@@ -1,0 +1,17 @@
+{
+  "kind": "single_live_leaf_discarded_oracle",
+  "command": [
+    "/tmp/mhgp8_wspd_q34_mutants_l7gokryo/single_live_leaf_discarded",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-21T10:41:12.010560+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "q4 seed cells gate: seed-cell stream differs from independent rational support/depth/shell oracle\n",
+  "stdout_base64": "",
+  "stderr_base64": "cTQgc2VlZCBjZWxscyBnYXRlOiBzZWVkLWNlbGwgc3RyZWFtIGRpZmZlcnMgZnJvbSBpbmRlcGVuZGVudCByYXRpb25hbCBzdXBwb3J0L2RlcHRoL3NoZWxsIG9yYWNsZQo=",
+  "finished_utc": "2026-09-21T10:41:12.127446+00:00"
+}

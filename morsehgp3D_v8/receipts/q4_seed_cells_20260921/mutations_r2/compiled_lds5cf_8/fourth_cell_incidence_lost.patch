@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q4_local.cpp
++++ mutated/wspd_q34.cpp
+@@ -635,7 +635,7 @@
+             push({xnode.right,product.cell,false});push({xnode.left,product.cell,false});
+           } else {
+             counter_add(extra.cell_splits);
+-            for(std::size_t quadrant=4;quadrant!=0;--quadrant)
++            for(std::size_t quadrant=3;quadrant!=0;--quadrant)
+               push({product.x,cell.children+quadrant-1,product.spatial_test_paid});
+           }
+         }

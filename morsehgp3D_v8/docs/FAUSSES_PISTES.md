@@ -3,6 +3,30 @@
 13 septembre 2026. Mémoire courte de l'audit et de la première tranche P0.
 Les sources et contre-fixtures complètes sont dans les rapports liés.
 
+## Graines et cellules q4 — tranche34,21 septembre
+
+- Attribuer tout le gain au parcours de produits X×C serait trompeur.
+  Le simple test `leaf_cells==0`, suivi du résumé des branches utiles,
+  fait déjà baisser fortement les visites. Les trois variantes sont
+  comparées séparément ; Joined paie ses bornes quadratiques, réentrées
+  par bloc et initialisations de cache, même s'il prépare moins de familles.
+- Un cache borné par bloc n'est pas une borne sur le travail total.
+  À8k/K5/s8,11,899M entrées de cache sont initialisées pour414248familles
+  préparées : le pic de mémoire ne suffit pas à juger cette architecture.
+- Repartir de la racine de l'atlas depuis chaque incidence terminale
+  ferait repayer le parcours et pourrait dupliquer les émissions. Le
+  port appelle directement le balayage du fragment avec son compte exact.
+- La fixture de contact doit exercer le support **canonique dans sa
+  cellule propriétaire**. La première gate laissait survivre `min>=0`
+  bien qu'elle contienne des contacts : échanger les deux IDs de complétions
+  rend la perte causale. L'échec initial et sa correction sont conservés.
+- Une borne de registre peut être non saturée. Corrompre son compteur
+  de+1 ne garantit alors pas une erreur détectable ; l'invariant quatre
+  lectures par branche est vérifié explicitement. Ne pas effacer l'échec
+  de l'autotest initial ni le présenter comme un défaut géométrique.
+
+Voir [contrat et limites34](Q4_GRAINES_ET_CELLULES_20260921.md).
+
 ## Régimes LiDAR et raccord global — tranche31,21 septembre
 
 - Attendre une preuve de coût sous-quadratique sur toutes les entrées

@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q4_local.cpp
++++ mutated/wspd_q34.cpp
+@@ -649,7 +649,7 @@
+   void run(const Q34SeedConsumer& consumer) {
+     // O(1) atlas certificate, shared by BOTH non-Individual controls. It
+     // precedes any live-summary allocation and is not a product-join gain.
+-    if(result.atlas.leaf_cells==0) {
++    if(result.atlas.leaf_cells<=1) {
+       counter_add(extra.whole_atlas_skips);observe();return;
+     }
+     prepare_live();

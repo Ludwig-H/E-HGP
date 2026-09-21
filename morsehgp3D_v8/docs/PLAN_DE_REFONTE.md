@@ -6,6 +6,21 @@ maintenant implémentée et testée, pas la chaîne complète. Le
 les [mesures P0](../receipts/p0_local_credits_20260913/README.md) sont propres à la v8.
 L'ordre demandé reste mono-thread, multi-CPU local, puis GPU G4 SPOT.
 
+État du21 septembre après34 : le [raccord graines/cellules q4](Q4_GRAINES_ET_CELLULES_20260921.md)
+réduit fortement la navigation sur les trois scans mesurés. Le contrôle
+LiveOnly fournit l'essentiel du gain ; ne pas prolonger les variantes de
+cache Joined pour quelques pourcents sans hypothèse de réduction du coût.
+Les [mesures34](../receipts/q4_seed_cells_20260921/ANALYSE_CROISSANCE.md)
+incluent réellement8k/16k/32k, K5/10 et s8/10/12 dans leurs périmètres.
+Atlas et census q3 dominent maintenant : à32k/K10,3,082Md tests de
+partition et2,127Md bornes de comptage q3, avant le reste de la chaîne.
+Scan200 conserve censusq3×4,317 et bornes d'atlas×4,355 au premier doublement.
+Priorité suivante : centres conditionnels préparés par bloc de graines q3
+(proposition A `f45e27c0`), comparaison au F direct et état compte/curseur
+cohérent ; puis réduction de la construction d'atlas. Conserver des parents
+immuables possédés pour les futures tâches de graines/paires redistribuables,
+sans recopier les préparations. Aucun contrat FULL/G4 n'est acquis.
+
 Réorientation explicite du21 septembre : les limites quadratiques restent
 publiées, mais ne bloquent plus le raccord et les essais sur les régimes
 visés. Priorité aux scans SemanticKITTI8k/16k/32k/50k et au coût complet

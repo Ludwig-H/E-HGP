@@ -61,6 +61,10 @@ class Q4LocalGeometry final {
   [[nodiscard]] Q4LocalForm form(std::size_t original_id) const;
   // Bounds of scale*L on the CLOSED cell, regardless of emission ownership.
   [[nodiscard]] Q4LocalBounds bounds(Q4LocalForm form, Q4LocalCell cell) const;
+  // Bounds of scale*L on INDEX-node-box x CLOSED cell. Validates the node
+  // ID and cell before use. The minimum is rounded down from its continuous
+  // quadratic relaxation; it is not the exact discrete-site minimum.
+  [[nodiscard]] Q4LocalBounds node_bounds(std::size_t node_id, Q4LocalCell cell) const;
   [[nodiscard]] bool outside(Q4LocalCell cell, Q4LocalGeometryQueryWork& work) const;
   [[nodiscard]] const Q4LocalGeometryWork& work() const noexcept { return work_; }
   // Own dynamic capacities only, excluding fixed objects/shared ownership.
@@ -73,7 +77,7 @@ class Q4LocalGeometry final {
   explicit Q4LocalGeometry(Q34EdgeCoverPtr cover, Q4CenterDomainMode mode);
   void decompose_cover();
   void prepare_hull(const Box3& box);
-  [[nodiscard]] Q4LocalBounds node_bounds(std::size_t node_id, Q4LocalCell cell) const;
+  [[nodiscard]] Q4LocalBounds node_bounds_unchecked(std::size_t node_id, Q4LocalCell cell) const;
 
   Q34EdgeCoverPtr cover_;
   Q4PositiveDomainPtr domain_;

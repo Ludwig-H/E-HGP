@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q4_local.cpp
++++ mutated/wspd_q34.cpp
+@@ -612,7 +612,7 @@
+         }
+         // Cell geometry is CLOSED. Even an isolated contact/corner or an
+         // entire coincident seed line must reach the existing owner-aware sweep.
+-        if(bound.minimum>0) {counter_add(extra.positive_products);continue;}
++        if(bound.minimum>=0) {counter_add(extra.positive_products);continue;}
+         if(bound.maximum<0) {counter_add(extra.negative_products);continue;}
+         counter_add(extra.uncertain_products);
+         if(bound.minimum==0 || bound.maximum==0) counter_add(extra.zero_bound_products);

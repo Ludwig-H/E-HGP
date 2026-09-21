@@ -1,0 +1,29 @@
+{
+  "kind": "single_live_leaf_discarded_compile",
+  "command": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "-std=c++20",
+    "-O3",
+    "-DNDEBUG",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-I/workspaces/E-HGP/morsehgp3D_v8/src",
+    "-I/workspaces/E-HGP/morsehgp3D_v8/src/lanes",
+    "-c",
+    "/tmp/mhgp8_wspd_q34_mutants_l7gokryo/single_live_leaf_discarded.cpp",
+    "-o",
+    "/tmp/mhgp8_wspd_q34_mutants_l7gokryo/single_live_leaf_discarded.o"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-21T10:41:09.153084+00:00",
+  "expected_exit_code": 0,
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "stdout_base64": "",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-21T10:41:11.933068+00:00"
+}

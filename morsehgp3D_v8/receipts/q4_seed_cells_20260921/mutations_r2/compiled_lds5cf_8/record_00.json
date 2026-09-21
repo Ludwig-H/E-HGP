@@ -1,0 +1,17 @@
+{
+  "kind": "baseline",
+  "command": [
+    "/workspaces/E-HGP/build/v8_q4_seed_cells_r2_20260921/mhgp8_q4_seed_cells_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-21T10:41:05.974010+00:00",
+  "expected_exit_code": 0,
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"schema\":\"mhgp8_q4_seed_cells_gate_v1\",\"status\":\"PASS\",\"checks\":5943,\"bounds_queries\":450,\"bounds_corners\":1800,\"bounds_site_checks\":4536,\"bounds_rounding\":30,\"bounds_wide\":63,\"bounds_contacts\":98,\"interior_minimum_cases\":1,\"axis_permutations\":1,\"extreme_cases\":1,\"edge_calls\":129,\"reference_calls\":43,\"oracle_completions\":1452,\"oracle_sites\":3071,\"candidates\":147,\"q4\":147,\"max_shell\":30,\"individual_calls\":43,\"live_calls\":43,\"product_calls\":43,\"work_checks\":82,\"cache_hits\":389,\"all_dead_cases\":4,\"dead_branch_cases\":2,\"live_skips\":3461,\"positive_rejections\":649,\"negative_rejections\":26,\"seed_splits\":1523,\"cell_splits\":966,\"terminal_pairs\":502,\"family_builds\":113,\"max_stack\":14,\"cached_fixture\":1,\"obtuse_completions\":1,\"q4_without_q3\":15,\"inactive_calls\":4,\"exhaustive_edges\":6,\"permutations\":2,\"invalid_inputs\":21,\"allocation_failures\":4,\"late_allocation_failures\":2,\"callback_failures\":1,\"parallel_calls\":4,\"owner_resets\":1}\n",
+  "stderr": "",
+  "stdout_base64": "eyJzY2hlbWEiOiJtaGdwOF9xNF9zZWVkX2NlbGxzX2dhdGVfdjEiLCJzdGF0dXMiOiJQQVNTIiwiY2hlY2tzIjo1OTQzLCJib3VuZHNfcXVlcmllcyI6NDUwLCJib3VuZHNfY29ybmVycyI6MTgwMCwiYm91bmRzX3NpdGVfY2hlY2tzIjo0NTM2LCJib3VuZHNfcm91bmRpbmciOjMwLCJib3VuZHNfd2lkZSI6NjMsImJvdW5kc19jb250YWN0cyI6OTgsImludGVyaW9yX21pbmltdW1fY2FzZXMiOjEsImF4aXNfcGVybXV0YXRpb25zIjoxLCJleHRyZW1lX2Nhc2VzIjoxLCJlZGdlX2NhbGxzIjoxMjksInJlZmVyZW5jZV9jYWxscyI6NDMsIm9yYWNsZV9jb21wbGV0aW9ucyI6MTQ1Miwib3JhY2xlX3NpdGVzIjozMDcxLCJjYW5kaWRhdGVzIjoxNDcsInE0IjoxNDcsIm1heF9zaGVsbCI6MzAsImluZGl2aWR1YWxfY2FsbHMiOjQzLCJsaXZlX2NhbGxzIjo0MywicHJvZHVjdF9jYWxscyI6NDMsIndvcmtfY2hlY2tzIjo4MiwiY2FjaGVfaGl0cyI6Mzg5LCJhbGxfZGVhZF9jYXNlcyI6NCwiZGVhZF9icmFuY2hfY2FzZXMiOjIsImxpdmVfc2tpcHMiOjM0NjEsInBvc2l0aXZlX3JlamVjdGlvbnMiOjY0OSwibmVnYXRpdmVfcmVqZWN0aW9ucyI6MjYsInNlZWRfc3BsaXRzIjoxNTIzLCJjZWxsX3NwbGl0cyI6OTY2LCJ0ZXJtaW5hbF9wYWlycyI6NTAyLCJmYW1pbHlfYnVpbGRzIjoxMTMsIm1heF9zdGFjayI6MTQsImNhY2hlZF9maXh0dXJlIjoxLCJvYnR1c2VfY29tcGxldGlvbnMiOjEsInE0X3dpdGhvdXRfcTMiOjE1LCJpbmFjdGl2ZV9jYWxscyI6NCwiZXhoYXVzdGl2ZV9lZGdlcyI6NiwicGVybXV0YXRpb25zIjoyLCJpbnZhbGlkX2lucHV0cyI6MjEsImFsbG9jYXRpb25fZmFpbHVyZXMiOjQsImxhdGVfYWxsb2NhdGlvbl9mYWlsdXJlcyI6MiwiY2FsbGJhY2tfZmFpbHVyZXMiOjEsInBhcmFsbGVsX2NhbGxzIjo0LCJvd25lcl9yZXNldHMiOjF9Cg==",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-21T10:41:06.088005+00:00"
+}

@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — bornes affines et recherche de témoins q3/q4
+# Morse HGP 3D v8 — graines et cellules q4
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -37,6 +37,32 @@ ses propres sources, tests et reçus, sans transfert implicite.
 
 ## État exécutable
 
+Tranche34,21 septembre : les [parcours graines/cellules q4](docs/Q4_GRAINES_ET_CELLULES_20260921.md)
+ajoutent deux options à Local28. LiveOnly élimine immédiatement les atlas
+sans feuille utile, puis saute leurs branches mortes ; Joined traite les
+produits de blocs de graines et de cellules, avec cache borné et balayage
+direct des feuilles. Individual et tous les défauts restent inchangés.
+Qualification corrigée close :96 CTests Release, quatre portes et24sondes
+ASan/UBSan/LSan, trois mutants géométriques détectés, lecteurs normal/−O
+et145corruptions contrôlées. L'[historique de préflight](receipts/q4_seed_cells_20260921/preflight/BUILD_INTEGRATION.md)
+conserve les échecs R1 ; les quatre builds R1/R2 restent épinglés.
+
+Les30 grandes observations34 couvrent les trois tailles. Surscan0/K5/s8,
+LiveOnly ramène les visites d'atlas à5,921/15,912/38,846M, soit×2,687/×2,441,
+contre24,982/100,372/562,408M auparavant. Les mêmes sorties sont conservées.
+Joined prépare moins de familles mais ajoute bornes et initialisations de
+cache : aucun gain supplémentaire stable établi. Voir les [reçus34](receipts/q4_seed_cells_20260921/README.md).
+La construction garde des ratios>4, notamment×4,355 surscan2008→16k ;
+le census q3 de ce scan conserve×4,317. Toute la chaîne n'est donc pas
+sous-quadratique dans tous les régimes testés.
+Atlas, balayages, tris et coquilles sont toujours payés. L'arête demeure
+atomique dans l'équipe CPU ; le découpage en tâches fines n'est pas encore
+raccordé. q3 est inchangé ; les centres conditionnels proposés par A
+préparent le prochain chantier de census commun à des blocs de graines.
+FULL, GPU, contrat50k et massif restent ouverts ; GCP non utilisé dans34.
+
+### Historique33
+
 Tranche33,21 septembre : les [bornes affines et exclusions de blocs](docs/Q34_BORNES_AFFINES_ET_EXCLUSION_20260921.md)
 complètent la recherche32. Pour une paire fixe, la géométrie du citron
 est préparée une fois ; les blocs sans témoin utile sont exclus avant
@@ -59,7 +85,7 @@ La suite structurelle est discutée avec les auditeurs : transmettre des
 préfixes de témoins intégralement classifiés entre produits, puis traiter
 les [blocs de graines q4 et cellules de l'atlas](docs/Q4_BLOCS_SEEDS_PISTE_20260921.md)
 ensemble, avec parent immuable partagé et tâches compactes. Ces deux
-propositions ne sont pas encore implémentées. Une question distincte aux
+propositions n'étaient pas encore implémentées dans33. Une question distincte aux
 auditeurs vise le census commun de blocs de graines q3, pour le scan200.
 Ni FULL, ni GPU, ni contrat
 50k ne découlent des tests du flux de candidats. GCP non utilisé dans33.

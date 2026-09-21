@@ -1,4 +1,4 @@
-# Passation v8 — bornes affines et réduction du travail q3/q4
+# Passation v8 — parcours graines/cellules q4
 
 21 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
@@ -10,6 +10,42 @@ d'audit indépendant. Ses anciens résultats de constructeur et ses nouveaux
 audits ne qualifient jamais automatiquement les nouveaux ports.
 
 ## À reprendre maintenant
+
+La [tranche34](docs/Q4_GRAINES_ET_CELLULES_20260921.md) porte les modes
+Local28 LiveOnly et Joined, sans changement de défaut. Résumé immuable
+des feuilles vivantes, court-circuit des atlas sans feuille avant résumé,
+cache paresseux par bloc disjoint et balayage direct des incidences.
+Les37 nouveaux compteurs séparent préparation, cache et navigation.
+Ne pas attribuer au parcours conjoint le gain du simple test d'atlas mort.
+Qualification corrigée close :96CTest Release, quatre portes/24sondes
+instrumentées avec détection explicite des fuites, trois mutants causaux,
+lectures normal/−O et145corruptions détectées. Conserver les échecs et
+captures R1 des [reçus34](receipts/q4_seed_cells_20260921/README.md).
+Les builds `build/v8_q4_seed_cells_20260921` et
+`build/v8_q4_seed_cells_sanitize_20260921` sont épinglés. R2 reconstruit
+séparément après renforcement de la seule fixture de contact et du lecteur.
+Les builds `build/v8_q4_seed_cells_r2_20260921` et
+`build/v8_q4_seed_cells_sanitize_r2_20260921` sont aussi épinglés.
+La sonde Release R1/R2 est bit-identique ; les binaires SAN ont des hashes
+différents, sans prétendre une identité binaire. Huit paires d'anciennes
+CLI33/34R1 préservent les records complets, avec +256octets/WorkerState.
+
+Trente grandes observations34 closes :6R1+24R2. Surscan0/K5/s8,
+visites d'atlas LiveOnly×2,687/×2,441 au lieu de×4,018/×5,603. Les autres
+scans etK10 confirment la baisse de ce poste, pas un gain de temps stable.
+Joined demeure expérimental : moins de familles mais bornes plus coûteuses
+et jusqu'à57,242M initialisations de cache à32k/K5. L'aval est inchangé.
+Bornes d'atlas scan0K5×4,112 et scan200×4,355, censusq3 scan200×4,317 :
+ce sont les priorités restantes, pas une clôture P0 globale.
+
+Pas d'autre micro-variante q2. Après mesure des trois tailles q4,
+prioriser q3 : la boîte de centres conditionnelle proposée par A évite
+de refaire un intervalle cubique par X×Z ; bornes λ et comparateur de
+fractions sans dépassement i128 à qualifier. Aucun crédit sans prefixe
+entièrement classifié ; compte/curseur transmis ensemble, ou census zéro.
+La préparation d'atlas et les tâches fines dans une arête restent ouvertes.
+
+### Historique33
 
 La [tranche33](docs/Q34_BORNES_AFFINES_ET_EXCLUSION_20260921.md) porte
 le rejet Xi négatif proposé par B et la préparation affine des paires.

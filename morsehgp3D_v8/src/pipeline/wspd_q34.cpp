@@ -228,9 +228,26 @@ void merge(Q3BallCensusWork& a, const Q3BallCensusWork& b) {
   MHGP8_MAX(peak_count_stack); MHGP8_MAX(peak_shell_stack); MHGP8_MAX(stack_storage_bytes);
 }
 
+void merge(Q4SeedCellWork& a, const Q4SeedCellWork& b) {
+  static_assert(sizeof(Q4SeedCellWork) == 37 * sizeof(u64));
+  MHGP8_ADD(queries); MHGP8_ADD(live_preparations); MHGP8_ADD(live_node_visits);
+  MHGP8_ADD(live_child_reads); MHGP8_ADD(live_leaves); MHGP8_ADD(whole_atlas_skips);
+  MHGP8_ADD(live_skipped_nodes); MHGP8_ADD(antichain_node_visits); MHGP8_ADD(antichain_splits);
+  MHGP8_ADD(blocks); MHGP8_ADD(block_sites); MHGP8_ADD(cache_entries_initialized);
+  MHGP8_ADD(cache_hits); MHGP8_ADD(cache_misses); MHGP8_ADD(invalid_cache_hits);
+  MHGP8_ADD(family_preparations); MHGP8_ADD(family_cache_hits); MHGP8_ADD(form_preparations);
+  MHGP8_ADD(product_visits); MHGP8_ADD(product_seed_rejections); MHGP8_ADD(positive_products);
+  MHGP8_ADD(negative_products); MHGP8_ADD(uncertain_products); MHGP8_ADD(zero_bound_products);
+  MHGP8_ADD(block_bound_tests); MHGP8_ADD(singleton_bound_tests); MHGP8_ADD(spatial_tests_reused);
+  MHGP8_ADD(x_splits); MHGP8_ADD(cell_splits); MHGP8_ADD(terminal_pairs);
+  MHGP8_MAX(max_block_sites); MHGP8_MAX(peak_cache_bytes); MHGP8_MAX(peak_live_bytes);
+  MHGP8_MAX(peak_product_stack); MHGP8_MAX(product_stack_bytes);
+  MHGP8_MAX(peak_auxiliary_bytes); MHGP8_MAX(peak_total_buffer_bytes);
+}
+
 void merge(WspdQ34Work& a, const WspdQ34Work& b) {
   static_assert(sizeof(WspdQ34Work) == 13 * sizeof(u64) + sizeof(Q34EdgeCoverWork) +
-      sizeof(WspdQ3Work) + sizeof(Q4LocalEdgeWork) + sizeof(Q4WindowEdgeWork) + sizeof(WspdQ34WitnessWork) + sizeof(Q3BallCensusWork));
+      sizeof(WspdQ3Work) + sizeof(Q4LocalEdgeWork) + sizeof(Q4WindowEdgeWork) + sizeof(WspdQ34WitnessWork) + sizeof(Q3BallCensusWork) + sizeof(Q4SeedCellWork));
   MHGP8_ADD(input_rectangles); MHGP8_ADD(expanded_pairs); MHGP8_ADD(q3_edges);
   MHGP8_ADD(q4_edges); MHGP8_ADD(both_edges); MHGP8_ADD(cover_builds);
   MHGP8_ADD(cover_sites); MHGP8_MAX(max_cover_sites); MHGP8_MAX(peak_cover_bytes);
@@ -240,6 +257,7 @@ void merge(WspdQ34Work& a, const WspdQ34Work& b) {
   merge(a.local, b.local); merge(a.window, b.window);
   merge(a.witness, b.witness);
   merge(a.q3_blocks, b.q3_blocks);
+  merge(a.q4_seed_cells, b.q4_seed_cells);
 }
 
 #undef MHGP8_ADD
@@ -289,6 +307,13 @@ void validate(Q2CensusIndexPtr index, unsigned k, unsigned s,
        options.local.domain != Q4CenterDomainMode::Positive) ||
       options.local.max_depth > 44 || options.local.node_budget == 0)
     throw std::invalid_argument("mhgp8 global q34 requires valid local options");
+  if ((options.q4_seed_cells.mode != Q4SeedCellMode::Individual &&
+       options.q4_seed_cells.mode != Q4SeedCellMode::LiveOnly &&
+       options.q4_seed_cells.mode != Q4SeedCellMode::Joined) ||
+      options.q4_seed_cells.block_sites == 0 ||
+      (options.q4_backend == WspdQ4Backend::Window30 &&
+       options.q4_seed_cells.mode != Q4SeedCellMode::Individual))
+    throw std::invalid_argument("mhgp8 invalid or incompatible q4 seed-cell options");
 }
 
 WspdQ34Result empty_result(const Q2CensusIndexPtr& index, unsigned kmax,
@@ -431,7 +456,8 @@ class Engine {
     }
     if (q4) {
       if (options_.q4_backend == WspdQ4Backend::Local28) {
-        const auto local = run_q4_local_edge_candidates(cover, k_, options_.local, sink_);
+        const auto local = run_q4_local_edge_candidates(cover, k_, options_.local, sink_,
+            options_.q4_seed_cells, work.q4_seed_cells);
         merge(work.local, local);
         observe(cover, local.peak_live_buffer_bytes);
       } else {
