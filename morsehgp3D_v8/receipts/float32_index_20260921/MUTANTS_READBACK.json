@@ -1,0 +1,23 @@
+{
+  "schema": "mhgp8_float32_index_mutations_readback_v1",
+  "status": "passed",
+  "normal_optimized_identical": true,
+  "reads": [
+    {
+      "cmd": "python -B morsehgp3D_v8/tests/float32_index_mutation_gate.py read --path morsehgp3D_v8/receipts/float32_index_20260921/mutants --check-live",
+      "chunk_id": "33c3bb",
+      "wall_time_seconds": 0.754457606,
+      "exit_code": 0,
+      "original_token_count": 148,
+      "output": "{\"check_live\": true, \"commands\": 25, \"completion_sha256\": \"572fcb3e9a2e15a60d30998464bbe5835df292caa2a94aae58936dbbdf1b8cd0\", \"killed\": [\"signed_zero\", \"open_box\", \"internal_escape\"], \"manifest_sha256\": \"6278a326b68a6cde6568ed73b010dee17e5080b15ebdcf8f16c53abe245b2597\", \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/mutants\", \"reader_sha256\": \"8236bb8b12c2f30064e8f9a7eb75573aa1a051329ad334caed16c16f1625910f\", \"schema\": \"mhgp8_float32_index_compiled_mutations_v1\", \"scope\": \"three_causal_mutations_one_native_index_selftest_not_FULL_or_GPU\", \"status\": \"passed\"}\n"
+    },
+    {
+      "cmd": "python -B -O morsehgp3D_v8/tests/float32_index_mutation_gate.py read --path morsehgp3D_v8/receipts/float32_index_20260921/mutants --check-live",
+      "chunk_id": "35d585",
+      "wall_time_seconds": 0.755802927,
+      "exit_code": 0,
+      "original_token_count": 148,
+      "output": "{\"check_live\": true, \"commands\": 25, \"completion_sha256\": \"572fcb3e9a2e15a60d30998464bbe5835df292caa2a94aae58936dbbdf1b8cd0\", \"killed\": [\"signed_zero\", \"open_box\", \"internal_escape\"], \"manifest_sha256\": \"6278a326b68a6cde6568ed73b010dee17e5080b15ebdcf8f16c53abe245b2597\", \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/mutants\", \"reader_sha256\": \"8236bb8b12c2f30064e8f9a7eb75573aa1a051329ad334caed16c16f1625910f\", \"schema\": \"mhgp8_float32_index_compiled_mutations_v1\", \"scope\": \"three_causal_mutations_one_native_index_selftest_not_FULL_or_GPU\", \"status\": \"passed\"}\n"
+    }
+  ]
+}

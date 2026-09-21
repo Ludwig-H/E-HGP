@@ -1,0 +1,23 @@
+{
+  "case": "baseline",
+  "command": [
+    "/workspaces/E-HGP/build/v8_float32_index_mutants_20260921/baseline/probe",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/mutants",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/bin:/usr/bin",
+    "TZ": "UTC"
+  },
+  "exit_code": 0,
+  "finished_utc": "2026-09-21T15:45:38.321817+00:00",
+  "label": "baseline_selftest",
+  "phase": "selftest",
+  "started_utc": "2026-09-21T15:45:38.316407+00:00",
+  "stderr": "",
+  "stderr_base64": "",
+  "stdout": "{\"schema\":\"mhgp8_float32_index_selftest_v1\",\"status\":\"passed\",\"tests\":151,\"invalid_inputs\":67,\"rounding_modes\":4,\"flush_modes\":4,\"concurrent_workers\":4,\"concurrent_queries\":64}\n",
+  "stdout_base64": "eyJzY2hlbWEiOiJtaGdwOF9mbG9hdDMyX2luZGV4X3NlbGZ0ZXN0X3YxIiwic3RhdHVzIjoicGFzc2VkIiwidGVzdHMiOjE1MSwiaW52YWxpZF9pbnB1dHMiOjY3LCJyb3VuZGluZ19tb2RlcyI6NCwiZmx1c2hfbW9kZXMiOjQsImNvbmN1cnJlbnRfd29ya2VycyI6NCwiY29uY3VycmVudF9xdWVyaWVzIjo2NH0K"
+}

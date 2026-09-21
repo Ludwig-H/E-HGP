@@ -1,0 +1,11 @@
+--- src/spatial/float32_index.cpp
++++ internal_escape/src/spatial/float32_index.cpp
+@@ -147,7 +147,7 @@
+   const auto right = build(order, scratch, middle, last, depth + 1);
+   nodes_[current].left = left;
+   nodes_[current].right = right;
+-  nodes_[current].escape = nodes_.size();
++  nodes_[current].escape = nodes_.size() - 1;
+   return current;
+ }
+ 

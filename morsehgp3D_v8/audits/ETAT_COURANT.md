@@ -24,6 +24,16 @@ Les mesures et reçus historiques 50k sont conservés sans réinterprétation.
 
 ## Diagnostic spatial et état constructeur
 
+Index natif float32 clos :27 fixtures/1125sites/404requêtes rationnelles,
+35refus,151contrôles natifs, Release/Clang ASan/UBSan, relectures normal/−O.
+Construction O(n log n) démontrée par trois tris et partitions stables ;
+stockage O(n), profondeur au plus ceil(log2 n). Les54constructions mesurées
+confirment une croissance sous le seuil quadratique pour cette préparation,
+pas pour le générateur. Trames0/100/200 :126,906/129,596/95,983ms locaux,
+19,25 à19,58Mo conservés. Voir [note et suite q3/q4](../docs/INDEX_FLOAT32_ET_SUITE_Q34_20260921.md)
+et [preuves](../receipts/float32_index_20260921/README.md). Aucun nouveau
+WSPD/FULL/GPU ; lectures concurrentes fonctionnelles, pas construction parallèle.
+
 Entrée float32/grille1mm close localement :15tests du préparateur,
 3923requêtes q2 contre Fraction et49contrôles natifs passent en Release
 et Clang ASan/UBSan. Six préparations entières,42nuages, lecteurs normal/−O

@@ -1,0 +1,491 @@
+{
+  "config": {
+    "build": "/workspaces/E-HGP/build/v8_float32_index_r2_20260921",
+    "compiler": "/usr/bin/g++",
+    "prepared": [
+      "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32",
+      "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_01_000100_float32",
+      "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_02_000200_float32"
+    ],
+    "python": "/home/codespace/.python/current/bin/python",
+    "sanitize": false
+  },
+  "environment": {
+    "ASAN_OPTIONS": null,
+    "UBSAN_OPTIONS": null
+  },
+  "gcp_used": false,
+  "git_commit": "367244383804d220d743c0d00354bf1090ac9a17",
+  "launch": [
+    "/home/codespace/.python/current/bin/python",
+    "morsehgp3D_v8/bench/run_float32_index_checks.py",
+    "run",
+    "--build",
+    "build/v8_float32_index_r2_20260921",
+    "--compiler",
+    "/usr/bin/g++",
+    "--output",
+    "morsehgp3D_v8/receipts/float32_index_20260921/release_r2",
+    "--prepared",
+    "morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32",
+    "morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_01_000100_float32",
+    "morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_02_000200_float32"
+  ],
+  "plan": [
+    [
+      "compiler",
+      [
+        "/usr/bin/g++",
+        "--version"
+      ]
+    ],
+    [
+      "compile_core",
+      [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/src",
+        "-O3",
+        "-DNDEBUG",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/src/spatial/float32_index.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/core.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/core.o"
+      ]
+    ],
+    [
+      "compile_test",
+      [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/src",
+        "-O3",
+        "-DNDEBUG",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_index_probe.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/test.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/test.o"
+      ]
+    ],
+    [
+      "compile_bench",
+      [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/src",
+        "-O3",
+        "-DNDEBUG",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/float32_index_probe.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/bench.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/bench.o"
+      ]
+    ],
+    [
+      "link_test",
+      [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/src",
+        "-O3",
+        "-DNDEBUG",
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/core.o",
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/test.o",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/mhgp8_float32_index_test"
+      ]
+    ],
+    [
+      "link_bench",
+      [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/src",
+        "-O3",
+        "-DNDEBUG",
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/core.o",
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/bench.o",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/mhgp8_float32_index_bench"
+      ]
+    ],
+    [
+      "gate_normal",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_index_gate.py",
+        "--binary",
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/mhgp8_float32_index_test",
+        "--output",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/release_r2/index_d_t8ag95/gate_normal"
+      ]
+    ],
+    [
+      "gate_optimized",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_index_gate.py",
+        "--binary",
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/mhgp8_float32_index_test",
+        "--output",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/release_r2/index_d_t8ag95/gate_optimized"
+      ]
+    ],
+    [
+      "synthetic_uniform_8000",
+      [
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/mhgp8_float32_index_bench",
+        "--synthetic",
+        "uniform",
+        "--n",
+        "8000",
+        "--repeat",
+        "3"
+      ]
+    ],
+    [
+      "synthetic_uniform_16000",
+      [
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/mhgp8_float32_index_bench",
+        "--synthetic",
+        "uniform",
+        "--n",
+        "16000",
+        "--repeat",
+        "3"
+      ]
+    ],
+    [
+      "synthetic_uniform_32000",
+      [
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/mhgp8_float32_index_bench",
+        "--synthetic",
+        "uniform",
+        "--n",
+        "32000",
+        "--repeat",
+        "3"
+      ]
+    ],
+    [
+      "synthetic_terrain_8000",
+      [
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/mhgp8_float32_index_bench",
+        "--synthetic",
+        "terrain",
+        "--n",
+        "8000",
+        "--repeat",
+        "3"
+      ]
+    ],
+    [
+      "synthetic_terrain_16000",
+      [
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/mhgp8_float32_index_bench",
+        "--synthetic",
+        "terrain",
+        "--n",
+        "16000",
+        "--repeat",
+        "3"
+      ]
+    ],
+    [
+      "synthetic_terrain_32000",
+      [
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/mhgp8_float32_index_bench",
+        "--synthetic",
+        "terrain",
+        "--n",
+        "32000",
+        "--repeat",
+        "3"
+      ]
+    ],
+    [
+      "synthetic_clusters_8000",
+      [
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/mhgp8_float32_index_bench",
+        "--synthetic",
+        "clusters",
+        "--n",
+        "8000",
+        "--repeat",
+        "3"
+      ]
+    ],
+    [
+      "synthetic_clusters_16000",
+      [
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/mhgp8_float32_index_bench",
+        "--synthetic",
+        "clusters",
+        "--n",
+        "16000",
+        "--repeat",
+        "3"
+      ]
+    ],
+    [
+      "synthetic_clusters_32000",
+      [
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/mhgp8_float32_index_bench",
+        "--synthetic",
+        "clusters",
+        "--n",
+        "32000",
+        "--repeat",
+        "3"
+      ]
+    ],
+    [
+      "scene_0_full",
+      [
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/mhgp8_float32_index_bench",
+        "--input",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/full.f32le",
+        "--repeat",
+        "3"
+      ]
+    ],
+    [
+      "scene_0_half_x_neg",
+      [
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/mhgp8_float32_index_bench",
+        "--input",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/half_x_neg.f32le",
+        "--repeat",
+        "3"
+      ]
+    ],
+    [
+      "scene_0_half_x_nonneg",
+      [
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/mhgp8_float32_index_bench",
+        "--input",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/half_x_nonneg.f32le",
+        "--repeat",
+        "3"
+      ]
+    ],
+    [
+      "scene_0_quarter_x_neg_y_neg",
+      [
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/mhgp8_float32_index_bench",
+        "--input",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/quarter_x_neg_y_neg.f32le",
+        "--repeat",
+        "3"
+      ]
+    ],
+    [
+      "scene_0_quarter_x_neg_y_nonneg",
+      [
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/mhgp8_float32_index_bench",
+        "--input",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/quarter_x_neg_y_nonneg.f32le",
+        "--repeat",
+        "3"
+      ]
+    ],
+    [
+      "scene_0_quarter_x_nonneg_y_neg",
+      [
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/mhgp8_float32_index_bench",
+        "--input",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/quarter_x_nonneg_y_neg.f32le",
+        "--repeat",
+        "3"
+      ]
+    ],
+    [
+      "scene_0_quarter_x_nonneg_y_nonneg",
+      [
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/mhgp8_float32_index_bench",
+        "--input",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/quarter_x_nonneg_y_nonneg.f32le",
+        "--repeat",
+        "3"
+      ]
+    ],
+    [
+      "scene_1_full",
+      [
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/mhgp8_float32_index_bench",
+        "--input",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_01_000100_float32/full.f32le",
+        "--repeat",
+        "3"
+      ]
+    ],
+    [
+      "scene_2_full",
+      [
+        "/workspaces/E-HGP/build/v8_float32_index_r2_20260921/mhgp8_float32_index_bench",
+        "--input",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_02_000200_float32/full.f32le",
+        "--repeat",
+        "3"
+      ]
+    ]
+  ],
+  "public_status": "not_claimed",
+  "scenes": [
+    {
+      "input": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/full.f32le",
+      "label": "scene_0_full",
+      "n": 123389,
+      "piece": "full",
+      "prepared": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32",
+      "sha256": "412b9d40c899419dec8f2d126a4d03737aa3538dc5fe3ad0ec7770bf9f1568eb"
+    },
+    {
+      "input": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/half_x_neg.f32le",
+      "label": "scene_0_half_x_neg",
+      "n": 61045,
+      "piece": "half_x_neg",
+      "prepared": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32",
+      "sha256": "b3ca3e1eaa0a86ca3c408920b7bf4e18f0f5378fbc4bbbb4d9327e020627c2e9"
+    },
+    {
+      "input": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/half_x_nonneg.f32le",
+      "label": "scene_0_half_x_nonneg",
+      "n": 62344,
+      "piece": "half_x_nonneg",
+      "prepared": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32",
+      "sha256": "4dc8c29b3e79d1e3852861e472e5c6ad244165fe7823c99b60f0d3fa2c2a8b23"
+    },
+    {
+      "input": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/quarter_x_neg_y_neg.f32le",
+      "label": "scene_0_quarter_x_neg_y_neg",
+      "n": 30265,
+      "piece": "quarter_x_neg_y_neg",
+      "prepared": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32",
+      "sha256": "4f5cad1aef78570a6551e86f3db241fd8283f57de4773242398c3c8d33bca206"
+    },
+    {
+      "input": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/quarter_x_neg_y_nonneg.f32le",
+      "label": "scene_0_quarter_x_neg_y_nonneg",
+      "n": 30780,
+      "piece": "quarter_x_neg_y_nonneg",
+      "prepared": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32",
+      "sha256": "1eaada6d463c377708e6e679955a4508ea3fa1d73903f3e7513f138e956f39d9"
+    },
+    {
+      "input": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/quarter_x_nonneg_y_neg.f32le",
+      "label": "scene_0_quarter_x_nonneg_y_neg",
+      "n": 31391,
+      "piece": "quarter_x_nonneg_y_neg",
+      "prepared": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32",
+      "sha256": "8fba3d73b0b2be16d6e899af0912dfa8006b50c261fbb7d3fdd0d76c8a0adb4d"
+    },
+    {
+      "input": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/quarter_x_nonneg_y_nonneg.f32le",
+      "label": "scene_0_quarter_x_nonneg_y_nonneg",
+      "n": 30953,
+      "piece": "quarter_x_nonneg_y_nonneg",
+      "prepared": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32",
+      "sha256": "52141515436df0cb8999e1a68d6e0d76c679b8cc03b2d36c3e7f0b6a64035758"
+    },
+    {
+      "input": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_01_000100_float32/full.f32le",
+      "label": "scene_1_full",
+      "n": 124479,
+      "piece": "full",
+      "prepared": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_01_000100_float32",
+      "sha256": "ce8305158b97f77932abe016a43d818ae4187468e64d49b3b8de674fce5ba83e"
+    },
+    {
+      "input": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_02_000200_float32/full.f32le",
+      "label": "scene_2_full",
+      "n": 125526,
+      "piece": "full",
+      "prepared": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_02_000200_float32",
+      "sha256": "bbda29549b1e1ecba60efcc3a356c714c4c639d00b819b5af9eef072ab30da24"
+    }
+  ],
+  "schema": "mhgp8_float32_index_qualification_v1",
+  "scope": "native_lossless_float32_index_not_WSPD_or_FULL",
+  "source_sha256": {
+    "/usr/bin/g++": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin": "92e945f37a6cd4a58acc8aa15b275af2e271ecf69c0a44a311d888524473c451",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin": "4dfb5701db9ff36bd592746e08e8fafd4d1c63cba1ef66d2c2791e405b800e80",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin": "132f437349e17c00a8a31539f10a3214d9391ae1251293e7794a26540412b5cd",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/float32_index_probe.cpp": "55e944ee224eb8fd739e519d77690d9ff9e9fe5393af2c411fb2fdf7cf20e663",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py": "d22a7b90f3f2214f14c44a4980d2cca7fb33fac8cbd23a977be958fa5d25fb84",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_float32_index_checks.py": "ab16c177a2345ef2c22cb25930024c08a05c9f4bc91852141ffe3f57179e056d",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_p0_matrix.py": "b806572d9b5a76afe15c26586321663aa946e318a7a8a2286c3e9549e3ba717f",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/COMPLETION.json": "be39e63bdfbd634195297fcef77ba4e9835403d062f8765db089ffbf900cdb97",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/MANIFEST.json": "c424724e5a863ccaac6096ac53b4bb48fde19c03217f911f252452bb5f75f5c2",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/full.f32le": "412b9d40c899419dec8f2d126a4d03737aa3538dc5fe3ad0ec7770bf9f1568eb",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/half_x_neg.f32le": "b3ca3e1eaa0a86ca3c408920b7bf4e18f0f5378fbc4bbbb4d9327e020627c2e9",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/half_x_nonneg.f32le": "4dc8c29b3e79d1e3852861e472e5c6ad244165fe7823c99b60f0d3fa2c2a8b23",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/quarter_x_neg_y_neg.f32le": "4f5cad1aef78570a6551e86f3db241fd8283f57de4773242398c3c8d33bca206",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/quarter_x_neg_y_nonneg.f32le": "1eaada6d463c377708e6e679955a4508ea3fa1d73903f3e7513f138e956f39d9",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/quarter_x_nonneg_y_neg.f32le": "8fba3d73b0b2be16d6e899af0912dfa8006b50c261fbb7d3fdd0d76c8a0adb4d",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/quarter_x_nonneg_y_nonneg.f32le": "52141515436df0cb8999e1a68d6e0d76c679b8cc03b2d36c3e7f0b6a64035758",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_01_000100_float32/COMPLETION.json": "98b02c37989598c4c6891fc91ed569fc95fbdf32c5e0b745a7925de38863e09b",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_01_000100_float32/MANIFEST.json": "585891850110dc3b2ba571d2eea7f2a9d3cb4da6673bbbf47523f67fb488e318",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_01_000100_float32/full.f32le": "ce8305158b97f77932abe016a43d818ae4187468e64d49b3b8de674fce5ba83e",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_02_000200_float32/COMPLETION.json": "b1f9533660e6b8e0814c25d14017adf22794d34fae93526602afc05d362ead3a",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_02_000200_float32/MANIFEST.json": "ee0a3e47a3e43ba45ba98acf5471017c0c68443ceb7bc3bd41b423534fbfca87",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_02_000200_float32/full.f32le": "bbda29549b1e1ecba60efcc3a356c714c4c639d00b819b5af9eef072ab30da24",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_predicates.hpp": "1f6175bb27cd7543c2d68916efabe68ebd23ac413dadc7aad82cabb30651997d",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/spatial/float32_index.cpp": "2b602f47e72e088ce8187154c80849beeb451833ed15279e4d79b2e773adcf4c",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/spatial/float32_index.hpp": "4137b8129fafdb6cc893d32f3969c1ab15eef0cc016a02170913cc1ba1a6a6f5",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_index_gate.py": "4d968fcd2b31b8c1a1130d2d46b4d5f06dfa2cac216f2e1628eb236739553bd3",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_index_probe.cpp": "a067aa2b532ec76e05834cfbf55eacb7f3f400f43e1ec3cb2e03b02a1695bfd2"
+  },
+  "started_utc": "2026-09-21T15:34:17.146286+00:00"
+}

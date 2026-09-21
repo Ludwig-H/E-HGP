@@ -43,9 +43,38 @@ déduit d'un échec de lien. Builds épinglés `build/v8_float32_precision_20260
 `build/v8_float32_precision_sanitize_20260921`,
 `build/v8_float32_precision_r2_20260921`,
 `build/v8_float32_precision_sanitize_r2_20260921`.
-GCP non utilisé. Suite : propriétaire/index float32, bornes/clés/prédicats
+GCP non utilisé. Suite initiale : propriétaire/index float32, bornes/clés/prédicats
 q3/q4 exacts et partage des tâches intérieures, sans élargissement aveugle
 des types ni nouvelle campagne de micro-optimisations q2.
+
+## Index natif float32 — 21 septembre2026
+
+Lire `morsehgp3D_v8/docs/INDEX_FLOAT32_ET_SUITE_Q34_20260921.md`.
+Cadre : exploration_v8_hors_registre, cpu_reference,
+lossless_float32_input_only, native_index_preparation, not_claimed.
+Le propriétaire/index est maintenant implémenté : copie privée avant
+validation, trois tris puis partitions médianes stables, construction
+O(n log n), mémoire O(n), profondeur au plus ceil(log2 n). Les boîtes
+gardent leurs extrémités exactes ; une largeur double ne choisit que l'axe,
+jamais un certificat. Les IDs originaux, rangs et liens escape sont séparés.
+Les boîtes fermées se parcourent sans pile ni allocation interne, index
+immuable partagé, états/callbacks privés ; construction encore mono-thread.
+Ne pas hériter des profondeurs u16 : fixture278points, milieu277/médiane9.
+Qualification :27fixtures/404requêtes Fraction/35refus/151contrôles natifs,
+Release et Clang ASan/UBSan, quatre lecteurs concurrents fonctionnels,
+trois mutants compilés tués causalement ; pas de gate TSan dans ce lot.
+Reçus `morsehgp3D_v8/receipts/float32_index_20260921/` :54constructions
+Release, synthétiques8k/16k/32k, trois trames complètes et les sept morceaux
+de la première. Coûts publiés sous le seuil quadratique ; preuve générale
+limitée à la construction, jamais au census ni aux candidats q3/q4.
+Trames complètes :126,906/129,596/95,983ms CPU local pour l'index seul.
+Builds épinglés : `build/v8_float32_index_sanitize_20260921` (premier
+échec signé/non signé conservé), `build/v8_float32_index_r2_20260921`,
+`build/v8_float32_index_sanitize_r2_20260921`,
+`build/v8_float32_index_mutants_20260921`. CMake/moteur u16 inchangés.
+Suite : intervalles/replis exacts q3/q4, clés globales à l'émission puis
+partage des graines/tâches intérieures. Aucun transfert automatique des
+18limbes q2 aux degrés5/6. Ni WSPD native ni FULL/GPU acquis ; GCP non utilisé.
 
 ## Cible de travail et statut
 

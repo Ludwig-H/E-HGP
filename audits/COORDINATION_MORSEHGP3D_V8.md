@@ -3593,3 +3593,47 @@ primitivefloat32, nouvelles gates/reçus, documents d'entrée et cette
 section uniquement. L'ancien ajout53lignes de l'auditeur complémentaire
 au milieu du journal et tous les fichiers indépendants/v6/v7 sont exclus.
 Index rendu libre dès publication du commit surmain ; aucune branche créée.
+
+## Constructeur — index natif float32, après 36724438
+
+Reprise sur main ; index Git libre. Cadre : exploration_v8_hors_registre,
+cpu_reference, lossless_float32_input_only, native_index_preparation,
+not_claimed. Nouveaux fichiers spatial/float32_index.{hpp,cpp}, sans
+modifier le moteur u16, CMake ou les sources qualifiées précédentes.
+Copie privée, IDs d'origine, zéros signés égaux pour l'unicité mais bits
+conservés ; trois tris initiaux puis partitions médianes stables, O(n log n),
+profondeur logarithmique. Boîtes aux extrémités float32 exactes, liens
+préordre/escape, requêtes fermées sans pile ni état partagé mutable.
+Les requêtes de boîte ne sont pas encore les certificats q3/q4.
+
+Fixture proposée par la contrelecture : 278 points {0} union {2^e,
+e=-149..127} donnent 277 niveaux avec un milieu géométrique contre 9
+avec une médiane. Ne pas hériter des piles dimensionnées pour u16.
+Qualification et mesures prévues : synthétiques 8k/16k/32k, trois trames
+float32 entières et les sept découpes de la première ; pas un contrat FULL.
+Pas de GCP nécessaire pour cette préparation locale.
+
+La contrelecture numérique q3/q4 conseille de séparer filtres d'intervalles,
+replis entiers et clés canoniques construites aux émissions. Les 18 limbes
+q2 ne suffisent pas aux degrés 5/6 ; borne proposée 53 limbes pour q3 et
+positivité q4 dans l'unité 2^-149. A/B : vos avis sur la normalisation des
+clés globales inter-supports et les filtres de blocs restent utiles ;
+une puissance exacte isolée ne remplace pas les clés ni la complétude.
+
+Clôture constructeur : Release26commandes et Clang ASan/UBSan11commandes
+PASS ;27fixtures/1125sites/404requêtes/35refus/151contrôles natifs,
+oracles Fraction et lecteurs normal/−O concordants. Premier essai San
+arrêté sur un avertissement signé/non signé du test, conservé ; seul le
+cast du test corrigé. Trois mutants compilés tués causalement en25commandes
+GCC ; pas de remplacement par des mutants de sortie seulement.
+54constructions mesurées : synthétiques8k/16k/32k environ7/15/33ms ;
+tramesfloat32 0/100/200 environ127/130/96ms, index seul mono local.
+Les12relations de croissance emploient les cardinalités réelles, tous les
+postes de construction publiés sous le seuil quadratique. Cela ne borne
+ni census ni q3/q4 et ne qualifie aucun contrat FULL/G4. Reçus complets dans
+`morsehgp3D_v8/receipts/float32_index_20260921/`. GCP non utilisé.
+
+Réservation courte de l'index Git pour ce lot constructeur uniquement :
+index natif, sondes/gates/reçus, documents d'entrée et cette section.
+L'ajout indépendant53lignes au milieu du journal et tous les fichiers
+indépendants/v6/v7 sont exclus. Index libéré dès publication sur main.

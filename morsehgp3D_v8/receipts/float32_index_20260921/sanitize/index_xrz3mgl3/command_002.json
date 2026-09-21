@@ -1,0 +1,33 @@
+{
+  "command": [
+    "/usr/bin/clang++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-ffp-contract=off",
+    "-fno-fast-math",
+    "-I",
+    "/workspaces/E-HGP/morsehgp3D_v8/src",
+    "-O1",
+    "-g",
+    "-fsanitize=address,undefined",
+    "-fno-omit-frame-pointer",
+    "-c",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_index_probe.cpp",
+    "-MD",
+    "-MF",
+    "/workspaces/E-HGP/build/v8_float32_index_sanitize_20260921/test.d",
+    "-o",
+    "/workspaces/E-HGP/build/v8_float32_index_sanitize_20260921/test.o"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": 1,
+  "label": "compile_test",
+  "stderr": "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_index_probe.cpp:233:34: error: comparison of integers of different signs: 'std::size_t' (aka 'unsigned long') and '_If_is_unsigned_integer<unsigned long, int>' (aka 'int') [-Werror,-Wsign-compare]\n  233 |         check(index->max_depth() <= std::bit_width(original.size() - 1), \"median depth depends on exponent range\");\n      |               ~~~~~~~~~~~~~~~~~~ ^  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n1 error generated.\n",
+  "stderr_base64": "L3dvcmtzcGFjZXMvRS1IR1AvbW9yc2VoZ3AzRF92OC90ZXN0cy9mbG9hdDMyX2luZGV4X3Byb2JlLmNwcDoyMzM6MzQ6IGVycm9yOiBjb21wYXJpc29uIG9mIGludGVnZXJzIG9mIGRpZmZlcmVudCBzaWduczogJ3N0ZDo6c2l6ZV90JyAoYWthICd1bnNpZ25lZCBsb25nJykgYW5kICdfSWZfaXNfdW5zaWduZWRfaW50ZWdlcjx1bnNpZ25lZCBsb25nLCBpbnQ+JyAoYWthICdpbnQnKSBbLVdlcnJvciwtV3NpZ24tY29tcGFyZV0KICAyMzMgfCAgICAgICAgIGNoZWNrKGluZGV4LT5tYXhfZGVwdGgoKSA8PSBzdGQ6OmJpdF93aWR0aChvcmlnaW5hbC5zaXplKCkgLSAxKSwgIm1lZGlhbiBkZXB0aCBkZXBlbmRzIG9uIGV4cG9uZW50IHJhbmdlIik7CiAgICAgIHwgICAgICAgICAgICAgICB+fn5+fn5+fn5+fn5+fn5+fn4gXiAgfn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn4KMSBlcnJvciBnZW5lcmF0ZWQuCg==",
+  "stdout": "",
+  "stdout_base64": ""
+}

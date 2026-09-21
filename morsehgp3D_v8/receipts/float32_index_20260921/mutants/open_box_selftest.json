@@ -1,0 +1,23 @@
+{
+  "case": "open_box",
+  "command": [
+    "/workspaces/E-HGP/build/v8_float32_index_mutants_20260921/open_box/probe",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/mutants",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/bin:/usr/bin",
+    "TZ": "UTC"
+  },
+  "exit_code": 1,
+  "finished_utc": "2026-09-21T15:45:49.639618+00:00",
+  "label": "open_box_selftest",
+  "phase": "selftest",
+  "started_utc": "2026-09-21T15:45:49.634386+00:00",
+  "stderr": "float32 index probe: subnormal singleton query lost its site\n",
+  "stderr_base64": "ZmxvYXQzMiBpbmRleCBwcm9iZTogc3Vibm9ybWFsIHNpbmdsZXRvbiBxdWVyeSBsb3N0IGl0cyBzaXRlCg==",
+  "stdout": "{\"status\":\"failed\"}\n",
+  "stdout_base64": "eyJzdGF0dXMiOiJmYWlsZWQifQo="
+}

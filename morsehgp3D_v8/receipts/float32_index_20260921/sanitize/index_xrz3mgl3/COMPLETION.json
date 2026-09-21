@@ -1,0 +1,47 @@
+{
+  "artifact_sha256": {
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/sanitize/index_xrz3mgl3/MANIFEST.json": "ff4dd82252218aabe98cb1a62754581ca04c2b5550361388e78e200e92bd6137",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/sanitize/index_xrz3mgl3/command_000.json": "4e11a0239ffab295bcdff05e9e49c977ea589099fa769a8e10196909335cdf3e",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/sanitize/index_xrz3mgl3/command_001.json": "0ea938b97b2585985bb0d3d18bf814f220be21d3877b8f352262d1e01ab8a319",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/sanitize/index_xrz3mgl3/command_002.json": "d1f1b6f3477674cabe07a4f1950e5f9f5fd6a7168761f5a2e3450249932c04a6",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/sanitize/index_xrz3mgl3/sources/bench/float32_index_probe.cpp": "55e944ee224eb8fd739e519d77690d9ff9e9fe5393af2c411fb2fdf7cf20e663",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/sanitize/index_xrz3mgl3/sources/bench/prepare_lidar_precision.py": "d22a7b90f3f2214f14c44a4980d2cca7fb33fac8cbd23a977be958fa5d25fb84",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/sanitize/index_xrz3mgl3/sources/bench/run_float32_index_checks.py": "ab16c177a2345ef2c22cb25930024c08a05c9f4bc91852141ffe3f57179e056d",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/sanitize/index_xrz3mgl3/sources/bench/run_p0_matrix.py": "b806572d9b5a76afe15c26586321663aa946e318a7a8a2286c3e9549e3ba717f",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/sanitize/index_xrz3mgl3/sources/src/core/float32_predicates.hpp": "1f6175bb27cd7543c2d68916efabe68ebd23ac413dadc7aad82cabb30651997d",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/sanitize/index_xrz3mgl3/sources/src/spatial/float32_index.cpp": "2b602f47e72e088ce8187154c80849beeb451833ed15279e4d79b2e773adcf4c",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/sanitize/index_xrz3mgl3/sources/src/spatial/float32_index.hpp": "4137b8129fafdb6cc893d32f3969c1ab15eef0cc016a02170913cc1ba1a6a6f5",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/sanitize/index_xrz3mgl3/sources/tests/float32_index_gate.py": "4d968fcd2b31b8c1a1130d2d46b4d5f06dfa2cac216f2e1628eb236739553bd3",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/sanitize/index_xrz3mgl3/sources/tests/float32_index_probe.cpp": "869cedfbb1a5d4dca6d97a8e7599f3de2d34bd3d098860bef4fe07cfcff71590"
+  },
+  "commands": [
+    {
+      "path": "command_000.json",
+      "sha256": "4e11a0239ffab295bcdff05e9e49c977ea589099fa769a8e10196909335cdf3e"
+    },
+    {
+      "path": "command_001.json",
+      "sha256": "0ea938b97b2585985bb0d3d18bf814f220be21d3877b8f352262d1e01ab8a319"
+    },
+    {
+      "path": "command_002.json",
+      "sha256": "d1f1b6f3477674cabe07a4f1950e5f9f5fd6a7168761f5a2e3450249932c04a6"
+    }
+  ],
+  "error": "ValueError: index command failed: compile_test",
+  "finished_utc": "2026-09-21T15:32:41.353915+00:00",
+  "source_sha256_after": {
+    "/usr/bin/clang++": "8ef402d453d1ba4902e4ee0f0f847f6cfa01400c95aa43c24e97818b9c0e3f45",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/float32_index_probe.cpp": "55e944ee224eb8fd739e519d77690d9ff9e9fe5393af2c411fb2fdf7cf20e663",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py": "d22a7b90f3f2214f14c44a4980d2cca7fb33fac8cbd23a977be958fa5d25fb84",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_float32_index_checks.py": "ab16c177a2345ef2c22cb25930024c08a05c9f4bc91852141ffe3f57179e056d",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_p0_matrix.py": "b806572d9b5a76afe15c26586321663aa946e318a7a8a2286c3e9549e3ba717f",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_predicates.hpp": "1f6175bb27cd7543c2d68916efabe68ebd23ac413dadc7aad82cabb30651997d",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/spatial/float32_index.cpp": "2b602f47e72e088ce8187154c80849beeb451833ed15279e4d79b2e773adcf4c",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/spatial/float32_index.hpp": "4137b8129fafdb6cc893d32f3969c1ab15eef0cc016a02170913cc1ba1a6a6f5",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_index_gate.py": "4d968fcd2b31b8c1a1130d2d46b4d5f06dfa2cac216f2e1628eb236739553bd3",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_index_probe.cpp": "869cedfbb1a5d4dca6d97a8e7599f3de2d34bd3d098860bef4fe07cfcff71590"
+  },
+  "started_utc": "2026-09-21T15:32:36.690053+00:00",
+  "status": "failed"
+}

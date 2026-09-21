@@ -1,0 +1,23 @@
+{
+  "case": "internal_escape",
+  "command": [
+    "/workspaces/E-HGP/build/v8_float32_index_mutants_20260921/internal_escape/probe",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/mutants",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/bin:/usr/bin",
+    "TZ": "UTC"
+  },
+  "exit_code": 1,
+  "finished_utc": "2026-09-21T15:45:55.403460+00:00",
+  "label": "internal_escape_selftest",
+  "phase": "selftest",
+  "started_utc": "2026-09-21T15:45:55.398917+00:00",
+  "stderr": "float32 index probe: whole box lost original IDs\n",
+  "stderr_base64": "ZmxvYXQzMiBpbmRleCBwcm9iZTogd2hvbGUgYm94IGxvc3Qgb3JpZ2luYWwgSURzCg==",
+  "stdout": "{\"status\":\"failed\"}\n",
+  "stdout_base64": "eyJzdGF0dXMiOiJmYWlsZWQifQo="
+}

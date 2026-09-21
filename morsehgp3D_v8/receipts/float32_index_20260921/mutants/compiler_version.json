@@ -1,0 +1,23 @@
+{
+  "case": null,
+  "command": [
+    "/usr/bin/g++",
+    "--version"
+  ],
+  "cwd": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/mutants",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/bin:/usr/bin",
+    "TZ": "UTC"
+  },
+  "exit_code": 0,
+  "finished_utc": "2026-09-21T15:45:32.498326+00:00",
+  "label": "compiler_version",
+  "phase": "version",
+  "started_utc": "2026-09-21T15:45:32.495068+00:00",
+  "stderr": "",
+  "stderr_base64": "",
+  "stdout": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+  "stdout_base64": "ZysrIChVYnVudHUgMTMuMy4wLTZ1YnVudHUyfjI0LjA0LjEpIDEzLjMuMApDb3B5cmlnaHQgKEMpIDIwMjMgRnJlZSBTb2Z0d2FyZSBGb3VuZGF0aW9uLCBJbmMuClRoaXMgaXMgZnJlZSBzb2Z0d2FyZTsgc2VlIHRoZSBzb3VyY2UgZm9yIGNvcHlpbmcgY29uZGl0aW9ucy4gIFRoZXJlIGlzIE5PCndhcnJhbnR5OyBub3QgZXZlbiBmb3IgTUVSQ0hBTlRBQklMSVRZIG9yIEZJVE5FU1MgRk9SIEEgUEFSVElDVUxBUiBQVVJQT1NFLgoK"
+}

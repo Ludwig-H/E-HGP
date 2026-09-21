@@ -31,6 +31,24 @@ n'est pas FULL ni GPU. Les reçus historiques 50k restent inchangés.
 
 ## À reprendre maintenant
 
+Propriétaire/index natif float32 désormais écrit et qualifié ; voir
+[l'index et le plan numérique q3/q4](docs/INDEX_FLOAT32_ET_SUITE_Q34_20260921.md).
+Trois tris partagés puis partitions médianes : O(n log n), profondeur
+logarithmique, boîtes exactes, IDs/rangs distincts et liens escape contigus.
+Ne pas le remplacer par les coupes au milieu u16 : fixture278points,
+profondeur277 par milieu contre9 au médian. Requêtes fermées sans pile,
+index immuable partagé par quatre lecteurs testés ; construction mono.
+Les [captures](receipts/float32_index_20260921/README.md) donnent27 fixtures,
+404requêtes,35refus,151contrôles natifs, Release/Clang ASan/UBSan et
+relectures normal/−O.54 constructions mesurées, dont trois trames et les
+sept morceaux de la première. Cela ne qualifie pas une WSPD/census/FULL.
+
+Suite concrète : filtres d'intervalles et replis dyadiques exacts q3/q4,
+puis clés canoniques globales matérialisées aux émissions. Ne pas allouer
+cinq tableaux multiprécision à chaque candidat : les bornes de dimension
+et les formules réduites proposées sont dans la note, pas encore portées.
+Partager ensuite blocs de graines et tâches intérieures avec ces contrats.
+
 Socle d'entrée qualifié :15tests de préparation,3923requêtes rationnelles
 q2 et49contrôles natifs, Release/Clang ASan/UBSan, lectures normal/−O
 concordantes ;42nuages issus de trois trames, sans fusion à1mm. Voir les
@@ -39,9 +57,10 @@ Les quatre builds de précision R1/R2 sont épinglés selon leurs noms exacts
 dans ce README ; ne pas les écraser. GCP non utilisé pour ce lot ;
 CMake et moteur u16 inchangés.
 
-Porter les formats numériques et les bornes sans simple élargissement des
-types : clés d'unicité, carrés, produits intermédiaires, piles, clés de
-boules et comparaisons exactes q3/q4. Ne pas charger f32/u32 dans les
+Poursuivre le port des formats numériques et des bornes sans simple
+élargissement des types : carrés, produits intermédiaires, clés de
+boules et comparaisons exactes q3/q4. L'index neuf ne corrige pas par
+héritage les anciennes clés d'unicité et piles u16. Ne pas charger f32/u32 dans les
 sondes u16. La primitive q2 filtrée est un socle arithmétique, pas une
 nouvelle recherche de quelques pourcents sur q2. Le partage des graines
 q3 et des tâches intérieures q3/q4 reste la priorité de parallélisation.

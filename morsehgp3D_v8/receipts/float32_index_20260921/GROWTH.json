@@ -1,0 +1,2049 @@
+{
+  "analyzer_sha256": "b2915532168c0d992c8490e377b6f7029293d5d94f9f2b1ac3e479cae9f40470",
+  "capture": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/release_r2/index_d_t8ag95",
+  "completion_sha256": "7419b09fe4183b09ba37029831205b57ec20b8858e65a0eed141d05c51a9f349",
+  "measurements": {
+    "scene_0_full": {
+      "build_ms_median": 126.905506,
+      "construction_peak_vector_bytes": 22209956,
+      "max_depth": 17,
+      "n": 123389,
+      "nodes": 246777,
+      "permutation_checksum": "6da4118e97ac12f0",
+      "point_checksum": "6f59f96f140ef124",
+      "query_id_sum": "00000001c5dc1c58",
+      "query_id_xor": "000000000000690c",
+      "query_ms_median": 0.141143,
+      "query_work": {
+        "accepted_nodes": 16,
+        "axis_tests": 1115,
+        "callbacks": 16,
+        "emitted_sites": 123448,
+        "node_visits": 494,
+        "refined_nodes": 239,
+        "rejected_nodes": 239
+      },
+      "retained_bytes": 19248620,
+      "work": {
+        "box_endpoint_reads": 1480662,
+        "duplicate_adjacent_tests": 123388,
+        "finite_points_validated": 123389,
+        "input_word_triples_copied": 123389,
+        "inverse_rank_writes": 123389,
+        "leaves": 123389,
+        "nodes": 246777,
+        "partition_id_reads": 10449650,
+        "partition_id_writes": 8359720,
+        "partition_rank_writes": 2089930,
+        "point_objects_constructed": 123389,
+        "presort_comparisons": 7774546
+      }
+    },
+    "scene_0_half_x_neg": {
+      "build_ms_median": 59.258687,
+      "construction_peak_vector_bytes": 10988036,
+      "max_depth": 16,
+      "n": 61045,
+      "nodes": 122089,
+      "permutation_checksum": "f25cca01b6b31bf8",
+      "point_checksum": "cba51253a8a4659c",
+      "query_id_sum": "000000006f233d0f",
+      "query_id_xor": "00000000000085bf",
+      "query_ms_median": 0.068538,
+      "query_work": {
+        "accepted_nodes": 16,
+        "axis_tests": 1077,
+        "callbacks": 16,
+        "emitted_sites": 61107,
+        "node_visits": 464,
+        "refined_nodes": 224,
+        "rejected_nodes": 224
+      },
+      "retained_bytes": 9522956,
+      "work": {
+        "box_endpoint_reads": 732534,
+        "duplicate_adjacent_tests": 61044,
+        "finite_points_validated": 61045,
+        "input_word_triples_copied": 61045,
+        "inverse_rank_writes": 61045,
+        "leaves": 61045,
+        "nodes": 122089,
+        "partition_id_reads": 4861145,
+        "partition_id_writes": 3888916,
+        "partition_rank_writes": 972229,
+        "point_objects_constructed": 61045,
+        "presort_comparisons": 3545654
+      }
+    },
+    "scene_0_half_x_nonneg": {
+      "build_ms_median": 58.479966,
+      "construction_peak_vector_bytes": 11221856,
+      "max_depth": 16,
+      "n": 62344,
+      "nodes": 124687,
+      "permutation_checksum": "14db8712957c5dd0",
+      "point_checksum": "cbc5e781f4bfd184",
+      "query_id_sum": "0000000073e87a4e",
+      "query_id_xor": "000000000000de4e",
+      "query_ms_median": 0.065422,
+      "query_work": {
+        "accepted_nodes": 16,
+        "axis_tests": 1082,
+        "callbacks": 16,
+        "emitted_sites": 62380,
+        "node_visits": 474,
+        "refined_nodes": 229,
+        "rejected_nodes": 229
+      },
+      "retained_bytes": 9725600,
+      "work": {
+        "box_endpoint_reads": 748122,
+        "duplicate_adjacent_tests": 62343,
+        "finite_points_validated": 62344,
+        "input_word_triples_copied": 62344,
+        "inverse_rank_writes": 62344,
+        "leaves": 62344,
+        "nodes": 124687,
+        "partition_id_reads": 4971560,
+        "partition_id_writes": 3977248,
+        "partition_rank_writes": 994312,
+        "point_objects_constructed": 62344,
+        "presort_comparisons": 3623172
+      }
+    },
+    "scene_0_quarter_x_neg_y_neg": {
+      "build_ms_median": 26.897247,
+      "construction_peak_vector_bytes": 5447636,
+      "max_depth": 15,
+      "n": 30265,
+      "nodes": 60529,
+      "permutation_checksum": "257a820f1f9f686c",
+      "point_checksum": "66647ad59a797065",
+      "query_id_sum": "000000001b51ceb3",
+      "query_id_xor": "0000000000005ff9",
+      "query_ms_median": 0.035867,
+      "query_work": {
+        "accepted_nodes": 16,
+        "axis_tests": 1031,
+        "callbacks": 16,
+        "emitted_sites": 30293,
+        "node_visits": 448,
+        "refined_nodes": 216,
+        "rejected_nodes": 216
+      },
+      "retained_bytes": 4721276,
+      "work": {
+        "box_endpoint_reads": 363174,
+        "duplicate_adjacent_tests": 30264,
+        "finite_points_validated": 30265,
+        "input_word_triples_copied": 30265,
+        "inverse_rank_writes": 30265,
+        "leaves": 30265,
+        "nodes": 60529,
+        "partition_id_reads": 2257360,
+        "partition_id_writes": 1805888,
+        "partition_rank_writes": 451472,
+        "point_objects_constructed": 30265,
+        "presort_comparisons": 1621042
+      }
+    },
+    "scene_0_quarter_x_neg_y_nonneg": {
+      "build_ms_median": 27.3982,
+      "construction_peak_vector_bytes": 5540336,
+      "max_depth": 15,
+      "n": 30780,
+      "nodes": 61559,
+      "permutation_checksum": "d176b7bf046595a5",
+      "point_checksum": "a325646449303130",
+      "query_id_sum": "000000001c466c46",
+      "query_id_xor": "00000000000011ee",
+      "query_ms_median": 0.036468,
+      "query_work": {
+        "accepted_nodes": 16,
+        "axis_tests": 1015,
+        "callbacks": 16,
+        "emitted_sites": 30819,
+        "node_visits": 442,
+        "refined_nodes": 213,
+        "rejected_nodes": 213
+      },
+      "retained_bytes": 4801616,
+      "work": {
+        "box_endpoint_reads": 369354,
+        "duplicate_adjacent_tests": 30779,
+        "finite_points_validated": 30780,
+        "input_word_triples_copied": 30780,
+        "inverse_rank_writes": 30780,
+        "leaves": 30780,
+        "nodes": 61559,
+        "partition_id_reads": 2298560,
+        "partition_id_writes": 1838848,
+        "partition_rank_writes": 459712,
+        "point_objects_constructed": 30780,
+        "presort_comparisons": 1641216
+      }
+    },
+    "scene_0_quarter_x_nonneg_y_neg": {
+      "build_ms_median": 27.737272,
+      "construction_peak_vector_bytes": 5650316,
+      "max_depth": 15,
+      "n": 31391,
+      "nodes": 62781,
+      "permutation_checksum": "91632c36fa9eef9d",
+      "point_checksum": "faf040507a937b52",
+      "query_id_sum": "000000001d6729fd",
+      "query_id_xor": "00000000000046cf",
+      "query_ms_median": 0.037179,
+      "query_work": {
+        "accepted_nodes": 16,
+        "axis_tests": 997,
+        "callbacks": 16,
+        "emitted_sites": 31453,
+        "node_visits": 442,
+        "refined_nodes": 213,
+        "rejected_nodes": 213
+      },
+      "retained_bytes": 4896932,
+      "work": {
+        "box_endpoint_reads": 376686,
+        "duplicate_adjacent_tests": 31390,
+        "finite_points_validated": 31391,
+        "input_word_triples_copied": 31391,
+        "inverse_rank_writes": 31391,
+        "leaves": 31391,
+        "nodes": 62781,
+        "partition_id_reads": 2347440,
+        "partition_id_writes": 1877952,
+        "partition_rank_writes": 469488,
+        "point_objects_constructed": 31391,
+        "presort_comparisons": 1699094
+      }
+    },
+    "scene_0_quarter_x_nonneg_y_nonneg": {
+      "build_ms_median": 27.572516,
+      "construction_peak_vector_bytes": 5571476,
+      "max_depth": 15,
+      "n": 30953,
+      "nodes": 61905,
+      "permutation_checksum": "6fe923cb6e6629f4",
+      "point_checksum": "72e902a0364a1b9e",
+      "query_id_sum": "000000001c934319",
+      "query_id_xor": "00000000000060f5",
+      "query_ms_median": 0.04319,
+      "query_work": {
+        "accepted_nodes": 16,
+        "axis_tests": 1013,
+        "callbacks": 16,
+        "emitted_sites": 30986,
+        "node_visits": 444,
+        "refined_nodes": 214,
+        "rejected_nodes": 214
+      },
+      "retained_bytes": 4828604,
+      "work": {
+        "box_endpoint_reads": 371430,
+        "duplicate_adjacent_tests": 30952,
+        "finite_points_validated": 30953,
+        "input_word_triples_copied": 30953,
+        "inverse_rank_writes": 30953,
+        "leaves": 30953,
+        "nodes": 61905,
+        "partition_id_reads": 2312400,
+        "partition_id_writes": 1849920,
+        "partition_rank_writes": 462480,
+        "point_objects_constructed": 30953,
+        "presort_comparisons": 1685084
+      }
+    },
+    "scene_1_full": {
+      "build_ms_median": 129.595549,
+      "construction_peak_vector_bytes": 22406156,
+      "max_depth": 17,
+      "n": 124479,
+      "nodes": 248957,
+      "permutation_checksum": "0767b62b817c7d71",
+      "point_checksum": "5ad18e14868e117b",
+      "query_id_sum": "00000001cde71393",
+      "query_id_xor": "00000000000184e3",
+      "query_ms_median": 0.12841,
+      "query_work": {
+        "accepted_nodes": 16,
+        "axis_tests": 1164,
+        "callbacks": 16,
+        "emitted_sites": 124509,
+        "node_visits": 504,
+        "refined_nodes": 244,
+        "rejected_nodes": 244
+      },
+      "retained_bytes": 19418660,
+      "work": {
+        "box_endpoint_reads": 1493742,
+        "duplicate_adjacent_tests": 124478,
+        "finite_points_validated": 124479,
+        "input_word_triples_copied": 124479,
+        "inverse_rank_writes": 124479,
+        "leaves": 124479,
+        "nodes": 248957,
+        "partition_id_reads": 10547750,
+        "partition_id_writes": 8438200,
+        "partition_rank_writes": 2109550,
+        "point_objects_constructed": 124479,
+        "presort_comparisons": 7807944
+      }
+    },
+    "scene_2_full": {
+      "build_ms_median": 95.982647,
+      "construction_peak_vector_bytes": 22594616,
+      "max_depth": 17,
+      "n": 125526,
+      "nodes": 251051,
+      "permutation_checksum": "6d2dd11d2b75dad5",
+      "point_checksum": "c2723b4b34c09fe3",
+      "query_id_sum": "00000001d5b09198",
+      "query_id_xor": "000000000000bc9c",
+      "query_ms_median": 0.093405,
+      "query_work": {
+        "accepted_nodes": 16,
+        "axis_tests": 1150,
+        "callbacks": 16,
+        "emitted_sites": 125555,
+        "node_visits": 504,
+        "refined_nodes": 244,
+        "rejected_nodes": 244
+      },
+      "retained_bytes": 19581992,
+      "work": {
+        "box_endpoint_reads": 1506306,
+        "duplicate_adjacent_tests": 125525,
+        "finite_points_validated": 125526,
+        "input_word_triples_copied": 125526,
+        "inverse_rank_writes": 125526,
+        "leaves": 125526,
+        "nodes": 251051,
+        "partition_id_reads": 10641980,
+        "partition_id_writes": 8513584,
+        "partition_rank_writes": 2128396,
+        "point_objects_constructed": 125526,
+        "presort_comparisons": 7925027
+      }
+    },
+    "synthetic_clusters_16000": {
+      "build_ms_median": 15.376236,
+      "construction_peak_vector_bytes": 2879936,
+      "max_depth": 14,
+      "n": 16000,
+      "nodes": 31999,
+      "permutation_checksum": "40782ac41f576847",
+      "point_checksum": "1f5d45e08a12bcb9",
+      "query_id_sum": "0000000007a4f48b",
+      "query_id_xor": "0000000000000e2b",
+      "query_ms_median": 0.023304,
+      "query_work": {
+        "accepted_nodes": 16,
+        "axis_tests": 1013,
+        "callbacks": 16,
+        "emitted_sites": 16031,
+        "node_visits": 414,
+        "refined_nodes": 199,
+        "rejected_nodes": 199
+      },
+      "retained_bytes": 2495936,
+      "work": {
+        "box_endpoint_reads": 191994,
+        "duplicate_adjacent_tests": 15999,
+        "finite_points_validated": 16000,
+        "input_word_triples_copied": 16000,
+        "inverse_rank_writes": 16000,
+        "leaves": 16000,
+        "nodes": 31999,
+        "partition_id_reads": 1118080,
+        "partition_id_writes": 894464,
+        "partition_rank_writes": 223616,
+        "point_objects_constructed": 16000,
+        "presort_comparisons": 812866
+      }
+    },
+    "synthetic_clusters_32000": {
+      "build_ms_median": 33.433187,
+      "construction_peak_vector_bytes": 5759936,
+      "max_depth": 15,
+      "n": 32000,
+      "nodes": 63999,
+      "permutation_checksum": "f1a8e5861b1e72ea",
+      "point_checksum": "8d1cb72c2aca5ef0",
+      "query_id_sum": "000000001e9052da",
+      "query_id_xor": "0000000000003662",
+      "query_ms_median": 0.039334,
+      "query_work": {
+        "accepted_nodes": 16,
+        "axis_tests": 1069,
+        "callbacks": 16,
+        "emitted_sites": 32049,
+        "node_visits": 432,
+        "refined_nodes": 208,
+        "rejected_nodes": 208
+      },
+      "retained_bytes": 4991936,
+      "work": {
+        "box_endpoint_reads": 383994,
+        "duplicate_adjacent_tests": 31999,
+        "finite_points_validated": 32000,
+        "input_word_triples_copied": 32000,
+        "inverse_rank_writes": 32000,
+        "leaves": 32000,
+        "nodes": 63999,
+        "partition_id_reads": 2396160,
+        "partition_id_writes": 1916928,
+        "partition_rank_writes": 479232,
+        "point_objects_constructed": 32000,
+        "presort_comparisons": 1735998
+      }
+    },
+    "synthetic_clusters_8000": {
+      "build_ms_median": 7.241246,
+      "construction_peak_vector_bytes": 1439936,
+      "max_depth": 13,
+      "n": 8000,
+      "nodes": 15999,
+      "permutation_checksum": "7887bb1335e21044",
+      "point_checksum": "e31788d2a060e7d6",
+      "query_id_sum": "0000000001e9b206",
+      "query_id_xor": "0000000000000c66",
+      "query_ms_median": 0.01607,
+      "query_work": {
+        "accepted_nodes": 16,
+        "axis_tests": 963,
+        "callbacks": 16,
+        "emitted_sites": 8024,
+        "node_visits": 392,
+        "refined_nodes": 188,
+        "rejected_nodes": 188
+      },
+      "retained_bytes": 1247936,
+      "work": {
+        "box_endpoint_reads": 95994,
+        "duplicate_adjacent_tests": 7999,
+        "finite_points_validated": 8000,
+        "input_word_triples_copied": 8000,
+        "inverse_rank_writes": 8000,
+        "leaves": 8000,
+        "nodes": 15999,
+        "partition_id_reads": 519040,
+        "partition_id_writes": 415232,
+        "partition_rank_writes": 103808,
+        "point_objects_constructed": 8000,
+        "presort_comparisons": 370141
+      }
+    },
+    "synthetic_terrain_16000": {
+      "build_ms_median": 15.374823,
+      "construction_peak_vector_bytes": 2879936,
+      "max_depth": 14,
+      "n": 16000,
+      "nodes": 31999,
+      "permutation_checksum": "bd5415da761d756b",
+      "point_checksum": "638dd40e5817321d",
+      "query_id_sum": "0000000007a55bd2",
+      "query_id_xor": "00000000000031b6",
+      "query_ms_median": 0.024265,
+      "query_work": {
+        "accepted_nodes": 16,
+        "axis_tests": 945,
+        "callbacks": 16,
+        "emitted_sites": 16031,
+        "node_visits": 414,
+        "refined_nodes": 199,
+        "rejected_nodes": 199
+      },
+      "retained_bytes": 2495936,
+      "work": {
+        "box_endpoint_reads": 191994,
+        "duplicate_adjacent_tests": 15999,
+        "finite_points_validated": 16000,
+        "input_word_triples_copied": 16000,
+        "inverse_rank_writes": 16000,
+        "leaves": 16000,
+        "nodes": 31999,
+        "partition_id_reads": 1118080,
+        "partition_id_writes": 894464,
+        "partition_rank_writes": 223616,
+        "point_objects_constructed": 16000,
+        "presort_comparisons": 816433
+      }
+    },
+    "synthetic_terrain_32000": {
+      "build_ms_median": 33.259062,
+      "construction_peak_vector_bytes": 5759936,
+      "max_depth": 15,
+      "n": 32000,
+      "nodes": 63999,
+      "permutation_checksum": "1b760810948a268a",
+      "point_checksum": "7c4acd54c36e7023",
+      "query_id_sum": "000000001e90a966",
+      "query_id_xor": "0000000000007b50",
+      "query_ms_median": 0.038482,
+      "query_work": {
+        "accepted_nodes": 16,
+        "axis_tests": 997,
+        "callbacks": 16,
+        "emitted_sites": 32049,
+        "node_visits": 432,
+        "refined_nodes": 208,
+        "rejected_nodes": 208
+      },
+      "retained_bytes": 4991936,
+      "work": {
+        "box_endpoint_reads": 383994,
+        "duplicate_adjacent_tests": 31999,
+        "finite_points_validated": 32000,
+        "input_word_triples_copied": 32000,
+        "inverse_rank_writes": 32000,
+        "leaves": 32000,
+        "nodes": 63999,
+        "partition_id_reads": 2396160,
+        "partition_id_writes": 1916928,
+        "partition_rank_writes": 479232,
+        "point_objects_constructed": 32000,
+        "presort_comparisons": 1725236
+      }
+    },
+    "synthetic_terrain_8000": {
+      "build_ms_median": 7.097156,
+      "construction_peak_vector_bytes": 1439936,
+      "max_depth": 13,
+      "n": 8000,
+      "nodes": 15999,
+      "permutation_checksum": "28d1888b8197c6a4",
+      "point_checksum": "133b2c61b90415cf",
+      "query_id_sum": "0000000001e9a1e5",
+      "query_id_xor": "0000000000000cc1",
+      "query_ms_median": 0.015409,
+      "query_work": {
+        "accepted_nodes": 16,
+        "axis_tests": 883,
+        "callbacks": 16,
+        "emitted_sites": 8024,
+        "node_visits": 392,
+        "refined_nodes": 188,
+        "rejected_nodes": 188
+      },
+      "retained_bytes": 1247936,
+      "work": {
+        "box_endpoint_reads": 95994,
+        "duplicate_adjacent_tests": 7999,
+        "finite_points_validated": 8000,
+        "input_word_triples_copied": 8000,
+        "inverse_rank_writes": 8000,
+        "leaves": 8000,
+        "nodes": 15999,
+        "partition_id_reads": 519040,
+        "partition_id_writes": 415232,
+        "partition_rank_writes": 103808,
+        "point_objects_constructed": 8000,
+        "presort_comparisons": 368840
+      }
+    },
+    "synthetic_uniform_16000": {
+      "build_ms_median": 15.354646,
+      "construction_peak_vector_bytes": 2879936,
+      "max_depth": 14,
+      "n": 16000,
+      "nodes": 31999,
+      "permutation_checksum": "04fe9dbc0a64bbdb",
+      "point_checksum": "93b3d752e32296dd",
+      "query_id_sum": "0000000007a4878b",
+      "query_id_xor": "000000000000147b",
+      "query_ms_median": 0.023744,
+      "query_work": {
+        "accepted_nodes": 16,
+        "axis_tests": 1017,
+        "callbacks": 16,
+        "emitted_sites": 16031,
+        "node_visits": 414,
+        "refined_nodes": 199,
+        "rejected_nodes": 199
+      },
+      "retained_bytes": 2495936,
+      "work": {
+        "box_endpoint_reads": 191994,
+        "duplicate_adjacent_tests": 15999,
+        "finite_points_validated": 16000,
+        "input_word_triples_copied": 16000,
+        "inverse_rank_writes": 16000,
+        "leaves": 16000,
+        "nodes": 31999,
+        "partition_id_reads": 1118080,
+        "partition_id_writes": 894464,
+        "partition_rank_writes": 223616,
+        "point_objects_constructed": 16000,
+        "presort_comparisons": 810293
+      }
+    },
+    "synthetic_uniform_32000": {
+      "build_ms_median": 33.172922,
+      "construction_peak_vector_bytes": 5759936,
+      "max_depth": 15,
+      "n": 32000,
+      "nodes": 63999,
+      "permutation_checksum": "5561447a4fabbf7a",
+      "point_checksum": "052ddc3a384864cf",
+      "query_id_sum": "000000001e8f7cfd",
+      "query_id_xor": "0000000000003585",
+      "query_ms_median": 0.039794,
+      "query_work": {
+        "accepted_nodes": 16,
+        "axis_tests": 1064,
+        "callbacks": 16,
+        "emitted_sites": 32049,
+        "node_visits": 432,
+        "refined_nodes": 208,
+        "rejected_nodes": 208
+      },
+      "retained_bytes": 4991936,
+      "work": {
+        "box_endpoint_reads": 383994,
+        "duplicate_adjacent_tests": 31999,
+        "finite_points_validated": 32000,
+        "input_word_triples_copied": 32000,
+        "inverse_rank_writes": 32000,
+        "leaves": 32000,
+        "nodes": 63999,
+        "partition_id_reads": 2396160,
+        "partition_id_writes": 1916928,
+        "partition_rank_writes": 479232,
+        "point_objects_constructed": 32000,
+        "presort_comparisons": 1735320
+      }
+    },
+    "synthetic_uniform_8000": {
+      "build_ms_median": 7.070637,
+      "construction_peak_vector_bytes": 1439936,
+      "max_depth": 13,
+      "n": 8000,
+      "nodes": 15999,
+      "permutation_checksum": "781b517608c20358",
+      "point_checksum": "b52b4dba4761bb31",
+      "query_id_sum": "0000000001e9bcc5",
+      "query_id_xor": "00000000000010c7",
+      "query_ms_median": 0.014938,
+      "query_work": {
+        "accepted_nodes": 16,
+        "axis_tests": 961,
+        "callbacks": 16,
+        "emitted_sites": 8024,
+        "node_visits": 392,
+        "refined_nodes": 188,
+        "rejected_nodes": 188
+      },
+      "retained_bytes": 1247936,
+      "work": {
+        "box_endpoint_reads": 95994,
+        "duplicate_adjacent_tests": 7999,
+        "finite_points_validated": 8000,
+        "input_word_triples_copied": 8000,
+        "inverse_rank_writes": 8000,
+        "leaves": 8000,
+        "nodes": 15999,
+        "partition_id_reads": 519040,
+        "partition_id_writes": 415232,
+        "partition_rank_writes": 103808,
+        "point_objects_constructed": 8000,
+        "presort_comparisons": 367993
+      }
+    }
+  },
+  "pairs": [
+    {
+      "child": "synthetic_uniform_8000",
+      "metrics": {
+        "build_ms_median": {
+          "below_quadratic": true,
+          "child": 7.070637,
+          "exponent": 1.118763151804487,
+          "parent": 15.354646,
+          "ratio": 2.1716071691984755
+        },
+        "construction_peak_vector_bytes": {
+          "below_quadratic": true,
+          "child": 1439936,
+          "exponent": 1.0000320609584976,
+          "parent": 2879936,
+          "ratio": 2.000044446419841
+        },
+        "retained_bytes": {
+          "below_quadratic": true,
+          "child": 1247936,
+          "exponent": 1.0000369936033686,
+          "parent": 2495936,
+          "ratio": 2.0000512846812657
+        },
+        "work.box_endpoint_reads": {
+          "below_quadratic": true,
+          "child": 95994,
+          "exponent": 1.0000450863334533,
+          "parent": 191994,
+          "ratio": 2.000062503906494
+        },
+        "work.duplicate_adjacent_tests": {
+          "below_quadratic": true,
+          "child": 7999,
+          "exponent": 1.0000901768941688,
+          "parent": 15999,
+          "ratio": 2.000125015626953
+        },
+        "work.finite_points_validated": {
+          "below_quadratic": true,
+          "child": 8000,
+          "exponent": 1,
+          "parent": 16000,
+          "ratio": 2
+        },
+        "work.input_word_triples_copied": {
+          "below_quadratic": true,
+          "child": 8000,
+          "exponent": 1,
+          "parent": 16000,
+          "ratio": 2
+        },
+        "work.inverse_rank_writes": {
+          "below_quadratic": true,
+          "child": 8000,
+          "exponent": 1,
+          "parent": 16000,
+          "ratio": 2
+        },
+        "work.leaves": {
+          "below_quadratic": true,
+          "child": 8000,
+          "exponent": 1,
+          "parent": 16000,
+          "ratio": 2
+        },
+        "work.nodes": {
+          "below_quadratic": true,
+          "child": 15999,
+          "exponent": 1.0000450863334533,
+          "parent": 31999,
+          "ratio": 2.000062503906494
+        },
+        "work.partition_id_reads": {
+          "below_quadratic": true,
+          "child": 519040,
+          "exponent": 1.1071057886994864,
+          "parent": 1118080,
+          "ratio": 2.154130702836005
+        },
+        "work.partition_id_writes": {
+          "below_quadratic": true,
+          "child": 415232,
+          "exponent": 1.1071057886994864,
+          "parent": 894464,
+          "ratio": 2.154130702836005
+        },
+        "work.partition_rank_writes": {
+          "below_quadratic": true,
+          "child": 103808,
+          "exponent": 1.1071057886994864,
+          "parent": 223616,
+          "ratio": 2.154130702836005
+        },
+        "work.point_objects_constructed": {
+          "below_quadratic": true,
+          "child": 8000,
+          "exponent": 1,
+          "parent": 16000,
+          "ratio": 2
+        },
+        "work.presort_comparisons": {
+          "below_quadratic": true,
+          "child": 367993,
+          "exponent": 1.1387653539426819,
+          "parent": 810293,
+          "ratio": 2.2019250366175442
+        }
+      },
+      "n_child": 8000,
+      "n_parent": 16000,
+      "n_ratio": 2,
+      "parent": "synthetic_uniform_16000",
+      "quadratic_ratio": 4
+    },
+    {
+      "child": "synthetic_uniform_16000",
+      "metrics": {
+        "build_ms_median": {
+          "below_quadratic": true,
+          "child": 15.354646,
+          "exponent": 1.1113308444226333,
+          "parent": 33.172922,
+          "ratio": 2.1604485052927953
+        },
+        "construction_peak_vector_bytes": {
+          "below_quadratic": true,
+          "child": 2879936,
+          "exponent": 1.000016030212069,
+          "parent": 5759936,
+          "ratio": 2.0000222227160602
+        },
+        "retained_bytes": {
+          "below_quadratic": true,
+          "child": 2495936,
+          "exponent": 1.0000184964459689,
+          "parent": 4991936,
+          "ratio": 2.00002564168312
+        },
+        "work.box_endpoint_reads": {
+          "below_quadratic": true,
+          "child": 191994,
+          "exponent": 1.0000225426383575,
+          "parent": 383994,
+          "ratio": 2.000031250976593
+        },
+        "work.duplicate_adjacent_tests": {
+          "below_quadratic": true,
+          "child": 15999,
+          "exponent": 1.0000450863334533,
+          "parent": 31999,
+          "ratio": 2.000062503906494
+        },
+        "work.finite_points_validated": {
+          "below_quadratic": true,
+          "child": 16000,
+          "exponent": 1,
+          "parent": 32000,
+          "ratio": 2
+        },
+        "work.input_word_triples_copied": {
+          "below_quadratic": true,
+          "child": 16000,
+          "exponent": 1,
+          "parent": 32000,
+          "ratio": 2
+        },
+        "work.inverse_rank_writes": {
+          "below_quadratic": true,
+          "child": 16000,
+          "exponent": 1,
+          "parent": 32000,
+          "ratio": 2
+        },
+        "work.leaves": {
+          "below_quadratic": true,
+          "child": 16000,
+          "exponent": 1,
+          "parent": 32000,
+          "ratio": 2
+        },
+        "work.nodes": {
+          "below_quadratic": true,
+          "child": 31999,
+          "exponent": 1.0000225426383575,
+          "parent": 63999,
+          "ratio": 2.000031250976593
+        },
+        "work.partition_id_reads": {
+          "below_quadratic": true,
+          "child": 1118080,
+          "exponent": 1.099700826666645,
+          "parent": 2396160,
+          "ratio": 2.1431024613623353
+        },
+        "work.partition_id_writes": {
+          "below_quadratic": true,
+          "child": 894464,
+          "exponent": 1.099700826666645,
+          "parent": 1916928,
+          "ratio": 2.1431024613623353
+        },
+        "work.partition_rank_writes": {
+          "below_quadratic": true,
+          "child": 223616,
+          "exponent": 1.099700826666645,
+          "parent": 479232,
+          "ratio": 2.1431024613623353
+        },
+        "work.point_objects_constructed": {
+          "below_quadratic": true,
+          "child": 16000,
+          "exponent": 1,
+          "parent": 32000,
+          "ratio": 2
+        },
+        "work.presort_comparisons": {
+          "below_quadratic": true,
+          "child": 810293,
+          "exponent": 1.0986861436064617,
+          "parent": 1735320,
+          "ratio": 2.141595694396965
+        }
+      },
+      "n_child": 16000,
+      "n_parent": 32000,
+      "n_ratio": 2,
+      "parent": "synthetic_uniform_32000",
+      "quadratic_ratio": 4
+    },
+    {
+      "child": "synthetic_terrain_8000",
+      "metrics": {
+        "build_ms_median": {
+          "below_quadratic": true,
+          "child": 7.097156,
+          "exponent": 1.1152568786136643,
+          "parent": 15.374823,
+          "ratio": 2.166335782953059
+        },
+        "construction_peak_vector_bytes": {
+          "below_quadratic": true,
+          "child": 1439936,
+          "exponent": 1.0000320609584976,
+          "parent": 2879936,
+          "ratio": 2.000044446419841
+        },
+        "retained_bytes": {
+          "below_quadratic": true,
+          "child": 1247936,
+          "exponent": 1.0000369936033686,
+          "parent": 2495936,
+          "ratio": 2.0000512846812657
+        },
+        "work.box_endpoint_reads": {
+          "below_quadratic": true,
+          "child": 95994,
+          "exponent": 1.0000450863334533,
+          "parent": 191994,
+          "ratio": 2.000062503906494
+        },
+        "work.duplicate_adjacent_tests": {
+          "below_quadratic": true,
+          "child": 7999,
+          "exponent": 1.0000901768941688,
+          "parent": 15999,
+          "ratio": 2.000125015626953
+        },
+        "work.finite_points_validated": {
+          "below_quadratic": true,
+          "child": 8000,
+          "exponent": 1,
+          "parent": 16000,
+          "ratio": 2
+        },
+        "work.input_word_triples_copied": {
+          "below_quadratic": true,
+          "child": 8000,
+          "exponent": 1,
+          "parent": 16000,
+          "ratio": 2
+        },
+        "work.inverse_rank_writes": {
+          "below_quadratic": true,
+          "child": 8000,
+          "exponent": 1,
+          "parent": 16000,
+          "ratio": 2
+        },
+        "work.leaves": {
+          "below_quadratic": true,
+          "child": 8000,
+          "exponent": 1,
+          "parent": 16000,
+          "ratio": 2
+        },
+        "work.nodes": {
+          "below_quadratic": true,
+          "child": 15999,
+          "exponent": 1.0000450863334533,
+          "parent": 31999,
+          "ratio": 2.000062503906494
+        },
+        "work.partition_id_reads": {
+          "below_quadratic": true,
+          "child": 519040,
+          "exponent": 1.1071057886994864,
+          "parent": 1118080,
+          "ratio": 2.154130702836005
+        },
+        "work.partition_id_writes": {
+          "below_quadratic": true,
+          "child": 415232,
+          "exponent": 1.1071057886994864,
+          "parent": 894464,
+          "ratio": 2.154130702836005
+        },
+        "work.partition_rank_writes": {
+          "below_quadratic": true,
+          "child": 103808,
+          "exponent": 1.1071057886994864,
+          "parent": 223616,
+          "ratio": 2.154130702836005
+        },
+        "work.point_objects_constructed": {
+          "below_quadratic": true,
+          "child": 8000,
+          "exponent": 1,
+          "parent": 16000,
+          "ratio": 2
+        },
+        "work.presort_comparisons": {
+          "below_quadratic": true,
+          "child": 368840,
+          "exponent": 1.146339375092052,
+          "parent": 816433,
+          "ratio": 2.2135153454072225
+        }
+      },
+      "n_child": 8000,
+      "n_parent": 16000,
+      "n_ratio": 2,
+      "parent": "synthetic_terrain_16000",
+      "quadratic_ratio": 4
+    },
+    {
+      "child": "synthetic_terrain_16000",
+      "metrics": {
+        "build_ms_median": {
+          "below_quadratic": true,
+          "child": 15.374823,
+          "exponent": 1.1131776793322399,
+          "parent": 33.259062,
+          "ratio": 2.1632159277540954
+        },
+        "construction_peak_vector_bytes": {
+          "below_quadratic": true,
+          "child": 2879936,
+          "exponent": 1.000016030212069,
+          "parent": 5759936,
+          "ratio": 2.0000222227160602
+        },
+        "retained_bytes": {
+          "below_quadratic": true,
+          "child": 2495936,
+          "exponent": 1.0000184964459689,
+          "parent": 4991936,
+          "ratio": 2.00002564168312
+        },
+        "work.box_endpoint_reads": {
+          "below_quadratic": true,
+          "child": 191994,
+          "exponent": 1.0000225426383575,
+          "parent": 383994,
+          "ratio": 2.000031250976593
+        },
+        "work.duplicate_adjacent_tests": {
+          "below_quadratic": true,
+          "child": 15999,
+          "exponent": 1.0000450863334533,
+          "parent": 31999,
+          "ratio": 2.000062503906494
+        },
+        "work.finite_points_validated": {
+          "below_quadratic": true,
+          "child": 16000,
+          "exponent": 1,
+          "parent": 32000,
+          "ratio": 2
+        },
+        "work.input_word_triples_copied": {
+          "below_quadratic": true,
+          "child": 16000,
+          "exponent": 1,
+          "parent": 32000,
+          "ratio": 2
+        },
+        "work.inverse_rank_writes": {
+          "below_quadratic": true,
+          "child": 16000,
+          "exponent": 1,
+          "parent": 32000,
+          "ratio": 2
+        },
+        "work.leaves": {
+          "below_quadratic": true,
+          "child": 16000,
+          "exponent": 1,
+          "parent": 32000,
+          "ratio": 2
+        },
+        "work.nodes": {
+          "below_quadratic": true,
+          "child": 31999,
+          "exponent": 1.0000225426383575,
+          "parent": 63999,
+          "ratio": 2.000031250976593
+        },
+        "work.partition_id_reads": {
+          "below_quadratic": true,
+          "child": 1118080,
+          "exponent": 1.099700826666645,
+          "parent": 2396160,
+          "ratio": 2.1431024613623353
+        },
+        "work.partition_id_writes": {
+          "below_quadratic": true,
+          "child": 894464,
+          "exponent": 1.099700826666645,
+          "parent": 1916928,
+          "ratio": 2.1431024613623353
+        },
+        "work.partition_rank_writes": {
+          "below_quadratic": true,
+          "child": 223616,
+          "exponent": 1.099700826666645,
+          "parent": 479232,
+          "ratio": 2.1431024613623353
+        },
+        "work.point_objects_constructed": {
+          "below_quadratic": true,
+          "child": 16000,
+          "exponent": 1,
+          "parent": 32000,
+          "ratio": 2
+        },
+        "work.presort_comparisons": {
+          "below_quadratic": true,
+          "child": 816433,
+          "exponent": 1.079387323795455,
+          "parent": 1725236,
+          "ratio": 2.1131384939119315
+        }
+      },
+      "n_child": 16000,
+      "n_parent": 32000,
+      "n_ratio": 2,
+      "parent": "synthetic_terrain_32000",
+      "quadratic_ratio": 4
+    },
+    {
+      "child": "synthetic_clusters_8000",
+      "metrics": {
+        "build_ms_median": {
+          "below_quadratic": true,
+          "child": 7.241246,
+          "exponent": 1.0863925163185593,
+          "parent": 15.376236,
+          "ratio": 2.1234240626544105
+        },
+        "construction_peak_vector_bytes": {
+          "below_quadratic": true,
+          "child": 1439936,
+          "exponent": 1.0000320609584976,
+          "parent": 2879936,
+          "ratio": 2.000044446419841
+        },
+        "retained_bytes": {
+          "below_quadratic": true,
+          "child": 1247936,
+          "exponent": 1.0000369936033686,
+          "parent": 2495936,
+          "ratio": 2.0000512846812657
+        },
+        "work.box_endpoint_reads": {
+          "below_quadratic": true,
+          "child": 95994,
+          "exponent": 1.0000450863334533,
+          "parent": 191994,
+          "ratio": 2.000062503906494
+        },
+        "work.duplicate_adjacent_tests": {
+          "below_quadratic": true,
+          "child": 7999,
+          "exponent": 1.0000901768941688,
+          "parent": 15999,
+          "ratio": 2.000125015626953
+        },
+        "work.finite_points_validated": {
+          "below_quadratic": true,
+          "child": 8000,
+          "exponent": 1,
+          "parent": 16000,
+          "ratio": 2
+        },
+        "work.input_word_triples_copied": {
+          "below_quadratic": true,
+          "child": 8000,
+          "exponent": 1,
+          "parent": 16000,
+          "ratio": 2
+        },
+        "work.inverse_rank_writes": {
+          "below_quadratic": true,
+          "child": 8000,
+          "exponent": 1,
+          "parent": 16000,
+          "ratio": 2
+        },
+        "work.leaves": {
+          "below_quadratic": true,
+          "child": 8000,
+          "exponent": 1,
+          "parent": 16000,
+          "ratio": 2
+        },
+        "work.nodes": {
+          "below_quadratic": true,
+          "child": 15999,
+          "exponent": 1.0000450863334533,
+          "parent": 31999,
+          "ratio": 2.000062503906494
+        },
+        "work.partition_id_reads": {
+          "below_quadratic": true,
+          "child": 519040,
+          "exponent": 1.1071057886994864,
+          "parent": 1118080,
+          "ratio": 2.154130702836005
+        },
+        "work.partition_id_writes": {
+          "below_quadratic": true,
+          "child": 415232,
+          "exponent": 1.1071057886994864,
+          "parent": 894464,
+          "ratio": 2.154130702836005
+        },
+        "work.partition_rank_writes": {
+          "below_quadratic": true,
+          "child": 103808,
+          "exponent": 1.1071057886994864,
+          "parent": 223616,
+          "ratio": 2.154130702836005
+        },
+        "work.point_objects_constructed": {
+          "below_quadratic": true,
+          "child": 8000,
+          "exponent": 1,
+          "parent": 16000,
+          "ratio": 2
+        },
+        "work.presort_comparisons": {
+          "below_quadratic": true,
+          "child": 370141,
+          "exponent": 1.134942595529437,
+          "parent": 812866,
+          "ratio": 2.196098243642288
+        }
+      },
+      "n_child": 8000,
+      "n_parent": 16000,
+      "n_ratio": 2,
+      "parent": "synthetic_clusters_16000",
+      "quadratic_ratio": 4
+    },
+    {
+      "child": "synthetic_clusters_16000",
+      "metrics": {
+        "build_ms_median": {
+          "below_quadratic": true,
+          "child": 15.376236,
+          "exponent": 1.1205785012181475,
+          "parent": 33.433187,
+          "ratio": 2.174341431804246
+        },
+        "construction_peak_vector_bytes": {
+          "below_quadratic": true,
+          "child": 2879936,
+          "exponent": 1.000016030212069,
+          "parent": 5759936,
+          "ratio": 2.0000222227160602
+        },
+        "retained_bytes": {
+          "below_quadratic": true,
+          "child": 2495936,
+          "exponent": 1.0000184964459689,
+          "parent": 4991936,
+          "ratio": 2.00002564168312
+        },
+        "work.box_endpoint_reads": {
+          "below_quadratic": true,
+          "child": 191994,
+          "exponent": 1.0000225426383575,
+          "parent": 383994,
+          "ratio": 2.000031250976593
+        },
+        "work.duplicate_adjacent_tests": {
+          "below_quadratic": true,
+          "child": 15999,
+          "exponent": 1.0000450863334533,
+          "parent": 31999,
+          "ratio": 2.000062503906494
+        },
+        "work.finite_points_validated": {
+          "below_quadratic": true,
+          "child": 16000,
+          "exponent": 1,
+          "parent": 32000,
+          "ratio": 2
+        },
+        "work.input_word_triples_copied": {
+          "below_quadratic": true,
+          "child": 16000,
+          "exponent": 1,
+          "parent": 32000,
+          "ratio": 2
+        },
+        "work.inverse_rank_writes": {
+          "below_quadratic": true,
+          "child": 16000,
+          "exponent": 1,
+          "parent": 32000,
+          "ratio": 2
+        },
+        "work.leaves": {
+          "below_quadratic": true,
+          "child": 16000,
+          "exponent": 1,
+          "parent": 32000,
+          "ratio": 2
+        },
+        "work.nodes": {
+          "below_quadratic": true,
+          "child": 31999,
+          "exponent": 1.0000225426383575,
+          "parent": 63999,
+          "ratio": 2.000031250976593
+        },
+        "work.partition_id_reads": {
+          "below_quadratic": true,
+          "child": 1118080,
+          "exponent": 1.099700826666645,
+          "parent": 2396160,
+          "ratio": 2.1431024613623353
+        },
+        "work.partition_id_writes": {
+          "below_quadratic": true,
+          "child": 894464,
+          "exponent": 1.099700826666645,
+          "parent": 1916928,
+          "ratio": 2.1431024613623353
+        },
+        "work.partition_rank_writes": {
+          "below_quadratic": true,
+          "child": 223616,
+          "exponent": 1.099700826666645,
+          "parent": 479232,
+          "ratio": 2.1431024613623353
+        },
+        "work.point_objects_constructed": {
+          "below_quadratic": true,
+          "child": 16000,
+          "exponent": 1,
+          "parent": 32000,
+          "ratio": 2
+        },
+        "work.presort_comparisons": {
+          "below_quadratic": true,
+          "child": 812866,
+          "exponent": 1.0946758352503532,
+          "parent": 1735998,
+          "ratio": 2.1356508944893746
+        }
+      },
+      "n_child": 16000,
+      "n_parent": 32000,
+      "n_ratio": 2,
+      "parent": "synthetic_clusters_32000",
+      "quadratic_ratio": 4
+    },
+    {
+      "child": "scene_0_half_x_neg",
+      "metrics": {
+        "build_ms_median": {
+          "below_quadratic": true,
+          "child": 59.258687,
+          "exponent": 1.0821332792718754,
+          "parent": 126.905506,
+          "ratio": 2.1415510944412253
+        },
+        "construction_peak_vector_bytes": {
+          "below_quadratic": true,
+          "child": 10988036,
+          "exponent": 1.0000041818745602,
+          "parent": 22209956,
+          "ratio": 2.0212853325198425
+        },
+        "retained_bytes": {
+          "below_quadratic": true,
+          "child": 9522956,
+          "exponent": 1.0000048252431084,
+          "parent": 19248620,
+          "ratio": 2.0212862476735163
+        },
+        "work.box_endpoint_reads": {
+          "below_quadratic": true,
+          "child": 732534,
+          "exponent": 1.0000058807715,
+          "parent": 1480662,
+          "ratio": 2.0212877491010657
+        },
+        "work.duplicate_adjacent_tests": {
+          "below_quadratic": true,
+          "child": 61044,
+          "exponent": 1.0000117616149984,
+          "parent": 123388,
+          "ratio": 2.0212961142782255
+        },
+        "work.finite_points_validated": {
+          "below_quadratic": true,
+          "child": 61045,
+          "exponent": 1,
+          "parent": 123389,
+          "ratio": 2.0212793840609384
+        },
+        "work.input_word_triples_copied": {
+          "below_quadratic": true,
+          "child": 61045,
+          "exponent": 1,
+          "parent": 123389,
+          "ratio": 2.0212793840609384
+        },
+        "work.inverse_rank_writes": {
+          "below_quadratic": true,
+          "child": 61045,
+          "exponent": 1,
+          "parent": 123389,
+          "ratio": 2.0212793840609384
+        },
+        "work.leaves": {
+          "below_quadratic": true,
+          "child": 61045,
+          "exponent": 1,
+          "parent": 123389,
+          "ratio": 2.0212793840609384
+        },
+        "work.nodes": {
+          "below_quadratic": true,
+          "child": 122089,
+          "exponent": 1.0000058807715,
+          "parent": 246777,
+          "ratio": 2.0212877491010657
+        },
+        "work.partition_id_reads": {
+          "below_quadratic": true,
+          "child": 4861145,
+          "exponent": 1.087482060200505,
+          "parent": 10449650,
+          "ratio": 2.1496272997411103
+        },
+        "work.partition_id_writes": {
+          "below_quadratic": true,
+          "child": 3888916,
+          "exponent": 1.087482060200505,
+          "parent": 8359720,
+          "ratio": 2.1496272997411103
+        },
+        "work.partition_rank_writes": {
+          "below_quadratic": true,
+          "child": 972229,
+          "exponent": 1.087482060200505,
+          "parent": 2089930,
+          "ratio": 2.1496272997411103
+        },
+        "work.point_objects_constructed": {
+          "below_quadratic": true,
+          "child": 61045,
+          "exponent": 1,
+          "parent": 123389,
+          "ratio": 2.0212793840609384
+        },
+        "work.presort_comparisons": {
+          "below_quadratic": true,
+          "child": 3545654,
+          "exponent": 1.1156717620656482,
+          "parent": 7774546,
+          "ratio": 2.1926973133870367
+        }
+      },
+      "n_child": 61045,
+      "n_parent": 123389,
+      "n_ratio": 2.0212793840609384,
+      "parent": "scene_0_full",
+      "quadratic_ratio": 4.0855703484297665
+    },
+    {
+      "child": "scene_0_half_x_nonneg",
+      "metrics": {
+        "build_ms_median": {
+          "below_quadratic": true,
+          "child": 58.479966,
+          "exponent": 1.1348871156546347,
+          "parent": 126.905506,
+          "ratio": 2.1700680537331367
+        },
+        "construction_peak_vector_bytes": {
+          "below_quadratic": true,
+          "child": 11221856,
+          "exponent": 1.0000041330877256,
+          "parent": 22209956,
+          "ratio": 1.9791695776527518
+        },
+        "retained_bytes": {
+          "below_quadratic": true,
+          "child": 9725600,
+          "exponent": 1.000004768950525,
+          "parent": 19248620,
+          "ratio": 1.979170436785391
+        },
+        "work.box_endpoint_reads": {
+          "below_quadratic": true,
+          "child": 748122,
+          "exponent": 1.0000058121647495,
+          "parent": 1480662,
+          "ratio": 1.9791718463031431
+        },
+        "work.duplicate_adjacent_tests": {
+          "below_quadratic": true,
+          "child": 62343,
+          "exponent": 1.0000116243996653,
+          "parent": 123388,
+          "ratio": 1.9791796994049051
+        },
+        "work.finite_points_validated": {
+          "below_quadratic": true,
+          "child": 62344,
+          "exponent": 1,
+          "parent": 123389,
+          "ratio": 1.979163993327345
+        },
+        "work.input_word_triples_copied": {
+          "below_quadratic": true,
+          "child": 62344,
+          "exponent": 1,
+          "parent": 123389,
+          "ratio": 1.979163993327345
+        },
+        "work.inverse_rank_writes": {
+          "below_quadratic": true,
+          "child": 62344,
+          "exponent": 1,
+          "parent": 123389,
+          "ratio": 1.979163993327345
+        },
+        "work.leaves": {
+          "below_quadratic": true,
+          "child": 62344,
+          "exponent": 1,
+          "parent": 123389,
+          "ratio": 1.979163993327345
+        },
+        "work.nodes": {
+          "below_quadratic": true,
+          "child": 124687,
+          "exponent": 1.0000058121647495,
+          "parent": 246777,
+          "ratio": 1.9791718463031431
+        },
+        "work.partition_id_reads": {
+          "below_quadratic": true,
+          "child": 4971560,
+          "exponent": 1.0881243964412277,
+          "parent": 10449650,
+          "ratio": 2.1018855248654345
+        },
+        "work.partition_id_writes": {
+          "below_quadratic": true,
+          "child": 3977248,
+          "exponent": 1.0881243964412277,
+          "parent": 8359720,
+          "ratio": 2.1018855248654345
+        },
+        "work.partition_rank_writes": {
+          "below_quadratic": true,
+          "child": 994312,
+          "exponent": 1.0881243964412277,
+          "parent": 2089930,
+          "ratio": 2.1018855248654345
+        },
+        "work.point_objects_constructed": {
+          "below_quadratic": true,
+          "child": 62344,
+          "exponent": 1,
+          "parent": 123389,
+          "ratio": 1.979163993327345
+        },
+        "work.presort_comparisons": {
+          "below_quadratic": true,
+          "child": 3623172,
+          "exponent": 1.1184029069848804,
+          "parent": 7774546,
+          "ratio": 2.145784412111818
+        }
+      },
+      "n_child": 62344,
+      "n_parent": 123389,
+      "n_ratio": 1.979163993327345,
+      "parent": "scene_0_full",
+      "quadratic_ratio": 3.917090112483443
+    },
+    {
+      "child": "scene_0_quarter_x_neg_y_neg",
+      "metrics": {
+        "build_ms_median": {
+          "below_quadratic": true,
+          "child": 26.897247,
+          "exponent": 1.1258076418861396,
+          "parent": 59.258687,
+          "ratio": 2.203150642145644
+        },
+        "construction_peak_vector_bytes": {
+          "below_quadratic": true,
+          "child": 5447636,
+          "exponent": 1.00000844282048,
+          "parent": 10988036,
+          "ratio": 2.017028303653181
+        },
+        "retained_bytes": {
+          "below_quadratic": true,
+          "child": 4721276,
+          "exponent": 1.000009741729107,
+          "parent": 9522956,
+          "ratio": 2.0170301418514827
+        },
+        "work.box_endpoint_reads": {
+          "below_quadratic": true,
+          "child": 363174,
+          "exponent": 1.0000118727586793,
+          "parent": 732534,
+          "ratio": 2.0170331576599647
+        },
+        "work.duplicate_adjacent_tests": {
+          "below_quadratic": true,
+          "child": 30264,
+          "exponent": 1.0000237458107588,
+          "parent": 61044,
+          "ratio": 2.0170499603489294
+        },
+        "work.finite_points_validated": {
+          "below_quadratic": true,
+          "child": 30265,
+          "exponent": 1,
+          "parent": 61045,
+          "ratio": 2.0170163555261853
+        },
+        "work.input_word_triples_copied": {
+          "below_quadratic": true,
+          "child": 30265,
+          "exponent": 1,
+          "parent": 61045,
+          "ratio": 2.0170163555261853
+        },
+        "work.inverse_rank_writes": {
+          "below_quadratic": true,
+          "child": 30265,
+          "exponent": 1,
+          "parent": 61045,
+          "ratio": 2.0170163555261853
+        },
+        "work.leaves": {
+          "below_quadratic": true,
+          "child": 30265,
+          "exponent": 1,
+          "parent": 61045,
+          "ratio": 2.0170163555261853
+        },
+        "work.nodes": {
+          "below_quadratic": true,
+          "child": 60529,
+          "exponent": 1.0000118727586793,
+          "parent": 122089,
+          "ratio": 2.0170331576599647
+        },
+        "work.partition_id_reads": {
+          "below_quadratic": true,
+          "child": 2257360,
+          "exponent": 1.0932965268900756,
+          "parent": 4861145,
+          "ratio": 2.1534646666902932
+        },
+        "work.partition_id_writes": {
+          "below_quadratic": true,
+          "child": 1805888,
+          "exponent": 1.0932965268900756,
+          "parent": 3888916,
+          "ratio": 2.1534646666902932
+        },
+        "work.partition_rank_writes": {
+          "below_quadratic": true,
+          "child": 451472,
+          "exponent": 1.0932965268900756,
+          "parent": 972229,
+          "ratio": 2.1534646666902932
+        },
+        "work.point_objects_constructed": {
+          "below_quadratic": true,
+          "child": 30265,
+          "exponent": 1,
+          "parent": 61045,
+          "ratio": 2.0170163555261853
+        },
+        "work.presort_comparisons": {
+          "below_quadratic": true,
+          "child": 1621042,
+          "exponent": 1.1154958254483998,
+          "parent": 3545654,
+          "ratio": 2.187268435981301
+        }
+      },
+      "n_child": 30265,
+      "n_parent": 61045,
+      "n_ratio": 2.0170163555261853,
+      "parent": "scene_0_half_x_neg",
+      "quadratic_ratio": 4.0683549784601345
+    },
+    {
+      "child": "scene_0_quarter_x_neg_y_nonneg",
+      "metrics": {
+        "build_ms_median": {
+          "below_quadratic": true,
+          "child": 27.3982,
+          "exponent": 1.1266000494017712,
+          "parent": 59.258687,
+          "ratio": 2.162867889131403
+        },
+        "construction_peak_vector_bytes": {
+          "below_quadratic": true,
+          "child": 5540336,
+          "exponent": 1.000008363799164,
+          "parent": 10988036,
+          "ratio": 1.9832797144433116
+        },
+        "retained_bytes": {
+          "below_quadratic": true,
+          "child": 4801616,
+          "exponent": 1.000009650550396,
+          "parent": 9522956,
+          "ratio": 1.9832814619078243
+        },
+        "work.box_endpoint_reads": {
+          "below_quadratic": true,
+          "child": 369354,
+          "exponent": 1.0000117616340873,
+          "parent": 732534,
+          "ratio": 1.9832843288552446
+        },
+        "work.duplicate_adjacent_tests": {
+          "below_quadratic": true,
+          "child": 30779,
+          "exponent": 1.0000235235555777,
+          "parent": 61044,
+          "ratio": 1.983300302154066
+        },
+        "work.finite_points_validated": {
+          "below_quadratic": true,
+          "child": 30780,
+          "exponent": 1,
+          "parent": 61045,
+          "ratio": 1.9832683560753737
+        },
+        "work.input_word_triples_copied": {
+          "below_quadratic": true,
+          "child": 30780,
+          "exponent": 1,
+          "parent": 61045,
+          "ratio": 1.9832683560753737
+        },
+        "work.inverse_rank_writes": {
+          "below_quadratic": true,
+          "child": 30780,
+          "exponent": 1,
+          "parent": 61045,
+          "ratio": 1.9832683560753737
+        },
+        "work.leaves": {
+          "below_quadratic": true,
+          "child": 30780,
+          "exponent": 1,
+          "parent": 61045,
+          "ratio": 1.9832683560753737
+        },
+        "work.nodes": {
+          "below_quadratic": true,
+          "child": 61559,
+          "exponent": 1.0000117616340873,
+          "parent": 122089,
+          "ratio": 1.9832843288552446
+        },
+        "work.partition_id_reads": {
+          "below_quadratic": true,
+          "child": 2298560,
+          "exponent": 1.0938230853898951,
+          "parent": 4861145,
+          "ratio": 2.1148653939858
+        },
+        "work.partition_id_writes": {
+          "below_quadratic": true,
+          "child": 1838848,
+          "exponent": 1.0938230853898951,
+          "parent": 3888916,
+          "ratio": 2.1148653939858
+        },
+        "work.partition_rank_writes": {
+          "below_quadratic": true,
+          "child": 459712,
+          "exponent": 1.0938230853898951,
+          "parent": 972229,
+          "ratio": 2.1148653939858
+        },
+        "work.point_objects_constructed": {
+          "below_quadratic": true,
+          "child": 30780,
+          "exponent": 1,
+          "parent": 61045,
+          "ratio": 1.9832683560753737
+        },
+        "work.presort_comparisons": {
+          "below_quadratic": true,
+          "child": 1641216,
+          "exponent": 1.1249207850373308,
+          "parent": 3545654,
+          "ratio": 2.1603823019029793
+        }
+      },
+      "n_child": 30780,
+      "n_parent": 61045,
+      "n_ratio": 1.9832683560753737,
+      "parent": "scene_0_half_x_neg",
+      "quadratic_ratio": 3.933353372209915
+    },
+    {
+      "child": "scene_0_quarter_x_nonneg_y_neg",
+      "metrics": {
+        "build_ms_median": {
+          "below_quadratic": true,
+          "child": 27.737272,
+          "exponent": 1.0870965343071393,
+          "parent": 58.479966,
+          "ratio": 2.1083531934935777
+        },
+        "construction_peak_vector_bytes": {
+          "below_quadratic": true,
+          "child": 5650316,
+          "exponent": 1.0000081959147475,
+          "parent": 11221856,
+          "ratio": 1.986058124890714
+        },
+        "retained_bytes": {
+          "below_quadratic": true,
+          "child": 4896932,
+          "exponent": 1.0000094568370972,
+          "parent": 9725600,
+          "ratio": 1.9860598431834462
+        },
+        "work.box_endpoint_reads": {
+          "below_quadratic": true,
+          "child": 376686,
+          "exponent": 1.000011525544983,
+          "parent": 748122,
+          "ratio": 1.986062662270432
+        },
+        "work.duplicate_adjacent_tests": {
+          "below_quadratic": true,
+          "child": 31390,
+          "exponent": 1.000023051365989,
+          "parent": 62343,
+          "ratio": 1.9860783689072954
+        },
+        "work.finite_points_validated": {
+          "below_quadratic": true,
+          "child": 31391,
+          "exponent": 1,
+          "parent": 62344,
+          "ratio": 1.9860469561339238
+        },
+        "work.input_word_triples_copied": {
+          "below_quadratic": true,
+          "child": 31391,
+          "exponent": 1,
+          "parent": 62344,
+          "ratio": 1.9860469561339238
+        },
+        "work.inverse_rank_writes": {
+          "below_quadratic": true,
+          "child": 31391,
+          "exponent": 1,
+          "parent": 62344,
+          "ratio": 1.9860469561339238
+        },
+        "work.leaves": {
+          "below_quadratic": true,
+          "child": 31391,
+          "exponent": 1,
+          "parent": 62344,
+          "ratio": 1.9860469561339238
+        },
+        "work.nodes": {
+          "below_quadratic": true,
+          "child": 62781,
+          "exponent": 1.000011525544983,
+          "parent": 124687,
+          "ratio": 1.986062662270432
+        },
+        "work.partition_id_reads": {
+          "below_quadratic": true,
+          "child": 2347440,
+          "exponent": 1.0936565585273774,
+          "parent": 4971560,
+          "ratio": 2.117864567358484
+        },
+        "work.partition_id_writes": {
+          "below_quadratic": true,
+          "child": 1877952,
+          "exponent": 1.0936565585273774,
+          "parent": 3977248,
+          "ratio": 2.117864567358484
+        },
+        "work.partition_rank_writes": {
+          "below_quadratic": true,
+          "child": 469488,
+          "exponent": 1.0936565585273774,
+          "parent": 994312,
+          "ratio": 2.117864567358484
+        },
+        "work.point_objects_constructed": {
+          "below_quadratic": true,
+          "child": 31391,
+          "exponent": 1,
+          "parent": 62344,
+          "ratio": 1.9860469561339238
+        },
+        "work.presort_comparisons": {
+          "below_quadratic": true,
+          "child": 1699094,
+          "exponent": 1.1036346300442545,
+          "parent": 3623172,
+          "ratio": 2.132414098337114
+        }
+      },
+      "n_child": 31391,
+      "n_parent": 62344,
+      "n_ratio": 1.9860469561339238,
+      "parent": "scene_0_half_x_nonneg",
+      "quadratic_ratio": 3.944382511968824
+    },
+    {
+      "child": "scene_0_quarter_x_nonneg_y_nonneg",
+      "metrics": {
+        "build_ms_median": {
+          "below_quadratic": true,
+          "child": 27.572516,
+          "exponent": 1.0737895267129163,
+          "parent": 58.479966,
+          "ratio": 2.1209513850676522
+        },
+        "construction_peak_vector_bytes": {
+          "below_quadratic": true,
+          "child": 5571476,
+          "exponent": 1.0000082603486578,
+          "parent": 11221856,
+          "ratio": 2.014162135850536
+        },
+        "retained_bytes": {
+          "below_quadratic": true,
+          "child": 4828604,
+          "exponent": 1.0000095311841313,
+          "parent": 9725600,
+          "ratio": 2.0141639281249817
+        },
+        "work.box_endpoint_reads": {
+          "below_quadratic": true,
+          "child": 371430,
+          "exponent": 1.0000116161558605,
+          "parent": 748122,
+          "ratio": 2.014166868588967
+        },
+        "work.duplicate_adjacent_tests": {
+          "below_quadratic": true,
+          "child": 30952,
+          "exponent": 1.0000232325925318,
+          "parent": 62343,
+          "ratio": 2.014183251486172
+        },
+        "work.finite_points_validated": {
+          "below_quadratic": true,
+          "child": 30953,
+          "exponent": 1,
+          "parent": 62344,
+          "ratio": 2.0141504862210446
+        },
+        "work.input_word_triples_copied": {
+          "below_quadratic": true,
+          "child": 30953,
+          "exponent": 1,
+          "parent": 62344,
+          "ratio": 2.0141504862210446
+        },
+        "work.inverse_rank_writes": {
+          "below_quadratic": true,
+          "child": 30953,
+          "exponent": 1,
+          "parent": 62344,
+          "ratio": 2.0141504862210446
+        },
+        "work.leaves": {
+          "below_quadratic": true,
+          "child": 30953,
+          "exponent": 1,
+          "parent": 62344,
+          "ratio": 2.0141504862210446
+        },
+        "work.nodes": {
+          "below_quadratic": true,
+          "child": 61905,
+          "exponent": 1.0000116161558605,
+          "parent": 124687,
+          "ratio": 2.014166868588967
+        },
+        "work.partition_id_reads": {
+          "below_quadratic": true,
+          "child": 2312400,
+          "exponent": 1.0931883008400396,
+          "parent": 4971560,
+          "ratio": 2.149956754886698
+        },
+        "work.partition_id_writes": {
+          "below_quadratic": true,
+          "child": 1849920,
+          "exponent": 1.0931883008400396,
+          "parent": 3977248,
+          "ratio": 2.149956754886698
+        },
+        "work.partition_rank_writes": {
+          "below_quadratic": true,
+          "child": 462480,
+          "exponent": 1.0931883008400396,
+          "parent": 994312,
+          "ratio": 2.149956754886698
+        },
+        "work.point_objects_constructed": {
+          "below_quadratic": true,
+          "child": 30953,
+          "exponent": 1,
+          "parent": 62344,
+          "ratio": 2.0141504862210446
+        },
+        "work.presort_comparisons": {
+          "below_quadratic": true,
+          "child": 1685084,
+          "exponent": 1.093312184641946,
+          "parent": 3623172,
+          "ratio": 2.1501432569533625
+        }
+      },
+      "n_child": 30953,
+      "n_parent": 62344,
+      "n_ratio": 2.0141504862210446,
+      "parent": "scene_0_half_x_nonneg",
+      "quadratic_ratio": 4.05680218114447
+    }
+  ],
+  "qualifications": {
+    "asymptotic_bound": "O(n log n) construction and O(n) storage by separate proof",
+    "cpu_only": true,
+    "gcp_used": false,
+    "public_status": "not_claimed",
+    "repetitions": 3,
+    "timing": "local shared host, no dedicated machine or speedup claim"
+  },
+  "reader_sha256": "ab16c177a2345ef2c22cb25930024c08a05c9f4bc91852141ffe3f57179e056d",
+  "schema": "mhgp8_float32_index_growth_v1",
+  "scope": "construction_only_not_query_scaling_WSPD_census_or_FULL",
+  "status": "passed"
+}

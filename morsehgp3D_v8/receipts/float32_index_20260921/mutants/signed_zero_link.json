@@ -1,0 +1,38 @@
+{
+  "case": "signed_zero",
+  "command": [
+    "/usr/bin/g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-ffp-contract=off",
+    "-fno-fast-math",
+    "-O3",
+    "-DNDEBUG",
+    "-I",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/mutants/cases/signed_zero/src",
+    "/workspaces/E-HGP/build/v8_float32_index_mutants_20260921/signed_zero/core.o",
+    "/workspaces/E-HGP/build/v8_float32_index_mutants_20260921/signed_zero/test.o",
+    "-o",
+    "/workspaces/E-HGP/build/v8_float32_index_mutants_20260921/signed_zero/probe"
+  ],
+  "cwd": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_index_20260921/mutants",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/bin:/usr/bin",
+    "TZ": "UTC"
+  },
+  "exit_code": 0,
+  "finished_utc": "2026-09-21T15:45:43.792548+00:00",
+  "label": "signed_zero_link",
+  "phase": "link",
+  "started_utc": "2026-09-21T15:45:43.699071+00:00",
+  "stderr": "",
+  "stderr_base64": "",
+  "stdout": "",
+  "stdout_base64": ""
+}

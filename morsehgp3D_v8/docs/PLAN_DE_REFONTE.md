@@ -22,6 +22,15 @@ suffit. Les performances20mm ne se transfèrent pas au nouveau profil.
 Conserver le partage par blocs et la future distribution fine pendant
 ce port ; ne pas en faire une nouvelle campagne de micro-optimisations q2.
 
+Le [propriétaire/index float32](INDEX_FLOAT32_ET_SUITE_Q34_20260921.md) est
+maintenant implémenté et qualifié : préparation O(n log n), boîtes exactes,
+IDs/rangs et stockage contigu partageable. Les mesures8k/16k/32k et les
+découpes de la trame0 sont closes ; cela ne transfère aucune propriété
+au census. Priorité suivante : filtres/replis exacts q3/q4 et clés globales
+construites à la demande, en conservant les comparateurs réduits et le
+partage entre graines. Les18limbes du prédicat q2 ne suffisent pas aux
+degrés5/6 ; les dimensions proposées dans la note restent à implémenter.
+
 Mise à jour utilisateur du21 septembre : les prochaines études LiDAR
 emploient le [découpage spatial capteur](PROTOCOLE_LIDAR_SPATIAL_20260921.md),
 pas une densité variable à8k/16k/32k. Mesurer scène, deux moitiés, quatre

@@ -1,0 +1,11 @@
+--- src/spatial/float32_index.cpp
++++ open_box/src/spatial/float32_index.cpp
+@@ -173,7 +173,7 @@
+       const auto nh = float32_order_key(node.box.high()[axis]);
+       const auto ql = float32_order_key(query.low()[axis]);
+       const auto qh = float32_order_key(query.high()[axis]);
+-      if (nh < ql || nl > qh) { outside = true; break; }
++      if (nh <= ql || nl >= qh) { outside = true; break; }
+       inside = inside && ql <= nl && nh <= qh;
+     }
+     if (outside) {

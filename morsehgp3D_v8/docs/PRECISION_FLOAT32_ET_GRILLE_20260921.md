@@ -136,6 +136,11 @@ float32 ; aucune campagne GCP n'est engagée pour cette brique locale.
 
 ## Suite de développement, sans perdre la parallélisation
 
+Mise à jour après cette capture : le [propriétaire/index natif float32](INDEX_FLOAT32_ET_SUITE_Q34_20260921.md)
+de l'étape1 ci-dessous est maintenant réalisé, avec boîtes exactes,
+préparation O(n log n), oracles et mesures séparés. Les étapes numériques
+q3/q4 et le raccord à la tour restent ouverts.
+
 1. Introduire un propriétaire/index qui conserve les float32, avec
    unicité et boîtes conservatrices adaptées. Ne pas émuler ce profil
    par une grille qui supprime silencieusement des bits.

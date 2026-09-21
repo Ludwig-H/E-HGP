@@ -63,6 +63,17 @@ ses propres sources, tests et reçus, sans transfert implicite.
 
 ## État exécutable
 
+L'[index natif float32](docs/INDEX_FLOAT32_ET_SUITE_Q34_20260921.md) est maintenant
+implémenté : copie immuable, IDs conservés, boîtes exactes, trois tris et
+partitions médianes en **O(n log n)**, stockage O(n). Qualification locale
+Release/ASan/UBSan :27 fixtures,404 requêtes rationnelles,151 contrôles natifs.
+Construction seule à8k/16k/32k : environ7/15/33ms ; trames entières0/100/200 :
+126,906/129,596/95,983ms sur CPU local partagé. Les
+[54 mesures et six comparaisons spatiales](receipts/float32_index_20260921/README.md)
+concernent la préparation, pas le census ni FULL/G4. Construction encore
+mono-thread ; lectures concurrentes testées, pas de GPU ni de nouveau
+contrat de tour. Le prochain port porte sur les bornes/prédicats/clés q3/q4.
+
 Entrée de précision fine close : [reçus](receipts/float32_precision_20260921/README.md),
 15tests de préparation,3923requêtes q2 contre oracle rationnel et49contrôles
 natifs, en Release et Clang ASan/UBSan. Lectures normal/−O identiques.

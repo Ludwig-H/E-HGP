@@ -3,6 +3,16 @@
 13 septembre 2026. Mémoire courte de l'audit et de la première tranche P0.
 Les sources et contre-fixtures complètes sont dans les rapports liés.
 
+## Hériter du découpage u16 pour le float32 — 21 septembre
+
+Un split au milieu géométrique peut créer277niveaux sur seulement278points
+dyadiques couvrant les exposantsfloat32. Ne pas hériter des piles u16 ni
+augmenter simplement leur plafond : l'[index neuf](INDEX_FLOAT32_ET_SUITE_Q34_20260921.md)
+coupe au rang médian, profondeur9 sur cette fixture. Trois tris réutilisés
+évitent de retrier chaque sous-plage. Les endpoints de boîtes sont exacts,
+mais leurs largeurs en double ne sont pas automatiquement des distances
+certifiées ; elles ne servent ici qu'au choix d'axe.
+
 ## Réduire simplement le pas u16 — 21 septembre
 
 Une grille1mm ne tient plus dansu16 sur les trames d'environ160m.

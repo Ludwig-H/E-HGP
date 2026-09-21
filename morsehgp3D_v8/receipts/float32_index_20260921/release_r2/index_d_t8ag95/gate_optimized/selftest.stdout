@@ -1,0 +1,1 @@
+{"schema":"mhgp8_float32_index_selftest_v1","status":"passed","tests":151,"invalid_inputs":67,"rounding_modes":4,"flush_modes":4,"concurrent_workers":4,"concurrent_queries":64}
