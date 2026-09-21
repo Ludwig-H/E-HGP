@@ -811,6 +811,16 @@ notations (W, G) du constructeur et (P, J, Q, λ) de A. Combinaison recommandée
 la fixture axiale de A (décision attendue [−101,29 ; −19,33]) et sa version
 tournée par ((2,−2,1),(1,2,2),(−2,−1,2)) + 500.
 
+Les fixtures ci-dessus (huit familles : sommet, axiale et sa rotation, λ, G
+ambigu, témoins mutuels, barycentriques, identités) sont gravées en rationnels
+exacts et rejouables dans
+[q3_bloc_float32_fixtures_20260921/](q3_bloc_float32_fixtures_20260921/README.md)
+(`run`/`read`, aucun assert), avec les valeurs attendues des trois enveloppes
+et des décisions : matière directe pour la porte de bloc que le journal
+annonce (« tests Fraction à venir »). Ma plage resserrée exacte pour la
+fixture axiale est [−1722/17 ; −58/3], la vraie plage ; celle du README de A,
+−486226/4800, est un peu plus lâche par ses conditions entières.
+
 ## Erreurs et points durs relevés (à 4dbe3024)
 
 1. **Session G4 R2 : diagnostic non établi.** La capture
