@@ -6,7 +6,10 @@
 #include <algorithm>
 #include <optional>
 #include <array>
+#include <functional>
 #include <atomic>
+#include <condition_variable>
+#include <mutex>
 #include <limits>
 #include <stdexcept>
 #include <utility>
@@ -365,12 +368,23 @@ std::pair<std::size_t, std::size_t> edge_key(std::size_t a, std::size_t b) {
   return {std::min(a, b), std::max(a, b)};
 }
 
+// A range of a-ranks of one residual rectangle (its b-range is whole), with
+// the lane mask already filtered at the rectangle level.
+struct RectangleTask {
+  std::size_t a_node{}, b_node{}, a_first{}, a_last{};
+  std::uint8_t mask{};
+};
+// Returns false when the queue refused the task (full): the caller expands
+// that range inline, so every pair is still expanded exactly once.
+using RectangleSplitter = std::function<bool(const RectangleTask&)>;
+
 class Engine {
  public:
   Engine(Q2CensusIndexPtr index, unsigned k, WspdQ34Options options,
-         const Q34SeedConsumer& consumer)
+         const Q34SeedConsumer& consumer, RectangleSplitter splitter = {})
       : index_(std::move(index)), k_(k), options_(options), consumer_(consumer),
-        sink_([this](const Q34SeedCandidate& candidate) { emit(candidate); }) {}
+        sink_([this](const Q34SeedCandidate& candidate) { emit(candidate); }),
+        splitter_(std::move(splitter)) {}
   Engine(const Engine&) = delete;
   Engine& operator=(const Engine&) = delete;
   Engine(Engine&&) = delete;
@@ -378,7 +392,6 @@ class Engine {
 
   void rectangle(const WspdRectangle& rectangle) {
     const auto nodes = index_->spatial_nodes();
-    const auto order = index_->spatial_order();
     const auto a = nodes[rectangle.a_node].range;
     const auto b = nodes[rectangle.b_node].range;
     counter_add(work.input_rectangles);
@@ -406,12 +419,33 @@ class Engine {
     // This is an explicit expansion of the certified residual WSPD products,
     // not an all-pairs fallback. The front's disjoint cover guarantees one
     // visit per unordered residual edge, even when both lanes survive.
-    for (auto ai = a.first; ai < a.last; ++ai)
-      for (auto bi = b.first; bi < b.last; ++bi)
-        edge(order[ai], order[bi], mask);
+    // With a splitter, a heavy rectangle is expanded by disjoint a-rank
+    // ranges: the first one here, the others as published tasks; every
+    // pair of the rectangle is still expanded exactly once.
+    const auto grain = options_.parallel_task_pairs;
+    if (splitter_ && grain != 0) {
+      const auto rows = mass > grain ? std::max<std::size_t>(1, grain / b.size()) : a.size();
+      if (rows < a.size()) counter_add(split_rectangles);
+      for (auto start = a.first; start < a.last; start += rows) {
+        const auto stop = std::min(start + rows, a.last);
+        if (!splitter_(RectangleTask{rectangle.a_node, rectangle.b_node, start, stop, mask}))
+          expand(start, stop, b.first, b.last, mask);
+      }
+      return;
+    }
+    expand(a.first, a.last, b.first, b.last, mask);
+  }
+
+  // Published range of an already filtered rectangle: no rectangle-level
+  // counter or witness search is paid again.
+  void rectangle_range(const RectangleTask& task) {
+    const auto nodes = index_->spatial_nodes();
+    const auto b = nodes[task.b_node].range;
+    expand(task.a_first, task.a_last, b.first, b.last, task.mask);
   }
 
   WspdQ34Work work{};
+  u64 split_rectangles{};  // Not a geometric counter: orchestration only.
 
  private:
   void emit(const Q34SeedCandidate& candidate) {
@@ -421,6 +455,14 @@ class Engine {
     counter_add(work.payload_shell_ids, static_cast<u64>(candidate.shell_first.size()));
     counter_add(work.payload_shell_ids, static_cast<u64>(candidate.shell_second.size()));
     consumer_(candidate);
+  }
+
+  void expand(std::size_t a_first, std::size_t a_last, std::size_t b_first, std::size_t b_last,
+              std::uint8_t mask) {
+    const auto order = index_->spatial_order();
+    for (auto ai = a_first; ai < a_last; ++ai)
+      for (auto bi = b_first; bi < b_last; ++bi)
+        edge(order[ai], order[bi], mask);
   }
 
   void observe(const Q34EdgeCoverPtr& cover, u64 q4_peak = 0) {
@@ -621,6 +663,7 @@ class Engine {
   WspdQ34Options options_;
   const Q34SeedConsumer& consumer_;
   Q34SeedConsumer sink_;
+  RectangleSplitter splitter_;
   std::vector<std::size_t> shell_;
 };
 
@@ -676,10 +719,24 @@ WspdQ34ParallelResult run_wspd_q34_parallel(Q2CensusIndexPtr index, unsigned kma
     WspdFrontWork front{};
     WspdQ34Work work{};
     WspdQ34WorkerWork stats{};
+    u64 tasks{}, split_rectangles{};
   };
   std::vector<WorkerState> states(started);
   orchestration.worker_state_bytes = storage_bytes(states.capacity(), sizeof(WorkerState));
-  std::atomic<std::size_t> next{0};
+  // Rectangle-range tasks: one mutex-protected queue shared by the joined
+  // team. A worker publishes ranges of a heavy rectangle while it expands the
+  // first one; idle workers take pending ranges before the next front job.
+  // Termination: no pending task, no unclaimed job and no busy worker.
+  struct TaskQueue {
+    std::mutex mutex;
+    std::condition_variable wake;
+    std::vector<RectangleTask> pending;
+    std::size_t busy{}, next_job{}, job_count{};
+    u64 published{}, consumed{}, task_pairs{}, peak_queue{}, waits{}, refused{};
+    bool cancelled{};
+  } queue;
+  queue.job_count = plan->job_count();
+  const auto sharing = started > 1 && options.parallel_task_pairs != 0;
   parallel_detail::run_joined_workers(started,
       [&](std::size_t slot, const std::atomic<bool>& cancel) {
         auto& state = states[slot];
@@ -687,23 +744,83 @@ WspdQ34ParallelResult run_wspd_q34_parallel(Q2CensusIndexPtr index, unsigned kma
           callbacks[slot](slot, candidate);
         };
         {
-          Engine engine(index, kmax, options, output);
+          const RectangleSplitter splitter = !sharing ? RectangleSplitter{} :
+              [&](const RectangleTask& task) {
+                const std::lock_guard<std::mutex> lock(queue.mutex);
+                if (queue.pending.size() >= options.parallel_queue_capacity) {
+                  counter_add(queue.refused);
+                  return false;
+                }
+                queue.pending.push_back(task);
+                counter_add(queue.published);
+                queue.peak_queue = std::max<u64>(queue.peak_queue, queue.pending.size());
+                queue.wake.notify_one();
+                return true;
+              };
+          Engine engine(index, kmax, options, output, splitter);
           const WspdRectangleConsumer receiver = [&](const WspdRectangle& rectangle) {
             engine.rectangle(rectangle);
           };
-          while (!cancel.load(std::memory_order_relaxed)) {
-            auto job = next.load(std::memory_order_relaxed);
-            while (job < plan->job_count() &&
-                   !next.compare_exchange_weak(job, job + 1, std::memory_order_relaxed)) {}
-            if (job == plan->job_count()) break;
-            // Coarse: do not interrupt an edge or re-seed its local census.
-            // run_job includes either an unvisited subtree or the callback
-            // of an already-counted terminal, never its prefix tests again.
-            const auto part = plan->run_job(job, receiver);
-            parallel_detail::merge_work(state.front, part.work);
-            counter_add(state.stats.jobs);
+          while (true) {
+            std::optional<RectangleTask> task;
+            std::optional<std::size_t> job;
+            {
+              std::unique_lock<std::mutex> lock(queue.mutex);
+              while (queue.pending.empty() && queue.next_job == queue.job_count &&
+                     queue.busy != 0 && !queue.cancelled) {
+                counter_add(queue.waits);
+                queue.wake.wait(lock);
+              }
+              if (queue.cancelled || cancel.load(std::memory_order_relaxed)) {
+                queue.cancelled = true;
+                queue.wake.notify_all();
+                break;
+              }
+              if (!queue.pending.empty()) {
+                task = queue.pending.back();
+                queue.pending.pop_back();
+                counter_add(queue.consumed);
+              } else if (queue.next_job < queue.job_count) {
+                job = queue.next_job++;
+              } else {
+                break;  // Nothing pending, nothing unclaimed, nobody busy.
+              }
+              ++queue.busy;
+            }
+            try {
+              if (task) {
+                const auto nodes = index->spatial_nodes();
+                const auto pairs = static_cast<u64>(task->a_last - task->a_first) *
+                    nodes[task->b_node].range.size();
+                engine.rectangle_range(*task);
+                counter_add(state.tasks);
+                {
+                  const std::lock_guard<std::mutex> lock(queue.mutex);
+                  counter_add(queue.task_pairs, pairs);
+                }
+              } else {
+                // Coarse job: an edge is never interrupted; run_job resumes an
+                // unvisited subtree or replays a counted terminal's callback.
+                const auto part = plan->run_job(*job, receiver);
+                parallel_detail::merge_work(state.front, part.work);
+                counter_add(state.stats.jobs);
+              }
+            } catch (...) {
+              const std::lock_guard<std::mutex> lock(queue.mutex);
+              --queue.busy;
+              queue.cancelled = true;
+              queue.wake.notify_all();
+              throw;
+            }
+            {
+              const std::lock_guard<std::mutex> lock(queue.mutex);
+              --queue.busy;
+              if (queue.busy == 0 && queue.pending.empty() && queue.next_job == queue.job_count)
+                queue.wake.notify_all();
+            }
           }
           state.work = engine.work;
+          state.split_rectangles = engine.split_rectangles;
         }  // Private engine buffers are released before this worker returns.
         state.stats.front_products = state.front.product_visits;
         state.stats.input_rectangles = state.work.input_rectangles;
@@ -715,15 +832,26 @@ WspdQ34ParallelResult run_wspd_q34_parallel(Q2CensusIndexPtr index, unsigned kma
   // All workers are joined before any reduction, including on launch or
   // callback failure. A failed call never publishes its partial counters.
   result.workers.reserve(states.size());
+  result.worker_tasks.reserve(states.size());
   for (const auto& state : states) {
     parallel_detail::merge_work(result.pipeline.front.work, state.front);
     merge(result.pipeline.work, state.work);
     counter_add(orchestration.completed_jobs, state.stats.jobs);
     counter_add(orchestration.edge_buffer_bytes_sum, state.stats.peak_edge_buffer_bytes);
     result.workers.push_back(state.stats);
+    result.worker_tasks.push_back(state.tasks);
+    counter_add(result.tasks.split_rectangles, state.split_rectangles);
   }
+  result.tasks.published = queue.published;
+  result.tasks.consumed = queue.consumed;
+  result.tasks.task_pairs = queue.task_pairs;
+  result.tasks.peak_queue = queue.peak_queue;
+  result.tasks.waits = queue.waits;
+  result.tasks.refused = queue.refused;
   if (orchestration.completed_jobs != orchestration.jobs)
     throw std::logic_error("mhgp8 parallel q34 lost its front job partition");
+  if (result.tasks.published != result.tasks.consumed || !queue.pending.empty())
+    throw std::logic_error("mhgp8 parallel q34 lost a published rectangle range");
   validate_completion(result.pipeline, options);
   return result;
 }

@@ -50,9 +50,21 @@ MUTATIONS = (
     ("q3_atlas_rejects_at_k_minus_2", (
         ("      else if (*certified >= k_ - 1) {", "      else if (*certified >= k_ - 2) {"),
     )),
+    # A rectangle range refused by the full task queue must be expanded inline
+    # by its publisher; dropping it loses whole edges, which the four-worker
+    # parallel cases (one-task queue) detect through the engine's completion
+    # ledger (input pair mass no longer partitioned) before the oracle.
+    ("parallel_refused_range_dropped", (
+        ("        if (!splitter_(RectangleTask{rectangle.a_node, rectangle.b_node, start, stop, mask}))\n          expand(start, stop, b.first, b.last, mask);",
+         "        static_cast<void>(splitter_(RectangleTask{rectangle.a_node, rectangle.b_node, start, stop, mask}));"),
+    )),
 )
 INDEXED_FAILURE = "wspd q34 gate: indexed filter lost support/depth/key/complete shell\n"
-EXPECTED_FAILURE = {"q3_atlas_rejects_at_k_minus_2": INDEXED_FAILURE}
+# The engine's own completion ledger (expanded pairs + rectangle mass must
+# equal the input mass) refutes the dropped range before the oracle runs.
+PARALLEL_FAILURE = "wspd q34 gate: mhgp8 global q34 completed ledger mismatch\n"
+EXPECTED_FAILURE = {"q3_atlas_rejects_at_k_minus_2": INDEXED_FAILURE,
+                    "parallel_refused_range_dropped": PARALLEL_FAILURE}
 
 
 def mutation_plan():

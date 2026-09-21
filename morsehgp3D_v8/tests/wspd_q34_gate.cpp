@@ -64,6 +64,7 @@ struct GlobalGate : Gate {
   u64 seed_cell_inactive_calls{},seed_cell_invalid_inputs{},seed_cell_callback_failures{},seed_cell_allocation_failures{};
   u64 seed_cell_shared_calls{},seed_cell_owner_resets{},seed_cell_parallel_failures{};
   u64 atlas_rejections{},atlas_lane_skips{},atlas_locations{},atlas_outside{};
+  u64 task_sharing_calls{},task_ranges{},task_splits{},task_refusals{};
 };
 
 // Every component is a standard-layout aggregate containing only u64 fields
@@ -447,6 +448,10 @@ void global_lifecycle(GlobalGate& gate) {
 
 void parallel_case(GlobalGate& gate,const Points& points,const Output& all,unsigned k,
                    mhgp8::WspdQ34Options opts,std::size_t worker_count,std::size_t grain) {
+  // Tiny fixtures never reach the default task grain: four-worker cases use a
+  // two-pair grain and a one-task queue so that range splitting AND the
+  // full-queue inline fallback are both exercised against the oracle.
+  if (worker_count==4) {opts.parallel_task_pairs=2;opts.parallel_queue_capacity=1;}
   const auto index=mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
   const auto expected=eligible(all,k,opts.requested_lane_mask);
   Output mono_output;
@@ -511,6 +516,17 @@ void parallel_case(GlobalGate& gate,const Points& points,const Output& all,unsig
   gate.require(p.target_jobs==worker_count*grain && p.terminal_jobs<=p.jobs &&
     (p.started_workers==0 || (p.worker_state_bytes>0 && p.callback_storage_bytes>0)),
     "parallel orchestration storage/target ledger mismatch");
+  // Rectangle-range task sharing: every published range is consumed exactly
+  // once by a started slot; a single started worker never shares.
+  const auto& t=result.tasks;
+  u64 consumed=0;
+  for (const auto count:result.worker_tasks) consumed+=count;
+  gate.require(result.worker_tasks.size()==result.workers.size() && t.published==t.consumed && consumed==t.consumed &&
+    t.task_pairs<=mono.work.expanded_pairs && t.split_rectangles<=mono.work.input_rectangles &&
+    (p.started_workers>1 || (t.published==0 && t.refused==0 && t.split_rectangles==0)),
+    "parallel rectangle-range task ledger mismatch");
+  if (t.published>0) ++gate.task_sharing_calls;
+  gate.task_ranges+=t.published;gate.task_splits+=t.split_rectangles;gate.task_refusals+=t.refused;
 }
 
 void parallel_fixtures(GlobalGate& gate) {
@@ -923,6 +939,8 @@ int main(int argc,char** argv) {
     global_fixtures(gate);global_lifecycle(gate);parallel_fixtures(gate);parallel_lifecycle(gate);indexed_fixtures(gate);
     bounds_mode_global_fixtures(gate);
     seed_cell_global_fixtures(gate);
+    gate.require(gate.task_sharing_calls>0 && gate.task_ranges>0 && gate.task_splits>0 && gate.task_refusals>0,
+      "rectangle-range task sharing was never exercised (calls, ranges, split rectangles, full-queue refusals)");
     gate.require(gate.atlas_rejections>0 && gate.atlas_locations>gate.atlas_rejections && gate.atlas_outside>0,
       "q3 atlas consultation was never exercised (rejections, non-rejected locations, outside-domain centers)");
     gate.require(gate.q3>0 && gate.q4>0 && gate.max_shell>=30 && gate.fat_rectangles>0 &&
@@ -948,6 +966,7 @@ int main(int argc,char** argv) {
     EMIT(parallel_callback_failures);EMIT(parallel_join_checks);EMIT(parallel_owner_resets);EMIT(parallel_empty_calls);
     EMIT(indexed_calls);EMIT(indexed_pair_rejections);EMIT(indexed_rectangle_rejections);EMIT(boxed_calls);
     EMIT(atlas_rejections);EMIT(atlas_lane_skips);EMIT(atlas_locations);EMIT(atlas_outside);
+    EMIT(task_sharing_calls);EMIT(task_ranges);EMIT(task_splits);EMIT(task_refusals);
     EMIT(bounds_mode_calls);EMIT(bounds_exclusion_calls);EMIT(bounds_affine_calls);EMIT(bounds_work_checks);EMIT(bounds_parallel_calls);
     EMIT(bounds_invalid_inputs);EMIT(bounds_inactive_calls);EMIT(bounds_callback_failures);EMIT(bounds_allocation_failures);
     EMIT(bounds_shared_calls);EMIT(bounds_owner_resets);

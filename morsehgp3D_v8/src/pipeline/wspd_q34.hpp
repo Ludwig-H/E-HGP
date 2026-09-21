@@ -33,6 +33,15 @@ struct WspdQ34Options {
   // on closed cells); the q4 sweep then reuses the same atlas. Off keeps the
   // historical order and every counter bit-identical.
   bool q3_atlas_consultation{false};
+  // Parallel entry only: every surviving residual rectangle is published to
+  // the team's bounded task queue, by ranges of a-ranks when its pair mass
+  // exceeds this grain, so that any idle worker expands it; the discovering
+  // worker expands inline only what the full queue refuses. Whole edges are
+  // never split. Zero disables sharing (historical Coarse jobs only).
+  std::size_t parallel_task_pairs{256};
+  // Pending tasks admitted before publishers fall back to inline expansion
+  // (bounded memory, never a search or output quota).
+  std::size_t parallel_queue_capacity{4096};
 };
 
 struct WspdQ3AtlasWork {
@@ -169,10 +178,21 @@ struct WspdQ34ParallelWork {
   bool operator==(const WspdQ34ParallelWork&) const = default;
 };
 
+// Rectangle-range task sharing between the joined workers (SUM fields, plus
+// maxima). published = ranges handed to the queue; consumed = ranges taken
+// from it (by any worker, the publisher included); task_pairs = their pair
+// mass; peak_queue = simultaneously pending tasks; waits = idle waits.
+struct WspdQ34TaskWork {
+  u64 split_rectangles{}, published{}, consumed{}, task_pairs{}, peak_queue{}, waits{}, refused{};
+  bool operator==(const WspdQ34TaskWork&) const = default;
+};
+
 struct WspdQ34ParallelResult {
   WspdQ34Result pipeline;
   WspdQ34ParallelWork parallel;
   std::vector<WspdQ34WorkerWork> workers;
+  WspdQ34TaskWork tasks;
+  std::vector<u64> worker_tasks;  // Ranges consumed per started slot.
 };
 
 // Explicit Coarse front-job entry; the old mono entry/default is unchanged.

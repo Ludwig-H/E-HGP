@@ -22,6 +22,9 @@ constexpr std::array q3_fields{
  F(WspdQ3Work,census_outside_sites),F(WspdQ3Work,census_shell_sites),F(WspdQ3Work,depth_rejections),
  F(WspdQ3Work,early_unread_sites),F(WspdQ3Work,shell_sort_comparisons),F(WspdQ3Work,shell_ids),
  F(WspdQ3Work,emitted),F(WspdQ3Work,peak_shell_bytes)};
+constexpr std::array task_fields{
+ F(WspdQ34TaskWork,split_rectangles),F(WspdQ34TaskWork,published),F(WspdQ34TaskWork,consumed),
+ F(WspdQ34TaskWork,task_pairs),F(WspdQ34TaskWork,peak_queue),F(WspdQ34TaskWork,waits),F(WspdQ34TaskWork,refused)};
 constexpr std::array q3_atlas_fields{
  F(WspdQ3AtlasWork,edges_with_atlas),F(WspdQ3AtlasWork,root_lane_skips),F(WspdQ3AtlasWork,locations),
  F(WspdQ3AtlasWork,outside_domain),F(WspdQ3AtlasWork,rejections)};
@@ -99,6 +102,7 @@ static_assert(sizeof(WspdQ34ParallelWork)==parallel_fields.size()*sizeof(u64));
 static_assert(sizeof(WspdQ34WorkerWork)==worker_fields.size()*sizeof(u64));
 static_assert(sizeof(WspdQ3Work)==q3_fields.size()*sizeof(u64));
 static_assert(sizeof(WspdQ3AtlasWork)==q3_atlas_fields.size()*sizeof(u64));
+static_assert(sizeof(WspdQ34TaskWork)==task_fields.size()*sizeof(u64));
 static_assert(sizeof(WspdQ34Work)==global_fields.size()*sizeof(u64)+sizeof(Q34EdgeCoverWork)+
  sizeof(WspdQ3Work)+sizeof(Q4LocalEdgeWork)+sizeof(Q4WindowEdgeWork)+sizeof(WspdQ34WitnessWork)+sizeof(Q3BallCensusWork)+sizeof(Q4SeedCellWork)+sizeof(WspdQ3AtlasWork));
 static_assert(sizeof(Q4SeedCellWork)==seed_cell_fields.size()*sizeof(u64));
@@ -272,6 +276,12 @@ int global_run(int argc,char** argv) {
   audit_dump(parallel.workers[slot],worker_fields);
  }
  std::cout<<']';
+ if(schema_version>=5) {
+  std::cout<<",\"tasks\":";audit_dump(parallel.tasks,task_fields);
+  std::cout<<",\"workers_tasks\":[";
+  for(std::size_t slot=0;slot<parallel.worker_tasks.size();++slot) {if(slot)std::cout<<',';std::cout<<parallel.worker_tasks[slot];}
+  std::cout<<']';
+ }
  std::cout<<",\"cloud_work\":";audit_dump(cloud->work(),cloud_fields);
  std::cout<<",\"index_work\":";audit_dump(index->work(),index_fields);
  std::cout<<",\"memory\":{\"id_bytes\":"<<sizeof(std::size_t)<<",\"input_capacity_bytes\":"<<input.points.capacity()*sizeof(Point3)
