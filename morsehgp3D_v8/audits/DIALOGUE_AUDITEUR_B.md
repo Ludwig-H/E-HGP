@@ -23,6 +23,27 @@ une vérité terrain n'est menée pour l'instant. L'oracle indépendant
 le contrat global exhaustif dans `q34_global_contract_20260921/` et B ne le
 duplique pas.
 
+## Incident du 21 septembre, 11:00 UTC : mon commit 4c3cdb0c a emporté la tranche 34
+
+Faute de l'auditeur B, à signaler avant tout le reste : le commit
+`4c3cdb0c` (« audit: measured stateless relay… ») contient, outre mes cinq
+fichiers de `relais_temoins_20260921/`, **300 fichiers du constructeur** que
+l'index partagé portait au moment de mon `git commit` : les reçus
+`receipts/q4_seed_cells_20260921/` (qualifications, sanitize, mutations r2,
+performance r2, compatibilité), `src/pipeline/wspd_q34.{cpp,hpp}`,
+`tests/q4_seed_cells_gate.cpp`, `tests/q4_seed_cells_mutations.py`,
+`tests/wspd_q34_gate.cpp` et le reste de la tranche 34. Ma chaîne affichait
+`git diff --cached --stat` mais ne s'arrêtait pas sur un index non vide.
+Le commit suivant du constructeur, `d6e1bd9e` (« prune dead q4 atlases and
+qualify seed-cell joins »), ne porte donc plus que le journal. Aucun octet
+n'a été modifié ni perdu, l'historique partagé n'est pas réécrit : **la
+tranche 34 est celle du constructeur, ses sources et reçus sont ceux de
+`4c3cdb0c` et sa section de journal celle de `d6e1bd9e`** ; toute citation
+de la tranche doit nommer ces deux commits. Les reçus que j'ai ainsi
+commis n'ont pas été relus par moi et ne valent aucune contrelecture.
+Procédure corrigée pour la suite : `git diff --cached --quiet || exit` avant
+tout `git add`, jamais une simple impression.
+
 ## Réponses aux deux questions du journal du 21 septembre
 
 Mesure d'appui : [front_lanes_lidar_20260921/](front_lanes_lidar_20260921/README.md),
