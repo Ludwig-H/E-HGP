@@ -13,6 +13,15 @@ moins d'une seconde puis100ms sur G4. La référence principale n'est plus
 Les moitiés/quarts mesurent la croissance, pas la réussite de ce contrat.
 Les références50k ci-dessous sont les objectifs et observations historiques.
 
+Précision précisée ensuite le21 septembre : float32 original par défaut,
+grille optionnelle paramétrable à1mm par défaut. Voir le
+[port numérique](PRECISION_FLOAT32_ET_GRILLE_20260921.md). Préparation et
+prédicat q2 exact sont séparés du moteur u16 : auditer/raccorder bornes,
+clés, comparateurs et stockage q3/q4 sans supposer qu'un type plus large
+suffit. Les performances20mm ne se transfèrent pas au nouveau profil.
+Conserver le partage par blocs et la future distribution fine pendant
+ce port ; ne pas en faire une nouvelle campagne de micro-optimisations q2.
+
 Mise à jour utilisateur du21 septembre : les prochaines études LiDAR
 emploient le [découpage spatial capteur](PROTOCOLE_LIDAR_SPATIAL_20260921.md),
 pas une densité variable à8k/16k/32k. Mesurer scène, deux moitiés, quatre

@@ -11,16 +11,41 @@ HGP **K=1..10 en moins d'une seconde** ; le repli porte sur toute la tour
 **K=1..5**, puis viser **100 ms** une fois le jalon d'une seconde acquis.
 Voir le [contrat détaillé](morsehgp3D_v8/docs/CONTRAT_TRAMES_SEMANTICKITTI_20260921.md).
 Aucun préfixe, tirage, plafonnement à 50k ou autre sous-échantillonnage
-ne remplace une trame entière. Le profil actuel reste une quantification
-u16 isotrope **fixe à 2 cm**, puis une déduplication globale publiée avec
-les correspondances de tous les retours : les trois trames disponibles
-ont 123389/124479/125526 retours bruts et 119142/119942/120725 sites distincts.
-Cette exactitude concerne les sites quantifiés, pas la géométrie float32
-brute. Les trames 08/000000, 08/000100 et 08/000200 ne constituent pas
+ne remplace une trame entière. Décision de précision ultérieure du même
+jour : **conserver les coordonnées float32 originales par défaut** ; une
+grille isotrope est optionnelle, paramétrable, **1 mm par défaut**. Voir
+`morsehgp3D_v8/docs/PRECISION_FLOAT32_ET_GRILLE_20260921.md`.
+Le moteur existant demeure u16 ; ses mesures à 2 cm sont historiques,
+sans transfert de qualification au profil float32 ou à la grille fine.
+Préparation d'entrée et primitive numérique ne qualifient pas le moteur.
+Ne jamais passer les nouveaux fichiers f32/u32 aux sondes binaires u16.
+Publier les doublons/fusions et conserver la correspondance de tous les
+retours. Les trames 08/000000, 08/000100 et 08/000200 ne constituent pas
 plusieurs séquences. Les moitiés/quarts spatiaux servent au diagnostic
 de croissance, jamais à valider le contrat de trame entière. Un flux
 q3/q4 CPU n'est ni FULL ni une exécution GPU. Les références historiques
 50k et leurs reçus restent inchangés ; aucun contrat de tour n'est acquis.
+
+## Entrée float32 / grille fine — 21 septembre2026
+
+Lire `morsehgp3D_v8/docs/PRECISION_FLOAT32_ET_GRILLE_20260921.md`.
+Préparateur distinct : float32 sans perte géométrique par défaut (zéros
+signés normalisés), grille décimale exacte optionnelle à1mm, translation
+entière commune et sept partitions. Formatsf32/u32 incompatibles avec
+les sondes u16 ; ne pas effectuer de raccord implicite. XYZ finis requis,
+réflectance brute conservée par IDs/hashes, doublons et fusions publiés.
+Primitive q2 isolée : intervallesdouble puis repli exact576bits ; aucune
+qualification héritée q3/q4/FULL/GPU. Captures R2 closes :15tests,
+3923requêtes Fraction,49contrôles natifs Release/Clang ASan/UBSan, lecteurs
+normal/−O ;42nuages pour trois trames×deux profils, aucune fusion1mm.
+Échec initial Clang++→Clang du lanceur conservé ; pas de défaut géométrique
+déduit d'un échec de lien. Builds épinglés `build/v8_float32_precision_20260921`,
+`build/v8_float32_precision_sanitize_20260921`,
+`build/v8_float32_precision_r2_20260921`,
+`build/v8_float32_precision_sanitize_r2_20260921`.
+GCP non utilisé. Suite : propriétaire/index float32, bornes/clés/prédicats
+q3/q4 exacts et partage des tâches intérieures, sans élargissement aveugle
+des types ni nouvelle campagne de micro-optimisations q2.
 
 ## Cible de travail et statut
 

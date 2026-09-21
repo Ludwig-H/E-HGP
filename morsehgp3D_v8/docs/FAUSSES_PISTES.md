@@ -3,6 +3,17 @@
 13 septembre 2026. Mémoire courte de l'audit et de la première tranche P0.
 Les sources et contre-fixtures complètes sont dans les rapports liés.
 
+## Réduire simplement le pas u16 — 21 septembre
+
+Une grille1mm ne tient plus dansu16 sur les trames d'environ160m.
+Élargir seulement Point3 provoquerait collisions de clés et débordements
+des carrés/produits ailleurs ; voir les contre-calculs de la
+[note de précision](PRECISION_FLOAT32_ET_GRILLE_20260921.md). Le moteur
+reste exact dans son ancien contrat, pas automatiquement après ce port.
+Le compromis provisoire2,5mm n'a pas été qualifié comme moteur : il est
+abandonné au profit du float32 original préféré et de la grille optionnelle
+paramétrable à1mm. Les reçus20mm restent historiques, jamais réétiquetés.
+
 ## Graines et cellules q4 — tranche34,21 septembre
 
 - Attribuer tout le gain au parcours de produits X×C serait trompeur.

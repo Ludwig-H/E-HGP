@@ -1,0 +1,115 @@
+{
+  "config": {
+    "build": "/workspaces/E-HGP/build/v8_float32_precision_sanitize_20260921",
+    "compiler": "/usr/lib/llvm-18/bin/clang",
+    "inputs": [],
+    "python": "/home/codespace/.python/current/bin/python",
+    "sanitize": true
+  },
+  "environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "full_contract_qualified": false,
+  "gcp_used": false,
+  "git_commit": "7e7c6cc475914846a44bd151ac37bcb14fe7c144",
+  "launch": [
+    "/home/codespace/.python/current/bin/python",
+    "morsehgp3D_v8/bench/run_lidar_precision_checks.py",
+    "run",
+    "--build",
+    "build/v8_float32_precision_sanitize_20260921",
+    "--compiler",
+    "/usr/bin/clang++",
+    "--sanitize",
+    "--output",
+    "morsehgp3D_v8/receipts/float32_precision_20260921/sanitize"
+  ],
+  "plan": [
+    [
+      "compiler",
+      [
+        "/usr/lib/llvm-18/bin/clang",
+        "--version"
+      ]
+    ],
+    [
+      "compile",
+      [
+        "/usr/lib/llvm-18/bin/clang",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/src",
+        "-O1",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_precision_sanitize_20260921/probe.d",
+        "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_predicate_probe.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_precision_sanitize_20260921/mhgp8_float32_predicate_probe"
+      ]
+    ],
+    [
+      "input_gate_normal",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "/workspaces/E-HGP/morsehgp3D_v8/tests/lidar_precision_gate.py"
+      ]
+    ],
+    [
+      "native_gate_normal",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_predicate_gate.py",
+        "--binary",
+        "/workspaces/E-HGP/build/v8_float32_precision_sanitize_20260921/mhgp8_float32_predicate_probe",
+        "--output",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/sanitize/precision_f9d1henc/native_normal"
+      ]
+    ],
+    [
+      "input_gate_optimized",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v8/tests/lidar_precision_gate.py"
+      ]
+    ],
+    [
+      "native_gate_optimized",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_predicate_gate.py",
+        "--binary",
+        "/workspaces/E-HGP/build/v8_float32_precision_sanitize_20260921/mhgp8_float32_predicate_probe",
+        "--output",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/sanitize/precision_f9d1henc/native_optimized"
+      ]
+    ]
+  ],
+  "prepared": [],
+  "public_status": "not_claimed",
+  "schema": "mhgp8_lossless_input_and_float32_q2_checks_v1",
+  "scope": "input_preparation_and_binary32_q2_primitive_not_full_pipeline",
+  "source_sha256": {
+    "/usr/lib/llvm-18/bin/clang": "8ef402d453d1ba4902e4ee0f0f847f6cfa01400c95aa43c24e97818b9c0e3f45",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py": "d22a7b90f3f2214f14c44a4980d2cca7fb33fac8cbd23a977be958fa5d25fb84",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_lidar_precision_checks.py": "6e04b8b08fb8e0d80de1941dd5b72ccf86cb3f1418f3ed370fd5c97fbdc0067b",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_p0_matrix.py": "b806572d9b5a76afe15c26586321663aa946e318a7a8a2286c3e9549e3ba717f",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_predicates.hpp": "1f6175bb27cd7543c2d68916efabe68ebd23ac413dadc7aad82cabb30651997d",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_predicate_gate.py": "7c43bbe7228f24c986a82facaaeba2ae67f91ad48fe83fc291ebc6d458c361f8",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_predicate_probe.cpp": "4edaa6c30c39eefd71bb7b5add044c26a21cc94264fd8d3e8267d61bd62fa357",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/lidar_precision_gate.py": "2106e37d89160ceffa3c2768ef163471cb973880ed74938f1bf4524bffeec971"
+  },
+  "started_utc": "2026-09-21T14:43:47.089515+00:00"
+}

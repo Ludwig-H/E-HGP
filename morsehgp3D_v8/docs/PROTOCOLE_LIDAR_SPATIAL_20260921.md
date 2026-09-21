@@ -2,8 +2,11 @@
 
 Protocole demandé par l'utilisateur le 21 septembre 2026. Il remplace
 les préfixes sous-échantillonnés comme expérience principale de croissance
-LiDAR. Cadre inchangé : CPU, `quantized_u16_input_only`, `not_claimed`.
-Ce changement de protocole ne qualifie aucun nouveau moteur ni contrat G4.
+LiDAR. La préférence numérique précisée ensuite est le float32 sans perte,
+avec grille optionnelle de1mm par défaut. Voir la
+[note de précision](PRECISION_FLOAT32_ET_GRILLE_20260921.md).
+Le moteur historique reste CPU/u16, `not_claimed` ; ce changement d'entrée
+ne qualifie aucun nouveau moteur ni contrat G4.
 
 ## Une même scène, sans raréfier ses points
 
@@ -28,7 +31,20 @@ le repère du scan 0. Les couper à `x=y=0` ne passerait donc pas par leur
 capteur. Le nouveau préparateur repart des `.bin` bruts, sans poses,
 calibration, recentrage ni rotation dépendant du morceau.
 
-## Le profil quantifié doit rester explicite
+## Profil actif et historique quantifié
+
+Avec `prepare_lidar_precision.py`, le défaut float32 conserve exactement
+XYZ et coupe selon les signes bruts x/y. L'option `--profile grid`
+applique une grille isotrope, `--precision-mm` valant1 par défaut, puis
+une translation entière commune aux sept objets pour l'encodage u32.
+Les plans capteur suivent cette translation ; jamais de recentrage par
+morceau. Les changements de côté dus à la grille sont publiés.
+Correspondances, déduplication globale et restrictions conservent le
+protocole ci-dessous. Ces fichiers ne sont **pas compatibles** avec les
+sondes u16 : le raccord moteur fin reste à développer.
+
+Le reste de cette section documente le profil historique20mm, afin de
+conserver l'interprétation exacte des reçus déjà clos.
 
 Le moteur actuel traite les **sites distincts u16**, pas le multiensemble
 des retours float32. Une grille isotrope fixe de 2 cm est appliquée une
@@ -79,7 +95,7 @@ Comparer s=8/10/12 à entrées identiques ; distinguer travail géométrique,
 préparations, mémoire, sorties et temps mur. Pour les chronos, éviter les
 campagnes concurrentes et faire des répétitions appariées.
 
-## Statut et conservation des preuves
+## Statut et conservation des preuves historiques20mm
 
 Le préparateur est [prepare_lidar_spatial.py](../bench/prepare_lidar_spatial.py).
 Il produit un manifeste haché, les sept nuages, leurs correspondances et

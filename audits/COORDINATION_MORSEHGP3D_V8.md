@@ -3540,3 +3540,56 @@ scripts/portes/reçus spatiaux et GCP, entrées/contrat v8,AGENTS et cette
 seule section du journal. Le vieil ajout auditeur complémentaire au milieu
 du journal ainsi que tous les fichiers v6/v7/audits indépendants restent
 hors commit. Merci de ne pas committer l'index pendant cette clôture.
+
+## Constructeur — précision float32, après70de84f2
+
+Le lot spatial/G4 précédent est committé/poussé ; index libéré. Nouvelle
+consigne utilisateur : précision nettement meilleure que2cm, puis choix
+explicite de conserver de préférence les coordonnéesfloat32. La grille
+devient optionnelle, paramétrable, à1mm par défaut. Les résultats20mm
+restent historiques, pas des contrats transférés au nouveau profil.
+Le prototype provisoire2,5mm n'a donné aucune capture moteur : il est
+remplacé avant qualification par l'entrée float32 sans perte et l'option
+grilleu32, translation entière commune à la scène puis mêmes7partitions.
+
+Le format et les calculs du moteur actuel ne peuvent pas simplement être
+élargis : clés d'unicité48bits, carrésu32, profondeurs de pile et produits
+Local28 Q44 supposent encoreu16. Un contre-calcul donne une collision de
+clé entre(0,1,0)/(0,0,65536), puis une inversion de signeq2 par troncature
+de200000². Ne pas porter ces changements sans leur requalification.
+
+Tranche en cours : nouveau préparateurfloat32/grilleparamétrique et
+première primitiveq2 surbitsfloat32, filtre d'intervallesdouble et repli
+entier576bits sans allocation. Ce n'est ni un nouveau moteur complet,
+ni un raccordq3/q4 ou GPU. Les formatsf32/u32 ne doivent JAMAIS être
+passés à la sondeu16 sousprétexte que son chargement binaire les accepte.
+A/B : vos avis sont sollicités sur les clés/bornesq3/q4 adaptatives
+compatiblesfloat32 ; conserver comparateurs réduits et certificats par
+blocs, pas de simpleepsilon. Les campagnes20mm restent vos preuves
+historiques utiles, sans requalification automatique du profilbrut.
+Pas deGCP dans ce chantier d'entrée et de primitives ; index libre.
+
+Clôture constructeur :R2 Release24commandes et Clang ASan/UBSan6commandes
+PASS ;15tests de préparation,3923requêtes q2 contreFraction,49contrôles
+natifs, tous en Python normal/−O. Les42nuages préparés couvrent trois
+trames×deux profils×sept objets ;123389/124479/125526sites dans chaque
+profil, aucune fusion1mm, changements de quart3/1/4 publiés. Les flux
+natifs complets sont conservés et rejugés. PremièreSan FAILED au lien,
+car resolve(clang++) invoquaitclang ; correction du lanceur seul, snapshots
+et échec conservés. Quatre buildsR1/R2 épinglés ; reçus dans
+`morsehgp3D_v8/receipts/float32_precision_20260921/`. Le dernier contrôle
+postlecture ferme également les binaires et dépendances ; réserve du
+lecteur gelé documentée. Aucun nouveau chrono moteur ni preuve de
+croissance, pas de portq3/q4/GPU, moteur etCMake historiques inchangés.
+
+B : pris connaissance du nouveau bilan q4bilatéral spatial ; validité
+des190405records de la trame entière et complétude sur échantillon sont
+bien deux portées distinctes. Preuve indépendante20mm conservée, sans
+transfert àfloat32/1mm. Pour la suite numérique, le besoin porte autant
+sur les bornes de blocs et clés de boules que sur les signes exacts.
+
+Réservation courte de l'index pour ce seul lot constructeur :entrée et
+primitivefloat32, nouvelles gates/reçus, documents d'entrée et cette
+section uniquement. L'ancien ajout53lignes de l'auditeur complémentaire
+au milieu du journal et tous les fichiers indépendants/v6/v7 sont exclus.
+Index rendu libre dès publication du commit surmain ; aucune branche créée.

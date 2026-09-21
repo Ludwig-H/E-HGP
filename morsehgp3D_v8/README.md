@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — graines et cellules q4
+# Morse HGP 3D v8 — entrée float32 et refonte parallèle
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -23,13 +23,16 @@ toute la tour **1..5**, puis **100 ms** sur le même périmètre. Aucun
 sous-échantillonnage, préfixe ou plafond de points ne satisfait cette cible.
 Voir le [contrat de trames entières](docs/CONTRAT_TRAMES_SEMANTICKITTI_20260921.md).
 
-L'entrée actuelle est quantifiée en u16 sur une grille isotrope **fixe de
-2 cm**, puis dédupliquée globalement : les trames 08/000000, 08/000100 et
-08/000200 comptent respectivement 123389/124479/125526 retours bruts et
-119142/119942/120725 sites distincts. Effectifs, fusions et correspondances
-sont [publiés](receipts/lidar_spatial_20260921/README.md). L'exactitude porte
-sur ces sites quantifiés, pas sur la géométrie float32 brute. Ces trois
-trames d'une même séquence ne valident pas plusieurs séquences.
+Précision demandée ensuite : **float32 original sans perte par défaut** ;
+grille isotrope optionnelle avec `--profile grid --precision-mm …`,
+**1 mm par défaut**. La [nouvelle préparation et la primitive q2 exacte](docs/PRECISION_FLOAT32_ET_GRILLE_20260921.md)
+sont séparées du moteur u16 existant : le port numérique de toute la chaîne
+reste à faire. Le cadre u16 ci-dessus décrit ce moteur, pas la nouvelle
+cible ni un support natif float32 déjà complet.
+Les mesures à 2 cm et leurs [fusions publiées](receipts/lidar_spatial_20260921/README.md)
+restent historiques. Ces trois trames d'une même séquence ne valident pas
+plusieurs séquences. Les nouveaux formats f32/u32 ne sont pas des entrées
+compatibles avec les sondes u16 actuelles.
 
 Les coupes spatiales restent un diagnostic de croissance ; un morceau
 rapide ne valide pas la trame entière. Le flux de candidats q3/q4 actuel
@@ -59,6 +62,13 @@ Les mesures de l'audit d'ouverture restent v7 ; chaque tranche v8 porte
 ses propres sources, tests et reçus, sans transfert implicite.
 
 ## État exécutable
+
+Entrée de précision fine close : [reçus](receipts/float32_precision_20260921/README.md),
+15tests de préparation,3923requêtes q2 contre oracle rationnel et49contrôles
+natifs, en Release et Clang ASan/UBSan. Lectures normal/−O identiques.
+Trois trames × deux profils × sept objets =42nuages vérifiés ; aucun
+point fusionné à1mm sur ces scènes. Nouvelle primitive isolée, pas un
+moteur float32 complet ; aucun nouveau benchmark ni usage GCP.
 
 **Diagnostic spatial LiDAR demandé le21 septembre :** mesurer
 une scène complète, ses deux moitiés puis ses quatre quarts, selon deux

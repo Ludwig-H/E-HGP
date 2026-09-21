@@ -1,0 +1,364 @@
+{
+  "config": {
+    "build": "/workspaces/E-HGP/build/v8_float32_precision_20260921",
+    "compiler": "/usr/bin/x86_64-linux-gnu-g++-13",
+    "inputs": [
+      "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin",
+      "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin",
+      "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin"
+    ],
+    "python": "/home/codespace/.python/current/bin/python",
+    "sanitize": false
+  },
+  "environment": {
+    "ASAN_OPTIONS": null,
+    "UBSAN_OPTIONS": null
+  },
+  "full_contract_qualified": false,
+  "gcp_used": false,
+  "git_commit": "7e7c6cc475914846a44bd151ac37bcb14fe7c144",
+  "launch": [
+    "/home/codespace/.python/current/bin/python",
+    "morsehgp3D_v8/bench/run_lidar_precision_checks.py",
+    "run",
+    "--build",
+    "build/v8_float32_precision_20260921",
+    "--compiler",
+    "/usr/bin/g++",
+    "--output",
+    "morsehgp3D_v8/receipts/float32_precision_20260921/release",
+    "--inputs",
+    "morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin",
+    "morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin",
+    "morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin"
+  ],
+  "plan": [
+    [
+      "compiler",
+      [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "--version"
+      ]
+    ],
+    [
+      "compile",
+      [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/src",
+        "-O3",
+        "-DNDEBUG",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_precision_20260921/probe.d",
+        "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_predicate_probe.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_precision_20260921/mhgp8_float32_predicate_probe"
+      ]
+    ],
+    [
+      "input_gate_normal",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "/workspaces/E-HGP/morsehgp3D_v8/tests/lidar_precision_gate.py"
+      ]
+    ],
+    [
+      "native_gate_normal",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_predicate_gate.py",
+        "--binary",
+        "/workspaces/E-HGP/build/v8_float32_precision_20260921/mhgp8_float32_predicate_probe",
+        "--output",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/native_normal"
+      ]
+    ],
+    [
+      "input_gate_optimized",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v8/tests/lidar_precision_gate.py"
+      ]
+    ],
+    [
+      "native_gate_optimized",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_predicate_gate.py",
+        "--binary",
+        "/workspaces/E-HGP/build/v8_float32_precision_20260921/mhgp8_float32_predicate_probe",
+        "--output",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/native_optimized"
+      ]
+    ],
+    [
+      "scene_00_000000_float32_prepare",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py",
+        "prepare",
+        "--input",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin",
+        "--output",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_00_000000_float32",
+        "--profile",
+        "float32"
+      ]
+    ],
+    [
+      "scene_00_000000_float32_read",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py",
+        "read",
+        "--path",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_00_000000_float32"
+      ]
+    ],
+    [
+      "scene_00_000000_float32_read_O",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py",
+        "read",
+        "--path",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_00_000000_float32"
+      ]
+    ],
+    [
+      "scene_00_000000_grid_prepare",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py",
+        "prepare",
+        "--input",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin",
+        "--output",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_00_000000_grid",
+        "--profile",
+        "grid"
+      ]
+    ],
+    [
+      "scene_00_000000_grid_read",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py",
+        "read",
+        "--path",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_00_000000_grid"
+      ]
+    ],
+    [
+      "scene_00_000000_grid_read_O",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py",
+        "read",
+        "--path",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_00_000000_grid"
+      ]
+    ],
+    [
+      "scene_01_000100_float32_prepare",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py",
+        "prepare",
+        "--input",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin",
+        "--output",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_01_000100_float32",
+        "--profile",
+        "float32"
+      ]
+    ],
+    [
+      "scene_01_000100_float32_read",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py",
+        "read",
+        "--path",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_01_000100_float32"
+      ]
+    ],
+    [
+      "scene_01_000100_float32_read_O",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py",
+        "read",
+        "--path",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_01_000100_float32"
+      ]
+    ],
+    [
+      "scene_01_000100_grid_prepare",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py",
+        "prepare",
+        "--input",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin",
+        "--output",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_01_000100_grid",
+        "--profile",
+        "grid"
+      ]
+    ],
+    [
+      "scene_01_000100_grid_read",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py",
+        "read",
+        "--path",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_01_000100_grid"
+      ]
+    ],
+    [
+      "scene_01_000100_grid_read_O",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py",
+        "read",
+        "--path",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_01_000100_grid"
+      ]
+    ],
+    [
+      "scene_02_000200_float32_prepare",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py",
+        "prepare",
+        "--input",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin",
+        "--output",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_02_000200_float32",
+        "--profile",
+        "float32"
+      ]
+    ],
+    [
+      "scene_02_000200_float32_read",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py",
+        "read",
+        "--path",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_02_000200_float32"
+      ]
+    ],
+    [
+      "scene_02_000200_float32_read_O",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py",
+        "read",
+        "--path",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_02_000200_float32"
+      ]
+    ],
+    [
+      "scene_02_000200_grid_prepare",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py",
+        "prepare",
+        "--input",
+        "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin",
+        "--output",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_02_000200_grid",
+        "--profile",
+        "grid"
+      ]
+    ],
+    [
+      "scene_02_000200_grid_read",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py",
+        "read",
+        "--path",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_02_000200_grid"
+      ]
+    ],
+    [
+      "scene_02_000200_grid_read_O",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py",
+        "read",
+        "--path",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_02_000200_grid"
+      ]
+    ]
+  ],
+  "prepared": [
+    {
+      "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_00_000000_float32",
+      "profile": "float32",
+      "source": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin"
+    },
+    {
+      "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_00_000000_grid",
+      "profile": "grid",
+      "source": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin"
+    },
+    {
+      "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_01_000100_float32",
+      "profile": "float32",
+      "source": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin"
+    },
+    {
+      "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_01_000100_grid",
+      "profile": "grid",
+      "source": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin"
+    },
+    {
+      "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_02_000200_float32",
+      "profile": "float32",
+      "source": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin"
+    },
+    {
+      "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_02_000200_grid",
+      "profile": "grid",
+      "source": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin"
+    }
+  ],
+  "public_status": "not_claimed",
+  "schema": "mhgp8_lossless_input_and_float32_q2_checks_v1",
+  "scope": "input_preparation_and_binary32_q2_primitive_not_full_pipeline",
+  "source_sha256": {
+    "/usr/bin/x86_64-linux-gnu-g++-13": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin": "92e945f37a6cd4a58acc8aa15b275af2e271ecf69c0a44a311d888524473c451",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin": "4dfb5701db9ff36bd592746e08e8fafd4d1c63cba1ef66d2c2791e405b800e80",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin": "132f437349e17c00a8a31539f10a3214d9391ae1251293e7794a26540412b5cd",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py": "d22a7b90f3f2214f14c44a4980d2cca7fb33fac8cbd23a977be958fa5d25fb84",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_lidar_precision_checks.py": "6e04b8b08fb8e0d80de1941dd5b72ccf86cb3f1418f3ed370fd5c97fbdc0067b",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_p0_matrix.py": "b806572d9b5a76afe15c26586321663aa946e318a7a8a2286c3e9549e3ba717f",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_predicates.hpp": "1f6175bb27cd7543c2d68916efabe68ebd23ac413dadc7aad82cabb30651997d",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_predicate_gate.py": "7c43bbe7228f24c986a82facaaeba2ae67f91ad48fe83fc291ebc6d458c361f8",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_predicate_probe.cpp": "4edaa6c30c39eefd71bb7b5add044c26a21cc94264fd8d3e8267d61bd62fa357",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/lidar_precision_gate.py": "2106e37d89160ceffa3c2768ef163471cb973880ed74938f1bf4524bffeec971"
+  },
+  "started_utc": "2026-09-21T14:43:47.060521+00:00"
+}

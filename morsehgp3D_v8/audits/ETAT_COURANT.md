@@ -10,10 +10,11 @@ SemanticKITTI entière**, sur plusieurs scènes : toute la tour **K=1..10
 en moins d'une seconde sur G4**, repli sur toute la tour **1..5**, puis
 **100 ms** après ce jalon. Voir le [contrat détaillé](../docs/CONTRAT_TRAMES_SEMANTICKITTI_20260921.md).
 Aucun sous-échantillonnage, préfixe ou plafond de points ne valide ce contrat.
-La grille u16 isotrope reste **fixe à 2 cm**, avec déduplication globale et
-correspondances publiées : 123389/124479/125526 retours bruts donnent
-119142/119942/120725 sites distincts pour 08/000000, 08/000100 et 08/000200.
-L'exactitude concerne ces sites quantifiés, pas la géométrie float32 brute.
+Décision de précision ultérieure : **coordonnées float32 originales par
+défaut**, grille isotrope optionnelle, de pas paramétrable, **1 mm par défaut**.
+La [préparation et primitive q2](../docs/PRECISION_FLOAT32_ET_GRILLE_20260921.md)
+ne constituent pas encore un moteur complet float32. Les mesures u16 à
+2 cm restent historiques ; aucun transfert de qualification ni de temps.
 Ces trois trames appartiennent à une seule séquence, pas à plusieurs.
 
 Les coupes spatiales servent au diagnostic de croissance, pas à une
@@ -22,6 +23,14 @@ candidats, pas FULL ni GPU ; aucun contrat de tour n'est acquis.
 Les mesures et reçus historiques 50k sont conservés sans réinterprétation.
 
 ## Diagnostic spatial et état constructeur
+
+Entrée float32/grille1mm close localement :15tests du préparateur,
+3923requêtes q2 contre Fraction et49contrôles natifs passent en Release
+et Clang ASan/UBSan. Six préparations entières,42nuages, lecteurs normal/−O
+concordants. Aucune fusion1mm sur les trois trames ; changements de quart
+3/1/4 conservés. [Reçus R2 et échec de lien Clang R1](../receipts/float32_precision_20260921/README.md).
+Nouvelle primitive q2 seulement, pas de croissance ni chronos du moteur
+sur ce profil. GCP non utilisé dans ce lot ; preuves20mm ci-dessous historiques.
 
 Diagnostic LiDAR : [scène, deux moitiés, quatre quarts](../docs/PROTOCOLE_LIDAR_SPATIAL_20260921.md),
 plans orthogonaux passant par le capteur propre de chaque scan. La densité

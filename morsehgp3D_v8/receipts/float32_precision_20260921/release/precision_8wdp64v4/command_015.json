@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py",
+    "prepare",
+    "--input",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin",
+    "--output",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_01_000100_grid",
+    "--profile",
+    "grid"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": 0,
+  "label": "scene_01_000100_grid_prepare",
+  "stderr": "",
+  "stderr_base64": "",
+  "stdout": "{\"completion_sha256\": \"60a955fb302add83245d5bb64f5910bfe0bb7d5fa89e8907dd905a11e9dd864d\", \"datasets\": 7, \"manifest_sha256\": \"f1c41bb4b34c70e5ecda557c56ba97eace1454a9665a0dbfb3af6da9041c8b2f\", \"parameters\": {\"precision_mm\": \"1\", \"profile\": \"grid\"}, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release/precision_8wdp64v4/scene_01_000100_grid\", \"profile\": \"quantized_u32_fixed_grid_input_only\", \"raw_returns\": 124479, \"schema\": \"mhgp8_lidar_precision_manifest_v2\", \"status\": \"passed\", \"unique_sites\": 124479}\n",
+  "stdout_base64": "eyJjb21wbGV0aW9uX3NoYTI1NiI6ICI2MGE5NTVmYjMwMmFkZDgzMjQ1ZDViYjY0ZjU5MTBiZmUwYmI3ZDVmYTg5ZTg5MDdkZDkwNWExMWU5ZGQ4NjRkIiwgImRhdGFzZXRzIjogNywgIm1hbmlmZXN0X3NoYTI1NiI6ICJmMWM0MWJiNGIzNGM3MGU1ZWNkYTU1N2M1NmJhOTdlYWNlMTQ1NGE5NjY1YTBkYmZiM2FmNmRhOTA0MWM4YjJmIiwgInBhcmFtZXRlcnMiOiB7InByZWNpc2lvbl9tbSI6ICIxIiwgInByb2ZpbGUiOiAiZ3JpZCJ9LCAicGF0aCI6ICIvd29ya3NwYWNlcy9FLUhHUC9tb3JzZWhncDNEX3Y4L3JlY2VpcHRzL2Zsb2F0MzJfcHJlY2lzaW9uXzIwMjYwOTIxL3JlbGVhc2UvcHJlY2lzaW9uXzh3ZHA2NHY0L3NjZW5lXzAxXzAwMDEwMF9ncmlkIiwgInByb2ZpbGUiOiAicXVhbnRpemVkX3UzMl9maXhlZF9ncmlkX2lucHV0X29ubHkiLCAicmF3X3JldHVybnMiOiAxMjQ0NzksICJzY2hlbWEiOiAibWhncDhfbGlkYXJfcHJlY2lzaW9uX21hbmlmZXN0X3YyIiwgInN0YXR1cyI6ICJwYXNzZWQiLCAidW5pcXVlX3NpdGVzIjogMTI0NDc5fQo="
+}

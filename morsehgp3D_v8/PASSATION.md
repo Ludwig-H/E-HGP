@@ -1,4 +1,4 @@
-# Passation v8 — parcours graines/cellules q4
+# Passation v8 — précision float32, puis chaîne parallèle
 
 21 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
@@ -18,17 +18,33 @@ toute la tour **K=1..5**, puis **100 ms** après le premier jalon.
 Le [contrat détaillé](docs/CONTRAT_TRAMES_SEMANTICKITTI_20260921.md)
 fait foi ; pas de sous-échantillonnage, de préfixe ou de plafond de points.
 
-Le profil actuel conserve la grille u16 isotrope **fixe de 2 cm** et la
-déduplication globale avec correspondances de tous les retours. Les
-trames 08/000000, 08/000100 et 08/000200 passent respectivement de
-123389/124479/125526 retours bruts à 119142/119942/120725 sites distincts,
-avec fusions publiées. Ne pas revendiquer l'exactitude sur les coordonnées
-float32 brutes ni une validation de plusieurs séquences à partir de ces
-trois trames de la séquence08. Les coupes spatiales diagnostiquent la
+La précision cible est désormais **float32 original sans perte**, avec
+une grille isotrope optionnelle, de pas paramétrable et **1 mm par défaut**.
+La [nouvelle entrée et première primitive q2 exacte](docs/PRECISION_FLOAT32_ET_GRILLE_20260921.md)
+ne sont pas encore raccordées au moteur complet ; les chronos u16 à 2 cm
+restent historiques. Ne pas les transformer en performances float32 ou
+millimétriques. Conserver les correspondances de tous les retours et
+publier doublons/fusions. Trois trames de la séquence08 ne constituent pas
+une validation de plusieurs séquences. Les coupes spatiales diagnostiquent la
 croissance ; elles ne remplacent pas le contrat entier. Le flux q3/q4 CPU
 n'est pas FULL ni GPU. Les reçus historiques 50k restent inchangés.
 
 ## À reprendre maintenant
+
+Socle d'entrée qualifié :15tests de préparation,3923requêtes rationnelles
+q2 et49contrôles natifs, Release/Clang ASan/UBSan, lectures normal/−O
+concordantes ;42nuages issus de trois trames, sans fusion à1mm. Voir les
+[captures R2 et l'échec initial conservé](receipts/float32_precision_20260921/README.md).
+Les quatre builds de précision R1/R2 sont épinglés selon leurs noms exacts
+dans ce README ; ne pas les écraser. GCP non utilisé pour ce lot ;
+CMake et moteur u16 inchangés.
+
+Porter les formats numériques et les bornes sans simple élargissement des
+types : clés d'unicité, carrés, produits intermédiaires, piles, clés de
+boules et comparaisons exactes q3/q4. Ne pas charger f32/u32 dans les
+sondes u16. La primitive q2 filtrée est un socle arithmétique, pas une
+nouvelle recherche de quelques pourcents sur q2. Le partage des graines
+q3 et des tâches intérieures q3/q4 reste la priorité de parallélisation.
 
 Prendre la trame entière comme référence principale ; utiliser le
 [protocole spatial LiDAR](docs/PROTOCOLE_LIDAR_SPATIAL_20260921.md)

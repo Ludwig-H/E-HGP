@@ -29,16 +29,25 @@ avant les chronométrages de qualification. Les trames08/000000,
 mais ne représentent pas plusieurs séquences ni une validation de tout
 SemanticKITTI ; élargir la diversité avant une qualification produit.
 
-## Ce que signifie « entière » dans le profil actuel
+## Entrée entière et précision demandée
 
-Ne pas réduire la trame à 50k, à un préfixe ou à un tirage. Le profil
-implémenté reste `quantized_u16_input_only` : grille isotrope **fixe de
-2 cm**, puis déduplication globale des sites, avec correspondance conservée
-pour **chaque retour brut**. Les trois entrées disponibles comptent
-123389/124479/125526 retours, donnant119142/119942/120725 sites distincts.
-Publier les deux effectifs et les fusions. Cette exactitude sur les sites
-quantifiés n'est pas une exactitude sur les coordonnées float32 originales
-ni un traitement des multiplicités comme sites distincts.
+Ne pas réduire la trame à 50k, à un préfixe ou à un tirage. La décision de
+précision ultérieure du21 septembre donne la préférence aux **coordonnées
+float32 originales, conservées exactement**. Une grille isotrope est
+autorisée en option, avec précision paramétrable et **pas de 1 mm par défaut**.
+Voir le [contrat numérique et son état d'implémentation](PRECISION_FLOAT32_ET_GRILLE_20260921.md).
+Ne pas mélanger les mesures de ces deux profils ni changer automatiquement
+le pas pour faire rentrer une scène. Une grille de1mm donne au plus0,5mm
+d'erreur par coordonnée ; cela ne dit rien de la précision physique du capteur.
+
+Publier les retours bruts, sites géométriques distincts, doublons d'origine
+et fusions dues à la grille, en conservant **chaque correspondance de retour**.
+Le modèle reste celui des sites distincts, pas des multiplicités indépendantes.
+Le moteur actuel reste `quantized_u16_input_only` ; les anciennes mesures
+à2cm (119142/119942/120725 sites contre123389/124479/125526 retours) sont
+historiques. La préparation sans perte et un prédicat exact isolé ne
+transforment pas ce moteur en moteur float32. Aucun contrat de tour sur
+le nouveau profil n'est encore acquis.
 
 Le [protocole spatial](PROTOCOLE_LIDAR_SPATIAL_20260921.md) garde la scène,
 ses deux moitiés et ses quatre quarts, définis par deux plans perpendiculaires

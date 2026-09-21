@@ -1,0 +1,38 @@
+{
+  "artifact_sha256": {
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/sanitize/precision_f9d1henc/MANIFEST.json": "d7c5f62ea5f3bf2ca434c7e8fd770b5c36546685a9aa2b55f3ae302703f0b7ff",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/sanitize/precision_f9d1henc/command_000.json": "cb3dfd5219a692c12a30320b88ab8867579e014daed7a75b87ef2ba2ab4232a4",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/sanitize/precision_f9d1henc/command_001.json": "427ca85a63a2fb307875aeb158664740696fae32561ac6ee014a6b1c21afc221",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/sanitize/precision_f9d1henc/sources/float32_predicate_gate.py": "7c43bbe7228f24c986a82facaaeba2ae67f91ad48fe83fc291ebc6d458c361f8",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/sanitize/precision_f9d1henc/sources/float32_predicate_probe.cpp": "4edaa6c30c39eefd71bb7b5add044c26a21cc94264fd8d3e8267d61bd62fa357",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/sanitize/precision_f9d1henc/sources/float32_predicates.hpp": "1f6175bb27cd7543c2d68916efabe68ebd23ac413dadc7aad82cabb30651997d",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/sanitize/precision_f9d1henc/sources/lidar_precision_gate.py": "2106e37d89160ceffa3c2768ef163471cb973880ed74938f1bf4524bffeec971",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/sanitize/precision_f9d1henc/sources/prepare_lidar_precision.py": "d22a7b90f3f2214f14c44a4980d2cca7fb33fac8cbd23a977be958fa5d25fb84",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/sanitize/precision_f9d1henc/sources/run_lidar_precision_checks.py": "6e04b8b08fb8e0d80de1941dd5b72ccf86cb3f1418f3ed370fd5c97fbdc0067b",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/sanitize/precision_f9d1henc/sources/run_p0_matrix.py": "b806572d9b5a76afe15c26586321663aa946e318a7a8a2286c3e9549e3ba717f"
+  },
+  "commands": [
+    {
+      "path": "command_000.json",
+      "sha256": "cb3dfd5219a692c12a30320b88ab8867579e014daed7a75b87ef2ba2ab4232a4"
+    },
+    {
+      "path": "command_001.json",
+      "sha256": "427ca85a63a2fb307875aeb158664740696fae32561ac6ee014a6b1c21afc221"
+    }
+  ],
+  "error": "ValueError: precision command failed: compile",
+  "finished_utc": "2026-09-21T14:43:49.802765+00:00",
+  "source_sha256_after": {
+    "/usr/lib/llvm-18/bin/clang": "8ef402d453d1ba4902e4ee0f0f847f6cfa01400c95aa43c24e97818b9c0e3f45",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py": "d22a7b90f3f2214f14c44a4980d2cca7fb33fac8cbd23a977be958fa5d25fb84",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_lidar_precision_checks.py": "6e04b8b08fb8e0d80de1941dd5b72ccf86cb3f1418f3ed370fd5c97fbdc0067b",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_p0_matrix.py": "b806572d9b5a76afe15c26586321663aa946e318a7a8a2286c3e9549e3ba717f",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_predicates.hpp": "1f6175bb27cd7543c2d68916efabe68ebd23ac413dadc7aad82cabb30651997d",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_predicate_gate.py": "7c43bbe7228f24c986a82facaaeba2ae67f91ad48fe83fc291ebc6d458c361f8",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_predicate_probe.cpp": "4edaa6c30c39eefd71bb7b5add044c26a21cc94264fd8d3e8267d61bd62fa357",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/lidar_precision_gate.py": "2106e37d89160ceffa3c2768ef163471cb973880ed74938f1bf4524bffeec971"
+  },
+  "started_utc": "2026-09-21T14:43:47.094211+00:00",
+  "status": "failed"
+}
