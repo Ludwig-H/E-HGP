@@ -478,6 +478,129 @@ violation, même flux qu'en modes anciens à 1k/K5. Le mode `joined` ne change
 pas l'objet émis ; ses coûts sont ceux des reçus 34 du constructeur, que je
 n'ai pas relus.
 
+### Lecture du brouillon du protocole spatial (non commis) : deux points à corriger, trois risques de lecture
+
+Lecture par quatre relectures indépendantes (méthode, code de préparation,
+lanceur et analyseur, outillage d'audit), toutes en lecture seule sur l'état
+du worktree du 21 septembre ; ce qui suit n'est pas une relecture des reçus.
+
+- **Erreur de documentation** : `Q34_MESURES_SPATIALES` affirme que « tous
+  les compteurs sont conservés, avec les temps et capacités séparés », mais
+  `level_sums` de l'analyseur additionne `timings_ms.*` et `parallel.*` entre
+  morceaux sans étiquette (sur la fixture, `parallel.requested_workers` vaut
+  8 au niveau des quarts et 4 au niveau de la scène : somme de constantes).
+  Exclure ces genres des sommes par niveau, ou les étiqueter.
+- **Erreur de lecture à prévenir** : les 513 compteurs aplatis reçoivent tous
+  une décision « quadratique », y compris les constantes et les compteurs nuls
+  (14 constantes sortent « below » avec exposant 0, 213 compteurs « zero_work »).
+  Désigner la courte liste des compteurs de tête à lire
+  (`local28.atlas.partition.node_visits`, `q3_blocks.count_node_visits`,
+  `witness.*.node_visits`, `front.work.product_visits` avec son préfixe
+  parallèle), et ne jamais publier un ratio « compteurs sous-quadratiques ».
+- **Risque méthodologique principal** : l'exposant par relation parent/enfant
+  est dominé par la différence de profil de densité, pas par n. Sur la scène 0,
+  un compteur exactement local et linéaire (paires à moins de 0,5 m, calcul
+  exact par grille) donne 58,0 paires par site sur la scène, 54,1 et 60,1 sur
+  les moitiés, 63,3 / 45,0 / 67,9 / 51,3 sur les quarts (×1,51 entre extrêmes),
+  et `growth()` lui attribue des exposants de 0,78 à 1,27 selon la relation,
+  pour un poste qui vaut 1. Estimateur à préférer : l'exposant poolé par
+  parent (déjà calculable depuis `level_sums`), les six exposants par relation
+  publiés comme dispersion, et l'écart entre frères (mêmes effectifs à ±3 %)
+  comme barre d'erreur ; une bande d'indécision |α − 2| < δ plutôt qu'un bit.
+- **Ce que les coupes ne peuvent pas voir** : à densité conservée, une lecture
+  « sous-quadratique » est presque tautologique pour tout algorithme local ;
+  elle ne détecte pas la croissance pilotée par la densité, qui est
+  précisément l'axe où le moteur a ses postes au-dessus de ×4 (census q3 ×4,3,
+  atlas q4 ×4,1 à ×6,5 au doublement des préfixes). Garder un axe densité
+  compagnon (préfixes hachés imbriqués d'un même morceau, ou superposition de
+  trames), annoncé comme non substituable ; les reçus 8k/16k/32k restent le
+  seul lien de comparabilité entre versions.
+- **Effet de frontière** : réel, petit, concentré dans la zone dense : 3,4 %
+  des sites à moins de 0,5 m du plan x (7,9 % à moins de 1 m, aux distances
+  2 à 10 m du capteur où le degré local est double de la moyenne) ; 1,49 % des
+  paires à 0,5 m traversent la coupe scène → moitiés, 0,20 % et 0,80 % pour
+  moitiés → quarts. Publier par compteur le déficit croisé 1 − ΣW_enfants/W_parent
+  et les effectifs par tranche de distance au plan, en interprétant le signe
+  selon l'étage (élagage ou acceptation).
+- **Reçus et pins** : la campagne de performance en cours (`spatial_9kscvyt0`)
+  tourne avec `--repeats 1` sous concurrence (1,74 cœur effectif sur 4 pour le
+  premier quart), en partie à cause de mes propres harnais (voir ci-dessous) :
+  n'y lire aucun exposant sur les temps, seulement sur les compteurs
+  déterministes ; l'analyseur n'est pas dans `PROTOCOL_SOURCES` et le
+  manifeste enregistre un worktree sale (scripts non suivis) ; le selftest du
+  lecteur (préfixe, mauvais morceau, hash, compteurs altérés) existe mais
+  n'est exercé par aucune porte ; la relecture dépend du répertoire courant ;
+  `TEST_PLAN` § 3.1 n'est pas amendé (les morceaux le satisfont par n ≥ 8 000,
+  pas à la lettre) ; « build R2 qualifié » désigne un reçu smoke `candidate`.
+  Détails vérifiés (lignes, essais synthétiques) disponibles sur demande.
+- Ce qui tient : `growth()` décide exactement sur les entiers dans tous les cas
+  limites ; les six relations et la conservation des effectifs sont
+  correctes ; les chiffres des deux portes (14 appels, 238 records, 688
+  triangles, 1 964 tétraèdres, 54 positifs) sont exacts, mais la fixture à 16
+  sites est un oracle de flux, jamais une mesure de croissance.
+- **Préparation** (`prepare_lidar_spatial.py`, commis à 759ce2b0 avec le
+  protocole et ses reçus ; seuls lanceur, analyseur et leur porte sont encore
+  non suivis) : aucune erreur ; quantification exacte vérifiée sur les
+  demi-cellules et 430 000 float32 denses (refus corrects hors grille et non
+  finis, −0,0 → 32768). Nuances : en coordonnées brutes la coupe effective est
+  x ≥ −0,01 m et non x ≥ 0 (les retours de [−0,01, 0) passent du côté non
+  négatif, 46 sur la scène 0, biais d'une demi-cellule unidirectionnel, à
+  écrire dans le protocole) ; un morceau réduit à un seul site serait invoqué
+  puis refusé par le chargeur natif (n ≥ 2) ; les champs `*_overlap_sites = 0`
+  et `*_equals_full = True` du manifeste sont des constantes littérales, pas
+  des mesures ; une réflectance non finie refuse tout le scan (champ
+  inutilisé) ; les reçus embarquent des chemins absolus vers un `data/`
+  ignoré par Git et le hash exact du script : relecture possible seulement sur
+  cette machine, à documenter.
+- **Mes propres outils, corrigés à la lecture** : ma première version V2 des
+  harnais ne gardait aucun gain (couverture descendue pour toutes les paires,
+  trois descentes du citron par paire) et ma relance de contrôle validait
+  l'atlas `joined` alors que la campagne chronométrée tourne en `live` ; les
+  deux sont corrigés (couverture seulement pour les paires conservées ou
+  soumises au lemme, une seule descente de décision, relance de la sonde en
+  `live` sur chaque morceau), sorties toujours identiques à la V1. Mes sept
+  morceaux sont identiques octet pour octet aux sept fichiers du constructeur
+  (`receipts/lidar_spatial_20260921/spatial_tbmhj_zx/scene_00_000000/`) : le
+  contrôle croisé porte sur le même objet que sa campagne. Sa campagne
+  chronométrée (`spatial_9kscvyt0`, `--repeats 1`) a chevauché mes harnais
+  (1,74 cœur effectif sur 4 pour son premier quart) : ses temps ne valent pas,
+  ses compteurs si.
+
+### Protocole spatial (brouillon du constructeur) : préparation indépendante et harnais adaptés
+
+Le protocole spatial demandé par l'utilisateur (scène brute dans son repère
+capteur, moitiés x < 0 / x ≥ 0, quarts par y, tous mesurés) remplace les
+préfixes sous-échantillonnés comme expérience principale de croissance. Pour
+le contre-vérifier sans hériter de la préparation du constructeur, le dossier
+[q34_stream_crosscheck_spatial_20260921/](q34_stream_crosscheck_spatial_20260921/SPATIAL_PIECES_SCAN0.json)
+contient une préparation indépendante de la scène 0 (`prepare_spatial_b.py` :
+quantification floor(50·x + 32768 + 1/2) en rationnels exacts depuis le
+float32, déduplication globale avant découpe, plans qx = qy = 32768 avec les
+sites du plan du côté ≥) : 119 142 sites uniques et 4 247 fusions, exactement
+les effectifs de la préparation A du 14 septembre ; moitiés 59 189 et 59 953
+sites, quarts 29 128 / 30 061 / 30 027 / 29 926 ; 80 sites sur le plan x et 54
+sur le plan y. Ces sept effectifs et empreintes sont à confronter au manifeste
+du constructeur dès qu'il sera commis ; toute différence sera un écart de
+convention à expliquer, pas une qualification.
+
+Les deux harnais de flux ont une version V2 à descentes d'index (décision du
+citron par la descente saturante « milieu d'abord », couverture par descente
+avec la borne inférieure séparable de |2z − a − b|² sur une boîte) qui
+reproduit à l'octet près les sorties V1 (supports et profondeurs q3, clés et
+profondeurs q4) sur les préfixes 1k/2k/4k à K5 et 1k/2k à K10 ; leur coût par
+paire ne dépend plus de n, ce qui met un quart de scène (≈ 30 000 sites) à
+portée d'un contrôle croisé exact en moins d'une heure par voie, les moitiés
+en quelques heures, la scène entière hors de portée. La campagne sur les
+quatre quarts à K5 (moteur 34 gelé, modes `rectangle-pair`/`boxes`/`affine`/
+`joined`, relance en `live`) démarre après la clôture de la capture
+chronométrée du constructeur ; ses reçus suivront.
+
+Processus de B sur la machine : ces harnais occupent un à deux cœurs par
+campagne (annoncée ici avec son heure de départ, 11:39 UTC pour les quarts,
+durée attendue deux à trois heures) ; en dehors de ces campagnes B ne laisse
+aucun processus actif. Une fenêtre libre pour les chronos isolés du
+constructeur peut être demandée dans ce dialogue.
+
 ## Erreurs et points durs relevés (à 4dbe3024)
 
 1. **Session G4 R2 : diagnostic non établi.** La capture

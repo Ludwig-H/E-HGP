@@ -1,0 +1,59 @@
+{
+ "cut": "qx = 32768 puis qy = 32768 ; site sur le plan du c\u00f4t\u00e9 >= ; restrictions disjointes et exhaustives",
+ "deduplication": "globale sur (qx,qy,qz) avant d\u00e9coupe",
+ "merged_returns": 4247,
+ "on_plane_x": 80,
+ "on_plane_y": 54,
+ "order": "lexicographique (x,y,z)",
+ "pieces": {
+  "full": {
+   "bytes": 714852,
+   "n": 119142,
+   "path": "morsehgp3D_v8/audits/q34_stream_crosscheck_spatial_20260921/pieces/scan0/full.u16le",
+   "sha256": "18212228802117f041fa76e2160aa397d8c7f7c7f5d94ea9047a8f7138f521a4"
+  },
+  "half_xneg": {
+   "bytes": 355134,
+   "n": 59189,
+   "path": "morsehgp3D_v8/audits/q34_stream_crosscheck_spatial_20260921/pieces/scan0/half_xneg.u16le",
+   "sha256": "bbd272081f6492d0741c4a133dee0fd6664f799d429d099e59539ff44cde278c"
+  },
+  "half_xpos": {
+   "bytes": 359718,
+   "n": 59953,
+   "path": "morsehgp3D_v8/audits/q34_stream_crosscheck_spatial_20260921/pieces/scan0/half_xpos.u16le",
+   "sha256": "d02092faf0389fefab8b6f8e67791a789eb2af4d9d0fb3b621a2956538b3a63c"
+  },
+  "quarter_xneg_yneg": {
+   "bytes": 174768,
+   "n": 29128,
+   "path": "morsehgp3D_v8/audits/q34_stream_crosscheck_spatial_20260921/pieces/scan0/quarter_xneg_yneg.u16le",
+   "sha256": "a4f0465c26e16cc901cdefd54ecffe5e3165366d5eba8f5c403dffc1331909b5"
+  },
+  "quarter_xneg_ypos": {
+   "bytes": 180366,
+   "n": 30061,
+   "path": "morsehgp3D_v8/audits/q34_stream_crosscheck_spatial_20260921/pieces/scan0/quarter_xneg_ypos.u16le",
+   "sha256": "79d921fd79f2687a3bedf99fd01720bb1bc229f47be6b4e1741c00a284316837"
+  },
+  "quarter_xpos_yneg": {
+   "bytes": 180162,
+   "n": 30027,
+   "path": "morsehgp3D_v8/audits/q34_stream_crosscheck_spatial_20260921/pieces/scan0/quarter_xpos_yneg.u16le",
+   "sha256": "83e60275d68217ea2d85970e1b97179eec67877ba865435ba5aeb04bf1868691"
+  },
+  "quarter_xpos_ypos": {
+   "bytes": 179556,
+   "n": 29926,
+   "path": "morsehgp3D_v8/audits/q34_stream_crosscheck_spatial_20260921/pieces/scan0/quarter_xpos_ypos.u16le",
+   "sha256": "ca06ae188573e7b0ff9cd121a3db24a07b7dff067210386d441d4b22478a53d3"
+  }
+ },
+ "quantization": "floor(50*x + 32768 + 1/2), rationnels exacts depuis float32, refus hors [0,65535] ou non fini",
+ "raw": "morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin",
+ "raw_bytes": 1974224,
+ "raw_returns": 123389,
+ "raw_sha256": "92e945f37a6cd4a58acc8aa15b275af2e271ecf69c0a44a311d888524473c451",
+ "schema": "audit_b_spatial_preparation_v1",
+ "unique_sites": 119142
+}
