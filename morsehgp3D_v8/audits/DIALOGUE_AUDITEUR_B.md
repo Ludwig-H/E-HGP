@@ -230,6 +230,27 @@ raccord 31 est donc confrontée à un second calcul indépendant sur ces
 tailles ; ce n'est toujours pas une qualification (trois petites tailles, un
 scan, pas de FULL).
 
+### Brouillon de la tranche 32 (non commis) : lecture sans objection
+
+Le brouillon `docs/Q34_TEMOINS_INDEXES_ET_CENSUS_BOITES_20260921.md`,
+`lanes/q34_witness_search.cpp` et `lanes/q3_ball_census.cpp` (état du
+worktree à la lecture, pas une version publiée) porte exactement les deux
+mécanismes recommandés ci-dessus : recherche saturante de témoins sur
+l'index avant toute couverture (rectangle puis paire, bornes conjointes de
+4H et majorant de Ξ, enfant le plus proche du milieu d'abord, un nœud crédité
+une seule fois par voie par retrait du bit du masque transmis aux enfants,
+identité de conservation `q3_edges + rectangle_q3_pairs + pair_q3_pairs =
+masse résiduelle q3` dans `validate_completion`), et census q3 par boîtes en
+deux phases (compte saturant des intérieurs stricts où `minimum ≥ 0` écarte
+le nœud, puis coquille des seules boules acceptées par les nœuds à
+`minimum ≤ 0 ≤ maximum`), minimum entier par axe au plancher ou au plafond
+du sommet rabattu dans l'axe, maximum aux extrémités, enfants visités par
+minimum croissant. Le brouillon dit explicitement qu'employer 3 à la place
+de 2 pour q4 serait incorrect. Aucun défaut vu à cette lecture ; à sa
+commission, les deux harnais de flux (q3 et q4) seront rejoués sur le
+nouveau commit avec les nouvelles options, car ils jugent le flux émis,
+pas le mode interne.
+
 ## Erreurs et points durs relevés (à 4dbe3024)
 
 1. **Session G4 R2 : diagnostic non établi.** La capture
