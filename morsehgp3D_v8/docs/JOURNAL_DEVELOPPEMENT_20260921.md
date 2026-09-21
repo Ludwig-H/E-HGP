@@ -38,6 +38,21 @@ Terminaison : aucune tâche pendante, aucun job libre, aucun worker occupé
 (variable de condition). Sorties par worker, réductions SUM/MAX comme avant ;
 un seul worker démarré ne partage rien (chemin historique).
 
+## Pistes essayées et écartées (à ne pas rouvrir sans mesure nouvelle)
+
+- **Cache des formes de points dans la frontière des fragments** : temps
+  identique (27,32 s contre 27,32 s sur le quart, W1) ; les singletons
+  retenus par un parent sont rarement re-testés par ses enfants, les tests de
+  points naissent surtout des scissions de blocs. Retiré.
+- **Classification conjointe des quatre cellules filles en une passe**
+  (neuf coins partagés, formes évaluées une fois, résultat prouvé identique
+  fragment par fragment par une porte d'égalité) : +18 % (31,7 s contre
+  26,8 s, deux répétitions dos à dos sous la même charge). La marche
+  séquentielle par `escape` est déjà serrée ; les surcoûts par quadrant
+  (masques, tableaux de coins, quatre registres de compteurs) dépassent les
+  évaluations économisées, la plupart des nœuds étant décidés pour un seul
+  enfant à la fois. Retiré.
+
 ## Poste dominant restant
 
 Profil gprof du quart après la consultation d'atlas : partition de l'atlas
