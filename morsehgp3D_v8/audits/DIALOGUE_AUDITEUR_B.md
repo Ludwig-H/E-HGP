@@ -251,6 +251,66 @@ commission, les deux harnais de flux (q3 et q4) seront rejoués sur le
 nouveau commit avec les nouvelles options, car ils jugent le flux émis,
 pas le mode interne.
 
+### Réponses aux questions A/B du brouillon 32 (journal non commis, lu le 21 septembre)
+
+**Couches duales 29 pour filtrer les seeds q3 à T = K − 1 : valide, mais non
+rentable ici.** La preuve tient : pour une seed x strictement aiguë,
+c_x > 0 (x hors de la boule diamètre), donc son centre q3 t_x vérifie
+L_x(t_x) = 0 avec t_x ≠ 0 ; si x est strictement intérieure aux T couches du
+groupe positif, la forme linéaire non constante 1 + p·t_x prend sur chaque
+couche un minimum strictement inférieur à 0, d'où T sites retenus distincts,
+autres que a, b, x (a et b ont c = 0, x n'est sur aucune couche),
+strictement intérieurs : profondeur ≥ K − 1, boule non émise. Peler le seul
+groupe positif suffit pour cette décision ; garder les duaux coïncidents,
+les points d'arête et les enveloppes dégénérées, et séparer dans l'API le
+seuil de sélection du seuil d'émission (le piège K + 1 → K − 1 signalé est
+réel). Contre-fixture du mauvais seuil recalculée exactement : centre
+(12, 65/6, 10), r² = 169/36, puissances −7/3 et +2/3, arêtes² 16/13/13,
+aigu, ab maximale : conforme. Mais le coût ne suit pas : sur les paires
+conservées de mes 18 exécutions, la part des sites de couverture qui sont
+des seeds aiguës propriétaires vaut de 0,15 à 0,20 (stable sur les trois
+scans, les trois tailles et les deux K), alors que le census par boîtes de
+la série 32 coûte environ 35 bornes par seed (67,5 M bornes pour 1,91 M
+seeds à 8k) : les couches coûtent (log₂ m + T)·m par arête, soit un seuil
+de rentabilité seeds/m ≥ 0,27 à 0,53 selon l'exécution, jamais atteint.
+Le filtre coûterait donc 1,5 à 3,3 fois le census qu'il évite. Ne pas le
+porter pour q3 sur ces régimes ; le réexaminer seulement si un régime donne
+seeds/m au-dessus du seuil ou si le coût par boule du census remonte.
+
+**Spécialisation de Ξ à endpoints fixes et rejet de voie par nœud : oui.**
+Pour a, b fixes, Ξ(z) = |d × (z − a)|² avec d = b − a est une somme de trois
+carrés de formes affines en z ; l'intervalle de chaque forme sur une boîte
+s'obtient par les signes de ses coefficients, son carré minimal vaut 0 si
+l'intervalle contient 0, sinon le plus petit carré des bornes, et la somme
+des trois minima minore Ξ sur la boîte. Si α·max(0, H_max)² ≤ Ξ_min, aucun
+z de la boîte n'est témoin de la voie (pour tout z, α·H(z)² ≤ α·max(0,H_max)²
+≤ Ξ_min ≤ Ξ(z)) : rejet sûr, qui complète H_max ≤ 0. Il vise les nœuds de
+la ceinture de la boule diamètre hors du citron, que la descente actuelle
+ouvre jusqu'aux feuilles ; même logique avec les bornes basses de Ξ sur
+A × B × Z au niveau rectangle.
+
+**Héritage des témoins entre produits subdivisés : oui, par monotonie.**
+Pour A' ⊆ A et B' ⊆ B, h_min(A', B', Z) ≥ h_min(A, B, Z) et
+Ξ_max(A', B', Z) ≤ Ξ_max(A, B, Z) : un nœud Z admis pour une voie sur A × B
+l'est sur tout sous-produit, un nœud exclu (H_max ≤ 0) le reste, et seule la
+frontière des nœuds ambigus est à retester chez les enfants. L'état à
+transmettre par voie est donc (crédits des nœuds admis, frontière des
+nœuds ambigus), sous-arbres disjoints, jamais un test ambigu pris pour un
+certificat ; la paire est le dernier sous-produit et repart de la frontière
+de son rectangle au lieu de la racine. C'est ce que mesurait
+[PROPAGATION_TEMOINS_20260914.md](PROPAGATION_TEMOINS_20260914.md) sur la
+voie q2 (résidu ×0,40 à ×0,60 à 32k uniforme, 0 rejet non sûr). Sur mes
+mesures, la descente par paire coûte 43 à 148 visites « milieu d'abord »
+dont la plus grande part est le tronc commun aux paires d'un même
+rectangle : c'est là que l'héritage porte, et il répond au ×5,4 des bornes
+par paire relevé de 16k à 32k.
+
+Série 32 en brouillon (8k/16k/32k, K5, non commise) lue : 1,91 M seeds q3 à
+8k contre 1,37 M projetés par mon échantillon (écart d'échantillonnage sur
+une moyenne à queue lourde, sens et ordre de grandeur confirmés), temps
+locaux 4,96/18,1/60,7 s au lieu de 1 361 s à 8k ; les visites q4 ×4,0 puis
+×5,6 par doublement restent le poste dominant à surveiller.
+
 ## Erreurs et points durs relevés (à 4dbe3024)
 
 1. **Session G4 R2 : diagnostic non établi.** La capture
