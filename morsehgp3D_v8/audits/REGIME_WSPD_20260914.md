@@ -5,6 +5,8 @@
 `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`. GCP non utilisé.
 
+> **Statut au 21 septembre 2026 (auditeur B)** : note historique de la première lecture (sources 1bf806f0), conservée pour son reçu [wspd_regime_20260914/](wspd_regime_20260914/WSPD_REGIME_CHECKS.json). La convention de séparation et le régime pur v4 sont repris dans [SEPARATION_20260914.md](SEPARATION_20260914.md) ; aucune pente n'est à tirer d'ici pour les sources actuelles.
+
 Les cinq tranches P0 mesurent le résidu q2 d'**un** rectangle dont chaque
 facteur porte 8 000 à 32 000 sites (grilles, nappes, `skew`). Aucune WSPD
 n'est encore générée en v8. Cette note mesure donc, sur le front WSPD pur

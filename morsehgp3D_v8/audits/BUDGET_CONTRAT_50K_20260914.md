@@ -5,6 +5,8 @@
 `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`. GCP non utilisé.
 
+> **Statut au 21 septembre 2026 (auditeur B)** : note historique (85015a8c). Le budget par poste n'a pas été réactualisé après le critère du 21 septembre (croissance mesurée sur les scans SemanticKITTI plutôt que borne uniforme préalable) ; aucun contrat 50k n'est acquis et les chiffres ci-dessous ne valent pas pour les sources actuelles.
+
 Aucun document v8 ne chiffre le travail admissible par poste pour « toute
 la tour K=1..10 à 50 000 points sous une seconde sur G4 », ni le plancher
 d'écriture de la sortie. Cette note le fait à partir des seuls chiffres

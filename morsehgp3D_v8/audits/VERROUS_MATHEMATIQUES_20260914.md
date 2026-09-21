@@ -5,6 +5,8 @@
 `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`. GCP non utilisé.
 
+> **Statut au 21 septembre 2026 (auditeur B)** : relecture historique (85015a8c). Le lemme du citron (α3 = 3, α4 = 2) est prouvé par A ([DIALOGUE_COURANT.md](DIALOGUE_COURANT.md)) et vérifié de façon exécutable par B dans [front_lanes_lidar_20260921/](front_lanes_lidar_20260921/README.md) ; les verrous q3/q4 ont été repris par les notes `Q3_Q4_*` et `Q4_*` du constructeur.
+
 Cette note fixe ce qui est démontré, ce qui est seulement inscrit au plan
 et ce qui reste à décider, pour les objets que la v8 n'a pas encore
 implémentés (q3/q4, catalogue, rattachements, histoire). Elle s'appuie sur

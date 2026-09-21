@@ -5,6 +5,8 @@
 `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`. GCP non utilisé.
 
+> **Statut au 21 septembre 2026 (auditeur B)** : note historique (85015a8c, complétée après e3af11a7). L'inventaire des portes a changé depuis (92 CTests Release à la tranche 31) ; la note reste lisible pour ses critères (planchers de couverture, mutants causaux, équivariance), pas pour son inventaire.
+
 Résultat d'ensemble : **aucun défaut du produit** n'a été trouvé par la
 campagne adversariale (huit dimensions, harnais C++ contre la bibliothèque
 publiée et juges Python en entiers exacts, mutants compilés hors dépôt).

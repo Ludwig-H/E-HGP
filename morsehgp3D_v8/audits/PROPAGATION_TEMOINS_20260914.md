@@ -5,6 +5,8 @@
 `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`. GCP non utilisé.
 
+> **Statut au 21 septembre 2026 (auditeur B)** : note historique du premier front (da366f7f) : lentille réfutée, propagation chiffrée, reçu [propagation_temoins_20260914/](propagation_temoins_20260914/PROPAGATION_CHECKS.json). Pour les sources actuelles, le plafond de tout proposeur est mesuré dans [plafond_proposeur_20260915/](plafond_proposeur_20260915/README.md) (q2) puis [front_lanes_lidar_20260921/](front_lanes_lidar_20260921/README.md) (voies q3/q4 sur LiDAR).
+
 Le premier front réel (`src/wspd/front.cpp`, mode `MidpointSamples`)
 rejette des voies sur des produits non séparés, mais son résultat négatif
 est net : à 32k uniforme, s=8, Kmax 10, 63,5 millions de recherches de

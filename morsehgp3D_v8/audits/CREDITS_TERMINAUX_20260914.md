@@ -5,6 +5,8 @@
 `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`. GCP non utilisé.
 
+> **Statut au 21 septembre 2026 (auditeur B)** : note historique (e3af11a7), chiffres corrigés sur son reçu [credits_terminaux_20260914/](credits_terminaux_20260914/CREDITS_TERMINAUX_CHECKS.json). Le filtre Pool terminal a été porté par le constructeur à ba11e3ab et contre-vérifié de bout en bout ([chaine_q2_20260914/CHAINE_Q2_POOL_CHECKS.json](chaine_q2_20260914/CHAINE_Q2_POOL_CHECKS.json)).
+
 Depuis le raccord front → census (huitième tranche), la famille « huit
 amas » du constructeur reste quadratique : 11,4 / 43,8 / 173,5 s à
 8k/16k/32k, visites ×4,1 puis ×4,2, résidu q2 de 460 millions de paires

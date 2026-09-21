@@ -1,0 +1,6555 @@
+{
+ "backend": "cpu_reference",
+ "finished_utc": "2026-09-21T08:21:02Z",
+ "gcp_used": false,
+ "inputs": [
+  {
+   "frame": "LiDAR_scan_000000",
+   "n": 8000,
+   "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n8000.u16le",
+   "quantization": {
+    "all_axes_same_grid": true,
+    "clipping_jitter_adaptation": false,
+    "formula": "floor(50*x + 32768 + 0.5)",
+    "invalid_input_policy": "reject_entire_preparation",
+    "step_m": 0.02
+   },
+   "sampling": {
+    "hash": "blake2b_128(seed_bytes + packed_u16le_xyz)",
+    "order": "ascending_priority",
+    "seed_u32_le": 3,
+    "targets": [
+     8000,
+     16000,
+     32000,
+     50000
+    ],
+    "tie_break": "lexicographic_xyz"
+   },
+   "scan": "single_000000",
+   "sha256": "ed5aa97941551e027a76d7c4eb4a03c739cdf0a83cbaf53035c1536bed0b5194"
+  },
+  {
+   "frame": "LiDAR_scan_000000",
+   "n": 16000,
+   "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n16000.u16le",
+   "quantization": {
+    "all_axes_same_grid": true,
+    "clipping_jitter_adaptation": false,
+    "formula": "floor(50*x + 32768 + 0.5)",
+    "invalid_input_policy": "reject_entire_preparation",
+    "step_m": 0.02
+   },
+   "sampling": {
+    "hash": "blake2b_128(seed_bytes + packed_u16le_xyz)",
+    "order": "ascending_priority",
+    "seed_u32_le": 3,
+    "targets": [
+     8000,
+     16000,
+     32000,
+     50000
+    ],
+    "tie_break": "lexicographic_xyz"
+   },
+   "scan": "single_000000",
+   "sha256": "fbd31be0f4de345b1b7f027a6a9536e6f0e776c46f6caf6a4f3b82f91d4e8595"
+  },
+  {
+   "frame": "LiDAR_scan_000000",
+   "n": 32000,
+   "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n32000.u16le",
+   "quantization": {
+    "all_axes_same_grid": true,
+    "clipping_jitter_adaptation": false,
+    "formula": "floor(50*x + 32768 + 0.5)",
+    "invalid_input_policy": "reject_entire_preparation",
+    "step_m": 0.02
+   },
+   "sampling": {
+    "hash": "blake2b_128(seed_bytes + packed_u16le_xyz)",
+    "order": "ascending_priority",
+    "seed_u32_le": 3,
+    "targets": [
+     8000,
+     16000,
+     32000,
+     50000
+    ],
+    "tie_break": "lexicographic_xyz"
+   },
+   "scan": "single_000000",
+   "sha256": "ac03426026406e79c154a557b91f054f815237cbd69a61c9a1d4c0e9e0993550"
+  },
+  {
+   "frame": "LiDAR_scan_000000",
+   "n": 8000,
+   "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n8000.u16le",
+   "quantization": {
+    "all_axes_same_grid": true,
+    "clipping_jitter_adaptation": false,
+    "formula": "floor(50*x + 32768 + 0.5)",
+    "invalid_input_policy": "reject_entire_preparation",
+    "step_m": 0.02
+   },
+   "sampling": {
+    "hash": "blake2b_128(seed_bytes + packed_u16le_xyz)",
+    "order": "ascending_priority",
+    "seed_u32_le": 3,
+    "targets": [
+     8000,
+     16000,
+     32000,
+     50000
+    ],
+    "tie_break": "lexicographic_xyz"
+   },
+   "scan": "single_000100",
+   "sha256": "813d595e799ff00d93fb94980d2e406c3775217b93aa4efbea0a675aaab3b402"
+  },
+  {
+   "frame": "LiDAR_scan_000000",
+   "n": 16000,
+   "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n16000.u16le",
+   "quantization": {
+    "all_axes_same_grid": true,
+    "clipping_jitter_adaptation": false,
+    "formula": "floor(50*x + 32768 + 0.5)",
+    "invalid_input_policy": "reject_entire_preparation",
+    "step_m": 0.02
+   },
+   "sampling": {
+    "hash": "blake2b_128(seed_bytes + packed_u16le_xyz)",
+    "order": "ascending_priority",
+    "seed_u32_le": 3,
+    "targets": [
+     8000,
+     16000,
+     32000,
+     50000
+    ],
+    "tie_break": "lexicographic_xyz"
+   },
+   "scan": "single_000100",
+   "sha256": "a96dd9fe13a47e6c65cd25a08910944b4386dff91ec2a87f93cda5b881a42e8b"
+  },
+  {
+   "frame": "LiDAR_scan_000000",
+   "n": 32000,
+   "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n32000.u16le",
+   "quantization": {
+    "all_axes_same_grid": true,
+    "clipping_jitter_adaptation": false,
+    "formula": "floor(50*x + 32768 + 0.5)",
+    "invalid_input_policy": "reject_entire_preparation",
+    "step_m": 0.02
+   },
+   "sampling": {
+    "hash": "blake2b_128(seed_bytes + packed_u16le_xyz)",
+    "order": "ascending_priority",
+    "seed_u32_le": 3,
+    "targets": [
+     8000,
+     16000,
+     32000,
+     50000
+    ],
+    "tie_break": "lexicographic_xyz"
+   },
+   "scan": "single_000100",
+   "sha256": "8791daeaf90f2116c13e5ea0fd69684c182c19f55f3612d657056b2c3707a417"
+  },
+  {
+   "frame": "LiDAR_scan_000000",
+   "n": 8000,
+   "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n8000.u16le",
+   "quantization": {
+    "all_axes_same_grid": true,
+    "clipping_jitter_adaptation": false,
+    "formula": "floor(50*x + 32768 + 0.5)",
+    "invalid_input_policy": "reject_entire_preparation",
+    "step_m": 0.02
+   },
+   "sampling": {
+    "hash": "blake2b_128(seed_bytes + packed_u16le_xyz)",
+    "order": "ascending_priority",
+    "seed_u32_le": 3,
+    "targets": [
+     8000,
+     16000,
+     32000,
+     50000
+    ],
+    "tie_break": "lexicographic_xyz"
+   },
+   "scan": "single_000200",
+   "sha256": "edc1a7980b366034984d0c3b020f5fa94777277b1618db7c16116c5ccfea4446"
+  },
+  {
+   "frame": "LiDAR_scan_000000",
+   "n": 16000,
+   "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n16000.u16le",
+   "quantization": {
+    "all_axes_same_grid": true,
+    "clipping_jitter_adaptation": false,
+    "formula": "floor(50*x + 32768 + 0.5)",
+    "invalid_input_policy": "reject_entire_preparation",
+    "step_m": 0.02
+   },
+   "sampling": {
+    "hash": "blake2b_128(seed_bytes + packed_u16le_xyz)",
+    "order": "ascending_priority",
+    "seed_u32_le": 3,
+    "targets": [
+     8000,
+     16000,
+     32000,
+     50000
+    ],
+    "tie_break": "lexicographic_xyz"
+   },
+   "scan": "single_000200",
+   "sha256": "c0616588a71ff72c77004aded32214e0d8c60b56286eabde04d592b5f0a909ed"
+  },
+  {
+   "frame": "LiDAR_scan_000000",
+   "n": 32000,
+   "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n32000.u16le",
+   "quantization": {
+    "all_axes_same_grid": true,
+    "clipping_jitter_adaptation": false,
+    "formula": "floor(50*x + 32768 + 0.5)",
+    "invalid_input_policy": "reject_entire_preparation",
+    "step_m": 0.02
+   },
+   "sampling": {
+    "hash": "blake2b_128(seed_bytes + packed_u16le_xyz)",
+    "order": "ascending_priority",
+    "seed_u32_le": 3,
+    "targets": [
+     8000,
+     16000,
+     32000,
+     50000
+    ],
+    "tie_break": "lexicographic_xyz"
+   },
+   "scan": "single_000200",
+   "sha256": "42fcd1a97753fdd854c81dbd9fdd4c5bc370f296eeec9c0da00e3dce2beeacf8"
+  }
+ ],
+ "mode": "audit_independant_math_and_architecture",
+ "parameters": {
+  "front_mode": "samples",
+  "kmax": [
+   5,
+   10
+  ],
+  "mask": 6,
+  "samples_per_lane": 2000,
+  "seed": 1,
+  "separation": 8,
+  "sizes": [
+   8000,
+   16000,
+   32000
+  ]
+ },
+ "phase": "exploration_v8_hors_registre",
+ "pins": {
+  "binary_sha256": "1591669cce5f2fa75c01b012aff1b34f6fdb83abfebb358a0496d0e3e012ddd2",
+  "build_command": [
+   "g++",
+   "-std=c++20",
+   "-O2",
+   "-Wall",
+   "-Wextra",
+   "-Wpedantic",
+   "-Werror",
+   "-I",
+   "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wt-c5308651/morsehgp3D_v8/src",
+   "/workspaces/E-HGP/morsehgp3D_v8/audits/front_lanes_lidar_20260921/front_lanes_probe.cpp",
+   "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wt-c5308651/build/v8-audit/libmhgp8_p0.a",
+   "-pthread",
+   "-o",
+   "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/front_lanes_probe_pinned"
+  ],
+  "commit": "c5308651ba31aa7178e759b08fa2a593bb7fd6b1",
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "harness_sha256": "76f3e30991ae617242f6b926c437a99261f7278ab3415cffcfbad4a2cb5896ce",
+  "library_sha256": "0dbfc5db4eabe42ed3ede88ebc2eb9a4080f7ce578d73668913912d5d5dc1dc7",
+  "runner_sha256": "f4bd94bf47775b88aeeda50ae6c5a0d96302d4e194f2663f36c9d7e9993f9c6f",
+  "worktree": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/wt-c5308651"
+ },
+ "profile": "quantized_u16_input_only",
+ "public_status": "not_claimed",
+ "run_count": 18,
+ "runs": [
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/front_lanes_probe_pinned",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n8000.u16le",
+    "5",
+    "8",
+    "2000",
+    "1"
+   ],
+   "derived": {
+    "q3": {
+     "ceiling_mass_share": 0.8692461637991377,
+     "ceiling_rectangle_share": 0.6187984490512166,
+     "census_tests_per_kept_pair": 388.13286713286715,
+     "cover_sites_kept_max": 392,
+     "cover_sites_per_kept_pair": 47.35664335664335,
+     "cover_sites_per_rejectable_pair": 2386.1023155627354,
+     "descent_leaf_tests_per_pair": 59.4895,
+     "descent_visits_max": 1614,
+     "descent_visits_per_kept_pair": 68.18881118881119,
+     "descent_visits_per_pair": 182.9555,
+     "descent_visits_per_rejectable_pair": 191.79321486268174,
+     "emitted_per_kept_pair": 0.5524475524475524,
+     "kept_pairs_with_emission_share": 0.2727272727272727,
+     "kept_share": 0.0715,
+     "lemma_pairs_checked": 100,
+     "lemma_seeds_checked": 39783,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 263.774,
+     "near_first_visits_max": 1124,
+     "near_first_visits_per_kept_pair": 68.18881118881119,
+     "near_first_visits_per_rejectable_pair": 56.69197630586968,
+     "rectangles": 345337,
+     "rejectable_reachable_by_box_proposer_share": 0.9380721593968767,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.9261795226293431,
+      0.9481561131309021
+     ],
+     "rejectable_share": 0.9285,
+     "rejectable_share_wilson95": [
+      0.9163673452202454,
+      0.9389897452338523
+     ],
+     "residual_mass": 2150109,
+     "residual_mass_share_of_all_pairs": 0.06719930616327041,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": 570.2779527559055,
+     "seeds_kept_max": 104,
+     "seeds_per_kept_pair": 8.881118881118882,
+     "seeds_per_rejectable_pair": 389.32848680667746,
+     "threshold": 4,
+     "tight_cover_per_kept_pair": 35.27972027972028,
+     "window_2k_mass_share": 0.491965291061988,
+     "window_4k_mass_share": 0.5559011194316195,
+     "witness_share_in_factors": 0.018422968146974302,
+     "witness_share_nonuniversal_outside": 0.47660307687641695,
+     "witness_share_universal_box": 0.5049739549766088
+    },
+    "q4": {
+     "ceiling_mass_share": 0.7651157743733102,
+     "ceiling_rectangle_share": 0.5031303809622053,
+     "census_tests_per_kept_pair": null,
+     "cover_sites_kept_max": 1451,
+     "cover_sites_per_kept_pair": 83.10917030567686,
+     "cover_sites_per_rejectable_pair": 2202.212874082439,
+     "descent_leaf_tests_per_pair": 68.7535,
+     "descent_visits_max": 5434,
+     "descent_visits_per_kept_pair": 84.50218340611353,
+     "descent_visits_per_pair": 206.2485,
+     "descent_visits_per_rejectable_pair": 221.99096555618294,
+     "emitted_per_kept_pair": null,
+     "kept_pairs_with_emission_share": null,
+     "kept_share": 0.1145,
+     "lemma_pairs_checked": 0,
+     "lemma_seeds_checked": 0,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 141.924,
+     "near_first_visits_max": 1204,
+     "near_first_visits_per_kept_pair": 84.50218340611353,
+     "near_first_visits_per_rejectable_pair": 103.26877470355731,
+     "rectangles": 252046,
+     "rejectable_reachable_by_box_proposer_share": 0.8667419536984754,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.8501172443460259,
+      0.8817791137764486
+     ],
+     "rejectable_share": 0.8855,
+     "rejectable_share_wilson95": [
+      0.8707997784285139,
+      0.8987221780943674
+     ],
+     "residual_mass": 1359325,
+     "residual_mass_share_of_all_pairs": 0.042484216777097135,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": null,
+     "seeds_kept_max": null,
+     "seeds_per_kept_pair": null,
+     "seeds_per_rejectable_pair": null,
+     "threshold": 3,
+     "tight_cover_per_kept_pair": 60.86026200873363,
+     "window_2k_mass_share": 0.14264947676236367,
+     "window_4k_mass_share": 0.22384933698710757,
+     "witness_share_in_factors": 0.03134424057946507,
+     "witness_share_nonuniversal_outside": 0.5933880104844846,
+     "witness_share_universal_box": 0.3752677489360503
+    }
+   },
+   "kmax": 5,
+   "n": 8000,
+   "output": {
+    "ceiling": {
+     "ms": 3115.1,
+     "q3": {
+      "mass": 2150109,
+      "mass_at_threshold": 1868974,
+      "mass_hist": [
+       85864,
+       59610,
+       78211,
+       57450,
+       1868974
+      ],
+      "node_visits": 33665991,
+      "point_tests": 7864448,
+      "rect_hist": [
+       43211,
+       33204,
+       29263,
+       25965,
+       213694
+      ],
+      "rectangles": 345337,
+      "rectangles_at_threshold": 213694,
+      "threshold": 4,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 1057779,
+        "rectangles": 106742
+       },
+       "L4K": {
+        "mass": 1195248,
+        "rectangles": 140108
+       },
+       "path_steps": 5762859,
+       "unsearchable": 0,
+       "window_tests": 9937222
+      }
+     },
+     "q4": {
+      "mass": 1359325,
+      "mass_at_threshold": 1040041,
+      "mass_hist": [
+       135178,
+       80524,
+       103582,
+       1040041
+      ],
+      "node_visits": 25671353,
+      "point_tests": 6073435,
+      "rect_hist": [
+       53036,
+       38803,
+       33395,
+       126812
+      ],
+      "rectangles": 252046,
+      "rectangles_at_threshold": 126812,
+      "threshold": 3,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 193907,
+        "rectangles": 37420
+       },
+       "L4K": {
+        "mass": 304284,
+        "rectangles": 62572
+       },
+       "path_steps": 5762859,
+       "unsearchable": 0,
+       "window_tests": 7665606
+      }
+     }
+    },
+    "file": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n8000.u16le",
+    "front": {
+     "active_lane_mask": 6,
+     "emitted_rectangles": 352701,
+     "fully_rejected_products": 195121,
+     "lane_rectangles": [
+      0,
+      345337,
+      252046
+     ],
+     "ms": 383.9,
+     "product_visits": 1103644,
+     "rejected_pair_mass": [
+      0,
+      29845891,
+      30636675
+     ],
+     "residual_pair_mass": [
+      0,
+      2150109,
+      1359325
+     ],
+     "total_unordered_pairs": 31996000,
+     "witness_searches": 1087644
+    },
+    "front_mode": "samples",
+    "index": {
+     "leaves_with_several_ranks": 0,
+     "nodes": 15999
+    },
+    "kmax": 5,
+    "mask": 6,
+    "n": 8000,
+    "s": 8,
+    "sample": {
+     "ms": 536.8,
+     "q3": {
+      "cover": {
+       "sites_kept": 6772,
+       "sites_kept_max": 392,
+       "sites_rejectable": 4430992,
+       "tight_kept": 5045,
+       "tight_rejectable": 3712432
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 118979,
+       "node_visits": 365911,
+       "visits_kept": 9751,
+       "visits_max": 1614,
+       "visits_rejectable": 356160,
+       "whole_nodes": 2041
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 115028,
+       "visits_kept": 9751,
+       "visits_max": 1124,
+       "visits_rejectable": 105277
+      },
+      "kept": 143,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 100,
+       "seeds": 39783,
+       "tests": 18697824,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1857,
+      "rejectable_with_ceiling": 1742,
+      "rejectable_without_ceiling": 115,
+      "scanned_sites": 15996000,
+      "seeds": {
+       "census_tests_kept": 55503,
+       "emitted_kept": 79,
+       "kept": 1270,
+       "kept_max": 104,
+       "kept_with_emission": 39,
+       "rejectable": 722983
+      },
+      "witnesses_in_a": 5103,
+      "witnesses_in_b": 4616,
+      "witnesses_nonuniversal_outside": 251431,
+      "witnesses_total": 527548,
+      "witnesses_universal_box": 266398
+     },
+     "q4": {
+      "cover": {
+       "sites_kept": 19032,
+       "sites_kept_max": 1451,
+       "sites_rejectable": 3900119,
+       "tight_kept": 13937,
+       "tight_rejectable": 3270705
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 137507,
+       "node_visits": 412497,
+       "visits_kept": 19351,
+       "visits_max": 5434,
+       "visits_rejectable": 393146,
+       "whole_nodes": 1395
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 202240,
+       "visits_kept": 19351,
+       "visits_max": 1204,
+       "visits_rejectable": 182889
+      },
+      "kept": 229,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 0,
+       "seeds": 0,
+       "tests": 0,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1771,
+      "rejectable_with_ceiling": 1535,
+      "rejectable_without_ceiling": 236,
+      "scanned_sites": 15996000,
+      "seeds": {
+       "census_tests_kept": 0,
+       "emitted_kept": 0,
+       "kept": 0,
+       "kept_max": 0,
+       "kept_with_emission": 0,
+       "rejectable": 0
+      },
+      "witnesses_in_a": 4608,
+      "witnesses_in_b": 4289,
+      "witnesses_nonuniversal_outside": 168432,
+      "witnesses_total": 283848,
+      "witnesses_universal_box": 106519
+     }
+    },
+    "samples_per_lane": 2000,
+    "schema": "audit_b_front_lanes_lidar_v3",
+    "seed": 1
+   },
+   "s": 8,
+   "scan": "single_000000",
+   "wall_seconds": 4.042596340179443
+  },
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/front_lanes_probe_pinned",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n8000.u16le",
+    "10",
+    "8",
+    "2000",
+    "1"
+   ],
+   "derived": {
+    "q3": {
+     "ceiling_mass_share": 0.8655882857984727,
+     "ceiling_rectangle_share": 0.6087290972103259,
+     "census_tests_per_kept_pair": 12940.92899408284,
+     "cover_sites_kept_max": 3022,
+     "cover_sites_per_kept_pair": 169.1656804733728,
+     "cover_sites_per_rejectable_pair": 2588.94101583834,
+     "descent_leaf_tests_per_pair": 79.131,
+     "descent_visits_max": 3615,
+     "descent_visits_per_kept_pair": 111.37869822485207,
+     "descent_visits_per_pair": 231.0255,
+     "descent_visits_per_rejectable_pair": 242.06881485527035,
+     "emitted_per_kept_pair": 1.2603550295857988,
+     "kept_pairs_with_emission_share": 0.38461538461538464,
+     "kept_share": 0.0845,
+     "lemma_pairs_checked": 100,
+     "lemma_seeds_checked": 39288,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 305.627,
+     "near_first_visits_max": 1102,
+     "near_first_visits_per_kept_pair": 111.37869822485207,
+     "near_first_visits_per_rejectable_pair": 42.72364827962862,
+     "rectangles": 607096,
+     "rejectable_reachable_by_box_proposer_share": 0.9437465865647188,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.932234017022981,
+      0.9534010835653628
+     ],
+     "rejectable_share": 0.9155,
+     "rejectable_share_wilson95": [
+      0.9024995016740615,
+      0.9269074320101337
+     ],
+     "residual_mass": 4490003,
+     "residual_mass_share_of_all_pairs": 0.1403301350168771,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": 143.74462365591398,
+     "seeds_kept_max": 711,
+     "seeds_per_kept_pair": 28.615384615384617,
+     "seeds_per_rejectable_pair": 377.01419989077004,
+     "threshold": 9,
+     "tight_cover_per_kept_pair": 126.95266272189349,
+     "window_2k_mass_share": 0.5648490658024059,
+     "window_4k_mass_share": 0.6453285220522125,
+     "witness_share_in_factors": 0.018522578175357542,
+     "witness_share_nonuniversal_outside": 0.43181557912095464,
+     "witness_share_universal_box": 0.5496618427036878
+    },
+    "q4": {
+     "ceiling_mass_share": 0.8368341417570461,
+     "ceiling_rectangle_share": 0.5664058036255346,
+     "census_tests_per_kept_pair": null,
+     "cover_sites_kept_max": 3139,
+     "cover_sites_per_kept_pair": 195.6751592356688,
+     "cover_sites_per_rejectable_pair": 2638.90830168204,
+     "descent_leaf_tests_per_pair": 90.8525,
+     "descent_visits_max": 4771,
+     "descent_visits_per_kept_pair": 122.79617834394904,
+     "descent_visits_per_pair": 257.3265,
+     "descent_visits_per_rejectable_pair": 268.78676071622357,
+     "emitted_per_kept_pair": null,
+     "kept_pairs_with_emission_share": null,
+     "kept_share": 0.0785,
+     "lemma_pairs_checked": 0,
+     "lemma_seeds_checked": 0,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 269.5025,
+     "near_first_visits_max": 1441,
+     "near_first_visits_per_kept_pair": 122.79617834394904,
+     "near_first_visits_per_rejectable_pair": 62.74498100922409,
+     "rectangles": 577570,
+     "rejectable_reachable_by_box_proposer_share": 0.9218665219750407,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.908717494029139,
+      0.9332605721021706
+     ],
+     "rejectable_share": 0.9215,
+     "rejectable_share_wilson95": [
+      0.9088882443638107,
+      0.9324956847526473
+     ],
+     "residual_mass": 4329619,
+     "residual_mass_share_of_all_pairs": 0.1353175084385548,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": null,
+     "seeds_kept_max": null,
+     "seeds_per_kept_pair": null,
+     "seeds_per_rejectable_pair": null,
+     "threshold": 8,
+     "tight_cover_per_kept_pair": 149.2675159235669,
+     "window_2k_mass_share": 0.48310902183309895,
+     "window_4k_mass_share": 0.5710650290475906,
+     "witness_share_in_factors": 0.017339356777766442,
+     "witness_share_nonuniversal_outside": 0.48705299579781264,
+     "witness_share_universal_box": 0.4956076474244209
+    }
+   },
+   "kmax": 10,
+   "n": 8000,
+   "output": {
+    "ceiling": {
+     "ms": 9266.4,
+     "q3": {
+      "mass": 4490003,
+      "mass_at_threshold": 3886494,
+      "mass_hist": [
+       85864,
+       59610,
+       78211,
+       57450,
+       89225,
+       59306,
+       62767,
+       55941,
+       55135,
+       3886494
+      ],
+      "node_visits": 80345931,
+      "point_tests": 21731761,
+      "rect_hist": [
+       43211,
+       33204,
+       29263,
+       25965,
+       24397,
+       22413,
+       20821,
+       19492,
+       18773,
+       369557
+      ],
+      "rectangles": 607096,
+      "rectangles_at_threshold": 369557,
+      "threshold": 9,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 2536174,
+        "rectangles": 208420
+       },
+       "L4K": {
+        "mass": 2897527,
+        "rectangles": 269088
+       },
+       "path_steps": 10266167,
+       "unsearchable": 0,
+       "window_tests": 35380099
+      }
+     },
+     "q4": {
+      "mass": 4329619,
+      "mass_at_threshold": 3623173,
+      "mass_hist": [
+       135178,
+       80524,
+       103582,
+       71175,
+       102939,
+       70828,
+       74553,
+       67667,
+       3623173
+      ],
+      "node_visits": 82093958,
+      "point_tests": 23124934,
+      "rect_hist": [
+       53036,
+       38803,
+       33395,
+       29155,
+       26998,
+       24567,
+       23078,
+       21399,
+       327139
+      ],
+      "rectangles": 577570,
+      "rectangles_at_threshold": 327139,
+      "threshold": 8,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 2091678,
+        "rectangles": 170372
+       },
+       "L4K": {
+        "mass": 2472494,
+        "rectangles": 226367
+       },
+       "path_steps": 10266167,
+       "unsearchable": 0,
+       "window_tests": 34337739
+      }
+     }
+    },
+    "file": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n8000.u16le",
+    "front": {
+     "active_lane_mask": 6,
+     "emitted_rectangles": 625669,
+     "fully_rejected_products": 162081,
+     "lane_rectangles": [
+      0,
+      607096,
+      577570
+     ],
+     "ms": 780.2,
+     "product_visits": 1583500,
+     "rejected_pair_mass": [
+      0,
+      27505997,
+      27666381
+     ],
+     "residual_pair_mass": [
+      0,
+      4490003,
+      4329619
+     ],
+     "total_unordered_pairs": 31996000,
+     "witness_searches": 1567500
+    },
+    "front_mode": "samples",
+    "index": {
+     "leaves_with_several_ranks": 0,
+     "nodes": 15999
+    },
+    "kmax": 10,
+    "mask": 6,
+    "n": 8000,
+    "s": 8,
+    "sample": {
+     "ms": 567.0,
+     "q3": {
+      "cover": {
+       "sites_kept": 28589,
+       "sites_kept_max": 3022,
+       "sites_rejectable": 4740351,
+       "tight_kept": 21455,
+       "tight_rejectable": 3928628
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 158262,
+       "node_visits": 462051,
+       "visits_kept": 18823,
+       "visits_max": 3615,
+       "visits_rejectable": 443228,
+       "whole_nodes": 4368
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 97050,
+       "visits_kept": 18823,
+       "visits_max": 1102,
+       "visits_rejectable": 78227
+      },
+      "kept": 169,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 100,
+       "seeds": 39288,
+       "tests": 17455851,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1831,
+      "rejectable_with_ceiling": 1728,
+      "rejectable_without_ceiling": 103,
+      "scanned_sites": 15996000,
+      "seeds": {
+       "census_tests_kept": 2187017,
+       "emitted_kept": 213,
+       "kept": 4836,
+       "kept_max": 711,
+       "kept_with_emission": 65,
+       "rejectable": 690313
+      },
+      "witnesses_in_a": 5689,
+      "witnesses_in_b": 5633,
+      "witnesses_nonuniversal_outside": 263949,
+      "witnesses_total": 611254,
+      "witnesses_universal_box": 335983
+     },
+     "q4": {
+      "cover": {
+       "sites_kept": 30721,
+       "sites_kept_max": 3139,
+       "sites_rejectable": 4863508,
+       "tight_kept": 23435,
+       "tight_rejectable": 4048618
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 181705,
+       "node_visits": 514653,
+       "visits_kept": 19279,
+       "visits_max": 4771,
+       "visits_rejectable": 495374,
+       "whole_nodes": 3978
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 134918,
+       "visits_kept": 19279,
+       "visits_max": 1441,
+       "visits_rejectable": 115639
+      },
+      "kept": 157,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 0,
+       "seeds": 0,
+       "tests": 0,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1843,
+      "rejectable_with_ceiling": 1699,
+      "rejectable_without_ceiling": 144,
+      "scanned_sites": 15996000,
+      "seeds": {
+       "census_tests_kept": 0,
+       "emitted_kept": 0,
+       "kept": 0,
+       "kept_max": 0,
+       "kept_with_emission": 0,
+       "rejectable": 0
+      },
+      "witnesses_in_a": 4751,
+      "witnesses_in_b": 4595,
+      "witnesses_nonuniversal_outside": 262524,
+      "witnesses_total": 539005,
+      "witnesses_universal_box": 267135
+     }
+    },
+    "samples_per_lane": 2000,
+    "schema": "audit_b_front_lanes_lidar_v3",
+    "seed": 1
+   },
+   "s": 8,
+   "scan": "single_000000",
+   "wall_seconds": 10.621930837631226
+  },
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/front_lanes_probe_pinned",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n16000.u16le",
+    "5",
+    "8",
+    "2000",
+    "1"
+   ],
+   "derived": {
+    "q3": {
+     "ceiling_mass_share": 0.8645860696256624,
+     "ceiling_rectangle_share": 0.6232866200091529,
+     "census_tests_per_kept_pair": 6743.284722222223,
+     "cover_sites_kept_max": 5051,
+     "cover_sites_per_kept_pair": 119.625,
+     "cover_sites_per_rejectable_pair": 3805.7844827586205,
+     "descent_leaf_tests_per_pair": 108.4735,
+     "descent_visits_max": 3608,
+     "descent_visits_per_kept_pair": 97.80555555555556,
+     "descent_visits_per_pair": 291.4495,
+     "descent_visits_per_rejectable_pair": 306.47359913793105,
+     "emitted_per_kept_pair": 0.6527777777777778,
+     "kept_pairs_with_emission_share": 0.3194444444444444,
+     "kept_share": 0.072,
+     "lemma_pairs_checked": 100,
+     "lemma_seeds_checked": 59547,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 342.575,
+     "near_first_visits_max": 2598,
+     "near_first_visits_per_kept_pair": 97.80555555555556,
+     "near_first_visits_per_rejectable_pair": 60.719288793103445,
+     "rectangles": 716712,
+     "rejectable_reachable_by_box_proposer_share": 0.9251077586206896,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.9122349515334944,
+      0.9362244655122869
+     ],
+     "rejectable_share": 0.928,
+     "rejectable_share_wilson95": [
+      0.9158321407417878,
+      0.9385268667596216
+     ],
+     "residual_mass": 5074537,
+     "residual_mass_share_of_all_pairs": 0.03964729826864179,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": 403.0177413851928,
+     "seeds_kept_max": 954,
+     "seeds_per_kept_pair": 20.354166666666668,
+     "seeds_per_rejectable_pair": 634.8674568965517,
+     "threshold": 4,
+     "tight_cover_per_kept_pair": 82.09027777777777,
+     "window_2k_mass_share": 0.448681919158339,
+     "window_4k_mass_share": 0.5214215602329828,
+     "witness_share_in_factors": 0.021442019995621397,
+     "witness_share_nonuniversal_outside": 0.5273181055243378,
+     "witness_share_universal_box": 0.4512398744800409
+    },
+    "q4": {
+     "ceiling_mass_share": 0.777092292577427,
+     "ceiling_rectangle_share": 0.5125867876279988,
+     "census_tests_per_kept_pair": null,
+     "cover_sites_kept_max": 1988,
+     "cover_sites_per_kept_pair": 104.2752808988764,
+     "cover_sites_per_rejectable_pair": 3884.0137211855103,
+     "descent_leaf_tests_per_pair": 140.435,
+     "descent_visits_max": 3144,
+     "descent_visits_per_kept_pair": 101.41573033707866,
+     "descent_visits_per_pair": 361.0495,
+     "descent_visits_per_rejectable_pair": 386.41437980241494,
+     "emitted_per_kept_pair": null,
+     "kept_pairs_with_emission_share": null,
+     "kept_share": 0.089,
+     "lemma_pairs_checked": 0,
+     "lemma_seeds_checked": 0,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 243.627,
+     "near_first_visits_max": 3073,
+     "near_first_visits_per_kept_pair": 101.41573033707866,
+     "near_first_visits_per_rejectable_pair": 95.57189901207464,
+     "rectangles": 532622,
+     "rejectable_reachable_by_box_proposer_share": 0.8457738748627881,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.8284642308466041,
+      0.8616285446630556
+     ],
+     "rejectable_share": 0.911,
+     "rejectable_share_wilson95": [
+      0.8977199730172305,
+      0.9227042140927677
+     ],
+     "residual_mass": 3791475,
+     "residual_mass_share_of_all_pairs": 0.02962274985936621,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": null,
+     "seeds_kept_max": null,
+     "seeds_per_kept_pair": null,
+     "seeds_per_rejectable_pair": null,
+     "threshold": 3,
+     "tight_cover_per_kept_pair": 78.80337078651685,
+     "window_2k_mass_share": 0.14893649569099096,
+     "window_4k_mass_share": 0.23124509590594688,
+     "witness_share_in_factors": 0.029249631608976017,
+     "witness_share_nonuniversal_outside": 0.6172837985937519,
+     "witness_share_universal_box": 0.35346656979727203
+    }
+   },
+   "kmax": 5,
+   "n": 16000,
+   "output": {
+    "ceiling": {
+     "ms": 7513.5,
+     "q3": {
+      "mass": 5074537,
+      "mass_at_threshold": 4387374,
+      "mass_hist": [
+       228021,
+       138094,
+       194496,
+       126552,
+       4387374
+      ],
+      "node_visits": 78902685,
+      "point_tests": 19161120,
+      "rect_hist": [
+       92439,
+       65952,
+       58875,
+       52729,
+       446717
+      ],
+      "rectangles": 716712,
+      "rectangles_at_threshold": 446717,
+      "threshold": 4,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 2276853,
+        "rectangles": 215170
+       },
+       "L4K": {
+        "mass": 2645973,
+        "rectangles": 285063
+       },
+       "path_steps": 12818725,
+       "unsearchable": 0,
+       "window_tests": 20755630
+      }
+     },
+     "q4": {
+      "mass": 3791475,
+      "mass_at_threshold": 2946326,
+      "mass_hist": [
+       387708,
+       183467,
+       273974,
+       2946326
+      ],
+      "node_visits": 65242845,
+      "point_tests": 16746829,
+      "rect_hist": [
+       115893,
+       76528,
+       67186,
+       273015
+      ],
+      "rectangles": 532622,
+      "rectangles_at_threshold": 273015,
+      "threshold": 3,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 564689,
+        "rectangles": 74873
+       },
+       "L4K": {
+        "mass": 876760,
+        "rectangles": 127086
+       },
+       "path_steps": 12818725,
+       "unsearchable": 0,
+       "window_tests": 16318878
+      }
+     }
+    },
+    "file": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n16000.u16le",
+    "front": {
+     "active_lane_mask": 6,
+     "emitted_rectangles": 735168,
+     "fully_rejected_products": 411639,
+     "lane_rectangles": [
+      0,
+      716712,
+      532622
+     ],
+     "ms": 863.4,
+     "product_visits": 2309614,
+     "rejected_pair_mass": [
+      0,
+      122917463,
+      124200525
+     ],
+     "residual_pair_mass": [
+      0,
+      5074537,
+      3791475
+     ],
+     "total_unordered_pairs": 127992000,
+     "witness_searches": 2277614
+    },
+    "front_mode": "samples",
+    "index": {
+     "leaves_with_several_ranks": 0,
+     "nodes": 31999
+    },
+    "kmax": 5,
+    "mask": 6,
+    "n": 16000,
+    "s": 8,
+    "sample": {
+     "ms": 1288.6,
+     "q3": {
+      "cover": {
+       "sites_kept": 17226,
+       "sites_kept_max": 5051,
+       "sites_rejectable": 7063536,
+       "tight_kept": 11821,
+       "tight_rejectable": 5852894
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 216947,
+       "node_visits": 582899,
+       "visits_kept": 14084,
+       "visits_max": 3608,
+       "visits_rejectable": 568815,
+       "whole_nodes": 2099
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 126779,
+       "visits_kept": 14084,
+       "visits_max": 2598,
+       "visits_rejectable": 112695
+      },
+      "kept": 144,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 100,
+       "seeds": 59547,
+       "tests": 74356698,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1856,
+      "rejectable_with_ceiling": 1717,
+      "rejectable_without_ceiling": 139,
+      "scanned_sites": 31996000,
+      "seeds": {
+       "census_tests_kept": 971033,
+       "emitted_kept": 94,
+       "kept": 2931,
+       "kept_max": 954,
+       "kept_with_emission": 46,
+       "rejectable": 1178314
+      },
+      "witnesses_in_a": 7112,
+      "witnesses_in_b": 7579,
+      "witnesses_nonuniversal_outside": 361292,
+      "witnesses_total": 685150,
+      "witnesses_universal_box": 309167
+     },
+     "q4": {
+      "cover": {
+       "sites_kept": 18561,
+       "sites_kept_max": 1988,
+       "sites_rejectable": 7076673,
+       "tight_kept": 14027,
+       "tight_rejectable": 5878953
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 280870,
+       "node_visits": 722099,
+       "visits_kept": 18052,
+       "visits_max": 3144,
+       "visits_rejectable": 704047,
+       "whole_nodes": 1538
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 192184,
+       "visits_kept": 18052,
+       "visits_max": 3073,
+       "visits_rejectable": 174132
+      },
+      "kept": 178,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 0,
+       "seeds": 0,
+       "tests": 0,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1822,
+      "rejectable_with_ceiling": 1541,
+      "rejectable_without_ceiling": 281,
+      "scanned_sites": 31996000,
+      "seeds": {
+       "census_tests_kept": 0,
+       "emitted_kept": 0,
+       "kept": 0,
+       "kept_max": 0,
+       "kept_with_emission": 0,
+       "rejectable": 0
+      },
+      "witnesses_in_a": 7913,
+      "witnesses_in_b": 6339,
+      "witnesses_nonuniversal_outside": 300774,
+      "witnesses_total": 487254,
+      "witnesses_universal_box": 172228
+     }
+    },
+    "samples_per_lane": 2000,
+    "schema": "audit_b_front_lanes_lidar_v3",
+    "seed": 1
+   },
+   "s": 8,
+   "scan": "single_000000",
+   "wall_seconds": 9.677762508392334
+  },
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/front_lanes_probe_pinned",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n16000.u16le",
+    "10",
+    "8",
+    "2000",
+    "1"
+   ],
+   "derived": {
+    "q3": {
+     "ceiling_mass_share": 0.8789819672110573,
+     "ceiling_rectangle_share": 0.6172163749798087,
+     "census_tests_per_kept_pair": 27361.8671875,
+     "cover_sites_kept_max": 6230,
+     "cover_sites_per_kept_pair": 222.2578125,
+     "cover_sites_per_rejectable_pair": 4532.086004273504,
+     "descent_leaf_tests_per_pair": 132.2545,
+     "descent_visits_max": 3296,
+     "descent_visits_per_kept_pair": 135.421875,
+     "descent_visits_per_pair": 351.0745,
+     "descent_visits_per_rejectable_pair": 365.81997863247864,
+     "emitted_per_kept_pair": 1.2734375,
+     "kept_pairs_with_emission_share": 0.3984375,
+     "kept_share": 0.064,
+     "lemma_pairs_checked": 100,
+     "lemma_seeds_checked": 64835,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 498.9245,
+     "near_first_visits_max": 2310,
+     "near_first_visits_per_kept_pair": 135.421875,
+     "near_first_visits_per_rejectable_pair": 63.276709401709404,
+     "rectangles": 1250542,
+     "rejectable_reachable_by_box_proposer_share": 0.9337606837606838,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.921582914889474,
+      0.9441618911606665
+     ],
+     "rejectable_share": 0.936,
+     "rejectable_share_wilson95": [
+      0.9244153340250055,
+      0.9459130007194209
+     ],
+     "residual_mass": 11951285,
+     "residual_mass_share_of_all_pairs": 0.09337525001562598,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": 281.8857202767876,
+     "seeds_kept_max": 1491,
+     "seeds_per_kept_pair": 37.2578125,
+     "seeds_per_rejectable_pair": 715.5683760683761,
+     "threshold": 9,
+     "tight_cover_per_kept_pair": 167.6796875,
+     "window_2k_mass_share": 0.5205002641975319,
+     "window_4k_mass_share": 0.6015485364126117,
+     "witness_share_in_factors": 0.01713485707757386,
+     "witness_share_nonuniversal_outside": 0.47688978993815695,
+     "witness_share_universal_box": 0.5059753529842692
+    },
+    "q4": {
+     "ceiling_mass_share": 0.8542328998421511,
+     "ceiling_rectangle_share": 0.5738329732174262,
+     "census_tests_per_kept_pair": null,
+     "cover_sites_kept_max": 1162,
+     "cover_sites_per_kept_pair": 115.30597014925372,
+     "cover_sites_per_rejectable_pair": 4775.847266881029,
+     "descent_leaf_tests_per_pair": 163.9445,
+     "descent_visits_max": 4066,
+     "descent_visits_per_kept_pair": 97.01492537313433,
+     "descent_visits_per_pair": 418.735,
+     "descent_visits_per_rejectable_pair": 441.83815648445875,
+     "emitted_per_kept_pair": null,
+     "kept_pairs_with_emission_share": null,
+     "kept_share": 0.067,
+     "lemma_pairs_checked": 0,
+     "lemma_seeds_checked": 0,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 457.4925,
+     "near_first_visits_max": 2725,
+     "near_first_visits_per_kept_pair": 97.01492537313433,
+     "near_first_visits_per_rejectable_pair": 94.08252947481243,
+     "rectangles": 1194060,
+     "rejectable_reachable_by_box_proposer_share": 0.9228295819935691,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.9098340312346932,
+      0.9340877849732429
+     ],
+     "rejectable_share": 0.933,
+     "rejectable_share_wilson95": [
+      0.9211915042498539,
+      0.943148332778441
+     ],
+     "residual_mass": 11928501,
+     "residual_mass_share_of_all_pairs": 0.09319723888993062,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": null,
+     "seeds_kept_max": null,
+     "seeds_per_kept_pair": null,
+     "seeds_per_rejectable_pair": null,
+     "threshold": 8,
+     "tight_cover_per_kept_pair": 85.07462686567165,
+     "window_2k_mass_share": 0.42836438543283856,
+     "window_4k_mass_share": 0.513465774115289,
+     "witness_share_in_factors": 0.018378443362459494,
+     "witness_share_nonuniversal_outside": 0.5189910217107384,
+     "witness_share_universal_box": 0.46263053492680206
+    }
+   },
+   "kmax": 10,
+   "n": 16000,
+   "output": {
+    "ceiling": {
+     "ms": 21619.7,
+     "q3": {
+      "mass": 11951285,
+      "mass_at_threshold": 10504964,
+      "mass_hist": [
+       228021,
+       138094,
+       194496,
+       126552,
+       154048,
+       124288,
+       158265,
+       121521,
+       201036,
+       10504964
+      ],
+      "node_visits": 186539721,
+      "point_tests": 51903913,
+      "rect_hist": [
+       92439,
+       65952,
+       58875,
+       52729,
+       47885,
+       44308,
+       41351,
+       38946,
+       36202,
+       771855
+      ],
+      "rectangles": 1250542,
+      "rectangles_at_threshold": 771855,
+      "threshold": 9,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 6220647,
+        "rectangles": 424061
+       },
+       "L4K": {
+        "mass": 7189278,
+        "rectangles": 548172
+       },
+       "path_steps": 22713571,
+       "unsearchable": 0,
+       "window_tests": 73103711
+      }
+     },
+     "q4": {
+      "mass": 11928501,
+      "mass_at_threshold": 10189718,
+      "mass_hist": [
+       387708,
+       183467,
+       273974,
+       168500,
+       190772,
+       166410,
+       208831,
+       159121,
+       10189718
+      ],
+      "node_visits": 197108137,
+      "point_tests": 57829457,
+      "rect_hist": [
+       115893,
+       76528,
+       67186,
+       59033,
+       53902,
+       48746,
+       45553,
+       42028,
+       685191
+      ],
+      "rectangles": 1194060,
+      "rectangles_at_threshold": 685191,
+      "threshold": 8,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 5109745,
+        "rectangles": 344656
+       },
+       "L4K": {
+        "mass": 6124877,
+        "rectangles": 460470
+       },
+       "path_steps": 22713571,
+       "unsearchable": 0,
+       "window_tests": 71280055
+      }
+     }
+    },
+    "file": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n16000.u16le",
+    "front": {
+     "active_lane_mask": 6,
+     "emitted_rectangles": 1294195,
+     "fully_rejected_products": 350991,
+     "lane_rectangles": [
+      0,
+      1250542,
+      1194060
+     ],
+     "ms": 1662.2,
+     "product_visits": 3306372,
+     "rejected_pair_mass": [
+      0,
+      116040715,
+      116063499
+     ],
+     "residual_pair_mass": [
+      0,
+      11951285,
+      11928501
+     ],
+     "total_unordered_pairs": 127992000,
+     "witness_searches": 3274372
+    },
+    "front_mode": "samples",
+    "index": {
+     "leaves_with_several_ranks": 0,
+     "nodes": 31999
+    },
+    "kmax": 10,
+    "mask": 6,
+    "n": 16000,
+    "s": 8,
+    "sample": {
+     "ms": 1414.5,
+     "q3": {
+      "cover": {
+       "sites_kept": 28449,
+       "sites_kept_max": 6230,
+       "sites_rejectable": 8484065,
+       "tight_kept": 21463,
+       "tight_rejectable": 7083132
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 264509,
+       "node_visits": 702149,
+       "visits_kept": 17334,
+       "visits_max": 3296,
+       "visits_rejectable": 684815,
+       "whole_nodes": 4499
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 135788,
+       "visits_kept": 17334,
+       "visits_max": 2310,
+       "visits_rejectable": 118454
+      },
+      "kept": 128,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 100,
+       "seeds": 64835,
+       "tests": 72720017,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1872,
+      "rejectable_with_ceiling": 1748,
+      "rejectable_without_ceiling": 124,
+      "scanned_sites": 31996000,
+      "seeds": {
+       "census_tests_kept": 3502319,
+       "emitted_kept": 163,
+       "kept": 4769,
+       "kept_max": 1491,
+       "kept_with_emission": 51,
+       "rejectable": 1339544
+      },
+      "witnesses_in_a": 8857,
+      "witnesses_in_b": 8241,
+      "witnesses_nonuniversal_outside": 475864,
+      "witnesses_total": 997849,
+      "witnesses_universal_box": 504887
+     },
+     "q4": {
+      "cover": {
+       "sites_kept": 15451,
+       "sites_kept_max": 1162,
+       "sites_rejectable": 8911731,
+       "tight_kept": 11400,
+       "tight_rejectable": 7418197
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 327889,
+       "node_visits": 837470,
+       "visits_kept": 13000,
+       "visits_max": 4066,
+       "visits_rejectable": 824470,
+       "whole_nodes": 4067
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 188558,
+       "visits_kept": 13000,
+       "visits_max": 2725,
+       "visits_rejectable": 175558
+      },
+      "kept": 134,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 0,
+       "seeds": 0,
+       "tests": 0,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1866,
+      "rejectable_with_ceiling": 1722,
+      "rejectable_without_ceiling": 144,
+      "scanned_sites": 31996000,
+      "seeds": {
+       "census_tests_kept": 0,
+       "emitted_kept": 0,
+       "kept": 0,
+       "kept_max": 0,
+       "kept_with_emission": 0,
+       "rejectable": 0
+      },
+      "witnesses_in_a": 9273,
+      "witnesses_in_b": 7543,
+      "witnesses_nonuniversal_outside": 474869,
+      "witnesses_total": 914985,
+      "witnesses_universal_box": 423300
+     }
+    },
+    "samples_per_lane": 2000,
+    "schema": "audit_b_front_lanes_lidar_v3",
+    "seed": 1
+   },
+   "s": 8,
+   "scan": "single_000000",
+   "wall_seconds": 24.71158242225647
+  },
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/front_lanes_probe_pinned",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n32000.u16le",
+    "5",
+    "8",
+    "2000",
+    "1"
+   ],
+   "derived": {
+    "q3": {
+     "ceiling_mass_share": 0.887437992117325,
+     "ceiling_rectangle_share": 0.6232924788078398,
+     "census_tests_per_kept_pair": 20197.31914893617,
+     "cover_sites_kept_max": 5042,
+     "cover_sites_per_kept_pair": 321.0851063829787,
+     "cover_sites_per_rejectable_pair": 8258.583945435466,
+     "descent_leaf_tests_per_pair": 166.315,
+     "descent_visits_max": 5380,
+     "descent_visits_per_kept_pair": 212.14893617021278,
+     "descent_visits_per_pair": 419.6845,
+     "descent_visits_per_rejectable_pair": 429.9197271773347,
+     "emitted_per_kept_pair": 0.574468085106383,
+     "kept_pairs_with_emission_share": 0.2765957446808511,
+     "kept_share": 0.047,
+     "lemma_pairs_checked": 100,
+     "lemma_seeds_checked": 181424,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 650.5885,
+     "near_first_visits_max": 3571,
+     "near_first_visits_per_kept_pair": 212.14893617021278,
+     "near_first_visits_per_rejectable_pair": 94.53252885624345,
+     "rectangles": 1463159,
+     "rejectable_reachable_by_box_proposer_share": 0.9218258132214061,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.9089080722084126,
+      0.9330466316872177
+     ],
+     "rejectable_share": 0.953,
+     "rejectable_share_wilson95": [
+      0.9428245574407699,
+      0.9614385976950675
+     ],
+     "residual_mass": 16026793,
+     "residual_mass_share_of_all_pairs": 0.03130330830650958,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": 508.4219244369998,
+     "seeds_kept_max": 835,
+     "seeds_per_kept_pair": 57.159574468085104,
+     "seeds_per_rejectable_pair": 1430.4186778593914,
+     "threshold": 4,
+     "tight_cover_per_kept_pair": 249.61702127659575,
+     "window_2k_mass_share": 0.5001362406065892,
+     "window_4k_mass_share": 0.5598130580459859,
+     "witness_share_in_factors": 0.02310062351240454,
+     "witness_share_nonuniversal_outside": 0.5735161319328577,
+     "witness_share_universal_box": 0.40338324455473773
+    },
+    "q4": {
+     "ceiling_mass_share": 0.773181217215796,
+     "ceiling_rectangle_share": 0.5142966069386199,
+     "census_tests_per_kept_pair": null,
+     "cover_sites_kept_max": 8112,
+     "cover_sites_per_kept_pair": 217.8091603053435,
+     "cover_sites_per_rejectable_pair": 5694.383627608347,
+     "descent_leaf_tests_per_pair": 105.534,
+     "descent_visits_max": 3546,
+     "descent_visits_per_kept_pair": 115.99236641221374,
+     "descent_visits_per_pair": 292.034,
+     "descent_visits_per_rejectable_pair": 304.3729266987694,
+     "emitted_per_kept_pair": null,
+     "kept_pairs_with_emission_share": null,
+     "kept_share": 0.0655,
+     "lemma_pairs_checked": 0,
+     "lemma_seeds_checked": 0,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 269.4955,
+     "near_first_visits_max": 6467,
+     "near_first_visits_per_kept_pair": 115.99236641221374,
+     "near_first_visits_per_rejectable_pair": 196.57570893525948,
+     "rectangles": 1104283,
+     "rejectable_reachable_by_box_proposer_share": 0.8416265382557517,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.8243761902581661,
+      0.8574754389570425
+     ],
+     "rejectable_share": 0.9345,
+     "rejectable_share_wilson95": [
+      0.9228026145583187,
+      0.9445314713280418
+     ],
+     "residual_mass": 9528598,
+     "residual_mass_share_of_all_pairs": 0.0186111245663927,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": null,
+     "seeds_kept_max": null,
+     "seeds_per_kept_pair": null,
+     "seeds_per_rejectable_pair": null,
+     "threshold": 3,
+     "tight_cover_per_kept_pair": 153.42748091603053,
+     "window_2k_mass_share": 0.09068207096154125,
+     "window_4k_mass_share": 0.17342110560231422,
+     "witness_share_in_factors": 0.035219512014115266,
+     "witness_share_nonuniversal_outside": 0.6687792560543683,
+     "witness_share_universal_box": 0.2960012319315165
+    }
+   },
+   "kmax": 5,
+   "n": 32000,
+   "output": {
+    "ceiling": {
+     "ms": 18086.6,
+     "q3": {
+      "mass": 16026793,
+      "mass_at_threshold": 14222785,
+      "mass_hist": [
+       713739,
+       315135,
+       289402,
+       485732,
+       14222785
+      ],
+      "node_visits": 191096459,
+      "point_tests": 49516094,
+      "rect_hist": [
+       200597,
+       130792,
+       114986,
+       104808,
+       911976
+      ],
+      "rectangles": 1463159,
+      "rectangles_at_threshold": 911976,
+      "threshold": 4,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 8015580,
+        "rectangles": 415709
+       },
+       "L4K": {
+        "mass": 8972008,
+        "rectangles": 558993
+       },
+       "path_steps": 27850926,
+       "unsearchable": 0,
+       "window_tests": 42661069
+      }
+     },
+     "q4": {
+      "mass": 9528598,
+      "mass_at_threshold": 7367333,
+      "mass_hist": [
+       1322182,
+       439925,
+       399158,
+       7367333
+      ],
+      "node_visits": 162005047,
+      "point_tests": 43910991,
+      "rect_hist": [
+       253251,
+       152273,
+       130830,
+       567929
+      ],
+      "rectangles": 1104283,
+      "rectangles_at_threshold": 567929,
+      "threshold": 3,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 864073,
+        "rectangles": 138045
+       },
+       "L4K": {
+        "mass": 1652460,
+        "rectangles": 246072
+       },
+       "path_steps": 27850926,
+       "unsearchable": 0,
+       "window_tests": 34120596
+      }
+     }
+    },
+    "file": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n32000.u16le",
+    "front": {
+     "active_lane_mask": 6,
+     "emitted_rectangles": 1503524,
+     "fully_rejected_products": 796372,
+     "lane_rectangles": [
+      0,
+      1463159,
+      1104283
+     ],
+     "ms": 1755.2,
+     "product_visits": 4631792,
+     "rejected_pair_mass": [
+      0,
+      495957207,
+      502455402
+     ],
+     "residual_pair_mass": [
+      0,
+      16026793,
+      9528598
+     ],
+     "total_unordered_pairs": 511984000,
+     "witness_searches": 4567792
+    },
+    "front_mode": "samples",
+    "index": {
+     "leaves_with_several_ranks": 0,
+     "nodes": 63999
+    },
+    "kmax": 5,
+    "mask": 6,
+    "n": 32000,
+    "s": 8,
+    "sample": {
+     "ms": 3642.9,
+     "q3": {
+      "cover": {
+       "sites_kept": 30182,
+       "sites_kept_max": 5042,
+       "sites_rejectable": 15740861,
+       "tight_kept": 23464,
+       "tight_rejectable": 12971009
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 332630,
+       "node_visits": 839369,
+       "visits_kept": 19942,
+       "visits_max": 5380,
+       "visits_rejectable": 819427,
+       "whole_nodes": 2078
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 200121,
+       "visits_kept": 19942,
+       "visits_max": 3571,
+       "visits_rejectable": 180179
+      },
+      "kept": 94,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 100,
+       "seeds": 181424,
+       "tests": 296341242,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1906,
+      "rejectable_with_ceiling": 1757,
+      "rejectable_without_ceiling": 149,
+      "scanned_sites": 63996000,
+      "seeds": {
+       "census_tests_kept": 1898548,
+       "emitted_kept": 54,
+       "kept": 5373,
+       "kept_max": 835,
+       "kept_with_emission": 26,
+       "rejectable": 2726378
+      },
+      "witnesses_in_a": 13979,
+      "witnesses_in_b": 16079,
+      "witnesses_nonuniversal_outside": 746246,
+      "witnesses_total": 1301177,
+      "witnesses_universal_box": 524873
+     },
+     "q4": {
+      "cover": {
+       "sites_kept": 28533,
+       "sites_kept_max": 8112,
+       "sites_rejectable": 10642803,
+       "tight_kept": 20099,
+       "tight_rejectable": 8479117
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 211068,
+       "node_visits": 584068,
+       "visits_kept": 15195,
+       "visits_max": 3546,
+       "visits_rejectable": 568873,
+       "whole_nodes": 1478
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 382595,
+       "visits_kept": 15195,
+       "visits_max": 6467,
+       "visits_rejectable": 367400
+      },
+      "kept": 131,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 0,
+       "seeds": 0,
+       "tests": 0,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1869,
+      "rejectable_with_ceiling": 1573,
+      "rejectable_without_ceiling": 296,
+      "scanned_sites": 63996000,
+      "seeds": {
+       "census_tests_kept": 0,
+       "emitted_kept": 0,
+       "kept": 0,
+       "kept_max": 0,
+       "kept_with_emission": 0,
+       "rejectable": 0
+      },
+      "witnesses_in_a": 10109,
+      "witnesses_in_b": 8874,
+      "witnesses_nonuniversal_outside": 360466,
+      "witnesses_total": 538991,
+      "witnesses_universal_box": 159542
+     }
+    },
+    "samples_per_lane": 2000,
+    "schema": "audit_b_front_lanes_lidar_v3",
+    "seed": 1
+   },
+   "s": 8,
+   "scan": "single_000000",
+   "wall_seconds": 23.508436679840088
+  },
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/front_lanes_probe_pinned",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n32000.u16le",
+    "10",
+    "8",
+    "2000",
+    "1"
+   ],
+   "derived": {
+    "q3": {
+     "ceiling_mass_share": 0.902269195581636,
+     "ceiling_rectangle_share": 0.6067534201574702,
+     "census_tests_per_kept_pair": 7121.0,
+     "cover_sites_kept_max": 3688,
+     "cover_sites_per_kept_pair": 213.8961038961039,
+     "cover_sites_per_rejectable_pair": 8895.092043681747,
+     "descent_leaf_tests_per_pair": 218.0305,
+     "descent_visits_max": 8328,
+     "descent_visits_per_kept_pair": 183.1818181818182,
+     "descent_visits_per_pair": 535.815,
+     "descent_visits_per_rejectable_pair": 549.934997399896,
+     "emitted_per_kept_pair": 0.5974025974025974,
+     "kept_pairs_with_emission_share": 0.24675324675324675,
+     "kept_share": 0.0385,
+     "lemma_pairs_checked": 100,
+     "lemma_seeds_checked": 166275,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 927.4905,
+     "near_first_visits_max": 3649,
+     "near_first_visits_per_kept_pair": 183.1818181818182,
+     "near_first_visits_per_rejectable_pair": 73.3458138325533,
+     "rectangles": 2453542,
+     "rejectable_reachable_by_box_proposer_share": 0.9505980239209568,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.9399820774977339,
+      0.9594172955083677
+     ],
+     "rejectable_share": 0.9615,
+     "rejectable_share_wilson95": [
+      0.9521448928946652,
+      0.9690856724368777
+     ],
+     "residual_mass": 33392450,
+     "residual_mass_share_of_all_pairs": 0.06522166708334635,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": 1044.3418740849195,
+     "seeds_kept_max": 612,
+     "seeds_per_kept_pair": 35.48051948051948,
+     "seeds_per_rejectable_pair": 1482.272490899636,
+     "threshold": 9,
+     "tight_cover_per_kept_pair": 167.1818181818182,
+     "window_2k_mass_share": 0.5623240283357466,
+     "window_4k_mass_share": 0.6261966402585015,
+     "witness_share_in_factors": 0.016952195197686662,
+     "witness_share_nonuniversal_outside": 0.50497552266034,
+     "witness_share_universal_box": 0.47807228214197345
+    },
+    "q4": {
+     "ceiling_mass_share": 0.8734535211551749,
+     "ceiling_rectangle_share": 0.5633201676625135,
+     "census_tests_per_kept_pair": null,
+     "cover_sites_kept_max": 3692,
+     "cover_sites_per_kept_pair": 272.36,
+     "cover_sites_per_rejectable_pair": 9159.968421052632,
+     "descent_leaf_tests_per_pair": 249.4445,
+     "descent_visits_max": 7803,
+     "descent_visits_per_kept_pair": 176.68,
+     "descent_visits_per_pair": 602.059,
+     "descent_visits_per_rejectable_pair": 624.4473684210526,
+     "emitted_per_kept_pair": null,
+     "kept_pairs_with_emission_share": null,
+     "kept_share": 0.05,
+     "lemma_pairs_checked": 0,
+     "lemma_seeds_checked": 0,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 854.615,
+     "near_first_visits_max": 5096,
+     "near_first_visits_per_kept_pair": 176.68,
+     "near_first_visits_per_rejectable_pair": 121.94263157894737,
+     "rectangles": 2364989,
+     "rejectable_reachable_by_box_proposer_share": 0.9057894736842105,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.8918232956676025,
+      0.9181180956213993
+     ],
+     "rejectable_share": 0.95,
+     "rejectable_share_wilson95": [
+      0.939555890975977,
+      0.9587187664437288
+     ],
+     "residual_mass": 34102956,
+     "residual_mass_share_of_all_pairs": 0.0666094174817963,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": null,
+     "seeds_kept_max": null,
+     "seeds_per_kept_pair": null,
+     "seeds_per_rejectable_pair": null,
+     "threshold": 8,
+     "tight_cover_per_kept_pair": 202.12,
+     "window_2k_mass_share": 0.5543854321601916,
+     "window_4k_mass_share": 0.6215433641588137,
+     "witness_share_in_factors": 0.01855572392246801,
+     "witness_share_nonuniversal_outside": 0.5454029007213774,
+     "witness_share_universal_box": 0.4360413753561545
+    }
+   },
+   "kmax": 10,
+   "n": 32000,
+   "output": {
+    "ceiling": {
+     "ms": 47511.9,
+     "q3": {
+      "mass": 33392450,
+      "mass_at_threshold": 30128979,
+      "mass_hist": [
+       713739,
+       315135,
+       289402,
+       485732,
+       299478,
+       291393,
+       271328,
+       264594,
+       332670,
+       30128979
+      ],
+      "node_visits": 407446204,
+      "point_tests": 115626136,
+      "rect_hist": [
+       200597,
+       130792,
+       114986,
+       104808,
+       96814,
+       88697,
+       82121,
+       75445,
+       70587,
+       1488695
+      ],
+      "rectangles": 2453542,
+      "rectangles_at_threshold": 1488695,
+      "threshold": 9,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 18777377,
+        "rectangles": 793390
+       },
+       "L4K": {
+        "mass": 20910240,
+        "rectangles": 1036844
+       },
+       "path_steps": 47508306,
+       "unsearchable": 0,
+       "window_tests": 144364942
+      }
+     },
+     "q4": {
+      "mass": 34102956,
+      "mass_at_threshold": 29787347,
+      "mass_hist": [
+       1322182,
+       439925,
+       399158,
+       650796,
+       405255,
+       379500,
+       373865,
+       344928,
+       29787347
+      ],
+      "node_visits": 443890940,
+      "point_tests": 133577468,
+      "rect_hist": [
+       253251,
+       152273,
+       130830,
+       118374,
+       107766,
+       98253,
+       89254,
+       82742,
+       1332246
+      ],
+      "rectangles": 2364989,
+      "rectangles_at_threshold": 1332246,
+      "threshold": 8,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 18906182,
+        "rectangles": 653665
+       },
+       "L4K": {
+        "mass": 21196466,
+        "rectangles": 878060
+       },
+       "path_steps": 47508306,
+       "unsearchable": 0,
+       "window_tests": 141945350
+      }
+     }
+    },
+    "file": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000000/n32000.u16le",
+    "front": {
+     "active_lane_mask": 6,
+     "emitted_rectangles": 2545334,
+     "fully_rejected_products": 687721,
+     "lane_rectangles": [
+      0,
+      2453542,
+      2364989
+     ],
+     "ms": 3505.8,
+     "product_visits": 6498110,
+     "rejected_pair_mass": [
+      0,
+      478591550,
+      477881044
+     ],
+     "residual_pair_mass": [
+      0,
+      33392450,
+      34102956
+     ],
+     "total_unordered_pairs": 511984000,
+     "witness_searches": 6434110
+    },
+    "front_mode": "samples",
+    "index": {
+     "leaves_with_several_ranks": 0,
+     "nodes": 63999
+    },
+    "kmax": 10,
+    "mask": 6,
+    "n": 32000,
+    "s": 8,
+    "sample": {
+     "ms": 4132.7,
+     "q3": {
+      "cover": {
+       "sites_kept": 16470,
+       "sites_kept_max": 3688,
+       "sites_rejectable": 17105262,
+       "tight_kept": 12873,
+       "tight_rejectable": 14208720
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 436061,
+       "node_visits": 1071630,
+       "visits_kept": 14105,
+       "visits_max": 8328,
+       "visits_rejectable": 1057525,
+       "whole_nodes": 4453
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 155149,
+       "visits_kept": 14105,
+       "visits_max": 3649,
+       "visits_rejectable": 141044
+      },
+      "kept": 77,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 100,
+       "seeds": 166275,
+       "tests": 302856909,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1923,
+      "rejectable_with_ceiling": 1828,
+      "rejectable_without_ceiling": 95,
+      "scanned_sites": 63996000,
+      "seeds": {
+       "census_tests_kept": 548317,
+       "emitted_kept": 46,
+       "kept": 2732,
+       "kept_max": 612,
+       "kept_with_emission": 19,
+       "rejectable": 2850410
+      },
+      "witnesses_in_a": 16427,
+      "witnesses_in_b": 15019,
+      "witnesses_nonuniversal_outside": 936720,
+      "witnesses_total": 1854981,
+      "witnesses_universal_box": 886815
+     },
+     "q4": {
+      "cover": {
+       "sites_kept": 27236,
+       "sites_kept_max": 3692,
+       "sites_rejectable": 17403940,
+       "tight_kept": 20212,
+       "tight_rejectable": 14507626
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 498889,
+       "node_visits": 1204118,
+       "visits_kept": 17668,
+       "visits_max": 7803,
+       "visits_rejectable": 1186450,
+       "whole_nodes": 4024
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 249359,
+       "visits_kept": 17668,
+       "visits_max": 5096,
+       "visits_rejectable": 231691
+      },
+      "kept": 100,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 0,
+       "seeds": 0,
+       "tests": 0,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1900,
+      "rejectable_with_ceiling": 1721,
+      "rejectable_without_ceiling": 179,
+      "scanned_sites": 63996000,
+      "seeds": {
+       "census_tests_kept": 0,
+       "emitted_kept": 0,
+       "kept": 0,
+       "kept_max": 0,
+       "kept_with_emission": 0,
+       "rejectable": 0
+      },
+      "witnesses_in_a": 16978,
+      "witnesses_in_b": 14738,
+      "witnesses_nonuniversal_outside": 932219,
+      "witnesses_total": 1709230,
+      "witnesses_universal_box": 745295
+     }
+    },
+    "samples_per_lane": 2000,
+    "schema": "audit_b_front_lanes_lidar_v3",
+    "seed": 1
+   },
+   "s": 8,
+   "scan": "single_000000",
+   "wall_seconds": 55.18238711357117
+  },
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/front_lanes_probe_pinned",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n8000.u16le",
+    "5",
+    "8",
+    "2000",
+    "1"
+   ],
+   "derived": {
+    "q3": {
+     "ceiling_mass_share": 0.8163249028689783,
+     "ceiling_rectangle_share": 0.6033756089393749,
+     "census_tests_per_kept_pair": 13445.063063063064,
+     "cover_sites_kept_max": 2908,
+     "cover_sites_per_kept_pair": 184.43693693693695,
+     "cover_sites_per_rejectable_pair": 2079.924634420697,
+     "descent_leaf_tests_per_pair": 46.9435,
+     "descent_visits_max": 2268,
+     "descent_visits_per_kept_pair": 96.84684684684684,
+     "descent_visits_per_pair": 152.532,
+     "descent_visits_per_rejectable_pair": 159.48481439820023,
+     "emitted_per_kept_pair": 0.5225225225225225,
+     "kept_pairs_with_emission_share": 0.25225225225225223,
+     "kept_share": 0.111,
+     "lemma_pairs_checked": 100,
+     "lemma_seeds_checked": 29893,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 177.978,
+     "near_first_visits_max": 1179,
+     "near_first_visits_per_kept_pair": 96.84684684684684,
+     "near_first_visits_per_rejectable_pair": 68.7896512935883,
+     "rectangles": 310581,
+     "rejectable_reachable_by_box_proposer_share": 0.9111361079865017,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.8970080653033308,
+      0.9234914200537425
+     ],
+     "rejectable_share": 0.889,
+     "rejectable_share_wilson95": [
+      0.8744800743554421,
+      0.9020284628362593
+     ],
+     "residual_mass": 1567213,
+     "residual_mass_share_of_all_pairs": 0.04898152894111764,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": 86.56528902924619,
+     "seeds_kept_max": 655,
+     "seeds_per_kept_pair": 32.806306306306304,
+     "seeds_per_rejectable_pair": 350.4904386951631,
+     "threshold": 4,
+     "tight_cover_per_kept_pair": 142.69819819819818,
+     "window_2k_mass_share": 0.3635944826899726,
+     "window_4k_mass_share": 0.4422915072807589,
+     "witness_share_in_factors": 0.02537392261964962,
+     "witness_share_nonuniversal_outside": 0.5092483340637607,
+     "witness_share_universal_box": 0.4653777433165897
+    },
+    "q4": {
+     "ceiling_mass_share": 0.7466476596277962,
+     "ceiling_rectangle_share": 0.48717456004719045,
+     "census_tests_per_kept_pair": null,
+     "cover_sites_kept_max": 2910,
+     "cover_sites_per_kept_pair": 188.98760330578511,
+     "cover_sites_per_rejectable_pair": 2348.353242320819,
+     "descent_leaf_tests_per_pair": 69.2575,
+     "descent_visits_max": 2263,
+     "descent_visits_per_kept_pair": 107.1900826446281,
+     "descent_visits_per_pair": 201.8355,
+     "descent_visits_per_rejectable_pair": 214.86405005688283,
+     "emitted_per_kept_pair": null,
+     "kept_pairs_with_emission_share": null,
+     "kept_share": 0.121,
+     "lemma_pairs_checked": 0,
+     "lemma_seeds_checked": 0,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 167.91,
+     "near_first_visits_max": 1713,
+     "near_first_visits_per_kept_pair": 107.1900826446281,
+     "near_first_visits_per_rejectable_pair": 124.32821387940842,
+     "rectangles": 223774,
+     "rejectable_reachable_by_box_proposer_share": 0.8475540386803185,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.8299947255659997,
+      0.8635977619078304
+     ],
+     "rejectable_share": 0.879,
+     "rejectable_share_wilson95": [
+      0.8639757775194766,
+      0.8925711006184535
+     ],
+     "residual_mass": 1212884,
+     "residual_mass_share_of_all_pairs": 0.03790736342042755,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": null,
+     "seeds_kept_max": null,
+     "seeds_per_kept_pair": null,
+     "seeds_per_rejectable_pair": null,
+     "threshold": 3,
+     "tight_cover_per_kept_pair": 145.36363636363637,
+     "window_2k_mass_share": 0.10966588725714907,
+     "window_4k_mass_share": 0.1952800102895248,
+     "witness_share_in_factors": 0.027556429039366327,
+     "witness_share_nonuniversal_outside": 0.5871865880531237,
+     "witness_share_universal_box": 0.38525698290751
+    }
+   },
+   "kmax": 5,
+   "n": 8000,
+   "output": {
+    "ceiling": {
+     "ms": 2500.0,
+     "q3": {
+      "mass": 1567213,
+      "mass_at_threshold": 1279355,
+      "mass_hist": [
+       122896,
+       59632,
+       52585,
+       52745,
+       1279355
+      ],
+      "node_visits": 25874898,
+      "point_tests": 5471720,
+      "rect_hist": [
+       40041,
+       30776,
+       27610,
+       24757,
+       187397
+      ],
+      "rectangles": 310581,
+      "rectangles_at_threshold": 187397,
+      "threshold": 4,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 569830,
+        "rectangles": 95092
+       },
+       "L4K": {
+        "mass": 693165,
+        "rectangles": 126532
+       },
+       "path_steps": 5032821,
+       "unsearchable": 0,
+       "window_tests": 8949484
+      }
+     },
+     "q4": {
+      "mass": 1212884,
+      "mass_at_threshold": 905597,
+      "mass_hist": [
+       163503,
+       75542,
+       68242,
+       905597
+      ],
+      "node_visits": 20202178,
+      "point_tests": 4558770,
+      "rect_hist": [
+       48338,
+       35525,
+       30894,
+       109017
+      ],
+      "rectangles": 223774,
+      "rectangles_at_threshold": 109017,
+      "threshold": 3,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 133012,
+        "rectangles": 33137
+       },
+       "L4K": {
+        "mass": 236852,
+        "rectangles": 56363
+       },
+       "path_steps": 5032821,
+       "unsearchable": 0,
+       "window_tests": 6792017
+      }
+     }
+    },
+    "file": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n8000.u16le",
+    "front": {
+     "active_lane_mask": 6,
+     "emitted_rectangles": 316635,
+     "fully_rejected_products": 180705,
+     "lane_rectangles": [
+      0,
+      310581,
+      223774
+     ],
+     "ms": 382.0,
+     "product_visits": 1002680,
+     "rejected_pair_mass": [
+      0,
+      30428787,
+      30783116
+     ],
+     "residual_pair_mass": [
+      0,
+      1567213,
+      1212884
+     ],
+     "total_unordered_pairs": 31996000,
+     "witness_searches": 986680
+    },
+    "front_mode": "samples",
+    "index": {
+     "leaves_with_several_ranks": 0,
+     "nodes": 15999
+    },
+    "kmax": 5,
+    "mask": 6,
+    "n": 8000,
+    "s": 8,
+    "sample": {
+     "ms": 503.0,
+     "q3": {
+      "cover": {
+       "sites_kept": 40945,
+       "sites_kept_max": 2908,
+       "sites_rejectable": 3698106,
+       "tight_kept": 31679,
+       "tight_rejectable": 3051805
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 93887,
+       "node_visits": 305064,
+       "visits_kept": 21500,
+       "visits_max": 2268,
+       "visits_rejectable": 283564,
+       "whole_nodes": 2020
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 143808,
+       "visits_kept": 21500,
+       "visits_max": 1179,
+       "visits_rejectable": 122308
+      },
+      "kept": 222,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 100,
+       "seeds": 29893,
+       "tests": 10809771,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1778,
+      "rejectable_with_ceiling": 1620,
+      "rejectable_without_ceiling": 158,
+      "scanned_sites": 15996000,
+      "seeds": {
+       "census_tests_kept": 2984804,
+       "emitted_kept": 116,
+       "kept": 7283,
+       "kept_max": 655,
+       "kept_with_emission": 56,
+       "rejectable": 623172
+      },
+      "witnesses_in_a": 4702,
+      "witnesses_in_b": 4330,
+      "witnesses_nonuniversal_outside": 181270,
+      "witnesses_total": 355956,
+      "witnesses_universal_box": 165654
+     },
+     "q4": {
+      "cover": {
+       "sites_kept": 45735,
+       "sites_kept_max": 2910,
+       "sites_rejectable": 4128405,
+       "tight_kept": 35178,
+       "tight_rejectable": 3460236
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 138515,
+       "node_visits": 403671,
+       "visits_kept": 25940,
+       "visits_max": 2263,
+       "visits_rejectable": 377731,
+       "whole_nodes": 1423
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 244509,
+       "visits_kept": 25940,
+       "visits_max": 1713,
+       "visits_rejectable": 218569
+      },
+      "kept": 242,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 0,
+       "seeds": 0,
+       "tests": 0,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1758,
+      "rejectable_with_ceiling": 1490,
+      "rejectable_without_ceiling": 268,
+      "scanned_sites": 15996000,
+      "seeds": {
+       "census_tests_kept": 0,
+       "emitted_kept": 0,
+       "kept": 0,
+       "kept_max": 0,
+       "kept_with_emission": 0,
+       "rejectable": 0
+      },
+      "witnesses_in_a": 4546,
+      "witnesses_in_b": 4708,
+      "witnesses_nonuniversal_outside": 197189,
+      "witnesses_total": 335820,
+      "witnesses_universal_box": 129377
+     }
+    },
+    "samples_per_lane": 2000,
+    "schema": "audit_b_front_lanes_lidar_v3",
+    "seed": 1
+   },
+   "s": 8,
+   "scan": "single_000100",
+   "wall_seconds": 3.3920066356658936
+  },
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/front_lanes_probe_pinned",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n8000.u16le",
+    "10",
+    "8",
+    "2000",
+    "1"
+   ],
+   "derived": {
+    "q3": {
+     "ceiling_mass_share": 0.8604219301507129,
+     "ceiling_rectangle_share": 0.6004627761185999,
+     "census_tests_per_kept_pair": 7484.184049079755,
+     "cover_sites_kept_max": 2764,
+     "cover_sites_per_kept_pair": 161.94478527607362,
+     "cover_sites_per_rejectable_pair": 2434.8573761567773,
+     "descent_leaf_tests_per_pair": 56.7265,
+     "descent_visits_max": 1806,
+     "descent_visits_per_kept_pair": 103.68711656441718,
+     "descent_visits_per_pair": 176.6255,
+     "descent_visits_per_rejectable_pair": 183.097441480675,
+     "emitted_per_kept_pair": 1.049079754601227,
+     "kept_pairs_with_emission_share": 0.34355828220858897,
+     "kept_share": 0.0815,
+     "lemma_pairs_checked": 100,
+     "lemma_seeds_checked": 39986,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 288.9445,
+     "near_first_visits_max": 1119,
+     "near_first_visits_per_kept_pair": 103.68711656441718,
+     "near_first_visits_per_rejectable_pair": 63.81763745236799,
+     "rectangles": 557505,
+     "rejectable_reachable_by_box_proposer_share": 0.9373979314099075,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.9253814501534179,
+      0.9475888929724889
+     ],
+     "rejectable_share": 0.9185,
+     "rejectable_share_wilson95": [
+      0.9056914877964648,
+      0.9297039436038617
+     ],
+     "residual_mass": 3883676,
+     "residual_mass_share_of_all_pairs": 0.12138004750593824,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": 152.38202508128194,
+     "seeds_kept_max": 590,
+     "seeds_per_kept_pair": 26.41717791411043,
+     "seeds_per_rejectable_pair": 354.84540010887315,
+     "threshold": 9,
+     "tight_cover_per_kept_pair": 124.50920245398773,
+     "window_2k_mass_share": 0.5159941251535916,
+     "window_4k_mass_share": 0.603800626004847,
+     "witness_share_in_factors": 0.01879772759128483,
+     "witness_share_nonuniversal_outside": 0.4206430646715892,
+     "witness_share_universal_box": 0.560559207737126
+    },
+    "q4": {
+     "ceiling_mass_share": 0.8341350229052238,
+     "ceiling_rectangle_share": 0.5581746037790454,
+     "census_tests_per_kept_pair": null,
+     "cover_sites_kept_max": 2945,
+     "cover_sites_per_kept_pair": 229.48387096774192,
+     "cover_sites_per_rejectable_pair": 2524.242557883131,
+     "descent_leaf_tests_per_pair": 67.997,
+     "descent_visits_max": 2066,
+     "descent_visits_per_kept_pair": 128.06451612903226,
+     "descent_visits_per_pair": 201.4355,
+     "descent_visits_per_rejectable_pair": 208.95865490628447,
+     "emitted_per_kept_pair": null,
+     "kept_pairs_with_emission_share": null,
+     "kept_share": 0.093,
+     "lemma_pairs_checked": 0,
+     "lemma_seeds_checked": 0,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 273.714,
+     "near_first_visits_max": 1156,
+     "near_first_visits_per_kept_pair": 128.06451612903226,
+     "near_first_visits_per_rejectable_pair": 80.65656008820287,
+     "rectangles": 525212,
+     "rejectable_reachable_by_box_proposer_share": 0.9250275633958104,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.9119901908331862,
+      0.9362686011898269
+     ],
+     "rejectable_share": 0.907,
+     "rejectable_share_wilson95": [
+      0.8934795251097535,
+      0.9189599983787361
+     ],
+     "residual_mass": 3710289,
+     "residual_mass_share_of_all_pairs": 0.11596102637829729,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": null,
+     "seeds_kept_max": null,
+     "seeds_per_kept_pair": null,
+     "seeds_per_rejectable_pair": null,
+     "threshold": 8,
+     "tight_cover_per_kept_pair": 174.55376344086022,
+     "window_2k_mass_share": 0.4338486840243442,
+     "window_4k_mass_share": 0.5220213304138842,
+     "witness_share_in_factors": 0.016683472529720803,
+     "witness_share_nonuniversal_outside": 0.4573332018091877,
+     "witness_share_universal_box": 0.5259833256610915
+    }
+   },
+   "kmax": 10,
+   "n": 8000,
+   "output": {
+    "ceiling": {
+     "ms": 7700.8,
+     "q3": {
+      "mass": 3883676,
+      "mass_at_threshold": 3341600,
+      "mass_hist": [
+       122896,
+       59632,
+       52585,
+       52745,
+       53408,
+       52939,
+       51222,
+       48667,
+       47982,
+       3341600
+      ],
+      "node_visits": 64006093,
+      "point_tests": 16287560,
+      "rect_hist": [
+       40041,
+       30776,
+       27610,
+       24757,
+       22803,
+       20867,
+       19759,
+       18639,
+       17492,
+       334761
+      ],
+      "rectangles": 557505,
+      "rectangles_at_threshold": 334761,
+      "threshold": 9,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 2003954,
+        "rectangles": 192191
+       },
+       "L4K": {
+        "mass": 2344966,
+        "rectangles": 246702
+       },
+       "path_steps": 9200903,
+       "unsearchable": 0,
+       "window_tests": 32603732
+      }
+     },
+     "q4": {
+      "mass": 3710289,
+      "mass_at_threshold": 3094882,
+      "mass_hist": [
+       163503,
+       75542,
+       68242,
+       65668,
+       63881,
+       59806,
+       58925,
+       59840,
+       3094882
+      ],
+      "node_visits": 64112976,
+      "point_tests": 17032356,
+      "rect_hist": [
+       48338,
+       35525,
+       30894,
+       27750,
+       24865,
+       23015,
+       21523,
+       20142,
+       293160
+      ],
+      "rectangles": 525212,
+      "rectangles_at_threshold": 293160,
+      "threshold": 8,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 1609704,
+        "rectangles": 155268
+       },
+       "L4K": {
+        "mass": 1936850,
+        "rectangles": 205772
+       },
+       "path_steps": 9200903,
+       "unsearchable": 0,
+       "window_tests": 31317262
+      }
+     }
+    },
+    "file": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n8000.u16le",
+    "front": {
+     "active_lane_mask": 6,
+     "emitted_rectangles": 573661,
+     "fully_rejected_products": 154714,
+     "lane_rectangles": [
+      0,
+      557505,
+      525212
+     ],
+     "ms": 730.5,
+     "product_visits": 1464750,
+     "rejected_pair_mass": [
+      0,
+      28112324,
+      28285711
+     ],
+     "residual_pair_mass": [
+      0,
+      3883676,
+      3710289
+     ],
+     "total_unordered_pairs": 31996000,
+     "witness_searches": 1448750
+    },
+    "front_mode": "samples",
+    "index": {
+     "leaves_with_several_ranks": 0,
+     "nodes": 15999
+    },
+    "kmax": 10,
+    "mask": 6,
+    "n": 8000,
+    "s": 8,
+    "sample": {
+     "ms": 562.2,
+     "q3": {
+      "cover": {
+       "sites_kept": 26397,
+       "sites_kept_max": 2764,
+       "sites_rejectable": 4472833,
+       "tight_kept": 20295,
+       "tight_rejectable": 3706358
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 113453,
+       "node_visits": 353251,
+       "visits_kept": 16901,
+       "visits_max": 1806,
+       "visits_rejectable": 336350,
+       "whole_nodes": 4314
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 134134,
+       "visits_kept": 16901,
+       "visits_max": 1119,
+       "visits_rejectable": 117233
+      },
+      "kept": 163,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 100,
+       "seeds": 39986,
+       "tests": 18100573,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1837,
+      "rejectable_with_ceiling": 1722,
+      "rejectable_without_ceiling": 115,
+      "scanned_sites": 15996000,
+      "seeds": {
+       "census_tests_kept": 1219922,
+       "emitted_kept": 171,
+       "kept": 4306,
+       "kept_max": 590,
+       "kept_with_emission": 56,
+       "rejectable": 651851
+      },
+      "witnesses_in_a": 5206,
+      "witnesses_in_b": 5657,
+      "witnesses_nonuniversal_outside": 243085,
+      "witnesses_total": 577889,
+      "witnesses_universal_box": 323941
+     },
+     "q4": {
+      "cover": {
+       "sites_kept": 42684,
+       "sites_kept_max": 2945,
+       "sites_rejectable": 4578976,
+       "tight_kept": 32467,
+       "tight_rejectable": 3811200
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 135994,
+       "node_visits": 402871,
+       "visits_kept": 23820,
+       "visits_max": 2066,
+       "visits_rejectable": 379051,
+       "whole_nodes": 3908
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 170131,
+       "visits_kept": 23820,
+       "visits_max": 1156,
+       "visits_rejectable": 146311
+      },
+      "kept": 186,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 0,
+       "seeds": 0,
+       "tests": 0,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1814,
+      "rejectable_with_ceiling": 1678,
+      "rejectable_without_ceiling": 136,
+      "scanned_sites": 15996000,
+      "seeds": {
+       "census_tests_kept": 0,
+       "emitted_kept": 0,
+       "kept": 0,
+       "kept_max": 0,
+       "kept_with_emission": 0,
+       "rejectable": 0
+      },
+      "witnesses_in_a": 4092,
+      "witnesses_in_b": 5041,
+      "witnesses_nonuniversal_outside": 250357,
+      "witnesses_total": 547428,
+      "witnesses_universal_box": 287938
+     }
+    },
+    "samples_per_lane": 2000,
+    "schema": "audit_b_front_lanes_lidar_v3",
+    "seed": 1
+   },
+   "s": 8,
+   "scan": "single_000100",
+   "wall_seconds": 9.00184679031372
+  },
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/front_lanes_probe_pinned",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n16000.u16le",
+    "5",
+    "8",
+    "2000",
+    "1"
+   ],
+   "derived": {
+    "q3": {
+     "ceiling_mass_share": 0.862283881331672,
+     "ceiling_rectangle_share": 0.6037594920951077,
+     "census_tests_per_kept_pair": 312.6119402985075,
+     "cover_sites_kept_max": 403,
+     "cover_sites_per_kept_pair": 47.47761194029851,
+     "cover_sites_per_rejectable_pair": 5155.195605573419,
+     "descent_leaf_tests_per_pair": 114.606,
+     "descent_visits_max": 3809,
+     "descent_visits_per_kept_pair": 69.85074626865672,
+     "descent_visits_per_pair": 304.838,
+     "descent_visits_per_rejectable_pair": 321.7127545551983,
+     "emitted_per_kept_pair": 0.4626865671641791,
+     "kept_pairs_with_emission_share": 0.2835820895522388,
+     "kept_share": 0.067,
+     "lemma_pairs_checked": 100,
+     "lemma_seeds_checked": 76667,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 642.2675,
+     "near_first_visits_max": 2900,
+     "near_first_visits_per_kept_pair": 69.85074626865672,
+     "near_first_visits_per_rejectable_pair": 104.27545551982851,
+     "rectangles": 634607,
+     "rejectable_reachable_by_box_proposer_share": 0.9228295819935691,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.9098340312346932,
+      0.9340877849732429
+     ],
+     "rejectable_share": 0.933,
+     "rejectable_share_wilson95": [
+      0.9211915042498539,
+      0.943148332778441
+     ],
+     "residual_mass": 5438216,
+     "residual_mass_share_of_all_pairs": 0.042488718044877805,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": 1518.5942698706099,
+     "seeds_kept_max": 83,
+     "seeds_per_kept_pair": 8.074626865671641,
+     "seeds_per_rejectable_pair": 879.9769560557341,
+     "threshold": 4,
+     "tight_cover_per_kept_pair": 35.843283582089555,
+     "window_2k_mass_share": 0.402697686152959,
+     "window_4k_mass_share": 0.46134504403650023,
+     "witness_share_in_factors": 0.015736433806786115,
+     "witness_share_nonuniversal_outside": 0.47918507475467775,
+     "witness_share_universal_box": 0.5050784914385361
+    },
+    "q4": {
+     "ceiling_mass_share": 0.8026318559593655,
+     "ceiling_rectangle_share": 0.48713723534577147,
+     "census_tests_per_kept_pair": null,
+     "cover_sites_kept_max": 4827,
+     "cover_sites_per_kept_pair": 81.68181818181819,
+     "cover_sites_per_rejectable_pair": 5111.991332611051,
+     "descent_leaf_tests_per_pair": 131.091,
+     "descent_visits_max": 5045,
+     "descent_visits_per_kept_pair": 77.9090909090909,
+     "descent_visits_per_pair": 344.7875,
+     "descent_visits_per_rejectable_pair": 367.05146262188515,
+     "emitted_per_kept_pair": null,
+     "kept_pairs_with_emission_share": null,
+     "kept_share": 0.077,
+     "lemma_pairs_checked": 0,
+     "lemma_seeds_checked": 0,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 355.0565,
+     "near_first_visits_max": 3202,
+     "near_first_visits_per_kept_pair": 77.9090909090909,
+     "near_first_visits_per_rejectable_pair": 196.636511375948,
+     "rectangles": 461215,
+     "rejectable_reachable_by_box_proposer_share": 0.8624052004333694,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.8459368299852191,
+      0.877368398998655
+     ],
+     "rejectable_share": 0.923,
+     "rejectable_share_wilson95": [
+      0.9104884887401901,
+      0.9338896892343336
+     ],
+     "residual_mass": 4132445,
+     "residual_mass_share_of_all_pairs": 0.03228674448403025,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": null,
+     "seeds_kept_max": null,
+     "seeds_per_kept_pair": null,
+     "seeds_per_rejectable_pair": null,
+     "threshold": 3,
+     "tight_cover_per_kept_pair": 62.24025974025974,
+     "window_2k_mass_share": 0.08921691637759244,
+     "window_4k_mass_share": 0.15418402422778765,
+     "witness_share_in_factors": 0.02706752305618965,
+     "witness_share_nonuniversal_outside": 0.6444565864869394,
+     "witness_share_universal_box": 0.3284758904568709
+    }
+   },
+   "kmax": 5,
+   "n": 16000,
+   "output": {
+    "ceiling": {
+     "ms": 5907.6,
+     "q3": {
+      "mass": 5438216,
+      "mass_at_threshold": 4689286,
+      "mass_hist": [
+       233318,
+       167614,
+       165249,
+       182749,
+       4689286
+      ],
+      "node_visits": 63320603,
+      "point_tests": 15161486,
+      "rect_hist": [
+       84493,
+       61968,
+       54770,
+       50226,
+       383150
+      ],
+      "rectangles": 634607,
+      "rectangles_at_threshold": 383150,
+      "threshold": 4,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 2189957,
+        "rectangles": 193458
+       },
+       "L4K": {
+        "mass": 2508894,
+        "rectangles": 255971
+       },
+       "path_steps": 11067157,
+       "unsearchable": 0,
+       "window_tests": 18232854
+      }
+     },
+     "q4": {
+      "mass": 4132445,
+      "mass_at_threshold": 3316832,
+      "mass_hist": [
+       366091,
+       228939,
+       220583,
+       3316832
+      ],
+      "node_visits": 48991701,
+      "point_tests": 12030605,
+      "rect_hist": [
+       103388,
+       71306,
+       61846,
+       224675
+      ],
+      "rectangles": 461215,
+      "rectangles_at_threshold": 224675,
+      "threshold": 3,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 368684,
+        "rectangles": 67182
+       },
+       "L4K": {
+        "mass": 637157,
+        "rectangles": 113213
+       },
+       "path_steps": 11067157,
+       "unsearchable": 0,
+       "window_tests": 13999352
+      }
+     }
+    },
+    "file": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n16000.u16le",
+    "front": {
+     "active_lane_mask": 6,
+     "emitted_rectangles": 648214,
+     "fully_rejected_products": 370221,
+     "lane_rectangles": [
+      0,
+      634607,
+      461215
+     ],
+     "ms": 779.3,
+     "product_visits": 2052870,
+     "rejected_pair_mass": [
+      0,
+      122553784,
+      123859555
+     ],
+     "residual_pair_mass": [
+      0,
+      5438216,
+      4132445
+     ],
+     "total_unordered_pairs": 127992000,
+     "witness_searches": 2020870
+    },
+    "front_mode": "samples",
+    "index": {
+     "leaves_with_several_ranks": 0,
+     "nodes": 31999
+    },
+    "kmax": 5,
+    "mask": 6,
+    "n": 16000,
+    "s": 8,
+    "sample": {
+     "ms": 1262.1,
+     "q3": {
+      "cover": {
+       "sites_kept": 6362,
+       "sites_kept_max": 403,
+       "sites_rejectable": 9619595,
+       "tight_kept": 4803,
+       "tight_rejectable": 8172591
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 229212,
+       "node_visits": 609676,
+       "visits_kept": 9360,
+       "visits_max": 3809,
+       "visits_rejectable": 600316,
+       "whole_nodes": 2052
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 203938,
+       "visits_kept": 9360,
+       "visits_max": 2900,
+       "visits_rejectable": 194578
+      },
+      "kept": 134,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 100,
+       "seeds": 76667,
+       "tests": 64102841,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1866,
+      "rejectable_with_ceiling": 1722,
+      "rejectable_without_ceiling": 144,
+      "scanned_sites": 31996000,
+      "seeds": {
+       "census_tests_kept": 41890,
+       "emitted_kept": 62,
+       "kept": 1082,
+       "kept_max": 83,
+       "kept_with_emission": 38,
+       "rejectable": 1642037
+      },
+      "witnesses_in_a": 8457,
+      "witnesses_in_b": 11757,
+      "witnesses_nonuniversal_outside": 615530,
+      "witnesses_total": 1284535,
+      "witnesses_universal_box": 648791
+     },
+     "q4": {
+      "cover": {
+       "sites_kept": 12579,
+       "sites_kept_max": 4827,
+       "sites_rejectable": 9436736,
+       "tight_kept": 9585,
+       "tight_rejectable": 7920579
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 262182,
+       "node_visits": 689575,
+       "visits_kept": 11998,
+       "visits_max": 5045,
+       "visits_rejectable": 677577,
+       "whole_nodes": 1454
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 374989,
+       "visits_kept": 11998,
+       "visits_max": 3202,
+       "visits_rejectable": 362991
+      },
+      "kept": 154,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 0,
+       "seeds": 0,
+       "tests": 0,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1846,
+      "rejectable_with_ceiling": 1592,
+      "rejectable_without_ceiling": 254,
+      "scanned_sites": 31996000,
+      "seeds": {
+       "census_tests_kept": 0,
+       "emitted_kept": 0,
+       "kept": 0,
+       "kept_max": 0,
+       "kept_with_emission": 0,
+       "rejectable": 0
+      },
+      "witnesses_in_a": 8696,
+      "witnesses_in_b": 10525,
+      "witnesses_nonuniversal_outside": 457637,
+      "witnesses_total": 710113,
+      "witnesses_universal_box": 233255
+     }
+    },
+    "samples_per_lane": 2000,
+    "schema": "audit_b_front_lanes_lidar_v3",
+    "seed": 1
+   },
+   "s": 8,
+   "scan": "single_000100",
+   "wall_seconds": 7.960495948791504
+  },
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/front_lanes_probe_pinned",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n16000.u16le",
+    "10",
+    "8",
+    "2000",
+    "1"
+   ],
+   "derived": {
+    "q3": {
+     "ceiling_mass_share": 0.8647885491177216,
+     "ceiling_rectangle_share": 0.6027838829133157,
+     "census_tests_per_kept_pair": 54646.24137931035,
+     "cover_sites_kept_max": 5755,
+     "cover_sites_per_kept_pair": 378.4896551724138,
+     "cover_sites_per_rejectable_pair": 4436.817789757412,
+     "descent_leaf_tests_per_pair": 101.5025,
+     "descent_visits_max": 9576,
+     "descent_visits_per_kept_pair": 145.2896551724138,
+     "descent_visits_per_pair": 279.8135,
+     "descent_visits_per_rejectable_pair": 290.3288409703504,
+     "emitted_per_kept_pair": 0.8068965517241379,
+     "kept_pairs_with_emission_share": 0.32413793103448274,
+     "kept_share": 0.0725,
+     "lemma_pairs_checked": 100,
+     "lemma_seeds_checked": 58345,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 521.1595,
+     "near_first_visits_max": 1738,
+     "near_first_visits_per_kept_pair": 145.2896551724138,
+     "near_first_visits_per_rejectable_pair": 74.44528301886793,
+     "rectangles": 1132016,
+     "rejectable_reachable_by_box_proposer_share": 0.9272237196765498,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.9144988388711506,
+      0.9381828099198648
+     ],
+     "rejectable_share": 0.9275,
+     "rejectable_share_wilson95": [
+      0.915297093167095,
+      0.9380638313816256
+     ],
+     "residual_mass": 9898067,
+     "residual_mass_share_of_all_pairs": 0.07733348178011126,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": 161.6391888648908,
+     "seeds_kept_max": 1354,
+     "seeds_per_kept_pair": 57.47586206896552,
+     "seeds_per_rejectable_pair": 721.7072776280323,
+     "threshold": 9,
+     "tight_cover_per_kept_pair": 291.88275862068963,
+     "window_2k_mass_share": 0.5226922590037024,
+     "window_4k_mass_share": 0.6020836189530744,
+     "witness_share_in_factors": 0.016361593715551574,
+     "witness_share_nonuniversal_outside": 0.4616638476320589,
+     "witness_share_universal_box": 0.5219745586523895
+    },
+    "q4": {
+     "ceiling_mass_share": 0.8392383478306922,
+     "ceiling_rectangle_share": 0.5599657061915234,
+     "census_tests_per_kept_pair": null,
+     "cover_sites_kept_max": 5147,
+     "cover_sites_per_kept_pair": 122.51127819548873,
+     "cover_sites_per_rejectable_pair": 4700.251205141939,
+     "descent_leaf_tests_per_pair": 125.6765,
+     "descent_visits_max": 8648,
+     "descent_visits_per_kept_pair": 99.51127819548873,
+     "descent_visits_per_pair": 331.179,
+     "descent_visits_per_rejectable_pair": 347.6823781467595,
+     "emitted_per_kept_pair": null,
+     "kept_pairs_with_emission_share": null,
+     "kept_share": 0.0665,
+     "lemma_pairs_checked": 0,
+     "lemma_seeds_checked": 0,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 479.498,
+     "near_first_visits_max": 1921,
+     "near_first_visits_per_kept_pair": 99.51127819548873,
+     "near_first_visits_per_rejectable_pair": 108.15211569362614,
+     "rectangles": 1073080,
+     "rejectable_reachable_by_box_proposer_share": 0.9078735940010713,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.8939044406074385,
+      0.9201677474820352
+     ],
+     "rejectable_share": 0.9335,
+     "rejectable_share_wilson95": [
+      0.9217283653432611,
+      0.9436095546377223
+     ],
+     "residual_mass": 10026309,
+     "residual_mass_share_of_all_pairs": 0.0783354350271892,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": null,
+     "seeds_kept_max": null,
+     "seeds_per_kept_pair": null,
+     "seeds_per_rejectable_pair": null,
+     "threshold": 8,
+     "tight_cover_per_kept_pair": 94.50375939849624,
+     "window_2k_mass_share": 0.4423836329002029,
+     "window_4k_mass_share": 0.5232348215080943,
+     "witness_share_in_factors": 0.016796733250190824,
+     "witness_share_nonuniversal_outside": 0.5055495539084626,
+     "witness_share_universal_box": 0.47765371284134656
+    }
+   },
+   "kmax": 10,
+   "n": 16000,
+   "output": {
+    "ceiling": {
+     "ms": 16854.1,
+     "q3": {
+      "mass": 9898067,
+      "mass_at_threshold": 8559735,
+      "mass_hist": [
+       233318,
+       167614,
+       165249,
+       182749,
+       116955,
+       121585,
+       118998,
+       118093,
+       113771,
+       8559735
+      ],
+      "node_visits": 141741784,
+      "point_tests": 36948994,
+      "rect_hist": [
+       84493,
+       61968,
+       54770,
+       50226,
+       45482,
+       42238,
+       38813,
+       36887,
+       34778,
+       682361
+      ],
+      "rectangles": 1132016,
+      "rectangles_at_threshold": 682361,
+      "threshold": 9,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 5173643,
+        "rectangles": 386254
+       },
+       "L4K": {
+        "mass": 5959464,
+        "rectangles": 500927
+       },
+       "path_steps": 20117629,
+       "unsearchable": 0,
+       "window_tests": 66123648
+      }
+     },
+     "q4": {
+      "mass": 10026309,
+      "mass_at_threshold": 8414463,
+      "mass_hist": [
+       366091,
+       228939,
+       220583,
+       210899,
+       152010,
+       145444,
+       144505,
+       143375,
+       8414463
+      ],
+      "node_visits": 146870536,
+      "point_tests": 40546774,
+      "rect_hist": [
+       103388,
+       71306,
+       61846,
+       56155,
+       50390,
+       46219,
+       42470,
+       40418,
+       600888
+      ],
+      "rectangles": 1073080,
+      "rectangles_at_threshold": 600888,
+      "threshold": 8,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 4435475,
+        "rectangles": 315928
+       },
+       "L4K": {
+        "mass": 5246114,
+        "rectangles": 421477
+       },
+       "path_steps": 20117629,
+       "unsearchable": 0,
+       "window_tests": 63870233
+      }
+     }
+    },
+    "file": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n16000.u16le",
+    "front": {
+     "active_lane_mask": 6,
+     "emitted_rectangles": 1167230,
+     "fully_rejected_products": 320721,
+     "lane_rectangles": [
+      0,
+      1132016,
+      1073080
+     ],
+     "ms": 1547.0,
+     "product_visits": 2991902,
+     "rejected_pair_mass": [
+      0,
+      118093933,
+      117965691
+     ],
+     "residual_pair_mass": [
+      0,
+      9898067,
+      10026309
+     ],
+     "total_unordered_pairs": 127992000,
+     "witness_searches": 2959902
+    },
+    "front_mode": "samples",
+    "index": {
+     "leaves_with_several_ranks": 0,
+     "nodes": 31999
+    },
+    "kmax": 10,
+    "mask": 6,
+    "n": 16000,
+    "s": 8,
+    "sample": {
+     "ms": 1228.1,
+     "q3": {
+      "cover": {
+       "sites_kept": 54881,
+       "sites_kept_max": 5755,
+       "sites_rejectable": 8230297,
+       "tight_kept": 42323,
+       "tight_rejectable": 6854513
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 203005,
+       "node_visits": 559627,
+       "visits_kept": 21067,
+       "visits_max": 9576,
+       "visits_rejectable": 538560,
+       "whole_nodes": 4423
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 159163,
+       "visits_kept": 21067,
+       "visits_max": 1738,
+       "visits_rejectable": 138096
+      },
+      "kept": 145,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 100,
+       "seeds": 58345,
+       "tests": 45029640,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1855,
+      "rejectable_with_ceiling": 1720,
+      "rejectable_without_ceiling": 135,
+      "scanned_sites": 31996000,
+      "seeds": {
+       "census_tests_kept": 7923705,
+       "emitted_kept": 117,
+       "kept": 8334,
+       "kept_max": 1354,
+       "kept_with_emission": 47,
+       "rejectable": 1338767
+      },
+      "witnesses_in_a": 7566,
+      "witnesses_in_b": 9488,
+      "witnesses_nonuniversal_outside": 481201,
+      "witnesses_total": 1042319,
+      "witnesses_universal_box": 544064
+     },
+     "q4": {
+      "cover": {
+       "sites_kept": 16294,
+       "sites_kept_max": 5147,
+       "sites_rejectable": 8775369,
+       "tight_kept": 12569,
+       "tight_rejectable": 7342667
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 251353,
+       "node_visits": 662358,
+       "visits_kept": 13235,
+       "visits_max": 8648,
+       "visits_rejectable": 649123,
+       "whole_nodes": 3927
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 215155,
+       "visits_kept": 13235,
+       "visits_max": 1921,
+       "visits_rejectable": 201920
+      },
+      "kept": 133,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 0,
+       "seeds": 0,
+       "tests": 0,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1867,
+      "rejectable_with_ceiling": 1695,
+      "rejectable_without_ceiling": 172,
+      "scanned_sites": 31996000,
+      "seeds": {
+       "census_tests_kept": 0,
+       "emitted_kept": 0,
+       "kept": 0,
+       "kept_max": 0,
+       "kept_with_emission": 0,
+       "rejectable": 0
+      },
+      "witnesses_in_a": 7213,
+      "witnesses_in_b": 8895,
+      "witnesses_nonuniversal_outside": 484820,
+      "witnesses_total": 958996,
+      "witnesses_universal_box": 458068
+     }
+    },
+    "samples_per_lane": 2000,
+    "schema": "audit_b_front_lanes_lidar_v3",
+    "seed": 1
+   },
+   "s": 8,
+   "scan": "single_000100",
+   "wall_seconds": 19.643181324005127
+  },
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/front_lanes_probe_pinned",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n32000.u16le",
+    "5",
+    "8",
+    "2000",
+    "1"
+   ],
+   "derived": {
+    "q3": {
+     "ceiling_mass_share": 0.8796787660107157,
+     "ceiling_rectangle_share": 0.6036082540747719,
+     "census_tests_per_kept_pair": 47242.61728395062,
+     "cover_sites_kept_max": 6701,
+     "cover_sites_per_kept_pair": 152.45679012345678,
+     "cover_sites_per_rejectable_pair": 10412.998436685773,
+     "descent_leaf_tests_per_pair": 207.1395,
+     "descent_visits_max": 10249,
+     "descent_visits_per_kept_pair": 88.50617283950618,
+     "descent_visits_per_pair": 511.2455,
+     "descent_visits_per_rejectable_pair": 529.0891089108911,
+     "emitted_per_kept_pair": 0.4567901234567901,
+     "kept_pairs_with_emission_share": 0.2345679012345679,
+     "kept_share": 0.0405,
+     "lemma_pairs_checked": 100,
+     "lemma_seeds_checked": 179327,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 985.2835,
+     "near_first_visits_max": 4040,
+     "near_first_visits_per_kept_pair": 88.50617283950618,
+     "near_first_visits_per_rejectable_pair": 147.588327253778,
+     "rectangles": 1317313,
+     "rejectable_reachable_by_box_proposer_share": 0.928087545596665,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.9156535839392917,
+      0.9388110378896412
+     ],
+     "rejectable_share": 0.9595,
+     "rejectable_share_wilson95": [
+      0.9499431767800542,
+      0.9672950567407345
+     ],
+     "residual_mass": 16980893,
+     "residual_mass_share_of_all_pairs": 0.033166843104472016,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": 1419.9281460897182,
+     "seeds_kept_max": 1671,
+     "seeds_per_kept_pair": 31.098765432098766,
+     "seeds_per_rejectable_pair": 1862.5742574257426,
+     "threshold": 4,
+     "tight_cover_per_kept_pair": 110.28395061728395,
+     "window_2k_mass_share": 0.40318144634678516,
+     "window_4k_mass_share": 0.4499021930118752,
+     "witness_share_in_factors": 0.021848533949873312,
+     "witness_share_nonuniversal_outside": 0.57038557937893,
+     "witness_share_universal_box": 0.4077658866711967
+    },
+    "q4": {
+     "ceiling_mass_share": 0.8274454896439154,
+     "ceiling_rectangle_share": 0.4893668352393599,
+     "census_tests_per_kept_pair": null,
+     "cover_sites_kept_max": 9716,
+     "cover_sites_per_kept_pair": 259.33673469387753,
+     "cover_sites_per_rejectable_pair": 10684.893270241851,
+     "descent_leaf_tests_per_pair": 233.5175,
+     "descent_visits_max": 9293,
+     "descent_visits_per_kept_pair": 151.28571428571428,
+     "descent_visits_per_pair": 567.8115,
+     "descent_visits_per_rejectable_pair": 589.2728706624606,
+     "emitted_per_kept_pair": null,
+     "kept_pairs_with_emission_share": null,
+     "kept_share": 0.049,
+     "lemma_pairs_checked": 0,
+     "lemma_seeds_checked": 0,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 694.9055,
+     "near_first_visits_max": 3367,
+     "near_first_visits_per_kept_pair": 151.28571428571428,
+     "near_first_visits_per_rejectable_pair": 221.835436382755,
+     "rectangles": 978213,
+     "rejectable_reachable_by_box_proposer_share": 0.8817034700315457,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.8664142364148759,
+      0.8954539626599332
+     ],
+     "rejectable_share": 0.951,
+     "rejectable_share_wilson95": [
+      0.940644363213663,
+      0.9596264601114199
+     ],
+     "residual_mass": 13333659,
+     "residual_mass_share_of_all_pairs": 0.02604311658176818,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": null,
+     "seeds_kept_max": null,
+     "seeds_per_kept_pair": null,
+     "seeds_per_rejectable_pair": null,
+     "threshold": 3,
+     "tight_cover_per_kept_pair": 196.70408163265307,
+     "window_2k_mass_share": 0.06312258323090458,
+     "window_4k_mass_share": 0.11476197193883539,
+     "witness_share_in_factors": 0.028068564718512084,
+     "witness_share_nonuniversal_outside": 0.649865341402536,
+     "witness_share_universal_box": 0.3220660938789519
+    }
+   },
+   "kmax": 5,
+   "n": 32000,
+   "output": {
+    "ceiling": {
+     "ms": 15038.9,
+     "q3": {
+      "mass": 16980893,
+      "mass_at_threshold": 14937731,
+      "mass_hist": [
+       749705,
+       457272,
+       318795,
+       517390,
+       14937731
+      ],
+      "node_visits": 148464161,
+      "point_tests": 37141649,
+      "rect_hist": [
+       184818,
+       125986,
+       110230,
+       101138,
+       795141
+      ],
+      "rectangles": 1317313,
+      "rectangles_at_threshold": 795141,
+      "threshold": 4,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 6846381,
+        "rectangles": 381362
+       },
+       "L4K": {
+        "mass": 7639741,
+        "rectangles": 510623
+       },
+       "path_steps": 24503436,
+       "unsearchable": 0,
+       "window_tests": 38240232
+      }
+     },
+     "q4": {
+      "mass": 13333659,
+      "mass_at_threshold": 11032876,
+      "mass_hist": [
+       1323597,
+       600211,
+       376975,
+       11032876
+      ],
+      "node_visits": 124083849,
+      "point_tests": 32943079,
+      "rect_hist": [
+       228448,
+       145692,
+       125368,
+       478705
+      ],
+      "rectangles": 978213,
+      "rectangles_at_threshold": 478705,
+      "threshold": 3,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 841655,
+        "rectangles": 129663
+       },
+       "L4K": {
+        "mass": 1530197,
+        "rectangles": 225312
+       },
+       "path_steps": 24503436,
+       "unsearchable": 0,
+       "window_tests": 30000550
+      }
+     }
+    },
+    "file": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n32000.u16le",
+    "front": {
+     "active_lane_mask": 6,
+     "emitted_rectangles": 1348234,
+     "fully_rejected_products": 737112,
+     "lane_rectangles": [
+      0,
+      1317313,
+      978213
+     ],
+     "ms": 1630.1,
+     "product_visits": 4202692,
+     "rejected_pair_mass": [
+      0,
+      495003107,
+      498650341
+     ],
+     "residual_pair_mass": [
+      0,
+      16980893,
+      13333659
+     ],
+     "total_unordered_pairs": 511984000,
+     "witness_searches": 4138692
+    },
+    "front_mode": "samples",
+    "index": {
+     "leaves_with_several_ranks": 0,
+     "nodes": 63999
+    },
+    "kmax": 5,
+    "mask": 6,
+    "n": 32000,
+    "s": 8,
+    "sample": {
+     "ms": 5114.4,
+     "q3": {
+      "cover": {
+       "sites_kept": 12349,
+       "sites_kept_max": 6701,
+       "sites_rejectable": 19982544,
+       "tight_kept": 8933,
+       "tight_rejectable": 16907370
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 414279,
+       "node_visits": 1022491,
+       "visits_kept": 7169,
+       "visits_max": 10249,
+       "visits_rejectable": 1015322,
+       "whole_nodes": 2118
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 290391,
+       "visits_kept": 7169,
+       "visits_max": 4040,
+       "visits_rejectable": 283222
+      },
+      "kept": 81,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 100,
+       "seeds": 179327,
+       "tests": 367304990,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1919,
+      "rejectable_with_ceiling": 1781,
+      "rejectable_without_ceiling": 138,
+      "scanned_sites": 63996000,
+      "seeds": {
+       "census_tests_kept": 3826652,
+       "emitted_kept": 37,
+       "kept": 2519,
+       "kept_max": 1671,
+       "kept_with_emission": 19,
+       "rejectable": 3574280
+      },
+      "witnesses_in_a": 18973,
+      "witnesses_in_b": 24081,
+      "witnesses_nonuniversal_outside": 1123983,
+      "witnesses_total": 1970567,
+      "witnesses_universal_box": 803530
+     },
+     "q4": {
+      "cover": {
+       "sites_kept": 25415,
+       "sites_kept_max": 9716,
+       "sites_rejectable": 20322667,
+       "tight_kept": 19277,
+       "tight_rejectable": 17176284
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 467035,
+       "node_visits": 1135623,
+       "visits_kept": 14826,
+       "visits_max": 9293,
+       "visits_rejectable": 1120797,
+       "whole_nodes": 1565
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 436757,
+       "visits_kept": 14826,
+       "visits_max": 3367,
+       "visits_rejectable": 421931
+      },
+      "kept": 98,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 0,
+       "seeds": 0,
+       "tests": 0,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1902,
+      "rejectable_with_ceiling": 1677,
+      "rejectable_without_ceiling": 225,
+      "scanned_sites": 63996000,
+      "seeds": {
+       "census_tests_kept": 0,
+       "emitted_kept": 0,
+       "kept": 0,
+       "kept_max": 0,
+       "kept_with_emission": 0,
+       "rejectable": 0
+      },
+      "witnesses_in_a": 18051,
+      "witnesses_in_b": 20959,
+      "witnesses_nonuniversal_outside": 903190,
+      "witnesses_total": 1389811,
+      "witnesses_universal_box": 447611
+     }
+    },
+    "samples_per_lane": 2000,
+    "schema": "audit_b_front_lanes_lidar_v3",
+    "seed": 1
+   },
+   "s": 8,
+   "scan": "single_000100",
+   "wall_seconds": 21.806209325790405
+  },
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/front_lanes_probe_pinned",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n32000.u16le",
+    "10",
+    "8",
+    "2000",
+    "1"
+   ],
+   "derived": {
+    "q3": {
+     "ceiling_mass_share": 0.8739009299355462,
+     "ceiling_rectangle_share": 0.5918127749210086,
+     "census_tests_per_kept_pair": 66668.76859504133,
+     "cover_sites_kept_max": 10331,
+     "cover_sites_per_kept_pair": 297.3223140495868,
+     "cover_sites_per_rejectable_pair": 9211.255987227249,
+     "descent_leaf_tests_per_pair": 222.4545,
+     "descent_visits_max": 6349,
+     "descent_visits_per_kept_pair": 129.95867768595042,
+     "descent_visits_per_pair": 544.143,
+     "descent_visits_per_rejectable_pair": 570.8147951037786,
+     "emitted_per_kept_pair": 1.0991735537190082,
+     "kept_pairs_with_emission_share": 0.34710743801652894,
+     "kept_share": 0.0605,
+     "lemma_pairs_checked": 100,
+     "lemma_seeds_checked": 134386,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 942.9735,
+     "near_first_visits_max": 5314,
+     "near_first_visits_per_kept_pair": 129.95867768595042,
+     "near_first_visits_per_rejectable_pair": 103.7802022352315,
+     "rectangles": 2259740,
+     "rejectable_reachable_by_box_proposer_share": 0.9079297498669505,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.8940114659459802,
+      0.9201834800856646
+     ],
+     "rejectable_share": 0.9395,
+     "rejectable_share_wilson95": [
+      0.9281849046541709,
+      0.9491300107590753
+     ],
+     "residual_mass": 28630909,
+     "residual_mass_share_of_all_pairs": 0.05592149168724023,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": 547.6898434655989,
+     "seeds_kept_max": 1534,
+     "seeds_per_kept_pair": 45.40495867768595,
+     "seeds_per_rejectable_pair": 1598.4640766365087,
+     "threshold": 9,
+     "tight_cover_per_kept_pair": 231.76859504132233,
+     "window_2k_mass_share": 0.5145685384980268,
+     "window_4k_mass_share": 0.5853804012998679,
+     "witness_share_in_factors": 0.017761368691697064,
+     "witness_share_nonuniversal_outside": 0.5212882440492761,
+     "witness_share_universal_box": 0.4609503872590269
+    },
+    "q4": {
+     "ceiling_mass_share": 0.855049647881094,
+     "ceiling_rectangle_share": 0.5487582145521465,
+     "census_tests_per_kept_pair": null,
+     "cover_sites_kept_max": 9570,
+     "cover_sites_per_kept_pair": 349.26666666666665,
+     "cover_sites_per_rejectable_pair": 9994.272823218997,
+     "descent_leaf_tests_per_pair": 274.045,
+     "descent_visits_max": 20547,
+     "descent_visits_per_kept_pair": 150.54285714285714,
+     "descent_visits_per_pair": 652.3005,
+     "descent_visits_per_rejectable_pair": 680.1023746701846,
+     "emitted_per_kept_pair": null,
+     "kept_pairs_with_emission_share": null,
+     "kept_share": 0.0525,
+     "lemma_pairs_checked": 0,
+     "lemma_seeds_checked": 0,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 901.2805,
+     "near_first_visits_max": 4079,
+     "near_first_visits_per_kept_pair": 150.54285714285714,
+     "near_first_visits_per_rejectable_pair": 164.87757255936677,
+     "rectangles": 2162169,
+     "rejectable_reachable_by_box_proposer_share": 0.9129287598944591,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.8993847204819768,
+      0.9248020449165525
+     ],
+     "rejectable_share": 0.9475,
+     "rejectable_share_wilson95": [
+      0.9368392096171152,
+      0.9564450330391479
+     ],
+     "residual_mass": 30520940,
+     "residual_mass_share_of_all_pairs": 0.05961307384605769,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": null,
+     "seeds_kept_max": null,
+     "seeds_per_kept_pair": null,
+     "seeds_per_rejectable_pair": null,
+     "threshold": 8,
+     "tight_cover_per_kept_pair": 254.34285714285716,
+     "window_2k_mass_share": 0.43344811791511006,
+     "window_4k_mass_share": 0.5021971145056476,
+     "witness_share_in_factors": 0.01848758516355341,
+     "witness_share_nonuniversal_outside": 0.5662438053414004,
+     "witness_share_universal_box": 0.41526860949504624
+    }
+   },
+   "kmax": 10,
+   "n": 32000,
+   "output": {
+    "ceiling": {
+     "ms": 37653.0,
+     "q3": {
+      "mass": 28630909,
+      "mass_at_threshold": 25020578,
+      "mass_hist": [
+       749705,
+       457272,
+       318795,
+       517390,
+       531653,
+       284510,
+       260109,
+       260018,
+       230879,
+       25020578
+      ],
+      "node_visits": 320466271,
+      "point_tests": 87492086,
+      "rect_hist": [
+       184818,
+       125986,
+       110230,
+       101138,
+       92930,
+       85349,
+       79522,
+       73532,
+       68892,
+       1337343
+      ],
+      "rectangles": 2259740,
+      "rectangles_at_threshold": 1337343,
+      "threshold": 9,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 14732565,
+        "rectangles": 734104
+       },
+       "L4K": {
+        "mass": 16759973,
+        "rectangles": 953931
+       },
+       "path_steps": 42884470,
+       "unsearchable": 0,
+       "window_tests": 132992080
+      }
+     },
+     "q4": {
+      "mass": 30520940,
+      "mass_at_threshold": 26096919,
+      "mass_hist": [
+       1323597,
+       600211,
+       376975,
+       605398,
+       532018,
+       335489,
+       319563,
+       330770,
+       26096919
+      ],
+      "node_visits": 341963126,
+      "point_tests": 99258209,
+      "rect_hist": [
+       228448,
+       145692,
+       125368,
+       113208,
+       102663,
+       93918,
+       86712,
+       79652,
+       1186508
+      ],
+      "rectangles": 2162169,
+      "rectangles_at_threshold": 1186508,
+      "threshold": 8,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 13229244,
+        "rectangles": 604493
+       },
+       "L4K": {
+        "mass": 15327528,
+        "rectangles": 805084
+       },
+       "path_steps": 42884470,
+       "unsearchable": 0,
+       "window_tests": 129621054
+      }
+     }
+    },
+    "file": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000100/n32000.u16le",
+    "front": {
+     "active_lane_mask": 6,
+     "emitted_rectangles": 2335864,
+     "fully_rejected_products": 645218,
+     "lane_rectangles": [
+      0,
+      2259740,
+      2162169
+     ],
+     "ms": 3162.3,
+     "product_visits": 5994164,
+     "rejected_pair_mass": [
+      0,
+      483353091,
+      481463060
+     ],
+     "residual_pair_mass": [
+      0,
+      28630909,
+      30520940
+     ],
+     "total_unordered_pairs": 511984000,
+     "witness_searches": 5930164
+    },
+    "front_mode": "samples",
+    "index": {
+     "leaves_with_several_ranks": 0,
+     "nodes": 63999
+    },
+    "kmax": 10,
+    "mask": 6,
+    "n": 32000,
+    "s": 8,
+    "sample": {
+     "ms": 3288.2,
+     "q3": {
+      "cover": {
+       "sites_kept": 35976,
+       "sites_kept_max": 10331,
+       "sites_rejectable": 17307950,
+       "tight_kept": 28044,
+       "tight_rejectable": 14527536
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 444909,
+       "node_visits": 1088286,
+       "visits_kept": 15725,
+       "visits_max": 6349,
+       "visits_rejectable": 1072561,
+       "whole_nodes": 4476
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 210728,
+       "visits_kept": 15725,
+       "visits_max": 5314,
+       "visits_rejectable": 195003
+      },
+      "kept": 121,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 100,
+       "seeds": 134386,
+       "tests": 223507841,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1879,
+      "rejectable_with_ceiling": 1706,
+      "rejectable_without_ceiling": 173,
+      "scanned_sites": 63996000,
+      "seeds": {
+       "census_tests_kept": 8066921,
+       "emitted_kept": 133,
+       "kept": 5494,
+       "kept_max": 1534,
+       "kept_with_emission": 42,
+       "rejectable": 3003514
+      },
+      "witnesses_in_a": 15432,
+      "witnesses_in_b": 18065,
+      "witnesses_nonuniversal_outside": 983122,
+      "witnesses_total": 1885947,
+      "witnesses_universal_box": 869328
+     },
+     "q4": {
+      "cover": {
+       "sites_kept": 36673,
+       "sites_kept_max": 9570,
+       "sites_rejectable": 18939147,
+       "tight_kept": 26706,
+       "tight_rejectable": 15949901
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 548090,
+       "node_visits": 1304601,
+       "visits_kept": 15807,
+       "visits_max": 20547,
+       "visits_rejectable": 1288794,
+       "whole_nodes": 4023
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 328250,
+       "visits_kept": 15807,
+       "visits_max": 4079,
+       "visits_rejectable": 312443
+      },
+      "kept": 105,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 0,
+       "seeds": 0,
+       "tests": 0,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1895,
+      "rejectable_with_ceiling": 1730,
+      "rejectable_without_ceiling": 165,
+      "scanned_sites": 63996000,
+      "seeds": {
+       "census_tests_kept": 0,
+       "emitted_kept": 0,
+       "kept": 0,
+       "kept_max": 0,
+       "kept_with_emission": 0,
+       "rejectable": 0
+      },
+      "witnesses_in_a": 14072,
+      "witnesses_in_b": 19253,
+      "witnesses_nonuniversal_outside": 1020689,
+      "witnesses_total": 1802561,
+      "witnesses_universal_box": 748547
+     }
+    },
+    "samples_per_lane": 2000,
+    "schema": "audit_b_front_lanes_lidar_v3",
+    "seed": 1
+   },
+   "s": 8,
+   "scan": "single_000100",
+   "wall_seconds": 44.13277578353882
+  },
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/front_lanes_probe_pinned",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n8000.u16le",
+    "5",
+    "8",
+    "2000",
+    "1"
+   ],
+   "derived": {
+    "q3": {
+     "ceiling_mass_share": 0.8529742513376888,
+     "ceiling_rectangle_share": 0.5996026244673442,
+     "census_tests_per_kept_pair": 14766.496240601504,
+     "cover_sites_kept_max": 3241,
+     "cover_sites_per_kept_pair": 239.45864661654136,
+     "cover_sites_per_rejectable_pair": 2797.9694697375467,
+     "descent_leaf_tests_per_pair": 77.954,
+     "descent_visits_max": 1504,
+     "descent_visits_per_kept_pair": 114.17293233082707,
+     "descent_visits_per_pair": 219.806,
+     "descent_visits_per_rejectable_pair": 227.3310123192287,
+     "emitted_per_kept_pair": 0.5338345864661654,
+     "kept_pairs_with_emission_share": 0.24060150375939848,
+     "kept_share": 0.0665,
+     "lemma_pairs_checked": 100,
+     "lemma_seeds_checked": 38823,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 369.643,
+     "near_first_visits_max": 1247,
+     "near_first_visits_per_kept_pair": 114.17293233082707,
+     "near_first_visits_per_rejectable_pair": 58.830208891269415,
+     "rectangles": 313054,
+     "rejectable_reachable_by_box_proposer_share": 0.9110873058382432,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.8973185312532835,
+      0.923167882874978
+     ],
+     "rejectable_share": 0.9335,
+     "rejectable_share_wilson95": [
+      0.9217283653432611,
+      0.9436095546377223
+     ],
+     "residual_mass": 2537025,
+     "residual_mass_share_of_all_pairs": 0.07929194274284286,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": 145.14,
+     "seeds_kept_max": 766,
+     "seeds_per_kept_pair": 39.097744360902254,
+     "seeds_per_rejectable_pair": 401.46116764863416,
+     "threshold": 4,
+     "tight_cover_per_kept_pair": 181.5563909774436,
+     "window_2k_mass_share": 0.3651000679930233,
+     "window_4k_mass_share": 0.416025857056986,
+     "witness_share_in_factors": 0.021727721071412145,
+     "witness_share_nonuniversal_outside": 0.4526272646851151,
+     "witness_share_universal_box": 0.5256450142434728
+    },
+    "q4": {
+     "ceiling_mass_share": 0.7798704294808666,
+     "ceiling_rectangle_share": 0.4848977083150408,
+     "census_tests_per_kept_pair": null,
+     "cover_sites_kept_max": 2810,
+     "cover_sites_per_kept_pair": 260.82208588957053,
+     "cover_sites_per_rejectable_pair": 2645.050081654872,
+     "descent_leaf_tests_per_pair": 108.8755,
+     "descent_visits_max": 2460,
+     "descent_visits_per_kept_pair": 130.36196319018404,
+     "descent_visits_per_pair": 287.8325,
+     "descent_visits_per_rejectable_pair": 301.80511703865,
+     "emitted_per_kept_pair": null,
+     "kept_pairs_with_emission_share": null,
+     "kept_share": 0.0815,
+     "lemma_pairs_checked": 0,
+     "lemma_seeds_checked": 0,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 251.647,
+     "near_first_visits_max": 1928,
+     "near_first_visits_per_kept_pair": 130.36196319018404,
+     "near_first_visits_per_rejectable_pair": 99.2814371257485,
+     "rectangles": 227780,
+     "rejectable_reachable_by_box_proposer_share": 0.854109961894393,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.837228717097846,
+      0.8695132968454052
+     ],
+     "rejectable_share": 0.9185,
+     "rejectable_share_wilson95": [
+      0.9056914877964648,
+      0.9297039436038617
+     ],
+     "residual_mass": 1902902,
+     "residual_mass_share_of_all_pairs": 0.059473121640205025,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": null,
+     "seeds_kept_max": null,
+     "seeds_per_kept_pair": null,
+     "seeds_per_rejectable_pair": null,
+     "threshold": 3,
+     "tight_cover_per_kept_pair": 196.72392638036808,
+     "window_2k_mass_share": 0.0825155473061671,
+     "window_4k_mass_share": 0.1399199748594515,
+     "witness_share_in_factors": 0.01881405301871272,
+     "witness_share_nonuniversal_outside": 0.5092927791708226,
+     "witness_share_universal_box": 0.47189316781046464
+    }
+   },
+   "kmax": 5,
+   "n": 8000,
+   "output": {
+    "ceiling": {
+     "ms": 2866.1,
+     "q3": {
+      "mass": 2537025,
+      "mass_at_threshold": 2164017,
+      "mass_hist": [
+       137297,
+       109858,
+       62864,
+       62989,
+       2164017
+      ],
+      "node_visits": 30845386,
+      "point_tests": 7874450,
+      "rect_hist": [
+       41078,
+       31759,
+       27466,
+       25043,
+       187708
+      ],
+      "rectangles": 313054,
+      "rectangles_at_threshold": 187708,
+      "threshold": 4,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 926268,
+        "rectangles": 93666
+       },
+       "L4K": {
+        "mass": 1055468,
+        "rectangles": 123665
+       },
+       "path_steps": 4993845,
+       "unsearchable": 0,
+       "window_tests": 9047034
+      }
+     },
+     "q4": {
+      "mass": 1902902,
+      "mass_at_threshold": 1484017,
+      "mass_hist": [
+       203439,
+       134915,
+       80531,
+       1484017
+      ],
+      "node_visits": 25326143,
+      "point_tests": 6967078,
+      "rect_hist": [
+       49933,
+       36377,
+       31020,
+       110450
+      ],
+      "rectangles": 227780,
+      "rectangles_at_threshold": 110450,
+      "threshold": 3,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 157019,
+        "rectangles": 32651
+       },
+       "L4K": {
+        "mass": 266254,
+        "rectangles": 55015
+       },
+       "path_steps": 4993845,
+       "unsearchable": 0,
+       "window_tests": 6932657
+      }
+     }
+    },
+    "file": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n8000.u16le",
+    "front": {
+     "active_lane_mask": 6,
+     "emitted_rectangles": 318859,
+     "fully_rejected_products": 168004,
+     "lane_rectangles": [
+      0,
+      313054,
+      227780
+     ],
+     "ms": 333.9,
+     "product_visits": 981726,
+     "rejected_pair_mass": [
+      0,
+      29458975,
+      30093098
+     ],
+     "residual_pair_mass": [
+      0,
+      2537025,
+      1902902
+     ],
+     "total_unordered_pairs": 31996000,
+     "witness_searches": 965726
+    },
+    "front_mode": "samples",
+    "index": {
+     "leaves_with_several_ranks": 0,
+     "nodes": 15999
+    },
+    "kmax": 5,
+    "mask": 6,
+    "n": 8000,
+    "s": 8,
+    "sample": {
+     "ms": 552.8,
+     "q3": {
+      "cover": {
+       "sites_kept": 31848,
+       "sites_kept_max": 3241,
+       "sites_rejectable": 5223809,
+       "tight_kept": 24147,
+       "tight_rejectable": 4397920
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 155908,
+       "node_visits": 439612,
+       "visits_kept": 15185,
+       "visits_max": 1504,
+       "visits_rejectable": 424427,
+       "whole_nodes": 1995
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 125021,
+       "visits_kept": 15185,
+       "visits_max": 1247,
+       "visits_rejectable": 109836
+      },
+      "kept": 133,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 100,
+       "seeds": 38823,
+       "tests": 17947690,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1867,
+      "rejectable_with_ceiling": 1701,
+      "rejectable_without_ceiling": 166,
+      "scanned_sites": 15996000,
+      "seeds": {
+       "census_tests_kept": 1963944,
+       "emitted_kept": 71,
+       "kept": 5200,
+       "kept_max": 766,
+       "kept_with_emission": 32,
+       "rejectable": 749528
+      },
+      "witnesses_in_a": 10469,
+      "witnesses_in_b": 5594,
+      "witnesses_nonuniversal_outside": 334621,
+      "witnesses_total": 739286,
+      "witnesses_universal_box": 388602
+     },
+     "q4": {
+      "cover": {
+       "sites_kept": 42514,
+       "sites_kept_max": 2810,
+       "sites_rejectable": 4858957,
+       "tight_kept": 32066,
+       "tight_rejectable": 4040439
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 217751,
+       "node_visits": 575665,
+       "visits_kept": 21249,
+       "visits_max": 2460,
+       "visits_rejectable": 554416,
+       "whole_nodes": 1361
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 203629,
+       "visits_kept": 21249,
+       "visits_max": 1928,
+       "visits_rejectable": 182380
+      },
+      "kept": 163,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 0,
+       "seeds": 0,
+       "tests": 0,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1837,
+      "rejectable_with_ceiling": 1569,
+      "rejectable_without_ceiling": 268,
+      "scanned_sites": 15996000,
+      "seeds": {
+       "census_tests_kept": 0,
+       "emitted_kept": 0,
+       "kept": 0,
+       "kept_max": 0,
+       "kept_with_emission": 0,
+       "rejectable": 0
+      },
+      "witnesses_in_a": 5082,
+      "witnesses_in_b": 4387,
+      "witnesses_nonuniversal_outside": 256324,
+      "witnesses_total": 503294,
+      "witnesses_universal_box": 237501
+     }
+    },
+    "samples_per_lane": 2000,
+    "schema": "audit_b_front_lanes_lidar_v3",
+    "seed": 1
+   },
+   "s": 8,
+   "scan": "single_000200",
+   "wall_seconds": 3.7597880363464355
+  },
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/front_lanes_probe_pinned",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n8000.u16le",
+    "10",
+    "8",
+    "2000",
+    "1"
+   ],
+   "derived": {
+    "q3": {
+     "ceiling_mass_share": 0.8538462444792289,
+     "ceiling_rectangle_share": 0.5898090661172272,
+     "census_tests_per_kept_pair": 18118.493243243243,
+     "cover_sites_kept_max": 3126,
+     "cover_sites_per_kept_pair": 304.7162162162162,
+     "cover_sites_per_rejectable_pair": 2757.273758099352,
+     "descent_leaf_tests_per_pair": 74.226,
+     "descent_visits_max": 3290,
+     "descent_visits_per_kept_pair": 138.51351351351352,
+     "descent_visits_per_pair": 213.153,
+     "descent_visits_per_rejectable_pair": 219.11771058315335,
+     "emitted_per_kept_pair": 0.8986486486486487,
+     "kept_pairs_with_emission_share": 0.31756756756756754,
+     "kept_share": 0.074,
+     "lemma_pairs_checked": 100,
+     "lemma_seeds_checked": 34413,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 333.812,
+     "near_first_visits_max": 1439,
+     "near_first_visits_per_kept_pair": 138.51351351351352,
+     "near_first_visits_per_rejectable_pair": 56.13768898488121,
+     "rectangles": 547467,
+     "rejectable_reachable_by_box_proposer_share": 0.923866090712743,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.9108906421460922,
+      0.9350867943890299
+     ],
+     "rejectable_share": 0.926,
+     "rejectable_share_wilson95": [
+      0.913692877147695,
+      0.9366737985429602
+     ],
+     "residual_mass": 4583146,
+     "residual_mass_share_of_all_pairs": 0.14324121765220652,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": 96.16099870856651,
+     "seeds_kept_max": 645,
+     "seeds_per_kept_pair": 47.08783783783784,
+     "seeds_per_rejectable_pair": 358.0869330453564,
+     "threshold": 9,
+     "tight_cover_per_kept_pair": 231.02027027027026,
+     "window_2k_mass_share": 0.4593997223741072,
+     "window_4k_mass_share": 0.5385807041713269,
+     "witness_share_in_factors": 0.02379333277413634,
+     "witness_share_nonuniversal_outside": 0.4411225480210418,
+     "witness_share_universal_box": 0.5350841192048219
+    },
+    "q4": {
+     "ceiling_mass_share": 0.8282471141980364,
+     "ceiling_rectangle_share": 0.5478469499825316,
+     "census_tests_per_kept_pair": null,
+     "cover_sites_kept_max": 3369,
+     "cover_sites_per_kept_pair": 325.21387283236993,
+     "cover_sites_per_rejectable_pair": 2865.9649698960043,
+     "descent_leaf_tests_per_pair": 87.3745,
+     "descent_visits_max": 2439,
+     "descent_visits_per_kept_pair": 155.1271676300578,
+     "descent_visits_per_pair": 243.121,
+     "descent_visits_per_rejectable_pair": 251.45320197044336,
+     "emitted_per_kept_pair": null,
+     "kept_pairs_with_emission_share": null,
+     "kept_share": 0.0865,
+     "lemma_pairs_checked": 0,
+     "lemma_seeds_checked": 0,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 326.545,
+     "near_first_visits_max": 1564,
+     "near_first_visits_per_kept_pair": 155.1271676300578,
+     "near_first_visits_per_rejectable_pair": 66.4920634920635,
+     "rectangles": 518079,
+     "rejectable_reachable_by_box_proposer_share": 0.9157088122605364,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.9020807012021792,
+      0.9275924486117639
+     ],
+     "rejectable_share": 0.9135,
+     "rejectable_share_wilson95": [
+      0.9003740476352478,
+      0.9250405542381932
+     ],
+     "residual_mass": 4578450,
+     "residual_mass_share_of_all_pairs": 0.14309444930616327,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": null,
+     "seeds_kept_max": null,
+     "seeds_per_kept_pair": null,
+     "seeds_per_rejectable_pair": null,
+     "threshold": 8,
+     "tight_cover_per_kept_pair": 247.2601156069364,
+     "window_2k_mass_share": 0.40176719195360877,
+     "window_4k_mass_share": 0.4774397448918302,
+     "witness_share_in_factors": 0.023275505673031282,
+     "witness_share_nonuniversal_outside": 0.47243105850648454,
+     "witness_share_universal_box": 0.5042934358204841
+    }
+   },
+   "kmax": 10,
+   "n": 8000,
+   "output": {
+    "ceiling": {
+     "ms": 7267.9,
+     "q3": {
+      "mass": 4583146,
+      "mass_at_threshold": 3913302,
+      "mass_hist": [
+       137297,
+       109858,
+       62864,
+       62989,
+       65904,
+       58472,
+       56783,
+       59367,
+       56310,
+       3913302
+      ],
+      "node_visits": 63869190,
+      "point_tests": 16897318,
+      "rect_hist": [
+       41078,
+       31759,
+       27466,
+       25043,
+       22977,
+       20904,
+       19680,
+       18370,
+       17289,
+       322901
+      ],
+      "rectangles": 547467,
+      "rectangles_at_threshold": 322901,
+      "threshold": 9,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 2105496,
+        "rectangles": 181744
+       },
+       "L4K": {
+        "mass": 2468394,
+        "rectangles": 234898
+       },
+       "path_steps": 8903360,
+       "unsearchable": 0,
+       "window_tests": 32156314
+      }
+     },
+     "q4": {
+      "mass": 4578450,
+      "mass_at_threshold": 3792088,
+      "mass_hist": [
+       203439,
+       134915,
+       80531,
+       79699,
+       75981,
+       72781,
+       70923,
+       68093,
+       3792088
+      ],
+      "node_visits": 65883588,
+      "point_tests": 18467884,
+      "rect_hist": [
+       49933,
+       36377,
+       31020,
+       27867,
+       25036,
+       22714,
+       21200,
+       20104,
+       283828
+      ],
+      "rectangles": 518079,
+      "rectangles_at_threshold": 283828,
+      "threshold": 8,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 1839471,
+        "rectangles": 148323
+       },
+       "L4K": {
+        "mass": 2185934,
+        "rectangles": 196711
+       },
+       "path_steps": 8903360,
+       "unsearchable": 0,
+       "window_tests": 30989380
+      }
+     }
+    },
+    "file": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n8000.u16le",
+    "front": {
+     "active_lane_mask": 6,
+     "emitted_rectangles": 562875,
+     "fully_rejected_products": 138280,
+     "lane_rectangles": [
+      0,
+      547467,
+      518079
+     ],
+     "ms": 698.6,
+     "product_visits": 1410310,
+     "rejected_pair_mass": [
+      0,
+      27412854,
+      27417550
+     ],
+     "residual_pair_mass": [
+      0,
+      4583146,
+      4578450
+     ],
+     "total_unordered_pairs": 31996000,
+     "witness_searches": 1394310
+    },
+    "front_mode": "samples",
+    "index": {
+     "leaves_with_several_ranks": 0,
+     "nodes": 15999
+    },
+    "kmax": 10,
+    "mask": 6,
+    "n": 8000,
+    "s": 8,
+    "sample": {
+     "ms": 530.2,
+     "q3": {
+      "cover": {
+       "sites_kept": 45098,
+       "sites_kept_max": 3126,
+       "sites_rejectable": 5106471,
+       "tight_kept": 34191,
+       "tight_rejectable": 4245424
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 148452,
+       "node_visits": 426306,
+       "visits_kept": 20500,
+       "visits_max": 3290,
+       "visits_rejectable": 405806,
+       "whole_nodes": 4421
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 124467,
+       "visits_kept": 20500,
+       "visits_max": 1439,
+       "visits_rejectable": 103967
+      },
+      "kept": 148,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 100,
+       "seeds": 34413,
+       "tests": 13300319,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1852,
+      "rejectable_with_ceiling": 1711,
+      "rejectable_without_ceiling": 141,
+      "scanned_sites": 15996000,
+      "seeds": {
+       "census_tests_kept": 2681537,
+       "emitted_kept": 133,
+       "kept": 6969,
+       "kept_max": 645,
+       "kept_with_emission": 47,
+       "rejectable": 663177
+      },
+      "witnesses_in_a": 6928,
+      "witnesses_in_b": 8957,
+      "witnesses_nonuniversal_outside": 294504,
+      "witnesses_total": 667624,
+      "witnesses_universal_box": 357235
+     },
+     "q4": {
+      "cover": {
+       "sites_kept": 56262,
+       "sites_kept_max": 3369,
+       "sites_rejectable": 5236118,
+       "tight_kept": 42776,
+       "tight_rejectable": 4375874
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 174749,
+       "node_visits": 486242,
+       "visits_kept": 26837,
+       "visits_max": 2439,
+       "visits_rejectable": 459405,
+       "whole_nodes": 3887
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 148318,
+       "visits_kept": 26837,
+       "visits_max": 1564,
+       "visits_rejectable": 121481
+      },
+      "kept": 173,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 0,
+       "seeds": 0,
+       "tests": 0,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1827,
+      "rejectable_with_ceiling": 1673,
+      "rejectable_without_ceiling": 154,
+      "scanned_sites": 15996000,
+      "seeds": {
+       "census_tests_kept": 0,
+       "emitted_kept": 0,
+       "kept": 0,
+       "kept_max": 0,
+       "kept_with_emission": 0,
+       "rejectable": 0
+      },
+      "witnesses_in_a": 7301,
+      "witnesses_in_b": 7900,
+      "witnesses_nonuniversal_outside": 308540,
+      "witnesses_total": 653090,
+      "witnesses_universal_box": 329349
+     }
+    },
+    "samples_per_lane": 2000,
+    "schema": "audit_b_front_lanes_lidar_v3",
+    "seed": 1
+   },
+   "s": 8,
+   "scan": "single_000200",
+   "wall_seconds": 8.504889726638794
+  },
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/front_lanes_probe_pinned",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n16000.u16le",
+    "5",
+    "8",
+    "2000",
+    "1"
+   ],
+   "derived": {
+    "q3": {
+     "ceiling_mass_share": 0.8773284109206434,
+     "ceiling_rectangle_share": 0.6058085737168651,
+     "census_tests_per_kept_pair": 64146.66197183099,
+     "cover_sites_kept_max": 5791,
+     "cover_sites_per_kept_pair": 463.84507042253523,
+     "cover_sites_per_rejectable_pair": 6082.115603939866,
+     "descent_leaf_tests_per_pair": 178.583,
+     "descent_visits_max": 3369,
+     "descent_visits_per_kept_pair": 152.91549295774647,
+     "descent_visits_per_pair": 438.678,
+     "descent_visits_per_rejectable_pair": 449.1959564541213,
+     "emitted_per_kept_pair": 0.352112676056338,
+     "kept_pairs_with_emission_share": 0.19718309859154928,
+     "kept_share": 0.0355,
+     "lemma_pairs_checked": 100,
+     "lemma_seeds_checked": 91884,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 830.9375,
+     "near_first_visits_max": 2868,
+     "near_first_visits_per_kept_pair": 152.91549295774647,
+     "near_first_visits_per_rejectable_pair": 86.62571280456194,
+     "rectangles": 665499,
+     "rejectable_reachable_by_box_proposer_share": 0.9212026956972524,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.9083253191830227,
+      0.9324058191797322
+     ],
+     "rejectable_share": 0.9645,
+     "rejectable_share_wilson95": [
+      0.9554589392270256,
+      0.9717601238206486
+     ],
+     "residual_mass": 8874239,
+     "residual_mass_share_of_all_pairs": 0.06933432558284892,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": 290.2862254025045,
+     "seeds_kept_max": 1179,
+     "seeds_per_kept_pair": 86.6056338028169,
+     "seeds_per_rejectable_pair": 922.1467081389321,
+     "threshold": 4,
+     "tight_cover_per_kept_pair": 352.1830985915493,
+     "window_2k_mass_share": 0.3787729854920518,
+     "window_4k_mass_share": 0.4351321842920841,
+     "witness_share_in_factors": 0.015478901842798045,
+     "witness_share_nonuniversal_outside": 0.44723941331327566,
+     "witness_share_universal_box": 0.5372816848439262
+    },
+    "q4": {
+     "ceiling_mass_share": 0.7998121008192168,
+     "ceiling_rectangle_share": 0.4880021630368377,
+     "census_tests_per_kept_pair": null,
+     "cover_sites_kept_max": 6544,
+     "cover_sites_per_kept_pair": 466.9166666666667,
+     "cover_sites_per_rejectable_pair": 5588.6284355179705,
+     "descent_leaf_tests_per_pair": 203.21,
+     "descent_visits_max": 3470,
+     "descent_visits_per_kept_pair": 164.09259259259258,
+     "descent_visits_per_pair": 493.981,
+     "descent_visits_per_rejectable_pair": 512.8118393234672,
+     "emitted_per_kept_pair": null,
+     "kept_pairs_with_emission_share": null,
+     "kept_share": 0.054,
+     "lemma_pairs_checked": 0,
+     "lemma_seeds_checked": 0,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 575.7695,
+     "near_first_visits_max": 2772,
+     "near_first_visits_per_kept_pair": 164.09259259259258,
+     "near_first_visits_per_rejectable_pair": 169.3070824524313,
+     "rectangles": 484504,
+     "rejectable_reachable_by_box_proposer_share": 0.8435517970401691,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.8264882090720591,
+      0.8592231376811172
+     ],
+     "rejectable_share": 0.946,
+     "rejectable_share_wilson95": [
+      0.9352121486087018,
+      0.9550778451894956
+     ],
+     "residual_mass": 6430044,
+     "residual_mass_share_of_all_pairs": 0.05023785861616351,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": null,
+     "seeds_kept_max": null,
+     "seeds_per_kept_pair": null,
+     "seeds_per_rejectable_pair": null,
+     "threshold": 3,
+     "tight_cover_per_kept_pair": 352.93518518518516,
+     "window_2k_mass_share": 0.08146180648219514,
+     "window_4k_mass_share": 0.14670024030939757,
+     "witness_share_in_factors": 0.016197454015886566,
+     "witness_share_nonuniversal_outside": 0.5123638886742004,
+     "witness_share_universal_box": 0.4714386573099131
+    }
+   },
+   "kmax": 5,
+   "n": 16000,
+   "output": {
+    "ceiling": {
+     "ms": 7162.3,
+     "q3": {
+      "mass": 8874239,
+      "mass_at_threshold": 7785622,
+      "mass_hist": [
+       457117,
+       332261,
+       150546,
+       148693,
+       7785622
+      ],
+      "node_visits": 76980840,
+      "point_tests": 21217138,
+      "rect_hist": [
+       88217,
+       64364,
+       57665,
+       52088,
+       403165
+      ],
+      "rectangles": 665499,
+      "rectangles_at_threshold": 403165,
+      "threshold": 4,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 3361322,
+        "rectangles": 202450
+       },
+       "L4K": {
+        "mass": 3861467,
+        "rectangles": 264969
+       },
+       "path_steps": 11391967,
+       "unsearchable": 0,
+       "window_tests": 19235454
+      }
+     },
+     "q4": {
+      "mass": 6430044,
+      "mass_at_threshold": 5142827,
+      "mass_hist": [
+       681969,
+       399610,
+       205638,
+       5142827
+      ],
+      "node_visits": 62469054,
+      "point_tests": 18091462,
+      "rect_hist": [
+       108436,
+       74483,
+       65146,
+       236439
+      ],
+      "rectangles": 484504,
+      "rectangles_at_threshold": 236439,
+      "threshold": 3,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 523803,
+        "rectangles": 70342
+       },
+       "L4K": {
+        "mass": 943289,
+        "rectangles": 116553
+       },
+       "path_steps": 11391967,
+       "unsearchable": 0,
+       "window_tests": 14790079
+      }
+     }
+    },
+    "file": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n16000.u16le",
+    "front": {
+     "active_lane_mask": 6,
+     "emitted_rectangles": 679577,
+     "fully_rejected_products": 363824,
+     "lane_rectangles": [
+      0,
+      665499,
+      484504
+     ],
+     "ms": 770.4,
+     "product_visits": 2102802,
+     "rejected_pair_mass": [
+      0,
+      119117761,
+      121561956
+     ],
+     "residual_pair_mass": [
+      0,
+      8874239,
+      6430044
+     ],
+     "total_unordered_pairs": 127992000,
+     "witness_searches": 2070802
+    },
+    "front_mode": "samples",
+    "index": {
+     "leaves_with_several_ranks": 0,
+     "nodes": 31999
+    },
+    "kmax": 5,
+    "mask": 6,
+    "n": 16000,
+    "s": 8,
+    "sample": {
+     "ms": 1491.1,
+     "q3": {
+      "cover": {
+       "sites_kept": 32933,
+       "sites_kept_max": 5791,
+       "sites_rejectable": 11732401,
+       "tight_kept": 25005,
+       "tight_rejectable": 9892913
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 357166,
+       "node_visits": 877356,
+       "visits_kept": 10857,
+       "visits_max": 3369,
+       "visits_rejectable": 866499,
+       "whole_nodes": 2020
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 177958,
+       "visits_kept": 10857,
+       "visits_max": 2868,
+       "visits_rejectable": 167101
+      },
+      "kept": 71,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 100,
+       "seeds": 91884,
+       "tests": 81367673,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1929,
+      "rejectable_with_ceiling": 1777,
+      "rejectable_without_ceiling": 152,
+      "scanned_sites": 31996000,
+      "seeds": {
+       "census_tests_kept": 4554413,
+       "emitted_kept": 25,
+       "kept": 6149,
+       "kept_max": 1179,
+       "kept_with_emission": 14,
+       "rejectable": 1778821
+      },
+      "witnesses_in_a": 14063,
+      "witnesses_in_b": 11661,
+      "witnesses_nonuniversal_outside": 743256,
+      "witnesses_total": 1661875,
+      "witnesses_universal_box": 892895
+     },
+     "q4": {
+      "cover": {
+       "sites_kept": 50427,
+       "sites_kept_max": 6544,
+       "sites_rejectable": 10573685,
+       "tight_kept": 38117,
+       "tight_rejectable": 8885208
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 406420,
+       "node_visits": 987962,
+       "visits_kept": 17722,
+       "visits_max": 3470,
+       "visits_rejectable": 970240,
+       "whole_nodes": 1458
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 338051,
+       "visits_kept": 17722,
+       "visits_max": 2772,
+       "visits_rejectable": 320329
+      },
+      "kept": 108,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 0,
+       "seeds": 0,
+       "tests": 0,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1892,
+      "rejectable_with_ceiling": 1596,
+      "rejectable_without_ceiling": 296,
+      "scanned_sites": 31996000,
+      "seeds": {
+       "census_tests_kept": 0,
+       "emitted_kept": 0,
+       "kept": 0,
+       "kept_max": 0,
+       "kept_with_emission": 0,
+       "rejectable": 0
+      },
+      "witnesses_in_a": 10887,
+      "witnesses_in_b": 7765,
+      "witnesses_nonuniversal_outside": 590007,
+      "witnesses_total": 1151539,
+      "witnesses_universal_box": 542880
+     }
+    },
+    "samples_per_lane": 2000,
+    "schema": "audit_b_front_lanes_lidar_v3",
+    "seed": 1
+   },
+   "s": 8,
+   "scan": "single_000200",
+   "wall_seconds": 9.43653655052185
+  },
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/front_lanes_probe_pinned",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n16000.u16le",
+    "10",
+    "8",
+    "2000",
+    "1"
+   ],
+   "derived": {
+    "q3": {
+     "ceiling_mass_share": 0.8800452228593637,
+     "ceiling_rectangle_share": 0.5952460972362498,
+     "census_tests_per_kept_pair": 108347.32352941176,
+     "cover_sites_kept_max": 5815,
+     "cover_sites_per_kept_pair": 609.1470588235294,
+     "cover_sites_per_rejectable_pair": 5966.401475237091,
+     "descent_leaf_tests_per_pair": 158.1285,
+     "descent_visits_max": 3581,
+     "descent_visits_per_kept_pair": 178.1764705882353,
+     "descent_visits_per_pair": 398.7,
+     "descent_visits_per_rejectable_pair": 410.55110642781875,
+     "emitted_per_kept_pair": 0.9607843137254902,
+     "kept_pairs_with_emission_share": 0.3333333333333333,
+     "kept_share": 0.051,
+     "lemma_pairs_checked": 100,
+     "lemma_seeds_checked": 87182,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 786.084,
+     "near_first_visits_max": 2334,
+     "near_first_visits_per_kept_pair": 178.1764705882353,
+     "near_first_visits_per_rejectable_pair": 75.06533192834563,
+     "rectangles": 1157449,
+     "rejectable_reachable_by_box_proposer_share": 0.9373024236037935,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.9254884120117857,
+      0.9473498533694138
+     ],
+     "rejectable_share": 0.949,
+     "rejectable_share_wilson95": [
+      0.9384684613684584,
+      0.9578100301458703
+     ],
+     "residual_mass": 14702299,
+     "residual_mass_share_of_all_pairs": 0.11486889024314019,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": 133.78570170804718,
+     "seeds_kept_max": 1480,
+     "seeds_per_kept_pair": 111.3529411764706,
+     "seeds_per_rejectable_pair": 794.6153846153846,
+     "threshold": 9,
+     "tight_cover_per_kept_pair": 460.03921568627453,
+     "window_2k_mass_share": 0.4937003389741972,
+     "window_4k_mass_share": 0.5566730073983668,
+     "witness_share_in_factors": 0.022883050666341002,
+     "witness_share_nonuniversal_outside": 0.44752151169595106,
+     "witness_share_universal_box": 0.5295954376377079
+    },
+    "q4": {
+     "ceiling_mass_share": 0.8558517237689999,
+     "ceiling_rectangle_share": 0.5521065310516865,
+     "census_tests_per_kept_pair": null,
+     "cover_sites_kept_max": 5871,
+     "cover_sites_per_kept_pair": 503.3909090909091,
+     "cover_sites_per_rejectable_pair": 6125.2269841269845,
+     "descent_leaf_tests_per_pair": 186.74,
+     "descent_visits_max": 4898,
+     "descent_visits_per_kept_pair": 179.74545454545455,
+     "descent_visits_per_pair": 458.759,
+     "descent_visits_per_rejectable_pair": 474.9978835978836,
+     "emitted_per_kept_pair": null,
+     "kept_pairs_with_emission_share": null,
+     "kept_share": 0.055,
+     "lemma_pairs_checked": 0,
+     "lemma_seeds_checked": 0,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 719.1625,
+     "near_first_visits_max": 2996,
+     "near_first_visits_per_kept_pair": 179.74545454545455,
+     "near_first_visits_per_rejectable_pair": 103.98412698412699,
+     "rectangles": 1098797,
+     "rejectable_reachable_by_box_proposer_share": 0.9095238095238095,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.8957468147035637,
+      0.9216394521038032
+     ],
+     "rejectable_share": 0.945,
+     "rejectable_share_wilson95": [
+      0.9341286161954542,
+      0.9541652116973661
+     ],
+     "residual_mass": 15048130,
+     "residual_mass_share_of_all_pairs": 0.11757086380398775,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": null,
+     "seeds_kept_max": null,
+     "seeds_per_kept_pair": null,
+     "seeds_per_rejectable_pair": null,
+     "threshold": 8,
+     "tight_cover_per_kept_pair": 375.75454545454545,
+     "window_2k_mass_share": 0.4202162660742564,
+     "window_4k_mass_share": 0.48517044975023477,
+     "witness_share_in_factors": 0.02026732483965724,
+     "witness_share_nonuniversal_outside": 0.4826739436497315,
+     "witness_share_universal_box": 0.4970587315106113
+    }
+   },
+   "kmax": 10,
+   "n": 16000,
+   "output": {
+    "ceiling": {
+     "ms": 17588.3,
+     "q3": {
+      "mass": 14702299,
+      "mass_at_threshold": 12938688,
+      "mass_hist": [
+       457117,
+       332261,
+       150546,
+       148693,
+       140724,
+       132305,
+       138383,
+       135907,
+       127675,
+       12938688
+      ],
+      "node_visits": 154323929,
+      "point_tests": 43098489,
+      "rect_hist": [
+       88217,
+       64364,
+       57665,
+       52088,
+       47357,
+       43656,
+       41018,
+       38063,
+       36054,
+       688967
+      ],
+      "rectangles": 1157449,
+      "rectangles_at_threshold": 688967,
+      "threshold": 9,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 7258530,
+        "rectangles": 390550
+       },
+       "L4K": {
+        "mass": 8184373,
+        "rectangles": 502457
+       },
+       "path_steps": 20196637,
+       "unsearchable": 0,
+       "window_tests": 67892461
+      }
+     },
+     "q4": {
+      "mass": 15048130,
+      "mass_at_threshold": 12878968,
+      "mass_hist": [
+       681969,
+       399610,
+       205638,
+       199031,
+       187602,
+       170295,
+       164674,
+       160343,
+       12878968
+      ],
+      "node_visits": 162049332,
+      "point_tests": 47989790,
+      "rect_hist": [
+       108436,
+       74483,
+       65146,
+       58297,
+       52085,
+       48172,
+       44376,
+       41149,
+       606653
+      ],
+      "rectangles": 1098797,
+      "rectangles_at_threshold": 606653,
+      "threshold": 8,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 6323469,
+        "rectangles": 317427
+       },
+       "L4K": {
+        "mass": 7300908,
+        "rectangles": 421310
+       },
+       "path_steps": 20196637,
+       "unsearchable": 0,
+       "window_tests": 65686417
+      }
+     }
+    },
+    "file": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n16000.u16le",
+    "front": {
+     "active_lane_mask": 6,
+     "emitted_rectangles": 1192047,
+     "fully_rejected_products": 308421,
+     "lane_rectangles": [
+      0,
+      1157449,
+      1098797
+     ],
+     "ms": 1516.9,
+     "product_visits": 3016936,
+     "rejected_pair_mass": [
+      0,
+      113289701,
+      112943870
+     ],
+     "residual_pair_mass": [
+      0,
+      14702299,
+      15048130
+     ],
+     "total_unordered_pairs": 127992000,
+     "witness_searches": 2984936
+    },
+    "front_mode": "samples",
+    "index": {
+     "leaves_with_several_ranks": 0,
+     "nodes": 31999
+    },
+    "kmax": 10,
+    "mask": 6,
+    "n": 16000,
+    "s": 8,
+    "sample": {
+     "ms": 1478.7,
+     "q3": {
+      "cover": {
+       "sites_kept": 62133,
+       "sites_kept_max": 5815,
+       "sites_rejectable": 11324230,
+       "tight_kept": 46924,
+       "tight_rejectable": 9537837
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 316257,
+       "node_visits": 797400,
+       "visits_kept": 18174,
+       "visits_max": 3581,
+       "visits_rejectable": 779226,
+       "whole_nodes": 4410
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 160648,
+       "visits_kept": 18174,
+       "visits_max": 2334,
+       "visits_rejectable": 142474
+      },
+      "kept": 102,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 100,
+       "seeds": 87182,
+       "tests": 73293994,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1898,
+      "rejectable_with_ceiling": 1779,
+      "rejectable_without_ceiling": 119,
+      "scanned_sites": 31996000,
+      "seeds": {
+       "census_tests_kept": 11051427,
+       "emitted_kept": 98,
+       "kept": 11358,
+       "kept_max": 1480,
+       "kept_with_emission": 34,
+       "rejectable": 1508180
+      },
+      "witnesses_in_a": 19791,
+      "witnesses_in_b": 16185,
+      "witnesses_nonuniversal_outside": 703579,
+      "witnesses_total": 1572168,
+      "witnesses_universal_box": 832613
+     },
+     "q4": {
+      "cover": {
+       "sites_kept": 55373,
+       "sites_kept_max": 5871,
+       "sites_rejectable": 11576679,
+       "tight_kept": 41333,
+       "tight_rejectable": 9763993
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 373480,
+       "node_visits": 917518,
+       "visits_kept": 19772,
+       "visits_max": 4898,
+       "visits_rejectable": 897746,
+       "whole_nodes": 3977
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 216302,
+       "visits_kept": 19772,
+       "visits_max": 2996,
+       "visits_rejectable": 196530
+      },
+      "kept": 110,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 0,
+       "seeds": 0,
+       "tests": 0,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1890,
+      "rejectable_with_ceiling": 1719,
+      "rejectable_without_ceiling": 171,
+      "scanned_sites": 31996000,
+      "seeds": {
+       "census_tests_kept": 0,
+       "emitted_kept": 0,
+       "kept": 0,
+       "kept_max": 0,
+       "kept_with_emission": 0,
+       "rejectable": 0
+      },
+      "witnesses_in_a": 14091,
+      "witnesses_in_b": 15060,
+      "witnesses_nonuniversal_outside": 694242,
+      "witnesses_total": 1438325,
+      "witnesses_universal_box": 714932
+     }
+    },
+    "samples_per_lane": 2000,
+    "schema": "audit_b_front_lanes_lidar_v3",
+    "seed": 1
+   },
+   "s": 8,
+   "scan": "single_000200",
+   "wall_seconds": 20.598703384399414
+  },
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/front_lanes_probe_pinned",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n32000.u16le",
+    "5",
+    "8",
+    "2000",
+    "1"
+   ],
+   "derived": {
+    "q3": {
+     "ceiling_mass_share": 0.8985312854664396,
+     "ceiling_rectangle_share": 0.6071652538785304,
+     "census_tests_per_kept_pair": 82541.12698412698,
+     "cover_sites_kept_max": 11003,
+     "cover_sites_per_kept_pair": 357.73015873015873,
+     "cover_sites_per_rejectable_pair": 11133.2942694889,
+     "descent_leaf_tests_per_pair": 381.955,
+     "descent_visits_max": 6683,
+     "descent_visits_per_kept_pair": 131.66666666666666,
+     "descent_visits_per_pair": 869.018,
+     "descent_visits_per_rejectable_pair": 893.0,
+     "emitted_per_kept_pair": 0.3968253968253968,
+     "kept_pairs_with_emission_share": 0.2222222222222222,
+     "kept_share": 0.0315,
+     "lemma_pairs_checked": 100,
+     "lemma_seeds_checked": 186415,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 1366.572,
+     "near_first_visits_max": 3379,
+     "near_first_visits_per_kept_pair": 131.66666666666666,
+     "near_first_visits_per_rejectable_pair": 70.87919463087249,
+     "rectangles": 1393698,
+     "rejectable_reachable_by_box_proposer_share": 0.9137842023748064,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.9004510879353301,
+      0.925479331401431
+     ],
+     "rejectable_share": 0.9685,
+     "rejectable_share_wilson95": [
+      0.9599017692062533,
+      0.9753019574629296
+     ],
+     "residual_mass": 27386806,
+     "residual_mass_share_of_all_pairs": 0.053491527078971216,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": 852.7292969727296,
+     "seeds_kept_max": 2126,
+     "seeds_per_kept_pair": 63.44444444444444,
+     "seeds_per_rejectable_pair": 1757.543624161074,
+     "threshold": 4,
+     "tight_cover_per_kept_pair": 271.3015873015873,
+     "window_2k_mass_share": 0.40293709313893705,
+     "window_4k_mass_share": 0.45528649817726097,
+     "witness_share_in_factors": 0.015891222709085214,
+     "witness_share_nonuniversal_outside": 0.4392929900510182,
+     "witness_share_universal_box": 0.5448157872398967
+    },
+    "q4": {
+     "ceiling_mass_share": 0.82844646066628,
+     "ceiling_rectangle_share": 0.4918046299016827,
+     "census_tests_per_kept_pair": null,
+     "cover_sites_kept_max": 11122,
+     "cover_sites_per_kept_pair": 758.0428571428571,
+     "cover_sites_per_rejectable_pair": 10707.18549222798,
+     "descent_leaf_tests_per_pair": 553.6475,
+     "descent_visits_max": 8015,
+     "descent_visits_per_kept_pair": 306.51428571428573,
+     "descent_visits_per_pair": 1224.4625,
+     "descent_visits_per_rejectable_pair": 1257.755958549223,
+     "emitted_per_kept_pair": null,
+     "kept_pairs_with_emission_share": null,
+     "kept_share": 0.035,
+     "lemma_pairs_checked": 0,
+     "lemma_seeds_checked": 0,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 924.283,
+     "near_first_visits_max": 4515,
+     "near_first_visits_per_kept_pair": 306.51428571428573,
+     "near_first_visits_per_rejectable_pair": 125.74300518134714,
+     "rectangles": 1031253,
+     "rejectable_reachable_by_box_proposer_share": 0.8621761658031089,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.8460761181315661,
+      0.8768373314584155
+     ],
+     "rejectable_share": 0.965,
+     "rejectable_share_wilson95": [
+      0.9560127151061829,
+      0.9722044308941798
+     ],
+     "residual_mass": 20083328,
+     "residual_mass_share_of_all_pairs": 0.03922647582736961,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": null,
+     "seeds_kept_max": null,
+     "seeds_per_kept_pair": null,
+     "seeds_per_rejectable_pair": null,
+     "threshold": 3,
+     "tight_cover_per_kept_pair": 564.8571428571429,
+     "window_2k_mass_share": 0.16372465758663107,
+     "window_4k_mass_share": 0.20403749816763436,
+     "witness_share_in_factors": 0.0204039239064226,
+     "witness_share_nonuniversal_outside": 0.5557410446800385,
+     "witness_share_universal_box": 0.4238550314135389
+    }
+   },
+   "kmax": 5,
+   "n": 32000,
+   "output": {
+    "ceiling": {
+     "ms": 16997.4,
+     "q3": {
+      "mass": 27386806,
+      "mass_at_threshold": 24607902,
+      "mass_hist": [
+       767990,
+       830201,
+       636101,
+       544612,
+       24607902
+      ],
+      "node_visits": 181183268,
+      "point_tests": 51192817,
+      "rect_hist": [
+       189437,
+       133182,
+       117719,
+       107155,
+       846205
+      ],
+      "rectangles": 1393698,
+      "rectangles_at_threshold": 846205,
+      "threshold": 4,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 11035160,
+        "rectangles": 413645
+       },
+       "L4K": {
+        "mass": 12468843,
+        "rectangles": 549142
+       },
+       "path_steps": 25675252,
+       "unsearchable": 0,
+       "window_tests": 40393631
+      }
+     },
+     "q4": {
+      "mass": 20083328,
+      "mass_at_threshold": 16637962,
+      "mass_hist": [
+       1468863,
+       1267489,
+       709014,
+       16637962
+      ],
+      "node_visits": 155898849,
+      "point_tests": 47033859,
+      "rect_hist": [
+       235172,
+       155138,
+       133768,
+       507175
+      ],
+      "rectangles": 1031253,
+      "rectangles_at_threshold": 507175,
+      "threshold": 3,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 3288136,
+        "rectangles": 145139
+       },
+       "L4K": {
+        "mass": 4097752,
+        "rectangles": 244464
+       },
+       "path_steps": 25675252,
+       "unsearchable": 0,
+       "window_tests": 31572928
+      }
+     }
+    },
+    "file": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n32000.u16le",
+    "front": {
+     "active_lane_mask": 6,
+     "emitted_rectangles": 1425870,
+     "fully_rejected_products": 756412,
+     "lane_rectangles": [
+      0,
+      1393698,
+      1031253
+     ],
+     "ms": 1629.8,
+     "product_visits": 4396564,
+     "rejected_pair_mass": [
+      0,
+      484597194,
+      491900672
+     ],
+     "residual_pair_mass": [
+      0,
+      27386806,
+      20083328
+     ],
+     "total_unordered_pairs": 511984000,
+     "witness_searches": 4332564
+    },
+    "front_mode": "samples",
+    "index": {
+     "leaves_with_several_ranks": 0,
+     "nodes": 63999
+    },
+    "kmax": 5,
+    "mask": 6,
+    "n": 32000,
+    "s": 8,
+    "sample": {
+     "ms": 4384.0,
+     "q3": {
+      "cover": {
+       "sites_kept": 22537,
+       "sites_kept_max": 11003,
+       "sites_rejectable": 21565191,
+       "tight_kept": 17092,
+       "tight_rejectable": 18023186
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 763910,
+       "node_visits": 1738036,
+       "visits_kept": 8295,
+       "visits_max": 6683,
+       "visits_rejectable": 1729741,
+       "whole_nodes": 2033
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 145588,
+       "visits_kept": 8295,
+       "visits_max": 3379,
+       "visits_rejectable": 137293
+      },
+      "kept": 63,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 100,
+       "seeds": 186415,
+       "tests": 356908393,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1937,
+      "rejectable_with_ceiling": 1770,
+      "rejectable_without_ceiling": 167,
+      "scanned_sites": 63996000,
+      "seeds": {
+       "census_tests_kept": 5200091,
+       "emitted_kept": 25,
+       "kept": 3997,
+       "kept_max": 2126,
+       "kept_with_emission": 14,
+       "rejectable": 3404362
+      },
+      "witnesses_in_a": 23545,
+      "witnesses_in_b": 19888,
+      "witnesses_nonuniversal_outside": 1200651,
+      "witnesses_total": 2733144,
+      "witnesses_universal_box": 1489060
+     },
+     "q4": {
+      "cover": {
+       "sites_kept": 53063,
+       "sites_kept_max": 11122,
+       "sites_rejectable": 20664868,
+       "tight_kept": 39540,
+       "tight_rejectable": 17179942
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 1107295,
+       "node_visits": 2448925,
+       "visits_kept": 21456,
+       "visits_max": 8015,
+       "visits_rejectable": 2427469,
+       "whole_nodes": 1438
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 264140,
+       "visits_kept": 21456,
+       "visits_max": 4515,
+       "visits_rejectable": 242684
+      },
+      "kept": 70,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 0,
+       "seeds": 0,
+       "tests": 0,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1930,
+      "rejectable_with_ceiling": 1664,
+      "rejectable_without_ceiling": 266,
+      "scanned_sites": 63996000,
+      "seeds": {
+       "census_tests_kept": 0,
+       "emitted_kept": 0,
+       "kept": 0,
+       "kept_max": 0,
+       "kept_with_emission": 0,
+       "rejectable": 0
+      },
+      "witnesses_in_a": 20443,
+      "witnesses_in_b": 17275,
+      "witnesses_nonuniversal_outside": 1027324,
+      "witnesses_total": 1848566,
+      "witnesses_universal_box": 783524
+     }
+    },
+    "samples_per_lane": 2000,
+    "schema": "audit_b_front_lanes_lidar_v3",
+    "seed": 1
+   },
+   "s": 8,
+   "scan": "single_000200",
+   "wall_seconds": 23.03386950492859
+  },
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/front_lanes_probe_pinned",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n32000.u16le",
+    "10",
+    "8",
+    "2000",
+    "1"
+   ],
+   "derived": {
+    "q3": {
+     "ceiling_mass_share": 0.9138357051300375,
+     "ceiling_rectangle_share": 0.5923630149596468,
+     "census_tests_per_kept_pair": 166016.43055555556,
+     "cover_sites_kept_max": 11225,
+     "cover_sites_per_kept_pair": 792.2083333333334,
+     "cover_sites_per_rejectable_pair": 13443.69917012448,
+     "descent_leaf_tests_per_pair": 382.822,
+     "descent_visits_max": 9989,
+     "descent_visits_per_kept_pair": 250.36111111111111,
+     "descent_visits_per_pair": 874.433,
+     "descent_visits_per_rejectable_pair": 897.7385892116182,
+     "emitted_per_kept_pair": 0.6527777777777778,
+     "kept_pairs_with_emission_share": 0.2222222222222222,
+     "kept_share": 0.036,
+     "lemma_pairs_checked": 100,
+     "lemma_seeds_checked": 204044,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 2359.9275,
+     "near_first_visits_max": 3931,
+     "near_first_visits_per_kept_pair": 250.36111111111111,
+     "near_first_visits_per_rejectable_pair": 110.79201244813278,
+     "rectangles": 2389896,
+     "rejectable_reachable_by_box_proposer_share": 0.9450207468879668,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.9339329603950425,
+      0.954338689491648
+     ],
+     "rejectable_share": 0.964,
+     "rejectable_share_wilson95": [
+      0.9549055867664208,
+      0.9713153933285649
+     ],
+     "residual_mass": 55937973,
+     "residual_mass_share_of_all_pairs": 0.10925726780524392,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": 419.210368227834,
+     "seeds_kept_max": 2405,
+     "seeds_per_kept_pair": 124.84722222222223,
+     "seeds_per_rejectable_pair": 1949.8407676348547,
+     "threshold": 9,
+     "tight_cover_per_kept_pair": 594.0972222222222,
+     "window_2k_mass_share": 0.4673455900877924,
+     "window_4k_mass_share": 0.5160520028139025,
+     "witness_share_in_factors": 0.011619636620192782,
+     "witness_share_nonuniversal_outside": 0.3959096201048549,
+     "witness_share_universal_box": 0.5924707432749523
+    },
+    "q4": {
+     "ceiling_mass_share": 0.8872778806796355,
+     "ceiling_rectangle_share": 0.5485241695620621,
+     "census_tests_per_kept_pair": null,
+     "cover_sites_kept_max": 11024,
+     "cover_sites_per_kept_pair": 1089.9137931034484,
+     "cover_sites_per_rejectable_pair": 12476.021112255406,
+     "descent_leaf_tests_per_pair": 457.156,
+     "descent_visits_max": 9387,
+     "descent_visits_per_kept_pair": 318.7241379310345,
+     "descent_visits_per_pair": 1024.579,
+     "descent_visits_per_rejectable_pair": 1045.6601441812563,
+     "emitted_per_kept_pair": null,
+     "kept_pairs_with_emission_share": null,
+     "kept_share": 0.029,
+     "lemma_pairs_checked": 0,
+     "lemma_seeds_checked": 0,
+     "lemma_violations": 0,
+     "mean_witnesses_per_pair": 1741.1105,
+     "near_first_visits_max": 4801,
+     "near_first_visits_per_kept_pair": 318.7241379310345,
+     "near_first_visits_per_rejectable_pair": 184.73274974253346,
+     "rectangles": 2283223,
+     "rejectable_reachable_by_box_proposer_share": 0.9145211122554068,
+     "rejectable_reachable_by_box_proposer_wilson95": [
+      0.9012530110065138,
+      0.9261525274311457
+     ],
+     "rejectable_share": 0.971,
+     "rejectable_share_wilson95": [
+      0.9626945430038272,
+      0.9774995984287984
+     ],
+     "residual_mass": 55164213,
+     "residual_mass_share_of_all_pairs": 0.10774597057720554,
+     "sample_pairs": 2000,
+     "seed_mass_reduction_factor": null,
+     "seeds_kept_max": null,
+     "seeds_per_kept_pair": null,
+     "seeds_per_rejectable_pair": null,
+     "threshold": 8,
+     "tight_cover_per_kept_pair": 799.2241379310345,
+     "window_2k_mass_share": 0.37680318216449493,
+     "window_4k_mass_share": 0.4180052201596713,
+     "witness_share_in_factors": 0.015247739876360519,
+     "witness_share_nonuniversal_outside": 0.46524732347544856,
+     "witness_share_universal_box": 0.5195049366481909
+    }
+   },
+   "kmax": 10,
+   "n": 32000,
+   "output": {
+    "ceiling": {
+     "ms": 42801.8,
+     "q3": {
+      "mass": 55937973,
+      "mass_at_threshold": 51118117,
+      "mass_hist": [
+       767990,
+       830201,
+       636101,
+       544612,
+       703843,
+       431412,
+       313006,
+       298462,
+       294229,
+       51118117
+      ],
+      "node_visits": 373206602,
+      "point_tests": 110654755,
+      "rect_hist": [
+       189437,
+       133182,
+       117719,
+       107155,
+       99259,
+       91222,
+       84435,
+       77941,
+       73860,
+       1415686
+      ],
+      "rectangles": 2389896,
+      "rectangles_at_threshold": 1415686,
+      "threshold": 9,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 26142365,
+        "rectangles": 783407
+       },
+       "L4K": {
+        "mass": 28866903,
+        "rectangles": 1015238
+       },
+       "path_steps": 44754919,
+       "unsearchable": 0,
+       "window_tests": 140582803
+      }
+     },
+     "q4": {
+      "mass": 55164213,
+      "mass_at_threshold": 48945986,
+      "mass_hist": [
+       1468863,
+       1267489,
+       709014,
+       729799,
+       766094,
+       478783,
+       401383,
+       396802,
+       48945986
+      ],
+      "node_visits": 398745575,
+      "point_tests": 124738703,
+      "rect_hist": [
+       235172,
+       155138,
+       133768,
+       120530,
+       109869,
+       99939,
+       91747,
+       84657,
+       1252403
+      ],
+      "rectangles": 2283223,
+      "rectangles_at_threshold": 1252403,
+      "threshold": 8,
+      "windows": {
+       "L1K": {
+        "mass": 0,
+        "rectangles": 0
+       },
+       "L2K": {
+        "mass": 20786051,
+        "rectangles": 642363
+       },
+       "L4K": {
+        "mass": 23058929,
+        "rectangles": 853667
+       },
+       "path_steps": 44754919,
+       "unsearchable": 0,
+       "window_tests": 136911675
+      }
+     }
+    },
+    "file": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/single_000200/n32000.u16le",
+    "front": {
+     "active_lane_mask": 6,
+     "emitted_rectangles": 2464911,
+     "fully_rejected_products": 641327,
+     "lane_rectangles": [
+      0,
+      2389896,
+      2283223
+     ],
+     "ms": 3170.3,
+     "product_visits": 6244476,
+     "rejected_pair_mass": [
+      0,
+      456046027,
+      456819787
+     ],
+     "residual_pair_mass": [
+      0,
+      55937973,
+      55164213
+     ],
+     "total_unordered_pairs": 511984000,
+     "witness_searches": 6180476
+    },
+    "front_mode": "samples",
+    "index": {
+     "leaves_with_several_ranks": 0,
+     "nodes": 63999
+    },
+    "kmax": 10,
+    "mask": 6,
+    "n": 32000,
+    "s": 8,
+    "sample": {
+     "ms": 4646.2,
+     "q3": {
+      "cover": {
+       "sites_kept": 57039,
+       "sites_kept_max": 11225,
+       "sites_rejectable": 25919452,
+       "tight_kept": 42775,
+       "tight_rejectable": 22263475
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 765644,
+       "node_visits": 1748866,
+       "visits_kept": 18026,
+       "visits_max": 9989,
+       "visits_rejectable": 1730840,
+       "whole_nodes": 4474
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 231633,
+       "visits_kept": 18026,
+       "visits_max": 3931,
+       "visits_rejectable": 213607
+      },
+      "kept": 72,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 100,
+       "seeds": 204044,
+       "tests": 331725638,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1928,
+      "rejectable_with_ceiling": 1822,
+      "rejectable_without_ceiling": 106,
+      "scanned_sites": 63996000,
+      "seeds": {
+       "census_tests_kept": 11953183,
+       "emitted_kept": 47,
+       "kept": 8989,
+       "kept_max": 2405,
+       "kept_with_emission": 16,
+       "rejectable": 3759293
+      },
+      "witnesses_in_a": 27627,
+      "witnesses_in_b": 27216,
+      "witnesses_nonuniversal_outside": 1868636,
+      "witnesses_total": 4719855,
+      "witnesses_universal_box": 2796376
+     },
+     "q4": {
+      "cover": {
+       "sites_kept": 63215,
+       "sites_kept_max": 11024,
+       "sites_rejectable": 24228433,
+       "tight_kept": 46355,
+       "tight_rejectable": 20694406
+      },
+      "descent": {
+       "disagreements": 0,
+       "leaf_tests": 914312,
+       "node_visits": 2049158,
+       "visits_kept": 18486,
+       "visits_max": 9387,
+       "visits_rejectable": 2030672,
+       "whole_nodes": 3931
+      },
+      "descent_near_first": {
+       "disagreements": 0,
+       "node_visits": 377237,
+       "visits_kept": 18486,
+       "visits_max": 4801,
+       "visits_rejectable": 358751
+      },
+      "kept": 58,
+      "kept_with_ceiling": 0,
+      "lemma": {
+       "pairs": 0,
+       "seeds": 0,
+       "tests": 0,
+       "violations": 0
+      },
+      "pairs": 2000,
+      "rejectable": 1942,
+      "rejectable_with_ceiling": 1776,
+      "rejectable_without_ceiling": 166,
+      "scanned_sites": 63996000,
+      "seeds": {
+       "census_tests_kept": 0,
+       "emitted_kept": 0,
+       "kept": 0,
+       "kept_max": 0,
+       "kept_with_emission": 0,
+       "rejectable": 0
+      },
+      "witnesses_in_a": 26702,
+      "witnesses_in_b": 26394,
+      "witnesses_nonuniversal_outside": 1620094,
+      "witnesses_total": 3482221,
+      "witnesses_universal_box": 1809031
+     }
+    },
+    "samples_per_lane": 2000,
+    "schema": "audit_b_front_lanes_lidar_v3",
+    "seed": 1
+   },
+   "s": 8,
+   "scan": "single_000200",
+   "wall_seconds": 50.64644408226013
+  }
+ ],
+ "schema": "audit_b_front_lanes_lidar_campaign_v3",
+ "scope": "front q3/q4 lanes only; no census, no q3/q4 engine, no clustering relevance"
+}

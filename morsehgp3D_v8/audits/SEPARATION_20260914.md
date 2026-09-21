@@ -6,6 +6,8 @@ indépendant B. `phase=exploration_v8_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`. GCP non utilisé.
 
+> **Statut au 21 septembre 2026 (auditeur B)** : acquis toujours valable : s ∈ {8, 10, 12} produit le même objet, coûts voisins, s = 8 par défaut confirmé ; reçu [separation_20260914/](separation_20260914/SEPARATION_CHECKS.json). Ne jamais prendre s < 8.
+
 Le domaine de la séparation est s ≥ 8 ; une valeur inférieure n'a pas
 de sens pour l'objet et n'est pas mesurée ici. Le constructeur compare
 s = 8, 10 et 12 dans ses reçus sans en désigner un optimum, et désigne
