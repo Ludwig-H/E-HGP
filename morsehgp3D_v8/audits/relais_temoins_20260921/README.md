@@ -27,9 +27,11 @@ Pour chaque rectangle résiduel A×B du front (masque 6) et chaque voie q3/q4 :
 
 L'identité (les sites hors U ∪ C sont hors du citron de toute paire du
 rectangle, par monotonie des bornes de boîte) est vérifiée sans saturation
-sur 2000 paires par voie et par exécution, tirées dans la masse
-résiduelle, contre un balayage complet du nuage : désaccords exigés nuls par
-le lecteur. Pour les mêmes paires, la descente saturante depuis la racine avec
+contre un balayage complet du nuage sur les paires tirées (2000 par voie et
+par exécution, dans la masse résiduelle) qui tombent dans un rectangle
+survivant, soit 172 à 510 par ligne ; les paires tirées d'un rectangle rejeté
+reçoivent le contrôle « compte ≥ h_q » : désaccords exigés nuls par le
+lecteur. Pour les mêmes paires, la descente saturante depuis la racine avec
 les boîtes singleton (celle de la tranche 32 en mode `pair`) est rejouée pour
 comparer ses visites de nœuds au nombre de candidats testés par le relais.
 Reçu [RELAY_CHECKS.json](RELAY_CHECKS.json), rejoué par `run_relay.py read`
@@ -37,7 +39,8 @@ en `python3` et `python3 -O`.
 
 ## Résultat
 
-- **Le relais est exact** : 0 désaccord sur les 8 exécutions (scan 0 à
+- **Le relais est exact** : 0 désaccord sur les 8 exécutions (identité
+  vérifiée sur 172 à 510 paires de rectangles survivants par ligne) (scan 0 à
   8k/16k/32k, K5 et K10 ; scans 100 et 200 à 8k/K5).
 - **L'état est petit** : 9,6 à 21,7 candidats par rectangle survivant en q3,
   12,7 à 30,8 en q4 (maximum 1 100 à 3 345 et 1 482 à 4 221), pour
@@ -94,7 +97,10 @@ Voie q4 :
 
 Unités de travail hétérogènes (une visite de nœud prépare deux bornes, un
 test de candidat évalue un citron entier) : les rapports sont des comptes,
-pas des temps. Le relais mesuré ne porte que sur la recherche de témoins
+pas des temps. La colonne « travail total relais / réf. » compare un compte
+mesuré à une **estimation** (recherches saturantes mesurées + masse
+survivante × visites par paire extrapolées depuis 172 à 510 paires tirées,
+sans intervalle de confiance). Le relais mesuré ne porte que sur la recherche de témoins
 rectangle → paires ; le même mécanisme (crédit commun + liste de candidats
 transitoire) s'applique au relais bloc de seeds → seeds du census q3, non
 mesuré ici. Trois tailles, trois scans, aucune qualification.

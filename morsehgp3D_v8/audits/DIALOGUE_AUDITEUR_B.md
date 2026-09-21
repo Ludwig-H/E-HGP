@@ -76,7 +76,7 @@ ci-dessous, jamais par un scan local quadratique.
 lui qui supprime les 780 M seeds : c'est le rejet exact de la paire avant sa
 couverture.** Sur les 18 exécutions, une paire rejetable porte 2 000 à
 13 000 sites de couverture et 350 à 1 950 seeds aigus (le constructeur mesure
-341 par arête à 8k/K5, en accord), alors qu'une paire conservée porte 47 à
+341 par arête développée à 8k/K5, soit 363 par arête q3, en accord), alors qu'une paire conservée porte 47 à
 792 sites de couverture en moyenne (maximum 11 225) et 8 à 125 seeds. Rejeter
 la paire d'abord divise la masse de seeds par 87 à 1 519 selon l'exécution
 (tableau des coûts du reçu). Mais les survivantes ne se censurent à bon
@@ -134,16 +134,20 @@ pas une preuve ; q4 n'est pas vérifié de cette façon.
 ### Citron : accord avec A, une phrase à préciser
 
 Accord avec la preuve de A par la variance (R² ≤ D²(q−1)/(2q), α3 = 3,
-α4 = 2, inégalités strictes, contacts réalisables en u16). **Une phrase de sa
-réponse est à préciser** : « utiliser α3 pour q4 aussi ». Si elle signifie
-prendre α = 3 sur la voie q4, c'est non sûr : α4 = 2 est exact et serré.
+α4 = 2, inégalités strictes, contacts réalisables en u16). **Une phrase de son
+brouillon non commis du 21 septembre est à préciser** (elle n'apparaît pas dans
+la version commise de son dialogue) : « utiliser α3 pour q4 aussi ». Si elle
+signifie prendre α = 3 sur la voie q4, c'est non sûr : α4 = 2 est exact et
+serré.
 Contre-exemple entier : tétraèdre a = (0,0,0), b = (60,0,0), c = (20,42,0),
 d = (28,10,49), arête ab maximale, centre strictement intérieur
 (30, 241/21, 28885/2058), r² = 5203980749/4235364 ; le site z = (28,−12,−12)
 a H = 608 et Ξ = 1 036 800, donc 2H² = 739 328 ≤ Ξ < 3H² = 1 108 992 : z est
 dans L_3(a,b) mais **strictement extérieur** à cette boule q4
-(|z−o|² = 5222107613/4235364 > r²). Un front qui le créditerait pour q4
-pourrait rejeter à tort l'arête. Vérifié à 4dbe3024 : `spindle/predicates.hpp`
+(|z−o|² = 5222107613/4235364 > r²). La même configuration translatée de
+(0, 12, 12), a = (0,12,12), b = (60,12,12), c = (20,54,12), d = (28,22,61),
+z = (28,0,0), est une entrée u16 valide aux mêmes H, Ξ et distances. Un front
+qui créditerait z pour q4 pourrait rejeter à tort l'arête. Vérifié à 4dbe3024 : `spindle/predicates.hpp`
 renvoie 3 pour Q3 et 2 sinon (ligne 125) ; rien à changer dans le code.
 
 ### Clôture 31 et pilote R3 : d'où vient le ×10 par doublement
@@ -280,7 +284,7 @@ c_x > 0 (x hors de la boule diamètre), donc son centre q3 t_x vérifie
 L_x(t_x) = 0 avec t_x ≠ 0 ; si x est strictement intérieure aux T couches du
 groupe positif, la forme linéaire non constante 1 + p·t_x prend sur chaque
 couche un minimum strictement inférieur à 0, d'où T sites retenus distincts,
-autres que a, b, x (a et b ont c = 0, x n'est sur aucune couche),
+autres que a, b, x (a et b ont la forme affine nulle, x n'est sur aucune couche),
 strictement intérieurs : profondeur ≥ K − 1, boule non émise. Peler le seul
 groupe positif suffit pour cette décision ; garder les duaux coïncidents,
 les points d'arête et les enveloppes dégénérées, et séparer dans l'API le
@@ -289,12 +293,18 @@ réel). Contre-fixture du mauvais seuil recalculée exactement : centre
 (12, 65/6, 10), r² = 169/36, puissances −7/3 et +2/3, arêtes² 16/13/13,
 aigu, ab maximale : conforme. Mais le coût ne suit pas : sur les paires
 conservées de mes 18 exécutions, la part des sites de couverture qui sont
-des seeds aiguës propriétaires vaut de 0,15 à 0,20 (stable sur les trois
+des seeds aiguës propriétaires vaut de 0,15 à 0,21 (stable sur les trois
 scans, les trois tailles et les deux K), alors que le census par boîtes de
-la série 32 coûte environ 35 bornes par seed (67,5 M bornes pour 1,91 M
-seeds à 8k) : les couches coûtent (log₂ m + T)·m par arête, soit un seuil
+la série 32 coûte environ 35 bornes par seed pour le compte seul (67,5 M
+bornes de compte pour 1,91 M seeds à 8k ; 72,9 M avec la coquille) : les couches coûtent (log₂ m + T)·m par arête, soit un seuil
 de rentabilité seeds/m ≥ 0,27 à 0,53 selon l'exécution, jamais atteint.
-Le filtre coûterait donc 1,5 à 3,3 fois le census qu'il évite. Ne pas le
+Le filtre coûterait donc 1,5 à 3,4 fois le census qu'il évite, en comptant
+une borne de boîte et une comparaison de couche pour une unité chacune. Marge
+à connaître : 1,34 seulement entre le ratio maximal (0,204) et le seuil
+minimal (0,273) ; avec le seul groupe positif et la couverture serrée le
+modèle frôle 1 à 8k/K5, mais le noyau 29 réellement mesuré par le
+constructeur (Window30) coûte 2,1 à 2,5 fois ce modèle, ce qui rend la
+conclusion conservatrice. Ne pas le
 porter pour q3 sur ces régimes ; le réexaminer seulement si un régime donne
 seeds/m au-dessus du seuil ou si le coût par boule du census remonte.
 
@@ -371,9 +381,13 @@ relancés à 8k (mêmes comptes, empreintes et IDs de coquille) ; 1 940 894
 paires rejetées par rectangle et 167 441 par paire, 344 856 paires
 développées et 1 911 457 seeds q3, exactement les paires rejetables,
 conservées et seeds de mon harnais et exactement les compteurs publiés par
-la série 32 du constructeur. À K10 : 409 195 boules q3 et 116 985 boules q4
-identiques, 4 171 837 + 324 331 paires rejetées, 717 777 développées,
-8 099 443 seeds q3, mêmes égalités. Les deux lemmes du citron restent sans
+la série 32 du constructeur (masses de l'union des voies ; par voie, q3 :
+1 868 974 + 115 604, q4 : 1 040 041 + 163 679). À K10 : 409 195 boules q3 et
+116 985 boules q4 identiques, 4 171 837 + 324 331 paires rejetées (union),
+717 777 développées,
+8 099 443 seeds q3, mêmes égalités (les 116 985 boules q4 sont les boules
+distinctes ; les deux côtés émettent 116 988 présentations, trois d'entre
+elles partageant une même boule cosphérique). Les deux lemmes du citron restent sans
 violation sur 300 (q3) et 200 (q4) paires rejetables par ligne. La sonde
 met 4,7 s à K5 et 19,2 s à K10 sur cet hôte partagé (la tranche 31 mettait
 1 361 s à K5). Tout ce qui suit le front dans le raccord est donc confronté
@@ -387,8 +401,10 @@ Vérification exacte indépendante sur 2 999 triangles entiers non colinéaires
 tirés au hasard : avec d = b − a, D = |d|², w = 2x − a − b, v = 2z − a − b,
 J = D|w|² − (d·w)² = |d × w|², P = Dw − (d·w)d, qx = |w|² − D et
 qz = |v|² − D, on a bien F = J·qz − qx·(P·v) = 4J·puissance(z) dans la
-circumboule de (a,b,x) et centre (a+b)/2 + qx·P/(4J), sans exception.
-J > 0 est la non-colinéarité, pas la positivité ; qx > 0 est l'acuité en x.
+circumboule de (a,b,x) (la sphère dont le centre est dans le plan du triangle) et
+centre (a+b)/2 + qx·P/(4J), sans exception ; l'identité est vide à J = 0 (P = 0,
+F = 0, centre indéfini). J > 0 est la non-colinéarité, pas la positivité ;
+qx = 4(a−x)·(b−x) > 0 est l'acuité en x.
 La note de A [q3_seed_block_power_20260921/](q3_seed_block_power_20260921/README.md)
 (boîte de centres par bloc X grâce à λ = DQ/J ∈ (0, 2/3] sous acuité et
 propriété, puis six paraboles en z par nœud Z) est l'alternative que
@@ -425,8 +441,10 @@ ni universelles ni exclues) ; chaque paire du rectangle teste C en saturant,
 puis C est libérée. L'identité « compte du citron = U + citron sur C » tient
 par monotonie des bornes de boîte (les nœuds exclus pour le rectangle le sont
 pour chaque paire, les nœuds universels le sont aussi) ; elle est vérifiée
-sans saturation contre le balayage complet sur 2 000 paires par voie et par
-exécution, 0 désaccord sur 8 exécutions (scan 0 à 8k/16k/32k, K5 et K10,
+sans saturation contre le balayage complet sur les paires tirées qui tombent
+dans un rectangle survivant (172 à 510 par voie et par exécution, sur 2 000
+tirées ; les autres ne reçoivent que le contrôle « compte ≥ h_q » du rectangle
+rejeté), 0 désaccord sur 8 exécutions (scan 0 à 8k/16k/32k, K5 et K10,
 scans 100 et 200 à 8k/K5). Le même schéma vaut pour le relais bloc de seeds →
 seeds du census q3 (crédit commun, liste transitoire, saturation par seed,
 rien d'hérité qui ne soit un certificat), non mesuré ici.
@@ -443,7 +461,10 @@ croissance : les candidats par rectangle passent de 10 à 18 (q3, K5, 8k →
 relais absorbe donc la part super-linéaire observée par le constructeur
 (×5,4 des bornes par paire de 16k à 32k), sans réduire le nombre de paires
 à juger, qui reste le vrai poste. Unités hétérogènes (visite ≠ test), donc
-comptes et non temps ; à comparer au coût mesuré du port avant de choisir.
+comptes et non temps ; la part « paires » de la référence est extrapolée
+depuis 172 à 510 paires échantillonnées par exécution, à distribution lourde
+et sans intervalle de confiance ; à comparer au coût mesuré du port avant de
+choisir.
 
 ### Tranche 34 (sources dans 4c3cdb0c par ma faute, journal dans d6e1bd9e) : rejeu des deux flux, accord exact
 
