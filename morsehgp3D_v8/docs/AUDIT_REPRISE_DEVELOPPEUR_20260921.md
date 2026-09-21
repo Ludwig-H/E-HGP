@@ -34,6 +34,20 @@ live), 8 workers locaux :
 | tests de partition q4 | 10,25 G |
 | masse résiduelle q3 après citron | 11,4 % des paires (2,9 % avec sol) |
 
+Base de temps complémentaire (lentille 9, même sonde, hôte partagé, une
+répétition) : sans sol K5 un worker 898,6 s mur pour 897,8 s CPU ; K5 quatre
+workers 283,1 s pour 1 051,9 s CPU ; **K10 quatre workers 1 180 s pour 3 922 s
+CPU** (2 830 806 q3 et 1 729 751 q4 émis). Contre le tirage avec sol de 32 000
+sites : K5 un worker 103,3 s, K10 321,7 s. Accélération réelle 1 → 4 workers :
+×1,5 à ×3,2 (plan Coarse : un worker reçoit 1,5 % des rectangles, un autre
+40 %). Sans sol, les paires développées sont ×9,8 (24,0 M contre 2,45 M), la
+couverture moyenne par arête 1 431 sites contre 228, 105 graines q3 par arête
+contre 28, et 99,6 % des 179,7 M boules q3 recensées sont rejetées par
+profondeur : l'élagage par témoins s'effondre dans l'espace vide et le census
+paie des graines dont le rejet aurait dû précéder. Profil d'instructions à 8k
+avec sol (callgrind, pas du temps) : q4 Local28 49 % (atlas 33 %, graines ×
+cellules 16 %), census q3 26 %, filtres de témoins 14 %.
+
 Par site, le nuage sans sol coûte 2,6 à 3,9 fois plus qu'avec le sol : le rejet
 par témoins universels perd le plan du sol qui remplissait les grandes boules.
 Ordre de grandeur du contrat (pas une prédiction) : 1 s sur 48 CPU = 48 CPU·s ;
