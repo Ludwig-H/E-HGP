@@ -1,0 +1,13 @@
+{
+  "status": "failed",
+  "command": [
+    "python",
+    "-B",
+    "morsehgp3D_v8/audits/q34_prefix_order_20260921/order_model.py"
+  ],
+  "returncode": 1,
+  "diagnostic": "RuntimeError: surviving navigator mutant",
+  "cause": "The mutant harness consumed the root immediately (policy1), so forgetting the sibling boundary was not exercised; corrected to leaf traversal policy0 for that mutant only",
+  "source_sha256": "48c93e2c1059ef8c8096491e80e6c124408d03b92d0376fb685d589ce7bf9953",
+  "source_archive": "MODEL_PREFLIGHT_SOURCE.py.gz"
+}

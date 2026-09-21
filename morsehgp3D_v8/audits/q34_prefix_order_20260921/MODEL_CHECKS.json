@@ -1,0 +1,27 @@
+{
+  "status": "passed",
+  "normal_optimized_identical": true,
+  "records": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/audits/q34_prefix_order_20260921/order_model.py"
+      ],
+      "returncode": 0,
+      "stdout": "{\"geometry_executions\": 960, \"mutants\": {\"forget_sibling_boundary\": {\"error\": \"wrong consumed prefix position\", \"n\": 2, \"pivot\": 1}, \"test_before_cut\": {\"error\": \"navigator omits or duplicates population\", \"n\": 2, \"pivot\": 1}}, \"reused_model_sha256\": \"8e767b59b3b05000357890a2a7f79e6fec2743db8a323f264f5d45175b7928e0\", \"scope\": \"Exact navigator/prefix model with exhaustive Boolean certificates, not a product or speed test\", \"source_sha256\": \"621f70b641a377d24977a700ee32c6c0845ab985bdc553bcfac2841be40b9907\", \"status\": \"passed\", \"structural_cuts\": 14049, \"structural_walks\": 7056, \"work_once_per_configuration\": {\"circular.enumerated_predicates\": 48127, \"circular.prefix_pair_checks\": 57974, \"circular.product_splits\": 690, \"circular.split_after_wrap\": 200, \"circular.split_with_different_cursors\": 236, \"circular.split_with_eof\": 8, \"circular.steps\": 12669, \"circular.structural_cuts\": 3197, \"pivot_path.enumerated_predicates\": 63639, \"pivot_path.prefix_pair_checks\": 42546, \"pivot_path.product_splits\": 703, \"pivot_path.split_after_wrap\": 572, \"pivot_path.split_with_different_cursors\": 248, \"pivot_path.split_with_eof\": 13, \"pivot_path.steps\": 8321}}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/audits/q34_prefix_order_20260921/order_model.py"
+      ],
+      "returncode": 0,
+      "stdout": "{\"geometry_executions\": 960, \"mutants\": {\"forget_sibling_boundary\": {\"error\": \"wrong consumed prefix position\", \"n\": 2, \"pivot\": 1}, \"test_before_cut\": {\"error\": \"navigator omits or duplicates population\", \"n\": 2, \"pivot\": 1}}, \"reused_model_sha256\": \"8e767b59b3b05000357890a2a7f79e6fec2743db8a323f264f5d45175b7928e0\", \"scope\": \"Exact navigator/prefix model with exhaustive Boolean certificates, not a product or speed test\", \"source_sha256\": \"621f70b641a377d24977a700ee32c6c0845ab985bdc553bcfac2841be40b9907\", \"status\": \"passed\", \"structural_cuts\": 14049, \"structural_walks\": 7056, \"work_once_per_configuration\": {\"circular.enumerated_predicates\": 48127, \"circular.prefix_pair_checks\": 57974, \"circular.product_splits\": 690, \"circular.split_after_wrap\": 200, \"circular.split_with_different_cursors\": 236, \"circular.split_with_eof\": 8, \"circular.steps\": 12669, \"circular.structural_cuts\": 3197, \"pivot_path.enumerated_predicates\": 63639, \"pivot_path.prefix_pair_checks\": 42546, \"pivot_path.product_splits\": 703, \"pivot_path.split_after_wrap\": 572, \"pivot_path.split_with_different_cursors\": 248, \"pivot_path.split_with_eof\": 13, \"pivot_path.steps\": 8321}}\n",
+      "stderr": ""
+    }
+  ]
+}

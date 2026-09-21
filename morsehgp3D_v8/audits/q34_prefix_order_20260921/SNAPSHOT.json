@@ -1,0 +1,16 @@
+{
+  "context_commit": "462c29a18ab17375b98edaac5586dc9a6d34650a",
+  "constructor33_static_review": {
+    "morsehgp3D_v8/src/lanes/q34_pair_bounds.hpp": "430f55ecba9c3c967581f4c6902f5bce0d8fb0ae063d4b12a239158c0ec611d7",
+    "morsehgp3D_v8/src/lanes/q34_witness_search.hpp": "d274610fe6a082b2d85994c85a6bd5c76f9adcfde47a5644ed10652b18bc418e",
+    "morsehgp3D_v8/src/lanes/q34_witness_search.cpp": "172ae93abf9c4506eeb98f242690aff8db76e5c7c83aead3b56d77b247b0eb45",
+    "morsehgp3D_v8/src/pipeline/wspd_q34.cpp": "b1d5972ccbd16869b991661e73702dba2586322df3db3b5ea8a6aa97a7672c48",
+    "morsehgp3D_v8/src/pipeline/wspd_q34.hpp": "886bc06744d48198129b66be1bafca6a145dd1993c8ac544e16cf2550e415a0b"
+  },
+  "source": "morsehgp3D_v8/src/lanes/q34_pair_bounds.hpp",
+  "source_sha256": "430f55ecba9c3c967581f4c6902f5bce0d8fb0ae063d4b12a239158c0ec611d7",
+  "copy": "snapshot/PAIR_BOUNDS.hpp",
+  "copy_sha256": "937e0a8e1880e45c3e4f07ddf464181dc8b332a21412efb1b60fccc5788a3ea0",
+  "only_change": "Relative include ../spindle/q2_prepared_bounds.hpp becomes spindle/q2_prepared_bounds.hpp",
+  "scope": "Explicit primitive reuse for independent order prototype; no constructor33 qualification"
+}

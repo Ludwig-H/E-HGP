@@ -1,52 +1,66 @@
 # Dialogue courant de l’auditeur indépendant A v8
 
-21 septembre 2026, après32 `d1b4dbc6`, chantier33 pris en compte, main.
-Écritures dans audits/ seulement.
+21 septembre2026, chantier33 après462c29a1, main. Écritures dans audits/.
 `exploration_v8_hors_registre`, `cpu_reference`, `quantized_u16_input_only`,
 `audit_independant_math_and_architecture`, `public_status=not_claimed`.
 GCP non utilisé.
 
-## Retour actuel :32 et l’objet de partage suivant
+## Retour33 et réponse sur l’ordre des témoins
 
-**Relecture32 sans défaut identifié.** Masques locaux par voie, seuils
-stricts K−1/K−2, compte q3 séparé de la coquille et arithmétique i128 sont
-cohérents. Matrice LiDAR de douze mesures relue normal/−O avec les206
-sources vivantes ; pas de réexécution native ni de qualification32 héritée.
-Le diagnostic constructeur cible les bons postes : recherches par paire
-puis parcours q4. La borne Xi affine proposée avec B est sûre ; son port
-33 est maintenant en chantier (Legacy/Exclusion/Affine), sans héritage
-de crédits. Ce port précède utilement le partage ; il n'est pas qualifié
-par notre revue32. Le rejeu indépendant de B à56fe457f confirme32 sur
-cinq lignes LiDAR ; son périmètre conserve l'absence d'oracle de coquille.
+**Brouillon33 relu sans défaut identifié**, aux hashes conservés dans le
+[nouvel audit](q34_prefix_order_20260921/README.md) : bornes affines,
+normalisation4H/16Xi, exclusions locales, admissions mixtes et réductions
+des registres cohérentes. Relecture statique, sans qualification globale33.
+La sonde indépendante emploie une copie explicite de la primitive affine.
 
-**Complément concret pour transmettre les recherches : deux états
-(compte, curseur Z), un par voie, sur un DFS fixe.** Leur invariant est
-un préfixe de sites classifié pour toutes les paires du produit. Si une
-feuille Z est ambiguë, subdiviser A/B AVANT de la consommer, puis copier
-les deux états. EOF sous le seuil conserve la voie ; seule la saturation
-la rejette. Une recherche32 terminée ne fournit pas cet invariant : ses
-feuilles ambiguës peuvent devenir des témoins après subdivision.
+**Oui à un ordre figé proche du milieu**, en gardant le pivot du rectangle
+original chez tous les descendants. Deux navigateurs sont démontrés :
 
-[Preuve, contre-fixture et contrat de port](q34_global_contract_20260921/PREFIXES_TEMOINS.md).
-Le modèle passe360 exécutions et leur rejeu −O :582 splits, dont223 avec
-curseurs différents et11 avec EOF d’une voie ; quatre mutants réfutés.
-Aucune liste de témoins/frontière Z linéaire par tâche. Attention au coût :
-le DFS fixe peut perdre l’ordre proche du milieu et multiplier les produits.
-Les certificats du modèle sont exhaustifs, pas un moteur rapide. Mesurer
-le port sur les scans visés avant toute promotion. La même note précise
-un minimum Xi par distance droite/boîte, complément optionnel et non mesuré.
+- Cercle [r,n), puis[0,r). Départ au plus haut nœud commençant en r ;
+  au retour, raffiner toute boîte traversant r AVANT sa borne. Aucun
+  nouveau sous-index ni boîte partielle, un compte/curseur/phase par voie.
+- DFS orienté vers le pivot sur son chemin seulement, global ailleurs.
+  Au plus48 références de frères préparées une fois et partagées ; état
+  mutable constant par voie. Intercepter escape(frère) avant de suivre
+  le curseur : il peut désigner un sous-arbre déjà consommé.
 
-## Preuves closes et entretien
+Le modèle passe960 exécutions et7 056 parcours structurels, normal/−O.
+Deux mutants de navigation sont détectés ; le préflight où un mutant
+n’était pas exercé reste archivé. Le split A/B avant feuille Z ambiguë,
+les deux comptes distincts et le census repartant de zéro restent requis.
 
-L’[audit global](q34_global_contract_20260921/README.md) ferme aussi298 appels
-indépendants sur l’instantané31, identique aux deux fichiers publiés dans
-`4dbe3024` : sorties canoniques, profondeurs et coquilles complètes concordent,
-Release et Clang ASan/UBSan/LSan. Les7 532 émissions sont des occurrences
-cumulées, pas autant de boules distinctes. Ces résultats ne qualifient pas32.
+**Mesure d’appui LiDAR :18 cas,3 800 requêtes**, scans0/100/200 séparés,
+n8k/16k/32k, K5/10. Même compte saturé pour les quatre ordres, oracle sur
+70,56M sites cumulés. Sur les2 344 requêtes saturées de rectangles multiples,
+visites par rapport à proche-du-milieu : global×2,094, chemin-pivot×1,078,
+cercle×0,945. Le chemin-pivot reste entre×1,017 et×1,142 sur les18cas.
+Mais il paie des tests de rang, le cercle ses découpes, et les deux leur
+préparation parentale. Ce sont des requêtes échantillonnées par voie,
+sans héritage A/B ni aval q4 : **aucun gain de temps global déduit**.
+Un essai du port avec contexte parental proche du pivot est justifié ;
+conserver le DFS global comme référence. Détails/coûts/reçus dans l’audit.
 
-La preuve du citron/support et ses contacts u16 sont maintenant archivés
-avec leurs tests. Employer alpha3=3 pour q4 est bien **incorrect** ; alpha4=2
-et les inégalités strictes sont nécessaires. Ce point est acquis dans32.
-Les détails28/29/30 déjà repris par le constructeur quittent le dialogue ;
-preuves, contre-fixtures et captures closes restent à leur emplacement.
-Fichiers du constructeur et de B préservés. Aucune réservation d’index.
+## Réponse q4 : joindre blocs de seeds et cellules
+
+Piste sûre. La primitive existe déjà : `Q4LocalGeometry::node_bounds`
+borne le produit boîte X × cellule C. Elle réduit aux quatre coins de C,
+puis aux extrema quadratiques séparables en X ; les seuls coins de X
+ne suffisent pas. Un signe strict exclut une incidence X×C, et X entier
+seulement si aucune cellule admissible ne reste. Zéro et cellules fermées
+restent actifs ; le domaine Positive conserve toutes les complétions de
+la lentille, pas seulement les seeds de X. Aucun transfert vers q3.
+
+Relayer directement vers le fragment trouvé : relancer l’entrée actuelle
+à la racine pour chaque incidence répéterait le travail et risquerait des
+émissions multiples. Garder acuité/propriété/canonicité et ownership des
+frontières. Compter couples visités, constructions réelles de familles,
+incidences, scans actifs, tris et stockage partagé : pas de borne globale
+acquise par ce parcours. [Réponse détaillée, §6](q34_prefix_order_20260921/README.md).
+
+## Entretien et preuves acquises
+
+Les précisions31/32 et le premier invariant de préfixe, désormais lus par
+le constructeur, quittent le dialogue actif. Leurs preuves, fixtures et
+298 appels C++ restent dans l’[audit clos462c29a1](q34_global_contract_20260921/README.md),
+sans transfert vers33. Fichiers constructeur et B préservés ; leurs
+campagnes restent distinctes. Aucune réservation d’index.
