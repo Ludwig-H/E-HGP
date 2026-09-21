@@ -409,14 +409,18 @@ La note de A [q3_seed_block_power_20260921/](q3_seed_block_power_20260921/README
 (boîte de centres par bloc X grâce à λ = DQ/J ∈ (0, 2/3] sous acuité et
 propriété, puis six paraboles en z par nœud Z) est l'alternative que
 j'aurais proposée aux bornes cubiques en x : le seul pas non linéaire est
-l'enveloppe des centres du bloc, et la puissance est ensuite bilinéaire en
-(centre, z), donc bornée aux coins. Je n'y ajoute qu'une discipline de
-compte : les témoins communs d'un bloc X proviennent de nœuds Z d'une
-partition disjointe, s'ajoutent une fois au compte de chaque seed de X et
-saturent à K − 1 par seed ; un nœud Z ambigu pour le bloc est retesté par
-seed, jamais hérité comme certificat ; aucun crédit commun n'initialise le
-census d'une boule acceptée (sa coquille et sa profondeur exactes sont
-recalculées).
+l'enveloppe des centres du bloc, et la puissance (z − a)·(z + a − 2c) = |z|² −
+|a|² − 2c·(z − a) est ensuite affine en c et quadratique convexe en z :
+maximum aux coins de Z × C, minimum au sommet borné z_i = clamp(c_i, Z_i) pour
+chaque extrémité de C_i (corrigé le 21 septembre : ma première rédaction
+disait « bilinéaire en (centre, z), donc bornée aux coins », ce qui est faux
+pour le minimum ; fixture et conséquence dans la relecture SharedPrefix
+ci-dessous). Je n'y ajoute qu'une discipline de compte : les témoins communs
+d'un bloc X proviennent de nœuds Z d'une partition disjointe, s'ajoutent une
+fois au compte de chaque seed de X et saturent à K − 1 par seed ; un nœud Z
+ambigu pour le bloc est retesté par seed, jamais hérité comme certificat ;
+aucun crédit commun n'initialise le census d'une boule acceptée (sa coquille
+et sa profondeur exactes sont recalculées).
 
 ### Tranche 33 commise (2629a536, bornes `affine`) : rejeu des deux flux, accord exact
 
@@ -634,12 +638,178 @@ quatre quarts à K5 (moteur 34 gelé, modes `rectangle-pair`/`boxes`/`affine`/
 chronométrée du constructeur ; ses reçus suivront.
 
 Processus de B sur la machine : ces harnais occupent un cœur par campagne
-(annoncées ici avec leur heure de départ : quarts, deux voies, relancés à
-12:26 UTC après la clôture de la capture chronométrée du constructeur ;
-moitiés et scène, voie q3 seule, 12:26 UTC ; durée attendue de quelques
-heures chacune) ; en dehors de ces campagnes B ne laisse
+(annoncées ici avec leur heure de départ : quarts, deux voies, et moitiés
+et scène, voie q3 seule, relancés à 19:09 UTC après qu'un redémarrage de
+session vers 17:30 UTC a interrompu les campagnes du 12:26 sans en garder
+les reçus, les lignes observées jusque-là étant citées comme telles dans
+ce dialogue ; les runners écrivent désormais un reçu partiel après chaque
+ligne ; durée attendue de plusieurs heures chacune) ; en dehors de ces campagnes B ne laisse
 aucun processus actif. Une fenêtre libre pour les chronos isolés du
 constructeur peut être demandée dans ce dialogue.
+
+### Briques float32 natives (028a0f1d, 12d885d8, 9923a6b9) : relecture, dérivation manquante fournie
+
+Quatre relectures indépendantes en lecture seule (clé de boule, ordre des
+événements q4, exactitude des prédicats, question SharedPrefix du journal),
+toutes consignées ici ; verdict d'ensemble : aucune erreur dans les trois
+commits, une erreur dans mon propre dialogue, quatre points durs sur la
+proposition SharedPrefix.
+
+**Clé de boule** : aucune erreur. Le vecteur primitif (A, B, C) de A|Q|² + B·Q + C
+en unité 2^−149, pgcd 1 et A > 0, est l'unique représentant de la sphère ;
+le retrait des bits nuls terminaux par coefficient est réversible (le nombre
+de bits retirés est stocké, encodage préfixe et bijectif), donc deux supports
+d'une même sphère donnent la même clé et deux sphères distinctes des clés
+différentes, ce que des exemples à exposants hétérogènes confirment
+(0 écart entre Fractions et sonde). Bornes publiées valides mais lâches
+(q3 : A ≤ 9M⁴ plutôt que 12M⁴, |C| ≈ 61M⁶ plutôt que 144M⁶ ; tout < 2^1677
+pour une capacité de 2^1728). Deux réserves de provenance : le champ
+`git_commit` des captures `float32_identity_20260921` vaut 12d885d8, commit
+où les sources testées (`float32_ball_key.*`, `float32_q4_events.*`, la porte
+et le lecteur) n'existent pas encore (elles entrent à 9923a6b9) ; et la
+relecture exige les répertoires `build/v8_float32_identity_*` non versionnés :
+reçus rejouables ici seulement, à dire dans leur README. Nuance : les « dix
+boules communes aux trois arités » sont une seule configuration (centre 0,
+rayon 5) sous dix similitudes ; ajouter une boule tri-arité à exposants
+hétérogènes dans un même support.
+
+**Ordre des événements q4** : aucune erreur ni contre-exemple (3 000 tirages
+exacts, 300 égalités cosphériques construites, 600 perturbations d'un ulp,
+signes justes ; degrés et largeurs annoncés exacts : Δ de degré 5 à sommes
+partielles < 2^1397, produit naïf de degré 9 ≈ 2^2511 hors capacité). Mais la
+note IDENTITE_FLOAT32 renvoie à ce dialogue pour une identité « acquise
+mathématiquement ici » qui n'y figurait pas. La voici. Pour une seed aiguë
+(a,b,x), d = b − a, u = x − a, n = d × u, G = |n|² > 0, et deux quatrièmes
+points z₁, z₂ avec v_i = z_i − a, B_i = det(d, u, v_i) et P_i le numérateur
+de la position du centre sur l'axe (t_i = P_i / (2G·B_i)), soit Δ le
+déterminant 4 × 4 des lignes (w, |w|²) pour w = d, u, v₁, v₂. Avec c le centre
+de (a,b,x,z₁) rapporté à a, l'opération de colonne C₄ ← C₄ − 2c·(C₁, C₂, C₃)
+laisse Δ inchangé et met en quatrième colonne la puissance pow(w) = |w|² −
+2c·w, nulle pour d, u, v₁ ; d'où Δ = pow(v₂)·det(d, u, v₁) = pow(v₂)·B₁. Or
+pow(v₂) = P₂/G − 2t₁B₂ et t₁ = P₁/(2G·B₁), donc G·Δ = P₂B₁ − P₁B₂ et
+sign(t₁ − t₂) = −sign(Δ)·sign(B₁)·sign(B₂), ce qu'implémente
+`float32_q4_events.cpp`. L'égalité Δ = 0 est exactement la cosphéricité de z₁
+et z₂ avec la seed. Deux points pour la suite : le corpus de 960 événements
+n'a aucune mantisse aléatoire (petits entiers sous un 2^e commun ; sur des
+mantisses aléatoires aux exposants LiDAR, 0 repli exact sur 182 tirages, sur
+toute la plage 14 replis sur 70) : ajouter une famille à mantisses et
+exposants aléatoires par coordonnée et publier le taux de repli ; et au
+futur tri, classer les sites à B = 0 avant tout `std::sort`.
+
+**Prédicats float32** : aucune erreur. Chaque mot binary32 fini devient un
+entier exact dans l'unité globale 2^−149 (|entier| < 2^277, NaN et infinis
+refusés deux fois, zéros signés confondus), l'arithmétique est un entier
+signe-magnitude de 54 mots (1 728 bits) sans i128 ni flottant sur le chemin
+exact, chaque opération vérifie sa capacité et lève une exception plutôt que
+de tronquer ; bornes recalculées : puissance q3 ≤ 144M⁶ (1 676 bits),
+accumulateur q4 ≤ 396M⁶ (1 677 bits), déterminant réduit ≤ 72M⁵ (1 397 bits),
+maxima observés 1 671 bits sur des mots-coins : les float32 arbitraires
+(exposants 2^−149 à 2^127, signes mêlés) tiennent, pas seulement une scène à
+échelle commune. Dégénérescences décidées exactement (colinéaire, coplanaire,
+centre sur facette, angle droit, doublons, sous-normaux, −0,0) ; le filtre
+d'intervalles (nextafter, serrage à ±DBL_MIN) ne certifie jamais un zéro et
+tient sous tout mode d'arrondi et FTZ/DAZ. Rejeu indépendant des binaires
+épinglés sur 13 340 boules, 11 720 clés et 6 044 événements : 0 désaccord.
+Deux risques : la discipline de compilation flottante (`-ffp-contract=off`,
+`-fno-fast-math`, `-frounding-math`) n'existe que dans les lecteurs Python,
+pas dans une cible CMake : un garde de compilation est requis avant tout
+raccord au build ou au GPU ; et le repli entier local recalcule tous les
+coefficients à 1 728 bits à chaque repli (plusieurs Ko de pile, produit
+quadratique) : mesurer le taux de repli sur les trames réelles avant de
+généraliser. Nuance : le prédicat q2 emploie une seconde arithmétique exacte
+(unité 2^−298, accumulateur à 18 mots) ; deux schémas coexistent sur le
+chemin de contact, à dire dans la note.
+
+**Question SharedPrefix (enveloppe conditionnelle aux graines positives)** :
+la proposition « non portée » du journal existe déjà dans l'arbre de travail
+comme fichiers non suivis (`src/core/float32_q3_block.*`,
+`src/lanes/float32_q3_census.*`), sans reçu ni test ; relus sans compilation,
+contrôlés en rationnels exacts. Réponse à la question : oui, conv(a,b,X) est
+une enveloppe valide de toutes les graines positives, sans hypothèse de
+propriété d'arête. Avec d = b − a, u = x − a, D = |d|², E = |u|², F = d·u et G
+= DE − F² = |d × u|², les coordonnées barycentriques du centre circonscrit
+sont α = F|x − b|²/(2G), β = E(D − F)/(2G), ξ = D(E − F)/(2G) ; strictement
+intérieur ⟺ F, D − F, E − F > 0 avec G > 0, exactement le test de validité de
+`float32_ball.cpp` ; triangle rectangle : une coordonnée nulle (centre au
+milieu de l'hypoténuse, sur le bord) ; obtus : une coordonnée négative, le
+centre peut sortir de conv(a,b,X). Le resserrement par W/(2G) est valide aussi
+(W = E(D − F)d + D(E − F)u, c = a + W/(2G) et non m + W/(2G) ; 0 violation sur
+297 boîtes contenant une graine valide), et une intersection vide conv ∩ (a +
+W/(2G)) prouverait qu'aucune graine positive n'existe dans X : le code replie
+sur le hull et perd ce certificat gratuit. Quatre points durs.
+
+(1) Erreur dans ce dialogue, corrigée ci-dessus (réponse à la question q3 du
+journal 33) : « bilinéaire en (centre, z), donc bornée aux coins » est faux
+pour le minimum. (z − a)·(z + a − 2c) est affine en c (les termes en c²
+s'annulent) mais quadratique convexe en z : maximum aux coins de Z × C,
+minimum au sommet borné z_i = clamp(c_i, Z_i) pour chaque extrémité de C_i.
+Fixture : a = (0,0,0), b = (10,0,0), x = (5,6,0) (aigu, c = (5, 11/12, 0)), Z
+= [0,10] × {0} × {0} : les 64 évaluations aux coins donnent [0, 0] (les coins
+sont a et b), la vraie plage est [−25, 0], atteinte en z = (5,0,0), témoin
+strict ; un port « coins seulement » sous-compterait et accepterait une boule
+à tort. Le README de A et le code non suivi (minimum au sommet, maximum aux
+extrémités) sont justes ; graver cette fixture (sommet intérieur à Z) dans
+toute porte de bloc.
+
+(2) L'enveloppe hull ∩ (a + W/(2G)) est nettement plus lâche que celle de A,
+parce que W est évalué par produits d'intervalles corrélés puis divisé par un
+G lui-même corrélé. La structure exacte est c = m + ξ·h(x) avec h(x) = x − a −
+(F/D)d affine (intervalle exact sur une boîte, coefficients constants D·I −
+dd^T) et ξ = D(E − F)/(2G) = λ/2 scalaire ; identités vérifiées sur 3 000
+triangles : J = 4G, Q = 4(E − F), P = 2(Du − Fd), λ = DQ/J = 2ξ, (c − m)·d =
+0. Fixture axiale de A (a = (20,20,20), b = (40,20,20), X = {(30, y, 20) : 32
+≤ y ≤ 37}) : vrai hull des centres {30} × [21,833 ; 25,559] × {20},
+constructeur c_x ∈ [24,983 ; 40], c_y ∈ [20,914 ; 31,156] ; puissance en z =
+(30,31,20) : vraie plage [−101,29 ; −19,33], rendue par l'enveloppe resserrée
+de A (décidée), constructeur [−424,44 ; 101,25] (indécis), A universelle
+[−103,67 ; 21] (indécis). Rapports de largeur sur 297 boîtes, constructeur sur
+A universelle : min 0,29, médiane 1,92, max 72 ; constructeur sur A resserrée
+: min 1,25, médiane 4,75, max 155. Remplacer les trois quotients par axe par c
+= m + ξ·h(X), ξ resserré par D(E − F)/(2G) quand G est certifié positif, en
+conservant la relation J = DQ + R de A.
+
+(3) La borne λ ∈ (0, 2/3] de A exige la propriété d'arête ; la voie
+SharedPrefix n'en impose aucune, et y porter l'enveloppe universelle de A avec
+2/3 serait faux : sous acuité seule, sup λ = 1 (non atteint), soit ξ < 1/2 ;
+formule fermée ξ = cos X/(cos(A − B) + cos X), qui tend vers 1/2 quand A → 90°
+et X → 0. Fixtures : a = (0,0,0), b = (4,0,0), x = (2,10,0) : λ = 24/25 ; b =
+(2,0,0), x = (1,−51,−52) : λ = 5304/5305 ; sur la bissectrice x = (1, n, 0), b
+= (2,0,0) : λ = 1 − 1/n². Sous propriété, maximum observé 245/377 ≈ 0,650 sur
+60 000 tirages (2/3 à l'équilatéral). Graver la fixture à 24/25 dans toute
+porte de bloc de la voie sans propriété, ou introduire la propriété avec un
+test explicite.
+
+(4) Repli quand G est ambigu (`gram.low ≤ 0`) ou petit : l'enveloppe est le
+hull entier et le quotient ne resserre plus rien après intersection. X = (30,
+[y_lo, 40], 20) sur la même seed : y_lo = 36 → c_y ∈ [23,12 ; 31,72] ; y_lo =
+30 → c_y = [20, 40] = hull ; y_lo = 21 → c_x ∈ [20,02 ; 40], c_y = [20, 40] ;
+y_lo = 20 → G.low = 0, hull [20, 40]² ; A universelle donne c_x = {30}, c_y ∈
+[20, 30] dans tous ces cas (vrai hull c_y ∈ [20,955 ; 27,5]). Le repli m + [0,
+1/2]·h(X) reste fini, sans division, et contient les centres de toutes les
+graines aiguës : le prendre à la place du hull, ou l'y intersecter.
+
+Nuances. (a) Largeurs : la puissance exacte q3 est de degré 6 (< 144M⁶ =
+2^1676, 53 mots) ; le test (z − a)·(z + a − 2c) avec des extrémités de centre
+dyadiques arrondies vers l'extérieur sur la grille 2^−149 est de degré 2
+(trois termes < 2^559 en unité 2^−298, 18 mots : l'accumulateur du prédicat
+q2), mais `fixed_signed.hpp` n'offre que `divided_exact` (reste non nul
+refusé) : un chemin entier des bornes de bloc exigerait une division avec
+reste ; sinon garder « ambigu ⇒ raffinement ou relais ». (b) Census
+SharedPrefix relu (215 + 169 lignes) : a et b sautés seulement dans COUNT
+(puissance nulle, aucun bloc les contenant ne peut être certifié intérieur),
+graines invalides conservées comme témoins, feuille ambiguë ⇒ scission de X
+avant consommation avec ticket (compte, curseur) gelé pour chaque enfant :
+aucune erreur produit trouvée. Ne pas sauter les feuilles de X dans Z, elles
+sont témoins les unes des autres (a = (0,0,0), b = (2,0,0), x₁ = (1, 3/2, 0),
+x₂ = (1, 10, 0), toutes deux aiguës : puissance de x₁ dans la boule (a,b,x₂) =
+−68/5 ; puissance nulle dans sa propre boule, donc tout Z ∋ x₁ a max ≥ 0 et
+min ≤ 0 pour X ∋ x₁). (c) Mesurer `shared_splits` et `shared_frames` contre le
+nombre de graines valides de X ; le journal l'annonce lui-même. (d) Documenter
+c = a + W/(2G) = m + ξ·h(x) et λ = 2ξ dans la note q3 float32 pour relier les
+notations (W, G) du constructeur et (P, J, Q, λ) de A. Combinaison recommandée
+: enveloppe m + ξ·h(X), puis bornes par six paraboles ; fixtures d'égalité :
+la fixture axiale de A (décision attendue [−101,29 ; −19,33]) et sa version
+tournée par ((2,−2,1),(1,2,2),(−2,−1,2)) + 500.
 
 ## Erreurs et points durs relevés (à 4dbe3024)
 
