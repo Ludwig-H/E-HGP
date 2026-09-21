@@ -1,0 +1,35 @@
+{
+  "schema": "mhgp8_cpu_adapter_local_selftest_v1",
+  "scope": "pure_local_predicates_and_mocked_lifecycle_not_cloud_execution",
+  "GCP_used": false,
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "gcp-migration/selftest_cpu_probe_v8.py"
+      ],
+      "chunk_id": "6cca7a",
+      "wall_time_seconds": 0.078373925,
+      "exit_code": 0,
+      "original_token_count": 27,
+      "output": ".......\n----------------------------------------------------------------------\nRan 7 tests in 0.047s\n\nOK\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "-B",
+        "gcp-migration/selftest_cpu_probe_v8.py"
+      ],
+      "chunk_id": "0e44a2",
+      "wall_time_seconds": 0.07644989,
+      "exit_code": 0,
+      "original_token_count": 27,
+      "output": ".......\n----------------------------------------------------------------------\nRan 7 tests in 0.046s\n\nOK\n"
+    }
+  ],
+  "hash_before": "e402e931da80104af94ef8dce25168160d35ef5c2792b8e18e00106456421dfc  gcp-migration/cpu_probe_session_v8.py\n41faae4e268b545c110489e24a973824140481885b6bbf4a6167dd64cde1c23b  gcp-migration/cpu_probe_worker_v8.py\n4d05cd7c2b70815c97d388b685b173b0beb53a71435cd2f7e39c7bc13944fdc4  gcp-migration/cpu_probe_snapshot_v8.py\n251616e0c90a001da93fa06ea96eea387c2ec07177195df85d60605635bfbab8  gcp-migration/selftest_cpu_probe_v8.py\n",
+  "hash_after": "e402e931da80104af94ef8dce25168160d35ef5c2792b8e18e00106456421dfc  gcp-migration/cpu_probe_session_v8.py\n41faae4e268b545c110489e24a973824140481885b6bbf4a6167dd64cde1c23b  gcp-migration/cpu_probe_worker_v8.py\n4d05cd7c2b70815c97d388b685b173b0beb53a71435cd2f7e39c7bc13944fdc4  gcp-migration/cpu_probe_snapshot_v8.py\n251616e0c90a001da93fa06ea96eea387c2ec07177195df85d60605635bfbab8  gcp-migration/selftest_cpu_probe_v8.py\n",
+  "status": "passed"
+}

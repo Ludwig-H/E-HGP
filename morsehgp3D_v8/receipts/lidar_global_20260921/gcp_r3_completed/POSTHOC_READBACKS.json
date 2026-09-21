@@ -1,0 +1,40 @@
+{
+  "schema": "mhgp8_gcp_r3_posthoc_readbacks_v1",
+  "status": "passed",
+  "normal_optimized_byte_equal": true,
+  "output_sha256": {
+    "ANALYSIS.json": "fb8557474690ea40c486c01fa092622546140f9038e1c6cee137c9201ec0e27f",
+    "ANALYSIS_OPTIMIZED.json": "fb8557474690ea40c486c01fa092622546140f9038e1c6cee137c9201ec0e27f",
+    "CPU_COSTS.json": "b049f12c0669f9b7698f612ec40ec73053c95d4f14b0d4116efa8f4dc1b13508",
+    "CPU_COSTS_OPTIMIZED.json": "b049f12c0669f9b7698f612ec40ec73053c95d4f14b0d4116efa8f4dc1b13508"
+  },
+  "commands": [
+    {
+      "command": "python3 -B gcp-migration/read_cpu_probe_v8.py --host /tmp/ehgp-v8-g4-r3-20260921.k5RPv9mL/cpu_v8_host --local-record morsehgp3D_v8/receipts/lidar_global_20260921/global_tsd9ofnm/record_0000.json",
+      "exit_code": 0,
+      "wall_time_seconds": 0.480975717,
+      "output_file": "ANALYSIS.json"
+    },
+    {
+      "command": "python3 -O -B gcp-migration/read_cpu_probe_v8.py --host /tmp/ehgp-v8-g4-r3-20260921.k5RPv9mL/cpu_v8_host --local-record morsehgp3D_v8/receipts/lidar_global_20260921/global_tsd9ofnm/record_0000.json",
+      "exit_code": 0,
+      "wall_time_seconds": 0.50084229,
+      "output_file": "ANALYSIS_OPTIMIZED.json"
+    },
+    {
+      "command": "python3 -B gcp-migration/read_cpu_probe_costs_v8.py --host /tmp/ehgp-v8-g4-r3-20260921.k5RPv9mL/cpu_v8_host --local-record morsehgp3D_v8/receipts/lidar_global_20260921/global_tsd9ofnm/record_0000.json",
+      "exit_code": 0,
+      "wall_time_seconds": 0.514504746,
+      "output_file": "CPU_COSTS.json"
+    },
+    {
+      "command": "python3 -O -B gcp-migration/read_cpu_probe_costs_v8.py --host /tmp/ehgp-v8-g4-r3-20260921.k5RPv9mL/cpu_v8_host --local-record morsehgp3D_v8/receipts/lidar_global_20260921/global_tsd9ofnm/record_0000.json",
+      "exit_code": 0,
+      "wall_time_seconds": 0.457401537,
+      "output_file": "CPU_COSTS_OPTIMIZED.json"
+    }
+  ],
+  "reader_sha256": "5d6f79e06a7a539d656cfa83c7fded4c631bae44efe48b2095eae1396ede554a",
+  "cost_reader_sha256": "cbac65f02e89ae12afb0f42043cf465a472fc40b0d60354fdabfb551a4e3814a",
+  "scope": "closed_G4_SPOT_CPU_q3_q4_candidate_stream_not_FULL_not_GPU"
+}

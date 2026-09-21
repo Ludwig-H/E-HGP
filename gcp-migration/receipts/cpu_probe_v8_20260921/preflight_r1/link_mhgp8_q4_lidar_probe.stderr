@@ -1,0 +1,8 @@
+In file included from /tmp/ehgp-cpu-v8-fc26638cad8f854c.bEB4xFWgPa/source/morsehgp3D_v8/bench/q4_lidar_probe.cpp:6:
+/tmp/ehgp-cpu-v8-fc26638cad8f854c.bEB4xFWgPa/source/morsehgp3D_v8/bench/q34_cover_probe.cpp: In member function ‘void {anonymous}::Output::collect(const mhgp8::Q34SeedCandidate&, std::size_t, std::size_t)’:
+/tmp/ehgp-cpu-v8-fc26638cad8f854c.bEB4xFWgPa/source/morsehgp3D_v8/bench/q34_cover_probe.cpp:185:33: error: ‘record’ may be used uninitialized [-Werror=maybe-uninitialized]
+  185 |       require(record.support[i] < n && (i == 0 || record.support[i - 1] < record.support[i]), "invalid support IDs");
+/tmp/ehgp-cpu-v8-fc26638cad8f854c.bEB4xFWgPa/source/morsehgp3D_v8/bench/q34_cover_probe.cpp:182:12: note: ‘record’ declared here
+  182 |     Record record{candidate.arity, candidate.support_ids, candidate.ball.coefficients(), candidate.depth, {}};
+      |            ^~~~~~
+cc1plus: all warnings being treated as errors

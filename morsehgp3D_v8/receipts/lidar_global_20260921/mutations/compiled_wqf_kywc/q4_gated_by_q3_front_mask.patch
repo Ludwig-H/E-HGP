@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/pipeline/wspd_q34.cpp
++++ mutated/wspd_q34.cpp
+@@ -334,7 +334,7 @@
+       q3_edge(cover);
+       observe(cover);
+     }
+-    if (q4) {
++    if (q4 && (options_.requested_lane_mask != 6 || q3)) {
+       if (options_.q4_backend == WspdQ4Backend::Local28) {
+         const auto local = run_q4_local_edge_candidates(cover, k_, options_.local, sink_);
+         merge(work.local, local);

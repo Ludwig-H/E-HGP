@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/pipeline/wspd_q34.cpp
++++ mutated/wspd_q34.cpp
+@@ -366,7 +366,7 @@
+         ++visited;
+         counter_add(q3.census_point_tests);
+         const auto power = ball->power(points[id]);
+-        if (power < 0) {
++        if (power <= 0) {
+           counter_add(q3.census_inside_sites);
+           if (++depth >= k_ - 1) {
+             counter_add(q3.depth_rejections);

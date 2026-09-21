@@ -2959,3 +2959,94 @@ ETAT_COURANT constructeur, receipts/q4_window_20260920 et cette seule
 section30. Les53 lignes complémentaires anciennes, tous audits
 indépendants (dont la nouvelle réponse A) et changements v6/v7 sont
 exclus. Réservation libérée après commit/push ; main uniquement.
+
+## CONSTRUCTEUR — tranche31, priorité LiDAR et raccord global (21 septembre2026)
+
+Reprise après c5308651. L'utilisateur précise aujourd'hui le critère :
+croissance et coût sur les régimes considérés, en priorité SemanticKITTI,
+pas preuve sous-quadratique uniforme préalable. Les contre-régimes restent
+des tests de résistance, pas un veto au raccord des briques et à G4.
+Exactitude/coquilles/complétude ne sont pas relâchées. Cadre inchangé :
+exploration_v8_hors_registre, cpu_reference, quantized_u16_input_only,
+implementation_v8_p0, not_claimed. G4 SPOT autorisée ; aucune VM démarrée.
+
+Travail ouvert : comparaison constructeur28/29/30 sur les neuf arêtes
+LiDAR productives A, mêmes IDs originaux à8k/16k/32k/50k, et raccord
+global du front multivoie aux candidats q3/q4. Une arête résiduelle possède
+un seul cover du même index ; q3 séparé sans balayage q4 caché, q4 voie28
+ou30 explicite. Pas d'entrée conditionnée par q2 accepté. La somme des
+paires résiduelles, covers, seeds, tris et sorties sera réellement payée.
+Le premier raccord reste un flux de candidats, pas catalogue/intérieurs/FULL.
+
+Question A : confirmez l'application du citron à l'arête maximale d'un
+SUPPORT positif q3/q4, indépendamment du nombre total de sites sur la
+coquille, puis la complétude de ce raccord sur les paires du front.
+Notre contrelecture donne puissance≤−H+sqrt(Xi/αq), α3=3, α4=2 ;
+les seuils de témoins distincts K−1 et K−2 restent donc valides.
+Priorité d'ingénierie : mesurer ce vrai coût global LiDAR avant d'imposer
+le futur index de couches à tous les cas. Vos126 mesures restent des
+preuves indépendantes, jamais des qualifications héritées du port31.
+
+Réponse A du21 septembre relue : accord sur support positif, variance,
+citron strict et indépendance des voies. Nos fixtures u16 exercent déjà
+les égalités W3/W4 et une coquille30 ; les trois mutations de stricte
+intériorité/accès q4 sont réfutées par l'oracle avant les registres.
+Le raccord passe92 CTests Release, dont166 appels globaux et46 appels
+multiworker appariés ; la qualification instrumentée est en cours.
+Les144 essais constructeur28/29/30 sur vos neuf arêtes sont clos :
+mêmes sorties et même travail pour les deux ordres d'exécution.
+Ce n'est pas une preuve de vitesse globale : le pilote global1000/K10
+s8/W4 développe210987 arêtes et83,307M incidences de cover, environ10,5s
+sous charge de tests. Aucune de ces durées ne vaut contrat G4/FULL.
+
+Question pratique A : au front multivoie actuel, peut-on identifier sur
+ces scans si la faiblesse dominante est le choix de K témoins autour du
+pivot ou l'absence de crédits h_a/h_b transmis par blocs ? La priorité
+est de réduire ces arêtes AVANT covers et seeds, sans restaurer un scan
+quadratique local. Le backend28 reste la référence globale ;30 ne sera
+pas imposé à tous les produits. Nous préparons un pilote CPU48 sur G4
+SPOT, distinct d'un backend GPU ; aucun démarrage à cette mise à jour.
+
+Mesure globale maintenant disponible : scan0/8k/K5/s8/28/W4,
+1360,996s sous charge locale, 2 285 750 arêtes, 104 670 candidats.
+La campagne `global_tsd9ofnm` est FAILED : arrêt volontaire pendant16k,
+la ligne8k achevée reste exploitable séparément, pas une campagne close PASS.
+q3 construit780 661 556 boules et fait361 201 093 303 tests ponctuels,
+dont357 937 525 263 extérieurs ; seulement93 914 émissions et327 815
+comparaisons de tri de coquille. Ce n'est manifestement pas le tri qui
+domine le volume d'opérations. Les sommes de covers/seeds doivent être
+réduites, même sur ce régime réellement visé, avant toute extrapolation50k.
+
+Question prioritaire A : en complément des rejets h/h_a/h_b du front,
+valideriez-vous pour q3 un census par boîtes de la puissance exacte
+A*|z|²+L·z+C (A>0), avec rejet/admission de nœuds entiers, saturation
+K−1 et récupération intégrale des contacts sur acceptation ? Cela évite
+les milliards de témoins extérieurs, mais ne supprime pas les780M seeds :
+quels certificats de famille ou blocs de seeds recommandez-vous AVANT
+construction des clés de boule ? Pas d'acceptation q2 comme condition.
+
+GCP utilisé : R1 arrêtée après avertissement GCC11 d'une sonde auxiliaire
+inutilisée ; R2 compilée mais gate rationnelle bloquée, interrompue.
+Les deux générations sont certifiées TERMINATED, captures conservées.
+Suspicion ciblée : trois rational/int ==0 sous ancien Boost/C++20 ;
+correction équivalente par numérateur, qualification distincte en cours.
+
+Clôture31 :92 CTests Release, dix gates ASan/UBSan/LSan, trois mutants
+causaux et16 relectures r2 passent ; seul l'oracle Boost diffère.
+Pilote G4 R3 COMPLETED, cinq mesures puis arrêt certifié TERMINATED.
+ÀK5/s8/48workers,1k/2k/4k/8k=0,863/8,470/59,274/614,744s.
+Censusq3×10,79/×10,08/×10,76 ; visitesatlasq4×9,38/×10,91/×10,39 :
+pas de sous-quadratique mesuré sur ce scan. GNUtime8k=1986,83sCPU/
+614,74smur,3,23CPU moyens malgré48workers. W1/W48à1k et localW4/G4W48
+à8k conservent géométrie/digests, deux lecteurs normal/−O concordants.
+La priorité est double : rejeter des blocs avant seeds/census et partager
+produits/plages de paires/blocs de seeds, avec parents immuables communs.
+L'audit A du front en cours reste indépendant et n'est pas inclus au commit.
+
+Réservation courte CONSTRUCTEUR de l'index constaté vide pour tranche31 :
+AGENTS, code/tests/bench/docs/entrées propres31, correctif du seul test
+de reçus q2, preuves `receipts/lidar_global_20260921`, nouveaux scripts
+CPU v8 dans gcp-migration et CETTE section31 uniquement. Les53 anciennes
+lignes complémentaires, tous fichiers d'auditeurs indépendants et toutes
+modifications v6/v7 restent exclus. Réservation libérée après commit/push ;
+main uniquement, aucune VM de cette session laissée active.

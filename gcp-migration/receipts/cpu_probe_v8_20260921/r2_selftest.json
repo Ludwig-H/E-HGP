@@ -1,0 +1,36 @@
+{
+  "schema": "mhgp8_cpu_adapter_r2_local_selftest_v1",
+  "status": "passed",
+  "GCP_mutation": false,
+  "scope": "two_executed_programs_only_warnings_and_196_sources_unchanged",
+  "commands": [
+    {
+      "command": "python3 -B gcp-migration/selftest_cpu_probe_v8.py",
+      "chunk_id": "edbab2",
+      "wall_time_seconds": 0.381583106,
+      "exit_code": 0,
+      "original_token_count": 27,
+      "output": ".......\n----------------------------------------------------------------------\nRan 7 tests in 0.078s\n\nOK\n"
+    },
+    {
+      "command": "python3 -O -B gcp-migration/selftest_cpu_probe_v8.py",
+      "chunk_id": "fd4ef0",
+      "wall_time_seconds": 0.528477091,
+      "exit_code": 0,
+      "original_token_count": 27,
+      "output": ".......\n----------------------------------------------------------------------\nRan 7 tests in 0.169s\n\nOK\n"
+    },
+    {
+      "command": "python3 -B -c \"import sys; sys.path.insert(0,'gcp-migration'); import cpu_probe_session_v8 as s; from pathlib import Path; p=Path('build/v8_lidar_global_20260921/gcp_package'); s.validate_snapshot(p/'snapshot.tar.gz',s.payload.strict_json((p/'source_manifest.json').read_text())); print('R2 strict manifest/archive validation PASS')\"",
+      "chunk_id": "430b80",
+      "wall_time_seconds": 0.293601897,
+      "exit_code": 0,
+      "original_token_count": 11,
+      "output": "R2 strict manifest/archive validation PASS\n"
+    }
+  ],
+  "pins": "e402e931da80104af94ef8dce25168160d35ef5c2792b8e18e00106456421dfc  gcp-migration/cpu_probe_session_v8.py\nb8385feb20c82485fc4347c45157e58abff786060cbd57a1a73355e3c6f073cd  gcp-migration/cpu_probe_worker_v8.py\n4d05cd7c2b70815c97d388b685b173b0beb53a71435cd2f7e39c7bc13944fdc4  gcp-migration/cpu_probe_snapshot_v8.py\n43cb9b5545d52e64926bd97bf50926004618ff767ce34bdb0e9823986ce799a9  gcp-migration/selftest_cpu_probe_v8.py\nd67c6f0a094a2fac83d682250a0365263011b0d77be3b62e376e47d54edf6cc0  gcp-migration/receipts/cpu_probe_v8_20260921/preflight_r1/link_mhgp8_q4_lidar_probe.stderr\n",
+  "remote_execution": "not_run_by_this_subtask",
+  "full_tower": false,
+  "gpu": false
+}

@@ -1,0 +1,17 @@
+{
+  "kind": "q3_shell_counted_inside_oracle",
+  "command": [
+    "/tmp/mhgp8_wspd_q34_mutants_pwfqxgmz/q3_shell_counted_inside",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-21T07:51:30.911616+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "wspd q34 gate: global q34 stream differs from independent rational support/depth/shell oracle\n",
+  "stdout_base64": "",
+  "stderr_base64": "d3NwZCBxMzQgZ2F0ZTogZ2xvYmFsIHEzNCBzdHJlYW0gZGlmZmVycyBmcm9tIGluZGVwZW5kZW50IHJhdGlvbmFsIHN1cHBvcnQvZGVwdGgvc2hlbGwgb3JhY2xlCg==",
+  "finished_utc": "2026-09-21T07:51:30.919667+00:00"
+}

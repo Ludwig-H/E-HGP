@@ -1,0 +1,37 @@
+{
+  "schema": "mhgp8_r3_partial_deadline_simulation_v1",
+  "status": "passed",
+  "scope": "local_mock_of_pinned_worker_command_only_not_VM_preemption_recovery",
+  "GCP_used": false,
+  "plan": "gcp-migration/gcp_plan_r3.json",
+  "plan_sha256": "57eb2cc1892f0d1757b81f7d822777d10d98e8ef2eca10d32a6a7ad02d2fda26",
+  "helper_sha256": "da967163bdb7247bc6aad4df0c294cda1071076a0127cd5bd9f59bc0e4788439",
+  "test_sha256": "48c06e4d09396e6b82ec26f0b5edb8437e36aff3c3761fddc75a84b256e6836b",
+  "initial_attempt": {
+    "status": "failed",
+    "normal_exit_code": 1,
+    "optimized_exit_code": 1,
+    "error": "ModuleNotFoundError: No module named 'cpu_probe_worker_v8'",
+    "cause": "Wrong local repository parent index in new auxiliary only; no subprocess/cloud command ran.",
+    "preserved_source": "check_partial_deadline_pre_path_fix.py",
+    "source_sha256": "c4d96528d183240bc36952c088c552ab484a37f906ac421e41fee0c73c6b8744"
+  },
+  "commands": [
+    {
+      "command": "python3 -B gcp-migration/receipts/cpu_probe_v8_20260921/check_partial_deadline.py",
+      "chunk_id": "1ebc6a",
+      "wall_time_seconds": 0.237063921,
+      "exit_code": 0,
+      "original_token_count": 80,
+      "output": "{\"GCP_used\": false, \"command_raw_hashes_verified\": true, \"helper_sha256\": \"da967163bdb7247bc6aad4df0c294cda1071076a0127cd5bd9f59bc0e4788439\", \"interrupted_exit_code\": -9, \"interrupted_group_closed\": true, \"interrupted_summary_absent\": true, \"previous_summary_preserved\": true, \"real_subprocesses\": 0, \"status\": \"PASS\"}\n"
+    },
+    {
+      "command": "python3 -O -B gcp-migration/receipts/cpu_probe_v8_20260921/check_partial_deadline.py",
+      "chunk_id": "ab2e03",
+      "wall_time_seconds": 0.277094054,
+      "exit_code": 0,
+      "original_token_count": 80,
+      "output": "{\"GCP_used\": false, \"command_raw_hashes_verified\": true, \"helper_sha256\": \"da967163bdb7247bc6aad4df0c294cda1071076a0127cd5bd9f59bc0e4788439\", \"interrupted_exit_code\": -9, \"interrupted_group_closed\": true, \"interrupted_summary_absent\": true, \"previous_summary_preserved\": true, \"real_subprocesses\": 0, \"status\": \"PASS\"}\n"
+    }
+  ]
+}

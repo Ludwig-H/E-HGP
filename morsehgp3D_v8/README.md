@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — reprise q3/q4 après audit du socle q2
+# Morse HGP 3D v8 — raccord global q3/q4 et diagnostic LiDAR
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -36,6 +36,30 @@ Les mesures de l'audit d'ouverture restent v7 ; chaque tranche v8 porte
 ses propres sources, tests et reçus, sans transfert implicite.
 
 ## État exécutable
+
+Priorité du21 septembre : mesurer les régimes visés, notamment les scans
+LiDAR, sans attendre une borne sous-quadratique universelle. Le
+[raccord global q3/q4](docs/Q34_GLOBAL_ET_LIDAR_20260921.md) est implémenté,
+en mono et avec une équipe CPU partagée ;92 CTests Release passent.
+Il traite toutes les arêtes résiduelles du front, indépendamment de q2,
+sans liste globale de faces. Les144 mesures constructeur sur neuf arêtes
+LiDAR à8k/16k/32k/50k retrouvent les mêmes sorties avec28/29/30.
+La méthode par blocs28 reste le défaut explicite du nouveau raccord.
+Ce flux global n'est **pas encore** le catalogue des boules, les payloads
+intérieurs ni FULL. Les dix gates instrumentées passent aussi ; reprise
+de portabilité de l'oracle séparément qualifiée. Le premier global LiDAR8k
+révèle361,201 milliards de tests ponctuels q3 et780,662 millions de seeds,
+pour93 914 q3 émis : ce travail répété, pas le tri, est la priorité.
+La campagne locale a été arrêtée pendant16k ; aucune croissance8→16→32
+n'est établie. Voir le [diagnostic détaillé](receipts/lidar_global_20260921/PARTIAL_GLOBAL_8K.md)
+et les [reçus31](receipts/lidar_global_20260921/README.md), qui distinguent
+qualifications locales et sessions G4 SPOT CPU.
+Le pilote G4 CPU est maintenant terminé et la VM arrêtée : K5/s8,
+48 workers,0,863/8,470/59,274/614,744s à1k/2k/4k/8k. Les lectures
+ponctuelles q3 sont multipliées par plus de10 à chaque doublement ;
+aucun comportement sous-quadratique constaté sur cette série. À8k,
+l'occupation moyenne n'est que3,23 CPU. Ces deux défauts guident la suite.
+Les paragraphes ci-dessous sont l'historique des tranches précédentes.
 
 Reprise du20 septembre : [audit du développement](docs/REPRISE_DEVELOPPEMENT_20260920.md)
 après `3e94c868`. Les preuves de la tranche21 sont relues et leurs empreintes

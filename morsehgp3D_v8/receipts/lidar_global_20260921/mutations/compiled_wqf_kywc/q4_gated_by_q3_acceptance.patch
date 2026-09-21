@@ -1,0 +1,16 @@
+--- morsehgp3D_v8/src/pipeline/wspd_q34.cpp
++++ mutated/wspd_q34.cpp
+@@ -330,11 +330,12 @@
+     work.max_cover_sites = std::max(work.max_cover_sites, static_cast<u64>(cover->site_count()));
+     merge(work.cover, cover->work());
+     observe(cover);
++    const auto q3_before = work.q3.emitted;
+     if (q3) {
+       q3_edge(cover);
+       observe(cover);
+     }
+-    if (q4) {
++    if (q4 && (!q3 || work.q3.emitted > q3_before)) {
+       if (options_.q4_backend == WspdQ4Backend::Local28) {
+         const auto local = run_q4_local_edge_candidates(cover, k_, options_.local, sink_);
+         merge(work.local, local);

@@ -1,7 +1,28 @@
 # État de l'audit v8
 
-20 septembre 2026. Audit constructeur, avec contrelectures parallèles.
+21 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
+
+État du21 septembre, tranche31 : raccord global mono/Coarse q3/q4,
+92 CTests Release, trois mutations compilées réfutées par l'oracle
+géométrique,144 mesures constructeur sur neuf arêtes LiDAR closes.
+La contrelecture A confirme indépendamment le citron sur un support
+positif même avec une grande coquille ; ses preuves ne sont pas héritées.
+Lire le [contrat31](../docs/Q34_GLOBAL_ET_LIDAR_20260921.md) et ses
+[reçus](../receipts/lidar_global_20260921/README.md). Dix gates instrumentées
+passent ; la reprise du seul oracle pour Boost ancien est qualifiée
+séparément. Le premier global LiDAR8k coûte361,201Md tests ponctuels q3,
+contre327 815 comparaisons de tri de coquille ; le rejet par blocs devient
+prioritaire. Campagne locale FAILED par arrêt volontaire pendant16k,
+pas de ratio de croissance8→16→32. Sessions G4 CPU et arrêts décrits dans
+les reçus ; aucune tour FULL ni résultat GPU revendiqué.
+Pilote CPU G4 R3 clos, cible arrêtée :1k/2k/4k/8k à48workers=
+0,863/8,470/59,274/614,744s. Croissance du census q3>×10 à chaque
+doublement, pas sous-quadratique sur cette série ; occupation8k=3,23CPU
+en moyenne, malgré48workers. W1/W48à1k et local/G4à8k concordent sur
+géométrie/digests. Les deux lecteurs posthoc normal/−O concordent.
+La croissance sur les scans ciblés prime désormais sur l'attente d'une
+borne uniforme. L'historique ci-dessous reste attaché à chaque tranche.
 
 État constructeur courant : [reprise après3e94c868](../docs/REPRISE_DEVELOPPEMENT_20260920.md).
 La relecture des deltas19–21 ne relève pas de défaut d'exactitude avéré ;

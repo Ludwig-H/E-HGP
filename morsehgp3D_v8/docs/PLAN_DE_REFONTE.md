@@ -6,6 +6,27 @@ maintenant implémentée et testée, pas la chaîne complète. Le
 les [mesures P0](../receipts/p0_local_credits_20260913/README.md) sont propres à la v8.
 L'ordre demandé reste mono-thread, multi-CPU local, puis GPU G4 SPOT.
 
+Réorientation explicite du21 septembre : les limites quadratiques restent
+publiées, mais ne bloquent plus le raccord et les essais sur les régimes
+visés. Priorité aux scans SemanticKITTI8k/16k/32k/50k et au coût complet
+des candidats. Le [raccord global31](Q34_GLOBAL_ET_LIDAR_20260921.md)
+mono/multi-CPU est maintenant écrit : mesurer front, expansion des arêtes,
+covers, seeds, census et sorties avant de choisir l'optimisation suivante.
+Les couches indexées ne sont plus un préalable imposé. La méthode q4
+par blocs28 reste disponible et choisie par défaut ;30 est une option.
+Cette réorientation ne relâche ni l'exactitude ni le contrat FULL/G4.
+Le premier global8k/K5 donne maintenant la priorité concrète :361,201Md
+tests ponctuels q3,99,1% extérieurs,780,662M seeds. Rejet précoce de
+rectangles/blocs de seeds et census exact par boîtes avant micro-tris ou
+autre file q2. La campagne locale arrêtée pendant16k ne donne aucun
+ratio8→16→32 ; reprendre ces tailles après réduction du travail.
+La série G4 CPU1k/2k/4k/8k confirme ensuite le défaut : census q3>×10
+par doublement et8k614,744s avec48workers, mais3,23CPU moyens réellement
+utilisés. Prévoir aussi le partage de produits, plages de paires et blocs
+de seeds d'une arête, sans recopier leurs préparations. Pas de nouvelle
+hausse de budget pour simplement prolonger ce même chemin jusqu'à50k.
+Les priorités datées ci-dessous expliquent les décisions historiques.
+
 Priorité de reprise du20 septembre, après3e94c868 : les options q2
 fenêtre2K/héritage sont qualifiées et conservées. Cesser les micro-variantes
 de constante ; construire les pièces manquantes q3/q4, catalogue et FULL.

@@ -3,6 +3,37 @@
 13 septembre 2026. Mémoire courte de l'audit et de la première tranche P0.
 Les sources et contre-fixtures complètes sont dans les rapports liés.
 
+## Régimes LiDAR et raccord global — tranche31,21 septembre
+
+- Attendre une preuve de coût sous-quadratique sur toutes les entrées
+  avant de raccorder les briques retarde la mesure utile. L'utilisateur
+  privilégie explicitement les régimes visés, sans relâcher l'exactitude.
+- Remplacer uniformément les blocs28 par la fenêtre30 n'est pas validé :
+  sur144 essais de neuf arêtes LiDAR,30 est plus rapide55 fois seulement,
+  médiane30/28=1,153 sous charge concurrente. Les blocs éliminent parfois
+  toutes les actives alors que les couches/fenêtres les relisent encore.
+  Il ne s'agit ni d'un verdict de vitesse stable ni du coût global du scan.
+- De petits covers sur des arêtes choisies ne prouvent pas de petits
+  covers sur toutes les arêtes résiduelles WSPD. Le premier raccord global
+  mesure leur somme réelle, sans la remplacer par le nombre de sites uniques.
+- Rejeter q4 faute de q3 accepté, ou à cause du masque q3 du front, perd
+  des boules admissibles : deux mutants du nouveau raccord le confirment.
+- Forcer à zéro un digest de worker n'est pas une mutation si ce worker
+  était inactif. La gate de reçus q2 parallèle utilise maintenant XOR1,
+  contrôlé sur0/1/u64max, comme la correction de la gate dynamique en30.
+  Cela ne change aucun moteur q2 ni ses qualifications historiques.
+- Accuser d'abord le tri masque le problème global mesuré sur LiDAR8k :
+  q3 effectue361,201 milliards de tests de census pour327 815 comparaisons
+  de tri de coquille. Les780,662 millions de seeds doivent elles aussi
+  être réduites. Le remplacement du tri ou une nouvelle file de tâches
+  ne suffiraient pas à résorber ce travail ; rejeter par blocs en amont.
+- Répéter les grandes tailles malgré ce premier coût22,7minutes local
+  n'apporte pas assez d'information par unité de calcul :16k est arrêté,
+  son échec conservé, puis diagnostic court1k/2k/4k/8k sur48CPU. Les
+  tests8k/16k/32k restent requis après la réduction structurelle.
+
+Voir [contrat, mesures et limites31](Q34_GLOBAL_ET_LIDAR_20260921.md).
+
 ## Balayages locaux q4 — tranche28, 20 septembre
 
 - Laisser le budget de classification Z expirer dans une feuille finale

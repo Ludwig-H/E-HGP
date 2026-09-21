@@ -1,0 +1,613 @@
+// Explicit reuse of test-only rational Gram/census/ownership helpers. The
+// previous gate is not run; no product or independent-audit model is copied.
+#define main mhgp8_pruning_helpers_for_global_q34_gate
+#include "q34_family_pruning_gate.cpp"
+#undef main
+
+#include "pipeline/wspd_q34.hpp"
+
+#include <cstdlib>
+#include <bit>
+#include <atomic>
+#include <new>
+#include <thread>
+#include <tuple>
+
+namespace global_q34_allocation {
+struct State { bool armed{}; std::size_t remaining{}; };
+thread_local State state;
+[[gnu::noinline]] void* allocate(std::size_t size, std::size_t alignment=alignof(std::max_align_t)) {
+  if (state.armed) {
+    if (state.remaining==0) { state.armed=false; throw std::bad_alloc(); }
+    --state.remaining;
+  }
+  void* result=nullptr;
+  if (alignment<=alignof(std::max_align_t)) result=std::malloc(size==0?1:size);
+  else if (posix_memalign(&result,alignment,size==0?1:size)!=0) result=nullptr;
+  if (!result) throw std::bad_alloc();
+  return result;
+}
+[[gnu::noinline]] void release(void* p) noexcept { std::free(p); }
+}
+void* operator new(std::size_t s) { return global_q34_allocation::allocate(s); }
+void* operator new[](std::size_t s) { return global_q34_allocation::allocate(s); }
+void* operator new(std::size_t s,std::align_val_t a) { return global_q34_allocation::allocate(s,static_cast<std::size_t>(a)); }
+void* operator new[](std::size_t s,std::align_val_t a) { return global_q34_allocation::allocate(s,static_cast<std::size_t>(a)); }
+void operator delete(void* p) noexcept { global_q34_allocation::release(p); }
+void operator delete[](void* p) noexcept { global_q34_allocation::release(p); }
+void operator delete(void* p,std::size_t) noexcept { global_q34_allocation::release(p); }
+void operator delete[](void* p,std::size_t) noexcept { global_q34_allocation::release(p); }
+void operator delete(void* p,std::align_val_t) noexcept { global_q34_allocation::release(p); }
+void operator delete[](void* p,std::align_val_t) noexcept { global_q34_allocation::release(p); }
+void operator delete(void* p,std::size_t,std::align_val_t) noexcept { global_q34_allocation::release(p); }
+void operator delete[](void* p,std::size_t,std::align_val_t) noexcept { global_q34_allocation::release(p); }
+
+namespace {
+struct GlobalGate : Gate {
+  u64 global_calls{},oracle_clouds{},oracle_triangles{},oracle_tetrahedra{};
+  u64 oracle_balls{},positive_triangles{},positive_tetrahedra{},canonical_groups{};
+  u64 front_replays{},expanded_pairs{},fat_rectangles{},q3_only_edges{},q4_only_edges{},both_edges{};
+  u64 split_q3_only_edges{},split_q4_only_edges{};
+  u64 q3_front_rejections{},q4_front_rejections{},xi_tests{},q3_depth_rejections{},q3_unread_sites{};
+  u64 pure_calls{},sample_calls{},local_calls{},window_calls{},inactive_calls{},singleton_calls{};
+  u64 s8_calls{},s10_calls{},s12_calls{},strict_w3_contacts{},strict_w4_contacts{};
+  u64 independent_q2_cases{},independent_q3_cases{},isolated_cases{},extreme_calls{};
+  u64 allocation_failures{},nested_calls{},owner_reset_calls{},input_alias_checks{};
+  u64 parallel_pipeline_calls{},parallel_w1_calls{},parallel_w2_calls{},parallel_w4_calls{};
+  u64 parallel_geometry_checks{},worker_ledger_checks{},callback_copy_checks{},multiworker_calls{};
+  u64 parallel_callback_failures{},parallel_join_checks{},parallel_owner_resets{},parallel_empty_calls{};
+};
+
+// Every component is a standard-layout aggregate containing only u64 fields
+// and the explicitly checked aggregates below. Exact size sums prove there
+// are no padding bytes; bit_cast then compares ALL counter values, including
+// future additions (which must first update these inventory assertions).
+// This is not a memcmp of an aggregate with unspecified padding.
+#define WORDS(type,count) static_assert(std::is_trivially_copyable_v<mhgp8::type> && \
+  std::is_standard_layout_v<mhgp8::type> && sizeof(mhgp8::type)==(count)*sizeof(u64))
+static_assert(sizeof(u64)==8 && std::numeric_limits<u64>::digits==64);
+WORDS(Q34EdgeCoverWork,10);WORDS(WspdQ3Work,23);
+WORDS(Q4PositiveDomainWork,12);WORDS(Q4LocalGeometryQueryWork,2);
+WORDS(Q4LocalGeometryWork,27);WORDS(Q4LocalPartitionWork,20);
+WORDS(Q4LocalAtlasWork,38);WORDS(Q4LocalSweepWork,41);WORDS(Q4LocalEdgeWork,117);
+WORDS(Q4ShallowSetWork,25);WORDS(Q4FamilyWork,13);WORDS(Q4ShallowSweepWork,32);
+WORDS(Q4WindowSelectionWork,25);WORDS(Q4WindowSweepWork,57);WORDS(Q4WindowEdgeWork,116);
+WORDS(WspdQ34Work,279);
+#undef WORDS
+std::array<u64,279> logical_work(mhgp8::WspdQ34Work work) {
+  // These two capacity peaks depend on the private buffer's previous jobs;
+  // they are paid separately, not erased from the published result.
+  work.q3.peak_shell_bytes=0;
+  work.peak_edge_buffer_bytes=0;
+  return std::bit_cast<std::array<u64,279>>(work);
+}
+
+// Enumerate every small-cloud support once. An independent Gaussian rational
+// solve decides positivity, centre and radius; the global census is cached by
+// primitive rational key. q4 grouping matches the published stream contract,
+// not a globally deduplicated catalogue and not all support incidences.
+Output global_oracle(GlobalGate& gate,const Points& points) {
+  ++gate.oracle_clouds;
+  std::map<Ids,bool> acute;
+  std::map<Coefficients,Candidate> balls;
+  auto payload=[&](const oracle::Ball& ball,std::span<const std::size_t> ids) {
+    auto position=balls.find(ball.coefficients);
+    if (position==balls.end()) {
+      position=balls.emplace(ball.coefficients,census(gate,points,ball,ids)).first;
+      ++gate.oracle_balls;
+    }
+    auto result=position->second;
+    result.arity=static_cast<unsigned>(ids.size());
+    result.support.assign(ids.begin(),ids.end());
+    return result;
+  };
+  Output result;
+  const auto n=points.size();
+  for (std::size_t a=0;a<n;++a) for (std::size_t b=a+1;b<n;++b)
+    for (std::size_t c=b+1;c<n;++c) {
+      const Ids ids{a,b,c};
+      const auto solved=oracle::make(select(points,ids));
+      ++gate.oracle_triangles;
+      acute.emplace(ids,solved.ball.has_value());
+      if (!solved.ball) continue;
+      ++gate.positive_triangles;
+      result.push_back(payload(*solved.ball,ids));
+    }
+  using RootKey=std::tuple<Edge,std::size_t,Coefficients>;
+  std::map<RootKey,std::pair<std::size_t,Candidate>> roots;
+  for (std::size_t a=0;a<n;++a) for (std::size_t b=a+1;b<n;++b)
+    for (std::size_t c=b+1;c<n;++c) for (std::size_t d=c+1;d<n;++d) {
+      const std::array<std::size_t,4> ids{a,b,c,d};
+      const auto solved=oracle::make(select(points,ids));
+      ++gate.oracle_tetrahedra;
+      if (!solved.ball) continue;
+      ++gate.positive_tetrahedra;
+      const auto edge=owner(points,ids);
+      auto seed=n;
+      for (const auto x:ids) {
+        if (x==edge[0] || x==edge[1]) continue;
+        Ids face{edge[0],edge[1],x};
+        std::sort(face.begin(),face.end());
+        if (acute.at(face)) seed=std::min(seed,x);
+      }
+      gate.require(seed<n,"positive tetrahedron has no acute face on its owning edge");
+      auto completion=n;
+      for (const auto id:ids) if (id!=edge[0] && id!=edge[1] && id!=seed) completion=id;
+      RootKey key{edge,seed,solved.ball->coefficients};
+      auto candidate=payload(*solved.ball,ids);
+      const auto position=roots.find(key);
+      if (position==roots.end()) roots.emplace(std::move(key),std::make_pair(completion,std::move(candidate)));
+      else if (completion<position->second.first) position->second={completion,std::move(candidate)};
+    }
+  gate.canonical_groups+=static_cast<u64>(roots.size());
+  for (auto& [key,value]:roots) { static_cast<void>(key);result.push_back(std::move(value.second)); }
+  normalize(result);
+  return result;
+}
+
+Output eligible(const Output& all,unsigned k,std::uint8_t mask) {
+  Output result;
+  for (const auto& value:all) {
+    const auto bit=static_cast<std::uint8_t>(value.arity==3?2:4);
+    if ((mask&bit)!=0 && k+2>value.arity && value.depth<k+2-value.arity) result.push_back(value);
+  }
+  return result;
+}
+
+mhgp8::WspdQ34Options options(mhgp8::WspdFrontMode mode,mhgp8::WspdQ4Backend backend,std::uint8_t mask=6) {
+  mhgp8::WspdQ34Options result;
+  result.front_mode=mode;result.q4_backend=backend;result.requested_lane_mask=mask;
+  result.local.max_depth=0;result.local.node_budget=1;result.local.z_test_budget=0;
+  result.local.leaf_sites=0;
+  return result;
+}
+
+Output check_global(GlobalGate& gate,const Points& points,const Output& all,
+                    unsigned k,unsigned s,mhgp8::WspdQ34Options opts) {
+  const auto index=mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
+  Output actual;
+  const auto result=mhgp8::run_wspd_q34_candidates(index,k,s,opts,[&](const auto& value) {
+    actual.push_back(copy(value));
+  });
+  normalize(actual);
+  const auto expected=eligible(all,k,opts.requested_lane_mask);
+  gate.require(actual==expected,"global q34 stream differs from independent rational support/depth/shell oracle");
+  ++gate.global_calls;
+  if (opts.front_mode==mhgp8::WspdFrontMode::Pure) ++gate.pure_calls;else ++gate.sample_calls;
+  if (opts.q4_backend==mhgp8::WspdQ4Backend::Local28) ++gate.local_calls;else ++gate.window_calls;
+  if (s==8) ++gate.s8_calls;
+  if (s==10) ++gate.s10_calls;
+  if (s==12) ++gate.s12_calls;
+  if (points.size()==1) ++gate.singleton_calls;
+  u64 q3=0,q4=0,shell=0;
+  for (const auto& value:actual) {
+    if (value.arity==3) ++q3;else ++q4;
+    shell+=static_cast<u64>(value.shell.size());
+    gate.max_shell=std::max(gate.max_shell,static_cast<u64>(value.shell.size()));
+  }
+  gate.candidates+=q3+q4;gate.q3+=q3;gate.q4+=q4;
+  const auto& work=result.work;
+  gate.require(work.q3_emitted==q3 && work.q4_emitted==q4 && work.payload_shell_ids==shell,
+               "global output/payload ledger mismatch");
+  gate.require(result.front.total_unordered_pairs==points.size()*(points.size()-1)/2,
+               "global pair metadata mismatch");
+  const std::uint8_t active=static_cast<std::uint8_t>(opts.requested_lane_mask&(k>=3?6:k==2?2:0));
+  gate.require(result.front.active_lane_mask==active,"global active lane mask mismatch");
+  if (active==0) {
+    ++gate.inactive_calls;
+    gate.require(result.front.work==mhgp8::WspdFrontWork{} && work.expanded_pairs==0 &&
+      work.input_rectangles==0 && work.cover_builds==0 && work.peak_edge_buffer_bytes==0 &&
+      work.q3==mhgp8::WspdQ3Work{} && work.local.atlas.cells_created==0 &&
+      work.window.selection.input_sites==0,"inactive global call performed hidden work");
+    return actual;
+  }
+  std::map<Edge,std::uint8_t> residual;
+  const auto front=mhgp8::run_wspd_front(*index,k,s,opts.front_mode,[&](const auto& rectangle) {
+    const auto a=index->spatial_nodes()[rectangle.a_node].range;
+    const auto b=index->spatial_nodes()[rectangle.b_node].range;
+    if (a.size()>1 || b.size()>1) ++gate.fat_rectangles;
+    for (auto ai=a.first;ai<a.last;++ai) for (auto bi=b.first;bi<b.last;++bi) {
+      auto x=index->spatial_order()[ai],y=index->spatial_order()[bi];
+      if (y<x) std::swap(x,y);
+      gate.require(residual.emplace(Edge{x,y},rectangle.lane_mask).second,
+                   "front residual rectangles duplicate an unordered edge");
+    }
+  },opts.requested_lane_mask);
+  ++gate.front_replays;
+  gate.require(result.front.work==front.work,"global wrapper changed the independently replayed front");
+  u64 edges3=0,edges4=0,both=0,covered_sites=0,max_cover=0;
+  for (const auto& [edge,mask]:residual) {
+    edges3+=static_cast<u64>((mask&2)!=0);edges4+=static_cast<u64>((mask&4)!=0);
+    both+=static_cast<u64>(mask==6);
+    if (mask==2) ++gate.q3_only_edges;
+    if (mask==4) ++gate.q4_only_edges;
+    if (mask==6) ++gate.both_edges;
+    if (opts.requested_lane_mask==6 && k>=3) {
+      if (mask==2) ++gate.split_q3_only_edges;
+      if (mask==4) ++gate.split_q4_only_edges;
+    }
+    const Big length=distance_squared(points[edge[0]],points[edge[1]]);
+    u64 size=0;
+    for (const auto z:points) {
+      Big square=0;
+      for (std::size_t axis=0;axis<3;++axis) {
+        const Big delta=2*Big(z[axis])-Big(points[edge[0]][axis])-Big(points[edge[1]][axis]);
+        square+=delta*delta;
+      }
+      size+=static_cast<u64>(square<=4*length);
+    }
+    covered_sites+=size;max_cover=std::max(max_cover,size);
+  }
+  gate.require(work.input_rectangles==front.work.emitted_rectangles && work.expanded_pairs==residual.size() &&
+    work.q3_edges==edges3 && work.q4_edges==edges4 && work.both_edges==both &&
+    work.cover_builds==residual.size() && work.cover_sites==covered_sites && work.max_cover_sites==max_cover,
+    "global edge expansion/shared cover ledger mismatch");
+  gate.require(front.work.residual_pair_mass[0]==0 && front.work.rejected_pair_mass[0]==0 &&
+    front.work.residual_pair_mass[1]==edges3 && front.work.residual_pair_mass[2]==edges4,
+    "global lane ledger includes hidden q2 or loses q3/q4 pairs");
+  for (const auto& value:expected) {
+    const auto edge=owner(points,value.support);
+    const auto position=residual.find(edge);
+    gate.require(position!=residual.end() && (position->second&(value.arity==3?2:4))!=0,
+                 "front rejected the owning edge of a valid positive support");
+  }
+  gate.require(work.q3.edge_queries==edges3 && work.q3.emitted==q3 &&
+    work.q3.census_point_tests==work.q3.census_inside_sites+work.q3.census_outside_sites+work.q3.census_shell_sites,
+    "q3-only census ledger mismatch");
+  gate.require(work.q3.seed_node_visits==work.q3.seed_bound_tests+work.q3.seed_point_tests &&
+    work.q3.seed_bound_tests==work.q3.seed_rejected_nodes+work.q3.seed_split_nodes &&
+    work.q3.seed_rejected_sites+work.q3.seed_point_tests==points.size()*edges3 &&
+    work.q3.acute_seeds==work.q3.owner_rejections+work.q3.seeds &&
+    work.q3.seeds==work.q3.ball_builds && work.q3.seeds==work.q3.depth_rejections+work.q3.emitted,
+    "q3-only seed tree or rejection partition mismatch");
+  if (edges3==0) gate.require(work.q3==mhgp8::WspdQ3Work{},"q4-only mask performed hidden q3 work");
+  if (opts.q4_backend==mhgp8::WspdQ4Backend::Local28) {
+    gate.require(work.window.selection.input_sites==0 && work.window.sweep.window.seed_queries==0 &&
+      work.window.peak_live_buffer_bytes==0 && work.local.sweep.emitted==q4,
+      "local global call performed hidden window work or miscounted outputs");
+  } else {
+    gate.require(work.local.atlas.cells_created==0 && work.local.sweep.seed_queries==0 &&
+      work.local.peak_live_buffer_bytes==0 && work.window.sweep.sweep.emitted==q4,
+      "window global call performed hidden local work or miscounted outputs");
+  }
+  if (edges4==0) gate.require(work.local.atlas.cells_created==0 && work.window.selection.input_sites==0,
+                            "q3-only mask performed hidden q4 preparation");
+  gate.expanded_pairs+=work.expanded_pairs;gate.q3_front_rejections+=front.work.rejected_pair_mass[1];
+  gate.q4_front_rejections+=front.work.rejected_pair_mass[2];gate.xi_tests+=front.work.xi_bound_tests;
+  gate.q3_depth_rejections+=work.q3.depth_rejections;gate.q3_unread_sites+=work.q3.early_unread_sites;
+  return actual;
+}
+
+void run_fixture(GlobalGate& gate,const Points& points,unsigned k,unsigned s=8) {
+  const auto all=global_oracle(gate,points);
+  for (const auto mode:{mhgp8::WspdFrontMode::Pure,mhgp8::WspdFrontMode::MidpointSamples})
+    for (const auto backend:{mhgp8::WspdQ4Backend::Local28,mhgp8::WspdQ4Backend::Window30})
+      static_cast<void>(check_global(gate,points,all,k,s,options(mode,backend)));
+}
+
+void global_fixtures(GlobalGate& gate) {
+  const Points regular{{10,10,10},{16,16,10},{16,10,16},{10,16,16},{13,13,13},{14,12,13}};
+  const auto all=global_oracle(gate,regular);
+  for (const auto k:{1U,2U,3U,5U,10U}) for (const auto s:{8U,10U,12U})
+    for (const auto mask:{std::uint8_t{2},std::uint8_t{4},std::uint8_t{6}})
+      for (const auto backend:{mhgp8::WspdQ4Backend::Local28,mhgp8::WspdQ4Backend::Window30})
+        static_cast<void>(check_global(gate,regular,all,k,s,options(mhgp8::WspdFrontMode::MidpointSamples,backend,mask)));
+  mhgp8::WspdQ34Options defaults;
+  static_cast<void>(check_global(gate,regular,all,5,8,defaults));
+  auto local_variant=defaults;
+  local_variant.local.domain=mhgp8::Q4CenterDomainMode::Disk;
+  local_variant.local.max_depth=2;local_variant.local.node_budget=21;
+  local_variant.local.clip_events=false;
+  static_cast<void>(check_global(gate,regular,all,5,8,local_variant));
+  run_fixture(gate,Points{{1,2,3}},3);
+  run_fixture(gate,Points{{0,0,0},{10,10,10}},5);
+  run_fixture(gate,Points{{0,0,0},{2,0,0},{1,0,0},{4,0,0},{3,0,0}},5);
+  run_fixture(gate,Points{{0,0,0},{4,0,0},{0,4,0},{4,4,0},{2,2,0},{1,3,0}},3);
+  // Two compact distant factors force genuine non-singleton rectangles.
+  run_fixture(gate,Points{{10,10,10},{11,12,10},{12,10,12},{10,12,12},
+                         {60000,60000,60000},{60001,60002,60000},{60002,60000,60002},{60000,60002,60002}},5);
+  const Points w3{{10,10,10},{16,16,10},{16,10,16},{12,14,8}};
+  const Points w4{{10,10,10},{16,16,10},{16,10,16},{10,16,16},{12,12,8},{14,14,8}};
+  auto contact=[&](const Points& points,std::size_t id,unsigned alpha) {
+    const auto za=oracle::difference(points[id],points[0]);
+    const auto bz=oracle::difference(points[1],points[id]);
+    const Big h=oracle::dot(za,bz);
+    const oracle::Vector cross{za[1]*bz[2]-za[2]*bz[1],za[2]*bz[0]-za[0]*bz[2],za[0]*bz[1]-za[1]*bz[0]};
+    gate.require(h>0 && Big(alpha)*h*h==oracle::dot(cross,cross),"strict WSPD contact fixture is not exact");
+    if (alpha==3) ++gate.strict_w3_contacts;else ++gate.strict_w4_contacts;
+  };
+  contact(w3,3,3);contact(w4,4,2);contact(w4,5,2);
+  const auto circle=oracle::make(select(w3,Ids{0,1,2}));
+  const auto sphere=oracle::make(select(w4,std::array<std::size_t,4>{0,1,2,3}));
+  gate.require(circle.ball && circle.ball->power(w3[3]).numerator()==0 && sphere.ball &&
+    sphere.ball->power(w4[4]).numerator()==0 && sphere.ball->power(w4[5]).numerator()==0,
+    "strict front contacts do not lie on the positive support shell");
+  run_fixture(gate,w3,2);run_fixture(gate,w4,3);
+  run_fixture(gate,Points{{10,10,10},{16,16,10},{16,10,16},{13,13,10}},3);
+  for (const auto k:{5U,10U}) {
+    Points q3_points{{900,1000,1000},{1100,1000,1000},{1000,1120,1000}};
+    Points q4_points{{900,1000,1000},{1100,1000,1000},{1000,1120,1040},{1000,1120,960}};
+    for (unsigned j=0;j<k;++j) {
+      const Point3 z{static_cast<std::uint16_t>(1000+j),910,1000};
+      q3_points.push_back(z);q4_points.push_back(z);
+    }
+    const auto diameter=oracle::make(select(q3_points,Edge{0,1}));
+    const auto face=oracle::make(select(q3_points,Ids{0,1,2}));
+    const auto tetra=oracle::make(select(q4_points,std::array<std::size_t,4>{0,1,2,3}));
+    gate.require(diameter.ball && face.ball && tetra.ball,"q2-independence fixtures lost strict positivity");
+    gate.require(census(gate,q3_points,*diameter.ball,Edge{0,1}).depth==k &&
+      census(gate,q3_points,*face.ball,Ids{0,1,2}).depth==0 &&
+      census(gate,q4_points,*tetra.ball,std::array<std::size_t,4>{0,1,2,3}).depth==0,
+      "q2 rejection does not coexist with accepted q3/q4 fixtures");
+    run_fixture(gate,q3_points,k);run_fixture(gate,q4_points,k);gate.independent_q2_cases+=2;
+    q4_points.resize(4);
+    for (unsigned j=0;j<k-1;++j) q4_points.push_back({static_cast<std::uint16_t>(1000+j),1020,1105});
+    const auto rejected_face=oracle::make(select(q4_points,Ids{0,1,2}));
+    gate.require(rejected_face.ball && census(gate,q4_points,*rejected_face.ball,Ids{0,1,2}).depth==k-1 &&
+      census(gate,q4_points,*tetra.ball,std::array<std::size_t,4>{0,1,2,3}).depth==0,
+      "q3 rejection does not coexist with accepted q4 fixture");
+    run_fixture(gate,q4_points,k);++gate.independent_q3_cases;
+  }
+  const Points isolated{{30,30,30},{36,36,30},{30,36,24},{36,30,24},
+                        {30,36,30},{36,30,30},{30,30,24},{32,32,32}};
+  run_fixture(gate,isolated,3);++gate.isolated_cases;
+  const Points extreme{{0,0,0},{65535,65535,0},{65535,0,65535},{0,65535,65535},
+                       {32767,32767,32767},{65535,0,0}};
+  run_fixture(gate,extreme,5);gate.extreme_calls+=4;
+  auto shuffled=w4;
+  std::reverse(shuffled.begin(),shuffled.end());run_fixture(gate,shuffled,3,10);++gate.permutations;
+  for (auto& p:shuffled) p={p[2],p[0],p[1]};
+  run_fixture(gate,shuffled,3,12);++gate.permutations;
+  const auto large=shell30();
+  const auto large_oracle=global_oracle(gate,large);
+  for (const auto backend:{mhgp8::WspdQ4Backend::Local28,mhgp8::WspdQ4Backend::Window30})
+    static_cast<void>(check_global(gate,large,large_oracle,3,8,options(mhgp8::WspdFrontMode::MidpointSamples,backend)));
+}
+
+void global_lifecycle(GlobalGate& gate) {
+  const Points points{{10,10,10},{16,16,10},{16,10,16},{10,16,16},{12,12,8},{14,14,8}};
+  const auto expected=eligible(global_oracle(gate,points),5,6);
+  auto source=points;
+  auto cloud=mhgp8::prepare_cloud(source);
+  auto index=mhgp8::make_q2_cloud_index(cloud);
+  const auto opts=options(mhgp8::WspdFrontMode::MidpointSamples,mhgp8::WspdQ4Backend::Window30);
+  const mhgp8::Q34SeedConsumer discard=[](const auto&) {};
+  auto call=[&](mhgp8::Q2CensusIndexPtr owner_index,unsigned k,unsigned s,mhgp8::WspdQ34Options config,
+                const mhgp8::Q34SeedConsumer& consumer) {
+    return mhgp8::run_wspd_q34_candidates(std::move(owner_index),k,s,config,consumer);
+  };
+  gate.rejects([&] { static_cast<void>(call({},5,8,opts,discard)); },"null index accepted");
+  gate.rejects([&] { static_cast<void>(call(index,5,8,opts,{})); },"empty callback accepted");
+  for (const auto k:{0U,11U}) gate.rejects([&] { static_cast<void>(call(index,k,8,opts,discard)); },"invalid K accepted");
+  gate.rejects([&] { static_cast<void>(call(index,1,0,opts,discard)); },"inactive invalid separation accepted");
+  for (const auto mask:{std::uint8_t{0},std::uint8_t{1},std::uint8_t{3},std::uint8_t{7}}) {
+    auto invalid=opts;invalid.requested_lane_mask=mask;
+    gate.rejects([&] { static_cast<void>(call(index,1,8,invalid,discard)); },"inactive invalid mask accepted");
+  }
+  for (unsigned which=0;which<5;++which) {
+    auto invalid=opts;
+    if (which==0) invalid.front_mode=static_cast<mhgp8::WspdFrontMode>(42);
+    if (which==1) invalid.q4_backend=static_cast<mhgp8::WspdQ4Backend>(42);
+    if (which==2) invalid.local.domain=static_cast<mhgp8::Q4CenterDomainMode>(42);
+    if (which==3) invalid.local.max_depth=45;
+    if (which==4) invalid.local.node_budget=0;
+    gate.rejects([&] { static_cast<void>(call(index,1,8,invalid,discard)); },"inactive invalid option accepted");
+  }
+  bool threw=false;
+  try { static_cast<void>(call(index,5,8,opts,[&](const auto&) { ++gate.callback_failures;throw std::logic_error("callback marker"); })); }
+  catch (const std::logic_error& error) { threw=std::string_view(error.what())=="callback marker"; }
+  gate.require(threw && gate.callback_failures==1,"callback failure was swallowed or callback repeated");
+  for (std::size_t before=0;before<4;++before) {
+    bool failed=false;
+    global_q34_allocation::state={true,before};
+    try { static_cast<void>(call(index,5,8,opts,discard)); }
+    catch (const std::bad_alloc&) { failed=true; }
+    global_q34_allocation::state.armed=false;
+    gate.require(failed,"allocation injection did not reach global pipeline");++gate.allocation_failures;
+  }
+  std::array<std::future<Output>,4> jobs;
+  for (std::size_t i=0;i<jobs.size();++i) jobs[i]=std::async(std::launch::async,[index,opts,i] {
+    auto config=opts;if (i%2==0) config.q4_backend=mhgp8::WspdQ4Backend::Local28;
+    Output result;
+    static_cast<void>(mhgp8::run_wspd_q34_candidates(index,5,8,config,[&](const auto& value) { result.push_back(copy(value)); }));
+    normalize(result);return result;
+  });
+  for (auto& job:jobs) { gate.require(job.get()==expected,"concurrent call changed global output");++gate.parallel_calls; }
+  Output outer,inner;
+  bool entered=false;
+  static_cast<void>(call(index,5,8,opts,[&](const auto& value) {
+    outer.push_back(copy(value));
+    if (!entered) {
+      entered=true;
+      static_cast<void>(call(index,5,8,opts,[&](const auto& nested) { inner.push_back(copy(nested)); }));
+      ++gate.nested_calls;
+    }
+  }));
+  normalize(inner);normalize(outer);
+  gate.require(inner==expected && outer==expected,"nested pipeline call shared mutable state");
+  source.assign(source.size(),Point3{0,0,0});
+  Output output;
+  static_cast<void>(call(index,5,8,opts,[&](const auto& value) {
+    output.push_back(copy(value));
+    if (index) { index.reset();cloud.reset();++gate.owner_reset_calls; }
+  }));
+  normalize(output);
+  gate.require(output==expected && !index && !cloud,"input alias mutation or callback owner reset changed output");
+  ++gate.input_alias_checks;
+}
+
+void parallel_case(GlobalGate& gate,const Points& points,const Output& all,unsigned k,
+                   mhgp8::WspdQ34Options opts,std::size_t worker_count,std::size_t grain) {
+  const auto index=mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
+  const auto expected=eligible(all,k,opts.requested_lane_mask);
+  Output mono_output;
+  const auto mono=mhgp8::run_wspd_q34_candidates(index,k,8,opts,[&](const auto& value) {
+    mono_output.push_back(copy(value));
+  });
+  normalize(mono_output);
+  gate.require(mono_output==expected,"parallel baseline differs from rational global oracle");
+  std::vector<Output> slots(worker_count);
+  std::vector<u64> slot_calls(worker_count),slot_q3(worker_count),slot_q4(worker_count);
+  const mhgp8::WspdQ34ParallelConsumer callback=[&,private_calls=u64{0}](std::size_t slot,const auto& value) mutable {
+    if (slot>=worker_count) throw std::runtime_error("parallel callback received out-of-range slot");
+    ++private_calls;
+    if (private_calls!=slot_calls[slot]+1) throw std::runtime_error("parallel slots share mutable callback target");
+    slot_calls[slot]=private_calls;
+    if (value.arity==3) ++slot_q3[slot];else ++slot_q4[slot];
+    slots[slot].push_back(copy(value));
+  };
+  const auto result=mhgp8::run_wspd_q34_parallel(index,k,8,opts,worker_count,callback,grain);
+  Output output;
+  for (const auto& slot:slots) output.insert(output.end(),slot.begin(),slot.end());
+  normalize(output);
+  gate.require(output==expected,"parallel global stream differs from independent rational support/depth/shell oracle");
+  gate.require(result.pipeline.front.total_unordered_pairs==mono.front.total_unordered_pairs &&
+    result.pipeline.front.active_lane_mask==mono.front.active_lane_mask &&
+    result.pipeline.front.work==mono.front.work && logical_work(result.pipeline.work)==logical_work(mono.work),
+    "parallel global logical counters differ from every mono counter");
+  ++gate.parallel_geometry_checks;
+  ++gate.parallel_pipeline_calls;
+  if (worker_count==1) ++gate.parallel_w1_calls;
+  if (worker_count==2) ++gate.parallel_w2_calls;
+  if (worker_count==4) ++gate.parallel_w4_calls;
+  const auto& p=result.parallel;
+  gate.require(p.requested_workers==worker_count && p.started_workers==result.workers.size() &&
+    p.started_workers==std::min<u64>(worker_count,p.jobs) && p.completed_jobs==p.jobs,
+    "parallel worker/job completion ledger mismatch");
+  if (mono.front.active_lane_mask==0) {
+    ++gate.parallel_empty_calls;
+    gate.require(result.workers.empty() && p.jobs==0 && p.job_storage_bytes==0 &&
+      p.worker_state_bytes==0 && p.callback_storage_bytes==0 && p.edge_buffer_bytes_sum==0,
+      "inactive parallel call prepared hidden engines or jobs");
+    return;
+  }
+  u64 jobs=0,products=0,rectangles=0,pairs=0,q3=0,q4=0,capacity_sum=0,capacity_max=0,used=0;
+  for (std::size_t slot=0;slot<result.workers.size();++slot) {
+    const auto& worker=result.workers[slot];
+    jobs+=worker.jobs;products+=worker.front_products;rectangles+=worker.input_rectangles;
+    pairs+=worker.expanded_pairs;q3+=worker.q3_emitted;q4+=worker.q4_emitted;
+    capacity_sum+=worker.peak_edge_buffer_bytes;
+    capacity_max=std::max(capacity_max,worker.peak_edge_buffer_bytes);
+    used+=static_cast<u64>(worker.jobs!=0);
+    gate.require(worker.q3_emitted==slot_q3[slot] && worker.q4_emitted==slot_q4[slot] &&
+      worker.q3_emitted+worker.q4_emitted==slot_calls[slot],"private worker payload ledger mismatch");
+    ++gate.worker_ledger_checks;gate.callback_copy_checks+=slot_calls[slot];
+  }
+  if (used>1) ++gate.multiworker_calls;
+  gate.require(jobs==p.jobs && products+p.prefix_product_visits==mono.front.work.product_visits &&
+    rectangles==mono.work.input_rectangles && pairs==mono.work.expanded_pairs &&
+    q3==mono.work.q3_emitted && q4==mono.work.q4_emitted &&
+    capacity_sum==p.edge_buffer_bytes_sum && capacity_max==result.pipeline.work.peak_edge_buffer_bytes,
+    "parallel sums of private worker work do not reconstruct the pipeline");
+  gate.require(p.target_jobs==worker_count*grain && p.terminal_jobs<=p.jobs &&
+    (p.started_workers==0 || (p.worker_state_bytes>0 && p.callback_storage_bytes>0)),
+    "parallel orchestration storage/target ledger mismatch");
+}
+
+void parallel_fixtures(GlobalGate& gate) {
+  const std::array<Points,3> fixtures{{
+    {{10,10,10},{16,16,10},{16,10,16},{10,16,16},{12,12,8},{14,14,8}},
+    {{30,30,30},{36,36,30},{30,36,24},{36,30,24},{30,36,30},{36,30,30},{30,30,24},{32,32,32}},
+    {{900,1000,1000},{1100,1000,1000},{1000,1120,1040},{1000,1120,960},
+     {1000,1020,1105},{1001,1020,1105},{1002,1020,1105},{1003,1020,1105}}
+  }};
+  for (std::size_t fixture=0;fixture<fixtures.size();++fixture) {
+    const auto& points=fixtures[fixture];
+    const auto all=global_oracle(gate,points);
+    const unsigned k=fixture==2?5:3;
+    for (const auto backend:{mhgp8::WspdQ4Backend::Local28,mhgp8::WspdQ4Backend::Window30})
+      for (const std::size_t workers:{1U,2U,4U})
+        for (const std::size_t grain:{1U,3U})
+          parallel_case(gate,points,all,k,options(mhgp8::WspdFrontMode::MidpointSamples,backend),workers,grain);
+    for (const auto mask:{std::uint8_t{2},std::uint8_t{4}})
+      parallel_case(gate,points,all,k,options(mhgp8::WspdFrontMode::Pure,mhgp8::WspdQ4Backend::Window30,mask),4,1);
+  }
+  const auto points=shell30();
+  const auto all=global_oracle(gate,points);
+  parallel_case(gate,points,all,3,options(mhgp8::WspdFrontMode::Pure,mhgp8::WspdQ4Backend::Window30),4,3);
+  const Points singleton{{1,2,3}};
+  const Output empty;
+  parallel_case(gate,singleton,empty,5,options(mhgp8::WspdFrontMode::Pure,mhgp8::WspdQ4Backend::Local28),4,1);
+  parallel_case(gate,fixtures[0],empty,1,options(mhgp8::WspdFrontMode::Pure,mhgp8::WspdQ4Backend::Window30),4,1);
+  parallel_case(gate,fixtures[0],empty,2,options(mhgp8::WspdFrontMode::Pure,mhgp8::WspdQ4Backend::Window30,4),2,1);
+}
+
+void parallel_lifecycle(GlobalGate& gate) {
+  const Points points{{10,10,10},{16,16,10},{16,10,16},{10,16,16},{12,12,8},{14,14,8}};
+  auto cloud=mhgp8::prepare_cloud(points);
+  auto index=mhgp8::make_q2_cloud_index(cloud);
+  const auto opts=options(mhgp8::WspdFrontMode::MidpointSamples,mhgp8::WspdQ4Backend::Window30);
+  const mhgp8::WspdQ34ParallelConsumer discard=[](std::size_t,const auto&) {};
+  auto invoke=[&](std::size_t workers,std::size_t grain,unsigned k,const mhgp8::WspdQ34ParallelConsumer& cb) {
+    return mhgp8::run_wspd_q34_parallel(index,k,8,opts,workers,cb,grain);
+  };
+  gate.rejects([&] { static_cast<void>(invoke(0,1,1,discard)); },"inactive zero workers accepted");
+  gate.rejects([&] { static_cast<void>(invoke(1,0,1,discard)); },"inactive zero jobs per worker accepted");
+  gate.rejects([&] { static_cast<void>(invoke(2,1,1,{})); },"inactive empty parallel callback accepted");
+  gate.rejects<std::overflow_error>([&] { static_cast<void>(invoke(std::numeric_limits<std::size_t>::max(),2,1,discard)); },
+                                  "inactive target-job multiplication overflow accepted");
+  std::atomic<u64> active{0},calls{0};
+  std::atomic<bool> first{true};
+  bool caught=false;
+  try {
+    static_cast<void>(invoke(4,3,5,[&](std::size_t,const auto&) {
+      struct Active { std::atomic<u64>& value;explicit Active(std::atomic<u64>& v):value(v) {++value;} ~Active() {--value;} } guard(active);
+      ++calls;
+      if (first.exchange(false)) throw std::logic_error("parallel callback marker");
+      std::this_thread::yield();
+    }));
+  } catch (const std::logic_error& error) { caught=std::string_view(error.what())=="parallel callback marker"; }
+  gate.require(caught && calls.load()>0 && active.load()==0,"parallel callback failure escaped before all callbacks joined");
+  ++gate.parallel_callback_failures;++gate.parallel_join_checks;
+  const auto expected=eligible(global_oracle(gate,points),5,6);
+  const std::weak_ptr<const mhgp8::Q2CensusIndex> weak=index;
+  std::atomic<bool> reset{false};
+  std::array<Output,4> output;
+  const auto result=invoke(4,1,5,[&](std::size_t slot,const auto& value) {
+    output.at(slot).push_back(copy(value));
+    if (!reset.exchange(true)) {index.reset();cloud.reset();}
+  });
+  Output combined;
+  for (const auto& slot:output) combined.insert(combined.end(),slot.begin(),slot.end());
+  normalize(combined);
+  gate.require(combined==expected && reset.load() && !index && !cloud && weak.expired() &&
+    result.parallel.completed_jobs==result.parallel.jobs,
+    "parallel owner reset lost output, retained work or returned before ownership joined");
+  ++gate.parallel_owner_resets;++gate.parallel_join_checks;
+}
+}
+
+int main(int argc,char** argv) {
+  try {
+    if (argc!=2 || std::string_view(argv[1])!="--selftest") throw std::invalid_argument("expected --selftest");
+    GlobalGate gate;
+    global_fixtures(gate);global_lifecycle(gate);parallel_fixtures(gate);parallel_lifecycle(gate);
+    gate.require(gate.q3>0 && gate.q4>0 && gate.max_shell>=30 && gate.fat_rectangles>0 &&
+      gate.q3_front_rejections>0 && gate.q4_front_rejections>0 && gate.xi_tests>0 &&
+      gate.q3_depth_rejections>0 && gate.q3_unread_sites>0 && gate.both_edges>0 &&
+      gate.q3_only_edges>0 && gate.q4_only_edges>0 && gate.split_q3_only_edges>0 &&
+      gate.split_q4_only_edges>0 && gate.multiworker_calls>0 && gate.callback_copy_checks>0,
+      "global q34 gate nonvacuity failed");
+    std::cout<<"{\"schema\":\"mhgp8_wspd_q34_gate_v1\",\"status\":\"PASS\"";
+#define EMIT(field) std::cout<<",\"" #field "\":"<<gate.field
+    EMIT(checks);EMIT(global_calls);EMIT(oracle_clouds);EMIT(oracle_triangles);EMIT(oracle_tetrahedra);
+    EMIT(oracle_balls);EMIT(positive_triangles);EMIT(positive_tetrahedra);EMIT(canonical_groups);EMIT(oracle_sites);
+    EMIT(front_replays);EMIT(expanded_pairs);EMIT(fat_rectangles);EMIT(q3_only_edges);EMIT(q4_only_edges);EMIT(both_edges);
+    EMIT(split_q3_only_edges);EMIT(split_q4_only_edges);
+    EMIT(q3_front_rejections);EMIT(q4_front_rejections);EMIT(xi_tests);EMIT(q3_depth_rejections);EMIT(q3_unread_sites);
+    EMIT(pure_calls);EMIT(sample_calls);EMIT(local_calls);EMIT(window_calls);EMIT(inactive_calls);EMIT(singleton_calls);
+    EMIT(s8_calls);EMIT(s10_calls);EMIT(s12_calls);EMIT(strict_w3_contacts);EMIT(strict_w4_contacts);
+    EMIT(independent_q2_cases);EMIT(independent_q3_cases);EMIT(isolated_cases);EMIT(extreme_calls);
+    EMIT(candidates);EMIT(q3);EMIT(q4);EMIT(max_shell);EMIT(permutations);EMIT(invalid_inputs);
+    EMIT(allocation_failures);EMIT(callback_failures);EMIT(parallel_calls);EMIT(nested_calls);EMIT(owner_reset_calls);EMIT(input_alias_checks);
+    EMIT(parallel_pipeline_calls);EMIT(parallel_w1_calls);EMIT(parallel_w2_calls);EMIT(parallel_w4_calls);
+    EMIT(parallel_geometry_checks);EMIT(worker_ledger_checks);EMIT(callback_copy_checks);EMIT(multiworker_calls);
+    EMIT(parallel_callback_failures);EMIT(parallel_join_checks);EMIT(parallel_owner_resets);EMIT(parallel_empty_calls);
+#undef EMIT
+    std::cout<<"}\n";
+    return 0;
+  } catch (const std::exception& error) {
+    global_q34_allocation::state.armed=false;
+    std::cerr<<"wspd q34 gate: "<<error.what()<<'\n';return 1;
+  }
+}

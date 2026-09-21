@@ -1,0 +1,21 @@
+{
+  "schema": "mhgp8_cpu_adapter_r1_preserved_v1",
+  "status": "worker_build_failed_before_gate_or_benchmark",
+  "archived_sources": {
+    "cpu_probe_session_v8.py": "e402e931da80104af94ef8dce25168160d35ef5c2792b8e18e00106456421dfc",
+    "cpu_probe_worker_v8.py": "41faae4e268b545c110489e24a973824140481885b6bbf4a6167dd64cde1c23b",
+    "cpu_probe_snapshot_v8.py": "4d05cd7c2b70815c97d388b685b173b0beb53a71435cd2f7e39c7bc13944fdc4",
+    "selftest_cpu_probe_v8.py": "251616e0c90a001da93fa06ea96eea387c2ec07177195df85d60605635bfbab8"
+  },
+  "diagnostic_sha256": "d67c6f0a094a2fac83d682250a0365263011b0d77be3b62e376e47d54edf6cc0",
+  "remote_compiler": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "external_capture_read_only": "/tmp/ehgp-v8-g4-20260921.5tT5sjoX/cpu_v8_host/received/output",
+  "external_capture_sha256": {
+    "link_mhgp8_wspd_q34_gate.command.json": "fd8ed13264a96fd67d9fdfc090d88b403c40d52a7a436dedbb031f9ad36b54fa",
+    "link_mhgp8_wspd_q34_probe.command.json": "9b77d47aa091846d25d180cc3bde368f971052b9b44fb71008f11be4ee07377c",
+    "receipt.json": "c6ae45950110e1d27bb046c806d16ce40bc4514d932999c1ce066073a84f67de"
+  },
+  "targeted_shutdown_authority": "root controller receipt, not this subtask",
+  "GCP_mutation_by_preparer": false,
+  "qualification_inherited_by_r2": false
+}

@@ -1,0 +1,25 @@
+{
+  "schema": "mhgp8_cpu_costs_selftest_v1",
+  "status": "passed",
+  "analyser_sha256": "cbac65f02e89ae12afb0f42043cf465a472fc40b0d60354fdabfb551a4e3814a",
+  "frozen_reader_sha256": "5d6f79e06a7a539d656cfa83c7fded4c631bae44efe48b2095eae1396ede554a",
+  "scope": "pure_synthetic_tests_no_cloud_or_R3_results",
+  "commands": [
+    {
+      "command": "python3 -B gcp-migration/read_cpu_probe_costs_v8.py --selftest",
+      "chunk_id": "15096c",
+      "wall_time_seconds": 0.035330814,
+      "exit_code": 0,
+      "original_token_count": 26,
+      "output": "...\n----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nOK\n"
+    },
+    {
+      "command": "python3 -O -B gcp-migration/read_cpu_probe_costs_v8.py --selftest",
+      "chunk_id": "3c40e2",
+      "wall_time_seconds": 0.025939114,
+      "exit_code": 0,
+      "original_token_count": 26,
+      "output": "...\n----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nOK\n"
+    }
+  ]
+}

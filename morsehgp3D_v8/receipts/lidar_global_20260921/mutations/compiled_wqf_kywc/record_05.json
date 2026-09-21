@@ -1,0 +1,22 @@
+{
+  "kind": "q4_gated_by_q3_acceptance_link",
+  "command": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "/workspaces/E-HGP/build/v8_lidar_global_r2_20260921/CMakeFiles/mhgp8_wspd_q34_gate.dir/tests/wspd_q34_gate.cpp.o",
+    "/tmp/mhgp8_wspd_q34_mutants_pwfqxgmz/q4_gated_by_q3_acceptance.o",
+    "/workspaces/E-HGP/build/v8_lidar_global_r2_20260921/libmhgp8_p0.a",
+    "-pthread",
+    "-o",
+    "/tmp/mhgp8_wspd_q34_mutants_pwfqxgmz/q4_gated_by_q3_acceptance"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-21T07:51:35.619625+00:00",
+  "expected_exit_code": 0,
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "stdout_base64": "",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-21T07:51:35.850315+00:00"
+}

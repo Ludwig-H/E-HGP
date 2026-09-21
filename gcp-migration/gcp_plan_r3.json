@@ -1,0 +1,10 @@
+{
+  "schema": "mhgp8_cpu_probe_plan_v1",
+  "cases": [
+    {"file": "data/scan0_n8000.u16le", "n": 1000, "k": 5, "s": 8, "mask": 6, "backend": 28, "workers": 1},
+    {"file": "data/scan0_n8000.u16le", "n": 1000, "k": 5, "s": 8, "mask": 6, "backend": 28, "workers": 48},
+    {"file": "data/scan0_n8000.u16le", "n": 2000, "k": 5, "s": 8, "mask": 6, "backend": 28, "workers": 48},
+    {"file": "data/scan0_n8000.u16le", "n": 4000, "k": 5, "s": 8, "mask": 6, "backend": 28, "workers": 48},
+    {"file": "data/scan0_n8000.u16le", "n": 8000, "k": 5, "s": 8, "mask": 6, "backend": 28, "workers": 48}
+  ]
+}

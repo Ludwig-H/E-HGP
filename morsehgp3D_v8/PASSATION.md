@@ -1,6 +1,6 @@
-# Passation v8 — reprise q3/q4 du20 septembre
+# Passation v8 — raccord global q3/q4 et priorité LiDAR
 
-20 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
+21 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`. Aucun contrat de tour n'est encore acquis.
 Le constructeur a changé le17 septembre, puis de nouveau à cette reprise
@@ -9,6 +9,50 @@ du20 septembre. L'ancien auditeur B a livré les tranches19–21 ; son canal
 qualification de son propre code.
 
 ## À reprendre maintenant
+
+Tranche31,21 septembre : l'utilisateur privilégie maintenant la croissance
+sur les régimes considérés, surtout SemanticKITTI, pas l'attente d'une borne
+universelle. Le [raccord global](docs/Q34_GLOBAL_ET_LIDAR_20260921.md)
+consomme le front multivoie avec un cover partagé par arête, un census q3
+séparé et q4 Local28 ou Window30. `run_wspd_q34_parallel` réutilise les
+jobs Coarse avec moteurs/buffers/callbacks privés, jointure avant retour.
+Chaque arête reste atomique ; les sommes/pics de buffers ne sont pas le RSS.
+92 CTests Release et trois mutants causaux passent. Les144 mesures des
+neuf arêtes LiDAR donnent des sorties identiques28/29/30 à8k/16k/32k/50k,
+sans promouvoir30 comme remplacement universel. Les dix gates instrumentées
+passent aussi. Trois comparaisons rationnel/entier de l'oracle ont ensuite
+été corrigées pour Boost ancien/C++20, puis92 CTests, dix gates instrumentées
+et trois mutants requalifiés dans de nouveaux builds. Moteur inchangé.
+Les sessions CPU48/G4 et leurs arrêts ciblés sont décrits séparément dans
+les [reçus31](receipts/lidar_global_20260921/README.md).
+Les scans sont quantifiés à2cm, échantillons imbriqués par priorité hash ;
+100/200 sont exprimés dans le repère du scan0, sans mélange des scans.
+
+Pilote G4 SPOT terminé et arrêté : cinq commandes, dont1k/W1-W48 à
+géométrie/digest égaux, puis2k/4k/8k/W48. Temps48workers=0,863/8,470/
+59,274/614,744s. À8k, le travail et les digests concordent aussi avec
+la commande localeW4. Census q3 multiplié par10,79/10,08/10,76 aux
+doublements : PAS de croissance sous-quadratique sur cette série.
+Occupation moyenne à8k=3,23 CPU pour48workers ; arêtes/rectangles
+restent atomiques. Réduire le travail ET rendre les grosses tâches
+redistribuables. Les mesures concernent les candidats seuls, pas FULL/GPU.
+
+Le coût GLOBAL mesuré impose maintenant la priorité : à8k/K5/s8/W4,
+2,286M arêtes,780,662M seeds q3 et361,201Md tests ponctuels q3,
+dont99,1% extérieurs, pour93 914 émissions q3. Le tri de coquilles ne
+fait que327 815 comparaisons. Voir le [diagnostic](receipts/lidar_global_20260921/PARTIAL_GLOBAL_8K.md).
+La campagne locale FAILED garde sa ligne8k achevée ;16k interrompu,
+32k non commencé, aucun exposant8→16→32 calculable.
+Implémenter le census q3 par boîtes exactes et, surtout, supprimer des
+blocs de seeds avant construction des clés ; renforcer le rejet WSPD
+h/h_a/h_b sans histogrammes carrés. Les bornes séparables proposées en
+fin de note31 restent à porter/tester. Ne pas optimiser seulement neuf
+arêtes favorables ni ajouter une
+nouvelle variante de file q2. Catalogue/intérieurs, reconstruction FULL
+et backend GPU restent distincts. L'index de couches proposé en30 reste
+une piste, plus un préalable obligatoire à ce raccord.
+
+### Tranche30 précédente close àf07fbd8c
 
 La tranche30 ajoute `run_q4_window_edge_candidates` et son entrée par
 seed sur le noyau29 : [preuve et architecture](docs/Q4_FENETRE_DE_FAIBLE_PROFONDEUR_20260920.md).
