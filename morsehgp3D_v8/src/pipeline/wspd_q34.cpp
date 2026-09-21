@@ -4,6 +4,7 @@
 #include "parallel/work_reduction.hpp"
 
 #include <algorithm>
+#include <optional>
 #include <array>
 #include <atomic>
 #include <limits>
@@ -19,6 +20,12 @@ namespace {
 // compile-time size checks prevent silently omitting a newly added counter.
 #define MHGP8_ADD(field) counter_add(a.field, b.field)
 #define MHGP8_MAX(field) a.field = std::max(a.field, b.field)
+
+void merge(WspdQ3AtlasWork& a, const WspdQ3AtlasWork& b) {
+  static_assert(sizeof(WspdQ3AtlasWork) == 5 * sizeof(u64));
+  MHGP8_ADD(edges_with_atlas); MHGP8_ADD(root_lane_skips); MHGP8_ADD(locations);
+  MHGP8_ADD(outside_domain); MHGP8_ADD(rejections);
+}
 
 void merge(Q34EdgeCoverWork& a, const Q34EdgeCoverWork& b) {
   static_assert(sizeof(Q34EdgeCoverWork) == 10 * sizeof(u64));
@@ -247,7 +254,7 @@ void merge(Q4SeedCellWork& a, const Q4SeedCellWork& b) {
 
 void merge(WspdQ34Work& a, const WspdQ34Work& b) {
   static_assert(sizeof(WspdQ34Work) == 13 * sizeof(u64) + sizeof(Q34EdgeCoverWork) +
-      sizeof(WspdQ3Work) + sizeof(Q4LocalEdgeWork) + sizeof(Q4WindowEdgeWork) + sizeof(WspdQ34WitnessWork) + sizeof(Q3BallCensusWork) + sizeof(Q4SeedCellWork));
+      sizeof(WspdQ3Work) + sizeof(Q4LocalEdgeWork) + sizeof(Q4WindowEdgeWork) + sizeof(WspdQ34WitnessWork) + sizeof(Q3BallCensusWork) + sizeof(Q4SeedCellWork) + sizeof(WspdQ3AtlasWork));
   MHGP8_ADD(input_rectangles); MHGP8_ADD(expanded_pairs); MHGP8_ADD(q3_edges);
   MHGP8_ADD(q4_edges); MHGP8_ADD(both_edges); MHGP8_ADD(cover_builds);
   MHGP8_ADD(cover_sites); MHGP8_MAX(max_cover_sites); MHGP8_MAX(peak_cover_bytes);
@@ -258,6 +265,7 @@ void merge(WspdQ34Work& a, const WspdQ34Work& b) {
   merge(a.witness, b.witness);
   merge(a.q3_blocks, b.q3_blocks);
   merge(a.q4_seed_cells, b.q4_seed_cells);
+  merge(a.q3_atlas, b.q3_atlas);
 }
 
 #undef MHGP8_ADD
@@ -450,14 +458,26 @@ class Engine {
     work.max_cover_sites = std::max(work.max_cover_sites, static_cast<u64>(cover->site_count()));
     merge(work.cover, cover->work());
     observe(cover);
+    // Explicit consultation: one atlas built here serves the q3 seed
+    // certificates and, unchanged, the q4 sweep of the same edge.
+    Q4LocalAtlasPtr atlas;
+    if (q3 && q4 && options_.q3_atlas_consultation && k_ >= 3 &&
+        options_.q4_backend == WspdQ4Backend::Local28) {
+      atlas = Q4LocalAtlas::make(cover, k_, options_.local);
+      counter_add(work.q3_atlas.edges_with_atlas);
+    }
     if (q3) {
-      q3_edge(cover);
+      const auto root = atlas ? atlas->root_certified_inside_count() : std::nullopt;
+      if (root && *root >= k_ - 1) counter_add(work.q3_atlas.root_lane_skips);
+      else q3_edge(cover, atlas.get());
       observe(cover);
     }
     if (q4) {
       if (options_.q4_backend == WspdQ4Backend::Local28) {
-        const auto local = run_q4_local_edge_candidates(cover, k_, options_.local, sink_,
-            options_.q4_seed_cells, work.q4_seed_cells);
+        const auto local = atlas
+            ? run_q4_local_edge_candidates(atlas, sink_, options_.q4_seed_cells, work.q4_seed_cells)
+            : run_q4_local_edge_candidates(cover, k_, options_.local, sink_,
+                  options_.q4_seed_cells, work.q4_seed_cells);
         merge(work.local, local);
         observe(cover, local.peak_live_buffer_bytes);
       } else {
@@ -468,10 +488,23 @@ class Engine {
     }
   }
 
-  void q3_seed(const Q34EdgeCoverPtr& cover, std::array<std::size_t, 3> ids) {
+  void q3_seed(const Q34EdgeCoverPtr& cover, std::array<std::size_t, 3> ids, const Q4LocalAtlas* atlas) {
     auto& q3 = work.q3;
     const auto points = index_->cloud().points();
     const auto order = index_->spatial_order();
+    if (atlas) {
+      // The certified count is a lower bound of the strict interior of the
+      // seed ball (a, b, x): reaching K-1 rejects it exactly, before any
+      // ball construction or census. No credit is transferred otherwise.
+      counter_add(work.q3_atlas.locations);
+      const auto certified = atlas->certified_inside_count(atlas->geometry()->q3_center(ids[2]));
+      if (!certified) counter_add(work.q3_atlas.outside_domain);
+      else if (*certified >= k_ - 1) {
+        counter_add(work.q3_atlas.rejections);
+        counter_add(q3.depth_rejections);
+        return;
+      }
+    }
     counter_add(q3.ball_builds);
     const auto ball = ExactBall::make_q3({points[ids[0]], points[ids[1]], points[ids[2]]});
     if (!ball) throw std::logic_error("mhgp8 q3 owned acute seed lacks its exact ball");
@@ -517,7 +550,7 @@ class Engine {
         std::numeric_limits<std::size_t>::max()}, *ball, depth, shell_, {}});
   }
 
-  void q3_edge(const Q34EdgeCoverPtr& cover) {
+  void q3_edge(const Q34EdgeCoverPtr& cover, const Q4LocalAtlas* atlas) {
     auto& q3 = work.q3;
     counter_add(q3.edge_queries);
     const auto nodes = index_->spatial_nodes();
@@ -550,7 +583,7 @@ class Engine {
               counter_add(q3.owner_rejections);
             else {
               counter_add(q3.seeds);
-              q3_seed(cover, {ids[0], ids[1], id});
+              q3_seed(cover, {ids[0], ids[1], id}, atlas);
             }
           }
         }

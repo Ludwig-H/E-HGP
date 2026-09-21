@@ -61,6 +61,8 @@ Q4LocalGeometry::Q4LocalGeometry(Q34EdgeCoverPtr cover,Q4CenterDomainMode mode)
   const i64 h=std::abs(v_[main_axis]),sign=v_[main_axis]>0?1:-1;
   a_basis_[axis_i_]=h;a_basis_[main_axis]=-sign*v_[axis_i_];
   b_basis_[axis_j_]=h;b_basis_[main_axis]=-sign*v_[axis_j_];
+  // Gram of the two basis vectors (two nonzero coordinates <=M each): <2^33.
+  gram_aa_=dot(a_basis_,a_basis_);gram_ab_=dot(a_basis_,b_basis_);gram_bb_=dot(b_basis_,b_basis_);
   if (mode==Q4CenterDomainMode::Positive) {
     domain_=Q4PositiveDomain::make(cover_);
     work_.domain=domain_->work();
@@ -110,6 +112,28 @@ Q4LocalForm Q4LocalGeometry::form(std::size_t id) const {
   // u16, M=65535: |w_i|<=2M, basis coordinates <=M and only two nonzero
   // coordinates per basis vector. |c|<=15M^2, |x|,|y|<=8M^2 fit i64.
   return {dot(w,w)-diameter_squared_,-2*dot(w,a_basis_),-2*dot(w,b_basis_)};
+}
+
+Q4LocalCenter Q4LocalGeometry::q3_center(std::size_t x_id) const {
+  // In unscaled coordinates u the center line of x is c0+fx*u1+fy*u2=0 and
+  // the real offset is t=u1*A+u2*B with Gram (aa,ab,bb). |t|^2 is minimal on
+  // the line where its gradient is parallel to (fx,fy): the second linear
+  // form u1*(aa*fy-ab*fx)+u2*(ab*fy-bb*fx)=0. Cramer on the two lines gives
+  // u1=-c0*q/det, u2=c0*p/det with p=aa*fy-ab*fx, q=ab*fy-bb*fx and
+  // det=fx*q-fy*p=-(bb*fx^2-2*ab*fx*fy+aa*fy^2), a negative definite form
+  // of (fx,fy) since the basis is independent: det==0 iff fx==fy==0, i.e.
+  // x on the line ab, never a strictly acute seed. Sizes (M=65535):
+  // |c0|<15M^2<2^36, |fx|,|fy|<=8M^2<2^35, Gram<2^33 -> |p|,|q|<2^69,
+  // |det|<2^105, |numerators|<2^105: every product fits i128, and the cell
+  // test scale*|x|<2^125, 2*scale*den<2^126 stays below 2^127.
+  const auto f=form(x_id);
+  const i128 p=static_cast<i128>(gram_aa_)*f.y-static_cast<i128>(gram_ab_)*f.x;
+  const i128 q=static_cast<i128>(gram_ab_)*f.y-static_cast<i128>(gram_bb_)*f.x;
+  const i128 det=static_cast<i128>(f.x)*q-static_cast<i128>(f.y)*p;
+  if (det==0) throw std::logic_error("mhgp8 q3 center requested for a site on the edge line");
+  Q4LocalCenter center{-static_cast<i128>(f.constant)*q,static_cast<i128>(f.constant)*p,det};
+  if (center.den<0) {center.x=-center.x;center.y=-center.y;center.den=-center.den;}
+  return center;
 }
 
 Q4LocalBounds Q4LocalGeometry::bounds(Q4LocalForm f,Q4LocalCell cell) const {

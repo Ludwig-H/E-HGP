@@ -92,5 +92,11 @@ struct Q4SeedCellWork {
     Q34EdgeCoverPtr cover, std::size_t kmax, Q4LocalOptions local_options,
     const Q34SeedConsumer& consumer, Q4SeedCellOptions seed_options,
     Q4SeedCellWork& work);
+// Same traversal from an atlas already built for this edge (shared with the
+// q3 seed certificates of the same edge); Individual delegates to the local
+// atlas-based entry. Work reports the supplied atlas and its geometry.
+[[nodiscard]] Q4LocalEdgeWork run_q4_local_edge_candidates(
+    Q4LocalAtlasPtr atlas, const Q34SeedConsumer& consumer,
+    Q4SeedCellOptions seed_options, Q4SeedCellWork& work);
 
 }  // namespace mhgp8

@@ -22,6 +22,9 @@ constexpr std::array q3_fields{
  F(WspdQ3Work,census_outside_sites),F(WspdQ3Work,census_shell_sites),F(WspdQ3Work,depth_rejections),
  F(WspdQ3Work,early_unread_sites),F(WspdQ3Work,shell_sort_comparisons),F(WspdQ3Work,shell_ids),
  F(WspdQ3Work,emitted),F(WspdQ3Work,peak_shell_bytes)};
+constexpr std::array q3_atlas_fields{
+ F(WspdQ3AtlasWork,edges_with_atlas),F(WspdQ3AtlasWork,root_lane_skips),F(WspdQ3AtlasWork,locations),
+ F(WspdQ3AtlasWork,outside_domain),F(WspdQ3AtlasWork,rejections)};
 constexpr std::array global_front_fields{
  F(WspdFrontWork,product_visits),F(WspdFrontWork,diagonal_splits),F(WspdFrontWork,diagonal_leaves),
  F(WspdFrontWork,disjoint_splits),F(WspdFrontWork,separation_tests),F(WspdFrontWork,witness_searches),
@@ -95,8 +98,9 @@ constexpr std::array seed_cell_fields{
 static_assert(sizeof(WspdQ34ParallelWork)==parallel_fields.size()*sizeof(u64));
 static_assert(sizeof(WspdQ34WorkerWork)==worker_fields.size()*sizeof(u64));
 static_assert(sizeof(WspdQ3Work)==q3_fields.size()*sizeof(u64));
+static_assert(sizeof(WspdQ3AtlasWork)==q3_atlas_fields.size()*sizeof(u64));
 static_assert(sizeof(WspdQ34Work)==global_fields.size()*sizeof(u64)+sizeof(Q34EdgeCoverWork)+
- sizeof(WspdQ3Work)+sizeof(Q4LocalEdgeWork)+sizeof(Q4WindowEdgeWork)+sizeof(WspdQ34WitnessWork)+sizeof(Q3BallCensusWork)+sizeof(Q4SeedCellWork));
+ sizeof(WspdQ3Work)+sizeof(Q4LocalEdgeWork)+sizeof(Q4WindowEdgeWork)+sizeof(WspdQ34WitnessWork)+sizeof(Q3BallCensusWork)+sizeof(Q4SeedCellWork)+sizeof(WspdQ3AtlasWork));
 static_assert(sizeof(Q4SeedCellWork)==seed_cell_fields.size()*sizeof(u64));
 static_assert(sizeof(Q3BallCensusWork)==q3_block_fields.size()*sizeof(u64));
 static_assert(sizeof(Q34WitnessSearchWork)==witness_search_fields.size()*sizeof(u64));
@@ -185,10 +189,11 @@ void dump_global_work(const WspdQ34Work& work,unsigned schema_version) {
   std::cout<<",\"q3_blocks\":";audit_dump(work.q3_blocks,q3_block_fields);
  }
  if(schema_version>=4) {std::cout<<",\"q4_seed_cells\":";audit_dump(work.q4_seed_cells,seed_cell_fields);}
+ if(schema_version>=5) {std::cout<<",\"q3_atlas\":";audit_dump(work.q3_atlas,q3_atlas_fields);}
  std::cout<<'}';
 }
 int global_run(int argc,char** argv) {
- require(argc>=8 && argc<=15,"usage: mhgp8_wspd_q34_probe file n K s mask backend workers [samples|pure] [digest|records] [disabled|pair|rectangle-pair] [scalar|boxes] [legacy|exclude|affine] [individual|live|joined] [block_sites]");
+ require(argc>=8 && argc<=16,"usage: mhgp8_wspd_q34_probe file n K s mask backend workers [samples|pure] [digest|records] [disabled|pair|rectangle-pair] [scalar|boxes] [legacy|exclude|affine] [individual|live|joined] [block_sites] [atlas|no-atlas]");
  const auto n=number(argv[2]),k=number(argv[3]),s=number(argv[4]),mask=number(argv[5]);
  const auto backend=number(argv[6]),workers=number(argv[7]);
  const std::string_view mode=argc>=9?argv[8]:"samples",output_mode=argc>=10?argv[9]:"digest";
@@ -197,11 +202,13 @@ int global_run(int argc,char** argv) {
  const std::string_view bounds_mode=argc>=13?argv[12]:"legacy";
  const std::string_view seed_mode=argc>=14?argv[13]:"individual";
  const auto block_sites=argc>=15?number(argv[14]):64;
- const unsigned schema_version=argc>=14?4:argc>=13?3:argc>=11?2:1;
+ const std::string_view atlas_mode=argc>=16?argv[15]:"no-atlas";
+ const unsigned schema_version=argc>=16?5:argc>=14?4:argc>=13?3:argc>=11?2:1;
  require(n>0 && k>=1 && k<=10 && s>0 && s<=std::numeric_limits<unsigned>::max() &&
   (mask==2 || mask==4 || mask==6) && (backend==28 || backend==30) && workers>0 &&
   (mode=="samples" || mode=="pure") && (output_mode=="digest" || output_mode=="records"),"invalid global probe options");
  require(witness_mode=="disabled" || witness_mode=="pair" || witness_mode=="rectangle-pair","invalid witness mode");
+ require(atlas_mode=="atlas" || atlas_mode=="no-atlas","invalid q3 atlas consultation mode");
  require(census_mode=="scalar" || census_mode=="boxes","invalid q3 census mode");
  require(bounds_mode=="legacy" || bounds_mode=="exclude" || bounds_mode=="affine","invalid witness bounds mode");
  require((seed_mode=="individual" || seed_mode=="live" || seed_mode=="joined") && block_sites>0 &&
@@ -220,6 +227,7 @@ int global_run(int argc,char** argv) {
  options.witness_mode=witness_mode=="disabled"?WspdQ34WitnessMode::Disabled:
   witness_mode=="pair"?WspdQ34WitnessMode::Pair:WspdQ34WitnessMode::RectanglePair;
  options.q3_census_mode=census_mode=="scalar"?WspdQ3CensusMode::ScalarCover:WspdQ3CensusMode::GlobalBoxes;
+ options.q3_atlas_consultation=atlas_mode=="atlas";
  options.witness_bounds_mode=bounds_mode=="legacy"?Q34WitnessBoundsMode::Legacy:
   bounds_mode=="exclude"?Q34WitnessBoundsMode::Exclusion:Q34WitnessBoundsMode::Affine;
  options.q4_seed_cells={seed_mode=="individual"?Q4SeedCellMode::Individual:
@@ -255,6 +263,7 @@ int global_run(int argc,char** argv) {
  if(argc>=11)std::cout<<",\"witness_mode\":\""<<witness_mode<<"\",\"q3_census_mode\":\""<<census_mode<<'"';
  if(argc>=13)std::cout<<",\"witness_bounds_mode\":\""<<bounds_mode<<'"';
  if(argc>=14)std::cout<<",\"q4_seed_mode\":\""<<seed_mode<<"\",\"q4_seed_block_size\":"<<block_sites;
+ if(argc>=16)std::cout<<",\"q3_atlas_mode\":\""<<atlas_mode<<'"';
  std::cout<<",\"work\":";dump_global_work(result.work,schema_version);
  std::cout<<",\"parallel\":";audit_dump(parallel.parallel,parallel_fields);
  std::cout<<",\"workers_work\":[";

@@ -2,6 +2,7 @@
 
 #include "lanes/q4_local_partition.hpp"
 #include "lanes/q34_seed.hpp"
+#include <optional>
 
 namespace mhgp8 {
 
@@ -47,6 +48,16 @@ class Q4LocalAtlas final {
   [[nodiscard]] std::size_t kmax() const noexcept;
   [[nodiscard]] const Q4LocalOptions& options() const noexcept;
   [[nodiscard]] std::size_t retained_bytes() const;
+  // Certified lower bound of depth_cover(t) for every center t of the CLOSED
+  // cell that contains the point: the exact inside count of that cell's
+  // fragment (never saturated, sites of the cover only). Descends the
+  // built quadtree once (no fragment is revisited); a point in an Outside
+  // cell or outside the root has no certificate (nullopt). Valid for ANY
+  // ball through a and b whose center is that point, q3 seeds included,
+  // because the cover contains every site inside such a ball.
+  [[nodiscard]] std::optional<std::size_t> certified_inside_count(const Q4LocalCenter& center) const;
+  // Same certificate for the whole root cell (every center of the domain).
+  [[nodiscard]] std::optional<std::size_t> root_certified_inside_count() const noexcept;
  private:
   struct Impl;
   explicit Q4LocalAtlas(std::unique_ptr<Impl> impl);
@@ -93,5 +104,10 @@ struct Q4LocalEdgeWork {
 [[nodiscard]] Q4LocalEdgeWork run_q4_local_edge_candidates(
     Q34EdgeCoverPtr cover, std::size_t kmax, Q4LocalOptions options,
     const Q34SeedConsumer& consumer);
+// Same stream from an atlas already built for this edge (its cover, kmax and
+// options): lets the caller share one atlas between the q3 seed certificates
+// and the q4 sweep. Work reports the atlas/geometry of the supplied atlas.
+[[nodiscard]] Q4LocalEdgeWork run_q4_local_edge_candidates(
+    Q4LocalAtlasPtr atlas, const Q34SeedConsumer& consumer);
 
 }  // namespace mhgp8

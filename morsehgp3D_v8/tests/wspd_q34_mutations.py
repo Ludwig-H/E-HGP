@@ -26,7 +26,7 @@ sys.path.insert(0, str(ROOT / "morsehgp3D_v8/bench"))
 from run_p0_matrix import digest, invoke, on_signal, parse_result, require, utc_stamp, write_json  # noqa: E402
 from run_q34_seed_checks import environment_record  # noqa: E402
 
-SCHEMA = "mhgp8_wspd_q34_compiled_mutants_v1"
+SCHEMA = "mhgp8_wspd_q34_compiled_mutants_v2"
 SCOPE = "three_causal_product_mutations_one_rational_global_gate"
 GATE = "wspd_q34"
 SOURCE = "morsehgp3D_v8/src/pipeline/wspd_q34.cpp"
@@ -36,14 +36,23 @@ MUTATIONS = (
         ("if (power < 0) {", "if (power <= 0) {"),
     )),
     ("q4_gated_by_q3_acceptance", (
-        ("    observe(cover);\n    if (q3) {",
-         "    observe(cover);\n    const auto q3_before = work.q3.emitted;\n    if (q3) {"),
+        ("    if (q3) {\n      const auto root = atlas",
+         "    const auto q3_before = work.q3.emitted;\n    if (q3) {\n      const auto root = atlas"),
         ("    if (q4) {", "    if (q4 && (!q3 || work.q3.emitted > q3_before)) {"),
     )),
     ("q4_gated_by_q3_front_mask", (
         ("    if (q4) {", "    if (q4 && (options_.requested_lane_mask != 6 || q3)) {"),
     )),
+    # The shared atlas certifies >= K-1 cover sites strictly inside every ball
+    # of a closed cell; rejecting q3 seeds one site earlier loses accepted
+    # balls, which the boxed/Local28 indexed configurations detect against the
+    # rational oracle (their failure message is the indexed one below).
+    ("q3_atlas_rejects_at_k_minus_2", (
+        ("      else if (*certified >= k_ - 1) {", "      else if (*certified >= k_ - 2) {"),
+    )),
 )
+INDEXED_FAILURE = "wspd q34 gate: indexed filter lost support/depth/key/complete shell\n"
+EXPECTED_FAILURE = {"q3_atlas_rejects_at_k_minus_2": INDEXED_FAILURE}
 
 
 def mutation_plan():
@@ -140,7 +149,7 @@ def run(args):
             if number == 0:
                 baseline(record["stdout"])
             elif expected == 1:
-                require(record["stderr"] == FAILURE,
+                require(record["stderr"] == EXPECTED_FAILURE.get(kind[:-len("_oracle")], FAILURE),
                         "mutant did not fail the geometric global oracle comparison: " + kind)
             record["status"] = "passed"
         finally:
@@ -204,7 +213,7 @@ def read(capture, check_live=False):
             manifest["mutations"] == mutation_plan() and manifest["causal_failure"] == FAILURE,
             "mutation capture not successful or plan changed")
     require(completion["manifest_sha256"] == digest(capture / "MANIFEST.json") and
-            completion["killed"] == [item[0] for item in MUTATIONS] and len(completion["records"]) == 10,
+            completion["killed"] == [item[0] for item in MUTATIONS] and len(completion["records"]) == 1 + 3 * len(MUTATIONS),
             "mutation plan, manifest or record count differs")
     sources, artifacts = inputs(Path(manifest["build"]))
     require(set(manifest["source_sha256"]) == sources and set(manifest["artifact_sha256"]) == artifacts,
@@ -219,7 +228,7 @@ def read(capture, check_live=False):
                 digest(Path(__file__)) == manifest["helper_sha256"] and
                 digest(Path(manifest["compiler"])) == manifest["compiler_sha256"],
                 "live mutation inputs differ")
-    require(len(completion["evidence"]) == 3, "missing compiled evidence")
+    require(len(completion["evidence"]) == len(MUTATIONS), "missing compiled evidence")
     for item, mutation in zip(completion["evidence"], MUTATIONS, strict=True):
         name, replacements = mutation
         require(item["name"] == name, "mutant evidence order differs")
@@ -257,9 +266,10 @@ def read(capture, check_live=False):
         if number == 0:
             baseline(record["stdout"])
         elif expected == 1:
-            require(record["stderr"] == FAILURE, "noncausal mutant failure")
-    return dict(status="passed", path=str(capture), baseline_gates=1, compiled_product_mutants=3,
-                command_count=10, source_count=len(sources), live_checked=check_live,
+            mutant = kind[:-len("_oracle")]
+            require(record["stderr"] == EXPECTED_FAILURE.get(mutant, FAILURE), "noncausal mutant failure")
+    return dict(status="passed", path=str(capture), baseline_gates=1, compiled_product_mutants=len(MUTATIONS),
+                command_count=1 + 3 * len(MUTATIONS), source_count=len(sources), live_checked=check_live,
                 full_contract_qualified=False, gcp_used=False)
 
 

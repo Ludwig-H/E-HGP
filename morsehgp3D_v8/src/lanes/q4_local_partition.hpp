@@ -25,6 +25,10 @@ struct Q4LocalCell {
   bool operator==(const Q4LocalCell&) const = default;
 };
 struct Q4LocalForm { i64 constant{}, x{}, y{}; };
+// Exact rational point of the center plane in UNSCALED cell coordinates
+// (alpha, beta) = (x, y) / den with den > 0: the cell [left, right] contains
+// it iff left * den <= scale * x <= right * den (same for beta).
+struct Q4LocalCenter { i128 x{}, y{}, den{}; };
 struct Q4LocalBounds { i128 minimum{}, maximum{}; };
 struct Q4LocalGeometryQueryWork {
   u64 disk_tests{}, facet_tests{};
@@ -66,6 +70,12 @@ class Q4LocalGeometry final {
   [[nodiscard]] const Q34EdgeCoverPtr& cover() const noexcept { return cover_; }
   [[nodiscard]] std::span<const std::size_t> cover_nodes() const noexcept { return cover_nodes_; }
   [[nodiscard]] Q4LocalForm form(std::size_t original_id) const;
+  // Circumcenter of the q3 seed (a, b, x): the point of x's center line that
+  // minimizes the real radius, i.e. the projection of the midpoint onto the
+  // line in the real metric of the (non-orthogonal) cell basis. Exact in
+  // i128 (|x|,|y| < 2^105, den < 2^105, proof in the .cpp). Requires x off
+  // the line ab (any strictly acute seed): a zero determinant throws.
+  [[nodiscard]] Q4LocalCenter q3_center(std::size_t x_id) const;
   // Bounds of scale*L on the CLOSED cell, regardless of emission ownership.
   [[nodiscard]] Q4LocalBounds bounds(Q4LocalForm form, Q4LocalCell cell) const;
   // Bounds of scale*L on INDEX-node-box x CLOSED cell. Validates the node
@@ -89,7 +99,7 @@ class Q4LocalGeometry final {
   Q34EdgeCoverPtr cover_;
   Q4PositiveDomainPtr domain_;
   Vec v_{}, a_basis_{}, b_basis_{}, midpoint_twice_{};
-  i64 diameter_squared_{};
+  i64 diameter_squared_{}, gram_aa_{}, gram_ab_{}, gram_bb_{};
   std::size_t axis_i_{}, axis_j_{};
   std::array<Facet,9> facets_{};
   std::size_t facet_count_{};

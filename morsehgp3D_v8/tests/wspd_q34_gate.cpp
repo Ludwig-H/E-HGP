@@ -63,6 +63,7 @@ struct GlobalGate : Gate {
   u64 seed_cell_calls{},seed_cell_live_calls{},seed_cell_joined_calls{},seed_cell_work_checks{},seed_cell_parallel_calls{};
   u64 seed_cell_inactive_calls{},seed_cell_invalid_inputs{},seed_cell_callback_failures{},seed_cell_allocation_failures{};
   u64 seed_cell_shared_calls{},seed_cell_owner_resets{},seed_cell_parallel_failures{};
+  u64 atlas_rejections{},atlas_lane_skips{},atlas_locations{},atlas_outside{};
 };
 
 // Every component is a standard-layout aggregate containing only u64 fields
@@ -80,14 +81,14 @@ WORDS(Q4LocalAtlasWork,38);WORDS(Q4LocalSweepWork,41);WORDS(Q4LocalEdgeWork,117)
 WORDS(Q4ShallowSetWork,25);WORDS(Q4FamilyWork,13);WORDS(Q4ShallowSweepWork,32);
 WORDS(Q4WindowSelectionWork,25);WORDS(Q4WindowSweepWork,57);WORDS(Q4WindowEdgeWork,116);
 WORDS(Q34WitnessSearchWork,25);WORDS(Q34WitnessBoundsWork,12);WORDS(WspdQ34WitnessWork,82);
-WORDS(Q3BallCensusWork,26);WORDS(Q4SeedCellWork,37);WORDS(WspdQ34Work,424);
+WORDS(Q3BallCensusWork,26);WORDS(Q4SeedCellWork,37);WORDS(WspdQ3AtlasWork,5);WORDS(WspdQ34Work,429);
 #undef WORDS
-std::array<u64,424> logical_work(mhgp8::WspdQ34Work work) {
+std::array<u64,429> logical_work(mhgp8::WspdQ34Work work) {
   // These two capacity peaks depend on the private buffer's previous jobs;
   // they are paid separately, not erased from the published result.
   work.q3.peak_shell_bytes=0;
   work.peak_edge_buffer_bytes=0;
-  return std::bit_cast<std::array<u64,424>>(work);
+  return std::bit_cast<std::array<u64,429>>(work);
 }
 
 // Enumerate every small-cloud support once. An independent Gaussian rational
@@ -614,7 +615,17 @@ void indexed_fixtures(GlobalGate& gate) {
           config.q3_census_mode=census_mode;
           // Exercise the real Local28 defaults too, not only the tiny atlas
           // used by the old combinatorial gate for fast exhaustive checks.
-          if (f==0) config.local=mhgp8::Q4LocalOptions{};
+          // Boxed census on Local28 also consults the shared q4 atlas for the
+          // q3 seeds: the oracle comparison below must stay bit-identical. The
+          // consultation runs with the real atlas options so that certified
+          // cells actually exist (the tiny root-only atlas certifies nothing).
+          config.q3_atlas_consultation=census_mode==mhgp8::WspdQ3CensusMode::GlobalBoxes &&
+            backend==mhgp8::WspdQ4Backend::Local28;
+          if (f==0 || config.q3_atlas_consultation) config.local=mhgp8::Q4LocalOptions{};
+          // Small fixtures never exceed the default leaf population (32 active
+          // sites), so the atlas would keep its single root cell: force real
+          // refinement so that certified sub-cells exist to be consulted.
+          if (config.q3_atlas_consultation) config.local.leaf_sites=2;
           Output actual;
           const auto result=mhgp8::run_wspd_q34_candidates(index,k,8+2*(k%3),config,
               [&](const auto& value) {actual.push_back(copy(value));});
@@ -632,11 +643,19 @@ void indexed_fixtures(GlobalGate& gate) {
           ++gate.indexed_calls;
           if (census_mode==mhgp8::WspdQ3CensusMode::GlobalBoxes) {
             ++gate.boxed_calls;
+            const auto& atlas=w.q3_atlas;
             gate.require(w.q3.census_point_tests==0 && w.q3.census_range_visits==0 &&
-              w.q3_blocks.queries==w.q3.seeds && w.q3_blocks.accepted_queries==w.q3.emitted &&
-              w.q3_blocks.rejected_queries==w.q3.depth_rejections && w.q3_blocks.shell_ids==w.q3.shell_ids,
+              w.q3_blocks.queries+atlas.rejections==w.q3.seeds && w.q3_blocks.accepted_queries==w.q3.emitted &&
+              w.q3_blocks.rejected_queries+atlas.rejections==w.q3.depth_rejections && w.q3_blocks.shell_ids==w.q3.shell_ids &&
+              w.q3.ball_builds+atlas.rejections==w.q3.seeds,
               "q3 boxed census ledger differs or hides a scalar scan");
-          } else gate.require(w.q3_blocks==mhgp8::Q3BallCensusWork{},"scalar performed hidden boxed census");
+            if (config.q3_atlas_consultation) {
+              gate.require(atlas.edges_with_atlas==w.both_edges && atlas.locations+atlas.root_lane_skips<=w.both_edges+w.q3.seeds &&
+                atlas.rejections+atlas.outside_domain<=atlas.locations,"q3 atlas consultation ledger differs");
+              gate.atlas_rejections+=atlas.rejections;gate.atlas_lane_skips+=atlas.root_lane_skips;
+              gate.atlas_locations+=atlas.locations;gate.atlas_outside+=atlas.outside_domain;
+            } else gate.require(atlas==mhgp8::WspdQ3AtlasWork{},"atlas consultation ran although disabled");
+          } else gate.require(w.q3_blocks==mhgp8::Q3BallCensusWork{} && w.q3_atlas==mhgp8::WspdQ3AtlasWork{},"scalar performed hidden boxed census");
           gate.indexed_pair_rejections+=v.rejected_pairs;
           gate.indexed_rectangle_rejections+=v.rejected_rectangles;
           if (k==3) parallel_case(gate,points,all,k,config,4,3);
@@ -663,7 +682,7 @@ void indexed_fixtures(GlobalGate& gate) {
     "indexed global modes have no exercised rejection");
 }
 
-std::array<u64,424> without_filter_geometry(mhgp8::WspdQ34Work work) {
+std::array<u64,429> without_filter_geometry(mhgp8::WspdQ34Work work) {
   // Keep ALL rejection masses and all work downstream of filtering. Only the
   // four explicitly changed search/bounds ledgers are normalized away.
   work.witness.rectangles={};work.witness.pairs={};
@@ -778,7 +797,7 @@ void bounds_mode_global_fixtures(GlobalGate& gate) {
   normalize(out);gate.require(out==expected && !index && !cloud,"bounds callback owner reset lost payload");
 }
 
-std::array<u64,424> without_local_q4(mhgp8::WspdQ34Work work) {
+std::array<u64,429> without_local_q4(mhgp8::WspdQ34Work work) {
   // Only the selected q4 traversal is replaced. All q3, filtering, covers,
   // lane masses and output counters remain subject to exact comparison.
   work.local={};work.q4_seed_cells={};
@@ -904,6 +923,8 @@ int main(int argc,char** argv) {
     global_fixtures(gate);global_lifecycle(gate);parallel_fixtures(gate);parallel_lifecycle(gate);indexed_fixtures(gate);
     bounds_mode_global_fixtures(gate);
     seed_cell_global_fixtures(gate);
+    gate.require(gate.atlas_rejections>0 && gate.atlas_locations>gate.atlas_rejections && gate.atlas_outside>0,
+      "q3 atlas consultation was never exercised (rejections, non-rejected locations, outside-domain centers)");
     gate.require(gate.q3>0 && gate.q4>0 && gate.max_shell>=30 && gate.fat_rectangles>0 &&
       gate.q3_front_rejections>0 && gate.q4_front_rejections>0 && gate.xi_tests>0 &&
       gate.q3_depth_rejections>0 && gate.q3_unread_sites>0 && gate.both_edges>0 &&
@@ -926,6 +947,7 @@ int main(int argc,char** argv) {
     EMIT(parallel_geometry_checks);EMIT(worker_ledger_checks);EMIT(callback_copy_checks);EMIT(multiworker_calls);
     EMIT(parallel_callback_failures);EMIT(parallel_join_checks);EMIT(parallel_owner_resets);EMIT(parallel_empty_calls);
     EMIT(indexed_calls);EMIT(indexed_pair_rejections);EMIT(indexed_rectangle_rejections);EMIT(boxed_calls);
+    EMIT(atlas_rejections);EMIT(atlas_lane_skips);EMIT(atlas_locations);EMIT(atlas_outside);
     EMIT(bounds_mode_calls);EMIT(bounds_exclusion_calls);EMIT(bounds_affine_calls);EMIT(bounds_work_checks);EMIT(bounds_parallel_calls);
     EMIT(bounds_invalid_inputs);EMIT(bounds_inactive_calls);EMIT(bounds_callback_failures);EMIT(bounds_allocation_failures);
     EMIT(bounds_shared_calls);EMIT(bounds_owner_resets);

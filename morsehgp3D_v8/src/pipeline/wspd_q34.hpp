@@ -25,6 +25,19 @@ struct WspdQ34Options {
   WspdQ3CensusMode q3_census_mode{WspdQ3CensusMode::ScalarCover};
   Q34WitnessBoundsMode witness_bounds_mode{Q34WitnessBoundsMode::Legacy};
   Q4SeedCellOptions q4_seed_cells{};
+  // Explicit option: when both lanes are active on Local28 (K>=3), build the
+  // q4 center atlas BEFORE the q3 lane and reject without census every q3
+  // seed whose circumcenter lies in a cell certified with >=K-1 cover sites
+  // strictly inside all its balls; a root certificate skips the q3 lane.
+  // Exact (the cover holds every site inside such balls; certificates hold
+  // on closed cells); the q4 sweep then reuses the same atlas. Off keeps the
+  // historical order and every counter bit-identical.
+  bool q3_atlas_consultation{false};
+};
+
+struct WspdQ3AtlasWork {
+  u64 edges_with_atlas{}, root_lane_skips{}, locations{}, outside_domain{}, rejections{};
+  bool operator==(const WspdQ3AtlasWork&) const = default;
 };
 
 struct WspdQ34WitnessWork {
@@ -67,6 +80,7 @@ struct WspdQ34Work {
   WspdQ34WitnessWork witness;
   Q3BallCensusWork q3_blocks;
   Q4SeedCellWork q4_seed_cells;
+  WspdQ3AtlasWork q3_atlas;
 };
 
 struct WspdQ34Result {

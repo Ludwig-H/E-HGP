@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <optional>
 #include <stdexcept>
 #include <vector>
 
@@ -99,6 +100,9 @@ struct Q4LocalAtlas::Impl {
     Q4LocalCell cell;
     Q4LocalFragmentPtr fragment;
     std::size_t children{absent};
+    // Exact inside count of this cell's fragment (last classification),
+    // kept after the fragment is released: a certificate for the closed cell.
+    std::size_t inside_count{};
     State state{State::Leaf};
   };
   Q4LocalGeometryPtr geometry;
@@ -137,6 +141,7 @@ struct Q4LocalAtlas::Impl {
     merge(work.partition,fragment->work());
     counter_add(fragment_bytes,static_cast<u64>(fragment->retained_bytes()));
     nodes[id].fragment=fragment;
+    nodes[id].inside_count=fragment->inside_count();
     observe();
     if(fragment->inside_count()>=k-2) {
       nodes[id].state=State::Deep;counter_add(work.deep_cells);release(id);return;
@@ -156,6 +161,7 @@ struct Q4LocalAtlas::Impl {
         observe();  // Both the previous and replacement frontier are live.
         release(id);fragment.reset();
         nodes[id].fragment=finished;fragment=std::move(finished);
+        nodes[id].inside_count=fragment->inside_count();
         if(fragment->inside_count()>=k-2) {
           nodes[id].state=State::Deep;counter_add(work.deep_cells);
           counter_add(work.terminal_deep_cells);release(id);return;
@@ -185,6 +191,28 @@ Q4LocalAtlasPtr Q4LocalAtlas::make(Q34EdgeCoverPtr cover,std::size_t k,Q4LocalOp
   return Q4LocalAtlasPtr(new Q4LocalAtlas(std::make_unique<Impl>(std::move(cover),k,o)));
 }
 const Q4LocalGeometryPtr& Q4LocalAtlas::geometry() const noexcept {return impl_->geometry;}
+std::optional<std::size_t> Q4LocalAtlas::certified_inside_count(const Q4LocalCenter& center) const {
+  const Center p{center.x,center.y,center.den};
+  if(p.den<=0) throw std::invalid_argument("mhgp8 atlas location requires a positive denominator");
+  const auto& nodes=impl_->nodes;
+  std::size_t id=0;
+  if(!contains(nodes[id].cell,p,false)) return std::nullopt;
+  while(true) {
+    const auto& node=nodes[id];
+    if(node.state==Impl::State::Outside) return std::nullopt;
+    if(node.state!=Impl::State::Branch) return node.inside_count;
+    std::size_t next=absent;
+    for(unsigned q=0;q<4 && next==absent;++q)
+      if(contains(nodes[node.children+q].cell,p,false)) next=node.children+q;
+    if(next==absent) throw std::logic_error("mhgp8 atlas children do not cover their parent cell");
+    id=next;
+  }
+}
+std::optional<std::size_t> Q4LocalAtlas::root_certified_inside_count() const noexcept {
+  const auto& root=impl_->nodes[0];
+  if(root.state==Impl::State::Outside) return std::nullopt;
+  return root.inside_count;
+}
 const Q4LocalAtlasWork& Q4LocalAtlas::work() const noexcept {return impl_->work;}
 std::size_t Q4LocalAtlas::kmax() const noexcept {return impl_->k;}
 const Q4LocalOptions& Q4LocalAtlas::options() const noexcept {return impl_->options;}
@@ -335,7 +363,13 @@ Q4LocalEdgeWork run_q4_local_edge_candidates(Q34EdgeCoverPtr cover,std::size_t k
   if(!cover || !consumer || k==0) throw std::invalid_argument("mhgp8 local edge requires cover, callback and K>0");
   Q4LocalEdgeWork work{};
   if(k<3) return work;
-  const auto atlas=Q4LocalAtlas::make(cover,k,o);
+  return run_q4_local_edge_candidates(Q4LocalAtlas::make(std::move(cover),k,o),consumer);
+}
+
+Q4LocalEdgeWork run_q4_local_edge_candidates(Q4LocalAtlasPtr atlas,const Q34SeedConsumer& consumer) {
+  if(!atlas || !consumer) throw std::invalid_argument("mhgp8 local edge requires an atlas and a callback");
+  const auto cover=atlas->geometry()->cover();
+  Q4LocalEdgeWork work{};
   work.atlas=atlas->work();work.geometry=atlas->geometry()->work();
   Q4LocalEngine engine(atlas);
   const auto points=cover->index()->cloud().points();
@@ -672,8 +706,18 @@ Q4LocalEdgeWork run_q4_local_edge_candidates(Q34EdgeCoverPtr cover,std::size_t k
     return run_q4_local_edge_candidates(std::move(cover),k,local_options,consumer);
   Q4LocalEdgeWork result{};
   if(k<3) return result;
+  return run_q4_local_edge_candidates(Q4LocalAtlas::make(std::move(cover),k,local_options),consumer,seed_options,extra);
+}
+
+Q4LocalEdgeWork run_q4_local_edge_candidates(Q4LocalAtlasPtr atlas,const Q34SeedConsumer& consumer,
+    Q4SeedCellOptions seed_options,Q4SeedCellWork& extra) {
+  if((seed_options.mode!=Q4SeedCellMode::Individual && seed_options.mode!=Q4SeedCellMode::LiveOnly &&
+      seed_options.mode!=Q4SeedCellMode::Joined) || seed_options.block_sites==0)
+    throw std::invalid_argument("mhgp8 seed/cell traversal requires a valid mode and positive block grain");
+  if(!atlas || !consumer) throw std::invalid_argument("mhgp8 seed/cell traversal requires an atlas and a callback");
+  if(seed_options.mode==Q4SeedCellMode::Individual) return run_q4_local_edge_candidates(std::move(atlas),consumer);
+  Q4LocalEdgeWork result{};
   counter_add(extra.queries);
-  auto atlas=Q4LocalAtlas::make(std::move(cover),k,local_options);
   result.atlas=atlas->work();result.geometry=atlas->geometry()->work();
   Q4SeedCellEngine engine(std::move(atlas),result,extra,seed_options);
   engine.run(consumer);
