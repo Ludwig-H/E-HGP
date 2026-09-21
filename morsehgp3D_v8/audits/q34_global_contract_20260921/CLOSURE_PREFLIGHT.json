@@ -1,0 +1,16 @@
+{
+  "status": "failed",
+  "reason": "Constructor files changed during closure after successful static32/readback capture; no31 engine or prefix-model input invalidated by these files",
+  "changed": [
+    {
+      "path": "morsehgp3D_v8/src/pipeline/wspd_q34.cpp",
+      "reviewed": "8f284cfa7f0dcc8bafce7edc1a5051eabfd776af33b1546ca9070031ca419534",
+      "current": "b1d5972ccbd16869b991661e73702dba2586322df3db3b5ea8a6aa97a7672c48"
+    },
+    {
+      "path": "morsehgp3D_v8/src/pipeline/wspd_q34.hpp",
+      "reviewed": "cfa496b98741c2bc6d2eec04f010076e93eaa669a9875350625c0b00705281d5",
+      "current": "886bc06744d48198129b66be1bafca6a145dd1993c8ac544e16cf2550e415a0b"
+    }
+  ]
+}

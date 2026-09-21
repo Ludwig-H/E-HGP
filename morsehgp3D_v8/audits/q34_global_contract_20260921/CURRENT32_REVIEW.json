@@ -1,0 +1,62 @@
+{
+  "schema": "mhgp8_audit_t32_review_v1",
+  "status": "passed",
+  "reviewed_commit": "d1b4dbc6",
+  "sources_and_receipts": {
+    "morsehgp3D_v8/src/lanes/q34_witness_search.cpp": "14f120224c11bc0f2244097be978aaf54ce5eb9183378000f91bdec7564df090",
+    "morsehgp3D_v8/src/lanes/q34_witness_search.hpp": "7cc574a7070e7d29dcdf093297620d6ce7cf01e499a34188a6e234c2cbe13f99",
+    "morsehgp3D_v8/src/lanes/q3_ball_census.cpp": "434bd6e49eee8cc11398f0f678cc5478a60a10e18828d294b6c44416de881956",
+    "morsehgp3D_v8/src/lanes/q3_ball_census.hpp": "d80558a46bf38414198fb3f26a3fb8993f3cf9ba9c6a7f94a6f2210bb37dec0f",
+    "morsehgp3D_v8/src/pipeline/wspd_q34.cpp": "8f284cfa7f0dcc8bafce7edc1a5051eabfd776af33b1546ca9070031ca419534",
+    "morsehgp3D_v8/src/pipeline/wspd_q34.hpp": "cfa496b98741c2bc6d2eec04f010076e93eaa669a9875350625c0b00705281d5",
+    "morsehgp3D_v8/receipts/q34_indexed_20260921/lidar/lidar_86twby55/MANIFEST.json": "2af1415b588f0466174ed5bdd3facc9a630afb70bba0fbca6dec1aab6483b293",
+    "morsehgp3D_v8/receipts/q34_indexed_20260921/lidar/lidar_86twby55/COMPLETION.json": "c26f59dfb948ad207d387463fcd6d0cc7b5f7a84c1d6288de152700727314759"
+  },
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v8/bench/run_q34_indexed_checks.py",
+        "read",
+        "morsehgp3D_v8/receipts/q34_indexed_20260921/lidar/lidar_86twby55",
+        "--check-live",
+        "--compact"
+      ],
+      "returncode": 0,
+      "stdout": "{\"campaign\": \"lidar\", \"commands\": 12, \"full_contract_qualified\": false, \"gates\": 0, \"input_files\": 4, \"measurements\": 12, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q34_indexed_20260921/lidar/lidar_86twby55\", \"qualification\": \"candidate\", \"sources\": 206, \"status\": \"passed\", \"tests\": 0, \"universal_subquadratic_claim\": false}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v8/bench/run_q34_indexed_checks.py",
+        "read",
+        "morsehgp3D_v8/receipts/q34_indexed_20260921/lidar/lidar_86twby55",
+        "--check-live",
+        "--compact"
+      ],
+      "returncode": 0,
+      "stdout": "{\"campaign\": \"lidar\", \"commands\": 12, \"full_contract_qualified\": false, \"gates\": 0, \"input_files\": 4, \"measurements\": 12, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/q34_indexed_20260921/lidar/lidar_86twby55\", \"qualification\": \"candidate\", \"sources\": 206, \"status\": \"passed\", \"tests\": 0, \"universal_subquadratic_claim\": false}\n",
+      "stderr": ""
+    }
+  ],
+  "snapshot31_comparison": [
+    {
+      "path": "morsehgp3D_v8/src/pipeline/wspd_q34.cpp",
+      "commit": "4dbe3024",
+      "sha256": "2dd9645037f9de6e453ff6c5371f86826bec7c048130a3231886efffd946ff6c",
+      "equal_to_snapshot": true
+    },
+    {
+      "path": "morsehgp3D_v8/src/pipeline/wspd_q34.hpp",
+      "commit": "4dbe3024",
+      "sha256": "727df97e4c2fec06bac38d24de0924f2e6e6752be8562fb350b9942b09bbcbe6",
+      "equal_to_snapshot": true
+    }
+  ],
+  "scope": "Static review of six files plus replay of constructor32 twelve saved LiDAR measures; no new engine execution, no independent dynamic qualification of32",
+  "gcp_used": false
+}

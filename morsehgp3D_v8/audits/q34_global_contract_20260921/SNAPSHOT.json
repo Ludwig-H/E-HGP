@@ -1,0 +1,15 @@
+{
+  "schema": "mhgp8_audit_global_snapshot_v1",
+  "base_commit": "c5308651ba31aa7178e759b08fa2a593bb7fd6b1",
+  "scope": "explicit copy of uncommitted constructor31 pipeline for independent tests; no inherited qualification",
+  "sources": {
+    "morsehgp3D_v8/src/pipeline/wspd_q34.cpp": {
+      "snapshot": "snapshot/pipeline/wspd_q34.cpp",
+      "sha256": "2dd9645037f9de6e453ff6c5371f86826bec7c048130a3231886efffd946ff6c"
+    },
+    "morsehgp3D_v8/src/pipeline/wspd_q34.hpp": {
+      "snapshot": "snapshot/pipeline/wspd_q34.hpp",
+      "sha256": "727df97e4c2fec06bac38d24de0924f2e6e6752be8562fb350b9942b09bbcbe6"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "status": "failed",
+  "cause": "LeakSanitizer cannot operate under sandbox ptrace; no product diagnostic",
+  "record": "0007.json.gz",
+  "record_sha256": "3275ec7ede93b1c0cd5bcb6cfc67ed7a7e8c9a1e921e52d76d1b81e7fd1f654d",
+  "stderr": "==19==LeakSanitizer has encountered a fatal error.\n==19==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1\n==19==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)\n",
+  "manifest_sha256": "d5b22b871fcd839cf4d517137fd63b7c11936e5133f02ae3325b7ce60ffc34a3",
+  "source_snapshots": {
+    "sources/oracle.py": "5012e184ab7b8339fd0619954ba9bc93347bbe3ce72a269a44e3540fa6c13322",
+    "sources/global_probe.cpp": "94584488259d433fe443a8ed02eeb504641feeadd73b12db80ba0ef06f12cc50",
+    "sources/campaign.py": "d2d0017d671a633da9e42fa7f2ff58b44716a44a19b72cef239c8b38a7e713fe"
+  },
+  "followup": "Fresh qualification_r2 outside sandbox, leaks remain enabled; old capture retained. Before restart, clarify one oracle mutant label and add explicit W3 coefficient misuse in q4."
+}
