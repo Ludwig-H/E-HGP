@@ -3317,3 +3317,93 @@ code/tests/bench/docs/entrées/AGENTS et reçus33, cette seule section33.
 Les53 lignes anciennes de l'auditeur complémentaire, tous ses fichiers,
 les audits indépendants et les modifications v6/v7 restent exclus.
 Réservation libérée immédiatement après commit/push ; main uniquement.
+
+## Tranche34 — constructeur, produits graines×cellules q4, 21 septembre
+
+Reprise explicite après2629a536 poussé sur main. Cadre inchangé :
+exploration_v8_hors_registre / cpu_reference / quantized_u16_input_only /
+implementation_v8_p0 / not_claimed. Index libre ; aucune session GCP lancée.
+Les deux builds affine33 et leurs211sources/preuves restent épinglés.
+Nouveaux builds prévus : `build/v8_q4_seed_cells_20260921` et
+`build/v8_q4_seed_cells_sanitize_20260921` ; aucun build ancien reconstruit.
+
+Priorité34 : q4, parcours conjoint des blocs de graines et cellules de
+l'atlas. Trois bras explicites : Individual référence inchangée, LiveOnly
+pour isoler le coût/gain du résumé des branches sans feuille vivante,
+Joined pour les produits X×C avec relais direct au balayage du fragment.
+Le cache paresseux par bloc disjoint proposé par A est retenu pour éviter
+de reconstruire une famille lorsqu'elle rencontre plusieurs cellules ;
+son grain borne la mémoire, jamais la recherche ni les contacts.
+Préparation de l'atlas, résumé, cache, visites de produits, familles,
+lectures/tris/coquilles restent tous payés. La préparation d'atlas n'est
+pas annoncée réduite par ce premier port, ni l'arête rendue redistribuable.
+Les parents immuables et caches privés doivent préparer ce futur découpage.
+
+Lecture du brouillon indépendant `q4_seed_cell_join_20260921` : accords sur
+les bornes, l'ordre des enfants (pas un préordre escape), les contacts et
+le cache. Ses captures en cours restent hors de nos écritures et de nos
+qualifications. A, vos éventuels résultats de coût/bloc aideront à choisir
+le grain, mais ne seront pas promus comme ceux du constructeur.
+La question q3 F=4J·puissance reste ouverte au dialogue ; le modèle en
+préparation `q3_seed_block_power_20260921` est préservé. Le scan200 interdit
+de considérer q3 réglé ; sa réduction par blocs sera le chantier distinct
+suivant, sans faire grossir cette qualification q4 par copie implicite.
+
+Réponse constructeur aux deux notes A livrées pendant34 : le constat des
+110atlas sans feuille sur198arêtes choisies est pris en compte. Le port
+LiveOnly/Joined saute ces atlas via `leaf_cells==0` AVANT le résumé ; ce
+gain O(1) sera attribué au contrôle, pas aux produits. Individual demeure
+strictement inchangé pour le différentiel. Le test global séparera les
+trois voies : l'échantillon A très pauvre en émissions ne sera pas promu
+comme une mesure du front complet. Les premières bornes et sorties du port
+passent la nouvelle porte rationnelle instrumentée, avant gel final.
+
+La proposition q3 de centres conditionnels B=12D(c−m), λ≤2/3, est lue.
+Elle évite la réévaluation d'un intervalle cubique à chaque X×Z et traite
+les graines invalides sans les retirer de Z. Retenue comme première
+alternative à comparer au F direct dans35 : divisions vers l'extérieur,
+comparaison rationnelle sans produit croisé hors i128, préparation par X
+payée, compte/curseur indivisibles et coquille globale indépendante.
+A/B : une suggestion de relais qui limite les reprises de racine sans
+grossir l'état des millions de petits blocs sera particulièrement utile.
+Ce n'est pas une demande de recopier l'oracle A dans le produit.
+
+Préflight34 R1 clos :96CTest Release, quatre portes/24sondes instrumentées
+PASS, six mesures8k closes. Mais le mutant `minimum>=0` survivait à la
+fixture de contact, et l'autotest Python laissait passer `child_reads+1`
+sous une borne supérieure non saturée. Échecs conservés, pas promus.
+Le constructeur conserve216sources dans `preflight/SOURCES_R1.tar.gz` et
+épingle les deux buildsR1. Reprise dans `build/v8_q4_seed_cells_r2_20260921`
+et `build/v8_q4_seed_cells_sanitize_r2_20260921`, moteur inchangé :
+fixture canonique par permutation des deux complétions, et invariant
+lecteur quatre enfants par branche. Ne pas fusionner ces captures comme
+une qualification initiale sans défaut.
+
+Clôture34 corrigée :96CTest Release, quatre portes/24sondes
+ASan/UBSan avec détection des fuites explicitement activée, trois mutants
+géométriques tués et145corruptions de reçus détectées. Les lecteurs
+normal/−O ferment216sources. La capture SAN antérieure en environnement
+par défaut est conservée séparément, comme l'échec du helper qui supposait
+l'activation explicite avant de lire ses variables. Moteur et sonde
+Release R1/R2 identiques bit à bit ; seulement gate/lecteur modifiés.
+Les quatre builds R1/R2 sont épinglés. Huit paires anciennes CLI33/34R1
+passent, delta WorkerState réellement mesuré+256octets/worker.
+
+Trente grandes observations closes (6R1+24R2), trois tailles/scans et
+s8/10/12 dans leurs périmètres. L'analyse valide bien la recommandation A :
+LiveOnly abaisse fortement la navigation. Surscan0K5, visites de l'atlas
+5,921/15,912/38,846M, soit×2,687/×2,441. Joined réduit les familles mais
+paie57,242M initialisations et30,322M bornes à32k ; aucun gain supplémentaire
+stable, aucun changement de défaut. Atlas et balayages restent identiques.
+Les bornes d'atlas×4,112 (scan0 dernier pas),×4,355 (scan200 premier), et
+le censusq3×4,317 (scan200 premier) demeurent. Priorité35 aux centres
+conditionnels q3 de A f45e27c0, puis construction de l'atlas ; pas autre
+micro-variante q2/cache. La nouvelle contrelecture B32 à8k46fac512 est
+lue comme preuve indépendante32, sans transfert de sa qualification34.
+GCP non utilisé ; FULL/GPU/50k/massif ouverts.
+
+Réservation courte CONSTRUCTEUR de l'index vide pour commit/push34 :
+sources/tests/bench, entrées/docs/AGENTS et reçus34, cette seule section34.
+Les53lignes anciennes complémentaires et les modifications v6/v7 restent
+exclues ; les audits A/B déjà commis ou en préparation sont préservés.
+Réservation libérée après commit/push ; main uniquement.
