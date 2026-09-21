@@ -1,0 +1,214 @@
+{
+ "backend": "cpu_reference",
+ "conventions": {
+  "cut": "qx = 32768 puis qy = 32768 ; site sur le plan du côté >= ; restrictions disjointes et exhaustives",
+  "deduplication": "globale sur (qx,qy,qz) avant masque et découpe",
+  "grid": "2 cm, origine 32768 au capteur",
+  "keep_rule": "site conservé si au moins un de ses retours a le statut 0 (indécis) ou 2 (non-sol) ; 1 (sol) retiré",
+  "order": "lexicographique (x,y,z)",
+  "profile": "quantized_u16_input_only",
+  "quantization": "floor(50*x + 32768 + 1/2), rationnels exacts depuis float32, refus hors [0,65535] ou non fini",
+  "scope": "entrée de calcul pour le moteur u16 ; ni qualité sémantique du masque, ni mesure HGP"
+ },
+ "finished_utc": "2026-09-21T20:39:24Z",
+ "gcp_used": false,
+ "ground_dir": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6",
+ "phase": "exploration_v8_hors_registre",
+ "preparer_sha256": "3e9000b9abbc84f89fcc8b870ee533e4cfbc658527fd249fd419b010ee16e2d4",
+ "profile": "quantized_u16_input_only",
+ "public_status": "not_claimed",
+ "scenes": [
+  {
+   "counts": {
+    "kept_sites": 39815,
+    "merged_returns": 4247,
+    "mixed_sites": 0,
+    "raw_sites": 119142,
+    "removed_sites": 79327,
+    "returns": 123389,
+    "returns_ground": 83504,
+    "returns_nonground": 39844,
+    "returns_unknown": 41
+   },
+   "frame": "000000.bin",
+   "mask": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_float32/mask.u8",
+   "mask_sha256": "9db3fe5c3f5c4c5d955dde9fcaf61f52ac304f4c23aa68076fd934b589caaf8f",
+   "pieces": {
+    "full": {
+     "bytes": 238890,
+     "n": 39815,
+     "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_00/full.u16le",
+     "sha256": "b0918930ac7189cd1277369ccc777effa7bedf39b471c33ac45ec3a95bf8d6ec"
+    },
+    "half_x_neg": {
+     "bytes": 147336,
+     "n": 24556,
+     "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_00/half_x_neg.u16le",
+     "sha256": "2ae68b21b77ae13db356b1bc09c274dc932ea4d1805a5860218cf3b1f4c1d7fa"
+    },
+    "half_x_nonneg": {
+     "bytes": 91554,
+     "n": 15259,
+     "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_00/half_x_nonneg.u16le",
+     "sha256": "782678e7e72698319dda36fd2e7e3cc9677070d9aefd90ce75070d7fa3d493a5"
+    },
+    "quarter_x_neg_y_neg": {
+     "bytes": 69048,
+     "n": 11508,
+     "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_00/quarter_x_neg_y_neg.u16le",
+     "sha256": "3f33e5f36b513d8e6e139f25b78b62d8a6d5c7ba4cadc8ad676cb8927ebafbb9"
+    },
+    "quarter_x_neg_y_nonneg": {
+     "bytes": 78288,
+     "n": 13048,
+     "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_00/quarter_x_neg_y_nonneg.u16le",
+     "sha256": "148c3d9a045e63c1becd210067db61e7a44f6b694cb18163cd3592934afaf04a"
+    },
+    "quarter_x_nonneg_y_neg": {
+     "bytes": 49152,
+     "n": 8192,
+     "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_00/quarter_x_nonneg_y_neg.u16le",
+     "sha256": "c6082cffa427f7783fd3a0c614ea041258b239418a8e2e18f492f1d7a3c56b2e"
+    },
+    "quarter_x_nonneg_y_nonneg": {
+     "bytes": 42402,
+     "n": 7067,
+     "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_00/quarter_x_nonneg_y_nonneg.u16le",
+     "sha256": "914f355043351dbb75310e6be5136f2ed42a09b290be58c76d1deaded80de66f"
+    }
+   },
+   "raw": "morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin",
+   "raw_sha256": "92e945f37a6cd4a58acc8aa15b275af2e271ecf69c0a44a311d888524473c451",
+   "scene": "00"
+  },
+  {
+   "counts": {
+    "kept_sites": 35491,
+    "merged_returns": 4537,
+    "mixed_sites": 1,
+    "raw_sites": 119942,
+    "removed_sites": 84451,
+    "returns": 124479,
+    "returns_ground": 88928,
+    "returns_nonground": 35519,
+    "returns_unknown": 32
+   },
+   "frame": "000100.bin",
+   "mask": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_float32/mask.u8",
+   "mask_sha256": "3e9e95b5f21dc177b192d8c0d2c537a3a0b6fde357b10ed26da641330ce74e51",
+   "pieces": {
+    "full": {
+     "bytes": 212946,
+     "n": 35491,
+     "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_01/full.u16le",
+     "sha256": "461c34fa2772b76de95af06bc9593ded6208aa8154073fb83b2de48ee9d705f1"
+    },
+    "half_x_neg": {
+     "bytes": 113808,
+     "n": 18968,
+     "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_01/half_x_neg.u16le",
+     "sha256": "8633a48f48f4e8411906516d0e18632642219f2ed7856f5955c41139065dfc80"
+    },
+    "half_x_nonneg": {
+     "bytes": 99138,
+     "n": 16523,
+     "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_01/half_x_nonneg.u16le",
+     "sha256": "5c7f47d8a5317636fb3b57b15f1f7629d41362a4eac88dacea26544970e51587"
+    },
+    "quarter_x_neg_y_neg": {
+     "bytes": 48330,
+     "n": 8055,
+     "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_01/quarter_x_neg_y_neg.u16le",
+     "sha256": "004ea710e8233f974ceb28f07e8c42a17a619e63f275f12f2bea583773edee45"
+    },
+    "quarter_x_neg_y_nonneg": {
+     "bytes": 65478,
+     "n": 10913,
+     "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_01/quarter_x_neg_y_nonneg.u16le",
+     "sha256": "37e96ede45bc7eeb22005313df184bdab0ea6f3d089679a22457e66ee44b80cd"
+    },
+    "quarter_x_nonneg_y_neg": {
+     "bytes": 55272,
+     "n": 9212,
+     "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_01/quarter_x_nonneg_y_neg.u16le",
+     "sha256": "b73390cc3e71558dc386c66c71295b5ad59c20f279d15c52c69620d72916596b"
+    },
+    "quarter_x_nonneg_y_nonneg": {
+     "bytes": 43866,
+     "n": 7311,
+     "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_01/quarter_x_nonneg_y_nonneg.u16le",
+     "sha256": "dc28907c5cf419eb2a1bdc0484fc1d0975e11f9fe1eebbbd140e8c22290311d0"
+    }
+   },
+   "raw": "morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin",
+   "raw_sha256": "4dfb5701db9ff36bd592746e08e8fafd4d1c63cba1ef66d2c2791e405b800e80",
+   "scene": "01"
+  },
+  {
+   "counts": {
+    "kept_sites": 45114,
+    "merged_returns": 4801,
+    "mixed_sites": 1,
+    "raw_sites": 120725,
+    "removed_sites": 75611,
+    "returns": 125526,
+    "returns_ground": 79681,
+    "returns_nonground": 45811,
+    "returns_unknown": 34
+   },
+   "frame": "000200.bin",
+   "mask": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_float32/mask.u8",
+   "mask_sha256": "86b2b46791993f7c3401270b369bfc2954a0a9de1370f7f6fa8637ec5d0b1126",
+   "pieces": {
+    "full": {
+     "bytes": 270684,
+     "n": 45114,
+     "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_02/full.u16le",
+     "sha256": "fb49f73a30e03fd4b36e714df5bcde447a113f9d13f7531d101fd9a36b7acf67"
+    },
+    "half_x_neg": {
+     "bytes": 150138,
+     "n": 25023,
+     "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_02/half_x_neg.u16le",
+     "sha256": "b3f103d1ec4052d2415e16c0fd1e15fe6399024cb55d32278a17bab74c0bebc6"
+    },
+    "half_x_nonneg": {
+     "bytes": 120546,
+     "n": 20091,
+     "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_02/half_x_nonneg.u16le",
+     "sha256": "1aea49fb804bfef4b1b3fe325c9444c201c8d41f5469ecb3a263a1acc1677a64"
+    },
+    "quarter_x_neg_y_neg": {
+     "bytes": 97404,
+     "n": 16234,
+     "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_02/quarter_x_neg_y_neg.u16le",
+     "sha256": "cdd128420b54eb363d2b87c245060a373530386d21819119d2d67af28226faca"
+    },
+    "quarter_x_neg_y_nonneg": {
+     "bytes": 52734,
+     "n": 8789,
+     "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_02/quarter_x_neg_y_nonneg.u16le",
+     "sha256": "65a8f67f9e5226cb1b8a299c7fd16559afb9e110bed8648867dcd30668ac1868"
+    },
+    "quarter_x_nonneg_y_neg": {
+     "bytes": 88860,
+     "n": 14810,
+     "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_02/quarter_x_nonneg_y_neg.u16le",
+     "sha256": "fa193668f3a7eeed6f059066dc45199e408f713337b21c02b37630b763139b3e"
+    },
+    "quarter_x_nonneg_y_nonneg": {
+     "bytes": 31686,
+     "n": 5281,
+     "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_02/quarter_x_nonneg_y_nonneg.u16le",
+     "sha256": "a121d9ff016bbb117628fa746eb74541a6cb738bdaf0678ebd482b7eda468b4f"
+    }
+   },
+   "raw": "morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin",
+   "raw_sha256": "132f437349e17c00a8a31539f10a3214d9391ae1251293e7794a26540412b5cd",
+   "scene": "02"
+  }
+ ],
+ "schema": "mhgp8_lidar_ground_u16_preparation_v1",
+ "seconds": 6.687,
+ "status": "prepared"
+}
