@@ -1,0 +1,49 @@
+{
+  "schema": "mhgp8_q34_spatial_plan_v1",
+  "cases": [
+    {
+      "scene": "scan000000",
+      "dataset": "quarter_x_neg_y_neg",
+      "file": "data/scan000000/quarter_x_neg_y_neg.u16le",
+      "n": 29128,
+      "input_hash": 2433959711657033650,
+      "k": 5,
+      "s": 8,
+      "workers": 48,
+      "repeat": 0
+    },
+    {
+      "scene": "scan000000",
+      "dataset": "full",
+      "file": "data/scan000000/full.u16le",
+      "n": 119142,
+      "input_hash": 13134673091434621324,
+      "k": 5,
+      "s": 8,
+      "workers": 48,
+      "repeat": 0
+    },
+    {
+      "scene": "scan000100",
+      "dataset": "full",
+      "file": "data/scan000100/full.u16le",
+      "n": 119942,
+      "input_hash": 8798051192188190109,
+      "k": 5,
+      "s": 8,
+      "workers": 48,
+      "repeat": 0
+    },
+    {
+      "scene": "scan000200",
+      "dataset": "full",
+      "file": "data/scan000200/full.u16le",
+      "n": 120725,
+      "input_hash": 13882714215535235516,
+      "k": 5,
+      "s": 8,
+      "workers": 48,
+      "repeat": 0
+    }
+  ]
+}

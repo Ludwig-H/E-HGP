@@ -1,0 +1,63 @@
+# Contrat principal : la tour sur une trame LiDAR entière
+
+Décision explicite de l'utilisateur du 21 septembre 2026. Elle remplace
+la taille nominale de 50 000 points comme référence principale, sans
+réinterpréter les anciennes mesures ni changer le contrat mathématique.
+
+## Résultat attendu
+
+Sur **GCP G4**, calculer toute la tour HGP **K=1..10** d'une trame
+SemanticKITTI complète en moins d'une seconde. Si cet objectif n'est pas
+atteint, qualifier séparément le repli **K=1..5**. Après le jalon d'une
+seconde, viser **100 ms** sur le même périmètre. Un seul niveau K, une
+voie q2/q3/q4 ou un flux de candidats ne constitue pas cette tour.
+
+Le chronométrage produit doit couvrir la préparation nécessaire depuis
+l'entrée déclarée, le calcul des événements, les parents et la construction
+de toutes les hiérarchies demandées. Les transferts CPU/GPU nécessaires
+ne disparaissent pas du bilan. Distinguer le temps de calcul en mémoire,
+le temps incluant préparation/transferts et les lectures disque, ainsi que
+le démarrage à froid et les répétitions à chaud ; ne pas choisir après
+mesure la frontière qui ferait passer le contrat. Le décompte définitif
+sera figé dans le lanceur FULL avant toute revendication de réussite.
+
+Tester **plusieurs scènes** et publier chaque résultat, pas seulement une
+moyenne ou le scan le plus favorable. Comparer K5/K10 et s8/s10/s12 à
+entrées identiques. Les scènes et répétitions doivent être sélectionnées
+avant les chronométrages de qualification. Les trames08/000000,
+08/000100 et08/000200 sont trois acquisitions distinctes déjà disponibles,
+mais ne représentent pas plusieurs séquences ni une validation de tout
+SemanticKITTI ; élargir la diversité avant une qualification produit.
+
+## Ce que signifie « entière » dans le profil actuel
+
+Ne pas réduire la trame à 50k, à un préfixe ou à un tirage. Le profil
+implémenté reste `quantized_u16_input_only` : grille isotrope **fixe de
+2 cm**, puis déduplication globale des sites, avec correspondance conservée
+pour **chaque retour brut**. Les trois entrées disponibles comptent
+123389/124479/125526 retours, donnant119142/119942/120725 sites distincts.
+Publier les deux effectifs et les fusions. Cette exactitude sur les sites
+quantifiés n'est pas une exactitude sur les coordonnées float32 originales
+ni un traitement des multiplicités comme sites distincts.
+
+Le [protocole spatial](PROTOCOLE_LIDAR_SPATIAL_20260921.md) garde la scène,
+ses deux moitiés et ses quatre quarts, définis par deux plans perpendiculaires
+passant par le capteur. Les morceaux servent au diagnostic de croissance.
+Leur somme, leur meilleur temps ou l'exécution d'un quart en moins d'une
+seconde ne valide **jamais** le contrat sur la trame entière. Les expériences
+synthétiques8k/16k/32k et les anciennes mesures50k restent des diagnostics
+distincts. L'objectif de plusieurs dizaines de millions de points sur G4
+reste également ouvert, sans transfert de qualification depuis une trame.
+
+## Situation à cette décision
+
+Le [raccord spatial q3/q4](Q34_MESURES_SPATIALES_20260921.md) mesure un
+producteur de candidats avec index, census et coquilles, **pas FULL**.
+Il n'existe pas encore de résultat qualifiant la tour sur cette nouvelle
+cible. Les modes multi-CPU exécutés sur une machine G4 restent des mesures
+CPU : ils ne deviennent pas des résultats GPU par le nom de la machine.
+
+L'autorisation GCP est renouvelée. Employer une seule session **SPOT**
+utile à la fois, les scripts gardés et les deux coupe-circuits du dépôt ;
+conserver configuration, sources, sorties, ressources et arrêt ciblé
+certifié. Les petites vérifications de protocole restent locales.

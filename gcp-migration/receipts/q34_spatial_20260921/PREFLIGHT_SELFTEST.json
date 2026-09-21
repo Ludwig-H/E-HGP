@@ -1,0 +1,21 @@
+{
+  "schema": "mhgp8_q34_spatial_gcp_adapter_preflight_v1",
+  "status": "failed",
+  "scope": "local mocked adapters only; no cloud/native execution",
+  "command": ["python3", "-B", "gcp-migration/q34_spatial_selftest_v8.py"],
+  "exit_code": 1,
+  "tests": 8,
+  "errors": 1,
+  "elapsed_reported_seconds": 2.939,
+  "failed_test": "test_plan_and_snapshot",
+  "exception": "KeyError: linkname 'data' not found",
+  "trace": [
+    "q34_spatial_selftest_v8.py:139: fixture(directory, member)",
+    "q34_spatial_selftest_v8.py:62: new.addfile(member, old.extractfile(member))",
+    "tarfile.py:2384: return self.extractfile(self._find_link_target(tarinfo))",
+    "tarfile.py:2723: raise KeyError(linkname not found)"
+  ],
+  "cause": "The hostile-tar fixture reused the previously corrupted tar as its next input; its symlink could not be extracted while constructing the next mutation.",
+  "correction": "Every hostile-tar mutation now starts from the saved clean archive. No native source, old adapter, guard or cloud state changed.",
+  "provenance": "Transcribed from the initial tool execution output; no initial source snapshot is claimed. Final qualification is separate."
+}

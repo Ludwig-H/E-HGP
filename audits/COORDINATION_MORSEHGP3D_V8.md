@@ -3442,3 +3442,101 @@ Réservation courte CONSTRUCTEUR : uniquement nouvelles sources/protocole,
 tests/reçus spatiaux, entrées v8/AGENTS et présente section du journal.
 Ne pas committer notre index ; fichiers v6/v7 et audits A/B exclus.
 Libération dès le commit/push de ce lot, sur main.
+
+## Constructeur — raccord des mesures spatiales, après759ce2b0
+
+Le nouveau lecteur/lanceur q3/q4 consommera les sept morceaux de chaque
+manifeste, n=source_n, sans préfixe ni nouveau build. Première campagne
+prévue : scan0 complet/moitiés/quarts, K5/s8, Local28 LiveOnly, W4,
+puis extension selon le travail mesuré. Les216sources et binaires34
+restent gelés ; leur qualification ne devient pas un oracle des grandes
+scènes. Petites entrées préparées, mutants de reçus et comparaisons
+parent/enfant à effectifs réels seront testés séparément.
+
+A : votre relais q3 `32297105` est lu, notamment ticket privé attaché au
+contexte, racines résiduelles successives et collecte globale de coquille.
+Il reste la priorité du prochain port moteur avec les centres conditionnels,
+après établissement de la référence spatiale. Aucun transfert du crédit
+à q4 ni duplication de la pile Z pour chaque petite graine.
+
+Trois processus lourds d'auditeurs sont actuellement actifs sur la machine.
+Nous ne les arrêtons pas. Les comptes de travail resteront exploitables ;
+les temps sous concurrence seront signalés et ne qualifient aucun gain
+stable. Merci de signaler une fenêtre libre pour les futurs chronos isolés.
+Pas de session GCP ouverte ; index libre pendant le développement.
+
+Précision utilisateur pendant ce raccord : le contrat principal devient
+la tour entière d'une **trame SemanticKITTI complète**, sur plusieurs
+scènes, K1..10/repli1..5, <1s puis100ms sur G4. Les50k restent historiques,
+pas un sous-échantillonnage autorisé du nouveau contrat. Le profil quantifié
+20mm et les fusions doivent rester publiés. Trois trames08 disponibles ne
+sont pas plusieurs séquences ; étendre la diversité avant qualification.
+
+Petites portes spatiales normal/−O closes,14appels et238records comparés
+chacune ;59corruptions de reçus refusées dans les deux modes Python.
+La référence locale7morceaux scan0/K5/s8/W4/LiveOnly est en cours, moteur34
+gelé. Un adaptateur G4 **CPU** explicite est préparé : l'ancien worker31
+refuse24unités et ne connaît pas le schéma4/affine/boxes/live. Ne pas le
+faire tourner sous un nom de configuration trompeur. Aucun démarrage GCP
+pendant cette préparation, gardes existantes inchangées.
+
+A/B : l'enjeu change aussi de densité — le premier quart spatial29 128sites
+paie déjà1,912Md bornes préparées q3 et2,008Md tests de partition q4
+(bloc+point). Ce résultat partiel ne ferme pas encore la campagne.
+Vos pistes pour partager le census entre graines et réduire la construction
+d'atlas restent centrales ; une baisse des seuls tris ou des visites de
+navigation ne suffit pas. Merci de conserver les nouveaux tests sur les
+trames entières/découpes, sans réinterpréter vos préfixes historiques.
+
+B : votre premier fichier spatial `pieces/scan0/quarter_xneg_yneg.u16le`
+et notre `scene_00_000000/quarter_x_neg_y_neg.u16le` ont bien le même SHA256
+`a4f0465c26e16cc901cdefd54ecffe5e3165366d5eba8f5c403dffc1331909b5`.
+Notre première commande K5/s8/LiveOnly/W4 est terminée :316274émissionsq3,
+52870émissionsq4,1173475IDs de coquille. Reçu partiel accessible dans
+`receipts/q34_spatial_20260921/performance/spatial_9kscvyt0/record_0000.json`.
+La campagne entière n'est pas encore close ; aucun verdict de votre audit
+n'est anticipé ni hérité. Merci pour la contre-vérification du vrai régime.
+
+Pilote G4 demandé par le constructeur : cible précise
+`devpod-gpu-exploration/us-central1-b/ehgp-v7-4fa0e0789a7d5bb06b787d35`,
+contrôleur spatial neuf avec session privée `ehgp8-spatial-gcp.iPx9wZQ9`.
+Ne pas démarrer/arrêter cette cible concurremment. Budget utile900s,
+arrêt invité30min/GCE3600s, fermeture ciblée par le contrôleur.
+Plan : premier quart scan0W48 puis trois trames complètes0/100/200K5s8.
+C'est du CPU, pas du GPU/FULL. Les9tests du protocole normal/−O passent,
+et la liaison des scripts exécutés au manifeste a été renforcée avant
+démarrage. Un refus local de permission de la nouvelle clé est conservé ;
+mode corrigé et vérifié avant la nouvelle invocation. État final à venir.
+
+Clôture locale : les sept morceaux scan0/K5/s8/W4 sont terminés ; lecteurs
+et analyses normal/−O identiques, source216 et protocole inchangés. Trame
+entière119142sites :383,311s CPU local partagé. Les six rapports sont dans
+`receipts/q34_spatial_20260921/GROWTH_SCAN0_K5_S8.json` ; ne pas omettre
+trame→moitié positive : exposants2,502 pour les bornes q3,2,332 pour les
+bornes de blocs q4. Ce n'est pas une preuve asymptotique ; l'asymétrie
+des moitiés n'autorise pas davantage à ne garder que les bons rapports.
+
+G4 : quart0 et trois trames0/100/200 achevés, quatre portes natives PASS,
+sources gelées inchangées, budget utile900s respecté. K5/s8/LiveOnly/W48
+CPU, pipeline45,594s pour le quart et165,214/34,319/505,479s pour les
+trames. Les processus complets consomment respectivement4,19/11,13/1,93CPU
+en moyenne malgré48workers lancés ; ce ne sont pas des temps par worker.
+Le code garde768sous-arbres Coarse indivisibles (769 pourscan100), sans
+vol des descendants ni des grosses arêtes. Priorité confirmée : travail
+q3 partagé puis tâches fines q3/q4, pas des tris seuls ni plus de fils.
+Arrêt ciblé certifié TERMINATED le21 septembre à12:09:34UTC ; aucune autre
+VM étiquetée active selon le contrôle de fermeture. Relecture/archivage
+locaux en cours, jamais le répertoire parent contenant la clé privée.
+A/B : les entrées entières et ces coûts sont désormais une base réelle
+pour vos contre-tests ; les résultats indépendants restent vos preuves.
+
+Relectures G4 normal/−O closes : `validated_complete`, quatre mesures,
+quatre portes natives, comptes/sorties local/G4 égaux sur les deux entrées
+communes. Inventaire hôte strict236fichiers et archive sans clé ; lecteur
+posthoc renforcé après contrelecture,5tests normal/−O PASS. Rapports dans
+`receipts/q34_spatial_20260921/gcp_r1{,_optimized}/READBACK.json`.
+Réservation courte de l'index pour clôturer ce lot constructeur : nouveaux
+scripts/portes/reçus spatiaux et GCP, entrées/contrat v8,AGENTS et cette
+seule section du journal. Le vieil ajout auditeur complémentaire au milieu
+du journal ainsi que tous les fichiers v6/v7/audits indépendants restent
+hors commit. Merci de ne pas committer l'index pendant cette clôture.

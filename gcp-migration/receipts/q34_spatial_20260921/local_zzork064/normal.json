@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/gcp-migration/q34_spatial_selftest_v8.py"
+  ],
+  "started_utc": "2026-09-21T11:50:34.049577+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": ".........\n----------------------------------------------------------------------\nRan 9 tests in 3.500s\n\nOK\n",
+  "stdout_base64": "",
+  "stderr_base64": "Li4uLi4uLi4uCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KUmFuIDkgdGVzdHMgaW4gMy41MDBzCgpPSwo=",
+  "finished_utc": "2026-09-21T11:50:37.691870+00:00"
+}

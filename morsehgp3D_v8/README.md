@@ -12,10 +12,33 @@ public_status=not_claimed
 
 L'audit d'ouverture est suivi, sur demande explicite du 13 septembre,
 de l'implémentation P0 mono-thread. Aucun code moteur ni résultat de
-performance n'est repris automatiquement. La cible reste toute la tour
-HGP FULL K=1..10 à 50 000 points sous une seconde **sur G4**, repli sur
-toute la tour 1..5, puis 100 ms sur cette cible. Les tests locaux mono
-sont des étapes d'optimisation ; la grande échelle G4 est un contrat distinct.
+performance n'est repris automatiquement.
+
+## Contrat principal actif
+
+Depuis la décision utilisateur du 21 septembre, la cible est **une trame
+SemanticKITTI entière**, sur plusieurs scènes, et non plus 50 000 points :
+toute la tour HGP FULL **K=1..10 en moins d'une seconde sur G4**, repli sur
+toute la tour **1..5**, puis **100 ms** sur le même périmètre. Aucun
+sous-échantillonnage, préfixe ou plafond de points ne satisfait cette cible.
+Voir le [contrat de trames entières](docs/CONTRAT_TRAMES_SEMANTICKITTI_20260921.md).
+
+L'entrée actuelle est quantifiée en u16 sur une grille isotrope **fixe de
+2 cm**, puis dédupliquée globalement : les trames 08/000000, 08/000100 et
+08/000200 comptent respectivement 123389/124479/125526 retours bruts et
+119142/119942/120725 sites distincts. Effectifs, fusions et correspondances
+sont [publiés](receipts/lidar_spatial_20260921/README.md). L'exactitude porte
+sur ces sites quantifiés, pas sur la géométrie float32 brute. Ces trois
+trames d'une même séquence ne valident pas plusieurs séquences.
+
+Les coupes spatiales restent un diagnostic de croissance ; un morceau
+rapide ne valide pas la trame entière. Le flux de candidats q3/q4 actuel
+n'est ni la tour FULL ni un moteur GPU. Aucun contrat de tour n'est acquis.
+Les anciennes mesures 50k restent historiques, sans réinterprétation.
+Les tests locaux mono sont des étapes d'optimisation ; l'objectif de
+plusieurs dizaines de millions de points sur G4 reste distinct et ouvert.
+
+## Organisation et périmètre
 
 La structure v7 est conservée pour organiser la refonte : `src/`, `cli/`,
 `oracle/`, `tests/`, `bench/`, `cmake/`, `docs/`, `audits/`, `receipts/`.
@@ -37,7 +60,7 @@ ses propres sources, tests et reçus, sans transfert implicite.
 
 ## État exécutable
 
-**Protocole LiDAR corrigé sur demande du21 septembre :** mesurer désormais
+**Diagnostic spatial LiDAR demandé le21 septembre :** mesurer
 une scène complète, ses deux moitiés puis ses quatre quarts, selon deux
 plans perpendiculaires passant par son capteur. Aucun sous-échantillonnage
 pour cette étude de croissance. Voir le [protocole spatial](docs/PROTOCOLE_LIDAR_SPATIAL_20260921.md).
@@ -45,7 +68,23 @@ Les ratios historiques ci-dessous concernent des préfixes à densité
 variable ; ils ne qualifient pas encore ce nouveau protocole.
 Les [préparations spatiales](receipts/lidar_spatial_20260921/README.md)
 sont closes pour trois scans :21nuages et11tests normal/−O réussis.
-Les mesures moteur sur ces morceaux restent à exécuter.
+Les [sept mesures scan0/K5/s8/W4](receipts/q34_spatial_20260921/README.md)
+sont maintenant closes, avec lectures et analyses normal/−O identiques.
+La trame entière119142sites prend383,311s de pipeline q3/q4 sur le CPU
+local partagé. Le front et les sorties croissent favorablement, mais
+trame→moitié positive conserve des exposants2,502 pour les bornes q3
+et2,332 pour les bornes de blocs q4 : toute la chaîne n'est pas encore
+sous-quadratique dans cette campagne. Ce sont des diagnostics empiriques,
+pas des bornes asymptotiques. Le moteur34 et ses builds restent inchangés.
+
+Première référence G4 close : trois trames entières0/100/200, K5/s8,
+48workers **CPU**, pipeline165,214/34,319/505,479s. Le quart de contrôle
+et la trame0 retrouvent les sorties/comptes géométriques locaux ; quatre
+portes natives et lecteurs normal/−O passent. Seulement4,19/11,13/1,93CPU
+logiques occupés en moyenne sur les trames : tâches intérieures trop
+grosses et travail q3/q4 à réduire restent prioritaires. VM SPOT arrêtée,
+état TERMINATED certifié. Aucun GPU ni contrat de tour acquis ; voir les
+[résultats G4 et leurs limites](receipts/q34_spatial_20260921/README.md).
 
 Tranche34,21 septembre : les [parcours graines/cellules q4](docs/Q4_GRAINES_ET_CELLULES_20260921.md)
 ajoutent deux options à Local28. LiveOnly élimine immédiatement les atlas
@@ -69,7 +108,7 @@ Atlas, balayages, tris et coquilles sont toujours payés. L'arête demeure
 atomique dans l'équipe CPU ; le découpage en tâches fines n'est pas encore
 raccordé. q3 est inchangé ; les centres conditionnels proposés par A
 préparent le prochain chantier de census commun à des blocs de graines.
-FULL, GPU, contrat50k et massif restent ouverts ; GCP non utilisé dans34.
+FULL, GPU, contrat de trame entière et massif restent ouverts ; GCP non utilisé dans34.
 
 ### Historique33
 

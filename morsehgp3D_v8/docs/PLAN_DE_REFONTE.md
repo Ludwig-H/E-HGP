@@ -6,13 +6,22 @@ maintenant implémentée et testée, pas la chaîne complète. Le
 les [mesures P0](../receipts/p0_local_credits_20260913/README.md) sont propres à la v8.
 L'ordre demandé reste mono-thread, multi-CPU local, puis GPU G4 SPOT.
 
+Contrat actif confirmé le21 septembre : **toute la tour d'une trame
+SemanticKITTI entière**, sur plusieurs scènes, K1..10 puis repli1..5,
+moins d'une seconde puis100ms sur G4. La référence principale n'est plus
+50k points ; voir le [périmètre précis](CONTRAT_TRAMES_SEMANTICKITTI_20260921.md).
+Les moitiés/quarts mesurent la croissance, pas la réussite de ce contrat.
+Les références50k ci-dessous sont les objectifs et observations historiques.
+
 Mise à jour utilisateur du21 septembre : les prochaines études LiDAR
 emploient le [découpage spatial capteur](PROTOCOLE_LIDAR_SPATIAL_20260921.md),
 pas une densité variable à8k/16k/32k. Mesurer scène, deux moitiés, quatre
 quarts et six relations parent/enfant, sans forcer leurs cardinalités.
-Le protocole doit être raccordé avant toute nouvelle conclusion de
-croissance sur les scènes importantes ; les résultats anciens ci-dessous
-restent bornés à leurs entrées sous-échantillonnées.
+Le [raccord et les sept mesures scan0](Q34_MESURES_SPATIALES_20260921.md)
+sont clos. Les rapports défavorables trame→moitié positive persistent
+dans les bornes q3 et la construction d'atlas q4 ; priorité au partage
+du census entre graines, puis à cette construction. Les résultats anciens
+ci-dessous restent bornés à leurs entrées sous-échantillonnées.
 
 État du21 septembre après34 : le [raccord graines/cellules q4](Q4_GRAINES_ET_CELLULES_20260921.md)
 réduit fortement la navigation sur les trois scans mesurés. Le contrôle

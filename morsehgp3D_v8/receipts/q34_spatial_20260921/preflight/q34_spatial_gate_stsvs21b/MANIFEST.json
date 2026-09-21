@@ -1,0 +1,48 @@
+{
+  "schema": "mhgp8_q34_spatial_gate_capture_v1",
+  "status": "running",
+  "error": null,
+  "scope": "sixteen_site_exhaustive_spatial_stream_oracle_not_full_or_performance",
+  "started_utc": "2026-09-21T11:31:07.527504+00:00",
+  "launch": [
+    "/home/codespace/.python/current/bin/python3",
+    "morsehgp3D_v8/tests/q34_spatial_gate.py",
+    "--build",
+    "build/v8_q4_seed_cells_r2_20260921",
+    "--output",
+    "morsehgp3D_v8/receipts/q34_spatial_20260921/preflight"
+  ],
+  "build": "/workspaces/E-HGP/build/v8_q4_seed_cells_r2_20260921",
+  "optimized": false,
+  "commands": [],
+  "captures": [],
+  "results": [],
+  "oracle": {
+    "clouds": 0,
+    "triangles": 0,
+    "positive_triangles": 0,
+    "tetrahedra": 0,
+    "positive_tetrahedra": 0,
+    "canonical_q4_groups": 0,
+    "balls": 0,
+    "census_sites": 0
+  },
+  "native_calls": 0,
+  "compared_records": 0,
+  "analysis_checks": 0,
+  "source_sha256": {
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_q34_spatial.py": "3a7a141cfdde2fd8baa0c197cdfab1419c16f181537f0230811b6e4d4d02c35c",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/analyze_q34_spatial.py": "cd2a789fedc53a0d3d76c36feae0d67bf88278f31096b41717825dbf4d9d1980",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_spatial.py": "d5bc8af10dad6c14f304f5737b52f2c0a6e452ac9a674957bd909f062c32c898",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/q34_spatial_gate.py": "3b5f39496f0f899ee4b5f4ff3f532ec3f37bcfd2ccf1439426f1f9d4cf0d57ca",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_p0_matrix.py": "b806572d9b5a76afe15c26586321663aa946e318a7a8a2286c3e9549e3ba717f"
+  },
+  "artifact_sha256": {
+    "/workspaces/E-HGP/build/v8_q4_seed_cells_r2_20260921/mhgp8_wspd_q34_probe": "925daeaa7a6ff948e0ed310066350af62fdc68f5af0512d219181864f4560d2c",
+    "/workspaces/E-HGP/build/v8_q4_seed_cells_r2_20260921/libmhgp8_p0.a": "a4d1a8ee636222c3b6c2f604967c3d3b08358352b1b1b0ee7f9f3b738213e194",
+    "/workspaces/E-HGP/build/v8_q4_seed_cells_r2_20260921/CMakeCache.txt": "cb3b93b8b2ee9c94a740a990e6c49075e3d2e170d8e1f68226a5efb53d1f48dd"
+  },
+  "closing_errors": [],
+  "gcp_used": false,
+  "full_contract_qualified": false
+}

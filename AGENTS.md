@@ -2,6 +2,26 @@
 
 Ce guide s'applique à tout le dépôt. Les règles de sécurité et de preuve ci-dessous sont impératives, même lorsqu'une tâche ne touche qu'un prototype ou de la documentation.
 
+## Contrat principal actif — trames SemanticKITTI entières
+
+Décision utilisateur du 21 septembre 2026 : le contrat principal remplace
+la taille nominale de 50k points par **une trame SemanticKITTI entière**,
+à qualifier sur plusieurs scènes. Sur **GCP G4**, viser toute la tour
+HGP **K=1..10 en moins d'une seconde** ; le repli porte sur toute la tour
+**K=1..5**, puis viser **100 ms** une fois le jalon d'une seconde acquis.
+Voir le [contrat détaillé](morsehgp3D_v8/docs/CONTRAT_TRAMES_SEMANTICKITTI_20260921.md).
+Aucun préfixe, tirage, plafonnement à 50k ou autre sous-échantillonnage
+ne remplace une trame entière. Le profil actuel reste une quantification
+u16 isotrope **fixe à 2 cm**, puis une déduplication globale publiée avec
+les correspondances de tous les retours : les trois trames disponibles
+ont 123389/124479/125526 retours bruts et 119142/119942/120725 sites distincts.
+Cette exactitude concerne les sites quantifiés, pas la géométrie float32
+brute. Les trames 08/000000, 08/000100 et 08/000200 ne constituent pas
+plusieurs séquences. Les moitiés/quarts spatiaux servent au diagnostic
+de croissance, jamais à valider le contrat de trame entière. Un flux
+q3/q4 CPU n'est ni FULL ni une exécution GPU. Les références historiques
+50k et leurs reçus restent inchangés ; aucun contrat de tour n'est acquis.
+
 ## Cible de travail et statut
 
 Le 13 septembre 2026, l'utilisateur demande un **audit complet de la v7 avant toute réimplémentation**, puis une refonte dans **`morsehgp3D_v8/`**, sur **`main` uniquement**. Entrées : `morsehgp3D_v8/README.md`, `PASSATION.md` et `audits/ETAT_COURANT.md`. Cadre initial : `phase=exploration_v8_hors_registre`, `backend=none`, `profile=quantized_u16_input_only`, `mode=audit_v7_math_and_architecture`, `public_status=not_claimed`. Aucun moteur v8 n'est encore implémenté ; les résultats v7 sont des objets d'audit, jamais des qualifications v8 héritées. Conserver la structure générale v7, pas son code par copie implicite. Les futurs noms utilisent C++20, `mhgp8`, `mhgp8_`, `MHGP8_` et les mêmes avertissements stricts. Ne pas modifier le registre formel pour cette exploration. Les règles mathématiques, de sécurité, de preuve, de tests et de budget ci-dessous restent applicables. Les modifications v6/v7 préexistantes et les audits indépendants sont préservés et exclus du commit d'ouverture v8.
@@ -151,6 +171,10 @@ Trente grandes observations34 :6R1 et24R2, scans0/100/200 séparés,8k/16k/32k,K
 ### Protocole LiDAR spatial demandé le21 septembre2026
 
 Lire `morsehgp3D_v8/docs/PROTOCOLE_LIDAR_SPATIAL_20260921.md`. Pour la croissance LiDAR, prendre une scène entière, la couper en deux par le plan vertical x=0 puis en quatre par y=0, plans orthogonaux passant par son origine capteur. Conserver tous les morceaux et leur densité ; ne pas forcer8k/16k/32k par tirage. Repartir des scans bruts dans leurs repères propres : les anciennes préparations100/200 sont recalées sur0. Profil actuel : quantification globale isotrope20mm puis déduplication globale et découpe des sitesu16 à32768 ; publier les fusions et les changements de côté dus à la quantification, conserver raw→site et local→global. Tous les retours restent traçables, aucune équivalence à la hiérarchie brute n'est revendiquée. Mesurer les six relations parent/enfant avec ratios d'effectifs réels, pas un doublement supposé, et chaque morceau avec son propre index/census. Les anciennes mesures restent historiques et comparables entre versions sur mêmes entrées, jamais requalifiées comme expérience spatiale. Aucun résultat moteur du nouveau protocole n'est encore acquis.
+
+Clôture du premier raccord spatial : lire `morsehgp3D_v8/docs/Q34_MESURES_SPATIALES_20260921.md` et `receipts/q34_spatial_20260921/README.md`. Les sept morceaux de scan0/K5/s8/W4/LiveOnly sont mesurés, moteur34 et builds inchangés, lectures et analyses normal/−O identiques. Deux petites portes rationnelles passent (14appels/238records chacune), ainsi que59corruptions de reçus. La trame entière119142sites prend383,311s sur CPU local partagé ; pas un contrat G4 ni FULL. Les six rapports utilisent les effectifs réels : trame→moitié positive garde des exposants2,502 pour les bornes q3 et2,332 pour les bornes de blocs q4. Ces diagnostics géométriquement asymétriques ne sont pas des preuves asymptotiques ; ne pas omettre les rapports défavorables. Le prochain port doit partager le census q3 entre graines avant construction des boules, avec compte/curseur privés et coquille globale ; ne pas rouvrir les micro-variantes q2. Le profil spatial nouveau reste limité àK5/s8, sans requalification automatique des anciensK10/s10/s12.
+
+Première référence G4 spatiale close : quatre commandesK5/s8/Local28LiveOnly/W48 CPU (quart0 puis trames0/100/200) et quatre portes natives PASS. Trois trames119142/119942/120725sites en165,214/34,319/505,479s ; occupation moyenne4,19/11,13/1,93CPU logiques malgré48workers, sur24cœurs/2SMT. Sources/commandes/arrêt ciblé fermés, lectures normal/−O concordantes, deux entrées local/G4 égales en travail géométrique et sorties. Le nouveau protocole CPU34 explicite ne modifie pas les anciens workers ni les gardes. Une seule session SPOT, budget utile900s respecté ; cible `devpod-gpu-exploration/us-central1-b/ehgp-v7-4fa0e0789a7d5bb06b787d35` certifiée TERMINATED à12:09:34UTC. Archiver seulement le dossier hôte, jamais son parent contenant la clé SSH. Coarse ne partage pas l'intérieur des sous-arbres ni les grosses arêtes : partager le census q3 puis redistribuer des tâches possédées fines, pas simplement ajouter des fils. Aucune exécution GPU ni tour FULL ; pas de contrat1s/100ms acquis. Les entièresK10/s10/s12 et d'autres séquences restent à tester, sans héritage des préfixes historiques.
 
 ### Cadre v7 audité
 

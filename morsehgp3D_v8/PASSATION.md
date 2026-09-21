@@ -9,10 +9,30 @@ du20 septembre. L'ancien auditeur B a livré les tranches19–21 ; son canal
 d'audit indépendant. Ses anciens résultats de constructeur et ses nouveaux
 audits ne qualifient jamais automatiquement les nouveaux ports.
 
+## Contrat principal actif — trames entières
+
+La décision utilisateur du 21 septembre remplace la cible nominale 50k
+par **une trame SemanticKITTI entière**, à qualifier sur plusieurs scènes.
+Objectif **G4 : toute la tour K=1..10 en moins d'une seconde**, repli sur
+toute la tour **K=1..5**, puis **100 ms** après le premier jalon.
+Le [contrat détaillé](docs/CONTRAT_TRAMES_SEMANTICKITTI_20260921.md)
+fait foi ; pas de sous-échantillonnage, de préfixe ou de plafond de points.
+
+Le profil actuel conserve la grille u16 isotrope **fixe de 2 cm** et la
+déduplication globale avec correspondances de tous les retours. Les
+trames 08/000000, 08/000100 et 08/000200 passent respectivement de
+123389/124479/125526 retours bruts à 119142/119942/120725 sites distincts,
+avec fusions publiées. Ne pas revendiquer l'exactitude sur les coordonnées
+float32 brutes ni une validation de plusieurs séquences à partir de ces
+trois trames de la séquence08. Les coupes spatiales diagnostiquent la
+croissance ; elles ne remplacent pas le contrat entier. Le flux q3/q4 CPU
+n'est pas FULL ni GPU. Les reçus historiques 50k restent inchangés.
+
 ## À reprendre maintenant
 
-Appliquer d'abord le [protocole spatial LiDAR](docs/PROTOCOLE_LIDAR_SPATIAL_20260921.md)
-demandé par l'utilisateur : scan entier dans son repère capteur, deux
+Prendre la trame entière comme référence principale ; utiliser le
+[protocole spatial LiDAR](docs/PROTOCOLE_LIDAR_SPATIAL_20260921.md)
+comme diagnostic : scan entier dans son repère capteur, deux
 moitiés x puis quatre quarts y, densité inchangée, tous les morceaux et
 effectifs réels. Les anciens sous-échantillons ne prouvent pas cette
 croissance. Les préparations historiques100/200 sont recalées sur0 :
@@ -20,10 +40,31 @@ repartir du brut, ne pas couper ces fichiers avec une fausse origine.
 La validation des nouvelles partitions et le raccord des mesures sont
 distincts de la qualification moteur34 ci-dessous.
 Préparations closes dans [les reçus spatiaux](receipts/lidar_spatial_20260921/README.md) :
-trois scènes,21nuages,11tests normal/−O,78artefacts. Raccorder un lecteur
-de mesures qui accepte les effectifs réels ; les anciens lecteurs imposent
-encore des fichiers de préfixes et ne doivent pas être contournés en
-falsifiant leurs commandes. Aucun chronométrage moteur spatial acquis.
+trois scènes,21nuages,11tests normal/−O,78artefacts. Le
+[raccord de mesures spatiales](docs/Q34_MESURES_SPATIALES_20260921.md)
+accepte maintenant les effectifs réels sans contourner les anciens lecteurs.
+Deux portes rationnelles normal/−O passent (14appels,238records chacune),
+ainsi que59corruptions de reçus. Sept mesures scan0/K5/s8/W4 sont closes,
+lectures et analyses normal/−O identiques ; trame entière119142sites en
+383,311s sur CPU local partagé. Les six relations parent/enfant sont
+publiées, y compris les défavorables : trame→moitié positive garde
+exposants2,502 pour les bornes q3 et2,332 pour les bornes de blocs q4.
+Ce n'est ni une borne asymptotique ni FULL ni un résultat GPU.
+La suite moteur prioritaire est le port complet SharedPrefix avant
+construction des boules q3, compte/curseur privés et coquille globale ;
+le plan de raccord et ses obligations figurent dans la note spatiale.
+
+Session G4 SPOT close : quart0 et trames entières0/100/200,K5/s8/W48
+CPU, quatre portes natives et lectures normal/−O PASS. Les trames prennent
+165,214/34,319/505,479s, pour4,19/11,13/1,93CPU logiques occupés en moyenne.
+Le plan Coarse768/769/768jobs ne partage pas leur intérieur ni les
+grosses arêtes ; future redistribution à prévoir avec des parents possédés.
+Ne pas confondre48CPU logiques et24cœurs physiques ni une moyenne globale
+avec un temps par worker. Deux comparaisons local/G4 conservent travail
+géométrique et sorties. Sources/commandes et arrêt ciblé TERMINATED clos
+dans les [reçus G4](receipts/q34_spatial_20260921/README.md). Aucun nouveau
+contrat FULL/GPU ; pas de relance de cette référence identique sans
+hypothèse utile. Les entièresK10/s10/s12 et d'autres séquences restent ouverts.
 
 La [tranche34](docs/Q4_GRAINES_ET_CELLULES_20260921.md) porte les modes
 Local28 LiveOnly et Joined, sans changement de défaut. Résumé immuable

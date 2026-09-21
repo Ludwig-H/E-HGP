@@ -3,16 +3,53 @@
 21 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
-Nouvelle consigne LiDAR : [scène, deux moitiés, quatre quarts](../docs/PROTOCOLE_LIDAR_SPATIAL_20260921.md),
+## Contrat principal actif — 21 septembre
+
+L'utilisateur remplace la référence nominale 50k par **une trame
+SemanticKITTI entière**, sur plusieurs scènes : toute la tour **K=1..10
+en moins d'une seconde sur G4**, repli sur toute la tour **1..5**, puis
+**100 ms** après ce jalon. Voir le [contrat détaillé](../docs/CONTRAT_TRAMES_SEMANTICKITTI_20260921.md).
+Aucun sous-échantillonnage, préfixe ou plafond de points ne valide ce contrat.
+La grille u16 isotrope reste **fixe à 2 cm**, avec déduplication globale et
+correspondances publiées : 123389/124479/125526 retours bruts donnent
+119142/119942/120725 sites distincts pour 08/000000, 08/000100 et 08/000200.
+L'exactitude concerne ces sites quantifiés, pas la géométrie float32 brute.
+Ces trois trames appartiennent à une seule séquence, pas à plusieurs.
+
+Les coupes spatiales servent au diagnostic de croissance, pas à une
+réussite sur trame entière. Le producteur q3/q4 CPU demeure un flux de
+candidats, pas FULL ni GPU ; aucun contrat de tour n'est acquis.
+Les mesures et reçus historiques 50k sont conservés sans réinterprétation.
+
+## Diagnostic spatial et état constructeur
+
+Diagnostic LiDAR : [scène, deux moitiés, quatre quarts](../docs/PROTOCOLE_LIDAR_SPATIAL_20260921.md),
 plans orthogonaux passant par le capteur propre de chaque scan. La densité
 est conservée ; rapports de croissance selon les effectifs réels.
 Les anciennes courbes sur préfixes hashés restent historiques et ne
-qualifient pas cette expérience spatiale. Aucun résultat moteur sur les
-sept nouveaux morceaux n'est encore revendiqué.
+qualifient pas cette expérience spatiale. Les
+[sept mesures scan0/K5/s8/W4](../receipts/q34_spatial_20260921/README.md)
+sont maintenant closes, lectures et analyses normal/−O identiques.
+La trame119142sites prend383,311s de pipeline CPU local partagé ;
+les grandes scènes n'ont pas d'oracle exhaustif dans cette campagne.
+Deux petites portes rationnelles indépendantes (14appels,238records
+chacune) et59corruptions de reçus qualifient le nouveau raccord.
+Les six comparaisons spatiales sont publiées : trame→moitié positive
+garde des exposants2,502 pour les bornes q3 et2,332 pour les bornes de
+blocs q4. Aucun sous-quadratique global ni contrat de tour n'en découle.
 Les [préparations des trois scans](../receipts/lidar_spatial_20260921/README.md)
 passent11tests normal/−O et six relectures complètes ;21nuages et leurs
 correspondances sont clos,78artefacts. Ce sont des données validées,
 pas une qualification géométrique du producteur sur ces nouveaux nuages.
+
+G4 SPOT effectivement utilisée dans la campagne spatiale : quart0 puis
+trois trames entières0/100/200,K5/s8/W48 **CPU**. Quatre portes natives,
+quatre mesures terminées, lectures normal/−O concordantes ; les deux
+entrées communes au local conservent sorties et comptes géométriques.
+Trames165,214/34,319/505,479s avec seulement4,19/11,13/1,93CPU occupés
+en moyenne malgré48workers. Réduction du travail et distribution fine
+intérieure restent ouvertes ; pas GPU ni FULL. Sources et preuves
+d'arrêt ciblé TERMINATED dans les [reçus spatiaux](../receipts/q34_spatial_20260921/README.md).
 
 Tranche34 close après qualification corrigée : LiveOnly et Joined, graines×cellules
 q4 avec bornes strictes, parents immuables, cache privé par bloc et relais

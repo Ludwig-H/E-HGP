@@ -1,0 +1,12 @@
+{
+  "status": "failed_before_cloud_action",
+  "stage": "local_session_key_validation",
+  "observed_private_key_mode": "0644",
+  "required_private_key_mode": "0600",
+  "containing_directory_mode": "0700",
+  "error": "ValueError: existing private/public key files",
+  "cloud_command_executed": false,
+  "vm_started": false,
+  "remedy": "chmod 600 on this newly generated session key, then verify mode before a distinct launch",
+  "private_key_content_archived": false
+}

@@ -18,8 +18,10 @@ et passent tous deux par l'origine du capteur. Conserver sept objets :
 Tous les morceaux sont mesurés, pas seulement le plus favorable. Aucun
 tirage, préfixe hashé, plafond de points, rééquilibrage des effectifs ou
 adaptation de la résolution. Les tailles sont celles de la scène : on ne
-les force pas à 8k/16k/32k. Les tests synthétiques à ces tailles et le
-contrat distinct 50k sont conservés, sans changer le présent protocole.
+les force pas à 8k/16k/32k. Les tests synthétiques à ces tailles et les
+mesures historiques50k restent distincts. La décision ultérieure du même
+jour fixe le [contrat principal](CONTRAT_TRAMES_SEMANTICKITTI_20260921.md)
+sur une trame entière, pas sur l'un de ses morceaux.
 
 Les préparations historiques des scans 100 et 200 étaient recalées dans
 le repère du scan 0. Les couper à `x=y=0` ne passerait donc pas par leur
@@ -104,8 +106,11 @@ il n'y a pas de plafond sur la durée d'un calcul normal.
 Les anciens reçus restent immuables et utiles aux comparaisons de versions
 sur une entrée identique. Leurs ratios 8k/16k/32k décrivent un changement
 de densité par sous-échantillonnage ; ils ne sont **pas** les résultats de
-cette nouvelle expérience spatiale. Une nouvelle campagne moteur et son
-lecteur restent à raccorder après validation des préparations.
+cette nouvelle expérience spatiale. Le
+[nouveau raccord de mesures](Q34_MESURES_SPATIALES_20260921.md) consomme
+les sept fichiers entiers et vérifie leurs commandes et hashes. La
+campagne scan0/K5/s8/W4 est close ; les six rapports, favorables ou non,
+sont publiés dans les [reçus moteur](../receipts/q34_spatial_20260921/README.md).
 
 Préparations des scans0/100/200 maintenant closes :21nuages,11 tests
 normal/−O,11 commandes et78 artefacts vérifiés. Les effectifs et toutes
