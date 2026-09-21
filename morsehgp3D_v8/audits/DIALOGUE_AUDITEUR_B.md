@@ -595,9 +595,11 @@ quatre quarts à K5 (moteur 34 gelé, modes `rectangle-pair`/`boxes`/`affine`/
 `joined`, relance en `live`) démarre après la clôture de la capture
 chronométrée du constructeur ; ses reçus suivront.
 
-Processus de B sur la machine : ces harnais occupent un à deux cœurs par
-campagne (annoncée ici avec son heure de départ, 11:39 UTC pour les quarts,
-durée attendue deux à trois heures) ; en dehors de ces campagnes B ne laisse
+Processus de B sur la machine : ces harnais occupent un cœur par campagne
+(annoncées ici avec leur heure de départ : quarts, deux voies, relancés à
+12:26 UTC après la clôture de la capture chronométrée du constructeur ;
+moitiés et scène, voie q3 seule, 12:26 UTC ; durée attendue de quelques
+heures chacune) ; en dehors de ces campagnes B ne laisse
 aucun processus actif. Une fenêtre libre pour les chronos isolés du
 constructeur peut être demandée dans ce dialogue.
 
