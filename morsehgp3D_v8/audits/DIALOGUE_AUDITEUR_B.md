@@ -181,6 +181,32 @@ bien 2^128), triangle aigu d'arête ab maximale. Les fixtures u16 de A
 (équilatéral et tétraèdre régulier d'arête 72, contacts z à Ξ = 3H² et
 Ξ = 2H², centre (33, 33, 27) strictement intérieur) sont exactes.
 
+### Flux q3 du raccord 31 : accord exact avec une énumération indépendante (1k à 4k)
+
+Reçu [q3_stream_crosscheck_20260921/](q3_stream_crosscheck_20260921/README.md) :
+la sonde `mhgp8_wspd_q34_probe` construite à 4dbe3024 (masque 2, quatre
+workers, mode `records`) et mon harnais en mode exhaustif (toutes les paires
+résiduelles q3 du même front, citron exact, seeds avec la règle de propriété
+du raccord, census entier des circumboules sur la couverture des paires
+conservées) donnent, sur les préfixes 1k/2k/4k du scan 0 à K5 et 1k/2k à
+K10, **les mêmes masses résiduelles, les mêmes seeds q3, les mêmes boules
+émises et le même multiensemble (support, profondeur)** : 10 481, 21 948,
+45 151, 42 876 et 92 994 boules ; la voie q3 ne dépend pas du masque demandé
+(1k et 2k relancés au masque 6). Le lemme du citron est vérifié seed par
+seed sur **toutes** les paires rejetables à 1k (78 419 paires K5 et 167 992
+paires K10, 13,2 M seeds, 0 violation) et sur 2 000 puis 1 000 paires aux
+tailles suivantes. C'est un contrôle du calcul (même objet, deux codes
+indépendants pour tout ce qui suit le front), pas une qualification : trois
+petites tailles, un scan, pas de q4.
+
+Deux lectures de coût sur ces lignes : les seeds du moteur croissent de
+×5,5 à ×6 par doublement (3,68 M → 21,9 M → 121,7 M à K5, soit n^2,5) quand
+les boules émises croissent linéairement (10,5 k → 21,9 k → 45,2 k, ≈ 11 n à
+K5, ≈ 46 n à K10) ; à 4k/K5 le census q3 du moteur fait 33,6 Md tests
+ponctuels là où le harnais n'en fait que 86,7 M sur les paires conservées,
+le reste étant réglé par le citron (facteur 387). Le rejet par paire avant
+la couverture est donc mesuré ici sur le moteur réel, pas seulement projeté.
+
 ## Erreurs et points durs relevés (à 4dbe3024)
 
 1. **Session G4 R2 : diagnostic non établi.** La capture
@@ -245,8 +271,8 @@ vérifié en direct par B (pas de `gcloud` ici).
   `wspd_regime_20260914/`, `propagation_temoins_20260914/`,
   `credits_terminaux_20260914/`, `chaine_q2_20260914/`,
   `separation_20260914/`, `surproposition_20260915/`,
-  `plafond_proposeur_20260915/`, `oracle_q3q4_20260915/` et
-  `front_lanes_lidar_20260921/`.
+  `plafond_proposeur_20260915/`, `oracle_q3q4_20260915/`,
+  `front_lanes_lidar_20260921/` et `q3_stream_crosscheck_20260921/`.
 - Rien n'est supprimé ni déplacé : chaque ancien fichier est cité par un reçu
   immuable, une note du constructeur ou le journal (précédent
   `P0_OWNER_CHECKS.json` à ne pas répéter). Les sections antérieures de ce
