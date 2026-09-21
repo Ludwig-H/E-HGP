@@ -1,0 +1,1 @@
+{"schema":"mhgp8_float32_q4_events_selftest_v1","status":"passed","tests":689,"queries":568,"equality_checks":104,"coplanar_rejections":4,"rejected_seeds":8,"invalid_modes":1,"counter_overflows":1,"owner_replacements":1,"rounding_modes":4,"flush_modes":4,"concurrent_workers":4,"concurrent_queries":32,"prepared_bytes":184}

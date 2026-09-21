@@ -1,0 +1,779 @@
+{
+  "schema": "mhgp8_float32_identity_readback_v1",
+  "status": "passed",
+  "normal_optimized_equal": true,
+  "records": [
+    {
+      "mode": "release_normal",
+      "command": "python -B morsehgp3D_v8/bench/run_float32_identity_checks.py read --path morsehgp3D_v8/receipts/float32_identity_20260921/release/identity_0ecgriwi",
+      "exit_code": 0,
+      "result": {
+        "ball_gate": {
+          "binary": "/workspaces/E-HGP/build/v8_float32_identity_20260921/mhgp8_float32_ball_test",
+          "binary_sha256": "08b6a6a315fb572b0e3d4d99454dd8736f805826c3d6bae8dab43019aa48fc77",
+          "cases": 1636,
+          "gate_sha256": "c22fa32d280beffaa3609ff3e07e7012a0fc58b31f7938c2a416b9d463899df8",
+          "native_selftest": {
+            "concurrent_queries": 128,
+            "concurrent_workers": 4,
+            "flush_modes": 4,
+            "invalid_modes": 2,
+            "nonfinite_rejections": 18,
+            "query_checks": 548,
+            "rounding_modes": 4,
+            "schema": "mhgp8_float32_ball_selftest_v1",
+            "status": "passed",
+            "support_bytes": 128,
+            "tests": 1287
+          },
+          "optimized": false,
+          "populations": {
+            "3": {
+              "invalid": 155,
+              "power_exact_fallbacks": 159,
+              "power_filter_accepts": 135,
+              "preparation_exact_fallbacks": 95,
+              "preparation_filter_accepts": 354,
+              "signs": {
+                "0": 117,
+                "1": 96,
+                "-1": 81
+              },
+              "valid": 294
+            },
+            "4": {
+              "invalid": 456,
+              "power_exact_fallbacks": 506,
+              "power_filter_accepts": 225,
+              "preparation_exact_fallbacks": 542,
+              "preparation_filter_accepts": 645,
+              "signs": {
+                "0": 408,
+                "1": 163,
+                "-1": 160
+              },
+              "valid": 731
+            }
+          },
+          "rejected_inputs": 53,
+          "rejected_mutations": 13,
+          "schema": "mhgp8_float32_ball_gate_v1",
+          "scope": "binary32_positive_q3_q4_supports_and_power_not_census_or_FULL",
+          "source_sha256": {
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/fixed_signed.hpp": "cd3facd9e93ddfe668f87a4e2f7faab9c0217596d2835b17f6c01cb0cbf3a3f8",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.cpp": "3c89462ee22b3636e21f67d3ec1d3eb5bc440e76e95864fa8dd2814ac8943a46",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.hpp": "c673372c58e5d64931827d54bb13a44b69d3835e069e6cc611d9939ae3408973",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_predicates.hpp": "1f6175bb27cd7543c2d68916efabe68ebd23ac413dadc7aad82cabb30651997d",
+            "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_ball_gate.py": "c22fa32d280beffaa3609ff3e07e7012a0fc58b31f7938c2a416b9d463899df8",
+            "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_ball_probe.cpp": "ae7d55a023ca978b8b5181fb088fbb0e7ab361e8b0e45b5386789370f27e7088"
+          },
+          "status": "passed",
+          "transcript_sha256": "459c2a42dff574bea2fb05da767a2a041bdccab3781b34ddb65d7d6151a42210"
+        },
+        "commands": 28,
+        "completion_sha256": "94a76a4f5662e4a67cbeda7890a735b9d477d0587572054500aabbd2b28b6f6f",
+        "division": {
+          "exact_divisions": 185,
+          "gcd_checks": 1124,
+          "invalid_divisor_rejections": 9,
+          "nonexact_rejections": 347,
+          "overflow_rejections": 9,
+          "shift_checks": 47,
+          "status": "passed",
+          "tests": 9051
+        },
+        "gcp_used": false,
+        "identity_gate": {
+          "binary": "/workspaces/E-HGP/build/v8_float32_identity_20260921/mhgp8_float32_ball_key_test",
+          "binary_sha256": "d553ca36bd66442852c11cd63782ead11360ea3440835fe5533a2062d3fec027",
+          "event_selftest": {
+            "concurrent_queries": 32,
+            "concurrent_workers": 4,
+            "coplanar_rejections": 4,
+            "counter_overflows": 1,
+            "equality_checks": 104,
+            "flush_modes": 4,
+            "invalid_modes": 1,
+            "owner_replacements": 1,
+            "prepared_bytes": 184,
+            "queries": 568,
+            "rejected_seeds": 8,
+            "rounding_modes": 4,
+            "schema": "mhgp8_float32_q4_events_selftest_v1",
+            "status": "passed",
+            "tests": 689
+          },
+          "events": {
+            "cases": 960,
+            "coplanar": 398,
+            "invalid": 41,
+            "orders": {
+              "0": 202,
+              "1": 158,
+              "-1": 161
+            },
+            "root_exact_fallbacks": 238,
+            "root_filter_accepts": 283,
+            "side_exact_fallbacks": 478,
+            "side_filter_accepts": 1360,
+            "sides": {
+              "0": 458,
+              "1": 693,
+              "-1": 687
+            },
+            "valid": 919
+          },
+          "events_binary": "/workspaces/E-HGP/build/v8_float32_identity_20260921/mhgp8_float32_q4_events_test",
+          "events_binary_sha256": "bf915f067b30c8f9d715081c05993c682a3bc2d8a37e35c17dc017597fd2b538",
+          "gate_sha256": "ed61e8b8b589054a0fbc81cddd0c60b139ed84e529269569b837c8cc3b3f9044",
+          "key_selftest": {
+            "concurrent_iterations": 64,
+            "concurrent_workers": 4,
+            "flush_modes": 4,
+            "key_object_bytes": 24,
+            "rounding_modes": 4,
+            "schema": "mhgp8_float32_key_selftest_v1",
+            "status": "passed",
+            "tests": 52
+          },
+          "keys": {
+            "cases": 229,
+            "cross_arity_balls": 10,
+            "distinct_balls": 63,
+            "populations": {
+              "2": {
+                "invalid": 2,
+                "valid": 64
+              },
+              "3": {
+                "invalid": 23,
+                "valid": 48
+              },
+              "4": {
+                "invalid": 34,
+                "valid": 58
+              }
+            },
+            "serialized_words": {
+              "max": 201,
+              "min": 10,
+              "sum": 2891
+            }
+          },
+          "optimized": false,
+          "rejected_inputs": {
+            "events": 64,
+            "keys": 77
+          },
+          "rejected_mutations": 18,
+          "schema": "mhgp8_float32_identity_gate_v1",
+          "scope": "binary32_ball_identity_and_q4_event_primitives_not_radius_sort_census_or_FULL",
+          "source_sha256": {
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/fixed_signed.hpp": "cd3facd9e93ddfe668f87a4e2f7faab9c0217596d2835b17f6c01cb0cbf3a3f8",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.cpp": "3c89462ee22b3636e21f67d3ec1d3eb5bc440e76e95864fa8dd2814ac8943a46",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.hpp": "c673372c58e5d64931827d54bb13a44b69d3835e069e6cc611d9939ae3408973",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball_key.cpp": "58b5f98ea921c9243a237900c25bb7ecce2217a8d5aa48262acad12ddb8ca3fb",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball_key.hpp": "e02a24bfa436c81c5ed977d28a1ad7860e1af9c57087c4c69d56a5013f4cc39d",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_predicates.hpp": "1f6175bb27cd7543c2d68916efabe68ebd23ac413dadc7aad82cabb30651997d",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_q4_events.cpp": "a1b55373271b4d3a8e889ad6cebf9d6972729c18be100bb9d367a401321d4531",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_q4_events.hpp": "526d340b4aca9bc52f9aee305707937d95f6e2e20c037756444ea161b5a27c6b",
+            "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_identity_gate.py": "ed61e8b8b589054a0fbc81cddd0c60b139ed84e529269569b837c8cc3b3f9044",
+            "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_key_probe.cpp": "532dde81a259e06c8446deb0e5865eb4e135d69056c7da60ee49989a56c3d8e8",
+            "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_q4_events_probe.cpp": "c4c94f30633a10408cfa45193671f6dcc001a47fa1dcb123f6fd58c0550428f8"
+          },
+          "status": "passed",
+          "transcript_sha256": "f04cabd3b8aefeb051702359e03d26ee21539acf68c7bd841e56034af00a6c5b"
+        },
+        "integer": {
+          "invalid_rejections": 6,
+          "overflow_rejections": 10,
+          "status": "passed",
+          "tests": 948
+        },
+        "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_identity_20260921/release/identity_0ecgriwi",
+        "schema": "mhgp8_float32_identity_qualification_v1",
+        "scope": "native_binary32_ball_keys_and_reduced_q4_events_not_pipeline_or_FULL_or_GPU",
+        "status": "passed"
+      }
+    },
+    {
+      "mode": "release_optimized",
+      "command": "python -B -O morsehgp3D_v8/bench/run_float32_identity_checks.py read --path morsehgp3D_v8/receipts/float32_identity_20260921/release/identity_0ecgriwi",
+      "exit_code": 0,
+      "result": {
+        "ball_gate": {
+          "binary": "/workspaces/E-HGP/build/v8_float32_identity_20260921/mhgp8_float32_ball_test",
+          "binary_sha256": "08b6a6a315fb572b0e3d4d99454dd8736f805826c3d6bae8dab43019aa48fc77",
+          "cases": 1636,
+          "gate_sha256": "c22fa32d280beffaa3609ff3e07e7012a0fc58b31f7938c2a416b9d463899df8",
+          "native_selftest": {
+            "concurrent_queries": 128,
+            "concurrent_workers": 4,
+            "flush_modes": 4,
+            "invalid_modes": 2,
+            "nonfinite_rejections": 18,
+            "query_checks": 548,
+            "rounding_modes": 4,
+            "schema": "mhgp8_float32_ball_selftest_v1",
+            "status": "passed",
+            "support_bytes": 128,
+            "tests": 1287
+          },
+          "optimized": false,
+          "populations": {
+            "3": {
+              "invalid": 155,
+              "power_exact_fallbacks": 159,
+              "power_filter_accepts": 135,
+              "preparation_exact_fallbacks": 95,
+              "preparation_filter_accepts": 354,
+              "signs": {
+                "0": 117,
+                "1": 96,
+                "-1": 81
+              },
+              "valid": 294
+            },
+            "4": {
+              "invalid": 456,
+              "power_exact_fallbacks": 506,
+              "power_filter_accepts": 225,
+              "preparation_exact_fallbacks": 542,
+              "preparation_filter_accepts": 645,
+              "signs": {
+                "0": 408,
+                "1": 163,
+                "-1": 160
+              },
+              "valid": 731
+            }
+          },
+          "rejected_inputs": 53,
+          "rejected_mutations": 13,
+          "schema": "mhgp8_float32_ball_gate_v1",
+          "scope": "binary32_positive_q3_q4_supports_and_power_not_census_or_FULL",
+          "source_sha256": {
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/fixed_signed.hpp": "cd3facd9e93ddfe668f87a4e2f7faab9c0217596d2835b17f6c01cb0cbf3a3f8",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.cpp": "3c89462ee22b3636e21f67d3ec1d3eb5bc440e76e95864fa8dd2814ac8943a46",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.hpp": "c673372c58e5d64931827d54bb13a44b69d3835e069e6cc611d9939ae3408973",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_predicates.hpp": "1f6175bb27cd7543c2d68916efabe68ebd23ac413dadc7aad82cabb30651997d",
+            "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_ball_gate.py": "c22fa32d280beffaa3609ff3e07e7012a0fc58b31f7938c2a416b9d463899df8",
+            "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_ball_probe.cpp": "ae7d55a023ca978b8b5181fb088fbb0e7ab361e8b0e45b5386789370f27e7088"
+          },
+          "status": "passed",
+          "transcript_sha256": "459c2a42dff574bea2fb05da767a2a041bdccab3781b34ddb65d7d6151a42210"
+        },
+        "commands": 28,
+        "completion_sha256": "94a76a4f5662e4a67cbeda7890a735b9d477d0587572054500aabbd2b28b6f6f",
+        "division": {
+          "exact_divisions": 185,
+          "gcd_checks": 1124,
+          "invalid_divisor_rejections": 9,
+          "nonexact_rejections": 347,
+          "overflow_rejections": 9,
+          "shift_checks": 47,
+          "status": "passed",
+          "tests": 9051
+        },
+        "gcp_used": false,
+        "identity_gate": {
+          "binary": "/workspaces/E-HGP/build/v8_float32_identity_20260921/mhgp8_float32_ball_key_test",
+          "binary_sha256": "d553ca36bd66442852c11cd63782ead11360ea3440835fe5533a2062d3fec027",
+          "event_selftest": {
+            "concurrent_queries": 32,
+            "concurrent_workers": 4,
+            "coplanar_rejections": 4,
+            "counter_overflows": 1,
+            "equality_checks": 104,
+            "flush_modes": 4,
+            "invalid_modes": 1,
+            "owner_replacements": 1,
+            "prepared_bytes": 184,
+            "queries": 568,
+            "rejected_seeds": 8,
+            "rounding_modes": 4,
+            "schema": "mhgp8_float32_q4_events_selftest_v1",
+            "status": "passed",
+            "tests": 689
+          },
+          "events": {
+            "cases": 960,
+            "coplanar": 398,
+            "invalid": 41,
+            "orders": {
+              "0": 202,
+              "1": 158,
+              "-1": 161
+            },
+            "root_exact_fallbacks": 238,
+            "root_filter_accepts": 283,
+            "side_exact_fallbacks": 478,
+            "side_filter_accepts": 1360,
+            "sides": {
+              "0": 458,
+              "1": 693,
+              "-1": 687
+            },
+            "valid": 919
+          },
+          "events_binary": "/workspaces/E-HGP/build/v8_float32_identity_20260921/mhgp8_float32_q4_events_test",
+          "events_binary_sha256": "bf915f067b30c8f9d715081c05993c682a3bc2d8a37e35c17dc017597fd2b538",
+          "gate_sha256": "ed61e8b8b589054a0fbc81cddd0c60b139ed84e529269569b837c8cc3b3f9044",
+          "key_selftest": {
+            "concurrent_iterations": 64,
+            "concurrent_workers": 4,
+            "flush_modes": 4,
+            "key_object_bytes": 24,
+            "rounding_modes": 4,
+            "schema": "mhgp8_float32_key_selftest_v1",
+            "status": "passed",
+            "tests": 52
+          },
+          "keys": {
+            "cases": 229,
+            "cross_arity_balls": 10,
+            "distinct_balls": 63,
+            "populations": {
+              "2": {
+                "invalid": 2,
+                "valid": 64
+              },
+              "3": {
+                "invalid": 23,
+                "valid": 48
+              },
+              "4": {
+                "invalid": 34,
+                "valid": 58
+              }
+            },
+            "serialized_words": {
+              "max": 201,
+              "min": 10,
+              "sum": 2891
+            }
+          },
+          "optimized": false,
+          "rejected_inputs": {
+            "events": 64,
+            "keys": 77
+          },
+          "rejected_mutations": 18,
+          "schema": "mhgp8_float32_identity_gate_v1",
+          "scope": "binary32_ball_identity_and_q4_event_primitives_not_radius_sort_census_or_FULL",
+          "source_sha256": {
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/fixed_signed.hpp": "cd3facd9e93ddfe668f87a4e2f7faab9c0217596d2835b17f6c01cb0cbf3a3f8",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.cpp": "3c89462ee22b3636e21f67d3ec1d3eb5bc440e76e95864fa8dd2814ac8943a46",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.hpp": "c673372c58e5d64931827d54bb13a44b69d3835e069e6cc611d9939ae3408973",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball_key.cpp": "58b5f98ea921c9243a237900c25bb7ecce2217a8d5aa48262acad12ddb8ca3fb",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball_key.hpp": "e02a24bfa436c81c5ed977d28a1ad7860e1af9c57087c4c69d56a5013f4cc39d",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_predicates.hpp": "1f6175bb27cd7543c2d68916efabe68ebd23ac413dadc7aad82cabb30651997d",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_q4_events.cpp": "a1b55373271b4d3a8e889ad6cebf9d6972729c18be100bb9d367a401321d4531",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_q4_events.hpp": "526d340b4aca9bc52f9aee305707937d95f6e2e20c037756444ea161b5a27c6b",
+            "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_identity_gate.py": "ed61e8b8b589054a0fbc81cddd0c60b139ed84e529269569b837c8cc3b3f9044",
+            "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_key_probe.cpp": "532dde81a259e06c8446deb0e5865eb4e135d69056c7da60ee49989a56c3d8e8",
+            "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_q4_events_probe.cpp": "c4c94f30633a10408cfa45193671f6dcc001a47fa1dcb123f6fd58c0550428f8"
+          },
+          "status": "passed",
+          "transcript_sha256": "f04cabd3b8aefeb051702359e03d26ee21539acf68c7bd841e56034af00a6c5b"
+        },
+        "integer": {
+          "invalid_rejections": 6,
+          "overflow_rejections": 10,
+          "status": "passed",
+          "tests": 948
+        },
+        "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_identity_20260921/release/identity_0ecgriwi",
+        "schema": "mhgp8_float32_identity_qualification_v1",
+        "scope": "native_binary32_ball_keys_and_reduced_q4_events_not_pipeline_or_FULL_or_GPU",
+        "status": "passed"
+      }
+    },
+    {
+      "mode": "sanitize_normal",
+      "command": "python -B morsehgp3D_v8/bench/run_float32_identity_checks.py read --path morsehgp3D_v8/receipts/float32_identity_20260921/sanitize/identity_4o1kodni",
+      "exit_code": 0,
+      "result": {
+        "ball_gate": {
+          "binary": "/workspaces/E-HGP/build/v8_float32_identity_sanitize_20260921/mhgp8_float32_ball_test",
+          "binary_sha256": "678289d04fe834a075ad2705c92de430a0f7853acef2b4d4b468faecc08a4324",
+          "cases": 1636,
+          "gate_sha256": "c22fa32d280beffaa3609ff3e07e7012a0fc58b31f7938c2a416b9d463899df8",
+          "native_selftest": {
+            "concurrent_queries": 128,
+            "concurrent_workers": 4,
+            "flush_modes": 4,
+            "invalid_modes": 2,
+            "nonfinite_rejections": 18,
+            "query_checks": 548,
+            "rounding_modes": 4,
+            "schema": "mhgp8_float32_ball_selftest_v1",
+            "status": "passed",
+            "support_bytes": 128,
+            "tests": 1287
+          },
+          "optimized": false,
+          "populations": {
+            "3": {
+              "invalid": 155,
+              "power_exact_fallbacks": 159,
+              "power_filter_accepts": 135,
+              "preparation_exact_fallbacks": 95,
+              "preparation_filter_accepts": 354,
+              "signs": {
+                "0": 117,
+                "1": 96,
+                "-1": 81
+              },
+              "valid": 294
+            },
+            "4": {
+              "invalid": 456,
+              "power_exact_fallbacks": 506,
+              "power_filter_accepts": 225,
+              "preparation_exact_fallbacks": 542,
+              "preparation_filter_accepts": 645,
+              "signs": {
+                "0": 408,
+                "1": 163,
+                "-1": 160
+              },
+              "valid": 731
+            }
+          },
+          "rejected_inputs": 53,
+          "rejected_mutations": 13,
+          "schema": "mhgp8_float32_ball_gate_v1",
+          "scope": "binary32_positive_q3_q4_supports_and_power_not_census_or_FULL",
+          "source_sha256": {
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/fixed_signed.hpp": "cd3facd9e93ddfe668f87a4e2f7faab9c0217596d2835b17f6c01cb0cbf3a3f8",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.cpp": "3c89462ee22b3636e21f67d3ec1d3eb5bc440e76e95864fa8dd2814ac8943a46",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.hpp": "c673372c58e5d64931827d54bb13a44b69d3835e069e6cc611d9939ae3408973",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_predicates.hpp": "1f6175bb27cd7543c2d68916efabe68ebd23ac413dadc7aad82cabb30651997d",
+            "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_ball_gate.py": "c22fa32d280beffaa3609ff3e07e7012a0fc58b31f7938c2a416b9d463899df8",
+            "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_ball_probe.cpp": "ae7d55a023ca978b8b5181fb088fbb0e7ab361e8b0e45b5386789370f27e7088"
+          },
+          "status": "passed",
+          "transcript_sha256": "8d60bef5ebbd4b47cf5c7b70fbfb9f049e507e75b48f4a23dd726a4813eeec4b"
+        },
+        "commands": 28,
+        "completion_sha256": "c8af60628af2957662479d7b7905f9bc3f8b6dd20f7a31a82810564e21169adb",
+        "division": {
+          "exact_divisions": 185,
+          "gcd_checks": 1124,
+          "invalid_divisor_rejections": 9,
+          "nonexact_rejections": 347,
+          "overflow_rejections": 9,
+          "shift_checks": 47,
+          "status": "passed",
+          "tests": 9051
+        },
+        "gcp_used": false,
+        "identity_gate": {
+          "binary": "/workspaces/E-HGP/build/v8_float32_identity_sanitize_20260921/mhgp8_float32_ball_key_test",
+          "binary_sha256": "468c611e4da0d48ea91c09e1dbe81a20eda762906058d8d47b706e10901a4bfa",
+          "event_selftest": {
+            "concurrent_queries": 32,
+            "concurrent_workers": 4,
+            "coplanar_rejections": 4,
+            "counter_overflows": 1,
+            "equality_checks": 104,
+            "flush_modes": 4,
+            "invalid_modes": 1,
+            "owner_replacements": 1,
+            "prepared_bytes": 184,
+            "queries": 568,
+            "rejected_seeds": 8,
+            "rounding_modes": 4,
+            "schema": "mhgp8_float32_q4_events_selftest_v1",
+            "status": "passed",
+            "tests": 689
+          },
+          "events": {
+            "cases": 960,
+            "coplanar": 398,
+            "invalid": 41,
+            "orders": {
+              "0": 202,
+              "1": 158,
+              "-1": 161
+            },
+            "root_exact_fallbacks": 238,
+            "root_filter_accepts": 283,
+            "side_exact_fallbacks": 478,
+            "side_filter_accepts": 1360,
+            "sides": {
+              "0": 458,
+              "1": 693,
+              "-1": 687
+            },
+            "valid": 919
+          },
+          "events_binary": "/workspaces/E-HGP/build/v8_float32_identity_sanitize_20260921/mhgp8_float32_q4_events_test",
+          "events_binary_sha256": "a3471db32f294a0b0539d8edf24d0c7812d43321c2ad6d66d52281fe6c37bb9e",
+          "gate_sha256": "ed61e8b8b589054a0fbc81cddd0c60b139ed84e529269569b837c8cc3b3f9044",
+          "key_selftest": {
+            "concurrent_iterations": 64,
+            "concurrent_workers": 4,
+            "flush_modes": 4,
+            "key_object_bytes": 24,
+            "rounding_modes": 4,
+            "schema": "mhgp8_float32_key_selftest_v1",
+            "status": "passed",
+            "tests": 52
+          },
+          "keys": {
+            "cases": 229,
+            "cross_arity_balls": 10,
+            "distinct_balls": 63,
+            "populations": {
+              "2": {
+                "invalid": 2,
+                "valid": 64
+              },
+              "3": {
+                "invalid": 23,
+                "valid": 48
+              },
+              "4": {
+                "invalid": 34,
+                "valid": 58
+              }
+            },
+            "serialized_words": {
+              "max": 201,
+              "min": 10,
+              "sum": 2891
+            }
+          },
+          "optimized": false,
+          "rejected_inputs": {
+            "events": 64,
+            "keys": 77
+          },
+          "rejected_mutations": 18,
+          "schema": "mhgp8_float32_identity_gate_v1",
+          "scope": "binary32_ball_identity_and_q4_event_primitives_not_radius_sort_census_or_FULL",
+          "source_sha256": {
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/fixed_signed.hpp": "cd3facd9e93ddfe668f87a4e2f7faab9c0217596d2835b17f6c01cb0cbf3a3f8",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.cpp": "3c89462ee22b3636e21f67d3ec1d3eb5bc440e76e95864fa8dd2814ac8943a46",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.hpp": "c673372c58e5d64931827d54bb13a44b69d3835e069e6cc611d9939ae3408973",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball_key.cpp": "58b5f98ea921c9243a237900c25bb7ecce2217a8d5aa48262acad12ddb8ca3fb",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball_key.hpp": "e02a24bfa436c81c5ed977d28a1ad7860e1af9c57087c4c69d56a5013f4cc39d",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_predicates.hpp": "1f6175bb27cd7543c2d68916efabe68ebd23ac413dadc7aad82cabb30651997d",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_q4_events.cpp": "a1b55373271b4d3a8e889ad6cebf9d6972729c18be100bb9d367a401321d4531",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_q4_events.hpp": "526d340b4aca9bc52f9aee305707937d95f6e2e20c037756444ea161b5a27c6b",
+            "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_identity_gate.py": "ed61e8b8b589054a0fbc81cddd0c60b139ed84e529269569b837c8cc3b3f9044",
+            "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_key_probe.cpp": "532dde81a259e06c8446deb0e5865eb4e135d69056c7da60ee49989a56c3d8e8",
+            "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_q4_events_probe.cpp": "c4c94f30633a10408cfa45193671f6dcc001a47fa1dcb123f6fd58c0550428f8"
+          },
+          "status": "passed",
+          "transcript_sha256": "c82ffc50f392d70fea7287a429dc4c1266f5b1515fdab2f0f0d9d54530588d00"
+        },
+        "integer": {
+          "invalid_rejections": 6,
+          "overflow_rejections": 10,
+          "status": "passed",
+          "tests": 948
+        },
+        "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_identity_20260921/sanitize/identity_4o1kodni",
+        "schema": "mhgp8_float32_identity_qualification_v1",
+        "scope": "native_binary32_ball_keys_and_reduced_q4_events_not_pipeline_or_FULL_or_GPU",
+        "status": "passed"
+      }
+    },
+    {
+      "mode": "sanitize_optimized",
+      "command": "python -B -O morsehgp3D_v8/bench/run_float32_identity_checks.py read --path morsehgp3D_v8/receipts/float32_identity_20260921/sanitize/identity_4o1kodni",
+      "exit_code": 0,
+      "result": {
+        "ball_gate": {
+          "binary": "/workspaces/E-HGP/build/v8_float32_identity_sanitize_20260921/mhgp8_float32_ball_test",
+          "binary_sha256": "678289d04fe834a075ad2705c92de430a0f7853acef2b4d4b468faecc08a4324",
+          "cases": 1636,
+          "gate_sha256": "c22fa32d280beffaa3609ff3e07e7012a0fc58b31f7938c2a416b9d463899df8",
+          "native_selftest": {
+            "concurrent_queries": 128,
+            "concurrent_workers": 4,
+            "flush_modes": 4,
+            "invalid_modes": 2,
+            "nonfinite_rejections": 18,
+            "query_checks": 548,
+            "rounding_modes": 4,
+            "schema": "mhgp8_float32_ball_selftest_v1",
+            "status": "passed",
+            "support_bytes": 128,
+            "tests": 1287
+          },
+          "optimized": false,
+          "populations": {
+            "3": {
+              "invalid": 155,
+              "power_exact_fallbacks": 159,
+              "power_filter_accepts": 135,
+              "preparation_exact_fallbacks": 95,
+              "preparation_filter_accepts": 354,
+              "signs": {
+                "0": 117,
+                "1": 96,
+                "-1": 81
+              },
+              "valid": 294
+            },
+            "4": {
+              "invalid": 456,
+              "power_exact_fallbacks": 506,
+              "power_filter_accepts": 225,
+              "preparation_exact_fallbacks": 542,
+              "preparation_filter_accepts": 645,
+              "signs": {
+                "0": 408,
+                "1": 163,
+                "-1": 160
+              },
+              "valid": 731
+            }
+          },
+          "rejected_inputs": 53,
+          "rejected_mutations": 13,
+          "schema": "mhgp8_float32_ball_gate_v1",
+          "scope": "binary32_positive_q3_q4_supports_and_power_not_census_or_FULL",
+          "source_sha256": {
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/fixed_signed.hpp": "cd3facd9e93ddfe668f87a4e2f7faab9c0217596d2835b17f6c01cb0cbf3a3f8",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.cpp": "3c89462ee22b3636e21f67d3ec1d3eb5bc440e76e95864fa8dd2814ac8943a46",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.hpp": "c673372c58e5d64931827d54bb13a44b69d3835e069e6cc611d9939ae3408973",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_predicates.hpp": "1f6175bb27cd7543c2d68916efabe68ebd23ac413dadc7aad82cabb30651997d",
+            "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_ball_gate.py": "c22fa32d280beffaa3609ff3e07e7012a0fc58b31f7938c2a416b9d463899df8",
+            "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_ball_probe.cpp": "ae7d55a023ca978b8b5181fb088fbb0e7ab361e8b0e45b5386789370f27e7088"
+          },
+          "status": "passed",
+          "transcript_sha256": "8d60bef5ebbd4b47cf5c7b70fbfb9f049e507e75b48f4a23dd726a4813eeec4b"
+        },
+        "commands": 28,
+        "completion_sha256": "c8af60628af2957662479d7b7905f9bc3f8b6dd20f7a31a82810564e21169adb",
+        "division": {
+          "exact_divisions": 185,
+          "gcd_checks": 1124,
+          "invalid_divisor_rejections": 9,
+          "nonexact_rejections": 347,
+          "overflow_rejections": 9,
+          "shift_checks": 47,
+          "status": "passed",
+          "tests": 9051
+        },
+        "gcp_used": false,
+        "identity_gate": {
+          "binary": "/workspaces/E-HGP/build/v8_float32_identity_sanitize_20260921/mhgp8_float32_ball_key_test",
+          "binary_sha256": "468c611e4da0d48ea91c09e1dbe81a20eda762906058d8d47b706e10901a4bfa",
+          "event_selftest": {
+            "concurrent_queries": 32,
+            "concurrent_workers": 4,
+            "coplanar_rejections": 4,
+            "counter_overflows": 1,
+            "equality_checks": 104,
+            "flush_modes": 4,
+            "invalid_modes": 1,
+            "owner_replacements": 1,
+            "prepared_bytes": 184,
+            "queries": 568,
+            "rejected_seeds": 8,
+            "rounding_modes": 4,
+            "schema": "mhgp8_float32_q4_events_selftest_v1",
+            "status": "passed",
+            "tests": 689
+          },
+          "events": {
+            "cases": 960,
+            "coplanar": 398,
+            "invalid": 41,
+            "orders": {
+              "0": 202,
+              "1": 158,
+              "-1": 161
+            },
+            "root_exact_fallbacks": 238,
+            "root_filter_accepts": 283,
+            "side_exact_fallbacks": 478,
+            "side_filter_accepts": 1360,
+            "sides": {
+              "0": 458,
+              "1": 693,
+              "-1": 687
+            },
+            "valid": 919
+          },
+          "events_binary": "/workspaces/E-HGP/build/v8_float32_identity_sanitize_20260921/mhgp8_float32_q4_events_test",
+          "events_binary_sha256": "a3471db32f294a0b0539d8edf24d0c7812d43321c2ad6d66d52281fe6c37bb9e",
+          "gate_sha256": "ed61e8b8b589054a0fbc81cddd0c60b139ed84e529269569b837c8cc3b3f9044",
+          "key_selftest": {
+            "concurrent_iterations": 64,
+            "concurrent_workers": 4,
+            "flush_modes": 4,
+            "key_object_bytes": 24,
+            "rounding_modes": 4,
+            "schema": "mhgp8_float32_key_selftest_v1",
+            "status": "passed",
+            "tests": 52
+          },
+          "keys": {
+            "cases": 229,
+            "cross_arity_balls": 10,
+            "distinct_balls": 63,
+            "populations": {
+              "2": {
+                "invalid": 2,
+                "valid": 64
+              },
+              "3": {
+                "invalid": 23,
+                "valid": 48
+              },
+              "4": {
+                "invalid": 34,
+                "valid": 58
+              }
+            },
+            "serialized_words": {
+              "max": 201,
+              "min": 10,
+              "sum": 2891
+            }
+          },
+          "optimized": false,
+          "rejected_inputs": {
+            "events": 64,
+            "keys": 77
+          },
+          "rejected_mutations": 18,
+          "schema": "mhgp8_float32_identity_gate_v1",
+          "scope": "binary32_ball_identity_and_q4_event_primitives_not_radius_sort_census_or_FULL",
+          "source_sha256": {
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/fixed_signed.hpp": "cd3facd9e93ddfe668f87a4e2f7faab9c0217596d2835b17f6c01cb0cbf3a3f8",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.cpp": "3c89462ee22b3636e21f67d3ec1d3eb5bc440e76e95864fa8dd2814ac8943a46",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.hpp": "c673372c58e5d64931827d54bb13a44b69d3835e069e6cc611d9939ae3408973",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball_key.cpp": "58b5f98ea921c9243a237900c25bb7ecce2217a8d5aa48262acad12ddb8ca3fb",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball_key.hpp": "e02a24bfa436c81c5ed977d28a1ad7860e1af9c57087c4c69d56a5013f4cc39d",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_predicates.hpp": "1f6175bb27cd7543c2d68916efabe68ebd23ac413dadc7aad82cabb30651997d",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_q4_events.cpp": "a1b55373271b4d3a8e889ad6cebf9d6972729c18be100bb9d367a401321d4531",
+            "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_q4_events.hpp": "526d340b4aca9bc52f9aee305707937d95f6e2e20c037756444ea161b5a27c6b",
+            "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_identity_gate.py": "ed61e8b8b589054a0fbc81cddd0c60b139ed84e529269569b837c8cc3b3f9044",
+            "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_key_probe.cpp": "532dde81a259e06c8446deb0e5865eb4e135d69056c7da60ee49989a56c3d8e8",
+            "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_q4_events_probe.cpp": "c4c94f30633a10408cfa45193671f6dcc001a47fa1dcb123f6fd58c0550428f8"
+          },
+          "status": "passed",
+          "transcript_sha256": "c82ffc50f392d70fea7287a429dc4c1266f5b1515fdab2f0f0d9d54530588d00"
+        },
+        "integer": {
+          "invalid_rejections": 6,
+          "overflow_rejections": 10,
+          "status": "passed",
+          "tests": 948
+        },
+        "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_identity_20260921/sanitize/identity_4o1kodni",
+        "schema": "mhgp8_float32_identity_qualification_v1",
+        "scope": "native_binary32_ball_keys_and_reduced_q4_events_not_pipeline_or_FULL_or_GPU",
+        "status": "passed"
+      }
+    }
+  ]
+}

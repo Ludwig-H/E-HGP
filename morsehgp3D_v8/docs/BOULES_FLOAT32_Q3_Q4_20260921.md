@@ -6,6 +6,12 @@
 `public_status=not_claimed`. Nouvelle brique numérique, sans remplacement
 implicite du moteur u16 ni héritage de ses performances.
 
+Suite numérique : [identité commune et événements q4](IDENTITE_FLOAT32_ET_EVENEMENTS_Q4_20260921.md).
+Elle ajoute un pont privé vers les coefficients globaux, sans modifier
+la disposition128octets ni les prédicats publics. Les captures de cette
+note restent liées à `12d885d8` ; leurs gates sont réexécutées dans le
+nouveau lot après extension du header entier, sans héritage automatique.
+
 ## Ce que cette brique fait
 
 Le [support préparé](../src/core/float32_ball.hpp) répond à deux questions :

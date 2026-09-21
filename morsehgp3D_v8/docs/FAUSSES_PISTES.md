@@ -3,6 +3,23 @@
 13 septembre 2026. Mémoire courte de l'audit et de la première tranche P0.
 Les sources et contre-fixtures complètes sont dans les rapports liés.
 
+## Identifier une boule par son support, ou trier les racines naïvement
+
+21 septembre. Les mêmes centre/rayon peuvent avoir des présentations
+positives q2, q3 et q4 : les IDs et l'arité ne sont pas une clé commune.
+Un rayon seul confond aussi deux centres distincts. La
+[clé float32 native](IDENTITE_FLOAT32_ET_EVENEMENTS_Q4_20260921.md)
+normalise le polynôme global dans la même unité dyadique pour toutes les
+arités. Retirer séparément des puissances de deux sans conserver leurs
+exposants détruirait cette identité ; ici c'est seulement un encodage.
+
+Les produits croisés directs des racines q4 ont un degré9, hors de la
+preuve1728bits du socle. Le déterminant réduit de degré5 suffit ; son
+signe doit encore être corrigé par **les deux** signes des dénominateurs.
+Ni cette comparaison ni l'égalité de clés ne trient les rayons de boules.
+Ne pas allouer de clé canonique pour les candidats rejetés ni confondre
+une copie de valeur immuable avec un transport GPU gratuit.
+
 ## Normaliser l'orientation q4 avant les poids — 21 septembre
 
 Le dénominateur des poids barycentriques est `2det²`, toujours positif.

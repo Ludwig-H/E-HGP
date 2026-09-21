@@ -1,0 +1,20 @@
+--- src/core/float32_q4_events.cpp
++++ second_denominator_sign_omitted/src/core/float32_q4_events.cpp
+@@ -145,7 +145,7 @@
+     const auto v2 = difference(op, op.point(z2), origin);
+     const auto query = minors(op, lifted(op, v1), lifted(op, v2));
+     const int sign = known_sign(determinant(op, minors_, query));
+-    if (sign != 0) { count(work.root_filter_accepts); return -sign * b1 * b2; }
++    if (sign != 0) { count(work.root_filter_accepts); return -sign * b1; }
+     count(work.root_exact_fallbacks);
+   }
+   count(work.root_exact_evaluations);
+@@ -165,7 +165,7 @@
+   const int sign = determinant(op, prepared, query).sign();
+   if (sign == 0) count(work.root_equalities);
+   // G*delta=P2*B1-P1*B2, G>0. BOTH denominator signs are essential.
+-  return -sign * b1 * b2;
++  return -sign * b1;
+ }
+ 
+ }  // namespace mhgp8

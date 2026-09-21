@@ -5,6 +5,13 @@
 GCP non utilisé. Voir le [contrat et les bornes](../../docs/BOULES_FLOAT32_Q3_Q4_20260921.md).
 Ce lot ne produit ni WSPD, ni census, ni clés canoniques, ni tour FULL.
 
+Instantané constructeur qualifié : `12d885d8`. L'ajout ultérieur des
+clés/événements étend `fixed_signed.hpp` et le pont privé de `Float32Ball` :
+les lecteurs **vivants** ci-dessous ne sont donc plus applicables tels
+quels aux sources courantes. Captures et builds sont conservés sans
+réécriture ; les948contrôles entiers et1636cas de boules sont réexécutés
+dans la [qualification commune suivante](../float32_identity_20260921/README.md).
+
 ## Qualifications closes
 
 | Capture | Profil | Commandes | Verdict |

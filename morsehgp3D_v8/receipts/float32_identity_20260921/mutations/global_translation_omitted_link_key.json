@@ -1,0 +1,42 @@
+{
+  "case": "global_translation_omitted",
+  "command": [
+    "/usr/bin/g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-ffp-contract=off",
+    "-fno-fast-math",
+    "-frounding-math",
+    "-O3",
+    "-DNDEBUG",
+    "-I",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_identity_20260921/mutations/cases/global_translation_omitted/src",
+    "/workspaces/E-HGP/build/v8_float32_identity_mutants_20260921/global_translation_omitted/ball.o",
+    "/workspaces/E-HGP/build/v8_float32_identity_mutants_20260921/global_translation_omitted/key.o",
+    "/workspaces/E-HGP/build/v8_float32_identity_mutants_20260921/global_translation_omitted/events.o",
+    "/workspaces/E-HGP/build/v8_float32_identity_mutants_20260921/global_translation_omitted/key_test.o",
+    "-o",
+    "/workspaces/E-HGP/build/v8_float32_identity_mutants_20260921/global_translation_omitted/key_probe"
+  ],
+  "cwd": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_identity_20260921/mutations",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/bin:/usr/bin",
+    "TZ": "UTC"
+  },
+  "exit_code": 0,
+  "finished_utc": "2026-09-21T16:59:23.580533+00:00",
+  "label": "global_translation_omitted_link_key",
+  "phase": "link",
+  "started_utc": "2026-09-21T16:59:23.483881+00:00",
+  "stderr": "",
+  "stderr_base64": "",
+  "stdin": null,
+  "stdout": "",
+  "stdout_base64": ""
+}

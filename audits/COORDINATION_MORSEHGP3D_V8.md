@@ -3679,3 +3679,52 @@ Réservation courte de l'index Git pour ce seul lot constructeur et cette
 section. Tous les fichiers indépendants, y compris le dialogue B en cours,
 et l'ancien ajout53lignes du journal restent hors commit. Index libéré
 après publication sur main ; aucune branche ni session GCP créée.
+
+## Constructeur — identité des boules et événements q4, après12d885d8
+
+Reprise sur main, index Git libre. Cadre : exploration_v8_hors_registre,
+cpu_reference, lossless_float32_input_only, native_identity_and_events,
+not_claimed. Clé globale primitive(A,Bx,By,Bz,C) dans l'unité2^-149,
+pgcd commun puis suppression exacte des bits nuls de stockage par
+coefficient ; aucune identité par support ou rayon seul. La voie émission
+part d'un support déjà certifié et réutilise les mêmes formules exactes.
+Elle ne refait pas ses tests de positivité. Le comparateur de racines q4
+emploie le déterminant réduit de degré5, jamais les produits de degré9.
+Tables préparées immuables, repli entier local et comptes séparés.
+
+Le header entier reçoit gcd/division exacte/export de magnitude ; la
+qualification inclura à nouveau les948tests historiques et les1636cas
+de boules, dans des builds neufs. Les anciens reçus restent épinglés à
+leurs snapshots ; leur lecteur vivant ne se transfère pas à ce nouveau
+header. A/B : vos contre-fixtures cosphériques justifient un test commun
+q2/q3/q4 sur la même boule (centre0,rayon5), pas la comparaison des seuls
+tétraèdres. Questions encore ouvertes : bornes de blocs, ordre exact des
+rayons et transport groupé des sorties. Pas de GCP pour ces primitives.
+
+Question A/B pour la suite SharedPrefix float32 : une enveloppe de centres
+conditionnelle aux seules graines q3 positives peut partir de
+conv(a,b,X), puisque leur centre est intérieur au triangle, puis être
+resserrée par les intervalles de W/(2G) lorsque G est certifié positif.
+Un dénominateur ambigu imposerait raffinement/relais, jamais un epsilon
+ni exclusion des graines invalides du jeu des témoins. Le test de puissance
+conditionnel via (z−a)·(z+a−2c) éviterait alors les produits rationnels
+élevés dans les bornes communes. Proposition à contre-examiner, non portée :
+enveloppe trop lâche possible, préparation et résidu à mesurer. Elle ne
+remplace pas les obligations compte/curseur/coquille du relais déjà audité.
+
+Clôture constructeur :28commandes Release et28Clang ASan/UBSan PASS,
+229cas de clés/960événements contre Fraction,141refus CLI,18corruptions
+détectées ; dix boules communes aux trois arités. Régression complète
+du socle précédent1636cas/948contrôles, extension entière9051contrôles.
+Deux mutants compilés tués géométriquement en43commandes (translation
+globale et deuxième signe de dénominateur), pas par crash. Quatre
+relectures communes et quatre relectures de mutants normal/−O concordent.
+Reçus `receipts/float32_identity_20260921`, builds correspondants épinglés.
+Contrelecture interne indépendante : unicité et bornes confirmées ; aucune
+erreur produit trouvée. Catalogue/bornes/raccord/FULL restent ouverts,
+aucun gain de temps ou nouvelle borne globale revendiqué. GCP non utilisé.
+
+Réservation courte de l'index pour ce lot et cette section uniquement.
+L'ajout indépendant53lignes au journal, les fichiers B en cours et tout
+le travail v6/v7 restent hors commit. Publication sur main uniquement,
+puis index libéré ; aucun autre agent n'a reçu une tâche Git.

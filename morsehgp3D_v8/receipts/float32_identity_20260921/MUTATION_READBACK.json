@@ -1,0 +1,95 @@
+{
+  "schema": "mhgp8_float32_identity_mutation_readback_v1",
+  "status": "passed",
+  "normal_optimized_equal": true,
+  "records": [
+    {
+      "mode": "normal",
+      "command": "python -B morsehgp3D_v8/tests/float32_identity_mutations.py read --path morsehgp3D_v8/receipts/float32_identity_20260921/mutations",
+      "exit_code": 0,
+      "result": {
+        "check_live": false,
+        "commands": 43,
+        "completion_sha256": "077df93fa88c9806347c99413f24756ffd3bb2213aa91282c7e840bb063ac341",
+        "fixtures": 2,
+        "killed": [
+          "global_translation_omitted",
+          "second_denominator_sign_omitted"
+        ],
+        "manifest_sha256": "4894d876eeb156690ccf9a59c70db5e3abe81c62831006018df056b493dd998c",
+        "native_reexecuted": false,
+        "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_identity_20260921/mutations",
+        "reader_sha256": "af6ac1584f8349a8e2d2b8f2518c7394ae001271d9a88ad7f253cecc4d4b12c1",
+        "schema": "mhgp8_float32_identity_compiled_mutations_v1",
+        "scope": "two_targeted_identity_root_mutations_not_catalogue_FULL_or_GPU",
+        "status": "passed"
+      }
+    },
+    {
+      "mode": "optimized",
+      "command": "python -B -O morsehgp3D_v8/tests/float32_identity_mutations.py read --path morsehgp3D_v8/receipts/float32_identity_20260921/mutations",
+      "exit_code": 0,
+      "result": {
+        "check_live": false,
+        "commands": 43,
+        "completion_sha256": "077df93fa88c9806347c99413f24756ffd3bb2213aa91282c7e840bb063ac341",
+        "fixtures": 2,
+        "killed": [
+          "global_translation_omitted",
+          "second_denominator_sign_omitted"
+        ],
+        "manifest_sha256": "4894d876eeb156690ccf9a59c70db5e3abe81c62831006018df056b493dd998c",
+        "native_reexecuted": false,
+        "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_identity_20260921/mutations",
+        "reader_sha256": "af6ac1584f8349a8e2d2b8f2518c7394ae001271d9a88ad7f253cecc4d4b12c1",
+        "schema": "mhgp8_float32_identity_compiled_mutations_v1",
+        "scope": "two_targeted_identity_root_mutations_not_catalogue_FULL_or_GPU",
+        "status": "passed"
+      }
+    },
+    {
+      "mode": "normal_live",
+      "command": "python -B morsehgp3D_v8/tests/float32_identity_mutations.py read --path morsehgp3D_v8/receipts/float32_identity_20260921/mutations --check-live",
+      "exit_code": 0,
+      "result": {
+        "check_live": true,
+        "commands": 43,
+        "completion_sha256": "077df93fa88c9806347c99413f24756ffd3bb2213aa91282c7e840bb063ac341",
+        "fixtures": 2,
+        "killed": [
+          "global_translation_omitted",
+          "second_denominator_sign_omitted"
+        ],
+        "manifest_sha256": "4894d876eeb156690ccf9a59c70db5e3abe81c62831006018df056b493dd998c",
+        "native_reexecuted": false,
+        "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_identity_20260921/mutations",
+        "reader_sha256": "af6ac1584f8349a8e2d2b8f2518c7394ae001271d9a88ad7f253cecc4d4b12c1",
+        "schema": "mhgp8_float32_identity_compiled_mutations_v1",
+        "scope": "two_targeted_identity_root_mutations_not_catalogue_FULL_or_GPU",
+        "status": "passed"
+      }
+    },
+    {
+      "mode": "optimized_live",
+      "command": "python -B -O morsehgp3D_v8/tests/float32_identity_mutations.py read --path morsehgp3D_v8/receipts/float32_identity_20260921/mutations --check-live",
+      "exit_code": 0,
+      "result": {
+        "check_live": true,
+        "commands": 43,
+        "completion_sha256": "077df93fa88c9806347c99413f24756ffd3bb2213aa91282c7e840bb063ac341",
+        "fixtures": 2,
+        "killed": [
+          "global_translation_omitted",
+          "second_denominator_sign_omitted"
+        ],
+        "manifest_sha256": "4894d876eeb156690ccf9a59c70db5e3abe81c62831006018df056b493dd998c",
+        "native_reexecuted": false,
+        "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_identity_20260921/mutations",
+        "reader_sha256": "af6ac1584f8349a8e2d2b8f2518c7394ae001271d9a88ad7f253cecc4d4b12c1",
+        "schema": "mhgp8_float32_identity_compiled_mutations_v1",
+        "scope": "two_targeted_identity_root_mutations_not_catalogue_FULL_or_GPU",
+        "status": "passed"
+      }
+    }
+  ]
+}

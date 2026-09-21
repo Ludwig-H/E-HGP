@@ -1,0 +1,1 @@
+{"schema":"mhgp8_float32_key_selftest_v1","status":"passed","tests":52,"rounding_modes":4,"flush_modes":4,"concurrent_workers":4,"concurrent_iterations":64,"key_object_bytes":24}

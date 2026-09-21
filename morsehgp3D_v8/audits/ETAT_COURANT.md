@@ -24,13 +24,25 @@ Les mesures et reçus historiques 50k sont conservés sans réinterprétation.
 
 ## Diagnostic spatial et état constructeur
 
+Identité float32 commune q2/q3/q4 et événements q4 réduits : voir
+[contrat et limites](../docs/IDENTITE_FLOAT32_ET_EVENEMENTS_Q4_20260921.md)
+et [qualification commune](../receipts/float32_identity_20260921/README.md).
+Clés construites seulement à l'émission, racines comparées en degré5,
+intervalles immuables et repli exact privé. Les anciens tests du socle
+sont rejoués ; aucun héritage implicite après extension du header.
+Le catalogue, les bornes de blocs et le raccord natif restent ouverts.
+Release/Clang ASan/UBSan :229clés,960événements,141refus,18corruptions,
+deux mutations compilées ; anciennes gates1636/948 et nouvelle9051 PASS.
+Relectures normal/−O concordantes ; pas de nouveau chrono ni GCP.
+
 Port ponctuel q3/q4 float32 clos : supports strictement positifs,
 puissances filtrées et exactes, objet128octets partagé sans cache mutable.
 1636cas Fraction/53refus/1287contrôles natifs/948contrôles entiers,
 Release et Clang ASan/UBSan. Voir [contrat numérique](../docs/BOULES_FLOAT32_Q3_Q4_20260921.md)
 et [preuves](../receipts/float32_ball_20260921/README.md). Ce n'est pas un
 catalogue, un census ou une tour ; pas de nouveaux chronos/scaling/GCP.
-Clés globales, racines q4, bornes et tâches de blocs restent ouverts.
+Les clés/racines sont traitées dans la tranche suivante ci-dessus ;
+bornes et tâches de blocs restent ouvertes.
 
 Index natif float32 clos :27 fixtures/1125sites/404requêtes rationnelles,
 35refus,151contrôles natifs, Release/Clang ASan/UBSan, relectures normal/−O.

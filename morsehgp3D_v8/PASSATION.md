@@ -31,6 +31,23 @@ n'est pas FULL ni GPU. Les reçus historiques 50k restent inchangés.
 
 ## À reprendre maintenant
 
+Lire d'abord [l'identité des boules et les événements q4 natifs](docs/IDENTITE_FLOAT32_ET_EVENEMENTS_Q4_20260921.md).
+Clé primitive globale commune q2/q3/q4 à l'émission ; `from_support`
+ne refait pas la positivité. Le format conserve les exposants des bits
+nuls comprimés, sans quantification. Copies/déplacements de clé copient
+leur vecteur : prévoir une arène de sorties avant un transport massif.
+Comparateur q4 préparé184octets, signes des DEUX dénominateurs, contacts
+exacts ; aucune formation des produits de degré9. Les
+[qualifications communes](receipts/float32_identity_20260921/README.md)
+rejouent les anciennes gates après extension du header entier.
+Release et Clang ASan/UBSan clos :229clés/960événements,141refus,
+18corruptions et deux mutants compilés ;948+9051contrôles entiers et
+1636cas géométriques précédents repassent. Builds exacts dans le reçu,
+à ne pas écraser. Relectures normal/−O concordantes ; GCP non utilisé.
+Ce n'est ni le catalogue ni l'ordre des rayons ni le census natif.
+Suite prioritaire : bornes de blocs et partage de graines q3, avec
+parents possédés et compte/curseur cohérent, puis raccord au front.
+
 Supports q3/q4 natifs et puissances désormais qualifiés ; lire
 [la nouvelle note numérique](docs/BOULES_FLOAT32_Q3_Q4_20260921.md).
 Préparation positive stricte, objet128octets, coefficients d'intervalles
@@ -40,8 +57,8 @@ quatre poids ; les requêtes ne recalculent pas la positivité déjà certifiée
 Release/Clang ASan/UBSan :1636cas Fraction,53refus,1287contrôles natifs,
 948contrôles entiers. [Captures et builds épinglés](receipts/float32_ball_20260921/README.md),
 aucune qualification héritée du moteur u16. GCP non utilisé.
-Suite concrète : clés canoniques globales à l'émission, comparateur réduit
-des racines q4, bornes certifiées de blocs puis raccord aux graines/tâches.
+La tranche suivante ci-dessus ajoute clés globales et comparateur réduit.
+Restent les bornes certifiées de blocs puis le raccord aux graines/tâches.
 Ne pas confondre objet support et identité de boule, ni étendre les bornes
 1728bits aux expressions naïves de degré9 ou aux comparaisons de rayons.
 
@@ -57,10 +74,10 @@ Les [captures](receipts/float32_index_20260921/README.md) donnent27 fixtures,
 relectures normal/−O.54 constructions mesurées, dont trois trames et les
 sept morceaux de la première. Cela ne qualifie pas une WSPD/census/FULL.
 
-Le port des filtres et replis ponctuels est clos dans la tranche ci-dessus ;
-restent les bornes de blocs et clés canoniques globales aux émissions. Ne pas allouer
+Le port des filtres, replis ponctuels et clés est traité ci-dessus ;
+restent les bornes de blocs et leur raccord au census. Ne pas allouer
 cinq tableaux multiprécision à chaque candidat : les bornes de dimension
-ponctuelles sont qualifiées, les comparateurs réduits restent à porter.
+ponctuelles et le comparateur de racines ne qualifient pas le tri des rayons.
 Partager ensuite blocs de graines et tâches intérieures avec ces contrats.
 
 Socle d'entrée qualifié :15tests de préparation,3923requêtes rationnelles

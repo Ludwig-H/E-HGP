@@ -63,6 +63,17 @@ ses propres sources, tests et reçus, sans transfert implicite.
 
 ## État exécutable
 
+Les [clés communes et événements q4 float32](docs/IDENTITE_FLOAT32_ET_EVENEMENTS_Q4_20260921.md)
+ajoutent l'identité exacte entre supports q2/q3/q4 et l'ordre exact des
+racines d'une famille. Clé globale construite à l'émission ; déterminant
+réduit de degré5, sans produit croisé de degré9. Objets immuables,
+états privés ; catalogue, bornes de blocs, raccord et FULL restent ouverts.
+Les [preuves propres](receipts/float32_identity_20260921/README.md) réexécutent
+aussi les gates précédentes après extension du socle entier.
+Release/ASan/UBSan :229cas de clés,960cas d'événements,948+9051contrôles
+entiers PASS ; deux mutations compilées détectées. Pas de nouveau gain
+de temps ni de borne globale sous-quadratique revendiqué.
+
 Les [supports et puissances q3/q4 natifs float32](docs/BOULES_FLOAT32_Q3_Q4_20260921.md)
 sont maintenant implémentés et qualifiés : positivité stricte, contacts
 exacts, intervalles préparés réutilisables et repli entier fixe sans tas.
@@ -70,8 +81,8 @@ Objet128octets, sans clé lourde ni cache partagé mutable. Release et
 ASan/UBSan passent1636cas rationnels,1287contrôles natifs et948contrôles
 arithmétiques ; [preuves propres](receipts/float32_ball_20260921/README.md).
 Ce sont des primitives, pas encore le générateur/census natif ni FULL.
-Suite : clés globales, comparateurs réduits et bornes de blocs q3/q4,
-puis partage des graines/tâches intérieures. Aucun nouveau chrono G4.
+Suite : bornes de blocs q3/q4, puis partage des graines/tâches intérieures.
+Aucun nouveau chrono G4.
 
 L'[index natif float32](docs/INDEX_FLOAT32_ET_SUITE_Q34_20260921.md) est maintenant
 implémenté : copie immuable, IDs conservés, boîtes exactes, trois tris et
