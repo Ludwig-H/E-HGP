@@ -566,6 +566,28 @@ du worktree du 21 septembre ; ce qui suit n'est pas une relecture des reçus.
   (1,74 cœur effectif sur 4 pour son premier quart) : ses temps ne valent pas,
   ses compteurs si.
 
+### Voie q4 à l'échelle de la scène : chaque record émis est une boule q4 valide (protocole bilatéral)
+
+Reçu [README_Q4_BILATERAL.md](q34_stream_crosscheck_spatial_20260921/README_Q4_BILATERAL.md) :
+là où l'énumération exhaustive de la voie q4 est hors de portée, chaque record
+q4 émis par la sonde (moteur 34 gelé, atlas `live`, le mode de la campagne
+chronométrée) est rejugé indépendamment (arête propriétaire, positivité
+stricte en i128, profondeur exacte par descente sur la couverture de l'arête,
+coquille complète comparée aux IDs), et la complétude est testée sur 2 000
+paires tirées par morceau (énumération de toutes les boules propriétaires des
+paires conservées). Sur les sept morceaux de la scène 0 à K5 : 189 486 records
+sur les quarts, 190 180 sur les moitiés et **190 405 sur la scène entière,
+tous valides** (0 propriétaire faux, 0 tétraèdre non positif, 0 profondeur ou
+coquille différente), 0 boule manquante sur les paires tirées ; le harnais
+coûte 1 à 72 s par morceau. La direction « complétude » reste celle d'un
+échantillon (1 à 12 boules énumérées par morceau à K5, car peu de paires
+tirées sont conservées) : l'énumération exhaustive des quarts, en cours,
+la complète. En parallèle, la voie q3 exhaustive sur la moitié x+ (59 953
+sites) donne les 528 575 boules du registre du constructeur, identiques à
+l'énumération indépendante (ligne observée, reçu à venir avec la moitié x− et
+la scène) ; le harnais y coûte 100 min, bien plus que projeté, car les paires
+conservées à pleine densité portent des couvertures et des seeds nombreux.
+
 ### Protocole spatial (brouillon du constructeur) : préparation indépendante et harnais adaptés
 
 Le protocole spatial demandé par l'utilisateur (scène brute dans son repère
@@ -671,7 +693,8 @@ vérifié en direct par B (pas de `gcloud` ici).
   `front_lanes_lidar_20260921/`, `q3_stream_crosscheck_20260921/`,
   `q4_stream_crosscheck_20260921/`, `q34_stream_crosscheck_t32_20260921/`,
   `q34_stream_crosscheck_t32_8k_20260921/`, `q34_stream_crosscheck_t33_20260921/`,
-  `q34_stream_crosscheck_t34_20260921/` et `relais_temoins_20260921/`.
+  `q34_stream_crosscheck_t34_20260921/`, `relais_temoins_20260921/` et
+  `q34_stream_crosscheck_spatial_20260921/`.
 - Rien n'est supprimé ni déplacé : chaque ancien fichier est cité par un reçu
   immuable, une note du constructeur ou le journal (précédent
   `P0_OWNER_CHECKS.json` à ne pas répéter). Les sections antérieures de ce

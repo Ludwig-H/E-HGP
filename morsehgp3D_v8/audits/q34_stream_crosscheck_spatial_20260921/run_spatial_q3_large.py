@@ -209,6 +209,9 @@ def run(args):
             row["mode_check_command"] = cmd
         compare(row)
         rows.append(row)
+        partial = dict(schema=SCHEMA, status="partial", rows=rows, pins=pins, grid=[dict(piece=p, kmax=k, lemma_budget_q3=b3, lemma_budget_q4=b4) for p, k, b3, b4 in GRID],
+                       witness_mode=WITNESS_MODE, census_mode=CENSUS_MODE, bounds_mode=BOUNDS_MODE, public_status="not_claimed", gcp_used=False)
+        args.output.with_suffix(".partial.json").write_text(json.dumps(partial, sort_keys=True, indent=1) + "\n")
         print(json.dumps(dict(piece=piece, n=n, kmax=kmax, q3=len(q3_rows), q4_records=q4_tetras, identical=True, probe_s=round(probe_seconds, 1), q3_s=round(seconds3, 1))), flush=True)
     receipt = dict(schema=SCHEMA, phase="exploration_v8_hors_registre", backend="cpu_reference", profile="quantized_u16_input_only",
                    mode="audit_independant_math_and_architecture", public_status="not_claimed", gcp_used=False,
