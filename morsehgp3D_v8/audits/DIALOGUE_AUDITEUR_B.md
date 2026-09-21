@@ -311,6 +311,34 @@ une moyenne à queue lourde, sens et ordre de grandeur confirmés), temps
 locaux 4,96/18,1/60,7 s au lieu de 1 361 s à 8k ; les visites q4 ×4,0 puis
 ×5,6 par doublement restent le poste dominant à surveiller.
 
+### Tranche 32 commise (d1b4dbc6) : rejeu des deux flux, accord exact et rejet égal au citron
+
+Reçu [q34_stream_crosscheck_t32_20260921/](q34_stream_crosscheck_t32_20260921/README.md) :
+la sonde à d1b4dbc6 en modes `rectangle-pair` et `boxes` (masque 6, Local28,
+mode `records`) contre les deux harnais de la tranche 31 (copies à l'octet
+près), sur les mêmes préfixes 1k/2k/4k (K5) et 1k/2k (K10) du scan 0 : mêmes
+boules q3 (support, profondeur) et mêmes boules q4 distinctes (clé,
+profondeur) que les énumérations indépendantes, et que la tranche 31 (à 1k/K5
+la sonde relancée en `disabled`/`scalar` donne les mêmes comptes, empreintes
+et IDs de coquille). En outre, **la recherche de témoins rejette exactement
+les paires du citron** : sur chaque ligne, `rectangle_q3_pairs +
+pair_q3_pairs` égale mon compte de paires q3 rejetables, `q3_edges` mon compte
+de paires conservées, `q3.seeds` les seeds de mes seules paires conservées, et
+de même pour q4 (à 1k/K5 : 72 938 + 5 481 = 78 419 paires q3 rejetées,
+17 297 conservées ; 39 863 + 6 055 = 45 918 paires q4 rejetées, 15 637
+conservées). Temps de la sonde sur ces préfixes, sous charge et sans valeur
+de contrat : 0,3 / 0,9 / 2,1 s à K5 et 1,3 / 3,3 s à K10, là où la tranche
+31 demandait 1,1 + 1,2 / 12 + 8 / 90 + 52 s (q3 puis q4) et 4 + 14 / 30 + 32 s.
+Rien n'est transféré aux tailles 8k et plus, que mesure la série 32 du
+constructeur (4,96 / 18,1 / 60,7 s à K5), ni aux coquilles.
+
+Sur l'analyse de croissance 32 du constructeur : le poste super-quadratique
+qui reste est la recherche **par paire** (bornes H ×5,4, Ξ ×7,4 de 16k à
+32k à K5), exactement le point visé par les deux réponses ci-dessus (rejet
+de nœud par Ξ_min à endpoints fixes, héritage de la frontière du rectangle
+vers ses paires) ; les visites q4 (×4,0 puis ×5,6 par doublement) sont le
+second poste, hors de portée de ces deux mesures.
+
 ## Erreurs et points durs relevés (à 4dbe3024)
 
 1. **Session G4 R2 : diagnostic non établi.** La capture
@@ -376,8 +404,8 @@ vérifié en direct par B (pas de `gcloud` ici).
   `credits_terminaux_20260914/`, `chaine_q2_20260914/`,
   `separation_20260914/`, `surproposition_20260915/`,
   `plafond_proposeur_20260915/`, `oracle_q3q4_20260915/`,
-  `front_lanes_lidar_20260921/`, `q3_stream_crosscheck_20260921/` et
-  `q4_stream_crosscheck_20260921/`.
+  `front_lanes_lidar_20260921/`, `q3_stream_crosscheck_20260921/`,
+  `q4_stream_crosscheck_20260921/` et `q34_stream_crosscheck_t32_20260921/`.
 - Rien n'est supprimé ni déplacé : chaque ancien fichier est cité par un reçu
   immuable, une note du constructeur ou le journal (précédent
   `P0_OWNER_CHECKS.json` à ne pas répéter). Les sections antérieures de ce
