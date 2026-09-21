@@ -56,6 +56,7 @@ struct GlobalGate : Gate {
   u64 parallel_pipeline_calls{},parallel_w1_calls{},parallel_w2_calls{},parallel_w4_calls{};
   u64 parallel_geometry_checks{},worker_ledger_checks{},callback_copy_checks{},multiworker_calls{};
   u64 parallel_callback_failures{},parallel_join_checks{},parallel_owner_resets{},parallel_empty_calls{};
+  u64 indexed_calls{},indexed_pair_rejections{},indexed_rectangle_rejections{},boxed_calls{};
 };
 
 // Every component is a standard-layout aggregate containing only u64 fields
@@ -72,14 +73,14 @@ WORDS(Q4LocalGeometryWork,27);WORDS(Q4LocalPartitionWork,20);
 WORDS(Q4LocalAtlasWork,38);WORDS(Q4LocalSweepWork,41);WORDS(Q4LocalEdgeWork,117);
 WORDS(Q4ShallowSetWork,25);WORDS(Q4FamilyWork,13);WORDS(Q4ShallowSweepWork,32);
 WORDS(Q4WindowSelectionWork,25);WORDS(Q4WindowSweepWork,57);WORDS(Q4WindowEdgeWork,116);
-WORDS(WspdQ34Work,279);
+WORDS(Q34WitnessSearchWork,25);WORDS(WspdQ34WitnessWork,58);WORDS(Q3BallCensusWork,26);WORDS(WspdQ34Work,363);
 #undef WORDS
-std::array<u64,279> logical_work(mhgp8::WspdQ34Work work) {
+std::array<u64,363> logical_work(mhgp8::WspdQ34Work work) {
   // These two capacity peaks depend on the private buffer's previous jobs;
   // they are paid separately, not erased from the published result.
   work.q3.peak_shell_bytes=0;
   work.peak_edge_buffer_bytes=0;
-  return std::bit_cast<std::array<u64,279>>(work);
+  return std::bit_cast<std::array<u64,363>>(work);
 }
 
 // Enumerate every small-cloud support once. An independent Gaussian rational
@@ -575,13 +576,92 @@ void parallel_lifecycle(GlobalGate& gate) {
     "parallel owner reset lost output, retained work or returned before ownership joined");
   ++gate.parallel_owner_resets;++gate.parallel_join_checks;
 }
+
+void indexed_fixtures(GlobalGate& gate) {
+  std::vector<Points> fixtures{
+    {{10,10,10},{16,16,10},{16,10,16},{10,16,16},{12,12,8},{14,14,8}},
+    {{100,100,100},{160,100,100},{120,142,100},{128,110,149},{128,88,88}},
+    {{0,0,0},{65535,65535,0},{65535,0,65535},{0,65535,65535},{32767,32767,32767},{65535,0,0}},
+    {{10,10,10},{11,12,10},{12,10,12},{10,12,12},
+     {60000,60000,60000},{60001,60002,60000},{60002,60000,60002},{60000,60002,60002}},
+    {{900,1000,1000},{1100,1000,1000},{1000,1120,1040},{1000,1120,960},
+     {1000,1020,1105},{1001,1020,1105},{1002,1020,1105},{1003,1020,1105}}
+  };
+  Points grid;
+  for (unsigned x=0;x<3;++x) for (unsigned y=0;y<3;++y) for (unsigned z=0;z<2;++z)
+    grid.push_back({static_cast<std::uint16_t>(20+4*x),static_cast<std::uint16_t>(20+4*y),
+                    static_cast<std::uint16_t>(20+4*z)});
+  fixtures.push_back(grid);
+  fixtures.push_back(shell30());
+  for (std::size_t f=0;f<fixtures.size();++f) {
+    auto points=fixtures[f];
+    if (f%2!=0) std::reverse(points.begin(),points.end());
+    const auto all=global_oracle(gate,points);
+    const auto index=mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
+    for (const auto mode:{mhgp8::WspdQ34WitnessMode::Pair,mhgp8::WspdQ34WitnessMode::RectanglePair})
+      for (const auto census_mode:{mhgp8::WspdQ3CensusMode::ScalarCover,mhgp8::WspdQ3CensusMode::GlobalBoxes})
+      for (const auto backend:{mhgp8::WspdQ4Backend::Local28,mhgp8::WspdQ4Backend::Window30})
+        for (const auto k:{3U,5U,10U}) {
+          auto config=options(f%2?mhgp8::WspdFrontMode::MidpointSamples:mhgp8::WspdFrontMode::Pure,backend);
+          config.witness_mode=mode;
+          config.q3_census_mode=census_mode;
+          // Exercise the real Local28 defaults too, not only the tiny atlas
+          // used by the old combinatorial gate for fast exhaustive checks.
+          if (f==0) config.local=mhgp8::Q4LocalOptions{};
+          Output actual;
+          const auto result=mhgp8::run_wspd_q34_candidates(index,k,8+2*(k%3),config,
+              [&](const auto& value) {actual.push_back(copy(value));});
+          normalize(actual);
+          gate.require(actual==eligible(all,k,6),"indexed filter lost support/depth/key/complete shell");
+          const auto& w=result.work;const auto& v=w.witness;
+          gate.require(w.q3_edges+v.rectangle_q3_pairs+v.pair_q3_pairs==result.front.work.residual_pair_mass[1] &&
+            w.q4_edges+v.rectangle_q4_pairs+v.pair_q4_pairs==result.front.work.residual_pair_mass[2] &&
+            w.expanded_pairs+v.rectangle_pair_mass==v.input_pair_mass &&
+            w.cover_builds+v.rejected_pairs==w.expanded_pairs &&
+            v.pairs.queries==w.expanded_pairs,"indexed mass partition differs");
+          gate.require((mode==mhgp8::WspdQ34WitnessMode::Pair && v.rectangles==mhgp8::Q34WitnessSearchWork{}) ||
+            (mode==mhgp8::WspdQ34WitnessMode::RectanglePair && v.rectangles.queries==w.input_rectangles),
+            "indexed search entry ledger differs");
+          ++gate.indexed_calls;
+          if (census_mode==mhgp8::WspdQ3CensusMode::GlobalBoxes) {
+            ++gate.boxed_calls;
+            gate.require(w.q3.census_point_tests==0 && w.q3.census_range_visits==0 &&
+              w.q3_blocks.queries==w.q3.seeds && w.q3_blocks.accepted_queries==w.q3.emitted &&
+              w.q3_blocks.rejected_queries==w.q3.depth_rejections && w.q3_blocks.shell_ids==w.q3.shell_ids,
+              "q3 boxed census ledger differs or hides a scalar scan");
+          } else gate.require(w.q3_blocks==mhgp8::Q3BallCensusWork{},"scalar performed hidden boxed census");
+          gate.indexed_pair_rejections+=v.rejected_pairs;
+          gate.indexed_rectangle_rejections+=v.rejected_rectangles;
+          if (k==3) parallel_case(gate,points,all,k,config,4,3);
+        }
+  }
+  const auto index=mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(fixtures[0]));
+  mhgp8::WspdQ34Options config;
+  config.witness_mode=static_cast<mhgp8::WspdQ34WitnessMode>(91);
+  gate.rejects([&] {static_cast<void>(mhgp8::run_wspd_q34_candidates(index,1,8,config,[](const auto&) {}));},
+    "invalid witness mode accepted even on inactive lanes");
+  config.witness_mode=mhgp8::WspdQ34WitnessMode::Disabled;
+  config.q3_census_mode=static_cast<mhgp8::WspdQ3CensusMode>(91);
+  gate.rejects([&] {static_cast<void>(mhgp8::run_wspd_q34_candidates(index,1,8,config,[](const auto&) {}));},
+    "invalid q3 census mode accepted even on inactive lanes");
+  config.q3_census_mode=mhgp8::WspdQ3CensusMode::GlobalBoxes;
+  parallel_case(gate,fixtures[0],global_oracle(gate,fixtures[0]),5,config,4,1);
+  config.q3_census_mode=mhgp8::WspdQ3CensusMode::ScalarCover;
+  for (const auto mode:{mhgp8::WspdQ34WitnessMode::Pair,mhgp8::WspdQ34WitnessMode::RectanglePair})
+    for (const auto k:{1U,2U,5U}) for (const std::uint8_t mask:{2,4}) {
+      config.witness_mode=mode;config.requested_lane_mask=mask;
+      parallel_case(gate,fixtures[0],global_oracle(gate,fixtures[0]),k,config,1,1);
+    }
+  gate.require(gate.indexed_calls>0 && gate.indexed_pair_rejections>0 && gate.indexed_rectangle_rejections>0,
+    "indexed global modes have no exercised rejection");
+}
 }
 
 int main(int argc,char** argv) {
   try {
     if (argc!=2 || std::string_view(argv[1])!="--selftest") throw std::invalid_argument("expected --selftest");
     GlobalGate gate;
-    global_fixtures(gate);global_lifecycle(gate);parallel_fixtures(gate);parallel_lifecycle(gate);
+    global_fixtures(gate);global_lifecycle(gate);parallel_fixtures(gate);parallel_lifecycle(gate);indexed_fixtures(gate);
     gate.require(gate.q3>0 && gate.q4>0 && gate.max_shell>=30 && gate.fat_rectangles>0 &&
       gate.q3_front_rejections>0 && gate.q4_front_rejections>0 && gate.xi_tests>0 &&
       gate.q3_depth_rejections>0 && gate.q3_unread_sites>0 && gate.both_edges>0 &&
@@ -603,6 +683,7 @@ int main(int argc,char** argv) {
     EMIT(parallel_pipeline_calls);EMIT(parallel_w1_calls);EMIT(parallel_w2_calls);EMIT(parallel_w4_calls);
     EMIT(parallel_geometry_checks);EMIT(worker_ledger_checks);EMIT(callback_copy_checks);EMIT(multiworker_calls);
     EMIT(parallel_callback_failures);EMIT(parallel_join_checks);EMIT(parallel_owner_resets);EMIT(parallel_empty_calls);
+    EMIT(indexed_calls);EMIT(indexed_pair_rejections);EMIT(indexed_rectangle_rejections);EMIT(boxed_calls);
 #undef EMIT
     std::cout<<"}\n";
     return 0;

@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q34_witness_search.cpp
++++ mutated/wspd_q34.cpp
+@@ -119,7 +119,7 @@
+         // the full population can overflow just to reach a small threshold.
+         count[lane] += static_cast<unsigned>(credit);
+         counter_add(lane == 0 ? work.q3_credits : work.q4_credits, static_cast<u64>(credit));
+-        frame.mask &= static_cast<std::uint8_t>(~bit);
++        /* mutant: leave admitted lane in children */
+         if (count[lane] == threshold[lane]) {
+           remaining &= static_cast<std::uint8_t>(~bit);
+           counter_add(lane == 0 ? work.q3_rejected : work.q4_rejected);

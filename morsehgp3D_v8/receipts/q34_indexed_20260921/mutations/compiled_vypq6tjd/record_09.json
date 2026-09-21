@@ -1,0 +1,17 @@
+{
+  "kind": "shell_contact_excluded_oracle",
+  "command": [
+    "/tmp/mhgp8_wspd_q34_mutants_8cgms1za/shell_contact_excluded",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-21T08:46:07.302160+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "q3 ball census gate: global census differs from independent rational depth and shell oracle\n",
+  "stdout_base64": "",
+  "stderr_base64": "cTMgYmFsbCBjZW5zdXMgZ2F0ZTogZ2xvYmFsIGNlbnN1cyBkaWZmZXJzIGZyb20gaW5kZXBlbmRlbnQgcmF0aW9uYWwgZGVwdGggYW5kIHNoZWxsIG9yYWNsZQo=",
+  "finished_utc": "2026-09-21T08:46:07.304718+00:00"
+}

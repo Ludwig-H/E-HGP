@@ -2,6 +2,8 @@
 
 #include "lanes/q4_local.hpp"
 #include "lanes/q4_window.hpp"
+#include "lanes/q34_witness_search.hpp"
+#include "lanes/q3_ball_census.hpp"
 #include "wspd/front.hpp"
 
 #include <functional>
@@ -10,12 +12,26 @@
 namespace mhgp8 {
 
 enum class WspdQ4Backend { Local28, Window30 };
+enum class WspdQ34WitnessMode { Disabled, Pair, RectanglePair };
+enum class WspdQ3CensusMode { ScalarCover, GlobalBoxes };
 
 struct WspdQ34Options {
   WspdFrontMode front_mode{WspdFrontMode::MidpointSamples};
   std::uint8_t requested_lane_mask{6};  // Exactly 2=q3, 4=q4 or 6=both.
   WspdQ4Backend q4_backend{WspdQ4Backend::Local28};
   Q4LocalOptions local{};
+  WspdQ34WitnessMode witness_mode{WspdQ34WitnessMode::Disabled};
+  WspdQ3CensusMode q3_census_mode{WspdQ3CensusMode::ScalarCover};
+};
+
+struct WspdQ34WitnessWork {
+  // Input union mass, then whole-product and individual-pair rejections.
+  // Lane masses overlap; they must NEVER be summed as a union mass.
+  u64 input_pair_mass{}, rejected_rectangles{}, rectangle_pair_mass{};
+  u64 rectangle_q3_pairs{}, rectangle_q4_pairs{};
+  u64 rejected_pairs{}, pair_q3_pairs{}, pair_q4_pairs{};
+  Q34WitnessSearchWork rectangles, pairs;
+  bool operator==(const WspdQ34WitnessWork&) const = default;
 };
 
 struct WspdQ3Work {
@@ -44,6 +60,8 @@ struct WspdQ34Work {
   // capacities, maxima and retained_bytes fields, which combine by MAX.
   Q4LocalEdgeWork local;
   Q4WindowEdgeWork window;
+  WspdQ34WitnessWork witness;
+  Q3BallCensusWork q3_blocks;
 };
 
 struct WspdQ34Result {
@@ -84,6 +102,18 @@ struct WspdQ34Result {
 // sorts, and the selected q4 backend. cover_sites is their paid Fcover sum,
 // not a distinct-site count. No global subquadratic or performance guarantee
 // follows. No complete edge/face list, cloud copy or per-edge index is built.
+//
+// Explicit witness modes first search the SAME index for strict universal
+// citron witnesses, independently at K-1/K-2. RectanglePair searches products
+// before expansion; both modes search remaining pairs BEFORE building covers.
+// Partial counts are discarded, never used to seed another search or census.
+// expanded_pairs counts pairs entered after whole-product filtering;
+// q3_edges/q4_edges/both_edges and cover_builds count only surviving lanes.
+// The separate witness ledger pays every search and partitions input masses.
+// GlobalBoxes is a separate explicit q3 option: census on the global index,
+// saturating strict interior first, complete shell only on acceptance. No
+// witness credit seeds it. q3.census_* and early_unread_sites then stay zero;
+// q3_blocks reports the actual work, including precomputed unvisited bounds.
 [[nodiscard]] WspdQ34Result run_wspd_q34_candidates(
     Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s,
     WspdQ34Options options, const Q34SeedConsumer& consumer);

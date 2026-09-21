@@ -1,0 +1,17 @@
+{
+  "kind": "q4_wrong_alpha_oracle",
+  "command": [
+    "/tmp/mhgp8_wspd_q34_mutants_13hul42k/q4_wrong_alpha",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-21T08:52:39.264916+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "q34 witness search gate: singleton witness decision differs from independent oracle\n",
+  "stdout_base64": "",
+  "stderr_base64": "cTM0IHdpdG5lc3Mgc2VhcmNoIGdhdGU6IHNpbmdsZXRvbiB3aXRuZXNzIGRlY2lzaW9uIGRpZmZlcnMgZnJvbSBpbmRlcGVuZGVudCBvcmFjbGUK",
+  "finished_utc": "2026-09-21T08:52:39.269541+00:00"
+}

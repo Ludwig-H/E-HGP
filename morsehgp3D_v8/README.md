@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — raccord global q3/q4 et diagnostic LiDAR
+# Morse HGP 3D v8 — témoins indexés et census q3 par boîtes
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -36,6 +36,29 @@ Les mesures de l'audit d'ouverture restent v7 ; chaque tranche v8 porte
 ses propres sources, tests et reçus, sans transfert implicite.
 
 ## État exécutable
+
+Tranche32,21 septembre : les [témoins indexés et le census par boîtes](docs/Q34_TEMOINS_INDEXES_ET_CENSUS_BOITES_20260921.md)
+sont implémentés comme options explicites du raccord mono/multi-CPU.
+Le filtre cherche assez de témoins pour rejeter un rectangle puis une
+paire AVANT couverture/seeds ; le census q3 sépare profondeur stricte
+et collecte complète des contacts.94 CTests Release, trois portes et
+12sondes Clang ASan/UBSan/LSan, six mutations géométriques compilées
+passent ; il ne s'agit pas de94tests instrumentés.29grandes mesures
+et36petites sondes sont closes. Le défaut reste géométriquement identique
+à31 sur huit comparaisons, avec704octets réels de plus par worker.
+Première série scan0/K5/s8/Local28/W4 :8k/16k/32k en4,960/18,139/60,661s
+sous charge locale ; seedsq3×3,156/×3,375, bornes census×3,165/×3,442.
+À8k, mêmes104670 candidats qu'en31. Mais certaines visites q4 font
+encore×4,018 puis×5,603 : ne pas annoncer que tous les coûts sont
+sous-quadratiques. Les [reçus32](receipts/q34_indexed_20260921/README.md)
+distinguent essais et qualifications ; FULL/GPU/contrats50k restent ouverts.
+La [suite structurelle](docs/Q34_PISTES_APRES_INDEXATION_20260921.md)
+retient les idées A/B : exclusion plus serrée des blocs sans témoin,
+certificats partagés entre sous-produits, suppression de groupes de seeds
+et composition emboîtée des réductions q4. Ces propositions ne sont pas
+encore des gains mesurés. GCP non utilisé dans cette tranche32.
+
+### Historique31
 
 Priorité du21 septembre : mesurer les régimes visés, notamment les scans
 LiDAR, sans attendre une borne sous-quadratique universelle. Le

@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q3_ball_census.cpp
++++ mutated/wspd_q34.cpp
+@@ -125,7 +125,7 @@
+       counter_add(work.count_nonnegative_sites, static_cast<u64>(node.range.size()));
+       continue;
+     }
+-    if (frame.bounds.maximum < 0) {
++    if (frame.bounds.maximum <= 0) {
+       counter_add(work.count_inside_nodes);
+       const auto credit = std::min(threshold - depth, node.range.size());
+       depth += credit;

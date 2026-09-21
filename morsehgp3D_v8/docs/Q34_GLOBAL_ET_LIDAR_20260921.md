@@ -339,9 +339,10 @@ Fixtures proposées pour ce futur port (pas une qualification exécutée) :
 
 - Triangle((0,0,0),(2,2,0),(2,0,2)), clé[3,−8,−4,−4,0] : sommets
   des paraboles4/3,2/3,2/3, choix du plancher ou du plafond selon l'axe.
-- Triangle((0,0,0),(2,0,0),(1,1,1)), clé[2,−4,−2,−2,0] : sommets
-  demi-entiers, égalités ; la boîte entière x=z=0,y∈[0,1] ne contient
-  que deux positions de coquille. Min=max=0 ne donne aucun intérieur.
+- Triangle((0,0,0),(2,0,0),(1,1,1)), clé[2,−4,−1,−1,0] : sommets
+  1,1/4,1/4. Correction par B le21 septembre : l'ancienne clé et
+  l'annonce de deux contacts étaient fausses ; x=z=0,y∈[0,1] contient
+  un contact à y=0 et un point extérieur de puissance1 à y=1.
 - Triangle((65535,65534,65533),(0,0,65532),(2,65531,0)) : grandes
   composantes B dont le carré dépasse128bits, bien que l'évaluation
   séparée précédente reste sûre. Confirmer la clé par l'oracle rationnel.

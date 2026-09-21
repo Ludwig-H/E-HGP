@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q3_ball_census.cpp
++++ mutated/wspd_q34.cpp
+@@ -46,7 +46,7 @@
+       };
+       const auto at_floor = term(std::clamp(floor_[axis], low, high));
+       const auto at_ceil = term(std::clamp(ceil_[axis], low, high));
+-      result.minimum += std::min(at_floor, at_ceil);
++      result.minimum += std::max(at_floor, at_ceil);
+       result.maximum += std::max(term(low), term(high));
+     }
+     // For M=65535 the dominating q3 coefficients obey A<=12M^4,

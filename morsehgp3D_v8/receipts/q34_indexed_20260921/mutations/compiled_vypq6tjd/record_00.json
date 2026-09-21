@@ -1,0 +1,17 @@
+{
+  "kind": "baseline",
+  "command": [
+    "/workspaces/E-HGP/build/v8_q34_indexed_20260921/mhgp8_q3_ball_census_gate",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-21T08:46:02.016164+00:00",
+  "expected_exit_code": 0,
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "{\"schema\":\"mhgp8_q3_ball_census_gate_v1\",\"status\":\"PASS\",\"checks\":475,\"calls\":44,\"oracle_sites\":1556,\"accepted\":29,\"rejected\":15,\"q2_balls\":2,\"q3_balls\":5,\"q4_balls\":1,\"shell_ids\":235,\"max_shell\":30,\"empty_shells\":4,\"integer_grid_contacts\":1,\"ceil_required\":1,\"floor_required\":1,\"whole_inside\":8,\"whole_nonnegative\":16,\"shell_exclusions\":120,\"saturating_overshoot\":1,\"prepared_unvisited\":58,\"near_first_cases\":1,\"singleton_cases\":3,\"extreme_cases\":5,\"wide_linear_squares\":3,\"permutations\":1,\"huge_threshold\":1,\"invalid_inputs\":1,\"allocation_failures\":1,\"allocation_free_rejections\":1,\"parallel_calls\":4,\"repeated_calls\":1,\"source_alias_checks\":1,\"overflow_exceptions\":1}\n",
+  "stderr": "",
+  "stdout_base64": "eyJzY2hlbWEiOiJtaGdwOF9xM19iYWxsX2NlbnN1c19nYXRlX3YxIiwic3RhdHVzIjoiUEFTUyIsImNoZWNrcyI6NDc1LCJjYWxscyI6NDQsIm9yYWNsZV9zaXRlcyI6MTU1NiwiYWNjZXB0ZWQiOjI5LCJyZWplY3RlZCI6MTUsInEyX2JhbGxzIjoyLCJxM19iYWxscyI6NSwicTRfYmFsbHMiOjEsInNoZWxsX2lkcyI6MjM1LCJtYXhfc2hlbGwiOjMwLCJlbXB0eV9zaGVsbHMiOjQsImludGVnZXJfZ3JpZF9jb250YWN0cyI6MSwiY2VpbF9yZXF1aXJlZCI6MSwiZmxvb3JfcmVxdWlyZWQiOjEsIndob2xlX2luc2lkZSI6OCwid2hvbGVfbm9ubmVnYXRpdmUiOjE2LCJzaGVsbF9leGNsdXNpb25zIjoxMjAsInNhdHVyYXRpbmdfb3ZlcnNob290IjoxLCJwcmVwYXJlZF91bnZpc2l0ZWQiOjU4LCJuZWFyX2ZpcnN0X2Nhc2VzIjoxLCJzaW5nbGV0b25fY2FzZXMiOjMsImV4dHJlbWVfY2FzZXMiOjUsIndpZGVfbGluZWFyX3NxdWFyZXMiOjMsInBlcm11dGF0aW9ucyI6MSwiaHVnZV90aHJlc2hvbGQiOjEsImludmFsaWRfaW5wdXRzIjoxLCJhbGxvY2F0aW9uX2ZhaWx1cmVzIjoxLCJhbGxvY2F0aW9uX2ZyZWVfcmVqZWN0aW9ucyI6MSwicGFyYWxsZWxfY2FsbHMiOjQsInJlcGVhdGVkX2NhbGxzIjoxLCJzb3VyY2VfYWxpYXNfY2hlY2tzIjoxLCJvdmVyZmxvd19leGNlcHRpb25zIjoxfQo=",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-21T08:46:02.028020+00:00"
+}

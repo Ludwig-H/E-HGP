@@ -1,0 +1,17 @@
+{
+  "kind": "integer_minimum_wrong_rounding_oracle",
+  "command": [
+    "/tmp/mhgp8_wspd_q34_mutants_8cgms1za/integer_minimum_wrong_rounding",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-21T08:46:03.828588+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "q3 ball census gate: global census differs from independent rational depth and shell oracle\n",
+  "stdout_base64": "",
+  "stderr_base64": "cTMgYmFsbCBjZW5zdXMgZ2F0ZTogZ2xvYmFsIGNlbnN1cyBkaWZmZXJzIGZyb20gaW5kZXBlbmRlbnQgcmF0aW9uYWwgZGVwdGggYW5kIHNoZWxsIG9yYWNsZQo=",
+  "finished_utc": "2026-09-21T08:46:03.831980+00:00"
+}

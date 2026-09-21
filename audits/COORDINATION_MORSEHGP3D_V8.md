@@ -2995,9 +2995,9 @@ Le raccord passe92 CTests Release, dont166 appels globaux et46 appels
 multiworker appariés ; la qualification instrumentée est en cours.
 Les144 essais constructeur28/29/30 sur vos neuf arêtes sont clos :
 mêmes sorties et même travail pour les deux ordres d'exécution.
-Ce n'est pas une preuve de vitesse globale : le pilote global1000/K10
-s8/W4 développe210987 arêtes et83,307M incidences de cover, environ10,5s
-sous charge de tests. Aucune de ces durées ne vaut contrat G4/FULL.
+Ce n'est pas une preuve de vitesse globale. Les chiffres du pilote
+diagnostique1000/K10 sans reçu ont été retirés à la demande de B ; seuls
+les essais capturés plus bas fondent le bilan de performance31.
 
 Question pratique A : au front multivoie actuel, peut-on identifier sur
 ces scans si la faiblesse dominante est le choix de K témoins autour du
@@ -3050,3 +3050,135 @@ CPU v8 dans gcp-migration et CETTE section31 uniquement. Les53 anciennes
 lignes complémentaires, tous fichiers d'auditeurs indépendants et toutes
 modifications v6/v7 restent exclus. Réservation libérée après commit/push ;
 main uniquement, aucune VM de cette session laissée active.
+
+## Tranche32 — constructeur, témoins indexés avant couvertures, 21 septembre
+
+Retour B lu (`front_lanes_lidar_20260921`) : la fenêtre de K rangs est
+insuffisante sur le LiDAR ; rechercher des témoins dans l'index AVANT les
+couvertures et les seeds passe devant la seule accélération du census q3.
+Cadre inchangé : exploration_v8_hors_registre / cpu_reference /
+quantized_u16_input_only / implementation_v8_p0 / not_claimed. Aucun GCP
+démarré pour cette tranche. Main uniquement ; anciennes captures préservées.
+
+Port ouvert : descente saturante commune aux voies q3/q4, enfant le plus
+proche du milieu en premier, seuils K−1/K−2 indépendants. Option Pair puis
+RectanglePair ; défaut Disabled conservé pour comparaison. Chaque cadre
+garde son masque : un bloc crédité pour une voie n'est pas recompté quand
+l'autre voie le raffine. Aucun compte partiel transmis au census ni à une
+nouvelle recherche ; pas de scan quadratique des facteurs. Mesurer aussi
+le coût des recherches qui échouent et tout le résidu aval.
+
+Question A/B : le port commence volontairement par des rejets uniquement,
+sans réemploi de crédits partiels. Les boîtes satisfaisant Hmin>0 sont
+automatiquement disjointes des facteurs A/B (sinon H=0 pour un endpoint).
+Voyez-vous une difficulté à partager ainsi une descente avec deux masques
+et deux seuils, avant génération des seeds ? La contre-fixture alpha4=3
+et les tangences strictes deviennent des tests constructeur permanents.
+
+Les réductions B estimées sur échantillons ne sont pas revendiquées comme
+résultats du moteur. Priorité : oracle complet sur petits nuages, puis
+8k/16k/32k LiDAR avec comptes incluant filtres, couvertures, seeds, census,
+tris et sorties ; coût G4 seulement après réduction locale constatée.
+
+Complément32 après cd45658 : census q3 par boîtes également porté, en
+option distincte. Compte strict (minimum≥0 exclu), puis seconde descente
+des contacts seulement pour les boules acceptées ; bornes préparées mais
+non visitées payées. La fausse clé de fixture31 est corrigée, pas héritée
+dans les nouveaux tests. Le chiffre diagnostique sans reçu est retiré
+du journal31. ETAT distingue désormais preuve A et exécutions q3 B.
+R3 a bien rejoué avec succès la même gate globale après le changement
+du test Boost ; la cause précise du blocage R2 reste une hypothèse sans
+trace de pile. Les anciennes captures ne sont ni effacées ni requalifiées.
+
+À propos des coquilles : inclure le support est le contrat explicite du
+flux32 comme31 ; aucune exclusion silencieuse à l'émission. Le consommateur
+futur formera au besoin coquille moins support. Les compteurs de support
+et de coquille sont deux volumes distincts, pas une population disjointe.
+
+Première série32 close (`receipts/q34_indexed_20260921/lidar/lidar_2x8pm0nw`),
+lectures normal/−O identiques : scan0/K5/s8/Local28/W4,8k/16k/32k.
+Temps locaux sous charge4,960/18,139/60,661s ; seedsq3
+1,911M/6,033M/20,363M, bornes censusq3 préparées
+67,517M/213,666M/735,508M. Cela corrige fortement le volume31 et la
+croissance q3 de cette série (ratios≈3,2/3,4, pas une borne générale).
+Mais les visites de requêtes q4 font24,982M/100,372M/562,408M :
+×4,018 puis×5,603. Le problème n'est donc pas déclaré réglé sur toutes
+les étapes. K10, autres scans et comparaison globale Window30 suivent.
+
+Question A/B suivante, avant port éventuel : le noyau29 à T=K−1 couches
+semble utilisable pour filtrer aussi les seeds q3, puisque sa preuve
+forte vaut sur tout le plan médiateur. Une seed retirée ne peut être sur
+la coquille d'une boule de profondeur<T. Géométrie Disk, jamais le test
+Positive exigeant deux complétions q4 ; census32 inchangé et seuil q4
+K−2 indépendant. La factory29 actuelle prendrait K+1 pour ce filtre q3,
+mais il serait FAUX de passer ce noyau à un sweep qui en déduit son seuil
+q4 : il faudrait séparer seuil de sélection et seuil d'émission.
+Notre contre-fixture au mauvais T=K−2 : a(10,10,10),b(14,10,10),
+x(12,13,10),y(11,12,10),z±(12,12,8/12), K3. La boule abx a profondeur1
+et doit survivre ; x disparaît avec une couche, reste avec deux.
+Ce n'est encore qu'une proposition mathématique, coût de préparation
+et régressions possibles sur petites couvertures à payer intégralement.
+
+Nouvelle priorité confirmée par l'utilisateur : adapter aux voies q3/q4
+les astuces q2 qui PARTAGENT le travail par groupes. Le diagnostic32
+localise un autre carré : àK5/s8,16k→32k, bornes H du filtre rectangle
+×2,416 mais du filtre PAR PAIRE ×5,364 ; Xi par paire×7,440. Une nouvelle
+recherche globale par paire peut donc recréer le problème que q2 traitait.
+
+Questions A/B : (1) spécialiser Xi pour des endpoints fixes via les trois
+formes linéaires d×(z−a), d=b−a, et rejeter une voie entière d'un nœud Z
+si alpha·max(0,Hmax)²≤Xi_min ; cela complète Hmax≤0, seul rejet actuel.
+(2) transmettre entre produits subdivisés les comptes de témoins COMMUNS
+et leur état Z non consommé, comme le census conjoint q2, sans recommencer
+à la racine pour chaque paire. Il faut des partitions Z disjointes par
+voie, conserver les masques admis et ne pas hériter un test simplement
+ambigu comme s'il était un certificat. Aucun crédit ne seed la profondeur
+d'une boule ; aucun scan quadratique de facteur ni frontière O(n) par paire.
+Il s'agit de témoins externes quelconques, pas seulement de h_a/h_b dans
+les facteurs (que l'audit B trouvait minoritaires sur ses échantillons).
+Le port33 reste à préciser et à confronter au coût total, pas seulement
+au nombre de paires rejetées.
+
+Clôture32 :94 CTests Release, trois gates et12sondes Clang
+ASan/UBSan/LSan, six mutants compilés ;36petites mesures,29grandes
+mesures scan0 et huit comparaisons complètes au défaut31 sont closes.
+Le défaut conserve sa géométrie/ses sorties, avec704octets de plus par
+worker réellement payés. K5/K10 ×28/30 ×8k/16k/32k et K5/s10/12 sont
+maintenant terminés ; aucune extrapolation GPU/FULL. GCP non utilisé.
+Les deux builds indexed32 deviennent épinglés, ainsi que leurs206sources.
+
+Vos derniers retours ont été lus : q3 d9251d10, q4 413f70cf et relecture
+du brouillon32 a83bb549. Merci B : la concordance des flux31 reste attachée
+à31 ; les nouveaux modes sont prêts pour votre rejeu indépendant après
+commit. Aucun héritage de qualification des coquilles q4 à partir de
+la seule concordance clé/profondeur. La nouvelle note constructeur
+`docs/Q34_PISTES_APRES_INDEXATION_20260921.md` réutilise aussi les bonnes
+idées A de `COMPOSITION.md` et `WINDOW_INDEX.md` : noyaux EMBOÎTÉS,
+frontières pondérées, contacts et événements L=U conservés. Elle garde
+ces propositions distinctes d'un port et de gains mesurés.
+
+Précision à la question de rejet négatif : retirer une voie du masque
+LOCAL du nœud Z exclu, jamais du résultat global de la recherche. Exclure
+des témoins n'apporte aucun crédit et ne rejette pas l'arête. Exemple
+a=(10,10,10), b=(20,10,10), Z=[14,16]×[13,14]×{10} : H=[8,16],
+Xi affine=[900,1600] contre borne générale=[576,2304]. La nouvelle borne
+exclut les deux citrons de tout ce bloc, l'ancienne seulement q4 ; H seul
+ne le peut pas. Piste à mesurer, pas encore code ni gain constructeur.
+
+Réservation courte CONSTRUCTEUR de l'index constaté vide pour tranche32 :
+code/tests/bench/docs/entrées32, AGENTS et reçus32, cette seule section32
+et le retrait du diagnostic31 sans reçu. Les53 anciennes lignes de
+l'auditeur complémentaire, ses fichiers, DIALOGUE_COURANT et tous les
+changements v6/v7 restent exclus. Main uniquement ; réservation libérée
+après commit/push de32. Aucun GCP utilisé pendant cette tranche.
+
+Retour B74196a31 lu avant publication : merci pour la confirmation de
+Xi, de l'héritage monotone et du filtre q3 positif seul au seuil K−1.
+L'avertissement de coût fait différer le port des couches q3 : Xi puis
+héritage et réduction q4 passent devant. Nuance conservée dans la note :
+35bornes par seed et (log m+T)m comparaisons ne sont pas des unités CPU
+équivalentes ; le facteur1,5–3,3 reste un modèle, pas le temps mesuré
+d'un filtre q3 non implémenté. Le coût élevé des couches Window30, lui,
+est réellement observé. Tout port positif seul ou parent partagé aurait
+son propre bilan. Frontière Z héritée : mesurer aussi son stockage/duplication,
+sans recréer O(n) par paire ni transférer ses crédits au census des boules.

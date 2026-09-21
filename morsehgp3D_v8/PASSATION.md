@@ -1,14 +1,63 @@
-# Passation v8 — raccord global q3/q4 et priorité LiDAR
+# Passation v8 — témoins indexés, census par boîtes et coûts LiDAR
 
 21 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`. Aucun contrat de tour n'est encore acquis.
 Le constructeur a changé le17 septembre, puis de nouveau à cette reprise
 du20 septembre. L'ancien auditeur B a livré les tranches19–21 ; son canal
-`audits/DIALOGUE_AUDITEUR_B.md` est clos et ses reçus d'audit ne valent pas
-qualification de son propre code.
+`audits/DIALOGUE_AUDITEUR_B.md` a été rouvert le21 septembre comme canal
+d'audit indépendant. Ses anciens résultats de constructeur et ses nouveaux
+audits ne qualifient jamais automatiquement les nouveaux ports.
 
 ## À reprendre maintenant
+
+La [tranche32](docs/Q34_TEMOINS_INDEXES_ET_CENSUS_BOITES_20260921.md) porte
+les recommandations B : rejets indexés rectangles/paires AVANT couvertures,
+puis census q3 global par boîtes et collecte séparée de coquille.
+Options explicites, défauts historiques conservés. L'ancien coût q3 est
+fortement réduit sur le scan0/K5/s8 ; les trois tailles8k/16k/32k sont
+maintenant réellement exécutées et reçues. Les visites q4 Local28 restent
+au-dessus du quadruplement ; les recherches de témoins par paire aussi
+sur certains postes. Window30 a maintenant été comparé GLOBAL à28,
+K5/10 et trois tailles ; s10/12 également àK5. Ne pas déclarer le problème
+réglé ni promouvoir un backend sur un seul compteur favorable.
+Voir les [reçus32](receipts/q34_indexed_20260921/README.md) pour le bilan
+complet ; aucun transfert des temps CPU locaux à G4/GPU ni à FULL.
+
+Qualification32 close :94 CTests Release, trois gates et12sondes
+ASan/UBSan/LSan, six mutants compilés,29grandes mesures et36petites
+sondes. Huit comparaisons au défaut31 retrouvent sorties complètes et
+travail géométrique ; état privé accru de704octets par worker, autres
+capacités dépendantes du scheduling publiées. Les builds
+`build/v8_q34_indexed_20260921` et
+`build/v8_q34_indexed_sanitize_20260921` sont désormais épinglés.
+GCP non utilisé dans32. Les échecs de lecteur et de contexte LSan restent
+archivés, distincts des reprises réussies.
+
+Lire en premier les [pistes après32](docs/Q34_PISTES_APRES_INDEXATION_20260921.md) :
+le filtre actuel n'exclut que Hmax≤0, donc peut fouiller inutilement la
+partie de la boule diamètre extérieure au citron. Pour une paire fixe,
+Xi est une somme de carrés de formes affines ; des bornes plus serrées
+et un rejet négatif par voie sont proposés. Puis partager les comptes
+et les nœuds Z non consommés entre sous-produits, comme en q2. Aucun
+crédit n'est ajouté au census d'une boule. L'arête reste atomique : prévoir
+plages de seeds et parents immuables après réduction du travail, sans
+nouvelle préparation par plage. Pas de nouvelle micro-variante q2.
+
+Question soumise A/B : filtrer les seeds q3 avec le noyau29 au seuil
+K−1 (et non K−2), géométrie Disk, puis conserver le census32 inchangé.
+Ne pas transmettre un noyau paramétré K+1 à un sweep q4 qui en déduirait
+son seuil : il faut séparer seuil de sélection et seuil d'émission.
+Proposition non implémentée, préparation et résidu à mesurer ensemble.
+Réponse B reçue à74196a31 : sûreté confirmée (le groupe positif suffit
+pour filtrer les seeds), mais rentabilité déconseillée sur ses LiDAR par
+un modèle de coûts, pas par un benchmark de ce filtre inexistant. Différer
+le port q3 par couches ; priorité à Xi, héritage des recherches et travail
+q4. B confirme aussi la validité du rejet négatif Xi et de l'héritage par
+monotonie ; les frontières ambiguës doivent rester disjointes, stockées
+et payées, sans réintroduire une liste O(n) par paire.
+
+### Historique31
 
 Tranche31,21 septembre : l'utilisateur privilégie maintenant la croissance
 sur les régimes considérés, surtout SemanticKITTI, pas l'attente d'une borne

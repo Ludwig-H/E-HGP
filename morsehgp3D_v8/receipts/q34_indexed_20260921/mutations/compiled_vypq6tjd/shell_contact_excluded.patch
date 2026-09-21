@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q3_ball_census.cpp
++++ mutated/wspd_q34.cpp
+@@ -157,7 +157,7 @@
+     const Frame frame = stack[--size];
+     const auto& node = nodes[frame.node];
+     counter_add(work.shell_node_visits);
+-    if (frame.bounds.minimum > 0 || frame.bounds.maximum < 0) {
++    if (frame.bounds.minimum >= 0 || frame.bounds.maximum < 0) {
+       counter_add(work.shell_excluded_nodes);
+       continue;
+     }

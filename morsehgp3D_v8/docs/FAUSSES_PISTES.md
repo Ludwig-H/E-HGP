@@ -378,6 +378,32 @@ Voir les [résultats et la suite](Q4_CARTE_CENTRES_PARTAGEE_20260920.md).
 
 Voir la [preuve, les mesures et la suite29](Q4_COUCHES_DUALES_20260920.md).
 
+## Témoins indexés32 : ce que les premières mesures ne permettent pas de conclure
+
+La petite fenêtre WSPD de K rangs ne suffisait pas sur le LiDAR : le port
+de la recherche indexée avant couvertures retire désormais la grande
+majorité des paires coûteuses. Se contenter d'accélérer le tri ou de
+paralléliser leur expansion aurait conservé ces calculs inutiles.
+
+En revanche, moins de lectures ne signifie pas automatiquement moins de
+temps : à8k les bornes q3 entières coûtent davantage qu'un simple test de
+point ; les essais Scalar/Boxes sous charge ne prouvent pas un gain
+chronométrique général pour Boxes. Le coût complet des recherches qui
+ne trouvent pas assez de témoins reste payé. Voir les
+[huit essais appariés](../receipts/q34_indexed_20260921/BENCH_8K_PAIR_RECTANGLE_SCALAR_BOXES.md).
+
+La première série32/K5/s8/Local28 corrige fortement q3 mais conserve des
+visites q4×5,603 au dernier doublement. Ne pas en faire une fermeture
+globale du sous-quadratique. Les modes et backend doivent être comparés
+sur des chaînes entières, avec les mêmes sorties et toute la préparation.
+Une analyse des mêmes scans à s10/12 est désormais reçue séparément.
+
+La sûreté du noyau dual pour q3 au seuil K−1 n'établit pas sa rentabilité.
+Le retour B74196a31 déconseille son port immédiat sur ces LiDAR ; les coûts
+élevés de préparation Window30 sont effectivement mesurés. Différer les
+couches q3 au profit de Xi et de l'héritage des recherches, sans transformer
+un modèle de compteurs en facteur de temps constaté pour un filtre absent.
+
 ## Fenêtre q4 exacte30 : ce qui doit rester payé et conservé
 
 - Rejeter L≥U perd un événement admissible lorsque L=U. Le creux

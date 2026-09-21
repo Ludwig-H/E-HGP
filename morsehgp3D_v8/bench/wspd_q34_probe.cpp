@@ -44,12 +44,42 @@ constexpr std::array worker_fields{
  F(WspdQ34WorkerWork,jobs),F(WspdQ34WorkerWork,front_products),F(WspdQ34WorkerWork,input_rectangles),
  F(WspdQ34WorkerWork,expanded_pairs),F(WspdQ34WorkerWork,q3_emitted),F(WspdQ34WorkerWork,q4_emitted),
  F(WspdQ34WorkerWork,peak_edge_buffer_bytes)};
+constexpr std::array witness_fields{
+ F(WspdQ34WitnessWork,input_pair_mass),F(WspdQ34WitnessWork,rejected_rectangles),
+ F(WspdQ34WitnessWork,rectangle_pair_mass),F(WspdQ34WitnessWork,rectangle_q3_pairs),
+ F(WspdQ34WitnessWork,rectangle_q4_pairs),F(WspdQ34WitnessWork,rejected_pairs),
+ F(WspdQ34WitnessWork,pair_q3_pairs),F(WspdQ34WitnessWork,pair_q4_pairs)};
+constexpr std::array witness_search_fields{
+ F(Q34WitnessSearchWork,queries),F(Q34WitnessSearchWork,q3_queries),F(Q34WitnessSearchWork,q4_queries),
+ F(Q34WitnessSearchWork,prepared_bounds),F(Q34WitnessSearchWork,node_visits),F(Q34WitnessSearchWork,h_bound_tests),
+ F(Q34WitnessSearchWork,xi_bound_tests),F(Q34WitnessSearchWork,point_tests),F(Q34WitnessSearchWork,h_excluded_nodes),
+ F(Q34WitnessSearchWork,admitted_nodes),F(Q34WitnessSearchWork,fully_admitted_nodes),F(Q34WitnessSearchWork,leaf_remainders),
+ F(Q34WitnessSearchWork,split_nodes),F(Q34WitnessSearchWork,q3_lane_tests),F(Q34WitnessSearchWork,q4_lane_tests),
+ F(Q34WitnessSearchWork,q3_admitted_nodes),F(Q34WitnessSearchWork,q4_admitted_nodes),
+ F(Q34WitnessSearchWork,q3_credits),F(Q34WitnessSearchWork,q4_credits),F(Q34WitnessSearchWork,q3_rejected),
+ F(Q34WitnessSearchWork,q4_rejected),F(Q34WitnessSearchWork,midpoint_box_tests),
+ F(Q34WitnessSearchWork,pending_nodes_skipped),F(Q34WitnessSearchWork,peak_stack),F(Q34WitnessSearchWork,stack_storage_bytes)};
+constexpr std::array q3_block_fields{
+ F(Q3BallCensusWork,queries),F(Q3BallCensusWork,preparations),F(Q3BallCensusWork,vertex_axes),
+ F(Q3BallCensusWork,accepted_queries),F(Q3BallCensusWork,rejected_queries),
+ F(Q3BallCensusWork,count_node_visits),F(Q3BallCensusWork,count_bounds_prepared),
+ F(Q3BallCensusWork,count_box_bound_tests),F(Q3BallCensusWork,count_point_tests),
+ F(Q3BallCensusWork,count_inside_nodes),F(Q3BallCensusWork,count_inside_sites),
+ F(Q3BallCensusWork,count_nonnegative_nodes),F(Q3BallCensusWork,count_nonnegative_sites),
+ F(Q3BallCensusWork,count_split_nodes),F(Q3BallCensusWork,count_prepared_unvisited),F(Q3BallCensusWork,count_saturations),
+ F(Q3BallCensusWork,shell_node_visits),F(Q3BallCensusWork,shell_bounds_prepared),
+ F(Q3BallCensusWork,shell_box_bound_tests),F(Q3BallCensusWork,shell_point_tests),
+ F(Q3BallCensusWork,shell_excluded_nodes),F(Q3BallCensusWork,shell_split_nodes),F(Q3BallCensusWork,shell_ids),
+ F(Q3BallCensusWork,peak_count_stack),F(Q3BallCensusWork,peak_shell_stack),F(Q3BallCensusWork,stack_storage_bytes)};
 #undef F
 static_assert(sizeof(WspdQ34ParallelWork)==parallel_fields.size()*sizeof(u64));
 static_assert(sizeof(WspdQ34WorkerWork)==worker_fields.size()*sizeof(u64));
 static_assert(sizeof(WspdQ3Work)==q3_fields.size()*sizeof(u64));
 static_assert(sizeof(WspdQ34Work)==global_fields.size()*sizeof(u64)+sizeof(Q34EdgeCoverWork)+
- sizeof(WspdQ3Work)+sizeof(Q4LocalEdgeWork)+sizeof(Q4WindowEdgeWork));
+ sizeof(WspdQ3Work)+sizeof(Q4LocalEdgeWork)+sizeof(Q4WindowEdgeWork)+sizeof(WspdQ34WitnessWork)+sizeof(Q3BallCensusWork));
+static_assert(sizeof(Q3BallCensusWork)==q3_block_fields.size()*sizeof(u64));
+static_assert(sizeof(Q34WitnessSearchWork)==witness_search_fields.size()*sizeof(u64));
+static_assert(sizeof(WspdQ34WitnessWork)==witness_fields.size()*sizeof(u64)+2*sizeof(Q34WitnessSearchWork));
 static_assert(sizeof(WspdFrontWork)==(global_front_fields.size()+19)*sizeof(u64));
 
 struct StreamingOutput {
@@ -105,7 +135,7 @@ void dump_global_front(const WspdFrontResult& result) {
  std::cout<<",\"size_class_pair_mass\":";dump_u64_array(result.work.size_class_pair_mass);
  std::cout<<"}}";
 }
-void dump_global_work(const WspdQ34Work& work) {
+void dump_global_work(const WspdQ34Work& work,bool indexed_schema) {
  std::cout<<'{';dump_fields(work,global_fields);
  std::cout<<",\"cover\":";audit_dump(work.cover,cover_fields);
  std::cout<<",\"q3\":";audit_dump(work.q3,q3_fields);
@@ -120,16 +150,27 @@ void dump_global_work(const WspdQ34Work& work) {
  std::cout<<",\"geometry\":";dump_geometry(work.window.geometry);
  std::cout<<",\"selection\":";audit_dump(work.window.selection,selection_fields);
  std::cout<<",\"sweep\":";dump_shallow_sweep(work.window.sweep.sweep);
- std::cout<<",\"window\":";audit_dump(work.window.sweep.window,window_fields);std::cout<<"}}";
+ std::cout<<",\"window\":";audit_dump(work.window.sweep.window,window_fields);std::cout<<'}';
+ if(indexed_schema) {
+  std::cout<<",\"witness\":{";dump_fields(work.witness,witness_fields);
+  std::cout<<",\"rectangles\":";audit_dump(work.witness.rectangles,witness_search_fields);
+  std::cout<<",\"pairs\":";audit_dump(work.witness.pairs,witness_search_fields);std::cout<<'}';
+  std::cout<<",\"q3_blocks\":";audit_dump(work.q3_blocks,q3_block_fields);
+ }
+ std::cout<<'}';
 }
 int global_run(int argc,char** argv) {
- require(argc>=8 && argc<=10,"usage: mhgp8_wspd_q34_probe file n K s mask backend workers [samples|pure] [digest|records]");
+ require(argc>=8 && argc<=12,"usage: mhgp8_wspd_q34_probe file n K s mask backend workers [samples|pure] [digest|records] [disabled|pair|rectangle-pair] [scalar|boxes]");
  const auto n=number(argv[2]),k=number(argv[3]),s=number(argv[4]),mask=number(argv[5]);
  const auto backend=number(argv[6]),workers=number(argv[7]);
  const std::string_view mode=argc>=9?argv[8]:"samples",output_mode=argc>=10?argv[9]:"digest";
+ const std::string_view witness_mode=argc>=11?argv[10]:"disabled";
+ const std::string_view census_mode=argc==12?argv[11]:"scalar";
  require(n>0 && k>=1 && k<=10 && s>0 && s<=std::numeric_limits<unsigned>::max() &&
   (mask==2 || mask==4 || mask==6) && (backend==28 || backend==30) && workers>0 &&
   (mode=="samples" || mode=="pure") && (output_mode=="digest" || output_mode=="records"),"invalid global probe options");
+ require(witness_mode=="disabled" || witness_mode=="pair" || witness_mode=="rectangle-pair","invalid witness mode");
+ require(census_mode=="scalar" || census_mode=="boxes","invalid q3 census mode");
  const auto started=Clock::now();
  auto input=read_lidar(argv[1]);const auto source_n=input.points.size();
  require(n<=source_n,"requested prefix larger than file");input.points.resize(n);
@@ -141,6 +182,9 @@ int global_run(int argc,char** argv) {
  options.requested_lane_mask=static_cast<std::uint8_t>(mask);
  options.front_mode=mode=="samples"?WspdFrontMode::MidpointSamples:WspdFrontMode::Pure;
  options.q4_backend=backend==28?WspdQ4Backend::Local28:WspdQ4Backend::Window30;
+ options.witness_mode=witness_mode=="disabled"?WspdQ34WitnessMode::Disabled:
+  witness_mode=="pair"?WspdQ34WitnessMode::Pair:WspdQ34WitnessMode::RectanglePair;
+ options.q3_census_mode=census_mode=="scalar"?WspdQ3CensusMode::ScalarCover:WspdQ3CensusMode::GlobalBoxes;
  std::vector<StreamingOutput> outputs(workers);
  std::vector<Output> payloads(output_mode=="records"?workers:0);
  const auto parallel=run_wspd_q34_parallel(index,static_cast<unsigned>(k),static_cast<unsigned>(s),options,workers,
@@ -161,7 +205,7 @@ int global_run(int argc,char** argv) {
   output.shell_ids==result.work.payload_shell_ids,"global callback ledger differs");
  const auto done=Clock::now();
  std::cout<<std::fixed<<std::setprecision(6)
-  <<"{\"schema\":\"mhgp8_wspd_q34_probe_v1\",\"status\":\"completed\","
+  <<"{\"schema\":\"mhgp8_wspd_q34_probe_v"<<(argc>=11?2:1)<<"\",\"status\":\"completed\","
     "\"scope\":\"global_q3_q4_candidate_stream_not_catalogue_or_full\",\"backend\":\"cpu_reference\","
     "\"profile\":\"quantized_u16_input_only\",\"public_status\":\"not_claimed\","
   <<"\"n\":"<<n<<",\"source_n\":"<<source_n<<",\"kmax\":"<<k<<",\"s\":"<<s
@@ -169,7 +213,8 @@ int global_run(int argc,char** argv) {
   <<",\"front_mode\":\""<<mode<<"\",\"output_mode\":\""<<output_mode<<"\",\"input_hash\":"<<input.hash
   <<",\"validation\":\"payload_structure_and_ledger_only_small_exhaustive_gate_separate\",\"output\":";
  output.dump();std::cout<<",\"front\":";dump_global_front(result.front);
- std::cout<<",\"work\":";dump_global_work(result.work);
+ if(argc>=11)std::cout<<",\"witness_mode\":\""<<witness_mode<<"\",\"q3_census_mode\":\""<<census_mode<<'"';
+ std::cout<<",\"work\":";dump_global_work(result.work,argc>=11);
  std::cout<<",\"parallel\":";audit_dump(parallel.parallel,parallel_fields);
  std::cout<<",\"workers_work\":[";
  for(std::size_t slot=0;slot<parallel.workers.size();++slot) {

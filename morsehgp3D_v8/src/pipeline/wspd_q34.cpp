@@ -181,9 +181,45 @@ void merge(WspdQ3Work& a, const WspdQ3Work& b) {
   MHGP8_ADD(emitted); MHGP8_MAX(peak_shell_bytes);
 }
 
+void merge(Q34WitnessSearchWork& a, const Q34WitnessSearchWork& b) {
+  static_assert(sizeof(Q34WitnessSearchWork) == 25 * sizeof(u64));
+  MHGP8_ADD(queries); MHGP8_ADD(q3_queries); MHGP8_ADD(q4_queries);
+  MHGP8_ADD(prepared_bounds); MHGP8_ADD(node_visits); MHGP8_ADD(h_bound_tests);
+  MHGP8_ADD(xi_bound_tests); MHGP8_ADD(point_tests); MHGP8_ADD(h_excluded_nodes);
+  MHGP8_ADD(admitted_nodes); MHGP8_ADD(fully_admitted_nodes); MHGP8_ADD(leaf_remainders);
+  MHGP8_ADD(split_nodes); MHGP8_ADD(q3_lane_tests); MHGP8_ADD(q4_lane_tests);
+  MHGP8_ADD(q3_admitted_nodes); MHGP8_ADD(q4_admitted_nodes);
+  MHGP8_ADD(q3_credits); MHGP8_ADD(q4_credits); MHGP8_ADD(q3_rejected); MHGP8_ADD(q4_rejected);
+  MHGP8_ADD(midpoint_box_tests); MHGP8_ADD(pending_nodes_skipped);
+  MHGP8_MAX(peak_stack); MHGP8_MAX(stack_storage_bytes);
+}
+
+void merge(WspdQ34WitnessWork& a, const WspdQ34WitnessWork& b) {
+  static_assert(sizeof(WspdQ34WitnessWork) == 8 * sizeof(u64) + 2 * sizeof(Q34WitnessSearchWork));
+  MHGP8_ADD(input_pair_mass); MHGP8_ADD(rejected_rectangles); MHGP8_ADD(rectangle_pair_mass);
+  MHGP8_ADD(rectangle_q3_pairs); MHGP8_ADD(rectangle_q4_pairs);
+  MHGP8_ADD(rejected_pairs); MHGP8_ADD(pair_q3_pairs); MHGP8_ADD(pair_q4_pairs);
+  merge(a.rectangles, b.rectangles); merge(a.pairs, b.pairs);
+}
+
+void merge(Q3BallCensusWork& a, const Q3BallCensusWork& b) {
+  static_assert(sizeof(Q3BallCensusWork) == 26 * sizeof(u64));
+  MHGP8_ADD(queries); MHGP8_ADD(preparations); MHGP8_ADD(vertex_axes);
+  MHGP8_ADD(accepted_queries); MHGP8_ADD(rejected_queries);
+  MHGP8_ADD(count_node_visits); MHGP8_ADD(count_bounds_prepared);
+  MHGP8_ADD(count_box_bound_tests); MHGP8_ADD(count_point_tests);
+  MHGP8_ADD(count_inside_nodes); MHGP8_ADD(count_inside_sites);
+  MHGP8_ADD(count_nonnegative_nodes); MHGP8_ADD(count_nonnegative_sites);
+  MHGP8_ADD(count_split_nodes); MHGP8_ADD(count_prepared_unvisited); MHGP8_ADD(count_saturations);
+  MHGP8_ADD(shell_node_visits); MHGP8_ADD(shell_bounds_prepared);
+  MHGP8_ADD(shell_box_bound_tests); MHGP8_ADD(shell_point_tests);
+  MHGP8_ADD(shell_excluded_nodes); MHGP8_ADD(shell_split_nodes); MHGP8_ADD(shell_ids);
+  MHGP8_MAX(peak_count_stack); MHGP8_MAX(peak_shell_stack); MHGP8_MAX(stack_storage_bytes);
+}
+
 void merge(WspdQ34Work& a, const WspdQ34Work& b) {
   static_assert(sizeof(WspdQ34Work) == 13 * sizeof(u64) + sizeof(Q34EdgeCoverWork) +
-      sizeof(WspdQ3Work) + sizeof(Q4LocalEdgeWork) + sizeof(Q4WindowEdgeWork));
+      sizeof(WspdQ3Work) + sizeof(Q4LocalEdgeWork) + sizeof(Q4WindowEdgeWork) + sizeof(WspdQ34WitnessWork) + sizeof(Q3BallCensusWork));
   MHGP8_ADD(input_rectangles); MHGP8_ADD(expanded_pairs); MHGP8_ADD(q3_edges);
   MHGP8_ADD(q4_edges); MHGP8_ADD(both_edges); MHGP8_ADD(cover_builds);
   MHGP8_ADD(cover_sites); MHGP8_MAX(max_cover_sites); MHGP8_MAX(peak_cover_bytes);
@@ -191,6 +227,8 @@ void merge(WspdQ34Work& a, const WspdQ34Work& b) {
   MHGP8_MAX(peak_edge_buffer_bytes);
   merge(a.cover, b.cover); merge(a.q3, b.q3);
   merge(a.local, b.local); merge(a.window, b.window);
+  merge(a.witness, b.witness);
+  merge(a.q3_blocks, b.q3_blocks);
 }
 
 #undef MHGP8_ADD
@@ -224,7 +262,12 @@ void validate(Q2CensusIndexPtr index, unsigned k, unsigned s,
       (options.requested_lane_mask != 2 && options.requested_lane_mask != 4 &&
        options.requested_lane_mask != 6) ||
       (options.q4_backend != WspdQ4Backend::Local28 &&
-       options.q4_backend != WspdQ4Backend::Window30))
+       options.q4_backend != WspdQ4Backend::Window30) ||
+      (options.witness_mode != WspdQ34WitnessMode::Disabled &&
+       options.witness_mode != WspdQ34WitnessMode::Pair &&
+       options.witness_mode != WspdQ34WitnessMode::RectanglePair) ||
+      (options.q3_census_mode != WspdQ3CensusMode::ScalarCover &&
+       options.q3_census_mode != WspdQ3CensusMode::GlobalBoxes))
     throw std::invalid_argument("mhgp8 unsupported global q34 options");
   // Match the unchanged local28 public contract, even if this call requests
   // no active q4 lane or selects Window30. Inert options cannot hide errors.
@@ -245,9 +288,16 @@ WspdQ34Result empty_result(const Q2CensusIndexPtr& index, unsigned kmax,
 
 void validate_completion(const WspdQ34Result& result, const WspdQ34Options& options) {
   // Whole-call identities, never promoted from a partly emitted traversal.
-  if (result.work.q3_edges != result.front.work.residual_pair_mass[1] ||
-      result.work.q4_edges != result.front.work.residual_pair_mass[2] ||
-      result.work.cover_builds != result.work.expanded_pairs ||
+  const auto& witness = result.work.witness;
+  auto q3 = result.work.q3_edges, q4 = result.work.q4_edges;
+  auto expanded = result.work.expanded_pairs, covered = result.work.cover_builds;
+  counter_add(q3, witness.rectangle_q3_pairs); counter_add(q3, witness.pair_q3_pairs);
+  counter_add(q4, witness.rectangle_q4_pairs); counter_add(q4, witness.pair_q4_pairs);
+  counter_add(expanded, witness.rectangle_pair_mass);
+  counter_add(covered, witness.rejected_pairs);
+  if (q3 != result.front.work.residual_pair_mass[1] ||
+      q4 != result.front.work.residual_pair_mass[2] ||
+      covered != result.work.expanded_pairs || expanded != witness.input_pair_mass ||
       result.work.input_rectangles != result.front.work.emitted_rectangles ||
       result.work.q3_emitted != result.work.q3.emitted ||
       result.work.q4_emitted != (options.q4_backend == WspdQ4Backend::Local28
@@ -285,12 +335,33 @@ class Engine {
     const auto a = nodes[rectangle.a_node].range;
     const auto b = nodes[rectangle.b_node].range;
     counter_add(work.input_rectangles);
+    const i128 product = static_cast<i128>(a.size()) * b.size();
+    if (product > std::numeric_limits<u64>::max())
+      throw std::overflow_error("mhgp8 q34 rectangle mass exceeds u64");
+    const auto mass = static_cast<u64>(product);
+    counter_add(work.witness.input_pair_mass, mass);
+    auto mask = rectangle.lane_mask;
+    if (options_.witness_mode == WspdQ34WitnessMode::RectanglePair) {
+      const auto filtered = filter_q34_witnesses(*index_, nodes[rectangle.a_node].box,
+          nodes[rectangle.b_node].box, static_cast<std::uint8_t>(k_), mask,
+          work.witness.rectangles);
+      if ((mask & 2U) != 0 && (filtered & 2U) == 0)
+        counter_add(work.witness.rectangle_q3_pairs, mass);
+      if ((mask & 4U) != 0 && (filtered & 4U) == 0)
+        counter_add(work.witness.rectangle_q4_pairs, mass);
+      mask = filtered;
+      if (mask == 0) {
+        counter_add(work.witness.rejected_rectangles);
+        counter_add(work.witness.rectangle_pair_mass, mass);
+        return;
+      }
+    }
     // This is an explicit expansion of the certified residual WSPD products,
     // not an all-pairs fallback. The front's disjoint cover guarantees one
     // visit per unordered residual edge, even when both lanes survive.
     for (auto ai = a.first; ai < a.last; ++ai)
       for (auto bi = b.first; bi < b.last; ++bi)
-        edge(order[ai], order[bi], rectangle.lane_mask);
+        edge(order[ai], order[bi], mask);
   }
 
   WspdQ34Work work{};
@@ -317,10 +388,19 @@ class Engine {
   }
 
   void edge(std::size_t a, std::size_t b, std::uint8_t mask) {
-    const bool q3 = (mask & 2U) != 0, q4 = (mask & 4U) != 0;
-    if ((!q3 && !q4) || (mask & ~6U) != 0)
+    if (mask == 0 || (mask & ~6U) != 0)
       throw std::logic_error("mhgp8 global q34 received an inactive rectangle");
     counter_add(work.expanded_pairs);
+    if (options_.witness_mode != WspdQ34WitnessMode::Disabled) {
+      const auto points = index_->cloud().points();
+      const auto filtered = filter_q34_witnesses(*index_, singleton_box(points[a]),
+          singleton_box(points[b]), static_cast<std::uint8_t>(k_), mask, work.witness.pairs);
+      if ((mask & 2U) != 0 && (filtered & 2U) == 0) counter_add(work.witness.pair_q3_pairs);
+      if ((mask & 4U) != 0 && (filtered & 4U) == 0) counter_add(work.witness.pair_q4_pairs);
+      mask = filtered;
+      if (mask == 0) { counter_add(work.witness.rejected_pairs); return; }
+    }
+    const bool q3 = (mask & 2U) != 0, q4 = (mask & 4U) != 0;
     if (q3) counter_add(work.q3_edges);
     if (q4) counter_add(work.q4_edges);
     if (q3 && q4) counter_add(work.both_edges);
@@ -356,6 +436,11 @@ class Engine {
     if (!ball) throw std::logic_error("mhgp8 q3 owned acute seed lacks its exact ball");
     shell_.clear();
     std::size_t depth = 0, visited = 0;
+    if (options_.q3_census_mode == WspdQ3CensusMode::GlobalBoxes) {
+      const auto census = census_q3_ball(*index_, *ball, k_ - 1, shell_, work.q3_blocks);
+      if (!census.accepted) { counter_add(q3.depth_rejections); return; }
+      depth = census.depth;
+    } else {
     // No q4-family preparation, events, root comparisons or q3->q4 credit.
     // The same closed cover certifies the entire positive owned q3 ball.
     // ExactBall::power has its u16 i128 proof in that immutable primitive.
@@ -378,6 +463,7 @@ class Engine {
           shell_.push_back(id);
         } else counter_add(q3.census_outside_sites);
       }
+    }
     }
     std::sort(shell_.begin(), shell_.end(), [&](std::size_t a, std::size_t b) {
       counter_add(q3.shell_sort_comparisons);

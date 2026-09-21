@@ -1,0 +1,17 @@
+{
+  "kind": "admitted_lane_recounted_in_children_oracle",
+  "command": [
+    "/tmp/mhgp8_wspd_q34_mutants_13hul42k/admitted_lane_recounted_in_children",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-21T08:52:44.091531+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "q34 witness search gate: singleton witness decision differs from independent oracle\n",
+  "stdout_base64": "",
+  "stderr_base64": "cTM0IHdpdG5lc3Mgc2VhcmNoIGdhdGU6IHNpbmdsZXRvbiB3aXRuZXNzIGRlY2lzaW9uIGRpZmZlcnMgZnJvbSBpbmRlcGVuZGVudCBvcmFjbGUK",
+  "finished_utc": "2026-09-21T08:52:44.122951+00:00"
+}

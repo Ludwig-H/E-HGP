@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q34_witness_search.cpp
++++ mutated/wspd_q34.cpp
+@@ -112,7 +112,7 @@
+         if ((frame.mask & bit) == 0) continue;
+         counter_add(lane == 0 ? work.q3_lane_tests : work.q4_lane_tests);
+         const i128 alpha = lane == 0 ? 3 : 2;
+-        if (alpha * h4_squared <= xi16) continue;
++        if (alpha * h4_squared < xi16) continue;
+         counter_add(lane == 0 ? work.q3_admitted_nodes : work.q4_admitted_nodes);
+         const auto credit = std::min<std::size_t>(threshold[lane] - count[lane], node.range.size());
+         // credit<=threshold<=9 before narrowing; no size_t/u64 sum with

@@ -3,11 +3,37 @@
 21 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
+Tranche32 close : filtres de témoins indexés avant couvertures,
+census q3 par boîtes, coquille complète collectée à l'acceptation seulement.
+94 CTests Release, trois gates/12sondes ASan/UBSan/LSan et six mutants
+géométriques compilés passent ;29grandes mesures et36petites sondes
+closes. Huit comparaisons complètes au défaut31 passent,704octets de
+plus par worker explicitement publiés. Premier
+scan0/K5/s8/28/W4 à8k/16k/32k clos : croissanceq3≈×3,2/×3,4, mais visites
+q4×4,018/×5,603. Pas de clôture générale du problème de croissance.
+[Note32](../docs/Q34_TEMOINS_INDEXES_ET_CENSUS_BOITES_20260921.md) et
+[reçus32](../receipts/q34_indexed_20260921/README.md) font autorité pour
+les nouveaux essais. Le défaut ancien est conservé. GCP non utilisé dans32.
+La [suite proposée](../docs/Q34_PISTES_APRES_INDEXATION_20260921.md)
+reprend les idées A/B et distingue leurs preuves indépendantes d'un port
+constructeur encore à faire. Les deux builds indexed32 sont épinglés.
+B a relu le brouillon code/note32 sans objection (`a83bb549`) ; son rejeu
+indépendant des flux avec les nouvelles options est annoncé après commit,
+pas déjà acquis par cette seule lecture.
+
+## Historique31
+
 État du21 septembre, tranche31 : raccord global mono/Coarse q3/q4,
 92 CTests Release, trois mutations compilées réfutées par l'oracle
 géométrique,144 mesures constructeur sur neuf arêtes LiDAR closes.
-La contrelecture A confirme indépendamment le citron sur un support
-positif même avec une grande coquille ; ses preuves ne sont pas héritées.
+La preuve indépendante de A établit le citron sur un support positif,
+même avec une grande coquille ; B apporte des vérifications exécutables
+[q3](q3_stream_crosscheck_20260921/README.md) et
+[q4](q4_stream_crosscheck_20260921/README.md) sur cinq préfixes LiDAR
+de31 (1k/2k/4k àK5,1k/2k àK10). Les supports/profondeurs q3 et clés/
+profondeurs q4 concordent avec ses énumérations indépendantes ; les
+coquilles q4 complètes ne sont pas comparées dans ce contrôle B.
+Cela ne qualifie pas par héritage le nouveau port32 ni tous les régimes.
 Lire le [contrat31](../docs/Q34_GLOBAL_ET_LIDAR_20260921.md) et ses
 [reçus](../receipts/lidar_global_20260921/README.md). Dix gates instrumentées
 passent ; la reprise du seul oracle pour Boost ancien est qualifiée

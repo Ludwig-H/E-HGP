@@ -77,7 +77,7 @@ la coquille constante q4, qui exige simultanément puissance et côté nuls.
 Une face propriétaire doit appartenir à la lentille fermée
 $|x-a|^2\leq D^2$, $|x-b|^2\leq D^2$ et être strictement extérieure
 à la boule diamètre : $|x-a|^2+|x-b|^2>D^2$.
-Les boîtes sont écartées si un minimum de distance dépasse D² ou si le
+Les boîtes sont écartées si un minimum de distance au carré dépasse D² ou si le
 maximum de la somme reste au plus D². Les égalités de longueur ne sont
 pas éliminées : le départage par IDs se fait au site. Les feuilles
 vérifient les trois angles stricts et la propriété exacte.

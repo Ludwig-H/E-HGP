@@ -1,0 +1,22 @@
+{
+  "kind": "shell_contact_excluded_link",
+  "command": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "/workspaces/E-HGP/build/v8_q34_indexed_20260921/CMakeFiles/mhgp8_q3_ball_census_gate.dir/tests/q3_ball_census_gate.cpp.o",
+    "/tmp/mhgp8_wspd_q34_mutants_o10v3lks/shell_contact_excluded.o",
+    "/workspaces/E-HGP/build/v8_q34_indexed_20260921/libmhgp8_p0.a",
+    "-pthread",
+    "-o",
+    "/tmp/mhgp8_wspd_q34_mutants_o10v3lks/shell_contact_excluded"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-21T08:52:53.217368+00:00",
+  "expected_exit_code": 0,
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "stdout_base64": "",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-21T08:52:53.436514+00:00"
+}

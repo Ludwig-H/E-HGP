@@ -27,6 +27,7 @@ from run_p0_matrix import digest, invoke, on_signal, parse_result, require, utc_
 from run_q34_seed_checks import environment_record  # noqa: E402
 
 SCHEMA = "mhgp8_wspd_q34_compiled_mutants_v1"
+SCOPE = "three_causal_product_mutations_one_rational_global_gate"
 GATE = "wspd_q34"
 SOURCE = "morsehgp3D_v8/src/pipeline/wspd_q34.cpp"
 FAILURE = "wspd q34 gate: global q34 stream differs from independent rational support/depth/shell oracle\n"
@@ -119,7 +120,7 @@ def run(args):
         compiler=compiler, compiler_sha256=digest(Path(compiler)),
         commit=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         launch_command=[sys.executable, *sys.argv], environment=environment_record(environment),
-        scope="three_causal_product_mutations_one_rational_global_gate", gcp_used=False,
+        scope=SCOPE, gcp_used=False,
         full_contract_qualified=False, public_status="not_claimed", mutations=mutation_plan(),
         causal_failure=FAILURE, planned_commands=commands)
     write_json(capture / "MANIFEST.json", manifest)
