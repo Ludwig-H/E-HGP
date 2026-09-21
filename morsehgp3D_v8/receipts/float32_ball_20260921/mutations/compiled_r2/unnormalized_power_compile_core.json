@@ -1,0 +1,43 @@
+{
+  "case": "unnormalized_power",
+  "command": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-ffp-contract=off",
+    "-fno-fast-math",
+    "-frounding-math",
+    "-O3",
+    "-DNDEBUG",
+    "-I",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r2/cases/unnormalized_power/src",
+    "-c",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r2/cases/unnormalized_power/src/core/float32_ball.cpp",
+    "-MD",
+    "-MF",
+    "/workspaces/E-HGP/build/v8_float32_ball_mutants_r2_20260921/unnormalized_power/core.d",
+    "-o",
+    "/workspaces/E-HGP/build/v8_float32_ball_mutants_r2_20260921/unnormalized_power/core.o"
+  ],
+  "cwd": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r2",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/bin:/usr/bin",
+    "TZ": "UTC"
+  },
+  "exit_code": 0,
+  "finished_utc": "2026-09-21T16:35:35.501969+00:00",
+  "label": "unnormalized_power_compile_core",
+  "phase": "compile",
+  "started_utc": "2026-09-21T16:35:33.478337+00:00",
+  "stderr": "",
+  "stderr_base64": "",
+  "stdin": null,
+  "stdout": "",
+  "stdout_base64": ""
+}

@@ -1,0 +1,32 @@
+{
+  "command": [
+    "/usr/bin/g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-ffp-contract=off",
+    "-fno-fast-math",
+    "-frounding-math",
+    "-I",
+    "/workspaces/E-HGP/morsehgp3D_v8/src",
+    "-O3",
+    "-DNDEBUG",
+    "-c",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/fixed_signed_gate.cpp",
+    "-MD",
+    "-MF",
+    "/workspaces/E-HGP/build/v8_float32_ball_20260921/integer.d",
+    "-o",
+    "/workspaces/E-HGP/build/v8_float32_ball_20260921/integer.o"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": 0,
+  "label": "compile_integer",
+  "stderr": "",
+  "stderr_base64": "",
+  "stdout": "",
+  "stdout_base64": ""
+}

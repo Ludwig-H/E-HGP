@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_float32_ball_sanitize_20260921/mhgp8_fixed_signed_test"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "exit_code": 0,
+  "label": "integer_gate",
+  "stderr": "",
+  "stderr_base64": "",
+  "stdout": "{\"status\":\"passed\",\"tests\":948,\"overflow_rejections\":10,\"invalid_rejections\":6}\n",
+  "stdout_base64": "eyJzdGF0dXMiOiJwYXNzZWQiLCJ0ZXN0cyI6OTQ4LCJvdmVyZmxvd19yZWplY3Rpb25zIjoxMCwiaW52YWxpZF9yZWplY3Rpb25zIjo2fQo="
+}

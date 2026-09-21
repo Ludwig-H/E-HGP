@@ -141,6 +141,10 @@ de l'étape1 ci-dessous est maintenant réalisé, avec boîtes exactes,
 préparation O(n log n), oracles et mesures séparés. Les étapes numériques
 q3/q4 et le raccord à la tour restent ouverts.
 
+Mise à jour suivante : [supports et puissances q3/q4](BOULES_FLOAT32_Q3_Q4_20260921.md)
+également portés et qualifiés, sans clés globales, bornes de blocs ou
+raccord census natif. Ne pas présenter ces primitives comme la tour.
+
 1. Introduire un propriétaire/index qui conserve les float32, avec
    unicité et boîtes conservatrices adaptées. Ne pas émuler ce profil
    par une grille qui supprime silencieusement des bits.

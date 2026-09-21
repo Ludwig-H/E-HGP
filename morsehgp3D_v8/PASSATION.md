@@ -31,6 +31,20 @@ n'est pas FULL ni GPU. Les reçus historiques 50k restent inchangés.
 
 ## À reprendre maintenant
 
+Supports q3/q4 natifs et puissances désormais qualifiés ; lire
+[la nouvelle note numérique](docs/BOULES_FLOAT32_Q3_Q4_20260921.md).
+Préparation positive stricte, objet128octets, coefficients d'intervalles
+réutilisés et repli entier1728bits local au worker, sans clé/gcd par
+candidat ni cache partagé mutable. Orientation q4 normalisée APRÈS les
+quatre poids ; les requêtes ne recalculent pas la positivité déjà certifiée.
+Release/Clang ASan/UBSan :1636cas Fraction,53refus,1287contrôles natifs,
+948contrôles entiers. [Captures et builds épinglés](receipts/float32_ball_20260921/README.md),
+aucune qualification héritée du moteur u16. GCP non utilisé.
+Suite concrète : clés canoniques globales à l'émission, comparateur réduit
+des racines q4, bornes certifiées de blocs puis raccord aux graines/tâches.
+Ne pas confondre objet support et identité de boule, ni étendre les bornes
+1728bits aux expressions naïves de degré9 ou aux comparaisons de rayons.
+
 Propriétaire/index natif float32 désormais écrit et qualifié ; voir
 [l'index et le plan numérique q3/q4](docs/INDEX_FLOAT32_ET_SUITE_Q34_20260921.md).
 Trois tris partagés puis partitions médianes : O(n log n), profondeur
@@ -43,10 +57,10 @@ Les [captures](receipts/float32_index_20260921/README.md) donnent27 fixtures,
 relectures normal/−O.54 constructions mesurées, dont trois trames et les
 sept morceaux de la première. Cela ne qualifie pas une WSPD/census/FULL.
 
-Suite concrète : filtres d'intervalles et replis dyadiques exacts q3/q4,
-puis clés canoniques globales matérialisées aux émissions. Ne pas allouer
+Le port des filtres et replis ponctuels est clos dans la tranche ci-dessus ;
+restent les bornes de blocs et clés canoniques globales aux émissions. Ne pas allouer
 cinq tableaux multiprécision à chaque candidat : les bornes de dimension
-et les formules réduites proposées sont dans la note, pas encore portées.
+ponctuelles sont qualifiées, les comparateurs réduits restent à porter.
 Partager ensuite blocs de graines et tâches intérieures avec ces contrats.
 
 Socle d'entrée qualifié :15tests de préparation,3923requêtes rationnelles

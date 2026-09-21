@@ -78,6 +78,34 @@ partage des graines/tâches intérieures. Aucun transfert automatique des
 
 ## Cible de travail et statut
 
+### Supports natifs float32 q3/q4 — 21 septembre2026
+
+Lire `morsehgp3D_v8/docs/BOULES_FLOAT32_Q3_Q4_20260921.md`.
+Cadre de cette brique : exploration_v8_hors_registre, cpu_reference,
+lossless_float32_input_only, native_ball_predicates, not_claimed.
+`Float32Ball` conserve128octets de points/mode/coefficients d'intervalles
+sur les builds qualifiés, pas une clé canonique. Supports q3 strictement
+aigus, centres q4 strictement intérieurs ; les quatre poids sont testés
+avant orientation. Intervalles partagés immuables, états privés ; repli
+entier1728bits local et sans tas. Les requêtes ne recalculent pas la
+positivité déjà certifiée. Pas de degré9 ni de comparaison de rayons
+implicitement couverts par la borne de degré6<2^1677.
+Qualification autonome Release/Clang ASan/UBSan :1636cas Fraction,
+53refus CLI,13mutations de résultats,1287contrôles natifs (SSE) et
+948contrôles entiers ; quatre arrondis/FTZ/DAZ,128lectures concurrentes.
+Pas de gate TSan, pas de nouveau census/générateur, ni chrono de tour.
+Builds épinglés `build/v8_float32_ball_20260921` et
+`build/v8_float32_ball_sanitize_20260921`. Dépendances compilées épinglées
+avant/après, sources/binaires rejugés aux lectures vivantes normal/−O ;
+reçus `morsehgp3D_v8/receipts/float32_ball_20260921/`.
+Trois mutants compilés tués par réponse géométrique incorrecte avec code0,
+pas par crash : poids nul admis, orientation omise, exposant normal décalé.
+Builds épinglés `build/v8_float32_ball_mutants_20260921` (R1 historique)
+et `build/v8_float32_ball_mutants_r2_20260921` (R2, lecteur renforcé).
+Suite : clés globales à l'émission, comparateurs réduits q4, bornes de
+blocs et partage de graines/tâches ; aucun transfert automatique de la
+croissance O(n log n) de l'index à la chaîne. GCP non utilisé.
+
 Le 13 septembre 2026, l'utilisateur demande un **audit complet de la v7 avant toute réimplémentation**, puis une refonte dans **`morsehgp3D_v8/`**, sur **`main` uniquement**. Entrées : `morsehgp3D_v8/README.md`, `PASSATION.md` et `audits/ETAT_COURANT.md`. Cadre initial : `phase=exploration_v8_hors_registre`, `backend=none`, `profile=quantized_u16_input_only`, `mode=audit_v7_math_and_architecture`, `public_status=not_claimed`. Aucun moteur v8 n'est encore implémenté ; les résultats v7 sont des objets d'audit, jamais des qualifications v8 héritées. Conserver la structure générale v7, pas son code par copie implicite. Les futurs noms utilisent C++20, `mhgp8`, `mhgp8_`, `MHGP8_` et les mêmes avertissements stricts. Ne pas modifier le registre formel pour cette exploration. Les règles mathématiques, de sécurité, de preuve, de tests et de budget ci-dessous restent applicables. Les modifications v6/v7 préexistantes et les audits indépendants sont préservés et exclus du commit d'ouverture v8.
 
 **Priorité P0 v8, confirmée le 13 septembre 2026 :** supprimer le calcul systématique O(|A|²+|B|²) des histogrammes locaux après échec des témoins universels WSPD. Comparer des architectures de minorants certifiés, traitements par blocs et autres alternatives sans imposer prématurément le petit ensemble de témoins proposé. Juger le travail total, candidates résiduelles et coût aval inclus ; ni le déplacement du carré ni sa seule parallélisation ne closent P0. Voir en premier `morsehgp3D_v8/docs/PLAN_DE_REFONTE.md`. Aucun gain ni borne globale ne sont encore acquis ; exactitude, complétude et contrats de tour restent inchangés.

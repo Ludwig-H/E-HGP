@@ -1,0 +1,785 @@
+{
+  "build": "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921",
+  "compiler": "/usr/bin/x86_64-linux-gnu-g++-13",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/bin:/usr/bin",
+    "TZ": "UTC"
+  },
+  "expected": [
+    {
+      "sign": null,
+      "valid": false
+    },
+    {
+      "sign": -1,
+      "valid": true
+    },
+    {
+      "sign": 0,
+      "valid": true
+    }
+  ],
+  "fixtures": [
+    {
+      "label": "centre_on_face",
+      "query": [
+        0,
+        0,
+        0
+      ],
+      "support": [
+        [
+          1084227584,
+          0,
+          0
+        ],
+        [
+          3225419776,
+          1082130432,
+          0
+        ],
+        [
+          3225419776,
+          3229614080,
+          0
+        ],
+        [
+          0,
+          0,
+          1084227584
+        ]
+      ]
+    },
+    {
+      "label": "negative_orientation_inside",
+      "query": [
+        0,
+        0,
+        0
+      ],
+      "support": [
+        [
+          1065353216,
+          1065353216,
+          1065353216
+        ],
+        [
+          1065353216,
+          3212836864,
+          3212836864
+        ],
+        [
+          3212836864,
+          1065353216,
+          3212836864
+        ],
+        [
+          3212836864,
+          3212836864,
+          1065353216
+        ]
+      ]
+    },
+    {
+      "label": "normal_subnormal_near_right",
+      "query": [
+        0,
+        0,
+        0
+      ],
+      "support": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          8388608,
+          0,
+          0
+        ],
+        [
+          4194304,
+          4194304,
+          1
+        ]
+      ]
+    }
+  ],
+  "flags": [
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-ffp-contract=off",
+    "-fno-fast-math",
+    "-frounding-math",
+    "-O3",
+    "-DNDEBUG"
+  ],
+  "launch": [
+    "/home/codespace/.python/current/bin/python3",
+    "morsehgp3D_v8/tests/float32_ball_mutations.py",
+    "--compiler",
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "--build",
+    "build/v8_float32_ball_mutants_20260921",
+    "--output",
+    "morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1"
+  ],
+  "mutations": [
+    {
+      "after": "if (x.sign() < 0) return false;",
+      "before": "if (x.sign() <= 0) return false;",
+      "fixture": 0,
+      "name": "nonstrict_barycentric",
+      "property": "a circumcentre on a tetrahedron face must reject the support",
+      "source": "src/core/float32_ball.cpp"
+    },
+    {
+      "after": "return sign;",
+      "before": "return sign * exact.scale.sign();",
+      "fixture": 1,
+      "name": "unnormalized_power",
+      "property": "negative determinant must not reverse the interior power sign",
+      "source": "src/core/float32_ball.cpp"
+    },
+    {
+      "after": "exponent == 0 ? 0 : exponent;",
+      "before": "exponent == 0 ? 0 : exponent - 1;",
+      "fixture": 2,
+      "name": "normal_exponent_shift",
+      "property": "normal and subnormal coordinates must share the same exact dyadic unit",
+      "source": "src/core/fixed_signed.hpp"
+    }
+  ],
+  "output": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1",
+  "plan": [
+    {
+      "case": null,
+      "command": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "--version"
+      ],
+      "label": "compiler_version",
+      "phase": "version",
+      "stdin": null
+    },
+    {
+      "case": "baseline",
+      "command": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/baseline/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/baseline/src/core/float32_ball.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/baseline/pre_core.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/baseline/core.o"
+      ],
+      "label": "baseline_dependencies_core",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "baseline",
+      "command": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/baseline/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/baseline/tests/float32_ball_probe.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/baseline/pre_test.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/baseline/test.o"
+      ],
+      "label": "baseline_dependencies_test",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "baseline",
+      "command": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/baseline/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/baseline/src/core/float32_ball.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/baseline/core.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/baseline/core.o"
+      ],
+      "label": "baseline_compile_core",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "baseline",
+      "command": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/baseline/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/baseline/tests/float32_ball_probe.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/baseline/test.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/baseline/test.o"
+      ],
+      "label": "baseline_compile_test",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "baseline",
+      "command": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/baseline/src",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/baseline/core.o",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/baseline/test.o",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/baseline/probe"
+      ],
+      "label": "baseline_link",
+      "phase": "link",
+      "stdin": null
+    },
+    {
+      "case": "baseline",
+      "command": [
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/baseline/probe"
+      ],
+      "label": "baseline_geometry",
+      "phase": "geometry",
+      "stdin": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/fixtures.txt"
+    },
+    {
+      "case": "nonstrict_barycentric",
+      "command": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/nonstrict_barycentric/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/nonstrict_barycentric/src/core/float32_ball.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/nonstrict_barycentric/pre_core.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/nonstrict_barycentric/core.o"
+      ],
+      "label": "nonstrict_barycentric_dependencies_core",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "nonstrict_barycentric",
+      "command": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/nonstrict_barycentric/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/nonstrict_barycentric/tests/float32_ball_probe.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/nonstrict_barycentric/pre_test.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/nonstrict_barycentric/test.o"
+      ],
+      "label": "nonstrict_barycentric_dependencies_test",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "nonstrict_barycentric",
+      "command": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/nonstrict_barycentric/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/nonstrict_barycentric/src/core/float32_ball.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/nonstrict_barycentric/core.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/nonstrict_barycentric/core.o"
+      ],
+      "label": "nonstrict_barycentric_compile_core",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "nonstrict_barycentric",
+      "command": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/nonstrict_barycentric/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/nonstrict_barycentric/tests/float32_ball_probe.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/nonstrict_barycentric/test.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/nonstrict_barycentric/test.o"
+      ],
+      "label": "nonstrict_barycentric_compile_test",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "nonstrict_barycentric",
+      "command": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/nonstrict_barycentric/src",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/nonstrict_barycentric/core.o",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/nonstrict_barycentric/test.o",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/nonstrict_barycentric/probe"
+      ],
+      "label": "nonstrict_barycentric_link",
+      "phase": "link",
+      "stdin": null
+    },
+    {
+      "case": "nonstrict_barycentric",
+      "command": [
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/nonstrict_barycentric/probe"
+      ],
+      "label": "nonstrict_barycentric_geometry",
+      "phase": "geometry",
+      "stdin": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/fixtures.txt"
+    },
+    {
+      "case": "unnormalized_power",
+      "command": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/unnormalized_power/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/unnormalized_power/src/core/float32_ball.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/unnormalized_power/pre_core.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/unnormalized_power/core.o"
+      ],
+      "label": "unnormalized_power_dependencies_core",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "unnormalized_power",
+      "command": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/unnormalized_power/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/unnormalized_power/tests/float32_ball_probe.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/unnormalized_power/pre_test.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/unnormalized_power/test.o"
+      ],
+      "label": "unnormalized_power_dependencies_test",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "unnormalized_power",
+      "command": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/unnormalized_power/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/unnormalized_power/src/core/float32_ball.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/unnormalized_power/core.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/unnormalized_power/core.o"
+      ],
+      "label": "unnormalized_power_compile_core",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "unnormalized_power",
+      "command": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/unnormalized_power/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/unnormalized_power/tests/float32_ball_probe.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/unnormalized_power/test.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/unnormalized_power/test.o"
+      ],
+      "label": "unnormalized_power_compile_test",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "unnormalized_power",
+      "command": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/unnormalized_power/src",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/unnormalized_power/core.o",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/unnormalized_power/test.o",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/unnormalized_power/probe"
+      ],
+      "label": "unnormalized_power_link",
+      "phase": "link",
+      "stdin": null
+    },
+    {
+      "case": "unnormalized_power",
+      "command": [
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/unnormalized_power/probe"
+      ],
+      "label": "unnormalized_power_geometry",
+      "phase": "geometry",
+      "stdin": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/fixtures.txt"
+    },
+    {
+      "case": "normal_exponent_shift",
+      "command": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/normal_exponent_shift/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/normal_exponent_shift/src/core/float32_ball.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/normal_exponent_shift/pre_core.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/normal_exponent_shift/core.o"
+      ],
+      "label": "normal_exponent_shift_dependencies_core",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "normal_exponent_shift",
+      "command": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/normal_exponent_shift/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/normal_exponent_shift/tests/float32_ball_probe.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/normal_exponent_shift/pre_test.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/normal_exponent_shift/test.o"
+      ],
+      "label": "normal_exponent_shift_dependencies_test",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "normal_exponent_shift",
+      "command": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/normal_exponent_shift/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/normal_exponent_shift/src/core/float32_ball.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/normal_exponent_shift/core.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/normal_exponent_shift/core.o"
+      ],
+      "label": "normal_exponent_shift_compile_core",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "normal_exponent_shift",
+      "command": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/normal_exponent_shift/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/normal_exponent_shift/tests/float32_ball_probe.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/normal_exponent_shift/test.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/normal_exponent_shift/test.o"
+      ],
+      "label": "normal_exponent_shift_compile_test",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "normal_exponent_shift",
+      "command": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/normal_exponent_shift/src",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/normal_exponent_shift/core.o",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/normal_exponent_shift/test.o",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/normal_exponent_shift/probe"
+      ],
+      "label": "normal_exponent_shift_link",
+      "phase": "link",
+      "stdin": null
+    },
+    {
+      "case": "normal_exponent_shift",
+      "command": [
+        "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/normal_exponent_shift/probe"
+      ],
+      "label": "normal_exponent_shift_geometry",
+      "phase": "geometry",
+      "stdin": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/fixtures.txt"
+    }
+  ],
+  "schema": "mhgp8_float32_ball_compiled_mutations_v1",
+  "scope": "three_targeted_fraction_oracle_mutations_not_census_catalogue_FULL_or_GPU",
+  "source_sha256": {
+    "/usr/bin/x86_64-linux-gnu-g++-13": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_p0_matrix.py": "b806572d9b5a76afe15c26586321663aa946e318a7a8a2286c3e9549e3ba717f",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/core/fixed_signed.hpp": "142cd54078a7fa6fc610277f885b18b01c3bbf55ec8ffe7710c6abcb290ed7fe",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.cpp": "df43a5b2221f03ece2707afb0ec910a6937c31745e5bd3c895662929a6882afe",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.hpp": "15f656196ebd64befc7fb9f695e0f4e2b5282312c80df35274db3bbd91d21b33",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_predicates.hpp": "1f6175bb27cd7543c2d68916efabe68ebd23ac413dadc7aad82cabb30651997d",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_ball_gate.py": "c22fa32d280beffaa3609ff3e07e7012a0fc58b31f7938c2a416b9d463899df8",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_ball_mutations.py": "6bcbaac39a54de07727bdcfb96ff8be8ba410afe3977f57b1dfdfb5e69332c43",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_ball_probe.cpp": "ae7d55a023ca978b8b5181fb088fbb0e7ab361e8b0e45b5386789370f27e7088",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_index_mutation_gate.py": "8236bb8b12c2f30064e8f9a7eb75573aa1a051329ad334caed16c16f1625910f"
+  },
+  "started_utc": "2026-09-21T16:31:31.853105+00:00",
+  "system_headers_archived": false
+}

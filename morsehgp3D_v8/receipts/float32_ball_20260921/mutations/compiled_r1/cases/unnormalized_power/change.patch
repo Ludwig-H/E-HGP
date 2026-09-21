@@ -1,0 +1,11 @@
+--- src/core/float32_ball.cpp
++++ unnormalized_power/src/core/float32_ball.cpp
+@@ -195,7 +195,7 @@
+   const auto exact = coefficients(op, points_, arity_, false);
+   const auto v = difference(op, op.point(z), exact.origin);
+   const auto sign = power(op, exact.scale, exact.linear, v).sign();
+-  return sign * exact.scale.sign();
++  return sign;
+ }
+ 
+ }  // namespace mhgp8

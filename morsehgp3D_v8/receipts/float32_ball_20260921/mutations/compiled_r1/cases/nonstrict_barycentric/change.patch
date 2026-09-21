@@ -1,0 +1,11 @@
+--- src/core/float32_ball.cpp
++++ nonstrict_barycentric/src/core/float32_ball.cpp
+@@ -125,7 +125,7 @@
+ }
+ bool eligible(const Coefficients<Integer>& c) {
+   if (c.scale.sign() == 0) return false;
+-  for (const auto& x : c.positive) if (x.sign() <= 0) return false;
++  for (const auto& x : c.positive) if (x.sign() < 0) return false;
+   return true;
+ }
+ 

@@ -1,0 +1,1 @@
+{"schema":"mhgp8_float32_ball_selftest_v1","status":"passed","tests":1287,"query_checks":548,"invalid_modes":2,"nonfinite_rejections":18,"rounding_modes":4,"flush_modes":4,"concurrent_workers":4,"concurrent_queries":128,"support_bytes":128}

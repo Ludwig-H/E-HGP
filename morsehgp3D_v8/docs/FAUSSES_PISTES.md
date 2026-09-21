@@ -3,6 +3,16 @@
 13 septembre 2026. Mémoire courte de l'audit et de la première tranche P0.
 Les sources et contre-fixtures complètes sont dans les rapports liés.
 
+## Normaliser l'orientation q4 avant les poids — 21 septembre
+
+Le dénominateur des poids barycentriques est `2det²`, toujours positif.
+Orienter seulement le numérateur du centre avant de le multiplier par
+les cofacteurs non orientés inverse trois poids lorsque det<0. Les
+[supports float32](BOULES_FLOAT32_Q3_Q4_20260921.md) testent les quatre poids
+d'abord, puis orientent ensemble les coefficients de puissance. Un centre
+sur facette reste refusé ; aucune tolérance ne transforme le contact en
+poids strictement positif.
+
 ## Hériter du découpage u16 pour le float32 — 21 septembre
 
 Un split au milieu géométrique peut créer277niveaux sur seulement278points

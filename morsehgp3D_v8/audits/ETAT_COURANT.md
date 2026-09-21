@@ -24,6 +24,14 @@ Les mesures et reçus historiques 50k sont conservés sans réinterprétation.
 
 ## Diagnostic spatial et état constructeur
 
+Port ponctuel q3/q4 float32 clos : supports strictement positifs,
+puissances filtrées et exactes, objet128octets partagé sans cache mutable.
+1636cas Fraction/53refus/1287contrôles natifs/948contrôles entiers,
+Release et Clang ASan/UBSan. Voir [contrat numérique](../docs/BOULES_FLOAT32_Q3_Q4_20260921.md)
+et [preuves](../receipts/float32_ball_20260921/README.md). Ce n'est pas un
+catalogue, un census ou une tour ; pas de nouveaux chronos/scaling/GCP.
+Clés globales, racines q4, bornes et tâches de blocs restent ouverts.
+
 Index natif float32 clos :27 fixtures/1125sites/404requêtes rationnelles,
 35refus,151contrôles natifs, Release/Clang ASan/UBSan, relectures normal/−O.
 Construction O(n log n) démontrée par trois tris et partitions stables ;

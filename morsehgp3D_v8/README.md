@@ -63,6 +63,16 @@ ses propres sources, tests et reçus, sans transfert implicite.
 
 ## État exécutable
 
+Les [supports et puissances q3/q4 natifs float32](docs/BOULES_FLOAT32_Q3_Q4_20260921.md)
+sont maintenant implémentés et qualifiés : positivité stricte, contacts
+exacts, intervalles préparés réutilisables et repli entier fixe sans tas.
+Objet128octets, sans clé lourde ni cache partagé mutable. Release et
+ASan/UBSan passent1636cas rationnels,1287contrôles natifs et948contrôles
+arithmétiques ; [preuves propres](receipts/float32_ball_20260921/README.md).
+Ce sont des primitives, pas encore le générateur/census natif ni FULL.
+Suite : clés globales, comparateurs réduits et bornes de blocs q3/q4,
+puis partage des graines/tâches intérieures. Aucun nouveau chrono G4.
+
 L'[index natif float32](docs/INDEX_FLOAT32_ET_SUITE_Q34_20260921.md) est maintenant
 implémenté : copie immuable, IDs conservés, boîtes exactes, trois tris et
 partitions médianes en **O(n log n)**, stockage O(n). Qualification locale

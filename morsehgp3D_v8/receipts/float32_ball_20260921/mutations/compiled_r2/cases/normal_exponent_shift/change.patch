@@ -1,0 +1,11 @@
+--- src/core/fixed_signed.hpp
++++ normal_exponent_shift/src/core/fixed_signed.hpp
+@@ -50,7 +50,7 @@
+     // Subnormals are integer multiples of 2^-149. For a normal, its 24-bit
+     // mantissa is shifted by exponent_field-1, in [0,253], in that same unit.
+     // Splitting a <=24-bit mantissa at offset<=31 never overflows u64.
+-    const unsigned shift = exponent == 0 ? 0 : exponent - 1;
++    const unsigned shift = exponent == 0 ? 0 : exponent;
+     const auto first = static_cast<std::size_t>(shift / 32U);
+     const auto value = static_cast<std::uint64_t>(mantissa) << (shift % 32U);
+     FixedSigned result;

@@ -1,0 +1,294 @@
+{
+  "config": {
+    "build": "/workspaces/E-HGP/build/v8_float32_ball_sanitize_20260921",
+    "compiler": "/usr/bin/clang++",
+    "python": "/home/codespace/.python/current/bin/python",
+    "sanitize": true
+  },
+  "environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "gcp_used": false,
+  "git_commit": "028a0f1d5eae25a9695bd98f15a55918d48c49ae",
+  "launch": [
+    "/home/codespace/.python/current/bin/python",
+    "morsehgp3D_v8/bench/run_float32_ball_checks.py",
+    "run",
+    "--build",
+    "build/v8_float32_ball_sanitize_20260921",
+    "--compiler",
+    "/usr/bin/clang++",
+    "--sanitize",
+    "--output",
+    "morsehgp3D_v8/receipts/float32_ball_20260921/sanitize"
+  ],
+  "plan": [
+    [
+      "compiler",
+      [
+        "/usr/bin/clang++",
+        "--version"
+      ]
+    ],
+    [
+      "dependencies_core",
+      [
+        "/usr/bin/clang++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/src",
+        "-O1",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_ball_sanitize_20260921/pre_core.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_ball_sanitize_20260921/core.o"
+      ]
+    ],
+    [
+      "dependencies_test",
+      [
+        "/usr/bin/clang++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/src",
+        "-O1",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_ball_probe.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_ball_sanitize_20260921/pre_test.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_ball_sanitize_20260921/test.o"
+      ]
+    ],
+    [
+      "dependencies_integer",
+      [
+        "/usr/bin/clang++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/src",
+        "-O1",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/tests/fixed_signed_gate.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_ball_sanitize_20260921/pre_integer.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_ball_sanitize_20260921/integer.o"
+      ]
+    ],
+    [
+      "compile_core",
+      [
+        "/usr/bin/clang++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/src",
+        "-O1",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_ball_sanitize_20260921/core.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_ball_sanitize_20260921/core.o"
+      ]
+    ],
+    [
+      "compile_test",
+      [
+        "/usr/bin/clang++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/src",
+        "-O1",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_ball_probe.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_ball_sanitize_20260921/test.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_ball_sanitize_20260921/test.o"
+      ]
+    ],
+    [
+      "compile_integer",
+      [
+        "/usr/bin/clang++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/src",
+        "-O1",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/tests/fixed_signed_gate.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_ball_sanitize_20260921/integer.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_ball_sanitize_20260921/integer.o"
+      ]
+    ],
+    [
+      "link_test",
+      [
+        "/usr/bin/clang++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/src",
+        "-O1",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+        "/workspaces/E-HGP/build/v8_float32_ball_sanitize_20260921/core.o",
+        "/workspaces/E-HGP/build/v8_float32_ball_sanitize_20260921/test.o",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_ball_sanitize_20260921/mhgp8_float32_ball_test"
+      ]
+    ],
+    [
+      "link_integer",
+      [
+        "/usr/bin/clang++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/src",
+        "-O1",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+        "/workspaces/E-HGP/build/v8_float32_ball_sanitize_20260921/integer.o",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_ball_sanitize_20260921/mhgp8_fixed_signed_test"
+      ]
+    ],
+    [
+      "integer_gate",
+      [
+        "/workspaces/E-HGP/build/v8_float32_ball_sanitize_20260921/mhgp8_fixed_signed_test"
+      ]
+    ],
+    [
+      "gate_normal",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_ball_gate.py",
+        "--binary",
+        "/workspaces/E-HGP/build/v8_float32_ball_sanitize_20260921/mhgp8_float32_ball_test",
+        "--output",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/sanitize/ball_9ut9u2_k/gate_normal"
+      ]
+    ],
+    [
+      "gate_optimized",
+      [
+        "/home/codespace/.python/current/bin/python",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_ball_gate.py",
+        "--binary",
+        "/workspaces/E-HGP/build/v8_float32_ball_sanitize_20260921/mhgp8_float32_ball_test",
+        "--output",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/sanitize/ball_9ut9u2_k/gate_optimized"
+      ]
+    ]
+  ],
+  "public_status": "not_claimed",
+  "schema": "mhgp8_float32_ball_qualification_v1",
+  "scope": "native_binary32_q3_q4_positive_supports_and_power_not_generator_or_FULL",
+  "source_sha256": {
+    "/usr/bin/clang++": "8ef402d453d1ba4902e4ee0f0f847f6cfa01400c95aa43c24e97818b9c0e3f45",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_float32_ball_checks.py": "449e6cb063969b1d55def1955fd43294680ed64e44f8171378eec602e5ec5594",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_p0_matrix.py": "b806572d9b5a76afe15c26586321663aa946e318a7a8a2286c3e9549e3ba717f",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/core/fixed_signed.hpp": "142cd54078a7fa6fc610277f885b18b01c3bbf55ec8ffe7710c6abcb290ed7fe",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.cpp": "df43a5b2221f03ece2707afb0ec910a6937c31745e5bd3c895662929a6882afe",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.hpp": "15f656196ebd64befc7fb9f695e0f4e2b5282312c80df35274db3bbd91d21b33",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_predicates.hpp": "1f6175bb27cd7543c2d68916efabe68ebd23ac413dadc7aad82cabb30651997d",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/fixed_signed_gate.cpp": "1565dfcb282842254683a0d802d81c463edf7b7c3f0198cdc9377e987e6ff136",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_ball_gate.py": "c22fa32d280beffaa3609ff3e07e7012a0fc58b31f7938c2a416b9d463899df8",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_ball_probe.cpp": "ae7d55a023ca978b8b5181fb088fbb0e7ab361e8b0e45b5386789370f27e7088"
+  },
+  "started_utc": "2026-09-21T16:32:29.300764+00:00"
+}

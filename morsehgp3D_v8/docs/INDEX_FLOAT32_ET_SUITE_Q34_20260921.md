@@ -149,6 +149,11 @@ la lecture concurrente testée ne la transforme pas en construction parallèle.
 
 ## q3/q4 : décision numérique et objets à préparer ensuite
 
+Mise à jour après cette capture : [supports et puissances ponctuelles](BOULES_FLOAT32_Q3_Q4_20260921.md)
+maintenant implémentés et qualifiés séparément. Le programme initial
+ci-dessous reste historique ; clés, racines et bornes de blocs restent
+ouverts. Les résultats de l'index ne les qualifient pas par héritage.
+
 La contrelecture du code u16 a confirmé les formules géométriques, **pas
 leur capacité arithmétique une fois les coordonnées élargies**. Séparer :
 

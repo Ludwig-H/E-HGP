@@ -3637,3 +3637,45 @@ Réservation courte de l'index Git pour ce lot constructeur uniquement :
 index natif, sondes/gates/reçus, documents d'entrée et cette section.
 L'ajout indépendant53lignes au milieu du journal et tous les fichiers
 indépendants/v6/v7 sont exclus. Index libéré dès publication sur main.
+
+## Constructeur — supports et puissances float32 q3/q4, après028a0f1d
+
+Reprise sur main, index Git libre. Cadre : exploration_v8_hors_registre,
+cpu_reference, lossless_float32_input_only, native_ball_predicates,
+not_claimed. Port numérique autonome en nouveaux fichiers, sans changer
+les moteurs u16 ni les captures précédentes. Propriétaire/index déjà clos ;
+nouveau support compact = points binaires + quatre coefficients par
+intervalles réutilisés, repli entier fixe privé seulement si nécessaire.
+Pas de clé canonique lourde allouée à chaque candidat, ni de cache partagé
+mutable. Les clés globales et comparateurs de racines restent la suite.
+
+A/B : la contrelecture interne confirme les bornes degré6<2^1677 dans
+l'unité2^-149 ; capacité1728bits. Pour q4, les quatre poids stricts sont
+testés AVANT normalisation d'orientation, sinon le signe de N peut inverser
+la validité. Les tests indépendants emploient une résolution rationnelle
+du centre/barycentriques, pas les mêmes formules cofactorielles.
+Vos avis restent sollicités sur les futurs certificats de blocs et clés
+globales. Ce lot ne porte pas le générateur complet ; aucune extrapolation
+des chronos20mm au float32 ni de la croissance de l'index au census.
+GCP non utilisé pour cette qualification numérique locale.
+
+Clôture : Release et Clang ASan/UBSan PASS,12commandes chacun,
+1636cas Fraction et53refus,1287contrôles natifs,948contrôles entiers.
+Support128octets ; quatre lecteurs partagés fonctionnels, pas TSan/GPU.
+Les quatre relectures normales/−O concordent ; dépendances avant/après
+compilation et fermetures source/binaire/objet après lecture vérifiées.
+Trois mutants compilés donnent exactement les erreurs géométriques
+visées,25commandes ; R1 conservée, R2 faisant autorité après renforcement
+du seul lecteur. Reçus `receipts/float32_ball_20260921/`.
+Pas de chrono/scaling de pipeline natif ; les primitives ont un coût
+borné par la représentation float32, pas une preuve sur le nombre de
+supports ni sur toute la tour. Clés globales/racines/bornes de blocs et
+partage fin restent la suite. A/B : les plateaux cosphériques spatiaux
+signalés par B confirment l'importance de la clé de boule inter-supports ;
+les rejets de supports à poids nul ne dispensent pas de collecter leur
+site comme contact d'une autre présentation positive de la même boule.
+
+Réservation courte de l'index Git pour ce seul lot constructeur et cette
+section. Tous les fichiers indépendants, y compris le dialogue B en cours,
+et l'ancien ajout53lignes du journal restent hors commit. Index libéré
+après publication sur main ; aucune branche ni session GCP créée.

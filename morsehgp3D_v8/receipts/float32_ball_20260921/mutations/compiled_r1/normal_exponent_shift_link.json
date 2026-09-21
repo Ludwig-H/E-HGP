@@ -1,0 +1,40 @@
+{
+  "case": "normal_exponent_shift",
+  "command": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-ffp-contract=off",
+    "-fno-fast-math",
+    "-frounding-math",
+    "-O3",
+    "-DNDEBUG",
+    "-I",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1/cases/normal_exponent_shift/src",
+    "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/normal_exponent_shift/core.o",
+    "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/normal_exponent_shift/test.o",
+    "-o",
+    "/workspaces/E-HGP/build/v8_float32_ball_mutants_20260921/normal_exponent_shift/probe"
+  ],
+  "cwd": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_ball_20260921/mutations/compiled_r1",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/bin:/usr/bin",
+    "TZ": "UTC"
+  },
+  "exit_code": 0,
+  "finished_utc": "2026-09-21T16:31:48.247672+00:00",
+  "label": "normal_exponent_shift_link",
+  "phase": "link",
+  "started_utc": "2026-09-21T16:31:48.161436+00:00",
+  "stderr": "",
+  "stderr_base64": "",
+  "stdin": null,
+  "stdout": "",
+  "stdout_base64": ""
+}

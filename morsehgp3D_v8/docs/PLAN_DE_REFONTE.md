@@ -29,7 +29,11 @@ découpes de la trame0 sont closes ; cela ne transfère aucune propriété
 au census. Priorité suivante : filtres/replis exacts q3/q4 et clés globales
 construites à la demande, en conservant les comparateurs réduits et le
 partage entre graines. Les18limbes du prédicat q2 ne suffisent pas aux
-degrés5/6 ; les dimensions proposées dans la note restent à implémenter.
+degrés5/6. Le [port ponctuel q3/q4](BOULES_FLOAT32_Q3_Q4_20260921.md) est
+maintenant qualifié : supports128octets, coefficients filtrés réutilisés,
+repli exact1728bits et oracles indépendants. Il reste à porter les clés
+globales à l'émission, le comparateur réduit q4 et les bornes de blocs ;
+ne pas confondre cette brique avec le générateur ou son coût global.
 
 Mise à jour utilisateur du21 septembre : les prochaines études LiDAR
 emploient le [découpage spatial capteur](PROTOCOLE_LIDAR_SPATIAL_20260921.md),
