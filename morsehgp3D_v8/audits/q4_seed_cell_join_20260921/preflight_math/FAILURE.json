@@ -1,0 +1,16 @@
+{
+  "cause": "The tight-bound fixture used a spine in the last DFS child; pending siblings do not accumulate to tree height. All preceding upper-bound checks passed.",
+  "command": [
+    "python3",
+    "-B",
+    "morsehgp3D_v8/audits/q4_seed_cell_join_20260921/math_checks.py"
+  ],
+  "correction": "Use a spine in the first DFS child for the bound-attainment fixture. Separate three executable join mutants from two geometric counterexamples in report. No product or prototype change.",
+  "exit_code": 1,
+  "preservation": "Source reconstructed by exact inverse correction and verified against hash measured before modification; stderr copied from original tool output. No rerun represented.",
+  "source_archived": "math_checks.py",
+  "source_sha256": "89b33a29b62b98b6bdf3c89ed7859de8c55dd0583e547c3f3fa43dddaed02455",
+  "status": "FAILED",
+  "stderr": "Traceback (most recent call last):\n  File \"/workspaces/E-HGP/morsehgp3D_v8/audits/q4_seed_cell_join_20260921/math_checks.py\", line 356, in <module>\n    main()\n  File \"/workspaces/E-HGP/morsehgp3D_v8/audits/q4_seed_cell_join_20260921/math_checks.py\", line 343, in main\n    structure, mutants = structure_checks(relation)\n                         ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/E-HGP/morsehgp3D_v8/audits/q4_seed_cell_join_20260921/math_checks.py\", line 333, in structure_checks\n    require(tight[\"peak_stack\"] == tight[\"stack_bound\"] == 23,\n  File \"/workspaces/E-HGP/morsehgp3D_v8/audits/q4_seed_cell_join_20260921/math_checks.py\", line 24, in require\n    raise CheckFailure(message)\nCheckFailure: product DFS bound not positively exercised\n",
+  "stdout": ""
+}
