@@ -207,6 +207,29 @@ ponctuels là où le harnais n'en fait que 86,7 M sur les paires conservées,
 le reste étant réglé par le citron (facteur 387). Le rejet par paire avant
 la couverture est donc mesuré ici sur le moteur réel, pas seulement projeté.
 
+### Flux q4 (Local28) du raccord 31 : accord exact avec une énumération indépendante (1k à 4k)
+
+Reçu [q4_stream_crosscheck_20260921/](q4_stream_crosscheck_20260921/README.md) :
+la sonde à 4dbe3024 (masque 4, Local28, mode `records`) et mon harnais, qui
+n'appelle aucune brique q4 du moteur (pour toutes les paires résiduelles de
+la voie q4 : citron exact, puis pour chaque paire conservée l'énumération de
+tous les tétraèdres propriétaires de ab au sens de `owned` de `q4_local.cpp`,
+positivité stricte par les quatre coordonnées barycentriques du centre en
+i128, profondeur exacte sur la couverture), donnent **le même ensemble de
+boules distinctes (clé entière réduite, profondeur)** sur les préfixes
+1k/2k/4k du scan 0 à K5 et 1k/2k à K10 : 876, 2 113, 4 798, 8 033 et 20 194
+boules, chacune émise une fois de chaque côté (pas de plateau cosphérique sur
+ces préfixes), chaque support de la sonde étant sur sa propre sphère ; la
+voie q4 ne dépend pas du masque demandé (1k et 2k relancés au masque 6). Le
+lemme du citron pour q4 (α4 = 2) est vérifié tétraèdre par tétraèdre sur
+toutes les paires rejetables à 1k (45 918 paires à K5, 1,06 M tétraèdres
+positifs, 0 violation ; toutes les paires rejetables aussi à K10) et sur
+2 000 puis 500 paires aux tailles suivantes. Les coquilles ne sont pas
+comparées. Avec le reçu q3, la totalité de ce qui suit le front dans le
+raccord 31 est donc confrontée à un second calcul indépendant sur ces
+tailles ; ce n'est toujours pas une qualification (trois petites tailles, un
+scan, pas de FULL).
+
 ## Erreurs et points durs relevés (à 4dbe3024)
 
 1. **Session G4 R2 : diagnostic non établi.** La capture
@@ -272,7 +295,8 @@ vérifié en direct par B (pas de `gcloud` ici).
   `credits_terminaux_20260914/`, `chaine_q2_20260914/`,
   `separation_20260914/`, `surproposition_20260915/`,
   `plafond_proposeur_20260915/`, `oracle_q3q4_20260915/`,
-  `front_lanes_lidar_20260921/` et `q3_stream_crosscheck_20260921/`.
+  `front_lanes_lidar_20260921/`, `q3_stream_crosscheck_20260921/` et
+  `q4_stream_crosscheck_20260921/`.
 - Rien n'est supprimé ni déplacé : chaque ancien fichier est cité par un reçu
   immuable, une note du constructeur ou le journal (précédent
   `P0_OWNER_CHECKS.json` à ne pas répéter). Les sections antérieures de ce
