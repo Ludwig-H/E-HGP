@@ -9,6 +9,26 @@ du20 septembre. L'ancien auditeur B a livré les tranches19–21 ; son canal
 d'audit indépendant. Ses anciens résultats de constructeur et ses nouveaux
 audits ne qualifient jamais automatiquement les nouveaux ports.
 
+## Reprise développeur du 21 septembre (20:10 UTC) — lire d'abord
+
+L'utilisateur a fait passer l'auditeur B au rôle de **développeur** de la v8.
+Directive : auditer entièrement, puis continuer le développement ; **régime
+prioritaire = LiDAR SemanticKITTI sans sol, 30 000 à 60 000 sites**, où les
+contrats **temps (1 s puis 100 ms)** et **K (5 ou 10)** doivent passer ;
+parallélisation multi-CPU puis GPU ; feu vert G4 quand une mesure l'exige.
+L'audit complet à neuf lentilles, l'état par composant, les incidents, les
+décisions proposées (moteur entier vers les contrats, frontière du chronomètre,
+régime de tests) et le plan par phases sont dans
+[docs/AUDIT_REPRISE_DEVELOPPEUR_20260921.md](docs/AUDIT_REPRISE_DEVELOPPEUR_20260921.md) ;
+ce document fait foi pour l'état courant, la suite de cette passation restant
+l'historique du constructeur précédent. Première entrée du régime prioritaire :
+nuages sans sol au profil u16 (2 cm), 39 815 / 35 491 / 45 114 sites
+([reçu](receipts/lidar_ground_u16_20260921/README.md), commit ec2bc503).
+Première mesure (diagnostic, à épingler en phase 0) : scène 0 sans sol, K5,
+1 050 à 1 240 CPU·s en local pour un flux de candidats, contre 48 CPU·s pour
+1 s sur 48 CPU. Brouillons non suivis de l'ancien constructeur (raccord global
+float32) : non repris, sort à décider par l'utilisateur.
+
 ## Contrat principal actif — trames entières
 
 La décision utilisateur du 21 septembre remplace la cible nominale 50k

@@ -3,6 +3,14 @@
 21 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
+## Reprise développeur — 21 septembre, 20:10 UTC
+
+L'auditeur B devient développeur ; l'audit complet de reprise (neuf lentilles,
+faits vérifiés, incidents, décisions proposées, plan par phases) est dans
+[docs/AUDIT_REPRISE_DEVELOPPEUR_20260921.md](../docs/AUDIT_REPRISE_DEVELOPPEUR_20260921.md).
+Régime prioritaire : LiDAR sans sol 30k–60k sites, contrats 1 s / 100 ms,
+K5 / K10. Aucun statut promu.
+
 ## Contrat principal actif — 21 septembre
 
 L'utilisateur remplace la référence nominale 50k par **une trame
