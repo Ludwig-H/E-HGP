@@ -331,6 +331,22 @@ def compute():
         require(Fr(D * Q, J) == 2 * xi and sum(s["bary"]) == 1, "λ = DQ/J = 2ξ, somme des barycentriques 1")
         checked += 1
     fx["f8_identities"] = dict(triangles=checked, seed=21, coordinate_range=[0, 200])
+    # F9 : la population des témoins est tout l'index, pas les graines propriétaires de X : une boule propriétaire de (a,b)
+    # a pour témoins stricts un site aigu non propriétaire (z₁, arête la plus longue az) et un site obtus (z₂, graine invalide).
+    a9, b9, x9, z1, z2 = (0, 0, 0), (10, 0, 0), (5, 8, 0), (9, 5, 0), (5, 1, 0)
+    s9 = seed(a9, b9, x9)
+    w1, w2 = seed(a9, b9, z1), seed(a9, b9, z2)
+    fx["f9_witness_population"] = dict(a=a9, b=b9, x=x9, centre=s9["c"], radius2=dot(sub(a9, s9["c"]), sub(a9, s9["c"])),
+                                       seed_acute=s9["acute"], seed_owned=s9["owned"],
+                                       z1=z1, z1_acute=w1["acute"], z1_owned=w1["owned"], z1_longest_edge2=max(dot(sub(b9, a9), sub(b9, a9)), dot(sub(z1, a9), sub(z1, a9)), dot(sub(z1, b9), sub(z1, b9))),
+                                       z1_power=power(z1, s9["c"], a9), z2=z2, z2_acute=w2["acute"], z2_owned=w2["owned"], z2_power=power(z2, s9["c"], a9))
+    # F10 : égalité de propriété (deux arêtes maximales) : la boule est émise par une seule arête, départagée par la paire d'IDs.
+    a10, b10, x10 = (0, 0, 0), (10, 0, 0), (6, 8, 0)
+    s10 = seed(a10, b10, x10)
+    fx["f10_ownership_tie"] = dict(a=a10, b=b10, x=x10, ab2=dot(sub(b10, a10), sub(b10, a10)), ax2=dot(sub(x10, a10), sub(x10, a10)),
+                                   bx2=dot(sub(x10, b10), sub(x10, b10)), acute=s10["acute"], owned_by_ab_non_strict=s10["owned"],
+                                   owned_by_ab_strict=dot(sub(x10, a10), sub(x10, a10)) < dot(sub(b10, a10), sub(b10, a10)) and dot(sub(x10, b10), sub(x10, b10)) < dot(sub(b10, a10), sub(b10, a10)),
+                                   centre=s10["c"], bary=s10["bary"])
     return fx
 
 
@@ -367,6 +383,12 @@ def checks(fx):
     for e in f7.values():
         require(e["acute"] == all(e["signs"]) and e["bary_sum"] == 1, "F7 acute iff signs")
     require(fx["f8_identities"]["triangles"] == 300, "F8")
+    f9 = fx["f9_witness_population"]
+    require(f9["seed_acute"] and f9["seed_owned"] and f9["centre"] == (Fr(5), Fr(39, 16), Fr(0)) and f9["radius2"] == Fr(7921, 256), "F9 seed")
+    require(f9["z1_acute"] and not f9["z1_owned"] and f9["z1_longest_edge2"] == 106 and f9["z1_power"] == Fr(-67, 8), "F9 acute non-owned witness")
+    require(not f9["z2_acute"] and f9["z2_owned"] and f9["z2_power"] == Fr(-231, 8), "F9 obtuse witness")
+    f10 = fx["f10_ownership_tie"]
+    require(f10["acute"] and f10["ab2"] == f10["ax2"] == 100 and f10["bx2"] == 80 and f10["owned_by_ab_non_strict"] and not f10["owned_by_ab_strict"], "F10 tie")
 
 
 def run(args):

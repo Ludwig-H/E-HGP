@@ -14,7 +14,9 @@ chaînes exactes), `read` recalcule tout et exige l'égalité ; aucun `assert`.
 `profile=quantized_u16_input_only`,
 `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 GCP non utilisé. Ce sont des **fixtures d'égalité** pour la porte de bloc à
-venir, pas une mesure ni une qualification.
+venir, pas une mesure ni une qualification. F9 (ajoutée après la question A/B
+du journal sur le port global « propriété dans X ») fixe la population des
+témoins : tout l'index, jamais les seules graines propriétaires ou valides.
 
 ## Notations
 
@@ -45,6 +47,8 @@ extrémités de Z_i (schéma du code) ; les bornes « coins seulement » évalue
 | F6 témoins mutuels | a = (0,0,0), b = (4,0,0), x₁ = (2,3,0), x₂ = (2,20,0), toutes deux aiguës | puissance de x₁ dans la boule (a,b,x₂) = −272/5 ; dans sa propre boule 0 ; de x₂ dans la boule (a,b,x₁) = 1088/3 : une feuille de X dans Z n'est jamais décidable pour le bloc |
 | F7 barycentriques | équilatéral ; rectangle en x (0,0,0), (10,0,0), (2,4,0) ; rectangle en a ; obtus en x (5,2,0) ; obtus en b (12,3,0) | (1/3, 1/3, 1/3) ; ξ = 0, centre sur ab ; α = 0 ; ξ = −21/8, centre hors de hull(a,b,x) ; β = −17/10 ; acuité ⟺ F, D − F, E − F > 0, somme 1 |
 | F8 identités | 300 triangles entiers non colinéaires, graine 21, coordonnées dans [0, 200) | J = 4G, Q = 4(E − F), P = 2(Du − Fd), c = m + ξ·h(x), (c − m)·d = 0, λ = 2ξ, somme des barycentriques 1 |
+| F9 population des témoins | a = (0,0,0), b = (10,0,0), x = (5,8,0) (aigu, propriétaire : centre (5, 39/16, 0), r² = 7921/256) ; z₁ = (9,5,0) ; z₂ = (5,1,0) | z₁ est aigu mais non propriétaire (arête la plus longue az, 106 > 100) et sa puissance vaut −67/8 : témoin strict ; z₂ est obtus (graine invalide) et sa puissance vaut −231/8 : témoin strict. Un port qui restreindrait Z aux graines propriétaires ou valides de X sous-compterait la profondeur de 2 |
+| F10 égalité de propriété | a = (0,0,0), b = (10,0,0), x = (6,8,0) | |ab|² = |ax|² = 100, |bx|² = 80, aigu : deux arêtes maximales ; propriétaire par ab au sens large (≤), pas au sens strict (<). Un port qui testerait la propriété strictement quelque part et largement ailleurs émettrait cette boule deux fois ou jamais ; la règle u16 (égalité départagée par la paire d'IDs triés) doit être la même dans la sélection de X et à l'émission |
 
 Le README de A donne pour F2 une plage resserrée −486226/4800 ≈ −101,30 (ses
 conditions entières u16 la rendent un peu plus lâche que la plage réelle) ;

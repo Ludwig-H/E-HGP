@@ -932,6 +932,52 @@ date. La ligne « A/B : vigilance sur le changement de témoins » du journal es
 une remarque du constructeur, pas une lecture d'audit : la présente section en
 tient lieu.
 
+### Question A/B du journal (brouillon après 21b85af2) : la propriété dans X ne touche pas Z, deux fixtures de plus
+
+Le brouillon `docs/RACCORD_NATIF_GLOBAL_PLAN_20260921.md` porte déjà la règle
+juste : « la lentille sert à sélectionner X, jamais à retirer ces points de Z
+». Réponse à la question : aucun contre-exemple n'existe tant que cette règle
+est tenue, et voici les deux cas qui la falsifient si elle ne l'est pas,
+gravés en F9 de
+[q3_bloc_float32_fixtures_20260921/](q3_bloc_float32_fixtures_20260921/README.md).
+Boule propriétaire (a,b,x) avec a = (0,0,0), b = (10,0,0), x = (5,8,0) (aiguë,
+centre (5, 39/16, 0), r² = 7921/256) : z₁ = (9,5,0) est aigu mais non
+propriétaire pour ab (sa plus longue arête est az, 106 > 100) et sa puissance
+vaut −67/8, témoin strict ; z₂ = (5,1,0) est obtus (graine invalide pour ab)
+et sa puissance vaut −231/8, témoin strict. Un port qui restreindrait Z aux
+graines propriétaires ou valides de X sous-compterait cette boule de deux et
+l'émettrait avec une profondeur fausse. Les seules feuilles de Z qu'on peut
+sauter sont a et b, de puissance nulle sur toute sphère du support.
+
+Deux précisions sur la sélection de X. (1) Les deux rejets de boîte du plan
+sont sûrs : « distance minimale à a ou à b supérieure à |ab|² » exclut toute
+graine propriétaire, et « maximum de |x − a|² + |x − b|² ≤ |ab|² » exclut
+toute graine aiguë en x, puisque |x − a|² + |x − b|² − |ab|² = 2(a − x)·(b −
+x). Sous propriété, l'acuité en x suffit à la validité : l'angle le plus grand
+est opposé à l'arête la plus longue, donc aigu en x ⇒ aigu partout ; le test
+de relais peut se réduire à propriété exacte (degré 2) plus (a − x)·(b − x) >
+0. (2) L'égalité de propriété doit être traitée par une seule convention
+partout : F10, a = (0,0,0), b = (10,0,0), x = (6,8,0), donne |ab|² = |ax|² =
+100 et |bx|² = 80, triangle aigu à deux arêtes maximales ; propriétaire par ab
+au sens large (≤), pas au sens strict (<). Si la sélection de X teste au sens
+large et l'émission au sens strict (ou l'inverse), la boule est émise deux
+fois ou jamais ; la règle u16 (égalité départagée par la paire d'IDs triés,
+lexicographique, celle qu'annonce le plan) doit être la même dans la boîte X,
+au relais et à l'émission, et c'est elle qui rend les digests appariables au
+moteur u16.
+
+Sur l'enveloppe m + [0, 1/3]·h(X) sous propriété : valide, et 1/3 est atteint
+(F4 équilatéral : ξ = 1/3, λ = 2/3) ; elle n'enveloppe que les centres des
+graines aiguës propriétaires de X, ce qui suffit au compte partagé puisque
+seules ces graines sont relayées et que les autres sites de X restent des
+témoins dans Z (F6, F9). Le resserrement par D(E − F)/(2G) quand G est
+certifié positif et le repli sans division restent ceux de ma relecture ; les
+valeurs attendues des trois enveloppes et des décisions (F2, F3, F5) ne
+changent pas avec la propriété, sauf λ_max. Deux points à mesurer plutôt qu'à
+supposer, déjà notés dans le plan : la population candidate Σ|X| par arête et
+le taux de repli hull à 8k/16k/32k, qui décident si le partage rapporte sur
+une trame réelle.
+
 ## Erreurs et points durs relevés (à 4dbe3024)
 
 1. **Session G4 R2 : diagnostic non établi.** La capture

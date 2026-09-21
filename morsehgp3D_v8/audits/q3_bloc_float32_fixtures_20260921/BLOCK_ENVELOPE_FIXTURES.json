@@ -1,6 +1,39 @@
 {
  "backend": "cpu_reference",
  "fixtures": {
+  "f10_ownership_tie": {
+   "a": [
+    "0",
+    "0",
+    "0"
+   ],
+   "ab2": "100",
+   "acute": true,
+   "ax2": "100",
+   "b": [
+    "10",
+    "0",
+    "0"
+   ],
+   "bary": [
+    "3/8",
+    "5/16",
+    "5/16"
+   ],
+   "bx2": "80",
+   "centre": [
+    "5",
+    "5/2",
+    "0"
+   ],
+   "owned_by_ab_non_strict": true,
+   "owned_by_ab_strict": false,
+   "x": [
+    "6",
+    "8",
+    "0"
+   ]
+  },
   "f1_vertex_minimum": {
    "Z": [
     [
@@ -1598,6 +1631,48 @@
    ],
    "seed": "21",
    "triangles": "300"
+  },
+  "f9_witness_population": {
+   "a": [
+    "0",
+    "0",
+    "0"
+   ],
+   "b": [
+    "10",
+    "0",
+    "0"
+   ],
+   "centre": [
+    "5",
+    "39/16",
+    "0"
+   ],
+   "radius2": "7921/256",
+   "seed_acute": true,
+   "seed_owned": true,
+   "x": [
+    "5",
+    "8",
+    "0"
+   ],
+   "z1": [
+    "9",
+    "5",
+    "0"
+   ],
+   "z1_acute": true,
+   "z1_longest_edge2": "106",
+   "z1_owned": false,
+   "z1_power": "-67/8",
+   "z2": [
+    "5",
+    "1",
+    "0"
+   ],
+   "z2_acute": false,
+   "z2_owned": true,
+   "z2_power": "-231/8"
   }
  },
  "gcp_used": false,
