@@ -821,6 +821,117 @@ annonce (« tests Fraction à venir »). Ma plage resserrée exacte pour la
 fixture axiale est [−1722/17 ; −58/3], la vraie plage ; celle du README de A,
 −486226/4800, est un peu plus lâche par ses conditions entières.
 
+### Commit a005f8aa (census q3 float32 partagé, protocole LiDAR sans sol) : relecture à quatre lentilles
+
+Quatre relectures indépendantes en lecture seule, sans cmake ni natif relancé
+: sources commises contre mes quatre points durs, protocole sans sol, sources
+web citées, reçus et analyse de croissance. Verdict : aucune affirmation
+fausse ni défaut produit ; trois risques de portée et une dizaine de nuances,
+ci-dessous.
+
+**Sources commises** (`core/float32_q3_block.*`, `lanes/float32_q3_census.*`,
+porte, mutations, sonde) : les huit points sont vérifiés ligne par ligne.
+Enveloppe = boîte de hull(a,b,X), resserrée par a + W/(2G) seulement si G.low
+> 0, replis sur le hull sans certificat (block.cpp 89-119) ; bornes par six
+paraboles, minimum au sommet clamp(c, Z_i), maximum aux extrémités, par
+extrémité de C_i, arrondi extérieur, 18 évaluations comptées et imposées par
+la porte ; a et b sautés seulement comme feuilles Z du préfixe partagé et
+comme graines au relais, graines invalides et sites de X conservés comme
+témoins ; ticket (nœud X, compte, curseur) copié figé pour chaque enfant et
+chaque graine, feuille Z ambiguë ⇒ scission de X avant consommation ; coquille
+= traversée globale depuis la racine, exclusions strictes seulement ; identité
+G − D(U − E) = E(D − E) > 0 ⇒ 0 < ξ < 1/2 exacte ; oracle Fraction indépendant
+(système de Gram résolu par élimination, barycentriques strictement
+positives), aucun assert nu, deux mutants tués par géométrie à code 0 ; les
+trois options flottantes sont dans les deux lanceurs et les manifestes. Mes
+fixtures rejouées sous -O : PASS ; F1 par le schéma du code rend [−25, 0] en
+rationnels et, en double avec les mêmes primitives, [−25,000000000000366 ;
++6,75e−13] avec classify 0 (correct, a et b ∈ Z). Deux nuances : aucun mutant
+compilé ne vise `float32_q3_block.cpp` (sommet → extrémité, intersection hull
+omise, `gram.low < 0`, dénominateur G) alors que F1 et la fixture ±2 les
+tueraient ; le plancher de couverture de la porte n'inclut ni
+`gram_unresolved` ni `center_intersection_fallbacks`. Un risque chiffré : sur
+les fixtures de la capture Release, 843 des 1 642 préparations partagées (51
+%) tombent en repli hull et 85 intersections sont vides ; mon point dur (4)
+n'est pas théorique. Publier ces taux dans la matrice 8k/16k/32k et les
+comparer au repli m + [0, 1/2]·h(X). Formulation : « les seuls témoins sautés
+sans borne sont a et b » vaut dans le préfixe partagé ; au compte individuel
+ils sont testés exactement.
+
+**Reçus et analyse de croissance** : les cinq commandes de lecture du README
+rejouées telles quelles rendent 0 et reproduisent octet pour octet READBACK et
+MUTATION_READBACKS (lecteurs LIVE : les trois builds épinglés non versionnés
+sont requis, présents ici) ; les quatre SHA256 sont exacts ; tous les nombres
+d'ANALYSE_CROISSANCE sont reproduits par un recalcul indépendant en Fractions
+depuis les 36 records (12 séries, 24 doublements, 122 postes, maxima
+×2,116563, ×2,000250, ×2,141703, ×2,217511, aucun ratio ≥ 4, aucun zéro →
+non-zéro, tableau K10, deux tableaux de temps). Deux risques de portée. (1) La
+matrice mesure le coût de rejet des graines saturées d'une seule chaîne
+emboîtée (intérieur de la boule i = {j < i}, seul site frontière = la graine)
+: K − 1 supports constants, Individual paie n − 2 préparations dont n − 6
+saturées ; en partagé, `outside` = 0, coquilles de 3 IDs, coût additif (+32
+visites, +2 préparations par doublement : une descente racine → feuille).
+Avant toute lecture de « forte réduction de travail », ajouter une famille où
+le nombre de supports acceptés croît avec n (graines réparties en 3D autour de
+l'arête) et une ligne de couverture à l'échelle (outside partagés, taux de
+repli exact, `gram_unresolved`). (2) Les chronos ont été pris pendant les
+propres captures concurrentes du constructeur (release, sanitize et mutations
+lancées 19:29:59, matrice 19:30:28 ; 13 des 36 chronos chevauchent la capture
+de mutations) ; bruit ×1,35 à ×1,77 sur un travail d'index identique (colonne
+32k : 13,19 à 23,32 ms) : aucun rapport de temps n'est lisible, ce que le
+texte dit déjà mais en sous-décrivant la charge. Nuances : la ligne «
+évaluations paraboliques » est `power_evaluations` (`axis_parabolas` vaut 672
+732 → 1 440 792, même ratio par structure) ; `slab` ne diffère de `column` que
+pour le pré-tri et le préfixe partagé (compteurs Individual et digests
+identiques ; x jusqu'à ±0,49 pour une arête de longueur 2) ; « l'index reste
+payé en O(n log n) » est invoqué du tri, pas établi par deux doublements
+(ratios 2,12 à 2,22 contre 2,14 à 2,15 prédits) ; `git_commit` vaut e2b09f94
+pour release et sanitize, 74fb0a6a pour la matrice, absent des mutations, et 8
+des 16 hashes épinglés sont absents de ces deux commits : les sources testées
+sont celles de a005f8aa, à écrire ; `read` et `selftest` du lecteur matrice
+sont le même chemin de code (quatre lectures × deux modes Python, pas huit
+relectures).
+
+**Protocole LiDAR sans sol** (`docs/LIDAR_SANS_SOL_PROTOCOLE_20260921.md`,
+décision utilisateur reprise dans `AGENTS.md`) : cohérent avec les règles
+contrôlées (float32 et IDs d'origine conservés, aucune reconstruction, labels
+hors du calcul, GCP non utilisé, s ∈ {8, 10, 12}, 8k/16k/32k gardés comme
+diagnostics) ; les 14 pages citées ont été relues (deux requêtes indépendantes
+pour les chiffres) : fréquences, CPU, threads, IoU 94,78 moyenne des séquences
+00-10, grille 0,33 m, licences BSD-2 et BSD-3, API sans en-tête ROS, défauts
+discordants (th_seeds 0,5 contre 0,125 ; elevation_thr), classes
+SemanticKITTI, protocoles d'évaluation : tout vérifié, rien de contredit.
+Trois risques. (1) Le protocole subordonne les chronos HGP à une évaluation de
+segmentation contre les fichiers `.label`, qui n'existent pas localement
+(`labels_downloaded = False`), alors que la consigne que j'ai reçue est « pas
+de confrontation à la vérité terrain pour l'instant, clustering seulement » ;
+découpler : campagnes HGP appariées brute/sans sol dès maintenant sur un
+masque à paramètres fixés a priori (défauts effectivement chargés publiés,
+masque haché), l'évaluation contre labels devenant un diagnostic séparé,
+ultérieur, soumis à la décision de télécharger les labels ; et régler méthode
+et paramètres sur d'autres séquences que 08, qui est le split de validation.
+(2) L'exposant par relation parent/enfant du protocole spatial est repris tel
+quel ; ma critique (biais dominé par le profil de densité, estimateur poolé
+par parent, dispersion entre frères comme barre d'erreur, déficit croisé de
+frontière, axe densité compagnon) s'applique davantage encore, le retrait du
+sol modifiant précisément les profils de densité. (3) Aucune métrique brute →
+sans sol sur un même morceau n'est définie, alors que c'est la question du
+régime : publier par morceau les effectifs et le rapport de travail par
+compteur de tête, et un compteur explicite des boules acceptées sans sol dont
+la profondeur brute dépassait le seuil (candidats créés par le retrait), avec
+une fixture gravée à petite taille. Nuances : « bits XYZ float32 » = après
+normalisation de −0 en +0 (comptée, nulle sur les trames présentes) ; sept
+scans sont présents (000000 à 000004 consécutifs avec poses KITTI odometry,
+000100, 000200), trois préparés, `data/` non versionné ; destination de
+l'adaptateur et licences des dépendances liées à nommer (bench v8 sous MIT,
+hors produit) ; cadre de statut absent en tête du document ; format et hachage
+du masque non spécifiés, et la politique des doublons XYZ n'est exerçable par
+aucune trame disponible (fixture à graver) ; renvois de section trop larges
+pour GroundGrid (§IV-A, IV-D) et URL de branches mobiles à épingler par SHA et
+date. La ligne « A/B : vigilance sur le changement de témoins » du journal est
+une remarque du constructeur, pas une lecture d'audit : la présente section en
+tient lieu.
+
 ## Erreurs et points durs relevés (à 4dbe3024)
 
 1. **Session G4 R2 : diagnostic non établi.** La capture
