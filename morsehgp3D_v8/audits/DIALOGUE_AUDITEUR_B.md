@@ -579,7 +579,12 @@ paires conservées). Sur les sept morceaux de la scène 0 à K5 : 189 486 record
 sur les quarts, 190 180 sur les moitiés et **190 405 sur la scène entière,
 tous valides** (0 propriétaire faux, 0 tétraèdre non positif, 0 profondeur ou
 coquille différente), 0 boule manquante sur les paires tirées ; le harnais
-coûte 1 à 72 s par morceau. La direction « complétude » reste celle d'un
+coûte 1 à 72 s par morceau. À K10
+([README_Q4_BILATERAL_K10.md](q34_stream_crosscheck_spatial_20260921/README_Q4_BILATERAL_K10.md)) :
+2 143 012 records sur les quarts, 2 154 843 sur les moitiés et **2 158 063 sur
+la scène entière, tous valides**, 0 boule manquante sur les paires tirées (1,36 Go
+de records lus en flux depuis le disque ; le harnais y coûte 39 s). La
+direction « complétude » reste celle d'un
 échantillon (1 à 12 boules énumérées par morceau à K5, car peu de paires
 tirées sont conservées) : l'énumération exhaustive des quarts, en cours,
 la complète. En parallèle, la voie q3 exhaustive sur la moitié x+ (59 953
@@ -587,6 +592,17 @@ sites) donne les 528 575 boules du registre du constructeur, identiques à
 l'énumération indépendante (ligne observée, reçu à venir avec la moitié x− et
 la scène) ; le harnais y coûte 100 min, bien plus que projeté, car les paires
 conservées à pleine densité portent des couvertures et des seeds nombreux.
+Énumération exhaustive des deux voies sur le quart x+y+ (29 926 sites, K5,
+ligne observée, reçu à la clôture des quatre quarts) : 270 202 boules q3 et
+28 481 boules q4 distinctes identiques aux énumérations indépendantes, rejets
+égaux au citron, lemmes sans violation ; le moteur émet 28 854 présentations
+q4 pour ces 28 481 boules (373 plateaux cosphériques sur un vrai quart à
+pleine densité, contre 3 sur le préfixe 8k/K10) et mon harnais 28 973
+tétraèdres propriétaires positifs ; la comparaison porte sur les boules
+distinctes, comme prévu. Le harnais q4 y a coûté trois heures (énumération
+des tétraèdres à pleine densité) : les trois autres quarts prendront la nuit,
+et la voie q4 des moitiés et de la scène reste couverte par le seul protocole
+bilatéral.
 
 ### Protocole spatial (brouillon du constructeur) : préparation indépendante et harnais adaptés
 

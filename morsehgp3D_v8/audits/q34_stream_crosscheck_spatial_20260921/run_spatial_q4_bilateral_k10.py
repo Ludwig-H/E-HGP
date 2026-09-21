@@ -23,9 +23,9 @@ import time
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 MANIFEST = HERE / "SPATIAL_PIECES_SCAN0.json"
-SCHEMA = "audit_b_q4_bilateral_spatial_v1"
+SCHEMA = "audit_b_q4_bilateral_spatial_k10_v1"
 PIECES = ("quarter_xpos_ypos", "quarter_xpos_yneg", "quarter_xneg_yneg", "quarter_xneg_ypos", "half_xpos", "half_xneg", "full")
-KMAX = (5,)
+KMAX = (10,)
 SEPARATION, WORKERS, BACKEND, SAMPLES, SEED = 8, 4, 28, 2000, 1
 MODES = ("rectangle-pair", "boxes", "affine", "live", "64")
 
@@ -173,10 +173,10 @@ def main():
     capture.add_argument("--worktree", type=Path, required=True)
     capture.add_argument("--scratch", type=Path, required=True)
     capture.add_argument("--commit", required=True)
-    capture.add_argument("--output", type=Path, default=HERE / "Q4_BILATERAL_SPATIAL.json")
+    capture.add_argument("--output", type=Path, default=HERE / "Q4_BILATERAL_SPATIAL_K10.json")
     reader = sub_parsers.add_parser("read")
     reader.add_argument("--commit", default=None)
-    reader.add_argument("--output", type=Path, default=HERE / "Q4_BILATERAL_SPATIAL.json")
+    reader.add_argument("--output", type=Path, default=HERE / "Q4_BILATERAL_SPATIAL_K10.json")
     args = parser.parse_args()
     try:
         run(args) if args.operation == "run" else read(args)

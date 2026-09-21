@@ -1,4 +1,4 @@
-# Voie q4 sur les sept morceaux spatiaux de la scène 0 : validité de chaque record émis et complétude par échantillon
+# Voie q4 à K = 10 sur les sept morceaux spatiaux de la scène 0 : validité de chaque record émis et complétude par échantillon
 
 Auditeur B, 21 septembre 2026. Moteur de la tranche 34 gelé, sonde construite à
 **d6e1bd9e** en modes `rectangle-pair`, `boxes`, `affine` et atlas q4 `live`
@@ -32,36 +32,30 @@ scène là où l'énumération exhaustive de la voie q4 ne l'est pas.
 Les morceaux sont ceux de la préparation indépendante
 [SPATIAL_PIECES_SCAN0.json](SPATIAL_PIECES_SCAN0.json), identiques octet pour
 octet aux fichiers du constructeur. Reçu
-[Q4_BILATERAL_SPATIAL.json](Q4_BILATERAL_SPATIAL.json), rejoué par
-`run_spatial_q4_bilateral.py read`.
+[Q4_BILATERAL_SPATIAL_K10.json](Q4_BILATERAL_SPATIAL_K10.json), rejoué par
+`run_spatial_q4_bilateral_k10.py read`.
 
 ## Résultat : 7 morceaux, tous les records valides, aucune boule manquante
 
 | morceau | n | K | résiduel q4 | records q4 | valides | boules distinctes | tests de validité | paires tirées / conservées | tétraèdres positifs | boules énumérées | manquantes | s sonde / harnais |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| quarter_xpos_ypos | 29 926 | 5 | 7 414 164 | 28 854 | 28 854 | 28 481 | 1 975 875 | 2 000 / 227 | 319 833 | 5 | 0 | 109 / 2.5 |
-| quarter_xpos_yneg | 30 027 | 5 | 10 202 121 | 23 513 | 23 513 | 22 483 | 952 035 | 2 000 / 141 | 27 422 | 3 | 0 | 64 / 1.4 |
-| quarter_xneg_yneg | 29 128 | 5 | 21 362 288 | 52 870 | 52 870 | 51 484 | 2 878 533 | 2 000 / 77 | 644 679 | 4 | 0 | 141 / 5.0 |
-| quarter_xneg_ypos | 30 061 | 5 | 21 606 715 | 84 249 | 84 249 | 83 803 | 4 169 309 | 2 000 / 101 | 608 608 | 12 | 0 | 254 / 17.2 |
-| half_xpos | 59 953 | 5 | 20 414 006 | 52 472 | 52 472 | 51 067 | 2 964 331 | 2 000 / 151 | 5 015 881 | 3 | 0 | 144 / 72.2 |
-| half_xneg | 59 189 | 5 | 54 171 726 | 137 708 | 137 708 | 135 871 | 7 161 583 | 2 000 / 53 | 181 235 | 4 | 0 | 276 / 6.5 |
-| full | 119 142 | 5 | 110 339 751 | 190 405 | 190 405 | 187 142 | 10 288 599 | 2 000 / 61 | 1 509 280 | 1 | 0 | 426 / 18.3 |
+| quarter_xpos_ypos | 29 926 | 10 | 19 461 163 | 340 163 | 340 163 | 337 652 | 39 483 308 | 2 000 / 151 | 467 496 | 30 | 0 | 274 / 8.0 |
+| quarter_xpos_yneg | 30 027 | 10 | 23 278 779 | 252 852 | 252 852 | 246 950 | 17 648 253 | 2 000 / 131 | 1 741 100 | 32 | 0 | 180 / 29.9 |
+| quarter_xneg_yneg | 29 128 | 10 | 44 261 406 | 593 471 | 593 471 | 584 251 | 57 888 389 | 2 000 / 72 | 403 318 | 18 | 0 | 357 / 9.8 |
+| quarter_xneg_ypos | 30 061 | 10 | 51 091 295 | 956 526 | 956 526 | 953 663 | 85 104 579 | 2 000 / 97 | 546 697 | 20 | 0 | 758 / 22.1 |
+| half_xpos | 59 953 | 10 | 69 170 659 | 594 653 | 594 653 | 586 224 | 57 845 862 | 2 000 / 87 | 1 501 736 | 4 | 0 | 369 / 30.6 |
+| half_xneg | 59 189 | 10 | 138 079 939 | 1 560 190 | 1 560 190 | 1 548 059 | 145 493 805 | 2 000 / 57 | 233 736 | 24 | 0 | 788 / 20.4 |
+| full | 119 142 | 10 | 358 297 342 | 2 158 063 | 2 158 063 | 2 137 403 | 205 936 490 | 2 000 / 52 | 1 821 913 | 22 | 0 | 1121 / 38.8 |
 
 Lecture : la direction « validité » est exhaustive sur les records (aucune boule
 émise n'est fausse : propriétaire, positivité, profondeur et coquille exactes) ;
 la direction « complétude » n'est établie que sur l'échantillon (une boule
 manquante hors échantillon resterait invisible ; l'énumération exhaustive des
-quarts, en cours, complète ce point). Rien n'est qualifié : un scan, K5.
-
-Note de provenance : le runner `run_spatial_q4_bilateral.py` a été modifié après
-la capture de ce reçu (lecture de la sortie de la sonde depuis le disque, en
-flux, pour la scène à K10 dont les records pèsent plusieurs Go) ; le reçu
-épingle par `runner_sha256` la version qui l'a produit, que `read` ne revérifie
-pas ; le harnais et le manifeste, eux, sont revérifiés.
+quarts, en cours, complète ce point). Rien n'est qualifié : un scan, K10 (le reçu K5 est [README_Q4_BILATERAL.md](README_Q4_BILATERAL.md)).
 
 ## Rejouer
 
 ```bash
-python3 -B -O morsehgp3D_v8/audits/q34_stream_crosscheck_spatial_20260921/run_spatial_q4_bilateral.py read --commit d6e1bd9e
-python3 -B -O morsehgp3D_v8/audits/q34_stream_crosscheck_spatial_20260921/run_spatial_q4_bilateral.py run --worktree /tmp/wt-d6e1bd9e --scratch /tmp/bilateral --commit d6e1bd9e --output /tmp/Q4_BILATERAL_SPATIAL.json
+python3 -B -O morsehgp3D_v8/audits/q34_stream_crosscheck_spatial_20260921/run_spatial_q4_bilateral_k10.py read --commit d6e1bd9e
+python3 -B -O morsehgp3D_v8/audits/q34_stream_crosscheck_spatial_20260921/run_spatial_q4_bilateral_k10.py run --worktree /tmp/wt-d6e1bd9e --scratch /tmp/bilateral10 --commit d6e1bd9e --output /tmp/Q4_BILATERAL_SPATIAL_K10.json
 ```
