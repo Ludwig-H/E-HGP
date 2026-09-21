@@ -57,6 +57,9 @@ struct GlobalGate : Gate {
   u64 parallel_geometry_checks{},worker_ledger_checks{},callback_copy_checks{},multiworker_calls{};
   u64 parallel_callback_failures{},parallel_join_checks{},parallel_owner_resets{},parallel_empty_calls{};
   u64 indexed_calls{},indexed_pair_rejections{},indexed_rectangle_rejections{},boxed_calls{};
+  u64 bounds_mode_calls{},bounds_exclusion_calls{},bounds_affine_calls{},bounds_work_checks{},bounds_parallel_calls{};
+  u64 bounds_invalid_inputs{},bounds_inactive_calls{},bounds_callback_failures{},bounds_allocation_failures{};
+  u64 bounds_shared_calls{},bounds_owner_resets{};
 };
 
 // Every component is a standard-layout aggregate containing only u64 fields
@@ -73,14 +76,15 @@ WORDS(Q4LocalGeometryWork,27);WORDS(Q4LocalPartitionWork,20);
 WORDS(Q4LocalAtlasWork,38);WORDS(Q4LocalSweepWork,41);WORDS(Q4LocalEdgeWork,117);
 WORDS(Q4ShallowSetWork,25);WORDS(Q4FamilyWork,13);WORDS(Q4ShallowSweepWork,32);
 WORDS(Q4WindowSelectionWork,25);WORDS(Q4WindowSweepWork,57);WORDS(Q4WindowEdgeWork,116);
-WORDS(Q34WitnessSearchWork,25);WORDS(WspdQ34WitnessWork,58);WORDS(Q3BallCensusWork,26);WORDS(WspdQ34Work,363);
+WORDS(Q34WitnessSearchWork,25);WORDS(Q34WitnessBoundsWork,12);WORDS(WspdQ34WitnessWork,82);
+WORDS(Q3BallCensusWork,26);WORDS(WspdQ34Work,387);
 #undef WORDS
-std::array<u64,363> logical_work(mhgp8::WspdQ34Work work) {
+std::array<u64,387> logical_work(mhgp8::WspdQ34Work work) {
   // These two capacity peaks depend on the private buffer's previous jobs;
   // they are paid separately, not erased from the published result.
   work.q3.peak_shell_bytes=0;
   work.peak_edge_buffer_bytes=0;
-  return std::bit_cast<std::array<u64,363>>(work);
+  return std::bit_cast<std::array<u64,387>>(work);
 }
 
 // Enumerate every small-cloud support once. An independent Gaussian rational
@@ -655,6 +659,121 @@ void indexed_fixtures(GlobalGate& gate) {
   gate.require(gate.indexed_calls>0 && gate.indexed_pair_rejections>0 && gate.indexed_rectangle_rejections>0,
     "indexed global modes have no exercised rejection");
 }
+
+std::array<u64,387> without_filter_geometry(mhgp8::WspdQ34Work work) {
+  // Keep ALL rejection masses and all work downstream of filtering. Only the
+  // four explicitly changed search/bounds ledgers are normalized away.
+  work.witness.rectangles={};work.witness.pairs={};
+  work.witness.rectangles_bounds={};work.witness.pairs_bounds={};
+  return logical_work(work);
+}
+
+void bounds_mode_global_fixtures(GlobalGate& gate) {
+  using Mode=mhgp8::Q34WitnessBoundsMode;
+  std::vector<Points> fixtures{
+    {{10,10,10},{16,16,10},{16,10,16},{10,16,16},{12,12,8},{14,14,8}},
+    {{100,100,100},{160,100,100},{120,142,100},{128,110,149},{128,88,88}},
+    {{30,30,30},{36,36,30},{30,36,24},{36,30,24},{30,36,30},{36,30,30},{30,30,24},{32,32,32}},
+    {{0,0,0},{65535,65535,0},{65535,0,65535},{0,65535,65535},{32767,32767,32767},{65535,0,0}},
+    shell30()};
+  for (std::size_t f=0;f<fixtures.size();++f) {
+    auto points=fixtures[f];if (f%2) std::reverse(points.begin(),points.end());
+    const auto all=global_oracle(gate,points);
+    const unsigned k=f==0?5U:3U;
+    const auto expected=eligible(all,k,6);
+    const auto index=mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
+    for (const auto witness:{mhgp8::WspdQ34WitnessMode::Pair,mhgp8::WspdQ34WitnessMode::RectanglePair})
+      for (const auto backend:{mhgp8::WspdQ4Backend::Local28,mhgp8::WspdQ4Backend::Window30}) {
+        auto config=options(f%2?mhgp8::WspdFrontMode::Pure:mhgp8::WspdFrontMode::MidpointSamples,backend);
+        config.witness_mode=witness;config.q3_census_mode=mhgp8::WspdQ3CensusMode::GlobalBoxes;
+        Output previous;
+        const auto legacy=mhgp8::run_wspd_q34_candidates(index,k,8,config,[&](const auto& v) {previous.push_back(copy(v));});
+        normalize(previous);
+        gate.require(previous==expected,"bounds-mode Legacy baseline differs from independent full payload oracle");
+        gate.require(legacy.work.witness.rectangles_bounds==mhgp8::Q34WitnessBoundsWork{} &&
+          legacy.work.witness.pairs_bounds==mhgp8::Q34WitnessBoundsWork{},"Legacy wrote new bounds counters");
+        for (const auto mode:{Mode::Exclusion,Mode::Affine}) {
+          config.witness_bounds_mode=mode;
+          Output actual;
+          const auto result=mhgp8::run_wspd_q34_candidates(index,k,8,config,[&](const auto& v) {actual.push_back(copy(v));});
+          normalize(actual);
+          gate.require(actual==expected,"bounds mode lost support/depth/key/complete shell");
+          gate.require(result.front.work==legacy.front.work &&
+            without_filter_geometry(result.work)==without_filter_geometry(legacy.work),
+            "bounds mode changed non-filter geometric work or lane masses");
+          ++gate.bounds_mode_calls;++gate.bounds_work_checks;
+          if (mode==Mode::Exclusion) ++gate.bounds_exclusion_calls;else ++gate.bounds_affine_calls;
+          const auto& w=result.work.witness;
+          gate.require(w.pairs_bounds.queries==w.pairs.queries && w.rectangles_bounds.queries==w.rectangles.queries,
+            "pipeline did not retain all private bounds work");
+          if (f==0) {
+            for (const std::size_t workers:{1U,2U,4U}) {
+              parallel_case(gate,points,all,k,config,workers,1);++gate.bounds_parallel_calls;
+            }
+          }
+        }
+      }
+  }
+  const auto points=fixtures[0];auto cloud=mhgp8::prepare_cloud(points);
+  auto index=mhgp8::make_q2_cloud_index(cloud);
+  auto config=options(mhgp8::WspdFrontMode::MidpointSamples,mhgp8::WspdQ4Backend::Window30);
+  config.witness_mode=mhgp8::WspdQ34WitnessMode::RectanglePair;
+  config.q3_census_mode=mhgp8::WspdQ3CensusMode::GlobalBoxes;
+  const auto expected=eligible(global_oracle(gate,points),5,6);
+  for (const auto mode:{Mode::Exclusion,Mode::Affine}) {
+    config.witness_bounds_mode=mode;
+    for (const auto k:{1U,2U}) {
+      auto inactive=config;inactive.requested_lane_mask=4;
+      const auto result=mhgp8::run_wspd_q34_parallel(index,k,8,inactive,4,
+          [](std::size_t,const auto&) {throw std::runtime_error("inactive bounds callback");},1);
+      gate.require(logical_work(result.pipeline.work)==logical_work(mhgp8::WspdQ34Work{}) &&
+        result.workers.empty() && result.parallel.jobs==0,"inactive bounds pipeline did work");++gate.bounds_inactive_calls;
+    }
+    auto disabled=config;disabled.witness_mode=mhgp8::WspdQ34WitnessMode::Disabled;
+    Output out;
+    const auto result=mhgp8::run_wspd_q34_candidates(index,5,8,disabled,[&](const auto& v) {out.push_back(copy(v));});
+    normalize(out);
+    gate.require(out==expected && result.work.witness.rectangles_bounds==mhgp8::Q34WitnessBoundsWork{} &&
+      result.work.witness.pairs_bounds==mhgp8::Q34WitnessBoundsWork{},"disabled witness mode performed hidden bounds work");
+    ++gate.bounds_inactive_calls;
+    bool caught=false;
+    try {static_cast<void>(mhgp8::run_wspd_q34_candidates(index,5,8,config,[](const auto&) {
+      throw std::logic_error("bounds callback marker");}));}
+    catch (const std::logic_error& error) {caught=std::string_view(error.what())=="bounds callback marker";}
+    gate.require(caught,"new bounds pipeline swallowed callback failure");++gate.bounds_callback_failures;
+  }
+  for (const auto witness:{mhgp8::WspdQ34WitnessMode::Disabled,mhgp8::WspdQ34WitnessMode::RectanglePair}) {
+    auto invalid=config;invalid.witness_mode=witness;invalid.witness_bounds_mode=static_cast<Mode>(99);
+    for (bool parallel:{false,true}) {
+      bool caught=false;
+      try {
+        if (parallel) static_cast<void>(mhgp8::run_wspd_q34_parallel(index,1,8,invalid,1,[](std::size_t,const auto&) {},1));
+        else static_cast<void>(mhgp8::run_wspd_q34_candidates(index,1,8,invalid,[](const auto&) {}));
+      } catch (const std::invalid_argument&) {caught=true;}
+      gate.require(caught,"inactive or disabled pipeline ignored invalid bounds enum");++gate.bounds_invalid_inputs;
+    }
+  }
+  config.witness_bounds_mode=Mode::Affine;
+  for (std::size_t before=0;before<4;++before) {
+    global_q34_allocation::state={true,before};bool caught=false;
+    try {static_cast<void>(mhgp8::run_wspd_q34_candidates(index,5,8,config,[](const auto&) {}));}
+    catch (const std::bad_alloc&) {caught=true;}
+    global_q34_allocation::state.armed=false;
+    gate.require(caught,"allocation failure did not propagate through new bounds pipeline");++gate.bounds_allocation_failures;
+  }
+  std::array<std::future<Output>,4> tasks;
+  for (std::size_t i=0;i<tasks.size();++i) tasks[i]=std::async(std::launch::async,[index,config,i] {
+    auto opts=config;if (i%2) opts.witness_bounds_mode=Mode::Exclusion;
+    Output out;static_cast<void>(mhgp8::run_wspd_q34_candidates(index,5,8,opts,[&](const auto& v) {out.push_back(copy(v));}));
+    normalize(out);return out;
+  });
+  for (auto& task:tasks) {gate.require(task.get()==expected,"shared index bounds pipeline changed full payload");++gate.bounds_shared_calls;}
+  Output out;
+  static_cast<void>(mhgp8::run_wspd_q34_candidates(index,5,8,config,[&](const auto& v) {
+    out.push_back(copy(v));if (index) {index.reset();cloud.reset();++gate.bounds_owner_resets;}
+  }));
+  normalize(out);gate.require(out==expected && !index && !cloud,"bounds callback owner reset lost payload");
+}
 }
 
 int main(int argc,char** argv) {
@@ -662,6 +781,7 @@ int main(int argc,char** argv) {
     if (argc!=2 || std::string_view(argv[1])!="--selftest") throw std::invalid_argument("expected --selftest");
     GlobalGate gate;
     global_fixtures(gate);global_lifecycle(gate);parallel_fixtures(gate);parallel_lifecycle(gate);indexed_fixtures(gate);
+    bounds_mode_global_fixtures(gate);
     gate.require(gate.q3>0 && gate.q4>0 && gate.max_shell>=30 && gate.fat_rectangles>0 &&
       gate.q3_front_rejections>0 && gate.q4_front_rejections>0 && gate.xi_tests>0 &&
       gate.q3_depth_rejections>0 && gate.q3_unread_sites>0 && gate.both_edges>0 &&
@@ -684,6 +804,9 @@ int main(int argc,char** argv) {
     EMIT(parallel_geometry_checks);EMIT(worker_ledger_checks);EMIT(callback_copy_checks);EMIT(multiworker_calls);
     EMIT(parallel_callback_failures);EMIT(parallel_join_checks);EMIT(parallel_owner_resets);EMIT(parallel_empty_calls);
     EMIT(indexed_calls);EMIT(indexed_pair_rejections);EMIT(indexed_rectangle_rejections);EMIT(boxed_calls);
+    EMIT(bounds_mode_calls);EMIT(bounds_exclusion_calls);EMIT(bounds_affine_calls);EMIT(bounds_work_checks);EMIT(bounds_parallel_calls);
+    EMIT(bounds_invalid_inputs);EMIT(bounds_inactive_calls);EMIT(bounds_callback_failures);EMIT(bounds_allocation_failures);
+    EMIT(bounds_shared_calls);EMIT(bounds_owner_resets);
 #undef EMIT
     std::cout<<"}\n";
     return 0;

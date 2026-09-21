@@ -404,6 +404,34 @@ Le retour B74196a31 déconseille son port immédiat sur ces LiDAR ; les coûts
 couches q3 au profit de Xi et de l'héritage des recherches, sans transformer
 un modèle de compteurs en facteur de temps constaté pour un filtre absent.
 
+## Bornes33 et partage futur : pièges à éviter
+
+Le [port33](Q34_BORNES_AFFINES_ET_EXCLUSION_20260921.md) distingue
+exclusion d'un bloc de témoins et rejet d'une voie de l'arête. Le premier
+retire seulement un bit du cadre Z ; il n'apporte aucun crédit. Retirer
+le bit global serait faux. La borne négative doit employer Xi_min,
+pas Xi_max ; l'égalité exclut un témoin strict, mais pas un contact de
+coquille lors du census final.
+
+Même un rejet sûr peut coûter plus que les visites économisées : les
+nouveaux tests Xi lorsque Hmin≤0 et les comparaisons d'exclusion restent
+payés séparément. Une baisse du nombre de nœuds ne ferme ni le coût
+total ni les postes q4 qui n'ont pas changé.
+
+Pour le futur héritage entre produits, un compte final insuffisant et
+un curseur épuisé ne forment PAS un préfixe réutilisable : une feuille Z
+ambiguë sur A×B peut devenir témoin après restriction des facteurs.
+Il faut scinder A/B avant de consommer cette feuille, puis transmettre
+le compte et le curseur de chaque voie. Ne pas changer l'ordre des témoins
+en conservant les anciens comptes. Les modèles de l'auditeur A démontrent
+ces invariants, pas une accélération d'un moteur encore absent.
+
+La [piste q4 par produits de graines/cellules](Q4_BLOCS_SEEDS_PISTE_20260921.md)
+doit éviter de recopier la liste des cellules pour chaque graine ou de
+repartir à la racine de l'atlas depuis chaque produit terminal. Le signe
+strict seul écarte une intersection ; les zéros doivent survivre. Une
+cellule vivante n'est pas une cellule de profondeur faible partout.
+
 ## Fenêtre q4 exacte30 : ce qui doit rester payé et conservé
 
 - Rejeter L≥U perd un événement admissible lorsque L=U. Le creux

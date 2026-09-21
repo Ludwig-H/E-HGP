@@ -59,6 +59,12 @@ constexpr std::array witness_search_fields{
  F(Q34WitnessSearchWork,q3_credits),F(Q34WitnessSearchWork,q4_credits),F(Q34WitnessSearchWork,q3_rejected),
  F(Q34WitnessSearchWork,q4_rejected),F(Q34WitnessSearchWork,midpoint_box_tests),
  F(Q34WitnessSearchWork,pending_nodes_skipped),F(Q34WitnessSearchWork,peak_stack),F(Q34WitnessSearchWork,stack_storage_bytes)};
+constexpr std::array witness_bounds_fields{
+ F(Q34WitnessBoundsWork,queries),F(Q34WitnessBoundsWork,pair_preparations),F(Q34WitnessBoundsWork,general_preparations),
+ F(Q34WitnessBoundsWork,affine_h_tests),F(Q34WitnessBoundsWork,affine_xi_tests),F(Q34WitnessBoundsWork,xi_on_nonpositive_minimum),
+ F(Q34WitnessBoundsWork,q3_exclusion_tests),F(Q34WitnessBoundsWork,q4_exclusion_tests),
+ F(Q34WitnessBoundsWork,q3_excluded_nodes),F(Q34WitnessBoundsWork,q4_excluded_nodes),
+ F(Q34WitnessBoundsWork,fully_excluded_nodes),F(Q34WitnessBoundsWork,mixed_terminal_nodes)};
 constexpr std::array q3_block_fields{
  F(Q3BallCensusWork,queries),F(Q3BallCensusWork,preparations),F(Q3BallCensusWork,vertex_axes),
  F(Q3BallCensusWork,accepted_queries),F(Q3BallCensusWork,rejected_queries),
@@ -79,7 +85,8 @@ static_assert(sizeof(WspdQ34Work)==global_fields.size()*sizeof(u64)+sizeof(Q34Ed
  sizeof(WspdQ3Work)+sizeof(Q4LocalEdgeWork)+sizeof(Q4WindowEdgeWork)+sizeof(WspdQ34WitnessWork)+sizeof(Q3BallCensusWork));
 static_assert(sizeof(Q3BallCensusWork)==q3_block_fields.size()*sizeof(u64));
 static_assert(sizeof(Q34WitnessSearchWork)==witness_search_fields.size()*sizeof(u64));
-static_assert(sizeof(WspdQ34WitnessWork)==witness_fields.size()*sizeof(u64)+2*sizeof(Q34WitnessSearchWork));
+static_assert(sizeof(Q34WitnessBoundsWork)==witness_bounds_fields.size()*sizeof(u64));
+static_assert(sizeof(WspdQ34WitnessWork)==witness_fields.size()*sizeof(u64)+2*sizeof(Q34WitnessSearchWork)+2*sizeof(Q34WitnessBoundsWork));
 static_assert(sizeof(WspdFrontWork)==(global_front_fields.size()+19)*sizeof(u64));
 
 struct StreamingOutput {
@@ -135,7 +142,7 @@ void dump_global_front(const WspdFrontResult& result) {
  std::cout<<",\"size_class_pair_mass\":";dump_u64_array(result.work.size_class_pair_mass);
  std::cout<<"}}";
 }
-void dump_global_work(const WspdQ34Work& work,bool indexed_schema) {
+void dump_global_work(const WspdQ34Work& work,unsigned schema_version) {
  std::cout<<'{';dump_fields(work,global_fields);
  std::cout<<",\"cover\":";audit_dump(work.cover,cover_fields);
  std::cout<<",\"q3\":";audit_dump(work.q3,q3_fields);
@@ -151,26 +158,34 @@ void dump_global_work(const WspdQ34Work& work,bool indexed_schema) {
  std::cout<<",\"selection\":";audit_dump(work.window.selection,selection_fields);
  std::cout<<",\"sweep\":";dump_shallow_sweep(work.window.sweep.sweep);
  std::cout<<",\"window\":";audit_dump(work.window.sweep.window,window_fields);std::cout<<'}';
- if(indexed_schema) {
+ if(schema_version>=2) {
   std::cout<<",\"witness\":{";dump_fields(work.witness,witness_fields);
   std::cout<<",\"rectangles\":";audit_dump(work.witness.rectangles,witness_search_fields);
-  std::cout<<",\"pairs\":";audit_dump(work.witness.pairs,witness_search_fields);std::cout<<'}';
+  std::cout<<",\"pairs\":";audit_dump(work.witness.pairs,witness_search_fields);
+  if(schema_version>=3) {
+   std::cout<<",\"rectangles_bounds\":";audit_dump(work.witness.rectangles_bounds,witness_bounds_fields);
+   std::cout<<",\"pairs_bounds\":";audit_dump(work.witness.pairs_bounds,witness_bounds_fields);
+  }
+  std::cout<<'}';
   std::cout<<",\"q3_blocks\":";audit_dump(work.q3_blocks,q3_block_fields);
  }
  std::cout<<'}';
 }
 int global_run(int argc,char** argv) {
- require(argc>=8 && argc<=12,"usage: mhgp8_wspd_q34_probe file n K s mask backend workers [samples|pure] [digest|records] [disabled|pair|rectangle-pair] [scalar|boxes]");
+ require(argc>=8 && argc<=13,"usage: mhgp8_wspd_q34_probe file n K s mask backend workers [samples|pure] [digest|records] [disabled|pair|rectangle-pair] [scalar|boxes] [legacy|exclude|affine]");
  const auto n=number(argv[2]),k=number(argv[3]),s=number(argv[4]),mask=number(argv[5]);
  const auto backend=number(argv[6]),workers=number(argv[7]);
  const std::string_view mode=argc>=9?argv[8]:"samples",output_mode=argc>=10?argv[9]:"digest";
  const std::string_view witness_mode=argc>=11?argv[10]:"disabled";
- const std::string_view census_mode=argc==12?argv[11]:"scalar";
+ const std::string_view census_mode=argc>=12?argv[11]:"scalar";
+ const std::string_view bounds_mode=argc==13?argv[12]:"legacy";
+ const unsigned schema_version=argc==13?3:argc>=11?2:1;
  require(n>0 && k>=1 && k<=10 && s>0 && s<=std::numeric_limits<unsigned>::max() &&
   (mask==2 || mask==4 || mask==6) && (backend==28 || backend==30) && workers>0 &&
   (mode=="samples" || mode=="pure") && (output_mode=="digest" || output_mode=="records"),"invalid global probe options");
  require(witness_mode=="disabled" || witness_mode=="pair" || witness_mode=="rectangle-pair","invalid witness mode");
  require(census_mode=="scalar" || census_mode=="boxes","invalid q3 census mode");
+ require(bounds_mode=="legacy" || bounds_mode=="exclude" || bounds_mode=="affine","invalid witness bounds mode");
  const auto started=Clock::now();
  auto input=read_lidar(argv[1]);const auto source_n=input.points.size();
  require(n<=source_n,"requested prefix larger than file");input.points.resize(n);
@@ -185,6 +200,8 @@ int global_run(int argc,char** argv) {
  options.witness_mode=witness_mode=="disabled"?WspdQ34WitnessMode::Disabled:
   witness_mode=="pair"?WspdQ34WitnessMode::Pair:WspdQ34WitnessMode::RectanglePair;
  options.q3_census_mode=census_mode=="scalar"?WspdQ3CensusMode::ScalarCover:WspdQ3CensusMode::GlobalBoxes;
+ options.witness_bounds_mode=bounds_mode=="legacy"?Q34WitnessBoundsMode::Legacy:
+  bounds_mode=="exclude"?Q34WitnessBoundsMode::Exclusion:Q34WitnessBoundsMode::Affine;
  std::vector<StreamingOutput> outputs(workers);
  std::vector<Output> payloads(output_mode=="records"?workers:0);
  const auto parallel=run_wspd_q34_parallel(index,static_cast<unsigned>(k),static_cast<unsigned>(s),options,workers,
@@ -205,7 +222,7 @@ int global_run(int argc,char** argv) {
   output.shell_ids==result.work.payload_shell_ids,"global callback ledger differs");
  const auto done=Clock::now();
  std::cout<<std::fixed<<std::setprecision(6)
-  <<"{\"schema\":\"mhgp8_wspd_q34_probe_v"<<(argc>=11?2:1)<<"\",\"status\":\"completed\","
+  <<"{\"schema\":\"mhgp8_wspd_q34_probe_v"<<schema_version<<"\",\"status\":\"completed\","
     "\"scope\":\"global_q3_q4_candidate_stream_not_catalogue_or_full\",\"backend\":\"cpu_reference\","
     "\"profile\":\"quantized_u16_input_only\",\"public_status\":\"not_claimed\","
   <<"\"n\":"<<n<<",\"source_n\":"<<source_n<<",\"kmax\":"<<k<<",\"s\":"<<s
@@ -214,7 +231,8 @@ int global_run(int argc,char** argv) {
   <<",\"validation\":\"payload_structure_and_ledger_only_small_exhaustive_gate_separate\",\"output\":";
  output.dump();std::cout<<",\"front\":";dump_global_front(result.front);
  if(argc>=11)std::cout<<",\"witness_mode\":\""<<witness_mode<<"\",\"q3_census_mode\":\""<<census_mode<<'"';
- std::cout<<",\"work\":";dump_global_work(result.work,argc>=11);
+ if(argc==13)std::cout<<",\"witness_bounds_mode\":\""<<bounds_mode<<'"';
+ std::cout<<",\"work\":";dump_global_work(result.work,schema_version);
  std::cout<<",\"parallel\":";audit_dump(parallel.parallel,parallel_fields);
  std::cout<<",\"workers_work\":[";
  for(std::size_t slot=0;slot<parallel.workers.size();++slot) {

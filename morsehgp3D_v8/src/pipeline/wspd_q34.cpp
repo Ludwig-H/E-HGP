@@ -194,12 +194,23 @@ void merge(Q34WitnessSearchWork& a, const Q34WitnessSearchWork& b) {
   MHGP8_MAX(peak_stack); MHGP8_MAX(stack_storage_bytes);
 }
 
+void merge(Q34WitnessBoundsWork& a, const Q34WitnessBoundsWork& b) {
+  static_assert(sizeof(Q34WitnessBoundsWork) == 12 * sizeof(u64));
+  MHGP8_ADD(queries); MHGP8_ADD(pair_preparations); MHGP8_ADD(general_preparations);
+  MHGP8_ADD(affine_h_tests); MHGP8_ADD(affine_xi_tests); MHGP8_ADD(xi_on_nonpositive_minimum);
+  MHGP8_ADD(q3_exclusion_tests); MHGP8_ADD(q4_exclusion_tests);
+  MHGP8_ADD(q3_excluded_nodes); MHGP8_ADD(q4_excluded_nodes);
+  MHGP8_ADD(fully_excluded_nodes); MHGP8_ADD(mixed_terminal_nodes);
+}
+
 void merge(WspdQ34WitnessWork& a, const WspdQ34WitnessWork& b) {
-  static_assert(sizeof(WspdQ34WitnessWork) == 8 * sizeof(u64) + 2 * sizeof(Q34WitnessSearchWork));
+  static_assert(sizeof(WspdQ34WitnessWork) == 8 * sizeof(u64) +
+      2 * sizeof(Q34WitnessSearchWork) + 2 * sizeof(Q34WitnessBoundsWork));
   MHGP8_ADD(input_pair_mass); MHGP8_ADD(rejected_rectangles); MHGP8_ADD(rectangle_pair_mass);
   MHGP8_ADD(rectangle_q3_pairs); MHGP8_ADD(rectangle_q4_pairs);
   MHGP8_ADD(rejected_pairs); MHGP8_ADD(pair_q3_pairs); MHGP8_ADD(pair_q4_pairs);
   merge(a.rectangles, b.rectangles); merge(a.pairs, b.pairs);
+  merge(a.rectangles_bounds, b.rectangles_bounds); merge(a.pairs_bounds, b.pairs_bounds);
 }
 
 void merge(Q3BallCensusWork& a, const Q3BallCensusWork& b) {
@@ -267,7 +278,10 @@ void validate(Q2CensusIndexPtr index, unsigned k, unsigned s,
        options.witness_mode != WspdQ34WitnessMode::Pair &&
        options.witness_mode != WspdQ34WitnessMode::RectanglePair) ||
       (options.q3_census_mode != WspdQ3CensusMode::ScalarCover &&
-       options.q3_census_mode != WspdQ3CensusMode::GlobalBoxes))
+       options.q3_census_mode != WspdQ3CensusMode::GlobalBoxes) ||
+      (options.witness_bounds_mode != Q34WitnessBoundsMode::Legacy &&
+       options.witness_bounds_mode != Q34WitnessBoundsMode::Exclusion &&
+       options.witness_bounds_mode != Q34WitnessBoundsMode::Affine))
     throw std::invalid_argument("mhgp8 unsupported global q34 options");
   // Match the unchanged local28 public contract, even if this call requests
   // no active q4 lane or selects Window30. Inert options cannot hide errors.
@@ -344,7 +358,7 @@ class Engine {
     if (options_.witness_mode == WspdQ34WitnessMode::RectanglePair) {
       const auto filtered = filter_q34_witnesses(*index_, nodes[rectangle.a_node].box,
           nodes[rectangle.b_node].box, static_cast<std::uint8_t>(k_), mask,
-          work.witness.rectangles);
+          work.witness.rectangles, options_.witness_bounds_mode, work.witness.rectangles_bounds);
       if ((mask & 2U) != 0 && (filtered & 2U) == 0)
         counter_add(work.witness.rectangle_q3_pairs, mass);
       if ((mask & 4U) != 0 && (filtered & 4U) == 0)
@@ -394,7 +408,8 @@ class Engine {
     if (options_.witness_mode != WspdQ34WitnessMode::Disabled) {
       const auto points = index_->cloud().points();
       const auto filtered = filter_q34_witnesses(*index_, singleton_box(points[a]),
-          singleton_box(points[b]), static_cast<std::uint8_t>(k_), mask, work.witness.pairs);
+          singleton_box(points[b]), static_cast<std::uint8_t>(k_), mask, work.witness.pairs,
+          options_.witness_bounds_mode, work.witness.pairs_bounds);
       if ((mask & 2U) != 0 && (filtered & 2U) == 0) counter_add(work.witness.pair_q3_pairs);
       if ((mask & 4U) != 0 && (filtered & 4U) == 0) counter_add(work.witness.pair_q4_pairs);
       mask = filtered;

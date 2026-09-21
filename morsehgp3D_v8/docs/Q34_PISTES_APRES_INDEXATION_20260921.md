@@ -5,6 +5,13 @@
 Cadre : `exploration_v8_hors_registre`, `cpu_reference`,
 `quantized_u16_input_only`, `public_status=not_claimed`.
 
+Mise à jour après cette proposition : la première piste Xi est désormais
+portée et qualifiée dans la [tranche33](Q34_BORNES_AFFINES_ET_EXCLUSION_20260921.md).
+Les éléments ci-dessous conservent leur contexte32 ; le bilan courant
+et les nouvelles priorités par régime sont dans la note33 et les
+[produits q4 graines/cellules](Q4_BLOCS_SEEDS_PISTE_20260921.md).
+L'héritage et les couches q3 décrits ici ne sont toujours pas des ports.
+
 Deux priorités complémentaires : éviter de chercher des témoins dans des
 blocs qui ne peuvent pas en contenir, puis éliminer des graines q3 avant de
 construire et compter leurs boules. Ni l'une ni l'autre ne démontre encore

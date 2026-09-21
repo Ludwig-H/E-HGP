@@ -6,6 +6,20 @@
 
 namespace mhgp8 {
 
+enum class Q34WitnessBoundsMode { Legacy, Exclusion, Affine };
+
+struct Q34WitnessBoundsWork {
+  u64 queries{};
+  u64 pair_preparations{}, general_preparations{};
+  u64 affine_h_tests{}, affine_xi_tests{};
+  u64 xi_on_nonpositive_minimum{};
+  u64 q3_exclusion_tests{}, q4_exclusion_tests{};
+  u64 q3_excluded_nodes{}, q4_excluded_nodes{};
+  u64 fully_excluded_nodes{}, mixed_terminal_nodes{};
+  // All twelve members combine by SUM, never MAX.
+  bool operator==(const Q34WitnessBoundsWork&) const = default;
+};
+
 struct Q34WitnessSearchWork {
   u64 queries{};
   u64 q3_queries{};
@@ -76,5 +90,37 @@ struct Q34WitnessSearchWork {
 [[nodiscard]] std::uint8_t filter_q34_witnesses(
     const Q2CensusIndex& index, const Box3& a, const Box3& b,
     std::uint8_t kmax, std::uint8_t lane_mask, Q34WitnessSearchWork& work);
+
+// Explicit new path; the six-argument entry above stays STRICTLY Legacy.
+// Legacy leaves bounds_work unchanged, including on success. Exclusion uses
+// the general Xi lower bound to exclude a node's witnesses separately per
+// lane. Affine also prepares fixed-endpoint H/Xi when BOTH boxes are points;
+// otherwise it is the same general preparation as Exclusion. No preparation
+// is doubled. Invalid mode/K/mask/boxes leave both work objects unchanged.
+// Active and inactive valid non-Legacy calls increment bounds_work.queries;
+// only active calls prepare bounds and increment exactly one preparation.
+//
+// After Hmax4<=0 has been handled, alpha*Hmax4^2<=16*Xi_low excludes that
+// lane LOCALLY: zero credit and NO change to the global surviving mask.
+// Xi is therefore also paid when Hmin4<=0, counted separately. Admission is
+// still strict Hmin4>0 && alpha*Hmin4^2>16*Xi_high. Exclusions are tested
+// before admissions; old lane_tests count only admissions actually tested.
+// All masks, endpoints, threshold saturation, borrowing and exception rules
+// above remain unchanged; no inherited witness credit is introduced.
+//
+// q3/q4_excluded_nodes include partial lane exclusions. fully_excluded_nodes
+// means every input lane was excluded by Xi, and mixed_terminal_nodes means
+// at least one input lane admitted and another excluded, with none pending.
+// old fully_admitted_nodes continues to mean ALL input lanes were admitted;
+// old admitted_nodes means at least one admission, even on mixed terminals.
+// The new completed-call partition is:
+// node_visits = h_excluded_nodes + fully_admitted_nodes + leaf_remainders +
+// split_nodes + fully_excluded_nodes + mixed_terminal_nodes.
+// Affine counts only actual affine tests; Search25.h_bound_tests/xi_bound_tests
+// include either arithmetic path. No additional heap or frontier allocation.
+[[nodiscard]] std::uint8_t filter_q34_witnesses(
+    const Q2CensusIndex& index, const Box3& a, const Box3& b,
+    std::uint8_t kmax, std::uint8_t lane_mask, Q34WitnessSearchWork& work,
+    Q34WitnessBoundsMode mode, Q34WitnessBoundsWork& bounds_work);
 
 }  // namespace mhgp8

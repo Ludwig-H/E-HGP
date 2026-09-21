@@ -1,0 +1,17 @@
+{
+  "kind": "local_exclusion_removes_global_lane_oracle",
+  "command": [
+    "/tmp/mhgp8_wspd_q34_mutants_kwtq8p76/local_exclusion_removes_global_lane",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-21T09:41:51.687314+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "q34 witness search gate: singleton witness decision differs from independent oracle\n",
+  "stdout_base64": "",
+  "stderr_base64": "cTM0IHdpdG5lc3Mgc2VhcmNoIGdhdGU6IHNpbmdsZXRvbiB3aXRuZXNzIGRlY2lzaW9uIGRpZmZlcnMgZnJvbSBpbmRlcGVuZGVudCBvcmFjbGUK",
+  "finished_utc": "2026-09-21T09:41:51.766434+00:00"
+}

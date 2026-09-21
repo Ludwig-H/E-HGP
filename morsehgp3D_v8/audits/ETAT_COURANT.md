@@ -3,6 +3,33 @@
 21 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
+Tranche33 close : trois modes de bornes pour la recherche
+indexée, exclusion négative locale et préparation affine des paires,
+sans changement des défauts. Les registres distinguent nouveaux tests
+Xi, admissions, exclusions et terminaisons mixtes. Voir la
+[note33](../docs/Q34_BORNES_AFFINES_ET_EXCLUSION_20260921.md) et ses
+[reçus distincts](../receipts/q34_affine_20260921/README.md).95 CTests Release,
+quatre portes/24sondes ASan/UBSan/LSan et trois mutants compilés passent.
+Trente grandes mesures et48petites sondes candidates, huit paires de
+compatibilité32/33 ; +192octets réels par worker. Les builds affine33
+sont épinglés, les échecs de préflight restent conservés.
+Aucun héritage de preuve des relectures A/B ; GCP non utilisé.
+
+La recherche par paire sur scan0/K5/s8 fait×2,603/×2,773 aux doublements,
+mais scan200/K5/s8 révèle census q3×4,317 et visites q4×6,540 entre8k/16k.
+Pas de sous-quadratique acquis pour l'ensemble des postes importants,
+ni de contrat FULL/GPU/G4. Les trois scans, K5/10 et s8/10/12 ont des
+périmètres distincts explicités dans les reçus, pas un produit cartésien
+complet de toutes ces configurations.
+
+Les replays B32 (`56fe457f`) retrouvent supports/profondeurs q3 et
+clés/profondeurs q4 sur cinq préfixes ; pas les coquilles par ce harnais.
+Les modèles A de préfixes et d'ordres figés motivent le partage futur des
+recherches. Ils ne qualifient pas un port constructeur absent. Même
+distinction pour la nouvelle piste de parcours q4 graines×cellules.
+
+## Historique32
+
 Tranche32 close : filtres de témoins indexés avant couvertures,
 census q3 par boîtes, coquille complète collectée à l'acceptation seulement.
 94 CTests Release, trois gates/12sondes ASan/UBSan/LSan et six mutants

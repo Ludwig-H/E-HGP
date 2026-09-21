@@ -36,6 +36,10 @@ struct Gate {
   u64 exhausted_queries{},permutations{},extreme_queries{},invalid_inputs{},parallel_calls{};
   u64 repeated_calls{},source_alias_checks{},left_tie_cases{},partial_admission_cases{};
   u64 deep_index_cases{},peak_stack{},wide_predicate_cases{},overflow_exceptions{};
+  u64 bounds_calls{},legacy_overload_calls{},exclusion_calls{},affine_calls{},mode_singletons{},mode_rectangles{};
+  u64 local_exclusion_cases{},nonpositive_minimum_cases{},mixed_terminal_cases{},mode_parallel_calls{};
+  u64 mode_invalid_inputs{},mode_repeated_calls{},mode_overflows{},affine_preparations{},general_preparations{};
+  u64 excluded_q3_nodes{},excluded_q4_nodes{},fully_excluded_nodes{},mode_xi_nonpositive{};
   void require(bool condition,const char* message) {
     ++checks;
     if (!condition) throw std::runtime_error(message);
@@ -405,12 +409,166 @@ void run(Gate& gate) {
       "required geometric branch was not exercised");
 }
 
+using BoundsMode=mhgp8::Q34WitnessBoundsMode;
+using BoundsWork=mhgp8::Q34WitnessBoundsWork;
+static_assert(std::is_trivially_copyable_v<BoundsWork> && std::is_standard_layout_v<BoundsWork> &&
+              sizeof(BoundsWork)==12*sizeof(u64));
+
+struct ModeResult {std::uint8_t mask;Work search;BoundsWork bounds;};
+ModeResult mode_query(Gate& gate,const mhgp8::Q2CensusIndex& index,const Points& sites,
+    const Box3& a,const Box3& b,unsigned k,unsigned mask,BoundsMode mode) {
+  const bool pair=a.low==a.high && b.low==b.high;
+  const auto exact=pair?counts(gate,sites,a.low,b.low):common_counts(gate,sites,a,b);
+  ModeResult result{};
+  result.mask=mhgp8::filter_q34_witnesses(index,a,b,static_cast<std::uint8_t>(k),
+      static_cast<std::uint8_t>(mask),result.search,mode,result.bounds);
+  const auto requested=active(k,mask);
+  const auto& w=result.search;const auto& v=result.bounds;
+  // All geometric checks precede counter identities, including the exact
+  // saturated credits for singleton pairs. Local exclusions earn NO credit.
+  if (pair) {
+    gate.require(result.mask==expected(k,mask,exact) &&
+      w.q3_credits==((requested&2U)?std::min<u64>(exact[0],k-1):0) &&
+      w.q4_credits==((requested&4U)?std::min<u64>(exact[1],k-2):0),
+      "singleton witness decision differs from independent oracle");
+    ++gate.mode_singletons;
+  } else {
+    gate.require(w.q3_credits<=exact[0] && w.q4_credits<=exact[1],
+        "rectangle credited more than its independent common-witness set");
+    for (const auto x:corners(a)) for (const auto y:corners(b)) {
+      const auto total=counts(gate,sites,x,y);
+      const auto removed=static_cast<unsigned>(requested&~result.mask);
+      gate.require(((removed&2U)==0 || total[0]>=k-1) && ((removed&4U)==0 || total[1]>=k-2),
+          "rectangle rejection removed a pair with too few exact citron witnesses");
+    }
+    ++gate.mode_rectangles;
+  }
+  ++gate.bounds_calls;
+  if (mode==BoundsMode::Legacy) ++gate.legacy_overload_calls;
+  if (mode==BoundsMode::Exclusion) ++gate.exclusion_calls;
+  if (mode==BoundsMode::Affine) ++gate.affine_calls;
+  gate.require(v.queries==static_cast<u64>(mode!=BoundsMode::Legacy) && w.queries==1,"mode query accounting");
+  gate.require(w.node_visits==w.h_bound_tests && w.node_visits==w.h_excluded_nodes+
+      w.fully_admitted_nodes+w.leaf_remainders+w.split_nodes+v.fully_excluded_nodes+v.mixed_terminal_nodes,
+      "new node classification partition");
+  gate.require(w.midpoint_box_tests==2*w.split_nodes && v.q3_excluded_nodes<=v.q3_exclusion_tests &&
+      v.q4_excluded_nodes<=v.q4_exclusion_tests && v.xi_on_nonpositive_minimum<=w.xi_bound_tests,
+      "new exclusion work inclusions");
+  if (requested==0) {
+    Work empty;empty.queries=1;BoundsWork other;other.queries=static_cast<u64>(mode!=BoundsMode::Legacy);
+    gate.require(w==empty && v==other,"inactive bounds mode did hidden geometry");
+  } else if (mode==BoundsMode::Legacy) {
+    Work old;
+    const auto old_mask=mhgp8::filter_q34_witnesses(index,a,b,static_cast<std::uint8_t>(k),
+        static_cast<std::uint8_t>(mask),old);
+    BoundsWork only;
+    gate.require(result.mask==old_mask && w==old && v==only,"explicit Legacy differs from old overload");
+  } else {
+    gate.require(v.pair_preparations+v.general_preparations==1 &&
+      v.pair_preparations==static_cast<u64>(mode==BoundsMode::Affine && pair),"bound preparation selection");
+    gate.require(v.affine_h_tests==(v.pair_preparations?w.h_bound_tests:0) &&
+      v.affine_xi_tests==(v.pair_preparations?w.xi_bound_tests:0),"affine primitive work accounting");
+  }
+  gate.affine_preparations+=v.pair_preparations;gate.general_preparations+=v.general_preparations;
+  gate.excluded_q3_nodes+=v.q3_excluded_nodes;gate.excluded_q4_nodes+=v.q4_excluded_nodes;
+  gate.fully_excluded_nodes+=v.fully_excluded_nodes;gate.mode_xi_nonpositive+=v.xi_on_nonpositive_minimum;
+  return result;
+}
+
+void bounds_mode_fixtures(Gate& gate) {
+  std::vector<Points> fixtures{
+    random_points(173,8),random_points(901,9),clustered(),
+    {{30,30,30},{36,36,30},{36,30,36},{32,34,28}},
+    {{30,30,30},{36,36,30},{30,36,24},{36,30,24},{32,32,32}},
+    {{100,100,100},{160,100,100},{120,142,100},{128,110,149},{128,88,88}},
+    {{0,0,0},{65535,65535,65535},{0,65535,65535},{65535,0,65535},{65535,65535,0},{32767,32768,32767}}};
+  for (std::size_t fixture=0;fixture<fixtures.size();++fixture) {
+    auto sites=fixtures[fixture];
+    if (fixture%2) std::reverse(sites.begin(),sites.end());
+    const auto index=mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(sites));
+    for (std::size_t a=0;a<sites.size();++a) for (std::size_t b=a+1;b<sites.size();++b) {
+      // The larger clustered fixture is exercised only on its supplied edge;
+      // the other six clouds cover ALL pairs and K1..10 in all lane submasks.
+      if (fixture==2 && (a!=0 || b!=1)) continue;
+      for (unsigned k=1;k<=10;++k) for (unsigned mask:{0U,2U,4U,6U})
+        for (const auto mode:{BoundsMode::Legacy,BoundsMode::Exclusion,BoundsMode::Affine})
+          static_cast<void>(mode_query(gate,*index,sites,mhgp8::singleton_box(sites[a]),
+              mhgp8::singleton_box(sites[b]),k,mask,mode));
+    }
+    const auto nodes=index->spatial_nodes();
+    for (std::size_t i=1;i<std::min<std::size_t>(nodes.size(),6);++i)
+      for (const auto mode:{BoundsMode::Exclusion,BoundsMode::Affine})
+        static_cast<void>(mode_query(gate,*index,sites,nodes[0].box,nodes[i].box,5,6,mode));
+  }
+  const Point3 a{100,100,100},b{200,100,100};
+  const auto abox=mhgp8::singleton_box(a),bbox=mhgp8::singleton_box(b);
+  const Points outside{{149,145,100},{151,151,100}},mixed{{150,126,100}};
+  for (const auto mode:{BoundsMode::Exclusion,BoundsMode::Affine}) {
+    // Xi_low must not be replaced by Xi_high: the node contains a central
+    // strict witness and a distant non-witness. Exclusion of the WHOLE node
+    // from its far corner would lose the K2 q3 rejection.
+    const Points crossing{{150,100,100},{150,145,100}};
+    const auto ic=mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(crossing));
+    static_cast<void>(mode_query(gate,*ic,crossing,abox,bbox,2,2,mode));
+    const auto index=mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(outside));
+    const auto result=mode_query(gate,*index,outside,abox,bbox,10,6,mode);
+    gate.require(result.mask==6 && result.search.q3_credits==0 && result.search.q4_credits==0 &&
+      result.bounds.fully_excluded_nodes>0,"local witness exclusion removed an entire global lane");
+    ++gate.local_exclusion_cases;
+    gate.require(result.bounds.xi_on_nonpositive_minimum>0,"nonpositive minimum did not require Xi");
+    ++gate.nonpositive_minimum_cases;
+    const auto im=mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(mixed));
+    const auto value=mode_query(gate,*im,mixed,abox,bbox,10,6,mode);
+    gate.require(value.mask==6 && value.search.q3_credits==1 && value.search.q4_credits==0 &&
+      value.bounds.mixed_terminal_nodes==1 && value.bounds.q4_excluded_nodes==1,
+      "mixed q3 admission/q4 exclusion fixture failed");++gate.mixed_terminal_cases;
+  }
+  const auto sites=clustered();auto index=mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(sites));
+  const auto baseline=mode_query(gate,*index,sites,abox,bbox,5,6,BoundsMode::Affine);
+  Work accumulated=baseline.search;BoundsWork accumulated_bounds=baseline.bounds;
+  gate.require(mhgp8::filter_q34_witnesses(*index,abox,bbox,5,6,accumulated,BoundsMode::Affine,
+      accumulated_bounds)==baseline.mask,"repeated affine query changed geometry");
+  const auto first=std::bit_cast<std::array<u64,12>>(baseline.bounds);
+  const auto second=std::bit_cast<std::array<u64,12>>(accumulated_bounds);
+  for (std::size_t i=0;i<12;++i) gate.require(second[i]==2*first[i],"new SUM ledger differs");
+  ++gate.mode_repeated_calls;
+  std::array<u64,12> sentinels{};
+  for (std::size_t i=0;i<sentinels.size();++i) sentinels[i]=static_cast<u64>(i+1);
+  auto untouched=std::bit_cast<BoundsWork>(sentinels);const auto original_bounds=untouched;
+  Work old,explicit_old;
+  const auto old_mask=mhgp8::filter_q34_witnesses(*index,abox,bbox,5,6,old);
+  gate.require(mhgp8::filter_q34_witnesses(*index,abox,bbox,5,6,explicit_old,BoundsMode::Legacy,untouched)==old_mask &&
+    explicit_old==old && untouched==original_bounds,"Legacy modified an existing new-work ledger");
+  for (const unsigned k:{1U,5U}) {
+    Work w=baseline.search;BoundsWork v=baseline.bounds;bool threw=false;
+    try {static_cast<void>(mhgp8::filter_q34_witnesses(*index,abox,bbox,static_cast<std::uint8_t>(k),0,w,
+        static_cast<BoundsMode>(99),v));} catch (const std::invalid_argument&) {threw=true;}
+    gate.require(threw && w==baseline.search && v==baseline.bounds,"invalid bounds enum changed work or was ignored");
+    ++gate.mode_invalid_inputs;
+  }
+  BoundsWork overflow;overflow.queries=std::numeric_limits<u64>::max();Work work;bool threw=false;
+  try {static_cast<void>(mhgp8::filter_q34_witnesses(*index,abox,bbox,5,6,work,BoundsMode::Affine,overflow));}
+  catch (const std::overflow_error&) {threw=true;}
+  gate.require(threw,"new bounds counters silently wrapped");++gate.mode_overflows;
+  std::array<std::future<ModeResult>,4> tasks;
+  for (auto& task:tasks) task=std::async(std::launch::async,[owned=index,abox,bbox] {
+    ModeResult r{};r.mask=mhgp8::filter_q34_witnesses(*owned,abox,bbox,5,6,r.search,BoundsMode::Affine,r.bounds);return r;
+  });
+  index.reset();
+  for (auto& task:tasks) {const auto result=task.get();
+    gate.require(result.mask==baseline.mask && result.search==baseline.search && result.bounds==baseline.bounds,
+      "private affine searches shared mutable state");++gate.mode_parallel_calls;}
+  gate.require(gate.affine_preparations && gate.general_preparations && gate.excluded_q3_nodes &&
+      gate.excluded_q4_nodes && gate.fully_excluded_nodes && gate.mode_xi_nonpositive,
+      "new witness-bound branches not exercised");
+}
+
 }  // namespace
 
 int main(int argc,char** argv) {
   try {
     if (argc!=2 || std::string_view(argv[1])!="--selftest") throw std::invalid_argument("expected --selftest");
-    Gate gate;run(gate);
+    Gate gate;run(gate);bounds_mode_fixtures(gate);
     std::cout<<"{\"schema\":\"mhgp8_q34_witness_search_gate_v1\",\"status\":\"PASS\"";
 #define FIELD(name) std::cout<<",\"" #name "\":"<<gate.name
     FIELD(checks);FIELD(queries);FIELD(singleton_queries);FIELD(rectangle_queries);FIELD(oracle_sites);FIELD(oracle_pairs);
@@ -421,6 +579,10 @@ int main(int argc,char** argv) {
     FIELD(exhausted_queries);FIELD(permutations);FIELD(extreme_queries);FIELD(invalid_inputs);FIELD(parallel_calls);
     FIELD(repeated_calls);FIELD(source_alias_checks);FIELD(left_tie_cases);FIELD(partial_admission_cases);
     FIELD(deep_index_cases);FIELD(peak_stack);FIELD(wide_predicate_cases);FIELD(overflow_exceptions);
+    FIELD(bounds_calls);FIELD(legacy_overload_calls);FIELD(exclusion_calls);FIELD(affine_calls);FIELD(mode_singletons);FIELD(mode_rectangles);
+    FIELD(local_exclusion_cases);FIELD(nonpositive_minimum_cases);FIELD(mixed_terminal_cases);FIELD(mode_parallel_calls);
+    FIELD(mode_invalid_inputs);FIELD(mode_repeated_calls);FIELD(mode_overflows);FIELD(affine_preparations);FIELD(general_preparations);
+    FIELD(excluded_q3_nodes);FIELD(excluded_q4_nodes);FIELD(fully_excluded_nodes);FIELD(mode_xi_nonpositive);
 #undef FIELD
     std::cout<<"}\n";return 0;
   } catch (const std::exception& error) {

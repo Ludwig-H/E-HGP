@@ -1,0 +1,100 @@
+{
+  "schema": "mhgp8_q34_affine_developer_preflight_v1",
+  "scope": "development preflight only; not a closed qualification capture",
+  "build_command": [
+    "cmake",
+    "--build",
+    "build/v8_q34_affine_20260921",
+    "--target",
+    "mhgp8_q34_pair_bounds_gate",
+    "mhgp8_q34_witness_search_gate",
+    "mhgp8_q3_ball_census_gate",
+    "mhgp8_wspd_q34_gate",
+    "--parallel",
+    "2"
+  ],
+  "build_exit_code": 0,
+  "build_stdout_stored": false,
+  "initial_syntax_attempts": {
+    "compiler": "g++",
+    "options": [
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wconversion",
+      "-Wshadow",
+      "-Wpedantic",
+      "-Werror",
+      "-Imorsehgp3D_v8/src",
+      "-fsyntax-only"
+    ],
+    "files": [
+      "morsehgp3D_v8/tests/q34_pair_bounds_gate.cpp",
+      "morsehgp3D_v8/tests/q34_witness_search_gate.cpp",
+      "morsehgp3D_v8/tests/wspd_q34_gate.cpp"
+    ],
+    "exit_codes": [
+      1,
+      1,
+      1
+    ],
+    "diagnostic": "fatal error: boost/multiprecision/cpp_int.hpp: No such file or directory",
+    "cause": "The ad-hoc syntax commands omitted the configured Boost include path. No product syntax diagnostic was reached. The subsequent configured CMake build succeeded."
+  },
+  "gate_invocations": [
+    {
+      "command": [
+        "build/v8_q34_affine_20260921/mhgp8_q34_pair_bounds_gate",
+        "--selftest"
+      ],
+      "chunk_id": "af81a5",
+      "wall_time_seconds": 0.000005009,
+      "exit_code": 0,
+      "original_token_count": 112,
+      "output": "{\"schema\":\"mhgp8_q34_pair_bounds_gate_v1\",\"status\":\"PASS\",\"checks\":10193,\"queries\":268,\"corner_evaluations\":2144,\"sample_evaluations\":7236,\"singleton_boxes\":72,\"nondegenerate_boxes\":196,\"half_integer_summits\":176,\"cross_zero_components\":320,\"positive_xi_lower\":94,\"wide_xi\":30,\"wide_h_squares\":46,\"reversed_pairs\":268,\"coincident_pairs\":46,\"extreme_cases\":50,\"axis_permutations\":1,\"invalid_inputs\":6,\"allocation_free_calls\":1,\"parallel_calls\":4}\n"
+    },
+    {
+      "command": [
+        "build/v8_q34_affine_20260921/mhgp8_q34_witness_search_gate",
+        "--selftest"
+      ],
+      "chunk_id": "3c3693",
+      "wall_time_seconds": 0.005456559,
+      "exit_code": 0,
+      "original_token_count": 338,
+      "output": "{\"schema\":\"mhgp8_q34_witness_search_gate_v1\",\"status\":\"PASS\",\"checks\":103235,\"queries\":2335,\"singleton_queries\":2068,\"rectangle_queries\":267,\"oracle_sites\":230181,\"oracle_pairs\":22095,\"q3_rejections\":89,\"q4_rejections\":55,\"q3_only_rejections\":69,\"q4_only_rejections\":35,\"both_rejections\":20,\"no_rejections\":2211,\"inactive_queries\":878,\"zero_mask_queries\":510,\"partial_q3\":137,\"partial_q4\":64,\"h_contacts\":1,\"q3_contacts\":1,\"q4_contacts\":1,\"wrong_alpha_cases\":1,\"positive_q4_external\":1,\"whole_admissions\":31,\"point_admission_cases\":1,\"node_rejections\":6129,\"saturations\":144,\"near_right_splits\":1,\"exhausted_queries\":1345,\"permutations\":1,\"extreme_queries\":15,\"invalid_inputs\":11,\"parallel_calls\":4,\"repeated_calls\":1,\"source_alias_checks\":1,\"left_tie_cases\":1,\"partial_admission_cases\":1,\"deep_index_cases\":1,\"peak_stack\":49,\"wide_predicate_cases\":6830,\"overflow_exceptions\":1,\"bounds_calls\":12797,\"legacy_overload_calls\":4240,\"exclusion_calls\":4278,\"affine_calls\":4279,\"mode_singletons\":12727,\"mode_rectangles\":70,\"local_exclusion_cases\":2,\"nonpositive_minimum_cases\":2,\"mixed_terminal_cases\":2,\"mode_parallel_calls\":4,\"mode_invalid_inputs\":2,\"mode_repeated_calls\":1,\"mode_overflows\":1,\"affine_preparations\":2760,\"general_preparations\":2829,\"excluded_q3_nodes\":2424,\"excluded_q4_nodes\":2500,\"fully_excluded_nodes\":3672,\"mode_xi_nonpositive\":25881}\n"
+    },
+    {
+      "command": [
+        "build/v8_q34_affine_20260921/mhgp8_q3_ball_census_gate",
+        "--selftest"
+      ],
+      "chunk_id": "4a2703",
+      "wall_time_seconds": 0.000004979,
+      "exit_code": 0,
+      "original_token_count": 168,
+      "output": "{\"schema\":\"mhgp8_q3_ball_census_gate_v1\",\"status\":\"PASS\",\"checks\":475,\"calls\":44,\"oracle_sites\":1556,\"accepted\":29,\"rejected\":15,\"q2_balls\":2,\"q3_balls\":5,\"q4_balls\":1,\"shell_ids\":235,\"max_shell\":30,\"empty_shells\":4,\"integer_grid_contacts\":1,\"ceil_required\":1,\"floor_required\":1,\"whole_inside\":8,\"whole_nonnegative\":16,\"shell_exclusions\":120,\"saturating_overshoot\":1,\"prepared_unvisited\":58,\"near_first_cases\":1,\"singleton_cases\":3,\"extreme_cases\":5,\"wide_linear_squares\":3,\"permutations\":1,\"huge_threshold\":1,\"invalid_inputs\":1,\"allocation_failures\":1,\"allocation_free_rejections\":1,\"parallel_calls\":4,\"repeated_calls\":1,\"source_alias_checks\":1,\"overflow_exceptions\":1}\n"
+    },
+    {
+      "command": [
+        "build/v8_q34_affine_20260921/mhgp8_wspd_q34_gate",
+        "--selftest"
+      ],
+      "chunk_id": "f7cb02",
+      "wall_time_seconds": 1.001344246,
+      "session_id": 77122,
+      "original_token_count": 0,
+      "output": ""
+    },
+    {
+      "resume_session": 77122,
+      "chunk_id": "31a74d",
+      "wall_time_seconds": 0.000002605,
+      "exit_code": 0,
+      "original_token_count": 444,
+      "output": "{\"schema\":\"mhgp8_wspd_q34_gate_v1\",\"status\":\"PASS\",\"checks\":16437,\"global_calls\":166,\"oracle_clouds\":52,\"oracle_triangles\":19158,\"oracle_tetrahedra\":116289,\"oracle_balls\":6348,\"positive_triangles\":8134,\"positive_tetrahedra\":6473,\"canonical_groups\":2463,\"oracle_sites\":175044,\"front_replays\":142,\"expanded_pairs\":3772,\"fat_rectangles\":100,\"q3_only_edges\":626,\"q4_only_edges\":306,\"both_edges\":2840,\"split_q3_only_edges\":188,\"split_q4_only_edges\":54,\"q3_front_rejections\":126,\"q4_front_rejections\":242,\"xi_tests\":3488,\"q3_depth_rejections\":3144,\"q3_unread_sites\":56570,\"pure_calls\":36,\"sample_calls\":130,\"local_calls\":84,\"window_calls\":82,\"inactive_calls\":24,\"singleton_calls\":4,\"s8_calls\":98,\"s10_calls\":34,\"s12_calls\":34,\"strict_w3_contacts\":1,\"strict_w4_contacts\":2,\"independent_q2_cases\":4,\"independent_q3_cases\":2,\"isolated_cases\":1,\"extreme_calls\":4,\"candidates\":2466,\"q3\":1196,\"q4\":1270,\"max_shell\":30,\"permutations\":2,\"invalid_inputs\":20,\"allocation_failures\":4,\"callback_failures\":1,\"parallel_calls\":4,\"nested_calls\":1,\"owner_reset_calls\":1,\"input_alias_checks\":1,\"parallel_pipeline_calls\":139,\"parallel_w1_calls\":32,\"parallel_w2_calls\":21,\"parallel_w4_calls\":86,\"parallel_geometry_checks\":139,\"worker_ledger_checks\":402,\"callback_copy_checks\":9178,\"multiworker_calls\":97,\"parallel_callback_failures\":1,\"parallel_join_checks\":2,\"parallel_owner_resets\":1,\"parallel_empty_calls\":8,\"indexed_calls\":168,\"indexed_pair_rejections\":344,\"indexed_rectangle_rejections\":264,\"boxed_calls\":84,\"bounds_mode_calls\":40,\"bounds_exclusion_calls\":20,\"bounds_affine_calls\":20,\"bounds_work_checks\":40,\"bounds_parallel_calls\":24,\"bounds_invalid_inputs\":4,\"bounds_inactive_calls\":6,\"bounds_callback_failures\":2,\"bounds_allocation_failures\":4,\"bounds_shared_calls\":4,\"bounds_owner_resets\":1}\n"
+    }
+  ],
+  "source_closure_claimed": false,
+  "native_gates_passed": 4
+}

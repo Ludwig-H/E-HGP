@@ -1,0 +1,17 @@
+{
+  "kind": "new_admission_wrong_xi_scale_oracle",
+  "command": [
+    "/tmp/mhgp8_wspd_q34_mutants_kwtq8p76/new_admission_wrong_xi_scale",
+    "--selftest"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-21T09:41:49.162802+00:00",
+  "expected_exit_code": 1,
+  "status": "passed",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "q34 witness search gate: singleton witness decision differs from independent oracle\n",
+  "stdout_base64": "",
+  "stderr_base64": "cTM0IHdpdG5lc3Mgc2VhcmNoIGdhdGU6IHNpbmdsZXRvbiB3aXRuZXNzIGRlY2lzaW9uIGRpZmZlcnMgZnJvbSBpbmRlcGVuZGVudCBvcmFjbGUK",
+  "finished_utc": "2026-09-21T09:41:49.260486+00:00"
+}

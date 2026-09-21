@@ -1,4 +1,4 @@
-# Morse HGP 3D v8 — témoins indexés et census q3 par boîtes
+# Morse HGP 3D v8 — bornes affines et recherche de témoins q3/q4
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
@@ -36,6 +36,35 @@ Les mesures de l'audit d'ouverture restent v7 ; chaque tranche v8 porte
 ses propres sources, tests et reçus, sans transfert implicite.
 
 ## État exécutable
+
+Tranche33,21 septembre : les [bornes affines et exclusions de blocs](docs/Q34_BORNES_AFFINES_ET_EXCLUSION_20260921.md)
+complètent la recherche32. Pour une paire fixe, la géométrie du citron
+est préparée une fois ; les blocs sans témoin utile sont exclus avant
+descente. L'exclusion est locale et n'apporte aucun crédit : elle ne
+rejette jamais directement l'arête. Trois modes comparables sont présents,
+Legacy / Exclusion / Affine ; Legacy reste le défaut.95 CTests Release,
+quatre portes et24sondes ASan/UBSan/LSan, trois mutants compilés passent.
+Trente grandes mesures couvrent8k/16k/32k, K5/10 sur le scan0, s8/10/12
+àK5 et deux scans supplémentaires100/200 àK5/s8. Voir les
+[reçus33](receipts/q34_affine_20260921/README.md), qualifications distinctes.
+
+Sur scan0/K5/s8, les visites de témoins par paire font désormais×2,603
+puis×2,773, contre×5,364 au dernier doublement32. Mais le scan200 révèle
+encore×4,317 de bornes census q3 et×6,540 de visites q4 entre8k et16k.
+Tous les coûts ne sont donc PAS sous-quadratiques dans les régimes testés.
+Les sorties appariées restent identiques ; les temps locaux sous charge
+ne sont ni des gains stables ni des performances G4.
+
+La suite structurelle est discutée avec les auditeurs : transmettre des
+préfixes de témoins intégralement classifiés entre produits, puis traiter
+les [blocs de graines q4 et cellules de l'atlas](docs/Q4_BLOCS_SEEDS_PISTE_20260921.md)
+ensemble, avec parent immuable partagé et tâches compactes. Ces deux
+propositions ne sont pas encore implémentées. Une question distincte aux
+auditeurs vise le census commun de blocs de graines q3, pour le scan200.
+Ni FULL, ni GPU, ni contrat
+50k ne découlent des tests du flux de candidats. GCP non utilisé dans33.
+
+### Historique32
 
 Tranche32,21 septembre : les [témoins indexés et le census par boîtes](docs/Q34_TEMOINS_INDEXES_ET_CENSUS_BOITES_20260921.md)
 sont implémentés comme options explicites du raccord mono/multi-CPU.

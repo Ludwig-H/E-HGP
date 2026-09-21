@@ -1,0 +1,11 @@
+--- morsehgp3D_v8/src/lanes/q34_witness_search.cpp
++++ mutated/wspd_q34.cpp
+@@ -129,7 +129,7 @@
+           return Q34XiBounds{general.low, general.high};
+         }
+       }();
+-      const i128 xi16 = static_cast<i128>(16) * xi.high;
++      const i128 xi16 = static_cast<i128>(Exclusion ? 4 : 16) * xi.high;
+       const i128 h4_squared = h.minimum4 > 0
+           ? static_cast<i128>(h.minimum4) * h.minimum4 : 0;
+       // Q2JointPreparedBounds encloses exactly 4H on A x B x Z.

@@ -1,4 +1,4 @@
-# Passation v8 — témoins indexés, census par boîtes et coûts LiDAR
+# Passation v8 — bornes affines et réduction du travail q3/q4
 
 21 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
@@ -10,6 +10,48 @@ d'audit indépendant. Ses anciens résultats de constructeur et ses nouveaux
 audits ne qualifient jamais automatiquement les nouveaux ports.
 
 ## À reprendre maintenant
+
+La [tranche33](docs/Q34_BORNES_AFFINES_ET_EXCLUSION_20260921.md) porte
+le rejet Xi négatif proposé par B et la préparation affine des paires.
+Les trois modes Legacy/Exclusion/Affine partagent les mêmes seuils stricts
+K−1/K−2 ; seule une quantité suffisante de témoins rejette une arête.
+Une boîte exclue retire seulement un bit de son cadre Z, jamais du masque
+global. Les12 nouveaux compteurs par étage paient aussi Xi lorsque Hmin≤0.
+Legacy reste le défaut et l'ancien overload est conservé. Qualification33
+close :95 CTests Release, quatre portes et24sondes ASan/UBSan/LSan,
+trois mutants compilés,48petites sondes candidates et huit paires de
+compatibilité32/33. L'état privé augmente réellement de192octets/worker.
+Trente mesures LiDAR grandes tailles sont closes ; builds32 intacts.
+Les nouveaux builds `build/v8_q34_affine_20260921` et
+`build/v8_q34_affine_sanitize_20260921` sont désormais épinglés.
+Voir les [reçus33](receipts/q34_affine_20260921/README.md).
+
+Le poste recherche de témoins progresse, mais pas toute la chaîne :
+scan0/K5/s8, visites par paire×2,603/×2,773 ; scan200/K5/s8, bornes census
+q3×4,317 et parcours q4×6,540 au premier doublement. Ne pas masquer ce
+second régime par une moyenne favorable. Une question de bornes de
+puissance communes à X×Z, arête fixe et bloc de graines q3, est adressée
+aux auditeurs dans le journal ; ce n'est pas une implémentation.
+Prioriser ces postes q3/q4 restants devant de nouvelles micro-variantes
+du filtre33. Les temps sous charge ne déterminent pas un défaut performant.
+
+Après33, ne pas ajouter de nouvelle micro-variante q2. Le partage proposé
+par A nécessite deux préfixes entièrement classifiés, avec compte/curseur
+par voie ; une feuille témoin ambiguë force la subdivision A/B AVANT
+consommation. Garder le même ordre de témoins dans tous les descendants.
+Les ordres circulaire ou orienté sur un pivot sont sûrs sous ce contrat,
+mais leur rentabilité reste à mesurer. Ne pas réutiliser les sorties
+terminales32 comme si elles possédaient cet invariant.
+
+La [note q4 par produits graines/cellules](docs/Q4_BLOCS_SEEDS_PISTE_20260921.md)
+décrit une autre piste de partage pour les visites de l'atlas Local28 :
+bornes déjà présentes, parcours conjoint, contacts conservés, balayage
+direct de la feuille et coût des préparations répétées payé. Aucun port
+ni gain acquis ; un filtre qui rescannerait toutes les cellules par graine
+ne résoudrait pas le problème. Les parents immuables et IDs de nœuds sont
+compatibles avec de futures tâches fines ; l'arête actuelle reste atomique.
+
+### Historique32
 
 La [tranche32](docs/Q34_TEMOINS_INDEXES_ET_CENSUS_BOITES_20260921.md) porte
 les recommandations B : rejets indexés rectangles/paires AVANT couvertures,

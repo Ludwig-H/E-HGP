@@ -22,6 +22,7 @@ struct WspdQ34Options {
   Q4LocalOptions local{};
   WspdQ34WitnessMode witness_mode{WspdQ34WitnessMode::Disabled};
   WspdQ3CensusMode q3_census_mode{WspdQ3CensusMode::ScalarCover};
+  Q34WitnessBoundsMode witness_bounds_mode{Q34WitnessBoundsMode::Legacy};
 };
 
 struct WspdQ34WitnessWork {
@@ -31,6 +32,7 @@ struct WspdQ34WitnessWork {
   u64 rectangle_q3_pairs{}, rectangle_q4_pairs{};
   u64 rejected_pairs{}, pair_q3_pairs{}, pair_q4_pairs{};
   Q34WitnessSearchWork rectangles, pairs;
+  Q34WitnessBoundsWork rectangles_bounds, pairs_bounds;
   bool operator==(const WspdQ34WitnessWork&) const = default;
 };
 
@@ -114,6 +116,12 @@ struct WspdQ34Result {
 // saturating strict interior first, complete shell only on acceptance. No
 // witness credit seeds it. q3.census_* and early_unread_sites then stay zero;
 // q3_blocks reports the actual work, including precomputed unvisited bounds.
+// Exclusion adds a certified lower-Xi exclusion of WITNESS nodes; Affine
+// additionally specializes H/Xi when both endpoint boxes are singletons.
+// Such exclusions remove only local DFS lanes and supply ZERO credits:
+// they never reject an edge/lane without its separate saturation proof.
+// Legacy preserves the previous traversal; the new bounds ledgers stay zero.
+// No witness-state inheritance between rectangles/pairs is introduced here.
 [[nodiscard]] WspdQ34Result run_wspd_q34_candidates(
     Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s,
     WspdQ34Options options, const Q34SeedConsumer& consumer);

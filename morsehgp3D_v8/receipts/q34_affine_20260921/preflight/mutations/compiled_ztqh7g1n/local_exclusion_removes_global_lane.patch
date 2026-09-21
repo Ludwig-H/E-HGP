@@ -1,0 +1,10 @@
+--- morsehgp3D_v8/src/lanes/q34_witness_search.cpp
++++ mutated/wspd_q34.cpp
+@@ -154,6 +154,7 @@
+             counter_add(lane == 0 ? bounds_work->q3_excluded_nodes
+                                   : bounds_work->q4_excluded_nodes);
+             frame.mask &= static_cast<std::uint8_t>(~bit);
++            remaining &= static_cast<std::uint8_t>(~bit);
+             continue;
+           }
+         }

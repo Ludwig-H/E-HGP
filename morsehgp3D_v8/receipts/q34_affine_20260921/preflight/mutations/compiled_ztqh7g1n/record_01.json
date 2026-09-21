@@ -1,0 +1,29 @@
+{
+  "kind": "xi_upper_used_to_exclude_compile",
+  "command": [
+    "/usr/bin/x86_64-linux-gnu-g++-13",
+    "-std=c++20",
+    "-O3",
+    "-DNDEBUG",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-I/workspaces/E-HGP/morsehgp3D_v8/src",
+    "-I/workspaces/E-HGP/morsehgp3D_v8/src/lanes",
+    "-c",
+    "/tmp/mhgp8_wspd_q34_mutants_kwtq8p76/xi_upper_used_to_exclude.cpp",
+    "-o",
+    "/tmp/mhgp8_wspd_q34_mutants_kwtq8p76/xi_upper_used_to_exclude.o"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "started_utc": "2026-09-21T09:41:44.254156+00:00",
+  "expected_exit_code": 0,
+  "status": "passed",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "stdout_base64": "",
+  "stderr_base64": "",
+  "finished_utc": "2026-09-21T09:41:46.633240+00:00"
+}

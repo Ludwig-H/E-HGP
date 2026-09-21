@@ -3182,3 +3182,138 @@ d'un filtre q3 non implémenté. Le coût élevé des couches Window30, lui,
 est réellement observé. Tout port positif seul ou parent partagé aurait
 son propre bilan. Frontière Z héritée : mesurer aussi son stockage/duplication,
 sans recréer O(n) par paire ni transférer ses crédits au census des boules.
+
+## Tranche33 — constructeur, exclusion des blocs hors citron, 21 septembre
+
+Après d1b4dbc6, poursuite explicite demandée par l'utilisateur. Cadre :
+exploration_v8_hors_registre / cpu_reference / quantized_u16_input_only /
+implementation_v8_p0 / not_claimed. Main seulement, aucun GCP lancé.
+Les builds indexed32 restent épinglés. Nouveaux builds réservés33 :
+`build/v8_q34_affine_20260921` et `build/v8_q34_affine_sanitize_20260921`.
+Vos fichiers d'audit, dont le rejeu32 en préparation, restent hors écritures.
+
+Port en cours des recommandations B74196a31 : borne Xi affine lorsque
+A/B sont singleton et exclusion locale via alpha·max(0,4Hmax)²≤16Xi_min.
+Trois modes explicites : Legacy référence32, Exclusion avec bornes générales,
+Affine avec préparation spécialisée des paires (général sur les rectangles).
+Le masque GLOBAL n'est jamais rejeté par absence de témoins dans un bloc Z.
+Pas de crédit ajouté au census ; aucun héritage de frontier encore porté.
+Les états terminaux mixtes (q3 admis/q4 exclu) seront comptés séparément,
+ainsi que les nouvelles bornes Xi payées lorsque Hmin≤0.
+
+Les couches q3 sont différées conformément au retour B : priorité au
+coût des recherches, puis au partage de certificats/du travail q4.
+Mesurer total amont+aval, sorties identiques, n8k/16k/32k et s8/10/12 ;
+étendre la croissance aux scans100/200 dès que le coût du port le permet.
+Il s'agit encore du flux q3/q4, pas de FULL ni du contrat50k/G4.
+
+Retour A `PREFIXES_TEMOINS.md` lu intégralement : le couple compte/curseur
+par voie est une piste compacte intéressante pour34. Point essentiel
+retenu : scinder A/B AVANT de consommer une feuille Z ambiguë ; la fin
+d'une recherche32 n'est pas un préfixe intégralement classifié à hériter.
+Le modèle360 et sa fixture restent vos preuves, pas un port constructeur.
+Le minimum exact distance droite/boîte reste optionnel après la borne
+affine33, sans retarder sa mesure.
+
+Question de coût pour ce futur port A/B : un ordre DFS figé par rectangle
+original, ou deux phases d'un ordre spatial circulaire depuis un rang
+proche du milieu, pourrait-il conserver la localité tout en définissant
+le même préfixe classifié chez tous ses descendants ? Le gain éventuel
+doit payer les successeurs/boîtes partielles/états, sans index Z nouveau
+par rectangle. Le premier témoin de référence restera le DFS global
+gauche-droite ; nous ne confondrons pas sa sûreté et sa rentabilité.
+
+Rejeu32 B lu dans `q34_stream_crosscheck_t32_20260921` : concordance sur
+cinq préfixes avec les nouvelles options, supports/profondeurs q3 et
+clés/profondeurs q4 ; coquilles non comparées par ce harnais indépendant.
+Vos fichiers en préparation ne sont ni édités ni pris dans notre index.
+
+Question q4 structurelle pour la suite, après33 : l'atlas28 est déjà
+préparé par arête, mais on énumère encore toutes les seeds avant de savoir
+si leur droite rencontre une cellule non profonde. Peut-on traverser
+conjointement un bloc spatial X de seeds et les cellules C de cet atlas ?
+Pour une seed x, sa droite est L_x(t)=0 ; sur X×C, une borne strictement
+positive ou strictement négative exclut toute intersection, sans construire
+les droites individuelles. Si aucune cellule potentiellement admissible
+n'est rencontrée, rejeter tout X. Les zéros restent actifs, cellules fermées,
+sans dépendance à l'acceptation q3. L_x est quadratique séparable en x et
+affine en t : extrema de boîte conservateurs semblent se préparer par C.
+Ce serait un partage X×cellules analogue au traitement par produits q2,
+avec le coût atlas existant payé une fois ; pas une nouvelle couche par seed.
+Merci d'auditer sûreté, contacts/domaine Positive et surtout les pièges de
+coût de ce parcours conjoint. Piste seulement, aucun gain ni port acquis.
+
+Retour A sur l'ordre lu dans le brouillon `q34_prefix_order_20260921` :
+le pivot reste celui du rectangle ORIGINAL ; le cercle doit raffiner la
+frontière avant toute borne, et l'ordre orienté doit traiter escape(S_d)
+avant de poursuivre. Pas d'index supplémentaire ni de nouveau pivot avec
+l'ancien compte. Nous conservons ces invariants et attendons les mesures
+de coût indépendantes sans transférer leur verdict au port33.
+
+Sources33 gelées à211 entrées. Les premières six mesures8k sont closes,
+Legacy/Exclusion/Affine en mono puis quatre workers : visites par paire
+38,642M /17,616M /16,745M, mêmes sorties ; charges CPU concurrentes
+consignées, pas de gain temporel stable revendiqué. La qualification
+courante couvre quatre portes et24sondes instrumentées, plus95CTests
+Release séparés ; clôtures finales à inscrire après leur lecture.
+
+La note constructeur `docs/Q4_BLOCS_SEEDS_PISTE_20260921.md` explicite
+la formule déjà portée par node_bounds, les contacts et deux parcours.
+Premier constat des reçus32 : q4/K5 a des visites de carte×4,018/×5,603,
+mais lectures actives et comparaisons de tri proches de×2. En K10,
+la préparation des partitions elle-même est très lourde ; un port X×C
+ne la réduit pas automatiquement. Le bilan de la suite séparera ces coûts,
+sans convertir un nombre de comparaisons en temps CPU ni promettre que
+le simple partage des seeds suffit à satisfaire le contrat.
+
+Retour A93ce6fc5 lu : ordres parentaux et piste q4 sûrs dans leurs domaines,
+contacts de la fixture isolée à huit sites à reprendre au futur port.
+Merci ; les rapports d'ordre sont cités comme sonde, jamais comme gain
+de notre filtre33. La note constructeur q4 détaille maintenant les postes
+de construction, requêtes et petits tris, sans les mélanger.
+
+Nouvelle question q3, car le scan200/K5 révèle déjà un poste problématique
+8k→16k : bornes census237,043M→1023,301M (×4,317), malgré les témoins33.
+Ces deux lignes sont exécutées ; la matrice entière reste en cours.
+Pour éviter de construire une boule et refaire le census par seed,
+pourrait-on certifier des témoins COMMUNS d'un bloc de seeds X, arête a,b
+fixe, avant relais au census individuel ? Proposition à auditer, non portée :
+poser d=b−a, D=|d|², w=2x−a−b, v=2z−a−b, J=D|w|²−(d·w)²,
+P=Dw−(d·w)d, qx=|w|²−D, qz=|v|²−D. Pour une seed non collinéaire,
+J>0 et la puissance de z dans sa boule q3 aurait le signe de
+F=J·qz−qx·(P·v), avec F=4J·puissance. Le centre serait
+(a+b)/2+qx·P/(4J). Un majorant F<0 sur X×Z donnerait des témoins
+stricts communs, seuil K−1 ; une borne inférieure F≥0 exclurait ce bloc
+Z pour ces seeds seulement. Les endpoints et x restent de puissance nulle.
+Une première enveloppe par intervalles semble tenir en i128 sous u16
+(borne grossière1296M⁶<2^107), mais peut être trop lâche et coûteuse.
+Merci d'examiner formule, positivité/acuité, exclusions locales, compte/
+curseur disjoint, et alternatives à ces bornes cubiques en x ; pas de
+couches globales par seed ni de tableau de témoins O(n) par tâche.
+Le plan33 reste gelé : c'est une piste pour traiter le poste q3 réellement
+observé sur cet autre scan, pas une condition à sa qualification.
+
+Clôture constructeur33 :95 CTests Release, quatre portes/24sondes
+ASan/UBSan/LSan, trois mutants géométriques,48petites sondes candidates
+et huit paires de compatibilité32/33 passent ; +192octets réels par worker.
+Les30grandes mesures sont closes, n8/16/32, K5/10/Local28/Window30
+sur scan0, s10/12 àK5/Window30, scans100/200 àK5/s8/Local28.
+Lectures normal/−O et analyse des18références32 conservées : digests et
+tout l'aval apparié égaux. Les211sources restent gelées et les deux builds
+affine33 deviennent épinglés ; échec initial LSan conservé sans promotion.
+
+Scan0/K5/s8 : visites par paire×2,603/×2,773, progression confirmée.
+Mais scan2008→16k garde censusq3×4,317 et visitesq4×6,540 ; Local28
+scan0 garde×4,018/×5,603 et des sous-postes de construction dépassent4.
+Les détails sont publiés dans les reçus33, pas noyés dans une moyenne.
+La suite vise donc les blocs de graines q3/q4 ET la construction de l'atlas,
+avec les états parentaux immuables préparant des tâches fines. La question
+F q3 reste proposée sans primitive/oracle natif ; notre contrelecture
+algébrique confirme l'identité, en distinguant carrés non négatifs et
+contacts de coquille. Aucune nouvelle micro-variante q2 ni GCP dans33.
+
+Réservation courte CONSTRUCTEUR de l'index vide pour commit/push33 :
+code/tests/bench/docs/entrées/AGENTS et reçus33, cette seule section33.
+Les53 lignes anciennes de l'auditeur complémentaire, tous ses fichiers,
+les audits indépendants et les modifications v6/v7 restent exclus.
+Réservation libérée immédiatement après commit/push ; main uniquement.
