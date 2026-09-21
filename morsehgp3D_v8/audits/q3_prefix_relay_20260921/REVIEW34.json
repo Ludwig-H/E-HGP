@@ -1,0 +1,129 @@
+{
+  "concrete_defects_found": [],
+  "date_utc": "2026-09-21",
+  "findings": [
+    {
+      "references": [
+        "morsehgp3D_v8/src/lanes/q4_local.cpp:496",
+        "morsehgp3D_v8/src/lanes/q4_local.cpp:613",
+        "morsehgp3D_v8/src/lanes/q4_local_partition.cpp:205"
+      ],
+      "statement": "Seuls minimum>0 et maximum<0 rejettent un produit. Les zéros restent actifs ; les bornes portent sur des cellules fermées, tandis que le balayage existant conserve la propriété des frontières. Le minimum quadratique arrondi vers le bas reste partagé avec le noyau de partition.",
+      "status": "confirmed_by_static_review",
+      "topic": "strict_contacts"
+    },
+    {
+      "references": [
+        "morsehgp3D_v8/src/lanes/q4_local.cpp:537",
+        "morsehgp3D_v8/src/lanes/q4_local.cpp:568",
+        "morsehgp3D_v8/src/lanes/q4_local.cpp:588",
+        "morsehgp3D_v8/src/lanes/q4_local.cpp:619"
+      ],
+      "statement": "Les blocs spatiaux sont disjoints ; le cache est indexé par rang dans le bloc, conserve aussi les refus et vit jusqu’à la fin du bloc. Une famille est préparée au plus une fois par graine et par arête. Les certificats spatiaux payés sont transmis lors des divisions de cellules ; une division spatiale invalide ce marqueur pour ses enfants. Chaque incidence terminale appelle directement le balayage du fragment, sans reprise à la racine.",
+      "status": "confirmed_by_static_review",
+      "topic": "cache_and_ownership"
+    },
+    {
+      "references": [
+        "morsehgp3D_v8/src/lanes/q4_local.cpp:409",
+        "morsehgp3D_v8/src/lanes/q4_local.cpp:662",
+        "morsehgp3D_v8/src/pipeline/wspd_q34.cpp:307",
+        "morsehgp3D_v8/src/pipeline/wspd_q34.cpp:456"
+      ],
+      "statement": "Les parents restent possédés et immuables pendant l’appel ; le domaine Positive utilise toutes les complétions du cover. Le raccord n’utilise aucune acceptation q3 pour ouvrir q4. Modes, grain et incompatibilité Window30 sont validés avant émission, y compris pour les voies inactives ; Individual garde son parcours historique.",
+      "status": "confirmed_by_static_review",
+      "topic": "parents_and_lane_independence"
+    },
+    {
+      "references": [
+        "morsehgp3D_v8/src/lanes/q4_local.cpp:418",
+        "morsehgp3D_v8/src/lanes/q4_local.cpp:537",
+        "morsehgp3D_v8/src/lanes/q4_local.cpp:649",
+        "morsehgp3D_v8/src/pipeline/wspd_q34.cpp:231"
+      ],
+      "statement": "L’atlas sans feuille est écarté avant allocation du résumé. Le pic du cache observe explicitement les anciennes et nouvelles allocations pendant sa croissance ; les capacités du résumé, de la pile fixe et des buffers de balayage sont couplées avec l’atlas, sans additionner des pics de phases disjointes. La réduction globale utilise 30 sommes et 7 maxima. Ce registre décrit les stockages comptabilisés, pas le RSS, les allocations du consommateur ou toute la mémoire partagée.",
+      "status": "confirmed_by_static_review",
+      "topic": "memory_and_work"
+    }
+  ],
+  "lidar_protocol": {
+    "historical_prefix_scope": "Nos préfixes LiDAR restent des tests historiques d’exactitude et des comparaisons différentielles sur entrées identiques, dans la portée propre à chaque reçu. Ils ne qualifient jamais la croissance scène entière/moitiés/quarts.",
+    "historical_ratios": "Les anciens ratios 8k/16k/32k portent sur la densité par sous-échantillonnage ; ils ne sont pas les ratios du nouveau protocole spatial.",
+    "new_scope": "Le nouveau protocole repart du scan brut dans son repère capteur, quantifie et fusionne globalement une seule fois sur grille isotrope fixe de 2 cm, puis conserve la scène, ses deux moitiés et ses quatre quarts. Chaque morceau reconstruit son calcul avec ses seuls sites ; les rapports utilisent les effectifs réels, sans raréfaction ni alignement implicite des points.",
+    "path": "morsehgp3D_v8/docs/PROTOCOLE_LIDAR_SPATIAL_20260921.md",
+    "sha256": "da0e67a84dea4a3e67cd147cc8458bb2aee050009d8882329b8aabcb7c6fd9bf",
+    "status": "new_spatial_protocol_documented_not_qualified_by_this_review"
+  },
+  "limitations": [
+    "Cette revue ne réexécute ni les portes constructeur ni une nouvelle campagne indépendante.",
+    "Les preuves de la sonde indépendante ne sont pas transférées automatiquement au port34.",
+    "Aucune borne globale de travail, qualification FULL/G4 ou redistribution intra-arête n’est établie ici."
+  ],
+  "new_qualification": false,
+  "new_tests_executed": false,
+  "product_files_modified": false,
+  "public_status": "not_claimed",
+  "receipt": {
+    "closing_errors": [],
+    "completion_sha256": "282f048be8a8d0025f456a70b551e04dadcacb9411a0914ca7d1d104bcfae80f",
+    "completion_status": "passed",
+    "manifest_closure_matches": true,
+    "manifest_sha256": "b4682fd3f59c9cb22266f8135c0f8ce08d256fc77c7c986eb8d3c580a1d1b0f0",
+    "path": "morsehgp3D_v8/receipts/q4_seed_cells_20260921/qualification_r2/smoke_ewedfs4y",
+    "source_count": 216
+  },
+  "schema": "mhgp8_audit_static_review34_v1",
+  "scope": "Lecture statique ciblée du port34 q4 graines × cellules et de son raccord global, comparée à la sonde indépendante.",
+  "sources": [
+    {
+      "path": "morsehgp3D_v8/src/lanes/q4_seed_cells.hpp",
+      "receipt_after_sha256": "bf6d5edc4aee0c41536fba962fdf9253d8d930feb40dbdf86e1d0725183f8cee",
+      "receipt_before_sha256": "bf6d5edc4aee0c41536fba962fdf9253d8d930feb40dbdf86e1d0725183f8cee",
+      "review_matches_receipt": true,
+      "reviewed_sha256": "bf6d5edc4aee0c41536fba962fdf9253d8d930feb40dbdf86e1d0725183f8cee"
+    },
+    {
+      "path": "morsehgp3D_v8/src/lanes/q4_local.cpp",
+      "receipt_after_sha256": "0b4eef4cb5b295d0fec7459098288c9997e6a84f755cb2df463c25833d4cb91e",
+      "receipt_before_sha256": "0b4eef4cb5b295d0fec7459098288c9997e6a84f755cb2df463c25833d4cb91e",
+      "review_matches_receipt": true,
+      "reviewed_sha256": "0b4eef4cb5b295d0fec7459098288c9997e6a84f755cb2df463c25833d4cb91e"
+    },
+    {
+      "path": "morsehgp3D_v8/src/lanes/q4_local.hpp",
+      "receipt_after_sha256": "6b2d34e4a3ff521f7a4bcc2f383a6fa461a7f8bc174ad6daad8865c473bb15e4",
+      "receipt_before_sha256": "6b2d34e4a3ff521f7a4bcc2f383a6fa461a7f8bc174ad6daad8865c473bb15e4",
+      "review_matches_receipt": true,
+      "reviewed_sha256": "6b2d34e4a3ff521f7a4bcc2f383a6fa461a7f8bc174ad6daad8865c473bb15e4"
+    },
+    {
+      "path": "morsehgp3D_v8/src/lanes/q4_local_partition.cpp",
+      "receipt_after_sha256": "8405202893fe6d2e25db82f914d0e4794f39ff9a9f74390d60ef3fe9be4126bb",
+      "receipt_before_sha256": "8405202893fe6d2e25db82f914d0e4794f39ff9a9f74390d60ef3fe9be4126bb",
+      "review_matches_receipt": true,
+      "reviewed_sha256": "8405202893fe6d2e25db82f914d0e4794f39ff9a9f74390d60ef3fe9be4126bb"
+    },
+    {
+      "path": "morsehgp3D_v8/src/lanes/q4_local_partition.hpp",
+      "receipt_after_sha256": "0e953812449de030df6603c9a2dfac7040395ac511ec309fc21ecd82b985c27a",
+      "receipt_before_sha256": "0e953812449de030df6603c9a2dfac7040395ac511ec309fc21ecd82b985c27a",
+      "review_matches_receipt": true,
+      "reviewed_sha256": "0e953812449de030df6603c9a2dfac7040395ac511ec309fc21ecd82b985c27a"
+    },
+    {
+      "path": "morsehgp3D_v8/src/pipeline/wspd_q34.cpp",
+      "receipt_after_sha256": "0a151e426a4735779802a9d5ae01d520534ea5b4be4a2427fc5c816a26dc7390",
+      "receipt_before_sha256": "0a151e426a4735779802a9d5ae01d520534ea5b4be4a2427fc5c816a26dc7390",
+      "review_matches_receipt": true,
+      "reviewed_sha256": "0a151e426a4735779802a9d5ae01d520534ea5b4be4a2427fc5c816a26dc7390"
+    },
+    {
+      "path": "morsehgp3D_v8/src/pipeline/wspd_q34.hpp",
+      "receipt_after_sha256": "609712f16fc8da7f1447761881e1f82dbacfeae2e74e664cb530b49d1054d06c",
+      "receipt_before_sha256": "609712f16fc8da7f1447761881e1f82dbacfeae2e74e664cb530b49d1054d06c",
+      "review_matches_receipt": true,
+      "reviewed_sha256": "609712f16fc8da7f1447761881e1f82dbacfeae2e74e664cb530b49d1054d06c"
+    }
+  ],
+  "status": "static_review_completed"
+}

@@ -1,0 +1,96 @@
+{
+  "commit": "d1b4dbc6",
+  "headers_copied_from": "../q4_seed_cell_join_20260921/snapshot/include",
+  "sources": [
+    {
+      "origin": "d1b4dbc6:morsehgp3D_v8/src/core/types.hpp",
+      "path": "snapshot/include/core/types.hpp",
+      "sha256": "8a0a855e582f39d5a2d64f29ed66b15f329b3d0d0fb90ac5c09e2557b5aff7de"
+    },
+    {
+      "origin": "d1b4dbc6:morsehgp3D_v8/src/lanes/edge_cover.hpp",
+      "path": "snapshot/include/lanes/edge_cover.hpp",
+      "sha256": "4c45472745a08f573f1b12bb4b9ae9a73b986400fd6127a1ee60c446734940bc"
+    },
+    {
+      "origin": "d1b4dbc6:morsehgp3D_v8/src/lanes/exact_ball.hpp",
+      "path": "snapshot/include/lanes/exact_ball.hpp",
+      "sha256": "1280c2ee3940c542096b5445b186aa0f164dddc9f9eadc7507677f0cdedfbaa4"
+    },
+    {
+      "origin": "d1b4dbc6:morsehgp3D_v8/src/lanes/q34_collective.hpp",
+      "path": "snapshot/include/lanes/q34_collective.hpp",
+      "sha256": "e8a9167cdfea4d7246b6fad2a133392ea123e348aa5b4cc05227e95a89ebf1bb"
+    },
+    {
+      "origin": "d1b4dbc6:morsehgp3D_v8/src/lanes/q34_cover.hpp",
+      "path": "snapshot/include/lanes/q34_cover.hpp",
+      "sha256": "552926a97d6d9232a4f1baf6cb584a3722efa45c3fb3843a0195aef56304b05d"
+    },
+    {
+      "origin": "d1b4dbc6:morsehgp3D_v8/src/lanes/q34_pruning.hpp",
+      "path": "snapshot/include/lanes/q34_pruning.hpp",
+      "sha256": "10cb7fee6d3511b65d8b1ca32dd8ee0dfbeac26710edb70dec3c89dbb4ee7c65"
+    },
+    {
+      "origin": "d1b4dbc6:morsehgp3D_v8/src/lanes/q34_seed.hpp",
+      "path": "snapshot/include/lanes/q34_seed.hpp",
+      "sha256": "55378ea41543eee31ef0537fd2299c0199249f04a933b32c1fea05f981bd929b"
+    },
+    {
+      "origin": "d1b4dbc6:morsehgp3D_v8/src/lanes/q4_center_map.hpp",
+      "path": "snapshot/include/lanes/q4_center_map.hpp",
+      "sha256": "872db8a0a3396652edc8aa3c08e2cd8fcacb645e779a999c832c4a97ad38a8a6"
+    },
+    {
+      "origin": "d1b4dbc6:morsehgp3D_v8/src/lanes/q4_family.hpp",
+      "path": "snapshot/include/lanes/q4_family.hpp",
+      "sha256": "44c816707d97933dfc6094c63669da988914c2f36044d17bd11e718a44fab614"
+    },
+    {
+      "origin": "d1b4dbc6:morsehgp3D_v8/src/lanes/q4_local.hpp",
+      "path": "snapshot/include/lanes/q4_local.hpp",
+      "sha256": "1fd724a41de6b5c801ce84800fd5668eb58f332612f002d79d29df658ca36441"
+    },
+    {
+      "origin": "d1b4dbc6:morsehgp3D_v8/src/lanes/q4_local_partition.hpp",
+      "path": "snapshot/include/lanes/q4_local_partition.hpp",
+      "sha256": "895cae0074b96578a051fff2bf78e7e5d712b47215d9d1ace0d5923dfb835af4"
+    },
+    {
+      "origin": "d1b4dbc6:morsehgp3D_v8/src/lanes/q4_positive_domain.hpp",
+      "path": "snapshot/include/lanes/q4_positive_domain.hpp",
+      "sha256": "a414a31d3fce4cd91ea648369b9b43dd4dde0c1d54b9554f2e5d45a5b794057f"
+    },
+    {
+      "origin": "d1b4dbc6:morsehgp3D_v8/src/pipeline/axis_q2.hpp",
+      "path": "snapshot/include/pipeline/axis_q2.hpp",
+      "sha256": "5d0022c7776b1c382f65e5bff9fe9e125c81c701c08a0d8db8e4e40672c4cac4"
+    },
+    {
+      "origin": "d1b4dbc6:morsehgp3D_v8/src/pipeline/local_credits.hpp",
+      "path": "snapshot/include/pipeline/local_credits.hpp",
+      "sha256": "a68fed7a40041ddc76b2a401d35cdafeaa66711ab3cd1d79ff41f3666b29a3d9"
+    },
+    {
+      "origin": "d1b4dbc6:morsehgp3D_v8/src/pipeline/prepared_cloud.hpp",
+      "path": "snapshot/include/pipeline/prepared_cloud.hpp",
+      "sha256": "2808e4e4609cbc11800894cf43824c1a6a7df1f2ca6e27931561848b9cde8352"
+    },
+    {
+      "origin": "d1b4dbc6:morsehgp3D_v8/src/pipeline/q2_census.hpp",
+      "path": "snapshot/include/pipeline/q2_census.hpp",
+      "sha256": "903f5ee92d72e0131096deefe04c51ba5f18000b214ee09276fa359b3972b8f7"
+    },
+    {
+      "origin": "d1b4dbc6:morsehgp3D_v8/src/lanes/q3_ball_census.cpp",
+      "path": "snapshot/q3_ball_census.cpp",
+      "sha256": "434bd6e49eee8cc11398f0f678cc5478a60a10e18828d294b6c44416de881956"
+    },
+    {
+      "origin": "d1b4dbc6:morsehgp3D_v8/src/lanes/q3_ball_census.hpp",
+      "path": "snapshot/include/lanes/q3_ball_census.hpp",
+      "sha256": "d80558a46bf38414198fb3f26a3fb8993f3cf9ba9c6a7f94a6f2210bb37dec0f"
+    }
+  ]
+}

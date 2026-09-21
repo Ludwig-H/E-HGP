@@ -1,0 +1,15 @@
+{
+  "errors": [],
+  "markdown": [
+    {
+      "path": "morsehgp3D_v8/audits/q3_prefix_relay_20260921/README.md",
+      "sha256": "d801d23594a033e8669de4b439a927d49a96c3c1a7a7953a2fc00199f60cfce6"
+    },
+    {
+      "path": "morsehgp3D_v8/audits/DIALOGUE_COURANT.md",
+      "sha256": "24d8566d03341f98cf789ec9e27c3dc42f3c8e08b234543e853ed8ba8ab57d88"
+    }
+  ],
+  "snapshot_files_verified": 18,
+  "status": "PASS"
+}

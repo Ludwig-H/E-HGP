@@ -1,0 +1,47 @@
+{
+  "binaries": {
+    "morsehgp3D_v8/audits/q3_prefix_relay_20260921/.build/r1/release": "48aeb95b9890e97403ccb87158ffe93a90038daf5b8377038bc749faed52fecc",
+    "morsehgp3D_v8/audits/q3_prefix_relay_20260921/.build/r1/sanitize": "ec96a28c50150ff283ad95a975719700b84f359441de63a2bd4ca02f78ddc33b"
+  },
+  "commands": 132,
+  "commands_sha256": "316de2e20772b43778d03127763ef3ad377d5fa7c6f8b9b4eb0986fda20cc999",
+  "counts": {
+    "accepted_relays": 745,
+    "calls": 126,
+    "global_oracle_point_tests": 1329260,
+    "max_shell": 4,
+    "positive_prefixes": 412,
+    "relays": 1040,
+    "seeds": 208
+  },
+  "cpu_affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "scope": "Exact suffix handoff; prefix brute-force is a test oracle, not an implemented common filter",
+  "sources": {
+    "build/v8_q34_indexed_20260921/libmhgp8_p0.a": "da2a8bc5054f2446abffffaf7dd242811ee7d670a019184cff9f3983a7fb5fa4",
+    "build/v8_q34_indexed_sanitize_20260921/libmhgp8_p0.a": "3a5fae4f8d877db0dc946c473c5ab5f2d91ab4a5c7128e919698537689e57224",
+    "morsehgp3D_v8/audits/q34_global_contract_20260921/oracle.py": "9853073a94dd422206ea6ac8c5653b8fc4a4391b2ab284471c8781f1e0f83b6f",
+    "morsehgp3D_v8/audits/q3_prefix_relay_20260921/campaign.py": "9deb6c31285f0537ba48487d7656ff467a629291b28641c11d1e60244490be01",
+    "morsehgp3D_v8/audits/q3_prefix_relay_20260921/forest_model.py": "8fbbb61ff52be1ea6149b92cfc23a6a5461a0376701d7aeb0137d80cef20e79c",
+    "morsehgp3D_v8/audits/q3_prefix_relay_20260921/probe.cpp": "bc418e66e993376fa9a5291b2acf74f5b3721cf9f6de4d940fbb791c9140852e",
+    "morsehgp3D_v8/audits/q3_prefix_relay_20260921/snapshot/include/core/types.hpp": "8a0a855e582f39d5a2d64f29ed66b15f329b3d0d0fb90ac5c09e2557b5aff7de",
+    "morsehgp3D_v8/audits/q3_prefix_relay_20260921/snapshot/include/lanes/exact_ball.hpp": "1280c2ee3940c542096b5445b186aa0f164dddc9f9eadc7507677f0cdedfbaa4",
+    "morsehgp3D_v8/audits/q3_prefix_relay_20260921/snapshot/include/lanes/q3_ball_census.hpp": "d80558a46bf38414198fb3f26a3fb8993f3cf9ba9c6a7f94a6f2210bb37dec0f",
+    "morsehgp3D_v8/audits/q3_prefix_relay_20260921/snapshot/include/pipeline/axis_q2.hpp": "5d0022c7776b1c382f65e5bff9fe9e125c81c701c08a0d8db8e4e40672c4cac4",
+    "morsehgp3D_v8/audits/q3_prefix_relay_20260921/snapshot/include/pipeline/local_credits.hpp": "a68fed7a40041ddc76b2a401d35cdafeaa66711ab3cd1d79ff41f3666b29a3d9",
+    "morsehgp3D_v8/audits/q3_prefix_relay_20260921/snapshot/include/pipeline/prepared_cloud.hpp": "2808e4e4609cbc11800894cf43824c1a6a7df1f2ca6e27931561848b9cde8352",
+    "morsehgp3D_v8/audits/q3_prefix_relay_20260921/snapshot/include/pipeline/q2_census.hpp": "903f5ee92d72e0131096deefe04c51ba5f18000b214ee09276fa359b3972b8f7",
+    "morsehgp3D_v8/audits/q3_prefix_relay_20260921/snapshot/q3_ball_census.cpp": "434bd6e49eee8cc11398f0f678cc5478a60a10e18828d294b6c44416de881956",
+    "morsehgp3D_v8/audits/q4_center_blocks_20260920/fixtures.py": "adadb78ffac7b60581b56d4eefa340d7e3b30afe8a40f1d7e8cf30d65fa0836f",
+    "morsehgp3D_v8/audits/q4_center_blocks_20260920/oracle_gate.py": "b8d633cf3d35236db6bce0976fe842894ca2c40289f85d78c729cf544ca432e0"
+  },
+  "status": "completed"
+}

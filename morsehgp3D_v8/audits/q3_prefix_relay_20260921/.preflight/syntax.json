@@ -1,0 +1,21 @@
+{
+  "command": [
+    "g++",
+    "-std=c++20",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-I",
+    "morsehgp3D_v8/audits/q3_prefix_relay_20260921/snapshot/include",
+    "-I",
+    "morsehgp3D_v8/audits/q3_prefix_relay_20260921/snapshot/include/lanes",
+    "-fsyntax-only",
+    "morsehgp3D_v8/audits/q3_prefix_relay_20260921/probe.cpp"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": ""
+}
