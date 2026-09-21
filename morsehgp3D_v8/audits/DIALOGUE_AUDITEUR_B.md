@@ -142,6 +142,45 @@ l'équipe inactive : le rejet par paire retire les grosses arêtes, mais la
 queue lourde des survivantes (couvertures jusqu'à 11 225 sites) demande un
 grain plus fin que l'arête, par blocs de seeds, avant tout pilote 50k.
 
+### Lecture du raccord 31 (`pipeline/wspd_q34.cpp` à 4dbe3024) et fixtures
+
+Voie q3 relue : test d'acuité strict sur les trois angles, propriété de
+l'arête ab avec égalité admise et départage par la plus petite clé d'IDs,
+bornes de nœud correctes (min de distance à a ou b > D² écarte, max de la
+somme ≤ D² écarte l'angle en x), seuil de rejet `depth ≥ K − 1` conforme,
+saturation du census, cover fermé qui contient tous les intérieurs. Aucun
+défaut d'exactitude vu. Deux remarques : (i) la coquille émise est la
+coquille **complète**, support compris (`q34_seed.hpp` : « complete-shell
+parts ») : trois IDs par émission q3, ce qui explique les 327 815
+comparaisons de tri pour 93 914 émissions et fait compter deux fois le
+support dans `payload_shell_ids` ; dire explicitement que le consommateur doit
+retirer le support de la coquille, ou l'exclure à l'émission. (ii) Le point
+d'insertion du rejet par paire est `Engine::edge`, **avant**
+`Q34EdgeCover::make` : une descente saturante par voie active avec les
+boîtes singleton de a et b (bornes `Q2JointPreparedBounds` et `xi_bounds`
+déjà écrites, feuilles jugées par le citron exact), retrait de la voie dont
+le compte atteint h_q, et pas de cover si aucune voie ne survit ; la
+descente « milieu d'abord » de mon harnais (`front_lanes_probe.cpp`, § 4 bis)
+en est le patron mesuré. Le pilote parallèle (jobs du front tirés par un
+compteur atomique, moteur privé par slot, jointure avant réduction) est
+correct ; son grain reste l'arête atomique à l'intérieur d'un job.
+
+Fixtures proposées pour le census par boîtes (contrat 31), recalculées en
+rationnels exacts : la clé de Triangle((0,0,0),(2,2,0),(2,0,2)) est bien
+[3, −8, −4, −4, 0] ; **celle de Triangle((0,0,0),(2,0,0),(1,1,1)) n'est pas
+[2, −4, −2, −2, 0] mais [2, −4, −1, −1, 0]** (centre (1, 1/4, 1/4),
+r² = 9/8 ; avec la clé écrite, |o−c|² vaudrait 1/2 contre 3/2 pour a). Les
+sommets des paraboles sont donc 1, 1/4, 1/4 (pas demi-entiers), et la boîte
+x = z = 0, y ∈ [0, 1] contient un seul contact, a lui-même ((0,1,0) a une
+puissance 1 > 0, extérieur). La clé de
+Triangle((65535,65534,65533),(0,0,65532),(2,65531,0)) est
+[27665049883098415167, −1208778244396181609578829,
+−2417279841248645846597407, −2417335173459171585359629,
+39606828108042427812408262620] (65, 80, 81, 81 et 95 bits ; B² dépasse
+bien 2^128), triangle aigu d'arête ab maximale. Les fixtures u16 de A
+(équilatéral et tétraèdre régulier d'arête 72, contacts z à Ξ = 3H² et
+Ξ = 2H², centre (33, 33, 27) strictement intérieur) sont exactes.
+
 ## Erreurs et points durs relevés (à 4dbe3024)
 
 1. **Session G4 R2 : diagnostic non établi.** La capture
@@ -180,7 +219,9 @@ grain plus fin que l'arête, par blocs de seeds, avant tout pilote 50k.
    et CMake modifiés par la tranche 31, attendu) : chaque README de reçu
    devrait nommer le commit auquel sa relecture vivante s'applique, pour que
    le lecteur sache faire `git worktree add --detach <commit>`.
-8. **Rédaction** : Q3_Q4_COVERS_PARTAGES (§ couverture) parle d'« un minimum
+8. **Clé de fixture fausse** dans le contrat 31 (Triangle((0,0,0),(2,0,0),(1,1,1)),
+   voir ci-dessus) : à corriger avant de graver la fixture.
+9. **Rédaction** : Q3_Q4_COVERS_PARTAGES (§ couverture) parle d'« un minimum
    de distance [qui] dépasse D² » ; comparer des carrés à des carrés
    (|2z−a−b|² à 4D²) comme dans `edge_cover.hpp`.
 
