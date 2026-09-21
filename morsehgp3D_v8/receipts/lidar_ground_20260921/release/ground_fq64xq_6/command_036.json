@@ -1,0 +1,31 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_ground_patchwork_20260921/mhgp8_patchwork_ground_probe",
+    "--input",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin",
+    "--output",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_repeat_1.u8"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "environment": {
+    "ASAN_OPTIONS": null,
+    "LANG": "C.UTF-8",
+    "LC_ALL": "C.UTF-8",
+    "LD_LIBRARY_PATH": null,
+    "LD_PRELOAD": null,
+    "MKL_NUM_THREADS": null,
+    "OMP_NUM_THREADS": null,
+    "OPENBLAS_NUM_THREADS": null,
+    "PATH": "/home/codespace/.codex/packages/standalone/releases/0.155.1-x86_64-unknown-linux-musl/codex-path:/home/codespace/.local/bin:/usr/local/rvm/gems/ruby-3.4.7/bin:/usr/local/rvm/gems/ruby-3.4.7@global/bin:/usr/local/rvm/rubies/ruby-3.4.7/bin:/home/codespace/.dotnet:/home/codespace/nvm/current/bin:/home/codespace/.php/current/bin:/home/codespace/.python/current/bin:/home/codespace/java/current/bin:/home/codespace/.ruby/current/bin:/home/codespace/.local/bin:/usr/local/python/current/bin:/usr/local/py-utils/bin:/usr/local/jupyter:/usr/local/oryx:/usr/local/go/bin:/go/bin:/usr/local/sdkman/bin:/usr/local/sdkman/candidates/java/current/bin:/usr/local/sdkman/candidates/gradle/current/bin:/usr/local/sdkman/candidates/maven/current/bin:/usr/local/sdkman/candidates/ant/current/bin:/usr/local/rvm/gems/default/bin:/usr/local/rvm/gems/default@global/bin:/usr/local/rvm/rubies/default/bin:/usr/local/share/rbenv/bin:/usr/local/php/current/bin:/opt/conda/bin:/usr/local/nvs:/usr/local/share/nvm/current/bin:/usr/local/hugo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/dotnet:/home/codespace/.dotnet/tools:/usr/local/rvm/bin",
+    "PYTHONPATH": null,
+    "TZ": null,
+    "UBSAN_OPTIONS": null
+  },
+  "exit_code": 0,
+  "expected_exit": 0,
+  "label": "scene_02_repeat_1",
+  "stderr": "PatchWorkpp::PatchWorkpp() - INITIALIZATION COMPLETE\n",
+  "stderr_base64": "UGF0Y2hXb3JrcHA6OlBhdGNoV29ya3BwKCkgLSBJTklUSUFMSVpBVElPTiBDT01QTEVURQo=",
+  "stdout": "{\"schema\":\"mhgp8_patchwork_ground_probe_v1\",\"upstream_commit\":\"3e6903a1d5537a4cc2ace897b0bbb98a92d6014c\",\"encoding\":\"u8_0_unknown_1_ground_2_nonground\",\"raw_returns\":125526,\"processed_returns\":125492,\"algorithm_invocations\":1,\"counts\":{\"unknown\":34,\"ground\":79681,\"nonground\":45811},\"unknown_reasons\":{\"outside_range\":34,\"numeric_domain\":0,\"upstream_z_sentinel\":0,\"upstream_unassigned\":0},\"nonfinite_reflectance\":0,\"numeric_abs_limit\":1099511627776,\"rnr_enabled\":false,\"reflectance_policy\":\"ignored_preserved_in_raw\",\"fresh_state\":true,\"eigen_threads\":1,\"openmp\":false,\"noise_status_available\":false,\"parameters\":{\"verbose\":false,\"enable_RNR\":false,\"enable_RVPF\":true,\"enable_TGR\":true,\"num_iter\":3,\"num_lpr\":20,\"num_min_pts\":10,\"num_zones\":4,\"num_rings_of_interest\":4,\"RNR_ver_angle_thr\":-15,\"RNR_intensity_thr\":0.20000000000000001,\"sensor_height\":1.7230000000000001,\"th_seeds\":0.125,\"th_dist\":0.125,\"th_seeds_v\":0.25,\"th_dist_v\":0.10000000000000001,\"max_range\":80,\"min_range\":2.7000000000000002,\"uprightness_thr\":0.70699999999999996,\"adaptive_seed_selection_margin\":-1.2,\"intensity_thr\":0,\"max_flatness_storage\":1000,\"max_elevation_storage\":1000,\"num_sectors_each_zone\":[16,32,54,32],\"num_rings_each_zone\":[2,4,4,4],\"elevation_thr\":[0,0,0,0],\"flatness_thr\":[0,0,0,0]},\"input_fnv1a64\":\"d190588d3a58d70e\",\"mask_fnv1a64\":\"48e1349b94bdb120\",\"timing_ms\":{\"read\":1.980796,\"prepare\":5.4392610000000001,\"segment\":21.271243999999999,\"mask\":0.98548899999999995,\"write\":0.24978600000000001,\"wall\":29.926576000000001}}\n",
+  "stdout_base64": "eyJzY2hlbWEiOiJtaGdwOF9wYXRjaHdvcmtfZ3JvdW5kX3Byb2JlX3YxIiwidXBzdHJlYW1fY29tbWl0IjoiM2U2OTAzYTFkNTUzN2E0Y2MyYWNlODk3YjBiYmI5OGE5MmQ2MDE0YyIsImVuY29kaW5nIjoidThfMF91bmtub3duXzFfZ3JvdW5kXzJfbm9uZ3JvdW5kIiwicmF3X3JldHVybnMiOjEyNTUyNiwicHJvY2Vzc2VkX3JldHVybnMiOjEyNTQ5MiwiYWxnb3JpdGhtX2ludm9jYXRpb25zIjoxLCJjb3VudHMiOnsidW5rbm93biI6MzQsImdyb3VuZCI6Nzk2ODEsIm5vbmdyb3VuZCI6NDU4MTF9LCJ1bmtub3duX3JlYXNvbnMiOnsib3V0c2lkZV9yYW5nZSI6MzQsIm51bWVyaWNfZG9tYWluIjowLCJ1cHN0cmVhbV96X3NlbnRpbmVsIjowLCJ1cHN0cmVhbV91bmFzc2lnbmVkIjowfSwibm9uZmluaXRlX3JlZmxlY3RhbmNlIjowLCJudW1lcmljX2Fic19saW1pdCI6MTA5OTUxMTYyNzc3Niwicm5yX2VuYWJsZWQiOmZhbHNlLCJyZWZsZWN0YW5jZV9wb2xpY3kiOiJpZ25vcmVkX3ByZXNlcnZlZF9pbl9yYXciLCJmcmVzaF9zdGF0ZSI6dHJ1ZSwiZWlnZW5fdGhyZWFkcyI6MSwib3Blbm1wIjpmYWxzZSwibm9pc2Vfc3RhdHVzX2F2YWlsYWJsZSI6ZmFsc2UsInBhcmFtZXRlcnMiOnsidmVyYm9zZSI6ZmFsc2UsImVuYWJsZV9STlIiOmZhbHNlLCJlbmFibGVfUlZQRiI6dHJ1ZSwiZW5hYmxlX1RHUiI6dHJ1ZSwibnVtX2l0ZXIiOjMsIm51bV9scHIiOjIwLCJudW1fbWluX3B0cyI6MTAsIm51bV96b25lcyI6NCwibnVtX3JpbmdzX29mX2ludGVyZXN0Ijo0LCJSTlJfdmVyX2FuZ2xlX3RociI6LTE1LCJSTlJfaW50ZW5zaXR5X3RociI6MC4yMDAwMDAwMDAwMDAwMDAwMSwic2Vuc29yX2hlaWdodCI6MS43MjMwMDAwMDAwMDAwMDAxLCJ0aF9zZWVkcyI6MC4xMjUsInRoX2Rpc3QiOjAuMTI1LCJ0aF9zZWVkc192IjowLjI1LCJ0aF9kaXN0X3YiOjAuMTAwMDAwMDAwMDAwMDAwMDEsIm1heF9yYW5nZSI6ODAsIm1pbl9yYW5nZSI6Mi43MDAwMDAwMDAwMDAwMDAyLCJ1cHJpZ2h0bmVzc190aHIiOjAuNzA2OTk5OTk5OTk5OTk5OTYsImFkYXB0aXZlX3NlZWRfc2VsZWN0aW9uX21hcmdpbiI6LTEuMiwiaW50ZW5zaXR5X3RociI6MCwibWF4X2ZsYXRuZXNzX3N0b3JhZ2UiOjEwMDAsIm1heF9lbGV2YXRpb25fc3RvcmFnZSI6MTAwMCwibnVtX3NlY3RvcnNfZWFjaF96b25lIjpbMTYsMzIsNTQsMzJdLCJudW1fcmluZ3NfZWFjaF96b25lIjpbMiw0LDQsNF0sImVsZXZhdGlvbl90aHIiOlswLDAsMCwwXSwiZmxhdG5lc3NfdGhyIjpbMCwwLDAsMF19LCJpbnB1dF9mbnYxYTY0IjoiZDE5MDU4OGQzYTU4ZDcwZSIsIm1hc2tfZm52MWE2NCI6IjQ4ZTEzNDliOTRiZGIxMjAiLCJ0aW1pbmdfbXMiOnsicmVhZCI6MS45ODA3OTYsInByZXBhcmUiOjUuNDM5MjYxMDAwMDAwMDAwMSwic2VnbWVudCI6MjEuMjcxMjQzOTk5OTk5OTk5LCJtYXNrIjowLjk4NTQ4ODk5OTk5OTk5OTk1LCJ3cml0ZSI6MC4yNDk3ODYwMDAwMDAwMDAwMSwid2FsbCI6MjkuOTI2NTc2MDAwMDAwMDAxfX0K"
+}

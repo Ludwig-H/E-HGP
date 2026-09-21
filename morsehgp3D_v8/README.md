@@ -44,7 +44,11 @@ plusieurs dizaines de millions de points sur G4 reste distinct et ouvert.
 Le **LiDAR sans sol** devient aussi un régime prioritaire, sur demande du
 21 septembre : voir [méthodes et protocole](docs/LIDAR_SANS_SOL_PROTOCOLE_20260921.md).
 Conserver le profil brut, les IDs et float32 ; chronométrer séparément
-segmentation, HGP et coût total. Pas encore de mesure sans sol qualifiée.
+segmentation, HGP et coût total. Le [premier pilote](docs/PILOTE_LIDAR_SANS_SOL_20260921.md)
+est implémenté : environ30ms CPU mono de lecture→masque sur trois trames,
+39 885/35 551/45 845sites conservés. Float32 et mappings vérifiés sur42nuages,
+Release et sanitizers passent ; pas encore de mesure HGP sans sol ni de
+qualification sémantique du retrait. Les labels ne bloquent pas les chronos.
 
 ## Organisation et périmètre
 
@@ -77,6 +81,10 @@ fournie : pas encore toutes les arêtes, q4 natif complet ou FULL. Les
 passent612appels Fraction,458contrôles natifs et deux mutations compilées,
 en Release/Clang ASan/UBSan. Les36mesures synthétiques8k/16k/32k comparent
 le partage à la référence ; elles ne qualifient pas une trame LiDAR.
+La [prochaine tranche globale](docs/RACCORD_NATIF_GLOBAL_PLAN_20260921.md)
+porte front, filtres avant graines et propriété dans la descente partagée.
+Elle doit mesurer des sorties croissantes et les replis des bornes, pas
+extrapoler la seule chaîne de graines imbriquées déjà chronométrée.
 
 Les [clés communes et événements q4 float32](docs/IDENTITE_FLOAT32_ET_EVENEMENTS_Q4_20260921.md)
 ajoutent l'identité exacte entre supports q2/q3/q4 et l'ordre exact des

@@ -48,12 +48,24 @@ Suite : raccorder aux graines/arêtes natives et mesurer le vrai travail
 global, puis partager les tickets possédés et porter les blocs q4.
 Ni un rejet q3 ni ses seules sorties ne doivent commander l'accès à q4.
 
-Le [LiDAR sans sol](docs/LIDAR_SANS_SOL_PROTOCOLE_20260921.md) est aussi
-prioritaire depuis la dernière demande : premier candidat Patchwork++,
-comparaison GroundGrid, masque conservant IDs/float32. Masquer la trame
-entière avant les coupes capteur ; publier segmentation, HGP et total.
-Garder la référence brute. Recherche documentée, pas encore de campagne
-sans sol ni de qualification transférée depuis les performances d'articles.
+Le [pilote LiDAR sans sol](docs/PILOTE_LIDAR_SANS_SOL_20260921.md) est
+maintenant implémenté dans `bench/` : Patchwork++ épinglé, RNRoff,
+état neuf, un thread, inconnus conservés. Préparer tout le brut avant
+masque : même translation de grille, doublons conservés si au moins un
+retour reste,27payloads par profil pour tous les IDs et sept partitions.
+Release44commandes etClang ASan/UBSan/LSan17 passent,20tests de préparation,
+lectures normal/−O et42nuages. Trames0/100/200 :39 885/35 551/45 845sites
+retenus, médianes lecture→masque30,358/29,843/29,927ms CPU partagé.
+Pas de mesure HGP ni de score sémantique ; aucune annotation n'est nécessaire
+pour lancer les futures comparaisons de calcul appariées. GCP non utilisé.
+Conserver les [builds/reçus](receipts/lidar_ground_20260921/README.md) épinglés.
+
+Priorité suivante : [raccord natif global](docs/RACCORD_NATIF_GLOBAL_PLAN_20260921.md),
+avec front et filtres de produits/arêtes, propriété dans X AVANT census et
+tickets partagés. Ne pas payer le census de toutes les graines puis filtrer
+les sorties. B `f7b220c4` exige des sorties croissantes et des taux de repli
+publiés à l'échelle ; ses limites sur la matrice précédente sont reconnues.
+Pas de nouvelle micro-campagne q2, ni d'attente des labels avant ces mesures.
 
 Lire d'abord [l'identité des boules et les événements q4 natifs](docs/IDENTITE_FLOAT32_ET_EVENEMENTS_Q4_20260921.md).
 Clé primitive globale commune q2/q3/q4 à l'émission ; `from_support`

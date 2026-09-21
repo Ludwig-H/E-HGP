@@ -3796,3 +3796,55 @@ les nouvelles captures ci-dessus. Avant raccord CMake/GPU : imposer les
 options flottantes et mesurer les replis sur float32 LiDAR hétérogènes.
 Les anciens reçus d'identité restent LIVE, avec snapshots sources faisant
 autorité ; leur git_commit est le HEAD au lancement, pas le contenu testé.
+
+## Constructeur — pilote LiDAR sans sol, après21b85af2
+
+Lecture des nouvelles fixtures B de blocs q3 : minimum continu,
+borne λsanspropriété et affinité du centre bien distingués. Elles sont
+inscrites dans le plan `docs/RACCORD_NATIF_GLOBAL_PLAN_20260921.md` :
+front natif et filtres avant graines, propriété intégrée à X, tickets
+partagés, jamais censusglobaldepuisroot puis owner en callback ; q4
+garde sa voie indépendante. Aucun gain du prototype n'est transféré.
+
+Tranche courante : pilote Patchwork++ par masque d'IDs sur trame entière,
+état neuf, RNR désactivé, indécis/horsportéeconservés. Nouveau préparateur
+réutilisant celui de précision sur TOUT le brut avant sélection : origine
+de grille commune, site conservé si au moins un retour l'est, tous retours
+mappés, septpartitions même si elles sont vides. Pas de XYZ tiers projeté,
+centroïde ou baisse implicite de précision. Les sources/builds antérieurs
+restent intacts. Qualification et premières mesures locales en préparation,
+sans HGP ni GCP dans ce pilote ; annotations de qualité non disponibles.
+
+Pris connaissance de B `f7b220c4` pendant ce lot : absence de défaut produit
+sur le census précédent, mais couverture à l'échelle trop étroite et fort
+repli hull à publier. Ces limites deviennent des obligations du prochain
+raccord global, pas un nouveau gain revendiqué sur la seule arête. Le
+protocole sans sol sépare maintenant les chronos des futures évaluations
+`.label` : pas d'attente d'annotations pour mesurer les entrées appariées.
+Il ajoute les rapports brut→retenu par morceau et la dispersion spatiale.
+Question A/B pour la suite : privilégier le port global avec propriété
+dans X, puis comparer l'enveloppe m+[0,1/3]h sous propriété ; merci de
+signaler tout contre-exemple où ce raccord changerait la population des
+témoins, notamment les graines invalides qui doivent rester dans Z.
+
+Clôture du pilote : Release44commandes etClang ASan/UBSan/LSan17 PASS,
+20tests de préparation, quatre fixtures natives/dix refus, neuf appels
+sur les trois trames, six préparations et42nuages. Aucun changement du
+moteur ni des sources numériques précédentes. Lecture→masque médiane
+30,358/29,843/29,927ms mono local partagé ;39 885/35 551/45 845sites
+retenus, indécis41/32/34 tous conservés. Masques répétés identiques,
+float32/grille1mm sans fusion. Pas de score sémantique, de gain HGP ou
+de chrono G4. La préparation Python horsligne est hors de ces chronos.
+Builds neufsdédiés désormais épinglés, capsules et lecteurs LIVE dans
+`receipts/lidar_ground_20260921/`. Préflights conservés séparément ; pas
+de nouvelles annotations ni de session GCP.
+
+Réservation courte de l'index Git pour publication de ce lot surmain,
+et de cette seule section du journal. Les53lignes indépendantes anciennes
+et les fichiers v6/v7 restent hors commit. Fin de réservation après push.
+
+Merci à B pour `ad9bbc9d` reçu pendant la clôture : les deux témoins
+aigu nonpropriétaire/obtus et le cas à deux arêtes maximales sont inscrits
+dans le plan natif. L'enveloppe propriétaire ne filtre que X, jamais Z ;
+les égalités indécises des boîtes atteignent le même départage exact au
+relais. Aucun changement du census gelé n'est introduit par cette réponse.

@@ -1,0 +1,482 @@
+{
+  "datasets": {
+    "full": {
+      "local_order": "increasing_retained_site_ID_same_order_as_original_site_ID",
+      "original_site_ids_file": "full.original_site_ids.u32le",
+      "original_site_ids_sha256": "20b0444acfe22f020d422ffb4a75ec0721a9891262a1a6234d43420d699661c8",
+      "point_bytes": 550140,
+      "points_file": "full.u32le",
+      "points_sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af",
+      "site_ids_file": "full.site_ids.u32le",
+      "site_ids_sha256": "b9700358a5dfb6269a5d50a2862cb05aa9e3fe8e0c77278e5bb3e023ac19c73e",
+      "sites": 45845
+    },
+    "half_x_neg": {
+      "local_order": "increasing_retained_site_ID_same_order_as_original_site_ID",
+      "original_site_ids_file": "half_x_neg.original_site_ids.u32le",
+      "original_site_ids_sha256": "9656def38ee058b992db93656577b1468dd21047adca5836ce388ca48ed01dd5",
+      "point_bytes": 308760,
+      "points_file": "half_x_neg.u32le",
+      "points_sha256": "a207f00aef22d469f970d35dae47d716833aed23a5a8b51e866969e2c22845a0",
+      "site_ids_file": "half_x_neg.site_ids.u32le",
+      "site_ids_sha256": "a11ba1f999e53a005e585e120b9abb2dfe936ad77100aa5933a899495f3ea6da",
+      "sites": 25730
+    },
+    "half_x_nonneg": {
+      "local_order": "increasing_retained_site_ID_same_order_as_original_site_ID",
+      "original_site_ids_file": "half_x_nonneg.original_site_ids.u32le",
+      "original_site_ids_sha256": "ec6c2567905f69c118de920669c69880cd035a10502ed4e9ae9ce8687bb3a0ca",
+      "point_bytes": 241380,
+      "points_file": "half_x_nonneg.u32le",
+      "points_sha256": "e1900f7766f41d51f2104461006d8b5abd89dc2c26e46d380b87827afb30dcba",
+      "site_ids_file": "half_x_nonneg.site_ids.u32le",
+      "site_ids_sha256": "0e159cb28e605ee761b545a859ae55f14f97356c7ac91b545a0e2199df9a1a38",
+      "sites": 20115
+    },
+    "quarter_x_neg_y_neg": {
+      "local_order": "increasing_retained_site_ID_same_order_as_original_site_ID",
+      "original_site_ids_file": "quarter_x_neg_y_neg.original_site_ids.u32le",
+      "original_site_ids_sha256": "5dc4421ff18667d52851739c2ef7c82021edb3e2f5131ac3ddd9fa4b4b861096",
+      "point_bytes": 195144,
+      "points_file": "quarter_x_neg_y_neg.u32le",
+      "points_sha256": "7033e374544c316ae28ce1df87b948452e3164a03163e2491e08291a0093b868",
+      "site_ids_file": "quarter_x_neg_y_neg.site_ids.u32le",
+      "site_ids_sha256": "6fd9246255cd97eeabb096964ef193611d61ce93cd5370f7bfe228385492a588",
+      "sites": 16262
+    },
+    "quarter_x_neg_y_nonneg": {
+      "local_order": "increasing_retained_site_ID_same_order_as_original_site_ID",
+      "original_site_ids_file": "quarter_x_neg_y_nonneg.original_site_ids.u32le",
+      "original_site_ids_sha256": "00d88bea7fb43a71ccb6cf1f7284fa82b4f4fed6e749a1de7911eb49a15a7eeb",
+      "point_bytes": 113616,
+      "points_file": "quarter_x_neg_y_nonneg.u32le",
+      "points_sha256": "23f76c730b4c540d2ab1be2a6dce3015bac78575f61d1d98499b331527a99821",
+      "site_ids_file": "quarter_x_neg_y_nonneg.site_ids.u32le",
+      "site_ids_sha256": "954440e6a16563174524e7b96bc3f65edca8344635dcecf592f300e834afafff",
+      "sites": 9468
+    },
+    "quarter_x_nonneg_y_neg": {
+      "local_order": "increasing_retained_site_ID_same_order_as_original_site_ID",
+      "original_site_ids_file": "quarter_x_nonneg_y_neg.original_site_ids.u32le",
+      "original_site_ids_sha256": "815ce101e675fdea99541265aef73730ad5d2aac16550e4283245b8d88c2dda6",
+      "point_bytes": 177948,
+      "points_file": "quarter_x_nonneg_y_neg.u32le",
+      "points_sha256": "6924df0523a457925a2398585fd170eeb02d6efacf9e673739d2c40b14fd1f68",
+      "site_ids_file": "quarter_x_nonneg_y_neg.site_ids.u32le",
+      "site_ids_sha256": "74133d4d510a6179cbc22a51759e69280ac0303b98768320906fb62edf676799",
+      "sites": 14829
+    },
+    "quarter_x_nonneg_y_nonneg": {
+      "local_order": "increasing_retained_site_ID_same_order_as_original_site_ID",
+      "original_site_ids_file": "quarter_x_nonneg_y_nonneg.original_site_ids.u32le",
+      "original_site_ids_sha256": "24b7e14d648a269a8eb0ce8b711f6ed23689e66ece498060bfa4f661bd06e3c4",
+      "point_bytes": 63432,
+      "points_file": "quarter_x_nonneg_y_nonneg.u32le",
+      "points_sha256": "47f05b7845a8e9ecf1dfbd005eb9242ac41a8e8d6421b27d9c2b481992d2f9f7",
+      "site_ids_file": "quarter_x_nonneg_y_nonneg.site_ids.u32le",
+      "site_ids_sha256": "e43d58dde13e592490b03a00f0b9877796fe56f7c3e4cea3f98b22d759c4fc3f",
+      "sites": 5286
+    }
+  },
+  "ground": {
+    "counts": {
+      "ground": 79681,
+      "nonground": 45811,
+      "unknown": 34
+    },
+    "geometric_exactness": "coordinates_only_not_semantic_ground_or_HGP_qualification",
+    "mixed_decision_sites": 0,
+    "original_sites": 125526,
+    "policy": "only_ground_returns_removed_site_kept_if_any_return_kept",
+    "removed_returns": 79681,
+    "removed_sites": 79681,
+    "retained_returns": 45845,
+    "retained_sites": 45845
+  },
+  "input_paths": [
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_repeat_0.u8",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_mask.json"
+  ],
+  "input_sha256": {
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin": "132f437349e17c00a8a31539f10a3214d9391ae1251293e7794a26540412b5cd",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_mask.json": "a371651af72b118b280b3624ed24e90d7fc1de9d9d7d24684471d4abf60dc0e1",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_repeat_0.u8": "86b2b46791993f7c3401270b369bfc2954a0a9de1370f7f6fa8637ec5d0b1126"
+  },
+  "mappings": {
+    "ground_return_with_retained_duplicate": "raw_to_original_still_maps_to_the_retained_original_site",
+    "original_kept": "original_kept.u8",
+    "raw_order_preserved": true,
+    "raw_to_original": "raw_to_original.u32le",
+    "retained_to_original": "retained_to_original.u32le",
+    "sentinel_used": false
+  },
+  "mask": {
+    "encoding": "u8_0_unknown_1_ground_2_nonground",
+    "input_sha256": "132f437349e17c00a8a31539f10a3214d9391ae1251293e7794a26540412b5cd",
+    "mask_sha256": "86b2b46791993f7c3401270b369bfc2954a0a9de1370f7f6fa8637ec5d0b1126",
+    "producer": {
+      "binary_sha256": "4aae71381763e274cc049f79ee47e310b5f92806a01a2d7df74b5795ff64febf",
+      "build_completion_sha256": "7f12b8ae85e8ffc6bc1a1dafef15af7dd8057f451d6347058a00b81f9fffad14",
+      "classification": "approximate_not_semantic_ground_truth",
+      "eigen_threads": 1,
+      "fresh_state": true,
+      "labels_used": false,
+      "method": "Patchwork++",
+      "native_command_sha256": "97ccb275e30350b00a19b53cccb68147528752afac44c9e08cbc915a6e8db6f5",
+      "openmp": false,
+      "parameters": {
+        "RNR_intensity_thr": 0.2,
+        "RNR_ver_angle_thr": -15,
+        "adaptive_seed_selection_margin": -1.2,
+        "elevation_thr": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "enable_RNR": false,
+        "enable_RVPF": true,
+        "enable_TGR": true,
+        "flatness_thr": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "intensity_thr": 0,
+        "max_elevation_storage": 1000,
+        "max_flatness_storage": 1000,
+        "max_range": 80,
+        "min_range": 2.7,
+        "num_iter": 3,
+        "num_lpr": 20,
+        "num_min_pts": 10,
+        "num_rings_each_zone": [
+          2,
+          4,
+          4,
+          4
+        ],
+        "num_rings_of_interest": 4,
+        "num_sectors_each_zone": [
+          16,
+          32,
+          54,
+          32
+        ],
+        "num_zones": 4,
+        "sensor_height": 1.723,
+        "th_dist": 0.125,
+        "th_dist_v": 0.1,
+        "th_seeds": 0.125,
+        "th_seeds_v": 0.25,
+        "uprightness_thr": 0.707,
+        "verbose": false
+      },
+      "reflectance_policy": "ignored_preserved_in_raw",
+      "rnr_enabled": false,
+      "unknown_policy": "retained",
+      "upstream_commit": "3e6903a1d5537a4cc2ace897b0bbb98a92d6014c",
+      "wrapper_sha256": "f1add2faf285f0fbf634438519d700de3c839a02732b13cf1ead53dec3cef2bd"
+    },
+    "raw_returns": 125526,
+    "schema": "mhgp8_lidar_ground_mask_v1"
+  },
+  "parameters": {
+    "precision_mm": "1",
+    "profile": "grid"
+  },
+  "partition": {
+    "empty_retained_cloud_allowed": true,
+    "encoded_sensor_origin": [
+      80271,
+      22224,
+      13694
+    ],
+    "inherited_original_partitions": true,
+    "mask_scope": "whole_original_frame_before_spatial_partition",
+    "planes": [
+      {
+        "axis": "x",
+        "value_metres": 0
+      },
+      {
+        "axis": "y",
+        "value_metres": 0
+      }
+    ],
+    "subsampling": false
+  },
+  "profile": "quantized_u32_fixed_grid_input_only",
+  "public_status": "not_claimed",
+  "raw_preparation": {
+    "boundaries": {
+      "raw_on_x_plane_returns": 0,
+      "raw_on_y_plane_returns": 1,
+      "raw_quadrant_returns": {
+        "quarter_x_neg_y_neg": 30083,
+        "quarter_x_neg_y_nonneg": 31860,
+        "quarter_x_nonneg_y_neg": 32040,
+        "quarter_x_nonneg_y_nonneg": 31543
+      },
+      "raw_to_represented_quadrant_changes": 4,
+      "raw_to_represented_x_partition_changes": 4,
+      "raw_to_represented_y_partition_changes": 0,
+      "represented_on_x_plane_returns": 8,
+      "represented_on_x_plane_sites": 8,
+      "represented_on_y_plane_returns": 2,
+      "represented_on_y_plane_sites": 2,
+      "represented_quadrant_returns": {
+        "quarter_x_neg_y_neg": 30080,
+        "quarter_x_neg_y_nonneg": 31859,
+        "quarter_x_nonneg_y_neg": 32043,
+        "quarter_x_nonneg_y_nonneg": 31544
+      },
+      "represented_quadrant_sites": {
+        "quarter_x_neg_y_neg": 30080,
+        "quarter_x_neg_y_nonneg": 31859,
+        "quarter_x_nonneg_y_neg": 32043,
+        "quarter_x_nonneg_y_nonneg": 31544
+      },
+      "sites_mixing_raw_quadrants": 0,
+      "sites_mixing_raw_x_sides": 0,
+      "sites_mixing_raw_y_sides": 0
+    },
+    "coordinate_bounds": {
+      "encoded_max": [
+        159832,
+        95896,
+        16573
+      ],
+      "encoded_min": [
+        0,
+        0,
+        0
+      ],
+      "raw_exact_float32_max_m": [
+        79.5614242553711,
+        73.67233276367188,
+        2.8794262409210205
+      ],
+      "raw_exact_float32_min_m": [
+        -80.27123260498047,
+        -22.22386360168457,
+        -13.694147109985352
+      ],
+      "signed_represented_max": [
+        79561,
+        73672,
+        2879
+      ],
+      "signed_represented_min": [
+        -80271,
+        -22224,
+        -13694
+      ]
+    },
+    "counts": {
+      "distinct_raw_sites_merged_by_quantization": 0,
+      "exact_float32_unique_xyz": 125526,
+      "merged_returns": 0,
+      "negative_zero_xyz_components": 0,
+      "nonfinite_reflectance_returns": 0,
+      "raw_returns": 125526,
+      "repeated_raw_xyz_returns": 0,
+      "sites_with_multiple_returns": 0,
+      "unique_sites": 125526
+    },
+    "datasets": {
+      "full": {
+        "local_order": "strictly_increasing_full_site_id",
+        "point_bytes": 1506312,
+        "points_file": "full.u32le",
+        "points_sha256": "37a7be399fae909a1291cddfc3ca5b972d3effdfa8dc8cd87a41accd5fa0f5f7",
+        "site_id_bytes": 502104,
+        "site_ids_file": "full.site_ids.u32le",
+        "site_ids_sha256": "3d83c380a62c44ed3d45b8788f160e30ee9c5aa25ecea258625c107e03034bb6",
+        "sites": 125526
+      },
+      "half_x_neg": {
+        "local_order": "strictly_increasing_full_site_id",
+        "point_bytes": 743268,
+        "points_file": "half_x_neg.u32le",
+        "points_sha256": "1b4a6c16153532e38eb7d45127db54a72c43602194869ce219423ffb4bac8a7e",
+        "site_id_bytes": 247756,
+        "site_ids_file": "half_x_neg.site_ids.u32le",
+        "site_ids_sha256": "e709642e74463d6e4f154fde125e1051a9a9d35eacb876b8ddf8dbb7fc3e6519",
+        "sites": 61939
+      },
+      "half_x_nonneg": {
+        "local_order": "strictly_increasing_full_site_id",
+        "point_bytes": 763044,
+        "points_file": "half_x_nonneg.u32le",
+        "points_sha256": "13cf32e3fa7c24c162c8eb7ca6d7930d71fc46f7211c0126750c6f533bd775b5",
+        "site_id_bytes": 254348,
+        "site_ids_file": "half_x_nonneg.site_ids.u32le",
+        "site_ids_sha256": "b9764b20638a30495b9d951c16c8c73b5bd2a5a8ec7e8edb0a3c5177ce5b9a86",
+        "sites": 63587
+      },
+      "quarter_x_neg_y_neg": {
+        "local_order": "strictly_increasing_full_site_id",
+        "point_bytes": 360960,
+        "points_file": "quarter_x_neg_y_neg.u32le",
+        "points_sha256": "0db9a0eab5351959e04836e2ad9d1fac53ee132950914eb147316cd9d63a62a1",
+        "site_id_bytes": 120320,
+        "site_ids_file": "quarter_x_neg_y_neg.site_ids.u32le",
+        "site_ids_sha256": "c024abaa5e93336dd9f570d06cf68dc2da6f8a6ed072d92025f9496efd78b753",
+        "sites": 30080
+      },
+      "quarter_x_neg_y_nonneg": {
+        "local_order": "strictly_increasing_full_site_id",
+        "point_bytes": 382308,
+        "points_file": "quarter_x_neg_y_nonneg.u32le",
+        "points_sha256": "947dff30e7a303b79ab6f28d29de139fbb280e4cf44812c6ca71eca4b229e1bc",
+        "site_id_bytes": 127436,
+        "site_ids_file": "quarter_x_neg_y_nonneg.site_ids.u32le",
+        "site_ids_sha256": "25c080eba9b298d888893eef7897d168ea110523a7cb5f9ab4f74f496c3ef3ac",
+        "sites": 31859
+      },
+      "quarter_x_nonneg_y_neg": {
+        "local_order": "strictly_increasing_full_site_id",
+        "point_bytes": 384516,
+        "points_file": "quarter_x_nonneg_y_neg.u32le",
+        "points_sha256": "70d4a87f51edd7379375453128bcb614cfda315c771595ee7667d4180612e132",
+        "site_id_bytes": 128172,
+        "site_ids_file": "quarter_x_nonneg_y_neg.site_ids.u32le",
+        "site_ids_sha256": "34282eb27da6ddd568dc273429ae22ee20a48ca6dffb6492422f4f1edf02f110",
+        "sites": 32043
+      },
+      "quarter_x_nonneg_y_nonneg": {
+        "local_order": "strictly_increasing_full_site_id",
+        "point_bytes": 378528,
+        "points_file": "quarter_x_nonneg_y_nonneg.u32le",
+        "points_sha256": "e9a2caa8b9d9e152202c01899a64165d977c8bf9bfae9a81197e3731da66f7b6",
+        "site_id_bytes": 126176,
+        "site_ids_file": "quarter_x_nonneg_y_nonneg.site_ids.u32le",
+        "site_ids_sha256": "3e5e00647a447d110d9a64ab4cb98cdb977e3bba196db57594531693bd8d5c5a",
+        "sites": 31544
+      }
+    },
+    "parameters": {
+      "precision_mm": "1",
+      "profile": "grid"
+    },
+    "partition": {
+      "boundary_owner": "nonnegative_side",
+      "encoded_sensor_origin": [
+        80271,
+        22224,
+        13694
+      ],
+      "equivalence_to_raw_sign_partition": false,
+      "half_rule": "encoded_x<encoded_sensor_origin_x versus >=; equivalently signed_x<0 versus >=0",
+      "origin_may_lie_outside_u32_storage": true,
+      "prefixes_or_subsampling": false,
+      "quarter_rule": "within_each_half: encoded_y<encoded_sensor_origin_y versus >=; equivalently signed_y<0 versus >=0",
+      "raw_reference_planes": [
+        {
+          "axis": "x",
+          "value_metres": 0
+        },
+        {
+          "axis": "y",
+          "value_metres": 0
+        }
+      ],
+      "stage": "after_global_coordinate_deduplication"
+    },
+    "partition_proof": {
+      "full_sites": 125526,
+      "half_overlap_sites": 0,
+      "half_sites": 125526,
+      "half_union_equals_full": true,
+      "local_to_full_ids_strictly_increasing": true,
+      "quarter_overlap_sites": 0,
+      "quarter_pairs_equal_halves": true,
+      "quarter_sites": 125526,
+      "quarter_union_equals_full": true,
+      "raw_mapping_distinct_full_ids": 125526,
+      "raw_mapping_entries": 125526,
+      "raw_mapping_surjective": true,
+      "raw_returns_discarded": 0,
+      "subsampled_sites": 0
+    },
+    "profile": "quantized_u32_fixed_grid_input_only",
+    "quantization": {
+      "adaptive_scale": false,
+      "applied": true,
+      "arithmetic": "exact_integer_ratio_and_rational_decimal_grid",
+      "clipping": false,
+      "formula": "floor(x/step_metres+1/2)",
+      "jitter": false,
+      "precision_mm_text": "1",
+      "step_metres": {
+        "denominator": 1000,
+        "numerator": 1
+      }
+    },
+    "quantization_error_proof": {
+      "bound_metres": {
+        "denominator": 2000,
+        "numerator": 1
+      },
+      "coordinates_verified": 376578,
+      "exact_raw_coordinate_values_preserved": false,
+      "float32_roundtrip_coordinates_verified": 0,
+      "max_abs_error_metres_by_axis": [
+        {
+          "denominator": 1048576000,
+          "numerator": 524283
+        },
+        {
+          "denominator": 2000,
+          "numerator": 1
+        },
+        {
+          "denominator": 524288000,
+          "numerator": 262141
+        }
+      ],
+      "physical_sensor_accuracy_claimed": false,
+      "source_multiplicity_not_preserved_as_distinct_sites": true,
+      "topology_preservation_claimed": false
+    },
+    "raw_to_full": {
+      "bytes": 502104,
+      "encoding": "little_endian_u32_full_site_id_in_raw_return_order",
+      "entries": 125526,
+      "file": "raw_to_full.u32le",
+      "sha256": "cf42a6118f20d32c046d0d30eb924d68761366b44ca057cc7ae1e952588ab0ae"
+    },
+    "representation": {
+      "coordinates": "little_endian_u32_xyz",
+      "current_u16_engine_input_compatible": false,
+      "native_full_qualified": false,
+      "physical_sensor_accuracy_claimed": false,
+      "point_bytes": 12,
+      "raw_coordinate_values_preserved": false,
+      "signed_zero": "normalize_negative_zero_to_positive_zero",
+      "suffix": ".u32le"
+    },
+    "translation": {
+      "applied": true,
+      "common_to_all_seven_datasets": true,
+      "policy": "minus_componentwise_minimum_signed_grid_index_of_entire_scene",
+      "preserves_grid_distances": true,
+      "vector": [
+        80271,
+        22224,
+        13694
+      ]
+    }
+  },
+  "reuse": "prepare_lidar_precision.reconstruct_on_complete_raw_before_mask",
+  "schema": "mhgp8_lidar_ground_preparation_v1",
+  "scope": "input_mask_and_seven_partitions_not_HGP",
+  "source_sha256": {
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_ground.py": "f679e28698ea3a025da019b41f2516644656f910e1c9f4b3983001d9979408e5",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py": "d22a7b90f3f2214f14c44a4980d2cca7fb33fac8cbd23a977be958fa5d25fb84"
+  },
+  "status": "prepared"
+}

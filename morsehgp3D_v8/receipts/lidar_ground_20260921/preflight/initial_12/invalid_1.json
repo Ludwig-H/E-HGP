@@ -1,0 +1,15 @@
+{
+  "case": "invalid",
+  "command": [
+    "/workspaces/E-HGP/build/v8_ground_patchwork_sanitize_20260921/mhgp8_patchwork_ground_probe",
+    "--input",
+    "/tmp/mhgp8-ground-preflight.4mfm_a74/invalid.bin",
+    "--output",
+    "/tmp/mhgp8-ground-preflight.4mfm_a74/invalid_1.u8"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "patchwork ground probe: nonfinite XYZ\n",
+  "binary_sha256": "a29e0ff665ccefd1dc53fdb1666db97b286e29cb24b92f5066d705ef0482c4d7",
+  "input_sha256": "2ffb157a90d8b58f6114acbdf9474af21dee3cfabfe507dc0f3c29b02170423f"
+}

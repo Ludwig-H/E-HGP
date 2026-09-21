@@ -76,6 +76,12 @@ de l'index séparée. Une seule observation, hôte partagé non isolé :
 des travaux d'audit concurrents étaient signalés. Aucun gain stable de
 latence ou contrat G4 ne se déduit de ces chronos.
 
+Précision après audit B `f7b220c4` : la charge ne venait pas seulement de
+l'auditeur. Treize des36chronos chevauchent aussi la capture de mutations
+du constructeur ; les qualifications Release/Sanitize étaient également
+lancées pendant la campagne. Les comptes restent ceux des reçus ; ces
+temps ne permettent pas de choisir une configuration performante stable.
+
 | Régime/mode | 8k | 16k | 32k |
 |---|---:|---:|---:|
 | column, Individual | 324,759 | 845,079 | 1 501,299 |
@@ -110,3 +116,8 @@ Les primitives ne fournissent ici ni intérieurs matérialisés, ni catalogue
 dédupliqué, ni parallélisation du census. Aucune trame SemanticKITTI entière,
 aucun GPU et aucun contrat de tour n'ont été exécutés dans cette matrice.
 GCP non utilisé.
+
+Le [plan du prochain raccord](../../docs/RACCORD_NATIF_GLOBAL_PLAN_20260921.md)
+impose des sorties croissant avec n et la couverture des branches à l'échelle,
+notamment les rejets extérieurs partagés absents de cette matrice. Les tests
+de correction variés ne remplacent pas cette couverture de performance.

@@ -1,0 +1,15 @@
+{
+  "case": "outside",
+  "command": [
+    "/workspaces/E-HGP/build/v8_ground_patchwork_sanitize_20260921/mhgp8_patchwork_ground_probe",
+    "--input",
+    "/tmp/mhgp8-ground-preflight.4mfm_a74/outside.bin",
+    "--output",
+    "/tmp/mhgp8-ground-preflight.4mfm_a74/outside_1.u8"
+  ],
+  "exit_code": 0,
+  "stdout": "{\"schema\":\"mhgp8_patchwork_ground_probe_v1\",\"upstream_commit\":\"3e6903a1d5537a4cc2ace897b0bbb98a92d6014c\",\"encoding\":\"u8_0_unknown_1_ground_2_nonground\",\"raw_returns\":4,\"processed_returns\":0,\"algorithm_invocations\":0,\"counts\":{\"unknown\":4,\"ground\":0,\"nonground\":0},\"unknown_reasons\":{\"outside_range\":2,\"numeric_domain\":1,\"upstream_z_sentinel\":1,\"upstream_unassigned\":0},\"nonfinite_reflectance\":0,\"numeric_abs_limit\":1099511627776,\"rnr_enabled\":false,\"reflectance_policy\":\"ignored_preserved_in_raw\",\"fresh_state\":true,\"eigen_threads\":1,\"openmp\":false,\"noise_status_available\":false,\"parameters\":{\"verbose\":false,\"enable_RNR\":false,\"enable_RVPF\":true,\"enable_TGR\":true,\"num_iter\":3,\"num_lpr\":20,\"num_min_pts\":10,\"num_zones\":4,\"num_rings_of_interest\":4,\"RNR_ver_angle_thr\":-15,\"RNR_intensity_thr\":0.20000000000000001,\"sensor_height\":1.7230000000000001,\"th_seeds\":0.125,\"th_dist\":0.125,\"th_seeds_v\":0.25,\"th_dist_v\":0.10000000000000001,\"max_range\":80,\"min_range\":2.7000000000000002,\"uprightness_thr\":0.70699999999999996,\"adaptive_seed_selection_margin\":-1.2,\"intensity_thr\":0,\"max_flatness_storage\":1000,\"max_elevation_storage\":1000,\"num_sectors_each_zone\":[16,32,54,32],\"num_rings_each_zone\":[2,4,4,4],\"elevation_thr\":[0,0,0,0],\"flatness_thr\":[0,0,0,0]},\"input_fnv1a64\":\"41c2e6a8c30b4c4f\",\"mask_fnv1a64\":\"4d25767f9dce13f5\",\"timing_ms\":{\"read\":0.44015199999999999,\"prepare\":0.068436999999999998,\"segment\":0.00033100000000000002,\"mask\":0.00090200000000000002,\"write\":0.071392999999999998,\"wall\":0.58121500000000004}}\n",
+  "stderr": "",
+  "binary_sha256": "a29e0ff665ccefd1dc53fdb1666db97b286e29cb24b92f5066d705ef0482c4d7",
+  "input_sha256": "f33482cf747f65919c2257cdb40b5bf9d5441b3320cd4564a59f05ed3396a7f9"
+}

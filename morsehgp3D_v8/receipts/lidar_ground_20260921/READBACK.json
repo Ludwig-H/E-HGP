@@ -1,0 +1,882 @@
+{
+  "commands": [
+    {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/run_lidar_ground_checks.py",
+        "read",
+        "--path",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 0,
+      "label": "release_normal",
+      "result": {
+        "commands": 44,
+        "completion_sha256": "67d1e6a8428cf92bf892001fd5cd31646677d0627f75ddff9115fd6c7292fa6d",
+        "gcp_used": false,
+        "native_binary_sha256": "4aae71381763e274cc049f79ee47e310b5f92806a01a2d7df74b5795ff64febf",
+        "native_fixtures": 4,
+        "native_refusals": 10,
+        "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6",
+        "preparation_tests": 20,
+        "repeat_count": 3,
+        "scenes": [
+          {
+            "counts": {
+              "ground": 83504,
+              "nonground": 39844,
+              "unknown": 41
+            },
+            "input": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin",
+            "input_sha256": "92e945f37a6cd4a58acc8aa15b275af2e271ecf69c0a44a311d888524473c451",
+            "mask_sha256": "9db3fe5c3f5c4c5d955dde9fcaf61f52ac304f4c23aa68076fd934b589caaf8f",
+            "prepared": {
+              "float32": {
+                "completion_sha256": "35d5cf352729368854f726b02e9701e22467bd275915759c6d48460ee0ff50a4",
+                "dataset_sites": {
+                  "full": 39885,
+                  "half_x_neg": 24591,
+                  "half_x_nonneg": 15294,
+                  "quarter_x_neg_y_neg": 11536,
+                  "quarter_x_neg_y_nonneg": 13055,
+                  "quarter_x_nonneg_y_neg": 8225,
+                  "quarter_x_nonneg_y_nonneg": 7069
+                },
+                "datasets": 7,
+                "ground": {
+                  "counts": {
+                    "ground": 83504,
+                    "nonground": 39844,
+                    "unknown": 41
+                  },
+                  "geometric_exactness": "coordinates_only_not_semantic_ground_or_HGP_qualification",
+                  "mixed_decision_sites": 0,
+                  "original_sites": 123389,
+                  "policy": "only_ground_returns_removed_site_kept_if_any_return_kept",
+                  "removed_returns": 83504,
+                  "removed_sites": 83504,
+                  "retained_returns": 39885,
+                  "retained_sites": 39885
+                },
+                "manifest_sha256": "a79f1e6b57b5b1f5fd965efabf881e18d362f052e84867e7f79e075d297252b0",
+                "parameters": {
+                  "precision_mm": null,
+                  "profile": "float32"
+                },
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_float32",
+                "schema": "mhgp8_lidar_ground_preparation_v1",
+                "status": "passed"
+              },
+              "grid": {
+                "completion_sha256": "717381ebe9e87b1f477ab143a997c74990593835718fd937eb93d04fda07fa89",
+                "dataset_sites": {
+                  "full": 39885,
+                  "half_x_neg": 24591,
+                  "half_x_nonneg": 15294,
+                  "quarter_x_neg_y_neg": 11536,
+                  "quarter_x_neg_y_nonneg": 13055,
+                  "quarter_x_nonneg_y_neg": 8225,
+                  "quarter_x_nonneg_y_nonneg": 7069
+                },
+                "datasets": 7,
+                "ground": {
+                  "counts": {
+                    "ground": 83504,
+                    "nonground": 39844,
+                    "unknown": 41
+                  },
+                  "geometric_exactness": "coordinates_only_not_semantic_ground_or_HGP_qualification",
+                  "mixed_decision_sites": 0,
+                  "original_sites": 123389,
+                  "policy": "only_ground_returns_removed_site_kept_if_any_return_kept",
+                  "removed_returns": 83504,
+                  "removed_sites": 83504,
+                  "retained_returns": 39885,
+                  "retained_sites": 39885
+                },
+                "manifest_sha256": "835ad83073e5af19072541e46fee5829af60917fab370e72558da90c1587caf4",
+                "parameters": {
+                  "precision_mm": "1",
+                  "profile": "grid"
+                },
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid",
+                "schema": "mhgp8_lidar_ground_preparation_v1",
+                "status": "passed"
+              }
+            },
+            "raw_returns": 123389,
+            "timing_ms": [
+              {
+                "mask": 1.078252,
+                "prepare": 5.506236,
+                "read": 1.980055,
+                "segment": 22.943475,
+                "wall": 31.772491,
+                "write": 0.264473
+              },
+              {
+                "mask": 1.053146,
+                "prepare": 5.400277,
+                "read": 1.936554,
+                "segment": 21.186336,
+                "wall": 29.836658,
+                "write": 0.260345
+              },
+              {
+                "mask": 1.036284,
+                "prepare": 5.532084,
+                "read": 2.380221,
+                "segment": 21.163814,
+                "wall": 30.358142,
+                "write": 0.245739
+              }
+            ],
+            "unknown_reasons": {
+              "numeric_domain": 0,
+              "outside_range": 41,
+              "upstream_unassigned": 0,
+              "upstream_z_sentinel": 0
+            }
+          },
+          {
+            "counts": {
+              "ground": 88928,
+              "nonground": 35519,
+              "unknown": 32
+            },
+            "input": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin",
+            "input_sha256": "4dfb5701db9ff36bd592746e08e8fafd4d1c63cba1ef66d2c2791e405b800e80",
+            "mask_sha256": "3e9e95b5f21dc177b192d8c0d2c537a3a0b6fde357b10ed26da641330ce74e51",
+            "prepared": {
+              "float32": {
+                "completion_sha256": "6e10b66613f5730a9613196b1b12d5545a8d78c9a7a5ae47fe3b6abb41eb96e3",
+                "dataset_sites": {
+                  "full": 35551,
+                  "half_x_neg": 19019,
+                  "half_x_nonneg": 16532,
+                  "quarter_x_neg_y_neg": 8074,
+                  "quarter_x_neg_y_nonneg": 10945,
+                  "quarter_x_nonneg_y_neg": 9221,
+                  "quarter_x_nonneg_y_nonneg": 7311
+                },
+                "datasets": 7,
+                "ground": {
+                  "counts": {
+                    "ground": 88928,
+                    "nonground": 35519,
+                    "unknown": 32
+                  },
+                  "geometric_exactness": "coordinates_only_not_semantic_ground_or_HGP_qualification",
+                  "mixed_decision_sites": 0,
+                  "original_sites": 124479,
+                  "policy": "only_ground_returns_removed_site_kept_if_any_return_kept",
+                  "removed_returns": 88928,
+                  "removed_sites": 88928,
+                  "retained_returns": 35551,
+                  "retained_sites": 35551
+                },
+                "manifest_sha256": "28e70a27fd90cfc21c13962890b7bf9c3aa5b9cc36635bb7fe0616d12fb70b69",
+                "parameters": {
+                  "precision_mm": null,
+                  "profile": "float32"
+                },
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_float32",
+                "schema": "mhgp8_lidar_ground_preparation_v1",
+                "status": "passed"
+              },
+              "grid": {
+                "completion_sha256": "bda9426532c61c429c427c3c51ccc4866a70fad8c0595dcb23f75b9fe61a3be2",
+                "dataset_sites": {
+                  "full": 35551,
+                  "half_x_neg": 19019,
+                  "half_x_nonneg": 16532,
+                  "quarter_x_neg_y_neg": 8074,
+                  "quarter_x_neg_y_nonneg": 10945,
+                  "quarter_x_nonneg_y_neg": 9221,
+                  "quarter_x_nonneg_y_nonneg": 7311
+                },
+                "datasets": 7,
+                "ground": {
+                  "counts": {
+                    "ground": 88928,
+                    "nonground": 35519,
+                    "unknown": 32
+                  },
+                  "geometric_exactness": "coordinates_only_not_semantic_ground_or_HGP_qualification",
+                  "mixed_decision_sites": 0,
+                  "original_sites": 124479,
+                  "policy": "only_ground_returns_removed_site_kept_if_any_return_kept",
+                  "removed_returns": 88928,
+                  "removed_sites": 88928,
+                  "retained_returns": 35551,
+                  "retained_sites": 35551
+                },
+                "manifest_sha256": "6c8cb4b949bb5cb0d0e5bbfa94c949191e4b9d734e8d579929741682a9f89f4c",
+                "parameters": {
+                  "precision_mm": "1",
+                  "profile": "grid"
+                },
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid",
+                "schema": "mhgp8_lidar_ground_preparation_v1",
+                "status": "passed"
+              }
+            },
+            "raw_returns": 124479,
+            "timing_ms": [
+              {
+                "mask": 1.090195,
+                "prepare": 5.410266,
+                "read": 1.963865,
+                "segment": 21.141021,
+                "wall": 29.843061,
+                "write": 0.237714
+              },
+              {
+                "mask": 1.041053,
+                "prepare": 5.47646,
+                "read": 1.942575,
+                "segment": 20.792631,
+                "wall": 29.535947,
+                "write": 0.283228
+              },
+              {
+                "mask": 1.069746,
+                "prepare": 5.663839,
+                "read": 2.200727,
+                "segment": 22.036193,
+                "wall": 31.226072,
+                "write": 0.255567
+              }
+            ],
+            "unknown_reasons": {
+              "numeric_domain": 0,
+              "outside_range": 32,
+              "upstream_unassigned": 0,
+              "upstream_z_sentinel": 0
+            }
+          },
+          {
+            "counts": {
+              "ground": 79681,
+              "nonground": 45811,
+              "unknown": 34
+            },
+            "input": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin",
+            "input_sha256": "132f437349e17c00a8a31539f10a3214d9391ae1251293e7794a26540412b5cd",
+            "mask_sha256": "86b2b46791993f7c3401270b369bfc2954a0a9de1370f7f6fa8637ec5d0b1126",
+            "prepared": {
+              "float32": {
+                "completion_sha256": "4365762b8ab5498e9d2778dd2a4547eb2cf009c9e5e8fe2b0161c9c613c49be5",
+                "dataset_sites": {
+                  "full": 45845,
+                  "half_x_neg": 25731,
+                  "half_x_nonneg": 20114,
+                  "quarter_x_neg_y_neg": 16263,
+                  "quarter_x_neg_y_nonneg": 9468,
+                  "quarter_x_nonneg_y_neg": 14828,
+                  "quarter_x_nonneg_y_nonneg": 5286
+                },
+                "datasets": 7,
+                "ground": {
+                  "counts": {
+                    "ground": 79681,
+                    "nonground": 45811,
+                    "unknown": 34
+                  },
+                  "geometric_exactness": "coordinates_only_not_semantic_ground_or_HGP_qualification",
+                  "mixed_decision_sites": 0,
+                  "original_sites": 125526,
+                  "policy": "only_ground_returns_removed_site_kept_if_any_return_kept",
+                  "removed_returns": 79681,
+                  "removed_sites": 79681,
+                  "retained_returns": 45845,
+                  "retained_sites": 45845
+                },
+                "manifest_sha256": "ce1ffee9de0a43a4aed101d880bb769614b9a5cb1583c3e4af6899835eadd387",
+                "parameters": {
+                  "precision_mm": null,
+                  "profile": "float32"
+                },
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_float32",
+                "schema": "mhgp8_lidar_ground_preparation_v1",
+                "status": "passed"
+              },
+              "grid": {
+                "completion_sha256": "2b4f7989cb15d3a90f9be3455acae5ae3c6dc24fd192a9fd65a66498cf8fadbe",
+                "dataset_sites": {
+                  "full": 45845,
+                  "half_x_neg": 25730,
+                  "half_x_nonneg": 20115,
+                  "quarter_x_neg_y_neg": 16262,
+                  "quarter_x_neg_y_nonneg": 9468,
+                  "quarter_x_nonneg_y_neg": 14829,
+                  "quarter_x_nonneg_y_nonneg": 5286
+                },
+                "datasets": 7,
+                "ground": {
+                  "counts": {
+                    "ground": 79681,
+                    "nonground": 45811,
+                    "unknown": 34
+                  },
+                  "geometric_exactness": "coordinates_only_not_semantic_ground_or_HGP_qualification",
+                  "mixed_decision_sites": 0,
+                  "original_sites": 125526,
+                  "policy": "only_ground_returns_removed_site_kept_if_any_return_kept",
+                  "removed_returns": 79681,
+                  "removed_sites": 79681,
+                  "retained_returns": 45845,
+                  "retained_sites": 45845
+                },
+                "manifest_sha256": "a37d4e46b529885b9fc370a25e361a302762b95109f00928b2b2e96fcac799da",
+                "parameters": {
+                  "precision_mm": "1",
+                  "profile": "grid"
+                },
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid",
+                "schema": "mhgp8_lidar_ground_preparation_v1",
+                "status": "passed"
+              }
+            },
+            "raw_returns": 125526,
+            "timing_ms": [
+              {
+                "mask": 0.865956,
+                "prepare": 5.59455,
+                "read": 2.068911,
+                "segment": 20.35207,
+                "wall": 29.105966,
+                "write": 0.224479
+              },
+              {
+                "mask": 0.985489,
+                "prepare": 5.439261,
+                "read": 1.980796,
+                "segment": 21.271244,
+                "wall": 29.926576,
+                "write": 0.249786
+              },
+              {
+                "mask": 1.116874,
+                "prepare": 5.541391,
+                "read": 2.044776,
+                "segment": 21.366482,
+                "wall": 30.300064,
+                "write": 0.230541
+              }
+            ],
+            "unknown_reasons": {
+              "numeric_domain": 0,
+              "outside_range": 34,
+              "upstream_unassigned": 0,
+              "upstream_z_sentinel": 0
+            }
+          }
+        ],
+        "schema": "mhgp8_lidar_ground_checks_v1",
+        "scope": "approximate_ground_mask_and_exact_retained_coordinates_not_segmentation_quality_or_HGP",
+        "status": "passed"
+      },
+      "stderr": "",
+      "stderr_base64": "",
+      "stdout": "{\"commands\": 44, \"completion_sha256\": \"67d1e6a8428cf92bf892001fd5cd31646677d0627f75ddff9115fd6c7292fa6d\", \"gcp_used\": false, \"native_binary_sha256\": \"4aae71381763e274cc049f79ee47e310b5f92806a01a2d7df74b5795ff64febf\", \"native_fixtures\": 4, \"native_refusals\": 10, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6\", \"preparation_tests\": 20, \"repeat_count\": 3, \"scenes\": [{\"counts\": {\"ground\": 83504, \"nonground\": 39844, \"unknown\": 41}, \"input\": \"/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin\", \"input_sha256\": \"92e945f37a6cd4a58acc8aa15b275af2e271ecf69c0a44a311d888524473c451\", \"mask_sha256\": \"9db3fe5c3f5c4c5d955dde9fcaf61f52ac304f4c23aa68076fd934b589caaf8f\", \"prepared\": {\"float32\": {\"completion_sha256\": \"35d5cf352729368854f726b02e9701e22467bd275915759c6d48460ee0ff50a4\", \"dataset_sites\": {\"full\": 39885, \"half_x_neg\": 24591, \"half_x_nonneg\": 15294, \"quarter_x_neg_y_neg\": 11536, \"quarter_x_neg_y_nonneg\": 13055, \"quarter_x_nonneg_y_neg\": 8225, \"quarter_x_nonneg_y_nonneg\": 7069}, \"datasets\": 7, \"ground\": {\"counts\": {\"ground\": 83504, \"nonground\": 39844, \"unknown\": 41}, \"geometric_exactness\": \"coordinates_only_not_semantic_ground_or_HGP_qualification\", \"mixed_decision_sites\": 0, \"original_sites\": 123389, \"policy\": \"only_ground_returns_removed_site_kept_if_any_return_kept\", \"removed_returns\": 83504, \"removed_sites\": 83504, \"retained_returns\": 39885, \"retained_sites\": 39885}, \"manifest_sha256\": \"a79f1e6b57b5b1f5fd965efabf881e18d362f052e84867e7f79e075d297252b0\", \"parameters\": {\"precision_mm\": null, \"profile\": \"float32\"}, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_float32\", \"schema\": \"mhgp8_lidar_ground_preparation_v1\", \"status\": \"passed\"}, \"grid\": {\"completion_sha256\": \"717381ebe9e87b1f477ab143a997c74990593835718fd937eb93d04fda07fa89\", \"dataset_sites\": {\"full\": 39885, \"half_x_neg\": 24591, \"half_x_nonneg\": 15294, \"quarter_x_neg_y_neg\": 11536, \"quarter_x_neg_y_nonneg\": 13055, \"quarter_x_nonneg_y_neg\": 8225, \"quarter_x_nonneg_y_nonneg\": 7069}, \"datasets\": 7, \"ground\": {\"counts\": {\"ground\": 83504, \"nonground\": 39844, \"unknown\": 41}, \"geometric_exactness\": \"coordinates_only_not_semantic_ground_or_HGP_qualification\", \"mixed_decision_sites\": 0, \"original_sites\": 123389, \"policy\": \"only_ground_returns_removed_site_kept_if_any_return_kept\", \"removed_returns\": 83504, \"removed_sites\": 83504, \"retained_returns\": 39885, \"retained_sites\": 39885}, \"manifest_sha256\": \"835ad83073e5af19072541e46fee5829af60917fab370e72558da90c1587caf4\", \"parameters\": {\"precision_mm\": \"1\", \"profile\": \"grid\"}, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid\", \"schema\": \"mhgp8_lidar_ground_preparation_v1\", \"status\": \"passed\"}}, \"raw_returns\": 123389, \"timing_ms\": [{\"mask\": 1.078252, \"prepare\": 5.506236, \"read\": 1.980055, \"segment\": 22.943475, \"wall\": 31.772491, \"write\": 0.264473}, {\"mask\": 1.053146, \"prepare\": 5.400277, \"read\": 1.936554, \"segment\": 21.186336, \"wall\": 29.836658, \"write\": 0.260345}, {\"mask\": 1.036284, \"prepare\": 5.532084, \"read\": 2.380221, \"segment\": 21.163814, \"wall\": 30.358142, \"write\": 0.245739}], \"unknown_reasons\": {\"numeric_domain\": 0, \"outside_range\": 41, \"upstream_unassigned\": 0, \"upstream_z_sentinel\": 0}}, {\"counts\": {\"ground\": 88928, \"nonground\": 35519, \"unknown\": 32}, \"input\": \"/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin\", \"input_sha256\": \"4dfb5701db9ff36bd592746e08e8fafd4d1c63cba1ef66d2c2791e405b800e80\", \"mask_sha256\": \"3e9e95b5f21dc177b192d8c0d2c537a3a0b6fde357b10ed26da641330ce74e51\", \"prepared\": {\"float32\": {\"completion_sha256\": \"6e10b66613f5730a9613196b1b12d5545a8d78c9a7a5ae47fe3b6abb41eb96e3\", \"dataset_sites\": {\"full\": 35551, \"half_x_neg\": 19019, \"half_x_nonneg\": 16532, \"quarter_x_neg_y_neg\": 8074, \"quarter_x_neg_y_nonneg\": 10945, \"quarter_x_nonneg_y_neg\": 9221, \"quarter_x_nonneg_y_nonneg\": 7311}, \"datasets\": 7, \"ground\": {\"counts\": {\"ground\": 88928, \"nonground\": 35519, \"unknown\": 32}, \"geometric_exactness\": \"coordinates_only_not_semantic_ground_or_HGP_qualification\", \"mixed_decision_sites\": 0, \"original_sites\": 124479, \"policy\": \"only_ground_returns_removed_site_kept_if_any_return_kept\", \"removed_returns\": 88928, \"removed_sites\": 88928, \"retained_returns\": 35551, \"retained_sites\": 35551}, \"manifest_sha256\": \"28e70a27fd90cfc21c13962890b7bf9c3aa5b9cc36635bb7fe0616d12fb70b69\", \"parameters\": {\"precision_mm\": null, \"profile\": \"float32\"}, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_float32\", \"schema\": \"mhgp8_lidar_ground_preparation_v1\", \"status\": \"passed\"}, \"grid\": {\"completion_sha256\": \"bda9426532c61c429c427c3c51ccc4866a70fad8c0595dcb23f75b9fe61a3be2\", \"dataset_sites\": {\"full\": 35551, \"half_x_neg\": 19019, \"half_x_nonneg\": 16532, \"quarter_x_neg_y_neg\": 8074, \"quarter_x_neg_y_nonneg\": 10945, \"quarter_x_nonneg_y_neg\": 9221, \"quarter_x_nonneg_y_nonneg\": 7311}, \"datasets\": 7, \"ground\": {\"counts\": {\"ground\": 88928, \"nonground\": 35519, \"unknown\": 32}, \"geometric_exactness\": \"coordinates_only_not_semantic_ground_or_HGP_qualification\", \"mixed_decision_sites\": 0, \"original_sites\": 124479, \"policy\": \"only_ground_returns_removed_site_kept_if_any_return_kept\", \"removed_returns\": 88928, \"removed_sites\": 88928, \"retained_returns\": 35551, \"retained_sites\": 35551}, \"manifest_sha256\": \"6c8cb4b949bb5cb0d0e5bbfa94c949191e4b9d734e8d579929741682a9f89f4c\", \"parameters\": {\"precision_mm\": \"1\", \"profile\": \"grid\"}, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid\", \"schema\": \"mhgp8_lidar_ground_preparation_v1\", \"status\": \"passed\"}}, \"raw_returns\": 124479, \"timing_ms\": [{\"mask\": 1.090195, \"prepare\": 5.410266, \"read\": 1.963865, \"segment\": 21.141021, \"wall\": 29.843061, \"write\": 0.237714}, {\"mask\": 1.041053, \"prepare\": 5.47646, \"read\": 1.942575, \"segment\": 20.792631, \"wall\": 29.535947, \"write\": 0.283228}, {\"mask\": 1.069746, \"prepare\": 5.663839, \"read\": 2.200727, \"segment\": 22.036193, \"wall\": 31.226072, \"write\": 0.255567}], \"unknown_reasons\": {\"numeric_domain\": 0, \"outside_range\": 32, \"upstream_unassigned\": 0, \"upstream_z_sentinel\": 0}}, {\"counts\": {\"ground\": 79681, \"nonground\": 45811, \"unknown\": 34}, \"input\": \"/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin\", \"input_sha256\": \"132f437349e17c00a8a31539f10a3214d9391ae1251293e7794a26540412b5cd\", \"mask_sha256\": \"86b2b46791993f7c3401270b369bfc2954a0a9de1370f7f6fa8637ec5d0b1126\", \"prepared\": {\"float32\": {\"completion_sha256\": \"4365762b8ab5498e9d2778dd2a4547eb2cf009c9e5e8fe2b0161c9c613c49be5\", \"dataset_sites\": {\"full\": 45845, \"half_x_neg\": 25731, \"half_x_nonneg\": 20114, \"quarter_x_neg_y_neg\": 16263, \"quarter_x_neg_y_nonneg\": 9468, \"quarter_x_nonneg_y_neg\": 14828, \"quarter_x_nonneg_y_nonneg\": 5286}, \"datasets\": 7, \"ground\": {\"counts\": {\"ground\": 79681, \"nonground\": 45811, \"unknown\": 34}, \"geometric_exactness\": \"coordinates_only_not_semantic_ground_or_HGP_qualification\", \"mixed_decision_sites\": 0, \"original_sites\": 125526, \"policy\": \"only_ground_returns_removed_site_kept_if_any_return_kept\", \"removed_returns\": 79681, \"removed_sites\": 79681, \"retained_returns\": 45845, \"retained_sites\": 45845}, \"manifest_sha256\": \"ce1ffee9de0a43a4aed101d880bb769614b9a5cb1583c3e4af6899835eadd387\", \"parameters\": {\"precision_mm\": null, \"profile\": \"float32\"}, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_float32\", \"schema\": \"mhgp8_lidar_ground_preparation_v1\", \"status\": \"passed\"}, \"grid\": {\"completion_sha256\": \"2b4f7989cb15d3a90f9be3455acae5ae3c6dc24fd192a9fd65a66498cf8fadbe\", \"dataset_sites\": {\"full\": 45845, \"half_x_neg\": 25730, \"half_x_nonneg\": 20115, \"quarter_x_neg_y_neg\": 16262, \"quarter_x_neg_y_nonneg\": 9468, \"quarter_x_nonneg_y_neg\": 14829, \"quarter_x_nonneg_y_nonneg\": 5286}, \"datasets\": 7, \"ground\": {\"counts\": {\"ground\": 79681, \"nonground\": 45811, \"unknown\": 34}, \"geometric_exactness\": \"coordinates_only_not_semantic_ground_or_HGP_qualification\", \"mixed_decision_sites\": 0, \"original_sites\": 125526, \"policy\": \"only_ground_returns_removed_site_kept_if_any_return_kept\", \"removed_returns\": 79681, \"removed_sites\": 79681, \"retained_returns\": 45845, \"retained_sites\": 45845}, \"manifest_sha256\": \"a37d4e46b529885b9fc370a25e361a302762b95109f00928b2b2e96fcac799da\", \"parameters\": {\"precision_mm\": \"1\", \"profile\": \"grid\"}, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid\", \"schema\": \"mhgp8_lidar_ground_preparation_v1\", \"status\": \"passed\"}}, \"raw_returns\": 125526, \"timing_ms\": [{\"mask\": 0.865956, \"prepare\": 5.59455, \"read\": 2.068911, \"segment\": 20.35207, \"wall\": 29.105966, \"write\": 0.224479}, {\"mask\": 0.985489, \"prepare\": 5.439261, \"read\": 1.980796, \"segment\": 21.271244, \"wall\": 29.926576, \"write\": 0.249786}, {\"mask\": 1.116874, \"prepare\": 5.541391, \"read\": 2.044776, \"segment\": 21.366482, \"wall\": 30.300064, \"write\": 0.230541}], \"unknown_reasons\": {\"numeric_domain\": 0, \"outside_range\": 34, \"upstream_unassigned\": 0, \"upstream_z_sentinel\": 0}}], \"schema\": \"mhgp8_lidar_ground_checks_v1\", \"scope\": \"approximate_ground_mask_and_exact_retained_coordinates_not_segmentation_quality_or_HGP\", \"status\": \"passed\"}\n",
+      "stdout_base64": "eyJjb21tYW5kcyI6IDQ0LCAiY29tcGxldGlvbl9zaGEyNTYiOiAiNjdkMWU2YTg0MjhjZjkyYmY4OTIwMDFmZDVjZDMxNjQ2Njc3ZDA2MjdmNzVkZGZmOTExNWZkNmM3MjkyZmE2ZCIsICJnY3BfdXNlZCI6IGZhbHNlLCAibmF0aXZlX2JpbmFyeV9zaGEyNTYiOiAiNGFhZTcxMzgxNzYzZTI3NGNjMDQ5Zjc5ZWU0N2UzMTBiNWY5MjgwNmEwMWEyZDdkZjc0YjU3OTVmZjY0ZmViZiIsICJuYXRpdmVfZml4dHVyZXMiOiA0LCAibmF0aXZlX3JlZnVzYWxzIjogMTAsICJwYXRoIjogIi93b3Jrc3BhY2VzL0UtSEdQL21vcnNlaGdwM0RfdjgvcmVjZWlwdHMvbGlkYXJfZ3JvdW5kXzIwMjYwOTIxL3JlbGVhc2UvZ3JvdW5kX2ZxNjR4cV82IiwgInByZXBhcmF0aW9uX3Rlc3RzIjogMjAsICJyZXBlYXRfY291bnQiOiAzLCAic2NlbmVzIjogW3siY291bnRzIjogeyJncm91bmQiOiA4MzUwNCwgIm5vbmdyb3VuZCI6IDM5ODQ0LCAidW5rbm93biI6IDQxfSwgImlucHV0IjogIi93b3Jrc3BhY2VzL0UtSEdQL21vcnNlaGdwM0RfdjgvYXVkaXRzL2xpZGFyMDhfMjAyNjA5MTQvZGF0YS9kYXRhc2V0L3NlcXVlbmNlcy8wOC92ZWxvZHluZS8wMDAwMDAuYmluIiwgImlucHV0X3NoYTI1NiI6ICI5MmU5NDVmMzdhNmNkNGE1OGFjYzhhYTE1YjI3NWFmMmUyNzFlY2Y2OWMwYTQ0YTMxMWQ4ODg1MjQ0NzNjNDUxIiwgIm1hc2tfc2hhMjU2IjogIjlkYjNmZTVjM2Y1YzRjNWQ5NTVkZGU5ZmNhZjYxZjUyYWMzMDRmNGMyM2FhNjgwNzZmZDkzNGI1ODljYWFmOGYiLCAicHJlcGFyZWQiOiB7ImZsb2F0MzIiOiB7ImNvbXBsZXRpb25fc2hhMjU2IjogIjM1ZDVjZjM1MjcyOTM2ODg1NGY3MjZiMDJlOTcwMWUyMjQ2N2JkMjc1OTE1NzU5YzZkNDg0NjBlZTBmZjUwYTQiLCAiZGF0YXNldF9zaXRlcyI6IHsiZnVsbCI6IDM5ODg1LCAiaGFsZl94X25lZyI6IDI0NTkxLCAiaGFsZl94X25vbm5lZyI6IDE1Mjk0LCAicXVhcnRlcl94X25lZ195X25lZyI6IDExNTM2LCAicXVhcnRlcl94X25lZ195X25vbm5lZyI6IDEzMDU1LCAicXVhcnRlcl94X25vbm5lZ195X25lZyI6IDgyMjUsICJxdWFydGVyX3hfbm9ubmVnX3lfbm9ubmVnIjogNzA2OX0sICJkYXRhc2V0cyI6IDcsICJncm91bmQiOiB7ImNvdW50cyI6IHsiZ3JvdW5kIjogODM1MDQsICJub25ncm91bmQiOiAzOTg0NCwgInVua25vd24iOiA0MX0sICJnZW9tZXRyaWNfZXhhY3RuZXNzIjogImNvb3JkaW5hdGVzX29ubHlfbm90X3NlbWFudGljX2dyb3VuZF9vcl9IR1BfcXVhbGlmaWNhdGlvbiIsICJtaXhlZF9kZWNpc2lvbl9zaXRlcyI6IDAsICJvcmlnaW5hbF9zaXRlcyI6IDEyMzM4OSwgInBvbGljeSI6ICJvbmx5X2dyb3VuZF9yZXR1cm5zX3JlbW92ZWRfc2l0ZV9rZXB0X2lmX2FueV9yZXR1cm5fa2VwdCIsICJyZW1vdmVkX3JldHVybnMiOiA4MzUwNCwgInJlbW92ZWRfc2l0ZXMiOiA4MzUwNCwgInJldGFpbmVkX3JldHVybnMiOiAzOTg4NSwgInJldGFpbmVkX3NpdGVzIjogMzk4ODV9LCAibWFuaWZlc3Rfc2hhMjU2IjogImE3OWYxZTZiNTdiNWIxZjVmZDk2NWVmYWJmODgxZTE4ZDM2MmYwNTJlODQ4NjdlN2Y3OWUwNzVkMjk3MjUyYjAiLCAicGFyYW1ldGVycyI6IHsicHJlY2lzaW9uX21tIjogbnVsbCwgInByb2ZpbGUiOiAiZmxvYXQzMiJ9LCAicGF0aCI6ICIvd29ya3NwYWNlcy9FLUhHUC9tb3JzZWhncDNEX3Y4L3JlY2VpcHRzL2xpZGFyX2dyb3VuZF8yMDI2MDkyMS9yZWxlYXNlL2dyb3VuZF9mcTY0eHFfNi9zY2VuZV8wMF9mbG9hdDMyIiwgInNjaGVtYSI6ICJtaGdwOF9saWRhcl9ncm91bmRfcHJlcGFyYXRpb25fdjEiLCAic3RhdHVzIjogInBhc3NlZCJ9LCAiZ3JpZCI6IHsiY29tcGxldGlvbl9zaGEyNTYiOiAiNzE3MzgxZWJlOWU4N2IxZjQ3N2FiMTQzYTk5N2M3NDk5MDU5MzgzNTcxOGZkOTM3ZWI5M2QwNGZkYTA3ZmE4OSIsICJkYXRhc2V0X3NpdGVzIjogeyJmdWxsIjogMzk4ODUsICJoYWxmX3hfbmVnIjogMjQ1OTEsICJoYWxmX3hfbm9ubmVnIjogMTUyOTQsICJxdWFydGVyX3hfbmVnX3lfbmVnIjogMTE1MzYsICJxdWFydGVyX3hfbmVnX3lfbm9ubmVnIjogMTMwNTUsICJxdWFydGVyX3hfbm9ubmVnX3lfbmVnIjogODIyNSwgInF1YXJ0ZXJfeF9ub25uZWdfeV9ub25uZWciOiA3MDY5fSwgImRhdGFzZXRzIjogNywgImdyb3VuZCI6IHsiY291bnRzIjogeyJncm91bmQiOiA4MzUwNCwgIm5vbmdyb3VuZCI6IDM5ODQ0LCAidW5rbm93biI6IDQxfSwgImdlb21ldHJpY19leGFjdG5lc3MiOiAiY29vcmRpbmF0ZXNfb25seV9ub3Rfc2VtYW50aWNfZ3JvdW5kX29yX0hHUF9xdWFsaWZpY2F0aW9uIiwgIm1peGVkX2RlY2lzaW9uX3NpdGVzIjogMCwgIm9yaWdpbmFsX3NpdGVzIjogMTIzMzg5LCAicG9saWN5IjogIm9ubHlfZ3JvdW5kX3JldHVybnNfcmVtb3ZlZF9zaXRlX2tlcHRfaWZfYW55X3JldHVybl9rZXB0IiwgInJlbW92ZWRfcmV0dXJucyI6IDgzNTA0LCAicmVtb3ZlZF9zaXRlcyI6IDgzNTA0LCAicmV0YWluZWRfcmV0dXJucyI6IDM5ODg1LCAicmV0YWluZWRfc2l0ZXMiOiAzOTg4NX0sICJtYW5pZmVzdF9zaGEyNTYiOiAiODM1YWQ4MzA3M2U1YWYxOTA3MjU0MWU0NmZlZTU4MjlhZjYwOTE3ZmFiMzcwZTcyNTU4ZGE5MGMxNTg3Y2FmNCIsICJwYXJhbWV0ZXJzIjogeyJwcmVjaXNpb25fbW0iOiAiMSIsICJwcm9maWxlIjogImdyaWQifSwgInBhdGgiOiAiL3dvcmtzcGFjZXMvRS1IR1AvbW9yc2VoZ3AzRF92OC9yZWNlaXB0cy9saWRhcl9ncm91bmRfMjAyNjA5MjEvcmVsZWFzZS9ncm91bmRfZnE2NHhxXzYvc2NlbmVfMDBfZ3JpZCIsICJzY2hlbWEiOiAibWhncDhfbGlkYXJfZ3JvdW5kX3ByZXBhcmF0aW9uX3YxIiwgInN0YXR1cyI6ICJwYXNzZWQifX0sICJyYXdfcmV0dXJucyI6IDEyMzM4OSwgInRpbWluZ19tcyI6IFt7Im1hc2siOiAxLjA3ODI1MiwgInByZXBhcmUiOiA1LjUwNjIzNiwgInJlYWQiOiAxLjk4MDA1NSwgInNlZ21lbnQiOiAyMi45NDM0NzUsICJ3YWxsIjogMzEuNzcyNDkxLCAid3JpdGUiOiAwLjI2NDQ3M30sIHsibWFzayI6IDEuMDUzMTQ2LCAicHJlcGFyZSI6IDUuNDAwMjc3LCAicmVhZCI6IDEuOTM2NTU0LCAic2VnbWVudCI6IDIxLjE4NjMzNiwgIndhbGwiOiAyOS44MzY2NTgsICJ3cml0ZSI6IDAuMjYwMzQ1fSwgeyJtYXNrIjogMS4wMzYyODQsICJwcmVwYXJlIjogNS41MzIwODQsICJyZWFkIjogMi4zODAyMjEsICJzZWdtZW50IjogMjEuMTYzODE0LCAid2FsbCI6IDMwLjM1ODE0MiwgIndyaXRlIjogMC4yNDU3Mzl9XSwgInVua25vd25fcmVhc29ucyI6IHsibnVtZXJpY19kb21haW4iOiAwLCAib3V0c2lkZV9yYW5nZSI6IDQxLCAidXBzdHJlYW1fdW5hc3NpZ25lZCI6IDAsICJ1cHN0cmVhbV96X3NlbnRpbmVsIjogMH19LCB7ImNvdW50cyI6IHsiZ3JvdW5kIjogODg5MjgsICJub25ncm91bmQiOiAzNTUxOSwgInVua25vd24iOiAzMn0sICJpbnB1dCI6ICIvd29ya3NwYWNlcy9FLUhHUC9tb3JzZWhncDNEX3Y4L2F1ZGl0cy9saWRhcjA4XzIwMjYwOTE0L2RhdGEvZGF0YXNldC9zZXF1ZW5jZXMvMDgvdmVsb2R5bmUvMDAwMTAwLmJpbiIsICJpbnB1dF9zaGEyNTYiOiAiNGRmYjU3MDFkYjlmZjM2YmQ1OTI3NDZlMDhlOGZhZmQ0ZDFjNjNjYmExZWY2NmQyYzI3OTFlNDA1YjgwMGU4MCIsICJtYXNrX3NoYTI1NiI6ICIzZTllOTViNWYyMWRjMTc3YjE5MmQ4YzBkMmM1MzdhM2EwYjZmZGUzNTdiMTBlZDI2ZGE2NDEzMzBjZTc0ZTUxIiwgInByZXBhcmVkIjogeyJmbG9hdDMyIjogeyJjb21wbGV0aW9uX3NoYTI1NiI6ICI2ZTEwYjY2NjEzZjU3MzBhOTYxMzE5NmIxYjEyZDU1NDVhOGQ3OGM5YTdhNWFlNDdmZTNiNmFiYjQxZWI5NmUzIiwgImRhdGFzZXRfc2l0ZXMiOiB7ImZ1bGwiOiAzNTU1MSwgImhhbGZfeF9uZWciOiAxOTAxOSwgImhhbGZfeF9ub25uZWciOiAxNjUzMiwgInF1YXJ0ZXJfeF9uZWdfeV9uZWciOiA4MDc0LCAicXVhcnRlcl94X25lZ195X25vbm5lZyI6IDEwOTQ1LCAicXVhcnRlcl94X25vbm5lZ195X25lZyI6IDkyMjEsICJxdWFydGVyX3hfbm9ubmVnX3lfbm9ubmVnIjogNzMxMX0sICJkYXRhc2V0cyI6IDcsICJncm91bmQiOiB7ImNvdW50cyI6IHsiZ3JvdW5kIjogODg5MjgsICJub25ncm91bmQiOiAzNTUxOSwgInVua25vd24iOiAzMn0sICJnZW9tZXRyaWNfZXhhY3RuZXNzIjogImNvb3JkaW5hdGVzX29ubHlfbm90X3NlbWFudGljX2dyb3VuZF9vcl9IR1BfcXVhbGlmaWNhdGlvbiIsICJtaXhlZF9kZWNpc2lvbl9zaXRlcyI6IDAsICJvcmlnaW5hbF9zaXRlcyI6IDEyNDQ3OSwgInBvbGljeSI6ICJvbmx5X2dyb3VuZF9yZXR1cm5zX3JlbW92ZWRfc2l0ZV9rZXB0X2lmX2FueV9yZXR1cm5fa2VwdCIsICJyZW1vdmVkX3JldHVybnMiOiA4ODkyOCwgInJlbW92ZWRfc2l0ZXMiOiA4ODkyOCwgInJldGFpbmVkX3JldHVybnMiOiAzNTU1MSwgInJldGFpbmVkX3NpdGVzIjogMzU1NTF9LCAibWFuaWZlc3Rfc2hhMjU2IjogIjI4ZTcwYTI3ZmQ5MGNmYzIxYzEzOTYyODkwYjdiZjljM2FhNWI5Y2MzNjYzNWJiN2ZlMDYxNmQxMmZiNzBiNjkiLCAicGFyYW1ldGVycyI6IHsicHJlY2lzaW9uX21tIjogbnVsbCwgInByb2ZpbGUiOiAiZmxvYXQzMiJ9LCAicGF0aCI6ICIvd29ya3NwYWNlcy9FLUhHUC9tb3JzZWhncDNEX3Y4L3JlY2VpcHRzL2xpZGFyX2dyb3VuZF8yMDI2MDkyMS9yZWxlYXNlL2dyb3VuZF9mcTY0eHFfNi9zY2VuZV8wMV9mbG9hdDMyIiwgInNjaGVtYSI6ICJtaGdwOF9saWRhcl9ncm91bmRfcHJlcGFyYXRpb25fdjEiLCAic3RhdHVzIjogInBhc3NlZCJ9LCAiZ3JpZCI6IHsiY29tcGxldGlvbl9zaGEyNTYiOiAiYmRhOTQyNjUzMmM2MWM0MjljNDI3YzNjNTFjY2M0ODY2YTcwZmFkOGMwNTk1ZGNiMjNmNzViOWZlNjFhM2JlMiIsICJkYXRhc2V0X3NpdGVzIjogeyJmdWxsIjogMzU1NTEsICJoYWxmX3hfbmVnIjogMTkwMTksICJoYWxmX3hfbm9ubmVnIjogMTY1MzIsICJxdWFydGVyX3hfbmVnX3lfbmVnIjogODA3NCwgInF1YXJ0ZXJfeF9uZWdfeV9ub25uZWciOiAxMDk0NSwgInF1YXJ0ZXJfeF9ub25uZWdfeV9uZWciOiA5MjIxLCAicXVhcnRlcl94X25vbm5lZ195X25vbm5lZyI6IDczMTF9LCAiZGF0YXNldHMiOiA3LCAiZ3JvdW5kIjogeyJjb3VudHMiOiB7Imdyb3VuZCI6IDg4OTI4LCAibm9uZ3JvdW5kIjogMzU1MTksICJ1bmtub3duIjogMzJ9LCAiZ2VvbWV0cmljX2V4YWN0bmVzcyI6ICJjb29yZGluYXRlc19vbmx5X25vdF9zZW1hbnRpY19ncm91bmRfb3JfSEdQX3F1YWxpZmljYXRpb24iLCAibWl4ZWRfZGVjaXNpb25fc2l0ZXMiOiAwLCAib3JpZ2luYWxfc2l0ZXMiOiAxMjQ0NzksICJwb2xpY3kiOiAib25seV9ncm91bmRfcmV0dXJuc19yZW1vdmVkX3NpdGVfa2VwdF9pZl9hbnlfcmV0dXJuX2tlcHQiLCAicmVtb3ZlZF9yZXR1cm5zIjogODg5MjgsICJyZW1vdmVkX3NpdGVzIjogODg5MjgsICJyZXRhaW5lZF9yZXR1cm5zIjogMzU1NTEsICJyZXRhaW5lZF9zaXRlcyI6IDM1NTUxfSwgIm1hbmlmZXN0X3NoYTI1NiI6ICI2YzhjYjRiOTQ5YmI1Y2IwZDBlNWJiZmE5NGM5NDkxOTFlNGI5ZDczNGU4ZDU3OTkyOTc0MTY4MmE5Zjg5ZjRjIiwgInBhcmFtZXRlcnMiOiB7InByZWNpc2lvbl9tbSI6ICIxIiwgInByb2ZpbGUiOiAiZ3JpZCJ9LCAicGF0aCI6ICIvd29ya3NwYWNlcy9FLUhHUC9tb3JzZWhncDNEX3Y4L3JlY2VpcHRzL2xpZGFyX2dyb3VuZF8yMDI2MDkyMS9yZWxlYXNlL2dyb3VuZF9mcTY0eHFfNi9zY2VuZV8wMV9ncmlkIiwgInNjaGVtYSI6ICJtaGdwOF9saWRhcl9ncm91bmRfcHJlcGFyYXRpb25fdjEiLCAic3RhdHVzIjogInBhc3NlZCJ9fSwgInJhd19yZXR1cm5zIjogMTI0NDc5LCAidGltaW5nX21zIjogW3sibWFzayI6IDEuMDkwMTk1LCAicHJlcGFyZSI6IDUuNDEwMjY2LCAicmVhZCI6IDEuOTYzODY1LCAic2VnbWVudCI6IDIxLjE0MTAyMSwgIndhbGwiOiAyOS44NDMwNjEsICJ3cml0ZSI6IDAuMjM3NzE0fSwgeyJtYXNrIjogMS4wNDEwNTMsICJwcmVwYXJlIjogNS40NzY0NiwgInJlYWQiOiAxLjk0MjU3NSwgInNlZ21lbnQiOiAyMC43OTI2MzEsICJ3YWxsIjogMjkuNTM1OTQ3LCAid3JpdGUiOiAwLjI4MzIyOH0sIHsibWFzayI6IDEuMDY5NzQ2LCAicHJlcGFyZSI6IDUuNjYzODM5LCAicmVhZCI6IDIuMjAwNzI3LCAic2VnbWVudCI6IDIyLjAzNjE5MywgIndhbGwiOiAzMS4yMjYwNzIsICJ3cml0ZSI6IDAuMjU1NTY3fV0sICJ1bmtub3duX3JlYXNvbnMiOiB7Im51bWVyaWNfZG9tYWluIjogMCwgIm91dHNpZGVfcmFuZ2UiOiAzMiwgInVwc3RyZWFtX3VuYXNzaWduZWQiOiAwLCAidXBzdHJlYW1fel9zZW50aW5lbCI6IDB9fSwgeyJjb3VudHMiOiB7Imdyb3VuZCI6IDc5NjgxLCAibm9uZ3JvdW5kIjogNDU4MTEsICJ1bmtub3duIjogMzR9LCAiaW5wdXQiOiAiL3dvcmtzcGFjZXMvRS1IR1AvbW9yc2VoZ3AzRF92OC9hdWRpdHMvbGlkYXIwOF8yMDI2MDkxNC9kYXRhL2RhdGFzZXQvc2VxdWVuY2VzLzA4L3ZlbG9keW5lLzAwMDIwMC5iaW4iLCAiaW5wdXRfc2hhMjU2IjogIjEzMmY0MzczNDllMTdjMDBhOGEzMTUzOWYxMGEzMjE0ZDkzOTFhZTEyNTEyOTNlNzc5NGEyNjU0MDQxMmI1Y2QiLCAibWFza19zaGEyNTYiOiAiODZiMmI0Njc5MTk5M2Y3YzM0MDEyNzBiMzY5YmZjMjk1NGEwYTlkZTEzNzBmN2Y2ZmE4NjM3ZWM1ZDBiMTEyNiIsICJwcmVwYXJlZCI6IHsiZmxvYXQzMiI6IHsiY29tcGxldGlvbl9zaGEyNTYiOiAiNDM2NTc2MmI4YWI1NDk4ZTlkMjc3OGRkMmE0NTQ3ZWIyY2YwMDljOWU1ZThmZTJiMDE2MWM5YzYxM2M0OWJlNSIsICJkYXRhc2V0X3NpdGVzIjogeyJmdWxsIjogNDU4NDUsICJoYWxmX3hfbmVnIjogMjU3MzEsICJoYWxmX3hfbm9ubmVnIjogMjAxMTQsICJxdWFydGVyX3hfbmVnX3lfbmVnIjogMTYyNjMsICJxdWFydGVyX3hfbmVnX3lfbm9ubmVnIjogOTQ2OCwgInF1YXJ0ZXJfeF9ub25uZWdfeV9uZWciOiAxNDgyOCwgInF1YXJ0ZXJfeF9ub25uZWdfeV9ub25uZWciOiA1Mjg2fSwgImRhdGFzZXRzIjogNywgImdyb3VuZCI6IHsiY291bnRzIjogeyJncm91bmQiOiA3OTY4MSwgIm5vbmdyb3VuZCI6IDQ1ODExLCAidW5rbm93biI6IDM0fSwgImdlb21ldHJpY19leGFjdG5lc3MiOiAiY29vcmRpbmF0ZXNfb25seV9ub3Rfc2VtYW50aWNfZ3JvdW5kX29yX0hHUF9xdWFsaWZpY2F0aW9uIiwgIm1peGVkX2RlY2lzaW9uX3NpdGVzIjogMCwgIm9yaWdpbmFsX3NpdGVzIjogMTI1NTI2LCAicG9saWN5IjogIm9ubHlfZ3JvdW5kX3JldHVybnNfcmVtb3ZlZF9zaXRlX2tlcHRfaWZfYW55X3JldHVybl9rZXB0IiwgInJlbW92ZWRfcmV0dXJucyI6IDc5NjgxLCAicmVtb3ZlZF9zaXRlcyI6IDc5NjgxLCAicmV0YWluZWRfcmV0dXJucyI6IDQ1ODQ1LCAicmV0YWluZWRfc2l0ZXMiOiA0NTg0NX0sICJtYW5pZmVzdF9zaGEyNTYiOiAiY2UxZmZlZTlkZTBhNDNhNGFlZDEwMWQ4ODBiYjc2OTYxNGI5YTVjYjE1ODNjM2U0YWY2ODk5ODM1ZWFkZDM4NyIsICJwYXJhbWV0ZXJzIjogeyJwcmVjaXNpb25fbW0iOiBudWxsLCAicHJvZmlsZSI6ICJmbG9hdDMyIn0sICJwYXRoIjogIi93b3Jrc3BhY2VzL0UtSEdQL21vcnNlaGdwM0RfdjgvcmVjZWlwdHMvbGlkYXJfZ3JvdW5kXzIwMjYwOTIxL3JlbGVhc2UvZ3JvdW5kX2ZxNjR4cV82L3NjZW5lXzAyX2Zsb2F0MzIiLCAic2NoZW1hIjogIm1oZ3A4X2xpZGFyX2dyb3VuZF9wcmVwYXJhdGlvbl92MSIsICJzdGF0dXMiOiAicGFzc2VkIn0sICJncmlkIjogeyJjb21wbGV0aW9uX3NoYTI1NiI6ICIyYjRmNzk4OWNiMTVkM2E5MGY5YmUzNDU1YWNhZTVhZTNjNmRjMjRmZDE5MmE5ZmQ2NWE2NjQ5OGNmOGZhZGJlIiwgImRhdGFzZXRfc2l0ZXMiOiB7ImZ1bGwiOiA0NTg0NSwgImhhbGZfeF9uZWciOiAyNTczMCwgImhhbGZfeF9ub25uZWciOiAyMDExNSwgInF1YXJ0ZXJfeF9uZWdfeV9uZWciOiAxNjI2MiwgInF1YXJ0ZXJfeF9uZWdfeV9ub25uZWciOiA5NDY4LCAicXVhcnRlcl94X25vbm5lZ195X25lZyI6IDE0ODI5LCAicXVhcnRlcl94X25vbm5lZ195X25vbm5lZyI6IDUyODZ9LCAiZGF0YXNldHMiOiA3LCAiZ3JvdW5kIjogeyJjb3VudHMiOiB7Imdyb3VuZCI6IDc5NjgxLCAibm9uZ3JvdW5kIjogNDU4MTEsICJ1bmtub3duIjogMzR9LCAiZ2VvbWV0cmljX2V4YWN0bmVzcyI6ICJjb29yZGluYXRlc19vbmx5X25vdF9zZW1hbnRpY19ncm91bmRfb3JfSEdQX3F1YWxpZmljYXRpb24iLCAibWl4ZWRfZGVjaXNpb25fc2l0ZXMiOiAwLCAib3JpZ2luYWxfc2l0ZXMiOiAxMjU1MjYsICJwb2xpY3kiOiAib25seV9ncm91bmRfcmV0dXJuc19yZW1vdmVkX3NpdGVfa2VwdF9pZl9hbnlfcmV0dXJuX2tlcHQiLCAicmVtb3ZlZF9yZXR1cm5zIjogNzk2ODEsICJyZW1vdmVkX3NpdGVzIjogNzk2ODEsICJyZXRhaW5lZF9yZXR1cm5zIjogNDU4NDUsICJyZXRhaW5lZF9zaXRlcyI6IDQ1ODQ1fSwgIm1hbmlmZXN0X3NoYTI1NiI6ICJhMzdkNGU0NmI1Mjk4ODViOWZjMzcwYTI1ZTM2MWEzMDI3NjJiOTUxMDlmMDA5MjhiMmIyZTk2ZmNhYzc5OWRhIiwgInBhcmFtZXRlcnMiOiB7InByZWNpc2lvbl9tbSI6ICIxIiwgInByb2ZpbGUiOiAiZ3JpZCJ9LCAicGF0aCI6ICIvd29ya3NwYWNlcy9FLUhHUC9tb3JzZWhncDNEX3Y4L3JlY2VpcHRzL2xpZGFyX2dyb3VuZF8yMDI2MDkyMS9yZWxlYXNlL2dyb3VuZF9mcTY0eHFfNi9zY2VuZV8wMl9ncmlkIiwgInNjaGVtYSI6ICJtaGdwOF9saWRhcl9ncm91bmRfcHJlcGFyYXRpb25fdjEiLCAic3RhdHVzIjogInBhc3NlZCJ9fSwgInJhd19yZXR1cm5zIjogMTI1NTI2LCAidGltaW5nX21zIjogW3sibWFzayI6IDAuODY1OTU2LCAicHJlcGFyZSI6IDUuNTk0NTUsICJyZWFkIjogMi4wNjg5MTEsICJzZWdtZW50IjogMjAuMzUyMDcsICJ3YWxsIjogMjkuMTA1OTY2LCAid3JpdGUiOiAwLjIyNDQ3OX0sIHsibWFzayI6IDAuOTg1NDg5LCAicHJlcGFyZSI6IDUuNDM5MjYxLCAicmVhZCI6IDEuOTgwNzk2LCAic2VnbWVudCI6IDIxLjI3MTI0NCwgIndhbGwiOiAyOS45MjY1NzYsICJ3cml0ZSI6IDAuMjQ5Nzg2fSwgeyJtYXNrIjogMS4xMTY4NzQsICJwcmVwYXJlIjogNS41NDEzOTEsICJyZWFkIjogMi4wNDQ3NzYsICJzZWdtZW50IjogMjEuMzY2NDgyLCAid2FsbCI6IDMwLjMwMDA2NCwgIndyaXRlIjogMC4yMzA1NDF9XSwgInVua25vd25fcmVhc29ucyI6IHsibnVtZXJpY19kb21haW4iOiAwLCAib3V0c2lkZV9yYW5nZSI6IDM0LCAidXBzdHJlYW1fdW5hc3NpZ25lZCI6IDAsICJ1cHN0cmVhbV96X3NlbnRpbmVsIjogMH19XSwgInNjaGVtYSI6ICJtaGdwOF9saWRhcl9ncm91bmRfY2hlY2tzX3YxIiwgInNjb3BlIjogImFwcHJveGltYXRlX2dyb3VuZF9tYXNrX2FuZF9leGFjdF9yZXRhaW5lZF9jb29yZGluYXRlc19ub3Rfc2VnbWVudGF0aW9uX3F1YWxpdHlfb3JfSEdQIiwgInN0YXR1cyI6ICJwYXNzZWQifQo=",
+      "stdout_sha256": "f6a928247868d2b2867d96ede3056414de23156f0d40564706e617908ff3cfe0"
+    },
+    {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/run_lidar_ground_checks.py",
+        "read",
+        "--path",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 0,
+      "label": "release_optimized",
+      "result": {
+        "commands": 44,
+        "completion_sha256": "67d1e6a8428cf92bf892001fd5cd31646677d0627f75ddff9115fd6c7292fa6d",
+        "gcp_used": false,
+        "native_binary_sha256": "4aae71381763e274cc049f79ee47e310b5f92806a01a2d7df74b5795ff64febf",
+        "native_fixtures": 4,
+        "native_refusals": 10,
+        "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6",
+        "preparation_tests": 20,
+        "repeat_count": 3,
+        "scenes": [
+          {
+            "counts": {
+              "ground": 83504,
+              "nonground": 39844,
+              "unknown": 41
+            },
+            "input": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin",
+            "input_sha256": "92e945f37a6cd4a58acc8aa15b275af2e271ecf69c0a44a311d888524473c451",
+            "mask_sha256": "9db3fe5c3f5c4c5d955dde9fcaf61f52ac304f4c23aa68076fd934b589caaf8f",
+            "prepared": {
+              "float32": {
+                "completion_sha256": "35d5cf352729368854f726b02e9701e22467bd275915759c6d48460ee0ff50a4",
+                "dataset_sites": {
+                  "full": 39885,
+                  "half_x_neg": 24591,
+                  "half_x_nonneg": 15294,
+                  "quarter_x_neg_y_neg": 11536,
+                  "quarter_x_neg_y_nonneg": 13055,
+                  "quarter_x_nonneg_y_neg": 8225,
+                  "quarter_x_nonneg_y_nonneg": 7069
+                },
+                "datasets": 7,
+                "ground": {
+                  "counts": {
+                    "ground": 83504,
+                    "nonground": 39844,
+                    "unknown": 41
+                  },
+                  "geometric_exactness": "coordinates_only_not_semantic_ground_or_HGP_qualification",
+                  "mixed_decision_sites": 0,
+                  "original_sites": 123389,
+                  "policy": "only_ground_returns_removed_site_kept_if_any_return_kept",
+                  "removed_returns": 83504,
+                  "removed_sites": 83504,
+                  "retained_returns": 39885,
+                  "retained_sites": 39885
+                },
+                "manifest_sha256": "a79f1e6b57b5b1f5fd965efabf881e18d362f052e84867e7f79e075d297252b0",
+                "parameters": {
+                  "precision_mm": null,
+                  "profile": "float32"
+                },
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_float32",
+                "schema": "mhgp8_lidar_ground_preparation_v1",
+                "status": "passed"
+              },
+              "grid": {
+                "completion_sha256": "717381ebe9e87b1f477ab143a997c74990593835718fd937eb93d04fda07fa89",
+                "dataset_sites": {
+                  "full": 39885,
+                  "half_x_neg": 24591,
+                  "half_x_nonneg": 15294,
+                  "quarter_x_neg_y_neg": 11536,
+                  "quarter_x_neg_y_nonneg": 13055,
+                  "quarter_x_nonneg_y_neg": 8225,
+                  "quarter_x_nonneg_y_nonneg": 7069
+                },
+                "datasets": 7,
+                "ground": {
+                  "counts": {
+                    "ground": 83504,
+                    "nonground": 39844,
+                    "unknown": 41
+                  },
+                  "geometric_exactness": "coordinates_only_not_semantic_ground_or_HGP_qualification",
+                  "mixed_decision_sites": 0,
+                  "original_sites": 123389,
+                  "policy": "only_ground_returns_removed_site_kept_if_any_return_kept",
+                  "removed_returns": 83504,
+                  "removed_sites": 83504,
+                  "retained_returns": 39885,
+                  "retained_sites": 39885
+                },
+                "manifest_sha256": "835ad83073e5af19072541e46fee5829af60917fab370e72558da90c1587caf4",
+                "parameters": {
+                  "precision_mm": "1",
+                  "profile": "grid"
+                },
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid",
+                "schema": "mhgp8_lidar_ground_preparation_v1",
+                "status": "passed"
+              }
+            },
+            "raw_returns": 123389,
+            "timing_ms": [
+              {
+                "mask": 1.078252,
+                "prepare": 5.506236,
+                "read": 1.980055,
+                "segment": 22.943475,
+                "wall": 31.772491,
+                "write": 0.264473
+              },
+              {
+                "mask": 1.053146,
+                "prepare": 5.400277,
+                "read": 1.936554,
+                "segment": 21.186336,
+                "wall": 29.836658,
+                "write": 0.260345
+              },
+              {
+                "mask": 1.036284,
+                "prepare": 5.532084,
+                "read": 2.380221,
+                "segment": 21.163814,
+                "wall": 30.358142,
+                "write": 0.245739
+              }
+            ],
+            "unknown_reasons": {
+              "numeric_domain": 0,
+              "outside_range": 41,
+              "upstream_unassigned": 0,
+              "upstream_z_sentinel": 0
+            }
+          },
+          {
+            "counts": {
+              "ground": 88928,
+              "nonground": 35519,
+              "unknown": 32
+            },
+            "input": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin",
+            "input_sha256": "4dfb5701db9ff36bd592746e08e8fafd4d1c63cba1ef66d2c2791e405b800e80",
+            "mask_sha256": "3e9e95b5f21dc177b192d8c0d2c537a3a0b6fde357b10ed26da641330ce74e51",
+            "prepared": {
+              "float32": {
+                "completion_sha256": "6e10b66613f5730a9613196b1b12d5545a8d78c9a7a5ae47fe3b6abb41eb96e3",
+                "dataset_sites": {
+                  "full": 35551,
+                  "half_x_neg": 19019,
+                  "half_x_nonneg": 16532,
+                  "quarter_x_neg_y_neg": 8074,
+                  "quarter_x_neg_y_nonneg": 10945,
+                  "quarter_x_nonneg_y_neg": 9221,
+                  "quarter_x_nonneg_y_nonneg": 7311
+                },
+                "datasets": 7,
+                "ground": {
+                  "counts": {
+                    "ground": 88928,
+                    "nonground": 35519,
+                    "unknown": 32
+                  },
+                  "geometric_exactness": "coordinates_only_not_semantic_ground_or_HGP_qualification",
+                  "mixed_decision_sites": 0,
+                  "original_sites": 124479,
+                  "policy": "only_ground_returns_removed_site_kept_if_any_return_kept",
+                  "removed_returns": 88928,
+                  "removed_sites": 88928,
+                  "retained_returns": 35551,
+                  "retained_sites": 35551
+                },
+                "manifest_sha256": "28e70a27fd90cfc21c13962890b7bf9c3aa5b9cc36635bb7fe0616d12fb70b69",
+                "parameters": {
+                  "precision_mm": null,
+                  "profile": "float32"
+                },
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_float32",
+                "schema": "mhgp8_lidar_ground_preparation_v1",
+                "status": "passed"
+              },
+              "grid": {
+                "completion_sha256": "bda9426532c61c429c427c3c51ccc4866a70fad8c0595dcb23f75b9fe61a3be2",
+                "dataset_sites": {
+                  "full": 35551,
+                  "half_x_neg": 19019,
+                  "half_x_nonneg": 16532,
+                  "quarter_x_neg_y_neg": 8074,
+                  "quarter_x_neg_y_nonneg": 10945,
+                  "quarter_x_nonneg_y_neg": 9221,
+                  "quarter_x_nonneg_y_nonneg": 7311
+                },
+                "datasets": 7,
+                "ground": {
+                  "counts": {
+                    "ground": 88928,
+                    "nonground": 35519,
+                    "unknown": 32
+                  },
+                  "geometric_exactness": "coordinates_only_not_semantic_ground_or_HGP_qualification",
+                  "mixed_decision_sites": 0,
+                  "original_sites": 124479,
+                  "policy": "only_ground_returns_removed_site_kept_if_any_return_kept",
+                  "removed_returns": 88928,
+                  "removed_sites": 88928,
+                  "retained_returns": 35551,
+                  "retained_sites": 35551
+                },
+                "manifest_sha256": "6c8cb4b949bb5cb0d0e5bbfa94c949191e4b9d734e8d579929741682a9f89f4c",
+                "parameters": {
+                  "precision_mm": "1",
+                  "profile": "grid"
+                },
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid",
+                "schema": "mhgp8_lidar_ground_preparation_v1",
+                "status": "passed"
+              }
+            },
+            "raw_returns": 124479,
+            "timing_ms": [
+              {
+                "mask": 1.090195,
+                "prepare": 5.410266,
+                "read": 1.963865,
+                "segment": 21.141021,
+                "wall": 29.843061,
+                "write": 0.237714
+              },
+              {
+                "mask": 1.041053,
+                "prepare": 5.47646,
+                "read": 1.942575,
+                "segment": 20.792631,
+                "wall": 29.535947,
+                "write": 0.283228
+              },
+              {
+                "mask": 1.069746,
+                "prepare": 5.663839,
+                "read": 2.200727,
+                "segment": 22.036193,
+                "wall": 31.226072,
+                "write": 0.255567
+              }
+            ],
+            "unknown_reasons": {
+              "numeric_domain": 0,
+              "outside_range": 32,
+              "upstream_unassigned": 0,
+              "upstream_z_sentinel": 0
+            }
+          },
+          {
+            "counts": {
+              "ground": 79681,
+              "nonground": 45811,
+              "unknown": 34
+            },
+            "input": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin",
+            "input_sha256": "132f437349e17c00a8a31539f10a3214d9391ae1251293e7794a26540412b5cd",
+            "mask_sha256": "86b2b46791993f7c3401270b369bfc2954a0a9de1370f7f6fa8637ec5d0b1126",
+            "prepared": {
+              "float32": {
+                "completion_sha256": "4365762b8ab5498e9d2778dd2a4547eb2cf009c9e5e8fe2b0161c9c613c49be5",
+                "dataset_sites": {
+                  "full": 45845,
+                  "half_x_neg": 25731,
+                  "half_x_nonneg": 20114,
+                  "quarter_x_neg_y_neg": 16263,
+                  "quarter_x_neg_y_nonneg": 9468,
+                  "quarter_x_nonneg_y_neg": 14828,
+                  "quarter_x_nonneg_y_nonneg": 5286
+                },
+                "datasets": 7,
+                "ground": {
+                  "counts": {
+                    "ground": 79681,
+                    "nonground": 45811,
+                    "unknown": 34
+                  },
+                  "geometric_exactness": "coordinates_only_not_semantic_ground_or_HGP_qualification",
+                  "mixed_decision_sites": 0,
+                  "original_sites": 125526,
+                  "policy": "only_ground_returns_removed_site_kept_if_any_return_kept",
+                  "removed_returns": 79681,
+                  "removed_sites": 79681,
+                  "retained_returns": 45845,
+                  "retained_sites": 45845
+                },
+                "manifest_sha256": "ce1ffee9de0a43a4aed101d880bb769614b9a5cb1583c3e4af6899835eadd387",
+                "parameters": {
+                  "precision_mm": null,
+                  "profile": "float32"
+                },
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_float32",
+                "schema": "mhgp8_lidar_ground_preparation_v1",
+                "status": "passed"
+              },
+              "grid": {
+                "completion_sha256": "2b4f7989cb15d3a90f9be3455acae5ae3c6dc24fd192a9fd65a66498cf8fadbe",
+                "dataset_sites": {
+                  "full": 45845,
+                  "half_x_neg": 25730,
+                  "half_x_nonneg": 20115,
+                  "quarter_x_neg_y_neg": 16262,
+                  "quarter_x_neg_y_nonneg": 9468,
+                  "quarter_x_nonneg_y_neg": 14829,
+                  "quarter_x_nonneg_y_nonneg": 5286
+                },
+                "datasets": 7,
+                "ground": {
+                  "counts": {
+                    "ground": 79681,
+                    "nonground": 45811,
+                    "unknown": 34
+                  },
+                  "geometric_exactness": "coordinates_only_not_semantic_ground_or_HGP_qualification",
+                  "mixed_decision_sites": 0,
+                  "original_sites": 125526,
+                  "policy": "only_ground_returns_removed_site_kept_if_any_return_kept",
+                  "removed_returns": 79681,
+                  "removed_sites": 79681,
+                  "retained_returns": 45845,
+                  "retained_sites": 45845
+                },
+                "manifest_sha256": "a37d4e46b529885b9fc370a25e361a302762b95109f00928b2b2e96fcac799da",
+                "parameters": {
+                  "precision_mm": "1",
+                  "profile": "grid"
+                },
+                "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid",
+                "schema": "mhgp8_lidar_ground_preparation_v1",
+                "status": "passed"
+              }
+            },
+            "raw_returns": 125526,
+            "timing_ms": [
+              {
+                "mask": 0.865956,
+                "prepare": 5.59455,
+                "read": 2.068911,
+                "segment": 20.35207,
+                "wall": 29.105966,
+                "write": 0.224479
+              },
+              {
+                "mask": 0.985489,
+                "prepare": 5.439261,
+                "read": 1.980796,
+                "segment": 21.271244,
+                "wall": 29.926576,
+                "write": 0.249786
+              },
+              {
+                "mask": 1.116874,
+                "prepare": 5.541391,
+                "read": 2.044776,
+                "segment": 21.366482,
+                "wall": 30.300064,
+                "write": 0.230541
+              }
+            ],
+            "unknown_reasons": {
+              "numeric_domain": 0,
+              "outside_range": 34,
+              "upstream_unassigned": 0,
+              "upstream_z_sentinel": 0
+            }
+          }
+        ],
+        "schema": "mhgp8_lidar_ground_checks_v1",
+        "scope": "approximate_ground_mask_and_exact_retained_coordinates_not_segmentation_quality_or_HGP",
+        "status": "passed"
+      },
+      "stderr": "",
+      "stderr_base64": "",
+      "stdout": "{\"commands\": 44, \"completion_sha256\": \"67d1e6a8428cf92bf892001fd5cd31646677d0627f75ddff9115fd6c7292fa6d\", \"gcp_used\": false, \"native_binary_sha256\": \"4aae71381763e274cc049f79ee47e310b5f92806a01a2d7df74b5795ff64febf\", \"native_fixtures\": 4, \"native_refusals\": 10, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6\", \"preparation_tests\": 20, \"repeat_count\": 3, \"scenes\": [{\"counts\": {\"ground\": 83504, \"nonground\": 39844, \"unknown\": 41}, \"input\": \"/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin\", \"input_sha256\": \"92e945f37a6cd4a58acc8aa15b275af2e271ecf69c0a44a311d888524473c451\", \"mask_sha256\": \"9db3fe5c3f5c4c5d955dde9fcaf61f52ac304f4c23aa68076fd934b589caaf8f\", \"prepared\": {\"float32\": {\"completion_sha256\": \"35d5cf352729368854f726b02e9701e22467bd275915759c6d48460ee0ff50a4\", \"dataset_sites\": {\"full\": 39885, \"half_x_neg\": 24591, \"half_x_nonneg\": 15294, \"quarter_x_neg_y_neg\": 11536, \"quarter_x_neg_y_nonneg\": 13055, \"quarter_x_nonneg_y_neg\": 8225, \"quarter_x_nonneg_y_nonneg\": 7069}, \"datasets\": 7, \"ground\": {\"counts\": {\"ground\": 83504, \"nonground\": 39844, \"unknown\": 41}, \"geometric_exactness\": \"coordinates_only_not_semantic_ground_or_HGP_qualification\", \"mixed_decision_sites\": 0, \"original_sites\": 123389, \"policy\": \"only_ground_returns_removed_site_kept_if_any_return_kept\", \"removed_returns\": 83504, \"removed_sites\": 83504, \"retained_returns\": 39885, \"retained_sites\": 39885}, \"manifest_sha256\": \"a79f1e6b57b5b1f5fd965efabf881e18d362f052e84867e7f79e075d297252b0\", \"parameters\": {\"precision_mm\": null, \"profile\": \"float32\"}, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_float32\", \"schema\": \"mhgp8_lidar_ground_preparation_v1\", \"status\": \"passed\"}, \"grid\": {\"completion_sha256\": \"717381ebe9e87b1f477ab143a997c74990593835718fd937eb93d04fda07fa89\", \"dataset_sites\": {\"full\": 39885, \"half_x_neg\": 24591, \"half_x_nonneg\": 15294, \"quarter_x_neg_y_neg\": 11536, \"quarter_x_neg_y_nonneg\": 13055, \"quarter_x_nonneg_y_neg\": 8225, \"quarter_x_nonneg_y_nonneg\": 7069}, \"datasets\": 7, \"ground\": {\"counts\": {\"ground\": 83504, \"nonground\": 39844, \"unknown\": 41}, \"geometric_exactness\": \"coordinates_only_not_semantic_ground_or_HGP_qualification\", \"mixed_decision_sites\": 0, \"original_sites\": 123389, \"policy\": \"only_ground_returns_removed_site_kept_if_any_return_kept\", \"removed_returns\": 83504, \"removed_sites\": 83504, \"retained_returns\": 39885, \"retained_sites\": 39885}, \"manifest_sha256\": \"835ad83073e5af19072541e46fee5829af60917fab370e72558da90c1587caf4\", \"parameters\": {\"precision_mm\": \"1\", \"profile\": \"grid\"}, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid\", \"schema\": \"mhgp8_lidar_ground_preparation_v1\", \"status\": \"passed\"}}, \"raw_returns\": 123389, \"timing_ms\": [{\"mask\": 1.078252, \"prepare\": 5.506236, \"read\": 1.980055, \"segment\": 22.943475, \"wall\": 31.772491, \"write\": 0.264473}, {\"mask\": 1.053146, \"prepare\": 5.400277, \"read\": 1.936554, \"segment\": 21.186336, \"wall\": 29.836658, \"write\": 0.260345}, {\"mask\": 1.036284, \"prepare\": 5.532084, \"read\": 2.380221, \"segment\": 21.163814, \"wall\": 30.358142, \"write\": 0.245739}], \"unknown_reasons\": {\"numeric_domain\": 0, \"outside_range\": 41, \"upstream_unassigned\": 0, \"upstream_z_sentinel\": 0}}, {\"counts\": {\"ground\": 88928, \"nonground\": 35519, \"unknown\": 32}, \"input\": \"/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin\", \"input_sha256\": \"4dfb5701db9ff36bd592746e08e8fafd4d1c63cba1ef66d2c2791e405b800e80\", \"mask_sha256\": \"3e9e95b5f21dc177b192d8c0d2c537a3a0b6fde357b10ed26da641330ce74e51\", \"prepared\": {\"float32\": {\"completion_sha256\": \"6e10b66613f5730a9613196b1b12d5545a8d78c9a7a5ae47fe3b6abb41eb96e3\", \"dataset_sites\": {\"full\": 35551, \"half_x_neg\": 19019, \"half_x_nonneg\": 16532, \"quarter_x_neg_y_neg\": 8074, \"quarter_x_neg_y_nonneg\": 10945, \"quarter_x_nonneg_y_neg\": 9221, \"quarter_x_nonneg_y_nonneg\": 7311}, \"datasets\": 7, \"ground\": {\"counts\": {\"ground\": 88928, \"nonground\": 35519, \"unknown\": 32}, \"geometric_exactness\": \"coordinates_only_not_semantic_ground_or_HGP_qualification\", \"mixed_decision_sites\": 0, \"original_sites\": 124479, \"policy\": \"only_ground_returns_removed_site_kept_if_any_return_kept\", \"removed_returns\": 88928, \"removed_sites\": 88928, \"retained_returns\": 35551, \"retained_sites\": 35551}, \"manifest_sha256\": \"28e70a27fd90cfc21c13962890b7bf9c3aa5b9cc36635bb7fe0616d12fb70b69\", \"parameters\": {\"precision_mm\": null, \"profile\": \"float32\"}, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_float32\", \"schema\": \"mhgp8_lidar_ground_preparation_v1\", \"status\": \"passed\"}, \"grid\": {\"completion_sha256\": \"bda9426532c61c429c427c3c51ccc4866a70fad8c0595dcb23f75b9fe61a3be2\", \"dataset_sites\": {\"full\": 35551, \"half_x_neg\": 19019, \"half_x_nonneg\": 16532, \"quarter_x_neg_y_neg\": 8074, \"quarter_x_neg_y_nonneg\": 10945, \"quarter_x_nonneg_y_neg\": 9221, \"quarter_x_nonneg_y_nonneg\": 7311}, \"datasets\": 7, \"ground\": {\"counts\": {\"ground\": 88928, \"nonground\": 35519, \"unknown\": 32}, \"geometric_exactness\": \"coordinates_only_not_semantic_ground_or_HGP_qualification\", \"mixed_decision_sites\": 0, \"original_sites\": 124479, \"policy\": \"only_ground_returns_removed_site_kept_if_any_return_kept\", \"removed_returns\": 88928, \"removed_sites\": 88928, \"retained_returns\": 35551, \"retained_sites\": 35551}, \"manifest_sha256\": \"6c8cb4b949bb5cb0d0e5bbfa94c949191e4b9d734e8d579929741682a9f89f4c\", \"parameters\": {\"precision_mm\": \"1\", \"profile\": \"grid\"}, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid\", \"schema\": \"mhgp8_lidar_ground_preparation_v1\", \"status\": \"passed\"}}, \"raw_returns\": 124479, \"timing_ms\": [{\"mask\": 1.090195, \"prepare\": 5.410266, \"read\": 1.963865, \"segment\": 21.141021, \"wall\": 29.843061, \"write\": 0.237714}, {\"mask\": 1.041053, \"prepare\": 5.47646, \"read\": 1.942575, \"segment\": 20.792631, \"wall\": 29.535947, \"write\": 0.283228}, {\"mask\": 1.069746, \"prepare\": 5.663839, \"read\": 2.200727, \"segment\": 22.036193, \"wall\": 31.226072, \"write\": 0.255567}], \"unknown_reasons\": {\"numeric_domain\": 0, \"outside_range\": 32, \"upstream_unassigned\": 0, \"upstream_z_sentinel\": 0}}, {\"counts\": {\"ground\": 79681, \"nonground\": 45811, \"unknown\": 34}, \"input\": \"/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin\", \"input_sha256\": \"132f437349e17c00a8a31539f10a3214d9391ae1251293e7794a26540412b5cd\", \"mask_sha256\": \"86b2b46791993f7c3401270b369bfc2954a0a9de1370f7f6fa8637ec5d0b1126\", \"prepared\": {\"float32\": {\"completion_sha256\": \"4365762b8ab5498e9d2778dd2a4547eb2cf009c9e5e8fe2b0161c9c613c49be5\", \"dataset_sites\": {\"full\": 45845, \"half_x_neg\": 25731, \"half_x_nonneg\": 20114, \"quarter_x_neg_y_neg\": 16263, \"quarter_x_neg_y_nonneg\": 9468, \"quarter_x_nonneg_y_neg\": 14828, \"quarter_x_nonneg_y_nonneg\": 5286}, \"datasets\": 7, \"ground\": {\"counts\": {\"ground\": 79681, \"nonground\": 45811, \"unknown\": 34}, \"geometric_exactness\": \"coordinates_only_not_semantic_ground_or_HGP_qualification\", \"mixed_decision_sites\": 0, \"original_sites\": 125526, \"policy\": \"only_ground_returns_removed_site_kept_if_any_return_kept\", \"removed_returns\": 79681, \"removed_sites\": 79681, \"retained_returns\": 45845, \"retained_sites\": 45845}, \"manifest_sha256\": \"ce1ffee9de0a43a4aed101d880bb769614b9a5cb1583c3e4af6899835eadd387\", \"parameters\": {\"precision_mm\": null, \"profile\": \"float32\"}, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_float32\", \"schema\": \"mhgp8_lidar_ground_preparation_v1\", \"status\": \"passed\"}, \"grid\": {\"completion_sha256\": \"2b4f7989cb15d3a90f9be3455acae5ae3c6dc24fd192a9fd65a66498cf8fadbe\", \"dataset_sites\": {\"full\": 45845, \"half_x_neg\": 25730, \"half_x_nonneg\": 20115, \"quarter_x_neg_y_neg\": 16262, \"quarter_x_neg_y_nonneg\": 9468, \"quarter_x_nonneg_y_neg\": 14829, \"quarter_x_nonneg_y_nonneg\": 5286}, \"datasets\": 7, \"ground\": {\"counts\": {\"ground\": 79681, \"nonground\": 45811, \"unknown\": 34}, \"geometric_exactness\": \"coordinates_only_not_semantic_ground_or_HGP_qualification\", \"mixed_decision_sites\": 0, \"original_sites\": 125526, \"policy\": \"only_ground_returns_removed_site_kept_if_any_return_kept\", \"removed_returns\": 79681, \"removed_sites\": 79681, \"retained_returns\": 45845, \"retained_sites\": 45845}, \"manifest_sha256\": \"a37d4e46b529885b9fc370a25e361a302762b95109f00928b2b2e96fcac799da\", \"parameters\": {\"precision_mm\": \"1\", \"profile\": \"grid\"}, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid\", \"schema\": \"mhgp8_lidar_ground_preparation_v1\", \"status\": \"passed\"}}, \"raw_returns\": 125526, \"timing_ms\": [{\"mask\": 0.865956, \"prepare\": 5.59455, \"read\": 2.068911, \"segment\": 20.35207, \"wall\": 29.105966, \"write\": 0.224479}, {\"mask\": 0.985489, \"prepare\": 5.439261, \"read\": 1.980796, \"segment\": 21.271244, \"wall\": 29.926576, \"write\": 0.249786}, {\"mask\": 1.116874, \"prepare\": 5.541391, \"read\": 2.044776, \"segment\": 21.366482, \"wall\": 30.300064, \"write\": 0.230541}], \"unknown_reasons\": {\"numeric_domain\": 0, \"outside_range\": 34, \"upstream_unassigned\": 0, \"upstream_z_sentinel\": 0}}], \"schema\": \"mhgp8_lidar_ground_checks_v1\", \"scope\": \"approximate_ground_mask_and_exact_retained_coordinates_not_segmentation_quality_or_HGP\", \"status\": \"passed\"}\n",
+      "stdout_base64": "eyJjb21tYW5kcyI6IDQ0LCAiY29tcGxldGlvbl9zaGEyNTYiOiAiNjdkMWU2YTg0MjhjZjkyYmY4OTIwMDFmZDVjZDMxNjQ2Njc3ZDA2MjdmNzVkZGZmOTExNWZkNmM3MjkyZmE2ZCIsICJnY3BfdXNlZCI6IGZhbHNlLCAibmF0aXZlX2JpbmFyeV9zaGEyNTYiOiAiNGFhZTcxMzgxNzYzZTI3NGNjMDQ5Zjc5ZWU0N2UzMTBiNWY5MjgwNmEwMWEyZDdkZjc0YjU3OTVmZjY0ZmViZiIsICJuYXRpdmVfZml4dHVyZXMiOiA0LCAibmF0aXZlX3JlZnVzYWxzIjogMTAsICJwYXRoIjogIi93b3Jrc3BhY2VzL0UtSEdQL21vcnNlaGdwM0RfdjgvcmVjZWlwdHMvbGlkYXJfZ3JvdW5kXzIwMjYwOTIxL3JlbGVhc2UvZ3JvdW5kX2ZxNjR4cV82IiwgInByZXBhcmF0aW9uX3Rlc3RzIjogMjAsICJyZXBlYXRfY291bnQiOiAzLCAic2NlbmVzIjogW3siY291bnRzIjogeyJncm91bmQiOiA4MzUwNCwgIm5vbmdyb3VuZCI6IDM5ODQ0LCAidW5rbm93biI6IDQxfSwgImlucHV0IjogIi93b3Jrc3BhY2VzL0UtSEdQL21vcnNlaGdwM0RfdjgvYXVkaXRzL2xpZGFyMDhfMjAyNjA5MTQvZGF0YS9kYXRhc2V0L3NlcXVlbmNlcy8wOC92ZWxvZHluZS8wMDAwMDAuYmluIiwgImlucHV0X3NoYTI1NiI6ICI5MmU5NDVmMzdhNmNkNGE1OGFjYzhhYTE1YjI3NWFmMmUyNzFlY2Y2OWMwYTQ0YTMxMWQ4ODg1MjQ0NzNjNDUxIiwgIm1hc2tfc2hhMjU2IjogIjlkYjNmZTVjM2Y1YzRjNWQ5NTVkZGU5ZmNhZjYxZjUyYWMzMDRmNGMyM2FhNjgwNzZmZDkzNGI1ODljYWFmOGYiLCAicHJlcGFyZWQiOiB7ImZsb2F0MzIiOiB7ImNvbXBsZXRpb25fc2hhMjU2IjogIjM1ZDVjZjM1MjcyOTM2ODg1NGY3MjZiMDJlOTcwMWUyMjQ2N2JkMjc1OTE1NzU5YzZkNDg0NjBlZTBmZjUwYTQiLCAiZGF0YXNldF9zaXRlcyI6IHsiZnVsbCI6IDM5ODg1LCAiaGFsZl94X25lZyI6IDI0NTkxLCAiaGFsZl94X25vbm5lZyI6IDE1Mjk0LCAicXVhcnRlcl94X25lZ195X25lZyI6IDExNTM2LCAicXVhcnRlcl94X25lZ195X25vbm5lZyI6IDEzMDU1LCAicXVhcnRlcl94X25vbm5lZ195X25lZyI6IDgyMjUsICJxdWFydGVyX3hfbm9ubmVnX3lfbm9ubmVnIjogNzA2OX0sICJkYXRhc2V0cyI6IDcsICJncm91bmQiOiB7ImNvdW50cyI6IHsiZ3JvdW5kIjogODM1MDQsICJub25ncm91bmQiOiAzOTg0NCwgInVua25vd24iOiA0MX0sICJnZW9tZXRyaWNfZXhhY3RuZXNzIjogImNvb3JkaW5hdGVzX29ubHlfbm90X3NlbWFudGljX2dyb3VuZF9vcl9IR1BfcXVhbGlmaWNhdGlvbiIsICJtaXhlZF9kZWNpc2lvbl9zaXRlcyI6IDAsICJvcmlnaW5hbF9zaXRlcyI6IDEyMzM4OSwgInBvbGljeSI6ICJvbmx5X2dyb3VuZF9yZXR1cm5zX3JlbW92ZWRfc2l0ZV9rZXB0X2lmX2FueV9yZXR1cm5fa2VwdCIsICJyZW1vdmVkX3JldHVybnMiOiA4MzUwNCwgInJlbW92ZWRfc2l0ZXMiOiA4MzUwNCwgInJldGFpbmVkX3JldHVybnMiOiAzOTg4NSwgInJldGFpbmVkX3NpdGVzIjogMzk4ODV9LCAibWFuaWZlc3Rfc2hhMjU2IjogImE3OWYxZTZiNTdiNWIxZjVmZDk2NWVmYWJmODgxZTE4ZDM2MmYwNTJlODQ4NjdlN2Y3OWUwNzVkMjk3MjUyYjAiLCAicGFyYW1ldGVycyI6IHsicHJlY2lzaW9uX21tIjogbnVsbCwgInByb2ZpbGUiOiAiZmxvYXQzMiJ9LCAicGF0aCI6ICIvd29ya3NwYWNlcy9FLUhHUC9tb3JzZWhncDNEX3Y4L3JlY2VpcHRzL2xpZGFyX2dyb3VuZF8yMDI2MDkyMS9yZWxlYXNlL2dyb3VuZF9mcTY0eHFfNi9zY2VuZV8wMF9mbG9hdDMyIiwgInNjaGVtYSI6ICJtaGdwOF9saWRhcl9ncm91bmRfcHJlcGFyYXRpb25fdjEiLCAic3RhdHVzIjogInBhc3NlZCJ9LCAiZ3JpZCI6IHsiY29tcGxldGlvbl9zaGEyNTYiOiAiNzE3MzgxZWJlOWU4N2IxZjQ3N2FiMTQzYTk5N2M3NDk5MDU5MzgzNTcxOGZkOTM3ZWI5M2QwNGZkYTA3ZmE4OSIsICJkYXRhc2V0X3NpdGVzIjogeyJmdWxsIjogMzk4ODUsICJoYWxmX3hfbmVnIjogMjQ1OTEsICJoYWxmX3hfbm9ubmVnIjogMTUyOTQsICJxdWFydGVyX3hfbmVnX3lfbmVnIjogMTE1MzYsICJxdWFydGVyX3hfbmVnX3lfbm9ubmVnIjogMTMwNTUsICJxdWFydGVyX3hfbm9ubmVnX3lfbmVnIjogODIyNSwgInF1YXJ0ZXJfeF9ub25uZWdfeV9ub25uZWciOiA3MDY5fSwgImRhdGFzZXRzIjogNywgImdyb3VuZCI6IHsiY291bnRzIjogeyJncm91bmQiOiA4MzUwNCwgIm5vbmdyb3VuZCI6IDM5ODQ0LCAidW5rbm93biI6IDQxfSwgImdlb21ldHJpY19leGFjdG5lc3MiOiAiY29vcmRpbmF0ZXNfb25seV9ub3Rfc2VtYW50aWNfZ3JvdW5kX29yX0hHUF9xdWFsaWZpY2F0aW9uIiwgIm1peGVkX2RlY2lzaW9uX3NpdGVzIjogMCwgIm9yaWdpbmFsX3NpdGVzIjogMTIzMzg5LCAicG9saWN5IjogIm9ubHlfZ3JvdW5kX3JldHVybnNfcmVtb3ZlZF9zaXRlX2tlcHRfaWZfYW55X3JldHVybl9rZXB0IiwgInJlbW92ZWRfcmV0dXJucyI6IDgzNTA0LCAicmVtb3ZlZF9zaXRlcyI6IDgzNTA0LCAicmV0YWluZWRfcmV0dXJucyI6IDM5ODg1LCAicmV0YWluZWRfc2l0ZXMiOiAzOTg4NX0sICJtYW5pZmVzdF9zaGEyNTYiOiAiODM1YWQ4MzA3M2U1YWYxOTA3MjU0MWU0NmZlZTU4MjlhZjYwOTE3ZmFiMzcwZTcyNTU4ZGE5MGMxNTg3Y2FmNCIsICJwYXJhbWV0ZXJzIjogeyJwcmVjaXNpb25fbW0iOiAiMSIsICJwcm9maWxlIjogImdyaWQifSwgInBhdGgiOiAiL3dvcmtzcGFjZXMvRS1IR1AvbW9yc2VoZ3AzRF92OC9yZWNlaXB0cy9saWRhcl9ncm91bmRfMjAyNjA5MjEvcmVsZWFzZS9ncm91bmRfZnE2NHhxXzYvc2NlbmVfMDBfZ3JpZCIsICJzY2hlbWEiOiAibWhncDhfbGlkYXJfZ3JvdW5kX3ByZXBhcmF0aW9uX3YxIiwgInN0YXR1cyI6ICJwYXNzZWQifX0sICJyYXdfcmV0dXJucyI6IDEyMzM4OSwgInRpbWluZ19tcyI6IFt7Im1hc2siOiAxLjA3ODI1MiwgInByZXBhcmUiOiA1LjUwNjIzNiwgInJlYWQiOiAxLjk4MDA1NSwgInNlZ21lbnQiOiAyMi45NDM0NzUsICJ3YWxsIjogMzEuNzcyNDkxLCAid3JpdGUiOiAwLjI2NDQ3M30sIHsibWFzayI6IDEuMDUzMTQ2LCAicHJlcGFyZSI6IDUuNDAwMjc3LCAicmVhZCI6IDEuOTM2NTU0LCAic2VnbWVudCI6IDIxLjE4NjMzNiwgIndhbGwiOiAyOS44MzY2NTgsICJ3cml0ZSI6IDAuMjYwMzQ1fSwgeyJtYXNrIjogMS4wMzYyODQsICJwcmVwYXJlIjogNS41MzIwODQsICJyZWFkIjogMi4zODAyMjEsICJzZWdtZW50IjogMjEuMTYzODE0LCAid2FsbCI6IDMwLjM1ODE0MiwgIndyaXRlIjogMC4yNDU3Mzl9XSwgInVua25vd25fcmVhc29ucyI6IHsibnVtZXJpY19kb21haW4iOiAwLCAib3V0c2lkZV9yYW5nZSI6IDQxLCAidXBzdHJlYW1fdW5hc3NpZ25lZCI6IDAsICJ1cHN0cmVhbV96X3NlbnRpbmVsIjogMH19LCB7ImNvdW50cyI6IHsiZ3JvdW5kIjogODg5MjgsICJub25ncm91bmQiOiAzNTUxOSwgInVua25vd24iOiAzMn0sICJpbnB1dCI6ICIvd29ya3NwYWNlcy9FLUhHUC9tb3JzZWhncDNEX3Y4L2F1ZGl0cy9saWRhcjA4XzIwMjYwOTE0L2RhdGEvZGF0YXNldC9zZXF1ZW5jZXMvMDgvdmVsb2R5bmUvMDAwMTAwLmJpbiIsICJpbnB1dF9zaGEyNTYiOiAiNGRmYjU3MDFkYjlmZjM2YmQ1OTI3NDZlMDhlOGZhZmQ0ZDFjNjNjYmExZWY2NmQyYzI3OTFlNDA1YjgwMGU4MCIsICJtYXNrX3NoYTI1NiI6ICIzZTllOTViNWYyMWRjMTc3YjE5MmQ4YzBkMmM1MzdhM2EwYjZmZGUzNTdiMTBlZDI2ZGE2NDEzMzBjZTc0ZTUxIiwgInByZXBhcmVkIjogeyJmbG9hdDMyIjogeyJjb21wbGV0aW9uX3NoYTI1NiI6ICI2ZTEwYjY2NjEzZjU3MzBhOTYxMzE5NmIxYjEyZDU1NDVhOGQ3OGM5YTdhNWFlNDdmZTNiNmFiYjQxZWI5NmUzIiwgImRhdGFzZXRfc2l0ZXMiOiB7ImZ1bGwiOiAzNTU1MSwgImhhbGZfeF9uZWciOiAxOTAxOSwgImhhbGZfeF9ub25uZWciOiAxNjUzMiwgInF1YXJ0ZXJfeF9uZWdfeV9uZWciOiA4MDc0LCAicXVhcnRlcl94X25lZ195X25vbm5lZyI6IDEwOTQ1LCAicXVhcnRlcl94X25vbm5lZ195X25lZyI6IDkyMjEsICJxdWFydGVyX3hfbm9ubmVnX3lfbm9ubmVnIjogNzMxMX0sICJkYXRhc2V0cyI6IDcsICJncm91bmQiOiB7ImNvdW50cyI6IHsiZ3JvdW5kIjogODg5MjgsICJub25ncm91bmQiOiAzNTUxOSwgInVua25vd24iOiAzMn0sICJnZW9tZXRyaWNfZXhhY3RuZXNzIjogImNvb3JkaW5hdGVzX29ubHlfbm90X3NlbWFudGljX2dyb3VuZF9vcl9IR1BfcXVhbGlmaWNhdGlvbiIsICJtaXhlZF9kZWNpc2lvbl9zaXRlcyI6IDAsICJvcmlnaW5hbF9zaXRlcyI6IDEyNDQ3OSwgInBvbGljeSI6ICJvbmx5X2dyb3VuZF9yZXR1cm5zX3JlbW92ZWRfc2l0ZV9rZXB0X2lmX2FueV9yZXR1cm5fa2VwdCIsICJyZW1vdmVkX3JldHVybnMiOiA4ODkyOCwgInJlbW92ZWRfc2l0ZXMiOiA4ODkyOCwgInJldGFpbmVkX3JldHVybnMiOiAzNTU1MSwgInJldGFpbmVkX3NpdGVzIjogMzU1NTF9LCAibWFuaWZlc3Rfc2hhMjU2IjogIjI4ZTcwYTI3ZmQ5MGNmYzIxYzEzOTYyODkwYjdiZjljM2FhNWI5Y2MzNjYzNWJiN2ZlMDYxNmQxMmZiNzBiNjkiLCAicGFyYW1ldGVycyI6IHsicHJlY2lzaW9uX21tIjogbnVsbCwgInByb2ZpbGUiOiAiZmxvYXQzMiJ9LCAicGF0aCI6ICIvd29ya3NwYWNlcy9FLUhHUC9tb3JzZWhncDNEX3Y4L3JlY2VpcHRzL2xpZGFyX2dyb3VuZF8yMDI2MDkyMS9yZWxlYXNlL2dyb3VuZF9mcTY0eHFfNi9zY2VuZV8wMV9mbG9hdDMyIiwgInNjaGVtYSI6ICJtaGdwOF9saWRhcl9ncm91bmRfcHJlcGFyYXRpb25fdjEiLCAic3RhdHVzIjogInBhc3NlZCJ9LCAiZ3JpZCI6IHsiY29tcGxldGlvbl9zaGEyNTYiOiAiYmRhOTQyNjUzMmM2MWM0MjljNDI3YzNjNTFjY2M0ODY2YTcwZmFkOGMwNTk1ZGNiMjNmNzViOWZlNjFhM2JlMiIsICJkYXRhc2V0X3NpdGVzIjogeyJmdWxsIjogMzU1NTEsICJoYWxmX3hfbmVnIjogMTkwMTksICJoYWxmX3hfbm9ubmVnIjogMTY1MzIsICJxdWFydGVyX3hfbmVnX3lfbmVnIjogODA3NCwgInF1YXJ0ZXJfeF9uZWdfeV9ub25uZWciOiAxMDk0NSwgInF1YXJ0ZXJfeF9ub25uZWdfeV9uZWciOiA5MjIxLCAicXVhcnRlcl94X25vbm5lZ195X25vbm5lZyI6IDczMTF9LCAiZGF0YXNldHMiOiA3LCAiZ3JvdW5kIjogeyJjb3VudHMiOiB7Imdyb3VuZCI6IDg4OTI4LCAibm9uZ3JvdW5kIjogMzU1MTksICJ1bmtub3duIjogMzJ9LCAiZ2VvbWV0cmljX2V4YWN0bmVzcyI6ICJjb29yZGluYXRlc19vbmx5X25vdF9zZW1hbnRpY19ncm91bmRfb3JfSEdQX3F1YWxpZmljYXRpb24iLCAibWl4ZWRfZGVjaXNpb25fc2l0ZXMiOiAwLCAib3JpZ2luYWxfc2l0ZXMiOiAxMjQ0NzksICJwb2xpY3kiOiAib25seV9ncm91bmRfcmV0dXJuc19yZW1vdmVkX3NpdGVfa2VwdF9pZl9hbnlfcmV0dXJuX2tlcHQiLCAicmVtb3ZlZF9yZXR1cm5zIjogODg5MjgsICJyZW1vdmVkX3NpdGVzIjogODg5MjgsICJyZXRhaW5lZF9yZXR1cm5zIjogMzU1NTEsICJyZXRhaW5lZF9zaXRlcyI6IDM1NTUxfSwgIm1hbmlmZXN0X3NoYTI1NiI6ICI2YzhjYjRiOTQ5YmI1Y2IwZDBlNWJiZmE5NGM5NDkxOTFlNGI5ZDczNGU4ZDU3OTkyOTc0MTY4MmE5Zjg5ZjRjIiwgInBhcmFtZXRlcnMiOiB7InByZWNpc2lvbl9tbSI6ICIxIiwgInByb2ZpbGUiOiAiZ3JpZCJ9LCAicGF0aCI6ICIvd29ya3NwYWNlcy9FLUhHUC9tb3JzZWhncDNEX3Y4L3JlY2VpcHRzL2xpZGFyX2dyb3VuZF8yMDI2MDkyMS9yZWxlYXNlL2dyb3VuZF9mcTY0eHFfNi9zY2VuZV8wMV9ncmlkIiwgInNjaGVtYSI6ICJtaGdwOF9saWRhcl9ncm91bmRfcHJlcGFyYXRpb25fdjEiLCAic3RhdHVzIjogInBhc3NlZCJ9fSwgInJhd19yZXR1cm5zIjogMTI0NDc5LCAidGltaW5nX21zIjogW3sibWFzayI6IDEuMDkwMTk1LCAicHJlcGFyZSI6IDUuNDEwMjY2LCAicmVhZCI6IDEuOTYzODY1LCAic2VnbWVudCI6IDIxLjE0MTAyMSwgIndhbGwiOiAyOS44NDMwNjEsICJ3cml0ZSI6IDAuMjM3NzE0fSwgeyJtYXNrIjogMS4wNDEwNTMsICJwcmVwYXJlIjogNS40NzY0NiwgInJlYWQiOiAxLjk0MjU3NSwgInNlZ21lbnQiOiAyMC43OTI2MzEsICJ3YWxsIjogMjkuNTM1OTQ3LCAid3JpdGUiOiAwLjI4MzIyOH0sIHsibWFzayI6IDEuMDY5NzQ2LCAicHJlcGFyZSI6IDUuNjYzODM5LCAicmVhZCI6IDIuMjAwNzI3LCAic2VnbWVudCI6IDIyLjAzNjE5MywgIndhbGwiOiAzMS4yMjYwNzIsICJ3cml0ZSI6IDAuMjU1NTY3fV0sICJ1bmtub3duX3JlYXNvbnMiOiB7Im51bWVyaWNfZG9tYWluIjogMCwgIm91dHNpZGVfcmFuZ2UiOiAzMiwgInVwc3RyZWFtX3VuYXNzaWduZWQiOiAwLCAidXBzdHJlYW1fel9zZW50aW5lbCI6IDB9fSwgeyJjb3VudHMiOiB7Imdyb3VuZCI6IDc5NjgxLCAibm9uZ3JvdW5kIjogNDU4MTEsICJ1bmtub3duIjogMzR9LCAiaW5wdXQiOiAiL3dvcmtzcGFjZXMvRS1IR1AvbW9yc2VoZ3AzRF92OC9hdWRpdHMvbGlkYXIwOF8yMDI2MDkxNC9kYXRhL2RhdGFzZXQvc2VxdWVuY2VzLzA4L3ZlbG9keW5lLzAwMDIwMC5iaW4iLCAiaW5wdXRfc2hhMjU2IjogIjEzMmY0MzczNDllMTdjMDBhOGEzMTUzOWYxMGEzMjE0ZDkzOTFhZTEyNTEyOTNlNzc5NGEyNjU0MDQxMmI1Y2QiLCAibWFza19zaGEyNTYiOiAiODZiMmI0Njc5MTk5M2Y3YzM0MDEyNzBiMzY5YmZjMjk1NGEwYTlkZTEzNzBmN2Y2ZmE4NjM3ZWM1ZDBiMTEyNiIsICJwcmVwYXJlZCI6IHsiZmxvYXQzMiI6IHsiY29tcGxldGlvbl9zaGEyNTYiOiAiNDM2NTc2MmI4YWI1NDk4ZTlkMjc3OGRkMmE0NTQ3ZWIyY2YwMDljOWU1ZThmZTJiMDE2MWM5YzYxM2M0OWJlNSIsICJkYXRhc2V0X3NpdGVzIjogeyJmdWxsIjogNDU4NDUsICJoYWxmX3hfbmVnIjogMjU3MzEsICJoYWxmX3hfbm9ubmVnIjogMjAxMTQsICJxdWFydGVyX3hfbmVnX3lfbmVnIjogMTYyNjMsICJxdWFydGVyX3hfbmVnX3lfbm9ubmVnIjogOTQ2OCwgInF1YXJ0ZXJfeF9ub25uZWdfeV9uZWciOiAxNDgyOCwgInF1YXJ0ZXJfeF9ub25uZWdfeV9ub25uZWciOiA1Mjg2fSwgImRhdGFzZXRzIjogNywgImdyb3VuZCI6IHsiY291bnRzIjogeyJncm91bmQiOiA3OTY4MSwgIm5vbmdyb3VuZCI6IDQ1ODExLCAidW5rbm93biI6IDM0fSwgImdlb21ldHJpY19leGFjdG5lc3MiOiAiY29vcmRpbmF0ZXNfb25seV9ub3Rfc2VtYW50aWNfZ3JvdW5kX29yX0hHUF9xdWFsaWZpY2F0aW9uIiwgIm1peGVkX2RlY2lzaW9uX3NpdGVzIjogMCwgIm9yaWdpbmFsX3NpdGVzIjogMTI1NTI2LCAicG9saWN5IjogIm9ubHlfZ3JvdW5kX3JldHVybnNfcmVtb3ZlZF9zaXRlX2tlcHRfaWZfYW55X3JldHVybl9rZXB0IiwgInJlbW92ZWRfcmV0dXJucyI6IDc5NjgxLCAicmVtb3ZlZF9zaXRlcyI6IDc5NjgxLCAicmV0YWluZWRfcmV0dXJucyI6IDQ1ODQ1LCAicmV0YWluZWRfc2l0ZXMiOiA0NTg0NX0sICJtYW5pZmVzdF9zaGEyNTYiOiAiY2UxZmZlZTlkZTBhNDNhNGFlZDEwMWQ4ODBiYjc2OTYxNGI5YTVjYjE1ODNjM2U0YWY2ODk5ODM1ZWFkZDM4NyIsICJwYXJhbWV0ZXJzIjogeyJwcmVjaXNpb25fbW0iOiBudWxsLCAicHJvZmlsZSI6ICJmbG9hdDMyIn0sICJwYXRoIjogIi93b3Jrc3BhY2VzL0UtSEdQL21vcnNlaGdwM0RfdjgvcmVjZWlwdHMvbGlkYXJfZ3JvdW5kXzIwMjYwOTIxL3JlbGVhc2UvZ3JvdW5kX2ZxNjR4cV82L3NjZW5lXzAyX2Zsb2F0MzIiLCAic2NoZW1hIjogIm1oZ3A4X2xpZGFyX2dyb3VuZF9wcmVwYXJhdGlvbl92MSIsICJzdGF0dXMiOiAicGFzc2VkIn0sICJncmlkIjogeyJjb21wbGV0aW9uX3NoYTI1NiI6ICIyYjRmNzk4OWNiMTVkM2E5MGY5YmUzNDU1YWNhZTVhZTNjNmRjMjRmZDE5MmE5ZmQ2NWE2NjQ5OGNmOGZhZGJlIiwgImRhdGFzZXRfc2l0ZXMiOiB7ImZ1bGwiOiA0NTg0NSwgImhhbGZfeF9uZWciOiAyNTczMCwgImhhbGZfeF9ub25uZWciOiAyMDExNSwgInF1YXJ0ZXJfeF9uZWdfeV9uZWciOiAxNjI2MiwgInF1YXJ0ZXJfeF9uZWdfeV9ub25uZWciOiA5NDY4LCAicXVhcnRlcl94X25vbm5lZ195X25lZyI6IDE0ODI5LCAicXVhcnRlcl94X25vbm5lZ195X25vbm5lZyI6IDUyODZ9LCAiZGF0YXNldHMiOiA3LCAiZ3JvdW5kIjogeyJjb3VudHMiOiB7Imdyb3VuZCI6IDc5NjgxLCAibm9uZ3JvdW5kIjogNDU4MTEsICJ1bmtub3duIjogMzR9LCAiZ2VvbWV0cmljX2V4YWN0bmVzcyI6ICJjb29yZGluYXRlc19vbmx5X25vdF9zZW1hbnRpY19ncm91bmRfb3JfSEdQX3F1YWxpZmljYXRpb24iLCAibWl4ZWRfZGVjaXNpb25fc2l0ZXMiOiAwLCAib3JpZ2luYWxfc2l0ZXMiOiAxMjU1MjYsICJwb2xpY3kiOiAib25seV9ncm91bmRfcmV0dXJuc19yZW1vdmVkX3NpdGVfa2VwdF9pZl9hbnlfcmV0dXJuX2tlcHQiLCAicmVtb3ZlZF9yZXR1cm5zIjogNzk2ODEsICJyZW1vdmVkX3NpdGVzIjogNzk2ODEsICJyZXRhaW5lZF9yZXR1cm5zIjogNDU4NDUsICJyZXRhaW5lZF9zaXRlcyI6IDQ1ODQ1fSwgIm1hbmlmZXN0X3NoYTI1NiI6ICJhMzdkNGU0NmI1Mjk4ODViOWZjMzcwYTI1ZTM2MWEzMDI3NjJiOTUxMDlmMDA5MjhiMmIyZTk2ZmNhYzc5OWRhIiwgInBhcmFtZXRlcnMiOiB7InByZWNpc2lvbl9tbSI6ICIxIiwgInByb2ZpbGUiOiAiZ3JpZCJ9LCAicGF0aCI6ICIvd29ya3NwYWNlcy9FLUhHUC9tb3JzZWhncDNEX3Y4L3JlY2VpcHRzL2xpZGFyX2dyb3VuZF8yMDI2MDkyMS9yZWxlYXNlL2dyb3VuZF9mcTY0eHFfNi9zY2VuZV8wMl9ncmlkIiwgInNjaGVtYSI6ICJtaGdwOF9saWRhcl9ncm91bmRfcHJlcGFyYXRpb25fdjEiLCAic3RhdHVzIjogInBhc3NlZCJ9fSwgInJhd19yZXR1cm5zIjogMTI1NTI2LCAidGltaW5nX21zIjogW3sibWFzayI6IDAuODY1OTU2LCAicHJlcGFyZSI6IDUuNTk0NTUsICJyZWFkIjogMi4wNjg5MTEsICJzZWdtZW50IjogMjAuMzUyMDcsICJ3YWxsIjogMjkuMTA1OTY2LCAid3JpdGUiOiAwLjIyNDQ3OX0sIHsibWFzayI6IDAuOTg1NDg5LCAicHJlcGFyZSI6IDUuNDM5MjYxLCAicmVhZCI6IDEuOTgwNzk2LCAic2VnbWVudCI6IDIxLjI3MTI0NCwgIndhbGwiOiAyOS45MjY1NzYsICJ3cml0ZSI6IDAuMjQ5Nzg2fSwgeyJtYXNrIjogMS4xMTY4NzQsICJwcmVwYXJlIjogNS41NDEzOTEsICJyZWFkIjogMi4wNDQ3NzYsICJzZWdtZW50IjogMjEuMzY2NDgyLCAid2FsbCI6IDMwLjMwMDA2NCwgIndyaXRlIjogMC4yMzA1NDF9XSwgInVua25vd25fcmVhc29ucyI6IHsibnVtZXJpY19kb21haW4iOiAwLCAib3V0c2lkZV9yYW5nZSI6IDM0LCAidXBzdHJlYW1fdW5hc3NpZ25lZCI6IDAsICJ1cHN0cmVhbV96X3NlbnRpbmVsIjogMH19XSwgInNjaGVtYSI6ICJtaGdwOF9saWRhcl9ncm91bmRfY2hlY2tzX3YxIiwgInNjb3BlIjogImFwcHJveGltYXRlX2dyb3VuZF9tYXNrX2FuZF9leGFjdF9yZXRhaW5lZF9jb29yZGluYXRlc19ub3Rfc2VnbWVudGF0aW9uX3F1YWxpdHlfb3JfSEdQIiwgInN0YXR1cyI6ICJwYXNzZWQifQo=",
+      "stdout_sha256": "f6a928247868d2b2867d96ede3056414de23156f0d40564706e617908ff3cfe0"
+    },
+    {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/run_lidar_ground_checks.py",
+        "read",
+        "--path",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/sanitize/ground_ggg5tyc0"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 0,
+      "label": "sanitize_normal",
+      "result": {
+        "commands": 17,
+        "completion_sha256": "8fd805912aeba52bf02f6ab9e7749629e3853e4a58c77cfdd61ec5502c73f7ec",
+        "gcp_used": false,
+        "native_binary_sha256": "a29e0ff665ccefd1dc53fdb1666db97b286e29cb24b92f5066d705ef0482c4d7",
+        "native_fixtures": 4,
+        "native_refusals": 10,
+        "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/sanitize/ground_ggg5tyc0",
+        "preparation_tests": 20,
+        "repeat_count": 0,
+        "scenes": [],
+        "schema": "mhgp8_lidar_ground_checks_v1",
+        "scope": "approximate_ground_mask_and_exact_retained_coordinates_not_segmentation_quality_or_HGP",
+        "status": "passed"
+      },
+      "stderr": "",
+      "stderr_base64": "",
+      "stdout": "{\"commands\": 17, \"completion_sha256\": \"8fd805912aeba52bf02f6ab9e7749629e3853e4a58c77cfdd61ec5502c73f7ec\", \"gcp_used\": false, \"native_binary_sha256\": \"a29e0ff665ccefd1dc53fdb1666db97b286e29cb24b92f5066d705ef0482c4d7\", \"native_fixtures\": 4, \"native_refusals\": 10, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/sanitize/ground_ggg5tyc0\", \"preparation_tests\": 20, \"repeat_count\": 0, \"scenes\": [], \"schema\": \"mhgp8_lidar_ground_checks_v1\", \"scope\": \"approximate_ground_mask_and_exact_retained_coordinates_not_segmentation_quality_or_HGP\", \"status\": \"passed\"}\n",
+      "stdout_base64": "eyJjb21tYW5kcyI6IDE3LCAiY29tcGxldGlvbl9zaGEyNTYiOiAiOGZkODA1OTEyYWViYTUyYmYwMmY2YWI5ZTc3NDk2MjllMzg1M2U0YTU4Yzc3Y2ZkZDYxZWM1NTAyYzczZjdlYyIsICJnY3BfdXNlZCI6IGZhbHNlLCAibmF0aXZlX2JpbmFyeV9zaGEyNTYiOiAiYTI5ZTBmZjY2NWNjZWZkMWRjNTNmZGIxNjY2ZGI5N2IyODZlMjljYjI0YjkyZjUwNjZkNzA1ZWYwNDgyYzRkNyIsICJuYXRpdmVfZml4dHVyZXMiOiA0LCAibmF0aXZlX3JlZnVzYWxzIjogMTAsICJwYXRoIjogIi93b3Jrc3BhY2VzL0UtSEdQL21vcnNlaGdwM0RfdjgvcmVjZWlwdHMvbGlkYXJfZ3JvdW5kXzIwMjYwOTIxL3Nhbml0aXplL2dyb3VuZF9nZ2c1dHljMCIsICJwcmVwYXJhdGlvbl90ZXN0cyI6IDIwLCAicmVwZWF0X2NvdW50IjogMCwgInNjZW5lcyI6IFtdLCAic2NoZW1hIjogIm1oZ3A4X2xpZGFyX2dyb3VuZF9jaGVja3NfdjEiLCAic2NvcGUiOiAiYXBwcm94aW1hdGVfZ3JvdW5kX21hc2tfYW5kX2V4YWN0X3JldGFpbmVkX2Nvb3JkaW5hdGVzX25vdF9zZWdtZW50YXRpb25fcXVhbGl0eV9vcl9IR1AiLCAic3RhdHVzIjogInBhc3NlZCJ9Cg==",
+      "stdout_sha256": "c79a8dd929f7faf91a91bb985fcd5865f0dd9ae16a28f198954f60b50b2a1d1d"
+    },
+    {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/morsehgp3D_v8/bench/run_lidar_ground_checks.py",
+        "read",
+        "--path",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/sanitize/ground_ggg5tyc0"
+      ],
+      "cwd": "/workspaces/E-HGP",
+      "exit_code": 0,
+      "label": "sanitize_optimized",
+      "result": {
+        "commands": 17,
+        "completion_sha256": "8fd805912aeba52bf02f6ab9e7749629e3853e4a58c77cfdd61ec5502c73f7ec",
+        "gcp_used": false,
+        "native_binary_sha256": "a29e0ff665ccefd1dc53fdb1666db97b286e29cb24b92f5066d705ef0482c4d7",
+        "native_fixtures": 4,
+        "native_refusals": 10,
+        "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/sanitize/ground_ggg5tyc0",
+        "preparation_tests": 20,
+        "repeat_count": 0,
+        "scenes": [],
+        "schema": "mhgp8_lidar_ground_checks_v1",
+        "scope": "approximate_ground_mask_and_exact_retained_coordinates_not_segmentation_quality_or_HGP",
+        "status": "passed"
+      },
+      "stderr": "",
+      "stderr_base64": "",
+      "stdout": "{\"commands\": 17, \"completion_sha256\": \"8fd805912aeba52bf02f6ab9e7749629e3853e4a58c77cfdd61ec5502c73f7ec\", \"gcp_used\": false, \"native_binary_sha256\": \"a29e0ff665ccefd1dc53fdb1666db97b286e29cb24b92f5066d705ef0482c4d7\", \"native_fixtures\": 4, \"native_refusals\": 10, \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/sanitize/ground_ggg5tyc0\", \"preparation_tests\": 20, \"repeat_count\": 0, \"scenes\": [], \"schema\": \"mhgp8_lidar_ground_checks_v1\", \"scope\": \"approximate_ground_mask_and_exact_retained_coordinates_not_segmentation_quality_or_HGP\", \"status\": \"passed\"}\n",
+      "stdout_base64": "eyJjb21tYW5kcyI6IDE3LCAiY29tcGxldGlvbl9zaGEyNTYiOiAiOGZkODA1OTEyYWViYTUyYmYwMmY2YWI5ZTc3NDk2MjllMzg1M2U0YTU4Yzc3Y2ZkZDYxZWM1NTAyYzczZjdlYyIsICJnY3BfdXNlZCI6IGZhbHNlLCAibmF0aXZlX2JpbmFyeV9zaGEyNTYiOiAiYTI5ZTBmZjY2NWNjZWZkMWRjNTNmZGIxNjY2ZGI5N2IyODZlMjljYjI0YjkyZjUwNjZkNzA1ZWYwNDgyYzRkNyIsICJuYXRpdmVfZml4dHVyZXMiOiA0LCAibmF0aXZlX3JlZnVzYWxzIjogMTAsICJwYXRoIjogIi93b3Jrc3BhY2VzL0UtSEdQL21vcnNlaGdwM0RfdjgvcmVjZWlwdHMvbGlkYXJfZ3JvdW5kXzIwMjYwOTIxL3Nhbml0aXplL2dyb3VuZF9nZ2c1dHljMCIsICJwcmVwYXJhdGlvbl90ZXN0cyI6IDIwLCAicmVwZWF0X2NvdW50IjogMCwgInNjZW5lcyI6IFtdLCAic2NoZW1hIjogIm1oZ3A4X2xpZGFyX2dyb3VuZF9jaGVja3NfdjEiLCAic2NvcGUiOiAiYXBwcm94aW1hdGVfZ3JvdW5kX21hc2tfYW5kX2V4YWN0X3JldGFpbmVkX2Nvb3JkaW5hdGVzX25vdF9zZWdtZW50YXRpb25fcXVhbGl0eV9vcl9IR1AiLCAic3RhdHVzIjogInBhc3NlZCJ9Cg==",
+      "stdout_sha256": "c79a8dd929f7faf91a91bb985fcd5865f0dd9ae16a28f198954f60b50b2a1d1d"
+    }
+  ],
+  "finished_utc": "2026-09-21T20:05:10.650954+00:00",
+  "pins_after": {
+    "/workspaces/E-HGP/build/v8_ground_patchwork_20260921/mhgp8_patchwork_ground_probe": "4aae71381763e274cc049f79ee47e310b5f92806a01a2d7df74b5795ff64febf",
+    "/workspaces/E-HGP/build/v8_ground_patchwork_sanitize_20260921/mhgp8_patchwork_ground_probe": "a29e0ff665ccefd1dc53fdb1666db97b286e29cb24b92f5066d705ef0482c4d7",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin": "92e945f37a6cd4a58acc8aa15b275af2e271ecf69c0a44a311d888524473c451",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin": "4dfb5701db9ff36bd592746e08e8fafd4d1c63cba1ef66d2c2791e405b800e80",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin": "132f437349e17c00a8a31539f10a3214d9391ae1251293e7794a26540412b5cd",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/build_patchwork_ground.py": "aea310fed9ad296b9b13e3d4adb1d240df6fbfcb8eb8292de1d5f0082dc3e4f7",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/patchwork_ground_probe.cpp": "f1add2faf285f0fbf634438519d700de3c839a02732b13cf1ead53dec3cef2bd",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_ground.py": "f679e28698ea3a025da019b41f2516644656f910e1c9f4b3983001d9979408e5",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py": "d22a7b90f3f2214f14c44a4980d2cca7fb33fac8cbd23a977be958fa5d25fb84",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_lidar_ground_checks.py": "49d49fe8612cd37960c7b81bc16f74d049e35d04fe944f96990e177201d1f584",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_p0_matrix.py": "b806572d9b5a76afe15c26586321663aa946e318a7a8a2286c3e9549e3ba717f",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/COMPLETION.json": "67d1e6a8428cf92bf892001fd5cd31646677d0627f75ddff9115fd6c7292fa6d",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/MANIFEST.json": "ba5a4fee1d6507a68382cf9d7e073d8d4b151983749a746e831f1d03f4be84e3",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/sanitize/ground_ggg5tyc0/COMPLETION.json": "8fd805912aeba52bf02f6ab9e7749629e3853e4a58c77cfdd61ec5502c73f7ec",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/sanitize/ground_ggg5tyc0/MANIFEST.json": "8675a2ef4824f90ba7546e17bfe45cf59e63a98a50be4520b2dc56c0f7115b50",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/lidar_ground_test.py": "35029a2ecb458c8e18a5a15c67d73e30f886cb79f521fb34d1f6e35fbefad2fe"
+  },
+  "pins_before": {
+    "/workspaces/E-HGP/build/v8_ground_patchwork_20260921/mhgp8_patchwork_ground_probe": "4aae71381763e274cc049f79ee47e310b5f92806a01a2d7df74b5795ff64febf",
+    "/workspaces/E-HGP/build/v8_ground_patchwork_sanitize_20260921/mhgp8_patchwork_ground_probe": "a29e0ff665ccefd1dc53fdb1666db97b286e29cb24b92f5066d705ef0482c4d7",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin": "92e945f37a6cd4a58acc8aa15b275af2e271ecf69c0a44a311d888524473c451",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin": "4dfb5701db9ff36bd592746e08e8fafd4d1c63cba1ef66d2c2791e405b800e80",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin": "132f437349e17c00a8a31539f10a3214d9391ae1251293e7794a26540412b5cd",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/build_patchwork_ground.py": "aea310fed9ad296b9b13e3d4adb1d240df6fbfcb8eb8292de1d5f0082dc3e4f7",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/patchwork_ground_probe.cpp": "f1add2faf285f0fbf634438519d700de3c839a02732b13cf1ead53dec3cef2bd",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_ground.py": "f679e28698ea3a025da019b41f2516644656f910e1c9f4b3983001d9979408e5",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py": "d22a7b90f3f2214f14c44a4980d2cca7fb33fac8cbd23a977be958fa5d25fb84",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_lidar_ground_checks.py": "49d49fe8612cd37960c7b81bc16f74d049e35d04fe944f96990e177201d1f584",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_p0_matrix.py": "b806572d9b5a76afe15c26586321663aa946e318a7a8a2286c3e9549e3ba717f",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/COMPLETION.json": "67d1e6a8428cf92bf892001fd5cd31646677d0627f75ddff9115fd6c7292fa6d",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/MANIFEST.json": "ba5a4fee1d6507a68382cf9d7e073d8d4b151983749a746e831f1d03f4be84e3",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/sanitize/ground_ggg5tyc0/COMPLETION.json": "8fd805912aeba52bf02f6ab9e7749629e3853e4a58c77cfdd61ec5502c73f7ec",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/sanitize/ground_ggg5tyc0/MANIFEST.json": "8675a2ef4824f90ba7546e17bfe45cf59e63a98a50be4520b2dc56c0f7115b50",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/lidar_ground_test.py": "35029a2ecb458c8e18a5a15c67d73e30f886cb79f521fb34d1f6e35fbefad2fe"
+  },
+  "schema": "mhgp8_lidar_ground_post_readback_v1",
+  "started_utc": "2026-09-21T20:04:18.987887+00:00",
+  "status": "passed"
+}

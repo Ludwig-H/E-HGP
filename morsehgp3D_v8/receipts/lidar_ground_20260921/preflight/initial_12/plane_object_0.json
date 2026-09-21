@@ -1,0 +1,15 @@
+{
+  "case": "plane_object",
+  "command": [
+    "/workspaces/E-HGP/build/v8_ground_patchwork_20260921/mhgp8_patchwork_ground_probe",
+    "--input",
+    "/tmp/mhgp8-ground-preflight.4mfm_a74/plane_object.bin",
+    "--output",
+    "/tmp/mhgp8-ground-preflight.4mfm_a74/plane_object_0.u8"
+  ],
+  "exit_code": 0,
+  "stdout": "{\"schema\":\"mhgp8_patchwork_ground_probe_v1\",\"upstream_commit\":\"3e6903a1d5537a4cc2ace897b0bbb98a92d6014c\",\"encoding\":\"u8_0_unknown_1_ground_2_nonground\",\"raw_returns\":450,\"processed_returns\":450,\"algorithm_invocations\":1,\"counts\":{\"unknown\":0,\"ground\":425,\"nonground\":25},\"unknown_reasons\":{\"outside_range\":0,\"numeric_domain\":0,\"upstream_z_sentinel\":0,\"upstream_unassigned\":0},\"nonfinite_reflectance\":0,\"numeric_abs_limit\":1099511627776,\"rnr_enabled\":false,\"reflectance_policy\":\"ignored_preserved_in_raw\",\"fresh_state\":true,\"eigen_threads\":1,\"openmp\":false,\"noise_status_available\":false,\"parameters\":{\"verbose\":false,\"enable_RNR\":false,\"enable_RVPF\":true,\"enable_TGR\":true,\"num_iter\":3,\"num_lpr\":20,\"num_min_pts\":10,\"num_zones\":4,\"num_rings_of_interest\":4,\"RNR_ver_angle_thr\":-15,\"RNR_intensity_thr\":0.20000000000000001,\"sensor_height\":1.7230000000000001,\"th_seeds\":0.125,\"th_dist\":0.125,\"th_seeds_v\":0.25,\"th_dist_v\":0.10000000000000001,\"max_range\":80,\"min_range\":2.7000000000000002,\"uprightness_thr\":0.70699999999999996,\"adaptive_seed_selection_margin\":-1.2,\"intensity_thr\":0,\"max_flatness_storage\":1000,\"max_elevation_storage\":1000,\"num_sectors_each_zone\":[16,32,54,32],\"num_rings_each_zone\":[2,4,4,4],\"elevation_thr\":[0,0,0,0],\"flatness_thr\":[0,0,0,0]},\"input_fnv1a64\":\"66ca17d41273caff\",\"mask_fnv1a64\":\"13e286d1344897a2\",\"timing_ms\":{\"read\":0.076301999999999995,\"prepare\":0.027831999999999999,\"segment\":0.27899000000000002,\"mask\":0.0028159999999999999,\"write\":0.056575,\"wall\":0.44251499999999999}}\n",
+  "stderr": "PatchWorkpp::PatchWorkpp() - INITIALIZATION COMPLETE\n",
+  "binary_sha256": "4aae71381763e274cc049f79ee47e310b5f92806a01a2d7df74b5795ff64febf",
+  "input_sha256": "b5c3771b893bf3dc71a3d61656c9b10274f4d60c620458639902d150dcb7566f"
+}

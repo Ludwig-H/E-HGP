@@ -53,6 +53,15 @@ Ne pas multiplier un chrono favorable par un nombre supposé d'arêtes ;
 ne pas utiliser l'acceptation q3 pour restreindre q4. Catalogue, q4 natif
 complet, FULL et régimes LiDAR brut/sans sol restent à développer/mesurer.
 
+Le [plan de raccord natif global](RACCORD_NATIF_GLOBAL_PLAN_20260921.md)
+précise maintenant quatre ports conjoints : front en flux, filtres avant
+graines, propriété intégrée à la descente X, puis sorties q3 globales.
+Ne pas appeler le census racine pour toute arête puis filtrer ses sorties.
+Le pilote [sans sol](PILOTE_LIDAR_SANS_SOL_20260921.md) prépare les entrées
+appariées ; son transport exact ne qualifie ni les classes physiques ni
+la chaîne HGP. L'évaluation par labels est un diagnostic ultérieur séparé,
+pas un préalable aux mesures du calcul.
+
 Mise à jour utilisateur du21 septembre : les prochaines études LiDAR
 emploient le [découpage spatial capteur](PROTOCOLE_LIDAR_SPATIAL_20260921.md),
 pas une densité variable à8k/16k/32k. Mesurer scène, deux moitiés, quatre

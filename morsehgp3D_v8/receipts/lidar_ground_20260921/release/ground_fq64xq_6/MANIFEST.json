@@ -1,0 +1,58 @@
+{
+  "config": {
+    "build": "/workspaces/E-HGP/build/v8_ground_patchwork_20260921",
+    "inputs": [
+      "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin",
+      "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin",
+      "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin"
+    ],
+    "python": "/home/codespace/.python/current/bin/python3",
+    "sanitize": false,
+    "small_only": false
+  },
+  "environment": {
+    "ASAN_OPTIONS": null,
+    "LANG": "C.UTF-8",
+    "LC_ALL": "C.UTF-8",
+    "LD_LIBRARY_PATH": null,
+    "LD_PRELOAD": null,
+    "MKL_NUM_THREADS": null,
+    "OMP_NUM_THREADS": null,
+    "OPENBLAS_NUM_THREADS": null,
+    "PATH": "/home/codespace/.codex/packages/standalone/releases/0.155.1-x86_64-unknown-linux-musl/codex-path:/home/codespace/.local/bin:/usr/local/rvm/gems/ruby-3.4.7/bin:/usr/local/rvm/gems/ruby-3.4.7@global/bin:/usr/local/rvm/rubies/ruby-3.4.7/bin:/home/codespace/.dotnet:/home/codespace/nvm/current/bin:/home/codespace/.php/current/bin:/home/codespace/.python/current/bin:/home/codespace/java/current/bin:/home/codespace/.ruby/current/bin:/home/codespace/.local/bin:/usr/local/python/current/bin:/usr/local/py-utils/bin:/usr/local/jupyter:/usr/local/oryx:/usr/local/go/bin:/go/bin:/usr/local/sdkman/bin:/usr/local/sdkman/candidates/java/current/bin:/usr/local/sdkman/candidates/gradle/current/bin:/usr/local/sdkman/candidates/maven/current/bin:/usr/local/sdkman/candidates/ant/current/bin:/usr/local/rvm/gems/default/bin:/usr/local/rvm/gems/default@global/bin:/usr/local/rvm/rubies/default/bin:/usr/local/share/rbenv/bin:/usr/local/php/current/bin:/opt/conda/bin:/usr/local/nvs:/usr/local/share/nvm/current/bin:/usr/local/hugo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/dotnet:/home/codespace/.dotnet/tools:/usr/local/rvm/bin",
+    "PYTHONPATH": null,
+    "TZ": null,
+    "UBSAN_OPTIONS": null
+  },
+  "gcp_used": false,
+  "git_commit": "f7b220c4c4fa51a6b7a2d716cd870b9e20803712",
+  "launch": [
+    "/home/codespace/.python/current/bin/python3",
+    "morsehgp3D_v8/bench/run_lidar_ground_checks.py",
+    "run",
+    "--build",
+    "build/v8_ground_patchwork_20260921",
+    "--output",
+    "morsehgp3D_v8/receipts/lidar_ground_20260921/release",
+    "--inputs",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin"
+  ],
+  "public_status": "not_claimed",
+  "schema": "mhgp8_lidar_ground_checks_v1",
+  "scope": "approximate_ground_mask_and_exact_retained_coordinates_not_segmentation_quality_or_HGP",
+  "source_input_sha256": {
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin": "92e945f37a6cd4a58acc8aa15b275af2e271ecf69c0a44a311d888524473c451",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin": "4dfb5701db9ff36bd592746e08e8fafd4d1c63cba1ef66d2c2791e405b800e80",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin": "132f437349e17c00a8a31539f10a3214d9391ae1251293e7794a26540412b5cd",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/build_patchwork_ground.py": "aea310fed9ad296b9b13e3d4adb1d240df6fbfcb8eb8292de1d5f0082dc3e4f7",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/patchwork_ground_probe.cpp": "f1add2faf285f0fbf634438519d700de3c839a02732b13cf1ead53dec3cef2bd",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_ground.py": "f679e28698ea3a025da019b41f2516644656f910e1c9f4b3983001d9979408e5",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_precision.py": "d22a7b90f3f2214f14c44a4980d2cca7fb33fac8cbd23a977be958fa5d25fb84",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_lidar_ground_checks.py": "49d49fe8612cd37960c7b81bc16f74d049e35d04fe944f96990e177201d1f584",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_p0_matrix.py": "b806572d9b5a76afe15c26586321663aa946e318a7a8a2286c3e9549e3ba717f",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/lidar_ground_test.py": "35029a2ecb458c8e18a5a15c67d73e30f886cb79f521fb34d1f6e35fbefad2fe"
+  },
+  "started_utc": "2026-09-21T20:01:14.291487+00:00"
+}

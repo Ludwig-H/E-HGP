@@ -1,0 +1,33 @@
+{
+  "command": [
+    "/workspaces/E-HGP/build/v8_ground_patchwork_sanitize_20260921/mhgp8_patchwork_ground_probe",
+    "--input",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/sanitize/ground_ggg5tyc0/fixtures/unknown.bin",
+    "--output",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/sanitize/ground_ggg5tyc0/rejected.u8",
+    "--other",
+    "1"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "environment": {
+    "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+    "LANG": "C.UTF-8",
+    "LC_ALL": "C.UTF-8",
+    "LD_LIBRARY_PATH": null,
+    "LD_PRELOAD": null,
+    "MKL_NUM_THREADS": null,
+    "OMP_NUM_THREADS": null,
+    "OPENBLAS_NUM_THREADS": null,
+    "PATH": "/home/codespace/.codex/packages/standalone/releases/0.155.1-x86_64-unknown-linux-musl/codex-path:/home/codespace/.local/bin:/usr/local/rvm/gems/ruby-3.4.7/bin:/usr/local/rvm/gems/ruby-3.4.7@global/bin:/usr/local/rvm/rubies/ruby-3.4.7/bin:/home/codespace/.dotnet:/home/codespace/nvm/current/bin:/home/codespace/.php/current/bin:/home/codespace/.python/current/bin:/home/codespace/java/current/bin:/home/codespace/.ruby/current/bin:/home/codespace/.local/bin:/usr/local/python/current/bin:/usr/local/py-utils/bin:/usr/local/jupyter:/usr/local/oryx:/usr/local/go/bin:/go/bin:/usr/local/sdkman/bin:/usr/local/sdkman/candidates/java/current/bin:/usr/local/sdkman/candidates/gradle/current/bin:/usr/local/sdkman/candidates/maven/current/bin:/usr/local/sdkman/candidates/ant/current/bin:/usr/local/rvm/gems/default/bin:/usr/local/rvm/gems/default@global/bin:/usr/local/rvm/rubies/default/bin:/usr/local/share/rbenv/bin:/usr/local/php/current/bin:/opt/conda/bin:/usr/local/nvs:/usr/local/share/nvm/current/bin:/usr/local/hugo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/dotnet:/home/codespace/.dotnet/tools:/usr/local/rvm/bin",
+    "PYTHONPATH": null,
+    "TZ": null,
+    "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "exit_code": 1,
+  "expected_exit": 1,
+  "label": "reject_unknown_option",
+  "stderr": "patchwork ground probe: unknown option\n",
+  "stderr_base64": "cGF0Y2h3b3JrIGdyb3VuZCBwcm9iZTogdW5rbm93biBvcHRpb24K",
+  "stdout": "",
+  "stdout_base64": ""
+}

@@ -35,7 +35,25 @@ séparément segmentation, HGP sur le sous-nuage et coût total. Une
 segmentation approximative du sol ne certifie pas les classes physiques ;
 HGP reste exact sur le sous-nuage explicitement déclaré. Ni les labels de
 vérité terrain ni une réussite sans sol ne remplacent le contrat principal
-sur la trame brute entière. Pas encore de mesure/qualification sans sol.
+sur la trame brute entière. Les labels ne bloquent pas les chronos HGP
+sur masque figé ; leur évaluation de qualité est un diagnostic distinct.
+
+Pilote implémenté : lire `morsehgp3D_v8/docs/PILOTE_LIDAR_SANS_SOL_20260921.md`.
+Patchwork++3e6903a1 épinglé, mono, RNRoff, RVPF/TGRon, état neuf par trame.
+Masque0unknown/1ground/2nonground, seul1retiré ; |XYZ|>2^40 et sentinelle
+FLT_MIN deviennent unknown, nonfiniteXYZ refusé. Préparateur réutilise TOUT
+le brut avant sélection, même origine de grille, site conservé si un retour
+reste,27payloads/profil et sept morceaux même vides. Builds épinglés
+`build/v8_ground_patchwork_20260921` et
+`build/v8_ground_patchwork_sanitize_20260921` ; reçus
+`morsehgp3D_v8/receipts/lidar_ground_20260921/`, lecteurs LIVE dépendant
+des builds et bruts non versionnés. Release44/San17commandes,20tests,
+42nuages, trois masques répétés trois fois identiques. Trames0/100/200 :
+39 885/35 551/45 845sites retenus ; lecture→masque30,358/29,843/29,927ms
+CPU local partagé. Préparation Python horsligne horschrono. Ni score
+sémantique ni HGP/FULL/GPU acquis ; GCP non utilisé. Priorité suivante :
+`docs/RACCORD_NATIF_GLOBAL_PLAN_20260921.md` dansv8, propriété intégrée
+à X avant census et sorties croissantes, pas nouvelle micro-variante q2.
 
 ## Entrée float32 / grille fine — 21 septembre2026
 

@@ -37,8 +37,16 @@ Les36mesures8k/16k/32k sont synthétiques, mono, sur hôte partagé.
 LiDAR sans sol ajouté aux régimes prioritaires :
 [recherche et protocole](../docs/LIDAR_SANS_SOL_PROTOCOLE_20260921.md).
 Masque géométrique sans labels, conservation des float32/IDs, segmentation
-avant partitions spatiales et coûts séparés. Pas de retrait de la
-référence brute, pas encore de nouvelle mesure sans sol. GCP non utilisé.
+avant partitions spatiales et coûts séparés. Le [pilote implémenté](../docs/PILOTE_LIDAR_SANS_SOL_20260921.md)
+ferme44commandes Release et17Clang ASan/UBSan/LSan :20tests, quatre fixtures
+natives et dix refus, neuf segmentations et42nuages préparés. Médianes
+lecture→masque30,358/29,843/29,927ms CPU mono sur0/100/200 ; sorties
+retenues39 885/35 551/45 845sites. Pas de score physique sans annotations,
+pas de mesure HGP sans sol ni de retrait de la référence brute. GCP non utilisé.
+Le [port global suivant](../docs/RACCORD_NATIF_GLOBAL_PLAN_20260921.md)
+intègre les limites B `f7b220c4` : matrice q3 à sorties constantes,
+replis hull, chronos sous charge du constructeur aussi. Les captures
+numériques antérieures sont inchangées, aucun gain global n'en est déduit.
 
 Identité float32 commune q2/q3/q4 et événements q4 réduits : voir
 [contrat et limites](../docs/IDENTITE_FLOAT32_ET_EVENEMENTS_Q4_20260921.md)

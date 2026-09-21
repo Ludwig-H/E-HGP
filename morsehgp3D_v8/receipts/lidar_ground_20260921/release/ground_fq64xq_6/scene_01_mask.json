@@ -1,0 +1,72 @@
+{
+  "encoding": "u8_0_unknown_1_ground_2_nonground",
+  "input_sha256": "4dfb5701db9ff36bd592746e08e8fafd4d1c63cba1ef66d2c2791e405b800e80",
+  "mask_sha256": "3e9e95b5f21dc177b192d8c0d2c537a3a0b6fde357b10ed26da641330ce74e51",
+  "producer": {
+    "binary_sha256": "4aae71381763e274cc049f79ee47e310b5f92806a01a2d7df74b5795ff64febf",
+    "build_completion_sha256": "7f12b8ae85e8ffc6bc1a1dafef15af7dd8057f451d6347058a00b81f9fffad14",
+    "classification": "approximate_not_semantic_ground_truth",
+    "eigen_threads": 1,
+    "fresh_state": true,
+    "labels_used": false,
+    "method": "Patchwork++",
+    "native_command_sha256": "b2b57660f86d649833264845660b5486d4a53c81ba8a74d861f7ebf862e40e30",
+    "openmp": false,
+    "parameters": {
+      "RNR_intensity_thr": 0.2,
+      "RNR_ver_angle_thr": -15,
+      "adaptive_seed_selection_margin": -1.2,
+      "elevation_thr": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "enable_RNR": false,
+      "enable_RVPF": true,
+      "enable_TGR": true,
+      "flatness_thr": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "intensity_thr": 0,
+      "max_elevation_storage": 1000,
+      "max_flatness_storage": 1000,
+      "max_range": 80,
+      "min_range": 2.7,
+      "num_iter": 3,
+      "num_lpr": 20,
+      "num_min_pts": 10,
+      "num_rings_each_zone": [
+        2,
+        4,
+        4,
+        4
+      ],
+      "num_rings_of_interest": 4,
+      "num_sectors_each_zone": [
+        16,
+        32,
+        54,
+        32
+      ],
+      "num_zones": 4,
+      "sensor_height": 1.723,
+      "th_dist": 0.125,
+      "th_dist_v": 0.1,
+      "th_seeds": 0.125,
+      "th_seeds_v": 0.25,
+      "uprightness_thr": 0.707,
+      "verbose": false
+    },
+    "reflectance_policy": "ignored_preserved_in_raw",
+    "rnr_enabled": false,
+    "unknown_policy": "retained",
+    "upstream_commit": "3e6903a1d5537a4cc2ace897b0bbb98a92d6014c",
+    "wrapper_sha256": "f1add2faf285f0fbf634438519d700de3c839a02732b13cf1ead53dec3cef2bd"
+  },
+  "raw_returns": 124479,
+  "schema": "mhgp8_lidar_ground_mask_v1"
+}

@@ -50,6 +50,9 @@ Le lecteur est **LIVE** : ce n'est pas une archive portable autonome.
 Le champ `git_commit` désigne le HEAD au lancement (e2b09f94), avant
 publication des nouveaux fichiers. Les snapshots et hashes de sources,
 pas ce seul commit, identifient donc le contenu effectivement testé.
+Les sources testées ont ensuite été publiées dans `a005f8aa` ; la matrice
+avait pour HEAD de lancement `74fb0a6a`. Le lecteur de matrice `read` et
+son alias `selftest` empruntent le même jugement, pas deux oracles distincts.
 
 ## Préflight et mutations compilées
 

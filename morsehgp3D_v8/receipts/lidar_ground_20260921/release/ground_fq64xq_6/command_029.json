@@ -1,0 +1,40 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_ground.py",
+    "prepare",
+    "--input",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin",
+    "--mask",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_repeat_0.u8",
+    "--mask-receipt",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_mask.json",
+    "--output",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_float32",
+    "--profile",
+    "float32"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "environment": {
+    "ASAN_OPTIONS": null,
+    "LANG": "C.UTF-8",
+    "LC_ALL": "C.UTF-8",
+    "LD_LIBRARY_PATH": null,
+    "LD_PRELOAD": null,
+    "MKL_NUM_THREADS": null,
+    "OMP_NUM_THREADS": null,
+    "OPENBLAS_NUM_THREADS": null,
+    "PATH": "/home/codespace/.codex/packages/standalone/releases/0.155.1-x86_64-unknown-linux-musl/codex-path:/home/codespace/.local/bin:/usr/local/rvm/gems/ruby-3.4.7/bin:/usr/local/rvm/gems/ruby-3.4.7@global/bin:/usr/local/rvm/rubies/ruby-3.4.7/bin:/home/codespace/.dotnet:/home/codespace/nvm/current/bin:/home/codespace/.php/current/bin:/home/codespace/.python/current/bin:/home/codespace/java/current/bin:/home/codespace/.ruby/current/bin:/home/codespace/.local/bin:/usr/local/python/current/bin:/usr/local/py-utils/bin:/usr/local/jupyter:/usr/local/oryx:/usr/local/go/bin:/go/bin:/usr/local/sdkman/bin:/usr/local/sdkman/candidates/java/current/bin:/usr/local/sdkman/candidates/gradle/current/bin:/usr/local/sdkman/candidates/maven/current/bin:/usr/local/sdkman/candidates/ant/current/bin:/usr/local/rvm/gems/default/bin:/usr/local/rvm/gems/default@global/bin:/usr/local/rvm/rubies/default/bin:/usr/local/share/rbenv/bin:/usr/local/php/current/bin:/opt/conda/bin:/usr/local/nvs:/usr/local/share/nvm/current/bin:/usr/local/hugo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/dotnet:/home/codespace/.dotnet/tools:/usr/local/rvm/bin",
+    "PYTHONPATH": null,
+    "TZ": null,
+    "UBSAN_OPTIONS": null
+  },
+  "exit_code": 0,
+  "expected_exit": 0,
+  "label": "prepare_01_float32",
+  "stderr": "",
+  "stderr_base64": "",
+  "stdout": "{\n  \"completion_sha256\": \"6e10b66613f5730a9613196b1b12d5545a8d78c9a7a5ae47fe3b6abb41eb96e3\",\n  \"dataset_sites\": {\n    \"full\": 35551,\n    \"half_x_neg\": 19019,\n    \"half_x_nonneg\": 16532,\n    \"quarter_x_neg_y_neg\": 8074,\n    \"quarter_x_neg_y_nonneg\": 10945,\n    \"quarter_x_nonneg_y_neg\": 9221,\n    \"quarter_x_nonneg_y_nonneg\": 7311\n  },\n  \"datasets\": 7,\n  \"ground\": {\n    \"counts\": {\n      \"ground\": 88928,\n      \"nonground\": 35519,\n      \"unknown\": 32\n    },\n    \"geometric_exactness\": \"coordinates_only_not_semantic_ground_or_HGP_qualification\",\n    \"mixed_decision_sites\": 0,\n    \"original_sites\": 124479,\n    \"policy\": \"only_ground_returns_removed_site_kept_if_any_return_kept\",\n    \"removed_returns\": 88928,\n    \"removed_sites\": 88928,\n    \"retained_returns\": 35551,\n    \"retained_sites\": 35551\n  },\n  \"manifest_sha256\": \"28e70a27fd90cfc21c13962890b7bf9c3aa5b9cc36635bb7fe0616d12fb70b69\",\n  \"parameters\": {\n    \"precision_mm\": null,\n    \"profile\": \"float32\"\n  },\n  \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_float32\",\n  \"schema\": \"mhgp8_lidar_ground_preparation_v1\",\n  \"status\": \"passed\"\n}\n",
+  "stdout_base64": "ewogICJjb21wbGV0aW9uX3NoYTI1NiI6ICI2ZTEwYjY2NjEzZjU3MzBhOTYxMzE5NmIxYjEyZDU1NDVhOGQ3OGM5YTdhNWFlNDdmZTNiNmFiYjQxZWI5NmUzIiwKICAiZGF0YXNldF9zaXRlcyI6IHsKICAgICJmdWxsIjogMzU1NTEsCiAgICAiaGFsZl94X25lZyI6IDE5MDE5LAogICAgImhhbGZfeF9ub25uZWciOiAxNjUzMiwKICAgICJxdWFydGVyX3hfbmVnX3lfbmVnIjogODA3NCwKICAgICJxdWFydGVyX3hfbmVnX3lfbm9ubmVnIjogMTA5NDUsCiAgICAicXVhcnRlcl94X25vbm5lZ195X25lZyI6IDkyMjEsCiAgICAicXVhcnRlcl94X25vbm5lZ195X25vbm5lZyI6IDczMTEKICB9LAogICJkYXRhc2V0cyI6IDcsCiAgImdyb3VuZCI6IHsKICAgICJjb3VudHMiOiB7CiAgICAgICJncm91bmQiOiA4ODkyOCwKICAgICAgIm5vbmdyb3VuZCI6IDM1NTE5LAogICAgICAidW5rbm93biI6IDMyCiAgICB9LAogICAgImdlb21ldHJpY19leGFjdG5lc3MiOiAiY29vcmRpbmF0ZXNfb25seV9ub3Rfc2VtYW50aWNfZ3JvdW5kX29yX0hHUF9xdWFsaWZpY2F0aW9uIiwKICAgICJtaXhlZF9kZWNpc2lvbl9zaXRlcyI6IDAsCiAgICAib3JpZ2luYWxfc2l0ZXMiOiAxMjQ0NzksCiAgICAicG9saWN5IjogIm9ubHlfZ3JvdW5kX3JldHVybnNfcmVtb3ZlZF9zaXRlX2tlcHRfaWZfYW55X3JldHVybl9rZXB0IiwKICAgICJyZW1vdmVkX3JldHVybnMiOiA4ODkyOCwKICAgICJyZW1vdmVkX3NpdGVzIjogODg5MjgsCiAgICAicmV0YWluZWRfcmV0dXJucyI6IDM1NTUxLAogICAgInJldGFpbmVkX3NpdGVzIjogMzU1NTEKICB9LAogICJtYW5pZmVzdF9zaGEyNTYiOiAiMjhlNzBhMjdmZDkwY2ZjMjFjMTM5NjI4OTBiN2JmOWMzYWE1YjljYzM2NjM1YmI3ZmUwNjE2ZDEyZmI3MGI2OSIsCiAgInBhcmFtZXRlcnMiOiB7CiAgICAicHJlY2lzaW9uX21tIjogbnVsbCwKICAgICJwcm9maWxlIjogImZsb2F0MzIiCiAgfSwKICAicGF0aCI6ICIvd29ya3NwYWNlcy9FLUhHUC9tb3JzZWhncDNEX3Y4L3JlY2VpcHRzL2xpZGFyX2dyb3VuZF8yMDI2MDkyMS9yZWxlYXNlL2dyb3VuZF9mcTY0eHFfNi9zY2VuZV8wMV9mbG9hdDMyIiwKICAic2NoZW1hIjogIm1oZ3A4X2xpZGFyX2dyb3VuZF9wcmVwYXJhdGlvbl92MSIsCiAgInN0YXR1cyI6ICJwYXNzZWQiCn0K"
+}

@@ -3,6 +3,25 @@
 13 septembre 2026. Mémoire courte de l'audit et de la première tranche P0.
 Les sources et contre-fixtures complètes sont dans les rapports liés.
 
+## Retrait du sol : modifier la géométrie ou attendre les annotations
+
+21 septembre. Le [pilote](PILOTE_LIDAR_SANS_SOL_20260921.md) applique un
+masque aux IDs ; les points de travail ou plans estimés par Patchwork++ ne
+remplacent jamais les XYZ. Recalculer la translation de grille sur le seul
+nuage retenu changerait sa représentation : garder celle du brut entier.
+Un retour retiré peut partager sa géométrie avec un retour conservé ; le
+site reste alors présent, avec le désaccord publié, pas un mapping perdu.
+Les indécis et les points hors portée restent dans HGP. La sentinelle
+`FLT_MIN` en z de la bibliothèque est détectée même avec RNR désactivé,
+sinon ce point serait omis sans motif explicite dans le masque.
+
+Des coordonnées et hashes cohérents ne prouvent pas la qualité du retrait.
+Inversement, l'absence de labels ne justifie pas d'attendre pour comparer
+le calcul sur brut et masque figé. Publier cette absence ; ne pas promettre
+un gain HGP proportionnel aux points retirés : moins de témoins peut rendre
+de nouvelles boules admissibles. La contrelecture B `f7b220c4` motive la
+séparation de ces deux évaluations dans le protocole.
+
 ## Identifier une boule par son support, ou trier les racines naïvement
 
 21 septembre. Les mêmes centre/rayon peuvent avoir des présentations

@@ -1,0 +1,32 @@
+{
+  "command": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_ground.py",
+    "read",
+    "--path",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_float32"
+  ],
+  "cwd": "/workspaces/E-HGP",
+  "environment": {
+    "ASAN_OPTIONS": null,
+    "LANG": "C.UTF-8",
+    "LC_ALL": "C.UTF-8",
+    "LD_LIBRARY_PATH": null,
+    "LD_PRELOAD": null,
+    "MKL_NUM_THREADS": null,
+    "OMP_NUM_THREADS": null,
+    "OPENBLAS_NUM_THREADS": null,
+    "PATH": "/home/codespace/.codex/packages/standalone/releases/0.155.1-x86_64-unknown-linux-musl/codex-path:/home/codespace/.local/bin:/usr/local/rvm/gems/ruby-3.4.7/bin:/usr/local/rvm/gems/ruby-3.4.7@global/bin:/usr/local/rvm/rubies/ruby-3.4.7/bin:/home/codespace/.dotnet:/home/codespace/nvm/current/bin:/home/codespace/.php/current/bin:/home/codespace/.python/current/bin:/home/codespace/java/current/bin:/home/codespace/.ruby/current/bin:/home/codespace/.local/bin:/usr/local/python/current/bin:/usr/local/py-utils/bin:/usr/local/jupyter:/usr/local/oryx:/usr/local/go/bin:/go/bin:/usr/local/sdkman/bin:/usr/local/sdkman/candidates/java/current/bin:/usr/local/sdkman/candidates/gradle/current/bin:/usr/local/sdkman/candidates/maven/current/bin:/usr/local/sdkman/candidates/ant/current/bin:/usr/local/rvm/gems/default/bin:/usr/local/rvm/gems/default@global/bin:/usr/local/rvm/rubies/default/bin:/usr/local/share/rbenv/bin:/usr/local/php/current/bin:/opt/conda/bin:/usr/local/nvs:/usr/local/share/nvm/current/bin:/usr/local/hugo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/dotnet:/home/codespace/.dotnet/tools:/usr/local/rvm/bin",
+    "PYTHONPATH": null,
+    "TZ": null,
+    "UBSAN_OPTIONS": null
+  },
+  "exit_code": 0,
+  "expected_exit": 0,
+  "label": "read_00_float32_normal",
+  "stderr": "",
+  "stderr_base64": "",
+  "stdout": "{\n  \"completion_sha256\": \"35d5cf352729368854f726b02e9701e22467bd275915759c6d48460ee0ff50a4\",\n  \"dataset_sites\": {\n    \"full\": 39885,\n    \"half_x_neg\": 24591,\n    \"half_x_nonneg\": 15294,\n    \"quarter_x_neg_y_neg\": 11536,\n    \"quarter_x_neg_y_nonneg\": 13055,\n    \"quarter_x_nonneg_y_neg\": 8225,\n    \"quarter_x_nonneg_y_nonneg\": 7069\n  },\n  \"datasets\": 7,\n  \"ground\": {\n    \"counts\": {\n      \"ground\": 83504,\n      \"nonground\": 39844,\n      \"unknown\": 41\n    },\n    \"geometric_exactness\": \"coordinates_only_not_semantic_ground_or_HGP_qualification\",\n    \"mixed_decision_sites\": 0,\n    \"original_sites\": 123389,\n    \"policy\": \"only_ground_returns_removed_site_kept_if_any_return_kept\",\n    \"removed_returns\": 83504,\n    \"removed_sites\": 83504,\n    \"retained_returns\": 39885,\n    \"retained_sites\": 39885\n  },\n  \"manifest_sha256\": \"a79f1e6b57b5b1f5fd965efabf881e18d362f052e84867e7f79e075d297252b0\",\n  \"parameters\": {\n    \"precision_mm\": null,\n    \"profile\": \"float32\"\n  },\n  \"path\": \"/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_float32\",\n  \"schema\": \"mhgp8_lidar_ground_preparation_v1\",\n  \"status\": \"passed\"\n}\n",
+  "stdout_base64": "ewogICJjb21wbGV0aW9uX3NoYTI1NiI6ICIzNWQ1Y2YzNTI3MjkzNjg4NTRmNzI2YjAyZTk3MDFlMjI0NjdiZDI3NTkxNTc1OWM2ZDQ4NDYwZWUwZmY1MGE0IiwKICAiZGF0YXNldF9zaXRlcyI6IHsKICAgICJmdWxsIjogMzk4ODUsCiAgICAiaGFsZl94X25lZyI6IDI0NTkxLAogICAgImhhbGZfeF9ub25uZWciOiAxNTI5NCwKICAgICJxdWFydGVyX3hfbmVnX3lfbmVnIjogMTE1MzYsCiAgICAicXVhcnRlcl94X25lZ195X25vbm5lZyI6IDEzMDU1LAogICAgInF1YXJ0ZXJfeF9ub25uZWdfeV9uZWciOiA4MjI1LAogICAgInF1YXJ0ZXJfeF9ub25uZWdfeV9ub25uZWciOiA3MDY5CiAgfSwKICAiZGF0YXNldHMiOiA3LAogICJncm91bmQiOiB7CiAgICAiY291bnRzIjogewogICAgICAiZ3JvdW5kIjogODM1MDQsCiAgICAgICJub25ncm91bmQiOiAzOTg0NCwKICAgICAgInVua25vd24iOiA0MQogICAgfSwKICAgICJnZW9tZXRyaWNfZXhhY3RuZXNzIjogImNvb3JkaW5hdGVzX29ubHlfbm90X3NlbWFudGljX2dyb3VuZF9vcl9IR1BfcXVhbGlmaWNhdGlvbiIsCiAgICAibWl4ZWRfZGVjaXNpb25fc2l0ZXMiOiAwLAogICAgIm9yaWdpbmFsX3NpdGVzIjogMTIzMzg5LAogICAgInBvbGljeSI6ICJvbmx5X2dyb3VuZF9yZXR1cm5zX3JlbW92ZWRfc2l0ZV9rZXB0X2lmX2FueV9yZXR1cm5fa2VwdCIsCiAgICAicmVtb3ZlZF9yZXR1cm5zIjogODM1MDQsCiAgICAicmVtb3ZlZF9zaXRlcyI6IDgzNTA0LAogICAgInJldGFpbmVkX3JldHVybnMiOiAzOTg4NSwKICAgICJyZXRhaW5lZF9zaXRlcyI6IDM5ODg1CiAgfSwKICAibWFuaWZlc3Rfc2hhMjU2IjogImE3OWYxZTZiNTdiNWIxZjVmZDk2NWVmYWJmODgxZTE4ZDM2MmYwNTJlODQ4NjdlN2Y3OWUwNzVkMjk3MjUyYjAiLAogICJwYXJhbWV0ZXJzIjogewogICAgInByZWNpc2lvbl9tbSI6IG51bGwsCiAgICAicHJvZmlsZSI6ICJmbG9hdDMyIgogIH0sCiAgInBhdGgiOiAiL3dvcmtzcGFjZXMvRS1IR1AvbW9yc2VoZ3AzRF92OC9yZWNlaXB0cy9saWRhcl9ncm91bmRfMjAyNjA5MjEvcmVsZWFzZS9ncm91bmRfZnE2NHhxXzYvc2NlbmVfMDBfZmxvYXQzMiIsCiAgInNjaGVtYSI6ICJtaGdwOF9saWRhcl9ncm91bmRfcHJlcGFyYXRpb25fdjEiLAogICJzdGF0dXMiOiAicGFzc2VkIgp9Cg=="
+}

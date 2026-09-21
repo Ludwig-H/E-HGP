@@ -7,6 +7,12 @@ un protocole proposé, **pas une implémentation ni une qualification**.
 Aucun paquet, dépôt tiers ou jeu de données n'a été installé ou téléchargé
 pour cette recherche ; aucune mesure native ou GCP n'en découle.
 
+Cadre de la recherche : `exploration_v8_hors_registre`, `backend=none`,
+`public_status=not_claimed`. Mise en œuvre ultérieure distincte : le
+[pilote Patchwork++](PILOTE_LIDAR_SANS_SOL_20260921.md) épingle une révision
+native et prépare maintenant les masques. Ses reçus, pas les performances
+bibliographiques ci-dessous, font autorité pour les nouveaux essais.
+
 Le [contrat de trame entière](CONTRAT_TRAMES_SEMANTICKITTI_20260921.md)
 et la [préférence float32 originale](PRECISION_FLOAT32_ET_GRILLE_20260921.md)
 restent applicables. La cible porte sur toute la tour K=1..10, puis K=1..5
@@ -131,6 +137,14 @@ originaux dans le repère capteur ; les coupes restent celles de ce repère.
 
 ## Évaluer le retrait sans utiliser les labels pour le décider
 
+Précision après la contrelecture B `f7b220c4` : cette évaluation sémantique
+est **indépendante des campagnes de calcul HGP**. L'absence locale des
+`.label` n'empêche pas les mesures appariées brut/sans sol sur un masque
+figé, à paramètres publiés et choisis avant les chronos. Elle interdit
+seulement de qualifier la qualité physique du retrait. Aucun téléchargement
+d'annotations ni réglage sur la séquence08 n'est requis pour ce pilote.
+Le [pilote implémenté](PILOTE_LIDAR_SANS_SOL_20260921.md) ne lit aucun label.
+
 Les fichiers `.label` ne sont lus que par l'évaluateur **après production
 du masque**. Ni la segmentation, ni son adaptation, ni HGP ne reçoivent
 les labels sémantiques ou d'instance. Le masque idéal issu des labels
@@ -211,6 +225,23 @@ une série. Les tailles 8k/16k/32k restent des diagnostics synthétiques,
 pas des plafonds ou sous-échantillonnages des nouvelles mesures LiDAR.
 Ces observations ne prouvent pas une borne globale sous-quadratique.
 
+Le retrait change aussi le profil de densité et les effets de frontière.
+Ces exposants spatiaux sont donc des diagnostics, pas l'estimation isolée
+d'un ordre algorithmique. Publier également, pour chaque parent, le rapport
+de son travail à la **somme** du travail de ses enfants et la dispersion
+entre frères ; ne pas cacher un quart défavorable dans une moyenne.
+Une campagne de densité contrôlée pourra compléter ce diagnostic, sans
+remplacer le contrat sur trame entière ni les coupes demandées.
+
+Pour la question différente « le retrait accélère-t-il HGP ? », comparer
+directement chaque morceau avec son homologue brut : Nretenu/Nbrut,
+Wretenu/Wbrut pour chaque compteur principal et temps HGP retenu/brut.
+Publier les sorties et les cas non estimables, sans supposer le même
+catalogue. Sur de petites fixtures à oracle exhaustif, compter aussi les
+boules désormais admissibles dont la profondeur brute dépassait le seuil.
+Sur grande trame, ne pas ajouter silencieusement un census brut complet
+par sortie pour obtenir ce diagnostic ; son coût doit rester séparé.
+
 ## Coûts à publier et portes avant raccord
 
 Mesurer séparément segmentation complète, adaptation/copies/masque,
@@ -235,8 +266,9 @@ Premières portes proposées pour l'adaptateur, avant campagne coûteuse :
   retenues ; cas vide, tout sol, aucun sol, hors portée et doublons ;
 - paramètres, état temporel et politiques de bruit explicites ; entrée
   `.label` inaccessible au processus de segmentation ;
-- plusieurs scènes, pente/rupture de pente, objet proche du sol et
-  végétation ; critères de qualité fixés avant sélection finale ;
+- pour la qualification sémantique ultérieure seulement : plusieurs scènes,
+  pente/rupture de pente, objet proche du sol et végétation ; critères de
+  qualité fixés avant sélection finale, sans bloquer les chronos HGP ;
 - relecture du masque depuis l'entrée source et inventaire de ses hashes,
   puis vérification des sept partitions et des correspondances ;
 - mesures appariées K5/K10 et s8/s10/s12, sans changer le masque en fonction
