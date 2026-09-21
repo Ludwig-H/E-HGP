@@ -1,0 +1,1 @@
+{"schema":"mhgp8_float32_q3_census_selftest_v1","status":"passed","tests":458,"callbacks_checked":7,"invalid_arguments":10,"callback_exceptions":1,"lifetime_checks":2,"concurrent_workers":4,"concurrent_calls":32,"rounding_modes":4,"flush_modes":4,"environment_calls":96,"bound_checks":224}

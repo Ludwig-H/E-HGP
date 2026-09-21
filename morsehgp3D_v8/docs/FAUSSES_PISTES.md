@@ -526,6 +526,32 @@ cellule vivante n'est pas une cellule de profondeur faible partout.
 
 Voir la [preuve et les limites30](Q4_FENETRE_DE_FAIBLE_PROFONDEUR_20260920.md).
 
+## Census q3 natif : ne pas perdre le travail ni les contacts
+
+Le [partage par préfixe float32](CENSUS_Q3_FLOAT32_PARTAGE_20260921.md)
+transmet le compte ET le curseur. Repartir de la racine avec le compte
+hérité compte deux fois les témoins ; reprendre la coquille au curseur
+du compte perd les contacts du préfixe. Ces deux erreurs font l'objet
+de mutations compilées distinctes, pas de seuls tests de compteurs.
+Les graines invalides restent des témoins pour les autres triangles.
+
+Une boîte de centres conditionnelle aux triangles aigus ne prouve pas
+que toutes les graines sont valides. Une division d'intervalles ambiguë
+ne justifie pas un epsilon : conserver la boîte géométrique et raffiner.
+Pour les coordonnées natives, le minimum de puissance sur une boîte
+est continu ; tester seulement ses coins ou importer le floor/ceil de
+la grille u16 peut perdre un minimum intérieur.
+
+Avec le même index X/Z et des bornes strictes, une graine valide impose
+un relais avant que son propre contact soit consommé. Exiger un test
+positif de `relays_at_eof` serait donc exiger un scénario impossible,
+pas renforcer la preuve. La coquille reste globale dans tous les cas.
+
+Enfin, accélérer toutes les graines d'UNE arête synthétique ne donne pas
+une borne sur le nombre d'arêtes ni sur le coût d'une trame SemanticKITTI.
+De même, retirer le sol change le nuage et ses hiérarchies : un résultat
+sans sol ne peut pas être présenté comme celui de la trame brute.
+
 Références : [implémentation](../audits/IMPLEMENTATION_PARALLELISATION.md)
 et [mesures](../audits/CONTRATS_ET_MESURES.md).
 

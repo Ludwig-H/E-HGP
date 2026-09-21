@@ -1,0 +1,42 @@
+{
+  "case": "shell_prefix_omitted",
+  "command": [
+    "/usr/bin/g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-ffp-contract=off",
+    "-fno-fast-math",
+    "-frounding-math",
+    "-O3",
+    "-DNDEBUG",
+    "-I",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/src",
+    "-M",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/src/spatial/float32_index.cpp",
+    "-MF",
+    "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/pre_index.d",
+    "-MT",
+    "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/index.o"
+  ],
+  "cwd": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/bin:/usr/bin",
+    "TZ": "UTC"
+  },
+  "exit_code": 0,
+  "finished_utc": "2026-09-21T19:30:22.236170+00:00",
+  "label": "shell_prefix_omitted_dependencies_index",
+  "phase": "dependencies",
+  "started_utc": "2026-09-21T19:30:22.150925+00:00",
+  "stderr": "",
+  "stderr_base64": "",
+  "stdin": null,
+  "stdout": "",
+  "stdout_base64": ""
+}

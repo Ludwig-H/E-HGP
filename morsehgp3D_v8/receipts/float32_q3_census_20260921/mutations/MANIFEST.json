@@ -1,0 +1,1217 @@
+{
+  "build": "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921",
+  "compiler": "/usr/bin/g++",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/bin:/usr/bin",
+    "TZ": "UTC"
+  },
+  "expected": [
+    [
+      {
+        "depth": 0,
+        "seed": 2,
+        "shell": [
+          0,
+          1,
+          2
+        ]
+      },
+      {
+        "depth": 1,
+        "seed": 3,
+        "shell": [
+          0,
+          1,
+          3
+        ]
+      },
+      {
+        "depth": 2,
+        "seed": 4,
+        "shell": [
+          0,
+          1,
+          4
+        ]
+      },
+      {
+        "depth": 3,
+        "seed": 5,
+        "shell": [
+          0,
+          1,
+          5
+        ]
+      }
+    ],
+    [
+      {
+        "depth": 0,
+        "seed": 2,
+        "shell": [
+          0,
+          1,
+          2
+        ]
+      },
+      {
+        "depth": 1,
+        "seed": 3,
+        "shell": [
+          0,
+          1,
+          3
+        ]
+      },
+      {
+        "depth": 2,
+        "seed": 4,
+        "shell": [
+          0,
+          1,
+          4
+        ]
+      },
+      {
+        "depth": 3,
+        "seed": 5,
+        "shell": [
+          0,
+          1,
+          5
+        ]
+      }
+    ]
+  ],
+  "fixture": {
+    "name": "nested_column_prefix_and_global_contacts",
+    "points": [
+      [
+        3212836864,
+        0,
+        0
+      ],
+      [
+        1065353216,
+        0,
+        0
+      ],
+      [
+        0,
+        1073741824,
+        0
+      ],
+      [
+        0,
+        1074790400,
+        0
+      ],
+      [
+        0,
+        1075838976,
+        0
+      ],
+      [
+        0,
+        1076887552,
+        0
+      ],
+      [
+        0,
+        1077936128,
+        0
+      ],
+      [
+        0,
+        1078984704,
+        0
+      ],
+      [
+        0,
+        1080033280,
+        0
+      ]
+    ],
+    "requests": [
+      {
+        "a": 0,
+        "b": 1,
+        "grain": 1,
+        "kmax": 5,
+        "mode": 0,
+        "node": 0
+      },
+      {
+        "a": 0,
+        "b": 1,
+        "grain": 1,
+        "kmax": 5,
+        "mode": 1,
+        "node": 0
+      }
+    ]
+  },
+  "flags": [
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-ffp-contract=off",
+    "-fno-fast-math",
+    "-frounding-math",
+    "-O3",
+    "-DNDEBUG"
+  ],
+  "launch": [
+    "/home/codespace/.python/current/bin/python3",
+    "morsehgp3D_v8/tests/float32_q3_census_mutations.py",
+    "run",
+    "--build",
+    "build/v8_float32_q3_census_mutants_20260921",
+    "--output",
+    "morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations",
+    "--compiler",
+    "/usr/bin/g++"
+  ],
+  "mutations": [
+    {
+      "edits": [
+        [
+          "      auto cursor = ticket.cursor;",
+          "      std::size_t cursor = 0; // MUTANT: recount credited prefix."
+        ]
+      ],
+      "name": "prefix_recounted_from_root",
+      "property": "a relayed seed must not recount the already credited witness prefix"
+    },
+    {
+      "edits": [
+        [
+          "      collect_shell(*ball, prepared);",
+          "      collect_shell(*ball, prepared, ticket.cursor);"
+        ],
+        [
+          "  void collect_shell(const Float32Ball& ball, const Float32Q3Block& prepared) {",
+          "  void collect_shell(const Float32Ball& ball, const Float32Q3Block& prepared, std::size_t cursor) {"
+        ],
+        [
+          "    std::size_t cursor = 0;",
+          "    // MUTANT: omit all contacts preceding the count cursor."
+        ]
+      ],
+      "name": "shell_prefix_omitted",
+      "property": "every accepted support must recover shell contacts from the entire global index"
+    }
+  ],
+  "output": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations",
+  "plan": [
+    {
+      "case": null,
+      "command": [
+        "/usr/bin/g++",
+        "--version"
+      ],
+      "label": "compiler_version",
+      "phase": "version",
+      "stdin": null
+    },
+    {
+      "case": "baseline",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/src/core/float32_ball.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/pre_ball.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/ball.o"
+      ],
+      "label": "baseline_dependencies_ball",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "baseline",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/src/spatial/float32_index.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/pre_index.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/index.o"
+      ],
+      "label": "baseline_dependencies_index",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "baseline",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/src/core/float32_q3_block.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/pre_block.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/block.o"
+      ],
+      "label": "baseline_dependencies_block",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "baseline",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/src/lanes/float32_q3_census.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/pre_census.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/census.o"
+      ],
+      "label": "baseline_dependencies_census",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "baseline",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/tests/float32_q3_census_probe.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/pre_test.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/test.o"
+      ],
+      "label": "baseline_dependencies_test",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "baseline",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/src/core/float32_ball.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/ball.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/ball.o"
+      ],
+      "label": "baseline_compile_ball",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "baseline",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/src/spatial/float32_index.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/index.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/index.o"
+      ],
+      "label": "baseline_compile_index",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "baseline",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/src/core/float32_q3_block.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/block.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/block.o"
+      ],
+      "label": "baseline_compile_block",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "baseline",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/src/lanes/float32_q3_census.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/census.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/census.o"
+      ],
+      "label": "baseline_compile_census",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "baseline",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/tests/float32_q3_census_probe.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/test.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/test.o"
+      ],
+      "label": "baseline_compile_test",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "baseline",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/src",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/ball.o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/index.o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/block.o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/census.o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/test.o",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/probe"
+      ],
+      "label": "baseline_link",
+      "phase": "link",
+      "stdin": null
+    },
+    {
+      "case": "baseline",
+      "command": [
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/probe"
+      ],
+      "label": "baseline_geometry",
+      "phase": "geometry",
+      "stdin": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/fixture.txt"
+    },
+    {
+      "case": "prefix_recounted_from_root",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/src/core/float32_ball.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/pre_ball.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/ball.o"
+      ],
+      "label": "prefix_recounted_from_root_dependencies_ball",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "prefix_recounted_from_root",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/src/spatial/float32_index.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/pre_index.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/index.o"
+      ],
+      "label": "prefix_recounted_from_root_dependencies_index",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "prefix_recounted_from_root",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/src/core/float32_q3_block.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/pre_block.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/block.o"
+      ],
+      "label": "prefix_recounted_from_root_dependencies_block",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "prefix_recounted_from_root",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/src/lanes/float32_q3_census.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/pre_census.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/census.o"
+      ],
+      "label": "prefix_recounted_from_root_dependencies_census",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "prefix_recounted_from_root",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/tests/float32_q3_census_probe.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/pre_test.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/test.o"
+      ],
+      "label": "prefix_recounted_from_root_dependencies_test",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "prefix_recounted_from_root",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/src/core/float32_ball.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/ball.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/ball.o"
+      ],
+      "label": "prefix_recounted_from_root_compile_ball",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "prefix_recounted_from_root",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/src/spatial/float32_index.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/index.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/index.o"
+      ],
+      "label": "prefix_recounted_from_root_compile_index",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "prefix_recounted_from_root",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/src/core/float32_q3_block.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/block.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/block.o"
+      ],
+      "label": "prefix_recounted_from_root_compile_block",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "prefix_recounted_from_root",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/src/lanes/float32_q3_census.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/census.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/census.o"
+      ],
+      "label": "prefix_recounted_from_root_compile_census",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "prefix_recounted_from_root",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/tests/float32_q3_census_probe.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/test.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/test.o"
+      ],
+      "label": "prefix_recounted_from_root_compile_test",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "prefix_recounted_from_root",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/src",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/ball.o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/index.o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/block.o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/census.o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/test.o",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/probe"
+      ],
+      "label": "prefix_recounted_from_root_link",
+      "phase": "link",
+      "stdin": null
+    },
+    {
+      "case": "prefix_recounted_from_root",
+      "command": [
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/probe"
+      ],
+      "label": "prefix_recounted_from_root_geometry",
+      "phase": "geometry",
+      "stdin": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/fixture.txt"
+    },
+    {
+      "case": "shell_prefix_omitted",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/src/core/float32_ball.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/pre_ball.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/ball.o"
+      ],
+      "label": "shell_prefix_omitted_dependencies_ball",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "shell_prefix_omitted",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/src/spatial/float32_index.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/pre_index.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/index.o"
+      ],
+      "label": "shell_prefix_omitted_dependencies_index",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "shell_prefix_omitted",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/src/core/float32_q3_block.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/pre_block.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/block.o"
+      ],
+      "label": "shell_prefix_omitted_dependencies_block",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "shell_prefix_omitted",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/src/lanes/float32_q3_census.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/pre_census.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/census.o"
+      ],
+      "label": "shell_prefix_omitted_dependencies_census",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "shell_prefix_omitted",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/src",
+        "-M",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/tests/float32_q3_census_probe.cpp",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/pre_test.d",
+        "-MT",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/test.o"
+      ],
+      "label": "shell_prefix_omitted_dependencies_test",
+      "phase": "dependencies",
+      "stdin": null
+    },
+    {
+      "case": "shell_prefix_omitted",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/src/core/float32_ball.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/ball.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/ball.o"
+      ],
+      "label": "shell_prefix_omitted_compile_ball",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "shell_prefix_omitted",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/src/spatial/float32_index.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/index.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/index.o"
+      ],
+      "label": "shell_prefix_omitted_compile_index",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "shell_prefix_omitted",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/src/core/float32_q3_block.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/block.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/block.o"
+      ],
+      "label": "shell_prefix_omitted_compile_block",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "shell_prefix_omitted",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/src/lanes/float32_q3_census.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/census.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/census.o"
+      ],
+      "label": "shell_prefix_omitted_compile_census",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "shell_prefix_omitted",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/src",
+        "-c",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/tests/float32_q3_census_probe.cpp",
+        "-MD",
+        "-MF",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/test.d",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/test.o"
+      ],
+      "label": "shell_prefix_omitted_compile_test",
+      "phase": "compile",
+      "stdin": null
+    },
+    {
+      "case": "shell_prefix_omitted",
+      "command": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-frounding-math",
+        "-O3",
+        "-DNDEBUG",
+        "-I",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/shell_prefix_omitted/src",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/ball.o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/index.o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/block.o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/census.o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/test.o",
+        "-o",
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/probe"
+      ],
+      "label": "shell_prefix_omitted_link",
+      "phase": "link",
+      "stdin": null
+    },
+    {
+      "case": "shell_prefix_omitted",
+      "command": [
+        "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/shell_prefix_omitted/probe"
+      ],
+      "label": "shell_prefix_omitted_geometry",
+      "phase": "geometry",
+      "stdin": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/fixture.txt"
+    }
+  ],
+  "schema": "mhgp8_float32_q3_census_compiled_mutations_v1",
+  "scope": "two_prefix_shell_mutations_of_one_supplied_edge_not_WSPD_FULL_or_GPU",
+  "source_sha256": {
+    "/usr/bin/g++": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_p0_matrix.py": "b806572d9b5a76afe15c26586321663aa946e318a7a8a2286c3e9549e3ba717f",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/core/fixed_signed.hpp": "cd3facd9e93ddfe668f87a4e2f7faab9c0217596d2835b17f6c01cb0cbf3a3f8",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.cpp": "3c89462ee22b3636e21f67d3ec1d3eb5bc440e76e95864fa8dd2814ac8943a46",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_ball.hpp": "c673372c58e5d64931827d54bb13a44b69d3835e069e6cc611d9939ae3408973",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_predicates.hpp": "1f6175bb27cd7543c2d68916efabe68ebd23ac413dadc7aad82cabb30651997d",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_q3_block.cpp": "4e9ce4f4e371885cfcd24e0ebe76863481ac109b6ea422b25ce8c10a2851a1d7",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_q3_block.hpp": "1737edb1090bcc30220e0ea64b1fab079b288aa22ba7c91483f3e2e55382d944",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/lanes/float32_q3_census.cpp": "a5edef03854654cdf6bdb8ec26164cf17043e59ca7e7a91c6e76d805c2625c35",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/lanes/float32_q3_census.hpp": "d279d4005841bf3bc45874ec107711965fb3b6e6079b8d35223aed355711da07",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/spatial/float32_index.cpp": "2b602f47e72e088ce8187154c80849beeb451833ed15279e4d79b2e773adcf4c",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/spatial/float32_index.hpp": "4137b8129fafdb6cc893d32f3969c1ab15eef0cc016a02170913cc1ba1a6a6f5",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_ball_gate.py": "c22fa32d280beffaa3609ff3e07e7012a0fc58b31f7938c2a416b9d463899df8",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_ball_mutations.py": "2204666f55db73eb477e9e63722daf49289fd1e25e4ef53bc57614efb84b6674",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_identity_gate.py": "ed61e8b8b589054a0fbc81cddd0c60b139ed84e529269569b837c8cc3b3f9044",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_index_mutation_gate.py": "8236bb8b12c2f30064e8f9a7eb75573aa1a051329ad334caed16c16f1625910f",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_q3_census_gate.py": "0c1f7e086f0fbf7db9b646794ae37986b0535e2499867ea7a14ad1ea5cf191cb",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_q3_census_mutations.py": "feb1ec99f076fe99252d67e3545fb8c79832235bde57c69a4eaad9d0019b44a1",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/float32_q3_census_probe.cpp": "63ae5ce247e14b588b617fbd098ad67bd7364dd87784e0d4aa844c5d6709fd8d"
+  },
+  "started_utc": "2026-09-21T19:29:59.351089+00:00",
+  "system_headers_archived": false
+}

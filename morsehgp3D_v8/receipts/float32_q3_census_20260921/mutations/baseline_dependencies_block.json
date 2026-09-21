@@ -1,0 +1,42 @@
+{
+  "case": "baseline",
+  "command": [
+    "/usr/bin/g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-ffp-contract=off",
+    "-fno-fast-math",
+    "-frounding-math",
+    "-O3",
+    "-DNDEBUG",
+    "-I",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/src",
+    "-M",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/baseline/src/core/float32_q3_block.cpp",
+    "-MF",
+    "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/pre_block.d",
+    "-MT",
+    "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/baseline/block.o"
+  ],
+  "cwd": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/bin:/usr/bin",
+    "TZ": "UTC"
+  },
+  "exit_code": 0,
+  "finished_utc": "2026-09-21T19:29:59.667321+00:00",
+  "label": "baseline_dependencies_block",
+  "phase": "dependencies",
+  "started_utc": "2026-09-21T19:29:59.573202+00:00",
+  "stderr": "",
+  "stderr_base64": "",
+  "stdin": null,
+  "stdout": "",
+  "stdout_base64": ""
+}

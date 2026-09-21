@@ -3728,3 +3728,71 @@ Réservation courte de l'index pour ce lot et cette section uniquement.
 L'ajout indépendant53lignes au journal, les fichiers B en cours et tout
 le travail v6/v7 restent hors commit. Publication sur main uniquement,
 puis index libéré ; aucun autre agent n'a reçu une tâche Git.
+
+## Constructeur — census q3 natif partagé, après e2b09f94
+
+Reprise sur main ; derniers audits B lus : tous les records q4 des sept
+morceaux K5/K10 contrôlés valides, complétude encore échantillonnée côté
+q4 hors quart exhaustif. Ces preuves restent attachées au moteur u16,
+pas au port float32 ; merci pour les distinctions de périmètre.
+
+Nouvelle entrée native par UNE arête et un nœud X fournis du même index,
+sans WSPD, propriété de plus longue arête, catalogue ni FULL. Deux modes
+Individual/SharedPrefix ; cadre X = nœud/compte/curseur, copie figée pour
+chaque enfant et graine relayée. Les endpoints fixes a/b sont connus de
+puissance nulle dans le compte ; les autres graines, invalides comprises,
+restent témoins. Une feuille Z ambiguë impose division X avant consommation.
+Collecte de coquille séparée globale, même après EOF du préfixe. Pile X
+bornée par profondeur médiane+1, Z sans pile via escape ; pas de pile49
+u16 ni de frontière réordonnée. Le grain de relais ne tronque rien.
+
+Bornes de centres conditionnelles à positivité q3 : boîte de hull(a,b,X),
+intersectée avec a+W/(2G) seulement si l'intervalle G est strictement
+positif. Boîte finie avant toute requête ; cas ambigu/intersection vide
+gardent le hull. Minimum continu de puissance par six paraboles sur Z,
+18évaluations bornées réellement comptées, jamais floor/ceil de grille.
+Contrelecture mathématique interne favorable ; tests Fraction à venir.
+La campagne prévue mesure toute cette arête à n8k/16k/32k sur régimes
+déclarés, pas un générateur global ni les contrats de trame/G4. GCP non
+utilisé pour ce lot. Aucun ancien fichier moteur/build qualifié modifié.
+
+Clôture :14commandes Release et14Clang ASan/UBSan/LSan PASS,
+612appels Fraction/1798supports/8610IDs,37refus,16corruptions,
+458contrôles natifs dont224bornes,96appels arrondis/FTZ/DAZ et32appels
+concurrents. Pas de gate TSan. Deux mutants compilés tués géométriquement
+en37commandes, pas par crash : recompte avec crédit et coquille tronquée.
+Préflight analytique erroné conservé, attendu corrigé sans changer le
+moteur. Sources gelées, dépendances par unité et binaires clôturés.
+Lectures normal/−O concordantes.36mesures8k/16k/32k/K5/10 closes,
+Individual et Shared grains1/8,24différentiels concordants. Colonne et
+bande synthétiques par UNE arête ; leur forte réduction de travail ne
+qualifie ni LiDAR, ni toutes les arêtes, ni FULL/G4. Reçus propres :
+`morsehgp3D_v8/receipts/float32_q3_census_20260921/`.
+
+Nouvelle demande utilisateur : LiDAR sans sol aussi prioritaire. Recherche
+primaire et protocole dans `docs/LIDAR_SANS_SOL_PROTOCOLE_20260921.md`.
+Pilote proposé Patchwork++ C++ par masque d'IDs ; GroundGrid concurrent,
+état neuf/séquence causale distincts. Aucun tiers installé, aucun chrono
+repris comme mesure HGP. A/B : vigilance sur le changement de témoins —
+moins de sites sans sol peut créer davantage de boules peu profondes.
+Conserver le brut, publier erreurs de retrait et coût segmentation+HGP,
+figer le masque entier avant les coupes capteur, coordonnéesfloat32/IDs
+originaux et tous les retours conservés dans les correspondances.
+
+Réservation courte de l'index Git pour ce lot constructeur et cette
+section uniquement. Les53lignes indépendantes précédentes du journal,
+le dialogue B courant et les modifications v6/v7 restent hors commit.
+Publication main uniquement puis index libéré. Aucune session GCP créée.
+
+Pris connaissance entre-temps du nouveau B74fb0a6a : merci pour la
+contrelecture des sources q3 alors non suivies et la dérivation réduite.
+Le port emploie bien le minimum continu, pas les seuls coins ; fixture
+±2 avec centre strictement intérieur exercée sous tous les modes FENV.
+La notation c=m+ξh, λ=2ξ et ξ<1/2 sans propriété est maintenant reliée
+dans la note q3. La meilleure enveloppe et le rejet d'intersection vide
+sont des suites à mesurer, pas des modifications silencieuses du lot gelé.
+L'état « sans reçu ni test » de votre lecture est désormais complété par
+les nouvelles captures ci-dessus. Avant raccord CMake/GPU : imposer les
+options flottantes et mesurer les replis sur float32 LiDAR hétérogènes.
+Les anciens reçus d'identité restent LIVE, avec snapshots sources faisant
+autorité ; leur git_commit est le HEAD au lancement, pas le contenu testé.

@@ -1,0 +1,39 @@
+{
+  "schema": "mhgp8_float32_q3_census_mutation_readbacks_v1",
+  "normal": {
+    "check_live": true,
+    "commands": 37,
+    "completion_sha256": "4520d1e628cb4e5debc7a002ff9bed5ecc28edc81e8ec6dc07582aa75aaf664b",
+    "fixtures": 1,
+    "killed": [
+      "prefix_recounted_from_root",
+      "shell_prefix_omitted"
+    ],
+    "manifest_sha256": "f76fa150ff529ede19d4f5f02fc17af2e0ab03d3c08e07015eac263a5f5a23d5",
+    "native_reexecuted": false,
+    "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations",
+    "reader_sha256": "feb1ec99f076fe99252d67e3545fb8c79832235bde57c69a4eaad9d0019b44a1",
+    "requests": 2,
+    "schema": "mhgp8_float32_q3_census_compiled_mutations_v1",
+    "scope": "two_prefix_shell_mutations_of_one_supplied_edge_not_WSPD_FULL_or_GPU",
+    "status": "passed"
+  },
+  "optimized": {
+    "check_live": true,
+    "commands": 37,
+    "completion_sha256": "4520d1e628cb4e5debc7a002ff9bed5ecc28edc81e8ec6dc07582aa75aaf664b",
+    "fixtures": 1,
+    "killed": [
+      "prefix_recounted_from_root",
+      "shell_prefix_omitted"
+    ],
+    "manifest_sha256": "f76fa150ff529ede19d4f5f02fc17af2e0ab03d3c08e07015eac263a5f5a23d5",
+    "native_reexecuted": false,
+    "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations",
+    "reader_sha256": "feb1ec99f076fe99252d67e3545fb8c79832235bde57c69a4eaad9d0019b44a1",
+    "requests": 2,
+    "schema": "mhgp8_float32_q3_census_compiled_mutations_v1",
+    "scope": "two_prefix_shell_mutations_of_one_supplied_edge_not_WSPD_FULL_or_GPU",
+    "status": "passed"
+  }
+}

@@ -41,6 +41,11 @@ Les anciennes mesures 50k restent historiques, sans réinterprétation.
 Les tests locaux mono sont des étapes d'optimisation ; l'objectif de
 plusieurs dizaines de millions de points sur G4 reste distinct et ouvert.
 
+Le **LiDAR sans sol** devient aussi un régime prioritaire, sur demande du
+21 septembre : voir [méthodes et protocole](docs/LIDAR_SANS_SOL_PROTOCOLE_20260921.md).
+Conserver le profil brut, les IDs et float32 ; chronométrer séparément
+segmentation, HGP et coût total. Pas encore de mesure sans sol qualifiée.
+
 ## Organisation et périmètre
 
 La structure v7 est conservée pour organiser la refonte : `src/`, `cli/`,
@@ -62,6 +67,16 @@ Les mesures de l'audit d'ouverture restent v7 ; chaque tranche v8 porte
 ses propres sources, tests et reçus, sans transfert implicite.
 
 ## État exécutable
+
+Le [census q3 natif partagé](docs/CENSUS_Q3_FLOAT32_PARTAGE_20260921.md)
+compte maintenant les témoins par groupes de graines et transmet compte
+et curseur aux relais, sans refaire le préfixe. Bornes continues certifiées,
+coquilles globales complètes, index partagé immuable. Il traite UNE arête
+fournie : pas encore toutes les arêtes, q4 natif complet ou FULL. Les
+[preuves et mesures propres](receipts/float32_q3_census_20260921/README.md)
+passent612appels Fraction,458contrôles natifs et deux mutations compilées,
+en Release/Clang ASan/UBSan. Les36mesures synthétiques8k/16k/32k comparent
+le partage à la référence ; elles ne qualifient pas une trame LiDAR.
 
 Les [clés communes et événements q4 float32](docs/IDENTITE_FLOAT32_ET_EVENEMENTS_Q4_20260921.md)
 ajoutent l'identité exacte entre supports q2/q3/q4 et l'ordre exact des

@@ -1,0 +1,24 @@
+--- src/lanes/float32_q3_census.cpp
++++ shell_prefix_omitted/src/lanes/float32_q3_census.cpp
+@@ -151,18 +151,18 @@
+         }
+       }
+       if (depth == threshold_) { count(work_.saturated_supports); continue; }
+-      collect_shell(*ball, prepared);
++      collect_shell(*ball, prepared, ticket.cursor);
+       count(work_.accepted_supports);
+       count(work_.callbacks);
+       emit_(Float32Q3Emission{seed, depth, *ball, shell_});
+     }
+   }
+ 
+-  void collect_shell(const Float32Ball& ball, const Float32Q3Block& prepared) {
++  void collect_shell(const Float32Ball& ball, const Float32Q3Block& prepared, std::size_t cursor) {
+     // Starts globally even if the count cursor was already EOF. All contacts
+     // skipped by the prefix (including a,b) must be recovered here.
+     shell_.clear();
+-    std::size_t cursor = 0;
++    // MUTANT: omit all contacts preceding the count cursor.
+     while (cursor != index_.nodes().size()) {
+       const auto& node = index_.nodes()[cursor];
+       count(work_.shell_node_visits);

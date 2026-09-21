@@ -58,6 +58,22 @@ synthétiques8k/16k/32k et les anciennes mesures50k restent des diagnostics
 distincts. L'objectif de plusieurs dizaines de millions de points sur G4
 reste également ouvert, sans transfert de qualification depuis une trame.
 
+## Régime prioritaire complémentaire : LiDAR sans sol
+
+L'utilisateur demande aussi, le21 septembre, un retrait du sol très rapide,
+plus pertinent qu'un seuil de hauteur. Le [protocole sans sol](LIDAR_SANS_SOL_PROTOCOLE_20260921.md)
+prévoit une segmentation géométrique de la trame entière, puis ses sept
+objets spatiaux avec le même masque figé. Conserver les coordonnées float32
+et les IDs originaux de tous les retours, retirés compris. Mesurer le coût
+du retrait, celui de HGP et leur somme ; publier les effectifs réellement
+retenus et les erreurs de segmentation. Aucun plafond de cardinalité.
+
+C'est un régime prioritaire **supplémentaire**, pas un remplacement de la
+référence brute entière. Les hiérarchies exactes du sous-nuage ne sont pas
+celles du nuage original : enlever des témoins change profondeurs, contacts
+et événements. La qualité de segmentation et l'exactitude HGP sont deux
+questions distinctes. Aucune mesure sans sol n'est encore qualifiée.
+
 ## Situation à cette décision
 
 Le [raccord spatial q3/q4](Q34_MESURES_SPATIALES_20260921.md) mesure un

@@ -13,6 +13,13 @@ moins d'une seconde puis100ms sur G4. La référence principale n'est plus
 Les moitiés/quarts mesurent la croissance, pas la réussite de ce contrat.
 Les références50k ci-dessous sont les objectifs et observations historiques.
 
+Décision complémentaire du21 septembre : prioriser également le
+[LiDAR sans sol](LIDAR_SANS_SOL_PROTOCOLE_20260921.md), avec segmentation
+géométrique rapide de la trame entière puis coupes spatiales à masque
+figé. Garder une campagne brute comparable ; publier le coût du retrait,
+le temps HGP seul et le total. Ne pas importer une performance d'article
+comme une mesure locale, ni utiliser les labels comme filtre de production.
+
 Précision précisée ensuite le21 septembre : float32 original par défaut,
 grille optionnelle paramétrable à1mm par défaut. Voir le
 [port numérique](PRECISION_FLOAT32_ET_GRILLE_20260921.md). Préparation et
@@ -36,6 +43,15 @@ repli exact1728bits et oracles indépendants. Le port suivant ajoute
 Il reste à porter les bornes de blocs et leur raccord ; ne pas confondre
 ces briques avec le générateur ou son coût global. Une identité de boule
 ne suffit pas pour trier les niveaux de rayon ou reconstruire FULL.
+
+Le [census q3 natif par préfixe](CENSUS_Q3_FLOAT32_PARTAGE_20260921.md)
+porte maintenant les bornes continues et le partage des graines d'UNE
+arête.612comparaisons Fraction et36mesures synthétiques sont closes.
+L'étape suivante doit raccorder les arêtes/graines natives et mesurer leur
+travail global, puis transporter les tickets possédés entre workers.
+Ne pas multiplier un chrono favorable par un nombre supposé d'arêtes ;
+ne pas utiliser l'acceptation q3 pour restreindre q4. Catalogue, q4 natif
+complet, FULL et régimes LiDAR brut/sans sol restent à développer/mesurer.
 
 Mise à jour utilisateur du21 septembre : les prochaines études LiDAR
 emploient le [découpage spatial capteur](PROTOCOLE_LIDAR_SPATIAL_20260921.md),

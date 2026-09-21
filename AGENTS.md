@@ -26,6 +26,17 @@ de croissance, jamais à valider le contrat de trame entière. Un flux
 q3/q4 CPU n'est ni FULL ni une exécution GPU. Les références historiques
 50k et leurs reçus restent inchangés ; aucun contrat de tour n'est acquis.
 
+Décision complémentaire du21 septembre : **LiDAR sans sol est aussi un
+régime prioritaire**. Voir `morsehgp3D_v8/docs/LIDAR_SANS_SOL_PROTOCOLE_20260921.md`.
+Comparer un retrait géométrique rapide adapté aux pentes, pas un seuil z.
+Masque produit sur la trame entière avant les coupes capteur, IDs et mots
+float32 d'origine conservés ; garder aussi les IDs retirés. Mesurer
+séparément segmentation, HGP sur le sous-nuage et coût total. Une
+segmentation approximative du sol ne certifie pas les classes physiques ;
+HGP reste exact sur le sous-nuage explicitement déclaré. Ni les labels de
+vérité terrain ni une réussite sans sol ne remplacent le contrat principal
+sur la trame brute entière. Pas encore de mesure/qualification sans sol.
+
 ## Entrée float32 / grille fine — 21 septembre2026
 
 Lire `morsehgp3D_v8/docs/PRECISION_FLOAT32_ET_GRILLE_20260921.md`.
@@ -75,6 +86,34 @@ Builds épinglés : `build/v8_float32_index_sanitize_20260921` (premier
 Suite : intervalles/replis exacts q3/q4, clés globales à l'émission puis
 partage des graines/tâches intérieures. Aucun transfert automatique des
 18limbes q2 aux degrés5/6. Ni WSPD native ni FULL/GPU acquis ; GCP non utilisé.
+
+## Census q3 float32 partagé — 21 septembre2026
+
+Lire `morsehgp3D_v8/docs/CENSUS_Q3_FLOAT32_PARTAGE_20260921.md`.
+Cadre lossless_float32_input_only/native_q3_shared_prefix, cpu_reference,
+hors registre, not_claimed. UNE arête fournie et un sous-arbre de graines,
+pas un générateur global, une WSPD, une propriété de plus longue arête ou
+q4/FULL. Individual reste la référence par défaut. SharedPrefix transmet
+un ticket figé compte/curseur à chaque enfant et chaque graine ; une
+feuille témoin ambiguë divise X avant consommation. Les graines invalides
+restent témoins. Centres conditionnels hull(a,b,X), puis a+W/(2G) si G>0
+certifié ; bornes continues de puissance, aucun floor/ceil u16. Coquille
+toujours globale et complète ; le relais à EOF d'une graine valide n'est
+pas une branche positivement atteignable avec ces règles de contact.
+Cadres24octets, pile profondeur médiane+1 ; pas de quota ni ancien plafond49.
+Release/Clang ASan/UBSan/LSan :612appels Fraction,1798supports,8610IDs,
+coquille30,37refus,16corruptions,458contrôles natifs (224bornes/96appels
+FENV et32appels concurrents). Pas de TSan dans ce lot. Deux mutations
+compilées tuées géométriquement en37commandes, lectures normal/−O.
+Préflight analytique erroné conservé, code produit inchangé par sa correction.
+Reçus `morsehgp3D_v8/receipts/float32_q3_census_20260921/`, builds épinglés
+`build/v8_float32_q3_census_20260921`,
+`build/v8_float32_q3_census_sanitize_20260921`,
+`build/v8_float32_q3_census_mutants_20260921`.
+Mesures synthétiques8k/16k/32k : UNE arête, pas LiDAR ni toute la chaîne.
+Ne pas extrapoler leur croissance au générateur. Suite : raccord aux
+graines/arêtes natives, transport possédé des tickets, q4 et catalogue.
+Aucun chrono FULL/G4, GCP non utilisé. Anciennes sources moteur inchangées.
 
 ## Cible de travail et statut
 

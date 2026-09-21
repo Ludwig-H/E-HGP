@@ -1,0 +1,43 @@
+{
+  "case": "prefix_recounted_from_root",
+  "command": [
+    "/usr/bin/g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-ffp-contract=off",
+    "-fno-fast-math",
+    "-frounding-math",
+    "-O3",
+    "-DNDEBUG",
+    "-I",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/src",
+    "-c",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations/cases/prefix_recounted_from_root/src/core/float32_q3_block.cpp",
+    "-MD",
+    "-MF",
+    "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/block.d",
+    "-o",
+    "/workspaces/E-HGP/build/v8_float32_q3_census_mutants_20260921/prefix_recounted_from_root/block.o"
+  ],
+  "cwd": "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_q3_census_20260921/mutations",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "PATH": "/bin:/usr/bin",
+    "TZ": "UTC"
+  },
+  "exit_code": 0,
+  "finished_utc": "2026-09-21T19:30:17.636480+00:00",
+  "label": "prefix_recounted_from_root_compile_block",
+  "phase": "compile",
+  "started_utc": "2026-09-21T19:30:16.433234+00:00",
+  "stderr": "",
+  "stderr_base64": "",
+  "stdin": null,
+  "stdout": "",
+  "stdout_base64": ""
+}

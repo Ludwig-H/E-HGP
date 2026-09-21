@@ -24,6 +24,22 @@ Les mesures et reçus historiques 50k sont conservés sans réinterprétation.
 
 ## Diagnostic spatial et état constructeur
 
+Census q3 float32 par arête maintenant qualifié :
+[algorithme et limites](../docs/CENSUS_Q3_FLOAT32_PARTAGE_20260921.md),
+[preuves et croissance locale](../receipts/float32_q3_census_20260921/README.md).
+SharedPrefix partage les témoins entre graines, sans redémarrage avec
+crédit ni perte du préfixe de coquille. Release/Clang ASan/UBSan :612appels
+Fraction,1798supports,8610IDs,458contrôles natifs,37refus,16corruptions ;
+deux mutants compilés tués. Une arête fournie ne constitue pas le
+générateur global ; pas de WSPD native ni q4/FULL qualifiés par cette brique.
+Les36mesures8k/16k/32k sont synthétiques, mono, sur hôte partagé.
+
+LiDAR sans sol ajouté aux régimes prioritaires :
+[recherche et protocole](../docs/LIDAR_SANS_SOL_PROTOCOLE_20260921.md).
+Masque géométrique sans labels, conservation des float32/IDs, segmentation
+avant partitions spatiales et coûts séparés. Pas de retrait de la
+référence brute, pas encore de nouvelle mesure sans sol. GCP non utilisé.
+
 Identité float32 commune q2/q3/q4 et événements q4 réduits : voir
 [contrat et limites](../docs/IDENTITE_FLOAT32_ET_EVENEMENTS_Q4_20260921.md)
 et [qualification commune](../receipts/float32_identity_20260921/README.md).

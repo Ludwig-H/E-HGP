@@ -1,0 +1,11 @@
+--- src/lanes/float32_q3_census.cpp
++++ prefix_recounted_from_root/src/lanes/float32_q3_census.cpp
+@@ -124,7 +124,7 @@
+       // These copies are essential: one seed's suffix never modifies the
+       // ticket used by its siblings, whether it accepts or saturates.
+       auto depth = ticket.depth;
+-      auto cursor = ticket.cursor;
++      std::size_t cursor = 0; // MUTANT: recount credited prefix.
+       while (cursor != index_.nodes().size() && depth != threshold_) {
+         const auto& z = index_.nodes()[cursor];
+         count(work_.count_node_visits);

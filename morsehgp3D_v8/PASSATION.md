@@ -31,6 +31,30 @@ n'est pas FULL ni GPU. Les reçus historiques 50k restent inchangés.
 
 ## À reprendre maintenant
 
+Lire le [census q3 float32 partagé](docs/CENSUS_Q3_FLOAT32_PARTAGE_20260921.md)
+et ses [preuves/mesures](receipts/float32_q3_census_20260921/README.md).
+Cette entrée traite UNE arête et un sous-arbre fournis. Les groupes X
+partagent le préfixe de témoins ; chaque enfant/graine reçoit son propre
+compte ET curseur. La coquille repart globalement, les graines invalides
+restent témoins. Bornes de centres conditionnelles, intervalles physiques
+continus, relais exact filtré. Pas de clé pour un rejet ni de propriété
+par plus longue arête. Les états et buffers sont privés, mais le transport
+asynchrone et le partage fin entre workers ne sont pas encore raccordés.
+Release/Clang ASan/UBSan/LSan :612appels Fraction,1798supports,8610IDs,
+37refus,16corruptions et458contrôles natifs ; deux mutations compilées
+tuées par sorties géométriques fausses, pas par crash. Builds épinglés
+dans le reçu. Mesures8k/16k/32k mono sur une arête synthétique seulement.
+Suite : raccorder aux graines/arêtes natives et mesurer le vrai travail
+global, puis partager les tickets possédés et porter les blocs q4.
+Ni un rejet q3 ni ses seules sorties ne doivent commander l'accès à q4.
+
+Le [LiDAR sans sol](docs/LIDAR_SANS_SOL_PROTOCOLE_20260921.md) est aussi
+prioritaire depuis la dernière demande : premier candidat Patchwork++,
+comparaison GroundGrid, masque conservant IDs/float32. Masquer la trame
+entière avant les coupes capteur ; publier segmentation, HGP et total.
+Garder la référence brute. Recherche documentée, pas encore de campagne
+sans sol ni de qualification transférée depuis les performances d'articles.
+
 Lire d'abord [l'identité des boules et les événements q4 natifs](docs/IDENTITE_FLOAT32_ET_EVENEMENTS_Q4_20260921.md).
 Clé primitive globale commune q2/q3/q4 à l'émission ; `from_support`
 ne refait pas la positivité. Le format conserve les exposants des bits
@@ -45,8 +69,8 @@ Release et Clang ASan/UBSan clos :229clés/960événements,141refus,
 1636cas géométriques précédents repassent. Builds exacts dans le reçu,
 à ne pas écraser. Relectures normal/−O concordantes ; GCP non utilisé.
 Ce n'est ni le catalogue ni l'ordre des rayons ni le census natif.
-Suite prioritaire : bornes de blocs et partage de graines q3, avec
-parents possédés et compte/curseur cohérent, puis raccord au front.
+Les bornes et le partage q3 sont portés dans l'entrée locale ci-dessus ;
+restent le raccord au front et le transport possédé des tâches.
 
 Supports q3/q4 natifs et puissances désormais qualifiés ; lire
 [la nouvelle note numérique](docs/BOULES_FLOAT32_Q3_Q4_20260921.md).
