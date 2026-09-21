@@ -360,6 +360,40 @@ met 4,7 s à K5 et 19,2 s à K10 sur cet hôte partagé (la tranche 31 mettait
 16k et 32k ne le sont pas (le harnais exhaustif y coûterait des heures), et
 rien n'est qualifié.
 
+### Question q3 du journal 33 (témoins communs d'un bloc de seeds) : formule confirmée, réponse de A suffisante
+
+Vérification exacte indépendante sur 2 999 triangles entiers non colinéaires
+tirés au hasard : avec d = b − a, D = |d|², w = 2x − a − b, v = 2z − a − b,
+J = D|w|² − (d·w)² = |d × w|², P = Dw − (d·w)d, qx = |w|² − D et
+qz = |v|² − D, on a bien F = J·qz − qx·(P·v) = 4J·puissance(z) dans la
+circumboule de (a,b,x) et centre (a+b)/2 + qx·P/(4J), sans exception.
+J > 0 est la non-colinéarité, pas la positivité ; qx > 0 est l'acuité en x.
+La note de A [q3_seed_block_power_20260921/](q3_seed_block_power_20260921/README.md)
+(boîte de centres par bloc X grâce à λ = DQ/J ∈ (0, 2/3] sous acuité et
+propriété, puis six paraboles en z par nœud Z) est l'alternative que
+j'aurais proposée aux bornes cubiques en x : le seul pas non linéaire est
+l'enveloppe des centres du bloc, et la puissance est ensuite bilinéaire en
+(centre, z), donc bornée aux coins. Je n'y ajoute qu'une discipline de
+compte : les témoins communs d'un bloc X proviennent de nœuds Z d'une
+partition disjointe, s'ajoutent une fois au compte de chaque seed de X et
+saturent à K − 1 par seed ; un nœud Z ambigu pour le bloc est retesté par
+seed, jamais hérité comme certificat ; aucun crédit commun n'initialise le
+census d'une boule acceptée (sa coquille et sa profondeur exactes sont
+recalculées).
+
+### Tranche 33 commise (2629a536, bornes `affine`) : rejeu des deux flux, accord exact
+
+Reçu [q34_stream_crosscheck_t33_20260921/](q34_stream_crosscheck_t33_20260921/README.md) :
+sonde à 2629a536 en modes `rectangle-pair`, `boxes` et bornes de témoins
+`affine` (Ξ spécialisée aux endpoints fixes, exclusion de nœuds), mêmes
+harnais et mêmes égalités que pour les tranches 31 et 32, sur les préfixes
+1k/2k/4k (K5) et 1k/2k (K10) du scan 0 : mêmes boules q3 et q4, mêmes
+profondeurs, rejets par rectangle et par paire égaux aux paires rejetables
+du citron, seeds égaux, lemmes sans violation, même flux qu'en modes
+`disabled`/`scalar`/`legacy` à 1k/K5. Les bornes 33 ne changent pas l'objet
+émis ; leur coût et leur croissance restent ceux que mesurent les reçus 33
+du constructeur, non jugés ici.
+
 ## Erreurs et points durs relevés (à 4dbe3024)
 
 1. **Session G4 R2 : diagnostic non établi.** La capture
@@ -426,8 +460,8 @@ vérifié en direct par B (pas de `gcloud` ici).
   `separation_20260914/`, `surproposition_20260915/`,
   `plafond_proposeur_20260915/`, `oracle_q3q4_20260915/`,
   `front_lanes_lidar_20260921/`, `q3_stream_crosscheck_20260921/`,
-  `q4_stream_crosscheck_20260921/`, `q34_stream_crosscheck_t32_20260921/` et
-  `q34_stream_crosscheck_t32_8k_20260921/`.
+  `q4_stream_crosscheck_20260921/`, `q34_stream_crosscheck_t32_20260921/`,
+  `q34_stream_crosscheck_t32_8k_20260921/` et `q34_stream_crosscheck_t33_20260921/`.
 - Rien n'est supprimé ni déplacé : chaque ancien fichier est cité par un reçu
   immuable, une note du constructeur ou le journal (précédent
   `P0_OWNER_CHECKS.json` à ne pas répéter). Les sections antérieures de ce
