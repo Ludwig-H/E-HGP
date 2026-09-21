@@ -137,8 +137,8 @@ void check_seed_bounds(SeedCellsGate& gate,const Points& points,Edge edge) {
   const SeedPlane plane(points[edge[0]],points[edge[1]]);
   constexpr auto q=Cell::scale;
   const std::array<Cell,6> cells{{{}, {0,q,-2*q,-q,2,false,false},
-    {-q,0,-q,0,2,false,false},{0,0,-q,-q,44,false,false},
-    {1,q-1,-q+1,3,44,true,false},{-2*q,-2*q+1,2*q-1,2*q,44,false,true}}};
+    {-q,0,-q,0,2,false,false},{0,0,-q,-q,Cell::max_depth,false,false},
+    {1,q-1,-q+1,3,Cell::max_depth,true,false},{-2*q,-2*q+1,2*q-1,2*q,Cell::max_depth,false,true}}};
   for (std::size_t id=0;id<index->spatial_nodes().size();++id) for (const auto cell:cells) {
     const auto& node=index->spatial_nodes()[id];
     const auto exact=cartesian_bounds(gate,plane,node.box,cell);
@@ -150,7 +150,11 @@ void check_seed_bounds(SeedCellsGate& gate,const Points& points,Edge edge) {
       "node-cell bounds differ from independent Cartesian rational extrema");
     ++gate.bounds_queries;
     if (low!=exact.first) ++gate.bounds_rounding;
-    if (oracle::absolute(Big(bound.minimum))>(Big(1)<<63) || oracle::absolute(Big(bound.maximum))>(Big(1)<<63)) ++gate.bounds_wide;
+    // Scale 2^20 keeps every partition bound inside the proven i64 domain
+    // (<2^59, q4_local_partition.cpp); wide bounds count the large ones.
+    gate.require(oracle::absolute(Big(bound.minimum))<(Big(1)<<59) && oracle::absolute(Big(bound.maximum))<(Big(1)<<59),
+      "block bound left the proven i64 domain of the 2^20 scale");
+    if (oracle::absolute(Big(bound.minimum))>=(Big(1)<<50) || oracle::absolute(Big(bound.maximum))>=(Big(1)<<50)) ++gate.bounds_wide;
     if (bound.minimum==0 || bound.maximum==0) ++gate.bounds_contacts;
     for (std::size_t rank=node.range.first;rank<node.range.last;++rank) {
       const auto point=points[index->spatial_order()[rank]];
@@ -177,7 +181,7 @@ void bounds_fixtures(SeedCellsGate& gate) {
       static_cast<std::uint16_t>((corner&2U)?39:27),static_cast<std::uint16_t>((corner&4U)?33:21)});
   const auto index=mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
   const auto geometry=mhgp8::Q4LocalGeometry::make(mhgp8::Q34EdgeCover::make(index,{0,1}),mhgp8::Q4CenterDomainMode::Disk);
-  const Cell single{0,0,-Cell::scale,-Cell::scale,44,false,false};
+  const Cell single{0,0,-Cell::scale,-Cell::scale,Cell::max_depth,false,false};
   const auto bound=geometry->node_bounds(0,single);
   gate.require(Big(bound.minimum)==-108*Big(Cell::scale) && Big(bound.maximum)==324*Big(Cell::scale),
     "interior box minimum lost a genuine contact although every box corner is positive");
@@ -310,7 +314,7 @@ void traversal_fixtures(SeedCellsGate& gate) {
   auto shell=shell_fixture();shell.push_back({20,20,20});
   local.max_depth=0;local.node_budget=1;local.z_test_budget=0;
   seed_cells_fixture(gate,shell,{0,1},5,local,2);
-  local.max_depth=44;local.node_budget=85;local.z_test_budget=0;
+  local.max_depth=Cell::max_depth;local.node_budget=85;local.z_test_budget=0;
   seed_cells_fixture(gate,fixtures.back(),{0,1},5,local,2);
   // Exhaustive edges of a tiny cloud, not enumeration in the product.
   for (std::size_t a=0;a<4;++a) for (std::size_t b=a+1;b<4;++b) {

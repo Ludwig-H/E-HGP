@@ -469,7 +469,7 @@ void local_fixtures(LocalGate& gate) {
     for (const auto& options : variants) local_fixture(gate,twin,{0,1},5,options);
     for (const auto* points : {&interior,&obtuse,&late_valid,&q3_dead,&rows})
       local_fixture(gate,*points,{0,1},5,{mode,3,85,512,0,true});
-    local_fixture(gate,extreme,{0,1},5,{mode,44,85,512,0,true});
+    local_fixture(gate,extreme,{0,1},5,{mode,mhgp8::Q4LocalCell::max_depth,85,512,0,true});
     ++gate.extreme_calls;
   }
   for (const auto k : {3U,5U,10U})
@@ -559,9 +559,9 @@ void local_lifecycle(LocalGate& gate) {
                  "inactive q4 K produced work or candidates");
   }
   auto deepest = fragment;
-  for (unsigned depth = 0; depth != 44; ++depth)
+  for (unsigned depth = 0; depth != mhgp8::Q4LocalCell::max_depth; ++depth)
     deepest = mhgp8::Q4LocalFragment::child(deepest,3,0);
-  gate.rejects([&] { static_cast<void>(mhgp8::Q4LocalFragment::child(deepest,0,0)); }, "depth44 fragment subdivided beyond exact dyadic domain");
+  gate.rejects([&] { static_cast<void>(mhgp8::Q4LocalFragment::child(deepest,0,0)); }, "max-depth fragment subdivided beyond exact dyadic domain");
   struct CallbackFailure {};
   bool caught = false;
   try { static_cast<void>(mhgp8::run_q4_local_seed_candidates(atlas,2,[](const auto&) { throw CallbackFailure{}; })); }

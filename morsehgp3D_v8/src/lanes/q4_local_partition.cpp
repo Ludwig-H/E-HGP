@@ -12,7 +12,7 @@ constexpr i64 scale = Q4LocalCell::scale;
 struct Projection { i128 x{}, y{}; Vec raw{}; };
 
 void validate_cell(Q4LocalCell c) {
-  if (c.depth>44 || c.left < -2*scale || c.right > 2*scale || c.left>c.right ||
+  if (c.depth>Q4LocalCell::max_depth || c.left < -2*scale || c.right > 2*scale || c.left>c.right ||
       c.bottom < -2*scale || c.top > 2*scale || c.bottom>c.top)
     throw std::invalid_argument("mhgp8 local cell outside exact arithmetic domain");
 }
@@ -21,6 +21,11 @@ Vec cross(Vec a, Vec b) {
   return {a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]};
 }
 Q4LocalBounds linear_bounds(i128 c,i128 x,i128 y,Q4LocalCell cell) {
+  return {c+x*(x<0?cell.right:cell.left)+y*(y<0?cell.top:cell.bottom),
+          c+x*(x<0?cell.left:cell.right)+y*(y<0?cell.bottom:cell.top)};
+}
+// Same extrema in i64: callers prove |c|+|x|*2*scale+|y|*2*scale<2^63.
+Q4LocalBounds linear_bounds64(i64 c,i64 x,i64 y,Q4LocalCell cell) {
   return {c+x*(x<0?cell.right:cell.left)+y*(y<0?cell.top:cell.bottom),
           c+x*(x<0?cell.left:cell.right)+y*(y<0?cell.bottom:cell.top)};
 }
@@ -108,7 +113,9 @@ Q4LocalForm Q4LocalGeometry::form(std::size_t id) const {
 
 Q4LocalBounds Q4LocalGeometry::bounds(Q4LocalForm f,Q4LocalCell cell) const {
   validate_cell(cell);
-  return linear_bounds(static_cast<i128>(scale)*f.constant,f.x,f.y,cell);
+  // |constant|<=15M^2<2^36 so scale*constant<2^56; |x|,|y|<=8M^2<2^35 and
+  // |cell|<=2*scale=2^21 give 2^56 per linear term: the sum stays <2^58.
+  return linear_bounds64(scale*f.constant,f.x,f.y,cell);
 }
 
 void Q4LocalGeometry::prepare_hull(const Box3& box) {
@@ -204,36 +211,40 @@ Q4LocalBounds Q4LocalGeometry::node_bounds(std::size_t id,Q4LocalCell cell) cons
 
 Q4LocalBounds Q4LocalGeometry::node_bounds_unchecked(std::size_t id,Q4LocalCell cell) const {
   const auto& box=cover_->index()->spatial_nodes()[id].box;
-  Q4LocalBounds result{};
+  // i64 domain with Q=2^20 (M=65535): |w|<=2M<2^17, |alpha|,|beta|<=2Q=2^21
+  // and |basis|<=M give |T|<2^38; Q*w^2<2^54 and 2*|w|*|T|<2^56, so each
+  // axis value is <2^57, the three-axis sum with Q*D (<2^54) is <2^59.
+  // Only T^2 (<2^76) needs i128, and Q is a power of two: floor(T^2/Q) is a
+  // shift and the remainder a mask, both exact on the nonnegative square.
+  i64 minimum_all=0,maximum_all=0;
   for (unsigned corner=0;corner<4;++corner) {
     const i64 alpha=(corner&1U)?cell.right:cell.left;
     const i64 beta=(corner&2U)?cell.top:cell.bottom;
-    i128 minimum=-static_cast<i128>(scale)*diameter_squared_,maximum=minimum;
+    i64 minimum=-scale*diameter_squared_,maximum=minimum;
     for (std::size_t axis=0;axis<3;++axis) {
       const i64 low=2*static_cast<i64>(box.low[axis])-midpoint_twice_[axis];
       const i64 high=2*static_cast<i64>(box.high[axis])-midpoint_twice_[axis];
-      const i128 target=static_cast<i128>(a_basis_[axis])*alpha+static_cast<i128>(b_basis_[axis])*beta;
-      const auto value=[&](i64 w) {return static_cast<i128>(scale)*w*w-2*static_cast<i128>(w)*target;};
-      const i128 at_low=value(low),at_high=value(high);
+      const i64 target=a_basis_[axis]*alpha+b_basis_[axis]*beta;
+      const auto value=[&](i64 w) {return scale*w*w-2*w*target;};
+      const i64 at_low=value(low),at_high=value(high);
       maximum+=std::max(at_low,at_high);
-      if (target<static_cast<i128>(scale)*low) minimum+=at_low;
-      else if (target>static_cast<i128>(scale)*high) minimum+=at_high;
+      if (target<scale*low) minimum+=at_low;
+      else if (target>scale*high) minimum+=at_high;
       else {
         // Minimum of Q*w^2-2*T*w is -T^2/Q at w=T/Q. Round DOWN,
         // never toward zero, to keep a certified lower integer bound.
-        const i128 square=target*target;
-        minimum-=square/scale+(square%scale!=0?1:0);
+        const i128 square=static_cast<i128>(target)*target;
+        const i64 quotient=static_cast<i64>(square>>20);
+        minimum-=quotient+((square&(scale-1))!=0?1:0);
       }
     }
-    if (corner==0) result={minimum,maximum};
-    else {result.minimum=std::min(result.minimum,minimum);result.maximum=std::max(result.maximum,maximum);}
+    if (corner==0) {minimum_all=minimum;maximum_all=maximum;}
+    else {minimum_all=std::min(minimum_all,minimum);maximum_all=std::max(maximum_all,maximum);}
   }
   // L is affine in the center: extrema on Z-box x cell reduce to the four
   // center corners. For fixed center the w quadratic is separable/convex;
   // endpoints give max, clamping T/Q gives min. Rounding min only weakens it.
-  // |T|<=4MQ -> T^2<=16M^2Q^2<2^124; each evaluated value<=20M^2Q
-  // in absolute value, sums<=63M^2Q<2^82. All products promoted beforehand.
-  return result;
+  return {minimum_all,maximum_all};
 }
 
 std::size_t Q4LocalGeometry::retained_bytes() const {return id_bytes(cover_nodes_.capacity());}
@@ -247,7 +258,7 @@ Q4LocalFragmentPtr Q4LocalFragment::root(Q4LocalGeometryPtr geometry,u64 budget)
 Q4LocalFragmentPtr Q4LocalFragment::child(Q4LocalFragmentPtr parent,unsigned quadrant,u64 budget) {
   if (!parent || quadrant>=4) throw std::invalid_argument("mhgp8 local child requires parent and quadrant0..3");
   const auto p=parent->cell();
-  if (p.depth>=44) throw std::invalid_argument("mhgp8 local child exceeds exact cell depth");
+  if (p.depth>=Q4LocalCell::max_depth) throw std::invalid_argument("mhgp8 local child exceeds exact cell depth");
   const i64 mx=p.left+(p.right-p.left)/2,my=p.bottom+(p.top-p.bottom)/2;
   const bool right=(quadrant&1U)!=0,top=(quadrant&2U)!=0;
   const Q4LocalCell cell{right?mx:p.left,right?p.right:mx,top?my:p.bottom,top?p.top:my,

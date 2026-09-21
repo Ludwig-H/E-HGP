@@ -43,8 +43,8 @@ Q4LocalCell child_cell(Q4LocalCell c,unsigned quadrant) {
 }
 void validate(Q4LocalOptions o) {
   if((o.domain!=Q4CenterDomainMode::Disk && o.domain!=Q4CenterDomainMode::Positive) ||
-     o.max_depth>44 || o.node_budget==0)
-    throw std::invalid_argument("mhgp8 local atlas requires domain, depth<=44 and at least its root");
+     o.max_depth>Q4LocalCell::max_depth || o.node_budget==0)
+    throw std::invalid_argument("mhgp8 local atlas requires domain, depth<=max_depth and at least its root");
 }
 void merge(Q4LocalPartitionWork& a,const Q4LocalPartitionWork& b) {
 #define A(f) counter_add(a.f,b.f)

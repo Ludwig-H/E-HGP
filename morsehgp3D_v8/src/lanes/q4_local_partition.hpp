@@ -10,8 +10,15 @@
 
 namespace mhgp8 {
 
+// Center cells are dyadic squares of the bisector plane, in the integer
+// parametrization (alpha, beta) scaled by 2^20. The root cell [-2,2]^2 can be
+// halved max_depth times while keeping integer corners; the atlas refines to
+// depth<=7, so this scale keeps every block/point bound of the partition in
+// i64 (proofs in q4_local_partition.cpp) instead of the former 2^44 in i128.
+// Real cells, hence every classification and emission, are unchanged.
 struct Q4LocalCell {
-  static constexpr i64 scale = i64{1} << 44;
+  static constexpr i64 scale = i64{1} << 20;
+  static constexpr unsigned max_depth = 20;
   i64 left{-2*scale}, right{2*scale}, bottom{-2*scale}, top{2*scale};
   unsigned depth{};
   bool owns_right{true}, owns_top{true};
