@@ -445,6 +445,18 @@ relais absorbe donc la part super-linéaire observée par le constructeur
 à juger, qui reste le vrai poste. Unités hétérogènes (visite ≠ test), donc
 comptes et non temps ; à comparer au coût mesuré du port avant de choisir.
 
+### Tranche 34 (sources dans 4c3cdb0c par ma faute, journal dans d6e1bd9e) : rejeu des deux flux, accord exact
+
+Reçu [q34_stream_crosscheck_t34_20260921/](q34_stream_crosscheck_t34_20260921/README.md) :
+sonde construite à d6e1bd9e en modes `rectangle-pair`, `boxes`, `affine` et
+atlas q4 `joined` (cellules de seeds jointes, atlas sans feuille sautés),
+mêmes harnais et mêmes égalités que pour les tranches 31 à 33, sur les
+préfixes 1k/2k/4k (K5) et 1k/2k (K10) du scan 0 : mêmes boules q3 et q4,
+mêmes profondeurs, rejets égaux au citron, seeds égaux, lemmes sans
+violation, même flux qu'en modes anciens à 1k/K5. Le mode `joined` ne change
+pas l'objet émis ; ses coûts sont ceux des reçus 34 du constructeur, que je
+n'ai pas relus.
+
 ## Erreurs et points durs relevés (à 4dbe3024)
 
 1. **Session G4 R2 : diagnostic non établi.** La capture
@@ -512,8 +524,8 @@ vérifié en direct par B (pas de `gcloud` ici).
   `plafond_proposeur_20260915/`, `oracle_q3q4_20260915/`,
   `front_lanes_lidar_20260921/`, `q3_stream_crosscheck_20260921/`,
   `q4_stream_crosscheck_20260921/`, `q34_stream_crosscheck_t32_20260921/`,
-  `q34_stream_crosscheck_t32_8k_20260921/`, `q34_stream_crosscheck_t33_20260921/` et
-  `relais_temoins_20260921/`.
+  `q34_stream_crosscheck_t32_8k_20260921/`, `q34_stream_crosscheck_t33_20260921/`,
+  `q34_stream_crosscheck_t34_20260921/` et `relais_temoins_20260921/`.
 - Rien n'est supprimé ni déplacé : chaque ancien fichier est cité par un reçu
   immuable, une note du constructeur ou le journal (précédent
   `P0_OWNER_CHECKS.json` à ne pas répéter). Les sections antérieures de ce
