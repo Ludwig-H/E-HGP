@@ -1,0 +1,208 @@
+{
+  "boundaries": {
+    "quantized_on_x_plane_returns": 89,
+    "quantized_on_x_plane_sites": 80,
+    "quantized_on_y_plane_returns": 56,
+    "quantized_on_y_plane_sites": 54,
+    "quantized_quadrant_returns": {
+      "quarter_x_neg_y_neg": 30227,
+      "quarter_x_neg_y_nonneg": 30772,
+      "quarter_x_nonneg_y_neg": 31404,
+      "quarter_x_nonneg_y_nonneg": 30986
+    },
+    "quantized_quadrant_sites": {
+      "quarter_x_neg_y_neg": 29128,
+      "quarter_x_neg_y_nonneg": 30061,
+      "quarter_x_nonneg_y_neg": 30027,
+      "quarter_x_nonneg_y_nonneg": 29926
+    },
+    "quantized_x_negative_returns": 60999,
+    "quantized_y_negative_returns": 61631,
+    "raw_on_x_plane_returns": 0,
+    "raw_on_y_plane_returns": 1,
+    "raw_quadrant_returns": {
+      "quarter_x_neg_y_neg": 30265,
+      "quarter_x_neg_y_nonneg": 30780,
+      "quarter_x_nonneg_y_neg": 31391,
+      "quarter_x_nonneg_y_nonneg": 30953
+    },
+    "raw_to_quantized_quadrant_changes": 71,
+    "raw_to_quantized_x_partition_changes": 46,
+    "raw_to_quantized_y_partition_changes": 25,
+    "raw_x_negative_returns": 61045,
+    "raw_y_negative_returns": 61656,
+    "sites_mixing_raw_quadrants": 11,
+    "sites_mixing_raw_x_sides": 9,
+    "sites_mixing_raw_y_sides": 2
+  },
+  "coordinate_frame": "raw_sensor_xyz_no_pose_no_rotation_no_translation",
+  "counts": {
+    "merged_returns": 4247,
+    "raw_returns": 123389,
+    "sites_with_multiple_returns": 4201,
+    "unique_sites": 119142
+  },
+  "dataset_order": [
+    "full",
+    "half_x_neg",
+    "half_x_nonneg",
+    "quarter_x_neg_y_neg",
+    "quarter_x_neg_y_nonneg",
+    "quarter_x_nonneg_y_neg",
+    "quarter_x_nonneg_y_nonneg"
+  ],
+  "datasets": {
+    "full": {
+      "local_order": "strictly_increasing_full_site_id",
+      "point_bytes": 714852,
+      "points_file": "full.u16le",
+      "points_sha256": "18212228802117f041fa76e2160aa397d8c7f7c7f5d94ea9047a8f7138f521a4",
+      "site_id_bytes": 476568,
+      "site_ids_file": "full.site_ids.u32le",
+      "site_ids_sha256": "b0986c31eab5419b3795c3c18c10dddb8f12d48d713bea78416f48a3e9230105",
+      "sites": 119142
+    },
+    "half_x_neg": {
+      "local_order": "strictly_increasing_full_site_id",
+      "point_bytes": 355134,
+      "points_file": "half_x_neg.u16le",
+      "points_sha256": "bbd272081f6492d0741c4a133dee0fd6664f799d429d099e59539ff44cde278c",
+      "site_id_bytes": 236756,
+      "site_ids_file": "half_x_neg.site_ids.u32le",
+      "site_ids_sha256": "4f2848f2f9a5e9e9876af3ce927c52e5a6916d2225ac10d8b506fe350ddf3785",
+      "sites": 59189
+    },
+    "half_x_nonneg": {
+      "local_order": "strictly_increasing_full_site_id",
+      "point_bytes": 359718,
+      "points_file": "half_x_nonneg.u16le",
+      "points_sha256": "d02092faf0389fefab8b6f8e67791a789eb2af4d9d0fb3b621a2956538b3a63c",
+      "site_id_bytes": 239812,
+      "site_ids_file": "half_x_nonneg.site_ids.u32le",
+      "site_ids_sha256": "5ff75b3cad0ed44cb19e73b1a3489230f78b29bba502f42937a5cc447ea4662f",
+      "sites": 59953
+    },
+    "quarter_x_neg_y_neg": {
+      "local_order": "strictly_increasing_full_site_id",
+      "point_bytes": 174768,
+      "points_file": "quarter_x_neg_y_neg.u16le",
+      "points_sha256": "a4f0465c26e16cc901cdefd54ecffe5e3165366d5eba8f5c403dffc1331909b5",
+      "site_id_bytes": 116512,
+      "site_ids_file": "quarter_x_neg_y_neg.site_ids.u32le",
+      "site_ids_sha256": "810dd3dc73d2b6cbc0b3bfbd0270739d4f5c4ea1deef2e69a767d925a0024483",
+      "sites": 29128
+    },
+    "quarter_x_neg_y_nonneg": {
+      "local_order": "strictly_increasing_full_site_id",
+      "point_bytes": 180366,
+      "points_file": "quarter_x_neg_y_nonneg.u16le",
+      "points_sha256": "79d921fd79f2687a3bedf99fd01720bb1bc229f47be6b4e1741c00a284316837",
+      "site_id_bytes": 120244,
+      "site_ids_file": "quarter_x_neg_y_nonneg.site_ids.u32le",
+      "site_ids_sha256": "a7677374fdd0c92e17a3a771337b7e7ab14ff57aa99c88552ce9b76164f12a9b",
+      "sites": 30061
+    },
+    "quarter_x_nonneg_y_neg": {
+      "local_order": "strictly_increasing_full_site_id",
+      "point_bytes": 180162,
+      "points_file": "quarter_x_nonneg_y_neg.u16le",
+      "points_sha256": "83e60275d68217ea2d85970e1b97179eec67877ba865435ba5aeb04bf1868691",
+      "site_id_bytes": 120108,
+      "site_ids_file": "quarter_x_nonneg_y_neg.site_ids.u32le",
+      "site_ids_sha256": "7d87c9e4f4c2379b29d89d43ac5959f5915673b9402aa45b0adc50ad5cfd348f",
+      "sites": 30027
+    },
+    "quarter_x_nonneg_y_nonneg": {
+      "local_order": "strictly_increasing_full_site_id",
+      "point_bytes": 179556,
+      "points_file": "quarter_x_nonneg_y_nonneg.u16le",
+      "points_sha256": "ca06ae188573e7b0ff9cd121a3db24a07b7dff067210386d441d4b22478a53d3",
+      "site_id_bytes": 119704,
+      "site_ids_file": "quarter_x_nonneg_y_nonneg.site_ids.u32le",
+      "site_ids_sha256": "bbda9de9137425da2ea0ef1548360d3908e8c2714e3eee3fbcfc4ffa7a36d02e",
+      "sites": 29926
+    }
+  },
+  "partition": {
+    "boundary_owner": "nonnegative_side",
+    "equivalence_to_raw_sign_partition": false,
+    "half_rule": "x_u16<32768 versus x_u16>=32768",
+    "prefixes_or_subsampling": false,
+    "quarter_rule": "within_each_half: y_u16<32768 versus y_u16>=32768",
+    "raw_reference_planes": [
+      {
+        "axis": "x",
+        "value_metres": 0
+      },
+      {
+        "axis": "y",
+        "value_metres": 0
+      }
+    ],
+    "stage": "after_global_quantization_and_deduplication",
+    "threshold_u16": 32768
+  },
+  "partition_proof": {
+    "full_sites": 119142,
+    "half_overlap_sites": 0,
+    "half_sites": 119142,
+    "half_union_equals_full": true,
+    "local_to_full_ids_strictly_increasing": true,
+    "quarter_overlap_sites": 0,
+    "quarter_pairs_equal_halves": true,
+    "quarter_sites": 119142,
+    "quarter_union_equals_full": true,
+    "raw_mapping_distinct_full_ids": 119142,
+    "raw_mapping_entries": 123389,
+    "raw_mapping_surjective": true,
+    "raw_returns_discarded": 0,
+    "subsampled_sites": 0
+  },
+  "profile": "quantized_u16_input_only",
+  "public_status": "not_claimed",
+  "quantization": {
+    "adaptive_scale": false,
+    "arithmetic": "exact_integer_ratio_of_decoded_float32",
+    "clipping": false,
+    "formula": "floor(50*x+32768+1/2)",
+    "grid_mm": 20,
+    "integer_formula": "(100*numerator+65537*denominator)//(2*denominator)",
+    "jitter": false,
+    "origin_u16": [
+      32768,
+      32768,
+      32768
+    ],
+    "range_policy": "reject_entire_scan_if_any_quantized_coordinate_is_outside_0_65535",
+    "scale_per_metre": 50,
+    "units": "metres"
+  },
+  "raw": {
+    "bytes": 1974224,
+    "finite_validation": "all_four_components",
+    "format": "little_endian_float32_x_y_z_reflectance",
+    "path": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin",
+    "reflectance": "not_quantized_or_filtered; retained in raw source and addressed by raw ID",
+    "sha256": "92e945f37a6cd4a58acc8aa15b275af2e271ecf69c0a44a311d888524473c451"
+  },
+  "raw_to_full": {
+    "bytes": 493556,
+    "encoding": "little_endian_u32_full_site_id_in_raw_return_order",
+    "entries": 123389,
+    "file": "raw_to_full.u32le",
+    "sha256": "4671e0ee6f0cc4cc3503e13064046725ce02c777a78e3f32712952891a92ab23"
+  },
+  "schema": "mhgp8_lidar_spatial_manifest_v1",
+  "scope": "whole_raw_sensor_scan_and_exact_quantized_spatial_partitions",
+  "script": {
+    "name": "prepare_lidar_spatial.py",
+    "sha256": "d5bc8af10dad6c14f304f5737b52f2c0a6e452ac9a674957bd909f062c32c898"
+  },
+  "site_identity": {
+    "all_raw_returns_mapped": true,
+    "deduplication": "global_equal_quantized_xyz",
+    "full_order": "lexicographic_u16_x_y_z",
+    "id_encoding": "u32_little_endian"
+  },
+  "status": "prepared"
+}

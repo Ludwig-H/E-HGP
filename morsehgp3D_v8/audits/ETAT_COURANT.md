@@ -3,6 +3,17 @@
 21 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 
+Nouvelle consigne LiDAR : [scène, deux moitiés, quatre quarts](../docs/PROTOCOLE_LIDAR_SPATIAL_20260921.md),
+plans orthogonaux passant par le capteur propre de chaque scan. La densité
+est conservée ; rapports de croissance selon les effectifs réels.
+Les anciennes courbes sur préfixes hashés restent historiques et ne
+qualifient pas cette expérience spatiale. Aucun résultat moteur sur les
+sept nouveaux morceaux n'est encore revendiqué.
+Les [préparations des trois scans](../receipts/lidar_spatial_20260921/README.md)
+passent11tests normal/−O et six relectures complètes ;21nuages et leurs
+correspondances sont clos,78artefacts. Ce sont des données validées,
+pas une qualification géométrique du producteur sur ces nouveaux nuages.
+
 Tranche34 close après qualification corrigée : LiveOnly et Joined, graines×cellules
 q4 avec bornes strictes, parents immuables, cache privé par bloc et relais
 direct aux fragments. Aucun changement de défaut, q3 ni backend GPU.

@@ -6,6 +6,14 @@ maintenant implémentée et testée, pas la chaîne complète. Le
 les [mesures P0](../receipts/p0_local_credits_20260913/README.md) sont propres à la v8.
 L'ordre demandé reste mono-thread, multi-CPU local, puis GPU G4 SPOT.
 
+Mise à jour utilisateur du21 septembre : les prochaines études LiDAR
+emploient le [découpage spatial capteur](PROTOCOLE_LIDAR_SPATIAL_20260921.md),
+pas une densité variable à8k/16k/32k. Mesurer scène, deux moitiés, quatre
+quarts et six relations parent/enfant, sans forcer leurs cardinalités.
+Le protocole doit être raccordé avant toute nouvelle conclusion de
+croissance sur les scènes importantes ; les résultats anciens ci-dessous
+restent bornés à leurs entrées sous-échantillonnées.
+
 État du21 septembre après34 : le [raccord graines/cellules q4](Q4_GRAINES_ET_CELLULES_20260921.md)
 réduit fortement la navigation sur les trois scans mesurés. Le contrôle
 LiveOnly fournit l'essentiel du gain ; ne pas prolonger les variantes de

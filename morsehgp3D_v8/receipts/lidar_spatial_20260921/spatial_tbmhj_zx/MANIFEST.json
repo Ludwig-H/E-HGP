@@ -1,0 +1,36 @@
+{
+  "closing_errors": [],
+  "commands": [],
+  "expected_artifact_sha256": {
+    "sources/lidar_spatial_gate.py": "f0576c9c48932154859a224998a1730a5d5a747812eef8f47f0f5e8755577e18",
+    "sources/prepare_lidar_spatial.py": "d5bc8af10dad6c14f304f5737b52f2c0a6e452ac9a674957bd909f062c32c898",
+    "sources/run_lidar_spatial_checks.py": "3aa2d30b566e6b9e9de3300a9720563a50b2f784726e492b44687e9316d86e4d",
+    "sources/run_p0_matrix.py": "b806572d9b5a76afe15c26586321663aa946e318a7a8a2286c3e9549e3ba717f"
+  },
+  "git_head": "1c31e5996c6ca28f1d560f93134f4f633d40d718\n",
+  "git_status": " M AGENTS.md\n M audits/COORDINATION_MORSEHGP3D_V7.md\n M audits/COORDINATION_MORSEHGP3D_V8.md\n M morsehgp3D_v6/src/gpu/lot_ring.hpp\n M morsehgp3D_v6/src/parallel/sort.hpp\n M morsehgp3D_v6/src/pipeline/census.hpp\n M morsehgp3D_v6/src/pipeline/expand.hpp\n M morsehgp3D_v7/PASSATION.md\n M morsehgp3D_v7/README.md\n M morsehgp3D_v7/docs/FAUSSES_PISTES.md\n M morsehgp3D_v7/docs/OBJETS_PARALLELES_TOUR_20260911.md\n M morsehgp3D_v8/PASSATION.md\n M morsehgp3D_v8/README.md\n M morsehgp3D_v8/audits/ETAT_COURANT.md\n M morsehgp3D_v8/docs/PLAN_DE_REFONTE.md\n?? audits/morsehgp3D_v8_complementaire/P0_CONSTANTES_CENSUS_Q2.md\n?? audits/morsehgp3D_v8_complementaire/P0_IDENTITES_NUAGE_ET_RECTANGLES.md\n?? audits/morsehgp3D_v8_complementaire/Q2_PREPARED_BOUNDS_CHECKS.json\n?? audits/morsehgp3D_v8_complementaire/Q2_PREPARED_CENSUS_CHECKS.json\n?? audits/morsehgp3D_v8_complementaire/archive/\n?? audits/morsehgp3D_v8_complementaire/cloud_rectangle_identity_checks.py\n?? audits/morsehgp3D_v8_complementaire/cloud_rectangle_identity_probe.cpp\n?? audits/morsehgp3D_v8_complementaire/q2_prepared_bounds_checks.py\n?? audits/morsehgp3D_v8_complementaire/q2_prepared_bounds_probe.cpp\n?? audits/morsehgp3D_v8_complementaire/q2_prepared_census_checks.py\n?? audits/morsehgp3D_v8_complementaire/q2_revision_protocol_checks.py\n?? morsehgp3D_v6/src/gpu/route_c6.hpp\n?? morsehgp3D_v6/tests/perm_sort_gate.cpp\n?? morsehgp3D_v6/tests/route_c6_gate.cpp\n?? morsehgp3D_v7/docs/MARQUES_PREMIER_PARCOURS_20260911.md\n?? morsehgp3D_v7/receipts/fused_history_streaming_20260911/\n?? morsehgp3D_v8/audits/q34_stream_crosscheck_t34_20260921/\n?? morsehgp3D_v8/audits/q3_prefix_relay_20260921/\n?? morsehgp3D_v8/bench/prepare_lidar_spatial.py\n?? morsehgp3D_v8/bench/run_lidar_spatial_checks.py\n?? morsehgp3D_v8/docs/PROTOCOLE_LIDAR_SPATIAL_20260921.md\n?? morsehgp3D_v8/tests/lidar_spatial_gate.py\n",
+  "launch": [
+    "/home/codespace/.python/current/bin/python",
+    "morsehgp3D_v8/bench/run_lidar_spatial_checks.py",
+    "--output",
+    "morsehgp3D_v8/receipts/lidar_spatial_20260921",
+    "--inputs",
+    "morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin",
+    "morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin",
+    "morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin"
+  ],
+  "pins_before": {
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin": "92e945f37a6cd4a58acc8aa15b275af2e271ecf69c0a44a311d888524473c451",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin": "4dfb5701db9ff36bd592746e08e8fafd4d1c63cba1ef66d2c2791e405b800e80",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin": "132f437349e17c00a8a31539f10a3214d9391ae1251293e7794a26540412b5cd",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/prepare_lidar_spatial.py": "d5bc8af10dad6c14f304f5737b52f2c0a6e452ac9a674957bd909f062c32c898",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_lidar_spatial_checks.py": "3aa2d30b566e6b9e9de3300a9720563a50b2f784726e492b44687e9316d86e4d",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_p0_matrix.py": "b806572d9b5a76afe15c26586321663aa946e318a7a8a2286c3e9549e3ba717f",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/lidar_spatial_gate.py": "f0576c9c48932154859a224998a1730a5d5a747812eef8f47f0f5e8755577e18"
+  },
+  "prepared": [],
+  "schema": "mhgp8_lidar_spatial_checks_v1",
+  "scope": "input_preparation_only_not_engine_or_full",
+  "started_utc": "2026-09-21T11:13:35.426802+00:00",
+  "status": "running"
+}

@@ -1,0 +1,1 @@
+{"errors": 0, "failures": 0, "gate_sha256": "f0576c9c48932154859a224998a1730a5d5a747812eef8f47f0f5e8755577e18", "optimized": false, "schema": "mhgp8_lidar_spatial_gate_v1", "source_sha256": "d5bc8af10dad6c14f304f5737b52f2c0a6e452ac9a674957bd909f062c32c898", "status": "passed", "tests": 11}

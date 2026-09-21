@@ -37,6 +37,16 @@ ses propres sources, tests et reçus, sans transfert implicite.
 
 ## État exécutable
 
+**Protocole LiDAR corrigé sur demande du21 septembre :** mesurer désormais
+une scène complète, ses deux moitiés puis ses quatre quarts, selon deux
+plans perpendiculaires passant par son capteur. Aucun sous-échantillonnage
+pour cette étude de croissance. Voir le [protocole spatial](docs/PROTOCOLE_LIDAR_SPATIAL_20260921.md).
+Les ratios historiques ci-dessous concernent des préfixes à densité
+variable ; ils ne qualifient pas encore ce nouveau protocole.
+Les [préparations spatiales](receipts/lidar_spatial_20260921/README.md)
+sont closes pour trois scans :21nuages et11tests normal/−O réussis.
+Les mesures moteur sur ces morceaux restent à exécuter.
+
 Tranche34,21 septembre : les [parcours graines/cellules q4](docs/Q4_GRAINES_ET_CELLULES_20260921.md)
 ajoutent deux options à Local28. LiveOnly élimine immédiatement les atlas
 sans feuille utile, puis saute leurs branches mortes ; Joined traite les

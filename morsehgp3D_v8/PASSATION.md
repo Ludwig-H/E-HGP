@@ -11,6 +11,20 @@ audits ne qualifient jamais automatiquement les nouveaux ports.
 
 ## À reprendre maintenant
 
+Appliquer d'abord le [protocole spatial LiDAR](docs/PROTOCOLE_LIDAR_SPATIAL_20260921.md)
+demandé par l'utilisateur : scan entier dans son repère capteur, deux
+moitiés x puis quatre quarts y, densité inchangée, tous les morceaux et
+effectifs réels. Les anciens sous-échantillons ne prouvent pas cette
+croissance. Les préparations historiques100/200 sont recalées sur0 :
+repartir du brut, ne pas couper ces fichiers avec une fausse origine.
+La validation des nouvelles partitions et le raccord des mesures sont
+distincts de la qualification moteur34 ci-dessous.
+Préparations closes dans [les reçus spatiaux](receipts/lidar_spatial_20260921/README.md) :
+trois scènes,21nuages,11tests normal/−O,78artefacts. Raccorder un lecteur
+de mesures qui accepte les effectifs réels ; les anciens lecteurs imposent
+encore des fichiers de préfixes et ne doivent pas être contournés en
+falsifiant leurs commandes. Aucun chronométrage moteur spatial acquis.
+
 La [tranche34](docs/Q4_GRAINES_ET_CELLULES_20260921.md) porte les modes
 Local28 LiveOnly et Joined, sans changement de défaut. Résumé immuable
 des feuilles vivantes, court-circuit des atlas sans feuille avant résumé,

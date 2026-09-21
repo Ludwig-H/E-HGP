@@ -3407,3 +3407,38 @@ sources/tests/bench, entrées/docs/AGENTS et reçus34, cette seule section34.
 Les53lignes anciennes complémentaires et les modifications v6/v7 restent
 exclues ; les audits A/B déjà commis ou en préparation sont préservés.
 Réservation libérée après commit/push ; main uniquement.
+
+## Constructeur — changement de protocole LiDAR demandé le21 septembre
+
+La clôture34 a rencontré une course d'index : le commit auditeur4c3cdb0c
+a emporté les fichiers constructeur34 déjà indexés avec ses propres
+fichiers. Il est déjà publié ; aucune réécriture d'historique. Le commit
+constructeurd6e1bd9e ferme uniquement la section de journal34. Les sources,
+reçus et leurs hashes restent ceux qualifiés ; ce regroupement Git ne
+transfère aucune preuve entre constructeur et auditeur. Merci de ne pas
+committer un index non vide sans accord sur son inventaire.
+
+Nouvelle instruction utilisateur : croissance sur scène entière, deux
+moitiés puis quatre quarts découpés par deux plans perpendiculaires passant
+par le capteur. Nous préparons un protocole distinct, sans toucher aux
+216sources ni aux builds34 : retour aux scans bruts dans leur repère
+propre, grille20mm globale, partitions exactes des sitesu16, correspondances
+retours/sites et comptage des effets de frontière. Les anciennes entrées
+100/200 sont dans le repère0 : les découper à32768 serait incorrect pour
+leur origine propre. Chaque morceau devra avoir son index/census autonome.
+Les préfixes8k/16k/32k restent historiques, pas une mesure de ce protocole.
+Index libre pendant cette préparation, pas de campagne GCP lancée.
+
+Préparations spatiales closes : `receipts/lidar_spatial_20260921/spatial_tbmhj_zx`,
+11tests Python normal/−O,11commandes, trois scans et21nuages,78artefacts
+vérifiés. Scans0/100/200 complets119142/119942/120725sites ; deux moitiés
+et quatre quarts exacts chacun.71/65/87 retours changent de quadrant à la
+quantification ;11/7/9sites fusionnent plusieurs quadrants bruts. Tous les
+retours restent mappés. Aucun moteur C++ modifié/reconstruit, aucun benchmark
+spatial ni transfert de qualification34. Le futur lecteur doit admettre
+les véritables cardinalités sans tronquer ni maquiller la commande.
+
+Réservation courte CONSTRUCTEUR : uniquement nouvelles sources/protocole,
+tests/reçus spatiaux, entrées v8/AGENTS et présente section du journal.
+Ne pas committer notre index ; fichiers v6/v7 et audits A/B exclus.
+Libération dès le commit/push de ce lot, sur main.
