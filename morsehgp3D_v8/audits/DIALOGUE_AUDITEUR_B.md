@@ -339,6 +339,27 @@ de nœud par Ξ_min à endpoints fixes, héritage de la frontière du rectangle
 vers ses paires) ; les visites q4 (×4,0 puis ×5,6 par doublement) sont le
 second poste, hors de portée de ces deux mesures.
 
+### Tranche 32 à 8 000 points : accord exact des deux flux à la première taille d'intérêt
+
+Reçu [q34_stream_crosscheck_t32_8k_20260921/](q34_stream_crosscheck_t32_8k_20260921/README.md) :
+mêmes harnais, mêmes égalités exigées, sur le scan 0 à 8 000 points entier,
+K5 et K10, sonde à d1b4dbc6 en modes `rectangle-pair`/`boxes`. À K5 :
+93 914 boules q3 et 10 756 boules q4 identiques (support ou clé, profondeur)
+à l'énumération indépendante, et identiques au flux des anciens modes
+relancés à 8k (mêmes comptes, empreintes et IDs de coquille) ; 1 940 894
+paires rejetées par rectangle et 167 441 par paire, 344 856 paires
+développées et 1 911 457 seeds q3, exactement les paires rejetables,
+conservées et seeds de mon harnais et exactement les compteurs publiés par
+la série 32 du constructeur. À K10 : 409 195 boules q3 et 116 985 boules q4
+identiques, 4 171 837 + 324 331 paires rejetées, 717 777 développées,
+8 099 443 seeds q3, mêmes égalités. Les deux lemmes du citron restent sans
+violation sur 300 (q3) et 200 (q4) paires rejetables par ligne. La sonde
+met 4,7 s à K5 et 19,2 s à K10 sur cet hôte partagé (la tranche 31 mettait
+1 361 s à K5). Tout ce qui suit le front dans le raccord est donc confronté
+à un second calcul indépendant à 8k, à deux valeurs de K, sur un scan ;
+16k et 32k ne le sont pas (le harnais exhaustif y coûterait des heures), et
+rien n'est qualifié.
+
 ## Erreurs et points durs relevés (à 4dbe3024)
 
 1. **Session G4 R2 : diagnostic non établi.** La capture
@@ -405,7 +426,8 @@ vérifié en direct par B (pas de `gcloud` ici).
   `separation_20260914/`, `surproposition_20260915/`,
   `plafond_proposeur_20260915/`, `oracle_q3q4_20260915/`,
   `front_lanes_lidar_20260921/`, `q3_stream_crosscheck_20260921/`,
-  `q4_stream_crosscheck_20260921/` et `q34_stream_crosscheck_t32_20260921/`.
+  `q4_stream_crosscheck_20260921/`, `q34_stream_crosscheck_t32_20260921/` et
+  `q34_stream_crosscheck_t32_8k_20260921/`.
 - Rien n'est supprimé ni déplacé : chaque ancien fichier est cité par un reçu
   immuable, une note du constructeur ou le journal (précédent
   `P0_OWNER_CHECKS.json` à ne pas répéter). Les sections antérieures de ce
