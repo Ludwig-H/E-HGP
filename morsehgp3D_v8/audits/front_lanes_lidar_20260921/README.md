@@ -83,7 +83,7 @@ descentes saturantes et le balayage complet) :
   paire, car 40 à 57 % (q3) et 46 à 67 % (q4) des témoins exacts sont hors
   A∪B sans être universels pour les boîtes.
 
-## Réponse : rejeter la paire avant la couverture divise les seeds par plusieurs centaines
+## Réponse : rejeter la paire avant la couverture divise les seeds par des centaines, puis le census par boîtes prend le relais
 
 - **Descente saturante par paire** : 43 à 148 visites de nœuds par paire rejetable q3
   en ordre « milieu d'abord » (159 à 898 en préordre), 63 à 222 en q4 ; les
@@ -96,9 +96,19 @@ descentes saturantes et le balayage complet) :
 - **Seeds q3** : 350 à 1 950 seeds aigus par paire rejetable (le constructeur mesure 341
   par arête à 8k/K5), 8 à 125 par paire conservée. Rejeter la paire avant de
   construire sa couverture divise la masse de seeds par 87 à 1 519 selon
-  l'exécution ; les seeds survivants coûtent 313 à 166 016 tests ponctuels par paire
-  conservée (census naïf sur la couverture) et émettent 0,35 à 1,27 boule par
-  paire conservée.
+  l'exécution. Les seeds survivants émettent 0,35 à 1,27 boule par paire
+  conservée mais coûtent 313 à 166 016 tests ponctuels par paire conservée en
+  census naïf sur la couverture, et ce coût **croît avec n** (couvertures et
+  seeds des survivantes ×2,3 à ×2,8 par doublement) : le census des
+  survivantes doit rester sous-linéaire dans la couverture (census par boîtes
+  saturant, milieu d'abord), il n'est pas facultatif.
+- **Projection sur la masse résiduelle** (part conservée × masse × moyennes
+  par paire, tableau ci-dessous) : à 8k/K5 sur le scan 0, 778 611 447 seeds
+  actuels contre 1 365 319 après rejet par paire (le constructeur en a
+  mesuré 780 661 556 : la projection tombe juste) et 59 668 750 tests naïfs
+  au lieu de 361 milliards ; mais à 32k/K10 sur le scan 200 il reste
+  251 413 220 seeds et 334 318 413 959 tests naïfs : sans census par
+  boîtes, la ligne 32k/K10 coûterait autant que la ligne 8k/K5 d'aujourd'hui.
 - **Lemme du citron, vérification exécutable (q3)** : 1 800 paires rejetables,
   1 712 517 seeds aigus propriétaires, 2 385 827 904 tests entiers, **0 violation** : aucun seed d'une paire
   rejetable n'a de circumboule de profondeur < h_q. C'est une confirmation
@@ -211,12 +221,40 @@ réduction de la masse de seeds (q3 seulement).
 | 000200 | 32000 | 10 | q3 | 898 / 111 | 250 / 250 | 3 931 | 13 444 | 792 | 11 225 | 1 950 | 124,8 | 2 405 | 0,65 | 166 016 | 419 |
 | 000200 | 32000 | 10 | q4 | 1 046 / 185 | 319 / 319 | 4 801 | 12 476 | 1 090 | 11 024 | — | — | — | — | — | — |
 
+Projection q3 par exécution : masse résiduelle de la voie, seeds que le
+pipeline actuel construit (paires rejetables × seeds par paire rejetable +
+conservées × seeds par paire conservée), paires conservées après rejet par
+paire, leurs seeds, leurs tests naïfs et leurs boules émises (produits des
+parts d'échantillon par la masse ; pas des comptes exhaustifs).
+
+| scan | n | K | masse résiduelle | seeds actuels | paires conservées | seeds conservées | tests naïfs | émises |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 000000 | 8000 | 5 | 2 150 109 | 778 611 447 | 153 733 | 1 365 319 | 59 668 750 | 84 929 |
+| 000000 | 8000 | 10 | 4 490 003 | 1 560 610 548 | 379 405 | 10 856 827 | 4 909 856 446 | 478 185 |
+| 000000 | 16000 | 5 | 5 074 537 | 2 997 135 729 | 365 367 | 7 436 734 | 2 463 771 443 | 238 503 |
+| 000000 | 16000 | 10 | 11 951 285 | 8 033 133 896 | 764 882 | 28 497 839 | 20 928 606 265 | 974 030 |
+| 000000 | 32000 | 5 | 16 026 793 | 21 890 603 902 | 753 259 | 43 055 979 | 15 213 817 898 | 432 723 |
+| 000000 | 32000 | 10 | 33 392 450 | 47 636 700 789 | 1 285 609 | 45 614 087 | 9 154 824 003 | 768 026 |
+| 000100 | 8000 | 5 | 1 567 213 | 494 028 636 | 173 961 | 5 707 006 | 2 338 911 816 | 90 898 |
+| 000100 | 8000 | 10 | 3 883 676 | 1 274 150 597 | 316 520 | 8 361 554 | 2 368 890 897 | 332 054 |
+| 000100 | 16000 | 5 | 5 438 216 | 4 467 818 018 | 364 360 | 2 942 075 | 113 903 434 | 168 585 |
+| 000100 | 16000 | 10 | 9 898 067 | 6 666 847 977 | 717 610 | 41 245 245 | 39 214 681 489 | 579 037 |
+| 000100 | 32000 | 5 | 16 980 893 | 30 368 620 551 | 687 726 | 21 387 435 | 32 489 984 080 | 314 147 |
+| 000100 | 32000 | 10 | 28 630 909 | 43 075 317 114 | 1 732 170 | 78 649 107 | 115 481 640 531 | 1 903 955 |
+| 000200 | 8000 | 5 | 2 537 025 | 957 381 902 | 168 712 | 6 596 265 | 2 491 287 513 | 90 064 |
+| 000200 | 8000 | 10 | 4 583 146 | 1 535 688 480 | 339 153 | 15 969 972 | 6 144 937 788 | 304 779 |
+| 000200 | 16000 | 5 | 8 874 239 | 7 920 125 194 | 315 035 | 27 283 848 | 20 208 474 733 | 110 928 |
+| 000200 | 16000 | 10 | 14 702 299 | 11 170 351 009 | 749 817 | 83 494 356 | 81 240 692 065 | 720 413 |
+| 000200 | 32000 | 5 | 27 386 806 | 46 672 033 356 | 862 684 | 54 732 532 | 71 206 941 700 | 342 335 |
+| 000200 | 32000 | 10 | 55 937 973 | 105 395 028 386 | 2 013 767 | 251 413 220 | 334 318 413 959 | 1 314 542 |
+
 ## Limites
 
 - Mesure sur trois scans et trois tailles, pas une borne ; les parts par
   paire sont des estimations d'échantillon (2 000 paires par voie).
-- Le front mesuré est celui de c5308651 (masque 6, défauts) ; la tranche 31
-  non commise n'est pas jugée ici, et rien n'est transféré à ses sources.
+- Le front mesuré est celui de c5308651 (masque 6, défauts) ; la tranche 31 commise
+  ensuite (4dbe3024) n'a pas touché `src/wspd/front.cpp`, mais rien n'est transféré
+  à ses sources : ses candidats q3/q4 ne sont pas jugés ici.
 - Les seeds q4 et leur census ne sont pas mesurés ; la couverture q4 l'est.
 - Aucune confrontation à une vérité terrain (demande de l'utilisateur : on
   s'occupe du calcul du clustering, pas de sa pertinence).

@@ -1,7 +1,8 @@
 # Dialogue courant de l'auditeur indépendant B (v8)
 
-21 septembre 2026, après **c5308651** (tranche 31 en chantier, non commise),
-sur main. Canal rouvert : l'auditeur B reprend son rôle d'auditeur indépendant
+21 septembre 2026, après **4dbe3024** (tranche 31 commise à 08:18 UTC pendant
+la mesure ci-dessous, épinglée à c5308651 ; `src/wspd/front.cpp` n'a pas
+changé entre les deux), sur main. Canal rouvert : l'auditeur B reprend son rôle d'auditeur indépendant
 après avoir été constructeur du 17 au 20 septembre (tranches 19 à 21) ; il ne
 requalifie jamais son propre code de cette période. Écritures limitées à
 `morsehgp3D_v8/audits/` ; l'auditeur A conserve
@@ -57,8 +58,16 @@ couverture.** Sur les 18 exécutions, une paire rejetable porte 2 000 à
 341 par arête à 8k/K5, en accord), alors qu'une paire conservée porte 47 à
 792 sites de couverture en moyenne (maximum 11 225) et 8 à 125 seeds. Rejeter
 la paire d'abord divise la masse de seeds par 87 à 1 519 selon l'exécution
-(tableau des coûts du reçu), et les survivantes se censurent à bon
-compte même naïvement. Ordre recommandé, avant covers et seeds :
+(tableau des coûts du reçu). Mais les survivantes ne se censurent à bon
+compte naïvement qu'aux petites tailles : leurs couvertures et leurs seeds
+croissent de ×2,3 à ×2,8 par doublement, et la projection sur la masse
+résiduelle (part conservée × masse × moyennes par paire) donne à 8k/K5 sur
+le scan 0 1,37 M seeds et 60 M tests naïfs au lieu de 779 M seeds (le
+constructeur en mesure 780,66 M : la projection tombe juste) et 361 Md
+tests, mais encore 251 M seeds et 334 Md tests naïfs à 32k/K10 sur le scan
+200. Le census par boîtes saturant n'est donc pas facultatif pour les
+survivantes ; il vient après le rejet par paire, pas à sa place. Ordre
+recommandé, avant covers et seeds :
 
 1. Par rectangle résiduel : descente saturante de l'index avec les bornes de
    boîte (le « plafond » mesuré), coût total 46 à 851 M visites de nœuds par
@@ -72,7 +81,8 @@ compte même naïvement. Ordre recommandé, avant covers et seeds :
    D/√3 du milieu et rayon au plus 2D/√3, D demi-longueur, donc tout intérieur
    à moins de √3·D du milieu), 1,54 fois moins de volume que 4|b−a|² ; en q4
    la couverture 4|b−a|² reste nécessaire ((1/√2 + √(3/2))·D < 2D).
-4. Census par seed sur les survivantes, naïf ou par boîtes.
+4. Census par seed sur les survivantes, par boîtes de la puissance,
+   saturant, sous-arbre du centre d'abord (le naïf ne tient pas à 32k/K10).
 
 Sur le census par boîtes lui-même (proposition du contrat 31) : la fonction
 A|z|² + B·z + C est convexe et séparable, son minimum entier par axe est
@@ -112,10 +122,27 @@ d = (28,10,49), arête ab maximale, centre strictement intérieur
 a H = 608 et Ξ = 1 036 800, donc 2H² = 739 328 ≤ Ξ < 3H² = 1 108 992 : z est
 dans L_3(a,b) mais **strictement extérieur** à cette boule q4
 (|z−o|² = 5222107613/4235364 > r²). Un front qui le créditerait pour q4
-pourrait rejeter à tort l'arête. Le contrat 31 garde α4 = 2 ; à confirmer
-dans le code de la tranche 31 avant sa commission.
+pourrait rejeter à tort l'arête. Vérifié à 4dbe3024 : `spindle/predicates.hpp`
+renvoie 3 pour Q3 et 2 sinon (ligne 125) ; rien à changer dans le code.
 
-## Erreurs et points durs relevés (à c5308651 et sur le chantier 31)
+### Clôture 31 et pilote R3 : d'où vient le ×10 par doublement
+
+Le journal de clôture donne, à K5/s8 sur G4 avec 48 workers, 1k/2k/4k/8k =
+0,863/8,470/59,274/614,744 s, census q3 ×10,8/×10,1/×10,8 par doublement,
+et 3,23 CPU moyens malgré 48 workers. Ma mesure décompose ce facteur sur
+8k → 32k : masse résiduelle des paires ×2,4 à ×3,2 par doublement (la part
+résiduelle décroît moins vite que 1/n), seeds par paire rejetable ×1,6 à
+×2,3, couverture par paire rejetable ×1,6 à ×2,2 ; le produit vaut ×6 à
+×16, en accord avec ×10. Rien n'est sous-quadratique tant que les paires
+rejetables sont développées ; après leur rejet, les paires conservées
+croissent de ×2,1 à ×2,4 par doublement et leurs seeds de ×2,3 à ×2,8,
+d'où l'ordre ci-dessus. Les 3,23 CPU sur 48 disent que le grain d'une arête
+atomique (2 237 sites de couverture en moyenne, maximum 8 000) laisse
+l'équipe inactive : le rejet par paire retire les grosses arêtes, mais la
+queue lourde des survivantes (couvertures jusqu'à 11 225 sites) demande un
+grain plus fin que l'arête, par blocs de seeds, avant tout pilote 50k.
+
+## Erreurs et points durs relevés (à 4dbe3024)
 
 1. **Session G4 R2 : diagnostic non établi.** La capture
    `receipts/lidar_global_20260921/gcp_r2_gate_failure/` montre
@@ -127,7 +154,9 @@ dans le code de la tranche 31 avant sa commission.
    (`gdb -batch`), ou un chien de garde par commande dans le worker. La
    réécriture par `numerator() == 0` est équivalente pour un rationnel
    normalisé (dénominateur > 0 garanti par Boost), donc sans risque, mais elle
-   ne vaut correction que si R3 passe la même porte.
+   ne vaut correction que si une session passe la même porte ; la clôture 31
+   déclare R3 `COMPLETED` (cinq mesures, arrêt certifié) sans dire si cette
+   porte y a été rejouée : le préciser.
 2. **Chiffre sans reçu.** « 210 987 arêtes, 83,307 M incidences, environ
    10,5 s » (journal, pilote 1000/K10) n'a pas de capture dans
    `receipts/lidar_global_20260921/` : le doter d'un reçu ou le retirer.
