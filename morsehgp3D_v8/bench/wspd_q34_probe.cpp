@@ -280,6 +280,11 @@ int global_run(int argc,char** argv) {
   std::cout<<",\"tasks\":";audit_dump(parallel.tasks,task_fields);
   std::cout<<",\"workers_tasks\":[";
   for(std::size_t slot=0;slot<parallel.worker_tasks.size();++slot) {if(slot)std::cout<<',';std::cout<<parallel.worker_tasks[slot];}
+  std::cout<<"],\"workers_timing_ms\":[";
+  for(std::size_t slot=0;slot<parallel.worker_timings.size();++slot) {
+   const auto& w=parallel.worker_timings[slot];if(slot)std::cout<<',';
+   std::cout<<"{\"wall\":"<<w.wall_ns/1e6<<",\"cpu\":"<<w.cpu_ns/1e6<<",\"wait\":"<<w.wait_ns/1e6<<'}';
+  }
   std::cout<<']';
  }
  std::cout<<",\"cloud_work\":";audit_dump(cloud->work(),cloud_fields);

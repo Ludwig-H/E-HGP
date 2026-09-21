@@ -187,12 +187,20 @@ struct WspdQ34TaskWork {
   bool operator==(const WspdQ34TaskWork&) const = default;
 };
 
+// Measured, never logical: wall time of the slot's loop, CPU time of its
+// thread (CLOCK_THREAD_CPUTIME_ID) and wall time spent waiting on the task
+// queue. Nanoseconds; they vary between runs and are never compared.
+struct WspdQ34WorkerTiming {
+  u64 wall_ns{}, cpu_ns{}, wait_ns{};
+};
+
 struct WspdQ34ParallelResult {
   WspdQ34Result pipeline;
   WspdQ34ParallelWork parallel;
   std::vector<WspdQ34WorkerWork> workers;
   WspdQ34TaskWork tasks;
   std::vector<u64> worker_tasks;  // Ranges consumed per started slot.
+  std::vector<WspdQ34WorkerTiming> worker_timings;
 };
 
 // Explicit Coarse front-job entry; the old mono entry/default is unchanged.

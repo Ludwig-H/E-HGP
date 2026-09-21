@@ -8,6 +8,8 @@
 #include <array>
 #include <functional>
 #include <atomic>
+#include <chrono>
+#include <ctime>
 #include <condition_variable>
 #include <mutex>
 #include <limits>
@@ -720,6 +722,16 @@ WspdQ34ParallelResult run_wspd_q34_parallel(Q2CensusIndexPtr index, unsigned kma
     WspdQ34Work work{};
     WspdQ34WorkerWork stats{};
     u64 tasks{}, split_rectangles{};
+    WspdQ34WorkerTiming timing{};
+  };
+  const auto thread_cpu_ns = [] {
+    timespec now{};
+    if (clock_gettime(CLOCK_THREAD_CPUTIME_ID, &now) != 0) return u64{0};
+    return static_cast<u64>(static_cast<u64>(now.tv_sec) * u64{1000000000} + static_cast<u64>(now.tv_nsec));
+  };
+  const auto wall_ns = [] {
+    return static_cast<u64>(std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count());
   };
   std::vector<WorkerState> states(started);
   orchestration.worker_state_bytes = storage_bytes(states.capacity(), sizeof(WorkerState));
@@ -740,6 +752,8 @@ WspdQ34ParallelResult run_wspd_q34_parallel(Q2CensusIndexPtr index, unsigned kma
   parallel_detail::run_joined_workers(started,
       [&](std::size_t slot, const std::atomic<bool>& cancel) {
         auto& state = states[slot];
+        const auto wall_start = wall_ns(), cpu_start = thread_cpu_ns();
+        u64 waited = 0;
         const Q34SeedConsumer output = [&](const Q34SeedCandidate& candidate) {
           callbacks[slot](slot, candidate);
         };
@@ -769,7 +783,9 @@ WspdQ34ParallelResult run_wspd_q34_parallel(Q2CensusIndexPtr index, unsigned kma
               while (queue.pending.empty() && queue.next_job == queue.job_count &&
                      queue.busy != 0 && !queue.cancelled) {
                 counter_add(queue.waits);
+                const auto before = wall_ns();
                 queue.wake.wait(lock);
+                counter_add(waited, wall_ns() - before);
               }
               if (queue.cancelled || cancel.load(std::memory_order_relaxed)) {
                 queue.cancelled = true;
@@ -822,6 +838,7 @@ WspdQ34ParallelResult run_wspd_q34_parallel(Q2CensusIndexPtr index, unsigned kma
           state.work = engine.work;
           state.split_rectangles = engine.split_rectangles;
         }  // Private engine buffers are released before this worker returns.
+        state.timing = {wall_ns() - wall_start, thread_cpu_ns() - cpu_start, waited};
         state.stats.front_products = state.front.product_visits;
         state.stats.input_rectangles = state.work.input_rectangles;
         state.stats.expanded_pairs = state.work.expanded_pairs;
@@ -840,6 +857,7 @@ WspdQ34ParallelResult run_wspd_q34_parallel(Q2CensusIndexPtr index, unsigned kma
     counter_add(orchestration.edge_buffer_bytes_sum, state.stats.peak_edge_buffer_bytes);
     result.workers.push_back(state.stats);
     result.worker_tasks.push_back(state.tasks);
+    result.worker_timings.push_back(state.timing);
     counter_add(result.tasks.split_rectangles, state.split_rectangles);
   }
   result.tasks.published = queue.published;
