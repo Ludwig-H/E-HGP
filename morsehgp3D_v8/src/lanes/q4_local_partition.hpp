@@ -137,10 +137,15 @@ class Q4LocalFragment final {
   // excludes fixed metadata, shared objects and allocator reallocation overlap.
   [[nodiscard]] std::size_t retained_bytes() const;
 
- private:
   enum class Origin : unsigned { Root = 0, Child = 1, Refine = 2 };
-  Q4LocalFragment(Q4LocalGeometryPtr geometry, Q4LocalCell cell, std::size_t inherited,
+  // Passkey: only the three factories can name Key, so std::make_shared can
+  // build the fragment and its control block in ONE allocation while the
+  // constructor stays private in effect. Never call this directly.
+  struct Key { explicit Key() = default; friend class Q4LocalFragment; };
+  Q4LocalFragment(Key, Q4LocalGeometryPtr geometry, Q4LocalCell cell, std::size_t inherited,
                   std::span<const std::size_t> input, u64 budget, Origin origin);
+
+ private:
   void retain(std::size_t node_id);
   Q4LocalGeometryPtr geometry_;
   Q4LocalCell cell_;

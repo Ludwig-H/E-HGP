@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <memory>
 #include <stdexcept>
 #include <utility>
 
@@ -252,7 +253,7 @@ std::size_t Q4LocalGeometry::retained_bytes() const {return id_bytes(cover_nodes
 Q4LocalFragmentPtr Q4LocalFragment::root(Q4LocalGeometryPtr geometry,u64 budget) {
   if (!geometry) throw std::invalid_argument("mhgp8 local root requires immutable geometry");
   const auto input=geometry->cover_nodes();
-  return Q4LocalFragmentPtr(new Q4LocalFragment(std::move(geometry),Q4LocalCell{},0,input,budget,Origin::Root));
+  return std::make_shared<Q4LocalFragment>(Key{},std::move(geometry),Q4LocalCell{},0,input,budget,Origin::Root);
 }
 
 Q4LocalFragmentPtr Q4LocalFragment::child(Q4LocalFragmentPtr parent,unsigned quadrant,u64 budget) {
@@ -263,18 +264,21 @@ Q4LocalFragmentPtr Q4LocalFragment::child(Q4LocalFragmentPtr parent,unsigned qua
   const bool right=(quadrant&1U)!=0,top=(quadrant&2U)!=0;
   const Q4LocalCell cell{right?mx:p.left,right?p.right:mx,top?my:p.bottom,top?p.top:my,
                         p.depth+1,right&&p.owns_right,top&&p.owns_top};
-  return Q4LocalFragmentPtr(new Q4LocalFragment(parent->geometry(),cell,parent->inside_count(),parent->active_nodes(),budget,Origin::Child));
+  return std::make_shared<Q4LocalFragment>(Key{},parent->geometry(),cell,parent->inside_count(),parent->active_nodes(),budget,Origin::Child);
 }
 
 Q4LocalFragmentPtr Q4LocalFragment::refine(Q4LocalFragmentPtr parent,u64 budget) {
   if (!parent) throw std::invalid_argument("mhgp8 local refinement requires immutable parent");
-  return Q4LocalFragmentPtr(new Q4LocalFragment(parent->geometry(),parent->cell(),parent->inside_count(),
-                                               parent->active_nodes(),budget,Origin::Refine));
+  return std::make_shared<Q4LocalFragment>(Key{},parent->geometry(),parent->cell(),parent->inside_count(),
+                                          parent->active_nodes(),budget,Origin::Refine);
 }
 
-Q4LocalFragment::Q4LocalFragment(Q4LocalGeometryPtr geometry,Q4LocalCell cell,std::size_t inherited,
+Q4LocalFragment::Q4LocalFragment(Key,Q4LocalGeometryPtr geometry,Q4LocalCell cell,std::size_t inherited,
     std::span<const std::size_t> input,u64 budget,Origin origin)
     :geometry_(std::move(geometry)),cell_(cell),inside_count_(inherited) {
+  // The retained frontier rarely exceeds the input frontier: reserving it
+  // once avoids the geometric reallocations of push_back on hot paths.
+  active_nodes_.reserve(input.size());
   switch (origin) {
     case Origin::Root: counter_add(work_.root_factories);break;
     case Origin::Child: counter_add(work_.child_factories);break;
