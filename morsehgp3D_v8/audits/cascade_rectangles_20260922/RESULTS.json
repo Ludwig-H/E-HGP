@@ -1,0 +1,84 @@
+{
+  "scope": "Differential witness-filter cascade on 32 sampled native WSPD rectangles per mass class per LiDAR/K context, no full-frame time extrapolation; no atlas/FULL timing",
+  "source_commit": "a5447d06a23910f77df081fb7e8e4add5836b97f",
+  "native_source_tree": "54a6d5816420855e594768865fb66f6f1136df99",
+  "modes": {
+    "0": "native rectangle then pair filters",
+    "1": "selective factor plans plus singleton reuse",
+    "2": "representative-pair negative common filter only",
+    "3": "combined factor plans singleton reuse representative negative common filter"
+  },
+  "compiler": "g++ (Debian 14.2.0-19) 14.2.0",
+  "checks": {
+    "scalar_gate": {"selftest": "pass", "contexts": 1728, "pair_mask_comparisons": 540216},
+    "forced_plan_gate": [
+      {"selftest": "pass", "contexts": 1728, "pair_mask_comparisons": 540216},
+      {"forced_plan_gate": "pass", "plans": 108, "avoided_pair_searches": 290608, "pair_mask_comparisons": 984960}
+    ],
+    "native_source_unchanged": true,
+    "no_sanitizer_this_session": true
+  },
+  "limits": [
+    "3 LiDAR frames of sequence08, frozen nonground mask, 1mm inputs",
+    "32 uniformly reservoir-sampled rectangles per mass class:1,2..63,64..1023,1024..65536,>65536 pairs",
+    "full-cloud native index/front, but sampled filtering only",
+    "three rotating repetitions on shared CPU; no confidence intervals",
+    "collective filter excluded from this cascade",
+    "native library GCC13.3; caller g++ (Debian 14.2.0-19) 14.2.0"
+  ],
+  "reproducibility_archive": "MorseHGP_LiDAR_cascade_2026-09-22.zip",
+  "archive_contents": "C++ callers, pinned-source transformation, raw repetitions, gates, native replay capsule and SHA256 manifest",
+  "contexts": [
+    {
+      "scene": "00", "K": 10, "n": 39885, "total_sampled_rectangles": 160, "sample_mass": 3150625,
+      "sum_of_class_median_cpu_ms": {"0": 709.300112, "1": 276.33001699999954, "2": 685.86171, "3": 270.2109710000005},
+      "pair_searches": {"0": 489308, "1": 166475, "2": 489308, "3": 166475},
+      "surviving_pairs": 5783, "speedup_combined": 2.6249863555688076, "speedup_combined_over_plans": 1.0226454387745754
+    },
+    {
+      "scene": "00", "K": 5, "n": 39885, "total_sampled_rectangles": 160, "sample_mass": 3518522,
+      "sum_of_class_median_cpu_ms": {"0": 273.0654759999997, "1": 68.62761, "2": 263.5829679999998, "3": 61.276558},
+      "pair_searches": {"0": 361276, "1": 73779, "2": 361276, "3": 73779},
+      "surviving_pairs": 1999, "speedup_combined": 4.456279610222227, "speedup_combined_over_plans": 1.1199651586174275
+    },
+    {
+      "scene": "01", "K": 10, "n": 35551, "total_sampled_rectangles": 160, "sample_mass": 4972424,
+      "sum_of_class_median_cpu_ms": {"0": 11.5870150000003, "1": 6.1030290000001, "2": 10.5192949999992, "3": 4.5370690000001},
+      "pair_searches": {"0": 9507, "1": 2705, "2": 9507, "3": 2705},
+      "surviving_pairs": 220, "speedup_combined": 2.553854702231781, "speedup_combined_over_plans": 1.3451479358149425
+    },
+    {
+      "scene": "01", "K": 5, "n": 35551, "total_sampled_rectangles": 160, "sample_mass": 3779981,
+      "sum_of_class_median_cpu_ms": {"0": 251.3534059999997, "1": 63.8355450000003, "2": 268.4283959999996, "3": 61.588218999999704},
+      "pair_searches": {"0": 198194, "1": 40128, "2": 198194, "3": 40128},
+      "surviving_pairs": 140, "speedup_combined": 4.0811929632191655, "speedup_combined_over_plans": 1.0364895435602808
+    },
+    {
+      "scene": "02", "K": 10, "n": 45845, "total_sampled_rectangles": 160, "sample_mass": 6629214,
+      "sum_of_class_median_cpu_ms": {"0": 2301.283751, "1": 830.4014920000003, "2": 2291.189384, "3": 817.606673},
+      "pair_searches": {"0": 1836916, "1": 510369, "2": 1836916, "3": 510369},
+      "surviving_pairs": 23648, "speedup_combined": 2.8146587191565153, "speedup_combined_over_plans": 1.015649112736633
+    },
+    {
+      "scene": "02", "K": 5, "n": 45845, "total_sampled_rectangles": 160, "sample_mass": 5704299,
+      "sum_of_class_median_cpu_ms": {"0": 547.9056790000002, "1": 216.2195309999998, "2": 535.138836, "3": 200.7165480000001},
+      "pair_searches": {"0": 861932, "1": 259875, "2": 861932, "3": 259875},
+      "surviving_pairs": 7883, "speedup_combined": 2.7297484161594885, "speedup_combined_over_plans": 1.0772381906448474
+    }
+  ],
+  "raw_sha256": {
+    "results/cascade_01_K10.jsonl": "7c210a61a493b95ffd3604e081b029bb4a87cd484c89b30ddde9247febd6de38",
+    "results/cascade_02_K10.jsonl": "eec25ca5a38bb18609d77ba4f71d0ad3c5664037033cf1143a21029995c45c25",
+    "results/cascade_01_K5.jsonl": "8bff5a55ebc000524110436e9863d582edd6dc4dcebf5a37fe35e7a6ec3d846c",
+    "results/cascade_00_K10.jsonl": "c54c6fe8c3707ade6e9a3278aba41bbc5b5ae3f794c547f6d39a6ea895d31b30",
+    "results/cascade_00_K5.jsonl": "b42850dbdc6f1b31d48f75321e55fd8a47165fc638a440734ed4f79c93c55006",
+    "results/cascade_02_K5.jsonl": "dab3ac3a6ce21c99fd4002dd59704fbb1fcadd9fa70cef3e4241f9fd2d6bb006",
+    "results/SELFTEST.json": "87e94054c9dea622420d869c602580f663ddc4d249f31149583eac939d8021a7",
+    "results/PLAN_GATE.jsonl": "5476dc206444a833b053d4eb4515e10aa678efc9d3ed2e2c9202d2c0c3e1d0b0"
+  },
+  "source_sha256": {
+    "new/cascade_filter.cpp": "407275e7ef4a0eccb1a92266276c0afd1eb5dc37fddf7df02c7636bd912db866",
+    "new/plan_gate.cpp": "8e2ab1c5d795f818fb7420670489031c5f2231bf3733b0fdc3ef315a6501a3ed",
+    "new/witness_representative.cpp": "e2c126387987575302791b3d1ae939a3f676f922344671ff9bf81283ec2102fb"
+  }
+}
