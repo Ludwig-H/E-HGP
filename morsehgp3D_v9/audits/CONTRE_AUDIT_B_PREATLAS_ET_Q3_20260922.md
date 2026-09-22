@@ -131,7 +131,9 @@ vérifie les quatre profondeurs, tous les signes et les seuils ; il passe
 en Python normal et `-O`. En diagnostic facultatif sur le premier
 exécutable v9 `d2700314`, les quatre ordres d'IDs (identité, supports
 inversés, témoins d'abord, tout inversé) donnent chacun une tour K1..3,
-`q4_emitted=1` et 69 boules. Les digests diffèrent avec les IDs, comme
+`q4_emitted=1` et 69 boules, avec le **même digest par permutation**
+pour s8/10/12 × W1/W4. Les 24 appels passent en Release et sous Clang
+ASan/UBSan. Les digests diffèrent entre permutations d'IDs, comme
 attendu ; ce contrôle ne compare pas les forêts après recodage. Le JSON
 agrégé **n'identifie pas** à lui seul la BallKey q4 : ajouter la fixture
 au juge d'inventaire exhaustif et une mutation supprimant **cette clé**.

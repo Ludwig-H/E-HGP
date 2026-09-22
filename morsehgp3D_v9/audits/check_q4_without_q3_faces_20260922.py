@@ -92,26 +92,37 @@ def probe_pipeline(binary: Path, sites: list[Point]) -> dict[str, object]:
         for name, order in permutations.items():
             payload = Path(directory) / f"{name}.u32le"
             payload.write_bytes(b"".join(struct.pack("<III", *sites[j]) for j in order))
-            run = subprocess.run(
-                [str(binary.resolve()), str(payload), "3", "1", "--s=8", "--grid=diagnostic_fixture"],
-                check=False, capture_output=True, text=True, timeout=60,
-            )
-            need(run.returncode == 0, f"v9 probe refused ({name}): {run.stderr} {run.stdout}")
-            data = json.loads(run.stdout)
-            need(data["status"] == "complete_relative" and data["options"]["run_tower"],
-                 f"v9 FULL status ({name})")
-            need(len(data["orders"]) == 3 and data["generator"]["q4_emitted"] > 0,
-                 f"v9 q4/full route ({name})")
-            results[name] = {
-                "q4_emitted": data["generator"]["q4_emitted"],
-                "balls": data["catalogue"]["balls"],
-                "tower_digest": data["tower_digest"],
-            }
+            reference: dict[str, object] | None = None
+            for s in (8, 10, 12):
+                for workers in (1, 4):
+                    run = subprocess.run(
+                        [str(binary.resolve()), str(payload), "3", str(workers),
+                         f"--s={s}", "--grid=diagnostic_fixture"],
+                        check=False, capture_output=True, text=True, timeout=60,
+                    )
+                    label = f"{name}/s{s}/W{workers}"
+                    need(run.returncode == 0, f"v9 probe refused ({label}): {run.stderr} {run.stdout}")
+                    data = json.loads(run.stdout)
+                    need(data["status"] == "complete_relative" and data["options"]["run_tower"],
+                         f"v9 FULL status ({label})")
+                    need(len(data["orders"]) == 3 and data["generator"]["q4_emitted"] > 0,
+                         f"v9 q4/full route ({label})")
+                    summary = {
+                        "q4_emitted": data["generator"]["q4_emitted"],
+                        "balls": data["catalogue"]["balls"],
+                        "tower_digest": data["tower_digest"],
+                    }
+                    if reference is None:
+                        reference = summary
+                    else:
+                        need(summary == reference, f"s/workers differential ({label})")
+            need(reference is not None, f"missing v9 route ({name})")
+            results[name] = reference
     need(len({item["q4_emitted"] for item in results.values()}) == 1,
          "q4 presentation count under permutations")
     need(len({item["balls"] for item in results.values()}) == 1,
          "catalogue size under permutations")
-    return results
+    return {"configurations_per_permutation": 6, "permutations": results}
 
 
 def main() -> None:

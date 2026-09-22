@@ -20,6 +20,16 @@ versionné depuis `3f0d188f`, mais ne qualifie que le flux q3/q4 CPU sur
 une seule trame, non la tour. Les modifications non commises du
 développeur restent hors de cette contrelecture ; aucune branche parasite créée.
 
+Le commit d'audit A `efc14c99` propose une sélection exacte des centres
+q4 peu profonds sur une droite de graine en `O(Km)` comparaisons, `m`
+étant le nombre de droites du cover. Son oracle local est publié ; la
+borne reste **par arête**, et si graines et droites sont toutes deux
+nombreuses, elle n'établit pas le sous-quadratique de la trame. La
+contrelecture indépendante de cette proposition continue. Son complément
+`2291da13` factorise la comparaison des racines par un déterminant
+entier signé de moins de 121 bits, au lieu du produit brut de 160 bits ;
+cela réduit la largeur de cette primitive, sans modifier le moteur.
+
 ## Lecture prioritaire
 
 1. [Audit initial v8, héritage et architecture q3/q4](AUDIT_INITIAL_V8_20260922.md).
@@ -73,6 +83,24 @@ développeur restent hors de cette contrelecture ; aucune branche parasite cré�
   a une q4 valable et **quatre faces q3 rejetées** ; son oracle exact
   passe et le probe émet une q4 sous quatre permutations d'IDs. Elle
   doit entrer dans la porte d'inventaire et un mutant de clé omise.
+- Le [contre-audit u18/sonde](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_U18_ET_SONDE_20260922.md)
+  vérifie en C++ O2 et sous ASan/UBSan une fixture de plateau dont un
+  produit dépasse int128 signé ; S192 la traite. Les bornes générales
+  du port attendent toujours une porte arithmétique dédiée. Le lanceur
+  accepte `K=2^32+1` en le tronquant à K1 et imprime `--grid` sans
+  échappement JSON : corriger avant tout reçu contractuel automatisé.
+- Le [contre-audit de résidence](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_RESIDENCE_CHAINE_20260922.md)
+  relève `224P` octets de capacités simultanées pour les présentations,
+  un cache temporel par défaut de **24 Gio à 30 M sites** et au moins
+  **6,48 Go** de sortie K1 explicite à cette taille. Le cache est
+  rescanné à chaque K>1 ; ses octets ne sont pas publiés par le probe.
+  Au pic analytique après K1 et avant K2, cache présent, un plancher
+  simultané est **43,05 Go + 248B** (`B` clés distinctes), sans overhead
+  d'allocateur. La construction K1 impose aussi au moins **trois petites
+  allocations par site** au fil de l'appel. Ce sont des planchers de
+  format/capacité LP64, pas des mesures de RSS ni des temps extrapolés
+  sur G4 ; le cache est libéré avant la publication finale, donc ne
+  s'additionne pas mécaniquement à ses 6,48 Go.
 - Le banc publié à l'ouverture v9 juge **v8** : 129 CTests exécutés et
   verts sur 132 enregistrés, trois désactivés. Son `SHA256SUMS` référence
   quatre journaux `logs/*.log` absents du commit `3595725a` ; un clone
