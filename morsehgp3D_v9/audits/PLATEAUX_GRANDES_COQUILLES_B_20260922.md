@@ -258,3 +258,36 @@ une borne prouvée pour un code ni une borne globale en nombre de points :
 largeurs arithmétiques, construction exacte des adjacences, population
 des coquilles et découverte des BallKey restent à qualifier. Une grande
 coquille de taille proportionnelle à `n` peut encore coûter `Ω(n²)`.
+
+**Suivi du commit `8054540c`.** La [contrelecture A](CONTRE_AUDIT_A_MATH_MOTEUR_20260922.md)
+factorise les normales des plans de `q_min=3` en u18, bornées en i128,
+et publie un [oracle ciblé](check_qmin_planes_u18_20260922.py) passé
+avec et sans `-O` (quatre fixtures et 755 sous-coquilles sans antipodes).
+Cela ferme une partie du calcul de `q_min` sous présentation positive,
+mais **pas** les prédicats ni les largeurs de l'arrangement des grands
+cercles, les composantes ou le catalogue FULL.
+
+**Gate du tri circulaire, distinct de l'identité de plans.** Poser
+`w_i=2A(p_i−c)` et `N_ij=w_i×(p_j−p_i)` pour les intersections du grand
+cercle de `i`. L'identité exacte
+`N_ij×N_ik=D w_i`, où `D=N_ij·(p_k−p_i)`, évite de matérialiser le
+produit vectoriel potentiellement plus large que `D`. Mais si le tri
+projette les normales sur les deux coordonnées restantes **dans l'ordre
+croissant** après suppression de l'axe `r` (`w_i[r]≠0`), son déterminant
+orienté vaut `(-1)^r D w_i[r]` : l'axe `r=1` **inverse le signe**.
+Fixture entière sur une sphère unité : `c=(1,1,1)`,
+`p_i=(1,2,1)`, `p_j=(2,1,1)`, `p_k=(1,1,2)`, `A=1` donnent
+`w_i=(0,2,0)`, `N_ij=(0,0,-2)`, `N_ik=(2,0,0)`, `D=-2`, mais le
+déterminant projeté en `(x,z)` vaut `+4`. Une convention cyclique
+d'axes est possible, à condition de la fixer et de la tester.
+
+Même avec ce signe corrigé, un déterminant relatif ne définit **pas**
+un ordre total autour de `2π`. Le comparateur doit d'abord classer les
+deux demi-plans dans le plan orienté, puis employer ce déterminant pour
+les rayons dans une même moitié. `D=0` exige de séparer rayon identique,
+rayon antipodal et intersection multiple, après exclusion des normales
+nulles des cercles coïncidents. Le contrôle local d'identité algébrique
+ne constitue donc pas un gate de tri ou de DCEL : imposer des tests
+`r=0,1,2`, changement de demi-plan, `D=0` dans ses deux sens,
+coïncidences et intersections multiples, puis comparer l'ordre et les
+adjacences à un oracle exact borné.

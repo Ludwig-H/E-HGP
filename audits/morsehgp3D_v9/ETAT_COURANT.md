@@ -8,11 +8,13 @@ la contrelecture vit dans [morsehgp3D_v9/audits](../../morsehgp3D_v9/audits/CONT
 Aucun GCP lancé pour cet audit.
 `origin/main` a d'abord avancé de 13 commits d'audit v8 jusqu'à `12294241`,
 puis de l'ouverture v9 `3595725a` jusqu'à `c5ba6e7f`, qui a intégré les
-contre-audits A, amendé le plan et publié la tranche u18 v8. Ces commits
+contre-audits A, amendé le plan et publié la tranche u18 v8. Au commit
+`d2700314`, arrivé pendant notre contrelecture, un **premier moteur v9**
+générateur → catalogue recoupé → tour FULL a été publié. Ces commits
 ont été relus sans fusion
 dans le worktree partagé, toujours chargé de modifications
 constructeur/auditeurs. Ils contiennent des documents, tests et reçus v8,
-et emplacements réservés, **aucun moteur v9**. Le `main` local reste
+et désormais du code v9. Le `main` local reste
 à `a74e90f2` dans ce worktree partagé. Le reçu 1 mm est désormais
 versionné depuis `3f0d188f`, mais ne qualifie que le flux q3/q4 CPU sur
 une seule trame, non la tour. Les modifications non commises du
@@ -50,6 +52,22 @@ développeur restent hors de cette contrelecture ; aucune branche parasite cré�
 - Ni tour FULL v8, ni catalogue canonique global, ni GPU v8, ni preuve de
   croissance sous-quadratique LiDAR, ni contrat G4 ne sont acquis. La voie
   float32 q3 globale non suivie est un chantier à qualifier, pas q4/FULL.
+- La première chaîne v9 `d2700314` relie effectivement les trois voies au
+  catalogue et à FULL, avec refus explicite pour une coquille de plus de
+  12 sites. Un essai **exploratoire sans reçu** sur 08/000000 sans sol à
+  1 mm/K5/W8 rapporte environ 131 s mur, dont 117 s q3/q4 et 11 s FULL,
+  1 306 696 boules et coquille maximale 5. C'est un changement de statut
+  fonctionnel important, **pas** une qualification des contrats.
+- Le [contre-audit FULL B](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_FULL_COUTS_ET_INTERFACES_20260922.md)
+  relève les coûts hérités `2^u`, l'intrus global et les tableaux de
+  résolutions, toujours présents dans le port v9. Le recoupement certifie
+  les boules **émises**, pas l'absence de clés omises. Le juge T2 utilise
+  `run_tower=false` puis appelle la tour directement : tester le chemin
+  public `run_tower=true` et son digest reste une porte à ajouter.
+  Notre rejeu indépendant du commit `d2700314` a compilé en Release et
+  passé les **20/20 CTests** ; le probe public K1..5 sur un préfixe de
+  10 sites a donné un digest identique pour s8/10/12 et W1/W4, sans q4.
+  C'est un diagnostic de raccord, non une trame qualifiée ni un oracle.
 - Le banc publié à l'ouverture v9 juge **v8** : 129 CTests exécutés et
   verts sur 132 enregistrés, trois désactivés. Son `SHA256SUMS` référence
   quatre journaux `logs/*.log` absents du commit `3595725a` ; un clone
