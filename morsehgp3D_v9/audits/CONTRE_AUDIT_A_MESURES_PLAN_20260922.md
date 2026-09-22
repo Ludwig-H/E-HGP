@@ -139,13 +139,67 @@ graver un extrait du vrai JUnit, puis refaire une capture **R3** depuis des
 sources gelées. Les R2 restent des essais échoués ; la v9 peut porter le
 code en le requalifiant, pas hériter d'un PASS inexistant.
 
-La [carte d'héritage v9](../docs/HERITAGE_V7_V8.md) et la
-[passation](../PASSATION.md) figent encore la v8 à `a74e90f2` et décrivent
-les gardes de fabrique u18, la porte de domaine et `saturate_deep` comme
-non commis. Conserver `a74e90f2` pour le **chemin mesuré d'origine**, mais
-ajouter `3f0d188f` comme pin distinct des gardes de domaine, du résultat
-« fragment exact ou certificat terminal » et de leurs tests. L'option
-`saturate_deep=false` du reçu 1 mm ne mesure aucun gain de cette option.
-La synthèse et la passation v9 doivent aussi corriger leurs mentions
-« non commis/non suivi » ; aucune de ces corrections documentaires ne
-promet un résultat FULL ou G4.
+Au premier moteur v9 `d2700314`, la [provenance du
+port](../docs/PROVENANCE.md) épingle **`3f0d188f`** pour les sources du
+générateur : cette demande d'identification est satisfaite au raccord.
+La [carte d'héritage](../docs/HERITAGE_V7_V8.md) garde toutefois des lignes
+et un paragraphe « non commise » à `a74e90f2` ; les actualiser ou les
+marquer explicitement comme photographie de l'ouverture. Conserver
+`a74e90f2` pour le **chemin mesuré d'origine** ; `saturate_deep=false`
+dans son reçu 1 mm ne mesure aucun gain de cette option. Ni le nouveau
+pin ni une correction documentaire ne promettent FULL ou G4.
+
+## 4. Premier moteur `d2700314` : publier le travail déjà calculé
+
+La [passation actuelle](../PASSATION.md) rapporte un premier FULL
+08/000000 sans sol 1 mm, 39 885 sites, K5/W8 : 131 s mur, 834 CPU·s,
+1,06 Go RSS, 1 306 696 boules, 117 s q3/q4 et 11 s FULL. Elle le dit
+**exploratoire, sans reçu** sur hôte chargé. Ce chiffre établit un ordre
+de priorité, pas une régression contre les 104,63 s v8 : ce dernier
+appel produisait un digest de flux q3/q4, tandis que la chaîne v9
+matérialise toutes les `Presentation` dans son callback et construit
+catalogue et tour. Une comparaison appariée doit garder même entrée,
+masque, grille, K, s, workers, type de sortie et code épinglé.
+
+Le générateur rend déjà `r34.pipeline.front.work`,
+`r34.pipeline.work`, `r34.parallel`, `r34.tasks` et
+`r34.worker_timings` (`src/gen/pipeline/wspd_q34.hpp:75–94,170–204`).
+`src/chain/tower_chain.cpp:274–279` n'en copie que
+`expanded_pairs`, `cover_builds`, `q3_emitted`, `q4_emitted` ;
+la sonde ne peut donc pas expliquer les 117 s. Une tranche compacte du
+premier reçu, **sans nouveau calcul géométrique**, doit garder :
+
+- les masses résiduelles du front **q3 indice 1** et **q4 indice 2**
+  séparées (elles se chevauchent, ne pas les sommer), les arêtes actives,
+  le cover et ses sites ;
+- les tests de témoins, graines et census q3, `q3_atlas.locations`,
+  `rejections`, `root_lane_skips`, puis cellules, bornes de blocs,
+  tests ponctuels et copies d'IDs de `local.atlas.partition`, événements
+  de `local.sweep` et `q4_seed_cells.whole_atlas_skips` ;
+- `parallel.started_workers`, tâches publiées/consommées/refusées,
+  et pour chaque slot `worker_timings.wall_ns/cpu_ns/wait_ns`.
+  Comparer `sum(worker_cpu)/q34_wall` à W pour détecter une faible
+  occupation ; les attentes ne couvrent que la condition variable.
+  Ces durées de boucle worker n'incluent pas tout le préfixe ni la
+  réduction finale et leurs sommes ne se soustraient pas au mur.
+
+Ces compteurs attribuent **le volume de travail**, pas des secondes à
+chaque sous-poste. Si le reçu confirme le verrou, une exécution
+diagnostique distincte peut chronométrer les blocs témoin, cover,
+atlas, q3, balayage q4 et callback, puis vérifier le même
+catalogue/digest que la mesure contractuelle sans instrumentation.
+Publier séparément `merge_ms`, `census_ms`, `tower_ms` et le coût du
+résumé/digest après `tower_ms` (inclus dans `chain_total_ms`).
+`chain_total_ms` inclut bien la destruction des temporaires du
+`try` ; il ne faut pas lui attribuer un trou fictif de libération.
+
+La fusion `tower_chain.cpp:220–295` garde les présentations par worker,
+réserve ensuite `all` à leur nombre total, copie tout avant de libérer
+les slots, puis trie. La double capacité transitoire est certaine ;
+le temps et le pic RSS de cette étape doivent précéder une refonte en
+runs triés/fusion, car q3/q4 domine aujourd'hui. Enfin,
+`bench/tower_probe.cpp` accepte `--n=prefix` mais n'inscrit pas ce
+paramètre ni la taille source dans le JSON ; pour un reçu **trame entière**,
+publier `source_sites`, `selected_sites`, `truncated=false` et le
+manifeste d'entrée. `--grid=1mm` n'est qu'un libellé fourni par
+l'appelant, pas un certificat de préparation.

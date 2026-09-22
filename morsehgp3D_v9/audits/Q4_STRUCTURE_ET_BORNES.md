@@ -1,8 +1,9 @@
 # Audit v8 → v9 : q4 par boules minimales locales certifiées
 
-22 septembre 2026. Moteur v8 lu à `a74e90f2`, ouverture v9 `3595725a`.
-Audit mathématique et architectural, **aucun moteur v9 ni
-chrono v9 qualifié**. Le [jalon de temps v9](https://github.com/Ludwig-H/E-HGP/blob/3595725a/morsehgp3D_v9/docs/AUDIT_V8_SYNTHESE.md)
+22 septembre 2026. Moteur v8 lu à `a74e90f2`, ouverture v9 `3595725a` ;
+premier moteur v9 `d2700314` relu ensuite. Audit mathématique et
+architectural, **aucun chrono v9 qualifié** : le premier essai FULL de la
+passation reste exploratoire sans reçu. Le [jalon de temps v9](https://github.com/Ludwig-H/E-HGP/blob/3595725a/morsehgp3D_v9/docs/AUDIT_V8_SYNTHESE.md)
 vise d'abord les trames LiDAR entières sans sol en u18/1 mm. La trame brute
 entière reste une obligation distincte, dont la portée temporelle v9 est à
 préciser ; float32 reste le défaut d'entrée antérieur, son développement
@@ -72,6 +73,24 @@ cause, et l'intersection avec q3 n'est pas publiée. Instrumenter une table
 par masque `q4_seul/q3+q4` × cause `Outside/Deep/aucune_droite/Leaf`
 avant d'attribuer un gain au préfiltre.
 
+Une porte moins coûteuse à tester est **l'existence d'une seule graine**
+`abx` strictement aiguë et possédée par `ab`, après le filtre de témoins
+de paire mais **avant** `Q34EdgeCover::make`. Les prédicats entiers
+`spatial_pass`/`seed_pass` de `q4_local.cpp:595–629` fournissent la base
+d'un parcours d'index avec arrêt au premier témoin, sans atlas ni liste
+de graines. Si aucune graine n'existe, la voie q3 ne peut rien émettre ;
+la voie q4 non plus, par le lemme de la complétion aiguë ci-dessous. Le
+cover partagé peut alors être omis pour cette arête. Si une graine existe,
+le prétest est du travail supplémentaire : le mesurer en mode *shadow*
+sur un échantillon stratifié avant d'en faire un défaut. Croiser masques
+q3/q4, absence de graine, absence de feuille q4, coût du prétest et
+`440 194 038` visites de construction de cover du reçu 1 mm. La
+[contrelecture B](CONTRE_AUDIT_B_PREATLAS_ET_Q3_20260922.md) montre aussi
+qu'un rejet `NoQ4Seed` **dans** l'atlas doit garder q3 et ses certificats
+Z, ou payer leur repli : `153 036 427` graines q3 furent rejetées grâce
+à cet atlas dans le reçu. Le filtre `X×C` ne doit pas matérialiser comme
+entrée les seules `9 550 974` graines q4 comptées **après** atlas.
+
 Pour q4, la condition « graine possible » est justifiée : si `ab` est
 l'arête propriétaire maximale d'un tétraèdre **strictement positif**, au
 moins une de ses deux complétions est hors de la boule diamétrale fermée de
@@ -135,6 +154,142 @@ borne de sortie pour la sous-famille positive du modèle HGP
 ([Erickson, construction de référence](https://arxiv.org/abs/cs/0103017)).
 Les cellules C proposées ci-dessous sont des **boîtes de calcul créées à la
 demande**, et non les cellules combinatoires de ce diagramme.
+
+### Une borne linéaire pour les centres q4 peu profonds d'une arête
+
+Fixer une arête `ab` avec son `Q34EdgeCover` **complet pour les centres
+admissibles**, puis grouper les formes non constantes `L_z=0` du cover
+par **droite géométrique** ; soit `m` le nombre de droites distinctes.
+Les formes toujours négatives ajoutent `p₀` au compte, celles toujours
+nulles sont des contacts et les positives ne contribuent pas. Un centre
+q4 strictement positif appartient à l'intersection de deux droites
+indépendantes. À la tour K, les centres conservés ont au plus
+`d=K−3−p₀` autres intérieurs stricts ; si `d<0`, il n'y en a aucun.
+
+Sur une droite `λ`, prendre les deux intersections extrêmes de profondeur
+au plus `d`. Toute autre droite qui coupe `λ` entre elles a un demi-plan
+strictement négatif contenant au moins une extrémité. Il y a donc au
+plus `2d` croisements intérieurs distincts, et au plus `2d+2`
+intersections peu profondes sur `λ`. Un sommet appartient à au moins
+deux droites : le nombre de **centres distincts** peu profonds est donc
+au plus `m(d+1)≤m(K−2)`. La [borne publiée pour les demi-plans en
+position générale](https://www.math.tau.ac.il/~michas/k_depth.pdf)
+(Har-Peled et Sharir, 2016, lemme 2.5) suit ce comptage ; ici les
+parallèles, concurrences et droites coïncidentes se traitent en comptant
+les croisements distincts et la multiplicité des sites dans la
+profondeur. Les contacts restent de profondeur zéro sur leur droite.
+
+On peut réduire les **droites parcourues** sans perdre la deuxième
+complétion obtuse : soit `s` le nombre de droites distinctes portant au
+moins une graine `abx` aiguë et possédée. Toute q4 positive de propriétaire
+`ab` en possède au moins une. Il suffit d'énumérer les sommets peu
+profonds **sur ces s droites**, mais de les croiser avec **toutes les m
+droites** du cover. Avant dédoublonnage, cela donne le plafond local
+`s(2d+2)` en plus du plafond symétrique `m(d+1)`. Si `s=0`, l'arête est
+rejetable avant atlas ; restreindre également les croisements aux seules
+graines aiguës serait faux. Il s'agit de graines **géométriquement
+possibles avant le census q3**, non des triangles q3 acceptés : la
+[fixture B](CONTRE_AUDIT_B_PREATLAS_ET_Q3_20260922.md) possède une q4
+admise alors que ses quatre faces q3 sont rejetées.
+
+**Sélection sans arrangement quadratique sur une droite.** Paramétrer une
+droite de graine `λ` par `t` croissant. Chaque forme du cover y devient
+`f_z(t)=α_z t+β_z`. Les constantes négatives ajoutent `p_λ` à la
+profondeur ; les constantes nulles restent des contacts. Pour `α_z≠0`,
+l'événement exact est `τ_z=−β_z/α_z`. À un événement `t₀`, les intérieurs
+variables sont exactement les formes `α_z>0, τ_z>t₀` et
+`α_z<0, τ_z<t₀`, avec multiplicité de sites, tandis que les égalités
+restent sur la coquille. Poser `d_λ=K−3−p_λ` ; si `d_λ<0`, aucune boule q4
+utile ne se trouve sur cette droite. Si un événement de profondeur
+au plus `d_λ` porte une pente positive, il appartient nécessairement aux
+`d_λ+1` **plus grands τ distincts** des pentes positives ; sinon il porte
+une pente négative et appartient aux `d_λ+1` **plus petits τ distincts**
+des pentes négatives. En effet, `d_λ+1` événements plus lointains du bon
+signe imposeraient déjà plus de `d_λ` sites intérieurs. Il suffit donc de
+retenir au plus `2d_λ+2` valeurs candidates, puis de recalculer leur
+profondeur exacte et leurs contacts. Les valeurs égales sont groupées,
+mais leurs sites sont tous comptés ; cette preuve accepte concurrences,
+droites coïncidentes et signes opposés.
+
+Après regroupement exact des `m` droites et de leurs multiplicités, des
+buffers top/bottom de taille `O(K)` sélectionnent ces valeurs en
+`O(Km)` comparaisons rationnelles par droite de graine ; les `O(K)` scans
+de profondeur coûtent aussi `O(Km)`. La largeur du comparateur est
+bornable dans le domaine de `Q4LocalGeometry::form` : ses coefficients
+vérifient `|constant|<2^40`, `|x|,|y|<2^39`. Pour la droite de graine
+`c₀+x₀u+y₀v=0` avec `y₀≠0`, prendre `t=u`. La forme restreinte vaut
+`(α_z t+β_z)/y₀`, où `α_z=x_z y₀−y_z x₀` et
+`β_z=c_z y₀−y_z c₀` ; `|α_z|<2^79`, `|β_z|<2^80`.
+La différence de deux produits croisés de racines a valeur absolue
+`<2^160` : un entier signé **192 bits** suffit, i128 ne suffit pas
+par cette preuve. Si `y₀=0`, paramétrer par `v` en échangeant les axes.
+Le signe de pente est celui de `α_z/y₀`, pas de `α_z` seul lorsque
+`y₀<0`. Les groupes de racines égales et le cas `α_z=0` doivent être
+traités explicitement. Une même droite géométrique peut porter des
+formes proportionnelles **de signes opposés** : conserver les IDs et
+multiplicités des deux orientations, plutôt qu'un seul représentant
+signé. Sur `s` droites de graines,
+le coût pessimiste demeure `O(sKm)` plus regroupement, census, MEB et
+catalogue : aucun sous-quadratique global n'en découle si `s≈m`.
+Cette route évite toutefois le tri `m log m` sur chaque droite et la
+construction explicite de toutes les intersections de l'arrangement.
+Elle examine encore les `m` droites pour chacune des `s` graines. Mesurer
+`m`, `s`,
+événements retenus, contacts, centres positifs, coûts de sélection et de
+census sur les arêtes LiDAR avant d'en faire un défaut. L'[oracle de
+sélection](check_q4_shallow_lines_20260922.py) confronte les valeurs
+retenues à toutes les intersections sur **7 210 cas** exacts, avec
+coïncidences et signes opposés ; elle contrôle 500 restrictions de formes
+u18 et un sommet propriétaire aigu qui n'est pas une miniballe. Les
+deux modes Python normal et `-O` doivent rendre le même PASS.
+
+Cette borne est **locale et combinatoire**, pas un algorithme
+`O(Km)` déjà construit. Les présentations de support sur une grande
+coquille et le coût de découverte des sommets restent ouverts. Sous une
+couverture complète des arêtes propriétaires, une route pour la voie q4
+consiste à énumérer **une fois**
+les sommets peu profonds de l'arrangement d'une arête propriétaire,
+choisir à chaque sommet deux droites incidentes indépendantes pour
+reconstruire la BallKey, puis faire le census global I/U. La clé n'est
+admissible que si le centre appartient à `conv(U)` : c'est le critère de
+miniballe des contacts, vérifiable exactement, et non une conséquence de
+la profondeur. Calculer ensuite `q_min`, garder la fenêtre de rang
+`p+q_min−1≤Kmax` et dédupliquer les clés. Toute boule utile de `q_min=4`
+possède un tétraèdre positif, donc une arête propriétaire dont les deux
+contacts restants donnent bien deux droites indépendantes. Les voies
+q2/q3 conservent leurs objets propres. La paire de droites choisie peut
+ne pas être un support positif ; elle sert à construire **une clé à
+certifier**, jamais à publier directement une boule.
+
+La condition `c∈conv(U)` est indispensable même avec arête maximale et
+graine aiguë. Fixture entière : `a=(8,5,1)`, `b=(9,5,8)`,
+`x=(8,1,5)`, `y=(9,2,5)`. Ces quatre points non coplanaires sont sur
+la sphère de centre `c=(5,5,5)`, rayon 5 ; `|ab|²=50` est strictement la
+plus grande distance, `abx` est aigu (`(a−x)·(b−x)=4>0`), et les deux
+droites de contact de `x,y` se coupent en `c` avec profondeur zéro.
+Pourtant tous les contacts ont première coordonnée ≥8, donc
+`c∉conv(U)` : cette sphère n'est la miniballe d'aucun support. Un
+émetteur « un sommet peu profond = une boule » ajouterait une fausse
+BallKey. Le test convexe peut partager le calcul du futur quotient de
+grande coquille ; une simple boîte englobante ne suffit pas.
+L'[oracle entier local](check_qmin_planes_u18_20260922.py) vérifie cette
+fixture et la sous-coquille q4 u12 à trois parents K10. Il ne construit
+pas l'arrangement ni un générateur de tour.
+
+L'objet de sortie prometteur est donc le **centre peu profond canonique
+certifié**, avec profondeur exacte et droites incidentes, plutôt que
+chaque paire de complétions `(x,y)` : dédupliquer la BallKey, puis payer
+le census global I/U une fois par clé et le quotient local des grandes
+coquilles.
+Retrouver toutes les incidences et payer ce census sont des obligations
+comptables, pas des coûts supprimés par la borne. Sur la
+ligne 1 mm, `Σ cover_sites` q4 vaut `2 778 563 938` pour `1 872 168`
+arêtes : à K5, la borne agrégée `3Σm≤8,336` milliards est encore trop
+lâche pour annoncer une seconde ou une croissance sous-quadratique.
+Comparer, sur les mêmes arêtes échantillonnées, `m`, centres peu profonds
+exacts, centres positifs possédés, temps d'énumération et les
+`11,433` milliards de visites de l'atlas ; une construction complète
+de l'arrangement en `m²` déplacerait simplement le coût.
 
 ## Certificat local de rayon : proposition v9 exacte
 

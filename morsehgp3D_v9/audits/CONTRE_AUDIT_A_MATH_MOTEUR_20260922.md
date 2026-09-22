@@ -1,6 +1,6 @@
 # Contre-audit A — mathématiques et moteur de l'ouverture v9
 
-22 septembre 2026. Ouverture jugée : `3595725ae3352ab67dced716e33e8f7705372a2c` ; code v8 publié à `a74e90f22167105cdba90b6850f0597f1a01a329` (identique à `12294241` pour `morsehgp3D_v8/src/`). Lecture seule du code, calculs entiers indépendants en Python ; **aucun CTest, sanitizer, TSan, benchmark ni GCP exécuté par cet audit**. Les modifications de reprise u18, alors non commises, ont depuis été publiées à `3f0d188f` ; leurs reçus R2 restent en échec. Ce rapport répond au Lot 1 de la [question du développeur](QUESTION_CLAUDE_CONTRE_AUDIT_OUVERTURE_20260922.md) et se limite aux points dont la correction peut être jugée.
+22 septembre 2026. Ouverture jugée : `3595725ae3352ab67dced716e33e8f7705372a2c` ; code v8 publié à `a74e90f22167105cdba90b6850f0597f1a01a329` (identique à `12294241` pour `morsehgp3D_v8/src/`). Lecture du code et calculs entiers indépendants en Python ; la première passe n'avait exécuté ni CTest ni benchmark. Le **suivi du moteur v9 `d2700314`** et ses rejeux ciblés figurent au § 5 ; aucun sanitizer, TSan, essai GCP ni benchmark de contrat n'est revendiqué. Les modifications de reprise u18, alors non commises, ont depuis été publiées à `3f0d188f` ; leurs reçus R2 restent en échec. Ce rapport répond au Lot 1 de la [question du développeur](QUESTION_CLAUDE_CONTRE_AUDIT_OUVERTURE_20260922.md) et se limite aux points dont la correction peut être jugée.
 
 ## 1. P0 — le raccord FULL ne peut pas garder ses gardes u16
 
@@ -72,6 +72,67 @@ antipodes d'une sphère entière à 30 sites. Il teste aussi les largeurs u18
 ci-dessus. C'est un gate local reproductible, pas un test du quotient FULL
 ni une qualification des grandes coquilles du moteur.
 
+Le même calcul borne une opération manquante de la cible d'arrangement B.
+Sur le grand cercle de normal `w_i`, ses sommets orientés sont les rayons
+`±N_ij` pour les `j` non parallèles. Pour deux sommets de référence,
+`N_ij×N_ik = D_ijk w_i`, où
+`D_ijk=N_ij·(p_k−p_i)=w_i·((p_j−p_i)×(p_k−p_i))`.
+Le signe de l'ordre circulaire, après choix d'une projection par une
+composante non nulle de `w_i`, se déduit donc du signe de `D_ijk` et de
+celui de cette composante ; `|D_ijk|≤504M⁷<2^135`, donc i192 suffit.
+Il n'est pas nécessaire de former le produit `N_ij×N_ik`, potentiellement
+plus large. Si `D_ijk=0`, regrouper les directions égales et distinguer
+leur antipode par les signes des composantes de `N`. L'oracle vérifie
+756 fois l'identité entière, dont le centre demi-entier, mais ne construit
+pas les adjacences DCEL.
+
+Pour initialiser les signes d'une région près d'un sommet `n=±N_ab`,
+prendre symboliquement `n+εe_x+ε²e_y+ε³e_z` avec `ε>0` assez petit.
+Le signe de chaque site est celui du premier coefficient non nul de
+`(n·w_i,w_{i,x},w_{i,y},w_{i,z})` ; il en existe un car `w_i≠0`.
+Le premier produit, s'il est non nul, a le signe de
+`±N_ab·(p_i−p_a)` ; calculer ce déterminant en i192 **sans former**
+`n·w_i=±2A·N_ab·(p_i−p_a)`, qui peut être plus large. Ce procédé évite
+un témoin flottant, mais la face choisie doit encore être raccordée
+correctement aux demi-arêtes de la DCEL, surtout aux intersections
+multiples et au cas d'un seul cercle.
+
+Trois fixtures entières de [l'oracle archivé](check_qmin_planes_u18_20260922.py)
+isolent les portes du port FULL :
+
+- Coquille **mixte u13**, centre `(5,5,5)`, `R²=25`, douze sites du
+  cercle entier `dx²+dy²=25` et un pôle nord. Une seule BallKey
+  `(A=1,B=(-10,-10,-10),C=50)` a six supports q2, quarante supports q3,
+  `q_min=2` et `p=0`. À K7, douze facettes strictes sont isolées avant
+  `R`, aucune coface K8 n'est stricte ; la fermeture doit avoir douze
+  parents pré-lot, puis K8 naît au même rayon et couvre les 13 sites.
+  Ajouter le centre comme 14e point donne `p=1` et décale ce juge à
+  K8/K9.
+- Coquille **q4 u13**, centre `(10,10,10)`, `R²=75`, décalages codés dans
+  le script. Une seule clé `(1,(-20,-20,-20),225)` a 60 supports q4
+  positifs, aucun q2/q3, `q_min=4`. À K10 il y a 32 facettes strictes
+  **mais trois cofaces K11 strictes**, donc deux composantes de tailles
+  31 et 1 avant `R`, puis une fusion à **deux** parents. Les normales
+  entières `(6,8,-3)`, `(8,5,-4)`, `(2,-1,2)` certifient les trois
+  cofaces ; compter les facettes sans leurs cofaces donnerait un faux
+  quotient à 32 parents.
+- Coquille **u17**, centre `(65,65,65)`, `R²=4225`, huit paires
+  antipodales équatoriales et un pôle nord. Sa clé
+  `(1,(-130,-130,-130),8450)` a huit supports q2, 112 q3, et seize
+  facettes strictes K9 sans coface K10. Elle exige un représentant et
+  une contribution au-delà du masque `u16` de
+  `full_coverage_certificate.hpp:57,85`, pas seulement la suppression
+  du plafond `ShellTable` à 12.
+
+L'oracle T2 v7 accepte `n≤14` (`census_tower_oracle.hpp:17`) : les deux
+nuages u13 et la variante n14 peuvent donc juger **l'inventaire complet**
+des clés, populations I/U, niveaux et coupes ouvertes/fermées de la tour,
+après port de leur catalogue au-delà du plafond v7. Le nuage u17 demande
+un oracle local exact distinct. Tant que la représentation refuse ces
+domaines, le refus doit être transactionnel avant publication de la tour.
+Le script contrôle supports et sous-ensembles stricts ; il ne prétend
+pas exécuter T2 ni FULL.
+
 ## 2. P0 positif — le rejet q3 par l'atlas est correct, avec une prémisse à expliciter
 
 Le [certificat publié](../../morsehgp3D_v8/docs/Q3_CERTIFICAT_ATLAS_20260921.md) (`0948d2d0`) et `q4_local_partition.cpp:303–361` établissent sur **chaque cellule fermée** C un compte de sites certifiés strictement intérieurs à toutes les boules de centre C : borne supérieure de la forme `<0`, nœuds spatiaux disjoints, compte transmis aux enfants ; les égalités restent dans la frontière. Les budgets n'effacent aucun bloc ambigu. `q4_local.cpp:228–249` renvoie ce minorant pour une cellule contenant le centre, et **aucun certificat** pour `Outside` ou hors racine. `wspd_q34.cpp:535–559` ne rejette la graine q3 qu'à `inside_count≥K−1`, seuil exact de cette voie. L'ancien arrêt profond q4 à `K−2` ne suffit pas à rejeter q3 ; le code publié ne fait pas cette substitution. La reprise [désormais publiée](../../morsehgp3D_v8/docs/REPRISE_U18_ET_ATLAS_SATURANT_20260922.md) choisit un certificat terminal distinct au seuil `K−1`, option désactivée par défaut. Ne jamais publier son préfixe comme fragment complet ni additionner `saturation_work.prefixes` à `work.partition.prefixes` : c'est un sous-ensemble.
@@ -110,3 +171,54 @@ python3 -B -O morsehgp3D_v9/audits/check_u18_bounds_20260922.py
 Les deux exécutions rendent le même JSON : `{"explicit_u18_bounds":16,"q3_center_fixture_bits":[112,113,114],"simple_comment_bounds":42,"source_hashes":12,"status":"PASS","v7_pin":"dc57ffd5","v8_pin":"a74e90f2"}`. Le script sort avec code non nul dès qu'un hash, une borne ou un décompte change ; le mode `-O` ne désactive aucun contrôle.
 
 Empreintes SHA-256 de `git show a74e90f2:<chemin>` : `src/lanes/q4_local.cpp` `ebe0087c79d8`, `src/lanes/q4_local_partition.cpp` `210caaa63bd2`, `src/lanes/q4_local_partition.hpp` `6835f7712363`, `src/pipeline/wspd_q34.cpp` `79ae04fe5056`, `src/core/types.hpp` `dbe746853b3a`. Le constructeur FULL lu à `dc57ffd5` (`src/forest/full_ball_tower.hpp`) a pour SHA-256 `83f1c78e0656`. Le texte u18 publié à `a74e90f2` a pour SHA-256 `4b783c2bf839` ; il peut être corrigé sans changer ces observations sur le code gelé.
+
+## 5. Suivi du premier moteur v9 `d2700314` — recoupement positif, portes à fermer
+
+Le raccord réel `src/chain/tower_chain.cpp:299–413` reprend les points
+indispensables de § 1 : clé et niveau recalculés depuis un support par les
+formules de la tour, census exact de chaque clé **émise** sur l'index FULL,
+égalité du compte intérieur/de la coquille, puis `q_min` recalculé pour une
+coquille étendue. Le constructeur a porté les gardes de clé u18 et les
+produits du plateau en entier 192 bits. La forme q4 canonise son orientation
+avant la vérification `det>0` ; le tri des IDs du générateur n'introduit
+donc pas de faux rejet. Le census lit jusqu'à EOF si la profondeur est
+exactement celle déclarée et ne refuse que si elle la dépasse. Je n'ai
+pas trouvé de défaut mathématique concret dans ces chemins lus.
+
+Rejeu indépendant local d'un worktree détaché à `d2700314` : les **20/20
+CTests v9** passent sans échec ni saut ; aucun reçu n'est encore versionné.
+Avec les deux fixtures u13 de l'[oracle](check_qmin_planes_u18_20260922.py),
+le probe K10/s8/W1 répond code 3, `unsupported_degeneracy`,
+`chain_shell_above_12`, `shell_over_12=1`, `max_shell=13`,
+`balls=0` et `orders=[]`. Le refus est transactionnel, ce qui est la
+bonne réponse actuelle. Sur ce chemin, `by_qmin` est incomplet parce que
+le retour `shell>12` précède son calcul ; il ne faut pas lire
+`by_qmin[4]=0` comme une réfutation de la fixture q4.
+
+La sous-coquille des **douze premiers points** de la fixture q4 u13 donne
+une porte positive dans le domaine actuel. L'oracle entier y trouve
+51 tétraèdres positifs pour la même sphère, trois facettes strictes K10
+isolées et aucune coface stricte K11 : la fermeture doit fusionner
+**trois parents** à rayon² 75. Le probe public `run_tower=true`, K10,
+W1/W4 × s8/s10/s12, rend six fois code 0, 160 clés/boules,
+`by_qmin[4]=1`, dix ordres et le même digest
+`8abbcd26b2d2f92c`. À K10, il publie quatre nœuds, trois naissances,
+une fusion, trois parents et trois contributions. C'est une porte de
+régression utile pour q4 + égalité + parentage ; le digest identique seul
+ne remplace pas le juge d'inventaire et de Γ.
+
+La limite logique reste la **complétude du générateur** : revérifier
+toutes les clés présentes ne détecte pas une clé totalement absente
+sur un grand nuage. T2 compare un inventaire exhaustif à `n≤14`,
+ce qui borne et exerce cette obligation mais ne la démontre pas à
+39 885 sites. De plus, `tests/chain/chain_census_tower_gate.cpp`
+appelle `run_tower=false`, puis construit FULL directement du catalogue ;
+il ne juge pas l'objet publié par `run_tower_chain(...,run_tower=true)`.
+Ajouter à ce juge la fixture q4 u12 et comparer directement les ordres,
+parents, contributions et verticales de cet appel public à l'oracle.
+Les mutants `--mutant-assignment`, `--mutant-open` et
+`--mutant-adjacency` existent et meurent chacun avec code 1/cause T2
+attendue en exécution directe, mais `CMakeLists.txt:117–124` n'inscrit
+que `--mutant-census` : les trois autres doivent entrer dans CTest.
+Le port générateur et les extrêmes u18 ont encore besoin de leurs
+portes dédiées, sanitizers et TSan avant héritage.
