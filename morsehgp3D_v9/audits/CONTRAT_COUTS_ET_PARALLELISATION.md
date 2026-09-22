@@ -32,6 +32,22 @@ Le [protocole spatial brut](../../morsehgp3D_v8/receipts/q34_spatial_20260921/RE
 
 Le fil directeur v9 est le **certificat local k-Gabriel d'un support canonique et de sa boule minimale**, avec compte de témoins stricts et coquille complète. L'index global donne des blocs de témoins et le front filtre des familles ; il n'est pas un diagramme de Voronoï/Delaunay d'ordre supérieur à construire. Un certificat commun ne devient une tâche qu'en présence de candidats, puis se partage entre supports d'une même arête ou d'un même bloc ; un signe indécis se raffine exactement. C'est cette paresse et le nombre total de certificats réellement visités, plutôt que la seule parallélisation des anciennes boucles, qu'il faut confronter au seuil sous-quadratique dans les deux régimes LiDAR. Les liens d'incidence entre supports cosphériques restent conservés après regroupement des boules.
 
+Une **fixture entière u18**, compatible avec le profil de la v9, rend la
+barrière de sortie q2 directement testable. Pour `1≤i,j≤m`, poser
+`A_i=(4Li,8L²−i²,0)` et `B_j=(0,j²,4Lj)`, avec `2L²>m³` et toutes les
+coordonnées dans `[0,262143]`. Pour un autre `A_h`, la puissance dans la
+boule diamétrale de `A_iB_j` vaut
+`(h−i)[8L²(h−i)+(h+i)(h²+j²)]>0`; la formule symétrique vaut pour les
+autres `B_h`. Les `m²` paires croisées sont donc toutes des feuilles q2
+Gabriel strictes distinctes. À `m=40,L=179`, les 80 sites tiennent dans
+u18 (coordonnée maximale `256327`) et produisent **1600 feuilles q2** ;
+une vérification entière des `1600×78` puissances étrangères donne une
+marge minimale `9769`. C'est une porte de sortie sensible aux octets à
+ajouter au FULL, pas un modèle LiDAR ni une preuve d'asymptotique dans
+l'univers u18 fini. Elle complète la [famille rationnelle à précision
+croissante de la v7](../../morsehgp3D_v7/docs/CROISSANCE_ET_BORNE_DE_SORTIE.md),
+sans en transférer les hypothèses de régularité.
+
 ## Découpage intérieur proposé pour v9
 
 L'unité de travail persistante est un **contexte d'arête possédé** : identifiant de l'index immuable, paire d'IDs propriétaire, masque q3/q4, cover certifié et, si construit, atlas immuable. Les objets lourds ont une durée de vie liée au dernier descendant ; une tâche en file porte un handle de propriété, jamais un span vers la pile du créateur. Un mécanisme de fenêtres borne les arêtes parentes simultanément résidentes ; la taille de la fenêtre n'est ni un quota géométrique ni un plafond de sorties.

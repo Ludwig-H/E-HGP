@@ -44,6 +44,51 @@ G4 W48 pour le flux q3/q4, avec occupation moyenne 4,19/11,13/1,93 CPU
 logiques. Ces nombres ne sont pas des mesures GPU et ne portent pas FULL.
 Un partage de file ne peut pas, à lui seul, effacer les milliards de tests.
 
+### Certifier les graines **avant** de partitionner les témoins Z
+
+La [piste v8 graines × cellules](../../morsehgp3D_v8/docs/Q4_BLOCS_SEEDS_PISTE_20260921.md)
+propose un rejet exact de produits `X×C`, mais le moteur construit aujourd'hui
+le fragment Z de chaque cellule dans `Q4LocalAtlas::Impl::build` **avant** que
+`Q4SeedCellEngine::joined` consulte ces produits. Elle ne peut donc pas
+économiser la construction de l'atlas, poste dominant du reçu 1 mm. Une
+expérience v9 distincte consiste à tester, sur la cellule fermée **avant**
+`Q4LocalFragment::child`, si une droite de graine peut la traverser. Pour un
+bloc de graines possibles X, les bornes existantes de `node_bounds(X,C)`
+autorisent le rejet seulement si `min L_x(C)>0` pour **tous** les x de X ou
+`max L_x(C)<0` pour tous ; un zéro, même sur un coin ou côté, reste actif.
+Si tous les blocs couvrant les graines possibles sont ainsi exclus, aucun
+centre de support q3 aigu propriétaire ou q4 strictement positif propriétaire
+de cette arête ne se trouve dans C : la partition Z
+de C peut être omise. Les sites de X demeurent témoins des autres cellules.
+
+Pour q4, la condition « graine possible » est justifiée : si `ab` est
+l'arête propriétaire maximale d'un tétraèdre **strictement positif**, au
+moins une de ses deux complétions est hors de la boule diamétrale fermée de
+`ab`. Sinon cette boule enfermerait les quatre sommets et leur miniball
+serait portée par `ab`, incompatible avec quatre poids barycentriques
+strictement positifs. Cette complétion forme un triangle `abx` aigu puisque
+`ab` est maximale. Il ne faut surtout pas exiger que les **deux** le soient.
+Fixture u18 entière : `a=(0,50,0)`, `b=(200,50,0)`,
+`x=(100,149,0)`, `y=(100,0,100)` ; `|ab|²=40000` est maximal,
+`(x−a)·(x−b)=−199`, `(y−a)·(y−b)=2500`, et le centre q4 exact est
+`(100,9701/198,4751/396)`. Ses poids barycentriques dans l'ordre
+`a,b,x,y` sont `3252301/7840800` pour chacun des deux premiers,
+`3955/78408` et `4751/39600` : tous sont positifs. `ab` échoue q2,
+mais q4 survit via `y` ; le domaine et les témoins doivent garder `x`.
+Pour q3, chaque triangle aigu propriétaire a directement sa droite
+`L_x=0`. L'arête avec une seule complétion reste un cas q3 autonome :
+`(0,0,0),(4,0,0),(2,3,0)` donne une graine q3 aiguë alors que la racine
+q4 est `Outside`. Aucun rejet pré-atlas ne peut supprimer cette voie.
+
+Ce déplacement du filtre ne gagne du temps que s'il évite plus de bornes Z,
+tests ponctuels et copies d'IDs qu'il ne paie de tests `X×C`. Avant de
+modifier le constructeur, instrumenter des arêtes lourdes puis des trames
+entières : cellules éliminées **avant Z**, visites et bornes X×C, travail Z
+évitable, contacts conservés, temps total et sorties exactes q3/q4/FULL.
+Recalculer les largeurs arithmétiques du filtre pour `M=262143` et le
+`Q=2^20` u18 actuel : celles de la note v8 supposaient u16 et `Q=2^44`.
+La preuve locale ne borne ni le nombre de produits X×C ni le coût global.
+
 ## Objet mathématique à énumérer
 
 Pour un tétraèdre strictement positif de sommets `a,b,x,y`, centre `c` et

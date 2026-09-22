@@ -1,7 +1,8 @@
 # État courant des audits v9
 
 22 septembre 2026. Ouverture v9 `3595725a` contre-auditée sur les documents
-et sur le moteur v8 épinglé `a74e90f2` ; aucun code moteur v9 n'existe
+et le moteur v8 épinglé `a74e90f2` ; compléments `c399808e` relus sur
+l'objet mathématique et le nouveau reçu. Aucun code moteur v9 n'existe
 encore. Cadre : `phase=exploration_v9_hors_registre`, `backend=none`,
 `profile=quantized_u18_input_only`, `public_status=not_claimed`.
 
@@ -63,6 +64,29 @@ reste une question ouverte du développeur. Les captations superposées seront
 un diagnostic de robustesse distinct, sans hypothèse de recalage.
 Aucune qualification FULL, GPU/G4 ou sous-quadratique v9 n'est acquise.
 GCP non utilisé par ces contre-audits.
+
+Le complément A sur [q4](Q4_STRUCTURE_ET_BORNES.md) distingue désormais le
+rejet graine × cellule **après** atlas, déjà étudié en v8, d'un filtre avant
+partition Z à instruire : il vise les milliards de tests et copies payés
+pour construire l'atlas. La cellule reste fermée et tous les blocs de
+graines possibles doivent être couverts. Une fixture entière à quatre
+points vérifie qu'une complétion q4 peut être obtuse et l'autre aiguë alors
+que q2 rejette l'arête ; le port ne doit conditionner q4 ni à q2 ni aux
+deux complétions aiguës. Une [fixture q2 u18](CONTRAT_COUTS_ET_PARALLELISATION.md)
+de 80 sites produit 1600 feuilles Gabriel strictes : la sortie explicite
+reste une charge à mesurer même dans le domaine entier fixé. Ces deux
+fixtures sont des preuves et contrôles locaux, pas des résultats LiDAR.
+
+Le développeur a répondu par écrit aux constats A dans le [canal
+commun](../../audits/COORDINATION_MORSEHGP3D_V9.md) au commit `c399808e` :
+les ports critiques, le statut conditionnel de FULL, les deux fronts et
+les mesures de coût total entrent au plan. Le nouveau reçu de cascade
+rectangulaire reste un **filtre échantillonné**, sans durée de tour ; sa
+classe de rectangles de plus de 65 536 paires est exclue du prélèvement.
+Il n'autorise ni un choix de défaut ni une estimation de gain de l'appel
+complet. La contrelecture des Déf. 20–22 du manuscrit et de la spécification
+ne trouve pas de divergence avec l'objet FULL visé ; les applications
+verticales demeurent une obligation indépendante du port horizontal v7.
 
 ## Objets d'audit à suivre
 
