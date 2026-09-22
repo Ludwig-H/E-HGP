@@ -371,10 +371,14 @@ l'index inférieur : 19→10 préparations pour K1..10. Les gains de temps de
 ces raccords ne sont pas acquis par les mesures de gardes de rang.
 
 Le [prototype de l'auditeur](../audits/receipts_fused_marks_20260911/README.md),
-publié dans 2970d679, qualifie le premier de ces deltas O2/SAN sur 30 essais
-structurels et 6 828 comparaisons BFS. Il ne remplace pas le raccord aux
-vrais census et ne fournit aucun chrono de tour. Ses captures sont conservées
-séparément de celles du constructeur.
+publié dans 2970d679, reste qualifié séparément sur 30 essais structurels.
+Le [raccord propre du constructeur](MARQUES_PREMIER_PARCOURS_20260911.md)
+passe maintenant O2/SAN sur 114 vrais census, 912 essais et 308208 marques
+physiquement comparées, avant l'export inchangé. Sa porte structurelle
+ajoute les forêts sans marques et vérifie 11504 coupes BFS sur 38 essais.
+Il évite le second DSU/rejeu, mais n'implémente encore ni réemploi
+contributif ni partage des index. Ses mesures et celles de l'auditeur
+ne sont pas interchangeables.
 
 La réutilisation demande une liaison explicite : MarkId=BlockId,
 représentant=φ, admission=rang(B), et segment égal à la composante fermée
@@ -386,6 +390,15 @@ donc être construites et liées dans un propriétaire immuable explicite ;
 des histoires extérieures gardent leur vérification indépendante, sans
 option implicite pour faire confiance aux marques.
 
+Ce propriétaire doit aussi posséder les données que l'Atlas emprunte :
+index et census à adresses stables, sans alias mutable. Une factory publique
+qui accepte des certificats arbitraires peut reconstruire fidèlement le
+mauvais graphe ; des hashes ou des métadonnées compatibles ne suffisent pas.
+Le prochain raccord utilisera une factory intégrée qui exécute elle-même
+le producteur qualifié et la reconstruction avant de publier les vues
+constantes. Un futur producteur parallèle séparé devra qualifier la même
+frontière, pas seulement remplir des champs structurellement plausibles.
+
 Émettre les contributions dans `atlas.program(K)`, à la date d'admission
 de B, pas à la naissance du segment ; ne pas parcourir simplement les
 marques triées par identifiant. Garder les singletons K1 à part, les marques
@@ -393,9 +406,9 @@ silencieuses et les coupes propres aux verticales. Les index adjacents
 restent vivants jusqu'à leur dernière consultation, sur des histoires
 immuables à adresses stables ; chaque histoire reste validée.
 
-La qualification du prochain raccord comparera tous les champs physiques
-des histoires/marques avant leur réemploi, y compris une forêt non vide
-sans marque et les naissances tardives. Le réemploi ajoutera une marque
+La qualification du premier parcours compare tous les champs physiques
+des histoires/marques, y compris les forêts non vides sans marque et les
+naissances tardives. Le prochain réemploi ajoutera une marque
 forgée vers une autre composante vivante et un mélange de propriétaires.
 Compter séparément marques réutilisées, HLD effectivement exécutées,
 recherches de marque, préparations d'index et résidence des deux index.

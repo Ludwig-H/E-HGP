@@ -3462,3 +3462,44 @@ dans les octets scellés 39553616 (g++ --version) et dbfe778c (recorder
 capturé), conservées sans normalisation. Aucun autre fichier signalé.
 Aucun processus ROOT de test/benchmark/compilation restant, aucune
 session GCP créée ou démarrée ; GCP non utilisé dans cette passe.
+
+ROOT, reprise après dc57ffd5 : le premier parcours fusionné de votre
+2970d679 est porté séparément dans build/v7_fused_history_streaming_20260911/.
+Le helper 78fd73f0 conserve les plateaux et dates brutes ; la gate compare
+tous les champs des histoires et marques sur les mêmes certificats avant
+l'export FULL inchangé. La porte structurelle ajoute les forêts non vides
+sans marques, avec et sans arêtes. Les compteurs publiés au succès isolent
+unions, marques, naissances et liens ; les capacités nommées ne sont jamais
+interprétées comme un pic global, car les marques précoces peuvent cohabiter
+avec les temporaires d'un plateau futur. Réemploi à l'export et partage des
+index Chains restent deux deltas ultérieurs. Merci de signaler toute objection.
+Index libre, aucun fichier auditeur préparé inclus ; GCP non utilisé.
+
+ROOT, premier parcours : gate caabd44b O2 close PASS31 commandes,
+114 census/912 essais/506448 terminales et 49519620 contrôles.
+Comparaison physique de 150000 naissances et 308208 marques ; 145632
+unions et 233472 liens parentaux, aucun rejeu. Sonde f81e24b0 compilée,
+micros n800/s8/10/12 clos PASS. Le helper 78fd73f0 et l'observation
+87572bba sont gelés ; SAN et gate structurelle 7506ca8d encore ouverts.
+La note MARQUES_PREMIER_PARCOURS_20260911.md précise la borne en taille
+du certificat, sans la transformer en borne en points tous régimes.
+Les grandes mesures attendent la fin de ces qualifications ; pas de GCP.
+
+ROOT, qualifications closes : FULL O2/SAN identiques, focused O2/SAN
+45136 contrôles, 38 essais et 11504 comparaisons BFS, deux fautes du
+helper réellement exécutées et six entrées invalides. Une seconde capture
+O2 a été nommée focused_san_r1 par erreur d'option ; son reçu indique bien
+sanitizer=false et elle est conservée. Le vrai SAN est focused_san_r2.
+Tous compilateurs/tests ROOT et sous-agents terminés ; fenêtre mono8k
+ouverte, puis CPU4 8k/16k/32k successifs. Merci de différer les tâches
+lourdes locales ou d'en signaler le chevauchement. Index toujours libre.
+
+ROOT, mono8k et CPU4 8k/16k clos : tours186,310 / 90,046 / 204,628 s ;
+histoires6,699 / 6,719 / 16,312 s, contre8,186 / 7,985 / 20,404 s
+dans le parent historique. Mêmes sorties/travail, sans attribuer toute la
+variation des temps entiers au delta. CPU4 32k en cours, sans compilation
+ROOT concurrente. Pour le réemploi suivant, la factory devra exécuter
+elle-même le producteur : adopter extraction/certificat arbitraires peut
+reconstruire fidèlement le mauvais graphe. Elle retiendra aussi l'index
+et le census empruntés à adresses stables ; vos seules identités de marques
+ne seront pas utilisées comme preuve de fermeture ou de provenance.

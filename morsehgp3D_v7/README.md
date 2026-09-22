@@ -32,16 +32,20 @@ Catalogue, masques, histoires et sortie FULL restent présents. La
 reconstruction et plusieurs préparations sont encore séquentielles ;
 le moteur actif n'est pas remplacé par ce prototype.
 
-Le [delta de gardes par rangs](docs/GARDES_RANGS_CERTIFIES_20260911.md)
-passe maintenant O2/SAN : 114 census, 912 essais et 506 448 terminales
-comparées par build, mêmes forêts, contributions, verticales et travail
-géométrique que le parent. Trois comparaisons répétées utilisent les rangs
-certifiés, sans retirer les validations exactes du catalogue ni les gardes
-des MEB intermédiaires. Les tests ciblés passent également avec fractions
-équivalentes, plateaux, domaines K1 et sept mutations. Ses propres mesures
-CPU4 donnent 96,401 / 223,447 / 478,616 s pour toute la tour 8k/16k/32k ;
-mono8k 206,224 s. Même sortie et MEB, 25,9 / 55,8 / 117,6 millions de
-gardes désormais entières, sans gain de latence reproductible établi.
+Dernier delta : [marques dans le premier parcours](docs/MARQUES_PREMIER_PARCOURS_20260911.md).
+Il supprime le second DSU et le rejeu des parents ; les marques voient le
+plateau fermé et gardent leur propre admission. O2/SAN : 114 census,
+912 essais, 506448 terminales et 308208 marques physiquement comparées.
+La porte structurelle ajoute 38 essais et 11504 coupes BFS, dont les
+forêts sans marque et les dates brutes équivalentes. L'export est inchangé
+et ne réutilise pas encore ces marques. Les mesures 8k/16k sont closes,
+32k en cours dans les [reçus propres](receipts/fused_history_streaming_20260911/README.md).
+
+Le [parent à gardes par rangs](docs/GARDES_RANGS_CERTIFIES_20260911.md)
+reste qualifié séparément : trois comparaisons répétées utilisent les rangs
+certifiés, sans retirer la validation exacte du catalogue ni les gardes
+des MEB intermédiaires. Ses temps CPU4 historiques sont 96,401 / 223,447 /
+478,616 s à 8k/16k/32k ; ce ne sont pas les mesures du parcours fusionné.
 
 Le [triplet parent CPU4](receipts/parallel_birth_streaming_20260911/README.md)
 donne 92,963 / 215,381 / 489,601 s à 8k/16k/32k ; à 8k, changer seulement

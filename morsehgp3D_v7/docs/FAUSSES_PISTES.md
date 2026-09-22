@@ -118,6 +118,15 @@ Le 11 septembre, la [décomposition en objets parallèles](OBJETS_PARALLELES_TOU
   les chaînes lourdes suffisent en mémoire linéaire. Leur construction reste
   un coût séparé ; le premier prototype ne la parallélise pas encore.
 
+Le [parcours fusionné des marques](MARQUES_PREMIER_PARCOURS_20260911.md)
+écarte trois autres raccourcis : répondre avant la fin du plateau donne
+une ancienne composante ; remplacer l'admission par la naissance du
+représentant anticipe la contribution ; vérifier seulement la sortie FULL
+ne détecte pas ces erreurs puisque l'export actuel ignore les marques.
+Supprimer le second DSU est justifié, mais soustraire 24L octets au pic RSS
+ne l'est pas : les marques précoces peuvent cohabiter avec le scratch des
+plateaux. L'ancien rejeu pouvait aussi s'arrêter avant les derniers parents.
+
 Le 10 septembre, deux distinctions supplémentaires sont conservées :
 
 - Le « dernier intrus » obtenu par balayage exhaustif peut raccourcir la descente mais augmente potentiellement le coût d'une requête. Une DFS droite anticipée retrouve exactement ce même témoin sans terminer le scan ; son [prototype](../receipts/rightmost_intruder_20260910/README.md) reste séparé du moteur mesuré.

@@ -15,18 +15,21 @@ native finale. φ porte des labels de naissance stables, pas des racines DSU.
 Une fenêtre géométrique est dispersée avant consommation dans l'ordre source.
 Les références historiques restent scellées, sans remplacement actif.
 
-Dernier delta : [trois gardes sur rangs certifiés](docs/GARDES_RANGS_CERTIFIES_20260911.md).
-O2/SAN FULL clos : 114 census, 912 essais, 506 448 terminales comparées et
-48 775 524 contrôles par build. Mêmes champs scientifiques et travail
-géométrique que le parent ; +4 368 contrôles du nouveau grand-livre.
-Gardes first=506448, seed=297162, terminal=484224. Tests ciblés O2/SAN :
-18 census, 36 Atlas, 2 796 couples, 12 882 contrôles et sept mutants,
-avec causes/code4 et exécution de la faute vérifiés. Sources dans les reçus,
-pas dans le moteur actif ; géométrie et validation initiale restent exactes.
-Mesures propres : mono8k 206,224 s ; CPU4 8k/16k/32k en 96,401 /
-223,447 / 478,616 s, même sortie/MEB que les parents. 25,9 / 55,8 /
-117,6 millions de gardes désormais entières ; pas de gain temporel
-reproductible établi sur ces captures non appariées et hôte partagé.
+Dernier delta : [marques au premier parcours](docs/MARQUES_PREMIER_PARCOURS_20260911.md).
+O2/SAN FULL clos : 114 census, 912 essais, 506448 terminales comparées et
+49519620 contrôles par build. Comparaison physique de toutes les histoires,
+dont 308208 marques, sur les mêmes certificats avant l'export inchangé.
+Le second DSU et le rejeu disparaissent. Porte structurelle O2/SAN :
+38 essais, 45136 contrôles, 11504 comparaisons BFS, deux mutants causaux,
+six certificats invalides et absence de publication partielle de Work.
+La capture focused_san_r1, lancée sans l'option par erreur, reste O2 ;
+le vrai SAN est focused_san_r2. Sources scellées dans les reçus privés,
+pas dans le moteur actif. Mesures grandes encore en cours.
+
+Le [parent à gardes certifiées](docs/GARDES_RANGS_CERTIFIES_20260911.md)
+reste qualifié séparément. Temps historiques CPU4 : 96,401 / 223,447 /
+478,616 s à 8k/16k/32k, sans gain reproductible alors établi. Le travail
+géométrique et les gardes restent ceux de ce parent dans le nouveau delta.
 
 Le [triplet CPU4 parent](receipts/parallel_birth_streaming_20260911/README.md)
 est clos à 92,963 / 215,381 / 489,601 s pour 8k/16k/32k,
@@ -40,9 +43,9 @@ Suite convenue avec l'auditeur : réemploi des marques contributives et
 partage des index précédent/courant (19→10 préparations pour K1..10).
 Garder dates d'admission, ordre source, validation des histoires et coupes
 propres aux verticales. Son [prototype de premier sweep](audits/receipts_fused_marks_20260911/README.md)
-est maintenant qualifié séparément sur 30 essais structurels, sans raccord
-géométrique ni mesure de tour ; ces résultats ne sont pas ceux du delta
-de rangs. Partage du catalogue,
+reste qualifié séparément sur 30 essais structurels ; le nouveau raccord
+aux vrais census et ses mesures propres sont liés ci-dessus, sans héritage
+de ses résultats. Partage du catalogue,
 reconstruction/export massivement parallèles et backend GPU restent ouverts.
 Aucun nouveau chrono 50k, contrat 1 s/100 ms ou qualification massive G4.
 GCP non utilisé. Les fichiers auditeur/v6 et les captures scellées ne sont
