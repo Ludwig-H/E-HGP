@@ -18,7 +18,8 @@ et désormais du code v9. Le `main` local reste
 à `a74e90f2` dans ce worktree partagé. Le reçu 1 mm est désormais
 versionné depuis `3f0d188f`, mais ne qualifie que le flux q3/q4 CPU sur
 une seule trame, non la tour. Les modifications non commises du
-développeur restent hors de cette contrelecture ; aucune branche parasite créée.
+développeur sont examinées en lecture seule, sans les promouvoir en preuve
+publiée ; aucune branche parasite créée.
 
 Le commit d'audit A `efc14c99` propose une sélection exacte des centres
 q4 peu profonds sur une droite de graine en `O(Km)` comparaisons, `m`
@@ -29,6 +30,14 @@ contrelecture indépendante de cette proposition continue. Son complément
 `2291da13` factorise la comparaison des racines par un déterminant
 entier signé de moins de 121 bits, au lieu du produit brut de 160 bits ;
 cela réduit la largeur de cette primitive, sans modifier le moteur.
+Le complément A `ce949e2e` publie un oracle de cover collectif et un plan
+de résidence FULL. Son lemme de boule autour de l'arête propriétaire est
+correct **si cette arête est maximale dans le support strictement positif** ;
+il ne certifie pas les arêtes omises par le front ni les centres non positifs.
+Le batch ne livre que des handles de cover : les arrangements et le coût
+`s·m` des graines restent à traiter. Les propositions de runs externes et
+cache par ordre n'ont pas encore de mesure produit ; le cache actuel est
+indexé par facettes, non directement par BallKey.
 
 ## Lecture prioritaire
 
@@ -68,12 +77,27 @@ cela réduit la largeur de cette primitive, sans modifier le moteur.
   1 mm/K5/W8 rapporte environ 131 s mur, dont 117 s q3/q4 et 11 s FULL,
   1 306 696 boules et coquille maximale 5. C'est un changement de statut
   fonctionnel important, **pas** une qualification des contrats.
+- Une [première campagne locale complète mais encore non publiée](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PREMIERE_CAMPAGNE_20260922.md)
+  a désormais six lignes sur 08/000000, 000100 et 000200 sans sol/1 mm,
+  s8/W8 : **K5 132–264 s**, **K10 381–802 s** de mur, 1,10–1,41 M
+  puis 4,38–5,51 M clés. À K10, q3/q4 prend 278–687 s et FULL
+  94–130 s. Sur 08/000000, FULL passe de 24,86 M à 1,065 G tests
+  de puissance MEB entre K5 et K10 : l'aval devient un verrou propre.
+  Le lecteur local ne ferme pas encore toute la provenance
+  binaire/entrées et la série ne fait varier que K, jamais n : ni
+  sous-quadratique ni contrat G4 n'en découlent.
 - Le [contre-audit FULL B](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_FULL_COUTS_ET_INTERFACES_20260922.md)
   relève les coûts hérités `2^u`, l'intrus global et les tableaux de
   résolutions, toujours présents dans le port v9. Le recoupement certifie
   les boules **émises**, pas l'absence de clés omises. Le juge T2 utilise
-  `run_tower=false` puis appelle la tour directement : tester le chemin
-  public `run_tower=true` et son digest reste une porte à ajouter.
+  `run_tower=false` puis appelle la tour directement. Une
+  [porte publique T2 séparée du moteur](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PORTE_PUBLIQUE_T2_20260922.md)
+  appelle désormais `run_tower=true`, compare son catalogue à un oracle
+  rationnel et sa forêt aux coupes Γ pour K1..3 : 24 configurations
+  Release et Clang ASan/UBSan passent, avec une q4 non issue des faces q3.
+  La mutation ciblée de suppression de clé est détectée **dans le harnais
+  après appel**, pas dans le producteur ; ce petit cas ne certifie pas les
+  grandes trames.
   Notre rejeu indépendant du commit `d2700314` a compilé en Release et
   sous Clang ASan/UBSan, **20/20 CTests dans chaque build** ; le
   probe public K1..5 sur un préfixe de
@@ -81,14 +105,18 @@ cela réduit la largeur de cette primitive, sans modifier le moteur.
   C'est un diagnostic de raccord, non une trame qualifiée ni un oracle.
   Une [fixture entière K3 à 12 sites](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PREATLAS_ET_Q3_20260922.md)
   a une q4 valable et **quatre faces q3 rejetées** ; son oracle exact
-  passe et le probe émet une q4 sous quatre permutations d'IDs. Elle
-  doit entrer dans la porte d'inventaire et un mutant de clé omise.
+  passe et le probe émet une q4 sous quatre permutations d'IDs. Elle est
+  désormais couverte par la porte d'inventaire, mais pas par un mutant
+  compilé de clé omise dans le producteur.
 - Le [contre-audit u18/sonde](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_U18_ET_SONDE_20260922.md)
   vérifie en C++ O2 et sous ASan/UBSan une fixture de plateau dont un
   produit dépasse int128 signé ; S192 la traite. Les bornes générales
   du port attendent toujours une porte arithmétique dédiée. Le lanceur
   accepte `K=2^32+1` en le tronquant à K1 et imprime `--grid` sans
   échappement JSON : corriger avant tout reçu contractuel automatisé.
+  La nouvelle porte `arith_u18` encore non publiée emploie l'oracle
+  numérique, mais elle est compilée sans `MHGP9_TESTING` : sa revendication
+  de mutant `level-trunc-hi` tué n'a pas de test causal activable.
 - Le [contre-audit de résidence](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_RESIDENCE_CHAINE_20260922.md)
   relève `224P` octets de capacités simultanées pour les présentations,
   un cache temporel par défaut de **24 Gio à 30 M sites** et au moins
@@ -169,10 +197,17 @@ PASS ni inférer une croissance globale de la sonde mono-arête prévue.
    composantes locales **sans** table de `2^u` masques. Elle n'est pas
    implémentée ; construire les régions, leurs signatures et `q_min`
    exactement reste à payer et à qualifier.
-   Le complément A `8054540c` factorise le calcul de `q_min=3` pour la
-   grille u18 et publie un [oracle local de plans](../../morsehgp3D_v9/audits/check_qmin_planes_u18_20260922.py)
-   (quatre fixtures et 755 sous-coquilles). Il ne teste pas encore les
-   composantes du quotient ni la tour FULL.
+  Le complément A `8054540c` factorise le calcul de `q_min=3` pour la
+  grille u18 et publie un [oracle local de plans](../../morsehgp3D_v9/audits/check_qmin_planes_u18_20260922.py)
+  (quatre fixtures et 755 sous-coquilles). Il ne teste pas encore les
+  composantes du quotient ni la tour FULL.
+  La [contre-lecture B des sommets q4 peu profonds](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_Q4_SHALLOW_20260922.md)
+  confirme une borne locale `O(Km)` de **sortie**, mais le schéma direct
+  de sélection paie encore `O(sKm)` pour `s` droites de graines parmi
+  `m` droites du cover. Son oracle exact inclut un faux sommet q4 qui
+  passe même le disque propriétaire : `centre∈conv(coquille)` reste
+  obligatoire. Les algorithmes classiques des niveaux de droites ne
+  sont pas transférés aux demi-plans orientés mixtes avec dégénérescences.
 5. Après réduction du travail, répartir les cellules/graines d'une arête
    lourde entre CPU/GPU avec tableaux compacts résidents, intervalles sûrs
    et repli exact. Juger le temps de **toute** la tour, pas un kernel.
