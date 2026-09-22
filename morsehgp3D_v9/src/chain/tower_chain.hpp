@@ -1,0 +1,100 @@
+// MorseHGP3D v9 — chaine de bout en bout : generateur exact (mhgp9::gen, port
+// v8) -> catalogue canonique de boules -> tour HGP FULL (mhgp9::tower, port v7).
+//
+// Frontiere du chronometre du contrat (synthese d'ouverture § 9, hypothese 1) :
+// du nuage prepare en memoire (sites 18 bits distincts) a la tour complete en
+// memoire. La lecture du fichier est mesuree a part par l'appelant.
+//
+// Le catalogue n'est pas une autorite : il recoupe deux implementations
+// independantes et refuse toute divergence (statut kInvariantViolated) :
+//   - la cle v8 (ExactBall) est recalculee depuis le support avec les formules
+//     de la tour v7 ;
+//   - le compte d'interieurs et la taille de coquille emis par le generateur
+//     sont recalcules par un census exact sur l'index de la tour ;
+//   - q_min recalcule sur la coquille (quotient local) doit egaler la plus
+//     petite arite presentee (sinon une voie du generateur est incomplete).
+// Une coquille de plus de 12 sites est un REFUS DE DOMAINE explicite
+// (kUnsupportedDegeneracy), jamais une troncature (contre-audit A § 1).
+#pragma once
+
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <span>
+#include <string>
+#include <vector>
+
+#include "core/types.hpp"  // mhgp9::gen::Point3
+#include "../tower/forest/full_ball_tower.hpp"
+
+namespace mhgp9 {
+
+enum class ChainStatus {
+  kComplete,               // tour complete relative au catalogue recoupe
+  kUnsupportedDegeneracy,  // coquille > 12 : hors du domaine du constructeur
+  kInvalidInput,
+  kResourceExhausted,
+  kInvariantViolated,
+};
+const char* chain_status_name(ChainStatus status);
+
+struct ChainOptions {
+  unsigned kmax = 5;
+  unsigned separation_s = 8;   // jamais moins de 8 (consigne utilisateur)
+  std::size_t workers = 1;     // generateur et census du catalogue
+  int tower_static_threads = 0;  // 0 = resolveur temporel sequentiel (voie par defaut v7)
+  bool run_tower = true;       // false : s'arreter au catalogue (mesure de l'amont)
+  bool keep_catalogue = false; // publier le catalogue recoupe (portes, juges)
+};
+
+// Temps de mur en millisecondes, CPU du processus en secondes.
+struct ChainTimes {
+  double prepare_ms = 0, gen_index_ms = 0, q2_ms = 0, q34_ms = 0;
+  double merge_ms = 0, tower_index_ms = 0, census_ms = 0, tower_ms = 0, total_ms = 0;
+  double cpu_s = 0;
+};
+
+struct CatalogueStats {
+  std::uint64_t q2_presentations = 0, q3_presentations = 0, q4_presentations = 0;
+  std::uint64_t unique_keys = 0, balls = 0, extra_shell_balls = 0;
+  std::uint64_t shell_over_cap = 0, max_shell = 0, max_interior = 0;
+  std::uint64_t census_nodes = 0, census_leaf_tests = 0;
+  std::array<std::uint64_t, 5> balls_by_qmin{};
+  std::array<std::uint64_t, 17> balls_by_shell{};  // index = taille de coquille (16 = 16 et plus)
+  std::uint64_t bytes = 0;  // capacite du catalogue BallData
+};
+
+struct OrderSummary {
+  unsigned k = 0;
+  std::uint64_t nodes = 0, births = 0, merges = 0, contributions = 0, parents = 0;
+};
+
+struct ChainResult {
+  ChainStatus status = ChainStatus::kInvalidInput;
+  std::string reason = "chain_uninitialized";
+  unsigned kmax_effective = 0;
+  std::uint64_t sites = 0;
+  ChainTimes times;
+  CatalogueStats catalogue;
+  // Registres du generateur (copies scalaires utiles au grand-livre).
+  std::uint64_t q2_front_rectangles = 0, q2_candidate_pairs = 0, q2_accepted_pairs = 0;
+  std::uint64_t q34_expanded_pairs = 0, q34_cover_builds = 0, q3_emitted = 0, q4_emitted = 0;
+  tower::FullBallStats tower_stats;
+  std::vector<OrderSummary> orders;
+  // Condense FNV-1a 64 d'un encodage canonique de toute la tour (tous ordres,
+  // noeuds, parents, contributions, populations en PointId, verticales).
+  std::uint64_t tower_digest = 0;
+  // Tour complete si status == kComplete et run_tower : proprietaire du
+  // resultat (le catalogue et l'index sont liberes avant publication).
+  tower::FullBallTowerResult tower;
+  // Catalogue recoupe (indices geometriques de l'index de la tour), si demande.
+  std::vector<tower::BallData> catalogue_balls;
+};
+
+// points[i] a l'identite i (PointId = rang d'entree). Sites distincts requis.
+ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOptions& options);
+
+// Condense canonique d'une tour publiee (independant de l'ordre du catalogue).
+std::uint64_t tower_digest(const tower::FullBallTowerResult& tower);
+
+}  // namespace mhgp9

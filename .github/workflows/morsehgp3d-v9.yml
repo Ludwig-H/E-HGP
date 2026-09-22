@@ -1,0 +1,55 @@
+name: MorseHGP3D v9 CPU gates
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'morsehgp3D_v9/**'
+      - 'tools/check_docs.py'
+      - '.github/workflows/morsehgp3d-v9.yml'
+  pull_request:
+    paths:
+      - 'morsehgp3D_v9/**'
+      - 'tools/check_docs.py'
+      - '.github/workflows/morsehgp3d-v9.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  cpu-gates:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      LC_ALL: C
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install CPU dependencies (Boost is mandatory for the exact judges)
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes libboost-dev
+
+      - name: Build the v9 CPU reference
+        run: |
+          cmake -S morsehgp3D_v9 -B build/v9 -DCMAKE_BUILD_TYPE=Release
+          cmake --build build/v9 --parallel 2
+
+      - name: Validate documentation
+        run: python3 tools/check_docs.py
+
+      - name: Run bounded gates, oracles and causal mutants
+        run: |
+          ctest --test-dir build/v9 --output-on-failure --no-tests=error -L '^gate$' --parallel 2 --output-junit gates.xml
+
+      - name: State the qualification boundary
+        run: |
+          echo 'CPU gates only; public_status=not_claimed.'
+          echo 'No cloud credentials, no VM, no GPU and no time-contract measurement in CI.'

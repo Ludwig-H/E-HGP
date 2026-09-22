@@ -1,0 +1,168 @@
+// MorseHGP3D v9 — sonde de la tour FULL de bout en bout sur un nuage fichier.
+//
+//   mhgp9_tower_probe <fichier .u32le|.u16le> K workers [--s=8] [--static=T]
+//                     [--no-tower] [--n=prefixe] [--grid=libelle]
+//
+// Chronometre du contrat : du nuage prepare en memoire a la tour complete en
+// memoire (ChainTimes, sans la lecture). La lecture et son empreinte sont
+// mesurees a part. Sortie : un objet JSON sur stdout. Code 0 conforme, 2 refus
+// d'arguments ou d'entree, 3 statut de chaine non complet.
+#include <sys/resource.h>
+
+#include <chrono>
+#include <cinttypes>
+#include <cstdio>
+#include <cstring>
+#include <fstream>
+#include <iterator>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <vector>
+
+#include "../src/chain/tower_chain.hpp"
+
+namespace {
+
+using mhgp9::gen::Point3;
+
+struct Input {
+  std::vector<Point3> points;
+  std::uint64_t hash = 14695981039346656037ull;  // FNV-1a 64 de n puis x, y, z (u64 LE)
+  std::string format;
+};
+
+void fnv_word(std::uint64_t& h, std::uint64_t w) {
+  for (int i = 0; i < 8; ++i) {
+    h ^= (w >> (8 * i)) & 0xffu;
+    h *= 1099511628211ull;
+  }
+}
+
+Input read_points(const std::string& path, std::size_t prefix) {
+  std::ifstream in(path, std::ios::binary);
+  if (!in) throw std::invalid_argument("cannot open input");
+  const std::vector<unsigned char> bytes((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+  Input out;
+  std::size_t width = 0;
+  if (path.ends_with(".u32le")) { width = 4; out.format = "u32le"; }
+  else if (path.ends_with(".u16le")) { width = 2; out.format = "u16le"; }
+  else throw std::invalid_argument("input must be .u32le or .u16le");
+  if (bytes.size() % (3 * width) != 0) throw std::invalid_argument("input length is not a multiple of a site record");
+  std::size_t n = bytes.size() / (3 * width);
+  if (prefix) {
+    if (prefix > n) throw std::invalid_argument("prefix exceeds input size");
+    n = prefix;
+  }
+  out.points.resize(n);
+  fnv_word(out.hash, n);
+  for (std::size_t i = 0; i < n; ++i) {
+    std::uint32_t c[3];
+    for (int a = 0; a < 3; ++a) {
+      std::uint32_t v = 0;
+      for (std::size_t b = 0; b < width; ++b) v |= static_cast<std::uint32_t>(bytes[(3 * i + a) * width + b]) << (8 * b);
+      if (v > 262143u) throw std::invalid_argument("coordinate outside [0, 2^18)");
+      c[a] = v;
+      fnv_word(out.hash, v);
+    }
+    out.points[i] = Point3{static_cast<mhgp9::gen::Coordinate>(c[0]), static_cast<mhgp9::gen::Coordinate>(c[1]),
+                           static_cast<mhgp9::gen::Coordinate>(c[2])};
+  }
+  return out;
+}
+
+unsigned long long parse_u(std::string_view s) {
+  if (s.empty()) throw std::invalid_argument("empty number");
+  unsigned long long v = 0;
+  for (char ch : s) {
+    if (ch < '0' || ch > '9') throw std::invalid_argument("not a number");
+    v = v * 10 + static_cast<unsigned>(ch - '0');
+  }
+  return v;
+}
+
+long peak_rss_kb() {
+  rusage usage{};
+  if (getrusage(RUSAGE_SELF, &usage) != 0) return -1;
+  return usage.ru_maxrss;
+}
+
+}  // namespace
+
+int main(int argc, char** argv) {
+  mhgp9::ChainOptions options;
+  std::string path, grid = "unspecified";
+  std::size_t prefix = 0;
+  try {
+    if (argc < 4) throw std::invalid_argument("usage: mhgp9_tower_probe file K workers [options]");
+    path = argv[1];
+    options.kmax = static_cast<unsigned>(parse_u(argv[2]));
+    options.workers = static_cast<std::size_t>(parse_u(argv[3]));
+    for (int i = 4; i < argc; ++i) {
+      const std::string_view arg(argv[i]);
+      if (arg.starts_with("--s=")) options.separation_s = static_cast<unsigned>(parse_u(arg.substr(4)));
+      else if (arg.starts_with("--static=")) options.tower_static_threads = static_cast<int>(parse_u(arg.substr(9)));
+      else if (arg == "--no-tower") options.run_tower = false;
+      else if (arg.starts_with("--n=")) prefix = static_cast<std::size_t>(parse_u(arg.substr(4)));
+      else if (arg.starts_with("--grid=")) grid = std::string(arg.substr(7));
+      else throw std::invalid_argument("unknown option");
+    }
+  } catch (const std::exception& e) {
+    std::fprintf(stderr, "argument refusal: %s\n", e.what());
+    return 2;
+  }
+  Input input;
+  const auto read_start = std::chrono::steady_clock::now();
+  try {
+    input = read_points(path, prefix);
+  } catch (const std::exception& e) {
+    std::fprintf(stderr, "input refusal: %s\n", e.what());
+    return 2;
+  }
+  const double read_ms =
+      std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - read_start).count();
+  const auto r = mhgp9::run_tower_chain(input.points, options);
+  const auto& t = r.times;
+  const auto& c = r.catalogue;
+  std::printf("{\"schema\":\"mhgp9_tower_probe_v1\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
+              r.reason.c_str());
+  std::printf("\"input\":{\"format\":\"%s\",\"grid\":\"%s\",\"sites\":%zu,\"hash\":\"%016" PRIx64 "\"},", input.format.c_str(),
+              grid.c_str(), input.points.size(), input.hash);
+  std::printf("\"options\":{\"K\":%u,\"K_effective\":%u,\"s\":%u,\"workers\":%zu,\"tower_static_threads\":%d,\"run_tower\":%s},",
+              options.kmax, r.kmax_effective, options.separation_s, options.workers, options.tower_static_threads,
+              options.run_tower ? "true" : "false");
+  std::printf("\"times_ms\":{\"read\":%.3f,\"prepare\":%.3f,\"gen_index\":%.3f,\"q2\":%.3f,\"q34\":%.3f,\"merge\":%.3f,"
+              "\"tower_index\":%.3f,\"census\":%.3f,\"tower\":%.3f,\"chain_total\":%.3f},\"chain_cpu_s\":%.3f,",
+              read_ms, t.prepare_ms, t.gen_index_ms, t.q2_ms, t.q34_ms, t.merge_ms, t.tower_index_ms, t.census_ms, t.tower_ms,
+              t.total_ms, t.cpu_s);
+  std::printf("\"generator\":{\"q2_front_rectangles\":%" PRIu64 ",\"q2_candidate_pairs\":%" PRIu64 ",\"q2_accepted_pairs\":%" PRIu64
+              ",\"q34_expanded_pairs\":%" PRIu64 ",\"q34_cover_builds\":%" PRIu64 ",\"q3_emitted\":%" PRIu64 ",\"q4_emitted\":%" PRIu64 "},",
+              r.q2_front_rectangles, r.q2_candidate_pairs, r.q2_accepted_pairs, r.q34_expanded_pairs, r.q34_cover_builds,
+              r.q3_emitted, r.q4_emitted);
+  std::printf("\"catalogue\":{\"q2_presentations\":%" PRIu64 ",\"q3_presentations\":%" PRIu64 ",\"q4_presentations\":%" PRIu64
+              ",\"unique_keys\":%" PRIu64 ",\"balls\":%" PRIu64 ",\"extra_shell_balls\":%" PRIu64 ",\"shell_over_12\":%" PRIu64
+              ",\"max_shell\":%" PRIu64 ",\"max_interior\":%" PRIu64 ",\"census_nodes\":%" PRIu64 ",\"census_leaf_tests\":%" PRIu64
+              ",\"bytes\":%" PRIu64 ",\"by_qmin\":[%" PRIu64 ",%" PRIu64 ",%" PRIu64 "],\"by_shell\":[",
+              c.q2_presentations, c.q3_presentations, c.q4_presentations, c.unique_keys, c.balls, c.extra_shell_balls,
+              c.shell_over_cap, c.max_shell, c.max_interior, c.census_nodes, c.census_leaf_tests, c.bytes, c.balls_by_qmin[2],
+              c.balls_by_qmin[3], c.balls_by_qmin[4]);
+  for (std::size_t s = 0; s < c.balls_by_shell.size(); ++s) std::printf("%s%" PRIu64, s ? "," : "", c.balls_by_shell[s]);
+  std::printf("]},");
+  const auto& ts = r.tower_stats;
+  std::printf("\"tower_work\":{\"records\":%" PRIu64 ",\"extra_records\":%" PRIu64 ",\"representatives\":%" PRIu64
+              ",\"anchor_hits\":%" PRIu64 ",\"key_lookups\":%" PRIu64 ",\"intruder_queries\":%" PRIu64 ",\"intruder_nodes\":%" PRIu64
+              ",\"meb_calls\":%" PRIu64 ",\"meb_power_tests\":%" PRIu64 ",\"births\":%" PRIu64 ",\"merges\":%" PRIu64
+              ",\"contributions\":%" PRIu64 ",\"grouped_lots\":%" PRIu64 ",\"resolver_cache_hits\":%" PRIu64 "},",
+              ts.records, ts.extra_records, ts.representatives, ts.anchor_hits, ts.key_lookups, ts.intruder_queries,
+              ts.intruder_nodes, ts.resolve_work.calls, ts.resolve_work.power_tests, ts.births, ts.merges, ts.contributions,
+              ts.grouped_lots, ts.resolver_cache_hits);
+  std::printf("\"orders\":[");
+  for (std::size_t i = 0; i < r.orders.size(); ++i) {
+    const auto& o = r.orders[i];
+    std::printf("%s{\"K\":%u,\"nodes\":%" PRIu64 ",\"births\":%" PRIu64 ",\"merges\":%" PRIu64 ",\"parents\":%" PRIu64
+                ",\"contributions\":%" PRIu64 "}",
+                i ? "," : "", o.k, o.nodes, o.births, o.merges, o.parents, o.contributions);
+  }
+  std::printf("],\"tower_digest\":\"%016" PRIx64 "\",\"peak_rss_kb\":%ld}\n", r.tower_digest, peak_rss_kb());
+  return r.status == mhgp9::ChainStatus::kComplete ? 0 : 3;
+}

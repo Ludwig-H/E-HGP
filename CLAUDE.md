@@ -24,13 +24,13 @@ Le dépôt est documenté en français ; travailler en français.
 
 ```text
 phase=exploration_v9_hors_registre
-backend=none (tant qu'aucun moteur v9 n'existe)
+backend=reference_cpu (chaine generateur v8 + tour v7 a 18 bits, depuis le 22 septembre au soir)
 profile=quantized_u18_input_only
-mode=ouverture_audit_v8_et_v7
+mode=tranche_verticale_v9_1
 public_status=not_claimed
 ```
 
-Objet : la tour HGP FULL de la v7, sur les trames SemanticKITTI sans sol de 30 000 à 60 000 sites, grille 1 mm, moteur entier exact 18 bits, 1 s puis 100 ms sur G4, K = 5 puis 10. La v8 (`12294241`) et la v7 (`dc57ffd5`) sont des sources différentielles ; aucun code v9 à l'ouverture. Commandes prévues : `cmake -S morsehgp3D_v9 -B build/v9 -DCMAKE_BUILD_TYPE=Release`, puis `ctest --test-dir build/v9 -L gate`. Les sections v5 à v8 ci-dessous sont historiques.
+Objet : la tour HGP FULL de la v7, sur les trames SemanticKITTI sans sol de 30 000 à 60 000 sites, grille 1 mm, moteur entier exact 18 bits, 1 s puis 100 ms sur G4, K = 5 puis 10. La v8 (`12294241`) et la v7 (`dc57ffd5`) sont des sources différentielles ; le premier moteur v9 (générateur v8 porté, catalogue recoupé, tour v7 portée, juge T2) est décrit dans `morsehgp3D_v9/docs/PROVENANCE.md`. Commandes : `cmake -S morsehgp3D_v9 -B build/v9 -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=<boost>`, puis `ctest --test-dir build/v9 -L gate`, sonde `build/v9/mhgp9_tower_probe`. Les sections v5 à v8 ci-dessous sont historiques.
 
 ## Ancienne cible : morsehgp3D_v5 (historique)
 

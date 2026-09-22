@@ -1,11 +1,34 @@
-# Passation v9 — ouverture
+# Passation v9
 
-22 septembre 2026. Cadre : `exploration_v9_hors_registre`, `backend=none`,
-`quantized_u18_input_only`, `ouverture_audit_v8_et_v7`, `not_claimed`.
-GCP non utilisé. Aucun statut formel modifié ; `docs/implementation_status.toml`
-n'est pas touché par cette exploration hors registre.
+22 septembre 2026. Cadre : `exploration_v9_hors_registre`,
+`backend=reference_cpu`, `quantized_u18_input_only`, `not_claimed`. Aucun
+statut formel modifié ; `docs/implementation_status.toml` n'est pas touché par
+cette exploration hors registre.
 
-## État du dépôt au moment de l'ouverture
+## État courant (22 septembre, soir) : premier moteur v9
+
+La tranche verticale de V9-1 existe et passe ses portes :
+
+- `src/tower/` : la tour FULL de la v7 portée au domaine 18 bits ;
+  `src/gen/` : le générateur exact de la v8 ; `src/chain/` : la chaîne
+  générateur → catalogue recoupé → tour. Détail et empreintes :
+  [provenance](docs/PROVENANCE.md).
+- 20 CTests verts (`ctest --test-dir build/v9 -L gate`), dont le juge T2 de la
+  v7 appliqué à la chaîne réelle (catalogue égal à l'inventaire rationnel
+  exhaustif, tour égale au modèle Γ, K = 1..10, s = 8/10/12, un et quatre fils).
+- Premier essai à l'échelle, **exploratoire et sans reçu** (hôte chargé, charge
+  32 au départ) : trame 08/000000 sans sol à 1 mm, 39 885 sites, K = 5, huit
+  fils : tour complète en 131 s de mur et 834 CPU·s, RSS 1,06 Go. Catalogue
+  de 1 306 696 boules, coquilles d'au plus 5 sites (227 coquilles étendues,
+  aucune au-delà de 12), aucune divergence entre les deux implémentations.
+  Le générateur q3/q4 prend 117 s (89 %), la tour 11 s en un fil, q2 1,7 s.
+  Le poste dominant est donc l'amont q3/q4, pas l'aval comme en v7 uniforme.
+
+Suite immédiate : campagne à reçu sur les trois trames, K5 puis K10 ; porte
+arithmétique 18 bits de la tour ; portes du générateur portées ; puis V9-2
+sur le poste mesuré (q3/q4).
+
+## État du dépôt au moment de l'ouverture (historique)
 
 - `origin/main` avant l'ouverture : **12294241** (dernier commit d'audit v8 du
   22 septembre). La v8 est gelée à ce commit pour ses sources publiées ; la v7

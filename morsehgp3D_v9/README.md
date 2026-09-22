@@ -4,19 +4,19 @@ Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 
 ```text
 phase=exploration_v9_hors_registre
-backend=none (aucun moteur v9 encore)
+backend=reference_cpu (premier moteur v9 : generateur v8 + tour v7, 18 bits)
 profile=quantized_u18_input_only (grille 1 mm, contrat temps)
 mode=ouverture_audit_v8_et_v7
 public_status=not_claimed
 ```
 
-La v9 succède à la v8 comme chantier actif. Ce dossier est volontairement
-minimal : il contient l'audit général de la v8 (et de ce qui était bon en v7),
-le plan, les règles, l'héritage à porter et les fausses pistes. Il ne contient
-**aucun code** : le premier commit de code de la v9 appartient à son
-développeur. La v8 et la v7 restent des sources différentielles et des
-réservoirs de fixtures, jamais des autorités implicites. GCP non utilisé pour
-cette ouverture.
+La v9 succède à la v8 comme chantier actif. Elle contient l'audit général de
+la v8 (et de ce qui était bon en v7), le plan, l'héritage, les fausses pistes,
+et depuis le 22 septembre au soir un premier moteur : la chaîne générateur
+exact → catalogue recoupé → tour FULL, jugée par le juge T2 (voir la
+[passation](PASSATION.md) et la [provenance](docs/PROVENANCE.md)). La v8 et la
+v7 restent des sources différentielles et des réservoirs de fixtures, jamais
+des autorités implicites.
 
 ## Objectif
 
@@ -68,12 +68,14 @@ emplacements réservés. Conventions : C++20, `-Wall -Wextra -Wpedantic -Werror`
 namespace `mhgp9`, cibles et tests `mhgp9_*`, macros `MHGP9_*`, portes Python
 sans `assert` (valides sous `python3 -O`).
 
-Commandes prévues dès le premier manifeste CMake :
+Commandes (Boost obligatoire : `libboost-dev`, ou `-DBOOST_ROOT=<préfixe>`
+d'un `libboost1.83-dev` extrait, voir le [plan](docs/PLAN_V9.md) V9-0) :
 
 ```bash
 cmake -S morsehgp3D_v9 -B build/v9 -DCMAKE_BUILD_TYPE=Release
 cmake --build build/v9 --parallel
 ctest --test-dir build/v9 --output-on-failure -L gate
+./build/v9/mhgp9_tower_probe <trame.u32le> K workers [--s=8] [--static=T] [--no-tower]
 ```
 
-Tant que ce manifeste n'existe pas, aucune mesure v8 ne vaut résultat v9.
+Options CMake : `MHGP9_SANITIZE` (ASan/UBSan), `MHGP9_TSAN`.
