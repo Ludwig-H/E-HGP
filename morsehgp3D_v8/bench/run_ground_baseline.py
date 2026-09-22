@@ -98,15 +98,20 @@ def run(args):
                 probe=str(probe), probe_sha256=sha256(probe), runner_sha256=sha256(Path(__file__)), manifest_sha256=sha256(MANIFEST),
                 pipeline_sources_sha256={s: sha256(ROOT / "morsehgp3D_v8" / s) for s in PIPELINE_SOURCES}, host=subprocess.check_output(["uname", "-a"], text=True).strip(),
                 cpus=subprocess.check_output(["nproc"], text=True).strip(), inputs=inputs)
+    args.output = args.output.resolve()
     args.output.mkdir(parents=True, exist_ok=True)
+    prefix = "only_" if args.only else ""
+    receipt_name = "BASELINE.only.json" if args.only else "BASELINE.json"
+    require(not (args.output / receipt_name).exists(), f"reçu déjà présent, jamais recouvert : {args.output / receipt_name}")
     rows = []
     for index, (scene, kmax, workers) in enumerate(GRID):
         if args.only and (scene, kmax, workers) not in args.only:
             continue
         entry = inputs[scene]
         command = [str(probe), str(ROOT / entry["path"]), str(entry["n"]), str(kmax), str(SEPARATION), str(MASK), str(BACKEND), str(workers), *MODES, *args.extra]
-        time_file = args.output / f"time_{index:02}_s{scene}_k{kmax}_w{workers}.txt"
-        json_file = args.output / f"probe_{index:02}_s{scene}_k{kmax}_w{workers}.json"
+        time_file = args.output / f"{prefix}time_{index:02}_s{scene}_k{kmax}_w{workers}.txt"
+        json_file = args.output / f"{prefix}probe_{index:02}_s{scene}_k{kmax}_w{workers}.json"
+        require(not time_file.exists() and not json_file.exists(), f"fichiers de mesure déjà présents, jamais recouverts : {json_file.name}")
         load_before = Path("/proc/loadavg").read_text().split()[:3]
         started = time.time()
         with json_file.open("wb") as sink:
@@ -128,9 +133,9 @@ def run(args):
                    pins=pins, grid=[dict(scene=s, kmax=k, workers=w) for s, k, w in GRID], separation=SEPARATION, mask=MASK, q4_backend=BACKEND, modes=[*MODES, *args.extra], rows=rows,
                    finished_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
     check(receipt)
-    (args.output / ("BASELINE.json" if not args.only else "BASELINE.only.json")).write_text(json.dumps(receipt, sort_keys=True, indent=1) + "\n")
+    (args.output / receipt_name).write_text(json.dumps(receipt, sort_keys=True, indent=1) + "\n")
     (args.output / "BASELINE.partial.json").unlink(missing_ok=True)
-    print(json.dumps(dict(status=receipt["status"], rows=len(rows), output=str(args.output.relative_to(ROOT)))))
+    print(json.dumps(dict(status=receipt["status"], rows=len(rows), output=str(args.output.resolve().relative_to(ROOT)))))
 
 
 def check(receipt):
@@ -150,11 +155,14 @@ def check(receipt):
     if receipt["status"] == "passed":
         require(identity_pairs >= 3, "porte d'identité W1/W8 vide")
         require([(r["scene"], r["kmax"], r["workers"]) for r in rows] == [tuple(g) for g in ((s, k, w) for s, k, w in GRID)], "grille incomplète")
+    else:
+        require(identity_pairs >= 1, "porte d'identité W1/W8 vide (reçu partiel)")
 
 
 def read(args):
-    receipt = json.loads((args.output / "BASELINE.json").read_text())
+    receipt = json.loads((args.output / ("BASELINE.only.json" if args.variant == "only" else "BASELINE.json")).read_text())
     require(receipt["schema"] == SCHEMA and receipt["public_status"] == "not_claimed" and receipt["gcp_used"] is False, "reçu hors cadre")
+    require(receipt["status"] in ("passed", "partial"), "statut de reçu inconnu")
     for row in receipt["rows"]:
         json_file = args.output / row["probe_json"]
         require(sha256(json_file) == row["probe_json_sha256"], f"JSON de sonde altéré : {json_file.name}")
@@ -176,6 +184,7 @@ def main():
     capture.add_argument("--extra", nargs="*", default=[], help="jetons CLI ajoutés après les modes (ex. atlas)")
     reader = sub_parsers.add_parser("read")
     reader.add_argument("--output", type=Path, default=OUTPUT)
+    reader.add_argument("--variant", choices=("full", "only"), default="full")
     args = parser.parse_args()
     if getattr(args, "only", None):
         args.only = [(s, int(k), int(w)) for s, k, w in args.only]

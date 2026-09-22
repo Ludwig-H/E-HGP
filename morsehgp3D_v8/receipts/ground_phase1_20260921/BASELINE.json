@@ -1,0 +1,494 @@
+{
+ "backend": "cpu_reference",
+ "finished_utc": "2026-09-21T23:51:39Z",
+ "gcp_used": false,
+ "grid": [
+  {
+   "kmax": 5,
+   "scene": "00",
+   "workers": 1
+  },
+  {
+   "kmax": 5,
+   "scene": "00",
+   "workers": 8
+  },
+  {
+   "kmax": 10,
+   "scene": "00",
+   "workers": 8
+  },
+  {
+   "kmax": 5,
+   "scene": "01",
+   "workers": 1
+  },
+  {
+   "kmax": 5,
+   "scene": "01",
+   "workers": 8
+  },
+  {
+   "kmax": 10,
+   "scene": "01",
+   "workers": 8
+  },
+  {
+   "kmax": 5,
+   "scene": "02",
+   "workers": 1
+  },
+  {
+   "kmax": 5,
+   "scene": "02",
+   "workers": 8
+  },
+  {
+   "kmax": 10,
+   "scene": "02",
+   "workers": 8
+  }
+ ],
+ "mask": 6,
+ "mode": "developpement_phase0_base",
+ "modes": [
+  "samples",
+  "digest",
+  "rectangle-pair",
+  "boxes",
+  "affine",
+  "live",
+  "64",
+  "atlas"
+ ],
+ "note": "Les trois lignes de la sc\u00e8ne 00 (K5 W1 455,16 s / 455,1 CPU\u00b7s ; K5 W8 120,64 / 741,4 ; K10 W8 359,85 / 2 210,1) ont perdu leurs fichiers bruts, \u00e9cras\u00e9s par la reprise au calme (BASELINE.only.json) : retir\u00e9es du re\u00e7u, cit\u00e9es comme non v\u00e9rifiables dans le README.",
+ "phase": "exploration_v8_hors_registre",
+ "pins": {
+  "cpus": "8",
+  "git_commit": "0e2c18caf4d56b46c243df5b82f0e2940abbe521",
+  "host": "Linux codespaces-0bcb78 6.8.0-1064-azure #72~22.04.1-Ubuntu SMP Wed Jul 22 23:39:45 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux",
+  "inputs": {
+   "00": {
+    "frame": "000000.bin",
+    "n": 39815,
+    "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_00/full.u16le",
+    "sha256": "b0918930ac7189cd1277369ccc777effa7bedf39b471c33ac45ec3a95bf8d6ec"
+   },
+   "01": {
+    "frame": "000100.bin",
+    "n": 35491,
+    "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_01/full.u16le",
+    "sha256": "461c34fa2772b76de95af06bc9593ded6208aa8154073fb83b2de48ee9d705f1"
+   },
+   "02": {
+    "frame": "000200.bin",
+    "n": 45114,
+    "path": "morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_02/full.u16le",
+    "sha256": "fb49f73a30e03fd4b36e714df5bcde447a113f9d13f7531d101fd9a36b7acf67"
+   }
+  },
+  "manifest_sha256": "f167479ab9f3cec634951672a6fc8a96e18f1c4d279085e67a524f37a8087148",
+  "pipeline_sources_sha256": {
+   "bench/wspd_q34_probe.cpp": "3c0c9c2f83a2fedc1ceeb1d43568e4a15b78ea7689378318cf8dc7ed46059c43",
+   "src/lanes/edge_cover.cpp": "a562527ad8f9fea78b663b75ff34d191a87d0c7dc112ceff703f3516678c9120",
+   "src/lanes/q34_witness_search.cpp": "172ae93abf9c4506eeb98f242690aff8db76e5c7c83aead3b56d77b247b0eb45",
+   "src/lanes/q3_ball_census.cpp": "434bd6e49eee8cc11398f0f678cc5478a60a10e18828d294b6c44416de881956",
+   "src/lanes/q4_local.cpp": "e482220a45dfceb215a0dbce707d82794f4cf835a3950376398249b9a918c374",
+   "src/lanes/q4_local_partition.cpp": "c7b426f947d410839de4e7d3dd1ac85f3466dd38e74258606cf1de354c775510",
+   "src/pipeline/wspd_q34.cpp": "1053327ba43074d323f86f450951fa638211188f6ee3867890c48a0ada67699a",
+   "src/pipeline/wspd_q34.hpp": "ac9840848a3e6eeaf32f659a17f5cce9385f1b4b3c28470146396a61bb5a3483",
+   "src/wspd/front.cpp": "eefe6f9a776636348293934af681546a54b984c8585e96fb3d710d3a44626cc4"
+  },
+  "probe": "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/probe_phase1",
+  "probe_sha256": "bb7f01fceccc7d3d10c70398e9a00a8476c7d6042b6a8e04303c9e90896d87e1",
+  "runner_sha256": "8f314d87cfb91833754050a402a1209e54c79f9793845f9ecc7903d47f470be0",
+  "worktree_status": "?? morsehgp3D_v8/src/core/float32_edge_geometry.cpp\n?? morsehgp3D_v8/src/core/float32_edge_geometry.hpp\n?? morsehgp3D_v8/src/core/float32_q3_owned_block.cpp\n?? morsehgp3D_v8/src/core/float32_q3_owned_block.hpp\n?? morsehgp3D_v8/src/lanes/float32_q3_owned.cpp\n?? morsehgp3D_v8/src/lanes/float32_q3_owned.hpp\n?? morsehgp3D_v8/src/pipeline/float32_q3_global.cpp\n?? morsehgp3D_v8/src/pipeline/float32_q3_global.hpp\n?? morsehgp3D_v8/src/wspd/float32_front.cpp\n?? morsehgp3D_v8/src/wspd/float32_front.hpp"
+ },
+ "profile": "quantized_u16_input_only",
+ "public_status": "not_claimed",
+ "q4_backend": 28,
+ "rows": [
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/probe_phase1",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_01/full.u16le",
+    "35491",
+    "5",
+    "8",
+    "6",
+    "28",
+    "1",
+    "samples",
+    "digest",
+    "rectangle-pair",
+    "boxes",
+    "affine",
+    "live",
+    "64",
+    "atlas"
+   ],
+   "frame": "000100.bin",
+   "gnu_time": {
+    "cpu_percent": 99,
+    "max_rss_kb": 12580,
+    "system_s": 0.05,
+    "user_s": 370.57,
+    "wall_s": 370.67
+   },
+   "index": 3,
+   "kmax": 5,
+   "load_before": [
+    "11.35",
+    "9.49",
+    "7.13"
+   ],
+   "logical_sha256": "fbbb42d389319b631237aa04551c85a18218d8905c9f70f0ef1427d57525e2af",
+   "n": 35491,
+   "output": {
+    "callbacks": 678361,
+    "q3": 556702,
+    "q4": 121659,
+    "shell_ids": 2166272,
+    "sum": "61c4f1432fabf424",
+    "support_ids": 2156742,
+    "xor": "35b3267d66d4486a"
+   },
+   "probe_json": "probe_03_s01_k5_w1.json",
+   "probe_json_sha256": "46f70d978994928887632b8df3b80cc4a8b68d78362129b11d7b99aaeff325a1",
+   "q3_emitted": 556702,
+   "q4_emitted": 121659,
+   "scene": "01",
+   "started_utc": "2026-09-21T23:06:01Z",
+   "time_file": "time_03_s01_k5_w1.txt",
+   "timings_ms": {
+    "cloud": 1.388872,
+    "front_edges_collect": 370653.822392,
+    "index": 12.882611,
+    "load_prefix_hash": 1.107226,
+    "pipeline_including_shared_preparation": 370668.093875,
+    "record_normalization": 0.000321,
+    "total_before_serialization_and_release": 370669.201422
+   },
+   "workers": 1
+  },
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/probe_phase1",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_01/full.u16le",
+    "35491",
+    "5",
+    "8",
+    "6",
+    "28",
+    "8",
+    "samples",
+    "digest",
+    "rectangle-pair",
+    "boxes",
+    "affine",
+    "live",
+    "64",
+    "atlas"
+   ],
+   "frame": "000100.bin",
+   "gnu_time": {
+    "cpu_percent": 611,
+    "max_rss_kb": 12632,
+    "system_s": 0.44,
+    "user_s": 601.34,
+    "wall_s": 98.4
+   },
+   "index": 4,
+   "kmax": 5,
+   "load_before": [
+    "4.26",
+    "5.40",
+    "5.97"
+   ],
+   "logical_sha256": "fbbb42d389319b631237aa04551c85a18218d8905c9f70f0ef1427d57525e2af",
+   "n": 35491,
+   "output": {
+    "callbacks": 678361,
+    "q3": 556702,
+    "q4": 121659,
+    "shell_ids": 2166272,
+    "sum": "61c4f1432fabf424",
+    "support_ids": 2156742,
+    "xor": "35b3267d66d4486a"
+   },
+   "probe_json": "probe_04_s01_k5_w8.json",
+   "probe_json_sha256": "d1ea87d8de94ceab711d5a62e3e3a3e9312b6e134b96cbb82545def3468d2bd9",
+   "q3_emitted": 556702,
+   "q4_emitted": 121659,
+   "scene": "01",
+   "started_utc": "2026-09-21T23:12:12Z",
+   "time_file": "time_04_s01_k5_w8.txt",
+   "timings_ms": {
+    "cloud": 1.372391,
+    "front_edges_collect": 98382.067589,
+    "index": 12.94134,
+    "load_prefix_hash": 1.165785,
+    "pipeline_including_shared_preparation": 98396.38132,
+    "record_normalization": 0.000351,
+    "total_before_serialization_and_release": 98397.547456
+   },
+   "workers": 8
+  },
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/probe_phase1",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_01/full.u16le",
+    "35491",
+    "10",
+    "8",
+    "6",
+    "28",
+    "8",
+    "samples",
+    "digest",
+    "rectangle-pair",
+    "boxes",
+    "affine",
+    "live",
+    "64",
+    "atlas"
+   ],
+   "frame": "000100.bin",
+   "gnu_time": {
+    "cpu_percent": 493,
+    "max_rss_kb": 12632,
+    "system_s": 1.15,
+    "user_s": 1664.1,
+    "wall_s": 337.22
+   },
+   "index": 5,
+   "kmax": 10,
+   "load_before": [
+    "9.48",
+    "6.91",
+    "6.46"
+   ],
+   "logical_sha256": "9277f0e4c2bdd3a0dbd06daf65f4e132527f4f172a67fb5c891e66a99c61a26a",
+   "n": 35491,
+   "output": {
+    "callbacks": 3575583,
+    "q3": 2305606,
+    "q4": 1269977,
+    "shell_ids": 12035930,
+    "sum": "c3c79e61959cad91",
+    "support_ids": 11996726,
+    "xor": "e1f11d8155fa38b"
+   },
+   "probe_json": "probe_05_s01_k10_w8.json",
+   "probe_json_sha256": "a70eb3dd87a81d5dbb10da55899959982ded3c137a08142ba4fcf7b64d6871d7",
+   "q3_emitted": 2305606,
+   "q4_emitted": 1269977,
+   "scene": "01",
+   "started_utc": "2026-09-21T23:13:50Z",
+   "time_file": "time_05_s01_k10_w8.txt",
+   "timings_ms": {
+    "cloud": 1.389003,
+    "front_edges_collect": 337206.944608,
+    "index": 14.162418,
+    "load_prefix_hash": 1.088912,
+    "pipeline_including_shared_preparation": 337222.496029,
+    "record_normalization": 0.000481,
+    "total_before_serialization_and_release": 337223.585422
+   },
+   "workers": 8
+  },
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/probe_phase1",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_02/full.u16le",
+    "45114",
+    "5",
+    "8",
+    "6",
+    "28",
+    "1",
+    "samples",
+    "digest",
+    "rectangle-pair",
+    "boxes",
+    "affine",
+    "live",
+    "64",
+    "atlas"
+   ],
+   "frame": "000200.bin",
+   "gnu_time": {
+    "cpu_percent": 99,
+    "max_rss_kb": 13364,
+    "system_s": 0.15,
+    "user_s": 851.88,
+    "wall_s": 852.2
+   },
+   "index": 6,
+   "kmax": 5,
+   "load_before": [
+    "13.79",
+    "11.63",
+    "8.68"
+   ],
+   "logical_sha256": "395bcb7531df96607a160a44a7cb58f3ce6b8e823c6fa7e37ce06c02b2ad8345",
+   "n": 45114,
+   "output": {
+    "callbacks": 819849,
+    "q3": 679702,
+    "q4": 140147,
+    "shell_ids": 2652491,
+    "sum": "7a14f45bce34d798",
+    "support_ids": 2599694,
+    "xor": "c42f0202182cf28"
+   },
+   "probe_json": "probe_06_s02_k5_w1.json",
+   "probe_json_sha256": "57b099fd99c904bab68ea36ce265ae6762d262728c69ee555e5fa34408d9205d",
+   "q3_emitted": 679702,
+   "q4_emitted": 140147,
+   "scene": "02",
+   "started_utc": "2026-09-21T23:19:28Z",
+   "time_file": "time_06_s02_k5_w1.txt",
+   "timings_ms": {
+    "cloud": 1.803145,
+    "front_edges_collect": 852182.465488,
+    "index": 15.695409,
+    "load_prefix_hash": 1.411925,
+    "pipeline_including_shared_preparation": 852199.964042,
+    "record_normalization": 0.00032,
+    "total_before_serialization_and_release": 852201.376287
+   },
+   "workers": 1
+  },
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/probe_phase1",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_02/full.u16le",
+    "45114",
+    "5",
+    "8",
+    "6",
+    "28",
+    "8",
+    "samples",
+    "digest",
+    "rectangle-pair",
+    "boxes",
+    "affine",
+    "live",
+    "64",
+    "atlas"
+   ],
+   "frame": "000200.bin",
+   "gnu_time": {
+    "cpu_percent": 525,
+    "max_rss_kb": 13932,
+    "system_s": 0.9,
+    "user_s": 1339.22,
+    "wall_s": 255.22
+   },
+   "index": 7,
+   "kmax": 5,
+   "load_before": [
+    "3.42",
+    "3.94",
+    "5.66"
+   ],
+   "logical_sha256": "395bcb7531df96607a160a44a7cb58f3ce6b8e823c6fa7e37ce06c02b2ad8345",
+   "n": 45114,
+   "output": {
+    "callbacks": 819849,
+    "q3": 679702,
+    "q4": 140147,
+    "shell_ids": 2652491,
+    "sum": "7a14f45bce34d798",
+    "support_ids": 2599694,
+    "xor": "c42f0202182cf28"
+   },
+   "probe_json": "probe_07_s02_k5_w8.json",
+   "probe_json_sha256": "1758ce6eef439cd830fcff9e7bffaf2e62cecd266fdf12f2594b803beac3974b",
+   "q3_emitted": 679702,
+   "q4_emitted": 140147,
+   "scene": "02",
+   "started_utc": "2026-09-21T23:33:40Z",
+   "time_file": "time_07_s02_k5_w8.txt",
+   "timings_ms": {
+    "cloud": 1.830426,
+    "front_edges_collect": 255200.621775,
+    "index": 15.558444,
+    "load_prefix_hash": 1.401375,
+    "pipeline_including_shared_preparation": 255218.010645,
+    "record_normalization": 0.000571,
+    "total_before_serialization_and_release": 255219.412591
+   },
+   "workers": 8
+  },
+  {
+   "command": [
+    "/tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/probe_phase1",
+    "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/prepared/ground_u16/scene_02/full.u16le",
+    "45114",
+    "10",
+    "8",
+    "6",
+    "28",
+    "8",
+    "samples",
+    "digest",
+    "rectangle-pair",
+    "boxes",
+    "affine",
+    "live",
+    "64",
+    "atlas"
+   ],
+   "frame": "000200.bin",
+   "gnu_time": {
+    "cpu_percent": 462,
+    "max_rss_kb": 14516,
+    "system_s": 2.33,
+    "user_s": 3808.69,
+    "wall_s": 824.14
+   },
+   "index": 8,
+   "kmax": 10,
+   "load_before": [
+    "16.02",
+    "9.71",
+    "7.55"
+   ],
+   "logical_sha256": "b6b6dc459feda509ddd86f7df73d5e66bd23f5dd76775d6e906c79f672948807",
+   "n": 45114,
+   "output": {
+    "callbacks": 4234127,
+    "q3": 2813227,
+    "q4": 1420900,
+    "shell_ids": 14380703,
+    "sum": "c29bc42676bd9391",
+    "support_ids": 14123281,
+    "xor": "a6a58bb994716213"
+   },
+   "probe_json": "probe_08_s02_k10_w8.json",
+   "probe_json_sha256": "4e35723914106c33e1db98272d32f0786d29d2e397e1f95261b976be35f573ab",
+   "q3_emitted": 2813227,
+   "q4_emitted": 1420900,
+   "scene": "02",
+   "started_utc": "2026-09-21T23:37:55Z",
+   "time_file": "time_08_s02_k10_w8.txt",
+   "timings_ms": {
+    "cloud": 9.28682,
+    "front_edges_collect": 824081.009064,
+    "index": 40.656389,
+    "load_prefix_hash": 5.200265,
+    "pipeline_including_shared_preparation": 824130.952273,
+    "record_normalization": 0.000371,
+    "total_before_serialization_and_release": 824136.152909
+   },
+   "workers": 8
+  }
+ ],
+ "schema": "mhgp8_ground_baseline_v1",
+ "scope": "u16 q3/q4 candidate stream on the three ground-free scenes: timings on a shared host (orientation only), logical counters, W1/W8 output identity",
+ "separation": 8,
+ "status": "partial"
+}

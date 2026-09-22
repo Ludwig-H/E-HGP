@@ -20,7 +20,11 @@ travail sans rien qualifier ; les reçus sont dans `receipts/`.
 Base de temps de référence (moteur avant ces tranches,
 `receipts/ground_baseline_20260921`, hôte partagé) : scène 0 sans sol K5
 W1 889,5 s, W8 298 s (1 283 CPU·s) ; K10 W8 911 s (3 877 CPU·s) ; scène 100
-K5 W1 742,9 s, W8 273 s.
+K5 W1 742,9 s, W8 273 s. Campagne appariée après les tranches
+(`receipts/ground_phase1_20260921`, scène 0 rejouée au calme) : K5 W1
+453 s (×1,96), K5 W8 108 s (×2,76, 686 % de CPU), K10 W8 323 s (×2,82) ;
+scènes 100/200 : CPU divisé par 1,5 à 2,2 malgré un chevauchement de charge
+déclaré dans les deux reçus.
 
 ## Partage de rectangles par plages (phase 2, première étape)
 
