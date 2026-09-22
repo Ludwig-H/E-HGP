@@ -69,6 +69,49 @@ construites depuis les **huit coins de la boîte X** des graines tirées,
 sans prétendre tester la traversée de l'index ; il ne teste pas non plus le relais
 du moteur v9 ni sa croissance sur LiDAR.
 
+**Ticket parallélisable, sans trou de témoins.** Une tâche possédée porte
+`(identité du nuage/index, propriétaire ab, nœud X, compte strict,
+curseur DFS Z, seuil)`. Le curseur est le **premier** sous-arbre non
+consommé ; `curseur, escape(curseur), …` partitionnent son suffixe, et
+le compte exact concerne uniquement le préfixe uniformément classifié
+pour toutes les graines valides de X. `upper<0` crédite le nœud Z puis
+avance ; `lower≥0` l'écarte du compte puis avance, jamais de la
+coquille. Un nœud ambigu se raffine ; à une feuille ambiguë, on laisse
+le curseur en place et on divise X. Les deux enfants reçoivent une
+**copie figée** du ticket, et le parent cesse de posséder ces graines.
+Après relais singleton, le suffixe se parcourt séparément ; la coquille
+repart toujours de la racine. Les endpoints fixes `a,b` peuvent être
+sautés structurellement pour le compte, avec leurs contacts rétablis
+dans la coquille ; les autres sites X restent témoins, même si leur
+propre graine est invalide.
+
+Un avance-cursor avant scission perd des intérieurs. À K3, prendre
+`a=(20,20,20), b=(40,20,20), z=(30,31,20),
+x₁=(30,32,20), x₂=(30,37,20)` : z est strictement intérieur aux
+deux boules aiguës, x₁ est contact de sa propre boule mais strictement
+intérieur à celle de x₂. Un ticket `(1, avant x₁)` transmis **après**
+consommation ambiguë de x₁ donne faussement profondeur 1 à x₂ au lieu
+de 2 et peut publier une q3 à rejeter. Même danger si des réponses GPU
+sur Z arrivent hors ordre : le `cursor` ne peut avancer qu'après un
+préfixe DFS **continu** validé, sinon il faut payer une forêt explicite
+des trous. Un `lower≥0` autorise désormais un EOF admis (trois seuls
+sites a,b,x avec contacts et zéro intérieur en donnent le cas simple) ;
+ne pas hériter de la preuve float32 d'EOF inaccessible avec l'ancien
+test `Outside>0`.
+
+Plan CPU/GPU : distribuer d'abord les arêtes q3 seules, puis donner des
+enfants X d'une arête lourde avec contexte d'arête paresseux. Un batch
+GPU peut proposer des signes de `(tâche X,nœud Z)` indépendants, mais
+le ticket se publie dans l'ordre DFS, avec repli exact pour toute
+indécision/débordement. Une file pleine se traite localement sans perdre
+le suffixe. Le budget de travail paie préparation des paquets, tests
+partagés, relais, suffixes individuels, coquilles et IDs, transferts et
+aval FULL. Borne de résidence en cours : index `O(n)`, tickets de file
+`O(Q)`, piles privées `O(W log n)` **plus** coquilles privées et sorties
+en vol ; sans coquille segmentée, le pire cas des `W` workers est
+`O(Wn)`. Aucun gain GPU ou borne de croissance n'est déduit de ce
+découpage.
+
 Avant un nouvel atlas par ancre, une optimisation à risque limité peut réutiliser **les feuilles exactes** de l'atlas q4 déjà payé pour une arête `ab`. [L'objet `Q4LocalFragment`](../../morsehgp3D_v8/src/lanes/q4_local_partition.hpp) garantit, sur sa cellule fermée, le **compte exact des nœuds déjà certifiés intérieurs** pour le même cover et une frontière disjointe complète de nœuds encore ambigus ; les autres nœuds sont strictement dehors. Sa forme locale a le même signe que `4Q` fois la puissance de la sphère de centre `c` passant par `a,b`, avec `Q>0` ([identité](../../morsehgp3D_v8/docs/Q3_CERTIFICAT_ATLAS_20260921.md)). Si le circumcentre q3 de `abx` est dans cette feuille, la positivité et la propriété de `ab` assurent que sa boule fermée entière est dans le cover de `ab` : en posant `D=|ab|²`, on a `R²≤D/3` et `|c−(a+b)/2|²=R²−D/4≤D/12`, donc `R+|c−(a+b)/2|≤√(3D)/2<√D`, le rayon du cover. Les sites strictement intérieurs **et tous les contacts de coquille** y sont. Le census q3 peut donc démarrer avec ce compte exact, tester seulement les sites de la frontière, saturer à K−1 ou conserver sa profondeur exacte, et construire la coquille complète dans cette même frontière. Les endpoints `a,b,x` ont signe zéro et doivent rester disponibles. Le fragment ne livre toutefois que le **compte** des intérieurs uniformes, pas leurs IDs : le catalogue FULL exige des handles vers ces nœuds ou une recollecte d'intérieurs une fois par boule canonique distincte, coût inclus. Ce port exige le **même nuage/index, la même arête, le même cover et la même cellule** ; une simple valeur numérique de compte détachée de son propriétaire n'est pas une preuve.
 
 La distinction des états de [l'atlas](../../morsehgp3D_v8/src/lanes/q4_local.cpp) est décisive. `Leaf` a un fragment exact utilisable. `Deep` ne conserve plus son fragment : s'il certifie au moins K−1 sites, il rejette q3 immédiatement ; s'il ne garantit que K−2, seuil suffisant pour q4, il **ne décide pas q3**. Le nouveau certificat `saturate_deep` atteint K−1 mais n'a volontairement aucune frontière complète : il rejette q3, sans pouvoir amorcer un census accepté. Dans les cas `Deep` insuffisants, il faut raffiner un état complet encore possédé ou reprendre un census global à zéro. `Outside`, notamment sous le domaine `Positive` q4, ne dit rien sur q3 : un circumcentre q3 peut être hors du domaine q4 même si sa graine est valide ; repli global obligatoire. Cette discipline conserve aussi la coquille des préfixes et des frontières, que le seul `certified_inside_count` public ne peut pas fournir. Mesurer séparément feuilles q3 accessibles, profondes à K−2 seulement, profondes à K−1, dehors, masse de frontière et rescans de repli. Le [certificat d'atlas q3 v8](../../morsehgp3D_v8/docs/Q3_CERTIFICAT_ATLAS_20260921.md) ne faisait que rejeter : il n'est pas déjà ce raccord de census.

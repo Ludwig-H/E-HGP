@@ -164,11 +164,18 @@ def main() -> None:
     E, U = dot(d, u), norm2(u)
     require(D * (U - E) * result[0][2] > (1 << 127) - 1,
             "literal i128 overflow fixture failed")
+    a, b, z, x1, x2 = ((20, 20, 20), (40, 20, 20), (30, 31, 20),
+                       (30, 32, 20), (30, 37, 20))
+    c1, c2 = seed(a, b, x1), seed(a, b, x2)
+    require(c1 is not None and c2 is not None, "cursor fixture seeds invalid")
+    require(power(a, z, c1[1]) < 0 and power(a, z, c2[1]) < 0 and
+            power(a, x1, c1[1]) == 0 and power(a, x1, c2[1]) < 0,
+            "cursor fixture contact/interior mismatch")
     require(groups > 100 and seeds > 500, "insufficient seed coverage")
     print(json.dumps({"status": "PASS", "index_box_groups": groups,
                       "groups": groups, "seeds": seeds,
                       "power_checks": checks, "contact_fixtures": 1,
-                      "overflow_fixtures": 1},
+                      "overflow_fixtures": 1, "cursor_fixtures": 1},
                      sort_keys=True))
 
 

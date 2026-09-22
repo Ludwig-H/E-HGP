@@ -2,8 +2,10 @@
 
 22 septembre 2026. Moteur v8 lu à `a74e90f2`, ouverture v9 `3595725a` ;
 premier moteur v9 `d2700314` relu ensuite. Audit mathématique et
-architectural, **aucun chrono v9 qualifié** : le premier essai FULL de la
-passation reste exploratoire sans reçu. Le [jalon de temps v9](https://github.com/Ludwig-H/E-HGP/blob/3595725a/morsehgp3D_v9/docs/AUDIT_V8_SYNTHESE.md)
+architectural ; les six lignes FULL locales du
+[premier reçu](../receipts/first_tower_20260922/README.md) donnent une base de
+coût relative aux clés émises, sans qualification du contrat G4. Le
+[jalon de temps v9](https://github.com/Ludwig-H/E-HGP/blob/3595725a/morsehgp3D_v9/docs/AUDIT_V8_SYNTHESE.md)
 vise d'abord les trames LiDAR entières sans sol en u18/1 mm. La trame brute
 entière reste une obligation distincte, dont la portée temporelle v9 est à
 préciser ; float32 reste le défaut d'entrée antérieur, son développement
@@ -301,7 +303,7 @@ vertical** ; les formes `y=0` peuvent ensuite rendre leur profondeur
 totale arbitrairement grande. Le lemme des demi-plans borne donc les
 intersections indépendantes de cette présélection à `O(m(d+1))`
 ([Har-Peled–Sharir, lemme 2.5](https://www.math.tau.ac.il/~michas/k_depth.pdf)).
-Cela indique une route locale proche de `O(mK polylog m+sorties)` ; **ce
+Cela indique une route locale quasi linéaire en `m` pour K5/K10 fixé ; **ce
 n'est pas encore un algorithme v9 ni une borne du pipeline**. Une première
 version peut construire les niveaux **sans poids** comme surensemble,
 puis compter les multiplicité/IDs aux seuls centres retenus : les poids
@@ -315,14 +317,80 @@ perturbation générique peut même effacer un sommet exact de profondeur
 zéro : pour `2(d+1)` formes `±n_i·(u,v)` concourantes à l'origine,
 remplacer chacune par `±n_i·(u,v)−ε` crée au moins `d+1` intérieurs
 partout. Il faut grouper les concurrences exactement, ou démontrer une
-perturbation orientée qui conserve tous les sommets à rabattre ; aucun
-coût de cette étape n'est encore acquis.
+perturbation orientée qui conserve tous les sommets à rabattre. La
+construction effective de ces niveaux reste à qualifier.
 
-L'exactification ne doit pas rescanner les m formes **par centre** : un
-arbre d'enveloppes supérieure/inférieure par famille peut retourner les
-quelques négatifs puis tous les contacts, avec leurs multiplicités, par
-priorité de racine exacte ; sa préparation et sa mémoire doivent être
-facturées. Le lemme des deux extrêmes donne au plus `2d+2` sommets peu
+Une **perturbation sortante** donne toutefois un protocole de couverture
+plus précis. Grouper d'abord les formes par droite *orientée* primitive,
+avec poids et IDs (`g≤2m`) ; conserver à part les formes constantes
+négatives et celles identiquement nulles. Pour chaque groupe non
+vertical, poser symboliquement `f_i*=f_i+ε+ε^{i+2}` pour des indices
+distincts, **sans changer la pente**. Les verticales reçoivent le même
+décalage de constante et restent dans leur branche d'abscisses.
+Le terme commun `+ε` domine : à un sommet original `v` de profondeur
+`p≤d`, tous ses contacts sont du côté **non intérieur**. Les contacts
+originaux contiennent deux normales indépendantes. L'intersection
+`P*=∩_{i contact}{f_i*≥0}` contient `v` strictement et est pointée.
+Minimiser sur `P*` la somme de deux formes **perturbées** dont les
+normales originales sont indépendantes :
+la valeur au point `v` est `O(ε)` et les deux formes sont non négatives.
+Leur sous-niveau borné contient donc un sommet `v*=v+O(ε)` ; après
+inversion de la matrice `2×2`, aucun contact n'est négatif en `v*` et les
+autres signes sont stables. Sa profondeur perturbée pondérée est `p`,
+donc sa profondeur **non pondérée** est au plus d. Les termes d'ordres
+distincts cassent toute concurrence de trois droites non parallèles ;
+les parallèles restent parallèles. Chaque paire active au sommet `v*`
+est donc indépendante **aussi avant perturbation**, et son intersection
+originale est exactement `v`. Le catalogue des niveaux peu profonds
+doit proposer ce sommet, puis la clé rationnelle originale est
+recertifiée. Une perturbation `−ε` échoue déjà pour `±u,±v` à l'origine,
+profondeur zéro devenue au moins deux partout.
+L'[oracle rationnel autonome](check_q4_outward_levels_20260922.py) compare
+les signes des polynômes en ε sans valeur flottante : 2 004 cas,
+5 926 centres exacts peu profonds et 7 351 sommets perturbés, avec
+parallèles, concurrences, orientations opposées et multiplicités. Les
+exécutions normales et `-O` donnent le même PASS. Cela contrôle le lemme
+local, sans tester le constructeur de niveaux ni le moteur v9.
+
+Le dédoublonnage **précède** les tests coûteux : chaque sommet perturbé
+donne une paire de droites originales indépendantes. On normalise
+exactement leur intersection
+`(N_u/D,N_v/D)`, `D>0`, PGCD commun, et on trie/hache la clé. Sous les
+bornes u18 des coefficients ci-dessus, `|N_u|,|N_v|<2^80`, `|D|<2^79` ;
+comparer deux clés par produits croisés peut demander environ 160 bits,
+donc une voie entière 256 bits est une cible prudente à qualifier.
+Plusieurs sommets perturbés d'une concurrence se rabattent sur **une**
+seule clé. Après unicité, un arbre binaire des groupes de racines
+`y>0` (enveloppe supérieure par nœud) et `y<0` (inférieure) peut
+rapporter les stricts intérieurs par priorité exacte, arrêter à
+`d+1` poids négatif, puis, seulement si admis, rendre **tous** les
+contacts égaux, y compris ceux invisibles dans les niveaux perturbés.
+Les verticales se joignent par préfixes/suffixes et groupe d'abscisse ;
+les formes identiquement nulles par leur liste d'IDs. Préparer les
+enveloppes vise `O(m log²m)` temps et `O(m log m)` mémoire ; interroger
+un centre vise `O((K+t)log²m)` pour `t` contacts. Avec `O(mK)` sommets
+perturbés et les clés dédoublonnées, la cible **locale conditionnelle**
+est `O(h log h+m log²m+mK log(mK)+mK²log²m+Ilog²m)` hors sorties,
+où `I` est le nombre d'incidences de coquille distinctes. La borne de
+deux extrêmes donne
+`I≤(2d+2)h` pour les centres effectivement admis, hors endpoints
+permanents. Ce compte suppose un constructeur exact de niveaux et des
+comparateurs symboliques à coût borné, encore à concevoir et à juger :
+ce n'est **ni** une borne du générateur entier **ni** un résultat GPU.
+Les parallèles sont explicitement admises dans la position générale de
+[Halperin–Har-Peled–Mehlhorn–Oh–Sharir, annexe A](https://sarielhp.org/p/20/max_level/max_level.pdf),
+qui donne `O(m log m+mK)` pour les premiers niveaux homogènes. Le lemme
+de profondeur cité plus haut suppose une position générale plus forte ;
+la borne utilisée ici pour les parallèles suit directement du comptage
+sur chaque droite, sans invoquer ce transfert. Une préparation de
+`O(m log m)` **par arête** serait ruineuse sur les millions de petites
+arêtes : déclencher cette voie seulement quand `s≈m` et `m` est grand,
+puis mesurer la somme des coûts et la mémoire simultanée.
+L'arête est une tâche indépendante, ses deux familles peuvent être
+préparées séparément ; les arêtes lourdes peuvent distribuer l'overlay
+par intervalles d'abscisse avec dédoublonnage rationnel aux frontières.
+
+Le lemme des deux extrêmes donne au plus `2d+2` sommets peu
 profonds par droite géométrique, donc `O(h(d+1))` incidences explicites
 de sites de coquille pour h formes du cover, hors les deux endpoints
 identiquement nuls. Cela concerne le **catalogue de centres**, pas le
