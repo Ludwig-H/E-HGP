@@ -144,4 +144,4 @@ mhgp9_gate(mhgp9_tower_probe_rejects_grid_label 2 mhgp9_tower_probe
 mhgp9_product_executable(mhgp9_tower_anchor_meb_mutant_gate tests/tower/anchor_meb_gate.cpp)
 target_compile_definitions(mhgp9_tower_anchor_meb_mutant_gate PRIVATE MHGP9_MEB_MUTANT_LAST_MAXIMUM=1)
 mhgp9_gate(mhgp9_tower_anchor_meb_mutant_last_maximum 1 mhgp9_tower_anchor_meb_mutant_gate
-           ARGS --selftest EXPECT_PREFIX "cause=" LABELS "gate;tower;mutant" TIMEOUT 120)
+           ARGS --selftest EXPECT_LINE "cause=support.first_positive_containing" LABELS "gate;tower;mutant" TIMEOUT 120)

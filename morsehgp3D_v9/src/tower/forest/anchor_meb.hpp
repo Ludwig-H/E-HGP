@@ -16,7 +16,7 @@
 namespace mhgp9::tower {
 
 inline constexpr const char* kAnchorMebWorkAccounting =
-    "anchor_meb_real_lexicographic_supports_and_powers_v1";
+    "anchor_meb_first_maximal_pair_then_lexicographic_supports_extremes_first_v2";
 
 enum class AnchorMebStatus { kOk, kInvalidInput, kCounterOverflow, kInvariantViolated };
 

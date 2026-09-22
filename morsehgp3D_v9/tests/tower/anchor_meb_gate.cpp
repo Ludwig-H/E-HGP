@@ -235,6 +235,17 @@ void run() {
   check_failure({{0,0,0},{1,0,0}}, overflow, AnchorMebStatus::kCounterOverflow);
   overflow = {}; overflow.materializations = maximum;
   check_failure({{0,0,0}}, overflow, AnchorMebStatus::kCounterOverflow);
+  // New v9 counter: the first-maximal-pair scan charges each pair distance.
+  // Saturating it refuses transactionally, with no support tried after it.
+  overflow = {}; overflow.pair_distances = maximum;
+  {
+    const std::vector<P3> three{{0,0,0},{1,0,0},{0,1,0}};
+    const auto refused = anchor_meb(three, overflow);
+    need(refused.status == AnchorMebStatus::kCounterOverflow && refused.key == BallKey{} &&
+         refused.support_size == 0 && overflow.pair_distances == maximum &&
+         overflow.supports_by_size == std::array<u64, 5>{} && overflow.power_tests == 0,
+         "counter.pair_distances_overflow_no_support_after");
+  }
   const std::vector<std::vector<P3>> arities{
     {}, {{0,0,0}}, {{0,0,0},{1,0,0}}, {{0,0,0},{2,2,0},{2,0,2}},
     {{0,0,0},{2,2,0},{2,0,2},{0,2,2}}
