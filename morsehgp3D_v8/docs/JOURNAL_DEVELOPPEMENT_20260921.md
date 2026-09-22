@@ -67,3 +67,34 @@ cellules filles (partage des évaluations de coins et des formes), arène de
 fragments, puis filtre flottant certifié à repli exact pour les bornes ;
 en parallèle, chronos par worker et campagne appariée sur les trois scènes
 (K5/K10, W1/W8) avec le nouveau binaire.
+
+## Prochain chantier : session G4 à 48 workers sur les nuages sans sol
+
+Le protocole `gcp-migration/q34_spatial_{worker,session,snapshot,selftest}_v8.py`
+est verrouillé sur la campagne spatiale du 21 septembre : inventaire de
+24 unités, commande de sonde à 14 jetons (schéma v4), plan
+`mhgp8_q34_spatial_plan_v1` sur des scènes préparées par
+`prepare_lidar_spatial.py` (RAW.bin reconstruit sur la VM), et **autorité
+native** = reçu local de qualification (216 sources hachées,
+`q4_seed_cells_20260921/qualification_r2/smoke_ewedfs4y`) couplé aux
+sources téléversées. Pour mesurer le nouveau moteur sur G4 il faut, dans
+l'ordre et sans toucher aux aides pinnées par hash :
+
+1. produire une nouvelle autorité locale (qualification fraîche des sources
+   courantes par le lanceur de `q4_seed_cells`, 216 hashes) et épingler ses
+   deux hashes dans le worker ;
+2. étendre les validateurs de sonde (`run_wspd_q34_lidar.strict_shape`,
+   `run_q4_seed_cells_checks.validate_row`, `run_q34_spatial`) au schéma v5
+   (jeton `atlas`, registres `q3_atlas`, `tasks`, `workers_tasks`,
+   `workers_timing_ms`) sans casser la lecture des reçus v4 ;
+3. ajouter au worker une préparation « sans sol » relocalisable (RAW.bin +
+   masque → sept morceaux u16 par la recette de
+   `prepare_lidar_ground_u16.py`, fonction pure sur octets) et le jeton
+   `atlas` dans `probe_command` / `validate_probe` ;
+4. plan : trois scènes sans sol × K5 et K10 × W48 (budget utile ≤ 900 s : K10
+   scène 200 ≈ 824 s à 8 workers locaux, donc K10 seulement si W48 tient),
+   `GPU_executed = False`, arrêt TERMINATED certifié ;
+5. selftests locaux sous faux gcloud (`q34_spatial_selftest_v8.py`,
+   `tests/gcp/`) avant toute session payante ; `describe` de contrôle de la
+   cible avant démarrage (incident conteneur/VM).
+

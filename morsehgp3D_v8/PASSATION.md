@@ -27,7 +27,13 @@ nuages sans sol au profil u16 (2 cm), 39 815 / 35 491 / 45 114 sites
 Première mesure (diagnostic, à épingler en phase 0) : scène 0 sans sol, K5,
 1 050 à 1 240 CPU·s en local pour un flux de candidats, contre 48 CPU·s pour
 1 s sur 48 CPU. Brouillons non suivis de l'ancien constructeur (raccord global
-float32) : non repris, sort à décider par l'utilisateur.
+float32) : non repris, sort à décider par l'utilisateur. Tranches du 21 au
+22 septembre et prochain chantier (session G4 à 48 workers) dans
+[docs/JOURNAL_DEVELOPPEMENT_20260921.md](docs/JOURNAL_DEVELOPPEMENT_20260921.md) ;
+reçus [ground_baseline_20260921](receipts/ground_baseline_20260921/README.md)
+et [ground_phase1_20260921](receipts/ground_phase1_20260921/README.md) :
+scène 0 sans sol K5 un worker 890 s → 453 s, K10 huit workers 911 s → 323 s,
+sorties identiques.
 
 ## Contrat principal actif — trames entières
 
