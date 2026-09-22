@@ -203,3 +203,61 @@ paramètre ni la taille source dans le JSON ; pour un reçu **trame entière**,
 publier `source_sites`, `selected_sites`, `truncated=false` et le
 manifeste d'entrée. `--grid=1mm` n'est qu'un libellé fourni par
 l'appelant, pas un certificat de préparation.
+
+## 5. Actualisation `ba762036` : six lignes FULL et levier exact du MEB
+
+Le [premier reçu v9](../receipts/first_tower_20260922/README.md) donne
+désormais les trois trames 08 sans sol entières, K5 et K10, s8/W8, une
+exécution locale par cas. J'ai revérifié les 30 blobs du manifeste, les
+trois SHA-256 d'entrées, les six `rc=0` et les six statuts
+`complete_relative`. Pour chaque trame, les **comptes** des ordres K1..5
+du run K5 sont exactement ceux du préfixe K10. Ce contrôle ne compare
+pas les nœuds, parents ou contributions eux-mêmes : un digest **par
+ordre** reste nécessaire pour le préfixe sémantique. La [contrelecture
+B](CONTRE_AUDIT_B_PREMIERE_CAMPAGNE_20260922.md) chiffre chaque ligne et
+les limites du lecteur.
+
+Trois corrections courtes rendent la publication plus fidèle. Le README
+annonce `227–444` boules à coquille étendue, mais les six nombres sont
+`227/135/572` à K5 et `444/280/1301` à K10 : la plage est
+**135–1301**. q2 va de **1,225 à 5,078 s**, et non de 1 à 4 s. La
+commande `sha256sum -c` doit être lancée depuis le dossier du reçu,
+car les chemins du manifeste lui sont relatifs. `run_campaign.sh` crée
+`campaign.done` même si un essai échoue ; le lecteur doit exiger les
+six sorties complètes et comparer les SHA d'entrée/du binaire, les
+options `s`, grille, K effectif, FULL activé, la provenance et les
+préfixes. Le reçu concret reste une base de coût utile malgré ces
+défauts de protocole. Il ne prouve pas qu'aucune BallKey entière a été
+omise sur les grandes trames.
+Les quatre SHA de headers à commentaires modifiés dans
+`docs/PROVENANCE.md` doivent aussi suivre `ba762036` ; leur code
+fonctionnel est inchangé.
+
+La voie FULL devient visible à K10 : sur 000000, le résolveur a fait
+**12 003 966 appels** de `anchor_meb` et **1 065 359 881 tests de
+puissance** (88,8 par appel). Les deux autres trames donnent 87,1 et
+86,5 tests par appel. C'est une obligation de temps autonome, même si
+q3/q4 reste dominant. Dans
+[`anchor_meb.hpp`](../src/tower/forest/anchor_meb.hpp), chaque appel
+essaie d'abord **toutes les paires** par ordre lexicographique, avant
+les triangles et tétraèdres. Un filtre exact peut préserver jusque dans
+le choix du support le comportement actuel : calculer une seule fois
+`Dmax=max_{i<j}|p_i−p_j|²`, choisir sa **première paire lexicographique**
+et ne tester que sa boule de diamètre. Si une paire `ab` quelconque
+enferme tous les points, son rayon vaut `|ab|/2` et la borne universelle
+`R≥√Dmax/2` impose `|ab|²=Dmax`. La miniballe est unique ; toute autre
+paire de longueur `√Dmax` est antipodale dans cette même boule et a le
+même milieu. Donc la première paire maximale est exactement la première
+paire que l'ancien parcours aurait acceptée ; si elle échoue, aucune
+paire n'aurait réussi. Le cas singleton et les refus de positions
+dupliquées restent inchangés.
+
+À 10 sites, cette étape remplace jusqu'à 45 parcours de 10 tests de
+puissance par 45 distances carrées et au plus 10 tests. Le total de
+1,065 milliard **n'est pas** identifié par arité dans le reçu ; aucun
+facteur de vitesse global n'en découle. Garder les compteurs
+`supports_by_size` et ajouter tests de puissance par arité, temps MEB
+et taille des ensembles sélectionnés ; comparer ancienne/nouvelle
+clé, niveau, `support_slots`, parents FULL et digest sur petits oracles,
+coquilles égales et trois trames. Cette réduction q2 laisse ouverte la
+combinatoire des supports q3/q4 et la parallélisation de l'aval.

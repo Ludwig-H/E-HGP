@@ -266,6 +266,102 @@ coïncidences et signes opposés ; elle contrôle 500 restrictions de formes
 u18 et un sommet propriétaire aigu qui n'est pas une miniballe. Les
 deux modes Python normal et `-O` doivent rendre le même PASS.
 
+### Si `s≈m` : deux familles de niveaux peu profonds
+
+Le balayage par droite de graine reste `O(sKm)` dans ce cas. Une réduction
+combinatoire plus forte sépare les formes non constantes
+`f_z(u,v)=c_z+x_z u+y_z v` : pour `y_z>0`, leur intérieur est
+`v<r_z(u)` ; pour `y_z<0`, il est `v>r_z(u)`, avec
+`r_z(u)=−(c_z+x_z u)/y_z`. Après les `p₀` constantes négatives,
+poser `d=K−3−p₀` et `q=d+1`. À un sommet de profondeur au plus d,
+chaque droite de contact `y>0` est parmi les **q plus hautes** racines
+de sa famille à cette abscisse, chaque droite `y<0` parmi les **q plus
+basses** de l'autre : toute racine strictement au-delà est déjà un
+site intérieur. Ignorer les multiplicités pour cette présélection donne
+un surensemble sûr ; les poids et IDs reviennent à l'exactification.
+Si deux droites indépendantes de contact appartiennent à la même
+famille, leur sommet est un événement de ses premiers q niveaux ; sinon
+c'est un croisement des deux familles. Les concurrences se groupent au
+même sommet exact, sans traiter les lignes coïncidentes de signes opposés
+comme deux directions indépendantes.
+
+Les droites verticales `y=0` se traitent par leur abscisse `u=τ` : leur
+profondeur verticale stricte se calcule par préfixes/suffixes des deux
+orientations. Au plus `2d+2` abscisses de droites verticales peuvent
+avoir ce compte au plus d : chaque abscisse entre les deux extrêmes
+éligibles rend au moins une forme strictement négative à l'un des
+extrêmes. Pour chacune, les contacts non verticaux
+utiles sont parmi les q racines extrêmes de leur famille. En position
+générale, les premiers q niveaux de **chaque famille homogène** ont
+`O(mq)` morceaux et une construction `O(m log m+mq)` est connue
+([Everett–Robert–van Kreveld](https://doi.org/10.1142/S0218195996000186)).
+Deux morceaux sélectionnés de familles opposées ne se croisent qu'à
+profondeur **non pondérée au plus `2d` dans le sous-arrangement non
+vertical** ; les formes `y=0` peuvent ensuite rendre leur profondeur
+totale arbitrairement grande. Le lemme des demi-plans borne donc les
+intersections indépendantes de cette présélection à `O(m(d+1))`
+([Har-Peled–Sharir, lemme 2.5](https://www.math.tau.ac.il/~michas/k_depth.pdf)).
+Cela indique une route locale proche de `O(mK polylog m+sorties)` ; **ce
+n'est pas encore un algorithme v9 ni une borne du pipeline**. Une première
+version peut construire les niveaux **sans poids** comme surensemble,
+puis compter les multiplicité/IDs aux seuls centres retenus : les poids
+positifs ne peuvent que relever la profondeur. Le port doit néanmoins
+traiter parallèles, concurrences, contacts isolés et recouvrements de
+droites opposées, puis prouver la largeur de
+ses comparateurs exacts. Le traitement symbolique des dégénérescences
+de niveaux homogènes ([Halperin et al., §4](https://sarielhp.org/p/20/max_level/max_level.pdf))
+ne se transfère **pas** tel quel aux deux familles orientées. Une
+perturbation générique peut même effacer un sommet exact de profondeur
+zéro : pour `2(d+1)` formes `±n_i·(u,v)` concourantes à l'origine,
+remplacer chacune par `±n_i·(u,v)−ε` crée au moins `d+1` intérieurs
+partout. Il faut grouper les concurrences exactement, ou démontrer une
+perturbation orientée qui conserve tous les sommets à rabattre ; aucun
+coût de cette étape n'est encore acquis.
+
+L'exactification ne doit pas rescanner les m formes **par centre** : un
+arbre d'enveloppes supérieure/inférieure par famille peut retourner les
+quelques négatifs puis tous les contacts, avec leurs multiplicités, par
+priorité de racine exacte ; sa préparation et sa mémoire doivent être
+facturées. Le lemme des deux extrêmes donne au plus `2d+2` sommets peu
+profonds par droite géométrique, donc `O(h(d+1))` incidences explicites
+de sites de coquille pour h formes du cover, hors les deux endpoints
+identiquement nuls. Cela concerne le **catalogue de centres**, pas le
+flux potentiellement bien plus gros de tous les supports cosphériques.
+Les niveaux ne certifient pas non plus l'**existence d'un tétraèdre
+strictement positif propriétaire** sur une coquille : la paire de
+droites ayant révélé le centre peut échouer alors qu'une autre paire
+réussit. Pour reproduire le **flux des présentations q4** et ses
+incidences, il faut un oracle d'existence sur la coquille, compatible
+avec la plus longue arête, ou garder le balayage actuel comme repli ;
+énumérer toutes les paires de contacts recréerait le carré sur un plateau.
+Pour un **catalogue de boules canoniques** seulement, la condition
+`c∈conv(U)` après census complet est plus puissante : elle certifie la
+miniballe de U, et Carathéodory donne un support positif minimal d'arité
+`q_min≤4`, éventuellement sur une autre arête. Le FULL porté consomme
+clé, niveau, I/U et `q_min`, pas le flux brut des supports. Le producteur
+de centres q4 peut ne publier que les clés de `q_min=4`, qui ont alors
+un tétraèdre strictement positif sur U, en laissant les `q_min=2,3`
+aux voies q2/q3 complètes ; cette voie
+peut donc être correcte sans inventaire q4, **si** le quotient local
+reconstruit toutes les incidences requises et si la complétude des clés
+est prouvée. La voie FULL actuelle refuse explicitement `|U|>12` et
+son quotient emploie `2^|U|` masques : l'argument de catalogue ne lève
+pas ce verrou de représentation ; il exige le quotient compact et sa
+preuve séparés. La garde actuelle `chain_qmin_differs_from_min_presented_arity`
+devrait alors être remplacée par une certification directe de `q_min`,
+jugée contre les petits inventaires exhaustifs. Les exemples
+octaèdre/cube ci-dessous distinguent ces deux contrats.
+Pour gagner le poste q4 dominant, cette route doit éviter la construction
+des fragments Z de l'atlas, tout en conservant ou remplaçant ses rejets
+q3 sur les arêtes communes ; une insertion **après** l'atlas ne suffirait
+pas. Mesurer d'abord `m,s,h`, événements et contacts par arête lourde,
+prétraitement des niveaux, scans évités et sorties FULL identiques.
+Sur les 1,87 million d'arêtes q4 du seul reçu 1 mm, même un
+`O(m log m)` **par arête** peut coûter trop cher : une sélection adaptative
+des arêtes lourdes doit comparer ce coût complet à l'atlas courant.
+La somme `Σ_e m_e log m_e` et le front WSPD restent à borner ou mesurer ;
+aucun sous-quadratique global n'est acquis par le lemme local.
+
 **Partage prudent avec q3.** Pour une graine aiguë propriétaire `abx`,
 `D=|ab|²` et le circumrayon de sa face vérifie `R₃²≤D/3` ; le centre
 `c₃` est à distance carrée au plus `D/12` du milieu de `ab`. Tout site
@@ -308,6 +404,15 @@ contacts restants donnent bien deux droites indépendantes. Les voies
 q2/q3 conservent leurs objets propres. La paire de droites choisie peut
 ne pas être un support positif ; elle sert à construire **une clé à
 certifier**, jamais à publier directement une boule.
+Le test `c∈conv(U)` certifie la miniballe de la coquille, **pas** une
+présentation q4 : six sites `±e_i` ont cette propriété mais aucun
+tétraèdre strictement positif contenant leur centre. `q_min<4` ne prouve
+pas non plus l'absence d'une présentation q4 **sur la même coquille** :
+les huit sommets `(±1,±1,±1)` ont une paire antipodale (`q_min=2`) et
+un tétraèdre alterné strictement positif autour du même centre.
+Un catalogue FULL peut fusionner les clés après census et quotient exacts ;
+le juge différentiel des supports doit conserver la positivité et les
+incidences de la voie qui a réellement émis chaque présentation.
 
 La condition `c∈conv(U)` est indispensable même avec arête maximale et
 graine aiguë. Fixture entière : `a=(8,5,1)`, `b=(9,5,8)`,

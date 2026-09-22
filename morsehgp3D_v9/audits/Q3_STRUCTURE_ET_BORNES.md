@@ -6,11 +6,69 @@
 
 La [reprise u18 inventoriée dans l’ouverture v9](https://github.com/Ludwig-H/E-HGP/blob/3595725a/morsehgp3D_v9/docs/AUDIT_V8_SYNTHESE.md) est la première lecture. Sa trame **08/000000 sans sol entière, 39 885 sites à 1 mm**, K5/s8/W8, dure 104,63 s mur et 812,82 CPU·s pour le seul flux q3/q4 ; atlas saturant désactivé. Le [reçu v8 publié après cette première lecture](../../morsehgp3D_v8/receipts/u18_resume_20260922/ground_1mm_first/only_probe_01_s00_k5_w8.json) (SHA-256 `89be317e0459f179…`) publie 23 686 751 paires développées, 1 716 642 arêtes q3, **184 461 509 graines q3**, 153 036 427 rejets par l'atlas et encore **31 425 082 boules construites/census q3**. Le census prépare 1 126 261 494 bornes de nœuds ; il n'émet que 691 284 supports q3. La même ligne émet 158 496 supports q4 et 2 707 842 IDs de coquille q3+q4. Les quotients descriptifs sont 267 graines q3 et 45,5 boules recensées par émission q3 ; ils ne sont pas des probabilités ni des coûts unitaires.
 
+
+Le registre sépare `1 716 642−1 545 198=171 444` arêtes **q3 seules**,
+sans atlas partagé. Elles portent
+`184 461 509−168 343 794=16 117 715` constructions/census. Sur les
+arêtes q3+q4, les `168 343 794` localisations se répartissent en
+`153 036 427` rejets atlas, `20 845` centres hors domaine et
+`15 286 522` census après consultation dans le domaine. Réutiliser
+seulement les feuilles q4 peut donc toucher **au plus 48,6 %** des
+`31 425 082` census, même avant ses replis `Deep` et `Outside`. Les
+arêtes q3 seules demandent une voie propre.
+
 L'atlas par arête a donc déjà écarté 83,0 % des graines q3 de cette ligne ; il reste 1,545 million d'arêtes avec atlas, 38,8 millions de cellules créées et des milliards de classifications de blocs/points. [La voie actuelle](../../morsehgp3D_v8/src/pipeline/wspd_q34.cpp) prépare un cover par arête, consulte l'atlas q4 *graine par graine*, puis lance `census_q3_ball` pour les survivantes ; [ce census](../../morsehgp3D_v8/src/lanes/q3_ball_census.cpp) repart de la racine pour chaque boule et collecte la coquille dans une autre traversée globale si elle passe. Le travail d'atlas et celui des 31,4 millions de census ne disparaissent donc pas en ajoutant seulement des workers. Ces données sont une répétition d'une seule trame, un flux incomplet, sans segmentation, catalogue, parents, FULL ou GPU. À débit CPU logique identique entre hôtes, sans GPU ni aval et avec 48 CPU logiques utilisés parfaitement, les 812,82 CPU·s représenteraient encore **×16,9** le budget d'une seconde et **×169** celui de 100 ms. Ce sont des scénarios arithmétiques conditionnels, pas des bornes ni des prévisions de performance G4.
 
 Le [census float32 partagé](../../morsehgp3D_v8/docs/CENSUS_Q3_FLOAT32_PARTAGE_20260921.md) et [l'audit du relais](../../morsehgp3D_v8/audits/q3_prefix_relay_20260921/README.md) apportent une preuve utile : un bloc de graines peut transmettre `(compte, curseur)` sans recommencer le préfixe, avec coquille globale. Ils portent sur **une arête** et des familles synthétiques, sans borne sur le nombre d'arêtes. Le brouillon global float32 non suivi `morsehgp3D_v8/src/pipeline/float32_q3_global.cpp`, examiné en lecture seule, développe encore les paires de chaque rectangle puis appelle le filtre et la voie q3 possédée par arête ; cette source non suivie n'est **pas** qualifiée par cet audit. La [mesure spatiale](../../morsehgp3D_v8/docs/Q34_MESURES_SPATIALES_20260921.md) montre déjà un exposant observé de 2,502 pour les bornes q3 de la trame brute vers sa moitié positive ; un gain local sur 8k/16k/32k ne suffit pas.
 
 ### Premier levier après la base FULL : feuille q4 exacte vers census q3
+
+
+Sur le profil mesuré `GlobalBoxes`, `wspd_q34.cpp` construit encore un
+`Q34EdgeCover` pour les 171 444 arêtes q3 seules ; leur voie n'en lit
+que `edge_ids()`, car le census prend l'index global. Une entrée typée
+`(index, arête propriétaire)` pourrait éviter ces covers, en les gardant
+pour q4, les arêtes communes et `ScalarCover`. Le contrôle causal est
+l'identité des supports/coquilles avec `cover_builds` réduit d'autant ;
+ce retrait ne supprime à lui seul aucun census.
+
+Le port entier u18 du `SharedPrefix` est le candidat suivant pour ces
+16,1 millions de census. Pour l'arête fixe `ab`, poser `D=|b−a|²`,
+`u=x−a`, `E=(b−a)·u`, `G=D|u|²−E²` et `H=D u−E(b−a)`.
+Le centre d'une graine aiguë propriétaire est
+`c=(a+b)/2+ξ H/D`, où `ξ=D(|u|²−E)/(2G)` satisfait `0<ξ≤1/3`.
+En effet, `t=E/D∈(0,1)` et `r=|u|²/D≤min(1,2t)≤3t−2t²`, ce qui
+donne `3(r−t)≤2(r−t²)`. Les extrêmes de H sur un
+paquet de graines X sont donc une boîte rationnelle conservatrice de
+centres, sans construire toutes leurs boules. Un ticket possédé
+`(compte strict, curseur Z)` transmet les témoins à ses enfants ; une
+feuille Z ambiguë divise X **avant** consommation, puis chaque singleton
+reprend le suffixe Z et collecte la coquille globalement. Un minorant
+de puissance `≥0` exclut un nœud du **compte**, pas de la coquille :
+`a=(1,2,0), b=(5,10,0), x=(9,2,0), z=(5,0,0)` donne un triangle
+aigu propriétaire, centre `(5,5,0)` et z exactement sur la sphère.
+Dans le domaine `[0,M]^3`, `M=262143`, une représentation commune des
+centres a un numérateur `<30M³<2^59`, et les bornes de puissance
+proposées `<234M⁴<2^80`. Pour construire un centre individuel, annuler
+`D` **avant** les produits :
+`c=[G(a+b)+(|u|²−E)H]/(2G)` ; son numérateur est
+`<54M⁵<2^96`. L'évaluation littérale du produit
+`D(|u|²−E)H` peut dépasser i128, même pour une graine valide :
+`a=(0,0,0), b=(M,M,0), x=(M,0,M)` donne `4M⁷>2^127−1` sur l'axe z.
+Ces bornes certifient les formes **réduites**, pas une réécriture
+arbitraire de `ξH/D`. Un paquet
+borné et un budget d'effort commun avec repli individuel limitent le
+surcoût par graine, sans plafonner les candidats. Comparer les visites
+X×Z, le travail individuel restant, les coquilles, le temps total et
+les sorties FULL exactes sur trames entières avant d'attribuer un gain.
+L'[oracle autonome](check_q3_shared_u18_20260922.py) passe en Python
+normal et `-O` : 213 paquets, 3 492 graines aiguës propriétaires,
+13 968 comparaisons de puissance, le contact ci-dessus et le témoin de
+débordement. Les IDs implicites `a=0,b=1,x≥2` règlent les égalités de
+plus longue arête dans l'oracle. Il vérifie les enveloppes rationnelles
+sur les graines effectivement tirées, pas la construction d'extrêmes
+depuis une boîte X de l'index ; il ne teste pas non plus le relais
+du moteur v9 ni sa croissance sur LiDAR.
 
 Avant un nouvel atlas par ancre, une optimisation à risque limité peut réutiliser **les feuilles exactes** de l'atlas q4 déjà payé pour une arête `ab`. [L'objet `Q4LocalFragment`](../../morsehgp3D_v8/src/lanes/q4_local_partition.hpp) garantit, sur sa cellule fermée, le **compte exact des nœuds déjà certifiés intérieurs** pour le même cover et une frontière disjointe complète de nœuds encore ambigus ; les autres nœuds sont strictement dehors. Sa forme locale a le même signe que `4Q` fois la puissance de la sphère de centre `c` passant par `a,b`, avec `Q>0` ([identité](../../morsehgp3D_v8/docs/Q3_CERTIFICAT_ATLAS_20260921.md)). Si le circumcentre q3 de `abx` est dans cette feuille, la positivité et la propriété de `ab` assurent que sa boule fermée entière est dans le cover de `ab` : en posant `D=|ab|²`, on a `R²≤D/3` et `|c−(a+b)/2|²=R²−D/4≤D/12`, donc `R+|c−(a+b)/2|≤√(3D)/2<√D`, le rayon du cover. Les sites strictement intérieurs **et tous les contacts de coquille** y sont. Le census q3 peut donc démarrer avec ce compte exact, tester seulement les sites de la frontière, saturer à K−1 ou conserver sa profondeur exacte, et construire la coquille complète dans cette même frontière. Les endpoints `a,b,x` ont signe zéro et doivent rester disponibles. Le fragment ne livre toutefois que le **compte** des intérieurs uniformes, pas leurs IDs : le catalogue FULL exige des handles vers ces nœuds ou une recollecte d'intérieurs une fois par boule canonique distincte, coût inclus. Ce port exige le **même nuage/index, la même arête, le même cover et la même cellule** ; une simple valeur numérique de compte détachée de son propriétaire n'est pas une preuve.
 
