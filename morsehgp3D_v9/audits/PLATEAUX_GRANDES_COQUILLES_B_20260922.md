@@ -203,3 +203,58 @@ La ligne carré+arc prend les axes `±(1313,0,0)`, `±(0,1313,0)` et
 `(1287,260,0)`, `(1212,505,0)` ; elle conserve bien la composante de
 paire isolée. Ce contrôle ciblé renforce la contrelecture mais **ne
 remplace ni le code de test archivé ni les fixtures v7/u18 à porter**.
+
+### Cible d'implémentation à contre-auditer
+
+Une construction explicite de l'arrangement peut éviter les bitsets de
+`u` sites **par région**. Après regroupement des grands cercles
+coïncidents, leurs sommets sont les directions rationnelles
+`±(v_i×v_j)` pour les normales indépendantes ; grouper les intersections
+multiples, trier exactement les sommets le long de chaque cercle et
+construire les adjacences orientées. Le nombre de sommets, arêtes et
+régions est `O(u²)` ; la cible de tri est `O(u² log u)` comparaisons
+exactes, **sous réserve d'une construction DCEL prouvée** pour les cas
+dégénérés, y compris un seul cercle. Pour `m≤u` cercles distincts,
+chaque paire a deux intersections orientées, donc
+`Σ_x binomial(k_x,2)=m(m−1)` pour les multiplicités `k_x≥2` des sommets ;
+la somme des incidences à trier reste `O(u²)` même si beaucoup de
+cercles concourent. Les directions de sommet se gardent en coordonnées
+homogènes rationnelles : aucune racine carrée n'est requise. Digones,
+arcs antipodaux et `m=1` demandent un traitement explicite.
+
+Sur un parcours DFS des régions, un ensemble ordonné **mutable et
+réversible** des sites positifs ne change que pour le cercle traversé :
+au plus deux sites antipodaux basculent, puisque les positions sont
+distinctes. On maintient `|P_C|` et `h` sans recalculer les `u` signes.
+Pour chaque région active (`|P_C|≥t`), les `t` plus petits indices
+positifs donnent le plus petit masque numérique strict contenu dans
+`P_C`. Un DSU des régions actives fusionne les voisines seulement si
+`|P_C∩P_D|≥t`, en gardant le minimum de ces représentants ; ce minimum
+par composante reproduit le choix du balayage des masques de la v7.
+Comparer par valeur du **masque numérique** (ordre colex sur les indices),
+pas par ordre lexicographique croissant des listes : `{0,3}` vaut `9`,
+alors que `{1,2}` vaut `6`. Le stockage naïf d'un candidat de `t` IDs
+par région prend `O(tu²)` mots ; pour `K≤10`, c'est `O(u²)` avec une
+constante physique à mesurer.
+Une paire antipodale échange deux signes sans changer `|P|` : calculer
+**l'intersection**, pas le minimum des deux comptes. Pour une arête qui
+traverse un groupe `G` de `|G|∈{1,2}` sites dont les signes basculent,
+`|P_C∩P_D|=(|P_C|+|P_D|−|G|)/2` : le test se fait sans bitset.
+Les opérations DSU
+coûtent `O(α(u²))` amorti, non une constante stricte.
+
+Pour la contribution globale, si `u≥2t−1`, le lemme ci-dessus la donne
+vide sans visite des couvertures. Sinon, pour la tour `K≤10`, on a
+`u≤18` et un masque de 32 bits suffit à accumuler exactement l'union
+des `P_C` actifs. Il y a alors au plus `u(u−1)+2≤308` régions ; même
+un balayage direct de couverture coûte au plus `18×308=5 544` tests
+de sites par rang. Un Fenwick ou autre ordre-statistique sans allocation
+par région peut maintenir les positifs et sortir `t` indices en
+`O(t log u)` par région active. Cela suggère, **en nombre d'opérations
+combinatoires et pour K fixé ≤10**, une cible
+`O(u² log u + t u² log u)` avec `O(u²)` mémoire, plus le calcul séparé
+de `q_min` et les représentants réellement émis. Ce n'est pas encore
+une borne prouvée pour un code ni une borne globale en nombre de points :
+largeurs arithmétiques, construction exacte des adjacences, population
+des coquilles et découverte des BallKey restent à qualifier. Une grande
+coquille de taille proportionnelle à `n` peut encore coûter `Ω(n²)`.

@@ -84,6 +84,9 @@ PASS ni inférer une croissance globale de la sonde mono-arête prévue.
    cellules adaptatives peu profondes, extraction d'arrangement de droites
    et bornes de blocs sur les segments de graines. Aucun de ces trois
    schémas n'est encore un algorithme v9 prouvé/qualifié.
+   Le complément A de `e8ce8f33` établit un certificat local exact de
+   blocs de graines **avant** la partition Z de l'atlas q4 ; sa couverture
+   de toutes les arêtes/graines/cellules et son coût net restent ouverts.
    La [contrelecture du certificat par capsule](../../morsehgp3D_v9/audits/CONTRELECTURE_B_CELLULES_ET_CATALOGUE_20260922.md)
    démontre un rejet exact de rectangle, mais il est **dominé à gardes
    et boîtes identiques même par la recherche rectangulaire native v8**.
