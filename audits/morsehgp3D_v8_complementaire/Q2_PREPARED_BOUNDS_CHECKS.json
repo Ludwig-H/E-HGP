@@ -1,0 +1,446 @@
+{
+  "audit_metadata_check": {
+    "initial_full_checks_equality": "failed only for UBSan binary_sha256; no compiler or test failure",
+    "resolution": "compare all check fields except binary_sha256; retain both binary hashes in receipt"
+  },
+  "checks": {
+    "generated_legacy_header_sha256": "6047f0846098fd46f5f2d50728aeda64d57f1700d327115721e17c73617022b1",
+    "legacy_excerpts_sha256": {
+      "pair_bounds": "6b9f4af6fd8980369a1f4eee58ec8168db481075e63678906ce919f522ba502c",
+      "shared_bounds": "a2bb78cc3840a85d07b0a0be35414d804f39549f15dcd4fca56b3bdc8d90b115"
+    },
+    "mutants": [
+      {
+        "binary_sha256": "a96468ada7242c732e22ada57ec39753343871a7ff3037ea9306ba27db892d04",
+        "build_exit": 0,
+        "compile_flags": [
+          "-std=c++20",
+          "-O2",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror"
+        ],
+        "invalid_cli_exit": 2,
+        "label": "center_u16",
+        "mutated_header_sha256": "b352d649ffe7e43e42ec63ef225be236a9502a783747a57f2d6efc6c3d96ccb5",
+        "replacement": [
+          "static_cast<std::uint32_t>(anchor + endpoints[side])",
+          "static_cast<std::uint16_t>(anchor + endpoints[side])"
+        ],
+        "result": null,
+        "run_exit": 1,
+        "stderr": "prepared bounds audit: prepared and legacy extrema differ\n",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "verdict": "rejected"
+      },
+      {
+        "binary_sha256": "7d9aa65a91eac3a0b82d722c358df1bdb627af9604bd5075f66d7eab99f6fe44",
+        "build_exit": 0,
+        "compile_flags": [
+          "-std=c++20",
+          "-O2",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror"
+        ],
+        "invalid_cli_exit": 2,
+        "label": "distance_squared_u16",
+        "mutated_header_sha256": "7016b6126dfba3032fb1f201200960c229f9789d963db4fd90e82cd4c22b8744",
+        "replacement": [
+          "static_cast<std::uint32_t>(difference * difference)",
+          "static_cast<std::uint16_t>(difference * difference)"
+        ],
+        "result": null,
+        "run_exit": 1,
+        "stderr": "prepared bounds audit: prepared and legacy extrema differ\n",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "verdict": "rejected"
+      },
+      {
+        "binary_sha256": "b2d0534c33d7bbc129b63fb67559b6d84c5736545824cf1b09d99db09b8cd50c",
+        "build_exit": 0,
+        "compile_flags": [
+          "-std=c++20",
+          "-O2",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror"
+        ],
+        "invalid_cli_exit": 2,
+        "label": "summit_lost",
+        "mutated_header_sha256": "20553cd19e159f0db8d9b80429f3a976699585d540dc6878ca3c38c2efa81335",
+        "replacement": [
+          "high_delta < 0 ? high_squared : 0;",
+          "high_delta < 0 ? high_squared : std::min(low_squared, high_squared);"
+        ],
+        "result": null,
+        "run_exit": 1,
+        "stderr": "prepared bounds audit: prepared and legacy extrema differ\n",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "verdict": "rejected"
+      },
+      {
+        "binary_sha256": "86cabba04e7091648f2a9e7f54023143337b4fe5f89a126adeeed0153836ceb8",
+        "build_exit": 0,
+        "compile_flags": [
+          "-std=c++20",
+          "-O2",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror"
+        ],
+        "invalid_cli_exit": 2,
+        "label": "minimum_nearest_endpoint",
+        "mutated_header_sha256": "0ddbf560c6da8c3fbfaa47120400437797fe31b2cdb8bc18af943c7b92672c63",
+        "replacement": [
+          "distance - std::max(low_squared, high_squared)",
+          "distance - std::min(low_squared, high_squared)"
+        ],
+        "result": null,
+        "run_exit": 1,
+        "stderr": "prepared bounds audit: prepared and legacy extrema differ\n",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "verdict": "rejected"
+      },
+      {
+        "binary_sha256": "d9d2608c242e850ee71bff03fefa06936e27ef282a2d24bbf40d550172892dee",
+        "build_exit": 0,
+        "compile_flags": [
+          "-std=c++20",
+          "-O2",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror"
+        ],
+        "invalid_cli_exit": 2,
+        "label": "unchecked_public_z",
+        "mutated_header_sha256": "2d7c10f250aa3bd5d7af20f3130fb303e9ea8ad04a047e0fd07b86beea202119",
+        "replacement": [
+          "    require_valid_box(z);",
+          "    // mutant: missing validation"
+        ],
+        "result": null,
+        "run_exit": 1,
+        "stderr": "prepared bounds audit: invalid box was not rejected\n",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "verdict": "rejected"
+      }
+    ],
+    "normal": {
+      "binary_sha256": "c7979f1e3f64f02c737b2ae369752ba22c57012febadbf7b22440577c90312ee",
+      "build_exit": 0,
+      "compile_flags": [
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror"
+      ],
+      "invalid_cli_exit": 2,
+      "label": "prepared_O2",
+      "result": {
+        "cache_split_cases": 1,
+        "checked_rejections": 2,
+        "equal_decisions": 35242,
+        "extreme_cases": 7939,
+        "point_bound_cases": 3393,
+        "preparations": 1118,
+        "prepared_bytes": 48,
+        "queries": 15924,
+        "rational_cases": 3375,
+        "rational_samples": 49875,
+        "scope": "prepared_bounds_functions_only",
+        "source_level_legacy_products": 382176,
+        "source_level_prepared_products": 197796,
+        "status": "passed"
+      },
+      "run_exit": 0,
+      "stderr": "",
+      "stdout_sha256": "a567cf455898d1d9f1dd08b2e7480d9b67c869f16b53bf1b62f02f1f0b4a4024"
+    },
+    "status": "passed",
+    "ubsan": {
+      "binary_sha256": "4a7d2510aae464b9dfca4702fabcc0b90d901c077aab842ce88c1429bb7935aa",
+      "build_exit": 0,
+      "compile_flags": [
+        "-std=c++20",
+        "-O1",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all"
+      ],
+      "invalid_cli_exit": 2,
+      "label": "prepared_ubsan",
+      "result": {
+        "cache_split_cases": 1,
+        "checked_rejections": 2,
+        "equal_decisions": 35242,
+        "extreme_cases": 7939,
+        "point_bound_cases": 3393,
+        "preparations": 1118,
+        "prepared_bytes": 48,
+        "queries": 15924,
+        "rational_cases": 3375,
+        "rational_samples": 49875,
+        "scope": "prepared_bounds_functions_only",
+        "source_level_legacy_products": 382176,
+        "source_level_prepared_products": 197796,
+        "status": "passed"
+      },
+      "run_exit": 0,
+      "stderr": "",
+      "stdout_sha256": "a567cf455898d1d9f1dd08b2e7480d9b67c869f16b53bf1b62f02f1f0b4a4024"
+    }
+  },
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "created_utc": "2026-09-13T21:21:26.634405+00:00",
+  "gcp_used": false,
+  "legacy_revision": "f4815cd4",
+  "optimized_replay": {
+    "checks": {
+      "generated_legacy_header_sha256": "6047f0846098fd46f5f2d50728aeda64d57f1700d327115721e17c73617022b1",
+      "legacy_excerpts_sha256": {
+        "pair_bounds": "6b9f4af6fd8980369a1f4eee58ec8168db481075e63678906ce919f522ba502c",
+        "shared_bounds": "a2bb78cc3840a85d07b0a0be35414d804f39549f15dcd4fca56b3bdc8d90b115"
+      },
+      "mutants": [
+        {
+          "binary_sha256": "a96468ada7242c732e22ada57ec39753343871a7ff3037ea9306ba27db892d04",
+          "build_exit": 0,
+          "compile_flags": [
+            "-std=c++20",
+            "-O2",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Werror"
+          ],
+          "invalid_cli_exit": 2,
+          "label": "center_u16",
+          "mutated_header_sha256": "b352d649ffe7e43e42ec63ef225be236a9502a783747a57f2d6efc6c3d96ccb5",
+          "replacement": [
+            "static_cast<std::uint32_t>(anchor + endpoints[side])",
+            "static_cast<std::uint16_t>(anchor + endpoints[side])"
+          ],
+          "result": null,
+          "run_exit": 1,
+          "stderr": "prepared bounds audit: prepared and legacy extrema differ\n",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "verdict": "rejected"
+        },
+        {
+          "binary_sha256": "7d9aa65a91eac3a0b82d722c358df1bdb627af9604bd5075f66d7eab99f6fe44",
+          "build_exit": 0,
+          "compile_flags": [
+            "-std=c++20",
+            "-O2",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Werror"
+          ],
+          "invalid_cli_exit": 2,
+          "label": "distance_squared_u16",
+          "mutated_header_sha256": "7016b6126dfba3032fb1f201200960c229f9789d963db4fd90e82cd4c22b8744",
+          "replacement": [
+            "static_cast<std::uint32_t>(difference * difference)",
+            "static_cast<std::uint16_t>(difference * difference)"
+          ],
+          "result": null,
+          "run_exit": 1,
+          "stderr": "prepared bounds audit: prepared and legacy extrema differ\n",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "verdict": "rejected"
+        },
+        {
+          "binary_sha256": "b2d0534c33d7bbc129b63fb67559b6d84c5736545824cf1b09d99db09b8cd50c",
+          "build_exit": 0,
+          "compile_flags": [
+            "-std=c++20",
+            "-O2",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Werror"
+          ],
+          "invalid_cli_exit": 2,
+          "label": "summit_lost",
+          "mutated_header_sha256": "20553cd19e159f0db8d9b80429f3a976699585d540dc6878ca3c38c2efa81335",
+          "replacement": [
+            "high_delta < 0 ? high_squared : 0;",
+            "high_delta < 0 ? high_squared : std::min(low_squared, high_squared);"
+          ],
+          "result": null,
+          "run_exit": 1,
+          "stderr": "prepared bounds audit: prepared and legacy extrema differ\n",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "verdict": "rejected"
+        },
+        {
+          "binary_sha256": "86cabba04e7091648f2a9e7f54023143337b4fe5f89a126adeeed0153836ceb8",
+          "build_exit": 0,
+          "compile_flags": [
+            "-std=c++20",
+            "-O2",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Werror"
+          ],
+          "invalid_cli_exit": 2,
+          "label": "minimum_nearest_endpoint",
+          "mutated_header_sha256": "0ddbf560c6da8c3fbfaa47120400437797fe31b2cdb8bc18af943c7b92672c63",
+          "replacement": [
+            "distance - std::max(low_squared, high_squared)",
+            "distance - std::min(low_squared, high_squared)"
+          ],
+          "result": null,
+          "run_exit": 1,
+          "stderr": "prepared bounds audit: prepared and legacy extrema differ\n",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "verdict": "rejected"
+        },
+        {
+          "binary_sha256": "d9d2608c242e850ee71bff03fefa06936e27ef282a2d24bbf40d550172892dee",
+          "build_exit": 0,
+          "compile_flags": [
+            "-std=c++20",
+            "-O2",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Werror"
+          ],
+          "invalid_cli_exit": 2,
+          "label": "unchecked_public_z",
+          "mutated_header_sha256": "2d7c10f250aa3bd5d7af20f3130fb303e9ea8ad04a047e0fd07b86beea202119",
+          "replacement": [
+            "    require_valid_box(z);",
+            "    // mutant: missing validation"
+          ],
+          "result": null,
+          "run_exit": 1,
+          "stderr": "prepared bounds audit: invalid box was not rejected\n",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "verdict": "rejected"
+        }
+      ],
+      "normal": {
+        "binary_sha256": "c7979f1e3f64f02c737b2ae369752ba22c57012febadbf7b22440577c90312ee",
+        "build_exit": 0,
+        "compile_flags": [
+          "-std=c++20",
+          "-O2",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror"
+        ],
+        "invalid_cli_exit": 2,
+        "label": "prepared_O2",
+        "result": {
+          "cache_split_cases": 1,
+          "checked_rejections": 2,
+          "equal_decisions": 35242,
+          "extreme_cases": 7939,
+          "point_bound_cases": 3393,
+          "preparations": 1118,
+          "prepared_bytes": 48,
+          "queries": 15924,
+          "rational_cases": 3375,
+          "rational_samples": 49875,
+          "scope": "prepared_bounds_functions_only",
+          "source_level_legacy_products": 382176,
+          "source_level_prepared_products": 197796,
+          "status": "passed"
+        },
+        "run_exit": 0,
+        "stderr": "",
+        "stdout_sha256": "a567cf455898d1d9f1dd08b2e7480d9b67c869f16b53bf1b62f02f1f0b4a4024"
+      },
+      "status": "passed",
+      "ubsan": {
+        "binary_sha256": "4a3bbc44c57d1051b862f620e12cd7213d26fbe614d6b21f6bfa5e8567c378ee",
+        "build_exit": 0,
+        "compile_flags": [
+          "-std=c++20",
+          "-O1",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror",
+          "-fsanitize=undefined",
+          "-fno-sanitize-recover=all"
+        ],
+        "invalid_cli_exit": 2,
+        "label": "prepared_ubsan",
+        "result": {
+          "cache_split_cases": 1,
+          "checked_rejections": 2,
+          "equal_decisions": 35242,
+          "extreme_cases": 7939,
+          "point_bound_cases": 3393,
+          "preparations": 1118,
+          "prepared_bytes": 48,
+          "queries": 15924,
+          "rational_cases": 3375,
+          "rational_samples": 49875,
+          "scope": "prepared_bounds_functions_only",
+          "source_level_legacy_products": 382176,
+          "source_level_prepared_products": 197796,
+          "status": "passed"
+        },
+        "run_exit": 0,
+        "stderr": "",
+        "stdout_sha256": "a567cf455898d1d9f1dd08b2e7480d9b67c869f16b53bf1b62f02f1f0b4a4024"
+      }
+    },
+    "command": "python3 -O audits/morsehgp3D_v8_complementaire/q2_prepared_bounds_checks.py --replay /tmp/q2_prepared_bounds_normal.json",
+    "command_note": "Le fichier temporaire contenait exactement le reçu normal avant ajout des métadonnées de rejeu ; son snapshot est embarqué dans ce reçu publié.",
+    "comparison_omits": "binary_sha256 only; the sanitizer binaries differ between temporary build directories",
+    "outcomes_identical_including_all_mutants": true,
+    "python_optimization": 1,
+    "raw_replay_sha256": "f38f7bb40eb949887ff5bd7c3138d00bd162fffbb66be0214d78712e46524b29",
+    "result": "passed",
+    "source_snapshot_identical": true
+  },
+  "performance_measured": false,
+  "python_optimization": 0,
+  "replay_command": "python3 audits/morsehgp3D_v8_complementaire/q2_prepared_bounds_checks.py --replay audits/morsehgp3D_v8_complementaire/Q2_PREPARED_BOUNDS_CHECKS.json",
+  "runner_guards": {
+    "invalid_cli_exit": 2,
+    "python_assert_nodes": 0,
+    "syntax_parsed": true,
+    "tampered_snapshot_error": "snapshot hash mismatch",
+    "tampered_snapshot_exit_under_O": 1
+  },
+  "runner_sha256": "e595306f844b7da1729f2821edb7c7d55b884e7748cce0e23e9b514c48c96df3",
+  "scope": "exact_prepared_bounds_not_census_performance_or_full_hgp",
+  "snapshot_sha256": "ae63f6f406c8741323c2c45bdcb1be07aa8174900d67a4f6d8f17b5f8511c295",
+  "snapshot_utf8": {
+    "audits/morsehgp3D_v8_complementaire/q2_prepared_bounds_probe.cpp": "// Independent bounds gate: tests the new header against the exact legacy\n// source excerpt and an exhaustive quarter-grid H oracle on small intervals.\n#include \"spindle/q2_prepared_bounds.hpp\"\n#include \"legacy_bounds.hpp\"\n\n#include <algorithm>\n#include <array>\n#include <cstdint>\n#include <iostream>\n#include <stdexcept>\n#include <string_view>\n\nnamespace {\nusing mhgp8::Box3;\nusing mhgp8::Point3;\nusing mhgp8::Q2Bounds;\nusing mhgp8::Q2PreparedBounds;\nusing mhgp8::i64;\nusing mhgp8::u64;\nstruct Work {\n  u64 preparations{};\n  u64 queries{};\n  u64 rational_cases{};\n  u64 rational_samples{};\n  u64 extreme_cases{};\n  u64 point_bound_cases{};\n  u64 equal_decisions{};\n  u64 checked_rejections{};\n  u64 cache_split_cases{};\n} work;\nvoid require(bool good, const char* message) {\n  if (!good) throw std::runtime_error(message);\n}\nint decision(Q2Bounds b) {\n  return b.minimum4 > 0 ? 1 : b.maximum4 <= 0 ? -1 : 0;\n}\nvoid same(Q2Bounds a, Q2Bounds b) {\n  require(a.minimum4 == b.minimum4 && a.maximum4 == b.maximum4,\n          \"prepared and legacy extrema differ\");\n  require(decision(a) == decision(b), \"bound decisions differ\");\n  ++work.equal_decisions;\n}\nlegacy::Q2BallKey pair_key(const Point3& a, const Point3& b) {\n  legacy::Q2BallKey key{};\n  for (unsigned d = 0; d < 3; ++d) {\n    key.center_twice[d] = static_cast<std::uint32_t>(a[d]) + b[d];\n    const i64 delta = static_cast<i64>(a[d]) - b[d];\n    key.diameter_squared += static_cast<u64>(delta * delta);\n  }\n  return key;\n}\nQ2Bounds evaluate(const Q2PreparedBounds& prepared, const Point3& a,\n                  const Box3& b, const Box3& z) {\n  const auto actual = prepared.bounds(z);\n  same(actual, legacy::shared_bounds(a, b, z));\n  const auto copied = prepared;\n  same(actual, copied.bounds(z));\n  if (b.low == b.high) {\n    same(actual, legacy::pair_bounds(pair_key(a, b.low), z));\n    ++work.point_bound_cases;\n  }\n  ++work.queries;\n  return actual;\n}\nPoint3 axial(unsigned d, std::uint16_t value) {\n  std::array<std::uint16_t, 3> p{};\n  p[d] = value;\n  return {p[0], p[1], p[2]};\n}\nvoid small_grid() {\n  for (unsigned d = 0; d < 3; ++d) {\n    for (unsigned a = 0; a <= 4; ++a) {\n      for (unsigned bl = 0; bl <= 4; ++bl) {\n        for (unsigned bh = bl; bh <= 4; ++bh) {\n          const auto anchor = axial(d, static_cast<std::uint16_t>(a));\n          const Box3 b{axial(d, static_cast<std::uint16_t>(bl)),\n                       axial(d, static_cast<std::uint16_t>(bh))};\n          const Q2PreparedBounds prepared(anchor, b);\n          ++work.preparations;\n          for (unsigned zl = 0; zl <= 4; ++zl) {\n            for (unsigned zh = zl; zh <= 4; ++zh) {\n              const Box3 z{axial(d, static_cast<std::uint16_t>(zl)),\n                           axial(d, static_cast<std::uint16_t>(zh))};\n              const auto actual = evaluate(prepared, anchor, b, z);\n              i64 minimum16 = INT64_MAX;\n              i64 maximum16 = INT64_MIN;\n              for (i64 bv = bl; bv <= bh; ++bv) {\n                for (i64 zv4 = 4 * zl; zv4 <= 4 * zh; ++zv4) {\n                  const i64 h16 = (zv4 - 4 * a) * (4 * bv - zv4);\n                  minimum16 = std::min(minimum16, h16);\n                  maximum16 = std::max(maximum16, h16);\n                  ++work.rational_samples;\n                }\n              }\n              require(4 * actual.minimum4 == minimum16 &&\n                          4 * actual.maximum4 == maximum16,\n                      \"prepared extrema differ from rational H oracle\");\n              ++work.rational_cases;\n            }\n          }\n        }\n      }\n    }\n  }\n}\nvoid extremes() {\n  constexpr std::array<std::uint16_t, 6> values{0, 1, 32767, 32768, 65534, 65535};\n  for (unsigned d = 0; d < 3; ++d) {\n    for (const auto a : values) {\n      for (std::size_t l = 0; l < values.size(); ++l) {\n        for (std::size_t h = l; h < values.size(); ++h) {\n          const auto anchor = axial(d, a);\n          const Box3 b{axial(d, values[l]), axial(d, values[h])};\n          const Q2PreparedBounds prepared(anchor, b);\n          ++work.preparations;\n          for (std::size_t zl = 0; zl < values.size(); ++zl) {\n            for (std::size_t zh = zl; zh < values.size(); ++zh) {\n              static_cast<void>(evaluate(prepared, anchor, b,\n                                         {axial(d, values[zl]), axial(d, values[zh])}));\n              ++work.extreme_cases;\n            }\n          }\n        }\n      }\n    }\n  }\n  const Point3 a{65535, 65535, 65535};\n  const Box3 b{{0, 0, 0}, {65535, 65535, 65535}};\n  const Q2PreparedBounds prepared(a, b);\n  ++work.preparations;\n  same(evaluate(prepared, a, b, b), {-12 * INT64_C(65535) * 65535,\n                                    3 * INT64_C(65535) * 65535});\n  ++work.extreme_cases;\n}\nvoid boxes_3d() {\n  u64 seed = UINT64_C(0xb00da31f0579926d);\n  const auto next = [&]() {\n    seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;\n    return static_cast<std::uint16_t>(seed);\n  };\n  const auto point = [&]() { const auto x = next(); const auto y = next(); const auto z = next(); return Point3{x, y, z}; };\n  const auto box = [&]() {\n    const auto p = point(); const auto q = point();\n    return Box3{{std::min(p.x, q.x), std::min(p.y, q.y), std::min(p.z, q.z)},\n                {std::max(p.x, q.x), std::max(p.y, q.y), std::max(p.z, q.z)}};\n  };\n  for (unsigned group = 0; group < 512; ++group) {\n    const auto a = point(); const auto b = box();\n    const Q2PreparedBounds prepared(a, b);\n    ++work.preparations;\n    for (unsigned i = 0; i < 9; ++i) {\n      static_cast<void>(evaluate(prepared, a, b, box()));\n    }\n  }\n}\nvoid caching_and_rejections() {\n  const Point3 a{1000, 0, 0};\n  const Box3 parent{{60000, 0, 0}, {60004, 0, 0}};\n  const Box3 child{{60002, 0, 0}, {60004, 0, 0}};\n  const Box3 z{{60001, 0, 0}, {60001, 0, 0}};\n  const Q2PreparedBounds p(a, parent), c(a, child);\n  work.preparations += 2;\n  const auto whole = evaluate(p, a, parent, z);\n  const auto narrowed = evaluate(c, a, child, z);\n  require(whole.minimum4 == -236004 && whole.maximum4 == 708012 &&\n              narrowed.minimum4 == 236004 && narrowed.maximum4 == 708012,\n          \"cache split fixture changed\");\n  require(decision(whole) == 0 && decision(narrowed) == 1,\n          \"reusing parent constants is not an equal-decision child preparation\");\n  ++work.cache_split_cases;\n  const Box3 inverted{{3, 0, 0}, {2, 0, 0}};\n  try { static_cast<void>(Q2PreparedBounds(a, inverted)); }\n  catch (const std::invalid_argument&) { ++work.checked_rejections; }\n  try { static_cast<void>(p.bounds(inverted)); }\n  catch (const std::invalid_argument&) { ++work.checked_rejections; }\n  require(work.checked_rejections == 2, \"invalid box was not rejected\");\n}\nvoid run() {\n  small_grid(); extremes(); boxes_3d(); caching_and_rejections();\n  require(work.rational_cases == 3375 && work.rational_samples == 49875 &&\n              work.extreme_cases == 7939 && work.queries == 15924 &&\n              work.preparations == 1118 && work.point_bound_cases > 3000,\n          \"prepared bounds gate nonvacuity\");\n  // Source-level products of nonconstant operands, excluding scaling by 2/4,\n  // loop indices and the independent judge. Not compiler instructions/time.\n  const u64 legacy_products = 24 * work.queries;\n  const u64 prepared_products = 6 * work.preparations + 12 * work.queries;\n  std::cout << \"{\\\"status\\\":\\\"passed\\\",\\\"scope\\\":\\\"prepared_bounds_functions_only\\\"\"\n            << \",\\\"preparations\\\":\" << work.preparations\n            << \",\\\"queries\\\":\" << work.queries\n            << \",\\\"rational_cases\\\":\" << work.rational_cases\n            << \",\\\"rational_samples\\\":\" << work.rational_samples\n            << \",\\\"extreme_cases\\\":\" << work.extreme_cases\n            << \",\\\"point_bound_cases\\\":\" << work.point_bound_cases\n            << \",\\\"equal_decisions\\\":\" << work.equal_decisions\n            << \",\\\"checked_rejections\\\":\" << work.checked_rejections\n            << \",\\\"cache_split_cases\\\":\" << work.cache_split_cases\n            << \",\\\"prepared_bytes\\\":\" << sizeof(Q2PreparedBounds)\n            << \",\\\"source_level_legacy_products\\\":\" << legacy_products\n            << \",\\\"source_level_prepared_products\\\":\" << prepared_products << \"}\\n\";\n}\n}  // namespace\nint main(int argc, char** argv) {\n  if (argc != 2 || std::string_view(argv[1]) != \"--selftest\") return 2;\n  try { run(); return 0; }\n  catch (const std::exception& error) { std::cerr << \"prepared bounds audit: \" << error.what() << '\\n'; return 1; }\n}\n",
+    "legacy_q2_census.cpp": "#include \"q2_census.hpp\"\n\n#include <algorithm>\n#include <chrono>\n#include <numeric>\n#include <stdexcept>\n#include <utility>\n\nnamespace mhgp8 {\nnamespace {\n\nusing Clock = std::chrono::steady_clock;\nconstexpr std::size_t absent = std::numeric_limits<std::size_t>::max();\n\n[[nodiscard]] double milliseconds(Clock::time_point begin, Clock::time_point end) {\n  return std::chrono::duration<double, std::milli>(end - begin).count();\n}\n\n[[nodiscard]] Box3 joined(const Box3& a, const Box3& b) {\n  return {{std::min(a.low.x, b.low.x), std::min(a.low.y, b.low.y),\n           std::min(a.low.z, b.low.z)},\n          {std::max(a.high.x, b.high.x), std::max(a.high.y, b.high.y),\n           std::max(a.high.z, b.high.z)}};\n}\n\n[[nodiscard]] i64 squared_diagonal(const Box3& box) {\n  i64 result = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const i64 delta = static_cast<i64>(box.high[axis]) - box.low[axis];\n    result += delta * delta;\n  }\n  return result;\n}\n\n[[nodiscard]] Q2BallKey ball_key(const Point3& a, const Point3& b) {\n  Q2BallKey key;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    key.center_twice[axis] = static_cast<std::uint32_t>(a[axis]) + b[axis];\n    const i64 difference = static_cast<i64>(a[axis]) - b[axis];\n    key.diameter_squared += static_cast<u64>(difference * difference);\n  }\n  return key;\n}\n\n// Coordinates are promoted BEFORE subtraction or multiplication. With\n// d=65535, -12*d^2 <= 4H <= 3*d^2; all sums below fit comfortably in i64.\n// The key uses the doubled center and four times the squared radius, so\n// half-integral centers require neither rounding nor division.\n[[nodiscard]] i64 point_power4(const Q2BallKey& key, const Point3& point) {\n  i64 value = static_cast<i64>(key.diameter_squared);\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const i64 delta = 2 * static_cast<i64>(point[axis]) - key.center_twice[axis];\n    value -= delta * delta;\n  }\n  return value;\n}\n\nstruct PowerBounds {\n  i64 minimum4{};\n  i64 maximum4{};\n};\n\n// The inexpensive singleton-pair path: exact min/max distances from the\n// doubled center to the doubled Z box. Pairwise never pays the product-box\n// routine used to share several different queries.\n[[nodiscard]] PowerBounds pair_bounds(const Q2BallKey& key, const Box3& z) {\n  i64 nearest_squared = 0;\n  i64 farthest_squared = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const i64 center = key.center_twice[axis];\n    const i64 low = 2 * static_cast<i64>(z.low[axis]);\n    const i64 high = 2 * static_cast<i64>(z.high[axis]);\n    const i64 nearest = center < low ? low - center : center > high ? center - high : 0;\n    const i64 low_delta = low - center;\n    const i64 high_delta = high - center;\n    nearest_squared += nearest * nearest;\n    farthest_squared += std::max(low_delta * low_delta, high_delta * high_delta);\n  }\n  const auto radius4 = static_cast<i64>(key.diameter_squared);\n  return {radius4 - farthest_squared, radius4 - nearest_squared};\n}\n\n// a is fixed. Per coordinate the minimum H needs four (b,z) endpoint\n// pairs, but the maximum needs just two b endpoints and the clipped\n// parabola summit in Z. Merely testing Z's corners for its maximum would\n// incorrectly discard interior witnesses (audit section 9 counterexample).\n[[nodiscard]] PowerBounds shared_bounds(const Point3& a, const Box3& b,\n                                        const Box3& z) {\n  PowerBounds bounds;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const i64 av = a[axis];\n    const std::array<i64, 2> bv{b.low[axis], b.high[axis]};\n    const i64 zl = z.low[axis];\n    const i64 zh = z.high[axis];\n    i64 minimum = std::numeric_limits<i64>::max();\n    i64 maximum4 = std::numeric_limits<i64>::min();\n    for (const i64 value : bv) {\n      minimum = std::min(minimum, (zl - av) * (value - zl));\n      minimum = std::min(minimum, (zh - av) * (value - zh));\n      const i64 summit2 = std::clamp(av + value, 2 * zl, 2 * zh);\n      const i64 residual = summit2 - av - value;\n      const i64 difference = value - av;\n      maximum4 = std::max(maximum4, difference * difference - residual * residual);\n    }\n    bounds.minimum4 += 4 * minimum;\n    bounds.maximum4 += maximum4;\n  }\n  return bounds;\n}\n\n}  // namespace\n\nQ2CensusIndex::Q2CensusIndex(RectanglePtr rectangle) : rectangle_(std::move(rectangle)) {\n  if (!rectangle_) {\n    throw std::invalid_argument(\"mhgp8 q2 index requires an owned rectangle\");\n  }\n  order_.resize(rectangle_->points().size());\n  std::iota(order_.begin(), order_.end(), std::size_t{0});\n  if (order_.empty()) {\n    throw std::logic_error(\"mhgp8 certified rectangle has no sites\");\n  }\n  static_cast<void>(build({0, order_.size()}, 0));\n}\n\nstd::size_t Q2CensusIndex::build(Range range, u64 depth) {\n  const auto points = rectangle_->points();\n  Box3 box = singleton_box(points[order_[range.first]]);\n  for (std::size_t position = range.first; position < range.last; ++position) {\n    counter_add(work_.point_visits);\n    box = joined(box, singleton_box(points[order_[position]]));\n  }\n  const auto node_id = nodes_.size();\n  nodes_.push_back(Node{range, box});\n  counter_add(work_.nodes);\n  work_.max_depth = std::max(work_.max_depth, depth);\n  if (range.size() == 1) {\n    nodes_[node_id].escape = nodes_.size();\n    counter_add(work_.escape_links);\n    if (nodes_[node_id].escape != node_id + 1) {\n      throw std::logic_error(\"mhgp8 q2 leaf escape must follow its preorder node\");\n    }\n    return node_id;\n  }\n  std::size_t axis = 0;\n  for (std::size_t other = 1; other < 3; ++other) {\n    if (box.high[other] - box.low[other] > box.high[axis] - box.low[axis]) {\n      axis = other;\n    }\n  }\n  const unsigned midpoint = (static_cast<unsigned>(box.low[axis]) + box.high[axis]) / 2;\n  const auto begin = order_.begin() + static_cast<std::ptrdiff_t>(range.first);\n  const auto end = order_.begin() + static_cast<std::ptrdiff_t>(range.last);\n  const auto cut = std::partition(begin, end, [&](std::size_t id) {\n    counter_add(work_.point_visits);\n    return points[id][axis] <= midpoint;\n  });\n  const auto split = static_cast<std::size_t>(cut - order_.begin());\n  if (split == range.first || split == range.last) {\n    throw std::logic_error(\"mhgp8 q2 index failed to split distinct u16 sites\");\n  }\n  // Midpoint splits halve one positive coordinate extent. At most 48 such\n  // splits occur on a u16 path; no artificial depth or visit limit is used.\n  const auto left = build({range.first, split}, depth + 1);\n  const auto right = build({split, range.last}, depth + 1);\n  nodes_[node_id].left = left;\n  nodes_[node_id].right = right;\n  nodes_[node_id].escape = nodes_.size();\n  counter_add(work_.escape_links);\n  // Validate the DFS continuation when linking children, without another\n  // point traversal: left follows parent, its escape is right, and the two\n  // child populations partition the parent. The right escape leaves parent.\n  // By induction every escape either advances to the next population range\n  // or to the final index sentinel; it cannot skip/revisit a witness prefix.\n  if (left != node_id + 1 || nodes_[left].escape != right ||\n      nodes_[right].escape != nodes_[node_id].escape ||\n      nodes_[left].range.first != range.first ||\n      nodes_[left].range.last != nodes_[right].range.first ||\n      nodes_[right].range.last != range.last) {\n    throw std::logic_error(\"mhgp8 q2 index children or DFS escapes do not partition their parent\");\n  }\n  return node_id;\n}\n\nQ2CensusIndexPtr make_q2_census_index(RectanglePtr rectangle) {\n  return Q2CensusIndexPtr(new Q2CensusIndex(std::move(rectangle)));\n}\n\nstruct Q2CensusEngine {\n  struct QueryNode {\n    Range range;\n    Box3 box;\n    std::size_t left{absent};\n    std::size_t right{absent};\n  };\n  const Q2CensusIndex& index;\n  const AxisQ2Plan& plan;\n  const Q2CensusConsumer& consumer;\n  std::span<const Point3> points;\n  std::span<const std::size_t> b_order;\n  unsigned threshold;\n  Q2CensusResult result;\n  std::vector<QueryNode> queries;\n  std::vector<std::size_t> interior;\n  std::vector<std::size_t> shell;\n\n  Q2CensusEngine(const Q2CensusIndex& input_index, const AxisQ2Plan& input_plan,\n                 const Q2CensusConsumer& input_consumer)\n      : index(input_index), plan(input_plan), consumer(input_consumer),\n        points(input_index.rectangle().points()), b_order(input_plan.b_order()),\n        threshold(input_index.rectangle().kmax()) {\n    result.candidate_pairs = plan.candidate_pairs();\n    result.work.input_descriptors = static_cast<u64>(plan.blocks().size());\n  }\n\n  [[nodiscard]] std::size_t build_queries(Range range, u64 depth) {\n    const auto id = queries.size();\n    queries.push_back(QueryNode{range, {}});\n    counter_add(result.work.query_build_nodes);\n    result.work.query_build_max_depth = std::max(result.work.query_build_max_depth, depth);\n    if (range.size() == 1) {\n      counter_add(result.work.query_build_point_visits);\n      queries[id].box = singleton_box(points[b_order[range.first]]);\n      return id;\n    }\n    // Preserve the axis permutation and its descriptor ranges. Construct\n    // boxes bottom-up in O(|B|), without rescanning B for every anchor.\n    const auto split = range.first + range.size() / 2;\n    const auto left = build_queries({range.first, split}, depth + 1);\n    const auto right = build_queries({split, range.last}, depth + 1);\n    queries[id].left = left;\n    queries[id].right = right;\n    queries[id].box = joined(queries[left].box, queries[right].box);\n    return id;\n  }\n\n  void root_start(unsigned acquired) {\n    counter_add(result.work.count_root_starts);\n    if (acquired != 0) {\n      counter_add(result.work.frontier_restarts);\n      throw std::logic_error(\"mhgp8 q2 census cannot restart its root after a credit\");\n    }\n  }\n\n  void consume_witnesses(std::size_t population) {\n    counter_add(result.work.consumed_witness_sites, static_cast<u64>(population));\n  }\n\n  void add_count(unsigned& count, std::size_t population) const {\n    // Count stays <=Kmax<=10 for the certified owner. Compare before narrowing\n    // even if the global witness population is many millions of sites.\n    const auto remaining = static_cast<std::size_t>(threshold - count);\n    count += static_cast<unsigned>(std::min(remaining, population));\n  }\n\n  void count_pair(std::size_t witness, const Q2BallKey& key, unsigned& count) {\n    if (count == threshold) {\n      return;\n    }\n    counter_add(result.work.count_node_visits);\n    const auto& z = index.nodes_[witness];\n    if (z.left == absent) {\n      counter_add(result.work.count_point_tests);\n      consume_witnesses(1);\n      if (point_power4(key, points[index.order_[z.range.first]]) > 0) {\n        add_count(count, 1);\n      }\n      return;\n    }\n    counter_add(result.work.count_bound_tests);\n    const auto bounds = pair_bounds(key, z.box);\n    if (bounds.minimum4 > 0) {\n      consume_witnesses(z.range.size());\n      add_count(count, z.range.size());\n    } else if (bounds.maximum4 <= 0) {\n      consume_witnesses(z.range.size());\n    } else {\n      counter_add(result.work.witness_splits);\n      count_pair(z.left, key, count);\n      count_pair(z.right, key, count);\n    }\n  }\n\n  void collect(std::size_t witness, const Q2BallKey& key) {\n    counter_add(result.work.payload_node_visits);\n    const auto& z = index.nodes_[witness];\n    if (z.left == absent) {\n      counter_add(result.work.payload_point_tests);\n      const auto id = index.order_[z.range.first];\n      const auto value = point_power4(key, points[id]);\n      if (value > 0) {\n        interior.push_back(id);\n      } else if (value == 0) {\n        shell.push_back(id);\n      }\n      return;\n    }\n    counter_add(result.work.payload_bound_tests);\n    const auto bounds = pair_bounds(key, z.box);\n    if (bounds.maximum4 < 0) {\n      return;\n    }\n    if (bounds.minimum4 > 0 || (bounds.minimum4 == 0 && bounds.maximum4 == 0)) {\n      auto& destination = bounds.minimum4 > 0 ? interior : shell;\n      const auto begin = index.order_.begin() + static_cast<std::ptrdiff_t>(z.range.first);\n      const auto end = index.order_.begin() + static_cast<std::ptrdiff_t>(z.range.last);\n      destination.insert(destination.end(), begin, end);\n      return;\n    }\n    // Equality cannot be discarded in this second pass: every shell ID is\n    // needed, including endpoints and non-support boundary sites.\n    collect(z.left, key);\n    collect(z.right, key);\n  }\n\n  void accept(std::size_t a_id, Range range, unsigned count) {\n    if (count >= threshold) {\n      throw std::logic_error(\"mhgp8 q2 accepted a saturated support\");\n    }\n    counter_add(result.accepted_pairs, static_cast<u64>(range.size()));\n    if (range.size() > 1) {\n      counter_add(result.work.uniform_accepted_pairs, static_cast<u64>(range.size()));\n    }\n    const auto started = Clock::now();\n    for (std::size_t position = range.first; position < range.last; ++position) {\n      const auto b_id = b_order[position];\n      const auto key = ball_key(points[a_id], points[b_id]);\n      interior.clear();\n      shell.clear();\n      collect(0, key);\n      if (interior.size() != count) {\n        throw std::logic_error(\"mhgp8 q2 count and second-pass interior IDs disagree\");\n      }\n      counter_add(result.work.payload_interior_sites, static_cast<u64>(interior.size()));\n      counter_add(result.work.payload_shell_sites, static_cast<u64>(shell.size()));\n      counter_add(result.work.payload_supports);\n      consumer(Q2Support{a_id, b_id, key, interior, shell});\n    }\n    result.payload_ms += milliseconds(started, Clock::now());\n  }\n\n  void reject(Range range) {\n    counter_add(result.rejected_pairs, static_cast<u64>(range.size()));\n    if (range.size() > 1) {\n      counter_add(result.work.uniform_rejected_pairs, static_cast<u64>(range.size()));\n    }\n  }\n\n  void shared_task(std::size_t a_id, std::size_t query, unsigned count,\n                    std::size_t cursor) {\n    counter_add(result.work.query_tasks);\n    const auto& b = queries[query];\n    const bool singleton = b.range.size() == 1;\n    const auto key = singleton ? ball_key(points[a_id], points[b_order[b.range.first]])\n                               : Q2BallKey{};\n    const auto b_diagonal = singleton ? 0 : squared_diagonal(b.box);\n    while (cursor != index.nodes_.size()) {\n      if (cursor >= index.nodes_.size()) {\n        throw std::logic_error(\"mhgp8 q2 witness cursor exceeds the immutable index\");\n      }\n      const auto& z = index.nodes_[cursor];\n      counter_add(result.work.count_node_visits);\n      PowerBounds bounds;\n      if (singleton && z.left == absent) {\n        counter_add(result.work.count_point_tests);\n        const auto value = point_power4(key, points[index.order_[z.range.first]]);\n        bounds = {value, value};\n      } else {\n        counter_add(result.work.count_bound_tests);\n        bounds = singleton ? pair_bounds(key, z.box) : shared_bounds(points[a_id], b.box, z.box);\n      }\n      if (bounds.minimum4 > 0) {\n        consume_witnesses(z.range.size());\n        if (!singleton) {\n          counter_add(result.work.uniform_credited_pairs, static_cast<u64>(b.range.size()));\n        }\n        add_count(count, z.range.size());\n        cursor = z.escape;\n        counter_add(result.work.cursor_advances);\n        if (count == threshold) {\n          reject(b.range);\n          return;\n        }\n      } else if (bounds.maximum4 <= 0) {\n        consume_witnesses(z.range.size());\n        cursor = z.escape;\n        counter_add(result.work.cursor_advances);\n      } else if (singleton ||\n                 (z.left != absent && squared_diagonal(z.box) > b_diagonal)) {\n        if (z.left == absent) {\n          throw std::logic_error(\"mhgp8 q2 singleton power cannot be uncertain\");\n        }\n        counter_add(result.work.witness_splits);\n        cursor = z.left;\n        counter_add(result.work.cursor_advances);\n      } else {\n        if (b.left == absent) {\n          throw std::logic_error(\"mhgp8 q2 shared task has no query children\");\n        }\n        counter_add(result.work.query_splits);\n        if (count > 0) {\n          counter_add(result.work.shared_splits_after_credit);\n        }\n        counter_add(result.work.cursor_reuses, 2);\n        // A fixed Z DFS order makes one preorder cursor represent the entire\n        // unconsumed suffix. Both query children inherit that cursor and the\n        // exact acquired count. No frontier list, allocation, root restart,\n        // or copy of a long continuation is needed. Query tasks may later be\n        // scheduled independently, but their internal Z order must stay fixed.\n        shared_task(a_id, b.left, count, cursor);\n        shared_task(a_id, b.right, count, cursor);\n        return;\n      }\n    }\n    accept(a_id, b.range, count);\n  }\n\n  void cover(std::size_t a_id, Range selected, std::size_t query) {\n    counter_add(result.work.query_cover_visits);\n    const auto& node = queries[query];\n    if (selected.last <= node.range.first || node.range.last <= selected.first) {\n      return;\n    }\n    if (selected.first <= node.range.first && node.range.last <= selected.last) {\n      root_start(0);\n      shared_task(a_id, query, 0, 0);\n      return;\n    }\n    if (node.left == absent) {\n      throw std::logic_error(\"mhgp8 q2 descriptor partially intersects a singleton range\");\n    }\n    cover(a_id, selected, node.left);\n    cover(a_id, selected, node.right);\n  }\n\n  void run(Q2CensusMode mode) {\n    if (result.candidate_pairs == 0) {\n      return;\n    }\n    if (mode == Q2CensusMode::SharedBlocks) {\n      const auto started = Clock::now();\n      static_cast<void>(build_queries({0, b_order.size()}, 0));\n      result.query_index_ms = milliseconds(started, Clock::now());\n      for (const auto& block : plan.blocks()) {\n        cover(block.a_id, block.b, 0);\n      }\n    } else {\n      for (const auto& block : plan.blocks()) {\n        for (std::size_t position = block.b.first; position < block.b.last; ++position) {\n          counter_add(result.work.query_tasks);\n          root_start(0);\n          unsigned count = 0;\n          const auto key = ball_key(points[block.a_id], points[b_order[position]]);\n          count_pair(0, key, count);\n          const Range singleton{position, position + 1};\n          if (count == threshold) {\n            reject(singleton);\n          } else {\n            accept(block.a_id, singleton, count);\n          }\n        }\n      }\n    }\n  }\n};\n\nQ2CensusResult run_q2_census(const Q2CensusIndex& index, const AxisQ2Plan& plan,\n                            Q2CensusMode mode, const Q2CensusConsumer& consumer) {\n  const auto started = Clock::now();\n  if (&index.rectangle() != &plan.rectangle()) {\n    throw std::invalid_argument(\"mhgp8 q2 index and plan require the same owner\");\n  }\n  if (mode != Q2CensusMode::Pairwise && mode != Q2CensusMode::SharedBlocks) {\n    throw std::invalid_argument(\"mhgp8 q2 census mode is invalid\");\n  }\n  if (!consumer) {\n    throw std::invalid_argument(\"mhgp8 q2 census requires a synchronous payload consumer\");\n  }\n  Q2CensusResult result;\n  {\n    Q2CensusEngine engine(index, plan, consumer);\n    engine.run(mode);\n    if (engine.result.accepted_pairs > engine.result.candidate_pairs ||\n        engine.result.rejected_pairs != engine.result.candidate_pairs - engine.result.accepted_pairs) {\n      throw std::logic_error(\"mhgp8 q2 census did not partition the candidate residual\");\n    }\n    result = engine.result;\n  }\n  // Include destruction of the temporary B tree and payload buffers\n  // in the enclosing interval, rather than reporting only active searches.\n  result.total_ms = milliseconds(started, Clock::now());\n  result.count_ms = result.total_ms - result.query_index_ms - result.payload_ms;\n  return result;\n}\n\n}  // namespace mhgp8\n",
+    "morsehgp3D_v8/src/core/types.hpp": "#pragma once\n\n#include <cstddef>\n#include <cstdint>\n#include <limits>\n#include <stdexcept>\n\nnamespace mhgp8 {\n\nusing u64 = std::uint64_t;\nusing i64 = std::int64_t;\n\n// The u16 geometry (including tube bounds) needs at most 75 signed bits. This first CPU\n// implementation requires the compiler's native integer extension; it does\n// not silently replace exact predicates with floating-point arithmetic.\n#if defined(__SIZEOF_INT128__)\n__extension__ typedef signed __int128 i128;\n#else\n#error \"mhgp8 CPU predicates require a compiler with signed 128-bit integers\"\n#endif\n\nstruct Point3 {\n  std::uint16_t x{};\n  std::uint16_t y{};\n  std::uint16_t z{};\n\n  [[nodiscard]] constexpr std::uint16_t operator[](std::size_t axis) const {\n    switch (axis) {\n      case 0: return x;\n      case 1: return y;\n      case 2: return z;\n      default: throw std::out_of_range(\"mhgp8 point axis must be 0, 1 or 2\");\n    }\n  }\n\n  bool operator==(const Point3&) const = default;\n};\n\nstruct Box3 {\n  Point3 low{};\n  Point3 high{};\n};\n\nenum class Lane : std::uint8_t { Q2 = 2, Q3 = 3, Q4 = 4 };\n\n[[nodiscard]] constexpr bool valid_lane(Lane lane) noexcept {\n  return lane == Lane::Q2 || lane == Lane::Q3 || lane == Lane::Q4;\n}\n\ninline void require_valid_lane(Lane lane) {\n  if (!valid_lane(lane)) {\n    throw std::invalid_argument(\"mhgp8 lane must be Q2, Q3 or Q4\");\n  }\n}\n\n[[nodiscard]] inline unsigned arity(Lane lane) {\n  require_valid_lane(lane);\n  return static_cast<unsigned>(lane);\n}\n\n[[nodiscard]] constexpr bool valid_box(const Box3& box) noexcept {\n  return box.low.x <= box.high.x && box.low.y <= box.high.y &&\n         box.low.z <= box.high.z;\n}\n\ninline void require_valid_box(const Box3& box) {\n  if (!valid_box(box)) {\n    throw std::invalid_argument(\"mhgp8 box has inverted bounds\");\n  }\n}\n\n[[nodiscard]] constexpr Box3 singleton_box(const Point3& point) noexcept {\n  return {point, point};\n}\n\n[[nodiscard]] inline Point3 box_corner(const Box3& box, unsigned corner) {\n  require_valid_box(box);\n  if (corner >= 8) {\n    throw std::out_of_range(\"mhgp8 box corner must be in [0, 8)\");\n  }\n  return {(corner & 1U) != 0U ? box.high.x : box.low.x,\n          (corner & 2U) != 0U ? box.high.y : box.low.y,\n          (corner & 4U) != 0U ? box.high.z : box.low.z};\n}\n\nstruct PredicateWork {\n  u64 point_tests{};\n  u64 universal_queries{};\n  u64 q2_axis_terms{};\n  u64 corner_tests{};\n  u64 block_bound_tests{};\n  u64 negative_probes{};\n};\n\ninline void counter_add(u64& value, u64 increment = 1) {\n  if (increment > std::numeric_limits<u64>::max() - value) {\n    throw std::overflow_error(\"mhgp8 work counter overflow\");\n  }\n  value += increment;\n}\n\n}  // namespace mhgp8\n",
+    "morsehgp3D_v8/src/pipeline/q2_census.cpp": "#include \"q2_census.hpp\"\n#include \"../spindle/q2_prepared_bounds.hpp\"\n\n#include <algorithm>\n#include <chrono>\n#include <numeric>\n#include <stdexcept>\n#include <utility>\n\nnamespace mhgp8 {\nnamespace {\n\nusing Clock = std::chrono::steady_clock;\nconstexpr std::size_t absent = std::numeric_limits<std::size_t>::max();\n\n[[nodiscard]] double milliseconds(Clock::time_point begin, Clock::time_point end) {\n  return std::chrono::duration<double, std::milli>(end - begin).count();\n}\n\n[[nodiscard]] Box3 joined(const Box3& a, const Box3& b) {\n  return {{std::min(a.low.x, b.low.x), std::min(a.low.y, b.low.y),\n           std::min(a.low.z, b.low.z)},\n          {std::max(a.high.x, b.high.x), std::max(a.high.y, b.high.y),\n           std::max(a.high.z, b.high.z)}};\n}\n\n[[nodiscard]] i64 squared_diagonal(const Box3& box) {\n  i64 result = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const i64 delta = static_cast<i64>(box.high[axis]) - box.low[axis];\n    result += delta * delta;\n  }\n  return result;\n}\n\n[[nodiscard]] Q2BallKey ball_key(const Point3& a, const Point3& b) {\n  Q2BallKey key;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    key.center_twice[axis] = static_cast<std::uint32_t>(a[axis]) + b[axis];\n    const i64 difference = static_cast<i64>(a[axis]) - b[axis];\n    key.diameter_squared += static_cast<u64>(difference * difference);\n  }\n  return key;\n}\n\n// Coordinates are promoted BEFORE subtraction or multiplication. With\n// d=65535, -12*d^2 <= 4H <= 3*d^2; all sums below fit comfortably in i64.\n// The key uses the doubled center and four times the squared radius, so\n// half-integral centers require neither rounding nor division.\n[[nodiscard]] i64 point_power4(const Q2BallKey& key, const Point3& point) {\n  i64 value = static_cast<i64>(key.diameter_squared);\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const i64 delta = 2 * static_cast<i64>(point[axis]) - key.center_twice[axis];\n    value -= delta * delta;\n  }\n  return value;\n}\n\nusing PowerBounds = Q2Bounds;\n\n// The inexpensive singleton-pair path: exact min/max distances from the\n// doubled center to the doubled Z box. Pairwise never pays the product-box\n// routine used to share several different queries.\n[[nodiscard]] PowerBounds pair_bounds(const Q2BallKey& key, const Box3& z) {\n  i64 nearest_squared = 0;\n  i64 farthest_squared = 0;\n  for (std::size_t axis = 0; axis < 3; ++axis) {\n    const i64 center = key.center_twice[axis];\n    const i64 low = 2 * static_cast<i64>(z.low[axis]);\n    const i64 high = 2 * static_cast<i64>(z.high[axis]);\n    const i64 nearest = center < low ? low - center : center > high ? center - high : 0;\n    const i64 low_delta = low - center;\n    const i64 high_delta = high - center;\n    nearest_squared += nearest * nearest;\n    farthest_squared += std::max(low_delta * low_delta, high_delta * high_delta);\n  }\n  const auto radius4 = static_cast<i64>(key.diameter_squared);\n  return {radius4 - farthest_squared, radius4 - nearest_squared};\n}\n\n}  // namespace\n\nQ2CensusIndex::Q2CensusIndex(RectanglePtr rectangle) : rectangle_(std::move(rectangle)) {\n  if (!rectangle_) {\n    throw std::invalid_argument(\"mhgp8 q2 index requires an owned rectangle\");\n  }\n  order_.resize(rectangle_->points().size());\n  std::iota(order_.begin(), order_.end(), std::size_t{0});\n  if (order_.empty()) {\n    throw std::logic_error(\"mhgp8 certified rectangle has no sites\");\n  }\n  static_cast<void>(build({0, order_.size()}, 0));\n}\n\nstd::size_t Q2CensusIndex::build(Range range, u64 depth) {\n  const auto points = rectangle_->points();\n  Box3 box = singleton_box(points[order_[range.first]]);\n  for (std::size_t position = range.first; position < range.last; ++position) {\n    counter_add(work_.point_visits);\n    box = joined(box, singleton_box(points[order_[position]]));\n  }\n  const auto node_id = nodes_.size();\n  nodes_.push_back(Node{range, box});\n  counter_add(work_.nodes);\n  work_.max_depth = std::max(work_.max_depth, depth);\n  if (range.size() == 1) {\n    nodes_[node_id].escape = nodes_.size();\n    counter_add(work_.escape_links);\n    if (nodes_[node_id].escape != node_id + 1) {\n      throw std::logic_error(\"mhgp8 q2 leaf escape must follow its preorder node\");\n    }\n    return node_id;\n  }\n  std::size_t axis = 0;\n  for (std::size_t other = 1; other < 3; ++other) {\n    if (box.high[other] - box.low[other] > box.high[axis] - box.low[axis]) {\n      axis = other;\n    }\n  }\n  const unsigned midpoint = (static_cast<unsigned>(box.low[axis]) + box.high[axis]) / 2;\n  const auto begin = order_.begin() + static_cast<std::ptrdiff_t>(range.first);\n  const auto end = order_.begin() + static_cast<std::ptrdiff_t>(range.last);\n  const auto cut = std::partition(begin, end, [&](std::size_t id) {\n    counter_add(work_.point_visits);\n    return points[id][axis] <= midpoint;\n  });\n  const auto split = static_cast<std::size_t>(cut - order_.begin());\n  if (split == range.first || split == range.last) {\n    throw std::logic_error(\"mhgp8 q2 index failed to split distinct u16 sites\");\n  }\n  // Midpoint splits halve one positive coordinate extent. At most 48 such\n  // splits occur on a u16 path; no artificial depth or visit limit is used.\n  const auto left = build({range.first, split}, depth + 1);\n  const auto right = build({split, range.last}, depth + 1);\n  nodes_[node_id].left = left;\n  nodes_[node_id].right = right;\n  nodes_[node_id].escape = nodes_.size();\n  counter_add(work_.escape_links);\n  // Validate the DFS continuation when linking children, without another\n  // point traversal: left follows parent, its escape is right, and the two\n  // child populations partition the parent. The right escape leaves parent.\n  // By induction every escape either advances to the next population range\n  // or to the final index sentinel; it cannot skip/revisit a witness prefix.\n  if (left != node_id + 1 || nodes_[left].escape != right ||\n      nodes_[right].escape != nodes_[node_id].escape ||\n      nodes_[left].range.first != range.first ||\n      nodes_[left].range.last != nodes_[right].range.first ||\n      nodes_[right].range.last != range.last) {\n    throw std::logic_error(\"mhgp8 q2 index children or DFS escapes do not partition their parent\");\n  }\n  return node_id;\n}\n\nQ2CensusIndexPtr make_q2_census_index(RectanglePtr rectangle) {\n  return Q2CensusIndexPtr(new Q2CensusIndex(std::move(rectangle)));\n}\n\nstruct Q2CensusEngine {\n  struct QueryNode {\n    Range range;\n    Box3 box;\n    std::size_t left{absent};\n    std::size_t right{absent};\n  };\n  const Q2CensusIndex& index;\n  const AxisQ2Plan& plan;\n  const Q2CensusConsumer& consumer;\n  std::span<const Point3> points;\n  std::span<const std::size_t> b_order;\n  unsigned threshold;\n  Q2CensusResult result;\n  std::vector<QueryNode> queries;\n  std::vector<std::size_t> interior;\n  std::vector<std::size_t> shell;\n\n  Q2CensusEngine(const Q2CensusIndex& input_index, const AxisQ2Plan& input_plan,\n                 const Q2CensusConsumer& input_consumer)\n      : index(input_index), plan(input_plan), consumer(input_consumer),\n        points(input_index.rectangle().points()), b_order(input_plan.b_order()),\n        threshold(input_index.rectangle().kmax()) {\n    result.candidate_pairs = plan.candidate_pairs();\n    result.work.input_descriptors = static_cast<u64>(plan.blocks().size());\n  }\n\n  [[nodiscard]] std::size_t build_queries(Range range, u64 depth) {\n    const auto id = queries.size();\n    queries.push_back(QueryNode{range, {}});\n    counter_add(result.work.query_build_nodes);\n    result.work.query_build_max_depth = std::max(result.work.query_build_max_depth, depth);\n    if (range.size() == 1) {\n      counter_add(result.work.query_build_point_visits);\n      queries[id].box = singleton_box(points[b_order[range.first]]);\n      return id;\n    }\n    // Preserve the axis permutation and its descriptor ranges. Construct\n    // boxes bottom-up in O(|B|), without rescanning B for every anchor.\n    const auto split = range.first + range.size() / 2;\n    const auto left = build_queries({range.first, split}, depth + 1);\n    const auto right = build_queries({split, range.last}, depth + 1);\n    queries[id].left = left;\n    queries[id].right = right;\n    queries[id].box = joined(queries[left].box, queries[right].box);\n    return id;\n  }\n\n  void root_start(unsigned acquired) {\n    counter_add(result.work.count_root_starts);\n    if (acquired != 0) {\n      counter_add(result.work.frontier_restarts);\n      throw std::logic_error(\"mhgp8 q2 census cannot restart its root after a credit\");\n    }\n  }\n\n  void consume_witnesses(std::size_t population) {\n    counter_add(result.work.consumed_witness_sites, static_cast<u64>(population));\n  }\n\n  void add_count(unsigned& count, std::size_t population) const {\n    // Count stays <=Kmax<=10 for the certified owner. Compare before narrowing\n    // even if the global witness population is many millions of sites.\n    const auto remaining = static_cast<std::size_t>(threshold - count);\n    count += static_cast<unsigned>(std::min(remaining, population));\n  }\n\n  void count_pair(std::size_t witness, const Q2BallKey& key, unsigned& count) {\n    if (count == threshold) {\n      return;\n    }\n    counter_add(result.work.count_node_visits);\n    const auto& z = index.nodes_[witness];\n    if (z.left == absent) {\n      counter_add(result.work.count_point_tests);\n      consume_witnesses(1);\n      if (point_power4(key, points[index.order_[z.range.first]]) > 0) {\n        add_count(count, 1);\n      }\n      return;\n    }\n    counter_add(result.work.count_bound_tests);\n    const auto bounds = pair_bounds(key, z.box);\n    if (bounds.minimum4 > 0) {\n      consume_witnesses(z.range.size());\n      add_count(count, z.range.size());\n    } else if (bounds.maximum4 <= 0) {\n      consume_witnesses(z.range.size());\n    } else {\n      counter_add(result.work.witness_splits);\n      count_pair(z.left, key, count);\n      count_pair(z.right, key, count);\n    }\n  }\n\n  void collect(std::size_t witness, const Q2BallKey& key) {\n    counter_add(result.work.payload_node_visits);\n    const auto& z = index.nodes_[witness];\n    if (z.left == absent) {\n      counter_add(result.work.payload_point_tests);\n      const auto id = index.order_[z.range.first];\n      const auto value = point_power4(key, points[id]);\n      if (value > 0) {\n        interior.push_back(id);\n      } else if (value == 0) {\n        shell.push_back(id);\n      }\n      return;\n    }\n    counter_add(result.work.payload_bound_tests);\n    const auto bounds = pair_bounds(key, z.box);\n    if (bounds.maximum4 < 0) {\n      return;\n    }\n    if (bounds.minimum4 > 0 || (bounds.minimum4 == 0 && bounds.maximum4 == 0)) {\n      auto& destination = bounds.minimum4 > 0 ? interior : shell;\n      const auto begin = index.order_.begin() + static_cast<std::ptrdiff_t>(z.range.first);\n      const auto end = index.order_.begin() + static_cast<std::ptrdiff_t>(z.range.last);\n      destination.insert(destination.end(), begin, end);\n      return;\n    }\n    // Equality cannot be discarded in this second pass: every shell ID is\n    // needed, including endpoints and non-support boundary sites.\n    collect(z.left, key);\n    collect(z.right, key);\n  }\n\n  void accept(std::size_t a_id, Range range, unsigned count) {\n    if (count >= threshold) {\n      throw std::logic_error(\"mhgp8 q2 accepted a saturated support\");\n    }\n    counter_add(result.accepted_pairs, static_cast<u64>(range.size()));\n    if (range.size() > 1) {\n      counter_add(result.work.uniform_accepted_pairs, static_cast<u64>(range.size()));\n    }\n    const auto started = Clock::now();\n    for (std::size_t position = range.first; position < range.last; ++position) {\n      const auto b_id = b_order[position];\n      const auto key = ball_key(points[a_id], points[b_id]);\n      interior.clear();\n      shell.clear();\n      collect(0, key);\n      if (interior.size() != count) {\n        throw std::logic_error(\"mhgp8 q2 count and second-pass interior IDs disagree\");\n      }\n      counter_add(result.work.payload_interior_sites, static_cast<u64>(interior.size()));\n      counter_add(result.work.payload_shell_sites, static_cast<u64>(shell.size()));\n      counter_add(result.work.payload_supports);\n      consumer(Q2Support{a_id, b_id, key, interior, shell});\n    }\n    result.payload_ms += milliseconds(started, Clock::now());\n  }\n\n  void reject(Range range) {\n    counter_add(result.rejected_pairs, static_cast<u64>(range.size()));\n    if (range.size() > 1) {\n      counter_add(result.work.uniform_rejected_pairs, static_cast<u64>(range.size()));\n    }\n  }\n\n  void shared_task(std::size_t a_id, std::size_t query, unsigned count,\n                    std::size_t cursor) {\n    counter_add(result.work.query_tasks);\n    const auto& b = queries[query];\n    const bool singleton = b.range.size() == 1;\n    const auto key = singleton ? ball_key(points[a_id], points[b_order[b.range.first]])\n                               : Q2BallKey{};\n    const auto b_diagonal = singleton ? 0 : squared_diagonal(b.box);\n    // Prepare six endpoint constants once for this query task, not once for\n    // every Z box. The 48-byte value has no heap storage or point views; the\n    // existing singleton-pair path does not compute these constants.\n    Q2PreparedBounds prepared;\n    if (!singleton) {\n      prepared = Q2PreparedBounds(points[a_id], b.box);\n    }\n    while (cursor != index.nodes_.size()) {\n      if (cursor >= index.nodes_.size()) {\n        throw std::logic_error(\"mhgp8 q2 witness cursor exceeds the immutable index\");\n      }\n      const auto& z = index.nodes_[cursor];\n      counter_add(result.work.count_node_visits);\n      PowerBounds bounds;\n      if (singleton && z.left == absent) {\n        counter_add(result.work.count_point_tests);\n        const auto value = point_power4(key, points[index.order_[z.range.first]]);\n        bounds = {value, value};\n      } else {\n        counter_add(result.work.count_bound_tests);\n        bounds = singleton ? pair_bounds(key, z.box) : prepared.bounds_unchecked(z.box);\n      }\n      if (bounds.minimum4 > 0) {\n        consume_witnesses(z.range.size());\n        if (!singleton) {\n          counter_add(result.work.uniform_credited_pairs, static_cast<u64>(b.range.size()));\n        }\n        add_count(count, z.range.size());\n        cursor = z.escape;\n        counter_add(result.work.cursor_advances);\n        if (count == threshold) {\n          reject(b.range);\n          return;\n        }\n      } else if (bounds.maximum4 <= 0) {\n        consume_witnesses(z.range.size());\n        cursor = z.escape;\n        counter_add(result.work.cursor_advances);\n      } else if (singleton ||\n                 (z.left != absent && squared_diagonal(z.box) > b_diagonal)) {\n        if (z.left == absent) {\n          throw std::logic_error(\"mhgp8 q2 singleton power cannot be uncertain\");\n        }\n        counter_add(result.work.witness_splits);\n        cursor = z.left;\n        counter_add(result.work.cursor_advances);\n      } else {\n        if (b.left == absent) {\n          throw std::logic_error(\"mhgp8 q2 shared task has no query children\");\n        }\n        counter_add(result.work.query_splits);\n        if (count > 0) {\n          counter_add(result.work.shared_splits_after_credit);\n        }\n        counter_add(result.work.cursor_reuses, 2);\n        // A fixed Z DFS order makes one preorder cursor represent the entire\n        // unconsumed suffix. Both query children inherit that cursor and the\n        // exact acquired count. No frontier list, allocation, root restart,\n        // or copy of a long continuation is needed. Query tasks may later be\n        // scheduled independently, but their internal Z order must stay fixed.\n        shared_task(a_id, b.left, count, cursor);\n        shared_task(a_id, b.right, count, cursor);\n        return;\n      }\n    }\n    accept(a_id, b.range, count);\n  }\n\n  void cover(std::size_t a_id, Range selected, std::size_t query) {\n    counter_add(result.work.query_cover_visits);\n    const auto& node = queries[query];\n    if (selected.last <= node.range.first || node.range.last <= selected.first) {\n      return;\n    }\n    if (selected.first <= node.range.first && node.range.last <= selected.last) {\n      root_start(0);\n      shared_task(a_id, query, 0, 0);\n      return;\n    }\n    if (node.left == absent) {\n      throw std::logic_error(\"mhgp8 q2 descriptor partially intersects a singleton range\");\n    }\n    cover(a_id, selected, node.left);\n    cover(a_id, selected, node.right);\n  }\n\n  void run(Q2CensusMode mode) {\n    if (result.candidate_pairs == 0) {\n      return;\n    }\n    if (mode == Q2CensusMode::SharedBlocks) {\n      const auto started = Clock::now();\n      static_cast<void>(build_queries({0, b_order.size()}, 0));\n      result.query_index_ms = milliseconds(started, Clock::now());\n      for (const auto& block : plan.blocks()) {\n        cover(block.a_id, block.b, 0);\n      }\n    } else {\n      for (const auto& block : plan.blocks()) {\n        for (std::size_t position = block.b.first; position < block.b.last; ++position) {\n          counter_add(result.work.query_tasks);\n          root_start(0);\n          unsigned count = 0;\n          const auto key = ball_key(points[block.a_id], points[b_order[position]]);\n          count_pair(0, key, count);\n          const Range singleton{position, position + 1};\n          if (count == threshold) {\n            reject(singleton);\n          } else {\n            accept(block.a_id, singleton, count);\n          }\n        }\n      }\n    }\n  }\n};\n\nQ2CensusResult run_q2_census(const Q2CensusIndex& index, const AxisQ2Plan& plan,\n                            Q2CensusMode mode, const Q2CensusConsumer& consumer) {\n  const auto started = Clock::now();\n  if (&index.rectangle() != &plan.rectangle()) {\n    throw std::invalid_argument(\"mhgp8 q2 index and plan require the same owner\");\n  }\n  if (mode != Q2CensusMode::Pairwise && mode != Q2CensusMode::SharedBlocks) {\n    throw std::invalid_argument(\"mhgp8 q2 census mode is invalid\");\n  }\n  if (!consumer) {\n    throw std::invalid_argument(\"mhgp8 q2 census requires a synchronous payload consumer\");\n  }\n  Q2CensusResult result;\n  {\n    Q2CensusEngine engine(index, plan, consumer);\n    engine.run(mode);\n    if (engine.result.accepted_pairs > engine.result.candidate_pairs ||\n        engine.result.rejected_pairs != engine.result.candidate_pairs - engine.result.accepted_pairs) {\n      throw std::logic_error(\"mhgp8 q2 census did not partition the candidate residual\");\n    }\n    result = engine.result;\n  }\n  // Include destruction of the temporary B tree and payload buffers\n  // in the enclosing interval, rather than reporting only active searches.\n  result.total_ms = milliseconds(started, Clock::now());\n  result.count_ms = result.total_ms - result.query_index_ms - result.payload_ms;\n  return result;\n}\n\n}  // namespace mhgp8\n",
+    "morsehgp3D_v8/src/spindle/q2_prepared_bounds.hpp": "#pragma once\n\n#include \"../core/types.hpp\"\n\n#include <algorithm>\n#include <array>\n#include <limits>\n#include <type_traits>\n\nnamespace mhgp8 {\n\nstruct Q2Bounds {\n  i64 minimum4{};\n  i64 maximum4{};\n};\n\n// Exact extrema of 4H(a,b,z) on {a} x B x Z, with a fixed and B prepared\n// once. This constant-size value contains no point views, dynamic storage,\n// witness counts or task history. Its trivial representation does not itself\n// qualify a parallel/GPU execution or a bound on the number of tasks.\nclass Q2PreparedBounds final {\n public:\n  Q2PreparedBounds(const Point3& a, const Box3& b) {\n    require_valid_box(b);\n    for (std::size_t axis = 0; axis < 3; ++axis) {\n      const i64 anchor = a[axis];\n      const std::array<i64, 2> endpoints{b.low[axis], b.high[axis]};\n      for (std::size_t side = 0; side < 2; ++side) {\n        const i64 difference = endpoints[side] - anchor;\n        constants_[axis][side] = {\n            static_cast<std::uint32_t>(anchor + endpoints[side]),\n            static_cast<std::uint32_t>(difference * difference)};\n      }\n    }\n  }\n\n  [[nodiscard]] Q2Bounds bounds(const Box3& z) const {\n    require_valid_box(z);\n    return bounds_unchecked(z);\n  }\n\n private:\n  struct Constants {\n    std::uint32_t center_twice{};\n    std::uint32_t distance_squared{};\n  };\n  std::array<std::array<Constants, 2>, 3> constants_{};\n\n  // The census uses only boxes constructed inside its validated immutable\n  // index. Other callers use the checked public entry point above.\n  friend struct Q2CensusEngine;\n  // The singleton path never queries this inert value. It avoids an optional\n  // discriminator; a nonsingleton task installs all prepared constants once.\n  Q2PreparedBounds() = default;\n  [[nodiscard]] Q2Bounds bounds_unchecked(const Box3& z) const {\n    Q2Bounds result;\n    for (std::size_t axis = 0; axis < 3; ++axis) {\n      const i64 low_twice = 2 * static_cast<i64>(z.low[axis]);\n      const i64 high_twice = 2 * static_cast<i64>(z.high[axis]);\n      i64 minimum4 = std::numeric_limits<i64>::max();\n      i64 maximum4 = std::numeric_limits<i64>::min();\n      for (const auto& constant : constants_[axis]) {\n        const i64 center = static_cast<i64>(constant.center_twice);\n        const i64 distance = static_cast<i64>(constant.distance_squared);\n        const i64 low_delta = low_twice - center;\n        const i64 high_delta = high_twice - center;\n        const i64 low_squared = low_delta * low_delta;\n        const i64 high_squared = high_delta * high_delta;\n        const i64 nearest_squared = low_delta > 0 ? low_squared\n                                        : high_delta < 0 ? high_squared : 0;\n        minimum4 = std::min(minimum4, distance - std::max(low_squared, high_squared));\n        maximum4 = std::max(maximum4, distance - nearest_squared);\n      }\n      result.minimum4 += minimum4;\n      result.maximum4 += maximum4;\n    }\n    return result;\n  }\n};\n\n// For each endpoint e of one coordinate of B, C=a+e and D=(e-a)^2\n// give 4H=D-(2z-C)^2. H is affine in b and concave in z, so minimizing\n// uses the farthest endpoint of 2Z, while maximizing uses its nearest point.\n// The two endpoint squares are reused for both extrema, with nearest square\n// zero when C lies inside 2Z (also for half-integral geometric centers).\n// With M=65535: C<=2M, D<=M^2, |2z-C|<=2M, each square<=4M^2,\n// and -12M^2<=4H<=3M^2. Promotion precedes every product; i64 is ample.\n// Both stored constants fit u32: 2M=131070 and M^2=4294836225. They are\n// promoted back to i64 before differences, so no unsigned wrap participates.\nstatic_assert(std::is_trivially_copyable_v<Q2PreparedBounds>);\nstatic_assert(sizeof(Q2PreparedBounds) == 12 * sizeof(std::uint32_t));\n\n}  // namespace mhgp8\n"
+  },
+  "source_hashes_still_match_worktree": true,
+  "source_sha256": {
+    "audits/morsehgp3D_v8_complementaire/q2_prepared_bounds_probe.cpp": "d755e0447fcc9e45abe94294a57fd837e6ea5c841a1a50c1d304af3e8cca53e3",
+    "legacy_q2_census.cpp": "3c513cc474c3d3a249779032f5cd03dac47198cf4b25d7698855bd118e0e593a",
+    "morsehgp3D_v8/src/core/types.hpp": "f4c05da3de254aadf95993988a44a933bf235282bc6f33930984689eba967f2b",
+    "morsehgp3D_v8/src/pipeline/q2_census.cpp": "b1ca5edd575f39bc7995bcf09dca0ccc9bb6838469fe3761f9bf1a2191187c74",
+    "morsehgp3D_v8/src/spindle/q2_prepared_bounds.hpp": "7bb46b4b7af3beede9bc2fc8926bafda9c900eb573671583206a6d94ffac5d21"
+  },
+  "source_state": "working_tree_snapshot",
+  "status": "passed"
+}
