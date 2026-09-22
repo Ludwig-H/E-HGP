@@ -8,7 +8,7 @@ ap.add_argument('--output',type=Path,required=True)
 ap.add_argument('--samples',type=int,default=24)
 ap.add_argument('--repeat',type=int,default=3)
 a=ap.parse_args()
-root=Path(__file__).resolve().parents[4]
+root=Path(__file__).resolve().parents[3]
 sys.path.insert(0,str(root/'morsehgp3D_v8/bench'))
 from run_ground_baseline import inputs_1mm
 inputs,manifests=inputs_1mm()
