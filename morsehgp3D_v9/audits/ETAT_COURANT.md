@@ -2,7 +2,7 @@
 
 22 septembre 2026. Code jugé : **`e28296bb`** (moteur chronométré à
 `d2700314`, puis portes et protocole G4) ; dernier audit B
-relu : `d4942b4e`. Cadre : `exploration_v9_hors_registre`,
+relu : `ae88ff1f`. Cadre : `exploration_v9_hors_registre`,
 `reference_cpu`, `quantized_u18_input_only`, `not_claimed`. Ce fichier est le
 verdict mutable du dossier ; les notes datées conservent les démonstrations et
 références. Les auditeurs écrivent dans `audits/` et communiquent au
@@ -89,7 +89,11 @@ appariée.
    ciblé certifié avant de lire un reçu comme mesure. Les quatre scripts
    sont publiés ; leur plafond de workers est corrigé à 48 dans `e28296bb`.
    Aucun essai GCP n'en découle. Le contrôleur doit encore vérifier
-   indépendamment les blobs du commit annoncés par l'archive.
+   indépendamment les blobs du commit annoncés par l'archive. Le [contre-audit
+   B du port MEB en cours](CONTRE_AUDIT_B_ANCHOR_MEB_DIAMETRE_20260922.md)
+   signale aussi que son nouveau champ JSON `ledger` ferait refuser au
+   worker G4 actuel chaque cas après calcul : figer son schéma avec la
+   sonde et le selftest avant la session.
 2. **Portes causales et entrée** : rejouer les 28 portes de `e28296bb`
    indépendamment ; comparer la restriction sémantique des ordres K1..5 de K10 à la tour K5
    sur les mêmes octets, après égalité des catalogues actifs bas-rang ;
@@ -131,7 +135,10 @@ appariée.
    de 000000/K10 font 1,065 milliard de tests de puissance ; un test
    exact de la paire la plus éloignée peut éliminer toutes les autres
    paires q2 dans chaque appel, sous la preuve détaillée de l'[actualisation
-   A](CONTRE_AUDIT_A_MESURES_PLAN_20260922.md). Instrumenter les tailles
+   A](CONTRE_AUDIT_A_MESURES_PLAN_20260922.md). Un port **non commis** a été
+   [contrelu par B](CONTRE_AUDIT_B_ANCHOR_MEB_DIAMETRE_20260922.md) sans
+   régression géométrique trouvée ; son étiquette de travail et sa mutation
+   causale restent à fermer. Instrumenter les tailles
    de supports et le temps avant de promettre un gain. La [note B](PLATEAUX_GRANDES_COQUILLES_B_20260922.md)
    propose un quotient local compact, [contrelu par B sur sept petites
    coquilles](CONTRE_AUDIT_B_QUOTIENT_COQUILLE_20260922.md), tandis que l'[oracle entier
