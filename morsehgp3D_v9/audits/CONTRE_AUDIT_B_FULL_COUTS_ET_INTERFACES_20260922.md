@@ -120,6 +120,9 @@ requalifier, indépendamment des reçus v8. Le statut public demeure
 **Rejeu indépendant ciblé.** Un worktree temporaire détaché au commit
 `d2700314`, sans modifier le `main` partagé, a compilé en Release avec
 Boost obligatoire ; `ctest -L gate --parallel 4` a passé **20/20** portes.
+Le même commit compilé sous Clang 18 ASan/UBSan en `RelWithDebInfo`
+a passé **20/20** portes en un second rejeu ; aucune nouvelle borne
+arithmétique u18 n'est déduite de ces cas bornés.
 Le probe public a aussi produit une tour K1..5 sur les **dix premiers
 sites** du fichier sans sol 08/000000 à 1 mm : W1/s8, W4/s8, W1/s10 et
 W1/s12 donnent le même digest `f26d0dd2bcc3f4d0` et les mêmes 55
@@ -138,6 +141,12 @@ probe accepte `--grid=<libellé>` sans contrôler l'origine ni le pas des
 coordonnées ; le mot `1mm` dans son JSON n'est pas un certificat de
 préparation. Lier le hash des octets d'entrée et le manifeste du masque
 à la ligne de qualification, et mesurer lecture/préparation séparément.
+Le parseur du probe accepte en outre `K=4294967297` : la conversion
+ultérieure en `unsigned` le tronque à `K=1`, l'appel public réussit et
+le JSON annonce `options.K=1` (reproduit sur un diagnostic à deux sites).
+La bibliothèque valide K **après** conversion : corriger le lanceur
+par un entier vérifié avant tout rétrécissement, puis ajouter un gate
+de refus CLI. Ce n'est pas une erreur de géométrie du cœur.
 
 La chaîne matérialise en outre chaque présentation dans un vecteur de
 worker, puis dans un second vecteur `all` avant tri global ; elle alloue

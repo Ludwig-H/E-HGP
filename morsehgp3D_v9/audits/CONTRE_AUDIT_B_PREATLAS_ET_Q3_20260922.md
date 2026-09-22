@@ -1,8 +1,8 @@
 # Contre-audit B — rejet pré-atlas : conserver q3 et compter l'amont
 
 22 septembre 2026. Audit de l'ordre effectif des opérations dans la v8
-u18, pour guider un futur port v9. **Aucun moteur v9, test G4 ou gain de
-temps n'est qualifié ici.** La [note A q4](Q4_STRUCTURE_ET_BORNES.md)
+u18, puis de ses risques pour le premier port v9 `d2700314`.
+**Aucun test G4 ni gain de temps v9 n'est qualifié ici.** La [note A q4](Q4_STRUCTURE_ET_BORNES.md)
 établit le certificat local de blocs de graines `X×C` avant la partition
 des témoins `Z`. Cette note précise ses dépendances de pipeline et ses
 risques de coût, sans contester le certificat sous ses préconditions.
@@ -101,6 +101,44 @@ pour `z₁,z₂` : elle survit. La graine `x` est aiguë et propriétaire ;
 la présentation depuis `y` est supprimée par la règle canonique
 `x<y` du balayage v8. Éliminer la **droite** de `x` à cause du rejet
 q3 ponctuel ferait donc perdre l'émission q4 canonique.
+
+**Fixture plus forte pour le catalogue v9 : aucune face q3 acceptée.**
+Prendre `K=3`, `O=(20,20,20)` et, dans l'ordre des IDs, les quatre
+sommets réguliers
+`v₀=(30,30,30)`, `v₁=(30,10,10)`, `v₂=(10,30,10)`,
+`v₃=(10,10,30)`. Pour chaque `i`, ajouter les deux témoins
+`zᵢ,₁₁=O−11 sign(vᵢ−O)` et
+`zᵢ,₁₂=O−12 sign(vᵢ−O)` (huit sites, IDs 4..11).
+Les coordonnées sont entières positives u18. La boule q4 des `vᵢ`
+a centre `O`, rayon carré `300`, poids `1/4` strictement positifs et
+aucun témoin intérieur : les puissances des `zᵢ,₁₁/₁₂` sont `63/132`.
+Elle est donc admise à K3 ; ses six arêtes ont longueur carrée `800`,
+l'arête propriétaire est `(0,1)` selon le départage par IDs.
+
+Pour **chaque** face q3 obtenue en omettant `vᵢ`, le centre est
+`O−(10/3) sign(vᵢ−O)` et le rayon carré `800/3`. Les deux témoins
+`zᵢ,₁₁/₁₂` ont les puissances `−271/3` et `−124/3` ; les six autres
+témoins et `vᵢ` sont extérieurs. La profondeur q3 est donc exactement
+`2=K−1` pour les quatre faces : toutes sont rejetées, alors que q4
+survit (`0<K−2`). Toute génération q4 limitée aux triangles q3
+**acceptés** perd cette BallKey. Le recoupement local du nouveau
+catalogue v9 `d2700314` ne la retrouverait pas si elle était omise ;
+seul un oracle de complétude du générateur la détecte. Cette fixture
+teste en même temps les égalités de plus longue arête, sans supposer
+qu'une présentation q3 rejetée transporte encore sa ligne q4.
+L'[oracle Fraction autonome](check_q4_without_q3_faces_20260922.py)
+vérifie les quatre profondeurs, tous les signes et les seuils ; il passe
+en Python normal et `-O`. En diagnostic facultatif sur le premier
+exécutable v9 `d2700314`, les quatre ordres d'IDs (identité, supports
+inversés, témoins d'abord, tout inversé) donnent chacun une tour K1..3,
+`q4_emitted=1` et 69 boules. Les digests diffèrent avec les IDs, comme
+attendu ; ce contrôle ne compare pas les forêts après recodage. Le JSON
+agrégé **n'identifie pas** à lui seul la BallKey q4 : ajouter la fixture
+au juge d'inventaire exhaustif et une mutation supprimant **cette clé**.
+Les variantes d'IDs du T2 actuel ne remplacent pas ce test : elles
+permutent l'index de son oracle mais reconstruisent le nuage d'entrée
+du **générateur** dans le même ordre géométrique `ix.upos` ; les ties
+WSPD/propriétaire ne varient donc pas réellement entre ces variantes.
 
 Les états et conséquences doivent rester **typés** :
 

@@ -65,9 +65,14 @@ développeur restent hors de cette contrelecture ; aucune branche parasite cré�
   `run_tower=false` puis appelle la tour directement : tester le chemin
   public `run_tower=true` et son digest reste une porte à ajouter.
   Notre rejeu indépendant du commit `d2700314` a compilé en Release et
-  passé les **20/20 CTests** ; le probe public K1..5 sur un préfixe de
+  sous Clang ASan/UBSan, **20/20 CTests dans chaque build** ; le
+  probe public K1..5 sur un préfixe de
   10 sites a donné un digest identique pour s8/10/12 et W1/W4, sans q4.
   C'est un diagnostic de raccord, non une trame qualifiée ni un oracle.
+  Une [fixture entière K3 à 12 sites](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PREATLAS_ET_Q3_20260922.md)
+  a une q4 valable et **quatre faces q3 rejetées** ; son oracle exact
+  passe et le probe émet une q4 sous quatre permutations d'IDs. Elle
+  doit entrer dans la porte d'inventaire et un mutant de clé omise.
 - Le banc publié à l'ouverture v9 juge **v8** : 129 CTests exécutés et
   verts sur 132 enregistrés, trois désactivés. Son `SHA256SUMS` référence
   quatre journaux `logs/*.log` absents du commit `3595725a` ; un clone
