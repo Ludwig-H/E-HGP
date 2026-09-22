@@ -130,19 +130,30 @@ appariée.
    deux familles de niveaux peu profonds proposent une sélection locale
    `O(mK polylog m)` sur modèle de comparaisons exactes. Le [contre-audit
    B](CONTRE_AUDIT_B_Q4_NIVEAUX_ORIENTES_20260922.md) propose une
-   perturbation sortante qui préserve les strates dégénérées, mais ni le port
-   symbolique, ni son coût réel, ni le census ne sont acquis. Plus grave pour
+   perturbation sortante qui préserve les strates dégénérées ; l'[oracle
+   rationnel A](check_q4_outward_levels_20260922.py) retrouve les 5 926
+   centres peu profonds de 2 004 arrangements dégénérés après rabattement.
+   Ni le port symbolique, ni son coût réel, ni le census ne sont acquis.
+   Plus grave pour
    la trame : le reçu 1 mm compte **2,779 milliards d'incidences
    site–cover cumulées sur les arêtes**, déjà davantage que `n²` pour
    `n=39 885`. Un parcours complet de chaque cover serait donc déjà plus
    coûteux que `n²` sur ce cas ; il faut partager ou élider ces covers, sans
-   confondre cette masse avec `Σh` des droites q4. Census global et test
+   confondre cette masse avec `Σh` des droites q4. Le compteur
+   `cover_sites` est une **population logique** additionnée sur des nœuds
+   certifiés, pas autant de lectures de sites dans le moteur actuel ; le
+   premier cover, sa décomposition et les IDs copiés ont leurs propres
+   compteurs. Census global et test
    `centre∈conv(coquille)` restent obligatoires ; le catalogue ne remplace
    pas automatiquement les présentations positives. La ligne v8 1 mm
    compte **171 444 arêtes q3 seules et 16,12 M census** que la réutilisation
    d'atlas q4 ne touche pas. L'[oracle q3 partagé](check_q3_shared_u18_20260922.py)
-   vérifie la boîte rationnelle u18 et un débordement i128 évité par
-   annulation algébrique ; le relais produit reste à qualifier. Le [contre-audit
+   vérifie la boîte rationnelle u18, un débordement i128 évité par
+   annulation algébrique et une fixture où avancer le curseur Z à travers
+   une feuille ambiguë perd un intérieur. La [note q3](Q3_STRUCTURE_ET_BORNES.md)
+   décrit le ticket possédé `(X,compte,curseur Z)` : une réponse GPU hors
+   ordre ne valide pas un préfixe DFS continu. Le relais produit reste à
+   qualifier. Le [contre-audit
    B](CONTRE_AUDIT_B_PREATLAS_ET_Q3_20260922.md) rappelle que la suppression
    d'une cellule q4 peut aussi enlever un certificat de rejet q3. Sa
    fixture entière prouve même qu'une q4 admise peut survivre quand

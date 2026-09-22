@@ -505,8 +505,16 @@ coquilles.
 Retrouver toutes les incidences et payer ce census sont des obligations
 comptables, pas des coûts supprimés par la borne. Sur la
 ligne 1 mm, `Σ cover_sites` q4 vaut `2 778 563 938` pour `1 872 168`
-arêtes : à K5, la borne agrégée `3Σm≤8,336` milliards est encore trop
-lâche pour annoncer une seconde ou une croissance sous-quadratique.
+arêtes. Ce compteur est une **population logique** :
+`Q4LocalGeometry::decompose_cover` ajoute `node.range.size()` lors de la
+copie d'un **seul ID de nœud**, sans lire tous ses sites. Il majore le
+nombre de formes qu'une construction de niveaux matérialisée **par arête**
+devrait examiner ; ce n'est pas le nombre d'opérations effectivement
+payées par le moteur actuel. À K5, la borne agrégée
+`3Σm≤8,336` milliards reste trop lâche pour annoncer une seconde ou une
+croissance sous-quadratique. Le reçu distingue les visites du premier
+cover, celles de sa décomposition et les IDs réellement copiés : les
+facturer séparément avant tout port des niveaux.
 Comparer, sur les mêmes arêtes échantillonnées, `m`, centres peu profonds
 exacts, centres positifs possédés, temps d'énumération et les
 `11,433` milliards de visites de l'atlas ; une construction complète
