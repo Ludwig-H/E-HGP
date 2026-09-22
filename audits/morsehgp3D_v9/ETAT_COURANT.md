@@ -87,6 +87,10 @@ PASS ni inférer une croissance globale de la sonde mono-arête prévue.
    Le complément A de `e8ce8f33` établit un certificat local exact de
    blocs de graines **avant** la partition Z de l'atlas q4 ; sa couverture
    de toutes les arêtes/graines/cellules et son coût net restent ouverts.
+   Le [contre-audit pré-atlas B](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PREATLAS_ET_Q3_20260922.md)
+   détaille le coût déjà payé du cover/domaine et le risque d'invalider
+   une part des 153 M rejets q3 par l'atlas partagé ; `NoSeed` reste un état
+   distinct, sans certificat Z implicite.
    La [contrelecture du certificat par capsule](../../morsehgp3D_v9/audits/CONTRELECTURE_B_CELLULES_ET_CATALOGUE_20260922.md)
    démontre un rejet exact de rectangle, mais il est **dominé à gardes
    et boîtes identiques même par la recherche rectangulaire native v8**.
@@ -107,6 +111,10 @@ PASS ni inférer une croissance globale de la sonde mono-arête prévue.
    composantes locales **sans** table de `2^u` masques. Elle n'est pas
    implémentée ; construire les régions, leurs signatures et `q_min`
    exactement reste à payer et à qualifier.
+   Le complément A `8054540c` factorise le calcul de `q_min=3` pour la
+   grille u18 et publie un [oracle local de plans](../../morsehgp3D_v9/audits/check_qmin_planes_u18_20260922.py)
+   (quatre fixtures et 755 sous-coquilles). Il ne teste pas encore les
+   composantes du quotient ni la tour FULL.
 5. Après réduction du travail, répartir les cellules/graines d'une arête
    lourde entre CPU/GPU avec tableaux compacts résidents, intervalles sûrs
    et repli exact. Juger le temps de **toute** la tour, pas un kernel.

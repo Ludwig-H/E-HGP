@@ -286,6 +286,10 @@ graines **avant** la partition Z, sous couverture de toutes les graines
 possibles et contact conservé. La présente contrelecture ajoute surtout
 le trajet global de complétude et l'obligation de juger le **coût net** ;
 elle ne revendique pas un certificat local concurrent.
+Le [contre-audit pré-atlas B](CONTRE_AUDIT_B_PREATLAS_ET_Q3_20260922.md)
+précise pourquoi un `NoSeed` q4 ne vaut pas un certificat de profondeur
+q3 et pourquoi les graines q4 comptées **après** atlas ne dimensionnent
+pas le travail du futur filtre pré-atlas.
 
 Sur la ligne 1 mm ci-dessus, rechercher même trois gardes par scan des
 39 885 sites pour chacune des 38,795 M cellules ferait environ
