@@ -104,6 +104,13 @@ def active_markdown() -> list[Path]:
             "PERIMETRE_ET_PREUVES.md",
         )
     )
+    # V9 (ouverte le 22 septembre 2026) : entrees, documents d'ouverture,
+    # recus et bancs du constructeur. Les rapports des auditeurs independants
+    # de morsehgp3D_v9/audits/ ne sont pas englobes, sauf l'etat courant nomme.
+    v9 = ROOT / "morsehgp3D_v9"
+    paths.extend((v9 / "README.md", v9 / "PASSATION.md", v9 / "audits" / "ETAT_COURANT.md"))
+    for directory in ("docs", "receipts", "bench"):
+        paths.extend(sorted((v9 / directory).rglob("*.md")))
     return list(dict.fromkeys(paths))
 
 

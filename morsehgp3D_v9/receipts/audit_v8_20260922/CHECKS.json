@@ -1,0 +1,94 @@
+{
+ "audited_commit": "122942413c40e477841b34760461c79a8b202751",
+ "boost_root": "build/v7_boost_gate/extracted/usr (Boost 1.83.0, non versionné)",
+ "builds": [
+  {
+   "build_dir": "build/v9-audit-v8-head-12294241",
+   "command": "ctest -j 3 --output-on-failure",
+   "configure": "-DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=…",
+   "executed": 125,
+   "failed": 0,
+   "log": "logs/head_ctest.log",
+   "not_run": [
+    "mhgp8_q34_affine_mutations",
+    "mhgp8_q34_indexed_census_mutations",
+    "mhgp8_q34_indexed_witness_mutations",
+    "mhgp8_q34_spatial_gate",
+    "mhgp8_q34_spatial_gate_optimized",
+    "mhgp8_q4_seed_cells_mutations",
+    "mhgp8_wspd_q34_mutations"
+   ],
+   "role": "suite complète hors de l'arbre canonique",
+   "total_seconds": 158.36
+  },
+  {
+   "build_dir": "<worktree audité>/build/v9-audit-mutations",
+   "command": "ctest -L mutation --output-on-failure",
+   "configure": "-DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=…",
+   "executed": 8,
+   "failed": 0,
+   "log": "logs/mut_ctest.log",
+   "not_run": [
+    "mhgp8_q34_indexed_witness_mutations"
+   ],
+   "role": "mutations dans l'arbre de build canonique <worktree>/build/",
+   "total_seconds": 126.15
+  }
+ ],
+ "cmake": "cmake version 3.28.3",
+ "compiler": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+ "cpus": "8",
+ "gcp_used": false,
+ "host": "Linux 6.8.0-1064-azure x86_64",
+ "lenses": {
+  "count": 12,
+  "reports": "morsehgp3D_v9/docs/audit_v8/",
+  "verification": "une contre-vérification adversariale par lentille, puis une critique de complétude"
+ },
+ "phase": "exploration_v9_hors_registre",
+ "public_status": "not_claimed",
+ "readers": [
+  {
+   "command": "python3 -B -O morsehgp3D_v8/bench/run_ground_baseline.py read --output morsehgp3D_v8/receipts/ground_baseline_20260921 --variant full",
+   "exit": 0,
+   "stdout": {
+    "commit": "92d74c13",
+    "rows": 9,
+    "status": "passed"
+   }
+  },
+  {
+   "command": "python3 -B -O morsehgp3D_v8/bench/run_ground_baseline.py read --output morsehgp3D_v8/receipts/ground_phase1_20260921 --variant full",
+   "exit": 0,
+   "stdout": {
+    "commit": "0e2c18ca",
+    "rows": 6,
+    "status": "passed"
+   }
+  },
+  {
+   "command": "python3 -B -O morsehgp3D_v8/bench/run_ground_baseline.py read --output morsehgp3D_v8/receipts/ground_phase1_20260921 --variant only",
+   "exit": 0,
+   "stdout": {
+    "commit": "0e2c18ca",
+    "rows": 3,
+    "status": "passed"
+   }
+  }
+ ],
+ "schema": "mhgp9_audit_v8_checks_v1",
+ "union": {
+  "disabled_by_construction": [
+   "mhgp8_q34_indexed_witness_mutations",
+   "mhgp8_q34_spatial_gate",
+   "mhgp8_q34_spatial_gate_optimized"
+  ],
+  "passed": 129,
+  "reasons": {
+   "mhgp8_q34_indexed_witness_mutations": "site de mutation non unique depuis 2629a536 (CMakeLists.txt)",
+   "mhgp8_q34_spatial_gate": "n'est active que dans le build épinglé build/v8_q4_seed_cells_r2_20260921",
+   "mhgp8_q34_spatial_gate_optimized": "idem"
+  },
+  "registered": 132
+ }
+}

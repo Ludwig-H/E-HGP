@@ -18,7 +18,21 @@ Le dépôt est documenté en français ; travailler en français.
 - Équations Markdown : une seule ligne physique, accolades explicites (`\mathbb{R}`), pas de `\operatorname`, pas de `\left\|`/`\left\{` (utiliser `\left\Vert`, `\left\lbrace`). `python tools/check_docs.py` vérifie tout cela (mais exclut `tests/**`).
 - Invariant d'architecture : MorseHGP3D calcule la hiérarchie **sans matérialiser la mosaïque de Delaunay d'ordre supérieur** ni catalogue global de cellules/cofaces (∝ C(n,k) interdit). Les oracles exhaustifs restent bornés et hors du chemin produit. Les pistes de `docs/archive/abandoned/README.md` et des `PISTES_FERMEES.md` ne se rouvrent qu'avec un nouveau théorème de complétude + fixture, jamais sur un benchmark.
 
-## Cible de travail : morsehgp3D_v5 (chantier actif)
+## Cible de travail : morsehgp3D_v9 (chantier actif depuis le 22 septembre 2026)
+
+`morsehgp3D_v9/` est le chantier actif (`AGENTS.md` § « Ouverture v9 »). Lire `morsehgp3D_v9/README.md`, `PASSATION.md` et `docs/AUDIT_V8_SYNTHESE.md` avant toute tâche. Cadre à annoncer :
+
+```text
+phase=exploration_v9_hors_registre
+backend=none (tant qu'aucun moteur v9 n'existe)
+profile=quantized_u18_input_only
+mode=ouverture_audit_v8_et_v7
+public_status=not_claimed
+```
+
+Objet : la tour HGP FULL de la v7, sur les trames SemanticKITTI sans sol de 30 000 à 60 000 sites, grille 1 mm, moteur entier exact 18 bits, 1 s puis 100 ms sur G4, K = 5 puis 10. La v8 (`12294241`) et la v7 (`dc57ffd5`) sont des sources différentielles ; aucun code v9 à l'ouverture. Commandes prévues : `cmake -S morsehgp3D_v9 -B build/v9 -DCMAKE_BUILD_TYPE=Release`, puis `ctest --test-dir build/v9 -L gate`. Les sections v5 à v8 ci-dessous sont historiques.
+
+## Ancienne cible : morsehgp3D_v5 (historique)
 
 `morsehgp3D_v5/` **remplace `morsehgp3D_v4/` comme chantier actif** (`AGENTS.md` § « Cible de travail », `morsehgp3D_v5/README.md`). Cadre à annoncer au début de toute tâche v5 :
 
@@ -34,7 +48,7 @@ La v5 calcule **le même objet** que la v4 avec **une base de code neuve** : la 
 
 ## Commandes
 
-Chantier actif `morsehgp3D_v5/` (C++20 sans extensions, `-Wall -Wextra -Wpedantic -Werror`, portes à code exact via `cmake/run_expect.cmake`, labels CTest `gate` / `oracle` / `scale8000` / `scale16000` / `scale32000`) :
+Ancien chantier `morsehgp3D_v5/` (C++20 sans extensions, `-Wall -Wextra -Wpedantic -Werror`, portes à code exact via `cmake/run_expect.cmake`, labels CTest `gate` / `oracle` / `scale8000` / `scale16000` / `scale32000`) :
 
 ```bash
 cmake -S morsehgp3D_v5 -B build/v5 -DCMAKE_BUILD_TYPE=Release

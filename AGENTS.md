@@ -2,6 +2,39 @@
 
 Ce guide s'applique à tout le dépôt. Les règles de sécurité et de preuve ci-dessous sont impératives, même lorsqu'une tâche ne touche qu'un prototype ou de la documentation.
 
+## Ouverture v9 — 22 septembre 2026 (chantier actif)
+
+`morsehgp3D_v9/` remplace `morsehgp3D_v8/` comme chantier actif, sur demande
+de l'utilisateur du 22 septembre 2026. Lire d'abord `morsehgp3D_v9/README.md`,
+`morsehgp3D_v9/PASSATION.md` et `morsehgp3D_v9/docs/AUDIT_V8_SYNTHESE.md`.
+Cadre à annoncer : `phase=exploration_v9_hors_registre`, `backend=none` tant
+qu'aucun moteur v9 n'existe, `profile=quantized_u18_input_only`,
+`mode=ouverture_audit_v8_et_v7`, `public_status=not_claimed`.
+
+Décisions de l'utilisateur qui s'appliquent à la v9, avec leur date. Le
+21 septembre 2026 (20:10 UTC) : « La priorité de régimes est pour les nuages
+LiDAR SemanticKITTI sans sol ; c'est principalement sur ces nuages avec entre
+30 000 et 60 000 points que les contrats temps (1 seconde ou 100 ms) et K (5 ou
+10) doivent passer », avec parallélisation multi-CPU puis GPU et feu vert G4.
+Le 22 septembre : « Oui, continuons en entier 18 bits », en réponse à la
+proposition de poursuivre le contrat temps sur le moteur entier élargi à
+18 bits (grille 1 mm), le profil float32 sans perte restant qualifié mais hors
+contrat temps ; puis « Ne développe pas plus pour le float32 pour l'instant ».
+Le moteur entier a été élargi à 18 bits en `a74e90f2`. Les paragraphes v8
+ci-dessous restent l'historique de la v8 ; en cas de conflit sur le régime ou
+la précision du contrat temps, ces décisions datées prévalent. Les points
+encore ouverts sont listés en § 9 de la synthèse.
+
+L'objet à livrer est la tour HGP FULL de la v7 (minima Gabriel, multifusions,
+parents, verticales, extension non régulière), pas le fold v4 (faux en
+général, fixture E5). La v8 (`origin/main` 12294241) et la v7 (`dc57ffd5`)
+sont des sources différentielles : tout port est explicite, épinglé et
+requalifié (`morsehgp3D_v9/docs/HERITAGE_V7_V8.md`). Un worktree Git par
+acteur, ou vérifier `git diff --cached --quiet` avant tout `git add` : l'index
+du worktree partagé peut contenir le travail non commis d'un autre acteur.
+Aucun octet de données KITTI dans la v9. Canal :
+`audits/COORDINATION_MORSEHGP3D_V9.md`.
+
 ## Contrat principal actif — trames SemanticKITTI entières
 
 Décision utilisateur du 21 septembre 2026 : le contrat principal remplace

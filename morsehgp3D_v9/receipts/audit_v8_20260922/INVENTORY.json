@@ -1,0 +1,970 @@
+{
+ "gcp_used": false,
+ "morsehgp3D_v7": {
+  "commits": 122,
+  "directories": {
+   "audits": {
+    "bytes": 143603115,
+    "files": 3136
+   },
+   "bench": {
+    "bytes": 433491,
+    "files": 24
+   },
+   "cli": {
+    "bytes": 35078,
+    "files": 2
+   },
+   "cmake": {
+    "bytes": 1624,
+    "files": 1
+   },
+   "docs": {
+    "bytes": 739946,
+    "files": 66
+   },
+   "oracle": {
+    "bytes": 29397,
+    "files": 3
+   },
+   "receipts": {
+    "bytes": 272869901,
+    "files": 23399
+   },
+   "src": {
+    "bytes": 826215,
+    "files": 57
+   },
+   "tests": {
+    "bytes": 1391345,
+    "files": 86
+   }
+  },
+  "first_commit": "e0e6396b 2026-09-04T20:43:39Z audit current v7 contracts and verification gates",
+  "last_commit": "dc57ffd5 2026-09-11T20:29:58Z qualify certified rank guards across the full cpu tower",
+  "tracked_files": 26777
+ },
+ "morsehgp3D_v8": {
+  "commits": 169,
+  "directories": {
+   "audits": {
+    "bytes": 39232414,
+    "files": 2920
+   },
+   "bench": {
+    "bytes": 1866823,
+    "files": 95
+   },
+   "cli": {
+    "bytes": 1,
+    "files": 1
+   },
+   "cmake": {
+    "bytes": 1304,
+    "files": 2
+   },
+   "docs": {
+    "bytes": 749635,
+    "files": 59
+   },
+   "oracle": {
+    "bytes": 6728,
+    "files": 2
+   },
+   "receipts": {
+    "bytes": 979311698,
+    "files": 16016
+   },
+   "src": {
+    "bytes": 774477,
+    "files": 87
+   },
+   "tests": {
+    "bytes": 2081994,
+    "files": 96
+   }
+  },
+  "first_commit": "2b658cbe 2026-09-13T14:06:17Z audit v7 bottlenecks and establish v8 foundations",
+  "last_commit": "12294241 2026-09-22T21:40:11+02:00 audit(v8): prioritize LiDAR rectangle cascade with combined-filter checks",
+  "tracked_files": 19281
+ },
+ "phase": "exploration_v9_hors_registre",
+ "public_status": "not_claimed",
+ "published_commit": "122942413c40e477841b34760461c79a8b202751",
+ "published_commit_date": "2026-09-22T21:40:11+02:00",
+ "schema": "mhgp9_audit_v8_inventory_v1",
+ "shared_worktree_pending_index": {
+  "entries": 89,
+  "files": [
+   {
+    "index_blob": "6a0aaf119fffbc69e174a05d1d4fcf07ed91f656",
+    "path": "audits/COORDINATION_MORSEHGP3D_V8.md",
+    "status": "M",
+    "worktree_sha256": "29b10dd9154373ffaa445040554f072c55793a436b155227e9d24243568aa135"
+   },
+   {
+    "index_blob": "182320ac055f25ad4a4d7132a220af390120c1d5",
+    "path": "morsehgp3D_v8/CMakeLists.txt",
+    "status": "M",
+    "worktree_sha256": "4d1a0a89136ffa350cca37aa7a6b649314b2ff811cc1555a9287bd946806dd95"
+   },
+   {
+    "index_blob": "fe290e67932cc73b10090dc1d0d059acc8a53fac",
+    "path": "morsehgp3D_v8/PASSATION.md",
+    "status": "M",
+    "worktree_sha256": "8a34706cc198ff4c06aef94075911da388239ccc87b1e5a72994bb9e11052ea3"
+   },
+   {
+    "index_blob": "195721cf1c66b2130afea77ecd0687ec32f2bd35",
+    "path": "morsehgp3D_v8/README.md",
+    "status": "M",
+    "worktree_sha256": "01337e690e3b8dd69add4ae43bf88f97c7a18fb149587293d245ca695d3eea19"
+   },
+   {
+    "index_blob": "46fda13bc7c6995c24cd1f285938a733dfd5a54d",
+    "path": "morsehgp3D_v8/audits/ETAT_COURANT.md",
+    "status": "M",
+    "worktree_sha256": "6d1deb6ad88ba95d247d6076f6d1ad7f9f07e0e90f306c514224f727005f65ff"
+   },
+   {
+    "index_blob": "fa815f07ae341888b50e62ffd55cba50d8e7586c",
+    "path": "morsehgp3D_v8/bench/run_ground_baseline.py",
+    "status": "M",
+    "worktree_sha256": "9c0971df7382cbc45d38a424164741797d1fa8466aa7d10168eb9c52b739752d"
+   },
+   {
+    "index_blob": "2e0c26a7549be97a9aa7d37112cb6266f2e057dd",
+    "path": "morsehgp3D_v8/bench/run_q34_affine_checks.py",
+    "status": "M",
+    "worktree_sha256": "489477686a1cc99d1d1065f61b0db347c66790084744cdb6c76bb70e021b0a77"
+   },
+   {
+    "index_blob": "afea1d6ca10125b92a82db9eb5cceae3c1f9989c",
+    "path": "morsehgp3D_v8/bench/run_q34_indexed_checks.py",
+    "status": "M",
+    "worktree_sha256": "e96ba1654a9e6f6ccba524c54ca772c1bf812c5dd8c9f3543f60d2ee7e17902d"
+   },
+   {
+    "index_blob": "e52135c499356d56e914586dddbdd6baa78c416e",
+    "path": "morsehgp3D_v8/bench/run_u18_resume_checks.py",
+    "status": "A",
+    "worktree_sha256": "df1452454ef5c070ea4b5ce44f49cd379c2147d70567d72c97d0e8cfc259f5dd"
+   },
+   {
+    "index_blob": "e2f611db0b923744f98c084ca91e6463a5ba2fc4",
+    "path": "morsehgp3D_v8/docs/ELARGISSEMENT_18_BITS_20260922.md",
+    "status": "M",
+    "worktree_sha256": "874202db6258aa3a4dff72ce3d41508db397a69abee3d1f29e2322cd4f795426"
+   },
+   {
+    "index_blob": "7334abca4e6cc9a9ccad16b63ab550827cdba5ae",
+    "path": "morsehgp3D_v8/docs/REPRISE_U18_ET_ATLAS_SATURANT_20260922.md",
+    "status": "A",
+    "worktree_sha256": "9643879f68ecb5d3d31302f947ab9e8d210eb360ef49df9cae24bffcb566a9f3"
+   },
+   {
+    "index_blob": "3880947fe348493864e1b215d7cf07a673355925",
+    "path": "morsehgp3D_v8/receipts/ground_18bits_20260922/u16_identity/BASELINE.only.json",
+    "status": "A",
+    "worktree_sha256": "28b0e440d79dc51cf2744ad1303c439377be48563170673b7439f859a08df995"
+   },
+   {
+    "index_blob": "d9852d1c59b87a0890391ac62d970f680c29f2eb",
+    "path": "morsehgp3D_v8/receipts/ground_18bits_20260922/u16_identity/only_probe_01_s00_k5_w8.json",
+    "status": "A",
+    "worktree_sha256": "b980c06b0ef85358f72f531de5d29dc8992920c9b7071cd09f0e2703d6d913f8"
+   },
+   {
+    "index_blob": "e99ac009aa4208fb6b3aafb444c3837c942d3ddc",
+    "path": "morsehgp3D_v8/receipts/ground_18bits_20260922/u16_identity/only_probe_02_s00_k10_w8.json",
+    "status": "A",
+    "worktree_sha256": "cf4fb6c3e9edc540ae6fcc37f2163a11583140dc2de6f94f3d67d0f24528d31b"
+   },
+   {
+    "index_blob": "c37e56d9145102a3603d6eca0b9a8dbe2cc5b2a4",
+    "path": "morsehgp3D_v8/receipts/ground_18bits_20260922/u16_identity/only_probe_04_s01_k5_w8.json",
+    "status": "A",
+    "worktree_sha256": "0bd8c05e52e5a72d8366a290a53f150246312df714630f4d2c036365b3dadc56"
+   },
+   {
+    "index_blob": "8a8ab79e5826f0398792e674a8dc58549dd33976",
+    "path": "morsehgp3D_v8/receipts/ground_18bits_20260922/u16_identity/only_probe_05_s01_k10_w8.json",
+    "status": "A",
+    "worktree_sha256": "6318ba2fd77fe5fbec37b1b1fefdca773dcde2550603c7a846e69af8456dfc2d"
+   },
+   {
+    "index_blob": "feba78a620beb9b2a9774c40fa4f101743be3e92",
+    "path": "morsehgp3D_v8/receipts/ground_18bits_20260922/u16_identity/only_probe_07_s02_k5_w8.json",
+    "status": "A",
+    "worktree_sha256": "a793a609b8fe156d231124c9eb0ba2d4aa6a0f3fbdb65baf86e6017f9a23dd7a"
+   },
+   {
+    "index_blob": "9c82eed8d3c6458fd91593253c40ece20bfffbeb",
+    "path": "morsehgp3D_v8/receipts/ground_18bits_20260922/u16_identity/only_probe_08_s02_k10_w8.json",
+    "status": "A",
+    "worktree_sha256": "884785872caf44cff028b28b53c2180cde2262dbe6f431c5f9a83ed3d9d01922"
+   },
+   {
+    "index_blob": "b8139607e5de85d717faf9bef08f01e52950dad7",
+    "path": "morsehgp3D_v8/receipts/ground_18bits_20260922/u16_identity/only_time_01_s00_k5_w8.txt",
+    "status": "A",
+    "worktree_sha256": "ac2d8ea7b55b96ce3b4b57bc1c3898964a382621070caec697c8f3c2c2aa3260"
+   },
+   {
+    "index_blob": "1320acf1eebac982bd1cf5a7dc896a9ebabeee9a",
+    "path": "morsehgp3D_v8/receipts/ground_18bits_20260922/u16_identity/only_time_02_s00_k10_w8.txt",
+    "status": "A",
+    "worktree_sha256": "587f883716e2d279acda4cd2f5473371eb0d34c6d5fd55a0cf12c0e06bd4d14c"
+   },
+   {
+    "index_blob": "68fb74d6e285c66bf1ff50b456136027176cb178",
+    "path": "morsehgp3D_v8/receipts/ground_18bits_20260922/u16_identity/only_time_04_s01_k5_w8.txt",
+    "status": "A",
+    "worktree_sha256": "b73e08f02e55ba3c9b88b582de9361151f21238ed294cf4fd8c1c0054bca26f9"
+   },
+   {
+    "index_blob": "a79e61250b1ff2959ca08120e74226a039dd83fc",
+    "path": "morsehgp3D_v8/receipts/ground_18bits_20260922/u16_identity/only_time_05_s01_k10_w8.txt",
+    "status": "A",
+    "worktree_sha256": "c922923760d2baad517512279194ce712951f65b52587aea6653ff013dd029bb"
+   },
+   {
+    "index_blob": "b412860268fd049edc30e7946c80f3593a712909",
+    "path": "morsehgp3D_v8/receipts/ground_18bits_20260922/u16_identity/only_time_07_s02_k5_w8.txt",
+    "status": "A",
+    "worktree_sha256": "ca4e14bddba9e7e9e0876b571c20bed8cd4e23d34e6d82831bc69064de14f9dc"
+   },
+   {
+    "index_blob": "8c946b3bd52673cc7d6c6471c35cd01a856c8572",
+    "path": "morsehgp3D_v8/receipts/ground_18bits_20260922/u16_identity/only_time_08_s02_k10_w8.txt",
+    "status": "A",
+    "worktree_sha256": "051c41a3ee848c55d8f1b894233a413a3834e2fdc3ce280e5215d4bd27b48347"
+   },
+   {
+    "index_blob": "934b6017eca26c2637ce5d449978da971d8dd0a8",
+    "path": "morsehgp3D_v8/receipts/u18_resume_20260922/preflight_center_oracle/PRELIGHT_GATES.xml",
+    "status": "A",
+    "worktree_sha256": "7413597bc9c411f499ec6978ac18526c64be932342c3e46c7ab8353aa192577e"
+   },
+   {
+    "index_blob": "7c854ce3b1a0cfc063dc0f64117ac2f3f75e6fc3",
+    "path": "morsehgp3D_v8/receipts/u18_resume_20260922/preflight_center_oracle/README.md",
+    "status": "A",
+    "worktree_sha256": "1901adcae645e0b87c4e305edaa6f31e56395dad73a167eb50c0553cad1acc24"
+   },
+   {
+    "index_blob": "8caeca515a6467a27b7a333db5d4ec3eea74e7ff",
+    "path": "morsehgp3D_v8/receipts/u18_resume_20260922/preflight_center_oracle/q4_local_gate.cpp",
+    "status": "A",
+    "worktree_sha256": "4da0131701720ad64aa069cc4a64cbcd1f58d75d1e68746313493edf9fa7ec79"
+   },
+   {
+    "index_blob": "2043a8868f7fcdad950b5de80a1586dae06917fd",
+    "path": "morsehgp3D_v8/src/core/types.hpp",
+    "status": "M",
+    "worktree_sha256": "5d1dc457e11bd07a60042563374c6dabe2f846d840ee72a4fa764c918e9e95e8"
+   },
+   {
+    "index_blob": "5c06ce0a1cf6cfbbbf3c04c6e62576843ce3f110",
+    "path": "morsehgp3D_v8/src/lanes/exact_ball.cpp",
+    "status": "M",
+    "worktree_sha256": "3a38816ab4eff2c9740d6666f25911581988ced22b9150ec28667f0f486f0268"
+   },
+   {
+    "index_blob": "36826e0182613928da18dc47e49a6007d9431b07",
+    "path": "morsehgp3D_v8/src/lanes/exact_ball.hpp",
+    "status": "M",
+    "worktree_sha256": "6d684c6e4d600874fe2dc4d1dd93d4960e3afb8717abde31bfcab38edda1c32c"
+   },
+   {
+    "index_blob": "bc470157ff146dcf1edeeb25db32996ab6b2892f",
+    "path": "morsehgp3D_v8/src/lanes/family_certificate.cpp",
+    "status": "M",
+    "worktree_sha256": "e80bd2c02c2e7d3fe2a4d66ed682684e5c1d56323ceeb6ef8309f65d58f7f271"
+   },
+   {
+    "index_blob": "4b64ab0327ca38bc67944bdd2356d38c76524bc4",
+    "path": "morsehgp3D_v8/src/lanes/family_certificate.hpp",
+    "status": "M",
+    "worktree_sha256": "40a3c238cd84f670b2c6bcecb4138cadc88999a414e461440f9127fc8125041e"
+   },
+   {
+    "index_blob": "41e24834be834b78f42cef17a071c8d2b850bae8",
+    "path": "morsehgp3D_v8/src/lanes/q34_pair_bounds.hpp",
+    "status": "M",
+    "worktree_sha256": "55ff64e38fa321963f1fe633dcd66183f6e44f87a167be9bbdc21b90f0fff416"
+   },
+   {
+    "index_blob": "6dfc69ec9366178d156bf773c4d02093951b26e3",
+    "path": "morsehgp3D_v8/src/lanes/q34_witness_search.cpp",
+    "status": "M",
+    "worktree_sha256": "157cacc1432ca475eaa4bd11da0d169c45afd7023d94a631b9ca0eeba1f8cf40"
+   },
+   {
+    "index_blob": "ffbe82d75b078abf60a85ea59a47b8cb0dfe420b",
+    "path": "morsehgp3D_v8/src/lanes/q4_family.cpp",
+    "status": "M",
+    "worktree_sha256": "926280836c8c14abbac996bf5d0e8ba1a40e45ddf1692a72506dc20a0862fdc8"
+   },
+   {
+    "index_blob": "38fbd3887fe1535855e0c2f3fd3d64f5d92cdc71",
+    "path": "morsehgp3D_v8/src/lanes/q4_family.hpp",
+    "status": "M",
+    "worktree_sha256": "5593a4df312f865b7981d7347c7dd0902c445af9eb3dd01960192ffc24ea671a"
+   },
+   {
+    "index_blob": "387401f1a5f3d65e74811cc365fcb16c2b4509f8",
+    "path": "morsehgp3D_v8/src/lanes/q4_local.cpp",
+    "status": "M",
+    "worktree_sha256": "43851f2087ebd3e21757b787a72a4423c82d6ee7796d04983b0125e414dd5fc0"
+   },
+   {
+    "index_blob": "83bd1138190856a6edb2bf7acf57ef931e79841a",
+    "path": "morsehgp3D_v8/src/lanes/q4_local.hpp",
+    "status": "M",
+    "worktree_sha256": "2465d85b310021e3e438dddb4b56e4352707c9f54cee8740975e8bb3a320f134"
+   },
+   {
+    "index_blob": "6e2173ec0a8a47654891434879bdeffe2e35610a",
+    "path": "morsehgp3D_v8/src/lanes/q4_local_partition.cpp",
+    "status": "M",
+    "worktree_sha256": "0e776fae11f2218e69dcb78767b0c37469fb604b528a709a55115edf2d94e962"
+   },
+   {
+    "index_blob": "1f81eb065d5309fb23f8d1ed63b677f02d32636a",
+    "path": "morsehgp3D_v8/src/lanes/q4_local_partition.hpp",
+    "status": "M",
+    "worktree_sha256": "98a0f517c07054b3da35d70a217ce987aa13f844a0936409b9595aaa5f4f7f49"
+   },
+   {
+    "index_blob": "13ecac177eb3145128ef2b73ee95145f7147e833",
+    "path": "morsehgp3D_v8/src/pipeline/q2_joint_bounds.hpp",
+    "status": "M",
+    "worktree_sha256": "b132ef0397bbf7013fd2f38b9805dac52632dd957c00792afb264f89a6b00767"
+   },
+   {
+    "index_blob": "7ce26cbdc0d2a06a82df4958deacf83af2a5b12f",
+    "path": "morsehgp3D_v8/src/spindle/q2_prepared_bounds.hpp",
+    "status": "M",
+    "worktree_sha256": "b2307ea8c6e0e849ea66a99c7373bfa2b716dd0a35a3ddd218e6d90e0402ce55"
+   },
+   {
+    "index_blob": "294b017e9d6b30e0fe8c2eeec158eb1889a21402",
+    "path": "morsehgp3D_v8/tests/axis_additive_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "7f211af5f338108746c09d2e20215a269e4f583d73fa810e978e82554ebdefef"
+   },
+   {
+    "index_blob": "fdf699c8c23c2d61be2f5ae3788658f7d5ebf169",
+    "path": "morsehgp3D_v8/tests/axis_q2_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "a978e7670f40c49d9b19b3fb27ad9179637613491758ae4fd83da233c027ca7d"
+   },
+   {
+    "index_blob": "33c891b540e2f7cf1312de19ca272d608cc2f1df",
+    "path": "morsehgp3D_v8/tests/batch_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "2759aeee8410ffff721badd04e875129f93d355e09bcd77b5e6ff70c844b9713"
+   },
+   {
+    "index_blob": "dd6404a6dcc58f556f4e8a091be4380fd1498969",
+    "path": "morsehgp3D_v8/tests/exact_ball_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "edf05ad3acfe96069b96d5468a35221aa4476f35d3ef59721e5de4b5c47d01d7"
+   },
+   {
+    "index_blob": "26ee8612f278e0cc1d97548ea593144dafafef50",
+    "path": "morsehgp3D_v8/tests/ground_baseline_test.py",
+    "status": "A",
+    "worktree_sha256": "00f9d14d9eb803974dc4af2cdc3b81b71620e2a7f47ae854e3098eb1739b75eb"
+   },
+   {
+    "index_blob": "3826bb01b8c954c6984b46d9021317c7b307839a",
+    "path": "morsehgp3D_v8/tests/p0_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "416f3ad0df538687355217b0662750c83026c4df84ec22a4bf42dfb0230c7dc3"
+   },
+   {
+    "index_blob": "9f1905a0cd5e2e1cbca72347584d044156f90916",
+    "path": "morsehgp3D_v8/tests/q2_census_detach_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "5d92118ab7401c5b42bb07f1083ce004f482ee1916560d8fd1a165cc42ed6798"
+   },
+   {
+    "index_blob": "7b69f94b0f2412724373837c47b1dcee871ff549",
+    "path": "morsehgp3D_v8/tests/q2_census_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "51997c48c502f7b0e59ce57a03d22444bd3013fd12c02df218efbb449a0505a3"
+   },
+   {
+    "index_blob": "03a607e59336f48cf70a43b6845b4b77da7b8e74",
+    "path": "morsehgp3D_v8/tests/q2_census_parallel_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "0c922f979c57c11074c7bf78df5ce8e9eda28ade8ab2bf5e2997111472a6f04a"
+   },
+   {
+    "index_blob": "4a358afa601ebc26cad9eed11c9e28eed9c3241e",
+    "path": "morsehgp3D_v8/tests/q2_census_resume_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "3404107084f2a33d1424db97fae6f955a550717dfe2e1338b82822650420fbb9"
+   },
+   {
+    "index_blob": "e97a9167b886e5979ed444a93b43b552c52a9e05",
+    "path": "morsehgp3D_v8/tests/q2_joint_bounds_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "dce16b8ffbe638f17c887e83330df644d7b8dd02ee30959ae7482268fbdda4ff"
+   },
+   {
+    "index_blob": "e2ded8b10fe53a719b4a22d1610613f6ea64f26f",
+    "path": "morsehgp3D_v8/tests/q2_joint_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "a748cf394ecb509e471e04a447e5c5723e1bc2e0f8b6d7b067c1546c95a730d7"
+   },
+   {
+    "index_blob": "508e0072385a03b427285c2750f2ee1eb891fd42",
+    "path": "morsehgp3D_v8/tests/q2_node_pool_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "1c1a3513ab6d9d0c2b7c49f873c1cebcfeb44e45bb93c0f920ffa50bdd263bac"
+   },
+   {
+    "index_blob": "69af3d5bc5f0b8c25a71a4651d75ddd2f8beb00d",
+    "path": "morsehgp3D_v8/tests/q2_prepared_bounds_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "9c5514f576087924f15d75f8514b8378d81545ed5dde5fed11b2d35f42dd6edf"
+   },
+   {
+    "index_blob": "0ef6efb2b7535b0d2b6b6c6470e02ebe8fe7416a",
+    "path": "morsehgp3D_v8/tests/q2_sibling_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "93cd72b72502f514ed637b4167a6cbd6ab01b27252c1e25cfeb3f07d651a4fcb"
+   },
+   {
+    "index_blob": "04989a77d8cd993c9639912f3bfc6f6331095687",
+    "path": "morsehgp3D_v8/tests/q2_terminal_pool_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "5e55381eab66ebbcb1d61e10563deecafe4a30390f82046dd83208abd99d0f42"
+   },
+   {
+    "index_blob": "4064743dfa24a8ef1fae3678653cd3b0920924ad",
+    "path": "morsehgp3D_v8/tests/q2_witness_order_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "7be9f8d1e3ad15c2b30cb28433f33c1edf715fb489f381c477ebd4500133400d"
+   },
+   {
+    "index_blob": "6c64fdec398538d5220266838a48e5c3d9bf7be9",
+    "path": "morsehgp3D_v8/tests/q34_collective_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "16c64819f148250ed81772e1ea4a4827ef2b1ee1e858dfaf61d36d972b62d3c8"
+   },
+   {
+    "index_blob": "6347586aaea1713b38e78aa322152fff515c1580",
+    "path": "morsehgp3D_v8/tests/q34_cover_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "a27ba8199c2bab135429152dbac8ad51ec3d187aede7132ff943ab458a07d9ae"
+   },
+   {
+    "index_blob": "234d2c979804750eea45cfa7636655aae44b5104",
+    "path": "morsehgp3D_v8/tests/q34_family_pruning_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "fe2a435e00c55437534b22ba294257ee17415301c64bdc2035df95b39b54423c"
+   },
+   {
+    "index_blob": "c3e5e184778c44f9a19b0552bc04bc7ae68dfa94",
+    "path": "morsehgp3D_v8/tests/q34_pair_bounds_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "0b9c74e4192d82bce92f1e0004e320a659448160e1f92668c40629aa9b78a328"
+   },
+   {
+    "index_blob": "10839938b4c055981e06a3d0d4f60750e7384b02",
+    "path": "morsehgp3D_v8/tests/q34_seed_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "afcb554a91bb7f09672bfe7461ee75d63e54f4ed30b5680b153920a66f509f90"
+   },
+   {
+    "index_blob": "987d25efb7de4a4692b47ce034449a6adbf667e5",
+    "path": "morsehgp3D_v8/tests/q34_witness_search_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "d0a4d64951fa78c6ead17c01f722608f95c7898dd0d50c02773d547994520cba"
+   },
+   {
+    "index_blob": "0c7f95767dee5c2a4f1382adb5b946148e29f4f1",
+    "path": "morsehgp3D_v8/tests/q3_ball_census_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "b84888d903c69e6807899f8efbaf796391a119702ebc32f36255bd4c9d38c68c"
+   },
+   {
+    "index_blob": "c79276aa07719f796f1dd9f303f260ff372bec96",
+    "path": "morsehgp3D_v8/tests/q4_center_map_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "6312831ed660e49912312b0caeeaab57c1a6cefafa676e99d43fca7a90de68f6"
+   },
+   {
+    "index_blob": "bb853df8e364640e4d2ddf86af886be2249ba99e",
+    "path": "morsehgp3D_v8/tests/q4_family_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "44402082ed9bb7807015de688aa281e171476e3aa0139e01f6adc1b5da1c0590"
+   },
+   {
+    "index_blob": "f06f3c136f7b32a5db0fb7fa50253a89809adcbe",
+    "path": "morsehgp3D_v8/tests/q4_local_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "ce4239e5e3272a99bb78a91511299477c3d9b555fdba59f3b8d2d7a509223d66"
+   },
+   {
+    "index_blob": "c0ce85fbd789ec8880465ac38ebdbe636c780a62",
+    "path": "morsehgp3D_v8/tests/q4_saturating_atlas_gate.cpp",
+    "status": "A",
+    "worktree_sha256": "8796c72e668075bf78ce7983c3bca2511a8e7bbd4600e46475b962d98543702e"
+   },
+   {
+    "index_blob": "a92e5283ac458266db93c02a508671d686f7d34f",
+    "path": "morsehgp3D_v8/tests/q4_saturating_mutations.py",
+    "status": "A",
+    "worktree_sha256": "94a367ec1905af8988878a9d75612b11ced38c312552d773692a3d4f9647012a"
+   },
+   {
+    "index_blob": "bfaa5ef3ce49ce5e24f25c58131c80d3d9341e48",
+    "path": "morsehgp3D_v8/tests/q4_seed_cells_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "77dec3e333724ceec2f8222af3fcc2273bfcb1a099525667c94da86e79e5abb9"
+   },
+   {
+    "index_blob": "a80f1ca2869bf28c470ad5cf26d4f3695ed75601",
+    "path": "morsehgp3D_v8/tests/q4_shallow_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "85e108f039e5e698c9fc1e6e99ff47d9f77b7880ff862f4314d112d52a69e037"
+   },
+   {
+    "index_blob": "6ee3c4768b6175abbe0ecc5c4f8b612cbdff91ba",
+    "path": "morsehgp3D_v8/tests/q4_window_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "d53ed4c0d66e8a3f9dd9af0ff3978f9a27ce9dc1b7b6330285056ad48e381c55"
+   },
+   {
+    "index_blob": "1bbf0af15d1ad3a69d8de368dd47a940eecd89e1",
+    "path": "morsehgp3D_v8/tests/tube_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "aad90a2cda69b533d9a6443386e0dfad8679d0cde068191047344b73ca1ad864"
+   },
+   {
+    "index_blob": "fd8bacd05ecab496f92a1785351b772b284444b1",
+    "path": "morsehgp3D_v8/tests/u18_numeric_domain_gate.cpp",
+    "status": "A",
+    "worktree_sha256": "621398a204680947e813c431b0491b87f7f59fecaf2366629e284f59fbea818c"
+   },
+   {
+    "index_blob": "31f1f5367da1b752f936381486edd661a197d9bd",
+    "path": "morsehgp3D_v8/tests/u18_resume_checks_test.py",
+    "status": "A",
+    "worktree_sha256": "635ed223f0743c1c9a7e600fda756a9fc5664d905189f1707aa69f52441460f1"
+   },
+   {
+    "index_blob": "0c78856254758bba94bdda3a6d6f88031aefa2d2",
+    "path": "morsehgp3D_v8/tests/wspd_front_dispatch_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "64821d6bc1a4e7bb80bde1cda3c9bcf8f7c7201cfd1908a9c095bceb6dd39d79"
+   },
+   {
+    "index_blob": "030f11edfc735843184a6b45ce116082b4bf631c",
+    "path": "morsehgp3D_v8/tests/wspd_front_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "94536c34b6aa7a177d7bc40b2216b6639afe074d6ddc97180caceb6466d0c6c1"
+   },
+   {
+    "index_blob": "4feda4f6a7019a734e5849505f0c0fbc8ae4ce62",
+    "path": "morsehgp3D_v8/tests/wspd_front_inheritance_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "44962b6d651059ff9e96fb7bfe5740bca6ed51b284243cc41010e97c2cecf80e"
+   },
+   {
+    "index_blob": "d5efe1f9f946acfe18ecf5a0a7fcadf759b7c101",
+    "path": "morsehgp3D_v8/tests/wspd_front_jobs_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "dacaee7aa4f1db83f76869d4827e1ab5d0416a76f89e0e64e7a0e442588944b5"
+   },
+   {
+    "index_blob": "ee1c5aaede2e4f26d0e70033b4d34ac2c54d92c5",
+    "path": "morsehgp3D_v8/tests/wspd_q2_batched_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "28a41d20527cbca86420eba920a6e22c3b11bba27b91d0c17e4b28152cb223dd"
+   },
+   {
+    "index_blob": "ea1db6c2c3d37feb8a54c94f1babcee9c9f8d697",
+    "path": "morsehgp3D_v8/tests/wspd_q2_census_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "8796e6c8641b1f212b9073ccad2ca08ef6be59e25b9bd4565e95c67d2bfbc93f"
+   },
+   {
+    "index_blob": "8bf8c8ba74d31d0cbbafadd9f4b9b8467525e293",
+    "path": "morsehgp3D_v8/tests/wspd_q2_cooperative_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "5d177910415bd56e2470b3b44308ad55879b4bb6da872a71912243bd1c19444d"
+   },
+   {
+    "index_blob": "872fb0d869ea686955b191a774155554b2cdb5aa",
+    "path": "morsehgp3D_v8/tests/wspd_q2_dynamic_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "ea6a02067089cab778226d45d78ddc23e8cebd669d1e9a5a2efe8865a0170bcd"
+   },
+   {
+    "index_blob": "605992d6b861158ac3c3d16fe9bda977bcfd0cdf",
+    "path": "morsehgp3D_v8/tests/wspd_q2_parallel_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "6af438c54cf262379752d8e3ded9a95732a094ab8548fcc93ffdd25bda7733a9"
+   },
+   {
+    "index_blob": "3552c7e0309dc8af565dc9b8cf0902a9cafa5355",
+    "path": "morsehgp3D_v8/tests/wspd_q2_proposals_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "9f02de921820fa1d9ce236c8b67b6cd41a0f4d421142122597feee276e30f1cb"
+   },
+   {
+    "index_blob": "387211b735fb1d59d6e3bf9233d4ed2aca8f1f4c",
+    "path": "morsehgp3D_v8/tests/wspd_q2_ranges_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "a0cffc57f8d863905b704c1bec3a05db6870896e41daff38bcc7342ba719176f"
+   },
+   {
+    "index_blob": "b7ef85b9784b6d1a04e33a43a0bb705ea05a4601",
+    "path": "morsehgp3D_v8/tests/wspd_q34_gate.cpp",
+    "status": "M",
+    "worktree_sha256": "3401b8eb7fe3a5da7e0abd34328cf1a4a9b009a38034a4e49e79d6e4c40e745f"
+   }
+  ],
+  "head": "a74e90f22167105cdba90b6850f0597f1a01a329",
+  "note": "indexé par un autre acteur (reprise u18 et atlas saturant), non commis, non qualifié par cet audit"
+ },
+ "shared_worktree_untracked_v8": [
+  "morsehgp3D_v8/audits/q34_stream_crosscheck_spatial_20260921/Q3_STREAM_CROSSCHECK_SPATIAL_LARGE.partial.json",
+  "morsehgp3D_v8/receipts/float32_q3_global_20260921/",
+  "morsehgp3D_v8/receipts/u18_resume_20260922/README.md",
+  "morsehgp3D_v8/receipts/u18_resume_20260922/ground_1mm_first/",
+  "morsehgp3D_v8/receipts/u18_resume_20260922/release/",
+  "morsehgp3D_v8/receipts/u18_resume_20260922/release_r2/",
+  "morsehgp3D_v8/receipts/u18_resume_20260922/sanitize/",
+  "morsehgp3D_v8/receipts/u18_resume_20260922/sanitize_r2/",
+  "morsehgp3D_v8/src/core/float32_edge_geometry.cpp",
+  "morsehgp3D_v8/src/core/float32_edge_geometry.hpp",
+  "morsehgp3D_v8/src/core/float32_q3_owned_block.cpp",
+  "morsehgp3D_v8/src/core/float32_q3_owned_block.hpp",
+  "morsehgp3D_v8/src/lanes/float32_q3_owned.cpp",
+  "morsehgp3D_v8/src/lanes/float32_q3_owned.hpp",
+  "morsehgp3D_v8/src/pipeline/float32_q3_global.cpp",
+  "morsehgp3D_v8/src/pipeline/float32_q3_global.hpp",
+  "morsehgp3D_v8/src/wspd/float32_front.cpp",
+  "morsehgp3D_v8/src/wspd/float32_front.hpp",
+  "morsehgp3D_v8/tests/float32_front_probe.cpp",
+  "morsehgp3D_v8/tests/float32_q3_global_probe.cpp",
+  "morsehgp3D_v8/tests/float32_q3_global_test.py"
+ ],
+ "v8_docs_sha256": {
+  "morsehgp3D_v8/docs/ALGORITHME_EXPLIQUE.md": "aafb6b03b1953f13d1239e11dd71aaa648a44dcbe92a99beb8cd8867a8ab36b8",
+  "morsehgp3D_v8/docs/AUDIT_REPRISE_DEVELOPPEUR_20260921.md": "6dd06b7580b498707a748d77feb21e03e55e948eb407b30abf0299b4009d0e06",
+  "morsehgp3D_v8/docs/AUDIT_V7_SYNTHESE.md": "cbf244daa32311710244dd70d85e4f4ffd9c992f3b2cc6fe0e247d02534141dc",
+  "morsehgp3D_v8/docs/BOULES_FLOAT32_Q3_Q4_20260921.md": "4449e19545064dc7caa7c49b66b6b4d93a643f7acd986d059cf71414b2f12955",
+  "morsehgp3D_v8/docs/CENSUS_Q3_FLOAT32_PARTAGE_20260921.md": "cb5ad8d63866798eb5786cc0e4c44c96b065da317891bf508afb9a4cbee15d6a",
+  "morsehgp3D_v8/docs/CONTRAT_TRAMES_SEMANTICKITTI_20260921.md": "7694a77a14c5152ac29682008d47ecfd419c9ad330f1dbaf8514e2f227f42716",
+  "morsehgp3D_v8/docs/ELARGISSEMENT_18_BITS_20260922.md": "4b783c2bf8392f0fd28c5da85cdf213ffb8e5bbedddd753d26c7fd533d2c6511",
+  "morsehgp3D_v8/docs/FAUSSES_PISTES.md": "1e3c8e5cf4153d7157f6d4fbf480f8ded6733553e62490576663baaba4dd78f9",
+  "morsehgp3D_v8/docs/IDENTITE_FLOAT32_ET_EVENEMENTS_Q4_20260921.md": "60d9e2924ff329432b61cccc98e6a616a0ce4a059bbd6e181db8889664f7faac",
+  "morsehgp3D_v8/docs/INDEX_FLOAT32_ET_SUITE_Q34_20260921.md": "ea18ea0c61333ec36368f4508ac2e707647425158bd6af5f50da687afe3ee13a",
+  "morsehgp3D_v8/docs/JOURNAL_DEVELOPPEMENT_20260921.md": "48b94fe42f4a1adc20f3fb870beb9dd16d7bc1becc317c6726a17e24e696f3eb",
+  "morsehgp3D_v8/docs/LIDAR_SANS_SOL_PROTOCOLE_20260921.md": "e36ae35442a87bad05da1ce84aefb325ace6d77551ee65b9a4a0c45b5ba3aa74",
+  "morsehgp3D_v8/docs/P0_ADDITION_ET_INTERSECTION.md": "1f4bffc7b7757ef143c1c016479e517a67756cd8d6ef3170842ae2bf4b6d5040",
+  "morsehgp3D_v8/docs/P0_BORNES_PREPAREES_ET_PARALLELISATION.md": "21a5a388e2a7fab77b4e1acf04aaf5107ff31647b93943a84ee098c609317650",
+  "morsehgp3D_v8/docs/P0_CENSUS_CONJOINT_Q2.md": "e1e17e1787c5dbb7bf3b73865d7e6aaeb2c2c28b3b59db7725f6fd218e16538e",
+  "morsehgp3D_v8/docs/P0_CENSUS_Q2_PARTAGE.md": "ec14fd834b0b97a69f0d3f921870154f68d061c5db01f50fac06976a41b572ad",
+  "morsehgp3D_v8/docs/P0_CENSUS_REPRENABLE_Q2.md": "980ef5e4eab01829a8051ea07f3d6aefab3041f1d3f1345b8d5b5f8a20a68ade",
+  "morsehgp3D_v8/docs/P0_CERTIFICAT_FRERE_Q2.md": "de71e285303a488fb10fb3bb43c8a2fb8525968f5108c7f4711d481855460bb4",
+  "morsehgp3D_v8/docs/P0_CREDITS_LOCAUX.md": "ddd3edaf096129fc27fa0a50be72104635ca2a33712fd8e589ccef5c60f79f89",
+  "morsehgp3D_v8/docs/P0_DETACHEMENT_CENSUS_Q2.md": "d24c96625e89728f89d630c7053fbd4b504ee9d95b8dd635d12f4ce0acc040ce",
+  "morsehgp3D_v8/docs/P0_EQUIPE_PERSISTANTE_Q2.md": "548a44f95317ac419bd178ffe82b97b621919d8757c28be94bc42000f9df0e80",
+  "morsehgp3D_v8/docs/P0_FRONT_ET_CENSUS_Q2.md": "d592bcb669e91493defea343232878b4ba74e2adca08bff05506019764331818",
+  "morsehgp3D_v8/docs/P0_FRONT_REEL.md": "d430c379c93470bfc9f8e5085b72e138d5b97b2f20fa637c34e6067da1366f7e",
+  "morsehgp3D_v8/docs/P0_FRONT_WORKERS_Q2.md": "59eaee9d3ee52735ec64cac9e73ca0c83c621fd01f8df00b40770c5af8a80ce5",
+  "morsehgp3D_v8/docs/P0_LOTS_SINGLETON_Q2.md": "8a937116d74eb8af0c7faa2e4238f079ca89f941d332328245cc133e436537a8",
+  "morsehgp3D_v8/docs/P0_NUAGE_ET_INDEX_PARTAGES.md": "1275b5e0384980fe687c4b25e2e0e9adb59fa6c45e08139660c61cf4acbf2aaf",
+  "morsehgp3D_v8/docs/P0_ORDRE_TEMOINS_Q2.md": "9dd9710a9c85ed1197ecdea8efe8dbca734c967321dada22df8f6f973cd2e7c4",
+  "morsehgp3D_v8/docs/P0_PARTAGE_ET_FILTRE_AXIAL.md": "120bea08fe48073b8189385c5feae22264f4eaad1d8d186a1419b3df8879833e",
+  "morsehgp3D_v8/docs/P0_PLAGES_ANCRES_Q2.md": "81551ff4aaeb1b741f8a8ef718ec823810d86dbf1d993d5a40105eb33a623e70",
+  "morsehgp3D_v8/docs/P0_POOL_TERMINAL_Q2.md": "7186d695bf93feff5b50efc4552548775b470c65d6e6e44c2096ab25126fc1f4",
+  "morsehgp3D_v8/docs/P0_POOL_TERMINAL_RACCORD.md": "f6b9722a61c7ee556e3215d4605581eb7bd5c5ef8101262d6a79080318141c70",
+  "morsehgp3D_v8/docs/P0_REDISTRIBUTION_FRONT_Q2.md": "1fb6a5b561b67c7b39022b6281d05a379c6e8530d72e5723e9549ad89c24c5d1",
+  "morsehgp3D_v8/docs/P0_SURPROPOSITION_TEMOINS_Q2.md": "0e7d04d5ae7d2959d1028bd56c7a0b42187f193d771adb76dc36e773b3946dc1",
+  "morsehgp3D_v8/docs/P0_TEMOINS_HERITES_Q2.md": "03b2c5f26d77c87f92b7f9318574dc9e7a986916b55ec49599349e07bbac7a89",
+  "morsehgp3D_v8/docs/PILOTE_LIDAR_SANS_SOL_20260921.md": "23f5f8675009104a17824484da4d6487134c903c59f2261438b4bf8c7f103eb3",
+  "morsehgp3D_v8/docs/PLAN_DE_REFONTE.md": "718a11262d2d327b73e67e5f5ef0e95d8af78fb1148e2ed5f76cba499800ac5a",
+  "morsehgp3D_v8/docs/PRECISION_FLOAT32_ET_GRILLE_20260921.md": "bc496403a1ce0c6bae95f14ea416cd38e328ef08b4b5882b013319cde760b32f",
+  "morsehgp3D_v8/docs/PROTOCOLE_LIDAR_SPATIAL_20260921.md": "ffb52199e96488858decc92daaf553c3570aa8884257b72de4b45db53c1eab76",
+  "morsehgp3D_v8/docs/Q34_BORNES_AFFINES_ET_EXCLUSION_20260921.md": "32c3104fbf8eecc8cba0c1f6f6c6d2ec979b1ff942f1044d6767db728b4cb7c5",
+  "morsehgp3D_v8/docs/Q34_GLOBAL_ET_LIDAR_20260921.md": "605dc9f0427f3d9cd0bf1ecf054d58dee9d1b4b08a50227f065858107831acba",
+  "morsehgp3D_v8/docs/Q34_MESURES_SPATIALES_20260921.md": "5096b826fb243a4863f90796d033ac251cd85919f616259f995daca91c7aa096",
+  "morsehgp3D_v8/docs/Q34_PISTES_APRES_INDEXATION_20260921.md": "f994ae2f9f5d3e74ac0dfb81a15d95f04e08bf479496e918c57bbf5f92f78e1e",
+  "morsehgp3D_v8/docs/Q34_TEMOINS_INDEXES_ET_CENSUS_BOITES_20260921.md": "4c3b8cff56ccd611b52b96a5200a4d45b9d8db15f58965366e6f771986733ac6",
+  "morsehgp3D_v8/docs/Q3_CERTIFICAT_ATLAS_20260921.md": "117aff572aac818d2eadf79535551a2dd82f507474ec27d1ce63b7c284d02e61",
+  "morsehgp3D_v8/docs/Q3_Q4_CANDIDATS_PAR_SEED_20260920.md": "0122fed7b7d0b6438561e6eeb7931a0f6b0a4fb68025310777e282d2a2f9aafe",
+  "morsehgp3D_v8/docs/Q3_Q4_CERTIFICAT_COLLECTIF_20260920.md": "72e3499ac656c2ba97e802db4a1ee654d533c478b10d68d91f60005331d8879c",
+  "morsehgp3D_v8/docs/Q3_Q4_COVERS_PARTAGES_20260920.md": "83d0f117227dd6efc09f76b04f5afee08f3bf3ae62c015904cf2ab4598b8ca39",
+  "morsehgp3D_v8/docs/Q3_Q4_OBJETS_ET_STRATEGIE_20260914.md": "eaf667504ea617897bcb04b0cb74f3b9640c4d812dfc22e840ed2dae998ad289",
+  "morsehgp3D_v8/docs/Q3_Q4_REJET_FAMILIAL_20260920.md": "73f94550557a7e51d1efb72401fcfb662022d21e20ef94853086f37022726c9f",
+  "morsehgp3D_v8/docs/Q4_BLOCS_SEEDS_PISTE_20260921.md": "d864162f66c10f960f1409d8fc6059b7addd511658d9310da01092a0332d132c",
+  "morsehgp3D_v8/docs/Q4_CARTE_CENTRES_PARTAGEE_20260920.md": "b7c926fec5d84ca0c64edb1e2adfbf4517157d3708c72b49f8db391ac7438d43",
+  "morsehgp3D_v8/docs/Q4_COUCHES_DUALES_20260920.md": "fdaacd7c273491077cbc5c8ce4f0b8f64f7fe1ee646bd06fc784e23e1a6d2efa",
+  "morsehgp3D_v8/docs/Q4_FAMILLE_ET_BALAYAGE_20260920.md": "888c829aea39a2bdadd7183aaf8488d4d338b9f97de566d0831b682537c8309a",
+  "morsehgp3D_v8/docs/Q4_FENETRE_DE_FAIBLE_PROFONDEUR_20260920.md": "e809c83a0602d80fbf659ad5b636f0ef214f517da5303be75b4e7e798f810178",
+  "morsehgp3D_v8/docs/Q4_FRAGMENTS_ET_BALAYAGES_LOCAUX_20260920.md": "ac65b3a8a9798433d85bbab5f34fcd2dc541004b726c48d0d8c5ae7f8dbf06a2",
+  "morsehgp3D_v8/docs/Q4_GRAINES_ET_CELLULES_20260921.md": "93dd130af3ca31731841423d8a5d5f1c4655e791a37f3df7a0107685c179f7aa",
+  "morsehgp3D_v8/docs/RACCORD_NATIF_GLOBAL_PLAN_20260921.md": "e1b29801471b896eec63754b83a850285c50570df18d7062baa7733ce98c13f7",
+  "morsehgp3D_v8/docs/REPRISE_DEVELOPPEMENT_20260920.md": "e6dc907a30721fcb56b9b5e923f3ced32985308ea4dbe109dcd53ca63be76ec0",
+  "morsehgp3D_v8/docs/VERROUS_ARCHITECTURE.md": "b2b4ef87985cd7d57e9b74f597fc8e1373f62fb552a85c44412c636b422b78bd"
+ },
+ "v8_entry_sha256": {
+  "AGENTS.md": "b0fc5fefabca69a0876521efe0083dbf5eca6e6d9de33fa2aad8908ddfad5164",
+  "audits/COORDINATION_MORSEHGP3D_V8.md": "2a261736d911f296008ca13bb60c1ebecb8dc905ff9c87661fcdd7b1178016da",
+  "morsehgp3D_v8/PASSATION.md": "46291b9ec2b6f5c049b471bc34c03d5a84f6969b3b48a47b1687e820d8d4c511",
+  "morsehgp3D_v8/README.md": "d23bda712f8e79c10673560bba50644d6114b8e42db88cfe73b48786abbeb38e",
+  "morsehgp3D_v8/audits/ETAT_COURANT.md": "ab522ec00dbd5f65234911237b16c1b51d7af58d0e0d10c515b73f6122cebc45"
+ },
+ "v8_receipts": {
+  "additive_q2_20260913": {
+   "bytes": 8805401,
+   "files": 15,
+   "readme_sha256": "ff064adcb000c0ba66b985bf689a7d1780481ae8aafbe112000b8ec4abce82d9"
+  },
+  "audit_v7_20260913": {
+   "bytes": 126895,
+   "files": 4,
+   "readme_sha256": null
+  },
+  "cloud_reuse_20260914": {
+   "bytes": 4689050,
+   "files": 17,
+   "readme_sha256": "0e6336527e43c66bc25d2434e74b0e16cc00e5a875e9f2d48f704c5b804c8138"
+  },
+  "float32_ball_20260921": {
+   "bytes": 16451498,
+   "files": 1049,
+   "readme_sha256": "71f7b23f6df582ee35c02dae98edb2dd35b4abdd30164f03b47ffaf35e125c8b"
+  },
+  "float32_identity_20260921": {
+   "bytes": 41917153,
+   "files": 3381,
+   "readme_sha256": "fab4acc06458116d3fd0cffefd19c2c17f64776b16ff693006d0bb71f00c3181"
+  },
+  "float32_index_20260921": {
+   "bytes": 11148425,
+   "files": 1576,
+   "readme_sha256": "615ee86a8a0b467cfccc597e5e7a3af5cf9bfcdcc6d8cf4fc2c5c79706f0a923"
+  },
+  "float32_precision_20260921": {
+   "bytes": 89736192,
+   "files": 340,
+   "readme_sha256": "85cd4154a5b638e8026d4c8b6dffc4a92ca6bb07b95cd9eb4ee6026e33025658"
+  },
+  "float32_q3_census_20260921": {
+   "bytes": 10840959,
+   "files": 1110,
+   "readme_sha256": "7606e5b9b13e3e102e9ddbe202644183b2cd3cd44b92ca4150d51da9a74e236b"
+  },
+  "ground_baseline_20260921": {
+   "bytes": 209923,
+   "files": 24,
+   "readme_sha256": "8fa92eac4937f85f80fa204df32233392b5c1463fc539b3cf3f8aed8a5897097"
+  },
+  "ground_phase1_20260921": {
+   "bytes": 171912,
+   "files": 21,
+   "readme_sha256": "49534c323a996c5bb98e80f953e20b9d8d7aa1135fcb57304648080e56658803"
+  },
+  "lidar_global_20260921": {
+   "bytes": 51144493,
+   "files": 320,
+   "readme_sha256": "c62819bdf4bcf6acbf2d00c35325cfffb70fbaafdcbdd7dffacc84023340f841"
+  },
+  "lidar_ground_20260921": {
+   "bytes": 28979924,
+   "files": 376,
+   "readme_sha256": "f0b8fe4c7ced8028910a43da5efdd04ccd0ec3e1cd5e8dc35aae431f06b93765"
+  },
+  "lidar_ground_u16_20260921": {
+   "bytes": 11593,
+   "files": 2,
+   "readme_sha256": "7616b7cdfa6387065d7850b6e94ee7f5f4aaf001694bea69a6752193c6140cba"
+  },
+  "lidar_spatial_20260921": {
+   "bytes": 12449339,
+   "files": 80,
+   "readme_sha256": "194ecda03d756a37d338f2063e54d5a9b3206a25470406b5d34c6814bf4edb75"
+  },
+  "p0_local_credits_20260913": {
+   "bytes": 12259839,
+   "files": 52,
+   "readme_sha256": "42375bd4646c92e9f013ab9c4e5a930f644c7994304ed306f1b094794b784940"
+  },
+  "q2_anchor_ranges_20260915": {
+   "bytes": 9463623,
+   "files": 217,
+   "readme_sha256": "304880d289ce5a55fd74b06c9e501920bdd8691a71ee33b6d1afda563f2aa659"
+  },
+  "q2_census_20260913": {
+   "bytes": 4331850,
+   "files": 17,
+   "readme_sha256": "87de189c74459e5b6ed980e193802786cc0a59c99bf125e8d28bede503c30722"
+  },
+  "q2_census_resume_20260914": {
+   "bytes": 2065322,
+   "files": 172,
+   "readme_sha256": "72c9dee42ef2dd89b3ebf123aedf6090ff0e00185d9e4852bbd52dae32115c29"
+  },
+  "q2_census_split_20260915": {
+   "bytes": 8327371,
+   "files": 182,
+   "readme_sha256": "f8704941e0193c75785596dbb599694ebd5e62441d2daa3f1b35fe5f2fdc5b45"
+  },
+  "q2_cooperative_20260915": {
+   "bytes": 8866217,
+   "files": 220,
+   "readme_sha256": "376a0bd60f250a3a919382e8d26663fd32c3f56bde1d1dcd907a4214cc01c258"
+  },
+  "q2_dynamic_front_20260914": {
+   "bytes": 29846682,
+   "files": 536,
+   "readme_sha256": "2e4ad2f0e0962fde3c7e29c2c71175552f35dc7811cab79fc74463c33a7b6af3"
+  },
+  "q2_front_inheritance_20260917": {
+   "bytes": 32390544,
+   "files": 930,
+   "readme_sha256": "87531da150da7f626df7d0d895a40cd06b3a58c8b9f6ace323428d8dfde1cab1"
+  },
+  "q2_front_proposals_20260917": {
+   "bytes": 23653490,
+   "files": 740,
+   "readme_sha256": "47afee38a614589516a29a448935e1f41d861e5325a71c0fbcbe641407cc0cf5"
+  },
+  "q2_front_workers_20260914": {
+   "bytes": 10576383,
+   "files": 536,
+   "readme_sha256": "bf6bd5747fdae356e335da0a4c1ba7078c311cb5bfea1b0466392083b503d458"
+  },
+  "q2_joint_20260914": {
+   "bytes": 2891374,
+   "files": 107,
+   "readme_sha256": "f7154e3195297f855e584b25995894ddd2054b4cc0a897b0d26cc88d302269b5"
+  },
+  "q2_joint_r2_20260914": {
+   "bytes": 3230482,
+   "files": 187,
+   "readme_sha256": "a4da5b5951eab2a31a7b71c94c511884c03f426ead21f627bcb71314f461106d"
+  },
+  "q2_prepared_bounds_20260914": {
+   "bytes": 2874436,
+   "files": 18,
+   "readme_sha256": "cf83541facec5fe06322b5ad00c6f3dca00993edfc6b2c3eb52a2d397b19b40c"
+  },
+  "q2_sibling_20260914": {
+   "bytes": 2414037,
+   "files": 158,
+   "readme_sha256": "aeb03333b5e1b36431cbcd9295601d7954509a30fdf98373945b9458e4d89d9a"
+  },
+  "q2_singleton_batch_20260915": {
+   "bytes": 8734726,
+   "files": 259,
+   "readme_sha256": "cda3326e410acfcb1e28b1b57db6e8117a943665ce33ad8030fe7e478919b438"
+  },
+  "q2_terminal_pool_20260914": {
+   "bytes": 6206779,
+   "files": 218,
+   "readme_sha256": "30a958b01e61b92f436d97e8b7c74d3ace8e97800ecdc11e96e6589182ccdc32"
+  },
+  "q2_witness_order_20260914": {
+   "bytes": 3525925,
+   "files": 165,
+   "readme_sha256": "89cb7167c5d38481b52059199e0519a3221e1d7e375345ac638875c8481e184f"
+  },
+  "q34_affine_20260921": {
+   "bytes": 123494404,
+   "files": 229,
+   "readme_sha256": "772ee688454121bf36ce76549e4bc29dd367925690090b5d6763207c8123d13b"
+  },
+  "q34_collective_20260920": {
+   "bytes": 17133476,
+   "files": 373,
+   "readme_sha256": "bb3e7f186b7720c34c057cc8eb61ef2f13f25ed50880bf63412f85f2df1f07a4"
+  },
+  "q34_cover_20260920": {
+   "bytes": 1992016,
+   "files": 90,
+   "readme_sha256": "e893ae5f3a236efdf5b5c3c3606c60cbc03efb7024ecaeac048db48b44d90f13"
+  },
+  "q34_indexed_20260921": {
+   "bytes": 60912220,
+   "files": 205,
+   "readme_sha256": "7209698a4778a86aa26c4f0845931b4038b889f6c5b1884920603b3a2d50c7ce"
+  },
+  "q34_pruning_20260920": {
+   "bytes": 6823289,
+   "files": 221,
+   "readme_sha256": "9cb277d62ca3f5a782da7913fdbf84ff673ae9e04f841f8e893716edcf9862bc"
+  },
+  "q34_seed_20260920": {
+   "bytes": 1082109,
+   "files": 92,
+   "readme_sha256": "7b8d2acf3dc17c880aa97e31cfb71af478e4f9fcd9d257f667f3041a092c64d5"
+  },
+  "q34_spatial_20260921": {
+   "bytes": 41342209,
+   "files": 130,
+   "readme_sha256": "26714d03013bd3b2c12be874fc2bce322c3598c373cd9e6cc96e153354498e58"
+  },
+  "q4_center_map_20260920": {
+   "bytes": 13334648,
+   "files": 297,
+   "readme_sha256": "af802a03855e020b8d3cb0a930c5b7ec523f64c78dabf5db08ee3cbb2f35b9a8"
+  },
+  "q4_family_20260920": {
+   "bytes": 245642,
+   "files": 25,
+   "readme_sha256": "d022f3751270ad8836569152ae666f0d1eff0223ab742dde6b00e163e3874d94"
+  },
+  "q4_local_20260920": {
+   "bytes": 9119837,
+   "files": 339,
+   "readme_sha256": "28287aec50a9b662fc59bd65f94a691a0e542fd4305640f5b51a52e1858af710"
+  },
+  "q4_seed_cells_20260921": {
+   "bytes": 221344585,
+   "files": 279,
+   "readme_sha256": "1a5972fb79a9adecb3a0528c1cb3223cf28d381b9e0e37cc0dd7dc0496983c84"
+  },
+  "q4_shallow_20260920": {
+   "bytes": 6285486,
+   "files": 174,
+   "readme_sha256": "98fb52ed88f09b39ae96ae9f57a699b5c9e4d41b42a6b9e5c534c4746aa7671e"
+  },
+  "q4_window_20260920": {
+   "bytes": 12371183,
+   "files": 343,
+   "readme_sha256": "9f960f4ee9cda14a4766595f6472ceb4401d6322da903ad22d5c2e985d309627"
+  },
+  "reprise_20260920": {
+   "bytes": 247746,
+   "files": 21,
+   "readme_sha256": "198c348641d69b9ea21c87f143dce3820d7a8ee4a5d8674c237286930bfb41e1"
+  },
+  "shared_axis_20260913": {
+   "bytes": 10818814,
+   "files": 26,
+   "readme_sha256": "23a506e3144a821d3c366a5f94817a2094f1f85b909d12925e4d1e4441d6e982"
+  },
+  "wspd_front_20260914": {
+   "bytes": 1505708,
+   "files": 12,
+   "readme_sha256": "23871441929b42ceb833ec5619c4e503cc8ff26bb0feb47575ee5fb07ece0c99"
+  },
+  "wspd_q2_census_20260914": {
+   "bytes": 2916488,
+   "files": 130,
+   "readme_sha256": "684a8ffd9e38fa81a148b926ee528bdf1f40469ba4b3babb54b930f42329cd0b"
+  }
+ }
+}
