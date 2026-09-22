@@ -377,7 +377,7 @@ static_assert(std::is_trivially_copy_constructible_v<Q2JointPreparedBounds>);
 static_assert(std::is_trivially_copy_assignable_v<Q2JointPreparedBounds>);
 static_assert(std::is_standard_layout_v<Q2JointPreparedBounds>);
 static_assert(!std::is_default_constructible_v<Q2JointPreparedBounds>);
-static_assert(sizeof(Q2JointPreparedBounds) == 96);
+static_assert(sizeof(Q2JointPreparedBounds) == 192);  // u64 constants since the 18-bit widening
 static_assert(sizeof(Q2Bounds) == 2 * sizeof(std::int64_t));
 
 }  // namespace

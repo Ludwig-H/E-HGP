@@ -22,7 +22,14 @@ from typing import Any
 from check_paired_campaign import PROVENANCE_POLICY, provenance
 from paired_receipts import ADDITIVE_FIELDS, AXIS_FIELDS, close, finite_times, fingerprint
 from run_p0_matrix import (InvalidReceipt, WORK_FIELDS, digest, invoke, on_signal,
+
                            parse_result, require, uint, utc_stamp, validate_work, write_json)
+
+# Largeur de coordonnée du moteur entier (18 bits depuis le 22 septembre 2026) : au plus 18 coupes
+# au milieu par axe, donc 54 niveaux d'index et 55 cadres de pile ; bornes prouvées, jamais des quotas.
+COORDINATE_BITS = 18
+MAX_INDEX_DEPTH = 3 * COORDINATE_BITS
+INDEX_STACK_FRAMES = MAX_INDEX_DEPTH + 1
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -150,14 +157,14 @@ def validate_result(row: dict[str, Any], command: list[str]) -> None:
     for name, value in index.items():
         uint(value, f"index.{name}")
     # Bounding-box scan AND partition scan at each internal depth, then leaves.
-    require(index["nodes"] == index["escape_links"] == 2 * n - 1 and index["max_depth"] <= 48 and
-            n <= index["point_visits"] <= 97 * n, "global index omitted sites or exceeded u16 depth")
+    require(index["nodes"] == index["escape_links"] == 2 * n - 1 and index["max_depth"] <= MAX_INDEX_DEPTH and
+            n <= index["point_visits"] <= (2 * MAX_INDEX_DEPTH + 1) * n, "global index omitted sites or exceeded its proven depth")
     axis = row.get("prefilter_work")
     require(type(axis) is dict and set(axis) == {*AXIS_FIELDS, *ADDITIVE_FIELDS}, "wrong prefilter counters")
     for name, value in axis.items():
         uint(value, f"prefilter.{name}")
     require(axis["sort_passes"] == 3 and axis["sorted_sites"] == 3 * row["n_a"] and
-            axis["emitted_blocks"] == descriptors and axis["max_tree_depth"] <= 48 and
+            axis["emitted_blocks"] == descriptors and axis["max_tree_depth"] <= MAX_INDEX_DEPTH and
             axis["contained_nodes"] + axis["whole_factor_accepts"] == descriptors + axis["coalesced_blocks"],
             "inconsistent prefilter accounting")
     restricted = row["prefilter"] == "intersection_pool"
@@ -189,7 +196,7 @@ def validate_result(row: dict[str, Any], command: list[str]) -> None:
         for name, value in work.items():
             uint(value, f"{mode}.{name}")
         require(work["frontier_restarts"] == 0 and
-                work["query_build_max_depth"] <= 48 and work["input_descriptors"] == descriptors and
+                work["query_build_max_depth"] <= MAX_INDEX_DEPTH and work["input_descriptors"] == descriptors and
                 work["uniform_accepted_pairs"] <= arm["accepted_pairs"] and
                 work["uniform_rejected_pairs"] <= arm["rejected_pairs"] and
                 work["count_node_visits"] == work["count_bound_tests"] + work["count_point_tests"] and

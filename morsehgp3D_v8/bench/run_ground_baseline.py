@@ -24,6 +24,11 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 SCHEMA = "mhgp8_ground_baseline_v1"
 MANIFEST = ROOT / "morsehgp3D_v8/receipts/lidar_ground_u16_20260921/MANIFEST.json"
+# Grille 1 mm (18 bits, profil `quantized_u18_input_only`) : les payloads sans sol `full.u32le` des trois scènes,
+# préparés le 21 septembre 2026 sur la trame brute entière (translation commune, aucune coupe ni clip).
+GRID_1MM = ROOT / "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6"
+INPUT_GRIDS = {"2cm": dict(profile="quantized_u16_input_only", suffix=".u16le", description="grille 2 cm, u16, origine 32768 (lidar_ground_u16_20260921)"),
+               "1mm": dict(profile="quantized_u18_input_only", suffix=".u32le", description="grille 1 mm, 18 bits, translation commune par scène (lidar_ground_20260921, scene_0X_grid)")}
 OUTPUT = ROOT / "morsehgp3D_v8/receipts/ground_baseline_20260921"
 PIPELINE_SOURCES = ("src/pipeline/wspd_q34.cpp", "src/pipeline/wspd_q34.hpp", "src/wspd/front.cpp", "src/lanes/q34_witness_search.cpp",
                     "src/lanes/q3_ball_census.cpp", "src/lanes/q4_local.cpp", "src/lanes/q4_local_partition.cpp", "src/lanes/edge_cover.cpp",
@@ -84,9 +89,7 @@ def gnu_time_fields(text):
     return fields
 
 
-def run(args):
-    probe = args.probe.resolve()
-    require(probe.is_file(), f"sonde absente : {probe}")
+def inputs_2cm():
     manifest = json.loads(MANIFEST.read_text())
     require(manifest["schema"] == "mhgp8_lidar_ground_u16_preparation_v1", "manifeste u16 sans sol inattendu")
     inputs = {}
@@ -94,8 +97,36 @@ def run(args):
         path = ROOT / record["pieces"]["full"]["path"]
         require(path.is_file() and sha256(path) == record["pieces"]["full"]["sha256"], f"entrée absente ou altérée : {path} (régénérer par prepare_lidar_ground_u16.py run)")
         inputs[record["scene"]] = dict(path=str(path.relative_to(ROOT)), n=record["pieces"]["full"]["n"], sha256=record["pieces"]["full"]["sha256"], frame=record["frame"])
+    return inputs, sha256(MANIFEST)
+
+
+def inputs_1mm():
+    """Les trois payloads sans sol à 1 mm (u32le, 18 bits) et leurs manifestes versionnés."""
+    inputs, manifests = {}, []
+    for scene in ("00", "01", "02"):
+        manifest_path = GRID_1MM / f"scene_{scene}_grid/MANIFEST.json"
+        manifest = json.loads(manifest_path.read_text())
+        require(manifest["schema"] == "mhgp8_lidar_ground_preparation_v1" and manifest["profile"] == "quantized_u32_fixed_grid_input_only", f"manifeste 1 mm inattendu : {manifest_path}")
+        preparation = manifest["raw_preparation"]
+        require(preparation["quantization"]["step_metres"] == dict(numerator=1, denominator=1000) and preparation["representation"]["suffix"] == ".u32le"
+                and preparation["representation"]["point_bytes"] == 12, "préparation 1 mm hors convention (pas 1/1000 m, u32le, 12 octets)")
+        require(max(preparation["coordinate_bounds"]["encoded_max"]) < (1 << 18) and min(preparation["coordinate_bounds"]["encoded_min"]) >= 0, "coordonnées hors 18 bits")
+        full = manifest["datasets"]["full"]
+        path = manifest_path.parent / full["points_file"]
+        require(path.is_file() and sha256(path) == full["points_sha256"] and path.stat().st_size == 12 * full["sites"], f"payload 1 mm absent ou altéré : {path}")
+        frame = Path(manifest["input_paths"][0]).stem
+        inputs[scene] = dict(path=str(path.relative_to(ROOT)), n=full["sites"], sha256=full["points_sha256"], frame=frame, encoded_max=preparation["coordinate_bounds"]["encoded_max"],
+                             translation=preparation["translation"]["vector"], manifest=str(manifest_path.relative_to(ROOT)), manifest_sha256=sha256(manifest_path))
+        manifests.append(sha256(manifest_path))
+    return inputs, manifests
+
+
+def run(args):
+    probe = args.probe.resolve()
+    require(probe.is_file(), f"sonde absente : {probe}")
+    inputs, manifest_sha = inputs_2cm() if args.grid == "2cm" else inputs_1mm()
     pins = dict(git_commit=git("rev-parse", "HEAD"), worktree_status=git("status", "--porcelain", "--", "morsehgp3D_v8/src", "morsehgp3D_v8/bench"),
-                probe=str(probe), probe_sha256=sha256(probe), runner_sha256=sha256(Path(__file__)), manifest_sha256=sha256(MANIFEST),
+                probe=str(probe), probe_sha256=sha256(probe), runner_sha256=sha256(Path(__file__)), manifest_sha256=manifest_sha,
                 pipeline_sources_sha256={s: sha256(ROOT / "morsehgp3D_v8" / s) for s in PIPELINE_SOURCES}, host=subprocess.check_output(["uname", "-a"], text=True).strip(),
                 cpus=subprocess.check_output(["nproc"], text=True).strip(), inputs=inputs)
     args.output = args.output.resolve()
@@ -118,6 +149,7 @@ def run(args):
             completed = subprocess.run(["/usr/bin/time", "-v", "-o", str(time_file), *command], stdout=sink, stderr=subprocess.PIPE)
         require(completed.returncode == 0, f"sonde en échec ({scene}, K{kmax}, W{workers}) : {completed.stderr[-400:]!r}")
         probe_json = json.loads(json_file.read_text())
+        require(probe_json["profile"] == INPUT_GRIDS[args.grid]["profile"] and probe_json["n"] == entry["n"], "profil ou taille publiés par la sonde différents de l'entrée")
         timing = gnu_time_fields(time_file.read_text())
         row = dict(index=index, scene=scene, frame=entry["frame"], n=entry["n"], kmax=kmax, workers=workers, command=command, started_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(started)),
                    load_before=load_before, gnu_time=timing, probe_json=json_file.name, time_file=time_file.name, probe_json_sha256=sha256(json_file),
@@ -127,9 +159,9 @@ def run(args):
         print(json.dumps(dict(scene=scene, kmax=kmax, workers=workers, wall_s=timing["wall_s"], cpu_s=round(timing["user_s"] + timing["system_s"], 1), cpu_percent=timing["cpu_percent"],
                               q3=row["q3_emitted"], q4=row["q4_emitted"], rss_mb=round(timing["max_rss_kb"] / 1024, 1))), flush=True)
         (args.output / "BASELINE.partial.json").write_text(json.dumps(dict(schema=SCHEMA, status="partial", pins=pins, rows=rows), sort_keys=True, indent=1) + "\n")
-    receipt = dict(schema=SCHEMA, status="partial" if args.only else "passed", phase="exploration_v8_hors_registre", backend="cpu_reference", profile="quantized_u16_input_only",
-                   mode="developpement_phase0_base", public_status="not_claimed", gcp_used=False,
-                   scope="u16 q3/q4 candidate stream on the three ground-free scenes: timings on a shared host (orientation only), logical counters, W1/W8 output identity",
+    receipt = dict(schema=SCHEMA, status="partial" if args.only else "passed", phase="exploration_v8_hors_registre", backend="cpu_reference", profile=INPUT_GRIDS[args.grid]["profile"],
+                   mode="developpement_phase0_base", public_status="not_claimed", gcp_used=False, input_grid=args.grid, input_grid_description=INPUT_GRIDS[args.grid]["description"],
+                   scope="integer q3/q4 candidate stream on the three ground-free scenes: timings on a shared host (orientation only), logical counters, W1/W8 output identity",
                    pins=pins, grid=[dict(scene=s, kmax=k, workers=w) for s, k, w in GRID], separation=SEPARATION, mask=MASK, q4_backend=BACKEND, modes=[*MODES, *args.extra], rows=rows,
                    finished_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
     check(receipt)
@@ -162,12 +194,15 @@ def check(receipt):
 def read(args):
     receipt = json.loads((args.output / ("BASELINE.only.json" if args.variant == "only" else "BASELINE.json")).read_text())
     require(receipt["schema"] == SCHEMA and receipt["public_status"] == "not_claimed" and receipt["gcp_used"] is False, "reçu hors cadre")
+    grid = receipt.get("input_grid", "2cm")
+    require(grid in INPUT_GRIDS and receipt["profile"] == INPUT_GRIDS[grid]["profile"], "grille d'entrée ou profil du reçu inconnus")
     require(receipt["status"] in ("passed", "partial"), "statut de reçu inconnu")
     for row in receipt["rows"]:
         json_file = args.output / row["probe_json"]
         require(sha256(json_file) == row["probe_json_sha256"], f"JSON de sonde altéré : {json_file.name}")
         probe_json = json.loads(json_file.read_text())
         require(probe_json["output"] == row["output"] and probe_json["work"]["q3_emitted"] == row["q3_emitted"], "ligne différente de son JSON")
+        require(probe_json["profile"] == receipt["profile"] and Path(row["command"][1]).suffix == INPUT_GRIDS[grid]["suffix"], "profil ou conteneur d'entrée hors grille déclarée")
         require(hashlib.sha256(json.dumps(logical({k: probe_json[k] for k in ("front", "work")}), sort_keys=True).encode()).hexdigest() == row["logical_sha256"], "empreinte logique non reproduite")
         require(gnu_time_fields((args.output / row["time_file"]).read_text()) == row["gnu_time"], "GNU time non reproduit")
     check(receipt)
@@ -182,6 +217,7 @@ def main():
     capture.add_argument("--output", type=Path, default=OUTPUT)
     capture.add_argument("--only", type=lambda s: tuple(x.strip() for x in s.split(",")), nargs="*", default=None, help="triplets scene,K,W à exécuter seulement")
     capture.add_argument("--extra", nargs="*", default=[], help="jetons CLI ajoutés après les modes (ex. atlas)")
+    capture.add_argument("--grid", choices=tuple(INPUT_GRIDS), default="2cm", help="entrées : grille 2 cm u16 (défaut) ou grille 1 mm 18 bits (u32le)")
     reader = sub_parsers.add_parser("read")
     reader.add_argument("--output", type=Path, default=OUTPUT)
     reader.add_argument("--variant", choices=("full", "only"), default="full")

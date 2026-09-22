@@ -41,7 +41,8 @@ using CloudPtr = std::shared_ptr<const PreparedCloud>;
 
 // Copies into private storage before checking uniqueness. A move of the
 // caller's vector would not revoke mutable aliases and is never used here.
-// Rejects an empty cloud and duplicate u16 coordinates without perturbation.
+// Rejects an empty cloud, any coordinate outside [0, coordinate_limit] and
+// duplicate sites, always without perturbation.
 [[nodiscard]] CloudPtr prepare_cloud(std::span<const Point3> points);
 
 class PreparedCloud final {

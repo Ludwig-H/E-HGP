@@ -258,7 +258,7 @@ int global_run(int argc,char** argv) {
  std::cout<<std::fixed<<std::setprecision(6)
   <<"{\"schema\":\"mhgp8_wspd_q34_probe_v"<<schema_version<<"\",\"status\":\"completed\","
     "\"scope\":\"global_q3_q4_candidate_stream_not_catalogue_or_full\",\"backend\":\"cpu_reference\","
-    "\"profile\":\"quantized_u16_input_only\",\"public_status\":\"not_claimed\","
+    "\"profile\":\""<<input_profile(input)<<"\",\"public_status\":\"not_claimed\","
   <<"\"n\":"<<n<<",\"source_n\":"<<source_n<<",\"kmax\":"<<k<<",\"s\":"<<s
   <<",\"mask\":"<<mask<<",\"q4_backend\":"<<backend<<",\"workers\":"<<workers
   <<",\"front_mode\":\""<<mode<<"\",\"output_mode\":\""<<output_mode<<"\",\"input_hash\":"<<input.hash

@@ -44,7 +44,7 @@ def check_fixture(k, q):
         require(determinant3(differences) != 0, "coplanar q4")
     points = support + witnesses
     require(len(set(points)) == len(points), "duplicate site")
-    require(all(0 <= x <= 65535 for p in points for x in p), "outside u16")
+    require(all(0 <= x <= 262143 for p in points for x in p), "outside the 18-bit grid")
     require(all(w > 0 for w in weights) and sum(weights) == 1, "non-positive support")
     require(tuple(sum(w * p[axis] for w, p in zip(weights, support, strict=True))
                   for axis in range(3)) == center, "barycentric center mismatch")

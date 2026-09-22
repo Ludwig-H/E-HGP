@@ -44,7 +44,7 @@ class PreparedPairCitronBounds final {
       result.minimum4 -= std::max(low_squared, high_squared);
       result.maximum4 -= low > 0 ? low_squared : high < 0 ? high_squared : 0;
     }
-    // 4H=|b-a|^2-|2z-a-b|^2. With u16 M=65535, each coordinate
+    // 4H=|b-a|^2-|2z-a-b|^2. With M=262143 (18 bits), each coordinate
     // difference is <=M, each doubled displacement <=2M, all these i64
     // intermediates fit. In particular -12M^2<=4H<=3M^2. The nearest
     // point is continuous, retaining half-integral maxima without rounding.
@@ -71,7 +71,7 @@ class PreparedPairCitronBounds final {
     // Xi=|d x (z-a)|^2. Component intervals are EXACT, since each has
     // two independent affine coordinates. |component|<=2M^2; even the
     // separate constant/evaluation intermediates are <=4M^2 and fit i64.
-    // Promote BEFORE squaring: Xi_high<=12M^4<2^68. Summing individual
+    // Promote BEFORE squaring: Xi_high<=12M^4<2^76. Summing individual
     // square minima/maxima remains conservative despite shared coordinates.
     return result;
   }

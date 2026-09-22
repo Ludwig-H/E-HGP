@@ -71,8 +71,8 @@ bool same_box(const Box3& a, const Box3& b) {
 
 // Deliberately independent of the product's range-tree reduction.
 Box3 scan_bounds(std::span<const Point3> points, Range range) {
-  std::array<std::uint16_t, 3> low{65535, 65535, 65535};
-  std::array<std::uint16_t, 3> high{};
+  std::array<mhgp8::Coordinate, 3> low{65535, 65535, 65535};
+  std::array<mhgp8::Coordinate, 3> high{};
   for (std::size_t i = range.first; i < range.last; ++i) {
     for (std::size_t axis = 0; axis < 3; ++axis) {
       low[axis] = std::min(low[axis], points[i][axis]);
@@ -136,7 +136,7 @@ std::vector<Pair> checked_census(Gate& gate, const mhgp8::Q2CensusIndex& index,
       u64 diameter = 0;
       for (std::size_t axis = 0; axis < 3; ++axis) {
         gate.require(support.key.center_twice[axis] ==
-                       std::uint32_t{points[pair.first][axis]} + points[pair.second][axis],
+                       static_cast<std::uint32_t>(points[pair.first][axis]) + points[pair.second][axis],
                      "census changed original-ID ball center");
         const auto delta = std::int64_t{points[pair.first][axis]} - points[pair.second][axis];
         diameter += static_cast<u64>(delta * delta);
@@ -223,6 +223,36 @@ void range_tree(Gate& gate) {
                "cloud accepted duplicate coordinate IDs");
   gate.rejects([&] { static_cast<void>(mhgp8::prepare_cloud(std::span<const Point3>{})); },
                "cloud accepted an empty point array");
+  // 18-bit range (22 September 2026): the declared limit is accepted, one
+  // past it and any negative value are refused before any key or tree work.
+  const mhgp8::Coordinate limit = mhgp8::coordinate_limit;
+  gate.require(limit == 262143 && mhgp8::coordinate_bits == 18, "declared coordinate width is not 18 bits");
+  // Counter-fixture of the historical 16-bit key packing (x<<32|y<<16|z):
+  // (0,1,0) and (0,0,65536) shared one key there and would have been refused
+  // as duplicates; three disjoint 18-bit fields keep them distinct.
+  const std::vector<Point3> wide{{0, 1, 0}, {0, 0, 65536}, {limit, limit, limit}, {limit, 0, limit - 1},
+                                 {65536, 0, 0}, {0, limit, 0}, {0, 0, limit}, {1, 65536, 65535}};
+  {
+    const auto cloud = mhgp8::prepare_cloud(wide);
+    ++gate.clouds;
+    gate.require(cloud->points().size() == wide.size() && std::equal(cloud->points().begin(), cloud->points().end(), wide.begin()),
+                 "18-bit sites were dropped, reordered or merged by the uniqueness keys");
+    gate.require(cloud->work().validation_points == wide.size() && cloud->work().uniqueness_adjacent_tests == wide.size() - 1,
+                 "18-bit validation did not charge one test per site");
+    const auto whole = cloud->bounds({0, wide.size()});
+    gate.require(whole.box.low == Point3{0, 0, 0} && whole.box.high == Point3{limit, limit, limit},
+                 "18-bit range tree lost the extreme corners");
+    ++gate.range_queries;
+  }
+  for (const Point3 outside : {Point3{limit + 1, 0, 0}, Point3{0, limit + 1, 0}, Point3{0, 0, limit + 1},
+                               Point3{-1, 0, 0}, Point3{0, -1, 0}, Point3{0, 0, -1}, Point3{1 << 20, 5, 5}}) {
+    const std::vector<Point3> invalid{{7, 8, 9}, outside};
+    gate.rejects([&] { static_cast<void>(mhgp8::prepare_cloud(invalid)); },
+                 "cloud accepted a coordinate outside [0, 2^18)");
+  }
+  const std::vector<Point3> wide_duplicates{{0, 0, 65536}, {limit, 1, 2}, {0, 0, 65536}};
+  gate.rejects([&] { static_cast<void>(mhgp8::prepare_cloud(wide_duplicates)); },
+               "cloud accepted duplicate 18-bit sites");
 }
 
 void ownership(Gate& gate) {

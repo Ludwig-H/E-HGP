@@ -107,8 +107,8 @@ void ledger(Gate& gate,const Work& work,mhgp8::Q3BallCensusResult result,
       "count node classification partition");
   gate.require(work.count_bounds_prepared==1+2*work.count_split_nodes && work.count_inside_sites==result.depth &&
       work.count_saturations==static_cast<u64>(!result.accepted),"count expansion or saturated credits");
-  gate.require(work.peak_count_stack>=1 && work.peak_count_stack<=49 && work.peak_shell_stack<=49 &&
-      work.stack_storage_bytes>=49*sizeof(std::size_t),"fixed proven stack backing");
+  gate.require(work.peak_count_stack>=1 && work.peak_count_stack<=mhgp8::index_stack_frames && work.peak_shell_stack<=mhgp8::index_stack_frames &&
+      work.stack_storage_bytes>=mhgp8::index_stack_frames*sizeof(std::size_t),"fixed proven stack backing");
   if (result.accepted) {
     gate.require(result.depth<threshold && work.count_prepared_unvisited==0 &&
         work.count_inside_sites+work.count_nonnegative_sites==n,"accepted global depth population partition");

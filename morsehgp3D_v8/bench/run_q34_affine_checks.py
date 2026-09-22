@@ -18,6 +18,12 @@ import run_q34_indexed_checks as base
 from run_q4_family_checks import digest, pins, read_json
 from run_p0_matrix import InvalidReceipt, parse_result, require, uint
 
+# Largeur de coordonnée du moteur entier (18 bits depuis le 22 septembre 2026) : au plus 18 coupes
+# au milieu par axe, donc 54 niveaux d'index et 55 cadres de pile ; bornes prouvées, jamais des quotas.
+COORDINATE_BITS = 18
+MAX_INDEX_DEPTH = 3 * COORDINATE_BITS
+INDEX_STACK_FRAMES = MAX_INDEX_DEPTH + 1
+
 ROOT = base.ROOT
 previous, edge = base.previous, base.edge
 MODES = base.MODES
@@ -137,7 +143,7 @@ def validate_gate(row, name):
         for field in (*base.SEARCH_GATE_FIELDS, *SEARCH_GATE_ADDED):
             require(uint(row[field], field) > 0, "affine witness gate vacuity")
         exact = dict(parallel_calls=4, permutations=1, source_alias_checks=1, repeated_calls=1, left_tie_cases=1,
-            partial_admission_cases=1, deep_index_cases=1, peak_stack=49, overflow_exceptions=1, q3_contacts=1,
+            partial_admission_cases=1, deep_index_cases=1, peak_stack=INDEX_STACK_FRAMES, overflow_exceptions=1, q3_contacts=1,
             q4_contacts=1, wrong_alpha_cases=1, positive_q4_external=1, h_contacts=1, extreme_queries=15,
             invalid_inputs=11, point_admission_cases=1, mode_parallel_calls=4, mode_invalid_inputs=2,
             mode_repeated_calls=1, mode_overflows=1, local_exclusion_cases=2, nonpositive_minimum_cases=2,
@@ -211,8 +217,8 @@ def validate_search(search, bounds, n, k, id_bytes, mode, section):
     require(s["node_visits"] + s["pending_nodes_skipped"] <= s["queries"] + 2*s["split_nodes"],
             "search pending frames ledger")
     if s["queries"]:
-        require(1 <= s["peak_stack"] <= 49 and s["stack_storage_bytes"] == 49*2*id_bytes,
-                "fixed u16 witness stack")
+        require(1 <= s["peak_stack"] <= INDEX_STACK_FRAMES and s["stack_storage_bytes"] in (49*2*id_bytes, INDEX_STACK_FRAMES*2*id_bytes),
+                "fixed witness stack (49 frames before the 18-bit widening of 22 September 2026, 55 after)")
     else:
         require(all(v == 0 for v in s.values()) and all(v == 0 for v in b.values()), "inactive search did work")
 

@@ -17,7 +17,7 @@ i64 distance_squared(Point3 a, Point3 b) noexcept {
     const i64 delta = static_cast<i64>(a[axis]) - b[axis];
     result += delta * delta;
   }
-  return result;  // <=3*65535^2<2^34.
+  return result;  // <=3*262143^2<2^38.
 }
 
 auto edge_key(std::size_t a, std::size_t b) noexcept {
@@ -28,7 +28,7 @@ struct RootBound { i64 ceiling; u64 iterations; };
 
 RootBound ceil_sqrt(i128 target) {
   if (target <= 0) throw std::logic_error("mhgp8 variance root requires a positive target");
-  // Here target=q*S<=54M^6<2^102. All squared search bounds fit i128.
+  // Here target=q*S<=54M^6<2^114. All squared search bounds fit i128.
   const auto high_word = static_cast<u64>(target >> 64);
   const unsigned bits = high_word != 0
       ? 64U + static_cast<unsigned>(std::bit_width(high_word))
@@ -116,7 +116,7 @@ Q34PoolAssessment assess_q34_family_pool(Q34WitnessPoolPtr pool, std::size_t x_i
       throw std::logic_error("mhgp8 maximal acute seed has invalid variance chord");
     // Audit 4215dd16: mu^2<=D*S^2/T, but DO NOT form D*S*S in i128.
     // 0<S<T and D integral imply q=ceil(D*S/T)<=D. G<=9M^4 gives
-    // S<=18M^4, hence D*S and q*S<=54M^6<2^102. Quotient/remainder
+    // S<=18M^4, hence D*S and q*S<=54M^6<2^114. Quotient/remainder
     // ceiling avoids an extra numerator+denominator intermediate.
     const i128 numerator = static_cast<i128>(d) * s;
     const i128 quotient = numerator / t + (numerator % t != 0 ? 1 : 0);
@@ -133,7 +133,7 @@ Q34PoolAssessment assess_q34_family_pool(Q34WitnessPoolPtr pool, std::size_t x_i
     counter_add(work.proposed_sites);
     counter_add(work.paired_predicate_tests);
     // One shared P/B evaluation per proposed site in this initial scan.
-    // P and U*B each fit i128; |P|+U*|B|<2^104, as for the old certificate.
+    // P and U*B each fit i128; |P|+U*|B|<2^116, as for the old certificate.
     const i128 power = family.power(points[id]);
     const i64 side = family.side(points[id]);
     const i128 scaled_side = static_cast<i128>(result.parameter_bound) * side;

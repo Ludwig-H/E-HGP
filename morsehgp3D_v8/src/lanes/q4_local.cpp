@@ -69,6 +69,40 @@ bool contains(Q4LocalCell c,Center p,bool ownership) {
   return !ownership || ((c.owns_right || x!=static_cast<i128>(c.right)*p.den) &&
                         (c.owns_top || y!=static_cast<i128>(c.top)*p.den));
 }
+// Scaled location of a rational center for closed-cell tests: floor(scale*x/den)
+// and whether scale*x/den is an integer, by exact long division. No product
+// scale*x or corner*den is formed: a q3 circumcenter has numerators and
+// denominator below 2^117 at 18 bits (q4_local_partition.cpp), so scale*x
+// would need 2^137 bits. The loop doubles a remainder r<den (<2^118) at most
+// scale_bits times; the quotient is the location in scaled coordinates.
+struct ScaledCenter { i128 x{},y{}; bool exact_x{},exact_y{}; };
+std::pair<i128,bool> scaled_floor(i128 numerator,i128 den) {
+  i128 quotient=numerator/den,remainder=numerator%den;  // den>0, truncating.
+  if(remainder<0) {remainder+=den;--quotient;}          // Now 0<=remainder<den.
+  // |quotient|<2^100 keeps every doubled quotient below 2^121; a q3 center of
+  // an acute seed has |scale*x/den|<=scale, far inside this guard.
+  if(quotient>(i128{1}<<100) || quotient<-(i128{1}<<100))
+    throw std::logic_error("mhgp8 local center location exceeds its proven range");
+  for(unsigned bit=0;bit<Q4LocalCell::scale_bits;++bit) {
+    quotient*=2;remainder*=2;
+    if(remainder>=den) {remainder-=den;++quotient;}
+  }
+  return {quotient,remainder==0};
+}
+ScaledCenter scaled(Center p) {
+  const auto [x,exact_x]=scaled_floor(p.x,p.den);
+  const auto [y,exact_y]=scaled_floor(p.y,p.den);
+  return {x,y,exact_x,exact_y};
+}
+bool contains(Q4LocalCell c,const ScaledCenter& p) {
+  // With v=scale*x/den=floor+r, 0<=r<1: left<=v iff left<=floor (integers),
+  // and v<=right iff floor<right or (floor==right and r==0). Closed cell.
+  const auto within=[](i64 low,i64 high,i128 floor,bool exact) {
+    return static_cast<i128>(low)<=floor &&
+           (floor<static_cast<i128>(high) || (floor==static_cast<i128>(high) && exact));
+  };
+  return within(c.left,c.right,p.x,p.exact_x) && within(c.bottom,c.top,p.y,p.exact_y);
+}
 Center intersection(Q4LocalForm a,Q4LocalForm b) {
   // Reduced intersections are degree four. Never cross-multiply two roots.
   return normalized({static_cast<i128>(a.y)*b.constant-static_cast<i128>(b.y)*a.constant,
@@ -192,18 +226,18 @@ Q4LocalAtlasPtr Q4LocalAtlas::make(Q34EdgeCoverPtr cover,std::size_t k,Q4LocalOp
 }
 const Q4LocalGeometryPtr& Q4LocalAtlas::geometry() const noexcept {return impl_->geometry;}
 std::optional<std::size_t> Q4LocalAtlas::certified_inside_count(const Q4LocalCenter& center) const {
-  const Center p{center.x,center.y,center.den};
-  if(p.den<=0) throw std::invalid_argument("mhgp8 atlas location requires a positive denominator");
+  if(center.den<=0) throw std::invalid_argument("mhgp8 atlas location requires a positive denominator");
+  const auto p=scaled(Center{center.x,center.y,center.den});
   const auto& nodes=impl_->nodes;
   std::size_t id=0;
-  if(!contains(nodes[id].cell,p,false)) return std::nullopt;
+  if(!contains(nodes[id].cell,p)) return std::nullopt;
   while(true) {
     const auto& node=nodes[id];
     if(node.state==Impl::State::Outside) return std::nullopt;
     if(node.state!=Impl::State::Branch) return node.inside_count;
     std::size_t next=absent;
     for(unsigned q=0;q<4 && next==absent;++q)
-      if(contains(nodes[node.children+q].cell,p,false)) next=node.children+q;
+      if(contains(nodes[node.children+q].cell,p)) next=node.children+q;
     if(next==absent) throw std::logic_error("mhgp8 atlas children do not cover their parent cell");
     id=next;
   }
@@ -424,7 +458,9 @@ struct Q4SeedCellEngine {
     std::optional<Q4FamilySeed> family;
   };
   struct Product {std::size_t x{},cell{};bool spatial_test_paid{};};
-  static constexpr std::size_t stack_capacity=1+48+3*44;
+  // Index height max_index_depth (54) plus three products per cell level
+  // of the historical depth-44 domain (>= Q4LocalCell::max_depth).
+  static constexpr std::size_t stack_capacity=1+max_index_depth+3*44;
 
   Q4LocalEngine engine;
   Q4LocalEdgeWork& result;

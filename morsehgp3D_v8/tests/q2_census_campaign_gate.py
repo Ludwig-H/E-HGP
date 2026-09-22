@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[2]
 BENCH = ROOT / "morsehgp3D_v8/bench"
 RUNNER = BENCH / "run_q2_census_matrix.py"
 sys.path.insert(0, str(BENCH))
-from run_q2_census_matrix import (CAPTURE_RUNNER_ARCHIVE, LEGACY_RUNNER_SHA256, RUNNER_SOURCE,
+from run_q2_census_matrix import (CAPTURE_RUNNER_ARCHIVE, LEGACY_RUNNER_SHA256, MAX_INDEX_DEPTH, RUNNER_SOURCE,
                                  InvalidReceipt, digest, parse_result, validate_legacy_archive,
                                  validate_result)  # noqa: E402
 
@@ -112,7 +112,7 @@ def main() -> int:
         upper = json.loads(json.dumps(original["result"]))
         # Synthetic consistency bounds, not purported measured geometry:
         # an internal depth scans coordinates twice (bbox + partition).
-        upper["index_work"]["point_visits"] = 97 * upper["n"]
+        upper["index_work"]["point_visits"] = (2 * MAX_INDEX_DEPTH + 1) * upper["n"]
         validate_result(upper, original["command"])
         upper["index_work"]["point_visits"] += 1
         try:
@@ -120,7 +120,7 @@ def main() -> int:
         except InvalidReceipt:
             stats["index_scan_boundary_controls"] += 1
         else:
-            raise RuntimeError("index work beyond 97n was accepted")
+            raise RuntimeError("index work beyond (2*depth+1)n was accepted")
 
         prelude = (f"#!{sys.executable}\nimport json, os, signal, subprocess\nfrom pathlib import Path\n"
                    "import sys\n" + f"real = {str(actual)!r}\n")

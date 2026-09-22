@@ -221,7 +221,7 @@ void seed_cells_ledger(SeedCellsGate& gate,const mhgp8::Q4LocalEdgeWork& edge,
     gate.require(extra.family_preparations==edge.sweep.seed_queries &&
       extra.family_preparations<=edge.seeds && edge.seeds<=point_count &&
       extra.cache_hits>=extra.invalid_cache_hits && extra.max_block_sites<=options.block_sites &&
-      extra.peak_product_stack<=181,"joined cache repeated a family or exceeded its owned block/DFS bounds");
+      extra.peak_product_stack<=1+mhgp8::max_index_depth+3*44,"joined cache repeated a family or exceeded its owned block/DFS bounds");
     gate.require(edge.sweep.query_visits==0 && edge.sweep.line_tests==0 && edge.sweep.line_skips==0 &&
       edge.sweep.seed_owner_tests==0,"joined terminal restarted the individual atlas traversal");
     gate.cache_hits+=extra.family_cache_hits;gate.family_builds+=extra.family_preparations;

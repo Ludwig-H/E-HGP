@@ -63,7 +63,7 @@ std::int64_t h(const Point3& a, const Point3& b, const Point3& z) {
 u64 scalar_box_diagonal_squared(std::span<const Point3> points) {
   u64 result = 0;
   for (std::size_t axis = 0; axis < 3; ++axis) {
-    std::uint16_t low = points.front()[axis], high = low;
+    mhgp8::Coordinate low = points.front()[axis], high = low;
     for (const auto& point : points) {
       low = std::min(low, point[axis]);
       high = std::max(high, point[axis]);
@@ -84,7 +84,7 @@ Output oracle(Gate& gate, std::span<const Point3> points) {
     for (std::size_t b = a + 1; b < points.size(); ++b) {
       Payload payload{{a, b}, {}, {}, {}};
       for (std::size_t axis = 0; axis < 3; ++axis) {
-        payload.key.center_twice[axis] = std::uint32_t{points[a][axis]} + points[b][axis];
+        payload.key.center_twice[axis] = static_cast<std::uint32_t>(points[a][axis]) + points[b][axis];
         const auto difference = std::int64_t{points[a][axis]} - points[b][axis];
         payload.key.diameter_squared += static_cast<u64>(difference * difference);
       }
@@ -182,7 +182,7 @@ Capture run(Gate& gate, const mhgp8::Q2CensusIndex& index, const Output& expecte
     gate.require(order_work(o) == std::array<u64, 4>{}, "GlobalDfs paid complement-order sidecar work");
   } else {
     gate.require(o.deferred_skips <= c.work.query_tasks && o.anchor_skips <= c.work.query_tasks &&
-                     o.phase_switches <= c.work.query_tasks && o.structural_splits <= 96 * c.work.query_tasks,
+                     o.phase_switches <= c.work.query_tasks && o.structural_splits <= 2 * mhgp8::max_index_depth * c.work.query_tasks,
                  "complement-order structural work exceeded its two-path/per-task envelope");
     gate.structural_splits += o.structural_splits;
     gate.deferred_skips += o.deferred_skips;

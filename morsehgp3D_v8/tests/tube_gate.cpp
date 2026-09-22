@@ -29,7 +29,7 @@ using mhgp8::Strategy;
 namespace oracle = mhgp8::oracle;
 using Integer = oracle::Integer;
 using Vector = std::array<Integer, 3>;
-using Key = std::array<std::uint16_t, 3>;
+using Key = std::array<mhgp8::Coordinate, 3>;
 constexpr std::array<Lane, 3> lanes{Lane::Q2, Lane::Q3, Lane::Q4};
 
 struct Gate {

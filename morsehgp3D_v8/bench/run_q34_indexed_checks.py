@@ -25,6 +25,12 @@ import run_q34_lidar_checks as edge
 from run_q4_family_checks import digest, pins, read_json
 from run_p0_matrix import InvalidReceipt, invoke, on_signal, parse_result, require, uint, utc_stamp, write_json
 
+# Largeur de coordonnée du moteur entier (18 bits depuis le 22 septembre 2026) : au plus 18 coupes
+# au milieu par axe, donc 54 niveaux d'index et 55 cadres de pile ; bornes prouvées, jamais des quotas.
+COORDINATE_BITS = 18
+MAX_INDEX_DEPTH = 3 * COORDINATE_BITS
+INDEX_STACK_FRAMES = MAX_INDEX_DEPTH + 1
+
 ROOT = previous.ROOT
 MODES = ("disabled", "pair", "rectangle-pair")
 SCHEMA = "mhgp8_q34_indexed_capture_v1"
@@ -166,7 +172,7 @@ def validate_gate(row, name):
         for key in SEARCH_GATE_FIELDS:
             require(uint(row[key], key) > 0, "witness gate vacuity")
         exact = dict(parallel_calls=4, permutations=1, source_alias_checks=1, repeated_calls=1, left_tie_cases=1,
-            partial_admission_cases=1, deep_index_cases=1, peak_stack=49, overflow_exceptions=1, q3_contacts=1,
+            partial_admission_cases=1, deep_index_cases=1, peak_stack=INDEX_STACK_FRAMES, overflow_exceptions=1, q3_contacts=1,
             q4_contacts=1, wrong_alpha_cases=1, positive_q4_external=1, h_contacts=1, extreme_queries=15, invalid_inputs=11,
             point_admission_cases=1)
         require(all(row[key] == value for key, value in exact.items()), "witness gate contract fixture counts")
@@ -211,8 +217,8 @@ def validate_search(search, n, k, id_bytes):
     require(s["node_visits"] + s["pending_nodes_skipped"] <= s["queries"] + 2*s["split_nodes"],
             "search pending frames ledger")
     if s["queries"]:
-        require(1 <= s["peak_stack"] <= 49 and s["stack_storage_bytes"] == 49*2*id_bytes,
-                "fixed u16 witness stack capacity")
+        require(1 <= s["peak_stack"] <= INDEX_STACK_FRAMES and s["stack_storage_bytes"] in (49*2*id_bytes, INDEX_STACK_FRAMES*2*id_bytes),
+                "fixed witness stack capacity (49 frames before the 18-bit widening, 55 after)")
     else:
         require(all(value == 0 for value in s.values()), "inactive search did work")
 
@@ -391,12 +397,12 @@ def validate_auxiliary(row):
             b["shell_box_bound_tests"] + b["shell_point_tests"] == b["accepted_queries"] + 2*b["shell_split_nodes"] and
             b["shell_node_visits"] == b["shell_excluded_nodes"] + b["shell_split_nodes"] + b["shell_ids"] and
             b["shell_node_visits"] <= b["accepted_queries"]*(2*n-1) and
-            b["shell_ids"] <= b["shell_point_tests"] and b["count_prepared_unvisited"] <= 49*b["rejected_queries"],
+            b["shell_ids"] <= b["shell_point_tests"] and b["count_prepared_unvisited"] <= INDEX_STACK_FRAMES*b["rejected_queries"],
             "q3 second pass/contact partition")
     if b["queries"]:
-        require(1 <= b["peak_count_stack"] <= 49 and b["stack_storage_bytes"] >= 49*(m["id_bytes"]+32) and
-                b["stack_storage_bytes"] % 49 == 0, "q3 fixed cached-bounds stack")
-        require((1 <= b["peak_shell_stack"] <= 49) if b["accepted_queries"] else b["peak_shell_stack"] == 0,
+        require(1 <= b["peak_count_stack"] <= INDEX_STACK_FRAMES and b["stack_storage_bytes"] >= 49*(m["id_bytes"]+32) and
+                (b["stack_storage_bytes"] % 49 == 0 or b["stack_storage_bytes"] % INDEX_STACK_FRAMES == 0), "q3 fixed cached-bounds stack")
+        require((1 <= b["peak_shell_stack"] <= INDEX_STACK_FRAMES) if b["accepted_queries"] else b["peak_shell_stack"] == 0,
                 "q3 shell stack activity")
     else:
         require(all(value == 0 for value in b.values()), "unused q3 blocks did work")

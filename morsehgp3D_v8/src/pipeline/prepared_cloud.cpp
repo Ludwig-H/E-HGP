@@ -42,7 +42,7 @@ CloudPtr prepare_cloud(std::span<const Point3> points) {
   const auto size = result->points_.size();
   counter_add(result->work_.coordinate_copies, work_size(size));
   if (size == 0) {
-    throw std::invalid_argument("mhgp8 cloud requires at least one u16 site");
+    throw std::invalid_argument("mhgp8 cloud requires at least one site");
   }
 
   {
@@ -50,8 +50,19 @@ CloudPtr prepare_cloud(std::span<const Point3> points) {
     keys.reserve(size);
     for (const auto& point : result->points_) {
       counter_add(result->work_.validation_points);
-      keys.push_back((static_cast<u64>(point.x) << 32) |
-                     (static_cast<u64>(point.y) << 16) | point.z);
+      // Explicit range refusal: the storage type admits values the proofs do
+      // not cover. Never a clamp, a modulo or a perturbation.
+      for (std::size_t axis = 0; axis < 3; ++axis) {
+        if (point[axis] < 0 || point[axis] > coordinate_limit) {
+          throw std::invalid_argument(
+              "mhgp8 cloud requires coordinates in [0, 2^18)");
+        }
+      }
+      // Three disjoint coordinate_bits fields (54 bits): distinct sites have
+      // distinct keys, so adjacent equality after sorting is exact uniqueness.
+      keys.push_back((static_cast<u64>(point.x) << (2 * coordinate_bits)) |
+                     (static_cast<u64>(point.y) << coordinate_bits) |
+                     static_cast<u64>(point.z));
     }
     std::sort(keys.begin(), keys.end(), [&result](u64 left, u64 right) {
       counter_add(result->work_.uniqueness_comparisons);
@@ -60,7 +71,7 @@ CloudPtr prepare_cloud(std::span<const Point3> points) {
     for (std::size_t index = 1; index < keys.size(); ++index) {
       counter_add(result->work_.uniqueness_adjacent_tests);
       if (keys[index - 1] == keys[index]) {
-        throw std::invalid_argument("mhgp8 cloud requires distinct u16 sites");
+        throw std::invalid_argument("mhgp8 cloud requires distinct sites");
       }
     }
   }  // Release the uniqueness keys before allocating the range tree.

@@ -8,6 +8,12 @@ from typing import Any
 
 from run_p0_matrix import WORK_FIELDS, require, uint, validate_work
 
+# Largeur de coordonnée du moteur entier (18 bits depuis le 22 septembre 2026) : au plus 18 coupes
+# au milieu par axe, donc 54 niveaux d'index et 55 cadres de pile ; bornes prouvées, jamais des quotas.
+COORDINATE_BITS = 18
+MAX_INDEX_DEPTH = 3 * COORDINATE_BITS
+INDEX_STACK_FRAMES = MAX_INDEX_DEPTH + 1
+
 
 def finite_times(row: dict[str, Any], names: tuple[str, ...]) -> None:
     for name in names:
@@ -172,7 +178,7 @@ def validate_axis(row: dict[str, Any], command: list[str]) -> None:
     for name in AXIS_FIELDS:
         uint(work[name], name)
     require(work["sort_passes"] == 3 and work["sorted_sites"] == 3 * row["n_a"] and
-            work["constrained_anchors"] <= row["n_a"] and work["max_tree_depth"] <= 48 and
+            work["constrained_anchors"] <= row["n_a"] and work["max_tree_depth"] <= MAX_INDEX_DEPTH and
             work["emitted_blocks"] == row["axis_descriptors"] and
             work["contained_nodes"] + work["whole_factor_accepts"] == work["emitted_blocks"] and
             work["whole_factor_accepts"] + work["whole_factor_rejects"] <= row["n_a"] and
@@ -247,7 +253,7 @@ def validate_additive(row: dict[str, Any], command: list[str]) -> None:
         for name in (*AXIS_FIELDS, *ADDITIVE_FIELDS):
             uint(work[name], f"{arm}.{name}")
         require(work["sort_passes"] == 3 and work["sorted_sites"] == 3 * row["n_a"] and
-                work["max_tree_depth"] <= 48 and work["constrained_anchors"] <= row["n_a"] and
+                work["max_tree_depth"] <= MAX_INDEX_DEPTH and work["constrained_anchors"] <= row["n_a"] and
                 work["slab_bound_updates"] <= 6 * row["n_a"] and
                 work["emitted_blocks"] == descriptors and
                 work["contained_nodes"] + work["whole_factor_accepts"] ==

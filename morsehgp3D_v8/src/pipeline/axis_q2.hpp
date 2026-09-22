@@ -104,7 +104,7 @@ class AxisQ2Plan final {
     std::size_t last{};
   };
   [[nodiscard]] unsigned axis_count(std::size_t a_index, std::size_t axis,
-                                    std::uint16_t value, AxisQ2Work* work) const;
+                                    Coordinate value, AxisQ2Work* work) const;
   [[nodiscard]] std::pair<unsigned, unsigned> axis_bounds(
       std::size_t a_index, const Box3& box, AxisQ2Work* work) const;
 

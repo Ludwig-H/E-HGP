@@ -432,7 +432,7 @@ Q34EdgeWork run_edge(Q34EdgeCoverPtr cover, std::size_t kmax,
       // A convex sum of two squares reaches its interval maximum at an end.
       max_sum += std::max(al * al + bl * bl, ah * ah + bh * bh);
     }
-    // Each quantity <=6*65535^2<2^35. Necessary conditions: both distances
+    // Each quantity <=6*262143^2<2^39. Necessary conditions: both distances
     // <=D and their squared sum>D². Equal-length owner ties remain leaf tests.
     if (min_a > diameter || min_b > diameter || max_sum <= diameter) {
       counter_add(work.rejected_nodes);

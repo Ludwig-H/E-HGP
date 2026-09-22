@@ -208,9 +208,9 @@ void predicate_gate(Gate& gate) {
 
 [[nodiscard]] std::vector<Point3> lattice(const Box3& box) {
   std::vector<Point3> points;
-  for (unsigned x = box.low.x; x <= box.high.x; ++x) {
-    for (unsigned y = box.low.y; y <= box.high.y; ++y) {
-      for (unsigned z = box.low.z; z <= box.high.z; ++z) {
+  for (auto x = box.low.x; x <= box.high.x; ++x) {
+    for (auto y = box.low.y; y <= box.high.y; ++y) {
+      for (auto z = box.low.z; z <= box.high.z; ++z) {
         points.push_back({static_cast<std::uint16_t>(x),
                           static_cast<std::uint16_t>(y),
                           static_cast<std::uint16_t>(z)});

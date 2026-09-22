@@ -88,10 +88,10 @@ inline FrontFixture make_front_fixture(std::size_t n, std::string_view family, u
     front_hash_word(result.input_hash, point.z);
   };
   if (family == "rows") {
-    for (const std::uint16_t x : {std::uint16_t{1000}, std::uint16_t{60000}}) {
+    for (const Coordinate x : {Coordinate{1000}, Coordinate{60000}}) {
       for (std::size_t i = 0; i < n / 2; ++i) {
         counter_add(result.work.proposed_points);
-        accept({x, static_cast<std::uint16_t>(i), 0});
+        accept({x, static_cast<Coordinate>(i), 0});
       }
     }
     return result;  // This deliberately deterministic family ignores seed.
@@ -114,13 +114,14 @@ inline FrontFixture make_front_fixture(std::size_t n, std::string_view family, u
       const auto corner = random.next() & 7U;
       const auto coordinate = [&](unsigned axis) {
         const u64 base = (corner & (u64{1} << axis)) != 0 ? 50000 : 20000;
-        return static_cast<std::uint16_t>(base + (random.next() & 1023U));
+        return static_cast<Coordinate>(base + (random.next() & 1023U));
       };
       point = {coordinate(0), coordinate(1), coordinate(2)};
     } else {
-      point = {static_cast<std::uint16_t>(random.next() & 65535U),
-               static_cast<std::uint16_t>(random.next() & 65535U),
-               static_cast<std::uint16_t>(random.next() & (family == "terrain" ? 255U : 65535U))};
+      // Engraved 16-bit recipes: masks are part of the pinned family, not a width.
+      point = {static_cast<Coordinate>(random.next() & 65535U),
+               static_cast<Coordinate>(random.next() & 65535U),
+               static_cast<Coordinate>(random.next() & (family == "terrain" ? 255U : 65535U))};
     }
     counter_add(result.work.proposed_points);
     const auto key = static_cast<u64>(point.x) | (static_cast<u64>(point.y) << 16U) |

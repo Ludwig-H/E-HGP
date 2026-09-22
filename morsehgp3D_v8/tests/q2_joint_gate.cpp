@@ -69,7 +69,7 @@ Output oracle(Gate& gate, std::span<const Point3> points) {
     for (std::size_t b = a + 1; b < points.size(); ++b) {
       Payload payload{{a, b}, {}, {}, {}};
       for (std::size_t axis = 0; axis < 3; ++axis) {
-        payload.key.center_twice[axis] = std::uint32_t{points[a][axis]} + points[b][axis];
+        payload.key.center_twice[axis] = static_cast<std::uint32_t>(points[a][axis]) + points[b][axis];
         const auto difference = std::int64_t{points[a][axis]} - points[b][axis];
         payload.key.diameter_squared += static_cast<u64>(difference * difference);
       }
@@ -181,7 +181,7 @@ Capture run(Gate& gate, const mhgp8::Q2CensusIndex& index, const Output& expecte
     gate.require(j.rejected_pairs + j.accepted_pairs + j.handoff_pair_mass == c.candidate_pairs &&
                      j.rejected_pairs <= c.rejected_pairs && j.accepted_pairs <= c.accepted_pairs &&
                      j.singleton_handoffs <= j.handoff_pair_mass && j.handoffs_after_credit <= j.singleton_handoffs &&
-                     j.splits_after_credit <= j.splits_a + j.splits_b && j.credit_events <= j.bound_tests && j.max_depth <= 96,
+                     j.splits_after_credit <= j.splits_a + j.splits_b && j.credit_events <= j.bound_tests && j.max_depth <= 2 * mhgp8::max_index_depth,
                  "joint rejected/accepted/handoff mass or credit ledger failed");
     if (anchors == Q2AnchorMode::SharedAnchors) {
       gate.require(j.splits_b == 0 && j.singleton_handoffs <= r.anchor_queries,
@@ -192,7 +192,7 @@ Capture run(Gate& gate, const mhgp8::Q2CensusIndex& index, const Output& expecte
       gate.require(j.structural_splits == 0 && j.deferred_skips == 0 && j.phase_switches == 0,
                    "global joint traversal paid complemented-order work");
     } else {
-      gate.require(j.deferred_skips <= j.tasks && j.phase_switches <= j.tasks && j.structural_splits <= 48 * j.tasks,
+      gate.require(j.deferred_skips <= j.tasks && j.phase_switches <= j.tasks && j.structural_splits <= mhgp8::max_index_depth * j.tasks,
                    "joint complemented-order structure exceeded its single deferred-path envelope");
     }
     gate.root_products += j.root_products;

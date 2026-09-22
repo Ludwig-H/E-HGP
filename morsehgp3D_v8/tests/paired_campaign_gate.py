@@ -163,7 +163,7 @@ def exercise_mutations(kind: str, row: dict[str, Any], command: list[str],
             add(field, (field,), value)
         for field, value in {
             "unknown": 0, "sort_passes": 2, "sorted_sites": 3 * row["n_a"] + 1,
-            "constrained_anchors": row["n_a"] + 1, "max_tree_depth": 49,
+            "constrained_anchors": row["n_a"] + 1, "max_tree_depth": 55,
             "emitted_blocks": row["axis_descriptors"] + 1,
             "slab_bound_updates": 6 * row["n_a"] + 1,
             "query_nodes": True, "tree_nodes": -1,

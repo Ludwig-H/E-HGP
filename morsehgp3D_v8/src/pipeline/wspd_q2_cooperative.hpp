@@ -59,7 +59,7 @@ struct WspdQ2CooperativeResult {
 // transient child is created while a free queue slot is held and fits that
 // same bound. This excludes synchronous Pool/engine buffers, front seeds,
 // index, callback/result objects, thread stacks and allocator metadata.
-// A continuation currently reserves 49 frames; quantum bounds transitions,
+// A continuation currently reserves index_stack_frames (55) frames; quantum bounds transitions,
 // not time: an entire payload collection/callback is one atomic transition.
 // Pool, small census roots and front jobs are still synchronous and may delay
 // cancellation. No claim of bounded wall-clock cancellation latency is made.

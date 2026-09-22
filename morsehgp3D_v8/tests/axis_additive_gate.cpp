@@ -143,7 +143,7 @@ void descriptors(Gate& gate, const AxisQ2Plan& plan, const RectangleInput& input
   gate.require(plan.work().contained_nodes + plan.work().whole_factor_accepts ==
                    plan.work().emitted_blocks + plan.work().coalesced_blocks,
                "accepted ranges disappeared from the descriptor/coalescing counters");
-  gate.require(plan.work().max_tree_depth <= 48, "u16 index exceeded its proven depth");
+  gate.require(plan.work().max_tree_depth <= mhgp8::max_index_depth, "index exceeded its proven depth");
   gate.whole_accepts += plan.work().whole_factor_accepts;
   gate.whole_rejects += plan.work().whole_factor_rejects;
   gate.query_nodes += plan.work().query_nodes;
@@ -303,7 +303,7 @@ void fixtures(Gate& gate) {
     for (unsigned reflection = 0; reflection < 2; ++reflection) {
       auto input = permuted;
       for (auto& point : input.points) {
-        const std::array<std::uint16_t, 3> old{point.x, point.y, point.z};
+        const std::array<mhgp8::Coordinate, 3> old{point.x, point.y, point.z};
         point = {old[axis], old[(axis + 1) % 3], old[(axis + 2) % 3]};
         if (reflection != 0) point = {static_cast<std::uint16_t>(65535 - point.x),
                                        static_cast<std::uint16_t>(65535 - point.y),

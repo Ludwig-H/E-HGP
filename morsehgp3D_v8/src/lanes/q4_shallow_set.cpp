@@ -29,8 +29,8 @@ int compare_coordinates(Q4LocalForm a,Q4LocalForm b) {
 i128 orientation(Q4LocalForm a,Q4LocalForm b,Q4LocalForm c) {
   // The positive product a.c*b.c*c.c need never be formed. Its sign is
   // known, so the rational orientation is the following 3x3 determinant.
-  // With M=65535: |c|<=15M^2, |x|,|y|<=8M^2. Each lex cross product is
-  // <=120M^4<2^71; the determinant is <=5760M^6<2^109. No cross product
+  // With M=262143: |c|<=15M^2, |x|,|y|<=8M^2. Each lex cross product is
+  // <=120M^4<2^79; the determinant is <=5760M^6<2^121. No cross product
   // of rational differences (degree eight) and no division is used.
   return static_cast<i128>(a.x)*(static_cast<i128>(b.y)*c.constant-static_cast<i128>(b.constant)*c.y)
        - static_cast<i128>(a.y)*(static_cast<i128>(b.x)*c.constant-static_cast<i128>(b.constant)*c.x)

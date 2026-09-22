@@ -173,7 +173,7 @@ class Q2NodePoolPlan final {
       direction[axis] = static_cast<i64>(opposite.low[axis]) + opposite.high[axis]
                         - own.low[axis] - own.high[axis];
     }
-    // |direction_i| <= 2*65535, hence every score fits signed i64. The
+    // |direction_i| <= 2*262143, hence every score (<=6M^2<2^39) fits signed i64. The
     // projection only proposes witnesses; it is never a geometric credit.
     const auto capacity = std::min(factor.size(), static_cast<std::size_t>(kmax_) + 1);
     // K <= 10: keep at most 11 entries, plus one insertion scratch slot.

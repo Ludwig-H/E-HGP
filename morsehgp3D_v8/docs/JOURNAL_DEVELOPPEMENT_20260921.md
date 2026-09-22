@@ -98,3 +98,52 @@ l'ordre et sans toucher aux aides pinnées par hash :
    `tests/gcp/`) avant toute session payante ; `describe` de contrôle de la
    cible avant démarrage (incident conteneur/VM).
 
+
+## Élargissement du moteur entier à 18 bits (22 septembre 2026)
+
+Décision utilisateur du 22 septembre : poursuivre les contrats temps sur le
+moteur entier élargi à **18 bits par coordonnée** (grille 1 mm sur ±131 m),
+le float32 sans perte restant hors contrat et hors développement pour
+l'instant. Conception, inventaire à quatre lentilles (415 dépendances de la
+largeur 16 bits, sept qui cassent) et choix d'implémentation dans
+[ELARGISSEMENT_18_BITS_20260922.md](ELARGISSEMENT_18_BITS_20260922.md).
+Port livré dans ce commit :
+
+- `Coordinate = std::int32_t`, `coordinate_bits = 18`, `coordinate_limit =
+  262 143`, `max_index_depth = 54`, `index_stack_frames = 55`
+  (`src/core/types.hpp`) ; refus explicite hors plage et clés d'unicité à
+  trois champs de 18 bits dans `prepare_cloud` ; constantes q2 en `uint64_t`
+  (les carrés 262 143² ne tiennent plus en u32) ; piles et réserves dérivées
+  de la largeur (census q3, recherche de témoins, front, continuations q2) ;
+  centre q3 localisé dans l'atlas par division longue exacte (le produit
+  `scale·x` demandait 2^137 bits) ; carte des centres à Q = 2^42 ; toutes les
+  bornes de preuve réécrites avec M = 262 143 ; lecteur `.u32le` (12 octets
+  par site, valeurs < 2^18) et profil publié `quantized_u18_input_only`
+  quand une coordonnée dépasse 16 bits ; validateurs Python dérivés des
+  mêmes constantes (les égalités de pile acceptent 49 pour les reçus
+  antérieurs et 55).
+- Portes : 79 portes courtes vertes, suite complète 129 exécutées (trois
+  désactivées comme avant) ; `mhgp8_q2_census_campaign_gate` mis à jour (le
+  mutant « visites au-delà de (2·profondeur+1)·n » suit la largeur) ;
+  `mhgp8_wspd_q34_mutations` a échoué une fois pendant la suite complète
+  lancée en concurrence avec un second build et une sonde à huit workers,
+  puis passe seul (22 s) ; à rejouer sur hôte calme avant tout reçu.
+  Porte du nuage : acceptation à 262 143, refus à 262 144 et pour toute
+  coordonnée négative, contre-fixture de collision de l'ancien empaquetage
+  ((0,1,0) contre (0,0,65536)), doublons 18 bits refusés.
+- Identité sur les entrées u16 : scène 0 sans sol, K5, huit workers, jeton
+  `atlas` : sorties (xor, somme, comptes, IDs de coquille) et les 444
+  compteurs logiques identiques à ceux du reçu
+  [ground_phase1_20260921](../receipts/ground_phase1_20260921/README.md) ;
+  seuls les octets retenus changent (entrée 238 890 → 477 780, nuage
+  1,19 → 2,39 Mo, index 7,66 → 8,71 Mo).
+- Première exécution 18 bits : préfixe de 3 000 sites du payload 1 mm de la
+  scène 0 (`scene_00_grid/full.u32le`, 39 885 sites, maximum 158 607), K5,
+  quatre workers : 49 584 q3 et 11 537 q4 émis, 83 % des graines q3 rejetées
+  par l'atlas, 6,8 s. Diagnostic, pas un reçu.
+
+Suite immédiate : fixtures jumelles à 262 143 dans toutes les portes qui
+gravent 65 535 (les anciennes restent des oracles intérieurs), campagne
+appariée d'identité u16 sur les six lignes W8 des trois scènes, puis première
+campagne 1 mm (K5 et K10, huit workers) sous
+`receipts/ground_18bits_20260922/`.

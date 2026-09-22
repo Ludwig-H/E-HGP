@@ -20,6 +20,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+# Largeur de coordonnée du moteur entier (18 bits depuis le 22 septembre 2026) : au plus 18 coupes
+# au milieu par axe, donc 54 niveaux d'index et 55 cadres de pile ; bornes prouvées, jamais des quotas.
+COORDINATE_BITS = 18
+MAX_INDEX_DEPTH = 3 * COORDINATE_BITS
+INDEX_STACK_FRAMES = MAX_INDEX_DEPTH + 1
+
 
 WORK_FIELDS = (
     "validation_points", "uniqueness_comparisons", "pool_selection_tests",
@@ -92,8 +98,8 @@ def validate_work(work: Any, name: str) -> None:
             f"{name}: missing or unknown predicate fields")
     for key in PREDICATE_FIELDS:
         uint(predicates[key], f"{name}.predicates.{key}")
-    require(work["max_tree_depth"] <= 48 and work["max_task_depth"] <= 96,
-            f"{name}: depth exceeds the u16 representation bound")
+    require(work["max_tree_depth"] <= MAX_INDEX_DEPTH and work["max_task_depth"] <= 2 * MAX_INDEX_DEPTH,
+            f"{name}: depth exceeds the 18-bit representation bound")
     require(work["tube_cells"] <= work["tube_records"] and
             work["tube_sweep_tests"] <= 2 * work["tube_records"],
             f"{name}: inconsistent tube records/cells/sweeps")

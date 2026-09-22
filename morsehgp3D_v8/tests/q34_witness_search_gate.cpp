@@ -182,7 +182,7 @@ void ledger(Gate& gate,const Work& work,unsigned k,unsigned mask,std::uint8_t re
                    "inactive lane obtained a credit or test");
     else gate.require(((result&bit)==0)==(credit==threshold),"credit/rejection threshold equivalence");
   }
-  gate.require(work.peak_stack>=1 && work.peak_stack<=49 && work.stack_storage_bytes>=49*sizeof(std::size_t),
+  gate.require(work.peak_stack>=1 && work.peak_stack<=mhgp8::index_stack_frames && work.stack_storage_bytes>=mhgp8::index_stack_frames*sizeof(std::size_t),
                "proven DFS storage contract");
   if (work.admitted_nodes>work.point_tests) gate.whole_admissions+=work.admitted_nodes-work.point_tests;
   gate.node_rejections+=work.h_excluded_nodes;
@@ -328,14 +328,16 @@ void block_and_order_fixtures(Gate& gate) {
   const auto left=singleton(gate,*il,tied,{90,100,100},{110,100,100},2,2);
   gate.require(left.node_visits==2 && left.point_tests==1,"equal midpoint distances did not choose left first");
   ++gate.left_tie_cases;
+  // Equality fixture of the proven boundary: one power of two per axis and
+  // bit, so the midpoint index reaches exactly max_index_depth (54 at 18 bits).
   Points deep{{0,0,0}};
-  for (unsigned axis=0;axis<3;++axis) for (unsigned bit=0;bit<16;++bit) {
-    std::array<std::uint16_t,3> coordinate{};coordinate[axis]=static_cast<std::uint16_t>(1U<<bit);
+  for (unsigned axis=0;axis<3;++axis) for (unsigned bit=0;bit<mhgp8::coordinate_bits;++bit) {
+    std::array<mhgp8::Coordinate,3> coordinate{};coordinate[axis]=static_cast<mhgp8::Coordinate>(1U<<bit);
     deep.push_back({coordinate[0],coordinate[1],coordinate[2]});
   }
   const auto id=mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(deep));
   const auto depth=singleton(gate,*id,deep,{0,0,0},{1,1,1},10,6);
-  gate.require(id->work().max_depth==48 && depth.peak_stack==49,"proven 48-level boundary not exercised");
+  gate.require(id->work().max_depth==mhgp8::max_index_depth && depth.peak_stack==mhgp8::index_stack_frames,"proven boundary depth not exercised");
   ++gate.deep_index_cases;
 }
 

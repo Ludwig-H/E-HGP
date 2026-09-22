@@ -62,7 +62,7 @@ Output oracle(Gate& gate, std::span<const Point3> points) {
     for (std::size_t b = a + 1; b < points.size(); ++b) {
       Payload support{{a, b}, {}, {}, {}};
       for (std::size_t axis = 0; axis < 3; ++axis) {
-        support.key.center_twice[axis] = std::uint32_t{points[a][axis]} + points[b][axis];
+        support.key.center_twice[axis] = static_cast<std::uint32_t>(points[a][axis]) + points[b][axis];
         const auto delta = std::int64_t{points[a][axis]} - points[b][axis];
         support.key.diameter_squared += static_cast<u64>(delta * delta);
       }

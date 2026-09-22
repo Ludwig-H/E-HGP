@@ -61,8 +61,8 @@ struct Task {
   std::size_t a{};
   std::size_t b{};
   u64 depth{};
-  // An index path has at most 48 coordinate halvings. A product path
-  // has at most 96 levels and adds at most two pending siblings per level.
+  // An index path has at most max_index_depth (54) coordinate halvings. A
+  // product path has at most 108 levels and adds at most two pending siblings per level.
   // This represents a proved bound, not a limit on exploration.
   std::uint32_t dfs_pending{};
   std::uint8_t mask{};
@@ -176,7 +176,7 @@ class Front {
     }
     // A reservation, not an exploration cap. No result is truncated.
     std::vector<Task> stack;
-    stack.reserve(97);
+    stack.reserve(2 * max_index_depth + 1);
     stack.push_back(initial);
     while (!stack.empty()) {
       const auto task = stack.back();
@@ -208,7 +208,7 @@ class Front {
                                          center4[axis] - 4 * static_cast<i64>(box.high[axis])});
       result += delta * delta;
     }
-    return result;  // 16 times squared distance; <=48*65535^2 fits i64.
+    return result;  // 16 times squared distance; <=48*262143^2<2^42 fits i64.
   }
 
   std::uint8_t filter(const Q2SpatialNode& a, const Q2SpatialNode& b, std::uint8_t mask, WitnessList& witnesses) {
@@ -662,9 +662,10 @@ struct WspdFrontDispatch::Impl {
     bool owns_fragment = false;
     bool seed = false;
     try {
-      // One seed at a time: potential depth(A)+depth(B)<=96 implies at
-      // most 97 pending entries. Reservation, never an exploration cap.
-      stack.reserve(97);
+      // One seed at a time: potential depth(A)+depth(B)<=2*max_index_depth
+      // implies at most 2*max_index_depth+1 pending entries. Reservation,
+      // never an exploration cap.
+      stack.reserve(2 * max_index_depth + 1);
       std::size_t until_poll = interval;
       Task initial;
       while (take(initial, seed, work, cancellation)) {

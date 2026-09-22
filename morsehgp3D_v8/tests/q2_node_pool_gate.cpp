@@ -73,7 +73,7 @@ std::vector<std::uint8_t> credits(Gate& gate, const mhgp8::Q2CensusIndex& index,
       if (proposal.second == order[rank]) continue;
       bool strict = true;
       for (unsigned mask = 0; mask < 8; ++mask) {
-        std::array<std::uint16_t, 3> coordinates{};
+        std::array<mhgp8::Coordinate, 3> coordinates{};
         for (std::size_t d = 0; d < 3; ++d)
           coordinates[d] = (mask & (1U << d)) != 0 ? nodes[opposite].box.high[d] : nodes[opposite].box.low[d];
         const Point3 corner{coordinates[0], coordinates[1], coordinates[2]};

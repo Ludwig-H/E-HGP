@@ -55,8 +55,8 @@ struct SquaredBounds {
           std::max(left, right)};
 }
 
-// M=65535. Coordinate differences have magnitude <=M, products <=M^2,
-// cross components <=2M^2, hence Xi<=12M^4<2^68. Dependencies between
+// M=262143. Coordinate differences have magnitude <=M, products <=M^2,
+// cross components <=2M^2<2^38, hence Xi<=12M^4<2^76. Dependencies between
 // intervals are discarded only outward: both Xi bounds remain certified.
 [[nodiscard]] inline SquaredBounds xi_bounds(const Box3& a, const Box3& b,
                                            const Box3& z) {
@@ -153,7 +153,7 @@ struct SquaredBounds {
     const i64 cross = u[j] * w[k] - u[k] * w[j];
     xi += spindle_detail::square(cross);
   }
-  // 3H^2<=27M^4<2^69. Promotion occurs before either multiplication.
+  // 3H^2<=27M^4<2^77. Promotion occurs before either multiplication.
   return static_cast<i128>(spindle_detail::multiplier(lane)) *
              spindle_detail::square(h) > xi;
 }
@@ -238,7 +238,7 @@ struct SquaredBounds {
     if (lane != Lane::Q2) {
       const auto xi = spindle_detail::xi_bounds(a, singleton_box(b0), z);
       // H_max = h_max4/4; equality fails the required strict witness test.
-      // 16Xi<=192M^4<2^72; all products are promoted to i128 first.
+      // 16Xi<=192M^4<2^80 and 3*(12M^2)^2<=432M^4<2^81; all products are promoted to i128 first.
       if (static_cast<i128>(spindle_detail::multiplier(lane)) *
               spindle_detail::square(h_max4) <= 16 * xi.low) {
         return BlockDecision::NoCredit;

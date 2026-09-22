@@ -24,7 +24,7 @@ inline std::size_t grid_side(std::size_t count, unsigned dimension) {
 }
 
 inline void append_factor(RectangleInput& input, std::size_t count,
-                          std::uint16_t base_x, std::string_view family) {
+                          Coordinate base_x, std::string_view family) {
   const auto side = family == "tube" ? std::size_t{1} :
       grid_side(count, family == "sheet" ? 2U : 3U);
   for (std::size_t index = 0; index < count; ++index) {
@@ -41,12 +41,12 @@ inline void append_factor(RectangleInput& input, std::size_t count,
       y += (index / side) % side;
       z += index / (side * side);
     }
-    if (std::max({x, y, z}) > std::numeric_limits<std::uint16_t>::max()) {
-      throw std::logic_error("fixture coordinate escaped its declared u16 domain");
+    if (std::max({x, y, z}) > static_cast<std::size_t>(coordinate_limit)) {
+      throw std::logic_error("fixture coordinate escaped its declared coordinate domain");
     }
-    input.points.push_back({static_cast<std::uint16_t>(x),
-                            static_cast<std::uint16_t>(y),
-                            static_cast<std::uint16_t>(z)});
+    input.points.push_back({static_cast<Coordinate>(x),
+                            static_cast<Coordinate>(y),
+                            static_cast<Coordinate>(z)});
   }
 }
 
@@ -66,8 +66,8 @@ inline void append_factor(RectangleInput& input, std::size_t count,
     for (unsigned side = 0; side < 2; ++side) {
       for (unsigned rail = 0; rail < 9; ++rail) {
         for (unsigned x = 0; x <= 150; ++x) {
-          result.points.push_back({static_cast<std::uint16_t>(64800 * side + x),
-                                   static_cast<std::uint16_t>(600 * rail), 0});
+          result.points.push_back({static_cast<Coordinate>(64800 * side + x),
+                                   static_cast<Coordinate>(600 * rail), 0});
         }
       }
     }

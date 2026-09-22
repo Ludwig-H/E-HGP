@@ -11,7 +11,10 @@
 namespace mhgp8 {
 namespace {
 using Vec = std::array<i64, 3>;
-constexpr i64 scale = i64{1} << 44;
+// Q=2^42: the disk test 2*norm<=96*M^2*Q^2 must stay below 2^127, which
+// 2^44 did for M=65535 but not for M=262143 (18 bits). Real cells and every
+// classification are unchanged; only the integer depth ceiling becomes 42.
+constexpr i64 scale = i64{1} << 42;
 constexpr auto absent = std::numeric_limits<std::size_t>::max();
 struct Form { i64 constant{}, x{}, y{}; };
 struct Cell { i64 left{}, right{}, bottom{}, top{}; };
@@ -44,8 +47,8 @@ std::size_t bytes(std::size_t count, std::size_t item) {
 
 void validate_q4_center_map_options(Q4CenterMapOptions options) {
   if ((options.domain!=Q4CenterDomainMode::Disk && options.domain!=Q4CenterDomainMode::Positive) ||
-      options.max_depth>44)
-    throw std::invalid_argument("mhgp8 center map requires valid domain and depth <=44");
+      options.max_depth>42)
+    throw std::invalid_argument("mhgp8 center map requires valid domain and depth <=42");
 }
 
 struct Q4CenterMap::Impl {
@@ -142,7 +145,7 @@ struct Q4CenterMap::Impl {
     if (count<3) return;  // Degenerate hull: keep disk, never infer empty.
     const auto turn=[&](const Projection& a,const Projection& b,const Projection& c) {
       counter_add(work.hull_orientation_tests);
-      // <=1152*M^6<2^107 for u16; promotion already precedes products.
+      // <=1152*M^6<2^119 for M=262143; promotion already precedes products.
       return (b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
     };
     std::array<Projection,18> hull{};
@@ -183,7 +186,7 @@ struct Q4CenterMap::Impl {
       const i128 nearest=low>0?low:(high<0?high:0);
       norm+=nearest*nearest;
     }
-    // |alpha|,|beta|<=2q; 2*norm<=96*M^2*q^2<2^127 for q=2^44.
+    // |alpha|,|beta|<=2q; 2*norm<=96*M^2*q^2<2^127 for q=2^42 and M=262143.
     if (2*norm>static_cast<i128>(d)*scale*scale) return true;
     if (domain && domain->completion_count()<2) return true;
     for (std::size_t i=0;i<facet_count;++i) {

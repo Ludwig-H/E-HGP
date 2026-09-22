@@ -44,10 +44,10 @@ namespace mhgp8::bench {
   }
   RectangleInput input;
   input.points.reserve(n);
-  for (const std::uint16_t x : {std::uint16_t{1000}, std::uint16_t{60000}}) {
+  for (const Coordinate x : {Coordinate{1000}, Coordinate{60000}}) {
     for (std::size_t index = 0; index < count; ++index) {
-      input.points.push_back({x, static_cast<std::uint16_t>(1000 + index % width),
-                              static_cast<std::uint16_t>(1000 + index / width)});
+      input.points.push_back({x, static_cast<Coordinate>(1000 + index % width),
+                              static_cast<Coordinate>(1000 + index / width)});
     }
   }
   input.a = {0, count};

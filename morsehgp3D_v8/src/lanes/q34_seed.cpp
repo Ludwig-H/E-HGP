@@ -12,7 +12,7 @@ i64 distance_squared(Point3 a, Point3 b) noexcept {
   const i64 x = static_cast<i64>(a.x) - b.x;
   const i64 y = static_cast<i64>(a.y) - b.y;
   const i64 z = static_cast<i64>(a.z) - b.z;
-  return x * x + y * y + z * z;  // <=3*65535^2 <2^34.
+  return x * x + y * y + z * z;  // <=3*262143^2 <2^38.
 }
 
 auto edge_key(std::size_t a, std::size_t b) noexcept {
@@ -40,7 +40,7 @@ bool acute(Point3 a, Point3 b, Point3 x) noexcept {
   const i64 ax = distance_squared(a, x);
   const i64 bx = distance_squared(b, x);
   // Strict triangle squared-length inequalities are equivalent to the three
-  // positive vertex scalar products. Sums <2^35 fit i64, without floating point.
+  // positive vertex scalar products. Sums <2^39 fit i64, without floating point.
   return ab + ax > bx && ab + bx > ax && ax + bx > ab;
 }
 

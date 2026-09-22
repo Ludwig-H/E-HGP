@@ -17,7 +17,7 @@ Vector3 difference(Point3 z, Point3 a) noexcept {
 }
 
 i64 dot(const Vector3& a, const Vector3& b) noexcept {
-  // Differences are at most M=65535 in magnitude: |dot| <= 3*M^2.
+  // Differences are at most M=262143 in magnitude: |dot| <= 3*M^2<2^38.
   return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 }
 
@@ -76,7 +76,7 @@ std::optional<Q4FamilySeed> Q4FamilySeed::make(Point3 a, Point3 b, Point3 x) {
 i128 Q4FamilySeed::power(Point3 z) const noexcept {
   const auto v = difference(z, points_[0]);
   // G <= 12*M^4, |W_i| <= 36*M^5 suffice even before using acuteness.
-  // Thus |G*|v|^2-W.v| <= 144*M^6 < 2^104 < 2^105; intermediates fit i128.
+  // Thus |G*|v|^2-W.v| <= 144*M^6 < 2^116 < 2^117; intermediates fit i128.
   i128 result = gram_ * dot(v, v);
   for (std::size_t axis = 0; axis < 3; ++axis) result -= linear_[axis] * v[axis];
   return result;
@@ -84,7 +84,7 @@ i128 Q4FamilySeed::power(Point3 z) const noexcept {
 
 i64 Q4FamilySeed::side(Point3 z) const noexcept {
   const auto v = difference(z, points_[0]);
-  // Each normal component <=2*M^2: |B| <=6*M^3 <2^51, including partial sums.
+  // Each normal component <=2*M^2: |B| <=6*M^3 <2^57, including partial sums.
   return normal_[0] * v[0] + normal_[1] * v[1] + normal_[2] * v[2];
 }
 
@@ -95,7 +95,7 @@ int Q4FamilySeed::compare_roots(Point3 z1, Point3 z2) const {
     throw std::invalid_argument("mhgp8 q4 root comparison requires two noncoplanar sites");
   const auto m = minors(lifted(z1, points_[0]), lifted(z2, points_[0]));
   // Laplace expansion in the first two rows of [d,D; u,E; v1,V1; v2,V2].
-  // The 24 determinant monomials have total absolute value <72*2^80<2^87,
+  // The 24 determinant monomials have total absolute value <=72*M^5<2^97,
   // so both the six products and every partial sum fit i128. In contrast,
   // computing P1*B2-P2*B1 directly would not be justified in i128.
   const i128 delta = minors_[0] * m[5] - minors_[1] * m[4] + minors_[2] * m[3]

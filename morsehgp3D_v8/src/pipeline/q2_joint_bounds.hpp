@@ -23,8 +23,8 @@ class Q2JointPreparedBounds final {
         for (std::size_t bi = 0; bi < 2; ++bi) {
           const i64 difference = b_ends[bi] - a_ends[ai];
           constants_[axis][2 * ai + bi] = {
-              static_cast<std::uint32_t>(a_ends[ai] + b_ends[bi]),
-              static_cast<std::uint32_t>(difference * difference)};
+              static_cast<std::uint64_t>(a_ends[ai] + b_ends[bi]),
+              static_cast<std::uint64_t>(difference * difference)};
         }
       }
     }
@@ -37,8 +37,8 @@ class Q2JointPreparedBounds final {
 
  private:
   struct Constants {
-    std::uint32_t center_twice{};
-    std::uint32_t distance_squared{};
+    std::uint64_t center_twice{};
+    std::uint64_t distance_squared{};
   };
   std::array<std::array<Constants, 4>, 3> constants_{};
 
@@ -80,11 +80,12 @@ class Q2JointPreparedBounds final {
 // includes half-integral summits without rounding and uses all four pairs,
 // not only matching low/low and high/high endpoints.
 //
-// With M=65535: C<=2M, D<=M^2, |2z-C|<=2M. Stored C,D fit u32, while
-// every subtraction/product above is performed in i64 before narrowing.
-// Summed bounds satisfy -12*M^2<=4H<=3*M^2. The 96-byte representation
-// does not qualify a task-count bound, a GPU kernel or an HGP FULL tower.
+// With M=262143 (18 bits): C<=2M<2^19, D<=M^2<2^36, |2z-C|<=2M. Stored C,D
+// are u64 (D no longer fits u32 beyond 16 bits), while every subtraction and
+// product above is performed in i64. Summed bounds satisfy
+// -12*M^2<=4H<=3*M^2 (<2^40). The 192-byte representation does not qualify
+// a task-count bound, a GPU kernel or an HGP FULL tower.
 static_assert(std::is_trivially_copyable_v<Q2JointPreparedBounds>);
-static_assert(sizeof(Q2JointPreparedBounds) == 24 * sizeof(std::uint32_t));
+static_assert(sizeof(Q2JointPreparedBounds) == 24 * sizeof(std::uint64_t));
 
 }  // namespace mhgp8

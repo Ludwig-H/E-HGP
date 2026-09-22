@@ -84,7 +84,7 @@ struct Q34WitnessSearchWork {
 // DFS uses at most49 pending frames because Q2CensusIndex::build splits the
 // longest positive integer coordinate extent at its midpoint. Each child
 // has at most floor(extent/2) in that coordinate; sixteen such reductions
-// per coordinate reach zero. Unique u16 sites force a singleton by depth48.
+// per coordinate reach zero. Unique sites force a singleton by depth max_index_depth (54).
 // The fixed backing is this proven bound, not a search/point/visit quota.
 // Work O(visited nodes), with no universal subquadratic bound on all calls.
 [[nodiscard]] std::uint8_t filter_q34_witnesses(

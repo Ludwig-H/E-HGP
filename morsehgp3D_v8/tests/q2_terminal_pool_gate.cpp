@@ -62,7 +62,7 @@ Output oracle(Gate& gate, std::span<const Point3> points) {
   for (std::size_t a = 0; a < points.size(); ++a) for (std::size_t b = a + 1; b < points.size(); ++b) {
     Payload payload{};
     for (std::size_t d = 0; d < 3; ++d) {
-      payload.key.center_twice[d] = std::uint32_t{points[a][d]} + points[b][d];
+      payload.key.center_twice[d] = static_cast<std::uint32_t>(points[a][d]) + points[b][d];
       const auto difference = std::int64_t{points[a][d]} - points[b][d];
       payload.key.diameter_squared += static_cast<u64>(difference * difference);
     }

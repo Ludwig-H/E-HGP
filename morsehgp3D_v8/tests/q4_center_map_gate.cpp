@@ -92,7 +92,7 @@ void check_domain(MapGate& gate, const Points& points, const mhgp8::Q34EdgeCover
                "positive-domain emptiness differs from exhaustive lens");
   if (ids.empty()) ++gate.empty_domains;
   else {
-    std::array<std::uint16_t,3> low{65535,65535,65535},high{};
+    std::array<mhgp8::Coordinate,3> low{65535,65535,65535},high{};
     for (const auto id : ids)
       for (std::size_t axis = 0; axis != 3; ++axis) {
         low[axis] = std::min(low[axis],points[id][axis]);
@@ -298,7 +298,7 @@ Points rotated(Points points) {
   constexpr std::array<std::array<int,3>,3> matrix{{{-20,4,22},{20,-10,20},{10,28,4}}};
   for (auto& point : points) {
     const std::array<int,3> p{static_cast<int>(point.x)-20,static_cast<int>(point.y)-20,static_cast<int>(point.z)-20};
-    std::array<std::uint16_t,3> output{};
+    std::array<mhgp8::Coordinate,3> output{};
     for (std::size_t row = 0; row != 3; ++row) {
       int value = 1000;
       for (std::size_t col = 0; col != 3; ++col) value += matrix[row][col]*p[col];
@@ -345,8 +345,8 @@ void center_map_fixtures(MapGate& gate) {
     direct_map(gate,twin,{0,1},3,0,{mode,7,1024});
     direct_map(gate,both,{0,1},3,32,{mode,0,1024});
     direct_map(gate,compression,{0,1},3,32,full);
-    direct_map(gate,extreme,{0,1},3,32,{mode,44,85}); ++gate.extreme_calls;
-    mapped_edge(gate,extreme,{0,1},3,32,universal,{mode,44,85}); ++gate.extreme_calls;
+    direct_map(gate,extreme,{0,1},3,32,{mode,42,85}); ++gate.extreme_calls;
+    mapped_edge(gate,extreme,{0,1},3,32,universal,{mode,42,85}); ++gate.extreme_calls;
     mapped_edge(gate,singleton,{0,1},3,32,universal,full);
     mapped_edge(gate,shell30(),{0,1},5,32,collective,full);
     for (const auto k : {1U,2U,5U,10U}) mapped_edge(gate,q3_survives,{0,1},k,32,collective,full);
@@ -392,7 +392,7 @@ void center_map_lifecycle(MapGate& gate) {
   gate.rejects([&] { static_cast<void>(mhgp8::Q4PositiveDomain::make({})); }, "null positive domain accepted");
   gate.rejects([&] { static_cast<void>(mhgp8::Q4CenterMap::make({},3,options)); }, "null map pool accepted");
   gate.rejects([&] { static_cast<void>(mhgp8::Q4CenterMap::make(pool,2,options)); }, "map accepted inactive q4 threshold");
-  auto invalid = options; invalid.max_depth = 45;
+  auto invalid = options; invalid.max_depth = 43;
   gate.rejects([&] { static_cast<void>(mhgp8::Q4CenterMap::make(pool,3,invalid)); }, "unproved arithmetic depth accepted");
   invalid = options; invalid.domain = static_cast<mhgp8::Q4CenterDomainMode>(99);
   gate.rejects([&] { mhgp8::validate_q4_center_map_options(invalid); }, "invalid center-domain mode accepted");

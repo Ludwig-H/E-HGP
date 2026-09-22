@@ -14,8 +14,9 @@ struct Q4CenterMapOptions {
   std::size_t node_budget{4096};
 };
 
-// Depth <=44 is the arithmetic domain of this certificate, not a search
-// truncation. Exhausted depth/nodes mean UNKNOWN and exact fallback.
+// Depth <=42 is the arithmetic domain of this certificate (scale 2^42, 18-bit
+// coordinates), not a search truncation. Exhausted depth/nodes mean UNKNOWN
+// and exact fallback.
 void validate_q4_center_map_options(Q4CenterMapOptions options);
 
 struct Q4CenterMapWork {

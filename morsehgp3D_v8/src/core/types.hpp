@@ -10,8 +10,27 @@ namespace mhgp8 {
 using u64 = std::uint64_t;
 using i64 = std::int64_t;
 
-// The initial u16 local-credit geometry (including tube bounds) needs at most
-// 75 signed bits. Later lane primitives document their own wider bounds.
+// Quantized integer coordinates on a grid of 2^coordinate_bits positions per
+// axis (18 bits: 1 mm over +-131 m). Storage is a signed 32-bit integer so
+// that sums and differences of two coordinates promote exactly as the
+// historical u16 fields did (to int); prepare_cloud refuses any value outside
+// [0, coordinate_limit], so every bound below is proved with M=coordinate_limit.
+// The 16-bit inputs of the 2 cm profile remain valid and produce bit-identical
+// outputs; each factor M of a bound gains two bits relative to M=65535.
+using Coordinate = std::int32_t;
+inline constexpr unsigned coordinate_bits = 18;
+inline constexpr Coordinate coordinate_limit = (Coordinate{1} << coordinate_bits) - 1;
+// Midpoint splits halve a positive integer extent at most coordinate_bits
+// times per axis: an index path has at most max_index_depth splits and a
+// binary DFS at most index_stack_frames pending frames. Proved bounds, never
+// exploration caps.
+inline constexpr std::size_t max_index_depth = 3 * coordinate_bits;
+inline constexpr std::size_t index_stack_frames = max_index_depth + 1;
+static_assert(coordinate_limit == 262143 && max_index_depth == 54);
+
+// The local-credit geometry (including tube bounds) needs at most 83 signed
+// bits at 18 bits (16Q<=768*M^4<2^82). Later lane primitives document their
+// own wider bounds; the widest (q3 balls) stays below 2^117.
 // This CPU implementation requires the compiler's native integer extension; it does
 // not silently replace exact predicates with floating-point arithmetic.
 #if defined(__SIZEOF_INT128__)
@@ -21,11 +40,11 @@ __extension__ typedef signed __int128 i128;
 #endif
 
 struct Point3 {
-  std::uint16_t x{};
-  std::uint16_t y{};
-  std::uint16_t z{};
+  Coordinate x{};
+  Coordinate y{};
+  Coordinate z{};
 
-  [[nodiscard]] constexpr std::uint16_t operator[](std::size_t axis) const {
+  [[nodiscard]] constexpr Coordinate operator[](std::size_t axis) const {
     switch (axis) {
       case 0: return x;
       case 1: return y;

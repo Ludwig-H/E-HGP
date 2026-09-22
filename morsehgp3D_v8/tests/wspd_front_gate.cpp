@@ -152,7 +152,7 @@ void check_spatial_index(Gate& gate, const Q2CensusIndex& index) {
   gate.require(nodes[0].range.first == 0 && nodes[0].range.last == n &&
                  nodes[0].escape == nodes.size(), "spatial root or terminal escape changed");
   gate.require(index.work().nodes == nodes.size() &&
-                 index.work().escape_links == nodes.size() && index.work().max_depth <= 48,
+                 index.work().escape_links == nodes.size() && index.work().max_depth <= mhgp8::max_index_depth,
                "spatial index ledger or u16 depth envelope changed");
   for (std::size_t id = 0; id < nodes.size(); ++id) {
     const auto& node = nodes[id];
@@ -322,10 +322,10 @@ Capture checked_front(Gate& gate, const Q2CensusIndex& index, const PairOracle& 
                        work.disjoint_splits + work.fully_rejected_products + work.emitted_rectangles,
                "front product/diagonal/split event ledger does not close");
   gate.require(work.product_visits > 0 &&
-                   work.max_product_depth <= 96 && work.max_stack_size <= 2 * work.max_product_depth + 1,
+                   work.max_product_depth <= 2 * mhgp8::max_index_depth && work.max_stack_size <= 2 * work.max_product_depth + 1,
                "front traversal exceeds the finite u16 depth/DFS stack envelope");
   gate.require(work.witness_searches <= work.product_visits &&
-                   work.witness_descent_steps <= 48 * work.witness_searches &&
+                   work.witness_descent_steps <= mhgp8::max_index_depth * work.witness_searches &&
                    work.witness_box_distance_tests <= 2 * work.witness_descent_steps &&
                    work.extended_proposals <= work.proposed_sites &&
                    work.proposed_sites - work.extended_proposals <= historical_window * work.witness_searches &&

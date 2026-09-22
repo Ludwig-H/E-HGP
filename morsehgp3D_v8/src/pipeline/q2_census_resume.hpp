@@ -163,7 +163,7 @@ class Q2CensusContinuation final {
   // +=m, moved_frames+=old_stack_size-1 (value shifts from erasing the first
   // frame). Child stats: imported_frames=1, everything else zero. Its resume
   // history is zero except max_pending_tasks=1, describing its initial stack.
-  // Each child currently reserves 49 frames and starts with empty payload
+  // Each child currently reserves index_stack_frames (55) frames and starts with empty payload
   // buffers; detachment is not a promise of a constant total memory footprint.
   // Across all descendants detached_frames=imported_frames; transferred_pairs
   // is cumulative traffic and may exceed the initial mass after repeat moves.

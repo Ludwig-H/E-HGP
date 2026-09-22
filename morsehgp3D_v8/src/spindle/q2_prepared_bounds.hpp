@@ -28,8 +28,8 @@ class Q2PreparedBounds final {
       for (std::size_t side = 0; side < 2; ++side) {
         const i64 difference = endpoints[side] - anchor;
         constants_[axis][side] = {
-            static_cast<std::uint32_t>(anchor + endpoints[side]),
-            static_cast<std::uint32_t>(difference * difference)};
+            static_cast<std::uint64_t>(anchor + endpoints[side]),
+            static_cast<std::uint64_t>(difference * difference)};
       }
     }
   }
@@ -41,8 +41,8 @@ class Q2PreparedBounds final {
 
  private:
   struct Constants {
-    std::uint32_t center_twice{};
-    std::uint32_t distance_squared{};
+    std::uint64_t center_twice{};
+    std::uint64_t distance_squared{};
   };
   std::array<std::array<Constants, 2>, 3> constants_{};
 
@@ -83,11 +83,12 @@ class Q2PreparedBounds final {
 // uses the farthest endpoint of 2Z, while maximizing uses its nearest point.
 // The two endpoint squares are reused for both extrema, with nearest square
 // zero when C lies inside 2Z (also for half-integral geometric centers).
-// With M=65535: C<=2M, D<=M^2, |2z-C|<=2M, each square<=4M^2,
-// and -12M^2<=4H<=3M^2. Promotion precedes every product; i64 is ample.
-// Both stored constants fit u32: 2M=131070 and M^2=4294836225. They are
-// promoted back to i64 before differences, so no unsigned wrap participates.
+// With M=262143 (18 bits): C<=2M<2^19, D<=M^2<2^36, |2z-C|<=2M, each
+// square<=4M^2<2^38, and -12M^2<=4H<=3M^2 (<2^40). Promotion precedes every
+// product; i64 is ample. The stored constants are u64: D no longer fits u32
+// (65535^2 did, 262143^2=68718952449 does not), and a u32 store would have
+// truncated silently. They are promoted back to i64 before differences.
 static_assert(std::is_trivially_copyable_v<Q2PreparedBounds>);
-static_assert(sizeof(Q2PreparedBounds) == 12 * sizeof(std::uint32_t));
+static_assert(sizeof(Q2PreparedBounds) == 12 * sizeof(std::uint64_t));
 
 }  // namespace mhgp8

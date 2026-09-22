@@ -54,11 +54,11 @@ Q4PositiveDomain::Q4PositiveDomain(Q34EdgeCoverPtr cover) : cover_(std::move(cov
   a_ = points[ids[0]];
   b_ = points[ids[1]];
   diameter_squared_ = distance_squared(a_, b_);
-  // M=65535. Each coordinate difference is in [-M,M], and every distance
-  // or extremal squared distance is <=3M^2<2^34. Promotion precedes every
+  // M=262143. Each coordinate difference is in [-M,M], and every distance
+  // or extremal squared distance is <=3M^2<2^38. Promotion precedes every
   // subtraction/product; i64 is sufficient for this entire preparation.
   // A later projection can use |D*w_i-(w.v)*v_i|<=12M^3 and hull
-  // orientations <=1152M^6<2^107, but MUST perform those products in i128.
+  // orientations <=1152M^6<2^119, but MUST perform those products in i128.
   // No projected hull, dyadic denominator or depth bound is created here.
   build();
 }

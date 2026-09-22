@@ -119,7 +119,7 @@ Output oracle(Gate& gate, const Points& points, std::size_t anchor,
     gate.require(anchor < points.size() && b < points.size() && anchor != b, "oracle received an invalid support pair");
     Support item; item.a = std::min(anchor, b); item.b = std::max(anchor, b);
     for (std::size_t axis = 0; axis < 3; ++axis) {
-      item.key.center_twice[axis] = std::uint32_t{points[anchor][axis]} + points[b][axis];
+      item.key.center_twice[axis] = static_cast<std::uint32_t>(points[anchor][axis]) + points[b][axis];
       const auto delta = std::int64_t{points[anchor][axis]} - points[b][axis];
       item.key.diameter_squared += static_cast<u64>(delta * delta);
     }

@@ -427,7 +427,7 @@ Points local_rotated(const Points& source) {
   const std::array<std::array<int,3>,3> transform{{{-20,4,22},{20,-10,20},{10,28,4}}};
   Points points;
   for (const auto point : source) {
-    std::array<std::uint16_t,3> target{};
+    std::array<mhgp8::Coordinate,3> target{};
     for (std::size_t row = 0; row != 3; ++row) {
       int coordinate = 1000;
       for (std::size_t column = 0; column != 3; ++column)

@@ -19,7 +19,7 @@ SmallVector difference(Point3 point, Point3 origin) noexcept {
 }
 
 i64 dot_small(const SmallVector& a, const SmallVector& b) noexcept {
-  // Used only for coordinates/differences, each of magnitude <=M=65535.
+  // Used only for coordinates/differences, each of magnitude <=M=262143.
   return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 }
 
@@ -34,7 +34,7 @@ i128 dot_wide(const WideVector& a, const SmallVector& b) noexcept {
 }
 
 i128 magnitude(i128 value) noexcept {
-  // All callers have |value|<2^105; negation cannot encounter INT128_MIN.
+  // All callers have |value|<2^117; negation cannot encounter INT128_MIN.
   return value < 0 ? -value : value;
 }
 
@@ -95,9 +95,9 @@ std::optional<ExactBall> ExactBall::make_q3(std::array<Point3, 3> points) {
   for (std::size_t axis = 0; axis < 3; ++axis)
     linear[axis] = along_d * d[axis] + along_u * u[axis];
   // Relative power G*|z-a|^2-W.(z-a); W=E(D-F)d+D(E-F)u.
-  // Conservative u16 bounds: G<=12*M^4, |W_i|<=36*M^5. After translation,
-  // A<=12*M^4, |B_i|<=60*M^5, |C|<=144*M^6. Every intermediate and the
-  // global power are bounded in magnitude by 360*M^6 <2^105; gcd only divides.
+  // Conservative bounds (M=262143): G<=12*M^4, |W_i|<=36*M^5. After
+  // translation, A<=12*M^4, |B_i|<=60*M^5, |C|<=144*M^6. Every intermediate
+  // and the global power are bounded in magnitude by 360*M^6<2^117; gcd only divides.
   return ExactBall(translated(gram, linear, points[0]));
 }
 
@@ -132,20 +132,20 @@ std::optional<ExactBall> ExactBall::make_q4(std::array<Point3, 4> points) {
   if (remaining <= 0) return std::nullopt;
 
   // |det|<=6*M^3, |numerator_i|<=18*M^4; each barycentric numerator is
-  // <=108*M^6 in magnitude, and all four-weight intermediates are <2^105.
+  // <=108*M^6 in magnitude, and all four-weight intermediates are <2^117.
   // Normalize orientation only now: A=|det| and lin=sign(det)*numerator.
   if (determinant < 0) {
     determinant = -determinant;
     for (auto& coefficient : numerator) coefficient = -coefficient;
   }
   // Relative power A*|z-a|^2-lin.(z-a). Global |B_i|<=30*M^4,
-  // |C|<=72*M^5; the global power is <=180*M^5<2^88 before gcd reduction.
+  // |C|<=72*M^5; the global power is <=180*M^5<2^98 before gcd reduction.
   return ExactBall(translated(determinant, numerator, points[0]));
 }
 
 i128 ExactBall::power(Point3 z) const noexcept {
   const auto point = coordinates(z);
-  // The q3 bound (<2^105) dominates q2/q4, including all partial sums.
+  // The q3 bound (<2^117) dominates q2/q4, including all partial sums.
   i128 value = coefficients_[0] * dot_small(point, point);
   for (std::size_t axis = 0; axis < 3; ++axis)
     value += coefficients_[axis + 1] * point[axis];

@@ -18,8 +18,7 @@ struct Frame {
   std::uint8_t mask{};
 };
 
-constexpr std::size_t stack_capacity =
-    3 * std::numeric_limits<std::uint16_t>::digits + 1;
+constexpr std::size_t stack_capacity = index_stack_frames;
 
 [[nodiscard]] i64 midpoint_distance16(const std::array<i64, 3>& center4,
                                       const Box3& box) {
@@ -31,7 +30,7 @@ constexpr std::size_t stack_capacity =
     result += delta * delta;
   }
   // Sixteen times the squared distance from the product-box midpoint.
-  // With M=65535, center4 in [0,4M], |delta|<=4M, sum<=48M^2<2^38.
+  // With M=262143, center4 in [0,4M], |delta|<=4M, sum<=48M^2<2^42.
   return result;
 }
 
@@ -134,7 +133,7 @@ std::uint8_t filter_impl(
           ? static_cast<i128>(h.minimum4) * h.minimum4 : 0;
       // Q2JointPreparedBounds encloses exactly 4H on A x B x Z.
       // Positive 4H<=3M^2 and Xi_high<=12M^4, so alpha*(4H)^2
-      // <=27M^4<2^69 and 16Xi_high<=192M^4<2^72. All wider
+      // <=27M^4<2^77 and 16Xi_high<=192M^4<2^80 (M=262143). All wider
       // products are promoted BEFORE multiplication. The comparison is
       // strict; equal roots or tangent witnesses never enter the counts.
       for (unsigned lane = 0; lane < 2; ++lane) {
@@ -147,7 +146,7 @@ std::uint8_t filter_impl(
           // Hmax4 is positive after the early H exclusion. For every
           // H>0 point, alpha*(4H)^2 <= alpha*Hmax4^2 <=16*Xi_low
           // refutes a STRICT witness. Equality therefore excludes safely.
-          // All products fit the same <2^72 bound as admission. Exclusion
+          // All products fit the same <2^80 bound as admission. Exclusion
           // removes ONLY this frame's lane, never remaining or its count.
           if (alpha * (static_cast<i128>(h.maximum4) * h.maximum4) <=
               static_cast<i128>(16) * xi.low) {

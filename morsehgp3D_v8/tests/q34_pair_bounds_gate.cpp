@@ -143,9 +143,9 @@ void check(Gate& gate,Point3 a,Point3 b,const Box3& box) {
       "endpoint reversal changed pair bounds");++gate.reversed_pairs;
   // A three-by-three-by-three integer sample also judges enclosure, not just
   // equality of interval endpoints. This is bounded even for a full u16 box.
-  std::array<std::array<std::uint16_t,3>,3> grid{};
+  std::array<std::array<mhgp8::Coordinate,3>,3> grid{};
   for (std::size_t axis=0;axis<3;++axis)
-    grid[axis]={box.low[axis],static_cast<std::uint16_t>((static_cast<unsigned>(box.low[axis])+box.high[axis])/2),box.high[axis]};
+    grid[axis]={box.low[axis],static_cast<mhgp8::Coordinate>((box.low[axis]+box.high[axis])/2),box.high[axis]};
   for (auto xx:grid[0]) for (auto yy:grid[1]) for (auto zz:grid[2]) {
     const Point3 z{xx,yy,zz};const Big hv=h4(a,b,twice(z)),xv=gram_xi(a,b,z);
     gate.require(Big(h.minimum4)<=hv && hv<=Big(h.maximum4) && Big(x.low)<=xv && xv<=Big(x.high),

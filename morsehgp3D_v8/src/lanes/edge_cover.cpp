@@ -28,8 +28,8 @@ Q34EdgeCover::Q34EdgeCover(Q2CensusIndexPtr index, std::array<std::size_t, 2> ed
     const i64 delta = static_cast<i64>(b[axis]) - a[axis];
     radius_fourfold_ += 4 * delta * delta;
   }
-  // For u16 coordinates, M=65535: each doubled displacement is in
-  // [-2M,2M], so both its squared 3-norm and 4*|b-a|^2 are <=12M^2<2^36.
+  // For 18-bit coordinates, M=262143: each doubled displacement is in
+  // [-2M,2M], so both its squared 3-norm and 4*|b-a|^2 are <=12M^2<2^40.
   // All operands are promoted before subtraction, doubling and products;
   // every bound, point predicate and intermediate therefore fits signed i64.
   build();

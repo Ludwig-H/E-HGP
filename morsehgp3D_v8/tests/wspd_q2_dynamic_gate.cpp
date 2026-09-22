@@ -73,7 +73,7 @@ Output oracle(Gate& gate, const Points& points) {
   for (std::size_t a = 0; a < points.size(); ++a) for (std::size_t b = a + 1; b < points.size(); ++b) {
     Support item; item.a = a; item.b = b;
     for (std::size_t axis = 0; axis < 3; ++axis) {
-      item.key.center_twice[axis] = std::uint32_t{points[a][axis]} + points[b][axis];
+      item.key.center_twice[axis] = static_cast<std::uint32_t>(points[a][axis]) + points[b][axis];
       const auto delta = std::int64_t{points[a][axis]} - points[b][axis];
       item.key.diameter_squared += static_cast<u64>(delta * delta);
     }
@@ -197,7 +197,7 @@ mhgp8::WspdQ2ParallelResult run(Gate& gate, const mhgp8::Q2CensusIndexPtr& index
                      dispatch.donor_checks == dispatch.offer_no_demand + dispatch.offer_attempts &&
                      dispatch.offer_attempts == dispatch.donations + dispatch.offer_full + dispatch.offer_busy &&
                      dispatch.waits == dispatch.wakes && dispatch.max_queue_size <= schedule.queue_capacity &&
-                     dispatch.max_local_stack_size <= 97 && (result.started_workers == 0 || result.queue_storage_bytes > 0),
+                     dispatch.max_local_stack_size <= 2 * mhgp8::max_index_depth + 1 && (result.started_workers == 0 || result.queue_storage_bytes > 0),
                  "dynamic dispatcher accounting or physical queue/stack bound failed");
     if (result.started_workers <= 1)
       gate.require(dispatch.donor_checks == 0 && dispatch.donations == 0,

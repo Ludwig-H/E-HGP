@@ -31,7 +31,7 @@ namespace {
          left.high.z < right.low.z || right.high.z < left.low.z;
 }
 
-void set_coordinate(Point3& point, std::size_t axis, std::uint16_t value) {
+void set_coordinate(Point3& point, std::size_t axis, Coordinate value) {
   switch (axis) {
     case 0: point.x = value; return;
     case 1: point.y = value; return;
@@ -135,8 +135,7 @@ class BoxIndex final {
         axis = candidate;
       }
     }
-    const unsigned middle =
-        (static_cast<unsigned>(box.low[axis]) + box.high[axis]) / 2;
+    const Coordinate middle = static_cast<Coordinate>((box.low[axis] + box.high[axis]) / 2);
     const auto begin = order_.begin() + static_cast<std::ptrdiff_t>(range.first);
     const auto end = order_.begin() + static_cast<std::ptrdiff_t>(range.last);
     const auto cut = std::partition(begin, end, [&](std::size_t id) {
@@ -147,8 +146,8 @@ class BoxIndex final {
     if (split == range.first || split == range.last) {
       throw std::logic_error("mhgp8 axis midpoint split failed on distinct sites");
     }
-    // Every split halves a positive u16 coordinate extent. A path has at most
-    // 48 splits; this is an input-width proof, not a truncation of queries.
+    // Every split halves a positive coordinate extent. A path has at most
+    // max_index_depth (54) splits; an input-width proof, not a truncation of queries.
     const auto left = build({range.first, split}, depth + 1);
     const auto right = build({split, range.last}, depth + 1);
     nodes_[node_id].left = left;
@@ -239,7 +238,7 @@ AxisQ2Plan::AxisQ2Plan(RectanglePtr rectangle, AxisQ2Mode mode,
     counter_add(work_.restriction_credit_copies, restriction_b_.size());
   }
 
-  constexpr auto maximum = std::numeric_limits<std::uint16_t>::max();
+  constexpr auto maximum = coordinate_limit;
   const Box3 universe{{0, 0, 0}, {maximum, maximum, maximum}};
   anchor_bounds_.assign(a.size(), universe);
   if (mode_ == AxisQ2Mode::Additive) {
@@ -492,7 +491,7 @@ AxisQ2Plan::AxisQ2Plan(AxisQ2Plan&& other) noexcept
 }
 
 unsigned AxisQ2Plan::axis_count(std::size_t a_index, std::size_t axis,
-                               std::uint16_t value, AxisQ2Work* work) const {
+                               Coordinate value, AxisQ2Work* work) const {
   if (work != nullptr) {
     counter_add(work->axis_count_queries);
   }

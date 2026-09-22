@@ -93,7 +93,7 @@ Output oracle(Gate& gate, const Points& points) {
       Support item;
       item.pair = {a, b};
       for (std::size_t axis = 0; axis < 3; ++axis) {
-        item.key.center_twice[axis] = std::uint32_t{points[a][axis]} + points[b][axis];
+        item.key.center_twice[axis] = static_cast<std::uint32_t>(points[a][axis]) + points[b][axis];
         const auto difference = std::int64_t{points[a][axis]} - points[b][axis];
         item.key.diameter_squared += static_cast<u64>(difference * difference);
       }

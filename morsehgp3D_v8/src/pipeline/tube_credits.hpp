@@ -92,9 +92,9 @@ class PreparedTubes final {
       return;
     }
 
-    // M=65535: |d_i|<=2M, |d.p|<=6M^2, |d cross p|_i<=4M^2.
+    // M=262143: |d_i|<=2M, |d.p|<=6M^2, |d cross p|_i<=4M^2.
     // Differences along the same d satisfy |Delta|<=6M^2 and transverse
-    // coordinate spans <=4M^2. Q<=48M^4, so 16Q and 9Delta^2 are <2^74.
+    // coordinate spans <=4M^2. Q<=48M^4, so 16Q and 9Delta^2 are <2^82.
     // Products in Q and the acceptance test are widened BEFORE multiplying.
     // Raw coordinates, signed differences, cell offsets and width fit i64.
     const i64 width = 4 * maximum_component;

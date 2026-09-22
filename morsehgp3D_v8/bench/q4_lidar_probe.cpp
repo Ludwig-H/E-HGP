@@ -18,26 +18,35 @@
 
 namespace {
 namespace judge = mhgp8_test::ball_oracle;
+// Binary containers without header: ".u16le" (6 bytes per site, three
+// little-endian u16) and ".u32le" (12 bytes per site, three little-endian
+// u32 whose values must be below 2^18). The input hash covers the integer
+// values, not the container: the same cloud hashes identically in both.
 Input read_lidar(const char* path) {
-  if(std::string_view(path).ends_with(".u16le")) {
+  const bool u16=std::string_view(path).ends_with(".u16le");
+  const bool u32=std::string_view(path).ends_with(".u32le");
+  if(u16 || u32) {
+    const std::size_t width=u16?2:4,stride=3*width;
     std::ifstream stream(path,std::ios::binary|std::ios::ate);
     require(stream.good(),"cannot open binary input");
     const auto length=static_cast<std::streamoff>(stream.tellg());
-    require(length>=12 && length%6==0,"u16le input must contain 6*n bytes, n>=2");
-    const auto count=static_cast<std::uintmax_t>(length/6);
+    require(length>=static_cast<std::streamoff>(2*stride) && length%static_cast<std::streamoff>(stride)==0,
+        u16?"u16le input must contain 6*n bytes, n>=2":"u32le input must contain 12*n bytes, n>=2");
+    const auto count=static_cast<std::uintmax_t>(length/static_cast<std::streamoff>(stride));
     require(count<=std::numeric_limits<std::size_t>::max(),"binary point count too large");
     const auto n=static_cast<std::size_t>(count);
     stream.seekg(0,std::ios::beg);require(stream.good(),"binary input seek failed");
     Input input;input.points.reserve(n);word(input.hash,n);
     for(std::size_t id=0;id<n;++id) {
-      std::array<char,6> bytes{};
-      require(static_cast<bool>(stream.read(bytes.data(),6)),"truncated binary coordinates");
-      std::array<std::uint16_t,3> p{};
+      std::array<char,12> bytes{};
+      require(static_cast<bool>(stream.read(bytes.data(),static_cast<std::streamsize>(stride))),"truncated binary coordinates");
+      std::array<Coordinate,3> p{};
       for(std::size_t axis=0;axis<3;++axis) {
-        const auto low=static_cast<unsigned char>(bytes[2*axis]);
-        const auto high=static_cast<unsigned char>(bytes[2*axis+1]);
-        p[axis]=static_cast<std::uint16_t>(static_cast<unsigned>(low) |
-            (static_cast<unsigned>(high)<<8U));
+        unsigned long value=0;
+        for(std::size_t byte=0;byte<width;++byte)
+          value|=static_cast<unsigned long>(static_cast<unsigned char>(bytes[width*axis+byte]))<<(8U*byte);
+        require(value<=static_cast<unsigned long>(coordinate_limit),"coordinate outside [0, 2^18)");
+        p[axis]=static_cast<Coordinate>(value);
         word(input.hash,p[axis]);
       }
       input.points.push_back({p[0],p[1],p[2]});
@@ -53,16 +62,28 @@ Input read_lidar(const char* path) {
   const auto n=number(token);require(n>=2,"input needs at least two sites");
   Input input;input.points.reserve(n);word(input.hash,n);
   for(std::size_t id=0;id<n;++id) {
-    std::array<std::uint16_t,3> p{};
+    std::array<Coordinate,3> p{};
     for(std::size_t axis=0;axis<3;++axis) {
       require(static_cast<bool>(stream>>token),"truncated coordinates");
-      const auto coordinate=number(token);require(coordinate<=65535,"coordinate outside u16");
-      p[axis]=static_cast<std::uint16_t>(coordinate);word(input.hash,coordinate);
+      const auto coordinate=number(token);
+      require(coordinate<=static_cast<std::size_t>(coordinate_limit),"coordinate outside [0, 2^18)");
+      p[axis]=static_cast<Coordinate>(coordinate);word(input.hash,coordinate);
     }
     input.points.push_back({p[0],p[1],p[2]});
   }
   require(!(stream>>token),"trailing input token");require(stream.eof() && !stream.bad(),"input read error");
   return input;  // Uniqueness is checked once by the shared product cloud factory.
+}
+// Published input profile: the historical 2 cm profile when every coordinate
+// fits 16 bits, the 18-bit profile otherwise. Same engine, same proofs.
+const char* input_profile(const Input& input) {
+  for(const auto point:input.points) for(std::size_t axis=0;axis<3;++axis)
+    if(point[axis]>65535) return "quantized_u18_input_only";
+  return "quantized_u16_input_only";
+}
+const char* input_format(const char* path) {
+  const std::string_view view(path);
+  return view.ends_with(".u16le")?"u16le_xyz_no_header":view.ends_with(".u32le")?"u32le_xyz_no_header":"text_count_xyz";
 }
 struct LidarJudgeWork {u64 supports{},owner_distance_tests{},distinct_balls{},point_tests{},shell_ids{},strict_interiors{};};
 LidarJudgeWork judge_emissions(const Output& output,std::span<const Point3> points,
@@ -293,10 +314,10 @@ u64 sum_counts(std::initializer_list<u64> values) {
     <<"{\"schema\":\"mhgp8_q4_lidar_probe_v1\",\"status\":\"passed\","
       "\"scope\":\"one_original_edge_q4_three_actual_product_apis_not_global_producer\","
       "\"phase\":\"exploration_v8_hors_registre\",\"backend\":\"cpu_reference\","
-      "\"profile\":\"quantized_u16_input_only\",\"mode\":\"implementation_v8_p0\","
+      "\"profile\":\""<<input_profile(input)<<"\",\"mode\":\"implementation_v8_p0\","
       "\"public_status\":\"not_claimed\",\"completeness_large_cloud_claimed\":false,"
       "\"input_reindexed\":false,\"input_format\":\""
-    <<(std::string_view(argv[1]).ends_with(".u16le")?"u16le_xyz_no_header":"text_count_xyz")
+    <<input_format(argv[1])
     <<"\",\"edge_ids\":["<<edge[0]<<','<<edge[1]
     <<"],\"execution_order\":["<<order[0]<<','<<order[1]<<','<<order[2]
     <<"],\"n\":"<<input.points.size()<<",\"kmax\":"<<k

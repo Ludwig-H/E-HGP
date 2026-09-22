@@ -58,7 +58,7 @@ constexpr std::size_t absent = std::numeric_limits<std::size_t>::max();
 }
 
 // Coordinates are promoted BEFORE subtraction or multiplication. With
-// d=65535, -12*d^2 <= 4H <= 3*d^2; all sums below fit comfortably in i64.
+// d=262143, -12*d^2 <= 4H <= 3*d^2 (<2^40); all sums below fit comfortably in i64.
 // The key uses the doubled center and four times the squared radius, so
 // half-integral centers require neither rounding nor division.
 [[nodiscard]] i64 point_power4(const Q2BallKey& key, const Point3& point) {
@@ -131,7 +131,8 @@ std::size_t Q2CensusIndex::build(Range range, u64 depth) {
       axis = other;
     }
   }
-  const unsigned midpoint = (static_cast<unsigned>(box.low[axis]) + box.high[axis]) / 2;
+  // Coordinates are nonnegative and below 2^18: the sum fits Coordinate.
+  const Coordinate midpoint = static_cast<Coordinate>((box.low[axis] + box.high[axis]) / 2);
   const auto begin = order_.begin() + static_cast<std::ptrdiff_t>(range.first);
   const auto end = order_.begin() + static_cast<std::ptrdiff_t>(range.last);
   const auto cut = std::partition(begin, end, [&](std::size_t id) {
@@ -140,10 +141,11 @@ std::size_t Q2CensusIndex::build(Range range, u64 depth) {
   });
   const auto split = static_cast<std::size_t>(cut - order_.begin());
   if (split == range.first || split == range.last) {
-    throw std::logic_error("mhgp8 q2 index failed to split distinct u16 sites");
+    throw std::logic_error("mhgp8 q2 index failed to split distinct sites");
   }
-  // Midpoint splits halve one positive coordinate extent. At most 48 such
-  // splits occur on a u16 path; no artificial depth or visit limit is used.
+  // Midpoint splits halve one positive coordinate extent. At most
+  // max_index_depth (54) such splits occur on a path; no artificial depth or
+  // visit limit is used.
   const auto left = build({range.first, split}, depth + 1);
   const auto right = build({split, range.last}, depth + 1);
   nodes_[node_id].left = left;
@@ -403,7 +405,7 @@ struct Q2CensusEngine {
                                : Q2BallKey{};
     const auto b_diagonal = singleton ? 0 : squared_diagonal(b.box);
     // Prepare six endpoint constants once for this query task, not once for
-    // every Z box. The 48-byte value has no heap storage or point views; the
+    // every Z box. The 96-byte value has no heap storage or point views; the
     // existing singleton-pair path does not compute these constants.
     Q2PreparedBounds prepared;
     if (!singleton) {
@@ -1515,9 +1517,10 @@ struct Q2CensusContinuation::Impl {
         original_b(b_node), original_escape(owner->spatial_nodes()[b_node].escape),
         sibling_mode(sibling), witness_order(order), engine(*owner, kmax, unused_consumer) {
     initialize_anchor_result(engine, original_b);
-    // Only B splits. Its u16 tree depth is <=48, so a single-root DFS has
-    // at most49 pending frames. This reserves storage, never caps searches.
-    stack.reserve(49);
+    // Only B splits. Its tree depth is <=max_index_depth, so a single-root
+    // DFS has at most index_stack_frames pending frames. This reserves
+    // storage, never caps searches.
+    stack.reserve(index_stack_frames);
     stack.emplace_back(original_b, 0, absent, 0, false);
     resume_work.max_pending_tasks = 1;
   }
@@ -1531,7 +1534,7 @@ struct Q2CensusContinuation::Impl {
         sibling_mode(source.sibling_mode), witness_order(source.witness_order),
         engine(*owner, source.engine.threshold, unused_consumer) {
     engine.result.candidate_pairs = mass;
-    stack.reserve(49);
+    stack.reserve(index_stack_frames);
     stack.push_back(unvisited);
     resume_work.max_pending_tasks = 1;
     detach_work.imported_frames = 1;

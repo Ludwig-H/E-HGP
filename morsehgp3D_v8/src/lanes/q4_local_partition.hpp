@@ -11,13 +11,15 @@
 namespace mhgp8 {
 
 // Center cells are dyadic squares of the bisector plane, in the integer
-// parametrization (alpha, beta) scaled by 2^20. The root cell [-2,2]^2 can be
-// halved max_depth times while keeping integer corners; the atlas refines to
-// depth<=7, so this scale keeps every block/point bound of the partition in
-// i64 (proofs in q4_local_partition.cpp) instead of the former 2^44 in i128.
-// Real cells, hence every classification and emission, are unchanged.
+// parametrization (alpha, beta) scaled by 2^scale_bits. The root cell
+// [-2,2]^2 can be halved max_depth times while keeping integer corners; the
+// atlas refines to depth<=7, so this scale keeps every block/point bound of
+// the partition in i64 (proofs in q4_local_partition.cpp, M=262143 at 18
+// bits) instead of the former 2^44 in i128. Real cells, hence every
+// classification and emission, are unchanged.
 struct Q4LocalCell {
-  static constexpr i64 scale = i64{1} << 20;
+  static constexpr unsigned scale_bits = 20;
+  static constexpr i64 scale = i64{1} << scale_bits;
   static constexpr unsigned max_depth = 20;
   i64 left{-2*scale}, right{2*scale}, bottom{-2*scale}, top{2*scale};
   unsigned depth{};
@@ -27,7 +29,9 @@ struct Q4LocalCell {
 struct Q4LocalForm { i64 constant{}, x{}, y{}; };
 // Exact rational point of the center plane in UNSCALED cell coordinates
 // (alpha, beta) = (x, y) / den with den > 0: the cell [left, right] contains
-// it iff left * den <= scale * x <= right * den (same for beta).
+// it iff left <= scale * x / den <= right (same for beta). A q3 circumcenter
+// has |x|, |y|, den < 2^117 at 18 bits: the atlas locates it by exact long
+// division (q4_local.cpp), never by forming scale * x or corner * den.
 struct Q4LocalCenter { i128 x{}, y{}, den{}; };
 struct Q4LocalBounds { i128 minimum{}, maximum{}; };
 struct Q4LocalGeometryQueryWork {
@@ -73,7 +77,7 @@ class Q4LocalGeometry final {
   // Circumcenter of the q3 seed (a, b, x): the point of x's center line that
   // minimizes the real radius, i.e. the projection of the midpoint onto the
   // line in the real metric of the (non-orthogonal) cell basis. Exact in
-  // i128 (|x|,|y| < 2^105, den < 2^105, proof in the .cpp). Requires x off
+  // i128 (|x|,|y| < 2^117, den < 2^117, proof in the .cpp). Requires x off
   // the line ab (any strictly acute seed): a zero determinant throws.
   [[nodiscard]] Q4LocalCenter q3_center(std::size_t x_id) const;
   // Bounds of scale*L on the CLOSED cell, regardless of emission ownership.
@@ -126,7 +130,7 @@ class Q4LocalFragment final {
  public:
   [[nodiscard]] static Q4LocalFragmentPtr root(Q4LocalGeometryPtr geometry, u64 z_test_budget);
   // Quadrant bit0 chooses right, bit1 top. Split ties belong right/top;
-  // external right/top ownership is inherited. depth44 cannot be split.
+  // external right/top ownership is inherited. max_depth cannot be split.
   [[nodiscard]] static Q4LocalFragmentPtr child(Q4LocalFragmentPtr parent, unsigned quadrant,
                                                u64 z_test_budget);
   // Continue classification on the SAME closed cell, inheriting its exact

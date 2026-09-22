@@ -26,7 +26,7 @@ using mhgp8::Point3;
 using mhgp8::Range;
 using mhgp8::RectangleInput;
 namespace oracle = mhgp8::oracle;
-using Key = std::array<std::uint16_t, 3>;
+using Key = std::array<mhgp8::Coordinate, 3>;
 
 struct Gate {
   std::uint64_t checks{};
@@ -64,8 +64,8 @@ struct Gate {
 [[nodiscard]] Box3 direct_bounds(const RectangleInput& input, std::size_t aid,
                                   unsigned need) {
   const Point3& a = input.points[aid];
-  std::array<std::uint16_t, 3> lower{0, 0, 0};
-  std::array<std::uint16_t, 3> upper{65535, 65535, 65535};
+  std::array<mhgp8::Coordinate, 3> lower{0, 0, 0};
+  std::array<mhgp8::Coordinate, 3> upper{65535, 65535, 65535};
   for (std::size_t axis = 0; axis < 3; ++axis) {
     std::vector<std::uint16_t> below;
     std::vector<std::uint16_t> above;

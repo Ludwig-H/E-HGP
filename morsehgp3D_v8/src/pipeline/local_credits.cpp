@@ -146,7 +146,7 @@ class DualTree {
         axis = candidate;
       }
     }
-    const unsigned middle = (static_cast<unsigned>(box.low[axis]) + box.high[axis]) / 2;
+    const Coordinate middle = static_cast<Coordinate>((box.low[axis] + box.high[axis]) / 2);
     const auto first = order_.begin() + static_cast<std::ptrdiff_t>(range.first);
     const auto last = order_.begin() + static_cast<std::ptrdiff_t>(range.last);
     const auto cut = std::partition(first, last, [&](std::size_t id) {
@@ -157,7 +157,7 @@ class DualTree {
     if (split == range.first || split == range.last) {
       throw std::logic_error("mhgp8 distinct points failed midpoint split");
     }
-    // u16 midpoint splits halve a positive coordinate span: depth <=48.
+    // Midpoint splits halve a positive coordinate span: depth <=max_index_depth (54).
     // This is an input representation bound, not a run-time truncation.
     const auto left = build({range.first, split}, depth + 1);
     const auto right = build({split, range.last}, depth + 1);

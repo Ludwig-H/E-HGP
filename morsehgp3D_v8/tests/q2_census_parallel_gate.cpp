@@ -108,7 +108,7 @@ Output oracle(Gate& gate, const Points& points, std::size_t anchor,
     Support item;
     item.a = std::min(anchor, b); item.b = std::max(anchor, b);
     for (std::size_t axis = 0; axis < 3; ++axis) {
-      item.key.center_twice[axis] = std::uint32_t{points[anchor][axis]} + points[b][axis];
+      item.key.center_twice[axis] = static_cast<std::uint32_t>(points[anchor][axis]) + points[b][axis];
       const auto d = std::int64_t{points[anchor][axis]} - points[b][axis];
       item.key.diameter_squared += static_cast<u64>(d * d);
     }
@@ -249,7 +249,7 @@ void compare(Gate& gate, const mhgp8::Q2CensusParallelResult& result,
   gate.require(work.max_queue_size >= 1 && work.max_queue_size <= options.queue_capacity &&
                    work.max_active_fragments >= 1 && work.max_active_fragments <= options.workers &&
                    result.queue_storage_bytes >= options.queue_capacity * sizeof(std::unique_ptr<mhgp8::Q2CensusContinuation>) &&
-                   s.resume_work.max_pending_tasks >= 1 && s.resume_work.max_pending_tasks <= 49 &&
+                   s.resume_work.max_pending_tasks >= 1 && s.resume_work.max_pending_tasks <= mhgp8::index_stack_frames &&
                    result.max_fragment_bytes > 0,
                "scheduler memory/activity/pending peaks omit retained obligations");
   gate.require(std::isfinite(result.total_ms) && result.total_ms >= 0,

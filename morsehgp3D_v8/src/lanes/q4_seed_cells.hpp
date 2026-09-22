@@ -84,7 +84,7 @@ struct Q4SeedCellWork {
 //
 // Work includes atlas preparation, live summary, block/cache preparation,
 // every product test, repeated spatial filtering, scans/sorts and callbacks.
-// Stack<=181 descriptors follows existing u16 height48 and cell depth44;
+// Stack<=187 descriptors follows the index height max_index_depth (54) and cell depth44;
 // it is NOT a work bound. No subquadratic guarantee over all edges/regimes.
 // Memory excludes shared point/index/cover storage, object/control metadata,
 // standard-library sort stack and callback allocations; it is not RSS.

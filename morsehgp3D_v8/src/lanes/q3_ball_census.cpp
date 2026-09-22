@@ -18,7 +18,7 @@ class PreparedPower final {
  public:
   explicit PreparedPower(const ExactBall& ball) : ball_(ball), coefficients_(ball.coefficients()) {
     const i128 denominator = 2 * coefficients_[0];
-    constexpr i128 maximum_coordinate = std::numeric_limits<std::uint16_t>::max();
+    constexpr i128 maximum_coordinate = coordinate_limit;
     for (std::size_t axis = 0; axis < 3; ++axis) {
       const i128 numerator = -coefficients_[axis + 1];
       i128 floor = numerator / denominator;
@@ -26,7 +26,7 @@ class PreparedPower final {
       if (remainder < 0) --floor;  // C++ division truncates toward zero.
       const i128 ceil = floor + (remainder != 0 ? 1 : 0);
       // Clamp before narrowing, even though positive support centres lie
-      // inside the u16 cube. This avoids relying on support-arity metadata.
+      // inside the coordinate cube. This avoids relying on support-arity metadata.
       floor_[axis] = static_cast<i64>(std::clamp<i128>(floor, 0, maximum_coordinate));
       ceil_[axis] = static_cast<i64>(std::clamp<i128>(ceil, 0, maximum_coordinate));
     }
@@ -49,9 +49,9 @@ class PreparedPower final {
       result.minimum += std::min(at_floor, at_ceil);
       result.maximum += std::max(term(low), term(high));
     }
-    // For M=65535 the dominating q3 coefficients obey A<=12M^4,
+    // For M=262143 (18 bits) the dominating q3 coefficients obey A<=12M^4,
     // |Bi|<=60M^5, |C|<=144M^6. Thus |A*t^2+Bi*t|<=72M^6 and
-    // every partial or complete bound <=360M^6<2^105. Existing q2/q4
+    // every partial or complete bound <=360M^6<2^117. Existing q2/q4
     // factory bounds are smaller. 2A and -Bi are also safe; no Bi^2 or
     // rational cross multiplication is used. Promotions precede products.
     return result;
@@ -69,8 +69,7 @@ struct Frame {
   PowerBounds bounds;
 };
 
-constexpr std::size_t stack_capacity =
-    3 * std::numeric_limits<std::uint16_t>::digits + 1;
+constexpr std::size_t stack_capacity = index_stack_frames;
 
 }  // namespace
 
@@ -95,10 +94,11 @@ Q3BallCensusResult census_q3_ball(
   std::size_t size = 0;
   const auto push = [&](Frame frame, u64& peak) {
     // build() halves the chosen positive integer extent at each split.
-    // Each coordinate allows at most16 such reductions; depth<=48 and
-    // a binary DFS has <=49 pending frames. This is not a visit budget.
+    // Each coordinate allows at most coordinate_bits such reductions:
+    // depth<=max_index_depth (54) and a binary DFS has <=index_stack_frames
+    // (55) pending frames. This is not a visit budget.
     if (size == stack.size())
-      throw std::logic_error("mhgp8 q3 census index exceeds its proven u16 DFS depth");
+      throw std::logic_error("mhgp8 q3 census index exceeds its proven DFS depth");
     stack[size++] = frame;
     peak = std::max(peak, static_cast<u64>(size));
   };

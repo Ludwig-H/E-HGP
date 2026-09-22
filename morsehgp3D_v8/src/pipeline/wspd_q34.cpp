@@ -318,7 +318,7 @@ void validate(Q2CensusIndexPtr index, unsigned k, unsigned s,
   // no active q4 lane or selects Window30. Inert options cannot hide errors.
   if ((options.local.domain != Q4CenterDomainMode::Disk &&
        options.local.domain != Q4CenterDomainMode::Positive) ||
-      options.local.max_depth > 44 || options.local.node_budget == 0)
+      options.local.max_depth > Q4LocalCell::max_depth || options.local.node_budget == 0)
     throw std::invalid_argument("mhgp8 global q34 requires valid local options");
   if ((options.q4_seed_cells.mode != Q4SeedCellMode::Individual &&
        options.q4_seed_cells.mode != Q4SeedCellMode::LiveOnly &&
@@ -647,7 +647,7 @@ class Engine {
         min_b += nb * nb;
         max_sum += std::max(al * al + bl * bl, ah * ah + bh * bh);
       }
-      // Under u16 each sum is <=6*65535^2<2^35. Ownership permits equality
+      // At 18 bits each sum is <=6*262143^2<2^39. Ownership permits equality
       // in either distance; the third acute angle demands their sum>D.
       if (min_a > diameter || min_b > diameter || max_sum <= diameter) {
         counter_add(q3.seed_rejected_nodes);

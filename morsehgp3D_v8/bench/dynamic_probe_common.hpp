@@ -72,7 +72,7 @@ mhgp8::bench::FrontFixture make_input(std::size_t n, std::string_view family, u6
     stream.read(reinterpret_cast<char*>(bytes.data()), 6);
     require(stream.gcount() == 6 && !stream.bad(), "truncated u16le input");
     const auto coordinate = [&](std::size_t offset) {
-      return static_cast<std::uint16_t>(static_cast<unsigned>(bytes[offset]) |
+      return static_cast<mhgp8::Coordinate>(static_cast<unsigned>(bytes[offset]) |
              (static_cast<unsigned>(bytes[offset + 1]) << 8U));
     };
     const mhgp8::Point3 point{coordinate(0), coordinate(2), coordinate(4)};

@@ -12,7 +12,7 @@ i64 distance_squared(Point3 a, Point3 b) noexcept {
     const i64 delta = static_cast<i64>(b[axis]) - a[axis];
     value += delta * delta;
   }
-  return value;  // <=3*65535^2<2^34, including partial sums.
+  return value;  // <=3*262143^2<2^38, including partial sums.
 }
 
 struct RootBound {
@@ -22,7 +22,7 @@ struct RootBound {
 
 RootBound ceil_sqrt(i128 target) {
   if (target <= 0) throw std::logic_error("mhgp8 family square root requires a positive target");
-  // For this caller target=ceil(J/2)<2^102. Start with a power-of-two upper
+  // For this caller target=ceil(J/2)<2^114. Start with a power-of-two upper
   // enclosure obtained from its exact bit length, NOT a replacement for U.
   const u64 high_word = static_cast<u64>(target >> 64);
   const unsigned bits = high_word != 0
@@ -32,7 +32,7 @@ RootBound ceil_sqrt(i128 target) {
   i64 high = i64{1} << ((bits + 1U) / 2U);
   u64 iterations = 0;
   // Invariant: low^2<target<=high^2. The interval halves at each step,
-  // hence at most 51 iterations under u16; no search/candidate quota exists.
+  // hence at most 58 iterations at 18 bits (high<=2^58); no search/candidate quota exists.
   while (high - low > 1) {
     const i64 middle = low + (high - low) / 2;
     const i128 square = static_cast<i128>(middle) * middle;
@@ -41,7 +41,7 @@ RootBound ceil_sqrt(i128 target) {
     ++iterations;
   }
   // Independently verify the adjacent-square enclosure before publishing U.
-  // high<=2^51, so BOTH products are <=2^102 and fit signed i128.
+  // high<=2^58, so BOTH products are <=2^116 and fit signed i128.
   const i128 previous = static_cast<i128>(high) - 1;
   if (static_cast<i128>(high) * high < target || previous * previous >= target)
     throw std::logic_error("mhgp8 family square root enclosure failed");
@@ -67,7 +67,7 @@ std::optional<Q34FamilyCertificate> Q34FamilyCertificate::make(Point3 a, Point3 
   // A longest edge in an acute triangle gives R0^2=D*E*X/(4G)<=D/3.
   // Thus J=D*(3G-2EX)>=D*G/3>0, without testing an approximate radius.
   if (j <= 0) throw std::logic_error("mhgp8 acute maximal-edge family has nonpositive J");
-  // M=65535, D/E/X<=3M^2, 0<G<=D*E<=9M^4. Hence J<=81M^6<2^103.
+  // M=262143, D/E/X<=3M^2, 0<G<=D*E<=9M^4. Hence J<=81M^6<2^115.
   // Every multiplication above is promoted before evaluation. The rounded
   // half avoids J+1 and the square root never squares P or a rational root.
   const i128 target = j / 2 + j % 2;
@@ -81,8 +81,8 @@ Q34FamilyWitness Q34FamilyCertificate::witness(Point3 z) const noexcept {
   const i128 absolute_side = side < 0 ? -side : side;
   // G<=9M^4 and |W_i|<=36M^5 imply |P|<=27M^6+108M^6=135M^6;
   // the normal components give |B|<=6M^3. Since
-  // ceil(J/2)<=49M^6, the exact root satisfies U<=7M^3<2^51. Therefore
-  // |P|+U*|B|<=177M^6<2^104; product, addition and sign test fit i128.
+  // ceil(J/2)<=49M^6, the exact root satisfies U<=7M^3<2^57. Therefore
+  // |P|+U*|B|<=177M^6<2^116; product, addition and sign test fit i128.
   // If |mu|<=U, P-mu*B<=P+U*|B|. Strict negativity certifies every
   // positive q4 completion with maximal edge ab, including both mu signs.
   const i128 maximum_power = power + static_cast<i128>(parameter_bound_) * absolute_side;

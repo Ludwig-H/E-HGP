@@ -65,7 +65,7 @@ struct WspdQ2BatchResult {
 //
 // The current synchronous singleton path ALREADY has no allocation per
 // query and no Z stack. This entry tests interleaved memory accesses and
-// singleton-specialized control, not a removed historical 49-frame cost.
+// singleton-specialized control, not a removed historical 49-frame (u16) cost.
 // The whole collect+callback remains atomic; no bound on wall time, shell
 // size or cancellation latency follows. An exception discards unfinished
 // private obligations only as part of a FAILED whole call, never a successful

@@ -77,7 +77,7 @@ Output oracle(Gate& gate, const Points& points) {
   for (std::size_t a = 0; a < points.size(); ++a) for (std::size_t b = a + 1; b < points.size(); ++b) {
     Support item; item.a = a; item.b = b;
     for (std::size_t axis = 0; axis < 3; ++axis) {
-      item.key.center_twice[axis] = std::uint32_t{points[a][axis]} + points[b][axis];
+      item.key.center_twice[axis] = static_cast<std::uint32_t>(points[a][axis]) + points[b][axis];
       const auto delta = std::int64_t{points[a][axis]} - points[b][axis];
       item.key.diameter_squared += static_cast<u64>(delta * delta);
     }
@@ -208,7 +208,7 @@ void compare(Gate& gate, const mhgp8::WspdQ2CooperativeResult& result, const Bas
                "cooperative root/fragment/offer/import/export/wake accounting is inconsistent");
   gate.require(r.transitions == r.entry_steps + r.witness_steps + r.admission_steps + r.payload_steps &&
                    r.advance_calls == r.pauses + w.completed_fragments && r.entry_steps <= p.census_work.query_tasks &&
-                   r.payload_steps <= p.accepted_pairs && r.max_pending_tasks <= 49 &&
+                   r.payload_steps <= p.accepted_pairs && r.max_pending_tasks <= mhgp8::index_stack_frames &&
                    r.pauses_after_credit <= r.pauses && r.pauses_inside_deferred <= r.pauses && r.pauses_during_emission <= r.pauses &&
                    w.max_queue_size <= options.queue_capacity && w.max_active_tasks <= p.started_workers,
                "cooperative transition, pause or memory-stack bounds are inconsistent");

@@ -33,7 +33,14 @@ float32) : non repris, sort à décider par l'utilisateur. Tranches du 21 au
 reçus [ground_baseline_20260921](receipts/ground_baseline_20260921/README.md)
 et [ground_phase1_20260921](receipts/ground_phase1_20260921/README.md) :
 scène 0 sans sol K5 un worker 890 s → 453 s, K10 huit workers 911 s → 323 s,
-sorties identiques.
+sorties identiques. **22 septembre** : décision utilisateur de poursuivre en
+**entier 18 bits** (grille 1 mm, ±131 m ; profil `quantized_u18_input_only`,
+les entrées u16 restant valides et bit-identiques) ; aucun développement
+float32 pour l'instant. Note, inventaire et choix dans
+[docs/ELARGISSEMENT_18_BITS_20260922.md](docs/ELARGISSEMENT_18_BITS_20260922.md) ;
+port et résultats dans le journal (section « Élargissement du moteur entier
+à 18 bits ») ; entrées 1 mm sans sol = `scene_0X_grid/full.u32le` du reçu
+[lidar_ground_20260921](receipts/lidar_ground_20260921/README.md).
 
 ## Contrat principal actif — trames entières
 

@@ -25,7 +25,7 @@ using mhgp8::RectangleInput;
 using mhgp8::Strategy;
 namespace oracle = mhgp8::q2_oracle;
 using Pair = std::pair<std::size_t, std::size_t>;
-using PointKey = std::array<std::uint16_t, 3>;
+using PointKey = std::array<mhgp8::Coordinate, 3>;
 using Geometry = std::pair<std::array<std::uint32_t, 3>, std::uint64_t>;
 
 struct Payload {
@@ -148,7 +148,7 @@ Run checked_run(Gate& gate, const mhgp8::Q2CensusIndex& index,
                "node visits omit exact bounds or point tests");
   gate.require(work.uniform_accepted_pairs <= result.accepted_pairs &&
                    work.uniform_rejected_pairs <= result.rejected_pairs &&
-                   work.query_build_max_depth <= 48,
+                   work.query_build_max_depth <= mhgp8::max_index_depth,
                "uniform census decisions or query-index depth were miscounted");
   for (const double time : {result.query_index_ms, result.count_ms, result.payload_ms, result.total_ms}) {
     gate.require(std::isfinite(time) && time >= 0, "invalid census timing metadata");
@@ -215,10 +215,10 @@ Output check_fixture(Gate& gate, const RectangleInput& input, unsigned kmax,
   gate.require(&index->cloud() == &owner->cloud(), "global witness index changed its immutable cloud");
   const auto preparation = index->work();
   gate.require(preparation.point_visits >= input.points.size() && preparation.nodes > 0 &&
-                   preparation.nodes == 2 * input.points.size() - 1 && preparation.max_depth <= 48,
+                   preparation.nodes == 2 * input.points.size() - 1 && preparation.max_depth <= mhgp8::max_index_depth,
                "global witness index does not account for the complete input cloud");
   gate.require(preparation.escape_links == preparation.nodes &&
-                   preparation.point_visits <= 97 * input.points.size(),
+                   preparation.point_visits <= (2 * mhgp8::max_index_depth + 1) * input.points.size(),
                "global index omitted escape links or exceeded its bbox-plus-partition work bound");
   std::map<Pair, oracle::Census> expected;
   std::uint64_t candidates = 0;
@@ -459,9 +459,11 @@ void shell_and_key_fixtures(Gate& gate) {
 
   // The current midpoint index visits a long u16 path even though the
   // capped census can reject quickly. bbox reads AND partitions are paid.
-  RectangleInput deep{{{0, 0, 0}, {65535, 65535, 65535}}, {0, 1}, {1, 2}, {}};
-  for (unsigned exponent = 0; exponent < 16; ++exponent) {
-    const auto coordinate = static_cast<std::uint16_t>(1U << exponent);
+  // One power of two per axis and bit up to the declared width: the index
+  // path reaches its proven depth (54 at 18 bits) on 2 + 3 * 18 sites.
+  RectangleInput deep{{{0, 0, 0}, {mhgp8::coordinate_limit, mhgp8::coordinate_limit, mhgp8::coordinate_limit}}, {0, 1}, {1, 2}, {}};
+  for (unsigned exponent = 0; exponent < mhgp8::coordinate_bits; ++exponent) {
+    const auto coordinate = static_cast<mhgp8::Coordinate>(1U << exponent);
     deep.points.push_back({coordinate, 0, 0});
     deep.points.push_back({0, coordinate, 0});
     deep.points.push_back({0, 0, coordinate});
@@ -469,10 +471,10 @@ void shell_and_key_fixtures(Gate& gate) {
   for (const unsigned separation : {8U, 10U, 12U}) {
     const auto deep_owner = mhgp8::prepare_rectangle(deep, 10, separation);
     const auto deep_index = mhgp8::make_q2_census_index(deep_owner);
-    gate.require(deep.points.size() == 50 && deep_index->work().max_depth >= 40 &&
-                     deep_index->work().max_depth <= 48 &&
-                     deep_index->work().point_visits > 49 * deep.points.size() &&
-                     deep_index->work().point_visits <= 97 * deep.points.size(),
+    gate.require(deep.points.size() == 2 + 3 * mhgp8::coordinate_bits && deep_index->work().max_depth >= mhgp8::max_index_depth - 8 &&
+                     deep_index->work().max_depth <= mhgp8::max_index_depth &&
+                     deep_index->work().point_visits > (mhgp8::max_index_depth + 1) * deep.points.size() &&
+                     deep_index->work().point_visits <= (2 * mhgp8::max_index_depth + 1) * deep.points.size(),
                  "deep index fixture failed to expose the missing partition visits");
     static_cast<void>(check_fixture(gate, deep, 10, separation));
     ++gate.deep_indices;

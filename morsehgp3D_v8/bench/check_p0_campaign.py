@@ -12,6 +12,12 @@ import statistics
 from collections import defaultdict
 from pathlib import Path
 
+# Largeur de coordonnée du moteur entier (18 bits depuis le 22 septembre 2026) : au plus 18 coupes
+# au milieu par axe, donc 54 niveaux d'index et 55 cadres de pile ; bornes prouvées, jamais des quotas.
+COORDINATE_BITS = 18
+MAX_INDEX_DEPTH = 3 * COORDINATE_BITS
+INDEX_STACK_FRAMES = MAX_INDEX_DEPTH + 1
+
 
 def require(condition: bool, message: str) -> None:
     if not condition:
@@ -87,8 +93,8 @@ def main() -> int:
                     abs(sum(times) - row["total_component_ms"]) < 0.000001, "timing partition")
             work = row["plan_work"]
             require(work["tube_sweep_tests"] <= 2 * work["tube_records"], "linear tube sweep")
-            require(work["max_tree_depth"] <= 48 and work["max_task_depth"] <= 96,
-                    "u16 depth representation bound")
+            require(work["max_tree_depth"] <= MAX_INDEX_DEPTH and work["max_task_depth"] <= 2 * MAX_INDEX_DEPTH,
+                    "18-bit depth representation bound")
             invariant = (row["input_fnv1a64_le_u16_xyz"], row["candidate_pairs"],
                          row["candidate_descriptors"], row["preparation_work"], row["plan_work"])
             # s changes only a passed precondition here, never the rectangle.

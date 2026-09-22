@@ -109,8 +109,9 @@ Q4LocalForm Q4LocalGeometry::form(std::size_t id) const {
   if (id>=points.size()) throw std::out_of_range("mhgp8 local form ID outside cloud");
   Vec w{};
   for (std::size_t i=0;i<3;++i) w[i]=2*static_cast<i64>(points[id][i])-midpoint_twice_[i];
-  // u16, M=65535: |w_i|<=2M, basis coordinates <=M and only two nonzero
-  // coordinates per basis vector. |c|<=15M^2, |x|,|y|<=8M^2 fit i64.
+  // M=262143 (18 bits): |w_i|<=2M, basis coordinates <=M and only two
+  // nonzero coordinates per basis vector. |c|<=15M^2<2^40, |x|,|y|<=8M^2<2^39
+  // fit i64.
   return {dot(w,w)-diameter_squared_,-2*dot(w,a_basis_),-2*dot(w,b_basis_)};
 }
 
@@ -122,10 +123,11 @@ Q4LocalCenter Q4LocalGeometry::q3_center(std::size_t x_id) const {
   // u1=-c0*q/det, u2=c0*p/det with p=aa*fy-ab*fx, q=ab*fy-bb*fx and
   // det=fx*q-fy*p=-(bb*fx^2-2*ab*fx*fy+aa*fy^2), a negative definite form
   // of (fx,fy) since the basis is independent: det==0 iff fx==fy==0, i.e.
-  // x on the line ab, never a strictly acute seed. Sizes (M=65535):
-  // |c0|<15M^2<2^36, |fx|,|fy|<=8M^2<2^35, Gram<2^33 -> |p|,|q|<2^69,
-  // |det|<2^105, |numerators|<2^105: every product fits i128, and the cell
-  // test scale*|x|<2^125, 2*scale*den<2^126 stays below 2^127.
+  // x on the line ab, never a strictly acute seed. Sizes (M=262143):
+  // |c0|<=15M^2<2^40, |fx|,|fy|<=8M^2<2^39, Gram<=2M^2<2^37 -> |p|,|q|<=32M^4
+  // <2^77, |det|<=512M^6<2^117, |numerators|<=480M^6<2^117: every product
+  // fits i128. The cell test cannot form scale*x (2^137): the atlas locates
+  // the point by exact long division of these numerators (q4_local.cpp).
   const auto f=form(x_id);
   const i128 p=static_cast<i128>(gram_aa_)*f.y-static_cast<i128>(gram_ab_)*f.x;
   const i128 q=static_cast<i128>(gram_ab_)*f.y-static_cast<i128>(gram_bb_)*f.x;
@@ -138,8 +140,9 @@ Q4LocalCenter Q4LocalGeometry::q3_center(std::size_t x_id) const {
 
 Q4LocalBounds Q4LocalGeometry::bounds(Q4LocalForm f,Q4LocalCell cell) const {
   validate_cell(cell);
-  // |constant|<=15M^2<2^36 so scale*constant<2^56; |x|,|y|<=8M^2<2^35 and
-  // |cell|<=2*scale=2^21 give 2^56 per linear term: the sum stays <2^58.
+  // M=262143: |constant|<=15M^2<2^40 so scale*constant<2^60; |x|,|y|<=8M^2
+  // <2^39 and |cell|<=2*scale=2^21 give <2^60 per linear term: the sum of
+  // the three magnitudes stays <2^62, inside i64.
   return linear_bounds64(scale*f.constant,f.x,f.y,cell);
 }
 
@@ -168,7 +171,7 @@ void Q4LocalGeometry::prepare_hull(const Box3& box) {
   const auto turn=[&](const Projection& a,const Projection& b,const Projection& c) {
     counter_add(work_.hull_orientation_tests);
     // Projected coordinates <=12M^3, differences <=24M^3; orientation
-    // <=1152M^6<2^107. Every multiplication already has i128 operands.
+    // <=1152M^6<2^119 (M=262143). Every multiplication already has i128 operands.
     return (b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
   };
   std::array<Projection,18> hull{};
@@ -210,7 +213,7 @@ bool Q4LocalGeometry::outside(Q4LocalCell cell,Q4LocalGeometryQueryWork& work) c
     const i128 nearest=bound.minimum>0?bound.minimum:(bound.maximum<0?bound.maximum:0);
     norm+=nearest*nearest;
   }
-  // |Q*t_i|<=4MQ; 2*norm<=96M^2Q^2<2^127 for Q=2^44.
+  // |Q*t_i|<=4MQ; 2*norm<=96M^2Q^2<2^83 for Q=2^20 and M=262143.
   if (2*norm>static_cast<i128>(diameter_squared_)*scale*scale) return true;
   if (domain_ && domain_->completion_count()<2) return true;
   for (std::size_t i=0;i<facet_count_;++i) {
@@ -221,7 +224,7 @@ bool Q4LocalGeometry::outside(Q4LocalCell cell,Q4LocalGeometryQueryWork& work) c
       x+=static_cast<i128>(facet.normal[j])*a_basis_[j];
       y+=static_cast<i128>(facet.normal[j])*b_basis_[j];
     }
-    // |n_i|<=4M^2, |H|<=24M^3. Facet test <=64M^3Q<2^99.
+    // |n_i|<=4M^2, |H|<=24M^3. Facet test <=64M^3Q<2^81 (Q=2^20, M=262143).
     if (linear_bounds(-facet.height*scale,x,y,cell).minimum>0) return true;
   }
   return false;
@@ -236,10 +239,10 @@ Q4LocalBounds Q4LocalGeometry::node_bounds(std::size_t id,Q4LocalCell cell) cons
 
 Q4LocalBounds Q4LocalGeometry::node_bounds_unchecked(std::size_t id,Q4LocalCell cell) const {
   const auto& box=cover_->index()->spatial_nodes()[id].box;
-  // i64 domain with Q=2^20 (M=65535): |w|<=2M<2^17, |alpha|,|beta|<=2Q=2^21
-  // and |basis|<=M give |T|<2^38; Q*w^2<2^54 and 2*|w|*|T|<2^56, so each
-  // axis value is <2^57, the three-axis sum with Q*D (<2^54) is <2^59.
-  // Only T^2 (<2^76) needs i128, and Q is a power of two: floor(T^2/Q) is a
+  // i64 domain with Q=2^20 (M=262143): |w|<=2M<2^19, |alpha|,|beta|<=2Q=2^21
+  // and |basis|<=M give |T|<=4MQ<2^40; Q*w^2<2^58 and 2*|w|*|T|<2^60, so each
+  // axis value is <1.25*2^60, the three-axis sum with Q*D (<3*2^56) is <2^62.
+  // Only T^2 (<2^80) needs i128, and Q is a power of two: floor(T^2/Q) is a
   // shift and the remainder a mask, both exact on the nonnegative square.
   i64 minimum_all=0,maximum_all=0;
   for (unsigned corner=0;corner<4;++corner) {
@@ -259,7 +262,7 @@ Q4LocalBounds Q4LocalGeometry::node_bounds_unchecked(std::size_t id,Q4LocalCell 
         // Minimum of Q*w^2-2*T*w is -T^2/Q at w=T/Q. Round DOWN,
         // never toward zero, to keep a certified lower integer bound.
         const i128 square=static_cast<i128>(target)*target;
-        const i64 quotient=static_cast<i64>(square>>20);
+        const i64 quotient=static_cast<i64>(square>>Q4LocalCell::scale_bits);
         minimum-=quotient+((square&(scale-1))!=0?1:0);
       }
     }
