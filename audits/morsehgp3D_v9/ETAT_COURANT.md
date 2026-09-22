@@ -101,6 +101,13 @@ cela réduit la largeur de cette primitive, sans modifier le moteur.
   format/capacité LP64, pas des mesures de RSS ni des temps extrapolés
   sur G4 ; le cache est libéré avant la publication finale, donc ne
   s'additionne pas mécaniquement à ses 6,48 Go.
+- Le [contre-audit du protocole G4 SPOT en préparation](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_GCP_SESSION_20260922.md)
+  constate des garde-fous de cible/arrêt et un snapshot lié au commit par
+  son constructeur. Les scripts encore non publiés mesurent **CPU seulement**
+  sur trois trames sans sol de la seule séquence 08 ; un reçu `partial`
+  peut retourner code 0 sans aucune tour achevée. Le plan personnalisé
+  admet jusqu'à 1 024 fils sur 48 vCPU : à borner avant une vraie session.
+  Aucun GCP n'a été lancé par cet audit.
 - Le banc publié à l'ouverture v9 juge **v8** : 129 CTests exécutés et
   verts sur 132 enregistrés, trois désactivés. Son `SHA256SUMS` référence
   quatre journaux `logs/*.log` absents du commit `3595725a` ; un clone
