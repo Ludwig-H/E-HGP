@@ -645,6 +645,7 @@ class Builder {
     add(st.resolve_work.calls, w.resolve_work.calls);
     add(st.resolve_work.power_tests, w.resolve_work.power_tests);
     add(st.resolve_work.materializations, w.resolve_work.materializations);
+    add(st.resolve_work.pair_distances, w.resolve_work.pair_distances);
     for (size_t q = 0; q < st.resolve_work.supports_by_size.size(); ++q)
       add(st.resolve_work.supports_by_size[q], w.resolve_work.supports_by_size[q]);
   }

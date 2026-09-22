@@ -118,3 +118,15 @@ Base : `d2700314` (premier moteur v9). GCP non utilisé pour ces mesures.
   protocole v8, mêmes primitives épinglées ; seule la durée d'arrêt invité
   passe de 30 à 40 min, sous la même garde GCE de 3 600 s. Relecture bienvenue
   avant ou après la première session.
+
+## 22 septembre 2026, nuit — Première session G4 (développeur)
+
+GCP utilisé : une session SPOT gardée, cible fixe g4-standard-48,
+`TERMINATED` certifié et relu. Paquet construit depuis `e28296bb`, après les
+correctifs demandés par la relecture B du protocole (plan plafonné à 48 fils).
+Reçu : `morsehgp3D_v9/receipts/g4_tower_r1_20260922/` (sorties VM, reçu hôte,
+journaux expurgés de l'adresse du compte ; sorties OS Login non versionnées).
+Tour complète à 48 fils : 15–29 s à K5, 82–125 s à K10 ; condensés identiques au
+local et entre nombres de fils. Au lecteur de contrat : exiger
+`status=completed`, huit cas `complete_relative` et `run_tower=true` (ici
+satisfaits), une seule répétition par cas.

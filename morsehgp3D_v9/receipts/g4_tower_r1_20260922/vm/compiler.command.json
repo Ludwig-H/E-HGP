@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/usr/bin/g++",
+    "--version"
+  ],
+  "cwd": "/tmp/ehgp-tower-v9-cfce04dc4b670366.qf3AWrC2E2/output",
+  "elapsed_seconds": 0.0033880200000027116,
+  "ended_utc": "2026-09-22T23:28:45.338889+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 2199,
+  "session_work_deadline_epoch": 1790121225.1573172,
+  "started_utc": "2026-09-22T23:28:45.335428+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "9eaf9b7f4b11c2e84e2478c2ceb0e4f48f4ba88565bcfc832b3bce49847dda6d"
+}

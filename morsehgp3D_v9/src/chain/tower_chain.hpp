@@ -64,6 +64,15 @@ struct CatalogueStats {
   std::uint64_t bytes = 0;  // capacite du catalogue BallData
 };
 
+// Registre du generateur q3/q4 (copie scalaire des compteurs v8, sommes sur
+// tous les workers ; masses de natures differentes, a ne jamais additionner).
+struct GeneratorLedger {
+  std::uint64_t expanded_pairs, cover_builds, cover_sites, cover_node_visits, q3_edges, q4_edges, both_edges, witness_input_pair_mass, witness_rejected_rectangles, witness_rejected_pairs;
+  std::uint64_t q3_seeds, q3_ball_builds, q3_depth_rejections, q3_census_bounds, q3_census_point_tests, q3_atlas_edges, q3_atlas_locations, q3_atlas_rejections, q3_atlas_outside_domain;
+  std::uint64_t atlas_cells, atlas_leaf_cells, atlas_deep_cells, atlas_outside_cells, atlas_splits, atlas_node_visits, atlas_block_bounds, atlas_point_tests, atlas_ids_copied;
+  std::uint64_t q4_seeds, q4_live_leaves, q4_whole_atlas_skips, q4_sweep_events;
+};
+
 struct OrderSummary {
   unsigned k = 0;
   std::uint64_t nodes = 0, births = 0, merges = 0, contributions = 0, parents = 0;
@@ -79,6 +88,7 @@ struct ChainResult {
   // Registres du generateur (copies scalaires utiles au grand-livre).
   std::uint64_t q2_front_rectangles = 0, q2_candidate_pairs = 0, q2_accepted_pairs = 0;
   std::uint64_t q34_expanded_pairs = 0, q34_cover_builds = 0, q3_emitted = 0, q4_emitted = 0;
+  GeneratorLedger ledger{};
   tower::FullBallStats tower_stats;
   std::vector<OrderSummary> orders;
   // Condense FNV-1a 64 d'un encodage canonique de toute la tour (tous ordres,

@@ -166,6 +166,17 @@ int main(int argc, char** argv) {
               c.balls_by_qmin[3], c.balls_by_qmin[4]);
   for (std::size_t s = 0; s < c.balls_by_shell.size(); ++s) std::printf("%s%" PRIu64, s ? "," : "", c.balls_by_shell[s]);
   std::printf("]},");
+  {
+    const auto& l = r.ledger;
+    const std::pair<const char*, std::uint64_t> rows[] = {{"expanded_pairs",l.expanded_pairs},{"cover_builds",l.cover_builds},{"cover_sites",l.cover_sites},{"cover_node_visits",l.cover_node_visits},{"q3_edges",l.q3_edges},{"q4_edges",l.q4_edges},{"both_edges",l.both_edges},{"witness_input_pair_mass",l.witness_input_pair_mass},{"witness_rejected_rectangles",l.witness_rejected_rectangles},{"witness_rejected_pairs",l.witness_rejected_pairs},{"q3_seeds",l.q3_seeds},{"q3_ball_builds",l.q3_ball_builds},{"q3_depth_rejections",l.q3_depth_rejections},{"q3_census_bounds",l.q3_census_bounds},{"q3_census_point_tests",l.q3_census_point_tests},{"q3_atlas_edges",l.q3_atlas_edges},{"q3_atlas_locations",l.q3_atlas_locations},{"q3_atlas_rejections",l.q3_atlas_rejections},{"q3_atlas_outside_domain",l.q3_atlas_outside_domain},{"atlas_cells",l.atlas_cells},{"atlas_leaf_cells",l.atlas_leaf_cells},{"atlas_deep_cells",l.atlas_deep_cells},{"atlas_outside_cells",l.atlas_outside_cells},{"atlas_splits",l.atlas_splits},{"atlas_node_visits",l.atlas_node_visits},{"atlas_block_bounds",l.atlas_block_bounds},{"atlas_point_tests",l.atlas_point_tests},{"atlas_ids_copied",l.atlas_ids_copied},{"q4_seeds",l.q4_seeds},{"q4_live_leaves",l.q4_live_leaves},{"q4_whole_atlas_skips",l.q4_whole_atlas_skips},{"q4_sweep_events",l.q4_sweep_events}};
+    std::printf("\"ledger\":{");
+    bool first = true;
+    for (const auto& [name, value] : rows) {
+      std::printf("%s\"%s\":%" PRIu64, first ? "" : ",", name, value);
+      first = false;
+    }
+    std::printf("},");
+  }
   const auto& ts = r.tower_stats;
   std::printf("\"tower_work\":{\"records\":%" PRIu64 ",\"extra_records\":%" PRIu64 ",\"representatives\":%" PRIu64
               ",\"anchor_hits\":%" PRIu64 ",\"key_lookups\":%" PRIu64 ",\"intruder_queries\":%" PRIu64 ",\"intruder_nodes\":%" PRIu64

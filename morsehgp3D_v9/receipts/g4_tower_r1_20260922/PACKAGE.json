@@ -1,0 +1,115 @@
+{
+  "FULL_executed": false,
+  "GCP_used": false,
+  "GPU_executed": false,
+  "cases": [
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "n": 39885,
+      "repeat": 0,
+      "s": 8,
+      "scene": "00",
+      "static_threads": 0,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_01.u32le",
+      "k": 5,
+      "n": 35551,
+      "repeat": 0,
+      "s": 8,
+      "scene": "01",
+      "static_threads": 0,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_02.u32le",
+      "k": 5,
+      "n": 45845,
+      "repeat": 0,
+      "s": 8,
+      "scene": "02",
+      "static_threads": 0,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 10,
+      "n": 39885,
+      "repeat": 0,
+      "s": 8,
+      "scene": "00",
+      "static_threads": 0,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_01.u32le",
+      "k": 10,
+      "n": 35551,
+      "repeat": 0,
+      "s": 8,
+      "scene": "01",
+      "static_threads": 0,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_02.u32le",
+      "k": 10,
+      "n": 45845,
+      "repeat": 0,
+      "s": 8,
+      "scene": "02",
+      "static_threads": 0,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "n": 39885,
+      "repeat": 0,
+      "s": 8,
+      "scene": "00",
+      "static_threads": 0,
+      "workers": 24
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 10,
+      "n": 39885,
+      "repeat": 0,
+      "s": 8,
+      "scene": "00",
+      "static_threads": 48,
+      "workers": 48
+    }
+  ],
+  "commit": "e28296bb4600b48ae2e4e2f7c95179faca5bf578",
+  "controller_sha256": "bcf19e3cd1f47174b539d35cba8f8551483c65bf2256962f055cf6e58163401e",
+  "inputs": {
+    "data/scene_00.u32le": {
+      "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le",
+      "n": 39885,
+      "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf"
+    },
+    "data/scene_01.u32le": {
+      "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/full.u32le",
+      "n": 35551,
+      "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f"
+    },
+    "data/scene_02.u32le": {
+      "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/full.u32le",
+      "n": 45845,
+      "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af"
+    }
+  },
+  "manifest_sha256": "afae898072f1ed54b8c514a3a3ab4818933216809713651dd0421921ad32f906",
+  "protocol_source": "commit",
+  "public_status": "not_claimed",
+  "real_session_allowed": true,
+  "snapshot_sha256": "e766319e5061c45b5de339c8e03115052811c983cc0226e1debdf0973f7d5de0",
+  "source_files": 101,
+  "status": "prepared_not_executed",
+  "tree": "54573bfe913345a67bcf2d53cdd6dedb88e6d81e",
+  "worker_sha256": "2098e77652a8f5a36d010278dafd0d44acedfb3c93626252861d5280668d5310"
+}

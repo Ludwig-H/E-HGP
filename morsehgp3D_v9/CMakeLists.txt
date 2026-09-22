@@ -138,3 +138,10 @@ mhgp9_gate(mhgp9_tower_probe_rejects_separation_below_8 2 mhgp9_tower_probe
            ARGS absent.u32le 5 1 --s=7 LABELS "gate;probe" TIMEOUT 30)
 mhgp9_gate(mhgp9_tower_probe_rejects_grid_label 2 mhgp9_tower_probe
            ARGS absent.u32le 5 1 --grid=a/b LABELS "gate;probe" TIMEOUT 30)
+
+# Mutant de compilation du noyau MEB (derniere paire maximale au lieu de la
+# premiere) : la porte doit le refuser (code 1, support canonique faux).
+mhgp9_product_executable(mhgp9_tower_anchor_meb_mutant_gate tests/tower/anchor_meb_gate.cpp)
+target_compile_definitions(mhgp9_tower_anchor_meb_mutant_gate PRIVATE MHGP9_MEB_MUTANT_LAST_MAXIMUM=1)
+mhgp9_gate(mhgp9_tower_anchor_meb_mutant_last_maximum 1 mhgp9_tower_anchor_meb_mutant_gate
+           ARGS --selftest EXPECT_PREFIX "cause=" LABELS "gate;tower;mutant" TIMEOUT 120)

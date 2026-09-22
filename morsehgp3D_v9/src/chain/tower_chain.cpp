@@ -275,6 +275,25 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       result.q34_cover_builds = r34.pipeline.work.cover_builds;
       result.q3_emitted = r34.pipeline.work.q3_emitted;
       result.q4_emitted = r34.pipeline.work.q4_emitted;
+      const auto& w = r34.pipeline.work;
+      auto& l = result.ledger;
+      l.expanded_pairs = w.expanded_pairs; l.cover_builds = w.cover_builds; l.cover_sites = w.cover_sites;
+      l.cover_node_visits = w.cover.node_visits; l.q3_edges = w.q3_edges; l.q4_edges = w.q4_edges;
+      l.both_edges = w.both_edges; l.witness_input_pair_mass = w.witness.input_pair_mass;
+      l.witness_rejected_rectangles = w.witness.rejected_rectangles; l.witness_rejected_pairs = w.witness.rejected_pairs;
+      l.q3_seeds = w.q3.seeds; l.q3_ball_builds = w.q3.ball_builds; l.q3_depth_rejections = w.q3.depth_rejections;
+      l.q3_census_bounds = w.q3_blocks.count_bounds_prepared; l.q3_census_point_tests = w.q3_blocks.count_point_tests;
+      l.q3_atlas_edges = w.q3_atlas.edges_with_atlas; l.q3_atlas_locations = w.q3_atlas.locations;
+      l.q3_atlas_rejections = w.q3_atlas.rejections; l.q3_atlas_outside_domain = w.q3_atlas.outside_domain;
+      l.atlas_cells = w.local.atlas.cells_created; l.atlas_leaf_cells = w.local.atlas.leaf_cells;
+      l.atlas_deep_cells = w.local.atlas.deep_cells; l.atlas_outside_cells = w.local.atlas.outside_cells;
+      l.atlas_splits = w.local.atlas.splits; l.atlas_node_visits = w.local.atlas.partition.node_visits;
+      l.atlas_block_bounds = w.local.atlas.partition.block_bound_tests;
+      l.atlas_point_tests = w.local.atlas.partition.point_tests;
+      l.atlas_ids_copied = w.local.atlas.partition.frontier_ids_copied;
+      l.q4_seeds = w.local.seeds; l.q4_live_leaves = w.q4_seed_cells.live_leaves;
+      l.q4_whole_atlas_skips = w.q4_seed_cells.whole_atlas_skips;
+      l.q4_sweep_events = w.local.sweep.kept_events;
     }
     result.times.q34_ms = ms_since(t);
 

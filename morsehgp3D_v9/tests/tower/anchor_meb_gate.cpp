@@ -69,28 +69,56 @@ std::vector<u32> supports(const std::vector<P3>& points) {
   }
   return result;
 }
-// Independent exact-support search. It evaluates every possible positive
-// Gram support, not the product's first-containing early exit.
+// Independent exact-support search. Truth is the smallest enclosing ball over
+// EVERY positive Gram support. The expected physical work models the v9
+// product order separately: n(n-1)/2 pair distances, only the FIRST maximal
+// pair at q=2 (receipts/meb_diameter_20260911 in v7), then all triples and
+// quadruples lexicographically; containment visits the two extremes first.
 oracle::Ball judge(const std::vector<P3>& points, AnchorMebWork& expected, u32& first_support) {
   const u32 full = (u32{1} << points.size()) - 1;
   std::optional<oracle::Ball> best;
   ++expected.calls;
   for (u32 support : supports(points)) {
     const auto ball = oracle::detail::support_ball(points, support);
-    if (first_support == 0) ++expected.supports_by_size[std::popcount(support)];
     if (!ball) continue;
     bool enclosed = true;
-    for (const auto& point : points) {
-      if (first_support == 0 && points.size() > 1) ++expected.power_tests;
+    for (const auto& point : points)
       if (distance2(point, *ball) > ball->radius2) { enclosed = false; break; }
-    }
     if (enclosed) {
-      if (first_support == 0) { first_support = support; ++expected.materializations; }
       if (!best || ball->radius2 < best->radius2) best = *ball;
       need(oracle::detail::enclosed(*ball, points, full), "oracle.containment_consistency");
     }
   }
   need(best.has_value(), "oracle.no_positive_support");
+  if (points.size() == 1) {
+    ++expected.supports_by_size[1]; ++expected.materializations; first_support = 1;
+    return *best;
+  }
+  const unsigned n = static_cast<unsigned>(points.size());
+  i64 diameter = -1;
+  unsigned ea = 0, eb = 1;
+  for (unsigned a = 0; a < n; ++a) for (unsigned b = a + 1; b < n; ++b) {
+    ++expected.pair_distances;
+    const P3 d{points[a].x - points[b].x, points[a].y - points[b].y, points[a].z - points[b].z};
+    const i64 dist = d.x * d.x + d.y * d.y + d.z * d.z;
+    if (dist > diameter) { diameter = dist; ea = a; eb = b; }
+  }
+  std::vector<unsigned> order{ea, eb};
+  for (unsigned i = 0; i < n; ++i) if (i != ea && i != eb) order.push_back(i);
+  std::vector<u32> tried{(u32{1} << ea) | (u32{1} << eb)};
+  for (u32 support : supports(points)) if (std::popcount(support) >= 3) tried.push_back(support);
+  for (u32 support : tried) {
+    ++expected.supports_by_size[std::popcount(support)];
+    const auto ball = oracle::detail::support_ball(points, support);
+    if (!ball) continue;
+    bool enclosed = true;
+    for (unsigned i : order) {
+      ++expected.power_tests;
+      if (distance2(points[i], *ball) > ball->radius2) { enclosed = false; break; }
+    }
+    if (enclosed) { first_support = support; ++expected.materializations; break; }
+  }
+  need(first_support != 0, "oracle.product_order_found_no_support");
   return *best;
 }
 AnchorMebResult compare(const std::vector<P3>& points, AnchorMebWork& cumulative) {
@@ -106,7 +134,8 @@ AnchorMebResult compare(const std::vector<P3>& points, AnchorMebWork& cumulative
   need(observed.center == truth.center && observed.radius2 == truth.radius2, "meb.rational_geometry");
   need(rational_level(got.level) == truth.radius2, "meb.rational_level");
   need(cumulative.calls == expected.calls && cumulative.supports_by_size == expected.supports_by_size &&
-       cumulative.power_tests == expected.power_tests && cumulative.materializations == expected.materializations,
+       cumulative.power_tests == expected.power_tests && cumulative.materializations == expected.materializations &&
+       cumulative.pair_distances == expected.pair_distances,
        "meb.physical_work");
   u32 support = 0;
   for (unsigned i = 0; i < got.support_size; ++i) {
@@ -238,6 +267,6 @@ void run() {
 int main(int argc, char** argv) {
   if (argc != 2 || std::string_view(argv[1]) != "--selftest") return 2;
   try { run(); return 0; }
-  catch (const Failure& failure) { std::fprintf(stderr, "%s\n", failure.why); return 1; }
-  catch (const std::exception& error) { std::fprintf(stderr, "%s\n", error.what()); return 1; }
+  catch (const Failure& failure) { std::printf("cause=%s\n", failure.why); return 1; }
+  catch (const std::exception& error) { std::printf("cause=%s\n", error.what()); return 1; }
 }

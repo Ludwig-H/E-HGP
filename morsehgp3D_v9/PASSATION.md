@@ -33,8 +33,20 @@ test de plateau i128 de la v7 rendait de vraies réponses fausses à 18 bits.
 Protocole G4 v9 écrit (`gcp-migration/tower_*_v9.py`, selftests hors ligne
 verts), pour une première session à 48 fils.
 
-Suite : session G4 ; noyau MEB exact accéléré et parallélisme de la tour ;
-V9-2 sur l'atlas q4 et le census q3 (leviers des auditeurs A et B).
+Première session G4 ([`g4_tower_r1_20260922`](receipts/g4_tower_r1_20260922/README.md),
+48 fils, `TERMINATED` certifié) : tour complète en 18,8 / 15,1 / 29,3 s à K5
+et 111,7 / 82,3 / 125,4 s à K10 ; condensés identiques au local. Le générateur
+q3/q4 passe à l'échelle (×11,6 de 8 fils locaux à 48 fils G4) ; à K10 la tour
+en un fil domine (56–76 s), 34 s en voie statique à 48 fils.
+
+Noyau MEB « première paire maximale » (port du prototype qualifié de la v7) :
+condensés identiques, tests de puissance −56 % à K5 et −64 % à K10, tour K10
+locale 130 → 109 s. La sonde publie maintenant le registre du générateur
+(`ledger`).
+
+Suite : parallélisme de la tour (voie statique par défaut, puis calendrier et
+tenue de livres), comptabilité hors géométrie de la tour (allocations par
+représentant, tri des niveaux) ; V9-2 sur l'atlas q4 et le census q3.
 
 ## État du dépôt au moment de l'ouverture (historique)
 

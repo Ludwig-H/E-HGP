@@ -1,0 +1,383 @@
+{
+  "FULL_executed": true,
+  "GPU_executed": false,
+  "backend": "reference_cpu",
+  "capture_pack_exit_code": 0,
+  "capture_received": true,
+  "capture_sha256": "6300d25545ad1bc8fde7287b987ef9485aa9bd3deb739eee1b9a7d54d2e775fc",
+  "case_cap_seconds": 600,
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "instances",
+        "describe",
+        "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-b",
+        "--format=json"
+      ],
+      "ended_epoch": 1790119594.9168882,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "before_start",
+      "pid": 633084,
+      "started_epoch": 1790119593.0828576,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "bf8e98c2cda033e243a0c1c00391e93270d4ceaa698b8730b28aa3c35d3e8d68",
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "os-login",
+        "ssh-keys",
+        "add",
+        "--project=devpod-gpu-exploration",
+        "--key-file=/workspaces/.ehgp-sessions/v9tower.20260922T232624Z/key.pub",
+        "--ttl=70m",
+        "--format=json",
+        "--quiet"
+      ],
+      "ended_epoch": 1790119596.4371305,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "oslogin_add",
+      "pid": 633162,
+      "started_epoch": 1790119594.9175572,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "934955e4f8b1b97acf8337cf435f479da193721cb08de911717cd5b585a709c3",
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "/workspaces/.ehgp-sessions/v9tower.20260922T232624Z/tower_v9_host/start_and_verify.sh",
+        "--yes",
+        "--guest-shutdown-minutes",
+        "40",
+        "--handoff-file",
+        "/workspaces/.ehgp-sessions/v9tower.20260922T232624Z/tower_v9_host/handoff.json",
+        "--lifecycle-state-file",
+        "/workspaces/.ehgp-sessions/v9tower.20260922T232624Z/tower_v9_host/lifecycle.txt",
+        "--guard-mark-dir",
+        "/workspaces/.ehgp-sessions/v9tower.20260922T232624Z/tower_v9_host/guardmarks"
+      ],
+      "ended_epoch": 1790119691.6471488,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "guarded_start",
+      "pid": 633255,
+      "started_epoch": 1790119596.4377196,
+      "stderr_sha256": "130f4668d00c695b0f37bc5a6c30883f5bc93822890652bbb0bde44ecc36f1c7",
+      "stdout_sha256": "4d0d4d5d7e0d07fa00a4337ea18062315cf11bb00387a0e1d8c5f833855f4db5",
+      "timeout_seconds": null
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "instances",
+        "describe",
+        "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-b",
+        "--format=json"
+      ],
+      "ended_epoch": 1790119693.67052,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "before_upload",
+      "pid": 637469,
+      "started_epoch": 1790119691.6483197,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "04fc302ea85faabd40801bfcd3c26dee41a1c81619808362ef8cd5e94c9c7690",
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "ssh",
+        "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-b",
+        "--quiet",
+        "--ssh-key-file=/workspaces/.ehgp-sessions/v9tower.20260922T232624Z/key",
+        "--ssh-key-expiration=2026-09-23T00:36:35.501958Z",
+        "--ssh-flag=-n",
+        "--ssh-flag=-o BatchMode=yes",
+        "--ssh-flag=-o ConnectTimeout=15",
+        "--command=sudo -n cat /run/systemd/shutdown/scheduled"
+      ],
+      "ended_epoch": 1790119700.353679,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "guest_schedule",
+      "pid": 637626,
+      "started_epoch": 1790119693.6714537,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "332a85ecef7e16d67840d258a620562d63413c3e941ca670712630e787f47a2c",
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "ssh",
+        "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-b",
+        "--quiet",
+        "--ssh-key-file=/workspaces/.ehgp-sessions/v9tower.20260922T232624Z/key",
+        "--ssh-key-expiration=2026-09-23T00:36:35.501958Z",
+        "--ssh-flag=-n",
+        "--ssh-flag=-o BatchMode=yes",
+        "--ssh-flag=-o ConnectTimeout=15",
+        "--command=umask 077; mktemp -d /tmp/ehgp-tower-v9-cfce04dc4b670366.XXXXXXXXXX"
+      ],
+      "ended_epoch": 1790119705.876154,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "remote_mkdir",
+      "pid": 637881,
+      "started_epoch": 1790119700.3547614,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "5ce24defbff5785252ed4e027b34a6d79b5fc3ed895b0105a0544ffad39ef260",
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "scp",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-b",
+        "--quiet",
+        "--ssh-key-file=/workspaces/.ehgp-sessions/v9tower.20260922T232624Z/key",
+        "--ssh-key-expiration=2026-09-23T00:36:35.501958Z",
+        "/workspaces/.ehgp-sessions/v9tower.20260922T232624Z/tower_v9_host/snapshot.tar.gz",
+        "/workspaces/.ehgp-sessions/v9tower.20260922T232624Z/tower_v9_host/source_manifest.json",
+        "/workspaces/.ehgp-sessions/v9tower.20260922T232624Z/tower_v9_host/worker.py",
+        "/workspaces/.ehgp-sessions/v9tower.20260922T232624Z/tower_v9_host/guardmarks/double_guard_verified",
+        "ehgp-v7-4fa0e0789a7d5bb06b787d35:/tmp/ehgp-tower-v9-cfce04dc4b670366.qf3AWrC2E2/"
+      ],
+      "ended_epoch": 1790119714.2816935,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "upload",
+      "pid": 638101,
+      "started_epoch": 1790119705.8771615,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timeout_seconds": 180
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "ssh",
+        "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-b",
+        "--quiet",
+        "--ssh-key-file=/workspaces/.ehgp-sessions/v9tower.20260922T232624Z/key",
+        "--ssh-key-expiration=2026-09-23T00:36:35.501958Z",
+        "--ssh-flag=-n",
+        "--ssh-flag=-o BatchMode=yes",
+        "--ssh-flag=-o ConnectTimeout=15",
+        "--command=test \"$(sha256sum /tmp/ehgp-tower-v9-cfce04dc4b670366.qf3AWrC2E2/snapshot.tar.gz | cut -d \" \" -f 1)\" = e766319e5061c45b5de339c8e03115052811c983cc0226e1debdf0973f7d5de0 && test \"$(sha256sum /tmp/ehgp-tower-v9-cfce04dc4b670366.qf3AWrC2E2/source_manifest.json | cut -d \" \" -f 1)\" = afae898072f1ed54b8c514a3a3ab4818933216809713651dd0421921ad32f906 && test \"$(sha256sum /tmp/ehgp-tower-v9-cfce04dc4b670366.qf3AWrC2E2/worker.py | cut -d \" \" -f 1)\" = 2098e77652a8f5a36d010278dafd0d44acedfb3c93626252861d5280668d5310 && test \"$(sha256sum /tmp/ehgp-tower-v9-cfce04dc4b670366.qf3AWrC2E2/double_guard_verified | cut -d \" \" -f 1)\" = ae1037b6911aa4864f9f359f24e14dc1eb3e6726253c050d8128505da7dec79b && mkdir -m 700 /tmp/ehgp-tower-v9-cfce04dc4b670366.qf3AWrC2E2/source && tar --no-same-owner --no-same-permissions -xzf /tmp/ehgp-tower-v9-cfce04dc4b670366.qf3AWrC2E2/snapshot.tar.gz -C /tmp/ehgp-tower-v9-cfce04dc4b670366.qf3AWrC2E2/source"
+      ],
+      "ended_epoch": 1790119719.1818826,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "unpack",
+      "pid": 638492,
+      "started_epoch": 1790119714.2822998,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "instances",
+        "describe",
+        "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-b",
+        "--format=json"
+      ],
+      "ended_epoch": 1790119720.8811479,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "before_worker",
+      "pid": 638686,
+      "started_epoch": 1790119719.1824963,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "04fc302ea85faabd40801bfcd3c26dee41a1c81619808362ef8cd5e94c9c7690",
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "ssh",
+        "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-b",
+        "--quiet",
+        "--ssh-key-file=/workspaces/.ehgp-sessions/v9tower.20260922T232624Z/key",
+        "--ssh-key-expiration=2026-09-23T00:36:35.501958Z",
+        "--ssh-flag=-n",
+        "--ssh-flag=-o BatchMode=yes",
+        "--ssh-flag=-o ConnectTimeout=15",
+        "--command=exec python3 /tmp/ehgp-tower-v9-cfce04dc4b670366.qf3AWrC2E2/worker.py --source-root /tmp/ehgp-tower-v9-cfce04dc4b670366.qf3AWrC2E2/source --source-manifest /tmp/ehgp-tower-v9-cfce04dc4b670366.qf3AWrC2E2/source_manifest.json --source-manifest-sha256 afae898072f1ed54b8c514a3a3ab4818933216809713651dd0421921ad32f906 --guard-mark /tmp/ehgp-tower-v9-cfce04dc4b670366.qf3AWrC2E2/double_guard_verified --guard-mark-sha256 ae1037b6911aa4864f9f359f24e14dc1eb3e6726253c050d8128505da7dec79b --generation 2026-09-22T16:27:08.673-07:00 --session-deadline-epoch 1790122075 --closing-margin-seconds 300 --output /tmp/ehgp-tower-v9-cfce04dc4b670366.qf3AWrC2E2/output --project devpod-gpu-exploration --zone us-central1-b --instance ehgp-v7-4fa0e0789a7d5bb06b787d35 --execute --useful-budget-seconds 1500 --case-cap-seconds 600"
+      ],
+      "ended_epoch": 1790120212.2493725,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "worker",
+      "pid": 638733,
+      "started_epoch": 1790119720.881853,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "d0f70b6fe834122c83d8e23f1ff176a1964ecab03402a7abaf454321cd18d93f",
+      "timeout_seconds": 1560
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "instances",
+        "describe",
+        "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-b",
+        "--format=json"
+      ],
+      "ended_epoch": 1790120214.973004,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "before_retrieve",
+      "pid": 660680,
+      "started_epoch": 1790120212.2502737,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "04fc302ea85faabd40801bfcd3c26dee41a1c81619808362ef8cd5e94c9c7690",
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "ssh",
+        "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-b",
+        "--quiet",
+        "--ssh-key-file=/workspaces/.ehgp-sessions/v9tower.20260922T232624Z/key",
+        "--ssh-key-expiration=2026-09-23T00:36:35.501958Z",
+        "--ssh-flag=-n",
+        "--ssh-flag=-o BatchMode=yes",
+        "--ssh-flag=-o ConnectTimeout=15",
+        "--command=tar -czf /tmp/ehgp-tower-v9-cfce04dc4b670366.qf3AWrC2E2/capture.tar.gz --exclude=output/build -C /tmp/ehgp-tower-v9-cfce04dc4b670366.qf3AWrC2E2 output; capture_code=$?; sha256sum /tmp/ehgp-tower-v9-cfce04dc4b670366.qf3AWrC2E2/capture.tar.gz; exit \"$capture_code\""
+      ],
+      "ended_epoch": 1790120221.8377028,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "pack_capture",
+      "pid": 660736,
+      "started_epoch": 1790120214.9737804,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "64c7893c8a22223c9333d3bb018203c8816c2a100a0b3c846879dce663485e08",
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "scp",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-b",
+        "--quiet",
+        "--ssh-key-file=/workspaces/.ehgp-sessions/v9tower.20260922T232624Z/key",
+        "--ssh-key-expiration=2026-09-23T00:36:35.501958Z",
+        "ehgp-v7-4fa0e0789a7d5bb06b787d35:/tmp/ehgp-tower-v9-cfce04dc4b670366.qf3AWrC2E2/capture.tar.gz",
+        "/workspaces/.ehgp-sessions/v9tower.20260922T232624Z/tower_v9_host/capture.tar.gz"
+      ],
+      "ended_epoch": 1790120228.888587,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "download",
+      "pid": 660983,
+      "started_epoch": 1790120221.838682,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timeout_seconds": 180
+    },
+    {
+      "argv": [
+        "/workspaces/.ehgp-sessions/v9tower.20260922T232624Z/tower_v9_host/stop_and_verify.sh",
+        "--yes",
+        "--expected-last-start-timestamp",
+        "2026-09-22T16:27:08.673-07:00"
+      ],
+      "ended_epoch": 1790120305.0005903,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "guarded_stop",
+      "pid": 661279,
+      "started_epoch": 1790120228.987533,
+      "stderr_sha256": "f4831c77f4d040641eca170abc4ceaeccfc0e0934cf0a11588b75ebf40af708c",
+      "stdout_sha256": "8237101459ad3fd3b178090dc01ee238c1558b1e6f7658c0954b25af6b58c3ee",
+      "timeout_seconds": null
+    }
+  ],
+  "controller_sha256": "bcf19e3cd1f47174b539d35cba8f8551483c65bf2256962f055cf6e58163401e",
+  "generation": "2026-09-22T16:27:08.673-07:00",
+  "guest_shutdown_minutes": 40,
+  "manifest_sha256": "afae898072f1ed54b8c514a3a3ab4818933216809713651dd0421921ad32f906",
+  "max_run_seconds": 3600,
+  "provenance": {
+    "commit": "e28296bb4600b48ae2e4e2f7c95179faca5bf578",
+    "helper": {
+      "path": "gcp-migration/full_probe_worker_v7.py",
+      "sha256": "da967163bdb7247bc6aad4df0c294cda1071076a0127cd5bd9f59bc0e4788439"
+    },
+    "inputs": {
+      "data/scene_00.u32le": {
+        "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le",
+        "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf"
+      },
+      "data/scene_01.u32le": {
+        "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/full.u32le",
+        "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f"
+      },
+      "data/scene_02.u32le": {
+        "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/full.u32le",
+        "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af"
+      }
+    },
+    "protocol_source": "commit",
+    "schema": "mhgp9_tower_provenance_v1",
+    "tree": "54573bfe913345a67bcf2d53cdd6dedb88e6d81e"
+  },
+  "public_status": "not_claimed",
+  "remote_directory": "/tmp/ehgp-tower-v9-cfce04dc4b670366.qf3AWrC2E2",
+  "session_deadline_epoch": 1790122075,
+  "snapshot_sha256": "e766319e5061c45b5de339c8e03115052811c983cc0226e1debdf0973f7d5de0",
+  "ssh_expiration": "2026-09-23T00:36:35.501958Z",
+  "status": "completed",
+  "target": {
+    "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-b"
+  },
+  "targeted_shutdown_certified": true,
+  "useful_budget_seconds": 1500,
+  "worker_exit_code": 0,
+  "worker_receipt_present": true,
+  "worker_sha256": "2098e77652a8f5a36d010278dafd0d44acedfb3c93626252861d5280668d5310",
+  "worker_status": "completed"
+}

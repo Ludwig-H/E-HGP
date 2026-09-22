@@ -1,0 +1,21 @@
+{
+  "case": {
+    "file": "data/scene_01.u32le",
+    "k": 10,
+    "n": 35551,
+    "repeat": 0,
+    "s": 8,
+    "scene": "01",
+    "static_threads": 0,
+    "workers": 48
+  },
+  "chain_total_ms": 82310.418,
+  "elapsed_seconds": 82.53273973299997,
+  "exit_code": 0,
+  "gnu_time_max_rss_kb": 3899876,
+  "index": 4,
+  "input_file_sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f",
+  "outcome": "complete_relative",
+  "probe_status": "complete_relative",
+  "tower_digest": "9ddbf7430c9086cc"
+}
