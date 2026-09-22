@@ -1,0 +1,65 @@
+name: V8 LiDAR rectangle audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'morsehgp3D_v8/audits/lidar_rectangles_20260922/probe.cpp'
+      - 'morsehgp3D_v8/audits/lidar_rectangles_20260922/run.py'
+      - '.github/workflows/morsehgp3d-v8-lidar-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: v8-lidar-rectangle-audit
+  cancel-in-progress: false
+
+jobs:
+  native-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      LC_ALL: C
+    steps:
+      - name: Checkout the exact triggering revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Build the unchanged native CPU library and audit caller
+        shell: bash
+        run: |
+          set -euo pipefail
+          A=morsehgp3D_v8/audits/lidar_rectangles_20260922
+          B="$RUNNER_TEMP/v8-lidar-audit-build"
+          cmake -S morsehgp3D_v8 -B "$B" -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+          cmake --build "$B" --target mhgp8_p0 --parallel 2
+          g++ -std=c++20 -O3 -Wall -Wextra -I morsehgp3D_v8/src "$A/probe.cpp" "$B/libmhgp8_p0.a" -pthread -o "$RUNNER_TEMP/lidar-audit-probe"
+          mkdir "$RUNNER_TEMP/lidar-audit-captures"
+          git rev-parse HEAD HEAD:morsehgp3D_v8/src > "$RUNNER_TEMP/lidar-audit-captures/REVISIONS.txt"
+          g++ --version > "$RUNNER_TEMP/lidar-audit-captures/COMPILER.txt"
+          lscpu > "$RUNNER_TEMP/lidar-audit-captures/CPU.txt"
+          sha256sum "$A/probe.cpp" "$A/run.py" "$RUNNER_TEMP/lidar-audit-probe" > "$RUNNER_TEMP/lidar-audit-captures/SHA256SUMS.txt"
+      - name: Check all variants against independent scalar witness counts
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lidar-audit-probe" --selftest | tee "$RUNNER_TEMP/lidar-audit-captures/SELFTEST.json"
+      - name: Test full 1mm clouds and sampled native rectangles
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B morsehgp3D_v8/audits/lidar_rectangles_20260922/run.py \
+            --binary "$RUNNER_TEMP/lidar-audit-probe" \
+            --output "$RUNNER_TEMP/lidar-audit-captures/measurements" --samples 24 --repeat 3
+          git diff --exit-code -- morsehgp3D_v8/src morsehgp3D_v8/bench morsehgp3D_v8/receipts
+      - name: Preserve captures including a failed preflight
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: v8-lidar-rectangle-audit-${{ github.run_id }}
+          path: ${{ runner.temp }}/lidar-audit-captures
+          if-no-files-found: warn
+          retention-days: 14
