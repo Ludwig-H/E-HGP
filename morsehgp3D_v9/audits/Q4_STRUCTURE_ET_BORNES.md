@@ -1,0 +1,279 @@
+# Audit v8 → v9 : q4 par boules minimales locales certifiées
+
+22 septembre 2026. Moteur v8 lu à `a74e90f2`, ouverture v9 `3595725a`.
+Audit mathématique et architectural, **aucun moteur v9 ni
+chrono v9 qualifié**. Le [jalon de temps v9](https://github.com/Ludwig-H/E-HGP/blob/3595725a/morsehgp3D_v9/docs/AUDIT_V8_SYNTHESE.md)
+vise d'abord les trames LiDAR entières sans sol en u18/1 mm. La trame brute
+entière reste une obligation distincte, dont la portée temporelle v9 est à
+préciser ; float32 reste le défaut d'entrée antérieur, son développement
+temporel v9 étant suspendu. La cible est la tour complète K=1..10 en moins
+d'une seconde sur
+GCP G4, avec repli K=1..5 puis objectif 100 ms.
+
+## Diagnostic qui doit guider le choix
+
+La v8 a acquis plusieurs objets exacts utiles : balayage d'une famille q4
+au lieu d'un census par tétraèdre, [fragments exacts de cellules](../../morsehgp3D_v8/docs/Q4_FRAGMENTS_ET_BALAYAGES_LOCAUX_20260920.md),
+[fenêtre fermée de faible profondeur](../../morsehgp3D_v8/docs/Q4_FENETRE_DE_FAIBLE_PROFONDEUR_20260920.md),
+[jointure graines × cellules](../../morsehgp3D_v8/docs/Q4_GRAINES_ET_CELLULES_20260921.md)
+et [rejet q3 par l'atlas](../../morsehgp3D_v8/docs/Q3_CERTIFICAT_ATLAS_20260921.md).
+Les tests de contact, de propriété et les registres de coûts sont des acquis
+à conserver. La fenêtre30 prouve déjà qu'à seuil fixe il ne faut trier que
+O(K) événements intérieurs par famille ; elle paie encore un ou deux scans
+des témoins retenus **par famille**. Réinventer cette fenêtre serait une
+micro-variante sans réponse au verrou.
+
+La [reprise u18 inventoriée dans l’ouverture v9](https://github.com/Ludwig-H/E-HGP/blob/3595725a/morsehgp3D_v9/docs/AUDIT_V8_SYNTHESE.md)
+mesure, sur **une** trame 08/000000 sans sol entière à 1 mm, 39 885 sites,
+K5/s8/huit workers, 104,63 s mur et 812,82 CPU·s pour q3/q4 seulement :
+3,252 milliards de bornes de blocs, 7,316 milliards de tests ponctuels,
+5,547 milliards d'IDs de frontière copiés dans l'atlas q4 ; 163,678
+millions de comparaisons de balayage. Les 691 284 supports q3 et 158 496
+q4 émis ne sont ni catalogue ni FULL. L'option `saturate_deep` était
+désactivée. Cette unique ligne ne mesure ni sa valeur ni la croissance.
+L'arrêt anticipé à K−1 est néanmoins un certificat exact à conserver :
+il n'a pas besoin de finir un fragment déjà rejeté.
+
+Sur l'ancien profil u16, LiveOnly réduit fortement les visites d'atlas,
+mais la préparation garde des sous-postes au-delà de ×4 au doublement et
+Joined crée 57,242 millions d'entrées de cache à 32k/K5. Les couches
+duales29 peuvent garder tous les sites ; la fenêtre30 laisse alors le
+produit graines × témoins. Les [mesures spatiales](../../morsehgp3D_v8/docs/Q34_MESURES_SPATIALES_20260921.md)
+sur trois trames brutes entières ont donné 165,214/34,319/505,479 s en CPU
+G4 W48 pour le flux q3/q4, avec occupation moyenne 4,19/11,13/1,93 CPU
+logiques. Ces nombres ne sont pas des mesures GPU et ne portent pas FULL.
+Un partage de file ne peut pas, à lui seul, effacer les milliards de tests.
+
+## Objet mathématique à énumérer
+
+Pour un tétraèdre strictement positif de sommets `a,b,x,y`, centre `c` et
+rayon `R`, les quatre poids barycentriques `λ_i` de `c` sont strictement
+positifs. Sa circumboule est aussi la **boule minimale englobante** de ces
+quatre sites : pour tout centre `d` d'une autre boule les contenant,
+
+`Σ_i λ_i |p_i−d|² = R² + |c−d|²`.
+
+Le rayon de cette autre boule est donc au moins `R`. C'est la base d'une
+énumération locale de *boules minimales k-Gabriel* ; cela ne réduit pas à
+lui seul le nombre de quadruples. Pour q4, une boule de profondeur stricte
+`d` appartient à la voie de niveau K seulement si `d < T4=K−2` ; le même
+`d` peut alimenter plusieurs K sans régénérer la boule. La clé canonique
+globale et le plus petit support positif `q_min` restent à déterminer après
+regroupement. Les voies q2/q3/q4 sont indépendantes : les
+[contre-fixtures](../../morsehgp3D_v8/docs/Q3_Q4_OBJETS_ET_STRATEGIE_20260914.md)
+ont déjà un q4 admissible dont l'arête q2 ou la face q3 est rejetée.
+
+Pour n'importe quel support `a` de la boule, la puissance d'un site `z`
+s'écrit
+
+`|z−c|²−|a−c|² = |z|²−|a|²−2(z−a)·c`.
+
+Chaque site définit donc un demi-espace **affine en centre**. La profondeur
+est le nombre de sites strictement plus proches de `c` que `a`, autrement
+dit le rang strict de `a` dans l'ordre de Voronoï. Cette identité peut
+partager des certificats entre arêtes et voies, mais construire toutes les
+étoiles de Voronoï d'ordre K ou toute la tétraédralisation de Delaunay3D
+serait un engagement beaucoup plus coûteux que nécessaire. La complexité
+de Delaunay3D peut déjà être quadratique pour K=0 ; ce fait ne donne pas une
+borne de sortie pour la sous-famille positive du modèle HGP
+([Erickson, construction de référence](https://arxiv.org/abs/cs/0103017)).
+Les cellules C proposées ci-dessous sont des **boîtes de calcul créées à la
+demande**, et non les cellules combinatoires de ce diagramme.
+
+## Certificat local de rayon : proposition v9 exacte
+
+Une *cellule de centres* `C` est une boîte rationnelle fermée en 3D,
+créée **à la demande** depuis le même index spatial du nuage déclaré.
+Tout centre q4 positif appartient au tétraèdre de ses quatre supports :
+la boîte englobante du nuage entier est donc un domaine initial complet.
+Les centres q3 aigus et les milieux q2 y appartiennent également.
+Cette racine globale n'est qu'une preuve de couverture : puisque toutes
+les boîtes Z de l'index sont incluses dans C, `gap²(C,box(Z))=0` et le
+certificat de rayon n'y écarte aucun site. La question algorithmique est
+de produire des cellules plus petites **sans payer déjà** toutes les
+graines et tous les atlas ; le front doit conserver des familles tant
+que leur expansion n'est pas justifiée.
+Choisir `T=Kmax−2>0` IDs distincts **de sites géométriques**
+`g_1,…,g_T` du nuage préparé, par exemple des voisins du milieu de C.
+Deux retours LiDAR fusionnés ne sont pas deux gardes. Leur proximité n'est
+qu'une heuristique ; la preuve demande seulement des sites distincts.
+Définir exactement
+
+`U_C = max_{1≤i≤T} max_{c∈C} |g_i−c|²`.
+
+Pour une boîte, chaque maximum axial est à une extrémité : `U_C` est donc
+calculable sur les huit coins sans racine ni approximation. Si une boule
+q4 admissible a son centre `c∈C` et son rayon carré `R²>U_C`, alors les
+`T` gardes vérifient toutes `|g_i−c|²≤U_C<R²` : elle a au moins `T`
+intérieurs stricts, contradiction. **Toute telle boule vérifie
+`R²≤U_C`.** En particulier, on peut écarter comme support, intérieur et
+contact chaque nœud spatial `Z` tel que
+
+`gap²(C, box(Z)) > U_C`,
+
+où `gap²` est le carré exact de la distance minimale entre deux boîtes.
+La stricte inégalité est obligatoire : à égalité, un site peut porter la
+coquille. Appelons `S_C` l'union des nœuds non écartés, développée en IDs
+seulement si nécessaire. Pour toute boule q4 acceptée centrée dans C,
+ses quatre supports, **tous ses intérieurs et toute sa coquille** sont
+dans `S_C`; les sites extérieurs à `S_C` ont une puissance strictement
+positive. C'est donc un contrat plus fort qu'un simple filtre de graines.
+
+On peut choisir une liste ordonnée de dix gardes et calculer séparément
+`U_8`, `U_9`, `U_10` pour les seuils maximums q4, q3 et q2 ; partager la
+cellule et l'index, sans confondre leurs seuils. Pour K plus petit, le
+certificat au seuil maximum reste sûr mais peut être large. Sur une arête
+propriétaire q4 de carré `D`, la borne géométrique déjà démontrée
+`R²≤3D/8` peut être intersectée avec `U_C`, si son contexte de propriété
+est certifié ; ne jamais l'appliquer aux graines non propriétaires.
+
+L'argument est indépendant de la disposition, de l'alignement des passages
+LiDAR et du profil numérique. Pour float32, les coordonnées et bornes de
+cellules sont représentées comme rationnels dyadiques exacts ; le moteur
+u18/i128 ne qualifie pas automatiquement cette voie. Les gardes issues d'un
+masque sans sol sont prises dans **ce même sous-nuage**, jamais dans la
+trame brute. Une cellule utilise des bornes fermées pour prouver et une
+convention de possession demi-ouverte pour n'émettre chaque centre qu'une
+fois, y compris sur les faces des cellules.
+
+### Comment l'utiliser sans construire une mosaïque complète
+
+Première expérience peu intrusive : prendre les cellules encore visitées
+de Local28, y calculer `U_C` et mesurer les nœuds/IDs que ce certificat
+retire **avant** les copies de frontières et le balayage. Une
+`Q4LocalCell` existante est un carré `(α,β)` dans le plan bissecteur,
+dont l'image par la carte affine des centres est un **parallélogramme
+3D**, et non la boîte XYZ C du lemme. Calculer `U_C` sur ses **quatre
+coins mappés** ; pour un premier gap sûr, utiliser la boîte XYZ qui les
+enveloppe, dont la distance à Z minore celle du parallélogramme. Cette
+surboîte peut perdre des rejets : mesurer ce coût avant un prédicat exact
+parallélogramme–boîte, et requalifier les largeurs numériques. Les gardes et
+leur preuve sont immuables et peuvent être réutilisés par plusieurs
+graines de l'arête ; une petite table de cellules spatiales partagée entre
+arêtes n'est utile que si ses réutilisations payent sa construction.
+`U_C` ne devient ni un crédit de profondeur, ni un fragment exact ; il
+borne le rayon des boules encore admises. Le certificat de saturation v8
+reste un autre état terminal.
+
+Un raccord q3 constructif peut aussi exploiter une feuille **exacte** déjà
+payée par Local28 pour la même arête : son compte uniforme `c0` et ses
+nœuds actifs disjoints donnent, au centre de la boule q3 valide,
+`d = c0 + #{z actif : puissance_q3(z)<0}`. Les extérieurs de cette partition
+sont strictement extérieurs dans toute la cellule fermée, et la coquille se collecte parmi
+les actifs ; le cover de l'arête restitue ensuite le nuage entier. Cela
+demande une vue typée `ExactLeaf` possédant atlas/cover/index et cellule,
+avec un appel synchrone ou une tâche qui prolonge leur durée de vie.
+`certified_inside_count()` seul ne suffit pas : un nœud `Deep` peut ne
+porter qu'un minorant après saturation et n'a plus de frontière exacte.
+`Deep ≥ K−1` peut rejeter q3 ; `Deep = K−2` exige le census q3 global ou
+un autre certificat. `Outside` ne transmet rien. Ne pas relancer le census
+à la racine avec `c0`, ce qui doublerait les intérieurs déjà classés.
+Cette feuille donne un compte, pas la liste des IDs uniformément intérieurs
+du catalogue FULL ; conserver les nœuds concernés ou les recollecter une
+fois par clé de boule après déduplication.
+
+Seconde expérience, seulement si les listes locales restent réellement
+petites : énumérer directement les boules minimales q4 des `S_C` des
+cellules demandées, tester centre dans la cellule possédante, positivité,
+profondeur exacte, clé et `q_min`. La référence simple peut essayer les
+quadruples locaux puis vérifier `S_C`; un générateur performant devra
+remplacer cette combinatoire par des événements peu profonds locaux.
+Le contexte contient propriétaire du nuage/index, cellule, gardes, seuil,
+liste de nœuds retenus et identités des sites ; les workers empruntent ce
+contexte immuable avec buffers privés. Une limite de taille déclenche un
+repli exact sur la cellule, jamais sa suppression.
+
+La [fenêtre30](../../morsehgp3D_v8/docs/Q4_FENETRE_DE_FAIBLE_PROFONDEUR_20260920.md)
+fournit déjà l'invariant du traitement local : pour la seed q4, profondeur
+au groupe de racine `r` = intérieurs permanents `c0` + entrées à racine
+`<r` + sorties à racine `>r`. Seules les `H=T−c0` premières entrées et
+les `H` dernières sorties, avec tous leurs ex æquo, peuvent porter un
+groupe peu profond. Les seuls événements *strictement entre* les deux
+bornes sont au plus `2H−2` IDs. L'index dual proposé dans
+[l'audit v8](../../morsehgp3D_v8/audits/q4_kernel_composition_20260920/WINDOW_INDEX.md)
+pourrait trouver ces rangs sans deux scans par seed ; ses chaînes,
+plateaux, pôles et constantes `c=0` restent à implémenter et à payer.
+Sur `S_C` petit, le scan local existant est une meilleure référence.
+
+## Ce qui interdit une promesse sous-quadratique prématurée
+
+Noter `C*` les cellules vraiment construites, `V` les visites de l'index
+**y compris la sélection des gardes**, `M=Σ_C |S_C|` les incidences
+cellule–site retenues, `A_C` le coût exact d'énumération et de
+vérification local, et `L` les octets des clés, coquilles, intérieurs et
+sorties. Le budget de la **tour entière** paie préparation de l'index,
+front et covers, construction des cellules, `V+M+Σ A_C+L`, q2/q3,
+déduplication, parents FULL et transferts CPU/GPU. Le prototype naïf a
+`A_C=O(binomial(|S_C|,4)·|S_C|)` ; sa validité ne suffit pas à son coût.
+Un régime de taille de cellules bornée, avec `|C*|=O(n)` et `V+M=O(n log n)`,
+donnerait une voie sous-quadratique **conditionnelle** à sortie compacte.
+La v8 ne démontre aucune de ces conditions sur le LiDAR.
+À titre de garde-fou concret, scanner 39 885 sites pour choisir des gardes
+dans chacune des 38,795 millions de cellules du reçu 1 mm ferait environ
+**1,55×10¹² examens** ; stocker huit IDs de 64 bits par cellule ajouterait
+environ **2,48 Go d'écritures logiques**. Réemployer les gardes d'un parent
+ou les chercher dans l'index ne vaut que si son propre coût est mesuré.
+
+Deux contre-régimes sont indispensables aux gates :
+
+1. **Un graphe k-NN fixe manque des q4.** Prendre les quatre sommets
+   `p_i=(5000,5000,5000)+1000 σ_i`, avec
+   `σ_i∈{(+,+,+),(+,−,−),(−,+,−),(−,−,+)}`. Leur sphère centrée en
+   `(5000,5000,5000)` est vide, leur tétraèdre est strictement positif.
+   Ajouter pour chaque sommet les `m` points distincts
+   `p_{i,j}=(5000,5000,5000)+(1000+j)σ_i`, `1≤j≤m<1000`.
+   Tous sont **hors** de la sphère initiale, donc le q4 reste de profondeur
+   zéro ; les `m` voisins radiaux de chaque sommet sont pourtant plus
+   proches que chacun des trois autres sommets. Pour `m≥k`, ses arêtes
+   peuvent manquer d'un graphe des k plus proches voisins. Un k-NN local
+   est une proposition ; seul un certificat de complétude autorise à
+   éliminer son repli.
+2. **Coquille massive / vide.** `n` points exactement cosphériques autour
+   d'un centre `c` donnent, même pour la cellule ponctuelle `{c}`,
+   `U_C=R²` et `S_C` contenant tous les points par égalité. Raffiner la
+   cellule ne réduit pas ce résidu. Des nuages sur parois autour d'une
+   cavité peuvent garder aussi de grands `S_C` sans cosphéricité exacte.
+   Regrouper par clé de boule et conserver la coquille complète ; ne pas
+   énumérer aveuglément tous les quadruples d'une même sphère.
+
+Le cas limite `K≤2` n'a pas de sortie q4 (`T≤0`) ; la fabrique de gardes
+ne doit pas demander un nombre nul de points pour ensuite conclure à un
+rayon fini. Si `n<T`, le seuil ne peut être atteint par des gardes :
+repli exact sur ce petit nuage. Les échecs de gardes et cellules trop
+larges restent des tâches exactes visibles. Une simple triangulation
+Delaunay d'ordre zéro ne suffit pas non plus lorsque `0<d<T`.
+
+## Ordre de preuve et de mesure proposé
+
+1. **Gate autonome de rayon** sur petits nuages avec `Fraction` : tous les
+   quadruples positifs, centres rationnels, gardes arbitraires et proches,
+   boîte du centre sur frontière, `gap²=U_C`, coquille 30, copie de masque
+   sans sol, contre-fixture k-NN ci-dessus. Comparer supports, profondeur
+   et coquille sur le **nuage entier** ; muter `>` en `≥` et fusionner des
+   IDs de gardes pour vérifier la causalité des tests.
+2. **Capture sans moteur v9** sur les mêmes trames complètes et masques
+   figés : distribution de `|S_C|`, `M`, `V`, cellules divisées, cellules
+   difficiles, gardes recherchées, `Σ binomial(|S_C|,4)`, récidives de
+   cellules entre arêtes, égalités/shells, et sortie minimale par niveau.
+   Mesurer avant/après gardes tous les coûts de Local28, notamment copies
+   de frontière. Ne pas se contenter du nombre de cellules rejetées.
+3. **Raccord exact minimal** seulement si la capture réduit le travail
+   total : une arête/cellule puis flux q4 global, comparaison aux sorties
+   v8 et à un oracle indépendant borné. Publier sans sol et brut avec sol
+   séparément, puis plusieurs scènes ; les moitiés/quarts restent des
+   diagnostics de croissance. K5/K10 et float32/grille ne se mélangent pas.
+4. **CPU/GPU G4** : tâches de cellules possédées, groupées par longueur de
+   `S_C`, seuils d'allocation et file de débordement exacts ; propositions
+   numériques rapides contrôlées par signes entiers exacts ou repli
+   certifié. Les groupes de racines égales et les clés de boules passent
+   une réduction déterministe. Mesurer temps mur, CPU, GPU, transferts,
+   mémoire de pointe, débordements et catalogue/FULL sur la même entrée.
+   Les entiers 1728 bits float32 et leur fréquence de repli exigent une
+   qualification GPU propre ; l'i128 u18 n'est pas un substitut.
+
+**Décision recommandée :** conserver le balayage et la fenêtre v8 comme
+oracles, vérifier d'abord si le certificat de rayon fait tomber les
+incidences cellule–site sur les vrais LiDAR. La prochaine avancée utile
+doit réduire simultanément préparation, graines, scans et copies ; une
+accélération du seul tri ou une redistribution des mêmes milliards de
+tests ne satisfera pas le contrat.
