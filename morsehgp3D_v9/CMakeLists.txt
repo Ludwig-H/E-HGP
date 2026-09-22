@@ -119,6 +119,22 @@ foreach(kind IN ITEMS historical line12 shell14 spatial12 rejects)
 endforeach()
 mhgp9_gate(mhgp9_chain_census_tower_bad_argument 2 mhgp9_chain_census_tower_gate
            ARGS --unknown LABELS "gate;chain" TIMEOUT 60)
+mhgp9_gate(mhgp9_chain_census_tower_mutant_assignment 1 mhgp9_chain_census_tower_gate
+           ARGS --mutant-assignment EXPECT_LINE "cause=T2 unassigned subset"
+           LABELS "gate;chain;oracle;mutant" TIMEOUT 120)
+mhgp9_gate(mhgp9_chain_census_tower_mutant_open 1 mhgp9_chain_census_tower_gate
+           ARGS --mutant-open EXPECT_LINE "cause=T2.historical.exact_Gamma"
+           LABELS "gate;chain;oracle;mutant" TIMEOUT 120)
+mhgp9_gate(mhgp9_chain_census_tower_mutant_adjacency 1 mhgp9_chain_census_tower_gate
+           ARGS --mutant-adjacency EXPECT_LINE "cause=T2.historical.exact_Gamma"
+           LABELS "gate;chain;oracle;mutant" TIMEOUT 120)
 mhgp9_gate(mhgp9_chain_census_tower_mutant_census 1 mhgp9_chain_census_tower_gate
            ARGS --mutant-census EXPECT_LINE "cause=T2.census.exhaustive_ball_inventory"
            LABELS "gate;chain;oracle;mutant" TIMEOUT 120)
+# Refus d'arguments de la sonde (code 2) avant toute lecture d'entree.
+mhgp9_gate(mhgp9_tower_probe_rejects_k_overflow 2 mhgp9_tower_probe
+           ARGS absent.u32le 4294967297 1 LABELS "gate;probe" TIMEOUT 30)
+mhgp9_gate(mhgp9_tower_probe_rejects_separation_below_8 2 mhgp9_tower_probe
+           ARGS absent.u32le 5 1 --s=7 LABELS "gate;probe" TIMEOUT 30)
+mhgp9_gate(mhgp9_tower_probe_rejects_grid_label 2 mhgp9_tower_probe
+           ARGS absent.u32le 5 1 --grid=a/b LABELS "gate;probe" TIMEOUT 30)

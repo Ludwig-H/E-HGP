@@ -181,7 +181,7 @@ def validate_plan(plan, manifest):
              case['file'] == INPUTS[case['scene']]['file'] and case['file'] in manifest, 'tower scene/file identity')
         need(case['n'] == INPUTS[case['scene']]['n'] and type(case['n']) is int, 'whole-frame size; prefixes forbidden')
         need(type(case['k']) is int and case['k'] in (5, 10) and type(case['s']) is int and case['s'] in (8, 10, 12) and
-             _integer(case['workers'], 1, 1024) and _integer(case['static_threads'], 0, 1024) and
+             _integer(case['workers'], 1, 48) and _integer(case['static_threads'], 0, 48) and
              _integer(case['repeat'], 0, (1 << 32) - 1), 'tower case domain')
         identity = tuple(case[key] for key in ('scene', 'k', 's', 'workers', 'static_threads', 'repeat'))
         need(identity not in seen, 'duplicate case needs an explicit distinct repetition')

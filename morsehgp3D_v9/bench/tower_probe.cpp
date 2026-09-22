@@ -74,6 +74,7 @@ Input read_points(const std::string& path, std::size_t prefix) {
 unsigned long long parse_u(std::string_view s) {
   if (s.empty()) throw std::invalid_argument("empty number");
   unsigned long long v = 0;
+  if (s.size() > 18) throw std::invalid_argument("number too long");
   for (char ch : s) {
     if (ch < '0' || ch > '9') throw std::invalid_argument("not a number");
     v = v * 10 + static_cast<unsigned>(ch - '0');
@@ -96,15 +97,32 @@ int main(int argc, char** argv) {
   try {
     if (argc < 4) throw std::invalid_argument("usage: mhgp9_tower_probe file K workers [options]");
     path = argv[1];
-    options.kmax = static_cast<unsigned>(parse_u(argv[2]));
-    options.workers = static_cast<std::size_t>(parse_u(argv[3]));
+    const auto k = parse_u(argv[2]);
+    if (k < 1 || k > 10) throw std::invalid_argument("K must be in 1..10");
+    options.kmax = static_cast<unsigned>(k);
+    const auto workers = parse_u(argv[3]);
+    if (workers < 1 || workers > 4096) throw std::invalid_argument("workers must be in 1..4096");
+    options.workers = static_cast<std::size_t>(workers);
     for (int i = 4; i < argc; ++i) {
       const std::string_view arg(argv[i]);
-      if (arg.starts_with("--s=")) options.separation_s = static_cast<unsigned>(parse_u(arg.substr(4)));
-      else if (arg.starts_with("--static=")) options.tower_static_threads = static_cast<int>(parse_u(arg.substr(9)));
+      if (arg.starts_with("--s=")) {
+        const auto s = parse_u(arg.substr(4));
+        if (s < 8 || s > 64) throw std::invalid_argument("s must be in 8..64 (never below 8)");
+        options.separation_s = static_cast<unsigned>(s);
+      } else if (arg.starts_with("--static=")) {
+        const auto t = parse_u(arg.substr(9));
+        if (t > 4096) throw std::invalid_argument("static threads must be in 0..4096");
+        options.tower_static_threads = static_cast<int>(t);
+      }
       else if (arg == "--no-tower") options.run_tower = false;
       else if (arg.starts_with("--n=")) prefix = static_cast<std::size_t>(parse_u(arg.substr(4)));
-      else if (arg.starts_with("--grid=")) grid = std::string(arg.substr(7));
+      else if (arg.starts_with("--grid=")) {
+        grid = std::string(arg.substr(7));
+        // Libelle injecte tel quel dans le JSON : alphabet sur, sans echappement.
+        if (grid.empty() || grid.size() > 32 ||
+            grid.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-") != std::string::npos)
+          throw std::invalid_argument("grid label must match [A-Za-z0-9_.-]{1,32}");
+      }
       else throw std::invalid_argument("unknown option");
     }
   } catch (const std::exception& e) {
