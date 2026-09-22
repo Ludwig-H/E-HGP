@@ -55,6 +55,26 @@ jobs:
             --binary "$RUNNER_TEMP/lidar-audit-probe" \
             --output "$RUNNER_TEMP/lidar-audit-captures/measurements" --samples 24 --repeat 3
           git diff --exit-code -- morsehgp3D_v8/src morsehgp3D_v8/bench morsehgp3D_v8/receipts
+      - name: Preserve a replay capsule from the same validated inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          R="$RUNNER_TEMP/lidar-audit-captures/replay"
+          mkdir "$R"
+          tar -czf "$R/native_sources.tar.gz" morsehgp3D_v8/src
+          cp "$RUNNER_TEMP/v8-lidar-audit-build/libmhgp8_p0.a" "$R/"
+          python3 -B - <<'PY'
+          import os, json, shutil, hashlib
+          from pathlib import Path
+          out=Path(os.environ['RUNNER_TEMP'])/'lidar-audit-captures'
+          report=json.loads((out/'measurements/SUMMARY.json').read_text())
+          for scene,entry in report['inputs'].items():
+              src=Path(entry['path'])
+              if hashlib.sha256(src.read_bytes()).hexdigest()!=entry['sha256']:
+                  raise RuntimeError('input changed after measurement')
+              shutil.copyfile(src,out/'replay'/f'scene_{scene}.u32le')
+          PY
+          sha256sum "$R"/* > "$RUNNER_TEMP/lidar-audit-captures/REPLAY_SHA256SUMS.txt"
       - name: Preserve captures including a failed preflight
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
