@@ -20,6 +20,9 @@ versionné depuis `3f0d188f`, mais ne qualifie que le flux q3/q4 CPU sur
 une seule trame, non la tour. Les modifications non commises du
 développeur sont examinées en lecture seule, sans les promouvoir en preuve
 publiée ; aucune branche parasite créée.
+Les commits `ba762036` et `e28296bb` ont depuis publié la campagne FULL,
+la porte u18, le protocole G4 SPOT, le jugement de la tour publique T2 et
+les refus CLI. Aucune exécution GCP/GPU n'en découle.
 
 Le commit d'audit A `efc14c99` propose une sélection exacte des centres
 q4 peu profonds sur une droite de graine en `O(Km)` comparaisons, `m`
@@ -77,14 +80,15 @@ indexé par facettes, non directement par BallKey.
   1 mm/K5/W8 rapporte environ 131 s mur, dont 117 s q3/q4 et 11 s FULL,
   1 306 696 boules et coquille maximale 5. C'est un changement de statut
   fonctionnel important, **pas** une qualification des contrats.
-- Une [première campagne locale complète mais encore non publiée](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PREMIERE_CAMPAGNE_20260922.md)
+- Une [première campagne locale complète publiée à `ba762036`](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PREMIERE_CAMPAGNE_20260922.md)
   a désormais six lignes sur 08/000000, 000100 et 000200 sans sol/1 mm,
   s8/W8 : **K5 132–264 s**, **K10 381–802 s** de mur, 1,10–1,41 M
   puis 4,38–5,51 M clés. À K10, q3/q4 prend 278–687 s et FULL
   94–130 s. Sur 08/000000, FULL passe de 24,86 M à 1,065 G tests
   de puissance MEB entre K5 et K10 : l'aval devient un verrou propre.
-  Le lecteur local ne ferme pas encore toute la provenance
-  binaire/entrées et la série ne fait varier que K, jamais n : ni
+  Les 30 SHA des fichiers versionnés du reçu passent, mais le binaire
+  exact de la mesure n'est pas archivé ; le lecteur ne ferme pas toute la
+  provenance source/binaire/entrées. La série ne fait varier que K, jamais n : ni
   sous-quadratique ni contrat G4 n'en découlent.
 - Le [contre-audit FULL B](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_FULL_COUTS_ET_INTERFACES_20260922.md)
   relève les coûts hérités `2^u`, l'intrus global et les tableaux de
@@ -98,6 +102,11 @@ indexé par facettes, non directement par BallKey.
   La mutation ciblée de suppression de clé est détectée **dans le harnais
   après appel**, pas dans le producteur ; ce petit cas ne certifie pas les
   grandes trames.
+  `e28296bb` a ajouté un jugement de la **tour publique K1..10** sur trois
+  petits nuages, s8/W1 et W4 ; les inventaires s8/10/12 et ses mutants
+  historiques restent des routes de test distinctes. Le
+  [mini-gate K5 à deux intérieurs](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_Q4_K5_DEUX_INTERIEURS_20260922.md)
+  cible encore un autre seuil q4.
   Notre rejeu indépendant du commit `d2700314` a compilé en Release et
   sous Clang ASan/UBSan, **20/20 CTests dans chaque build** ; le
   probe public K1..5 sur un préfixe de
@@ -111,10 +120,11 @@ indexé par facettes, non directement par BallKey.
 - Le [contre-audit u18/sonde](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_U18_ET_SONDE_20260922.md)
   vérifie en C++ O2 et sous ASan/UBSan une fixture de plateau dont un
   produit dépasse int128 signé ; S192 la traite. Les bornes générales
-  du port attendent toujours une porte arithmétique dédiée. Le lanceur
-  accepte `K=2^32+1` en le tronquant à K1 et imprime `--grid` sans
-  échappement JSON : corriger avant tout reçu contractuel automatisé.
-  La nouvelle porte `arith_u18` encore non publiée emploie l'oracle
+  du port sont désormais échantillonnées par la porte `arith_u18` publiée
+  à `ba762036`, que nous avons relancée en lecture seule avec code 0.
+  `e28296bb` refuse maintenant `K=2^32+1` avant conversion et restreint
+  `--grid` à un alphabet sûr, fermant ces deux défauts de CLI précis.
+  La porte `arith_u18` emploie l'oracle
   numérique, mais elle est compilée sans `MHGP9_TESTING` : sa revendication
   de mutant `level-trunc-hi` tué n'a pas de test causal activable.
 - Le [contre-audit de résidence](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_RESIDENCE_CHAINE_20260922.md)
@@ -129,13 +139,14 @@ indexé par facettes, non directement par BallKey.
   format/capacité LP64, pas des mesures de RSS ni des temps extrapolés
   sur G4 ; le cache est libéré avant la publication finale, donc ne
   s'additionne pas mécaniquement à ses 6,48 Go.
-- Le [contre-audit du protocole G4 SPOT en préparation](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_GCP_SESSION_20260922.md)
+- Le [contre-audit du protocole G4 SPOT](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_GCP_SESSION_20260922.md)
   constate des garde-fous de cible/arrêt et un snapshot lié au commit par
-  son constructeur. Les scripts encore non publiés mesurent **CPU seulement**
+  son constructeur. Les scripts publiés mesurent **CPU seulement**
   sur trois trames sans sol de la seule séquence 08 ; un reçu `partial`
-  peut retourner code 0 sans aucune tour achevée. Le plan personnalisé
-  admet jusqu'à 1 024 fils sur 48 vCPU : à borner avant une vraie session.
-  Aucun GCP n'a été lancé par cet audit.
+  peut retourner code 0 sans aucune tour achevée. Le plafond du plan
+  personnalisé est corrigé de 1 024 à 48 fils par `e28296bb` ; 17
+  selftests passent en Python normal/−O et un paquet exact de ce commit
+  est `prepared_not_executed`, sans appel GCP.
 - Le banc publié à l'ouverture v9 juge **v8** : 129 CTests exécutés et
   verts sur 132 enregistrés, trois désactivés. Son `SHA256SUMS` référence
   quatre journaux `logs/*.log` absents du commit `3595725a` ; un clone
@@ -197,6 +208,11 @@ PASS ni inférer une croissance globale de la sonde mono-arête prévue.
    composantes locales **sans** table de `2^u` masques. Elle n'est pas
    implémentée ; construire les régions, leurs signatures et `q_min`
    exactement reste à payer et à qualifier.
+   La [contrelecture B avec oracle exact](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_QUOTIENT_COQUILLE_20260922.md)
+   confirme les composantes, représentants et contributions sur sept
+   petites coquilles, mais `q_min` et son support témoin restent une route
+   distincte ; `BallData`, masques u16 et parents FULL bloquent encore les
+   coquilles de plus de 12 sites.
   Le complément A `8054540c` factorise le calcul de `q_min=3` pour la
   grille u18 et publie un [oracle local de plans](../../morsehgp3D_v9/audits/check_qmin_planes_u18_20260922.py)
   (quatre fixtures et 755 sous-coquilles). Il ne teste pas encore les
@@ -211,6 +227,9 @@ PASS ni inférer une croissance globale de la sonde mono-arête prévue.
 5. Après réduction du travail, répartir les cellules/graines d'une arête
    lourde entre CPU/GPU avec tableaux compacts résidents, intervalles sûrs
    et repli exact. Juger le temps de **toute** la tour, pas un kernel.
+   Le [contre-audit des unités parallèles](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PARALLELISME_Q34_FULL_20260922.md)
+   localise l'arête et l'atlas comme tâches actuellement indivisibles, puis
+   les barrières de niveau/K dans FULL ; le code publié est CXX CPU seulement.
 
 Dans la ligne 1 mm actuelle, 26,23 M fragments sont fabriqués et leurs
 frontières d'entrée représentent 6,00 G slots réservés cumulés, soit au

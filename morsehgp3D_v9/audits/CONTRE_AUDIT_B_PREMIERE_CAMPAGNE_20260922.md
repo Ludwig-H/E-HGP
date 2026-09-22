@@ -1,6 +1,7 @@
 # Contre-audit B — première campagne locale de la tour v9
 
-22 septembre 2026. Lecture seule du reçu **non publié** du worktree développeur
+22 septembre 2026. Lecture seule du reçu **publié** au commit `ba762036`,
+initialement produit dans le worktree développeur,
 `morsehgp3D_v9/receipts/first_tower_20260922/` (`SUMMARY.json`, six couples
 `raw/*.json`/`*.time`, `run_campaign.sh`, `summarize.py`). Trois sous-nuages
 **sans sol complets, sans coupe spatiale**, à grille optionnelle **1 mm**,
@@ -30,6 +31,11 @@ englobe aussi lecture et impression. RSS = maximum GNU time en KiB divisé par
 1 048 576 ; B = `catalogue.unique_keys = catalogue.balls`, pas le nombre de
 présentations ni de nœuds de sortie. q3/q4 occupe 90–93 % du temps de chaîne
 à K5 et 73–86 % à K10 ; l'aval monte néanmoins à 94–130 s sur K10.
+À titre de localisation, q2 prend 1,23–2,66 s en K5 et 2,73–5,08 s en
+K10 ; fusion + census du catalogue prennent ensemble 0,95–1,40 s en K5
+et 4,56–5,55 s en K10. Dans cette capture CPU, q3/q4 puis le
+résolveur FULL K10 sont donc les premiers postes à réduire ; un gain de
+quelques pourcents sur q2 ne change pas la conclusion.
 
 | Même trame, ratio K10/K5 | q3/q4 | Tour aval | Chaîne FULL | RSS max | B |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -62,10 +68,13 @@ sans démontrer à eux seuls quel sous-poste domine le temps de chaque lot.
   du `rc` ajouté par le shell. Le nombre d'ordres rejette indirectement
   `--no-tower` dans ces six cas, mais pas une provenance substituée.
 - `context.txt` donne un commit `d2700314…`, trois SHA d'entrée et un SHA de
-  binaire ; un recalcul indépendant en lecture seule retrouve bien ces quatre
-  SHA sur les fichiers actuellement présents. Le worktree développeur
-  contient toutefois des modifications et ce reçu est non suivi. Le lecteur
-  ne reconstruit pas le binaire ni ne lie ses octets
+  binaire. Après publication, `sha256sum -c SHA256SUMS` passe **30/30** pour
+  les fichiers versionnés du reçu ; un recalcul indépendant retrouve aussi
+  les trois SHA des entrées brutes actuellement présentes. En revanche, le
+  binaire local a été rebâti après la capture et son SHA actuel ne correspond
+  plus au SHA de `context.txt` : **le binaire exact de la mesure n'est pas
+  conservé dans le reçu**. Le lecteur ne reconstruit pas ce binaire ni ne lie
+  ses octets
   et les données aux objets du commit. `SUMMARY.status=passed` qualifie donc
   la cohérence **locale** des six fichiers, pas une clôture hermétique de
   source, binaire, entrée, protocole et sortie. Le digest FNV de la tour
