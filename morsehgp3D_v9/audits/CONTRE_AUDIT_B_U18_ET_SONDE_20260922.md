@@ -65,3 +65,33 @@ Exiger `run_tower=true`, ordres K1..K demandé, hash/provenance, sortie
 FULL et chronos de toutes les phases. Ni les 20 CTests, ni la fixture
 ci-dessus ne démontrent encore une croissance sous-quadratique ou le
 contrat G4.
+
+## Addendum — nouvelle porte arithmétique encore non publiée
+
+Dans le worktree développeur postérieur à `d2700314`, une porte
+`arith_u18_gate.cpp` d'environ 1 600 lignes apporte des comparaisons
+`cpp_int`/`cpp_rational` de formules distinctes, des cas extrêmes et des
+refus. Les en-têtes arithmétiques modifiés ne changent **que les
+commentaires** ; aucune régression d'instructions n'en découle.
+Cependant `CMakeLists.txt` crée `arith_u18` avec
+`mhgp9_product_executable`, sans `MHGP9_TESTING`. Dans cette configuration,
+`MHGP9_MUTANT(...)` vaut toujours `false` : le mutant `level-trunc-hi`
+annoncé dans `wide.hpp` n'est ni activable par la CLI de cette porte ni
+exécuté par CTest. L'oracle échantillonné conserve sa valeur, mais la
+preuve causale « mutant tué » est **non établie**. Il faut une cible
+instrumentée distincte et un reçu du premier désaccord numérique exact.
+
+Deux commentaires de q4 conservent aussi les anciennes bornes u16 malgré
+la nouvelle ligne u18. Pour `M=262143` et le tétraèdre bien centré
+`a=(0,0,0)`, `b=(0,M,M)`, `x=(M,0,M)`, `y=(M,M,0)`, les formes **brutes
+non réduites** valent `det=16M³`, `N'=(8M⁴,8M⁴,8M⁴)`, donc
+`|N'|²=192M⁸` (152 bits), `det²=256M⁶` (116 bits) et
+`|B_i|=16M⁴` (76 bits) : les mentions `<2^146`, `<2^114`, `<2^74`
+de `q4.hpp` sont fausses en u18. En translatant le même motif par
+`t=M/3=87381` sur chaque axe et en prenant `L=2M/3`, le coefficient
+brut `C=48L³t(t+L)` occupe 93 bits, pas `<2^90`. Les nouveaux majorants
+u18 `<2^160`, `<2^120`, `<2^81`, `<2^100` restent compatibles avec
+ces témoins. Le commentaire `<2^171` pour la comparaison q3/q3 dans
+`level.hpp` doit également suivre la borne u18 `<2^192`.
+Ces écarts sont documentaires/de preuve ; aucun débordement réel de la
+voie U192/U320 n'est montré par ces témoins.
