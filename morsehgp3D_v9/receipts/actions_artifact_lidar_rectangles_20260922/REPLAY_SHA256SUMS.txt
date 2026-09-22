@@ -1,0 +1,5 @@
+676023ab9c9cfc298580523479ad9aa6e9bb97f05c3bfc8c4c3765171e56a660  /home/runner/work/_temp/lidar-audit-captures/replay/libmhgp8_p0.a
+9a7598b89fabb98d2d8498d1497e6ba36f3b143065e4e0c54db364cbb9931133  /home/runner/work/_temp/lidar-audit-captures/replay/native_sources.tar.gz
+0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf  /home/runner/work/_temp/lidar-audit-captures/replay/scene_00.u32le
+ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f  /home/runner/work/_temp/lidar-audit-captures/replay/scene_01.u32le
+a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af  /home/runner/work/_temp/lidar-audit-captures/replay/scene_02.u32le

@@ -57,6 +57,35 @@ et de mettre à jour [l'état courant](ETAT_COURANT.md).
    Git), données KITTI et profil OS Login versionnés dans le dépôt public v8,
    portes hermétiques et CI.
 
+## Complément, même jour : ce que l'audit d'ouverture n'a pas lu
+
+Une critique de complétude a relevé des sources non lues. Quatre lectures
+complémentaires ont été ajoutées (canal v8, verrous B1–B5 et plan de
+refonte, passation et fausses pistes v8, carte des sources) : voir les
+rapports 13 à 16 de [audit_v8/](../docs/audit_v8/README.md). Restent hors de
+cet audit, et vous reviennent si vous les jugez utiles :
+
+1. **Objet contre les textes normatifs** (lot 1) : aucune lecture ne confronte
+   la tour FULL de la v7, extension non régulière comprise, aux Déf. 20–31 du
+   manuscrit (pages PDF 35–134 ; seules les pages 110–116 ont été relues) ni à
+   `docs/SPECIFICATION_MORSEHGP3D.md` en entier.
+2. **Notes q3/q4 des tranches 22 à 34** (lot 1) : corps connus par la passation
+   seulement ; `Q34_PISTES_APRES_INDEXATION_20260921.md`,
+   `Q34_MESURES_SPATIALES_20260921.md`, et les rapports
+   `morsehgp3D_v8/audits/WSPD_Q2_Q3_Q4.md` et `PERIMETRE_ET_PREUVES.md` non lus.
+3. **Dossiers d'auditeurs** (lot 2) : 15 des 21 notes de l'auditeur
+   complémentaire, les six dossiers de l'auditeur A (`q34_prefix_order`,
+   `q3_prefix_relay`, `q3_seed_block_power`, `q4_center_blocks`,
+   `q4_local_sweeps`, `q4_kernel_composition`), et le seul coût CPU G4
+   consolidé (`receipts/lidar_global_20260921/gcp_r3_completed/CPU_COSTS.json`).
+4. **Preuves hors dépôt** (lot 2) : l'artefact Actions 10704262200, qui
+   expirait le 6 octobre, a été rapatrié sans les trames KITTI
+   ([reçu](../receipts/actions_artifact_lidar_rectangles_20260922/README.md)).
+   Les deux archives zip des audits du 22 septembre restent hors dépôt.
+5. **Étendue des données personnelles** (lot 2) : mesurer dans l'historique
+   Git toutes les archives qui contiennent `oslogin_add.stdout`, sans rien
+   réécrire (décision réservée à l'utilisateur).
+
 ## Ce que le développeur fera de vos réponses
 
 Chaque constat recevra une réponse écrite dans le canal : accepté (avec la

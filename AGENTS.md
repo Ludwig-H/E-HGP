@@ -20,10 +20,21 @@ Le 22 septembre : « Oui, continuons en entier 18 bits », en réponse à la
 proposition de poursuivre le contrat temps sur le moteur entier élargi à
 18 bits (grille 1 mm), le profil float32 sans perte restant qualifié mais hors
 contrat temps ; puis « Ne développe pas plus pour le float32 pour l'instant ».
-Le moteur entier a été élargi à 18 bits en `a74e90f2`. Les paragraphes v8
-ci-dessous restent l'historique de la v8 ; en cas de conflit sur le régime ou
-la précision du contrat temps, ces décisions datées prévalent. Les points
-encore ouverts sont listés en § 9 de la synthèse.
+Le moteur entier a été élargi à 18 bits en `a74e90f2`. Deux consignes
+antérieures restent en vigueur : séparation WSPD s ∈ {8, 10, 12}, s = 8 par
+défaut, **jamais s < 8** (« ne prends jamais s en-dessous de 8 », consignée
+dans `morsehgp3D_v8/audits/SEPARATION_20260914.md`) ; et, le 21 septembre,
+« Pas de confrontation à la vérité terrain pour l'instant. On ne s'occupe que
+du clustering, pas encore de la pertinence du clustering ». Le 22 septembre,
+l'utilisateur a laissé la portée de cette consigne au développeur (« le but
+est d'avoir un livrable qui fonctionne, pas de pinailler sur les détails à
+l'infini ») : aucune comparaison aux étiquettes SemanticKITTI ; les oracles
+de correction bornés (`reference/`, juge T2 de la v7) restent des portes de
+test. Même jour : « L'objectif multi-millions est un objectif secondaire, une
+fois les contrats satisfaits sur LiDAR ». Les paragraphes v8 ci-dessous restent l'historique de la v8 ; en cas
+de conflit sur le régime ou la précision du contrat temps, ces décisions
+datées prévalent. Les points encore ouverts sont listés en § 9 de la
+synthèse.
 
 L'objet à livrer est la tour HGP FULL de la v7 (minima Gabriel, multifusions,
 parents, verticales, extension non régulière), pas le fold v4 (faux en

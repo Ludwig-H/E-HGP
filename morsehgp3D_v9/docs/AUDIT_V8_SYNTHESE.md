@@ -51,11 +51,15 @@ prioritaire.
 | --- | --- | --- | --- |
 | hérité v7 | `AGENTS.md` | tour FULL K=1..10 à 50 000 points en moins de 1 s sur G4, repli K=1..5, puis 100 ms | jamais mesuré en v8 (aucune tour) ; référence v7 419 s / 34 s |
 | 13 sept. | ouverture v8 | P0 : supprimer les histogrammes locaux O(\|A\|²+\|B\|²) | non clos au sens strict ; constantes divisées (tranches 12, 20, 21), exposants inchangés |
+| 14 sept. | consigne utilisateur | séparation WSPD : « ne prends jamais s en-dessous de 8 » ; s ∈ {8, 10, 12} donne le même objet, s = 8 par défaut | respectée ; consignée seulement dans `morsehgp3D_v8/audits/SEPARATION_20260914.md`, reportée dans `AGENTS.md` à l'ouverture v9 |
+| 21 sept. matin | consigne utilisateur à l'auditeur B | « Pas de confrontation à la vérité terrain pour l'instant. On ne s'occupe que du clustering, pas encore de la pertinence du clustering. » | respectée : aucune étiquette SemanticKITTI utilisée, et la confrontation prévue des entrées q3/q4 à `reference/morsehgp3d_oracle` a été abandonnée ; absente du dépôt jusqu'à l'ouverture v9, citée d'après le journal de session ; portée exacte en § 9 |
 | 21 sept. | `morsehgp3D_v8/docs/CONTRAT_TRAMES_SEMANTICKITTI_20260921.md` | une trame SemanticKITTI **entière**, plusieurs scènes, tour K=1..10 en moins de 1 s sur G4, repli 1..5, puis 100 ms | non mesurable (pas de tour) |
 | 21 sept. | `morsehgp3D_v8/docs/PRECISION_FLOAT32_ET_GRILLE_20260921.md` | float32 original par défaut, grille isotrope optionnelle à 1 mm | briques float32 qualifiées, aucun générateur global |
+| 21 sept. | décision utilisateur (`AGENTS.md`, section q3/q4 global et LiDAR) | la croissance sur les régimes visés, surtout SemanticKITTI, prime sur l'attente d'une borne sous-quadratique universelle ; les contre-régimes restent publiés, sans veto ; l'exactitude reste exigée sur tout le profil | respectée ; reprise dans le plan v9 |
 | 21 sept. 20:10 | directive utilisateur (citée ci-dessous) | régime prioritaire : SemanticKITTI **sans sol**, 30 000 à 60 000 points ; contrats temps 1 s / 100 ms et K5 / K10 à y passer ; multi-CPU puis GPU ; feu vert G4 | `AGENTS.md` cite le sans-sol comme régime prioritaire « supplémentaire », sans la taille ni le transfert du contrat ; mesurée sur le flux seul |
 | 22 sept. ~01:20 | réponse utilisateur à la question Q2 de l'audit de reprise | « Oui, continuons en entier 18 bits » : contrat temps sur le moteur entier élargi à 18 bits (grille 1 mm), float32 sans perte qualifié mais hors contrat temps | port `a74e90f2` publié ; `AGENTS.md` dit encore « le moteur existant demeure u16 » |
 | 22 sept. | consigne utilisateur | « Ne développe pas plus pour le float32 pour l'instant » | respectée |
+| 22 sept. soir | réponse utilisateur aux points 6 et 7 du § 9 | « Je te laisse décider pour l'oracle ; le but est d'avoir un livrable qui fonctionne, pas de pinailler sur les détails à l'infini. L'objectif multi-millions est un objectif secondaire, une fois les contrats satisfaits sur LiDAR » | tranchée : oracles de correction bornés utilisés comme portes, étiquettes exclues ; échelle multi-millions après les contrats LiDAR |
 
 Directive du 21 septembre, texte de l'utilisateur : « La priorité de régimes
 est pour les nuages LiDAR SemanticKITTI sans sol ; c'est principalement sur
@@ -72,6 +76,16 @@ contrat temps » (`morsehgp3D_v8/docs/AUDIT_REPRISE_DEVELOPPEUR_20260921.md`,
 tranche non commise d'un autre acteur la requalifie en « priorité de
 développement » (voir § 8). La v9 part de la décision telle qu'elle a été
 donnée ; les points encore ambigus sont listés au § 9.
+
+Questions posées à l'utilisateur par l'audit de reprise du 21 septembre
+(`morsehgp3D_v8/docs/AUDIT_REPRISE_DEVELOPPEUR_20260921.md`, § Questions),
+et leur sort :
+
+| question | réponse | provenance | état pour la v9 |
+| --- | --- | --- | --- |
+| Q1 — session concurrente dans l'arbre partagé, sort des brouillons float32 | aucune réponse écrite | — | ouverte ; un « constructeur » écrivait encore le 22 septembre de 09:58 à 10:56 UTC (§ 8) ; reprise en § 9, point 5 |
+| Q2 — contrat temps sur le moteur entier 18 bits, float32 qualifié hors contrat | « Oui, continuons en entier 18 bits » | réponse en conversation le 22 septembre, non consignée en v8 ; consignée dans `AGENTS.md` à l'ouverture v9 | tranchée |
+| Q3 — dérivés KITTI versionnés (111 Mo), licence Patchwork++ | aucune réponse | — | ouverte ; élargie au profil OS Login en § 9, point 4 |
 
 ## 3. Ce que la v8 calcule
 
@@ -103,20 +117,37 @@ physiques). « Flux » désigne le seul générateur q3/q4 en mode digest.
 | atlas q4, scène 0, K10 | 10,7 G bornes de blocs + 24,2 G tests ponctuels + 18,3 G IDs copiés, inchangés par les phases 1-2 | `ground_phase1_20260921/only_probe_02…json` |
 | graines q3 rejetées par l'atlas sans census | 82,7 à 95,0 % | idem |
 | budget du contrat 1 s sur G4 | 48 CPU·s (24 cœurs physiques, 48 fils) | — |
-| facteur de travail à gagner sur le **flux seul**, 1 s, trames sans sol 2 cm | K5 ×6 à ×36 ; K10 ×17 à ×101 ; 100 ms : ×10 de plus (selon la scène, le nombre de fils utiles et la vitesse par fil de la G4, jamais mesurée à W1) | [parallélisme](audit_v8/12_parallelisme_gpu_perf.md) § 4 bis et sa contre-vérification |
-| suite CTest au commit audité | 132 enregistrés ; 129 passent (dont 8 mutations) ; 3 désactivés par construction | [reçu d'audit](../receipts/audit_v8_20260922/README.md) |
+| facteur de travail à gagner sur le **flux seul**, 1 s, trames sans sol 2 cm : **scénarios conditionnels de débit**, ni mesures ni minorants | K5 ×6 à ×36 ; K10 ×17 à ×101 ; 100 ms : ×10 de plus (selon la scène, CPU W1 mesuré ou inféré, charge croisée, 24 ou 48 fils équivalents, vitesse G4 supposée) | [parallélisme](audit_v8/12_parallelisme_gpu_perf.md) § 4 bis et sa contre-vérification |
+| suite CTest au commit audité | 132 enregistrés ; 129 exécutés et verts (dont 8 mutations) ; 3 désactivés par construction, donc non jugés | [reçu d'audit](../receipts/audit_v8_20260922/README.md) |
 | volume versionné de la v8 | 19 281 fichiers ; reçus 979,3 Mo en 16 016 fichiers | inventaire du reçu d'audit |
 
-Lecture : même en supposant un parallélisme parfait, le flux seul coûte 6 à
-100 fois le budget d'une seconde ; l'aval absent (q2 dans l'appel, catalogue,
-fold, tour) s'y ajoutera, et il représentait 93 % du temps de la tour v7. Sur
-la seule paire comparable (trame brute 0, K5, mêmes sorties), la G4 a consommé
-0,49 fois les CPU·s de l'hôte local : les facteurs calculés en local
-surestiment peut-être l'écart d'un facteur 2. À K10, l'atlas q4 seul totalise
-53 milliards d'opérations élémentaires sur la scène 0 (copies d'IDs comprises)
-et près de 100 milliards sur la scène 2 : le **nombre** d'opérations doit
-baisser d'au moins un ordre de grandeur, aucune constante ni aucun
-parallélisme ne suffit seul.
+Lecture : la conclusion robuste est que le flux actuel **dépasse fortement**
+le budget, pas que le gain requis est connu au facteur près. L'aval absent
+(q2 dans l'appel, catalogue, tour) s'y ajoutera ; il représentait 93 % du
+temps de la tour v7 sur nuage uniforme K10, ce qui est une alerte et non un
+Amdahl applicable au LiDAR. Sur la trame brute 0 (K5, mêmes sorties), la G4
+a consommé 0,49 fois les CPU·s de l'hôte local, mais ce rapport compare G4
+W48 (4,19 CPU logiques occupés en moyenne) et local W4 sous charges
+différentes : il ne donne pas de vitesse G4 par fil. À K10, l'atlas q4 paie
+sur la scène 0 10,7 G bornes de blocs, 24,2 G tests de points et 18,3 G copies
+d'IDs, masses de coûts unitaires différents à publier séparément : le
+**nombre** d'opérations doit baisser d'au moins un ordre de grandeur, aucune
+constante ni aucun parallélisme ne suffit seul.
+
+Chiffres **sans reçu** qui circulent dans les documents v8 et dans certains
+rapports d'audit : ils ne doivent ni fermer une piste ni ordonner une
+priorité en v9 tant qu'une mesure épinglée ne les a pas remplacés.
+
+| chiffre | où il apparaît | pourquoi il n'est pas une mesure |
+| --- | --- | --- |
+| coût float32 « ×20/×23 à ×70 par prédicat », « clé 78 µs », « 68–185 ms par arête » | audit de reprise, rapports 01, 03, 12 | la source déclare « aucune mesure n'est épinglée » ; aucun reçu |
+| profil après phase 1 : atlas ≈ 52 %, filtres 13 % | journal du 21 septembre | aucun profil épinglé après phase 1 ; le seul gprof épinglé est celui de la base (famille atlas ≈ 57,6 %, dont `node_bounds_unchecked` 40,32 %) |
+| chronos du quart de 7 067 sites (48,5 → 39,9 → 27,3 s ; W8 7,2 s) et variantes d'atlas rejetées | journal du 21 septembre | diagnostic sur une sonde de scratchpad perdue |
+| écriture de la sortie v7 à 50k : 62,7 ms | note v7 | seule la taille (1,75 Go = 27 273 218 × 64 octets) est vérifiée |
+| taux de rejet des graines q3 « 73,8–90,7 % » | note de tranche | quart de trame et préfixe 8k, déclaré diagnostic ; les reçus épinglés donnent 82,7–95,0 % |
+| « ×2,6–3,9 par site sans sol », « 250 nuages », « 3/366 », « 415 dépendances 16 bits », « 79 portes, 129 exécutées » | notes d'audit et journal | comptes ou rapports non recalculables depuis un reçu |
+| MEB pivot4 0,262–0,271 ; exhaustifs du quart et de la moitié x+ | notes d'auditeur | sources hors dépôt ou captures non épinglées |
+| gains de la cascade (×2,55–4,46), présélection (×5,13–11,10), collectif LiDAR (221/763) | audits du 22 septembre | sources dans des archives jointes à une conversation ; seul l'artefact Actions a été rapatrié ([reçu](../receipts/actions_artifact_lidar_rectangles_20260922/README.md)), et il ne mesure que le filtre sur échantillon |
 
 ## 5. Ce qui est bon et doit être gardé
 
@@ -127,7 +158,7 @@ parallélisme ne suffit seul.
   (reçu encore non commis).
 - **Certificats de rejet prouvés** : lemme du citron (α3 = 3, α4 = 2) et son
   contre-exemple sur q4, certificat frère, théorème H des témoins hérités,
-  Pool terminal par facteurs (×9,6 à ×17 sur amas), certificat familial,
+  Pool terminal par facteurs (×3,7 à ×17,2 sur amas selon n et K ; aucun plan retenu sur uniforme et terrain), certificat familial,
   corde resserrée, fenêtre q4 [L, U], couches duales, certificat d'atlas pour
   les graines q3, certificat collectif d'arête (prototype d'audit).
 - **Indépendance des voies** q2, q3, q4, gravée par contre-fixtures et
@@ -194,7 +225,12 @@ Gravité moyenne : défauts de bibliothèque lents (la configuration mesurée
 environ 1 900 lignes de prototypes compilées dans la bibliothèque produit ;
 reçus non autonomes (lecteurs LIVE liés à 181 builds locaux non versionnés,
 sonde de la campagne de phase 1 perdue dans un scratchpad, preuves d'audit du
-22 septembre dans des archives jointes à une conversation) ; campagnes sous
+22 septembre dans des archives jointes à une conversation) ; canal de coordination v8
+muet après `204b0620` (21 septembre) : les six commits moteur et les audits
+du 22 n'y sont jamais annoncés, et l'auditeur complémentaire ne répondait
+plus depuis le 13 ; documents de verrous et de refonte périmés (§ 10) ;
+arbre de plages du nuage (80 % de sa mémoire) construit pour un prototype
+abandonné ; campagnes sous
 charge croisée (sentinelle périmée) ; voie q2 jamais mesurée sans sol ;
 registre des preuves `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md` jamais mis
 à jour en v8 ; domaine non régulier (plateaux cosphériques) sans sémantique
@@ -210,10 +246,16 @@ singletons, cover construit pour les arêtes q3 seules.
 
 ## 7. Ce que la v7 avait de bon et que la v8 a laissé
 
-- L'**objet FULL** prouvé et contrelu : feuilles = minima Gabriel de cardinal
+- L'**objet FULL** défini et contrelu : feuilles = minima Gabriel de cardinal
   K, nœuds internes = vraies multifusions de cardinal K+1 avec parents
   pré-lot, portails silencieux internes, ancres et verticales, extension non
-  régulière (contributions datées, ancres inertes).
+  régulière (contributions datées, ancres inertes). Portée exacte de la
+  preuve (registre `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`, l. 120-122 et
+  131-134) : un **théorème conditionnel horizontal** sous prémisses
+  régulières ; la fenêtre d'inertie ne prouve ni toutes les verticales ni
+  l'objet public. Sur une grille 1 mm, plateaux et coquilles supplémentaires
+  de rang pertinent exigent un quotient de plateau certifié ou un refus de
+  domaine explicite.
 - Le **constructeur de référence** `full_ball_tower.hpp`, la MEB à coquille
   libre, le journal daté v2, le quotient local de coquille, le juge T2
   census→FULL (n ≤ 14) et ses fixtures (E5, quatre points, A–E, coquille à
@@ -255,19 +297,31 @@ correction du lecteur, ou l'abandonner par écrit. D'autres états non commis su
 septembre), delta v7 « marques au premier parcours », notes de l'auditeur
 complémentaire du 13 septembre.
 
-## 9. Questions à l'utilisateur
+## 9. Questions à l'utilisateur et décisions prises
 
-1. **Régime et chronomètre.** Le contrat temps porte-t-il sur la trame sans sol
-   (30 000–60 000 sites, directive du 21 septembre), sur la trame brute
-   entière (≈ 120 000 sites, contrat du même jour), ou les deux avec priorité ?
-   Le chronomètre inclut-il la lecture, la grille, le masque sans sol ?
-2. **Format de sortie.** Nœuds explicites (écriture de la sortie v7 à 50k
-   estimée à 62,7 ms, sans reçu) ou sortie implicite déclarée ? C'est une
-   condition du 100 ms.
-3. **Multiplicités.** La spécification permet à une première version certifiée
-   d'exiger des sites distincts, les multiplicités venant ensuite ; la v8
-   fusionne les retours de même position (aucune fusion à 1 mm sur les trois
-   trames). À confirmer comme décision pour la v9.
+Le 22 septembre, l'utilisateur a demandé un livrable qui fonctionne plutôt
+qu'un raffinement sans fin, et laissé les choix de détail au développeur.
+Les points 1 à 3 sont donc tranchés ici comme **hypothèses de travail
+révocables** ; les points 4 et 5 restent à l'utilisateur.
+
+1. **Régime et chronomètre** — hypothèse. Le contrat temps se juge d'abord sur
+   les trois trames sans sol de 30 000 à 60 000 sites (directive du
+   21 septembre, explicite sur ce régime) ; la trame brute entière vient en
+   phase V9-5, comme ligne de qualification distincte : le contrat sur trame
+   brute du 21 septembre n'est pas retiré et n'est pas acquis sans elle. Le chronomètre part du nuage préparé en mémoire (sites 18 bits
+   distincts, masque sans sol déjà appliqué) et s'arrête à la tour complète en
+   mémoire. Lecture du fichier, grille et masque sont mesurés à part et
+   publiés dans le même reçu, jamais cachés (en v8 : environ 30 ms mono-thread
+   de la lecture du brut au masque fermé, `morsehgp3D_v8/receipts/lidar_ground_20260921/README.md`).
+2. **Format de sortie** — hypothèse. Nœuds explicites en mémoire (ordre, rayon
+   carré exact, parents, verticales), convertibles sans perte en
+   `CertifiedTowerInput` de `morsehgp3d/` ; la sérialisation est mesurée à
+   part. Une sortie implicite ne sera envisagée que si le 100 ms l'exige, avec
+   reçu.
+3. **Multiplicités** — hypothèse. Sites distincts, comme la v8 : les retours de
+   même position sont fusionnés avec leur compte conservé en métadonnée (aucune
+   fusion à 1 mm sur les trois trames). Les multiplicités pondérées viennent
+   après le premier livrable.
 4. **Données KITTI et profil OS Login dans le dépôt public.** Notice de
    licence et exception documentée, ou retrait avec réécriture d'historique
    (hors du pouvoir d'un agent) ? Même question pour les archives G4 qui
@@ -275,3 +329,38 @@ complémentaire du 13 septembre.
    versionne aucun octet KITTI ni aucune archive hôte en attendant.
 5. **Travail non commis** : sort de la tranche u18 du constructeur, du
    brouillon float32 et du delta v7.
+6. **Portée de « pas de confrontation à la vérité terrain »** — tranchée le
+   22 septembre, décision laissée au développeur : aucune comparaison aux
+   étiquettes SemanticKITTI ; `reference/morsehgp3d_oracle`, le juge T2 de la
+   v7 et les oracles rationnels servent de portes de correction sur petits
+   nuages, parce qu'un livrable qui fonctionne doit pouvoir être vérifié.
+7. **Échelle v6** — tranchée le 22 septembre : l'objectif du 2 septembre
+   (« des dizaines de milliers de points jusqu'à des dizaines de millions »,
+   mur de résidence v6 estimé vers 480 000 points à K = 10 sur 180 Gio,
+   `morsehgp3D_v6/docs/ECHELLE.md` § 2) est **secondaire** et vient après les
+   contrats sur les trames LiDAR sans sol.
+
+## 10. Verrous d'architecture v8 et limites de cet audit
+
+Les documents `morsehgp3D_v8/docs/VERROUS_ARCHITECTURE.md` (dernière
+modification `785d0589`) et `PLAN_DE_REFONTE.md` (`204b0620`) sont périmés : ils
+portent encore le contrat 50k et ignorent les phases 1-2 et le port 18 bits.
+État réel au commit audité ([rapport 14](audit_v8/14_verrous_et_plan_de_refonte.md)) :
+
+| verrou | état | preuve |
+| --- | --- | --- |
+| P0 (histogrammes locaux) | objet levé (Pool terminal O(KF)), critère de clôture jamais prononcé ; défauts de l'API restés lents | `P0_POOL_TERMINAL_Q2.md` |
+| B1 recherche spatiale | partiel en q2 (fenêtre 2K, témoins hérités, opt-in, masque 1) ; ouvert en q3/q4 (recherche relancée par paire : 1,09 G visites à K5, 1,92 G à K10, scène 0) | `front.cpp:406-412`, `wspd_q34.cpp:485-492` |
+| B2 carré de voisinages | partiel : graines q3 construites 179,7 M → 31,0 M ; atlas q4 inchangé | reçus `ground_phase1_20260921` |
+| B3 recherche lexicographique de l'aval | ouvert, jamais commencé en v8 | `src/forest/` vide |
+| B4 calendrier séquentiel de l'aval | ouvert ; en v7, exposant 1,243 contre 1,094 pour la géométrie | note v7 de découpe de la tour |
+| B5 résidence | ouvert ; aucun code GPU | `src/gpu/` vide |
+| packing de la WSPD à bissection au milieu | lacune de preuve ouverte, question du 13 septembre jamais répondue | canal v8 |
+
+Ce que cet audit n'a pas couvert, soumis aux auditeurs v9
+([question](../audits/QUESTION_CLAUDE_CONTRE_AUDIT_OUVERTURE_20260922.md)) :
+confrontation de la tour FULL aux Déf. 20–31 du manuscrit et à la
+spécification en entier ; corps des notes q3/q4 des tranches 22 à 34 ; 15 notes
+de l'auditeur complémentaire et six dossiers de l'auditeur A ; deux archives
+zip du 22 septembre restées hors dépôt. Les rapports 13 à 16 sont des
+lectures simples, non contre-vérifiées.

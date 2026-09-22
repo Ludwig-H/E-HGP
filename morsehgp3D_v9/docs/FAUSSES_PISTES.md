@@ -7,6 +7,15 @@ raison de sa fermeture. Les références complètes sont dans
 et les rapports de [audit_v8/](audit_v8/README.md). « Non épinglé » signale une
 fermeture fondée sur un journal sans reçu : elle reste une présomption.
 
+Une fermeture n'a pas toujours la même force : une **preuve** ou une
+**fixture** (fausse en général), une **mesure** (plus lente sur un régime
+donné), un **modèle de coût** conditionnel, ou une **consigne** de priorité.
+Seules les deux premières sont définitives. La liste v8 complète
+(`morsehgp3D_v8/docs/FAUSSES_PISTES.md`, 580 lignes) contient en outre
+environ 70 garde-fous d'exactitude qui ne sont pas recopiés ici : la relire
+avant de porter l'atlas, le census q3, la fenêtre q4, le catalogue ou les
+parents FULL (liste ciblée dans le [rapport 15](audit_v8/15_entrees_v8_non_lues.md)).
+
 ## Objet et mathématiques
 
 | piste | fermée par |
@@ -56,26 +65,27 @@ fermeture fondée sur un journal sans reçu : elle reste une présomption.
 | Fabrique de rectangle recopiant le nuage | coût ×R sur les préparations |
 | Census conjoint A/B équilibré ; conjoint A seul | rangées 8k 0,242 → 1,888 s ; gain non concluant |
 | Test de lentille avant recherche | 0,4 à 1 % des recherches évitées |
-| Blocs Z certifiés le long de la descente | uniforme 32k : 57,6 → 78,6 s |
+| Blocs Z certifiés le long de la descente | **différée, non fermée** : uniforme 32k 57,6 → 78,6 s, mais la comparaison front + census demandée par l'auditeur B n'a jamais été faite |
 | Réutiliser le pivot du parent sans redescendre ; descente plafonnée à K | ×0,94 à ×6,00 ; 38 à 91 bornes par rectangle |
-| Élargir la fenêtre de K témoins au lieu d'une descente saturante | fenêtre 2K : 36 à 56 % de la masse q3 contre 82 à 91 % pour un proposeur par descente |
+| Élargir la fenêtre de témoins **des voies q3/q4** au lieu d'une descente saturante | fenêtre 2K : 36 à 56 % de la masse q3 contre 82 à 91 % pour un proposeur parfait (plafond théorique, pas une mesure de moteur) ; la fenêtre 2K reste portée pour q2 seul |
 | Lots de singletons entrelacés | ×1,005 à ×1,225 sur 54 comparaisons, aucune plus rapide |
 | Redistribution `Donate`, détachement par ancre, équipe coopérative, plages d'ancres | pas de gain général ; 17 comparaisons rangées sur 18 plus lentes (coopératif) ; 8 favorables sur 72 (détachement) |
-| Nouvelles micro-variantes q2 isolées | consigne répétée des tranches 19 à 34 : constantes, pas exposants |
+| Nouvelles micro-variantes q2 isolées | **consigne** des tranches 19 à 34 (constantes, pas exposants) ; restent différées : reprise exacte de la descente (×0,94–0,98, à réévaluer à 18 bits), produits de masse 1 |
 
 ## Voies q3/q4
 
 | piste | fermée par |
 | --- | --- |
 | Census q3 scalaire sur le cover | 361 G tests ponctuels à 8k, 99,1 % extérieurs, ×10,8 de 4k à 8k |
-| Window30 en remplacement de Local28 | médiane 1,153 plus lente ; K10 32k 241 s contre 153 s |
-| Couches duales comme remplacement ou comme filtre des graines q3 | adversaire K10 : ×10,27 ; coût 1,5 à 3,4 fois le census évité |
+| Window30 en remplacement de Local28 | médiane 1,153 plus lente ; K10 32k 241 s contre 153 s ; réserve du reçu : plus rapide à 32k/K5 sous charge (40,5 s contre 45,0 s) |
+| Couches duales en remplacement de Local28 | adversaire K10 : ×10,27 |
+| Couches duales comme filtre des graines q3 à K−1 | **différée, non fermée** : modèle de coût conditionnel (1,5 à 3,4 fois le census évité), à réexaminer si graines par arête dépasse le seuil ; régime sans sol 1 mm jamais mesuré |
 | Parcours `Joined` graines × cellules | 57 M initialisations de cache à 32k, pas de gain stable sur LiveOnly |
 | Pool universel, minimum collectif de graine, carte des centres comme cache de rejet | résidu dense, régressions jusqu'à ×1,56 |
 | Covers comme stockage partagé | contre-régime : 65 024 lectures pour 14 sorties |
 | Cache des formes dans la frontière de l'atlas ; classification conjointe des quatre cellules filles | neutre ; +18 % (quart de 7 067 sites, **non épinglé**) |
 | Récursion relançant l'index par sous-rectangle ; reprise par listes d'IDs | 903 → 1 095 ms ; 450 → 511 ms (archive d'audit, **non épinglé**) |
-| Rejeter q4 seul pour supprimer l'atlas | l'atlas sert aussi aux graines q3 |
+| Rejeter q4 seul pour supprimer l'atlas | réserve de méthode, pas une réfutation : l'atlas sert aussi aux graines q3 |
 | Assimiler une sonde d'une arête ou un quart spatial à une mesure d'échelle | diagnostic « 8k/16k/32k » constant par construction (7 tests pour tout n) |
 | Exposant par relation parent/enfant comme verdict de croissance | un compteur exactement linéaire reçoit 0,78 à 1,27 |
 

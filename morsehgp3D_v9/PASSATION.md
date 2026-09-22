@@ -52,12 +52,19 @@ reçu, données hors Git. Puis V9-1 : la tranche verticale mono de bout en bout
 trois trames sans sol 1 mm. Le premier chiffre utile de la v9 est le temps de
 la **tour complète** sur ces trames, pas celui d'un composant.
 
-## Décisions demandées à l'utilisateur
+## Décisions et questions ouvertes
 
-Voir la [synthèse](docs/AUDIT_V8_SYNTHESE.md) § 9 : régime et frontière du
-chronomètre ; format de sortie ; multiplicités ; données KITTI versionnées dans
-un dépôt public ; sort du travail non commis. En attendant, la v9 suit les
-décisions consignées en § 2 de la synthèse et ne versionne aucun octet KITTI.
+L'utilisateur veut un livrable qui fonctionne et laisse les choix de détail
+au développeur (22 septembre). La [synthèse](docs/AUDIT_V8_SYNTHESE.md) § 9
+fixe donc des hypothèses de travail révocables : contrat jugé d'abord sur les
+trames sans sol, chronomètre du nuage préparé en mémoire à la tour complète en
+mémoire (lecture, grille et masque mesurés à part) ; nœuds explicites
+convertibles en `CertifiedTowerInput` ; sites distincts. Les oracles de
+correction bornés servent de portes ; aucune étiquette SemanticKITTI.
+L'échelle multi-millions vient après les contrats LiDAR. Restent à
+l'utilisateur : les données KITTI et le profil OS Login versionnés dans un
+dépôt public, et le sort du travail non commis d'autres acteurs. En
+attendant, la v9 ne versionne aucun octet KITTI.
 
 ## Entrées disponibles
 
