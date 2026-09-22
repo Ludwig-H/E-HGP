@@ -68,7 +68,7 @@ endfunction()
 # ---- Tour FULL (port de morsehgp3D_v7, dc57ffd5, au domaine u18).
 # Les portes jugent la tour contre l'oracle rationnel borne ; le catalogue
 # d'entree y est fourni par l'oracle (le producteur reel vient ensuite).
-foreach(gate IN ITEMS full_certificate full_coverage_certificate anchor_meb local_plateau full_ball_tower)
+foreach(gate IN ITEMS full_certificate full_coverage_certificate anchor_meb local_plateau full_ball_tower arith_u18)
   mhgp9_product_executable(mhgp9_tower_${gate}_gate tests/tower/${gate}_gate.cpp)
   mhgp9_gate(mhgp9_tower_${gate} 0 mhgp9_tower_${gate}_gate
              ARGS --selftest LABELS "gate;tower;oracle" TIMEOUT 300)

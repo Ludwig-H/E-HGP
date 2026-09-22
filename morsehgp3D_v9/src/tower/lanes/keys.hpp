@@ -6,8 +6,8 @@
 //                  P(z) = A|z|² + B·z + C, primitive (pgcd) et A > 0, quelle
 //                  que soit la lane generatrice (q2 : A = 1 ; q3 : A = G ;
 //                  q4 : A = det). P < 0 interieur strict, P = 0 coquille.
-//                  Largeurs sous u16 : A < 2^68, |B_i| < 2^86, |C| < 2^104 ;
-//                  A|z|² < 2^102, |B·z| < 2^105 — i128 ;
+//                  Largeurs sous u18 : A < 2^76, |B_i| < 2^96, |C| < 2^116 ;
+//                  |A|z|² + B·z + C| < 2^118 — i128 (porte arith_u18) ;
 //   FacetKey     : K-uplet trie de PointId (K <= 10), sommet du K-graphe.
 //
 // Contrat causal : la forme brute est une fonction pure du support, formee

@@ -4,8 +4,8 @@
 // r = (|b-a|², |x-a|², |y-a|²), M(c-a) = r, c-a = N'/det ; canonisation
 // d'orientation det > 0 ; det = 0 (coplanaires) : jamais un support q4.
 // Puissance AFFINE : P4(z) = det|z-a|² - 2N'·(z-a) = det(|z-c|² - R²) ; sous
-// det > 0 : < 0 interieur strict, = 0 coquille. Largeurs u16 : det < 2^57,
-// |N'_i| < 2^72, P4 < 2^94 — i128.
+// det > 0 : < 0 interieur strict, = 0 coquille. Largeurs u18 : det < 2^60,
+// |N'_i| < 2^79, P4 < 2^102 — i128 (porte mhgp9_tower_arith_u18).
 // Arite 4 STRICTE : le centre est strictement interieur ssi, pour chaque face,
 // le centre et le sommet oppose sont strictement du meme cote ; un zero =>
 // centre sur une face => arite <= 3 (autre lane). Le volume V = det3(u,p,q)

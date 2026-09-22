@@ -24,9 +24,17 @@ La tranche verticale de V9-1 existe et passe ses portes :
   Le générateur q3/q4 prend 117 s (89 %), la tour 11 s en un fil, q2 1,7 s.
   Le poste dominant est donc l'amont q3/q4, pas l'aval comme en v7 uniforme.
 
-Suite immédiate : campagne à reçu sur les trois trames, K5 puis K10 ; porte
-arithmétique 18 bits de la tour ; portes du générateur portées ; puis V9-2
-sur le poste mesuré (q3/q4).
+Base de temps à reçu ([`first_tower_20260922`](receipts/first_tower_20260922/README.md),
+huit fils, hôte local) : tour complète en 143 / 132 / 264 s à K5 et
+523 / 381 / 802 s à K10 sur les trames 000000 / 000100 / 000200 ; q3/q4 fait
+73 à 93 % du mur, la tour en un fil 13 à 25 % à K10. Porte arithmétique
+18 bits de la tour (`mhgp9_tower_arith_u18`) verte : elle montre que l'ancien
+test de plateau i128 de la v7 rendait de vraies réponses fausses à 18 bits.
+Protocole G4 v9 écrit (`gcp-migration/tower_*_v9.py`, selftests hors ligne
+verts), pour une première session à 48 fils.
+
+Suite : session G4 ; noyau MEB exact accéléré et parallélisme de la tour ;
+V9-2 sur l'atlas q4 et le census q3 (leviers des auditeurs A et B).
 
 ## État du dépôt au moment de l'ouverture (historique)
 

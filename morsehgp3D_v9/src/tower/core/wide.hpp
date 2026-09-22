@@ -1,10 +1,10 @@
 // MorseHGP3D v6 — entiers non signes larges : U192 et U320.
 //
 // Les niveaux exacts sont des rayons AU CARRE en fraction : q2/q3 tiennent en
-// i128 (num < 2^101, den < 2^70), q4 non (|N'|² < 2^146, det² < 2^114). L'ordre
-// des niveaux se decide par produits croises : q3/q3 < 2^171 (U192),
-// q4/q4 < 2^260 (U320). Preconditions PROUVEES sur le profil u16 et testees
-// contre l'oracle 384 bits (`mhgp7_level_cmp`). Le mutant `level-trunc-hi`
+// i128 (num < 2^113, den < 2^79 sous u18), q4 non (|N'|² < 2^160, det² < 2^120).
+// L'ordre des niveaux se decide par produits croises : q3/q3 < 2^192 (U192),
+// q4/q4 < 2^280 (U320). Bornes u18 (v9) jugees contre un oracle cpp_int
+// independant par la porte `mhgp9_tower_arith_u18`. Le mutant `level-trunc-hi`
 // tronque le mot haut : la porte qui le tue prouve que les comparaisons
 // traversent les bits hauts.
 #pragma once

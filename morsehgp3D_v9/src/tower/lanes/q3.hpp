@@ -9,10 +9,10 @@
 // Forme de Gram (puissance sans centre) : d = b-a, u = x-a, D = d·d, E = u·u,
 // F = d·u, G = DE - F² > 0, W = E(D-F) d + D(E-F) u ;
 // P(z) = G|z-a|² - (z-a)·W : < 0 interieur strict, = 0 coquille.
-// Largeurs u16 : D, E < 3·2^32 ; G < 9·2^64 ; |W_i| < 9·2^82 ; G|v|² < 2^103 ;
-// |v·W| < 2^105 — i128.
-// BallForm : (A, B, C) = (G, -(2G a + W), G|a|² + W·a) ; |B_i| < 2^86, |C| < 2^104.
-// Niveau (rayon carre) : D·E·X/(4G), X = |b-x|² = D+E-2F ; D·E·X < 2^104.
+// Largeurs u18 : D, E < 3·2^36 ; G < 9·2^72 ; |W_i| < 2^96 ; G|v|² < 2^113 ;
+// |v·W| < 2^115 — i128.
+// BallForm : (A, B, C) = (G, -(2G a + W), G|a|² + W·a) ; |B_i| < 2^96, |C| < 2^116.
+// Niveau (rayon carre) : D·E·X/(4G), X = |b-x|² = D+E-2F ; D·E·X < 2^113 (u18).
 // Profondeur par descente exacte de l'arbre : P separable par axe et convexe
 // (minimum de reseau par axe aux entiers voisins du sommet). Elagage STRICT
 // `mn > 0` : un nœud a mn == 0 peut porter une coquille (mutant `q3-prune-ge`).

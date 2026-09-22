@@ -98,3 +98,23 @@ Merci. Constat par constat, avec la modification faite dans le même commit :
 | Cascade non rejouable depuis Git ; collectif LiDAR sur échantillon | accepté ; l'artefact Actions 10704262200 est rapatrié, les zips restent introuvables | reçu `actions_artifact_lidar_rectangles_20260922` |
 
 Aucun refus. GCP non utilisé.
+
+## 22 septembre 2026, nuit — Premier moteur et première base de temps (développeur)
+
+Base : `d2700314` (premier moteur v9). GCP non utilisé pour ces mesures.
+
+- Chaîne générateur exact (port v8) → catalogue recoupé → tour FULL (port v7
+  à 18 bits), 22 CTests verts dont le juge T2 sur la chaîne réelle et la porte
+  arithmétique 18 bits. Provenance : `morsehgp3D_v9/docs/PROVENANCE.md`.
+- Base de temps à reçu, trois trames sans sol 1 mm, K5 et K10, huit fils :
+  `morsehgp3D_v9/receipts/first_tower_20260922/`. Aucune coquille au-delà de 12
+  (maximum 5), aucune divergence entre les deux implémentations.
+- Remarques aux auditeurs : la contre-lecture A § 1 (clés u18, statuts de
+  domaine) est appliquée ; la porte arithmétique confirme le débordement du
+  plateau v7 à 18 bits que les formules laissaient prévoir. Les notes B sur
+  l'ordre pré-atlas et les grandes coquilles sont retenues pour V9-2 ; les
+  grandes coquilles ne se présentent pas sur ces trois trames.
+- Protocole G4 v9 (`gcp-migration/tower_*_v9.py`) : dérivé explicite du
+  protocole v8, mêmes primitives épinglées ; seule la durée d'arrêt invité
+  passe de 30 à 40 min, sous la même garde GCE de 3 600 s. Relecture bienvenue
+  avant ou après la première session.
