@@ -61,6 +61,20 @@ struct Box3 {
   Point3 high{};
 };
 
+// Storage is wider than the certified arithmetic domain. Standalone
+// factories must check before any subtraction/product; hot queries may use
+// points already certified by PreparedCloud under an explicit precondition.
+[[nodiscard]] constexpr bool valid_point(const Point3& point) noexcept {
+  return point.x >= 0 && point.x <= coordinate_limit &&
+         point.y >= 0 && point.y <= coordinate_limit &&
+         point.z >= 0 && point.z <= coordinate_limit;
+}
+
+inline void require_valid_point(const Point3& point) {
+  if (!valid_point(point))
+    throw std::invalid_argument("mhgp8 point outside the certified coordinate domain");
+}
+
 enum class Lane : std::uint8_t { Q2 = 2, Q3 = 3, Q4 = 4 };
 
 [[nodiscard]] constexpr bool valid_lane(Lane lane) noexcept {
@@ -79,13 +93,14 @@ inline void require_valid_lane(Lane lane) {
 }
 
 [[nodiscard]] constexpr bool valid_box(const Box3& box) noexcept {
-  return box.low.x <= box.high.x && box.low.y <= box.high.y &&
+  return valid_point(box.low) && valid_point(box.high) &&
+         box.low.x <= box.high.x && box.low.y <= box.high.y &&
          box.low.z <= box.high.z;
 }
 
 inline void require_valid_box(const Box3& box) {
   if (!valid_box(box)) {
-    throw std::invalid_argument("mhgp8 box has inverted bounds");
+    throw std::invalid_argument("mhgp8 box has inverted or out-of-domain bounds");
   }
 }
 

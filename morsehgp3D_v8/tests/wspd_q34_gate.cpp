@@ -65,6 +65,10 @@ struct GlobalGate : Gate {
   u64 seed_cell_shared_calls{},seed_cell_owner_resets{},seed_cell_parallel_failures{};
   u64 atlas_rejections{},atlas_lane_skips{},atlas_locations{},atlas_outside{};
   u64 task_sharing_calls{},task_ranges{},task_splits{},task_refusals{};
+  // Internal floors for the 18-bit twins only (the emitted inventory is
+  // frozen by bench/run_q34_indexed_checks.py): never emitted.
+  u64 extreme18_calls{},extreme18_indexed_calls{},extreme18_atlas_locations{},extreme18_atlas_rejections{};
+  u64 extreme18_bounds_calls{},deep_atlas_calls{};
 };
 
 // Every component is a standard-layout aggregate containing only u64 fields
@@ -338,7 +342,7 @@ void global_fixtures(GlobalGate& gate) {
     Points q3_points{{900,1000,1000},{1100,1000,1000},{1000,1120,1000}};
     Points q4_points{{900,1000,1000},{1100,1000,1000},{1000,1120,1040},{1000,1120,960}};
     for (unsigned j=0;j<k;++j) {
-      const Point3 z{static_cast<std::uint16_t>(1000+j),910,1000};
+      const Point3 z{static_cast<mhgp8::Coordinate>(1000+j),910,1000};
       q3_points.push_back(z);q4_points.push_back(z);
     }
     const auto diameter=oracle::make(select(q3_points,Edge{0,1}));
@@ -351,7 +355,7 @@ void global_fixtures(GlobalGate& gate) {
       "q2 rejection does not coexist with accepted q3/q4 fixtures");
     run_fixture(gate,q3_points,k);run_fixture(gate,q4_points,k);gate.independent_q2_cases+=2;
     q4_points.resize(4);
-    for (unsigned j=0;j<k-1;++j) q4_points.push_back({static_cast<std::uint16_t>(1000+j),1020,1105});
+    for (unsigned j=0;j<k-1;++j) q4_points.push_back({static_cast<mhgp8::Coordinate>(1000+j),1020,1105});
     const auto rejected_face=oracle::make(select(q4_points,Ids{0,1,2}));
     gate.require(rejected_face.ball && census(gate,q4_points,*rejected_face.ball,Ids{0,1,2}).depth==k-1 &&
       census(gate,q4_points,*tetra.ball,std::array<std::size_t,4>{0,1,2,3}).depth==0,
@@ -364,6 +368,22 @@ void global_fixtures(GlobalGate& gate) {
   const Points extreme{{0,0,0},{65535,65535,0},{65535,0,65535},{0,65535,65535},
                        {32767,32767,32767},{65535,0,0}};
   run_fixture(gate,extreme,5);gate.extreme_calls+=4;
+  // 18-bit twin (u16 corners are interior points since the widening): same K,
+  // same four front/backend combinations, then the Local28 atlas at its exact
+  // depth ceiling (max_depth=20 accepted, refined to leaves) on the same oracle.
+  const Points extreme18{{0,0,0},{262143,262143,0},{262143,0,262143},{0,262143,262143},
+                         {131071,131071,131071},{262143,0,0}};
+  const auto extreme18_all=global_oracle(gate,extreme18);
+  for (const auto mode:{mhgp8::WspdFrontMode::Pure,mhgp8::WspdFrontMode::MidpointSamples})
+    for (const auto backend:{mhgp8::WspdQ4Backend::Local28,mhgp8::WspdQ4Backend::Window30})
+      static_cast<void>(check_global(gate,extreme18,extreme18_all,5,8,options(mode,backend)));
+  gate.extreme_calls+=4;gate.extreme18_calls+=4;
+  auto deep_local=defaults;
+  deep_local.q4_backend=mhgp8::WspdQ4Backend::Local28;
+  deep_local.local.max_depth=mhgp8::Q4LocalCell::max_depth;deep_local.local.node_budget=85;
+  deep_local.local.leaf_sites=0;
+  static_cast<void>(check_global(gate,extreme18,extreme18_all,5,8,deep_local));
+  ++gate.extreme18_calls;++gate.deep_atlas_calls;
   auto shuffled=w4;
   std::reverse(shuffled.begin(),shuffled.end());run_fixture(gate,shuffled,3,10);++gate.permutations;
   for (auto& p:shuffled) p={p[2],p[0],p[1]};
@@ -394,14 +414,27 @@ void global_lifecycle(GlobalGate& gate) {
     auto invalid=opts;invalid.requested_lane_mask=mask;
     gate.rejects([&] { static_cast<void>(call(index,1,8,invalid,discard)); },"inactive invalid mask accepted");
   }
-  for (unsigned which=0;which<5;++which) {
+  for (unsigned which=0;which<6;++which) {
     auto invalid=opts;
     if (which==0) invalid.front_mode=static_cast<mhgp8::WspdFrontMode>(42);
     if (which==1) invalid.q4_backend=static_cast<mhgp8::WspdQ4Backend>(42);
     if (which==2) invalid.local.domain=static_cast<mhgp8::Q4CenterDomainMode>(42);
     if (which==3) invalid.local.max_depth=45;
     if (which==4) invalid.local.node_budget=0;
+    if (which==5) invalid.local.max_depth=mhgp8::Q4LocalCell::max_depth+1;  // First refused depth (21).
     gate.rejects([&] { static_cast<void>(call(index,1,8,invalid,discard)); },"inactive invalid option accepted");
+  }
+  {
+    // The exact depth ceiling itself (20) is accepted on an active Local28
+    // call and leaves the full payload equal to the oracle.
+    auto accepted=opts;accepted.q4_backend=mhgp8::WspdQ4Backend::Local28;
+    accepted.local.max_depth=mhgp8::Q4LocalCell::max_depth;accepted.local.node_budget=85;
+    accepted.local.z_test_budget=512;
+    Output deep;
+    static_cast<void>(call(index,5,8,accepted,[&](const auto& value) { deep.push_back(copy(value)); }));
+    normalize(deep);
+    gate.require(deep==expected,"Local28 atlas at its exact depth ceiling changed the global stream");
+    ++gate.deep_atlas_calls;
   }
   bool threw=false;
   try { static_cast<void>(call(index,5,8,opts,[&](const auto&) { ++gate.callback_failures;throw std::logic_error("callback marker"); })); }
@@ -613,10 +646,16 @@ void indexed_fixtures(GlobalGate& gate) {
   };
   Points grid;
   for (unsigned x=0;x<3;++x) for (unsigned y=0;y<3;++y) for (unsigned z=0;z<2;++z)
-    grid.push_back({static_cast<std::uint16_t>(20+4*x),static_cast<std::uint16_t>(20+4*y),
-                    static_cast<std::uint16_t>(20+4*z)});
+    grid.push_back({static_cast<mhgp8::Coordinate>(20+4*x),static_cast<mhgp8::Coordinate>(20+4*y),
+                    static_cast<mhgp8::Coordinate>(20+4*z)});
   fixtures.push_back(grid);
   fixtures.push_back(shell30());
+  // 18-bit twins of the extreme fixture (index 2): index 7 runs reversed with
+  // midpoint samples, index 8 (corner variant) pure in original order exactly
+  // as the u16 fixture did; both pass the q3 atlas consultation identities.
+  const std::size_t first_extreme18=fixtures.size();
+  fixtures.push_back({{0,0,0},{262143,262143,0},{262143,0,262143},{0,262143,262143},{131071,131071,131071},{262143,0,0}});
+  fixtures.push_back({{0,0,0},{262143,262142,262141},{0,262143,262143},{262143,0,262143},{131071,131071,131071},{262143,0,0}});
   for (std::size_t f=0;f<fixtures.size();++f) {
     auto points=fixtures[f];
     if (f%2!=0) std::reverse(points.begin(),points.end());
@@ -657,6 +696,7 @@ void indexed_fixtures(GlobalGate& gate) {
             (mode==mhgp8::WspdQ34WitnessMode::RectanglePair && v.rectangles.queries==w.input_rectangles),
             "indexed search entry ledger differs");
           ++gate.indexed_calls;
+          if (f>=first_extreme18) ++gate.extreme18_indexed_calls;
           if (census_mode==mhgp8::WspdQ3CensusMode::GlobalBoxes) {
             ++gate.boxed_calls;
             const auto& atlas=w.q3_atlas;
@@ -670,6 +710,9 @@ void indexed_fixtures(GlobalGate& gate) {
                 atlas.rejections+atlas.outside_domain<=atlas.locations,"q3 atlas consultation ledger differs");
               gate.atlas_rejections+=atlas.rejections;gate.atlas_lane_skips+=atlas.root_lane_skips;
               gate.atlas_locations+=atlas.locations;gate.atlas_outside+=atlas.outside_domain;
+              if (f>=first_extreme18) {
+                gate.extreme18_atlas_locations+=atlas.locations;gate.extreme18_atlas_rejections+=atlas.rejections;
+              }
             } else gate.require(atlas==mhgp8::WspdQ3AtlasWork{},"atlas consultation ran although disabled");
           } else gate.require(w.q3_blocks==mhgp8::Q3BallCensusWork{} && w.q3_atlas==mhgp8::WspdQ3AtlasWork{},"scalar performed hidden boxed census");
           gate.indexed_pair_rejections+=v.rejected_pairs;
@@ -713,11 +756,14 @@ void bounds_mode_global_fixtures(GlobalGate& gate) {
     {{100,100,100},{160,100,100},{120,142,100},{128,110,149},{128,88,88}},
     {{30,30,30},{36,36,30},{30,36,24},{36,30,24},{30,36,30},{36,30,30},{30,30,24},{32,32,32}},
     {{0,0,0},{65535,65535,0},{65535,0,65535},{0,65535,65535},{32767,32767,32767},{65535,0,0}},
-    shell30()};
+    shell30(),
+    // 18-bit twin of index 3: index 5 is odd too (reversed, pure front, K=3).
+    {{0,0,0},{262143,262143,0},{262143,0,262143},{0,262143,262143},{131071,131071,131071},{262143,0,0}}};
   for (std::size_t f=0;f<fixtures.size();++f) {
     auto points=fixtures[f];if (f%2) std::reverse(points.begin(),points.end());
     const auto all=global_oracle(gate,points);
     const unsigned k=f==0?5U:3U;
+    if (f==5) ++gate.extreme18_bounds_calls;
     const auto expected=eligible(all,k,6);
     const auto index=mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
     for (const auto witness:{mhgp8::WspdQ34WitnessMode::Pair,mhgp8::WspdQ34WitnessMode::RectanglePair})
@@ -943,6 +989,9 @@ int main(int argc,char** argv) {
       "rectangle-range task sharing was never exercised (calls, ranges, split rectangles, full-queue refusals)");
     gate.require(gate.atlas_rejections>0 && gate.atlas_locations>gate.atlas_rejections && gate.atlas_outside>0,
       "q3 atlas consultation was never exercised (rejections, non-rejected locations, outside-domain centers)");
+    gate.require(gate.extreme18_calls==5 && gate.deep_atlas_calls==2 && gate.extreme18_indexed_calls==48 &&
+      gate.extreme18_bounds_calls==1 && gate.extreme18_atlas_locations>0,
+      "18-bit extreme twins were not exercised (global, deep atlas, indexed consultation, bounds modes)");
     gate.require(gate.q3>0 && gate.q4>0 && gate.max_shell>=30 && gate.fat_rectangles>0 &&
       gate.q3_front_rejections>0 && gate.q4_front_rejections>0 && gate.xi_tests>0 &&
       gate.q3_depth_rejections>0 && gate.q3_unread_sites>0 && gate.both_edges>0 &&

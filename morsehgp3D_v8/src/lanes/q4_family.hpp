@@ -20,8 +20,11 @@ namespace mhgp8 {
 class Q4FamilySeed final {
  public:
   // Right, obtuse, collinear and repeated-point triangles return nullopt.
+  // Out-of-domain coordinates throw invalid_argument before arithmetic.
   [[nodiscard]] static std::optional<Q4FamilySeed> make(Point3 a, Point3 b, Point3 x);
 
+  // All query points below must lie in [0,coordinate_limit]^3. The indexed
+  // paths use certified cloud points and do not repeat range scans per root.
   [[nodiscard]] i128 power(Point3 z) const noexcept;
   [[nodiscard]] i64 side(Point3 z) const noexcept;
   // Compare the rational roots P(z1)/B(z1) and P(z2)/B(z2). Both B must be

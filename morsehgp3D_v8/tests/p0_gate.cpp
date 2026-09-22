@@ -66,8 +66,13 @@ struct Gate {
   }
 };
 
+// The default seed and the `% bound` recipes are pinned: the historical
+// 16-bit clouds are reproduced bit for bit. 18-bit clouds use a distinct seed
+// and bound 262144, never the continuation of a pinned stream.
 class Generator {
  public:
+  explicit Generator(std::uint32_t seed = 0x91d352a7U) : state_{seed} {}
+
   [[nodiscard]] std::uint32_t next() {
     state_ ^= state_ << 13;
     state_ ^= state_ >> 17;
@@ -75,8 +80,8 @@ class Generator {
     return state_;
   }
 
-  [[nodiscard]] std::uint16_t coordinate(unsigned bound = 65536) {
-    return static_cast<std::uint16_t>(next() % bound);
+  [[nodiscard]] mhgp8::Coordinate coordinate(unsigned bound = 65536) {
+    return static_cast<mhgp8::Coordinate>(next() % bound);
   }
 
   [[nodiscard]] Point3 point(unsigned bound = 65536) {
@@ -84,8 +89,12 @@ class Generator {
   }
 
  private:
-  std::uint32_t state_{0x91d352a7U};
+  std::uint32_t state_;
 };
+
+constexpr unsigned wide_side = 262144;
+constexpr std::uint32_t wide_seed = 0x2f6b1d93U;
+static_assert(wide_side == static_cast<unsigned>(mhgp8::coordinate_limit) + 1);
 
 void compare_point(Gate& gate, Lane lane, const Point3& a, const Point3& b,
                    const Point3& z) {
@@ -134,29 +143,33 @@ void predicate_gate(Gate& gate) {
                  "oracle accepts boundary witness");
     compare_point(gate, lanes[i], zero, b, z);
     ++gate.strict_mutants;
-    for (const unsigned scale : {1U, 32767U}) {
+    // 32767 scales the boundary to 65534 (16-bit), 131071 to 262142 (18-bit).
+    for (const unsigned scale : {1U, 32767U, 131071U}) {
       const Point3 scaled_b{
-          static_cast<std::uint16_t>(b.x * scale),
-          static_cast<std::uint16_t>(b.y * scale),
-          static_cast<std::uint16_t>(b.z * scale)};
+          static_cast<mhgp8::Coordinate>(b.x * scale),
+          static_cast<mhgp8::Coordinate>(b.y * scale),
+          static_cast<mhgp8::Coordinate>(b.z * scale)};
       const Point3 scaled_z{
-          static_cast<std::uint16_t>(z.x * scale),
-          static_cast<std::uint16_t>(z.y * scale),
-          static_cast<std::uint16_t>(z.z * scale)};
+          static_cast<mhgp8::Coordinate>(z.x * scale),
+          static_cast<mhgp8::Coordinate>(z.y * scale),
+          static_cast<mhgp8::Coordinate>(z.z * scale)};
       compare_point(gate, lanes[i], zero, scaled_b, scaled_z);
     }
   }
 
-  const Point3 maximum{65535, 65535, 65535};
-  const Point3 middle{32768, 32768, 32768};
-  const auto large = oracle::metrics(zero, maximum, middle);
-  gate.require(3 * large.h * large.h > std::numeric_limits<std::uint64_t>::max(),
-               "wide-product fixture does not exceed 64 bits");
-  for (const auto lane : lanes) {
-    compare_point(gate, lane, zero, maximum, middle);
-    compare_point(gate, lane, zero, maximum, zero);
-    compare_point(gate, lane, zero, maximum, maximum);
-    compare_point(gate, lane, maximum, maximum, middle);
+  // 16-bit corner and its 18-bit twin (coordinate_limit and 2^17).
+  for (const auto& [maximum, middle] : {
+           std::pair{Point3{65535, 65535, 65535}, Point3{32768, 32768, 32768}},
+           std::pair{Point3{262143, 262143, 262143}, Point3{131072, 131072, 131072}}}) {
+    const auto large = oracle::metrics(zero, maximum, middle);
+    gate.require(3 * large.h * large.h > std::numeric_limits<std::uint64_t>::max(),
+                 "wide-product fixture does not exceed 64 bits");
+    for (const auto lane : lanes) {
+      compare_point(gate, lane, zero, maximum, middle);
+      compare_point(gate, lane, zero, maximum, zero);
+      compare_point(gate, lane, zero, maximum, maximum);
+      compare_point(gate, lane, maximum, maximum, middle);
+    }
   }
 
   for (unsigned sample = 0; sample < 192; ++sample) {
@@ -204,6 +217,48 @@ void predicate_gate(Gate& gate) {
                    "positive Q3/Q4 box fixture did not exercise all eight corners");
     }
   }
+
+  // 18-bit random populations on a distinct seed: point and universal
+  // predicates against the same cpp_int Gram oracle, with their own floors.
+  Generator wide_random{wide_seed};
+  const auto wide_positive_before = gate.positive_points;
+  const auto wide_negative_before = gate.negative_points;
+  for (unsigned sample = 0; sample < 1024; ++sample) {
+    const Point3 a = wide_random.point(wide_side);
+    const Point3 b = wide_random.point(wide_side);
+    const Point3 z = wide_random.point(wide_side);
+    for (const auto lane : lanes) {
+      compare_point(gate, lane, a, b, z);
+      PredicateWork work;
+      gate.require(mhgp8::point_witness(lane, a, b, z, work) ==
+                       mhgp8::point_witness(lane, b, a, z, work),
+                   "endpoint reversal changed an 18-bit witness");
+    }
+  }
+  gate.require(gate.positive_points - wide_positive_before > 100 &&
+                   gate.negative_points - wide_negative_before > 100,
+               "18-bit point predicate population is vacuous");
+  for (unsigned sample = 0; sample < 192; ++sample) {
+    Point3 first = wide_random.point(wide_side);
+    Point3 last = wide_random.point(wide_side);
+    const Box3 box{
+        {std::min(first.x, last.x), std::min(first.y, last.y),
+         std::min(first.z, last.z)},
+        {std::max(first.x, last.x), std::max(first.y, last.y),
+         std::max(first.z, last.z)}};
+    const Point3 a = wide_random.point(wide_side);
+    const Point3 z = wide_random.point(wide_side);
+    for (const auto lane : lanes) {
+      PredicateWork work;
+      gate.require(mhgp8::universal_witness(lane, a, box, z, work) ==
+                       oracle::universal_witness(lane, a, box, z),
+                   "18-bit universal predicate disagrees with independent corners");
+      if (lane == Lane::Q2) {
+        gate.require(work.q2_axis_terms == 3 && work.corner_tests == 0,
+                     "18-bit Q2 box minimum did not use exactly three affine terms");
+      }
+    }
+  }
 }
 
 [[nodiscard]] std::vector<Point3> lattice(const Box3& box) {
@@ -211,17 +266,17 @@ void predicate_gate(Gate& gate) {
   for (auto x = box.low.x; x <= box.high.x; ++x) {
     for (auto y = box.low.y; y <= box.high.y; ++y) {
       for (auto z = box.low.z; z <= box.high.z; ++z) {
-        points.push_back({static_cast<std::uint16_t>(x),
-                          static_cast<std::uint16_t>(y),
-                          static_cast<std::uint16_t>(z)});
+        points.push_back({static_cast<mhgp8::Coordinate>(x),
+                          static_cast<mhgp8::Coordinate>(y),
+                          static_cast<mhgp8::Coordinate>(z)});
       }
     }
   }
   return points;
 }
 
-void check_block(Gate& gate, Lane lane, const Box3& a, const Box3& b,
-                 const Box3& z) {
+BlockDecision check_block(Gate& gate, Lane lane, const Box3& a, const Box3& b,
+                          const Box3& z) {
   PredicateWork work;
   const auto decision = mhgp8::classify_witness_block(lane, a, b, z, work);
   gate.require(work.block_bound_tests == 1, "missing block classification count");
@@ -229,7 +284,7 @@ void check_block(Gate& gate, Lane lane, const Box3& a, const Box3& b,
   gate.require(ordinal < gate.block_decisions.size(), "invalid block decision");
   ++gate.block_decisions[ordinal];
   if (decision == BlockDecision::Uncertain) {
-    return;
+    return decision;
   }
   const auto anchor_points = lattice(a);
   const auto witness_points = lattice(z);
@@ -247,34 +302,54 @@ void check_block(Gate& gate, Lane lane, const Box3& a, const Box3& b,
       }
     }
   }
+  return decision;
+}
+
+[[nodiscard]] Box3 translated(const Box3& box, const Point3& shift) {
+  return {{static_cast<mhgp8::Coordinate>(box.low.x + shift.x),
+           static_cast<mhgp8::Coordinate>(box.low.y + shift.y),
+           static_cast<mhgp8::Coordinate>(box.low.z + shift.z)},
+          {static_cast<mhgp8::Coordinate>(box.high.x + shift.x),
+           static_cast<mhgp8::Coordinate>(box.high.y + shift.y),
+           static_cast<mhgp8::Coordinate>(box.high.z + shift.z)}};
 }
 
 void block_gate(Gate& gate) {
+  // Each deterministic fixture is also translated to the 18-bit corner (its
+  // far endpoint 101 lands on coordinate_limit, y and z on the limit plane);
+  // the exact classification is translation invariant.
+  constexpr Point3 corner_shift{262042, 262143, 262143};
+  static_assert(corner_shift.x + 101 == mhgp8::coordinate_limit);
+  const std::array<std::array<Box3, 3>, 4> blocks{{
+      {Box3{{0, 0, 0}, {1, 0, 0}}, Box3{{100, 0, 0}, {101, 0, 0}}, Box3{{30, 0, 0}, {31, 0, 0}}},
+      {Box3{{10, 0, 0}, {11, 0, 0}}, Box3{{100, 0, 0}, {101, 0, 0}}, Box3{{0, 0, 0}, {1, 0, 0}}},
+      {Box3{{0, 0, 0}, {2, 0, 0}}, Box3{{100, 0, 0}, {100, 0, 0}}, Box3{{1, 0, 0}, {1, 0, 0}}},
+      // The maximum in z is at 1.5, not at either integer endpoint.
+      {Box3{{0, 0, 0}, {0, 0, 0}}, Box3{{3, 0, 0}, {3, 0, 0}}, Box3{{1, 0, 0}, {2, 0, 0}}}}};
   for (const auto lane : lanes) {
-    check_block(gate, lane, {{0, 0, 0}, {1, 0, 0}},
-                 {{100, 0, 0}, {101, 0, 0}}, {{30, 0, 0}, {31, 0, 0}});
-    check_block(gate, lane, {{10, 0, 0}, {11, 0, 0}},
-                 {{100, 0, 0}, {101, 0, 0}}, {{0, 0, 0}, {1, 0, 0}});
-    check_block(gate, lane, {{0, 0, 0}, {2, 0, 0}},
-                 {{100, 0, 0}, {100, 0, 0}}, {{1, 0, 0}, {1, 0, 0}});
-    // The maximum in z is at 1.5, not at either integer endpoint.
-    check_block(gate, lane, {{0, 0, 0}, {0, 0, 0}},
-                 {{3, 0, 0}, {3, 0, 0}}, {{1, 0, 0}, {2, 0, 0}});
+    for (const auto& [a, b, z] : blocks) {
+      const auto decision = check_block(gate, lane, a, b, z);
+      const auto wide_decision = check_block(gate, lane, translated(a, corner_shift),
+                                             translated(b, corner_shift),
+                                             translated(z, corner_shift));
+      gate.require(decision == wide_decision,
+                   "block classification changed under translation to the 18-bit corner");
+    }
   }
   Generator random;
-  const auto random_box = [&random](unsigned base, unsigned spread) {
-    const Point3 low{static_cast<std::uint16_t>(base + random.coordinate(spread)),
-                     random.coordinate(6), random.coordinate(6)};
+  const auto random_box = [](Generator& generator, unsigned base, unsigned spread) {
+    const Point3 low{static_cast<mhgp8::Coordinate>(base + generator.coordinate(spread)),
+                     generator.coordinate(6), generator.coordinate(6)};
     const Point3 high{
-        static_cast<std::uint16_t>(low.x + random.coordinate(3)),
-        static_cast<std::uint16_t>(low.y + random.coordinate(3)),
-        static_cast<std::uint16_t>(low.z + random.coordinate(3))};
+        static_cast<mhgp8::Coordinate>(low.x + generator.coordinate(3)),
+        static_cast<mhgp8::Coordinate>(low.y + generator.coordinate(3)),
+        static_cast<mhgp8::Coordinate>(low.z + generator.coordinate(3))};
     return Box3{low, high};
   };
   for (unsigned sample = 0; sample < 96; ++sample) {
-    const auto a = random_box(0, 6);
-    const auto b = random_box(8, 6);
-    const auto z = random_box(0, 16);
+    const auto a = random_box(random, 0, 6);
+    const auto b = random_box(random, 8, 6);
+    const auto z = random_box(random, 0, 16);
     for (const auto lane : lanes) {
       check_block(gate, lane, a, b, z);
     }
@@ -282,35 +357,73 @@ void block_gate(Gate& gate) {
   for (const auto count : gate.block_decisions) {
     gate.require(count > 0, "block decision branch has no non-vacuous fixture");
   }
+  // 18-bit random blocks on a distinct seed, mirrored at the corner: the
+  // highest box corner reaches coordinate_limit (262136 + 5 + 2) on y and z
+  // and 262137 on x. Every decision branch must be exercised again.
+  Generator wide_random{wide_seed};
+  const auto wide_box = [&wide_random](unsigned base, unsigned spread) {
+    const Point3 low{static_cast<mhgp8::Coordinate>(base + wide_random.coordinate(spread)),
+                     static_cast<mhgp8::Coordinate>(262136 + wide_random.coordinate(6)),
+                     static_cast<mhgp8::Coordinate>(262136 + wide_random.coordinate(6))};
+    const Point3 high{
+        static_cast<mhgp8::Coordinate>(low.x + wide_random.coordinate(3)),
+        static_cast<mhgp8::Coordinate>(low.y + wide_random.coordinate(3)),
+        static_cast<mhgp8::Coordinate>(low.z + wide_random.coordinate(3))};
+    return Box3{low, high};
+  };
+  const auto before = gate.block_decisions;
+  for (unsigned sample = 0; sample < 96; ++sample) {
+    const auto a = wide_box(262120, 6);
+    const auto b = wide_box(262128, 6);
+    const auto z = wide_box(262120, 16);
+    for (const auto lane : lanes) {
+      check_block(gate, lane, a, b, z);
+    }
+  }
+  for (std::size_t i = 0; i < before.size(); ++i) {
+    gate.require(gate.block_decisions[i] > before[i],
+                 "18-bit block decision branch has no non-vacuous fixture");
+  }
 }
 
-[[nodiscard]] RectangleInput line_input(std::size_t count_a,
-                                        std::size_t count_b) {
+// Factor origins: (1000, 60000) are the pinned 16-bit lines; the 18-bit
+// twins put A at 2^17 and end B exactly at coordinate_limit.
+constexpr unsigned wide_a_base = 131072;
+constexpr unsigned wide_line_b_base = 262080;   // + 63 sites = 262143
+constexpr unsigned wide_cluster_b_base = 262044; // + coordinate(100) <= 262143
+constexpr unsigned wide_core_base = 196608;      // between A and B
+static_assert(wide_line_b_base + 63 == static_cast<unsigned>(mhgp8::coordinate_limit));
+static_assert(wide_cluster_b_base + 99 == static_cast<unsigned>(mhgp8::coordinate_limit));
+
+[[nodiscard]] RectangleInput line_input(std::size_t count_a, std::size_t count_b,
+                                        unsigned a_base = 1000, unsigned b_base = 60000) {
   RectangleInput result;
   result.a = {0, count_a};
   result.b = {count_a, count_a + count_b};
   for (std::size_t i = 0; i < count_a; ++i) {
-    result.points.push_back({static_cast<std::uint16_t>(1000 + i), 1000, 1000});
+    result.points.push_back({static_cast<mhgp8::Coordinate>(a_base + i), 1000, 1000});
   }
   for (std::size_t i = 0; i < count_b; ++i) {
-    result.points.push_back({static_cast<std::uint16_t>(60000 + i), 1000, 1000});
+    result.points.push_back({static_cast<mhgp8::Coordinate>(b_base + i), 1000, 1000});
   }
   return result;
 }
 
 [[nodiscard]] RectangleInput clusters_input(Generator& random,
                                             std::size_t count_a,
-                                            std::size_t count_b) {
+                                            std::size_t count_b,
+                                            unsigned a_base = 1000,
+                                            unsigned b_base = 60000) {
   RectangleInput result;
   result.a = {0, count_a};
   result.b = {count_a, count_a + count_b};
   for (std::size_t i = 0; i < count_a + count_b; ++i) {
-    const unsigned base = i < count_a ? 1000 : 60000;
+    const unsigned base = i < count_a ? a_base : b_base;
     Point3 point;
     do {
-      point = {static_cast<std::uint16_t>(base + random.coordinate(100)),
-               static_cast<std::uint16_t>(1000 + random.coordinate(100)),
-               static_cast<std::uint16_t>(1000 + random.coordinate(100))};
+      point = {static_cast<mhgp8::Coordinate>(base + random.coordinate(100)),
+               static_cast<mhgp8::Coordinate>(1000 + random.coordinate(100)),
+               static_cast<mhgp8::Coordinate>(1000 + random.coordinate(100))};
     } while (std::find(result.points.begin(), result.points.end(), point) !=
              result.points.end());
     result.points.push_back(point);
@@ -403,15 +516,19 @@ void check_plan(Gate& gate, const RectangleInput& input, unsigned kmax,
 }
 
 void plan_gate(Gate& gate) {
-  const auto line = line_input(64, 64);
-  for (const auto lane : lanes) {
-    for (const auto strategy : strategies) {
-      check_plan(gate, line, 10, 8, lane, strategy);
-      const auto plan = mhgp8::make_credit_plan(
-          mhgp8::prepare_rectangle(line, 10, 8), lane, strategy);
-      const auto h = oracle::threshold(10, lane);
-      gate.require(plan.candidate_pairs() == h * (h + 1) / 2,
-                   "64+64 collinear residual is not the exact triangular count");
+  // The pinned 16-bit line and its 18-bit twin (A at 2^17, B ending at
+  // coordinate_limit): the collinear residual is the exact triangular count.
+  for (const auto& line : {line_input(64, 64),
+                           line_input(64, 64, wide_a_base, wide_line_b_base)}) {
+    for (const auto lane : lanes) {
+      for (const auto strategy : strategies) {
+        check_plan(gate, line, 10, 8, lane, strategy);
+        const auto plan = mhgp8::make_credit_plan(
+            mhgp8::prepare_rectangle(line, 10, 8), lane, strategy);
+        const auto h = oracle::threshold(10, lane);
+        gate.require(plan.candidate_pairs() == h * (h + 1) / 2,
+                     "64+64 collinear residual is not the exact triangular count");
+      }
     }
   }
   Generator random;
@@ -426,41 +543,79 @@ void plan_gate(Gate& gate) {
       }
     }
   }
-  // Offset ranges, a gap, reversed factor order and a non-witness proposal.
-  auto offset = line_input(5, 7);
-  offset.points.insert(offset.points.begin(), {0, 65535, 0});
-  offset.points.insert(offset.points.begin() + 6, {30000, 1000, 1000});
-  offset.a = {1, 6};
-  offset.b = {7, 14};
-  offset.core_candidates = {0, 6};
-  auto core = line_input(7, 9);
-  for (unsigned i = 0; i < 10; ++i) {
-    core.core_candidates.push_back(core.points.size());
-    core.points.push_back({static_cast<std::uint16_t>(30000 + i), 1000, 1000});
-  }
-  for (const auto lane : lanes) {
-    for (const auto strategy : strategies) {
-      check_plan(gate, offset, 10, 12, lane, strategy);
-      auto reversed = offset;
-      std::swap(reversed.a, reversed.b);
-      check_plan(gate, reversed, 5, 10, lane, strategy);
-      check_plan(gate, core, 10, 8, lane, strategy);
-      auto partial = core;
-      partial.core_candidates.resize(2);
-      check_plan(gate, partial, 10, 8, lane, strategy);
-      check_plan(gate, line_input(1, 1), 1, 1, lane, strategy);
-      RectangleInput sheets;
-      sheets.a = {0, 9};
-      sheets.b = {9, 18};
-      for (unsigned i = 0; i < 18; ++i) {
-        sheets.points.push_back({static_cast<std::uint16_t>(i < 9 ? 1000 : 60000),
-                                  static_cast<std::uint16_t>(1000 + i % 9), 1000});
+  // 18-bit random clusters on a distinct seed, B ending at coordinate_limit,
+  // with their own killed/retained floors.
+  {
+    Generator wide_random{wide_seed};
+    const auto plans_before = gate.plans;
+    const auto killed_before = gate.killed_pairs;
+    const auto retained_before = gate.retained_pairs;
+    for (unsigned sample = 0; sample < 12; ++sample) {
+      const auto input = clusters_input(wide_random, 2 + sample, 3 + sample % 7,
+                                        wide_a_base, wide_cluster_b_base);
+      for (const auto kmax : {1U, 5U, 10U}) {
+        for (const auto lane : lanes) {
+          for (const auto strategy : strategies) {
+            check_plan(gate, input, kmax, std::array{8U, 10U, 12U}[sample % 3],
+                         lane, strategy);
+          }
+        }
       }
-      check_plan(gate, sheets, 10, 8, lane, strategy);
-      const auto sheet_plan = mhgp8::make_credit_plan(
-          mhgp8::prepare_rectangle(sheets, 10, 8), lane, strategy);
-      gate.require(sheet_plan.candidate_pairs() == 81,
-                   "negative witness blocks incorrectly killed sheet anchors");
+    }
+    gate.require(gate.plans - plans_before == 324 &&
+                     gate.killed_pairs - killed_before > 100 &&
+                     gate.retained_pairs - retained_before > 100,
+                 "18-bit cluster plan population is vacuous");
+  }
+  // Offset ranges, a gap, reversed factor order and a non-witness proposal,
+  // on the pinned 16-bit line and on its 18-bit twin (corner proposal at
+  // (0, coordinate_limit, 0), witness proposals between 2^17 and the limit).
+  struct LineProfile {
+    unsigned a_base;
+    unsigned b_base;
+    unsigned core_base;
+    mhgp8::Coordinate corner;
+  };
+  for (const auto& profile : {LineProfile{1000, 60000, 30000, 65535},
+                              LineProfile{wide_a_base, wide_line_b_base, wide_core_base,
+                                          mhgp8::coordinate_limit}}) {
+    auto offset = line_input(5, 7, profile.a_base, profile.b_base);
+    offset.points.insert(offset.points.begin(), {0, profile.corner, 0});
+    offset.points.insert(offset.points.begin() + 6,
+                         {static_cast<mhgp8::Coordinate>(profile.core_base), 1000, 1000});
+    offset.a = {1, 6};
+    offset.b = {7, 14};
+    offset.core_candidates = {0, 6};
+    auto core = line_input(7, 9, profile.a_base, profile.b_base);
+    for (unsigned i = 0; i < 10; ++i) {
+      core.core_candidates.push_back(core.points.size());
+      core.points.push_back({static_cast<mhgp8::Coordinate>(profile.core_base + i), 1000, 1000});
+    }
+    for (const auto lane : lanes) {
+      for (const auto strategy : strategies) {
+        check_plan(gate, offset, 10, 12, lane, strategy);
+        auto reversed = offset;
+        std::swap(reversed.a, reversed.b);
+        check_plan(gate, reversed, 5, 10, lane, strategy);
+        check_plan(gate, core, 10, 8, lane, strategy);
+        auto partial = core;
+        partial.core_candidates.resize(2);
+        check_plan(gate, partial, 10, 8, lane, strategy);
+        check_plan(gate, line_input(1, 1, profile.a_base, profile.b_base), 1, 1, lane, strategy);
+        RectangleInput sheets;
+        sheets.a = {0, 9};
+        sheets.b = {9, 18};
+        for (unsigned i = 0; i < 18; ++i) {
+          sheets.points.push_back({static_cast<mhgp8::Coordinate>(i < 9 ? profile.a_base
+                                                                        : profile.b_base),
+                                    static_cast<mhgp8::Coordinate>(1000 + i % 9), 1000});
+        }
+        check_plan(gate, sheets, 10, 8, lane, strategy);
+        const auto sheet_plan = mhgp8::make_credit_plan(
+            mhgp8::prepare_rectangle(sheets, 10, 8), lane, strategy);
+        gate.require(sheet_plan.candidate_pairs() == 81,
+                     "negative witness blocks incorrectly killed sheet anchors");
+      }
     }
   }
   // Identical local witness populations must not be counted again as core.
@@ -621,6 +776,26 @@ void rejection_gate(Gate& gate) {
                             {0, 2}, {2, 4}, {}};
   bad_input(changed, "insufficient separation accepted");
   bad_input({}, "empty input accepted");
+  // Explicit 18-bit range boundary: coordinate_limit itself is accepted, one
+  // grid step beyond it and any negative value are refused, never clamped.
+  constexpr auto limit = mhgp8::coordinate_limit;
+  const RectangleInput at_limit{
+      {{131072, 1000, 1000}, {131073, 1000, 1000}, {limit - 1, 1000, 1000}, {limit, 1000, 1000}},
+      {0, 2}, {2, 4}, {}};
+  gate.require(mhgp8::prepare_rectangle(at_limit, 10, 8) != nullptr,
+               "coordinate_limit itself was refused");
+  changed = at_limit;
+  changed.points[3] = {limit + 1, 1000, 1000};
+  bad_input(changed, "coordinate 2^18 accepted");
+  changed = at_limit;
+  changed.points[3] = {limit, limit + 1, 1000};
+  bad_input(changed, "y coordinate 2^18 accepted");
+  changed = at_limit;
+  changed.points[3] = {limit, 1000, limit + 1};
+  bad_input(changed, "z coordinate 2^18 accepted");
+  changed = at_limit;
+  changed.points[0] = {-1, 1000, 1000};
+  bad_input(changed, "negative coordinate accepted");
 
   const auto rectangle = mhgp8::prepare_rectangle(valid, 10, 8);
   const auto bad_lane = static_cast<Lane>(255);

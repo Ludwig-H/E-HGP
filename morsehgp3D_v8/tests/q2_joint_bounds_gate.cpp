@@ -36,6 +36,12 @@ struct Gate {
   std::uint64_t model_mutants{};
   std::uint64_t invalid_inputs{};
   std::uint64_t copies{};
+  // 18-bit coverage (coordinate_limit = 262143): counted separately so that
+  // every historical u16 pin above keeps its exact value.
+  std::uint64_t cases18{};
+  std::uint64_t random18{};
+  std::uint64_t symmetries18{};
+  std::uint64_t model_mutants18{};
 
   void require(bool condition, const char* message) {
     ++checks;
@@ -56,8 +62,12 @@ struct ExactBounds {
 };
 
 Point3 point(const Doubled& values) {
-  return {static_cast<std::uint16_t>(values[0]), static_cast<std::uint16_t>(values[1]),
-          static_cast<std::uint16_t>(values[2])};
+  return {static_cast<mhgp8::Coordinate>(values[0]), static_cast<mhgp8::Coordinate>(values[1]),
+          static_cast<mhgp8::Coordinate>(values[2])};
+}
+
+bool exceeds_u16(const Box3& box) {
+  return box.high.x > 65535 || box.high.y > 65535 || box.high.z > 65535;
 }
 
 Box3 enclosure(const Point3& first, const Point3& second) {
@@ -154,10 +164,17 @@ Q2Bounds compare(Gate& gate, const Box3& a, const Box3& b, const Box3& z,
   gate.require(Integer(actual.minimum4) == expected.minimum4 &&
                    Integer(actual.maximum4) == expected.maximum4,
                "joint bounds differ from independent exact continuous extrema");
-  const Integer square = Integer(65535) * 65535;
+  // Proved range for the input width: -12 M^2 <= 4H <= 3 M^2 with M = 65535
+  // when every box fits the historical u16 profile (unchanged check) and
+  // M = coordinate_limit = 262143 otherwise.
+  const bool wide = exceeds_u16(a) || exceeds_u16(b) || exceeds_u16(z);
+  const Integer width = wide ? Integer(mhgp8::coordinate_limit) : Integer(65535);
+  const Integer square = width * width;
   gate.require(-12 * square <= actual.minimum4 && actual.minimum4 <= actual.maximum4 &&
                    actual.maximum4 <= 3 * square,
-               "joint bounds exceed their proved signed-u16 range");
+               wide ? "joint bounds exceed their proved signed 18-bit range"
+                    : "joint bounds exceed their proved signed-u16 range");
+  if (wide) ++gate.cases18;
   const auto swapped = Q2JointPreparedBounds(b, a).bounds(z);
   gate.require(swapped.minimum4 == actual.minimum4 && swapped.maximum4 == actual.maximum4,
                "exchanging A and B changed joint bounds");
@@ -213,20 +230,22 @@ void interval_exhaustion(Gate& gate) {
   }
 }
 
+// Exact lattice isometry: axis permutation then reflection x -> side - x,
+// with side = 65535 (u16 profile) or coordinate_limit (18-bit profile).
 Point3 transformed(const Point3& input, const std::array<unsigned, 3>& axes,
-                    unsigned reflection) {
+                    unsigned reflection, mhgp8::Coordinate side) {
   Doubled values{};
   for (std::size_t axis = 0; axis < 3; ++axis) {
     const auto value = input[axes[axis]];
-    values[axis] = (reflection & (1U << axis)) != 0 ? 65535 - value : value;
+    values[axis] = (reflection & (1U << axis)) != 0 ? side - value : value;
   }
   return point(values);
 }
 
 Box3 transformed(const Box3& input, const std::array<unsigned, 3>& axes,
-                  unsigned reflection) {
-  return enclosure(transformed(input.low, axes, reflection),
-                   transformed(input.high, axes, reflection));
+                  unsigned reflection, mhgp8::Coordinate side) {
+  return enclosure(transformed(input.low, axes, reflection, side),
+                   transformed(input.high, axes, reflection, side));
 }
 
 void three_dimensional(Gate& gate) {
@@ -246,11 +265,33 @@ void three_dimensional(Gate& gate) {
   std::array<unsigned, 3> axes{0, 1, 2};
   do {
     for (unsigned reflection = 0; reflection < 8; ++reflection) {
-      const auto actual = check(gate, transformed(a, axes, reflection),
-                                     transformed(b, axes, reflection), transformed(z, axes, reflection));
+      const auto actual = check(gate, transformed(a, axes, reflection, 65535),
+                                     transformed(b, axes, reflection, 65535),
+                                     transformed(z, axes, reflection, 65535));
       gate.require(actual.minimum4 == baseline.minimum4 && actual.maximum4 == baseline.maximum4,
                    "axis permutation or exact u16 reflection changed joint bounds");
       ++gate.symmetries;
+    }
+  } while (std::next_permutation(axes.begin(), axes.end()));
+
+  // 18-bit twin: the same boxes translated by 260000 next to the far corner
+  // (4H depends on differences only, so the extrema are equal), then every
+  // axis permutation and exact reflection x -> 262143 - x.
+  const Box3 a18{{261000, 261001, 261002}, {261003, 261004, 261005}};
+  const Box3 b18{{261004, 261002, 261000}, {261008, 261007, 261005}};
+  const Box3 z18{{260999, 261000, 261001}, {261009, 261004, 261006}};
+  const auto baseline18 = check(gate, a18, b18, z18);
+  gate.require(baseline18.minimum4 == baseline.minimum4 && baseline18.maximum4 == baseline.maximum4,
+               "translating the symmetry fixture to 18-bit coordinates changed joint bounds");
+  axes = {0, 1, 2};
+  do {
+    for (unsigned reflection = 0; reflection < 8; ++reflection) {
+      const auto actual = check(gate, transformed(a18, axes, reflection, mhgp8::coordinate_limit),
+                                     transformed(b18, axes, reflection, mhgp8::coordinate_limit),
+                                     transformed(z18, axes, reflection, mhgp8::coordinate_limit));
+      gate.require(actual.minimum4 == baseline.minimum4 && actual.maximum4 == baseline.maximum4,
+                   "axis permutation or exact 18-bit reflection changed joint bounds");
+      ++gate.symmetries18;
     }
   } while (std::next_permutation(axes.begin(), axes.end()));
 
@@ -269,6 +310,29 @@ void three_dimensional(Gate& gate) {
       box = enclosure(first, second);
     }
     static_cast<void>(check(gate, boxes[0], boxes[1], boxes[2]));
+  }
+
+  // Separate stable pseudo-random full-18-bit family (own state and own
+  // floor); the u16 recipe above is pinned and unchanged.
+  std::uint64_t state18 = UINT64_C(0x2b7e9d0c4a61f358);
+  const auto coordinate18 = [&state18]() {
+    state18 ^= state18 >> 12;
+    state18 ^= state18 << 25;
+    state18 ^= state18 >> 27;
+    return static_cast<mhgp8::Coordinate>((state18 * UINT64_C(2685821657736338717)) >> 46);
+  };
+  for (unsigned iteration = 0; iteration < 128; ++iteration) {
+    std::array<Box3, 3> boxes;
+    for (auto& box : boxes) {
+      const Point3 first{coordinate18(), coordinate18(), coordinate18()};
+      const Point3 second{coordinate18(), coordinate18(), coordinate18()};
+      box = enclosure(first, second);
+      gate.require(box.high.x <= mhgp8::coordinate_limit && box.high.y <= mhgp8::coordinate_limit &&
+                       box.high.z <= mhgp8::coordinate_limit,
+                   "18-bit pseudo-random recipe left the coordinate range");
+    }
+    static_cast<void>(check(gate, boxes[0], boxes[1], boxes[2]));
+    ++gate.random18;
   }
 }
 
@@ -330,6 +394,40 @@ void model_counterexamples(Gate& gate) {
   gate.require(summed.minimum4 == 12 && summed.maximum4 == 12 && summed.minimum4 != 4,
                "one coordinate extremum incorrectly replaced the sum over three axes");
   ++gate.model_mutants;
+
+  // 18-bit twins of the extremal fixtures (M = coordinate_limit = 262143):
+  // the same identities with M^2 = 68718952449 > 2^32, counted separately.
+  constexpr mhgp8::Coordinate m = mhgp8::coordinate_limit;
+  const Integer square18 = Integer(m) * m;
+  const Box3 full18{{0, 0, 0}, {m, m, m}};
+  const auto extremes18 = check(gate, full18, full18, full18);
+  gate.require(Integer(extremes18.minimum4) == -12 * square18 &&
+                   Integer(extremes18.maximum4) == 3 * square18,
+               "full-18-bit joint boxes did not attain both proved extrema");
+  const auto wide18 = check(gate, {{0, 0, 0}, {0, 0, 0}}, {{m, 0, 0}, {m, 0, 0}},
+                                 {{0, 0, 0}, {m, 0, 0}});
+  Integer wrapped32_18 = Integer(wide18.maximum4) % (Integer(1) << 32);
+  if (wrapped32_18 >= (Integer(1) << 31)) wrapped32_18 -= Integer(1) << 32;
+  gate.require(Integer(wide18.maximum4) == square18 && wrapped32_18 < 0,
+               "signed-i32 overflow did not invert a wide 18-bit maximum");
+  ++gate.model_mutants18;
+  // A u32 store of the prepared square D = (b - a)^2 (the historical layout)
+  // would keep only D mod 2^32 at 18 bits and silently shrink the maximum.
+  const Integer truncated32 = square18 % (Integer(1) << 32);
+  gate.require(square18 >= (Integer(1) << 32) && truncated32 < square18 &&
+                   Integer(wide18.maximum4) != truncated32,
+               "u32 square-storage mutant did not lose the wide 18-bit maximum");
+  ++gate.model_mutants18;
+  gate.require(extremes18.minimum4 < 0 && (Integer(1) << 64) + extremes18.minimum4 > 0,
+               "unsigned arithmetic did not turn a negative 18-bit minimum into positive credit");
+  ++gate.model_mutants18;
+  // Varying-A fixture translated to the far corner: the same mixed extrema
+  // (-12, 12) with C = a + b close to 2^19 and every product promoted to i64.
+  const auto varying_a18 = check(gate, {{m - 4, 0, 0}, {m - 2, 0, 0}}, {{m, 0, 0}, {m, 0, 0}},
+                                      {{m - 3, 0, 0}, {m - 3, 0, 0}});
+  gate.require(varying_a18.minimum4 == -12 && varying_a18.maximum4 == 12,
+               "far-corner varying-A fixture lost its mixed extrema");
+  ++gate.model_mutants18;
 }
 
 void ownership_and_rejections(Gate& gate) {
@@ -399,6 +497,12 @@ int main(int argc, char** argv) {
                      gate.symmetries == 48 && gate.model_mutants == 9 &&
                      gate.invalid_inputs == 9 && gate.copies == 3,
                  "joint bounds gate non-vacuity failed");
+    // cases18 = 1 translated baseline + 42 symmetries (the six fully
+    // reflected images fall back under 65535) + 128 random + 3 model-twin
+    // checks (extremes, wide, varying-A).
+    gate.require(gate.cases18 == 174 && gate.random18 == 128 && gate.symmetries18 == 48 &&
+                     gate.model_mutants18 == 4,
+                 "joint bounds gate 18-bit non-vacuity failed");
     std::cout << "mhgp8_q2_joint_bounds_gate passed checks=" << gate.checks
               << " cases=" << gate.cases << " oracle_values=" << gate.oracle_values
               << " dense_values=" << gate.dense_values << " interior=" << gate.interior
@@ -406,6 +510,8 @@ int main(int argc, char** argv) {
               << " swaps=" << gate.swaps << " singleton_reductions=" << gate.singleton_reductions
               << " symmetries=" << gate.symmetries << " model_mutants=" << gate.model_mutants
               << " invalid_inputs=" << gate.invalid_inputs << " copies=" << gate.copies
+              << " cases18=" << gate.cases18 << " random18=" << gate.random18
+              << " symmetries18=" << gate.symmetries18 << " model_mutants18=" << gate.model_mutants18
               << " prepared_bytes=" << sizeof(Q2JointPreparedBounds) << '\n';
     return 0;
   } catch (const std::exception& error) {

@@ -70,6 +70,8 @@ std::array<i128, 5> translated(i128 scale, const WideVector& linear, Point3 orig
 }  // namespace
 
 std::optional<ExactBall> ExactBall::make_q2(Point3 a, Point3 b) {
+  require_valid_point(a);
+  require_valid_point(b);
   if (a == b) return std::nullopt;
   // (z-a).(z-b): A=1 already forces the common gcd to one.
   // |B_i|<=2*M, |C|<=3*M^2, and all arithmetic fits i64 before widening.
@@ -81,6 +83,7 @@ std::optional<ExactBall> ExactBall::make_q2(Point3 a, Point3 b) {
 }
 
 std::optional<ExactBall> ExactBall::make_q3(std::array<Point3, 3> points) {
+  for (const auto point : points) require_valid_point(point);
   const auto d = difference(points[1], points[0]);
   const auto u = difference(points[2], points[0]);
   const i64 dd = dot_small(d, d);
@@ -102,6 +105,7 @@ std::optional<ExactBall> ExactBall::make_q3(std::array<Point3, 3> points) {
 }
 
 std::optional<ExactBall> ExactBall::make_q4(std::array<Point3, 4> points) {
+  for (const auto point : points) require_valid_point(point);
   const std::array<SmallVector, 3> d{
       difference(points[1], points[0]), difference(points[2], points[0]),
       difference(points[3], points[0])};

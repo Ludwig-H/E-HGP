@@ -1,0 +1,32 @@
+{
+  "name": "unit_0079",
+  "command": [
+    "/usr/bin/g++",
+    "-I/workspaces/E-HGP/morsehgp3D_v8",
+    "-I/workspaces/E-HGP/morsehgp3D_v8/src",
+    "-isystem",
+    "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-O3",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "/workspaces/E-HGP/morsehgp3D_v8/tests/p0_gate.cpp",
+    "-M",
+    "-MF",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/u18_resume_20260922/release_r2/dependencies/unit_0079.d",
+    "-MT",
+    "mhgp8_dependency_target"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v8_u18_resume_release_r2_20260922",
+  "source": "/workspaces/E-HGP/morsehgp3D_v8/tests/p0_gate.cpp",
+  "started": "2026-09-22T10:35:09.765063+00:00",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "stdout_base64": "",
+  "stderr_base64": "",
+  "finished": "2026-09-22T10:35:10.065466+00:00"
+}

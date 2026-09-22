@@ -1,18 +1,29 @@
-# Morse HGP 3D v8 — entrée float32 et refonte parallèle
+# Morse HGP 3D v8 — moteur entier 1 mm, float32 et refonte parallèle
 
 Ouverture demandée le 13 septembre 2026, sur `main` uniquement.
 
 ```text
 phase=exploration_v8_hors_registre
 backend=cpu_reference
-profile=quantized_u16_input_only
-mode=implementation_v8_p0
+profile=quantized_u18_input_only
+mode=implementation_v8_u18_and_atlas
 public_status=not_claimed
 ```
 
 L'audit d'ouverture est suivi, sur demande explicite du 13 septembre,
 de l'implémentation P0 mono-thread. Aucun code moteur ni résultat de
 performance n'est repris automatiquement.
+
+## Reprise du 22 septembre — lire d'abord
+
+Le moteur entier a été élargi à 18 bits (`a74e90f2`) et accepte explicitement
+les fichiers `.u32le` de grille 1 mm ; les fichiers float32 restent séparés.
+La [reprise et l'option d'arrêt anticipé d'atlas](docs/REPRISE_U18_ET_ATLAS_SATURANT_20260922.md)
+finalisent les tests extrêmes laissés en cours, protègent les fabriques
+publiques hors domaine et distinguent certificat profond/fragment exact.
+L'option reste désactivée par défaut. La grille demeure **optionnelle**,
+exacte sur ses sites déclarés, sans équivalence avec le profil float32.
+Le contrat de tour complète n'est toujours pas acquis.
 
 ## Contrat principal actif
 
@@ -26,13 +37,14 @@ Voir le [contrat de trames entières](docs/CONTRAT_TRAMES_SEMANTICKITTI_20260921
 Précision demandée ensuite : **float32 original sans perte par défaut** ;
 grille isotrope optionnelle avec `--profile grid --precision-mm …`,
 **1 mm par défaut**. La [nouvelle préparation et la primitive q2 exacte](docs/PRECISION_FLOAT32_ET_GRILLE_20260921.md)
-sont séparées du moteur u16 existant : le port numérique de toute la chaîne
-reste à faire. Le cadre u16 ci-dessus décrit ce moteur, pas la nouvelle
-cible ni un support natif float32 déjà complet.
+sont séparées du moteur entier : son port u18 sert la grille 1 mm ; le
+raccord natif float32 de toute la chaîne reste à faire. Le cadre ci-dessus
+décrit le moteur entier, pas un support natif float32 déjà complet.
 Les mesures à 2 cm et leurs [fusions publiées](receipts/lidar_spatial_20260921/README.md)
 restent historiques. Ces trois trames d'une même séquence ne valident pas
 plusieurs séquences. Les nouveaux formats f32/u32 ne sont pas des entrées
-compatibles avec les sondes u16 actuelles.
+compatibles avec les anciennes sondes u16. Seule une sonde explicitement
+élargie peut consommer `.u32le` ; aucun raccord implicite depuis `.f32le`.
 
 Les coupes spatiales restent un diagnostic de croissance ; un morceau
 rapide ne valide pas la trame entière. Le flux de candidats q3/q4 actuel
@@ -47,8 +59,10 @@ Conserver le profil brut, les IDs et float32 ; chronométrer séparément
 segmentation, HGP et coût total. Le [premier pilote](docs/PILOTE_LIDAR_SANS_SOL_20260921.md)
 est implémenté : environ30ms CPU mono de lecture→masque sur trois trames,
 39 885/35 551/45 845sites conservés. Float32 et mappings vérifiés sur42nuages,
-Release et sanitizers passent ; pas encore de mesure HGP sans sol ni de
-qualification sémantique du retrait. Les labels ne bloquent pas les chronos.
+Release et sanitizers passent. Les campagnes sans sol à 2 cm du développeur
+suivant mesurent un flux q3/q4, pas HGP FULL ni la précision 1 mm ; voir
+[le journal](docs/JOURNAL_DEVELOPPEMENT_20260921.md). Aucune qualification
+sémantique du retrait ; les labels ne bloquent pas les chronos.
 
 ## Organisation et périmètre
 
@@ -81,7 +95,7 @@ fournie : pas encore toutes les arêtes, q4 natif complet ou FULL. Les
 passent612appels Fraction,458contrôles natifs et deux mutations compilées,
 en Release/Clang ASan/UBSan. Les36mesures synthétiques8k/16k/32k comparent
 le partage à la référence ; elles ne qualifient pas une trame LiDAR.
-La [prochaine tranche globale](docs/RACCORD_NATIF_GLOBAL_PLAN_20260921.md)
+Le [plan de raccord float32, non repris dans la tranche u18](docs/RACCORD_NATIF_GLOBAL_PLAN_20260921.md)
 porte front, filtres avant graines et propriété dans la descente partagée.
 Elle doit mesurer des sorties croissantes et les replis des bornes, pas
 extrapoler la seule chaîne de graines imbriquées déjà chronométrée.

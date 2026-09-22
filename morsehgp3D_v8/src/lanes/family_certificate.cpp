@@ -56,6 +56,9 @@ Q34FamilyCertificate::Q34FamilyCertificate(const Q4FamilySeed& family, i128 j_bo
       sqrt_iterations_(sqrt_iterations) {}
 
 std::optional<Q34FamilyCertificate> Q34FamilyCertificate::make(Point3 a, Point3 b, Point3 x) {
+  require_valid_point(a);
+  require_valid_point(b);
+  require_valid_point(x);
   const i64 d = distance_squared(a, b);
   const i64 e = distance_squared(a, x);
   const i64 other = distance_squared(b, x);

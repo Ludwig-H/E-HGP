@@ -69,6 +69,10 @@ struct Gate {
   u64 inherited_duplicates{};
   u64 inheritance_only_pairs{};  // q2 pairs kept by window 4K alone, rejected with inherited witnesses.
   u64 historical_constant_checks{};
+  // 18-bit twins (coordinate_limit = 262143): clouds with a coordinate above 65535 and
+  // the deepest index path met, which the saturating fixture drives to max_index_depth.
+  u64 wide_clouds{};
+  u64 max_depth_seen{};
 
   void require(bool condition, const char* message) {
     ++checks;
@@ -400,7 +404,14 @@ std::vector<Pair> q2_supports(Gate& gate, const Covers& cover, const PairOracle&
   return result;
 }
 
+// Historical corpus (u16 profile) followed by its 18-bit twins. The historical
+// clouds keep their oracle role unchanged; since the 18-bit widening their
+// 65535 corners are interior points and exercise no bound any more.
+constexpr std::size_t historical_fixture_count = 15;
+constexpr std::size_t wide_fixture_count = 5;
+
 std::vector<std::vector<Point3>> fixtures() {
+  using mhgp8::Coordinate;
   std::vector<std::vector<Point3>> result{
       {{7, 8, 9}},
       {{0, 0, 0}, {65535, 65535, 65535}},
@@ -412,16 +423,16 @@ std::vector<std::vector<Point3>> fixtures() {
        {65535, 65535, 65535}, {65535, 65535, 0}, {65535, 0, 65535}, {0, 65535, 65535}}};
   std::vector<Point3> line;
   for (unsigned i = 0; i < 17; ++i) {
-    line.push_back({static_cast<std::uint16_t>(i * 31), 9, 11});
+    line.push_back({static_cast<Coordinate>(i * 31), 9, 11});
   }
   result.push_back(line);
   std::vector<Point3> grid;
   for (unsigned x = 0; x < 3; ++x) {
     for (unsigned y = 0; y < 3; ++y) {
       for (unsigned z = 0; z < 3; ++z) {
-        grid.push_back({static_cast<std::uint16_t>(x * 100),
-                        static_cast<std::uint16_t>(y * 100),
-                        static_cast<std::uint16_t>(z * 100)});
+        grid.push_back({static_cast<Coordinate>(x * 100),
+                        static_cast<Coordinate>(y * 100),
+                        static_cast<Coordinate>(z * 100)});
       }
     }
   }
@@ -429,16 +440,16 @@ std::vector<std::vector<Point3>> fixtures() {
   std::vector<Point3> sheet;
   for (unsigned x = 0; x < 5; ++x) {
     for (unsigned y = 0; y < 5; ++y) {
-      sheet.push_back({static_cast<std::uint16_t>(x * 37), static_cast<std::uint16_t>(y * 41), 73});
+      sheet.push_back({static_cast<Coordinate>(x * 37), static_cast<Coordinate>(y * 41), 73});
     }
   }
   result.push_back(sheet);
   std::vector<Point3> clusters;
   for (unsigned group = 0; group < 3; ++group) {
     for (unsigned i = 0; i < 8; ++i) {
-      clusters.push_back({static_cast<std::uint16_t>(group * 20000 + (i & 1U)),
-                          static_cast<std::uint16_t>((i >> 1U) & 1U),
-                          static_cast<std::uint16_t>((i >> 2U) & 1U)});
+      clusters.push_back({static_cast<Coordinate>(group * 20000 + (i & 1U)),
+                          static_cast<Coordinate>((i >> 1U) & 1U),
+                          static_cast<Coordinate>((i >> 2U) & 1U)});
     }
   }
   result.push_back(clusters);
@@ -457,7 +468,61 @@ std::vector<std::vector<Point3>> fixtures() {
     }
     result.push_back(random);
   }
+  if (result.size() != historical_fixture_count) throw std::logic_error("historical front corpus changed its size");
+  // ---- 18-bit twins (coordinate_limit = 262143), judged by the same Boost oracle.
+  static_assert(mhgp8::coordinate_limit == 262143);
+  // Diagonal of the whole 18-bit grid and the eight corners of its cube.
+  result.push_back({{0, 0, 0}, {262143, 262143, 262143}});
+  result.push_back({{0, 0, 0}, {262143, 0, 0}, {0, 262143, 0}, {0, 0, 262143},
+                    {262143, 262143, 262143}, {262143, 262143, 0}, {262143, 0, 262143}, {0, 262143, 262143}});
+  // The eight u16 corners are interior points of the 18-bit cube (origin shared).
+  result.push_back({{0, 0, 0}, {65535, 0, 0}, {0, 65535, 0}, {0, 0, 65535},
+                    {65535, 65535, 65535}, {65535, 65535, 0}, {65535, 0, 65535}, {0, 65535, 65535},
+                    {262143, 0, 0}, {0, 262143, 0}, {0, 0, 262143},
+                    {262143, 262143, 262143}, {262143, 262143, 0}, {262143, 0, 262143}, {0, 262143, 262143}});
+  // Depth saturation: three chains of powers of two 2^0..2^17 plus 262143 on each
+  // axis, sharing the origin. The index splits the longest axis at its integer
+  // midpoint (ties to x): the root cube is cut on x, then y, then z, and each cut
+  // halves one extent 262143 -> 65536 -> ... -> 1 -> 0, so the origin leaf sits at
+  // depth 3 * 18 = max_index_depth exactly (3 * 16 = 48 on the u16 grid).
+  std::vector<Point3> chains{{0, 0, 0}};
+  for (std::size_t axis = 0; axis < 3; ++axis) {
+    for (unsigned bit = 0; bit <= 17; ++bit) {
+      Point3 point{};
+      if (axis == 0) point.x = static_cast<Coordinate>(1U << bit);
+      if (axis == 1) point.y = static_cast<Coordinate>(1U << bit);
+      if (axis == 2) point.z = static_cast<Coordinate>(1U << bit);
+      chains.push_back(point);
+    }
+    Point3 corner{};
+    if (axis == 0) corner.x = 262143;
+    if (axis == 1) corner.y = 262143;
+    if (axis == 2) corner.z = 262143;
+    chains.push_back(corner);
+  }
+  result.push_back(chains);
+  // A separate 18-bit pseudo-random cloud (state >> 14 gives 18 bits); the u16
+  // generators above are pinned recipes and do not change.
+  for (std::uint32_t seed : {1013U}) {
+    std::vector<Point3> random;
+    auto state = seed;
+    const auto coordinate = [&]() {
+      state = state * 1664525U + 1013904223U;
+      return static_cast<Coordinate>(state >> 14U);
+    };
+    for (std::size_t i = 0; i < 19; ++i) {
+      const auto x = static_cast<Coordinate>(i * 13797 + seed % 101);  // < 262143 for i < 19.
+      random.push_back({x, coordinate(), coordinate()});
+    }
+    result.push_back(random);
+  }
+  if (result.size() != historical_fixture_count + wide_fixture_count) throw std::logic_error("wide front corpus changed its size");
   return result;
+}
+
+bool wide(std::span<const Point3> points) {
+  return std::any_of(points.begin(), points.end(), [](const Point3& point) {
+    return point.x > 65535 || point.y > 65535 || point.z > 65535; });
 }
 
 void corpus(Gate& gate) {
@@ -480,6 +545,8 @@ void corpus(Gate& gate) {
       const auto cloud = mhgp8::prepare_cloud(points);
       const auto index = mhgp8::make_q2_cloud_index(cloud);
       ++gate.clouds;
+      gate.wide_clouds += static_cast<u64>(wide(cloud->points()));
+      gate.max_depth_seen = std::max(gate.max_depth_seen, index->work().max_depth);
       check_spatial_index(gate, *index);
       const auto oracle = make_oracle(gate, expected_points);
       // Mutating the caller's storage after certification must not change
@@ -762,7 +829,8 @@ int main(int argc, char** argv) {
                      gate.nonidentity_orders >= 10 && gate.oracle_point_tests > 200000 &&
                      gate.nonsingleton_rectangles > 0 && gate.partial_lane_rectangles > 0 &&
                      gate.absent_lane_pairs > 0 && gate.residual_lane_pairs > 0 &&
-                     gate.q2_support_checks > 1000 && gate.permutations == 15 &&
+                     gate.q2_support_checks > 1000 && gate.permutations == historical_fixture_count + wide_fixture_count &&
+                     gate.wide_clouds == 2 * wide_fixture_count && gate.max_depth_seen >= mhgp8::max_index_depth &&
                      gate.invalid_inputs >= 25 && gate.model_mutants >= 7 && gate.callback_exceptions == 1 &&
                      gate.witness_searches > 0 && gate.witness_descent_steps > 0 && gate.proposed_sites > 0 &&
                      gate.widened_runs >= 1440 && gate.extended_products > 0 && gate.extended_proposals > 0 &&
@@ -787,7 +855,8 @@ int main(int argc, char** argv) {
               << " extension_only_pairs=" << gate.extension_only_pairs << " limit_bites=" << gate.limit_bites
               << " inheriting_runs=" << gate.inheriting_runs << " inherited_credits=" << gate.inherited_credits
               << " inherited_duplicates=" << gate.inherited_duplicates
-              << " inheritance_only_pairs=" << gate.inheritance_only_pairs << '\n';
+              << " inheritance_only_pairs=" << gate.inheritance_only_pairs
+              << " wide_clouds=" << gate.wide_clouds << " max_depth_seen=" << gate.max_depth_seen << '\n';
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "mhgp8_wspd_front_gate failed: " << error.what() << '\n';

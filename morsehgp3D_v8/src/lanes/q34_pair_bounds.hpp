@@ -22,6 +22,8 @@ struct Q34XiBounds {
 class PreparedPairCitronBounds final {
  public:
   explicit PreparedPairCitronBounds(Point3 a, Point3 b) {
+    require_valid_point(a);
+    require_valid_point(b);
     for (std::size_t axis = 0; axis < 3; ++axis) {
       difference_[axis] = static_cast<i64>(b[axis]) - a[axis];
       center_twice_[axis] = static_cast<i64>(a[axis]) + b[axis];
@@ -36,6 +38,18 @@ class PreparedPairCitronBounds final {
 
   [[nodiscard]] Q2Bounds h_bounds(const Box3& z) const {
     require_valid_box(z);
+    return h_bounds_unchecked(z);
+  }
+
+  [[nodiscard]] Q34XiBounds xi_bounds(const Box3& z) const {
+    require_valid_box(z);
+    return xi_bounds_unchecked(z);
+  }
+
+ private:
+  // The friend only passes immutable index boxes, already range certified.
+  friend struct Q34WitnessSearchBoundsAccess;
+  [[nodiscard]] Q2Bounds h_bounds_unchecked(const Box3& z) const {
     Q2Bounds result{diameter_squared_, diameter_squared_};
     for (std::size_t axis = 0; axis < 3; ++axis) {
       const i64 low = 2 * static_cast<i64>(z.low[axis]) - center_twice_[axis];
@@ -51,8 +65,7 @@ class PreparedPairCitronBounds final {
     return result;
   }
 
-  [[nodiscard]] Q34XiBounds xi_bounds(const Box3& z) const {
-    require_valid_box(z);
+  [[nodiscard]] Q34XiBounds xi_bounds_unchecked(const Box3& z) const {
     Q34XiBounds result{};
     for (std::size_t axis = 0; axis < 3; ++axis) {
       const auto j = (axis + 1) % 3, k = (axis + 2) % 3;
@@ -76,7 +89,6 @@ class PreparedPairCitronBounds final {
     return result;
   }
 
- private:
   std::array<i64, 3> difference_{}, center_twice_{}, cross_constant_{};
   i64 diameter_squared_{};
 };

@@ -1,14 +1,17 @@
 # Élargissement du moteur entier à 18 bits par coordonnée (grille 1 mm)
 
-Décision utilisateur du 22 septembre 2026 : le contrat temps (1 s puis 100 ms,
-K5 et K10, LiDAR sans sol de 30 000 à 60 000 sites) se poursuit sur le
-**moteur entier** élargi de 16 à 18 bits par coordonnée ; le profil float32 sans
-perte reste qualifié hors contrat temps. Cadre : `exploration_v8_hors_registre`,
+La passation du développeur du 22 septembre donne la priorité au
+**moteur entier** élargi de 16 à 18 bits, sur le LiDAR sans sol à 1 mm.
+Cette priorité de développement ne remplace pas le contrat normatif rappelé
+dans `AGENTS.md` : trame brute entière, float32 original par défaut,
+grille optionnelle et sans-sol également prioritaire. Le moteur entier est
+exact sur la grille déclarée, pas sur les coordonnées float32 d'origine.
+Cadre : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, nouveau profil `quantized_u18_input_only` (grille
 isotrope de pas paramétrable, 1 mm par défaut, translation calculée sur la
 trame brute entière), `public_status=not_claimed`. GCP non utilisé pour cette
-tranche. Note de conception ; l'inventaire exhaustif des dépendances 16 bits
-est joint en annexe au fur et à mesure du port.
+tranche. Le port initial est dans `a74e90f2` ; la reprise et les limites de
+qualification sont suivies dans [la note du 22 septembre](REPRISE_U18_ET_ATLAS_SATURANT_20260922.md).
 
 ## Objet et invariants
 
@@ -27,7 +30,7 @@ digests des campagnes spatiales).
 
 ## Décisions de conception
 
-1. **Un seul type de coordonnée** : `Coordinate` (stockage `std::uint32_t`)
+1. **Un seul type de coordonnée** : `Coordinate` (stockage `std::int32_t`)
    dans `src/core/types.hpp`, avec `coordinate_bits = 18` et
    `coordinate_limit = 2^18 − 1` ; `Point3` et `Box3` le portent. Toute
    entrée est validée à `prepare_cloud` (refus explicite au-delà de la limite,
@@ -43,11 +46,11 @@ digests des campagnes spatiales).
    sûrs sous 2^127), census q3 (A ≤ 12 M⁴ < 2^76, |B| ≤ 60 M⁵ < 2^96, |C| ≤
    144 M⁶ < 2^115, bornes < 2^117), mineurs q4 et orientation d'enveloppe
    (< 2^97 et < 2^119), atlas de centres (échelle Q = 2^20 : |w| < 2^19, |T| <
-   2^40, valeur par axe < 2^60, somme < 2^62 : trop près de i64 ; **l'échelle
-   passe à Q = 2^18** avec `max_depth = 18`, ce qui redonne < 2^60 par somme ;
-   centre q3 en i128 : |p|, |q| < 2^73, |det| < 2^113, test de cellule
-   Q·|x| < 2^131 : **dépasse i128**, à réduire (voir port) ; disque du domaine
-   96 M² Q² < 2^76 ✓).
+   2^40, somme < 2^62 : **Q = 2^20 est conservé** avec sa marge prouvée en i64 ;
+   centre q3 en i128 : |p|, |q| < 2^77, |det| et numérateurs < 2^117 ;
+   Q·|x| pourrait atteindre 137 bits, donc la localisation utilise une
+   division longue exacte, pas ce produit ; disque du domaine
+   96 M² Q² < 2^83). La baisse envisagée à Q=2^18 n'a pas été retenue.
 4. **Entrée** : lecteur `.u32le` (12 octets par site, petit-boutiste, valeurs
    < 2^18 exigées) à côté du lecteur `.u16le` ; empreinte d'entrée FNV
    calculée sur les valeurs entières (identique pour un même nuage quel que
@@ -57,7 +60,8 @@ digests des campagnes spatiales).
    maximum par axe 159 832) sont les premières entrées.
 5. **Portes** : chaque fixture « extrême » à 65 535 est doublée à 262 143 ;
    les oracles rationnels (Boost) ne supposent aucune largeur ; les assertions
-   de taille de registres sont inchangées (aucun compteur n'est ajouté) ; le
+   de taille de registres du moteur sont inchangées dans le port initial ;
+   les portes ajoutent des métriques u18 distinctes ; le
    mutant « limite de plage non vérifiée » (accepter 2^18) doit être tué par
    la porte du nuage.
 6. **Reçus** : une campagne appariée u16 (2 cm) avant/après port (bit-identité)
@@ -110,7 +114,10 @@ compteurs de partition sur les entrées u16.
   reste nul dit si la valeur est entière. Le test de cellule fermée devient
   `left ≤ ⌊v⌋` et `⌊v⌋ < right ou (⌊v⌋ = right et v entière)`. Le centre d'une
   graine aiguë vérifie |u| ≤ 1/2 en coefficients réels (λ_min du Gram = h²),
-  donc |quotient| ≤ scale ; une garde à 2^100 rend l'arithmétique totale.
+  donc |quotient| ≤ scale. La reprise vérifie explicitement les numérateurs
+  et le dénominateur (<2^117) des centres publics, puis exclut les centres
+  hors racine avant la division ; la seule garde sur le quotient ne suffisait
+  pas à protéger un dénominateur forgé très grand.
 - **Profil publié par les sondes** : `quantized_u16_input_only` quand toutes
   les coordonnées lues tiennent sur 16 bits, `quantized_u18_input_only`
   sinon ; les reçus u16 restent comparables au JSON près, seuls les octets

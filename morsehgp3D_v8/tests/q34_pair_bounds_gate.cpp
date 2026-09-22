@@ -52,6 +52,8 @@ struct Gate {
   u64 half_integer_summits{},cross_zero_components{},positive_xi_lower{},wide_xi{},wide_h_squares{};
   u64 reversed_pairs{},coincident_pairs{},extreme_cases{},axis_permutations{},invalid_inputs{};
   u64 allocation_free_calls{},parallel_calls{};
+  // 18-bit twins: floors provably unreachable by 16-bit inputs (see check()).
+  u64 extreme_cases_u18{},wide_xi_u18{},wide_h_squares_u18{};
   void require(bool value,const char* message) {++checks;if (!value) throw std::runtime_error(message);}
 };
 
@@ -135,6 +137,10 @@ void check(Gate& gate,Point3 a,Point3 b,const Box3& box) {
   if (expected.xlow>0) ++gate.positive_xi_lower;
   if (expected.xhigh>(Big(1)<<64)) ++gate.wide_xi;
   if (expected.hlow*expected.hlow>(Big(1)<<64) || expected.hhigh*expected.hhigh>(Big(1)<<64)) ++gate.wide_h_squares;
+  // On 16-bit inputs Xi<=|u|^2|v|^2<=(3*65535^2)^2<2^67.2 and |H4|<=12*65535^2<2^35.6
+  // (H4^2<2^71.2): the two counters below are reachable only by an 18-bit fixture.
+  if (expected.xhigh>(Big(1)<<68)) ++gate.wide_xi_u18;
+  if (expected.hlow*expected.hlow>(Big(1)<<72) || expected.hhigh*expected.hhigh>(Big(1)<<72)) ++gate.wide_h_squares_u18;
   if (a==b) ++gate.coincident_pairs;
   const Bounds reverse(b,a);
   const auto rh=reverse.h_bounds(box);
@@ -142,7 +148,7 @@ void check(Gate& gate,Point3 a,Point3 b,const Box3& box) {
   gate.require(rh.minimum4==h.minimum4 && rh.maximum4==h.maximum4 && rx.low==x.low && rx.high==x.high,
       "endpoint reversal changed pair bounds");++gate.reversed_pairs;
   // A three-by-three-by-three integer sample also judges enclosure, not just
-  // equality of interval endpoints. This is bounded even for a full u16 box.
+  // equality of interval endpoints. This is bounded even for a full 18-bit box.
   std::array<std::array<mhgp8::Coordinate,3>,3> grid{};
   for (std::size_t axis=0;axis<3;++axis)
     grid[axis]={box.low[axis],static_cast<mhgp8::Coordinate>((box.low[axis]+box.high[axis])/2),box.high[axis]};
@@ -164,6 +170,15 @@ void run(Gate& gate) {
     check(gate,a,b,{{0,0,0},{65535,65535,65535}});
     check(gate,a,b,{{65534,0,32767},{65535,1,32768}});gate.extreme_cases+=2;
   }
+  // 18-bit twins: corners at 262143, the far corner cell and the halving
+  // midpoints 131071/131072; the historical 65535 corners become interior sites.
+  const std::array<Point3,5> extreme18{{{0,0,0},{262143,262143,262143},{262143,0,262143},{0,262143,0},{262143,262142,1}}};
+  for (const auto a:extreme18) for (const auto b:extreme18) {
+    check(gate,a,b,{{0,0,0},{262143,262143,262143}});
+    check(gate,a,b,{{262142,0,131071},{262143,1,131072}});gate.extreme_cases_u18+=2;
+  }
+  check(gate,{65535,65535,65535},{262143,262143,262143},{{65534,65534,65534},{262143,262143,262143}});
+  check(gate,{0,0,0},{262143,262143,262143},{{65535,65535,65535},{131072,131072,131072}});gate.extreme_cases_u18+=2;
   const Point3 a{100,101,102},b{200,170,140};
   const Box3 box{{80,95,100},{220,190,160}};
   check(gate,a,b,box);
@@ -196,6 +211,8 @@ void run(Gate& gate) {
   gate.require(gate.half_integer_summits && gate.cross_zero_components && gate.positive_xi_lower &&
       gate.wide_xi && gate.wide_h_squares && gate.coincident_pairs && gate.singleton_boxes && gate.nondegenerate_boxes,
       "required pair-bound geometry was not exercised");
+  gate.require(gate.extreme_cases_u18==52 && gate.wide_xi_u18 && gate.wide_h_squares_u18,
+      "18-bit pair-bound geometry was not exercised");
 }
 }
 
@@ -209,6 +226,7 @@ int main(int argc,char** argv) {
     FIELD(nondegenerate_boxes);FIELD(half_integer_summits);FIELD(cross_zero_components);FIELD(positive_xi_lower);
     FIELD(wide_xi);FIELD(wide_h_squares);FIELD(reversed_pairs);FIELD(coincident_pairs);FIELD(extreme_cases);
     FIELD(axis_permutations);FIELD(invalid_inputs);FIELD(allocation_free_calls);FIELD(parallel_calls);
+    FIELD(extreme_cases_u18);FIELD(wide_xi_u18);FIELD(wide_h_squares_u18);
 #undef FIELD
     std::cout<<"}\n";return 0;
   } catch (const std::exception& error) {

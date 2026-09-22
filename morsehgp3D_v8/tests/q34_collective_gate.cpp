@@ -16,6 +16,9 @@ struct CollectiveGate : Gate {
   u64 initial_saturation_drops{}, exact_minimum_checks{}, workspace_reuses{};
   u64 option_calls{}, zero_budget_calls{}, jung_universal_pairs{};
   u64 foreign_owner_calls{};
+  // 18-bit twin fixtures (coordinate_limit = 262143), counted apart so that
+  // the historical floors keep their meaning on the 16-bit fixtures.
+  u64 wide_fixture_calls{};
 };
 
 constexpr std::array<mhgp8::Q34PoolOptions,4> pool_options{{
@@ -337,12 +340,26 @@ void collective_fixtures(CollectiveGate& gate) {
   const Points narrower{{10,10,10},{14,14,10},{14,10,13},{10,14,13},{12,12,12},{13,11,11}};
   const Points extreme{{0,0,0},{60000,65000,1000},{62000,500,64000},
     {2000,63000,62000},{32000,32000,32000},{65535,65535,65535}};
+  // 18-bit twins of `extreme` (the 65535 corner is an interior site since the
+  // widening): an oblique cloud reaching coordinate_limit = 262143 and the
+  // corner cloud with the two middle values 131071/131072. Same rational
+  // judge (staged variance rounding, closed endpoints, exact pool minimum).
+  const Points extreme18{{0,0,0},{240000,260000,4000},{248000,2000,256000},
+    {8000,252000,248000},{128000,128000,128000},{262143,262143,262143}};
+  const Points corners18{{0,0,0},{262143,262143,0},{262143,0,262143},{0,262143,262143},
+    {131071,131072,131071},{262143,262143,262143}};
   const Points q3_only{{900,1000,1000},{1100,1000,1000},{1000,1120,1040},
     {1000,1120,960},{1000,1020,1105},{1001,1020,1105}};
   const Points both{{20,20,20},{60,60,20},{60,20,60},{20,60,60},
     {40,40,40},{41,40,40},{40,41,40},{40,40,41}};
   for (const auto& points : {collective_overlap(),collective_dip(),lower,upper,narrower,extreme,q3_only,both})
     for (const auto budget : {0U,3U,32U}) check_collective_edge(gate,points,{0,1},3,budget);
+  for (const auto* points : {&extreme18,&corners18})
+    for (const auto k : {3U,5U})
+      for (const auto budget : {0U,3U,32U}) {
+        check_collective_edge(gate,*points,{0,1},k,budget);
+        ++gate.wide_fixture_calls;
+      }
   for (const auto k : {1U,2U,3U,5U,10U})
     for (const auto budget : {0U,1U,32U}) check_collective_edge(gate,regular,{0,1},k,budget);
   check_collective_edge(gate,shell30(),{0,1},5,32);
@@ -442,6 +459,7 @@ int collective_selftest() {
   gate.require(gate.q3_only_rejections > 0 && gate.q4_only_rejections > 0 &&
     gate.both_rejections > 0 && gate.neither_rejections > 0,
     "independent q3/q4 rejection non-vacuity floors");
+  gate.require(gate.wide_fixture_calls == 12, "18-bit twin fixture non-vacuity floor");
   std::cout << "{\"schema\":\"mhgp8_q34_collective_gate_v1\",\"status\":\"passed\"";
 #define MHGP8_COLLECTIVE_FIELD(name) std::cout << ",\"" #name "\":" << gate.name
   MHGP8_COLLECTIVE_FIELD(checks); MHGP8_COLLECTIVE_FIELD(assessments);
@@ -462,7 +480,7 @@ int collective_selftest() {
   MHGP8_COLLECTIVE_FIELD(max_shell); MHGP8_COLLECTIVE_FIELD(pool_calls);
   MHGP8_COLLECTIVE_FIELD(exhaustive_edges); MHGP8_COLLECTIVE_FIELD(permutations);
   MHGP8_COLLECTIVE_FIELD(invalid_inputs); MHGP8_COLLECTIVE_FIELD(callback_failures);
-  MHGP8_COLLECTIVE_FIELD(parallel_calls);
+  MHGP8_COLLECTIVE_FIELD(parallel_calls); MHGP8_COLLECTIVE_FIELD(wide_fixture_calls);
 #undef MHGP8_COLLECTIVE_FIELD
   std::cout << "}\n";
   return 0;

@@ -1,5 +1,17 @@
 # État de l'audit v8
 
+## Reprise du 22 septembre
+
+Base relue `a74e90f2`, trois contrelectures : domaine numérique u18,
+architecture/coûts q3/q4 et preuves des mesures sans sol.
+Voir [la note de reprise](../docs/REPRISE_U18_ET_ATLAS_SATURANT_20260922.md).
+Deux risques hors domaine corrigés aux frontières publiques ; aucun
+débordement établi en statique pour le pipeline sur nuage u18 certifié.
+Nouvelle option de saturation de l'atlas, désactivée par défaut, avec
+certificat distinct du fragment exact et coût interrompu intégralement payé.
+La qualification de reprise est séparée des captures historiques.
+Ni FULL ni contrat G4 ni croissance globale nouvellement qualifiés.
+
 21 septembre 2026. Audit constructeur, avec contrelectures parallèles.
 Ce dossier n'est pas l'auditeur indépendant propriétaire des audits v7.
 

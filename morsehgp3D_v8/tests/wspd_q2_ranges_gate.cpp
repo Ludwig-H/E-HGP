@@ -75,7 +75,8 @@ Output join(const std::vector<Output>& slots) {
 // Explicit reuse of the independent scalar-oracle methodology of the
 // cooperative gate, not of its answers or qualification. Neither the front
 // nor product box/census predicates enter this exhaustive bounded judge.
-// All promoted dot products fit int64 over the quantized u16 domain.
+// All promoted dot products fit int64 over the quantized domain
+// (3 * 262143^2 < 2^38 per term at 18 bits).
 Output oracle(Gate& gate, const Points& points) {
   gate.require(!points.empty() && points.size() <= 100, "range oracle exceeded its bounded n<=100 domain");
   Output result;
@@ -307,24 +308,24 @@ std::vector<Points> fixtures() {
   Points shell, cube, rows, random, clusters, planes;
   for (int x = -5; x <= 5; ++x) for (int y = -5; y <= 5; ++y) for (int z = -5; z <= 5; ++z)
     if (x*x + y*y + z*z == 25)
-      shell.push_back({static_cast<std::uint16_t>(8 + x), static_cast<std::uint16_t>(8 + y), static_cast<std::uint16_t>(8 + z)});
+      shell.push_back({static_cast<mhgp8::Coordinate>(8 + x), static_cast<mhgp8::Coordinate>(8 + y), static_cast<mhgp8::Coordinate>(8 + z)});
   for (unsigned bits = 0; bits < 8; ++bits)
-    cube.push_back({static_cast<std::uint16_t>((bits & 1U) ? 65535 : 0), static_cast<std::uint16_t>((bits & 2U) ? 65535 : 0),
-                    static_cast<std::uint16_t>((bits & 4U) ? 65535 : 0)});
+    cube.push_back({static_cast<mhgp8::Coordinate>((bits & 1U) ? 65535 : 0), static_cast<mhgp8::Coordinate>((bits & 2U) ? 65535 : 0),
+                    static_cast<mhgp8::Coordinate>((bits & 4U) ? 65535 : 0)});
   cube.push_back({32767, 32768, 32767});
   for (unsigned side = 0; side < 2; ++side) for (unsigned i = 0; i < 32; ++i)
-    rows.push_back({static_cast<std::uint16_t>(1000 + side * 59000), static_cast<std::uint16_t>(i), 0});
+    rows.push_back({static_cast<mhgp8::Coordinate>(1000 + side * 59000), static_cast<mhgp8::Coordinate>(i), 0});
   std::uint32_t state = 971;
   for (unsigned i = 0; i < 13; ++i) {
     state = state * 1664525U + 1013904223U;
-    const auto y = static_cast<std::uint16_t>(state >> 16U);
+    const auto y = static_cast<mhgp8::Coordinate>(state >> 16U);
     state = state * 1664525U + 1013904223U;
-    random.push_back({static_cast<std::uint16_t>(4093 * i), y, static_cast<std::uint16_t>(state >> 16U)});
+    random.push_back({static_cast<mhgp8::Coordinate>(4093 * i), y, static_cast<mhgp8::Coordinate>(state >> 16U)});
   }
   // Unequal factors8x72 exercise a real Pool64 plan while the independent
   // oracle remains within n<=100. Spatial ranks are not original IDs.
-  for (unsigned i = 0; i < 8; ++i) clusters.push_back({static_cast<std::uint16_t>(i), 17, 31});
-  for (unsigned i = 0; i < 72; ++i) clusters.push_back({static_cast<std::uint16_t>(60000 + i), 17, 31});
+  for (unsigned i = 0; i < 8; ++i) clusters.push_back({static_cast<mhgp8::Coordinate>(i), 17, 31});
+  for (unsigned i = 0; i < 72; ++i) clusters.push_back({static_cast<mhgp8::Coordinate>(60000 + i), 17, 31});
   result.push_back(shell);
   result.push_back(cube);
   result.push_back(rows);
@@ -341,60 +342,104 @@ std::vector<Points> fixtures() {
   // whose surviving local credit classes may each contain just one anchor.
   for (const unsigned x : {100U, 200U, 60000U, 60100U})
     for (unsigned y = 0; y < 16; ++y)
-      planes.push_back({static_cast<std::uint16_t>(x), static_cast<std::uint16_t>(y), 0});
+      planes.push_back({static_cast<mhgp8::Coordinate>(x), static_cast<mhgp8::Coordinate>(y), 0});
   result.push_back(planes);
   return result;
 }
 
+// 18-bit twins (coordinate_limit = 262143) of the u16 corner fixtures: the
+// diagonal pair, the full-extent cube with its near-center site
+// {131071, 131072, 131071}, a random cloud drawn on 18 bits (state >> 14), and
+// the unequal 8x72 clusters translated so the far cluster ends exactly at
+// 262143 (squared axis gaps above 2^32 inside a real Pool64 plan). They pass
+// through the same oracle and the same scheduling matrix as the u16 corpus,
+// continuing its cloud index so the Pool cutoff rotation goes on, and carry
+// their own floors; the u16 fixtures and floors are untouched.
+std::vector<Points> fixtures_18bits() {
+  constexpr mhgp8::Coordinate limit = mhgp8::coordinate_limit;
+  std::vector<Points> result{{{0, 0, 0}, {limit, limit, limit}}};
+  Points cube, random, clusters;
+  for (unsigned bits = 0; bits < 8; ++bits)
+    cube.push_back({(bits & 1U) != 0 ? limit : 0, (bits & 2U) != 0 ? limit : 0, (bits & 4U) != 0 ? limit : 0});
+  cube.push_back({131071, 131072, 131071});
+  std::uint32_t state = 971;
+  for (unsigned i = 0; i < 13; ++i) {
+    state = state * 1664525U + 1013904223U;
+    const auto y = static_cast<mhgp8::Coordinate>(state >> 14U);
+    state = state * 1664525U + 1013904223U;
+    random.push_back({static_cast<mhgp8::Coordinate>(20143 * i), y, static_cast<mhgp8::Coordinate>(state >> 14U)});
+  }
+  for (unsigned i = 0; i < 8; ++i) clusters.push_back({static_cast<mhgp8::Coordinate>(i), 17, 31});
+  for (unsigned i = 0; i < 72; ++i) clusters.push_back({static_cast<mhgp8::Coordinate>(limit - 71 + i), 17, 31});
+  result.push_back(cube);
+  result.push_back(random);
+  result.push_back(clusters);
+  return result;
+}
+
+void exercise(Gate& gate, const Points& points, std::size_t c, bool four_layers) {
+  const auto all = oracle(gate, points);
+  const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
+  unsigned variant = 0;
+  for (const unsigned k : {1U, 5U, 10U}) for (const unsigned s : {8U, 10U, 12U}) {
+    const auto choice = variant++;
+    const GeometryOptions geometry{k, s,
+        choice % 2 == 0 ? WspdFrontMode::Pure : WspdFrontMode::MidpointSamples,
+        choice % 3 == 0 ? Q2SiblingMode::Disabled : Q2SiblingMode::Saturating,
+        choice % 2 == 0 ? Q2WitnessOrder::GlobalDfs : Q2WitnessOrder::ComplementFirst,
+        std::array<std::size_t, 3>{0, 2, 64}[(choice + c) % 3]};
+    const auto baseline = coarse(gate, index, geometry, accepted(all, k));
+    static_cast<void>(run(gate, index, baseline, geometry, 1, {1, 1, 1}));
+    static_cast<void>(run(gate, index, baseline, geometry, 2, {1, 1, 1}));
+    static_cast<void>(run(gate, index, baseline, geometry, 4, {4, 8, 8}));
+    static_cast<void>(run(gate, index, baseline, geometry, 8, {1, 1, 64}));
+    if (choice == 0) {
+      const GeometryOptions defaults{k, s};
+      const auto default_base = coarse(gate, index, defaults, accepted(all, k));
+      static_cast<void>(run(gate, index, default_base, defaults, 2, {}, true));
+    }
+  }
+  // Pool selection, including its no-filter fallback, must remain exactly
+  // the same when small unstarted anchor ranges can be transferred. There
+  // is no scheduling-dependent minimum donation count in the test.
+  for (const auto pool : {std::size_t{0}, std::size_t{2}, std::size_t{64}}) {
+    const GeometryOptions fine{10, 8, WspdFrontMode::Pure, Q2SiblingMode::Saturating,
+                               Q2WitnessOrder::ComplementFirst, pool};
+    const auto baseline = coarse(gate, index, fine, accepted(all, 10));
+    static_cast<void>(run(gate, index, baseline, fine, 4, {1, 1, 1}));
+  }
+  if (four_layers) {
+    for (unsigned k : {1U, 2U}) {
+      const GeometryOptions wide{k, 8, WspdFrontMode::Pure, Q2SiblingMode::Disabled,
+                                 Q2WitnessOrder::GlobalDfs, 2};
+      const auto baseline = coarse(gate, index, wide, accepted(all, k));
+      gate.require(baseline.result.pool_work.filtered_pairs >= 3 * 16 * 16 &&
+                       baseline.result.pool_work.selected_anchors >= 16 && baseline.result.pool_work.pair_roots >= 16 * 16,
+                   "four-layer fixture lost its wide, genuinely filtered Pool residue");
+      for (unsigned repetition = 0; repetition < 3; ++repetition) {
+        static_cast<void>(run(gate, index, baseline, wide, 8, {1, 8, 1}));
+        static_cast<void>(run(gate, index, baseline, wide, 32, {1, 8, 1}));
+        gate.wide_pool_cases += 2;
+      }
+    }
+  }
+  ++gate.clouds;
+}
+
 void corpus(Gate& gate) {
   const auto clouds = fixtures();
+  for (std::size_t c = 0; c < clouds.size(); ++c) exercise(gate, clouds[c], c, c + 1 == clouds.size());
+}
+
+void corpus_18bits(Gate& gate) {
+  const auto clouds = fixtures_18bits();
+  const auto offset = fixtures().size();
   for (std::size_t c = 0; c < clouds.size(); ++c) {
-    const auto all = oracle(gate, clouds[c]);
-    const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(clouds[c]));
-    unsigned variant = 0;
-    for (const unsigned k : {1U, 5U, 10U}) for (const unsigned s : {8U, 10U, 12U}) {
-      const auto choice = variant++;
-      const GeometryOptions geometry{k, s,
-          choice % 2 == 0 ? WspdFrontMode::Pure : WspdFrontMode::MidpointSamples,
-          choice % 3 == 0 ? Q2SiblingMode::Disabled : Q2SiblingMode::Saturating,
-          choice % 2 == 0 ? Q2WitnessOrder::GlobalDfs : Q2WitnessOrder::ComplementFirst,
-          std::array<std::size_t, 3>{0, 2, 64}[(choice + c) % 3]};
-      const auto baseline = coarse(gate, index, geometry, accepted(all, k));
-      static_cast<void>(run(gate, index, baseline, geometry, 1, {1, 1, 1}));
-      static_cast<void>(run(gate, index, baseline, geometry, 2, {1, 1, 1}));
-      static_cast<void>(run(gate, index, baseline, geometry, 4, {4, 8, 8}));
-      static_cast<void>(run(gate, index, baseline, geometry, 8, {1, 1, 64}));
-      if (choice == 0) {
-        const GeometryOptions defaults{k, s};
-        const auto default_base = coarse(gate, index, defaults, accepted(all, k));
-        static_cast<void>(run(gate, index, default_base, defaults, 2, {}, true));
-      }
-    }
-    // Pool selection, including its no-filter fallback, must remain exactly
-    // the same when small unstarted anchor ranges can be transferred. There
-    // is no scheduling-dependent minimum donation count in the test.
-    for (const auto pool : {std::size_t{0}, std::size_t{2}, std::size_t{64}}) {
-      const GeometryOptions fine{10, 8, WspdFrontMode::Pure, Q2SiblingMode::Saturating,
-                                 Q2WitnessOrder::ComplementFirst, pool};
-      const auto baseline = coarse(gate, index, fine, accepted(all, 10));
-      static_cast<void>(run(gate, index, baseline, fine, 4, {1, 1, 1}));
-    }
-    if (c + 1 == clouds.size()) {
-      for (unsigned k : {1U, 2U}) {
-        const GeometryOptions wide{k, 8, WspdFrontMode::Pure, Q2SiblingMode::Disabled,
-                                   Q2WitnessOrder::GlobalDfs, 2};
-        const auto baseline = coarse(gate, index, wide, accepted(all, k));
-        gate.require(baseline.result.pool_work.filtered_pairs >= 3 * 16 * 16 &&
-                         baseline.result.pool_work.selected_anchors >= 16 && baseline.result.pool_work.pair_roots >= 16 * 16,
-                     "four-layer fixture lost its wide, genuinely filtered Pool residue");
-        for (unsigned repetition = 0; repetition < 3; ++repetition) {
-          static_cast<void>(run(gate, index, baseline, wide, 8, {1, 8, 1}));
-          static_cast<void>(run(gate, index, baseline, wide, 32, {1, 8, 1}));
-          gate.wide_pool_cases += 2;
-        }
-      }
-    }
-    ++gate.clouds;
+    mhgp8::Coordinate widest = 0;
+    for (const auto& point : clouds[c]) widest = std::max({widest, point.x, point.y, point.z});
+    gate.require(widest > 65535 && widest <= mhgp8::coordinate_limit,
+                 "18-bit fixture does not leave the historical u16 range or exceeds coordinate_limit");
+    exercise(gate, clouds[c], offset + c, false);
   }
 }
 
@@ -573,6 +618,20 @@ int main(int argc, char** argv) {
                      gate.multiple_callback_threads >= 2 && gate.callback_threads_joined >= 2 && gate.callback_failures == 1 &&
                      gate.reentrant_runs == 1 && gate.index_resets == 1 && gate.invalid_inputs == 14 && gate.mutants == 7,
                  "range gate lost a required positive geometry/routing/lifetime fixture");
+    // 18-bit twins: four clouds through the same matrix (13 coarse and 40
+    // range runs, one default run each; 1 + 36 + 78 + 3160 oracle pairs); the
+    // u16 max_shell of 30 is unchanged (at most 8 cospherical sites); the
+    // clusters twin must select and filter at cutoff 64 and pass through.
+    const Gate u16 = gate;
+    corpus_18bits(gate);
+    gate.require(gate.clouds - u16.clouds == 4 && gate.coarse_runs - u16.coarse_runs == 52 &&
+                     gate.range_runs - u16.range_runs == 160 && gate.default_runs - u16.default_runs == 4 &&
+                     gate.oracle_pairs - u16.oracle_pairs == 3275 && gate.supports > u16.supports && gate.max_shell == 30 &&
+                     gate.selected64 > u16.selected64 && gate.filtered64 > u16.filtered64 && gate.passthrough > u16.passthrough &&
+                     gate.wide_pool_cases == u16.wide_pool_cases && gate.callback_failures == u16.callback_failures &&
+                     gate.reentrant_runs == u16.reentrant_runs && gate.index_resets == u16.index_resets &&
+                     gate.invalid_inputs == u16.invalid_inputs && gate.mutants == u16.mutants,
+                 "18-bit range corpus lost a required positive geometry/routing fixture");
     // Donation counts are observations, not deterministic signatures or
     // nonvacuity promises. Seeds-exhausted means CLAIMED, not completed.
     std::cout << "{\"schema\":\"mhgp8_wspd_q2_ranges_gate_v1\",\"status\":\"passed\",\"public_status\":\"not_claimed\""

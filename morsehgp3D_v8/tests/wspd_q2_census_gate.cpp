@@ -58,6 +58,12 @@ struct Gate {
   u64 invalid_inputs{};
   u64 callback_exceptions{};
   u64 model_mutants{};
+  // The 18-bit twin corpus is counted under its own exact pins so that the
+  // u16 pins (clouds, permutations) keep their historical values.
+  bool wide{};
+  u64 clouds18{};
+  u64 permutations18{};
+  u64 supports18{};
 
   void require(bool condition, const char* message) {
     ++checks;
@@ -83,7 +89,7 @@ void sort_output(Output& output) {
 
 // Test-only all-pairs/all-sites oracle. It calls no production geometry,
 // bounds, front, census, credit planner, or candidate-selection routine.
-// Each factor is promoted before subtraction; |H| <= 3*65535^2 fits i64.
+// Each factor is promoted before subtraction; |H| <= 3*262143^2 < 2^38 fits i64.
 Output exhaustive(Gate& gate, std::span<const Point3> points) {
   Output result;
   for (std::size_t a = 0; a < points.size(); ++a) {
@@ -248,7 +254,7 @@ Capture checked_run(Gate& gate, const Q2CensusIndex& index, const Output& expect
   }
   gate.require(result.total_ms == census.total_ms,
                "integrated total and census total no longer name the same enclosing interval");
-  gate.supports += census.accepted_pairs;
+  (gate.wide ? gate.supports18 : gate.supports) += census.accepted_pairs;
   gate.interior_sites += interiors;
   gate.shell_sites += shells;
   gate.front_rejected_pairs += actual_front.work.rejected_pair_mass[0];
@@ -274,12 +280,14 @@ Output relabel(Output output, std::span<const std::size_t> original_ids) {
   return output;
 }
 
+using Coordinate = mhgp8::Coordinate;
+
 std::vector<Point3> cube(unsigned side) {
   std::vector<Point3> points;
   for (unsigned bits = 0; bits < 8; ++bits) {
-    points.push_back({static_cast<std::uint16_t>((bits & 1U) != 0 ? side : 0),
-                      static_cast<std::uint16_t>((bits & 2U) != 0 ? side : 0),
-                      static_cast<std::uint16_t>((bits & 4U) != 0 ? side : 0)});
+    points.push_back({static_cast<Coordinate>((bits & 1U) != 0 ? side : 0),
+                      static_cast<Coordinate>((bits & 2U) != 0 ? side : 0),
+                      static_cast<Coordinate>((bits & 4U) != 0 ? side : 0)});
   }
   return points;
 }
@@ -293,21 +301,21 @@ std::vector<std::vector<Point3>> fixtures() {
       {{0, 0, 0}, {5, 0, 0}, {10, 0, 0}, {11, 0, 0}},
       cube(2), cube(65535)};
   std::vector<Point3> line;
-  for (unsigned i = 0; i < 12; ++i) line.push_back({static_cast<std::uint16_t>(i * 41), 13, 17});
+  for (unsigned i = 0; i < 12; ++i) line.push_back({static_cast<Coordinate>(i * 41), 13, 17});
   result.push_back(line);
   std::vector<Point3> sheet;
   for (unsigned x = 0; x < 3; ++x) {
     for (unsigned y = 0; y < 4; ++y) {
-      sheet.push_back({static_cast<std::uint16_t>(x * 53), static_cast<std::uint16_t>(y * 47), 31});
+      sheet.push_back({static_cast<Coordinate>(x * 53), static_cast<Coordinate>(y * 47), 31});
     }
   }
   result.push_back(sheet);
   std::vector<Point3> clusters;
   for (unsigned group = 0; group < 2; ++group) {
     for (unsigned bits = 0; bits < 8; ++bits) {
-      clusters.push_back({static_cast<std::uint16_t>(group * 40000 + (bits & 1U)),
-                          static_cast<std::uint16_t>((bits >> 1U) & 1U),
-                          static_cast<std::uint16_t>((bits >> 2U) & 1U)});
+      clusters.push_back({static_cast<Coordinate>(group * 40000 + (bits & 1U)),
+                          static_cast<Coordinate>((bits >> 1U) & 1U),
+                          static_cast<Coordinate>((bits >> 2U) & 1U)});
     }
   }
   result.push_back(clusters);
@@ -315,26 +323,59 @@ std::vector<std::vector<Point3>> fixtures() {
     auto state = seed;
     const auto next = [&]() {
       state = state * 1664525U + 1013904223U;
-      return static_cast<std::uint16_t>(state >> 16U);
+      return static_cast<Coordinate>(state >> 16U);
     };
     std::vector<Point3> random;
     for (unsigned i = 0; i < 19; ++i) {
-      random.push_back({static_cast<std::uint16_t>(i * 271 + seed), next(), next()});
+      random.push_back({static_cast<Coordinate>(i * 271 + seed), next(), next()});
     }
     result.push_back(random);
   }
   std::vector<Point3> skew;
   for (unsigned i = 0; i < 20; ++i) {
-    skew.push_back({static_cast<std::uint16_t>(i * 103),
-                    static_cast<std::uint16_t>((i * i * 7) % 101),
-                    static_cast<std::uint16_t>((i * 13) % 17)});
+    skew.push_back({static_cast<Coordinate>(i * 103),
+                    static_cast<Coordinate>((i * i * 7) % 101),
+                    static_cast<Coordinate>((i * 13) % 17)});
   }
   result.push_back(skew);
   return result;
 }
 
-void corpus(Gate& gate) {
-  for (const auto& original : fixtures()) {
+// 18-bit twins of the extreme fixtures, graved at the engine limit 262143:
+// the space diagonal, the 262143-cube, two unit cubes whose far group ends
+// exactly at the limit and a random cloud whose own recipe draws 18 bits
+// (>> 14U). They pass the same permutation, front-reference and exhaustive
+// oracle checks as the u16 corpus.
+static_assert(mhgp8::coordinate_limit == 262143, "18-bit fixtures are graved at the engine limit");
+std::vector<std::vector<Point3>> fixtures18() {
+  std::vector<std::vector<Point3>> result{
+      {{0, 0, 0}, {262143, 262143, 262143}},
+      cube(262143)};
+  std::vector<Point3> clusters;
+  for (unsigned group = 0; group < 2; ++group) {
+    for (unsigned bits = 0; bits < 8; ++bits) {
+      clusters.push_back({static_cast<Coordinate>(group * 262142 + (bits & 1U)),
+                          static_cast<Coordinate>((bits >> 1U) & 1U),
+                          static_cast<Coordinate>((bits >> 2U) & 1U)});
+    }
+  }
+  result.push_back(clusters);
+  std::uint32_t state = 1U;
+  const auto next = [&]() {
+    state = state * 1664525U + 1013904223U;
+    return static_cast<Coordinate>(state >> 14U);
+  };
+  std::vector<Point3> random;
+  for (unsigned i = 0; i < 19; ++i) {
+    random.push_back({static_cast<Coordinate>(i * 13791 + 1), next(), next()});
+  }
+  result.push_back(random);
+  return result;
+}
+
+void corpus(Gate& gate, const std::vector<std::vector<Point3>>& clouds, bool wide) {
+  gate.wide = wide;
+  for (const auto& original : clouds) {
     std::array<Output, 4> references;
     for (unsigned permutation = 0; permutation < 2; ++permutation) {
       auto points = original;
@@ -347,12 +388,12 @@ void corpus(Gate& gate) {
           std::rotate(points.begin(), points.begin() + 1, points.end());
           std::rotate(original_ids.begin(), original_ids.begin() + 1, original_ids.end());
         }
-        ++gate.permutations;
+        ++(wide ? gate.permutations18 : gate.permutations);
       }
       const auto all_pairs = exhaustive(gate, points);
       const auto cloud = mhgp8::prepare_cloud(points);
       const auto index = mhgp8::make_q2_cloud_index(cloud);
-      ++gate.clouds;
+      ++(wide ? gate.clouds18 : gate.clouds);
       bool nonidentity = false;
       for (std::size_t rank = 0; rank < points.size(); ++rank) {
         nonidentity = nonidentity || index->spatial_order()[rank] != rank;
@@ -379,6 +420,7 @@ void corpus(Gate& gate) {
       }
     }
   }
+  gate.wide = false;
 }
 
 void targeted(Gate& gate) {
@@ -546,7 +588,8 @@ int main(int argc, char** argv) {
   }
   try {
     Gate gate;
-    corpus(gate);
+    corpus(gate, fixtures(), false);
+    corpus(gate, fixtures18(), true);
     targeted(gate);
     invalid_and_exceptions(gate);
     gate.require(gate.clouds == 26 && gate.integrated_runs >= 1248 && gate.front_reference_runs >= 624 &&
@@ -558,6 +601,10 @@ int main(int argc, char** argv) {
                      gate.root_savings > 0 && gate.invalid_inputs == 11 && gate.callback_exceptions == 4 &&
                      gate.model_mutants >= 8,
                  "integrated WSPD/q2 qualification lost a non-vacuity floor");
+    // Separate floors of the 18-bit twin corpus (four fixtures, each in two
+    // input permutations).
+    gate.require(gate.clouds18 == 8 && gate.permutations18 == 4 && gate.supports18 > 0 && !gate.wide,
+                 "integrated WSPD/q2 qualification lost an 18-bit twin fixture floor");
     std::cout << "mhgp8_wspd_q2_census_gate passed checks=" << gate.checks << " clouds=" << gate.clouds
               << " oracle_pairs=" << gate.oracle_pairs << " oracle_sites=" << gate.oracle_sites
               << " front_reference_runs=" << gate.front_reference_runs << " integrated_runs=" << gate.integrated_runs
@@ -568,7 +615,9 @@ int main(int argc, char** argv) {
               << " query_splits=" << gate.query_splits << " split_after_credit=" << gate.split_after_credit
               << " uniform_credit=" << gate.uniform_credit << " uniform_reject=" << gate.uniform_reject
               << " root_savings=" << gate.root_savings << " invalid_inputs=" << gate.invalid_inputs
-              << " callback_exceptions=" << gate.callback_exceptions << " model_mutants=" << gate.model_mutants << '\n';
+              << " callback_exceptions=" << gate.callback_exceptions << " model_mutants=" << gate.model_mutants
+              << " clouds18=" << gate.clouds18 << " permutations18=" << gate.permutations18
+              << " supports18=" << gate.supports18 << '\n';
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "mhgp8_wspd_q2_census_gate failed: " << error.what() << '\n';

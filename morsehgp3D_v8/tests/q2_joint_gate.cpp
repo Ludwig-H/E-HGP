@@ -37,6 +37,9 @@ struct Gate {
   u64 root_products{}, joint_tasks{}, splits_a{}, splits_b{}, joint_tests{}, joint_credits{};
   u64 joint_rejected_pairs{}, joint_accepted_pairs{}, handoffs{}, handoffs_after_credit{}, handoff_pair_mass{};
   u64 structural_splits{}, phase_switches{}, shared_anchor_runs{}, default_comparisons{}, invalid_inputs{}, callback_failures{}, model_mutants{};
+  // 18-bit coverage (coordinate_limit = 262143): counted separately so that
+  // every historical u16 pin above keeps its exact value.
+  u64 clouds18{}, default_comparisons18{}, six_site_structures{};
   void require(bool condition, const char* message) {
     ++checks;
     if (!condition) throw std::runtime_error(message);
@@ -51,7 +54,8 @@ struct Gate {
 };
 
 // Explicit scalar oracle pattern, independent of every production bound,
-// planner and traversal. u16 coordinates are promoted before all products.
+// planner and traversal. Coordinates (u16 or 18-bit) are promoted to i64
+// before all products.
 std::int64_t h(const Point3& a, const Point3& b, const Point3& z) {
   std::int64_t result = 0;
   for (std::size_t axis = 0; axis < 3; ++axis)
@@ -249,31 +253,70 @@ std::vector<std::vector<Point3>> fixtures() {
       {{1000, 0, 0}, {1000, 1, 0}, {0, 0, 0}, {0, 1, 0}, {500, 500, 0}}, six_sites()};
   std::vector<Point3> cube;
   for (unsigned bits = 0; bits < 8; ++bits)
-    cube.push_back({static_cast<std::uint16_t>((bits & 1U) * 2),
-                   static_cast<std::uint16_t>(((bits >> 1U) & 1U) * 2),
-                   static_cast<std::uint16_t>(((bits >> 2U) & 1U) * 2)});
+    cube.push_back({static_cast<mhgp8::Coordinate>((bits & 1U) * 2),
+                   static_cast<mhgp8::Coordinate>(((bits >> 1U) & 1U) * 2),
+                   static_cast<mhgp8::Coordinate>(((bits >> 2U) & 1U) * 2)});
   result.push_back(cube);
+  // Pinned u16 recipe (>> 16U): same clouds as before the 18-bit widening.
   for (std::uint32_t seed : {3U, 37U}) {
     auto state = seed;
-    const auto next = [&]() { state = state * 1664525U + 1013904223U; return static_cast<std::uint16_t>(state >> 16U); };
+    const auto next = [&]() { state = state * 1664525U + 1013904223U; return static_cast<mhgp8::Coordinate>(state >> 16U); };
     std::vector<Point3> random;
-    for (unsigned i = 0; i < 17; ++i) random.push_back({static_cast<std::uint16_t>(i * 251 + seed), next(), next()});
+    for (unsigned i = 0; i < 17; ++i) random.push_back({static_cast<mhgp8::Coordinate>(i * 251 + seed), next(), next()});
     result.push_back(random);
   }
   return result;
 }
 
-void corpus(Gate& gate) {
-  for (const auto& base : fixtures()) {
+// 18-bit twin of six_sites(): the two anchors sit at x = coordinate_limit,
+// the three sites at x = 0 and the common witness at x = 131071. The cross
+// depths {1,2,3,3,2,1} are unchanged (only the x terms grow) and the witness
+// value 131072 * 131071 - 2 exceeds 2^32, so it needs the i64 promotion.
+std::vector<Point3> six_sites18() {
+  constexpr mhgp8::Coordinate m = mhgp8::coordinate_limit;
+  return {{m, 0, 0}, {m, 4, 0}, {0, 1, 0}, {0, 2, 0}, {0, 3, 0}, {131071, 2, 0}};
+}
+
+// Separate 18-bit corpus (coordinate_limit = 262143), with its own floors:
+// the far diagonal, two near pairs at both ends of the x range (maximum
+// index depth), the far-corner tetrahedron, the stretched six-site fixture
+// and a separate pseudo-random recipe (>> 14U, 18 bits). The u16 recipes
+// above are pinned and unchanged.
+std::vector<std::vector<Point3>> fixtures18() {
+  constexpr mhgp8::Coordinate m = mhgp8::coordinate_limit;
+  std::vector<std::vector<Point3>> result{
+      {{0, 0, 0}, {m, m, m}},
+      {{m, 0, 0}, {m - 1, 0, 0}, {0, 0, 0}, {1, 0, 0}},
+      {{m, m, m}, {m - 1, m, m}, {m, m - 1, m}, {m, m, m - 1}},
+      six_sites18()};
+  for (std::uint32_t seed : {3U, 37U}) {
+    auto state = seed;
+    const auto next = [&]() { state = state * 1664525U + 1013904223U; return static_cast<mhgp8::Coordinate>(state >> 14U); };
+    std::vector<Point3> random;
+    for (unsigned i = 0; i < 17; ++i) random.push_back({static_cast<mhgp8::Coordinate>(i * 15413 + seed), next(), next()});
+    result.push_back(random);
+  }
+  for (const auto& cloud : result)
+    for (const auto& point : cloud)
+      if (point.x > m || point.y > m || point.z > m) throw std::logic_error("18-bit fixture left the coordinate range");
+  return result;
+}
+
+// Two clouds per base: the base itself and its exact lattice isometry
+// (x, y, z) -> (z, side - x, y) with reversed IDs; side is 65535 for the
+// u16 corpus and coordinate_limit for the 18-bit corpus.
+void corpus(Gate& gate, const std::vector<std::vector<Point3>>& bases, mhgp8::Coordinate side,
+            u64& clouds, u64& default_comparisons) {
+  for (const auto& base : bases) {
     for (unsigned transform = 0; transform < 2; ++transform) {
       auto points = base;
       if (transform != 0) {
-        for (auto& point : points) point = {point.z, static_cast<std::uint16_t>(65535U - point.x), point.y};
+        for (auto& point : points) point = {point.z, static_cast<mhgp8::Coordinate>(side - point.x), point.y};
         std::reverse(points.begin(), points.end());
       }
       const auto all = oracle(gate, points);
       const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
-      ++gate.clouds;
+      ++clouds;
       for (const unsigned kmax : {1U, 2U, 5U, 10U}) {
         const auto expected = accepted(all, kmax);
         for (const unsigned s : {8U, 10U, 12U}) {
@@ -293,7 +336,7 @@ void corpus(Gate& gate) {
                                    order_work(individual.result.order_work) == order_work(implicit.result.order_work) &&
                                    sibling_work(individual.result.sibling_work) == sibling_work(implicit.result.sibling_work),
                                "default anchor mode changed an existing work counter");
-                  ++gate.default_comparisons;
+                  ++default_comparisons;
                 }
               }
             }
@@ -304,15 +347,19 @@ void corpus(Gate& gate) {
   }
 }
 
-void targeted(Gate& gate) {
-  const auto points = six_sites();
+// Six-site structure shared by the u16 fixture and its 18-bit twin: the
+// declared cross depths, the common strict witness (h >= witness_floor), the
+// K=1 joint saturation certificate, the K=2 singleton continuation after
+// joint credit and the two admissible cross supports. Returns the K=2
+// expected output for the caller's arithmetic models.
+Output six_site_structure(Gate& gate, const std::vector<Point3>& points, std::int64_t witness_floor) {
   const auto all = oracle(gate, points);
   const std::array<std::size_t, 6> expected_depths{1, 2, 3, 3, 2, 1};
   std::size_t slot = 0;
   for (std::size_t a = 0; a < 2; ++a) for (std::size_t b = 2; b < 5; ++b) {
     const auto found = std::find_if(all.begin(), all.end(), [&](const auto& support) { return support.pair == Pair{a, b}; });
     gate.require(found != all.end() && found->interior.size() == expected_depths[slot++] &&
-                     h(points[a], points[b], points[5]) >= 2498,
+                     h(points[a], points[b], points[5]) >= witness_floor,
                  "six-site fixture lost its declared cross depths or common strict witness");
   }
   const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
@@ -330,6 +377,14 @@ void targeted(Gate& gate) {
                                           [](const auto& p) { return p.pair.first < 2 && p.pair.second >= 2 && p.pair.second < 5; });
     gate.require(cross_count == 2, "six-site K2 fixture did not preserve exactly its two admissible cross supports");
   }
+  ++gate.six_site_structures;
+  return expected;
+}
+
+void targeted(Gate& gate) {
+  const auto points = six_sites();
+  const auto expected = six_site_structure(gate, points, 2498);
+  const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
   auto restarted = expected;
   restarted.erase(std::remove_if(restarted.begin(), restarted.end(),
       [](const auto& p) { return p.pair == Pair{0, 2} || p.pair == Pair{1, 4}; }), restarted.end());
@@ -396,6 +451,12 @@ void targeted(Gate& gate) {
   }
 }
 
+// 18-bit twin of the targeted six-site structure: same depths and same
+// certificates; the common witness is proved to exceed 2^32.
+void targeted18(Gate& gate) {
+  static_cast<void>(six_site_structure(gate, six_sites18(), std::int64_t{1} << 32));
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -405,8 +466,10 @@ int main(int argc, char** argv) {
   }
   try {
     Gate gate;
-    corpus(gate);
+    corpus(gate, fixtures(), 65535, gate.clouds, gate.default_comparisons);
+    corpus(gate, fixtures18(), mhgp8::coordinate_limit, gate.clouds18, gate.default_comparisons18);
     targeted(gate);
+    targeted18(gate);
     gate.require(gate.clouds == 18 && gate.runs > 5328 && gate.oracle_pairs > 700 && gate.oracle_sites > 10000 &&
                      gate.supports > 10000 && gate.shell_sites >= 2 * gate.supports && gate.root_products > 0 &&
                      gate.joint_tasks > gate.root_products && gate.splits_a > 0 && gate.splits_b > 0 && gate.joint_tests > 0 &&
@@ -415,6 +478,8 @@ int main(int argc, char** argv) {
                      gate.structural_splits > 0 && gate.shared_anchor_runs > 1728 && gate.default_comparisons == 144 &&
                      gate.invalid_inputs == 4 && gate.callback_failures == 4 && gate.model_mutants == 5,
                  "joint census qualification lost a non-vacuity floor");
+    gate.require(gate.clouds18 == 12 && gate.default_comparisons18 == 96 && gate.six_site_structures == 2,
+                 "joint census 18-bit qualification lost a non-vacuity floor");
     std::cout << "mhgp8_q2_joint_gate passed checks=" << gate.checks << " clouds=" << gate.clouds
               << " oracle_pairs=" << gate.oracle_pairs << " oracle_sites=" << gate.oracle_sites << " runs=" << gate.runs
               << " supports=" << gate.supports << " shell_sites=" << gate.shell_sites << " root_products=" << gate.root_products
@@ -426,7 +491,9 @@ int main(int argc, char** argv) {
               << " phase_switches=" << gate.phase_switches << " shared_anchor_runs=" << gate.shared_anchor_runs
               << " default_comparisons=" << gate.default_comparisons
               << " invalid_inputs=" << gate.invalid_inputs << " callback_failures=" << gate.callback_failures
-              << " model_mutants=" << gate.model_mutants << '\n';
+              << " model_mutants=" << gate.model_mutants << " clouds18=" << gate.clouds18
+              << " default_comparisons18=" << gate.default_comparisons18
+              << " six_site_structures=" << gate.six_site_structures << '\n';
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "mhgp8_q2_joint_gate failed: " << error.what() << '\n';

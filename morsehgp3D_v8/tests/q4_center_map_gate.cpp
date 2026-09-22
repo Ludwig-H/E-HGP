@@ -92,7 +92,7 @@ void check_domain(MapGate& gate, const Points& points, const mhgp8::Q34EdgeCover
                "positive-domain emptiness differs from exhaustive lens");
   if (ids.empty()) ++gate.empty_domains;
   else {
-    std::array<mhgp8::Coordinate,3> low{65535,65535,65535},high{};
+    std::array<mhgp8::Coordinate,3> low{mhgp8::coordinate_limit,mhgp8::coordinate_limit,mhgp8::coordinate_limit},high{};
     for (const auto id : ids)
       for (std::size_t axis = 0; axis != 3; ++axis) {
         low[axis] = std::min(low[axis],points[id][axis]);
@@ -294,16 +294,21 @@ void mapped_edge(MapGate& gate, const Points& points, Edge edge, std::size_t k,
   ++gate.edge_calls;
 }
 
-Points rotated(Points points) {
+// Integer rotation of a small cloud about (20,20,20), translated to `offset`
+// on every axis: the historical 1000 keeps the u16 fixtures, 261800 places
+// the same shape within 276 of the 18-bit limit (the transform moves each
+// axis by at most 276 for the twin). Any coordinate outside [0, limit] is a
+// refusal, never a clamp.
+Points rotated(Points points, int offset = 1000) {
   constexpr std::array<std::array<int,3>,3> matrix{{{-20,4,22},{20,-10,20},{10,28,4}}};
   for (auto& point : points) {
     const std::array<int,3> p{static_cast<int>(point.x)-20,static_cast<int>(point.y)-20,static_cast<int>(point.z)-20};
     std::array<mhgp8::Coordinate,3> output{};
     for (std::size_t row = 0; row != 3; ++row) {
-      int value = 1000;
+      int value = offset;
       for (std::size_t col = 0; col != 3; ++col) value += matrix[row][col]*p[col];
-      if (value < 0 || value > 65535) throw std::runtime_error("rotation fixture outside u16");
-      output[row] = static_cast<std::uint16_t>(value);
+      if (value < 0 || value > mhgp8::coordinate_limit) throw std::runtime_error("rotation fixture outside the 18-bit grid");
+      output[row] = static_cast<mhgp8::Coordinate>(value);
     }
     point = {output[0],output[1],output[2]};
   }
@@ -318,13 +323,21 @@ void center_map_fixtures(MapGate& gate) {
   const Points outside_lens{{0,0,0},{20,20,0},{20,0,20},{0,20,20},{19,19,19}};
   const Points coplanar{{10,10,10},{20,10,10},{15,17,10},{12,16,10},{18,16,10}};
   const Points extreme{{0,0,0},{65535,65534,65533},{0,65535,65535},{65535,0,65535}};
+  // 18-bit twin of `extreme` (u16 corners are interior points since the
+  // widening): the disk test 96*M^2*Q^2 < 2^127 at Q=2^42 is exercised here.
+  const Points extreme18{{0,0,0},{262143,262142,262141},{0,262143,262143},{262143,0,262143}};
   const Points tangent{{10,10,10},{13,14,10},{15,10,10},{10,15,10},{0,0,0}};
   const Points singleton{{20,20,20},{26,26,20},{26,20,26}};
   const Points compression{{10,20,20},{30,20,20},{20,25,20},{20,15,20},
     {20,29,27},{20,11,27},{20,29,13},{20,11,13}};
   const auto spun = rotated(twin);
   auto flipped = spun; std::swap(flipped[0],flipped[1]);
-  for (const auto& points : {twin,both,q3_survives,obtuse,outside_lens,coplanar,extreme,tangent,singleton,compression,spun,flipped,
+  const auto spun18 = rotated(twin,261800);
+  auto flipped18 = spun18; std::swap(flipped18[0],flipped18[1]);
+  gate.rejects<std::runtime_error>([&] { static_cast<void>(rotated(twin,mhgp8::coordinate_limit)); },
+                                   "rotation fixture escaped the 18-bit grid without refusal");
+  for (const auto& points : {twin,both,q3_survives,obtuse,outside_lens,coplanar,extreme,extreme18,tangent,singleton,compression,
+                            spun,flipped,spun18,flipped18,
                             Points{{0,0,0},{1,0,0}},Points{{0,0,0},{2,0,0},{1,0,0}}}) {
     const auto cover = mhgp8::Q34EdgeCover::make(mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points)),{0,1});
     check_domain(gate,points,cover);
@@ -333,7 +346,7 @@ void center_map_fixtures(MapGate& gate) {
   constexpr mhgp8::Q34PoolOptions collective{mhgp8::Q34ChordBound::Variance,mhgp8::Q34PoolReduction::Collective};
   for (const auto mode : {mhgp8::Q4CenterDomainMode::Disk,mhgp8::Q4CenterDomainMode::Positive}) {
     const mhgp8::Q4CenterMapOptions full{mode,7,1024};
-    for (const auto& points : {twin,both,q3_survives,obtuse,outside_lens,coplanar,spun,flipped}) {
+    for (const auto& points : {twin,both,q3_survives,obtuse,outside_lens,coplanar,spun,flipped,spun18,flipped18}) {
       direct_map(gate,points,{0,1},3,32,full);
       direct_map(gate,points,{0,1},3,32,full,true);
       mapped_edge(gate,points,{0,1},3,32,universal,full);
@@ -347,11 +360,13 @@ void center_map_fixtures(MapGate& gate) {
     direct_map(gate,compression,{0,1},3,32,full);
     direct_map(gate,extreme,{0,1},3,32,{mode,42,85}); ++gate.extreme_calls;
     mapped_edge(gate,extreme,{0,1},3,32,universal,{mode,42,85}); ++gate.extreme_calls;
+    direct_map(gate,extreme18,{0,1},3,32,{mode,42,85}); ++gate.extreme_calls;
+    mapped_edge(gate,extreme18,{0,1},3,32,universal,{mode,42,85}); ++gate.extreme_calls;
     mapped_edge(gate,singleton,{0,1},3,32,universal,full);
     mapped_edge(gate,shell30(),{0,1},5,32,collective,full);
     for (const auto k : {1U,2U,5U,10U}) mapped_edge(gate,q3_survives,{0,1},k,32,collective,full);
   }
-  gate.rotations += 2;
+  gate.rotations += 4;
   for (std::size_t a = 0; a != twin.size(); ++a)
     for (std::size_t b = a+1; b != twin.size(); ++b) {
       mapped_edge(gate,twin,{a,b},3,3,universal,{mhgp8::Q4CenterDomainMode::Positive,5,128});

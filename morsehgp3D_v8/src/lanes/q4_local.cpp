@@ -134,8 +134,8 @@ struct Q4LocalAtlas::Impl {
     Q4LocalCell cell;
     Q4LocalFragmentPtr fragment;
     std::size_t children{absent};
-    // Exact inside count of this cell's fragment (last classification),
-    // kept after the fragment is released: a certificate for the closed cell.
+    // Complete fragment's exact uniform count OR a terminal lower bound
+    // >=K-1. Both certify the closed cell, but only Leaf has a sweep fragment.
     std::size_t inside_count{};
     State state{State::Leaf};
   };
@@ -143,6 +143,7 @@ struct Q4LocalAtlas::Impl {
   std::size_t k;
   Q4LocalOptions options;
   Q4LocalAtlasWork work;
+  Q4LocalSaturationWork saturation;
   std::vector<Node> nodes;
   u64 fragment_bytes{};
   Impl(Q34EdgeCoverPtr cover,std::size_t kmax,Q4LocalOptions o)
@@ -164,13 +165,50 @@ struct Q4LocalAtlas::Impl {
     fragment_bytes-=static_cast<u64>(nodes[id].fragment->retained_bytes());
     nodes[id].fragment.reset();
   }
+  bool terminal_certificate(std::size_t id,const Q4LocalPartitionResult& result) {
+    counter_add(saturation.queries);
+    if(!result.saturated()) {
+      counter_add(saturation.exact_fragments);
+      return false;
+    }
+    if(result.geometry()!=geometry || result.certified_depth()<k-1 || result.cell()!=nodes[id].cell)
+      throw std::logic_error("mhgp8 atlas received an invalid terminal depth certificate");
+    counter_add(saturation.certificates);
+    if(result.unvisited_sites()!=0) counter_add(saturation.certificates_with_unvisited_sites);
+    counter_add(saturation.unvisited_site_mass,static_cast<u64>(result.unvisited_sites()));
+    counter_add(saturation.discarded_frontier_ids,result.work().frontier_ids_copied);
+    saturation.peak_temporary_bytes=std::max(saturation.peak_temporary_bytes,
+        static_cast<u64>(result.temporary_bytes()));
+    merge(saturation.prefixes,result.work());
+    merge(work.partition,result.work());
+    // Include the temporary prefix while its parent/current fragment lived.
+    // Construction has finished now; no partial frontier is retained.
+    u64 coupled=fragment_bytes;
+    counter_add(coupled,static_cast<u64>(result.temporary_bytes()));
+    work.peak_fragment_bytes=std::max(work.peak_fragment_bytes,coupled);
+    u64 total=memory();
+    counter_add(total,static_cast<u64>(result.temporary_bytes()));
+    work.peak_build_bytes=std::max(work.peak_build_bytes,total);
+    nodes[id].inside_count=result.certified_depth();
+    nodes[id].state=State::Deep;
+    counter_add(work.deep_cells);
+    return true;
+  }
   void build(std::size_t id,Q4LocalFragmentPtr parent,unsigned quadrant) {
     const auto c=nodes[id].cell;
     work.max_depth=std::max(work.max_depth,static_cast<u64>(c.depth));
     observe();
     if(geometry->outside(c,work.domain)) {nodes[id].state=State::Outside;counter_add(work.outside_cells);return;}
-    auto fragment=parent?Q4LocalFragment::child(std::move(parent),quadrant,options.z_test_budget):
-                         Q4LocalFragment::root(geometry,options.z_test_budget);
+    Q4LocalFragmentPtr fragment;
+    if(options.saturate_deep) {
+      const auto result=parent?Q4LocalFragment::child_until(std::move(parent),quadrant,options.z_test_budget,k-1):
+                               Q4LocalFragment::root_until(geometry,options.z_test_budget,k-1);
+      if(terminal_certificate(id,result)) return;
+      fragment=result.exact_fragment();
+    } else {
+      fragment=parent?Q4LocalFragment::child(std::move(parent),quadrant,options.z_test_budget):
+                      Q4LocalFragment::root(geometry,options.z_test_budget);
+    }
     if(fragment->cell()!=c) throw std::logic_error("mhgp8 local atlas partition cell mismatch");
     merge(work.partition,fragment->work());
     counter_add(fragment_bytes,static_cast<u64>(fragment->retained_bytes()));
@@ -189,7 +227,19 @@ struct Q4LocalAtlas::Impl {
         // Pay the final partition ONCE per shared leaf, before any seed can
         // scan it. Unclassified large Z blocks must not become repeated full
         // cover scans just because the center-refinement budget was exhausted.
-        auto finished=Q4LocalFragment::refine(fragment,std::numeric_limits<u64>::max());
+        Q4LocalFragmentPtr finished;
+        if(options.saturate_deep) {
+          const auto result=Q4LocalFragment::refine_until(fragment,std::numeric_limits<u64>::max(),k-1);
+          if(terminal_certificate(id,result)) {
+            counter_add(work.terminal_refinements);
+            counter_add(work.terminal_deep_cells);
+            release(id);
+            return;
+          }
+          finished=result.exact_fragment();
+        } else {
+          finished=Q4LocalFragment::refine(fragment,std::numeric_limits<u64>::max());
+        }
         merge(work.partition,finished->work());counter_add(work.terminal_refinements);
         counter_add(fragment_bytes,static_cast<u64>(finished->retained_bytes()));
         observe();  // Both the previous and replacement frontier are live.
@@ -226,7 +276,18 @@ Q4LocalAtlasPtr Q4LocalAtlas::make(Q34EdgeCoverPtr cover,std::size_t k,Q4LocalOp
 }
 const Q4LocalGeometryPtr& Q4LocalAtlas::geometry() const noexcept {return impl_->geometry;}
 std::optional<std::size_t> Q4LocalAtlas::certified_inside_count(const Q4LocalCenter& center) const {
-  if(center.den<=0) throw std::invalid_argument("mhgp8 atlas location requires a positive denominator");
+  constexpr i128 limit=i128{1}<<117;
+  // Public rational coordinates are forgeable. This explicit domain covers
+  // every generated q3 centre, bounds the doubled remainder by 2^118, and
+  // rejects INT128_MIN without negating or taking its absolute value.
+  if(center.den<=0 || center.den>=limit || center.x<=-limit || center.x>=limit ||
+     center.y<=-limit || center.y>=limit)
+    throw std::invalid_argument("mhgp8 atlas center exceeds its certified arithmetic domain");
+  // Outside-root rationals need no scaled quotient. After the checked
+  // denominator bound, doubling is <2^118; retained quotients lie in [-2,2].
+  const auto twice_den=2*center.den;
+  if(center.x < -twice_den || center.x > twice_den ||
+     center.y < -twice_den || center.y > twice_den) return std::nullopt;
   const auto p=scaled(Center{center.x,center.y,center.den});
   const auto& nodes=impl_->nodes;
   std::size_t id=0;
@@ -248,6 +309,7 @@ std::optional<std::size_t> Q4LocalAtlas::root_certified_inside_count() const noe
   return root.inside_count;
 }
 const Q4LocalAtlasWork& Q4LocalAtlas::work() const noexcept {return impl_->work;}
+const Q4LocalSaturationWork& Q4LocalAtlas::saturation_work() const noexcept {return impl_->saturation;}
 std::size_t Q4LocalAtlas::kmax() const noexcept {return impl_->k;}
 const Q4LocalOptions& Q4LocalAtlas::options() const noexcept {return impl_->options;}
 std::size_t Q4LocalAtlas::retained_bytes() const {
@@ -367,7 +429,7 @@ struct Q4LocalEngine {
     const auto& node=p.nodes[id];counter_add(work.query_visits);
     if(node.state==Q4LocalAtlas::Impl::State::Deep || node.state==Q4LocalAtlas::Impl::State::Outside) return;
     counter_add(work.line_tests);
-    const auto b=p.geometry->bounds(line,node.cell);
+    const auto b=p.geometry->bounds_unchecked(line,node.cell);
     if(b.minimum>0 || b.maximum<0) {counter_add(work.line_skips);return;}
     if(node.state==Q4LocalAtlas::Impl::State::Leaf) sweep(*node.fragment,x,family,line,consumer);
     else for(std::size_t q=0;q<4;++q) visit(node.children+q,x,family,line,consumer);
@@ -569,7 +631,7 @@ struct Q4SeedCellEngine {
     if(live[cell_id]==0) {counter_add(extra.live_skipped_nodes);return;}
     const auto& cell=engine.atlas->impl_->nodes[cell_id];
     counter_add(engine.work.line_tests);
-    const auto bound=engine.atlas->geometry()->bounds(line,cell.cell);
+    const auto bound=engine.atlas->geometry()->bounds_unchecked(line,cell.cell);
     if(bound.minimum>0 || bound.maximum<0) {counter_add(engine.work.line_skips);return;}
     if(cell.state==State::Leaf) {
       engine.sweep(*cell.fragment,x,family,line,consumer);observe();
@@ -673,7 +735,7 @@ struct Q4SeedCellEngine {
           if(seed->status==CacheEntry::Status::Invalid) {
             counter_add(extra.product_seed_rejections);continue;
           }
-          counter_add(extra.singleton_bound_tests);bound=geometry.bounds(seed->line,cell.cell);
+          counter_add(extra.singleton_bound_tests);bound=geometry.bounds_unchecked(seed->line,cell.cell);
         } else {
           if(product.spatial_test_paid) counter_add(extra.spatial_tests_reused);
           else if(!spatial_pass(product.x)) {counter_add(extra.product_seed_rejections);continue;}

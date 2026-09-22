@@ -40,6 +40,7 @@ struct Gate {
   u64 local_exclusion_cases{},nonpositive_minimum_cases{},mixed_terminal_cases{},mode_parallel_calls{};
   u64 mode_invalid_inputs{},mode_repeated_calls{},mode_overflows{},affine_preparations{},general_preparations{};
   u64 excluded_q3_nodes{},excluded_q4_nodes{},fully_excluded_nodes{},mode_xi_nonpositive{};
+  u64 extreme18_queries{},wide18_predicate_cases{};
   void require(bool condition,const char* message) {
     ++checks;
     if (!condition) throw std::runtime_error(message);
@@ -77,6 +78,9 @@ std::array<u64,2> counts(Gate& gate,const Points& sites,Point3 a,Point3 b) {
     const auto value=citron(a,b,z);
     ++gate.oracle_sites;
     if (value.h4*value.h4>(Big(1)<<64)) ++gate.wide_predicate_cases;
+    // |H4|<=3*65535^2<2^33.6 on 16-bit inputs, so H4^2>2^68 is reachable only by
+    // an 18-bit fixture: the historical extreme cloud cannot satisfy this floor.
+    if (value.h4*value.h4>(Big(1)<<68)) ++gate.wide18_predicate_cases;
     result[0]+=static_cast<u64>(value.q3);
     result[1]+=static_cast<u64>(value.q4);
   }
@@ -124,9 +128,9 @@ std::array<u64,2> common_counts(Gate& gate,const Points& sites,const Box3& a,con
 Points clustered() {
   Points result{{100,100,100},{200,100,100},{0,0,0},{500,500,500}};
   for (unsigned i=0;i<18;++i)
-    result.push_back({static_cast<std::uint16_t>(143+i),
-                      static_cast<std::uint16_t>(98+i%5),
-                      static_cast<std::uint16_t>(99+i%3)});
+    result.push_back({static_cast<mhgp8::Coordinate>(143+i),
+                      static_cast<mhgp8::Coordinate>(98+i%5),
+                      static_cast<mhgp8::Coordinate>(99+i%3)});
   return result;
 }
 
@@ -134,7 +138,7 @@ Points random_points(unsigned seed,std::size_t n) {
   std::uint32_t state=seed;
   const auto next=[&]() {
     state=1664525U*state+1013904223U;
-    return static_cast<std::uint16_t>((state>>16)%41U);
+    return static_cast<mhgp8::Coordinate>((state>>16)%41U);
   };
   Points result;
   while (result.size()<n) {
@@ -404,11 +408,23 @@ void run(Gate& gate) {
     static_cast<void>(singleton(gate,*ie,extreme,extreme[0],extreme[1],k,mask));++gate.extreme_queries;
   }
   rectangle(gate,*ie,extreme,{{0,0,0},{1,1,1}},{{65534,65534,65534},{65535,65535,65535}},5,6);
+  // 18-bit twins: corners at 262143, the halving midpoints 131071/131072, the
+  // far-corner rectangle pair, and the old 65535 corner as an interior site.
+  const Points extreme18{{0,0,0},{262143,262143,262143},{131071,131072,131071},{131072,131071,131072},
+      {0,262143,262143},{262143,0,262143},{262143,262143,0},{262143,1,2},{65535,65535,65535}};
+  const auto ie18=mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(extreme18));
+  for (unsigned k:{1U,2U,3U,5U,10U}) for (unsigned mask:{2U,4U,6U}) {
+    static_cast<void>(singleton(gate,*ie18,extreme18,extreme18[0],extreme18[1],k,mask));++gate.extreme18_queries;
+  }
+  rectangle(gate,*ie18,extreme18,{{0,0,0},{1,1,1}},{{262142,262142,262142},{262143,262143,262143}},5,6);
+  rectangle(gate,*ie18,extreme18,{{65534,65534,65534},{65535,65535,65535}},{{262142,262142,262142},{262143,262143,262143}},3,6);
   validation_and_lifecycle(gate);
   gate.require(gate.q3_only_rejections && gate.q4_only_rejections && gate.both_rejections && gate.no_rejections &&
       gate.partial_q3 && gate.partial_q4 && gate.whole_admissions && gate.point_admission_cases && gate.node_rejections &&
       gate.saturations && gate.near_right_splits && gate.exhausted_queries && gate.wide_predicate_cases,
       "required geometric branch was not exercised");
+  gate.require(gate.extreme18_queries==15 && gate.wide18_predicate_cases,
+      "18-bit extreme branch was not exercised");
 }
 
 using BoundsMode=mhgp8::Q34WitnessBoundsMode;
@@ -483,14 +499,16 @@ void bounds_mode_fixtures(Gate& gate) {
     {{30,30,30},{36,36,30},{36,30,36},{32,34,28}},
     {{30,30,30},{36,36,30},{30,36,24},{36,30,24},{32,32,32}},
     {{100,100,100},{160,100,100},{120,142,100},{128,110,149},{128,88,88}},
-    {{0,0,0},{65535,65535,65535},{0,65535,65535},{65535,0,65535},{65535,65535,0},{32767,32768,32767}}};
+    {{0,0,0},{65535,65535,65535},{0,65535,65535},{65535,0,65535},{65535,65535,0},{32767,32768,32767}},
+    {{0,0,0},{262143,262143,262143},{0,262143,262143},{262143,0,262143},{262143,262143,0},{131071,131072,131071}}};
   for (std::size_t fixture=0;fixture<fixtures.size();++fixture) {
     auto sites=fixtures[fixture];
     if (fixture%2) std::reverse(sites.begin(),sites.end());
     const auto index=mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(sites));
     for (std::size_t a=0;a<sites.size();++a) for (std::size_t b=a+1;b<sites.size();++b) {
       // The larger clustered fixture is exercised only on its supplied edge;
-      // the other six clouds cover ALL pairs and K1..10 in all lane submasks.
+      // the other clouds (16-bit and 18-bit corners alike) cover ALL pairs and
+      // K1..10 in all lane submasks.
       if (fixture==2 && (a!=0 || b!=1)) continue;
       for (unsigned k=1;k<=10;++k) for (unsigned mask:{0U,2U,4U,6U})
         for (const auto mode:{BoundsMode::Legacy,BoundsMode::Exclusion,BoundsMode::Affine})
@@ -585,6 +603,7 @@ int main(int argc,char** argv) {
     FIELD(local_exclusion_cases);FIELD(nonpositive_minimum_cases);FIELD(mixed_terminal_cases);FIELD(mode_parallel_calls);
     FIELD(mode_invalid_inputs);FIELD(mode_repeated_calls);FIELD(mode_overflows);FIELD(affine_preparations);FIELD(general_preparations);
     FIELD(excluded_q3_nodes);FIELD(excluded_q4_nodes);FIELD(fully_excluded_nodes);FIELD(mode_xi_nonpositive);
+    FIELD(extreme18_queries);FIELD(wide18_predicate_cases);
 #undef FIELD
     std::cout<<"}\n";return 0;
   } catch (const std::exception& error) {

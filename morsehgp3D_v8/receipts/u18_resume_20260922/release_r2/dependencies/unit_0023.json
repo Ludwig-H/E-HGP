@@ -1,0 +1,29 @@
+{
+  "name": "unit_0023",
+  "command": [
+    "/usr/bin/g++",
+    "-I/workspaces/E-HGP/morsehgp3D_v8/src",
+    "-O3",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/lanes/q3_ball_census.cpp",
+    "-M",
+    "-MF",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/u18_resume_20260922/release_r2/dependencies/unit_0023.d",
+    "-MT",
+    "mhgp8_dependency_target"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v8_u18_resume_release_r2_20260922",
+  "source": "/workspaces/E-HGP/morsehgp3D_v8/src/lanes/q3_ball_census.cpp",
+  "started": "2026-09-22T10:35:01.599392+00:00",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "stdout_base64": "",
+  "stderr_base64": "",
+  "finished": "2026-09-22T10:35:01.671408+00:00"
+}

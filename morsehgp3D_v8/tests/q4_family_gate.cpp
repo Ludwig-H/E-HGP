@@ -41,6 +41,8 @@ struct Gate {
   u64 oracle_sites{}, groups{}, mixed_groups{}, decreasing_steps{}, high_depth{};
   u64 max_shell{}, max_cross_bits{}, permutations{}, invalid_inputs{};
   u64 callback_failures{}, reentrant_calls{}, parallel_calls{}, mutants{};
+  // 18-bit twins (a seed coordinate above 65535) with their own floors.
+  u64 wide_clouds{}, wide_runs{}, wide_max_cross_bits{};
   void require(bool condition, const char* message) {
     ++checks;
     if (!condition) throw std::runtime_error(message);
@@ -72,6 +74,7 @@ u64 bits(Big value) {
   if (value < 0) value = -value;
   return value == 0 ? 0 : static_cast<u64>(boost::multiprecision::msb(value)) + 1;
 }
+bool wide_point(Point3 point) { return point.x > 65535 || point.y > 65535 || point.z > 65535; }
 
 std::optional<Center> solve(std::array<std::array<Rational, 4>, 3> matrix) {
   for (std::size_t column = 0; column != 3; ++column) {
@@ -213,6 +216,7 @@ std::vector<Group> collect(const mhgp8::CloudPtr& cloud, Ids ids, mhgp8::Q4Famil
 }
 
 void check_case(Gate& gate, const Points& points, Ids ids) {
+  const bool wide = wide_point(points[ids[0]]) || wide_point(points[ids[1]]) || wide_point(points[ids[2]]);
   const auto reference = oracle_seed(points[ids[0]], points[ids[1]], points[ids[2]]);
   const auto seed = mhgp8::Q4FamilySeed::make(points[ids[0]], points[ids[1]], points[ids[2]]);
   gate.require(reference.has_value() == seed.has_value(), "seed positivity disagrees with rational oracle");
@@ -236,6 +240,7 @@ void check_case(Gate& gate, const Points& points, Ids ids) {
     const Big crossed = Rational(reference->gram * reference->side(points[second]) *
                                 reference->power(points[first])).numerator();
     gate.max_cross_bits = std::max(gate.max_cross_bits, bits(crossed));
+    if (wide) gate.wide_max_cross_bits = std::max(gate.wide_max_cross_bits, bits(crossed));
     ++gate.root_comparisons;
   }
   const auto expected = oracle(gate, points, *reference);
@@ -269,6 +274,7 @@ void check_case(Gate& gate, const Points& points, Ids ids) {
                cloud->retained_bytes() == bytes_before, "family mutated shared immutable cloud");
   gate.groups += actual.size();
   ++gate.runs;
+  if (wide) ++gate.wide_runs;
 }
 
 void add_unique(Points& points, Point3 point) {
@@ -278,9 +284,9 @@ Points shell_fixture() {
   Points result{{25, 20, 20}, {17, 24, 20}, {17, 16, 20}};
   for (int x = -5; x <= 5; ++x) for (int y = -5; y <= 5; ++y)
     for (int z = -5; z <= 5; ++z) if (x * x + y * y + z * z == 25)
-      add_unique(result, {static_cast<std::uint16_t>(x + 20),
-                          static_cast<std::uint16_t>(y + 20),
-                          static_cast<std::uint16_t>(z + 20)});
+      add_unique(result, {static_cast<mhgp8::Coordinate>(x + 20),
+                          static_cast<mhgp8::Coordinate>(y + 20),
+                          static_cast<mhgp8::Coordinate>(z + 20)});
   result.push_back({20, 20, 20});  // Permanent strict interior.
   result.push_back({50, 50, 20});  // Permanent exterior.
   return result;
@@ -296,9 +302,14 @@ std::vector<Points> fixtures() {
   result.push_back({{0, 0, 0}, {65535, 0, 0}, {32767, 65535, 0},
                     {0, 0, 65535}, {65535, 65535, 65534}, {1, 65534, 32767},
                     {65535, 0, 1}, {32767, 32767, 0}});
+  // 18-bit twin of the corner fixture (262143/262142/131071), with the old
+  // 65535 corner kept as an interior site.
+  result.push_back({{0, 0, 0}, {262143, 0, 0}, {131071, 262143, 0},
+                    {0, 0, 262143}, {262143, 262143, 262142}, {1, 262142, 131071},
+                    {262143, 0, 1}, {131071, 131071, 0}, {65535, 65535, 65535}});
   Points deep{{100, 100, 100}, {120, 100, 100}, {110, 120, 100}};
   for (unsigned z = 70; z <= 130; ++z)
-    deep.push_back({110, 108, static_cast<std::uint16_t>(z)});
+    deep.push_back({110, 108, static_cast<mhgp8::Coordinate>(z)});
   result.push_back(std::move(deep));
   // Symmetric off-plane points produce equal roots with opposite directions.
   result.push_back({{15, 10, 10}, {7, 14, 10}, {7, 6, 10},
@@ -307,12 +318,15 @@ std::vector<Points> fixtures() {
 }
 
 void invalid_cases(Gate& gate) {
-  const std::array<Points, 5> bad{{
+  // The last two are consecutive Fibonacci pairs (Cassini: Gram determinant
+  // 1), obtuse at x; the second is the 18-bit twin of the 16-bit one.
+  const std::array<Points, 6> bad{{
       {{0, 0, 0}, {1, 0, 0}, {0, 1, 0}},
       {{0, 0, 0}, {2, 0, 0}, {1, 0, 0}},
       {{0, 0, 0}, {1, 0, 0}, {3, 1, 0}},
       {{0, 0, 0}, {0, 0, 0}, {0, 1, 0}},
-      {{0, 0, 0}, {46368, 28657, 0}, {28657, 17711, 0}}
+      {{0, 0, 0}, {46368, 28657, 0}, {28657, 17711, 0}},
+      {{0, 0, 0}, {196418, 121393, 0}, {121393, 75025, 0}}
   }};
   for (const auto& points : bad) {
     gate.require(!mhgp8::Q4FamilySeed::make(points[0], points[1], points[2]),
@@ -440,9 +454,9 @@ void run(Gate& gate) {
     Points points;
     const unsigned side = trial % 3 == 0 ? 65536U : 17U;
     while (points.size() < 9 + trial % 12)
-      add_unique(points, {static_cast<std::uint16_t>(next() % side),
-                          static_cast<std::uint16_t>(next() % side),
-                          static_cast<std::uint16_t>(next() % side)});
+      add_unique(points, {static_cast<mhgp8::Coordinate>(next() % side),
+                          static_cast<mhgp8::Coordinate>(next() % side),
+                          static_cast<mhgp8::Coordinate>(next() % side)});
     unsigned admitted = 0;
     for (std::size_t a = 0; a != points.size() && admitted != 3; ++a)
       for (std::size_t b = a + 1; b != points.size() && admitted != 3; ++b)
@@ -454,6 +468,30 @@ void run(Gate& gate) {
     gate.require(admitted == 3, "random fixture did not exercise enough positive seeds");
     ++gate.clouds;
   }
+  // Separate 18-bit random clouds (side 262144) with their own floors; the
+  // historical generator above is pinned by its floors and left unchanged.
+  std::uint64_t wide_state = 0x9e3779b97f4a7c15ULL;
+  auto wide_next = [&]() {
+    wide_state = wide_state * 6364136223846793005ULL + 1442695040888963407ULL;
+    return wide_state >> 32;
+  };
+  for (unsigned trial = 0; trial != 12; ++trial) {
+    Points points;
+    while (points.size() < 9 + trial % 12)
+      add_unique(points, {static_cast<mhgp8::Coordinate>(wide_next() % 262144U),
+                          static_cast<mhgp8::Coordinate>(wide_next() % 262144U),
+                          static_cast<mhgp8::Coordinate>(wide_next() % 262144U)});
+    unsigned admitted = 0;
+    for (std::size_t a = 0; a != points.size() && admitted != 3; ++a)
+      for (std::size_t b = a + 1; b != points.size() && admitted != 3; ++b)
+        for (std::size_t x = b + 1; x != points.size() && admitted != 3; ++x)
+          if (oracle_seed(points[a], points[b], points[x])) {
+            check_case(gate, points, {a, b, x});
+            ++admitted;
+          }
+    gate.require(admitted == 3, "18-bit random fixture did not exercise enough positive seeds");
+    ++gate.wide_clouds;
+  }
   callback_cases(gate);
   mutation_cases(gate);
   gate.require(gate.runs >= 200 && gate.groups >= 1000 && gate.oracle_sites >= 10000,
@@ -463,6 +501,8 @@ void run(Gate& gate) {
                gate.max_shell >= 30 && gate.max_cross_bits > 128, "adversarial nonvacuity floor");
   gate.require(gate.mutants == 5 && gate.callback_failures == 1 && gate.parallel_calls == 4 &&
                gate.reentrant_calls == 1, "lifecycle/judge nonvacuity floor");
+  gate.require(gate.wide_clouds == 12 && gate.wide_runs >= 30 && gate.wide_max_cross_bits > 128,
+               "18-bit nonvacuity floor");
 }
 }  // namespace
 
@@ -483,7 +523,9 @@ int main(int argc, char** argv) {
               << ",\"max_shell\":" << gate.max_shell << ",\"max_cross_bits\":" << gate.max_cross_bits
               << ",\"permutations\":" << gate.permutations << ",\"invalid_inputs\":" << gate.invalid_inputs
               << ",\"callback_failures\":" << gate.callback_failures << ",\"reentrant_calls\":" << gate.reentrant_calls
-              << ",\"parallel_calls\":" << gate.parallel_calls << ",\"judge_mutants\":" << gate.mutants << "}\n";
+              << ",\"parallel_calls\":" << gate.parallel_calls << ",\"judge_mutants\":" << gate.mutants
+              << ",\"wide_clouds\":" << gate.wide_clouds << ",\"wide_runs\":" << gate.wide_runs
+              << ",\"wide_max_cross_bits\":" << gate.wide_max_cross_bits << "}\n";
   } catch (const std::exception& error) {
     std::cerr << "q4 family gate: " << error.what() << '\n';
     return 1;

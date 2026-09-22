@@ -36,6 +36,11 @@ struct Gate {
   u64 proposals{}, cardinality_skips{}, bound_tests{}, rejected_tasks{}, rejected_pairs{}, rejected_after_credit{};
   u64 transformed_clouds{}, permutations{}, default_comparisons{}, invalid_inputs{}, callback_failures{}, model_mutants{};
   u64 fragmentation_bound{}, fragmentation_disabled_tasks{}, fragmentation_enabled_tasks{};
+  // 18-bit coverage (coordinate_limit = 262143): counted separately so that
+  // every historical u16 pin above keeps its exact value.
+  u64 clouds18{}, transformed_clouds18{}, permutations18{}, default_comparisons18{};
+  u64 fragmentation_bound18{}, fragmentation_disabled_tasks18{}, fragmentation_enabled_tasks18{};
+  u64 credited18{}, negative18{};
 
   void require(bool condition, const char* message) {
     ++checks;
@@ -55,7 +60,8 @@ void sort_output(Output& output) {
 }
 
 // Exhaustive scalar test oracle only. No production geometry or selection.
-// u16 differences are promoted first; the three dot-product terms fit i64.
+// Differences (u16 or 18-bit) are promoted to i64 first; the three
+// dot-product terms fit i64.
 Output oracle(Gate& gate, std::span<const Point3> points) {
   Output result;
   for (std::size_t a = 0; a < points.size(); ++a) {
@@ -196,43 +202,76 @@ std::vector<std::vector<Point3>> fixtures() {
       {{0, 0, 0}, {5, 0, 0}, {10, 0, 0}, {11, 0, 0}}};
   std::vector<Point3> cube;
   for (unsigned bits = 0; bits < 8; ++bits) {
-    cube.push_back({static_cast<std::uint16_t>((bits & 1U) * 2),
-                   static_cast<std::uint16_t>(((bits >> 1U) & 1U) * 2),
-                   static_cast<std::uint16_t>(((bits >> 2U) & 1U) * 2)});
+    cube.push_back({static_cast<mhgp8::Coordinate>((bits & 1U) * 2),
+                   static_cast<mhgp8::Coordinate>(((bits >> 1U) & 1U) * 2),
+                   static_cast<mhgp8::Coordinate>(((bits >> 2U) & 1U) * 2)});
   }
   result.push_back(cube);
   std::vector<Point3> sheet;
   for (unsigned x = 0; x < 3; ++x) for (unsigned y = 0; y < 4; ++y)
-    sheet.push_back({static_cast<std::uint16_t>(x * 43), static_cast<std::uint16_t>(y * 47), 17});
+    sheet.push_back({static_cast<mhgp8::Coordinate>(x * 43), static_cast<mhgp8::Coordinate>(y * 47), 17});
   result.push_back(sheet);
+  // Pinned u16 recipe (>> 16U): same clouds as before the 18-bit widening.
   for (std::uint32_t seed : {3U, 37U}) {
     auto state = seed;
-    const auto next = [&]() { state = state * 1664525U + 1013904223U; return static_cast<std::uint16_t>(state >> 16U); };
+    const auto next = [&]() { state = state * 1664525U + 1013904223U; return static_cast<mhgp8::Coordinate>(state >> 16U); };
     std::vector<Point3> random;
-    for (unsigned i = 0; i < 17; ++i) random.push_back({static_cast<std::uint16_t>(i * 251 + seed), next(), next()});
+    for (unsigned i = 0; i < 17; ++i) random.push_back({static_cast<mhgp8::Coordinate>(i * 251 + seed), next(), next()});
     result.push_back(random);
   }
   return result;
 }
 
-void corpus(Gate& gate) {
-  for (const auto& base : fixtures()) {
+// Separate 18-bit corpus (coordinate_limit = 262143), with its own floors:
+// the far diagonal, a triangle spanning the x range, the {0,5,10,11} line
+// translated to the far end, a sheet in the far corner and a separate
+// pseudo-random recipe (>> 14U, 18 bits). The u16 recipes above are pinned
+// and unchanged.
+std::vector<std::vector<Point3>> fixtures18() {
+  constexpr mhgp8::Coordinate m = mhgp8::coordinate_limit;
+  std::vector<std::vector<Point3>> result{
+      {{0, 0, 0}, {m, m, m}},
+      {{0, 0, 0}, {m - 1, 0, 0}, {131071, 131071, 0}},
+      {{m - 11, 0, 0}, {m - 6, 0, 0}, {m - 1, 0, 0}, {m, 0, 0}}};
+  std::vector<Point3> sheet;
+  for (unsigned x = 0; x < 3; ++x) for (unsigned y = 0; y < 4; ++y)
+    sheet.push_back({static_cast<mhgp8::Coordinate>(m - 100 + x * 43), static_cast<mhgp8::Coordinate>(m - 150 + y * 47), m});
+  result.push_back(sheet);
+  for (std::uint32_t seed : {3U, 37U}) {
+    auto state = seed;
+    const auto next = [&]() { state = state * 1664525U + 1013904223U; return static_cast<mhgp8::Coordinate>(state >> 14U); };
+    std::vector<Point3> random;
+    for (unsigned i = 0; i < 17; ++i) random.push_back({static_cast<mhgp8::Coordinate>(i * 15413 + seed), next(), next()});
+    result.push_back(random);
+  }
+  for (const auto& cloud : result)
+    for (const auto& point : cloud)
+      if (point.x > m || point.y > m || point.z > m) throw std::logic_error("18-bit fixture left the coordinate range");
+  return result;
+}
+
+// Three clouds per base: the base, its exact reflection x -> side - x and
+// its cyclic axis permutation, each with reversed IDs; side is 65535 for the
+// u16 corpus and coordinate_limit for the 18-bit corpus.
+void corpus(Gate& gate, const std::vector<std::vector<Point3>>& bases, mhgp8::Coordinate side,
+            u64& clouds, u64& transformed_clouds, u64& permutations, u64& default_comparisons) {
+  for (const auto& base : bases) {
     for (unsigned transform = 0; transform < 3; ++transform) {
       auto points = base;
       if (transform != 0) {
         for (auto& point : points) {
           // Exact signed coordinate permutation: a rigid lattice isometry.
-          point = transform == 1 ? Point3{static_cast<std::uint16_t>(65535U - point.x), point.y, point.z}
+          point = transform == 1 ? Point3{static_cast<mhgp8::Coordinate>(side - point.x), point.y, point.z}
                                  : Point3{point.z, point.x, point.y};
         }
-        ++gate.transformed_clouds;
+        ++transformed_clouds;
         std::reverse(points.begin(), points.end());
-        ++gate.permutations;
+        ++permutations;
       }
       const auto all = oracle(gate, points);
       const auto cloud = mhgp8::prepare_cloud(points);
       const auto index = mhgp8::make_q2_cloud_index(cloud);
-      ++gate.clouds;
+      ++clouds;
       for (const unsigned kmax : {1U, 2U, 5U, 10U}) {
         const auto expected = accepted(all, kmax);
         for (const unsigned s : {8U, 10U, 12U}) {
@@ -245,7 +284,7 @@ void corpus(Gate& gate) {
               unchanged(gate, disabled, implicit);
               gate.require(census_work(disabled.result.census.work) == census_work(implicit.result.census.work),
                            "default mode changed a generic census counter compared with Disabled");
-              ++gate.default_comparisons;
+              ++default_comparisons;
             }
           }
         }
@@ -259,10 +298,12 @@ std::size_t height(std::span<const mhgp8::Q2SpatialNode> nodes, std::size_t id) 
   return 1 + std::max(height(nodes, nodes[id].left), height(nodes, nodes[id].right));
 }
 
-void fragmentation(Gate& gate) {
-  std::vector<Point3> points;
-  for (unsigned i = 0; i < 64; ++i) points.push_back({static_cast<std::uint16_t>(i), 0, 0});
-  points.push_back({1000, 0, 0});
+// Collinear fragmentation family: an independent task bound is computed
+// from the real s=8 front on this index, then the K=1 / s=8 / Pure run must
+// reject at least one task, stay within the bound and below the Disabled
+// run. Shared by the u16 fixture and its 18-bit reflection.
+void bounded_fragmentation(Gate& gate, const std::vector<Point3>& points,
+                           u64& bound_out, u64& disabled_out, u64& enabled_out) {
   const auto all = oracle(gate, points);
   const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
   const auto nodes = index->spatial_nodes();
@@ -288,16 +329,39 @@ void fragmentation(Gate& gate) {
                            enabled.result.census.work.query_tasks <= bound &&
                            enabled.result.census.work.query_tasks < disabled.result.census.work.query_tasks,
                        "integrated collinear fixture lost its independently bounded sibling fragmentation");
-          gate.fragmentation_bound = bound;
-          gate.fragmentation_disabled_tasks = disabled.result.census.work.query_tasks;
-          gate.fragmentation_enabled_tasks = enabled.result.census.work.query_tasks;
+          bound_out = bound;
+          disabled_out = disabled.result.census.work.query_tasks;
+          enabled_out = enabled.result.census.work.query_tasks;
         }
       }
     }
   }
+}
+
+// A witness outside B is consumed before the B subtree. The subsequent
+// sibling certificate must reject autonomously even with acquired count
+// one, without adding to it or changing the shared continuation contract.
+void credited_rejection(Gate& gate, const std::vector<Point3>& credited) {
+  const auto credited_expected = accepted(oracle(gate, credited), 2);
+  const auto credited_index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(credited));
+  for (const auto front : {WspdFrontMode::Pure, WspdFrontMode::MidpointSamples}) {
+    const auto disabled = run(gate, *credited_index, credited_expected, 2, 8, front, Q2SiblingMode::Disabled);
+    const auto enabled = run(gate, *credited_index, credited_expected, 2, 8, front, Q2SiblingMode::Saturating);
+    unchanged(gate, disabled, enabled);
+    gate.require(enabled.result.sibling_work.rejected_after_credit > 0,
+                 "sibling fixture lost its autonomous rejection after inherited credit");
+  }
+}
+
+void fragmentation(Gate& gate) {
+  std::vector<Point3> points;
+  for (unsigned i = 0; i < 64; ++i) points.push_back({static_cast<mhgp8::Coordinate>(i), 0, 0});
+  points.push_back({1000, 0, 0});
+  bounded_fragmentation(gate, points, gate.fragmentation_bound, gate.fragmentation_disabled_tasks,
+                        gate.fragmentation_enabled_tasks);
 
   auto reflected = points;
-  for (auto& point : reflected) point.x = static_cast<std::uint16_t>(65535U - point.x);
+  for (auto& point : reflected) point.x = static_cast<mhgp8::Coordinate>(65535 - point.x);
   std::reverse(reflected.begin(), reflected.end());
   const auto reflected_all = oracle(gate, reflected);
   const auto reflected_index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(reflected));
@@ -312,20 +376,35 @@ void fragmentation(Gate& gate) {
     }
   }
 
-  // A witness outside B is consumed before the B subtree. The subsequent
-  // sibling certificate must reject autonomously even with acquired count
-  // one, without adding to it or changing the shared continuation contract.
   std::vector<Point3> credited{{0, 0, 0}, {500, 0, 0}};
-  for (unsigned i = 0; i < 64; ++i) credited.push_back({static_cast<std::uint16_t>(1000 + i), 0, 0});
-  const auto credited_expected = accepted(oracle(gate, credited), 2);
-  const auto credited_index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(credited));
-  for (const auto front : {WspdFrontMode::Pure, WspdFrontMode::MidpointSamples}) {
-    const auto disabled = run(gate, *credited_index, credited_expected, 2, 8, front, Q2SiblingMode::Disabled);
-    const auto enabled = run(gate, *credited_index, credited_expected, 2, 8, front, Q2SiblingMode::Saturating);
-    unchanged(gate, disabled, enabled);
-    gate.require(enabled.result.sibling_work.rejected_after_credit > 0,
-                 "sibling fixture lost its autonomous rejection after inherited credit");
-  }
+  for (unsigned i = 0; i < 64; ++i) credited.push_back({static_cast<mhgp8::Coordinate>(1000 + i), 0, 0});
+  credited_rejection(gate, credited);
+}
+
+// 18-bit twins (coordinate_limit = 262143), with their own counters.
+void fragmentation18(Gate& gate) {
+  constexpr mhgp8::Coordinate m = mhgp8::coordinate_limit;
+  // Exact reflection x -> 262143 - x of the collinear fixture: the 64 sites
+  // occupy the far end of the x range and the lone site sits at m - 1000;
+  // the same independent bound and the same rejection are required.
+  std::vector<Point3> reflected18;
+  for (unsigned i = 0; i < 64; ++i) reflected18.push_back({static_cast<mhgp8::Coordinate>(m - i), 0, 0});
+  reflected18.push_back({m - 1000, 0, 0});
+  std::reverse(reflected18.begin(), reflected18.end());
+  bounded_fragmentation(gate, reflected18, gate.fragmentation_bound18, gate.fragmentation_disabled_tasks18,
+                        gate.fragmentation_enabled_tasks18);
+
+  // Credited twins: the u16 fixture translated to the far end (identical
+  // index and front by translation invariance), and a stretched one whose
+  // witness 131072 and B block {m-63..m} span the full 18-bit range.
+  std::vector<Point3> translated{{m - 1063, 0, 0}, {m - 563, 0, 0}};
+  for (unsigned i = 0; i < 64; ++i) translated.push_back({static_cast<mhgp8::Coordinate>(m - 63 + i), 0, 0});
+  credited_rejection(gate, translated);
+  ++gate.credited18;
+  std::vector<Point3> stretched{{0, 0, 0}, {131072, 0, 0}};
+  for (unsigned i = 0; i < 64; ++i) stretched.push_back({static_cast<mhgp8::Coordinate>(m - 63 + i), 0, 0});
+  credited_rejection(gate, stretched);
+  ++gate.credited18;
 }
 
 void negative_models_and_requests(Gate& gate) {
@@ -404,6 +483,42 @@ void negative_models_and_requests(Gate& gate) {
   }
 }
 
+// 18-bit twins of the two engine-facing negative fixtures. Midpoint splits
+// and separation are translation invariant, so the translated line keeps
+// its sole non-singleton query and its pinned autonomous counters; the
+// boundary anchor moves to x = coordinate_limit and z = (0,0,0) still lies
+// exactly on the shell of a--(0,1,0).
+void negative_models18(Gate& gate) {
+  constexpr mhgp8::Coordinate m = mhgp8::coordinate_limit;
+  const std::vector<Point3> boundary{{m, 0, 0}, {0, 1, 0}, {0, 0, 0}};
+  const auto shell = accepted(oracle(gate, boundary), 1);
+  const auto support = std::find_if(shell.begin(), shell.end(), [](const auto& p) { return p.pair == Pair{0, 1}; });
+  gate.require(support != shell.end() && support->interior.empty() && support->shell.size() == 3,
+               "18-bit nonstrict sibling-bound model lost its boundary fixture");
+  const auto boundary_index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(boundary));
+  const auto boundary_disabled = run(gate, *boundary_index, shell, 1, 8,
+                                     WspdFrontMode::Pure, Q2SiblingMode::Disabled);
+  const auto boundary_enabled = run(gate, *boundary_index, shell, 1, 8,
+                                    WspdFrontMode::Pure, Q2SiblingMode::Saturating);
+  unchanged(gate, boundary_disabled, boundary_enabled);
+  gate.require(sibling_work(boundary_enabled.result.sibling_work) == std::array<u64, 6>{2, 0, 2, 0, 0, 0},
+               "18-bit sibling-boundary fixture did not test and preserve both nonsaturating children");
+  ++gate.negative18;
+
+  const std::vector<Point3> line{{m - 11, 0, 0}, {m - 6, 0, 0}, {m - 1, 0, 0}, {m, 0, 0}};
+  const auto expected = accepted(oracle(gate, line), 2);
+  const auto one = std::find_if(expected.begin(), expected.end(), [](const auto& p) { return p.pair == Pair{0, 2}; });
+  gate.require(one != expected.end() && one->interior == std::vector<std::size_t>{1},
+               "18-bit double-credit model lost its single-witness fixture");
+  const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(line));
+  const auto below_threshold = run(gate, *index, expected, 2, 8, WspdFrontMode::Pure, Q2SiblingMode::Saturating);
+  gate.require(below_threshold.result.census.work.query_splits == 1 &&
+                   below_threshold.result.census.work.shared_splits_after_credit == 1 &&
+                   sibling_work(below_threshold.result.sibling_work) == std::array<u64, 6>{2, 2, 0, 0, 0, 0},
+               "18-bit subthreshold sibling was combined with inherited credit instead of skipped");
+  ++gate.negative18;
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -413,9 +528,14 @@ int main(int argc, char** argv) {
   }
   try {
     Gate gate;
-    corpus(gate);
+    corpus(gate, fixtures(), 65535, gate.clouds, gate.transformed_clouds, gate.permutations,
+           gate.default_comparisons);
+    corpus(gate, fixtures18(), mhgp8::coordinate_limit, gate.clouds18, gate.transformed_clouds18,
+           gate.permutations18, gate.default_comparisons18);
     fragmentation(gate);
+    fragmentation18(gate);
     negative_models_and_requests(gate);
+    negative_models18(gate);
     gate.require(gate.clouds == 24 && gate.runs > 1300 && gate.oracle_pairs > 3000 && gate.oracle_sites > 130000 &&
                      gate.supports > 10000 && gate.proposals > 0 && gate.cardinality_skips > 0 && gate.bound_tests > 0 &&
                      gate.rejected_tasks > 0 && gate.rejected_pairs > 0 && gate.rejected_after_credit > 0 &&
@@ -423,6 +543,16 @@ int main(int argc, char** argv) {
                      gate.permutations == 16 && gate.default_comparisons == 192 && gate.invalid_inputs == 3 &&
                      gate.callback_failures == 2 && gate.model_mutants == 5 && gate.fragmentation_bound > 0,
                  "sibling qualification lost a non-vacuity floor");
+    // The reflected collinear fixture is the mirror image of the u16 one:
+    // a contiguous integer range splits into equal halves on both sides of
+    // the mirror, so the independent front bound is equal. Task counts are
+    // not compared: the witness DFS visits the mirrored tree in the
+    // opposite x order, so saturation is detected at different depths.
+    gate.require(gate.clouds18 == 18 && gate.transformed_clouds18 == 12 && gate.permutations18 == 12 &&
+                     gate.default_comparisons18 == 144 && gate.fragmentation_bound18 > 0 &&
+                     gate.fragmentation_bound18 == gate.fragmentation_bound &&
+                     gate.credited18 == 2 && gate.negative18 == 2,
+                 "sibling 18-bit qualification lost a non-vacuity floor");
     std::cout << "mhgp8_q2_sibling_gate passed checks=" << gate.checks << " clouds=" << gate.clouds
               << " oracle_pairs=" << gate.oracle_pairs << " oracle_sites=" << gate.oracle_sites << " runs=" << gate.runs
               << " supports=" << gate.supports << " proposals=" << gate.proposals
@@ -433,7 +563,13 @@ int main(int argc, char** argv) {
               << " invalid_inputs=" << gate.invalid_inputs << " callback_failures=" << gate.callback_failures
               << " model_mutants=" << gate.model_mutants << " fragmentation_bound=" << gate.fragmentation_bound
               << " fragmentation_disabled_tasks=" << gate.fragmentation_disabled_tasks
-              << " fragmentation_enabled_tasks=" << gate.fragmentation_enabled_tasks << '\n';
+              << " fragmentation_enabled_tasks=" << gate.fragmentation_enabled_tasks
+              << " clouds18=" << gate.clouds18 << " transformed_clouds18=" << gate.transformed_clouds18
+              << " permutations18=" << gate.permutations18 << " default_comparisons18=" << gate.default_comparisons18
+              << " fragmentation_bound18=" << gate.fragmentation_bound18
+              << " fragmentation_disabled_tasks18=" << gate.fragmentation_disabled_tasks18
+              << " fragmentation_enabled_tasks18=" << gate.fragmentation_enabled_tasks18
+              << " credited18=" << gate.credited18 << " negative18=" << gate.negative18 << '\n';
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "mhgp8_q2_sibling_gate failed: " << error.what() << '\n';

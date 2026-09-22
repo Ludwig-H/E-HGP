@@ -43,7 +43,7 @@ d'erreur par coordonnée ; cela ne dit rien de la précision physique du capteur
 Publier les retours bruts, sites géométriques distincts, doublons d'origine
 et fusions dues à la grille, en conservant **chaque correspondance de retour**.
 Le modèle reste celui des sites distincts, pas des multiplicités indépendantes.
-Le moteur actuel reste `quantized_u16_input_only` ; les anciennes mesures
+Le moteur entier est élargi à `quantized_u18_input_only` depuis le22 septembre ; les anciennes mesures
 à2cm (119142/119942/120725 sites contre123389/124479/125526 retours) sont
 historiques. La préparation sans perte et un prédicat exact isolé ne
 transforment pas ce moteur en moteur float32. Aucun contrat de tour sur

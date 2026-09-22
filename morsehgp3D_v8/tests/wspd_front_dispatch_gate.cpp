@@ -40,6 +40,7 @@ struct Gate {
   u64 cross_worker_transfers{}, callback_failures{}, launch_failures{}, invalid_inputs{};
   u64 widened_cases{}, extended_products{};
   u64 inheriting_cases{}, inherited_credits{}, seed_witness_ranks{}, donated_witness_ranks{}, inherited_transfers{};
+  u64 wide_clouds{}, wide_inherited_transfers{};  // 18-bit twins (coordinate_limit = 262143).
   void require(bool condition, const char* message) {
     ++checks;
     if (!condition) throw std::runtime_error(message);
@@ -195,16 +196,41 @@ DispatchWork run_case(Gate& gate, const mhgp8::Q2CensusIndexPtr& index, const Or
   return work;
 }
 
+// Every integer predicate of the index and the front is invariant under an integer
+// translation: the twin of a cloud pushed to the far corner of the 18-bit grid (its
+// maximum on each axis becomes coordinate_limit) has the same tree, counters and
+// rectangles, and the oracle judges it independently. Any difference is an engine fault.
+Points far_corner(Points points) {
+  static_assert(mhgp8::coordinate_limit == 262143);
+  std::array<mhgp8::Coordinate, 3> maximum{};
+  for (const auto& point : points)
+    for (std::size_t axis = 0; axis < 3; ++axis) maximum[axis] = std::max(maximum[axis], point[axis]);
+  for (auto& point : points) {
+    point.x = static_cast<mhgp8::Coordinate>(point.x + (262143 - maximum[0]));
+    point.y = static_cast<mhgp8::Coordinate>(point.y + (262143 - maximum[1]));
+    point.z = static_cast<mhgp8::Coordinate>(point.z + (262143 - maximum[2]));
+  }
+  return points;
+}
+
+bool wide(const Points& points) {
+  return std::any_of(points.begin(), points.end(), [](const Point3& point) {
+    return point.x > 65535 || point.y > 65535 || point.z > 65535; });
+}
+
+constexpr std::size_t wide_fixture_count = 3;
+
 void corpus(Gate& gate) {
+  using mhgp8::Coordinate;
   std::vector<Points> fixtures{
       {{7, 8, 9}}, {{0, 0, 0}, {65535, 65535, 65535}},
       {{0, 0, 0}, {2, 0, 0}, {5, 0, 0}, {8, 0, 0}, {10, 0, 0}, {1000, 0, 0}, {1001, 0, 0}},
       {{0, 0, 0}, {6, 0, 0}, {2, 1, 1}}};
   Points cube, random;
   for (unsigned bits = 0; bits < 8; ++bits)
-    cube.push_back({static_cast<std::uint16_t>((bits & 1U) * 65535),
-                    static_cast<std::uint16_t>(((bits >> 1U) & 1U) * 65535),
-                    static_cast<std::uint16_t>(((bits >> 2U) & 1U) * 65535)});
+    cube.push_back({static_cast<Coordinate>((bits & 1U) * 65535),
+                    static_cast<Coordinate>(((bits >> 1U) & 1U) * 65535),
+                    static_cast<Coordinate>(((bits >> 2U) & 1U) * 65535)});
   std::uint32_t state = 13;
   for (unsigned i = 0; i < 17; ++i) {
     state = state * 1664525U + 1013904223U; const auto y = static_cast<std::uint16_t>(state >> 16U);
@@ -212,9 +238,27 @@ void corpus(Gate& gate) {
     random.push_back({static_cast<std::uint16_t>(i * 4093), y, static_cast<std::uint16_t>(state >> 16U)});
   }
   fixtures.push_back(cube); fixtures.push_back(random);
+  // ---- 18-bit twins (coordinate_limit = 262143), judged by the same Boost oracle:
+  // the diagonal of the whole grid, the eight corners of its cube and a separate
+  // 18-bit pseudo-random cloud (state >> 14); the u16 generator above is a pinned
+  // recipe and does not change.
+  fixtures.push_back({{0, 0, 0}, {262143, 262143, 262143}});
+  Points wide_cube, wide_random;
+  for (unsigned bits = 0; bits < 8; ++bits)
+    wide_cube.push_back({static_cast<Coordinate>((bits & 1U) * 262143U),
+                         static_cast<Coordinate>(((bits >> 1U) & 1U) * 262143U),
+                         static_cast<Coordinate>(((bits >> 2U) & 1U) * 262143U)});
+  state = 1013;
+  for (unsigned i = 0; i < 17; ++i) {
+    state = state * 1664525U + 1013904223U; const auto y = static_cast<Coordinate>(state >> 14U);
+    state = state * 1664525U + 1013904223U;
+    wide_random.push_back({static_cast<Coordinate>(i * 16381U), y, static_cast<Coordinate>(state >> 14U)});  // < 262143 for i < 17.
+  }
+  fixtures.push_back(wide_cube); fixtures.push_back(wide_random);
   for (const auto& points : fixtures) {
     const auto expected = oracle(gate, points);
     const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
+    gate.wide_clouds += static_cast<u64>(wide(points));
     unsigned sample = 0;
     for (const unsigned k : {1U, 2U, 5U, 10U}) for (const unsigned s : {8U, 10U, 12U})
       for (const auto mode : {WspdFrontMode::Pure, WspdFrontMode::MidpointSamples}) {
@@ -264,20 +308,25 @@ void corpus(Gate& gate) {
 // Received witness lists through BOTH task channels of the dispatcher, deterministically.
 // Bridged cubes (see the front-job gate): at Kmax 5 the product of the two cubes survives its
 // search with three credits and is split, so its descendants carry a non-empty received list.
-void inherited_transfers(Gate& gate) {
+Points bridged_cubes() {
+  using mhgp8::Coordinate;
   Points bridged;
   for (unsigned corner = 0; corner < 8; ++corner) {
-    const auto x = static_cast<std::uint16_t>((corner & 1U) * 6000U);
-    const auto y = static_cast<std::uint16_t>(((corner >> 1U) & 1U) * 6000U);
-    const auto z = static_cast<std::uint16_t>(((corner >> 2U) & 1U) * 6000U);
+    const auto x = static_cast<Coordinate>((corner & 1U) * 6000U);
+    const auto y = static_cast<Coordinate>(((corner >> 1U) & 1U) * 6000U);
+    const auto z = static_cast<Coordinate>(((corner >> 2U) & 1U) * 6000U);
     bridged.push_back({x, y, z});
-    bridged.push_back({static_cast<std::uint16_t>(x + 54000U), y, z});
+    bridged.push_back({static_cast<Coordinate>(x + 54000), y, z});
   }
   bridged.push_back({30100, 3000, 3000});
   bridged.push_back({30110, 3010, 2990});
   bridged.push_back({30120, 2990, 3010});
   for (unsigned i = 0; i < 8; ++i)
-    bridged.push_back({static_cast<std::uint16_t>(7000U * i + 500U), 65000, static_cast<std::uint16_t>(100U * i)});
+    bridged.push_back({static_cast<Coordinate>(7000U * i + 500U), 65000, static_cast<Coordinate>(100U * i)});
+  return bridged;
+}
+
+void inherited_transfers(Gate& gate, const Points& bridged, u64& transfers) {
   const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(bridged));
   const auto expected = oracle(gate, bridged);
   const mhgp8::WspdFrontProposals inheriting{1, std::numeric_limits<std::size_t>::max(), true};
@@ -295,7 +344,17 @@ void inherited_transfers(Gate& gate) {
   gate.require(work.donations > 0 && work.stolen_completed == work.donations &&
                    gate.donated_witness_ranks > before,
                "no donated task of the dispatcher carried a received witness list");
-  ++gate.inherited_transfers;
+  ++transfers;
+}
+
+void inherited_transfers(Gate& gate) {
+  const auto bridged = bridged_cubes();
+  inherited_transfers(gate, bridged, gate.inherited_transfers);
+  // 18-bit twin: the same cubes at the far corner (far sites at y = 262143 instead of
+  // the u16 frontier 65000). Translation invariance: same seeds, same donations.
+  const auto wide_bridged = far_corner(bridged);
+  gate.require(wide(wide_bridged), "far-corner bridged cubes are not an 18-bit cloud");
+  inherited_transfers(gate, wide_bridged, gate.wide_inherited_transfers);
 }
 
 // Test-only deadline bounds synchronization bugs. No timing-based claim of
@@ -461,7 +520,8 @@ int main(int argc, char** argv) {
                      gate.cross_worker_transfers == 1 && gate.launch_failures == 1 && gate.invalid_inputs == 4 &&
                      gate.widened_cases >= 60 && gate.extended_products > 0 && gate.inheriting_cases >= 60 &&
                      gate.inherited_credits > 0 && gate.seed_witness_ranks > 0 && gate.donated_witness_ranks > 0 &&
-                     gate.inherited_transfers == 1,
+                     gate.inherited_transfers == 1 && gate.wide_clouds == wide_fixture_count &&
+                     gate.wide_inherited_transfers == 1,
                  "front dispatch gate lost a declared non-vacuity floor");
     std::cout << "{\"schema\":\"mhgp8_wspd_front_dispatch_gate_v1\",\"status\":\"passed\","
               << "\"public_status\":\"not_claimed\",\"checks\":" << gate.checks
@@ -477,7 +537,9 @@ int main(int argc, char** argv) {
               << ",\"inheriting_cases\":" << gate.inheriting_cases << ",\"inherited_credits\":" << gate.inherited_credits
               << ",\"seed_witness_ranks\":" << gate.seed_witness_ranks
               << ",\"donated_witness_ranks\":" << gate.donated_witness_ranks
-              << ",\"inherited_transfers\":" << gate.inherited_transfers << "}\n";
+              << ",\"inherited_transfers\":" << gate.inherited_transfers
+              << ",\"wide_clouds\":" << gate.wide_clouds
+              << ",\"wide_inherited_transfers\":" << gate.wide_inherited_transfers << "}\n";
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "mhgp8_wspd_front_dispatch_gate failed: " << error.what() << '\n';

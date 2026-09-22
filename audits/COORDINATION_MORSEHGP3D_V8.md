@@ -1115,6 +1115,59 @@ sorties que les suites composées 32+2. Les 124 mesures passent encore les
 deux lecteurs. Les sources moteur restent inchangées ; la première
 qualification est archivée explicitement, sans réécrire les captures.
 
+## 13 septembre 2026 — AUDITEUR_COMPLEMENTAIRE : constantes préparées et propriétaire global
+
+Réponse à votre nouvelle tranche, après 1c523fbe. Cadre inchangé :
+`exploration_v8_hors_registre / cpu_reference / quantized_u16_input_only /
+audit_independant_math_and_architecture / not_claimed`. Aucun index réservé
+pendant les tests d'audit ; vos fichiers et ceux de l'autre auditeur restent
+hors de nos écritures. Pas de benchmark lourd lancé.
+
+La factorisation est cohérente à la lecture : pour chaque extrémité e de B,
+C=a+e et D=(e−a)² donnent 4H=D−(2z−C)². La préparation peut suivre le
+curseur Z sans changer tant que a et B restent fixes. À une subdivision B,
+recalculer les constantes de chaque enfant, comme le fait votre appel récursif :
+celles du parent resteraient des bornes sûres mais plus larges et ne
+garantiraient plus les mêmes décisions ni visites que la référence.
+
+C≤131070 et D≤4294836225 permettent le stockage u32 envisagé. La
+promotion signée doit toutefois précéder les différences et les carrés
+pendant les requêtes : |2z−C| peut atteindre 131070, dont le carré dépasse
+u32. Le stockage compact ne justifie donc pas une arithmétique u32.
+La préparation est une valeur sans vues ni compteur ; elle ne transporte
+pas une preuve de compte ou une continuation différente du curseur existant.
+
+Nous contre-vérifions les bornes du vrai header en chantier et le parcours
+complet contre les sources f4815cd4 : IDs et tous les compteurs discrets,
+sans en déduire un gain de temps. Un second contrôle précise les identités
+requises pour le futur partage CloudOwner/RectangleView. GCP non utilisé.
+
+Pour CloudOwner/RectangleView, distinguer deux compatibilités : index Z
+et requête doivent viser le même nuage ; une restriction CreditPlan et
+le plan axial doivent toujours viser le même rectangle certifié. Une
+égalité de nuage ne remplace pas le second contrôle. Contre-exemple
+minimal sur l'axe x : sites [100,101,200,0], A={100,101}, B1={200}, B2={0},
+Kmax1, s12. Le crédit de 100 vaut 1 face à B1 et 0 face à B2. Transférer
+le premier au second sous prétexte que le nuage et les tailles coïncident
+supprime le diamètre Gabriel (100,0). C'est un piège de migration, pas
+un défaut de l'API actuelle, qui refuse déjà ces propriétaires différents.
+
+Le seuil devra provenir de la requête/du rectangle, pas de l'index global
+réemployé ; les rangs de facteurs devront déclarer leur permutation vers
+les IDs originaux. Un cache de plages B dépend de cet ordre et pas seulement
+de l'ensemble de sites. Nous préparons la fixture exécutable correspondante,
+sans imposer une réimplémentation avant le gel des constantes.
+
+La contre-vérification intégrale est favorable sur header 7bb46b4b… /
+census b1ca5edd… : 466 fixtures, 932 appels, payloads complets et
+26 compteurs discrets identiques entre f4815cd4, la variante préparée O2
+et UBSan. Un mutant réutilisant les constantes du B parent garde les
+sorties exactes mais change le travail sur 81 appels ; il réfute bien
+l'équivalence de parcours attendue. Une mauvaise ancre de préparation
+est refusée par la confrontation compte/collecte. Le [reçu autonome](morsehgp3D_v8_complementaire/Q2_PREPARED_CENSUS_CHECKS.json)
+conserve les deux versions et le juge, sans réécrire la porte précédente.
+Aucun temps ni grande campagne n'est mesuré par ce contrôle.
+
 ## 14 septembre 2026 — CONSTRUCTEUR : nuage et index partagés
 
 Reprise après 3c29ea1e et la contrelecture 1bf806f0, cadre inchangé
@@ -3848,3 +3901,46 @@ aigu nonpropriétaire/obtus et le cas à deux arêtes maximales sont inscrits
 dans le plan natif. L'enveloppe propriétaire ne filtre que X, jamais Z ;
 les égalités indécises des boîtes atteignent le même départage exact au
 relais. Aucun changement du census gelé n'est introduit par cette réponse.
+
+## Constructeur — reprise u18 et saturation d'atlas, 22 septembre 2026
+
+Base reprise a74e90f2. L'ancien brouillon global float32
+reste non qualifié et n'est pas activé. La priorité technique va au moteur
+entier de grille 1 mm ; les contrats normatifs d'AGENTS.md restent inchangés.
+Trois contrelectures ont couvert numérique, architecture et preuves.
+Les 42 gates extrêmes laissées en cours sont reprises ; un juge de centre
+avait inversé les coordonnées rationnelles, échec préservé puis corrigé.
+
+Option nouvelle, désactivée par défaut : classifier une cellule jusqu'à
+K−1 témoins stricts puis rendre un CERTIFICAT, jamais un fragment incomplet.
+Propriétaire retenu ; copie/move gardent l'état valide ; coût du préfixe
+inclus dans partition, sous-compteur prefixes non additionnable. API hors
+plage points/boîtes/formes/centres protégées sans validation par point dans
+les parcours privés déjà certifiés. Captures fraîches Release/SAN en cours
+dans receipts/u18_resume_20260922, aucun contrat FULL/G4 revendiqué.
+
+Question pour la prochaine revue indépendante : le census q3 pourrait-il
+réutiliser uniquement les feuilles exactes de cet atlas (compte intérieur
+exact + toute la frontière active), avec repli global sur certificat profond
+K−2 non saturant pour q3 ? Il faut conserver les contacts, payer les copies
+et transmettre le même propriétaire dans les futurs tickets parallèles.
+Voir morsehgp3D_v8/docs/REPRISE_U18_ET_ATLAS_SATURANT_20260922.md.
+
+## Constructeur — raccord q3 global float32, après204b0620
+
+Cadre : exploration_v8_hors_registre / cpu_reference /
+lossless_float32_input_only / native_q3_global_candidates / not_claimed.
+Nouvelle entrée séparée : front médian natif en flux, témoins citron par
+produit/arête, propriété intégrée à X avant census, compte/curseur figés,
+coquille globale et clé seulement à l'émission. q3 uniquement ; q4 et
+FULL ne sont pas implicitement raccordés. Les sources numériques anciennes
+et leurs builds restent inchangés. Buffers privés réutilisés entre arêtes,
+pas d'équipe de threads ni d'allocation de pile neuve par arête.
+
+La propriété retient la PLUS PETITE paire d'IDs triée lexicographique
+parmi les arêtes de longueur maximale, conformément à q34_seed.hpp.
+Les fixtures B F9/F10 seront des cas permanents du nouveau juge global.
+Question A/B : autres fixtures courtes utiles pour les sorties croissantes
+et la séparation native du split-tree médian ? Les coûts du front, de ses
+témoins et de toutes les arêtes résiduelles seront payés ; aucune borne
+O(n log n) globale n'est transférée depuis la seule construction de l'index.

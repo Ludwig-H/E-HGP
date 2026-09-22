@@ -44,6 +44,11 @@ struct Gate {
   u64 powers{}, strict_interiors{}, shell_sites{}, strict_exteriors{};
   u64 same_ball_across_arities{}, shell_supports{}, max_coefficient_bits{};
   u64 max_power_bits{}, max_naive_radius_bits{}, translated{}, judge_mutants{};
+  // 18-bit twins (a support coordinate above 65535) keep separate floors, so
+  // the widened fixtures reach the wide-arithmetic bits on their own while the
+  // historical 65535/32767 fixtures, now interior points, keep their pinned floors.
+  u64 wide_cases{}, wide_accepted_q2{}, wide_accepted_q3{}, wide_accepted_q4{}, wide_rejected{};
+  u64 wide_max_coefficient_bits{}, wide_max_power_bits{}, wide_max_naive_radius_bits{}, wide_translated{};
   void require(bool condition, const char* message) {
     ++checks;
     if (!condition) throw std::runtime_error(message);
@@ -67,21 +72,30 @@ Coefficients copy_key(const mhgp8::ExactBall& ball) {
   return result;
 }
 
+bool wide_support(const Points& support) {
+  for (const auto& point : support)
+    for (std::size_t axis = 0; axis != 3; ++axis) if (point[axis] > 65535) return true;
+  return false;
+}
+
 std::optional<Coefficients> check_case(Gate& gate, const Points& support, const Points& probes) {
   const auto reference = oracle_ball(support);
   const auto actual = make_ball(support);
+  const bool wide = wide_support(support);
   ++gate.cases;
+  if (wide) ++gate.wide_cases;
   gate.require(actual.has_value() == reference.ball.has_value(), "strict positivity/rank differs from rational Gram solve");
   if (!actual) {
     ++gate.rejected;
+    if (wide) ++gate.wide_rejected;
     if (reference.refusal == Refusal::Rank) ++gate.rank_deficient;
     if (reference.refusal == Refusal::Boundary) ++gate.boundary_centres;
     if (reference.refusal == Refusal::Exterior) ++gate.exterior_centres;
     return std::nullopt;
   }
-  if (support.size() == 2) ++gate.accepted_q2;
-  if (support.size() == 3) ++gate.accepted_q3;
-  if (support.size() == 4) ++gate.accepted_q4;
+  if (support.size() == 2) { ++gate.accepted_q2; if (wide) ++gate.wide_accepted_q2; }
+  if (support.size() == 3) { ++gate.accepted_q3; if (wide) ++gate.wide_accepted_q3; }
+  if (support.size() == 4) { ++gate.accepted_q4; if (wide) ++gate.wide_accepted_q4; }
   const auto key = copy_key(*actual);
   gate.require(key == reference.ball->coefficients, "primitive key differs from independently rationalised centre/radius");
   gate.require(key[0] > 0, "nonpositive quadratic coefficient");
@@ -89,11 +103,13 @@ std::optional<Coefficients> check_case(Gate& gate, const Points& support, const 
   for (const auto& coefficient : key) {
     common = gcd(common, coefficient);
     gate.max_coefficient_bits = std::max(gate.max_coefficient_bits, bits(coefficient));
+    if (wide) gate.wide_max_coefficient_bits = std::max(gate.wide_max_coefficient_bits, bits(coefficient));
   }
   gate.require(common == 1, "nonprimitive polynomial key");
   Big naive_numerator = -4 * key[0] * key[4];
   for (std::size_t axis = 0; axis != 3; ++axis) naive_numerator += key[axis + 1] * key[axis + 1];
   gate.max_naive_radius_bits = std::max(gate.max_naive_radius_bits, bits(naive_numerator));
+  if (wide) gate.wide_max_naive_radius_bits = std::max(gate.wide_max_naive_radius_bits, bits(naive_numerator));
   gate.require(Rational(naive_numerator, 4 * key[0] * key[0]) == reference.ball->radius_squared,
                "primitive polynomial changed the exact radius");
   for (const auto& point : support) gate.require(actual->power(point) == 0, "support site omitted from sphere");
@@ -102,6 +118,7 @@ std::optional<Coefficients> check_case(Gate& gate, const Points& support, const 
     gate.require(power.denominator() == 1, "primitive oracle power was nonintegral");
     gate.require(Big(actual->power(point)) == power.numerator(), "point power differs from solved centre/radius");
     gate.max_power_bits = std::max(gate.max_power_bits, bits(power.numerator()));
+    if (wide) gate.wide_max_power_bits = std::max(gate.wide_max_power_bits, bits(power.numerator()));
     if (power.numerator() < 0) ++gate.strict_interiors;
     if (power.numerator() == 0) ++gate.shell_sites;
     if (power.numerator() > 0) ++gate.strict_exteriors;
@@ -119,28 +136,38 @@ Points shell_fixture() {
   Points points;
   for (int x = -5; x <= 5; ++x) for (int y = -5; y <= 5; ++y)
     for (int z = -5; z <= 5; ++z) if (x * x + y * y + z * z == 25)
-      points.push_back({static_cast<std::uint16_t>(x + 20),
-                        static_cast<std::uint16_t>(y + 20),
-                        static_cast<std::uint16_t>(z + 20)});
+      points.push_back({static_cast<mhgp8::Coordinate>(x + 20),
+                        static_cast<mhgp8::Coordinate>(y + 20),
+                        static_cast<mhgp8::Coordinate>(z + 20)});
   return points;
 }
 
 std::vector<Points> fixtures() {
+  // Every 65535/32767 corner fixture is followed by its 18-bit twin at
+  // 262143/131071 (the historical corners are interior points since the
+  // widening of 22 September 2026 and keep only their oracle role).
   return {
       {{0, 0, 0}, {1, 1, 1}},
       {{0, 0, 0}, {65535, 65535, 65535}},
+      {{0, 0, 0}, {262143, 262143, 262143}},
+      {{262143, 262143, 262143}, {262142, 262143, 262143}},
       {{15, 10, 10}, {5, 10, 10}},
       {{10, 10, 10}, {10, 10, 10}},
       {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
       {{25, 20, 20}, {17, 24, 20}, {17, 16, 20}},
       {{0, 0, 0}, {65535, 0, 0}, {32767, 65535, 0}},
+      {{0, 0, 0}, {262143, 0, 0}, {131071, 262143, 0}},
+      {{262143, 262143, 262143}, {262141, 262143, 262143}, {262142, 262142, 262143}},
       {{0, 0, 0}, {46368, 28657, 0}, {28657, 17711, 0}},
+      {{0, 0, 0}, {196418, 121393, 0}, {121393, 75025, 0}},
       {{0, 0, 0}, {2, 0, 0}, {0, 2, 0}},
       {{0, 0, 0}, {3, 0, 0}, {1, 1, 0}},
       {{0, 0, 0}, {2, 0, 0}, {1, 0, 0}},
       {{0, 0, 0}, {0, 0, 0}, {1, 1, 1}},
       {{0, 0, 0}, {1, 1, 0}, {1, 0, 1}, {0, 1, 1}},
       {{0, 0, 0}, {65535, 65535, 0}, {65535, 0, 65535}, {0, 65535, 65535}},
+      {{0, 0, 0}, {262143, 262143, 0}, {262143, 0, 262143}, {0, 262143, 262143}},
+      {{0, 0, 0}, {262143, 65535, 0}, {65535, 0, 262143}, {0, 262143, 65535}},
       {{23, 24, 20}, {17, 24, 20}, {20, 17, 24}, {20, 17, 16}},
       {{25, 20, 20}, {17, 24, 20}, {17, 16, 20}, {20, 20, 25}},
       {{0, 0, 0}, {10, 0, 0}, {5, 5, 0}, {5, 0, 5}},
@@ -208,26 +235,38 @@ void translated_cases(Gate& gate) {
       {{0, 0, 0}, {4, 4, 0}, {4, 0, 4}, {0, 4, 4}}
   };
   const std::array<std::array<unsigned, 3>, 3> shifts{{{100, 1000, 2000}, {65520, 65520, 65520}, {17, 0, 400}}};
+  // 18-bit twins of the 65520 shift: the largest support coordinate (13)
+  // lands exactly on 262143 and next to the halving midpoint 131071/131072.
+  const std::array<std::array<unsigned, 3>, 2> wide_shifts{{{262128, 262128, 262128}, {131072, 131071, 262130}}};
+  const auto translate = [&](const Points& support, const oracle::Result& reference,
+                             const std::array<unsigned, 3>& shift) {
+    Points moved;
+    for (const auto& point : support)
+      moved.push_back({static_cast<mhgp8::Coordinate>(point.x + shift[0]),
+                       static_cast<mhgp8::Coordinate>(point.y + shift[1]),
+                       static_cast<mhgp8::Coordinate>(point.z + shift[2])});
+    const auto next = oracle_ball(moved);
+    gate.require(next.ball && next.ball->radius_squared == reference.ball->radius_squared,
+                 "translation changed oracle radius");
+    for (std::size_t axis = 0; axis != 3; ++axis)
+      gate.require(next.ball->center[axis] == reference.ball->center[axis] + Rational(Big(shift[axis])),
+                   "translation changed centre displacement");
+    Points probes = moved;
+    probes.push_back({0, 0, 0});
+    probes.push_back({65535, 65535, 65535});
+    probes.push_back({262143, 262143, 262143});
+    static_cast<void>(check_case(gate, moved, probes));
+  };
   for (const auto& support : supports) {
     const auto reference = oracle_ball(support);
     gate.require(reference.ball.has_value(), "translation fixture is not positive");
     for (const auto& shift : shifts) {
-      Points moved;
-      for (const auto& point : support)
-        moved.push_back({static_cast<std::uint16_t>(point.x + shift[0]),
-                         static_cast<std::uint16_t>(point.y + shift[1]),
-                         static_cast<std::uint16_t>(point.z + shift[2])});
-      const auto next = oracle_ball(moved);
-      gate.require(next.ball && next.ball->radius_squared == reference.ball->radius_squared,
-                   "translation changed oracle radius");
-      for (std::size_t axis = 0; axis != 3; ++axis)
-        gate.require(next.ball->center[axis] == reference.ball->center[axis] + Rational(Big(shift[axis])),
-                     "translation changed centre displacement");
-      Points probes = moved;
-      probes.push_back({0, 0, 0});
-      probes.push_back({65535, 65535, 65535});
-      static_cast<void>(check_case(gate, moved, probes));
+      translate(support, reference, shift);
       ++gate.translated;
+    }
+    for (const auto& shift : wide_shifts) {
+      translate(support, reference, shift);
+      ++gate.wide_translated;
     }
   }
 }
@@ -235,7 +274,8 @@ void translated_cases(Gate& gate) {
 void run(Gate& gate) {
   Points probes = shell_fixture();
   probes.insert(probes.end(), {{0, 0, 0}, {65535, 65535, 65535}, {1, 32768, 65534},
-                               {20, 20, 20}, {30000, 40000, 20000}});
+                               {20, 20, 20}, {30000, 40000, 20000},
+                               {262143, 262143, 262143}, {1, 131072, 262142}, {120000, 160000, 80000}});
   for (const auto& support : fixtures()) permutations(gate, support, probes);
   common_sphere(gate);
   translated_cases(gate);
@@ -248,9 +288,9 @@ void run(Gate& gate) {
     Points points;
     const unsigned side = trial % 3 == 0 ? 65536U : 17U;
     while (points.size() != 8)
-      add_unique(points, {static_cast<std::uint16_t>(next() % side),
-                          static_cast<std::uint16_t>(next() % side),
-                          static_cast<std::uint16_t>(next() % side)});
+      add_unique(points, {static_cast<mhgp8::Coordinate>(next() % side),
+                          static_cast<mhgp8::Coordinate>(next() % side),
+                          static_cast<mhgp8::Coordinate>(next() % side)});
     Points sample_probes = points;
     sample_probes.push_back({0, 0, 0});
     sample_probes.push_back({65535, 65535, 65535});
@@ -258,6 +298,29 @@ void run(Gate& gate) {
       Points support(points.begin(), points.begin() + static_cast<std::ptrdiff_t>(arity));
       static_cast<void>(check_case(gate, support, sample_probes));
       if (trial < 6) permutations(gate, support, sample_probes);
+    }
+  }
+  // Separate 18-bit random clouds (side 262144) with their own floors; the
+  // historical generator above is pinned by its floors and left unchanged.
+  std::uint64_t wide_state = 0x2545f4914f6cdd1dULL;
+  auto wide_next = [&]() {
+    wide_state = wide_state * 6364136223846793005ULL + 1442695040888963407ULL;
+    return wide_state >> 32;
+  };
+  for (unsigned trial = 0; trial != 140; ++trial) {
+    Points points;
+    while (points.size() != 8)
+      add_unique(points, {static_cast<mhgp8::Coordinate>(wide_next() % 262144U),
+                          static_cast<mhgp8::Coordinate>(wide_next() % 262144U),
+                          static_cast<mhgp8::Coordinate>(wide_next() % 262144U)});
+    Points sample_probes = points;
+    sample_probes.push_back({0, 0, 0});
+    sample_probes.push_back({65535, 65535, 65535});
+    sample_probes.push_back({262143, 262143, 262143});
+    for (std::size_t arity = 2; arity != 5; ++arity) {
+      Points support(points.begin(), points.begin() + static_cast<std::ptrdiff_t>(arity));
+      static_cast<void>(check_case(gate, support, sample_probes));
+      if (trial < 2) permutations(gate, support, sample_probes);
     }
   }
   gate.require(gate.cases >= 1500 && gate.accepted_q2 >= 400 && gate.accepted_q3 >= 100 &&
@@ -270,6 +333,11 @@ void run(Gate& gate) {
                "wide arithmetic nonvacuity floor");
   gate.require(gate.same_ball_across_arities == 3 && gate.shell_supports == 3 &&
                gate.translated == 9 && gate.judge_mutants == 3, "canonical key nonvacuity floor");
+  gate.require(gate.wide_cases >= 400 && gate.wide_accepted_q2 >= 100 && gate.wide_accepted_q3 >= 40 &&
+               gate.wide_accepted_q4 >= 20 && gate.wide_rejected >= 100 && gate.wide_translated == 6,
+               "18-bit arity/correctness nonvacuity floor");
+  gate.require(gate.wide_max_coefficient_bits > 64 && gate.wide_max_power_bits > 64 && gate.wide_max_naive_radius_bits > 128,
+               "18-bit wide arithmetic nonvacuity floor");
 }
 }  // namespace
 
@@ -293,7 +361,14 @@ int main(int argc, char** argv) {
               << ",\"max_coefficient_bits\":" << gate.max_coefficient_bits
               << ",\"max_power_bits\":" << gate.max_power_bits
               << ",\"max_naive_radius_bits\":" << gate.max_naive_radius_bits
-              << ",\"translated\":" << gate.translated << ",\"judge_mutants\":" << gate.judge_mutants << "}\n";
+              << ",\"translated\":" << gate.translated << ",\"judge_mutants\":" << gate.judge_mutants
+              << ",\"wide_cases\":" << gate.wide_cases << ",\"wide_accepted_q2\":" << gate.wide_accepted_q2
+              << ",\"wide_accepted_q3\":" << gate.wide_accepted_q3 << ",\"wide_accepted_q4\":" << gate.wide_accepted_q4
+              << ",\"wide_rejected\":" << gate.wide_rejected
+              << ",\"wide_max_coefficient_bits\":" << gate.wide_max_coefficient_bits
+              << ",\"wide_max_power_bits\":" << gate.wide_max_power_bits
+              << ",\"wide_max_naive_radius_bits\":" << gate.wide_max_naive_radius_bits
+              << ",\"wide_translated\":" << gate.wide_translated << "}\n";
   } catch (const std::exception& error) {
     std::cerr << "exact ball gate: " << error.what() << '\n';
     return 1;

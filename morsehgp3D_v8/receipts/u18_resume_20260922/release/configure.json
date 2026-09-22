@@ -1,0 +1,23 @@
+{
+  "name": "configure",
+  "command": [
+    "cmake",
+    "-S",
+    "/workspaces/E-HGP/morsehgp3D_v8",
+    "-B",
+    "/workspaces/E-HGP/build/v8_u18_resume_release_20260922",
+    "-DBUILD_TESTING=ON",
+    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_CXX_COMPILER=/usr/bin/g++",
+    "-DBOOST_ROOT=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr",
+    "-DMHGP8_SANITIZE=OFF"
+  ],
+  "started": "2026-09-22T10:16:51.756753+00:00",
+  "exit_code": 0,
+  "stdout": "-- The CXX compiler identification is GNU 13.3.0\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: /usr/bin/g++ - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\n-- Performing Test CMAKE_HAVE_LIBC_PTHREAD\n-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success\n-- Found Threads: TRUE  \n-- mhgp8: Boost 1.83.0 found in /workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include; exact judges enabled\n-- mhgp8: MHGP8_PATCHWORK_SOURCE_DIR is empty; bench/patchwork_ground_probe.cpp is not built (obtain the pinned upstream sources offline with bench/build_patchwork_ground.py, then pass the tree)\n-- Found Python3: /home/codespace/.python/current/bin/python3 (found version \"3.12.1\") found components: Interpreter \n-- mhgp8: q34 spatial gate registered DISABLED (this tree is not the pinned r2 authority build /workspaces/E-HGP/build/v8_q4_seed_cells_r2_20260921)\n-- mhgp8: mhgp8_q34_indexed_witness_mutations registered DISABLED (tests/q34_indexed_mutations.py: mutation site not unique in q34_witness_search.cpp since 2629a536)\n-- Configuring done (0.5s)\n-- Generating done (0.2s)\n-- Build files have been written to: /workspaces/E-HGP/build/v8_u18_resume_release_20260922\n",
+  "stderr": "",
+  "stdout_base64": "LS0gVGhlIENYWCBjb21waWxlciBpZGVudGlmaWNhdGlvbiBpcyBHTlUgMTMuMy4wCi0tIERldGVjdGluZyBDWFggY29tcGlsZXIgQUJJIGluZm8KLS0gRGV0ZWN0aW5nIENYWCBjb21waWxlciBBQkkgaW5mbyAtIGRvbmUKLS0gQ2hlY2sgZm9yIHdvcmtpbmcgQ1hYIGNvbXBpbGVyOiAvdXNyL2Jpbi9nKysgLSBza2lwcGVkCi0tIERldGVjdGluZyBDWFggY29tcGlsZSBmZWF0dXJlcwotLSBEZXRlY3RpbmcgQ1hYIGNvbXBpbGUgZmVhdHVyZXMgLSBkb25lCi0tIFBlcmZvcm1pbmcgVGVzdCBDTUFLRV9IQVZFX0xJQkNfUFRIUkVBRAotLSBQZXJmb3JtaW5nIFRlc3QgQ01BS0VfSEFWRV9MSUJDX1BUSFJFQUQgLSBTdWNjZXNzCi0tIEZvdW5kIFRocmVhZHM6IFRSVUUgIAotLSBtaGdwODogQm9vc3QgMS44My4wIGZvdW5kIGluIC93b3Jrc3BhY2VzL0UtSEdQL2J1aWxkL3Y3X2Jvb3N0X2dhdGUvZXh0cmFjdGVkL3Vzci9pbmNsdWRlOyBleGFjdCBqdWRnZXMgZW5hYmxlZAotLSBtaGdwODogTUhHUDhfUEFUQ0hXT1JLX1NPVVJDRV9ESVIgaXMgZW1wdHk7IGJlbmNoL3BhdGNod29ya19ncm91bmRfcHJvYmUuY3BwIGlzIG5vdCBidWlsdCAob2J0YWluIHRoZSBwaW5uZWQgdXBzdHJlYW0gc291cmNlcyBvZmZsaW5lIHdpdGggYmVuY2gvYnVpbGRfcGF0Y2h3b3JrX2dyb3VuZC5weSwgdGhlbiBwYXNzIHRoZSB0cmVlKQotLSBGb3VuZCBQeXRob24zOiAvaG9tZS9jb2Rlc3BhY2UvLnB5dGhvbi9jdXJyZW50L2Jpbi9weXRob24zIChmb3VuZCB2ZXJzaW9uICIzLjEyLjEiKSBmb3VuZCBjb21wb25lbnRzOiBJbnRlcnByZXRlciAKLS0gbWhncDg6IHEzNCBzcGF0aWFsIGdhdGUgcmVnaXN0ZXJlZCBESVNBQkxFRCAodGhpcyB0cmVlIGlzIG5vdCB0aGUgcGlubmVkIHIyIGF1dGhvcml0eSBidWlsZCAvd29ya3NwYWNlcy9FLUhHUC9idWlsZC92OF9xNF9zZWVkX2NlbGxzX3IyXzIwMjYwOTIxKQotLSBtaGdwODogbWhncDhfcTM0X2luZGV4ZWRfd2l0bmVzc19tdXRhdGlvbnMgcmVnaXN0ZXJlZCBESVNBQkxFRCAodGVzdHMvcTM0X2luZGV4ZWRfbXV0YXRpb25zLnB5OiBtdXRhdGlvbiBzaXRlIG5vdCB1bmlxdWUgaW4gcTM0X3dpdG5lc3Nfc2VhcmNoLmNwcCBzaW5jZSAyNjI5YTUzNikKLS0gQ29uZmlndXJpbmcgZG9uZSAoMC41cykKLS0gR2VuZXJhdGluZyBkb25lICgwLjJzKQotLSBCdWlsZCBmaWxlcyBoYXZlIGJlZW4gd3JpdHRlbiB0bzogL3dvcmtzcGFjZXMvRS1IR1AvYnVpbGQvdjhfdTE4X3Jlc3VtZV9yZWxlYXNlXzIwMjYwOTIyCg==",
+  "stderr_base64": "",
+  "finished": "2026-09-22T10:16:52.455612+00:00"
+}

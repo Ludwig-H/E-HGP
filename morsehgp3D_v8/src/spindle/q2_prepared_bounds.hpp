@@ -21,6 +21,7 @@ struct Q2Bounds {
 class Q2PreparedBounds final {
  public:
   Q2PreparedBounds(const Point3& a, const Box3& b) {
+    require_valid_point(a);
     require_valid_box(b);
     for (std::size_t axis = 0; axis < 3; ++axis) {
       const i64 anchor = a[axis];

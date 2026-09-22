@@ -28,6 +28,22 @@ using Pair = std::pair<std::size_t, std::size_t>;
 using PointKey = std::array<mhgp8::Coordinate, 3>;
 using Geometry = std::pair<std::array<std::uint32_t, 3>, std::uint64_t>;
 
+// Historical 16-bit border. Since the engine widened to 18 bits every fixture
+// engraved at 65535 became an interior point; each one below keeps its oracle
+// role and is doubled by an 18-bit twin at coordinate_limit. A support whose
+// squared diameter exceeds 3 * 65535^2 cannot exist on a u16 cloud: counting
+// those supports proves the twins exercise the widened range, not just the
+// same arithmetic on larger literals.
+constexpr mhgp8::Coordinate u16_limit = 65535;
+constexpr std::uint64_t u16_diameter_bound = 3 * std::uint64_t{u16_limit} * std::uint64_t{u16_limit};
+static_assert(u16_limit < mhgp8::coordinate_limit);
+
+bool wide_input(const RectangleInput& input) {
+  return std::any_of(input.points.begin(), input.points.end(), [](const Point3& point) {
+    return point.x > u16_limit || point.y > u16_limit || point.z > u16_limit;
+  });
+}
+
 struct Payload {
   mhgp8::Q2BallKey key;
   std::vector<std::size_t> interior;
@@ -62,6 +78,11 @@ struct Gate {
   std::uint64_t permutations{};
   std::uint64_t rejections{};
   std::uint64_t callbacks_recovered{};
+  // 18-bit twins, counted apart so that every u16 pin above stays untouched.
+  std::uint64_t wide_cases{};
+  std::uint64_t wide_permutations{};
+  std::uint64_t wide_supports{};
+  std::uint64_t wide_diameter{};
 
   void require(bool condition, const char* message) {
     ++checks;
@@ -128,6 +149,8 @@ Run checked_run(Gate& gate, const mhgp8::Q2CensusIndex& index,
                  "accepted support lost its strict window or endpoint shell identities");
     payload_inside += payload.interior.size();
     payload_shell += payload.shell.size();
+    if (payload.key.diameter_squared > u16_diameter_bound) ++gate.wide_supports;
+    gate.wide_diameter = std::max(gate.wide_diameter, payload.key.diameter_squared);
     gate.require(output.emplace(pair, std::move(payload)).second,
                  "one support incidence was emitted twice");
   });
@@ -249,26 +272,32 @@ Output check_fixture(Gate& gate, const RectangleInput& input, unsigned kmax,
                    index->work().max_depth == preparation.max_depth,
                "query execution mutated or rebuilt the immutable global index");
   ++gate.cases;
+  if (wide_input(input)) ++gate.wide_cases;
   return shared.output;
 }
 
-RectangleInput sheet(unsigned side, bool extra) {
+// The 18-bit twin keeps the u16 proportions (far plane at 240000 instead of
+// 60000, universal interior site at 120000 instead of 30000) and moves the
+// corner from 65535 to coordinate_limit.
+RectangleInput sheet(unsigned side, bool extra, bool wide = false) {
   RectangleInput input;
   const std::size_t size = side * side;
   input.a = {0, size};
   input.b = {size, 2 * size};
-  for (const std::uint16_t x : {std::uint16_t{1000}, std::uint16_t{60000}}) {
+  const mhgp8::Coordinate far_plane = wide ? 240000 : 60000;
+  for (const mhgp8::Coordinate x : {mhgp8::Coordinate{1000}, far_plane}) {
     for (unsigned y = 0; y < side; ++y) {
       for (unsigned z = 0; z < side; ++z) {
-        input.points.push_back({x, static_cast<std::uint16_t>(1000 + 10 * y),
-                                  static_cast<std::uint16_t>(1000 + 10 * z)});
+        input.points.push_back({x, static_cast<mhgp8::Coordinate>(1000 + 10 * y),
+                                  static_cast<mhgp8::Coordinate>(1000 + 10 * z)});
       }
     }
   }
   if (extra) {
-    input.points.push_back({30000, 1000, 1000});
+    const mhgp8::Coordinate corner = wide ? mhgp8::coordinate_limit : u16_limit;
+    input.points.push_back({wide ? 120000 : 30000, 1000, 1000});
     input.points.push_back({0, 0, 0});
-    input.points.push_back({65535, 65535, 65535});
+    input.points.push_back({corner, corner, corner});
   }
   return input;
 }
@@ -313,9 +342,25 @@ void ordinary_fixtures(Gate& gate) {
       }
     }
   }
+  // 18-bit twin of the sheet family: same loops and checks, counted apart.
+  for (const unsigned side : {2U, 3U, 4U}) {
+    for (const bool extra : {false, true}) {
+      const auto input = sheet(side, extra, true);
+      for (const unsigned k : {1U, 2U, 5U, 10U}) {
+        const auto output = check_fixture(gate, input, k);
+        const auto reversed = reverse_ids(input);
+        const auto other = check_fixture(gate, reversed, k, 12, AxisQ2Mode::Independent);
+        gate.require(physical(output, input) == physical(other, reversed),
+                     "owner permutations or prefilter modes changed physical 18-bit q2 supports");
+        ++gate.wide_permutations;
+      }
+    }
+  }
   for (const auto strategy : {Strategy::Pool, Strategy::DualBlocks, Strategy::Tubes}) {
     for (const unsigned k : {1U, 5U, 10U}) {
       static_cast<void>(check_fixture(gate, sheet(4, true), k, 12,
+                                        AxisQ2Mode::Additive, true, strategy));
+      static_cast<void>(check_fixture(gate, sheet(4, true, true), k, 12,
                                         AxisQ2Mode::Additive, true, strategy));
     }
   }
@@ -324,37 +369,64 @@ void ordinary_fixtures(Gate& gate) {
       {0, 1}, {1, 3}, {}};
   static_cast<void>(check_fixture(gate, no_credit, 1));
   static_cast<void>(check_fixture(gate, no_credit, 2));
+  // 18-bit twin: the x gap 239000 keeps the same +4/-4 fourfold powers on the
+  // witness (read from the Boost oracle in model_counterexamples).
+  const RectangleInput wide_no_credit{
+      {{1000, 1, 0}, {240000, 1, 0}, {240000, 3, 0}, {1000, 2, 0}},
+      {0, 1}, {1, 3}, {}};
+  static_cast<void>(check_fixture(gate, wide_no_credit, 1));
+  static_cast<void>(check_fixture(gate, wide_no_credit, 2));
   const RectangleInput inherited{
       {{1000, 0, 0}, {60000, 0, 0}, {60000, 2, 0}, {30000, 1, 0}, {60000, 1, 0}},
       {0, 1}, {1, 3}, {}};
-  for (unsigned reflected = 0; reflected < 8; ++reflected) {
-    auto input = inherited;
+  const RectangleInput wide_inherited{
+      {{1000, 0, 0}, {240000, 0, 0}, {240000, 2, 0}, {120000, 1, 0}, {240000, 1, 0}},
+      {0, 1}, {1, 3}, {}};
+  const auto reflect = [](RectangleInput input, unsigned reflected, mhgp8::Coordinate side) {
     for (auto& point : input.points) {
-      point = {static_cast<std::uint16_t>((reflected & 1U) != 0 ? 65535 - point.x : point.x),
-                 static_cast<std::uint16_t>((reflected & 2U) != 0 ? 65535 - point.y : point.y),
-                 static_cast<std::uint16_t>((reflected & 4U) != 0 ? 65535 - point.z : point.z)};
+      point = {static_cast<mhgp8::Coordinate>((reflected & 1U) != 0 ? side - point.x : point.x),
+                 static_cast<mhgp8::Coordinate>((reflected & 2U) != 0 ? side - point.y : point.y),
+                 static_cast<mhgp8::Coordinate>((reflected & 4U) != 0 ? side - point.z : point.z)};
     }
-    static_cast<void>(check_fixture(gate, input, 2));
+    return input;
+  };
+  for (unsigned reflected = 0; reflected < 8; ++reflected) {
+    static_cast<void>(check_fixture(gate, reflect(inherited, reflected, u16_limit), 2));
+    // 18-bit twins: the u16 fixture reflected through coordinate_limit - x
+    // reaches the upper 18-bit border; the scaled fixture keeps the inherited
+    // credit structure ({3} then {3, 4}, read from the Boost oracle below).
+    static_cast<void>(check_fixture(gate, reflect(inherited, reflected, mhgp8::coordinate_limit), 2));
+    static_cast<void>(check_fixture(gate, reflect(wide_inherited, reflected, mhgp8::coordinate_limit), 2));
   }
   const RectangleInput accepted_block{
       {{1000, 1000, 1000}, {60000, 999, 1000}, {60000, 1001, 1000},
        {60000, 998, 1000}, {60000, 1002, 1000}}, {0, 1}, {1, 3}, {}};
   static_cast<void>(check_fixture(gate, accepted_block, 1));
   static_cast<void>(check_fixture(gate, accepted_block, 5));
+  const RectangleInput wide_accepted_block{
+      {{1000, 1000, 1000}, {240000, 999, 1000}, {240000, 1001, 1000},
+       {240000, 998, 1000}, {240000, 1002, 1000}}, {0, 1}, {1, 3}, {}};
+  static_cast<void>(check_fixture(gate, wide_accepted_block, 1));
+  static_cast<void>(check_fixture(gate, wide_accepted_block, 5));
 
   // A small work fixture, not a performance measurement: one universal
   // exterior-to-A/B site can reject an entire block of 64 residual queries.
-  RectangleInput shared_rejection;
-  shared_rejection.points.push_back({1000, 1000, 1000});
-  for (unsigned index = 0; index < 64; ++index) {
-    shared_rejection.points.push_back({60000, static_cast<std::uint16_t>(1000 + index), 1000});
+  const auto shared_rejection = [](mhgp8::Coordinate far_plane, mhgp8::Coordinate universal) {
+    RectangleInput input;
+    input.points.push_back({1000, 1000, 1000});
+    for (unsigned index = 0; index < 64; ++index) {
+      input.points.push_back({far_plane, static_cast<mhgp8::Coordinate>(1000 + index), 1000});
+    }
+    input.points.push_back({universal, 1000, 1000});
+    input.a = {0, 1};
+    input.b = {1, 65};
+    return input;
+  };
+  for (const auto& input : {shared_rejection(60000, 30000), shared_rejection(240000, 120000)}) {
+    static_cast<void>(check_fixture(gate, input, 1));
+    static_cast<void>(check_fixture(gate, input, 5));
+    static_cast<void>(check_fixture(gate, input, 10));
   }
-  shared_rejection.points.push_back({30000, 1000, 1000});
-  shared_rejection.a = {0, 1};
-  shared_rejection.b = {1, 65};
-  static_cast<void>(check_fixture(gate, shared_rejection, 1));
-  static_cast<void>(check_fixture(gate, shared_rejection, 5));
-  static_cast<void>(check_fixture(gate, shared_rejection, 10));
 }
 
 void shell_and_key_fixtures(Gate& gate) {
@@ -371,19 +443,23 @@ void shell_and_key_fixtures(Gate& gate) {
   std::array<unsigned, 3> axes{0, 1, 2};
   do {
     for (unsigned reflection = 0; reflection < 8; ++reflection) {
-      auto input = fractional;
-      for (auto& point : input.points) {
-        const auto before = point;
-        const auto coord = [&](std::size_t axis) {
-          return static_cast<std::uint16_t>((reflection & (1U << axis)) != 0
-              ? 65535 - before[axes[axis]] : before[axes[axis]]);
-        };
-        point = {coord(0), coord(1), coord(2)};
+      // Each axis permutation and reflection runs twice: through the u16 side
+      // 65535 (historical pin) and through coordinate_limit (18-bit twin).
+      for (const mhgp8::Coordinate side : {u16_limit, mhgp8::coordinate_limit}) {
+        auto input = fractional;
+        for (auto& point : input.points) {
+          const auto before = point;
+          const auto coord = [&](std::size_t axis) {
+            return static_cast<mhgp8::Coordinate>((reflection & (1U << axis)) != 0
+                ? side - before[axes[axis]] : before[axes[axis]]);
+          };
+          point = {coord(0), coord(1), coord(2)};
+        }
+        for (const unsigned k : {1U, 2U, 5U, 10U}) {
+          static_cast<void>(check_fixture(gate, input, k, 8 + 2 * (reflection % 3)));
+        }
+        if (side == u16_limit) ++gate.permutations; else ++gate.wide_permutations;
       }
-      for (const unsigned k : {1U, 2U, 5U, 10U}) {
-        static_cast<void>(check_fixture(gate, input, k, 8 + 2 * (reflection % 3)));
-      }
-      ++gate.permutations;
     }
   } while (std::next_permutation(axes.begin(), axes.end()));
 
@@ -426,9 +502,9 @@ void shell_and_key_fixtures(Gate& gate) {
         if (x * x + y * y + z * z != 25) continue;
         if (x == -5) a = sphere.points.size();
         if (x == 5) b = sphere.points.size();
-        sphere.points.push_back({static_cast<std::uint16_t>(10 + x),
-                                   static_cast<std::uint16_t>(10 + y),
-                                   static_cast<std::uint16_t>(10 + z)});
+        sphere.points.push_back({static_cast<mhgp8::Coordinate>(10 + x),
+                                   static_cast<mhgp8::Coordinate>(10 + y),
+                                   static_cast<mhgp8::Coordinate>(10 + z)});
       }
     }
   }
@@ -444,9 +520,9 @@ void shell_and_key_fixtures(Gate& gate) {
 
   RectangleInput extreme;
   for (unsigned bits = 0; bits < 8; ++bits) {
-    extreme.points.push_back({static_cast<std::uint16_t>((bits & 1U) != 0 ? 65535 : 0),
-                                static_cast<std::uint16_t>((bits & 2U) != 0 ? 65535 : 0),
-                                static_cast<std::uint16_t>((bits & 4U) != 0 ? 65535 : 0)});
+    extreme.points.push_back({static_cast<mhgp8::Coordinate>((bits & 1U) != 0 ? u16_limit : 0),
+                                static_cast<mhgp8::Coordinate>((bits & 2U) != 0 ? u16_limit : 0),
+                                static_cast<mhgp8::Coordinate>((bits & 4U) != 0 ? u16_limit : 0)});
   }
   extreme.points.push_back({32767, 32767, 32767});
   extreme.a = {0, 1};
@@ -456,6 +532,26 @@ void shell_and_key_fixtures(Gate& gate) {
                    large_integer.at({0, 7}).shell.size() == 8,
                "u16 extremes lost the wide squared diameter or cube-corner shell");
   static_cast<void>(check_fixture(gate, extreme, 1));
+
+  // 18-bit twin of the corner cube: corners at coordinate_limit, near-centre
+  // site at 131071. The squared diagonal 3 * 262143^2 exceeds any u16 pair;
+  // its value was read from the Boost oracle (q2_oracle::census), not derived.
+  RectangleInput wide_extreme;
+  for (unsigned bits = 0; bits < 8; ++bits) {
+    wide_extreme.points.push_back({static_cast<mhgp8::Coordinate>((bits & 1U) != 0 ? mhgp8::coordinate_limit : 0),
+                                     static_cast<mhgp8::Coordinate>((bits & 2U) != 0 ? mhgp8::coordinate_limit : 0),
+                                     static_cast<mhgp8::Coordinate>((bits & 4U) != 0 ? mhgp8::coordinate_limit : 0)});
+  }
+  wide_extreme.points.push_back({131071, 131071, 131071});
+  wide_extreme.a = {0, 1};
+  wide_extreme.b = {7, 8};
+  const auto wide_integer = check_fixture(gate, wide_extreme, 2);
+  gate.require(wide_integer.at({0, 7}).key.diameter_squared == UINT64_C(206156857347) &&
+                   wide_integer.at({0, 7}).key.diameter_squared > u16_diameter_bound &&
+                   wide_integer.at({0, 7}).shell.size() == 8 &&
+                   wide_integer.at({0, 7}).interior == std::vector<std::size_t>{8},
+               "u18 extremes lost the wide squared diameter, cube-corner shell or centre interior");
+  static_cast<void>(check_fixture(gate, wide_extreme, 1));
 
   // The current midpoint index visits a long u16 path even though the
   // capped census can reject quickly. bbox reads AND partitions are paid.
@@ -489,8 +585,8 @@ void model_counterexamples(Gate& gate) {
       {0, 1}, {1, 2}, {}};
   const auto exact = oracle::census(corners.points, 0, 1);
   for (unsigned bits = 0; bits < 8; ++bits) {
-    const Point3 corner{2, static_cast<std::uint16_t>((bits & 2U) != 0 ? 4 : 0),
-                           static_cast<std::uint16_t>((bits & 4U) != 0 ? 4 : 0)};
+    const Point3 corner{2, static_cast<mhgp8::Coordinate>((bits & 2U) != 0 ? 4 : 0),
+                           static_cast<mhgp8::Coordinate>((bits & 4U) != 0 ? 4 : 0)};
     gate.require(oracle::power_four(exact.key, corner) == 16,
                  "outside-corner counter-model lost its negative-H corners");
   }
@@ -506,6 +602,9 @@ void model_counterexamples(Gate& gate) {
   gate.require(oracle::power_four(oracle::ball_key(anchor, {60000, 1, 0}), witness) == 4 &&
                    oracle::power_four(oracle::ball_key(anchor, {60000, 3, 0}), witness) == -4,
                "NoCredit was not refuted as a global-exterior certificate");
+  gate.require(oracle::power_four(oracle::ball_key(anchor, {240000, 1, 0}), witness) == 4 &&
+                   oracle::power_four(oracle::ball_key(anchor, {240000, 3, 0}), witness) == -4,
+               "18-bit NoCredit twin was not refuted as a global-exterior certificate");
   ++gate.model_mutants;
 
   const std::vector<Point3> fractional{
@@ -540,6 +639,13 @@ void model_counterexamples(Gate& gate) {
                    right.interior == std::vector<std::size_t>({3, 4}) &&
                    1 + left.interior.size() >= 2,
                "restarting after a shared credit did not expose a false rejection");
+  const std::vector<Point3> wide_inherited{
+      {1000, 0, 0}, {240000, 0, 0}, {240000, 2, 0}, {120000, 1, 0}, {240000, 1, 0}};
+  const auto wide_left = oracle::census(wide_inherited, 0, 1);
+  const auto wide_right = oracle::census(wide_inherited, 0, 2);
+  gate.require(wide_left.interior == std::vector<std::size_t>{3} &&
+                   wide_right.interior == std::vector<std::size_t>({3, 4}),
+               "18-bit inherited twin lost its shared-credit interior structure");
   ++gate.model_mutants;
 
   // Independent five-node preorder for the three sites x=0,2,4. Correct
@@ -684,6 +790,12 @@ int main(int argc, char** argv) {
                      gate.deep_indices == 3 && gate.permutations == 72 && gate.model_mutants == 10 &&
                      gate.rejections == 10 && gate.callbacks_recovered == 2,
                  "q2 census gate non-vacuity failed");
+    // 18-bit twins: separate floors, the u16 pins above are unchanged. At
+    // least one accepted support must be impossible on a u16 cloud, and the
+    // widest accepted diameter is the cube diagonal read from the oracle.
+    gate.require(gate.wide_permutations == 72 && gate.wide_cases == 252 && gate.wide_supports > 0 &&
+                     gate.wide_diameter > u16_diameter_bound && gate.wide_diameter == UINT64_C(206156857347),
+                 "q2 census gate 18-bit twin non-vacuity failed");
     std::cout << "mhgp8_q2_census_gate passed checks=" << gate.checks
               << " cases=" << gate.cases << " runs=" << gate.runs
               << " oracle_pairs=" << gate.oracle_pairs << " oracle_sites=" << gate.oracle_sites
@@ -696,7 +808,9 @@ int main(int argc, char** argv) {
               << " cursor_reuses=" << gate.cursor_reuses << " cursor_advances=" << gate.cursor_advances
               << " deep_indices=" << gate.deep_indices
               << " root_savings=" << gate.root_savings << " permutations=" << gate.permutations
-              << " model_mutants=" << gate.model_mutants << " rejections=" << gate.rejections << '\n';
+              << " model_mutants=" << gate.model_mutants << " rejections=" << gate.rejections
+              << " wide_cases=" << gate.wide_cases << " wide_permutations=" << gate.wide_permutations
+              << " wide_supports=" << gate.wide_supports << " wide_diameter=" << gate.wide_diameter << '\n';
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "mhgp8_q2_census_gate failed: " << error.what() << '\n';

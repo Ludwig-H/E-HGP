@@ -1,5 +1,27 @@
 # Journal de développement v8 (reprise du 21 septembre 2026)
 
+## Reprise du 22 septembre — mise à jour
+
+La [note de reprise u18/atlas](REPRISE_U18_ET_ATLAS_SATURANT_20260922.md)
+décrit la continuation depuis a74e90f2 : finalisation des 42 gates extrêmes,
+correction des frontières numériques publiques et option d'arrêt anticipé
+à K−1 dans l'atlas. Les nouvelles captures Release/Clang ASan/UBSan sont
+séparées des anciens builds et des mesures à 2 cm.
+La passation technique vers le moteur grille ne change pas le contrat
+principal brut/float32 d'AGENTS.md. Les sections suivantes sont historiques.
+
+La relecture des six mesures u16/W8 du port18 retrouve les mêmes digests
+et **449 compteurs** que la phase1, dont cinq compteurs `terminal_*` que
+l'ancien filtre excluait par mégarde. Le nouveau runner v2 ferme aussi les
+références et les erreurs ; ses lectures v1 restent explicitement historiques.
+Aucune campagne 1 mm ni amélioration chronométrique n'en découle.
+
+Mesure distincte de cette reprise : `u18_resume_20260922/ground_1mm_first`,
+trame08/000000 sans sol entière à1mm,39885sites,K5/s8/W8. Temps104,63s mur,
+812,82CPU·s ;691284supports q3 et158496q4. Saturation nouvelle désactivée,
+une répétition, hors segmentation/catalogue/FULL/GPU. Reçu v2 fermé et
+relu LIVE normal/−O ; aucune paire W1/W8, aucun gain revendiqué.
+
 Cadre : `exploration_v8_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`, `public_status=not_claimed`. GCP non
 utilisé. Régime prioritaire : LiDAR sans sol, 30 000 à 60 000 sites, contrats
@@ -62,8 +84,9 @@ un seul worker démarré ne partage rien (chemin historique).
 Profil gprof du quart après la consultation d'atlas : partition de l'atlas
 q4 ≈ 52 % (bornes de blocs 21 %, constructeur de fragments 13 %, formes 11 %,
 rétention 6 %), census q3 12 %, filtres de témoins 13 %, balayage 3 %.
-Prochaines étapes : passe unique sur la frontière du parent pour les quatre
-cellules filles (partage des évaluations de coins et des formes), arène de
+Pistes alors proposées : passe unique sur la frontière du parent pour les quatre
+cellules filles (depuis mesurée et rejetée ci-dessus, ne plus la traiter comme
+prochaine étape acquise), arène de
 fragments, puis filtre flottant certifié à repli exact pour les bornes ;
 en parallèle, chronos par worker et campagne appariée sur les trois scènes
 (K5/K10, W1/W8) avec le nouveau binaire.

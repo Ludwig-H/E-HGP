@@ -66,6 +66,40 @@ struct Gate {
   }
 };
 
+// Coordinate profile of the synthetic fixtures. `narrow` reproduces the
+// historical 16-bit fixtures bit for bit; `wide` is their 18-bit twin: factor
+// A at 2^17, factor B ending exactly at coordinate_limit (262124 + 19 in the
+// generic fixture), the y/z origin above 2^16, reflections and corner sites
+// at 262143, the 3-4-5 rotation scaled to 262140 and the small literal
+// fixtures translated so that they touch the limit. Every twin passes
+// through the same scalar ID oracle and the same cpp_int census.
+struct Width {
+  mhgp8::Coordinate a_x;       // x of factor A in grids and lines
+  mhgp8::Coordinate b_x;       // x of factor B
+  mhgp8::Coordinate base;      // y/z origin of the grids
+  mhgp8::Coordinate core_x;    // x of the core proposals between A and B
+  mhgp8::Coordinate limit;     // reflection and corner value
+  mhgp8::Coordinate rot_a_x;   // x of A before the 3-4-5 scaling by five
+  mhgp8::Coordinate rot_b_x;   // x of B before the 3-4-5 scaling by five
+  mhgp8::Coordinate rot_base;  // y/z origin of the rotated grid
+  mhgp8::Coordinate far_yz;    // y/z (above base) of the far B site of all_axes
+  Point3 shift;                // translation of the small literal fixtures
+};
+constexpr Width narrow{1000, 60000, 1000, 30000, 65535, 1000, 10000, 2000, 30000, {0, 0, 0}};
+constexpr Width wide{131072, 262124, 260000, 200000, 262143, 40000, 52428, 262000, 262143,
+                     {202143, 261141, 261141}};
+static_assert(wide.limit == mhgp8::coordinate_limit && wide.b_x + 19 == mhgp8::coordinate_limit &&
+              5 * wide.rot_b_x <= mhgp8::coordinate_limit);
+
+RectangleInput shifted(RectangleInput input, const Point3& shift) {
+  for (auto& point : input.points) {
+    point = {static_cast<mhgp8::Coordinate>(point.x + shift.x),
+             static_cast<mhgp8::Coordinate>(point.y + shift.y),
+             static_cast<mhgp8::Coordinate>(point.z + shift.z)};
+  }
+  return input;
+}
+
 // A deliberately scalar definition on actual original IDs. It neither sorts
 // columns nor calls the product's axis/box predicates. Each witness is tested
 // on all axes; distinct exact coordinate lines only meet at the excluded a.
@@ -250,64 +284,67 @@ void check_small(Gate& gate, const RectangleInput& input, unsigned kmax, unsigne
   ++gate.small_cases;
 }
 
-RectangleInput grid(unsigned width, unsigned height, std::size_t count = 0) {
+RectangleInput grid(unsigned width, unsigned height, std::size_t count = 0,
+                    const Width& w = narrow) {
   if (count == 0) count = static_cast<std::size_t>(width) * height;
   RectangleInput input;
   input.a = {0, count};
   input.b = {count, 2 * count};
   input.points.reserve(2 * count);
-  for (const std::uint16_t x : {std::uint16_t{1000}, std::uint16_t{60000}}) {
+  for (const mhgp8::Coordinate x : {w.a_x, w.b_x}) {
     for (std::size_t index = 0; index < count; ++index) {
-      input.points.push_back({x, static_cast<std::uint16_t>(1000 + index % width),
-                                static_cast<std::uint16_t>(1000 + index / width)});
+      input.points.push_back({x, static_cast<mhgp8::Coordinate>(w.base + index % width),
+                                static_cast<mhgp8::Coordinate>(w.base + index / width)});
     }
   }
   return input;
 }
 
-RectangleInput longitudinal(unsigned count) {
+RectangleInput longitudinal(unsigned count, const Width& w = narrow) {
   RectangleInput input;
   input.a = {0, count};
   input.b = {count, 2 * count};
   for (unsigned side = 0; side < 2; ++side) {
     for (unsigned index = 0; index < count; ++index) {
-      input.points.push_back({static_cast<std::uint16_t>((side == 0 ? 1000 : 60000) + index),
-                                1000, 1000});
+      input.points.push_back({static_cast<mhgp8::Coordinate>((side == 0 ? w.a_x : w.b_x) + index),
+                                w.base, w.base});
     }
   }
   return input;
 }
 
-void fixtures(Gate& gate) {
+void fixtures(Gate& gate, const Width& w) {
   for (const unsigned k : {1U, 2U, 5U, 10U}) {
     for (const unsigned s : {8U, 10U, 12U}) {
-      check_small(gate, grid(6, 5), k, s);
-      check_small(gate, grid(6, 5, 27), k, s);
-      check_small(gate, longitudinal(13), k, s);
+      check_small(gate, grid(6, 5, 0, w), k, s);
+      check_small(gate, grid(6, 5, 27, w), k, s);
+      check_small(gate, longitudinal(13, w), k, s);
     }
-    check_small(gate, grid(1, 1), k, 12);
-    auto core = grid(4, 3);
+    check_small(gate, grid(1, 1, 0, w), k, 12);
+    auto core = grid(4, 3, 0, w);
     for (unsigned index = 0; index < 12; ++index) {
       core.core_candidates.push_back(core.points.size());
-      core.points.push_back({static_cast<std::uint16_t>(30000 + index), 1001, 1001});
+      core.points.push_back({static_cast<mhgp8::Coordinate>(w.core_x + index),
+                             static_cast<mhgp8::Coordinate>(w.base + 1),
+                             static_cast<mhgp8::Coordinate>(w.base + 1)});
     }
     // A proposal that is not a witness must not inflate the shared core.
     core.core_candidates.push_back(core.points.size());
-    core.points.push_back({0, 65535, 65535});
+    core.points.push_back({0, w.limit, w.limit});
     check_small(gate, core, k, 12);
     core.core_candidates.resize(1);
     check_small(gate, core, k, 12);
   }
-  auto permuted = grid(5, 4, 18);
+  auto permuted = grid(5, 4, 18, w);
   for (unsigned axis = 0; axis < 3; ++axis) {
     for (unsigned reflection = 0; reflection < 2; ++reflection) {
       auto input = permuted;
       for (auto& point : input.points) {
         const std::array<mhgp8::Coordinate, 3> old{point.x, point.y, point.z};
         point = {old[axis], old[(axis + 1) % 3], old[(axis + 2) % 3]};
-        if (reflection != 0) point = {static_cast<std::uint16_t>(65535 - point.x),
-                                       static_cast<std::uint16_t>(65535 - point.y),
-                                       static_cast<std::uint16_t>(65535 - point.z)};
+        if (reflection != 0) point = {static_cast<mhgp8::Coordinate>(w.limit - point.x),
+                                       static_cast<mhgp8::Coordinate>(w.limit - point.y),
+                                       static_cast<mhgp8::Coordinate>(w.limit - point.z)};
       }
       std::reverse(input.points.begin(), input.points.begin() +
                      static_cast<std::ptrdiff_t>(input.a.last));
@@ -320,16 +357,20 @@ void fixtures(Gate& gate) {
   // Integer 3-4-5 rotation of a small grid, with a common scale of five.
   // On this width/height no two distinct rotated sites share y or z, hence
   // no axial credits; the census still sees the same scaled geometry.
-  auto rotated = grid(4, 4);
+  auto rotated = grid(4, 4, 0, w);
   for (auto& point : rotated.points) {
-    if (point.x == 60000) point.x = 10000;
+    if (point.x == w.b_x) {
+      point.x = w.rot_b_x;
+    } else if (point.x == w.a_x) {
+      point.x = w.rot_a_x;
+    }
   }
   for (auto& point : rotated.points) {
-    const int y = static_cast<int>(point.y) - 1000;
-    const int z = static_cast<int>(point.z) - 1000;
-    point = {static_cast<std::uint16_t>(5 * point.x),
-               static_cast<std::uint16_t>(2000 + 3 * y - 4 * z),
-               static_cast<std::uint16_t>(2000 + 4 * y + 3 * z)};
+    const int y = static_cast<int>(point.y) - w.base;
+    const int z = static_cast<int>(point.z) - w.base;
+    point = {static_cast<mhgp8::Coordinate>(5 * point.x),
+               static_cast<mhgp8::Coordinate>(w.rot_base + 3 * y - 4 * z),
+               static_cast<mhgp8::Coordinate>(w.rot_base + 4 * y + 3 * z)};
   }
   for (const unsigned k : {1U, 5U, 10U}) check_small(gate, rotated, k, 12);
   const auto rotated_plan = mhgp8::make_axis_q2_plan(
@@ -341,15 +382,15 @@ void fixtures(Gate& gate) {
   generic.a = {0, 11};
   generic.b = {11, 20};
   for (unsigned index = 0; index < 20; ++index) {
-    generic.points.push_back({static_cast<std::uint16_t>((index < 11 ? 1000 : 60000) + index),
-                               static_cast<std::uint16_t>(1000 + index * 7),
-                               static_cast<std::uint16_t>(1000 + index * index)});
+    generic.points.push_back({static_cast<mhgp8::Coordinate>((index < 11 ? w.a_x : w.b_x) + index),
+                               static_cast<mhgp8::Coordinate>(w.base + index * 7),
+                               static_cast<mhgp8::Coordinate>(w.base + index * index)});
   }
   // An unproposed outside witness exercises the global small census.
-  generic.points.push_back({30000, 1000, 1000});
+  generic.points.push_back({w.core_x, w.base, w.base});
   for (const unsigned k : {1U, 5U, 10U}) check_small(gate, generic, k, 8);
-  auto offset_input = grid(3, 4);
-  offset_input.points.insert(offset_input.points.begin(), {0, 65535, 65535});
+  auto offset_input = grid(3, 4, 0, w);
+  offset_input.points.insert(offset_input.points.begin(), {0, w.limit, w.limit});
   offset_input.a = {1, 13};
   offset_input.b = {13, 25};
   check_small(gate, offset_input, 2, 12);
@@ -357,12 +398,12 @@ void fixtures(Gate& gate) {
   check_small(gate, offset_input, 2, 12);
 }
 
-void counter_fixtures(Gate& gate) {
+void counter_fixtures(Gate& gate, const Width& w) {
   // Explicit port of the independent auditor's section-8 four-site example.
   // The previous gate retains it under Independent; Additive must remove it.
-  const RectangleInput four{
-      {{1000, 1000, 1000}, {1000, 1001, 1000}, {1000, 1000, 1001},
-       {60000, 1002, 1002}}, {0, 3}, {3, 4}, {}};
+  const auto four = shifted(
+      {{{1000, 1000, 1000}, {1000, 1001, 1000}, {1000, 1000, 1001},
+        {60000, 1002, 1002}}, {0, 3}, {3, 4}, {}}, w.shift);
   check_small(gate, four, 2, 12);
   const auto owner = mhgp8::prepare_rectangle(four, 2, 12);
   const auto old_plan = mhgp8::make_axis_q2_plan(owner);
@@ -373,7 +414,7 @@ void counter_fixtures(Gate& gate) {
                "the additive filter failed the disjoint two-column certificate");
   ++gate.model_mutants;
 
-  const RectangleInput overlap{{{0, 0, 0}, {1, 0, 0}, {100, 0, 0}}, {0, 2}, {2, 3}, {}};
+  const auto overlap = shifted({{{0, 0, 0}, {1, 0, 0}, {100, 0, 0}}, {0, 2}, {2, 3}, {}}, w.shift);
   check_small(gate, overlap, 2, 12);
   const auto overlap_owner = mhgp8::prepare_rectangle(overlap, 2, 12);
   const auto counts = direct_counts(gate, overlap, 0, 2);
@@ -387,9 +428,9 @@ void counter_fixtures(Gate& gate) {
                  "intersection added overlapping axial and local witness populations");
     ++gate.model_mutants;
   }
-  const RectangleInput strict{
-      {{0, 0, 0}, {0, 2, 0}, {0, 0, 2}, {100, 2, 3}, {100, 3, 3}},
-      {0, 3}, {3, 5}, {}};
+  const auto strict = shifted(
+      {{{0, 0, 0}, {0, 2, 0}, {0, 0, 2}, {100, 2, 3}, {100, 3, 3}},
+       {0, 3}, {3, 5}, {}}, w.shift);
   check_small(gate, strict, 2, 12);
   const auto strict_plan = mhgp8::make_axis_q2_plan(
       mhgp8::prepare_rectangle(strict, 2, 12), AxisQ2Mode::Additive);
@@ -398,8 +439,8 @@ void counter_fixtures(Gate& gate) {
                    oracle::metrics(strict.points[0], strict.points[3], strict.points[1]).h == 0,
                "a closed witness boundary replaced the strict axial count");
   ++gate.model_mutants;
-  const RectangleInput approximate{
-      {{0, 0, 0}, {0, 1, 1}, {100, 2, 0}}, {0, 2}, {2, 3}, {}};
+  const auto approximate = shifted(
+      {{{0, 0, 0}, {0, 1, 1}, {100, 2, 0}}, {0, 2}, {2, 3}, {}}, w.shift);
   check_small(gate, approximate, 1, 12);
   const auto no_column = mhgp8::make_axis_q2_plan(
       mhgp8::prepare_rectangle(approximate, 1, 12), AxisQ2Mode::Additive);
@@ -407,9 +448,9 @@ void counter_fixtures(Gate& gate) {
                                                              Lane::Q2, 2) == 0,
                "approximate columns supplied false axial witnesses");
   ++gate.model_mutants;
-  const RectangleInput irregular{
-      {{0, 0, 0}, {0, 2, 0}, {0, 100, 0}, {60000, 99, 0}, {60000, 101, 0}},
-      {0, 3}, {3, 5}, {}};
+  const auto irregular = shifted(
+      {{{0, 0, 0}, {0, 2, 0}, {0, 100, 0}, {60000, 99, 0}, {60000, 101, 0}},
+       {0, 3}, {3, 5}, {}}, w.shift);
   check_small(gate, irregular, 2, 12);
   const auto exact_rank = mhgp8::make_axis_q2_plan(
       mhgp8::prepare_rectangle(irregular, 2, 12), AxisQ2Mode::Additive);
@@ -417,21 +458,24 @@ void counter_fixtures(Gate& gate) {
                "rank offsets replaced the coordinates of actual axial neighbors");
   ++gate.model_mutants;
 
+  const auto limit = w.limit;
   const RectangleInput maximal{
-      {{0, 65533, 65533}, {0, 65534, 65533}, {0, 65533, 65534},
-       {65535, 65535, 65535}}, {0, 3}, {3, 4}, {}};
+      {{0, limit - 2, limit - 2}, {0, limit - 1, limit - 2}, {0, limit - 2, limit - 1},
+       {limit, limit, limit}}, {0, 3}, {3, 4}, {}};
   check_small(gate, maximal, 2, 12);
+  const auto ax = w.a_x;
+  const auto base = w.base;
   RectangleInput all_axes{
-      {{1000, 1000, 1000}, {1001, 1000, 1000}, {1002, 1000, 1000},
-       {1000, 1001, 1000}, {1000, 1002, 1000}, {1000, 1000, 1001},
-       {1000, 1000, 1002}, {60000, 30000, 30000}}, {0, 7}, {7, 8}, {}};
+      {{ax, base, base}, {ax + 1, base, base}, {ax + 2, base, base},
+       {ax, base + 1, base}, {ax, base + 2, base}, {ax, base, base + 1},
+       {ax, base, base + 2}, {w.b_x, w.far_yz, w.far_yz}}, {0, 7}, {7, 8}, {}};
   check_small(gate, all_axes, 5, 12);
   const auto three_counts = direct_counts(gate, all_axes, 0, 7);
   gate.require(three_counts == std::array<unsigned, 3>{2, 2, 2},
                "three-axis fixture did not exercise all disjoint populations");
 }
 
-void large_grids(Gate& gate) {
+void large_grids(Gate& gate, const Width& w) {
   // For h=10 the sum of actual column counts is (|dy|-1)+ + (|dz|-1)+.
   // The 261 admissible offsets sum to this closed placement formula.
   // No pair expansion and no multiprecision census on these large inputs.
@@ -440,7 +484,7 @@ void large_grids(Gate& gate) {
   for (const auto& dimensions : cases) {
     const auto width = dimensions[0];
     const auto height = dimensions[1];
-    const auto input = grid(static_cast<unsigned>(width), static_cast<unsigned>(height));
+    const auto input = grid(static_cast<unsigned>(width), static_cast<unsigned>(height), 0, w);
     const auto owner = mhgp8::prepare_rectangle(input, 10, 12);
     const auto plan = mhgp8::make_axis_q2_plan(owner, AxisQ2Mode::Additive);
     const auto formula = 261 * width * height - 990 * (width + height) + 2860;
@@ -469,7 +513,7 @@ void ownership_and_rejections(Gate& gate) {
   const auto replacement_owner = mhgp8::prepare_rectangle(grid(3, 3), 5, 12);
   local = mhgp8::make_credit_plan(replacement_owner, Lane::Q2, Strategy::Pool);
   for (std::size_t index = 0; index < input.points.size(); ++index) {
-    input.points[index] = {static_cast<std::uint16_t>(index), 65535, 65535};
+    input.points[index] = {static_cast<mhgp8::Coordinate>(index), 65535, 65535};
   }
   owner.reset();
   Bits expected(original.a.size() * original.b.size(), 0);
@@ -567,9 +611,9 @@ int main(int argc, char** argv) {
   }
   try {
     Gate gate;
-    fixtures(gate);
-    counter_fixtures(gate);
-    large_grids(gate);
+    fixtures(gate, narrow);
+    counter_fixtures(gate, narrow);
+    large_grids(gate, narrow);
     ownership_and_rejections(gate);
     gate.require(gate.small_cases >= 70 && gate.checked_plans >= 560 &&
                      gate.census_pairs > 10000 && gate.additive_prunes > 100 &&
@@ -583,6 +627,32 @@ int main(int argc, char** argv) {
                      gate.ownership_cases == 2 && gate.large_points == 56000 &&
                      gate.large_candidates == 6759210,
                  "additive/intersection gate non-vacuity failed");
+    // 18-bit twin: the same fixtures at 2^17 / coordinate_limit, judged by the
+    // same scalar ID oracle and cpp_int census, with separately pinned floors.
+    // The exact q2 census is translation and reflection invariant, so the
+    // pair populations of the twin must coincide with the 16-bit ones.
+    Gate wide_gate;
+    fixtures(wide_gate, wide);
+    counter_fixtures(wide_gate, wide);
+    large_grids(wide_gate, wide);
+    wide_gate.require(wide_gate.small_cases >= 70 && wide_gate.checked_plans >= 560 &&
+                          wide_gate.census_pairs > 10000 && wide_gate.additive_prunes > 100 &&
+                          wide_gate.intersection_prunes > 100 && wide_gate.rejected_pairs > 1000 &&
+                          wide_gate.retained_pairs > 1000 && wide_gate.whole_accepts > 0 &&
+                          wide_gate.whole_rejects > 0 && wide_gate.query_nodes > 0 &&
+                          wide_gate.axis_queries > 0 && wide_gate.restriction_queries > 0 &&
+                          wide_gate.restriction_copies > 0 &&
+                          wide_gate.core_partial >= 2 && wide_gate.core_saturated >= 4 &&
+                          wide_gate.model_mutants == 7 && wide_gate.large_points == 56000 &&
+                          wide_gate.large_candidates == 6759210,
+                      "wide additive/intersection gate non-vacuity failed");
+    wide_gate.require(wide_gate.small_cases == gate.small_cases &&
+                          wide_gate.census_pairs == gate.census_pairs &&
+                          wide_gate.additive_prunes == gate.additive_prunes &&
+                          wide_gate.intersection_prunes == gate.intersection_prunes &&
+                          wide_gate.core_partial == gate.core_partial &&
+                          wide_gate.core_saturated == gate.core_saturated,
+                      "wide twin populations differ from the translated 16-bit fixtures");
     std::cout << "mhgp8_axis_additive_gate passed checks=" << gate.checks
               << " small_cases=" << gate.small_cases << " checked_plans=" << gate.checked_plans
               << " census_pairs=" << gate.census_pairs << " additive_prunes=" << gate.additive_prunes
@@ -594,7 +664,18 @@ int main(int argc, char** argv) {
               << " core_partial=" << gate.core_partial << " core_saturated=" << gate.core_saturated
               << " model_mutants=" << gate.model_mutants << " rejections=" << gate.rejections
               << " ownership_cases=" << gate.ownership_cases << " large_points=" << gate.large_points
-              << " large_candidates=" << gate.large_candidates << '\n';
+              << " large_candidates=" << gate.large_candidates
+              << " wide_checks=" << wide_gate.checks
+              << " wide_small_cases=" << wide_gate.small_cases
+              << " wide_checked_plans=" << wide_gate.checked_plans
+              << " wide_census_pairs=" << wide_gate.census_pairs
+              << " wide_additive_prunes=" << wide_gate.additive_prunes
+              << " wide_intersection_prunes=" << wide_gate.intersection_prunes
+              << " wide_rejected_pairs=" << wide_gate.rejected_pairs
+              << " wide_retained_pairs=" << wide_gate.retained_pairs
+              << " wide_model_mutants=" << wide_gate.model_mutants
+              << " wide_large_points=" << wide_gate.large_points
+              << " wide_large_candidates=" << wide_gate.large_candidates << '\n';
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "mhgp8_axis_additive_gate failed: " << error.what() << '\n';

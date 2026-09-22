@@ -57,6 +57,8 @@ struct Gate {
   u64 named_fixture_checks{}, model_constant_checks{}, historical_constant_checks{};
   u64 oracle_pairs{}, oracle_sites{}, entry_runs{}, supports{}, max_shell{}, entry_inherited_credits{};
   u64 invalid_inputs{}, fit_checks{}, wide_rank_runs{}, max_duplicate_rank{};
+  // 18-bit twins (coordinate_limit = 262143): clouds pushed to the far corner of the grid.
+  u64 wide_clouds{}, wide_named_fixture_checks{}, wide_model_constant_checks{}, wide_historical_constant_checks{};
   void require(bool condition, const char* message) {
     ++checks;
     if (!condition) throw std::runtime_error(message);
@@ -392,35 +394,62 @@ Points k2_counterfactual_overcount() {
   return {{5, 2, 0}, {16, 1, 0}, {31, 0, 0}, {36, 5, 0}, {52, 7, 0}};
 }
 Points bridged_cubes() {
+  using mhgp8::Coordinate;
   Points cloud;
   for (unsigned corner = 0; corner < 8; ++corner) {
-    const auto x = static_cast<std::uint16_t>((corner & 1U) * 6000U);
-    const auto y = static_cast<std::uint16_t>(((corner >> 1U) & 1U) * 6000U);
-    const auto z = static_cast<std::uint16_t>(((corner >> 2U) & 1U) * 6000U);
+    const auto x = static_cast<Coordinate>((corner & 1U) * 6000U);
+    const auto y = static_cast<Coordinate>(((corner >> 1U) & 1U) * 6000U);
+    const auto z = static_cast<Coordinate>(((corner >> 2U) & 1U) * 6000U);
     cloud.push_back({x, y, z});
-    cloud.push_back({static_cast<std::uint16_t>(x + 54000U), y, z});
+    cloud.push_back({static_cast<Coordinate>(x + 54000), y, z});
   }
   cloud.push_back({30100, 3000, 3000});
   cloud.push_back({30110, 3010, 2990});
   cloud.push_back({30120, 2990, 3010});
   for (unsigned i = 0; i < 8; ++i)
-    cloud.push_back({static_cast<std::uint16_t>(7000U * i + 500U), 65000, static_cast<std::uint16_t>(100U * i)});
+    cloud.push_back({static_cast<Coordinate>(7000U * i + 500U), 65000, static_cast<Coordinate>(100U * i)});
   return cloud;
 }
 Points grid4() {
+  using mhgp8::Coordinate;
   Points grid;
   for (unsigned x = 0; x < 4; ++x) for (unsigned y = 0; y < 4; ++y) for (unsigned z = 0; z < 4; ++z)
-    grid.push_back({static_cast<std::uint16_t>(100 * x), static_cast<std::uint16_t>(100 * y), static_cast<std::uint16_t>(100 * z)});
+    grid.push_back({static_cast<Coordinate>(100 * x), static_cast<Coordinate>(100 * y), static_cast<Coordinate>(100 * z)});
   return grid;
 }
 Points sphere22() {
+  using mhgp8::Coordinate;
   Points sphere{{100, 100, 100}, {150, 100, 100}};
   for (const auto& d : std::vector<std::array<int, 3>>{{0, 25, 0}, {0, -25, 0}, {0, 0, 25}, {0, 0, -25}, {-20, 15, 0},
        {-20, -15, 0}, {20, 15, 0}, {20, -15, 0}, {-15, 20, 0}, {15, -20, 0}, {-7, 24, 0}, {7, -24, 0},
        {0, 15, 20}, {0, -15, -20}, {-15, 0, 20}, {15, 0, -20}, {-7, 0, 24}, {7, 0, -24}, {0, 7, 24}, {0, -24, 7}})
-    sphere.push_back({static_cast<std::uint16_t>(125 + d[0]), static_cast<std::uint16_t>(100 + d[1]),
-                      static_cast<std::uint16_t>(100 + d[2])});
+    sphere.push_back({static_cast<Coordinate>(125 + d[0]), static_cast<Coordinate>(100 + d[1]),
+                      static_cast<Coordinate>(100 + d[2])});
   return sphere;
+}
+// 18-bit twins (coordinate_limit = 262143). Every integer predicate of the index
+// (longest-axis split at the integer midpoint, partition by <=) and of the front
+// (H, box gaps, descent distances, separation) is invariant under an integer
+// translation: the cloud pushed to the far corner of the grid (its maximum on
+// each axis becomes 262143) has the same tree, counters, rectangles and
+// supports, so every engraved expectation of the original holds for the twin
+// by invariance, while the replay and the brute-force oracle judge it anew.
+// Any difference is an engine fault of the 18-bit port.
+Points far_corner(Points points) {
+  static_assert(mhgp8::coordinate_limit == 262143);
+  std::array<mhgp8::Coordinate, 3> maximum{};
+  for (const auto& point : points)
+    for (std::size_t axis = 0; axis < 3; ++axis) maximum[axis] = std::max(maximum[axis], point[axis]);
+  for (auto& point : points) {
+    point.x = static_cast<mhgp8::Coordinate>(point.x + (262143 - maximum[0]));
+    point.y = static_cast<mhgp8::Coordinate>(point.y + (262143 - maximum[1]));
+    point.z = static_cast<mhgp8::Coordinate>(point.z + (262143 - maximum[2]));
+  }
+  return points;
+}
+bool wide(const Points& points) {
+  return std::any_of(points.begin(), points.end(), [](const Point3& point) {
+    return point.x > 65535 || point.y > 65535 || point.z > 65535; });
 }
 
 // Engraved clouds. Coordinates are exact u16 values; none is random at run time.
@@ -465,6 +494,13 @@ std::vector<Points> fixtures() {
   return clouds;
 }
 constexpr std::size_t fixture_count = 15;
+// Far-corner twins of the pinned clouds: the far sites of the bridged cubes (y = 65000,
+// the u16 frontier) reach y = 262143; the named fixtures keep their exact expectations.
+std::vector<Points> wide_fixtures() {
+  return {far_corner(grid4()), far_corner(sphere22()), far_corner(bridged_cubes()),
+          far_corner(k2_counterfactual_overcount()), far_corner(k2_union_rejects()), far_corner(k2_reproposed_witness())};
+}
+constexpr std::size_t wide_fixture_count = 6;
 
 const std::vector<WspdFrontProposals>& variants() {
   static const std::vector<WspdFrontProposals> values{{1, unlimited, true}, {2, 16, true}, {2, unlimited, true},
@@ -495,23 +531,28 @@ void named_fixtures(Gate& gate) {
     bool residual;
     u64 rejected_mass, inherited_credits, duplicates, inherited_rejections, true_rejections, extended_rejections;
   };
-  const auto check = [&](const Points& points, unsigned depth, const std::vector<Expected>& expectations,
+  // Each fixture is checked twice: as engraved, then its far-corner 18-bit twin
+  // against the SAME expectations (translation invariance), on a separate counter.
+  const auto check = [&](const Points& engraved, unsigned depth, const std::vector<Expected>& expectations,
                          const char* message) {
-    const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
-    const auto oracle = depths(points);
-    gate.require(oracle.at(3, 4) == depth, "named fixture lost the engraved depth of its judged pair");
-    for (const auto& e : expectations) {
-      const auto engine = observe(*index, 2, 8, e.proposals);
-      const auto replay = replay_front(*index, 2, 8, e.proposals, Mutant::None);
-      const auto& w = engine.result.work;
-      gate.require(agrees(engine, replay) && pair_is_residual(*index, engine.rectangles, 3, 4) == e.residual &&
-                       w.rejected_pair_mass[0] == e.rejected_mass && w.inherited_credits == e.inherited_credits &&
-                       w.inherited_duplicates == e.duplicates && w.inherited_rejections == e.inherited_rejections &&
-                       replay.true_inherited_rejections == e.true_rejections &&
-                       w.extended_rejections == e.extended_rejections &&
-                       lost_supports(*index, engine.rectangles, oracle, 2) == 0,
-                   message);
-      ++gate.named_fixture_checks;
+    for (const bool twin : {false, true}) {
+      const auto points = twin ? far_corner(engraved) : engraved;
+      const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
+      const auto oracle = depths(points);
+      gate.require(oracle.at(3, 4) == depth, "named fixture lost the engraved depth of its judged pair");
+      for (const auto& e : expectations) {
+        const auto engine = observe(*index, 2, 8, e.proposals);
+        const auto replay = replay_front(*index, 2, 8, e.proposals, Mutant::None);
+        const auto& w = engine.result.work;
+        gate.require(agrees(engine, replay) && pair_is_residual(*index, engine.rectangles, 3, 4) == e.residual &&
+                         w.rejected_pair_mass[0] == e.rejected_mass && w.inherited_credits == e.inherited_credits &&
+                         w.inherited_duplicates == e.duplicates && w.inherited_rejections == e.inherited_rejections &&
+                         replay.true_inherited_rejections == e.true_rejections &&
+                         w.extended_rejections == e.extended_rejections &&
+                         lost_supports(*index, engine.rectangles, oracle, 2) == 0,
+                     message);
+        ++(twin ? gate.wide_named_fixture_checks : gate.named_fixture_checks);
+      }
     }
   };
   check(k2_union_rejects(), 2,
@@ -527,14 +568,16 @@ void named_fixtures(Gate& gate) {
          {{2, unlimited, true}, true, 3, 2, 2, 0, 0, 2}},
         "K2_counterfactual_overcount: the engine counter must stay an upper bound of the true count");
   // The bare-count mutant loses the depth-1 support that the engine keeps.
-  const auto points = k2_reproposed_witness();
-  const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
-  for (const auto& proposals : {WspdFrontProposals{1, unlimited, true}, WspdFrontProposals{2, unlimited, true}}) {
-    const auto mutant = replay_front(*index, 2, 8, proposals, Mutant::CountOnly);
-    gate.require(!pair_is_residual(*index, mutant.rectangles, 3, 4) &&
-                     lost_supports(*index, mutant.rectangles, depths(points), 2) >= 1,
-                 "K2_reproposed_witness: inheriting a bare count must lose the depth-1 support");
-    ++gate.named_fixture_checks;
+  for (const bool twin : {false, true}) {
+    const auto points = twin ? far_corner(k2_reproposed_witness()) : k2_reproposed_witness();
+    const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
+    for (const auto& proposals : {WspdFrontProposals{1, unlimited, true}, WspdFrontProposals{2, unlimited, true}}) {
+      const auto mutant = replay_front(*index, 2, 8, proposals, Mutant::CountOnly);
+      gate.require(!pair_is_residual(*index, mutant.rectangles, 3, 4) &&
+                       lost_supports(*index, mutant.rectangles, depths(points), 2) >= 1,
+                   "K2_reproposed_witness: inheriting a bare count must lose the depth-1 support");
+      ++(twin ? gate.wide_named_fixture_checks : gate.named_fixture_checks);
+    }
   }
 }
 
@@ -548,26 +591,32 @@ void model_constants(Gate& gate) {
         residual_mass, extended_products, extended_proposals, extended_credits, extended_rejections,
         inherited_credits, duplicates, extended_duplicates, inherited_rejections, true_rejections, emitted_credits;
   };
-  const auto check = [&](const Points& points, const Model& m) {
-    const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
-    const WspdFrontProposals proposals{m.factor, unlimited, true};
-    const auto w = observe(*index, m.k, 8, proposals).result.work;
-    const auto replay = replay_front(*index, m.k, 8, proposals, Mutant::None);
-    gate.require(w.product_visits == m.visits && w.witness_searches == m.searches &&
-                     w.witness_descent_steps == m.steps && w.proposed_sites == m.proposed &&
-                     w.proposals_in_factors == m.in_factors && w.h_bound_tests == m.h_tests &&
-                     w.witness_lane_credits == m.credits && w.fully_rejected_products == m.rejected &&
-                     w.emitted_rectangles == m.emitted && w.rejected_pair_mass[0] == m.rejected_mass &&
-                     w.residual_pair_mass[0] == m.residual_mass && w.extended_products == m.extended_products &&
-                     w.extended_proposals == m.extended_proposals && w.extended_credits == m.extended_credits &&
-                     w.extended_rejections == m.extended_rejections && w.inherited_credits == m.inherited_credits &&
-                     w.inherited_duplicates == m.duplicates &&
-                     w.extended_inherited_duplicates == m.extended_duplicates &&
-                     w.inherited_rejections == m.inherited_rejections &&
-                     replay.true_inherited_rejections == m.true_rejections &&
-                     w.emitted_witness_credits == m.emitted_credits,
-                 "front with inherited witnesses differs from the independent Python model");
-    ++gate.model_constant_checks;
+  // Each cloud is checked as engraved, then as its far-corner 18-bit twin against the
+  // SAME model constants (translation invariance), on a separate counter.
+  const auto check = [&](const Points& engraved, const Model& m) {
+    for (const bool twin : {false, true}) {
+      const auto points = twin ? far_corner(engraved) : engraved;
+      const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
+      const WspdFrontProposals proposals{m.factor, unlimited, true};
+      const auto w = observe(*index, m.k, 8, proposals).result.work;
+      const auto replay = replay_front(*index, m.k, 8, proposals, Mutant::None);
+      gate.require(w.product_visits == m.visits && w.witness_searches == m.searches &&
+                       w.witness_descent_steps == m.steps && w.proposed_sites == m.proposed &&
+                       w.proposals_in_factors == m.in_factors && w.h_bound_tests == m.h_tests &&
+                       w.witness_lane_credits == m.credits && w.fully_rejected_products == m.rejected &&
+                       w.emitted_rectangles == m.emitted && w.rejected_pair_mass[0] == m.rejected_mass &&
+                       w.residual_pair_mass[0] == m.residual_mass && w.extended_products == m.extended_products &&
+                       w.extended_proposals == m.extended_proposals && w.extended_credits == m.extended_credits &&
+                       w.extended_rejections == m.extended_rejections && w.inherited_credits == m.inherited_credits &&
+                       w.inherited_duplicates == m.duplicates &&
+                       w.extended_inherited_duplicates == m.extended_duplicates &&
+                       w.inherited_rejections == m.inherited_rejections &&
+                       replay.true_inherited_rejections == m.true_rejections &&
+                       w.emitted_witness_credits == m.emitted_credits,
+                   twin ? "18-bit far-corner twin differs from the independent Python model (translation invariance broken)"
+                        : "front with inherited witnesses differs from the independent Python model");
+      ++(twin ? gate.wide_model_constant_checks : gate.model_constant_checks);
+    }
   };
   const auto grid = grid4();
   check(grid, {2, 1, 3204, 3076, 18456, 6010, 1191, 3949, 912, 436, 1134, 882, 1134, 0, 0, 0, 0, 1252, 870, 0, 382, 240, 666});
@@ -589,21 +638,26 @@ void model_constants(Gate& gate) {
 void historical_constants(Gate& gate) {
   struct Constants { u64 visits, searches, descents, proposed, in_factors, h_tests, credits, rejected, emitted, separations,
                          rejected_mass, residual_mass; };
-  const auto check = [&](const Points& points, unsigned k, const Constants& c) {
-    const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
-    for (const auto& proposals : {WspdFrontProposals{}, WspdFrontProposals{1, unlimited, false}}) {
-      const auto w = observe(*index, k, 8, proposals).result.work;
-      gate.require(w.product_visits == c.visits && w.witness_searches == c.searches &&
-                       w.witness_descent_steps == c.descents && w.proposed_sites == c.proposed &&
-                       w.proposals_in_factors == c.in_factors && w.h_bound_tests == c.h_tests &&
-                       w.witness_lane_credits == c.credits && w.fully_rejected_products == c.rejected &&
-                       w.emitted_rectangles == c.emitted && w.separation_tests == c.separations &&
-                       w.rejected_pair_mass[0] == c.rejected_mass && w.residual_pair_mass[0] == c.residual_mass &&
-                       w.inherited_credits == 0 && w.inherited_duplicates == 0 &&
-                       w.extended_inherited_duplicates == 0 && w.inherited_rejections == 0 &&
-                       w.emitted_witness_credits == 0,
-                   "default front drifted from its engraved pre-tranche counters");
-      ++gate.historical_constant_checks;
+  // Each cloud is checked as engraved, then as its far-corner 18-bit twin against the
+  // SAME pre-tranche constants (translation invariance), on a separate counter.
+  const auto check = [&](const Points& engraved, unsigned k, const Constants& c) {
+    for (const bool twin : {false, true}) {
+      const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(twin ? far_corner(engraved) : engraved));
+      for (const auto& proposals : {WspdFrontProposals{}, WspdFrontProposals{1, unlimited, false}}) {
+        const auto w = observe(*index, k, 8, proposals).result.work;
+        gate.require(w.product_visits == c.visits && w.witness_searches == c.searches &&
+                         w.witness_descent_steps == c.descents && w.proposed_sites == c.proposed &&
+                         w.proposals_in_factors == c.in_factors && w.h_bound_tests == c.h_tests &&
+                         w.witness_lane_credits == c.credits && w.fully_rejected_products == c.rejected &&
+                         w.emitted_rectangles == c.emitted && w.separation_tests == c.separations &&
+                         w.rejected_pair_mass[0] == c.rejected_mass && w.residual_pair_mass[0] == c.residual_mass &&
+                         w.inherited_credits == 0 && w.inherited_duplicates == 0 &&
+                         w.extended_inherited_duplicates == 0 && w.inherited_rejections == 0 &&
+                         w.emitted_witness_credits == 0,
+                     twin ? "18-bit far-corner twin drifted from the engraved pre-tranche counters (translation invariance broken)"
+                          : "default front drifted from its engraved pre-tranche counters");
+        ++(twin ? gate.wide_historical_constant_checks : gate.historical_constant_checks);
+      }
     }
   };
   check(grid4(), 5, {4064, 3936, 23616, 19680, 2794, 16886, 5824, 48, 1952, 3889, 64, 1952});
@@ -614,12 +668,18 @@ void historical_constants(Gate& gate) {
 // ----------------------------------------------------------------- 4. corpus
 void replay_corpus(Gate& gate) {
   static_assert(all_mutants.size() == 10);
-  const auto clouds = fixtures();
+  auto clouds = fixtures();
   gate.require(clouds.size() == fixture_count, "engraved corpus changed its size");
+  const auto twins = wide_fixtures();
+  gate.require(twins.size() == wide_fixture_count &&
+                   std::all_of(twins.begin(), twins.end(), [](const Points& points) { return wide(points); }),
+               "18-bit twin corpus changed its size or lost its 18-bit coordinates");
+  clouds.insert(clouds.end(), twins.begin(), twins.end());
   for (const auto& points : clouds) {
     const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
     const auto oracle = depths(points);
     ++gate.clouds;
+    gate.wide_clouds += static_cast<u64>(wide(points));
     for (const unsigned k : {1U, 2U, 3U, 5U, 10U}) for (const unsigned s : {8U, 10U, 12U}) {
       u64 previous_mass = std::numeric_limits<u64>::max();
       Rectangles previous_rectangles;
@@ -784,7 +844,10 @@ Output support_oracle(Gate& gate, const Points& points, unsigned k) {
 }
 
 void entries(Gate& gate) {
-  for (const auto& points : fixtures()) {
+  auto clouds = fixtures();
+  const auto twins = wide_fixtures();
+  clouds.insert(clouds.end(), twins.begin(), twins.end());
+  for (const auto& points : clouds) {
     const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
     for (const unsigned k : {2U, 5U, 10U}) {
       const auto expected = support_oracle(gate, points, k);
@@ -909,15 +972,19 @@ int main(int argc, char** argv) {
     wide_ranks(gate);
     entries(gate);
     rejections(gate);
-    gate.require(gate.clouds == fixture_count && gate.replay_runs == fixture_count * 15 * 5 &&
+    constexpr std::size_t corpus_count = fixture_count + wide_fixture_count;
+    gate.require(gate.clouds == corpus_count && gate.wide_clouds == wide_fixture_count &&
+                     gate.replay_runs == corpus_count * 15 * 5 &&
                      gate.safety_runs == gate.replay_runs && gate.rejected_pairs_judged > 0 &&
                      gate.named_fixture_checks == 13 && gate.model_constant_checks == 12 &&
-                     gate.historical_constant_checks == 6 && gate.nonempty_lists > 0 && gate.full_lists > 0 &&
+                     gate.historical_constant_checks == 6 && gate.wide_named_fixture_checks == 13 &&
+                     gate.wide_model_constant_checks == 12 && gate.wide_historical_constant_checks == 6 &&
+                     gate.nonempty_lists > 0 && gate.full_lists > 0 &&
                      gate.duplicates > 0 && gate.extension_duplicates > 0 && gate.inherited_rejections > 0 &&
                      gate.true_inherited_rejections > 0 && gate.overcounted_rejections > 0 &&
                      gate.gained_rejected_mass > 0 && gate.fewer_rejected_products > 0 && gate.mutants == 10 &&
                      gate.unsafe_mutants == 4 && gate.mutant_lost_supports > 0 &&
-                     gate.entry_runs == fixture_count * 3 * 2 * 11 && gate.entry_inherited_credits > 0 &&
+                     gate.entry_runs == corpus_count * 3 * 2 * 11 && gate.entry_inherited_credits > 0 &&
                      gate.supports > 0 && gate.max_shell >= 20 && gate.invalid_inputs == 19 && gate.fit_checks == 6 &&
                      gate.wide_rank_runs == 4 && gate.max_duplicate_rank >= 256,
                  "inheritance gate lost a declared non-vacuity floor");
@@ -947,7 +1014,10 @@ int main(int argc, char** argv) {
               << ",\"entry_runs\":" << gate.entry_runs << ",\"entry_inherited_credits\":" << gate.entry_inherited_credits
               << ",\"supports\":" << gate.supports << ",\"max_shell\":" << gate.max_shell
               << ",\"invalid_inputs\":" << gate.invalid_inputs << ",\"fit_checks\":" << gate.fit_checks
-              << ",\"wide_rank_runs\":" << gate.wide_rank_runs << ",\"max_duplicate_rank\":" << gate.max_duplicate_rank << "}\n";
+              << ",\"wide_rank_runs\":" << gate.wide_rank_runs << ",\"max_duplicate_rank\":" << gate.max_duplicate_rank
+              << ",\"wide_clouds\":" << gate.wide_clouds << ",\"wide_named_fixture_checks\":" << gate.wide_named_fixture_checks
+              << ",\"wide_model_constant_checks\":" << gate.wide_model_constant_checks
+              << ",\"wide_historical_constant_checks\":" << gate.wide_historical_constant_checks << "}\n";
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "mhgp8_wspd_front_inheritance_gate failed: " << error.what() << '\n';

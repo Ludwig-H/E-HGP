@@ -61,14 +61,42 @@ struct Gate {
 
 [[nodiscard]] Key key(const Point3& point) { return {point.x, point.y, point.z}; }
 
+// Coordinate profile of the synthetic fixtures. `narrow` reproduces the
+// historical 16-bit fixtures bit for bit; `wide` is their 18-bit twin: factor
+// B sits exactly at coordinate_limit, factor A at 2^17, the y/z origin above
+// 2^16, reflections and corner sites use 262143 and the small literal
+// fixtures are translated so that they touch the limit. Every twin passes
+// through the same direct column model and the same cpp_int census.
+struct Width {
+  mhgp8::Coordinate a_x;     // x of factor A in grids and slanted lines
+  mhgp8::Coordinate b_x;     // x of factor B
+  mhgp8::Coordinate base;    // y/z origin of the grids
+  mhgp8::Coordinate core_x;  // x of the core proposals between A and B
+  mhgp8::Coordinate limit;   // reflection and corner value
+  Point3 shift;              // translation of the small literal fixtures
+};
+constexpr Width narrow{1000, 60000, 1000, 30000, 65535, {0, 0, 0}};
+constexpr Width wide{131072, 262143, 260000, 200000, 262143, {202143, 261141, 261141}};
+static_assert(wide.limit == mhgp8::coordinate_limit && wide.b_x == mhgp8::coordinate_limit);
+
+[[nodiscard]] RectangleInput shifted(RectangleInput input, const Point3& shift) {
+  for (auto& point : input.points) {
+    point = {static_cast<mhgp8::Coordinate>(point.x + shift.x),
+             static_cast<mhgp8::Coordinate>(point.y + shift.y),
+             static_cast<mhgp8::Coordinate>(point.z + shift.z)};
+  }
+  return input;
+}
+
 [[nodiscard]] Box3 direct_bounds(const RectangleInput& input, std::size_t aid,
                                   unsigned need) {
   const Point3& a = input.points[aid];
   std::array<mhgp8::Coordinate, 3> lower{0, 0, 0};
-  std::array<mhgp8::Coordinate, 3> upper{65535, 65535, 65535};
+  std::array<mhgp8::Coordinate, 3> upper{mhgp8::coordinate_limit, mhgp8::coordinate_limit,
+                                         mhgp8::coordinate_limit};
   for (std::size_t axis = 0; axis < 3; ++axis) {
-    std::vector<std::uint16_t> below;
-    std::vector<std::uint16_t> above;
+    std::vector<mhgp8::Coordinate> below;
+    std::vector<mhgp8::Coordinate> above;
     for (std::size_t zid = input.a.first; zid < input.a.last; ++zid) {
       const Point3& z = input.points[zid];
       bool same_column = true;
@@ -170,30 +198,30 @@ struct Signature {
 }
 
 [[nodiscard]] RectangleInput grid(unsigned columns, unsigned rows,
-                                   std::size_t count = 0) {
+                                   std::size_t count = 0, const Width& w = narrow) {
   RectangleInput input;
   if (count == 0) count = static_cast<std::size_t>(columns) * rows;
   input.a = {0, count};
   input.b = {count, 2 * count};
   for (unsigned side = 0; side < 2; ++side) {
     for (std::size_t i = 0; i < count; ++i) {
-      input.points.push_back({static_cast<std::uint16_t>(side == 0 ? 1000 : 60000),
-                               static_cast<std::uint16_t>(1000 + i % columns),
-                               static_cast<std::uint16_t>(1000 + i / columns)});
+      input.points.push_back({side == 0 ? w.a_x : w.b_x,
+                               static_cast<mhgp8::Coordinate>(w.base + i % columns),
+                               static_cast<mhgp8::Coordinate>(w.base + i / columns)});
     }
   }
   return input;
 }
 
-void ordinary_fixtures(Gate& gate) {
+void ordinary_fixtures(Gate& gate, const Width& w) {
   for (unsigned orientation = 0; orientation < 6; ++orientation) {
-    auto input = grid(5, 4);
+    auto input = grid(5, 4, 0, w);
     for (auto& point : input.points) {
       if (orientation % 3 == 1) std::swap(point.x, point.y);
       if (orientation % 3 == 2) std::swap(point.x, point.z);
       if (orientation >= 3) {
-        point.x = static_cast<std::uint16_t>(65535 - point.x);
-        point.y = static_cast<std::uint16_t>(65535 - point.y);
+        point.x = static_cast<mhgp8::Coordinate>(w.limit - point.x);
+        point.y = static_cast<mhgp8::Coordinate>(w.limit - point.y);
       }
     }
     auto permuted = input;
@@ -209,10 +237,10 @@ void ordinary_fixtures(Gate& gate) {
       }
     }
   }
-  auto with_core = grid(4, 3);
+  auto with_core = grid(4, 3, 0, w);
   for (unsigned i = 0; i < 10; ++i) {
     with_core.core_candidates.push_back(with_core.points.size());
-    with_core.points.push_back({static_cast<std::uint16_t>(30000 + i), 1000, 1000});
+    with_core.points.push_back({static_cast<mhgp8::Coordinate>(w.core_x + i), w.base, w.base});
   }
   for (const unsigned count : {0U, 1U, 3U, 10U}) {
     auto input = with_core;
@@ -224,9 +252,9 @@ void ordinary_fixtures(Gate& gate) {
   RectangleInput slanted;
   for (unsigned side = 0; side < 2; ++side) {
     for (unsigned i = 0; i < 8; ++i) {
-      slanted.points.push_back({static_cast<std::uint16_t>(side == 0 ? 1000 : 60000),
-                                  static_cast<std::uint16_t>(1000 + i),
-                                  static_cast<std::uint16_t>(1000 + 2 * i)});
+      slanted.points.push_back({side == 0 ? w.a_x : w.b_x,
+                                  static_cast<mhgp8::Coordinate>(w.base + i),
+                                  static_cast<mhgp8::Coordinate>(w.base + 2 * i)});
     }
   }
   slanted.a = {0, 8};
@@ -236,14 +264,14 @@ void ordinary_fixtures(Gate& gate) {
   gate.require(unaligned.candidate_pairs() == 64 && unaligned.work().whole_factor_accepts == 8 &&
                    unaligned.work().tree_nodes == 0 && unaligned.work().query_nodes == 0,
                 "unhelpful columns did not keep one compact whole-factor block per anchor");
-  const RectangleInput singleton{{{0, 0, 0}, {65535, 0, 0}}, {0, 1}, {1, 2}, {}};
+  const RectangleInput singleton{{{0, 0, 0}, {w.limit, 0, 0}}, {0, 1}, {1, 2}, {}};
   static_cast<void>(check_small(gate, singleton, 1, 8));
-  const RectangleInput unequal{
-      {{0, 0, 0}, {0, 1, 0}, {0, 2, 0}, {0, 3, 0}, {0, 4, 0},
-       {100, 10, 0}, {100, 11, 0}, {50, 500, 500}}, {0, 5}, {5, 7}, {7}};
+  const auto unequal = shifted(
+      {{{0, 0, 0}, {0, 1, 0}, {0, 2, 0}, {0, 3, 0}, {0, 4, 0},
+        {100, 10, 0}, {100, 11, 0}, {50, 500, 500}}, {0, 5}, {5, 7}, {7}}, w.shift);
   static_cast<void>(check_small(gate, unequal, 1, 8));
-  auto offset = grid(3, 4);
-  offset.points.insert(offset.points.begin(), {0, 65535, 65535});
+  auto offset = grid(3, 4, 0, w);
+  offset.points.insert(offset.points.begin(), {0, w.limit, w.limit});
   offset.a = {1, 13};
   offset.b = {13, 25};
   static_cast<void>(check_small(gate, offset, 2, 8));
@@ -251,9 +279,9 @@ void ordinary_fixtures(Gate& gate) {
   static_cast<void>(check_small(gate, offset, 2, 8));
 }
 
-void counter_fixtures(Gate& gate) {
-  const RectangleInput boundary{
-      {{0, 0, 0}, {0, 1, 0}, {100, 1, 0}, {100, 2, 0}}, {0, 2}, {2, 4}, {}};
+void counter_fixtures(Gate& gate, const Width& w) {
+  const auto boundary = shifted(
+      {{{0, 0, 0}, {0, 1, 0}, {100, 1, 0}, {100, 2, 0}}, {0, 2}, {2, 4}, {}}, w.shift);
   static_cast<void>(check_small(gate, boundary, 1, 8));
   const auto exact = mhgp8::make_axis_q2_plan(mhgp8::prepare_rectangle(boundary, 1, 8));
   gate.require(exact.keeps(0, 2) && !exact.keeps(0, 3) &&
@@ -264,8 +292,8 @@ void counter_fixtures(Gate& gate) {
                 "closed-tail mutation was not refuted by a real boundary pair");
   ++gate.model_mutants;
 
-  const RectangleInput approximate{
-      {{0, 0, 0}, {0, 1, 1}, {100, 2, 0}}, {0, 2}, {2, 3}, {}};
+  const auto approximate = shifted(
+      {{{0, 0, 0}, {0, 1, 1}, {100, 2, 0}}, {0, 2}, {2, 3}, {}}, w.shift);
   static_cast<void>(check_small(gate, approximate, 1, 8));
   const auto no_fake_column = mhgp8::make_axis_q2_plan(
       mhgp8::prepare_rectangle(approximate, 1, 8));
@@ -277,19 +305,19 @@ void counter_fixtures(Gate& gate) {
                 "approximate-column mutation was not refuted");
   ++gate.model_mutants;
 
-  const RectangleInput irregular{
-      {{1000, 0, 0}, {1000, 2, 0}, {1000, 100, 0},
-       {60000, 99, 0}, {60000, 101, 0}}, {0, 3}, {3, 5}, {}};
+  const auto irregular = shifted(
+      {{{1000, 0, 0}, {1000, 2, 0}, {1000, 100, 0},
+        {60000, 99, 0}, {60000, 101, 0}}, {0, 3}, {3, 5}, {}}, w.shift);
   static_cast<void>(check_small(gate, irregular, 2, 8));
   const auto real_coordinate = mhgp8::make_axis_q2_plan(
       mhgp8::prepare_rectangle(irregular, 2, 8));
   gate.require(real_coordinate.keeps(0, 3) && !real_coordinate.keeps(0, 4) &&
-                   irregular.points[3].y > 2 &&
+                   irregular.points[3].y - irregular.points[0].y > 2 &&
                    oracle::point_credit(irregular.points, 0, 3, Lane::Q2, 2) == 1,
                 "rank-instead-of-coordinate mutation was not refuted");
   ++gate.model_mutants;
-  const RectangleInput too_short{
-      {{0, 0, 0}, {0, 1, 0}, {100, 2, 0}}, {0, 2}, {2, 3}, {}};
+  const auto too_short = shifted(
+      {{{0, 0, 0}, {0, 1, 0}, {100, 2, 0}}, {0, 2}, {2, 3}, {}}, w.shift);
   static_cast<void>(check_small(gate, too_short, 2, 8));
   const auto insufficient = mhgp8::make_axis_q2_plan(
       mhgp8::prepare_rectangle(too_short, 2, 8));
@@ -303,9 +331,9 @@ void counter_fixtures(Gate& gate) {
   // meet only at the excluded anchor: their witnesses could be added safely.
   // This gate records the present isolated-axis filter's conservatism, not
   // a requirement for a future additive filter or a production-code mutant.
-  const RectangleInput separate_axes{
-      {{1000, 1000, 1000}, {1000, 1001, 1000}, {1000, 1000, 1001},
-       {60000, 1002, 1002}}, {0, 3}, {3, 4}, {}};
+  const auto separate_axes = shifted(
+      {{{1000, 1000, 1000}, {1000, 1001, 1000}, {1000, 1000, 1001},
+        {60000, 1002, 1002}}, {0, 3}, {3, 4}, {}}, w.shift);
   static_cast<void>(check_small(gate, separate_axes, 2, 12));
   const auto isolated = mhgp8::make_axis_q2_plan(
       mhgp8::prepare_rectangle(separate_axes, 2, 12));
@@ -325,11 +353,11 @@ void counter_fixtures(Gate& gate) {
   return h >= size ? size * size : (2 * h + 1) * size - h * (h + 1);
 }
 
-void large_grids(Gate& gate) {
+void large_grids(Gate& gate, const Width& w) {
   constexpr unsigned h = 10;
   for (const auto& dimensions : {std::pair{50U, 80U}, std::pair{80U, 100U},
                                   std::pair{100U, 160U}}) {
-    const auto input = grid(dimensions.first, dimensions.second);
+    const auto input = grid(dimensions.first, dimensions.second, 0, w);
     const auto owner = mhgp8::prepare_rectangle(input, h, 12);
     const auto plan = mhgp8::make_axis_q2_plan(owner);
     const auto expected = band_mass(dimensions.first, h) * band_mass(dimensions.second, h);
@@ -360,7 +388,7 @@ void large_grids(Gate& gate) {
   // The ceil(sqrt(m)) recipe has an incomplete last row. A missing h-th
   // successor leaves an open bound, so the COMPLETE-grid per-anchor bound
   // cannot be transferred. This is a measured descriptor sum, not a census.
-  const auto truncated = grid(64, 63, 4000);
+  const auto truncated = grid(64, 63, 4000, w);
   const auto plan = mhgp8::make_axis_q2_plan(mhgp8::prepare_rectangle(truncated, h, 12));
   const std::size_t anchor = 62 * 64 + 22;
   std::uint64_t row_mass = 0;
@@ -426,9 +454,9 @@ int main(int argc, char** argv) {
   }
   try {
     Gate gate;
-    ordinary_fixtures(gate);
-    counter_fixtures(gate);
-    large_grids(gate);
+    ordinary_fixtures(gate, narrow);
+    counter_fixtures(gate, narrow);
+    large_grids(gate, narrow);
     ownership_and_rejections(gate);
     gate.require(gate.small_plans >= 150 && gate.exact_census_pairs > 10000 &&
                      gate.rejected_pairs > 1000 && gate.retained_pairs > 1000 &&
@@ -438,6 +466,26 @@ int main(int argc, char** argv) {
                      gate.whole_accepts > 0 && gate.whole_rejects > 0 &&
                      gate.large_grid_points == 56000,
                   "axial gate non-vacuity failed");
+    // 18-bit twin: the same fixtures at 2^17 / coordinate_limit, judged by the
+    // same direct column model and cpp_int census, with separately pinned
+    // floors. The exact q2 census is translation and reflection invariant, so
+    // its pair populations must coincide with the 16-bit ones.
+    Gate wide_gate;
+    ordinary_fixtures(wide_gate, wide);
+    counter_fixtures(wide_gate, wide);
+    large_grids(wide_gate, wide);
+    wide_gate.require(wide_gate.small_plans >= 150 && wide_gate.exact_census_pairs > 10000 &&
+                          wide_gate.rejected_pairs > 1000 && wide_gate.retained_pairs > 1000 &&
+                          wide_gate.permutations == 72 && wide_gate.model_mutants == 5 &&
+                          wide_gate.conservative_cases == 1 && wide_gate.positive_queries > 0 &&
+                          wide_gate.whole_accepts > 0 && wide_gate.whole_rejects > 0 &&
+                          wide_gate.large_grid_points == 56000,
+                      "wide axial gate non-vacuity failed");
+    wide_gate.require(wide_gate.exact_census_pairs == gate.exact_census_pairs &&
+                          wide_gate.rejected_pairs == gate.rejected_pairs &&
+                          wide_gate.retained_pairs == gate.retained_pairs &&
+                          wide_gate.large_grid_candidates == gate.large_grid_candidates,
+                      "wide twin populations differ from the translated 16-bit fixtures");
     std::cout << "mhgp8_axis_q2_gate passed checks=" << gate.checks
               << " small_plans=" << gate.small_plans
               << " exact_census_pairs=" << gate.exact_census_pairs
@@ -449,7 +497,16 @@ int main(int argc, char** argv) {
               << " invalid_inputs=" << gate.invalid_inputs
               << " moved_rejections=" << gate.moved_rejections
               << " large_grid_points=" << gate.large_grid_points
-              << " large_grid_candidates=" << gate.large_grid_candidates << '\n';
+              << " large_grid_candidates=" << gate.large_grid_candidates
+              << " wide_checks=" << wide_gate.checks
+              << " wide_small_plans=" << wide_gate.small_plans
+              << " wide_exact_census_pairs=" << wide_gate.exact_census_pairs
+              << " wide_rejected_pairs=" << wide_gate.rejected_pairs
+              << " wide_retained_pairs=" << wide_gate.retained_pairs
+              << " wide_permutations=" << wide_gate.permutations
+              << " wide_model_mutants=" << wide_gate.model_mutants
+              << " wide_large_grid_points=" << wide_gate.large_grid_points
+              << " wide_large_grid_candidates=" << wide_gate.large_grid_candidates << '\n';
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "mhgp8_axis_q2_gate failed: " << error.what() << '\n';

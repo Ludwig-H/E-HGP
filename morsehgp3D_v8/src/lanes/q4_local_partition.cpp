@@ -140,6 +140,15 @@ Q4LocalCenter Q4LocalGeometry::q3_center(std::size_t x_id) const {
 
 Q4LocalBounds Q4LocalGeometry::bounds(Q4LocalForm f,Q4LocalCell cell) const {
   validate_cell(cell);
+  constexpr i64 square=static_cast<i64>(coordinate_limit)*coordinate_limit;
+  // Comparisons, not abs(): even an externally supplied INT64_MIN is safe.
+  if(f.constant < -15*square || f.constant > 15*square ||
+     f.x < -8*square || f.x > 8*square || f.y < -8*square || f.y > 8*square)
+    throw std::invalid_argument("mhgp8 local form exceeds its certified arithmetic domain");
+  return bounds_unchecked(f,cell);
+}
+
+Q4LocalBounds Q4LocalGeometry::bounds_unchecked(Q4LocalForm f,Q4LocalCell cell) const {
   // M=262143: |constant|<=15M^2<2^40 so scale*constant<2^60; |x|,|y|<=8M^2
   // <2^39 and |cell|<=2*scale=2^21 give <2^60 per linear term: the sum of
   // the three magnitudes stays <2^62, inside i64.
@@ -300,8 +309,59 @@ Q4LocalFragmentPtr Q4LocalFragment::refine(Q4LocalFragmentPtr parent,u64 budget)
                                           parent->active_nodes(),budget,Origin::Refine);
 }
 
+Q4LocalPartitionResult Q4LocalFragment::finish_until(
+    std::shared_ptr<Q4LocalFragment> fragment,std::size_t input_sites) {
+  const auto work=fragment->work();
+  const auto cell=fragment->cell();
+  const auto depth=fragment->inside_count();
+  const auto geometry=fragment->geometry();
+  if(!fragment->saturated_)
+    return {geometry,std::move(fragment),depth,cell,work,0,0};
+  const auto classified=work.inside_sites+work.outside_sites+work.active_sites;
+  if(classified>input_sites) throw std::logic_error("mhgp8 saturated partition exceeds input population");
+  const auto bytes=fragment->retained_bytes();
+  // Destroy the partial frontier here; no public exact-fragment pointer can
+  // escape. The remaining value only certifies a uniform lower bound.
+  return {geometry,{},depth,cell,work,input_sites-static_cast<std::size_t>(classified),bytes};
+}
+
+Q4LocalPartitionResult Q4LocalFragment::root_until(
+    Q4LocalGeometryPtr geometry,u64 budget,std::size_t threshold) {
+  if(!geometry || threshold==0)
+    throw std::invalid_argument("mhgp8 saturated root requires geometry and positive threshold");
+  const auto input=geometry->cover_nodes();
+  const auto sites=geometry->cover()->site_count();
+  auto fragment=std::make_shared<Q4LocalFragment>(Key{},geometry,Q4LocalCell{},0,input,budget,Origin::Root,threshold);
+  return finish_until(std::move(fragment),sites);
+}
+
+Q4LocalPartitionResult Q4LocalFragment::child_until(
+    Q4LocalFragmentPtr parent,unsigned quadrant,u64 budget,std::size_t threshold) {
+  if(!parent || quadrant>=4 || threshold==0)
+    throw std::invalid_argument("mhgp8 saturated child requires parent, quadrant and positive threshold");
+  const auto p=parent->cell();
+  if(p.depth>=Q4LocalCell::max_depth)
+    throw std::invalid_argument("mhgp8 saturated child exceeds exact cell depth");
+  const i64 mx=p.left+(p.right-p.left)/2,my=p.bottom+(p.top-p.bottom)/2;
+  const bool right=(quadrant&1U)!=0,top=(quadrant&2U)!=0;
+  const Q4LocalCell cell{right?mx:p.left,right?p.right:mx,top?my:p.bottom,top?p.top:my,
+                        p.depth+1,right&&p.owns_right,top&&p.owns_top};
+  auto fragment=std::make_shared<Q4LocalFragment>(Key{},parent->geometry(),cell,parent->inside_count(),
+      parent->active_nodes(),budget,Origin::Child,threshold);
+  return finish_until(std::move(fragment),parent->active_sites());
+}
+
+Q4LocalPartitionResult Q4LocalFragment::refine_until(
+    Q4LocalFragmentPtr parent,u64 budget,std::size_t threshold) {
+  if(!parent || threshold==0)
+    throw std::invalid_argument("mhgp8 saturated refinement requires parent and positive threshold");
+  auto fragment=std::make_shared<Q4LocalFragment>(Key{},parent->geometry(),parent->cell(),
+      parent->inside_count(),parent->active_nodes(),budget,Origin::Refine,threshold);
+  return finish_until(std::move(fragment),parent->active_sites());
+}
+
 Q4LocalFragment::Q4LocalFragment(Key,Q4LocalGeometryPtr geometry,Q4LocalCell cell,std::size_t inherited,
-    std::span<const std::size_t> input,u64 budget,Origin origin)
+    std::span<const std::size_t> input,u64 budget,Origin origin,std::size_t stop_after)
     :geometry_(std::move(geometry)),cell_(cell),inside_count_(inherited) {
   // The retained frontier rarely exceeds the input frontier: reserving it
   // once avoids the geometric reallocations of push_back on hot paths.
@@ -312,6 +372,11 @@ Q4LocalFragment::Q4LocalFragment(Key,Q4LocalGeometryPtr geometry,Q4LocalCell cel
     case Origin::Refine: counter_add(work_.refine_factories);break;
   }
   work_.inherited_inside_sites=static_cast<u64>(inherited);
+  if(stop_after!=0 && inherited>=stop_after) {
+    saturated_=true;
+    work_.peak_retained_bytes=static_cast<u64>(retained_bytes());
+    return;
+  }
   const auto& index=*geometry_->cover()->index();
   const auto nodes=index.spatial_nodes();
   u64 tested=0;
@@ -331,7 +396,7 @@ Q4LocalFragment::Q4LocalFragment(Key,Q4LocalGeometryPtr geometry,Q4LocalCell cel
       Q4LocalBounds bound;
       if (node.range.size()==1) {
         counter_add(work_.point_tests);
-        bound=geometry_->bounds(geometry_->form(index.spatial_order()[node.range.first]),cell_);
+        bound=geometry_->bounds_unchecked(geometry_->form(index.spatial_order()[node.range.first]),cell_);
       } else {
         counter_add(work_.block_bound_tests);
         bound=geometry_->node_bounds_unchecked(cursor,cell_);
@@ -340,6 +405,11 @@ Q4LocalFragment::Q4LocalFragment(Key,Q4LocalGeometryPtr geometry,Q4LocalCell cel
         counter_add(work_.inside_nodes);
         counter_add(work_.inside_sites,static_cast<u64>(node.range.size()));
         inside_count_+=node.range.size();cursor=node.escape;
+        if(stop_after!=0 && inside_count_>=stop_after) {
+          saturated_=true;
+          work_.peak_retained_bytes=static_cast<u64>(retained_bytes());
+          return;
+        }
       } else if (bound.minimum>0) {
         counter_add(work_.outside_nodes);
         counter_add(work_.outside_sites,static_cast<u64>(node.range.size()));

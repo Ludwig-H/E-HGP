@@ -240,28 +240,7 @@ void targeted(Gate& gate) {
   gate.rejects([&] { static_cast<void>(plan.prefix_for_a_rank(plan.b_range().first)); });
 }
 
-void corpus(Gate& gate) {
-  std::vector<Points> clouds{
-      {{0, 0, 0}, {1, 0, 0}, {99, 0, 0}, {100, 0, 0}},
-      {{0, 0, 0}, {1, 0, 0}, {100, 0, 0}},
-      {{100, 0, 0}, {0, 1, 0}, {1, 0, 1}},
-      {{1000, 0, 0}, {0, 1, 0}, {0, 0, 0}},
-      {{0, 0, 0}, {100, 0, 0}, {50, 0, 0}}};
-  Points cube;
-  for (unsigned bits = 0; bits < 8; ++bits)
-    cube.push_back({static_cast<std::uint16_t>((bits & 1U) * 65535),
-                   static_cast<std::uint16_t>(((bits >> 1U) & 1U) * 65535),
-                   static_cast<std::uint16_t>(((bits >> 2U) & 1U) * 65535)});
-  clouds.push_back(cube);
-  Points random;
-  std::uint32_t state = 571U;
-  for (unsigned i = 0; i < 11; ++i) {
-    state = state * 1664525U + 1013904223U;
-    const auto y = static_cast<std::uint16_t>(state >> 16U);
-    state = state * 1664525U + 1013904223U;
-    random.push_back({static_cast<std::uint16_t>(i * 251), y, static_cast<std::uint16_t>(state >> 16U)});
-  }
-  clouds.push_back(random);
+void exercise(Gate& gate, const std::vector<Points>& clouds) {
   for (auto points : clouds) for (unsigned permutation = 0; permutation < 2; ++permutation) {
     if (permutation != 0) std::reverse(points.begin(), points.end());
     const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
@@ -272,17 +251,71 @@ void corpus(Gate& gate) {
   }
 }
 
+void corpus(Gate& gate) {
+  std::vector<Points> clouds{
+      {{0, 0, 0}, {1, 0, 0}, {99, 0, 0}, {100, 0, 0}},
+      {{0, 0, 0}, {1, 0, 0}, {100, 0, 0}},
+      {{100, 0, 0}, {0, 1, 0}, {1, 0, 1}},
+      {{1000, 0, 0}, {0, 1, 0}, {0, 0, 0}},
+      {{0, 0, 0}, {100, 0, 0}, {50, 0, 0}}};
+  Points cube;
+  for (unsigned bits = 0; bits < 8; ++bits)
+    cube.push_back({static_cast<mhgp8::Coordinate>((bits & 1U) * 65535),
+                   static_cast<mhgp8::Coordinate>(((bits >> 1U) & 1U) * 65535),
+                   static_cast<mhgp8::Coordinate>(((bits >> 2U) & 1U) * 65535)});
+  clouds.push_back(cube);
+  Points random;
+  std::uint32_t state = 571U;
+  for (unsigned i = 0; i < 11; ++i) {
+    state = state * 1664525U + 1013904223U;
+    const auto y = static_cast<mhgp8::Coordinate>(state >> 16U);
+    state = state * 1664525U + 1013904223U;
+    random.push_back({static_cast<mhgp8::Coordinate>(i * 251), y, static_cast<mhgp8::Coordinate>(state >> 16U)});
+  }
+  clouds.push_back(random);
+  exercise(gate, clouds);
+}
+
+// 18-bit twins (coordinate_limit = 262143): the full-extent corner cube and
+// a random cloud drawn on 18 bits (state >> 14), judged by the same
+// projection/corner oracle over the same node pairs, permutations and
+// thresholds as the u16 corpus, whose fixtures and floors are untouched.
+void corpus_18bits(Gate& gate) {
+  constexpr mhgp8::Coordinate limit = mhgp8::coordinate_limit;
+  std::vector<Points> clouds;
+  Points cube;
+  for (unsigned bits = 0; bits < 8; ++bits)
+    cube.push_back({(bits & 1U) != 0 ? limit : 0, (bits & 2U) != 0 ? limit : 0, (bits & 4U) != 0 ? limit : 0});
+  clouds.push_back(cube);
+  Points random;
+  std::uint32_t state = 571U;
+  for (unsigned i = 0; i < 11; ++i) {
+    state = state * 1664525U + 1013904223U;
+    const auto y = static_cast<mhgp8::Coordinate>(state >> 14U);
+    state = state * 1664525U + 1013904223U;
+    random.push_back({static_cast<mhgp8::Coordinate>(i * 23831), y, static_cast<mhgp8::Coordinate>(state >> 14U)});
+  }
+  clouds.push_back(random);
+  for (const auto& points : clouds) {
+    mhgp8::Coordinate widest = 0;
+    for (const auto& point : points) widest = std::max({widest, point.x, point.y, point.z});
+    gate.require(widest > 65535 && widest <= limit,
+                 "18-bit fixture does not leave the historical u16 range or exceeds coordinate_limit");
+  }
+  exercise(gate, clouds);
+}
+
 void repeated_cost(Gate& gate) {
   for (const std::size_t n : {8U, 16U, 32U}) {
     Points points;
     std::vector<std::size_t> aids, bids;
     for (std::size_t i = 0; i < n; ++i) {
       aids.push_back(points.size());
-      points.push_back({0, static_cast<std::uint16_t>(3 * i), 0});
+      points.push_back({0, static_cast<mhgp8::Coordinate>(3 * i), 0});
     }
     for (std::size_t i = 0; i < n; ++i) {
       bids.push_back(points.size());
-      points.push_back({static_cast<std::uint16_t>(10000 + i), 0, 0});
+      points.push_back({static_cast<mhgp8::Coordinate>(10000 + i), 0, 0});
     }
     const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
     const auto an = node(*index, aids), bn = node(*index, bids);
@@ -319,6 +352,17 @@ int main(int argc, char** argv) {
                      gate.jobs == 3 * gate.plans && gate.jobs_pairs == gate.candidates &&
                      gate.model_mutants == 3 && gate.invalid_inputs == 7,
                  "node Pool qualification lost a non-vacuity floor");
+    // 18-bit corpus: separate floors on its increments; the global identities
+    // (jobs, jobs_pairs, empty_plans) must keep holding on the totals.
+    const Gate u16 = gate;
+    corpus_18bits(gate);
+    gate.require(gate.plans > u16.plans && gate.pairs > u16.pairs && gate.oracle_corners > u16.oracle_corners &&
+                     gate.strict_rejections > u16.strict_rejections && gate.candidates > u16.candidates &&
+                     gate.saturated > u16.saturated && gate.empty_plans == 0 &&
+                     gate.jobs == 3 * gate.plans && gate.jobs_pairs == gate.candidates &&
+                     gate.fixed_rescans == u16.fixed_rescans && gate.growing_rescans == u16.growing_rescans &&
+                     gate.model_mutants == u16.model_mutants && gate.invalid_inputs == u16.invalid_inputs,
+                 "18-bit node Pool corpus lost a non-vacuity floor");
     std::cout << "mhgp8_q2_node_pool_gate passed checks=" << gate.checks << " plans=" << gate.plans
               << " pairs=" << gate.pairs << " oracle_corners=" << gate.oracle_corners
               << " rejected=" << gate.strict_rejections << " candidates=" << gate.candidates

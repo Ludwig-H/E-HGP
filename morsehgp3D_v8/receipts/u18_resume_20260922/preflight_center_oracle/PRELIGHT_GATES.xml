@@ -1,0 +1,622 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Linux-c++"
+	tests="79"
+	failures="1"
+	disabled="0"
+	skipped="0"
+	hostname="codespaces-0bcb78"
+	time="48"
+	timestamp="2026-09-22T10:00:29"
+	>
+	<testcase name="mhgp8_q2_node_pool_gate" classname="mhgp8_q2_node_pool_gate" time="0.0079334" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>mhgp8_q2_node_pool_gate passed checks=100821 plans=3795 pairs=13406 oracle_corners=139256 rejected=4043 candidates=9363 empty_plans=0 saturated=2411 jobs=11385 jobs_pairs=9363 factor_sites=14158 fixed_rescans=236 growing_rescans=1400 model_mutants=3 invalid_inputs=7
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_terminal_pool_gate" classname="mhgp8_q2_terminal_pool_gate" time="0.420113" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>mhgp8_q2_terminal_pool_gate passed checks=3021481 clouds=28 runs=3928 oracle_pairs=10767 oracle_sites=679149 supports=294012 extra_shells=29768 max_shell=30 selected_rectangles=120450 filtered_pairs=142570 residual_pairs=228726 factor_sites=355206 bands=30693 selected64=112 default_comparisons=112 passthrough_rectangles=102134 unchanged_census=2288 reentrant_calls=1 joint_runs=450 pairwise_runs=4 invalid_inputs=6 callback_failures=3 model_mutants=5
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_parallel_gate" classname="mhgp8_wspd_q2_parallel_gate" time="0.126264" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_wspd_q2_parallel_gate_v1","status":"passed","scope":"bounded_cpu_q2_jobs_not_full","public_status":"not_claimed","checks":261552,"clouds":8,"oracle_pairs":17580,"oracle_sites":2197848,"mono_runs":216,"parallel_runs":438,"supports":45161,"max_shell":30,"empty_job_runs":36,"excess_worker_runs":136,"multi_worker_runs":324,"pool_selected":79,"pool_filtered":100779,"pool_passthrough":38,"selected64":24,"filtered64":100728,"joint_runs":32,"pairwise_runs":16,"sibling_tests":1062,"structural_steps":381531,"callback_failures":1,"reentrant_runs":1,"ownership_resets":1,"joined_checks":5,"launch_failures":1,"invalid_inputs":24,"mutants":6,"clouds18":4,"parallel_runs18":186,"supports18":18846,"max_shell18":8}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_dynamic_gate" classname="mhgp8_wspd_q2_dynamic_gate" time="0.0866096" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_wspd_q2_dynamic_gate_v1","status":"passed","public_status":"not_claimed","checks":4774,"clouds":8,"oracle_pairs":17573,"oracle_sites":2197822,"mono_runs":98,"coarse_runs":108,"donate_runs":206,"default_runs":8,"supports":24337,"max_shell":30,"donations":2260,"full_refusals":6067,"empty_runs":27,"selected64":22,"filtered64":92520,"passthrough":15,"joint_runs":66,"pairwise_runs":30,"callback_failures":1,"reentrant_runs":1,"index_resets":1,"invalid_inputs":8,"mutants":4,"clouds18":4,"default_runs18":4,"supports18":11520,"max_shell18":8}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_census_resume_gate" classname="mhgp8_q2_census_resume_gate" time="0.00921919" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_q2_census_resume_gate_v1","status":"pass","scope":"shared_anchor_continuations_not_full","checks":262621,"fixtures":14,"roots":14,"oracle_pairs":598,"oracle_sites":37232,"references":227,"resumptions":896,"advances":25336,"supports":1610,"max_shell":30,"credit_pauses":11325,"split_credit_pauses":2184,"phase_pauses":90,"emission_pauses":494,"deferred_child_pauses":1694,"partial_range_pauses":0,"two_engines":1,"thread_transfers":1,"owner_resets":1,"callback_failures":1,"reentrant_calls":2,"overlap_rejections":1,"invalid_inputs":26,"mutants":3,"wide_fixtures":2,"wide_supports":140,"wide_diameter":206156857347}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_census_detach_gate" classname="mhgp8_q2_census_detach_gate" time="0.00983638" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_q2_census_detach_gate_v1","status":"pass","scope":"owned_shared_anchor_detach_not_full","checks":72721,"fixtures":7,"runs":350,"oracle_pairs":1522,"oracle_sites":85992,"supports":888,"max_shell":30,"detaches":1799,"imported_credit":167,"imported_phase":150,"emit_donors":167,"recursive_detaches":1188,"no_child":2461,"destroyed_parents":933,"owner_resets":1,"parallel_pairs":1,"distinct_threads":2,"allocation_failures":9,"allocation_successes":3,"injected_allocations":9,"callback_failures":1,"reentrant_rejections":8,"invalid_inputs":12,"mutants":3,"wide_fixtures":1,"wide_supports":156,"wide_diameter":206156857347}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_census_parallel_gate" classname="mhgp8_q2_census_parallel_gate" time="0.206313" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"status":"passed","scope":"small_q2_anchor_parallel_not_full","checks":102261,"fixtures":10,"references":160,"resumptions":160,"parallel_calls":2880,"supports":3960,"donations":3899,"multi_slot_outputs":44,"multi_active_runs":148,"max_shell":30,"callback_failures":4,"invalid_inputs":14,"wide_fixtures":2,"wide_supports":504,"wide_diameter":206156857347,"partial_launch_failure_injected":false}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_cooperative_gate" classname="mhgp8_wspd_q2_cooperative_gate" time="0.238581" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_wspd_q2_cooperative_gate_v1","status":"passed","public_status":"not_claimed","checks":76862,"clouds":8,"oracle_pairs":9019,"oracle_sites":650426,"coarse_runs":135,"cooperative_runs":351,"default_runs":8,"supports":50438,"max_shell":30,"continued_anchors":53748,"donations":1813,"donations_after_seeds_claimed":1752,"credit_pauses":368572,"phase_pauses":76049,"empty_runs":20,"small_only_runs":132,"pool_blocks_continuations":72,"selected64":18,"filtered64":9960,"passthrough":2337,"multiple_callback_threads":2,"callback_threads_joined":2,"callback_failures":1,"reentrant_runs":1,"index_resets":1,"invalid_inputs":14,"mutants":5,"clouds18":4,"default_runs18":4,"supports18":19610,"max_shell18":8}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_ranges_gate" classname="mhgp8_wspd_q2_ranges_gate" time="0.255317" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_wspd_q2_ranges_gate_v1","status":"passed","public_status":"not_claimed","checks":170850,"clouds":14,"oracle_pairs":14195,"oracle_sites":1032250,"coarse_runs":187,"range_runs":575,"default_runs":14,"supports":153568,"max_shell":30,"donations":1625,"donations_after_seeds_claimed":1236,"pool_donations":103,"passthrough_donations":612,"wide_pool_cases":12,"empty_runs":31,"surplus_workers":62,"selected64":39,"filtered64":21492,"passthrough":5917,"multiple_callback_threads":2,"callback_threads_joined":2,"callback_failures":1,"reentrant_runs":1,"index_resets":1,"invalid_inputs":14,"mutants":7}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_batched_gate" classname="mhgp8_wspd_q2_batched_gate" time="0.318566" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_wspd_q2_batched_gate_v1","status":"passed","public_status":"not_claimed","checks":203070,"clouds":13,"oracle_pairs":17393,"oracle_sites":1285216,"coarse_runs":243,"batch_runs":795,"default_runs":13,"supports":124145,"max_shell":30,"compact_tasks":261263,"inherited_credit":11750,"phase2_tasks":5740,"siblings_due":60632,"empty_runs":31,"surplus_requests":81,"selected64":52,"filtered64":28656,"passthrough":7546,"multiple_callback_threads":2,"callback_threads_joined":2,"callback_failures":1,"reentrant_runs":1,"index_resets":1,"invalid_inputs":14,"mutants":7,"clouds18":5,"default_runs18":5,"supports18":50219,"max_shell18":8}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_joint_gate" classname="mhgp8_q2_joint_gate" time="0.205879" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>mhgp8_q2_joint_gate passed checks=1884183 clouds=18 oracle_pairs=1340 oracle_sites=19990 runs=8892 supports=234404 shell_sites=507756 root_products=205340 joint_tasks=210492 splits_a=2384 splits_b=192 joint_tests=4678 joint_credits=178 joint_rejected_pairs=168 joint_accepted_pairs=0 handoffs=207888 handoffs_after_credit=300 handoff_pair_mass=218844 structural_splits=1292 phase_switches=0 shared_anchor_runs=2886 default_comparisons=144 invalid_inputs=4 callback_failures=4 model_mutants=5 clouds18=12 default_comparisons18=96 six_site_structures=2
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_witness_order_gate" classname="mhgp8_q2_witness_order_gate" time="0.097942" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>mhgp8_q2_witness_order_gate passed checks=766826 clouds=24 oracle_pairs=4214 oracle_sites=245272 runs=2694 supports=91482 shell_sites=234224 structural_splits=333048 deferred_skips=42076 anchor_skips=53990 phase_switches=40310 default_comparisons=384 transformed_clouds=12 invalid_inputs=3 callback_failures=2 model_mutants=5 fixture_global_splits=1638 fixture_complement_splits=1384 fixture_universal_witnesses=12
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_sibling_gate" classname="mhgp8_q2_sibling_gate" time="0.130526" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>mhgp8_q2_sibling_gate passed checks=844606 clouds=24 oracle_pairs=14865 oracle_sites=863754 runs=2516 supports=115166 proposals=37448 cardinality_skips=26728 bound_tests=10720 rejected_tasks=5358 rejected_pairs=11945 rejected_after_credit=30 transformed_clouds=16 permutations=16 default_comparisons=192 invalid_inputs=3 callback_failures=2 model_mutants=5 fragmentation_bound=2633 fragmentation_disabled_tasks=2261 fragmentation_enabled_tasks=1967 clouds18=18 transformed_clouds18=12 permutations18=12 default_comparisons18=144 fragmentation_bound18=2633 fragmentation_disabled_tasks18=2147 fragmentation_enabled_tasks18=1967 credited18=2 negative18=2
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q2_census_gate" classname="mhgp8_wspd_q2_census_gate" time="0.0779122" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>mhgp8_wspd_q2_census_gate passed checks=674319 clouds=26 oracle_pairs=2389 oracle_sites=39659 front_reference_runs=823 integrated_runs=1639 supports=46762 interior_sites=97164 shell_sites=190676 front_rejected_pairs=14440 census_rejected_pairs=29894 empty_runs=96 permutations=13 nonidentity_orders=27 query_splits=5866 split_after_credit=60 uniform_credit=1236 uniform_reject=512 root_savings=6122 invalid_inputs=11 callback_exceptions=4 model_mutants=8 clouds18=8 permutations18=4 supports18=21576
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_cloud_owner_gate" classname="mhgp8_cloud_owner_gate" time="0.00319215" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>mhgp8_cloud_owner_gate passed checks=7792 clouds=20 range_queries=2405 multi_node_queries=2042 max_range_visits=8 max_range_steps=6 oracle_sites=299 census_runs=24 supports=38 invalid_inputs=97 model_mutants=17 lifetime_checks=2
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_batch_gate" classname="mhgp8_batch_gate" time="0.0102027" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>mhgp8_batch_gate passed checks=10872 batches=195 lane_comparisons=585 shared_preparations=27 saturated_batches=81 fallback_batches=5 rejections=3 wide_checks=10869 wide_batches=195 wide_lane_comparisons=585 wide_shared_preparations=27 wide_saturated_batches=81 wide_fallback_batches=5 wide_rejections=1
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_plan_assignment_gate" classname="mhgp8_plan_assignment_gate" time="0.00254425" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>mhgp8_plan_assignment_gate passed checks=1110 plan_allocation_failures=5 batch_allocation_failures=15 physical_comparisons=70 successful_assignments=2 self_operations=4 move_operations=4 moved_rejections=24
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_p0_gate" classname="mhgp8_p0_gate" time="1.43967" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>mhgp8_p0_gate passed checks=301329 plans=777 rejections=36 strict_mutants=3 killed_pairs=81574 retained_pairs=19124 credited_blocks=1253 noncredit_blocks=3224 leaf_pairs=5166 saturated_tasks=404
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_tube_gate" classname="mhgp8_tube_gate" time="0.730112" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>mhgp8_tube_gate passed checks=108730 small_plans=295 permutations=135 geometric_rejections=28995 retained_pairs=8073 missed_credits=10 mutants=5 fallback_cases=3 large_rails_residual=2916 wide_checks=108731 wide_small_plans=295 wide_permutations=135 wide_geometric_rejections=28995 wide_retained_pairs=8073 wide_missed_credits=10 wide_mutants=5 wide_fallback_cases=3
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_axis_q2_gate" classname="mhgp8_axis_q2_gate" time="1.02508" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>mhgp8_axis_q2_gate passed checks=1495478 small_plans=158 exact_census_pairs=58556 rejected_pairs=14752 retained_pairs=43804 permutations=72 model_mutants=5 conservative_cases=1 invalid_inputs=5 moved_rejections=3 large_grid_points=56000 large_grid_candidates=11067600 wide_checks=1495468 wide_small_plans=158 wide_exact_census_pairs=58556 wide_rejected_pairs=14752 wide_retained_pairs=43804 wide_permutations=72 wide_model_mutants=5 wide_large_grid_points=56000 wide_large_grid_candidates=11067600
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_axis_additive_gate" classname="mhgp8_axis_additive_gate" time="1.60687" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>mhgp8_axis_additive_gate passed checks=2947081 small_cases=81 checked_plans=650 census_pairs=29946 additive_prunes=572 intersection_prunes=1894 axis_queries=5569431 restriction_queries=55856 restriction_copies=15916 rejected_pairs=81918 retained_pairs=157988 core_partial=3 core_saturated=5 model_mutants=7 rejections=15 ownership_cases=2 large_points=56000 large_candidates=6759210 wide_checks=2944109 wide_small_cases=81 wide_checked_plans=648 wide_census_pairs=29946 wide_additive_prunes=572 wide_intersection_prunes=1894 wide_rejected_pairs=81610 wide_retained_pairs=157958 wide_model_mutants=7 wide_large_points=56000 wide_large_candidates=6759210
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_census_gate" classname="mhgp8_q2_census_gate" time="0.0865377" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>mhgp8_q2_census_gate passed checks=371159 cases=551 runs=1105 oracle_pairs=16754 oracle_sites=519396 prefilter_rejections=3001 census_rejections=9948 accepted=17606 shell_sites=103444 interior_sites=30450 uniform_credit=560 uniform_accept=288 uniform_reject=152 query_splits=10926 witness_splits=232476 split_after_credit=264 cursor_reuses=21852 cursor_advances=227247 deep_indices=3 root_savings=155 permutations=72 model_mutants=10 rejections=10 wide_cases=252 wide_permutations=72 wide_supports=8474 wide_diameter=206156857347
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_joint_bounds_gate" classname="mhgp8_q2_joint_bounds_gate" time="0.080442" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>mhgp8_q2_joint_bounds_gate passed checks=13040 cases=3370 oracle_values=412026 dense_values=120366 interior=45 exterior=355 shell=229 mixed=2741 swaps=3370 singleton_reductions=2416 symmetries=48 model_mutants=9 invalid_inputs=9 copies=3 cases18=174 random18=128 symmetries18=48 model_mutants18=4 prepared_bytes=192
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q2_prepared_bounds_gate" classname="mhgp8_q2_prepared_bounds_gate" time="0.0483212" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>mhgp8_q2_prepared_bounds_gate passed checks=62444 cases=1637 oracle_values=272541 dense_values=57675 interior=40 exterior=254 shell=158 mixed=1185 symmetries=48 model_mutants=8 invalid_inputs=6 copies=3 cases18=207 random18=160 symmetries18=48 model_mutants18=4 prepared_bytes=96
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q34_pair_bounds_gate" classname="mhgp8_q34_pair_bounds_gate" time="0.0106914" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_q34_pair_bounds_gate_v1","status":"PASS","checks":12170,"queries":320,"corner_evaluations":2560,"sample_evaluations":8640,"singleton_boxes":72,"nondegenerate_boxes":248,"half_integer_summits":223,"cross_zero_components":360,"positive_xi_lower":114,"wide_xi":72,"wide_h_squares":98,"reversed_pairs":320,"coincident_pairs":56,"extreme_cases":50,"axis_permutations":1,"invalid_inputs":6,"allocation_free_calls":1,"parallel_calls":4,"extreme_cases_u18":52,"wide_xi_u18":42,"wide_h_squares_u18":48}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_front_gate" classname="mhgp8_wspd_front_gate" time="1.99103" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>mhgp8_wspd_front_gate passed checks=6025142 clouds=40 spatial_nodes=2272 nonidentity_orders=70 oracle_point_tests=840678 front_runs=6247 rectangles=532225 nonsingleton_rectangles=15210 partial_lane_rectangles=7139 absent_lane_pairs=371129 residual_lane_pairs=1022428 q2_support_checks=355020 permutations=20 invalid_inputs=25 model_mutants=7 callback_exceptions=1 witness_searches=1080692 witness_descent_steps=11796708 proposed_sites=9095126 widened_runs=1920 extended_products=470392 extended_proposals=3609600 extended_rejections=51388 extension_only_pairs=19742 limit_bites=588 inheriting_runs=1920 inherited_credits=265800 inherited_duplicates=243792 inheritance_only_pairs=72 wide_clouds=10 max_depth_seen=54
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_front_jobs_gate" classname="mhgp8_wspd_front_jobs_gate" time="0.794347" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>mhgp8_wspd_front_jobs_gate passed checks=1656023 clouds=16 oracle_point_tests=76791 mono_runs=3361 plans=19681 ordered_replays=59043 job_runs=763011 zero_job_plans=1035 all_terminal_plans=6805 terminal_jobs=498987 pending_jobs=264024 sparse_masks=1152 filtered_cuts=276 mixed_lane_cuts=9 rejected_lane_pairs=69004 residual_lane_pairs=271658 partial_lane_rectangles=2012 nonsingleton_rectangles=19957 reentrant_runs=2 callback_failures=2 invalid_inputs=16 model_mutants=55 widened_plans=1920 extended_products=70383 limit_bites=111 inheriting_plans=4320 inherited_credits=33590 inherited_rejections=644 witness_carrying_jobs=6768 wide_clouds=4
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_front_dispatch_gate" classname="mhgp8_wspd_front_dispatch_gate" time="0.0766176" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_wspd_front_dispatch_gate_v1","status":"passed","public_status":"not_claimed","checks":111595,"oracle_sites":79935,"reference_runs":444,"dispatch_runs":442,"donations":2584,"full_refusals":6389,"reduced_rectangles":276,"masked_cases":5,"zero_seed_cases":32,"ownership_cases":1,"waits":125,"cross_worker_transfers":1,"callback_failures":1,"launch_failures":1,"invalid_inputs":4,"widened_cases":108,"extended_products":8654,"inheriting_cases":108,"inherited_credits":3252,"seed_witness_ranks":182,"donated_witness_ranks":244,"inherited_transfers":1,"wide_clouds":3,"wide_inherited_transfers":1}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_exact_ball_gate" classname="mhgp8_exact_ball_gate" time="0.0794113" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_exact_ball_gate_v1","status":"passed","checks":45879,"cases":2380,"accepted_q2":607,"accepted_q3":305,"accepted_q4":232,"rejected":1236,"rank_deficient":67,"boundary_centres":68,"exterior_centres":1101,"permutations":630,"powers":17007,"strict_interiors":3668,"shell_sites":4491,"strict_exteriors":8848,"same_ball_across_arities":3,"max_coefficient_bits":107,"max_power_bits":107,"max_naive_radius_bits":181,"translated":9,"judge_mutants":3,"wide_cases":573,"wide_accepted_q2":154,"wide_accepted_q3":73,"wide_accepted_q4":40,"wide_rejected":306,"wide_max_coefficient_bits":107,"wide_max_power_bits":107,"wide_max_naive_radius_bits":181,"wide_translated":6}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q4_family_gate" classname="mhgp8_q4_family_gate" time="0.622344" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_q4_family_gate_v1","status":"passed","checks":75655,"clouds":58,"runs":250,"primitive_sites":3747,"root_comparisons":57897,"oracle_sites":62200,"groups":2664,"mixed_groups":49,"decreasing_steps":808,"max_depth":35,"max_shell":30,"max_cross_bits":163,"permutations":48,"invalid_inputs":13,"callback_failures":1,"reentrant_calls":1,"parallel_calls":4,"judge_mutants":5,"wide_clouds":12,"wide_runs":44,"wide_max_cross_bits":163}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q34_seed_gate" classname="mhgp8_q34_seed_gate" time="0.320354" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_q34_seed_gate_v1","status":"passed","checks":31171,"calls":803,"oracle_completions":3156,"oracle_sites":31943,"candidates":639,"q3":528,"q4":111,"owner_refusals":5,"q3_rejected":186,"q4_without_q3":6,"late_valid":4,"max_shell":30,"canonical_refusals":43,"positive_refusals":747,"depth_refusals":1142,"exhaustive_clouds":19,"exhaustive_balls":354,"invalid_inputs":6,"callback_failures":1,"parallel_calls":4,"judge_mutants":3,"unexamined":106,"depth_drop_runs":37,"larger_than_minimal":1,"wide_exhaustive":6,"wide_random_clouds":3}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q34_cover_gate" classname="mhgp8_q34_cover_gate" time="0.0661612" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_q34_cover_gate_v1","status":"passed","checks":15548,"clouds":15,"covers":248,"edge_calls":248,"seed_calls":226,"reference_calls":226,"oracle_completions":1565,"oracle_sites":4276,"candidates":241,"q3":191,"q4":50,"max_shell":30,"cover_boundary":20,"cover_excluded":410,"cover_admitted_nodes":497,"cover_rejected_nodes":318,"cover_split_nodes":567,"reused_covers":48,"q4_without_q3":8,"invalid_root_depth_changed":1,"exhaustive_edges":228,"permutations":3,"invalid_inputs":9,"callback_failures":1,"parallel_calls":4,"judge_mutants":3,"edge_seed_count":218,"edge_pruned_sites":498,"covered_site_reads":2088,"wide_clouds":3,"wide_edge_calls":5}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q34_family_pruning_gate" classname="mhgp8_q34_family_pruning_gate" time="0.045661" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_q34_family_pruning_gate_v1","status":"passed","checks":6323,"primitive_calls":228,"refused":92,"certified_q3":230,"certified_q4":202,"positive_completions":120,"universal_inside_checks":190,"strict_boundary":18,"nonintegral_radius_bounds":40,"max_j_bits":110,"max_product_bits":109,"edge_calls":69,"seed_calls":141,"reference_calls":210,"oracle_completions":1033,"oracle_sites":2327,"candidates":115,"q3":77,"q4":38,"max_shell":30,"q3_only_rejections":11,"q4_only_rejections":9,"both_rejections":7,"neither_rejections":102,"saved_site_reads":68,"pool_calls":70,"exhaustive_edges":20,"permutations":217,"invalid_inputs":9,"callback_failures":1,"parallel_calls":4,"wide_primitive_calls":32,"wide_max_j_bits":110,"wide_max_product_bits":109,"max_sqrt_iterations":55}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q34_collective_gate" classname="mhgp8_q34_collective_gate" time="0.050615" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_q34_collective_gate_v1","status":"passed","checks":10096,"assessments":421,"collective_queries":99,"universal_shortcuts":38,"collective_gains":2,"tighter_bounds":58,"variance_roundings":76,"wide_variance_numerators":28,"q3_only_rejections":40,"q4_only_rejections":57,"both_rejections":20,"neither_rejections":156,"lower_tangencies":17,"upper_tangencies":10,"equal_mixed_roots":23,"endpoint_dips":24,"initial_saturation_drops":38,"exact_minimum_checks":99,"workspace_reuses":128,"option_calls":420,"zero_budget_calls":116,"jung_universal_pairs":105,"foreign_owner_calls":4,"edge_calls":292,"seed_calls":420,"reference_calls":105,"oracle_completions":462,"oracle_sites":1143,"candidates":324,"q3":264,"q4":60,"max_shell":30,"pool_calls":73,"exhaustive_edges":20,"permutations":1,"invalid_inputs":9,"callback_failures":1,"parallel_calls":4,"wide_fixture_calls":12}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q4_center_map_gate" classname="mhgp8_q4_center_map_gate" time="0.0361043" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_q4_center_map_gate_v1","status":"passed","checks":2361,"domains":17,"domain_sites":46,"empty_domains":1,"obtuse_completions":3,"lens_boundary":29,"outside_lens_inside":8,"admitted_domain_blocks":42,"rejected_domain_blocks":3,"maps":56,"queries":340,"rejected_queries":32,"unknown_queries":308,"requeries":170,"order_trials":20,"positive_presentations":164,"pool_depth_checks":328,"shallow_pool_roots":264,"disk_contacts":120,"line_skips":2369,"witness_tests":1952,"inside_credits":110,"outside_witnesses":398,"outside_cells":628,"deep_cells":110,"splits":742,"compressed_deep":2,"compressed_outside":0,"depth_stops":204,"budget_stops":48,"empty_stops":40,"max_depth":21,"rotations":4,"extreme_calls":8,"map_q3_only":6,"map_both_rejected":4,"bypass_calls":6,"deferred_calls":22,"edge_calls":57,"seed_calls":138,"reference_calls":138,"oracle_completions":736,"oracle_sites":1790,"candidates":156,"q3":108,"q4":48,"max_shell":30,"exhaustive_edges":15,"invalid_inputs":15,"callback_failures":1,"parallel_calls":...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q4_local_gate" classname="mhgp8_q4_local_gate" time="0.025783" status="fail">
+		<failure message="Failed"/>
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>q4 local gate: engine q3 center differs from the rational circumcenter in the plane chart
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q4_shallow_gate" classname="mhgp8_q4_shallow_gate" time="0.16386" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_q4_shallow_gate_v1","status":"passed","checks":3831,"sets":25,"oracle_layers":59,"boundary_groups":153,"degenerate_groups":66,"duplicate_ids":14,"retained_ids":297,"discarded_ids":32,"zero_sites":64,"positive_sites":180,"negative_sites":85,"query_centres":2060,"shallow_centres":584,"removed_nonpositive":2110,"strict_witness_checks":12576,"removed_shell_contacts":258,"t0_queries":25,"collinear_cases":4,"extreme_calls":8,"boundary_nonvertices":15,"coincident_duals":6,"saved_seed_sites":24,"allocation_failures":4,"removed_seed_rejections":24,"retained_seed_queries":119,"constant_shells":363,"mixed_sign_cases":8,"edge_calls":41,"seed_calls":143,"reference_calls":143,"oracle_completions":1922,"oracle_sites":7613,"candidates":87,"q4":87,"max_shell":30,"exhaustive_edges":10,"permutations":1,"invalid_inputs":9,"callback_failures":1,"parallel_calls":4,"wide_calls":2}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q4_window_gate" classname="mhgp8_q4_window_gate" time="0.0667144" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_q4_window_gate_v1","status":"passed","checks":6643,"families":187,"root_groups":385,"root_ids":1322,"constant_rejections":18,"empty_windows":7,"fixed_rejections":2,"point_windows":37,"point_windows_with_constants":6,"point_window_candidates":13,"lower_infinite":80,"upper_infinite":77,"both_infinite":62,"finite_intervals":30,"mixed_groups":44,"constant_inside":149,"constant_shells":585,"endpoint_ids":1059,"inner_ids":263,"fixed_inside":53,"outside_ids":134,"depth_rejected_groups":30,"removed_seed_rejections":12,"interior_bound_checks":162,"strict_shell_checks":385,"extreme_calls":12,"allocation_failures":4,"second_pass_sites":2290,"heap_comparisons":2249,"heap_replacements":479,"huge_k_calls":1,"isolated_point_fixtures":1,"wide_calls":8,"edge_calls":58,"seed_calls":199,"reference_calls":257,"oracle_completions":2246,"oracle_sites":6462,"candidates":99,"q4":99,"max_shell":30,"exhaustive_edges":10,"permutations":2,"invalid_inputs":7,"callback_failures":1,"parallel_calls":4}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_wspd_q34_gate" classname="mhgp8_wspd_q34_gate" time="3.61791" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_wspd_q34_gate_v1","status":"PASS","checks":19006,"global_calls":171,"oracle_clouds":62,"oracle_triangles":23418,"oracle_tetrahedra":143870,"oracle_balls":7836,"positive_triangles":10082,"positive_tetrahedra":8051,"canonical_groups":3043,"oracle_sites":217426,"front_replays":147,"expanded_pairs":3847,"fat_rectangles":100,"q3_only_edges":626,"q4_only_edges":306,"both_edges":2915,"split_q3_only_edges":188,"split_q4_only_edges":54,"q3_front_rejections":126,"q4_front_rejections":242,"xi_tests":3512,"q3_depth_rejections":3144,"q3_unread_sites":56570,"pure_calls":38,"sample_calls":133,"local_calls":87,"window_calls":84,"inactive_calls":24,"singleton_calls":4,"s8_calls":103,"s10_calls":34,"s12_calls":34,"strict_w3_contacts":1,"strict_w4_contacts":2,"independent_q2_cases":4,"independent_q3_cases":2,"isolated_cases":1,"extreme_calls":8,"candidates":2506,"q3":1231,"q4":1275,"max_shell":30,"permutations":2,"invalid_inputs":21,"allocation_failures":4,"callback_failures":1,"parallel_calls":4,"nested_calls"...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q34_witness_search_gate" classname="mhgp8_q34_witness_search_gate" time="0.0959986" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_q34_witness_search_gate_v1","status":"PASS","checks":113716,"queries":2352,"singleton_queries":2083,"rectangle_queries":269,"oracle_sites":247074,"oracle_pairs":24342,"q3_rejections":94,"q4_rejections":61,"q3_only_rejections":72,"q4_only_rejections":39,"both_rejections":22,"no_rejections":2219,"inactive_queries":882,"zero_mask_queries":510,"partial_q3":142,"partial_q4":66,"h_contacts":1,"q3_contacts":1,"q4_contacts":1,"wrong_alpha_cases":1,"positive_q4_external":1,"whole_admissions":31,"point_admission_cases":1,"node_rejections":6173,"saturations":155,"near_right_splits":1,"exhausted_queries":1351,"permutations":1,"extreme_queries":15,"invalid_inputs":11,"parallel_calls":4,"repeated_calls":1,"source_alias_checks":1,"left_tie_cases":1,"partial_admission_cases":1,"deep_index_cases":1,"peak_stack":55,"wide_predicate_cases":15283,"overflow_exceptions":1,"bounds_calls":14607,"legacy_overload_calls":4840,"exclusion_calls":4883,"affine_calls":4884,"mode_singletons":14527,"mode_rectangles":80,"local_...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q3_ball_census_gate" classname="mhgp8_q3_ball_census_gate" time="0.00687252" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_q3_ball_census_gate_v1","status":"PASS","checks":542,"calls":51,"oracle_sites":1608,"accepted":33,"rejected":18,"q2_balls":2,"q3_balls":6,"q4_balls":1,"shell_ids":241,"max_shell":30,"empty_shells":6,"integer_grid_contacts":1,"ceil_required":1,"floor_required":1,"whole_inside":8,"whole_nonnegative":18,"shell_exclusions":134,"saturating_overshoot":1,"prepared_unvisited":68,"near_first_cases":1,"singleton_cases":4,"extreme_cases":5,"wide_linear_squares":3,"permutations":1,"huge_threshold":1,"invalid_inputs":1,"allocation_failures":1,"allocation_free_rejections":1,"parallel_calls":4,"repeated_calls":1,"source_alias_checks":1,"overflow_exceptions":1,"wide_linear_squares_u18":3,"extreme_cases_u18":5}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q4_seed_cells_gate" classname="mhgp8_q4_seed_cells_gate" time="0.107245" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_q4_seed_cells_gate_v1","status":"PASS","checks":7299,"bounds_queries":528,"bounds_corners":2112,"bounds_site_checks":5184,"bounds_rounding":36,"bounds_wide":104,"bounds_contacts":116,"interior_minimum_cases":1,"axis_permutations":1,"extreme_cases":2,"edge_calls":144,"reference_calls":48,"oracle_completions":1472,"oracle_sites":3146,"candidates":162,"q4":162,"max_shell":30,"individual_calls":48,"live_calls":48,"product_calls":48,"work_checks":92,"cache_hits":468,"all_dead_cases":4,"dead_branch_cases":2,"live_skips":3915,"positive_rejections":826,"negative_rejections":26,"seed_splits":1903,"cell_splits":1141,"terminal_pairs":591,"family_builds":123,"max_stack":14,"cached_fixture":1,"obtuse_completions":1,"q4_without_q3":15,"inactive_calls":4,"exhaustive_edges":6,"permutations":2,"invalid_inputs":28,"allocation_failures":4,"late_allocation_failures":2,"callback_failures":1,"parallel_calls":4,"owner_resets":1}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q3_q4_owner_independence_gate" classname="mhgp8_q3_q4_owner_independence_gate" time="0.0883404" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"claim": "q2_survival_is_not_a_q3_q4_owner_filter", "deep_seed_fixtures": [{"kmax": 5, "q3_seed_depth": 4, "q4_depth": 0, "q4_power_distance_minus_radius": ["425", "426", "429", "434"], "seed_ids": [0, 1, 2], "seed_power_distance_minus_radius": ["-1050", "-1049", "-1046", "-1041"]}, {"kmax": 10, "q3_seed_depth": 9, "q4_depth": 0, "q4_power_distance_minus_radius": ["425", "426", "429", "434", "441", "450", "461", "474", "489"], "seed_ids": [0, 1, 2], "seed_power_distance_minus_radius": ["-1050", "-1049", "-1046", "-1041", "-1034", "-1025", "-1014", "-1001", "-986"]}], "fixtures": [{"center": ["1000", "3055/3", "1000"], "kmax": 5, "lane_rejection_threshold": 4, "q": 3, "q2_depth_at_least": 5, "radius_squared": "93025/9", "shell": [0, 1, 2], "sites": 8, "support_depth": 0, "unique_maximal_edge": [0, 1], "witness_powers": ["-1400", "-1401", "-1404", "-1409", "-1416"]}, {"center": ["1000", "1025", "1000"], "kmax": 5, "lane_rejection_threshold": 3, "q": 4, "q2_depth_at_least": 5, "radius_squared": "10625", "shell"...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_q3_q4_owner_independence_gate_optimized" classname="mhgp8_q3_q4_owner_independence_gate_optimized" time="0.0359628" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"claim": "q2_survival_is_not_a_q3_q4_owner_filter", "deep_seed_fixtures": [{"kmax": 5, "q3_seed_depth": 4, "q4_depth": 0, "q4_power_distance_minus_radius": ["425", "426", "429", "434"], "seed_ids": [0, 1, 2], "seed_power_distance_minus_radius": ["-1050", "-1049", "-1046", "-1041"]}, {"kmax": 10, "q3_seed_depth": 9, "q4_depth": 0, "q4_power_distance_minus_radius": ["425", "426", "429", "434", "441", "450", "461", "474", "489"], "seed_ids": [0, 1, 2], "seed_power_distance_minus_radius": ["-1050", "-1049", "-1046", "-1041", "-1034", "-1025", "-1014", "-1001", "-986"]}], "fixtures": [{"center": ["1000", "3055/3", "1000"], "kmax": 5, "lane_rejection_threshold": 4, "q": 3, "q2_depth_at_least": 5, "radius_squared": "93025/9", "shell": [0, 1, 2], "sites": 8, "support_depth": 0, "unique_maximal_edge": [0, 1], "witness_powers": ["-1400", "-1401", "-1404", "-1409", "-1416"]}, {"center": ["1000", "1025", "1000"], "kmax": 5, "lane_rejection_threshold": 3, "q": 4, "q2_depth_at_least": 5, "radius_squared": "10625", "shell"...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_docs_scope" classname="mhgp8_docs_scope" time="1.91178" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"checks": 27, "independent_audits_excluded": true, "missing_link_mutants_refuted": 1, "positive_validations": 1, "recursive_directories": 3, "required_entries": 8, "scope": "documentation_only_not_an_engine_test", "status": "passed", "writes": 0}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_docs_scope_optimized" classname="mhgp8_docs_scope_optimized" time="0.558142" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"checks": 27, "independent_audits_excluded": true, "missing_link_mutants_refuted": 1, "positive_validations": 1, "recursive_directories": 3, "required_entries": 8, "scope": "documentation_only_not_an_engine_test", "status": "passed", "writes": 0}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_probe_cli" classname="mhgp8_probe_cli" time="0.250148" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"status": "passed", "checks": 118, "scope": "p0_probe_cli"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_probe_cli_optimized" classname="mhgp8_probe_cli_optimized" time="0.258181" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"status": "passed", "checks": 118, "scope": "p0_probe_cli"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_batch_probe_cli" classname="mhgp8_batch_probe_cli" time="1.2544" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"status": "passed", "checks": 301, "literal_checksum_plans": 72, "historical_recipe_differentials": 12, "python_optimized": false, "scope": "paired_three_lane_probe_not_full_tower"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_batch_probe_cli_optimized" classname="mhgp8_batch_probe_cli_optimized" time="0.875659" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"status": "passed", "checks": 301, "literal_checksum_plans": 72, "historical_recipe_differentials": 12, "python_optimized": true, "scope": "paired_three_lane_probe_not_full_tower"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_axis_probe_cli" classname="mhgp8_axis_probe_cli" time="1.10392" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"status": "passed", "checks": 466, "literal_checksums": 144, "reduced_sheet_cases": 126, "single_q2_controls": 90, "python_optimized": false, "scope": "axis_probe_receipts_and_full_sheet_formula_not_full_hgp"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_axis_probe_cli_optimized" classname="mhgp8_axis_probe_cli_optimized" time="1.14506" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"status": "passed", "checks": 466, "literal_checksums": 144, "reduced_sheet_cases": 126, "single_q2_controls": 90, "python_optimized": true, "scope": "axis_probe_receipts_and_full_sheet_formula_not_full_hgp"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_additive_probe_cli" classname="mhgp8_additive_probe_cli" time="2.12182" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"status": "passed", "checks": 809, "literal_checksums": 396, "reduced_sheet_cases": 72, "intersection_improvements": 144, "independent_axis_controls": 198, "python_optimized": false, "scope": "additive_probe_receipts_and_sheet_formula_not_full_hgp"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_additive_probe_cli_optimized" classname="mhgp8_additive_probe_cli_optimized" time="2.1648" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;u16"/>
+		</properties>
+		<system-out>{"status": "passed", "checks": 809, "literal_checksums": 396, "reduced_sheet_cases": 72, "intersection_improvements": 144, "independent_axis_controls": 198, "python_optimized": true, "scope": "additive_probe_receipts_and_sheet_formula_not_full_hgp"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_float32_ball_selftest" classname="mhgp8_float32_ball_selftest" time="0.00608968" status="run">
+		<properties>
+			<property name="cmake_labels" value="float32;gate"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_float32_ball_selftest_v1","status":"passed","tests":1287,"query_checks":548,"invalid_modes":2,"nonfinite_rejections":18,"rounding_modes":4,"flush_modes":4,"concurrent_workers":4,"concurrent_queries":128,"support_bytes":128}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_float32_predicate_selftest" classname="mhgp8_float32_predicate_selftest" time="0.00224322" status="run">
+		<properties>
+			<property name="cmake_labels" value="float32;gate"/>
+		</properties>
+		<system-out>{"status":"passed","tests":49,"filter_accepts":15,"filter_fallbacks":15,"rounding_modes":4}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_float32_index_selftest" classname="mhgp8_float32_index_selftest" time="0.00256978" status="run">
+		<properties>
+			<property name="cmake_labels" value="float32;gate"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_float32_index_selftest_v1","status":"passed","tests":151,"invalid_inputs":67,"rounding_modes":4,"flush_modes":4,"concurrent_workers":4,"concurrent_queries":64}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_float32_key_selftest" classname="mhgp8_float32_key_selftest" time="0.00335976" status="run">
+		<properties>
+			<property name="cmake_labels" value="float32;gate"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_float32_key_selftest_v1","status":"passed","tests":52,"rounding_modes":4,"flush_modes":4,"concurrent_workers":4,"concurrent_iterations":64,"key_object_bytes":24}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_float32_q4_events_selftest" classname="mhgp8_float32_q4_events_selftest" time="0.00446684" status="run">
+		<properties>
+			<property name="cmake_labels" value="float32;gate"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_float32_q4_events_selftest_v1","status":"passed","tests":689,"queries":568,"equality_checks":104,"coplanar_rejections":4,"rejected_seeds":8,"invalid_modes":1,"counter_overflows":1,"owner_replacements":1,"rounding_modes":4,"flush_modes":4,"concurrent_workers":4,"concurrent_queries":32,"prepared_bytes":184}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_float32_q3_census_selftest" classname="mhgp8_float32_q3_census_selftest" time="0.00644782" status="run">
+		<properties>
+			<property name="cmake_labels" value="float32;gate"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_float32_q3_census_selftest_v1","status":"passed","tests":458,"callbacks_checked":7,"invalid_arguments":10,"callback_exceptions":1,"lifetime_checks":2,"concurrent_workers":4,"concurrent_calls":32,"rounding_modes":4,"flush_modes":4,"environment_calls":96,"bound_checks":224}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_fixed_signed_gate" classname="mhgp8_fixed_signed_gate" time="0.00241985" status="run">
+		<properties>
+			<property name="cmake_labels" value="float32;gate"/>
+		</properties>
+		<system-out>{"status":"passed","tests":948,"overflow_rejections":10,"invalid_rejections":6}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_fixed_signed_division_gate" classname="mhgp8_fixed_signed_division_gate" time="0.00471287" status="run">
+		<properties>
+			<property name="cmake_labels" value="float32;gate"/>
+		</properties>
+		<system-out>{"status":"passed","tests":9051,"exact_divisions":185,"gcd_checks":1124,"shift_checks":47,"nonexact_rejections":347,"invalid_divisor_rejections":9,"overflow_rejections":9}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_float32_index_bench_uniform_8000" classname="mhgp8_float32_index_bench_uniform_8000" time="0.00812053" status="run">
+		<properties>
+			<property name="cmake_labels" value="float32;gate"/>
+		</properties>
+		<system-out>{"schema":"mhgp8_float32_index_bench_v1","status":"passed","n":8000,"input_ms":0.223997,"point_bytes":12,"node_bytes":64,"records":[{"build_ms":5.417694,"query_ms":0.011341,"nodes":15999,"max_depth":13,"retained_bytes":1247936,"construction_peak_vector_bytes":1439936,"work":{"input_word_triples_copied":8000,"finite_points_validated":8000,"point_objects_constructed":8000,"presort_comparisons":367993,"duplicate_adjacent_tests":7999,"box_endpoint_reads":95994,"partition_rank_writes":103808,"partition_id_reads":519040,"partition_id_writes":415232,"inverse_rank_writes":8000,"nodes":15999,"leaves":8000},"query_work":{"node_visits":392,"axis_tests":961,"rejected_nodes":188,"accepted_nodes":16,"refined_nodes":188,"emitted_sites":8024,"callbacks":16},"point_checksum":"b52b4dba4761bb31","permutation_checksum":"781b517608c20358","query_id_sum":"0000000001e9bcc5","query_id_xor":"00000000000010c7"}]}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_float32_ball_gate" classname="mhgp8_float32_ball_gate" time="1.61269" status="run">
+		<properties>
+			<property name="cmake_labels" value="float32;gate"/>
+		</properties>
+		<system-out>{"binary": "/workspaces/E-HGP/build/v8_u18_resume_preflight_20260922/mhgp8_float32_ball_probe", "binary_sha256": "c277b0dd7e3d05b51932863f9b1cb9db14fc417a1db90ceaed4779ba7584a26f", "cases": 1636, "gate_sha256": "c22fa32d280beffaa3609ff3e07e7012a0fc58b31f7938c2a416b9d463899df8", "native_selftest": {"concurrent_queries": 128, "concurrent_workers": 4, "flush_modes": 4, "invalid_modes": 2, "nonfinite_rejections": 18, "query_checks": 548, "rounding_modes": 4, "schema": "mhgp8_float32_ball_selftest_v1", "status": "passed", "support_bytes": 128, "tests": 1287}, "optimized": false, "populations": {"3": {"invalid": 155, "power_exact_fallbacks": 159, "power_filter_accepts": 135, "preparation_exact_fallbacks": 95, "preparation_filter_accepts": 354, "signs": {"-1": 81, "0": 117, "1": 96}, "valid": 294}, "4": {"invalid": 456, "power_exact_fallbacks": 506, "power_filter_accepts": 225, "preparation_exact_fallbacks": 542, "preparation_filter_accepts": 645, "signs": {"-1": 160, "0": 408, "1": 163}, "valid": 731}}, "rejected_i...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_float32_predicate_gate" classname="mhgp8_float32_predicate_gate" time="0.782456" status="run">
+		<properties>
+			<property name="cmake_labels" value="float32;gate"/>
+		</properties>
+		<system-out>{"binary": "/workspaces/E-HGP/build/v8_u18_resume_preflight_20260922/mhgp8_float32_predicate_probe", "binary_sha256": "3463612e491d135037a177750d05f4b973e5d4b88defc8aaa61fe52905c6fbdd", "cases": 3923, "exact_fallbacks": 1208, "filtered_accepts": 2715, "gate_sha256": "7c43bbe7228f24c986a82facaaeba2ae67f91ad48fe83fc291ebc6d458c361f8", "input_sha256": "cd15026312243e8a977d324dbe97b64d1ce3eec47779c35c366dde4f9e86bee0", "native_selftest": {"filter_accepts": 15, "filter_fallbacks": 15, "rounding_modes": 4, "status": "passed", "tests": 49}, "optimized": false, "output_sha256": "b6e5c22dbae76274a380c9b8646ef6299cbd8a7e65e93c18f71a719ecb15caf5", "rejected_mutations": 5, "schema": "mhgp8_float32_predicate_gate_v1", "scope": "binary32_q2_power_primitive_not_pipeline_or_FULL", "signs": {"-1": 916, "0": 1208, "1": 1799}, "status": "passed"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_float32_index_gate" classname="mhgp8_float32_index_gate" time="1.03037" status="run">
+		<properties>
+			<property name="cmake_labels" value="float32;gate"/>
+		</properties>
+		<system-out>{"binary": "/workspaces/E-HGP/build/v8_u18_resume_preflight_20260922/mhgp8_float32_index_probe", "binary_sha256": "4712c79999f027aee67e932231bd10d68749931823bc8d50ddb4f55545f15280", "emitted_sites": 5605, "empty_queries": 65, "exponent_chain_depth": 9, "fixtures": 27, "gate_sha256": "4d968fcd2b31b8c1a1130d2d46b4d5f06dfa2cac216f2e1628eb236739553bd3", "internal_population": 7441, "native_selftest": {"concurrent_queries": 64, "concurrent_workers": 4, "flush_modes": 4, "invalid_inputs": 67, "rounding_modes": 4, "schema": "mhgp8_float32_index_selftest_v1", "status": "passed", "tests": 151}, "nodes": 2223, "optimized": false, "queries": 404, "refined_nodes": 2089, "rejected_inputs": 35, "rejected_mutations": 11, "schema": "mhgp8_float32_index_gate_v1", "scope": "binary32_immutable_index_and_box_queries_not_WSPD_census_or_FULL", "sites": 1125, "source_sha256": {"/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_predicates.hpp": "1f6175bb27cd7543c2d68916efabe68ebd23ac413dadc7aad82cabb30651997d", "/workspaces/E-HGP/mor...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_float32_q3_census_gate" classname="mhgp8_float32_q3_census_gate" time="1.13841" status="run">
+		<properties>
+			<property name="cmake_labels" value="float32;gate"/>
+		</properties>
+		<system-out>{"accepted_supports": 1798, "binary": "/workspaces/E-HGP/build/v8_u18_resume_preflight_20260922/mhgp8_float32_q3_census_probe", "binary_sha256": "4f15ede7bb8305e028f8b17f7d9aa6e01190f4a76020ca34a2d598fc8106ee9d", "coverage": {"count_inside_nodes": 9366, "count_splits": 30709, "invalid_supports": 3088, "relays_with_credit": 179, "saturated_supports": 1738, "shared_children_with_credit": 188, "shared_inside_nodes": 431, "shared_outside_nodes": 336, "shared_saturated_blocks": 60, "shared_splits": 1576, "shell_excluded_nodes": 15444, "shell_splits": 22256}, "fixtures": 18, "gate_sha256": "0c1f7e086f0fbf7db9b646794ae37986b0535e2499867ea7a14ad1ea5cf191cb", "invalid_inputs": 37, "max_shell": 30, "mutation_checks": 16, "optimized": false, "queries": 612, "schema": "mhgp8_float32_q3_census_gate_v1", "scope": "one_supplied_edge_and_seed_subtree_not_generator_or_FULL", "selftest": {"bound_checks": 224, "callback_exceptions": 1, "callbacks_checked": 7, "concurrent_calls": 32, "concurrent_workers": 4, "environment_calls":...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_float32_identity_gate" classname="mhgp8_float32_identity_gate" time="2.31635" status="run">
+		<properties>
+			<property name="cmake_labels" value="float32;gate"/>
+		</properties>
+		<system-out>{"binary": "/workspaces/E-HGP/build/v8_u18_resume_preflight_20260922/mhgp8_float32_key_probe", "binary_sha256": "7e66fc817db7437cecfeacf775933bb38a55ec0bef5fb55d3c4e73210453e927", "event_selftest": {"concurrent_queries": 32, "concurrent_workers": 4, "coplanar_rejections": 4, "counter_overflows": 1, "equality_checks": 104, "flush_modes": 4, "invalid_modes": 1, "owner_replacements": 1, "prepared_bytes": 184, "queries": 568, "rejected_seeds": 8, "rounding_modes": 4, "schema": "mhgp8_float32_q4_events_selftest_v1", "status": "passed", "tests": 689}, "events": {"cases": 960, "coplanar": 398, "invalid": 41, "orders": {"-1": 161, "0": 202, "1": 158}, "root_exact_fallbacks": 238, "root_filter_accepts": 283, "side_exact_fallbacks": 478, "side_filter_accepts": 1360, "sides": {"-1": 687, "0": 458, "1": 693}, "valid": 919}, "events_binary": "/workspaces/E-HGP/build/v8_u18_resume_preflight_20260922/mhgp8_float32_q4_events_probe", "events_binary_sha256": "e2f54060597d7e982adcc5fdb6c0a54827223917d2b29cce3cca25eed3f7ba9f", "...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_float32_ball_gate_optimized" classname="mhgp8_float32_ball_gate_optimized" time="1.59579" status="run">
+		<properties>
+			<property name="cmake_labels" value="float32;gate"/>
+		</properties>
+		<system-out>{"binary": "/workspaces/E-HGP/build/v8_u18_resume_preflight_20260922/mhgp8_float32_ball_probe", "binary_sha256": "c277b0dd7e3d05b51932863f9b1cb9db14fc417a1db90ceaed4779ba7584a26f", "cases": 1636, "gate_sha256": "c22fa32d280beffaa3609ff3e07e7012a0fc58b31f7938c2a416b9d463899df8", "native_selftest": {"concurrent_queries": 128, "concurrent_workers": 4, "flush_modes": 4, "invalid_modes": 2, "nonfinite_rejections": 18, "query_checks": 548, "rounding_modes": 4, "schema": "mhgp8_float32_ball_selftest_v1", "status": "passed", "support_bytes": 128, "tests": 1287}, "optimized": true, "populations": {"3": {"invalid": 155, "power_exact_fallbacks": 159, "power_filter_accepts": 135, "preparation_exact_fallbacks": 95, "preparation_filter_accepts": 354, "signs": {"-1": 81, "0": 117, "1": 96}, "valid": 294}, "4": {"invalid": 456, "power_exact_fallbacks": 506, "power_filter_accepts": 225, "preparation_exact_fallbacks": 542, "preparation_filter_accepts": 645, "signs": {"-1": 160, "0": 408, "1": 163}, "valid": 731}}, "rejected_in...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_float32_predicate_gate_optimized" classname="mhgp8_float32_predicate_gate_optimized" time="0.753702" status="run">
+		<properties>
+			<property name="cmake_labels" value="float32;gate"/>
+		</properties>
+		<system-out>{"binary": "/workspaces/E-HGP/build/v8_u18_resume_preflight_20260922/mhgp8_float32_predicate_probe", "binary_sha256": "3463612e491d135037a177750d05f4b973e5d4b88defc8aaa61fe52905c6fbdd", "cases": 3923, "exact_fallbacks": 1208, "filtered_accepts": 2715, "gate_sha256": "7c43bbe7228f24c986a82facaaeba2ae67f91ad48fe83fc291ebc6d458c361f8", "input_sha256": "cd15026312243e8a977d324dbe97b64d1ce3eec47779c35c366dde4f9e86bee0", "native_selftest": {"filter_accepts": 15, "filter_fallbacks": 15, "rounding_modes": 4, "status": "passed", "tests": 49}, "optimized": true, "output_sha256": "b6e5c22dbae76274a380c9b8646ef6299cbd8a7e65e93c18f71a719ecb15caf5", "rejected_mutations": 5, "schema": "mhgp8_float32_predicate_gate_v1", "scope": "binary32_q2_power_primitive_not_pipeline_or_FULL", "signs": {"-1": 916, "0": 1208, "1": 1799}, "status": "passed"}
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_float32_index_gate_optimized" classname="mhgp8_float32_index_gate_optimized" time="1.02059" status="run">
+		<properties>
+			<property name="cmake_labels" value="float32;gate"/>
+		</properties>
+		<system-out>{"binary": "/workspaces/E-HGP/build/v8_u18_resume_preflight_20260922/mhgp8_float32_index_probe", "binary_sha256": "4712c79999f027aee67e932231bd10d68749931823bc8d50ddb4f55545f15280", "emitted_sites": 5605, "empty_queries": 65, "exponent_chain_depth": 9, "fixtures": 27, "gate_sha256": "4d968fcd2b31b8c1a1130d2d46b4d5f06dfa2cac216f2e1628eb236739553bd3", "internal_population": 7441, "native_selftest": {"concurrent_queries": 64, "concurrent_workers": 4, "flush_modes": 4, "invalid_inputs": 67, "rounding_modes": 4, "schema": "mhgp8_float32_index_selftest_v1", "status": "passed", "tests": 151}, "nodes": 2223, "optimized": true, "queries": 404, "refined_nodes": 2089, "rejected_inputs": 35, "rejected_mutations": 11, "schema": "mhgp8_float32_index_gate_v1", "scope": "binary32_immutable_index_and_box_queries_not_WSPD_census_or_FULL", "sites": 1125, "source_sha256": {"/workspaces/E-HGP/morsehgp3D_v8/src/core/float32_predicates.hpp": "1f6175bb27cd7543c2d68916efabe68ebd23ac413dadc7aad82cabb30651997d", "/workspaces/E-HGP/mors...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_float32_q3_census_gate_optimized" classname="mhgp8_float32_q3_census_gate_optimized" time="1.15012" status="run">
+		<properties>
+			<property name="cmake_labels" value="float32;gate"/>
+		</properties>
+		<system-out>{"accepted_supports": 1798, "binary": "/workspaces/E-HGP/build/v8_u18_resume_preflight_20260922/mhgp8_float32_q3_census_probe", "binary_sha256": "4f15ede7bb8305e028f8b17f7d9aa6e01190f4a76020ca34a2d598fc8106ee9d", "coverage": {"count_inside_nodes": 9366, "count_splits": 30709, "invalid_supports": 3088, "relays_with_credit": 179, "saturated_supports": 1738, "shared_children_with_credit": 188, "shared_inside_nodes": 431, "shared_outside_nodes": 336, "shared_saturated_blocks": 60, "shared_splits": 1576, "shell_excluded_nodes": 15444, "shell_splits": 22256}, "fixtures": 18, "gate_sha256": "0c1f7e086f0fbf7db9b646794ae37986b0535e2499867ea7a14ad1ea5cf191cb", "invalid_inputs": 37, "max_shell": 30, "mutation_checks": 16, "optimized": true, "queries": 612, "schema": "mhgp8_float32_q3_census_gate_v1", "scope": "one_supplied_edge_and_seed_subtree_not_generator_or_FULL", "selftest": {"bound_checks": 224, "callback_exceptions": 1, "callbacks_checked": 7, "concurrent_calls": 32, "concurrent_workers": 4, "environment_calls": ...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_float32_identity_gate_optimized" classname="mhgp8_float32_identity_gate_optimized" time="2.31199" status="run">
+		<properties>
+			<property name="cmake_labels" value="float32;gate"/>
+		</properties>
+		<system-out>{"binary": "/workspaces/E-HGP/build/v8_u18_resume_preflight_20260922/mhgp8_float32_key_probe", "binary_sha256": "7e66fc817db7437cecfeacf775933bb38a55ec0bef5fb55d3c4e73210453e927", "event_selftest": {"concurrent_queries": 32, "concurrent_workers": 4, "coplanar_rejections": 4, "counter_overflows": 1, "equality_checks": 104, "flush_modes": 4, "invalid_modes": 1, "owner_replacements": 1, "prepared_bytes": 184, "queries": 568, "rejected_seeds": 8, "rounding_modes": 4, "schema": "mhgp8_float32_q4_events_selftest_v1", "status": "passed", "tests": 689}, "events": {"cases": 960, "coplanar": 398, "invalid": 41, "orders": {"-1": 161, "0": 202, "1": 158}, "root_exact_fallbacks": 238, "root_filter_accepts": 283, "side_exact_fallbacks": 478, "side_filter_accepts": 1360, "sides": {"-1": 687, "0": 458, "1": 693}, "valid": 919}, "events_binary": "/workspaces/E-HGP/build/v8_u18_resume_preflight_20260922/mhgp8_float32_q4_events_probe", "events_binary_sha256": "e2f54060597d7e982adcc5fdb6c0a54827223917d2b29cce3cca25eed3f7ba9f", "...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_lidar_precision_gate" classname="mhgp8_lidar_precision_gate" time="0.378879" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;lidar"/>
+		</properties>
+		<system-out>test_closure_failure_never_publishes_success (__main__.PrecisionPreparationTests.test_closure_failure_never_publishes_success) ... ok
+test_default_float32_prepare_read_preserves_raw_reflectance_bits (__main__.PrecisionPreparationTests.test_default_float32_prepare_read_preserves_raw_reflectance_bits) ... ok
+test_default_float32_subnormals_extremes_neighbours_and_signed_zero (__main__.PrecisionPreparationTests.test_default_float32_subnormals_extremes_neighbours_and_signed_zero) ... ok
+test_empty_pieces_and_nonnegative_contact_owner (__main__.PrecisionPreparationTests.test_empty_pieces_and_nonnegative_contact_owner) ... ok
+test_existing_output_not_overwritten_and_raw_change_rejected (__main__.PrecisionPreparationTests.test_existing_output_not_overwritten_and_raw_change_rejected) ... ok
+test_final_read_closure_and_extra_symlink_json_artifacts (__main__.PrecisionPreparationTests.test_final_read_closure_and_extra_symlink_json_artifacts) ... ok
+test_grid_default_1mm_2500um_01mm_fraction_partition_and_maps (__main__....
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_lidar_spatial_gate" classname="mhgp8_lidar_spatial_gate" time="2.95331" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;lidar"/>
+		</properties>
+		<system-out>test_disjoint_partitions_and_all_return_mappings (__main__.SpatialPreparationTests.test_disjoint_partitions_and_all_return_mappings) ... ok
+test_empty_pieces_and_negative_zero_have_unique_ownership (__main__.SpatialPreparationTests.test_empty_pieces_and_negative_zero_have_unique_ownership) ... ok
+test_exact_rounding_against_fraction (__main__.SpatialPreparationTests.test_exact_rounding_against_fraction) ... ok
+test_existing_directory_is_not_overwritten (__main__.SpatialPreparationTests.test_existing_directory_is_not_overwritten) ... ok
+test_invalid_raw_rejected_before_creating_output (__main__.SpatialPreparationTests.test_invalid_raw_rejected_before_creating_output) ... ok
+test_late_write_failure_keeps_failed_capture (__main__.SpatialPreparationTests.test_late_write_failure_keeps_failed_capture) ... ok
+test_preparation_hash_closure_cannot_persist_success (__main__.SpatialPreparationTests.test_preparation_hash_closure_cannot_persist_success) ... ok
+test_reader_checks_final_payload_hashes (__main__.SpatialPrepa...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_lidar_ground_test" classname="mhgp8_lidar_ground_test" time="0.568069" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;lidar"/>
+		</properties>
+		<system-out>test_all_ground_keeps_empty_seven_pieces_and_complete_original_maps (__main__.GroundPreparationTests.test_all_ground_keeps_empty_seven_pieces_and_complete_original_maps) ... ok
+test_descriptor_schema_strict_types_hashes_and_no_ambiguous_lists (__main__.GroundPreparationTests.test_descriptor_schema_strict_types_hashes_and_no_ambiguous_lists) ... ok
+test_existing_output_is_not_overwritten_and_stale_receipt_precedes_mkdir (__main__.GroundPreparationTests.test_existing_output_is_not_overwritten_and_stale_receipt_precedes_mkdir) ... ok
+test_final_reader_closure_extra_symlink_and_strict_json (__main__.GroundPreparationTests.test_final_reader_closure_extra_symlink_and_strict_json) ... ok
+test_float32_bits_extremes_subnormals_signed_zero_reflectance (__main__.GroundPreparationTests.test_float32_bits_extremes_subnormals_signed_zero_reflectance) ... ok
+test_grid_fusion_across_raw_sides_keeps_mixed_site (__main__.GroundPreparationTests.test_grid_fusion_across_raw_sides_keeps_mixed_site) ... ok
+test_grid_reuses_raw_trans...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_lidar_precision_gate_optimized" classname="mhgp8_lidar_precision_gate_optimized" time="0.388376" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;lidar"/>
+		</properties>
+		<system-out>test_closure_failure_never_publishes_success (__main__.PrecisionPreparationTests.test_closure_failure_never_publishes_success) ... ok
+test_default_float32_prepare_read_preserves_raw_reflectance_bits (__main__.PrecisionPreparationTests.test_default_float32_prepare_read_preserves_raw_reflectance_bits) ... ok
+test_default_float32_subnormals_extremes_neighbours_and_signed_zero (__main__.PrecisionPreparationTests.test_default_float32_subnormals_extremes_neighbours_and_signed_zero) ... ok
+test_empty_pieces_and_nonnegative_contact_owner (__main__.PrecisionPreparationTests.test_empty_pieces_and_nonnegative_contact_owner) ... ok
+test_existing_output_not_overwritten_and_raw_change_rejected (__main__.PrecisionPreparationTests.test_existing_output_not_overwritten_and_raw_change_rejected) ... ok
+test_final_read_closure_and_extra_symlink_json_artifacts (__main__.PrecisionPreparationTests.test_final_read_closure_and_extra_symlink_json_artifacts) ... ok
+test_grid_default_1mm_2500um_01mm_fraction_partition_and_maps (__main__....
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_lidar_spatial_gate_optimized" classname="mhgp8_lidar_spatial_gate_optimized" time="3.06293" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;lidar"/>
+		</properties>
+		<system-out>test_disjoint_partitions_and_all_return_mappings (__main__.SpatialPreparationTests.test_disjoint_partitions_and_all_return_mappings) ... ok
+test_empty_pieces_and_negative_zero_have_unique_ownership (__main__.SpatialPreparationTests.test_empty_pieces_and_negative_zero_have_unique_ownership) ... ok
+test_exact_rounding_against_fraction (__main__.SpatialPreparationTests.test_exact_rounding_against_fraction) ... ok
+test_existing_directory_is_not_overwritten (__main__.SpatialPreparationTests.test_existing_directory_is_not_overwritten) ... ok
+test_invalid_raw_rejected_before_creating_output (__main__.SpatialPreparationTests.test_invalid_raw_rejected_before_creating_output) ... ok
+test_late_write_failure_keeps_failed_capture (__main__.SpatialPreparationTests.test_late_write_failure_keeps_failed_capture) ... ok
+test_preparation_hash_closure_cannot_persist_success (__main__.SpatialPreparationTests.test_preparation_hash_closure_cannot_persist_success) ... ok
+test_reader_checks_final_payload_hashes (__main__.SpatialPrepa...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="mhgp8_lidar_ground_test_optimized" classname="mhgp8_lidar_ground_test_optimized" time="0.58886" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;lidar"/>
+		</properties>
+		<system-out>test_all_ground_keeps_empty_seven_pieces_and_complete_original_maps (__main__.GroundPreparationTests.test_all_ground_keeps_empty_seven_pieces_and_complete_original_maps) ... ok
+test_descriptor_schema_strict_types_hashes_and_no_ambiguous_lists (__main__.GroundPreparationTests.test_descriptor_schema_strict_types_hashes_and_no_ambiguous_lists) ... ok
+test_existing_output_is_not_overwritten_and_stale_receipt_precedes_mkdir (__main__.GroundPreparationTests.test_existing_output_is_not_overwritten_and_stale_receipt_precedes_mkdir) ... ok
+test_final_reader_closure_extra_symlink_and_strict_json (__main__.GroundPreparationTests.test_final_reader_closure_extra_symlink_and_strict_json) ... ok
+test_float32_bits_extremes_subnormals_signed_zero_reflectance (__main__.GroundPreparationTests.test_float32_bits_extremes_subnormals_signed_zero_reflectance) ... ok
+test_grid_fusion_across_raw_sides_keeps_mixed_site (__main__.GroundPreparationTests.test_grid_fusion_across_raw_sides_keeps_mixed_site) ... ok
+test_grid_reuses_raw_trans...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+</testsuite>

@@ -46,6 +46,35 @@ du worktree partagé peut contenir le travail non commis d'un autre acteur.
 Aucun octet de données KITTI dans la v9. Canal :
 `audits/COORDINATION_MORSEHGP3D_V9.md`.
 
+## Reprise v8 du 22 septembre 2026 (historique, constructeur)
+
+Section écrite par le constructeur de la v8 avant l'ouverture v9 et commise
+avec sa tranche. Sur la précision, la décision utilisateur datée du
+22 septembre citée dans la section v9 ci-dessus prévaut : la v9 travaille sur
+le moteur entier 18 bits, le float32 reste un profil qualifié hors contrat
+temps.
+
+Lire `morsehgp3D_v8/docs/REPRISE_U18_ET_ATLAS_SATURANT_20260922.md` avant
+les passations historiques. Le port entier 18 bits (`a74e90f2`) sert la grille
+OPTIONNELLE 1 mm ; il ne remplace ni le profil float32 par défaut ni le
+contrat brut entier ci-dessous. Les 42 gates extrêmes laissées en cours sont
+reprises, les fabriques numériques publiques protègent leur domaine.
+`saturate_deep=false` reste le défaut : opt-in d'atlas à K−1, résultat
+fragment EXACT ou certificat profond distinct, propriétaire conservé.
+`work.partition` inclut déjà tous les préfixes interrompus ;
+`saturation_work.prefixes` est un SOUS-ENSEMBLE, ne jamais l'ajouter.
+La sonde 8k/16k/32k nouvelle traite UNE arête avec sortie q4 vide connue,
+pas le générateur LiDAR. Captures séparées `receipts/u18_resume_20260922` ;
+le préflight mutable n'est pas une autorité. Les six mesures héritées
+`ground_18bits_20260922/u16_identity` restent u16/2 cm historiques.
+Le runner sans-sol v2 ne transforme pas cette archive en preuve LIVE ni ses
+449 compteurs appariés en nouvelle borne de croissance. Aucun contrat FULL,
+GPU/G4 ni sous-quadratique global nouvellement acquis. GCP non utilisé.
+Première ligne entière sans sol à1mm :08/000000,39885sites,K5/s8/W8,
+104,63s mur et812,82CPU·s ; q3/q4 seulement, saturation désactivée,
+hors segmentation/catalogue/FULL. Reçu v2 `ground_1mm_first` LIVE normal/−O,
+une répétition, zéro paire W1/W8 ; ne pas extrapoler à plusieurs trames.
+
 ## Contrat principal actif — trames SemanticKITTI entières
 
 Décision utilisateur du 21 septembre 2026 : le contrat principal remplace
@@ -59,7 +88,7 @@ ne remplace une trame entière. Décision de précision ultérieure du même
 jour : **conserver les coordonnées float32 originales par défaut** ; une
 grille isotrope est optionnelle, paramétrable, **1 mm par défaut**. Voir
 `morsehgp3D_v8/docs/PRECISION_FLOAT32_ET_GRILLE_20260921.md`.
-Le moteur existant demeure u16 ; ses mesures à 2 cm sont historiques,
+Le moteur entier est désormais élargi à u18 ; ses mesures à 2 cm sont historiques,
 sans transfert de qualification au profil float32 ou à la grille fine.
 Préparation d'entrée et primitive numérique ne qualifient pas le moteur.
 Ne jamais passer les nouveaux fichiers f32/u32 aux sondes binaires u16.

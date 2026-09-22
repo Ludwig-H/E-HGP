@@ -131,7 +131,10 @@ Points contact_eight() {
           {30,36,30},{36,30,30},{30,30,24},{32,32,32}};
 }
 
-void check_seed_bounds(SeedCellsGate& gate,const Points& points,Edge edge) {
+// proven_bits: the i64 domain of node bounds at the fixture's width. The u16
+// fixtures keep their historical 2^59 (M=65535); an 18-bit fixture is held to
+// the engine's proof at M=262143 (<2^62, q4_local_partition.cpp).
+void check_seed_bounds(SeedCellsGate& gate,const Points& points,Edge edge,unsigned proven_bits=59) {
   const auto index=mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
   const auto geometry=mhgp8::Q4LocalGeometry::make(mhgp8::Q34EdgeCover::make(index,edge),mhgp8::Q4CenterDomainMode::Disk);
   const SeedPlane plane(points[edge[0]],points[edge[1]]);
@@ -152,7 +155,7 @@ void check_seed_bounds(SeedCellsGate& gate,const Points& points,Edge edge) {
     if (low!=exact.first) ++gate.bounds_rounding;
     // Scale 2^20 keeps every partition bound inside the proven i64 domain
     // (<2^59, q4_local_partition.cpp); wide bounds count the large ones.
-    gate.require(oracle::absolute(Big(bound.minimum))<(Big(1)<<59) && oracle::absolute(Big(bound.maximum))<(Big(1)<<59),
+    gate.require(oracle::absolute(Big(bound.minimum))<(Big(1)<<proven_bits) && oracle::absolute(Big(bound.maximum))<(Big(1)<<proven_bits),
       "block bound left the proven i64 domain of the 2^20 scale");
     if (oracle::absolute(Big(bound.minimum))>=(Big(1)<<50) || oracle::absolute(Big(bound.maximum))>=(Big(1)<<50)) ++gate.bounds_wide;
     if (bound.minimum==0 || bound.maximum==0) ++gate.bounds_contacts;
@@ -170,6 +173,8 @@ void check_seed_bounds(SeedCellsGate& gate,const Points& points,Edge edge) {
     "node-cell bounds accepted an invalid spatial ID");
   auto invalid=Cell{};invalid.depth=45;
   gate.rejects([&] {static_cast<void>(geometry->node_bounds(0,invalid));},"node-cell bounds accepted depth45");
+  invalid=Cell{};invalid.depth=Cell::max_depth+1;
+  gate.rejects([&] {static_cast<void>(geometry->node_bounds(0,invalid));},"node-cell bounds accepted depth max_depth+1");
   invalid=Cell{};invalid.left=invalid.right+1;
   gate.rejects([&] {static_cast<void>(geometry->node_bounds(0,invalid));},"node-cell bounds accepted reversed cell");
 }
@@ -177,8 +182,8 @@ void check_seed_bounds(SeedCellsGate& gate,const Points& points,Edge edge) {
 void bounds_fixtures(SeedCellsGate& gate) {
   auto points=contact_eight();
   for (unsigned corner=0;corner<8;++corner)
-    add_unique(points,{static_cast<std::uint16_t>((corner&1U)?39:27),
-      static_cast<std::uint16_t>((corner&2U)?39:27),static_cast<std::uint16_t>((corner&4U)?33:21)});
+    add_unique(points,{static_cast<mhgp8::Coordinate>((corner&1U)?39:27),
+      static_cast<mhgp8::Coordinate>((corner&2U)?39:27),static_cast<mhgp8::Coordinate>((corner&4U)?33:21)});
   const auto index=mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
   const auto geometry=mhgp8::Q4LocalGeometry::make(mhgp8::Q34EdgeCover::make(index,{0,1}),mhgp8::Q4CenterDomainMode::Disk);
   const Cell single{0,0,-Cell::scale,-Cell::scale,Cell::max_depth,false,false};
@@ -193,6 +198,10 @@ void bounds_fixtures(SeedCellsGate& gate) {
   check_seed_bounds(gate,points,{1,0});++gate.axis_permutations;
   check_seed_bounds(gate,{{0,0,0},{65535,65534,65533},{65535,0,0},{0,65535,0},
     {0,0,65535},{65535,65535,65535},{32767,32768,32769}}, {0,1});++gate.extreme_cases;
+  // 18-bit twin: the u16 corners above are interior points since the
+  // widening; only this fixture reaches the 2^62 bound domain.
+  check_seed_bounds(gate,{{0,0,0},{262143,262142,262141},{262143,0,0},{0,262143,0},
+    {0,0,262143},{262143,262143,262143},{131071,131072,131073}}, {0,1},62);++gate.extreme_cases;
 }
 
 static_assert(std::is_trivially_copyable_v<mhgp8::Q4SeedCellWork> &&
@@ -280,7 +289,9 @@ void traversal_fixtures(SeedCellsGate& gate) {
     {{10,10,10},{16,16,10},{16,10,16},{10,16,16}},contact_eight(),coincident,obtuse,
     {{900,1000,1000},{1100,1000,1000},{1000,1120,1040},{1000,1120,960},
       {1000,1020,1105},{1001,1020,1105}},shell_fixture(),
-    {{0,0,0},{65535,65535,0},{65535,0,65535},{0,65535,65535},{32767,32767,32767}}};
+    {{0,0,0},{65535,65535,0},{65535,0,65535},{0,65535,65535},{32767,32767,32767}},
+    // 18-bit twin of the previous fixture (index 7), same K and options.
+    {{0,0,0},{262143,262143,0},{262143,0,262143},{0,262143,262143},{131071,131071,131071}}};
   for (std::size_t f=0;f<fixtures.size();++f) {
     for (const auto domain:{mhgp8::Q4CenterDomainMode::Disk,mhgp8::Q4CenterDomainMode::Positive})
       for (const std::size_t block:{2U,64U}) {
@@ -315,7 +326,8 @@ void traversal_fixtures(SeedCellsGate& gate) {
   local.max_depth=0;local.node_budget=1;local.z_test_budget=0;
   seed_cells_fixture(gate,shell,{0,1},5,local,2);
   local.max_depth=Cell::max_depth;local.node_budget=85;local.z_test_budget=0;
-  seed_cells_fixture(gate,fixtures.back(),{0,1},5,local,2);
+  seed_cells_fixture(gate,fixtures[6],{0,1},5,local,2);
+  seed_cells_fixture(gate,fixtures[7],{0,1},5,local,2);
   // Exhaustive edges of a tiny cloud, not enumeration in the product.
   for (std::size_t a=0;a<4;++a) for (std::size_t b=a+1;b<4;++b) {
     local.max_depth=2;local.node_budget=21;local.z_test_budget=32;

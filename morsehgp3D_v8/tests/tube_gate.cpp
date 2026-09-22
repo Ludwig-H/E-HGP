@@ -54,6 +54,38 @@ struct Gate {
   return {point.x, point.y, point.z};
 }
 
+// Coordinate profile of the synthetic fixtures. `narrow` reproduces the
+// historical 16-bit fixtures bit for bit; `wide` is their 18-bit twin: the
+// tube lines end exactly at coordinate_limit, the reflections use 262143,
+// the small literal fixtures are translated so that they touch the limit
+// and the rails end at the (limit, limit, limit) corner. Every twin passes
+// through the same direct cpp_int judges.
+struct Width {
+  unsigned base;        // origin of the tube_fixture lines
+  unsigned side_shift;  // x offset of factor B in tube_fixture
+  unsigned core_x;      // x of the universal core proposal
+  unsigned limit;       // reflection value
+  unsigned step;        // t of the {0, t, limit - t, limit} diagonal fixture
+  Point3 shift;         // translation of the small literal fixtures
+  Point3 rails_origin;  // translation of the rails fixtures
+};
+constexpr Width narrow{1000, 30000, 15000, 65535, 6000, {0, 0, 0}, {0, 0, 0}};
+constexpr Width wide{200000, 62120, 231072, 262143, 24000,
+                     {261139, 262133, 262133}, {197193, 257343, 262143}};
+static_assert(wide.limit == static_cast<unsigned>(mhgp8::coordinate_limit));
+// Orientation 3 adds the odd-site offset (y - base = 1) to x: the last B site
+// of the 12-site line reaches coordinate_limit exactly there.
+static_assert(wide.base + wide.side_shift + 2 * 11 + 1 == wide.limit);
+
+[[nodiscard]] RectangleInput shifted(RectangleInput input, const Point3& shift) {
+  for (auto& point : input.points) {
+    point = {static_cast<mhgp8::Coordinate>(point.x + shift.x),
+             static_cast<mhgp8::Coordinate>(point.y + shift.y),
+             static_cast<mhgp8::Coordinate>(point.z + shift.z)};
+  }
+  return input;
+}
+
 [[nodiscard]] Vector direction(const Box3& a, const Box3& b) {
   Vector result;
   for (std::size_t j = 0; j < 3; ++j) {
@@ -240,35 +272,38 @@ struct Signature {
   return signature;
 }
 
-[[nodiscard]] RectangleInput tube_fixture(unsigned count, unsigned orientation) {
+[[nodiscard]] RectangleInput tube_fixture(unsigned count, unsigned orientation,
+                                          const Width& w) {
   RectangleInput result;
   result.a = {0, count};
   result.b = {count, 2 * count};
   for (unsigned side = 0; side < 2; ++side) {
     for (unsigned i = 0; i < count; ++i) {
-      const unsigned x = 1000 + 2 * i + side * 30000;
-      const unsigned y = 1000 + i % 2;
-      const unsigned z = 1000 + (i / 2) % 2;
+      const unsigned x = w.base + 2 * i + side * w.side_shift;
+      const unsigned y = w.base + i % 2;
+      const unsigned z = w.base + (i / 2) % 2;
       std::array<unsigned, 3> values{x, y, z};
       switch (orientation) {
         case 0: break;
         case 1: values = {y, x, z}; break;
-        case 2: values = {65535 - x, y, z}; break;
-        case 3: values = {x + y - 1000, x + 1000 - y, z}; break;
-        case 4: values = {z, 65535 - y, x}; break;
+        case 2: values = {w.limit - x, y, z}; break;
+        case 3: values = {x + y - w.base, x + w.base - y, z}; break;
+        case 4: values = {z, w.limit - y, x}; break;
         default: throw std::invalid_argument("test orientation");
       }
-      result.points.push_back({static_cast<std::uint16_t>(values[0]),
-                                static_cast<std::uint16_t>(values[1]),
-                                static_cast<std::uint16_t>(values[2])});
+      result.points.push_back({static_cast<mhgp8::Coordinate>(values[0]),
+                                static_cast<mhgp8::Coordinate>(values[1]),
+                                static_cast<mhgp8::Coordinate>(values[2])});
     }
   }
   return result;
 }
 
-void regular_gate(Gate& gate) {
+void regular_gate(Gate& gate, const Width& w) {
+  const auto limit = static_cast<mhgp8::Coordinate>(w.limit);
+  const auto step = static_cast<mhgp8::Coordinate>(w.step);
   for (unsigned orientation = 0; orientation < 5; ++orientation) {
-    const auto input = tube_fixture(12, orientation);
+    const auto input = tube_fixture(12, orientation, w);
     auto permuted = input;
     std::reverse(permuted.points.begin(), permuted.points.begin() + 12);
     std::rotate(permuted.points.begin() + 12, permuted.points.begin() + 17,
@@ -288,52 +323,57 @@ void regular_gate(Gate& gate) {
     }
   }
   // Global offsets exercise negative cross coordinates and wide products.
-  RectangleInput wide{{{0, 0, 0}, {6000, 6000, 6000},
-                       {59535, 59535, 59535}, {65535, 65535, 65535}},
-                      {0, 2}, {2, 4}, {}};
-  const auto a = oracle::bounds(wide.points, 0, 2);
-  const auto b = oracle::bounds(wide.points, 2, 4);
+  RectangleInput diagonal{{{0, 0, 0}, {step, step, step},
+                           {static_cast<mhgp8::Coordinate>(limit - step),
+                            static_cast<mhgp8::Coordinate>(limit - step),
+                            static_cast<mhgp8::Coordinate>(limit - step)},
+                           {limit, limit, limit}},
+                          {0, 2}, {2, 4}, {}};
+  const auto a = oracle::bounds(diagonal.points, 0, 2);
+  const auto b = oracle::bounds(diagonal.points, 2, 4);
   const auto d = direction(a, b);
   Integer delta = 0;
   for (std::size_t j = 0; j < 3; ++j) {
-    delta += d[j] * 6000;
+    delta += d[j] * step;
   }
   gate.require(9 * delta * delta > std::numeric_limits<std::uint64_t>::max(),
                 "wide tube fixture does not exceed 64-bit products");
   for (const auto lane : lanes) {
-    static_cast<void>(check_small(gate, wide, 5, 8, lane));
+    static_cast<void>(check_small(gate, diagonal, 5, 8, lane));
   }
-  for (auto& point : wide.points) {
-    point.y = static_cast<std::uint16_t>(65535 - point.y);
+  for (auto& point : diagonal.points) {
+    point.y = static_cast<mhgp8::Coordinate>(limit - point.y);
   }
   for (const auto lane : lanes) {
-    static_cast<void>(check_small(gate, wide, 5, 8, lane));
+    static_cast<void>(check_small(gate, diagonal, 5, 8, lane));
   }
-  auto with_core = tube_fixture(6, 0);
+  auto with_core = tube_fixture(6, 0, w);
   with_core.core_candidates.push_back(with_core.points.size());
-  with_core.points.push_back({15000, 1000, 1000});
+  with_core.points.push_back({static_cast<mhgp8::Coordinate>(w.core_x),
+                              static_cast<mhgp8::Coordinate>(w.base),
+                              static_cast<mhgp8::Coordinate>(w.base)});
   for (const auto lane : lanes) {
     static_cast<void>(check_small(gate, with_core, 5, 8, lane));
     static_cast<void>(check_small(gate, with_core, 1, 8, lane));
   }
 }
 
-void equalities_and_mutants(Gate& gate) {
+void equalities_and_mutants(Gate& gate, const Width& w) {
   // Cone-bound equalities have a separate strict geometric margin. Delta=0
   // does not: it must still exclude the anchor and coincident projections.
   const std::array<Point3, 3> steps{Point3{1, 3, 0}, Point3{1, 1, 0},
                                      Point3{4, 3, 0}};
   for (std::size_t i = 0; i < lanes.size(); ++i) {
     const auto z = steps[i];
-    const RectangleInput input{{{0, 0, 0}, z, {1000, 0, 0},
-                                 {static_cast<std::uint16_t>(1000 + z.x), z.y, z.z}},
-                                {0, 2}, {2, 4}, {}};
+    const auto input = shifted(RectangleInput{{{0, 0, 0}, z, {1000, 0, 0},
+                                               {static_cast<mhgp8::Coordinate>(1000 + z.x), z.y, z.z}},
+                                              {0, 2}, {2, 4}, {}}, w.shift);
     const auto signature = check_small(gate, input, static_cast<unsigned>(lanes[i]) - 1,
                                        8, lanes[i]);
-    gate.require(signature.a.at({0, 0, 0}) == 1,
+    gate.require(signature.a.at(key(input.points[0])) == 1,
                   "cone equality was incorrectly replaced by strict inequality");
   }
-  const RectangleInput singleton{{{0, 0, 0}, {100, 0, 0}}, {0, 1}, {1, 2}, {}};
+  const auto singleton = shifted({{{0, 0, 0}, {100, 0, 0}}, {0, 1}, {1, 2}, {}}, w.shift);
   const auto one_a = oracle::bounds(singleton.points, 0, 1);
   const auto one_b = oracle::bounds(singleton.points, 1, 2);
   const auto self_mutant = direct_tubes(singleton, singleton.a, one_a, one_b,
@@ -346,8 +386,8 @@ void equalities_and_mutants(Gate& gate) {
   for (const auto lane : lanes) {
     static_cast<void>(check_small(gate, singleton, 5, 8, lane));
   }
-  const RectangleInput rank{{{0, 0, 0}, {1, 3, 0}, {1000, 0, 0}, {1001, 3, 0}},
-                             {0, 2}, {2, 4}, {}};
+  const auto rank = shifted({{{0, 0, 0}, {1, 3, 0}, {1000, 0, 0}, {1001, 3, 0}},
+                             {0, 2}, {2, 4}, {}}, w.shift);
   const auto rank_a = oracle::bounds(rank.points, 0, 2);
   const auto rank_b = oracle::bounds(rank.points, 2, 4);
   for (const auto lane : {Lane::Q3, Lane::Q4}) {
@@ -359,7 +399,7 @@ void equalities_and_mutants(Gate& gate) {
     ++gate.mutants;
     static_cast<void>(check_small(gate, rank, 5, 8, lane));
   }
-  const auto input = tube_fixture(12, 0);
+  const auto input = tube_fixture(12, 0, w);
   const auto owner = mhgp8::prepare_rectangle(input, 10, 8);
   const auto plan = mhgp8::make_credit_plan(owner, Lane::Q2, Strategy::Tubes);
   bool double_loses_valid_pair = false;
@@ -378,8 +418,8 @@ void equalities_and_mutants(Gate& gate) {
 
   // D/R = 5.2, hence 25*diag^2 passes but the required 100*diag^2 fails.
   // The wrong factor four actually credits a non-W4 site, not just a model mismatch.
-  const RectangleInput wrong_scale{
-      {{0, 2, 0}, {4, 5, 0}, {15, 1, 0}, {15, 6, 0}}, {0, 2}, {2, 4}, {}};
+  const auto wrong_scale = shifted(
+      {{{0, 2, 0}, {4, 5, 0}, {15, 1, 0}, {15, 6, 0}}, {0, 2}, {2, 4}, {}}, w.shift);
   const auto scale_a = oracle::bounds(wrong_scale.points, 0, 2);
   const auto scale_b = oracle::bounds(wrong_scale.points, 2, 4);
   gate.require(separated(scale_a, scale_b, 25) && !separated(scale_a, scale_b),
@@ -396,7 +436,7 @@ void equalities_and_mutants(Gate& gate) {
   }
 }
 
-void missed_witness_gate(Gate& gate) {
+void missed_witness_gate(Gate& gate, const Width& w) {
   RectangleInput cube;
   cube.a = {0, 8};
   cube.b = {8, 16};
@@ -404,9 +444,9 @@ void missed_witness_gate(Gate& gate) {
     for (unsigned x : {0U, 10U}) {
       for (unsigned y : {0U, 10U}) {
         for (unsigned z : {0U, 10U}) {
-          cube.points.push_back({static_cast<std::uint16_t>(200 * side + x),
-                                  static_cast<std::uint16_t>(y),
-                                  static_cast<std::uint16_t>(z)});
+          cube.points.push_back({static_cast<mhgp8::Coordinate>(200 * side + x + w.shift.x),
+                                  static_cast<mhgp8::Coordinate>(y + w.shift.y),
+                                  static_cast<mhgp8::Coordinate>(z + w.shift.z)});
         }
       }
     }
@@ -417,7 +457,7 @@ void missed_witness_gate(Gate& gate) {
                 "tube limitation fixture lost its true uncredited W4 witnesses or residual");
 }
 
-[[nodiscard]] RectangleInput rails_fixture(unsigned length) {
+[[nodiscard]] RectangleInput rails_fixture(unsigned length, const Point3& origin) {
   constexpr unsigned rails = 9;
   const unsigned shift = 48 * rails * length;
   RectangleInput result;
@@ -427,26 +467,27 @@ void missed_witness_gate(Gate& gate) {
   for (unsigned side = 0; side < 2; ++side) {
     for (unsigned rail = 0; rail < rails; ++rail) {
       for (unsigned x = 0; x <= length; ++x) {
-        result.points.push_back({static_cast<std::uint16_t>(side * shift + x),
-                                  static_cast<std::uint16_t>(4 * length * rail), 0});
+        result.points.push_back({static_cast<mhgp8::Coordinate>(origin.x + side * shift + x),
+                                  static_cast<mhgp8::Coordinate>(origin.y + 4 * length * rail),
+                                  origin.z});
       }
     }
   }
   return result;
 }
 
-void rails_gate(Gate& gate) {
+void rails_gate(Gate& gate, const Width& w) {
   // Exhaustive geometric judges are confined to this small member.
-  static_cast<void>(check_small(gate, rails_fixture(8), 10, 8, Lane::Q4));
+  static_cast<void>(check_small(gate, rails_fixture(8, w.rails_origin), 10, 8, Lane::Q4));
   // The 2718-point member is judged by the independently proved rail formula.
   // No A*A, B*B or A*B geometric enumeration is performed in this large test.
-  const auto input = rails_fixture(150);
+  const auto input = rails_fixture(150, w.rails_origin);
   const auto owner = mhgp8::prepare_rectangle(input, 10, 12);
   const auto tubes = mhgp8::make_credit_plan(owner, Lane::Q4, Strategy::Tubes);
   const auto pool = mhgp8::make_credit_plan(owner, Lane::Q4, Strategy::Pool);
   const auto dual = mhgp8::make_credit_plan(owner, Lane::Q4, Strategy::DualBlocks);
   for (std::size_t i = 0; i < input.a.size(); ++i) {
-    const auto x = static_cast<unsigned>(input.points[i].x);
+    const auto x = static_cast<unsigned>(input.points[i].x - w.rails_origin.x);
     gate.require(tubes.a_credits()[i] == std::min(8U, 150U - x) &&
                      tubes.b_credits()[i] == std::min(8U, x),
                   "large rails disagree with the proven per-coordinate credit formula");
@@ -473,14 +514,33 @@ int main(int argc, char** argv) {
   }
   try {
     Gate gate;
-    regular_gate(gate);
-    equalities_and_mutants(gate);
-    missed_witness_gate(gate);
-    rails_gate(gate);
+    regular_gate(gate, narrow);
+    equalities_and_mutants(gate, narrow);
+    missed_witness_gate(gate, narrow);
+    rails_gate(gate, narrow);
     gate.require(gate.small_plans >= 280 && gate.permutations == 135 &&
                      gate.geometric_rejections > 1000 && gate.retained_pairs > 100 &&
                      gate.missed_credits > 0 && gate.fallback_cases == 3 && gate.mutants == 5,
                   "tube gate non-vacuity failed");
+    // 18-bit twin: the same fixtures at the coordinate_limit corner, judged by
+    // the same direct cpp_int models, with their own separately pinned floors.
+    Gate wide_gate;
+    regular_gate(wide_gate, wide);
+    equalities_and_mutants(wide_gate, wide);
+    missed_witness_gate(wide_gate, wide);
+    rails_gate(wide_gate, wide);
+    wide_gate.require(wide_gate.small_plans >= 280 && wide_gate.permutations == 135 &&
+                          wide_gate.geometric_rejections > 1000 &&
+                          wide_gate.retained_pairs > 100 && wide_gate.missed_credits > 0 &&
+                          wide_gate.fallback_cases == 3 && wide_gate.mutants == 5,
+                      "wide tube gate non-vacuity failed");
+    // Translation and reflection invariance of the exact tube model: the
+    // sampled pair populations of the twin coincide with the 16-bit ones.
+    wide_gate.require(wide_gate.small_plans == gate.small_plans &&
+                          wide_gate.geometric_rejections == gate.geometric_rejections &&
+                          wide_gate.retained_pairs == gate.retained_pairs &&
+                          wide_gate.missed_credits == gate.missed_credits,
+                      "wide twin populations differ from the translated 16-bit fixtures");
     std::cout << "mhgp8_tube_gate passed checks=" << gate.checks
               << " small_plans=" << gate.small_plans
               << " permutations=" << gate.permutations
@@ -489,7 +549,15 @@ int main(int argc, char** argv) {
               << " missed_credits=" << gate.missed_credits
               << " mutants=" << gate.mutants
               << " fallback_cases=" << gate.fallback_cases
-              << " large_rails_residual=2916\n";
+              << " large_rails_residual=2916"
+              << " wide_checks=" << wide_gate.checks
+              << " wide_small_plans=" << wide_gate.small_plans
+              << " wide_permutations=" << wide_gate.permutations
+              << " wide_geometric_rejections=" << wide_gate.geometric_rejections
+              << " wide_retained_pairs=" << wide_gate.retained_pairs
+              << " wide_missed_credits=" << wide_gate.missed_credits
+              << " wide_mutants=" << wide_gate.mutants
+              << " wide_fallback_cases=" << wide_gate.fallback_cases << '\n';
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "mhgp8_tube_gate failed: " << error.what() << '\n';

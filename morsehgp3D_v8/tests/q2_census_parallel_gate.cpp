@@ -23,6 +23,18 @@ using mhgp8::Q2WitnessOrder;
 using mhgp8::u64;
 using Points = std::vector<Point3>;
 
+// Historical 16-bit border: the diagonal pair engraved at 65535 became an
+// interior fixture when the engine widened to 18 bits, so it is doubled by a
+// twin at coordinate_limit (plus an 18-bit corner cube). A support whose
+// squared diameter exceeds 3 * 65535^2 cannot exist on a u16 cloud; counting
+// those proves the twins exercise the widened range under parallel detach.
+constexpr mhgp8::Coordinate u16_limit = 65535;
+constexpr u64 u16_diameter_bound = 3 * u64{u16_limit} * u64{u16_limit};
+static_assert(u16_limit < mhgp8::coordinate_limit);
+bool wide_points(const Points& points) {
+  return std::any_of(points.begin(), points.end(), [](const Point3& p) { return p.x > u16_limit || p.y > u16_limit || p.z > u16_limit; });
+}
+
 struct Support {
   std::size_t a{}, b{};
   mhgp8::Q2BallKey key;
@@ -35,6 +47,7 @@ struct Gate {
   u64 checks{}, fixtures{}, references{}, resumptions{}, parallel_calls{}, supports{};
   u64 donations{}, multi_slot_outputs{}, multi_active_runs{}, callback_failures{}, invalid_inputs{};
   u64 max_shell{};
+  u64 wide_fixtures{}, wide_supports{}, wide_diameter{};  // 18-bit twins, counted apart.
   void require(bool value, const char* message) {
     ++checks;
     if (!value) throw std::runtime_error(message);
@@ -266,6 +279,8 @@ void compare(Gate& gate, const mhgp8::Q2CensusParallelResult& result,
                      std::binary_search(item.shell.begin(), item.shell.end(), item.b),
                  "parallel payload lost endpoints or duplicated shell/interior IDs");
     gate.max_shell = std::max(gate.max_shell, static_cast<u64>(item.shell.size()));
+    if (item.key.diameter_squared > u16_diameter_bound) ++gate.wide_supports;
+    gate.wide_diameter = std::max(gate.wide_diameter, item.key.diameter_squared);
   }
   gate.supports += all.size(); gate.donations += work.donations;
   if (nonempty > 1) ++gate.multi_slot_outputs;
@@ -277,37 +292,48 @@ struct Fixture { Points points; std::size_t anchor{}; std::vector<std::size_t> t
 
 std::vector<Fixture> fixtures() {
   std::vector<Fixture> result{
-      {{{0, 0, 0}, {65535, 65535, 65535}}, 0, {1}},
+      {{{0, 0, 0}, {u16_limit, u16_limit, u16_limit}}, 0, {1}},
+      // 18-bit twin of the u16 diagonal pair.
+      {{{0, 0, 0}, {mhgp8::coordinate_limit, mhgp8::coordinate_limit, mhgp8::coordinate_limit}}, 0, {1}},
       {{{0, 0, 0}, {5, 0, 0}, {10, 0, 0}, {11, 0, 0}}, 0, {2, 3}},
       {{{1000, 0, 0}, {0, 1, 0}, {0, 0, 0}}, 0, {1, 2}},
       {{{0, 1, 1}, {3, 2, 2}, {1, 0, 1}, {2, 3, 2}, {1, 1, 1}, {1, 1, 4}}, 0, {1}}};
   Fixture sphere;
   for (int x = -5; x <= 5; ++x) for (int y = -5; y <= 5; ++y) for (int z = -5; z <= 5; ++z)
     if (x*x + y*y + z*z == 25)
-      sphere.points.push_back({static_cast<std::uint16_t>(10 + x), static_cast<std::uint16_t>(10 + y),
-                               static_cast<std::uint16_t>(10 + z)});
+      sphere.points.push_back({static_cast<mhgp8::Coordinate>(10 + x), static_cast<mhgp8::Coordinate>(10 + y),
+                               static_cast<mhgp8::Coordinate>(10 + z)});
   sphere.targets = {sphere.points.size() - 1}; result.push_back(std::move(sphere));
+  // 18-bit corner cube (the same fixture as q2_census_resume_gate): corners
+  // at coordinate_limit, near-centre site at 131071, B = the far corner 7.
+  Fixture wide_corners;
+  for (unsigned bits = 0; bits < 8; ++bits)
+    wide_corners.points.push_back({static_cast<mhgp8::Coordinate>((bits & 1U) != 0 ? mhgp8::coordinate_limit : 0),
+                                   static_cast<mhgp8::Coordinate>((bits & 2U) != 0 ? mhgp8::coordinate_limit : 0),
+                                   static_cast<mhgp8::Coordinate>((bits & 4U) != 0 ? mhgp8::coordinate_limit : 0)});
+  wide_corners.points.push_back({131071, 131071, 131071}); wide_corners.targets = {7};
+  result.push_back(std::move(wide_corners));
   Fixture credited{{{0, 0, 0}, {500, 0, 0}}, 0, {}};
   for (unsigned x = 0; x < 64; ++x) {
     credited.targets.push_back(credited.points.size());
-    credited.points.push_back({static_cast<std::uint16_t>(1000 + x), 0, 0});
+    credited.points.push_back({static_cast<mhgp8::Coordinate>(1000 + x), 0, 0});
   }
   result.push_back(std::move(credited));
   Fixture deferred;
   for (unsigned x = 0; x < 4; ++x) for (unsigned y = 0; y < 4; ++y) for (unsigned z = 0; z < 4; ++z) {
     deferred.targets.push_back(deferred.points.size());
-    deferred.points.push_back({static_cast<std::uint16_t>(x), static_cast<std::uint16_t>(y),
-                               static_cast<std::uint16_t>(z)});
+    deferred.points.push_back({static_cast<mhgp8::Coordinate>(x), static_cast<mhgp8::Coordinate>(y),
+                               static_cast<mhgp8::Coordinate>(z)});
   }
   deferred.anchor = deferred.points.size(); deferred.points.push_back({1000, 1000, 1000});
   for (unsigned x = 997; x < 1000; ++x) for (unsigned y = 998; y < 1000; ++y)
-    deferred.points.push_back({static_cast<std::uint16_t>(x), static_cast<std::uint16_t>(y), 999});
+    deferred.points.push_back({static_cast<mhgp8::Coordinate>(x), static_cast<mhgp8::Coordinate>(y), 999});
   result.push_back(std::move(deferred));
   Fixture mixed;
   for (unsigned i = 0; i < 24; ++i)
-    mixed.points.push_back({static_cast<std::uint16_t>(137 * i),
-                            static_cast<std::uint16_t>((379 * i + 83) % 5000),
-                            static_cast<std::uint16_t>((811 * i + 97) % 4000)});
+    mixed.points.push_back({static_cast<mhgp8::Coordinate>(137 * i),
+                            static_cast<mhgp8::Coordinate>((379 * i + 83) % 5000),
+                            static_cast<mhgp8::Coordinate>((811 * i + 97) % 4000)});
   result.push_back(std::move(mixed));
   return result;
 }
@@ -318,6 +344,7 @@ void matrix(Gate& gate) {
     const auto rank = rank_of(*index, fixture.anchor);
     const auto b = select_node(*index, rank, fixture.targets);
     ++gate.fixtures;
+    if (wide_points(fixture.points)) ++gate.wide_fixtures;
     for (const unsigned k : {1U, 2U, 5U, 10U}) {
       const auto expected = oracle(gate, fixture.points, fixture.anchor, ids_of(*index, b), k);
       for (const auto sibling : {Q2SiblingMode::Disabled, Q2SiblingMode::Saturating})
@@ -467,6 +494,13 @@ int main() {
     failures_and_join(gate);
     gate.require(gate.donations > 0 && gate.multi_slot_outputs > 0 && gate.multi_active_runs > 0 && gate.max_shell >= 30,
                  "parallel gate was vacuous for donations, distinct callback workers, concurrent fragments or full shells");
+    // 18-bit twins: separate floor, the u16 floors above are unchanged. At
+    // least one parallel support must be impossible on a u16 cloud.
+    // The widest parallel diameter is the 18-bit diagonal 3 * 262143^2, read
+    // at execution from the scalar oracle comparison, never derived.
+    gate.require(gate.wide_fixtures == 2 && gate.wide_supports > 0 && gate.wide_diameter > u16_diameter_bound &&
+                     gate.wide_diameter == UINT64_C(206156857347),
+                 "parallel gate 18-bit twin non-vacuity failed");
     std::cout << "{\"status\":\"passed\",\"scope\":\"small_q2_anchor_parallel_not_full\","
               << "\"checks\":" << gate.checks << ",\"fixtures\":" << gate.fixtures
               << ",\"references\":" << gate.references << ",\"resumptions\":" << gate.resumptions
@@ -474,6 +508,8 @@ int main() {
               << ",\"donations\":" << gate.donations << ",\"multi_slot_outputs\":" << gate.multi_slot_outputs
               << ",\"multi_active_runs\":" << gate.multi_active_runs << ",\"max_shell\":" << gate.max_shell
               << ",\"callback_failures\":" << gate.callback_failures << ",\"invalid_inputs\":" << gate.invalid_inputs
+              << ",\"wide_fixtures\":" << gate.wide_fixtures << ",\"wide_supports\":" << gate.wide_supports
+              << ",\"wide_diameter\":" << gate.wide_diameter
               << ",\"partial_launch_failure_injected\":false}\n";
     return 0;
   } catch (const std::exception& error) {

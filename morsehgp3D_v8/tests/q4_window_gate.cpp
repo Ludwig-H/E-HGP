@@ -50,6 +50,8 @@ struct WindowGate : Gate {
   u64 fixed_rejections{},second_pass_sites{},heap_comparisons{},heap_replacements{};
   u64 huge_k_calls{};
   u64 isolated_point_fixtures{};
+  // 18-bit twin fixtures (coordinate_limit = 262143), counted apart.
+  u64 wide_calls{};
 };
 
 Rational window_fraction(Big n,Big d) {
@@ -302,17 +304,27 @@ Output window_pipeline(WindowGate& gate,const Points& points,Edge edge,std::size
 Points window_rings() {
   Points result{{20,30,30},{40,30,30}};
   for(const int radius:{11,12,15}) {
-    result.push_back({30,static_cast<std::uint16_t>(30+radius),30});
-    result.push_back({30,static_cast<std::uint16_t>(30-radius),30});
-    result.push_back({30,30,static_cast<std::uint16_t>(30+radius)});
-    result.push_back({30,30,static_cast<std::uint16_t>(30-radius)});
+    result.push_back({30,static_cast<mhgp8::Coordinate>(30+radius),30});
+    result.push_back({30,static_cast<mhgp8::Coordinate>(30-radius),30});
+    result.push_back({30,30,static_cast<mhgp8::Coordinate>(30+radius)});
+    result.push_back({30,30,static_cast<mhgp8::Coordinate>(30-radius)});
   }
   return result;
 }
 
 Points window_point_fixture(std::size_t k) {
   Points points{{900,1000,1000},{1100,1000,1000},{1000,1040,1120},{1000,1100,1000},{1000,900,1000}};
-  for(std::size_t j=0;j<k-3;++j) points.push_back({static_cast<std::uint16_t>(1000+j),1000,1000});
+  for(std::size_t j=0;j<k-3;++j) points.push_back({static_cast<mhgp8::Coordinate>(1000+j),1000,1000});
+  return points;
+}
+// 18-bit twin: the same configuration translated by +261000 on every axis so
+// that its top site reaches 262120 < coordinate_limit. Translation preserves
+// the point window, the depth K-3 and the five-site shell; the ball key is
+// taken from the rational oracle at run time, never written by hand.
+Points window_point_fixture18(std::size_t k) {
+  Points points{{261900,262000,262000},{262100,262000,262000},{262000,262040,262120},
+    {262000,262100,262000},{262000,261900,262000}};
+  for(std::size_t j=0;j<k-3;++j) points.push_back({static_cast<mhgp8::Coordinate>(262000+j),262000,262000});
   return points;
 }
 
@@ -366,10 +378,23 @@ void window_fixtures(WindowGate& gate) {
       return candidate.key==key && candidate.depth==k-3 && candidate.shell==std::vector<std::size_t>{0,1,2,3,4};
     }),"point window with T-1 constants lost its exact positive sphere and five-site shell");
   }
+  for(const auto k:{5U,10U}) {
+    const auto points=window_point_fixture18(k);
+    const auto output=window_pipeline(gate,points,{0,1},k);
+    // Circumsphere of the four fixed sites (full rank, positivity not claimed):
+    // the emitted candidate must carry exactly this rational key.
+    const auto sphere=oracle::make(select(points,std::array<std::size_t,4>{0,1,2,3}),false);
+    gate.require(sphere.ball.has_value(),"18-bit point window fixture lost its rational circumsphere");
+    gate.require(std::any_of(output.begin(),output.end(),[&](const auto& candidate) {
+      return candidate.key==sphere.ball->coefficients && candidate.depth==k-3 &&
+        candidate.shell==std::vector<std::size_t>{0,1,2,3,4};
+    }),"18-bit point window with T-1 constants lost its exact positive sphere and five-site shell");
+    ++gate.wide_calls;
+  }
   for(const auto k:{3U,5U,10U}) {
     auto points=shell30();
     if(k==5) {points.push_back({20,17,19});points.push_back({20,17,21});}
-    if(k==10) for(std::uint16_t z=17;z<=23;++z) points.push_back({20,17,z});
+    if(k==10) for(mhgp8::Coordinate z=17;z<=23;++z) points.push_back({20,17,z});
     static_cast<void>(window_pipeline(gate,points,{0,1},k));
   }
   const Points extremes{{0,0,0},{65535,65534,65533},{0,65535,65535},
@@ -378,6 +403,16 @@ void window_fixtures(WindowGate& gate) {
     {32000,32000,32000},{65535,65535,65535},{65000,30000,30000},{100,25000,62000}};
   for(const auto* points:{&extremes,&oblique}) for(const auto k:{3U,5U,10U}) {
     static_cast<void>(window_pipeline(gate,*points,{0,1},k));++gate.extreme_calls;
+  }
+  // 18-bit twins (coordinate_limit = 262143; 262142/262141 and 131071 replace
+  // 65534/65533 and 32767): the corners above are interior sites since the
+  // widening. Same rational window oracle, same ledgers.
+  const Points extremes18{{0,0,0},{262143,262142,262141},{0,262143,262143},
+    {262143,0,262143},{131071,131071,131071},{262143,0,0}};
+  const Points oblique18{{0,0,0},{240000,260000,4000},{248000,2000,256000},{8000,252000,248000},
+    {128000,128000,128000},{262143,262143,262143},{260000,120000,120000},{400,100000,248000}};
+  for(const auto* points:{&extremes18,&oblique18}) for(const auto k:{3U,5U,10U}) {
+    static_cast<void>(window_pipeline(gate,*points,{0,1},k));++gate.extreme_calls;++gate.wide_calls;
   }
   for(std::size_t a=0;a!=late_valid.size();++a) for(std::size_t b=a+1;b!=late_valid.size();++b) {
     static_cast<void>(window_pipeline(gate,late_valid,{a,b},5));++gate.exhaustive_edges;
@@ -467,6 +502,7 @@ int main(int argc,char** argv) {
     gate.require(gate.q4>0 && gate.max_shell>=30 && gate.exhaustive_edges==10 && gate.isolated_point_fixtures==1 &&
       gate.allocation_failures==4 && gate.callback_failures==1 && gate.parallel_calls==4,
       "nonvacuity: window output, shell, ownership or lifetime classes missing");
+    gate.require(gate.wide_calls==8,"nonvacuity: window 18-bit twin fixtures missing");
     std::cout<<"{\"schema\":\"mhgp8_q4_window_gate_v1\",\"status\":\"passed\"";
 #define MHGP8_WINDOW_FIELD(name) std::cout<<",\"" #name "\":"<<gate.name
     MHGP8_WINDOW_FIELD(checks);MHGP8_WINDOW_FIELD(families);MHGP8_WINDOW_FIELD(root_groups);MHGP8_WINDOW_FIELD(root_ids);
@@ -478,7 +514,7 @@ int main(int argc,char** argv) {
     MHGP8_WINDOW_FIELD(depth_rejected_groups);MHGP8_WINDOW_FIELD(removed_seed_rejections);MHGP8_WINDOW_FIELD(interior_bound_checks);
     MHGP8_WINDOW_FIELD(strict_shell_checks);MHGP8_WINDOW_FIELD(extreme_calls);MHGP8_WINDOW_FIELD(allocation_failures);
     MHGP8_WINDOW_FIELD(second_pass_sites);MHGP8_WINDOW_FIELD(heap_comparisons);MHGP8_WINDOW_FIELD(heap_replacements);MHGP8_WINDOW_FIELD(huge_k_calls);
-    MHGP8_WINDOW_FIELD(isolated_point_fixtures);
+    MHGP8_WINDOW_FIELD(isolated_point_fixtures);MHGP8_WINDOW_FIELD(wide_calls);
     MHGP8_WINDOW_FIELD(edge_calls);MHGP8_WINDOW_FIELD(seed_calls);MHGP8_WINDOW_FIELD(reference_calls);
     MHGP8_WINDOW_FIELD(oracle_completions);MHGP8_WINDOW_FIELD(oracle_sites);MHGP8_WINDOW_FIELD(candidates);MHGP8_WINDOW_FIELD(q4);
     MHGP8_WINDOW_FIELD(max_shell);MHGP8_WINDOW_FIELD(exhaustive_edges);MHGP8_WINDOW_FIELD(permutations);

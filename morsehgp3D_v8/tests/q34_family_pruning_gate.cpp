@@ -46,6 +46,9 @@ struct Gate {
   u64 candidates{}, q3{}, q4{}, max_shell{}, q3_only_rejections{}, q4_only_rejections{};
   u64 both_rejections{}, neither_rejections{}, saved_site_reads{}, pool_calls{};
   u64 exhaustive_edges{}, permutations{}, invalid_inputs{}, callback_failures{}, parallel_calls{};
+  // 18-bit twins (a seed coordinate above 65535): separate bit maxima whose
+  // floors are provably unreachable by 16-bit seeds (see selftest()).
+  u64 wide_primitive_calls{}, wide_max_j_bits{}, wide_max_product_bits{}, max_sqrt_iterations{};
   void require(bool condition, const char* message) {
     ++checks;
     if (!condition) throw std::runtime_error(message);
@@ -82,6 +85,7 @@ Edge owner(const Points& points, std::span<const std::size_t> ids) {
     }
   return result;
 }
+bool wide_point(Point3 point) { return point.x > 65535 || point.y > 65535 || point.z > 65535; }
 Big ceil_sqrt(const Big& value) {
   Big lower = 0, upper = 1;
   while (upper * upper < value) upper *= 2;
@@ -95,6 +99,7 @@ Big ceil_sqrt(const Big& value) {
 
 void check_certificate(Gate& gate, const Points& points, Ids ids) {
   const auto a = points[ids[0]], b = points[ids[1]], x = points[ids[2]];
+  const bool wide = wide_point(a) || wide_point(b) || wide_point(x);
   const auto face = oracle::make(select(points, ids));
   const auto diameter = distance_squared(a, b);
   const bool wanted = face.ball.has_value() && distance_squared(a, x) <= diameter &&
@@ -103,6 +108,7 @@ void check_certificate(Gate& gate, const Points& points, Ids ids) {
   ++gate.primitive_calls;
   gate.require(certificate.has_value() == wanted, "certificate domain differs from rational positive face and maximum edge");
   if (!certificate) { ++gate.refused; return; }
+  if (wide) ++gate.wide_primitive_calls;
   const auto d = oracle::difference(b, a), u = oracle::difference(x, a);
   const oracle::Vector normal{d[1] * u[2] - d[2] * u[1],
                               d[2] * u[0] - d[0] * u[2],
@@ -119,9 +125,13 @@ void check_certificate(Gate& gate, const Points& points, Ids ids) {
                "integer Jung bound differs from multiprecision ceil sqrt");
   gate.require(2 * limit * limit >= j && 2 * (limit - 1) * (limit - 1) < j,
                "ceil sqrt is not minimal");
-  gate.require(certificate->sqrt_iterations() > 0 && certificate->sqrt_iterations() <= 52,
+  // The bisection starts at high=2^ceil(bits(J/2)/2)<=2^58 at 18 bits (52 at
+  // 16 bits: the 18-bit twins exceed the historical bound, widened 22 September 2026).
+  gate.require(certificate->sqrt_iterations() > 0 && certificate->sqrt_iterations() <= 58,
                "integer sqrt iteration ledger");
+  gate.max_sqrt_iterations = std::max(gate.max_sqrt_iterations, certificate->sqrt_iterations());
   gate.max_j_bits = std::max(gate.max_j_bits, oracle::bits(j));
+  if (wide) gate.wide_max_j_bits = std::max(gate.wide_max_j_bits, oracle::bits(j));
   if (2 * limit * limit != j) ++gate.nonintegral_radius_bounds;
   std::vector<bool> universal;
   for (const auto z : points) {
@@ -145,6 +155,7 @@ void check_certificate(Gate& gate, const Points& points, Ids ids) {
     }
     if (p == 0) gate.require(!flags.q3 && !flags.q4, "face shell credited as interior");
     gate.max_product_bits = std::max(gate.max_product_bits, oracle::bits(limit * oracle::absolute(side)));
+    if (wide) gate.wide_max_product_bits = std::max(gate.wide_max_product_bits, oracle::bits(limit * oracle::absolute(side)));
     universal.push_back(flags.q4);
   }
   for (std::size_t y = 0; y != points.size(); ++y) {
@@ -251,13 +262,19 @@ Output oracle_seed(Gate& gate, const Points& points, Edge edge, std::size_t x, s
 }
 
 void primitive_fixtures(Gate& gate) {
-  const std::array<Points, 7> fixtures{{
+  // The two 65535/32767 corner fixtures are followed by their 18-bit twins
+  // (262143/131071 corners, and the spread fixture scaled by four).
+  const std::array<Points, 9> fixtures{{
     {{0,0,0},{2,2,0},{2,0,2},{0,2,2},{1,1,1},{2,0,0}},
     {{0,0,0},{4,4,0},{4,0,3},{0,4,3},{2,2,2},{3,1,1}},
     {{0,0,0},{65535,65535,0},{65535,0,65535},{0,65535,65535},
      {32767,32767,32767},{65535,0,0}},
     {{0,0,0},{60000,65000,1000},{62000,500,64000},{2000,63000,62000},
      {32000,32000,32000},{65535,65535,65535}},
+    {{0,0,0},{262143,262143,0},{262143,0,262143},{0,262143,262143},
+     {131071,131071,131071},{262143,0,0}},
+    {{0,0,0},{240000,260000,4000},{248000,2000,256000},{8000,252000,248000},
+     {128000,128000,128000},{262143,262143,262143}},
     {{900,1000,1000},{1100,1000,1000},{1000,1120,1040},{1000,1120,960},
      {1000,1020,1105},{1001,1020,1105}},
     {{0,0,0},{2,0,0},{1,3,0},{0,1,0},{3,0,0}},
@@ -402,7 +419,7 @@ Output check_edge(Gate& gate, const Points& points, Edge edge, std::size_t kmax,
     const bool queried = active3 && !pool->ids().empty();
     gate.require(p.seed_queries == static_cast<u64>(queried) &&
                  p.certificate_builds == static_cast<u64>(queried) &&
-                 (queried ? p.sqrt_iterations > 0 && p.sqrt_iterations <= 52 : p.sqrt_iterations == 0),
+                 (queried ? p.sqrt_iterations > 0 && p.sqrt_iterations <= 58 : p.sqrt_iterations == 0),
                  "pruning seed/certificate/sqrt ledger");
     gate.require(p.q3_only_survivors == static_cast<u64>(queried && !reject3 && (!active4 || reject4)) &&
                  p.q4_only_survivors == static_cast<u64>(queried && active4 && reject3 && !reject4) &&
@@ -458,7 +475,7 @@ Points shell30() {
     for (int y = -5; y <= 5; ++y)
       for (int z = -5; z <= 5; ++z) {
         if (x*x+y*y+z*z != 25) continue;
-        const Point3 point{static_cast<std::uint16_t>(20+x),static_cast<std::uint16_t>(20+y),static_cast<std::uint16_t>(20+z)};
+        const Point3 point{static_cast<mhgp8::Coordinate>(20+x),static_cast<mhgp8::Coordinate>(20+y),static_cast<mhgp8::Coordinate>(20+z)};
         if (std::find(points.begin(),points.end(),point) == points.end()) points.push_back(point);
       }
   return points;
@@ -475,7 +492,9 @@ void pipeline_fixtures(Gate& gate) {
   const Points late_valid{{0,0,0},{2,2,0},{2,2,2},{2,0,2},{0,2,2}};
   const Points extreme{{0,0,0},{65535,65535,0},{65535,0,65535},{0,65535,65535},
     {32767,32767,32767},{65535,0,0}};
-  for (const auto* points : {&q3_only,&both,&late_valid,&extreme})
+  const Points extreme18{{0,0,0},{262143,262143,0},{262143,0,262143},{0,262143,262143},
+    {131071,131071,131071},{262143,0,0},{65535,65535,65535}};
+  for (const auto* points : {&q3_only,&both,&late_valid,&extreme,&extreme18})
     for (const auto k : {3U,5U})
       for (const auto budget : {0U,1U,32U}) static_cast<void>(check_edge(gate,*points,{0,1},k,budget));
   for (const auto budget : {0U,3U,32U}) static_cast<void>(check_edge(gate,shell30(),{0,1},5,budget));
@@ -547,6 +566,10 @@ int selftest() {
     gate.strict_boundary > 0 && gate.nonintegral_radius_bounds > 0 &&
     gate.max_j_bits >= 96 && gate.max_product_bits >= 96,
     "primitive non-vacuity floors");
+  // 16-bit seeds give J<=3*diam^3<=81*65535^6<2^102.4 and limit*|side|<2^101.6,
+  // so bits above 103 and 102 can only come from the 18-bit twins.
+  gate.require(gate.wide_primitive_calls > 0 && gate.wide_max_j_bits > 103 && gate.wide_max_product_bits > 102,
+    "18-bit primitive non-vacuity floors");
   gate.require(gate.q3_only_rejections > 0 && gate.q4_only_rejections > 0 &&
     gate.both_rejections > 0 && gate.neither_rejections > 0 && gate.saved_site_reads > 0 &&
     gate.q3 > 0 && gate.q4 > 0 && gate.max_shell >= 30 && gate.exhaustive_edges > 0,
@@ -566,6 +589,8 @@ int selftest() {
   MHGP8_PRUNING_FIELD(saved_site_reads); MHGP8_PRUNING_FIELD(pool_calls); MHGP8_PRUNING_FIELD(exhaustive_edges);
   MHGP8_PRUNING_FIELD(permutations); MHGP8_PRUNING_FIELD(invalid_inputs);
   MHGP8_PRUNING_FIELD(callback_failures); MHGP8_PRUNING_FIELD(parallel_calls);
+  MHGP8_PRUNING_FIELD(wide_primitive_calls); MHGP8_PRUNING_FIELD(wide_max_j_bits); MHGP8_PRUNING_FIELD(wide_max_product_bits);
+  MHGP8_PRUNING_FIELD(max_sqrt_iterations);
 #undef MHGP8_PRUNING_FIELD
   std::cout << "}\n";
   return 0;

@@ -38,6 +38,10 @@ struct Gate {
   u64 checks{}, clouds{}, oracle_pairs{}, oracle_sites{}, mono_runs{}, coarse_runs{}, donate_runs{}, default_runs{};
   u64 supports{}, max_shell{}, donations{}, full_refusals{}, empty_runs{}, selected64{}, filtered64{}, passthrough{};
   u64 joint_runs{}, pairwise_runs{}, callback_failures{}, reentrant_runs{}, index_resets{}, invalid_inputs{}, mutants{};
+  // The 18-bit twin corpus is counted under its own exact pins so that every
+  // u16 pin (clouds, default_runs, max_shell) keeps its historical value.
+  bool wide{};
+  u64 clouds18{}, default_runs18{}, supports18{}, max_shell18{};
   void require(bool condition, const char* message) {
     ++checks;
     if (!condition) throw std::runtime_error(message);
@@ -66,7 +70,7 @@ void sort(Output& output) {
 
 // Independent test-only scalar all-pairs/all-sites oracle. Its dot-product
 // formula and ball key never call product predicates, census or front code.
-// Every subtraction is promoted; |H| <= 3*65535^2 fits signed int64_t.
+// Every subtraction is promoted; |H| <= 3*262143^2 < 2^38 fits signed int64_t.
 Output oracle(Gate& gate, const Points& points) {
   gate.require(!points.empty() && points.size() <= 140, "dynamic oracle exceeded n<=140");
   Output result;
@@ -100,8 +104,9 @@ Output accepted(const Output& all, unsigned k) {
 void check_output(Gate& gate, Output& output, const Output& expected) {
   sort(output);
   gate.require(output == expected, "dynamic key/interior/full-shell/support multiset differs from the independent oracle");
-  for (const auto& item : output) gate.max_shell = std::max(gate.max_shell, static_cast<u64>(item.shell.size()));
-  gate.supports += output.size();
+  auto& max_shell = gate.wide ? gate.max_shell18 : gate.max_shell;
+  for (const auto& item : output) max_shell = std::max(max_shell, static_cast<u64>(item.shell.size()));
+  (gate.wide ? gate.supports18 : gate.supports) += output.size();
 }
 
 struct Options {
@@ -208,7 +213,7 @@ mhgp8::WspdQ2ParallelResult run(Gate& gate, const mhgp8::Q2CensusIndexPtr& index
                  "default/coarse mode allocated or used the dynamic dispatcher");
     ++gate.coarse_runs;
   }
-  gate.default_runs += static_cast<u64>(implicit);
+  (gate.wide ? gate.default_runs18 : gate.default_runs) += static_cast<u64>(implicit);
   gate.empty_runs += static_cast<u64>(result.jobs == 0);
   gate.passthrough += result.pool_work.passthrough_rectangles;
   if (options.pool == 64) { gate.selected64 += result.pool_work.selected_rectangles; gate.filtered64 += result.pool_work.filtered_pairs; }
@@ -219,32 +224,62 @@ mhgp8::WspdQ2ParallelResult run(Gate& gate, const mhgp8::Q2CensusIndexPtr& index
 
 Points axis() { return {{0, 0, 0}, {1, 0, 0}, {99, 0, 0}, {100, 0, 0}}; }
 
+using Coordinate = mhgp8::Coordinate;
+
+// The u16 corpus is a pinned recipe (same clouds, same floors); only the cast
+// type follows the engine's Coordinate. Its 65535/32767 sites are interior
+// points of the 18-bit domain and no longer exercise any bound.
 std::vector<Points> fixtures() {
   std::vector<Points> result{{{7, 8, 9}}, {{0, 0, 0}, {65535, 65535, 65535}}, axis()};
   Points shell, cube, rows, random, clusters;
   for (int x = -5; x <= 5; ++x) for (int y = -5; y <= 5; ++y) for (int z = -5; z <= 5; ++z)
     if (x * x + y * y + z * z == 25)
-      shell.push_back({static_cast<std::uint16_t>(x + 8), static_cast<std::uint16_t>(y + 8), static_cast<std::uint16_t>(z + 8)});
+      shell.push_back({static_cast<Coordinate>(x + 8), static_cast<Coordinate>(y + 8), static_cast<Coordinate>(z + 8)});
   for (unsigned bits = 0; bits < 8; ++bits)
-    cube.push_back({static_cast<std::uint16_t>((bits & 1U) * 65535), static_cast<std::uint16_t>(((bits >> 1U) & 1U) * 65535),
-                    static_cast<std::uint16_t>(((bits >> 2U) & 1U) * 65535)});
+    cube.push_back({static_cast<Coordinate>((bits & 1U) * 65535), static_cast<Coordinate>(((bits >> 1U) & 1U) * 65535),
+                    static_cast<Coordinate>(((bits >> 2U) & 1U) * 65535)});
   cube.push_back({32767, 32768, 32767});
   for (unsigned side = 0; side < 2; ++side) for (unsigned i = 0; i < 8; ++i)
-    rows.push_back({static_cast<std::uint16_t>(1000 + side * 59000), static_cast<std::uint16_t>(i), 0});
+    rows.push_back({static_cast<Coordinate>(1000 + side * 59000), static_cast<Coordinate>(i), 0});
   std::uint32_t state = 971;
   for (unsigned i = 0; i < 13; ++i) {
-    state = state * 1664525U + 1013904223U; const auto y = static_cast<std::uint16_t>(state >> 16U);
+    state = state * 1664525U + 1013904223U; const auto y = static_cast<Coordinate>(state >> 16U);
     state = state * 1664525U + 1013904223U;
-    random.push_back({static_cast<std::uint16_t>(i * 4093), y, static_cast<std::uint16_t>(state >> 16U)});
+    random.push_back({static_cast<Coordinate>(i * 4093), y, static_cast<Coordinate>(state >> 16U)});
   }
   for (unsigned side = 0; side < 2; ++side) for (unsigned i = 0; i < 65; ++i)
-    clusters.push_back({static_cast<std::uint16_t>(side * 60000 + i), 17, 31});
+    clusters.push_back({static_cast<Coordinate>(side * 60000 + i), 17, 31});
   result.push_back(shell); result.push_back(cube); result.push_back(rows); result.push_back(random); result.push_back(clusters);
   return result;
 }
 
-void corpus(Gate& gate) {
-  const auto clouds = fixtures();
+// 18-bit twins of the extreme fixtures, graved at the engine limit 262143:
+// the space diagonal, the eight corners with the near-center site, a random
+// cloud whose own recipe draws 18 bits (>> 14U, separate seed) and two
+// 65-site clusters whose far cluster ends exactly at the limit. They pass
+// the same oracle, work-identity and metadata checks as the u16 corpus.
+static_assert(mhgp8::coordinate_limit == 262143, "18-bit fixtures are graved at the engine limit");
+std::vector<Points> fixtures18() {
+  std::vector<Points> result{{{0, 0, 0}, {262143, 262143, 262143}}};
+  Points cube, random, clusters;
+  for (unsigned bits = 0; bits < 8; ++bits)
+    cube.push_back({static_cast<Coordinate>((bits & 1U) * 262143), static_cast<Coordinate>(((bits >> 1U) & 1U) * 262143),
+                    static_cast<Coordinate>(((bits >> 2U) & 1U) * 262143)});
+  cube.push_back({131071, 131072, 131071});
+  std::uint32_t state = 1811;
+  for (unsigned i = 0; i < 13; ++i) {
+    state = state * 1664525U + 1013904223U; const auto y = static_cast<Coordinate>(state >> 14U);
+    state = state * 1664525U + 1013904223U;
+    random.push_back({static_cast<Coordinate>(i * 16381), y, static_cast<Coordinate>(state >> 14U)});
+  }
+  for (unsigned side = 0; side < 2; ++side) for (unsigned i = 0; i < 65; ++i)
+    clusters.push_back({static_cast<Coordinate>(side * 262079 + i), 17, 31});
+  result.push_back(cube); result.push_back(random); result.push_back(clusters);
+  return result;
+}
+
+void corpus(Gate& gate, const std::vector<Points>& clouds, bool wide) {
+  gate.wide = wide;
   for (std::size_t cloud = 0; cloud < clouds.size(); ++cloud) {
     const auto& points = clouds[cloud];
     const auto all = oracle(gate, points);
@@ -270,8 +305,9 @@ void corpus(Gate& gate) {
         static_cast<void>(run(gate, index, baseline, options, {WspdQ2ScheduleMode::Donate, 1, 1}, 1, 1));
       }
     }
-    ++gate.clouds;
+    ++(wide ? gate.clouds18 : gate.clouds);
   }
+  gate.wide = false;
 }
 
 struct CallbackFailure {};
@@ -384,7 +420,7 @@ int main(int argc, char** argv) {
   }
   try {
     Gate gate;
-    corpus(gate); callbacks(gate); invalids(gate);
+    corpus(gate, fixtures(), false); corpus(gate, fixtures18(), true); callbacks(gate); invalids(gate);
     gate.require(gate.clouds == 8 && gate.oracle_sites > 1000000 && gate.mono_runs >= 60 &&
                      gate.coarse_runs >= 60 && gate.donate_runs >= 130 && gate.default_runs == 8 &&
                      gate.supports > 1000 && gate.max_shell == 30 && gate.empty_runs > 0 && gate.selected64 > 0 &&
@@ -392,6 +428,11 @@ int main(int argc, char** argv) {
                      gate.callback_failures == 1 && gate.reentrant_runs == 1 && gate.index_resets == 1 &&
                      gate.invalid_inputs == 8 && gate.mutants == 4,
                  "dynamic q2 gate lost a declared non-vacuity floor");
+    // Separate floors of the 18-bit twin corpus; max_shell18 is the full
+    // shell of the 262143-cube diagonal as reported by the scalar oracle.
+    gate.require(gate.clouds18 == 4 && gate.default_runs18 == 4 && gate.supports18 > 0 && gate.max_shell18 == 8 &&
+                     !gate.wide,
+                 "dynamic q2 gate lost an 18-bit twin fixture floor");
     // Donation/full-queue positives are deterministic in the companion
     // dispatch gate. Here scheduling counters are observations, not stable
     // signatures to demand from every run of a parallel scheduler.
@@ -407,7 +448,9 @@ int main(int argc, char** argv) {
               << ",\"joint_runs\":" << gate.joint_runs << ",\"pairwise_runs\":" << gate.pairwise_runs
               << ",\"callback_failures\":" << gate.callback_failures << ",\"reentrant_runs\":" << gate.reentrant_runs
               << ",\"index_resets\":" << gate.index_resets << ",\"invalid_inputs\":" << gate.invalid_inputs
-              << ",\"mutants\":" << gate.mutants << "}\n";
+              << ",\"mutants\":" << gate.mutants << ",\"clouds18\":" << gate.clouds18
+              << ",\"default_runs18\":" << gate.default_runs18 << ",\"supports18\":" << gate.supports18
+              << ",\"max_shell18\":" << gate.max_shell18 << "}\n";
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "mhgp8_wspd_q2_dynamic_gate failed: " << error.what() << '\n';

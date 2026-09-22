@@ -1,0 +1,21 @@
+{
+  "name": "scan",
+  "command": [
+    "/home/codespace/.python/current/bin/python3",
+    "/workspaces/E-HGP/morsehgp3D_v8/bench/run_u18_resume_checks.py",
+    "scan",
+    "--build",
+    "/workspaces/E-HGP/build/v8_u18_resume_release_20260922",
+    "--compiler",
+    "/usr/bin/g++",
+    "--output",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/u18_resume_20260922/release/dependencies"
+  ],
+  "started": "2026-09-22T10:16:52.474129+00:00",
+  "exit_code": 0,
+  "stdout": "{\"dependencies\": 1172, \"status\": \"passed\", \"units\": 113}\n",
+  "stderr": "",
+  "stdout_base64": "eyJkZXBlbmRlbmNpZXMiOiAxMTcyLCAic3RhdHVzIjogInBhc3NlZCIsICJ1bml0cyI6IDExM30K",
+  "stderr_base64": "",
+  "finished": "2026-09-22T10:17:15.317735+00:00"
+}

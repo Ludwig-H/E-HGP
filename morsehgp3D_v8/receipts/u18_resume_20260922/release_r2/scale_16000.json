@@ -1,0 +1,15 @@
+{
+  "name": "scale_16000",
+  "command": [
+    "/workspaces/E-HGP/build/v8_u18_resume_release_r2_20260922/mhgp8_q4_saturating_atlas_gate",
+    "--scale",
+    "16000"
+  ],
+  "started": "2026-09-22T10:46:45.158867+00:00",
+  "exit_code": 0,
+  "stdout": "{\"schema\":\"mhgp8_q4_saturating_atlas_scale_v1\",\"scope\":\"one_supplied_edge_empty_q4_stream_not_pipeline\",\"n\":16000,\"kmax\":10,\"outputs\":0,\"prepare_ms\":5.84016,\"baseline_ms\":0.006452,\"saturated_ms\":0.001132,\"baseline_tests\":7,\"saturated_total_tests\":4,\"baseline_node_visits\":7,\"saturated_total_node_visits\":4,\"baseline_frontier_copies\":2,\"saturated_total_frontier_copies\":1,\"unvisited_site_mass\":16,\"certificates\":1,\"baseline_peak_build_bytes\":104,\"saturated_peak_build_bytes\":96}\n",
+  "stderr": "",
+  "stdout_base64": "eyJzY2hlbWEiOiJtaGdwOF9xNF9zYXR1cmF0aW5nX2F0bGFzX3NjYWxlX3YxIiwic2NvcGUiOiJvbmVfc3VwcGxpZWRfZWRnZV9lbXB0eV9xNF9zdHJlYW1fbm90X3BpcGVsaW5lIiwibiI6MTYwMDAsImttYXgiOjEwLCJvdXRwdXRzIjowLCJwcmVwYXJlX21zIjo1Ljg0MDE2LCJiYXNlbGluZV9tcyI6MC4wMDY0NTIsInNhdHVyYXRlZF9tcyI6MC4wMDExMzIsImJhc2VsaW5lX3Rlc3RzIjo3LCJzYXR1cmF0ZWRfdG90YWxfdGVzdHMiOjQsImJhc2VsaW5lX25vZGVfdmlzaXRzIjo3LCJzYXR1cmF0ZWRfdG90YWxfbm9kZV92aXNpdHMiOjQsImJhc2VsaW5lX2Zyb250aWVyX2NvcGllcyI6Miwic2F0dXJhdGVkX3RvdGFsX2Zyb250aWVyX2NvcGllcyI6MSwidW52aXNpdGVkX3NpdGVfbWFzcyI6MTYsImNlcnRpZmljYXRlcyI6MSwiYmFzZWxpbmVfcGVha19idWlsZF9ieXRlcyI6MTA0LCJzYXR1cmF0ZWRfcGVha19idWlsZF9ieXRlcyI6OTZ9Cg==",
+  "stderr_base64": "",
+  "finished": "2026-09-22T10:46:45.167248+00:00"
+}

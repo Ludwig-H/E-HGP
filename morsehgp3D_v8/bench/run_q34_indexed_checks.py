@@ -71,6 +71,7 @@ BALL_GATE_FIELDS = ("checks calls oracle_sites accepted rejected q2_balls q3_bal
     "saturating_overshoot prepared_unvisited near_first_cases singleton_cases extreme_cases wide_linear_squares "
     "permutations huge_threshold invalid_inputs allocation_failures allocation_free_rejections parallel_calls "
     "repeated_calls source_alias_checks overflow_exceptions").split()
+BALL_GATE_U18_ADDED = ("wide_linear_squares_u18", "extreme_cases_u18")
 
 
 def validate_matrix(matrix):
@@ -178,17 +179,22 @@ def validate_gate(row, name):
         require(all(row[key] == value for key, value in exact.items()), "witness gate contract fixture counts")
         return
     require(name == "mhgp8_q3_ball_census_gate", "unknown indexed gate")
-    previous.exact_fields(row, [*BALL_GATE_FIELDS, "schema", "status"], "ball census gate")
+    u18 = type(row) is dict and any(field in row for field in BALL_GATE_U18_ADDED)
+    fields = [*BALL_GATE_FIELDS, *(BALL_GATE_U18_ADDED if u18 else ())]
+    previous.exact_fields(row, [*fields, "schema", "status"], "ball census gate")
     require(row["schema"] == "mhgp8_q3_ball_census_gate_v1" and row["status"] == "PASS", "ball gate identity")
-    for key in BALL_GATE_FIELDS:
+    for key in fields:
         require(uint(row[key], key) > 0, "ball gate vacuity")
     exact = dict(integer_grid_contacts=1, ceil_required=1, floor_required=1, saturating_overshoot=1,
-        near_first_cases=1, singleton_cases=3, extreme_cases=5, wide_linear_squares=3, permutations=1,
+        near_first_cases=1, singleton_cases=4 if u18 else 3, extreme_cases=5, wide_linear_squares=3, permutations=1,
         huge_threshold=1, invalid_inputs=1, allocation_failures=1, allocation_free_rejections=1,
         parallel_calls=4, repeated_calls=1, source_alias_checks=1, overflow_exceptions=1)
     require(all(row[key] == value for key, value in exact.items()) and row["max_shell"] >= 30 and
             row["calls"] == row["accepted"] + row["rejected"],
             "ball gate contract fixtures")
+    if u18:
+        require(row["wide_linear_squares_u18"] == 3 and row["extreme_cases_u18"] == 5,
+                "ball census u18 wide-support floors")
 
 
 def validate_search(search, n, k, id_bytes):

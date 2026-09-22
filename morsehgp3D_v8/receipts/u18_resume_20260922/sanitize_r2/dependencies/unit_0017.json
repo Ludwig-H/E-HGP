@@ -1,0 +1,32 @@
+{
+  "name": "unit_0017",
+  "command": [
+    "/usr/bin/clang++",
+    "-I/workspaces/E-HGP/morsehgp3D_v8/src",
+    "-O1",
+    "-g",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-fsanitize=address,undefined",
+    "-fno-omit-frame-pointer",
+    "/workspaces/E-HGP/morsehgp3D_v8/src/lanes/q4_local.cpp",
+    "-M",
+    "-MF",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/u18_resume_20260922/sanitize_r2/dependencies/unit_0017.d",
+    "-MT",
+    "mhgp8_dependency_target"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v8_u18_resume_sanitize_r2_20260922",
+  "source": "/workspaces/E-HGP/morsehgp3D_v8/src/lanes/q4_local.cpp",
+  "started": "2026-09-22T10:35:02.633588+00:00",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "stdout_base64": "",
+  "stderr_base64": "",
+  "finished": "2026-09-22T10:35:02.701081+00:00"
+}

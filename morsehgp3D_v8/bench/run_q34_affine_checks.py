@@ -46,13 +46,20 @@ BOUNDS_FIELDS = ("queries pair_preparations general_preparations affine_h_tests 
 PAIR_GATE_FIELDS = ("checks queries corner_evaluations sample_evaluations singleton_boxes nondegenerate_boxes "
     "half_integer_summits cross_zero_components positive_xi_lower wide_xi wide_h_squares reversed_pairs "
     "coincident_pairs extreme_cases axis_permutations invalid_inputs allocation_free_calls parallel_calls").split()
+PAIR_GATE_U18_ADDED = ("extreme_cases_u18", "wide_xi_u18", "wide_h_squares_u18")
 SEARCH_GATE_ADDED = ("bounds_calls legacy_overload_calls exclusion_calls affine_calls mode_singletons mode_rectangles "
     "local_exclusion_cases nonpositive_minimum_cases mixed_terminal_cases mode_parallel_calls mode_invalid_inputs "
     "mode_repeated_calls mode_overflows affine_preparations general_preparations excluded_q3_nodes excluded_q4_nodes "
     "fully_excluded_nodes mode_xi_nonpositive").split()
+SEARCH_GATE_U18_ADDED = ("extreme18_queries", "wide18_predicate_cases")
 GLOBAL_GATE_ADDED = ("bounds_mode_calls bounds_exclusion_calls bounds_affine_calls bounds_work_checks "
     "bounds_parallel_calls bounds_invalid_inputs bounds_inactive_calls bounds_callback_failures "
     "bounds_allocation_failures bounds_shared_calls bounds_owner_resets").split()
+GLOBAL_SEED_CELL_ADDED = ("seed_cell_calls seed_cell_live_calls seed_cell_joined_calls seed_cell_work_checks "
+    "seed_cell_parallel_calls seed_cell_inactive_calls seed_cell_invalid_inputs seed_cell_callback_failures "
+    "seed_cell_allocation_failures seed_cell_shared_calls seed_cell_owner_resets seed_cell_parallel_failures").split()
+GLOBAL_ATLAS_TASK_ADDED = ("atlas_rejections atlas_lane_skips atlas_locations atlas_outside "
+    "task_sharing_calls task_ranges task_splits task_refusals").split()
 
 _spec = importlib.util.spec_from_file_location("_mhgp8_affine_capture_protocol",
     Path(base.__file__).resolve())
@@ -127,23 +134,35 @@ def validate_gate(row, name):
     if name == "mhgp8_q3_ball_census_gate":
         return base.validate_gate(row, name)
     if name == "mhgp8_q34_pair_bounds_gate":
-        previous.exact_fields(row, [*PAIR_GATE_FIELDS, "schema", "status"], "pair bounds gate")
+        u18 = type(row) is dict and any(field in row for field in PAIR_GATE_U18_ADDED)
+        fields = [*PAIR_GATE_FIELDS, *(PAIR_GATE_U18_ADDED if u18 else ())]
+        previous.exact_fields(row, [*fields, "schema", "status"], "pair bounds gate")
         require(row["schema"] == "mhgp8_q34_pair_bounds_gate_v1" and row["status"] == "PASS", "pair gate identity")
-        for field in PAIR_GATE_FIELDS:
+        for field in fields:
             require(uint(row[field], field) > 0, "pair bounds gate vacuity")
         exact = dict(extreme_cases=50, axis_permutations=1, invalid_inputs=6, allocation_free_calls=1, parallel_calls=4)
-        require(all(row[k] == v for k, v in exact.items()) and
+        require(all(row[k] == v for k, v in exact.items()) and row["queries"] == (320 if u18 else 268) and
                 row["queries"] == row["singleton_boxes"] + row["nondegenerate_boxes"] == row["reversed_pairs"] and
                 row["corner_evaluations"] == 8*row["queries"] and row["sample_evaluations"] == 27*row["queries"],
                 "pair bounds gate fixture counts")
+        if u18:
+            require(row["extreme_cases_u18"] == 52 and row["wide_xi_u18"] <= row["wide_xi"] <= row["queries"] and
+                    row["wide_h_squares_u18"] <= row["wide_h_squares"] <= row["queries"], "pair bounds u18 floors")
         return
     if name == "mhgp8_q34_witness_search_gate":
-        previous.exact_fields(row, [*base.SEARCH_GATE_FIELDS, *SEARCH_GATE_ADDED, "schema", "status"], "witness gate33")
+        # Schema v1 predates the u18 fixtures. Keep two CLOSED inventories:
+        # historical u16/49 frames, or u18/55 frames with BOTH new floors.
+        # A missing u18 field must not silently downgrade a current result.
+        u18 = type(row) is dict and any(field in row for field in SEARCH_GATE_U18_ADDED)
+        fields = [*base.SEARCH_GATE_FIELDS, *SEARCH_GATE_ADDED,
+                  *(SEARCH_GATE_U18_ADDED if u18 else ())]
+        previous.exact_fields(row, [*fields, "schema", "status"], "witness gate33")
         require(row["schema"] == "mhgp8_q34_witness_search_gate_v1" and row["status"] == "PASS", "witness gate identity")
-        for field in (*base.SEARCH_GATE_FIELDS, *SEARCH_GATE_ADDED):
+        for field in fields:
             require(uint(row[field], field) > 0, "affine witness gate vacuity")
         exact = dict(parallel_calls=4, permutations=1, source_alias_checks=1, repeated_calls=1, left_tie_cases=1,
-            partial_admission_cases=1, deep_index_cases=1, peak_stack=INDEX_STACK_FRAMES, overflow_exceptions=1, q3_contacts=1,
+            partial_admission_cases=1, deep_index_cases=1, peak_stack=INDEX_STACK_FRAMES if u18 else 49,
+            overflow_exceptions=1, q3_contacts=1,
             q4_contacts=1, wrong_alpha_cases=1, positive_q4_external=1, h_contacts=1, extreme_queries=15,
             invalid_inputs=11, point_admission_cases=1, mode_parallel_calls=4, mode_invalid_inputs=2,
             mode_repeated_calls=1, mode_overflows=1, local_exclusion_cases=2, nonpositive_minimum_cases=2,
@@ -151,13 +170,23 @@ def validate_gate(row, name):
         require(all(row[k] == v for k, v in exact.items()) and row["bounds_calls"] ==
                 row["legacy_overload_calls"] + row["exclusion_calls"] + row["affine_calls"] ==
                 row["mode_singletons"] + row["mode_rectangles"], "affine witness gate fixture counts")
+        if u18:
+            require(row["extreme18_queries"] == 15 and
+                    row["extreme18_queries"] <= row["singleton_queries"] and
+                    row["wide18_predicate_cases"] <= row["wide_predicate_cases"] <= row["oracle_sites"],
+                    "affine witness u18 extreme/strict-width fixtures differ")
         return
     require(name == "mhgp8_wspd_q34_gate", "unknown affine gate")
-    fields = [*edge.GLOBAL_GATE_FIELDS, *base.GLOBAL_GATE_ADDED, *GLOBAL_GATE_ADDED]
+    seed_cells = type(row) is dict and any(field in row for field in GLOBAL_SEED_CELL_ADDED)
+    atlas_tasks = type(row) is dict and any(field in row for field in GLOBAL_ATLAS_TASK_ADDED)
+    require(not atlas_tasks or seed_cells, "atlas/task gate lacks seed-cell extension")
+    fields = [*edge.GLOBAL_GATE_FIELDS, *base.GLOBAL_GATE_ADDED, *GLOBAL_GATE_ADDED,
+              *(GLOBAL_SEED_CELL_ADDED if seed_cells else ()), *(GLOBAL_ATLAS_TASK_ADDED if atlas_tasks else ())]
     previous.exact_fields(row, [*fields, "schema", "status"], "global gate33")
     require(row["schema"] == "mhgp8_wspd_q34_gate_v1" and row["status"] == "PASS", "global gate identity")
     for field in fields:
-        require(uint(row[field], field) > 0, "affine global gate vacuity")
+        count=uint(row[field], field)
+        require(count > 0 or field == "atlas_lane_skips", "affine global gate vacuity")
     exact = dict(allocation_failures=4, callback_failures=1, parallel_calls=4, nested_calls=1,
         owner_reset_calls=1, input_alias_checks=1, parallel_callback_failures=1,
         parallel_owner_resets=1, parallel_join_checks=2, parallel_empty_calls=8,
@@ -167,6 +196,16 @@ def validate_gate(row, name):
             row["candidates"] == row["q3"] + row["q4"] and row["max_shell"] >= 30 and
             row["bounds_mode_calls"] == row["bounds_work_checks"] ==
             row["bounds_exclusion_calls"] + row["bounds_affine_calls"], "affine global gate lifecycle differs")
+    if seed_cells:
+        exact_seed=dict(seed_cell_calls=10,seed_cell_live_calls=5,seed_cell_joined_calls=5,seed_cell_work_checks=10,
+            seed_cell_parallel_calls=12,seed_cell_inactive_calls=6,seed_cell_invalid_inputs=12,
+            seed_cell_callback_failures=2,seed_cell_allocation_failures=4,seed_cell_shared_calls=4,
+            seed_cell_owner_resets=1,seed_cell_parallel_failures=1)
+        require(all(row[k]==v for k,v in exact_seed.items()), "global seed-cell lifecycle differs")
+    if atlas_tasks:
+        require(row["atlas_rejections"] + row["atlas_outside"] <= row["atlas_locations"] and
+                row["task_sharing_calls"] <= row["task_ranges"] and row["task_splits"] <= row["task_ranges"],
+                "global atlas/task fixture accounting differs")
 
 
 def validate_search(search, bounds, n, k, id_bytes, mode, section):

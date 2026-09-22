@@ -51,6 +51,8 @@ struct ShallowGate : Gate {
   u64 removed_shell_contacts{}, t0_queries{}, collinear_cases{}, extreme_calls{};
   u64 boundary_nonvertices{}, coincident_duals{}, saved_seed_sites{}, allocation_failures{};
   u64 removed_seed_rejections{}, retained_seed_queries{}, constant_shells{}, mixed_sign_cases{};
+  // 18-bit twin fixtures (coordinate_limit = 262143), counted apart.
+  u64 wide_calls{};
 };
 
 static_assert(!std::is_copy_constructible_v<mhgp8::Q4ShallowSet>);
@@ -324,17 +326,17 @@ Output shallow_pipeline(ShallowGate& gate,const Points& points,Edge edge,std::si
 Points shallow_rings(bool mixed) {
   Points points{{20,30,30},{40,30,30}};
   for(const int radius:{11,12,15}) {
-    points.push_back({30,static_cast<std::uint16_t>(30+radius),30});
-    points.push_back({30,static_cast<std::uint16_t>(30-radius),30});
-    points.push_back({30,30,static_cast<std::uint16_t>(30+radius)});
-    points.push_back({30,30,static_cast<std::uint16_t>(30-radius)});
+    points.push_back({30,static_cast<mhgp8::Coordinate>(30+radius),30});
+    points.push_back({30,static_cast<mhgp8::Coordinate>(30-radius),30});
+    points.push_back({30,30,static_cast<mhgp8::Coordinate>(30+radius)});
+    points.push_back({30,30,static_cast<mhgp8::Coordinate>(30-radius)});
   }
   if(mixed) {
     for(const int radius:{5,2}) {
-      points.push_back({30,static_cast<std::uint16_t>(30+radius),30});
-      points.push_back({30,static_cast<std::uint16_t>(30-radius),30});
-      points.push_back({30,30,static_cast<std::uint16_t>(30+radius)});
-      points.push_back({30,30,static_cast<std::uint16_t>(30-radius)});
+      points.push_back({30,static_cast<mhgp8::Coordinate>(30+radius),30});
+      points.push_back({30,static_cast<mhgp8::Coordinate>(30-radius),30});
+      points.push_back({30,30,static_cast<mhgp8::Coordinate>(30+radius)});
+      points.push_back({30,30,static_cast<mhgp8::Coordinate>(30-radius)});
     }
     points.push_back({30,30,30});
     points.push_back({30,40,30});points.push_back({30,30,40});
@@ -377,6 +379,18 @@ void shallow_fixtures(ShallowGate& gate) {
   shallow_primitive(gate,oblique,{0,1},3);
   static_cast<void>(shallow_pipeline(gate,oblique,{0,1},5));
   gate.extreme_calls+=2;
+  // 18-bit twins (coordinate_limit = 262143; 262142/262141 and 131071 replace
+  // 65534/65533 and 32767): the historical corners above are interior sites
+  // since the widening. Same supporting-line and ball oracles, same checks.
+  const Points extremes18{{0,0,0},{262143,262142,262141},{0,262143,262143},
+    {262143,0,262143},{131071,131071,131071},{262143,0,0}};
+  const Points oblique18{{0,0,0},{240000,260000,4000},{248000,2000,256000},{8000,252000,248000},
+    {128000,128000,128000},{262143,262143,262143},{260000,120000,120000},{400,100000,248000}};
+  shallow_primitive(gate,extremes18,{0,1},5);
+  for(const auto k:{3U,5U,10U}) static_cast<void>(shallow_pipeline(gate,extremes18,{0,1},k));
+  shallow_primitive(gate,oblique18,{0,1},3);
+  static_cast<void>(shallow_pipeline(gate,oblique18,{0,1},5));
+  gate.extreme_calls+=2;gate.wide_calls+=2;
   const auto shell=shell30();
   shallow_primitive(gate,shell,{0,1},5,false);
   static_cast<void>(shallow_pipeline(gate,shell,{0,1},5));
@@ -475,6 +489,7 @@ int main(int argc,char** argv) {
     gate.require(gate.q4>0 && gate.max_shell>=30 && gate.exhaustive_edges==10 &&
       gate.parallel_calls==4 && gate.callback_failures==1 && gate.allocation_failures==4,
       "nonvacuity: shallow outputs, ownership or lifetime classes missing");
+    gate.require(gate.wide_calls==2,"nonvacuity: shallow 18-bit twin fixtures missing");
     std::cout<<"{\"schema\":\"mhgp8_q4_shallow_gate_v1\",\"status\":\"passed\"";
 #define MHGP8_SHALLOW_FIELD(name) std::cout<<",\"" #name "\":"<<gate.name
     MHGP8_SHALLOW_FIELD(checks);MHGP8_SHALLOW_FIELD(sets);MHGP8_SHALLOW_FIELD(oracle_layers);
@@ -490,7 +505,7 @@ int main(int argc,char** argv) {
     MHGP8_SHALLOW_FIELD(oracle_completions);MHGP8_SHALLOW_FIELD(oracle_sites);MHGP8_SHALLOW_FIELD(candidates);
     MHGP8_SHALLOW_FIELD(q4);MHGP8_SHALLOW_FIELD(max_shell);MHGP8_SHALLOW_FIELD(exhaustive_edges);
     MHGP8_SHALLOW_FIELD(permutations);MHGP8_SHALLOW_FIELD(invalid_inputs);MHGP8_SHALLOW_FIELD(callback_failures);
-    MHGP8_SHALLOW_FIELD(parallel_calls);
+    MHGP8_SHALLOW_FIELD(parallel_calls);MHGP8_SHALLOW_FIELD(wide_calls);
 #undef MHGP8_SHALLOW_FIELD
     std::cout<<"}\n";return 0;
   } catch(const std::exception& error) {

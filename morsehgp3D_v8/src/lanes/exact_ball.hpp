@@ -16,7 +16,8 @@ namespace mhgp8 {
 //
 // Only the checked factories can create a value; immutable private integer
 // coefficients neither borrow points nor admit a forged coefficient array.
-// This is a newly derived CPU u16 primitive, not an inherited v7 certificate.
+// Factories reject any coordinate outside [0,coordinate_limit] before
+// arithmetic. This is not an inherited v7 certificate.
 class ExactBall final {
  public:
   // Distinct endpoints of a diameter; duplicates return nullopt.
@@ -30,6 +31,8 @@ class ExactBall final {
   // Coefficient order: {A, Bx, By, Bz, C}. The reference lasts as long as
   // this immutable value; copying the value copies no coordinate owner.
   [[nodiscard]] const std::array<i128, 5>& coefficients() const noexcept { return coefficients_; }
+  // Precondition: z is in the certified coordinate domain (e.g. a point
+  // from PreparedCloud). No per-census-point range scan is performed here.
   [[nodiscard]] i128 power(Point3 z) const noexcept;
   [[nodiscard]] bool operator==(const ExactBall& other) const noexcept {
     return coefficients_ == other.coefficients_;

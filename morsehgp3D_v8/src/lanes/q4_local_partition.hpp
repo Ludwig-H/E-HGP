@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <memory>
 #include <span>
+#include <utility>
 #include <vector>
 
 namespace mhgp8 {
@@ -57,6 +58,7 @@ struct Q4LocalPartitionWork {
 
 class Q4LocalGeometry;
 class Q4LocalFragment;
+class Q4LocalPartitionResult;
 using Q4LocalGeometryPtr = std::shared_ptr<const Q4LocalGeometry>;
 using Q4LocalFragmentPtr = std::shared_ptr<const Q4LocalFragment>;
 
@@ -81,6 +83,8 @@ class Q4LocalGeometry final {
   // the line ab (any strictly acute seed): a zero determinant throws.
   [[nodiscard]] Q4LocalCenter q3_center(std::size_t x_id) const;
   // Bounds of scale*L on the CLOSED cell, regardless of emission ownership.
+  // Public forms must satisfy |constant|<=15M^2, |x|,|y|<=8M^2,
+  // M=coordinate_limit; larger/forged values are rejected before arithmetic.
   [[nodiscard]] Q4LocalBounds bounds(Q4LocalForm form, Q4LocalCell cell) const;
   // Bounds of scale*L on INDEX-node-box x CLOSED cell. Validates the node
   // ID and cell before use. The minimum is rounded down from its continuous
@@ -93,11 +97,15 @@ class Q4LocalGeometry final {
 
  private:
   friend class Q4LocalFragment;
+  friend struct Q4LocalEngine;
+  friend struct Q4SeedCellEngine;
   using Vec = std::array<i64,3>;
   struct Facet { Vec normal{}; i128 height{}; };
   explicit Q4LocalGeometry(Q34EdgeCoverPtr cover, Q4CenterDomainMode mode);
   void decompose_cover();
   void prepare_hull(const Box3& box);
+  // Only genuine forms from this certified geometry and owned atlas cells.
+  [[nodiscard]] Q4LocalBounds bounds_unchecked(Q4LocalForm form, Q4LocalCell cell) const;
   [[nodiscard]] Q4LocalBounds node_bounds_unchecked(std::size_t node_id, Q4LocalCell cell) const;
 
   Q34EdgeCoverPtr cover_;
@@ -137,6 +145,15 @@ class Q4LocalFragment final {
   // count/frontier. Does not split centers or change emission ownership.
   // budget0 is a valid identity partition; failure leaves parent unchanged.
   [[nodiscard]] static Q4LocalFragmentPtr refine(Q4LocalFragmentPtr parent, u64 z_test_budget);
+  // Explicit alternative: either an EXACT fragment as above, or a terminal
+  // lower-bound certificate. Threshold>=1; a saturated prefix is NEVER
+  // published as Q4LocalFragment and cannot be supplied to child/refine/sweep.
+  [[nodiscard]] static Q4LocalPartitionResult root_until(
+      Q4LocalGeometryPtr geometry, u64 z_test_budget, std::size_t threshold);
+  [[nodiscard]] static Q4LocalPartitionResult child_until(
+      Q4LocalFragmentPtr parent, unsigned quadrant, u64 z_test_budget, std::size_t threshold);
+  [[nodiscard]] static Q4LocalPartitionResult refine_until(
+      Q4LocalFragmentPtr parent, u64 z_test_budget, std::size_t threshold);
   Q4LocalFragment(const Q4LocalFragment&) = delete;
   Q4LocalFragment& operator=(const Q4LocalFragment&) = delete;
   Q4LocalFragment(Q4LocalFragment&&) = delete;
@@ -155,17 +172,55 @@ class Q4LocalFragment final {
   // Passkey: only the three factories can name Key, so std::make_shared can
   // build the fragment and its control block in ONE allocation while the
   // constructor stays private in effect. Never call this directly.
-  struct Key { explicit Key() = default; friend class Q4LocalFragment; };
+  struct Key { private: explicit Key() = default; friend class Q4LocalFragment; };
   Q4LocalFragment(Key, Q4LocalGeometryPtr geometry, Q4LocalCell cell, std::size_t inherited,
-                  std::span<const std::size_t> input, u64 budget, Origin origin);
+                  std::span<const std::size_t> input, u64 budget, Origin origin,
+                  std::size_t stop_after = 0);
 
  private:
+  [[nodiscard]] static Q4LocalPartitionResult finish_until(
+      std::shared_ptr<Q4LocalFragment> fragment, std::size_t input_sites);
   void retain(std::size_t node_id);
   Q4LocalGeometryPtr geometry_;
   Q4LocalCell cell_;
   std::size_t inside_count_{}, active_sites_{};
   std::vector<std::size_t> active_nodes_;
   Q4LocalPartitionWork work_{};
+  bool saturated_{};
+};
+
+// Factory-only tagged union: exact_fragment()!=nullptr XOR saturated().
+// Prefix work records ACTUALLY visited/classified nodes, not the unvisited
+// input population. It does not satisfy a complete-partition ledger when
+// saturated. unvisited_sites() is a population, never "tests saved".
+class Q4LocalPartitionResult final {
+ public:
+  // Value copies preserve both the tag and its immutable owner. A user-
+  // declared copy constructor suppresses destructive implicit moves: even
+  // std::move(result) copies the shared pointers and leaves result valid.
+  Q4LocalPartitionResult(const Q4LocalPartitionResult&) = default;
+  Q4LocalPartitionResult& operator=(const Q4LocalPartitionResult&) = delete;
+  [[nodiscard]] bool saturated() const noexcept { return !exact_; }
+  [[nodiscard]] const Q4LocalGeometryPtr& geometry() const noexcept { return geometry_; }
+  [[nodiscard]] const Q4LocalFragmentPtr& exact_fragment() const noexcept { return exact_; }
+  [[nodiscard]] std::size_t certified_depth() const noexcept { return depth_; }
+  [[nodiscard]] const Q4LocalCell& cell() const noexcept { return cell_; }
+  [[nodiscard]] const Q4LocalPartitionWork& work() const noexcept { return work_; }
+  [[nodiscard]] std::size_t unvisited_sites() const noexcept { return unvisited_; }
+  // Capacity alive in the discarded temporary, not current retained bytes.
+  [[nodiscard]] std::size_t temporary_bytes() const noexcept { return temporary_; }
+ private:
+  friend class Q4LocalFragment;
+  Q4LocalPartitionResult(Q4LocalGeometryPtr geometry, Q4LocalFragmentPtr exact, std::size_t depth, Q4LocalCell cell,
+      Q4LocalPartitionWork work, std::size_t unvisited, std::size_t temporary)
+      : geometry_(std::move(geometry)), exact_(std::move(exact)), depth_(depth), cell_(cell), work_(work),
+        unvisited_(unvisited), temporary_(temporary) {}
+  Q4LocalGeometryPtr geometry_;
+  Q4LocalFragmentPtr exact_;
+  std::size_t depth_{};
+  Q4LocalCell cell_;
+  Q4LocalPartitionWork work_;
+  std::size_t unvisited_{}, temporary_{};
 };
 
 }  // namespace mhgp8

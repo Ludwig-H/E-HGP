@@ -31,6 +31,9 @@ struct Gate {
   u64 canonical_refusals{}, positive_refusals{}, depth_refusals{}, exhaustive_clouds{};
   u64 exhaustive_balls{}, invalid_inputs{}, callback_failures{}, parallel_calls{}, judge_mutants{};
   u64 unexamined{}, depth_drop_runs{}, larger_than_minimal{};
+  // 18-bit clouds (coordinate_limit = 262143); counted apart so that the
+  // historical 16-bit pins keep their values.
+  u64 wide_exhaustive{}, wide_random_clouds{};
   void require(bool condition, const char* message) {
     ++checks;
     if (!condition) throw std::runtime_error(message);
@@ -298,8 +301,8 @@ Points shell_fixture() {
   Points points{{23, 24, 20}, {20, 17, 24}, {20, 17, 16}, {17, 24, 20}};
   for (int x = -5; x <= 5; ++x) for (int y = -5; y <= 5; ++y)
     for (int z = -5; z <= 5; ++z) if (x * x + y * y + z * z == 25)
-      add_unique(points, {static_cast<std::uint16_t>(x + 20), static_cast<std::uint16_t>(y + 20),
-                          static_cast<std::uint16_t>(z + 20)});
+      add_unique(points, {static_cast<mhgp8::Coordinate>(x + 20), static_cast<mhgp8::Coordinate>(y + 20),
+                          static_cast<mhgp8::Coordinate>(z + 20)});
   return points;
 }
 
@@ -340,7 +343,7 @@ void fixtures(Gate& gate) {
     Points cloud{{900, 1000, 1000}, {1100, 1000, 1000},
                   {1000, 1120, 1040}, {1000, 1120, 960}};
     for (unsigned j = 0; j != k - 1; ++j)
-      cloud.push_back({static_cast<std::uint16_t>(1000 + j), 1020, 1105});
+      cloud.push_back({static_cast<mhgp8::Coordinate>(1000 + j), 1020, 1105});
     const auto output = check_case(gate, cloud, {0, 1, 2}, k);
     gate.require(std::none_of(output.begin(), output.end(), [](const auto& c) { return c.arity == 3; }) &&
                  std::any_of(output.begin(), output.end(), [](const auto& c) { return c.arity == 4; }),
@@ -446,9 +449,9 @@ void run(Gate& gate) {
     Points points;
     const unsigned side_length = trial % 3 == 0 ? 65536U : 13U;
     while (points.size() != 8)
-      add_unique(points, {static_cast<std::uint16_t>(next() % side_length),
-                          static_cast<std::uint16_t>(next() % side_length),
-                          static_cast<std::uint16_t>(next() % side_length)});
+      add_unique(points, {static_cast<mhgp8::Coordinate>(next() % side_length),
+                          static_cast<mhgp8::Coordinate>(next() % side_length),
+                          static_cast<mhgp8::Coordinate>(next() % side_length)});
     unsigned seeds = 0;
     for (std::size_t a = 0; a != points.size() && seeds != 3; ++a)
       for (std::size_t b = a + 1; b != points.size() && seeds != 3; ++b)
@@ -466,6 +469,47 @@ void run(Gate& gate) {
   }
   const Points regular{{0, 0, 0}, {2, 2, 0}, {2, 0, 2}, {0, 2, 2}};
   exhaustive(gate, regular, 3);
+  // 18-bit corner cloud: 262143 = coordinate_limit, 131071/131072 the two
+  // middle values. This gate had no engraved 16-bit corner cloud (its widest
+  // inputs were the side-65536 random trials above, which stay pinned).
+  const Points corners18{{0, 0, 0}, {262143, 262143, 0}, {262143, 0, 262143}, {0, 262143, 262143},
+                         {131071, 131072, 131071}, {262143, 262143, 262143}};
+  for (const auto k : {3U, 5U, 10U}) {
+    exhaustive(gate, corners18, k);
+    ++gate.wide_exhaustive;
+  }
+  // Separate 18-bit random clouds (own generator; each must leave the 16-bit
+  // range, otherwise it proves nothing that the u16 trials did not).
+  std::uint64_t wide_state = 0x5a2f8c1d93e7b604ULL;
+  auto wide_next = [&]() {
+    wide_state = wide_state * 6364136223846793005ULL + 1442695040888963407ULL;
+    return wide_state >> 32;
+  };
+  for (unsigned trial = 0; trial != 3; ++trial) {
+    Points points;
+    while (points.size() != 8)
+      add_unique(points, {static_cast<mhgp8::Coordinate>(wide_next() % 262144U),
+                          static_cast<mhgp8::Coordinate>(wide_next() % 262144U),
+                          static_cast<mhgp8::Coordinate>(wide_next() % 262144U)});
+    gate.require(std::any_of(points.begin(), points.end(), [](const Point3& point) {
+      return point.x > 65535 || point.y > 65535 || point.z > 65535;
+    }), "18-bit random cloud stayed inside the 16-bit range");
+    unsigned seeds = 0;
+    for (std::size_t a = 0; a != points.size() && seeds != 3; ++a)
+      for (std::size_t b = a + 1; b != points.size() && seeds != 3; ++b)
+        for (std::size_t x = b + 1; x != points.size() && seeds != 3; ++x) {
+          const Ids ids{a, b, x};
+          if (!oracle::make(select(points, ids)).ball) continue;
+          const auto edge = owner(points, ids);
+          const auto third = a != edge.first && a != edge.second ? a : b != edge.first && b != edge.second ? b : x;
+          for (const auto k : {1U, 2U, 3U, 5U, 10U})
+            static_cast<void>(check_case(gate, points, {edge.first, edge.second, third}, k));
+          ++seeds;
+        }
+    gate.require(seeds == 3, "18-bit random cloud lacked three positive seeds");
+    if (trial == 0) for (const auto k : {3U, 5U, 10U}) { exhaustive(gate, points, k); ++gate.wide_exhaustive; }
+    ++gate.wide_random_clouds;
+  }
   lifecycle(gate);
   gate.require(gate.calls >= 500 && gate.oracle_completions >= 1500 && gate.oracle_sites >= 10000 &&
                gate.candidates >= 100 && gate.q3 >= 100 && gate.q4 >= 20, "q34 correctness nonvacuity floor");
@@ -473,9 +517,10 @@ void run(Gate& gate) {
                gate.late_valid > 0 && gate.max_shell >= 30 && gate.canonical_refusals > 0 &&
                gate.positive_refusals > 0 && gate.depth_refusals > 0 && gate.unexamined > 0 &&
                gate.depth_drop_runs > 0 && gate.larger_than_minimal > 0, "q34 adversarial nonvacuity floor");
-  gate.require(gate.exhaustive_clouds == 13 && gate.exhaustive_balls > 20 && gate.invalid_inputs == 6 &&
+  gate.require(gate.exhaustive_clouds == 13 + gate.wide_exhaustive && gate.exhaustive_balls > 20 && gate.invalid_inputs == 6 &&
                gate.callback_failures == 1 && gate.parallel_calls == 4 && gate.judge_mutants == 3,
                "q34 exhaustive/lifecycle nonvacuity floor");
+  gate.require(gate.wide_exhaustive == 6 && gate.wide_random_clouds == 3, "q34 18-bit cloud nonvacuity floor");
 }
 }  // namespace
 
@@ -499,7 +544,8 @@ int main(int argc, char** argv) {
               << ",\"invalid_inputs\":" << gate.invalid_inputs << ",\"callback_failures\":" << gate.callback_failures
               << ",\"parallel_calls\":" << gate.parallel_calls << ",\"judge_mutants\":" << gate.judge_mutants
               << ",\"unexamined\":" << gate.unexamined << ",\"depth_drop_runs\":" << gate.depth_drop_runs
-              << ",\"larger_than_minimal\":" << gate.larger_than_minimal << "}\n";
+              << ",\"larger_than_minimal\":" << gate.larger_than_minimal
+              << ",\"wide_exhaustive\":" << gate.wide_exhaustive << ",\"wide_random_clouds\":" << gate.wide_random_clouds << "}\n";
   } catch (const std::exception& error) {
     std::cerr << "q34 seed gate: " << error.what() << '\n';
     return 1;

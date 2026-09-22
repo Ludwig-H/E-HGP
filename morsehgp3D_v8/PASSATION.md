@@ -1,5 +1,25 @@
 # Passation v8 — précision float32, puis chaîne parallèle
 
+## Reprise du 22 septembre — entrée courante
+
+Base `a74e90f2`, reprise du développement sur `main`. Lire d'abord
+[REPRISE_U18_ET_ATLAS_SATURANT_20260922.md](docs/REPRISE_U18_ET_ATLAS_SATURANT_20260922.md).
+Les 42 gates extrêmes laissées non commises sont finalisées avec des
+contrôles distincts u18 ; les API numériques autonomes sont protégées.
+Une option d'atlas interrompt les classifications déjà rejetées à K−1,
+sans publier de fragment partiel. Les compteurs incluent le préfixe payé.
+Les nouvelles captures, et non les anciens builds, font autorité.
+Première référence entière sans sol à1mm :08/000000,39885sites,K5/s8/W8,
+104,63s mur (812,82CPU·s), flux q3/q4 seul et saturation désactivée.
+Une répétition ; ni FULL/GPU ni croissance qualifiés par cette ligne.
+
+Priorité technique de cette reprise : moteur entier à 1 mm. Le contrat
+normatif reste celui d'`AGENTS.md` : trame brute entière, float32 original
+par défaut, grille optionnelle, LiDAR sans sol également prioritaire.
+Les paragraphes suivants relatent les décisions/passations précédentes ;
+ils ne transforment pas les résultats sans sol à 2 cm en qualification du
+contrat principal. Les brouillons float32 sont conservés sans modification.
+
 21 septembre 2026. Cadre actif : `exploration_v8_hors_registre`,
 `backend=cpu_reference`, `quantized_u16_input_only`,
 `implementation_v8_p0`, `not_claimed`. Aucun contrat de tour n'est encore acquis.
@@ -9,7 +29,7 @@ du20 septembre. L'ancien auditeur B a livré les tranches19–21 ; son canal
 d'audit indépendant. Ses anciens résultats de constructeur et ses nouveaux
 audits ne qualifient jamais automatiquement les nouveaux ports.
 
-## Reprise développeur du 21 septembre (20:10 UTC) — lire d'abord
+## Historique : reprise développeur du 21 septembre (20:10 UTC)
 
 L'utilisateur a fait passer l'auditeur B au rôle de **développeur** de la v8.
 Directive : auditer entièrement, puis continuer le développement ; **régime
@@ -20,8 +40,8 @@ L'audit complet à neuf lentilles, l'état par composant, les incidents, les
 décisions proposées (moteur entier vers les contrats, frontière du chronomètre,
 régime de tests) et le plan par phases sont dans
 [docs/AUDIT_REPRISE_DEVELOPPEUR_20260921.md](docs/AUDIT_REPRISE_DEVELOPPEUR_20260921.md) ;
-ce document fait foi pour l'état courant, la suite de cette passation restant
-l'historique du constructeur précédent. Première entrée du régime prioritaire :
+ce document décrit l'état à cette date, avant la reprise du 22 septembre
+placée en tête de cette passation. Première entrée du régime prioritaire :
 nuages sans sol au profil u16 (2 cm), 39 815 / 35 491 / 45 114 sites
 ([reçu](receipts/lidar_ground_u16_20260921/README.md), commit ec2bc503).
 Première mesure (diagnostic, à épingler en phase 0) : scène 0 sans sol, K5,
@@ -62,7 +82,7 @@ une validation de plusieurs séquences. Les coupes spatiales diagnostiquent la
 croissance ; elles ne remplacent pas le contrat entier. Le flux q3/q4 CPU
 n'est pas FULL ni GPU. Les reçus historiques 50k restent inchangés.
 
-## À reprendre maintenant
+## Historique : plan de raccord float32, non repris dans la tranche u18
 
 Lire le [census q3 float32 partagé](docs/CENSUS_Q3_FLOAT32_PARTAGE_20260921.md)
 et ses [preuves/mesures](receipts/float32_q3_census_20260921/README.md).

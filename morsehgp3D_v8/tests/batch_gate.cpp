@@ -170,20 +170,24 @@ void compare_batch(Gate& gate, const RectangleInput& input, unsigned kmax,
   if (active == 0) ++gate.saturated_batches;
 }
 
-RectangleInput fixture(unsigned core_count) {
+// side_shift is the x offset of factor B, core_x the first core proposal.
+// The historical (30000, 15000) values keep the pinned 16-bit fixture; the
+// 18-bit twin ends factor B exactly at coordinate_limit.
+RectangleInput fixture(unsigned core_count, unsigned side_shift = 30000,
+                       unsigned core_x = 15000) {
   RectangleInput input;
   for (unsigned side = 0; side < 2; ++side) {
     for (unsigned i = 0; i < 12; ++i) {
-      input.points.push_back({static_cast<std::uint16_t>(1000 + side * 30000 + 2 * i),
-                               static_cast<std::uint16_t>(1000 + i % 2),
-                               static_cast<std::uint16_t>(1000 + (i / 2) % 2)});
+      input.points.push_back({static_cast<mhgp8::Coordinate>(1000 + side * side_shift + 2 * i),
+                               static_cast<mhgp8::Coordinate>(1000 + i % 2),
+                               static_cast<mhgp8::Coordinate>(1000 + (i / 2) % 2)});
     }
   }
   input.a = {0, 12};
   input.b = {12, 24};
   for (unsigned i = 0; i < core_count; ++i) {
     input.core_candidates.push_back(input.points.size());
-    input.points.push_back({static_cast<std::uint16_t>(15000 + i), 1000, 1000});
+    input.points.push_back({static_cast<mhgp8::Coordinate>(core_x + i), 1000, 1000});
   }
   return input;
 }
@@ -232,6 +236,53 @@ void run(Gate& gate) {
                 "batch coverage or accounting non-vacuity failed");
 }
 
+// 18-bit twin of run(): the same loops on a fixture whose B factor ends at
+// coordinate_limit (1000 + 261121 + 22 = 262143) with core proposals at 2^17,
+// the same failed-separation fixture translated to the (limit, limit, limit)
+// corner, and the range refusal one grid step beyond the limit. Its counters
+// are pinned separately from the 16-bit gate.
+void run_wide(Gate& gate) {
+  constexpr auto limit = mhgp8::coordinate_limit;
+  constexpr unsigned wide_shift = 261121;
+  constexpr unsigned wide_core = 131072;
+  static_assert(1000 + wide_shift + 2 * 11 == static_cast<unsigned>(limit));
+  for (const auto kmax : {1U, 2U, 3U, 5U, 10U}) {
+    for (const auto core : {0U, 1U, 3U, 12U}) {
+      for (const auto separation : {8U, 10U, 12U}) {
+        for (const auto strategy : strategies) {
+          compare_batch(gate, fixture(core, wide_shift, wide_core), kmax, separation, strategy);
+        }
+      }
+    }
+  }
+  const RectangleInput fallback{
+      {{limit - 15, limit - 4, limit}, {limit - 11, limit - 1, limit},
+       {limit, limit - 5, limit}, {limit, limit, limit}}, {0, 2}, {2, 4}, {}};
+  for (const auto kmax : {1U, 2U, 3U, 5U, 10U}) {
+    for (const auto strategy : strategies) compare_batch(gate, fallback, kmax, 1, strategy);
+  }
+  gate.rejects([&] {
+    static_cast<void>(mhgp8::prepare_rectangle(fixture(0, wide_shift + 1, wide_core), 10, 8));
+  }, "batch owner accepted a coordinate one step beyond coordinate_limit");
+  auto source = fixture(0, wide_shift, wide_core);
+  auto retained = mhgp8::prepare_rectangle(source, 10, 8);
+  std::weak_ptr<const mhgp8::PreparedRectangle> weak = retained;
+  const auto persistent = mhgp8::make_credit_batch(retained, Strategy::Tubes);
+  const auto first = retained->points()[0];
+  retained.reset();
+  source.points[0] = {limit, limit, limit};
+  for (const auto lane : lanes) {
+    gate.require(!weak.expired() && persistent.plan(lane).rectangle().points()[0] == first,
+                  "wide batch lost its immutable copied owner");
+  }
+  gate.require(gate.batches == 195 && gate.lane_comparisons == 585 &&
+                   gate.rejections == 1 && gate.shared_preparations > 0 &&
+                   gate.saturated_batches > 0 && gate.fallback_batches == 5 &&
+                   std::all_of(gate.active_populations.begin(), gate.active_populations.end(),
+                                [](std::uint64_t n) { return n > 0; }),
+                "wide batch coverage or accounting non-vacuity failed");
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -242,12 +293,20 @@ int main(int argc, char** argv) {
   try {
     Gate gate;
     run(gate);
+    Gate wide;
+    run_wide(wide);
     std::cout << "mhgp8_batch_gate passed checks=" << gate.checks
               << " batches=" << gate.batches << " lane_comparisons=" << gate.lane_comparisons
               << " shared_preparations=" << gate.shared_preparations
               << " saturated_batches=" << gate.saturated_batches
               << " fallback_batches=" << gate.fallback_batches
-              << " rejections=" << gate.rejections << '\n';
+              << " rejections=" << gate.rejections
+              << " wide_checks=" << wide.checks << " wide_batches=" << wide.batches
+              << " wide_lane_comparisons=" << wide.lane_comparisons
+              << " wide_shared_preparations=" << wide.shared_preparations
+              << " wide_saturated_batches=" << wide.saturated_batches
+              << " wide_fallback_batches=" << wide.fallback_batches
+              << " wide_rejections=" << wide.rejections << '\n';
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "mhgp8_batch_gate failed: " << error.what() << '\n';

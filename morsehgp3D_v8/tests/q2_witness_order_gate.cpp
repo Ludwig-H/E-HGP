@@ -223,26 +223,57 @@ std::vector<std::vector<Point3>> fixtures() {
       {{1, 0, 0}, {5, 0, 0}, {6, 0, 0}, {10, 0, 0}, {11, 0, 0}, {1000, 0, 0}}};
   std::vector<Point3> cube;
   for (unsigned bits = 0; bits < 8; ++bits)
-    cube.push_back({static_cast<std::uint16_t>((bits & 1U) * 2),
-                   static_cast<std::uint16_t>(((bits >> 1U) & 1U) * 2),
-                   static_cast<std::uint16_t>(((bits >> 2U) & 1U) * 2)});
+    cube.push_back({static_cast<mhgp8::Coordinate>((bits & 1U) * 2),
+                   static_cast<mhgp8::Coordinate>(((bits >> 1U) & 1U) * 2),
+                   static_cast<mhgp8::Coordinate>(((bits >> 2U) & 1U) * 2)});
   result.push_back(cube);
   for (std::uint32_t seed : {3U, 37U}) {
     auto state = seed;
-    const auto next = [&]() { state = state * 1664525U + 1013904223U; return static_cast<std::uint16_t>(state >> 16U); };
+    const auto next = [&]() { state = state * 1664525U + 1013904223U; return static_cast<mhgp8::Coordinate>(state >> 16U); };
     std::vector<Point3> random;
-    for (unsigned i = 0; i < 17; ++i) random.push_back({static_cast<std::uint16_t>(i * 251 + seed), next(), next()});
+    for (unsigned i = 0; i < 17; ++i) random.push_back({static_cast<mhgp8::Coordinate>(i * 251 + seed), next(), next()});
     result.push_back(random);
   }
   return result;
 }
 
-void corpus(Gate& gate) {
-  for (const auto& base : fixtures()) {
+// 18-bit twins (coordinate_limit = 262143) of the u16 corner fixtures: the
+// diagonal pair and a full-extent cube, plus two random clouds drawn on 18
+// bits (state >> 14). They pass through the same scalar oracle and the same
+// runs as the u16 corpus, reflected by 262143 - x, and carry their own floors;
+// the u16 fixtures and their pinned floors are untouched.
+std::vector<std::vector<Point3>> fixtures_18bits() {
+  constexpr mhgp8::Coordinate limit = mhgp8::coordinate_limit;
+  std::vector<std::vector<Point3>> result{{{0, 0, 0}, {limit, limit, limit}}};
+  std::vector<Point3> cube;
+  for (unsigned bits = 0; bits < 8; ++bits)
+    cube.push_back({(bits & 1U) != 0 ? limit : 0, (bits & 2U) != 0 ? limit : 0, (bits & 4U) != 0 ? limit : 0});
+  result.push_back(cube);
+  for (std::uint32_t seed : {3U, 37U}) {
+    auto state = seed;
+    const auto next = [&]() { state = state * 1664525U + 1013904223U; return static_cast<mhgp8::Coordinate>(state >> 14U); };
+    std::vector<Point3> random;
+    for (unsigned i = 0; i < 17; ++i) random.push_back({static_cast<mhgp8::Coordinate>(i * 15413 + seed), next(), next()});
+    result.push_back(random);
+  }
+  return result;
+}
+
+void require_wide(Gate& gate, const std::vector<std::vector<Point3>>& fixtures) {
+  for (const auto& fixture : fixtures) {
+    mhgp8::Coordinate widest = 0;
+    for (const auto& point : fixture) widest = std::max({widest, point.x, point.y, point.z});
+    gate.require(widest > 65535 && widest <= mhgp8::coordinate_limit,
+                 "18-bit fixture does not leave the historical u16 range or exceeds coordinate_limit");
+  }
+}
+
+void corpus(Gate& gate, const std::vector<std::vector<Point3>>& fixtures, mhgp8::Coordinate reflect) {
+  for (const auto& base : fixtures) {
     for (unsigned transform = 0; transform < 2; ++transform) {
       auto points = base;
       if (transform != 0) {
-        for (auto& point : points) point = {point.z, static_cast<std::uint16_t>(65535U - point.x), point.y};
+        for (auto& point : points) point = {point.z, static_cast<mhgp8::Coordinate>(reflect - point.x), point.y};
         std::reverse(points.begin(), points.end());
         ++gate.transformed_clouds;
       }
@@ -276,11 +307,11 @@ void corpus(Gate& gate) {
 void spatial_counterexample(Gate& gate) {
   std::vector<Point3> points;
   for (unsigned x = 0; x < 4; ++x) for (unsigned y = 0; y < 4; ++y) for (unsigned z = 0; z < 4; ++z)
-    points.push_back({static_cast<std::uint16_t>(x), static_cast<std::uint16_t>(y), static_cast<std::uint16_t>(z)});
+    points.push_back({static_cast<mhgp8::Coordinate>(x), static_cast<mhgp8::Coordinate>(y), static_cast<mhgp8::Coordinate>(z)});
   const std::size_t anchor = points.size();
   points.push_back({1000, 1000, 1000});
   for (unsigned x = 997; x < 1000; ++x) for (unsigned y = 998; y < 1000; ++y) for (unsigned z = 998; z < 1000; ++z)
-    points.push_back({static_cast<std::uint16_t>(x), static_cast<std::uint16_t>(y), static_cast<std::uint16_t>(z)});
+    points.push_back({static_cast<mhgp8::Coordinate>(x), static_cast<mhgp8::Coordinate>(y), static_cast<mhgp8::Coordinate>(z)});
   gate.require(points.size() == 77 && anchor == 64, "3D deferral fixture lost its declared populations");
   for (std::size_t witness = anchor + 1; witness < points.size(); ++witness) {
     for (std::size_t b = 0; b < anchor; ++b)
@@ -390,7 +421,7 @@ int main(int argc, char** argv) {
   }
   try {
     Gate gate;
-    corpus(gate);
+    corpus(gate, fixtures(), 65535);
     spatial_counterexample(gate);
     models_and_rejections(gate);
     gate.require(gate.clouds == 16 && gate.runs > 1700 && gate.oracle_pairs > 3500 && gate.oracle_sites > 200000 &&
@@ -400,6 +431,21 @@ int main(int argc, char** argv) {
                      gate.callback_failures == 2 && gate.model_mutants == 5 && gate.fixture_universal_witnesses == 12 &&
                      gate.fixture_complement_splits < gate.fixture_global_splits,
                  "witness-order qualification lost a non-vacuity floor");
+    // 18-bit twins: four fixtures, each doubled by the 262143 - x reflection,
+    // through the same run matrix (112 runs and 16 default comparisons per
+    // cloud). Structural counts are exact; the diagonal pair alone yields one
+    // support per run (its only pair has an empty interior), hence >= 224.
+    const Gate u16 = gate;
+    const auto wide = fixtures_18bits();
+    require_wide(gate, wide);
+    corpus(gate, wide, mhgp8::coordinate_limit);
+    gate.require(wide.size() == 4 && gate.clouds - u16.clouds == 8 && gate.transformed_clouds - u16.transformed_clouds == 4 &&
+                     gate.default_comparisons - u16.default_comparisons == 128 && gate.runs - u16.runs == 896 &&
+                     gate.oracle_pairs - u16.oracle_pairs == 602 && gate.oracle_sites - u16.oracle_sites == 9700 &&
+                     gate.supports - u16.supports >= 224 && gate.shell_sites - u16.shell_sites >= 2 * (gate.supports - u16.supports) &&
+                     gate.structural_splits > u16.structural_splits && gate.anchor_skips > u16.anchor_skips &&
+                     gate.invalid_inputs == u16.invalid_inputs && gate.model_mutants == u16.model_mutants,
+                 "18-bit witness-order corpus lost a non-vacuity floor");
     std::cout << "mhgp8_q2_witness_order_gate passed checks=" << gate.checks << " clouds=" << gate.clouds
               << " oracle_pairs=" << gate.oracle_pairs << " oracle_sites=" << gate.oracle_sites << " runs=" << gate.runs
               << " supports=" << gate.supports << " shell_sites=" << gate.shell_sites

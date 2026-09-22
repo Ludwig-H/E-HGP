@@ -50,6 +50,9 @@ Q4FamilySeed::Q4FamilySeed(std::array<Point3, 3> points, std::array<i64, 3> norm
     : points_(points), normal_(normal), gram_(gram), linear_(linear), minors_(prepared_minors) {}
 
 std::optional<Q4FamilySeed> Q4FamilySeed::make(Point3 a, Point3 b, Point3 x) {
+  require_valid_point(a);
+  require_valid_point(b);
+  require_valid_point(x);
   const auto d = difference(b, a);
   const auto u = difference(x, a);
   const i64 dd = dot(d, d);

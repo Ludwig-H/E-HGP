@@ -57,6 +57,9 @@ struct Gate {
   u64 near_first_cases{},singleton_cases{},extreme_cases{},wide_linear_squares{},permutations{},huge_threshold{};
   u64 invalid_inputs{},allocation_failures{},allocation_free_rejections{},parallel_calls{},repeated_calls{};
   u64 source_alias_checks{},overflow_exceptions{};
+  // 18-bit twin of the wide support (262143/262142/262141): its own floor, so
+  // the historical 65535 fixture keeps wide_linear_squares==3 unchanged.
+  u64 wide_linear_squares_u18{},extreme_cases_u18{};
   void require(bool condition,const char* message) {
     ++checks;if (!condition) throw std::runtime_error(message);
   }
@@ -155,8 +158,8 @@ Points shell30() {
   Points result;
   for (int x=-5;x<=5;++x) for (int y=-5;y<=5;++y) for (int z=-5;z<=5;++z)
     if (x*x+y*y+z*z==25)
-      result.push_back({static_cast<std::uint16_t>(30+x),static_cast<std::uint16_t>(30+y),
-                        static_cast<std::uint16_t>(30+z)});
+      result.push_back({static_cast<mhgp8::Coordinate>(30+x),static_cast<mhgp8::Coordinate>(30+y),
+                        static_cast<mhgp8::Coordinate>(30+z)});
   return result;
 }
 
@@ -176,14 +179,14 @@ void rounding_and_contacts(Gate& gate) {
   gate.require(half.rational.coefficients==oracle::Coefficients{1,-1,-1,-1,0},"half-centre tetrahedral key");
   Points cube;
   for (unsigned x=0;x<2;++x) for (unsigned y=0;y<2;++y) for (unsigned z=0;z<2;++z)
-    cube.push_back({static_cast<std::uint16_t>(x),static_cast<std::uint16_t>(y),static_cast<std::uint16_t>(z)});
+    cube.push_back({static_cast<mhgp8::Coordinate>(x),static_cast<mhgp8::Coordinate>(y),static_cast<mhgp8::Coordinate>(z)});
   const auto boundary=query(gate,cube,half,1);
   gate.require(boundary.count_node_visits==1 && boundary.count_nonnegative_sites==8 &&
       boundary.count_inside_sites==0 && boundary.shell_ids==8,"integer-box tangent root was not handled exactly");
   ++gate.integer_grid_contacts;
   Points grid;
   for (unsigned x=0;x<4;++x) for (unsigned y=0;y<4;++y) for (unsigned z=0;z<4;++z)
-    grid.push_back({static_cast<std::uint16_t>(x),static_cast<std::uint16_t>(y),static_cast<std::uint16_t>(z)});
+    grid.push_back({static_cast<mhgp8::Coordinate>(x),static_cast<mhgp8::Coordinate>(y),static_cast<mhgp8::Coordinate>(z)});
   for (std::size_t threshold:{1U,2U,3U,5U,10U,65U}) {
     static_cast<void>(query(gate,grid,fractional,threshold));
     static_cast<void>(query(gate,grid,quarter,threshold));
@@ -194,7 +197,7 @@ void rounding_and_contacts(Gate& gate) {
 void regimes(Gate& gate) {
   const auto ball=make_ball(gate,{{0,50,50},{100,50,50}});
   Points interior;
-  for (unsigned x=40;x<60;++x) interior.push_back({static_cast<std::uint16_t>(x),50,50});
+  for (unsigned x=40;x<60;++x) interior.push_back({static_cast<mhgp8::Coordinate>(x),50,50});
   const auto overshoot=query(gate,interior,ball,3);
   gate.require(overshoot.count_node_visits==1 && overshoot.count_inside_nodes==1 &&
       overshoot.count_inside_sites==3 && overshoot.count_point_tests==0,"whole-node saturation overshoot fixture");
@@ -205,7 +208,7 @@ void regimes(Gate& gate) {
   gate.require(near.count_node_visits==2 && near.count_bounds_prepared==3 &&
       near.count_prepared_unvisited==1 && near.count_point_tests==2,"near-centre order did not retain charged pending bounds");
   ++gate.near_first_cases;
-  for (const auto point:Points{{0,50,50},{50,50,50},{65535,65535,65535}}) {
+  for (const auto point:Points{{0,50,50},{50,50,50},{65535,65535,65535},{262143,262143,262143}}) {
     static_cast<void>(query(gate,{point},ball,1));static_cast<void>(query(gate,{point},ball,2));++gate.singleton_cases;
   }
   const auto circle=make_ball(gate,{{35,30,30},{27,34,30},{27,26,30}});
@@ -222,6 +225,18 @@ void regimes(Gate& gate) {
   extreme.insert(extreme.end(),{{0,0,0},{65535,65535,65535},{32768,32768,32768},{65535,0,0},{0,65535,0}});
   for (std::size_t threshold:{1U,2U,3U,5U,10U}) {
     static_cast<void>(query(gate,extreme,wide,threshold));++gate.extreme_cases;
+  }
+  // 18-bit twin: the same acute support carried to the 262143 corner (the
+  // 65535 corner and the old midpoint 32768 are now interior sites of it).
+  const Points support18{{262143,262142,262141},{0,0,262140},{2,262139,0}};
+  const auto wide18=make_ball(gate,support18);
+  for (std::size_t i=1;i<4;++i) if (oracle::bits(wide18.rational.coefficients[i]*wide18.rational.coefficients[i])>128)
+    ++gate.wide_linear_squares_u18;
+  Points extreme18=support18;
+  extreme18.insert(extreme18.end(),{{0,0,0},{262143,262143,262143},{131072,131072,131072},{262143,0,0},{0,262143,0},
+      {65535,65535,65535},{32768,32768,32768}});
+  for (std::size_t threshold:{1U,2U,3U,5U,10U}) {
+    static_cast<void>(query(gate,extreme18,wide18,threshold));++gate.extreme_cases_u18;
   }
 }
 
@@ -281,6 +296,9 @@ void run(Gate& gate) {
   gate.require(gate.accepted && gate.rejected && gate.whole_inside && gate.whole_nonnegative && gate.prepared_unvisited &&
       gate.shell_exclusions && gate.max_shell>=30 && gate.wide_linear_squares==3 && gate.empty_shells,
       "required census branch was not exercised");
+  // ==3 observed from the rational Gram solve of support18 at execution (22 September 2026).
+  gate.require(gate.wide_linear_squares_u18==3 && gate.extreme_cases_u18==5,
+      "18-bit wide support branch was not exercised");
 }
 }  // namespace
 
@@ -295,7 +313,7 @@ int main(int argc,char** argv) {
     FIELD(whole_inside);FIELD(whole_nonnegative);FIELD(shell_exclusions);FIELD(saturating_overshoot);FIELD(prepared_unvisited);
     FIELD(near_first_cases);FIELD(singleton_cases);FIELD(extreme_cases);FIELD(wide_linear_squares);FIELD(permutations);FIELD(huge_threshold);
     FIELD(invalid_inputs);FIELD(allocation_failures);FIELD(allocation_free_rejections);FIELD(parallel_calls);FIELD(repeated_calls);
-    FIELD(source_alias_checks);FIELD(overflow_exceptions);
+    FIELD(source_alias_checks);FIELD(overflow_exceptions);FIELD(wide_linear_squares_u18);FIELD(extreme_cases_u18);
 #undef FIELD
     std::cout<<"}\n";return 0;
   } catch (const std::exception& error) {

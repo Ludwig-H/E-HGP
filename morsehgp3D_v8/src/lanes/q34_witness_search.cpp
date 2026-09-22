@@ -11,6 +11,19 @@
 #include <stdexcept>
 
 namespace mhgp8 {
+// Internal adapter: Z always belongs to the immutable certified index.
+// Public entry points validate A/B and standalone bound queries remain checked.
+struct Q34WitnessSearchBoundsAccess {
+  static Q2Bounds h(const Q2JointPreparedBounds& prepared, const Box3& z) {
+    return prepared.bounds_unchecked(z);
+  }
+  static Q2Bounds h(const PreparedPairCitronBounds& prepared, const Box3& z) {
+    return prepared.h_bounds_unchecked(z);
+  }
+  static Q34XiBounds xi(const PreparedPairCitronBounds& prepared, const Box3& z) {
+    return prepared.xi_bounds_unchecked(z);
+  }
+};
 namespace {
 
 struct Frame {
@@ -104,8 +117,8 @@ std::uint8_t filter_impl(
     const auto h = [&] {
       if constexpr (Affine) {
         counter_add(bounds_work->affine_h_tests);
-        return prepared.h_bounds(node.box);
-      } else return prepared.bounds(node.box);
+        return Q34WitnessSearchBoundsAccess::h(prepared, node.box);
+      } else return Q34WitnessSearchBoundsAccess::h(prepared, node.box);
     }();
     if (h.maximum4 <= 0) {
       counter_add(work.h_excluded_nodes);
@@ -122,7 +135,7 @@ std::uint8_t filter_impl(
       const auto xi = [&] {
         if constexpr (Affine) {
           counter_add(bounds_work->affine_xi_tests);
-          return prepared.xi_bounds(node.box);
+          return Q34WitnessSearchBoundsAccess::xi(prepared, node.box);
         } else {
           const auto general = spindle_detail::xi_bounds(a, b, node.box);
           return Q34XiBounds{general.low, general.high};

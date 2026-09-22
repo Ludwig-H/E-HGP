@@ -185,12 +185,26 @@ if(BUILD_TESTING)
     endforeach()
   endfunction()
 
+  foreach(script IN ITEMS ground_baseline_test u18_resume_checks_test)
+    foreach(opt IN ITEMS normal optimized)
+      set(resume_flags -B)
+      set(resume_suffix "")
+      if(opt STREQUAL "optimized")
+        list(APPEND resume_flags -O)
+        set(resume_suffix "_optimized")
+      endif()
+      add_test(NAME mhgp8_${script}${resume_suffix} COMMAND ${Python3_EXECUTABLE}
+        ${resume_flags} "${CMAKE_CURRENT_SOURCE_DIR}/tests/${script}.py")
+      mhgp8_label("u18;gate" mhgp8_${script}${resume_suffix})
+    endforeach()
+  endforeach()
+
   # ---------------------------------------------------------------- u16 engine
   # C++ gates that do not include a Boost judge.
   foreach(gate IN ITEMS q2_node_pool q2_terminal_pool wspd_q2_parallel wspd_q2_dynamic
       q2_census_resume q2_census_detach q2_census_parallel wspd_q2_cooperative wspd_q2_ranges
       wspd_q2_batched wspd_q2_proposals wspd_front_inheritance q2_joint q2_witness_order
-      q2_sibling wspd_q2_census cloud_owner batch plan_assignment)
+      q2_sibling wspd_q2_census cloud_owner batch plan_assignment u18_numeric_domain)
     add_executable(mhgp8_${gate}_gate tests/${gate}_gate.cpp)
     target_include_directories(mhgp8_${gate}_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     target_link_libraries(mhgp8_${gate}_gate PRIVATE mhgp8_p0)
@@ -205,7 +219,7 @@ if(BUILD_TESTING)
         q2_prepared_bounds q34_pair_bounds wspd_front wspd_front_jobs wspd_front_dispatch
         exact_ball q4_family q34_seed q34_cover q34_family_pruning q34_collective
         q4_center_map q4_local q4_shallow q4_window wspd_q34 q34_witness_search
-        q3_ball_census q4_seed_cells)
+        q3_ball_census q4_seed_cells q4_saturating_atlas)
       add_executable(mhgp8_${gate}_gate tests/${gate}_gate.cpp)
       target_include_directories(mhgp8_${gate}_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
       mhgp8_use_boost(mhgp8_${gate}_gate)
@@ -576,6 +590,12 @@ if(BUILD_TESTING)
         --build "${CMAKE_BINARY_DIR}" --output "${mutation_root}")
     mhgp8_label("u16;mutation;slow" mhgp8_${stem})
   endforeach()
+  set(saturating_mutation_root "${MHGP8_FRESH_ROOT}/q4_saturating_mutations")
+  mhgp8_add_fresh_test(mhgp8_q4_saturating_mutations
+    FRESH "${saturating_mutation_root}"
+    COMMAND ${Python3_EXECUTABLE} -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/q4_saturating_mutations.py" run
+      --build "${CMAKE_BINARY_DIR}" --output "${saturating_mutation_root}")
+  mhgp8_label("u18;mutation;slow" mhgp8_q4_saturating_mutations)
   foreach(kind IN ITEMS witness census)
     set(mutation_root "${MHGP8_FRESH_ROOT}/q34_indexed_${kind}_mutations")
     mhgp8_add_fresh_test(mhgp8_q34_indexed_${kind}_mutations
@@ -587,7 +607,7 @@ if(BUILD_TESTING)
   if(mhgp8_tree_reasons)
     set_tests_properties(mhgp8_q34_affine_mutations mhgp8_q4_seed_cells_mutations
       mhgp8_wspd_q34_mutations mhgp8_q34_indexed_witness_mutations
-      mhgp8_q34_indexed_census_mutations PROPERTIES DISABLED TRUE)
+      mhgp8_q34_indexed_census_mutations mhgp8_q4_saturating_mutations PROPERTIES DISABLED TRUE)
   endif()
   # tests/q34_indexed_mutations.py --kind witness (written at d1b4dbc6) requires
   # each mutation site to be unique in src/lanes/q34_witness_search.cpp; since

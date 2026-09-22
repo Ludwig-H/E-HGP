@@ -27,6 +27,18 @@ using mhgp8::Q2WitnessOrder;
 using mhgp8::u64;
 using Points = std::vector<Point3>;
 constexpr auto unlimited = std::numeric_limits<std::size_t>::max();
+
+// Historical 16-bit border: the pair and the corner cube engraved at 65535
+// became interior points when the engine widened to 18 bits, so each one is
+// doubled by a twin at coordinate_limit. A support whose squared diameter
+// exceeds 3 * 65535^2 cannot exist on a u16 cloud; counting those proves the
+// twins exercise the widened range.
+constexpr mhgp8::Coordinate u16_limit = 65535;
+constexpr u64 u16_diameter_bound = 3 * u64{u16_limit} * u64{u16_limit};
+static_assert(u16_limit < mhgp8::coordinate_limit);
+bool wide_points(const Points& points) {
+  return std::any_of(points.begin(), points.end(), [](const Point3& p) { return p.x > u16_limit || p.y > u16_limit || p.z > u16_limit; });
+}
 static_assert(!std::is_copy_constructible_v<mhgp8::Q2CensusContinuation> &&
               !std::is_move_constructible_v<mhgp8::Q2CensusContinuation> &&
               !std::is_copy_assignable_v<mhgp8::Q2CensusContinuation> &&
@@ -45,6 +57,7 @@ struct Gate {
   u64 advances{}, supports{}, max_shell{}, credit_pauses{}, split_credit_pauses{}, phase_pauses{}, deferred_child_pauses{};
   u64 emission_pauses{}, partial_range_pauses{}, two_engines{}, thread_transfers{}, owner_resets{};
   u64 callback_failures{}, reentrant_calls{}, overlap_rejections{}, invalid_inputs{}, mutants{};
+  u64 wide_fixtures{}, wide_supports{}, wide_diameter{};  // 18-bit twins, counted apart.
   void require(bool condition, const char* message) {
     ++checks;
     if (!condition) throw std::runtime_error(message);
@@ -74,7 +87,8 @@ void sort(Output& output) {
 
 // Independent, test-only scalar oracle. Neither its keys nor H signs call
 // a product predicate, front, index traversal or census implementation.
-// All differences are promoted before multiplication: |H| <=3*65535^2.
+// All differences are promoted to int64 before multiplication:
+// |H| <= 3 * 262143^2 < 2^38 at 18 bits (3 * 65535^2 < 2^34 historically).
 Output oracle(Gate& gate, const Points& points, std::size_t anchor,
               std::vector<std::size_t> targets, unsigned k) {
   gate.require(points.size() <= 140 && anchor < points.size(), "resume oracle exceeded its declared small domain");
@@ -156,6 +170,8 @@ void check_output(Gate& gate, const Output& output, const Output& expected) {
                      std::binary_search(support.shell.begin(), support.shell.end(), support.b),
                  "count-only anchor exclusion removed a support endpoint from its shell");
     gate.max_shell = std::max(gate.max_shell, static_cast<u64>(support.shell.size()));
+    if (support.key.diameter_squared > u16_diameter_bound) ++gate.wide_supports;
+    gate.wide_diameter = std::max(gate.wide_diameter, support.key.diameter_squared);
   }
   gate.supports += output.size();
 }
@@ -282,7 +298,9 @@ struct Fixture { Points points; std::size_t anchor{}; std::vector<std::size_t> s
 
 std::vector<Fixture> fixtures() {
   std::vector<Fixture> result{
-      {{{0, 0, 0}, {65535, 65535, 65535}}, 0, {1}},
+      {{{0, 0, 0}, {u16_limit, u16_limit, u16_limit}}, 0, {1}},
+      // 18-bit twin of the u16 diagonal pair.
+      {{{0, 0, 0}, {mhgp8::coordinate_limit, mhgp8::coordinate_limit, mhgp8::coordinate_limit}}, 0, {1}},
       // Explicit port of q2_sibling_gate's split-after-credit counterexample.
       {{{0, 0, 0}, {5, 0, 0}, {10, 0, 0}, {11, 0, 0}}, 0, {2, 3}},
       {{{1000, 0, 0}, {0, 1, 0}, {0, 0, 0}}, 0, {1, 2}},
@@ -295,32 +313,41 @@ std::vector<Fixture> fixtures() {
   Fixture sphere;
   for (int x = -5; x <= 5; ++x) for (int y = -5; y <= 5; ++y) for (int z = -5; z <= 5; ++z)
     if (x*x + y*y + z*z == 25)
-      sphere.points.push_back({static_cast<std::uint16_t>(10 + x), static_cast<std::uint16_t>(10 + y),
-                               static_cast<std::uint16_t>(10 + z)});
+      sphere.points.push_back({static_cast<mhgp8::Coordinate>(10 + x), static_cast<mhgp8::Coordinate>(10 + y),
+                               static_cast<mhgp8::Coordinate>(10 + z)});
   sphere.selected = {29};
   result.push_back(sphere);
   sphere.points.push_back({10, 10, 10});
   result.push_back(std::move(sphere));
   Fixture extremes;
   for (unsigned bits = 0; bits < 8; ++bits)
-    extremes.points.push_back({static_cast<std::uint16_t>((bits & 1U) != 0 ? 65535 : 0),
-                               static_cast<std::uint16_t>((bits & 2U) != 0 ? 65535 : 0),
-                               static_cast<std::uint16_t>((bits & 4U) != 0 ? 65535 : 0)});
+    extremes.points.push_back({static_cast<mhgp8::Coordinate>((bits & 1U) != 0 ? u16_limit : 0),
+                               static_cast<mhgp8::Coordinate>((bits & 2U) != 0 ? u16_limit : 0),
+                               static_cast<mhgp8::Coordinate>((bits & 4U) != 0 ? u16_limit : 0)});
   extremes.points.push_back({32767, 32767, 32767}); extremes.selected = {7};
   result.push_back(std::move(extremes));
+  // 18-bit twin of the corner cube: corners at coordinate_limit, near-centre
+  // site at 131071, same anchor 0 and same selected B (the far corner 7).
+  Fixture wide_extremes;
+  for (unsigned bits = 0; bits < 8; ++bits)
+    wide_extremes.points.push_back({static_cast<mhgp8::Coordinate>((bits & 1U) != 0 ? mhgp8::coordinate_limit : 0),
+                                    static_cast<mhgp8::Coordinate>((bits & 2U) != 0 ? mhgp8::coordinate_limit : 0),
+                                    static_cast<mhgp8::Coordinate>((bits & 4U) != 0 ? mhgp8::coordinate_limit : 0)});
+  wide_extremes.points.push_back({131071, 131071, 131071}); wide_extremes.selected = {7};
+  result.push_back(std::move(wide_extremes));
   Fixture deferral;
   for (unsigned x = 0; x < 4; ++x) for (unsigned y = 0; y < 4; ++y) for (unsigned z = 0; z < 4; ++z) {
     deferral.selected.push_back(deferral.points.size());
-    deferral.points.push_back({static_cast<std::uint16_t>(x), static_cast<std::uint16_t>(y), static_cast<std::uint16_t>(z)});
+    deferral.points.push_back({static_cast<mhgp8::Coordinate>(x), static_cast<mhgp8::Coordinate>(y), static_cast<mhgp8::Coordinate>(z)});
   }
   deferral.anchor = deferral.points.size(); deferral.points.push_back({1000, 1000, 1000});
   for (unsigned x = 997; x < 1000; ++x) for (unsigned y = 998; y < 1000; ++y) for (unsigned z = 998; z < 1000; ++z)
-    deferral.points.push_back({static_cast<std::uint16_t>(x), static_cast<std::uint16_t>(y), static_cast<std::uint16_t>(z)});
+    deferral.points.push_back({static_cast<mhgp8::Coordinate>(x), static_cast<mhgp8::Coordinate>(y), static_cast<mhgp8::Coordinate>(z)});
   result.push_back(std::move(deferral));
   Fixture credited{{{0, 0, 0}, {500, 0, 0}}, 0, {}};
   for (unsigned i = 0; i < 64; ++i) {
     credited.selected.push_back(credited.points.size());
-    credited.points.push_back({static_cast<std::uint16_t>(1000 + i), 0, 0});
+    credited.points.push_back({static_cast<mhgp8::Coordinate>(1000 + i), 0, 0});
   }
   result.push_back(std::move(credited));
   return result;
@@ -333,6 +360,7 @@ void matrix(Gate& gate) {
     const auto b = fixture.selected.empty() ? largest_disjoint(*index, rank) : node_for(*index, fixture.selected);
     const auto targets = ids_of(*index, b);
     ++gate.fixtures; ++gate.roots;
+    if (wide_points(fixture.points)) ++gate.wide_fixtures;
     for (const unsigned k : {1U, 2U, 5U, 10U}) {
       const auto expected = oracle(gate, fixture.points, fixture.anchor, targets, k);
       for (const auto sibling : {Q2SiblingMode::Disabled, Q2SiblingMode::Saturating})
@@ -520,6 +548,13 @@ int main(int argc, char** argv) {
                      gate.owner_resets > 0 && gate.thread_transfers > 0 && gate.callback_failures > 0 && gate.reentrant_calls > 0 &&
                      gate.overlap_rejections > 0,
                  "resume gate lost a required positive suspension/lifetime/exception fixture");
+    // 18-bit twins: separate floor, the u16 floors above are unchanged. At
+    // least one resumed support must be impossible on a u16 cloud.
+    // The widest resumed diameter is the 18-bit diagonal 3 * 262143^2, read
+    // at execution from the scalar oracle comparison, never derived.
+    gate.require(gate.wide_fixtures == 2 && gate.wide_supports > 0 && gate.wide_diameter > u16_diameter_bound &&
+                     gate.wide_diameter == UINT64_C(206156857347),
+                 "resume gate 18-bit twin non-vacuity failed");
     std::cout << "{\"schema\":\"mhgp8_q2_census_resume_gate_v1\",\"status\":\"pass\",\"scope\":\"shared_anchor_continuations_not_full\""
               << ",\"checks\":" << gate.checks << ",\"fixtures\":" << gate.fixtures << ",\"roots\":" << gate.roots
               << ",\"oracle_pairs\":" << gate.oracle_pairs << ",\"oracle_sites\":" << gate.oracle_sites
@@ -532,7 +567,9 @@ int main(int argc, char** argv) {
               << ",\"thread_transfers\":" << gate.thread_transfers << ",\"owner_resets\":" << gate.owner_resets
               << ",\"callback_failures\":" << gate.callback_failures << ",\"reentrant_calls\":" << gate.reentrant_calls
               << ",\"overlap_rejections\":" << gate.overlap_rejections
-              << ",\"invalid_inputs\":" << gate.invalid_inputs << ",\"mutants\":" << gate.mutants << "}\n";
+              << ",\"invalid_inputs\":" << gate.invalid_inputs << ",\"mutants\":" << gate.mutants
+              << ",\"wide_fixtures\":" << gate.wide_fixtures << ",\"wide_supports\":" << gate.wide_supports
+              << ",\"wide_diameter\":" << gate.wide_diameter << "}\n";
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "mhgp8 q2 resume gate: " << error.what() << '\n';

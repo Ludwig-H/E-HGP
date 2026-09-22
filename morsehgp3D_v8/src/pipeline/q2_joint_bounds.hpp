@@ -43,6 +43,7 @@ class Q2JointPreparedBounds final {
   std::array<std::array<Constants, 4>, 3> constants_{};
 
   friend struct Q2CensusEngine;
+  friend struct Q34WitnessSearchBoundsAccess;
   // Only the census may create an inert value before installing prepared
   // constants. Public callers cannot accidentally query an unprepared box.
   Q2JointPreparedBounds() = default;

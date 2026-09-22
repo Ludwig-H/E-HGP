@@ -44,6 +44,9 @@ struct Gate {
   u64 exhaustive_edges{}, permutations{}, invalid_inputs{}, callback_failures{};
   u64 parallel_calls{}, judge_mutants{};
   u64 edge_seed_count{}, edge_pruned_sites{}, covered_site_reads{};
+  // 18-bit twins (coordinate_limit = 262143); counted apart so that the
+  // historical 16-bit pins above keep their values.
+  u64 wide_clouds{}, wide_edge_calls{};
   void require(bool condition, const char* message) {
     ++checks;
     if (!condition) throw std::runtime_error(message);
@@ -386,8 +389,8 @@ Points shell_fixture() {
   Points points{{23, 24, 20}, {20, 17, 24}, {20, 17, 16}, {17, 24, 20}};
   for (int x = -5; x <= 5; ++x) for (int y = -5; y <= 5; ++y)
     for (int z = -5; z <= 5; ++z) if (x * x + y * y + z * z == 25)
-      add_unique(points, {static_cast<std::uint16_t>(x + 20), static_cast<std::uint16_t>(y + 20),
-                          static_cast<std::uint16_t>(z + 20)});
+      add_unique(points, {static_cast<mhgp8::Coordinate>(x + 20), static_cast<mhgp8::Coordinate>(y + 20),
+                          static_cast<mhgp8::Coordinate>(z + 20)});
   return points;
 }
 
@@ -395,6 +398,14 @@ void special_cases(Gate& gate) {
   const Points boundary{{10, 20, 20}, {30, 20, 20}, {20, 40, 20}, {20, 0, 20},
                          {20, 41, 20}, {20, 35, 20}, {20, 25, 5}, {65535, 65535, 65535}};
   for (const auto k : {1U, 2U, 3U, 5U, 10U}) static_cast<void>(check_edge(gate, boundary, {1, 0}, k));
+  // 18-bit twin: the far site sits at coordinate_limit (262143); the 65535
+  // corner above is an interior site since the widening and keeps its role.
+  const Points boundary18{{10, 20, 20}, {30, 20, 20}, {20, 40, 20}, {20, 0, 20},
+                           {20, 41, 20}, {20, 35, 20}, {20, 25, 5}, {262143, 262143, 262143}};
+  for (const auto k : {1U, 2U, 3U, 5U, 10U}) {
+    static_cast<void>(check_edge(gate, boundary18, {1, 0}, k));
+    ++gate.wide_edge_calls;
+  }
   const Points partial{{10, 20, 20}, {30, 20, 20}, {20, 35, 20},
                         {20, 20, 21}, {20, 25, 0}, {20, 25, 5}};
   const std::array<std::size_t, 4> invalid{0, 1, 2, 3};
@@ -418,7 +429,7 @@ void special_cases(Gate& gate) {
     Points points{{900, 1000, 1000}, {1100, 1000, 1000},
                   {1000, 1120, 1040}, {1000, 1120, 960}};
     for (unsigned j = 0; j != k - 1; ++j)
-      points.push_back({static_cast<std::uint16_t>(1000 + j), 1020, 1105});
+      points.push_back({static_cast<mhgp8::Coordinate>(1000 + j), 1020, 1105});
     static_cast<void>(check_edge(gate, points, {0, 1}, k));
     auto reversed = points;
     std::reverse(reversed.begin(), reversed.end());
@@ -427,8 +438,8 @@ void special_cases(Gate& gate) {
   }
   Points rows;
   for (unsigned i = 0; i != 6; ++i) {
-    rows.push_back({0, static_cast<std::uint16_t>(4 * i), 0});
-    rows.push_back({100, static_cast<std::uint16_t>(4 * i), 0});
+    rows.push_back({0, static_cast<mhgp8::Coordinate>(4 * i), 0});
+    rows.push_back({100, static_cast<mhgp8::Coordinate>(4 * i), 0});
   }
   static_cast<void>(check_edge(gate, rows, {0, 11}, 10));
   auto rotated = rows;
@@ -500,6 +511,12 @@ void run(Gate& gate) {
                         {32767, 32768, 32767}, {65535, 65535, 65535}};
   for (const auto k : {1U, 2U, 3U, 5U, 10U}) all_edges(gate, regular, k);
   all_edges(gate, extremes, 5);
+  // 18-bit twin of the corner cloud: 262143 = coordinate_limit, 131071/131072
+  // the two middle values (the 65535/32767/32768 sites above are interior now).
+  const Points extremes18{{0, 0, 0}, {262143, 262143, 0}, {262143, 0, 262143}, {0, 262143, 262143},
+                          {131071, 131072, 131071}, {262143, 262143, 262143}};
+  all_edges(gate, extremes18, 5);
+  ++gate.wide_clouds;
   std::uint64_t state = 0x4c8a2761f01529b3ULL;
   auto next = [&]() {
     state = state * 6364136223846793005ULL + 1442695040888963407ULL;
@@ -509,10 +526,29 @@ void run(Gate& gate) {
     Points points;
     const unsigned side_length = trial % 2 == 0 ? 65536U : 13U;
     while (points.size() != 7)
-      add_unique(points, {static_cast<std::uint16_t>(next() % side_length),
-                          static_cast<std::uint16_t>(next() % side_length),
-                          static_cast<std::uint16_t>(next() % side_length)});
+      add_unique(points, {static_cast<mhgp8::Coordinate>(next() % side_length),
+                          static_cast<mhgp8::Coordinate>(next() % side_length),
+                          static_cast<mhgp8::Coordinate>(next() % side_length)});
     all_edges(gate, points, trial % 2 == 0 ? 5 : 10);
+  }
+  // Separate 18-bit random clouds (own generator: the six clouds above stay
+  // pinned). Each must leave the 16-bit range, otherwise it proves nothing new.
+  std::uint64_t wide_state = 0x7d3e19a6c52b40f1ULL;
+  auto wide_next = [&]() {
+    wide_state = wide_state * 6364136223846793005ULL + 1442695040888963407ULL;
+    return wide_state >> 32;
+  };
+  for (unsigned trial = 0; trial != 2; ++trial) {
+    Points points;
+    while (points.size() != 7)
+      add_unique(points, {static_cast<mhgp8::Coordinate>(wide_next() % 262144U),
+                          static_cast<mhgp8::Coordinate>(wide_next() % 262144U),
+                          static_cast<mhgp8::Coordinate>(wide_next() % 262144U)});
+    gate.require(std::any_of(points.begin(), points.end(), [](const Point3& point) {
+      return point.x > 65535 || point.y > 65535 || point.z > 65535;
+    }), "18-bit random cloud stayed inside the 16-bit range");
+    all_edges(gate, points, trial == 0 ? 5 : 10);
+    ++gate.wide_clouds;
   }
   lifecycle(gate);
   gate.require(gate.covers >= 150 && gate.edge_calls >= 150 && gate.seed_calls >= 100 &&
@@ -523,9 +559,10 @@ void run(Gate& gate) {
                gate.max_shell >= 30 && gate.q4_without_q3 >= 2 && gate.invalid_root_depth_changed == 1 &&
                gate.edge_seed_count > 0 && gate.edge_pruned_sites > 0 && gate.covered_site_reads > 0,
                "cover adversarial nonvacuity floor");
-  gate.require(gate.clouds == 12 && gate.exhaustive_edges >= 150 && gate.invalid_inputs == 9 &&
+  gate.require(gate.clouds == 12 + gate.wide_clouds && gate.exhaustive_edges >= 150 && gate.invalid_inputs == 9 &&
                gate.callback_failures == 1 && gate.parallel_calls == 4 && gate.judge_mutants == 3,
                "cover exhaustive/lifecycle nonvacuity floor");
+  gate.require(gate.wide_clouds == 3 && gate.wide_edge_calls == 5, "18-bit twin fixture nonvacuity floor");
 }
 }  // namespace
 
@@ -552,7 +589,8 @@ int main(int argc, char** argv) {
               << ",\"invalid_inputs\":" << gate.invalid_inputs << ",\"callback_failures\":" << gate.callback_failures
               << ",\"parallel_calls\":" << gate.parallel_calls << ",\"judge_mutants\":" << gate.judge_mutants
               << ",\"edge_seed_count\":" << gate.edge_seed_count << ",\"edge_pruned_sites\":" << gate.edge_pruned_sites
-              << ",\"covered_site_reads\":" << gate.covered_site_reads << "}\n";
+              << ",\"covered_site_reads\":" << gate.covered_site_reads
+              << ",\"wide_clouds\":" << gate.wide_clouds << ",\"wide_edge_calls\":" << gate.wide_edge_calls << "}\n";
   } catch (const std::exception& error) {
     std::cerr << "q34 cover gate: " << error.what() << '\n';
     return 1;

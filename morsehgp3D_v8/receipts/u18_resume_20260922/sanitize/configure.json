@@ -1,0 +1,24 @@
+{
+  "name": "configure",
+  "command": [
+    "cmake",
+    "-S",
+    "/workspaces/E-HGP/morsehgp3D_v8",
+    "-B",
+    "/workspaces/E-HGP/build/v8_u18_resume_sanitize_20260922",
+    "-DBUILD_TESTING=ON",
+    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+    "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+    "-DCMAKE_CXX_COMPILER=/usr/bin/clang++",
+    "-DBOOST_ROOT=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr",
+    "-DMHGP8_SANITIZE=ON",
+    "-DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-O1 -g -DNDEBUG"
+  ],
+  "started": "2026-09-22T10:18:18.174495+00:00",
+  "exit_code": 0,
+  "stdout": "-- The CXX compiler identification is Clang 18.1.3\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: /usr/bin/clang++ - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\n-- Performing Test CMAKE_HAVE_LIBC_PTHREAD\n-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success\n-- Found Threads: TRUE  \n-- mhgp8: Boost 1.83.0 found in /workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include; exact judges enabled\n-- mhgp8: MHGP8_PATCHWORK_SOURCE_DIR is empty; bench/patchwork_ground_probe.cpp is not built (obtain the pinned upstream sources offline with bench/build_patchwork_ground.py, then pass the tree)\n-- Found Python3: /home/codespace/.python/current/bin/python3 (found version \"3.12.1\") found components: Interpreter \n-- mhgp8: q34/q4 mutation tests registered DISABLED (CMAKE_BUILD_TYPE is not Release; MHGP8_SANITIZE is ON)\n-- mhgp8: q34 spatial gate registered DISABLED (CMAKE_BUILD_TYPE is not Release; MHGP8_SANITIZE is ON; this tree is not the pinned r2 authority build /workspaces/E-HGP/build/v8_q4_seed_cells_r2_20260921)\n-- mhgp8: mhgp8_q34_indexed_witness_mutations registered DISABLED (tests/q34_indexed_mutations.py: mutation site not unique in q34_witness_search.cpp since 2629a536)\n-- Configuring done (2.2s)\n-- Generating done (0.2s)\n-- Build files have been written to: /workspaces/E-HGP/build/v8_u18_resume_sanitize_20260922\n",
+  "stderr": "",
+  "stdout_base64": "LS0gVGhlIENYWCBjb21waWxlciBpZGVudGlmaWNhdGlvbiBpcyBDbGFuZyAxOC4xLjMKLS0gRGV0ZWN0aW5nIENYWCBjb21waWxlciBBQkkgaW5mbwotLSBEZXRlY3RpbmcgQ1hYIGNvbXBpbGVyIEFCSSBpbmZvIC0gZG9uZQotLSBDaGVjayBmb3Igd29ya2luZyBDWFggY29tcGlsZXI6IC91c3IvYmluL2NsYW5nKysgLSBza2lwcGVkCi0tIERldGVjdGluZyBDWFggY29tcGlsZSBmZWF0dXJlcwotLSBEZXRlY3RpbmcgQ1hYIGNvbXBpbGUgZmVhdHVyZXMgLSBkb25lCi0tIFBlcmZvcm1pbmcgVGVzdCBDTUFLRV9IQVZFX0xJQkNfUFRIUkVBRAotLSBQZXJmb3JtaW5nIFRlc3QgQ01BS0VfSEFWRV9MSUJDX1BUSFJFQUQgLSBTdWNjZXNzCi0tIEZvdW5kIFRocmVhZHM6IFRSVUUgIAotLSBtaGdwODogQm9vc3QgMS44My4wIGZvdW5kIGluIC93b3Jrc3BhY2VzL0UtSEdQL2J1aWxkL3Y3X2Jvb3N0X2dhdGUvZXh0cmFjdGVkL3Vzci9pbmNsdWRlOyBleGFjdCBqdWRnZXMgZW5hYmxlZAotLSBtaGdwODogTUhHUDhfUEFUQ0hXT1JLX1NPVVJDRV9ESVIgaXMgZW1wdHk7IGJlbmNoL3BhdGNod29ya19ncm91bmRfcHJvYmUuY3BwIGlzIG5vdCBidWlsdCAob2J0YWluIHRoZSBwaW5uZWQgdXBzdHJlYW0gc291cmNlcyBvZmZsaW5lIHdpdGggYmVuY2gvYnVpbGRfcGF0Y2h3b3JrX2dyb3VuZC5weSwgdGhlbiBwYXNzIHRoZSB0cmVlKQotLSBGb3VuZCBQeXRob24zOiAvaG9tZS9jb2Rlc3BhY2UvLnB5dGhvbi9jdXJyZW50L2Jpbi9weXRob24zIChmb3VuZCB2ZXJzaW9uICIzLjEyLjEiKSBmb3VuZCBjb21wb25lbnRzOiBJbnRlcnByZXRlciAKLS0gbWhncDg6IHEzNC9xNCBtdXRhdGlvbiB0ZXN0cyByZWdpc3RlcmVkIERJU0FCTEVEIChDTUFLRV9CVUlMRF9UWVBFIGlzIG5vdCBSZWxlYXNlOyBNSEdQOF9TQU5JVElaRSBpcyBPTikKLS0gbWhncDg6IHEzNCBzcGF0aWFsIGdhdGUgcmVnaXN0ZXJlZCBESVNBQkxFRCAoQ01BS0VfQlVJTERfVFlQRSBpcyBub3QgUmVsZWFzZTsgTUhHUDhfU0FOSVRJWkUgaXMgT047IHRoaXMgdHJlZSBpcyBub3QgdGhlIHBpbm5lZCByMiBhdXRob3JpdHkgYnVpbGQgL3dvcmtzcGFjZXMvRS1IR1AvYnVpbGQvdjhfcTRfc2VlZF9jZWxsc19yMl8yMDI2MDkyMSkKLS0gbWhncDg6IG1oZ3A4X3EzNF9pbmRleGVkX3dpdG5lc3NfbXV0YXRpb25zIHJlZ2lzdGVyZWQgRElTQUJMRUQgKHRlc3RzL3EzNF9pbmRleGVkX211dGF0aW9ucy5weTogbXV0YXRpb24gc2l0ZSBub3QgdW5pcXVlIGluIHEzNF93aXRuZXNzX3NlYXJjaC5jcHAgc2luY2UgMjYyOWE1MzYpCi0tIENvbmZpZ3VyaW5nIGRvbmUgKDIuMnMpCi0tIEdlbmVyYXRpbmcgZG9uZSAoMC4ycykKLS0gQnVpbGQgZmlsZXMgaGF2ZSBiZWVuIHdyaXR0ZW4gdG86IC93b3Jrc3BhY2VzL0UtSEdQL2J1aWxkL3Y4X3UxOF9yZXN1bWVfc2FuaXRpemVfMjAyNjA5MjIK",
+  "stderr_base64": "",
+  "finished": "2026-09-22T10:18:20.685429+00:00"
+}

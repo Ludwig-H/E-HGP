@@ -47,6 +47,8 @@ struct LocalGate : Gate {
   u64 clip_pairs{}, atlas_reuses{}, full_sweeps{}, empty_outputs{}, rotations{};
   u64 partition_inside{}, partition_outside{}, partition_splits{}, allocation_failures{};
   u64 refinements{}, refine_inside_added{};
+  // Internal floors only (the emitted field inventory is frozen by bench).
+  u64 center_locations{}, center_certificates{}, center_uncertified{}, extreme18_calls{};
 };
 
 static_assert(!std::is_copy_constructible_v<mhgp8::Q4LocalGeometry>);
@@ -423,21 +425,60 @@ void local_corner_fixture(LocalGate& gate) {
       {mhgp8::Q4CenterDomainMode::Positive,4,341,2048,0,true});
 }
 
-Points local_rotated(const Points& source) {
+// Integer rotation about (20,20,20) translated to `offset` on every axis: 1000
+// keeps the historical u16 fixture, 261800 places the same shape within 276 of
+// the 18-bit limit (the transform moves the twin by at most 276 per axis).
+// Any coordinate outside [0, limit] is a refusal, never a clamp.
+Points local_rotated(const Points& source, int offset = 1000) {
   const std::array<std::array<int,3>,3> transform{{{-20,4,22},{20,-10,20},{10,28,4}}};
   Points points;
   for (const auto point : source) {
     std::array<mhgp8::Coordinate,3> target{};
     for (std::size_t row = 0; row != 3; ++row) {
-      int coordinate = 1000;
+      int coordinate = offset;
       for (std::size_t column = 0; column != 3; ++column)
         coordinate += transform[row][column]*(static_cast<int>(point[column])-20);
-      if (coordinate < 0 || coordinate > 65535) throw std::runtime_error("rotation fixture outside u16");
-      target[row] = static_cast<std::uint16_t>(coordinate);
+      if (coordinate < 0 || coordinate > mhgp8::coordinate_limit) throw std::runtime_error("rotation fixture outside the 18-bit grid");
+      target[row] = static_cast<mhgp8::Coordinate>(coordinate);
     }
     points.push_back({target[0],target[1],target[2]});
   }
   return points;
+}
+
+// q3 circumcenters located in the atlas by exact long division (18 bits, no
+// scale*x product): the engine's (x,y,den) must equal the rational
+// circumcenter of (a,b,x) in the plane chart (cell coordinates = scale times
+// real coefficients on the basis (A,B), root [-2,2]^2), and the certificate
+// of the closed cell containing it can never exceed the strict interior count
+// of that ball over the whole cloud, nor drop below the root's certificate.
+void local_center_fixture(LocalGate& gate, const Points& points, Edge edge,
+                          std::size_t k, mhgp8::Q4LocalOptions options) {
+  const auto cover = mhgp8::Q34EdgeCover::make(mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points)),edge);
+  edge = cover->edge_ids();
+  const auto atlas = mhgp8::Q4LocalAtlas::make(cover,k,options);
+  const auto& geometry = atlas->geometry();
+  const LocalPlane plane(points[edge[0]],points[edge[1]]);
+  const auto root = atlas->root_certified_inside_count();
+  for (const auto x : local_seeds(points,edge)) {
+    const auto circumball = oracle::make(select(points,Ids{edge[0],edge[1],x}));
+    gate.require(circumball.ball.has_value(), "acute seed lost its rational circumball");
+    const auto expected = plane.coordinates(*circumball.ball);
+    const auto center = geometry->q3_center(x);
+    gate.require(center.den > 0 &&
+                 Rational(Big(center.x),Big(center.den)) == expected[0] &&
+                 Rational(Big(center.y),Big(center.den)) == expected[1],
+                 "engine q3 center differs from the rational circumcenter in the plane chart");
+    std::size_t inside = 0;
+    for (const auto& point : points) if (circumball.ball->power(point).numerator() < 0) ++inside;
+    const auto certified = atlas->certified_inside_count(center);
+    if (certified) {
+      gate.require(root.has_value() && *certified >= *root && *certified <= inside,
+                   "atlas certificate at a q3 center exceeds the strict interior count or drops below its root");
+      ++gate.center_certificates;
+    } else ++gate.center_uncertified;
+    ++gate.center_locations;
+  }
 }
 
 void local_fixtures(LocalGate& gate) {
@@ -448,6 +489,11 @@ void local_fixtures(LocalGate& gate) {
   const Points obtuse{{10,20,20},{30,20,20},{20,29,27},{20,11,22},{20,20,20}};
   const Points extreme{{0,0,0},{65535,65534,65533},{0,65535,65535},
                        {65535,0,65535},{32767,32767,32767},{65535,0,0}};
+  // 18-bit twin of `extreme`: the u16 corners are interior points since the
+  // widening; only this fixture exercises the 2^18 bounds and the long
+  // division of the q3 center location.
+  const Points extreme18{{0,0,0},{262143,262142,262141},{0,262143,262143},
+                         {262143,0,262143},{131071,131071,131071},{262143,0,0}};
   const Points late_valid{{0,0,0},{2,2,0},{2,2,2},{2,0,2},{0,2,2}};
   const Points q3_dead{{0,0,0},{2,2,0},{2,0,2},{0,2,2},{1,1,1}};
   const Points rows{{10,10,10},{18,10,10},{10,14,10},{12,14,10},
@@ -463,6 +509,8 @@ void local_fixtures(LocalGate& gate) {
       local_partition_fixture(gate,interior,{0,1},mode,budget);
     local_partition_fixture(gate,extreme,{0,1},mode,2048);
     ++gate.extreme_calls;
+    local_partition_fixture(gate,extreme18,{0,1},mode,2048);
+    ++gate.extreme_calls; ++gate.extreme18_calls;
     const std::array<mhgp8::Q4LocalOptions,4> variants{{
       {mode,0,1,0,0,true}, {mode,2,21,32,0,true},
       {mode,5,85,512,0,true}, {mode,7,4096,512,32,true}}};
@@ -471,6 +519,10 @@ void local_fixtures(LocalGate& gate) {
       local_fixture(gate,*points,{0,1},5,{mode,3,85,512,0,true});
     local_fixture(gate,extreme,{0,1},5,{mode,mhgp8::Q4LocalCell::max_depth,85,512,0,true});
     ++gate.extreme_calls;
+    local_fixture(gate,extreme18,{0,1},5,{mode,mhgp8::Q4LocalCell::max_depth,85,512,0,true});
+    ++gate.extreme_calls; ++gate.extreme18_calls;
+    for (const auto* points : {&twin,&interior,&extreme,&extreme18})
+      local_center_fixture(gate,*points,{0,1},5,{mode,mhgp8::Q4LocalCell::max_depth,85,512,0,true});
   }
   for (const auto k : {3U,5U,10U})
     local_fixture(gate,interior,{0,1},k,{Mode::Positive,3,85,512,0,true});
@@ -483,6 +535,19 @@ void local_fixtures(LocalGate& gate) {
   local_partition_fixture(gate,rotated,{0,1},Mode::Positive,2048);
   local_fixture(gate,rotated,{0,1},5,{Mode::Positive,3,85,512,0,true});
   ++gate.rotations;
+  // Same rotated shape translated next to the 18-bit limit, and the refusal
+  // of a rotation that would leave the grid.
+  auto rotated18 = local_rotated(twin,261800);
+  local_fixture(gate,rotated18,{0,1},5,{Mode::Positive,3,85,512,0,true});
+  local_center_fixture(gate,rotated18,{0,1},5,{Mode::Positive,mhgp8::Q4LocalCell::max_depth,85,512,0,true});
+  ++gate.rotations;
+  std::swap(rotated18[0],rotated18[1]);
+  local_partition_fixture(gate,rotated18,{0,1},Mode::Positive,2048);
+  local_fixture(gate,rotated18,{0,1},5,{Mode::Positive,3,85,512,0,true});
+  ++gate.rotations;
+  gate.rejects<std::runtime_error>([&] { static_cast<void>(local_rotated(twin,mhgp8::coordinate_limit)); },
+                                   "rotation fixture escaped the 18-bit grid without refusal");
+  local_center_fixture(gate,shell30(),{0,1},5,{Mode::Positive,3,85,512,0,true});
   for (std::size_t a = 0; a != late_valid.size(); ++a)
     for (std::size_t b = a+1; b != late_valid.size(); ++b) {
       local_fixture(gate,late_valid,{a,b},5,{Mode::Positive,2,21,32,0,true});
@@ -536,6 +601,36 @@ void local_lifecycle(LocalGate& gate) {
   gate.rejects([&] { static_cast<void>(mhgp8::Q4LocalAtlas::make(cover,2,options)); }, "atlas K<3 accepted");
   auto invalid_options = options; invalid_options.max_depth = 45;
   gate.rejects([&] { static_cast<void>(mhgp8::Q4LocalAtlas::make(cover,5,invalid_options)); }, "atlas depth45 accepted");
+  invalid_options = options; invalid_options.max_depth = mhgp8::Q4LocalCell::max_depth+1;
+  gate.rejects([&] { static_cast<void>(mhgp8::Q4LocalAtlas::make(cover,5,invalid_options)); }, "atlas depth max_depth+1 accepted");
+  {
+    // Exact long-division location against the CLOSED root of a root-only
+    // disk atlas: 2-1/den and exactly 2 are kept, 2+1/den is refused (floor
+    // equals the corner but the value is not integral), on both axes; a
+    // non-positive denominator and out-of-domain representation throw;
+    // valid but far outside-root values return no certificate before division.
+    const mhgp8::Q4LocalOptions root_only{Mode::Disk,0,1,0,0,true};
+    const auto root_atlas = mhgp8::Q4LocalAtlas::make(cover,5,root_only);
+    const auto root_count = root_atlas->root_certified_inside_count();
+    gate.require(root_count.has_value(), "root-only disk atlas has no root certificate");
+    using Center = mhgp8::Q4LocalCenter;
+    const mhgp8::i128 den = (mhgp8::i128{1} << 40)+1;  // den > scale: 1/den is below one scaled unit.
+    gate.require(root_atlas->certified_inside_count(Center{2*den-1,-2*den+1,den}) == root_count &&
+                 root_atlas->certified_inside_count(Center{2*den,-2*den,den}) == root_count &&
+                 root_atlas->certified_inside_count(Center{-2*den,2*den,den}) == root_count &&
+                 root_atlas->certified_inside_count(Center{0,0,den}) == root_count &&
+                 !root_atlas->certified_inside_count(Center{2*den+1,0,den}) &&
+                 !root_atlas->certified_inside_count(Center{0,2*den+1,den}) &&
+                 !root_atlas->certified_inside_count(Center{-2*den-1,0,den}) &&
+                 !root_atlas->certified_inside_count(Center{0,-2*den-1,den}),
+                 "long-division location misplaced a center against the closed root cell");
+    gate.rejects([&] { static_cast<void>(root_atlas->certified_inside_count(Center{0,0,0})); }, "zero denominator location accepted");
+    gate.rejects([&] { static_cast<void>(root_atlas->certified_inside_count(Center{0,0,-1})); }, "negative denominator location accepted");
+    gate.require(!root_atlas->certified_inside_count(Center{mhgp8::i128{1} << 101,0,1}),
+                 "far outside-root location received a certificate");
+    gate.rejects([&] { static_cast<void>(root_atlas->certified_inside_count(Center{mhgp8::i128{1} << 117,0,1})); },
+                 "out-of-domain center representation accepted");
+  }
   invalid_options = options; invalid_options.node_budget = 0;
   gate.rejects([&] { static_cast<void>(mhgp8::Q4LocalAtlas::make(cover,5,invalid_options)); }, "atlas without root budget accepted");
   gate.rejects([&] { static_cast<void>(mhgp8::run_q4_local_seed_candidates({},2,ignore)); }, "null atlas sweep accepted");
@@ -607,6 +702,8 @@ int main(int argc, char** argv) {
     gate.require(gate.parallel_calls == 4 && gate.callback_failures == 1 && gate.allocation_failures == 5 &&
                  gate.refinements > 0 && gate.refine_inside_added > 0,
                  "nonvacuity: local ownership or exception cases not exercised");
+    gate.require(gate.extreme18_calls == 4 && gate.center_locations > 0 && gate.center_certificates > 0,
+                 "nonvacuity: 18-bit extreme fixtures or located q3 centers not exercised");
     std::cout << "{\"schema\":\"mhgp8_q4_local_gate_v1\",\"status\":\"passed\"";
 #define MHGP8_LOCAL_FIELD(name) std::cout << ",\"" #name "\":" << gate.name
     MHGP8_LOCAL_FIELD(checks); MHGP8_LOCAL_FIELD(partitions); MHGP8_LOCAL_FIELD(fragment_checks);

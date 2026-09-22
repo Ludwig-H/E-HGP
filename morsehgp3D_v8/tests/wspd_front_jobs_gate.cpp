@@ -126,6 +126,7 @@ struct Gate {
   u64 inheriting_plans{};
   WspdFrontWork inheriting_work{};  // Sum over the mono runs with inherit_witnesses.
   u64 witness_carrying_jobs{};      // Jobs whose ROOT task received at least one rank.
+  u64 wide_clouds{};                // 18-bit twins: clouds with a coordinate above 65535.
 
   void require(bool condition, const char* message) {
     ++checks;
@@ -341,7 +342,35 @@ void compare_jobs(Gate& gate, const WspdFrontJobs& plan, const Capture& referenc
   ++gate.plans;
 }
 
+// Every integer predicate of the index and the front (midpoint splits, box gaps,
+// H, descent distances) is invariant under an integer translation: the twin of a
+// cloud pushed to the far corner of the 18-bit grid (its maximum on each axis
+// becomes coordinate_limit) has the same tree, counters and rectangles, and the
+// oracle judges it independently. Any difference is an engine fault.
+std::vector<Point3> far_corner(std::vector<Point3> points) {
+  static_assert(mhgp8::coordinate_limit == 262143);
+  std::array<mhgp8::Coordinate, 3> maximum{};
+  for (const auto& point : points)
+    for (std::size_t axis = 0; axis < 3; ++axis) maximum[axis] = std::max(maximum[axis], point[axis]);
+  for (auto& point : points) {
+    point.x = static_cast<mhgp8::Coordinate>(point.x + (262143 - maximum[0]));
+    point.y = static_cast<mhgp8::Coordinate>(point.y + (262143 - maximum[1]));
+    point.z = static_cast<mhgp8::Coordinate>(point.z + (262143 - maximum[2]));
+  }
+  return points;
+}
+
+bool wide(std::span<const Point3> points) {
+  return std::any_of(points.begin(), points.end(), [](const Point3& point) {
+    return point.x > 65535 || point.y > 65535 || point.z > 65535; });
+}
+
+// Historical corpus (u16 profile) followed by its 18-bit twins.
+constexpr std::size_t historical_fixture_count = 12;
+constexpr std::size_t wide_fixture_count = 4;
+
 std::vector<std::vector<Point3>> fixtures() {
+  using mhgp8::Coordinate;
   std::vector<std::vector<Point3>> result{
       {{123, 456, 789}},
       {{0, 0, 0}, {65535, 65535, 65535}},
@@ -351,15 +380,15 @@ std::vector<std::vector<Point3>> fixtures() {
       {{0, 0, 0}, {6, 0, 0}, {2, 1, 1}}};
   std::vector<Point3> line;
   for (unsigned i = 0; i < 17; ++i) {
-    line.push_back({static_cast<std::uint16_t>(i * 37), 101, 203});
+    line.push_back({static_cast<Coordinate>(i * 37), 101, 203});
   }
   result.push_back(line);
   std::vector<Point3> cube;
   for (const auto x : {0U, 65535U}) {
     for (const auto y : {0U, 65535U}) {
       for (const auto z : {0U, 65535U}) {
-        cube.push_back({static_cast<std::uint16_t>(x), static_cast<std::uint16_t>(y),
-                        static_cast<std::uint16_t>(z)});
+        cube.push_back({static_cast<Coordinate>(x), static_cast<Coordinate>(y),
+                        static_cast<Coordinate>(z)});
       }
     }
   }
@@ -367,9 +396,9 @@ std::vector<std::vector<Point3>> fixtures() {
   std::vector<Point3> separated_groups;
   for (unsigned group = 0; group < 3; ++group) {
     for (unsigned i = 0; i < 4; ++i) {
-      separated_groups.push_back({static_cast<std::uint16_t>(group * 27000 + i),
-                                  static_cast<std::uint16_t>(i & 1U),
-                                  static_cast<std::uint16_t>(i >> 1U)});
+      separated_groups.push_back({static_cast<Coordinate>(group * 27000 + i),
+                                  static_cast<Coordinate>(i & 1U),
+                                  static_cast<Coordinate>(i >> 1U)});
     }
   }
   result.push_back(separated_groups);
@@ -394,11 +423,11 @@ std::vector<std::vector<Point3>> fixtures() {
   // inside its subtree carry a non-empty received list.
   std::vector<Point3> bridged;
   for (unsigned corner = 0; corner < 8; ++corner) {
-    const auto x = static_cast<std::uint16_t>((corner & 1U) * 6000U);
-    const auto y = static_cast<std::uint16_t>(((corner >> 1U) & 1U) * 6000U);
-    const auto z = static_cast<std::uint16_t>(((corner >> 2U) & 1U) * 6000U);
+    const auto x = static_cast<Coordinate>((corner & 1U) * 6000U);
+    const auto y = static_cast<Coordinate>(((corner >> 1U) & 1U) * 6000U);
+    const auto z = static_cast<Coordinate>(((corner >> 2U) & 1U) * 6000U);
     bridged.push_back({x, y, z});
-    bridged.push_back({static_cast<std::uint16_t>(x + 54000U), y, z});
+    bridged.push_back({static_cast<Coordinate>(x + 54000), y, z});
   }
   // x > 30000: the index puts the three witnesses with the second cube, then
   // splits them from it; they are never inside a factor of the cube product.
@@ -406,9 +435,40 @@ std::vector<std::vector<Point3>> fixtures() {
   bridged.push_back({30110, 3010, 2990});
   bridged.push_back({30120, 2990, 3010});
   for (unsigned i = 0; i < 8; ++i) {
-    bridged.push_back({static_cast<std::uint16_t>(7000U * i + 500U), 65000, static_cast<std::uint16_t>(100U * i)});
+    bridged.push_back({static_cast<Coordinate>(7000U * i + 500U), 65000, static_cast<Coordinate>(100U * i)});
   }
   result.push_back(bridged);
+  if (result.size() != historical_fixture_count) throw std::logic_error("historical front-job corpus changed its size");
+  // ---- 18-bit twins (coordinate_limit = 262143), judged by the same Boost oracle.
+  result.push_back({{0, 0, 0}, {262143, 262143, 262143}});
+  std::vector<Point3> wide_cube;
+  for (const auto x : {0U, 262143U}) {
+    for (const auto y : {0U, 262143U}) {
+      for (const auto z : {0U, 262143U}) {
+        wide_cube.push_back({static_cast<Coordinate>(x), static_cast<Coordinate>(y),
+                             static_cast<Coordinate>(z)});
+      }
+    }
+  }
+  result.push_back(wide_cube);
+  // The bridged cubes at the far corner: their far sites (y = 65000, the u16
+  // frontier of the historical fixture) now sit at y = 262143.
+  result.push_back(far_corner(bridged));
+  // A separate 18-bit pseudo-random cloud (state >> 14 gives 18 bits); the u16
+  // generators above are pinned recipes and do not change.
+  for (std::uint32_t seed : {1013U}) {
+    std::vector<Point3> random;
+    auto state = seed;
+    const auto coordinate = [&] {
+      state = state * 1664525U + 1013904223U;
+      return static_cast<Coordinate>(state >> 14U);
+    };
+    for (unsigned i = 0; i < 13; ++i) {
+      random.push_back({static_cast<Coordinate>(i * 20011U + seed), coordinate(), coordinate()});  // < 262143 for i < 13.
+    }
+    result.push_back(random);
+  }
+  if (result.size() != historical_fixture_count + wide_fixture_count) throw std::logic_error("wide front-job corpus changed its size");
   return result;
 }
 
@@ -416,6 +476,7 @@ void corpus(Gate& gate) {
   for (const auto& points : fixtures()) {
     const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
     const auto oracle = make_oracle(gate, points);
+    gate.wide_clouds += static_cast<u64>(wide(points));
     const auto* const node_storage = index->spatial_nodes().data();
     const auto* const order_storage = index->spatial_order().data();
     const auto index_work = index->work();
@@ -633,7 +694,8 @@ int main(int argc, char** argv) {
     ownership_and_callbacks(gate);
     rejects_and_models(gate);
     const auto& inheriting = gate.inheriting_work;
-    const bool floors = gate.clouds == 12 && gate.mono_runs > 1000 && gate.plans > 5000 &&
+    const bool floors = gate.clouds == historical_fixture_count + wide_fixture_count &&
+                     gate.wide_clouds == wide_fixture_count && gate.mono_runs > 1000 && gate.plans > 5000 &&
                      gate.ordered_replays == 3 * gate.plans && gate.job_runs > 10000 &&
                      gate.oracle_point_tests > 10000 && gate.zero_job_plans > 0 &&
                      gate.all_terminal_plans > 0 && gate.terminal_jobs > 0 && gate.pending_jobs > 0 &&
@@ -655,7 +717,8 @@ int main(int argc, char** argv) {
                 << " inherited_rejections=" << inheriting.inherited_rejections
                 << " emitted_credits=" << inheriting.emitted_witness_credits
                 << " witness_jobs=" << gate.witness_carrying_jobs
-                << " model_mutants=" << gate.model_mutants << " widened_plans=" << gate.widened_plans << '\n';
+                << " model_mutants=" << gate.model_mutants << " widened_plans=" << gate.widened_plans
+                << " clouds=" << gate.clouds << " wide_clouds=" << gate.wide_clouds << '\n';
     }
     gate.require(floors, "front-job gate lost a declared non-vacuity floor");
     std::cout << "mhgp8_wspd_front_jobs_gate passed checks=" << gate.checks << " clouds=" << gate.clouds
@@ -674,7 +737,8 @@ int main(int argc, char** argv) {
               << " limit_bites=" << gate.limit_bites << " inheriting_plans=" << gate.inheriting_plans
               << " inherited_credits=" << inheriting.inherited_credits
               << " inherited_rejections=" << inheriting.inherited_rejections
-              << " witness_carrying_jobs=" << gate.witness_carrying_jobs << '\n';
+              << " witness_carrying_jobs=" << gate.witness_carrying_jobs
+              << " wide_clouds=" << gate.wide_clouds << '\n';
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "mhgp8_wspd_front_jobs_gate failed: " << error.what() << '\n';

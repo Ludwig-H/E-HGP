@@ -25,6 +25,7 @@ class Q34FamilyCertificate final {
  public:
   // A repeated/collinear/right/obtuse triangle or a nonmaximal ab returns
   // nullopt. There is no floating-point proposal or approximate decision.
+  // Out-of-domain coordinates throw invalid_argument before arithmetic.
   [[nodiscard]] static std::optional<Q34FamilyCertificate> make(Point3 a, Point3 b, Point3 x);
 
   [[nodiscard]] i64 radius_parameter_bound() const noexcept { return parameter_bound_; }
@@ -36,6 +37,7 @@ class Q34FamilyCertificate final {
   // witness. q4 implies q3, but lane thresholds differ and must stay separate.
   // False does not prove exteriority or absence of a different certificate.
   // Distinct witness IDs/counting and lane rejection belong to the caller.
+  // Precondition: z lies in the certified coordinate domain.
   [[nodiscard]] Q34FamilyWitness witness(Point3 z) const noexcept;
 
  private:

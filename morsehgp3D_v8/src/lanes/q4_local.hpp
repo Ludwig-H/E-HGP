@@ -15,9 +15,25 @@ struct Q4LocalOptions {
   u64 z_test_budget{512};
   std::size_t leaf_sites{32};
   bool clip_events{true};
+  // Optional early terminal certificate at K-1 (safe for BOTH q3 and q4).
+  // Default keeps the historical complete-partition path and its counters.
+  bool saturate_deep{false};
+};
+
+struct Q4LocalSaturationWork {
+  // Diagnostic SUBSET of Q4LocalAtlasWork::partition, NOT additive to it:
+  // only interrupted/certifying constructions. All their physical work is
+  // also included in partition so existing wrappers retain the total cost.
+  Q4LocalPartitionWork prefixes;
+  u64 queries{}, exact_fragments{}, certificates{}, certificates_with_unvisited_sites{};
+  u64 unvisited_site_mass{}, discarded_frontier_ids{};
+  u64 peak_temporary_bytes{}; // MAX; all preceding fields are SUM.
 };
 
 struct Q4LocalAtlasWork {
+  // Total physical partition work, INCLUDING saturated prefixes. Complete-
+  // partition population identities require saturate_deep==false; exact
+  // fragment objects themselves always retain their original identities.
   Q4LocalPartitionWork partition;
   Q4LocalGeometryQueryWork domain;
   u64 cells_created{}, outside_cells{}, deep_cells{}, leaf_cells{}, splits{};
@@ -45,16 +61,20 @@ class Q4LocalAtlas final {
   Q4LocalAtlas& operator=(Q4LocalAtlas&&) = delete;
   [[nodiscard]] const Q4LocalGeometryPtr& geometry() const noexcept;
   [[nodiscard]] const Q4LocalAtlasWork& work() const noexcept;
+  [[nodiscard]] const Q4LocalSaturationWork& saturation_work() const noexcept;
   [[nodiscard]] std::size_t kmax() const noexcept;
   [[nodiscard]] const Q4LocalOptions& options() const noexcept;
   [[nodiscard]] std::size_t retained_bytes() const;
   // Certified lower bound of depth_cover(t) for every center t of the CLOSED
-  // cell that contains the point: the exact inside count of that cell's
-  // fragment (never saturated, sites of the cover only). Descends the
+  // cell that contains the point: exact inside count of its complete fragment,
+  // or a terminal lower bound>=K-1 when saturate_deep is enabled. The latter
+  // is NEVER exposed as a fragment or used as a sweep's exact base. Descends the
   // built quadtree once (no fragment is revisited); a point in an Outside
   // cell or outside the root has no certificate (nullopt). Valid for ANY
   // ball through a and b whose center is that point, q3 seeds included,
   // because the cover contains every site inside such a ball.
+  // Public input must satisfy 0<den<2^117 and |x|,|y|<2^117 (the proven
+  // generated q3 range); invalid_argument precedes arithmetic otherwise.
   [[nodiscard]] std::optional<std::size_t> certified_inside_count(const Q4LocalCenter& center) const;
   // Same certificate for the whole root cell (every center of the domain).
   [[nodiscard]] std::optional<std::size_t> root_certified_inside_count() const noexcept;

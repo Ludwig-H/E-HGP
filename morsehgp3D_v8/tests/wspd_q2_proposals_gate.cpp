@@ -51,6 +51,8 @@ struct Gate {
   std::array<u64, 10> disagreements_by_mutant{};
   u64 oracle_pairs{}, oracle_sites{}, entry_runs{}, supports{}, max_shell{}, entry_extended_products{};
   u64 invalid_inputs{};
+  // 18-bit twins (coordinate_limit = 262143): clouds pushed to the far corner of the grid.
+  u64 wide_clouds{}, wide_named_fixture_checks{}, wide_historical_constant_checks{};
   void require(bool condition, const char* message) {
     ++checks;
     if (!condition) throw std::runtime_error(message);
@@ -353,6 +355,7 @@ Points k2_second_in_extension() {
 
 // Engraved clouds. Coordinates are exact u16 values; none is random at run time.
 std::vector<Points> fixtures() {
+  using mhgp8::Coordinate;
   std::vector<Points> clouds;
   clouds.push_back({{7, 8, 9}});
   clouds.push_back({{0, 0, 0}, {10, 0, 0}});
@@ -364,19 +367,19 @@ std::vector<Points> fixtures() {
   for (const auto& d : std::vector<std::array<int, 3>>{{0, 25, 0}, {0, -25, 0}, {0, 0, 25}, {0, 0, -25}, {-20, 15, 0},
        {-20, -15, 0}, {20, 15, 0}, {20, -15, 0}, {-15, 20, 0}, {15, -20, 0}, {-7, 24, 0}, {7, -24, 0},
        {0, 15, 20}, {0, -15, -20}, {-15, 0, 20}, {15, 0, -20}, {-7, 0, 24}, {7, 0, -24}, {0, 7, 24}, {0, -24, 7}})
-    sphere.push_back({static_cast<std::uint16_t>(125 + d[0]), static_cast<std::uint16_t>(100 + d[1]),
-                      static_cast<std::uint16_t>(100 + d[2])});
+    sphere.push_back({static_cast<Coordinate>(125 + d[0]), static_cast<Coordinate>(100 + d[1]),
+                      static_cast<Coordinate>(100 + d[2])});
   clouds.push_back(sphere);
   Points line;                                              // Collinear: many strict witnesses, factor ranks adjacent.
-  for (unsigned i = 0; i < 40; ++i) line.push_back({static_cast<std::uint16_t>(3 * i + (i % 3)), 50, 50});
+  for (unsigned i = 0; i < 40; ++i) line.push_back({static_cast<Coordinate>(3 * i + (i % 3)), 50, 50});
   clouds.push_back(line);
   Points rows;                                              // Two parallel rows: almost no universal witness.
-  for (unsigned i = 0; i < 24; ++i) { rows.push_back({static_cast<std::uint16_t>(10 * i), 0, 0});
-                                      rows.push_back({static_cast<std::uint16_t>(10 * i + 3), 4000, 0}); }
+  for (unsigned i = 0; i < 24; ++i) { rows.push_back({static_cast<Coordinate>(10 * i), 0, 0});
+                                      rows.push_back({static_cast<Coordinate>(10 * i + 3), 4000, 0}); }
   clouds.push_back(rows);
   Points grid;                                              // Equal distances and ties everywhere.
   for (unsigned x = 0; x < 4; ++x) for (unsigned y = 0; y < 4; ++y) for (unsigned z = 0; z < 4; ++z)
-    grid.push_back({static_cast<std::uint16_t>(100 * x), static_cast<std::uint16_t>(100 * y), static_cast<std::uint16_t>(100 * z)});
+    grid.push_back({static_cast<Coordinate>(100 * x), static_cast<Coordinate>(100 * y), static_cast<Coordinate>(100 * z)});
   clouds.push_back(grid);
   for (const auto& [size, seed] : std::vector<std::pair<unsigned, std::uint32_t>>{{24, 5}, {48, 11}, {96, 23}}) {
     Points cloud;
@@ -396,13 +399,47 @@ std::vector<Points> fixtures() {
   clouds.push_back(clusters);
   Points fourteen;                                           // K < n < 2K for K = 10: the 2K window is truncated.
   for (unsigned i = 0; i < 14; ++i)
-    fourteen.push_back({static_cast<std::uint16_t>(40 * i + (i * i) % 7), static_cast<std::uint16_t>(30 + (3 * i) % 5),
-                        static_cast<std::uint16_t>(20 + (5 * i) % 3)});
+    fourteen.push_back({static_cast<Coordinate>(40 * i + (i * i) % 7), static_cast<Coordinate>(30 + (3 * i) % 5),
+                        static_cast<Coordinate>(20 + (5 * i) % 3)});
   clouds.push_back(fourteen);
   clouds.push_back(k2_tangent_second());
   clouds.push_back(k2_second_in_extension());
   return clouds;
 }
+constexpr std::size_t fixture_count = 15;
+
+// 18-bit twins (coordinate_limit = 262143). Every integer predicate of the index
+// (longest-axis split at the integer midpoint, partition by <=) and of the front
+// (H, box gaps, descent distances, separation) is invariant under an integer
+// translation: the cloud pushed to the far corner of the grid (its maximum on
+// each axis becomes 262143) has the same tree, counters, rectangles and
+// supports, so every engraved expectation of the original holds for the twin
+// by invariance, while the replay and the brute-force oracle judge it anew.
+// Any difference is an engine fault of the 18-bit port.
+Points far_corner(Points points) {
+  static_assert(mhgp8::coordinate_limit == 262143);
+  std::array<mhgp8::Coordinate, 3> maximum{};
+  for (const auto& point : points)
+    for (std::size_t axis = 0; axis < 3; ++axis) maximum[axis] = std::max(maximum[axis], point[axis]);
+  for (auto& point : points) {
+    point.x = static_cast<mhgp8::Coordinate>(point.x + (262143 - maximum[0]));
+    point.y = static_cast<mhgp8::Coordinate>(point.y + (262143 - maximum[1]));
+    point.z = static_cast<mhgp8::Coordinate>(point.z + (262143 - maximum[2]));
+  }
+  return points;
+}
+bool wide(const Points& points) {
+  return std::any_of(points.begin(), points.end(), [](const Point3& point) {
+    return point.x > 65535 || point.y > 65535 || point.z > 65535; });
+}
+// Far-corner twins of the pinned clouds: the sphere and the grid of the pre-tranche
+// constants, and the two named fixtures whose far sites (60000, near the u16
+// frontier) reach 262143.
+std::vector<Points> wide_fixtures() {
+  const auto clouds = fixtures();
+  return {far_corner(clouds[4]), far_corner(clouds[7]), far_corner(k2_tangent_second()), far_corner(k2_second_in_extension())};
+}
+constexpr std::size_t wide_fixture_count = 4;
 
 const std::vector<WspdFrontProposals>& variants() {
   static const std::vector<WspdFrontProposals> values{{1, unlimited}, {1, 1}, {2, unlimited}, {2, 16},
@@ -426,32 +463,30 @@ bool pair_is_residual(const Q2CensusIndex& index, const Observed& engine, std::s
 // Exact expectations of the two named fixtures, K = 2, s = 8, q2 lane alone.
 void named_fixtures(Gate& gate) {
   struct Expected { WspdFrontProposals proposals; bool residual; u64 rejected_mass, extended_rejections, extended_credits; };
-  {
-    const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(k2_tangent_second()));
-    for (const auto& e : {Expected{{1, unlimited}, true, 1, 0, 0}, Expected{{2, unlimited}, true, 1, 0, 0},
-                          Expected{{4, unlimited}, true, 1, 0, 0}, Expected{{4, 1}, true, 1, 0, 0}}) {
-      const auto engine = observe(*index, 2, 8, e.proposals);
-      gate.require(pair_is_residual(*index, engine, 0, 1) == e.residual &&
-                       engine.result.work.rejected_pair_mass[0] == e.rejected_mass &&
-                       engine.result.work.extended_rejections == e.extended_rejections &&
-                       engine.result.work.extended_credits == e.extended_credits,
-                   "K2_tangent_second: a tangent site was credited or the depth-1 pair was rejected");
-      ++gate.named_fixture_checks;
+  // Each fixture is checked as engraved, then as its far-corner 18-bit twin against
+  // the SAME expectations (translation invariance), on a separate counter.
+  const auto check = [&](const Points& engraved, const std::vector<Expected>& expectations, const char* message) {
+    for (const bool twin : {false, true}) {
+      const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(twin ? far_corner(engraved) : engraved));
+      for (const auto& e : expectations) {
+        const auto engine = observe(*index, 2, 8, e.proposals);
+        gate.require(pair_is_residual(*index, engine, 0, 1) == e.residual &&
+                         engine.result.work.rejected_pair_mass[0] == e.rejected_mass &&
+                         engine.result.work.extended_rejections == e.extended_rejections &&
+                         engine.result.work.extended_credits == e.extended_credits,
+                     message);
+        ++(twin ? gate.wide_named_fixture_checks : gate.named_fixture_checks);
+      }
     }
-  }
-  {
-    const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(k2_second_in_extension()));
-    for (const auto& e : {Expected{{1, unlimited}, true, 0, 0, 0}, Expected{{2, unlimited}, false, 4, 4, 6},
-                          Expected{{4, unlimited}, false, 4, 4, 6}, Expected{{4, 1}, false, 4, 4, 4}}) {
-      const auto engine = observe(*index, 2, 8, e.proposals);
-      gate.require(pair_is_residual(*index, engine, 0, 1) == e.residual &&
-                       engine.result.work.rejected_pair_mass[0] == e.rejected_mass &&
-                       engine.result.work.extended_rejections == e.extended_rejections &&
-                       engine.result.work.extended_credits == e.extended_credits,
-                   "K2_second_in_extension: only the extension must find the second witness");
-      ++gate.named_fixture_checks;
-    }
-  }
+  };
+  check(k2_tangent_second(),
+        {Expected{{1, unlimited}, true, 1, 0, 0}, Expected{{2, unlimited}, true, 1, 0, 0},
+         Expected{{4, unlimited}, true, 1, 0, 0}, Expected{{4, 1}, true, 1, 0, 0}},
+        "K2_tangent_second: a tangent site was credited or the depth-1 pair was rejected");
+  check(k2_second_in_extension(),
+        {Expected{{1, unlimited}, true, 0, 0, 0}, Expected{{2, unlimited}, false, 4, 4, 6},
+         Expected{{4, unlimited}, false, 4, 4, 6}, Expected{{4, 1}, false, 4, 4, 4}},
+        "K2_second_in_extension: only the extension must find the second witness");
 }
 
 // Counters of the front BEFORE this tranche (commit 8d615cfd, pinned tranche-19 library),
@@ -459,19 +494,24 @@ void named_fixtures(Gate& gate) {
 void historical_constants(Gate& gate) {
   struct Constants { u64 visits, searches, descents, proposed, in_factors, h_tests, credits, rejected, emitted, separations,
                          rejected_mass, residual_mass; };
-  const auto check = [&](const Points& points, unsigned k, const Constants& c) {
-    const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
-    for (const auto& proposals : {WspdFrontProposals{}, WspdFrontProposals{1, 1}}) {
-      const auto w = observe(*index, k, 8, proposals).result.work;
-      gate.require(w.product_visits == c.visits && w.witness_searches == c.searches &&
-                       w.witness_descent_steps == c.descents && w.proposed_sites == c.proposed &&
-                       w.proposals_in_factors == c.in_factors && w.h_bound_tests == c.h_tests &&
-                       w.witness_lane_credits == c.credits && w.fully_rejected_products == c.rejected &&
-                       w.emitted_rectangles == c.emitted && w.separation_tests == c.separations &&
-                       w.rejected_pair_mass[0] == c.rejected_mass && w.residual_pair_mass[0] == c.residual_mass &&
-                       w.extended_products == 0 && w.extended_proposals == 0,
-                   "default front drifted from its engraved pre-tranche counters");
-      ++gate.historical_constant_checks;
+  // Each cloud is checked as engraved, then as its far-corner 18-bit twin against the
+  // SAME pre-tranche constants (translation invariance), on a separate counter.
+  const auto check = [&](const Points& engraved, unsigned k, const Constants& c) {
+    for (const bool twin : {false, true}) {
+      const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(twin ? far_corner(engraved) : engraved));
+      for (const auto& proposals : {WspdFrontProposals{}, WspdFrontProposals{1, 1}}) {
+        const auto w = observe(*index, k, 8, proposals).result.work;
+        gate.require(w.product_visits == c.visits && w.witness_searches == c.searches &&
+                         w.witness_descent_steps == c.descents && w.proposed_sites == c.proposed &&
+                         w.proposals_in_factors == c.in_factors && w.h_bound_tests == c.h_tests &&
+                         w.witness_lane_credits == c.credits && w.fully_rejected_products == c.rejected &&
+                         w.emitted_rectangles == c.emitted && w.separation_tests == c.separations &&
+                         w.rejected_pair_mass[0] == c.rejected_mass && w.residual_pair_mass[0] == c.residual_mass &&
+                         w.extended_products == 0 && w.extended_proposals == 0,
+                     twin ? "18-bit far-corner twin drifted from the engraved pre-tranche counters (translation invariance broken)"
+                          : "default front drifted from its engraved pre-tranche counters");
+        ++(twin ? gate.wide_historical_constant_checks : gate.historical_constant_checks);
+      }
     }
   };
   const auto clouds = fixtures();
@@ -486,9 +526,17 @@ void replay_corpus(Gate& gate) {
                                Mutant::ShiftedWindow, Mutant::LimitOnMinimum, Mutant::NoEarlyStop,
                                Mutant::InheritCredits, Mutant::WiderScanInOrder};
   static_assert(mutants.size() == 10);
-  for (const auto& points : fixtures()) {
+  auto clouds = fixtures();
+  gate.require(clouds.size() == fixture_count, "engraved corpus changed its size");
+  const auto twins = wide_fixtures();
+  gate.require(twins.size() == wide_fixture_count &&
+                   std::all_of(twins.begin(), twins.end(), [](const Points& points) { return wide(points); }),
+               "18-bit twin corpus changed its size or lost its 18-bit coordinates");
+  clouds.insert(clouds.end(), twins.begin(), twins.end());
+  for (const auto& points : clouds) {
     const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
     ++gate.clouds;
+    gate.wide_clouds += static_cast<u64>(wide(points));
     for (const unsigned k : {1U, 2U, 3U, 5U, 10U}) for (const unsigned s : {8U, 10U, 12U}) {
       const auto historical = observe(*index, k, s, {});
       for (const auto& proposals : variants()) {
@@ -582,7 +630,10 @@ Output oracle(Gate& gate, const Points& points, unsigned k) {
 }
 
 void entries(Gate& gate) {
-  for (const auto& points : fixtures()) {
+  auto clouds = fixtures();
+  const auto twins = wide_fixtures();
+  clouds.insert(clouds.end(), twins.begin(), twins.end());
+  for (const auto& points : clouds) {
     const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
     for (const unsigned k : {2U, 5U, 10U}) {
       const auto expected = oracle(gate, points, k);
@@ -683,16 +734,19 @@ int main(int argc, char** argv) {
     replay_corpus(gate);
     entries(gate);
     rejections(gate);
+    constexpr std::size_t corpus_count = fixture_count + wide_fixture_count;
     gate.require(gate.windows == 3 * 10 * (48 * 49 / 2) && gate.clamped_left > 0 && gate.clamped_right > 0 &&
-                     gate.whole_permutation_windows > 0 && gate.clouds == 15 && gate.replay_runs == 15 * 15 * 7 &&
+                     gate.whole_permutation_windows > 0 && gate.clouds == corpus_count &&
+                     gate.wide_clouds == wide_fixture_count && gate.replay_runs == corpus_count * 15 * 7 &&
                      gate.named_fixture_checks == 8 && gate.historical_constant_checks == 6 &&
+                     gate.wide_named_fixture_checks == 8 && gate.wide_historical_constant_checks == 6 &&
                      gate.extension_clamped_left > 0 && gate.extension_clamped_right > 0 &&
                      gate.truncated_double_windows > 0 && gate.rejections_with_historical_credit > 0 &&
                      gate.singleton_tangent_extension_sites > 0 && gate.singleton_kth_in_extension > 0 &&
                      gate.tangent_extension_sites > 0 && gate.factor_ranks_in_extension > 0 &&
                      gate.truncated_windows > 0 && gate.exhausted_extensions > 0 && gate.kth_witness_in_extension > 0 &&
                      gate.equal_distance_ties > 0 && gate.limit_skips > 0 && gate.extended_products > 0 &&
-                     gate.mutants == 10 && gate.entry_runs == 15 * 3 * 2 * 11 && gate.entry_extended_products > 0 &&
+                     gate.mutants == 10 && gate.entry_runs == corpus_count * 3 * 2 * 11 && gate.entry_extended_products > 0 &&
                      gate.supports > 0 && gate.max_shell >= 20 && gate.invalid_inputs == 21,
                  "proposal gate lost a declared non-vacuity floor");
     std::cout << "{\"schema\":\"mhgp8_wspd_q2_proposals_gate_v1\",\"status\":\"passed\",\"public_status\":\"not_claimed\""
@@ -722,7 +776,9 @@ int main(int argc, char** argv) {
               << ",\"oracle_pairs\":" << gate.oracle_pairs << ",\"oracle_sites\":" << gate.oracle_sites
               << ",\"entry_runs\":" << gate.entry_runs << ",\"entry_extended_products\":" << gate.entry_extended_products
               << ",\"supports\":" << gate.supports << ",\"max_shell\":" << gate.max_shell
-              << ",\"invalid_inputs\":" << gate.invalid_inputs << "}\n";
+              << ",\"invalid_inputs\":" << gate.invalid_inputs
+              << ",\"wide_clouds\":" << gate.wide_clouds << ",\"wide_named_fixture_checks\":" << gate.wide_named_fixture_checks
+              << ",\"wide_historical_constant_checks\":" << gate.wide_historical_constant_checks << "}\n";
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "mhgp8_wspd_q2_proposals_gate failed: " << error.what() << '\n';

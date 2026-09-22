@@ -244,32 +244,70 @@ std::vector<Points> fixtures() {
   Points sphere, cube, large, random;
   for (int x = -5; x <= 5; ++x) for (int y = -5; y <= 5; ++y) for (int z = -5; z <= 5; ++z)
     if (x * x + y * y + z * z == 25)
-      sphere.push_back({static_cast<std::uint16_t>(x + 8), static_cast<std::uint16_t>(y + 8),
-                        static_cast<std::uint16_t>(z + 8)});
+      sphere.push_back({static_cast<mhgp8::Coordinate>(x + 8), static_cast<mhgp8::Coordinate>(y + 8),
+                        static_cast<mhgp8::Coordinate>(z + 8)});
   for (unsigned bits = 0; bits < 8; ++bits)
-    cube.push_back({static_cast<std::uint16_t>((bits & 1U) * 65535),
-                   static_cast<std::uint16_t>(((bits >> 1U) & 1U) * 65535),
-                   static_cast<std::uint16_t>(((bits >> 2U) & 1U) * 65535)});
+    cube.push_back({static_cast<mhgp8::Coordinate>((bits & 1U) * 65535),
+                   static_cast<mhgp8::Coordinate>(((bits >> 1U) & 1U) * 65535),
+                   static_cast<mhgp8::Coordinate>(((bits >> 2U) & 1U) * 65535)});
   cube.push_back({32768, 32767, 32768});
   for (unsigned y = 0; y < 2; ++y) for (unsigned z = 0; z < 2; ++z)
-    large.push_back({0, static_cast<std::uint16_t>(y), static_cast<std::uint16_t>(z)});
-  for (unsigned i = 0; i < 65; ++i) large.push_back({static_cast<std::uint16_t>(1000 + i), 0, 0});
+    large.push_back({0, static_cast<mhgp8::Coordinate>(y), static_cast<mhgp8::Coordinate>(z)});
+  for (unsigned i = 0; i < 65; ++i) large.push_back({static_cast<mhgp8::Coordinate>(1000 + i), 0, 0});
   std::uint32_t state = 971;
   for (unsigned i = 0; i < 13; ++i) {
     state = state * 1664525U + 1013904223U;
-    const auto y = static_cast<std::uint16_t>(state >> 16U);
+    const auto y = static_cast<mhgp8::Coordinate>(state >> 16U);
     state = state * 1664525U + 1013904223U;
-    random.push_back({static_cast<std::uint16_t>(i * 251), y, static_cast<std::uint16_t>(state >> 16U)});
+    random.push_back({static_cast<mhgp8::Coordinate>(i * 251), y, static_cast<mhgp8::Coordinate>(state >> 16U)});
   }
   result.push_back(sphere); result.push_back(cube); result.push_back(large); result.push_back(random);
   return result;
 }
 
-void corpus(Gate& gate) {
-  for (const auto& base : fixtures()) for (unsigned transform = 0; transform < 2; ++transform) {
+// 18-bit twins (coordinate_limit = 262143) of the u16 corner fixture: the
+// full-extent cube with its near-center site {131072, 131071, 131072}, a
+// random cloud drawn on 18 bits (state >> 14), and the 4x65 large-factor
+// fixture translated so its far row ends exactly at 262143 (squared axis
+// gaps above 2^32, the Pool64 selection and filtering at 18-bit magnitude,
+// judged by the same n==69 cutoff-64 check). They pass through the same
+// oracle and run matrix as the u16 corpus, reflected by 262143 - x, with
+// their own floors; the u16 fixtures and their pinned floors are untouched.
+std::vector<Points> fixtures_18bits() {
+  constexpr mhgp8::Coordinate limit = mhgp8::coordinate_limit;
+  std::vector<Points> result;
+  Points cube, random, large;
+  for (unsigned bits = 0; bits < 8; ++bits)
+    cube.push_back({(bits & 1U) != 0 ? limit : 0, (bits & 2U) != 0 ? limit : 0, (bits & 4U) != 0 ? limit : 0});
+  cube.push_back({131072, 131071, 131072});
+  std::uint32_t state = 971;
+  for (unsigned i = 0; i < 13; ++i) {
+    state = state * 1664525U + 1013904223U;
+    const auto y = static_cast<mhgp8::Coordinate>(state >> 14U);
+    state = state * 1664525U + 1013904223U;
+    random.push_back({static_cast<mhgp8::Coordinate>(i * 20143), y, static_cast<mhgp8::Coordinate>(state >> 14U)});
+  }
+  for (unsigned y = 0; y < 2; ++y) for (unsigned z = 0; z < 2; ++z)
+    large.push_back({0, static_cast<mhgp8::Coordinate>(y), static_cast<mhgp8::Coordinate>(z)});
+  for (unsigned i = 0; i < 65; ++i) large.push_back({static_cast<mhgp8::Coordinate>(limit - 64 + i), 0, 0});
+  result.push_back(cube); result.push_back(random); result.push_back(large);
+  return result;
+}
+
+void require_wide(Gate& gate, const std::vector<Points>& fixtures) {
+  for (const auto& fixture : fixtures) {
+    mhgp8::Coordinate widest = 0;
+    for (const auto& point : fixture) widest = std::max({widest, point.x, point.y, point.z});
+    gate.require(widest > 65535 && widest <= mhgp8::coordinate_limit,
+                 "18-bit fixture does not leave the historical u16 range or exceeds coordinate_limit");
+  }
+}
+
+void corpus(Gate& gate, const std::vector<Points>& fixtures, mhgp8::Coordinate reflect) {
+  for (const auto& base : fixtures) for (unsigned transform = 0; transform < 2; ++transform) {
     auto points = base;
     if (transform != 0) {
-      for (auto& point : points) point = {point.z, static_cast<std::uint16_t>(65535U - point.x), point.y};
+      for (auto& point : points) point = {point.z, static_cast<mhgp8::Coordinate>(reflect - point.x), point.y};
       std::reverse(points.begin(), points.end());
     }
     const auto index = mhgp8::make_q2_cloud_index(mhgp8::prepare_cloud(points));
@@ -400,7 +438,7 @@ int main(int argc, char** argv) {
   }
   try {
     Gate gate;
-    corpus(gate);
+    corpus(gate, fixtures(), 65535);
     targeted(gate);
     gate.require(gate.clouds == 22 && gate.runs > 3000 && gate.oracle_pairs > 5000 && gate.oracle_sites > 300000 &&
                      gate.supports > 10000 && gate.max_shell == 30 && gate.extra_shells > 100 &&
@@ -410,6 +448,27 @@ int main(int argc, char** argv) {
                      gate.default_comparisons == 88 && gate.joint_runs > 300 && gate.pairwise_runs == 4 &&
                      gate.invalid_inputs == 6 && gate.callback_failures == 3 && gate.model_mutants == 5,
                  "terminal Pool qualification lost a non-vacuity floor");
+    // 18-bit twins: three fixtures, each doubled by the 262143 - x reflection,
+    // through the same run matrix (140 runs and 4 default comparisons per
+    // cloud; 36 + 78 + 2346 oracle pairs per transform). Structural counts are
+    // exact; the u16 max_shell of 30 is unchanged (the new clouds have at most
+    // 8 cospherical sites, the cube corners); the large twin must filter, band
+    // and select at cutoff 64.
+    const Gate u16 = gate;
+    const auto wide = fixtures_18bits();
+    require_wide(gate, wide);
+    corpus(gate, wide, mhgp8::coordinate_limit);
+    gate.require(wide.size() == 3 && gate.clouds - u16.clouds == 6 && gate.runs - u16.runs == 840 &&
+                     gate.oracle_pairs - u16.oracle_pairs == 4920 && gate.oracle_sites - u16.oracle_sites == 326424 &&
+                     gate.default_comparisons - u16.default_comparisons == 24 && gate.supports > u16.supports &&
+                     gate.max_shell == 30 && gate.joint_runs > u16.joint_runs && gate.unchanged_census > u16.unchanged_census &&
+                     gate.selected_rectangles > u16.selected_rectangles && gate.residual_pairs > u16.residual_pairs &&
+                     gate.filtered_pairs > u16.filtered_pairs && gate.bands > u16.bands && gate.selected64 > u16.selected64 &&
+                     gate.passthrough_rectangles > u16.passthrough_rectangles && gate.extra_shells > u16.extra_shells &&
+                     gate.factor_sites > u16.factor_sites && gate.pairwise_runs == u16.pairwise_runs &&
+                     gate.reentrant_calls == u16.reentrant_calls && gate.invalid_inputs == u16.invalid_inputs &&
+                     gate.callback_failures == u16.callback_failures && gate.model_mutants == u16.model_mutants,
+                 "18-bit terminal Pool corpus lost a non-vacuity floor");
     std::cout << "mhgp8_q2_terminal_pool_gate passed checks=" << gate.checks << " clouds=" << gate.clouds
               << " runs=" << gate.runs << " oracle_pairs=" << gate.oracle_pairs << " oracle_sites=" << gate.oracle_sites
               << " supports=" << gate.supports << " extra_shells=" << gate.extra_shells << " max_shell=" << gate.max_shell

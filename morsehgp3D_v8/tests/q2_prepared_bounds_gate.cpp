@@ -36,6 +36,12 @@ struct Gate {
   std::uint64_t model_mutants{};
   std::uint64_t invalid_inputs{};
   std::uint64_t copies{};
+  // 18-bit coverage (coordinate_limit = 262143): counted separately so that
+  // every historical u16 pin above keeps its exact value.
+  std::uint64_t cases18{};
+  std::uint64_t random18{};
+  std::uint64_t symmetries18{};
+  std::uint64_t model_mutants18{};
 
   void require(bool condition, const char* message) {
     ++checks;
@@ -56,8 +62,12 @@ struct ExactBounds {
 };
 
 Point3 point(const Doubled& values) {
-  return {static_cast<std::uint16_t>(values[0]), static_cast<std::uint16_t>(values[1]),
-            static_cast<std::uint16_t>(values[2])};
+  return {static_cast<mhgp8::Coordinate>(values[0]), static_cast<mhgp8::Coordinate>(values[1]),
+          static_cast<mhgp8::Coordinate>(values[2])};
+}
+
+bool exceeds_u16(const Point3& value) {
+  return value.x > 65535 || value.y > 65535 || value.z > 65535;
 }
 
 // Direct polynomial, not the product's stored center/diameter constants:
@@ -150,10 +160,18 @@ Q2Bounds check(Gate& gate, const Point3& a, const Box3& b, const Box3& z,
   gate.require(Integer(actual.minimum4) == expected.minimum4 &&
                    Integer(actual.maximum4) == expected.maximum4,
                "prepared q2 bounds differ from independent cpp_int extrema");
-  const Integer square = Integer(65535) * 65535;
+  // Proved range for the input width: -12 M^2 <= 4H <= 3 M^2 with M = 65535
+  // when every coordinate fits the historical u16 profile (unchanged check)
+  // and M = coordinate_limit = 262143 otherwise.
+  const bool wide = exceeds_u16(a) || exceeds_u16(b.low) || exceeds_u16(b.high) ||
+                    exceeds_u16(z.low) || exceeds_u16(z.high);
+  const Integer width = wide ? Integer(mhgp8::coordinate_limit) : Integer(65535);
+  const Integer square = width * width;
   gate.require(-12 * square <= actual.minimum4 && actual.minimum4 <= actual.maximum4 &&
                    actual.maximum4 <= 3 * square,
-               "prepared q2 bounds exceeded their exact u16 range");
+               wide ? "prepared q2 bounds exceeded their exact 18-bit range"
+                    : "prepared q2 bounds exceeded their exact u16 range");
+  if (wide) ++gate.cases18;
   if (actual.minimum4 > 0) ++gate.interior;
   else if (actual.maximum4 < 0) ++gate.exterior;
   else if (actual.minimum4 == 0 && actual.maximum4 == 0) ++gate.shell;
@@ -186,20 +204,22 @@ void interval_exhaustion(Gate& gate) {
   }
 }
 
+// Exact lattice isometry: axis permutation then reflection x -> side - x,
+// with side = 65535 (u16 profile) or coordinate_limit (18-bit profile).
 Point3 transformed(const Point3& input, const std::array<unsigned, 3>& axes,
-                    unsigned reflection) {
+                    unsigned reflection, mhgp8::Coordinate side) {
   Doubled result{};
   for (std::size_t axis = 0; axis < 3; ++axis) {
     const auto value = input[axes[axis]];
-    result[axis] = (reflection & (1U << axis)) != 0 ? 65535 - value : value;
+    result[axis] = (reflection & (1U << axis)) != 0 ? side - value : value;
   }
   return point(result);
 }
 
 Box3 transformed(const Box3& box, const std::array<unsigned, 3>& axes,
-                  unsigned reflection) {
-  const auto first = transformed(box.low, axes, reflection);
-  const auto second = transformed(box.high, axes, reflection);
+                  unsigned reflection, mhgp8::Coordinate side) {
+  const auto first = transformed(box.low, axes, reflection, side);
+  const auto second = transformed(box.high, axes, reflection, side);
   return {{std::min(first.x, second.x), std::min(first.y, second.y), std::min(first.z, second.z)},
           {std::max(first.x, second.x), std::max(first.y, second.y), std::max(first.z, second.z)}};
 }
@@ -223,11 +243,33 @@ void three_dimensional(Gate& gate) {
   std::array<unsigned, 3> axes{0, 1, 2};
   do {
     for (unsigned reflection = 0; reflection < 8; ++reflection) {
-      const auto result = check(gate, transformed(a, axes, reflection),
-                                  transformed(b, axes, reflection), transformed(z, axes, reflection));
+      const auto result = check(gate, transformed(a, axes, reflection, 65535),
+                                  transformed(b, axes, reflection, 65535),
+                                  transformed(z, axes, reflection, 65535));
       gate.require(result.minimum4 == baseline.minimum4 && result.maximum4 == baseline.maximum4,
                    "axis permutation or u16 reflection changed q2 extrema");
       ++gate.symmetries;
+    }
+  } while (std::next_permutation(axes.begin(), axes.end()));
+
+  // 18-bit twin: the same local geometry translated by 260000 next to the
+  // far corner (4H depends on differences only, so the extrema are equal),
+  // then every axis permutation and exact reflection x -> 262143 - x.
+  const Point3 a18{261000, 261001, 261002};
+  const Box3 b18{{261004, 261002, 261000}, {261008, 261007, 261005}};
+  const Box3 z18{{260999, 261000, 261001}, {261009, 261004, 261006}};
+  const auto baseline18 = check(gate, a18, b18, z18);
+  gate.require(baseline18.minimum4 == baseline.minimum4 && baseline18.maximum4 == baseline.maximum4,
+               "translating the symmetry fixture to 18-bit coordinates changed q2 extrema");
+  axes = {0, 1, 2};
+  do {
+    for (unsigned reflection = 0; reflection < 8; ++reflection) {
+      const auto result = check(gate, transformed(a18, axes, reflection, mhgp8::coordinate_limit),
+                                  transformed(b18, axes, reflection, mhgp8::coordinate_limit),
+                                  transformed(z18, axes, reflection, mhgp8::coordinate_limit));
+      gate.require(result.minimum4 == baseline.minimum4 && result.maximum4 == baseline.maximum4,
+                   "axis permutation or 18-bit reflection changed q2 extrema");
+      ++gate.symmetries18;
     }
   } while (std::next_permutation(axes.begin(), axes.end()));
 
@@ -250,6 +292,32 @@ void three_dimensional(Gate& gate) {
     const Box3 zv{{std::min(z0.x, z1.x), std::min(z0.y, z1.y), std::min(z0.z, z1.z)},
                  {std::max(z0.x, z1.x), std::max(z0.y, z1.y), std::max(z0.z, z1.z)}};
     static_cast<void>(check(gate, anchor, bv, zv));
+  }
+
+  // Separate stable pseudo-random full-18-bit family (own state and own
+  // floor); the u16 recipe above is pinned and unchanged.
+  std::uint64_t state18 = UINT64_C(0x5c1f0b3a9e72d641);
+  const auto coordinate18 = [&state18]() {
+    state18 ^= state18 >> 12;
+    state18 ^= state18 << 25;
+    state18 ^= state18 >> 27;
+    return static_cast<mhgp8::Coordinate>((state18 * UINT64_C(2685821657736338717)) >> 46);
+  };
+  for (unsigned index = 0; index < 160; ++index) {
+    const Point3 anchor{coordinate18(), coordinate18(), coordinate18()};
+    const Point3 b0{coordinate18(), coordinate18(), coordinate18()};
+    const Point3 b1{coordinate18(), coordinate18(), coordinate18()};
+    const Point3 z0{coordinate18(), coordinate18(), coordinate18()};
+    const Point3 z1{coordinate18(), coordinate18(), coordinate18()};
+    const Box3 bv{{std::min(b0.x, b1.x), std::min(b0.y, b1.y), std::min(b0.z, b1.z)},
+                 {std::max(b0.x, b1.x), std::max(b0.y, b1.y), std::max(b0.z, b1.z)}};
+    const Box3 zv{{std::min(z0.x, z1.x), std::min(z0.y, z1.y), std::min(z0.z, z1.z)},
+                 {std::max(z0.x, z1.x), std::max(z0.y, z1.y), std::max(z0.z, z1.z)}};
+    gate.require(anchor.x <= mhgp8::coordinate_limit && bv.high.x <= mhgp8::coordinate_limit &&
+                     zv.high.x <= mhgp8::coordinate_limit,
+                 "18-bit pseudo-random recipe left the coordinate range");
+    static_cast<void>(check(gate, anchor, bv, zv));
+    ++gate.random18;
   }
 }
 
@@ -318,6 +386,41 @@ void model_counterexamples(Gate& gate) {
   gate.require(all_axes.minimum4 == 12 && all_axes.maximum4 == 12 && all_axes.minimum4 != 4,
                "an axiswise extremum replaced the sum of all three coordinate contributions");
   ++gate.model_mutants;
+
+  // 18-bit twins of the extremal fixtures (M = coordinate_limit = 262143):
+  // the same identities with M^2 = 68718952449 > 2^32, counted separately.
+  constexpr mhgp8::Coordinate m = mhgp8::coordinate_limit;
+  const Integer square18 = Integer(m) * m;
+  const auto maximum18 = check(gate, {0, 0, 0}, {{m, m, m}, {m, m, m}}, {{0, 0, 0}, {m, m, m}});
+  const auto minimum18 = check(gate, {0, 0, 0}, {{0, 0, 0}, {0, 0, 0}}, {{m, m, m}, {m, m, m}});
+  gate.require(Integer(maximum18.maximum4) == 3 * square18 &&
+                   Integer(minimum18.minimum4) == -12 * square18 &&
+                   minimum18.minimum4 == minimum18.maximum4,
+               "the exact positive or negative 18-bit extrema were not attained");
+  const auto wide18 = check(gate, {0, 0, 0}, {{m, 0, 0}, {m, 0, 0}}, {{0, 0, 0}, {m, 0, 0}});
+  Integer wrapped32_18 = Integer(wide18.maximum4) % (Integer(1) << 32);
+  if (wrapped32_18 >= (Integer(1) << 31)) wrapped32_18 -= Integer(1) << 32;
+  gate.require(Integer(wide18.maximum4) == square18 && wrapped32_18 < 0,
+               "signed-i32 arithmetic mutant did not invert a wide 18-bit maximum");
+  ++gate.model_mutants18;
+  // A u32 store of the prepared square D = (e - a)^2 (the historical layout)
+  // would keep only D mod 2^32 at 18 bits and silently shrink the maximum.
+  const Integer truncated32 = square18 % (Integer(1) << 32);
+  gate.require(square18 >= (Integer(1) << 32) && truncated32 < square18 &&
+                   Integer(wide18.maximum4) != truncated32,
+               "u32 square-storage mutant did not lose the wide 18-bit maximum");
+  ++gate.model_mutants18;
+  const Integer unsigned_negative18 = (Integer(1) << 64) + minimum18.minimum4;
+  gate.require(minimum18.minimum4 < 0 && unsigned_negative18 > 0,
+               "unsigned residual mutation did not turn 18-bit exterior power into positive credit");
+  ++gate.model_mutants18;
+  // NoCredit twin with a far B endpoint: D = 261000^2 > 2^32 must cancel
+  // exactly against (2z - C)^2 on the x axis, leaving only the y contribution.
+  const auto no_credit18 = check(gate, {1000, 1, 0}, {{262000, 1, 0}, {262000, 3, 0}},
+                                   {{1000, 2, 0}, {1000, 2, 0}});
+  gate.require(no_credit18.minimum4 == -4 && no_credit18.maximum4 == 4,
+               "one far refuting B endpoint incorrectly excluded every query in the B box");
+  ++gate.model_mutants18;
 }
 
 void ownership_and_rejections(Gate& gate) {
@@ -385,12 +488,19 @@ int main(int argc, char** argv) {
                      gate.symmetries == 48 && gate.model_mutants == 8 &&
                      gate.invalid_inputs == 6 && gate.copies == 3,
                  "prepared q2 bounds gate non-vacuity failed");
+    // cases18 = 1 translated baseline + 42 symmetries (the six fully
+    // reflected images fall back under 65535) + 160 random + 4 model twins.
+    gate.require(gate.cases18 == 207 && gate.random18 == 160 && gate.symmetries18 == 48 &&
+                     gate.model_mutants18 == 4,
+                 "prepared q2 bounds gate 18-bit non-vacuity failed");
     std::cout << "mhgp8_q2_prepared_bounds_gate passed checks=" << gate.checks
               << " cases=" << gate.cases << " oracle_values=" << gate.oracle_values
               << " dense_values=" << gate.dense_values << " interior=" << gate.interior
               << " exterior=" << gate.exterior << " shell=" << gate.shell << " mixed=" << gate.mixed
               << " symmetries=" << gate.symmetries << " model_mutants=" << gate.model_mutants
               << " invalid_inputs=" << gate.invalid_inputs << " copies=" << gate.copies
+              << " cases18=" << gate.cases18 << " random18=" << gate.random18
+              << " symmetries18=" << gate.symmetries18 << " model_mutants18=" << gate.model_mutants18
               << " prepared_bytes=" << sizeof(Q2PreparedBounds) << '\n';
     return 0;
   } catch (const std::exception& error) {
