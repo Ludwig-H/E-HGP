@@ -1,8 +1,8 @@
 # État courant des audits v9
 
-22 septembre 2026. Code jugé : **`e28296bb`** (moteur chronométré à
-`d2700314`, puis portes et protocole G4) ; dernier audit B
-relu : `ae88ff1f`. Cadre : `exploration_v9_hors_registre`,
+22 septembre 2026. Code jugé : **`5ab4326c`** (session G4 sur le paquet
+`e28296bb`, noyau MEB à `ad2d0ebb`, sonde v2 à `5ab4326c`). Cadre :
+`exploration_v9_hors_registre`,
 `reference_cpu`, `quantized_u18_input_only`, `not_claimed`. Ce fichier est le
 verdict mutable du dossier ; les notes datées conservent les démonstrations et
 références. Les auditeurs écrivent dans `audits/` et communiquent au
@@ -69,6 +69,18 @@ de sortie K1. Ce sont des planchers ou capacités logiques, pas un RSS
 mesuré ; ils imposent une résidence de travail maîtrisée et une
 représentation de sortie adaptée pour les dizaines de millions de sites.
 
+La [première session G4](../receipts/g4_tower_r1_20260922/README.md) est
+réelle, clôturée et **CPU seulement** : huit cas complets du paquet
+`e28296bb`, sur trois trames sans sol de la séquence 08, s8, une exécution
+par cas. À W48, la tour K1..5 prend **18,81 / 15,05 / 29,25 s** et K1..10
+**111,68 / 82,31 / 125,44 s** ; 000000/K10 descend à **70,00 s** en FULL
+statique W48. Les six cas communs ont `generator`, `catalogue`,
+`tower_work` et `orders` exactement égaux aux reçus locaux, pas seulement
+le condensé. Ce reçu n'est ni GPU, ni brut, ni multi-séquence, ni s10/s12 ;
+ces tailles voisines ne prouvent aucune pente sous-quadratique. Voir la
+[lecture des mesures](CONTRE_AUDIT_B_PREMIER_G4_20260922.md) et la
+[contrelecture du protocole](CONTRE_AUDIT_B_G4_R1_ET_SCHEMA_V2_20260922.md).
+
 Le chiffre v8 de 104,63 s portait sur le seul flux q3/q4 en mode digest :
 aucune régression ni accélération v9 ne se déduit de cette comparaison non
 appariée.
@@ -83,19 +95,22 @@ appariée.
    Publier les registres déjà calculés : tests/copies de partition d'atlas, rejets q3,
    travail et attente par worker, `merge`, census, quotient et résolveur
    FULL. Ne pas confondre les sommes de temps worker avec le temps mur.
-   Pour la [session G4 SPOT préparée](CONTRE_AUDIT_B_GCP_SESSION_20260922.md),
-   `partial` et code 0 peuvent accompagner **zéro** tour achevée : exiger
-   les huit cas du plan par défaut complets, leurs comparaisons et l'arrêt
-   ciblé certifié avant de lire un reçu comme mesure. Les quatre scripts
-   sont publiés ; leur plafond de workers est corrigé à 48 dans `e28296bb`.
-   Aucun essai GCP n'en découle. Le contrôleur doit encore vérifier
-   indépendamment les blobs du commit annoncés par l'archive. Le [contre-audit
-   B du port MEB en cours](CONTRE_AUDIT_B_ANCHOR_MEB_DIAMETRE_20260922.md)
-   signale aussi que son nouveau champ JSON `ledger` ferait refuser au
-   worker G4 actuel chaque cas après calcul : figer son schéma avec la
-   sonde et le selftest avant la session.
+   Le reçu G4 R1 satisfait cette porte pour son paquet **ancien**
+   `e28296bb` : huit cas achevés, sources et entrées recoupées, arrêt ciblé
+   certifié. Il ne qualifie pas le nouveau noyau MEB. **Bloquant pour le
+   prochain G4** : à `5ab4326c`, le worker accepte `ledger` et l'étiquette
+   v2, mais exige encore des entiers pour toutes les valeurs de
+   `tower_work`. La vraie sonde v2 ajoute `meb_accounting` (chaîne) et
+   `meb_supports_by_size` (tableau) ; `validate_probe` refuse
+   `probe counters tower_work` après calcul. Les 17 selftests Python sont
+   verts car leur fausse sonde omet ces champs. Juger une **vraie petite
+   sortie** de la sonde, complète et refusée, avant une autre session
+   facturée. Le lecteur de reçu doit aussi refuser toute commande tuée
+   dont le groupe de processus n'est pas fermé, même en campagne `partial`.
 2. **Portes causales et entrée** : rejouer les 28 portes de `e28296bb`
-   indépendamment ; comparer la restriction sémantique des ordres K1..5 de K10 à la tour K5
+   indépendamment ; les portes MEB et FULL ciblées du nouveau noyau passent
+   déjà en Release et sous ASan/UBSan, mais pas une campagne appariée LiDAR.
+   Comparer la restriction sémantique des ordres K1..5 de K10 à la tour K5
    sur les mêmes octets, après égalité des catalogues actifs bas-rang ;
    rendre causal le
    mutant arithmétique u18, ajouter égalités de cellules, générateur porté
@@ -113,8 +128,15 @@ appariée.
    plus `2(K−2−p_λ)` événements par droite en `O(sKm)` après regroupement ;
    un déterminant factorisé tient en i128 sous les bornes u18. Pour `s≈m`,
    deux familles de niveaux peu profonds proposent une sélection locale
-   `O(mK polylog m)` **en position générale**, avec dégénérescences,
-   census et coût par arête encore ouverts. Census global et test
+   `O(mK polylog m)` sur modèle de comparaisons exactes. Le [contre-audit
+   B](CONTRE_AUDIT_B_Q4_NIVEAUX_ORIENTES_20260922.md) propose une
+   perturbation sortante qui préserve les strates dégénérées, mais ni le port
+   symbolique, ni son coût réel, ni le census ne sont acquis. Plus grave pour
+   la trame : le reçu 1 mm compte **2,779 milliards d'incidences
+   site–cover cumulées sur les arêtes**, déjà davantage que `n²` pour
+   `n=39 885`. Un parcours complet de chaque cover serait donc déjà plus
+   coûteux que `n²` sur ce cas ; il faut partager ou élider ces covers, sans
+   confondre cette masse avec `Σh` des droites q4. Census global et test
    `centre∈conv(coquille)` restent obligatoires ; le catalogue ne remplace
    pas automatiquement les présentations positives. La ligne v8 1 mm
    compte **171 444 arêtes q3 seules et 16,12 M census** que la réutilisation
@@ -135,11 +157,15 @@ appariée.
    de 000000/K10 font 1,065 milliard de tests de puissance ; un test
    exact de la paire la plus éloignée peut éliminer toutes les autres
    paires q2 dans chaque appel, sous la preuve détaillée de l'[actualisation
-   A](CONTRE_AUDIT_A_MESURES_PLAN_20260922.md). Un port **non commis** a été
-   [contrelu par B](CONTRE_AUDIT_B_ANCHOR_MEB_DIAMETRE_20260922.md) sans
-   régression géométrique trouvée ; son étiquette de travail et sa mutation
-   causale restent à fermer. Instrumenter les tailles
-   de supports et le temps avant de promettre un gain. La [note B](PLATEAUX_GRANDES_COQUILLES_B_20260922.md)
+   A](CONTRE_AUDIT_A_MESURES_PLAN_20260922.md). Le port `ad2d0ebb` a été
+   [contrelu par B](CONTRE_AUDIT_B_ANCHOR_MEB_DIAMETRE_20260922.md) ; le
+   noyau nominal et son mutant causal passent indépendamment sous Release
+   et Clang ASan/UBSan, ainsi que trois portes FULL de petits nuages. Le
+   contrat comptable et la cause exacte de mutation sont corrigés à
+   `5ab4326c`. Le gain local annoncé 130→109 s n'a pas encore de reçu
+   apparié versionné ; l'amélioration G4 du MEB n'est pas mesurée.
+   Instrumenter les tailles de supports et le temps avant de promettre un
+   gain. La [note B](PLATEAUX_GRANDES_COQUILLES_B_20260922.md)
    propose un quotient local compact, [contrelu par B sur sept petites
    coquilles](CONTRE_AUDIT_B_QUOTIENT_COQUILLE_20260922.md), tandis que l'[oracle entier
    A](check_qmin_planes_u18_20260922.py) donne des fixtures u13/u17 et les
@@ -152,8 +178,9 @@ appariée.
 Le jalon temporel v9 commence par le **sans-sol u18/1 mm**. Le contrat
 principal antérieur sur trames **brutes entières** et le profil float32
 original ne sont pas effacés par ce jalon ; les trames 08/000000, 000100,
-000200 viennent toutes d'une seule séquence. Aucune qualification FULL
-GCP G4, GPU, sous-quadratique globale, K10 <1 s ou K5 <1 s n'est acquise.
+000200 viennent toutes d'une seule séquence. Une mesure FULL CPU G4
+**relative au catalogue émis** est acquise ; aucun contrat GPU,
+sous-quadratique global, K10 <1 s ou K5 <1 s n'est acquis.
 
 La [synthèse A d'architecture](AUDIT_A_ARCHITECTURE_K_GABRIEL_20260922.md),
 les notes [q3](Q3_STRUCTURE_ET_BORNES.md), [q4](Q4_STRUCTURE_ET_BORNES.md),

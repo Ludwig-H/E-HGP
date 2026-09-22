@@ -42,6 +42,29 @@ Le batch ne livre que des handles de cover : les arrangements et le coût
 cache par ordre n'ont pas encore de mesure produit ; le cache actuel est
 indexé par facettes, non directement par BallKey.
 
+## Reprise de l'audit au commit `5ab4326c`
+
+La [synthèse produit à jour](../../morsehgp3D_v9/audits/ETAT_COURANT.md)
+porte désormais les développements postérieurs à `e28296bb`. Le [premier
+reçu G4](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PREMIER_G4_20260922.md)
+est réel et clos : huit tours CPU sur trames sans sol de la séquence 08,
+grille 1 mm, s8, **K1..5 en 15–29 s** et **K1..10 en 82–125 s** à W48
+(70 s pour 000000/K10 avec FULL statique W48). Il utilise le paquet
+`e28296bb`, **avant** l'optimisation MEB et le nouveau ledger ; aucun GPU,
+contrat d'une seconde ou caractère sous-quadratique n'est acquis.
+
+Le [contre-audit de provenance et de schéma](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_G4_R1_ET_SCHEMA_V2_20260922.md)
+recoupe 175 hashes, les huit cas et l'arrêt ciblé. Il identifie deux
+blocages **pour la prochaine session**, sans invalider R1 : le worker v2
+refuse les champs MEB textuel/tableau de la vraie sonde malgré 17 selftests
+verts, et un cas censuré avec `group_closed=false` peut être accepté comme
+`partial`. Corriger puis tester le raccord réel avant de facturer G4.
+La [contrelecture du MEB diamètre](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_ANCHOR_MEB_DIAMETRE_20260922.md)
+est verte localement sur ses petites portes, mais son gain LiDAR n'a pas
+de reçu apparié ; les [niveaux q4 orientés](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_Q4_NIVEAUX_ORIENTES_20260922.md)
+restent une piste exacte locale, pas un port ni une réduction globale de
+`Σ_e cover_sites(e)=2,779` milliards sur la ligne 1 mm publiée.
+
 ## Lecture prioritaire
 
 1. [Audit initial v8, héritage et architecture q3/q4](AUDIT_INITIAL_V8_20260922.md).
