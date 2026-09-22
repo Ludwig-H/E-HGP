@@ -1,8 +1,8 @@
 # État courant des audits v9
 
 22 septembre 2026. Ouverture v9 `3595725a` contre-auditée sur les documents
-et le moteur v8 épinglé `a74e90f2` ; compléments `c399808e` relus sur
-l'objet mathématique et le nouveau reçu. Aucun code moteur v9 n'existe
+et le moteur v8 `a74e90f2` ; compléments jusqu'à `27c26eb6` relus sur
+l'objet mathématique, les pins et les reçus. Aucun code moteur v9 n'existe
 encore. Cadre : `phase=exploration_v9_hors_registre`, `backend=none`,
 `profile=quantized_u18_input_only`, `public_status=not_claimed`.
 
@@ -24,8 +24,8 @@ et un [contre-audit des mesures et du plan](CONTRE_AUDIT_A_MESURES_PLAN_20260922
 Le raccord q3 ← feuille **exacte** de l'atlas q4 est mathématiquement sûr
 avec le même nuage, arête, cover et centre dans la cellule ; un nœud profond
 à K−2 ne fournit aucun fragment q3. La borne u18 du port FULL doit changer
-avant `BallKey::power` (`A<2^76`, `|B|<2^96`, `|C|<2^116` suffisent pour q3)
-avec une borne q4 à établir séparément ; le plafond v7 de coquille à 12
+avant `BallKey::power` (`A<2^76`, `|B|<2^96`, `|C|<2^116` suffisent pour
+les clés q2/q3/q4 produites par la v8, le majorant q3 dominant q4) ; le plafond v7 de coquille à 12
 demeure un refus de domaine, pas une tour
 générale. La note u18 publiée contient huit énoncés numériques faux ; les
 42 inégalités simples `c·M^d<2^b` relevées dans les commentaires du code
@@ -88,6 +88,30 @@ complet. La contrelecture des Déf. 20–22 du manuscrit et de la spécification
 ne trouve pas de divergence avec l'objet FULL visé ; les applications
 verticales demeurent une obligation indépendante du port horizontal v7.
 
+Depuis `3f0d188f`, la reprise u18 et sa ligne sans sol 1 mm sont
+**versionnées**, mais cette ligne est toujours un seul flux q3/q4 K5/W8,
+sans gain mesuré de `saturate_deep`. Les deux captures R2 de qualification
+restent `failed` : le lecteur confond les exclusions JUnit
+`status="disabled"` avec des enfants `<skipped>` absents du vrai CTest.
+Le [suivi A](CONTRE_AUDIT_A_MESURES_PLAN_20260922.md) donne le correctif
+et demande un pin distinct `3f0d188f` dans l'héritage v9 pour les gardes
+de domaine publiées. Le reçu montre aussi 60,5 % d'arêtes q4 sans feuille
+vivante **après** atlas ; la [note q4](Q4_STRUCTURE_ET_BORNES.md) sépare
+ce diagnostic du gain encore inconnu d'un filtre pré-atlas, en tenant
+compte de la réutilisation q3.
+
+La [contrelecture B des grandes coquilles](PLATEAUX_GRANDES_COQUILLES_B_20260922.md)
+propose un quotient local exact par chambres en `O(u²)` régions au lieu de
+la table `2^u` de la v7 ; elle ne borne pas le catalogue global. Le
+[complément numérique A](CONTRE_AUDIT_A_MATH_MOTEUR_20260922.md) factorise
+les normales des plans du test `q_min=3` : i128 suffit pour les normales
+u18, tandis qu'un déterminant direct de coplanarité demande i192 sous les
+majorants publiés. Ce calcul ne prétend pas borner l'arrangement complet.
+L'[oracle entier local A](check_qmin_planes_u18_20260922.py) passe quatre
+fixtures et 755 sous-coquilles exactes sans antipodes, y compris un centre
+demi-entier ; le prochain port doit encore comparer au `ShellTable` gelé
+et qualifier l'arrangement complet.
+
 ## Objets d'audit à suivre
 
 Demande du développeur sortant, en deux lots :
@@ -102,8 +126,11 @@ Demande du développeur sortant, en deux lots :
    (atlas en i64 à Q = 2^20), `02987f18`
    (fragments d'atlas), `0948d2d0` (rejet des graines q3 par l'atlas),
    `5224ff4e` (file de plages), `5fdda963` (chronos par worker), `a74e90f2`
-   (moteur 18 bits, bornes réécrites avec M = 262 143). Les fixtures ciblées,
-   mutants, sanitizers et TSan restent à porter ou à exécuter avant héritage.
+   (moteur 18 bits, bornes réécrites avec M = 262 143). La tranche
+   `3f0d188f` est publiée mais ses reçus R2 de qualification restent en
+   échec ; ses corrections exigent un pin distinct et une qualification v9.
+   Les fixtures ciblées, mutants, sanitizers et TSan restent à porter ou à
+   exécuter avant héritage.
 3. Chaque port v9 : épinglage, requalification, fixtures d'égalité, mutants.
 4. La première tour v9 de bout en bout : objet (contre le juge T2 et les
    fixtures E5, A–E, quatre points), sorties, chronomètre.

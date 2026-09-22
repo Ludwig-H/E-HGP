@@ -113,3 +113,39 @@ droits de redistribution. Pour la v9, appliquer immédiatement la règle du
 plan : **aucun octet de scan ni sortie OS Login dans les reçus Git**, seulement
 empreintes et paramètres, et contrôleur capable d'inspecter les membres des
 archives. L'historique v8 demeure une question séparée pour les mainteneurs.
+
+## Suivi au commit `3f0d188f` — reçu publié, qualification R2 encore ouverte
+
+La ligne sans sol 1 mm décrite plus haut est maintenant **versionnée** dans
+[`ground_1mm_first`](../../morsehgp3D_v8/receipts/u18_resume_20260922/README.md)
+par `3f0d188f`. Son reçu v2 est `passed` en lecture LIVE normale et `-O`
+(187 fichiers contrôlés) et son entrée `.u32le` est versionnée en v8, mais
+le lecteur dépend encore des builds et dépendances locaux : le reçu ne
+constitue pas une archive autonome depuis un clone neuf. La campagne
+reste `partial`, avec une répétition, K5/W8 sur une seule trame et aucun
+différentiel W1/W8 ; le chiffre de 104,63 s reste **q3/q4 seul**.
+
+Les captures `release_r2` et `sanitize_r2` de la reprise u18 sont en revanche
+`status="failed"` dans leurs deux `COMPLETION.json`, même si leurs CTests
+ont code 0. Le lecteur `run_u18_resume_checks.py:168–180` cherche des
+éléments JUnit `<skipped>`, alors que les vrais `CTEST.xml` marquent les
+exclusions par `testcase status="disabled"` **sans** cet enfant : 139 cas,
+136 exécutés/3 désactivés en Release, 131/8 sous sanitizers, zéro échec
+CTest. Son test `u18_resume_checks_test.py:72–78` fabrique seulement
+`status="notrun"` **avec** `<skipped>` et ne juge pas le format réel.
+Correctif proposé au constructeur : prendre `status="disabled"` comme
+autorité, refuser un désaccord avec tout marqueur `<skipped>` éventuel,
+graver un extrait du vrai JUnit, puis refaire une capture **R3** depuis des
+sources gelées. Les R2 restent des essais échoués ; la v9 peut porter le
+code en le requalifiant, pas hériter d'un PASS inexistant.
+
+La [carte d'héritage v9](../docs/HERITAGE_V7_V8.md) et la
+[passation](../PASSATION.md) figent encore la v8 à `a74e90f2` et décrivent
+les gardes de fabrique u18, la porte de domaine et `saturate_deep` comme
+non commis. Conserver `a74e90f2` pour le **chemin mesuré d'origine**, mais
+ajouter `3f0d188f` comme pin distinct des gardes de domaine, du résultat
+« fragment exact ou certificat terminal » et de leurs tests. L'option
+`saturate_deep=false` du reçu 1 mm ne mesure aucun gain de cette option.
+La synthèse et la passation v9 doivent aussi corriger leurs mentions
+« non commis/non suivi » ; aucune de ces corrections documentaires ne
+promet un résultat FULL ou G4.

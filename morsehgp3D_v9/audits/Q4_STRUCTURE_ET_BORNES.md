@@ -58,8 +58,19 @@ autorisent le rejet seulement si `min L_x(C)>0` pour **tous** les x de X ou
 `max L_x(C)<0` pour tous ; un zéro, même sur un coin ou côté, reste actif.
 Si tous les blocs couvrant les graines possibles sont ainsi exclus, aucun
 centre de support q3 aigu propriétaire ou q4 strictement positif propriétaire
-de cette arête ne se trouve dans C : la partition Z
-de C peut être omise. Les sites de X demeurent témoins des autres cellules.
+de cette arête ne se trouve dans C : la partition Z de C peut être omise.
+Les sites de X demeurent témoins des autres cellules.
+
+Le [reçu 1 mm désormais versionné](../../morsehgp3D_v8/receipts/u18_resume_20260922/README.md)
+donne `1 133 440` arêtes q4 sans feuille vivante sur `1 872 168`
+requêtes (60,5 %), constat fait **après** le coût de l'atlas. Sur l'ensemble
+des `1 872 168` arêtes q4, `1 545 198` portent aussi q3 et réutilisent l'atlas
+pour ses rejets ; il ne reste que `326 970` arêtes q4 seules. Le nombre
+de `whole_atlas_skips` n'est donc **pas** le nombre d'atlas économisables
+par le filtre proposé : les rejets profonds par Z peuvent en être la
+cause, et l'intersection avec q3 n'est pas publiée. Instrumenter une table
+par masque `q4_seul/q3+q4` × cause `Outside/Deep/aucune_droite/Leaf`
+avant d'attribuer un gain au préfiltre.
 
 Pour q4, la condition « graine possible » est justifiée : si `ab` est
 l'arête propriétaire maximale d'un tétraèdre **strictement positif**, au
