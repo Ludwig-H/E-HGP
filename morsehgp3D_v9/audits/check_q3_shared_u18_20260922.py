@@ -33,6 +33,12 @@ def norm2(a: Point) -> int:
     return dot(a, a)
 
 
+def h_for_x(a: Point, b: Point, x: Point) -> Point:
+    d, u = sub(b, a), sub(x, a)
+    D, E = norm2(d), dot(d, u)
+    return tuple(D * u[i] - E * d[i] for i in range(3))
+
+
 def seed(a: Point, b: Point, x: Point):
     d, u = sub(b, a), sub(x, a)
     D, U = norm2(d), norm2(u)
@@ -40,7 +46,7 @@ def seed(a: Point, b: Point, x: Point):
     G = D * U - E * E
     if not D or not G or U <= E or E <= 0 or U > D or norm2(sub(x, b)) > D:
         return None
-    H = tuple(D * u[i] - E * d[i] for i in range(3))
+    H = h_for_x(a, b, x)
     xi = Fraction(D * (U - E), 2 * G)
     require(0 < xi <= Fraction(1, 3), "owned acute xi bound")
     require(3 * D * (U - E) <= 2 * G, "integer xi bound")
@@ -112,16 +118,21 @@ def main() -> None:
 
         a, b = point(), point()
         found = []
+        selected_x = []
         for _ in range(100):
             x = point()
             result = seed(a, b, x)
             if result is not None:
                 found.append(result)
+                selected_x.append(x)
         if not found:
             continue
         groups += 1
         seeds += len(found)
-        cbox = center_box(a, b, [h for h, _ in found])
+        xlow = tuple(min(x[i] for x in selected_x) for i in range(3))
+        xhigh = tuple(max(x[i] for x in selected_x) for i in range(3))
+        xcorners = itertools.product(*[(xlow[i], xhigh[i]) for i in range(3)])
+        cbox = center_box(a, b, [h_for_x(a, b, x) for x in xcorners])
         den, low, high = cbox
         for _, c in found:
             for i in range(3):
@@ -154,7 +165,8 @@ def main() -> None:
     require(D * (U - E) * result[0][2] > (1 << 127) - 1,
             "literal i128 overflow fixture failed")
     require(groups > 100 and seeds > 500, "insufficient seed coverage")
-    print(json.dumps({"status": "PASS", "groups": groups, "seeds": seeds,
+    print(json.dumps({"status": "PASS", "index_box_groups": groups,
+                      "groups": groups, "seeds": seeds,
                       "power_checks": checks, "contact_fixtures": 1,
                       "overflow_fixtures": 1},
                      sort_keys=True))

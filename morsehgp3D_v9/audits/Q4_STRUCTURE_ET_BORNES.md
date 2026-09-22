@@ -276,7 +276,7 @@ combinatoire plus forte sépare les formes non constantes
 poser `d=K−3−p₀` et `q=d+1`. À un sommet de profondeur au plus d,
 chaque droite de contact `y>0` est parmi les **q plus hautes** racines
 de sa famille à cette abscisse, chaque droite `y<0` parmi les **q plus
-basses** de l'autre : toute racine strictement au-delà est déjà un
+basses** de l'autre, en conservant **tous les ex æquo** : toute racine strictement au-delà est déjà un
 site intérieur. Ignorer les multiplicités pour cette présélection donne
 un surensemble sûr ; les poids et IDs reviennent à l'exactification.
 Si deux droites indépendantes de contact appartiennent à la même

@@ -21,8 +21,7 @@ L'atlas par arête a donc déjà écarté 83,0 % des graines q3 de cette ligne ;
 
 Le [census float32 partagé](../../morsehgp3D_v8/docs/CENSUS_Q3_FLOAT32_PARTAGE_20260921.md) et [l'audit du relais](../../morsehgp3D_v8/audits/q3_prefix_relay_20260921/README.md) apportent une preuve utile : un bloc de graines peut transmettre `(compte, curseur)` sans recommencer le préfixe, avec coquille globale. Ils portent sur **une arête** et des familles synthétiques, sans borne sur le nombre d'arêtes. Le brouillon global float32 non suivi `morsehgp3D_v8/src/pipeline/float32_q3_global.cpp`, examiné en lecture seule, développe encore les paires de chaque rectangle puis appelle le filtre et la voie q3 possédée par arête ; cette source non suivie n'est **pas** qualifiée par cet audit. La [mesure spatiale](../../morsehgp3D_v8/docs/Q34_MESURES_SPATIALES_20260921.md) montre déjà un exposant observé de 2,502 pour les bornes q3 de la trame brute vers sa moitié positive ; un gain local sur 8k/16k/32k ne suffit pas.
 
-### Premier levier après la base FULL : feuille q4 exacte vers census q3
-
+### Deux routes q3 après la base FULL : partage autonome et feuille q4 exacte
 
 Sur le profil mesuré `GlobalBoxes`, `wspd_q34.cpp` construit encore un
 `Q34EdgeCover` pour les 171 444 arêtes q3 seules ; leur voie n'en lit
@@ -66,8 +65,8 @@ normal et `-O` : 213 paquets, 3 492 graines aiguës propriétaires,
 13 968 comparaisons de puissance, le contact ci-dessus et le témoin de
 débordement. Les IDs implicites `a=0,b=1,x≥2` règlent les égalités de
 plus longue arête dans l'oracle. Il vérifie les enveloppes rationnelles
-sur les graines effectivement tirées, pas la construction d'extrêmes
-depuis une boîte X de l'index ; il ne teste pas non plus le relais
+construites depuis les **huit coins de la boîte X** des graines tirées,
+sans prétendre tester la traversée de l'index ; il ne teste pas non plus le relais
 du moteur v9 ni sa croissance sur LiDAR.
 
 Avant un nouvel atlas par ancre, une optimisation à risque limité peut réutiliser **les feuilles exactes** de l'atlas q4 déjà payé pour une arête `ab`. [L'objet `Q4LocalFragment`](../../morsehgp3D_v8/src/lanes/q4_local_partition.hpp) garantit, sur sa cellule fermée, le **compte exact des nœuds déjà certifiés intérieurs** pour le même cover et une frontière disjointe complète de nœuds encore ambigus ; les autres nœuds sont strictement dehors. Sa forme locale a le même signe que `4Q` fois la puissance de la sphère de centre `c` passant par `a,b`, avec `Q>0` ([identité](../../morsehgp3D_v8/docs/Q3_CERTIFICAT_ATLAS_20260921.md)). Si le circumcentre q3 de `abx` est dans cette feuille, la positivité et la propriété de `ab` assurent que sa boule fermée entière est dans le cover de `ab` : en posant `D=|ab|²`, on a `R²≤D/3` et `|c−(a+b)/2|²=R²−D/4≤D/12`, donc `R+|c−(a+b)/2|≤√(3D)/2<√D`, le rayon du cover. Les sites strictement intérieurs **et tous les contacts de coquille** y sont. Le census q3 peut donc démarrer avec ce compte exact, tester seulement les sites de la frontière, saturer à K−1 ou conserver sa profondeur exacte, et construire la coquille complète dans cette même frontière. Les endpoints `a,b,x` ont signe zéro et doivent rester disponibles. Le fragment ne livre toutefois que le **compte** des intérieurs uniformes, pas leurs IDs : le catalogue FULL exige des handles vers ces nœuds ou une recollecte d'intérieurs une fois par boule canonique distincte, coût inclus. Ce port exige le **même nuage/index, la même arête, le même cover et la même cellule** ; une simple valeur numérique de compte détachée de son propriétaire n'est pas une preuve.
