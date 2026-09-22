@@ -67,6 +67,20 @@ def restricted(seed: tuple[int, int, int],
     return alpha, beta, den
 
 
+def det3(seed: tuple[int, int, int], f: tuple[int, int, int],
+         g: tuple[int, int, int]) -> int:
+    c0, x0, y0 = seed
+    c, x, y = f
+    cc, xx, yy = g
+    value = c0 * (x * yy - y * xx) - x0 * (c * yy - y * cc) + y0 * (c * xx - x * cc)
+    require(abs(value) < 1 << 121, "factorized determinant exceeds i128 u18 bound")
+    return value
+
+
+def sign(value: int) -> int:
+    return (value > 0) - (value < 0)
+
+
 def check_u18_restriction_bounds() -> int:
     rng = random.Random(180922)
     samples = 0
@@ -106,6 +120,16 @@ def check_u18_restriction_bounds() -> int:
                     (Fraction(n1, d1) > Fraction(n2, d2)) -
                     (Fraction(n1, d1) < Fraction(n2, d2)),
                     "rational-root comparator sign")
+            # The 160-bit cross-product difference factors by the seed
+            # pivot. Its sign needs only a 3x3 determinant <2^121.
+            d3 = det3(seed, f, g)
+            raw_cross = b * aa - bb * a
+            pivot = y0 if y0 != 0 else -x0
+            require(raw_cross == pivot * d3,
+                    "cross-product / 3x3 determinant identity")
+            factorized_sign = -sign(pivot) * sign(d3) * sign(a) * sign(aa)
+            require(factorized_sign == sign(determinant),
+                    "i128 factorized comparator differs from Fraction")
         samples += 1
     return samples
 
@@ -162,6 +186,8 @@ def owner_false_vertex() -> None:
 
 
 def main() -> None:
+    require(5760 * M**6 < 1 << 121,
+            "u18 six-term determinant bound does not fit signed i128")
     rng = random.Random(20260922)
     cases = 0
     selected_total = 0
@@ -201,6 +227,7 @@ def main() -> None:
                       "shallow_events": brute_total,
                       "owner_false_vertex": 1,
                       "u18_restriction_samples": numeric_samples,
+                      "factorized_compare_bits": 121,
                       "max_candidates_formula": "2*(budget+1)"},
                      sort_keys=True))
 

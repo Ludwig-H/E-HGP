@@ -220,11 +220,18 @@ vérifient `|constant|<2^40`, `|x|,|y|<2^39`. Pour la droite de graine
 `c₀+x₀u+y₀v=0` avec `y₀≠0`, prendre `t=u`. La forme restreinte vaut
 `(α_z t+β_z)/y₀`, où `α_z=x_z y₀−y_z x₀` et
 `β_z=c_z y₀−y_z c₀` ; `|α_z|<2^79`, `|β_z|<2^80`.
-La différence de deux produits croisés de racines a valeur absolue
-`<2^160` : un entier signé **192 bits** suffit, i128 ne suffit pas
-par cette preuve. Si `y₀=0`, paramétrer par `v` en échangeant les axes.
-Le signe de pente est celui de `α_z/y₀`, pas de `α_z` seul lorsque
-`y₀<0`. Les groupes de racines égales et le cas `α_z=0` doivent être
+Le produit croisé direct de deux racines pourrait occuper 160 bits,
+mais son signe se **factorise**. Pour les formes `F₀=(c₀,x₀,y₀)`,
+`F_z=(c_z,x_z,y_z)` et `F_w`, poser
+`D=det(F₀,F_z,F_w)`. Alors
+`β_z α_w−β_w α_z = y₀ D`. Chaque terme du déterminant vaut au plus
+`960M⁶` et `|D|≤5760M⁶<2^121` pour `M=262143` : **i128 signé suffit**
+pour le calcul et la comparaison des racines. Le comparateur prend le
+signe de `−y₀D/(α_z α_w)` sans former le produit `y₀D`.
+Si `y₀=0`, paramétrer par `t=v`, échanger les axes et utiliser
+`β_z α_w−β_w α_z=−x₀D`. Le signe de pente est celui de
+`α_z/y₀` (ou `α_z/x₀` dans l'autre branche), pas de `α_z` seul
+lorsque le pivot est négatif. Les groupes de racines égales et le cas `α_z=0` doivent être
 traités explicitement. Une même droite géométrique peut porter des
 formes proportionnelles **de signes opposés** : conserver les IDs et
 multiplicités des deux orientations, plutôt qu'un seul représentant

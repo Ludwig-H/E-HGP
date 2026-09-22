@@ -70,7 +70,7 @@ appariée.
    distinctes motive un catalogue de centres. Sur les `s` droites de
    graines aiguës, une sélection top/bottom de racines exactes garde au
    plus `2(K−2−p_λ)` événements par droite en `O(sKm)` après regroupement ;
-   le comparateur u18 demande i192. Census global et test
+   un déterminant factorisé tient en i128 sous les bornes u18. Census global et test
    `centre∈conv(coquille)` restent obligatoires. Ce n'est pas une borne
    sous-quadratique globale lorsque `s≈m`. Le [contre-audit
    B](CONTRE_AUDIT_B_PREATLAS_ET_Q3_20260922.md) rappelle que la suppression
