@@ -16,7 +16,7 @@ Le [reçu G4 du flux q3/q4](../../morsehgp3D_v8/receipts/q34_spatial_20260921/RE
 
 La dernière colonne ne suppose qu'une division arithmétique du travail CPU mesuré entre **48 CPU logiques occupés à 100 %**, hypothèse favorable pour une route CPU seule à débit par logique inchangé, sans coût FULL ni transfert. Les cœurs physiques sont 24 avec SMT ; ce n'est pas une prévision de débit ni une borne pour une future route GPU. Pour 100 ms, les mêmes facteurs CPU seuls deviennent 144,1 / 79,6 / 202,8. Le facteur de temps mur requis depuis ce flux mesuré est 1 652 / 343 / 5 055 pour 100 ms. Les 768–769 jobs Coarse s'achèvent, mais l'arête et ses travaux intérieurs sont indivisibles ; augmenter encore le nombre de jobs de front seul ne rend pas ces arêtes parallèles. K10, s10/s12 et d'autres séquences n'ont pas été exécutés dans ce reçu. Le GPU G4 n'a pas participé à ces calculs.
 
-Le [premier reçu sans sol entier à 1 mm, inventorié à l'ouverture](https://github.com/Ludwig-H/E-HGP/blob/3595725a/morsehgp3D_v9/docs/AUDIT_V8_SYNTHESE.md), trame 08/000000, compte 39 885 sites, K5/s8/W8, **104,63 s mur** et **812,82 CPU·s** pour le seul flux q3/q4, avec 691 284 émissions q3 et 158 496 q4. Ce reçu v8 est encore **non commis** au pin lu ; les chiffres proviennent de sa ligne JSON locale `ground_1mm_first/only_probe_01_s00_k5_w8.json` (SHA-256 `89be317e0459f179…`), sans rejeu par cet audit. L'option `saturate_deep` y est désactivée ; une seule répétition et aucune identité W1/W8 de cette entrée ne sont disponibles. Ce reçu est un autre profil et un autre hôte : le comparer numériquement à la ligne brute u16/G4, ou à la base sans sol u16, ne donne aucun speedup. Son index partagé prend 15,653 ms, la préparation du nuage 2,192 ms et la lecture/hash 2,586 ms **sur l'hôte local** ; le front et ses consommateurs prennent 104 610,5 ms. Le pilote de segmentation indique 30,358 ms médians pour lecture brute→masque sur cette trame, processus exclu, [reçu du pilote](../../morsehgp3D_v8/docs/PILOTE_LIDAR_SANS_SOL_20260921.md). La préparation Python hors ligne, le catalogue et FULL ne sont dans aucune de ces durées. La segmentation et HGP doivent figurer séparément puis ensemble dans le scénario issu du brut.
+Le [premier reçu sans sol entier à 1 mm, inventorié à l'ouverture](https://github.com/Ludwig-H/E-HGP/blob/3595725a/morsehgp3D_v9/docs/AUDIT_V8_SYNTHESE.md), trame 08/000000, compte 39 885 sites, K5/s8/W8, **104,63 s mur** et **812,82 CPU·s** pour le seul flux q3/q4, avec 691 284 émissions q3 et 158 496 q4. Ce reçu v8 était **non commis au pin d'ouverture** ; il est depuis publié à `3f0d188f` dans `morsehgp3D_v8/receipts/u18_resume_20260922/ground_1mm_first/`, sans rejeu par cet audit. L'option `saturate_deep` y est désactivée ; une seule répétition et aucune identité W1/W8 de cette entrée ne sont disponibles. Ce reçu est un autre profil et un autre hôte : le comparer numériquement à la ligne brute u16/G4, ou à la base sans sol u16, ne donne aucun speedup. Son index partagé prend 15,653 ms, la préparation du nuage 2,192 ms et la lecture/hash 2,586 ms **sur l'hôte local** ; le front et ses consommateurs prennent 104 610,5 ms. Le pilote de segmentation indique 30,358 ms médians pour lecture brute→masque sur cette trame, processus exclu, [reçu du pilote](../../morsehgp3D_v8/docs/PILOTE_LIDAR_SANS_SOL_20260921.md). La préparation Python hors ligne, le catalogue et FULL ne sont dans aucune de ces durées. La segmentation et HGP doivent figurer séparément puis ensemble dans le scénario issu du brut.
 
 Le flux 1 mm émet 849 780 callbacks et totalise 2 707 836 IDs de supports ainsi que 2 707 842 IDs de coquille. La sonde n'en conserve qu'un digest : une sortie complète, ses clés et son catalogue restent à mesurer. Pour situer l'échelle seulement, matérialiser ces deux listes en IDs de 64 bits exige déjà au moins 43,3 Mo d'écriture, avant clés, offsets et parents. Atteindre 100 ms exige également au moins 8,5 millions d'émissions/s sur cette scène si la même quantité de supports subsiste ; cela ne prouve pas que la bande passante mémoire serait le verrou principal. Les sorties FULL peuvent différer fortement de ce flux.
 
@@ -31,6 +31,56 @@ Sur le reçu 1 mm, avant 849 780 émissions, le front laisse 23,687 millions de 
 Le [protocole spatial brut](../../morsehgp3D_v8/receipts/q34_spatial_20260921/README.md) a déjà une relation défavorable sur 08/000000 : trame→moitié x+, exposant observé 2,502 pour les bornes q3 et 2,332 pour les bornes de blocs q4 ; les sorties q3/q4 ont des exposants nettement inférieurs sur ses six relations. Les coupes modifient densité et frontières : ce sont des diagnostics de régime, pas une preuve asymptotique. Il faut répéter le même grand-livre sur plusieurs **séquences** entières, brutes et sans sol à masque figé, K5/K10 et s8/s10/s12, sans choisir après coup le meilleur morceau. Ajouter un diagnostic séparé de captations LiDAR superposées et de densités accrues, sans supposer leur alignement : des passages proches peuvent grossir les frontières actives et les coquilles sans contact exactement cosphérique. Le coût global visé est sensible aux sorties : une garantie universelle strictement sous-quadratique est impossible si le résultat explicite lui-même est quadratique.
 
 Le fil directeur v9 est le **certificat local k-Gabriel d'un support canonique et de sa boule minimale**, avec compte de témoins stricts et coquille complète. L'index global donne des blocs de témoins et le front filtre des familles ; il n'est pas un diagramme de Voronoï/Delaunay d'ordre supérieur à construire. Un certificat commun ne devient une tâche qu'en présence de candidats, puis se partage entre supports d'une même arête ou d'un même bloc ; un signe indécis se raffine exactement. C'est cette paresse et le nombre total de certificats réellement visités, plutôt que la seule parallélisation des anciennes boucles, qu'il faut confronter au seuil sous-quadratique dans les deux régimes LiDAR. Les liens d'incidence entre supports cosphériques restent conservés après regroupement des boules.
+
+### Covers communs sur un bloc d'arêtes survivantes : certificat entier secondaire
+
+Le premier moteur v9 `d2700314` construit encore un `Q34EdgeCover` **par
+arête** après son filtre ponctuel dans la configuration mesurée ; ce
+filtre est facultatif dans l'API. Sur le reçu v8 sans sol 1 mm, cela
+représente 2 043 612 covers et 440 194 038 visites d'index : un poste
+mesurable, mais inférieur aux milliards de tests de l'atlas q4. Une
+famille de covers peut partager un certificat exact au niveau d'un
+bloc d'arêtes survivantes `E⊂A×B` et d'un nœud spatial `Z`, sans
+transférer aucun crédit de profondeur. Le prédicat individuel est
+
+`F(a,b,z)=|2z−a−b|²−4|a−b|²≤0`.
+
+Pour chaque axe, borner les intervalles `R_i=2Z_i−A_i−B_i` et
+`D_i=A_i−B_i`, puis définir `minsq` et `maxsq` exacts sur un intervalle
+entier fermé. Poser
+
+`L=Σ minsq(R_i)−4Σ maxsq(D_i)`,
+`U=Σ maxsq(R_i)−4Σ minsq(D_i)`.
+
+Alors `L≤F≤U` pour **toutes** les paires du produit, donc pour le
+sous-ensemble `E` : `U≤0` admet le nœud Z pour toutes les arêtes,
+`L>0` le rejette pour toutes, les autres cas divisent `E` ou `Z` puis
+reviennent au test exact singleton. L'égalité `F=0` est admise. Avec
+`M=262143`, `|L|,|U|≤12M²<2^40` ; i64 suffit si chaque soustraction
+et carré est promu avant calcul. Un certificat partagé peut rester un
+handle **intermédiaire** `(bloc E, nœud Z, décision)`. L'API actuelle
+attend ensuite pour **chaque arête** des ranges de rangs spatiaux
+triés, disjoints et fusionnés, `site_count`, `contains_id` et la
+propriété de l'index : `Q4LocalGeometry::decompose_cover` consomme ces
+ranges. Une partition du produit en tuiles disjointes ou un tri final
+par `(arête, rang Z)` peut fournir l'ordre, puis il faut fusionner les
+ranges adjacents et facturer matérialisation, allocations et copies.
+
+L'[oracle entier autonome](check_cover_batch_u18_20260922.py) passe en
+Python normal et `-O` : 45 871 triplets de points bornés, 1 001
+familles subdivisées sans trou/doublon et trois contacts exacts. Il
+vérifie des ensembles de rangs, **pas** la fusion des ranges du produit
+v9, les rectangles WSPD réels ou le coût d'une file GPU. Pour une
+ablation pertinente, former les blocs après le masque de rectangle et
+le filtre de paire **s'il est actif**, en conservant le masque q3/q4
+de chaque arête ; ne mutualiser que lorsque plusieurs arêtes survivantes
+partagent un produit. Le buffer `E` doit avoir sa propre fenêtre
+bornée : `parallel_task_pairs` ne borne pas la taille d'une tâche si
+`|B|` dépasse son grain. Sinon garder le cover individuel. Comparer sur les trois
+trames les tests conjoints, décisions `in/out/ambiguous`, handles,
+replis individuels, octets simultanés, durée complète et sorties
+q3/q4 puis FULL identiques. Un arbre de boîtes d'audit ou quelques
+arêtes choisies hors WSPD ne prouvent aucun gain de pipeline.
 
 Une **fixture entière u18**, compatible avec le profil de la v9, rend la
 barrière de sortie q2 directement testable. Pour `1≤i,j≤m`, poser
@@ -55,7 +105,35 @@ L'unité de travail persistante est un **contexte d'arête possédé** : identif
 1. **Front et témoins.** Traiter les rectangles en vagues ; garder les masques séparés, les certificats de rejet et l'identité des sous-produits. Publier directement des plages de paires résiduelles dans des buffers bornés à offsets disjoints. Ne pas matérialiser toutes les 23,7 millions de paires du reçu 1 mm : deux IDs de 64 bits par paire feraient déjà environ 379 Mo, avant tout contexte. Si la file est pleine, le propriétaire poursuit localement ; aucun travail n'est abandonné ni bloqué derrière une file qui ne peut se vider.
 2. **q3 : bloc de graines × sous-arbre de témoins.** Avant de construire toutes les boules, certifier sur un bloc X de graines propriétaires des bornes communes de puissance contre Z. Le ticket transmissible contient **ensemble** le compte strict et le curseur du préordre Z ; à une feuille ambiguë, diviser X avant de consommer Z. Chaque graine restante copie le ticket figé et traite les racines du suffixe, puis recherche la coquille sur l'index global. Les points de X restent témoins possibles des autres graines. Les contextes X/curseur sont les tâches partageables ; préparer la boîte de centres une fois par X, réutiliser un petit moteur privé, ne pas créer une pile complète par graine. Le [relais d'audit](../../morsehgp3D_v8/audits/q3_prefix_relay_20260921/README.md) et le [census float32 partagé](../../morsehgp3D_v8/docs/CENSUS_Q3_FLOAT32_PARTAGE_20260921.md) établissent des coutures utiles, pas un gain global sur LiDAR.
 3. **q4 : cellules utiles et produits graine × cellule.** Sur l'arête, publier après construction des tâches indépendantes portant un bloc disjoint de graines et une racine de cellule vivante, avec le fragment exact parent conservé. Le parcours `LiveOnly` prouve l'intérêt du rejet des atlas sans feuille ; `Joined` montre comment certifier des produits, mais ses caches et bornes supplémentaires n'ont pas encore donné de gain stable. Une cellule au seuil `K−1` peut fournir un **certificat terminal de rejet** pour q3 et q4 ; elle ne fournit pas une frontière incomplète utilisable pour un balayage positif. Pour les cellules restantes, parcourir les nœuds Z disjoints puis agréger comptes et fragments sans double compter l'héritage. Étudier une représentation persistante des frontières par handles de sous-arbres immuables et deltas : elle viserait les 5,547 milliards d'IDs copiés du reçu, mais ses octets, visites et accès aléatoires doivent être mesurés. Le balayage d'une incidence `(graine, feuille)` reste atomique jusqu'à une preuve de partition des événements. Les contacts de puissance zéro, notamment aux frontières fermées de cellules, restent actifs ; garder exactement la règle actuelle d'affectation et de regroupement. À court terme, distribuer les blocs de graines d'une même arête avec atlas partagé est plus simple à prouver que distribuer un événement racine isolé.
-4. **Sorties et FULL.** Chaque tâche émet vers un run privé avec clé de boule exacte, support, profondeur et coquille complète, puis fusion déterministe des runs. Garder toutes les **présentations de supports** dans le flux différentiel v8 ; le chemin industriel peut n'émettre qu'une boule canonique avec `q_min`, IDs intérieurs, coquille et incidences de facettes/parents utiles au FULL, **si** la couverture de toutes les clés est prouvée. Un compte intérieur de fragment n'est pas sa liste d'IDs : les recollecter une fois par clé distincte ou en conserver les nœuds possédés. Un digest n'est qu'un contrôle. Construire le catalogue commun et son atlas compact de blocs `(K, boule)` une fois, puis traiter les résolutions et graphes datés par fenêtres. Les pivots, forêts minimales par date, multifusions et consultations historiques disposent de [prototypes v7 vérifiés](../../morsehgp3D_v7/docs/OBJETS_PARALLELES_TOUR_20260911.md) ; leurs preuves reposent sur de vrais census de petits nuages et doivent être requalifiées sous les flux et profils v9. Les événements q4 ne doivent pas être déduits des seuls triangles q3 acceptés.
+4. **Sorties et FULL.** Chaque tâche émet vers un run privé avec clé de boule exacte, support, profondeur et coquille complète, puis fusion déterministe des runs. Garder toutes les **présentations de supports** dans le flux différentiel v8 ; le chemin industriel peut n'émettre qu'une boule canonique avec `q_min`, IDs intérieurs, coquille et incidences de facettes/parents utiles au FULL, **si** la couverture de toutes les clés est prouvée. Un compte intérieur de fragment n'est pas sa liste d'IDs : les recollecter une fois par clé distincte ou en conserver les nœuds possédés. Un digest n'est qu'un contrôle. Construire le catalogue commun et son atlas compact de blocs `(K, boule)` une fois, puis traiter les résolutions et graphes datés par fenêtres **sans fermer séparément des fractions d'un même niveau exact**. Les pivots, forêts minimales par date, multifusions et consultations historiques disposent de [prototypes v7 vérifiés](../../morsehgp3D_v7/docs/OBJETS_PARALLELES_TOUR_20260911.md) ; leurs preuves reposent sur de vrais census de petits nuages et doivent être requalifiées sous les flux et profils v9. Les événements q4 ne doivent pas être déduits des seuls triangles q3 acceptés.
+
+**Raccord exact à résidence maîtrisée.** Dans le premier moteur v9,
+`slots[W]` et `all` détiennent simultanément au moins `224P` octets de
+capacités de présentations sur l'ABI lu par [B](CONTRE_AUDIT_B_RESIDENCE_CHAINE_20260922.md).
+Des runs privés bornés, triés par `(BallKey, arité, support)` et fusionnés
+avec pression de retour, gardent le même représentant minimal ; ils
+doivent vérifier profondeur, coquille et doublons de **toutes** les
+présentations d'une clé, puis recenser chaque clé une fois et attribuer
+des BallIds stables. Le catalogue certifié reste consultable par BallKey
+et par niveau rationnel exact. À l'ordre K, seules les boules dont
+`p+q_min−1≤K≤p+u` peuvent être des terminaux du résolveur ; un index
+immuable des clés actives à K peut réduire sa résidence, à comparer au
+cache direct actuel `48·nextpow2(16n)` et à son reset par ordre. Ce
+filtre ne supprime pas le catalogue global.
+
+Les facettes d'un lot de même niveau peuvent être résolues par fenêtres
+indépendantes contre l'état **avant** ce niveau. La fermeture exige
+ensuite la connectivité de **tous** ses blocs par parents communs et la
+publication des ancres seulement après le lot entier ; si le lot dépasse
+la RAM, il faut spooler les blocs et réunir exactement leurs composantes
+avant fermeture. Le seul tuilage des runs ne borne ni le disque ni la
+sortie : `ChainResult.tower` exige aujourd'hui une tour complète en mémoire,
+dont K1 représente au moins `216n` octets, soit 6,48 Go décimaux à 30 M
+sites sur cette ABI. Une représentation adressable CSR/arène ou externe
+avec budget de cache doit donc faire partie du contrat massif, y compris
+son coût de lecture et d'export. Ces transformations préservent la
+possibilité d'un calcul exact et parallèle ; ni une borne temporelle ni
+la complétude des BallKeys n'en résultent sans oracle et mesures.
 
 La file CPU doit accepter des tâches de granularité adaptative avec coût estimé par compteurs locaux (taille des produits, nœuds Z/C encore actifs), vol de suffixes **non visités** seulement et repli local si saturée. La fin exige zéro seed non attribuée, zéro tâche en file et zéro worker actif. La pression mémoire doit limiter **à la fois** parents vivants, frontiers, runs de sortie, tâches et copies d'IDs ; `Q+W` objets de contrôle ne borne ni leurs octets ni les payloads. Publier RSS et pics couplés réellement simultanés, pas une somme de maxima par worker. Faire d'abord une implémentation CPU qui permet de rejouer exactement les mêmes tâches en W1/W8/W48, puis introduire des lots GPU.
 

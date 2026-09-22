@@ -7,13 +7,13 @@ publié pour l'ouverture v9 `3595725a` ;
 Périmètre lu : parties I et II du [manuscrit](../../docs/references/MANUSCRIT_THESE_HAUSEUX.pdf),
 dont les définitions 20–22 et le théorème 2 (PDF 83–87), les
 [fondements et contre-preuves](../../morsehgp3D_v8/audits/FONDEMENTS_ET_OBJET.md),
-la reprise u18 `morsehgp3D_v8/docs/REPRISE_U18_ET_ATLAS_SATURANT_20260922.md`
-(encore non commise au pin lu),
+la [reprise u18](../../morsehgp3D_v8/docs/REPRISE_U18_ET_ATLAS_SATURANT_20260922.md)
+(non commise au pin lu, publiée ensuite à `3f0d188f`),
 les sources et reçus v8 indiqués ci-dessous. Le moteur local lu part de
 `a74e90f2` ; les audits complémentaires publiés sur `main` jusqu'à
-`12294241` sont repris ci-dessous. Les travaux de reprise et de q3 global
-float32 encore présents dans l'arbre partagé sont des états en cours, pas
-une qualification v9.
+`12294241` sont repris ci-dessous. Le brouillon q3 global float32 présent
+à cette lecture n'est pas une qualification v9 ; la reprise u18 a été
+publiée depuis, sans transfert automatique de ses reçus au moteur v9.
 GCP non utilisé.
 
 Cette note donne un choix d'architecture et ses critères de décision. Les
@@ -94,7 +94,7 @@ complexité suffisante.
 | --- | --- | --- | --- |
 | [G4 spatial v8](../../morsehgp3D_v8/receipts/q34_spatial_20260921/README.md) | trames brutes entières u16/2 cm 08/000000,100,200 ; K5/s8/W48 CPU | 165,214 / 34,319 / 505,479 s pour le seul flux q3/q4 ; 4,19 / 11,13 / 1,93 CPU logiques occupés en moyenne ; 244,805 / 122,737 / 273,138 M boules q3 construites | une répétition/scène ; ni GPU, ni FULL, ni profil float32 |
 | [sans sol phase 1+2](../../morsehgp3D_v8/receipts/ground_phase1_20260921/README.md) | trois trames sans sol u16/2 cm ; K5/K10, hôte local partagé | sur scène0 au calme, K5/W8 108,0 s et 741,5 CPU·s ; K10/W8 323,0 s et 2212,1 CPU·s ; identités de sorties/compteurs aux configurations appariées | captures 01/02 concurrentes ; flux seulement, pas contrat G4 |
-| [premier u18 sans sol, inventorié à l'ouverture](https://github.com/Ludwig-H/E-HGP/blob/3595725a/morsehgp3D_v9/docs/AUDIT_V8_SYNTHESE.md) | 08/000000 entier sans sol, 39 885 sites à 1 mm, K5/s8/W8 | 104,63 s mur, 812,82 CPU·s, 691 284 q3 et 158 496 q4 émis ; atlas 3,252 G bornes de blocs, 7,316 G tests points, 5,547 G IDs de frontière copiés | reçu v8 non commis au pin, une seule ligne, option `saturate_deep` inactive, aucun W1/W8 apparié |
+| [premier u18 sans sol, publié après l'ouverture](../../morsehgp3D_v8/receipts/u18_resume_20260922/ground_1mm_first/only_probe_01_s00_k5_w8.json) | 08/000000 entier sans sol, 39 885 sites à 1 mm, K5/s8/W8 | 104,63 s mur, 812,82 CPU·s, 691 284 q3 et 158 496 q4 émis ; atlas 3,252 G bornes de blocs, 7,316 G tests points, 5,547 G IDs de frontière copiés | non commis au pin lu ; une seule ligne, option `saturate_deep` inactive, aucun W1/W8 apparié |
 | [tour v7](../../morsehgp3D_v8/docs/AUDIT_V7_SYNTHESE.md) | uniforme u16 50k sur G4, K1..10 | 418,873 s pour la tour, dont 389,668 s de constructeur FULL ; catalogue 21,47 M boules, tour 27,27 M nœuds ; 3,90 G essais de supports aval | autre nuage/architecture, jamais temps v9 |
 
 Le [diagnostic spatial](../../morsehgp3D_v8/receipts/q34_spatial_20260921/README.md)

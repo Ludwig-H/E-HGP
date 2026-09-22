@@ -1,6 +1,6 @@
 # Contre-audit A — mathématiques et moteur de l'ouverture v9
 
-22 septembre 2026. Ouverture jugée : `3595725ae3352ab67dced716e33e8f7705372a2c` ; code v8 publié à `a74e90f22167105cdba90b6850f0597f1a01a329` (identique à `12294241` pour `morsehgp3D_v8/src/`). Lecture du code et calculs entiers indépendants en Python ; la première passe n'avait exécuté ni CTest ni benchmark. Le **suivi du moteur v9 `d2700314`** et ses rejeux ciblés figurent au § 5 ; aucun sanitizer, TSan, essai GCP ni benchmark de contrat n'est revendiqué. Les modifications de reprise u18, alors non commises, ont depuis été publiées à `3f0d188f` ; leurs reçus R2 restent en échec. Ce rapport répond au Lot 1 de la [question du développeur](QUESTION_CLAUDE_CONTRE_AUDIT_OUVERTURE_20260922.md) et se limite aux points dont la correction peut être jugée.
+22 septembre 2026. Ouverture jugée : `3595725ae3352ab67dced716e33e8f7705372a2c` ; code v8 publié à `a74e90f22167105cdba90b6850f0597f1a01a329` (identique à `12294241` pour `morsehgp3D_v8/src/`). Lecture du code et calculs entiers indépendants en Python ; la première passe n'avait exécuté ni CTest ni benchmark. Le **suivi du moteur v9 `d2700314`** et ses rejeux ciblés figurent au § 5 ; aucun sanitizer, TSan, essai GCP ni benchmark de contrat n'est revendiqué. Les modifications de reprise u18, alors non commises, ont depuis été publiées à `3f0d188f` ; leurs reçus R2 restent en échec. Ce rapport répond au Lot 1 transmis par le développeur à l’ouverture et se limite aux points dont la correction peut être jugée.
 
 ## 1. P0 — le raccord FULL ne peut pas garder ses gardes u16
 
@@ -206,6 +206,20 @@ W1/W4 × s8/s10/s12, rend six fois code 0, 160 clés/boules,
 une fusion, trois parents et trois contributions. C'est une porte de
 régression utile pour q4 + égalité + parentage ; le digest identique seul
 ne remplace pas le juge d'inventaire et de Γ.
+
+La [fixture B où q4 survit sans aucune face q3
+admise](CONTRE_AUDIT_B_PREATLAS_ET_Q3_20260922.md) a aussi été greffée
+temporairement au juge T2, avec **cinq permutations réelles** des IDs
+d'entrée du générateur, s8/10/12 et W1/W4 : 30 appels publics
+`run_tower=true`, K1..10, ont passé l'inventaire rationnel des BallKeys,
+I/U et `q_min`, les coupes Γ ouvertes/fermées et les verticales.
+Ce diagnostic indépendant n'a pas encore de source/reçu versionné et
+ne remplace pas la gate permanente proposée ci-dessous. Comparer les
+niveaux comme rationnels, pas par l'encodage brut numérateur/dénominateur :
+`q4_level_raw` garde explicitement un quotient non réduit, tandis que
+l'oracle emploie une fraction canonique. Sur cette fixture, `387/1` et
+`3977235136512/10277093376` désignent exactement le même niveau ; leurs
+coupes peuvent donc être égales lorsque les mots du payload diffèrent.
 
 La limite logique reste la **complétude du générateur** : revérifier
 toutes les clés présentes ne détecte pas une clé totalement absente

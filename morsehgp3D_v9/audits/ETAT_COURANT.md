@@ -1,7 +1,7 @@
 # État courant des audits v9
 
 22 septembre 2026. Code jugé : **`d2700314`**, premier moteur v9 ; dernier
-audit publié relu : `0f3d077a`. Cadre : `exploration_v9_hors_registre`,
+audit B relu : `0786d6c1`. Cadre : `exploration_v9_hors_registre`,
 `reference_cpu`, `quantized_u18_input_only`, `not_claimed`. Ce fichier est le
 verdict mutable du dossier ; les notes datées conservent les démonstrations et
 références. Les auditeurs écrivent dans `audits/` et communiquent au
@@ -18,7 +18,9 @@ défaut concret sur ces chemins ; voir le [contre-audit A du
 moteur](CONTRE_AUDIT_A_MATH_MOTEUR_20260922.md) et la [lecture B de
 FULL](CONTRE_AUDIT_B_FULL_COUTS_ET_INTERFACES_20260922.md).
 
-Un rejeu indépendant local de `d2700314` passe **20/20 CTests** sans saut.
+Un rejeu indépendant local de `d2700314` passe **20/20 CTests** sans saut ;
+B retrouve ces 20 portes en Release et sous Clang ASan/UBSan.
+
 Deux coquilles exactes u13 (une mixte, une q4 pure) obtiennent le refus
 `chain_shell_above_12`, sans tour ni catalogue partiel publiés. Une fixture
 q4 u12 exerce l'appel public `run_tower=true` : six configurations
@@ -27,6 +29,11 @@ parents à K10**. Ces contrôles ciblés n'ont pas encore de reçu versionné.
 Trois mutants T2 déjà présents (`assignment`, `open`, `adjacency`) échouent
 causalement en exécution directe, mais ne sont **pas inscrits à CTest** ;
 les y enregistrer est un correctif court avant le premier reçu.
+Deux défauts de la sonde publique faussent déjà un reçu : le K décimal
+`4294967297` est rétréci en K1 avec succès, et `--grid=` est injecté sans
+échappement dans le JSON (jusqu'à créer deux clés `sites`). Vérifier K avant
+conversion et lier un manifeste d'entrée au pas réel ; voir le
+[contre-audit B du port et de la sonde](CONTRE_AUDIT_B_U18_ET_SONDE_20260922.md).
 
 Le juge T2 compare l'inventaire exact des boules et la tour Γ sur de petits
 nuages (`n≤14`) ; il ne démontre pas l'absence d'une BallKey complètement
@@ -44,6 +51,13 @@ indiquent où commencer, sans qualifier le contrat ni une croissance. La
 chaîne ne publie que quatre compteurs du registre q3/q4 pourtant disponible
 et matérialise deux capacités complètes de présentations lors de la fusion ;
 voir les [mesures et la suite A](CONTRE_AUDIT_A_MESURES_PLAN_20260922.md).
+Le [calcul de résidence B](CONTRE_AUDIT_B_RESIDENCE_CHAINE_20260922.md)
+identifie aussi un cache temporel optionnel de 48·nextpow2(16n) octets
+(24 Gio à 30 M sites), sa remise à zéro par ordre, et au moins 216n octets
+de sortie K1. Ce sont des planchers ou capacités logiques, pas un RSS
+mesuré ; ils imposent une résidence de travail maîtrisée et une
+représentation de sortie adaptée pour les dizaines de millions de sites.
+
 Le chiffre v8 de 104,63 s portait sur le seul flux q3/q4 en mode digest :
 aucune régression ni accélération v9 ne se déduit de cette comparaison non
 appariée.
@@ -51,15 +65,20 @@ appariée.
 ## Priorités de preuve et d'optimisation
 
 1. **Premier reçu FULL honnête** : trois trames sans sol entières, K5 puis
-   K10, provenance du masque/grille et hash des octets d'entrée ; sortie FULL
-   vérifiée, temps CPU/mur et RSS séparés, échecs conservés. Publier les
-   registres déjà calculés : tests/copies de partition d'atlas, rejets q3,
+   K10, provenance du masque/grille et hash des octets d'entrée ; les trois
+   entrées `scene_00/01/02_grid/full.u32le` sont déjà versionnées dans le
+   [reçu v8 `lidar_ground_20260921`](../../morsehgp3D_v8/receipts/lidar_ground_20260921/README.md).
+   Sortie FULL vérifiée, temps CPU/mur et RSS séparés, échecs conservés.
+   Publier les registres déjà calculés : tests/copies de partition d'atlas, rejets q3,
    travail et attente par worker, `merge`, census, quotient et résolveur
    FULL. Ne pas confondre les sommes de temps worker avec le temps mur.
-2. **Portes causales** : inscrire les trois mutants T2 ; comparer l'appel
-   public FULL à l'oracle sur une fixture q4 avec égalité et parentage ;
-   ajouter portes u18 extrêmes, égalités de cellules, générateur porté,
-   sanitizers et TSan. Les reçus v8 R2 de la reprise u18 restaient `failed`
+2. **Portes causales et entrée** : inscrire les trois mutants T2 ; comparer
+   l'appel public FULL à l'oracle sur une fixture q4 avec égalité et parentage ;
+   comparer la restriction sémantique des ordres K1..5 de K10 à la tour K5
+   sur les mêmes octets, après égalité des catalogues actifs bas-rang ;
+   corriger la validation de K et le JSON de la sonde ; ajouter portes u18
+   extrêmes, égalités de cellules, générateur porté et TSan. Les reçus v8
+   R2 de la reprise u18 restaient `failed`
    à cause du lecteur JUnit : la provenance v9 épingle `3f0d188f`, mais
    aucune qualification n'est héritée automatiquement.
 3. **Verrou q3/q4 mesuré** : préserver les miniballes k-Gabriel locales,
@@ -70,14 +89,19 @@ appariée.
    distinctes motive un catalogue de centres. Sur les `s` droites de
    graines aiguës, une sélection top/bottom de racines exactes garde au
    plus `2(K−2−p_λ)` événements par droite en `O(sKm)` après regroupement ;
-   un déterminant factorisé tient en i128 sous les bornes u18. Census global et test
-   `centre∈conv(coquille)` restent obligatoires. Ce n'est pas une borne
+   un déterminant factorisé tient en i128 sous les bornes u18. Census global
+   et test `centre∈conv(coquille)` restent obligatoires. Ce n'est pas une borne
    sous-quadratique globale lorsque `s≈m`. Le [contre-audit
    B](CONTRE_AUDIT_B_PREATLAS_ET_Q3_20260922.md) rappelle que la suppression
    d'une cellule q4 peut aussi enlever un certificat de rejet q3. Sa
    fixture entière prouve même qu'une q4 admise peut survivre quand
    **toutes** ses faces q3 sont rejetées : les graines à parcourir ne
-   peuvent pas être limitées aux q3 finalement émises.
+   peuvent pas être limitées aux q3 finalement émises. Un [certificat de
+   cover par bloc d'arêtes survivantes](CONTRAT_COUTS_ET_PARALLELISATION.md)
+   partage le prédicat exact sur `E×Z` et son oracle entier passe ; c'est
+   une piste secondaire pour les 440 millions de visites de cover, à
+   mesurer après le filtre de paire, sans lui attribuer le coût dominant
+   de l'atlas.
 4. **Grandes coquilles et échelle** : la [note B](PLATEAUX_GRANDES_COQUILLES_B_20260922.md)
    propose un quotient local compact, tandis que l'[oracle entier
    A](check_qmin_planes_u18_20260922.py) donne des fixtures u13/u17 et les

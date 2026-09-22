@@ -160,6 +160,15 @@ demande**, et non les cellules combinatoires de ce diagramme.
 Fixer une arête `ab` avec son `Q34EdgeCover` **complet pour les centres
 admissibles**, puis grouper les formes non constantes `L_z=0` du cover
 par **droite géométrique** ; soit `m` le nombre de droites distinctes.
+Cette complétude a une marge stricte pour q4 positif. Si `l=|ab|` est
+la plus longue arête du tétraèdre positif et `λ_i>0` ses poids au centre,
+`R²=Σ_{i<j}λ_iλ_j|p_i−p_j|²≤(3/8)l²` par l'identité de variance.
+Pour le milieu `m_ab`, `|c−m_ab|²=R²−l²/4≤l²/8` ; chaque site de
+l'intérieur **ou de la coquille** satisfait donc
+`|z−m_ab|≤R+|c−m_ab|≤(√3+1)l/(2√2)<l`. La boule fermée de rayon
+`l` du `Q34EdgeCover` les contient tous, sans hypothèse d'alignement
+du LiDAR. Cette propriété n'autorise pas à écarter les sites du cover
+qui pourraient être des témoins d'autres centres.
 Les formes toujours négatives ajoutent `p₀` au compte, celles toujours
 nulles sont des contacts et les positives ne contribuent pas. Un centre
 q4 strictement positif appartient à l'intersection de deux droites
@@ -211,7 +220,11 @@ profondeur exacte et leurs contacts. Les valeurs égales sont groupées,
 mais leurs sites sont tous comptés ; cette preuve accepte concurrences,
 droites coïncidentes et signes opposés.
 
-Après regroupement exact des `m` droites et de leurs multiplicités, des
+Normaliser d'abord les formes en clés primitives de droite, avec deux
+orientations et leurs listes d'IDs : ce prétraitement sur les `h` sites
+du cover coûte au moins `Ω(h)` et typiquement `O(h log h)` par tri exact,
+ou `O(h)` attendu par hachage, avec mémoire `O(h)`.
+Après ce regroupement exact des `m` droites et de leurs multiplicités, des
 buffers top/bottom de taille `O(K)` sélectionnent ces valeurs en
 `O(Km)` comparaisons rationnelles par droite de graine ; les `O(K)` scans
 de profondeur coûtent aussi `O(Km)`. La largeur du comparateur est
@@ -235,7 +248,10 @@ lorsque le pivot est négatif. Les groupes de racines égales et le cas `α_z=0`
 traités explicitement. Une même droite géométrique peut porter des
 formes proportionnelles **de signes opposés** : conserver les IDs et
 multiplicités des deux orientations, plutôt qu'un seul représentant
-signé. Sur `s` droites de graines,
+signé. Les buffers top/bottom peuvent s'arrêter avant `d_λ+1` racines
+si le **poids cumulé** des racines plus lointaines dépasse déjà `d_λ` ;
+un groupe concurrent reste un événement unique et ses contacts ne se
+comptent pas comme intérieurs à son propre sommet. Sur `s` droites de graines,
 le coût pessimiste demeure `O(sKm)` plus regroupement, census, MEB et
 catalogue : aucun sous-quadratique global n'en découle si `s≈m`.
 Cette route évite toutefois le tri `m log m` sur chaque droite et la
@@ -249,6 +265,31 @@ retenues à toutes les intersections sur **7 210 cas** exacts, avec
 coïncidences et signes opposés ; elle contrôle 500 restrictions de formes
 u18 et un sommet propriétaire aigu qui n'est pas une miniballe. Les
 deux modes Python normal et `-O` doivent rendre le même PASS.
+
+**Partage prudent avec q3.** Pour une graine aiguë propriétaire `abx`,
+`D=|ab|²` et le circumrayon de sa face vérifie `R₃²≤D/3` ; le centre
+`c₃` est à distance carrée au plus `D/12` du milieu de `ab`. Tout site
+intérieur ou contact de sa boule satisfait donc
+`|z−milieu(ab)|≤√(D/3)+√(D/12)=√(3D/4)<√D` : le
+`Q34EdgeCover` de rayon `√D` contient **tout** son intérieur et sa
+coquille. Si le passage q4 doit déjà parcourir les groupes de formes
+pour cette droite, il peut simultanément établir le census q3 exact à
+`c₃`, par un seul `ExactBall::power` sur un représentant de chaque
+orientation et les multiplicités/IDs du groupe. Les formes nulles sur
+tout le plan sont des contacts permanents. Cela ne supprime pas à
+priori la consultation de l'atlas q3, qui rejette beaucoup de graines
+avant tout census, ni ne prouve un gain : comparer le scan partagé au
+census q3 par boîtes sur les arêtes où les deux voies vivent. Ne pas
+conditionner q3 à une feuille, un domaine positif ou un événement q4 :
+sa voie autonome reste nécessaire quand q4 est écarté. L'évaluation
+naïve de `Q4LocalForm` au centre rationnel q3 peut atteindre environ
+158 bits ; `ExactBall::power`
+reste dans son domaine u18 certifié.
+Avant port actif du comparateur, juger les **formes réellement produites**
+par `Q4LocalGeometry::form` aux extrêmes u18 contre un oracle rationnel,
+avec pivot négatif, racines égales, groupes de signes opposés et mutations
+de l'orientation du déterminant. Les 500 formes arbitraires bornées du
+script ne remplacent pas cette gate native.
 
 Cette borne est **locale et combinatoire**, pas un algorithme
 `O(Km)` déjà construit. Les présentations de support sur une grande
