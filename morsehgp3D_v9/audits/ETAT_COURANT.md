@@ -737,6 +737,21 @@ pas de champ `validated` archivé et que le cas plein chevauche un autre
 calcul CPU sur l'hôte partagé. Cœur **plus** couverture complète
 matérialisent **2,304 milliards** de formes au plein K10 ; la croissance
 du nombre moyen de sites par charge explique l'essentiel de leur pente.
+Le [complément K10 par moitiés physiques](lidar_raw_k10_sectors_20260923/README.md)
+croise ensuite le plan `x=0` avec les **trois mêmes densités** sur la
+trame brute. Les six nouvelles sondes et leurs répétitions gardées
+retrouvent les cinq premiers ordres de K5. En sommant les deux moitiés,
+le rapport au plein des **formes cœur** vaut 0,570/0,587/0,418 aux densités
+1/4, 1/2, entière ; celui des **charges cœur** reste 0,958/0,970/0,969
+et celui des boules de catalogue 0,990/0,993/0,996. À densité entière,
+les pentes spatiales finies des formes plein→demi sont **2,195 et 2,326**,
+alors que la pente de densité 1/2→entière du plein vaut 1,936 : les deux
+diagnostics ne sont pas interchangeables. Les tours sont recalculées sur
+chaque morceau ; ces rapports ne dénombrent pas directement les arêtes
+traversant le plan. Les six rejeux conservent exactement formes, charges,
+paires, catalogues et ordres ; seules quelques visites de cache/témoins
+varient, avec au plus 0,51 % de variation CPU. Les quarts K10 restent à
+compléter ; aucune borne globale ou mesure G4 n'en découle.
 Le [crédit exact par nœuds du certificat de cœur](../receipts/dead_node_credit_negative_20260923/README.md)
 a été essayé hors produit : mêmes voies et digest, mais CPU de chaîne
 **+27 % à K5 et +32 % à K10** sur la coupe 16k de 000000 ; cette variante
