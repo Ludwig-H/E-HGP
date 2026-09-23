@@ -155,6 +155,28 @@ sonde v12 `4530644b`, runner v2, trois trames sans sol, K5 et K10, emboîtés
 ×2,8 par doublement et boules sous-linéaires, mais `core_sites` (sites
 énumérés dans les cœurs diamétraux) atteint p = 2,5 à 3,05 sur un doublement
 de s00 et de s02 aux deux K. Le cœur est la première cible d'échelle.
+Le crédit par nœuds du certificat, décisions identiques, est mesuré puis
+fermé : CPU +27 à +32 % ([reçu](receipts/dead_node_credit_negative_20260923/README.md)).
+
+Sonde **v13** (`c768e06a`) :
+- **Invariant d'Euler** du catalogue (auditeur C, preuve par le nerf de B),
+  imposé par la chaîne : `chain_catalogue_euler_violated`.
+- Portes : `chain_euler`, porte T2, porte `scale8000` de C avec juge
+  d'échantillon.
+- Occupation par ouvrier de q34, chronos par phase de la tour ; lecteur G4
+  revu par une revue multi-agents (un faux refus corrigé, `515b3666`).
+
+Session G4 R8 ([`g4_tower_r8_20260923`](receipts/g4_tower_r8_20260923/README.md),
+paquet `515b3666`, **`completed`**, `TERMINATED` certifié) :
+- Euler « holds » sur les trois trames réelles.
+- Chaîne K5 3,67 / 5,46 / 6,39 s, K10 9,40 / 13,69 / 15,19 s.
+- **q34 affamé à W48** : 35 à 49 % du temps des fils à K5 passe à attendre
+  la file de tâches (jobs du front trop gros).
+- Tour K10 : phase 0 1,1–1,5 s, lots séquentiels 0,8–1,2 s.
+- s = 8 reste le meilleur choix, devant s = 10 et 12.
+
+Suite immédiate : ordonnancement de q34 (ordre des jobs par masse, grain
+plus fin), puis squelette des lots de la tour et phase 0.
 
 Suite : coût q3/q4 (ventilation K10 W8 locale en Gcycles : atlas 229, q4 235,
 paires 187, rectangles 123, noyau 120, q3 120, preuve sur cover 86) ; seuil

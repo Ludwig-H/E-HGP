@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "/home/codespace/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "ssh",
+    "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-b",
+    "--quiet",
+    "--ssh-key-file=/workspaces/.ehgp-sessions/v9tower.20260923T093839Z/key",
+    "--ssh-key-expiration=2026-09-23T10:48:58.345794Z",
+    "--ssh-flag=-n",
+    "--ssh-flag=-o BatchMode=yes",
+    "--ssh-flag=-o ConnectTimeout=15",
+    "--command=exec python3 /tmp/ehgp-tower-v9-7616f2a67bb67fb4.R0qBVAxGTH/worker.py --source-root /tmp/ehgp-tower-v9-7616f2a67bb67fb4.R0qBVAxGTH/source --source-manifest /tmp/ehgp-tower-v9-7616f2a67bb67fb4.R0qBVAxGTH/source_manifest.json --source-manifest-sha256 16a0c35a7831ee6e98cc5677222440873fb0c834a4b22d12bd1c6bf9df5b799d --guard-mark /tmp/ehgp-tower-v9-7616f2a67bb67fb4.R0qBVAxGTH/double_guard_verified --guard-mark-sha256 72496bf77e39bb434d9ea4cf4c1f1f1dd425b9787b882985c2df1014c21acf11 --generation 2026-09-23T02:39:28.958-07:00 --session-deadline-epoch 1790158813 --closing-margin-seconds 300 --output /tmp/ehgp-tower-v9-7616f2a67bb67fb4.R0qBVAxGTH/output --project devpod-gpu-exploration --zone us-central1-b --instance ehgp-v7-4fa0e0789a7d5bb06b787d35 --execute --useful-budget-seconds 1500 --case-cap-seconds 600"
+  ],
+  "name": "worker",
+  "started_epoch": 1790156460.6212277,
+  "timeout_seconds": 1560
+}

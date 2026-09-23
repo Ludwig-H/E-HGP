@@ -1,0 +1,395 @@
+{
+  "FULL_executed": false,
+  "GCP_used": false,
+  "GPU_executed": false,
+  "cases": [
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true,
+        "tower_meb_proposal": true
+      },
+      "n": 39885,
+      "repeat": 0,
+      "s": 8,
+      "scene": "00",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 10,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true,
+        "tower_meb_proposal": true
+      },
+      "n": 39885,
+      "repeat": 0,
+      "s": 8,
+      "scene": "00",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_01.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true,
+        "tower_meb_proposal": true
+      },
+      "n": 35551,
+      "repeat": 0,
+      "s": 8,
+      "scene": "01",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_01.u32le",
+      "k": 10,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true,
+        "tower_meb_proposal": true
+      },
+      "n": 35551,
+      "repeat": 0,
+      "s": 8,
+      "scene": "01",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_02.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true,
+        "tower_meb_proposal": true
+      },
+      "n": 45845,
+      "repeat": 0,
+      "s": 8,
+      "scene": "02",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_02.u32le",
+      "k": 10,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true,
+        "tower_meb_proposal": true
+      },
+      "n": 45845,
+      "repeat": 0,
+      "s": 8,
+      "scene": "02",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true,
+        "tower_meb_proposal": true
+      },
+      "n": 39885,
+      "repeat": 1,
+      "s": 8,
+      "scene": "00",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 10,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true,
+        "tower_meb_proposal": true
+      },
+      "n": 39885,
+      "repeat": 1,
+      "s": 8,
+      "scene": "00",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_01.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true,
+        "tower_meb_proposal": true
+      },
+      "n": 35551,
+      "repeat": 1,
+      "s": 8,
+      "scene": "01",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_01.u32le",
+      "k": 10,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true,
+        "tower_meb_proposal": true
+      },
+      "n": 35551,
+      "repeat": 1,
+      "s": 8,
+      "scene": "01",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_02.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true,
+        "tower_meb_proposal": true
+      },
+      "n": 45845,
+      "repeat": 1,
+      "s": 8,
+      "scene": "02",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_02.u32le",
+      "k": 10,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true,
+        "tower_meb_proposal": true
+      },
+      "n": 45845,
+      "repeat": 1,
+      "s": 8,
+      "scene": "02",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true,
+        "tower_meb_proposal": true
+      },
+      "n": 39885,
+      "repeat": 0,
+      "s": 10,
+      "scene": "00",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_01.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true,
+        "tower_meb_proposal": true
+      },
+      "n": 35551,
+      "repeat": 0,
+      "s": 10,
+      "scene": "01",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_02.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true,
+        "tower_meb_proposal": true
+      },
+      "n": 45845,
+      "repeat": 0,
+      "s": 10,
+      "scene": "02",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true,
+        "tower_meb_proposal": true
+      },
+      "n": 39885,
+      "repeat": 0,
+      "s": 12,
+      "scene": "00",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_01.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true,
+        "tower_meb_proposal": true
+      },
+      "n": 35551,
+      "repeat": 0,
+      "s": 12,
+      "scene": "01",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_02.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true,
+        "tower_meb_proposal": true
+      },
+      "n": 45845,
+      "repeat": 0,
+      "s": 12,
+      "scene": "02",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_01.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true,
+        "tower_meb_proposal": true
+      },
+      "n": 35551,
+      "repeat": 0,
+      "s": 8,
+      "scene": "01",
+      "static_threads": 24,
+      "workers": 24
+    },
+    {
+      "file": "data/scene_01.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true,
+        "tower_meb_proposal": true
+      },
+      "n": 35551,
+      "repeat": 0,
+      "s": 8,
+      "scene": "01",
+      "static_threads": 0,
+      "workers": 1
+    }
+  ],
+  "commit": "515b36668ec5de628ba9fbde82311c5bc0a999fd",
+  "controller_sha256": "cd6ff6978e7135c7ab567c9e3094d1a6c23b44baa514f231752e3a674e6e5930",
+  "inputs": {
+    "data/scene_00.u32le": {
+      "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le",
+      "n": 39885,
+      "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf"
+    },
+    "data/scene_01.u32le": {
+      "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/full.u32le",
+      "n": 35551,
+      "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f"
+    },
+    "data/scene_02.u32le": {
+      "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/full.u32le",
+      "n": 45845,
+      "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af"
+    }
+  },
+  "manifest_sha256": "16a0c35a7831ee6e98cc5677222440873fb0c834a4b22d12bd1c6bf9df5b799d",
+  "protocol_source": "commit",
+  "public_status": "not_claimed",
+  "real_session_allowed": true,
+  "snapshot_sha256": "c6a965a81dc9b64fe7bf5fba13af5d9efae664b5ef9f6f8eab5cdacfb5007645",
+  "source_files": 148,
+  "status": "prepared_not_executed",
+  "tree": "cb258faf05f4c9549ad89b41cb49e89a108eb06c",
+  "worker_sha256": "49e80b6f388b2aff423f7d6d7679a65bd6b5c0b254f9582b3717ea7fcef932c0"
+}

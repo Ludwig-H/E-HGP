@@ -1584,3 +1584,44 @@ pour un refus G4 pré-Euler. Restent quatre écarts distincts :
    porte de mutants de la chaîne accepte toujours une erreur de chaîne
    quelconque sous `cause=euler.chain_refused`. Exiger le lien dans les
    deux sens, sans confondre cela avec un faux succès `complete_relative`.
+
+## 23 septembre 2026, 10 h 00 UTC — v13 publiée, revue multi-agents, G4 R8 (développeur)
+
+- **v13** (`c768e06a`, `a08378da`, `50646eef`, `515b3666`) : Euler imposé par
+  la chaîne. Le calcul est fait sur les ouvriers du recensement, dans
+  `census_ms` : je le mesurerai à part si B le demande ; le recensement vaut
+  0,08 à 0,49 s à W48. Plus : occupation q34, phases de la tour, lecteur G4
+  v13, runner v13.
+  - B, runner local : le schéma de sonde est désormais fixé par le résumé de
+    campagne (`mhgp9_lidar_scaling_v3` porte `probe_schema` ; un résumé v2
+    vaut v12 et ne peut pas revendiquer v13). Le bloc Euler est exigé avec
+    ses clés exactes et K entiers. Une archive v13 rétrogradée en v12 est
+    refusée à `--revalidate`, vérifié sur une vraie campagne v13 de 000100
+    K5. Les 10 condensés y sont identiques à la campagne v12.
+  - B, porte `scale8000` de C (`8d5e08ed`) : l'étape est renommée
+    « validation des listes fournies ». Un **juge d'échantillon** recense une
+    boule sur 64 par balayage brut de tous les sites, soit 39 985 boules à
+    8k, ensembles égaux. `--n` est strict, et un mutant absent est refusé à
+    la configuration. La fixture de 13 points (faux négatif K+2) est notée :
+    Euler reste nécessaire, non suffisant.
+- **Revue multi-agents du commit v13** (trois lecteurs, vérificateurs
+  sceptiques) : un seul défaut réel, trouvé par deux lecteurs. Un refus
+  explicite **antérieur** à l'étape Euler aurait été pris pour un défaut de
+  protocole, ce qui aurait gâché la suite de la session, comme en R2. Il est
+  corrigé dans `515b3666`, et la porte de raccord lance un vrai refus précoce
+  (30 points cosphériques, `chain_shell_above_12`). Le cœur mathématique
+  d'Euler est confirmé par 21 000 exécutions dégénérées sans violation.
+- **G4 R8**
+  ([reçu](../morsehgp3D_v9/receipts/g4_tower_r8_20260923/README.md), paquet
+  `515b3666`, `completed`, `TERMINATED` relu 02:46:01 PDT) :
+  - 20/20 cas `complete_relative`, **Euler « holds » sur les trois trames**,
+    condensés égaux à R7b.
+  - Nouveau fait mesuré : à W48, **q34 attend la file de tâches 35 à 49 % du
+    temps à K5** (16 à 36 % à K10). Les 16 jobs de front par fil sont
+    réclamés tôt ; front, filtre de rectangle et petits rectangles restent
+    dans quelques jobs longs.
+  - s = 10 et 12 sont plus lents ; W1 → W48 donne ×16,9 sur q34.
+  - Tour K10 : phase 0 1,1–1,5 s, lots 0,8–1,2 s (un fil par ordre).
+- **Suite** : ordonnancement exact de q34 (ordre de réclamation des jobs par
+  masse décroissante, grain plus fin, durée du plus long job publiée), puis
+  squelette des lots de la tour.
